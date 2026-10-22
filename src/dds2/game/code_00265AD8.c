@@ -84,7 +84,7 @@ extern void dspStartActivePresetEntry(void);
 
 /* DDS2's twelve-state shop sequence. The stock scan and dispatcher pattern
  * share the exact DDS1 donor, but fade, reward and preset paths are DDS2's. */
-s32 mnuTickShopMessageSequence(KwlnTask *task) {
+s32 mnuTickShopMessageSequence(dds3ProcessID_t *task) {
     MenuTerminalContext *state = (MenuTerminalContext *)dds3GetProcessData(task);
     s32 *dispatchSlot = &state->popupState;
     s32 allowed;
@@ -231,7 +231,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
 extern void mnuDrawShopPanelDecorations(MenuTerminalContext *scene);
 extern void mnuDrawTerminalPanelTransition(MenuTerminalContext *object, s32 elapsedFrames);
 
-s32 evtAdvancePopupWithOptionalPreparation(KwlnTask *callback) {
+s32 evtAdvancePopupWithOptionalPreparation(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
 
     if (*(s32 *)(context + 0xE0) != 0) {
@@ -243,7 +243,7 @@ s32 evtAdvancePopupWithOptionalPreparation(KwlnTask *callback) {
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
 /* Route the supplied callback through dispatch mode 2 after menu setup. */
-s32 evtSetupDispatchSyncI(KwlnTask *callback) {
+s32 evtSetupDispatchSyncI(dds3ProcessID_t *callback) {
     s32 eventContext = dds3GetProcessData(callback);
     dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)eventContext, 2, (void *)callback);
@@ -262,7 +262,7 @@ u32 mnuTerminalMenuMessageLeaveNoOp(void) {
 
 extern u8 mnuShopReturnFadePopupEntry[];
 
-s32 mnuPollMessageWindowBeforeClosing(KwlnTask *callback) {
+s32 mnuPollMessageWindowBeforeClosing(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
     s32 *window = (s32 *)(context + 0x58);
     s32 state = mnuDispatchPopupTransition(&((EventCallbackContext *)context)->transitionWork, window, 0, (void *)callback);
@@ -279,14 +279,14 @@ s32 mnuPollMessageWindowBeforeClosing(KwlnTask *callback) {
     return state;
 }
 
-s32 mnuDrawShopPanelAfterMessageClose(KwlnTask *callback) {
+s32 mnuDrawShopPanelAfterMessageClose(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
 
     mnuDrawShopPanelDecorations((MenuTerminalContext *)context);
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
 
-s32 evtAdvanceTerminalMenuMessage(KwlnTask *callback) {
+s32 evtAdvanceTerminalMenuMessage(dds3ProcessID_t *callback) {
     s32 eventContext = dds3GetProcessData(callback);
     dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)eventContext, 2, (void *)callback);
@@ -309,7 +309,7 @@ u32 evtStartFadeOut(void) {
     return 1;
 }
 
-s32 mnuWaitForFadeBeforePopup(KwlnTask *callback) {
+s32 mnuWaitForFadeBeforePopup(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
     s32 *window = (s32 *)(context + 0x58);
     s32 state = mnuDispatchPopupTransition(&((EventCallbackContext *)context)->transitionWork, window, 0, (void *)callback);
@@ -324,14 +324,14 @@ s32 mnuWaitForFadeBeforePopup(KwlnTask *callback) {
     return state;
 }
 
-s32 mnuDrawShopPanelAfterFade(KwlnTask *callback) {
+s32 mnuDrawShopPanelAfterFade(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
 
     mnuDrawShopPanelDecorations((MenuTerminalContext *)context);
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
 
-s32 evtDispatchSync(KwlnTask *callback) {
+s32 evtDispatchSync(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
 
     return evtMenuSetHandler((void *)context, 2, (void *)callback);
@@ -363,8 +363,8 @@ u32 mnuPopupFinishNoOp(void) {
 }
 
 /* Snapshot four primary flag pairs and sixteen extra pairs for restoration. */
-struct SdfMemBlock *mnuCreateFlagEntries(void) {
-    struct SdfMemBlock *handle = sdfMemAllocDirect(MNU_FLAG_SNAPSHOT_BYTES);
+struct sdfMemHandle_t *mnuCreateFlagEntries(void) {
+    struct sdfMemHandle_t *handle = sdfMemAllocDirect(MNU_FLAG_SNAPSHOT_BYTES);
     MnuFlagSnapshotEntry *entries = (MnuFlagSnapshotEntry *)sdfMemLock(handle);
     u32 i;
 
@@ -383,7 +383,7 @@ struct SdfMemBlock *mnuCreateFlagEntries(void) {
     return handle;
 }
 
-void mnuApplyCampResourceFlagEntries(struct SdfMemBlock *handle) {
+void mnuApplyCampResourceFlagEntries(struct sdfMemHandle_t *handle) {
     MnuFlagSnapshotEntry *entries = (MnuFlagSnapshotEntry *)sdfMemLock(handle);
     u32 i;
 
@@ -429,7 +429,7 @@ void mnuLoadCampEffectMapResources(struct EffectSlotSet *object, MenuEffectResou
     CampMapArguments mapArguments = mnuCampEffectMapArguments;
     CampEffectRows rows = mnuCampEffectInitialRows;
     u32 dataAddress;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     struct EffMappedResource *mappedResource;
 
     allocation = sdfDevLoadFileEx(mnuCampBackgroundMotionPath, &dataAddress, 0);

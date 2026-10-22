@@ -44,11 +44,11 @@ extern SdfStreamState D_0047BCC0;
 extern u8 D_0047BE40[];
 
 extern s32 D_0047BE00[];
-extern DevState *sdfFileCmdReadOpen(const char *path,
-                                          s32 (*callback)(DevState *, s32, s32, s32, s32),
+extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path,
+                                          s32 (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32),
                                           s32 callbackContext);
 extern s32 sdfFileCmdFileSize();
-extern s32 sdfFileRpcReadCallback(DevState *, s32, s32, s32, s32);
+extern s32 sdfFileRpcReadCallback(sdfFileCmdHandle_t *, s32, s32, s32, s32);
 
 
 
@@ -434,7 +434,7 @@ void sdfFileRpcContinueRead(void) {
 
 /* Handle stream replies and DMA-copy read chunks, requesting the next chunk as needed.
  * Uses the shared stream, ignores deviceState/callbackArg, and always returns zero. */
-s32 sdfFileRpcReadCallback(DevState *deviceState, s32 command, s32 sourceAddress,
+s32 sdfFileRpcReadCallback(sdfFileCmdHandle_t *deviceState, s32 command, s32 sourceAddress,
                   s32 byteCount, s32 callbackArg) {
     SdfStreamState *stream = &D_0047BCC0;
     s32 dmaId;
@@ -493,7 +493,7 @@ s32 sdfFileRpcReadCallback(DevState *deviceState, s32 command, s32 sourceAddress
  * An unrecognized command leaves the shared reply unchanged. */
 s32 *sdfFileRpcHandler(u32 command, s32 request) {
     SdfStreamState *state = &D_0047BCC0;
-    DevState *deviceState;
+    sdfFileCmdHandle_t *deviceState;
     switch (command) {
     case SDF_STREAM_COMMAND_CREATE_STATE:
         state->deviceState = sdfFileCmdReadOpen((const char *)request, sdfFileRpcReadCallback, 0);
@@ -585,9 +585,9 @@ void LoadMcModules(const char *prefix, s32 moduleGroup) {
 }
 
 /* Rebalance a right-heavy parent using its heavy child; return the new subtree root. */
-SdfKeyTreeNode *sdfSortOtAvlRotateLR(SdfKeyTreeNode *heavyChild, SdfKeyTreeNode *parent) {
-    SdfKeyTreeNode *childRoot = heavyChild;
-    SdfKeyTreeNode *pivot;
+sdfSortOtNode_tag *sdfSortOtAvlRotateLR(sdfSortOtNode_tag *heavyChild, sdfSortOtNode_tag *parent) {
+    sdfSortOtNode_tag *childRoot = heavyChild;
+    sdfSortOtNode_tag *pivot;
 
     if (childRoot->balance < 0) {
         pivot = childRoot->left;
@@ -614,9 +614,9 @@ SdfKeyTreeNode *sdfSortOtAvlRotateLR(SdfKeyTreeNode *heavyChild, SdfKeyTreeNode 
 }
 
 /* Rebalance a left-heavy parent using its heavy child; return the new subtree root. */
-SdfKeyTreeNode *sdfSortOtAvlRotateRL(SdfKeyTreeNode *heavyChild, SdfKeyTreeNode *parent) {
-    SdfKeyTreeNode *childRoot = heavyChild;
-    SdfKeyTreeNode *pivot;
+sdfSortOtNode_tag *sdfSortOtAvlRotateRL(sdfSortOtNode_tag *heavyChild, sdfSortOtNode_tag *parent) {
+    sdfSortOtNode_tag *childRoot = heavyChild;
+    sdfSortOtNode_tag *pivot;
 
     if (childRoot->balance > 0) {
         pivot = childRoot->right;
@@ -643,10 +643,10 @@ SdfKeyTreeNode *sdfSortOtAvlRotateRL(SdfKeyTreeNode *heavyChild, SdfKeyTreeNode 
 }
 
 /* Walk the insertion path upward, updating balance flags and reconnecting a rotated subtree. */
-void sdfSortOtAvlCheckBalance(SdfKeyTreeNode **path, s32 depth, SdfKeyTreeNode *child,
-                   SdfKeyTreeNode **root) {
-    SdfKeyTreeNode *parent;
-    SdfKeyTreeNode *replacement = NULL;
+void sdfSortOtAvlCheckBalance(sdfSortOtNode_tag **path, s32 depth, sdfSortOtNode_tag *child,
+                   sdfSortOtNode_tag **root) {
+    sdfSortOtNode_tag *parent;
+    sdfSortOtNode_tag *replacement = NULL;
     s32 balance;
 
     if (depth > 0) {
@@ -672,7 +672,7 @@ void sdfSortOtAvlCheckBalance(SdfKeyTreeNode **path, s32 depth, SdfKeyTreeNode *
         } while (depth > 0);
     }
     if (depth > 0) {
-        SdfKeyTreeNode *ancestor = path[--depth];
+        sdfSortOtNode_tag *ancestor = path[--depth];
         if (ancestor->right == parent) {
             ancestor->right = replacement;
         } else {
@@ -684,12 +684,12 @@ void sdfSortOtAvlCheckBalance(SdfKeyTreeNode **path, s32 depth, SdfKeyTreeNode *
 }
 
 /* Insert `item` into the key-ordered tree; an equal key swaps the item in place. */
-void sdfSortOtAvlRegist(SdfKeyTreeNode **tree, SdfKeyPoolNode *item) {
-    SdfKeyTreeNode *path[SDF_KEY_TREE_PATH_LIMIT];
+void sdfSortOtAvlRegist(sdfSortOtNode_tag **tree, SdfKeyPoolNode *item) {
+    sdfSortOtNode_tag *path[SDF_KEY_TREE_PATH_LIMIT];
     s32 depth = 0;
-    SdfKeyTreeNode **link = tree;
-    SdfKeyTreeNode *cur = *tree;
-    SdfKeyTreeNode *node;
+    sdfSortOtNode_tag **link = tree;
+    sdfSortOtNode_tag *cur = *tree;
+    sdfSortOtNode_tag *node;
     f32 key = item->key;
 
     while (cur != NULL) {
@@ -710,7 +710,7 @@ void sdfSortOtAvlRegist(SdfKeyTreeNode **tree, SdfKeyPoolNode *item) {
         cur = *link;
     }
     item->next = NULL;
-    node = (SdfKeyTreeNode *)sdfGrAllocPacketBuff(0x10);
+    node = (sdfSortOtNode_tag *)sdfGrAllocPacketBuff(0x10);
     node->right = NULL;
     node->left = NULL;
     node->item = item;
@@ -755,8 +755,8 @@ void sdfGrSortOtFixup(void *first, SdfKeyPoolNode **head, SdfKeyPoolNode **tail)
 }
 
 /* Append items in descending key order (right, item, left). The starting node must be non-null. */
-void sdfGrSortOtTraverse(SdfKeyTreeNode *node, SdfKeyPoolNode **head, SdfKeyPoolNode **tail) {
-    SdfKeyTreeNode *next;
+void sdfGrSortOtTraverse(sdfSortOtNode_tag *node, SdfKeyPoolNode **head, SdfKeyPoolNode **tail) {
+    sdfSortOtNode_tag *next;
 
     do {
         if (node->right != NULL) {

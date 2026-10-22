@@ -246,7 +246,7 @@ void fldDrawSelectedMapMarker(void) {
 /* Build a ring of `count` request nodes (0x20 bytes each) behind a 0x44-byte queue header. */
 MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
     s32 size = count * 0x20 + 0x44;
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
     MapRequestRing *block = (MapRequestRing *)sdfMemGetPtr(allocation);
     MapRequestState *ring = &block->header;
     MapRequestNode *node;
@@ -401,7 +401,7 @@ done:
 }
 
 s32 texLoad(const char *name, MapResource *record) {
-    struct SdfMemBlock *allocation = sdfDevLoadFileEx(name, (u32 *)&record->resourceData, 0);
+    struct sdfMemHandle_t *allocation = sdfDevLoadFileEx(name, (u32 *)&record->resourceData, 0);
     record->allocation = allocation;
     record->texture = sdfTexSet(record->resourceData);
     if (record->allocation != NULL) {
@@ -412,7 +412,7 @@ s32 texLoad(const char *name, MapResource *record) {
     return 1;
 }
 
-u32 texRelease(struct SdfTex **texture) {
+u32 texRelease(struct sdfTexHandle_t **texture) {
     if (*texture != 0) {
         sdfTexReleaseReferenceViaHandler(*texture);
         *texture = 0;

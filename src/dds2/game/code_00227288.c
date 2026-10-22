@@ -1272,7 +1272,7 @@ extern s32 ptyRebalanceFrontline(s32 rosterIndex);
  * entries and fewer than three frontline entries. */
 void btlPromoteSeraForSmallParty(void) {
     u16 flags;
-    DatPartyRecord *entry;
+    datUnitWork_t *entry;
     u32 markedCount;
     u32 index;
     u32 activeCount;

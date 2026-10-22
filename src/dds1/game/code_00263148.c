@@ -14,18 +14,18 @@
 #include "dsp_name.h"
 #include "kwln_fade.h"
 
-extern void ptyRecomputeMaxVitals(DatPartyRecord *, const s32 *);
+extern void ptyRecomputeMaxVitals(datUnitWork_t *, const s32 *);
 
-extern u32 ptyBuildProfileCapSkillList(DatPartyRecord *, PrfSkillList *);
-
-
+extern u32 ptyBuildProfileCapSkillList(datUnitWork_t *, PrfSkillList *);
 
 
-extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 
-extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
 
-extern void ptyApplyProfile(DatPartyRecord *, u16);
+extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
+
+extern s32 ptyTestPrimaryProfileFlag(datUnitWork_t *, u16);
+
+extern void ptyApplyProfile(datUnitWork_t *, u16);
 
 
 extern void mnuRefreshPanelLayer(BrsSkillPackageWork *);
@@ -36,7 +36,7 @@ extern void dspRequestMessageWindowModeOne(void);
 
 /* Apply a capped selected profile and record whether the selection was applied. */
 void kwlnItemApplySelection(BrsSkillPackageWork *scene) {
-    DatPartyRecord *item = scene->selectedRewardRow->unit;
+    datUnitWork_t *item = scene->selectedRewardRow->unit;
     DatProfileRecord *profile = ptyGetCurrentProfileRecord(item);
     s8 selection = item->profileId;
     if (selection != 0 && prfGetCapValue((u16)selection) == profile->value &&
@@ -65,12 +65,12 @@ u32 mnuProcessItemSelection(BrsSkillPackageWork *scene) {
 extern DspUnitName *D_003BAA70;
 extern DspUnitName *D_003BAA8C;
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
+extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
 extern s32 prfResolveMantraNameOrFallback(u16, u8 **);
 
 void prfCapPresentMessages(BrsSkillPackageWork *scene) {
     u8 *message;
-    DatPartyRecord *item = scene->selectedRewardRow->unit;
+    datUnitWork_t *item = scene->selectedRewardRow->unit;
     s32 profileId = ptyGetCurrentProfileId(item);
     u16 skillId;
 
@@ -122,7 +122,7 @@ extern s32 mnuStaffInitPanel(BrsSkillPackageWork *);
 extern char brsRewardFadeWaitPopupEntry[];
 extern char brsPrimaryRewardPopupEntry[];
 
-s32 prfCapTaskStep(KwlnTask *request) {
+s32 prfCapTaskStep(dds3ProcessID_t *request) {
     s32 result;
     BrsSkillPackageWork *scene = (BrsSkillPackageWork *)dds3GetProcessData(request);
     s32 *dispatchStatus = &scene->transition.state;
@@ -167,20 +167,20 @@ s32 prfCapTaskStep(KwlnTask *request) {
     return result;
 }
 
-s32 mnuRefreshAndRunResultPanel(KwlnTask *request) {
+s32 mnuRefreshAndRunResultPanel(dds3ProcessID_t *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
     mnuRefreshPanelLayer(context);
     return menuRunPanel(context, 1, (void *)request);
 }
 
-s32 mnuAdvanceResultPanel(KwlnTask *request) {
+s32 mnuAdvanceResultPanel(dds3ProcessID_t *request) {
     s32 context = dds3GetProcessData(request);
     dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 /* Clear the scene's two selection-processing markers; return 1. */
-s32 mnuResetItemSelectionMarkers(KwlnTask *task) {
+s32 mnuResetItemSelectionMarkers(dds3ProcessID_t *task) {
     BrsSkillPackageWork *scene = (BrsSkillPackageWork *)dds3GetProcessData(task);
     scene->selectedRow = 0;
     scene->resetStateB = 0;
@@ -201,7 +201,7 @@ typedef struct ActiveItemSlots {
 
 void brsShowStatSelectionStatus(BrsSkillPackageWork *scene) {
     ActiveItemSlots active;
-    DatPartyRecord *item = scene->selectedRewardRow->unit;
+    datUnitWork_t *item = scene->selectedRewardRow->unit;
     s32 i;
 
     memset(&active, 0, sizeof(active));
@@ -229,7 +229,7 @@ extern void brsShowStatSelectionStatus(BrsSkillPackageWork *);
 /* Cap the available extent by the remaining capacity of five components. */
 void brsUpdateStatSelectionExtent(BrsSkillPackageWork *scene) {
     char text[16];
-    DatPartyRecord *item = scene->selectedRewardRow->unit;
+    datUnitWork_t *item = scene->selectedRewardRow->unit;
     s32 available = scene->selectedRewardRow->values.amount * 3;
     s32 sum = 0;
     s32 i;
@@ -262,17 +262,17 @@ void brsUpdateStatSelectionExtent(BrsSkillPackageWork *scene) {
 
 extern void evtStageTestUpdateCamera(void);
 extern s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *);
-extern void ptyAccumulateStatGains(s32 *, s32, DatPartyRecord *);
-extern s32 mnuAdvanceTitleEntryAnimation(DatPartyRecord *);
-extern void mnuStaffCopyPanelBlock(DatPartyRecord *, BrsSkillPackageWork *);
-extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
-extern u32 mnuInitializeItemSelectionExtent(KwlnTask *task);
-extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
+extern void ptyAccumulateStatGains(s32 *, s32, datUnitWork_t *);
+extern s32 mnuAdvanceTitleEntryAnimation(datUnitWork_t *);
+extern void mnuStaffCopyPanelBlock(datUnitWork_t *, BrsSkillPackageWork *);
+extern void mnuRefreshSelectedUnitPanels(datUnitWork_t *, BrsSkillPackageWork *);
+extern u32 mnuInitializeItemSelectionExtent(dds3ProcessID_t *task);
+extern s32 btlAddBaseStats(s32 *, datUnitWork_t *);
 extern void p2sdStopBGM(u32);
 extern char brsStatAssignmentPopupEntry[];
 extern char brsLevelChangePopupEntry[];
 
-s32 brsProcessNextPrimaryReward(KwlnTask *task) {
+s32 brsProcessNextPrimaryReward(dds3ProcessID_t *task) {
     s32 result;
     BrsSkillPackageWork *scene = (BrsSkillPackageWork *)dds3GetProcessData(task);
     s32 *dispatchStatus;
@@ -329,14 +329,14 @@ void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *scene) {
 }
 
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, u32, s32, s32);
-extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
 void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *scene) {
     char text[16];
-    DatPartyRecord *item = scene->selectedRewardRow->unit;
+    datUnitWork_t *item = scene->selectedRewardRow->unit;
     s32 fade = scene->iconFade;
     s32 delta;
     s32 x;
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
     u32 color;
 
     effDrawSpriteWithCornerFade(0x9A0, 0x348, 0, fade, 1, (u32)scene->unitResource, 8, 0x53);
@@ -374,7 +374,7 @@ extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *scene, s32 copyOptions) {
-    DatPartyRecord *item = scene->selectedRewardRow->unit;
+    datUnitWork_t *item = scene->selectedRewardRow->unit;
     s32 i;
 
     uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x19, 0x53);
@@ -396,7 +396,7 @@ void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *scene, s32 copyOptions) {
 }
 
 
-s32 mnuAdvanceSkillPackageToItemPanel(KwlnTask *request) {
+s32 mnuAdvanceSkillPackageToItemPanel(dds3ProcessID_t *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {
@@ -407,7 +407,7 @@ s32 mnuAdvanceSkillPackageToItemPanel(KwlnTask *request) {
     return menuRunPanel(context, 1, (void *)request);
 }
 
-s32 mnuAdvanceSkillPanelToNextMenu(KwlnTask *request) {
+s32 mnuAdvanceSkillPanelToNextMenu(dds3ProcessID_t *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {
@@ -418,7 +418,7 @@ s32 mnuAdvanceSkillPanelToNextMenu(KwlnTask *request) {
 }
 
 /* Bound the selection extent by the remaining capacity after five components. */
-u32 mnuInitializeItemSelectionExtent(KwlnTask *task) {
+u32 mnuInitializeItemSelectionExtent(dds3ProcessID_t *task) {
     s8 component;
     BrsSkillPackageWork *scene;
     s32 *slot;
@@ -475,7 +475,7 @@ void mnuClearItemSelectionSlots(BrsSkillPackageWork *scene) {
     } while (-1 < remaining);
 }
 
-void mnuRefreshPartyUnitVitalsPanels(DatPartyRecord *unit, BrsSkillPackageWork *menu) {
+void mnuRefreshPartyUnitVitalsPanels(datUnitWork_t *unit, BrsSkillPackageWork *menu) {
     ptyRecomputeMaxVitals(unit, menu->statGains);
     mnuRefreshSelectedUnitPanels(unit, menu);
 }

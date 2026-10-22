@@ -76,7 +76,7 @@ extern char D_0039FA00[];
 
 extern void fldStepValueByPad(f32 *controlledValue, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
 
-extern s32 fldTestDrawUpdate(KwlnTask *task);
+extern s32 fldTestDrawUpdate(dds3ProcessID_t *task);
 
 extern void fldClearCameraMoveMode(void);
 
@@ -97,7 +97,7 @@ extern u8 D_0033F068[];
 
 extern u8 D_00342868[];
 
-struct EffWorldNode;
+struct dds3Basic_t;
 
 extern s16 D_0032C9B0[];
 
@@ -108,8 +108,8 @@ void fldSetPacketArgumentPair(u32 *packet, u32 first, u32 second) {
     packet[5] = second;
 }
 
-struct SdfListHead *dds3FontReqAllocDrawTag(void) {
-    struct SdfListHead *packet = (struct SdfListHead *)sdfGrAllocPacketBuff(0x20);
+struct sdfDrawTag_t *dds3FontReqAllocDrawTag(void) {
+    struct sdfDrawTag_t *packet = (struct sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
 
     sdfDrawTagInit(packet);
     return packet;
@@ -677,7 +677,7 @@ extern u32 fldRunDanteGunFlag[];
 
 extern void rsetOtOfs(u32);
 
-s32 fldTestDrawUpdate(KwlnTask *task) {
+s32 fldTestDrawUpdate(dds3ProcessID_t *task) {
     if (fldGetEncounterRuntimeResult() != 0) {
         return 0;
     }
@@ -854,19 +854,19 @@ enum {
 void drawSceneBasicList(void) {
     s32 hasEligibleBackground = 0;
     WorldIndexNode *objectChain;
-    EffWorldNode *worldObject;
+    dds3Basic_t *worldObject;
 
     objectChain = dds3SceneBasicGetList(dds3GetControlScene(), 5);
     if (objectChain != 0) {
-        if (dds3SetFirstBasicArray((WorldValueIndices *)objectChain) != 0) {
+        if (dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)objectChain) != 0) {
             do {
-                worldObject = (EffWorldNode *)dds3GetBasicArray((WorldValueIndices *)objectChain);
+                worldObject = (dds3Basic_t *)dds3GetBasicArray((dds3BasicArrayHandle_t *)objectChain);
                 if (dds3ObjectBaseCheckFlag(worldObject, FIELD_BACKGROUND_REQUIRED_OBJECT_FLAG) != 0) {
                     if (dds3ObjectBaseCheckFlag(worldObject, FIELD_BACKGROUND_EXCLUDED_OBJECT_FLAG) == 0) {
                         hasEligibleBackground = 1;
                     }
                 }
-            } while (dds3SetNextBasicArray((WorldValueIndices *)objectChain) != 0);
+            } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)objectChain) != 0);
         }
         dds3FreeBasicArrayHandle(objectChain);
     }
@@ -893,10 +893,10 @@ void drawSceneBasicList(void) {
 #include "sdf.h"
 
 /* All declarations below refer to the existing primary runtime owners. */
-extern EvtUnit *dds3GetUnitHandleObjectBasic(EffWorldNode *);
+extern evtUnitHandle_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *);
 extern void *dds3GetActiveScene(void);
-extern EffWorldNode *dds3SearchSceneBasic(EffWorldNode *, u32, s32);
-extern s32 sdfModelGetMarkPos(SdfModel *, s32);
+extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *, u32, s32);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *, s32);
 extern void fldMakeEveHitPlanes(f32 *, f32 *, f32 *, f32 *, f32 *);
 extern void aDrawBoxF(s32, s32, s32, s32, u32, u32, u32, u32);
 extern void aDrawBoxF_Direct(s32, s32, s32, s32, u32, u32, u32, u32);
@@ -941,7 +941,7 @@ extern s32 D_0032C608[][3], D_0032C750[][3];
 
 
 /* Submits the accumulated strip request and starts an empty one. */
-static inline void fldFlushShadowStrip(SdfListHead *list, SdfPrimitiveRequest *request) {
+static inline void fldFlushShadowStrip(sdfDrawTag_t *list, SdfPrimitiveRequest *request) {
     sdfDrawTagLink(list, (u32)sdf3DPrimMakePoly(request));
     request->stripWordCount = 0;
     request->vertexCount = 0;
@@ -952,7 +952,7 @@ static inline SdfPoolNode *fldGetDisplaySurfaceBase(void) {
 }
 
 /* Appends a finished packet list to the active display surface. */
-static inline void fldAppendToDisplaySurface(SdfListHead *list) {
+static inline void fldAppendToDisplaySurface(sdfDrawTag_t *list) {
     SdfPoolNode *surface = &fldGetDisplaySurfaceBase()[rsetFrameMaskOtOffset];
 
     surface->append(surface, list);
@@ -960,7 +960,7 @@ static inline void fldAppendToDisplaySurface(SdfListHead *list) {
 
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FA28);
 
-void fldDrawEffectObjectShadow(EffWorldNode *object) {
+void fldDrawEffectObjectShadow(dds3Basic_t *object) {
     f32 anchorPosition[4];
     f32 edgeStart[4];
     f32 edgeEnd[4];
@@ -989,13 +989,13 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
     f32 planeVertices[4][4];
     f32 plane[4];
     s32 slot;
-    SdfModel *model;
-    ObjBase *base;
+    sdfModelRootNode_t *model;
+    dds3ObjectBaseControlWorkData_t *base;
     s32 vertexCount;
     EffectObjectData *data;
-    EvtUnit *transition;
-    EffWorldNode *target;
-    SdfDrawNode *drawNode;
+    evtUnitHandle_t *transition;
+    dds3Basic_t *target;
+    sdfModelNode_t *drawNode;
     f32 (*vertices)[3];
     s32 (*triangles)[3];
     s32 *triangle;
@@ -1011,8 +1011,8 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
     s32 j;
     s32 edgeFrom;
     s32 alpha;
-    SdfListHead *quadList;
-    SdfListHead *triangleList;
+    sdfDrawTag_t *quadList;
+    sdfDrawTag_t *triangleList;
     f32 length = 300.0f;
     f32 opacity;
     f32 horizontalDistance;
@@ -1046,7 +1046,7 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
     quadStrip = D_0032C880;
     opacity = 100.0f;
     base = dds3GetBaseControlWorkData(object);
-    model = ((MdlCtx *)dds3ObjectBaseGetModelHandle(object))->inner;
+    model = ((dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(object))->inner;
     if (dds3ObjectBaseCheckFlag(object, 0x4000)) {
         transition = dds3GetUnitHandleObjectBasic(object);
         D_003BAB28 = transition->shadowLevel;
@@ -1198,7 +1198,7 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
     for (slot = 0; slot < base->resourceSlotCount; slot++) {
         i = base->resourceSlots[slot];
         if (i < 0) continue;
-        drawNode = ((SdfDrawNode **)model->list->buffer)[i];
+        drawNode = ((sdfModelNode_t **)model->list->buffer)[i];
         D_003BAB24 = 0;
         switch (slot) {
         case 0:
@@ -1419,7 +1419,7 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
         rsetTest(1, 0, 0x80, 1, 0, 0, 1, 3);
         fldSubmitPrimaryFramePacket();
         for (pass = 0; pass < 2; pass++) {
-            quadList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+            quadList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
             sdfDrawTagInit(quadList);
             sdf3DPrimLinkResetTm(quadList, NULL);
             sdf3DPrimLinkMat(quadList, (void *)D_003BACEC, NULL);
@@ -1430,7 +1430,7 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
             quadRequest.vertexCount = 0;
             if (pass == 0) quadRequest.color = 0x80000000;
             else quadRequest.color = 0;
-            triangleList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+            triangleList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
             sdfDrawTagInit(triangleList);
             sdf3DPrimLinkResetTm(triangleList, NULL);
             sdf3DPrimLinkMat(triangleList, (void *)D_003BACEC, NULL);
@@ -1586,7 +1586,7 @@ extern FldNpcMotion D_00336A60[];
 extern FldCameraSetting *fldCameraSettings;
 
 void fldLoadFieldTables(void) {
-    DevState *command = sdfFileOpen("/fld/f/bin/FLDALL.TBL");
+    sdfFileCmdHandle_t *command = sdfFileOpen("/fld/f/bin/FLDALL.TBL");
 
     sdfFileRead(command, D_0033EC90, 0x3D8);
     sdfFileRead(command, D_0033F068, 0x3800);

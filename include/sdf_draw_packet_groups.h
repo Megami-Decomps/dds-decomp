@@ -6,16 +6,16 @@
 #include "sdf_dma_tag.h"
 
 typedef struct SdfDrawPacketGroup {
-    SdfListHead list;
+    sdfDrawTag_t list;
     union {
-        SdfGsBlendPacket blend;
+        sdfPrimTransPacket_t blend;
         SdfDmaTagHeader dma;
     } packet;
 } SdfDrawPacketGroup;
 
 typedef struct SdfDrawPacketGroups {
     SdfDrawPacketGroup groups[4];
-    SdfListHead syncList;
+    sdfDrawTag_t syncList;
     u64 syncPacketWords[2] QWORD_ALIGNED; /* a DMA tag: NEXT, with VIF FLUSHA */
 } SdfDrawPacketGroups;
 

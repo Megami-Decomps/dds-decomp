@@ -11,7 +11,7 @@ extern s32 sdfDrawThreadId;
 #define SDF_GRAPH_UNCACHED_ALIAS 0x20000000
 #define SDF_GS_FRAMEBUFFER_PAGE_SHIFT 11
 
-extern SdfGraphObj D_003980E0;
+extern sdfGrFrameSet_t D_003980E0;
 extern u8 sdfGrScreenMode;
 extern u8 reqMakeFrameBuff;
 
@@ -23,7 +23,7 @@ void sdfGrSetScreen(s32 displayModeIndex) {
 }
 
 /* Release buffers in slot order, clearing each slot immediately afterward. */
-void sdfGrFreeFrameSet(SdfGraphObj *graph) {
+void sdfGrFreeFrameSet(sdfGrFrameSet_t *graph) {
     sdfGsMemFree(graph->buffers[0]);
     graph->buffers[0] = NULL;
     sdfGsMemFree(graph->buffers[1]);
@@ -33,7 +33,7 @@ void sdfGrFreeFrameSet(SdfGraphObj *graph) {
 }
 
 /* Rebuild the auxiliary buffer with its own PSM; both others share a PSM. */
-void sdfGrMakeFrameSet(SdfGraphObj *graph) {
+void sdfGrMakeFrameSet(sdfGrFrameSet_t *graph) {
     s16 width;
     s16 height;
     u8 bufferFormat;
@@ -51,7 +51,7 @@ extern SdfDisplayEnvView sdfDisplayEnvironment;
 
 /* Select the indexed image buffer for display; the index and pointer are unchecked. */
 void sdfGrSetDisp(s32 bufferIndex) {
-    SdfTexResource *displayBuffer = D_003980E0.buffers[bufferIndex];
+    sdfGsMemSlice_t *displayBuffer = D_003980E0.buffers[bufferIndex];
 
     /* Initialize the environment through its uncached main-RAM alias. */
     sceGsSetDefDispEnv((void *)(((u32)&sdfDisplayEnvironment & SDF_GRAPH_CPU_ADDRESS_MASK) | SDF_GRAPH_UNCACHED_ALIAS),

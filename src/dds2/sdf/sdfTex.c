@@ -14,9 +14,9 @@
 #include "ee_mmi.h"
 #include "btl.h"
 /* Declared before first use (were implicit int). */
-extern SdfTexResource * sdfTexAllocClut(s32 type, s32 kind, s32 unused);
-extern SdfTexResource * sdfGsMemAllocFromTail(s32 size, s32 allocationMode);
-extern SdfTex * sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 paletteCount, SdfTexResource *secondary);
+extern sdfGsMemSlice_t * sdfTexAllocClut(s32 type, s32 kind, s32 unused);
+extern sdfGsMemSlice_t * sdfGsMemAllocFromTail(s32 size, s32 allocationMode);
+extern sdfTexHandle_t * sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, sdfGsMemSlice_t *primary, s32 paletteFormat, s32 paletteCount, sdfGsMemSlice_t *secondary);
 
 /* PlayStation 2 GS pixel storage formats used to size indexed palettes. */
 enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
@@ -25,7 +25,7 @@ enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
 
 
 
-SdfTexBuf *sdfTexMakeGIFPacketSub(SdfTex *texture, s32 variant);
+sdfTexPacket_t *sdfTexMakeGIFPacketSub(sdfTexHandle_t *texture, s32 variant);
 
 extern SdfPendingRequest sdfTexDelayedResrcCB;
 
@@ -43,7 +43,7 @@ s32 __attribute__((const)) sdfTexGetClutDataSize(s32 textureFormat, s32 paletteF
     return colorsPerPalette * bytesPerColor * paletteCount;
 }
 
-void sdfTexAllocClutBuff(SdfTex *texture) {
+void sdfTexAllocClutBuff(sdfTexHandle_t *texture) {
     s32 size = sdfTexGetClutDataSize(texture->pixelFormat, texture->clutFormat,
                                       texture->paletteCount);
     texture->paletteDataSize = size;
@@ -51,16 +51,16 @@ void sdfTexAllocClutBuff(SdfTex *texture) {
 }
 
 /* Copy retained palette bytes without changing the texture resource metadata. */
-void sdfTexCopyClutData(SdfTex *texture, const u8 *source) {
+void sdfTexCopyClutData(sdfTexHandle_t *texture, const u8 *source) {
     memcpy(texture->paletteData, source, texture->paletteDataSize);
 }
 
-SdfTex *sdfTexAlloc(s32 width, s32 height, u32 format,
+sdfTexHandle_t *sdfTexAlloc(s32 width, s32 height, u32 format,
     u32 maxMipLevel, u32 paletteFormat, u32 paletteCount) {
     s32 indexed = 0;
     s32 bitsPerPixel;
-    SdfTexResource *secondary;
-    SdfTexResource *primary;
+    sdfGsMemSlice_t *secondary;
+    sdfGsMemSlice_t *primary;
     s32 mipWidth;
     s32 mipHeight;
     s32 words;
@@ -110,9 +110,9 @@ SdfTex *sdfTexAlloc(s32 width, s32 height, u32 format,
 }
 
 /* Release both GPU resources and unlink the texture from the active list. */
-void sdfTexRelease(SdfTex *texture) {
-    SdfTex *next;
-    SdfTex *prev;
+void sdfTexRelease(sdfTexHandle_t *texture) {
+    sdfTexHandle_t *next;
+    sdfTexHandle_t *prev;
 
     if (texture->reference->cloneSource == NULL) {
         sdfGsMemFree(texture->primaryResource);
@@ -137,7 +137,7 @@ void sdfTexRelease(SdfTex *texture) {
 }
 
 /* Release a texture when the final ordinary reference is dropped. */
-void sdfTexReleaseReference(SdfTex *texture) {
+void sdfTexReleaseReference(sdfTexHandle_t *texture) {
     SdfTexRef *ref;
     s32 remainingReferenceCount;
 
@@ -153,7 +153,7 @@ void sdfTexReleaseReference(SdfTex *texture) {
 }
 
 /* Hand the last reference to sdfDelayedResrcEntry rather than releasing it here. */
-void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
+void sdfTexReleaseReferenceViaHandler(sdfTexHandle_t *texture) {
     SdfTexRef *ref;
     s32 remainingReferenceCount;
 
@@ -171,8 +171,8 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
 INCLUDE_ASM(const s32, "sdf/sdfTex", sdfTexSetPacket);
 
 /* Allocate and populate one of the two resource packet variants. */
-SdfTexBuf *sdfTexMakeGIFPacketSub(SdfTex *texture, s32 variant) {
-    SdfTexBuf *packet;
+sdfTexPacket_t *sdfTexMakeGIFPacketSub(sdfTexHandle_t *texture, s32 variant) {
+    sdfTexPacket_t *packet;
     u32 primary;
     u32 secondary;
 
@@ -184,18 +184,18 @@ SdfTexBuf *sdfTexMakeGIFPacketSub(SdfTex *texture, s32 variant) {
 }
 
 /* Store the first packet on the texture. */
-void sdfTexMakeGIFPacket(SdfTex *texture) {
+void sdfTexMakeGIFPacket(sdfTexHandle_t *texture) {
     texture->primaryBuffer = sdfTexMakeGIFPacketSub(texture, 0);
 }
 
 /* Store the second packet on the texture. */
-void sdfTexMakeGIFPacketCtx2(SdfTex *texture) {
+void sdfTexMakeGIFPacketCtx2(sdfTexHandle_t *texture) {
     texture->secondaryBuffer = sdfTexMakeGIFPacketSub(texture, 1);
 }
 
 /* Rebuild existing texture packets while preserving each packet's TEX0 TCC bit. */
-void sdfTexRebuildPacket(SdfTex *texture) {
-    SdfTexBuf *buffer;
+void sdfTexRebuildPacket(sdfTexHandle_t *texture) {
+    sdfTexPacket_t *buffer;
 
     buffer = texture->primaryBuffer;
     if (buffer != NULL) {
@@ -218,8 +218,8 @@ void sdfTexRebuildPacket(SdfTex *texture) {
     }
 }
 
-SdfTex *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header, s32 mode) {
-    SdfTex *texture;
+sdfTexHandle_t *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header, s32 mode) {
+    sdfTexHandle_t *texture;
     u8 *pixels;
     s32 format;
     s32 width;
@@ -230,7 +230,7 @@ SdfTex *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header, s32 mode)
     s32 key = header->resourceKey;
 
     if (key != 0) {
-        SdfTex *existing = sdfTexHandleLink;
+        sdfTexHandle_t *existing = sdfTexHandleLink;
         while (existing != NULL) {
             if (existing->resourceKey == key) {
                 existing->reference->refCount++;
@@ -269,17 +269,17 @@ SdfTex *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header, s32 mode)
 }
 
 /* Build the texture and its packet with variant zero. */
-SdfTex *sdfTexSet(const SdfTextureFileHeader *header) {
+sdfTexHandle_t *sdfTexSet(const SdfTextureFileHeader *header) {
     return sdfTexCreateFromFileHeader(header, 0);
 }
 
 /* Build the texture and its packet with variant one. */
-SdfTex *sdfTexSetDirect(const SdfTextureFileHeader *header) {
+sdfTexHandle_t *sdfTexSetDirect(const SdfTextureFileHeader *header) {
     return sdfTexCreateFromFileHeader(header, 1);
 }
 
 /* Build weighted-RGB intensity bytes from retained palette color data. */
-void sdfTexSetMonoClut(SdfTex *texture) {
+void sdfTexSetMonoClut(sdfTexHandle_t *texture) {
     s32 stride;
     s32 paletteColorCount;
     u8 *output;

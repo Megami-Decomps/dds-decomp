@@ -67,20 +67,20 @@ extern u8 D_0040ABD0[];
 extern u8 D_0040ABC0[];
 extern u8 D_0040ABB0[];
 extern s32 D_00438944;
-struct EffWorldNode;
-extern void dds3CameraObjectBasicGetCameraTM(struct EffWorldNode *camera, u128 *worldEye);
+struct dds3Basic_t;
+extern void dds3CameraObjectBasicGetCameraTM(struct dds3Basic_t *camera, u128 *worldEye);
 
 /* Reload the camera vectors, invoke its update callback, then restore both copies
  * of the final vector in the camera data. */
 void CalcCamera(void) {
     CameraData *cameraData;
-    EffWorldNode *camera;
+    dds3Basic_t *camera;
 
-    dds3CameraObjectBasicGetCameraTM((EffWorldNode *)D_00438944, (u128 *)D_0040ABD0);
-    dds3SetPosPoseSet((EffWorldNode *)D_00438944, (u128 *)D_0040ABC0);
-    camera = (EffWorldNode *)D_00438944;
+    dds3CameraObjectBasicGetCameraTM((dds3Basic_t *)D_00438944, (u128 *)D_0040ABD0);
+    dds3SetPosPoseSet((dds3Basic_t *)D_00438944, (u128 *)D_0040ABC0);
+    camera = (dds3Basic_t *)D_00438944;
     camera->ops->update(camera);
-    cameraData = (CameraData *)((EffWorldNode *)D_00438944)->data;
+    cameraData = (CameraData *)((dds3Basic_t *)D_00438944)->data;
     PCP_COPY_VECTOR(&cameraData->localUp, D_0040ABB0);
     PCP_COPY_VECTOR(&cameraData->worldUp, D_0040ABB0);
 }
@@ -92,7 +92,7 @@ void dds3InitSoundSlotPool(void) {
         dds3ReleaseSoundSlotPool();
     }
     handle = (u32)sdfMemAllocDirect(0x32c);
-    dds3SoundSlotPool = (void *)sdfMemGetPtr((struct SdfMemBlock *)(u32)handle);
+    dds3SoundSlotPool = (void *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)handle);
     memset(dds3SoundSlotPool, 0, 0x32c);
     pool = (SoundSlotPool *)dds3SoundSlotPool;
     pool->handle = handle;
@@ -102,7 +102,7 @@ void dds3InitSoundSlotPool(void) {
 
 void dds3ReleaseSoundSlotPool(void) {
     if (dds3SoundSlotPool != (u32 *)0x0) {
-        sdfMemFreeDirect((struct SdfMemBlock *)(u32)(*dds3SoundSlotPool));
+        sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(*dds3SoundSlotPool));
         dds3SoundSlotPool = (u32 *)0x0;
     }
 }
@@ -167,7 +167,7 @@ s32 mnuApplyFrameKeyedModelMotion(MenuWorkEntry *work, MnuShootingWork *unusedCo
     MenuShortRecordList *list;
     MenuShortRecord *record;
     MnuModelNode *node;
-    MdlCtx *model;
+    dds3ModelHandle_t *model;
     s16 frame;
     s32 i;
 
@@ -207,7 +207,7 @@ MnuEffectWork *mnuCreateEffectWork(s32 listCount, s32 *recordCounts) {
     s32 listBytes = listCount * 8;
     s32 allocationSize = listBytes + 16;
     s32 i;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     MnuEffectWork *work;
     MnuEffectList *list;
     MnuEffectRecord *records;
@@ -405,7 +405,7 @@ void mnuClearNodeBroadcastFlag(u8 *node) {
 u32 mnuLoadNodeModelFromResource(u32 *owner, u32 resource) {
     u32 handle;
     u32 other;
-    struct SdfMemBlock *data = sdfDevLoadFileEx((const char *)(u32)resource, &handle, &other);
+    struct sdfMemHandle_t *data = sdfDevLoadFileEx((const char *)(u32)resource, &handle, &other);
     *owner = (u32)fileCloneQueueEntries((FileQueue *)handle);
     fileQueueNotifyAllJobsComplete((FileQueue *)*owner);
     sdfMemFreeDirect(data);
@@ -516,9 +516,9 @@ MnuSectionModelWork *mnuCreateSectionModelWork(s32 listCount, s32 *nodeCounts) {
     for (i = 0; i < listCount; i++) allocationSize += nodeCounts[i] * sizeof(MnuModelNode);
     evtPrintDeveloperConsoleMessage(D_0042DAE8, allocationSize);
     handle = (u32)sdfMemAllocDirect(allocationSize);
-    work = (MnuSectionModelWork *)sdfMemGetPtr((struct SdfMemBlock *)(u32)handle);
+    work = (MnuSectionModelWork *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)handle);
     memset(work, 0, allocationSize);
-    work->allocation = (struct SdfMemBlock *)handle;
+    work->allocation = (struct sdfMemHandle_t *)handle;
     work->count = listCount;
     work->groups = (MnuNodeList *)(work + 1);
     list = work->groups;
@@ -564,7 +564,7 @@ void mnuDestroyAllModelNodeContexts(MnuNodeList *list) {
     s16 index = 0;
     if (list->count > 0) {
         do {
-            MdlCtx *model = node->model;
+            dds3ModelHandle_t *model = node->model;
             node++;
             if (model != NULL) {
                 mdlFree(model);
@@ -590,7 +590,7 @@ MnuModelNode *mnuAcquireUnusedModelNode(MnuNodeList *group) {
     if (group->count > 0) {
         do {
             if ((node->flags & 1) == 0) {
-                MdlCtx *model = node->model;
+                dds3ModelHandle_t *model = node->model;
                 if (model != 0) {
                     model->flags &= ~MDL_SKIP_TRANSFORMS;
                     node->value48 = 0;
@@ -658,7 +658,7 @@ void mnuRestoreActiveNodeModelDepth(MnuNodeList *list) {
 
 /* Create the resource-backed model; -1 omits flagged-entry setup and scalar saving. */
 void mnuCreateNodeModelEntry(MnuModelNode *node, s32 resourceGroup, s32 resourceId, s32 entryFlags, f32 x, f32 y, f32 z) {
-    MdlCtx *model = mdlLoad(resourceGroup, resourceId);
+    dds3ModelHandle_t *model = mdlLoad(resourceGroup, resourceId);
     node->model = model;
     if (entryFlags != -1) {
         model->first->frameStep = z;

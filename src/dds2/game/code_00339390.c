@@ -55,16 +55,16 @@ typedef struct {
     u8 *secondCoordinates; /* 0xA4 */
     u8 *vertexColors;      /* 0xA8 */
     f32 depth;             /* 0xAC */
-} VuWork;
+} corePktCb_t;
 
-extern void corePktEmitBase(VuWork *work);
+extern void corePktEmitBase(corePktCb_t *work);
 
-/* Finish the selected node's transformed rows and emit its textured geometry. */ void corePktEmitMultiTexPass(VuWork *work);
+/* Finish the selected node's transformed rows and emit its textured geometry. */ void corePktEmitMultiTexPass(corePktCb_t *work);
 
-/* Split ring addressing at position 128; retain the native 96-byte stride. */ void corePktSetupPointBuff(VuWork *work, s32 ringPosition);
+/* Split ring addressing at position 128; retain the native 96-byte stride. */ void corePktSetupPointBuff(corePktCb_t *work, s32 ringPosition);
 
 /* Emit selected geometry, then apply flag callbacks; the first may change flags. */
-void corePktEmitAllPasses(VuWork *work) {
+void corePktEmitAllPasses(corePktCb_t *work) {
     u32 selectedFlags;
 
     corePktEmitBase(work);
@@ -79,14 +79,14 @@ void corePktEmitAllPasses(VuWork *work) {
     }
 }
 
-extern void corePktBuildFaceList(VuWork *);
+extern void corePktBuildFaceList(corePktCb_t *);
 
 extern void corePktRelightBackFaces(u32, s32);
 
-extern void corePktBuildBackFaceList(VuWork *);
+extern void corePktBuildBackFaceList(corePktCb_t *);
 
 /* Align the packet to 64 bytes; the optional second pass preserves vf24-vf26. */
-void corePktOpenAndEmit(VuWork *work) {
+void corePktOpenAndEmit(corePktCb_t *work) {
     u128 savedVectors[3];
     u32 packetStart = sdfGrOpenPacketBuff();
     u32 alignedStart = (packetStart + 0x3F) & ~0x3F;
@@ -114,7 +114,7 @@ void corePktOpenAndEmit(VuWork *work) {
 }
 
 /* Pad and finalize the packet; inactive or empty work returns NULL. */
-u64 *corePktClosePacket(VuWork *work) {
+u64 *corePktClosePacket(corePktCb_t *work) {
     u32 cursor;
     u32 start;
     s32 quadwords;

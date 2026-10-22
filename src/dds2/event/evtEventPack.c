@@ -17,7 +17,7 @@
 #include "sdf_texture_offset_list.h"
 
 #include "dds3_world_primary.h"
-extern Motion *mdlGetMotionCtrlr(MdlCtx *ctx, s32 searchId);
+extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(dds3ModelHandle_t *ctx, s32 searchId);
 extern s32 evtPlaySe(s32 id, s32 fade);
 
 /* The selected script entry and the terminal value of the native load state. */
@@ -136,11 +136,11 @@ s32 evtRegistBEField(s32 eventId, s32 resourceId) {
     return 0;
 }
 
-s32 evtMotionSeProcess1(KwlnTask *task) {
+s32 evtMotionSeProcess1(dds3ProcessID_t *task) {
     EvtMotionSeTaskParams *motionSeParams;
-    EffWorldNode *motionNode;
+    dds3Basic_t *motionNode;
     EvtPackLoadState *packState;
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
     u16 motionId;
     s32 motionFrame;
     s32 entryIndex;
@@ -185,7 +185,7 @@ s32 evtMotionSeProcess1(KwlnTask *task) {
 }
 
 /* Free the three-word parameter block owned by the motion-SE task. */
-void evtFreeScriptProcessData(KwlnTask *task) {
+void evtFreeScriptProcessData(dds3ProcessID_t *task) {
     void *params = (void *)(u32)dds3GetProcessData(task);
 
     sdfChipFreeDirect(params);
@@ -196,7 +196,7 @@ const char evtMotionSeTaskNameFormat[0x10] __attribute__((aligned(8))) = "mse_%d
 
 
 /* Allocate a three-word task parameter block and format its "mse_..." name. */
-KwlnTask *evtLoadModelSe(s32 modelKey, s32 eventTaskId, s32 resourceId) {
+dds3ProcessID_t *evtLoadModelSe(s32 modelKey, s32 eventTaskId, s32 resourceId) {
     char taskName[0x20];
     EvtMotionSeTaskParams *params;
 
@@ -263,7 +263,7 @@ void evtCheckEventScriptLoaded(EvtPackLoadState *state) {
     }
 }
 
-s32 evtCheckScriptDone(KwlnTask *task) {
+s32 evtCheckScriptDone(dds3ProcessID_t *task) {
     EvtPackLoadState *packState = (EvtPackLoadState *)dds3GetProcessData(task);
 
     switch (packState->loaded) {
@@ -288,7 +288,7 @@ extern void Eve_RippleBlurSetDefTex(void);
 extern void Eve_PartialMultiFilterSetDefTex(void);
 /* Release the event task's owned handles, then free its state.
  * File I/O is waited on even when the user-value handle is zero. */
-void evtWaitEventPackLoad(KwlnTask *task) {
+void evtWaitEventPackLoad(dds3ProcessID_t *task) {
     s32 stateHandle = dds3GetProcessData(task);
     EvtPackLoadState *packState = (EvtPackLoadState *)stateHandle;
 

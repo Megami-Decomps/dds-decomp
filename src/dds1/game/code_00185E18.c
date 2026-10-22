@@ -93,11 +93,11 @@ void effSetPairedResourceColor(PairedEffectResources *pair, u32 colorWithAlpha) 
     pair->colorWithAlpha = colorWithAlpha;
 }
 
-typedef EffBlurQuad BlurSource;
+typedef dds3Effect_Blur_t BlurSource;
 
 
 
-struct SdfListHead;
+struct sdfDrawTag_t;
 struct SdfDmaNode;
 
 extern SdfPoolNode D_003253E8;
@@ -248,15 +248,15 @@ void effBuildBlurUnitTextureQuad(const BlurSource *source, BlurPacketQuad *quad,
 }
 
 
-void effDrawBlurRectangle(const EffBlurQuad *source)
+void effDrawBlurRectangle(const dds3Effect_Blur_t *source)
 {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     void *tag;
     u64 *samplingPacket, *textureAlphaPacket, *blendPacket, *clampPacket;
     SdfDrawPacket *drawPacket;
 
     if (dds3NullDrawProc() == 0) {
-        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         tag = (void *)sdfGrAllocPacketBuff(0x20);
         sdfGrLinkDispFrameTex(list, (u32)kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag);
@@ -309,7 +309,7 @@ void effDrawBlurRectangle(const EffBlurQuad *source)
 
 extern void sdfBuildMaskedFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
-void effAppendBlurRenderState(void *list, s32 blendControl, SdfTex *resource)
+void effAppendBlurRenderState(void *list, s32 blendControl, sdfTexHandle_t *resource)
 {
     SdfDmaReferenceChainPacket *framePacket;
     u64 *blendPacket;
@@ -408,7 +408,7 @@ extern u32 dds3NullDrawProc();
 extern void effAppendBlurRenderState();
 
 /* Queue blend setup and both rectangle packets, then finish with the filter draw. */
-void effDrawBlurSource(const BlurSource *source, SdfTex *resource, u8 fixedPointCoordinates) {
+void effDrawBlurSource(const BlurSource *source, sdfTexHandle_t *resource, u8 fixedPointCoordinates) {
     void *list;
 
     if (dds3NullDrawProc(source) == 0) {
@@ -420,7 +420,7 @@ void effDrawBlurSource(const BlurSource *source, SdfTex *resource, u8 fixedPoint
     }
 }
 
-void dds3EffectBlurSetRect(EffBlurTemplateBody *work) {
+void dds3EffectBlurSetRect(dds3Effect_PartialMultiBlurParam_t *work) {
     s32 x = work->source.position[0] + 0x100;
     s32 y = work->source.position[1] + 0xE0;
     s32 extent = work->extent;
@@ -435,7 +435,7 @@ void dds3EffectBlurSetRect(EffBlurTemplateBody *work) {
 
 
 /* Clone a blur template into a fresh allocation. */
-EffBlurTemplate *dds3EffectPartialMultiBlurCreate(const EffBlurTemplateBody *src) {
+EffBlurTemplate *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMultiBlurParam_t *src) {
     EffBlurTemplate *dst = sdfChipAllocDirect(sizeof(EffBlurTemplate));
 
     dst->texture = dds3BillboardGetGeneralTex(2);

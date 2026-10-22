@@ -5,23 +5,23 @@
 #include "dds3_world_selection.h"
 #include "dds3_world_lifecycle.h"
 
-extern EffWorldNode *dds3TheWorld;
+extern dds3Basic_t *dds3TheWorld;
 
-void dds3DeleteBasic(EffWorldNode *node);
+void dds3DeleteBasic(dds3Basic_t *node);
 
-EffWorldNode *dds3AllocBasic(u32 kind);
-
-
-
-void dds3DeleteBasicArray(WorldValueIndices *iterator);
+dds3Basic_t *dds3AllocBasic(u32 kind);
 
 
+
+void dds3DeleteBasicArray(dds3BasicArrayHandle_t *iterator);
 
 
 
 
 
-void dds3DeleteAllBasicArray(WorldValueIndices *object);
+
+
+void dds3DeleteAllBasicArray(dds3BasicArrayHandle_t *object);
 
 #define DDS3_WORLD_NODE_KIND 1
 #define DDS3_WORLD_INDEX_NODE_BYTES 0x10
@@ -29,7 +29,7 @@ void dds3DeleteAllBasicArray(WorldValueIndices *object);
 
 /* Destroy the active world if present; clear the global only after destruction. */
 void dds3DeleteWorld(void) {
-    EffWorldNode *world;
+    dds3Basic_t *world;
 
     world = dds3TheWorld;
     if (world != NULL) {
@@ -39,15 +39,15 @@ void dds3DeleteWorld(void) {
 }
 
 /* Set the primary world node without releasing it; no world is a no-op. */
-void dds3SetActiveScene(EffWorldNode *primaryWorldNode) {
+void dds3SetActiveScene(dds3Basic_t *primaryWorldNode) {
     if (dds3TheWorld != NULL) {
         ((WorldInfo *)dds3TheWorld->data)->primaryObject = primaryWorldNode;
     }
 }
 
 /* Return the selected primary object, or NULL when no world is active. */
-EffWorldNode *dds3GetActiveScene(void) {
-    EffWorldNode *world;
+dds3Basic_t *dds3GetActiveScene(void) {
+    dds3Basic_t *world;
 
     world = dds3TheWorld;
     if (world == NULL) {
@@ -57,15 +57,15 @@ EffWorldNode *dds3GetActiveScene(void) {
 }
 
 /* Set the secondary world node without releasing it; no world is a no-op. */
-void dds3SetControlScene(EffWorldNode *secondaryWorldNode) {
+void dds3SetControlScene(dds3Basic_t *secondaryWorldNode) {
     if (dds3TheWorld != NULL) {
         ((WorldInfo *)dds3TheWorld->data)->secondaryObject = secondaryWorldNode;
     }
 }
 
 /* Return the selected secondary object, or NULL when no world is active. */
-EffWorldNode *dds3GetControlScene(void) {
-    EffWorldNode *world;
+dds3Basic_t *dds3GetControlScene(void) {
+    dds3Basic_t *world;
 
     world = dds3TheWorld;
     if (world == NULL) {
@@ -76,9 +76,9 @@ EffWorldNode *dds3GetControlScene(void) {
 
 /* Create a kind-1 world node and append it at the tail.
  * Missing active world or failed creation returns NULL without changing the list. */
-EffWorldNode *dds3AddScene(void) {
+dds3Basic_t *dds3AddScene(void) {
     WorldInfo *worldInfo;
-    EffWorldNode *worldNode;
+    dds3Basic_t *worldNode;
 
     if (dds3TheWorld == NULL) {
         return NULL;
@@ -101,7 +101,7 @@ EffWorldNode *dds3AddScene(void) {
 
 /* Clear boundary and selected-object references before generic node destruction.
  * NULL node or missing active world leaves the node untouched. */
-void dds3DeleteScene(EffWorldNode *worldNode) {
+void dds3DeleteScene(dds3Basic_t *worldNode) {
     WorldInfo *worldInfo;
 
     if (worldNode == NULL) {
@@ -158,7 +158,7 @@ WorldIndexNode *dds3GetBasicArrayHandle(s32 initialCount) {
         indexNode->previous = worldInfo->lastIndex;
         worldInfo->lastIndex = indexNode;
     }
-    dds3AddBasicArray((WorldValueIndices *)indexNode, initialCount);
+    dds3AddBasicArray((dds3BasicArrayHandle_t *)indexNode, initialCount);
     return indexNode;
 }
 
@@ -174,7 +174,7 @@ void dds3FreeBasicArrayHandle(WorldIndexNode *indexNode) {
         return;
     }
     worldInfo = (WorldInfo *)dds3TheWorld->data;
-    dds3DeleteAllBasicArray((WorldValueIndices *)indexNode);
+    dds3DeleteAllBasicArray((dds3BasicArrayHandle_t *)indexNode);
     if (indexNode->previous == NULL) {
         worldInfo->firstIndex = indexNode->next;
     } else {
@@ -190,7 +190,7 @@ void dds3FreeBasicArrayHandle(WorldIndexNode *indexNode) {
 
 /* Preserve native-width tail copies; see docs/idioms.md,
  * "Trace-justified world free-list tail publication". */
-void dds3DeleteBasicArray(WorldValueIndices *iterator) {
+void dds3DeleteBasicArray(dds3BasicArrayHandle_t *iterator) {
     WorldInfo *info;
     WorldValueEntry *entries;
     s16 previous;
@@ -239,7 +239,7 @@ void dds3DeleteBasicArray(WorldValueIndices *iterator) {
 }
 
 /* Return this index record's values to the active world's free-entry chain. */
-void dds3DeleteAllBasicArray(WorldValueIndices *object) {
+void dds3DeleteAllBasicArray(dds3BasicArrayHandle_t *object) {
     WorldInfo *world;
     s32 entryIndex;
 
@@ -275,7 +275,7 @@ void dds3DeleteAllBasicArray(WorldValueIndices *object) {
 
 /* Reset the cursor and remove this node's matching address once, or all matches
  * when processAllMatches is nonzero. Return whether any match was processed. */
-s32 dds3SearchDeleteBasicArray(WorldValueIndices *indexNode, EffWorldNode *targetNode, s32 processAllMatches) {
+s32 dds3SearchDeleteBasicArray(dds3BasicArrayHandle_t *indexNode, dds3Basic_t *targetNode, s32 processAllMatches) {
     s32 processedMatch;
 
     processedMatch = 0;
@@ -295,7 +295,7 @@ s32 dds3SearchDeleteBasicArray(WorldValueIndices *indexNode, EffWorldNode *targe
 /* Search from the current cursor without resetting it; leave it on a match.
  * A NULL payload terminates before comparison, even if later entries remain,
  * so a NULL target never matches. Return 1 for a match, otherwise 0. */
-s32 dds3SetSearchNextBasicArray(WorldValueIndices *indexNode, const EffWorldNode *targetNode) {
+s32 dds3SetSearchNextBasicArray(dds3BasicArrayHandle_t *indexNode, const dds3Basic_t *targetNode) {
     u32 candidateWord;
 
     do {

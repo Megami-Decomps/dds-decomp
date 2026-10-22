@@ -15,7 +15,7 @@ SdfPendingRequest dds3CleanupList __attribute__((section(".sbss"), aligned(8)));
 
 SdfChipClassTable sdfChipCB __attribute__((section(".bss"), aligned(8)));
 
-void sdfChipAllocNextPage(SdfChipClass *sizeClass);
+void sdfChipAllocNextPage(sdfChipCB_tag *sizeClass);
 
 void *sdfAllocAndClearQuadwords(s32 size) {
     void *allocation;
@@ -26,7 +26,7 @@ void *sdfAllocAndClearQuadwords(s32 size) {
 
 void sdfChipFreeDirect(void *memory) {
     SdfChipPage *page;
-    SdfChipClass *sizeClass;
+    sdfChipCB_tag *sizeClass;
     SdfChipCell *cell = memory;
     SdfChipPage **link;
     s32 interrupts;

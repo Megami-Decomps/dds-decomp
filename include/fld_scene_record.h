@@ -30,7 +30,7 @@ typedef struct FldSceneRecord {
     char *name;
     FldItem *items;
     u32 count;
-    SdfItemListRef *model;
+    sdfModelDef_t *model;
     FldPoint *pos;
 } FldSceneRecord;
 
@@ -71,7 +71,7 @@ typedef char FldSceneRecordTableHeader_count_at_8[
 
 extern FldSceneRecord *fldAutoMapHeader;
 extern s32 fldAutoMapData;
-struct SdfMemBlock;
-extern struct SdfMemBlock *fldAutoMapBuf;
+struct sdfMemHandle_t;
+extern struct sdfMemHandle_t *fldAutoMapBuf;
 
 #endif /* FLD_SCENE_RECORD_H */

@@ -4,7 +4,7 @@
 #include "eff_param.h"
 #include "eff_thunder_fragment.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Serialized 0x164-byte group-set input copied into each live owner. */
 typedef struct EffPCPGroupHead {
@@ -49,9 +49,9 @@ typedef struct EffPCPGroupSet {
     f32 scale; /* 0x168: multiplies start/end positions */
     f32 fragmentLength; /* Distance along the normalized fragment direction. */
     u32 color; /* 0x170 */
-    EffParamWork **duplicates; /* 0x174: four groups of parameter work */
-    struct SdfMemBlock *duplicateHandle; /* 0x178 */
-    struct SdfMemBlock *workHandle; /* 0x17C */
+    effPartHandle_t **duplicates; /* 0x174: four groups of parameter work */
+    struct sdfMemHandle_t *duplicateHandle; /* 0x178 */
+    struct sdfMemHandle_t *workHandle; /* 0x17C */
 } EffPCPGroupSet;
 
 typedef char EffPCPGroupHead_size_must_be_0x164[

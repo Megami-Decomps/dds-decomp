@@ -10,7 +10,7 @@ extern f32 mnuTitleCameraRotation[4];
 
 
 
-extern EffWorldNode *mnuTitleCameraObject;
+extern dds3Basic_t *mnuTitleCameraObject;
 
 extern void fldReleaseCameraColorEffect(void);
 

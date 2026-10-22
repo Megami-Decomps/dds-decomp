@@ -79,7 +79,7 @@ extern void fldPrepareDeferredSceneTransition(void);
 extern void mnuDrawMovieMenuSpriteSlot1A(s32 alpha);
 extern void dds3FadeClear(void);
 
-s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
+s32 mnuUpdateMovieMenuTask(dds3ProcessID_t *task) {
     s32 alpha;
     s32 menuAction;
     s32 selectedItem;
@@ -500,7 +500,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
     return 0;
 }
 
-extern KwlnTask *mnuCreateTitleMenuTask(s32 mode);
+extern dds3ProcessID_t *mnuCreateTitleMenuTask(s32 mode);
 
 u32 mnuOpenTitleMenuForMode(s32 mode) {
     mnuCreateTitleMenuTask(mode);

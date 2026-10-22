@@ -4,7 +4,7 @@
 #include "mnu.h"
 
 extern void mnuCloseCurrentProfilePanel(MenuProgressHost *host);
-extern void mnuEnsureProfilePanelEffect(DatPartyRecord *selectionState, MenuProgressHost *host);
+extern void mnuEnsureProfilePanelEffect(datUnitWork_t *selectionState, MenuProgressHost *host);
 
 typedef struct MenuRenderListNode {
     u8 pad00[0x70];
@@ -31,5 +31,5 @@ typedef struct MenuRenderState {
 void mnuRebuildProfilePanelFromRenderSnapshot(MenuRenderState *state) {
     mnuCloseCurrentProfilePanel(state->effect);
     memcpy(state->snapshot, state->context->node->items, 0x1C4);
-    mnuEnsureProfilePanelEffect((DatPartyRecord *)state->snapshot, state->effect);
+    mnuEnsureProfilePanelEffect((datUnitWork_t *)state->snapshot, state->effect);
 }

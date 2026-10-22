@@ -17,7 +17,7 @@
 
 extern u8 D_0037B8BC[];
 
-extern MovObj mnuMovieDrawContext;
+extern movieStream_t mnuMovieDrawContext;
 
 extern SdfPoolNode D_003253C8;
 
@@ -27,7 +27,7 @@ extern char D_003B1168[]; /* "staffProc" */
 
 extern MnuMovieResourceEntry mnuMovieResourceEntries[];
 
-extern KwlnTask *PlayingNo;
+extern dds3ProcessID_t *PlayingNo;
 
 extern u16 dds3VblanksPerFrame;
 
@@ -41,7 +41,7 @@ extern s32 D_003BC618;
 extern void mnuLoadMovieRollSprite(void);
 extern void mnuInitializeMovieRollEntry(void);
 extern void sdfSetGridScaledDrawBounds(s32 column, s32 row, s32 width, s32 height, u32 drawColor);
-extern void sdfMovieDrawFrame(MovObj *, SdfPoolNode *);
+extern void sdfMovieDrawFrame(movieStream_t *, SdfPoolNode *);
 
 /* Three signed image-relative control points per movie image bank. */
 typedef struct StaffImageCorners {
@@ -236,9 +236,9 @@ void mnuReleaseStaffRollText(void) {
     frwFreeStaffFont();
 }
 
-extern FrFontGlyph *frwGetStaffFontFRQ();
+extern _FRQ *frwGetStaffFontFRQ();
 s32 mnuDrawStaffRollText(f32 x, f32 y, s32 alternate, u32 color, const char *source) {
-    FrFontGlyph *glyph;
+    _FRQ *glyph;
 
     if (alternate == 0) {
         glyph = frwGetStaffFontFRQ(
@@ -256,11 +256,11 @@ extern char D_003BC628[];
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void mnuInitializeMovieRollViewport(void);
-extern void mnuReleaseMovieResourceAfterPendingWork(KwlnTask *task);
-extern s32 mnuStaffImageProc(KwlnTask *task);
+extern void mnuReleaseMovieResourceAfterPendingWork(dds3ProcessID_t *task);
+extern s32 mnuStaffImageProc(dds3ProcessID_t *task);
 extern void dds3AdminiCallSequence(s32, void *, u32, s32);
 
-s32 mnuUpdateStaffRoll(KwlnTask *task) {
+s32 mnuUpdateStaffRoll(dds3ProcessID_t *task) {
     char text[128];
     s32 request;
     s32 i;
@@ -424,7 +424,7 @@ void mnuAdvanceStaffImageSequence(void) {
     }
 }
 
-s32 mnuStaffImageProc(KwlnTask *task) {
+s32 mnuStaffImageProc(dds3ProcessID_t *task) {
     mnuDrawIconAlphaSprite(-10, -10, 0, 0x80, mnuMovieWork->spriteSet, 0x10, 0, 0x27);
     mnuDrawIconAlphaSprite(mnuStaffRollImageRecords[D_003BC614].x - 5, mnuStaffRollImageRecords[D_003BC614].y - 5, 0, 0x80, mnuMovieWork->spriteSet, mnuStaffRollImageSpriteFrames[mnuMovieWork->imageIndex], 0, 0x53);
     mnuDrawStaffRollFrame(0x53);
@@ -432,7 +432,7 @@ s32 mnuStaffImageProc(KwlnTask *task) {
     return 0;
 }
 
-void mnuFinishStaffMovieAndFreeState(KwlnTask *task) {
+void mnuFinishStaffMovieAndFreeState(dds3ProcessID_t *task) {
     s32 pendingWork;
 
     dds3VblanksPerFrame = 2;
@@ -446,7 +446,7 @@ void mnuFinishStaffMovieAndFreeState(KwlnTask *task) {
     mnuMovieWork = NULL;
 }
 
-void mnuReleaseMovieResourceAfterPendingWork(KwlnTask *task) {
+void mnuReleaseMovieResourceAfterPendingWork(dds3ProcessID_t *task) {
     effDestroyResourceSlotSet(mnuMovieWork->spriteSet);
     while (sdfDelayedResrcCheck() != 0) {
     }
@@ -479,12 +479,12 @@ extern char D_003B1168[];
 
 
 
-extern s32 mnuUpdateStaffRoll(KwlnTask *task);
+extern s32 mnuUpdateStaffRoll(dds3ProcessID_t *task);
 
-extern void mnuFinishStaffMovieAndFreeState(KwlnTask *task);
+extern void mnuFinishStaffMovieAndFreeState(dds3ProcessID_t *task);
 
 void mnuMovieCreateTask(void) {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     MnuStaffMovieWork *movie;
 
     D_003BA8EC = 0x80000000;
@@ -510,7 +510,7 @@ s32 mnuStopStaffTasks(void) {
     return 0;
 }
 
-s32 movieDrawProc(KwlnTask *task) {
+s32 movieDrawProc(dds3ProcessID_t *task) {
     sdfMovieDrawFrame(&mnuMovieDrawContext, &D_003253C8);
     return 0;
 }
@@ -537,7 +537,7 @@ void movieStop(void) {
     PlayingNo = 0;
 }
 
-extern s32 sdfMovieIsFinished(MovObj *job);
+extern s32 sdfMovieIsFinished(movieStream_t *job);
 
 s32 mnuCheckMovieDecoderStatus(void) {
     sdfMovieIsFinished(&mnuMovieDrawContext);

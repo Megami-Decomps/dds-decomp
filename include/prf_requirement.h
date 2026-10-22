@@ -1,7 +1,7 @@
 #ifndef PRF_REQUIREMENT_H
 #define PRF_REQUIREMENT_H
 #include "common.h"
-struct DatPartyRecord;
+struct datUnitWork_t;
 
 #ifdef VERSION_DDS1
 /* DDS1's 0x54-byte requirement row is distinct from the DDS2 rule record.
@@ -52,8 +52,8 @@ typedef struct PrfRequirementRecord {
 } PrfRequirementRecord;
 extern PrfRequirementRecord D_00402BE0[176];
 PrfRequirementRecord *scrGetEntryDescriptor(u16);
-s32 prfReqEvaluateRules(u32, u32, struct DatPartyRecord *, u32, u32 *);
-s32 prfCheckRequirementRules(u32, struct DatPartyRecord *, u16);
+s32 prfReqEvaluateRules(u32, u32, struct datUnitWork_t *, u32, u32 *);
+s32 prfCheckRequirementRules(u32, struct datUnitWork_t *, u16);
 typedef char PrfRequirementRecord_size[(sizeof(PrfRequirementRecord)==0x2C)?1:-1];
 typedef char PrfRequirementRecord_rules[((u32)&((PrfRequirementRecord*)0)->rules==4)?1:-1];
 typedef char PrfRequirementTable_extent[(sizeof(D_00402BE0)==0x1E40)?1:-1];

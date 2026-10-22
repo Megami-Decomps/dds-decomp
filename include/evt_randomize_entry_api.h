@@ -1,8 +1,8 @@
 #ifndef EVT_RANDOMIZE_ENTRY_API_H
 #define EVT_RANDOMIZE_ENTRY_API_H
 
-struct DatPartyRecord;
+struct datUnitWork_t;
 
-void evtRandomizeEntryValue(struct DatPartyRecord *entry);
+void evtRandomizeEntryValue(struct datUnitWork_t *entry);
 
 #endif

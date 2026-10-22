@@ -128,7 +128,7 @@ void btlClearAllActorEntrySlots(BtlUnit *unit);
 
 void btlClearSceneTaskActiveFlag(BtlTask *task);
 
-s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *entry);
+s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *entry);
 
 extern s32 btlTestActorStatusPredicate(BtlUnit *);
 
@@ -147,7 +147,7 @@ void btlSyncPlayerWork(BtlUnit *actor);
 
 void btlCreateTargetSelectionTask(s32 sourceTask);
 
-void btlClearPartyRecordStatusBits(DatPartyRecord *record, s32 mask);
+void btlClearPartyRecordStatusBits(datUnitWork_t *record, s32 mask);
 
 void btlActionSeqStateSelect(u8 *task) {
     u8 *work = (u8 *)btlGetRuntime();
@@ -779,7 +779,7 @@ s32 btlAiTaskUpdate(BtlTask *task) {
                     } else {
                         btlDispatchStateHandler(task, 0xC);
                     }
-                } else if (dds3ExistProcess((KwlnTask *)scene->boundTask) == 0) {
+                } else if (dds3ExistProcess((dds3ProcessID_t *)scene->boundTask) == 0) {
                     if (task->indexWork.phase == -1) {
                         btlBossDebugPrintf("btl:AI script return NULL[%p]\n", task);
                         btlDebugPrintf("AI script return NULL\n");
@@ -2359,7 +2359,7 @@ void btlStartLinkedActorEffectTask(s32 task) {
 }
 
 extern void btlResetUnitLinks(BtlUnit *);
-extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *, s32);
+extern void btlInitializePartyRecordFromEnemy(datUnitWork_t *, s32);
 extern void btlInsertPartyActorByPriority(BtlUnit *, u8, u8);
 extern u8 *btlCreateControlObject(void);
 extern BtlTask *btlCreateActionSeq(void);
@@ -2614,7 +2614,7 @@ extern BtlTask *btlFindUnitByActor(BtlUnit *target);
 
 void btlReloadLinkedUnitAndQueueEffects(BtlTask *task) {
     BtlUnit *unit = task->indexWork.linkedUnit;
-    DatPartyRecord *record;
+    datUnitWork_t *record;
     BtlRuntimeTask *load;
     BtlRuntimeTask *spawned;
     BtlRuntimeTask *delayed;
@@ -2934,7 +2934,7 @@ void btlStartActorDefeatTransition(s32 command) {
     BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
     BtlTask *commandTask = (BtlTask *)command;
     BtlUnit *actor = commandTask->unit;
-    DatPartyRecord *profile = &actor->partyRecord;
+    datUnitWork_t *profile = &actor->partyRecord;
     BtlRuntimeTask *soundTask;
     BtlRuntimeTask *object;
     s64 sequence;

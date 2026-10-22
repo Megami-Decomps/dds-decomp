@@ -3,9 +3,9 @@
 
 #include "common.h"
 
-struct EffWorldNode;
+struct dds3Basic_t;
 
 /* Appends a linked kind-2 world node; both inputs remain generic words. */
-struct EffWorldNode *dds3AddAreaBasic(s32 key, s32 value);
+struct dds3Basic_t *dds3AddAreaBasic(s32 key, s32 value);
 
 #endif /* EVT_ACTION_OBJECT_H */

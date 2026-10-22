@@ -57,10 +57,10 @@ void sdf3DMakeLightParallelPacket(SdfLightingPacketStorage *packet,
                             SdfLightSources sources, f32 *ambient);
 
 /* Buffered SDK storage: live entries are distinct from allocated capacity. */
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 typedef struct DevRequest {
-    struct SdfMemBlock *backingAllocation;
+    struct sdfMemHandle_t *backingAllocation;
     s16 usedCount;
     u16 capacity;
     s16 stride;
@@ -80,7 +80,7 @@ typedef struct SdfCommandNode {
     s8 packetSelector;
     s16 quadwordCount;
     void *payload; /* Packet bytes for kind 1; serialized commands for kinds 2/3. */
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
 } SdfCommandNode;
 
 typedef char SdfCommandNode_size_must_be_0x10[(sizeof(SdfCommandNode) == 0x10) ? 1 : -1];
@@ -105,16 +105,16 @@ typedef char SdfObjectRefCommand_count_at_18[
 typedef char SdfObjectRefCommand_indices_at_1A[
     ((u32)&((SdfObjectRefCommand *)0)->objectIndices == 0x1A) ? 1 : -1];
 
-struct SdfModel;
-struct Motion;
+struct sdfModelRootNode_t;
+struct sdfMotionCtrlr_t;
 
 /* Allocated as 0x100-byte nodes; each owns a circular list of child draw nodes. */
-typedef struct SdfDrawNode {
-    struct SdfDrawNode *previous; /* 0x00 */
-    struct SdfDrawNode *next;     /* 0x04 */
-    struct SdfDrawNode *parent;   /* 0x08 */
-    struct SdfDrawNode *children; /* 0x0C */
-    struct SdfModel *root;        /* 0x10: backlink installed by sdfModelNodeAdd */
+typedef struct sdfModelNode_t {
+    struct sdfModelNode_t *previous; /* 0x00 */
+    struct sdfModelNode_t *next;     /* 0x04 */
+    struct sdfModelNode_t *parent;   /* 0x08 */
+    struct sdfModelNode_t *children; /* 0x0C */
+    struct sdfModelRootNode_t *root;        /* 0x10: backlink installed by sdfModelNodeAdd */
     u16 flags;                   /* 0x14 */
     u16 drawFlagMask;             /* 0x16: all model draw flags enabled by default */
     s32 nodeId;                   /* 0x18: lookup key when model flags bit 0 is set */
@@ -130,7 +130,7 @@ typedef struct SdfDrawNode {
     f32 scale[4];                /* 0x70 */
     f32 localMatrix[4][4];       /* 0x80: all four local basis/translation rows */
     f32 worldMatrix[4][4];       /* 0xC0: local transform composed with its parent */
-} SdfDrawNode;
+} sdfModelNode_t;
 
 #define SDF_DRAW_NODE_FLAG_SKIP_RENDER 0x0001
 #define SDF_DRAW_NODE_FLAG_USE_NODE_COLOR 0x0002
@@ -146,13 +146,13 @@ typedef struct SdfSlotEntry {
 } SdfSlotEntry;
 
 typedef char SdfDrawNode_boundsCorners_at_34[
-    ((u32)&((SdfDrawNode *)0)->boundsCorners == 0x34) ? 1 : -1];
+    ((u32)&((sdfModelNode_t *)0)->boundsCorners == 0x34) ? 1 : -1];
 typedef char SdfSlotPair_size_must_be_8[(sizeof(SdfSlotPair) == 8) ? 1 : -1];
 typedef char SdfSlotEntry_size_must_be_0x10[(sizeof(SdfSlotEntry) == 0x10) ? 1 : -1];
 
 
 typedef char SdfDrawNode_workspace_at_30[
-    ((u32)&((SdfDrawNode *)0)->workspace == 0x30) ? 1 : -1];
+    ((u32)&((sdfModelNode_t *)0)->workspace == 0x30) ? 1 : -1];
 
 /* Model flags select indexed lookup, scalar overrides and alternate item setup. */
 #define SDF_MODEL_FIND_DRAW_NODE_BY_ID 0x01
@@ -162,13 +162,13 @@ typedef char SdfDrawNode_workspace_at_30[
 
 
 /* The buffered-transform constructor allocates and clears all 0x9C bytes. */
-typedef struct SdfModel {
+typedef struct sdfModelRootNode_t {
     DevRequest *list;
-    SdfDrawNode *rootNode;
+    sdfModelNode_t *rootNode;
     void *assetData;
     DevRequest *resources;
     DevRequest *slotPairs;
-    struct Motion *motionList;
+    struct sdfMotionCtrlr_t *motionList;
     u8 unk18;
     u8 flags;
     u16 drawFlags;
@@ -186,24 +186,24 @@ typedef struct SdfModel {
     f32 modelScale;
     u8 lodIndex; /* Native model-viewer and MODEL_LOD_CHG setters use byte 0x98. */
     u8 pad99[3];
-} SdfModel;
+} sdfModelRootNode_t;
 
-typedef char SdfModel_size_must_be_0x9C[(sizeof(SdfModel) == 0x9C) ? 1 : -1];
+typedef char SdfModel_size_must_be_0x9C[(sizeof(sdfModelRootNode_t) == 0x9C) ? 1 : -1];
 typedef char SdfModel_drawFlags_at_1A[
-    ((u32)&((SdfModel *)0)->drawFlags == 0x1A) ? 1 : -1];
+    ((u32)&((sdfModelRootNode_t *)0)->drawFlags == 0x1A) ? 1 : -1];
 typedef char SdfModel_chunkTable_at_90[
-    ((u32)&((SdfModel *)0)->chunkTable == 0x90) ? 1 : -1];
+    ((u32)&((sdfModelRootNode_t *)0)->chunkTable == 0x90) ? 1 : -1];
 typedef char SdfModel_secondaryLighting_at_84[
-    ((u32)&((SdfModel *)0)->secondaryLighting == 0x84) ? 1 : -1];
+    ((u32)&((sdfModelRootNode_t *)0)->secondaryLighting == 0x84) ? 1 : -1];
 typedef char SdfModel_modelScale_at_94[
-    ((u32)&((SdfModel *)0)->modelScale == 0x94) ? 1 : -1];
+    ((u32)&((sdfModelRootNode_t *)0)->modelScale == 0x94) ? 1 : -1];
 typedef char SdfModel_scalarOverrideFirst_at_88[
-    ((u32)&((SdfModel *)0)->scalarOverrideFirst == 0x88) ? 1 : -1];
+    ((u32)&((sdfModelRootNode_t *)0)->scalarOverrideFirst == 0x88) ? 1 : -1];
 typedef char SdfModel_scalarOverrideSecond_at_8C[
-    ((u32)&((SdfModel *)0)->scalarOverrideSecond == 0x8C) ? 1 : -1];
+    ((u32)&((sdfModelRootNode_t *)0)->scalarOverrideSecond == 0x8C) ? 1 : -1];
 
-SdfDrawNode *sdfModelSearchNode(SdfModel *model, s32 nodeIdOrIndex);
-void sdfCoreDrawScanOneSkinNodes(SdfModel *model, SdfObjectRefCommand *source);
+sdfModelNode_t *sdfModelSearchNode(sdfModelRootNode_t *model, s32 nodeIdOrIndex);
+void sdfCoreDrawScanOneSkinNodes(sdfModelRootNode_t *model, SdfObjectRefCommand *source);
 
 
 /* Serialized clip duration/reserved remain halfwords (tools/fld.py).
@@ -242,16 +242,16 @@ typedef char SdfMotionCommand_size_must_be_8[
 
 /* Resource header followed by the binding commands used to construct a motion. */
 typedef struct MotionTable {
-    u16 entryCount; /* Motion-index upper bound returned by mdlGetNumOfCut. */
+    u16 entryCount; /* sdfMotionCtrlr_t-index upper bound returned by mdlGetNumOfCut. */
     u16 commandCount;
     MotionEntry **entries;
     SdfMotionCommand commands[1];
 } MotionTable;
 
 /* SDK motions are allocated as 0x34-byte records; model slots retain these nodes. */
-typedef struct Motion {
-    struct Motion *next;
-    SdfModel *owner;
+typedef struct sdfMotionCtrlr_t {
+    struct sdfMotionCtrlr_t *next;
+    sdfModelRootNode_t *owner;
     MotionTable *motionTable;
     s32 unkC;
     DevRequest *request;
@@ -268,6 +268,6 @@ typedef struct Motion {
     u8 previousState;
     u8 loopEnabled;
     u8 pad33;
-} Motion;
+} sdfMotionCtrlr_t;
 
 #endif /* SDF_DRAW_H */

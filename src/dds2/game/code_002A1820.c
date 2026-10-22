@@ -40,7 +40,7 @@
 #define MNU_STREAM_COMMIT_COMPLETE 4
 
 typedef struct MovieMenuState {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u8 pad04[0x0C];
     s32 state;
     s32 cursor;
@@ -331,7 +331,7 @@ void mnuWriteTitleStreamStatusLocked(TitleAudioStreamStatusSnapshot *statusValue
 void mnuLoadTitleStreamFrameData(char *filePath, TitleAudioStreamState *streamState) {
     void *fileData;
     s32 frameCount;
-    struct SdfMemBlock *resourceHandle = sdfDevLoadFileEx(filePath, (u32 *)&fileData, 0);
+    struct sdfMemHandle_t *resourceHandle = sdfDevLoadFileEx(filePath, (u32 *)&fileData, 0);
     s32 fileBytes = sdfMemGetSize(resourceHandle);
     memcpy(streamState->compressedData, fileData, fileBytes);
     frameCount = fileBytes / streamState->frameBytes;
@@ -355,10 +355,10 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
     s32 ready = pacFileCheckEnd(mnuTitleStreamFileRequest);
 
     if (ready != 0) {
-        struct SdfMemBlock *resourceHandle = fileGetMemHandle(mnuTitleStreamFileRequest);
+        struct sdfMemHandle_t *resourceHandle = fileGetMemHandle(mnuTitleStreamFileRequest);
         void *fileData = fileGetLoadPtr(mnuTitleStreamFileRequest);
         s32 fileBytes = (s32)fileGetLoadSize(mnuTitleStreamFileRequest);
-        struct SdfMemBlock *allocation;
+        struct sdfMemHandle_t *allocation;
 
         fileHandleFree(mnuTitleStreamFileRequest);
         allocation = sdfMemAllocFromTailDirect(fileBytes);
@@ -540,7 +540,7 @@ INCLUDE_RODATA(const s32, "game/code_002A1820", D_00428650);
 void mnuInitializeTitleSoundBuffer(void) {
     TitleAudioStreamState *streamState = &mnuTitleSoundBufferState;
     u32 *decoder = mnuTitleSoundBufferDecoderState;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u8 *bufferAddress;
 
     WaitSema(mnuTitleStreamSemaphore);
@@ -563,7 +563,7 @@ extern char D_00428650[];
 
 /* Each format reserves 600 compressed frames before loading its named stream. */
 void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex) {
-    struct SdfMemBlock *allocation = NULL;
+    struct sdfMemHandle_t *allocation = NULL;
     u8 *bufferAddress;
     char soundPath[MNU_TITLE_SOUND_PATH_BYTES];
 
@@ -607,7 +607,7 @@ void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex) {
  * format while holding the shared sound-buffer semaphore. The native code
  * has no default-format guard or buffer-capacity check. */
 void mnuInstallTitleSoundBufferFromData(void *compressedData, s32 dataBytes, s32 format) {
-    struct SdfMemBlock *allocation = NULL;
+    struct sdfMemHandle_t *allocation = NULL;
     u8 *bufferAddress;
     s32 frameCount;
 
@@ -682,7 +682,7 @@ void mnuResetSoundBuffer(void) {
 /* Release the allocation handle, not the data address, then clear its slot. */
 void mnuReleaseSoundBuffer(void) {
     TitleAudioStreamState *streamState = &mnuTitleSoundBufferState;
-    struct SdfMemBlock *allocationHandle = streamState->allocation;
+    struct sdfMemHandle_t *allocationHandle = streamState->allocation;
 
     if (allocationHandle == 0) {
         return;
@@ -714,16 +714,16 @@ void mnuLoadTitleMenuAssets(void) {
 extern void mnuStopTitleMovieDraw(void);
 extern void mnuRecreateMenuSelectionList(void);
 extern void mnuSelectMenuListCursorByAdvance(s32);
-extern s32 mnuUpdateTitleMenuTask(KwlnTask *);
+extern s32 mnuUpdateTitleMenuTask(dds3ProcessID_t *);
 extern u32 D_00435CBC;
 
-KwlnTask *mnuCreateTitleMenuTask(s32 mode) {
-    struct SdfMemBlock *allocation;
+dds3ProcessID_t *mnuCreateTitleMenuTask(s32 mode) {
+    struct sdfMemHandle_t *allocation;
 
     kwlnFadeBackgroundStartOut(0);
     mnuStopTitleMovieDraw();
     allocation = sdfMemAllocDirect(sizeof(MovieMenuState));
-    titleWork = (void *)sdfMemLock((struct SdfMemBlock *)(allocation));
+    titleWork = (void *)sdfMemLock((struct sdfMemHandle_t *)(allocation));
     memset(titleWork, 0, sizeof(MovieMenuState));
     titleWork->allocation = allocation;
     mnuRecreateMenuSelectionList();
@@ -761,7 +761,7 @@ void mnuReleaseTitleMenuAssetsAndMarkClosed(void) {
     mnuReleaseMenuResourceSlots();
     mnuReleaseSpriteHandle();
     mnuDestroyMovieMenuSelectionList();
-    sdfMemFreeDirect((struct SdfMemBlock *)(u32)((u32)titleWork->allocation));
+    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)((u32)titleWork->allocation));
     titleWork = 0;
     D_00435BB0 = 1;
 }
@@ -933,7 +933,7 @@ extern s32 fileLoadStateChanged(void);
 extern void fileCacheSlotFlagsFromState(void);
 extern void fileRestoreSlotFlagsToState(void);
 
-s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
+s32 mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
     s32 volume;
     s32 menuAction;
     s32 selectedItem;

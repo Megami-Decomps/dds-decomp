@@ -17,7 +17,7 @@ extern void dds3Filter2Off(s32 duration);
 extern s32 scrGetIntPara(s32 parameterIndex);
 extern void sdfIpuInit(void);
 
-extern MovObj mnuMovieDrawContext;
+extern movieStream_t mnuMovieDrawContext;
 
 extern char D_003B1168[]; /* "staffProc" */
 
@@ -166,7 +166,7 @@ MnuMovieListNode *movieViewerStep(void) {
 
 void movieDebugDrawInfo(void) {
     MnuMovieListNode *node;
-    SdfListHead *packets;
+    sdfDrawTag_t *packets;
     s32 selected;
     s32 i;
 
@@ -196,7 +196,7 @@ void movieDebugDrawInfo(void) {
 
 
 void MovieViewerDrawFrameInfo(void) {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     if (mnuCheckMovieDecoderStatus() == 0) {
         list = mnuMovieList.packets;
         sdfDrawTagLink(list, (u32)dds3PrimFrameRect(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
@@ -266,7 +266,7 @@ s32 mnuMovieViewer(void) {
         }
     }
 
-    mnuMovieList.packets = (SdfListHead *)sdfPrimAllocDrawTag(0);
+    mnuMovieList.packets = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
     movieDebugDrawInfo();
     MovieViewerDrawFrameInfo();
     D_003255A8.append(&D_003255A8, mnuMovieList.packets);
@@ -281,7 +281,7 @@ void InitMovieViewer(void) {
 }
 
 void FinishMovieViewer(void) {
-    KwlnTask *task = dds3SearchProcessName(mnuMovieViewerTaskName);
+    dds3ProcessID_t *task = dds3SearchProcessName(mnuMovieViewerTaskName);
     if (task != NULL) {
         dds3KillProcess(task, 0);
         mnuMovieList.task = 0;
@@ -312,7 +312,7 @@ void movieViewerDrawInfo(void) {
 }
 
 s32 movieViewerDebugDraw(void) {
-    SdfListHead *packets;
+    sdfDrawTag_t *packets;
     s32 n;
     s32 i;
     s32 x;

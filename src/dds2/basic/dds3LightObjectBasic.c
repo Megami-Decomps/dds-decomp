@@ -5,14 +5,14 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
-void dds3FreePoseSet(EffWorldNode *object);
-void dds3ObjectBaseFreeControlWorkData(ObjBase *object);
+void dds3FreePoseSet(dds3Basic_t *object);
+void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *object);
 extern f32 (*D_0037F770[4])[4];
 extern f32 kwlnDefaultColorVector[4];
 
 
 /* Releases the light's buffer and resource before freeing the object itself. */
-void lightdestructor(EffWorldNode *light) {
+void lightdestructor(dds3Basic_t *light) {
     EffLightData *data;
 
     data = light->data;
@@ -23,7 +23,7 @@ void lightdestructor(EffWorldNode *light) {
     dds3FreePoseSet(light);
 }
 
-s32 lightmainprocedure(EffWorldNode *lightObject) {
+s32 lightmainprocedure(dds3Basic_t *lightObject) {
     SdfLightSources sources;
     EffLightData *data;
     u32 flags;

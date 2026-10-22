@@ -3,7 +3,7 @@
 
 #include "eff.h"
 
-struct EffEventWork;
+struct effEveBEDCutHandle_t;
 struct SoundMixer;
 
 /* One retained fragment-history header follows its point/color buffers. */
@@ -16,8 +16,8 @@ typedef struct EffPcpThunderFragmentResources {
     s32 subdivisions;                       /* 0x14: retained input value */
     u128 *points;                           /* 0x18 */
     u32 *colors;                            /* 0x1C */
-    SdfAsset *resourceHandle;               /* 0x20 */
-    SdfMemBlock *allocation;                /* 0x24 */
+    sdfMat_t *resourceHandle;               /* 0x20 */
+    sdfMemHandle_t *allocation;                /* 0x24 */
     u128 *endPoints;                        /* 0x28 */
     u32 *endColors;                         /* 0x2C */
 } EffPcpThunderFragmentResources;
@@ -47,7 +47,7 @@ typedef struct EffPcpThunderGroupSlot {
     f32 fadeScale;                          /* 0x14 */
     EffPcpThunderFragmentResources *fragment;/* 0x18 */
     EffSegmentedBezierSlot curve;           /* 0x1C */
-    struct EffEventWork *eventNode;          /* 0x7C */
+    struct effEveBEDCutHandle_t *eventNode;          /* 0x7C */
 } EffPcpThunderGroupSlot;
 
 /* Allocation header followed by groupCount inline 0x80-byte slots. */
@@ -58,7 +58,7 @@ typedef struct EffPcpThunderGroup {
     struct SoundMixer *soundMixer;           /* 0x58 */
     u8 ownsMixerVoices;                      /* 0x5C */
     u8 pad5D[3];                             /* 0x5D */
-    SdfMemBlock *allocation;                 /* 0x60 */
+    sdfMemHandle_t *allocation;                 /* 0x60 */
 } EffPcpThunderGroup;
 
 typedef char EffPcpThunderFragmentResources_size[(sizeof(EffPcpThunderFragmentResources) == 0x30) ? 1 : -1];

@@ -23,7 +23,7 @@ extern f32 D_003AF190[4];
 
 /* Release each nonzero parameter-work slot, unlink the owner, then drop its active count.
  * The diagnostic observes the decremented count before the owner is freed. */
-void effBTLCutDelete(BattleEffect *owner) {
+void effBTLCutDelete(effBTLCutHandle_t *owner) {
     s32 workIndex;
 
     for (workIndex = 0; workIndex < EFF_BATTLE_PARAMETER_WORK_CAPACITY; workIndex++) {
@@ -39,12 +39,12 @@ void effBTLCutDelete(BattleEffect *owner) {
 }
 
 /* Return the policy controlling trigger-frame copying and minimum ramp selection. */
-u16 effBTLCutGetCutNumber(BattleEffect *effect) {
+u16 effBTLCutGetCutNumber(effBTLCutHandle_t *effect) {
     return effect->kind;
 }
 
 /* Read the frame counter that the native updater advances after callbacks. */
-u32 effBTLCutGetFrame(BattleEffect *effect) {
+u32 effBTLCutGetFrame(effBTLCutHandle_t *effect) {
     return effect->currentFrame;
 }
 
@@ -54,22 +54,22 @@ u32 effBTLCutGetFormation(u32 *value) {
 }
 
 /* Store the callback; native code invokes it with this work at the source frame. */
-void effBTLCutSetMotionChangeCallbackFunc(BattleEffect *effect, BattleEffectCallback callback) {
+void effBTLCutSetMotionChangeCallbackFunc(effBTLCutHandle_t *effect, BattleEffectCallback callback) {
     effect->sourceFrameCallback = callback;
 }
 
 /* Store the callback used when the current frame reaches triggerFrame. */
-void effBTLCutSetCutEndCallbackFunc(BattleEffect *effect, BattleEffectCallback callback) {
+void effBTLCutSetCutEndCallbackFunc(effBTLCutHandle_t *effect, BattleEffectCallback callback) {
     effect->triggerFrameCallback = callback;
 }
 
 /* Read the frame used by the source-frame callback equality test. */
-u32 effBTLCutGetMotionChangeFrame(BattleEffect *effect) {
+u32 effBTLCutGetMotionChangeFrame(effBTLCutHandle_t *effect) {
     return effect->list->callbackFrame;
 }
 
 /* Set the trigger frame; mode 0 also copies its stored bits into the color-ramp endpoint. */
-void effBTLCutSetCutEndFrame(BattleEffect *effect, s32 triggerFrame) {
+void effBTLCutSetCutEndFrame(effBTLCutHandle_t *effect, s32 triggerFrame) {
     effect->triggerFrame = triggerFrame;
     if (effect->kind == EFF_BATTLE_COPY_TRIGGER_FRAME) {
         effect->colorRampEndFrame = triggerFrame;
@@ -77,12 +77,12 @@ void effBTLCutSetCutEndFrame(BattleEffect *effect, s32 triggerFrame) {
 }
 
 /* Return the frame tested by the native trigger callback. */
-u32 effBTLCutGetCutEndFrame(BattleEffect *effect) {
+u32 effBTLCutGetCutEndFrame(effBTLCutHandle_t *effect) {
     return effect->triggerFrame;
 }
 
 /* Select the ramp endpoint: mode 1 keeps the unsigned minimum; other modes replace it. */
-void effBTLCutSetDrawEndFrame(BattleEffect *effect, u32 endFrame) {
+void effBTLCutSetDrawEndFrame(effBTLCutHandle_t *effect, u32 endFrame) {
     if (effect->kind == EFF_BATTLE_MINIMUM_RAMP_END_FRAME) {
         if (endFrame < effect->colorRampEndFrame) {
             effect->colorRampEndFrame = endFrame;
@@ -93,17 +93,17 @@ void effBTLCutSetDrawEndFrame(BattleEffect *effect, u32 endFrame) {
 }
 
 /* Return the selected endpoint used by native color-ramp calculation. */
-u32 effBTLCutGetDrawEndFrame(BattleEffect *effect) {
+u32 effBTLCutGetDrawEndFrame(effBTLCutHandle_t *effect) {
     return effect->colorRampEndFrame;
 }
 
 /* Store the opaque caller word without assigning it a stronger semantic role. */
-void effBTLCutSetUserData(BattleEffect *effect, u32 value) {
+void effBTLCutSetUserData(effBTLCutHandle_t *effect, u32 value) {
     effect->unk120 = value;
 }
 
 /* Return the same opaque caller word. */
-u32 effBTLCutGetUserData(BattleEffect *effect) {
+u32 effBTLCutGetUserData(effBTLCutHandle_t *effect) {
     return effect->unk120;
 }
 
@@ -147,12 +147,12 @@ extern void effBTLPartGetRotateMatrixPtr(EffectVectorRequest *request, u128 *out
 extern f32 effBattleMiscQueryScalar(BtlUnit *unit, EffectVectorRequest *request);
 extern u32 effBTLFieldColorGetOverrideSelector(void); extern u32 effBTLFieldColorGetFinalSelector(void);
 extern u32 effMagaCylinderCalcColor(u32, u32); extern u32 effBTLCutGetAllPartColor(u32, u32);
-extern void dds3SetQuake(s32, s32); extern void mdlGetScale(MdlCtx *);
+extern void dds3SetQuake(s32, s32); extern void mdlGetScale(dds3ModelHandle_t *);
 extern void effBTLModelGetMarkMatrix2(BtlUnit *unit, s32 mode);
 extern void effBattleApplyUnitRgbKeyframe(BtlUnit *unit, EffBattleUnitRgbCommand *command, s32 frame);
-extern void dds3EffectPartSetPosition(EffParamWork *, void *); extern void dds3EffectPartSetRotateMatrix(EffParamWork *, void *);
-extern void dds3EffectPartSetColor(EffParamWork *, u32); extern void dds3EffectPartSetDirection(EffParamWork *, void *);
-extern void dds3EffectPartSetArea(EffParamWork *, f32); extern void dds3EffectPartDraw(EffParamWork *);
+extern void dds3EffectPartSetPosition(effPartHandle_t *, void *); extern void dds3EffectPartSetRotateMatrix(effPartHandle_t *, void *);
+extern void dds3EffectPartSetColor(effPartHandle_t *, u32); extern void dds3EffectPartSetDirection(effPartHandle_t *, void *);
+extern void dds3EffectPartSetArea(effPartHandle_t *, f32); extern void dds3EffectPartDraw(effPartHandle_t *);
 
 extern void effBattleApplyUnitColorDirection(BtlUnit *unit, EffBattleUnitColorCommand *command, u32 frame);
 
@@ -162,7 +162,7 @@ INCLUDE_RODATA(const s32, "effect/effBattle", D_004144B0);
 
 INCLUDE_RODATA(const s32, "effect/effBattle", D_004144C0);
 
-void effBattleUpdate(BattleEffect *work) {
+void effBattleUpdate(effBTLCutHandle_t *work) {
     BtlUnit *unit;
     EffBattleEntryList *list;
     EffBattleEntry *entry;
@@ -387,15 +387,15 @@ void effBattleUpdate(BattleEffect *work) {
     }
 
     if (list->callbackFrame == frame && work->sourceFrameCallback != 0) {
-        ((void (*)(BattleEffect *))work->sourceFrameCallback)(work);
+        ((void (*)(effBTLCutHandle_t *))work->sourceFrameCallback)(work);
     }
     if (work->triggerFrame == frame && work->triggerFrameCallback != 0) {
-        ((void (*)(BattleEffect *))work->triggerFrameCallback)(work);
+        ((void (*)(effBTLCutHandle_t *))work->triggerFrameCallback)(work);
     }
     work->currentFrame++;
 }
 
-void effBTLCutSetScale(BattleEffect *effect, f32 scale) {
+void effBTLCutSetScale(effBTLCutHandle_t *effect, f32 scale) {
     s32 i;
     s32 count;
 
@@ -408,7 +408,7 @@ void effBTLCutSetScale(BattleEffect *effect, f32 scale) {
 }
 
 /* True when any entry is of kind 2 or 3. */
-s32 effBattleHasActiveKind(BattleEffect *owner) {
+s32 effBattleHasActiveKind(effBTLCutHandle_t *owner) {
     EffBattleEntryList *list = owner->list;
     s32 count = list->count;
     EffBattleEntry *entry = list->entries;
@@ -445,7 +445,7 @@ void effBTLPartCreate(SoundMixer *destination, SoundMixer *source) {
                         u32 sourceBank = index / 0x3C;
                         u32 sourceEntryIndex = index % 0x3C;
                         EffBattleEntry *sourceEntry = &destination->banks[sourceBank].list.entries[sourceEntryIndex];
-                        EffParamWork *duplicatedWork = dds3EffectPartCopy(sourceEntry->value.work);
+                        effPartHandle_t *duplicatedWork = dds3EffectPartCopy(sourceEntry->value.work);
                         u16 sourceKind = sourceEntry->paramKind;
 
                         entry->value.work = duplicatedWork;

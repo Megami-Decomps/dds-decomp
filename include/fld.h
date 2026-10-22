@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-struct EffWorldNode;
+struct dds3Basic_t;
 
 /* Field-work flag prefix (0xA5C, flags at +0xA58); DDS1/2 game/code_0011D3A0/0011F208.c. */
 typedef struct FldWorkFlags {
@@ -12,7 +12,7 @@ typedef struct FldWorkFlags {
 } FldWorkFlags;
 
 /* Sequence command packet: the submission contract copies all 0xA0 bytes. */
-typedef struct FieldSequenceRecord {
+typedef struct fldSceneParam_t {
     u8 unk_00[0x30];
     u32 unk_30;
     u32 unk_34;
@@ -31,7 +31,7 @@ typedef struct FieldSequenceRecord {
     char note[16];
     u32 options; /* 0x90: record options */
     u8 pad94[0xC];
-} FieldSequenceRecord;
+} fldSceneParam_t;
 
 
 /* Packed actor placement rows used by field searches, motion and sound dispatch.
@@ -159,7 +159,7 @@ typedef struct FldValueRecord {
     u16 unkC8;
     u16 unkCA;
     s32 id;
-    struct EffWorldNode *worldNode; /* Cached object for this record ID. */
+    struct dds3Basic_t *worldNode; /* Cached object for this record ID. */
     FldCollisionFace *face;
     void *stopData;
     s32 sceneFlag;

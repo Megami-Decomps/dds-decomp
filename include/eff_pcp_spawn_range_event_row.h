@@ -3,11 +3,11 @@
 
 #include "common.h"
 
-struct EffEventWork;
+struct effEveBEDCutHandle_t;
 
 /* Spawn-range owners allocate count * 0x20 bytes after their 0xAC-byte header. */
 typedef struct EffPCPSpawnRangeEventRow {
-    struct EffEventWork *event;
+    struct effEveBEDCutHandle_t *event;
     s32 frame;
     f32 height;
     f32 heightStep;

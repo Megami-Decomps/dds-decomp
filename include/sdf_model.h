@@ -39,7 +39,7 @@ typedef struct SdfItem {
 typedef char SdfItem_size_must_be_0x50[(sizeof(SdfItem) == 0x50) ? 1 : -1];
 
 /* Scale the model root transform and propagate its draw-node tree for frame. */
-void sdfModelEvalTm2(SdfModel *model, s32 frame);
+void sdfModelEvalTm2(sdfModelRootNode_t *model, s32 frame);
 typedef char SdfItem_boundsCorners_at_40[
     ((u32)&((SdfItem *)0)->boundsCorners == 0x40) ? 1 : -1];
 typedef char SdfItem_commandData_at_44[
@@ -57,38 +57,38 @@ typedef char SdfItemList_header_size_must_be_0x10[
 typedef char SdfItemList_firstItem_must_be_at_0x10[
     ((u32)&((SdfItemList *)0)->firstItem == 0x10) ? 1 : -1];
 
-typedef struct SdfItemListRef {
+typedef struct sdfModelDef_t {
     SdfItemList *items; /* 0x00 */
     u32 *serializedAssetData; /* 0x04: count followed by flag-driven asset records */
     s32 slotPairCount; /* 0x08: passed to sdfModelMakeMorphList */
-    struct SdfChunkHeader *chunkTable; /* 0x0C: borrowed by SdfModel */
-} SdfItemListRef;
+    struct SdfChunkHeader *chunkTable; /* 0x0C: borrowed by sdfModelRootNode_t */
+} sdfModelDef_t;
 
-typedef char SdfItemListRef_size_must_be_0x10[(sizeof(SdfItemListRef) == 0x10) ? 1 : -1];
-typedef char SdfItemListRef_serializedAssetData_at_4[((u32)&((SdfItemListRef *)0)->serializedAssetData == 4) ? 1 : -1];
-typedef char SdfItemListRef_slotPairCount_at_8[((u32)&((SdfItemListRef *)0)->slotPairCount == 8) ? 1 : -1];
-typedef char SdfItemListRef_chunkTable_at_C[((u32)&((SdfItemListRef *)0)->chunkTable == 0xC) ? 1 : -1];
+typedef char SdfItemListRef_size_must_be_0x10[(sizeof(sdfModelDef_t) == 0x10) ? 1 : -1];
+typedef char SdfItemListRef_serializedAssetData_at_4[((u32)&((sdfModelDef_t *)0)->serializedAssetData == 4) ? 1 : -1];
+typedef char SdfItemListRef_slotPairCount_at_8[((u32)&((sdfModelDef_t *)0)->slotPairCount == 8) ? 1 : -1];
+typedef char SdfItemListRef_chunkTable_at_C[((u32)&((sdfModelDef_t *)0)->chunkTable == 0xC) ? 1 : -1];
 
-SdfModel *sdfModelMakeRoot(void *assetData, SdfItemListRef *listRef);
-SdfModel *sdfModelMake(void *assetData, SdfItemListRef *listRef);
-SdfModel *sdfModelMakeEarly(void *assetData, SdfItemListRef *listRef);
-void sdfModelLinkDrawPacket(SdfDrawNode *node, u32 *commandList,
+sdfModelRootNode_t *sdfModelMakeRoot(void *assetData, sdfModelDef_t *listRef);
+sdfModelRootNode_t *sdfModelMake(void *assetData, sdfModelDef_t *listRef);
+sdfModelRootNode_t *sdfModelMakeEarly(void *assetData, sdfModelDef_t *listRef);
+void sdfModelLinkDrawPacket(sdfModelNode_t *node, u32 *commandList,
                                 s32 packetSelector, s32 alternateSelector,
                                 s32 listIndex);
-void sdfModelMakeLocalTm(SdfDrawNode *node);
-void sdfModelNodeSet(SdfDrawNode *node, SdfItem *item);
+void sdfModelMakeLocalTm(sdfModelNode_t *node);
+void sdfModelNodeSet(sdfModelNode_t *node, SdfItem *item);
 /* Build the kind-3 command packet; zero means there is no packet to append. */
-u32 sdfCorePacketGen(SdfDrawNode *node, void *payload,
+u32 sdfCorePacketGen(sdfModelNode_t *node, void *payload,
                                    s32 nodeFlags, s32 color,
                                    f32 firstScalar, f32 secondScalar,
                                    s32 frame, s32 skipCommands);
 /* The draw node owns the lazily allocated workspace; callers receive a borrowed
  * pointer to it, and must not release it independently. */
-u8 *sdfModelAllocTmPacket(SdfDrawNode *root);
+u8 *sdfModelAllocTmPacket(sdfModelNode_t *root);
 /* Releases each allocation in both free-node lists. The list heads remain
  * stored on root and must not be traversed again after this call. */
-void sdfModelPacketFree(SdfDrawNode *root);
+void sdfModelPacketFree(sdfModelNode_t *root);
 /* Refresh the current per-node transforms from the model's selected frame. */
-void sdfModelEvalTm(SdfModel *model);
+void sdfModelEvalTm(sdfModelRootNode_t *model);
 
 #endif /* SDF_MODEL_H */

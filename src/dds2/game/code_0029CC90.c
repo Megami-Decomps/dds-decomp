@@ -10,20 +10,20 @@
 #include "mnu_result.h"
 #include "prf_profile_cap.h"
 
-extern u32 brsBuildProfileSkillList(DatPartyRecord *, PrfSkillList *);
-extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
-extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
-extern s32 prfBuildSkillListState0(DatPartyRecord *, DatProfileRecord *, PrfSkillList *);
-extern void scrClearAllSecondaryScriptFlags(DatPartyRecord *);
-extern s32 scrSetFlag(DatPartyRecord *, u16);
-extern void scrSetSecondaryScriptFlag(DatPartyRecord *, u16);
-extern s32 ptyCalcLevelUps(DatPartyRecord *);
-extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
-extern s32 ptyHasSkill(DatPartyRecord *, s32);
+extern u32 brsBuildProfileSkillList(datUnitWork_t *, PrfSkillList *);
+extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
+extern s32 ptyTestPrimaryProfileFlag(datUnitWork_t *, u16);
+extern s32 prfBuildSkillListState0(datUnitWork_t *, DatProfileRecord *, PrfSkillList *);
+extern void scrClearAllSecondaryScriptFlags(datUnitWork_t *);
+extern s32 scrSetFlag(datUnitWork_t *, u16);
+extern void scrSetSecondaryScriptFlag(datUnitWork_t *, u16);
+extern s32 ptyCalcLevelUps(datUnitWork_t *);
+extern void ptyRecomputeMaxHpMp(datUnitWork_t *);
+extern s32 ptyHasSkill(datUnitWork_t *, s32);
 
 
 
-extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
+extern s32 btlAddBaseStats(s32 *, datUnitWork_t *);
 
 
 
@@ -107,7 +107,7 @@ u32 func_0029CE88(void) {
 
 extern s32 D_003D845C[][100];
 
-u32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta) {
+u32 ptyComputeTotalExp(datUnitWork_t *unit, s32 levelDelta) {
     s32 unitId = unit->unitId;
     s32 total = 0;
     s32 level;
@@ -136,7 +136,7 @@ extern BrsProfileApRecord *D_00435E18;
 extern s32 fldGetSparkRewardProfileIndex(void);
 extern s16 fldGetSparkPickupCount(void);
 
-s32 brsCalcApGain(DatPartyRecord *unit, s32 baseApTotal, s32 perUnitBonus) {
+s32 brsCalcApGain(datUnitWork_t *unit, s32 baseApTotal, s32 perUnitBonus) {
     s32 gain;
     s32 profileIndex;
 
@@ -159,7 +159,7 @@ s32 brsCalcApGain(DatPartyRecord *unit, s32 baseApTotal, s32 perUnitBonus) {
 
 /* Active party members take full EXP; benched members need the half/full
  * EXP skills (0x23F/0x240 respectively). */
-s32 brsCalcExpGain(DatPartyRecord *unit, s32 exp) {
+s32 brsCalcExpGain(datUnitWork_t *unit, s32 exp) {
     s32 result;
 
     if ((unit->flags & BRS_ACTIVE_PARTY_FLAG) != 0) {
@@ -176,7 +176,7 @@ s32 brsCalcExpGain(DatPartyRecord *unit, s32 exp) {
     return result;
 }
 
-s32 mnuIsTitleEntryAvailable(DatPartyRecord *unit) {
+s32 mnuIsTitleEntryAvailable(datUnitWork_t *unit) {
     return 0;
 }
 
@@ -188,7 +188,7 @@ s32 brsBuildPartyRewardBatch(BrsRewardBatch *batch, BrsRewardSummary *summary) {
 
     memset(batch, 0, sizeof(*batch));
     for (i = 0; i < 5; i++) {
-        DatPartyRecord *unit = &DDS3_GBWK->party[i];
+        datUnitWork_t *unit = &DDS3_GBWK->party[i];
         u16 occupied = unit->flags & 1;
         if (occupied != 0 && (unit->status & 0x4000) == 0 && unit->unitId != 9) {
             DatProfileRecord *profile;
@@ -227,7 +227,7 @@ s32 brsBuildPartyRewardBatch(BrsRewardBatch *batch, BrsRewardSummary *summary) {
 
 /* Keep the level progression indexed; see docs/idioms.md,
  * "Trace-justified party experience table progression". */
-s32 ptyCalcLevelUps(DatPartyRecord *unit) {
+s32 ptyCalcLevelUps(datUnitWork_t *unit) {
     u16 level = unit->level;
     u16 unitId = unit->unitId;
     u32 exp = unit->totalExp;
@@ -273,7 +273,7 @@ s32 brsBuildLevelUpList(BrsRewardBatch *batch) {
     memset(batch, 0, sizeof(*batch));
     batch->count = 0;
     for (i = 0; i < 5; i++) {
-        DatPartyRecord *unit = &DDS3_GBWK->party[i];
+        datUnitWork_t *unit = &DDS3_GBWK->party[i];
         u16 occupied = unit->flags & 1;
 
         if (occupied != 0 && unit->unitId != 9) {
@@ -305,11 +305,11 @@ s32 brsBuildProfileCapList(BrsRewardBatch *batch) {
     memset(batch, 0, sizeof(*batch));
     batch->count = 0;
     for (remaining = 4; remaining >= 0; remaining--) {
-        DatPartyRecord *unit = (DatPartyRecord *)
+        datUnitWork_t *unit = (datUnitWork_t *)
             ((u8 *)&DDS3_GBWK->party + partyOffset);
         u16 occupied = unit->flags & 1;
 
-        partyOffset += sizeof(DatPartyRecord);
+        partyOffset += sizeof(datUnitWork_t);
         if (occupied != 0 && unit->unitId != 9) {
             DatProfileRecord *profile = ptyGetCurrentProfileRecord(unit);
 
@@ -330,14 +330,14 @@ s32 brsBuildProfileCapList(BrsRewardBatch *batch) {
     return batch->count;
 }
 
-s32 mnuAdvanceTitleEntryAnimation(DatPartyRecord *unit) {
+s32 mnuAdvanceTitleEntryAnimation(datUnitWork_t *unit) {
     s32 step = ptyCalcLevelUps(unit);
     unit->level += step;
     ptyRecomputeMaxHpMp(unit);
     return step;
 }
 
-s32 btlAddBaseStats(s32 *src, DatPartyRecord *seq) {
+s32 btlAddBaseStats(s32 *src, datUnitWork_t *seq) {
     s32 i;
 
     for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
@@ -354,7 +354,7 @@ s32 btlAddBaseStats(s32 *src, DatPartyRecord *seq) {
 
 extern PartyStatGrowthBank D_003D6518[];
 
-void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, DatPartyRecord *unit) {
+void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, datUnitWork_t *unit) {
     s32 eligible[DAT_BASE_STAT_COUNT];
     s32 eligibleCount;
     s32 overflow;
@@ -415,7 +415,7 @@ counted:
     }
 }
 
-u32 brsBuildProfileSkillList(DatPartyRecord *entry, PrfSkillList *out) {
+u32 brsBuildProfileSkillList(datUnitWork_t *entry, PrfSkillList *out) {
     PrfSkillList result;
     u32 applied = 0;
     DatProfileRecord *slot;
@@ -454,16 +454,16 @@ void mnuTitleInitFourParameters(u32 *state, u32 first, u32 second, u32 third, u3
 }
 
 
-extern u32 ptyComputeTotalExp(DatPartyRecord *, s32);
+extern u32 ptyComputeTotalExp(datUnitWork_t *, s32);
 
-extern u32 ptyAddProfileRecordValueClamped(DatPartyRecord *, u32);
+extern u32 ptyAddProfileRecordValueClamped(datUnitWork_t *, u32);
 
-extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
+extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
 
 
 
 /* Set up the level and profile progress bars for one party member. */
-void brsBuildUnitProgressRow(BrsProgressRow *progressRow, DatPartyRecord *partyRecord) {
+void brsBuildUnitProgressRow(BrsProgressRow *progressRow, datUnitWork_t *partyRecord) {
     s32 levelDelta;
     s32 profilePoints;
 
@@ -490,7 +490,7 @@ void brsBuildActiveUnitProgressRows(BrsActiveProgressList *output) {
 
     memset(output, 0, sizeof(*output));
     for (i = 0; i < 5; i++) {
-        DatPartyRecord *unit = &DDS3_GBWK->party[i];
+        datUnitWork_t *unit = &DDS3_GBWK->party[i];
         if ((unit->flags & 1) != 0) {
             if (unit->unitId == 9) {
                 continue;
@@ -518,9 +518,9 @@ extern s32 brsPollResultCounterCompletion(void);
 extern void p2sdStopSe(u32 sound);
 
 void mnuDrawUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressList *list, s32 context) {
-    KwlnTask *task;
+    dds3ProcessID_t *task;
     BrsSkillPackageWork *work = NULL;
-    DatPartyRecord *unit;
+    datUnitWork_t *unit;
     s32 i;
     s32 count;
     s32 offset = 0;

@@ -44,7 +44,7 @@ typedef struct StageTestQueue {
 typedef struct StageTestState {
     s32 mode;
     s32 assetRequest;
-    struct MdlCtx *model;
+    struct dds3ModelHandle_t *model;
     s8 flag;
     u8 pad0D[3];
     StageTestEntry *entries;

@@ -44,7 +44,7 @@ extern u32 itfMessageFlags;
 /* Option IDs index the same signed-byte bank used by the named controls. */
 extern SndPad dds3PadButtonState;
 
-typedef ItfMesPoolNode ItfMesWindowRec;
+typedef mesflow_tag ItfMesWindowRec;
 
 extern ItfMesSlot pinst[];
 
@@ -56,12 +56,12 @@ ItfMesGlobals itfMesMngManager __attribute__((section(".bss")));
 
 extern ItfMesDebugState D_003B4770;
 
-ItfMesEntry *GetTypeHeader(ItfMesState *mes, s32 index);
+ItfMesEntry *GetTypeHeader(instanceMes_tag *mes, s32 index);
 
 ItfMesEntry *GetTypeHeader2(ItfMesSub *sub);
 
 u8 *GetMessagePagePtr(ItfMesTable *table, s32 index);
-u8 *GetSpeakerName(ItfMesState *mes);
+u8 *GetSpeakerName(instanceMes_tag *mes);
 
 void ResolveResourceAddress(ItfMesSub *resource);
 
@@ -84,26 +84,26 @@ void DestructFlow(s32 window);
 
 void CommitVarTable(s32 *table);
 
-s32 GetMessageWidth(FrFontGlyph *glyph);
+s32 GetMessageWidth(_FRQ *glyph);
 
 
 
-extern s32 CalcMsgMng_Process(KwlnTask *task);
+extern s32 CalcMsgMng_Process(dds3ProcessID_t *task);
 
-extern void DrawMsgMng_Shutdown(KwlnTask *task);
+extern void DrawMsgMng_Shutdown(dds3ProcessID_t *task);
 
-extern s32 DrawMsgMng_Process(KwlnTask *task);
+extern s32 DrawMsgMng_Process(dds3ProcessID_t *task);
 
 void SetVar();
 
-extern void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
+extern void frFontCenterGlyphChainAt(s32 x, s32 y, _FRQ *glyphChain);
 
 
-void itfMesInitializePanelPlacementSprite(ItfMesState *panel);
+void itfMesInitializePanelPlacementSprite(instanceMes_tag *panel);
 
-void OpenCheckSpeakerWindow(ItfMesState *panel);
+void OpenCheckSpeakerWindow(instanceMes_tag *panel);
 
-extern UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 payload);
+extern itfpanel_t *itfCreateUiSpriteByKind(s32 kind, u32 payload);
 
 #define ITF_MES_SCRIPT_PANEL_BIT 0x200000
 #define ITF_MES_LOWER_STATUS_PAIR_MASK 0x300
@@ -173,7 +173,7 @@ s32 itfMesMngOpenWindow(void) {
  * value was zero. Finishing a nonzero state therefore still returns 0. */
 s32 itfMesMngCloseWindow(void) {
     s32 window = scrGetMessageHandle();
-    ItfMesState *mes;
+    instanceMes_tag *mes;
     u32 scriptStatus;
 
     if (window < 0) {
@@ -191,7 +191,7 @@ s32 itfMesMngCloseWindow(void) {
 /* Mark each originally nonzero status pair with both bits, then clean/reset
  * content and clear the script panel bit. The status pairs are set, not cleared. */
 void itfMesMngMsgWndCls(s32 window) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
     u32 previousFlags = mes->flags;
 
     if (previousFlags & ITF_MES_LOWER_STATUS_PAIR_MASK) {
@@ -331,7 +331,7 @@ s32 itfMesMngSelectDefKey(void) {
 }
 
 /* Return the loaded message-window texture resource, not a window index. */
-SdfTex *itfMesGetWindowTexture(void) {
+sdfTexHandle_t *itfMesGetWindowTexture(void) {
     return itfMesMngManager.windowTexture;
 }
 
@@ -348,14 +348,14 @@ void itfMesClearFlags(u32 mask) {
 ItfMesSub *itfMesMngSetResourcePtr(s32 window, ItfMesSub *sub);
 
 s32 itfMesMngInitialize(ItfMesSub *sub) {
-    ItfMesPoolNode *node = itfMiscLinkTake(&itfMesMngManager.pool);
+    mesflow_tag *node = itfMiscLinkTake(&itfMesMngManager.pool);
     s32 window = node->index;
-    ItfMesState *mes;
-    struct SdfMemBlock *handle;
+    instanceMes_tag *mes;
+    struct sdfMemHandle_t *handle;
 
     handle = sdfMemAllocDirect(0x1E0);
     node->resourceHandle = handle;
-    mes = (ItfMesState *)sdfMemLock(handle);
+    mes = (instanceMes_tag *)sdfMemLock(handle);
     node->state = mes;
     mes->sub = NULL;
     itfMesMngSetResourcePtr(window, sub);
@@ -381,12 +381,12 @@ void itfMesMngRelease(s32 window) {
     }
 }
 
-void itfMesBuildEntryGlyph(ItfMesState *mes);
+void itfMesBuildEntryGlyph(instanceMes_tag *mes);
 
 /* Install an entry's table into the window, rebuild its text glyphs and the
  * selected-item caption, then mark the entry block active. */
 s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
     ItfMesEntryBlock *entryBlock = &mes->entryBlock;
     ItfMesTable *table = GetTypeHeader(mes, entryIndex)->table;
     ItfMesBlk14 *captionBlock;
@@ -446,12 +446,12 @@ s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex) {
     return 1;
 }
 
-extern s32 itfInitTextDrawArgs(u8 *encodedText, FrFontGlyph *sub);
+extern s32 itfInitTextDrawArgs(u8 *encodedText, _FRQ *sub);
 
 /* Cache the selected table and narrowed item index, then initialize its text.
  * Empty tables return 0; nonempty tables return the text initializer's result. */
 s32 itfMesSelectTableItemText(s32 window, s32 entryIndex, s32 itemIndex) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
     ItfMesTable *table = GetTypeHeader(mes, entryIndex)->table;
     ItfMesEntryBlock *entryBlock = &mes->entryBlock;
 
@@ -467,7 +467,7 @@ s32 itfMesSelectTableItemText(s32 window, s32 entryIndex, s32 itemIndex) {
 /* Release/reset selected-entry glyphs and their status; optionally do the same
  * for primary text. Negative window is a no-op; no other slot validation. */
 void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock) {
-    ItfMesState *mes;
+    instanceMes_tag *mes;
     ItfMesEntryBlock *entryBlock;
     ItfMesBlk14 *primaryTextBlock;
 
@@ -496,7 +496,7 @@ void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock) {
 
 /* Build the option panel around the widest measured row, using this game's
  * fixed row spacing. Preserve the existing panel creation/layout order. */
-void itfMesBuildOptionFrame(ItfMesState *mes) {
+void itfMesBuildOptionFrame(instanceMes_tag *mes) {
     ItfMesBlk40 *optionBlock = &mes->blk40;
     ItfMesBlkA4 *panelBlock = &mes->blkA4;
     s32 bounds[4];
@@ -528,7 +528,7 @@ void itfMesBuildOptionFrame(ItfMesState *mes) {
 /* Replace the option glyph chain with rows selected by clear panel-mask bits.
  * Item zero is skipped; mode 3 additionally builds the surrounding frame. */
 void itfMesBuildOptionList(s32 window, s32 entryIndex) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
     ItfMesBlk40 *optionBlock = &mes->blk40;
     ItfMesEntry *entry = GetTypeHeader(mes, entryIndex);
     ItfMesTable *table;
@@ -546,7 +546,7 @@ void itfMesBuildOptionList(s32 window, s32 entryIndex) {
     if (mes->temporaryFontEntry != 0) {
         frSetExtDic(mes->temporaryFontEntry);
     }
-    optionBlock->glyphChain = (FrFontGlyph *)itfMesBuildNodeRows(&table->items[1], table->bitCount, optionBlock->panelValue, optionBlock->x, firstRowY, mes->renderValue);
+    optionBlock->glyphChain = (_FRQ *)itfMesBuildNodeRows(&table->items[1], table->bitCount, optionBlock->panelValue, optionBlock->x, firstRowY, mes->renderValue);
     optionBlock->rowCount = visibleRowCount;
     mes->flags = (mes->flags & ~ITF_MES_OPTION_STATE_MASK) | ITF_MES_OPTION_LIST_READY;
     if (mes->panelMode == 3) {
@@ -558,7 +558,7 @@ void itfMesBuildOptionList(s32 window, s32 entryIndex) {
 /* Release option glyphs, clear option selection/state and invalidate its rank.
  * Other content and the window allocation remain installed. */
 void itfMesMngRequestSelectRelease(s32 window) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
     ItfMesBlk40 *optionBlock = &mes->blk40;
     if (optionBlock->glyphChain != NULL) {
         frDestroyFontRequestAfter(optionBlock->glyphChain);
@@ -601,7 +601,7 @@ void itfMesMngSetSelect(s32 window, s32 selectedBitIndex) {
     optionBlock->savedIndex = clearBitCount;
 }
 
-void ChangeFontPosition(FrFontGlyph *glyph, s32 dx, s32 dy);
+void ChangeFontPosition(_FRQ *glyph, s32 dx, s32 dy);
 
 /* Move primary text to an absolute position; an unchanged position is a no-op. */
 void itfMesMngSetSpeakerPosition(s32 window, s32 x, s32 y) {
@@ -668,7 +668,7 @@ void itfMesMngSetSelPositionOffset(s32 window, s32 dx, s32 dy) {
 
 /* Propagate a changed render value to all three glyph chains before caching it. */
 void itfMesMngSetPriority(s32 window, s32 renderValue) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
     if (mes->renderValue != renderValue) {
         ChangeZBuffer(mes->blk14.glyphChain, renderValue);
         ChangeZBuffer(mes->entryBlock.glyphChain, renderValue);
@@ -684,7 +684,7 @@ u32 itfMesMngGetStat(s32 window) {
 
 /* Replace only the high half, preserving the existing low-half cast. */
 void itfMesMngSetStat(s32 window, u32 highFlags) {
-    ItfMesState *mes;
+    instanceMes_tag *mes;
 
     mes = pinst[window].mes;
     mes->flags = (u32)(u16)mes->flags | (highFlags & ITF_MES_HIGH_FLAGS_MASK);
@@ -692,7 +692,7 @@ void itfMesMngSetStat(s32 window, u32 highFlags) {
 
 /* Set only high-half mask bits; low-half status is unchanged. */
 void itfMesMngMarkBitStat(s32 window, u32 mask) {
-    ItfMesState *mes;
+    instanceMes_tag *mes;
 
     mes = pinst[window].mes;
     mes->flags = mes->flags | (mask & ITF_MES_HIGH_FLAGS_MASK);
@@ -700,7 +700,7 @@ void itfMesMngMarkBitStat(s32 window, u32 mask) {
 
 /* Clear only high-half mask bits; low-half status is unchanged. */
 void itfMesMngClearBitStat(s32 window, u32 mask) {
-    ItfMesState *mes;
+    instanceMes_tag *mes;
 
     mes = pinst[window].mes;
     mes->flags = mes->flags & (~mask | ITF_MES_LOW_FLAGS_MASK);
@@ -836,7 +836,7 @@ void itfMesMngSetVarImmediate2(s32 window, s32 slotIndex, const char *source, s3
 /* Install/relocate a message resource and cache MSG1's trailing-entry word as
  * the temporary font entry. Return the previous resource without releasing it. */
 ItfMesSub *itfMesMngSetResourcePtr(s32 window, ItfMesSub *sub) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
     ItfMesSub *previous = mes->sub;
     ItfMesEntry *entry;
     u8 *temporaryFontEntry;
@@ -861,7 +861,7 @@ extern void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *blk, s32 panelMo
 /* Refresh changed panel values only when both content-status pairs are clear.
  * Release the old primitive after applying the panel mode and fade limit. */
 void itfMesMngChangeWindowType(s32 window, s32 panelMode, s32 fadeLimit) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
     ItfMesBlkA4 *panelBlock = &mes->blkA4;
 
     if ((mes->flags & ITF_MES_CONTENT_STATUS_MASK) == 0) {
@@ -909,10 +909,10 @@ s32 itfMesMngSetSelectDefKey(s32 window, s32 id, s32 value) {
 /* Build and release a temporary glyph chain to measure the widest grouped row.
  * Empty tables and zero/missing encoded items return zero. */
 s32 itfMesMngGetWidth(s32 window, s32 entryIndex, s32 itemIndex) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
     ItfMesTable *table;
     u8 *encodedText;
-    FrFontGlyph *glyphChain;
+    _FRQ *glyphChain;
     s32 textExtent;
 
     table = GetTypeHeader(mes, entryIndex)->table;
@@ -946,7 +946,7 @@ void itfMesMngSetKutiCallback(s32 window, void (*callback)(void)) {
 /* Initialize the fixed window pool, load its texture and register the named
  * calculation/drawing tasks. Keep the existing task flags and callback casts. */
 void itfMesMngInitializeManager(void) {
-    ItfMesPoolNode *poolNode;
+    mesflow_tag *poolNode;
 
     itfMesMngManager.activeWindowCount = 0;
     itfMesMngManager.unk8 = 0;
@@ -998,9 +998,9 @@ INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414D10);
 
 s32 itfMesMngDebugProc(void) {
     ItfMesBlkA4 *panel;
-    UiSprite *panelSprite;
+    itfpanel_t *panelSprite;
     s32 *bounds;
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
     s32 menuItemIndex;
     s32 menuItemY;
     const char *menuItemFormat;
@@ -1118,7 +1118,7 @@ extern ItfMesWindowRec D_00452960[];
  * the pool-array-relative counter. An empty record is a no-op. */
 void DestructFlow(s32 window) {
     ItfMesWindowRec *windowRecord = &D_00452960[window];
-    ItfMesState *mes = windowRecord->state;
+    instanceMes_tag *mes = windowRecord->state;
     if (mes != NULL) {
         itfMesMngRequestMessageRelease(window, 1);
         itfMesMngRequestSelectRelease(window);
@@ -1160,7 +1160,7 @@ u32 CheckMessageBinary(ItfMesSub *resource) {
 }
 
 /* Address an installed resource entry; caller supplies an in-range index. */
-ItfMesEntry *GetTypeHeader(ItfMesState *mes, s32 entryIndex) {
+ItfMesEntry *GetTypeHeader(instanceMes_tag *mes, s32 entryIndex) {
     ItfMesEntry *entries = mes->sub->entries;
 
     return &entries[entryIndex];
@@ -1198,10 +1198,10 @@ extern s32 itfGetTextLipsUnitId();
 extern s32 itfGetTextLipsMotionId();
 /* Rebuild colored entry glyphs, synchronize interface flags/hooks and cache
  * the span count. Existing span helpers require a valid created chain. */
-void itfMesBuildEntryGlyph(ItfMesState *mes) {
+void itfMesBuildEntryGlyph(instanceMes_tag *mes) {
     ItfMesEntryBlock *entryBlock = &mes->entryBlock;
-    FrFontGlyph *glyph;
-    FrFontGlyph *previousGlyph;
+    _FRQ *glyph;
+    _FRQ *previousGlyph;
     s32 lipsValue;
     u32 interfaceMask;
     void (*callback)();
@@ -1251,7 +1251,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
  * padded string span; positive counts copy that many bytes into a zeroed block.
  * DDS2 also zeroes string-mode blocks first. Keep the K&R declaration form. */
 void SetVar(mes, slotIndex, source, byteCount)
-    ItfMesState *mes;
+    instanceMes_tag *mes;
     s32 slotIndex;
     const char *source;
     s32 byteCount;
@@ -1290,7 +1290,7 @@ void CommitVarTable(s32 *table) {
 }
 
 /* Read the selected item from the window's trailing entry, without validation. */
-u8 *GetSpeakerName(ItfMesState *mes) {
+u8 *GetSpeakerName(instanceMes_tag *mes) {
     u32 *items;
 
     items = GetTypeHeader2(mes->sub)->itemList;
@@ -1317,8 +1317,8 @@ s32 GetNumSelectItem(s32 bitCount, u32 remainingMask) {
 
 /* Append text for each clear mask bit. Masked items are still consumed, while
  * y advances only for built text. Return NULL if nothing was built. */
-FrFontGlyph *itfMesBuildNodeRows(u32 *items, s32 itemCount, u32 mask, s32 x, s32 y, s32 renderValue) {
-    FrFontGlyph *glyphChain = NULL;
+_FRQ *itfMesBuildNodeRows(u32 *items, s32 itemCount, u32 mask, s32 x, s32 y, s32 renderValue) {
+    _FRQ *glyphChain = NULL;
     s32 itemIndex;
 
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++, items++) {
@@ -1343,12 +1343,12 @@ FrFontGlyph *itfMesBuildNodeRows(u32 *items, s32 itemCount, u32 mask, s32 x, s32
 /* Discard (to - from - 1) preceding rows when positive, retain the next
  * complete y-group and queue everything after it. Requires non-NULL input;
  * return NULL if discarding preceding rows exhausts the chain. */
-FrFontGlyph *UnchainFontHandleUnit(FrFontGlyph *glyph, s32 from, s32 to) {
+_FRQ *UnchainFontHandleUnit(_FRQ *glyph, s32 from, s32 to) {
     s32 rowsToDiscard = to - from - 1;
     s32 rowY = glyph->y;
-    FrFontGlyph *nextNode;
-    FrFontGlyph *rowHead;
-    FrFontGlyph *rowTail;
+    _FRQ *nextNode;
+    _FRQ *rowHead;
+    _FRQ *rowTail;
 
     while (rowsToDiscard > 0) {
         while (rowY == glyph->y) {
@@ -1388,7 +1388,7 @@ FrFontGlyph *UnchainFontHandleUnit(FrFontGlyph *glyph, s32 from, s32 to) {
 }
 
 /* Return the final previous-linked glyph; input must be non-NULL. */
-FrFontGlyph *GetLastLinkFontHandle(FrFontGlyph *glyph) {
+_FRQ *GetLastLinkFontHandle(_FRQ *glyph) {
     while (glyph->previous != NULL) {
         glyph = glyph->previous;
     }
@@ -1396,8 +1396,8 @@ FrFontGlyph *GetLastLinkFontHandle(FrFontGlyph *glyph) {
 }
 
 /* Copy the auxiliary glyph's shade bytes; its encoded intensity is unsigned. */
-void GetLastMessagePara(FrFontGlyph *glyph, ItfMesEntryBlock *entryBlock) {
-    FrFontChildGlyph *shade = glyph->lastChild;
+void GetLastMessagePara(_FRQ *glyph, ItfMesEntryBlock *entryBlock) {
+    _TEXT *shade = glyph->lastChild;
     u8 encodedIntensity = glyph->glyphCodeOrContext.byteRoles.encodedContextByte;
 
     entryBlock->color[3] = encodedIntensity >> 1;
@@ -1408,14 +1408,14 @@ void GetLastMessagePara(FrFontGlyph *glyph, ItfMesEntryBlock *entryBlock) {
 
 /* Inclusive step count from the y delta in eighths and the first row's height.
  * Both pointers and a nonzero first-row height are required. */
-s32 CountLineMessage(FrFontGlyph *last, FrFontGlyph *first) {
+s32 CountLineMessage(_FRQ *last, _FRQ *first) {
     s16 rowHeightUnits = first->parentDimensionsOrRenderWord.parentDimensions.cellHeight;
 
     return ((first->y - last->y) >> ITF_MES_TEXT_Y_SHIFT) / rowHeightUnits + 1;
 }
 
 /* Translate every linked node in text units; a NULL chain is a no-op. */
-void ChangeFontPosition(FrFontGlyph *glyph, s32 dx, s32 dy) {
+void ChangeFontPosition(_FRQ *glyph, s32 dx, s32 dy) {
     if (glyph == NULL) {
         return;
     }
@@ -1428,7 +1428,7 @@ void ChangeFontPosition(FrFontGlyph *glyph, s32 dx, s32 dy) {
 
 /* Assign the render value across the complete chain; a NULL chain is a no-op. */
 /* Persona 4 func_0027a340 @ 0027A340 (src/itfMesManager.c), recompiled unchanged */
-void ChangeZBuffer(FrFontGlyph *glyph, s32 renderValue) {
+void ChangeZBuffer(_FRQ *glyph, s32 renderValue) {
     while (glyph != NULL) {
         glyph->renderValueOrSetupOrShade.renderValue = renderValue;
         glyph = glyph->previous;
@@ -1437,11 +1437,11 @@ void ChangeZBuffer(FrFontGlyph *glyph, s32 renderValue) {
 
 /* Skip (rowCount - rowIndex - 1) preceding y-groups when positive, then set each
  * child's flag byte in the next row. Requires non-NULL input; past-end is a no-op. */
-void ChangeFontColor(FrFontGlyph *glyph, s32 rowIndex, s32 rowCount, s32 requestedFlagValue) {
+void ChangeFontColor(_FRQ *glyph, s32 rowIndex, s32 rowCount, s32 requestedFlagValue) {
     s32 rowsToSkip = rowCount - rowIndex - 1;
     s32 rowY = glyph->y;
     s32 currentY = rowY;
-    FrFontChildGlyph *child;
+    _TEXT *child;
     u8 flagValue;
 
     while (rowsToSkip > 0) {
@@ -1465,8 +1465,8 @@ void ChangeFontColor(FrFontGlyph *glyph, s32 rowIndex, s32 rowCount, s32 request
 }
 
 /* Set every child's flag byte across the parent chain; NULL is a no-op. */
-void ChangeFontColorAll(FrFontGlyph *glyph, u8 flagValue) {
-    FrFontChildGlyph *child;
+void ChangeFontColorAll(_FRQ *glyph, u8 flagValue) {
+    _TEXT *child;
 
     for (; glyph != NULL; glyph = glyph->previous) {
         for (child = glyph->firstChild; child != NULL; child = child->next) {
@@ -1477,8 +1477,8 @@ void ChangeFontColorAll(FrFontGlyph *glyph, u8 flagValue) {
 
 /* Clear each child's low color byte, then OR the unmasked input word.
  * High input bits can therefore also change the upper bytes. */
-void ChangeFontAlpha(FrFontGlyph *glyph, u32 color) {
-    FrFontChildGlyph *child;
+void ChangeFontAlpha(_FRQ *glyph, u32 color) {
+    _TEXT *child;
 
     for (; glyph != NULL; glyph = glyph->previous) {
         for (child = glyph->firstChild; child != NULL; child = child->next) {
@@ -1489,7 +1489,7 @@ void ChangeFontAlpha(FrFontGlyph *glyph, u32 color) {
 
 /* Find the maximum summed advance of contiguous equal-y groups, scaled by 16.
  * NULL returns zero; the initial zero also excludes negative group totals. */
-s32 GetMessageWidth(FrFontGlyph *glyph) {
+s32 GetMessageWidth(_FRQ *glyph) {
     s32 maxAdvance = 0;
 
     while (glyph != NULL) {
@@ -1525,7 +1525,7 @@ s32 GetMaskedIndex(s32 clearBitsToSkip, u32 mask) {
 
 /* Enable parent contexts whose first child's tested flag is zero.
  * NULL chain is allowed, but every visited node must have a first child. */
-void itfMesEnableUnflaggedNodeContexts(FrFontGlyph *glyph) {
+void itfMesEnableUnflaggedNodeContexts(_FRQ *glyph) {
     for (; glyph != NULL; glyph = glyph->previous) {
         if (glyph->firstChild->renderValueOrSetupOrShade.setupBytes.secondOption == 0) {
             frFontEnableContextMode(glyph);
@@ -1560,14 +1560,14 @@ extern ItfMesGlobals itfMesMngManager;
 extern void DestructFlow(s32 window);
 #include "sdf_packet_alloc.h"
 
-extern void itfMiscDrawAlphaPrim(SdfListHead *list, s32 context, s32 mode);
+extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *list, s32 context, s32 mode);
 
-extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
+extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 
 
-extern UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 payload);
+extern itfpanel_t *itfCreateUiSpriteByKind(s32 kind, u32 payload);
 
-extern void ChangeFontPosition(FrFontGlyph *glyph, s32 dx, s32 dy);
+extern void ChangeFontPosition(_FRQ *glyph, s32 dx, s32 dy);
 
 extern void ChangeFontColor();
 
@@ -1580,19 +1580,19 @@ extern s32 SelectItemDefKey(ItfMesBlk40 *);
 extern SdfPoolNode sdfGrOtTable[];
 
 
-extern void itfPnlDraw(UiSprite *sprite, SdfPoolNode *surface);
+extern void itfPnlDraw(itfpanel_t *sprite, SdfPoolNode *surface);
 
-extern void DebugDrawWindowLine(UiSprite *sprite);
+extern void DebugDrawWindowLine(itfpanel_t *sprite);
 
 
 /* Enable context rendering for every font object in the linked chain. */
-void frFontEnableNodeContextModes(FrFontGlyph *fontObject) {
+void frFontEnableNodeContextModes(_FRQ *fontObject) {
     for (; fontObject != NULL; fontObject = fontObject->previous) {
         frFontEnableContextMode(fontObject);
     }
 }
 
-void itfMesInitializePanelPlacementSprite(ItfMesState *panel) {
+void itfMesInitializePanelPlacementSprite(instanceMes_tag *panel) {
     ItfMesEntryBlock *pos = &panel->entryBlock;
     ItfMesBlkA4 *place = &panel->blkA4;
     s32 top;
@@ -1609,7 +1609,7 @@ void itfMesInitializePanelPlacementSprite(ItfMesState *panel) {
     panel->flags = (panel->flags & ~0x300) | 0x100;
 }
 
-void OpenCheckSpeakerWindow(ItfMesState *panel) {
+void OpenCheckSpeakerWindow(instanceMes_tag *panel) {
     ItfMesBlk14 *origin = &panel->blk14;
     ItfMesBlkA4 *place = &panel->blkA4;
     if (origin->glyphChain != NULL && !(panel->flags & 0x10000)) {
@@ -1706,7 +1706,7 @@ void ForceSetCurCtr(BtlFade *fade, s16 phase, s16 alpha, s16 timer) {
     fade->timer = timer;
 }
 
-void btlReleaseEffectResourceHandles(ItfMesState *effect) {
+void btlReleaseEffectResourceHandles(instanceMes_tag *effect) {
     ItfMesBlkA4 *place = &effect->blkA4;
     if (place->frame != NULL) {
         itfPnlRelease(place->frame);
@@ -1792,24 +1792,24 @@ void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 panelMode, s
     }
 }
 
-void itfMesUpdatePanelFades(ItfMesState *panel);
+void itfMesUpdatePanelFades(instanceMes_tag *panel);
 
-void CalcCurCtr(ItfMesState *panel);
+void CalcCurCtr(instanceMes_tag *panel);
 
-void itfUpdateSoundSelectionTransition(ItfMesState *panel);
+void itfUpdateSoundSelectionTransition(instanceMes_tag *panel);
 
-void itfMesAdvanceEntryText(ItfMesState *mes);
+void itfMesAdvanceEntryText(instanceMes_tag *mes);
 
-void itfUpdateBattleDisplayAndFadeIndicator(ItfMesState *panel) {
+void itfUpdateBattleDisplayAndFadeIndicator(instanceMes_tag *panel) {
     itfMesUpdatePanelFades(panel);
     itfMesAdvanceEntryText(panel);
     itfUpdateSoundSelectionTransition(panel);
     CalcCurCtr(panel);
 }
 
-void itfMesUpdatePanelFades(ItfMesState *panel) {
+void itfMesUpdatePanelFades(instanceMes_tag *panel) {
     ItfMesBlkA4 *place = &panel->blkA4;
-    UiSprite *sprite;
+    itfpanel_t *sprite;
     s32 transition;
 
     sprite = place->sprite;
@@ -1874,7 +1874,7 @@ void itfMesUpdatePanelFades(ItfMesState *panel) {
     }
 }
 
-void itfMesAdvanceEntryText(ItfMesState *mes) {
+void itfMesAdvanceEntryText(instanceMes_tag *mes) {
     ItfMesEntryBlock *entryBlock = &mes->entryBlock;
     u32 flags;
 
@@ -1925,15 +1925,15 @@ void itfMesAdvanceEntryText(ItfMesState *mes) {
     mes->flags = flags & ~0x1000000;
 }
 
-extern void ChangeFontColorAll(FrFontGlyph *glyph, u8 flagValue);
+extern void ChangeFontColorAll(_FRQ *glyph, u8 flagValue);
 
 extern s32 GetMaskedIndex(s32 clearBitsToSkip, u32 mask);
 
-extern s32 SelectItem(ItfMesState *panel);
+extern s32 SelectItem(instanceMes_tag *panel);
 
-extern void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy);
+extern void itfMesShiftPanelVertically(instanceMes_tag *panel, s32 dy);
 
-void itfUpdateSoundSelectionTransition(ItfMesState *panel) {
+void itfUpdateSoundSelectionTransition(instanceMes_tag *panel) {
     ItfMesBlk40 *selection = &panel->blk40;
     ItfMesEntryBlock *entry = &panel->entryBlock;
     u32 flags = panel->flags;
@@ -2000,7 +2000,7 @@ void itfUpdateSoundSelectionTransition(ItfMesState *panel) {
     }
 }
 
-void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy) {
+void itfMesShiftPanelVertically(instanceMes_tag *panel, s32 dy) {
     ItfMesBlk14 *origin = &panel->blk14;
     ItfMesEntryBlock *pos = &panel->entryBlock;
     ItfMesBlkA4 *place = &panel->blkA4;
@@ -2018,7 +2018,7 @@ void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy) {
     }
 }
 
-s32 SelectItem(ItfMesState *panel) {
+s32 SelectItem(instanceMes_tag *panel) {
     ItfMesBlk40 *sel = &panel->blk40;
     s32 dir = 0;
     s32 index;
@@ -2102,7 +2102,7 @@ s32 SelectItemDefKey(ItfMesBlk40 *selection) {
     return -1;
 }
 
-void CalcCurCtr(ItfMesState *panel) {
+void CalcCurCtr(instanceMes_tag *panel) {
     BtlFade *fade = &panel->fade;
     s32 minimumAlpha;
     if (fade->kind != 0) {
@@ -2130,18 +2130,18 @@ void CalcCurCtr(ItfMesState *panel) {
     }
 }
 
-extern void itfMesRenderActivePanelSprites(ItfMesState *);
+extern void itfMesRenderActivePanelSprites(instanceMes_tag *);
 
-extern void itfDrawSoundSelectorFadeLayers(ItfMesState *);
+extern void itfDrawSoundSelectorFadeLayers(instanceMes_tag *);
 
-extern void itfDrawSoundSelectorOptionPanel(ItfMesState *);
+extern void itfDrawSoundSelectorOptionPanel(instanceMes_tag *);
 
-extern void itfDrawSelectedSoundRow(ItfMesState *);
+extern void itfDrawSelectedSoundRow(instanceMes_tag *);
 
-void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
+void itfUpdateSoundSelectorPanel(instanceMes_tag *panel) {
     u32 flags = panel->flags;
     ItfMesBlk40 *selection;
-    FrFontGlyph *glyph;
+    _FRQ *glyph;
 
     itfMesMngManager.flags &= ~2;
     itfMesRenderActivePanelSprites(panel);
@@ -2186,7 +2186,7 @@ void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
     }
 }
 
-void itfMesRenderActivePanelSprites(ItfMesState *panel) {
+void itfMesRenderActivePanelSprites(instanceMes_tag *panel) {
     ItfMesBlkA4 *place;
     if (panel->flags & 0x80000) {
         return;
@@ -2208,19 +2208,19 @@ void itfMesRenderActivePanelSprites(ItfMesState *panel) {
 
 extern DrawColorRec D_003B49B8[];
 
-extern void itfDrawThreePanelBorderBands(DrawVertex *, DrawColorRec *, u32, s32, SdfListHead *);
+extern void itfDrawThreePanelBorderBands(DrawVertex *, DrawColorRec *, u32, s32, sdfDrawTag_t *);
 
-extern void itfMiscDrawSpritePrim2(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
+extern void itfMiscDrawSpritePrim2(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, sdfDrawTag_t *);
 
 /* Draw the selected sound row and its expanding fade outline. */
-void itfDrawSelectedSoundRow(ItfMesState *panel) {
+void itfDrawSelectedSoundRow(instanceMes_tag *panel) {
     DrawColorRec uv;
     DrawColorRec color;
     DrawVertex bounds[2];
     ItfMesBlk40 *selection = &panel->blk40;
     BtlFade *fade = &panel->fade;
     s32 selected = selection->savedIndex;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     s32 x;
     s32 y;
     s32 bottom;
@@ -2232,7 +2232,7 @@ void itfDrawSelectedSoundRow(ItfMesState *panel) {
     if (selected == -1) {
         return;
     }
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     x = selection->x;
     y = (s32)selection->y - ((selection->rowCount * 25 - 23) << 3) + selected * 0xA0;
@@ -2294,10 +2294,10 @@ extern u8 D_003B49E8[];
 extern s32 D_003B4A08[];
 
 /* Draw the sound selector frame, its fade layer and the expanding timer outline. */
-void itfDrawSoundSelectorFadeLayers(ItfMesState *panel) {
+void itfDrawSoundSelectorFadeLayers(instanceMes_tag *panel) {
     s32 bounds[4];
     BtlFade *fade = &panel->fade;
-    SdfListHead *packet;
+    sdfDrawTag_t *packet;
     s32 expansion;
     SdfPoolNode *surface;
 
@@ -2305,7 +2305,7 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *panel) {
     bounds[1] = 0xC60;
     bounds[2] = 0x1BD0;
     bounds[3] = 0xD58;
-    packet = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packet);
     D_003B4A08[3] = 0xFF;
     itfMiscDrawSpritePrim(bounds, D_003B49F8, D_003B4A08, panel->renderValue,
@@ -2329,8 +2329,8 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *panel) {
     surface->append(surface, packet);
 }
 
-s32 CalcMsgMng_Process(KwlnTask *task) {
-    ItfMesPoolNode *node;
+s32 CalcMsgMng_Process(dds3ProcessID_t *task) {
+    mesflow_tag *node;
     for (node = itfMesMngManager.pool.activeHead; node != 0; node = node->next) {
         itfUpdateBattleDisplayAndFadeIndicator(node->state);
     }
@@ -2339,8 +2339,8 @@ s32 CalcMsgMng_Process(KwlnTask *task) {
 
 extern u32 dds3NullDrawProc(void);
 
-s32 DrawMsgMng_Process(KwlnTask *task) {
-    ItfMesPoolNode *node;
+s32 DrawMsgMng_Process(dds3ProcessID_t *task) {
+    mesflow_tag *node;
 
     if (dds3NullDrawProc() != 0) {
         return 0;
@@ -2352,8 +2352,8 @@ s32 DrawMsgMng_Process(KwlnTask *task) {
     return 0;
 }
 
-void DrawMsgMng_Shutdown(KwlnTask *task) {
-    ItfMesPoolNode *node = itfMesMngManager.pool.activeHead;
+void DrawMsgMng_Shutdown(dds3ProcessID_t *task) {
+    mesflow_tag *node = itfMesMngManager.pool.activeHead;
     s32 message;
     while (node != 0) {
         message = node->index;
@@ -2372,25 +2372,25 @@ extern u8 D_00436630[5];
 
 extern u8 D_00436638[5];
 
-extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, SdfListHead *);
+extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, sdfDrawTag_t *);
 
-void DebugDrawWindowLine(UiSprite *sprite) {
+void DebugDrawWindowLine(itfpanel_t *sprite) {
     s32 vertices[4][2] = {
         {sprite->left, sprite->top},
         {sprite->right, sprite->top},
         {sprite->right, sprite->bottom},
         {sprite->left, sprite->bottom}
     };
-    SdfListHead *list;
+    sdfDrawTag_t *list;
 
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     itfMiscDrawLineStripPrim(vertices, D_003B4A18, D_00436630, D_00436638, 5, 0xFFFFFF, list);
     D_00380708.append(&D_00380708, list);
 }
 
 void DebugMoveWinVert(ItfMesBlkA4 *panel, s32 boundsMode) {
-    UiSprite *sprite = panel->sprite;
+    itfpanel_t *sprite = panel->sprite;
     s32 *bounds;
     s32 dx;
     s32 dy;
@@ -2462,7 +2462,7 @@ void DebugMoveWinAlpha(ItfMesBlkA4 *panel) {
     }
 }
 
-ItfMesPoolNode *DebugChangeInstance(ItfMesPoolNode *node) {
+mesflow_tag *DebugChangeInstance(mesflow_tag *node) {
     s32 index = 0;
     s32 count = itfMesMngManager.activeWindowCount;
 
@@ -2489,7 +2489,7 @@ ItfMesPoolNode *DebugChangeInstance(ItfMesPoolNode *node) {
 }
 
 void itfQueueOffsetTexturedRect(s32 *bounds, s32 *region, s32 x, s32 y,
-                   s32 alpha, SdfTex *texture, SdfListHead *command) {
+                   s32 alpha, sdfTexHandle_t *texture, sdfDrawTag_t *command) {
     s32 positions[4];
     s32 uv[4];
     UiQuadColor color = D_00414D50;
@@ -2519,8 +2519,8 @@ void itfMesDrawWindowBackground(s32 mode) {
     DrawColorRec borderColor;
     s32 rectangleData[12][4];
     s32 textureData[7][4];
-    SdfTex *texture = itfMesMngManager.windowTexture;
-    SdfListHead *packet;
+    sdfTexHandle_t *texture = itfMesMngManager.windowTexture;
+    sdfDrawTag_t *packet;
     s32 (*rectangles)[4];
     s32 (*textures)[4];
     s32 i;
@@ -2533,7 +2533,7 @@ void itfMesDrawWindowBackground(s32 mode) {
     rectangles = memcpy(rectangleData, &D_00414D60, sizeof(rectangleData));
     textures = memcpy(textureData, &D_00414E20, sizeof(textureData));
 
-    packet = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packet);
 
     if (mode == 0) {
@@ -2607,7 +2607,7 @@ void itfMesDrawWindowBackground(s32 mode) {
     sdfSubmitGsAlphaOneRegisterPacket(0x44, 0x53);
     D_003805A8.append(&D_003805A8, packet);
 
-    packet = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packet);
     if (mode != 0) {
         sdfSubmitGsAlphaOneRegisterPacket(0x48, 0x53);
@@ -2655,7 +2655,7 @@ void itfUpdateSoundSelectorOptions(void) {
     step = 1;
     x = 0xAF;
     for (digit = 7; digit >= 0; digit--) {
-        FrFontGlyph *glyph;
+        _FRQ *glyph;
         s32 left = x * 16;
 
         left += 0x9F0;
@@ -2751,7 +2751,7 @@ extern s8 D_0037F531[];
 /* Start the window entry, then poll completion and restore its normal flags. */
 s32 itfMesScriptStartEntryAndWait(void) {
     s32 window = scrGetMessageHandle();
-    ItfMesState *state;
+    instanceMes_tag *state;
     s32 entry;
     if (window < 0) {
         return 1;

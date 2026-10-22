@@ -69,7 +69,7 @@ void dds3AdminiCallSequence(s32 requestedMode, void *requestData, u32 dataBytes,
     }
 }
 
-extern s32 dds3AdminPollModeCompletion(KwlnTask *task);
+extern s32 dds3AdminPollModeCompletion(dds3ProcessID_t *task);
 
 /* Configure administrative state from three caller-supplied parameters. */
 void dds3AdminiOverwriteSequence(s32 requestedMode, void *requestData, u32 dataBytes)
@@ -120,7 +120,7 @@ u32 dds3AdminiGetPrevHistoryFlag(void)
 }
 
 /* Activate a pending mode request and continue through the mode dispatcher. */
-s32 dds3AdminActivateRequestedMode(KwlnTask *task) {
+s32 dds3AdminActivateRequestedMode(dds3ProcessID_t *task) {
     AdminWork *work = (AdminWork *)dds3GetProcessData(task);
     u32 flags = work->flags;
     s32 isRestoringHistory;
@@ -165,7 +165,7 @@ s32 dds3AdminActivateRequestedMode(KwlnTask *task) {
 /* Run the mode's destroy callback; a non-negative result is stored (+1) as
    the transition delay and the mode cleared. Return the next update address
    as a signed scheduler control word, or zero on failure. */
-s32 dds3AdminiEndCheck(KwlnTask *task) {
+s32 dds3AdminiEndCheck(dds3ProcessID_t *task) {
     AdminWork *work = (AdminWork *)dds3GetProcessData(task);
     s32 activeMode = work->activeMode;
     s32 (*destroy)(void);
@@ -185,7 +185,7 @@ s32 dds3AdminiEndCheck(KwlnTask *task) {
     return (s32)dds3AdminActivateRequestedMode;
 }
 
-s32 dds3AdminPollModeCompletion(KwlnTask *task) {
+s32 dds3AdminPollModeCompletion(dds3ProcessID_t *task) {
     AdminWork *work = (AdminWork *)dds3GetProcessData(task);
     u32 flags = work->flags;
     s32 (*cleanup)(void);
@@ -229,7 +229,7 @@ s32 dds3AdminPollModeCompletion(KwlnTask *task) {
 
 /* Run the mode's destroy callback (the row's second pointer), then release the
  * attached data block and the task's AdminWork block. */
-void dds3AdminiNeoShutdown(KwlnTask *task) {
+void dds3AdminiNeoShutdown(dds3ProcessID_t *task) {
     AdminWork* work = (AdminWork*)dds3GetProcessData(task);
     s32 activeMode = work->activeMode;
 

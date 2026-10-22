@@ -1,0 +1,3 @@
+# Types that keep their current name although the SMT3HD name is proven
+# (smt3-decomp tools/dds_type_names.py skips them). One name per line.
+# <type name>  # reason

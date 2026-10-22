@@ -3,9 +3,9 @@
 
 #include "common.h"
 
-struct EffEventWork;
-struct EffParamWork;
-struct SdfMemBlock;
+struct effEveBEDCutHandle_t;
+struct effPartHandle_t;
+struct sdfMemHandle_t;
 struct SoundMixer;
 
 /* One event per model-map position. Init seeds the entry, then the updater
@@ -16,7 +16,7 @@ typedef struct EffPCPMapEventEntry {
     u8 pad11[3];
     s32 age;
     s32 frameLimit;
-    struct EffEventWork *event;
+    struct effEveBEDCutHandle_t *event;
 } EffPCPMapEventEntry;
 
 /* Serialized model placement and fade parameters copied into the owner. */
@@ -32,9 +32,9 @@ typedef struct EffPCPEventParamHead {
 typedef struct EffPCPMapEventWork {
     EffPCPEventParamHead params;
     EffPCPMapEventEntry *entries;
-    struct SdfMemBlock *entriesHandle;
+    struct sdfMemHandle_t *entriesHandle;
     struct SoundMixer *owner;
-    struct EffParamWork *modelResource;
+    struct effPartHandle_t *modelResource;
     f32 scale;
     s32 frame;
     s32 frameLimit;

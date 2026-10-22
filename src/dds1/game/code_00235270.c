@@ -44,7 +44,7 @@ extern void evtWriteSerializedBytes(s32 output, void *data, s32 size);
 extern s32 evtViewerCheckDirty(void);
 extern s32 sndFindPackedTrackLoadStatus(s32 sequence);
 extern void p2sdLoadSMGFile(s32 sequence);
-extern s32 evtUpdateFrameVariableTask(KwlnTask *task);
+extern s32 evtUpdateFrameVariableTask(dds3ProcessID_t *task);
 extern void dds3EffectObjectBasicStatOn(void *object, s32 flags);
 extern void *dds3AddBEDEffectObjectBasic2(void *obj, void *vecA, void *vecB);
 extern void fldSetFilterAnime(u32 mode);
@@ -112,7 +112,7 @@ extern u32 fldbokasi;
 extern char D_003BC0C8[]; /* "NAME:" */
 
 /* Create a task with an initialized event payload. */
-KwlnTask *evtStartPictureProcess2(s32 taskId, const char *path) {
+dds3ProcessID_t *evtStartPictureProcess2(s32 taskId, const char *path) {
     EvtPictureWork *data;
 
     data = evtAllocateContext();
@@ -121,7 +121,7 @@ KwlnTask *evtStartPictureProcess2(s32 taskId, const char *path) {
 }
 
 
-KwlnTask *evtStartPictureProcess(s32 taskId, SdfTex *texture) {
+dds3ProcessID_t *evtStartPictureProcess(s32 taskId, sdfTexHandle_t *texture) {
     EvtPictureWork *data;
 
     data = evtAllocateContext();
@@ -166,7 +166,7 @@ void evtUpdateSkyAlpha(void) {
     }
 }
 
-s32 evtSkyProcess1(KwlnTask *task) {
+s32 evtSkyProcess1(dds3ProcessID_t *task) {
     evtUpdateSkyAlpha();
     fldSkyDrawFilter();
     if (fldbokasi != 0) {
@@ -176,13 +176,13 @@ s32 evtSkyProcess1(KwlnTask *task) {
     return 0;
 }
 
-void evtSkyShutdown(KwlnTask *task) {
+void evtSkyShutdown(dds3ProcessID_t *task) {
     skyanime = 0;
     fldbokasi = 0;
 }
 
 void evtExitSky(void) {
-    KwlnTask *task;
+    dds3ProcessID_t *task;
 
     task = dds3SearchProcessName(evtSkyTaskName);
     if (task != 0) {
@@ -199,14 +199,14 @@ s32 evtInitSky(void) {
 }
 
 /* Frame-variable task update: polls the parent task's user value each frame. */
-s32 evtUpdateFrameVariableTask(KwlnTask *task) {
+s32 evtUpdateFrameVariableTask(dds3ProcessID_t *task) {
     u8 unused[16]; /* retail frame 0x20: unused local storage */
 
     dds3GetProcessData(task->parent);
     return 0;
 }
 
-KwlnTask *evtInitFrameVar(void) {
+dds3ProcessID_t *evtInitFrameVar(void) {
     return dds3StartProcess("FrameVar", 0x2AF9, 1, 1, evtUpdateFrameVariableTask, 0, 0);
 }
 
@@ -218,7 +218,7 @@ extern char D_003BC050[];
 
 /* Draw a framed debug menu: the optional header returns how many rows it used, the row callback fills the rest,
  * and blinking scroll markers appear above/below when entries precede `first` or follow the last drawn one. */
-void evtDrawMenuFrame(SdfListHead *list, s32 x, s32 y, s32 width, s32 rows, s32 first, s32 total, void *callbackContext,
+void evtDrawMenuFrame(sdfDrawTag_t *list, s32 x, s32 y, s32 width, s32 rows, s32 first, s32 total, void *callbackContext,
                    EvtMenuHeaderFn header, EvtMenuRowFn row) {
     s32 i = 0;
     s32 textX;
@@ -258,7 +258,7 @@ void evtDrawMenuFrame(SdfListHead *list, s32 x, s32 y, s32 width, s32 rows, s32 
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADDE0);
 
-s32 evtAppendValueChangeDebugLabel(SdfListHead *list, s32 x, s32 y) {
+s32 evtAppendValueChangeDebugLabel(sdfDrawTag_t *list, s32 x, s32 y) {
     sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
@@ -279,7 +279,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE40);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE50);
 
-void evtDrawFloatValueEditorRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtDrawFloatValueEditorRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     switch (index) {
     case 0:
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 4, D_003ADE00,
@@ -308,7 +308,7 @@ extern void evtDrawFloatValueEditorRow();
 /* Edit the bounded float only in mode 8. Confirm precedes cancel; coarse steps
  * replace fine steps before the value is clamped to the runtime limits. */
 s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     f32 step;
 
     list = dds3FontReqAllocDrawTag();
@@ -344,7 +344,7 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     return 0;
 }
 
-s32 evtDrawValueChangeNoticeRow(SdfListHead *list, s32 x, s32 y) {
+s32 evtDrawValueChangeNoticeRow(sdfDrawTag_t *list, s32 x, s32 y) {
     sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
@@ -355,7 +355,7 @@ extern char D_003ADE78[];
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE78);
 
-void evtDrawValueChangeInstructionRow(SdfListHead *list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
+void evtDrawValueChangeInstructionRow(sdfDrawTag_t *list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     switch (index) {
     case 0:
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 4, D_003BC058, ctx->value));
@@ -376,7 +376,7 @@ void evtDrawValueChangeInstructionRow(SdfListHead *list, s32 x, s32 y, u32 index
 }
 
 s32 evtUpdateValueChangeDialog(s32 x, s32 y, EvtRuntime *ctx) {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     s32 step;
 
     list = dds3FontReqAllocDrawTag();
@@ -413,12 +413,12 @@ s32 evtUpdateValueChangeDialog(s32 x, s32 y, EvtRuntime *ctx) {
     return 0;
 }
 
-s32 evtFrameChangeHead(SdfListHead *target, s32 x, s32 y) {
+s32 evtFrameChangeHead(sdfDrawTag_t *target, s32 x, s32 y) {
     sdfDrawTagLink(target, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "FRAME CHANGE."));
     return 2;
 }
 
-void evtViewerDrawFrameChangeRow(SdfListHead *list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
+void evtViewerDrawFrameChangeRow(sdfDrawTag_t *list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     switch (index) {
     case 0:
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 4, D_003BC058, ctx->value));
@@ -450,7 +450,7 @@ void evtViewerDrawFrameChangeRow(SdfListHead *list, s32 x, s32 y, u32 index, Evt
 }
 
 s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     s32 step;
 
     list = dds3FontReqAllocDrawTag();
@@ -511,7 +511,7 @@ extern u32 mnuCampGetPrimaryOption(EvtRuntime *scene);
 extern u32 mnuCampGetSecondaryOption(EvtRuntime *scene);
 
 /* Draw a project-menu command, including its current toggle/skip option. */
-void evtDrawProjectCommandRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtDrawProjectCommandRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     char labels[11][30] = {
         "SAVE PROJ    >>",
         "LOAD PROJ    >>",
@@ -560,7 +560,7 @@ extern s32 dds3SelectMenu(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 
                                  s32 *secondaryCursor, s32 *primaryCursor);
 
 s32 mnuDrawInfoWindowA(s32 x, s32 y, EvtRuntime *work) {
-    SdfListHead *packets = dds3FontReqAllocDrawTag();
+    sdfDrawTag_t *packets = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(packets, x, y, 0xF, 0xB, 0, 0xB, work, 0, evtDrawProjectCommandRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, packets);
     if (work->actionMode != 1) {
@@ -575,7 +575,7 @@ extern s8 D_003688B8[][12];
 
 
 /* Draw the runtime title when present; return two rows used, or zero for no title. */
-s32 evtDrawStringEntry(SdfListHead *output, s32 x, s32 y, EvtRuntime *work) {
+s32 evtDrawStringEntry(sdfDrawTag_t *output, s32 x, s32 y, EvtRuntime *work) {
     if (work->title == 0) {
         return 0;
     }
@@ -584,7 +584,7 @@ s32 evtDrawStringEntry(SdfListHead *output, s32 x, s32 y, EvtRuntime *work) {
 }
 
 /* Draw an in-range item name, distinguishing selected active and inactive rows. */
-void evtDrawSelectableTextRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *work) {
+void evtDrawSelectableTextRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, EvtRuntime *work) {
     s32 color;
 
     if (index < work->itemCount) {
@@ -599,7 +599,7 @@ void evtDrawSelectableTextRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRun
 
 /* Draw a title-sized selection dialog; only action mode 2 advances its cursor. */
 s32 evtUpdateTextSelectionDialog(s32 x, s32 y, EvtRuntime *work) {
-    SdfListHead *packets = dds3FontReqAllocDrawTag();
+    sdfDrawTag_t *packets = dds3FontReqAllocDrawTag();
     s32 width = 10;
 
     if (work->title != 0) {
@@ -616,7 +616,7 @@ s32 evtUpdateTextSelectionDialog(s32 x, s32 y, EvtRuntime *work) {
     return dds3SelectMenu(0, 1, work->itemCount, 1, work->itemCount, 0, 0, 0, &work->cursor);
 }
 
-s32 evtDrawInputValueRow(SdfListHead *list, s32 x, s32 y, u8 *ctx) {
+s32 evtDrawInputValueRow(sdfDrawTag_t *list, s32 x, s32 y, u8 *ctx) {
     char text[16];
     sprintf(text, D_003BC098, (s32)ctx + 0x22D4, (s32)ctx + 0x22E0);
     sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003BC088, text));
@@ -625,7 +625,7 @@ s32 evtDrawInputValueRow(SdfListHead *list, s32 x, s32 y, u8 *ctx) {
 
 /* Draw eleven characters from a twelve-byte keyboard row and highlight the
  * runtime character selection, using mode 3 for the active color. */
-void evtDrawKeyboardRow(SdfListHead *list, s32 xPosition, s32 y, s32 row, EvtRuntime *work) {
+void evtDrawKeyboardRow(sdfDrawTag_t *list, s32 xPosition, s32 y, s32 row, EvtRuntime *work) {
     s32 x = xPosition + 0xC0;
     s8 *table = D_003688B8[row];
     s32 i = 0;
@@ -648,7 +648,7 @@ void evtDrawKeyboardRow(SdfListHead *list, s32 xPosition, s32 y, s32 row, EvtRun
 
 /* Draw the keyboard and edit the eight-character name when input is active. */
 s32 evtUpdateNameEntryDialog(s32 x, s32 y, EvtRuntime *ctx) {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     s32 input;
     s32 length;
     s32 key;
@@ -703,14 +703,14 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE0C8);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE0D8);
 
-s32 evtDrawEventFileNameRow(SdfListHead *list, s32 x, s32 y) {
+s32 evtDrawEventFileNameRow(sdfDrawTag_t *list, s32 x, s32 y) {
     char text[32];
     sprintf(text, "[E%3d_%03d.PM1+2+3]", D_003BBE78, D_003BBE7A);
     sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003BC088, text));
     return 2;
 }
 
-void evtDrawEventCutSelectRow(SdfListHead *list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
+void evtDrawEventCutSelectRow(sdfDrawTag_t *list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     s32 color = 0;
 
     if (ctx->charRow == index) {
@@ -744,7 +744,7 @@ void evtDrawEventCutSelectRow(SdfListHead *list, s32 x, s32 y, u32 index, EvtRun
 }
 
 s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     u32 num;
 
     list = dds3FontReqAllocDrawTag();
@@ -833,7 +833,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
     return 0;
 }
 
-void evtDrawSelectedEntryLabel(SdfListHead *list, EvtRuntimeGroup *selected, s32 x,
+void evtDrawSelectedEntryLabel(sdfDrawTag_t *list, EvtRuntimeGroup *selected, s32 x,
                                s32 unused, EvtRuntime *runtime) {
     x += 0x6C0;
     dds3ConsPanelTagLink(list, (x - 0x7000) >> 4, 0x3C, 0x1C, 3);
@@ -845,7 +845,7 @@ void evtDrawSelectedEntryLabel(SdfListHead *list, EvtRuntimeGroup *selected, s32
     }
 }
 
-void evtDrawEntrySelectionRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtDrawEntrySelectionRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     char names[33][30] = {
         "STAGE",
         "UNIT",
@@ -912,7 +912,7 @@ void evtDrawEntrySelectionRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRun
 }
 
 s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *work) {
-    SdfListHead *packets = dds3FontReqAllocDrawTag();
+    sdfDrawTag_t *packets = dds3FontReqAllocDrawTag();
     s32 count;
     s32 shown;
 
@@ -937,7 +937,7 @@ extern s8 D_00368750[];
 extern char D_003BC0D0[];
 
 /* Header row of the frame list: one text cell per column of the selected group's table row. */
-s32 evtDrawFrameListColumnHeadings(SdfListHead *list, s32 x, s32 y, u8 *runtimeContext) {
+s32 evtDrawFrameListColumnHeadings(sdfDrawTag_t *list, s32 x, s32 y, u8 *runtimeContext) {
     EvtRuntime *ctx = (EvtRuntime *)runtimeContext;
     s32 type = ctx->frameGroup->type;
     s32 i;
@@ -1008,7 +1008,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE570);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE580);
 
-void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color,
+void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
                    EvtRuntimeChild *node, EvtRuntime *ctx) {
     char name[32];
     s32 type;
@@ -1323,10 +1323,10 @@ void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color,
 }
 
 
-extern void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color, EvtRuntimeChild *node, EvtRuntime *ctx);
+extern void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color, EvtRuntimeChild *node, EvtRuntime *ctx);
 
 /* Draw an indexed child of the selected group, or its trailing new-frame row. */
-s32 evtFrameListItem(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+s32 evtFrameListItem(sdfDrawTag_t *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EvtRuntimeChild *node;
     s32 color;
     s32 i;
@@ -1357,7 +1357,7 @@ s32 evtFrameListItem(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx
 }
 
 s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     s32 shown = 20;
     s32 count;
     s32 result;
@@ -1413,11 +1413,11 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
 
 #include "dds3_world_selection.h"
 
-void evtViewerDrawWorldNodeRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtViewerDrawWorldNodeRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     s32 color;
     s32 count;
     s32 i;
-    EffWorldNode *node;
+    dds3Basic_t *node;
 
     color = 4;
     if (ctx->groupFirst + ctx->groupCursor != index) {
@@ -1430,7 +1430,7 @@ void evtViewerDrawWorldNodeRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRu
     count = 0;
     for (i = 0; i < 0x12; i++) {
         if (i != EVT_WORLD_SLOT_MOVIE) {
-            for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetActiveScene())->data)->slots[i].head; node != NULL; node = node->next) {
+            for (node = ((EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data)->slots[i].head; node != NULL; node = node->next) {
                 if (((char *)node->value) != NULL) {
                     count++;
                     if (count == index) {
@@ -1446,14 +1446,14 @@ void evtViewerDrawWorldNodeRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRu
 s32 evtUpdateWorldNodeListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 i;
     s32 count = 0;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     s32 shown = 0x17;
-    EffWorldNode *node;
+    dds3Basic_t *node;
 
     list = dds3FontReqAllocDrawTag();
     for (i = 0; i < 0x12; i++) {
         if (i != EVT_WORLD_SLOT_MOVIE) {
-            for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetActiveScene())->data)->slots[i].head;
+            for (node = ((EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data)->slots[i].head;
                  node != NULL; node = node->next) {
                 if (node->value != NULL) {
                     count++;
@@ -1479,8 +1479,8 @@ s32 evtUpdateWorldNodeListDialog(s32 x, s32 y, EvtRuntime *ctx) {
 extern char D_003BC240[]; /* "P%d:" */
 extern char D_003BC248[]; /* "   %s" */
 
-void evtViewerDrawPendingNodeRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
-    EffWorldNode *node;
+void evtViewerDrawPendingNodeRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+    dds3Basic_t *node;
     s32 color;
     s32 slot;
 
@@ -1505,7 +1505,7 @@ extern void evtViewerDrawPendingNodeRow();
 
 /* Draw the pending-node selector for group types 20/21; other types return -1. */
 s32 mnuDrawInfoWindowB(s32 x, s32 y, EvtRuntime *work) {
-    SdfListHead *packets = dds3FontReqAllocDrawTag();
+    sdfDrawTag_t *packets = dds3FontReqAllocDrawTag();
     s32 rows;
     switch (work->frameGroup->type) {
     case 20:
@@ -1529,7 +1529,7 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, EvtRuntime *work) {
 
 /* Draw the message count from the runtime window context
  * and its entry handle, returning two rows used. */
-s32 mnuDrawMessageMenuLabel(SdfListHead *list, s32 x, s32 y, EvtRuntime *work) {
+s32 mnuDrawMessageMenuLabel(sdfDrawTag_t *list, s32 x, s32 y, EvtRuntime *work) {
     s32 count = itfMesGetEntryCount(work->windowContext->handle);
     sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "MESSAGE MENU (MESMAX %3d)", count));
     return 2;
@@ -1570,7 +1570,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE950);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE960);
 
-void evtDrawMessageDataRow(SdfListHead *list, s32 x, s32 y, u32 kind, EvtRuntime *ctx) {
+void evtDrawMessageDataRow(sdfDrawTag_t *list, s32 x, s32 y, u32 kind, EvtRuntime *ctx) {
     char *names[11] = {D_003BC250, D_003AE8D0, D_003AE8E0, D_003AE8F0,
         D_003AE900, D_003AE910, D_003AE920, D_003AE930, D_003AE940, D_003AE950, D_003AE960};
 
@@ -1614,7 +1614,7 @@ void evtDrawMessageDataRow(SdfListHead *list, s32 x, s32 y, u32 kind, EvtRuntime
 }
 
 s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     s32 packed;
     s32 number;
     s32 branch;
@@ -1678,7 +1678,7 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
 
 
 
-s32 mnuDrawCutFlagLabel(SdfListHead *target, s32 x, s32 y) {
+s32 mnuDrawCutFlagLabel(sdfDrawTag_t *target, s32 x, s32 y) {
     sdfDrawTagLink(target, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "CUTFLAG MENU"));
     return 2;
 }
@@ -1686,7 +1686,7 @@ s32 mnuDrawCutFlagLabel(SdfListHead *target, s32 x, s32 y) {
 
 /* Draw the packed four-bit option or twelve-bit number and highlight
  * the selected comparison field; later rows provide input instructions. */
-void evtDrawComparisonValueRow(SdfListHead *list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
+void evtDrawComparisonValueRow(sdfDrawTag_t *list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     char *labels[11] = {D_003BC260, D_003AE8D0, D_003AE8E0, D_003AE8F0,
         D_003AE900, D_003AE910, D_003AE920, D_003AE930, D_003AE940, D_003AE950, D_003AE960};
     s32 flag;
@@ -1717,7 +1717,7 @@ void evtDrawComparisonValueRow(SdfListHead *list, s32 x, s32 y, u32 index, EvtRu
 }
 
 s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     s32 packed;
     s32 number;
     s32 branch;
@@ -1786,7 +1786,7 @@ extern char D_003BC298[];
 extern char D_003BC2A0[];
 extern s8 D_003BC268[3];
 
-void evtDrawGroupPropertyTable(SdfListHead *list, s32 x, s32 y, s32 hidden, EvtRuntime *runtime) {
+void evtDrawGroupPropertyTable(sdfDrawTag_t *list, s32 x, s32 y, s32 hidden, EvtRuntime *runtime) {
     s32 offset = 0;
     EvtRuntimeGroup *group = runtime->frameGroup;
     s32 i;
@@ -1837,7 +1837,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEA70);
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEA80);
 
 s32 evtHandleGroupPropertyMenu(s32 x, s32 y, EvtRuntime *runtime) {
-    SdfListHead *packets;
+    sdfDrawTag_t *packets;
     EvtRuntimeGroup *group;
     EvtRuntimeChild *child;
     s32 column;
@@ -1929,7 +1929,7 @@ s32 evtHandleGroupPropertyMenu(s32 x, s32 y, EvtRuntime *runtime) {
     return dds3PadButtonState.cancel >= 0 ? 0 : -1;
 }
 
-s32 mnuDrawMotionChangeLabel(SdfListHead *target, s32 x, s32 y) {
+s32 mnuDrawMotionChangeLabel(sdfDrawTag_t *target, s32 x, s32 y) {
     sdfDrawTagLink(target, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "MOTION CHANGE MENU"));
     return 2;
 }
@@ -1946,7 +1946,7 @@ typedef union EvtMotionValue {
     EvtMotionBits bits;
 } EvtMotionValue;
 
-extern Motion *mdlGetMotionCtrlr(MdlCtx *model, s32 index);
+extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(dds3ModelHandle_t *model, s32 index);
 
 extern char D_003BC2A8[];
 extern char D_003BBFF0[];
@@ -2155,11 +2155,11 @@ INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2A0);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2A8);
 
-void evtDrawMotionChangeRow(SdfListHead *list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
+void evtDrawMotionChangeRow(sdfDrawTag_t *list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
     s32 i;
     s32 count = 0;
     s32 style = 0;
-    MdlCtx *model = (MdlCtx *)((EffectObjectData *)ctx->frameGroup->info->data)->modelHolder->resourceHandle;
+    dds3ModelHandle_t *model = (dds3ModelHandle_t *)((EffectObjectData *)ctx->frameGroup->info->data)->modelHolder->resourceHandle;
     EvtMotionValue packed;
     char *loopNames[] = {D_003BC2A8, D_003BBFF0};
 
@@ -2205,15 +2205,15 @@ void evtDrawMotionChangeRow(SdfListHead *list, s32 x, s32 y, s32 row, EvtRuntime
 
 extern void evtDrawMotionChangeRow();
 
-/* Motion editor row: ctx->value packs group (byte 0), motion number (byte 1), loop flag (byte 2) and interpolation (byte 3). */
+/* sdfMotionCtrlr_t editor row: ctx->value packs group (byte 0), motion number (byte 1), loop flag (byte 2) and interpolation (byte 3). */
 s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
-    SdfListHead *list;
-    MdlCtx *model;
+    sdfDrawTag_t *list;
+    dds3ModelHandle_t *model;
     s32 count;
     EvtMotionValue packed;
 
     list = dds3FontReqAllocDrawTag();
-    model = (MdlCtx *)((EffectObjectData *)ctx->frameGroup->info->data)->modelHolder->resourceHandle;
+    model = (dds3ModelHandle_t *)((EffectObjectData *)ctx->frameGroup->info->data)->modelHolder->resourceHandle;
     evtDrawMenuFrame(list, x, y, 0x14, 0xA, 0, 1, ctx, mnuDrawMotionChangeLabel, evtDrawMotionChangeRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 0x10) {
@@ -2233,7 +2233,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
         }
     }
     packed.word = ctx->value;
-    count = mdlGetNumOfCut((MdlCtx *)model, packed.bits.group);
+    count = mdlGetNumOfCut((dds3ModelHandle_t *)model, packed.bits.group);
     switch (ctx->fieldIndex) {
     case 0:
         if (dds3PadButtonState.incOne & 2) {
@@ -2253,7 +2253,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
                 }
             } while (mdlGetMotionCtrlr(model, packed.bits.group) == NULL);
         }
-        if (packed.bits.motion >= mdlGetNumOfCut((MdlCtx *)model, packed.bits.group)) {
+        if (packed.bits.motion >= mdlGetNumOfCut((dds3ModelHandle_t *)model, packed.bits.group)) {
             packed.bits.motion = 0;
         }
         break;
@@ -2305,7 +2305,7 @@ extern char D_003BC288[]; /* "DISABLE" */
 extern char D_003BC280[]; /* "ALL" */
 extern char D_003AEA80[]; /* "UNIT ALL" */
 
-void evtDrawGroupListRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtDrawGroupListRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EvtRuntimeGroup *group;
     s32 color;
     s32 n;
@@ -2338,7 +2338,7 @@ void evtDrawGroupListRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime 
 s32 evtUpdateGroupListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     EvtRuntimeGroup *group;
     s32 count = 0;
-    SdfListHead *packets;
+    sdfDrawTag_t *packets;
     s32 shown = 15;
 
     for (group = ctx->groups; group != NULL; group = group->next) {
@@ -2360,7 +2360,7 @@ s32 evtUpdateGroupListDialog(s32 x, s32 y, EvtRuntime *ctx) {
 }
 
 /* Empty RGB-editor row renderer passed to evtDrawMenuFrame. */
-void evtNoOpRGBEditorRow(SdfListHead *list, s32 x, s32 y, s32 row, void *runtime) {
+void evtNoOpRGBEditorRow(sdfDrawTag_t *list, s32 x, s32 y, s32 row, void *runtime) {
 }
 
 extern f32 sdfViewMatrix[];
@@ -2423,7 +2423,7 @@ extern void evtSetSlotVectors(s32, s32, s32, f32 *, f32 *, f32 *);
 
 
 /* Select and draw one light-color bank at the current panel offset. */
-static inline void evtDrawLightRgbComponents(SdfListHead *list, EvtRuntime *runtime,
+static inline void evtDrawLightRgbComponents(sdfDrawTag_t *list, EvtRuntime *runtime,
                                              s32 selected, s32 y, s32 firstComponent) {
     if ((u32)selected >= 3U || runtime->unk232C != 1) {
         selected = -1;
@@ -2439,13 +2439,13 @@ static inline s32 evtLightCaptionX(s32 panelOffset) {
 }
 
 s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     EvtRuntimeGroup *group;
     s32 mode;
     s32 submode;
     s32 changed;
     s32 firstRgbMode;
-    EvtUnit *nestedValue = NULL;
+    evtUnitHandle_t *nestedValue = NULL;
 
     group = runtime->frameGroup;
     list = dds3FontReqAllocDrawTag();
@@ -2601,8 +2601,8 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
                           &runtime->commandMatrix[0], &runtime->commandMatrix[4], &runtime->commandMatrix[8]);
         break;
     case 3: {
-        EffWorldNode *world = dds3GetActiveScene();
-        EffWorldNode *node = dds3SceneBasicSearchNameAndType(
+        dds3Basic_t *world = dds3GetActiveScene();
+        dds3Basic_t *node = dds3SceneBasicSearchNameAndType(
             world, 5, (const u8 *)runtime->entryName[(s8)group->metadata.extra2]);
 
         if (node != NULL) {
@@ -2633,8 +2633,8 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
                               &runtime->savedCommandMatrix[8]);
             break;
         case 3: {
-            EffWorldNode *world = dds3GetActiveScene();
-            EffWorldNode *node = dds3SceneBasicSearchNameAndType(
+            dds3Basic_t *world = dds3GetActiveScene();
+            dds3Basic_t *node = dds3SceneBasicSearchNameAndType(
                 world, 5, (const u8 *)runtime->entryName[(s8)group->metadata.extra2]);
             if (node != NULL) {
                 nestedValue = evtGetUnitHandle2(node);
@@ -2672,7 +2672,7 @@ extern void evtSetSlotVector(s32 vectorSlot, f32 x, f32 y);
 
 /* Draw the XY/overlay editor; cancel restores the captured values and flag. */
 s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     EvtRuntimeGroup *group;
     const EvtFloatPanelRow *row;
     s32 i;
@@ -2859,7 +2859,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
 }
 
 /* Draw command text for row 0 or 1; null texts and other rows emit nothing. */
-void evtDrawOptionalPromptText(SdfListHead *list, s32 x, s32 y, s32 kind, EvtRuntime *work) {
+void evtDrawOptionalPromptText(sdfDrawTag_t *list, s32 x, s32 y, s32 kind, EvtRuntime *work) {
     switch (kind) {
     case 0:
         if (work->commandSecond.text != 0) {
@@ -2878,7 +2878,7 @@ void evtDrawOptionalPromptText(SdfListHead *list, s32 x, s32 y, s32 kind, EvtRun
 /* In mode 0x14, count down before checking input: zero expires, negative waits
  * indefinitely, and confirm takes precedence over cancel. */
 s32 mnuDrawTimedPrompt(s32 x, s32 y, EvtRuntime *work) {
-    SdfListHead *packets = dds3FontReqAllocDrawTag();
+    sdfDrawTag_t *packets = dds3FontReqAllocDrawTag();
     s32 count;
     evtDrawMenuFrame(packets, x, y, 0x19, 2, 0, 1, work, 0, evtDrawOptionalPromptText);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, packets);
@@ -2915,7 +2915,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEB60);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEB90);
 
-void evtViewerDrawGroupRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtViewerDrawGroupRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EvtRuntimeGroup *group;
     s32 color;
     s32 n;
@@ -2947,7 +2947,7 @@ void evtViewerDrawGroupRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntim
 s32 evtViewerDrawGroupWindow(s32 x, s32 y, EvtRuntime *ctx) {
     EvtRuntimeGroup *group;
     s32 count = 0;
-    SdfListHead *packets;
+    sdfDrawTag_t *packets;
     s32 shown = 15;
 
     for (group = ctx->groups; group != NULL; group = group->next) {
@@ -2973,7 +2973,7 @@ extern char *D_00368B18[];
 /* Draw one row of the shadow-configuration menu. */
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEBB0);
 
-void evtDrawShadowSettingsRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtDrawShadowSettingsRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EvtRuntimeChild *node;
     s32 color;
 
@@ -3001,7 +3001,7 @@ void evtDrawShadowSettingsRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRun
  * selected row's mode, alpha or Y offset; confirm returns 1, cancel -1. */
 s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
     EvtRuntimeChild *node = evtEventViewerGetPendingNode(ctx);
-    SdfListHead *list = dds3FontReqAllocDrawTag();
+    sdfDrawTag_t *list = dds3FontReqAllocDrawTag();
     s32 lastRow = 0;
     s32 lastMode = 0;
 
@@ -3118,7 +3118,7 @@ extern s32 evtActiveEntryFlags;
 
 /* Cache nonzero entry selections, publishing first-tick flags only at timer zero.
  * A zero setup status clears runtime control and returns -1. */
-s32 evtSynchronizeSelectedEntry(KwlnTask *task) {
+s32 evtSynchronizeSelectedEntry(dds3ProcessID_t *task) {
     EvtRuntime *runtime = (EvtRuntime *)dds3GetProcessData(task);
     if (mfilterRun() == 0) {
         runtime->controlState = 0;
@@ -3141,7 +3141,7 @@ s32 evtSynchronizeSelectedEntry(KwlnTask *task) {
 }
 
 /* Poll solid-rectangle setup; zero status clears runtime control and returns -1. */
-s32 evtPollRuntimeControlReady(KwlnTask *task) {
+s32 evtPollRuntimeControlReady(dds3ProcessID_t *task) {
     EvtRuntime *runtime;
 
     runtime = (EvtRuntime *)dds3GetProcessData(task);
@@ -3183,7 +3183,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEC30);
 s32 evtEditEffectSpriteFrame(EvtRuntime *runtime) {
     EvtRuntimeChild *key;
     u8 *channel;
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
     s32 selectedChannel;
     s32 step;
     s32 next;
@@ -3460,9 +3460,9 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
     key = evtEventViewerGetPendingNode(runtime)->payload;
 
     style = runtime->colorSelection == 0 ? 6 : 0;
-    sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
+    sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
         0x7000 + (panelX << 4), 0x7A80, 0xFEFFFF, 0, "SPEED:"));
-    sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
+    sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
         0x7000 + (panelX << 4), 0x7A80, 0xFEFFFF, style, "       %d", key->parameters.x));
 
     if (runtime->colorSelection > 0 && runtime->editField < 4) {
@@ -3475,25 +3475,25 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
                            selectedChannel, color, 0);
 
     style = runtime->colorSelection == 4 ? 6 : 0;
-    sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
+    sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
         0x7000 + (panelX << 4), 0x7C00, 0xFEFFFF, 0, D_003BC328));
-    sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
+    sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
         0x7000 + (panelX << 4), 0x7C00, 0xFEFFFF, style, D_003BC290, key->parameters.w[3]));
 
     style = runtime->colorSelection == 5 ? 6 : 0;
-    sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
+    sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
         0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, 0, D_003BC330));
     switch ((s32)key->parameters.flagWord) {
     case 0:
-        sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
             0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, style, D_003AEC00));
         break;
     case 1:
-        sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
             0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, style, D_003AEC10));
         break;
     case 2:
-        sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
             0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, style, D_003AEC20));
         break;
     }
@@ -3503,25 +3503,25 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
     for (; bank < 3; bank++) {
         style = runtime->colorSelection == bank * 2 + 6 ? 6 : 0;
         textY = 0x7900 + ((bank * 36 + 144) << 3);
-        sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
             textX, textY, 0xFEFFFF, 0,
             "S%d SPEED:", bank));
-        sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
             textX, textY, 0xFEFFFF, style,
             "          %d", key->parameters.y[bank]));
 
         style = runtime->colorSelection == bank * 2 + 7 ? 6 : 0;
         textY = 0x7900 + ((bank * 36 + 156) << 3);
-        sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
             textX, textY, 0xFEFFFF, 0,
             "S0 ALPHA:"));
-        sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
             textX, textY, 0xFEFFFF, style,
             "          %d", key->parameters.z[bank]));
     }
 
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface,
-                                     (SdfListHead *)packetList);
+                                     (sdfDrawTag_t *)packetList);
     fldApplyCameraColorKeyWords(runtime, &key->parameters);
 
     step = 0;
@@ -4616,7 +4616,7 @@ extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32 kind, EvtRuntime *runtime)
 extern s32 evtEventViewerAddName(const char *name, EvtRuntime *runtime);
 extern void mdlPackDecode(s32 packageId, s32 partId, s32 flags, void *data, s32 length);
 extern s32 mdlSpawnCameraSlotViewerObject(s32 packageId, s32 partId);
-extern EvtUnit *evtGetUnitHandle(s32 key);
+extern evtUnitHandle_t *evtGetUnitHandle(s32 key);
 extern s32 evtPathLinkAndMake(void *target, void *owner);
 extern EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *runtime);
 extern s32 evtLoadEventBgm(s32 eventId);
@@ -4636,7 +4636,7 @@ typedef struct { u8 bytes[0x40]; } EvtRowPayload40;
 extern EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *, s32, EvtRuntime *);
 extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32, EvtRuntime *);
 extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
-extern void dds3CameraObjectBasicSetFovy(EffWorldNode *, f32);
+extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *, f32);
 /* The camp lookup receives the movie owner through its opaque API boundary. */
 extern s32 mnuCampFindMatchingEntryIndex(void *, EvtRuntime *, s32);
 
@@ -4652,12 +4652,12 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
     s32 packageId;
     s32 partId;
     s32 objectKey;
-    EffWorldNode *node;
-    EffWorldNode *owner;
+    dds3Basic_t *node;
+    dds3Basic_t *owner;
     EvtRuntimeGroup *group;
     EvtRuntimeChild *key;
 
-    EffWorldNode *world;
+    dds3Basic_t *world;
     EvtCameraColorPayload *rain;
     u8 *data;
     void *payload;
@@ -4679,7 +4679,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         group->resourceIds.resourceGroup = packageId;
         group->resourceIds.resourceId = partId;
     }
-    worldTable = ((EffWorldNode *)dds3GetControlScene())->data;
+    worldTable = ((dds3Basic_t *)dds3GetControlScene())->data;
     for (node = worldTable->slots[4].head; node != NULL; node = node->next) {
         if (node->value != 0) {
             const char *objectName;
@@ -4700,7 +4700,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 objectKey = mdlSpawnCameraSlotViewerObject(packageId, partId);
                 group = evtEventViewerCreateEntry(1, runtime);
                 {
-                    EffWorldNode *modelObject;
+                    dds3Basic_t *modelObject;
                     EvtViewerPackageRecord *packages;
                     char *names;
                     modelObject = dds3SearchSceneBasic((void *)dds3GetControlScene(), objectKey, 5);
@@ -4716,7 +4716,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                     mdlSmoothSingleMotion(evtGetUnitHandle(objectKey)->owner, 0, 0, 0.0f, 0.0f);
                 }
                 {
-                    ObjectTransform *transform = group->info->inner;
+                    dds3PoseSet_t *transform = group->info->inner;
                     PCP_COPY_VECTOR(group->savedPosition, transform->position);
                     PCP_COPY_VECTOR(group->savedRotation, transform->rotation);
                 }
@@ -4749,7 +4749,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
             s32 entryNameIndex;
             EvtViewerResourceRecord *resources;
             u8 *resourceBase;
-            SdfTex *texture;
+            sdfTexHandle_t *texture;
             group = evtEventViewerCreateEntry(0x18, runtime);
             entryNameIndex = evtEventViewerAddName(
                 (char *)work->mainEntry1Data + ((EvtViewerResourceRecord *)work->mainEntry22Data)[row].nameIndex * 32, runtime);
@@ -4880,7 +4880,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                     key->p0C.h[0] = ((EvtCameraFovRowPayload *)evtGetRowPayloadAddress(work, row))->opaque04;
                     {
                         s32 serializedNameIndex;
-                        EffWorldNode *camera;
+                        dds3Basic_t *camera;
                         nameIndex = evtGetRowVariant(work, row);
                         serializedNameIndex = evtEventViewerAddName(
                             (char *)work->subEntry1Data + nameIndex * 32, runtime);
@@ -5493,7 +5493,7 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     while (sdfDelayedResrcCheck() != 0) {
     }
     if (runtime->pendingResource != 0) {
-        sdfMemFreeDelayedDirect((struct SdfMemBlock *)runtime->pendingResource);
+        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)runtime->pendingResource);
         runtime->pendingResource = 0;
         runtime->pendingWork = 0;
     }
@@ -5628,7 +5628,7 @@ void evtMakeEventPackName(s32 taskId, char *buffer) {
     sprintf(buffer, D_003BC360, taskId);
 }
 
-KwlnTask *evtSearchEventPack(u32 taskId) {
+dds3ProcessID_t *evtSearchEventPack(u32 taskId) {
     char taskName[32];
 
     evtMakeEventPackName(taskId, taskName);
@@ -5637,7 +5637,7 @@ KwlnTask *evtSearchEventPack(u32 taskId) {
 
 /* Return this event task's loaded state, or -1 when it does not exist. */
 s32 evtGetEventPackStat(u32 taskId) {
-    KwlnTask *task;
+    dds3ProcessID_t *task;
 
     task = evtSearchEventPack(taskId);
     if (task != 0) {
@@ -5648,7 +5648,7 @@ s32 evtGetEventPackStat(u32 taskId) {
 }
 
 EvtPackLoadState *evtGetPackProcessData(u32 taskId) {
-    KwlnTask *task;
+    dds3ProcessID_t *task;
 
     task = evtSearchEventPack(taskId);
     if (task != 0) {
@@ -5661,7 +5661,7 @@ EvtPackLoadState *evtGetPackProcessData(u32 taskId) {
 void *evtGetResorceData(u32 taskId, s32 key) {
     s32 i;
     EvtPackLoadState *data;
-    KwlnTask *task;
+    dds3ProcessID_t *task;
 
     task = evtSearchEventPack(taskId);
     if (task != 0) {
@@ -5678,14 +5678,14 @@ void *evtGetResorceData(u32 taskId, s32 key) {
     }
     return NULL;
 }
-extern void Eve_DistortionBlurSetTex(SdfTex *);
+extern void Eve_DistortionBlurSetTex(sdfTexHandle_t *);
 
 void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
     EvtPackLoadState *data = evtGetPackProcessData(taskId);
     void *address = evtGetResorceData(taskId, key);
-    SdfTex *texture;
+    sdfTexHandle_t *texture;
     if (address != 0) {
-        SdfTex *old = data->effect72;
+        sdfTexHandle_t *old = data->effect72;
         if (old != 0) {
             sdfTexReleaseReferenceViaHandler(old);
             data->effect72 = 0;

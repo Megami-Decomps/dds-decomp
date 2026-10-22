@@ -6,8 +6,8 @@
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 
-extern s32 scrTestEntryFlag(DatPartyRecord *context, u16 entryId, u32 bit);
-extern void scrClearEntryFlag(DatPartyRecord *context, u16 entryId, u32 bit);
+extern s32 scrTestEntryFlag(datUnitWork_t *context, u16 entryId, u32 bit);
+extern void scrClearEntryFlag(datUnitWork_t *context, u16 entryId, u32 bit);
 
 extern EvtLoadedRecord *mnuMantraPanelPositionTable;
 
@@ -27,12 +27,12 @@ extern s8 gMsgInvFlag;
 
 extern u32 D_00437890[];
 
-extern s32 scrTestEntryFlagBit15(DatPartyRecord *context, u8 entry);
+extern s32 scrTestEntryFlagBit15(datUnitWork_t *context, u8 entry);
 
-extern s32 scrTestEntryFlagAtZeroBit0(DatPartyRecord *context);
+extern s32 scrTestEntryFlagAtZeroBit0(datUnitWork_t *context);
 
 /* Return whether bit 15 is set for the supplied entry. */
-s32 scrTestEntryFlagBit15(DatPartyRecord *context, u8 entry) {
+s32 scrTestEntryFlagBit15(datUnitWork_t *context, u8 entry) {
     return scrTestEntryFlag(context, entry, 0xf);
 }
 
@@ -42,13 +42,13 @@ void func_0026DB68(void) {
 /* The consumed context is cleared under the post-call cleanup exception.
  * Retail uses JAL plus epilogue. Qualified cc1 RTL retains this reset through
  * 01.sibling and 02.jump, then deletes it in 03.cse (both entry-zero clears). */
-void scrClearEntryFlagAtZeroBit0(DatPartyRecord *context) {
+void scrClearEntryFlagAtZeroBit0(datUnitWork_t *context) {
     scrClearEntryFlag(context, 0, 0);
     context = NULL;
 }
 
 /* Return the flag test's result through the native selector-zero wrapper. */
-s32 scrTestEntryFlagAtZeroBit0(DatPartyRecord *context) {
+s32 scrTestEntryFlagAtZeroBit0(datUnitWork_t *context) {
     return scrTestEntryFlag(context, 0, 0);
 }
 
@@ -59,13 +59,13 @@ void mtrMantraEquipReleaseHookNoOp(void) {
 /* The consumed context is cleared under the post-call cleanup exception.
  * Retail uses JAL plus epilogue. Qualified cc1 RTL retains this reset through
  * 01.sibling and 02.jump, then deletes it in 03.cse (both entry-zero clears). */
-void scrClearEntryFlagAtZeroBit1(DatPartyRecord *context) {
+void scrClearEntryFlagAtZeroBit1(datUnitWork_t *context) {
     scrClearEntryFlag(context, 0, 1);
     context = NULL;
 }
 
 /* Call the existing flag routine with entry zero and selector one; ignore its result. */
-void nbCameraHelperModelSet(DatPartyRecord *context) {
+void nbCameraHelperModelSet(datUnitWork_t *context) {
     scrTestEntryFlag(context, 0, 1);
 }
 

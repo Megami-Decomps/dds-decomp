@@ -43,8 +43,8 @@ extern s32 ptyRemoveUnitWithFlags(s32 param0, s32 param1);
 #define DAT_CURRENCY_MAX 0x98967F
 
 
-extern s32 ptyComputeMaxHp(DatPartyRecord *unit);
-extern s32 ptyComputeMaxMp(DatPartyRecord *unit);
+extern s32 ptyComputeMaxHp(datUnitWork_t *unit);
+extern s32 ptyComputeMaxMp(datUnitWork_t *unit);
 
 typedef struct UiObject {
     u8 unk_00[0x110];
@@ -59,13 +59,13 @@ typedef struct UiObject {
 
 
 /* Clear only the requested bits of the unit's halfword status. */
-void datResetBadStat(DatPartyRecord *unit, s32 mask) {
+void datResetBadStat(datUnitWork_t *unit, s32 mask) {
     unit->status &= ~mask;
 }
 
 /* Add each owned HP bonus separately against the original maximum, truncating
  * each unsigned percentage independently. Only inline-skill units cap at 999. */
-u32 datComputeSkillBoostedMaxHp(DatPartyRecord *unit) {
+u32 datComputeSkillBoostedMaxHp(datUnitWork_t *unit) {
     u32 bonusHp = 0;
     u32 maxHp = ptyComputeMaxHp(unit);
 
@@ -86,7 +86,7 @@ u32 datComputeSkillBoostedMaxHp(DatPartyRecord *unit) {
 }
 
 /* MP bonuses have the same independent truncation and conditional cap as HP. */
-u32 datComputeSkillBoostedMaxMp(DatPartyRecord *unit) {
+u32 datComputeSkillBoostedMaxMp(datUnitWork_t *unit) {
     u32 bonusMp = 0;
     u32 maxMp = ptyComputeMaxMp(unit);
 
@@ -108,7 +108,7 @@ u32 datComputeSkillBoostedMaxMp(DatPartyRecord *unit) {
 
 /* Add delta to current HP, then clamp to 0..maxHp. Preserve unsigned
  * addition, signed comparisons and the final s16 cast. */
-s32 datAddHp(DatPartyRecord *unit, s32 delta) {
+s32 datAddHp(datUnitWork_t *unit, s32 delta) {
     u32 currentHp;
 
     currentHp = (u32)unit->hp + delta;
@@ -123,7 +123,7 @@ s32 datAddHp(DatPartyRecord *unit, s32 delta) {
 }
 
 /* Add delta to current MP and clamp with the same integer/cast rules as HP. */
-s32 datAddMp(DatPartyRecord *unit, s32 delta) {
+s32 datAddMp(datUnitWork_t *unit, s32 delta) {
     u32 currentMp;
 
     currentMp = (u32)unit->mp + delta;
@@ -137,13 +137,13 @@ s32 datAddMp(DatPartyRecord *unit, s32 delta) {
     return currentMp;
 }
 
-extern s32 ptyGetCurrentProfileId(DatPartyRecord *unit);
+extern s32 ptyGetCurrentProfileId(datUnitWork_t *unit);
 extern u32 prfGetIndexedProfileByte(u16 id, s32 sub);
 
 
 /* Add the signed per-unit stat byte to its profile adjustment and clamp
  * the existing result to 1..127. Keep the profile callee's unsigned return type. */
-s32 datGetClampedProfileAdjustedStat(DatPartyRecord *unit, s32 statIndex) {
+s32 datGetClampedProfileAdjustedStat(datUnitWork_t *unit, s32 statIndex) {
     s32 adjustedStat = unit->baseStats[statIndex] +
                 prfGetIndexedProfileByte(ptyGetCurrentProfileId(unit), statIndex);
 
@@ -157,7 +157,7 @@ extern s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot);
 
 /* Only an exact masked status of 0x1000 forces one. Otherwise add the
  * record/slot adjustment to the profile stat, then clamp to 0..99 (DDS2 only). */
-s32 datGetStatWithStatusOverride(DatPartyRecord *unit, s32 statIndex) {
+s32 datGetStatWithStatusOverride(datUnitWork_t *unit, s32 statIndex) {
     s32 adjustedStat;
 
     if ((unit->status & DAT_STATUS_VALUE_MASK) == DAT_STATUS_STAT_OVERRIDE) {
@@ -180,7 +180,7 @@ extern DatEnemyRecord *datEnemyRecords;
 
 /* Search 24 inline skill IDs or eight IDs in the selected external record.
  * Return on the first match; no record-index or pointer validation here. */
-s32 datUnitHasSkill(const DatPartyRecord *unit, s32 skillId) {
+s32 datUnitHasSkill(const datUnitWork_t *unit, s32 skillId) {
     s32 skillIndex;
 
     if (!(unit->flags & DAT_EXTERNAL_SKILL_TABLE)) {
@@ -202,7 +202,7 @@ s32 datUnitHasSkill(const DatPartyRecord *unit, s32 skillId) {
 /* Unless a skip-status bit is set, adjust only the low 16 bits by exact masked
  * status: 8/0x100 floor at 200, 2 at 150, 1 at 300, and 4 forces one.
  * High bits are retained; combined or unlisted statuses leave the value alone. */
-s32 datRaiseCalculatedValueFloor(DatPartyRecord *unit, s32 packedValue) {
+s32 datRaiseCalculatedValueFloor(datUnitWork_t *unit, s32 packedValue) {
     if ((packedValue & DAT_CALC_SKIP_STATUS_MASK) == 0) {
         switch (unit->status & DAT_STATUS_VALUE_MASK) {
         case 8:
@@ -233,7 +233,7 @@ extern s32 *datAffinityTablePrimary;
 extern s32 *datAffinityTableAlternate;
 extern s32 *datExternalAffinityTable;
 
-s32 datGetEffectiveAffinity(DatPartyRecord *unit, s32 element) {
+s32 datGetEffectiveAffinity(datUnitWork_t *unit, s32 element) {
     s32 calculatedValue;
     u16 unitId;
     u32 low;
@@ -311,11 +311,11 @@ s32 datGetEffectiveAffinity(DatPartyRecord *unit, s32 element) {
     return calculatedValue;
 }
 
-u32 datGetAisyoValue(DatPartyRecord *unit, s32 element) {
+u32 datGetAisyoValue(datUnitWork_t *unit, s32 element) {
     return (u16)datGetEffectiveAffinity(unit, element);
 }
 
-u32 datGetAisyoFlag(DatPartyRecord *unit, s32 element) {
+u32 datGetAisyoFlag(datUnitWork_t *unit, s32 element) {
     return datGetEffectiveAffinity(unit, element) & DAT_CALC_HIGH_MASK;
 }
 
@@ -375,7 +375,7 @@ s32 datFlagToElementIndex(s32 elementFlag) {
 }
 
 /* Test the truncated current-HP percentage; maximum HP must be nonzero. */
-s32 datCheckDying(DatPartyRecord *unit) {
+s32 datCheckDying(datUnitWork_t *unit) {
     return unit->hp * DAT_PERCENT_SCALE / unit->maxHp < DAT_QUARTER_PERCENT;
 }
 
@@ -441,13 +441,13 @@ enum {
 };
 
 extern u8 ptyAffinityPermutationOrders[];
-extern s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *unit, s32 affinity, u8 requirementIndex);
+extern s32 ptyUnitMatchesAffinityRequirement(datUnitWork_t *unit, s32 affinity, u8 requirementIndex);
 
 
 
-extern DatPartyRecord *dds3FindEntry(s32 rosterIndex);
+extern datUnitWork_t *dds3FindEntry(s32 rosterIndex);
 
-extern ScrData *evtWorkScriptTask;
+extern scrProcessWork_s *evtWorkScriptTask;
 
 extern DatEnemyRecord *datEnemyRecords;
 
@@ -460,14 +460,14 @@ extern PtyItemQuantityUpdateView ptyItemQuantityUpdates[];
 /* This separate script context is cleared as one native 24-byte allocation. */
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
-extern void ptyRefreshEntryFromSavedTemplate(DatPartyRecord *entry);
+extern void ptyRefreshEntryFromSavedTemplate(datUnitWork_t *entry);
 
 
 
 
 extern s32 scrGetIntPara(s32 idx);
 
-extern s32 datGetStatWithStatusOverride(DatPartyRecord *unit, s32 statIndex);
+extern s32 datGetStatWithStatusOverride(datUnitWork_t *unit, s32 statIndex);
 
 
 extern u8 *datRosterDetails;
@@ -496,14 +496,14 @@ extern s8 (*D_00435E3C)[6];
 
 extern s32 D_00386288[];
 
-extern u32 mnuSetPartyEntryCurrentId(DatPartyRecord *, u32);
+extern u32 mnuSetPartyEntryCurrentId(datUnitWork_t *, u32);
 
 extern s32 ptyRebalanceFrontline(s32);
 
-extern void scrRemoveAvailableSkillFlagAndSlot(DatPartyRecord *, s32);
+extern void scrRemoveAvailableSkillFlagAndSlot(datUnitWork_t *, s32);
 
 
-extern s32 scrStartProcessProcedure(ScrData *context, s32 procedureIndex);
+extern s32 scrStartProcessProcedure(scrProcessWork_s *context, s32 procedureIndex);
 
 
 extern s32 btlAverageAllCurrentForMask(u32 partyRecordFlagsMask);
@@ -513,7 +513,7 @@ extern s32 btlAverageAllMaximumForMask(u32 partyRecordFlagsMask);
 extern s32 btlAverageAllLevelsForMask(u32 actorMask);
 
 
-extern DatPartyRecord *D_00435DD4;
+extern datUnitWork_t *D_00435DD4;
 extern void evtBitOn(s32 flagIndex);
 
 /* Flag-range items set their model flag regardless of quantityDelta.
@@ -587,7 +587,7 @@ s32 ptyIsInventoryItemAtCapacity(s32 itemId) {
     return 0;
 }
 
-u8 evtGetFlaggedRosterValue(DatPartyRecord *entry) {
+u8 evtGetFlaggedRosterValue(datUnitWork_t *entry) {
     if ((entry->flags & 0x20) == 0) {
         return 0;
     }
@@ -598,7 +598,7 @@ s32 dds3FindEntryIndex(rosterIndex)
     s32 rosterIndex;
 {
     s32 slotIndex = 0;
-    DatPartyRecord *entry = DDS3_GBWK->party;
+    datUnitWork_t *entry = DDS3_GBWK->party;
     do {
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             if (entry->unitId == rosterIndex) {
@@ -616,13 +616,13 @@ s8 ptyReadSignedRosterStatByte(s32 byteOffset) {
     return DDS3_GBWK->party[0].baseStats[byteOffset];
 }
 
-extern void sdfRaisePackedChannelValue(DatPartyRecord *, u32 minimumValue);
+extern void sdfRaisePackedChannelValue(datUnitWork_t *, u32 minimumValue);
 
 /* Event penalties affect living roster slots, then optionally raise a status channel. */
 void ptyApplyEventPenalty(s32 penaltyMode) {
     s32 nextHp, loss, slotIndex;
     if (penaltyMode == 1 || penaltyMode == 4 || penaltyMode == 5 || penaltyMode == 6) {
-        DatPartyRecord *entry = DDS3_GBWK->party;
+        datUnitWork_t *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
             if (entry->hp != 0) {
@@ -638,7 +638,7 @@ void ptyApplyEventPenalty(s32 penaltyMode) {
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
     if (penaltyMode == 2) {
-        DatPartyRecord *entry = DDS3_GBWK->party;
+        datUnitWork_t *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
             if (entry->hp != 0) {
@@ -654,7 +654,7 @@ void ptyApplyEventPenalty(s32 penaltyMode) {
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
     if (penaltyMode == 3) {
-        DatPartyRecord *entry = DDS3_GBWK->party;
+        datUnitWork_t *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
             if (entry->hp != 0) entry->hp = 1;
@@ -680,7 +680,7 @@ void ptyApplyEventPenalty(s32 penaltyMode) {
 void ptyApplyFieldHpAttrition(s32 attritionMode) {
     s32 nextHp, loss, slotIndex;
     if (attritionMode == 1) {
-        DatPartyRecord *entry = DDS3_GBWK->party;
+        datUnitWork_t *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
             if ((entry->flags & DAT_PARTY_FLAG_FRONTLINE) && (entry->status & 0x80)) {
@@ -698,7 +698,7 @@ void ptyApplyFieldHpAttrition(s32 attritionMode) {
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
     if (attritionMode == 2) {
-        DatPartyRecord *entry = DDS3_GBWK->party;
+        datUnitWork_t *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
             if (entry->flags & DAT_PARTY_FLAG_FRONTLINE) {
@@ -716,7 +716,7 @@ void ptyApplyFieldHpAttrition(s32 attritionMode) {
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
     if (attritionMode == 3) {
-        DatPartyRecord *entry = DDS3_GBWK->party;
+        datUnitWork_t *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
             if (entry->flags & DAT_PARTY_FLAG_FRONTLINE) {
@@ -734,7 +734,7 @@ void ptyApplyFieldHpAttrition(s32 attritionMode) {
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
     if (attritionMode == 4) {
-        DatPartyRecord *entry = DDS3_GBWK->party;
+        datUnitWork_t *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
             if (entry->flags & DAT_PARTY_FLAG_FRONTLINE) {
@@ -758,7 +758,7 @@ void ptyApplyFieldHpAttrition(s32 attritionMode) {
 void ptyRecoverAllUnits(void) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
-        DatPartyRecord *entry = &DDS3_GBWK->party[slotIndex];
+        datUnitWork_t *entry = &DDS3_GBWK->party[slotIndex];
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             datAddHp(entry, PTY_RECOVERY_DELTA);
             datAddMp(entry, PTY_RECOVERY_DELTA);
@@ -770,7 +770,7 @@ void ptyRecoverAllUnits(void) {
 /* Test occupied entries with nonzero HP; mode 1 additionally requires a frontline member. */
 s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode) {
     s32 slotIndex = 0;
-    DatPartyRecord *entry = DDS3_GBWK->party;
+    datUnitWork_t *entry = DDS3_GBWK->party;
     do {
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             if (entry->hp != 0) {
@@ -792,7 +792,7 @@ void datAddExp(s32 counterAddress, s32 increment) {
 }
 
 /* Apply the owned skill's positive HP/MP recovery rate; unsupported skills do nothing. */
-void ptyApplySkillRecovery(DatPartyRecord *unit, u32 skillId) {
+void ptyApplySkillRecovery(datUnitWork_t *unit, u32 skillId) {
     f32 recoveryRate;
     s32 hpRecovery;
     s32 mpRecovery;
@@ -830,7 +830,7 @@ void ptyApplySkillRecovery(DatPartyRecord *unit, u32 skillId) {
 void evtUpdateFlaggedStats(void) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
-        DatPartyRecord *entry = &DDS3_GBWK->party[slotIndex];
+        datUnitWork_t *entry = &DDS3_GBWK->party[slotIndex];
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             if (entry->flags & DAT_PARTY_FLAG_FRONTLINE) {
                 ptyApplySkillRecovery(entry, 0x24C);
@@ -844,7 +844,7 @@ void evtUpdateFlaggedStats(void) {
 s32 evtHasMatchingFlaggedEntry(s32 skillId) {
     s32 slotIndex = 0;
     do {
-        DatPartyRecord *entry = &DDS3_GBWK->party[slotIndex];
+        datUnitWork_t *entry = &DDS3_GBWK->party[slotIndex];
         if ((entry->flags & DAT_PARTY_FLAG_OCCUPIED) && (entry->flags & DAT_PARTY_FLAG_FRONTLINE)) {
             if (datUnitHasSkill(entry, skillId)) {
                 return 1;
@@ -859,7 +859,7 @@ s32 evtHasMatchingFlaggedEntry(s32 skillId) {
  * Mode one scales max HP and floors the result at one unless the entry is
  * enemy-flagged; mode two returns a fixed value subject to the enemy flag gate.
  * commandId selects the record; cost holds the resolved result. */
-s32 datCalculateCommandBaseValue(DatPartyRecord *battler, s32 commandId) {
+s32 datCalculateCommandBaseValue(datUnitWork_t *battler, s32 commandId) {
     s32 cost = 0;
     DatCommandRecord *commands = datCommandRecords;
 
@@ -888,7 +888,7 @@ void ptyInitRuntime(void) {
     s32 i;
 
     for (i = 0; i < 5; i++) {
-        memset(&DDS3_GBWK->party[i], 0, sizeof(DatPartyRecord));
+        memset(&DDS3_GBWK->party[i], 0, sizeof(datUnitWork_t));
         DDS3_GBWK->partyOrder[i] = i;
     }
     DDS3_GBWK->partyCount = 0;
@@ -905,7 +905,7 @@ void ptyInitRuntime(void) {
         DDS3_GBWK->inventory.counts[i] = 0;
     }
     for (i = 0; i < 16; i++) {
-        memset(&DDS3_GBWK->templates[i], 0, sizeof(DatPartyRecord));
+        memset(&DDS3_GBWK->templates[i], 0, sizeof(datUnitWork_t));
     }
 }
 
@@ -916,15 +916,15 @@ u32 evtGetIndexedEventRecordId(s32 tableIndex) {
 
 /* Read the entry's level, capped at the script-visible maximum. */
 u16 datGetLevelForDraw(s32 entryAddress) {
-    s32 level = ((DatPartyRecord *)entryAddress)->level;
+    s32 level = ((datUnitWork_t *)entryAddress)->level;
 
     return level < PTY_LEVEL_LIMIT ? level : PTY_MAX_LEVEL;
 }
 
 /* Find the first occupied slot with this roster identifier, or return zero. */
-DatPartyRecord *dds3FindEntry(s32 rosterIndex) {
+datUnitWork_t *dds3FindEntry(s32 rosterIndex) {
     s32 slotIndex = 0;
-    DatPartyRecord *entry = DDS3_GBWK->party;
+    datUnitWork_t *entry = DDS3_GBWK->party;
     do {
         if (entry->unitId == rosterIndex && (entry->flags & DAT_PARTY_FLAG_OCCUPIED)) {
             return entry;
@@ -937,7 +937,7 @@ DatPartyRecord *dds3FindEntry(s32 rosterIndex) {
 
 s32 ptyRebalanceFrontline(s32 rosterIndex) {
     DatGameState *scanState;
-    DatPartyRecord savedEntry;
+    datUnitWork_t savedEntry;
     s32 selectedIndex;
     s32 scanIndex;
     s32 frontlineCount;
@@ -948,7 +948,7 @@ s32 ptyRebalanceFrontline(s32 rosterIndex) {
     }
 
     {
-        DatPartyRecord *const selectedEntry = &DDS3_GBWK->party[selectedIndex];
+        datUnitWork_t *const selectedEntry = &DDS3_GBWK->party[selectedIndex];
         if ((selectedEntry->flags & DAT_PARTY_FLAG_FRONTLINE) != 0) {
             return 0;
         }
@@ -958,7 +958,7 @@ s32 ptyRebalanceFrontline(s32 rosterIndex) {
     scanIndex = 0;
     frontlineCount = 0;
     for (; scanIndex < PTY_ACTIVE_ROSTER_COUNT; scanIndex++) {
-        DatPartyRecord *const currentEntry = &scanState->party[scanIndex];
+        datUnitWork_t *const currentEntry = &scanState->party[scanIndex];
         u16 flags = currentEntry->flags;
 
         if ((u16)(flags & DAT_PARTY_FLAG_OCCUPIED) != 0) {
@@ -982,7 +982,7 @@ s32 ptyRebalanceFrontline(s32 rosterIndex) {
 }
 
 u8 ptyIsRosterEntryPresent(s32 rosterIndex) {
-    DatPartyRecord *entry;
+    datUnitWork_t *entry;
 
     entry = dds3FindEntry(rosterIndex);
     return entry != 0;
@@ -992,7 +992,7 @@ u8 ptyIsRosterEntryPresent(s32 rosterIndex) {
 s32 dds3EntryMax(void) {
     s32 maximumLevel = 0;
     s32 remaining = 4;
-    DatPartyRecord *entry = DDS3_GBWK->party;
+    datUnitWork_t *entry = DDS3_GBWK->party;
     do {
         remaining--;
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
@@ -1011,7 +1011,7 @@ s32 ptyGetRoundedAveragePartyLevel(void) {
     s32 levelSum = 0;
     s32 activeCount = 0;
     s32 remaining = 4;
-    DatPartyRecord *entry = DDS3_GBWK->party;
+    datUnitWork_t *entry = DDS3_GBWK->party;
     do {
         remaining--;
         if ((entry->flags & DAT_PARTY_FLAG_OCCUPIED) != 0) {
@@ -1026,17 +1026,17 @@ s32 ptyGetRoundedAveragePartyLevel(void) {
     return (levelSum + activeCount - 1) / activeCount;
 }
 
-extern void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, DatPartyRecord *unit);
-extern s32 ptyComputeTotalExp(DatPartyRecord *, s32);
-extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
-extern void evtCopyRosterTableValue(DatPartyRecord *);
+extern void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, datUnitWork_t *unit);
+extern s32 ptyComputeTotalExp(datUnitWork_t *, s32);
+extern void ptyRecomputeMaxHpMp(datUnitWork_t *);
+extern void evtCopyRosterTableValue(datUnitWork_t *);
 extern void mtrRefreshMantraStateForUnit2(void);
 extern void mtrRefreshMantraStateForPartyUnit(void);
-extern void ptyRebuildProfileSkills(s32, DatPartyRecord *);
-void ptyAssignRosterItemAndMarkOwned(DatPartyRecord *entry);
+extern void ptyRebuildProfileSkills(s32, datUnitWork_t *);
+void ptyAssignRosterItemAndMarkOwned(datUnitWork_t *entry);
 
 /* Clone an entry template and raise it to the maximum occupied party level. */
-void ptyCloneTemplateAtPartyMaxLevel(DatPartyRecord *entry, s32 templateIndex) {
+void ptyCloneTemplateAtPartyMaxLevel(datUnitWork_t *entry, s32 templateIndex) {
     s32 targetLevel = dds3EntryMax();
     s32 statGains[DAT_BASE_STAT_COUNT];
     s8 *stat;
@@ -1059,10 +1059,10 @@ void ptyCloneTemplateAtPartyMaxLevel(DatPartyRecord *entry, s32 templateIndex) {
     ptyAssignRosterItemAndMarkOwned(entry);
 }
 
-extern void mtrRecomputeMantraFlagsForPartyUnit(DatPartyRecord *record);
+extern void mtrRecomputeMantraFlagsForPartyUnit(datUnitWork_t *record);
 
 /* Consume a saved template, optionally raise its level, then mark its item owned. */
-void ptyRestoreUnitFromSavedTemplate(DatPartyRecord *entry, s32 templateIndex, s32 initFlags) {
+void ptyRestoreUnitFromSavedTemplate(datUnitWork_t *entry, s32 templateIndex, s32 initFlags) {
     s32 targetLevel = 0;
     s32 maxPartyLevel = dds3EntryMax();
     s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
@@ -1105,7 +1105,7 @@ void ptyRestoreUnitFromSavedTemplate(DatPartyRecord *entry, s32 templateIndex, s
 /* Clone template 1 into roster 2 and inherit its mantra state, then clear the
  * assigned item. The maximum-party-level flag overrides keep-base-level;
  * otherwise use the rounded party average only when keep-base-level is clear. */
-void ptyInitRosterAndClearItem(DatPartyRecord *entry, s32 initFlags) {
+void ptyInitRosterAndClearItem(datUnitWork_t *entry, s32 initFlags) {
     s32 targetLevel = 0;
     s32 maxPartyLevel = dds3EntryMax();
     s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
@@ -1142,7 +1142,7 @@ void ptyInitRosterAndClearItem(DatPartyRecord *entry, s32 initFlags) {
 /* Clone template 7 into roster 3 and inherit its mantra state. After optional
  * post-initialization, mark any assigned item owned. Level-flag precedence is
  * the same as the adjacent initializer; flag mask 2 skips the optional call. */
-void ptyCloneTemplateSevenToRosterUnitThree(DatPartyRecord *entry, s32 initFlags) {
+void ptyCloneTemplateSevenToRosterUnitThree(datUnitWork_t *entry, s32 initFlags) {
     s32 targetLevel = 0;
     s32 maxPartyLevel = dds3EntryMax();
     s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
@@ -1180,21 +1180,21 @@ void ptyCloneTemplateSevenToRosterUnitThree(DatPartyRecord *entry, s32 initFlags
     }
 }
 
-extern s32 ptyTestSecondaryProfileFlag(DatPartyRecord *, u16);
-extern void ptySetSecondaryProfileFlag(DatPartyRecord *, u16);
-extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
-extern void ptyApplyProfile(DatPartyRecord *, u16);
-extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
-extern void ptySetProfileRecordValue(DatPartyRecord *, u16, u32);
+extern s32 ptyTestSecondaryProfileFlag(datUnitWork_t *, u16);
+extern void ptySetSecondaryProfileFlag(datUnitWork_t *, u16);
+extern s32 ptyTestPrimaryProfileFlag(datUnitWork_t *, u16);
+extern void ptyApplyProfile(datUnitWork_t *, u16);
+extern u32 ptyGetProfileRecordValue(datUnitWork_t *, u16);
+extern void ptySetProfileRecordValue(datUnitWork_t *, u16, u32);
 extern void mtrSynchronizeMantraFlagsAcrossParty(void);
-extern u32 ptyGetSkillNibbleState(DatPartyRecord *, u16);
-extern s32 scrSetFlag(DatPartyRecord *, u16);
+extern u32 ptyGetSkillNibbleState(datUnitWork_t *, u16);
+extern s32 scrSetFlag(datUnitWork_t *, u16);
 
 /* Merge saved templates 1 and 2 into roster 8, taking their greater level
  * and stats and combining both sets of profile and skill flags. */
-void ptyMergeSavedUnitTemplates(DatPartyRecord *entry) {
-    DatPartyRecord first;
-    DatPartyRecord second;
+void ptyMergeSavedUnitTemplates(datUnitWork_t *entry) {
+    datUnitWork_t first;
+    datUnitWork_t second;
     s32 index;
     s32 present;
     s32 firstValue;
@@ -1264,8 +1264,8 @@ extern s32 D_00386048[][4];
  * roster kind, refill HP/MP, set its model flags and apply skill-boosted maxima. Returns the
  * slot, -1 if the member is already present or -2 if the party is full. */
 s32 ptyAddUnitWithFlags(s32 rosterIndex, s32 initFlags) {
-    DatPartyRecord *entry;
-    DatPartyRecord *party;
+    datUnitWork_t *entry;
+    datUnitWork_t *party;
     s32 slotIndex;
     s32 occupiedCount;
     s32 modelFlagIndex;
@@ -1363,11 +1363,11 @@ s32 ptyRemoveUnitWithFlags(s32 unitId, s32 flags) {
         DDS3_GBWK->party[partyIndex].itemId = 0;
     }
 
-    memcpy(&DDS3_GBWK->templates[unitId], &DDS3_GBWK->party[partyIndex], sizeof(DatPartyRecord));
+    memcpy(&DDS3_GBWK->templates[unitId], &DDS3_GBWK->party[partyIndex], sizeof(datUnitWork_t));
     for (i = partyIndex; i < 4; i++) {
-        memcpy(&DDS3_GBWK->party[i], &DDS3_GBWK->party[i + 1], sizeof(DatPartyRecord));
+        memcpy(&DDS3_GBWK->party[i], &DDS3_GBWK->party[i + 1], sizeof(datUnitWork_t));
     }
-    memset(&DDS3_GBWK->party[i], 0, sizeof(DatPartyRecord));
+    memset(&DDS3_GBWK->party[i], 0, sizeof(datUnitWork_t));
 
     modelFlags = D_00386048[unitId];
     for (i = 0; i < 4U; i++) {
@@ -1420,7 +1420,7 @@ u32 ptyReturnOne(void) {
 extern DatSkillList *D_00435E28;
 
 /* Test whether a party record satisfies one participant requirement of an affinity. */
-s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *unit, s32 affinity, u8 requirementIndex) {
+s32 ptyUnitMatchesAffinityRequirement(datUnitWork_t *unit, s32 affinity, u8 requirementIndex) {
     DatAffinityRecord *record;
     s32 requirement;
     s32 requirementValue;
@@ -1503,7 +1503,7 @@ s32 ptyMatchAffinityPermutation(const s32 *actors, s32 affinity) {
     return 0;
 }
 
-void evtCopyRosterTableValue(DatPartyRecord *entry) {
+void evtCopyRosterTableValue(datUnitWork_t *entry) {
     entry->menuValue = ptyRosterMenuValues[entry->unitId].value;
 }
 
@@ -1511,7 +1511,7 @@ void evtCopyRosterTableValue(DatPartyRecord *entry) {
 void evtUpdateFlaggedEntries(void) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
-        DatPartyRecord *entry = &DDS3_GBWK->party[slotIndex];
+        datUnitWork_t *entry = &DDS3_GBWK->party[slotIndex];
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             s32 rosterIndex = 0;
             do {
@@ -1543,16 +1543,16 @@ void dds3ForEachEntry(void) {
 
 extern void mtrRefreshMantraStateForUnit1(void);
 extern void mtrRefreshMantraStateForUnit7(void);
-extern void scrClearAllSecondaryScriptFlags(DatPartyRecord *);
-extern void scrSetSecondaryScriptFlag(DatPartyRecord *, u16);
+extern void scrClearAllSecondaryScriptFlags(datUnitWork_t *);
+extern void scrSetSecondaryScriptFlag(datUnitWork_t *, u16);
 extern u16 ptyRosterDefaultSkillIds[16][4];
 
 /* Restore special-character banks, occupied stock skills and four presets. */
-void ptyRefreshEntryFromSavedTemplate(DatPartyRecord *entry) {
+void ptyRefreshEntryFromSavedTemplate(datUnitWork_t *entry) {
     u16 unitId = entry->unitId;
     u32 stockId;
     u16 occupied;
-    DatPartyRecord *stock;
+    datUnitWork_t *stock;
     u32 i;
     u16 *preset;
     if (!evtBitCheck(0x80E)) {
@@ -1602,7 +1602,7 @@ void ptyRefreshEntryFromSavedTemplate(DatPartyRecord *entry) {
 void dds3ForEachFlagged(void) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
-        DatPartyRecord *entry = &DDS3_GBWK->party[slotIndex];
+        datUnitWork_t *entry = &DDS3_GBWK->party[slotIndex];
 
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             ptyRefreshEntryFromSavedTemplate(entry);
@@ -1613,7 +1613,7 @@ void dds3ForEachFlagged(void) {
 void ptyClearSelectedSkillFlagsFromActiveEntries(void) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
-        DatPartyRecord *entry = &DDS3_GBWK->party[slotIndex];
+        datUnitWork_t *entry = &DDS3_GBWK->party[slotIndex];
         if ((entry->flags & DAT_PARTY_FLAG_OCCUPIED) != 0) {
             scrRemoveAvailableSkillFlagAndSlot(entry, 0x5B);
             scrRemoveAvailableSkillFlagAndSlot(entry, 0x5C);
@@ -1626,7 +1626,7 @@ void ptyClearItemF8FromPartyAndInventory(void) {
     s32 slotIndex;
 
     for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
-        DatPartyRecord *entry = &DDS3_GBWK->party[slotIndex];
+        datUnitWork_t *entry = &DDS3_GBWK->party[slotIndex];
 
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             if (entry->itemId == 0xF8) {
@@ -1643,22 +1643,22 @@ void ptySaveActivePartyTemplates(void) {
     s32 slotIndex;
 
     for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
-        DatPartyRecord *entry = &DDS3_GBWK->party[slotIndex];
+        datUnitWork_t *entry = &DDS3_GBWK->party[slotIndex];
 
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             memcpy(&DDS3_GBWK->templates[entry->unitId], entry, sizeof(*entry));
         }
     }
     if (dds3FindEntryIndex(3) < 0) {
-        memset(&DDS3_GBWK->templates[3], 0, sizeof(DatPartyRecord));
+        memset(&DDS3_GBWK->templates[3], 0, sizeof(datUnitWork_t));
     }
     if (dds3FindEntryIndex(7) < 0) {
-        memset(&DDS3_GBWK->templates[7], 0, sizeof(DatPartyRecord));
+        memset(&DDS3_GBWK->templates[7], 0, sizeof(datUnitWork_t));
     }
 }
 
 
-void evtRandomizeEntryValue(DatPartyRecord *entry) {
+void evtRandomizeEntryValue(datUnitWork_t *entry) {
     s32 randomOffset;
 
     randomOffset = dds3GetRandIntA(0, 4);
@@ -1670,7 +1670,7 @@ void evtRandomizeEntryValue(DatPartyRecord *entry) {
 s32 evtClearRandomStatusFlags(void) {
     s32 clearedAny = 0;
     s32 remaining;
-    DatPartyRecord *entry;
+    datUnitWork_t *entry;
     s32 roll = (s32)dds3GetRandIntA(0, 100);
     if (roll >= 51) {
         return 0;
@@ -1699,7 +1699,7 @@ s32 ptyGetCombinedRecordAndSlotValue(s32 itemId, s32 statIndex) {
     return D_00435E3C[itemStatIndex][statIndex] + DDS3_GBWK->itemStatBonuses[itemStatIndex][statIndex];
 }
 
-void ptyAddClampedEntryValue(DatPartyRecord *entry, s32 statIndex, s32 amount) {
+void ptyAddClampedEntryValue(datUnitWork_t *entry, s32 statIndex, s32 amount) {
     s32 updated = entry->baseStats[statIndex] + amount;
     if (updated < 0) {
         updated = 0;
@@ -1710,7 +1710,7 @@ void ptyAddClampedEntryValue(DatPartyRecord *entry, s32 statIndex, s32 amount) {
     entry->baseStats[statIndex] = updated;
 }
 
-void ptyAssignRosterItemAndMarkOwned(DatPartyRecord *entry) {
+void ptyAssignRosterItemAndMarkOwned(datUnitWork_t *entry) {
     s32 value = D_00386288[entry->unitId];
     mnuSetPartyEntryCurrentId(entry, value);
     if (value != 0) {
@@ -1721,7 +1721,7 @@ void ptyAssignRosterItemAndMarkOwned(DatPartyRecord *entry) {
 void ptyAssignPartyRosterItemsAndMarkOwned(void) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
-        DatPartyRecord *entry = &DDS3_GBWK->party[slotIndex];
+        datUnitWork_t *entry = &DDS3_GBWK->party[slotIndex];
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             s32 index = 0;
             do {
@@ -1752,7 +1752,7 @@ void dds3WorkInit(void *header) {
     memset(&evtWorkScriptContext, 0, sizeof(evtWorkScriptContext));
 }
 
-ScrData *scrGetWorkTaskHandle(void) {
+scrProcessWork_s *scrGetWorkTaskHandle(void) {
     return evtWorkScriptTask;
 }
 
@@ -1762,36 +1762,36 @@ void scrDestroyWorkTask(void) {
 }
 
 s32 evtPushFirstRosterLevel(void) {
-    scrSetIntReturnValue(((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level);
+    scrSetIntReturnValue(((datUnitWork_t *)evtWorkScriptContext.firstArgument)->level);
     return 1;
 }
 
 s32 evtPushSecondRosterLevel(void) {
-    scrSetIntReturnValue(((DatPartyRecord *)evtWorkScriptContext.secondArgument)->level);
+    scrSetIntReturnValue(((datUnitWork_t *)evtWorkScriptContext.secondArgument)->level);
     return 1;
 }
 
 s32 evtPushFirstRosterCurrentHp(void) {
-    scrSetIntReturnValue(((DatPartyRecord *)evtWorkScriptContext.firstArgument)->hp);
+    scrSetIntReturnValue(((datUnitWork_t *)evtWorkScriptContext.firstArgument)->hp);
     return 1;
 }
 
 s32 evtPushSecondRosterCurrentHp(void) {
-    scrSetIntReturnValue(((DatPartyRecord *)evtWorkScriptContext.secondArgument)->hp);
+    scrSetIntReturnValue(((datUnitWork_t *)evtWorkScriptContext.secondArgument)->hp);
     return 1;
 }
 
 s32 evtPushFirstRosterMaximumHp(void) {
-    scrSetIntReturnValue(((DatPartyRecord *)evtWorkScriptContext.firstArgument)->maxHp);
+    scrSetIntReturnValue(((datUnitWork_t *)evtWorkScriptContext.firstArgument)->maxHp);
     return 1;
 }
 
 s32 evtPushSecondRosterMaximumHp(void) {
-    scrSetIntReturnValue(((DatPartyRecord *)evtWorkScriptContext.secondArgument)->maxHp);
+    scrSetIntReturnValue(((datUnitWork_t *)evtWorkScriptContext.secondArgument)->maxHp);
     return 1;
 }
 
-extern u32 datGetAisyoValue(DatPartyRecord *, s32);
+extern u32 datGetAisyoValue(datUnitWork_t *, s32);
 /* Push the first entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushFirstRosterSelectedStat(void) {
     s8 statIndex = datCommandSelectors[evtWorkScriptContext.commandIndex].stat;
@@ -1806,10 +1806,10 @@ s32 evtPushFirstRosterSelectedStat(void) {
     default:
         if (btlIsRuntimeAllocated()) {
             statValue = (u16)btlResolveUnitValueWithOverride(
-                (DatPartyRecord *)evtWorkScriptContext.firstArgument, statIndex);
+                (datUnitWork_t *)evtWorkScriptContext.firstArgument, statIndex);
         } else {
             statValue = datGetAisyoValue(
-                (DatPartyRecord *)evtWorkScriptContext.firstArgument, statIndex);
+                (datUnitWork_t *)evtWorkScriptContext.firstArgument, statIndex);
         }
         break;
     }
@@ -1831,10 +1831,10 @@ s32 evtPushSecondRosterSelectedStat(void) {
     default:
         if (btlIsRuntimeAllocated()) {
             statValue = (u16)btlResolveUnitValueWithOverride(
-                (DatPartyRecord *)evtWorkScriptContext.secondArgument, statIndex);
+                (datUnitWork_t *)evtWorkScriptContext.secondArgument, statIndex);
         } else {
             statValue = datGetAisyoValue(
-                (DatPartyRecord *)evtWorkScriptContext.secondArgument, statIndex);
+                (datUnitWork_t *)evtWorkScriptContext.secondArgument, statIndex);
         }
         break;
     }
@@ -1855,10 +1855,10 @@ s32 evtPushFirstRosterOptionStat(void) {
     default:
         if (btlIsRuntimeAllocated()) {
             statValue = (u16)btlResolveUnitValueWithOverride(
-                (DatPartyRecord *)evtWorkScriptContext.firstArgument, statIndex);
+                (datUnitWork_t *)evtWorkScriptContext.firstArgument, statIndex);
         } else {
             statValue = datGetAisyoValue(
-                (DatPartyRecord *)evtWorkScriptContext.firstArgument, statIndex);
+                (datUnitWork_t *)evtWorkScriptContext.firstArgument, statIndex);
         }
         break;
     }
@@ -1879,10 +1879,10 @@ s32 evtPushSecondRosterOptionStat(void) {
     default:
         if (btlIsRuntimeAllocated()) {
             statValue = (u16)btlResolveUnitValueWithOverride(
-                (DatPartyRecord *)evtWorkScriptContext.secondArgument, statIndex);
+                (datUnitWork_t *)evtWorkScriptContext.secondArgument, statIndex);
         } else {
             statValue = datGetAisyoValue(
-                (DatPartyRecord *)evtWorkScriptContext.secondArgument, statIndex);
+                (datUnitWork_t *)evtWorkScriptContext.secondArgument, statIndex);
         }
         break;
     }
@@ -1894,7 +1894,7 @@ s32 evtPushSecondRosterOptionStat(void) {
 s32 evtPushFirstRosterStatEligibility(void) {
     s32 statIndex = scrGetIntPara(0);
 
-    scrSetIntReturnValue(datGetStatWithStatusOverride((DatPartyRecord *)evtWorkScriptContext.firstArgument, statIndex));
+    scrSetIntReturnValue(datGetStatWithStatusOverride((datUnitWork_t *)evtWorkScriptContext.firstArgument, statIndex));
     return 1;
 }
 
@@ -1902,7 +1902,7 @@ s32 evtPushFirstRosterStatEligibility(void) {
 s32 evtPushSecondRosterStatEligibility(void) {
     s32 statIndex = scrGetIntPara(0);
 
-    scrSetIntReturnValue(datGetStatWithStatusOverride((DatPartyRecord *)evtWorkScriptContext.secondArgument, statIndex));
+    scrSetIntReturnValue(datGetStatWithStatusOverride((datUnitWork_t *)evtWorkScriptContext.secondArgument, statIndex));
     return 1;
 }
 
@@ -1911,7 +1911,7 @@ s32 evtPushSelectedStatOrRosterLowValue(void) {
     s32 statValue;
     s32 commandIndex = evtWorkScriptContext.commandIndex;
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
-        u16 rosterIndex = ((DatPartyRecord *)evtWorkScriptContext.firstArgument)->unitId;
+        u16 rosterIndex = ((datUnitWork_t *)evtWorkScriptContext.firstArgument)->unitId;
         statValue = ((EventRosterStat *)datRosterDetails)[rosterIndex].alternateA;
     } else {
         statValue = datCommandRecords[commandIndex].stat11;
@@ -1926,7 +1926,7 @@ s32 evtPushSelectedScaledStat(void) {
     s32 commandIndex = evtWorkScriptContext.commandIndex;
     statValue = datCommandRecords[commandIndex].attribute.parts.hitChance;
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
-        u16 rosterIndex = ((DatPartyRecord *)evtWorkScriptContext.firstArgument)->unitId;
+        u16 rosterIndex = ((datUnitWork_t *)evtWorkScriptContext.firstArgument)->unitId;
         statValue = (s32)((f32)statValue * ((EventRosterStat *)datRosterDetails)[rosterIndex].multiplier);
     }
     scrSetIntReturnValue(statValue);
@@ -1963,7 +1963,7 @@ s32 evtPushEntryIndexedStatOption(void) {
     EvtScriptContext *context = &evtWorkScriptContext;
     s32 statValue;
     u16 statOption = context->options;
-    u16 commandIndex = datItemSkillRecords[((DatPartyRecord *)context->firstArgument)->menuValue].commandIndex;
+    u16 commandIndex = datItemSkillRecords[((datUnitWork_t *)context->firstArgument)->menuValue].commandIndex;
     switch (statOption) {
     case 1:
         statValue = datCommandRecords[commandIndex].hpPower;
@@ -1984,7 +1984,7 @@ s32 evtPushSelectedTotalOrRosterHighValue(void) {
     s32 statValue;
     s32 commandIndex = evtWorkScriptContext.commandIndex;
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
-        u16 rosterIndex = ((DatPartyRecord *)evtWorkScriptContext.firstArgument)->unitId;
+        u16 rosterIndex = ((datUnitWork_t *)evtWorkScriptContext.firstArgument)->unitId;
         statValue = ((EventRosterStat *)datRosterDetails)[rosterIndex].alternateB;
     } else {
         statValue = datCommandRecords[commandIndex].criticalPercent;
@@ -2013,7 +2013,7 @@ s32 evtPushScriptContextResult(void) {
 }
 
 s32 evtPushEntryFlagBitInverted(void) {
-    scrSetIntReturnValue(((((DatPartyRecord *)evtWorkScriptContext.firstArgument)->flags >> 5) ^ 1) & 1);
+    scrSetIntReturnValue(((((datUnitWork_t *)evtWorkScriptContext.firstArgument)->flags >> 5) ^ 1) & 1);
     return 1;
 }
 
@@ -2118,25 +2118,25 @@ s32 evtPushAvailableIntegerValue(void) {
 /* The paired DDS1 readers identify the halfword index as the entry's level.
  * The shared coefficient arrays start at level one. */
 s32 evtPushLevelMaxHpGrowth(void) {
-    DatPartyRecord *entry = (DatPartyRecord *)evtWorkScriptContext.firstArgument;
+    datUnitWork_t *entry = (datUnitWork_t *)evtWorkScriptContext.firstArgument;
     u16 levelIndex = entry->level;
     scrSetFloatReturnValue(datBattleParameters->maxHpGrowth[levelIndex - 1]);
     return 1;
 }
 
 s32 evtPushLevelMaxMpGrowth(void) {
-    DatPartyRecord *entry = (DatPartyRecord *)evtWorkScriptContext.firstArgument;
+    datUnitWork_t *entry = (datUnitWork_t *)evtWorkScriptContext.firstArgument;
     u16 levelIndex = entry->level;
     scrSetFloatReturnValue(datBattleParameters->maxMpGrowth[levelIndex - 1]);
     return 1;
 }
 
-extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
+extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
 
 /* Push the coarse HP-percentage table value; only exactly 100 percent uses index zero. */
 s32 evtSelectStatGrade(void) {
-    s32 maximumHp = datComputeSkillBoostedMaxHp((DatPartyRecord *)evtWorkScriptContext.secondArgument);
-    s32 currentHp = ((DatPartyRecord *)evtWorkScriptContext.secondArgument)->hp;
+    s32 maximumHp = datComputeSkillBoostedMaxHp((datUnitWork_t *)evtWorkScriptContext.secondArgument);
+    s32 currentHp = ((datUnitWork_t *)evtWorkScriptContext.secondArgument)->hp;
     s32 hpPercent = (s32)((f32)currentHp / (f32)maximumHp * 100.0f);
     s32 gradeIndex = 0;
 
@@ -2163,28 +2163,28 @@ s32 evtSelectStatGrade(void) {
 }
 
 s32 evtPushLevelValueA(void) {
-    DatPartyRecord *entry = (DatPartyRecord *)evtWorkScriptContext.firstArgument;
+    datUnitWork_t *entry = (datUnitWork_t *)evtWorkScriptContext.firstArgument;
     u16 levelIndex = entry->level;
     scrSetFloatReturnValue(datBattleParameters->levelValuesA[levelIndex - 1]);
     return 1;
 }
 
 s32 evtPushLevelValueB(void) {
-    DatPartyRecord *entry = (DatPartyRecord *)evtWorkScriptContext.firstArgument;
+    datUnitWork_t *entry = (datUnitWork_t *)evtWorkScriptContext.firstArgument;
     u16 levelIndex = entry->level;
     scrSetFloatReturnValue(datBattleParameters->levelValuesB[levelIndex - 1]);
     return 1;
 }
 
 s32 evtPushLevelValueCCommand18D(void) {
-    DatPartyRecord *entry = (DatPartyRecord *)evtWorkScriptContext.firstArgument;
+    datUnitWork_t *entry = (datUnitWork_t *)evtWorkScriptContext.firstArgument;
     u16 levelIndex = entry->level;
     scrSetFloatReturnValue(datBattleParameters->levelValuesC[levelIndex - 1]);
     return 1;
 }
 
 s32 evtPushLevelValueCCommand18E(void) {
-    DatPartyRecord *entry = (DatPartyRecord *)evtWorkScriptContext.firstArgument;
+    datUnitWork_t *entry = (datUnitWork_t *)evtWorkScriptContext.firstArgument;
     u16 levelIndex = entry->level;
     scrSetFloatReturnValue(datBattleParameters->levelValuesC[levelIndex - 1]);
     return 1;
@@ -2192,7 +2192,7 @@ s32 evtPushLevelValueCCommand18E(void) {
 
 s32 evtRollFlagDependentResultCode(void) {
     s32 resultCode;
-    if ((((DatPartyRecord *)evtWorkScriptContext.secondArgument)->flags & 0x20) == 0) {
+    if ((((datUnitWork_t *)evtWorkScriptContext.secondArgument)->flags & 0x20) == 0) {
         resultCode = dds3GetRandIntA(0, 0x20) != 0 ? 0xA : 0x80;
     } else {
         resultCode = dds3GetRandIntA(0, 0x30) != 0 ? 0 : 0x80;
@@ -2202,15 +2202,15 @@ s32 evtRollFlagDependentResultCode(void) {
 }
 
 s32 evtPushRosterBaseValue(void) {
-    u16 unitId = ((DatPartyRecord *)evtWorkScriptContext.firstArgument)->unitId;
+    u16 unitId = ((datUnitWork_t *)evtWorkScriptContext.firstArgument)->unitId;
     scrSetIntReturnValue(((EventRosterStat *)datRosterDetails)[unitId].base);
     return 1;
 }
 
 /* Push the finer HP-percentage table value; only exactly 100 percent uses index zero. */
 s32 evtSelectFineStatGrade(void) {
-    s32 maximumHp = datComputeSkillBoostedMaxHp((DatPartyRecord *)evtWorkScriptContext.secondArgument);
-    s32 currentHp = ((DatPartyRecord *)evtWorkScriptContext.secondArgument)->hp;
+    s32 maximumHp = datComputeSkillBoostedMaxHp((datUnitWork_t *)evtWorkScriptContext.secondArgument);
+    s32 currentHp = ((datUnitWork_t *)evtWorkScriptContext.secondArgument)->hp;
     s32 hpPercent = (s32)((f32)currentHp / (f32)maximumHp * 100.0f);
     s32 gradeIndex = 0;
 
@@ -2246,7 +2246,7 @@ s32 evtSelectFineStatGrade(void) {
 }
 
 s32 evtPushLevelRelativeStatGradeScale(void) {
-    DatPartyRecord *unit = (DatPartyRecord *)evtWorkScriptContext.firstArgument;
+    datUnitWork_t *unit = (datUnitWork_t *)evtWorkScriptContext.firstArgument;
     u16 level = unit->level;
     s32 grade = datGetStatWithStatusOverride(unit, 4);
 
@@ -2263,7 +2263,7 @@ s32 evtPushLevelRelativeStatGradeScale(void) {
 }
 
 s32 evtPushRosterOrGlobalCounterValue(void) {
-    DatPartyRecord *entry = (DatPartyRecord *)evtWorkScriptContext.firstArgument;
+    datUnitWork_t *entry = (datUnitWork_t *)evtWorkScriptContext.firstArgument;
     s32 result;
     if (!(entry->flags & 0x20)) {
         result = DDS3_GBWK->header.currency;
@@ -2363,7 +2363,7 @@ s32 btlCheckScenePartyLevelThreshold(u32 sceneIndex) {
     u16 *cursor;
     u32 sceneOffset;
     DatEnemyRecord *enemyRecordsBase;
-    DatPartyRecord *entry;
+    datUnitWork_t *entry;
     s32 partyTotal;
     s32 average;
     u16 value;
@@ -2404,7 +2404,7 @@ s32 btlCheckScenePartyLevelThreshold(u32 sceneIndex) {
                     }
                 }
                 remaining--;
-                levelCursor = (u16 *)((u8 *)levelCursor + sizeof(DatPartyRecord));
+                levelCursor = (u16 *)((u8 *)levelCursor + sizeof(datUnitWork_t));
             } while (remaining >= 0);
             result = 0;
             if (count != 0) {

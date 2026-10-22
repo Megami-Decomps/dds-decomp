@@ -3,8 +3,8 @@
 
 #include "common.h"
 
-struct SdfAsset;
-struct SdfMemBlock;
+struct sdfMat_t;
+struct sdfMemHandle_t;
 
 /* One beam draw node owns its asset and vertex allocation separately. */
 typedef struct EffPCPBeamNode {
@@ -17,8 +17,8 @@ typedef struct EffPCPBeamNode {
     u32 vertexCount;
     f32 *points;
     u32 *colors;
-    struct SdfAsset *assetHandle;
-    struct SdfMemBlock *allocationHandle;
+    struct sdfMat_t *assetHandle;
+    struct sdfMemHandle_t *allocationHandle;
 } EffPCPBeamNode;
 
 /* The parameter prefix copied into the standard beam work. */

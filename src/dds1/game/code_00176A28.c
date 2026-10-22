@@ -32,7 +32,7 @@ void effPCPNeedleSpiralSetColor(EffResourceWork *work, f32 (*normals)[4]) {
 /* Allocate the resource group and initialize its matrix, scale and entry colors. */
 EffResourceWork *dds3NeedleModelCreate(u32 count)
 {
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(count * sizeof(EffResourceEntry) + sizeof(EffResourceWork));
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(EffResourceEntry) + sizeof(EffResourceWork));
     EffResourceWork *work = (void *)sdfMemLock(allocation);
     EffResourceEntry *entry;
     u32 entryIndex;
@@ -66,13 +66,13 @@ void dds3NeedleModelDelete(EffResourceWork *work) {
 /* Emit scaled, translated triangle batches with separate vector and packed-color streams. */
 void dds3NeedleModelDraw(EffResourceWork *work) {
     f32 matrix[16] __attribute__((aligned(16)));
-    SdfListHead *packet;
+    sdfDrawTag_t *packet;
     EffResourceEntry *entry;
     u32 entryIndex;
     u32 remaining;
     u32 triangleSize;
 
-    packet = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packet);
     sdf3DPrimLinkMat(packet, work->drawAsset, 0);
     EE_MMI_UNIT_MATRIX(matrix);
@@ -130,9 +130,9 @@ void dds3NeedleModelDraw(EffResourceWork *work) {
 
 void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor, u32 outerColor,
                    f32 radiusScale, f32 height) {
-    struct SdfMemBlock *oldResource = work->streamAllocation;
+    struct sdfMemHandle_t *oldResource = work->streamAllocation;
     u32 recordCount;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     f32 (*positions)[4];
     f32 (*unitVectors)[4];
     u32 *colors;

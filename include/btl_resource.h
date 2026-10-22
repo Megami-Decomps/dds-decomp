@@ -4,7 +4,7 @@
 #include "common.h"
 
 struct EffectSlotSet;
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Panel resource root: both native constructors allocate 0x28 bytes.
  * Preserve each game's established allocator-handle contract. */
@@ -12,11 +12,11 @@ typedef struct BtlResBlock {
 #ifdef VERSION_DDS1
     s32 unk0;
 #else
-    struct SdfMemBlock *unk0;
+    struct sdfMemHandle_t *unk0;
 #endif
-    struct SdfMemBlock *resourceAllocationA; /* 0x04: /battle/panel/batle_01.spr */
-    struct SdfMemBlock *resourceAllocationB; /* 0x08: /battle/panel/batle_02.spr */
-    struct SdfMemBlock *resourceAllocationC; /* 0x0C: /battle/panel/battle_03.spr */
+    struct sdfMemHandle_t *resourceAllocationA; /* 0x04: /battle/panel/batle_01.spr */
+    struct sdfMemHandle_t *resourceAllocationB; /* 0x08: /battle/panel/batle_02.spr */
+    struct sdfMemHandle_t *resourceAllocationC; /* 0x0C: /battle/panel/battle_03.spr */
     struct EffectSlotSet *resA; /* 0x10 */
     struct EffectSlotSet *resB; /* 0x14 */
     struct EffectSlotSet *resC; /* 0x18 */

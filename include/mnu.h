@@ -166,12 +166,12 @@ typedef struct PartyPanel {
 } PartyPanel;
 
 /* Native result-menu row shared by the level and profile progress bars. */
-struct DatPartyRecord;
+struct datUnitWork_t;
 
 typedef struct BrsProgressRow {
     s32 flags;
     s32 amount;
-    struct DatPartyRecord *unit; /* 0x08: profile record for the row. */
+    struct datUnitWork_t *unit; /* 0x08: profile record for the row. */
     u32 levelProgress[4];
     u32 profileProgress[4];
 } BrsProgressRow;
@@ -266,7 +266,7 @@ void mnuFreeSpriteStateWork(MenuSpriteState *);
 
 #ifndef VERSION_DDS2
 void mnuDrawPartyInfoSprites(s32 x, s32 y, s32 depth,
-                             struct DatPartyRecord *entry,
+                             struct datUnitWork_t *entry,
                              MenuSpriteState *spriteState, s32 flags);
 #endif
 
@@ -344,11 +344,11 @@ extern void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection
 #ifdef VERSION_DDS2
 extern void mnuApplyPackedGroupValues(MenuPanelGroup *group, s32 itemId);
 void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth,
-                                 struct DatPartyRecord *entry,
+                                 struct datUnitWork_t *entry,
                                  MenuPanelGroup *group, s32 mode, s32 drawFlags);
 #else
 void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth,
-                                 struct DatPartyRecord *entry,
+                                 struct datUnitWork_t *entry,
                                  MenuPanelGroup *group, s32 drawFlags);
 #endif
 
@@ -725,7 +725,7 @@ struct MenuIconSprites;
 
 /* Terminal/shop modes share this complete 0x38C-byte scene allocation. */
 typedef struct MenuTerminalContext {
-    struct SdfMemBlock *resourceHandle;
+    struct sdfMemHandle_t *resourceHandle;
     u8 pad04[4];
     s32 type;
     MenuPopupState transitionWork;
@@ -793,7 +793,7 @@ void func_0025FD78(MenuTerminalContext *scene);
 
 
 typedef struct MenuIconSprites {
-    struct SdfMemBlock *allocation; /* 0x00: retained descriptor for this bundle. */
+    struct sdfMemHandle_t *allocation; /* 0x00: retained descriptor for this bundle. */
     u32 value;
     u32 unk8;
     struct EffectSlotSet *sprite[3];
@@ -821,7 +821,7 @@ struct EffectList;
 
 /* The allocated progress display owns its request list and staff sprite banks. */
 typedef struct MenuProgressHost {
-    struct SdfMemBlock *allocation; /* Retained descriptor for this entire host. */
+    struct sdfMemHandle_t *allocation; /* Retained descriptor for this entire host. */
     struct EffectList *titleEffectHandle;
     StaffSlots staffSlots;
     s32 loadState;
@@ -844,14 +844,14 @@ typedef char MenuProgressHost_size_must_be_0x82C[(sizeof(MenuProgressHost) == 0x
 #endif
 
 #ifndef VERSION_DDS2
-void mnuSetupStaffMenuProfilePage(struct DatPartyRecord *source, MenuProgressHost *work);
+void mnuSetupStaffMenuProfilePage(struct datUnitWork_t *source, MenuProgressHost *work);
 void mnuReleaseMenuVisualWorkResources(MenuProgressHost *work);
 void effUpdateAttached(s32 x, s32 y, s32 mode, void *owner, s32 layer);
 #endif
 
 #ifndef VERSION_DDS2
 /* DDS1 staff movie task work allocated by mnuMovieCreateTask (0x20 bytes). */
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 struct MnuSpriteResourceGroup;
 
 void mnuDrawIconAlphaSprite(s32 x, s32 y, s32 z, s32 alpha,
@@ -859,7 +859,7 @@ void mnuDrawIconAlphaSprite(s32 x, s32 y, s32 z, s32 alpha,
                             s32 flags, s32 surface);
 
 typedef struct MnuStaffMovieWork {
-    struct SdfMemBlock *allocation; /* 0x00: retained general-heap descriptor */
+    struct sdfMemHandle_t *allocation; /* 0x00: retained general-heap descriptor */
     struct EffectSlotSet *spriteSet; /* 0x04: loaded roll-sprite slot-set owner */
     s32 phase;           /* 0x08 */
     s32 scrollTicks;     /* 0x0C */
@@ -873,7 +873,7 @@ typedef char MnuStaffMovieWork_size_must_be_0x20[(sizeof(MnuStaffMovieWork) == 0
 
 /* DDS1 title-movie menu allocation (0x40 bytes). */
 typedef struct MovieMenuState {
-    struct SdfMemBlock *allocation; /* 0x00: retained general-heap owner */
+    struct sdfMemHandle_t *allocation; /* 0x00: retained general-heap owner */
     u32 spriteHandles[3]; /* 0x04: indexed resource slots used by the sprite table */
     s32 state;           /* 0x10 */
     s32 cursor;          /* 0x14 */
@@ -901,7 +901,7 @@ struct MenuIconState;
 
 
 typedef struct MenuStaffContext {
-    struct SdfMemBlock *allocation; /* 0x00: retained descriptor for the full camp work. */
+    struct sdfMemHandle_t *allocation; /* 0x00: retained descriptor for the full camp work. */
     u8 pad04[4];
     MenuPopupState transitionWork; /* +0x08: native saved-entry transition state */
     s32 popupState;       /* 0x54 */
@@ -948,7 +948,7 @@ typedef char MenuStaffContext_resourceListWindow_offset[
 
 /* Five owned windows and their selection/transition state share one 0x54 allocation. */
 typedef struct MenuStaffChoices {
-    struct SdfMemBlock *allocation; /* 0x00: retained descriptor for this 0x54-byte owner. */
+    struct sdfMemHandle_t *allocation; /* 0x00: retained descriptor for this 0x54-byte owner. */
     u8 pad04[4];
     MenuWindowContainer *windows[5];
     s32 currentSelection;

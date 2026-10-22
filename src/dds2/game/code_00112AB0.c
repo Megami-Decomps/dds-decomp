@@ -5,15 +5,15 @@
 #include "eff_dependency.h"
 #include "eff_event.h"
 
-extern ObjBase *dds3LightObjectBasicGetControlWorkData(EffWorldNode *object);
+extern dds3ObjectBaseControlWorkData_t *dds3LightObjectBasicGetControlWorkData(dds3Basic_t *object);
 
 
 
 
 
 /* Each object kind keeps its handle in a different structure. */
-ObjBase *dds3GetBaseControlWorkData(EffWorldNode *worldNode) {
-    ObjBase *handle;
+dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *worldNode) {
+    dds3ObjectBaseControlWorkData_t *handle;
 
     handle = 0;
     switch ((worldNode->kindTag >> 24) - 4) {
@@ -28,8 +28,8 @@ ObjBase *dds3GetBaseControlWorkData(EffWorldNode *worldNode) {
 }
 
 
-void dds3ObjectBaseSetControlBasicSvs(EffWorldNode *object, u32 value) {
-    ObjBase *base;
+void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *object, u32 value) {
+    dds3ObjectBaseControlWorkData_t *base;
 
     base = dds3GetBaseControlWorkData(object);
     base->unk44 = value;
@@ -37,9 +37,9 @@ void dds3ObjectBaseSetControlBasicSvs(EffWorldNode *object, u32 value) {
 
 extern void dds3ObjectBaseOnFlag(void *object, u32 mask);
 
-s32 dds3CreateCameraData(EffWorldNode *object) {
+s32 dds3CreateCameraData(dds3Basic_t *object) {
     CameraData *inner;
-    ObjBase *objectBase;
+    dds3ObjectBaseControlWorkData_t *objectBase;
 
     dds3InitPoseSet(object);
     inner = sdfChipAllocDirect(0x90);

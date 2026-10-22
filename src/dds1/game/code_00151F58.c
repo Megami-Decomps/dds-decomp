@@ -50,16 +50,16 @@ extern EffRandState effDefaultRandomState[];
 extern EffectConfig D_0034DF54[];
 
 
-extern BillObj *hGeneralBillboard[];
+extern billHandle_t *hGeneralBillboard[];
 
 extern s32 effEmitterDelayRandomState[];
 
 #include "sdf_packet_alloc.h"
 
 
-void effDrawGeneratedTextureQuad(SdfListHead *packet, EffGeneratedTextureDescriptor *source);
+void effDrawGeneratedTextureQuad(sdfDrawTag_t *packet, EffGeneratedTextureDescriptor *source);
 
-void effDrawCompositeTextureQuad(SdfListHead *packet, EffCompositeGsDescriptor *source);
+void effDrawCompositeTextureQuad(sdfDrawTag_t *packet, EffCompositeGsDescriptor *source);
 
 void dds3Particle_BasicCreate(void *effect);
 
@@ -76,9 +76,9 @@ void dds3Particle_RadiateBuffInit(EffLookAtRingEmitter *effect, u32 index);
 
 
 /* Create a billboard sharing the indexed entry's resource. Word two of the
- * resource stores the reference count; the BillObj payload is not an emitter. */
-BillObj *effCreateBillboardSharingIndexedResource(s32 index) {
-    BillObj *effect = dds3BillboardCreate(D_0034DF54[index].billboardKind, 0);
+ * resource stores the reference count; the billHandle_t payload is not an emitter. */
+billHandle_t *effCreateBillboardSharingIndexedResource(s32 index) {
+    billHandle_t *effect = dds3BillboardCreate(D_0034DF54[index].billboardKind, 0);
     BillChildPayload *resource = hGeneralBillboard[index]->child;
     s32 references = resource->refCount;
 
@@ -91,7 +91,7 @@ u32 dds3BillboardGeneralNumber(void) {
     return 0xf;
 }
 
-SdfTex *dds3BillboardGetGeneralTex(s32 index) {
+sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 index) {
     return hGeneralBillboard[index]->child->texture;
 }
 
@@ -100,21 +100,21 @@ void effCopyVector(void *dst, const void *src) {
 }
 
 /* Set the radian rotation applied to the billboard quad corners. */
-void dds3BillboardSetRotate(BillObj *effect, float angle) {
+void dds3BillboardSetRotate(billHandle_t *effect, float angle) {
     effect->rotationAngle = angle;
 }
 
 /* Set the two child scale components stored at +0x10 and +0x14. */
-void dds3BillboardSetScale(BillObj *effect, float x, float y) {
+void dds3BillboardSetScale(billHandle_t *effect, float x, float y) {
     effect->childScaleX = x;
     effect->childScaleY = y;
 }
 
-void dds3BillboardSetRGBA(BillObj *effect, u32 value) {
+void dds3BillboardSetRGBA(billHandle_t *effect, u32 value) {
     effect->childParam = value;
 }
 
-void billSetChildTextureQuad(BillObj *effect, const BillTextureQuad *textureQuad) {
+void billSetChildTextureQuad(billHandle_t *effect, const BillTextureQuad *textureQuad) {
     if (effect->kind == 0) {
         memcpy(&effect->child->uv, textureQuad, sizeof(*textureQuad));
     }
@@ -123,7 +123,7 @@ void billSetChildTextureQuad(BillObj *effect, const BillTextureQuad *textureQuad
 
 
 /* Narrow mode for the child kinds, or update each resolved animation entry. */
-void dds3BillboardSetMode(BillObj *effect, s32 mode) {
+void dds3BillboardSetMode(billHandle_t *effect, s32 mode) {
     mode = (s16)mode;
     switch (effect->kind) {
     case 0:
@@ -155,7 +155,7 @@ void dds3BillboardSetMode(BillObj *effect, s32 mode) {
 
 
 /* Store the variant bits in one child payload or every child of a list. */
-void dds3BillboardSetCondition(BillObj *effect, s32 variant) {
+void dds3BillboardSetCondition(billHandle_t *effect, s32 variant) {
     s32 remainingChildren;
     BillChildPayload **childEntries;
     BillChildPayload **childCursor;
@@ -181,19 +181,19 @@ void dds3BillboardSetCondition(BillObj *effect, s32 variant) {
     }
 }
 
-s32 dds3BillboardGetTex(BillObj *effect) {
+s32 dds3BillboardGetTex(billHandle_t *effect) {
     if (effect->kind == 0) {
         return (s32)effect->child->texture;
     }
     return 0;
 }
 
-u16 dds3BillboardGetType(BillObj *effect) {
+u16 dds3BillboardGetType(billHandle_t *effect) {
     return effect->kind;
 }
 
 /* Store the low halfword through the kind-specific variant field. */
-void dds3BillboardSetDrawType(BillObj *effect, s32 variantValue) {
+void dds3BillboardSetDrawType(billHandle_t *effect, s32 variantValue) {
     s32 maskedValue = variantValue & BILL_VARIANT_MASK;
 
     switch (effect->kind) {
@@ -206,7 +206,7 @@ void dds3BillboardSetDrawType(BillObj *effect, s32 variantValue) {
     }
 }
 
-u16 dds3BillboardGetDrawType(BillObj *effect) {
+u16 dds3BillboardGetDrawType(billHandle_t *effect) {
     switch (effect->kind) {
     case 0:
         return effect->child->variant;
@@ -218,14 +218,14 @@ u16 dds3BillboardGetDrawType(BillObj *effect) {
 }
 
 /* Replace the selected list entry only when its index changes. */
-void dds3BillboardSetAnimNumber(BillObj *effect, u32 entryIndex) {
+void dds3BillboardSetAnimNumber(billHandle_t *effect, u32 entryIndex) {
     if (effect->kind == 1 && effect->animationEntryIndex != entryIndex) {
         dds3Billboard_P2ASetNumber(effect, entryIndex);
     }
 }
 
 /* Read the selected entry for list billboards; other kinds have none. */
-s32 dds3BillboardGetCurrentAnimNumber(BillObj *effect) {
+s32 dds3BillboardGetCurrentAnimNumber(billHandle_t *effect) {
     if (effect->kind == 1) {
         return effect->animationEntryIndex;
     }
@@ -233,14 +233,14 @@ s32 dds3BillboardGetCurrentAnimNumber(BillObj *effect) {
 }
 
 s32 dds3BillboardGetAnimNumber(s32 billboard) {
-    if (((BillObj *)billboard)->kind == 1) {
-        return ((BillLinkedValue *)((BillObj *)billboard)->animationData->base)->value;
+    if (((billHandle_t *)billboard)->kind == 1) {
+        return ((BillLinkedValue *)((billHandle_t *)billboard)->animationData->base)->value;
     }
     return 0;
 }
 
 /* Select the frame and make the next animation update advance immediately. */
-void dds3BillboardSetAnimKey(BillObj *effect, u32 startFrame) {
+void dds3BillboardSetAnimKey(billHandle_t *effect, u32 startFrame) {
     if (effect->kind == 1) {
         s32 entryCount = effect->entryCount;
 
@@ -261,7 +261,7 @@ void dds3BillboardSetAnimKey(BillObj *effect, u32 startFrame) {
 }
 
 /* Select the frame and hold it for one animation update before advancing. */
-void dds3BillboardSetAnimKey2(BillObj *effect, u32 startFrame) {
+void dds3BillboardSetAnimKey2(billHandle_t *effect, u32 startFrame) {
     if (effect->kind == 1) {
         s32 entryCount = effect->entryCount;
 
@@ -282,7 +282,7 @@ void dds3BillboardSetAnimKey2(BillObj *effect, u32 startFrame) {
 }
 
 /* Read the animation modulus of the first entry, if this is a list billboard. */
-s32 dds3BillboardGetAnimFrame(const BillObj *effect) {
+s32 dds3BillboardGetAnimFrame(const billHandle_t *effect) {
     if (effect->kind == 1) {
         const BillOut *entry = effect->resolvedEntries;
         const BillAnimationEntry *frame = entry->entry;
@@ -292,7 +292,7 @@ s32 dds3BillboardGetAnimFrame(const BillObj *effect) {
 }
 
 /* Read the animation-active gate for list billboards. */
-u16 dds3BillboardGetAnimState(const BillObj *effect) {
+u16 dds3BillboardGetAnimState(const billHandle_t *effect) {
     if (effect->kind == 1) {
         return effect->animationActive;
     }
@@ -300,20 +300,20 @@ u16 dds3BillboardGetAnimState(const BillObj *effect) {
 }
 
 s32 dds3BillboardGetAnimType(s32 billboard) {
-    if (((BillObj *)billboard)->kind == 1) {
-        return ((BillObj *)billboard)->modeFlags;
+    if (((billHandle_t *)billboard)->kind == 1) {
+        return ((billHandle_t *)billboard)->modeFlags;
     }
     return 0;
 }
 
-void dds3BillboardSetAnimColorAdvMode(BillObj *billboard) {
+void dds3BillboardSetAnimColorAdvMode(billHandle_t *billboard) {
     if (billboard->kind == 1) {
         billboard->modeFlags |= 0x1000000;
     }
 }
 
 /* Kind 0 stores half the supplied width/height; other kinds remain unchanged. */
-void dds3BillboardSetXYOffset(BillObj *billboard, float width, float height) {
+void dds3BillboardSetXYOffset(billHandle_t *billboard, float width, float height) {
     if (billboard->kind == 0) {
         BillChildPayload *child = billboard->child;
         child->halfWidth = width * 0.5f;
@@ -412,7 +412,7 @@ u8 *dds3P2APolygonCopy(u8 *source) {
 }
 
 void dds3P2APolygonDelete(u32 instance) {
-    sdfMatFreeDelayed((SdfAsset *)((EffUnitObject *)instance)->resource);
+    sdfMatFreeDelayed((sdfMat_t *)((EffUnitObject *)instance)->resource);
     dds3BillboardDelete(((EffUnitObject *)instance)->billboard);
     sdfChipFreeDirect(instance);
 }
@@ -442,7 +442,7 @@ void dds3P2APolygonSetDirection(void *dst, void *src) {
 
 /* Kind 1 writes mode plus one/two entry values; untouched output words retain their contents. */
 void dds3P2APolygonGetResource(EffUnitObject *instance, s32 *modeValues) {
-    BillObj *billboard = instance->billboard;
+    billHandle_t *billboard = instance->billboard;
 
     if (billboard->kind == 1) {
         u32 modeFlags = billboard->modeFlags;
@@ -467,8 +467,8 @@ extern u32 D_0034E090[],D_0034E0A0[];
 extern SdfPoolNode *D_0034E0B0[];
 extern void *effPkt3DPrimMakePoly(EffPacketParams *);
 
-extern void sdf3DPrimLinkMat(SdfListHead *packetList, SdfAsset *asset, s32 (*allocatePacket)(s32));
-extern void sdf3DPrimLinkTm(SdfListHead *packetList, s32 (*allocatePacket)(s32));
+extern void sdf3DPrimLinkMat(sdfDrawTag_t *packetList, sdfMat_t *asset, s32 (*allocatePacket)(s32));
+extern void sdf3DPrimLinkTm(sdfDrawTag_t *packetList, s32 (*allocatePacket)(s32));
 
 void dds3P2APolygonDraw(EffUnitObject *instance) {
     EffPacketParams params;
@@ -479,7 +479,7 @@ void dds3P2APolygonDraw(EffUnitObject *instance) {
     f32 secondaryUv[4][2];
     s32 list;
     BillChildPayload *child;
-    SdfTex *texture;
+    sdfTexHandle_t *texture;
     SdfPoolNode *surface;
     f32 x, y;
     f32 scaleX, scaleY;
@@ -492,7 +492,7 @@ void dds3P2APolygonDraw(EffUnitObject *instance) {
     }
     dds3P2APolygonGetResource(instance, modeValues);
     list = sdfGrAllocPacketBuff(0x20);
-    sdfDrawTagInit((SdfListHead *)list);
+    sdfDrawTagInit((sdfDrawTag_t *)list);
     VU0_LOAD_MATRIX(instance->transform);
     VU0_LOAD_MATRIX_B(instance->localMatrix);
     sdfComposeVuMatrixFromRegisters();
@@ -501,7 +501,7 @@ void dds3P2APolygonDraw(EffUnitObject *instance) {
     matrix[3][1] = instance->billboard->position[1];
     matrix[3][2] = instance->billboard->position[2];
     VU0_LOAD_MATRIX(matrix);
-    sdf3DPrimLinkTm((SdfListHead *)list, 0);
+    sdf3DPrimLinkTm((sdfDrawTag_t *)list, 0);
     memset(&params, 0, sizeof(params));
     params.primitive = 0x4000;
     params.parameters = D_0034E090;
@@ -551,7 +551,7 @@ void dds3P2APolygonDraw(EffUnitObject *instance) {
     uv[2][1] = child->uv.components[7] * height;
     uv[3][0] = child->uv.components[4] * width;
     uv[3][1] = child->uv.components[5] * height;
-    sdfSetAssetPrimaryTextureAddress((SdfAsset *)instance->resource, texture);
+    sdfSetAssetPrimaryTextureAddress((sdfMat_t *)instance->resource, texture);
     switch ((u32)modeValues[0]) {
     case 2:
     case 3:
@@ -597,19 +597,19 @@ void dds3P2APolygonDraw(EffUnitObject *instance) {
         secondaryUv[2][1] = child->uv.components[7] / height;
         secondaryUv[3][0] = child->uv.components[4] / width;
         secondaryUv[3][1] = child->uv.components[5] / height;
-        sdfMatSetMultiTex((SdfAsset *)instance->resource, texture);
+        sdfMatSetMultiTex((sdfMat_t *)instance->resource, texture);
         break;
     }
-    sdf3DPrimLinkMat((SdfListHead *)list, (SdfAsset *)instance->resource, 0);
-    sdfDrawTagLink((SdfListHead *)list, (u32)effPkt3DPrimMakePoly(&params));
+    sdf3DPrimLinkMat((sdfDrawTag_t *)list, (sdfMat_t *)instance->resource, 0);
+    sdfDrawTagLink((sdfDrawTag_t *)list, (u32)effPkt3DPrimMakePoly(&params));
     surface = D_0034E0B0[instance->billboard->requestedPacketListIndex];
-    surface->append(surface, (SdfListHead *)list);
+    surface->append(surface, (sdfDrawTag_t *)list);
 }
 
 extern void sdfBillBoardMakeTMPacket(u8 *, const f32 *);
 extern void sdfBillBoardMake1(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
 
-void effDrawGeneratedTextureQuad(SdfListHead *list, EffGeneratedTextureDescriptor *source) {
+void effDrawGeneratedTextureQuad(sdfDrawTag_t *list, EffGeneratedTextureDescriptor *source) {
     f32 matrix[16] __attribute__((aligned(16)));
     BillTextureQuad uv;
     f32 corners[4][2];
@@ -687,7 +687,7 @@ void effDrawGeneratedTextureQuad(SdfListHead *list, EffGeneratedTextureDescripto
 
 /* Allocate/init a packet list, generate its texture payload, then append it to the draw surface. */
 void effSubmitGeneratedTexturePacket(SdfPoolNode *surface, EffGeneratedTextureDescriptor *source) {
-    SdfListHead *packetList = (SdfListHead *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
+    sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
 
     sdfDrawTagInit(packetList);
     effDrawGeneratedTextureQuad(packetList, source);
@@ -700,10 +700,10 @@ extern void sdfBuildFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacke
 extern void sdfMultiBillBoardMake1(u8 *, const f32 *, u32, u32,
                         const BillTextureQuad *, const BillTextureQuad *, const f32 *);
 
-void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *source) {
+void effDrawCompositeTextureQuad(sdfDrawTag_t *list, EffCompositeGsDescriptor *source) {
     f32 matrix[16] __attribute__((aligned(16)));
     f32 corners[4][2];
-    SdfGsBlendPacket *state;
+    sdfPrimTransPacket_t *state;
     SdfGsTexturePacket *textureState;
     u8 *geometry;
     SdfDmaReferenceChainPacket *framePacket;
@@ -716,7 +716,7 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
     sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
     sdfDrawTagLinkRefGif(list, (u32)framePacket);
 
-    state = (SdfGsBlendPacket *)sdfGrAllocPacketBuff(0x40);
+    state = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
     state->header.dmaTag = 3;
     state->header.vifCommands = 0x5000000310000000ULL;
     state->header.gifTag = 0x1000000000008002ULL;
@@ -727,7 +727,7 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
     state->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(list, (u32)state);
 
-    state = (SdfGsBlendPacket *)sdfGrAllocPacketBuff(0x40);
+    state = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
     state->header.dmaTag = 3;
     state->header.vifCommands = 0x5000000310000000ULL;
     state->header.gifTag = 0x1000000000008002ULL;
@@ -827,7 +827,7 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
     sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
     sdfDrawTagLinkRefGif(list, (u32)framePacket);
 
-    state = (SdfGsBlendPacket *)sdfGrAllocPacketBuff(0x40);
+    state = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
     state->header.dmaTag = 3;
     state->header.vifCommands = 0x5000000310000000ULL;
     state->header.gifTag = 0x1000000000008002ULL;
@@ -842,7 +842,7 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
 
 /* Allocate/init a packet list, generate its composite GS payload, then append it to the draw surface. */
 void effSubmitCompositeGsPacket(SdfPoolNode *surface, EffCompositeGsDescriptor *source) {
-    SdfListHead *packetList = (SdfListHead *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
+    sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
 
     sdfDrawTagInit(packetList);
     effDrawCompositeTextureQuad(packetList, source);
@@ -861,7 +861,7 @@ void dds3ParticleManagerExit(void) {
 /* Allocate records followed by their owner tail; clear only two native state words per record. */
 EffectBufferTail *dds3Particle_PhysicsCreate(s32 recordCount) {
     s32 recordBytes = recordCount * sizeof(EffectBufferRecord);
-    SdfMemBlock *allocationHandle = sdfMemAllocDirect(recordBytes + sizeof(EffectBufferTail));
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(recordBytes + sizeof(EffectBufferTail));
     EffectBufferRecord *recordCursor = (void *)sdfMemLock(allocationHandle);
     EffectBufferTail *bufferTail = (EffectBufferTail *)((u8 *)recordCursor + recordBytes);
 
@@ -885,7 +885,7 @@ void dds3Particle_PhysicsDelete(EffectBufferTail *buffer) {
 
 struct ParColorRamp;
 extern void dds3ParticleSetColorTable(struct ParColorRamp *, s32);
-extern ParTable *dds3Particle_BlurCreate(u32, u16, BillObj **);
+extern dds3Particle_BlurBuff_t *dds3Particle_BlurCreate(u32, u16, billHandle_t **);
 extern u32 dds3Particle_TrackPolyGetRecTiming(u16);
 extern void dds3TrackPolyVCSet(void *, s32, void *, void *);
 
@@ -3192,7 +3192,7 @@ void dds3Particle_SmokeOffsetSetScale(float scale, EffTemplatePacketList *effect
 /* Clone the disc prefix/tail plus a separate 16-byte-per-packet auxiliary allocation. */
 EffTemplatePacketList *dds3Particle_SmokeOffsetCreate(EffTemplatePacketList *source) {
     EffTemplatePacketList *clone = sdfChipAllocDirect(0x200);
-    struct SdfMemBlock *auxAllocationHandle;
+    struct sdfMemHandle_t *auxAllocationHandle;
     s32 tailBytes = 0xB0;
 
     memset(clone, 0, 0x200);

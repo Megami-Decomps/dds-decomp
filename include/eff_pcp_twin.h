@@ -13,8 +13,8 @@ typedef struct EffPCPTwinWork {
     u32 color;
     u32 frame;
     f32 scale;
-    EffParamWork *pair[8][2];
-    EffParamWork *shared[8];
+    effPartHandle_t *pair[8][2];
+    effPartHandle_t *shared[8];
     u32 state[8];
     u32 counter[8];
 } EffPCPTwinWork;

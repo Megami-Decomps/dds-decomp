@@ -8,8 +8,8 @@
 typedef struct EffPCPSpawnOnceWork {
     f32 vector[4]; /* 0x00: loaded together by the spawn callback's VU vector load. */
     u32 color; /* 0x10 */
-    EffParamWork *primaryHandle; /* 0x14 */
-    EffParamWork *secondaryHandle; /* 0x18 */
+    effPartHandle_t *primaryHandle; /* 0x14 */
+    effPartHandle_t *secondaryHandle; /* 0x18 */
 } EffPCPSpawnOnceWork;
 
 typedef char EffPCPSpawnOnceWork_size_must_be_0x1C[

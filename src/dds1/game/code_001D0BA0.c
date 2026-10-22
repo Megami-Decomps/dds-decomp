@@ -132,13 +132,13 @@ extern EffRandState effSharedRandomState[];
 
 extern void btlResetDeferredTaskQueue(void);
 
-s32 btlAdjustUnitHp(DatPartyRecord *object, s32 delta);
+s32 btlAdjustUnitHp(datUnitWork_t *object, s32 delta);
 
-s32 btlAdjustUnitMp(DatPartyRecord *object, s32 delta);
+s32 btlAdjustUnitMp(datUnitWork_t *object, s32 delta);
 
-u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *object);
+u16 btlRefreshUnitMaximumHpAndClampCurrentHp(datUnitWork_t *object);
 
-u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *object);
+u16 btlRefreshUnitMaximumMpAndClampCurrentMp(datUnitWork_t *object);
 
 
 extern EffRandState effSharedRandomState[];
@@ -153,11 +153,11 @@ void btlClearAllActorEntrySlots(BtlUnit *unit);
 
 s32 btlGetActorBedAssetIdFromIndex(s32 itemIndex);
 
-s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *entry);
+s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *entry);
 
-struct EvtUnit;
+struct evtUnitHandle_t;
 
-extern void evtSetWaitMotionSpeed(struct EvtUnit *, f32);
+extern void evtSetWaitMotionSpeed(struct evtUnitHandle_t *, f32);
 
 extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
 
@@ -173,9 +173,9 @@ extern void btlRefreshUnitMotionSelection(BtlUnit *unit);
 
 extern void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit);
 
-extern void evtSetUnitMotion(struct EvtUnit *, s32, s32, s32, s32);
+extern void evtSetUnitMotion(struct evtUnitHandle_t *, s32, s32, s32, s32);
 
-extern void evtSetWaitHokanFrame(struct EvtUnit *, s32, s32);
+extern void evtSetWaitHokanFrame(struct evtUnitHandle_t *, s32, s32);
 
 extern s32 btlGetSlotRateKind(u8 *, s32);
 
@@ -191,7 +191,7 @@ s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
 
 void btlSetTrackedTaskDisplayMode(s32 mode);
 
-void btlClearPartyRecordStatusBits(DatPartyRecord *record, s32 mask);
+void btlClearPartyRecordStatusBits(datUnitWork_t *record, s32 mask);
 
 void btlApplyMaskedActorEntryAdjustments(BtlUnit *unit, u32 flags, s16 delta);
 
@@ -501,9 +501,9 @@ extern u32 btlEncodeActorIndexAsSelectionMask(u32);
 
 extern s32 btlGetLinkedPartyCommandFailureReason(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
-extern s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *battler, s32 command);
+extern s32 btlApplyCommandAbilityMultiplier(datUnitWork_t *battler, s32 command);
 
-extern s32 btlGetCombinedPartyCommandPower(DatPartyRecord *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
+extern s32 btlGetCombinedPartyCommandPower(datUnitWork_t *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
@@ -1177,7 +1177,7 @@ void btlResetIndexWork(BattleIndexWork *work) {
 
 /* Allocate the index list and retained groups, then initialize their headers. */
 void btlInitBattleIndexWork(BattleIndexWork *object) {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u32 value;
     object->indices = btlAllocateIndexList(13);
     allocation = sdfMemAllocDirect(0x836C);
@@ -1190,7 +1190,7 @@ void btlInitBattleIndexWork(BattleIndexWork *object) {
 
 /* Release each owned buffer once. The cached group address is deliberately not cleared. */
 void btlReleaseObjectBuffers(BattleIndexWork *object) {
-    struct SdfMemBlock *handle = object->allocationHandle;
+    struct sdfMemHandle_t *handle = object->allocationHandle;
     if (handle != 0) {
         sdfMemFreeDirect(handle);
         object->allocationHandle = 0;
@@ -1289,7 +1289,7 @@ u32 btlApplyDeferredActorStats(BtlOperandTaskArgs *arguments) {
     BtlState *context = (BtlState *)btlGetRuntime();
     BtlUnit *actor = arguments->unit;
     s32 primary;
-    DatPartyRecord *resource;
+    datUnitWork_t *resource;
     if ((context->battleFlags & 0x80) == 0) {
         return 1;
     }
@@ -1474,7 +1474,7 @@ void *btlCreateClearActorEntrySelectionTask(BtlUnit *owner) {
     return task;
 }
 
-extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
+extern datUnitWork_t *btlGetIndexedPartyEntryRecord(s32);
 
 /* Award hunt experience; the sharing ability also rewards eligible party records. */
 u32 btlAwardHuntExperience(s32 address) {
@@ -1482,7 +1482,7 @@ u32 btlAwardHuntExperience(s32 address) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     BtlUnit *head;
-    DatPartyRecord *record;
+    datUnitWork_t *record;
     u32 count;
     u32 index;
     u32 share;
@@ -2314,7 +2314,7 @@ void btlInheritActorModelState(BtlUnit *dst, BtlUnit *src) {
 /* Kind-5 world-node payload attaches the event unit at +8. */
 typedef struct EventUnitData {
     u8 pad00[8];
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 } EventUnitData;
 
 extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
@@ -2325,7 +2325,7 @@ extern void dds3ObjectBaseOffFlag(void *, s32);
 
 extern void dds3ObjectBaseOnFlag(void *, s32);
 
-extern void mdlSetEffectScale(MdlCtx *, f32);
+extern void mdlSetEffectScale(dds3ModelHandle_t *, f32);
 
 extern struct SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id);
 
@@ -2339,7 +2339,7 @@ extern void btlSetUnitRotation(BtlUnit *object, void *rotation);
 void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
     BtlUnit *reused = NULL;
     BtlState *battle = (BtlState *)btlGetRuntime();
-    MdlCtx *model;
+    dds3ModelHandle_t *model;
     BtlActorStatusRecord *status;
     EventUnitData *data;
     s32 key;
@@ -2428,7 +2428,7 @@ extern const char D_003A3AD0[];
 void btlReleaseActorModelResources(BtlUnit *object) {
     SoundSlotOwner *sound;
     s32 load;
-    EffWorldNode *model;
+    dds3Basic_t *model;
     u32 state;
     u32 flags;
     if (((u8 *)object)[0xCC] == 0) {
@@ -2439,7 +2439,7 @@ void btlReleaseActorModelResources(BtlUnit *object) {
         }
         load = *(s32 *)((u8 *)object + 0x324);
         if (load != 0) {
-            sdfModelRootFree((SdfModel *)load, 1, 1);
+            sdfModelRootFree((sdfModelRootNode_t *)load, 1, 1);
             *(s32 *)((u8 *)object + 0x324) = 0;
             btlBossDebugPrintf(D_003A3AD0, object);
         }
@@ -2527,7 +2527,7 @@ void btlClearUnitDefeatCandidate(BtlUnit *object) {
     masked &= ~8;
     object->status.flags = masked;
     if ((flags & 2) != 0) {
-        MdlCtx *resource = object->ext->owner;
+        dds3ModelHandle_t *resource = object->ext->owner;
         resource->flags |= MDL_SKIP_TRANSFORMS;
     }
 }
@@ -2555,7 +2555,7 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
     BtlState *context;
     BtlEffectResource *table;
     u8 *task;
-    MdlCtx *model;
+    dds3ModelHandle_t *model;
     s32 selected;
     s32 node;
     s32 start;
@@ -2836,7 +2836,7 @@ void btlUpdateUnitEffects(void) {
         if ((u32)object->status.flags & 2) {
             u8 *resource = (u8 *)btlGetSideIndexedActorStatusTable(*(s32 *)((u8 *)object + 0xC4),
                                                   *(s32 *)((u8 *)object + 0xC8));
-            MdlCtx *model = object->ext->owner;
+            dds3ModelHandle_t *model = object->ext->owner;
             s32 node = mdlGetMotionNum(model, 0);
             if (*(s16 *)(resource + node * 20 + 0x30) == 1 &&
                 btlIsActorModeAcceptedByBattleHook(object) == 0) {
@@ -2967,7 +2967,7 @@ void btlGetUnitWorldPos(u8 *object, void *worldPosition) {
     VU0_STORE_VF(vf10, worldPosition);
 }
 
-extern s32 sdfModelGetMarkPos(SdfModel *, s32);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *, s32);
 
 
 extern void btlRefreshUnitFxVectors(BtlUnit *);
@@ -2986,7 +2986,7 @@ s32 value;
     }
     btlRefreshUnitFxVectors(object);
     {
-        MdlCtx *owner = object->ext->owner;
+        dds3ModelHandle_t *owner = object->ext->owner;
         return (s8)sdfModelGetMarkPos(owner->inner, value);
     }
 }
@@ -3033,7 +3033,7 @@ s32 btlSampleActorModelPositionVU(BtlUnit *unit, s32 value) {
     return result;
 }
 
-extern s32 sdfModelGetMarkPosMatrix(SdfModel *, s32);
+extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *, s32);
 
 s32 btlSetActorAlternateEffectParameter(object, value)
 BtlUnit *object;
@@ -3049,7 +3049,7 @@ s32 value;
     }
     btlRefreshUnitFxVectors(object);
     {
-        MdlCtx *owner = object->ext->owner;
+        dds3ModelHandle_t *owner = object->ext->owner;
         return (s8)sdfModelGetMarkPosMatrix(owner->inner, value);
     }
 }
@@ -3117,7 +3117,7 @@ void btlBlendUnitColor(BtlUnit *unit, u32 color, s32 mode) {
     }
 }
 
-extern void mdlSetClutColor(MdlCtx *, s32, f32);
+extern void mdlSetClutColor(dds3ModelHandle_t *, s32, f32);
 
 void btlReleaseUnitModelColorResource(BtlUnit *unit, s32 value, f32 scalar) {
     mdlSetClutColor(unit->ext->owner, (value & 0xffffff) | 0x80000000, scalar);
@@ -3169,27 +3169,27 @@ void btlUnitFaceTargetScaled(BtlUnit *object, BtlUnit *target, f32 scale) {
     }
 }
 
-void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source) {
-    DatPartyRecord *stats = &unit->partyRecord;
+void btlCopyUnitStats(BtlUnit *unit, datUnitWork_t *source) {
+    datUnitWork_t *stats = &unit->partyRecord;
     *stats = *source;
     btlRefreshUnitMaximumHpAndClampCurrentHp(stats);
     btlRefreshUnitMaximumMpAndClampCurrentMp(stats);
 }
 
-extern void mdlLinkEffect(MdlCtx *, MdlResourceItem *);
+extern void mdlLinkEffect(dds3ModelHandle_t *, dds3ModelEffectCtrlr_t *);
 
 #include "sdf_packet_alloc.h"
 
-extern void sdfModelCopyStat(SdfModel *, SdfModel *);
+extern void sdfModelCopyStat(sdfModelRootNode_t *, sdfModelRootNode_t *);
 
 
 extern u64 btlTransparencySurfaceTestValues[4];
 
 /* Draw the model into four surfaces in three GS TEST passes, then update its anchors. */
-void btlDrawUnitTransparencyPasses(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode **surfaces, u32 color) {
-    SdfListHead *list;
+void btlDrawUnitTransparencyPasses(BtlUnit *unit, dds3ModelHandle_t *model, sdfModelRootNode_t *overlay, SdfPoolNode **surfaces, u32 color) {
+    sdfDrawTag_t *list;
     u64 *packet;
-    MdlResourceItem *item;
+    dds3ModelEffectCtrlr_t *item;
     u16 savedFlags;
     s32 i;
 
@@ -3198,7 +3198,7 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, MdlCtx *model, SdfModel *overl
     }
     mdlSetColor(model, color);
     for (i = 0; i != 4; i++) {
-        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         packet = (u64 *)sdfGrAllocPacketBuff(0x30);
         packet[0] = 2;
@@ -3217,7 +3217,7 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, MdlCtx *model, SdfModel *overl
     model->flags &= ~MDL_SKIP_ANCHORS;
     model->inner->drawFlags = savedFlags;
     for (i = 0; i != 4; i++) {
-        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         packet = (u64 *)sdfGrAllocPacketBuff(0x30);
         packet[0] = 2;
@@ -3237,7 +3237,7 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, MdlCtx *model, SdfModel *overl
     }
     sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, surfaces, overlay);
     for (i = 0; i != 4; i++) {
-        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         packet = (u64 *)sdfGrAllocPacketBuff(0x30);
         packet[0] = 2;
@@ -3258,7 +3258,7 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, MdlCtx *model, SdfModel *overl
 INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3B70);
 
 void btlCreateUnitTransparency(BtlUnit *unit) {
-    BattleGroupNode *shape;
+    dds3ModelResrc_t *shape;
     if ((unit->status.flags & 2) == 0) {
         return;
     }
@@ -3281,7 +3281,7 @@ extern SdfPoolNode *btlUnitTransparencySurfaces[];
 void btlUpdateUnitTransparency(BtlUnit *unit) {
     u32 flags = unit->status.flags;
     u32 color;
-    MdlCtx *info;
+    dds3ModelHandle_t *info;
     u32 alpha;
 
     if (flags & 2) {
@@ -3314,7 +3314,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
     }
 }
 
-extern SdfGraphObj D_003980E0;
+extern sdfGrFrameSet_t D_003980E0;
 
 extern SdfPoolNode *btlMirrorSourceTransparencySurfaces[];
 
@@ -3325,8 +3325,8 @@ extern SdfPoolNode *btlMirrorTargetTransparencySurfaces[];
  * model is created (and the update ends) on the first frame it is missing. */
 /* Emit the mirror model's transparency packets using its overlay color. */
 void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
-    MdlCtx *info;
-    SdfListHead *list;
+    dds3ModelHandle_t *info;
+    sdfDrawTag_t *list;
 
     if ((unit->status.flags & 2) == 0) {
         return;
@@ -3971,7 +3971,7 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
             btlDestroyUnit((u8 *)unit->mirror);
             unit->mirror = NULL;
             if (unit->transparencyBufferAllocation != 0) {
-                sdfMemFreeDelayedDirect((struct SdfMemBlock *)unit->transparencyBufferAllocation);
+                sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)unit->transparencyBufferAllocation);
                 unit->transparencyBufferAllocation = 0;
                 unit->transparencyBuffer = 0;
             }
@@ -4184,8 +4184,8 @@ u32 btlStepUnitDefeatFadeIn(u32 *arguments) {
         btlFlagUnitDefeatCandidate(unit);
     }
     if (taskArgs->durationOrMode == 0) {
-        evtSetUnitColorRGB((struct EvtUnit *)unit->ext, 0, unit->overlayColor);
-        evtSetUnitColorA((struct EvtUnit *)unit->ext, 0,
+        evtSetUnitColorRGB((struct evtUnitHandle_t *)unit->ext, 0, unit->overlayColor);
+        evtSetUnitColorA((struct evtUnitHandle_t *)unit->ext, 0,
                                   (unit->overlayColor & 0xFFFFFF) | 0x80000000);
     }
     if (taskArgs->elapsed >= taskArgs->durationOrMode) {
@@ -4327,9 +4327,9 @@ u8 *btlCreateUnitExitFadeTask(u8 *owner, u32 value) {
     return task;
 }
 
-extern void effBattleUpdate(BattleEffect *);
+extern void effBattleUpdate(effBTLCutHandle_t *);
 
-extern BattleEffect * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
+extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
 
 /* Start from the selected-unit SYSEFF source, then update through its duration.
  * Return one for an ineligible unit or expiry, zero while updating. */
@@ -4370,7 +4370,7 @@ u32 btlUpdateSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *arguments) {
 extern u32 btlUpdateSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *);
 
 void btlFinishSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *arguments) {
-    BattleEffect *voice = arguments->effect;
+    effBTLCutHandle_t *voice = arguments->effect;
     if (voice != 0) {
         effBTLCutDelete(voice);
     }
@@ -4459,14 +4459,14 @@ extern u8 kwlnDefaultColorVector[];
 
 u32 btlUnitBaseLightTask(BtlUnitBaseLightArgs *work) {
     BtlUnit *unit = work->unit;
-    EvtUnit *ext;
+    evtUnitHandle_t *ext;
     EvtTargetInfo *info;
-    EffWorldNode *target;
+    dds3Basic_t *target;
     if (unit->status.flags & 2) {
         if (work->delay >= 2) {
             ext = unit->ext;
             evtUnitLightOn(ext);
-            target = (EffWorldNode *)ext->currentTransitionValue;
+            target = (dds3Basic_t *)ext->currentTransitionValue;
             if (target != NULL && (ext->flags & 0x40000)) {
                 info = target->data;
                 PCP_COPY_VECTOR(unit->colorStart, info->firstColor);
@@ -4991,7 +4991,7 @@ void btlResetUnitLinks(BtlUnit *actor) {
 
 
 BtlUnit *btlCreateUnit(void) {
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(0x348);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(0x348);
     BtlUnit *unit = (BtlUnit *)sdfMemLock(allocation);
     BtlActorWork *work;
     memset(unit, 0, 0x348);
@@ -5049,7 +5049,7 @@ void btlReleaseUnitResources(BtlUnit *unit) {
     }
     btlReleaseActorModelResources(unit);
     if (unit->transparencyBufferAllocation != 0) {
-        sdfMemFreeDelayedDirect((struct SdfMemBlock *)unit->transparencyBufferAllocation);
+        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)unit->transparencyBufferAllocation);
         unit->transparencyBufferAllocation = 0;
         unit->transparencyBuffer = 0;
     }
@@ -5073,7 +5073,7 @@ void btlDestroyUnit(u8 *actor) {
     } else {
         *(u8 **)((u8 *)btlGetRuntime() + 0x228) = *(u8 **)(actor + 0x344);
     }
-    sdfMemFreeDirect((struct SdfMemBlock *)(u32)(*(s32 *)(actor + 0x33C)));
+    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(*(s32 *)(actor + 0x33C)));
 }
 
 void btlDestroyAllUnits(void) {
@@ -5221,10 +5221,10 @@ s32 btlFindListIndex(BtlIndexList *list, void *entry) {
     return -1;
 }
 
-extern void mdlSetEffectScale(MdlCtx *, f32);
+extern void mdlSetEffectScale(dds3ModelHandle_t *, f32);
 
 void btlApplyUnitEffectScale(BtlUnit *unit) {
-    ObjectTransform *inner;
+    dds3PoseSet_t *inner;
     if (unit->status.flags & 2) {
         btlInitializeEffectVectorsFromSourceRecords(unit, unit->resourceKind, unit->species);
         VU0_SET_ONES_XYZ(vf10);
@@ -5668,7 +5668,7 @@ BtlRuntimeTask *btlScheduleContextReset(void) {
     return task;
 }
 
-extern void dds3CameraObjectBasicSetFovy(EffWorldNode *, f32);
+extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *, f32);
 extern f32 btlCameraLocalUpVector[4], btlCameraOutputRotation[4];
 
 /* Per-frame battle camera update: run the active camera mode's update hook,
@@ -5676,7 +5676,7 @@ extern f32 btlCameraLocalUpVector[4], btlCameraOutputRotation[4];
 void btlUpdateBattleCameraFrame(void) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     u32 kind;
-    EffWorldNode *camera;
+    dds3Basic_t *camera;
     CameraData *data;
     u32 flags;
     s32 result;
@@ -5759,17 +5759,17 @@ extern f32 btlCreatedCameraTarget[4], btlCreatedCameraRotation[4];
 
 extern u32 D_003BB660;
 
-extern EffWorldNode *dds3AddCameraObjectBasicTypeFree(s32, void *, void *);
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32, void *, void *);
 
 
-extern void dds3GetRadiusPoseSet(EffWorldNode *, f32);
+extern void dds3GetRadiusPoseSet(dds3Basic_t *, f32);
 
 extern void dds3ObjectBaseCreateMover(void *);
 
 /* vu0 routine: add the battle origin to the default camera position. */
 void btlInitializeWorldCamera(void) {
     f32 position[4];
-    EffWorldNode *camera;
+    dds3Basic_t *camera;
     CameraData *data;
     BtlState *battle = (BtlState *)btlGetRuntime();
 
@@ -5924,13 +5924,13 @@ u32 btlIsRuntimeFlag2000Clear(void) {
     return ((*(s32 *)(temp_v0 + 0x160) >> 0xd) ^ 1U) & 1;
 }
 
-extern f32 dds3CameraObjectBasicGetFovy(EffWorldNode *);
+extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *);
 
 extern void dds3SetScreenFovy(f32);
 
 void btlRefreshWorldCameraHandle(void) {
-    EffWorldNode *object;
-    EffWorldNode *handle;
+    dds3Basic_t *object;
+    dds3Basic_t *handle;
     if (((BtlState *)btlGetRuntime())->battleFlags & 2) {
         object = dds3GetActiveScene();
         if (object != NULL) {
@@ -5953,7 +5953,7 @@ extern s32 D_003BB668;
 extern s32 D_003BB664;
 
 s32 btlGetWorldObjectDefault(void) {
-    EffWorldNode *camera;
+    dds3Basic_t *camera;
     if (!(((BtlState *)btlGetRuntime())->battleFlags & 2)) {
         return D_003BB668;
     }
@@ -5973,7 +5973,7 @@ s32 btlIsWorldMotionIdle(void) {
         return 0;
     }
     {
-        EffWorldNode *camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
+        dds3Basic_t *camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
         if (camera == NULL) {
             return 0;
         }
@@ -6068,7 +6068,7 @@ extern char D_003A3E08[];
 extern void btlBossDebugPrintfN(s32, s32, s32, s32, ...);
 
 void btlDebugPrintWorldTransform(s32 x, s32 y) {
-    EffWorldNode *object;
+    dds3Basic_t *object;
 
     if (((BtlState *)btlGetRuntime())->battleFlags & 2) {
         object = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());

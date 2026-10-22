@@ -20,7 +20,7 @@ typedef struct EvtFrameStatePacket {
     SdfGsRegisterWrite bottomRightPosition;
     u64 blendGifTag;
     u64 blendGifRegisters;
-    SdfGsBlendRegisters blend;
+    sdfPrimTransElem_t blend;
 } EvtFrameStatePacket;
 
 typedef char EvtFrameStatePacketSizeCheck[sizeof(EvtFrameStatePacket) == 0xB0 ? 1 : -1];

@@ -4,7 +4,7 @@
 #include "common.h"
 
 struct MdlPadState;
-struct SdfListHead;
+struct sdfDrawTag_t;
 
 typedef struct MdlLightEditorState {
     f32 (**lights)[4];
@@ -13,7 +13,7 @@ typedef struct MdlLightEditorState {
     u8 editing;
     u8 blinkTick;
     s16 selection;
-    struct SdfListHead *packetList;
+    struct sdfDrawTag_t *packetList;
 } MdlLightEditorState;
 
 typedef char MdlLightEditorState_size[(sizeof(MdlLightEditorState) == 0x14) ? 1 : -1];

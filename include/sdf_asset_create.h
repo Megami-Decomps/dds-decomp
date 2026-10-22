@@ -1,8 +1,8 @@
 #ifndef SDF_ASSET_CREATE_H
 #define SDF_ASSET_CREATE_H
 
-struct SdfAsset;
+struct sdfMat_t;
 
-struct SdfAsset *sdfMatNew(void);
+struct sdfMat_t *sdfMatNew(void);
 
 #endif /* SDF_ASSET_CREATE_H */

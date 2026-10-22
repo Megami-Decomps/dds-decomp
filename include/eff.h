@@ -8,7 +8,7 @@ struct EffNode;
 struct EffMappedRecord;
 
 struct FilePacRequest;
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Packed position/basis query; the final word is a signed extent override. */
 typedef struct EffectVectorRequest {
@@ -57,8 +57,8 @@ typedef struct EffMagatuhiValueWork {
     u16 *writeIndices;
     u16 *validCounts;
     f32 (*angleRows)[4];
-    SdfTex *texture;
-    struct SdfMemBlock *allocationHandle;
+    sdfTexHandle_t *texture;
+    struct sdfMemHandle_t *allocationHandle;
 } EffMagatuhiValueWork;
 
 /* Seven copied words; the parent appends its independently allocated history. */
@@ -99,12 +99,12 @@ void effMagaCylinderSetPartPtrs(EffMagatuhiValueWork *work, s32 index);
 void effMagaCylinderSetPartPos(EffMagatuhiValueWork *work, s32 index, const f32 vector[4]);
 #endif
 
-struct MdlCtx;
-struct EffTrackPolyData;
+struct dds3ModelHandle_t;
+struct dds3HermitianTrackPoly_tag;
 
 /* Thirteen copied words, followed by an update counter and owned history. */
 typedef struct {
-    struct MdlCtx *model;
+    struct dds3ModelHandle_t *model;
     s32 idA;
     s32 idB;
     f32 startFrame;
@@ -119,7 +119,7 @@ typedef struct {
 typedef struct EffTrackPolyWork {
     EffTrackPolyParams params;
     u32 updateCount;
-    struct EffTrackPolyData *data;
+    struct dds3HermitianTrackPoly_tag *data;
 } EffTrackPolyWork;
 
 typedef char EffTrackPolyParams_size_must_be_0x34[(sizeof(EffTrackPolyParams) == 0x34) ? 1 : -1];
@@ -192,22 +192,22 @@ typedef struct {
     /* The native movie blender interpolates both center coordinates in one loop. */
     s32 center[2];
     EffResourceRectDrawParams draw;
-} EffResourceRectParams; /* 0x24 */
+} dds3Effect_PartialMultiFilterParam_t; /* 0x24 */
 
-void Eve_PartialMultiFilterSetParam(EffResourceRectParams *parameters);
+void Eve_PartialMultiFilterSetParam(dds3Effect_PartialMultiFilterParam_t *parameters);
 
 typedef struct {
-    EffResourceRectParams params;
-    SdfTex *texture;
+    dds3Effect_PartialMultiFilterParam_t params;
+    sdfTexHandle_t *texture;
 } EffResourceRectWork; /* 0x28 */
 
-EffResourceRectWork *dds3EffectPartialMultiFilterCreate(EffResourceRectParams *params);
+EffResourceRectWork *dds3EffectPartialMultiFilterCreate(dds3Effect_PartialMultiFilterParam_t *params);
 void dds3EffectPartialMultiFilterDelete(EffResourceRectWork *work);
 
 typedef char EffResourceRectDrawParams_size_must_be_0x18[(sizeof(EffResourceRectDrawParams) == 0x18) ? 1 : -1];
-typedef char EffResourceRectParams_size_must_be_0x24[(sizeof(EffResourceRectParams) == 0x24) ? 1 : -1];
+typedef char EffResourceRectParams_size_must_be_0x24[(sizeof(dds3Effect_PartialMultiFilterParam_t) == 0x24) ? 1 : -1];
 typedef char EffResourceRectWork_size_must_be_0x28[(sizeof(EffResourceRectWork) == 0x28) ? 1 : -1];
-typedef char EffResourceRectDrawParams_layout[((u32)&((EffResourceRectParams *)0)->draw == 0xC && (u32)&((EffResourceRectDrawParams *)0)->blendControl == 4 && (u32)&((EffResourceRectDrawParams *)0)->bounds == 8) ? 1 : -1];
+typedef char EffResourceRectDrawParams_layout[((u32)&((dds3Effect_PartialMultiFilterParam_t *)0)->draw == 0xC && (u32)&((EffResourceRectDrawParams *)0)->blendControl == 4 && (u32)&((EffResourceRectDrawParams *)0)->bounds == 8) ? 1 : -1];
 
 /* Random slot index and associated release id (0x8); DDS1/2 effect and panel views. */
 typedef struct EffCntRec {
@@ -219,8 +219,8 @@ typedef struct EffCntRec {
  * Keys are borrowed XYZ samples; the three polynomial coefficient banks share
  * the optional backing allocation. */
 typedef struct EffPrimitiveCurve {
-    struct SdfMemBlock *allocation;            /* 0x00: curve owner storage */
-    struct SdfMemBlock *coefficientAllocation; /* 0x04: cubic coefficient storage */
+    struct sdfMemHandle_t *allocation;            /* 0x00: curve owner storage */
+    struct sdfMemHandle_t *coefficientAllocation; /* 0x04: cubic coefficient storage */
     u32 recordCount;                          /* 0x08: number of XYZ keys */
     u16 interpolationMode;                    /* 0x0C: zero cubic, nonzero linear */
     u8 pad0E[2];
@@ -273,7 +273,7 @@ typedef struct EffSub {
 typedef struct EffArrHdr {
     void *slots; /* Slot-array base; effMath and effEvent use different slot types. */
     u32 unk4;   /* Slot count. */
-    struct SdfMemBlock *allocation; /* Retained allocation descriptor. */
+    struct sdfMemHandle_t *allocation; /* Retained allocation descriptor. */
 } EffArrHdr;
 
 /* Two-child draw descriptor at +0x34 in animation-list objects; child allocations end before it. */
@@ -282,7 +282,7 @@ typedef struct BillRenderPair {
     u16 cameraFacingMode; /* 0x08: value 1 builds a view-facing matrix; other values use identity. */
     u16 kind;
     u32 colors[2];
-    SdfListHead *packetList; /* 0x14 */
+    sdfDrawTag_t *packetList; /* 0x14 */
     struct BillRenderPair *next; /* 0x18 */
 } BillRenderPair;
 
@@ -295,7 +295,7 @@ struct BillChildPayload;
 /* Billboard common prefix and animation-list view (max 0x64); child allocations are 0x34 bytes. */
 struct BillOut;
 
-typedef struct BillObj {
+typedef struct billHandle_t {
     f32 position[4]; /* 0x00: copied as a four-component position by both render paths. */
     f32 childScaleX;  /* 0x10: set by dds3BillboardSetScale */
     f32 childScaleY;  /* 0x14 */
@@ -319,15 +319,15 @@ typedef struct BillObj {
     u32 animationEntryIndex; /* 0x58: selected nonempty animation descriptor */
     s32 entryCount;
     struct BillOut *resolvedEntries; /* 0x60: runtime animation state array */
-} BillObj;
+} billHandle_t;
 
 typedef char BillObj_size_must_be_0x64[
-    (sizeof(BillObj) == 0x64) ? 1 : -1];
+    (sizeof(billHandle_t) == 0x64) ? 1 : -1];
 typedef char BillObj_payload_offset_must_be_0x30[
-    ((u32)&((BillObj *)0)->payload == 0x30) ? 1 : -1];
+    ((u32)&((billHandle_t *)0)->payload == 0x30) ? 1 : -1];
 
 /* Serialized entry offsets are relative to BillData.base. */
-/* BillAnimationEntry.flags bits; distinct from entryModeFlags and BillObj.modeFlags. */
+/* BillAnimationEntry.flags bits; distinct from entryModeFlags and billHandle_t.modeFlags. */
 enum {
     BILL_ANIMATION_FLAG_FRAME_COLORS = 0x00000001,
     BILL_ANIMATION_FLAG_PACKET_LIST_2 = 0x00000002,
@@ -383,7 +383,7 @@ typedef struct BillOut {
 
 /* Runtime header precedes the copied resource bytes; the child table is indirect. */
 typedef struct BillData {
-    struct SdfMemBlock *allocation; /* Retained general-heap descriptor. */
+    struct sdfMemHandle_t *allocation; /* Retained general-heap descriptor. */
     u8 *base;
     BillAnimationEntry *entries;
     s32 entryCount;
@@ -420,7 +420,7 @@ typedef struct BillSnapshot {
     f32 y;
     f32 halfWidth;
     f32 halfHeight;
-    SdfTex *texture;
+    sdfTexHandle_t *texture;
     BillTextureQuad uv;
 } BillSnapshot;
 
@@ -443,7 +443,7 @@ typedef char BillPacketWork_size_must_be_0x400[
 
 /* Child manager at retained allocation +0x400; shared by resource and draw owners. */
 typedef struct BillChildPayload {
-    SdfTex *texture; /* 0x00: acquired texture reference. */
+    sdfTexHandle_t *texture; /* 0x00: acquired texture reference. */
     u16 variant; /* Child variant bits; signed inputs narrow on assignment. */
     u8 pad06[2];
     s32 refCount;      /* 0x08 */
@@ -452,10 +452,10 @@ typedef struct BillChildPayload {
     f32 y;             /* 0x20 */
     f32 halfWidth;  /* 0x24 */
     f32 halfHeight; /* 0x28 */
-    SdfListHead *pendingLists[5]; /* 0x2C */
+    sdfDrawTag_t *pendingLists[5]; /* 0x2C */
     u16 packetListIndex; /* 0x40 */
     u8 pad42[2];
-    struct SdfMemBlock *allocation; /* 0x44: allocation descriptor released with this child. */
+    struct sdfMemHandle_t *allocation; /* 0x44: allocation descriptor released with this child. */
     BillPacketWork *work; /* 0x48: retained packet-buffer address */
     struct BillChildPayload *next; /* 0x4C */
 } BillChildPayload;
@@ -477,13 +477,13 @@ typedef struct EffectConfig {
     u8 pad02[10];
 } EffectConfig;
 
-struct ParTable;
+struct dds3Particle_BlurBuff_t;
 struct ParSystem;
-struct EffTrackPolyList;
+struct effMTPolyListHandle_t;
 
 /* The kind tag selects one complete view of the 16-byte payload at +8. */
 typedef struct {
-    struct ParTable *table; /* +8: kind 1 history source */
+    struct dds3Particle_BlurBuff_t *table; /* +8: kind 1 history source */
     u8 opaque0C[0xC];       /* No other kind-1 payload words are read here. */
 } ParKindHistoryPayload; /* 0x10 */
 
@@ -505,7 +505,7 @@ typedef struct {
     f32 scale;                          /* +8: shared by kinds 2..4 */
     u32 firstGradientColor;             /* +0xC: kind 4 */
     u32 secondGradientColor;            /* +0x10: kind 4 */
-    struct EffTrackPolyList *modelList; /* +0x14: kind 4 */
+    struct effMTPolyListHandle_t *modelList; /* +0x14: kind 4 */
 } ParKindTrackPolygonPayload; /* 0x10 */
 
 typedef union {
@@ -565,7 +565,7 @@ typedef char EffectBufferRecord_size_must_be_0x40[(sizeof(EffectBufferRecord) ==
 
 /* Buffer allocation and record array owner (0x8); DDS1/2 game/code_00151F58/00159B48.c. */
 typedef struct EffectBufferTail {
-    SdfMemBlock *allocation;
+    sdfMemHandle_t *allocation;
     EffectBufferRecord *records;
 } EffectBufferTail;
 
@@ -591,7 +591,7 @@ typedef struct EffEmitterHead {
     u8 padA8[8];
     f32 matrix[16];        /* 0xB0 */
     u32 colorMask;         /* 0xF0 */
-    BillObj *billboard; /* 0xF4: owned billboard shared with the particle view */
+    billHandle_t *billboard; /* 0xF4: owned billboard shared with the particle view */
     EffectBufferTail *buffer; /* 0xF8 */
     u32 pendingRestartSteps;
     f32 backupMatrix[16];
@@ -625,9 +625,9 @@ typedef struct EffTemplatePacketList {
     };
     s32 recordList; /* 0x16C: start of the three-word packet records */
     s32 recordsPerPacket; /* 0x170 */
-    struct SdfMemBlock *listAllocation; /* 0x174: allocation descriptor */
+    struct sdfMemHandle_t *listAllocation; /* 0x174: allocation descriptor */
     void *auxiliaryData; /* 0x178: optional 16 bytes per packet */
-    struct SdfMemBlock *auxiliaryAllocation; /* 0x17C: allocation descriptor */
+    struct sdfMemHandle_t *auxiliaryAllocation; /* 0x17C: allocation descriptor */
 } EffTemplatePacketList;
 
 typedef char EffTemplatePacketList_layout_preserved[(sizeof(EffTemplatePacketList) == 0x180) ? 1 : -1];
@@ -655,15 +655,15 @@ typedef struct EffResourceWork {
     f32 (*positions)[4];
     f32 (*normals)[4];
     u32 *colors;
-    struct SdfMemBlock *streamAllocation;
-    SdfAsset *drawAsset;
-    struct SdfMemBlock *backingAllocation;
+    struct sdfMemHandle_t *streamAllocation;
+    sdfMat_t *drawAsset;
+    struct sdfMemHandle_t *backingAllocation;
 } EffResourceWork; /* 0x74 */
 typedef char EffResourceWork_drawAsset_offset_must_be_0x6C[
     ((u32)&((EffResourceWork *)0)->drawAsset == 0x6C) ? 1 : -1];
 
 /* Position/color arrays precede this render pool; constructors clear the full allocation. */
-typedef struct EffRecordPool {
+typedef struct dds3FlashPolyList_t {
     f32 matrix[16];
     f32 origin[3];
     u8 pad4C[4];
@@ -673,19 +673,19 @@ typedef struct EffRecordPool {
     f32 scale;
     u8 *recordBase;
     u8 *auxRecordBase;
-    SdfAsset *resource;
-    SdfMemBlock *buffer;
-} EffRecordPool; /* 0x70 */
+    sdfMat_t *resource;
+    sdfMemHandle_t *buffer;
+} dds3FlashPolyList_t; /* 0x70 */
 
-typedef char EffRecordPool_size_must_be_0x70[(sizeof(EffRecordPool) == 0x70) ? 1 : -1];
+typedef char EffRecordPool_size_must_be_0x70[(sizeof(dds3FlashPolyList_t) == 0x70) ? 1 : -1];
 typedef char EffRecordPool_resource_offset_must_be_0x68[
-    ((u32)&((EffRecordPool *)0)->resource == 0x68) ? 1 : -1];
+    ((u32)&((dds3FlashPolyList_t *)0)->resource == 0x68) ? 1 : -1];
 typedef char EffRecordPool_buffer_offset_must_be_0x6C[
-    ((u32)&((EffRecordPool *)0)->buffer == 0x6C) ? 1 : -1];
+    ((u32)&((dds3FlashPolyList_t *)0)->buffer == 0x6C) ? 1 : -1];
 typedef char EffRecordPool_recordBase_offset_must_be_0x60[
-    ((u32)&((EffRecordPool *)0)->recordBase == 0x60) ? 1 : -1];
+    ((u32)&((dds3FlashPolyList_t *)0)->recordBase == 0x60) ? 1 : -1];
 typedef char EffRecordPool_auxRecordBase_offset_must_be_0x64[
-    ((u32)&((EffRecordPool *)0)->auxRecordBase == 0x64) ? 1 : -1];
+    ((u32)&((dds3FlashPolyList_t *)0)->auxRecordBase == 0x64) ? 1 : -1];
 
 typedef struct EffRingParticle {
     u32 color;
@@ -725,8 +725,8 @@ typedef struct EffRingWork {
     f32 currentAxisOffset;
     f32 currentSideOffsetB;
     f32 currentSideOffsetA;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *recordPool;
+    sdfMemHandle_t *allocationHandle;
+    dds3FlashPolyList_t *recordPool;
 } EffRingWork;
 
 typedef char EffRingParticleSizeCheck[sizeof(EffRingParticle) == 0x10 ? 1 : -1];
@@ -761,8 +761,8 @@ typedef struct PcpFlashTrianglePulseWork {
     s32 updateCount;
     u32 tintColor;
     f32 renderScale;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
+    sdfMemHandle_t *allocationHandle;
+    dds3FlashPolyList_t *resourceHandle;
 } PcpFlashTrianglePulseWork;
 
 typedef char PcpFlashPulseParticleSizeCheck[sizeof(PcpFlashPulseParticle) == 0x10 ? 1 : -1];
@@ -770,7 +770,7 @@ typedef char PcpFlashTrianglePulseWorkSizeCheck[sizeof(PcpFlashTrianglePulseWork
 
 /* Shared scatter texture reference, created and released independently of pools. */
 typedef struct PcpScatterRes {
-    SdfTex *textureHandle;
+    sdfTexHandle_t *textureHandle;
     s32 refCount;
 } PcpScatterRes; /* 0x08 */
 
@@ -783,8 +783,8 @@ typedef struct PcpScatterPool {
     f32 unk1C;
     u8 *recordBase;
     u8 *auxRecordBase;
-    SdfAsset *drawAsset;
-    SdfMemBlock *allocation;
+    sdfMat_t *drawAsset;
+    sdfMemHandle_t *allocation;
     PcpScatterRes *sharedResource;
 } PcpScatterPool; /* 0x34 */
 typedef char PcpScatterPool_size_must_be_0x34[(sizeof(PcpScatterPool) == 0x34) ? 1 : -1];
@@ -844,7 +844,7 @@ typedef struct EffPCPNeedleWork {
     u32 count;
     struct ParSystem *system;
     EffResourceWork *resource;
-    SdfMemBlock *allocationHandle; /* Descriptor, not the retained data address. */
+    sdfMemHandle_t *allocationHandle; /* Descriptor, not the retained data address. */
 } EffPCPNeedleWork; /* 0x74, followed by count slots */
 
 typedef char EffResourceEntrySizeCheck[sizeof(EffResourceEntry) == 0x14 ? 1 : -1];
@@ -949,16 +949,16 @@ typedef struct EffectSlotDescription {
 
 /* Native 0x30-byte resource-slot owner: source descriptors and live work arrays. */
 typedef struct EffectSlotSet {
-    struct SdfMemBlock *sourceAllocation;
+    struct sdfMemHandle_t *sourceAllocation;
     u32 sharesTextureReferences;
     u32 count;
-    struct SdfMemBlock *descriptionAllocation;
+    struct sdfMemHandle_t *descriptionAllocation;
     EffectSlotDescription *descriptions;
-    struct SdfMemBlock *workAllocation;
+    struct sdfMemHandle_t *workAllocation;
     BdWork *workEntries;
     u32 textureCount;
-    struct SdfMemBlock *textureAllocation;
-    SdfTex **textureReferences;
+    struct sdfMemHandle_t *textureAllocation;
+    sdfTexHandle_t **textureReferences;
     s32 defaultValue;
     u8 pad2C[4];
 } EffectSlotSet;
@@ -996,11 +996,11 @@ typedef struct ParSystem {
     s32 cellCount;       /* 0x04 */
     s32 vertexWordCount; /* 0x08 */
     s32 groupDivisor;   /* 0x0C: cell-system allocator input */
-    struct SdfMemBlock *allocation; /* 0x10: geometry allocation descriptor */
+    struct sdfMemHandle_t *allocation; /* 0x10: geometry allocation descriptor */
     ParCell *cells;      /* 0x14 */
     u128 *vertices;      /* 0x18: backing vector history for all cells */
     u32 *colors;         /* 0x1C: backing color stream for all cells */
-    struct SdfAsset *asset; /* 0x20: submitted draw asset */
+    struct sdfMat_t *asset; /* 0x20: submitted draw asset */
     struct ParSystem *next; /* 0x24: pending cell-system list */
     s32 unk28;           /* 0x28 */
 } ParSystem;

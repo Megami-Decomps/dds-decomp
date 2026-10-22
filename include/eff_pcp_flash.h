@@ -227,8 +227,8 @@ struct PcpFlashStreakWork {
     s32 updateCount;
     u32 tintColor;
     f32 renderScale;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
+    sdfMemHandle_t *allocationHandle;
+    dds3FlashPolyList_t *resourceHandle;
 };
 
 typedef struct PcpFlashOrbitParticle PcpFlashOrbitParticle;
@@ -265,8 +265,8 @@ struct PcpFlashScalingOrbitWork {
     u32 updateCount;
     u32 tintColor;
     f32 renderScale;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
+    sdfMemHandle_t *allocationHandle;
+    dds3FlashPolyList_t *resourceHandle;
 };
 
 typedef struct PcpFlashAccumulatingParticle PcpFlashAccumulatingParticle;
@@ -307,8 +307,8 @@ struct PcpFlashAccumulatingWork {
     u32 updateCount;
     u32 tintColor;
     f32 renderScale;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
+    sdfMemHandle_t *allocationHandle;
+    dds3FlashPolyList_t *resourceHandle;
 };
 
 /* Shared 0x10-byte motion state: accumulator is an angle for orbit arcs and
@@ -358,8 +358,8 @@ struct PcpFlashOrbitArcWork {
     f32 normalSpan;
     f32 upSpan;
     f32 acrossSpan;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
+    sdfMemHandle_t *allocationHandle;
+    dds3FlashPolyList_t *resourceHandle;
 };
 
 typedef struct PcpFlashRotatingQuadParticle PcpFlashRotatingQuadParticle;
@@ -400,8 +400,8 @@ struct PcpFlashRotatingQuadWork {
     u32 updateCount;
     u32 tintColor;
     f32 renderScale;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
+    sdfMemHandle_t *allocationHandle;
+    dds3FlashPolyList_t *resourceHandle;
 };
 
 typedef struct PcpFlashRadialTriangleWork PcpFlashRadialTriangleWork;
@@ -425,8 +425,8 @@ struct PcpFlashRadialTriangleWork {
     s32 updateCount;
     u32 tintColor;
     f32 renderScale;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
+    sdfMemHandle_t *allocationHandle;
+    dds3FlashPolyList_t *resourceHandle;
 };
 
 typedef struct PcpFlashRadialStripParticle PcpFlashRadialStripParticle;
@@ -469,8 +469,8 @@ struct PcpFlashRadialStripWork {
     u32 updateCount;
     u32 tintColor;
     f32 renderScale;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
+    sdfMemHandle_t *allocationHandle;
+    dds3FlashPolyList_t *resourceHandle;
 };
 
 typedef struct PcpFlashFadingOrbitWork PcpFlashFadingOrbitWork;
@@ -499,8 +499,8 @@ struct PcpFlashFadingOrbitWork {
     u32 updateCount;
     u32 tintColor;
     f32 renderScale;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
+    sdfMemHandle_t *allocationHandle;
+    dds3FlashPolyList_t *resourceHandle;
 };
 
 typedef struct PcpFlashOffsetRadialWork PcpFlashOffsetRadialWork;
@@ -525,8 +525,8 @@ struct PcpFlashOffsetRadialWork {
     s32 updateCount;
     u32 tintColor;
     f32 renderScale;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
+    sdfMemHandle_t *allocationHandle;
+    dds3FlashPolyList_t *resourceHandle;
 };
 
 struct PcpFlashRotatingParticle {
@@ -599,7 +599,7 @@ typedef char PcpFlashTrianglePulseParamsCountOffsetCheck[
 typedef char PcpFlashTrianglePulseParamsDrawModeOffsetCheck[
     ((u32)&((PcpFlashTrianglePulseParams *)0)->drawMode) == 0x2C ? 1 : -1];
 
-/* Native constructors copy each field unchanged into EffRecordPool.drawMode. */
+/* Native constructors copy each field unchanged into dds3FlashPolyList_t.drawMode. */
 typedef char PcpFlashStreakParamsDrawModeOffsetCheck[
     ((u32)&((PcpFlashStreakParams *)0)->drawMode) == 0x3C ? 1 : -1];
 typedef char PcpFlashScalingOrbitParamsDrawModeOffsetCheck[

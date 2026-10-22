@@ -18,13 +18,13 @@ extern EvtFrameTableEntry D_00368768[];
 extern EvtFrameTableEntry D_003C9538[];
 #endif
 
-struct SdfTex;
-struct SdfMemBlock;
+struct sdfTexHandle_t;
+struct sdfMemHandle_t;
 
 /* The picture-task allocator creates this complete 0x08-byte state. */
 typedef struct EvtPictureWork {
     u32 drawEnabled; /* Only EVT_PICTURE_FLAG_DRAW_ENABLED is set or tested. */
-    struct SdfTex *texture;
+    struct sdfTexHandle_t *texture;
 } EvtPictureWork;
 
 typedef char EvtPictureWork_size_must_be_0x08[(sizeof(EvtPictureWork) == 0x08) ? 1 : -1];
@@ -45,7 +45,7 @@ typedef char EvtResourcePair_dataAddress_offset_must_be_0x04[((u32)&((EvtResourc
 /* Loaded resource table header: the resource handle, the origin of a
  * 32-byte-stride record array, and its record count. */
 typedef struct EvtLoadedRecord {
-    struct SdfMemBlock *handle; /* 0x0: released by sdfMemFreeDirect */
+    struct sdfMemHandle_t *handle; /* 0x0: released by sdfMemFreeDirect */
     u8 *records; /* 0x4: origin of a 32-byte-stride lookup */
     u32 recordCount; /* 0x8: bound used by the coordinate search */
 } EvtLoadedRecord;
@@ -66,18 +66,18 @@ struct BfFlw0Header;
 /* The object's 18 per-kind intrusive lists. */
 typedef struct EvtWorldSlot {
     s32 count;
-    EffWorldNode *head;
-    EffWorldNode *tail;
+    dds3Basic_t *head;
+    dds3Basic_t *tail;
 } EvtWorldSlot;
 
 typedef struct EvtWorldTable {
     s32 areaRoomKey; /* 0x00: packed area in the high halfword and room in the low halfword; -1 before assignment. */
-    struct SdfMemBlock *resource; /* 0x04: descriptor owning the slot array */
+    struct sdfMemHandle_t *resource; /* 0x04: descriptor owning the slot array */
     EvtWorldSlot *slots; /* 0x08; valid index range is a caller contract */
-    EffWorldNode *cameraObject; /* 0x0C: retained camera world node */
-    EffWorldNode *playerObject; /* 0x10 */
+    dds3Basic_t *cameraObject; /* 0x0C: retained camera world node */
+    dds3Basic_t *playerObject; /* 0x10 */
     u32 indexedHandle; /* 0x14 */
-    struct SdfMemBlock *sceneResourceHandle; /* 0x18: retained allocation descriptor; released at teardown. */
+    struct sdfMemHandle_t *sceneResourceHandle; /* 0x18: retained allocation descriptor; released at teardown. */
     struct BfFlw0Header *sceneScript; /* 0x1C: resolved FLW0 header used for script lookup. */
     s32 drawEnabled; /* 0x20: controls drawing of kind 2 */
     u8 pad24[0x1C]; /* The SDK constructor allocates 0x40 bytes. */
@@ -92,13 +92,13 @@ typedef char EvtWorldTable_size_must_be_0x40[
 
 
 /* Preserve the signed-byte drawing gate; only a missing payload is ignored. */
-void dds3VisibleSceneBasic(EffWorldNode *object, s8 enabled);
-void dds3SetMapNo(EffWorldNode *worldNode, u32 areaRoomKey);
-s32 dds3GetMapNo(EffWorldNode *worldNode);
+void dds3VisibleSceneBasic(dds3Basic_t *object, s8 enabled);
+void dds3SetMapNo(dds3Basic_t *worldNode, u32 areaRoomKey);
+s32 dds3GetMapNo(dds3Basic_t *worldNode);
 
 /* Scene resource scripts are selected by name on a world node. The start
  * result is the task-handle word returned by the script task creator. */
-s32 evtStartSceneResourceTask(EffWorldNode *worldNode, const char *taskName);
+s32 evtStartSceneResourceTask(dds3Basic_t *worldNode, const char *taskName);
 void dds3SceneBasicEndScript(void *unusedContext, const char *taskName);
 
 #endif /* EVT_WORLD_H */

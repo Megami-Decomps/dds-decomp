@@ -66,10 +66,10 @@ s32 evtCommand_LIGHT_PATH_WAIT(void) {
 }
 
 u32 evtCommand_TEX_BE(void) {
-    ScrData *work;
+    scrProcessWork_s *work;
     s32 id;
-    struct SdfTex *entry;
-    KwlnTask *task;
+    struct sdfTexHandle_t *entry;
+    dds3ProcessID_t *task;
 
     work = scrGetScriptHandle();
     if (work == NULL) {
@@ -92,8 +92,8 @@ u32 evtCommand_TEX_BE(void) {
 }
 
 u32 evtCommand_TEX_LOAD(void) {
-    ScrData *work;
-    KwlnTask *childTask;
+    scrProcessWork_s *work;
+    dds3ProcessID_t *childTask;
 
     work = scrGetScriptHandle();
     if (work == NULL) {
@@ -114,9 +114,9 @@ u32 evtCommand_TEX_ON(void) {
     s32 registered;
 
     task = scrGetIntPara(0);
-    registered = dds3ExistProcess((KwlnTask *)task);
+    registered = dds3ExistProcess((dds3ProcessID_t *)task);
     if (registered != 0) {
-        evtPictureDrawOn((KwlnTask *)task);
+        evtPictureDrawOn((dds3ProcessID_t *)task);
     }
     return 1;
 }
@@ -126,9 +126,9 @@ u32 evtCommand_TEX_OFF(void) {
     s32 registered;
 
     task = scrGetIntPara(0);
-    registered = dds3ExistProcess((KwlnTask *)task);
+    registered = dds3ExistProcess((dds3ProcessID_t *)task);
     if (registered != 0) {
-        evtPictureDrawOff((KwlnTask *)task);
+        evtPictureDrawOff((dds3ProcessID_t *)task);
     }
     return 1;
 }
@@ -140,7 +140,7 @@ u32 evtCommand_TEX_CLS(void) {
     s32 registered;
 
     task = scrGetIntPara(0);
-    registered = dds3ExistProcess((KwlnTask *)task);
+    registered = dds3ExistProcess((dds3ProcessID_t *)task);
     if (registered != 0) {
         evtKillPictureProcess(task);
     }
@@ -376,7 +376,7 @@ void evtDisableMoonDraw2(void) {
     DDS3_GBWK->world.flags = DDS3_GBWK->world.flags & 0xfd;
 }
 
-s32 evtUpdateSolarOverlayFade(KwlnTask *task) {
+s32 evtUpdateSolarOverlayFade(dds3ProcessID_t *task) {
     DatWorldState *state;
     SolarOverlayWork *overlay;
     f32 alpha;
@@ -461,7 +461,7 @@ void evtAdvanceSolarClockAndExpireControls(f32 travelDistance) {
 
 
 
-s32 evtCreateSolarOverlayWork(KwlnTask *task) {
+s32 evtCreateSolarOverlayWork(dds3ProcessID_t *task) {
     SolarOverlayWork *overlay;
 
     overlay = sdfChipAllocDirect(0x104);
@@ -471,7 +471,7 @@ s32 evtCreateSolarOverlayWork(KwlnTask *task) {
     return (s32)evtUpdateSolarOverlayFade;
 }
 
-void evtFreeSolarOverlayWork(KwlnTask *task) {
+void evtFreeSolarOverlayWork(dds3ProcessID_t *task) {
     SolarOverlayWork *overlay;
 
     overlay = (SolarOverlayWork *)dds3GetProcessData(task);

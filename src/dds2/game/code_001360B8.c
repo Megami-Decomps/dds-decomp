@@ -168,14 +168,14 @@ void fldInitializeDisplayPointerTable(void) {
 }
 
 extern u32 fldPlayerObject;
-struct EffWorldNode;
+struct dds3Basic_t;
 
 /* Sky lighting also supplies the player's packed colors and VU direction. */
 void fldApplySkyLightSetToPlayerVU(void) {
     FldLightSet *light;
     f32 vec[4];
     f32 dir[4];
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
     u32 colorA;
     u32 colorB;
     s32 red, green, blue;
@@ -233,7 +233,7 @@ void fldApplySkyLightSetToPlayerVU(void) {
         vec[3] = 1.0f;
         dds3SetAmbientColor(0, vec);
 
-        unit = evtGetUnitHandle2((struct EffWorldNode *)fldPlayerObject);
+        unit = evtGetUnitHandle2((struct dds3Basic_t *)fldPlayerObject);
         evtUnitLightOn(unit);
         red = light->unitColorA[0] * 128.0f;
         green = light->unitColorA[1] * 128.0f;
@@ -261,13 +261,13 @@ extern u32 D_00435F1C;
 void fldApplyLightSetToChaseCameraUnit(void) {
     FldLightSet *light = &((FldLightSet *)fldSkyLightSetBuffer)[D_00436128];
     f32 dir[4];
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
     u32 colorA;
     u32 colorB;
     s32 red, green, blue;
     s32 index;
 
-    unit = evtGetUnitHandle2((struct EffWorldNode *)D_00435F1C);
+    unit = evtGetUnitHandle2((struct dds3Basic_t *)D_00435F1C);
     index = 0;
     evtUnitLightOn(unit);
     red = light->unitColorA[0] * 128.0f;

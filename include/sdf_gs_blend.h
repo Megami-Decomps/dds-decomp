@@ -4,22 +4,22 @@
 #include "sdf_gs_packet.h"
 
 /* Register writers take the payload; DMA builders take its complete packet. */
-void sdfPrimSetAddTransElem(SdfGsBlendRegisters *packet);
-void sdfPrimSetOpaqueElem(SdfGsBlendRegisters *packet);
-void sdfPrimSetSubTransElem(SdfGsBlendRegisters *packet);
-void sdfPrimSetAddTrans2Elem(SdfGsBlendRegisters *packet);
-void sdfPrimSetOpaque2Elem(SdfGsBlendRegisters *packet);
-void sdfPrimSetSubTrans2Elem(SdfGsBlendRegisters *packet);
-void sdfPrimSetSemiTransElem(SdfGsBlendRegisters *packet);
-void sdfPrimSetSemiTrans2Elem(SdfGsBlendRegisters *packet);
+void sdfPrimSetAddTransElem(sdfPrimTransElem_t *packet);
+void sdfPrimSetOpaqueElem(sdfPrimTransElem_t *packet);
+void sdfPrimSetSubTransElem(sdfPrimTransElem_t *packet);
+void sdfPrimSetAddTrans2Elem(sdfPrimTransElem_t *packet);
+void sdfPrimSetOpaque2Elem(sdfPrimTransElem_t *packet);
+void sdfPrimSetSubTrans2Elem(sdfPrimTransElem_t *packet);
+void sdfPrimSetSemiTransElem(sdfPrimTransElem_t *packet);
+void sdfPrimSetSemiTrans2Elem(sdfPrimTransElem_t *packet);
 
-void sdfPrimSetAddTransPacket(SdfGsBlendPacket *packet);
-void sdfPrimSetOpaquePacket(SdfGsBlendPacket *packet);
-void sdfPrimSetSubTransPacket(SdfGsBlendPacket *packet);
-void sdfPrimSetSemiTransPacket(SdfGsBlendPacket *packet);
-void sdfPrimSetAddTrans2Packet(SdfGsBlendPacket *packet);
-void sdfPrimSetOpaque2Packet(SdfGsBlendPacket *packet);
-void sdfPrimSetSubTrans2Packet(SdfGsBlendPacket *packet);
-void sdfPrimSetSemiTrans2Packet(SdfGsBlendPacket *packet);
+void sdfPrimSetAddTransPacket(sdfPrimTransPacket_t *packet);
+void sdfPrimSetOpaquePacket(sdfPrimTransPacket_t *packet);
+void sdfPrimSetSubTransPacket(sdfPrimTransPacket_t *packet);
+void sdfPrimSetSemiTransPacket(sdfPrimTransPacket_t *packet);
+void sdfPrimSetAddTrans2Packet(sdfPrimTransPacket_t *packet);
+void sdfPrimSetOpaque2Packet(sdfPrimTransPacket_t *packet);
+void sdfPrimSetSubTrans2Packet(sdfPrimTransPacket_t *packet);
+void sdfPrimSetSemiTrans2Packet(sdfPrimTransPacket_t *packet);
 
 #endif

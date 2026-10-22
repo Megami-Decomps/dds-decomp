@@ -4,36 +4,36 @@
 #include "scr.h"
 
 
-void scrSetUserData(KwlnTask *task, void *actor) {
-    ScrData *context;
+void scrSetUserData(dds3ProcessID_t *task, void *actor) {
+    scrProcessWork_s *context;
 
-    context = (ScrData *)dds3GetProcessData(task);
+    context = (scrProcessWork_s *)dds3GetProcessData(task);
     context->actor = actor;
 }
 
-void *scrGetUserData(KwlnTask *task) {
-    ScrData *context;
+void *scrGetUserData(dds3ProcessID_t *task) {
+    scrProcessWork_s *context;
 
-    context = (ScrData *)dds3GetProcessData(task);
+    context = (scrProcessWork_s *)dds3GetProcessData(task);
     return context->actor;
 }
 
-void scrScriptShutdown(KwlnTask *task) {
-    ScrData *previousContext;
+void scrScriptShutdown(dds3ProcessID_t *task) {
+    scrProcessWork_s *previousContext;
 
-    previousContext = (ScrData *)dds3GetProcessData(task);
+    previousContext = (scrProcessWork_s *)dds3GetProcessData(task);
     if (previousContext != NULL) {
         scrProcDestroyTask(previousContext);
     }
     dds3SetProcessData(task, 0);
 }
 
-void scrRunScript(ScrData *context) {
+void scrRunScript(scrProcessWork_s *context) {
     scrTraceCode(context);
 }
 
-s32 scrScriptProcess(KwlnTask *task) {
-    switch (scrTraceCode((ScrData *)dds3GetProcessData(task))) {
+s32 scrScriptProcess(dds3ProcessID_t *task) {
+    switch (scrTraceCode((scrProcessWork_s *)dds3GetProcessData(task))) {
     case 0:
         return -1;
     case 2:
@@ -44,32 +44,32 @@ s32 scrScriptProcess(KwlnTask *task) {
     }
 }
 
-void PushInt(ScrData *script, s32 integerValue) {
+void PushInt(scrProcessWork_s *script, s32 integerValue) {
     script->stackTypes[script->sp] = 0;
     script->stackValues[script->sp].i = integerValue;
     script->sp = script->sp + 1;
 }
 
-void PushFloat(ScrData *script, f32 floatValue) {
+void PushFloat(scrProcessWork_s *script, f32 floatValue) {
     script->stackTypes[script->sp] = 1;
     script->stackValues[script->sp].f = floatValue;
     script->sp = script->sp + 1;
 }
 
-void PushStr(ScrData *script, char *string) {
+void PushStr(scrProcessWork_s *script, char *string) {
     script->stackTypes[script->sp] = 5;
     script->stackValues[script->sp].s = string;
     script->sp = script->sp + 1;
 }
 
-void PushRet(ScrData *script, s32 programCounter) {
+void PushRet(scrProcessWork_s *script, s32 programCounter) {
     script->stackTypes[script->sp] = 4;
     script->stackValues[script->sp].i = programCounter;
     script->sp = script->sp + 1;
 }
 
 
-s32 PopInt(ScrData *script) {
+s32 PopInt(scrProcessWork_s *script) {
     s32 stackIndex = script->sp;
 
     script->sp = stackIndex - 1;
@@ -87,7 +87,7 @@ s32 PopInt(ScrData *script) {
     return 0;
 }
 
-f32 PopFloat(ScrData *script) {
+f32 PopFloat(scrProcessWork_s *script) {
     s32 stackIndex = script->sp;
 
     script->sp = stackIndex - 1;
@@ -107,7 +107,7 @@ f32 PopFloat(ScrData *script) {
 }
 
 /* Push the word following the opcode, then advance past its operand. */
-u32 CodeFunc_PushI(ScrData *script) {
+u32 CodeFunc_PushI(scrProcessWork_s *script) {
     s32 operandPc;
 
     operandPc = script->pc + 1;

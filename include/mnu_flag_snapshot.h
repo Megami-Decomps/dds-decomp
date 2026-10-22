@@ -3,7 +3,7 @@
 
 #include "mnu_event_flag_entries.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 #define MNU_FLAG_SNAPSHOT_BYTES 0x140
 
@@ -25,11 +25,11 @@ typedef char MnuFlagSnapshotEntry_allocation_extent[
      MNU_FLAG_SNAPSHOT_BYTES) ? 1 : -1];
 
 /* The snapshot handle owns the allocation; its retained data holds flag pairs. */
-struct SdfMemBlock *mnuCreateFlagEntries(void);
+struct sdfMemHandle_t *mnuCreateFlagEntries(void);
 #ifdef VERSION_DDS1
-void mnuApplyFlagEntries(struct SdfMemBlock *snapshot);
+void mnuApplyFlagEntries(struct sdfMemHandle_t *snapshot);
 #else
-void mnuApplyCampResourceFlagEntries(struct SdfMemBlock *snapshot);
+void mnuApplyCampResourceFlagEntries(struct sdfMemHandle_t *snapshot);
 #endif
 
 #endif

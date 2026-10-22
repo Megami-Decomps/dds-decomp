@@ -136,10 +136,10 @@ s32 dds3FontReqDrawFont(void *owner) {
     return frFontDrawGlyphInDefaultMode(node->glyph);
 }
 
-extern FrFontGlyph * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph);
+extern _FRQ * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
 
 Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, void *text) {
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
     Dds3FontNode *node;
 
     glyph = frFontBuildGlyphChain(text, 0, 0, 0, NULL);

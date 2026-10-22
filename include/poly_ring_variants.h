@@ -4,7 +4,7 @@
 #include "poly_band.h"
 
 struct ParSystem;
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Arc and rotating-band owners share the ring template prefix, but have
  * distinct parameter tails and trailing per-entry record arrays. */
@@ -20,7 +20,7 @@ typedef struct PolyArc {
     void *dispatchArgA;             /* 0xDC */
     struct ParSystem *strip;         /* 0xE0 */
     PolyArcRecord *records;          /* 0xE4 */
-    struct SdfMemBlock *allocation;  /* 0xE8 */
+    struct sdfMemHandle_t *allocation;  /* 0xE8 */
     u8 padEC[4];
 } PolyArc; /* 0xF0, followed by eight-byte records */
 
@@ -41,7 +41,7 @@ typedef struct PolyRotatingBand {
     void *dispatchArgA;             /* 0xF0 */
     struct ParSystem *strip;         /* 0xF4 */
     PolyRotatingBandRecord *records; /* 0xF8 */
-    struct SdfMemBlock *allocation;  /* 0xFC */
+    struct sdfMemHandle_t *allocation;  /* 0xFC */
 } PolyRotatingBand; /* 0x100, followed by 20-byte records */
 
 /* Creation clamps the shared segment-count field through this typed view. */

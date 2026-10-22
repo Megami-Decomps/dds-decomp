@@ -3,9 +3,9 @@
 
 #include "common.h"
 
-struct DatPartyRecord;
+struct datUnitWork_t;
 
-u32 btlComputeSkillAdjustedMaxHp(struct DatPartyRecord *record);
-u32 btlComputeSkillAdjustedMaxMp(struct DatPartyRecord *record);
+u32 btlComputeSkillAdjustedMaxHp(struct datUnitWork_t *record);
+u32 btlComputeSkillAdjustedMaxMp(struct datUnitWork_t *record);
 
 #endif

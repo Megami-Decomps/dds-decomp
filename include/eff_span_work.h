@@ -6,7 +6,7 @@
 
 struct EffPointSet;
 struct EffTrackSet;
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Span table layout shared by the DDS1/DDS2 model-effect implementations. */
 typedef struct EffSpanEntry {
@@ -27,7 +27,7 @@ typedef struct EffSpanTable {
     u32 count;
     u16 total;
     u8 pad0A[2];
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
 } EffSpanTable;
 
 /* Inline source prefix consumed by the paired particle-span owners. Bytes in

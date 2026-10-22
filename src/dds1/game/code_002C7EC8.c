@@ -21,11 +21,11 @@ extern float vecLength(float *vector);
 
 
 
-struct FrFontGlyph;
-extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *glyph, s8 mode);
+struct _FRQ;
+extern s32 frFontDrawGlyphWithSharedFlags(struct _FRQ *glyph, s8 mode);
 
 void sdfCounterDrawGlyphAtGridCell(s32 gridX, s32 gridY, u32 style, const u8 *text) {
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
 
     glyph = itfCreateConvertedTextGlyph(gridX << 4, gridY << 3, 0, style, text, 0);
     frFontDrawGlyphWithSharedFlags(glyph, 1);
@@ -298,9 +298,9 @@ extern float sdfPowFloatByTruncatedExponent(float base, float exponent);
 
 /* Sample a Bezier curve of the given degree: binomial coefficients first, then the Bernstein
  * weighted sum of the control points for sampleCount + 1 evenly spaced parameters. */
-struct SdfMemBlock *sdfSampleBernsteinCurve(SdfMathVector4 *controlPoints, s32 degree, s32 sampleCount) {
-    struct SdfMemBlock *outputBlock;
-    struct SdfMemBlock *coefficientBlock;
+struct sdfMemHandle_t *sdfSampleBernsteinCurve(SdfMathVector4 *controlPoints, s32 degree, s32 sampleCount) {
+    struct sdfMemHandle_t *outputBlock;
+    struct sdfMemHandle_t *coefficientBlock;
     f32 *coefficients;
     SdfMathVector4 *output;
     SdfMathVector4 *sample;

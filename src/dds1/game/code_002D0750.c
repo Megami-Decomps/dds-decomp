@@ -23,9 +23,9 @@ extern SdfPendingRequest sdfMemDelayedResrcCB;
 
 
 /* Resize backing storage while preserving this resource's allocation descriptor. */
-void sdfMemReallocRecord(SdfMemBlock *allocation, s32 size) {
-    SdfMemBlock *nextBlock;
-    SdfMemBlock *replacement;
+void sdfMemReallocRecord(sdfMemHandle_t *allocation, s32 size) {
+    sdfMemHandle_t *nextBlock;
+    sdfMemHandle_t *replacement;
     s32 temporaryAddress;
     s32 interruptsDisabled;
     s32 currentSize;
@@ -62,7 +62,7 @@ void sdfMemReallocRecord(SdfMemBlock *allocation, s32 size) {
             allocation->prev = replacement->prev;
             allocation->address = replacement->address;
             allocation->next = replacement->next;
-            replacement->prev = (SdfMemBlock *)temporaryAddress;
+            replacement->prev = (sdfMemHandle_t *)temporaryAddress;
             replacement->next = nextBlock;
             replacement->address = oldAddress;
             allocation->prev->next = allocation;
@@ -75,13 +75,13 @@ void sdfMemReallocRecord(SdfMemBlock *allocation, s32 size) {
         nextBlock->address = temporaryAddress + size;
     } else {
         temporaryAddress = (s32)sdfChipAllocDirect(0x10);
-        ((SdfMemBlock *)temporaryAddress)->prev = allocation;
-        ((SdfMemBlock *)temporaryAddress)->next = nextBlock;
-        nextBlock->prev = (SdfMemBlock *)temporaryAddress;
-        ((SdfMemBlock *)temporaryAddress)->state = SDF_HEAP_BLOCK_FREE;
-        allocation->next = (SdfMemBlock *)temporaryAddress;
-        ((SdfMemBlock *)temporaryAddress)->referenceCount = 0;
-        ((SdfMemBlock *)temporaryAddress)->address = allocation->address + size;
+        ((sdfMemHandle_t *)temporaryAddress)->prev = allocation;
+        ((sdfMemHandle_t *)temporaryAddress)->next = nextBlock;
+        nextBlock->prev = (sdfMemHandle_t *)temporaryAddress;
+        ((sdfMemHandle_t *)temporaryAddress)->state = SDF_HEAP_BLOCK_FREE;
+        allocation->next = (sdfMemHandle_t *)temporaryAddress;
+        ((sdfMemHandle_t *)temporaryAddress)->referenceCount = 0;
+        ((sdfMemHandle_t *)temporaryAddress)->address = allocation->address + size;
     }
     if (interruptsDisabled != 0) {
         EIntr();
@@ -90,15 +90,15 @@ void sdfMemReallocRecord(SdfMemBlock *allocation, s32 size) {
 
 
 /* Unlink the successor, not node itself, and reconnect both neighboring links. */
-void sdfMemFreeMerge(SdfMemBlock *node) {
-    SdfMemBlock *followingNode = node->next->next;
+void sdfMemFreeMerge(sdfMemHandle_t *node) {
+    sdfMemHandle_t *followingNode = node->next->next;
     followingNode->prev = node;
     node->next = followingNode;
 }
 
 /* Coalesce adjacent free records, then recycle this record or mark it free. */
-void sdfMemFreeDirect(struct SdfMemBlock *allocation) {
-    SdfMemBlock *nextBlock;
+void sdfMemFreeDirect(struct sdfMemHandle_t *allocation) {
+    sdfMemHandle_t *nextBlock;
     s32 interruptsDisabled;
 
     if (allocation == NULL) {
@@ -124,7 +124,7 @@ void sdfMemFreeDirect(struct SdfMemBlock *allocation) {
 
 /* Resolve a data address to its allocation record before releasing it. */
 void sdfMemFreePtrDirect(void *address) {
-    SdfMemBlock *allocation;
+    sdfMemHandle_t *allocation;
 
     allocation = sdfMemGetHandleByPtr(address);
     sdfMemFreeDirect(allocation);
@@ -137,13 +137,13 @@ void sdfMemFreeHandleDirect(s32 *handleSlot) {
     allocationHandle = *handleSlot;
     if (allocationHandle != 0) {
         *handleSlot = 0;
-        sdfMemFreeDirect((struct SdfMemBlock *)allocationHandle);
+        sdfMemFreeDirect((struct sdfMemHandle_t *)allocationHandle);
         return;
     }
 }
 
 /* Zero is a sentinel and is never submitted to the pending queue. */
-void sdfMemFreeDelayedDirect(struct SdfMemBlock *allocation) {
+void sdfMemFreeDelayedDirect(struct sdfMemHandle_t *allocation) {
     if (allocation != NULL) {
         sdfDelayedResrcEntry(&sdfMemDelayedResrcCB, allocation);
     }
@@ -151,13 +151,13 @@ void sdfMemFreeDelayedDirect(struct SdfMemBlock *allocation) {
 
 
 /* Increment the signed reference count and return the stored data address. */
-u32 sdfMemLock(SdfMemBlock *allocation) {
+u32 sdfMemLock(sdfMemHandle_t *allocation) {
     allocation->referenceCount = allocation->referenceCount + 1;
     return allocation->address;
 }
 
 /* This path reads the same reference-count storage unsigned and never decrements zero. */
-void sdfMemUnlock(SdfMemBlock *allocation) {
+void sdfMemUnlock(sdfMemHandle_t *allocation) {
     u16 referenceCount = (u16)allocation->referenceCount;
     if (referenceCount != 0) {
         allocation->referenceCount = (s16)(referenceCount - 1);
@@ -165,9 +165,9 @@ void sdfMemUnlock(SdfMemBlock *allocation) {
 }
 
 /* The address must belong to an existing used block: the end-marker path does not end this scan. */
-SdfMemBlock *sdfMemGetHandleByPtr(void *address) {
+sdfMemHandle_t *sdfMemGetHandleByPtr(void *address) {
     SdfMemHeap *heap = &sdfMemCB;
-    SdfMemBlock *block;
+    sdfMemHandle_t *block;
     s32 interruptsDisabled;
 
     interruptsDisabled = DIntr();
@@ -189,7 +189,7 @@ SdfMemBlock *sdfMemGetHandleByPtr(void *address) {
 
 /* Walk the general heap's block list and write its statistics: total bytes, free bytes, largest and smallest free block, block count and free block count. */
 void sdfMemGetInfo(SdfGeneralHeapStats *stats) {
-    SdfMemBlock *block = sdfMemCB.head.next;
+    sdfMemHandle_t *block = sdfMemCB.head.next;
     s32 totalBytes = 0;
     s32 freeBytes = 0;
     s32 largestFreeBytes = 0;
@@ -224,9 +224,9 @@ void sdfMemGetInfo(SdfGeneralHeapStats *stats) {
 }
 
 /* Find the used heap block that contains `address`; NULL when the end marker is reached. */
-SdfMemBlock *sdfFindGeneralBlockContaining(s32 address) {
-    SdfMemBlock *block = sdfMemCB.head.next;
-    SdfMemBlock *nextBlock;
+sdfMemHandle_t *sdfFindGeneralBlockContaining(s32 address) {
+    sdfMemHandle_t *block = sdfMemCB.head.next;
+    sdfMemHandle_t *nextBlock;
 
     for (;; block = nextBlock) {
         nextBlock = block->next;
@@ -247,7 +247,7 @@ s32 SdfIopFileRpc(const char *name, s32 dataSize, const void *data, s32 *outSize
     u8 replyScratch[0x50];
     s32 nameLength = strlen(name);
     s32 requestBytes = nameLength + dataSize + SDF_NAMED_REQUEST_OVERHEAD_BYTES;
-    u32 *requestWords = (u32 *)sdfMemLock((struct SdfMemBlock *)sdfMemAllocDirect(requestBytes));
+    u32 *requestWords = (u32 *)sdfMemLock((struct sdfMemHandle_t *)sdfMemAllocDirect(requestBytes));
     u32 *replyWords;
     s32 result;
 

@@ -39,6 +39,6 @@ typedef struct {
     u8 *secondCoordinates; /* 0xA4 */
     u8 *vertexColors;      /* 0xA8 */
     f32 depth;             /* 0xAC */
-} VuWork;
+} corePktCb_t;
 
 #endif /* SDF_VU_WORK_H */

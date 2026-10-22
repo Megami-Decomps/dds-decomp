@@ -35,7 +35,7 @@ void DebugMoveWinAlpha(struct ItfMesBlkA4 *panel);
 /* Clear the 32 encoded-text address slots owned by a message window. */
 void InitializeVariable(struct ItfMesTextSlots *slots);
 
-struct SdfTex;
-struct SdfTex *itfMesGetWindowTexture(void);
+struct sdfTexHandle_t;
+struct sdfTexHandle_t *itfMesGetWindowTexture(void);
 
 #endif /* ITF_MES_WINDOW_H */

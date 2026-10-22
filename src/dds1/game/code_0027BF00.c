@@ -72,13 +72,13 @@ extern void mnuUpdateWindowPanelHandleStates(MenuPanelHandles *);
 
 extern void mnuDrawWindowSprites();
 
-extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
+extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
 
 extern s32 prfResolveMantraNameOrFallback(u16, u8 **);
 
-extern void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
+extern void frFontCenterGlyphChainAt(s32 x, s32 y, _FRQ *glyphChain);
 
-extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
 typedef struct MenuListNode MenuListNode;
 
 extern void qsort(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
@@ -190,7 +190,7 @@ void mnuDispatchEntryWords(EffectSlotSet *menu, s32 entryIndex, MenuListNode *en
     }
 }
 
-extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
 extern const char D_003BC718[];
 
 /* Draw visible rows, preserving each row's glyph chain and callback state. */
@@ -205,7 +205,7 @@ void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
     mnuDecreaseListNodeFadeCounters(list);
     while (node != NULL && row < list->visibleCount) {
         u32 color = (node->flags48 & 1) ? 0xA09DC340 : 0xA09DC380;
-        FrFontGlyph *glyph = NULL;
+        _FRQ *glyph = NULL;
         s32 chainFlag = 0;
 
         color = mnuDispatchByFlag(color, node);
@@ -605,7 +605,7 @@ void mnuSpinForWindowListCount(MenuWindowContainer *window) {
 
 
 typedef struct MenuWindowSpriteGroup {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u32 variant;
     u8 pad8[4];
     struct EffectSlotSet *sprites[7];
@@ -660,7 +660,7 @@ extern void mnuInitializeWindowSpriteGroup(struct MenuWindowSpriteGroup *, u32, 
 
 /* Allocate/clear the native seven-sprite resource group before its initializer runs. */
 MenuWindowSpriteGroup *mnuCreateWindowState(u32 source, u32 mode, u32 variant, u32 option) {
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(sizeof(MenuWindowSpriteGroup));
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(sizeof(MenuWindowSpriteGroup));
     MenuWindowSpriteGroup *group = (MenuWindowSpriteGroup *)sdfMemLock(allocation);
 
     memset(group, 0, sizeof(MenuWindowSpriteGroup));
@@ -1063,7 +1063,7 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
         mnuComparePrimaryKeyAscending, mnuCompareSecondaryKeyAscending, mnuCompareTertiaryKeyAscending
     };
     s32 nodeCount = 0;
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(menu->count * MNU_LIST_POINTER_BYTES);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(menu->count * MNU_LIST_POINTER_BYTES);
     MenuListNode **items = (MenuListNode **)sdfMemLock(allocation);
     MenuListNode **writeCursor = items;
     MenuListNode *node;
@@ -1389,7 +1389,7 @@ extern char D_003BC720[];
  * leaving 73 of 144 words different. */
 void mnuDrawPartyPageContents(s32 x, s32 y, s32 z, s32 layout, MenuPageResources *page, s32 drawArg) {
     char text[0x10];
-    FrFontGlyph *glyph;
+    _FRQ *glyph;
 
     if (layout != 1) {
         goto compact;
@@ -1765,13 +1765,13 @@ void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSe
     }
 }
 
-extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
+extern s32 mnuGetSelectionFromFlags(datUnitWork_t *);
 
 /* Rebuild one party row's icon and frame resources from its current selectors. */
 void mnuRebuildPartySlotResources(MenuPageWindow *window, s32 partySlotIndex, s32 kind) {
     MenuPageSlot *slot = &window->slots[partySlotIndex];
     PartyPanelEntry *entry = &window->records->slots[partySlotIndex];
-    DatPartyRecord *actor = &DDS3_GBWK->party[entry->index];
+    datUnitWork_t *actor = &DDS3_GBWK->party[entry->index];
     s32 resourceIndex;
     s32 selection;
 
@@ -2189,7 +2189,7 @@ s32 mnuGetPartyRowDrawState(MenuPageWindow *window, s32 row) {
     s32 mode;
     s32 target;
     s32 highlighted;
-    DatPartyRecord *party;
+    datUnitWork_t *party;
 
     target = 0;
     mode = 0;
@@ -2278,9 +2278,9 @@ s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unused
     }
 }
 
-extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
+extern u16 mnuGetPartyEntryMenuValue(datUnitWork_t *);
 extern u16 evtGetIndexedEventRecordId(s32);
-extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
 extern u8 *D_003BAA84;
 extern char D_003BC720[];
 extern u8 D_003BC730[];
@@ -2293,7 +2293,7 @@ void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *pag
     s32 value;
     s32 alpha;
     s32 color;
-    FrFontGlyph *glyph;
+    _FRQ *glyph;
 
     value = mnuGetPartyEntryMenuValue(&DDS3_GBWK->party[partyIndex]);
     alpha = page->drawAlpha;
@@ -2344,11 +2344,11 @@ void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *pag
 
 extern void prfCopyMantraNamePart(u32 textId, s32 mode, char *destination);
 
-extern FrFontGlyph * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph);
+extern _FRQ * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
 
 void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 surface) {
     char text[0x40];
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
     s32 width;
 
     prfCopyMantraNamePart(textId & 0xFFFF, 1, text);
@@ -2366,7 +2366,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
     s32 profileId = ptyGetCurrentProfileId(&DDS3_GBWK->party[partyIndex]);
     s32 code;
     s32 color;
-    FrFontGlyph *glyph;
+    _FRQ *glyph;
 
     color = fclBlendColor(0xA09DC380, 0xA09DC300, fade);
     code = selectedCode != 0 ? selectedCode : profileId;
@@ -2382,16 +2382,16 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
     }
 }
 
-extern u32 ptyComputeTotalExp(DatPartyRecord *, s32);
+extern u32 ptyComputeTotalExp(datUnitWork_t *, s32);
 extern char D_003BC740[];
 
 void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
                    s32 partyIndex, u32 flags, s32 surface) {
     char text[0x40];
-    DatPartyRecord *unit = &DDS3_GBWK->party[partyIndex];
+    datUnitWork_t *unit = &DDS3_GBWK->party[partyIndex];
     s32 color;
     s32 remainingExp;
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
 
     if (slot->iconBundle != NULL) {
         mnuDrawAndUpdateFadingSprites(x, y, depth, slot->kind,

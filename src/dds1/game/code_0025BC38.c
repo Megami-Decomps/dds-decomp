@@ -350,7 +350,7 @@ typedef struct MnuProfileMarkerIds {
 
 extern MnuProfileMarkerIds D_003BC4D0[];
 extern u32 prfGetCapValue(u16);
-extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
+extern u32 ptyGetProfileRecordValue(struct datUnitWork_t *, u16);
 extern u32 mnuGetMantraPrerequisiteFlags(s32, MnuMantraGridEntry *,
                                         MnuMantraNodeState *, MnuProfileProgress *);
 
@@ -471,7 +471,7 @@ typedef struct MnuProfileIdList {
 
 extern const MnuProfileIdList D_003AFA00;
 extern u32 prfGetCapValue(u16);
-extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
+extern u32 ptyGetProfileRecordValue(struct datUnitWork_t *, u16);
 extern void mnuDrawMantraSceneSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                                                 s32 flags, s32 context);
 

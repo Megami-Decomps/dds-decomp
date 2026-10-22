@@ -49,8 +49,8 @@
 #include "prf_profile_cap.h"
 /* Declared before first use (were implicit int). */
 extern u16 btlCheckSelectedPartyCommandEligibility(s32 commandId, u32 memberMask);
-extern s32 datAddHp(DatPartyRecord *unit, s32 delta);
-extern s32 datAddMp(DatPartyRecord *unit, s32 delta);
+extern s32 datAddHp(datUnitWork_t *unit, s32 delta);
+extern s32 datAddMp(datUnitWork_t *unit, s32 delta);
 extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText);
 extern void evtFreeStage(void);
 extern void fldActivatePendingSceneCommand(void);
@@ -59,7 +59,7 @@ extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceInde
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *resource, s32 resourceIndex, s32 x, s32 y, s32 width, s32 height);
 extern void kwlnDebugGraphSetEnabled(s8 enabled);
 extern u8 ptyIsRosterEntryPresent(s32 rosterIndex);
-extern s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item);
+extern s32 sdfApplyCommandResults(s32 channel, s32 queryArg, datUnitWork_t *item);
 extern void sndDestroyFileQueueWrapper(u32 handle);
 /* Original-style implicit int, kept: matched code depends on it: qsort, sndCreateSystemEffectHandle. */
 
@@ -122,7 +122,7 @@ extern s32 mnuLookupRangeEntry(u16);
 
 extern s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot);
 
-extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
+extern void ptyRecomputeMaxHpMp(datUnitWork_t *);
 
 
 extern s32 evtStageTestAdvanceResourceWork(void);
@@ -140,7 +140,7 @@ extern void evtStageTestQueueMotionSegment(u32, f32, f32);
 extern void evtStageTestCreateModelEffect(s32);
 extern void evtStageTestUpdateCamera(void);
 extern void btlUpdateJobPositionFromModel(s32);
-extern u32 ptyGetSkillNibbleState(DatPartyRecord *, u16);
+extern u32 ptyGetSkillNibbleState(datUnitWork_t *, u16);
 
 extern void evtStageTestStop(void);
 
@@ -167,7 +167,7 @@ extern void evtStageTestAdvanceMotionQueue(void);
 
 
 
-extern EffWorldNode *evtAddCamera(f32 *pos, f32 *rot);
+extern dds3Basic_t *evtAddCamera(f32 *pos, f32 *rot);
 
 extern char D_00437CB0[];
 
@@ -631,7 +631,7 @@ extern void mnuDrawPartyProfileAndExpOverlay(s32, s32, s32, MenuPageSlot *, s32,
 extern s32 mnuClearWindowPendingFlagAfterSelection();
 extern void uiDrawActiveSurfaceRegion(s32);
 extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
-extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
+extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
 u32 mnuGetPanelRatioColor(s32, s32, s32);
 void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
 void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
@@ -708,7 +708,7 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     sprintf(text, D_00437C68, level);
     if (panel->iconBundle != NULL) {
         u32 bundleFade = panel->iconBundle->fade;
-        struct FrFontGlyph *glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 0x10, z,
+        struct _FRQ *glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 0x10, z,
                           fclBlendColor(0xA09DC380, 0xA09DC300, bundleFade), text, NULL);
         frSetFontColorNo(glyph, 3);
         frFontDrawGlyphChain(glyph, 1, surface);
@@ -720,7 +720,7 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     effDrawTextureSlotWithBlendedCornerColors(labelX, labelY, z, alpha,
                   1, panel->icon[2], 0, surface);
     {
-        struct FrFontGlyph *glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 0x10, z,
+        struct _FRQ *glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 0x10, z,
                           fclBlendColor(0xA09DC380, 0xA09DC300, alpha), text, NULL);
         frFontDrawGlyphChain(glyph, 1, surface);
         frDestroyFontRequestAfter(glyph);
@@ -771,9 +771,9 @@ extern void mnuUpdateAndDrawPartyCommandQueue(s32, s32, s32, MenuQueuedCommand *
 extern s32 mnuClearWindowPendingFlagAfterSelection();
 extern void uiDrawActiveSurfaceRegion(s32);
 extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
-typedef struct FrFontGlyph FrFontGlyph;
-extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
-extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
+typedef struct _FRQ _FRQ;
+extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
 u32 mnuGetPanelRatioColor(s32, s32, s32);
 void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
 
@@ -790,7 +790,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     u32 textColor = fclBlendColor(0x80808080, 0x80808000, alpha);
     s32 labelX;
     s32 labelY;
-    FrFontGlyph *glyph;
+    _FRQ *glyph;
     s32 selection;
     s32 level;
     s32 iconX;
@@ -1192,7 +1192,7 @@ u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
 extern void mnuDrawAndAdvancePanelItem(s32, s32, s32, s32, u32, MenuPanelItem *, u32);
 
 /* Draw the five party stats, including the sequel's candidate-value colors. */
-void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth, DatPartyRecord *partyRecord,
+void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth, datUnitWork_t *partyRecord,
                                  MenuPanelGroup *group, s32 mode, s32 drawFlags) {
     s32 index;
     s32 selectionMode;
@@ -1549,10 +1549,10 @@ u32 mnuGetPanelRatioColor(s32 useDefault, s32 amount, s32 divisor) {
     return color;
 }
 
-typedef struct FrFontGlyph FrFontGlyph;
+typedef struct _FRQ _FRQ;
 extern char D_00437C88[];
-extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
-extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
+extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
 INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawRatioPanelContents);
 
 extern void mnuDrawRatioPanelContents(s32, s32, s32, u32, u32, s32, s32, MenuPageBar *, u32);
@@ -1702,7 +1702,7 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
     s32 value;
     u32 fade = item->initialValue;
     u32 color;
-    FrFontGlyph *glyph;
+    _FRQ *glyph;
 
     effDrawTextureSlotWithBlendedCornerColors(x, y, depth, fade, 0, item->spriteGridSlots[0].set,
                   item->spriteGridSlots[0].index, flags);
@@ -1755,11 +1755,11 @@ void mnuSetProfilePanelValues(MenuProfilePanel *panel, s32 capValue, s32 optionV
     panel->option = optionValue;
 }
 
-extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
-extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
+extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
+extern u32 scrGetSelectedScriptEntryId(datUnitWork_t *);
 
 /* Create a profile panel and initialize its five native random words. */
-MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState) {
+MenuProfilePanel *mnuCreateProfilePanel(datUnitWork_t *selectionState) {
     MenuProfilePanel *panel = (MenuProfilePanel *)sdfChipAllocDirect(MNU_PROFILE_PANEL_BYTES);
     s32 profileId;
     DatProfileRecord *profileRecord;
@@ -1996,7 +1996,7 @@ void mnuBindPresentMenuEntry(MenuPopupState *state, s32 *entrySlot) {
     }
 }
 
-void mnuPopulatePartyPanelSlot(DatPartyRecord *partyRecord, s32 unused, u32 index, PartyPanel *panel) {
+void mnuPopulatePartyPanelSlot(datUnitWork_t *partyRecord, s32 unused, u32 index, PartyPanel *panel) {
     s32 i;
 
     if (partyRecord->flags & 2)
@@ -2017,7 +2017,7 @@ void mnuPopulatePartyPanelSlot(DatPartyRecord *partyRecord, s32 unused, u32 inde
 /* Populate occupied party slots; empty slots retain a unit index of -1. */
 void mnuInitPartyPanelSlots(PartyPanel *panel) {
     u32 partyIndex;
-    DatPartyRecord *partyEntry;
+    datUnitWork_t *partyEntry;
 
     memset(panel, 0, 0x10C);
     panel->frontlineCount = 0;
@@ -2282,9 +2282,9 @@ void mnuPlayDefaultInputSounds(u32 inputFlags) {
 
 
 /* Find the first occupied slot with the same table ID; zero also serves as no-match. */
-s32 mnuFindMatchingPartyEntryIndex(DatPartyRecord *targetEntry) {
+s32 mnuFindMatchingPartyEntryIndex(datUnitWork_t *targetEntry) {
     s32 partyIndex;
-    DatPartyRecord *partyEntry = DDS3_GBWK->party;
+    datUnitWork_t *partyEntry = DDS3_GBWK->party;
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++, partyEntry++) {
         if ((partyEntry->flags & 1) &&
             targetEntry->unitId == partyEntry->unitId) {
@@ -2369,7 +2369,7 @@ u8 mnuGetRangeEntryKind(u32 commandId) {
 }
 
 /* HP-kind values use max HP as a percentage basis; other kinds retain the stored value. */
-u16 mnuGetAdjustedEntryValue(s32 commandId, DatPartyRecord *actor) {
+u16 mnuGetAdjustedEntryValue(s32 commandId, datUnitWork_t *actor) {
     DatCommandRecord *command = (DatCommandRecord *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
     u16 entryValue = command->costPercentage;
     u16 flatAddition = command->costBase;
@@ -2392,7 +2392,7 @@ s32 mnuGetRangeEntryFlatValue(s32 id) {
 }
 
 /* Compare the stored raw HP/MP cost; equality is affordable and other kinds pass. */
-s32 mnuCanAffordEntryCost(u16 commandId, DatPartyRecord *actorEntry) {
+s32 mnuCanAffordEntryCost(u16 commandId, datUnitWork_t *actorEntry) {
     u16 cost = datCommandRecords[commandId].costPercentage;
     s32 costKind = mnuGetRangeEntryKind(commandId);
 
@@ -2412,7 +2412,7 @@ s32 mnuCanAffordEntryCost(u16 commandId, DatPartyRecord *actorEntry) {
 }
 
 /* Return -1 for insufficient raw cost, else 0 for flagged IDs below the boundary, or 1. */
-s32 mnuGetEntryUseStatus(DatPartyRecord *actorEntry, u16 commandId) {
+s32 mnuGetEntryUseStatus(datUnitWork_t *actorEntry, u16 commandId) {
     if (mnuCanAffordEntryCost(commandId, actorEntry) == 0) return -1;
     if ((((DatCommandRecord *)((s32)datCommandRecords + commandId * MNU_COMMAND_RECORD_BYTES))->menuFlags & 1) == 0) return 1;
     if (commandId < MNU_COMMAND_USE_STATUS_BOUNDARY) return 0;
@@ -2420,7 +2420,7 @@ s32 mnuGetEntryUseStatus(DatPartyRecord *actorEntry, u16 commandId) {
 }
 
 /* Report insufficient raw HP/MP cost; equality and unhandled kinds return zero. */
-s32 mnuIsEntryCostUnaffordable(u16 commandId, DatPartyRecord *actorEntry) {
+s32 mnuIsEntryCostUnaffordable(u16 commandId, datUnitWork_t *actorEntry) {
     s32 costKind = datCommandRecords[commandId].costMode;
     u16 cost = datCommandRecords[commandId].costPercentage;
 
@@ -2440,7 +2440,7 @@ s32 mnuIsEntryCostUnaffordable(u16 commandId, DatPartyRecord *actorEntry) {
 }
 
 /* Deduct an affordable stored HP/MP cost; unhandled kinds succeed without a deduction. */
-s32 mnuConsumeEntryCost(s32 commandId, DatPartyRecord *actorEntry) {
+s32 mnuConsumeEntryCost(s32 commandId, datUnitWork_t *actorEntry) {
     DatCommandRecord *command = (DatCommandRecord *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
     u16 cost = command->costPercentage;
 
@@ -2480,16 +2480,16 @@ s32 mnuGetAbilityTargetCategory(u16 commandId) {
     return 0;
 }
 
-void datDelDevil(u16 ability, DatPartyRecord *target, DatPartyRecord *entry) {
+void datDelDevil(u16 ability, datUnitWork_t *target, datUnitWork_t *entry) {
     sdfApplyCommandResults(ability, target, entry);
 }
 
-u32 ptyCheckFieldUseOverride(MenuPageWindow *context, s32 ability, DatPartyRecord *target, DatPartyRecord *entry) {
+u32 ptyCheckFieldUseOverride(MenuPageWindow *context, s32 ability, datUnitWork_t *target, datUnitWork_t *entry) {
     return 0;
 }
 
-s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRecord *target, DatPartyRecord *selectedEntry) {
-    DatPartyRecord *entry = selectedEntry;
+s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, datUnitWork_t *target, datUnitWork_t *selectedEntry) {
+    datUnitWork_t *entry = selectedEntry;
     s32 multiTarget = 0;
     s32 applied = 0;
     s32 mask;
@@ -2624,7 +2624,7 @@ s32 mnuIsHighRangeItemId(s32 id) {
 }
 
 
-extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
+extern u16 mnuGetPartyEntryMenuValue(datUnitWork_t *);
 
 /* Count inventory plus one for every matching slot value, without an occupancy test.
  * This counter still rejects 0xBF, although DDS2's bullet-ID predicate accepts it. */
@@ -2635,7 +2635,7 @@ s32 ptyCountBulletItem(s32 bulletId) {
     if (bulletId >= 0xBF) return 0;
     totalCount = DDS3_GBWK->inventory.counts[bulletId];
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
-        DatPartyRecord *partyEntry = &DDS3_GBWK->party[partyIndex];
+        datUnitWork_t *partyEntry = &DDS3_GBWK->party[partyIndex];
         if (bulletId == mnuGetPartyEntryMenuValue(partyEntry)) {
             totalCount++;
         }
@@ -2643,31 +2643,31 @@ s32 ptyCountBulletItem(s32 bulletId) {
     return totalCount;
 }
 
-u32 mnuSetPartyEntryMenuValue(DatPartyRecord *entry, u32 menuValue) {
+u32 mnuSetPartyEntryMenuValue(datUnitWork_t *entry, u32 menuValue) {
     entry->menuValue = menuValue;
     return 1;
 }
 
-u16 mnuGetPartyEntryMenuValue(DatPartyRecord *entry) {
+u16 mnuGetPartyEntryMenuValue(datUnitWork_t *entry) {
     return entry->menuValue;
 }
 
 void mnuMarkEntryBlocked(s32 itemId);
 
-u32 mnuSetPartyEntryCurrentId(DatPartyRecord *entry, u32 id) {
+u32 mnuSetPartyEntryCurrentId(datUnitWork_t *entry, u32 id) {
     entry->itemId = id;
     mnuMarkEntryBlocked(id);
     ptyRecomputeMaxHpMp(entry);
     return 1;
 }
 
-u16 mnuGetPartyEntryCurrentId(DatPartyRecord *entry) {
+u16 mnuGetPartyEntryCurrentId(datUnitWork_t *entry) {
     return entry->itemId;
 }
 
-DatPartyRecord *mnuFindPartySlotByCurrentId(u32 id) {
+datUnitWork_t *mnuFindPartySlotByCurrentId(u32 id) {
     s32 index;
-    DatPartyRecord *entry = DDS3_GBWK->party;
+    datUnitWork_t *entry = DDS3_GBWK->party;
     for (index = 0; index < 5; index++, entry++) {
         if ((entry->flags & 1) && id == entry->itemId) {
             return entry;
@@ -2676,9 +2676,9 @@ DatPartyRecord *mnuFindPartySlotByCurrentId(u32 id) {
     return 0;
 }
 
-DatPartyRecord *mnuFindReserveSlotByCurrentId(u32 id) {
+datUnitWork_t *mnuFindReserveSlotByCurrentId(u32 id) {
     s32 index;
-    DatPartyRecord *entry = DDS3_GBWK->templates;
+    datUnitWork_t *entry = DDS3_GBWK->templates;
     for (index = 0; index < 16; index++, entry++) {
         if (entry->level != 0 && (entry->flags & 1) && id == entry->itemId) {
             return entry;
@@ -2745,8 +2745,8 @@ s32 sndPlayPartyItemSe(u32 id, s32 soundMode) {
 }
 
 
-extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
-extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
+extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
+extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *);
 
 /* Apply a permanent stat/capacity item and refill eligible vitals.
  * Returns 0 for other items, 1 when accepted, or 2 when capped and already full. */
@@ -2762,7 +2762,7 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B440);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B4C0);
 
-s32 btlItemApplyPermanentBonus(u16 itemId, DatPartyRecord *unit) {
+s32 btlItemApplyPermanentBonus(u16 itemId, datUnitWork_t *unit) {
     s32 statIndex = -1;
     s32 accepted = 0;
 
@@ -2851,8 +2851,8 @@ extern void fldRiberaMaStart(void);
 extern s32 fldRifutoMaChk(void);
 extern void fldRifutoMaStart(void);
 extern u8 *datUnitNames;
-s32 func_002C5A28(MenuPageWindow *page, u16 ability, struct DatPartyRecord *target,
-                  struct DatPartyRecord *selected) {
+s32 func_002C5A28(MenuPageWindow *page, u16 ability, struct datUnitWork_t *target,
+                  struct datUnitWork_t *selected) {
     s32 result = btlItemApplyPermanentBonus(ability, selected);
 
     switch (result) {
@@ -2913,7 +2913,7 @@ accepted:
 }
 
 /* Return the first matching status index in native priority order, or -1. */
-s32 mnuGetSelectionFromFlags(DatPartyRecord *actorEntry) {
+s32 mnuGetSelectionFromFlags(datUnitWork_t *actorEntry) {
     u16 statusFlags = actorEntry->status;
     if (statusFlags & 0x400) return 0;
     if (statusFlags & 0x100) return 1;
@@ -2924,9 +2924,9 @@ s32 mnuGetSelectionFromFlags(DatPartyRecord *actorEntry) {
 }
 
 /* Return one bit for the first occupied matching table ID, or zero when absent. */
-s32 mnuGetMatchingPartyEntryMask(DatPartyRecord *targetEntry) {
+s32 mnuGetMatchingPartyEntryMask(datUnitWork_t *targetEntry) {
     s32 partyIndex;
-    DatPartyRecord *partyEntry = DDS3_GBWK->party;
+    datUnitWork_t *partyEntry = DDS3_GBWK->party;
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++, partyEntry++) {
         if ((partyEntry->flags & 1) &&
             partyEntry->unitId == targetEntry->unitId) {
@@ -2953,9 +2953,9 @@ s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor) {
     return 0;
 }
 
-DatPartyRecord *mnuPickBestPartyEntry(u32 *table) {
-    DatPartyRecord *best = NULL;
-    DatPartyRecord *entry;
+datUnitWork_t *mnuPickBestPartyEntry(u32 *table) {
+    datUnitWork_t *best = NULL;
+    datUnitWork_t *entry;
     s32 pass;
     s32 bestMp;
     s32 i;
@@ -2990,12 +2990,12 @@ DatPartyRecord *mnuPickBestPartyEntry(u32 *table) {
     return 0;
 }
 
-DatPartyRecord *mnuFindPartyEntryBySelection(s32 *out) {
+datUnitWork_t *mnuFindPartyEntryBySelection(s32 *out) {
     u16 table[5][2] = {{0x400, 0xD4}, {0x100, 0xCF}, {0x80, 0xA9}, {0x40, 0xCE}, {0x10, 0xA8}};
     u32 i;
 
     for (i = 0; i < 5; i++) {
-        DatPartyRecord *entry;
+        datUnitWork_t *entry;
         s32 j;
 
         for (j = 0, entry = DDS3_GBWK->party; j < 5; j++, entry++) {
@@ -3008,9 +3008,9 @@ DatPartyRecord *mnuFindPartyEntryBySelection(s32 *out) {
     return 0;
 }
 
-s32 mnuTryUseFieldSkill(PartyPanel *partyPanel, MenuPageWindow *page, DatPartyRecord *target, s32 commit) {
+s32 mnuTryUseFieldSkill(PartyPanel *partyPanel, MenuPageWindow *page, datUnitWork_t *target, s32 commit) {
     s32 id;
-    DatPartyRecord *entry = mnuFindPartyEntryBySelection(&id);
+    datUnitWork_t *entry = mnuFindPartyEntryBySelection(&id);
 
     if (entry == 0) {
         return 3;
@@ -3034,8 +3034,8 @@ s32 mnuTryUseFieldSkill(PartyPanel *partyPanel, MenuPageWindow *page, DatPartyRe
 /* Give flag-bit-1 entries precedence, then compare their 10-bit fixed-point
  * HP/max-HP ratios without converting to floating point. */
 s32 mnuComparePartyEntryCostRatio(u32 *left, u32 *right) {
-    DatPartyRecord *a = (DatPartyRecord *)*left;
-    DatPartyRecord *b = (DatPartyRecord *)*right;
+    datUnitWork_t *a = (datUnitWork_t *)*left;
+    datUnitWork_t *b = (datUnitWork_t *)*right;
     s32 leftRatio = (a->hp << 10) / a->maxHp;
     s32 rightRatio = (b->hp << 10) / b->maxHp;
     if (a->flags & 2) {
@@ -3054,12 +3054,12 @@ extern const u16 D_0042B518[];
 
 
 s32 func_002C6008(PartyPanel *partyPanel, MenuPageWindow *page,
-                  DatPartyRecord *caster, s32 commit) {
-    DatPartyRecord *targets[5];
-    DatPartyRecord preview[5];
+                  datUnitWork_t *caster, s32 commit) {
+    datUnitWork_t *targets[5];
+    datUnitWork_t preview[5];
     u16 abilities[6];
-    DatPartyRecord *entry;
-    DatPartyRecord **target;
+    datUnitWork_t *entry;
+    datUnitWork_t **target;
     u16 *ability;
     s32 abilityId;
     u16 abilityArg;
@@ -3132,7 +3132,7 @@ s32 func_002C6008(PartyPanel *partyPanel, MenuPageWindow *page,
 
 s32 mnuUseFieldSkillOnParty(PartyPanel *partyPanel, MenuPageWindow *page, s32 commit) {
     u32 used[32];
-    DatPartyRecord *entry;
+    datUnitWork_t *entry;
     s32 pass;
     s32 more;
     s32 result;
@@ -3180,7 +3180,7 @@ void evtStageTestSetModelScalingEnabled(s32 enabled) {
     }
 }
 
-MdlCtx *evtStageTestGetActiveModel(void) {
+dds3ModelHandle_t *evtStageTestGetActiveModel(void) {
     return evtStageTestState.model;
 }
 
@@ -3444,7 +3444,7 @@ void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption)
 INCLUDE_ASM(const s32, "game/code_002BE628", evtStageTestAdvanceResourceWork);
 
 void evtStageTestApplyInitialMotion(s32 initialMotionIndex) {
-    MdlCtx *model = evtStageTestState.model;
+    dds3ModelHandle_t *model = evtStageTestState.model;
     StageTestSlot *slot = &evtStageTestState.queue.slot[0];
     s8 motionIndex;
 
@@ -3463,7 +3463,7 @@ void evtStageTestApplyInitialMotion(s32 initialMotionIndex) {
 extern u8 *D_00435DF0;
 
 /* Store uniform model scale through vf10 and return it; useTable selects the model-record factor. */
-f32 mnuSetModelScaleVector(MdlCtx *model, s32 useTable) {
+f32 mnuSetModelScaleVector(dds3ModelHandle_t *model, s32 useTable) {
     f32 scale = 1.0f;
     f32 scaleVector[4];
 
@@ -3506,7 +3506,7 @@ void cmpResetStatusModelPos(void) {
 
 /* Apply the active entry's model position and scale-dependent view depth.
  * Retain the post-call entry rereads and subtraction-based scaling expressions. */
-void mnuApplyModelCamera(MdlCtx *model) {
+void mnuApplyModelCamera(dds3ModelHandle_t *model) {
     f32 position[4];
     StageTestEntry *stageEntry;
     f32 scale;
@@ -3533,7 +3533,7 @@ void mnuApplyModelCamera(MdlCtx *model) {
 }
 
 /* Convert the active entry's degree angles to radians and update the model rotation basis. */
-void evtStageTestApplyEntryRotation(MdlCtx *model) {
+void evtStageTestApplyEntryRotation(dds3ModelHandle_t *model) {
     StageTestEntry *stageEntry = (StageTestEntry *)(evtStageTestState.queue.slot[0].entryIndex * EVT_STAGE_ENTRY_BYTES + (s32)evtStageTestState.entries);
 
     sdfConvertEulerAnglesToQuaternionVU(stageEntry->rotation[0] * 3.14159265f / 180.0f, stageEntry->rotation[1] * 3.14159265f / 180.0f,
@@ -3683,7 +3683,7 @@ s32 evtStageTestHasPendingMotion(void) {
 void evtStageTestAdvanceMotionQueue(void) {
     StageTestSlot *activeSlot = evtStageTestState.queue.slot;
     s32 motionIndex;
-    MdlCtx *model;
+    dds3ModelHandle_t *model;
 
     if (activeSlot->state != EVT_STAGE_MOTION_IDLE && activeSlot->state != EVT_STAGE_MOTION_FALLBACK_STARTED && (model = evtStageTestGetActiveModel()) != 0) {
         if (activeSlot->state == EVT_STAGE_MOTION_QUEUED) {
@@ -3742,7 +3742,7 @@ extern s32 D_00437CA4;
 extern const char *D_00437CA0;
 extern char D_00437CA8[];
 extern SdfPoolNode sdfGrOtTable[];
-extern f32 dds3CameraObjectBasicGetFovy(EffWorldNode *camera);
+extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *camera);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B518);
 
@@ -3755,11 +3755,11 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B548);
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B558);
 
 void evtStageTestDrawCameraTransformDebug(void) {
-    EffWorldNode *world = (EffWorldNode *)dds3GetActiveScene();
-    EffWorldNode *camera;
+    dds3Basic_t *world = (dds3Basic_t *)dds3GetActiveScene();
+    dds3Basic_t *camera;
     const char *caption;
     const char *name;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     SdfPoolNode *surface;
 
     if (world == NULL) {
@@ -3785,7 +3785,7 @@ void evtStageTestDrawCameraTransformDebug(void) {
         } else {
             camera = ((EvtWorldTable *)world->data)->slots[4].head;
         }
-        dds3SetActiveCameraSceneBasic((EffWorldNode *)dds3GetActiveScene(), camera);
+        dds3SetActiveCameraSceneBasic((dds3Basic_t *)dds3GetActiveScene(), camera);
         dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
     } else if (dds3PadButtonState[0x22] < 0) {
         if (camera->previous != NULL) {
@@ -3793,7 +3793,7 @@ void evtStageTestDrawCameraTransformDebug(void) {
         } else {
             camera = ((EvtWorldTable *)world->data)->slots[4].tail;
         }
-        dds3SetActiveCameraSceneBasic((EffWorldNode *)dds3GetActiveScene(), camera);
+        dds3SetActiveCameraSceneBasic((dds3Basic_t *)dds3GetActiveScene(), camera);
         dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
     }
     name = camera->value;
@@ -3826,7 +3826,7 @@ u32 evtStageTestCameraUpdate(void) {
 void *evtCreateBattleStageTestCamera(void) {
     f32 position[4] = {401.0f, -593.0f, -1208.25f, 0.0f};
     f32 orientation[4] = {0.22f, 0.12f, 0.03f, 1.0f};
-    EffWorldNode *cameraTarget = evtAddCamera(position, orientation);
+    dds3Basic_t *cameraTarget = evtAddCamera(position, orientation);
 
     cameraTarget->value = D_00437CB0;
     return evtStageTestCameraUpdate;
@@ -3834,8 +3834,8 @@ void *evtCreateBattleStageTestCamera(void) {
 
 /* Draw the battle-stage selector; confirmation creates the selected world object
  * and returns its camera callback before the four trigger-bit ID adjustments. */
-s32 evtBattleStageTestScreen(KwlnTask *task) {
-    SdfListHead *packetList = (SdfListHead *)sdfGrAllocPacketBuff(EVT_STAGE_SCREEN_WORK_BYTES);
+s32 evtBattleStageTestScreen(dds3ProcessID_t *task) {
+    sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EVT_STAGE_SCREEN_WORK_BYTES);
 
     sdfDrawTagInit(packetList);
     dds3ConsPanelTagLink(packetList, 0x84, 0x46, 0x14, 9);
@@ -3863,7 +3863,7 @@ s32 evtBattleStageTestScreen(KwlnTask *task) {
     return 0;
 }
 
-void evtDestroyBattleStageTestWorldNode(KwlnTask *task) {
+void evtDestroyBattleStageTestWorldNode(dds3ProcessID_t *task) {
     evtFreeStage();
 }
 
@@ -3890,7 +3890,7 @@ s32 pacFileHandleFree(request)
     if (request->state == FILE_REQUEST_COMPLETE_STATE) {
         void *deviceRequest = request->deviceRequest;
         if (deviceRequest != NULL) {
-            sdfFileCmdFree((DevState *)deviceRequest);
+            sdfFileCmdFree((sdfFileCmdHandle_t *)deviceRequest);
         }
         sdfPacFree(&request->packet);
         sdfChipFreeDirect(request->name);

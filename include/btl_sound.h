@@ -27,12 +27,12 @@ typedef char BattleSoundArchiveEntry_opaque08_at_0x08[
 typedef char BattleSoundArchiveTable_extent_must_be_0x24C[
     (sizeof(BattleSoundArchiveEntry[BTL_SOUND_ENTRY_COUNT]) == 0x24C) ? 1 : -1];
 
-typedef struct BattleEffect BattleEffect;
-typedef void (*BattleEffectCallback)(BattleEffect *effect);
+typedef struct effBTLCutHandle_t effBTLCutHandle_t;
+typedef void (*BattleEffectCallback)(effBTLCutHandle_t *effect);
 
 typedef union EffBattleParameterValue {
     u32 sourceOffset;
-    struct EffParamWork *work;
+    struct effPartHandle_t *work;
 } EffBattleParameterValue;
 
 typedef struct EffBattleEntry {
@@ -100,8 +100,8 @@ typedef char EffBattleEntryList_triggerFrame_at_0x00[
 typedef char EffBattleEntryList_colorRampEndFrame_at_0x70[
     ((u32)&((EffBattleEntryList *)0)->colorRampEndFrame == 0x70) ? 1 : -1];
 
-struct EffParamWork;
-struct SdfMemBlock;
+struct effPartHandle_t;
+struct sdfMemHandle_t;
 struct FileRequest;
 struct BtlUnit;
 struct BtlRuntimeTask;
@@ -109,13 +109,13 @@ struct BtlRuntimeTask;
 typedef struct SoundMixer {
     SoundBank banks[2];
     u8 pad0C30[8];
-    struct SdfMemBlock *resource; /* 0xC38: owns the mixer allocation. */
+    struct sdfMemHandle_t *resource; /* 0xC38: owns the mixer allocation. */
     u32 active;
-    BattleEffect *voiceList;
+    effBTLCutHandle_t *voiceList;
 } SoundMixer;
 
 /* DDS1 00160958 / DDS2 00168548 allocate and clear exactly 0x128 bytes. */
-struct BattleEffect {
+struct effBTLCutHandle_t {
     void *owner; /* 0x00 */
     SoundMixer *state; /* 0x04 */
     u32 color; /* 0x08 */
@@ -128,11 +128,11 @@ struct BattleEffect {
     u8 pad1E[2];
     s32 unk20;
     struct EffBattleEntryList *list; /* 0x24 */
-    struct EffParamWork *parameterWorks[0x3C]; /* 0x28 */
+    struct effPartHandle_t *parameterWorks[0x3C]; /* 0x28 */
     BattleEffectCallback sourceFrameCallback; /* 0x118 */
     BattleEffectCallback triggerFrameCallback; /* 0x11C */
     u32 unk120;
-    BattleEffect *next; /* 0x124 */
+    effBTLCutHandle_t *next; /* 0x124 */
 };
 
 /* The allocated 0x20-byte resource is also the system-effect task owner. */
@@ -169,7 +169,7 @@ typedef char SoundResourceNode_next_offset_must_be_0x1C[
 /* Per-unit command-effect link, allocated at exactly 0x10 bytes. */
 typedef struct SoundLink {
     struct BtlUnit *owner; /* 0x00 */
-    BattleEffect *effectHandle; /* 0x04 */
+    effBTLCutHandle_t *effectHandle; /* 0x04 */
     SoundResourceNode *effect; /* 0x08 */
     u16 commandEffectId; /* 0x0C: selected datCommandRecords entry's +0x2E value. */
     u16 pad0E[1];
@@ -182,7 +182,7 @@ typedef char SoundLink_commandEffectId_offset_must_be_0x0C[
 /* Per-unit model-resource link, allocated at exactly 0x14 bytes. */
 typedef struct SoundResourceLink {
     struct BtlUnit *owner; /* 0x00 */
-    BattleEffect *effectHandle; /* 0x04 */
+    effBTLCutHandle_t *effectHandle; /* 0x04 */
     SoundResourceNode *effect; /* 0x08 */
     u32 opaque0C; /* 0x0C: retained for the title-specific link updater. */
     u8 refreshRequested; /* 0x10 */
@@ -215,7 +215,7 @@ typedef struct SoundEffectReferenceArgs {
     SoundResourceNode *source;
     u16 option;
     u8 pad06[2];
-    BattleEffect *effect;
+    effBTLCutHandle_t *effect;
     ActorEffectOwner sourceOwner;
     s32 sourceSelector;
     s32 targetSelector;
@@ -225,7 +225,7 @@ typedef struct SoundEffectReferenceArgs {
 
 typedef struct SoundEffectSourceArgs {
     SoundResourceNode *source;
-    BattleEffect *effect;
+    effBTLCutHandle_t *effect;
     ActorEffectOwner owner;
     u8 pad0C[4];
     u64 resource;
@@ -260,7 +260,7 @@ typedef char EffectLoadArgs_name_offset_must_be_8[
 typedef struct BtlDeadLoadArgs {
     struct BtlUnit *unit; /* 0x00 */
     struct FileRequest *request; /* 0x04 */
-    struct SdfMemBlock *resourceAllocation; /* 0x08: retained until task finish. */
+    struct sdfMemHandle_t *resourceAllocation; /* 0x08: retained until task finish. */
 } BtlDeadLoadArgs;
 
 typedef char BtlDeadLoadArgs_size_must_be_0x0C[
@@ -297,12 +297,12 @@ u32 sndGetResourceStatus(SoundResourceNode *effect);
 s32 sndHasResourceFlagsOneOrEight(struct ActiveSoundNode *node);
 struct BtlRuntimeTask *sndCreateStationedSeTask(u32 soundId);
 struct BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *source, struct BtlUnit *owner, u64 resource);
-BattleEffect *func_00160958(SoundMixer *mixer, u16 kind, void *owner, s32 value);
-BattleEffect *func_00168548(SoundMixer *mixer, u16 kind, void *owner, s32 value);
-void effBTLCutListRelease(BattleEffect *effect);
-void effBTLCutDelete(BattleEffect *effect);
-u32 effBTLCutGetFrame(BattleEffect *effect);
-void effBTLCutSetDrawEndFrame(BattleEffect *effect, u32 endFrame);
+effBTLCutHandle_t *func_00160958(SoundMixer *mixer, u16 kind, void *owner, s32 value);
+effBTLCutHandle_t *func_00168548(SoundMixer *mixer, u16 kind, void *owner, s32 value);
+void effBTLCutListRelease(effBTLCutHandle_t *effect);
+void effBTLCutDelete(effBTLCutHandle_t *effect);
+u32 effBTLCutGetFrame(effBTLCutHandle_t *effect);
+void effBTLCutSetDrawEndFrame(effBTLCutHandle_t *effect, u32 endFrame);
 
 /* The data-file task allocates four argument bytes for its borrowed unit. */
 typedef struct SoundDataFileArgs {
@@ -316,7 +316,7 @@ typedef char SoundDataFileArgs_size_must_be_4[
 typedef struct SoundFileTaskArgs {
     ActiveSoundNode *node; /* 0x00: sound-list owner; file-load view is shared. */
     struct FileRequest *request; /* 0x04: queued file request */
-    struct SdfMemBlock *resourceAllocation; /* 0x08: retained file allocation */
+    struct sdfMemHandle_t *resourceAllocation; /* 0x08: retained file allocation */
 #ifdef VERSION_DDS1
     u32 blockIndex; /* 0x0C */
 #else

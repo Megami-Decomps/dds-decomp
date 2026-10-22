@@ -335,7 +335,7 @@ void effPCPThunderSpherePolyDraw(EffThunderVectorWork *work) {
 /* Allocate one work followed by its vector cells and retain unscaled dimensions.
    Only cell countdowns/color are initialized; geometry is sampled on the first restart. */
 EffThunderVectorWork *effBTLBindCreateTrack(EffThunderVectorParams *parameters) {
-    SdfMemBlock *allocationHandle = sdfMemAllocDirect(parameters->cellCount * sizeof(EffThunderVectorCell) + sizeof(EffThunderVectorWork));
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(parameters->cellCount * sizeof(EffThunderVectorCell) + sizeof(EffThunderVectorWork));
     EffThunderVectorWork *work = (EffThunderVectorWork *)sdfMemLock(allocationHandle);
     u32 cellIndex;
 
@@ -602,7 +602,7 @@ extern void effThunderSparkInit(EffThunderSparkWork *work, s32 index);
 /* Allocate spark state after the work and a separate one-cell system per spark.
    Clamp delay spread only in the copied head; sample motion before initial age. */
 EffThunderSparkWork *effThunderSparkCreate(EffThunderSparkParams *parameters) {
-    SdfMemBlock *allocationHandle = sdfMemAllocDirect(parameters->sparkCount * sizeof(EffThunderSpark) + sizeof(EffThunderSparkWork));
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(parameters->sparkCount * sizeof(EffThunderSpark) + sizeof(EffThunderSparkWork));
     EffThunderSparkWork *work = (EffThunderSparkWork *)sdfMemLock(allocationHandle);
     s32 delaySpread;
     u32 sparkIndex;
@@ -925,7 +925,7 @@ struct EffThunderFragmentWork {
         ParSystem *secondarySystem; /* dual-system variant */
     } state;                 /* 0x5C */
     ParSystem *system;            /* 0x60 */
-    SdfMemBlock *allocationHandle; /* 0x64 */
+    sdfMemHandle_t *allocationHandle; /* 0x64 */
 }; /* 0x68 */
 
 extern void effPCP_ThunderPolyDrawOff(EffThunderFragmentWork *work, s32 index);
@@ -933,7 +933,7 @@ extern void effPCP_ThunderPolyDrawOff(EffThunderFragmentWork *work, s32 index);
 /* Create the single-system fragment work and seed every fragment's timing/color.
    The native history-count expression and unchecked ranges are retained. */
 EffThunderFragmentWork *effPCP_ThunderPolyCreate(EffThunderFragmentParams *parameters) {
-    SdfMemBlock *allocationHandle = sdfMemAllocDirect(parameters->fragmentCount * sizeof(EffThunderFrag) + sizeof(EffThunderFragmentWork));
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(parameters->fragmentCount * sizeof(EffThunderFrag) + sizeof(EffThunderFragmentWork));
     EffThunderFragmentWork *work = (EffThunderFragmentWork *)sdfMemLock(allocationHandle);
     u32 i;
 
@@ -1254,7 +1254,7 @@ extern void effPCP_ThunderPolyLowDrawOff(EffThunderFragmentWork *work, s32 index
 /* Allocate dual-system fragment work, creating the secondary system before the primary.
    Both systems share one fragment-state array; keep native dispatch/allocation order. */
 EffThunderFragmentWork *effPCP_ThunderPolyLowCreate(EffThunderFragmentParams *parameters) {
-    SdfMemBlock *allocationHandle = sdfMemAllocDirect(parameters->fragmentCount * sizeof(EffThunderFrag) + sizeof(EffThunderFragmentWork));
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(parameters->fragmentCount * sizeof(EffThunderFrag) + sizeof(EffThunderFragmentWork));
     EffThunderFragmentWork *work = (EffThunderFragmentWork *)sdfMemLock(allocationHandle);
     u32 i;
 
@@ -1557,7 +1557,7 @@ extern void effPCP_ThunderRadiatePolyDrawOff(EffThunderCellWork *work, s32 index
 /* Allocate cell states after the work, configure its system and sample directions/timing.
    The opaque settable word is not initialized here; no new default or range checks are added. */
 EffThunderCellWork *effPCP_ThunderRadiatePolyCreate(EffThunderCellParams *parameters) {
-    SdfMemBlock *allocationHandle = sdfMemAllocDirect(parameters->cellCount * sizeof(EffThunderCell) + sizeof(EffThunderCellWork));
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(parameters->cellCount * sizeof(EffThunderCell) + sizeof(EffThunderCellWork));
     EffThunderCellWork *work = (EffThunderCellWork *)sdfMemLock(allocationHandle);
     u32 i;
 
@@ -2099,7 +2099,7 @@ extern void dds3BezierTrackPolyCreate(EffPcpThunderFragmentResources *history, u
 EffPcpThunderGroup *effPCPBezierBillCreate(const EffPcpThunderGroupParams *src, SoundMixer *eventParams)
 {
     u32 count = src->groupCount;
-    SdfMemBlock *allocation = sdfMemAllocDirect(count * sizeof(EffPcpThunderGroupSlot) + sizeof(EffPcpThunderGroup));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(EffPcpThunderGroupSlot) + sizeof(EffPcpThunderGroup));
     EffPcpThunderGroup *work = (EffPcpThunderGroup *)sdfMemLock(allocation);
     EffPcpThunderGroupSlot *slot = (EffPcpThunderGroupSlot *)(work + 1);
     EffPCPEventPlace place;
@@ -2167,7 +2167,7 @@ EffPcpThunderGroup *effPCPBezierBillCreatePCF(void *paramTable) {
 
 EffPcpThunderGroup *effPCPBezierBillCopy(EffPcpThunderGroup *src) {
     u32 count = src->params.groupCount;
-    SdfMemBlock *allocation = sdfMemAllocDirect(count * sizeof(EffPcpThunderGroupSlot) + sizeof(EffPcpThunderGroup));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(EffPcpThunderGroupSlot) + sizeof(EffPcpThunderGroup));
     EffPcpThunderGroup *work = (EffPcpThunderGroup *)sdfMemLock(allocation);
     EffPcpThunderGroupSlot *slot = (EffPcpThunderGroupSlot *)(work + 1);
     EffPCPEventPlace place;
@@ -2712,10 +2712,10 @@ EffPcpThunderFragmentResources *dds3BezierTrackPolySetVertex(s32 historyLength, 
     s32 count = historyLength * subdivisions * 3 + 6;
     u32 colorBytes = count * sizeof(u32);
     u32 bufferBytes = count * (sizeof(u128) + sizeof(u32)) + 8 * (sizeof(u128) + sizeof(u32));
-    SdfMemBlock *allocation = sdfMemAllocDirect(bufferBytes + sizeof(EffPcpThunderFragmentResources));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(bufferBytes + sizeof(EffPcpThunderFragmentResources));
     u8 *storage = (u8 *)sdfMemLock(allocation);
     EffPcpThunderFragmentResources *history = (EffPcpThunderFragmentResources *)(storage + bufferBytes);
-    SdfAsset *asset;
+    sdfMat_t *asset;
 
     history->points = (u128 *)storage;
     storage += count * sizeof(u128);
@@ -2821,7 +2821,7 @@ extern void *effPkt3DPrimMakePoly(EffThunderDrawParams *);
 void dds3BezierTrackPolyDraw(EffPcpThunderFragmentResources *history) {
     s32 start[4];
     s32 length[4];
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     s32 recent;
     s32 wrapped;
     s32 i;
@@ -2835,7 +2835,7 @@ void dds3BezierTrackPolyDraw(EffPcpThunderFragmentResources *history) {
     if (history->activePointCount == 0) {
         return;
     }
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     sdf3DPrimLinkResetTm(list, 0);
     sdf3DPrimLinkMat(list, history->resourceHandle, 0);
@@ -2887,14 +2887,14 @@ void dds3BezierTrackPolyDraw(EffPcpThunderFragmentResources *history) {
 }
 
 
-extern EffRecordPool *dds3FlashPolyList2Create(s32 triangleCount);
+extern dds3FlashPolyList_t *dds3FlashPolyList2Create(s32 triangleCount);
 
 /* Clone the 0x30-byte parameter block, create the record pool and clear every particle's age. */
 PcpFlashTrianglePulseWork *effPCPFlashPolySphere2Create(PcpFlashTrianglePulseParams *params)
 {
-    SdfMemBlock *allocation = sdfMemAllocDirect(params->particleCount * sizeof(PcpFlashPulseParticle) + sizeof(PcpFlashTrianglePulseWork));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(params->particleCount * sizeof(PcpFlashPulseParticle) + sizeof(PcpFlashTrianglePulseWork));
     PcpFlashTrianglePulseWork *work = (PcpFlashTrianglePulseWork *)sdfMemLock(allocation);
-    EffRecordPool *record;
+    dds3FlashPolyList_t *record;
     u32 i;
 
     memcpy(work, params, 0x30);

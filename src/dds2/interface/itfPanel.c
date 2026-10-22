@@ -10,7 +10,7 @@
 
 /* A sprite with a retained payload owns a secondary allocation. Release that
  * before its primary allocation; NULL is a no-op. */
-void itfPnlRelease(UiSprite *sprite) {
+void itfPnlRelease(itfpanel_t *sprite) {
     if (sprite != NULL) {
         if (sprite->payload != NULL) {
             sdfMemFreeDirect(sprite->payloadAllocation);
@@ -25,7 +25,7 @@ extern void (*itfPanelLayoutCallbacks[])();
 
 /* Store rectangle corners and the caller's render value before notifying the
  * kind-specific handler with context only. No kind-range or context checks. */
-void itfPnlSetPosition(UiSprite *panel, s32 left, s32 top, s32 right, s32 bottom, s32 renderValue) {
+void itfPnlSetPosition(itfpanel_t *panel, s32 left, s32 top, s32 right, s32 bottom, s32 renderValue) {
     panel->renderValue = renderValue;
     panel->left = left;
     panel->top = top;
@@ -39,7 +39,7 @@ void itfPnlSetPosition(UiSprite *panel, s32 left, s32 top, s32 right, s32 bottom
 
 /* Add independent corner/render-value deltas, then notify with the updated
  * corners as well as context. */
-void itfPnlSetPositionOffset(UiSprite *panel, s32 leftDelta, s32 topDelta, s32 rightDelta, s32 bottomDelta, s32 renderValueDelta) {
+void itfPnlSetPositionOffset(itfpanel_t *panel, s32 leftDelta, s32 topDelta, s32 rightDelta, s32 bottomDelta, s32 renderValueDelta) {
     void (*handler)() = itfPanelLayoutCallbacks[panel->kind];
 
     panel->left += leftDelta;
@@ -56,7 +56,7 @@ extern void (*CreateColorTable[])();
 
 /* Store the RGBA words in packet order, then notify with context.
  * The panel renderers consume these channels directly. */
-void itfPnlSetColor(UiSprite *panel, s32 redValue, s32 greenValue, s32 blueValue, s32 alphaValue) {
+void itfPnlSetColor(itfpanel_t *panel, s32 redValue, s32 greenValue, s32 blueValue, s32 alphaValue) {
     panel->red = redValue;
     panel->green = greenValue;
     panel->blue = blueValue;
@@ -70,8 +70,8 @@ void itfPnlSetColor(UiSprite *panel, s32 redValue, s32 greenValue, s32 blueValue
 #include "sdf_packet_alloc.h"
 
 /* Build the panel list and append it to the SDK draw-surface pool. */
-void itfPnlDraw(UiSprite *panel, SdfPoolNode *packetOwner) {
-    SdfListHead *packetList = (SdfListHead *)sdfGrAllocPacketBuff(ITF_PANEL_PACKET_LIST_BYTES);
+void itfPnlDraw(itfpanel_t *panel, SdfPoolNode *packetOwner) {
+    sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(ITF_PANEL_PACKET_LIST_BYTES);
 
     sdfDrawTagInit(packetList);
     DrawTestAlphaPrim(packetList);

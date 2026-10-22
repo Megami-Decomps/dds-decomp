@@ -4,6 +4,6 @@
 #include "evt_unit.h"
 
 /* Store a motion slot's three parameters and apply its mode flags. */
-void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 slot, s32 parameterA, s32 parameterB, s32 parameterC, s32 mode);
+void evtConfigureUnitMotionSlot(evtUnitHandle_t *unit, s32 slot, s32 parameterA, s32 parameterB, s32 parameterC, s32 mode);
 
 #endif

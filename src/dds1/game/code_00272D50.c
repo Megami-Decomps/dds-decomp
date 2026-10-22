@@ -268,14 +268,14 @@ void mnuSelectStaffDisplayCategory(u32 context) {
 void mnuNoOpStaffDisplayTeardown(StaffDisplayContext *context) {
 }
 
-s32 mnuInitializeStaffDisplayResources(KwlnTask *task) {
+s32 mnuInitializeStaffDisplayResources(dds3ProcessID_t *task) {
     StaffDisplayContext *context;
     StaffWindowResources *resources;
     s32 handle;
 
     context = (StaffDisplayContext *)dds3GetProcessData(task);
     handle = (u32)sdfMemAllocDirect(0x2C);
-    resources = (void *)sdfMemLock((struct SdfMemBlock *)(handle));
+    resources = (void *)sdfMemLock((struct sdfMemHandle_t *)(handle));
     context->resources = resources;
     memset(resources, 0, 0x2C);
     resources->allocation = handle;
@@ -289,12 +289,12 @@ s32 mnuInitializeStaffDisplayResources(KwlnTask *task) {
     return 1;
 }
 
-s32 mnuStaffFreeDisplayResources(KwlnTask *task) {
+s32 mnuStaffFreeDisplayResources(dds3ProcessID_t *task) {
     StaffDisplayContext *context = (StaffDisplayContext *)dds3GetProcessData(task);
     StaffWindowResources *resources = context->resources;
     mnuReleaseStaffPrimaryWindows(context);
     mnuNoOpStaffDisplayTeardown(context);
-    sdfMemFreeDirect((struct SdfMemBlock *)(u32)(resources->allocation));
+    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(resources->allocation));
     return 1;
 }
 
@@ -307,7 +307,7 @@ extern char mnuCampSpecialItemListPopupEntry[];
 extern char mnuCampCommandSelectionPopupEntry[];
 
 /* Handle staff-item selection and window navigation while the popup is idle. */
-s32 mnuHandleStaffDisplayInput(KwlnTask *callback) {
+s32 mnuHandleStaffDisplayInput(dds3ProcessID_t *callback) {
     StaffDisplayContext *context;
     StaffWindowResources *resources;
     MenuWindowContainer *window;
@@ -371,7 +371,7 @@ extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 extern u8 mnuCampItemCommandHelpTextBank[];
 extern u8 *D_003BAA9C;
 
-s32 mnuStaffDrawImagePanelA(KwlnTask *callback) {
+s32 mnuStaffDrawImagePanelA(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
     mnuDrawCampScreenDefault(callback);
     mnuCreateStaffImageSprite(4);
@@ -381,13 +381,13 @@ s32 mnuStaffDrawImagePanelA(KwlnTask *callback) {
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
-s32 mnuStaffRunPanel2b(KwlnTask *request) {
+s32 mnuStaffRunPanel2b(dds3ProcessID_t *request) {
     s32 state = dds3GetProcessData(request);
 
     return menuRunPanel((void *)state, 2, request);
 }
 
-extern s32 btlItemApplyDirectEffect(MenuPageWindow *, u16, s32, DatPartyRecord *);
+extern s32 btlItemApplyDirectEffect(MenuPageWindow *, u16, s32, datUnitWork_t *);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void mnuUpdatePartyPanelPercentDisplays(s32);
@@ -399,13 +399,13 @@ s32 mnuUseStaffItem(s32 itemId, StaffDisplayContext *context) {
     s32 partyPanel = (s32)context + 0x15C;
     s32 targetUnit = (s32)&DDS3_GBWK->party[context->selectionList->cursor->index];
     s32 result = btlItemApplyDirectEffect((MenuPageWindow *)partyPanel, itemId & 0xFFFF,
-                                         targetUnit, (DatPartyRecord *)targetUnit);
+                                         targetUnit, (datUnitWork_t *)targetUnit);
 
     if (result != 1) {
         if (result == 2) {
             return 0;
         }
-        if (ptySkillApplyFieldUseEffect((MenuPageWindow *)partyPanel, evtGetIndexedEventRecordId(itemId) & 0xFFFF, (DatPartyRecord *)targetUnit, (DatPartyRecord *)targetUnit) == 0) {
+        if (ptySkillApplyFieldUseEffect((MenuPageWindow *)partyPanel, evtGetIndexedEventRecordId(itemId) & 0xFFFF, (datUnitWork_t *)targetUnit, (datUnitWork_t *)targetUnit) == 0) {
             return 0;
         }
     }
@@ -438,7 +438,7 @@ extern char mnuCampItemTargetSelectionPopupEntry[];
 extern char mnuCampItemCategoryPopupEntry[];
 
 /* Use an eligible staff item and update its selection window while messages are idle. */
-s32 mnuHandleStaffInventoryListInput(KwlnTask *task) {
+s32 mnuHandleStaffInventoryListInput(dds3ProcessID_t *task) {
     StaffDisplayContext *context;
     StaffWindowResources *resources;
     MenuWindowContainer *window;

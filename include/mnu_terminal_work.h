@@ -10,7 +10,7 @@
 
 /* The Karma Terminal's menu scene: its resources, list and panel state. */
 typedef struct MenuTerminalWork {
-    struct SdfMemBlock *allocation; /* 0x00: retained scene allocation */
+    struct sdfMemHandle_t *allocation; /* 0x00: retained scene allocation */
     u32 initFlags;          /* 0x04: entry initialization bits */
     MenuPopupState transitionWork; /* 0x08 */
     s32 popupState;         /* 0x54 */

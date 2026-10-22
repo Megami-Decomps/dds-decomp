@@ -5,54 +5,54 @@
 #include "scr_arg_read.h"
 
 
-extern u32 (*codefunc[])(ScrData *scr);
+extern u32 (*codefunc[])(scrProcessWork_s *scr);
 extern const ScrCommand D_00411408[];
 
-u32 CodeFunc_PushIS(ScrData *scr) {
+u32 CodeFunc_PushIS(scrProcessWork_s *scr) {
     PushInt(scr, scr->instructions[scr->pc].parts.sOperand);
     scr->pc++;
     return 1;
 }
 
-u32 CodeFunc_PushF(ScrData *scr) {
+u32 CodeFunc_PushF(scrProcessWork_s *scr) {
     scr->pc++;
     PushFloat(scr, scr->instructions[scr->pc].fOperand);
     scr->pc++;
     return 1;
 }
 
-u32 CodeFunc_PushIX(ScrData *scr) {
+u32 CodeFunc_PushIX(scrProcessWork_s *scr) {
     PushInt(scr, DDS3_GBWK->script.ints[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
 
-u32 CodeFunc_PushFX(ScrData *scr) {
+u32 CodeFunc_PushFX(scrProcessWork_s *scr) {
     PushFloat(scr, DDS3_GBWK->script.floats[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
 
-u32 CodeFunc_PushLIX(ScrData *scr) {
+u32 CodeFunc_PushLIX(scrProcessWork_s *scr) {
     PushInt(scr, scr->localInt[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
 
-u32 CodeFunc_PushLFX(ScrData *scr) {
+u32 CodeFunc_PushLFX(scrProcessWork_s *scr) {
     PushFloat(scr, scr->localFloat[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
 
-u32 CodeFunc_PushSTR(ScrData *scr) {
+u32 CodeFunc_PushSTR(scrProcessWork_s *scr) {
     PushStr(scr, scr->strings + scr->instructions[scr->pc].parts.sOperand);
     scr->pc++;
     return 1;
 }
 
 /* Copy the VM's reserved return slot back onto its active operand stack. */
-u32 CodeFunc_PushReg(ScrData *scr) {
+u32 CodeFunc_PushReg(scrProcessWork_s *scr) {
     scr->stackTypes[scr->sp] = scr->stackTypes[SCR_STACK_RET];
     scr->stackValues[scr->sp].i = scr->stackValues[SCR_STACK_RET].i;
     scr->sp++;
@@ -60,13 +60,13 @@ u32 CodeFunc_PushReg(ScrData *scr) {
     return 1;
 }
 
-u32 CodeFunc_PopIX(ScrData *scr) {
+u32 CodeFunc_PopIX(scrProcessWork_s *scr) {
     DDS3_GBWK->script.ints[scr->instructions[scr->pc].parts.sOperand] = PopInt(scr);
     scr->pc++;
     return 1;
 }
 
-u32 CodeFunc_PopFX(ScrData *scr) {
+u32 CodeFunc_PopFX(scrProcessWork_s *scr) {
     f32 floatValue;
 
     floatValue = PopFloat(scr);
@@ -75,7 +75,7 @@ u32 CodeFunc_PopFX(ScrData *scr) {
     return 1;
 }
 
-u32 CodeFunc_PopLIX(ScrData *scr) {
+u32 CodeFunc_PopLIX(scrProcessWork_s *scr) {
     u32 integerValue;
 
     integerValue = PopInt(scr);
@@ -84,19 +84,19 @@ u32 CodeFunc_PopLIX(ScrData *scr) {
     return 1;
 }
 
-u32 CodeFunc_PopLFX(ScrData *scr) {
+u32 CodeFunc_PopLFX(scrProcessWork_s *scr) {
     scr->localFloat[scr->instructions[scr->pc].parts.sOperand] = PopFloat(scr);
     scr->pc++;
     return 1;
 }
 
-u32 CodeFunc_Proc(ScrData *scr) {
+u32 CodeFunc_Proc(scrProcessWork_s *scr) {
     scr->pc++;
     return 1;
 }
 
 /* Yield without consuming operands until the command completes. */
-u32 CodeFunc_Comm(ScrData *scr) {
+u32 CodeFunc_Comm(scrProcessWork_s *scr) {
     s32 programCounter = scr->pc;
     s32 commandIndex = scr->instructions[programCounter].parts.sOperand;
 
@@ -111,7 +111,7 @@ u32 CodeFunc_Comm(ScrData *scr) {
     return 1;
 }
 
-u32 CodeFunc_End(ScrData *scr)
+u32 CodeFunc_End(scrProcessWork_s *scr)
 {
     if (scr->sp == 0) {
         return 0;
@@ -120,24 +120,24 @@ u32 CodeFunc_End(ScrData *scr)
     return 1;
 }
 
-u32 CodeFunc_Jump(ScrData *scr) {
+u32 CodeFunc_Jump(scrProcessWork_s *scr) {
     scr->pc = scr->procedures[scr->instructions[scr->pc].parts.sOperand].addr;
     return 1;
 }
 
 /* Save the return PC before transferring control to a procedure. */
-u32 CodeFunc_Call(ScrData *scr) {
+u32 CodeFunc_Call(scrProcessWork_s *scr) {
     PushRet(scr, scr->pc);
     scr->pc = scr->procedures[scr->instructions[scr->pc].parts.sOperand].addr;
     return 1;
 }
 
-u32 CodeFunc_Run(ScrData *scr) {
+u32 CodeFunc_Run(scrProcessWork_s *scr) {
     scr->pc++;
     return 1;
 }
 
-u32 CodeFunc_Goto(ScrData *scr) {
+u32 CodeFunc_Goto(scrProcessWork_s *scr) {
     scr->pc = scr->labels[scr->instructions[scr->pc].parts.sOperand].addr;
     return 1;
 }
@@ -151,7 +151,7 @@ extern f32 CodeFunc_2Operation_rf;
 extern s32 CodeFunc_2Operation_t1;
 extern s32 CodeFunc_2Operation_t2;
 
-void CodeFunc_2Operation(ScrData *scr, s32 operatorCode)
+void CodeFunc_2Operation(scrProcessWork_s *scr, s32 operatorCode)
 {
     CodeFunc_2Operation_t1 = scr->stackTypes[scr->sp - 1];
     CodeFunc_2Operation_t2 = scr->stackTypes[scr->sp - 2];
@@ -314,31 +314,31 @@ void CodeFunc_2Operation(ScrData *scr, s32 operatorCode)
     }
 }
 
-u32 CodeFunc_Add(ScrData *scr) {
+u32 CodeFunc_Add(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 0);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 CodeFunc_Sub(ScrData *scr) {
+u32 CodeFunc_Sub(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 1);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 CodeFunc_Mul(ScrData *scr) {
+u32 CodeFunc_Mul(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 2);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 CodeFunc_Div(ScrData *scr) {
+u32 CodeFunc_Div(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 3);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 CodeFunc_Minus(ScrData *scr) {
+u32 CodeFunc_Minus(scrProcessWork_s *scr) {
     switch (scr->stackTypes[scr->sp - 1]) {
     case 0:
         scr->stackValues[scr->sp - 1].i = -scr->stackValues[scr->sp - 1].i;
@@ -361,7 +361,7 @@ u32 CodeFunc_Minus(ScrData *scr) {
     return 1;
 }
 
-u32 CodeFunc_Not(ScrData *scr) {
+u32 CodeFunc_Not(scrProcessWork_s *scr) {
     switch (scr->stackTypes[scr->sp - 1]) {
     case 0:
     case 2:
@@ -378,55 +378,55 @@ u32 CodeFunc_Not(ScrData *scr) {
     return 1;
 }
 
-u32 CodeFunc_Or(ScrData *scr) {
+u32 CodeFunc_Or(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 4);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 CodeFunc_And(ScrData *scr) {
+u32 CodeFunc_And(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 5);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 CodeFunc_EQ(ScrData *scr) {
+u32 CodeFunc_EQ(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 6);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 CodeFunc_NEQ(ScrData *scr) {
+u32 CodeFunc_NEQ(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 7);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 CodeFunc_S(ScrData *scr) {
+u32 CodeFunc_S(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 8);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 CodeFunc_L(ScrData *scr) {
+u32 CodeFunc_L(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 9);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 CodeFunc_SE(ScrData *scr) {
+u32 CodeFunc_SE(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 10);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 CodeFunc_LE(ScrData *scr) {
+u32 CodeFunc_LE(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 0xb);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 CodeFunc_IF(ScrData *scr)
+u32 CodeFunc_IF(scrProcessWork_s *scr)
 {
     s32 conditionIsTruthy;
 
@@ -455,7 +455,7 @@ u32 CodeFunc_IF(ScrData *scr)
 
 /* Run instructions until one stops the context: returns 2 when a handler returns 0 (finished),
  * 1 when a handler returns 2 (yield for one tick). */
-s32 scrTraceCode(ScrData *scr) {
+s32 scrTraceCode(scrProcessWork_s *scr) {
     u32 handlerResult;
 
     while (1) {
@@ -479,7 +479,7 @@ s32 scrTraceCode(ScrData *scr) {
 /* Script command parameter `parameterIndex` (0 = first) as an int, converting floats and
  * dereferencing global variable references. */
 s32 scrGetIntPara(s32 parameterIndex) {
-    ScrData *scr = nowpwork;
+    scrProcessWork_s *scr = nowpwork;
     s32 stackIndex = scr->sp - parameterIndex - 1;
 
     switch (scr->stackTypes[stackIndex]) {
@@ -498,7 +498,7 @@ s32 scrGetIntPara(s32 parameterIndex) {
 
 f32 scrGetFloatPara(s32 parameterIndex)
 {
-    ScrData *scr = nowpwork;
+    scrProcessWork_s *scr = nowpwork;
     s32 stackIndex = scr->sp - parameterIndex - 1;
 
     switch (scr->stackTypes[stackIndex]) {
@@ -518,7 +518,7 @@ f32 scrGetFloatPara(s32 parameterIndex)
 /* Return a string parameter only when its VM stack tag is STRING. */
 char *scrGetStrPara(s32 parameterIndex)
 {
-    ScrData *scr = nowpwork;
+    scrProcessWork_s *scr = nowpwork;
     s32 stackIndex = scr->sp - parameterIndex - 1;
     s32 stackType = (s8)scr->stackTypes[stackIndex];
 
@@ -545,16 +545,16 @@ char *scrGetStrPara(s32 parameterIndex)
 /* The setters return the context they set the value in, which retail
  * leaves in v0: a command that ends by setting its value returns it as its
  * result, and a nonzero result tells CodeFunc_Comm the command is done. */
-ScrData *scrSetIntReturnValue(s32 retVal)
+scrProcessWork_s *scrSetIntReturnValue(s32 retVal)
 {
-    ScrData *scr = nowpwork;
+    scrProcessWork_s *scr = nowpwork;
     SCR_SET_RETURN_VALUE(scr, 0, i, retVal);
     return scr;
 }
 
-ScrData *scrSetFloatReturnValue(f32 retVal)
+scrProcessWork_s *scrSetFloatReturnValue(f32 retVal)
 {
-    ScrData *scr = nowpwork;
+    scrProcessWork_s *scr = nowpwork;
     SCR_SET_RETURN_VALUE(scr, 1, f, retVal);
     return scr;
 }

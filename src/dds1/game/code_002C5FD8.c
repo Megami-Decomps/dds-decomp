@@ -389,7 +389,7 @@ void fldDrawLocalMapTransitionFrame(f32 progress) {
 extern void eglSetOt(u32);
 
 /* Draw the supplied map texture with uniform grey/alpha and native asymmetric scaled extents. */
-void fldDrawScaledGrayTintMapTexture(s32 x, s32 y, s8 grey, s8 alpha, struct SdfTex *texture, f32 scale) {
+void fldDrawScaledGrayTintMapTexture(s32 x, s32 y, s8 grey, s8 alpha, struct sdfTexHandle_t *texture, f32 scale) {
     u32 color;
     f32 left, top, width, height;
 
@@ -561,7 +561,7 @@ void fldDrawCounterMapMarker(void) {
 /* Build a ring of `count` request nodes (0x20 bytes each) behind a 0x44-byte queue header. */
 MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
     s32 size = count * 0x20 + 0x44;
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
     MapRequestRing *pool = (MapRequestRing *)sdfMemGetPtr(allocation);
     MapRequestState *state = &pool->header;
     MapRequestNode *node;
@@ -717,7 +717,7 @@ done:
 }
 
 s32 texLoad(const char *name, MapResource *record) {
-    struct SdfMemBlock *allocation = sdfDevLoadFileEx(name, (u32 *)&record->resourceData, 0);
+    struct sdfMemHandle_t *allocation = sdfDevLoadFileEx(name, (u32 *)&record->resourceData, 0);
     record->allocation = allocation;
     record->texture = sdfTexSet(record->resourceData);
     if (record->allocation != NULL) {
@@ -728,7 +728,7 @@ s32 texLoad(const char *name, MapResource *record) {
     return 1;
 }
 
-u32 texRelease(struct SdfTex **texture) {
+u32 texRelease(struct sdfTexHandle_t **texture) {
     if (*texture != 0) {
         sdfTexReleaseReferenceViaHandler(*texture);
         *texture = 0;

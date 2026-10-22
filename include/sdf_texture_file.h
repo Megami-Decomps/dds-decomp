@@ -65,10 +65,10 @@ typedef char SdfTextureFileHeader_battleTextureSlot_offset_must_be_0x20[
     (SDF_TEXTURE_FILE_HEADER_OFFSET(battleTextureSlot) == 0x20) ? 1 : -1];
 #undef SDF_TEXTURE_FILE_HEADER_OFFSET
 
-struct SdfTex;
+struct sdfTexHandle_t;
 
 /* Acquire a texture from a serialized texture-file header. */
-struct SdfTex *sdfTexSet(const SdfTextureFileHeader *header);
-struct SdfTex *sdfTexSetDirect(const SdfTextureFileHeader *header);
+struct sdfTexHandle_t *sdfTexSet(const SdfTextureFileHeader *header);
+struct sdfTexHandle_t *sdfTexSetDirect(const SdfTextureFileHeader *header);
 
 #endif /* SDF_TEXTURE_FILE_H */

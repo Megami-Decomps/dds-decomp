@@ -5,13 +5,13 @@
 
 struct BtlUnit;
 struct SoundMixer;
-struct BattleEffect;
+struct effBTLCutHandle_t;
 
 /* Selected-unit effect updater state, allocated and cleared as one task block. */
 typedef struct BtlSelectedUnitEffectTaskArgs {
     struct BtlUnit *unit;         /* 0x00: affected unit, also used by the finish hook */
     struct SoundMixer *mixer;     /* 0x04: cloned sound mixer, released by the finish hook */
-    struct BattleEffect *effect;  /* 0x08: selected-unit effect voice */
+    struct effBTLCutHandle_t *effect;  /* 0x08: selected-unit effect voice */
     s32 duration;                /* 0x0C: update lifetime in frames */
     s32 counter;                 /* 0x10: elapsed update count */
 } BtlSelectedUnitEffectTaskArgs;

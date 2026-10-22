@@ -19,7 +19,7 @@ extern void ptyApplyEventPenalty(s32 penaltyMode);
 
 
 extern void Normalize(void);
-void dds3BackupPoseSet(ObjectTransform *node);
+void dds3BackupPoseSet(dds3PoseSet_t *node);
 
 u32 ptyScriptApplyEventPenalty(void) {
     s32 penaltyMode;
@@ -51,9 +51,9 @@ extern char D_00435D80[];
 
 /* Each transform section owns its row coordinate; see docs/idioms.md,
  * "Trace-justified diagnostic row coordinates". */
-s32 DispBaseData(void *worldNode, s32 x, s32 y, SdfListHead *list) {
-    EffWorldNode *node = worldNode;
-    ObjectTransform *transform;
+s32 DispBaseData(void *worldNode, s32 x, s32 y, sdfDrawTag_t *list) {
+    dds3Basic_t *node = worldNode;
+    dds3PoseSet_t *transform;
     s32 labelX;
     s32 valueX;
     s32 positionY;
@@ -101,7 +101,7 @@ s32 DispBaseData(void *worldNode, s32 x, s32 y, SdfListHead *list) {
 extern const char D_00412778[]; /* "FLAG  : 0x%08X" */
 
 u32 DispObjectBaseData(void *worldNode, s32 x, s32 y, void *list) {
-    ObjBase *handle;
+    dds3ObjectBaseControlWorkData_t *handle;
     void *command;
 
     handle = dds3GetBaseControlWorkData(worldNode);
@@ -117,7 +117,7 @@ u32 DispObjectBaseData(void *worldNode, s32 x, s32 y, void *list) {
 
 
 #include "dds3_world_primary.h"
-extern s32 dds3SceneBasicExistBasic(EffWorldNode *object, EffWorldNode *node);
+extern s32 dds3SceneBasicExistBasic(dds3Basic_t *object, dds3Basic_t *node);
 #include "sdf_packet_alloc.h"
 extern SdfPoolNode D_00380708;
 extern s8 D_0037F543[];
@@ -127,17 +127,17 @@ extern s32 evtSceneDispProcess(void *task);
 s32 dds3DebugBasic(void *task) {
     s32 width;
     u8 *node;
-    SdfListHead *list;
-    SdfListHead *spriteList;
+    sdfDrawTag_t *list;
+    sdfDrawTag_t *spriteList;
 
     if (dds3GetActiveScene() == NULL) {
         return -1;
     }
     node = dds3GetProcessData(task);
-    if (dds3SceneBasicExistBasic(dds3GetActiveScene(), (EffWorldNode *)node) == 0) {
+    if (dds3SceneBasicExistBasic(dds3GetActiveScene(), (dds3Basic_t *)node) == 0) {
         return (s32)evtSceneDispProcess;
     }
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     width = DispBaseData(node, 3, 0xA, list) + 0xB;
     if (node[0xF] < 0xA) {
@@ -145,7 +145,7 @@ s32 dds3DebugBasic(void *task) {
             width += DispObjectBaseData(node, 3, width, list);
         }
     }
-    spriteList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    spriteList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(spriteList);
     dds3ConsPanelTagLink(spriteList, 0x24, 0x72, 0x23, width - 9);
     D_00380708.append(&D_00380708, spriteList);
@@ -157,11 +157,11 @@ s32 dds3DebugBasic(void *task) {
 }
 
 extern EffWorldOps *D_003849D8[EFF_WORLD_KIND_COUNT];
-void dds3DeleteBasic(EffWorldNode *node);
+void dds3DeleteBasic(dds3Basic_t *node);
 
 /* Allocate a node of `kind`, link its owner and run the owner's create hook. */
-EffWorldNode *dds3AllocBasic(u32 kind) {
-    EffWorldNode *node;
+dds3Basic_t *dds3AllocBasic(u32 kind) {
+    dds3Basic_t *node;
     EffWorldOps *ops;
 
     if (kind >= EFF_WORLD_KIND_COUNT) {
@@ -196,10 +196,10 @@ EffWorldNode *dds3AllocBasic(u32 kind) {
 }
 
 /* Notify the owner before unlinking and freeing this transform node. */
-void dds3DeleteBasic(EffWorldNode *node) {
+void dds3DeleteBasic(dds3Basic_t *node) {
     EffWorldOps *owner;
-    EffWorldNode *next;
-    EffWorldNode *prev;
+    dds3Basic_t *next;
+    dds3Basic_t *prev;
 
     if (node != NULL) {
         owner = node->ops;
@@ -220,8 +220,8 @@ void dds3DeleteBasic(EffWorldNode *node) {
     }
 }
 
-s32 dds3InitPoseSet(EffWorldNode *node) {
-    ObjectTransform *inner;
+s32 dds3InitPoseSet(dds3Basic_t *node) {
+    dds3PoseSet_t *inner;
 
     if (node == NULL) {
         return 0;
@@ -229,7 +229,7 @@ s32 dds3InitPoseSet(EffWorldNode *node) {
     if (node->inner != NULL) {
         return 0;
     }
-    inner = sdfChipAllocDirect(sizeof(ObjectTransform));
+    inner = sdfChipAllocDirect(sizeof(dds3PoseSet_t));
     if (inner == NULL) {
         return 0;
     }
@@ -242,8 +242,8 @@ s32 dds3InitPoseSet(EffWorldNode *node) {
     return 1;
 }
 
-void dds3FreePoseSet(EffWorldNode *node) {
-    ObjectTransform *inner;
+void dds3FreePoseSet(dds3Basic_t *node) {
+    dds3PoseSet_t *inner;
 
     if (node != 0) {
         inner = node->inner;
@@ -254,19 +254,19 @@ void dds3FreePoseSet(EffWorldNode *node) {
     }
 }
 
-void dds3OnPoseSetFlag(ObjectTransform *node, u32 flags) {
+void dds3OnPoseSetFlag(dds3PoseSet_t *node, u32 flags) {
     node->flags = node->flags | flags;
 }
 
-void dds3OffPoseSetFlag(ObjectTransform *node, u32 flags) {
+void dds3OffPoseSetFlag(dds3PoseSet_t *node, u32 flags) {
     node->flags = node->flags & ~flags;
 }
 
-u8 dds3CheckPoseSetFlag(ObjectTransform *node, u32 flags) {
+u8 dds3CheckPoseSetFlag(dds3PoseSet_t *node, u32 flags) {
     return (node->flags & flags) != 0;
 }
 
-void dds3BackupPoseSet(ObjectTransform *node) {
+void dds3BackupPoseSet(dds3PoseSet_t *node) {
     u8 *p40 = (u8 *)&node->position;
     u8 *p50;
     u8 *p60;
@@ -279,66 +279,66 @@ void dds3BackupPoseSet(ObjectTransform *node) {
     VU0_STORE_VF(vf10, p60);
 }
 
-void dds3SetRadiusPoseSet(ObjectTransform *node) {
+void dds3SetRadiusPoseSet(dds3PoseSet_t *node) {
     PCP_COPY_VECTOR(&node->savedScale, &node->scale);
     PCP_COPY_VECTOR(&node->savedRotation, &node->rotation);
     PCP_COPY_VECTOR(&node->savedPosition, &node->position);
 }
 
-void dds3GetRadiusPoseSet(EffWorldNode *node, f32 value) {
+void dds3GetRadiusPoseSet(dds3Basic_t *node, f32 value) {
     node->inner->radius = value;
 }
 
-f32 effObjGetInnerFloat(EffWorldNode *node) {
+f32 effObjGetInnerFloat(dds3Basic_t *node) {
     return node->inner->radius;
 }
 
-void dds3SetPosPoseSet(EffWorldNode *node, u128 *vector) {
-    ObjectTransform *inner = node->inner;
+void dds3SetPosPoseSet(dds3Basic_t *node, u128 *vector) {
+    dds3PoseSet_t *inner = node->inner;
 
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     PCP_COPY_VECTOR(&inner->position, vector);
 }
 
-void dds3SetRotPoseSet(EffWorldNode *node, u128 *vector) {
-    ObjectTransform *inner = node->inner;
+void dds3SetRotPoseSet(dds3Basic_t *node, u128 *vector) {
+    dds3PoseSet_t *inner = node->inner;
 
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     PCP_COPY_VECTOR(&inner->rotation, vector);
 }
 
-void dds3SetSclPoseSet(EffWorldNode *node, u128 *vector) {
-    ObjectTransform *inner = node->inner;
+void dds3SetSclPoseSet(dds3Basic_t *node, u128 *vector) {
+    dds3PoseSet_t *inner = node->inner;
 
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     PCP_COPY_VECTOR(&inner->scale, vector);
 }
 
-void dds3GetPosPoseSet(EffWorldNode *node) {
+void dds3GetPosPoseSet(dds3Basic_t *node) {
     u8 *p = (u8 *)&node->inner->position;
 
     VU0_LOAD_VF_MEMORY(vf10, p);
     VU0_SET_W_ONE(vf10);
 }
 
-void dds3GetRotPoseSet(EffWorldNode *node) {
+void dds3GetRotPoseSet(dds3Basic_t *node) {
     u8 *p = (u8 *)&node->inner->rotation;
 
     VU0_LOAD_VF_MEMORY(vf10, p);
     Normalize();
 }
 
-void effObjFetchInnerScale(EffWorldNode *node) {
+void effObjFetchInnerScale(dds3Basic_t *node) {
     u8 *p = (u8 *)&node->inner->scale;
 
     VU0_LOAD_VF_MEMORY(vf10, p);
 }
 
-void dds3GetPosPoseSetMCR(EffWorldNode *node, u128 *vector) {
-    ObjectTransform *inner = node->inner;
+void dds3GetPosPoseSetMCR(dds3Basic_t *node, u128 *vector) {
+    dds3PoseSet_t *inner = node->inner;
 
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
@@ -348,8 +348,8 @@ void dds3GetPosPoseSetMCR(EffWorldNode *node, u128 *vector) {
     VU0_STORE_VF($vf10, &inner->position);
 }
 
-void dds3AddRotPoseSet(EffWorldNode *node, u128 *vector) {
-    ObjectTransform *inner = node->inner;
+void dds3AddRotPoseSet(dds3Basic_t *node, u128 *vector) {
+    dds3PoseSet_t *inner = node->inner;
 
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
@@ -359,8 +359,8 @@ void dds3AddRotPoseSet(EffWorldNode *node, u128 *vector) {
     VU0_STORE_VF($vf10, &inner->rotation);
 }
 
-void dds3GetSclPoseSetMCR(EffWorldNode *node, u128 *vector) {
-    ObjectTransform *inner = node->inner;
+void dds3GetSclPoseSetMCR(dds3Basic_t *node, u128 *vector) {
+    dds3PoseSet_t *inner = node->inner;
 
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;

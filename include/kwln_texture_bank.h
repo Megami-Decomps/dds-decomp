@@ -8,7 +8,7 @@
 
 /* The held texture's packets in one frame bank (KwlnFrameDrawBank::heldTexture). */
 typedef struct KwlnTextureBank {
-    SdfListHead list;
+    sdfDrawTag_t list;
     SdfSceneDrawPacket scene;
     ConsMatrixPacket matrix;
     SdfLightingPacketStorage lighting;

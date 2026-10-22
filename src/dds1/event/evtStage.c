@@ -16,13 +16,13 @@
 
 
 
-extern void dds3MoverBasicMakePath(EffWorldNode *object);
+extern void dds3MoverBasicMakePath(dds3Basic_t *object);
 
 extern const char evtFieldScriptTerminationFormat[0x28];
 #include "sdf_debug_api.h"
 
-extern EffWorldNode *dds3AddScene(void);
-extern void dds3SceneBasicMakeScene_FromMemory(EffWorldNode *object, u32 area, u32 room,
+extern dds3Basic_t *dds3AddScene(void);
+extern void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *object, u32 area, u32 room,
                                                        u32 resource0Data, u32 resource1Data,
                                                        const SdfTextureOffsetListHeader *textureOffsets, u32 flags);
 extern void evtSetTestCamera(void);
@@ -37,9 +37,9 @@ extern char D_00367ED0[];
 
 void evtFreeStage(void)
 {
-    EffWorldNode *node;
+    dds3Basic_t *node;
 
-    node = (EffWorldNode *)dds3GetControlScene();
+    node = (dds3Basic_t *)dds3GetControlScene();
     if (node != 0) {
         dds3DeleteScene(node);
     }
@@ -49,7 +49,7 @@ void evtFreeStage(void)
 
 /* Detach every unit node from the secondary object's per-kind list. */
 void evtFreeAllUnit(void) {
-    EffWorldNode *secondaryObject = (EffWorldNode *)dds3GetControlScene();
+    dds3Basic_t *secondaryObject = (dds3Basic_t *)dds3GetControlScene();
     EvtWorldTable *worldTable;
 
     if (secondaryObject != NULL) {
@@ -67,7 +67,7 @@ s32 evtLoadArea(s32 area, s32 room)
 {
     char directory[0x40];
     char resourcePath[0x50];
-    EffWorldNode *worldObject;
+    dds3Basic_t *worldObject;
 
     evtFreeStage();
     worldObject = dds3AddScene();
@@ -97,7 +97,7 @@ extern s32 sdfDelayedResrcCheck(void);
 s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
                                      const SdfTextureOffsetListHeader *textureOffsets, s32 flags)
 {
-    EffWorldNode *worldObject;
+    dds3Basic_t *worldObject;
     char directory[0x40];
 
     evtFreeStage();
@@ -133,7 +133,7 @@ void evtKillFieldScript(void)
 {
     s32 taskState;
     s32 taskIndex;
-    KwlnTask *task;
+    dds3ProcessID_t *task;
 
     for (taskState = KWLN_TASK_DELAYED_START; taskState < KWLN_TASK_DESTROY_PENDING; taskState++) {
     restartStateScan:
@@ -151,7 +151,7 @@ void evtKillFieldScript(void)
 
 void evtPathStop(void *object)
 {
-    Dds3PathCurveWork *slotData;
+    dds3PathBasicControl_t *slotData;
 
     slotData = dds3ObjectBaseGetPathControl(object);
     if (slotData != 0) {
@@ -161,7 +161,7 @@ void evtPathStop(void *object)
 
 void evtPathStart(void *object)
 {
-    Dds3PathCurveWork *slotData;
+    dds3PathBasicControl_t *slotData;
 
     slotData = dds3ObjectBaseGetPathControl(object);
     if (slotData != 0) {
@@ -172,7 +172,7 @@ void evtPathStart(void *object)
 
 /* Scale the object's retained path time within the clamped multiplier range. */
 void evtPathRate(void *worldNode, f32 multiplier) {
-    Dds3PathCurveWork *slotData;
+    dds3PathBasicControl_t *slotData;
 
     slotData = dds3ObjectBaseGetPathControl(worldNode);
     if (slotData != 0) {
@@ -187,7 +187,7 @@ void evtPathRate(void *worldNode, f32 multiplier) {
 }
 
 void evtPathDir(void *worldNode, u32 direction) {
-    Dds3PathCurveWork *slotData;
+    dds3PathBasicControl_t *slotData;
 
     slotData = dds3ObjectBaseGetPathControl(worldNode);
     if (slotData != 0) {
@@ -197,7 +197,7 @@ void evtPathDir(void *worldNode, u32 direction) {
 
 /* Attach object to the node referenced by owner's owned handle. */
 s32 evtPathLinkAndMake(void *object, void *owner) {
-    ObjBase *ref;
+    dds3ObjectBaseControlWorkData_t *ref;
     void *slotNode;
 
     if (object == NULL) {

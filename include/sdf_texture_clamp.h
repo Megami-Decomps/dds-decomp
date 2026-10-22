@@ -11,7 +11,7 @@ enum {
     SDF_TEXTURE_CLAMP_STATE_MASK = 0x0F
 };
 
-struct SdfTex;
-void sdfTexSetWrapMode(struct SdfTex *texture, SdfTextureClampMode mode);
+struct sdfTexHandle_t;
+void sdfTexSetWrapMode(struct sdfTexHandle_t *texture, SdfTextureClampMode mode);
 
 #endif /* SDF_TEXTURE_CLAMP_H */

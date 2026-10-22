@@ -21,7 +21,7 @@ typedef struct FldRoomState {
     f32 center[4];    /* 0x80 */
     f32 plane[FIELD_ROOM_PLANE_COUNT][4];  /* 0x90 */
     f32 limit[FIELD_ROOM_PLANE_COUNT];     /* 0xF0 */
-    s32 worldObjectKey; /* 0x108: compared with an EffWorldNode key */
+    s32 worldObjectKey; /* 0x108: compared with an dds3Basic_t key */
     f32 sizeX;        /* 0x10C: the trigger shape's extents on its own axes */
     f32 sizeY;
     f32 sizeZ;

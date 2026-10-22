@@ -15,7 +15,7 @@ extern f32 aViewTarget[4];
 
 extern f32 sdfViewTargetVector[4];
 
-extern Motion *mdlGetMotionCtrlr(MdlCtx *model, s32 id);
+extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(dds3ModelHandle_t *model, s32 id);
 
 /* Replace only the high byte of the model's broadcast word. */
 void mnuSetNodeModelBroadcastByte(MnuModelNode *node, u8 highByte) {
@@ -43,7 +43,7 @@ void mnuSetModelNodeVisibility(u8 *node, s8 selector) {
  * sibling decision; no reset instruction survives in the emitted code.
  */
 void mnuSampleModelMotionAtFrame(MnuModelNode *node, f32 frame) {
-    Motion *motion = mdlGetMotionCtrlr(node->model, 0);
+    sdfMotionCtrlr_t *motion = mdlGetMotionCtrlr(node->model, 0);
     if (frame < 0.0f) {
         u32 random = dds3GetRandA(NULL);
         sdfMotionSeek(motion, (f32)(random % node->model->first->frameCount));

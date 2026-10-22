@@ -6,7 +6,7 @@
 
 struct SdfMotionKeyTrack;
 
-/* Motion callbacks release storage, bind keys, sample, capture and blend. */
+/* sdfMotionCtrlr_t callbacks release storage, bind keys, sample, capture and blend. */
 typedef struct SdfMotionBindingDispatch {
     void (*releaseStorage)(void *binding);
     void (*bindKeyTrack)(void *binding, struct SdfMotionKeyTrack *track);
@@ -19,10 +19,10 @@ typedef struct SdfMotionBindingDispatch {
 /* Common dispatch/motion prefix used by motion-owned bindings. */
 typedef struct SdfMotionBindingHead {
     SdfMotionBindingDispatch *dispatch;
-    Motion *motion;
+    sdfMotionCtrlr_t *motion;
 } SdfMotionBindingHead;
 
-void sdfMotionNodeBaseInit(SdfMotionBindingHead *binding, Motion *motion,
+void sdfMotionNodeBaseInit(SdfMotionBindingHead *binding, sdfMotionCtrlr_t *motion,
                              SdfMotionBindingDispatch *dispatch);
 
 typedef struct SdfMotionKeyInterval {
@@ -42,7 +42,7 @@ typedef struct SdfMotionKeyTrack {
 
 typedef struct SdfMotionKeyBinding {
     SdfMotionBindingDispatch *dispatch;
-    Motion *motion;
+    sdfMotionCtrlr_t *motion;
     SdfMotionKeyTrack *track;
 } SdfMotionKeyBinding;
 
@@ -54,10 +54,10 @@ void sdfMotCLBK_SetCut(SdfMotionKeyBinding *binding, SdfMotionKeyTrack *track);
 /* Indexed asset bindings share the key prefix and retain the selected asset. */
 typedef struct SdfMotionIndexedBinding {
     SdfMotionKeyBinding keys;
-    SdfAsset *target;
+    sdfMat_t *target;
 } SdfMotionIndexedBinding;
 
-void sdfMotGenMatInit(SdfMotionIndexedBinding *binding, Motion *motion,
+void sdfMotGenMatInit(SdfMotionIndexedBinding *binding, sdfMotionCtrlr_t *motion,
     SdfMotionBindingDispatch *dispatch, s32 options);
 
 /* Slot weights update a model entry and retain its complete previous pair. */
@@ -68,12 +68,12 @@ typedef struct SdfMotionSlotPairBinding {
 } SdfMotionSlotPairBinding;
 
 void sdfMotGenMorphInit(SdfMotionSlotPairBinding *destination,
-    Motion *motion, SdfMotionBindingDispatch *dispatch, s32 entryIndex);
+    sdfMotionCtrlr_t *motion, SdfMotionBindingDispatch *dispatch, s32 entryIndex);
 
 /* Color/word and scalar bindings capture one target word at +0x10. */
 typedef struct SdfMotionIndexedValueBinding {
     SdfMotionKeyBinding keys;
-    SdfAsset *target;
+    sdfMat_t *target;
     union {
         u32 capturedWord;
         f32 capturedFloat;
@@ -98,29 +98,29 @@ typedef union SdfMotionTextCapture {
 /* Text blends snapshot 0x14 bytes; direct-key bindings leave this tail unused. */
 typedef struct SdfMotionIndexedTextBinding {
     SdfMotionKeyBinding keys;
-    SdfAsset *target;
+    sdfMat_t *target;
     SdfMotionTextCapture capture;
 } SdfMotionIndexedTextBinding;
 
 /* Shared 0x10-byte draw-target prefix; vector and key-flag tails differ. */
 typedef struct SdfMotionDrawTargetBinding {
     SdfMotionKeyBinding keys;
-    SdfDrawNode *node;
+    sdfModelNode_t *node;
 } SdfMotionDrawTargetBinding;
 
-void sdfMotGenModelInit(SdfMotionDrawTargetBinding *binding, Motion *motion,
+void sdfMotGenModelInit(SdfMotionDrawTargetBinding *binding, sdfMotionCtrlr_t *motion,
                           SdfMotionBindingDispatch *dispatch, s32 nodeIndex);
 
 typedef struct SdfMotionDrawBinding {
     SdfMotionKeyBinding keys;
-    SdfDrawNode *node;
+    sdfModelNode_t *node;
     f32 capturedVector[4];
 } SdfMotionDrawBinding;
 
 /* The key-flag callback observes the draw node's flag and returns its inverse. */
 typedef struct SdfMotionKeyFlagBinding {
     SdfMotionKeyBinding keys;
-    SdfDrawNode *node;
+    sdfModelNode_t *node;
     s8 keyFlagClear;
     u8 pad11[3];
 } SdfMotionKeyFlagBinding;

@@ -3,13 +3,13 @@
 
 #include "common.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Shared 0xC per-instance prefix: entries, asset view and allocation handle. */
 typedef struct EffFrameState {
     u8 *entries;
     u8 *asset;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
 } EffFrameState;
 
 typedef char EffFrameState_size_check[

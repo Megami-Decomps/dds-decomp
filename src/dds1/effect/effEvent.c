@@ -83,14 +83,14 @@
 
 extern EffScreenDrawParams Eve_Blur;
 extern EffScreenDrawParams D_00355908;
-extern EffSolidRectParams Eve_Filter;
+extern dds3Effect_Filter_t Eve_Filter;
 extern EffScreenDrawParams D_003559A0;
-extern EffBlurTemplateBody effTexturedBlurSetupParameters;
-extern EffBlurScatterParams effScatterBlurSetupParameters;
+extern dds3Effect_PartialMultiBlurParam_t effTexturedBlurSetupParameters;
+extern dds3Effect_DistortionBlurParam_t effScatterBlurSetupParameters;
 extern EffScreenDrawParams D_00355E48;
-extern EffSolidRectParams D_00355F88;
-extern EffResourceRectParams effResourceRectangleSetupParameters;
-extern EffBlurScaleParams effStaggeredBlurSetupParameters;
+extern dds3Effect_Filter_t D_00355F88;
+extern dds3Effect_PartialMultiFilterParam_t effResourceRectangleSetupParameters;
+extern dds3Effect_RippleBlurParam_t effStaggeredBlurSetupParameters;
 
 extern EffResourceRectWork *hEve_PartialMultiFilter;
 
@@ -121,12 +121,12 @@ extern SdfPoolNode kwlnPositionedTextSurface;
 #include "sdf_packet_alloc.h"
 
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
-extern void dds3EffectFilter(EffSolidRectParams *arg);
+extern void dds3EffectFilter(dds3Effect_Filter_t *arg);
 
 /* Allocate contiguous slots followed by their count and allocation handle. */
 EffArrHdr *effCreateSlotArray(u32 count) {
     s32 slotBytes = count * EFF_EVENT_BEZIER_SLOT_BYTES;
-    SdfMemBlock *allocation = sdfMemAllocDirect(slotBytes + EFF_EVENT_SLOT_HEADER_BYTES);
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(slotBytes + EFF_EVENT_SLOT_HEADER_BYTES);
     EffSegmentedBezierSlot *slot = (EffSegmentedBezierSlot *)sdfMemLock(allocation);
     EffArrHdr *table = (EffArrHdr *)((u8 *)slot + slotBytes);
     u32 index = 0;
@@ -252,7 +252,7 @@ extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 
 /* Project a point and draw a filled/bordered marker with 0x20/0x10 GS-unit extents. */
 void effDebugPointDraw(f32 *position) {
-    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
     f32 screen[EFF_EVENT_VECTOR_COMPONENTS];
     s32 pixel[2]; /* written, never read; retail keeps the frame slot */
     s32 x;
@@ -269,12 +269,12 @@ void effDebugPointDraw(f32 *position) {
     pixel[1] = y;
     sdfDrawTagLink(list, (u32)(dds3PrimFrameRect((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, EFF_EVENT_MARKER_COLOR, EFF_EVENT_MARKER_COLOR)));
     scene = &kwlnPositionedTextSurface;
-    scene->append(scene, (SdfListHead *)list);
+    scene->append(scene, (sdfDrawTag_t *)list);
 }
 
 /* Project a point and use color for both the marker's fill and border. */
 void effDebugPointDraw2(f32 *position, s32 color) {
-    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
     f32 screen[EFF_EVENT_VECTOR_COMPONENTS];
     s32 pixel[2]; /* written, never read; retail keeps the frame slot */
     s32 x;
@@ -291,14 +291,14 @@ void effDebugPointDraw2(f32 *position, s32 color) {
     pixel[1] = y;
     sdfDrawTagLink(list, (u32)(dds3PrimFrameRect((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, color, color)));
     scene = &kwlnPositionedTextSurface;
-    scene->append(scene, (SdfListHead *)list);
+    scene->append(scene, (sdfDrawTag_t *)list);
 }
 
 extern u64 *dds3PrimLine(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags);
 
 /* Draw a GS line between two projected points, using the fixed marker color. */
 void effDebugLineDraw(f32 *from, f32 *to) {
-    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
     f32 start[EFF_EVENT_VECTOR_COMPONENTS];
     f32 end[EFF_EVENT_VECTOR_COMPONENTS];
     s32 pixel[4]; /* written, never read; retail keeps the frame slot */
@@ -325,12 +325,12 @@ void effDebugLineDraw(f32 *from, f32 *to) {
     pixel[3] = y1;
     sdfDrawTagLink(list, (u32)(dds3PrimLine((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, 0)));
     scene = &kwlnPositionedTextSurface;
-    scene->append(scene, (SdfListHead *)list);
+    scene->append(scene, (sdfDrawTag_t *)list);
 }
 
 /* Draw a GS line between two projected points, using color at both vertices. */
 void effDebugLineDraw2(f32 *from, f32 *to, s32 color) {
-    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
     f32 start[EFF_EVENT_VECTOR_COMPONENTS];
     f32 end[EFF_EVENT_VECTOR_COMPONENTS];
     s32 pixel[4]; /* written, never read; retail keeps the frame slot */
@@ -357,18 +357,18 @@ void effDebugLineDraw2(f32 *from, f32 *to, s32 color) {
     pixel[3] = y1;
     sdfDrawTagLink(list, (u32)(dds3PrimLine((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, 0)));
     scene = &kwlnPositionedTextSurface;
-    scene->append(scene, (SdfListHead *)list);
+    scene->append(scene, (sdfDrawTag_t *)list);
 }
 
 /* Submit a formatted native command at biased screen coordinates. */
 void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, s32 format) {
-    SdfListHead *task = (SdfListHead *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
+    sdfDrawTag_t *task = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
     SdfPoolNode *scene;
 
     sdfDrawTagInit(task);
     sdfDrawTagLink(task, (u32)(sdfDevPrintf((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, commandIndex, (const char *)format)));
     scene = &kwlnPositionedTextSurface;
-    scene->append(scene, (SdfListHead *)task);
+    scene->append(scene, (sdfDrawTag_t *)task);
 }
 
 extern SdfPoolNode sdfGrOtTable[];
@@ -378,7 +378,7 @@ void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
     f32 matrix[4][4] __attribute__((aligned(16)));
     f32 vertices[40][4] __attribute__((aligned(16)));
     u32 colors[40];
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     SdfPoolNode *surface;
     f32 (*out)[4];
     f32 latitude;
@@ -389,7 +389,7 @@ void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
     u32 ring = 0;
     u32 segment;
 
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     do {
         colors[ring++] = color;
@@ -443,19 +443,19 @@ void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
 #include "sdf_asset_create.h"
 #include "sdf_asset_state.h"
 
-extern SdfAsset *D_003BB068;
+extern sdfMat_t *D_003BB068;
 extern f32 D_003BB06C;
 extern f32 effTriangleVertexScratch[4][4];
 extern u32 D_00355870[4];
 extern SdfPoolNode D_00325028;
 extern void *effPkt3DPrimMakePoly(EffPacketParams *params);
 
-extern void sdf3DPrimLinkMat(SdfListHead *packetList, SdfAsset *asset, s32 (*allocatePacket)(s32));
-extern void sdf3DPrimLinkTm(SdfListHead *packetList, s32 (*allocatePacket)(s32));
+extern void sdf3DPrimLinkMat(sdfDrawTag_t *packetList, sdfMat_t *asset, s32 (*allocatePacket)(s32));
+extern void sdf3DPrimLinkTm(sdfDrawTag_t *packetList, s32 (*allocatePacket)(s32));
 
 void effDebugSelectCursorDraw(f32 *position) {
-    SdfAsset *asset = D_003BB068;
-    SdfListHead *list;
+    sdfMat_t *asset = D_003BB068;
+    sdfDrawTag_t *list;
     EffPacketParams packet;
 
     if (asset == NULL) {
@@ -464,7 +464,7 @@ void effDebugSelectCursorDraw(f32 *position) {
         sdfMatSetConstant(asset, 1.0f);
     }
 
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     SetRotateMatrixY(D_003BB06C);
     D_003BB06C += 0.10471974313259125f;
@@ -502,7 +502,7 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
     f32 point[4]; /* The line provider consumes xyz; preserve the untouched w lane. */
     f32 vertices[40][4];
     u32 colors[40];
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     f32 (*out)[4];
     SdfPoolNode *surface;
     u32 ring;
@@ -513,7 +513,7 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
     f32 angle;
     f32 oppositeAngle;
 
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     for (ring = 0; ring < 40; ring++) {
         colors[ring] = color;
@@ -622,13 +622,13 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
 /* Submit a filled rectangle and its line-strip border. Keep native width/height
  * scaling and the distinct shift/multiply forms used by the other draw paths. */
 void effDebugWindowDraw(s32 x, s32 y, s32 width, s32 height, s32 fillColor, s32 borderColor) {
-    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
     SdfPoolNode *scene;
 
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)(dds3PrimFrameRect(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, width * EFF_EVENT_GS_X_SCALE, height * EFF_EVENT_GS_Y_SCALE, fillColor, borderColor)));
     scene = &kwlnPositionedTextSurface;
-    scene->append(scene, (SdfListHead *)list);
+    scene->append(scene, (sdfDrawTag_t *)list);
 }
 
 void Eve_BlurON(void) {
@@ -640,7 +640,7 @@ void Eve_BlurOFF(void) {
 }
 
 /* Copy only the 0x28-byte source prefix; retain the screen record's trailing bytes. */
-void Eve_BlurSetParam(const EffBlurQuad *parameters) {
+void Eve_BlurSetParam(const dds3Effect_Blur_t *parameters) {
     memcpy(&Eve_Blur, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
@@ -658,7 +658,7 @@ void Eve_PartialMultiBlurOFF(void) {
 }
 
 /* Copy the pixel rectangle only; retain its selected source resource. */
-void Eve_PartialMultiBlurSetParam(EffBlurTemplateBody *parameters) {
+void Eve_PartialMultiBlurSetParam(dds3Effect_PartialMultiBlurParam_t *parameters) {
     hEve_PartialMultiBlur->body = *parameters;
 }
 
@@ -667,7 +667,7 @@ EffBlurTemplate *Eve_PartialMultiBlurGetParams(void) {
     return hEve_PartialMultiBlur;
 }
 
-void Eve_PartialMultiBlurSetTex(SdfTex *texture) {
+void Eve_PartialMultiBlurSetTex(sdfTexHandle_t *texture) {
     hEve_PartialMultiBlur->texture = texture;
 }
 
@@ -685,7 +685,7 @@ void Eve_DistortionBlurOFF(void) {
 }
 
 /* Update scatter parameters without replacing the owned allocation or slots. */
-void Eve_DistortionBlurSetParam(EffBlurScatterParams *parameters) {
+void Eve_DistortionBlurSetParam(dds3Effect_DistortionBlurParam_t *parameters) {
     hEve_DistortionBlur->params = *parameters;
 }
 
@@ -694,7 +694,7 @@ EffBlurScatterWork *Eve_DistortionBlurGetParams(void) {
     return hEve_DistortionBlur;
 }
 
-void Eve_DistortionBlurSetTex(SdfTex *sourceHandle) {
+void Eve_DistortionBlurSetTex(sdfTexHandle_t *sourceHandle) {
     hEve_DistortionBlur->texture = sourceHandle;
 }
 
@@ -712,7 +712,7 @@ void Eve_RippleBlurOFF(void) {
 }
 
 /* Update scale parameters without replacing the owned allocation or slots. */
-void Eve_RippleBlurSetParam(EffBlurScaleParams *parameters) {
+void Eve_RippleBlurSetParam(dds3Effect_RippleBlurParam_t *parameters) {
     hEve_RippleBlur->params = *parameters;
 }
 
@@ -721,7 +721,7 @@ EffBlurScaleWork *Eve_RippleBlurGetParams(void) {
     return hEve_RippleBlur;
 }
 
-void Eve_RippleBlurSetTex(SdfTex *sourceHandle) {
+void Eve_RippleBlurSetTex(sdfTexHandle_t *sourceHandle) {
     hEve_RippleBlur->texture = sourceHandle;
 }
 
@@ -757,12 +757,12 @@ void Eve_FilterOFF(void) {
 }
 
 /* Replace the complete solid-rectangle parameter block. */
-void Eve_FilterSetParam(EffSolidRectParams *parameters) {
+void Eve_FilterSetParam(dds3Effect_Filter_t *parameters) {
     Eve_Filter = *parameters;
 }
 
 /* Expose the solid-rectangle parameter block by address. */
-EffSolidRectParams *Eve_FilterGetParams(void) {
+dds3Effect_Filter_t *Eve_FilterGetParams(void) {
     return &Eve_Filter;
 }
 
@@ -775,7 +775,7 @@ void Eve_PartialMultiFilterOFF(void) {
 }
 
 /* Copy the resource template body while preserving its selected resource. */
-void Eve_PartialMultiFilterSetParam(EffResourceRectParams *parameters) {
+void Eve_PartialMultiFilterSetParam(dds3Effect_PartialMultiFilterParam_t *parameters) {
     hEve_PartialMultiFilter->params = *parameters;
 }
 
@@ -784,7 +784,7 @@ EffResourceRectWork *Eve_PartialMultiFilterGetParams(void) {
     return hEve_PartialMultiFilter;
 }
 
-void Eve_PartialMultiFilterSetTex(SdfTex *texture) {
+void Eve_PartialMultiFilterSetTex(sdfTexHandle_t *texture) {
     hEve_PartialMultiFilter->texture = texture;
 }
 
@@ -795,10 +795,10 @@ void Eve_PartialMultiFilterSetDefTex(void) {
 
 /* Clone the four default work templates; only the staggered slot count is overridden. */
 void Eve_EffectInit(void) {
-    hEve_PartialMultiBlur = dds3EffectPartialMultiBlurCreate((EffBlurTemplateBody *)D_003558D8);
-    hEve_DistortionBlur = dds3EffectDistortionBlurCreate((EffBlurScatterParams *)D_003558A8);
-    hEve_PartialMultiFilter = dds3EffectPartialMultiFilterCreate((EffResourceRectParams *)D_00355948);
-    hEve_RippleBlur = dds3EffectRippleBlurCreate((EffBlurScaleParams *)D_00355970);
+    hEve_PartialMultiBlur = dds3EffectPartialMultiBlurCreate((dds3Effect_PartialMultiBlurParam_t *)D_003558D8);
+    hEve_DistortionBlur = dds3EffectDistortionBlurCreate((dds3Effect_DistortionBlurParam_t *)D_003558A8);
+    hEve_PartialMultiFilter = dds3EffectPartialMultiFilterCreate((dds3Effect_PartialMultiFilterParam_t *)D_00355948);
+    hEve_RippleBlur = dds3EffectRippleBlurCreate((dds3Effect_RippleBlurParam_t *)D_00355970);
     Eve_RippleBlurGetParams()->params.count = EFF_EVENT_STAGGERED_SLOT_COUNT;
 }
 
@@ -911,12 +911,12 @@ s32 effEventAdvanceBlurTemplateSetup(void) {
 }
 
 /* Expose the blur-template setup parameters by address. */
-EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void) {
+dds3Effect_PartialMultiBlurParam_t *effEventGetBlurTemplateSetupParams(void) {
     return &effTexturedBlurSetupParameters;
 }
 
 /* Replace the setup template; this does not modify the active blur work. */
-void effEventSetBlurTemplateParameters(EffBlurTemplateBody *parameters) {
+void effEventSetBlurTemplateParameters(dds3Effect_PartialMultiBlurParam_t *parameters) {
     effTexturedBlurSetupParameters = *parameters;
 }
 
@@ -954,12 +954,12 @@ s32 effEventAdvanceScatterBlurSetup(void) {
 }
 
 /* Expose the scatter-blur setup parameters by address. */
-EffBlurScatterParams *effEventGetScatterBlurSetupParams(void) {
+dds3Effect_DistortionBlurParam_t *effEventGetScatterBlurSetupParams(void) {
     return &effScatterBlurSetupParameters;
 }
 
 /* Replace setup parameters without replacing the active filter-blur work. */
-void effEventSetScatterBlurParameters(EffBlurScatterParams *parameters) {
+void effEventSetScatterBlurParameters(dds3Effect_DistortionBlurParam_t *parameters) {
     effScatterBlurSetupParameters = *parameters;
 }
 
@@ -1040,12 +1040,12 @@ s32 evtViewerCheckDirty(void) {
 }
 
 /* Expose the solid-rectangle setup parameters by address. */
-EffSolidRectParams *effEventGetSolidRectangleSetupParams(void) {
+dds3Effect_Filter_t *effEventGetSolidRectangleSetupParams(void) {
     return &D_00355F88;
 }
 
 /* Replace the setup block rather than the active solid-rectangle parameters. */
-void effEventSetSolidRectangleParameters(EffSolidRectParams *parameters) {
+void effEventSetSolidRectangleParameters(dds3Effect_Filter_t *parameters) {
     D_00355F88 = *parameters;
 }
 
@@ -1083,12 +1083,12 @@ s32 mfilterRun(void) {
 }
 
 /* Expose the resource-template setup body by address. */
-EffResourceRectParams *mfilterGetParam(void) {
+dds3Effect_PartialMultiFilterParam_t *mfilterGetParam(void) {
     return &effResourceRectangleSetupParameters;
 }
 
 /* Replace the setup body without replacing the active textured-square work. */
-void mfilterSetParam(EffResourceRectParams *parameters) {
+void mfilterSetParam(dds3Effect_PartialMultiFilterParam_t *parameters) {
     effResourceRectangleSetupParameters = *parameters;
 }
 
@@ -1126,12 +1126,12 @@ s32 rblurProcess(void) {
 }
 
 /* Expose the scale-blur setup parameters by address. */
-EffBlurScaleParams *rblurGetParam(void) {
+dds3Effect_RippleBlurParam_t *rblurGetParam(void) {
     return &effStaggeredBlurSetupParameters;
 }
 
 /* Replace setup parameters without replacing the active staggered-blur work. */
-void rblurSetParam(EffBlurScaleParams *parameters) {
+void rblurSetParam(dds3Effect_RippleBlurParam_t *parameters) {
     effStaggeredBlurSetupParameters = *parameters;
 }
 
@@ -1154,22 +1154,22 @@ extern u32 D_003BB144;
 extern u32 D_003BB148;
 
 /* Compact event owner: the allocator reserves exactly 0x38 bytes. */
-struct EffEventWork {
+struct effEveBEDCutHandle_t {
     EffEventInit init;
-    struct EvtUnit *actor; /* Linked event unit supplies its model owner. */
-    BattleEffect *effect;
+    struct evtUnitHandle_t *actor; /* Linked event unit supplies its model owner. */
+    effBTLCutHandle_t *effect;
 };
 
 
 
-extern void effBTLCutSetScale(BattleEffect *effect, f32 scale);
+extern void effBTLCutSetScale(effBTLCutHandle_t *effect, f32 scale);
 
-extern BattleEffect * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
+extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
 
 /* Allocate the compact record, copy its init prefix, then attach the new effect. */
-EffEventWork *effEveBEDCutCreate(SoundMixer *owner, u16 kind, const void *params) {
+effEveBEDCutHandle_t *effEveBEDCutCreate(SoundMixer *owner, u16 kind, const void *params) {
     const EffEventInit *init = (const EffEventInit *)params;
-    EffEventWork *work = sdfChipAllocDirect(sizeof(EffEventWork));
+    effEveBEDCutHandle_t *work = sdfChipAllocDirect(sizeof(effEveBEDCutHandle_t));
 
     memcpy(work, init, sizeof(*init));
     work->actor = NULL;
@@ -1179,13 +1179,13 @@ EffEventWork *effEveBEDCutCreate(SoundMixer *owner, u16 kind, const void *params
 }
 
 /* Release the attached effect before freeing the event work. */
-void effEveBEDCutDelete(EffEventWork *work) {
+void effEveBEDCutDelete(effEveBEDCutHandle_t *work) {
     effBTLCutDelete(work->effect);
     sdfChipFreeDirect(work);
 }
 
 /* Copy the serialized init prefix, retaining the event's actor and effect links. */
-void effEveBEDCutSetParams(EffEventWork *destination, const void *source) {
+void effEveBEDCutSetParams(effEveBEDCutHandle_t *destination, const void *source) {
     memcpy(&destination->init, source, sizeof(destination->init));
 }
 
@@ -1195,11 +1195,11 @@ void effEveBEDCutGetParams(const void *source, void *destination) {
 }
 
 /* Forward the effect's scale value without modifying the record's init prefix. */
-void effEveBEDCutSetScale(EffEventWork *work, f32 scale) {
+void effEveBEDCutSetScale(effEveBEDCutHandle_t *work, f32 scale) {
     effBTLCutSetScale(work->effect, scale);
 }
 
-void effEveBEDCutSetUnitHandle(EffEventWork *work, void *actor) {
+void effEveBEDCutSetUnitHandle(effEveBEDCutHandle_t *work, void *actor) {
     work->actor = actor;
 }
 
@@ -1207,17 +1207,17 @@ void effEveBEDCutSetUnitHandle(EffEventWork *work, void *actor) {
 #include "mdl.h"
 
 extern void effEveBEDPartGetPositionPtr(EffEventInit *source, EffectVectorRequest *params);
-extern s32 sdfModelGetMarkPos(SdfModel *model, s32 id);
-extern s32 sdfModelGetMarkPosMatrix(SdfModel *model, s32 id);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 id);
+extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *model, s32 id);
 extern const f32 D_003A12E0[4];
 
 /* Callbacks consume the VU0 output buffers; see docs/idioms.md,
  * "Event-effect SDK output frontiers". */
-void effEventUpdateEffectParameters(EffEventWork *work) {
-    BattleEffect *effect;
+void effEventUpdateEffectParameters(effEveBEDCutHandle_t *work) {
+    effBTLCutHandle_t *effect;
     EffBattleEntryList *list;
     EffBattleEntry *entry;
-    SdfModel *model;
+    sdfModelRootNode_t *model;
     f32 position[4];
     f32 rotationMatrix[4][4];
     f32 matrix[4][4];
@@ -1281,8 +1281,8 @@ void effEventUpdateEffectParameters(EffEventWork *work) {
 }
 
 /* Initialize a holder and its effect record; the teardown flag starts set. */
-EffEventLight *effSimpleBEDCreate(SoundMixer *mixer, f32 param) {
-    EffEventLight *work = sdfChipAllocDirect(sizeof(EffEventLight));
+effSimpleBED_t *effSimpleBEDCreate(SoundMixer *mixer, f32 param) {
+    effSimpleBED_t *work = sdfChipAllocDirect(sizeof(effSimpleBED_t));
 
     work->init.orientation[3] = 1.0f;
     work->init.range = 50.0f;
@@ -1303,7 +1303,7 @@ EffEventLight *effSimpleBEDCreate(SoundMixer *mixer, f32 param) {
 }
 
 /* Release the effect, invoke shared teardown only when flagged, then free the holder. */
-void effSimpleBEDDelete(EffEventLight *work) {
+void effSimpleBEDDelete(effSimpleBED_t *work) {
     effEveBEDCutDelete(work->owner);
     if (work->active != 0) {
         effEveBEDDelete(work->handle);
@@ -1312,9 +1312,9 @@ void effSimpleBEDDelete(EffEventLight *work) {
 }
 
 /* Clone the init block/effect using the same handle; clear the shared-teardown flag. */
-EffEventLight *effSimpleBEDCopy(EffEventLight *src) {
+effSimpleBED_t *effSimpleBEDCopy(effSimpleBED_t *src) {
     EffEventInit *block = &src->init;
-    EffEventLight *work = sdfChipAllocDirect(sizeof(EffEventLight));
+    effSimpleBED_t *work = sdfChipAllocDirect(sizeof(effSimpleBED_t));
 
     work->owner = effEveBEDCutCreate(src->handle, 0, block);
     work->handle = src->handle;
@@ -1324,12 +1324,12 @@ EffEventLight *effSimpleBEDCopy(EffEventLight *src) {
 }
 
 /* Apply the native owner operation to the pointer stored in the record prefix. */
-void effSimpleBEDDraw(EffEventLight *work) {
+void effSimpleBEDDraw(effSimpleBED_t *work) {
     effEventUpdateEffectParameters(work->owner);
 }
 
 /* Copy xyz, lower y by half the aim height, clear w and publish the record. */
-void effSimpleBEDSetPosition(EffEventLight *work, f32 *position) {
+void effSimpleBEDSetPosition(effSimpleBED_t *work, f32 *position) {
     work->init.position[0] = position[0];
     work->init.position[1] = position[1] - work->init.height * 0.5f;
     work->init.position[2] = position[2];
@@ -1338,7 +1338,7 @@ void effSimpleBEDSetPosition(EffEventLight *work, f32 *position) {
 }
 
 /* Copy the holder's updated packed tint to its event record. */
-void effSimpleBEDSetRGBA(EffEventLight *work, u32 color) {
+void effSimpleBEDSetRGBA(effSimpleBED_t *work, u32 color) {
     work->init.color = color;
     effEveBEDCutSetParams(work->owner, &work->init);
 }
@@ -1423,7 +1423,7 @@ void effEveBEDPartGetPositionPtr(EffEventInit *source, EffectVectorRequest *para
     VU0_LOAD_VF(vf10, out);
 }
 
-extern BillObj *billCreateFromResource(s32 kind, const char *path);
+extern billHandle_t *billCreateFromResource(s32 kind, const char *path);
 
 /* Allocate particles plus their owner, copy parameters and acquire shared textures. */
 INCLUDE_RODATA(const s32, "effect/effEvent", D_003A12E0);
@@ -1431,7 +1431,7 @@ INCLUDE_RODATA(const s32, "effect/effEvent", D_003A12E0);
 EffEventBillSet *effEVECombParSmokeCreate(EffEventBillParams *src) {
     u32 particleCount = src->particleCount;
     u32 particleBytes = particleCount * sizeof(EffEventBillParticle);
-    SdfMemBlock *allocationHandle = sdfMemAllocDirect(particleBytes + sizeof(EffEventBillSet));
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(particleBytes + sizeof(EffEventBillSet));
     EffEventBillParticle *particle = (EffEventBillParticle *)sdfMemLock(allocationHandle);
     EffEventBillSet *work = (EffEventBillSet *)((u8 *)particle + particleBytes);
     u32 particleIndex;
@@ -1467,8 +1467,8 @@ EffEventBillSet *effEVECombParSmokeCreate(EffEventBillParams *src) {
 void effEVECombParSmokeDelete(EffEventBillSet *work) {
     D_003BB140 = D_003BB140 - 1;
     if (D_003BB140 == 0) {
-        dds3BillboardDelete((BillObj *)D_003BB144);
-        dds3BillboardDelete((BillObj *)D_003BB148);
+        dds3BillboardDelete((billHandle_t *)D_003BB144);
+        dds3BillboardDelete((billHandle_t *)D_003BB148);
     }
     sdfMemFreeDirect(work->allocationHandle);
 }
@@ -1525,7 +1525,7 @@ void effEVECombParSmokePartInit(EffEventBillSet *work, s32 index) {
 }
 
 extern f32 aViewTarget[4];
-extern void dds3BillboardDraw(BillObj *obj);
+extern void dds3BillboardDraw(billHandle_t *obj);
 
 /* vu0 routine: camera-right normalization and position addition use the
  * native SDK pipeline. As in effEVECombParSmokeDraw, position W is untouched. */
@@ -1556,8 +1556,8 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
     swayPhaseStep = work->head.swayPhaseStep;
     swayAmplitudeStep = work->head.swayAmplitudeStep;
     PCP_COPY_VECTOR(origin, work->head.position);
-    dds3BillboardSetMode((BillObj *)D_003BB144, work->head.drawMode);
-    dds3BillboardSetMode((BillObj *)D_003BB148, 3);
+    dds3BillboardSetMode((billHandle_t *)D_003BB144, work->head.drawMode);
+    dds3BillboardSetMode((billHandle_t *)D_003BB148, 3);
     for (index = 0; index < particleCount; index++, particle++) {
         s32 age = particle->age;
         if (age == 0) {
@@ -1606,16 +1606,16 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
             VU0_LOAD_VF(vf11, origin);
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF(vf10, position);
-            effCopyVector((BillObj *)D_003BB144, position);
-            dds3BillboardSetScale((BillObj *)D_003BB144, scaleX, scaleY);
-            dds3BillboardSetRGBA((BillObj *)D_003BB144, drawColor);
-            dds3BillboardSetRotate((BillObj *)D_003BB144, particle->rotation);
-            dds3BillboardDraw((BillObj *)D_003BB144);
-            effCopyVector((BillObj *)D_003BB148, position);
-            dds3BillboardSetScale((BillObj *)D_003BB148, scaleX, scaleY);
-            dds3BillboardSetRGBA((BillObj *)D_003BB148, drawColor);
-            dds3BillboardSetRotate((BillObj *)D_003BB148, particle->rotation);
-            dds3BillboardDraw((BillObj *)D_003BB148);
+            effCopyVector((billHandle_t *)D_003BB144, position);
+            dds3BillboardSetScale((billHandle_t *)D_003BB144, scaleX, scaleY);
+            dds3BillboardSetRGBA((billHandle_t *)D_003BB144, drawColor);
+            dds3BillboardSetRotate((billHandle_t *)D_003BB144, particle->rotation);
+            dds3BillboardDraw((billHandle_t *)D_003BB144);
+            effCopyVector((billHandle_t *)D_003BB148, position);
+            dds3BillboardSetScale((billHandle_t *)D_003BB148, scaleX, scaleY);
+            dds3BillboardSetRGBA((billHandle_t *)D_003BB148, drawColor);
+            dds3BillboardSetRotate((billHandle_t *)D_003BB148, particle->rotation);
+            dds3BillboardDraw((billHandle_t *)D_003BB148);
             particle->scalePhaseX += particle->scalePhaseStepX;
             particle->scalePhaseY += particle->scalePhaseStepY;
             particle->rotation += particle->angularSpeed;
@@ -1634,7 +1634,7 @@ extern void sdf3DMakeDirectRefPacket(struct DmaPacketHeader *packet, u32 sourceA
 extern void sdfBillBoardMakeTMPacket(u8 *packet, const f32 *matrix);
 extern SdfPoolNode D_003252A8;
 
-extern s32 dds3BillboardGetTex(BillObj *effect);
+extern s32 dds3BillboardGetTex(billHandle_t *effect);
 
 /* DDS1 event-bill renderer, reconstructed from the native owner and its
  * current providers. The VIF position stream consumes XYZ only: native never
@@ -1643,8 +1643,8 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     EffEventBillBatch primary, secondary;
     f32 matrix[4][4];
     f32 position[4], origin[4], lateral[4];
-    SdfListHead *primaryList, *secondaryList;
-    SdfTex *primaryTexture, *secondaryTexture;
+    sdfDrawTag_t *primaryList, *secondaryList;
+    sdfTexHandle_t *primaryTexture, *secondaryTexture;
     EffEventBillParticle *particle;
     s32 repeat;
     u32 index, particleCount;
@@ -1652,25 +1652,25 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     u32 color;
     f32 acceleration, swayPhaseStep, swayAmplitudeStep;
     struct DmaPacketHeader *texturePacket;
-    SdfTexBuf *textureBuffer;
+    sdfTexPacket_t *textureBuffer;
     s32 textureBytes;
     u8 *geometryPacket;
-    SdfListHead *stateList;
+    sdfDrawTag_t *stateList;
     u64 *statePacket;
     SdfPoolNode *surface;
     primary.count = 0;
     secondary.count = 0;
-    primaryList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    primaryList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(primaryList);
-    secondaryList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    secondaryList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(secondaryList);
-    primaryTexture = (SdfTex *)dds3BillboardGetTex((BillObj *)D_003BB144);
+    primaryTexture = (sdfTexHandle_t *)dds3BillboardGetTex((billHandle_t *)D_003BB144);
     texturePacket = (struct DmaPacketHeader *)sdfGrAllocPacketBuff(0x20);
     textureBuffer = sdfTexGetPacket(primaryTexture);
     textureBytes = sdfTexGetPacketLength(primaryTexture);
     sdf3DMakeDirectRefPacket(texturePacket, (u32)textureBuffer, textureBytes);
     sdfAppendReferencePacket(primaryList, (u32)texturePacket);
-    secondaryTexture = (SdfTex *)dds3BillboardGetTex((BillObj *)D_003BB148);
+    secondaryTexture = (sdfTexHandle_t *)dds3BillboardGetTex((billHandle_t *)D_003BB148);
     texturePacket = (struct DmaPacketHeader *)sdfGrAllocPacketBuff(0x20);
     textureBuffer = sdfTexGetPacket(secondaryTexture);
     textureBytes = sdfTexGetPacketLength(secondaryTexture);
@@ -1869,7 +1869,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
         sdfDrawTagLink(secondaryList, (u32)sdfBillBoardMakeN(secondary.positions,
             secondary.colors, secondary.uv, secondary.corners, secondary.count, 0));
     }
-    stateList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    stateList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(stateList);
     statePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
     statePacket[0] = 3;
@@ -1883,7 +1883,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     statePacket[7] = 0x42;
     sdfDrawTagLink(stateList, (u32)statePacket);
     D_003252A8.append(&D_003252A8, stateList);
-    stateList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    stateList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(stateList);
     statePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
     statePacket[0] = 3;
@@ -1941,10 +1941,10 @@ void effEVECombParSmokeCreate2(void) {
 EffChanWork *effAPPoint4Create(const EffChanHead *source, u16 kind, void *params) {
     const EffChanHead *head = source;
     u32 recordCount = head->count;
-    SdfMemBlock *allocation = sdfMemAllocDirect(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
     EffChanWork *work = (EffChanWork *)sdfMemLock(allocation);
     EffChanRecord *record = (EffChanRecord *)(work + 1);
-    EffParamWork *parameterTemplate;
+    effPartHandle_t *parameterTemplate;
     s32 delayModulus;
     u32 recordIndex;
 

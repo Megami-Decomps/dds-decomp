@@ -4,7 +4,7 @@ The field controller pair is DDS1 `func_0012FF48` (4,428 bytes) and DDS2
 `func_00132540` (4,864 bytes). They share the input/collision/camera pipeline,
 but DDS2 adds guide-position interpolation, a movement-sound latch, a fresh
 quarter-speed heading query and secondary-object pose updates. They are not
-identical twins. Both use the established `FldAreaWork` and `ObjectTransform`
+identical twins. Both use the established `FldAreaWork` and `dds3PoseSet_t`
 owners, preserve the full position W lane, and publish only the established
 32-byte prefix of each 48-byte exported transform buffer.
 

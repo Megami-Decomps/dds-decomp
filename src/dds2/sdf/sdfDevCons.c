@@ -16,11 +16,11 @@
 
 
 
-void sdfDevConsPutInside(DevConsState *console, s32 character, s32 attribute);
+void sdfDevConsPutInside(sdfDevConsCB_tag *console, s32 character, s32 attribute);
 
 
 /* Scroll only at the last row; otherwise advance it. Always reset the column. */
-void sdfDevConsNewLine(DevConsState *console) {
+void sdfDevConsNewLine(sdfDevConsCB_tag *console) {
     if (console->cursorRow == console->rows - 1) {
         s32 rowBytes = console->columns * SDF_DEVCONS_CELL_BYTES;
         s32 copyBytes = rowBytes * console->cursorRow;
@@ -35,7 +35,7 @@ void sdfDevConsNewLine(DevConsState *console) {
 }
 
 /* Store one character/attribute cell, interpreting cursor controls and row wrap. */
-void sdfDevConsPutInside(DevConsState *console, s32 character, s32 attribute) {
+void sdfDevConsPutInside(sdfDevConsCB_tag *console, s32 character, s32 attribute) {
     s32 tabCellsRemaining;
     s32 cursorColumnRemainder;
     s32 tabWidth;
@@ -83,12 +83,12 @@ void sdfDevConsPutInside(DevConsState *console, s32 character, s32 attribute) {
 
 
 /* Forward a character and explicit attribute to the console renderer. */
-void sdfDevConsPut(DevConsState *console, s32 character, s32 attribute) {
+void sdfDevConsPut(sdfDevConsCB_tag *console, s32 character, s32 attribute) {
     sdfDevConsPutInside(console, character, attribute);
 }
 
 /* Return the emitted character count. The formatter receives no buffer limit. */
-s32 sdfDevConsPrintf(DevConsState *console, const char *format, ...) {
+s32 sdfDevConsPrintf(sdfDevConsCB_tag *console, const char *format, ...) {
     char textBuffer[SDF_DEVCONS_TEXT_BUFFER_BYTES];
     __builtin_va_list arguments;
     char *textCursor;
@@ -109,32 +109,32 @@ s32 sdfDevConsPrintf(DevConsState *console, const char *format, ...) {
 }
 
 /* Set the next cell coordinates without clamping them to the grid. */
-void sdfDevConsLocate(DevConsState *console, s16 column, s16 row) {
+void sdfDevConsLocate(sdfDevConsCB_tag *console, s16 column, s16 row) {
     console->cursorColumn = column;
     console->cursorRow = row;
 }
 
 /* Select the attribute passed to each subsequently printed character. */
-void sdfDevConsAttribute(DevConsState *console, u8 attribute) {
+void sdfDevConsAttribute(sdfDevConsCB_tag *console, u8 attribute) {
     console->textAttribute = attribute;
 }
 
 /* Read or write the console control byte at offset 0x14. */
-u8 sdfDevConsGetMode(DevConsState *console) {
+u8 sdfDevConsGetMode(sdfDevConsCB_tag *console) {
     return console->controlByte;
 }
 
 /* Store the control byte unchanged; its individual bits are not decoded here. */
-void sdfDevConsSetMode(DevConsState *console, u8 controlByte) {
+void sdfDevConsSetMode(sdfDevConsCB_tag *console, u8 controlByte) {
     console->controlByte = controlByte;
 }
 
-struct SdfTex;
+struct sdfTexHandle_t;
 extern u32 sdfDebugFontHandle;
 
 /* Close the ordered register-list tag in the console's uncached DMA buffer.
  * Five eight-byte register values form one sprite; pad an odd value count. */
-void sdfDevConsTagClose(ConsBuf *buffers) {
+void sdfDevConsTagClose(sdfDevConsDrawCB_t *buffers) {
     u8 *cursor = buffers->writeCursor;
     vu64 *tag = (vu64 *)buffers->currentTag;
     s32 registerCount = ((cursor - buffers->currentTag) >> 3) - 2;
@@ -154,7 +154,7 @@ void sdfDevConsTagClose(ConsBuf *buffers) {
 /* Finalize the current GIF tag and submit completed packets, then rotate buffers.
  * Keep the eight-byte pending-data test distinct from the quadword DMA count.
  */
-void sdfDevConsDrawFlush(ConsBuf *packetBuffers) {
+void sdfDevConsDrawFlush(sdfDevConsDrawCB_t *packetBuffers) {
     s32 packetBytes;
     u32 *channelRegisters;
     u32 nextBufferIndex;
@@ -178,7 +178,7 @@ void sdfDevConsDrawFlush(ConsBuf *packetBuffers) {
 
 /* Append the console background sprite, then reserve the next glyph tag.
  * Packed coordinates wrap as words before their zero-extended packet writes. */
-void sdfDevConsDrawBG(DevConsState *console, ConsBuf *packetBuffers) {
+void sdfDevConsDrawBG(sdfDevConsCB_tag *console, sdfDevConsDrawCB_t *packetBuffers) {
     vu64 *packet;
     u32 origin;
     u32 extent;
@@ -213,7 +213,7 @@ extern u32 sdfDevConsColorTable[];
 
 /* Emit five ordered register values per glyph into the console DMA buffer.
  * The native do-loops have no zero-dimension guard. */
-void sdfDevConsDraw(DevConsState *console, ConsBuf *buffers) {
+void sdfDevConsDraw(sdfDevConsCB_tag *console, sdfDevConsDrawCB_t *buffers) {
     u8 *cells;
     vu64 *writeCursor;
     u8 *packetStart;
@@ -274,7 +274,7 @@ void sdfDevConsDraw(DevConsState *console, ConsBuf *buffers) {
 
 /* Initialize both uncached packet buffers and complete the GS setup packet.
  * Reserve the first glyph tag only after the setup values have been written. */
-void sdfDevConsDrawInit(ConsBuf *packetBuffers, u8 *storageBase, s32 storageCapacityBytes) {
+void sdfDevConsDrawInit(sdfDevConsDrawCB_t *packetBuffers, u8 *storageBase, s32 storageCapacityBytes) {
     u32 ringAddress;
     u8 *ring;
     vu64 *packet;
@@ -288,7 +288,7 @@ void sdfDevConsDrawInit(ConsBuf *packetBuffers, u8 *storageBase, s32 storageCapa
     packetBuffers->bufferAddresses[1] = ring + halfBufferBytes;
     packetBuffers->packetStart = ring;
     packetBuffers->activeBufferIndex = 0;
-    textureState = sdfTexGetTex0Reg((struct SdfTex *)sdfDebugFontHandle);
+    textureState = sdfTexGetTex0Reg((struct sdfTexHandle_t *)sdfDebugFontHandle);
     packet = (vu64 *)ring;
     packet[0] = 0x10AB400000008005ULL;
     packet[1] = 0xE;
@@ -307,15 +307,15 @@ void sdfDevConsDrawInit(ConsBuf *packetBuffers, u8 *storageBase, s32 storageCapa
     packetBuffers->dmaChannel = sceDmaGetChan(2);
 }
 
-extern DevConsState *D_00438AB0;
-void sdfDevConsDrawInit(ConsBuf *packetBuffers, u8 *storageBase, s32 storageCapacityBytes);
-void sdfDevConsDraw(DevConsState *console, ConsBuf *buffers);
+extern sdfDevConsCB_tag *D_00438AB0;
+void sdfDevConsDrawInit(sdfDevConsDrawCB_t *packetBuffers, u8 *storageBase, s32 storageCapacityBytes);
+void sdfDevConsDraw(sdfDevConsCB_tag *console, sdfDevConsDrawCB_t *buffers);
 
 /* Render every console in the global chain into a stack packet buffer and submit it. */
 void sdfDevConsDrawAll(void) {
     DevConsStackPackets storage;
-    ConsBuf packetBuffers;
-    DevConsState *console;
+    sdfDevConsDrawCB_t packetBuffers;
+    sdfDevConsCB_tag *console;
 
     if (D_00438AB0 != NULL) {
         sdfDevConsDrawInit(&packetBuffers, storage.data, 0x1000);

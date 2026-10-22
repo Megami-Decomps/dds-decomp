@@ -184,7 +184,7 @@ extern char D_00419468[]; /* "/soundat3/%s.at3" */
 
 s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
     char path[0x80];
-    struct SdfMemBlock *resource;
+    struct sdfMemHandle_t *resource;
     s32 data;
     s32 size;
     if (args->state == 0) {

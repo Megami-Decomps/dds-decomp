@@ -21,8 +21,8 @@ extern u32 effBattleTransitionDurations[];
 extern void (*GetPositionPtrTable[])();
 
 #include "dds3_world_primary.h"
-struct EffWorldNode;
-extern void dds3CameraObjectBasicGetTargetPos(struct EffWorldNode *object);
+struct dds3Basic_t;
+extern void dds3CameraObjectBasicGetTargetPos(struct dds3Basic_t *object);
 
 extern f32 effBattleAnchorHeightFactors[];
 extern f32 effBTL_Ptr_D[];
@@ -233,7 +233,7 @@ void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *requ
     f32 height;
     f32 out[4];
     f32 dir[4];
-    struct EffWorldNode *camera;
+    struct dds3Basic_t *camera;
     s32 extentOverride = request->extentOverride;
     u32 directionMode = request->directionMode;
     u32 anchorKind = request->count;

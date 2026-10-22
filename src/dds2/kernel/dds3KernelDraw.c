@@ -32,16 +32,16 @@ extern s16 bluralphatarget;
 extern s16 blurscaletarget;
 
 
-extern EffResourceRectParams mfiltertarget;
+extern dds3Effect_PartialMultiFilterParam_t mfiltertarget;
 
-extern EffBlurTemplateBody mulblurtarget;
+extern dds3Effect_PartialMultiBlurParam_t mulblurtarget;
 
-extern EffBlurScatterParams distblurtarget;
+extern dds3Effect_DistortionBlurParam_t distblurtarget;
 
 extern u32 distblurovercnt;
 
 /* These snapshot buffers are eight-byte aligned; the parameter body is 0x2C bytes. */
-extern EffBlurScaleParams ripblurtarget __attribute__((aligned(8)));
+extern dds3Effect_RippleBlurParam_t ripblurtarget __attribute__((aligned(8)));
 
 extern u32 ripblurovercnt;
 
@@ -82,7 +82,7 @@ extern u16 ripblurmax;
 
 extern void Normalize(void);
 
-extern EffSolidRectParams filter2target;
+extern dds3Effect_Filter_t filter2target;
 
 extern u16 filter2abase;
 
@@ -93,7 +93,7 @@ extern u16 filter2atarget;
 extern u16 filter2max;
 
 
-extern EffBlurQuad blur2target;
+extern dds3Effect_Blur_t blur2target;
 
 extern u16 blur2abase;
 
@@ -155,7 +155,7 @@ void dds3SetFilter2RGBA(u32 rgba) {
 extern u16 filter2swapnow;
 extern u16 filter2swapmax;
 
-extern EffSolidRectParams dds3Filter2Buf;
+extern dds3Effect_Filter_t dds3Filter2Buf;
 
 /* Capture the live solid rectangle before applying or interpolating staged params.
  * Duration storage is 16-bit; the immediate test uses the full argument. */
@@ -174,7 +174,7 @@ void dds3Filter2Swap(s32 duration) {
 
 /* Fade solid-rectangle alpha from zero to the staged color; zero applies now. */
 void dds3Filter2On(s32 duration) {
-    EffSolidRectParams *params = &filter2target;
+    dds3Effect_Filter_t *params = &filter2target;
     s32 requestedDuration = duration;
 
     filter2abase = 0;
@@ -225,7 +225,7 @@ void dds3SetMFilterArea(u32 extent, u32 centerX, u32 centerY) {
     mfiltertarget.center[1] = centerY;
 }
 
-extern EffResourceRectParams dds3MFilterBuf;
+extern dds3Effect_PartialMultiFilterParam_t dds3MFilterBuf;
 extern u16 mfilterswapnow;
 extern u16 mfilterswapmax;
 
@@ -244,7 +244,7 @@ void dds3MFilterSwap(s32 duration) {
 
 /* Fade square alpha from zero to its staged color, or apply/enable it now. */
 void dds3MFilterOn(s32 duration) {
-    EffResourceRectParams *params = &mfiltertarget;
+    dds3Effect_PartialMultiFilterParam_t *params = &mfiltertarget;
     s32 requestedDuration = duration;
 
     mfilterabase = 0;
@@ -326,7 +326,7 @@ void dds3SetBlur2Area(u32 centerX, u32 centerY) {
     blur2target.position[1] = centerY;
 }
 
-extern EffBlurQuad kwlnRectangleBlurTransitionStartParameters;
+extern dds3Effect_Blur_t kwlnRectangleBlurTransitionStartParameters;
 extern u16 blur2swapnow;
 extern u16 blur2swapmax;
 
@@ -346,7 +346,7 @@ void dds3Blur2Swap(s32 duration) {
 
 /* Fade rectangle-blur alpha from zero to the staged color; zero applies/enables now. */
 void dds3Blur2On(s32 duration) {
-    EffBlurQuad *params = &blur2target;
+    dds3Effect_Blur_t *params = &blur2target;
     s32 requestedDuration = duration;
 
     blur2abase = 0;
@@ -399,7 +399,7 @@ void dds3SetMultiBlurArea(u32 extent, u32 centerX, u32 centerY) {
     mulblurtarget.source.position[1] = centerY;
 }
 
-extern EffBlurTemplateBody dds3MultiBlurBuf;
+extern dds3Effect_PartialMultiBlurParam_t dds3MultiBlurBuf;
 extern u16 mulblurswapnow;
 extern u16 mulblurswapmax;
 
@@ -418,7 +418,7 @@ void dds3MultiBlurSwap(s32 duration) {
 
 /* Fade textured-blur alpha from zero to staged alpha, or apply/enable it now. */
 void dds3MultiBlurOn(s32 duration) {
-    EffBlurTemplateBody *params = &mulblurtarget;
+    dds3Effect_PartialMultiBlurParam_t *params = &mulblurtarget;
     s32 requestedDuration = duration;
 
     mulblurabase = 0;
@@ -437,7 +437,7 @@ void dds3MultiBlurOn(s32 duration) {
 
 /* Fade staged textured-blur alpha toward zero. Immediate disable also copies params. */
 void dds3MultiBlurOff(s32 duration) {
-    EffBlurTemplateBody *params = &mulblurtarget;
+    dds3Effect_PartialMultiBlurParam_t *params = &mulblurtarget;
     s32 requestedDuration = duration;
 
     mulbluratarget = 0;
@@ -496,7 +496,7 @@ void dds3SetDistBlurArea(u32 positionSpread, u32 x, u32 y) {
     distblurtarget.position[1] = y;
 }
 
-extern EffBlurScatterParams kwlnFilterBlurTransitionStartParameters;
+extern dds3Effect_DistortionBlurParam_t kwlnFilterBlurTransitionStartParameters;
 extern u16 distblurswapnow;
 extern u16 distblurswapmax;
 
@@ -516,7 +516,7 @@ void dds3DistBlurSwap(s32 duration) {
 /* Fade filter alpha from zero to staged alpha. Both paths copy params;
  * a timed fade disables the effect before subsequent updates sample alpha. */
 void dds3DistBlurOn(s32 duration) {
-    EffBlurScatterParams *params = &distblurtarget;
+    dds3Effect_DistortionBlurParam_t *params = &distblurtarget;
     s32 requestedDuration = duration;
 
     distblurabase = 0;
@@ -581,7 +581,7 @@ void dds3SetRipBlurArea(u32 size, u32 x, u32 y) {
     ripblurtarget.position[1] = y;
 }
 
-extern EffBlurScaleParams dds3RipBlurBuf __attribute__((aligned(8)));
+extern dds3Effect_RippleBlurParam_t dds3RipBlurBuf __attribute__((aligned(8)));
 extern u16 ripblurswapnow;
 extern u16 ripblurswapmax;
 
@@ -601,7 +601,7 @@ void dds3RipBlurSwap(s32 duration) {
 /* Fade staggered alpha from zero to staged alpha. Both paths copy params;
  * a timed fade disables the effect before subsequent updates sample alpha. */
 void dds3RipBlurOn(s32 duration) {
-    EffBlurScaleParams *params = &ripblurtarget;
+    dds3Effect_RippleBlurParam_t *params = &ripblurtarget;
     s32 requestedDuration = duration;
 
     ripblurabase = 0;
@@ -640,21 +640,21 @@ void dds3RipBlurOff(s32 duration) {
  * polygon-movie blend helpers combine the block saved when the transition
  * started with the staged block into one of these, and the effCopy* call then
  * hands the result to the effect. */
-extern EffBlurTemplateBody key2;
-extern EffBlurScatterParams kwlnFilterBlurFrameParameters;
-extern EffBlurScaleParams dds3BlurState __attribute__((aligned(8)));
-extern EffBlurQuad kwlnRectangleBlurFrameParameters;
-extern EffSolidRectParams dds3BlurParam;
-extern EffResourceRectParams kwlnTexturedSquareFrameParameters;
+extern dds3Effect_PartialMultiBlurParam_t key2;
+extern dds3Effect_DistortionBlurParam_t kwlnFilterBlurFrameParameters;
+extern dds3Effect_RippleBlurParam_t dds3BlurState __attribute__((aligned(8)));
+extern dds3Effect_Blur_t kwlnRectangleBlurFrameParameters;
+extern dds3Effect_Filter_t dds3BlurParam;
+extern dds3Effect_PartialMultiFilterParam_t kwlnTexturedSquareFrameParameters;
 
 /* The blend helpers replace the parameters, which are the leading fields the
  * staged block shares with their own parameter block. */
-extern void evtHokanBlur2(s32 enable, f32 t, EffBlurQuad *from, EffBlurQuad *to, EffBlurQuad *out);
-extern void evtHokanMultBlur(s32 enable, f32 t, EffBlurTemplateBody *from, EffBlurTemplateBody *to, EffBlurTemplateBody *out);
-extern void evtHokanMultFilter(s32 enable, f32 t, EffResourceRectParams *from, EffResourceRectParams *to, EffResourceRectParams *out);
-extern void evtHokanDistBlur(s32 enable, f32 t, EffBlurScatterParams *from, EffBlurScatterParams *to, EffBlurScatterParams *out);
-extern void evtHokanRipBlur(s32 enable, f32 t, EffBlurScaleParams *from, EffBlurScaleParams *to, EffBlurScaleParams *out);
-extern void evtHokanFilter(s32 enable, f32 t, EffSolidRectParams *from, EffSolidRectParams *to, EffSolidRectParams *out);
+extern void evtHokanBlur2(s32 enable, f32 t, dds3Effect_Blur_t *from, dds3Effect_Blur_t *to, dds3Effect_Blur_t *out);
+extern void evtHokanMultBlur(s32 enable, f32 t, dds3Effect_PartialMultiBlurParam_t *from, dds3Effect_PartialMultiBlurParam_t *to, dds3Effect_PartialMultiBlurParam_t *out);
+extern void evtHokanMultFilter(s32 enable, f32 t, dds3Effect_PartialMultiFilterParam_t *from, dds3Effect_PartialMultiFilterParam_t *to, dds3Effect_PartialMultiFilterParam_t *out);
+extern void evtHokanDistBlur(s32 enable, f32 t, dds3Effect_DistortionBlurParam_t *from, dds3Effect_DistortionBlurParam_t *to, dds3Effect_DistortionBlurParam_t *out);
+extern void evtHokanRipBlur(s32 enable, f32 t, dds3Effect_RippleBlurParam_t *from, dds3Effect_RippleBlurParam_t *to, dds3Effect_RippleBlurParam_t *out);
+extern void evtHokanFilter(s32 enable, f32 t, dds3Effect_Filter_t *from, dds3Effect_Filter_t *to, dds3Effect_Filter_t *out);
 
 /* Advance every running kernel-draw fade and transition by one frame. Each arm
  * keeps its control bit set while its timer runs: it reinterpolates its

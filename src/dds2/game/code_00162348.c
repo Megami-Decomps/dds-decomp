@@ -49,7 +49,7 @@ extern f32 D_003AAEF0[];
 
 extern f32 D_003AAF00[];
 
-extern ParReleaseRecord *hDrawListTop;
+extern dds3Polygon_t *hDrawListTop;
 
 extern ParSystem *D_00436404;
 
@@ -77,7 +77,7 @@ extern void dds3TrackPolyVCRefresh_ParType2(ParSystem *system, s32 cellIndex);
 
 #include "sdf_packet_alloc.h"
 
-struct SdfListHead;
+struct sdfDrawTag_t;
 
 
 
@@ -150,7 +150,7 @@ extern ParDispatch dds3ParticleFuncTable[];
 
 ParObj *dds3ParticleExpCreate(s32 kind, ParKindResource *resource) {
     ParObj *object = (ParObj *)((u8 *)resource + resource->offset + 0x10);
-    BillObj *billboard;
+    billHandle_t *billboard;
 
     if (resource->type != 3 || resource->offset != 0) {
         object->billboardCloneMarker = PAR_BILLBOARD_CLONE_FROM_RESOURCE;
@@ -169,7 +169,7 @@ ParObj *dds3ParticleExpCreate(s32 kind, ParKindResource *resource) {
 
 ParObj *dds3ParticleExpCopy(ParObj *source) {
     ParObj *particle;
-    BillObj *billboard;
+    billHandle_t *billboard;
 
     particle = dds3ParticleFuncTable[source->dispatchIndex].func(source);
     particle->dispatchIndex = source->dispatchIndex;
@@ -187,12 +187,12 @@ void dds3ParticleExpDelete(ParObj *object) {
     dds3ParticleFuncTable[object->dispatchIndex].destroy(object);
 }
 
-extern void dds3BillboardDraw(BillObj *);
+extern void dds3BillboardDraw(billHandle_t *);
 
 /* Apply queued updates, then draw live records and submit the kind's resource. */
 void dds3ParticleExpDraw(ParObj *effect) {
     EffectBufferRecord *record;
-    BillObj *billboard;
+    billHandle_t *billboard;
     u32 step;
     s32 particleCount;
     s32 lifetime;
@@ -424,7 +424,7 @@ void dds3Particle_Track2Set(s32 particle, s32 index, u32 color) {
     dds3TrackPolyColorSet(particle, index, (color & 0xFF000000) | 0x808080);
 }
 
-void dds3Particle_Track3Set(EffTrackPolyList *list, s32 index, u32 color) {
+void dds3Particle_Track3Set(effMTPolyListHandle_t *list, s32 index, u32 color) {
     u128 axis[2];
     VU0_MOVE_VF(vf11, vf12);
     VU0_SUB(vf10, vf10, vf11);
@@ -468,13 +468,13 @@ void dds3PolygonManagerInit(void) {
 void dds3PolygonManagerExit(void) {
 }
 
-ParReleaseRecord *dds3PolygonCreate(s32 count, s16 flags, s16 options) {
+dds3Polygon_t *dds3PolygonCreate(s32 count, s16 flags, s16 options) {
     s32 vertexCount;
     s32 bytes;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u8 *buffer;
-    ParReleaseRecord *record;
-    struct SdfAsset *asset;
+    dds3Polygon_t *record;
+    struct sdfMat_t *asset;
 
     if (flags & 8) vertexCount = count + 2;
     else vertexCount = count * 3;
@@ -484,7 +484,7 @@ ParReleaseRecord *dds3PolygonCreate(s32 count, s16 flags, s16 options) {
     if (flags & 4) bytes += vertexCount * sizeof(u32);
     allocation = sdfMemAllocDirect(bytes + sizeof(*record));
     buffer = (u8 *)sdfMemLock(allocation);
-    record = (ParReleaseRecord *)(buffer + bytes);
+    record = (dds3Polygon_t *)(buffer + bytes);
     memset(record, 0, sizeof(*record));
     record->positions = (u128 *)buffer;
     /* Allocation and layout reuse one byte extent; qualified cc1probe:
@@ -512,28 +512,28 @@ ParReleaseRecord *dds3PolygonCreate(s32 count, s16 flags, s16 options) {
     return record;
 }
 
-void dds3PolygonDelete(ParReleaseRecord *record) {
+void dds3PolygonDelete(dds3Polygon_t *record) {
     record->flags = 1;
     sdfMatFreeDelayed(record->asset);
     sdfMemFreeDirect(record->allocation);
 }
 
-void dds3PolygonDraw(ParReleaseRecord *node) {
+void dds3PolygonDraw(dds3Polygon_t *node) {
     node->next = hDrawListTop;
     hDrawListTop = node;
 }
 
 extern SdfPoolNode sdfGrOtTable[0x62];
 
-static inline void parAppendDrawSurfacePool(SdfPoolNode *pool, SdfListHead *packet) {
+static inline void parAppendDrawSurfacePool(SdfPoolNode *pool, sdfDrawTag_t *packet) {
     pool->append(pool, packet);
 }
 
 extern void *effPkt3DPrimMakePoly(EffPacketParams *);
 
 void dds3PolygonLinkOt(void) {
-    ParReleaseRecord *record;
-    SdfListHead *packet;
+    dds3Polygon_t *record;
+    sdfDrawTag_t *packet;
     s32 remaining;
     s16 flags;
     SdfPoolNode *priorityPool;
@@ -542,7 +542,7 @@ void dds3PolygonLinkOt(void) {
         priorityPool = &sdfGrOtTable[51];
         do {
             if (record->drawCount != 0 && record->flags != 1) {
-                packet = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+                packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
                 sdfDrawTagInit(packet);
                 sdf3DPrimLinkResetTm(packet, 0);
                 sdf3DPrimLinkMat(packet, record->asset, 0);
@@ -579,7 +579,7 @@ void dds3PolygonLinkOt(void) {
 }
 
 /* Replace the record asset's primary texture and dirty its draw state. */
-void dds3PolygonSetTex(ParReleaseRecord *record, SdfTex *texture) {
+void dds3PolygonSetTex(dds3Polygon_t *record, sdfTexHandle_t *texture) {
     sdfSetAssetPrimaryTextureAddress(record->asset, texture);
 }
 
@@ -593,7 +593,7 @@ void dds3TrackPolyInit(void) {
 
 ParSystem *dds3TrackPolyCreate(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
     s32 total;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     s32 base;
     s32 cellsSize;
     ParSystem *system;
@@ -1572,10 +1572,10 @@ extern SdfPoolNode *D_003AAF50[];
 
 /* Batch pending cell systems by topology, then submit the five draw buckets. */
 void dds3TrackPolyLinkOt(void) {
-    SdfListHead *lists[5];
-    SdfListHead **slot;
-    SdfListHead *list;
-    SdfListHead *specialList;
+    sdfDrawTag_t *lists[5];
+    sdfDrawTag_t **slot;
+    sdfDrawTag_t *list;
+    sdfDrawTag_t *specialList;
     s32 count;
     s32 i;
     s32 remaining;
@@ -1591,12 +1591,12 @@ void dds3TrackPolyLinkOt(void) {
         slot = &lists[system->bucket];
         list = *slot;
         if (list == 0) {
-            *slot = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+            *slot = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
             sdfDrawTagInit(*slot);
             sdf3DPrimLinkResetTm(*slot, NULL);
             list = *slot;
         }
-        sdf3DPrimLinkMat(list, (SdfAsset *)system->asset, NULL);
+        sdf3DPrimLinkMat(list, (sdfMat_t *)system->asset, NULL);
         count = system->cellCount;
         if (system->kind == PAR_CELL_TOPOLOGY_PAIR) {
             parDrawControl.parameters = D_003AAC90;
@@ -1701,7 +1701,7 @@ void dds3TrackPolyLinkOt(void) {
         }
     }
     if (lists[4] != 0) {
-        specialList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        specialList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(specialList);
         packet = (u64 *)sdfGrAllocPacketBuff(0x30);
         packet[0] = 2;
@@ -1728,7 +1728,7 @@ void dds3TrackPolyLinkOt(void) {
 ParBlock *dds3TrianglePolyCreate(s32 count) {
     s32 points = count * 3;
     s32 colorBytes = points * 4;
-    struct SdfMemBlock *allocation = sdfMemAllocDirect((colorBytes + points) * 4 + 0x18);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect((colorBytes + points) * 4 + 0x18);
     s32 base = sdfMemLock(allocation);
     u8 *vertices = (u8 *)base + points * 16;
     ParBlock *block = (ParBlock *)(vertices + colorBytes);
@@ -1748,7 +1748,7 @@ void dds3TrianglePolyDelete(ParBlock *block) {
 }
 
 void dds3TrianglePolyLinkOt(SdfPoolNode *emitter, ParBlock *cmd) {
-    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     EffPacketParams state;
     s32 remaining;
     sdfDrawTagInit(list);

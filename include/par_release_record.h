@@ -4,28 +4,28 @@
 #include "common.h"
 #include "eff_packet_params.h"
 
-struct SdfMemBlock;
-struct SdfAsset;
+struct sdfMemHandle_t;
+struct sdfMat_t;
 
 /* The constructor appends this owner after its position and attribute streams. */
-typedef struct ParReleaseRecord {
+typedef struct dds3Polygon_t {
     s16 flags;
     u8 opaque02[2];
     s32 capacity;
     s32 unk08;
     s32 drawCount;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     EffPacketParams request;
-    struct SdfAsset *asset;
+    struct sdfMat_t *asset;
     u128 *positions;
     f32 (*texcoords)[2];
     u128 *normals;
     u32 *colors;
-    struct ParReleaseRecord *next;
+    struct dds3Polygon_t *next;
     s32 unk58;
-} ParReleaseRecord;
+} dds3Polygon_t;
 
 typedef char ParReleaseRecordSizeCheck[
-    sizeof(ParReleaseRecord) == 0x5C ? 1 : -1];
+    sizeof(dds3Polygon_t) == 0x5C ? 1 : -1];
 
 #endif

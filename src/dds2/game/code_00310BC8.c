@@ -27,11 +27,11 @@ extern s8 dds3PadButtonState[];
 
 
 
-extern FrFontGlyph *itfCreateTightFont3TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
-extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
-extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
-extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
-extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
+extern _FRQ *itfCreateTightFont3TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+extern _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
+extern s32 frFontDrawGlyphWithSharedFlags(_FRQ *, s8);
+extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
 
 
 
@@ -333,7 +333,7 @@ void sdfRayPlaneHit(f32 *plane, f32 *rotation, f32 *out) {
 }
 
 void sdfFontRegisterShort(s32 x, s32 y, u32 colors, const u8 *text) {
-    FrFontGlyph *handle;
+    _FRQ *handle;
 
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
@@ -341,7 +341,7 @@ void sdfFontRegisterShort(s32 x, s32 y, u32 colors, const u8 *text) {
 }
 
 u32 frFontMeasureAndQueueGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *text, s32 option) {
-    FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, depth, colors, text, 0);
+    _FRQ *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, depth, colors, text, 0);
     u32 result = frGetStrWidth(handle);
     frFontDrawGlyphChain(handle, 1, option);
     frDestroyFontRequestAfter(handle);
@@ -349,7 +349,7 @@ u32 frFontMeasureAndQueueGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *te
 }
 
 u32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 depth, u32 colors, s8 type, void *glyphSource, s32 flag, s32 option) {
-    FrFontGlyph *handle = frFontBuildGlyphChain(glyphSource, 0, type, 0, 0);
+    _FRQ *handle = frFontBuildGlyphChain(glyphSource, 0, type, 0, 0);
     u32 result = 0;
     frSetFontColor(handle, colors);
     frSetDrawPosition(handle, x << 4, y << 3);
@@ -366,7 +366,7 @@ u32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 depth, u32 colors, s8 
 }
 
 u32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, const u8 *text, s32 flag, s32 option) {
-    FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, text, 0);
+    _FRQ *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, text, 0);
     u32 result = 0;
     frSetFontColorNo(handle, flags);
     if (flag & 0x100) {
@@ -381,7 +381,7 @@ u32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, c
 }
 
 u32 frFontDrawTextVariantAAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char *text, s32 flag, s32 option) {
-    FrFontGlyph *handle = itfCreateTightFont3TextGlyph(x << 4, y << 3, z, w, text, 0);
+    _FRQ *handle = itfCreateTightFont3TextGlyph(x << 4, y << 3, z, w, text, 0);
     u32 result = 0;
     frSetFontColorNo(handle, flags);
     if (flag & 0x100) {
@@ -396,7 +396,7 @@ u32 frFontDrawTextVariantAAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char 
 }
 
 u32 frFontDrawTextVariantBAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char *text, s32 flag, s32 option) {
-    FrFontGlyph *handle = itfCreateFont2TextGlyph(x << 4, y << 3, z, w, text, 0);
+    _FRQ *handle = itfCreateFont2TextGlyph(x << 4, y << 3, z, w, text, 0);
     u32 result = 0;
     frSetFontColorNo(handle, flags);
     if (flag & 0x100) {
@@ -411,7 +411,7 @@ u32 frFontDrawTextVariantBAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char 
 }
 
 u32 frFontQueueTintedGlyphChainAndMeasure(s32 x, s32 y, s32 depth, u32 colors, u8 opacity, u16 textId, FrFontTextBank *bank, s32 layoutFlags, s32 flag, s32 option) {
-    FrFontGlyph *handle = itfDrawBankTextWithLayoutFlags(x << 4, y << 3, depth, textId, bank, layoutFlags);
+    _FRQ *handle = itfDrawBankTextWithLayoutFlags(x << 4, y << 3, depth, textId, bank, layoutFlags);
     u32 result = 0;
     frSetFontColorNo(handle, opacity);
     frSetFontColor(handle, colors);
@@ -436,7 +436,7 @@ extern SdfPoolNode sdfGrOtTable[];
  * useFirstColor bit 0 selects colors[0] instead of a color per vertex. */
 void sdfDrawColoredTriangleFan(s32 *points, u32 tail, u32 *colors, s32 count,
                    s32 useFirstColor, s32 surfaceIndex) {
-    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     SdfDrawPacket *packet;
     u64 *vertex;
     SdfPoolNode *surface;
@@ -476,7 +476,7 @@ void sdfDrawColoredTriangleFan(s32 *points, u32 tail, u32 *colors, s32 count,
 
 /* Return a callback-list header with its allocation descriptor and teardown userData. */
 SdfList *sdfCreateTaskHeader(void *userData) {
-    SdfMemBlock *allocation = sdfMemAllocDirect(sizeof(SdfList));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(sizeof(SdfList));
     SdfList *obj = (SdfList *)sdfMemGetPtr(allocation);
 
     memset(obj, 0, sizeof(SdfList));
@@ -727,7 +727,7 @@ void sdfDestroyTaskWorkerTasks(TaskWork *work) {
 
 u8 sdfIsPrimaryTaskRegistered(TaskWork *work) {
     u8 registered;
-    KwlnTask *task;
+    dds3ProcessID_t *task;
 
     registered = 0;
     if (work != NULL) {

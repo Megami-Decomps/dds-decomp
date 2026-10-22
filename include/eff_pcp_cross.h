@@ -11,8 +11,8 @@ typedef struct EffPCPCrossWork {
     u8 pad0C[4];
     u32 color;
     f32 scale;
-    EffParamWork *base; /* Parameter work for the anchor model. */
-    EffParamWork *handle[4][3];
+    effPartHandle_t *base; /* Parameter work for the anchor model. */
+    effPartHandle_t *handle[4][3];
     u8 pad4C[0x60];
     u32 remainingDelay[4][3];
 } EffPCPCrossWork;

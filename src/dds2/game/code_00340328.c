@@ -74,15 +74,15 @@ extern u8 D_00438AE0;
 
 extern s8 D_00438B1E;
 
-extern DevState *D_00438B08;
+extern sdfFileCmdHandle_t *D_00438B08;
 
-extern DevState *D_00438B0C;
+extern sdfFileCmdHandle_t *D_00438B0C;
 
 extern s16 D_00438B1C;
 
-extern DevState *D_00438B14;
+extern sdfFileCmdHandle_t *D_00438B14;
 
-extern DevState *D_00438B18;
+extern sdfFileCmdHandle_t *D_00438B18;
 
 extern s16 D_00438B10;
 
@@ -193,7 +193,7 @@ void sdfItemArrayFree(DevRequest *request) {
     sdfChipFreeDirect(request);
 }
 
-extern void sdfMemReallocRecord(struct SdfMemBlock *allocation, s32 size);
+extern void sdfMemReallocRecord(struct sdfMemHandle_t *allocation, s32 size);
 
 /* Grow capacity, preserving the SDK's signed 16-bit allocation-size arithmetic. */
 void sdfItemArrayGrow(DevRequest *request) {

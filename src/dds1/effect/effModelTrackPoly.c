@@ -16,7 +16,7 @@
 #include "eff_track_poly_data.h"
 #include "eff_packet_params.h"
 
-void pMeshDelete(EffTrackPolyData *data);
+void pMeshDelete(dds3HermitianTrackPoly_tag *data);
 
 /* Release both owned resources before freeing this track. */
 void effTrackPolyRelease(EffTrackPolyWork *work) {
@@ -24,17 +24,17 @@ void effTrackPolyRelease(EffTrackPolyWork *work) {
     sdfChipFreeDirect(work);
 }
 
-void dds3HermitianTrackPolyReset(EffTrackPolyData *data);
+void dds3HermitianTrackPolyReset(dds3HermitianTrackPoly_tag *data);
 
 void effTrackPolyReset(EffTrackPolyWork *work) {
     work->updateCount = 0;
     dds3HermitianTrackPolyReset(work->data);
 }
 
-void dds3HermitianTrackPolySetVertex(EffTrackPolyData *data, const u128 *src);
+void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *data, const u128 *src);
 
 void Eff_ModelTrackPolyGetMarkPosition(EffTrackPolyWork *work) {
-    MdlCtx *model = work->params.model;
+    dds3ModelHandle_t *model = work->params.model;
     u128 points[2];
 
     sdfModelGetMarkPos(model->inner, work->params.idA);
@@ -52,7 +52,7 @@ void effTrackPolySetColor(EffTrackPolyWork *work, u32 color) {
     work->data->color = color;
 }
 
-void dds3HermitianTrackPolyDraw(EffTrackPolyData *data);
+void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *data);
 
 void Eff_ModelTrackPolyDrawOnly(EffTrackPolyWork *work) {
     dds3HermitianTrackPolyDraw(work->data);
@@ -61,7 +61,7 @@ void Eff_ModelTrackPolyDrawOnly(EffTrackPolyWork *work) {
 /* Sample endpoints between startFrame and endFrame (inclusive), fade after
  * endFrame, and reset history before startFrame. */
 void effTrackPolyUpdate(EffTrackPolyWork *work) {
-    MdlCtx *model = work->params.model;
+    dds3ModelHandle_t *model = work->params.model;
     f32 currentFrame = model->first->currentFrame;
 
     if (work->params.startFrame <= currentFrame) {
@@ -71,7 +71,7 @@ void effTrackPolyUpdate(EffTrackPolyWork *work) {
             }
             dds3HermitianTrackPolyDraw(work->data);
         } else {
-            EffTrackPolyData *data = work->data;
+            dds3HermitianTrackPoly_tag *data = work->data;
 
             if (data->color & 0xFF000000) {
                 data->color += 0xE0000000;
@@ -85,9 +85,9 @@ void effTrackPolyUpdate(EffTrackPolyWork *work) {
 }
 
 /* Clone count tracks from one parameter block, each with its own data. */
-EffTrackPolyList *Eff_ModelTrackPolyListCreate(EffTrackPolyParams *params, u32 count) {
-    SdfMemBlock *handle = sdfMemAllocDirect(count * sizeof(EffTrackPolyWork *) + sizeof(EffTrackPolyList));
-    EffTrackPolyList *list = (EffTrackPolyList *)sdfMemLock(handle);
+effMTPolyListHandle_t *Eff_ModelTrackPolyListCreate(EffTrackPolyParams *params, u32 count) {
+    sdfMemHandle_t *handle = sdfMemAllocDirect(count * sizeof(EffTrackPolyWork *) + sizeof(effMTPolyListHandle_t));
+    effMTPolyListHandle_t *list = (effMTPolyListHandle_t *)sdfMemLock(handle);
     u32 workIndex;
 
     list->handle = handle;
@@ -99,7 +99,7 @@ EffTrackPolyList *Eff_ModelTrackPolyListCreate(EffTrackPolyParams *params, u32 c
     return list;
 }
 
-void Eff_ModelTrackPolyListDelete(EffTrackPolyList *list) {
+void Eff_ModelTrackPolyListDelete(effMTPolyListHandle_t *list) {
     u32 count = list->count;
     u32 workIndex = 0;
 
@@ -110,19 +110,19 @@ void Eff_ModelTrackPolyListDelete(EffTrackPolyList *list) {
     sdfMemFreeDirect(list->handle);
 }
 
-void Eff_ModelTrackPolyListVertexSet(EffTrackPolyList *list, s32 index, const u128 *endpoints) {
+void Eff_ModelTrackPolyListVertexSet(effMTPolyListHandle_t *list, s32 index, const u128 *endpoints) {
     Eff_ModelTrackPolyVertexSet(list->items[index], endpoints);
 }
 
-void Eff_ModelTrackPolyListReset(EffTrackPolyList *list, s32 index) {
+void Eff_ModelTrackPolyListReset(effMTPolyListHandle_t *list, s32 index) {
     effTrackPolyReset(list->items[index]);
 }
 
-void effTrackPolySetIndexedColor(EffTrackPolyList *list, s32 index, u32 color) {
+void effTrackPolySetIndexedColor(effMTPolyListHandle_t *list, s32 index, u32 color) {
     effTrackPolySetColor(list->items[index], color);
 }
 
-void Eff_ModelTrackPolyListDrawOnly(EffTrackPolyList *list) {
+void Eff_ModelTrackPolyListDrawOnly(effMTPolyListHandle_t *list) {
     u32 count = list->count;
     u32 workIndex = 0;
 
@@ -189,12 +189,12 @@ extern EffPacketParams effTrackPolyDrawParams;
 extern const u32 effTrackPolyTriangleIndices[];
 
 
-EffTrackPolyData *dds3HermitianTrackPolyCreate(s32 historyLength, s32 steps) {
+dds3HermitianTrackPoly_tag *dds3HermitianTrackPolyCreate(s32 historyLength, s32 steps) {
     s32 count = historyLength * steps * 2 + 4;
     s32 bytes = count * (sizeof(u128) + sizeof(u32));
-    SdfMemBlock *handle = sdfMemAllocDirect(bytes + sizeof(EffTrackPolyData));
+    sdfMemHandle_t *handle = sdfMemAllocDirect(bytes + sizeof(dds3HermitianTrackPoly_tag));
     u8 *cursor = (u8 *)sdfMemLock(handle);
-    EffTrackPolyData *data = (EffTrackPolyData *)(cursor + bytes);
+    dds3HermitianTrackPoly_tag *data = (dds3HermitianTrackPoly_tag *)(cursor + bytes);
 
     data->points = (u128 *)cursor;
     cursor += count * sizeof(u128);
@@ -207,30 +207,30 @@ EffTrackPolyData *dds3HermitianTrackPolyCreate(s32 historyLength, s32 steps) {
     data->resourceHandle = handle;
     data->colors = (u32 *)cursor;
     data->nodeHandle = sdfMatNew();
-    sdfMatSetConstant((struct SdfAsset *)data->nodeHandle, 1.0f);
+    sdfMatSetConstant((struct sdfMat_t *)data->nodeHandle, 1.0f);
     memset(&effTrackPolyDrawParams, 0, sizeof(effTrackPolyDrawParams));
     effTrackPolyDrawParams.primitive = 0x4000;
     effTrackPolyDrawParams.parameters = effTrackPolyTriangleIndices;
     return data;
 }
 
-void pMeshDelete(EffTrackPolyData *data) {
-    sdfMatFreeDelayed((SdfAsset *)data->nodeHandle);
+void pMeshDelete(dds3HermitianTrackPoly_tag *data) {
+    sdfMatFreeDelayed((sdfMat_t *)data->nodeHandle);
     sdfMemFreeDirect(data->resourceHandle);
 }
 
-void dds3HermitianTrackPolyReset(EffTrackPolyData *data) {
+void dds3HermitianTrackPolyReset(dds3HermitianTrackPoly_tag *data) {
     data->position = 2;
     data->color = 0x80808080;
     data->activePointCount = 0;
 }
 
 /* Select the draw target on the data created by the track constructor. */
-void dds3HermitianTrackPolySetBlend(EffTrackPolyData *data, u32 kind) {
+void dds3HermitianTrackPolySetBlend(dds3HermitianTrackPoly_tag *data, u32 kind) {
     data->kind = kind;
 }
 
-void dds3HermitianTrackPolySetVC(EffTrackPolyData *data, u32 *gradientColors) {
+void dds3HermitianTrackPolySetVC(dds3HermitianTrackPoly_tag *data, u32 *gradientColors) {
     f32 t = 0.0f;
     u32 count = data->count >> 1;
     f32 step = 1.0f / count;
@@ -249,7 +249,7 @@ void dds3HermitianTrackPolySetVC(EffTrackPolyData *data, u32 *gradientColors) {
 }
 
 /* Copy the pair of track points at the wrapped position into the two outputs. */
-void dds3HermitianTrackPolyGetVertex(EffTrackPolyData *data, u128 *dst0, u128 *dst1, s32 amount) {
+void dds3HermitianTrackPolyGetVertex(dds3HermitianTrackPoly_tag *data, u128 *dst0, u128 *dst1, s32 amount) {
     s32 pos = data->position - (data->step * (amount - 1) + amount) * 2;
     u128 *p;
 
@@ -263,7 +263,7 @@ void dds3HermitianTrackPolyGetVertex(EffTrackPolyData *data, u128 *dst0, u128 *d
 }
 
 /* Advance around the track's ring, wrapping below the reserved first pair. */
-void dds3HermitianTrackPolySetCurrent(EffTrackPolyData *data, s32 amount) {
+void dds3HermitianTrackPolySetCurrent(dds3HermitianTrackPoly_tag *data, s32 amount) {
     s32 pos = data->position + ((data->step - 1) * (amount - 1) + amount) * -2;
 
     if (pos < 2) {
@@ -273,7 +273,7 @@ void dds3HermitianTrackPolySetCurrent(EffTrackPolyData *data, s32 amount) {
 }
 
 /* Append a point pair at the ring position, wrapping back to the reserved pair. */
-void dds3HermitianTrackPolySetVertexSub(EffTrackPolyData *data, const u128 *src) {
+void dds3HermitianTrackPolySetVertexSub(dds3HermitianTrackPoly_tag *data, const u128 *src) {
     s32 position = data->position;
     u128 *points = data->points;
     s32 count;
@@ -295,7 +295,7 @@ void dds3HermitianTrackPolySetVertexSub(EffTrackPolyData *data, const u128 *src)
 
 /* Resample the newest history span at a fixed interval, smoothing established
  * tracks with Catmull-Rom interpolation and linearly extending short tracks. */
-void dds3HermitianTrackPolySetVertex(EffTrackPolyData *data, const u128 *src) {
+void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *data, const u128 *src) {
     f32 firstHistory[4][4];
     f32 secondHistory[4][4];
     f32 firstBasePoint[4];
@@ -419,8 +419,8 @@ extern void *effPkt3DPrimMakePoly(EffPacketParams *);
 
 /* Walk at most two ring runs. Each full strip consumes 16 vertices, with
  * two additional vertices overlapping the next strip (18 inputs total). */
-void dds3HermitianTrackPolyDraw(EffTrackPolyData *data) {
-    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *data) {
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     s32 runStart[4];
     s32 runPointCount[2];
     EffPacketParams *draw;
@@ -428,7 +428,7 @@ void dds3HermitianTrackPolyDraw(EffTrackPolyData *data) {
     s32 pointsRemaining;
     s32 wrappedStartOffset;
     s32 activePointCount;
-    SdfListHead *list2;
+    sdfDrawTag_t *list2;
     u64 *packet;
 
     sdfDrawTagInit(list);
@@ -470,7 +470,7 @@ void dds3HermitianTrackPolyDraw(EffTrackPolyData *data) {
     if (data->kind < 4) {
         effTrackPolyDrawSurfaces[data->kind]->append(effTrackPolyDrawSurfaces[data->kind], list);
     } else {
-        list2 = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        list2 = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list2);
         packet = (u64 *)sdfGrAllocPacketBuff(0x30);
         packet[0] = 2;

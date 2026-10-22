@@ -17,11 +17,11 @@ extern s32 scrGetIntPara(s32 idx);
 
 extern s32 dds3FindEntryIndex(s32 rosterIndex);
 
-extern s32 scrSetFlag(DatPartyRecord *work, u16 index);
+extern s32 scrSetFlag(datUnitWork_t *work, u16 index);
 
-extern void scrClearAllSecondaryScriptFlags(DatPartyRecord *work);
+extern void scrClearAllSecondaryScriptFlags(datUnitWork_t *work);
 
-extern void scrSetSecondaryScriptFlag(DatPartyRecord *work, u16 index);
+extern void scrSetSecondaryScriptFlag(datUnitWork_t *work, u16 index);
 
 
 
@@ -61,7 +61,7 @@ s32 scrCmdSetEntryFlagsInBothStores(void) {
     s32 result = 0;
 
     if (index >= 0) {
-        DatPartyRecord *entry = &DDS3_GBWK->party[index];
+        datUnitWork_t *entry = &DDS3_GBWK->party[index];
 
         scrSetFlag(entry, flagId);
         scrClearAllSecondaryScriptFlags(entry);
@@ -164,7 +164,7 @@ s32 dds3FontReqDrawFont(void *owner) {
 }
 
 Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, void *text) {
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
     Dds3FontNode *node;
 
     glyph = frFontBuildGlyphChain(text, 0, 0, 0, NULL);

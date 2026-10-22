@@ -19,8 +19,8 @@ typedef struct EffResourceOwner {
     u32 plainEntry; // 0x3C: add the model entry plain instead of flagged
     f32 frameStep; /* 0x40 */
     struct FileQueue **entries; /* 0x44: retained queue-pointer array */
-    struct SdfMemBlock *queueAllocation; /* 0x48: queue-pointer array descriptor */
-    MdlCtx *model;
+    struct sdfMemHandle_t *queueAllocation; /* 0x48: queue-pointer array descriptor */
+    dds3ModelHandle_t *model;
 } EffResourceOwner;
 typedef char EffResourceOwner_size_check[(sizeof(EffResourceOwner) == 0x50) ? 1 : -1];
 typedef char EffResourceOwner_plainEntry_offset_check[
@@ -55,8 +55,8 @@ typedef struct EffResourceOwner {
     EffResourceConfig base;
     EffResourceExtendedConfig extended;
     FileQueue **entries;
-    SdfMemBlock *buffer;
-    MdlCtx *model;
+    sdfMemHandle_t *buffer;
+    dds3ModelHandle_t *model;
 } EffResourceOwner;
 
 typedef char EffResourceConfig_size_check[sizeof(EffResourceConfig) == 0x3C ? 1 : -1];

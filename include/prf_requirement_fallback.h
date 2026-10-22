@@ -3,9 +3,9 @@
 
 #include "common.h"
 
-struct DatPartyRecord;
+struct datUnitWork_t;
 
 /* Check rule-backed profile requirements, then explicit fallback flags. */
-s32 prfReqCheckWithFallback(struct DatPartyRecord *operand, u16 requirementId);
+s32 prfReqCheckWithFallback(struct datUnitWork_t *operand, u16 requirementId);
 
 #endif

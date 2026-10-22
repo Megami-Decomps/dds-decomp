@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-/* Kind-6 world nodes keep this state in EffWorldNode.data. Only the word at
+/* Kind-6 world nodes keep this state in dds3Basic_t.data. Only the word at
  * +0x10 is currently identified; the payload prefix remains opaque. */
 typedef struct Dds3PathStatePayload {
     u8 opaque00[0x10];

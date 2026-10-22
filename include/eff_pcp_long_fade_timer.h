@@ -7,7 +7,7 @@ typedef struct EffPCPFadeTimerLongParams {
     s32 duration;
     s32 fadeIn;
     s32 fadeOut;
-    EffBlurQuad source;
+    dds3Effect_Blur_t source;
 } EffPCPFadeTimerLongParams;
 
 typedef struct EffPCPFadeTimerLong {

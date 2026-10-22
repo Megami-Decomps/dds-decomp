@@ -27,7 +27,7 @@ void sdfChipInit(u32 heapSize) {
     u8 *heapStart;
     u8 *page;
     s32 pageCount;
-    SdfChipClass *sizeClass;
+    sdfChipCB_tag *sizeClass;
     s32 unitSize;
     s32 cellCount;
 
@@ -119,7 +119,7 @@ extern SdfPendingRequest sdfMemDelayedResrcCB;
 /* Align the usable span to 128 bytes and link one free block between sentinels. */
 void sdfMemInit(u32 heapSize) {
     SdfMemHeap *heap = &sdfMemCB;
-    SdfMemBlock *freeBlock;
+    sdfMemHandle_t *freeBlock;
     u32 alignedStart;
     u32 alignedEnd;
 
@@ -147,12 +147,12 @@ void sdfMemInit(u32 heapSize) {
     sdfDelayedResrcInitCB(&sdfMemDelayedResrcCB, sdfMemFreeDirect);
 }
 
-u16 sdfMemGetType(SdfMemBlock *block) {
+u16 sdfMemGetType(sdfMemHandle_t *block) {
     return block->state;
 }
 
 /* Return the first general-heap allocation descriptor. */
-SdfMemBlock *sdfMemGetTop(void) {
+sdfMemHandle_t *sdfMemGetTop(void) {
     return sdfMemCB.head.next;
 }
 

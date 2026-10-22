@@ -30,7 +30,7 @@ typedef struct PanelRecSub {
 typedef struct PanelOptionBlock {
     u32 x;
     u32 y;
-    FrFontGlyph *glyphChain;
+    _FRQ *glyphChain;
     u32 panelValue;
     s16 status;
     s16 clearBitCount;
@@ -45,7 +45,7 @@ typedef struct PanelRec {
     u8 bytes35[0xB];
     PanelOptionBlock options;
     u8 bytes58[0x50];
-    UiSprite *layoutSprite; /* 0xA8: sprite passed to the layout updater. */
+    itfpanel_t *layoutSprite; /* 0xA8: sprite passed to the layout updater. */
 } PanelRec;
 
 /* Table entry begins with its payload pointer; the trailing words are unknown. */

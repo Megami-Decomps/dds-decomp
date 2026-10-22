@@ -5,11 +5,11 @@
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "kwln_task_lifecycle.h"
-extern KwlnTask *inputpanel_id;
+extern dds3ProcessID_t *inputpanel_id;
 
 
 
-void fldInputPanelShutdown(KwlnTask *panelTask) {
+void fldInputPanelShutdown(dds3ProcessID_t *panelTask) {
     void *panelChipBlock;
 
     panelChipBlock = (void *)dds3GetProcessData(panelTask);

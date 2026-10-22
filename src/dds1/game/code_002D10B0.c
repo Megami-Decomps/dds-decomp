@@ -40,8 +40,8 @@ enum {
 
 
 
-extern SdfTexResource *gsMemHandleLinkTail;
-extern SdfTexResource *gsMemHandleLinkHead;
+extern sdfGsMemSlice_t *gsMemHandleLinkTail;
+extern sdfGsMemSlice_t *gsMemHandleLinkHead;
 extern s8 sdfDispFrameId[2];
 
 /* Busy-buffer index is published by the slot setters and polled below;
@@ -54,9 +54,9 @@ extern u8 *sdfGrCaptureReq;
 extern void (*sdfGrCaptureTarget)(u8 *);
 
 extern void (*D_003BD304)(s32 size, s32 allocationMode);
-struct SdfTexResource *sdfGsMemAllocFromHead(s32 size, s32 allocationMode);
-void sdfTexMakeGIFPacketCtx2(SdfTex *texture);
-void sdfTexRebuildPacket(SdfTex *texture);
+struct sdfGsMemSlice_t *sdfGsMemAllocFromHead(s32 size, s32 allocationMode);
+void sdfTexMakeGIFPacketCtx2(sdfTexHandle_t *texture);
+void sdfTexRebuildPacket(sdfTexHandle_t *texture);
 
 void sdfGrReqCapture(u8 *destination, void (*onComplete)(u8 *)) {
     sdfGrCaptureReq = destination;
@@ -65,7 +65,7 @@ void sdfGrReqCapture(u8 *destination, void (*onComplete)(u8 *)) {
 }
 
 extern sceGsStoreImage sdfGsCaptureStoreImage;
-extern SdfGraphObj D_003980E0;
+extern sdfGrFrameSet_t D_003980E0;
 extern volatile u8 sdfDispThreadFlag;
 
 
@@ -77,7 +77,7 @@ void sdfGrCapture(void) {
     s32 pixelBytes;
     s32 rowBytes;
     s32 stride;
-    SdfMemBlock *allocation;
+    sdfMemHandle_t *allocation;
     s32 rows;
     u8 *pixels;
     u8 *source;
@@ -162,7 +162,7 @@ extern volatile u8 D_003BD32D;
 extern volatile u8 sdfDrawFrameFlag;
 extern u16 D_003BD32E;
 extern s32 sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
-extern void sdfGrMakeFrameSet(SdfGraphObj *);
+extern void sdfGrMakeFrameSet(sdfGrFrameSet_t *);
 extern void sdfGrGsReset(void);
 extern void sdfGrDrawFrame(void);
 extern s32 sdfDrawThIntHandler(s32);
@@ -260,7 +260,7 @@ extern void sdfTexInit(void);
 /* Reset GS/buffer state and start graphics workers; packetBufferBytes sizes each packet-buffer half. */
 void sdfGrInit(s32 packetBufferBytes) {
     s32 thread;
-    SdfGraphObj *graph = &D_003980E0;
+    sdfGrFrameSet_t *graph = &D_003980E0;
 
     sceGsResetPath();
     sdfGrScreenMode = 1;
@@ -349,8 +349,8 @@ s32 sdfGetTexelBitCount(u32 format) {
     }
 }
 
-s32 sdfGsMemCheckHandle(SdfTex *target) {
-    SdfTexResource *node = gsMemHandleLinkHead;
+s32 sdfGsMemCheckHandle(sdfTexHandle_t *target) {
+    sdfGsMemSlice_t *node = gsMemHandleLinkHead;
 
     if (node == NULL) {
         return 0;
@@ -364,9 +364,9 @@ s32 sdfGsMemCheckHandle(SdfTex *target) {
     return 0;
 }
 
-SdfTexResource *sdfGsMemAllocFromHead(s32 size, s32 allocationMode) {
-    SdfTexResource *block;
-    SdfTexResource *allocated;
+sdfGsMemSlice_t *sdfGsMemAllocFromHead(s32 size, s32 allocationMode) {
+    sdfGsMemSlice_t *block;
+    sdfGsMemSlice_t *allocated;
     s32 interruptsEnabled;
 
     interruptsEnabled = DIntr();
@@ -410,9 +410,9 @@ SdfTexResource *sdfGsMemAllocFromHead(s32 size, s32 allocationMode) {
     }
 }
 
-SdfTexResource *sdfGsMemAllocFromTail(s32 size, s32 allocationMode) {
-    SdfTexResource *block;
-    SdfTexResource *allocated;
+sdfGsMemSlice_t *sdfGsMemAllocFromTail(s32 size, s32 allocationMode) {
+    sdfGsMemSlice_t *block;
+    sdfGsMemSlice_t *allocated;
     s32 interruptsEnabled;
 
     interruptsEnabled = DIntr();
@@ -457,10 +457,10 @@ SdfTexResource *sdfGsMemAllocFromTail(s32 size, s32 allocationMode) {
 
 
 /* Convert storage bits to 32-bit VRAM words before selecting an allocation direction. */
-SdfTexResource *sdfGsMemAllocRect(s32 width, s32 height, s32 format, s32 allocationMode, s32 useFirstAllocator) {
+sdfGsMemSlice_t *sdfGsMemAllocRect(s32 width, s32 height, s32 format, s32 allocationMode, s32 useFirstAllocator) {
     s32 storageBitsPerPixel = sdfGsMemGetBitCount(format);
     s32 sizeWords = (width * height * storageBitsPerPixel) >> 5;
-    SdfTexResource *textureBlock;
+    sdfGsMemSlice_t *textureBlock;
 
     if (useFirstAllocator != 0) {
         textureBlock = sdfGsMemAllocFromHead(sizeWords, allocationMode);
@@ -474,8 +474,8 @@ SdfTexResource *sdfGsMemAllocRect(s32 width, s32 height, s32 format, s32 allocat
 }
 
 /* Merge the previous free range into block; return one only when a record was recycled. */
-s32 sdfGsMemCheckMerge(SdfTexResource *block) {
-    SdfTexResource *previousBlock = block->prev;
+s32 sdfGsMemCheckMerge(sdfGsMemSlice_t *block) {
+    sdfGsMemSlice_t *previousBlock = block->prev;
 
     if (previousBlock == NULL || previousBlock->allocationMode != 0) {
         return 0;
@@ -486,13 +486,13 @@ s32 sdfGsMemCheckMerge(SdfTexResource *block) {
     } else {
         gsMemHandleLinkTail = block;
     }
-    sdfChipFreeDirect((SdfTex *)previousBlock);
+    sdfChipFreeDirect((sdfTexHandle_t *)previousBlock);
     return 1;
 }
 
 /* Walk both list endpoints without returning them or changing either list head. */
 void sdfGsMemCheckLinkConsistence(void) {
-    SdfTexResource *node;
+    sdfGsMemSlice_t *node;
 
     node = gsMemHandleLinkHead;
     while (node->prev != NULL) {
@@ -505,7 +505,7 @@ void sdfGsMemCheckLinkConsistence(void) {
 }
 
 /* Mark a range free and coalesce its neighbors while interrupts are masked. */
-void sdfGsMemFree(SdfTexResource *textureBlock) {
+void sdfGsMemFree(sdfGsMemSlice_t *textureBlock) {
     s32 restoreInterrupts;
 
     if (textureBlock == NULL) {
@@ -524,14 +524,14 @@ void sdfGsMemFree(SdfTexResource *textureBlock) {
     }
 }
 
-void sdfGsMemFreeDelayed(SdfTexResource *texture) {
+void sdfGsMemFreeDelayed(sdfGsMemSlice_t *texture) {
     sdfDelayedResrcEntry(&gsMemDelayedResrcCB, texture);
 }
 
 void sdfGsMemInit(void) {
-    SdfTexResource *head;
+    sdfGsMemSlice_t *head;
 
-    head = sdfChipAllocDirect(sizeof(SdfTexResource));
+    head = sdfChipAllocDirect(sizeof(sdfGsMemSlice_t));
     head->size = 0x100000;
     head->next = NULL;
     head->prev = NULL;
@@ -543,10 +543,10 @@ void sdfGsMemInit(void) {
 }
 
 /* Align the storage rows, pack 16-bit formats two pixels per word, then allocate whole GS pages. */
-SdfTexResource *sdfGsAllocFrameBuff(s32 width, s32 height, s32 format) {
+sdfGsMemSlice_t *sdfGsAllocFrameBuff(s32 width, s32 height, s32 format) {
     s32 rowWidth = (width + 0x3F) & -0x40;
     s32 rowCount = (height + 0x1F) & -0x20;
-    SdfTexResource *textureBlock;
+    sdfGsMemSlice_t *textureBlock;
 
     switch (format) {
     case SDF_PSMCT16:
@@ -568,11 +568,11 @@ SdfTexResource *sdfGsAllocFrameBuff(s32 width, s32 height, s32 format) {
     return textureBlock;
 }
 
-SdfTexResource *sdfGsMemGetLinkHead(void) {
+sdfGsMemSlice_t *sdfGsMemGetLinkHead(void) {
     return gsMemHandleLinkHead;
 }
 
-SdfTexResource *sdfGsMemGetLinkTail(void) {
+sdfGsMemSlice_t *sdfGsMemGetLinkTail(void) {
     return gsMemHandleLinkTail;
 }
 
@@ -825,14 +825,14 @@ void sdfImageSetInit(void) {
     sdfImageSetClearCb(obj);
 }
 
-SdfTexBuf *sdfTexGetPacket(SdfTex *texture) {
+sdfTexPacket_t *sdfTexGetPacket(sdfTexHandle_t *texture) {
     return texture->primaryBuffer;
 }
 
 /* Size in bytes of a packed primary texture buffer: only the low 15 bits
  * contribute to its 16-byte block count. */
-s32 sdfTexGetPacketLength(const SdfTex *texture) {
-    const SdfTexBuf *buffer = texture->primaryBuffer;
+s32 sdfTexGetPacketLength(const sdfTexHandle_t *texture) {
+    const sdfTexPacket_t *buffer = texture->primaryBuffer;
 
     if (buffer == NULL) {
         return 0;
@@ -840,8 +840,8 @@ s32 sdfTexGetPacketLength(const SdfTex *texture) {
     return ((buffer->gifTagWord & SDF_GIF_LOOP_COUNT_MASK) + 1) << SDF_QWORD_BYTE_SHIFT;
 }
 
-SdfTexBuf *sdfTexGetPacketCtx2(SdfTex *texture) {
-    SdfTexBuf *buf;
+sdfTexPacket_t *sdfTexGetPacketCtx2(sdfTexHandle_t *texture) {
+    sdfTexPacket_t *buf;
 
     buf = texture->secondaryBuffer;
     if (buf == NULL) {
@@ -852,8 +852,8 @@ SdfTexBuf *sdfTexGetPacketCtx2(SdfTex *texture) {
 }
 
 /* Mirror the primary-buffer size calculation for the secondary buffer. */
-s32 sdfTexGetPacketCtx2Length(const SdfTex *texture) {
-    const SdfTexBuf *buffer = texture->secondaryBuffer;
+s32 sdfTexGetPacketCtx2Length(const sdfTexHandle_t *texture) {
+    const sdfTexPacket_t *buffer = texture->secondaryBuffer;
 
     if (buffer == NULL) {
         return 0;
@@ -861,11 +861,11 @@ s32 sdfTexGetPacketCtx2Length(const SdfTex *texture) {
     return ((buffer->gifTagWord & SDF_GIF_LOOP_COUNT_MASK) + 1) << SDF_QWORD_BYTE_SHIFT;
 }
 
-u8 sdfTexGetCLUTCount(SdfTex *texture) {
+u8 sdfTexGetCLUTCount(sdfTexHandle_t *texture) {
     return texture->paletteCount;
 }
 
-u32 sdfTexGetCLUTAddr(SdfTex *texture) {
+u32 sdfTexGetCLUTAddr(sdfTexHandle_t *texture) {
     u32 word;
 
     word = 0;
@@ -875,7 +875,7 @@ u32 sdfTexGetCLUTAddr(SdfTex *texture) {
     return word;
 }
 
-u32 sdfTexGetPixelAddr(SdfTex *texture) {
+u32 sdfTexGetPixelAddr(sdfTexHandle_t *texture) {
     return texture->primaryResource->word;
 }
 
@@ -919,29 +919,29 @@ s32 sdfTexGetTexelBitCount(s32 format) {
     return storageBitsPerPixel;
 }
 
-u64 sdfTexGetTex0Reg(SdfTex *texture) {
+u64 sdfTexGetTex0Reg(sdfTexHandle_t *texture) {
     return texture->primaryBuffer->textureState;
 }
 
-u64 sdfTexGetTex1Reg(SdfTex *texture) {
+u64 sdfTexGetTex1Reg(sdfTexHandle_t *texture) {
     return texture->primaryBuffer->samplingState;
 }
 
-u64 sdfTexGetClampReg(SdfTex *texture) {
+u64 sdfTexGetClampReg(sdfTexHandle_t *texture) {
     return texture->primaryBuffer->clampState;
 }
 
 /* Clear TEX1 MMAG/MMIN and OR in the supplied filters; input values are not masked. */
-void sdfTexSetFilter(SdfTex *texture, s32 magFilter, s32 minFilter) {
-    SdfTexBuf *buffer;
+void sdfTexSetFilter(sdfTexHandle_t *texture, s32 magFilter, s32 minFilter) {
+    sdfTexPacket_t *buffer;
 
     buffer = texture->primaryBuffer;
     buffer->samplingState = (buffer->samplingState & ~SDF_TEX_FILTER_MASK) | (magFilter << SDF_MAG_FILTER_SHIFT) | (minFilter << SDF_MIN_FILTER_SHIFT);
 }
 
 /* Create the secondary packet if absent, then update TEX1 filters without masking input values. */
-void sdfTexSetFilterCtx2(SdfTex *texture, s32 magFilter, s32 minFilter) {
-    SdfTexBuf *buffer = texture->secondaryBuffer;
+void sdfTexSetFilterCtx2(sdfTexHandle_t *texture, s32 magFilter, s32 minFilter) {
+    sdfTexPacket_t *buffer = texture->secondaryBuffer;
 
     if (buffer == NULL) {
         sdfTexMakeGIFPacketCtx2(texture);
@@ -950,7 +950,7 @@ void sdfTexSetFilterCtx2(SdfTex *texture, s32 magFilter, s32 minFilter) {
     buffer->samplingState = (buffer->samplingState & ~SDF_TEX_FILTER_MASK) | (magFilter << SDF_MAG_FILTER_SHIFT) | (minFilter << SDF_MIN_FILTER_SHIFT);
 }
 
-void sdfTexSetWrapMode(SdfTex *texture, SdfTextureClampMode mode) {
+void sdfTexSetWrapMode(sdfTexHandle_t *texture, SdfTextureClampMode mode) {
     texture->clampMode = mode;
     sdfTexRebuildPacket(texture);
 }
@@ -986,7 +986,7 @@ u8 *sdfTexTransData(u32 destination, s32 width, s32 height, u32 format, u8 *pixe
 }
 
 /* Upload the CLUT as 16x16 for 8-bit indexed formats, otherwise 8x2; forward pixel ownership. */
-u8 *sdfTexTransCLUT(SdfTex *texture, u32 destination, u8 *pixels, s32 borrowPixels) {
+u8 *sdfTexTransCLUT(sdfTexHandle_t *texture, u32 destination, u8 *pixels, s32 borrowPixels) {
     s32 paletteWidth;
     s32 paletteHeight;
 
@@ -1000,13 +1000,13 @@ u8 *sdfTexTransCLUT(SdfTex *texture, u32 destination, u8 *pixels, s32 borrowPixe
     return sdfTexTransData(destination, paletteWidth, paletteHeight, texture->clutFormat, pixels, borrowPixels);
 }
 
-void sdfTexClutToGs(SdfTex *tex) {
+void sdfTexClutToGs(sdfTexHandle_t *tex) {
     if (tex->secondaryResource != NULL) {
         sdfTexTransCLUT(tex, sdfTexGetCLUTAddr(tex), tex->paletteData, 0);
     }
 }
 
-void sdfTexLink(SdfTex *texture) {
+void sdfTexLink(sdfTexHandle_t *texture) {
     texture->next = NULL;
     if (sdfTexHandleLink != NULL) {
         texture->prev = sdfTexHandleLink;
@@ -1017,8 +1017,8 @@ void sdfTexLink(SdfTex *texture) {
     sdfTexHandleLink = texture;
 }
 
-SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 paletteCount, SdfTexResource *secondary) {
-    SdfTex *tex = sdfAllocAndClearQuadwords(sizeof(SdfTex));
+sdfTexHandle_t *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, sdfGsMemSlice_t *primary, s32 paletteFormat, s32 paletteCount, sdfGsMemSlice_t *secondary) {
+    sdfTexHandle_t *tex = sdfAllocAndClearQuadwords(sizeof(sdfTexHandle_t));
     SdfTexRef *ref = sdfAllocAndClearQuadwords(sizeof(SdfTexRef));
 
     ref->refCount = 1;
@@ -1036,13 +1036,13 @@ SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 max
     return tex;
 }
 
-extern SdfTexResource *sdfTexAllocClut(s32, s32, s32);
-extern void sdfTexMakeGIFPacket(SdfTex *);
+extern sdfGsMemSlice_t *sdfTexAllocClut(s32, s32, s32);
+extern void sdfTexMakeGIFPacket(sdfTexHandle_t *);
 
-SdfTex *sdfTexClone(SdfTex *source) {
-    SdfTex *texture;
+sdfTexHandle_t *sdfTexClone(sdfTexHandle_t *source) {
+    sdfTexHandle_t *texture;
     SdfTexRef *reference;
-    SdfTex *original;
+    sdfTexHandle_t *original;
 
     texture = sdfChipAllocDirect(sizeof(*texture));
     *texture = *source;
@@ -1072,8 +1072,8 @@ SdfTex *sdfTexClone(SdfTex *source) {
 }
 
 /* Allocate a texture head for a 0x20-byte (kind 0) or 0x10-byte (kind 2/10) unit; types 19/27 use unit*8 bytes and 0x20 rows, 20/36/44 use 0x40 bytes and 8 rows. */
-SdfTexResource *sdfTexAllocClut(s32 type, s32 kind, s32 unused) {
-    SdfTexResource *head = NULL;
+sdfGsMemSlice_t *sdfTexAllocClut(s32 type, s32 kind, s32 unused) {
+    sdfGsMemSlice_t *head = NULL;
     s32 unit;
     s32 size;
     s16 height;

@@ -29,7 +29,7 @@
 /* Declared before first use (were implicit int). */
 extern s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex);
 extern s32 fldCountSceneSlots(void);
-extern u32 sdfQueryChannelBits(s32 channel, s32 queryArg, DatPartyRecord *item);
+extern u32 sdfQueryChannelBits(s32 channel, s32 queryArg, datUnitWork_t *item);
 /* Original-style implicit int, kept: matched code depends on it: btlRollAiBucket. */
 
 typedef struct BattleController {
@@ -50,7 +50,7 @@ typedef struct BattleController {
     s32 adjustmentEntryIndex;
     s32 mode;
     u8 pad_280[0x1C];
-    KwlnTask *taskParent;
+    dds3ProcessID_t *taskParent;
     u8 pad_2A0[8];
     s32 sceneObjectTask;
     s32 spriteObject;
@@ -77,7 +77,7 @@ typedef struct BattleController {
     u32 (*enemyLimitOverride)(BtlUnit *, DatBattleSceneRecord *, u32); /* 0x688 */
 } BattleController;
 
-extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32);
+extern s32 datGetStatWithStatusOverride(datUnitWork_t *, s32);
 
 extern s32 D_00358510[];
 
@@ -104,7 +104,7 @@ s8 btlGetActorIndexedSignedValue(BtlUnit *unit, s32 index);
 
 s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command);
 
-s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record);
+s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record);
 
 s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *unit, u32 slot);
 
@@ -118,11 +118,11 @@ s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element);
 
 s32 btlFlagToElementIndex(s32 flag);
 
-extern s32 sdfQueryChannelValue(s32, DatPartyRecord *, DatPartyRecord *);
+extern s32 sdfQueryChannelValue(s32, datUnitWork_t *, datUnitWork_t *);
 #include "sdf_debug_api.h"
 
 s32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, s32 command, s32 variant, s32 mode) {
-    DatPartyRecord *record;
+    datUnitWork_t *record;
     s32 value;
     s32 guard;
 
@@ -580,7 +580,7 @@ s32 btlRollEscapeChance(BtlUnit *actor) {
     s32 noEligibleEnemy;
     s32 chance;
     f32 ratio;
-    DatPartyRecord *record;
+    datUnitWork_t *record;
 
     if (datBattleSceneRecords[battle->battleMode].voice != 0) {
         return 0;

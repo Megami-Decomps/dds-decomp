@@ -191,8 +191,8 @@ extern s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot);
 extern u32 itfCreateTightFont3TextGlyph(s32, s32, s32, u32, char *, s32);
 extern char D_00437968[];
 
-extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
-extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
+extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
+extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
 
 /* Draw the terminal value panel for the selected item: its frames, then by
  * item kind its power (kind 1) or per-stat bonuses (kind 3), and the count. */
@@ -203,7 +203,7 @@ void mnuDrawTerminalPanelValues(s32 x, s32 y, s32 z, MenuTerminalContext *object
     s32 count;
     u32 color;
     CampWindowParams *item;
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
     s32 value;
     s32 i;
     s32 id;
@@ -267,7 +267,7 @@ void mnuDrawTerminalPanelValues(s32 x, s32 y, s32 z, MenuTerminalContext *object
         count = ptyCountBulletItem(id);
     }
     sprintf(text, D_00437968, count);
-    glyph = (struct FrFontGlyph *)itfCreateTightFont3TextGlyph(0x1700, 0xA58, z, color, text, 0);
+    glyph = (struct _FRQ *)itfCreateTightFont3TextGlyph(0x1700, 0xA58, z, color, text, 0);
     frFontDrawGlyphChain(glyph, 1, option);
     frDestroyFontRequestAfter(glyph);
 }
@@ -286,7 +286,7 @@ void mnuDrawCampItemListRow(s32 x, s32 y, s32 z, struct MenuList *list,
     s32 row = value - headIndex;
     f32 alpha = 1.0f;
     f32 pulseAlpha;
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
     char text[16];
     s32 selected = 0;
     u32 color;
@@ -382,7 +382,7 @@ void mnuDrawFadingValueListRow(s32 x, s32 y, s32 z, struct MenuList *list,
     u32 style = 0xA09DC300;
     s32 selected = 0;
     s32 value;
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
     char text[16];
 
     switch (mode) {
@@ -505,7 +505,7 @@ void mnuDrawListFlagIndicatorsWithFade(s32 x, s32 y, s32 z, s32 unused, u8 *obje
     }
 }
 
-struct FrFontGlyph;
+struct _FRQ;
 
 extern char D_00437978[]; /* "%d" */
 
@@ -517,7 +517,7 @@ void mnuDrawShopSelectedRowDetails(s32 x, s32 y, s32 depth, MenuTerminalContext 
     s32 row;
     s32 firstIndex;
     s32 textOffset;
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
 
     if (list->count != 0) {
         firstIndex = list->head->index;
@@ -534,7 +534,7 @@ void mnuDrawShopSelectedRowDetails(s32 x, s32 y, s32 depth, MenuTerminalContext 
             textOffset = 0x70;
         }
         sprintf(text, D_00437978, scene->multiplier);
-        glyph = (struct FrFontGlyph *)itfCreateTightFont3TextGlyph(
+        glyph = (struct _FRQ *)itfCreateTightFont3TextGlyph(
             0xD30 + textOffset, (135 + row * 22) << 3, depth, 0xA09DC380, text, 0);
         frSetFontColorNo(glyph, 4);
         frFontDrawGlyphChain(glyph, 1, option);
@@ -553,7 +553,7 @@ void mnuDrawShopSelectedRowDetailsWithAlpha(s32 x, s32 y, s32 depth, MenuTermina
     s32 firstIndex;
     s32 textOffset;
     u32 color;
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
 
     if (list->count != 0) {
         firstIndex = list->head->index;
@@ -579,7 +579,7 @@ void mnuDrawShopSelectedRowDetailsWithAlpha(s32 x, s32 y, s32 depth, MenuTermina
             textOffset = 0;
         }
         sprintf(text, D_00437978, scene->multiplier);
-        glyph = (struct FrFontGlyph *)itfCreateTightFont3TextGlyph(
+        glyph = (struct _FRQ *)itfCreateTightFont3TextGlyph(
             0xD30 + textOffset, (135 + row * 22) << 3, depth, color, text, 0);
         frSetFontColorNo(glyph, 4);
         frFontDrawGlyphChain(glyph, 1, option);
@@ -629,7 +629,7 @@ void mnuDrawShopPricePlaceholder(s32 x, s32 y, s32 depth, MenuTerminalContext *p
     struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
     MenuWindowContainer *object = panel->window;
     struct MenuList *inner;
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
 
     effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[25][BRS_ICON_X] * 16, mnuCommonIconPlacements[25][BRS_ICON_Y] * 8,
                   0, 0x100, 0, texture, mnuCommonIconPlacements[25][BRS_ICON_ID], option);
@@ -638,7 +638,7 @@ void mnuDrawShopPricePlaceholder(s32 x, s32 y, s32 depth, MenuTerminalContext *p
     inner = object->list;
     if (inner->count != 0) {
         sprintf(text, D_00437980, 0);
-        glyph = (struct FrFontGlyph *)itfCreateTightFont3TextGlyph(0x1910, 0x290, depth, 0xA09DC380, text, 0);
+        glyph = (struct _FRQ *)itfCreateTightFont3TextGlyph(0x1910, 0x290, depth, 0xA09DC380, text, 0);
         frSetFontColorNo(glyph, 4);
         frFontDrawGlyphChain(glyph, 1, option);
         frDestroyFontRequestAfter(glyph);
@@ -656,7 +656,7 @@ void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 optio
 void mnuDrawShopZeroValueIconAndText(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     char text[16];
     s32 value;
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
 
     effDrawTextureSlotWithBlendedCornerColors(
         x + mnuCommonIconPlacements[25][BRS_ICON_X] * 16,
@@ -666,7 +666,7 @@ void mnuDrawShopZeroValueIconAndText(s32 x, s32 y, s32 z, s32 unused, s32 scale,
     );
     value = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
     sprintf(text, D_00437980, 0);
-    glyph = (struct FrFontGlyph *)itfCreateTightFont3TextGlyph(x + 0x1910, y + 0x290, z, value, text, 0);
+    glyph = (struct _FRQ *)itfCreateTightFont3TextGlyph(x + 0x1910, y + 0x290, z, value, text, 0);
     frSetFontColorNo(glyph, 4);
     frFontDrawGlyphChain(glyph, 1, option);
     frDestroyFontRequestAfter(glyph);
@@ -677,7 +677,7 @@ void mnuDrawShopSelectedRowTotal(s32 x, s32 y, s32 depth, MenuTerminalContext *p
     struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
     MenuWindowContainer *object = panel->window;
     struct MenuList *inner;
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
 
     effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[25][BRS_ICON_X] * 16, mnuCommonIconPlacements[25][BRS_ICON_Y] * 8,
                   0, 0x100, 0, texture, mnuCommonIconPlacements[25][BRS_ICON_ID], option);
@@ -686,7 +686,7 @@ void mnuDrawShopSelectedRowTotal(s32 x, s32 y, s32 depth, MenuTerminalContext *p
     inner = object->list;
     if (inner->count != 0) {
         sprintf(text, D_00437980, inner->cursor->camp.value * panel->multiplier);
-        glyph = (struct FrFontGlyph *)itfCreateTightFont3TextGlyph(0x1910, 0x290, depth, 0xA09DC380, text, 0);
+        glyph = (struct _FRQ *)itfCreateTightFont3TextGlyph(0x1910, 0x290, depth, 0xA09DC380, text, 0);
         frSetFontColorNo(glyph, 4);
         frFontDrawGlyphChain(glyph, 1, option);
         frDestroyFontRequestAfter(glyph);
@@ -716,7 +716,7 @@ void mnuDrawShopCurrencyBalance(MenuTerminalContext *state, s32 style) {
     }
 
     {
-        struct FrFontGlyph *glyph = (struct FrFontGlyph *)itfCreateTightFont3TextGlyph(0x1910, 0x1D0, 0, style, text, 0);
+        struct _FRQ *glyph = (struct _FRQ *)itfCreateTightFont3TextGlyph(0x1910, 0x1D0, 0, style, text, 0);
 
         frFontDrawGlyphChain(glyph, 1, 0x53);
         frDestroyFontRequestAfter(glyph);

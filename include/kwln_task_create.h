@@ -3,7 +3,7 @@
 
 #include "kwln.h"
 
-KwlnTask *dds3StartProcess(const char *name, u32 priority, s32 startDelay,
+dds3ProcessID_t *dds3StartProcess(const char *name, u32 priority, s32 startDelay,
                          s32 destroyDelay, TaskUpdate update,
                          TaskDestroy destroy, u32 userValue);
 

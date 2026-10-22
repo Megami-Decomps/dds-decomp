@@ -11,9 +11,9 @@ extern SdfPoolNode D_003805A8;
 void dds3FontReqDrawBoxLine(void *rectangleData)
 {
     Dds3L2dRectangle *rect = rectangleData;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
 
-    list = (SdfListHead *)sdfPrimAllocDrawTag(0);
+    list = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
     sdfPrimLinkBoxLine(list, rect->color, 0, rect->left, rect->top,
                   rect->left + rect->width, rect->top + rect->height,
                   rect->depth, 0);

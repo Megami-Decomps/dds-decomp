@@ -5,10 +5,10 @@
 
 struct FileRequest;
 struct FilePacRequest;
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Return the request's allocation descriptor without changing ownership. */
-struct SdfMemBlock *fileGetMemHandle(const struct FileRequest *request);
+struct sdfMemHandle_t *fileGetMemHandle(const struct FileRequest *request);
 /* Return the address of the loaded resource payload as a byte pointer. */
 u8 *fileGetLoadPtr(const struct FileRequest *request);
 u32 fileGetLoadSize(const struct FileRequest *request);

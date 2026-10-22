@@ -27,7 +27,7 @@
 #define MTR_SELECTION_ALPHA_SCALE 128.0f
 #define MTR_UNIT_FADE_FRAMES 10
 
-extern void mtrMantraSetBit(DatPartyRecord *);
+extern void mtrMantraSetBit(datUnitWork_t *);
 
 struct MnuStatusResource;
 
@@ -89,16 +89,16 @@ extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void mnuReleasePanelEntryPool(void);
 const char D_00425F70[] = "*****************[mtrMantraUpdate():[0x%x]]*****************\n";
 
-extern MantraFlagResource *evtAllocateMantraSelectionWork(DatPartyRecord *, s32);
+extern MantraFlagResource *evtAllocateMantraSelectionWork(datUnitWork_t *, s32);
 extern void evtReleaseMantraSelectionWork(MantraFlagResource *);
 extern s32 mnuGetActiveMantraModelFlagState(void);
-extern void mnuValidateProfileEntry(MantraFlagResource *, DatPartyRecord *);
-extern s32 *ptyGetProfileRecordPointer(DatPartyRecord *, u16);
-extern void ptyApplyProfile(DatPartyRecord *, u16);
-extern void scrSetEntryLowFlags(DatPartyRecord *, u16, u16);
+extern void mnuValidateProfileEntry(MantraFlagResource *, datUnitWork_t *);
+extern s32 *ptyGetProfileRecordPointer(datUnitWork_t *, u16);
+extern void ptyApplyProfile(datUnitWork_t *, u16);
+extern void scrSetEntryLowFlags(datUnitWork_t *, u16, u16);
 
 /* Recompute every mantra node's unlock state for a party member and report changes. */
-void mtrRecomputeMantraFlagsForPartyUnit(DatPartyRecord *record) {
+void mtrRecomputeMantraFlagsForPartyUnit(datUnitWork_t *record) {
     s32 modelFlagState;
     MantraFlagResource *current;
     MantraFlagResource *source;
@@ -182,7 +182,7 @@ extern void mtrInitUnitSelectionWork(MnuStatusResource *);
 /* Allocate and clear status work, retain its allocation handle and create the progress host.
  * Print the native load banner and initialize panel sound entries before returning the work pointer. */
 MnuStatusResource *mnuAllocateMantraResourceWork(void) {
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(MTR_STATUS_RESOURCE_BYTES);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(MTR_STATUS_RESOURCE_BYTES);
     MnuStatusResource *resourceWork = (MnuStatusResource *)sdfMemGetPtr(allocation);
 
     memset(resourceWork, 0, MTR_STATUS_RESOURCE_BYTES);
@@ -363,15 +363,15 @@ u64 mtrMantraSelectDraw(void) {
 }
 
 extern MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *);
-extern void mnuSetupStaffMenuProfilePage(DatPartyRecord *, MenuProgressHost *);
-extern void mnuEnsureProfilePanelEffect(DatPartyRecord *, MenuProgressHost *);
+extern void mnuSetupStaffMenuProfilePage(datUnitWork_t *, MenuProgressHost *);
+extern void mnuEnsureProfilePanelEffect(datUnitWork_t *, MenuProgressHost *);
 extern char D_00426208[];
 extern char D_00426218[];
 
 /* Initialize the equip panel from the selected party entry and selector. */
 s32 mtrMantraEquipInit(void) {
     MnuStatusResource *work = (MnuStatusResource *)sdfGetTaskValueByKey(mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
-    DatPartyRecord *snapshot = &work->snapshot;
+    datUnitWork_t *snapshot = &work->snapshot;
     MtrEquipState *equip = &work->menu.equip;
     MantraNodePos *selector;
 
@@ -395,8 +395,8 @@ s32 mtrMantraEquipInit(void) {
     return 0;
 }
 
-extern DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *);
-extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
+extern datUnitWork_t *mnuGetSelectedNodeValue(MnuStatusResource *);
+extern u32 scrGetSelectedScriptEntryId(datUnitWork_t *);
 extern s32 mnuUpdateSelectedPanelSlot(MnuStatusResource *);
 /* Legacy calls forward the selected record to this no-op. */
 extern void mtrMantraEquipReleaseHookNoOp();
@@ -418,7 +418,7 @@ void mtrMantraEquipRelease(s32 key, s32 initResult) {
     mnuReleaseMenuVisualWorkResources(resource->progressHost);
     evtFinishMessageWindowAndNotify();
     if (resource->flags.equipApplied) {
-        DatPartyRecord *selectedRecord;
+        datUnitWork_t *selectedRecord;
         MantraNodePos *position;
         mnuUpdateSelectedPanelSlot(resource);
         mtrMantraEquipReleaseHookNoOp(mnuGetSelectedNodeValue(resource));
@@ -439,12 +439,12 @@ void mtrMantraEquipRelease(s32 key, s32 initResult) {
 extern DspUnitName *datUnitNames;
 extern DspMantraName *D_00435E50;
 extern s8 dds3PadButtonState[];
-extern DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *);
+extern datUnitWork_t *mnuGetSelectedNodeValue(MnuStatusResource *);
 extern u16 mnuGetSelectedPanelValue(MnuStatusResource *);
 extern MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *);
-extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
+extern u32 scrGetSelectedScriptEntryId(datUnitWork_t *);
 extern s32 mnuGetMantraSourceValue(u16);
-extern u8 scrSelectScriptEntryAndInitialize(DatPartyRecord *, u32);
+extern u8 scrSelectScriptEntryAndInitialize(datUnitWork_t *, u32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern void mnuShowMantraInfo(struct MantraDrawPool *pool);
@@ -463,7 +463,7 @@ INCLUDE_SDATA(const s32, "game/code_00286BA8", D_00437918);
 s32 mtrMantraEquipUpdate(void) {
     MnuStatusResource *work;
     MtrEquipState *equip;
-    DatPartyRecord *selectedRecord;
+    datUnitWork_t *selectedRecord;
     MantraNodePos *defaultSelector;
     s32 selectedPanelFlags;
     s32 selectedHighFlags;
@@ -644,7 +644,7 @@ extern void dspRequestMessageWindowModeOne(void);
 extern void mnuUpdateMantraDrawPool(struct MantraDrawPool *pool);
 extern void mnuDrawMantraSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                                 s32 flags, s32 context);
-extern s32 mnuDrawLoadedProgressPanels(DatPartyRecord *resource, MenuProgressHost *host, s32 mode);
+extern s32 mnuDrawLoadedProgressPanels(datUnitWork_t *resource, MenuProgressHost *host, s32 mode);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
 extern void mnuDrawCurrentProfilePanel(s32, s32, s32, MenuProgressHost *, s32);
 struct SdfPoolNode;
@@ -687,7 +687,7 @@ extern s32 frFontDrawTextVariantBAndMeasure(s32, s32, s32, u32, s32, char *, s32
 void mtrDrawUnitSelectionRow(s32 unusedX, s32 unusedY, s32 drawPool, MenuList *list,
                   MenuListNode *node, s32 depth) {
     MtrSelectionState *selection = (MtrSelectionState *)list->userData;
-    DatPartyRecord *record;
+    datUnitWork_t *record;
     s32 selected;
     s32 highlightAlpha;
     s8 icons[9] = {0, 6, 16, 8, 12, 10, 14, 18, 20};
@@ -695,7 +695,7 @@ void mtrDrawUnitSelectionRow(s32 unusedX, s32 unusedY, s32 drawPool, MenuList *l
 
     selected = list->cursor->index == node->index;
     highlightAlpha = selection->highlightAlpha;
-    record = (DatPartyRecord *)node->items;
+    record = (datUnitWork_t *)node->items;
     mnuDrawMantraSprite(0, node->index * 22 + (selection->scale - 1.0f) * 32.0f,
                         drawPool, selection->alpha, 0x22, 0, depth);
     mnuDrawMantraSprite(0, node->index * 22, drawPool, highlightAlpha,
@@ -1001,7 +1001,7 @@ extern u32 frFontQueueTextAndOptionallyMeasure(s32, s32, u32, u32, s8, void *, s
 
 /* Draw the selected mantra's two sprites, refresh the profile panel opacity and queue the mantra name. */
 s32 mtrDrawSelectedMantraEntry(s32 x, s32 y, s32 z, s32 alpha, MnuStatusResource *resource, s32 drawContext) {
-    DatPartyRecord *record = (DatPartyRecord *)resource->list->cursor->items;
+    datUnitWork_t *record = (datUnitWork_t *)resource->list->cursor->items;
     u32 entryId;
     MenuProgressHost *host;
     u8 scratch[0x20];

@@ -1,9 +1,9 @@
 #ifndef DDS3_WORLD_SECONDARY_H
 #define DDS3_WORLD_SECONDARY_H
 
-struct EffWorldNode;
+struct dds3Basic_t;
 
 /* Return the borrowed secondary world node, or NULL when no world is active. */
-struct EffWorldNode *dds3GetControlScene(void);
+struct dds3Basic_t *dds3GetControlScene(void);
 
 #endif

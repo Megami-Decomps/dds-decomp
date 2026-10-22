@@ -24,7 +24,7 @@
 #include "fld_map_resource.h"
 #include "mdl_flag_api.h"
 
-extern EffWorldNode *fldLocalMapCameraObject;
+extern dds3Basic_t *fldLocalMapCameraObject;
 
 typedef struct {
     f32 v[4];
@@ -126,8 +126,8 @@ s32 sdfLoadMapCounterCameraVectorsForMask(s32 mask) {
     f32 position[4];
     f32 rotation[4];
     char name[16];
-    EffWorldNode *world;
-    EffWorldNode *node;
+    dds3Basic_t *world;
+    dds3Basic_t *node;
     s8 count;
     s8 i;
 
@@ -330,7 +330,7 @@ void sdfSetLocalMapCounterMarkerState(s32 index, s32 value) {
         "md_01all_02",
         "md_01all_02"
     };
-    EffWorldNode *node;
+    dds3Basic_t *node;
     s32 modelIndex;
 
     if (index != 0) {
@@ -810,7 +810,7 @@ void sdfCounterDrawSelectedTimerFade(s32 unused, s32 x, f32 fade) {
 }
 
 s32 frMeasureAndQueueCounterText(const char *text) {
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
     s32 width;
 
     glyph = itfCreateMeasuredTextGlyph(0, 0, 0, 0, text, NULL);

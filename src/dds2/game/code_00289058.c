@@ -16,11 +16,11 @@
 extern s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 
-extern s32 mtrChkMantraCompleteMaster(DatPartyRecord *);
-extern s32 prfAreAllRequiredProfileFlagsSet(DatPartyRecord *);
+extern s32 mtrChkMantraCompleteMaster(datUnitWork_t *);
+extern s32 prfAreAllRequiredProfileFlagsSet(datUnitWork_t *);
 extern s32 scrGetEntryRequirementFlags(u16);
-extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
-extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
+extern s32 ptyTestPrimaryProfileFlag(datUnitWork_t *, u16);
+extern u32 scrGetSelectedScriptEntryId(datUnitWork_t *);
 extern void mnuSpawnMantraPanelsFromSelectedUnitFlags(MnuStatusResource *, s32, s32);
 extern void mnuStoreMantraPanelFlagsToScript(MnuStatusResource *);
 extern void mnuReleaseMiddleMantraSpriteSlots(void);
@@ -39,11 +39,11 @@ extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 /* Work block at object+0x240; the node IDs fill the eight slots before
    the selected index and count. */
 
-DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *resource) {
+datUnitWork_t *mnuGetSelectedNodeValue(MnuStatusResource *resource) {
     return resource->list->cursor->partyRecord;
 }
 
-DatPartyRecord *mnuGetNodeValueByIndex(MnuStatusResource *resource, s32 nodeIndex) {
+datUnitWork_t *mnuGetNodeValueByIndex(MnuStatusResource *resource, s32 nodeIndex) {
     struct MenuListNode *node = resource->list->first;
     s32 current = 0;
     while (node != 0) {
@@ -97,13 +97,13 @@ s32 mnuMoveNodeCursorToTargetIndex(MnuStatusResource *resource, s8 targetIndex) 
 }
 
 /* Script entry IDs are signed 16-bit indices into the position table. */
-static inline MantraNodePos *mnuFindNodePosition(DatPartyRecord *value) {
+static inline MantraNodePos *mnuFindNodePosition(datUnitWork_t *value) {
     s16 id = scrGetSelectedScriptEntryId(value);
     return (MantraNodePos *)mnuGetMantraNodePositionRecord(id);
 }
 
 /* Both icon variants use the same node-to-screen coordinate conversion. */
-static inline void mnuRefreshNodeTransitionIcons(MnuStatusResource *object, MantraMenuWork *work, DatPartyRecord *value) {
+static inline void mnuRefreshNodeTransitionIcons(MnuStatusResource *object, MantraMenuWork *work, datUnitWork_t *value) {
     MantraNodePos *position = mnuFindNodePosition(value);
 
     mnuSpawnMantraShortLoopIconAtPosition((s32)((f32)position->x / 10.0f * 40.0f),
@@ -122,7 +122,7 @@ static inline void mnuRefreshNodeTransitionIcons(MnuStatusResource *object, Mant
 
 void mnuSelectPreviousMantraUnit(MnuStatusResource *resource) {
     MantraMenuWork *work = &resource->menu;
-    DatPartyRecord *value;
+    datUnitWork_t *value;
 
     evtPrintDeveloperConsoleMessage("UnitIndex:%d\n", resource->list->cursor->index);
     mnuAdvanceMantraUnitPanelListState(resource->menu.selectionController);
@@ -137,7 +137,7 @@ void mnuSelectPreviousMantraUnit(MnuStatusResource *resource) {
 
 void mnuSelectNextMantraUnit(MnuStatusResource *resource) {
     MantraMenuWork *work = &resource->menu;
-    DatPartyRecord *value;
+    datUnitWork_t *value;
 
     mnuQueueNextUnitPanelSelection(resource->menu.selectionController);
     mnuAdvanceNodeCursorAndClearListFlags(resource);
@@ -173,7 +173,7 @@ void mnuSelectAvailableMantraNeighbor(MnuStatusResource *resource) {
     MantraNodePos *neighbor;
     MantraNodePos **neighbors;
     u16 *flags;
-    DatPartyRecord *selectedValue;
+    datUnitWork_t *selectedValue;
     u32 selectedIndex;
     s32 i;
 
@@ -228,7 +228,7 @@ void mnuSelectNextUnitWithAvailableMantraNode(MnuStatusResource *resource) {
     MantraNodePos *neighbor;
     MantraNodePos **neighbors;
     u16 *flags;
-    DatPartyRecord *selectedValue;
+    datUnitWork_t *selectedValue;
     u32 selectedIndex;
     s32 i;
 
@@ -277,15 +277,15 @@ void mnuSelectNextUnitWithAvailableMantraNode(MnuStatusResource *resource) {
 
 void mnuUpdateSelectedMantraResourceId(s32 object) {
     MantraMenuWork *state = &((MnuStatusResource *)object)->menu;
-    s16 id = scrGetSelectedScriptEntryId((DatPartyRecord *)((MnuStatusResource *)object)->list->cursor->userValue);
+    s16 id = scrGetSelectedScriptEntryId((datUnitWork_t *)((MnuStatusResource *)object)->list->cursor->userValue);
     state->defaultSelector = mnuGetMantraNodePositionRecord(id);
     mnuSpawnMantraPanelsFromSelectedUnitFlags((MnuStatusResource *)object, 5, 0);
 }
 
 extern struct MantraDrawPool *mnuCreateMantraDrawPool(u32);
-extern MantraFlagResource *evtAllocateMantraSelectionWork(DatPartyRecord *, s32);
-extern s32 mnuValidateProfileEntry(MantraFlagResource *, DatPartyRecord *);
-extern u16 scrGetEntryLowFlags(DatPartyRecord *, u16);
+extern MantraFlagResource *evtAllocateMantraSelectionWork(datUnitWork_t *, s32);
+extern s32 mnuValidateProfileEntry(MantraFlagResource *, datUnitWork_t *);
+extern u16 scrGetEntryLowFlags(datUnitWork_t *, u16);
 extern void mnuMergePartyMantraProfileCapStates(MantraFlagResource **);
 extern void mnuRebuildMantraCategoryAvailability(void);
 extern void mnuBuildMantraSourceList(MnuStatusResource *);
@@ -300,7 +300,7 @@ const char D_00426340[] = "mtrMantraPlayerDataCreate!!!! \n";
 void mnuInitializeMantraSelectionWork(MnuStatusResource *object) {
     MantraMenuWork *state = &object->menu;
     struct MenuListNode *node;
-    DatPartyRecord *record;
+    datUnitWork_t *record;
     s32 i;
 
     object->menu.selectionController = mnuCreateMantraDrawPool(0xB);
@@ -355,7 +355,7 @@ const char D_00426360[16] = "AT3 LOAD!!\n";
 void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *object) {
     MantraMenuWork *work = &object->menu;
     struct MenuListNode *node;
-    DatPartyRecord *selectedValue = object->list->cursor->partyRecord;
+    datUnitWork_t *selectedValue = object->list->cursor->partyRecord;
     s32 count;
 
     work->drawBits.drawEnabled = 0;
@@ -417,7 +417,7 @@ void mnuCleanupMantraVisualsAndResetTitleStream(MnuStatusResource *object) {
     mnuResetTitleStreamLocked();
 }
 
-s32 mnuCheckRequiredMantraEntries(DatPartyRecord *unit) {
+s32 mnuCheckRequiredMantraEntries(datUnitWork_t *unit) {
     s32 index;
     for (index = 1; index < 0xb0; index++) {
         u16 id = index;
@@ -429,7 +429,7 @@ s32 mnuCheckRequiredMantraEntries(DatPartyRecord *unit) {
     return 1;
 }
 
-s32 mtrChkMantraCompleteMaster(DatPartyRecord *unit) {
+s32 mtrChkMantraCompleteMaster(datUnitWork_t *unit) {
     u16 flagIds[6] = {0x9A0, 0x9A1, 0x9A2, 0x9A3, 0x9A4, 0x9A5};
     u8 flagIndices[9] = {0, 0, 1, 2, 3, 4, 5, 2, 1};
 
@@ -445,7 +445,7 @@ s32 mtrChkMantraCompleteMaster(DatPartyRecord *unit) {
     return 1;
 }
 
-s32 mnuSetSelectedMantraOptionFlag(DatPartyRecord *party) {
+s32 mnuSetSelectedMantraOptionFlag(datUnitWork_t *party) {
     u16 flagIds[6] = {0x9a0, 0x9a1, 0x9a2, 0x9a3, 0x9a4, 0x9a5};
     u8 flagIndices[9] = {0, 0, 1, 2, 3, 4, 5, 2, 1};
     evtBitOn(flagIds[flagIndices[party->unitId]]);
@@ -456,7 +456,7 @@ s32 mnuFindFirstMatchingListItemIndex(MnuStatusResource *resource) {
     struct MenuListNode *node = resource->list->first;
     s32 listIndex = 0;
     while (node != 0) {
-        if (mtrChkMantraCompleteMaster((DatPartyRecord *)node->userValue) != 0) {
+        if (mtrChkMantraCompleteMaster((datUnitWork_t *)node->userValue) != 0) {
             return listIndex;
         }
         node = node->next;
@@ -707,7 +707,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
     MantraMenuWork *work = &object->menu;
     s32 result = 0;
     MantraNodePos *position;
-    DatPartyRecord *party;
+    datUnitWork_t *party;
     s32 index;
     s32 dialogResult;
 
@@ -1521,7 +1521,7 @@ void mnuRefreshMantraUnitNodeFlags(s32 object) {
     if (node != 0) {
         resourceSlot = ((MnuStatusResource *)object)->menu.slots;
         do {
-            DatPartyRecord *unit = (DatPartyRecord *)node->userValue;
+            datUnitWork_t *unit = (datUnitWork_t *)node->userValue;
             MantraNodePos *record =
                 (MantraNodePos *)mnuGetMantraNodePositionRecord(0);
             u16 *flag = ((MantraFlagResource *)*resourceSlot)->flags;

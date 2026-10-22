@@ -3,9 +3,9 @@
 
 #include "common.h"
 
-struct DatPartyRecord;
+struct datUnitWork_t;
 
 /* Tests whether a party record has the requested special ability. */
-s32 btlCheckSpecialAbility(struct DatPartyRecord *record, s32 ability);
+s32 btlCheckSpecialAbility(struct datUnitWork_t *record, s32 ability);
 
 #endif /* BTL_SPECIAL_ABILITY_H */

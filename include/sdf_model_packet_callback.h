@@ -5,12 +5,12 @@
 
 struct SdfPoolNode;
 
-void sdfModelTempPacketLinkOt(struct SdfPoolNode **surfaces, SdfModel *model);
-void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **surfaces, SdfModel *model);
+void sdfModelTempPacketLinkOt(struct SdfPoolNode **surfaces, sdfModelRootNode_t *model);
+void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **surfaces, sdfModelRootNode_t *model);
 
 static inline void sdfBuildModelPacketsVia(
-        void (*build)(struct SdfPoolNode **, SdfModel *),
-        struct SdfPoolNode **surfaces, SdfModel *model) {
+        void (*build)(struct SdfPoolNode **, sdfModelRootNode_t *),
+        struct SdfPoolNode **surfaces, sdfModelRootNode_t *model) {
     build(surfaces, model);
 }
 

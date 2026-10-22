@@ -330,8 +330,8 @@ void mnuDrawOrderedStaffItemEntry(s32 x, s32 y, s32 depth, struct MenuList *list
 
 
 extern void mnuDrawOrderedStaffItemEntry();
-extern DatPartyRecord *mnuFindPartySlotByCurrentId(u32);
-extern DatPartyRecord *mnuFindReserveSlotByCurrentId(u32);
+extern datUnitWork_t *mnuFindPartySlotByCurrentId(u32);
+extern datUnitWork_t *mnuFindReserveSlotByCurrentId(u32);
 extern s32 mtrMantraIdIsValid(s32);
 extern void mnuSortItems(struct MenuList *, s32, s32);
 
@@ -530,9 +530,9 @@ void mnuNoOpStaffDisplayTeardown(s32 object) {
 }
 
 
-u32 mnuInitializeWindowOwnerResourceSet(KwlnTask *task) {
+u32 mnuInitializeWindowOwnerResourceSet(dds3ProcessID_t *task) {
     MenuStaffContext *context = (MenuStaffContext *)dds3GetProcessData(task);
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(0x54);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(0x54);
     MenuStaffChoices *resource = (void *)sdfMemLock(allocation);
 
     context->menu = resource;
@@ -548,7 +548,7 @@ u32 mnuInitializeWindowOwnerResourceSet(KwlnTask *task) {
 
 /* Close the staff selection state: drop the owner's window containers, run
  * the owner's teardown hook, then close the party's resource menu. */
-s32 mnuDestroyWindowOwnerResourceSet(KwlnTask *task) {
+s32 mnuDestroyWindowOwnerResourceSet(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
     MenuStaffContext *owner = (MenuStaffContext *)context;
     MenuStaffChoices *party = (MenuStaffChoices *)owner->menu;
@@ -573,7 +573,7 @@ extern char mnuCampItemCategoryPopupEntry[];
 extern char mnuCampItemTargetSelectionPopupEntry[];
 
 /* Handle staff-item popup selection and idle-window navigation. */
-s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
+s32 mnuHandleStaffPopupSelection(dds3ProcessID_t *callback) {
     MenuStaffContext *context;
     MenuStaffChoices *resources;
     MenuWindowContainer *window;
@@ -641,7 +641,7 @@ extern void mnuDrawCampGridAndLabelDefault(s32 kind, s32 labelIndex, s32 textTab
                                            s32 drawOption, s32 layer);
 extern u8 mnuCampItemCommandHelpTextBank[];
 
-s32 mnuDrawStaffItemSelectionScreen(KwlnTask *callback) {
+s32 mnuDrawStaffItemSelectionScreen(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
     mnuDrawCampScreenDefault(callback);
     mnuCreateStaffImageSprite(4);
@@ -653,7 +653,7 @@ s32 mnuDrawStaffItemSelectionScreen(KwlnTask *callback) {
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
-s32 mnuFinishStaffReturnPopup(KwlnTask *callback) {
+s32 mnuFinishStaffReturnPopup(dds3ProcessID_t *callback) {
     return menuSetHandler((void *)dds3GetProcessData(callback), 2, (void *)callback);
 }
 
@@ -663,7 +663,7 @@ extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 s32 mnuUseStaffItem(s32 itemId, MenuStaffContext *context) {
     MenuPageWindow *partyPanel = &context->partyWindow;
-    DatPartyRecord *targetUnit = &DDS3_GBWK->party[context->partyWindow.lists[0]->cursor->index];
+    datUnitWork_t *targetUnit = &DDS3_GBWK->party[context->partyWindow.lists[0]->cursor->index];
     s32 result = func_002C5A28(partyPanel, itemId & 0xFFFF, targetUnit, targetUnit);
 
     if (result != 1) {
@@ -696,7 +696,7 @@ void mnuApplyResourceSelection(s32 index, MenuStaffContext *context) {
     mnuSetStateValue(&((MenuStaffContext *)context)->unkAA50, 1);
 }
 
-u32 mnuFadeInStaffItemList(KwlnTask *task) {
+u32 mnuFadeInStaffItemList(dds3ProcessID_t *task) {
     s32 context;
 
     context = dds3GetProcessData(task);
@@ -704,7 +704,7 @@ u32 mnuFadeInStaffItemList(KwlnTask *task) {
     return 1;
 }
 
-u32 mnuFadeInActiveStaffWindow(KwlnTask *task) {
+u32 mnuFadeInActiveStaffWindow(dds3ProcessID_t *task) {
     s32 context;
 
     context = dds3GetProcessData(task);
@@ -712,7 +712,7 @@ u32 mnuFadeInActiveStaffWindow(KwlnTask *task) {
     return 1;
 }
 
-s32 mnuHandleStaffInventoryListInput(KwlnTask *callback) {
+s32 mnuHandleStaffInventoryListInput(dds3ProcessID_t *callback) {
     MenuStaffContext *context;
     MenuStaffChoices *resources;
     MenuWindowContainer *window;

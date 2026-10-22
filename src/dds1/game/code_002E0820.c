@@ -126,7 +126,7 @@ extern u32 D_003BDA2C;
 
 extern u32 corePktCurrLight;
 
-extern DevConsState *D_003BD3C0;
+extern sdfDevConsCB_tag *D_003BD3C0;
 
 extern u32 D_003BD3C4;
 
@@ -140,11 +140,11 @@ extern u128 D_003F9890;
 
 extern f32 D_003BDA30;
 
-extern SdfTex *D_003BD37C;
+extern sdfTexHandle_t *D_003BD37C;
 
-extern SdfTex *D_003BD380;
+extern sdfTexHandle_t *D_003BD380;
 
-extern SdfTex *D_003BD390;
+extern sdfTexHandle_t *D_003BD390;
 
 #include "sdf_packet_alloc.h"
 
@@ -155,8 +155,8 @@ extern s32 D_003BDA20;
 
 INCLUDE_ASM(const s32, "game/code_002E0820", sdfCorePacketGen);
 
-void sdfCoreDrawScanOneSkinNodes(SdfModel *model, SdfObjectRefCommand *source) {
-    SdfDrawNode **objects = model->list->buffer;
+void sdfCoreDrawScanOneSkinNodes(sdfModelRootNode_t *model, SdfObjectRefCommand *source) {
+    sdfModelNode_t **objects = model->list->buffer;
     u16 *indices = &source->count;
     if ((source->flags & 0x800) != 0) {
         s32 count = *indices;
@@ -209,16 +209,16 @@ void sdfCoreDrawInit(s32 workspaceBytes) {
     sceDmaSync(dmaChannel, 0, 0);
     sdfMemFreeHandleDirect(&D_003BD350);
     D_003BD350 = (u32)sdfMemAllocDirect(workspaceBytes);
-    D_003BDA20 = sdfMemLock((struct SdfMemBlock *)(D_003BD350));
+    D_003BDA20 = sdfMemLock((struct sdfMemHandle_t *)(D_003BD350));
 }
 
 /* Fixed allocation size; the texture is deliberately unused. */
-u32 sdf2DGetTexPacketSize(SdfTex *texture) {
+u32 sdf2DGetTexPacketSize(sdfTexHandle_t *texture) {
     return SDF_TEXTURE_DRAW_PACKET_BYTES;
 }
 
 /* Fill TEX1, TEX0 and CLAMP A+D writes; contextOffset 0/1 selects GS context. */
-SdfTextureDrawPacket *sdf2DMakeTexPacket(SdfTextureDrawPacket *drawPacket, SdfTex *texture, s32 contextOffset) {
+SdfTextureDrawPacket *sdf2DMakeTexPacket(SdfTextureDrawPacket *drawPacket, sdfTexHandle_t *texture, s32 contextOffset) {
     drawPacket->header.quadwords = 4;
     drawPacket->header.gifTag = 0x1000000000008003ULL;
     drawPacket->header.command = 0x50000004;
@@ -234,7 +234,7 @@ SdfTextureDrawPacket *sdf2DMakeTexPacket(SdfTextureDrawPacket *drawPacket, SdfTe
 }
 
 /* Allocate and append texture state; return its packet address. */
-s32 sdf2DLinkTexPacket(SdfListHead *packetList, SdfTex *texture, s32 contextOffset) {
+s32 sdf2DLinkTexPacket(sdfDrawTag_t *packetList, sdfTexHandle_t *texture, s32 contextOffset) {
     s32 packetBytes = sdf2DGetTexPacketSize(texture);
     SdfTextureDrawPacket *packet = (SdfTextureDrawPacket *)sdfGrAllocPacketBuff(packetBytes);
     s32 packetAddress = (s32)sdf2DMakeTexPacket(packet, texture, contextOffset);
@@ -539,7 +539,7 @@ void sdf3DMakeDirectRefPacket(DmaPacketHeader *packet, u32 sourceAddress, s32 pa
 extern u8 D_00324350[];
 
 /* Append the second fixed program block as a DMA reference packet. */
-void sdf3DLinkInitPacket(SdfListHead *packetList, DmaPacketHeader *packet) {
+void sdf3DLinkInitPacket(sdfDrawTag_t *packetList, DmaPacketHeader *packet) {
     packet->address = (u32)D_00320630 & SDF_DMA_ADDRESS_MASK;
     packet->quadwords = (D_00324350 - D_00320630) >> SDF_DMA_QWORD_SHIFT;
     packet->tag = 0;
@@ -554,7 +554,7 @@ extern void sdfTmxSetHeader(SdfTextureFileHeader *, s32, s32, s32, s32, s32);
 
 /* Acquire a 128x64 grayscale power lookup texture; release its temporary image. */
 void sdf3DInitSpecularTex2(void) {
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(0x2440);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(0x2440);
     SdfGeneratedLookupTexture *texture = (SdfGeneratedLookupTexture *)(u32)sdfMemLock(allocation);
     s32 i;
     s32 j;
@@ -630,7 +630,7 @@ void sdf3DInit(void) {
 extern u8 D_00398580[];
 
 /* Append the fixed clear block; NULL allocatePacket selects the packet allocator. */
-void sdf3DPrimLinkResetTm(SdfListHead *packetList,
+void sdf3DPrimLinkResetTm(sdfDrawTag_t *packetList,
                              s32 (*allocatePacket)(s32)) {
     u64 *referencePacket;
     if (allocatePacket == NULL) {
@@ -653,7 +653,7 @@ void sdf3DPrimSetTmPacket(VuLightingPacket *lightingPacket) {
 }
 
 /* Append inline matrix/lighting data using allocatePacket or the default allocator. */
-void sdf3DPrimLinkTm(SdfListHead *packetList,
+void sdf3DPrimLinkTm(sdfDrawTag_t *packetList,
                            s32 (*allocatePacket)(s32)) {
     u64 *dmaPacket;
     if (allocatePacket == NULL) {
@@ -669,7 +669,7 @@ void sdf3DPrimLinkTm(SdfListHead *packetList,
 extern vu8 sdfFrameId;
 
 /* Apply current-buffer changes and append the asset reference; keep both index reads. */
-void sdf3DPrimLinkMat(SdfListHead *packetList, SdfAsset *asset,
+void sdf3DPrimLinkMat(sdfDrawTag_t *packetList, sdfMat_t *asset,
                               s32 (*allocatePacket)(s32)) {
     u64 *referencePacket;
     if (allocatePacket == NULL) {
@@ -1552,8 +1552,8 @@ u32 *sdfDevConsGetFontUvTable(void) {
 }
 
 /* Append to the next-linked list and move its stored tail to this node. */
-void sdfDevConsLinkToTop(DevConsState *node) {
-    DevConsState *previousTail = D_003BD3C0;
+void sdfDevConsLinkToTop(sdfDevConsCB_tag *node) {
+    sdfDevConsCB_tag *previousTail = D_003BD3C0;
 
     node->next = NULL;
     node->previousNode = previousTail;
@@ -1564,9 +1564,9 @@ void sdfDevConsLinkToTop(DevConsState *node) {
 }
 
 /* Unlink this node, moving the stored tail when its next link is NULL. */
-void sdfDevConsUnlink(DevConsState *node) {
-    DevConsState *nextNode = node->next;
-    DevConsState *previousNode = node->previousNode;
+void sdfDevConsUnlink(sdfDevConsCB_tag *node) {
+    sdfDevConsCB_tag *nextNode = node->next;
+    sdfDevConsCB_tag *previousNode = node->previousNode;
 
     if (nextNode != NULL) {
         nextNode->previousNode = previousNode;
@@ -1579,33 +1579,33 @@ void sdfDevConsUnlink(DevConsState *node) {
 }
 
 /* Unlink the console, release its cell-buffer allocation, then free the node. */
-void sdfDevConsClose(DevConsState *node) {
+void sdfDevConsClose(sdfDevConsCB_tag *node) {
     sdfDevConsUnlink(node);
     sdfMemFreeDirect(node->bufferAllocation);
     sdfChipFreeDirect(node);
 }
 
 /* Reset both cursor coordinates and clear the two-byte character-cell grid. */
-void sdfDevConsClearInside(DevConsState *node) {
+void sdfDevConsClearInside(sdfDevConsCB_tag *node) {
     node->cursorColumn = 0;
     node->cursorRow = 0;
     memset(node->cells, 0, node->columns * node->rows * SDF_CONSOLE_CELL_BYTES);
 }
 
 /* Reset a console through the existing clear operation. */
-void sdfDevConsClear(DevConsState *node) {
+void sdfDevConsClear(sdfDevConsCB_tag *node) {
     sdfDevConsClearInside(node);
 }
 
 /* Allocate a two-byte character grid and link it for cleanup.
  * Allocation uses the supplied dimensions; clearing uses their stored s16
  * values. Dimensions and the two opaque halfword inputs are not validated. */
-DevConsState *sdfDevConsOpen(u32 screenOriginX, u32 screenOriginY, s32 columns, s32 rows) {
-    DevConsState *node;
-    struct SdfMemBlock *bufferAllocation;
+sdfDevConsCB_tag *sdfDevConsOpen(u32 screenOriginX, u32 screenOriginY, s32 columns, s32 rows) {
+    sdfDevConsCB_tag *node;
+    struct sdfMemHandle_t *bufferAllocation;
 
     sdfDevConsInit();
-    node = sdfChipAllocDirect(sizeof(DevConsState));
+    node = sdfChipAllocDirect(sizeof(sdfDevConsCB_tag));
     node->screenOriginX = screenOriginX;
     node->screenOriginY = screenOriginY;
     node->columns = columns;

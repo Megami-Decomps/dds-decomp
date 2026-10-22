@@ -113,7 +113,7 @@ void movReleaseActivePartyCategoryModels(struct EffectSlotSet **modelHandles, s3
 
     effResolveAndReleaseResource(modelHandles[0]);
     for (partyIndex = 0; partyIndex < MNU_STAFF_PARTY_COUNT; partyIndex++) {
-        DatPartyRecord *partyRecord = &DDS3_GBWK->party[partyIndex];
+        datUnitWork_t *partyRecord = &DDS3_GBWK->party[partyIndex];
 
         if ((partyRecord->flags & MNU_STAFF_PARTY_PRESENT_BIT) != 0) {
             s32 modelIndex = partyRecord->unitId + D_003BC6B5;

@@ -8,7 +8,7 @@
 struct MenuList;
 struct EffectSlotSet;
 struct EffMappedResource;
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Shop stock by progress row: unlock flag, row price percent, then 32 stock entries. */
 typedef struct ShopRankPriceEntry {
@@ -171,7 +171,7 @@ typedef struct MnuShopListContext {
 
 /* DDS1 mnuShopCreateScene allocates and clears this complete 0xB4-byte owner. */
 typedef struct ShopScene {
-    struct SdfMemBlock *resourceHandle;
+    struct sdfMemHandle_t *resourceHandle;
     u8 pad04[4];
     MenuPopupState transitionWork;
     s32 dispatchState;

@@ -69,7 +69,7 @@ typedef struct SkillMenuContext {
 
 extern void mnuDrawPanelState(s32, s32, s32, s32, s32);
 
-s32 ptySkillMenuUpdate(KwlnTask *callback) {
+s32 ptySkillMenuUpdate(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     s32 state = menuRunPanel((void *)context, 0, (void *)callback);
@@ -123,7 +123,7 @@ void ptySkillMenuCopyPageState(s32 context) {
     }
 }
 
-s32 ptySkillMenuEnterPage(KwlnTask *callback) {
+s32 ptySkillMenuEnterPage(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
     SkillMenuContext *work = (SkillMenuContext *)context;
     SkillMenuState *menu = work->menu;
@@ -158,22 +158,22 @@ s32 ptySkillMenuEnterPage(KwlnTask *callback) {
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
-s32 ptySkillMenuDispatchPageRequest(KwlnTask *selection) {
+s32 ptySkillMenuDispatchPageRequest(dds3ProcessID_t *selection) {
     s32 context = dds3GetProcessData(selection);
     return menuRunPanel((void *)context, 2, (void *)selection);
 }
 
-extern s32 mnuConsumeEntryCost(s32 commandId, DatPartyRecord *actorEntry);
-extern s32 mnuIsEntryCostUnaffordable(u16 commandId, DatPartyRecord *actor);
+extern s32 mnuConsumeEntryCost(s32 commandId, datUnitWork_t *actorEntry);
+extern s32 mnuIsEntryCostUnaffordable(u16 commandId, datUnitWork_t *actor);
 
 s32 ptySkillMenuUseSelectedInField(id, context)
     u16 id;
     s32 context;
 {
     s32 window = context + 0x15C;
-    DatPartyRecord *selectedEntry =
+    datUnitWork_t *selectedEntry =
         &DDS3_GBWK->party[((SkillMenuContext *)context)->selection->cursor->index];
-    DatPartyRecord *targetEntry =
+    datUnitWork_t *targetEntry =
         &DDS3_GBWK->party[((SkillMenuContext *)context)->target->cursor->index];
     if (mnuIsEntryCostUnaffordable(id, selectedEntry) != 0) {
         return 0;
@@ -190,7 +190,7 @@ s32 ptySkillMenuUseSelectedInField(id, context)
 }
 
 void mnuFlagMatchingEntries(s32 context) {
-    DatPartyRecord *selectedEntry =
+    datUnitWork_t *selectedEntry =
         &DDS3_GBWK->party[((SkillMenuContext *)context)->selection->cursor->index];
     struct MenuListNode *node = ((SkillMenuContext *)context)->menu->selected->list->first;
     if (node != NULL) {
@@ -204,7 +204,7 @@ void mnuFlagMatchingEntries(s32 context) {
     }
 }
 
-s32 ptySkillMenuHandleFieldUse(KwlnTask *callback) {
+s32 ptySkillMenuHandleFieldUse(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
@@ -239,7 +239,7 @@ s32 ptySkillMenuHandleFieldUse(KwlnTask *callback) {
     return 0;
 }
 
-s32 ptySkillMenuEnterConfirm(KwlnTask *callback) {
+s32 ptySkillMenuEnterConfirm(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     mnuDrawCampScreenDefault(callback);
@@ -251,7 +251,7 @@ s32 ptySkillMenuEnterConfirm(KwlnTask *callback) {
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
-s32 ptySkillMenuDispatchConfirmRequest(KwlnTask *selection) {
+s32 ptySkillMenuDispatchConfirmRequest(dds3ProcessID_t *selection) {
     s32 context = dds3GetProcessData(selection);
     return menuRunPanel((void *)context, 2, (void *)selection);
 }
@@ -259,7 +259,7 @@ s32 ptySkillMenuDispatchConfirmRequest(KwlnTask *selection) {
 extern void mnuSelectPage(MenuPageWindow *, s32);
 extern void ptySkillMenuInitPages(void *);
 
-s32 ptySkillMenuOpenPartyPage(KwlnTask *menu) {
+s32 ptySkillMenuOpenPartyPage(dds3ProcessID_t *menu) {
     u8 *ctx = (u8 *)dds3GetProcessData(menu);
     MenuPageWindow *panel = (MenuPageWindow *)(ctx + 0x15C);
 
@@ -270,10 +270,10 @@ s32 ptySkillMenuOpenPartyPage(KwlnTask *menu) {
     return 1;
 }
 
-extern u32 mnuDestroySelectedPartyWindow(KwlnTask *task);
+extern u32 mnuDestroySelectedPartyWindow(dds3ProcessID_t *task);
 extern void mnuDestroySkillMenuWindows(s32 context);
 
-s32 mnuCloseSelectionAndReleasePartyPanel(KwlnTask *selection) {
+s32 mnuCloseSelectionAndReleasePartyPanel(dds3ProcessID_t *selection) {
     s32 context = dds3GetProcessData(selection);
     mnuDestroySelectedPartyWindow(selection);
     mnuDestroySkillMenuWindows(context);
@@ -282,7 +282,7 @@ s32 mnuCloseSelectionAndReleasePartyPanel(KwlnTask *selection) {
 }
 
 extern void mnuClearListFlagsOneAndTwo();
-s32 ptySkillMenuHandlePageSwitch(KwlnTask *callback) {
+s32 ptySkillMenuHandlePageSwitch(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
     s32 changed = 0;
     u32 buttons = mnuMapPadMaskToFlags(0x300);

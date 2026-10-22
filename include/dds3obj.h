@@ -8,17 +8,17 @@
  * Object resources, indexed slots and motion control share the same record. */
 #define DDS3_OBJECT_RESOURCE_SLOT_COUNT 24
 
-struct Motion;
+struct sdfMotionCtrlr_t;
 
-typedef struct ObjBase {
+typedef struct dds3ObjectBaseControlWorkData_t {
     u32 flags;
     struct WorldIndexNode *worldIndexNode;
     u32 resourceState;
-    void *resourceHandle; /* MdlCtx or SdfModel pointer according to resourceState. */
+    void *resourceHandle; /* dds3ModelHandle_t or sdfModelRootNode_t pointer according to resourceState. */
     void *slots[8];
     void *extData;
     s32 devSlot;
-    struct Motion *motion;
+    struct sdfMotionCtrlr_t *motion;
     s32 mode;
     f32 weight;
     u32 unk44;
@@ -26,50 +26,50 @@ typedef struct ObjBase {
     s32 resourceSlots[DDS3_OBJECT_RESOURCE_SLOT_COUNT];
     u32 resourceSlotFamily;
     s32 currentSlot;
-} ObjBase;
+} dds3ObjectBaseControlWorkData_t;
 
-typedef char ObjBase_size_must_be_0xB4[(sizeof(ObjBase) == 0xB4) ? 1 : -1];
+typedef char ObjBase_size_must_be_0xB4[(sizeof(dds3ObjectBaseControlWorkData_t) == 0xB4) ? 1 : -1];
 typedef char ObjBase_resourceSlotFamily_offset_must_be_0xAC[
-    ((u32)&((ObjBase *)0)->resourceSlotFamily == 0xAC) ? 1 : -1];
+    ((u32)&((dds3ObjectBaseControlWorkData_t *)0)->resourceSlotFamily == 0xAC) ? 1 : -1];
 
-ObjBase *dds3CreateSlotResourceState(void *owner);
+dds3ObjectBaseControlWorkData_t *dds3CreateSlotResourceState(void *owner);
 void dds3ObjectBaseCreateMover(void *object);
-ObjBase *dds3GetBaseControlWorkData(EffWorldNode *object);
-void *dds3ObjectBaseGetModelHandle(EffWorldNode *object);
-void *dds3EventBasicGetResource(EffWorldNode *object);
+dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *object);
+void *dds3ObjectBaseGetModelHandle(dds3Basic_t *object);
+void *dds3EventBasicGetResource(dds3Basic_t *object);
 /* Forward a callback to the object's slot-1 handler when one is present; returns 1 if it did. */
-u8 dds3ObjectBaseSetPadControl(EffWorldNode *object,
-                                   s32 (*update)(struct ObjectTransform *, struct EffWorldNode *));
-void *dds3ObjectBaseSetControlBasic(EffWorldNode *object, EffWorldNode *slotData);
-void *dds3ObjectBaseSetControlBasicType(EffWorldNode *object, void *slotData, s32 slotIndex);
-void *dds3ObjectBaseGetControlBasic(EffWorldNode *object, s32 slotIndex);
-void dds3ObjectBaseSetControlBasicSvs(EffWorldNode *object, u32 value);
-EffWorldNode *dds3SearchSceneBasic(EffWorldNode *world, u32 key, s32 kind);
-EffWorldNode *dds3SceneBasicSearchNameAndType(EffWorldNode *world, s32 slotIndex, const u8 *name);
-EffWorldNode *dds3SceneBasicSearchName(EffWorldNode *world, const u8 *name);
-EffWorldNode *dds3AddSceneBasicData(s32 kind);
+u8 dds3ObjectBaseSetPadControl(dds3Basic_t *object,
+                                   s32 (*update)(struct dds3PoseSet_t *, struct dds3Basic_t *));
+void *dds3ObjectBaseSetControlBasic(dds3Basic_t *object, dds3Basic_t *slotData);
+void *dds3ObjectBaseSetControlBasicType(dds3Basic_t *object, void *slotData, s32 slotIndex);
+void *dds3ObjectBaseGetControlBasic(dds3Basic_t *object, s32 slotIndex);
+void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *object, u32 value);
+dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *world, u32 key, s32 kind);
+dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *world, s32 slotIndex, const u8 *name);
+dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *world, const u8 *name);
+dds3Basic_t *dds3AddSceneBasicData(s32 kind);
 /* Allocate and initialize the inner transform object for a world node. */
-s32 dds3InitPoseSet(EffWorldNode *node);
-void dds3DeleteSceneBasicData(EffWorldNode *node);
+s32 dds3InitPoseSet(dds3Basic_t *node);
+void dds3DeleteSceneBasicData(dds3Basic_t *node);
 /* Attach the resource indexed by resourceId to the object's world table. */
-void dds3SceneBasicMakeScene(EffWorldNode *object, u32 resourceId);
+void dds3SceneBasicMakeScene(dds3Basic_t *object, u32 resourceId);
 /* Store the source object address used by a slot's later path replacement. */
-void dds3MoverBasicSetPath(EffWorldNode *object, EffWorldNode *sourceObject);
-EffWorldNode *dds3GetActiveCameraSceneBasic(EffWorldNode *world);
-EffWorldNode *dds3SetActiveCameraSceneBasic(EffWorldNode *world, EffWorldNode *camera);
-EffWorldNode *dds3GetActiveUnitSceneBasic(EffWorldNode *world);
-EffWorldNode *dds3SetActiveUnitSceneBasic(EffWorldNode *world, EffWorldNode *player);
+void dds3MoverBasicSetPath(dds3Basic_t *object, dds3Basic_t *sourceObject);
+dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *world);
+dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *world, dds3Basic_t *camera);
+dds3Basic_t *dds3GetActiveUnitSceneBasic(dds3Basic_t *world);
+dds3Basic_t *dds3SetActiveUnitSceneBasic(dds3Basic_t *world, dds3Basic_t *player);
 
 /* Inner transform vector helpers; fetch results are returned in VU vf10. */
-void dds3SetPosPoseSet(EffWorldNode *object, u128 *vector);
-void dds3SetRotPoseSet(EffWorldNode *object, u128 *vector);
-void dds3SetSclPoseSet(EffWorldNode *object, u128 *vector);
-void dds3GetPosPoseSet(EffWorldNode *object);
-void dds3GetRotPoseSet(EffWorldNode *object);
-void effObjFetchInnerScale(EffWorldNode *object);
-void dds3GetPosPoseSetMCR(EffWorldNode *object, u128 *vector);
-void dds3AddRotPoseSet(EffWorldNode *object, u128 *vector);
-void dds3GetSclPoseSetMCR(EffWorldNode *object, u128 *vector);
+void dds3SetPosPoseSet(dds3Basic_t *object, u128 *vector);
+void dds3SetRotPoseSet(dds3Basic_t *object, u128 *vector);
+void dds3SetSclPoseSet(dds3Basic_t *object, u128 *vector);
+void dds3GetPosPoseSet(dds3Basic_t *object);
+void dds3GetRotPoseSet(dds3Basic_t *object);
+void effObjFetchInnerScale(dds3Basic_t *object);
+void dds3GetPosPoseSetMCR(dds3Basic_t *object, u128 *vector);
+void dds3AddRotPoseSet(dds3Basic_t *object, u128 *vector);
+void dds3GetSclPoseSetMCR(dds3Basic_t *object, u128 *vector);
 
 /* Four-word object inner record (0x10); no direct C unit users yet. */
 typedef struct {
@@ -100,19 +100,19 @@ typedef char WorldIndexNodeLayoutAssert[
 
 WorldIndexNode *dds3GetBasicArrayHandle(s32 initialCount);
 void dds3FreeBasicArrayHandle(WorldIndexNode *node);
-WorldIndexNode *dds3ObjectBaseGetEventArray(EffWorldNode *object);
-u32 dds3AddBasicArray(WorldValueIndices *object, s32 count);
-u16 dds3GetBasicArrayCount(const WorldValueIndices *object);
-s32 dds3SetSearchNextBasicArray(WorldValueIndices *indexNode, const EffWorldNode *targetNode);
-u32 dds3SetBasicArray(WorldValueIndices *object, u32 value);
-u32 dds3GetBasicArray(const WorldValueIndices *object);
-u32 dds3SetFirstBasicArray(WorldValueIndices *object);
-u32 dds3SetNextBasicArray(WorldValueIndices *object);
-s32 dds3ForEachBasicArray(WorldValueIndices *object, s32 (*callback)(u32));
-WorldIndexNode *dds3SceneBasicGetList(EffWorldNode *object, s32 kind);
+WorldIndexNode *dds3ObjectBaseGetEventArray(dds3Basic_t *object);
+u32 dds3AddBasicArray(dds3BasicArrayHandle_t *object, s32 count);
+u16 dds3GetBasicArrayCount(const dds3BasicArrayHandle_t *object);
+s32 dds3SetSearchNextBasicArray(dds3BasicArrayHandle_t *indexNode, const dds3Basic_t *targetNode);
+u32 dds3SetBasicArray(dds3BasicArrayHandle_t *object, u32 value);
+u32 dds3GetBasicArray(const dds3BasicArrayHandle_t *object);
+u32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *object);
+u32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *object);
+s32 dds3ForEachBasicArray(dds3BasicArrayHandle_t *object, s32 (*callback)(u32));
+WorldIndexNode *dds3SceneBasicGetList(dds3Basic_t *object, s32 kind);
 
-void dds3AreaBasicRegistItem(EffWorldNode *indexOwner, EffWorldNode *node);
-WorldIndexNode *dds3AreaBasicReleaseItem(EffWorldNode *worldIndexOwner, s32 slotIndex);
+void dds3AreaBasicRegistItem(dds3Basic_t *indexOwner, dds3Basic_t *node);
+WorldIndexNode *dds3AreaBasicReleaseItem(dds3Basic_t *worldIndexOwner, s32 slotIndex);
 
 /* Eight-byte entries link both allocated and free world value chains. */
 typedef struct WorldValueEntry {
@@ -123,15 +123,15 @@ typedef struct WorldValueEntry {
 
 typedef char WorldValueEntry_size_must_be_0x08[(sizeof(WorldValueEntry) == 0x08) ? 1 : -1];
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Complete kind-0 payload: node lists, selected objects and the value-entry pool. */
 typedef struct {
-    EffWorldNode *firstNode;
-    EffWorldNode *lastNode;
+    dds3Basic_t *firstNode;
+    dds3Basic_t *lastNode;
     void *primaryObject;   /* 0x08: selected world node */
     void *secondaryObject; /* 0x0C: selected world node */
-    struct SdfMemBlock *entryAllocation; /* 0x10: descriptor, distinct from its data */
+    struct sdfMemHandle_t *entryAllocation; /* 0x10: descriptor, distinct from its data */
     WorldValueEntry *entries;           /* 0x14: retained allocation address */
     u16 entryCapacity;                  /* 0x18: initial entry count */
     s16 freeHeadIndex;                  /* 0x1A: -1 when the pool is exhausted */
@@ -194,8 +194,8 @@ typedef struct WorldTransformData {
     u32 flags;        /* 0x64 */
 } WorldTransformData;
 
-void dds3SetLightObjectResoruce(EffWorldNode *object, WorldTransformSetup *setup);
-void dds3SetLightObjectPathResoruce(EffWorldNode *object, const WorldTransformParams *params);
+void dds3SetLightObjectResoruce(dds3Basic_t *object, WorldTransformSetup *setup);
+void dds3SetLightObjectPathResoruce(dds3Basic_t *object, const WorldTransformParams *params);
 
 typedef char WorldTransformData_offsets_must_match_paired_loaders[
     ((u32)&((WorldTransformData *)0)->position == 0x00 &&
@@ -214,7 +214,7 @@ typedef struct CameraData {
     u128 localUp;
     u128 worldEye;
     u128 worldUp;
-    ObjBase *handle;
+    dds3ObjectBaseControlWorkData_t *handle;
     s32 eyeIsRelative;
     u32 fovUpdatePending; /* Bit 0 requests a field-of-view update. */
     f32 fieldOfView;      /* Radians. */
@@ -222,7 +222,7 @@ typedef struct CameraData {
 
 typedef char CameraData_size_must_be_0x90[(sizeof(CameraData) == 0x90) ? 1 : -1];
 
-ObjBase *dds3GetCameraObjectBaseControlWorkData(EffWorldNode *camera);
+dds3ObjectBaseControlWorkData_t *dds3GetCameraObjectBaseControlWorkData(dds3Basic_t *camera);
 
 
 #endif /* DDS3OBJ_H */

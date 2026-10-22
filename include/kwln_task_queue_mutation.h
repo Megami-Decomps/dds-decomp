@@ -3,7 +3,7 @@
 
 #include "kwln.h"
 
-void DeleteProcessList(KwlnTask *task);
-void AddProcessList(KwlnTask *task);
+void DeleteProcessList(dds3ProcessID_t *task);
+void AddProcessList(dds3ProcessID_t *task);
 
 #endif /* KWLN_TASK_QUEUE_MUTATION_H */

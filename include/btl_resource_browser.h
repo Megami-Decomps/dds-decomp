@@ -48,7 +48,7 @@ typedef struct BtlResourceEntryList {
 typedef char BtlResourceEntrySizeCheck[(sizeof(BtlResourceEntry) == 0x44) ? 1 : -1];
 typedef char BtlResourceEntryListSizeCheck[(sizeof(BtlResourceEntryList) == 0x0C) ? 1 : -1];
 
-struct SdfTex;
+struct sdfTexHandle_t;
 
 /* Browser viewport/selection and texture ownership; the entry list is borrowed. */
 typedef struct BtlResourceDescriptor {
@@ -67,7 +67,7 @@ typedef struct BtlResourceDescriptor {
     struct BtlResourceEntry *firstVisibleEntry; /* 0x30 */
     struct BtlResourceEntry *selectedEntry; /* 0x34 */
     struct BtlResourceEntry *cachedEntry; /* 0x38: last entry whose preview was updated */
-    struct SdfTex *texture;        /* 0x3C: owned or borrowed preview texture */
+    struct sdfTexHandle_t *texture;        /* 0x3C: owned or borrowed preview texture */
     s32 textureCategory;    /* 0x40: TMX is owned; GENERAL is borrowed. */
     struct BtlResourceEntryList *entryList; /* 0x44 */
 } BtlResourceDescriptor;

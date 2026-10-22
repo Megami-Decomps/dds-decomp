@@ -4,10 +4,10 @@
 #include "common.h"
 #include "sdf.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 struct SdfList;
 struct SdfListNode;
-struct KwlnTask;
+struct dds3ProcessID_t;
 
 /* Caller-supplied description copied into one scheduled task entry (0x14). */
 typedef struct SdfTaskItemDesc {
@@ -72,7 +72,7 @@ typedef char SdfTaskEntry_size_must_be_0x1C[
 
 /* Backing owner passed through the Kwln task's user-value word (0x14). */
 typedef struct TaskWork {
-    struct SdfMemBlock *allocation; /* 0x00 */
+    struct sdfMemHandle_t *allocation; /* 0x00 */
     char *primaryTaskName;          /* 0x04 */
     char *secondaryTaskName;        /* 0x08 */
     struct SdfList *list;           /* 0x0C */
@@ -106,10 +106,10 @@ s32 sdfGetTaskValueByKey(TaskWork *work, s32 key);
 
 /* Scheduler updates drain the current entry/callback pass. They return -1
  * when the task work has no current entry, otherwise 0 after the pass. */
-s32 sdfTaskWorkRunAllEntries(struct KwlnTask *task);
-s32 sdfTaskWorkRunAll(struct KwlnTask *task);
+s32 sdfTaskWorkRunAllEntries(struct dds3ProcessID_t *task);
+s32 sdfTaskWorkRunAll(struct dds3ProcessID_t *task);
 /* The scheduler destroy callback releases the TaskWork owned by task's user value. */
-void sdfReleaseCurrentTaskOwnedResources(struct KwlnTask *task);
+void sdfReleaseCurrentTaskOwnedResources(struct dds3ProcessID_t *task);
 
 void sdfSetTaskItemMode(TaskWork *, s32, u32);
 SdfTaskEntry *sdfCreateTaskEntry(SdfTaskItemDesc *);

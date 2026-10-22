@@ -90,8 +90,8 @@ extern char mnuStaffSecondaryPanelTaskName[];
 
 
 
-extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *unit);
-extern u32 ptyAddProfileRecordValueClamped(DatPartyRecord *unit, u32 amount);
+extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *unit);
+extern u32 ptyAddProfileRecordValueClamped(datUnitWork_t *unit, u32 amount);
 extern void brsSetSkillProgressAnimations(BrsSkillPackageWork *, s32, s32, u32, s32, s32, s32);
 
 
@@ -735,13 +735,13 @@ void gstApplyBundleMacca(BrsRewardSummary *batch) {
     datAddCurrencyClamped(batch->macca);
 }
 
-extern s32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta);
+extern s32 ptyComputeTotalExp(datUnitWork_t *unit, s32 levelDelta);
 
 
 
 /* Cap stored EXP at the EXP required for level 99. */
-void ptyClampExp(DatPartyRecord *unit) {
-    DatPartyRecord snapshot;
+void ptyClampExp(datUnitWork_t *unit) {
+    datUnitWork_t snapshot;
     u32 exp;
 
     memcpy(&snapshot, unit, sizeof(snapshot));
@@ -759,16 +759,16 @@ void brsApplyPartyRewards(BrsSkillPackageWork *partyWork, BrsRewardBatch *batch)
     s32 partyOffset;
     s32 rewardOffset;
     s32 rewardIndex;
-    DatPartyRecord *currentPartyUnit;
-    DatPartyRecord *unit;
+    datUnitWork_t *currentPartyUnit;
+    datUnitWork_t *unit;
     s32 profilePointGain;
     s32 experienceGain;
     BrsRewardValues *values;
 
     for (partyOffset = 0, partyIndex = 0; partyIndex < 5;
-         partyIndex++, partyOffset += sizeof(DatPartyRecord)) {
+         partyIndex++, partyOffset += sizeof(datUnitWork_t)) {
         currentPartyUnit =
-            (DatPartyRecord *)((u8 *)DDS3_GBWK->party + partyOffset);
+            (datUnitWork_t *)((u8 *)DDS3_GBWK->party + partyOffset);
 
         if ((currentPartyUnit->flags & 1) != 0 &&
             (currentPartyUnit->status & 0x4000) != 0) {
@@ -907,7 +907,7 @@ void brsMarkPartyRows(BrsProgressRow *dst, BrsRewardBatch *state, s32 flags) {
 
     for (i = 0; i < state->count; i++) {
         BrsProgressRow *d = dst;
-        DatPartyRecord *unit = DDS3_GBWK->party;
+        datUnitWork_t *unit = DDS3_GBWK->party;
         s32 j;
 
         for (j = 4; j >= 0; j--) {
@@ -956,7 +956,7 @@ INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428368);
 
 BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     BrsRewardSummary *rewards;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     BrsProgressRow *party;
     BrsRewardBatch *rewardState;
     BrsRewardBatch *primary;
@@ -995,7 +995,7 @@ extern s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *);
 extern void brsCloseSkillPackagePanel(BrsSkillPackageWork *);
 
 /* Release the panel and task resources, then mark the result task finished. */
-void brsStaffTaskDestroy(KwlnTask *task) {
+void brsStaffTaskDestroy(dds3ProcessID_t *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
 
     if (context->teardownResource != NULL) {
@@ -1012,10 +1012,10 @@ void brsStaffTaskDestroy(KwlnTask *task) {
 }
 
 extern BrsSkillPackageWork *brsCreateRewardTaskWork(void);
-extern s32 brsMessageInputStep(KwlnTask *task);
-extern s32 mnuStaffRunPanel1(KwlnTask *task);
-extern s32 mnuStaffRunPanel2(KwlnTask *task);
-extern void brsStaffTaskDestroy(KwlnTask *task);
+extern s32 brsMessageInputStep(dds3ProcessID_t *task);
+extern s32 mnuStaffRunPanel1(dds3ProcessID_t *task);
+extern s32 mnuStaffRunPanel2(dds3ProcessID_t *task);
+extern void brsStaffTaskDestroy(dds3ProcessID_t *task);
 
 s32 mnuStaffCreateTasks(void) {
     s32 secondaryPanelTaskHandle;
@@ -1064,7 +1064,7 @@ u32 brsTaskTryDestroy(void) {
 }
 
 s32 brsIsPrimaryPanelUpdateReady(void) {
-    KwlnTask *task;
+    dds3ProcessID_t *task;
     BrsSkillPackageWork *work;
 
     task = dds3SearchProcessName(mnuStaffPrimaryPanelTaskName);
@@ -1104,7 +1104,7 @@ void mnuRefreshSelectedUnitPanels(u32 unusedPartyRecord, BrsSkillPackageWork *me
     mnuRefreshPartyPanelBars(&menu->partyWindow);
 }
 
-void mnuStaffCopyPanelBlock(DatPartyRecord *src, BrsSkillPackageWork *base) {
+void mnuStaffCopyPanelBlock(datUnitWork_t *src, BrsSkillPackageWork *base) {
     base->previewUnit = *src;
 }
 

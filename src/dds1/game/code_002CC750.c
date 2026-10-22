@@ -28,7 +28,7 @@
 #include "prf_profile_parameters.h"
 /* Declared before first use (were implicit int). */
 extern u16 prfGetSkillAtIndex(u16 profileId, u32 skillIndex);
-extern s32 scrSetFlag(DatPartyRecord *work, u16 flagId);
+extern s32 scrSetFlag(datUnitWork_t *work, u16 flagId);
 
 #define SCR_FLAG_ID_MASK 0xFFFF
 #define SCR_FLAG_SLOT_INDEX_MASK 7
@@ -70,7 +70,7 @@ extern s32 scrSetFlag(DatPartyRecord *work, u16 flagId);
 
 extern void memset(void *dst, s32 value, s32 size);
 extern PtyPresetRecord D_00393A80[];
-extern void ptyMergeStockSkills(DatPartyRecord *);
+extern void ptyMergeStockSkills(datUnitWork_t *);
 
 extern void (*sdfTickCallback)(void);
 
@@ -80,7 +80,7 @@ extern u32 D_003BD2C8;
 
 extern u32 prfIsRequirementExcluded(u16);
 
-extern DatProfileRecord *ptyGetProfileRecord(DatPartyRecord *, u16);
+extern DatProfileRecord *ptyGetProfileRecord(datUnitWork_t *, u16);
 
 
 extern FrFontTextBank frFontColoredGlyphResource;
@@ -111,14 +111,14 @@ extern void fprintf(SdkFileStream *, const char *, s32, s32);
 extern void fclose(SdkFileStream *);
 extern char sdfDebugLogAppendMode[];
 extern char sdfDebugLogPairFormat[];
-extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
-extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
-extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
-DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
-s32 ptyGetCurrentProfileId(DatPartyRecord *);
+extern _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
+extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
+extern s32 ptyTestPrimaryProfileFlag(datUnitWork_t *, u16);
+DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
+s32 ptyGetCurrentProfileId(datUnitWork_t *);
 
 
-extern void ptyRecomputeMaxVitals(DatPartyRecord *, const s32 *);
+extern void ptyRecomputeMaxVitals(datUnitWork_t *, const s32 *);
 
 void sdfAppendFormattedDebugLogPair(s32 left, s32 right) {
     SdkFileStream *file = fopen("debug.log", sdfDebugLogAppendMode);
@@ -133,12 +133,12 @@ void ptyClearProfileRecords(void) {
     memset(DDS3_GBWK->profileRecords, 0, sizeof(DDS3_GBWK->profileRecords));
 }
 
-s8 scrSelectOperandIndex(DatPartyRecord *unit, s32 profileId);
-extern void ptySetSecondaryProfileFlag(DatPartyRecord *, u16);
-u32 ptyAddProfilePoints(DatPartyRecord *unit, s32 increment);
+s8 scrSelectOperandIndex(datUnitWork_t *unit, s32 profileId);
+extern void ptySetSecondaryProfileFlag(datUnitWork_t *, u16);
+u32 ptyAddProfilePoints(datUnitWork_t *unit, s32 increment);
 
 /* Pick the highest preset stage whose required profiles all sit at their cap, then apply that stage's script. */
-void ptySelectProfileStage(DatPartyRecord *unit) {
+void ptySelectProfileStage(datUnitWork_t *unit) {
     u16 unitId = unit->unitId;
     s32 best = 0;
     s32 stage;
@@ -174,10 +174,10 @@ void ptySelectProfileStage(DatPartyRecord *unit) {
     }
 }
 
-extern void ptyApplyProfile(DatPartyRecord *, u16);
+extern void ptyApplyProfile(datUnitWork_t *, u16);
 
 /* Choose the least-conflicting profile group and install its nonzero IDs. */
-void ptyApplyProfilePreset(s32 useCurrentProfile, DatPartyRecord *unit) {
+void ptyApplyProfilePreset(s32 useCurrentProfile, datUnitWork_t *unit) {
     s32 presetIndex = unit->unitId;
     s32 bestScore;
     u32 selectedGroup;
@@ -189,7 +189,7 @@ void ptyApplyProfilePreset(s32 useCurrentProfile, DatPartyRecord *unit) {
     s32 profileId;
     u16 occupied;
     u16 selectedProfileId;
-    DatPartyRecord *partyUnit;
+    datUnitWork_t *partyUnit;
 
     if (useCurrentProfile == 0) {
         ptySelectProfileStage(unit);
@@ -230,7 +230,7 @@ void ptyApplyProfilePreset(s32 useCurrentProfile, DatPartyRecord *unit) {
 }
 
 /* Load nonzero preset IDs into their original slots; zero IDs leave slots unchanged. */
-void ptyLoadPresetSkillSlots(DatPartyRecord *unit) {
+void ptyLoadPresetSkillSlots(datUnitWork_t *unit) {
     u16 *presetSkills = D_00393A80[unit->unitId].skillSlots;
     u16 *skillCursor = unit->effectData;
     u32 presetIndex;
@@ -247,7 +247,7 @@ void ptyLoadPresetSkillSlots(DatPartyRecord *unit) {
 }
 
 /* Mark nonzero IDs in the preset pool, then perform the native flag-gated extra call. */
-void ptyMarkPresetSkillPool(DatPartyRecord *unit) {
+void ptyMarkPresetSkillPool(datUnitWork_t *unit) {
     u16 *presetSkills = D_00393A80[unit->unitId].poolSkills;
     u32 presetIndex = 0;
     do {
@@ -262,14 +262,14 @@ void ptyMarkPresetSkillPool(DatPartyRecord *unit) {
     }
 }
 
-extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
+extern void ptyRecomputeMaxHpMp(datUnitWork_t *);
 extern s32 prfBuildRawSkillList(u16, PrfSkillList *);
-extern s32 scrSetFlag(DatPartyRecord *, u16);
-extern void scrSetSecondaryScriptFlag(DatPartyRecord *, u16);
-extern void scrClearFlags(DatPartyRecord *);
+extern s32 scrSetFlag(datUnitWork_t *, u16);
+extern void scrSetSecondaryScriptFlag(datUnitWork_t *, u16);
+extern void scrClearFlags(datUnitWork_t *);
 
 /* Rebuild skill flags from the preset (no current profile) or from the current profile. */
-void ptyRebuildProfileSkills(s32 useCurrentProfile, DatPartyRecord *unit) {
+void ptyRebuildProfileSkills(s32 useCurrentProfile, datUnitWork_t *unit) {
     PrfSkillList skillList;
     s32 profileId;
     u16 profile;
@@ -306,7 +306,7 @@ void ptyRebuildProfileSkills(s32 useCurrentProfile, DatPartyRecord *unit) {
 void ptyRebuildAllProfiles(void) {
     s32 unitIndex;
     for (unitIndex = 0; unitIndex < 5; unitIndex++) {
-        DatPartyRecord *unit = &DDS3_GBWK->party[unitIndex];
+        datUnitWork_t *unit = &DDS3_GBWK->party[unitIndex];
         if ((unit->flags & PTY_PROFILE_UNIT_OCCUPIED_BIT) != 0) {
             s32 candidateUnitId;
             for (candidateUnitId = 0; candidateUnitId < PTY_PROFILE_UNIT_ID_COUNT; candidateUnitId++) {
@@ -318,13 +318,13 @@ void ptyRebuildAllProfiles(void) {
     }
 }
 
-extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *unit);
-extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *unit);
+extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *unit);
+extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *unit);
 
 /* Recompute effective maxima from the profile plus optional stat gains, then
  * preserve each current resource's proportion of its former maximum. */
-void ptyRecomputeMaxVitals(DatPartyRecord *unit, const s32 *statDeltas) {
-    DatPartyRecord adjusted = *unit;
+void ptyRecomputeMaxVitals(datUnitWork_t *unit, const s32 *statDeltas) {
+    datUnitWork_t adjusted = *unit;
     u16 oldMaxHp;
     u16 oldMaxMp;
     s32 newMaxHp;
@@ -377,7 +377,7 @@ void ptyRecomputeMaxVitals(DatPartyRecord *unit, const s32 *statDeltas) {
     }
 }
 
-void ptyRecomputeMaxHpMp(DatPartyRecord *unit) {
+void ptyRecomputeMaxHpMp(datUnitWork_t *unit) {
     ptyRecomputeMaxVitals(unit, NULL);
 }
 
@@ -432,7 +432,7 @@ u32 prfGetCapValue(u16 profileId) {
 }
 
 /* Store the configured capacity in an unchecked profile record. */
-void ptySetProfileRecordToCap(DatPartyRecord *unitAddress, u16 profileId) {
+void ptySetProfileRecordToCap(datUnitWork_t *unitAddress, u16 profileId) {
     DatProfileRecord *record;
     u32 recordCap;
 
@@ -442,7 +442,7 @@ void ptySetProfileRecordToCap(DatPartyRecord *unitAddress, u16 profileId) {
 }
 
 /* Add to the selected record and cap the unsigned result; no selection returns zero. */
-u32 ptyAddProfilePoints(DatPartyRecord *unit, s32 increment) {
+u32 ptyAddProfilePoints(datUnitWork_t *unit, s32 increment) {
     DatProfileRecord *record;
     u32 recordCap;
     u32 recordValue;
@@ -476,7 +476,7 @@ extern ScriptFlagSlot D_00393280[];
 
 /* Search the selected 16-entry table for an exact nonzero byte ID.
  * Set and return its global flag ID; return zero if no entry matches. */
-u32 ptySetMappedGlobalFlagForSlot(DatPartyRecord *unit, u32 slotId) {
+u32 ptySetMappedGlobalFlagForSlot(datUnitWork_t *unit, u32 slotId) {
     ScriptFlagSlot *slotCursor = (ScriptFlagSlot *)((u8 *)D_00393280 + (unit->unitId << SDF_FLAG_SLOT_TABLE_SHIFT));
     u32 slotIndex;
 
@@ -493,7 +493,7 @@ u32 ptySetMappedGlobalFlagForSlot(DatPartyRecord *unit, u32 slotId) {
 INCLUDE_ASM(const s32, "game/code_002CC750", ptyApplyProfile);
 
 /* Test the first bit of the decoded profile flag pair for this unit. */
-s32 ptyTestPrimaryProfileFlag(DatPartyRecord *partyRecord, u16 id) {
+s32 ptyTestPrimaryProfileFlag(datUnitWork_t *partyRecord, u16 id) {
     u32 word;
     u32 shift;
 
@@ -502,7 +502,7 @@ s32 ptyTestPrimaryProfileFlag(DatPartyRecord *partyRecord, u16 id) {
 }
 
 /* Require the primary profile flag for every row not marked as excluded. */
-s32 scrCheckStateBits(DatPartyRecord *unit) {
+s32 scrCheckStateBits(datUnitWork_t *unit) {
     u32 profileIndex = 0;
     do {
         u16 profileId = profileIndex;
@@ -516,7 +516,7 @@ s32 scrCheckStateBits(DatPartyRecord *unit) {
 }
 
 /* Mark the second bit of the decoded mantra pair for this unit. */
-void ptySetSecondaryProfileFlag(DatPartyRecord *unit, u16 id) {
+void ptySetSecondaryProfileFlag(datUnitWork_t *unit, u16 id) {
     u32 word;
     u32 shift;
 
@@ -526,7 +526,7 @@ void ptySetSecondaryProfileFlag(DatPartyRecord *unit, u16 id) {
 }
 
 /* Test the second bit of the decoded profile flag pair for this unit. */
-s32 ptyTestSecondaryProfileFlag(DatPartyRecord *partyRecord, u16 id) {
+s32 ptyTestSecondaryProfileFlag(datUnitWork_t *partyRecord, u16 id) {
     u32 word;
     u32 shift;
 
@@ -535,16 +535,16 @@ s32 ptyTestSecondaryProfileFlag(DatPartyRecord *partyRecord, u16 id) {
     return (DDS3_GBWK->mantraBits[partyRecord->unitId].words[word] & (1 << shift)) != 0;
 }
 
-s8 scrGetSelectedOperandIndex(DatPartyRecord *op) {
+s8 scrGetSelectedOperandIndex(datUnitWork_t *op) {
     return op->profileId;
 }
 
 /* Address an unchecked profile record within the unit's record bank. */
-DatProfileRecord *ptyGetProfileRecord(DatPartyRecord *unit, u16 profileId) {
+DatProfileRecord *ptyGetProfileRecord(datUnitWork_t *unit, u16 profileId) {
     return &DDS3_GBWK->profileRecords[unit->unitId][profileId];
 }
 
-u32 ptyGetProfileRecordValue(DatPartyRecord *unit, u16 profileId) {
+u32 ptyGetProfileRecordValue(datUnitWork_t *unit, u16 profileId) {
     DatProfileRecord *record;
 
     record = ptyGetProfileRecord(unit, profileId);
@@ -552,16 +552,16 @@ u32 ptyGetProfileRecordValue(DatPartyRecord *unit, u16 profileId) {
 }
 
 /* Resolve the selected ID using the native low-16-bit conversion. */
-DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *unit) {
+DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *unit) {
     return ptyGetProfileRecord(unit, scrGetSelectedOperandIndex(unit) & SCR_FLAG_ID_MASK);
 }
 
-s32 ptyGetCurrentProfileId(DatPartyRecord *op) {
+s32 ptyGetCurrentProfileId(datUnitWork_t *op) {
     return op->profileId;
 }
 
 /* Store the narrowed selection, mark its paired profile flag, and return the stored ID. */
-s8 scrSelectOperandIndex(DatPartyRecord *unit, s32 profileId) {
+s8 scrSelectOperandIndex(datUnitWork_t *unit, s32 profileId) {
     unit->profileId = profileId;
     ptySetSecondaryProfileFlag(unit, profileId & SCR_FLAG_ID_MASK);
     return unit->profileId;
@@ -585,7 +585,7 @@ u32 mnuShopCommitMode1PurchaseNoOp(u32 itemId) {
 
 /* Decode the low 16 bits: eight four-bit flag slots per word.
  * The unused first argument remains part of the existing calling convention. */
-void scrDecodePackedFlagIndex(DatPartyRecord *unused, u32 flagId, u32 *wordIndex, u32 *bitShift) {
+void scrDecodePackedFlagIndex(datUnitWork_t *unused, u32 flagId, u32 *wordIndex, u32 *bitShift) {
     u32 slotIndex;
 
     flagId &= SCR_FLAG_ID_MASK;
@@ -596,7 +596,7 @@ void scrDecodePackedFlagIndex(DatPartyRecord *unused, u32 flagId, u32 *wordIndex
 }
 
 /* Set bit 0 of the selected nibble; the return value is always 1. */
-s32 scrSetFlag(DatPartyRecord *work, u16 flagId) {
+s32 scrSetFlag(datUnitWork_t *work, u16 flagId) {
     u32 wordIndex, bitShift;
     scrDecodePackedFlagIndex(work, flagId, &wordIndex, &bitShift);
     work->skillFlags[wordIndex] |= SCR_FLAG_PRIMARY_BIT << bitShift;
@@ -623,21 +623,21 @@ u32 scrTestGlobalSeenBit(u32 flagId) {
 }
 
 /* Set only bit 2 of the selected flag nibble. */
-void scrSetSecondaryScriptFlag(DatPartyRecord *work, u16 flagId) {
+void scrSetSecondaryScriptFlag(datUnitWork_t *work, u16 flagId) {
     u32 wordIndex, bitShift;
     scrDecodePackedFlagIndex(work, flagId, &wordIndex, &bitShift);
     work->skillFlags[wordIndex] |= SCR_FLAG_SECONDARY_BIT << bitShift;
 }
 
 /* Clear only bit 2 of the selected flag nibble. */
-void scrClearSecondaryScriptFlag(DatPartyRecord *work, u16 flagId) {
+void scrClearSecondaryScriptFlag(datUnitWork_t *work, u16 flagId) {
     u32 wordIndex, bitShift;
     scrDecodePackedFlagIndex(work, flagId, &wordIndex, &bitShift);
     work->skillFlags[wordIndex] &= ~(SCR_FLAG_SECONDARY_BIT << bitShift);
 }
 
 /* Clear secondary bits over the fixed ID range, preserving other nibble bits. */
-void scrClearFlags(DatPartyRecord *work) {
+void scrClearFlags(datUnitWork_t *work) {
     s32 flagId;
     for (flagId = 0; flagId < SCR_SECONDARY_FLAG_COUNT; flagId++) {
         scrClearSecondaryScriptFlag(work, flagId);
@@ -645,7 +645,7 @@ void scrClearFlags(DatPartyRecord *work) {
 }
 
 /* Return bit 2's raw word mask, not a normalized boolean. */
-u32 scrGetSecondaryScriptFlag(DatPartyRecord *work, u16 flagId) {
+u32 scrGetSecondaryScriptFlag(datUnitWork_t *work, u16 flagId) {
     u32 wordIndex, bitShift;
     scrDecodePackedFlagIndex(work, flagId, &wordIndex, &bitShift);
     return work->skillFlags[wordIndex] & (SCR_FLAG_SECONDARY_BIT << bitShift);
@@ -653,7 +653,7 @@ u32 scrGetSecondaryScriptFlag(DatPartyRecord *work, u16 flagId) {
 
 /* Bit 1 takes precedence and returns state 2; otherwise return boolean bit 0.
  * The secondary bit does not affect this state. */
-u32 ptyGetSkillNibbleState(DatPartyRecord *partyRecord, u16 flagId) {
+u32 ptyGetSkillNibbleState(datUnitWork_t *partyRecord, u16 flagId) {
     u32 wordIndex, bitShift;
     u32 flagWord;
     scrDecodePackedFlagIndex(partyRecord, flagId, &wordIndex, &bitShift);
@@ -665,7 +665,7 @@ u32 ptyGetSkillNibbleState(DatPartyRecord *partyRecord, u16 flagId) {
 }
 
 /* Search all slots for the low 16-bit ID; zero can match an empty slot. */
-s32 ptyHasSkill(DatPartyRecord *unit, s32 skillId) {
+s32 ptyHasSkill(datUnitWork_t *unit, s32 skillId) {
     u32 maskedSkillId = skillId & SCR_FLAG_ID_MASK;
     u16 *skillSlot = unit->effectData;
     u32 slotIndex = 0;
@@ -679,10 +679,10 @@ s32 ptyHasSkill(DatPartyRecord *unit, s32 skillId) {
     return 0;
 }
 
-extern s32 scrFindSlot(DatPartyRecord *unit, u16 skillId);
-extern s32 scrRemoveSlot(DatPartyRecord *unit, u16 skillId);
+extern s32 scrFindSlot(datUnitWork_t *unit, u16 skillId);
+extern s32 scrRemoveSlot(datUnitWork_t *unit, u16 skillId);
 
-void ptyRemoveProfileSkills(DatPartyRecord *unit, u16 profileId) {
+void ptyRemoveProfileSkills(datUnitWork_t *unit, u16 profileId) {
     u32 wordIndex, bitShift;
     u32 index = 0;
     s32 skill;
@@ -707,7 +707,7 @@ void ptyRemoveProfileSkills(DatPartyRecord *unit, u16 profileId) {
 }
 
 /* Return the first exact-ID slot, including zero IDs, or -1 when absent. */
-s32 scrFindSlot(DatPartyRecord *unit, u16 skillId) {
+s32 scrFindSlot(datUnitWork_t *unit, u16 skillId) {
     u32 slotIndex;
     u16 *skillSlots = unit->effectData;
     for (slotIndex = 0; slotIndex < PTY_SKILL_SLOT_COUNT; slotIndex++) {
@@ -719,7 +719,7 @@ s32 scrFindSlot(DatPartyRecord *unit, u16 skillId) {
 }
 
 /* Read a slot's ID, returning zero for an out-of-range unsigned index. */
-u16 scrGetSlot(DatPartyRecord *unit, u32 slotIndex) {
+u16 scrGetSlot(datUnitWork_t *unit, u32 slotIndex) {
     if (slotIndex >= PTY_SKILL_SLOT_COUNT) {
         return 0;
     }
@@ -727,7 +727,7 @@ u16 scrGetSlot(DatPartyRecord *unit, u32 slotIndex) {
 }
 
 /* Count nonzero skill IDs across every slot. */
-u32 scrCountSlots(DatPartyRecord *unit) {
+u32 scrCountSlots(datUnitWork_t *unit) {
     u32 occupiedCount = 0;
     u32 slotIndex;
 
@@ -740,7 +740,7 @@ u32 scrCountSlots(DatPartyRecord *unit) {
 }
 
 /* Replace an unchecked skill-slot index and return its previous identifier. */
-u16 scrSetSlot(DatPartyRecord *unit, s32 slotIndex, u16 skillId) {
+u16 scrSetSlot(datUnitWork_t *unit, s32 slotIndex, u16 skillId) {
     u16 previousSkillId = unit->effectData[slotIndex];
 
     unit->effectData[slotIndex] = skillId;
@@ -748,7 +748,7 @@ u16 scrSetSlot(DatPartyRecord *unit, s32 slotIndex, u16 skillId) {
 }
 
 /* Clear the first exact-ID match and report whether a slot was found. */
-s32 scrRemoveSlot(DatPartyRecord *unit, u16 skillId) {
+s32 scrRemoveSlot(datUnitWork_t *unit, u16 skillId) {
     s32 slotIndex = scrFindSlot(unit, skillId);
     if (slotIndex >= 0) {
         unit->effectData[slotIndex] = 0;
@@ -778,7 +778,7 @@ u32 prfGetIndexedProfileByte(u16 profileId, s32 statIndex) {
 
 /* DDS2 reads an indexed profile byte here; DDS1's native callee returns zero.
  * Retain both selection reads and the no-selection fall-through. */
-u32 scrCallIfOperandReady(DatPartyRecord *operand, u32 byteIndex) {
+u32 scrCallIfOperandReady(datUnitWork_t *operand, u32 byteIndex) {
     s32 selectedProfileId = ptyGetCurrentProfileId(operand);
 
     if (ptyGetCurrentProfileId(operand)) {
@@ -798,7 +798,7 @@ u32 func_002CDE60(void) {
     return 0;
 }
 
-u32 ptyCheckLevelAtLeastProfileParam7b6(DatPartyRecord *operand, u16 index) {
+u32 ptyCheckLevelAtLeastProfileParam7b6(datUnitWork_t *operand, u16 index) {
     s32 value = operand->level;
     if (value < (s32)prfGetRequiredProfileLevel(index)) {
         return 0;
@@ -811,7 +811,7 @@ void scrClearPairedEntryOutput(u32 unused0, u32 unused1, u32 output) {
     memset(output, 0, SCR_PAIRED_OUTPUT_BYTES);
 }
 
-u8 ptyIsCurrentProfileId(DatPartyRecord *operand, u32 profileId) {
+u8 ptyIsCurrentProfileId(datUnitWork_t *operand, u32 profileId) {
     return operand->profileId == (profileId & 0xffff);
 }
 
@@ -842,7 +842,7 @@ s32 prfBuildRawSkillList(u16 profile, PrfSkillList *output) {
 /* Compact the selected profile's nonzero skills, optionally including nonzero
  * nibble states and marking them in the output. The profile argument is unused;
  * output may be NULL when only the resulting count is needed. */
-s32 prfBuildSkillList(DatPartyRecord *unit, DatProfileRecord *unusedProfile, PrfSkillList *output, s32 includeFlagged) {
+s32 prfBuildSkillList(datUnitWork_t *unit, DatProfileRecord *unusedProfile, PrfSkillList *output, s32 includeFlagged) {
     PrfSkillList compactedList;
     u32 sourceIndex;
     u16 *profileSkillCursor;
@@ -878,7 +878,7 @@ s32 prfBuildSkillList(DatPartyRecord *unit, DatProfileRecord *unusedProfile, Prf
 }
 
 /* Build the stored selection's list without flagged skills; the second argument is unused. */
-u32 prfBuildSkillListState0(DatPartyRecord *unit, DatProfileRecord *unusedProfile, PrfSkillList *output) {
+u32 prfBuildSkillListState0(datUnitWork_t *unit, DatProfileRecord *unusedProfile, PrfSkillList *output) {
     return prfBuildSkillList(unit, unusedProfile, output, 0);
 }
 
@@ -895,7 +895,7 @@ u32 prfCountProfileList(PrfDds1RequirementSlot *operand) {
 }
 
 /* Require each listed profile's primary flag; an empty list succeeds. */
-s32 ptyHasAllReqProfiles(DatPartyRecord *unit, PrfDds1RequirementSlot *operand) {
+s32 ptyHasAllReqProfiles(datUnitWork_t *unit, PrfDds1RequirementSlot *operand) {
     s32 profileIndex = 0;
     s32 profileCount = prfCountProfileList(operand);
     if (profileCount > 0) {
@@ -910,7 +910,7 @@ s32 ptyHasAllReqProfiles(DatPartyRecord *unit, PrfDds1RequirementSlot *operand) 
 }
 
 /* Compare the number of flagged IDs in the list with its minimum count. */
-s32 ptyReqProfileCountAtLeast(DatPartyRecord *unit, PrfDds1RequirementSlot *operand) {
+s32 ptyReqProfileCountAtLeast(datUnitWork_t *unit, PrfDds1RequirementSlot *operand) {
     u32 matchedCount = 0;
     s32 profileIndex = 0;
     s32 profileCount = prfCountProfileList(operand);
@@ -929,7 +929,7 @@ s32 ptyReqProfileCountAtLeast(DatPartyRecord *unit, PrfDds1RequirementSlot *oper
 }
 
 /* Count flagged profile rows whose byte-five value reaches the operand's threshold. */
-s32 ptyProfileCountAtLeast(DatPartyRecord *unit, PrfDds1RequirementSlot *operand) {
+s32 ptyProfileCountAtLeast(datUnitWork_t *unit, PrfDds1RequirementSlot *operand) {
     u32 profileIndex;
     u32 matchedCount = 0;
 
@@ -957,7 +957,7 @@ s32 ptyAreReqProfilesInParty(PrfDds1RequirementSlot *operand) {
             s32 profileId = profileIds[profileIndex];
             s32 unitIndex;
             for (unitIndex = 0; unitIndex < 5; unitIndex++) {
-                DatPartyRecord *partyUnit = &DDS3_GBWK->party[unitIndex];
+                datUnitWork_t *partyUnit = &DDS3_GBWK->party[unitIndex];
                 if ((partyUnit->flags & PTY_PROFILE_UNIT_OCCUPIED_BIT) != 0) {
                     if (ptyTestPrimaryProfileFlag(partyUnit, (u16)profileId) != 0) {
                         profilePresent = 1;
@@ -974,7 +974,7 @@ s32 ptyAreReqProfilesInParty(PrfDds1RequirementSlot *operand) {
 }
 
 /* Compare the unit's level word with the prerequisite's byte threshold. */
-u32 prfReqCheckUnitLevel(DatPartyRecord *unit, PrfDds1RequirementSlot *operand) {
+u32 prfReqCheckUnitLevel(datUnitWork_t *unit, PrfDds1RequirementSlot *operand) {
     if (unit->level < operand->unknown04[0]) {
         return 0;
     }
@@ -1019,21 +1019,21 @@ s32 prfReqEvaluateRules(u32 state, u32 unitAddress, u16 requirementId, u32 *mism
     for (i = 0; i < 2; i++) {
         switch (rules[i].operation) {
         case 1:
-            if (ptyHasAllReqProfiles((DatPartyRecord *)unitAddress, &rules[i]) == expected) {
+            if (ptyHasAllReqProfiles((datUnitWork_t *)unitAddress, &rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
             }
             break;
         case 2:
-            if (ptyReqProfileCountAtLeast((DatPartyRecord *)unitAddress, &rules[i]) == expected) {
+            if (ptyReqProfileCountAtLeast((datUnitWork_t *)unitAddress, &rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
             }
             break;
         case 4:
-            if (ptyProfileCountAtLeast((DatPartyRecord *)unitAddress, &rules[i]) == expected) {
+            if (ptyProfileCountAtLeast((datUnitWork_t *)unitAddress, &rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
@@ -1047,7 +1047,7 @@ s32 prfReqEvaluateRules(u32 state, u32 unitAddress, u16 requirementId, u32 *mism
             }
             break;
         case 16:
-            if (prfReqCheckUnitLevel((DatPartyRecord *)unitAddress, &rules[i]) == expected) {
+            if (prfReqCheckUnitLevel((datUnitWork_t *)unitAddress, &rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
@@ -1092,7 +1092,7 @@ typedef struct PrfFallbackGroup {
 extern PrfFallbackGroup D_003931B0[];
 /* A zero evaluator return selects its result; otherwise test the fallback flags.
  * Missing fallback IDs succeed, as do entries with no nonzero flag requirements. */
-s32 prfReqCheckWithFallback(DatPartyRecord *operand, u16 requirementId) {
+s32 prfReqCheckWithFallback(datUnitWork_t *operand, u16 requirementId) {
 
     u32 ruleResult;
     u32 groupIndex;
@@ -1183,7 +1183,7 @@ PrfDds1RequirementRecord *prfReqGetEntryRecord(u16 profileId) {
 }
 
 void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
-    FrFontGlyph *handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, &frFontColoredGlyphResource, 0);
+    _FRQ *handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, &frFontColoredGlyphResource, 0);
     frSetFontColor(handle, second);
     frFontDrawGlyphChain(handle, 1, option);
     frDestroyFontRequestAfter(handle);
@@ -1217,7 +1217,7 @@ void sdfResetFlagListEntries(SdfFlagListWork *work) {
 SdfFlagListWork *sdfCreateFlagListWork(const SdfFlagListParams *source) {
     u32 count;
     u32 arrayBytes;
-    SdfMemBlock *allocation;
+    sdfMemHandle_t *allocation;
     u8 *buffer;
     SdfFlagListWork *work;
 
@@ -1401,8 +1401,8 @@ void sdfDrawFlagListVertices(SdfFlagListWork *work) {
     f32 (*copiedVertices)[4];
     u32 count;
     u32 vertexIndex;
-    struct SdfMemBlock *vertexAllocation;
-    SdfListHead *packetList;
+    struct sdfMemHandle_t *vertexAllocation;
+    sdfDrawTag_t *packetList;
     SdfPoolNode *surface;
 
     if (work->params.maxFrames != 0 && work->frame >= work->params.maxFrames) {
@@ -1421,7 +1421,7 @@ void sdfDrawFlagListVertices(SdfFlagListWork *work) {
         }
         VU0_STORE_VF_UNCLOBBERED(vf10, &copiedVertices[vertexIndex]);
     }
-    packetList = (SdfListHead *)sdfGrAllocPacketBuff(SDF_FLAG_LIST_PACKET_BYTES);
+    packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(SDF_FLAG_LIST_PACKET_BYTES);
     sdfDrawTagInit(packetList);
     sdfDrawTagLink(packetList, (u32)effDebugDrawWireModel(copiedVertices, work->colors, work->params.count * SDF_FLAG_LIST_VERTICES_PER_ENTRY, 0x40));
     surface = D_00398098[work->params.alpha.surfaceIndex];

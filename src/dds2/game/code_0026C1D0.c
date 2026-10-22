@@ -18,7 +18,7 @@
 #include "eff_random.h"
 #include "eff_event_draw.h"
 
-typedef struct SdfTex SdfTex;
+typedef struct sdfTexHandle_t sdfTexHandle_t;
 
 #define EVT_ACTIVE_ENTRY_LIMIT 0x100
 
@@ -118,8 +118,8 @@ void fclInitPanelPos(u32 firstWord, u32 secondWord, u32 thirdWord, s16 firstHalf
 /* Destroy a nonzero, registered task. The declared return value is not set. */
 s32 fclScriptForcedEnd(s32 task) {
     if (task != 0) {
-        if (dds3GetProcessStat((KwlnTask *)task) != 0) {
-            dds3KillProcess((KwlnTask *)task, 0);
+        if (dds3GetProcessStat((dds3ProcessID_t *)task) != 0) {
+            dds3KillProcess((dds3ProcessID_t *)task, 0);
         }
     }
 }
@@ -214,7 +214,7 @@ void evtLoadResourcePair(u32 resourceId, EvtResourcePair *record) {
 
 /* Release the handle without clearing either word of the caller's record. */
 void evtReleaseResourcePairHandle(EvtResourcePair *record) {
-    sdfMemFreeDirect((struct SdfMemBlock *)(u32)(record->handle));
+    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(record->handle));
 }
 
 struct ItfMesSub;
@@ -463,13 +463,13 @@ void evtMoveMessageWindowWithPanelOffset(s32 x, s32 y) {
 
 /* Recognize all three scheduler queues. Preserve the repeated queries. */
 s32 fclChkMessageDraw(s32 task) {
-    if (dds3GetProcessStat((KwlnTask *)task) == KWLN_TASK_DELAYED_START) {
+    if (dds3GetProcessStat((dds3ProcessID_t *)task) == KWLN_TASK_DELAYED_START) {
         return 1;
     }
-    if (dds3GetProcessStat((KwlnTask *)task) == KWLN_TASK_ACTIVE) {
+    if (dds3GetProcessStat((dds3ProcessID_t *)task) == KWLN_TASK_ACTIVE) {
         return 1;
     }
-    return dds3GetProcessStat((KwlnTask *)task) == KWLN_TASK_DESTROY_PENDING;
+    return dds3GetProcessStat((dds3ProcessID_t *)task) == KWLN_TASK_DESTROY_PENDING;
 }
 
 extern s8 evtActiveEntryFlags[8];
@@ -529,7 +529,7 @@ s32 fclLoadTexture(u32 path) {
 
     allocation = sdfDevLoadFileEx((const char *)(u32)path, &info[0], (u32 *)&info[1]);
     texture = (s32)sdfTexSet((SdfTextureFileHeader *)(info[0]));
-    sdfMemFreeDirect((struct SdfMemBlock *)(u32)(allocation));
+    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(allocation));
     return texture;
 }
 

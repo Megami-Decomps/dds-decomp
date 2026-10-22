@@ -37,20 +37,20 @@ void sdfMotionNodeFree(SdfMotionBindingHead *binding) {
 }
 
 /* Install the binding's dispatch table and motion without touching its payload. */
-void sdfMotionNodeBaseInit(SdfMotionBindingHead *binding, Motion *motion, SdfMotionBindingDispatch *dispatch) {
+void sdfMotionNodeBaseInit(SdfMotionBindingHead *binding, sdfMotionCtrlr_t *motion, SdfMotionBindingDispatch *dispatch) {
     binding->dispatch = dispatch;
     binding->motion = motion;
 }
 
 
-Motion *sdfMotionCtrlrNew(SdfModel *model, MotionTable *table) {
-    Motion *motion;
+sdfMotionCtrlr_t *sdfMotionCtrlrNew(sdfModelRootNode_t *model, MotionTable *table) {
+    sdfMotionCtrlr_t *motion;
     DevRequest *request;
     SdfMotionCommand *command;
     s32 commandIndex;
     u16 commandCount;
 
-    motion = sdfAllocAndClearQuadwords(sizeof(Motion));
+    motion = sdfAllocAndClearQuadwords(sizeof(sdfMotionCtrlr_t));
     motion->next = model->motionList;
     commandCount = table->commandCount;
     model->motionList = motion;
@@ -72,10 +72,10 @@ Motion *sdfMotionCtrlrNew(SdfModel *model, MotionTable *table) {
 
 
 /* Unlinks the node from its owner's list, notifies each request callback, then frees the request and the node. */
-void sdfMotionCtrlrFree(Motion *node)
+void sdfMotionCtrlrFree(sdfMotionCtrlr_t *node)
 {
-    Motion **prev;
-    Motion *cur;
+    sdfMotionCtrlr_t **prev;
+    sdfMotionCtrlr_t *cur;
     DevRequest *request;
     void **bindings;
     s32 bindingCount;
@@ -105,7 +105,7 @@ void sdfMotionCtrlrFree(Motion *node)
 }
 
 /* Select a motion entry, initialize its timing and state, and bind its setup records. */
-void sdfMotionChangeBlend(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 blendLeadFrames,
+void sdfMotionChangeBlend(sdfMotionCtrlr_t *motion, s32 motionIndex, s32 loopEnabled, f32 blendLeadFrames,
                          f32 blendDurationFrames) {
     s32 i;
     MotionEntry *entry;
@@ -144,12 +144,12 @@ void sdfMotionChangeBlend(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 
     }
 }
 /* Select a motion with no lead-in and no blend duration. */
-void sdfMotionChange(Motion *motion, s32 motionIndex, s32 loopEnabled) {
+void sdfMotionChange(sdfMotionCtrlr_t *motion, s32 motionIndex, s32 loopEnabled) {
     sdfMotionChangeBlend(motion, motionIndex, loopEnabled, 0.0f, 0.0f);
 }
 
 
-void sdfMotionSeek(Motion *motion, f32 frame) {
+void sdfMotionSeek(sdfMotionCtrlr_t *motion, f32 frame) {
     s32 i;
     s32 count;
     f32 elapsed;
@@ -184,7 +184,7 @@ void sdfMotionSeek(Motion *motion, f32 frame) {
 }
 
 /* Apply the current motion state and report completion (1) or a loop wrap (2). */
-s32 sdfMotionNext(Motion *motion) {
+s32 sdfMotionNext(sdfMotionCtrlr_t *motion) {
     s32 result;
     f32 frame;
     f32 frameCount;
@@ -226,7 +226,7 @@ s32 sdfMotionNext(Motion *motion) {
     return result;
 }
 /* State 6 parks motion processing, retaining the previous state to resume. */
-void sdfMotionPause(Motion *motion) {
+void sdfMotionPause(sdfMotionCtrlr_t *motion) {
     u8 previousState;
 
     previousState = motion->state;
@@ -237,7 +237,7 @@ void sdfMotionPause(Motion *motion) {
 }
 
 /* Resume only a suspended motion, restoring the state saved by suspend. */
-void sdfMotionPauseOff(Motion *motion) {
+void sdfMotionPauseOff(sdfMotionCtrlr_t *motion) {
     if (motion->state == SDF_MOTION_STATE_SUSPENDED) {
         motion->state = motion->previousState;
     }
@@ -359,16 +359,16 @@ s32 sdfMotGenNode(void *binding, s32 selector, s32 targetIndex) {
     return D_003981B8[(u16)selector](binding, selector, targetIndex);
 }
 
-void sdfMotGenModelInit(SdfMotionDrawTargetBinding *binding, Motion *motion,
+void sdfMotGenModelInit(SdfMotionDrawTargetBinding *binding, sdfMotionCtrlr_t *motion,
                           SdfMotionBindingDispatch *dispatch, s32 nodeIndex) {
-    SdfDrawNode *drawNode;
+    sdfModelNode_t *drawNode;
 
     sdfMotionNodeBaseInit((SdfMotionBindingHead *)&binding->keys, motion, dispatch);
     drawNode = sdfModelSearchNode(motion->owner, nodeIndex);
     binding->node = drawNode;
 }
 
-SdfMotionDrawBinding *sdfMotGenModelLinerPos(Motion *motion, s32 unused, s32 nodeIndex) {
+SdfMotionDrawBinding *sdfMotGenModelLinerPos(sdfMotionCtrlr_t *motion, s32 unused, s32 nodeIndex) {
     SdfMotionDrawBinding *binding;
 
     binding = sdfChipAllocDirect(sizeof(SdfMotionDrawBinding));
@@ -400,7 +400,7 @@ void sdfMotCLBK_modelLinerPosBlendSeek(SdfMotionDrawBinding *binding, f32 frame,
     VU0_STORE_VF_UNCLOBBERED(vf10, binding->node->translation);
 }
 
-SdfMotionDrawBinding *sdfMotGenModelLinerRotXYZ(Motion *motion, s32 unused, s32 nodeIndex) {
+SdfMotionDrawBinding *sdfMotGenModelLinerRotXYZ(sdfMotionCtrlr_t *motion, s32 unused, s32 nodeIndex) {
     SdfMotionDrawBinding *binding;
 
     binding = sdfChipAllocDirect(sizeof(SdfMotionDrawBinding));
@@ -414,7 +414,7 @@ SdfMotionDrawBinding *sdfMotGenModelLinerRotXYZ(Motion *motion, s32 unused, s32 
 void sdfMotCLBK_modelLinerRotXYZSeek(SdfMotionDrawBinding *binding, f32 frame) {
     SdfMotionKeyInterval keyInterval;
     volatile f32 angles[4] __attribute__((aligned(16)));
-    SdfDrawNode *drawNode;
+    sdfModelNode_t *drawNode;
     f32 (*matrix)[4];
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
@@ -436,7 +436,7 @@ void sdfMotCLBK_modelLinerRotXYZSeek(SdfMotionDrawBinding *binding, f32 frame) {
 void sdfMotCLBK_modelLinerRotXYZBlendSeek(SdfMotionDrawBinding *binding, f32 frame, f32 blendWeight) {
     SdfMotionKeyInterval keyInterval;
     volatile f32 angles[4] __attribute__((aligned(16)));
-    SdfDrawNode *drawNode;
+    sdfModelNode_t *drawNode;
     f32 (*matrix)[4];
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
@@ -457,7 +457,7 @@ void sdfMotCLBK_modelLinerRotXYZBlendSeek(SdfMotionDrawBinding *binding, f32 fra
     VU0_STORE_VF_UNCLOBBERED(vf30, matrix[2]);
 }
 
-SdfMotionDrawBinding *sdfMotGenModelLinerScale(Motion *motion, s32 unused, s32 nodeIndex) {
+SdfMotionDrawBinding *sdfMotGenModelLinerScale(sdfMotionCtrlr_t *motion, s32 unused, s32 nodeIndex) {
     SdfMotionDrawBinding *binding;
 
     binding = sdfChipAllocDirect(sizeof(SdfMotionDrawBinding));
@@ -489,7 +489,7 @@ void sdfMotCLBK_modelLinerScaleBlendSeek(SdfMotionDrawBinding *binding, f32 fram
     VU0_STORE_VF(vf10, binding->node->scale);
 }
 
-SdfMotionDrawBinding *sdfMotGenModelLerpRotQuat(Motion *motion, s32 unused, s32 nodeIndex) {
+SdfMotionDrawBinding *sdfMotGenModelLerpRotQuat(sdfMotionCtrlr_t *motion, s32 unused, s32 nodeIndex) {
     SdfMotionDrawBinding *binding;
 
     binding = sdfChipAllocDirect(sizeof(SdfMotionDrawBinding));
@@ -500,7 +500,7 @@ SdfMotionDrawBinding *sdfMotGenModelLerpRotQuat(Motion *motion, s32 unused, s32 
 /* vu0 routine: nlerp sampled quaternion keys, then store the quaternion and matrix. */
 void sdfMotCLBK_modelLerpRotQuatSeek(SdfMotionDrawBinding *binding, f32 frame) {
     SdfMotionKeyInterval keyInterval;
-    SdfDrawNode *drawNode;
+    sdfModelNode_t *drawNode;
     f32 (*matrix)[4];
     f32 *keyData;
 
@@ -522,7 +522,7 @@ void sdfMotCLBK_modelLerpRotQuatSeek(SdfMotionDrawBinding *binding, f32 frame) {
 /* vu0 routine: nlerp sampled keys with the captured quaternion, then build the matrix. */
 void sdfMotCLBK_modelLerpRotQuatBlendSeek(SdfMotionDrawBinding *binding, f32 frame, f32 blendWeight) {
     SdfMotionKeyInterval keyInterval;
-    SdfDrawNode *drawNode;
+    sdfModelNode_t *drawNode;
     f32 (*matrix)[4];
     f32 *keyData;
 
@@ -544,7 +544,7 @@ void sdfMotCLBK_modelLerpRotQuatBlendSeek(SdfMotionDrawBinding *binding, f32 fra
     VU0_STORE_VF_UNCLOBBERED(vf30, matrix[2]);
 }
 
-SdfMotionKeyFlagBinding *sdfMotGenModelVisible(Motion *motion, s32 unused, s32 nodeIndex) {
+SdfMotionKeyFlagBinding *sdfMotGenModelVisible(sdfMotionCtrlr_t *motion, s32 unused, s32 nodeIndex) {
     SdfMotionKeyFlagBinding *binding;
 
     binding = sdfChipAllocDirect(sizeof(SdfMotionKeyFlagBinding));
@@ -554,7 +554,7 @@ SdfMotionKeyFlagBinding *sdfMotGenModelVisible(Motion *motion, s32 unused, s32 n
 
 void sdfMotCLBK_modelVisibleSeek(SdfMotionKeyFlagBinding *binding, f32 frame) {
     SdfMotionKeyInterval keyInterval;
-    SdfDrawNode *node;
+    sdfModelNode_t *node;
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     node = binding->node;
@@ -568,7 +568,7 @@ void sdfMotCLBK_modelVisibleSeek(SdfMotionKeyFlagBinding *binding, f32 frame) {
 /* The blend slot resamples the discrete flag; it does not consume blend weight. */
 void sdfMotCLBK_modelVisibleBlendSeek(SdfMotionKeyFlagBinding *binding, f32 frame) {
     SdfMotionKeyInterval keyInterval;
-    SdfDrawNode *node;
+    sdfModelNode_t *node;
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     node = binding->node;
@@ -602,13 +602,13 @@ s32 sdfMotGenMatNode(void *handlerContext, s32 handlerIndex, s32 targetIndex) {
     return D_00398248[(u16)handlerIndex](handlerContext, handlerIndex, targetIndex);
 }
 
-void sdfMotGenMatInit(SdfMotionIndexedBinding *binding, Motion *motion,
+void sdfMotGenMatInit(SdfMotionIndexedBinding *binding, sdfMotionCtrlr_t *motion,
                                SdfMotionBindingDispatch *dispatch, s32 options) {
     sdfMotionNodeBaseInit((SdfMotionBindingHead *)&binding->keys, motion, dispatch);
-    binding->target = ((SdfAsset **)motion->owner->resources->buffer)[options];
+    binding->target = ((sdfMat_t **)motion->owner->resources->buffer)[options];
 }
 
-SdfMotionIndexedValueBinding *sdfMotGenMatDiffuse(Motion *motion, s32 unused, s32 options) {
+SdfMotionIndexedValueBinding *sdfMotGenMatDiffuse(sdfMotionCtrlr_t *motion, s32 unused, s32 options) {
     SdfMotionIndexedValueBinding *binding;
 
     binding = sdfChipAllocDirect(sizeof(SdfMotionIndexedValueBinding));
@@ -639,7 +639,7 @@ void sdfMotCLBK_matDiffuseInitBlend(SdfMotionIndexedValueBinding *binding) {
     binding->capturedWord = binding->target->primaryStateWordSecond;
 }
 
-SdfMotionIndexedValueBinding *sdfMotGenMatAmbient(Motion *motion, s32 unused, s32 options) {
+SdfMotionIndexedValueBinding *sdfMotGenMatAmbient(sdfMotionCtrlr_t *motion, s32 unused, s32 options) {
     SdfMotionIndexedValueBinding *binding;
 
     binding = sdfChipAllocDirect(sizeof(SdfMotionIndexedValueBinding));
@@ -670,7 +670,7 @@ void sdfMotCLBK_matAmbientInitBlend(SdfMotionIndexedValueBinding *binding) {
     binding->capturedWord = binding->target->primaryStateWordFirst;
 }
 
-SdfMotionIndexedValueBinding *sdfMotGenMatSpecular(Motion *motion, s32 unused, s32 options) {
+SdfMotionIndexedValueBinding *sdfMotGenMatSpecular(sdfMotionCtrlr_t *motion, s32 unused, s32 options) {
     SdfMotionIndexedValueBinding *binding;
 
     binding = sdfChipAllocDirect(sizeof(SdfMotionIndexedValueBinding));
@@ -701,7 +701,7 @@ void sdfMotCLBK_matSpecularInitBlend(SdfMotionIndexedValueBinding *binding) {
     binding->capturedWord = binding->target->primaryStateWordThird;
 }
 
-SdfMotionIndexedValueBinding *sdfMotGenMatRefMap(Motion *motion, s32 unused, s32 options) {
+SdfMotionIndexedValueBinding *sdfMotGenMatRefMap(sdfMotionCtrlr_t *motion, s32 unused, s32 options) {
     SdfMotionIndexedValueBinding *binding;
 
     binding = sdfChipAllocDirect(sizeof(SdfMotionIndexedValueBinding));
@@ -732,7 +732,7 @@ void sdfMotCLBK_matRefMapInitBlend(SdfMotionIndexedValueBinding *binding) {
     binding->capturedWord = binding->target->primaryStateWordFourth;
 }
 
-SdfMotionIndexedValueBinding *sdfMotGenMatConstant(Motion *motion, s32 unused, s32 options) {
+SdfMotionIndexedValueBinding *sdfMotGenMatConstant(sdfMotionCtrlr_t *motion, s32 unused, s32 options) {
     SdfMotionIndexedValueBinding *binding;
 
     binding = sdfChipAllocDirect(sizeof(SdfMotionIndexedValueBinding));
@@ -759,7 +759,7 @@ void sdfMotCLBK_matConstantInitBlend(SdfMotionIndexedValueBinding *binding) {
     binding->capturedFloat = binding->target->primaryStateFloat;
 }
 
-SdfMotionIndexedTextBinding *sdfMotGenMatUvw(Motion *motion, s32 unused, s32 options) {
+SdfMotionIndexedTextBinding *sdfMotGenMatUvw(sdfMotionCtrlr_t *motion, s32 unused, s32 options) {
     SdfMotionIndexedTextBinding *binding;
 
     binding = sdfChipAllocDirect(sizeof(SdfMotionIndexedTextBinding));
@@ -795,7 +795,7 @@ void sdfMotCLBK_matUvwInitBlend(SdfMotionIndexedTextBinding *binding) {
     binding->capture.snapshot = *textParams;
 }
 
-SdfMotionIndexedTextBinding *sdfMotGenMatMultiUvw(Motion *motion, s32 unused, s32 options) {
+SdfMotionIndexedTextBinding *sdfMotGenMatMultiUvw(sdfMotionCtrlr_t *motion, s32 unused, s32 options) {
     SdfMotionIndexedTextBinding *binding;
 
     binding = sdfChipAllocDirect(sizeof(SdfMotionIndexedTextBinding));
@@ -831,7 +831,7 @@ void sdfMotCLBK_matMultiUvwInitBlend(SdfMotionIndexedTextBinding *binding) {
     binding->capture.snapshot = *textParams;
 }
 
-SdfMotionIndexedValueBinding *sdfMotGenMatMultiDiffuse(Motion *motion, s32 unused,
+SdfMotionIndexedValueBinding *sdfMotGenMatMultiDiffuse(sdfMotionCtrlr_t *motion, s32 unused,
                                                                   s32 options) {
     SdfMotionIndexedValueBinding *binding;
 
@@ -863,7 +863,7 @@ void sdfMotCLBK_matMultiDiffuseInitBlend(SdfMotionIndexedValueBinding *binding) 
     binding->capturedWord = binding->target->secondaryColor;
 }
 
-SdfMotionIndexedTextBinding *sdfMotGenMatUvw2(Motion *motion, s32 unused, s32 options) {
+SdfMotionIndexedTextBinding *sdfMotGenMatUvw2(sdfMotionCtrlr_t *motion, s32 unused, s32 options) {
     SdfMotionIndexedTextBinding *binding;
 
     binding = sdfChipAllocDirect(sizeof(SdfMotionIndexedTextBinding));
@@ -889,7 +889,7 @@ void sdfMotCLBK_matUvw2BlendSeek(SdfMotionIndexedTextBinding *binding, f32 frame
 void sdfMotCLBK_matUvw2InitBlend(void) {
 }
 
-SdfMotionIndexedTextBinding *sdfMotGenMatMultiUvw2(Motion *motion, s32 unused,
+SdfMotionIndexedTextBinding *sdfMotGenMatMultiUvw2(sdfMotionCtrlr_t *motion, s32 unused,
                                                                        s32 options) {
     SdfMotionIndexedTextBinding *binding;
 

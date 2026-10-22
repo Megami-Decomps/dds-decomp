@@ -5,14 +5,14 @@
 #include "sdf_pac_packet.h"
 #include "sdf_pac_work.h"
 
-struct SdfMemBlock;
-struct SdfTex;
+struct sdfMemHandle_t;
+struct sdfTexHandle_t;
 
 /* Complete 0x10-byte packet buffer: texture is the acquired output, while
  * resourceSlot owns the optional general-heap allocation descriptor. */
 typedef struct PacBuf {
-    struct SdfTex *texture;
-    struct SdfMemBlock *resourceSlot;
+    struct sdfTexHandle_t *texture;
+    struct sdfMemHandle_t *resourceSlot;
     u8 *cursor;
     s32 remainingBytes;
 } PacBuf;

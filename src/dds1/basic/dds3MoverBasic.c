@@ -5,7 +5,7 @@
 #include "eff_transform.h"
 #include "pcp_vu0.h"
 
-extern void dds3BackupPoseSet(ObjectTransform *transform);
+extern void dds3BackupPoseSet(dds3PoseSet_t *transform);
 
 
 #define DDS3_MOVER_POSITION_COPY_KIND 6
@@ -16,15 +16,15 @@ extern void dds3BackupPoseSet(ObjectTransform *transform);
 /* Apply enabled absolute path channels and step the path counter once, or apply
  * a callback-built relative transform when its return value is exactly 1.
  * Always return 1, even when no channel or callback transform was applied. */
-s32 MoverBasicMainprocuder(EffWorldNode *moverNode)
+s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
 {
     f32 pathVector[4];
     WorldTransformParams transformParams;
-    ObjectTransform relativeTransform;
+    dds3PoseSet_t relativeTransform;
     Dds3SlotResource *slotResource = moverNode->data;
-    EffWorldNode *targetObject = slotResource->target;
-    ObjectTransform *inner = targetObject->inner;
-    s32 (*updateCallback)(ObjectTransform *, EffWorldNode *);
+    dds3Basic_t *targetObject = slotResource->target;
+    dds3PoseSet_t *inner = targetObject->inner;
+    s32 (*updateCallback)(dds3PoseSet_t *, dds3Basic_t *);
     CameraData *cameraData;
     f32 fieldOfView;
 

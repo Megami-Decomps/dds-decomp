@@ -11,8 +11,8 @@ typedef struct {
     u32 parameterVector[4]; /* 0x10 copied from the parameter block */
     s32 frame;      /* 0x20 counts updates */
     u32 color;      /* 0x24 set by effPCPBossBaelSetColor, starts 0x80808080 */
-    EffParamWork *modelResource; /* Kind 3: supplies the model effect. */
-    EffParamWork *auxiliaryResource; /* Kind 6: receives the same basis, vector and tint. */
+    effPartHandle_t *modelResource; /* Kind 3: supplies the model effect. */
+    effPartHandle_t *auxiliaryResource; /* Kind 6: receives the same basis, vector and tint. */
 } EffPCPBossWork;
 
 /* Trail parameters copied verbatim on spawn. Trail colors use the owner frame;
@@ -76,7 +76,7 @@ typedef struct {
 } EffBossCell; /* 0x14 */
 
 typedef struct {
-    EffRecordPool *drawPool;
+    dds3FlashPolyList_t *drawPool;
     f32 direction[3]; /* Unit Y initially; mode 2 refreshes it from the model. */
     u8 pad10[4];
     f32 rotationAngle;
@@ -88,15 +88,15 @@ typedef struct {
 typedef struct {
     EffBossHead head;
     EffBossGroup *groups; /* 0x8C */
-    SdfMemBlock *groupsHandle; /* 0x90 */
+    sdfMemHandle_t *groupsHandle; /* 0x90 */
     u32 groupCount;   /* 0x94 */
     u16 cellCount;    /* 0x98 */
     u8 pad9A[2];
     u32 frame;
     u32 color;        /* 0xA0 */
     ParSystem *system; /* 0xA4: allocated cell system */
-    EffParamWork *paramWork; /* 0xA8 */
-} EffBossWork;
+    effPartHandle_t *paramWork; /* 0xA8 */
+} effPCPCrack_t;
 
 /* Five packed RGBA values paired with the draw pool's five vertex positions.
    Native update writes tinted colors here; these are not vertex indices. */
@@ -109,7 +109,7 @@ typedef char EffBossHead_size_must_be_0x8C[(sizeof(EffBossHead) == 0x8C) ? 1 : -
 typedef char EffBossParams_size_must_be_0x94[(sizeof(EffBossParams) == 0x94) ? 1 : -1];
 typedef char EffBossCell_size_must_be_0x14[(sizeof(EffBossCell) == 0x14) ? 1 : -1];
 typedef char EffBossGroup_size_must_be_0x24[(sizeof(EffBossGroup) == 0x24) ? 1 : -1];
-typedef char EffBossWork_size_must_be_0xAC[(sizeof(EffBossWork) == 0xAC) ? 1 : -1];
+typedef char EffBossWork_size_must_be_0xAC[(sizeof(effPCPCrack_t) == 0xAC) ? 1 : -1];
 typedef char EffBossColorSlot_size_must_be_0x14[(sizeof(EffBossColorSlot) == 0x14) ? 1 : -1];
 
 #endif /* EFF_PCP_BOSS_H */

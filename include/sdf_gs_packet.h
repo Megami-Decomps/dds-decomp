@@ -70,16 +70,16 @@ typedef struct SdfGsRegisterWrite {
 } SdfGsRegisterWrite;
 
 /* TEST and ALPHA form the two A+D writes shared by the blend builders. */
-typedef struct SdfGsBlendRegisters {
+typedef struct sdfPrimTransElem_t {
     SdfGsRegisterWrite test;
     SdfGsRegisterWrite alpha;
-} SdfGsBlendRegisters;
+} sdfPrimTransElem_t;
 
 /* Fixed packets allocated by the paired blend and composite-quad renderers. */
-typedef struct SdfGsBlendPacket {
+typedef struct sdfPrimTransPacket_t {
     SdfGsPacketHeader header;
-    SdfGsBlendRegisters registers;
-} SdfGsBlendPacket;
+    sdfPrimTransElem_t registers;
+} sdfPrimTransPacket_t;
 
 /* A single A+D write follows the texture-flush DMA/VIF/GIF header. */
 typedef struct SdfGsTextureFlushPacket {
@@ -99,17 +99,17 @@ typedef char SdfGsPacketHeader_size_must_be_0x20[
 typedef char SdfGsRegisterWrite_size_must_be_0x10[
     (sizeof(SdfGsRegisterWrite) == 0x10) ? 1 : -1];
 typedef char SdfGsBlendRegisters_size_must_be_0x20[
-    (sizeof(SdfGsBlendRegisters) == 0x20) ? 1 : -1];
+    (sizeof(sdfPrimTransElem_t) == 0x20) ? 1 : -1];
 typedef char SdfGsBlendRegisters_alpha_at_0x10[
-    ((u32)&((SdfGsBlendRegisters *)0)->alpha == 0x10) ? 1 : -1];
+    ((u32)&((sdfPrimTransElem_t *)0)->alpha == 0x10) ? 1 : -1];
 typedef char SdfGsBlendPacket_size_must_be_0x40[
-    (sizeof(SdfGsBlendPacket) == 0x40) ? 1 : -1];
+    (sizeof(sdfPrimTransPacket_t) == 0x40) ? 1 : -1];
 typedef char SdfGsTexturePacket_size_must_be_0x50[
     (sizeof(SdfGsTexturePacket) == 0x50) ? 1 : -1];
 typedef char SdfGsBlendPacket_test_at_0x20[
-    ((u32)&((SdfGsBlendPacket *)0)->registers.test == 0x20) ? 1 : -1];
+    ((u32)&((sdfPrimTransPacket_t *)0)->registers.test == 0x20) ? 1 : -1];
 typedef char SdfGsBlendPacket_alpha_at_0x30[
-    ((u32)&((SdfGsBlendPacket *)0)->registers.alpha == 0x30) ? 1 : -1];
+    ((u32)&((sdfPrimTransPacket_t *)0)->registers.alpha == 0x30) ? 1 : -1];
 typedef char SdfGsTexturePacket_sampling_at_0x20[
     ((u32)&((SdfGsTexturePacket *)0)->sampling == 0x20) ? 1 : -1];
 typedef char SdfGsTexturePacket_texture_at_0x30[

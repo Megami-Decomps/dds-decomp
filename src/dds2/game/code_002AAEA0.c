@@ -35,7 +35,7 @@ extern u8 mnuCampCommandDispatchEntries[];
 
 
 
-u32 mnuPrepareCampFieldSkillDisplay(KwlnTask *task) {
+u32 mnuPrepareCampFieldSkillDisplay(dds3ProcessID_t *task) {
     s32 context;
 
     context = dds3GetProcessData(task);
@@ -50,7 +50,7 @@ u32 mnuPrepareCampFieldSkillDisplay(KwlnTask *task) {
     return 1;
 }
 
-u32 mnuStartCampTitleFadeOut(KwlnTask *task) {
+u32 mnuStartCampTitleFadeOut(dds3ProcessID_t *task) {
     s32 context;
 
     context = dds3GetProcessData(task);
@@ -59,7 +59,7 @@ u32 mnuStartCampTitleFadeOut(KwlnTask *task) {
 }
 
 /* Handle the selected field skill after both dispatch and resource readiness. */
-s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
+s32 mnuHandleCampFieldSkillInput(dds3ProcessID_t *callback) {
     MenuStaffContext *context;
     s32 *popup;
     u32 input;
@@ -111,7 +111,7 @@ extern void mnuDrawCampGridFrameAndLabel(s32, u32, u32, u32, u32, u32, u32, u32,
 extern char mnuCampCommandHelpTextBank[];
 extern char mnuCampFieldSkillHelpConditionFlags[];
 
-s32 mnuDrawCampFieldSkillPage(KwlnTask *task) {
+s32 mnuDrawCampFieldSkillPage(dds3ProcessID_t *task) {
     MenuStaffContext *context = (MenuStaffContext *)dds3GetProcessData(task);
     s32 state;
     s32 layer = 0x53;
@@ -129,14 +129,14 @@ s32 mnuDrawCampFieldSkillPage(KwlnTask *task) {
     return menuSetHandler((void *)context, 1, (void *)task);
 }
 
-s32 mnuFinishStaffConfigPopup(KwlnTask *callback) {
+s32 mnuFinishStaffConfigPopup(dds3ProcessID_t *callback) {
     s32 context;
 
     context = dds3GetProcessData(callback);
     return menuSetHandler((void *)context, 2, (void *)callback);
 }
 
-u32 mnuOpenCampConfigPanelTasks(KwlnTask *task) {
+u32 mnuOpenCampConfigPanelTasks(dds3ProcessID_t *task) {
     s32 context;
 
     context = dds3GetProcessData(task);
@@ -148,7 +148,7 @@ u32 mnuOpenCampConfigPanelTasks(KwlnTask *task) {
 }
 
 /* Switch the staff display to the alternate resource at context + 0x60. */
-u32 mnuConfigureCampDrawContextPanel(KwlnTask *task) {
+u32 mnuConfigureCampDrawContextPanel(dds3ProcessID_t *task) {
     s32 context;
 
     context = dds3GetProcessData(task);
@@ -158,7 +158,7 @@ u32 mnuConfigureCampDrawContextPanel(KwlnTask *task) {
 }
 
 /* Dispatch a callback; on idle, install the default entry unless busy. */
-s32 mnuDispatchStaffMenuWithIdlePopup(KwlnTask *callback) {
+s32 mnuDispatchStaffMenuWithIdlePopup(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
     s32 *dispatchEntry = &((MenuStaffContext *)context)->popupState;
     s32 state = mnuDispatchPopupTransition(&((MenuStaffContext *)context)->transitionWork, dispatchEntry, 0, (void *)callback);
@@ -171,7 +171,7 @@ s32 mnuDispatchStaffMenuWithIdlePopup(KwlnTask *callback) {
     return state;
 }
 
-s32 mnuDrawStaffImageScreen(KwlnTask *callback) {
+s32 mnuDrawStaffImageScreen(dds3ProcessID_t *callback) {
     s32 context;
 
     context = dds3GetProcessData(callback);
@@ -182,7 +182,7 @@ s32 mnuDrawStaffImageScreen(KwlnTask *callback) {
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
-s32 mnuFinishStaffImagePopup(KwlnTask *callback) {
+s32 mnuFinishStaffImagePopup(dds3ProcessID_t *callback) {
     s32 context;
 
     context = dds3GetProcessData(callback);
@@ -194,12 +194,12 @@ u32 mnuCampFieldSkillDisplayLeaveNoOp(void) {
     return 1;
 }
 
-u32 mnuRunCampFieldSkillDisplayTask(KwlnTask *task) {
+u32 mnuRunCampFieldSkillDisplayTask(dds3ProcessID_t *task) {
     mnuPrepareCampFieldSkillDisplay(task);
     return 1;
 }
 
-s32 mnuPollCampFieldSkillAndPopup(KwlnTask *callback) {
+s32 mnuPollCampFieldSkillAndPopup(dds3ProcessID_t *callback) {
     s32 context;
     s32 state;
 
@@ -213,7 +213,7 @@ s32 mnuPollCampFieldSkillAndPopup(KwlnTask *callback) {
     return 0;
 }
 
-s32 mnuDrawStaffCampImageScreen(KwlnTask *task) {
+s32 mnuDrawStaffCampImageScreen(dds3ProcessID_t *task) {
     MenuStaffContext *context = (MenuStaffContext *)dds3GetProcessData(task);
     s32 state;
     s32 layer = 0x53;
@@ -231,7 +231,7 @@ s32 mnuDrawStaffCampImageScreen(KwlnTask *task) {
     return menuSetHandler((void *)context, 1, (void *)task);
 }
 
-s32 mnuFinishFieldSkillPopup(KwlnTask *callback) {
+s32 mnuFinishFieldSkillPopup(dds3ProcessID_t *callback) {
     s32 context;
 
     context = dds3GetProcessData(callback);
@@ -295,7 +295,7 @@ s32 mtrMantraFindIndex(s32 mantraId) {
     return 0;
 }
 
-extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
+extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
 extern void mnuDrawCampGridResourceSlot(s32, u32, u32, s32, u32, u32);
 extern void mnuDispatchEntryWords(EffectSlotSet *, s32, struct MenuListNode *);
 extern void mnuDrawRepeatedPanelSprites(s32, s32, s32, s32, s32, EffectSlotSet *, s32, s32);
@@ -319,7 +319,7 @@ void mnuDrawCampGridEntry(s32 x, s32 y, s32 depth, s32 offset, struct MenuList *
     mnuDrawCampGridResourceSlot(x, y, depth, (s32)list, (u32)node, texture);
     markerY = y + 0x40;
     if (DDS3_GBWK->inventory.counts[node->sortKeySecondary] != 0) {
-        struct FrFontGlyph *glyph;
+        struct _FRQ *glyph;
 
         if (node->flags48 & 1) {
             color = 0xA09DC320;

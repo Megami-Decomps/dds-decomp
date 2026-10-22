@@ -47,9 +47,9 @@ typedef struct BtlUnit BtlUnit;
 void btlInitFxLights(BtlUnit *unit);
 void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *unit, s32 kind, s32 index);
 
-struct EvtUnit;
+struct evtUnitHandle_t;
 struct SoundResourceLink;
-struct EffWorldNode;
+struct dds3Basic_t;
 
 /* The actor owns both status words as one complete, naturally aligned record.
  * Scalar accesses retain their ordinary word alias behavior. Packed observations
@@ -148,7 +148,7 @@ typedef struct BtlUnit {
     u32 gunResourceFlags; /* 0x118 */
     u8 lookupId; /* 0x11C: retail lookup consumers use unsigned byte loads. */
     u8 pad11D[3];
-    DatPartyRecord partyRecord; /* 0x120: complete copied actor record (0x1A4). */
+    datUnitWork_t partyRecord; /* 0x120: complete copied actor record (0x1A4). */
     u8 partyIndex; /* 0x2C4: saved party-entry index, read with lbu. */
     u8 pad2C5;
     BtlUnitEntrySlot entrySlots[7]; /* 0x2C6 */
@@ -164,9 +164,9 @@ typedef struct BtlUnit {
     u8 firstCountdown; /* 0x318: active linked-number displays; selects modulo-12 offset. */
     u8 counterDisplayCount; /* 0x319: active counter displays; selects modulo-12 offset. */
     u8 pad31A[2];
-    struct EffWorldNode *effectObject; /* 0x31C: actor's world node and transform. */
-    struct EvtUnit *ext; /* 0x320: the event manager's complete 0x170-byte work. */
-    struct SdfModel *transparencyModel; /* 0x324: alternate SDF model retained during transparency. */
+    struct dds3Basic_t *effectObject; /* 0x31C: actor's world node and transform. */
+    struct evtUnitHandle_t *ext; /* 0x320: the event manager's complete 0x170-byte work. */
+    struct sdfModelRootNode_t *transparencyModel; /* 0x324: alternate SDF model retained during transparency. */
     struct BtlUnit *mirror; /* 0x328: unit drawn from this unit's transparency packet buffer */
     s32 transparencyBuffer; /* 0x32C: mirror pass's 512x224 transfer image. */
     s32 transparencyBufferAllocation; /* 0x330: general allocation released with the image. */
@@ -236,7 +236,7 @@ typedef struct BtlUnit {
     s32 gunResourceFlags;
     u8 lookupId;
     u8 pad11D[3];
-    DatPartyRecord partyRecord; /* 0x120: complete copied roster record (0x1C4). */
+    datUnitWork_t partyRecord; /* 0x120: complete copied roster record (0x1C4). */
     u8 partyIndex; /* 0x2E4: saved party-entry index, read with lbu. */
     u8 pad2E5;
     BtlUnitEntrySlot entrySlots[7]; /* 0x2E6: btlClearActorEntrySlot clears each signed record. */
@@ -252,9 +252,9 @@ typedef struct BtlUnit {
     u8 linkedNumberCount; /* 0x338: active linked-number displays; selects modulo-12 offset. */
     u8 counterDisplayCount; /* 0x339: active counter displays; selects modulo-12 offset. */
     u8 pad33A[2];
-    struct EffWorldNode *effectObject; /* 0x33C: effect whose first inner vector becomes the origin */
-    struct EvtUnit *ext; /* 0x340: the event manager's complete 0x1D0-byte work. */
-    struct SdfModel *transparencyModel; /* Alternate SDF model used by the transparency path. */
+    struct dds3Basic_t *effectObject; /* 0x33C: effect whose first inner vector becomes the origin */
+    struct evtUnitHandle_t *ext; /* 0x340: the event manager's complete 0x1D0-byte work. */
+    struct sdfModelRootNode_t *transparencyModel; /* Alternate SDF model used by the transparency path. */
     struct BtlUnit *mirror; /* 0x348: created and destroyed by the model-change task. */
     s32 transparencyBuffer; /* 0x34C: mirror pass's 512x224 transfer image. */
     s32 transparencyBufferAllocation; /* 0x350: general allocation released with the image. */

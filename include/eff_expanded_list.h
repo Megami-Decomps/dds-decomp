@@ -4,7 +4,7 @@
 #include "common.h"
 
 struct RefObj;
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Each serialized entry expands to itself and additionalCount children.
  * Animation sampling uses additionalCount as the segment length, with one
@@ -33,7 +33,7 @@ typedef struct EffExpandedList {
     s32 totalEntryCount;
     u32 refCount;
     s32 unk20;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
 } EffExpandedList;
 
 typedef char EffExpandedEntrySizeCheck[(sizeof(EffExpandedEntry) == 0x10) ? 1 : -1];

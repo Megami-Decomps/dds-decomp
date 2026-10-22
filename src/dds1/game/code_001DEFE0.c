@@ -75,7 +75,7 @@ extern s32 btlBuildEligibleTargetIndexList(void *actionArg, BtlIndexList *target
 extern s32 btlGetSelectedUnitProperty(s32 unitAddress);
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex);
 extern void effBTLFieldColorResetFlags(void);
-extern BattleEffect * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
+extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
 extern void effSweepFloorModelList(void);
 extern void effTickSlotVolumeFade(void);
 extern void evtFreeStage(void);
@@ -172,7 +172,7 @@ extern u8 D_0035F5D0[];
 extern char D_003BB6B0[];
 
 
-extern struct EffWorldNode *dds3AddLightObjectBasic(s32);
+extern struct dds3Basic_t *dds3AddLightObjectBasic(s32);
 
 
 
@@ -212,9 +212,9 @@ extern s32 btlRepositionPartyAroundBattleCenter(void);
 extern s32 btlAreWorkBuffersReady(void);
 
 
-s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *entry);
+s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *entry);
 
-struct EvtUnit;
+struct evtUnitHandle_t;
 
 extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
 
@@ -244,9 +244,9 @@ extern void btlSetUnitPosition(BtlUnit *object, void *position);
 
 extern void btlSetUnitRotation(BtlUnit *object, void *rotation);
 
-extern s32 sdfModelGetMarkPos(SdfModel *, s32);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *, s32);
 
-extern void mdlGetPosition(MdlCtx *);
+extern void mdlGetPosition(dds3ModelHandle_t *);
 
 extern void btlUnitGetBodyPosVU(u8 *);
 
@@ -256,7 +256,7 @@ extern u8 D_0037E110[];
 
 
 
-extern void effBattleUpdate(BattleEffect *);
+extern void effBattleUpdate(effBTLCutHandle_t *);
 
 extern f32 *D_00324770[];
 
@@ -6440,7 +6440,7 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
 
 /* Camera parameter banks are indexed with a native 0x80-byte stride. */
 
-extern void btlScaleCameraTrackValues(BtlLinkedCommand *, BtlCamState *,
+extern void func_001EBE88(BtlLinkedCommand *, BtlCamState *,
                          const BtlCameraTimedInstruction *, const s32 *,
                          const BtlCameraParameterRecord *, f32 *);
 
@@ -6455,7 +6455,7 @@ extern f32 D_0035F5B0[4];
 
 extern f32 D_003BB690;
 
-INCLUDE_ASM(const s32, "game/code_001DEFE0", btlScaleCameraTrackValues);
+INCLUDE_ASM(const s32, "game/code_001DEFE0", func_001EBE88);
 
 void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                   const BtlCameraTimedInstruction *instruction, s32 *currentIndex,
@@ -6477,7 +6477,7 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                 value[1] = records[*currentIndex].value[1];
                 value[2] = records[*currentIndex].value[2];
                 value[3] = records[*currentIndex].value[3];
-                btlScaleCameraTrackValues(command, pose, instruction, currentIndex, records, value);
+                func_001EBE88(command, pose, instruction, currentIndex, records, value);
                 switch (instruction->kind) {
                 case 1:
                     VU0_LOAD_VF(vf10, pose->direction);
@@ -7765,7 +7765,7 @@ void btlInitCursorAndApplyAction(BtlLinkedCommand *actor, BtlCamState *target) {
 void btlAdvanceWorldCounterAndSpawnActionObject(void) {
     u32 counter;
     BtlState *context;
-    struct EffWorldNode *object;
+    struct dds3Basic_t *object;
 
     context = (BtlState *)btlGetRuntime();
     counter = dds3AllocObjectId();
@@ -7823,17 +7823,17 @@ void btlFreeFieldBlocks(void) {
     BtlState *context = (BtlState *)btlGetRuntime();
     btlWaitForPendingWorkAndReleaseBuffers();
     if (context->fieldTBResourceId != 0) {
-        sdfMemFreeDelayedDirect((struct SdfMemBlock *)context->fieldTBResourceId);
+        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)context->fieldTBResourceId);
         context->fieldTBResourceId = 0;
         btlBossDebugPrintf(D_003A4AD8);
     }
     if (context->fieldF2ResourceId != 0) {
-        sdfMemFreeDelayedDirect((struct SdfMemBlock *)context->fieldF2ResourceId);
+        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)context->fieldF2ResourceId);
         context->fieldF2ResourceId = 0;
         btlBossDebugPrintf(D_003A4AF0);
     }
     if (context->fieldF1ResourceId != 0) {
-        sdfMemFreeDelayedDirect((struct SdfMemBlock *)context->fieldF1ResourceId);
+        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)context->fieldF1ResourceId);
         context->fieldF1ResourceId = 0;
         btlBossDebugPrintf(D_003A4B08);
     }
@@ -8013,8 +8013,8 @@ void btlStepBlendColor(void) {
     btlStepTintTransition();
 }
 
-struct EffSolidRectParams;
-extern void dds3EffectFilter(struct EffSolidRectParams *source);
+struct dds3Effect_Filter_t;
+extern void dds3EffectFilter(struct dds3Effect_Filter_t *source);
 
 void effBTLFieldFilterDraw(void) {
     BtlTintTransition *transition = (BtlTintTransition *)D_0035F5D0;
@@ -8069,14 +8069,14 @@ void btlTickFieldSwayAndTint(void) {
 
 extern WorldTransformSetup D_003D74A0;
 
-extern void dds3SetLightObjectResoruce(EffWorldNode *, WorldTransformSetup *);
+extern void dds3SetLightObjectResoruce(dds3Basic_t *, WorldTransformSetup *);
 
-extern void dds3LinkSceneLight(EffWorldNode *object, s32 blendFrames);
+extern void dds3LinkSceneLight(dds3Basic_t *object, s32 blendFrames);
 
 /* Stage light/ambient RGB on the scene node and start its frames-long blend. */
 void btlBeginSceneLightColorTransition(f32 *lightColor, f32 *ambientColor, s32 frames) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    EffWorldNode *listener = work->sceneLightNode;
+    dds3Basic_t *listener = work->sceneLightNode;
 
     D_003D74A0.transform.position[0] = lightColor[0];
     D_003D74A0.transform.position[1] = lightColor[1];
@@ -8229,7 +8229,7 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
                                              args->fieldTB, 0);
             btlInitializeSceneLightingAndTint();
             if (blocks->fieldTBResourceId != 0) {
-                sdfMemFreeDelayedDirect((struct SdfMemBlock *)blocks->fieldTBResourceId);
+                sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)blocks->fieldTBResourceId);
                 blocks->fieldTBResourceId = 0;
                 btlBossDebugPrintf(D_003A4AD8);
             }
@@ -8387,7 +8387,7 @@ void *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value) {
 s32 btlRestoreSceneTransformLighting(SceneLightRestoreArgs *args) {
     BtlState *work;
     BtlUnit *unit;
-    EffWorldNode *listener;
+    dds3Basic_t *listener;
     u32 firstColor;
     u32 secondColor;
     u32 packedStart[4];
@@ -8765,7 +8765,7 @@ void sndAddEffectReferences(SoundEffectReferenceArgs *args) {
     ++target->effectLink.referenceCount;
 }
 
-extern void effBTLCutSetCutEndFrame(BattleEffect *, s32);
+extern void effBTLCutSetCutEndFrame(effBTLCutHandle_t *, s32);
 
 /* Advance the referenced battle effect; return one when its battle or duration ends. */
 s32 btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
@@ -9004,7 +9004,7 @@ extern char D_003A4C88[];
 
 s32 sndPollEffectLoad(EffectLoadArgs *args) {
     SoundResourceNode *effect = args->effect;
-    struct SdfMemBlock *resource;
+    struct sdfMemHandle_t *resource;
 
     if (effect->flags & 2) {
         return 1;
@@ -9697,8 +9697,8 @@ void btlUpdateJobPositionFromModel(s32 *args) {
     SoundHandleNode *node = (SoundHandleNode *)args;
     f32 pos[4];
 
-    if (sdfModelGetMarkPos(((MdlCtx *)node->actor)->inner, 1) == 0) {
-        mdlGetPosition((MdlCtx *)node->actor);
+    if (sdfModelGetMarkPos(((dds3ModelHandle_t *)node->actor)->inner, 1) == 0) {
+        mdlGetPosition((dds3ModelHandle_t *)node->actor);
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         pos[1] -= 150.0f;
     } else {
@@ -10252,7 +10252,7 @@ void sndReleaseSlotOwner(SoundSlotOwner *node) {
     node->work.refCount = count;
     if (count == 0) {
         u32 i = 0;
-        struct SdfMemBlock **resources = node->work.resourceHandles;
+        struct sdfMemHandle_t **resources = node->work.resourceHandles;
         struct FileRequest **requests = node->work.fileRequests;
         for (; i < 0x1D; i++, requests++, resources++) {
             if (*requests != 0) {
@@ -10465,7 +10465,7 @@ void btlPollMotionSoundResources(void) {
                 if (owner->work.fileRequests[slot] != 0) {
                     if (pacFileCheckEnd(
                             owner->work.fileRequests[slot]) != 0) {
-                        struct SdfMemBlock *resource = fileGetMemHandle(
+                        struct sdfMemHandle_t *resource = fileGetMemHandle(
                             owner->work.fileRequests[slot]);
 
                         struct FileRequest *completedRequest = owner->work.fileRequests[slot];
@@ -10517,7 +10517,7 @@ void btlPollMotionSoundResources(void) {
             for (owner = state->soundSlotOwners; owner != NULL; owner = owner->next) {
                 if (owner->flags & SOUND_SLOT_TRACK_LOAD_REQUESTED) {
                     SoundSlotWork *work = &owner->work;
-                    struct SdfMemBlock *block = work->resourceHandles[owner->work.pendingSlot];
+                    struct sdfMemHandle_t *block = work->resourceHandles[owner->work.pendingSlot];
                     s32 size = sdfMemGetSize(block);
                     u32 address = sdfMemGetPtr(work->resourceHandles[owner->work.pendingSlot]);
 
@@ -10582,7 +10582,7 @@ extern char D_003A5358[];
 
 s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
     char path[0x80];
-    struct SdfMemBlock *resource;
+    struct sdfMemHandle_t *resource;
     u32 data;
     u32 size;
 

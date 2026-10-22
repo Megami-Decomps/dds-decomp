@@ -8,13 +8,13 @@
 
 void dds3FreeSplineHandle(struct EffPrimitiveCurve *primitive);
 
-void dds3DeletePathControl(Dds3PathCurveWork *path) {
+void dds3DeletePathControl(dds3PathBasicControl_t *path) {
     dds3FreeSplineHandle(path->primitiveCurve);
     sdfChipFreeDirect(path);
 }
 
 /* vu0 routine: interpolate the path's XYZ keys into vf10. */
-void dds3PathBasicControlGetPos(Dds3PathCurveWork *path) {
+void dds3PathBasicControlGetPos(dds3PathBasicControl_t *path) {
     u32 segmentIndex;
     f32 interpolationWeight;
     Dds3PathKeyframes *keyframes;
@@ -40,7 +40,7 @@ void dds3PathBasicControlGetPos(Dds3PathCurveWork *path) {
     }
 }
 
-void dds3PathBasicControlGetRot(Dds3PathCurveWork *path) {
+void dds3PathBasicControlGetRot(dds3PathBasicControl_t *path) {
     u32 segmentIndex;
     f32 interpolationWeight;
     Dds3PathKeyframes *keyframes;
@@ -62,7 +62,7 @@ void dds3PathBasicControlGetRot(Dds3PathCurveWork *path) {
 }
 
 /* vu0 routine: lerp the three key vectors of adjacent path entries into transformParams, or clear it. */
-void dds3PathBasicControlNextStep(Dds3PathCurveWork *path, WorldTransformParams *transformParams) {
+void dds3PathBasicControlNextStep(dds3PathBasicControl_t *path, WorldTransformParams *transformParams) {
     u32 segmentIndex;
     f32 interpolationWeight;
     Dds3PathKeyframes *keyframes;

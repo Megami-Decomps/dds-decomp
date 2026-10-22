@@ -45,7 +45,7 @@ extern SdfFlagListWork *fldCameraColorEffect;
 
 extern u32 fldCameraColorEnabled;
 
-extern SdfTex *fldRainTextureReference;
+extern sdfTexHandle_t *fldRainTextureReference;
 
 extern u32 fldItemBoxObjBuf;
 
@@ -81,7 +81,7 @@ void fldInitializeCameraColorResource(void) {
     fldRainTextureReference = sdfTexSet((SdfTextureFileHeader *)(fldRainTextureData));
     fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
     if (fldRainTextureResource != 0) {
-        sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldRainTextureResource);
+        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldRainTextureResource);
         fldRainTextureResource = 0;
     }
     fldUpdateCameraColorEffect(fldCameraSettings);
@@ -138,7 +138,7 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
 /* Keep both the resource handles and retained addresses: callers use the
  * retained storage, whereas the handles are needed at release time. */
 void fldAllocPlaneTable(void) {
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(FIELD_VALUE_RECORD_STORAGE_SIZE);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(FIELD_VALUE_RECORD_STORAGE_SIZE);
     void *storage;
 
     fldValueRecordResource = (u32)allocation;
@@ -154,11 +154,11 @@ void fldAllocPlaneTable(void) {
 
 /* Release both retained resources and clear the usable buffer addresses. */
 void fldFreeMatterTable(void) {
-    sdfMemUnlock((struct SdfMemBlock *)fldValueRecordResource);
-    sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldValueRecordResource);
+    sdfMemUnlock((struct sdfMemHandle_t *)fldValueRecordResource);
+    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldValueRecordResource);
     fldMatterTable = NULL;
-    sdfMemUnlock((struct SdfMemBlock *)fldAuxRecordResource);
-    sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldAuxRecordResource);
+    sdfMemUnlock((struct sdfMemHandle_t *)fldAuxRecordResource);
+    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldAuxRecordResource);
     fldItemBoxObjBuf = 0;
 }
 
@@ -210,7 +210,7 @@ void fldMakeEveHitPlanes(f32 *vertices, f32 *normalX, f32 *normalY, f32 *normalZ
 }
 
 /* Return the first matching record's world node; NULL also denotes a missing ID. */
-struct EffWorldNode *fldFindMatterIndex(s32 id) {
+struct dds3Basic_t *fldFindMatterIndex(s32 id) {
     s32 index = 0;
 
     if (fldValueRecordCount > 0) {
@@ -227,7 +227,7 @@ struct EffWorldNode *fldFindMatterIndex(s32 id) {
 }
 
 /* Update every matching ID, including duplicates; leave other records intact. */
-void fldFindMatterIndexFrom(s32 id, struct EffWorldNode *worldNode) {
+void fldFindMatterIndexFrom(s32 id, struct dds3Basic_t *worldNode) {
     s32 index;
 
     for (index = 0; index < fldValueRecordCount; index++) {
@@ -925,8 +925,8 @@ void fldHitChkUnitElvOnly(f32 *input) {
     f32 absoluteDelta[4];
     f32 clearance;
     FldValueRecord *record;
-    ObjectTransform *transform;
-    ObjectTransform *anchor;
+    dds3PoseSet_t *transform;
+    dds3PoseSet_t *anchor;
     f32 distance;
     s32 relative;
     s32 inside;
@@ -1025,7 +1025,7 @@ void fldHitChkUnitElv(f32 *position) {
     index = fldGlobalBase.unk90;
     if (index != -1) {
         if (fldMatterTable[index].worldNode != 0) {
-            ObjectTransform *transform;
+            dds3PoseSet_t *transform;
 
             transform = fldMatterTable[index].worldNode->inner;
             movement[0] = transform->position[0] - fldMatterTable[index].previousPosition[0];
@@ -1042,7 +1042,7 @@ void fldHitChkUnitElv(f32 *position) {
                         fldGlobalBase.floor + 1,
                         fldMatterTable[index].sceneFlag) == 0) {
                 if (fldMatterTable[index].worldNode != 0) {
-                    ObjectTransform *transform;
+                    dds3PoseSet_t *transform;
 
                     transform = fldMatterTable[index].worldNode->inner;
                     movement[0] += transform->position[0] - fldMatterTable[index].previousPosition[0];
@@ -1125,7 +1125,7 @@ void fldHitChkUnitDamage(f32 *position) {
         if (fldValueRecordCount > 0) {
             areaState = &fldGlobalBase;
             do {
-                EffWorldNode *node;
+                dds3Basic_t *node;
 
                 margin = fldMatterTable[recordIndex].mode == 1 ? 45.0f : 60.0f;
                 if (pass == 0) {
@@ -1256,7 +1256,7 @@ f32 HitPositionInside3(s32 axisMode, s32 planeCount, f32 margin, f32 *position, 
 
 extern void fldToggleWorldNodeState(s64 enabled);
 
-extern void dds3MatterObjectBasicSetAlpMode(EffWorldNode *object, u32 value);
+extern void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *object, u32 value);
 
 s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
     f32 origin[4];
@@ -1265,8 +1265,8 @@ s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
     f32 probeStart[4];
     f32 probeEnd[4];
     f32 anchor[4];
-    ObjectTransform *transform;
-    EffWorldNode *secondary;
+    dds3PoseSet_t *transform;
+    dds3Basic_t *secondary;
     f32 startDistance;
     f32 endDistance;
     f32 total;
@@ -1384,7 +1384,7 @@ s32 fldHitChkEnemy(f32 *start, f32 *end, f32 *hitPoint) {
     f32 probeStart[4];
     f32 probeEnd[4];
     f32 anchor[4];
-    ObjectTransform *transform;
+    dds3PoseSet_t *transform;
     f32 startDistance;
     f32 endDistance;
     f32 total;

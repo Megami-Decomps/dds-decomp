@@ -44,7 +44,7 @@ extern void ptyAssignPartyRosterItemsAndMarkOwned(void);
 extern void sdfSaveResetSnapshot(void);
 extern void sdfRestoreResetSnapshot(void);
 
-s32 sdfBumpTickCounters(KwlnTask *task);
+s32 sdfBumpTickCounters(dds3ProcessID_t *task);
 
 void evtResetWorldAndProfileRuntime(void);
 
@@ -65,15 +65,15 @@ const char D_00412AB0[16] = "sys:[%s]\n";
 extern DatEnemyRecord *datEnemyRecords;
 
 
-extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32 statIndex);
+extern s32 datGetStatWithStatusOverride(datUnitWork_t *, s32 statIndex);
 
-extern u32 sdfRollActionHit(s32 channel, s32 queryArg, DatPartyRecord *item);
+extern u32 sdfRollActionHit(s32 channel, s32 queryArg, datUnitWork_t *item);
 
 extern void scrDestroyWorkTask(void);
 
 
 /* Linearly interpolated curve sample at `time`; 0 when no curve is active. */
-f32 dds3PathBasicControlGetFovy(Dds3PathCurveWork *user) {
+f32 dds3PathBasicControlGetFovy(dds3PathBasicControl_t *user) {
     u32 index;
     f32 fraction;
     Dds3PathKeyframes *curve;
@@ -150,8 +150,8 @@ void dds3PathBasicLoopOff(SdfFloatCounter *value) {
     value->flags = value->flags & ~SDF_FLOAT_COUNTER_WRAP_FLAG;
 }
 
-EffWorldNode *dds3AddPointBasic(u32 key, EvtWorldSourceTransformPrefix *source, const char *name) {
-    EffWorldNode *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_TRANSFORM_SOURCE);
+dds3Basic_t *dds3AddPointBasic(u32 key, EvtWorldSourceTransformPrefix *source, const char *name) {
+    dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_TRANSFORM_SOURCE);
 
     obj->data = source;
     obj->key = key;
@@ -159,23 +159,23 @@ EffWorldNode *dds3AddPointBasic(u32 key, EvtWorldSourceTransformPrefix *source, 
     return obj;
 }
 
-f32 *dds3GetTransformSourceData(EffWorldNode *node) {
+f32 *dds3GetTransformSourceData(dds3Basic_t *node) {
     return node->data;
 }
 
-void *dds3GetWorldNodeData(EffWorldNode *node) {
+void *dds3GetWorldNodeData(dds3Basic_t *node) {
     return node->data;
 }
 
 /* Load the world node's borrowed data vector into VF10. */
-void evtLoadValueVectorIntoVu(EffWorldNode *node) {
+void evtLoadValueVectorIntoVu(dds3Basic_t *node) {
     void *vec = dds3GetWorldNodeData(node);
 
     VU0_LOAD_VF_MEMORY(vf10, vec);
 }
 
 /* Same, from the second quadword in the borrowed vector. */
-void evtLoadValueSecondaryVectorIntoVu(EffWorldNode *node) {
+void evtLoadValueSecondaryVectorIntoVu(dds3Basic_t *node) {
     void *vec = (void *)((u8 *)dds3GetWorldNodeData(node) + 0x10);
 
     VU0_LOAD_VF_MEMORY(vf10, vec);
@@ -184,7 +184,7 @@ void evtLoadValueSecondaryVectorIntoVu(EffWorldNode *node) {
 
 /* Allocate the runtime state block, zero it and register the "GBWK" tick task. */
 void sdfCreateRuntimeTask(void) {
-    struct SdfMemBlock *mem = sdfMemAllocDirect(0x1E840);
+    struct sdfMemHandle_t *mem = sdfMemAllocDirect(0x1E840);
     DatGameState *state = (void *)sdfMemLock(mem);
 
     memset(state, 0, 0x1E840);
@@ -197,7 +197,7 @@ void sdfCreateRuntimeTask(void) {
 }
 
 void sdfDestroyRuntimeTask(void) {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
 
     dds3KillProcessName(sdfRuntimeTaskName, 0);
     sdfRuntimeTaskTeardownHook();
@@ -207,7 +207,7 @@ void sdfDestroyRuntimeTask(void) {
     DDS3_GBWK = 0;
 }
 
-s32 sdfBumpTickCounters(KwlnTask *task) {
+s32 sdfBumpTickCounters(dds3ProcessID_t *task) {
     DatGameState *runtime;
 
     runtime = DDS3_GBWK;
@@ -249,16 +249,16 @@ extern s32 D_00435DBC;
 extern s32 D_00435DC0;
 extern s8 D_00435DC4;
 extern s8 D_00435DC5;
-extern SdfMemBlock *D_00438E90;
-extern SdfMemBlock *D_00438E94;
-extern SdfMemBlock *D_00438E98;
-extern SdfMemBlock *D_00438E9C;
-extern SdfMemBlock *D_00438EA0;
-extern SdfMemBlock *D_00438EA4;
-extern SdfMemBlock *D_00438EA8;
+extern sdfMemHandle_t *D_00438E90;
+extern sdfMemHandle_t *D_00438E94;
+extern sdfMemHandle_t *D_00438E98;
+extern sdfMemHandle_t *D_00438E9C;
+extern sdfMemHandle_t *D_00438EA0;
+extern sdfMemHandle_t *D_00438EA4;
+extern sdfMemHandle_t *D_00438EA8;
 extern u32 D_00438EAC;
 extern void ptySaveActivePartyTemplates(void);
-extern SdfMemBlock *mtrMantraEventBitPush(void);
+extern sdfMemHandle_t *mtrMantraEventBitPush(void);
 
 
 /* Snapshot the progress that survives a full runtime reset: the three carried flags, header words, battle flags,
@@ -311,7 +311,7 @@ void sdfSaveResetSnapshot(void) {
 }
 
 extern void mnuMarkEntryBlocked(s32);
-extern void mtrMantraEventBitPop(SdfMemBlock *);
+extern void mtrMantraEventBitPop(sdfMemHandle_t *);
 extern void dds3ForEachFlagged(void);
 extern void ptyClearSelectedSkillFlagsFromActiveEntries(void);
 extern void ptyClearItemF8FromPartyAndInventory(void);
@@ -319,7 +319,7 @@ extern void ptyClearItemF8FromPartyAndInventory(void);
 void sdfRestoreResetSnapshot(void) {
     DatMantraBitmap *mantra;
     DatProfileBank *profiles;
-    DatPartyRecord *templates;
+    datUnitWork_t *templates;
     void *bytes;
     DatGameState *state;
     u32 i;
@@ -369,7 +369,7 @@ void sdfRestoreResetSnapshot(void) {
 
 /* A full reset preserves the scene allocation and restores the saved runtime data. */
 void sdfResetGameRuntime(s32 fullReset) {
-    struct SdfMemBlock *backingAllocation;
+    struct sdfMemHandle_t *backingAllocation;
 
     if (fullReset == 1) {
         sdfSaveResetSnapshot();
@@ -407,8 +407,8 @@ void sdfFirePendingCallback(void) {
     scrDestroyWorkTask();
 }
 
-u8 scrIsCurrentWorkTask(struct ScrData *expected) {
-    struct ScrData *current;
+u8 scrIsCurrentWorkTask(struct scrProcessWork_s *expected) {
+    struct scrProcessWork_s *current;
 
     current = scrGetWorkTaskHandle();
     return current == expected;
@@ -416,8 +416,8 @@ u8 scrIsCurrentWorkTask(struct ScrData *expected) {
 
 /* Load the channel file and copy its size-prefixed segments into table slots. */
 void sdfReloadChannelSegments(SdfChannel *table) {
-    DevState *command;
-    struct SdfMemBlock *block;
+    sdfFileCmdHandle_t *command;
+    struct sdfMemHandle_t *block;
     s32 size;
     u8 *address;
     u32 segmentBytes;
@@ -470,7 +470,7 @@ void sdfResetChannels(void) {
 }
 
 /* Enemy vitals use their base record; party vitals use level growth and bonuses. */
-s32 ptyComputeMaxHp(DatPartyRecord *unit) {
+s32 ptyComputeMaxHp(datUnitWork_t *unit) {
     s32 level;
     s32 stat;
     s32 result;
@@ -491,7 +491,7 @@ s32 ptyComputeMaxHp(DatPartyRecord *unit) {
     return result;
 }
 
-s32 ptyComputeMaxMp(DatPartyRecord *unit) {
+s32 ptyComputeMaxMp(datUnitWork_t *unit) {
     s32 level;
     s32 stat;
     s32 result;
@@ -573,7 +573,7 @@ s32 sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
 }
 
 
-f32 sdfGetHpBracketScale(DatPartyRecord *unit) {
+f32 sdfGetHpBracketScale(datUnitWork_t *unit) {
     s32 hp = unit->hp;
     s32 band;
 
@@ -593,7 +593,7 @@ f32 sdfGetHpBracketScale(DatPartyRecord *unit) {
     return datBattleParameters->partyHpScale[band];
 }
 
-s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital) {
+s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, datUnitWork_t *item, u32 mode, u8 vital) {
     s32 healing;
     s32 damage;
     u16 current;
@@ -703,7 +703,7 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *ite
         }
         damage += base;
         if (type == 16) {
-            damage = damage * sdfGetHpBracketScale((DatPartyRecord *)queryArg);
+            damage = damage * sdfGetHpBracketScale((datUnitWork_t *)queryArg);
         }
         if (type < 14) {
             if (type >= 12) {
@@ -734,11 +734,11 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *ite
     return damage > 0 ? -damage : healing;
 }
 
-extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
+extern s32 datGetEffectiveAffinity(datUnitWork_t *, s32);
 extern char D_00412B08[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
 /* Rolls whether the action hits: returns the surviving channel mask, or 0 on a miss. */
-u32 sdfRollActionHit(s32 channel, s32 queryArg, DatPartyRecord *packed) {
+u32 sdfRollActionHit(s32 channel, s32 queryArg, datUnitWork_t *packed) {
     u16 list[16];
     u16 count;
     u16 bit;
@@ -790,7 +790,7 @@ u32 sdfRollActionHit(s32 channel, s32 queryArg, DatPartyRecord *packed) {
     }
     flag = mask & 1;
     if (flag) {
-        DatPartyRecord *actor = packed;
+        datUnitWork_t *actor = packed;
 
         if (actor->hp * 100 / actor->maxHp >= 25) {
             mask &= 0xFFFE;
@@ -819,7 +819,7 @@ u32 sdfRollActionHit(s32 channel, s32 queryArg, DatPartyRecord *packed) {
     return hit ? mask : 0;
 }
 
-u32 sdfQueryChannelValue(s32 channel, s32 queryArg, DatPartyRecord *item) {
+u32 sdfQueryChannelValue(s32 channel, s32 queryArg, datUnitWork_t *item) {
     u32 result;
     u32 mode = datCommandRecords[channel].attribute.parts.kind;
 
@@ -834,7 +834,7 @@ u32 sdfQueryChannelValue(s32 channel, s32 queryArg, DatPartyRecord *item) {
     return result;
 }
 
-u32 sdfQueryChannelBits(s32 channel, s32 queryArg, DatPartyRecord *item) {
+u32 sdfQueryChannelBits(s32 channel, s32 queryArg, datUnitWork_t *item) {
     u32 result;
 
     if (datCommandRecords[channel].attribute.parts.kind != DAT_COMMAND_ATTRIBUTE_KIND_FLAG_MASK) {
@@ -849,12 +849,12 @@ u32 sdfQueryChannelBits(s32 channel, s32 queryArg, DatPartyRecord *item) {
 
 extern void datResetBadStat(void *item, s32 mask);
 /* HP/MP mutators deliberately have no prototypes in this TU; see docs/idioms.md. */
-void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 minimumValue);
+void sdfRaisePackedChannelValue(datUnitWork_t *item, u32 minimumValue);
 
-extern s32 datAddHp(DatPartyRecord *unit, s32 delta);
-extern s32 datAddMp(DatPartyRecord *unit, s32 delta);
+extern s32 datAddHp(datUnitWork_t *unit, s32 delta);
+extern s32 datAddMp(datUnitWork_t *unit, s32 delta);
 
-s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
+s32 sdfApplyCommandResults(s32 channel, s32 queryArg, datUnitWork_t *item) {
     s32 hpDelta;
     s32 mpDelta;
     u32 value;
@@ -897,12 +897,12 @@ s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
     return 1;
 }
 
-void sdfSetPackedValuePreservingFlag(DatPartyRecord *item, u16 channelValue) {
+void sdfSetPackedValuePreservingFlag(datUnitWork_t *item, u16 channelValue) {
     item->status = (item->status & SDF_PACKED_FLAG) | (channelValue & SDF_PACKED_VALUE_MASK);
 }
 
 /* Raise the packed value to `minimumValue` (never lower it); reaching 0x40, 0x80 or 0x400 re-randomizes the entry. */
-void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 minimumValue) {
+void sdfRaisePackedChannelValue(datUnitWork_t *item, u32 minimumValue) {
     s32 channel;
 
     if ((item->status & SDF_PACKED_VALUE_MASK) < minimumValue) {

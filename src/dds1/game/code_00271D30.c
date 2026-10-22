@@ -105,7 +105,7 @@ extern void p2sdBgmVolDown(void);
 /* Allocate and clear menu work, select its request-list mode from the
  * previous sample, then initialize the owned UI and resource state. */
 StaffMenuWork *mnuCreateStaffCampWork(void) {
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(sizeof(StaffMenuWork));
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(sizeof(StaffMenuWork));
     StaffMenuWork *menu = (StaffMenuWork *)sdfMemLock(allocation);
 
     memset(menu, 0, sizeof(*menu));
@@ -135,7 +135,7 @@ extern void p2sdBgmVolUp(void);
 
 /* Ignore null task userdata; otherwise drain transitions and release owned
  * resources in shutdown order before marking camp cleanup complete. */
-void mnuDestroyStaffMenuTask(KwlnTask *task) {
+void mnuDestroyStaffMenuTask(dds3ProcessID_t *task) {
     StaffMenuWork *menu = (StaffMenuWork *)dds3GetProcessData(task);
     if (menu == NULL) {
         return;
@@ -156,7 +156,7 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
 
 extern void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface);
 
-s32 mnuDrawAndStepStaffGradientFade(KwlnTask *task) {
+s32 mnuDrawAndStepStaffGradientFade(dds3ProcessID_t *task) {
     s32 context;
 
     context = dds3GetProcessData(task);
@@ -173,7 +173,7 @@ extern s32 checkConfigState(void);
 
 /* Mapped cancel input closes camp only through the full guard chain.
  * Return -1 on closure, otherwise 0; blocked nested guards use the alternate sound. */
-s32 mnuStaffCampCancelCheck(KwlnTask *task) {
+s32 mnuStaffCampCancelCheck(dds3ProcessID_t *task) {
     u32 mappedButtons = mnuMapPadMaskToFlags(MNU_CAMP_CANCEL_MASK);
     s32 result;
 
@@ -196,18 +196,18 @@ s32 mnuStaffCampCancelCheck(KwlnTask *task) {
     return result;
 }
 
-extern s32 mnuHandleCampFieldSkillInput(KwlnTask *task);
+extern s32 mnuHandleCampFieldSkillInput(dds3ProcessID_t *task);
 
-extern s32 mnuDrawStaffCampImageScreen(KwlnTask *task);
+extern s32 mnuDrawStaffCampImageScreen(dds3ProcessID_t *task);
 
-extern s32 mnuFinishStaffConfigPopup(KwlnTask *task);
+extern s32 mnuFinishStaffConfigPopup(dds3ProcessID_t *task);
 
-extern s32 mnuInitializeCampMenuWhenResourcesReady(KwlnTask *task);
+extern s32 mnuInitializeCampMenuWhenResourcesReady(dds3ProcessID_t *task);
 /* Share menu userdata across the input/draw/owner tasks, attach fade and cancel
  * tasks to drawing, then start the opening fade and mark camp active. */
 void mnuCreateCampTasks(void) {
     StaffMenuWork *menu;
-    KwlnTask *drawTask;
+    dds3ProcessID_t *drawTask;
 
     menu = mnuCreateStaffCampWork();
     dds3StartProcess(mnuCampInputTaskName, 0x3F2, 1, 0, mnuHandleCampFieldSkillInput, 0, (u32)menu);
@@ -253,9 +253,9 @@ u8 mnuIsFadeIdle(void) {
 
 extern s32 itfCreateTightFont3TextGlyph(s32, s32, s32, u32, u32, s32);
 
-typedef struct FrFontGlyph FrFontGlyph;
+typedef struct _FRQ _FRQ;
 
-extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
 
 extern char D_003BC6C0[];
 
@@ -268,15 +268,15 @@ void mnuDrawStaffCampSlotsAndCurrency(s32 unused0, s32 unused1, s32 z, s32 first
     itfDrawGridWithResolvedSlot(0x2B0, 0xCE8, 0, 1, (EffectSlotSet *)(u32)secondSlot, 3, drawFlags);
     sprintf(text, D_003BC6C0, DDS3_GBWK->header.currency);
     glyph = itfCreateTightFont3TextGlyph(0x4B0, 0xCD8, z, 0x80808080, (u32)text, 0);
-    frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, drawFlags);
-    frDestroyFontRequestAfter((FrFontGlyph *)glyph);
+    frFontDrawGlyphChain((_FRQ *)glyph, 1, drawFlags);
+    frDestroyFontRequestAfter((_FRQ *)glyph);
 }
 
 extern u8 *mnuCampSelectionPromptTexts[];
 
 /* Create and queue the table-selected image sprite; imageIndex is unchecked. */
 void mnuCreateStaffImageSprite(s32 imageIndex) {
-    FrFontGlyph *sprite = itfCreateConvertedTextGlyph(0x2F0, 0x1E0, 0, 0xa09dc35a,
+    _FRQ *sprite = itfCreateConvertedTextGlyph(0x2F0, 0x1E0, 0, 0xa09dc35a,
                                       mnuCampSelectionPromptTexts[imageIndex], 0);
     frFontDrawGlyphChain(sprite, 1, 0x54);
     frDestroyFontRequestAfter(sprite);
@@ -298,12 +298,12 @@ void mnuDrawStaffGridLabelsForKind(s32 kind, struct EffectSlotSet *resources) {
 }
 
 
-extern struct FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
+extern struct _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
 
 void mnuDrawCampGridAndLabel(s32 kind, s32 labelIndex, s32 textTable, s32 context,
                    s32 drawOption, s32 textOption, s32 layer) {
     StaffMenuWork *menu = (StaffMenuWork *)context;
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
     if (kind == 0) {
         itfDrawGridWithResolvedSlot(0x1C0, 0xA20, 0, drawOption, menu->staffSlots.baseResources[5], 0x1E, layer);
     } else {
@@ -326,7 +326,7 @@ void mnuDrawCampGridAndLabelDefault(s32 kind, s32 labelIndex, s32 textTable, s32
 extern void mnuDrawBackdrop(MenuAssets *assets, s32 option);
 extern void mnuDrawStaffScrollPanel(s32 x, s32 y, s32 depth, MenuScrollPanel *panel, s32 surface);
 
-void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task) {
+void mnuDrawStaffCampScreen(s32 kind, dds3ProcessID_t *task) {
     StaffMenuWork *menu = (StaffMenuWork *)dds3GetProcessData(task);
 
     mnuDrawBackdrop((MenuAssets *)menu->background, 0x20);
@@ -342,7 +342,7 @@ void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task) {
     }
 }
 
-void mnuDrawCampScreenDefault(KwlnTask *task) {
+void mnuDrawCampScreenDefault(dds3ProcessID_t *task) {
     mnuDrawStaffCampScreen(0, task);
 }
 

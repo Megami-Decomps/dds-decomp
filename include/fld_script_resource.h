@@ -7,7 +7,7 @@ struct MotionTable;
 
 typedef struct FldScriptResource {
     u8 opaque00[0x10];
-    SdfItemListRef itemList;
+    sdfModelDef_t itemList;
     struct MotionTable *motionTable;
 } FldScriptResource;
 

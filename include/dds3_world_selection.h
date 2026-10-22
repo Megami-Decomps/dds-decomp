@@ -4,10 +4,10 @@
 #include "dds3_world_primary.h"
 #include "dds3_world_secondary.h"
 
-struct EffWorldNode;
+struct dds3Basic_t;
 
 /* Setting either selection does not transfer ownership. */
-void dds3SetActiveScene(struct EffWorldNode *primaryObject);
-void dds3SetControlScene(struct EffWorldNode *secondaryObject);
+void dds3SetActiveScene(struct dds3Basic_t *primaryObject);
+void dds3SetControlScene(struct dds3Basic_t *secondaryObject);
 
 #endif

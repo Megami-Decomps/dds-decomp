@@ -220,7 +220,7 @@ void sdfPacMemDecoderFuncInit(PacState *state, SdfPacStreamPacketHeader *packet)
         } else {
             node->resourceHandle = sdfMemAllocDirect(allocationSize);
         }
-        state->outputCursor = node->dataCursor = (u8 *)sdfMemLock((struct SdfMemBlock *)(node->resourceHandle));
+        state->outputCursor = node->dataCursor = (u8 *)sdfMemLock((struct sdfMemHandle_t *)(node->resourceHandle));
         switch (packet->flags & PAC_ENCODING_MASK) {
         case PAC_ENCODING_RAW:
             state->onInput = sdfPacMemDecoderFunc;

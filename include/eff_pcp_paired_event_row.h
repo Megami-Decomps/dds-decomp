@@ -4,14 +4,14 @@
 #include "common.h"
 
 struct EffThunderFragmentWork;
-struct EffEventWork;
+struct effEveBEDCutHandle_t;
 
 /* The paired PCP event owners allocate count * 0x20 bytes after the 0xA4
  * byte work header and initialize/release two event nodes per row. */
 typedef struct EffPCPPairedEventRow {
     struct EffThunderFragmentWork *fragment;
-    struct EffEventWork *eventA;
-    struct EffEventWork *eventB;
+    struct effEveBEDCutHandle_t *eventA;
+    struct effEveBEDCutHandle_t *eventB;
     f32 phase;
     f32 radius;
     f32 tilt;

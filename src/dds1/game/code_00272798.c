@@ -14,7 +14,7 @@
 
 extern void dds3ConfigProcessStart(s32 mode);
 
-typedef struct FrFontGlyph FrFontGlyph;
+typedef struct _FRQ _FRQ;
 extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
 extern char D_003BC6C8[];
 extern const char D_003BC6D0[];
@@ -40,7 +40,7 @@ extern u8 mnuCampCommandDispatchEntries[];
 
 
 
-s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
+s32 mnuHandleCampFieldSkillInput(dds3ProcessID_t *callback) {
     StaffMenuWork *context;
     s32 *popup;
     u32 input;
@@ -92,7 +92,7 @@ extern void mnuDrawCampGridAndLabelDefault(s32, s32, const void *, StaffMenuWork
 extern void mnuDrawStaffCampSlotsAndCurrency(s32, s32, s32, struct EffectSlotSet *, struct EffectSlotSet *, s32);
 extern const u8 mnuCampCommandHelpTextBank[];
 
-s32 mnuDrawStaffCampImageScreen(KwlnTask *task) {
+s32 mnuDrawStaffCampImageScreen(dds3ProcessID_t *task) {
     StaffMenuWork *context = (StaffMenuWork *)dds3GetProcessData(task);
     s32 state;
 
@@ -110,14 +110,14 @@ s32 mnuDrawStaffCampImageScreen(KwlnTask *task) {
 }
 
 /* Submit a request to the active menu dispatcher in mode 2. */
-s32 mnuFinishStaffConfigPopup(KwlnTask *request) {
+s32 mnuFinishStaffConfigPopup(dds3ProcessID_t *request) {
     s32 context = dds3GetProcessData(request);
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 extern void mnuSetStaffDisplayMode(s32 nextCategory, StaffMenuWork *menu);
 
-s32 mnuStartStaffDisplay(KwlnTask *task) {
+s32 mnuStartStaffDisplay(dds3ProcessID_t *task) {
     StaffMenuWork *context = (StaffMenuWork *)dds3GetProcessData(task);
     mnuSetStaffDisplayMode(5, context);
     mnuActivatePanelAndConfigureGridResources(context->scrollPanel, context->singleResource, 0, 1);
@@ -126,7 +126,7 @@ s32 mnuStartStaffDisplay(KwlnTask *task) {
 }
 
 /* Switch the staff display to the fourth base resource. */
-u32 mnuConfigureCampDrawContextPanel(KwlnTask *task) {
+u32 mnuConfigureCampDrawContextPanel(dds3ProcessID_t *task) {
     StaffMenuWork *context = (StaffMenuWork *)dds3GetProcessData(task);
     mnuActivatePanelAndConfigureGridResources(context->scrollPanel,
                                                context->staffSlots.baseResources[3], 0, 1);
@@ -134,7 +134,7 @@ u32 mnuConfigureCampDrawContextPanel(KwlnTask *task) {
 }
 
 /* Dispatch a callback; on idle, install the default entry unless busy. */
-s32 mnuDispatchStaffMenuWithIdlePopup(KwlnTask *callback) {
+s32 mnuDispatchStaffMenuWithIdlePopup(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
     s32 *dispatchEntry = (s32 *)(context + 0x54);
     s32 state = menuRunPanel((void *)context, 0, (void *)callback);
@@ -147,7 +147,7 @@ s32 mnuDispatchStaffMenuWithIdlePopup(KwlnTask *callback) {
     return state;
 }
 
-s32 mnuDrawStaffImageScreen(KwlnTask *callback) {
+s32 mnuDrawStaffImageScreen(dds3ProcessID_t *callback) {
     StaffMenuWork *context = (StaffMenuWork *)dds3GetProcessData(callback);
     mnuDrawBackdrop((s32)(context->background), 0x20);
     mnuDrawStaffScrollPanel(-0x10, -8, 0, context->scrollPanel, 0x54);
@@ -156,7 +156,7 @@ s32 mnuDrawStaffImageScreen(KwlnTask *callback) {
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
-s32 mnuFinishStaffImagePopup(KwlnTask *request) {
+s32 mnuFinishStaffImagePopup(dds3ProcessID_t *request) {
     s32 context = dds3GetProcessData(request);
     return menuRunPanel((void *)context, 2, (void *)request);
 }
@@ -175,19 +175,19 @@ void mnuDrawStaffItemListEntry(s32 x, s32 y, s32 z, struct MenuList *list,
     u32 color = 0xA09DC380;
 
     if (quantity != 0) {
-        FrFontGlyph *label;
-        FrFontGlyph *count;
+        _FRQ *label;
+        _FRQ *count;
         char buffer[0x20];
 
         if (node->flags48 & 1) {
             color = 0xA09DC340;
         }
-        label = (FrFontGlyph *)itfCreateFont2TextGlyph(x + 0x810, y + 0x10, z, color,
+        label = (_FRQ *)itfCreateFont2TextGlyph(x + 0x810, y + 0x10, z, color,
                                           D_003BC6C8, 0);
         frSetFontColorNo(label, 0);
         sprintf(buffer, D_003BC6D0,
                        DDS3_GBWK->inventory.counts[node->sortKeySecondary]);
-        count = (FrFontGlyph *)itfCreateFont2TextGlyph(x + 0x910, y + 0x20, z, color,
+        count = (_FRQ *)itfCreateFont2TextGlyph(x + 0x910, y + 0x20, z, color,
                                           buffer, (s32)label);
         frFontDrawGlyphChain(count, 1, drawArg);
         frDestroyFontRequestAfter(count);

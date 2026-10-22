@@ -8,11 +8,11 @@
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
 
-s32 sdfFileCmdFileSize(DevState *state);
+s32 sdfFileCmdFileSize(sdfFileCmdHandle_t *state);
 extern s32 movieStreamSema;
 
 /* Queue up to 0x4000 bytes into the linear ring; state 5 means insufficient room. */
-void movieReadNextChunk(MovObj *movie) {
+void movieReadNextChunk(movieStream_t *movie) {
     MovLinearStream *stream = movie->stream.linear;
     s32 remaining = movie->remainingBytes;
     s32 readSize;
@@ -20,7 +20,7 @@ void movieReadNextChunk(MovObj *movie) {
     u8 *streamPosition;
     u8 *ringStart;
     u8 *ringEnd;
-    DevState *deviceState;
+    sdfFileCmdHandle_t *deviceState;
 
     if (remaining == 0) {
         return;
@@ -49,7 +49,7 @@ void movieReadNextChunk(MovObj *movie) {
 }
 
 /* Consume device completions and stop requests for the linear stream; always return 0. */
-s32 movieGetStreamSize(DevState *deviceState, s32 operation, void *data, s32 bytesRead, MovObj *movie) {
+s32 movieGetStreamSize(sdfFileCmdHandle_t *deviceState, s32 operation, void *data, s32 bytesRead, movieStream_t *movie) {
     MovLinearStream *stream;
     s32 restoreInterrupts;
 
@@ -107,7 +107,7 @@ s32 movieGetStreamSize(DevState *deviceState, s32 operation, void *data, s32 byt
 }
 
 /* Queue a movie-PAC block only when both ring-buffer room predicates allow it. */
-void movieReadHeaderChunk(MovObj *movie) {
+void movieReadHeaderChunk(movieStream_t *movie) {
     MovPacStream *stream;
     s32 remaining;
 
@@ -125,7 +125,7 @@ void movieReadHeaderChunk(MovObj *movie) {
 }
 
 /* Process movie-PAC header, block-mask and payload completions; always return 0. */
-s32 movieReadChunk(DevState *deviceState, s32 operation, void *readBuffer, s32 bytesRead, MovObj *movie) {
+s32 movieReadChunk(sdfFileCmdHandle_t *deviceState, s32 operation, void *readBuffer, s32 bytesRead, movieStream_t *movie) {
     MovPacStream *stream;
 
     movie->deviceState = deviceState;
@@ -244,7 +244,7 @@ s32 movieReadChunk(DevState *deviceState, s32 operation, void *readBuffer, s32 b
 }
 
 /* Sound/IPU source operations: report available bytes/EOF, copy data, or resume reads. */
-s32 movieCopyChunk(SdfStreamFrameNode *unused, MovObj *movie, s32 operation, void *dataBuffer, s32 byteCount) {
+s32 movieCopyChunk(sdfIpuDecodeCb_t *unused, movieStream_t *movie, s32 operation, void *dataBuffer, s32 byteCount) {
     MovLinearStream *stream = movie->stream.linear;
 
     switch (operation) {
@@ -294,7 +294,7 @@ s32 movieCopyChunk(SdfStreamFrameNode *unused, MovObj *movie, s32 operation, voi
 }
 
 /* Sound/IPU source operations for the movie-PAC ring; retain the native copy helper. */
-s32 movieParseHeader(SdfStreamFrameNode *unused, MovObj *movie, s32 operation, void *dataBuffer, s32 byteCount) {
+s32 movieParseHeader(sdfIpuDecodeCb_t *unused, movieStream_t *movie, s32 operation, void *dataBuffer, s32 byteCount) {
     void movieMemcpy(void *destination, const void *source, u32 byteCount) {
         memcpy(destination, source, byteCount);
     }

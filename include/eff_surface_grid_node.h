@@ -15,10 +15,10 @@ typedef struct EffSurfaceGridNode {
     u32 type;       // 0x20
     u128 *buffer;     // 0x24
     u32 *tail;       // 0x28
-    SdfAsset *handle; // 0x2C
+    sdfMat_t *handle; // 0x2C
     u128 *queueA;     // 0x30
     u32 *queueB;     // 0x34
-    struct SdfMemBlock *allocation; // 0x38
+    struct sdfMemHandle_t *allocation; // 0x38
 } EffSurfaceGridNode;
 
 typedef char EffSurfaceGridNodeSizeCheck[(sizeof(EffSurfaceGridNode) == 0x3C) ? 1 : -1];
@@ -32,10 +32,10 @@ typedef struct EffSurfaceGridNode {
     u32 type;           // 0x30
     u128 *buffer;         // 0x34
     u32 *tail;           // 0x38
-    SdfAsset *handle;     // 0x3C
+    sdfMat_t *handle;     // 0x3C
     u128 *queueA;         // 0x40
     u32 *queueB;          // 0x44
-    struct SdfMemBlock *allocation; // 0x48
+    struct sdfMemHandle_t *allocation; // 0x48
 } EffSurfaceGridNode;
 
 typedef char EffSurfaceGridNodeSizeCheck[(sizeof(EffSurfaceGridNode) == 0x4C) ? 1 : -1];

@@ -3,9 +3,9 @@
 
 #include "common.h"
 
-struct Motion;
+struct sdfMotionCtrlr_t;
 struct MotionTable;
-struct SdfModel;
+struct sdfModelRootNode_t;
 
 typedef enum {
     SDF_MOTION_STATE_UNINITIALIZED = 0,
@@ -15,15 +15,15 @@ typedef enum {
     SDF_MOTION_STATE_SUSPENDED = 6,
 } SdfMotionState;
 
-void sdfMotionChange(struct Motion *motion, s32 motionIndex, s32 loopEnabled);
-void *sdfMotionNodeNew(struct Motion *motion, u32 commandWord, s32 targetIndex);
-struct Motion *sdfMotionCtrlrNew(struct SdfModel *model, struct MotionTable *table);
-void sdfMotionCtrlrFree(struct Motion *motion);
-void sdfMotionChangeBlend(struct Motion *motion, s32 motionIndex, s32 loopEnabled,
+void sdfMotionChange(struct sdfMotionCtrlr_t *motion, s32 motionIndex, s32 loopEnabled);
+void *sdfMotionNodeNew(struct sdfMotionCtrlr_t *motion, u32 commandWord, s32 targetIndex);
+struct sdfMotionCtrlr_t *sdfMotionCtrlrNew(struct sdfModelRootNode_t *model, struct MotionTable *table);
+void sdfMotionCtrlrFree(struct sdfMotionCtrlr_t *motion);
+void sdfMotionChangeBlend(struct sdfMotionCtrlr_t *motion, s32 motionIndex, s32 loopEnabled,
                          f32 blendLeadFrames, f32 blendDurationFrames);
-void sdfMotionSeek(struct Motion *motion, f32 frame);
-s32 sdfMotionNext(struct Motion *motion);
-void sdfMotionPause(struct Motion *motion);
-void sdfMotionPauseOff(struct Motion *motion);
+void sdfMotionSeek(struct sdfMotionCtrlr_t *motion, f32 frame);
+s32 sdfMotionNext(struct sdfMotionCtrlr_t *motion);
+void sdfMotionPause(struct sdfMotionCtrlr_t *motion);
+void sdfMotionPauseOff(struct sdfMotionCtrlr_t *motion);
 
 #endif /* SDF_MOTION_H */

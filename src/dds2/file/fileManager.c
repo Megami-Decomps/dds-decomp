@@ -30,7 +30,7 @@ s32 fileHandleFree(struct FileRequest *request) {
     }
     if (request->state == FILE_REQUEST_COMPLETE) {
         if (request->deviceRequest != NULL) {
-            sdfFileCmdFree((DevState *)request->deviceRequest);
+            sdfFileCmdFree((sdfFileCmdHandle_t *)request->deviceRequest);
         }
         sdfChipFreeDirect(request->name);
         sdfChipFreeDirect(request);
@@ -178,7 +178,7 @@ struct FileRequest *fileLoadUseTail(const char *requestName) {
 }
 
 /* Return the stored allocation descriptor without changing ownership; work is required. */
-struct SdfMemBlock *fileGetMemHandle(const struct FileRequest *request) {
+struct sdfMemHandle_t *fileGetMemHandle(const struct FileRequest *request) {
     return request->allocationHandle;
 }
 
@@ -302,6 +302,6 @@ void pacRead(FileRequest *request) {
         chunkBytes = FILE_READ_SLOT_BYTES;
     }
     SignalSema(work->sema);
-    sdfFileCmdRead((DevState *)request->deviceRequest,
+    sdfFileCmdRead((sdfFileCmdHandle_t *)request->deviceRequest,
                     work->buffer + (slotIndex << FILE_READ_SLOT_SHIFT), chunkBytes);
 }

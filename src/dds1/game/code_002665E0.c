@@ -71,8 +71,8 @@ extern const BrsCornerColors D_003AFC40;
 
 void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
                    BrsProgressRow *progressRow, s32 surfaceIndex, s32 rowIndex) {
-    DatPartyRecord *unit = progressRow->unit;
-    DatPartyRecord *tintUnit;
+    datUnitWork_t *unit = progressRow->unit;
+    datUnitWork_t *tintUnit;
     BrsCornerColors color = D_003AFC40;
     s32 iconX;
     s32 iconY;
@@ -131,7 +131,7 @@ void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
 
 
 extern void nbPlaySe(u32 sequenceId);
-extern u32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta);
+extern u32 ptyComputeTotalExp(datUnitWork_t *unit, s32 levelDelta);
 extern s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
 
 void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
@@ -229,7 +229,7 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
 #include "eff.h"
 #include "fr_font.h"
 #include "fr_font_draw_glyph.h"
-extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
+extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 extern const char D_003BC578[];
 
@@ -252,7 +252,7 @@ void brsDrawLevelProgressDetails(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
     s32 baseExp;
     s32 progress;
     s32 required;
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
     s32 rawPercent;
     s32 displayPercent;
     EffectSlotSet *resource;
@@ -601,8 +601,8 @@ void brsDrawProfileProgressIndicator(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
 }
 
 
-extern u32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta);
-extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
+extern u32 ptyComputeTotalExp(datUnitWork_t *unit, s32 levelDelta);
+extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
 extern u32 prfGetCapValue(u16);
 
 s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *progressRow, s32 rowIndex, s8 progressKind) {
@@ -718,7 +718,7 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *prog
 
 extern s32 dds3AddCameraObjectBasicTypeFree(s32 counter, f32 *position, f32 *rotation);
 
-struct EffWorldNode;
+struct dds3Basic_t;
 
 extern void dds3GetRadiusPoseSet(s32 object, f32 value);
 
@@ -760,7 +760,7 @@ extern u8 D_003BC598[];
 
 
 
-extern KwlnTask *mnuTitleSoundTask;
+extern dds3ProcessID_t *mnuTitleSoundTask;
 
 extern char D_003771D8[];
 
@@ -797,8 +797,8 @@ typedef struct BrsResultWork {
     BrsResultCounterView profileCounters[8];
 } BrsResultWork;
 
-extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
-extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
+extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
+extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
 extern u32 prfGetCapValue(u16);
 extern s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
 extern void nbPlaySe(u32 sequenceId);
@@ -878,7 +878,7 @@ void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork 
 #include "prf_profile_cap.h"
 
 extern s32 prfResolveMantraNameOrFallback(u16, u8 **);
-extern s32 mnuIsTitleEntryAvailable(DatPartyRecord *);
+extern s32 mnuIsTitleEntryAvailable(datUnitWork_t *);
 
 typedef struct BrsProfilePalette { u32 values[4]; } BrsProfilePalette;
 extern const BrsProfilePalette D_003AFC80;
@@ -899,7 +899,7 @@ void brsDrawProfileProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork 
     s32 frameX, frameY;
     u32 color = work->profileAnimation[index].alpha | 0x80808000;
     u32 barColor;
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
     EffectSlotSet *resources;
     EffectSlotSet *restoreResources;
     BdWork *bar;
@@ -1027,7 +1027,7 @@ void brsDrawProfileProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork 
 /* Complete after six successful polls of five counter pairs.
  * Early returns deliberately leave the accumulated settled count unchanged. */
 s32 brsPollResultCounterCompletion(void) {
-    KwlnTask *resultTask = dds3SearchProcessName(D_003AFBA0);
+    dds3ProcessID_t *resultTask = dds3SearchProcessName(D_003AFBA0);
     BrsResultWork *resultWork;
     s32 counterIndex;
 
@@ -1131,7 +1131,7 @@ u32 func_002694F8(void) {
     return 0x599;
 }
 
-s32 mnuIncrementTitleEffectFrameCounter(KwlnTask *task) {
+s32 mnuIncrementTitleEffectFrameCounter(dds3ProcessID_t *task) {
     TitleEffectState *effectState;
 
     effectState = (TitleEffectState *)dds3GetProcessData(task);
@@ -1139,7 +1139,7 @@ s32 mnuIncrementTitleEffectFrameCounter(KwlnTask *task) {
     return 0;
 }
 
-void mnuDestroyTitleEffectTask(KwlnTask *task) {
+void mnuDestroyTitleEffectTask(dds3ProcessID_t *task) {
     sdfChipFreeDirect((void *)dds3GetProcessData(task));
     mnuTitleSoundTask = 0;
 }
@@ -1147,7 +1147,7 @@ void mnuDestroyTitleEffectTask(KwlnTask *task) {
 /* Allocate the two-word effect state and attach it to the frame-counter task. */
 void mnuCreateTitleEffectTask(void) {
     TitleEffectState *effectState = (TitleEffectState *)sdfChipAllocDirect(MNU_TITLE_EFFECT_BYTES);
-    KwlnTask *effectTask = dds3StartProcess(D_003BC5A0, 0x5214, 1, 1,
+    dds3ProcessID_t *effectTask = dds3StartProcess(D_003BC5A0, 0x5214, 1, 1,
                               mnuIncrementTitleEffectFrameCounter, mnuDestroyTitleEffectTask, 0);
     mnuTitleSoundTask = effectTask;
     dds3SetProcessData(effectTask, (u32)effectState);

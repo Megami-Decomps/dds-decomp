@@ -27,8 +27,8 @@ struct EffNodeDescriptor;
 extern f32 *D_0037F770[];
 extern u8 kwlnDefaultColorVector[];
 
-extern void evtGetUnitDirVector(EvtUnit *unit);
-s32 evtRotateUnitTowardTarget(EvtUnit *unit, f32 *dir, f32 angle);
+extern void evtGetUnitDirVector(evtUnitHandle_t *unit);
+s32 evtRotateUnitTowardTarget(evtUnitHandle_t *unit, f32 *dir, f32 angle);
 
 typedef struct PcpScatterWork4 PcpScatterWork4;
 
@@ -44,7 +44,7 @@ struct PcpScatterWork4 {
 };
 
 /* Length of the path's vec4 trajectory sampled at 20 steps of the value multiplier. */
-f32 GetSplineLength(Dds3PathCurveWork *path) {
+f32 GetSplineLength(dds3PathBasicControl_t *path) {
     f32 savedScaleFactor;
     f32 length = 0.0f;
     f32 step = 0.05f;
@@ -71,14 +71,14 @@ f32 GetSplineLength(Dds3PathCurveWork *path) {
 
 extern f32 sdfFaceDivSoften, sdfFaceDivBias;
 #include "dds3_world_primary.h"
-extern s32 dds3SceneBasicExistBasicFromType(EffWorldNode *object, s32 slotIndex, EffWorldNode *value);
-extern s32 sdfModelGetMarkPos(SdfModel *model, s32 mapRecordId);
+extern s32 dds3SceneBasicExistBasicFromType(dds3Basic_t *object, s32 slotIndex, dds3Basic_t *value);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 mapRecordId);
 extern void dds3RotationArc(void);
-extern s32 evtFindUnitSlotAuxCoordinates(EvtUnit *unit, f32 *outX, f32 *outY);
+extern s32 evtFindUnitSlotAuxCoordinates(evtUnitHandle_t *unit, f32 *outX, f32 *outY);
 
 
 /* Advance the model, light-colour and directional transitions for one event unit. */
-void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
+void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
     f32 identity[4];
     f32 targetDirection[4];
     f32 previousDirection[4];
@@ -123,10 +123,10 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
         VU0_SCALE_VF(vf10, 1.0f - factor);
         VU0_SCALE_VF(vf11, factor);
         VU0_ADD(vf10, vf10, vf11);
-        oldColor = mdlGetColor((MdlCtx *)unit->owner);
+        oldColor = mdlGetColor((dds3ModelHandle_t *)unit->owner);
         EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
         rgbResult[0] = packed;
-        mdlSetColor((MdlCtx *)unit->owner, (oldColor & 0xFF000000) | (rgbResult[0] & 0xFFFFFF));
+        mdlSetColor((dds3ModelHandle_t *)unit->owner, (oldColor & 0xFF000000) | (rgbResult[0] & 0xFFFFFF));
         if (unit->rgbElapsed >= unit->rgbDuration) {
             flags = unit->flags &= ~EVT_UNIT_FLAG_RGB_TRANSITION;
         } else {
@@ -145,10 +145,10 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
         VU0_SCALE_VF(vf10, 1.0f - factor);
         VU0_SCALE_VF(vf11, factor);
         VU0_ADD(vf10, vf10, vf11);
-        oldColor = mdlGetColor((MdlCtx *)unit->owner);
+        oldColor = mdlGetColor((dds3ModelHandle_t *)unit->owner);
         EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
         alphaResult[0] = packed;
-        mdlSetColor((MdlCtx *)unit->owner, (oldColor & 0xFFFFFF) | (alphaResult[0] & 0xFF000000));
+        mdlSetColor((dds3ModelHandle_t *)unit->owner, (oldColor & 0xFFFFFF) | (alphaResult[0] & 0xFF000000));
         if (unit->alphaElapsed >= unit->alphaDuration) {
             flags = unit->flags &= ~EVT_UNIT_FLAG_ALPHA_TRANSITION;
         } else {
@@ -161,7 +161,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
         if (unit->currentTransitionValue == 0) {
             unit->flags = flags & ~EVT_UNIT_FLAG_TARGET_TRANSITION;
         } else if (!dds3SceneBasicExistBasicFromType(dds3GetActiveScene(), 9,
-                                                 (EffWorldNode *)unit->currentTransitionValue)) {
+                                                 (dds3Basic_t *)unit->currentTransitionValue)) {
             unit->currentTransitionValue = 0;
             unit->previousTransitionValue = 0;
             unit->flags &= ~EVT_UNIT_FLAG_TARGET_TRANSITION;
@@ -169,7 +169,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
     }
     if (unit->previousTransitionValue &&
         !dds3SceneBasicExistBasicFromType(dds3GetActiveScene(), 9,
-                                       (EffWorldNode *)unit->previousTransitionValue)) {
+                                       (dds3Basic_t *)unit->previousTransitionValue)) {
         unit->previousTransitionValue = 0;
     }
     transition = 0.0f;
@@ -181,15 +181,15 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
         flags = unit->flags;
         if (flags & EVT_UNIT_FLAG_TARGET_TRANSITION) {
             f32 distance;
-            target = ((EffWorldNode *)unit->currentTransitionValue)->data;
+            target = ((dds3Basic_t *)unit->currentTransitionValue)->data;
             if (unit->previousTransitionValue) {
-                previous = ((EffWorldNode *)unit->previousTransitionValue)->data;
+                previous = ((dds3Basic_t *)unit->previousTransitionValue)->data;
             }
             if (!sdfModelGetMarkPos(unit->owner->inner, 0)) {
                 mdlGetPosition(unit->owner);
             }
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
-            VU0_LOAD_VF(vf11, ((EffWorldNode *)unit->currentTransitionValue)->inner->position);
+            VU0_LOAD_VF(vf11, ((dds3Basic_t *)unit->currentTransitionValue)->inner->position);
             VU0_SUB(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, targetDirection);
             VU0_LENGTH_VF10(distance);
@@ -204,7 +204,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
             if (previous) {
                 f32 previousDistance;
                 VU0_LOAD_VF(vf10, position);
-                VU0_LOAD_VF(vf11, ((EffWorldNode *)unit->previousTransitionValue)->inner->position);
+                VU0_LOAD_VF(vf11, ((dds3Basic_t *)unit->previousTransitionValue)->inner->position);
                 VU0_SUB(vf10, vf10, vf11);
                 VU0_STORE_VF_UNCLOBBERED(vf10, previousDirection);
                 VU0_LENGTH_VF10(previousDistance);
@@ -503,14 +503,14 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
 
 
 /* vu0 routine: load vf10 with the unit's colour (flag 0x100), its target's vector, or the default */
-void GetBaseLightRGB(EvtUnit *unit) {
+void GetBaseLightRGB(evtUnitHandle_t *unit) {
     EvtTargetInfo *info = 0;
     s32 ownVector = 0;
     s32 color;
     f32 scale;
 
     if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        info = ((EffWorldNode *)unit->currentTransitionValue)->data;
+        info = ((dds3Basic_t *)unit->currentTransitionValue)->data;
         if (info->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
@@ -527,14 +527,14 @@ void GetBaseLightRGB(EvtUnit *unit) {
 }
 
 /* vu0 routine: load the target info secondColor vector when unit-owned. */
-void GetBaseAmbientRGB(EvtUnit *unit) {
+void GetBaseAmbientRGB(evtUnitHandle_t *unit) {
     EvtTargetInfo *info = 0;
     s32 ownVector = 0;
     s32 color;
     f32 scale;
 
     if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        info = ((EffWorldNode *)unit->currentTransitionValue)->data;
+        info = ((dds3Basic_t *)unit->currentTransitionValue)->data;
         if (info->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
@@ -551,11 +551,11 @@ void GetBaseAmbientRGB(EvtUnit *unit) {
 }
 
 /* vu0 routine: load vf10 with the unit's vector, or the default one */
-void GetBaseLightDir(EvtUnit *unit) {
+void GetBaseLightDir(evtUnitHandle_t *unit) {
     s32 ownVector = 0;
 
     if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        if (((EvtTargetInfo *)((EffWorldNode *)unit->currentTransitionValue)->data)->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
+        if (((EvtTargetInfo *)((dds3Basic_t *)unit->currentTransitionValue)->data)->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
     }
@@ -569,11 +569,11 @@ void GetBaseLightDir(EvtUnit *unit) {
 }
 
 
-extern void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit);
+extern void evtApplyMatchingUnitSlotEndpoints(evtUnitHandle_t *unit);
 
 /* Refresh endpoint render work after the value-change flag is cleared; defer
  * to the matching-slot selector when no target or color transition is active. */
-void evtRefreshUnitEndpointWork(EvtUnit *unit) {
+void evtRefreshUnitEndpointWork(evtUnitHandle_t *unit) {
     f32 ends[4][4];
     f32 color[4];
     SdfLightSources desc = { ends, 0, 0 };
@@ -614,7 +614,7 @@ void evtRefreshUnitEndpointWork(EvtUnit *unit) {
     unit->value = (u32)unit->endpointWork;
 }
 
-void evtSetUnitValueTransition(EvtUnit *unit, EffWorldNode *target, s32 duration) {
+void evtSetUnitValueTransition(evtUnitHandle_t *unit, dds3Basic_t *target, s32 duration) {
     unit->flags |= EVT_UNIT_FLAG_TARGET_TRANSITION;
     unit->previousTransitionValue = unit->currentTransitionValue;
     unit->currentTransitionValue = (s32)target;
@@ -631,7 +631,7 @@ void evtSetUnitValueTransition(EvtUnit *unit, EffWorldNode *target, s32 duration
     }
 }
 
-void evtEndUnitValueTransition(EvtUnit *unit, s32 duration) {
+void evtEndUnitValueTransition(evtUnitHandle_t *unit, s32 duration) {
     if (unit->currentTransitionValue != 0) {
         if (duration == 0) {
             unit->flags &= ~EVT_UNIT_FLAG_TARGET_TRANSITION;
@@ -646,17 +646,17 @@ void evtEndUnitValueTransition(EvtUnit *unit, s32 duration) {
     }
 }
 
-void evtUnitSetValueAndFlag(EvtUnit *unit, u32 value) {
+void evtUnitSetValueAndFlag(evtUnitHandle_t *unit, u32 value) {
     unit->value = value;
     unit->flags = unit->flags | EVT_UNIT_FLAG_VALUE_CHANGED;
 }
 
-void evtUnlinkExternalLightPacket(EvtUnit *unit) {
+void evtUnlinkExternalLightPacket(evtUnitHandle_t *unit) {
     unit->flags = unit->flags & ~EVT_UNIT_FLAG_VALUE_CHANGED;
     evtRefreshUnitEndpointWork(unit);
 }
 
-void evtSetUnitLightAndAmbient(EvtUnit *unit, s32 duration, u32 firstColor, u32 secondColor) {
+void evtSetUnitLightAndAmbient(evtUnitHandle_t *unit, s32 duration, u32 firstColor, u32 secondColor) {
     s32 firstColorVector[4];
     s32 secondColorVector[4];
     u32 firstPackedColor;
@@ -682,7 +682,7 @@ void evtSetUnitLightAndAmbient(EvtUnit *unit, s32 duration, u32 firstColor, u32 
 }
 
 /* vu0 routine: normalize the direction in vf10, store it to vec30, then vf10 from GetBaseLightDir to vec20 */
-void evtSetUnitLightDir(EvtUnit *unit, s32 directionMode) {
+void evtSetUnitLightDir(evtUnitHandle_t *unit, s32 directionMode) {
     unit->directionMode = directionMode;
     VU0_CLEAR_W(vf10);
     VU0_NORMALIZE_VF10();
@@ -694,16 +694,16 @@ void evtSetUnitLightDir(EvtUnit *unit, s32 directionMode) {
 
 
 
-void evtSetUnitColorRGB(EvtUnit *unit, s32 duration, u32 color) {
+void evtSetUnitColorRGB(evtUnitHandle_t *unit, s32 duration, u32 color) {
     unit->rgbDuration = duration;
     unit->rgbElapsed = 0;
     if (duration == 0) {
-        mdlSetColor((MdlCtx *)unit->owner,
-            (mdlGetColor((MdlCtx *)unit->owner) & 0xFF000000) | (color & 0xFFFFFF));
+        mdlSetColor((dds3ModelHandle_t *)unit->owner,
+            (mdlGetColor((dds3ModelHandle_t *)unit->owner) & 0xFF000000) | (color & 0xFFFFFF));
         unit->color60 = (unit->color60 & 0xFF000000) | (color & 0xFFFFFF);
         unit->flags &= ~EVT_UNIT_FLAG_RGB_TRANSITION;
     } else {
-        u32 currentRgb = mdlGetColor((MdlCtx *)unit->owner) & 0xFFFFFF;
+        u32 currentRgb = mdlGetColor((dds3ModelHandle_t *)unit->owner) & 0xFFFFFF;
 
         unit->color60 = (unit->color60 & 0xFF000000) | currentRgb;
         unit->color64 = (unit->color64 & 0xFF000000) | (color & 0xFFFFFF);
@@ -711,16 +711,16 @@ void evtSetUnitColorRGB(EvtUnit *unit, s32 duration, u32 color) {
     }
 }
 
-void evtSetUnitColorA(EvtUnit *unit, s32 duration, u32 color) {
+void evtSetUnitColorA(evtUnitHandle_t *unit, s32 duration, u32 color) {
     unit->alphaDuration = duration;
     unit->alphaElapsed = 0;
     if (duration == 0) {
-        mdlSetColor((MdlCtx *)unit->owner,
-            (mdlGetColor((MdlCtx *)unit->owner) & 0xFFFFFF) | (color & 0xFF000000));
+        mdlSetColor((dds3ModelHandle_t *)unit->owner,
+            (mdlGetColor((dds3ModelHandle_t *)unit->owner) & 0xFFFFFF) | (color & 0xFF000000));
         unit->color60 = (unit->color60 & 0xFFFFFF) | (color & 0xFF000000);
         unit->flags &= ~EVT_UNIT_FLAG_ALPHA_TRANSITION;
     } else {
-        u32 currentAlpha = mdlGetColor((MdlCtx *)unit->owner) & 0xFF000000;
+        u32 currentAlpha = mdlGetColor((dds3ModelHandle_t *)unit->owner) & 0xFF000000;
 
         unit->color60 = (unit->color60 & 0xFFFFFF) | currentAlpha;
         unit->color64 = (unit->color64 & 0xFFFFFF) | (color & 0xFF000000);
@@ -728,15 +728,15 @@ void evtSetUnitColorA(EvtUnit *unit, s32 duration, u32 color) {
     }
 }
 
-u8 evtUnitLightAnimeStat(EvtUnit *unit) {
+u8 evtUnitLightAnimeStat(evtUnitHandle_t *unit) {
     return (unit->flags & 0x7800) != 0;
 }
 
-void evtUnitLightOn(EvtUnit *unit) {
+void evtUnitLightOn(evtUnitHandle_t *unit) {
     unit->flags = unit->flags | EVT_UNIT_FLAG_USE_UNIT_COLOR_CHANNELS;
 }
 
-void evtUnitLightOff(EvtUnit *unit, s32 duration) {
+void evtUnitLightOff(evtUnitHandle_t *unit, s32 duration) {
     if (duration == 0) {
         unit->flags &= ~0x700;
         unit->flags &= ~0x5000;
@@ -750,34 +750,34 @@ void evtUnitLightOff(EvtUnit *unit, s32 duration) {
     }
 }
 
-EvtUnit *evtGetUnitHandle(s32 worldObjectKey) {
-    EffWorldNode *obj = dds3SearchSceneBasic(dds3GetActiveScene(), worldObjectKey, EFF_WORLD_KIND_FOLLOW_MODEL);
+evtUnitHandle_t *evtGetUnitHandle(s32 worldObjectKey) {
+    dds3Basic_t *obj = dds3SearchSceneBasic(dds3GetActiveScene(), worldObjectKey, EFF_WORLD_KIND_FOLLOW_MODEL);
 
     if (obj != NULL) {
-        return (EvtUnit *)*(s32 *)((u8 *)obj->data + 8);
+        return (evtUnitHandle_t *)*(s32 *)((u8 *)obj->data + 8);
     }
     return NULL;
 }
 
-EvtUnit *evtGetUnitHandle2(EffWorldNode *unit) {
+evtUnitHandle_t *evtGetUnitHandle2(dds3Basic_t *unit) {
     if (unit == NULL) {
         return NULL;
     }
-    return (EvtUnit *)*(s32 *)((u8 *)unit->data + 8);
+    return (evtUnitHandle_t *)*(s32 *)((u8 *)unit->data + 8);
 }
 
 extern f32 D_004215D0[];
 
 
-EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, MdlCtx *owner) {
-    EvtUnit *work;
+evtUnitHandle_t *evtCreateUnitTransitionWork(dds3Basic_t *effObj, dds3ModelHandle_t *owner) {
+    evtUnitHandle_t *work;
     struct SdfLightingPacketStorage *endpoint;
     f32 defaultVector[4];
     s32 i;
 
     memcpy(defaultVector, D_004215D0, sizeof(defaultVector));
-    work = sdfChipAllocDirect(sizeof(EvtUnit));
-    memset(work, 0, sizeof(EvtUnit));
+    work = sdfChipAllocDirect(sizeof(evtUnitHandle_t));
+    memset(work, 0, sizeof(evtUnitHandle_t));
     work->motionState = EVT_UNIT_MOTION_STATE_IDLE;
     work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE;
     work->transitionMotionScale = 1.0f;
@@ -814,7 +814,7 @@ EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, MdlCtx *owner) {
     return work;
 }
 
-s32 evtDeleteUnitHandle(EvtUnit *transitionWork) {
+s32 evtDeleteUnitHandle(evtUnitHandle_t *transitionWork) {
     struct SdfLightingPacketStorage *endpointWork;
 
     if (transitionWork == NULL) {
@@ -827,32 +827,32 @@ s32 evtDeleteUnitHandle(EvtUnit *transitionWork) {
         transitionWork->endpointWork = NULL;
     }
     if (transitionWork->pathHandle != 0) {
-        dds3DeletePathControl((Dds3PathCurveWork *)transitionWork->pathHandle);
+        dds3DeletePathControl((dds3PathBasicControl_t *)transitionWork->pathHandle);
         transitionWork->pathHandle = 0;
     }
     sdfChipFreeDirect(transitionWork);
     return 1;
 }
 
-s32 evtGetUnitStat(EvtUnit *unit) {
+s32 evtGetUnitStat(evtUnitHandle_t *unit) {
     return unit->motionState;
 }
 
 /* Callers pass the promoted full-width value; only the low halfword is stored. */
-void evtSetWaitMotion(EvtUnit *unit, s32 storedParameter) {
+void evtSetWaitMotion(evtUnitHandle_t *unit, s32 storedParameter) {
     unit->unkBC = storedParameter;
 }
 
-void evtSetWaitMotionSpeed(EvtUnit *unit, f32 transitionMotionScale) {
+void evtSetWaitMotionSpeed(evtUnitHandle_t *unit, f32 transitionMotionScale) {
     unit->transitionMotionScale = transitionMotionScale;
 }
 
-void evtSetWaitHokanFrame(EvtUnit *unit, s32 firstParameter, s32 secondParameter) {
+void evtSetWaitHokanFrame(evtUnitHandle_t *unit, s32 firstParameter, s32 secondParameter) {
     unit->unkBE = firstParameter;
     unit->unkC0 = secondParameter;
 }
 
-s32 evtCheckUnitWait(EvtUnit *unit) {
+s32 evtCheckUnitWait(evtUnitHandle_t *unit) {
     s32 state = evtGetUnitStat(unit);
 
     if (state == EVT_UNIT_MOTION_STATE_IDLE) {
@@ -865,16 +865,16 @@ s32 evtCheckUnitWait(EvtUnit *unit) {
     return 0;
 }
 
-void evtSetUnitKutiMotion(EvtUnit *unit, s32 firstSlot, s32 secondSlot) {
+void evtSetUnitKutiMotion(evtUnitHandle_t *unit, s32 firstSlot, s32 secondSlot) {
     unit->firstSlot = firstSlot;
     unit->secondSlot = secondSlot;
 }
 
-void evtActivateStoredUnitMotionSlot(EvtUnit *unit) {
+void evtActivateStoredUnitMotionSlot(evtUnitHandle_t *unit) {
     evtConfigureUnitMotionSlot(unit, unit->firstSlot, unit->secondSlot, 0, 0, 2);
 }
 
-void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 slot, s32 slotAValue, s32 slotBValue,
+void evtConfigureUnitMotionSlot(evtUnitHandle_t *unit, s32 slot, s32 slotAValue, s32 slotBValue,
                                 s32 slotCValue, s32 mode) {
     unit->slotFlags[slot] = 3;
     unit->slotA[slot] = slotAValue;
@@ -893,7 +893,7 @@ void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 slot, s32 slotAValue, s32 slo
     }
 }
 
-void evtSetUnitMotion(EvtUnit *unit, s32 motionId, s32 startFrame, s32 endFrame, s32 mode) {
+void evtSetUnitMotion(evtUnitHandle_t *unit, s32 motionId, s32 startFrame, s32 endFrame, s32 mode) {
     unit->flags &= ~0x1;
     unit->flags &= ~0x20;
     unit->flags &= ~0x40;
@@ -926,7 +926,7 @@ extern const s32 D_004215F0[];
 extern void evtVu0SubVectorXZAxis(f32 *a, f32 *b);
 extern void FromRotation(f32 angle);
 
-s32 evtRotateUnitTowardTarget(EvtUnit *unit, f32 *dir, f32 scale) {
+s32 evtRotateUnitTowardTarget(evtUnitHandle_t *unit, f32 *dir, f32 scale) {
     /* SDK stores end local CSE before the axis and quaternion addresses
      * are rebuilt. One angle carries the cosine through acos and clamping. */
     f32 a[4];
@@ -978,7 +978,7 @@ s32 evtRotateUnitTowardTarget(EvtUnit *unit, f32 *dir, f32 scale) {
 
 
 /* Flat, negated direction of the rotation in quat, offset by the effect object's point, aimed with evtRotateUnitTowardTarget. */
-s32 evtUnitRotationQuat(EvtUnit *unit, f32 *quat, f32 angle) {
+s32 evtUnitRotationQuat(evtUnitHandle_t *unit, f32 *quat, f32 angle) {
     f32 v[4];
 
     VU0_LOAD_VF(vf10, quat);
@@ -993,10 +993,10 @@ s32 evtUnitRotationQuat(EvtUnit *unit, f32 *quat, f32 angle) {
     return evtRotateUnitTowardTarget(unit, v, angle);
 }
 
-s32 evtUnitMoveType0(EvtUnit *unit) {
+s32 evtUnitMoveType0(evtUnitHandle_t *unit) {
     f32 v[4];
     f32 scale;
-    EffWorldNode *obj;
+    dds3Basic_t *obj;
 
     evtRotateUnitTowardTarget(unit, unit->targetVector, unit->directionOffset * 0.01f);
     if (unit->directionOffset != 0) {
@@ -1017,7 +1017,7 @@ s32 evtUnitMoveType0(EvtUnit *unit) {
 }
 
 
-extern s32 evtCheckMoveEnd(EvtUnit *unit);
+extern s32 evtCheckMoveEnd(evtUnitHandle_t *unit);
 #include "sdf_debug_api.h"
 
 /* Run a copy of the unit until evtCheckMoveEnd reports done, and derive its per-step Y speed. */
@@ -1027,8 +1027,8 @@ INCLUDE_RODATA(const s32, "event/evtUnitManager", D_004215E0);
 
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_004215F0);
 
-s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
-    EvtUnit copy;
+s32 evtUnitPrepareVerticalMoveSteps(evtUnitHandle_t *unit) {
+    evtUnitHandle_t copy;
     f32 delta[4];
     f32 savedA[4];
     f32 savedB[4];
@@ -1063,15 +1063,15 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
     return simulatedStepCount;
 }
 
-s32 evtUnitMoveTypePathTrace(EvtUnit *unit) {
+s32 evtUnitMoveTypePathTrace(evtUnitHandle_t *unit) {
     f32 v[4];
 
-    dds3PathBasicControlIsFinished(&((Dds3PathCurveWork *)unit->pathHandle)->counter);
-    dds3PathBasicControlGetPos((Dds3PathCurveWork *)unit->pathHandle);
+    dds3PathBasicControlIsFinished(&((dds3PathBasicControl_t *)unit->pathHandle)->counter);
+    dds3PathBasicControlGetPos((dds3PathBasicControl_t *)unit->pathHandle);
     VU0_STORE_VF($vf10, v);
     dds3SetPosPoseSet(unit->effObj, (u128 *)v);
     if (unit->flags & 0x10) {
-        dds3PathBasicControlGetRot((Dds3PathCurveWork *)unit->pathHandle);
+        dds3PathBasicControlGetRot((dds3PathBasicControl_t *)unit->pathHandle);
         VU0_MOVE_VF(vf11, vf10);
         sdfConvertEulerAnglesToQuaternionVU(0.0f, 3.14159265f, 0.0f);
         effMiscQuatMultiplyVU();
@@ -1081,7 +1081,7 @@ s32 evtUnitMoveTypePathTrace(EvtUnit *unit) {
     return 1;
 }
 
-void evtCopyUnitTargetVector(EvtUnit *work, void *src) {
+void evtCopyUnitTargetVector(evtUnitHandle_t *work, void *src) {
     PCP_COPY_VECTOR(work->targetVector, src);
 }
 
@@ -1108,10 +1108,10 @@ void evtCopyUnitTargetVector(EvtUnit *work, void *src) {
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
 
-extern EvtUnit *evtWindowMotionUnit;
+extern evtUnitHandle_t *evtWindowMotionUnit;
 extern s32 D_004371F0;
 
-extern u32 sdfGetLodChunkValue(SdfModel *model);
+extern u32 sdfGetLodChunkValue(sdfModelRootNode_t *model);
 
 
 extern EvtUnitVectorSlot evtUnitVectorSlots[10];
@@ -1122,7 +1122,7 @@ extern BtlActorStatusRecord *D_00435DF0;
 extern void mnuInitializeCampPanelVisualDefaults(f32 *firstVector, f32 *secondVector, f32 *thirdVector, f32 *scalarA, f32 *scalarB);
 #include "dds3_world_secondary.h"
 
-extern void evtSetUnitMove1(EvtUnit *work, s32 motionSubmode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast);
+extern void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(evtUnitHandle_t *, s32), s32 unusedLast);
 
 
 
@@ -1133,21 +1133,21 @@ extern void dds3ObjectBaseOnFlag(void *object, s32 flags);
 
 extern void dds3ObjectBaseOffFlag(void *object, s32 flags);
 
-extern void evtArmEffectObjectPendingValue(EffWorldNode *object, s32 value);
+extern void evtArmEffectObjectPendingValue(dds3Basic_t *object, s32 value);
 
-extern void evtResetObjectPendingValue(EffWorldNode *object);
+extern void evtResetObjectPendingValue(dds3Basic_t *object);
 
 
 
 /* World object views used by the model-parameter opcodes. */
-extern EvtUnit *evtGetUnitHandle(s32 idx);
+extern evtUnitHandle_t *evtGetUnitHandle(s32 idx);
 
 
-extern s32 evtCheckUnitWait(EvtUnit *unit);
+extern s32 evtCheckUnitWait(evtUnitHandle_t *unit);
 
 
 
-extern void evtSetUnitMotion(EvtUnit *unit, s32 motionId, s32 startFrame, s32 endFrame, s32 mode);
+extern void evtSetUnitMotion(evtUnitHandle_t *unit, s32 motionId, s32 startFrame, s32 endFrame, s32 mode);
 
 
 extern u8 D_00421AC0[];
@@ -1155,9 +1155,9 @@ extern u8 D_00421AC0[];
 
 extern void dds3EffectObjectBasicStatOn(void *object, s32 flags);
 
-extern EffWorldNode *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
+extern dds3Basic_t *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
 extern void *dds3AddBEDEffectObjectBasic2(void *resource, void *position, void *scale);
-extern EffWorldNode *dds3AddMG12EffectObjectBasic2(s32 kind, struct EffNodeDescriptor *descriptor);
+extern dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 kind, struct EffNodeDescriptor *descriptor);
 extern char D_00421A78[];
 
 extern void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *firstVector, void *secondVector);
@@ -1174,11 +1174,11 @@ extern u8 D_00421B70[];
 
 extern s32 evtLoadUnit(s32 slotKind, s32 resource);
 
-extern void evtUnitLightOff(EvtUnit *unit, s32 duration);
+extern void evtUnitLightOff(evtUnitHandle_t *unit, s32 duration);
 
-extern u8 evtUnitLightAnimeStat(EvtUnit *unit);
+extern u8 evtUnitLightAnimeStat(evtUnitHandle_t *unit);
 
-extern void evtEndUnitValueTransition(EvtUnit *unit, s32 duration);
+extern void evtEndUnitValueTransition(evtUnitHandle_t *unit, s32 duration);
 
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
@@ -1190,14 +1190,14 @@ extern s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId);
 extern u32 scrGetMessageHandle(void);
 
 
-extern void evtSetUnitKutiMotion(EvtUnit *unit, s32 firstSlot, s32 secondSlot);
+extern void evtSetUnitKutiMotion(evtUnitHandle_t *unit, s32 firstSlot, s32 secondSlot);
 
 
 extern f32 evtComputeClampedModelScale(s32);
 
 
 /* Start a bounded vector transition; detach any previous secondary-world source. */
-void evtSetUnitRot1(EvtUnit *work, s128 *vector, s32 frames) {
+void evtSetUnitRot1(evtUnitHandle_t *work, s128 *vector, s32 frames) {
     f32 *destination = work->targetVector;
 
     if ((u32)(frames - 1) < 100) {
@@ -1212,8 +1212,8 @@ void evtSetUnitRot1(EvtUnit *work, s128 *vector, s32 frames) {
 }
 
 /* Track a secondary-world unit and copy the vector in its subobject at +0x10. */
-void evtSetUnitRot2(EvtUnit *work, s32 worldObjectKey, s32 frames) {
-    EffWorldNode *worldUnit;
+void evtSetUnitRot2(evtUnitHandle_t *work, s32 worldObjectKey, s32 frames) {
+    dds3Basic_t *worldUnit;
     EvtWorldSourceTransformPrefix *source;
 
     worldUnit = dds3SearchSceneBasic(dds3GetControlScene(), worldObjectKey, 0x11);
@@ -1225,7 +1225,7 @@ void evtSetUnitRot2(EvtUnit *work, s32 worldObjectKey, s32 frames) {
 }
 
 /* Configure a mode-one vector transition, without retaining a world source. */
-void evtSetUnitMove1(EvtUnit *work, s32 motionSubmode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast) {
+void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(evtUnitHandle_t *, s32), s32 unusedLast) {
     f32 *destination = work->targetVector;
 
     work->motionSubmode = motionSubmode;
@@ -1240,8 +1240,8 @@ void evtSetUnitMove1(EvtUnit *work, s32 motionSubmode, s128 *vector, s32 unused,
 }
 
 /* Configure the same transition from a secondary-world object's vector. */
-void evtSetUnitMove2(EvtUnit *work, s32 motionSubmode, s32 worldObjectKey, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast) {
-    EffWorldNode *worldUnit;
+void evtSetUnitMove2(evtUnitHandle_t *work, s32 motionSubmode, s32 worldObjectKey, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(evtUnitHandle_t *, s32), s32 unusedLast) {
+    dds3Basic_t *worldUnit;
     EvtWorldSourceTransformPrefix *source;
 
     worldUnit = dds3SearchSceneBasic(dds3GetControlScene(), worldObjectKey, 0x11);
@@ -1253,16 +1253,16 @@ void evtSetUnitMove2(EvtUnit *work, s32 motionSubmode, s32 worldObjectKey, s32 u
     }
 }
 
-void evtSetUnitMove3(EvtUnit *work, s32 pathObjectKey, s32 frames, s32 valueB6, s32 pathFollowMode, s32 dirFlag, s32 sideMode) {
-    EffWorldNode *pathSource;
-    Dds3PathCurveWork *path;
+void evtSetUnitMove3(evtUnitHandle_t *work, s32 pathObjectKey, s32 frames, s32 valueB6, s32 pathFollowMode, s32 dirFlag, s32 sideMode) {
+    dds3Basic_t *pathSource;
+    dds3PathBasicControl_t *path;
 
     pathSource = dds3SearchSceneBasic(dds3GetControlScene(), pathObjectKey, 0x10);
     if (pathSource == NULL) {
         return;
     }
     if (work->pathHandle != 0) {
-        dds3DeletePathControl((Dds3PathCurveWork *)work->pathHandle);
+        dds3DeletePathControl((dds3PathBasicControl_t *)work->pathHandle);
     }
     path = dds3AllocPathBasicWorkData(pathSource);
     work->pathHandle = (s32)path;
@@ -1318,7 +1318,7 @@ void evtSetUnitMove3(EvtUnit *work, s32 pathObjectKey, s32 frames, s32 valueB6, 
     work->motionTicks = 0;
 }
 
-s32 evtStartUnitModeWithValue(EvtUnit *eventUnit, s32 (*callback)(EvtUnit *, s32)) {
+s32 evtStartUnitModeWithValue(evtUnitHandle_t *eventUnit, s32 (*callback)(evtUnitHandle_t *, s32)) {
     s32 result = 0;
 
     if (callback != 0) {
@@ -1330,20 +1330,20 @@ s32 evtStartUnitModeWithValue(EvtUnit *eventUnit, s32 (*callback)(EvtUnit *, s32
     return result;
 }
 
-extern void evtAdvanceUnitVisualTransitions(EvtUnit *);
-extern s32 evtUnitRotationQuat(EvtUnit *, f32 *, f32);
-extern s32 evtCheckMoveEnd(EvtUnit *);
-extern s32 evtGetNextMovePos(EvtUnit *);
-extern s32 evtUnitMoveType0(EvtUnit *);
-extern s32 evtUnitMoveTypePathTrace(EvtUnit *);
-extern void evtRefreshUnitEndpointWork(EvtUnit *);
-s32 evtUpdateUnitMotion(ObjectTransform *unused, EffWorldNode *object) {
+extern void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *);
+extern s32 evtUnitRotationQuat(evtUnitHandle_t *, f32 *, f32);
+extern s32 evtCheckMoveEnd(evtUnitHandle_t *);
+extern s32 evtGetNextMovePos(evtUnitHandle_t *);
+extern s32 evtUnitMoveType0(evtUnitHandle_t *);
+extern s32 evtUnitMoveTypePathTrace(evtUnitHandle_t *);
+extern void evtRefreshUnitEndpointWork(evtUnitHandle_t *);
+s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
     f32 delta[4];
     s32 moving = 0;
     s32 wobble = 0;
     EffectObjectData *data = object->data;
-    EvtUnit *unit = data->transitionWork;
-    MdlCtx *model;
+    evtUnitHandle_t *unit = data->transitionWork;
+    dds3ModelHandle_t *model;
     s32 i;
     u8 enabled;
 
@@ -1592,7 +1592,7 @@ s32 evtCopyUnitVectorSlotEndpoint(s32 id, f32 *out) {
 }
 
 /* Select a matching slot and write its endpoint render work. */
-void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
+void evtApplyMatchingUnitSlotEndpoints(evtUnitHandle_t *unit) {
     f32 ends[4][4];
     f32 color[4];
     SdfLightSources desc = { ends, 0, 0 };
@@ -1638,7 +1638,7 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
 }
 
 /* Find auxiliary coordinates for the unit-bound slot, else the shared fallback. */
-s32 evtFindUnitSlotAuxCoordinates(EvtUnit *unit, f32 *outX, f32 *outY) {
+s32 evtFindUnitSlotAuxCoordinates(evtUnitHandle_t *unit, f32 *outX, f32 *outY) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
@@ -1667,7 +1667,7 @@ void *evtSearchBasic(s32 objectKind, s32 worldObjectKey) {
 
 u32 evtCommand_MODEL_PLAYER(void) {
     void *world;
-    EffWorldNode *object;
+    dds3Basic_t *object;
     s32 playerObjectKey;
 
     world = dds3GetActiveScene();
@@ -1696,7 +1696,7 @@ u32 evtCommand_MODEL_BE(void) {
     s32 eventId;
     s32 resourceId;
     s32 modelKey;
-    KwlnTask *motionSeTask;
+    dds3ProcessID_t *motionSeTask;
 
     if (scrGetScriptHandle() == 0) {
         return 1;
@@ -1814,11 +1814,11 @@ u32 evtOpClearWorldObjectPendingValue(void) {
 u32 evtOpModelLodChg(void) {
     s32 lod;
     void *world;
-    EffWorldNode *unit;
+    dds3Basic_t *unit;
     EffectObjectData *data;
-    ObjBase *modelHolder;
-    MdlCtx *context;
-    SdfModel *model;
+    dds3ObjectBaseControlWorkData_t *modelHolder;
+    dds3ModelHandle_t *context;
+    sdfModelRootNode_t *model;
     s32 max;
 
     lod = scrGetIntPara(1);
@@ -1839,7 +1839,7 @@ u32 evtOpModelLodChg(void) {
         printf("warning!! MODEL_LOD_CHG(int,int) mh pointer null\n");
         return 1;
     }
-    context = (MdlCtx *)modelHolder->resourceHandle;
+    context = (dds3ModelHandle_t *)modelHolder->resourceHandle;
     model = context->inner;
     if (model == NULL) {
         printf("warning!! MODEL_LOD_CHG(int,int) root pointer null\n");
@@ -1928,7 +1928,7 @@ u32 evtCommand_MODEL_SCL_XYZ(void) {
 extern char D_00421810[];
 
 u32 evtOpDeprecatedModelMotion(void) {
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
     if (unit == NULL) {
@@ -1940,7 +1940,7 @@ u32 evtOpDeprecatedModelMotion(void) {
 }
 
 u32 evtOpSetUnitParams5(void) {
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
     if (unit == NULL) {
@@ -1957,7 +1957,7 @@ u32 evtOpSetUnitParams5(void) {
 }
 
 u32 evtOpSetUnitParams6(void) {
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
     if (unit == NULL) {
@@ -1982,13 +1982,13 @@ INCLUDE_RODATA(const s32, "event/evtUnitManager", D_00421810);
 
 void evtLipsExecFunction(s32 unitUniqueId, s32 motionId) {
     void *unit = NULL;
-    MdlCtx *model = NULL;
-    EffWorldNode *node;
+    dds3ModelHandle_t *model = NULL;
+    dds3Basic_t *node;
 
     if (unitUniqueId == 0) {
         return;
     }
-    for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetActiveScene())->data)->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
+    for (node = ((EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data)->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
         model = ((EvtLipsLink *)node->data)->mh->model;
         if (sdfGetUniqueChunkValue(model->inner) == unitUniqueId) {
             unit = ((EvtLipsLink *)node->data)->unit;
@@ -2010,13 +2010,13 @@ void evtLipsExecFunction(s32 unitUniqueId, s32 motionId) {
 
 void evtLipsStopFunction(void) {
     void *unit = NULL;
-    MdlCtx *model = NULL;
-    EffWorldNode *node;
+    dds3ModelHandle_t *model = NULL;
+    dds3Basic_t *node;
 
     if (D_004371F0 == 0) {
         return;
     }
-    for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetActiveScene())->data)->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
+    for (node = ((EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data)->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
         model = ((EvtLipsLink *)node->data)->mh->model;
         if (sdfGetUniqueChunkValue(model->inner) == D_004371F0) {
             unit = ((EvtLipsLink *)node->data)->unit;
@@ -2037,7 +2037,7 @@ void evtLipsStopFunction(void) {
 }
 
 u32 evtCommand_KUTISET(void) {
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
     if (unit == NULL) {
@@ -2060,7 +2060,7 @@ u32 evtCommand_KUTISET(void) {
 }
 
 u32 evtCommand_KUTI(void) {
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
     if (unit == NULL) {
@@ -2085,7 +2085,7 @@ u32 evtCommand_KUTI(void) {
 
 u32 evtCommand_MODEL_WAIT(void) {
     s32 worldObjectKey;
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
     u32 ret = 1;
 
     worldObjectKey = scrGetIntPara(0);
@@ -2098,7 +2098,7 @@ u32 evtCommand_MODEL_WAIT(void) {
 
 u32 evtCommand_MODEL_EXWAIT(void) {
     s32 worldObjectKey;
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
     s32 motionNodeIndex;
     u32 ret = 1;
 
@@ -2131,7 +2131,7 @@ u32 evtCmdDestroySelectedWorldUnit(void) {
 }
 
 u32 evtOpStartUnitTransitionTowardWorldObject(void) {
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
     if (unit == NULL) {
@@ -2152,7 +2152,7 @@ u32 evtOpStartUnitTransitionTowardWorldObject(void) {
 }
 
 u32 evtCommand_MODEL_MOVE2(void) {
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
     if (unit == NULL) {
@@ -2172,7 +2172,7 @@ u32 evtCommand_MODEL_MOVE2(void) {
 }
 
 u32 evtScriptSetUnitTableValueAndReset(void) {
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
     if (unit == NULL) {
@@ -2192,7 +2192,7 @@ u32 evtScriptSetUnitTableValueAndReset(void) {
 /* Store the script-supplied value for the selected event unit. */
 u32 evtCommand_MODEL_WAIT_MOT(void) {
     s32 worldObjectKey;
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     worldObjectKey = scrGetIntPara(0);
     unit = evtGetUnitHandle(worldObjectKey);
@@ -2206,7 +2206,7 @@ u32 evtCommand_MODEL_WAIT_MOT(void) {
 /* Store the two script-supplied world-unit state values. */
 u32 evtCommand_MODEL_WAIT_HOKAN(void) {
     s32 worldObjectKey;
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     worldObjectKey = scrGetIntPara(0);
     unit = evtGetUnitHandle(worldObjectKey);
@@ -2220,7 +2220,7 @@ u32 evtCommand_MODEL_WAIT_HOKAN(void) {
 
 u32 evtCommand_MODEL_MOVE_MOT(void) {
     s32 worldObjectKey;
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     worldObjectKey = scrGetIntPara(0);
     unit = evtGetUnitHandle(worldObjectKey);
@@ -2235,7 +2235,7 @@ u32 evtCommand_MODEL_MOVE_MOT(void) {
 
 u32 evtCommand_MODEL_ROT(void) {
     s32 unitObjectKey;
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
     s32 worldObjectKey;
     s32 frames;
 
@@ -2275,9 +2275,9 @@ f32 evtGetShortestAngleDelta(f32 a, f32 b) {
 extern f32 EulerAngleAxisY(void);
 
 u32 evtOpTurnUnitRelativeToWorldNode(void) {
-    EvtUnit *unit;
-    EffWorldNode *actor;
-    EffWorldNode *source;
+    evtUnitHandle_t *unit;
+    dds3Basic_t *actor;
+    dds3Basic_t *source;
     EvtWorldSourceTransformPrefix *sourceTransform;
     f32 rotation[4] __attribute__((aligned(16)));
     f32 actorPosition[4] __attribute__((aligned(16)));
@@ -2293,12 +2293,12 @@ u32 evtOpTurnUnitRelativeToWorldNode(void) {
     }
     unit->motionTicks = 0;
 
-    actor = (EffWorldNode *)dds3SearchSceneBasic(
+    actor = (dds3Basic_t *)dds3SearchSceneBasic(
         dds3GetActiveScene(), scrGetIntPara(0), 5);
     if (actor == NULL) {
         return 1;
     }
-    source = (EffWorldNode *)dds3SearchSceneBasic(
+    source = (dds3Basic_t *)dds3SearchSceneBasic(
         dds3GetActiveScene(), scrGetIntPara(1), 0x11);
     if (source == NULL) {
         return 1;
@@ -2357,8 +2357,8 @@ u32 evtOpTurnUnitRelativeToWorldNode(void) {
 }
 
 u32 evtOpRestoreUnitReferenceAngle(void) {
-    EvtUnit *unit;
-    EffWorldNode *actor;
+    evtUnitHandle_t *unit;
+    dds3Basic_t *actor;
     f32 rotation[4] __attribute__((aligned(16)));
     f32 referenceAngle;
     f32 angleDelta;
@@ -2408,7 +2408,7 @@ u32 evtOpRestoreUnitReferenceAngle(void) {
 
 u32 evtCommand_MODEL_ON(void) {
     s32 worldObjectKey;
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     worldObjectKey = scrGetIntPara(0);
     unit = evtGetUnitHandle(worldObjectKey);
@@ -2420,7 +2420,7 @@ u32 evtCommand_MODEL_ON(void) {
 
 u32 evtCommand_MODEL_OFF(void) {
     s32 worldObjectKey;
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     worldObjectKey = scrGetIntPara(0);
     unit = evtGetUnitHandle(worldObjectKey);
@@ -2432,7 +2432,7 @@ u32 evtCommand_MODEL_OFF(void) {
 
 u32 evtCommand_MODEL_LIGHT_ON(void) {
     s32 worldObjectKey;
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     worldObjectKey = scrGetIntPara(0);
     unit = evtGetUnitHandle(worldObjectKey);
@@ -2442,7 +2442,7 @@ u32 evtCommand_MODEL_LIGHT_ON(void) {
 
 u32 evtCommand_MODEL_LIGHT_OFF(void) {
     s32 worldObjectKey;
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
     s32 duration;
 
     worldObjectKey = scrGetIntPara(0);
@@ -2454,7 +2454,7 @@ u32 evtCommand_MODEL_LIGHT_OFF(void) {
 
 u8 evtCommand_MODEL_LIGHT_WAIT(void) {
     s32 worldObjectKey;
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
     u8 active;
 
     worldObjectKey = scrGetIntPara(0);
@@ -2464,7 +2464,7 @@ u8 evtCommand_MODEL_LIGHT_WAIT(void) {
 }
 
 u32 evtCommand_MODEL_LIGHT_RGB(void) {
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
     s32 color1[4];
     s32 color2[4];
     u32 packed1;
@@ -2493,7 +2493,7 @@ const char D_00421A30[] = "WARNING: MODEL_LIGHT_DIR length zero\n";
 
 u32 evtCommand_MODEL_LIGHT_DIR(void) {
     f32 direction[4];
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     memset(direction, 0, sizeof(direction));
     unit = evtGetUnitHandle(scrGetIntPara(0));
@@ -2512,7 +2512,7 @@ u32 evtCommand_MODEL_LIGHT_DIR(void) {
 
 
 u32 evtCommand_MODEL_RGB(void) {
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
     s32 color[4];
     u32 packed;
 
@@ -2527,7 +2527,7 @@ u32 evtCommand_MODEL_RGB(void) {
 }
 
 u32 evtCommand_MODEL_A(void) {
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
     s32 color[4];
     u32 packed;
 
@@ -2542,8 +2542,8 @@ u32 evtCommand_MODEL_A(void) {
 
 u32 evtCommand_MODEL_LIGHT_LINK(void) {
     s32 worldObjectKey;
-    EvtUnit *unit;
-    EffWorldNode *target;
+    evtUnitHandle_t *unit;
+    dds3Basic_t *target;
 
     worldObjectKey = scrGetIntPara(0);
     unit = evtGetUnitHandle(worldObjectKey);
@@ -2557,7 +2557,7 @@ u32 evtCommand_MODEL_LIGHT_LINK(void) {
 
 u32 evtCommand_MODEL_LIGHT_UNLINK(void) {
     s32 worldObjectKey;
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
     s32 duration;
 
     worldObjectKey = scrGetIntPara(0);
@@ -2575,7 +2575,7 @@ u32 evtCommand_EFFECT_BE(void) {
     s32 taskId;
     s32 key;
     struct EffNodeDescriptor *descriptor;
-    EffWorldNode *object;
+    dds3Basic_t *object;
 
     memset(firstVector, 0, sizeof(firstVector));
     memset(secondVector, 0, sizeof(secondVector));
@@ -2603,7 +2603,7 @@ u32 evtCommand_EFFECT_LOAD(void) {
     u8 buf1[16];
     u8 buf2[16];
     char *resourceName;
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     memset(buf1, 0, 0x10);
     memset(buf2, 0, 0x10);
@@ -2624,7 +2624,7 @@ u32 evtCommand_EFFBED_LOAD(void) {
     f32 buf1[4];
     f32 buf2[4];
     char *param0;
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     memset(buf1, 0, 0x10);
     memset(buf2, 0, 0x10);
@@ -2656,7 +2656,7 @@ u32 evtCommand_EFFBED_BE(void) {
     s32 taskId;
     s32 key;
     struct EffNodeDescriptor *descriptor;
-    EffWorldNode *object;
+    dds3Basic_t *object;
 
     memset(position, 0, sizeof(position));
     memset(scale, 0, sizeof(scale));
@@ -2669,7 +2669,7 @@ u32 evtCommand_EFFBED_BE(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    object = (EffWorldNode *)dds3AddBEDEffectObjectBasic2(descriptor, position, scale);
+    object = (dds3Basic_t *)dds3AddBEDEffectObjectBasic2(descriptor, position, scale);
     if (object == NULL) {
         scrSetIntReturnValue(0);
     } else {
@@ -2714,7 +2714,7 @@ f32 evtComputeClampedModelScale(s32 modelRecordIndex) {
 }
 
 u32 evtCommand_EFFBED_START_EVO(void) {
-    EffWorldNode *unit;
+    dds3Basic_t *unit;
 
     unit = evtSearchBasic(7, scrGetIntPara(0));
     if (unit != NULL) {
@@ -2739,7 +2739,7 @@ u32 evtCommand_EFFBED_START_EVO(void) {
 
 u32 evtCommand_EFFMG1_LOAD(void) {
     char *param0;
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     param0 = scrGetStrPara(0);
     unit = dds3AddMG12EffectObjectBasic(1, param0);
@@ -2764,7 +2764,7 @@ u32 evtCommand_EFFMG1_BE(void) {
     s32 taskId;
     s32 key;
     struct EffNodeDescriptor *descriptor;
-    EffWorldNode *object;
+    dds3Basic_t *object;
 
     taskId = scrGetIntPara(0);
     key = scrGetIntPara(1);
@@ -2787,7 +2787,7 @@ u32 evtCommand_EFFMG1_BE(void) {
 
 u32 evtCommand_EFFMG2_LOAD(void) {
     char *param0;
-    EvtUnit *unit;
+    evtUnitHandle_t *unit;
 
     param0 = scrGetStrPara(0);
     unit = dds3AddMG12EffectObjectBasic(2, param0);
@@ -2810,7 +2810,7 @@ u32 evtCommand_EFFMG2_BE(void) {
     s32 taskId;
     s32 key;
     struct EffNodeDescriptor *descriptor;
-    EffWorldNode *object;
+    dds3Basic_t *object;
 
     taskId = scrGetIntPara(0);
     key = scrGetIntPara(1);
@@ -2838,7 +2838,7 @@ u32 evtCommand_EFFMG2_PRESET(void) {
     worldObjectKey = scrGetIntPara(0);
     obj = evtSearchBasic(7, worldObjectKey);
     if (obj != NULL) {
-        dds3EffectObjectPresetMG12((EffWorldNode *)obj);
+        dds3EffectObjectPresetMG12((dds3Basic_t *)obj);
     }
     return 1;
 }
@@ -2850,7 +2850,7 @@ u32 evtCommand_EFFECT_PRESET(void) {
     worldObjectKey = scrGetIntPara(0);
     obj = evtSearchBasic(7, worldObjectKey);
     if (obj != NULL) {
-        dds3EffectObjectPresetMG12((EffWorldNode *)obj);
+        dds3EffectObjectPresetMG12((dds3Basic_t *)obj);
     }
     return 1;
 }
@@ -2868,7 +2868,7 @@ u32 evtCommand_EFFECT_CLS(void) {
 }
 
 u32 evtCommand_EFFECT_POS_XYZ(void) {
-    EffWorldNode *obj;
+    dds3Basic_t *obj;
     EvtModelHeader *header;
 
     obj = evtSearchBasic(7, scrGetIntPara(0));
@@ -2888,7 +2888,7 @@ u32 evtCommand_EFFECT_POS_XYZ(void) {
 
 u32 evtCommand_EFFECT_ROT_XYZ(void) {
     f32 v[4];
-    EffWorldNode *obj;
+    dds3Basic_t *obj;
     f32 toRad;
     f32 x;
     f32 y;
@@ -2911,10 +2911,10 @@ u32 evtCommand_EFFECT_ROT_XYZ(void) {
 }
 
 u32 evtCommand_EFFECT_POS(void) {
-    EffWorldNode *obj;
-    EffWorldNode *source;
+    dds3Basic_t *obj;
+    dds3Basic_t *source;
     EvtWorldSourceTransformPrefix *vec;
-    ObjectTransform *params;
+    dds3PoseSet_t *params;
 
     obj = evtSearchBasic(7, scrGetIntPara(0));
     if (obj == NULL) {

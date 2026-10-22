@@ -44,10 +44,10 @@ extern void dds3BuildSplineCoefsSkipDup(EffPrimitiveCurve *primitive, f32 *tange
  * The record count is captured before allocation; a nonpositive delay modulus becomes one. */
 EffChanWork *effAPPoint4Copy(EffChanSource *source) {
     u32 recordCount = source->head.count;
-    SdfMemBlock *allocationHandle = sdfMemAllocDirect(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
     EffChanWork *work = (EffChanWork *)sdfMemLock(allocationHandle);
     EffChanRecord *recordCursor = (EffChanRecord *)(work + 1);
-    EffParamWork *parameterTemplate;
+    effPartHandle_t *parameterTemplate;
     s32 delayModulus;
     u32 recordIndex;
 
@@ -302,10 +302,10 @@ void effEveAPP4Randomize(EffEmit *emitter) {
 extern void dds3AllocSplinePoints(EffPrimitiveCurve *primitive, s32 flattenEqualComponents);
 
 EffPrimitiveCurve *dds3AllocSplineHandle(f32 *keys, u32 recordCount, s32 flattenEqualComponents) {
-    SdfMemBlock *primaryResource = sdfMemAllocDirect(0x2C);
+    sdfMemHandle_t *primaryResource = sdfMemAllocDirect(0x2C);
     f32 step = EFF_CHANNEL_DEFAULT_STEP;
     EffPrimitiveCurve *primitive = (EffPrimitiveCurve *)sdfMemLock(primaryResource);
-    SdfMemBlock *coefficientResource;
+    sdfMemHandle_t *coefficientResource;
     f32 (*coefficients)[EFF_CURVE_COMPONENT_COUNT];
 
     primitive->allocation = primaryResource;
@@ -436,7 +436,7 @@ void effSplSetStep(EffPrimitiveCurve *primitive, f32 step) {
 
 /* Build temporary coordinate-major tangents, select a coefficient policy, then release the temporary buffer. */
 void dds3AllocSplinePoints(EffPrimitiveCurve *primitive, s32 flattenEqualComponents) {
-    SdfMemBlock *allocation = sdfMemAllocDirect(primitive->recordCount * EFF_CURVE_POINT_BYTES);
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(primitive->recordCount * EFF_CURVE_POINT_BYTES);
     f32 *tangentData = (f32 *)sdfMemLock(allocation);
 
     dds3BuildSplinePoints(tangentData, primitive->keys, primitive->recordCount);
@@ -454,7 +454,7 @@ void dds3AllocSplinePoints(EffPrimitiveCurve *primitive, s32 flattenEqualCompone
 void dds3BuildSplinePoints(f32 *tangents, f32 *keys, u32 recordCount)
 {
     s32 count = recordCount;
-    SdfMemBlock *allocation = sdfMemAllocDirect(count * sizeof(f32));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(f32));
     f32 *slopes = (f32 *)sdfMemLock(allocation);
     f32 (*key)[EFF_CURVE_COMPONENT_COUNT] = (f32 (*)[EFF_CURVE_COMPONENT_COUNT])keys;
     s32 component;
@@ -564,7 +564,7 @@ void dds3BuildSplineCoefsSkipDup(EffPrimitiveCurve *primitive, f32 *tangents) {
 /* Allocate the small channel when at least four records exist; borrow the supplied rows and set its default step. */
 void *effCreateChannel(void *rows, u32 recordCount) {
     void *channel = NULL;
-    SdfMemBlock *allocation;
+    sdfMemHandle_t *allocation;
     EffChan *channelObject;
 
     if (recordCount < EFF_BEZIER_MIN_RECORD_COUNT) {
@@ -701,7 +701,7 @@ s32 fmInitFontMemControl(u32 unused, s32 columns, s32 rows, s32 cellWidth, s32 c
             node->uv.u0 = (column * cellWidth) << 4;
             node->uv.u1 = ((column * cellWidth) << 4) + (cellWidth << 4);
             if (records != NULL) {
-                node->item = (FrFontRecord *)(records + i * recordBytes);
+                node->item = (GsFont_t *)(records + i * recordBytes);
             } else {
                 node->item = NULL;
             }

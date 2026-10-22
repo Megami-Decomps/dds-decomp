@@ -5,11 +5,11 @@
 #include "kwln.h"
 #include "eff_transform.h"
 
-struct MdlCtx;
-struct SdfTex;
+struct dds3ModelHandle_t;
+struct sdfTexHandle_t;
 struct SdfLightingPacketStorage;
 
-/* Values stored in EvtUnit.motionState; the field remains a signed halfword. */
+/* Values stored in evtUnitHandle_t.motionState; the field remains a signed halfword. */
 typedef enum EvtUnitMotionState {
     EVT_UNIT_MOTION_STATE_IDLE = 0,
     EVT_UNIT_MOTION_STATE_SOURCE = 1,
@@ -18,7 +18,7 @@ typedef enum EvtUnitMotionState {
     EVT_UNIT_MOTION_STATE_VALUE = 4
 } EvtUnitMotionState;
 
-/* Values observed in EvtUnit.transitionSourceKind; the field remains s16. */
+/* Values observed in evtUnitHandle_t.transitionSourceKind; the field remains s16. */
 typedef enum EvtUnitTransitionSourceKind {
     EVT_UNIT_TRANSITION_SOURCE_COPIED_VECTOR = 0,
     EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE = 1,
@@ -86,7 +86,7 @@ typedef char EvtUnitVectorSlotSizeCheck[sizeof(EvtUnitVectorSlot) == 0x40 ? 1 : 
  * targetVector is four floats even when copied as a quadword by VU0/MMI macros.
  * The manager copies the entire object by value: 0x170 (DDS1), 0x1D0 (DDS2).
  * No stronger alignment than the manager's original float layout is implied. */
-typedef struct EvtUnit {
+typedef struct evtUnitHandle_t {
     u32 color;                     /* 0x00 */
     union {
         s32 objectId;               /* Legacy script-facing view at +0x04 */
@@ -123,12 +123,12 @@ typedef struct EvtUnit {
     struct SdfLightingPacketStorage *endpointWork; /* 0x68: owned lighting packet storage */
     u32 value;                     /* 0x6C */
     f32 targetVector[4];           /* 0x70 */
-    EffWorldNode *effObj;          /* 0x80: kind-5 world node owning this motion work. */
+    dds3Basic_t *effObj;          /* 0x80: kind-5 world node owning this motion work. */
     s32 currentTransitionValue;    /* 0x84 */
     s32 previousTransitionValue;   /* 0x88 */
-    struct MdlCtx *owner;          /* 0x8C: model context and its SDK motion slots */
+    struct dds3ModelHandle_t *owner;          /* 0x8C: model context and its SDK motion slots */
     void *linkedUnit;              /* 0x90: retained source of a transition */
-    s32 (*motionCallback)(struct EvtUnit *, s32); /* 0x94: returns 1 when motion completes. */
+    s32 (*motionCallback)(struct evtUnitHandle_t *, s32); /* 0x94: returns 1 when motion completes. */
     f32 wobblePhase;               /* 0x98: wrapping radians used by model scale/rotation wobble. */
     s32 unk9C;                     /* 0x9C */
     s32 pathHandle;                /* 0xA0: freed when replacing the path */
@@ -226,20 +226,20 @@ typedef struct EvtUnit {
     s16 stepCount;                 /* 0x1C4 */
     u8 pad1C6[10];
 #endif
-} EvtUnit;
+} evtUnitHandle_t;
 
-EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, struct MdlCtx *owner);
-s32 evtDeleteUnitHandle(EvtUnit *work);
+evtUnitHandle_t *evtCreateUnitTransitionWork(dds3Basic_t *effObj, struct dds3ModelHandle_t *owner);
+s32 evtDeleteUnitHandle(evtUnitHandle_t *work);
 
-void evtSetUnitValueTransition(EvtUnit *unit, EffWorldNode *target, s32 duration);
-void evtSetUnitLightDir(EvtUnit *unit, s32 duration);
-void evtSetUnitColorRGB(EvtUnit *unit, s32 duration, u32 color);
-void evtSetUnitColorA(EvtUnit *unit, s32 duration, u32 color);
-void evtUnitLightOn(EvtUnit *unit);
-EvtUnit *evtGetUnitHandle2(EffWorldNode *unit);
-void evtSetWaitMotion(EvtUnit *unit, s32 value);
+void evtSetUnitValueTransition(evtUnitHandle_t *unit, dds3Basic_t *target, s32 duration);
+void evtSetUnitLightDir(evtUnitHandle_t *unit, s32 duration);
+void evtSetUnitColorRGB(evtUnitHandle_t *unit, s32 duration, u32 color);
+void evtSetUnitColorA(evtUnitHandle_t *unit, s32 duration, u32 color);
+void evtUnitLightOn(evtUnitHandle_t *unit);
+evtUnitHandle_t *evtGetUnitHandle2(dds3Basic_t *unit);
+void evtSetWaitMotion(evtUnitHandle_t *unit, s32 value);
 
-s32 evtCheckScriptDone(KwlnTask *task);
-void evtWaitEventPackLoad(KwlnTask *task);
+s32 evtCheckScriptDone(dds3ProcessID_t *task);
+void evtWaitEventPackLoad(dds3ProcessID_t *task);
 
 #endif /* EVT_UNIT_H */

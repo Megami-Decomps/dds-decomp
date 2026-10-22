@@ -1,8 +1,8 @@
 #ifndef SDF_GENERAL_HEAP_API_H
 #define SDF_GENERAL_HEAP_API_H
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
-struct SdfMemBlock *sdfMemGetTop(void);
+struct sdfMemHandle_t *sdfMemGetTop(void);
 
 #endif /* SDF_GENERAL_HEAP_API_H */

@@ -7,7 +7,7 @@
 
 #include "eff_curve.h"
 
-struct BillObj;
+struct billHandle_t;
 struct EffTrackSet;
 struct FileSlotTable;
 
@@ -69,7 +69,7 @@ typedef struct EffectStripNode {
     f32 opacity;
     EffStripParams copiedHeader;
     struct EffTrackSet *trackSet;
-    struct BillObj *resource;
+    struct billHandle_t *resource;
     struct FileSlotTable *active;
     u16 count;
 } EffectStripNode;
@@ -101,9 +101,9 @@ typedef struct EffQuadWork {
     u32 sourceKind;
     s32 frame;
     EffQuadParams source;
-    struct BillObj *billHandle;
+    struct billHandle_t *billHandle;
     struct EffExpandedList *reference; /* Kind-7 retained resource wrapper. */
-    SdfAsset *assetHandle;
+    sdfMat_t *assetHandle;
 } EffQuadWork;
 
 typedef char EffQuadParamsSizeCheck[(sizeof(EffQuadParams) == 0x98) ? 1 : -1];
@@ -218,8 +218,8 @@ typedef struct EffTrackSet {
     u8 *buffer;
     u8 *columns;
     u8 *tail;
-    SdfAsset *handle;
-    struct SdfMemBlock *allocation;
+    sdfMat_t *handle;
+    struct sdfMemHandle_t *allocation;
 } EffTrackSet;
 
 typedef char EffTrackSet_size_must_be_0x30[(sizeof(EffTrackSet) == 0x30) ? 1 : -1];
@@ -232,7 +232,7 @@ typedef char EffTrackSet_allocation_offset_must_be_0x2C[
 typedef struct EffBillFrameState {
     u8 *entries;
     EffTrackSet *asset;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u32 unk0C;
 } EffBillFrameState;
 
@@ -611,8 +611,8 @@ typedef struct EffStripWork {
     u8 *uvsA;           // 0x20
     u8 *uvsB;           // 0x24
     u8 *extra;          // 0x28
-    SdfAsset *handle;   // 0x2C
-    struct SdfMemBlock *allocation; // 0x30
+    sdfMat_t *handle;   // 0x2C
+    struct sdfMemHandle_t *allocation; // 0x30
 } EffStripWork;
 
 /* The class operation table selects the interpretation of each 0x30-byte

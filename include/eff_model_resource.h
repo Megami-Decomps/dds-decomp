@@ -12,7 +12,7 @@ typedef struct EffModelResource {
     u32 color;
     s32 updateCount;
     s32 kind;
-    MdlCtx *model;
+    dds3ModelHandle_t *model;
     u32 attributes;
     struct EffSpanTable *childResource;
     struct EffSpanConfig *source;

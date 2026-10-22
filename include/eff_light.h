@@ -32,7 +32,7 @@ typedef struct EffLightData {
     u32 packedColorB;
     u16 blendFrames;
     u16 unk72;
-    ObjBase *resourceState;
+    dds3ObjectBaseControlWorkData_t *resourceState;
     struct SdfLightingPacketStorage *buffer;
 } EffLightData;
 

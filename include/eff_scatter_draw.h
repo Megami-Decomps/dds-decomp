@@ -3,13 +3,13 @@
 
 #include "common.h"
 
-struct SdfAsset;
-struct SdfMemBlock;
+struct sdfMat_t;
+struct sdfMemHandle_t;
 struct PcpScatterRes;
 
 /* The drawable owns its geometry allocation and asset independently of the
  * effect instance that supplies its transform and scale. */
-typedef struct PcpScatterDraw {
+typedef struct dds3WhirlwindPolyList_tag {
     f32 origin[4];             // 0x00
     f32 matrix[16];            // 0x10
     u32 packetQueueIndex;     // 0x50
@@ -21,18 +21,18 @@ typedef struct PcpScatterDraw {
     f32 *uv;                  // 0x68
     u32 *vertexColors;        // 0x6C
     u32 *colors;              // 0x70
-    struct SdfAsset *asset;    // 0x74
-    struct SdfMemBlock *allocation; // 0x78
+    struct sdfMat_t *asset;    // 0x74
+    struct sdfMemHandle_t *allocation; // 0x78
     struct PcpScatterRes *sharedResource; // 0x7C
-} PcpScatterDraw;
+} dds3WhirlwindPolyList_tag;
 
-typedef char PcpScatterDrawSizeCheck[sizeof(PcpScatterDraw) == 0x80 ? 1 : -1];
+typedef char PcpScatterDrawSizeCheck[sizeof(dds3WhirlwindPolyList_tag) == 0x80 ? 1 : -1];
 typedef char PcpScatterDrawAssetOffsetCheck[
-    ((u32)&((PcpScatterDraw *)0)->asset == 0x74) ? 1 : -1];
+    ((u32)&((dds3WhirlwindPolyList_tag *)0)->asset == 0x74) ? 1 : -1];
 typedef char PcpScatterDrawAllocationOffsetCheck[
-    ((u32)&((PcpScatterDraw *)0)->allocation == 0x78) ? 1 : -1];
+    ((u32)&((dds3WhirlwindPolyList_tag *)0)->allocation == 0x78) ? 1 : -1];
 
-void dds3WhirlwindPolyListDelete(PcpScatterDraw *object);
-void dds3WhirlwindPolyListSetRotateMatrix(PcpScatterDraw *draw, const void *sourceMatrix);
+void dds3WhirlwindPolyListDelete(dds3WhirlwindPolyList_tag *object);
+void dds3WhirlwindPolyListSetRotateMatrix(dds3WhirlwindPolyList_tag *draw, const void *sourceMatrix);
 
 #endif

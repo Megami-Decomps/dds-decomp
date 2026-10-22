@@ -21,7 +21,7 @@ extern void effBillDispatchAll(void);
 extern void dds3ParticleManagerExit(void);
 extern void dds3PolygonManagerExit(void);
 
-void effManagerInitializeSubsystems(KwlnTask *task) {
+void effManagerInitializeSubsystems(dds3ProcessID_t *task) {
     (void)task;
     dds3ParticleManagerExit();
     dds3PolygonManagerExit();
@@ -29,15 +29,15 @@ void effManagerInitializeSubsystems(KwlnTask *task) {
 }
 
 /* Submit the test and alpha state packets to both field draw buffers. */
-s32 effSubmitFieldBlendStateTask(KwlnTask *task) {
-    SdfListHead *list;
-    SdfGsBlendPacket *state;
+s32 effSubmitFieldBlendStateTask(dds3ProcessID_t *task) {
+    sdfDrawTag_t *list;
+    sdfPrimTransPacket_t *state;
     SdfPoolNode *surface;
 
     (void)task;
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    state = (SdfGsBlendPacket *)sdfGrAllocPacketBuff(0x40);
+    state = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
     state->header.dmaTag = 3;
     state->header.vifCommands = 0x5000000310000000ULL;
     state->header.gifTag = 0x1000000000008002ULL;
@@ -50,9 +50,9 @@ s32 effSubmitFieldBlendStateTask(KwlnTask *task) {
     surface = &sdfGrOtTable[51];
     surface->append(surface, list);
 
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    state = (SdfGsBlendPacket *)sdfGrAllocPacketBuff(0x40);
+    state = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
     state->header.dmaTag = 3;
     state->header.vifCommands = 0x5000000310000000ULL;
     state->header.gifTag = 0x1000000000008002ULL;
@@ -74,7 +74,7 @@ extern void billFlushPendingRenderPairs(void);
 extern void dds3UpdateCrossfade(void);
 extern void effDispatchActive(void);
 
-s32 dds3EffectManagerRun(KwlnTask *task) {
+s32 dds3EffectManagerRun(dds3ProcessID_t *task) {
     (void)task;
     dds3PolygonLinkOt();
     dds3TrackPolyLinkOt();
@@ -197,7 +197,7 @@ EffNode *effCreateNodeFromParameter(u32 parameter) {
 
 struct EffNode *dds3EffectFileLoad(const char *resource) {
     u32 resolvedId;
-    struct SdfMemBlock *resourceHandle;
+    struct sdfMemHandle_t *resourceHandle;
     struct EffNode *node;
 
     printf("d3p file read...[%s]\n", resource);

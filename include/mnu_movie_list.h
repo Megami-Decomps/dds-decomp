@@ -4,20 +4,20 @@
 #include "common.h"
 #include "mnu_movie_list_node.h"
 
-struct SdfListHead;
-struct KwlnTask;
+struct sdfDrawTag_t;
+struct dds3ProcessID_t;
 
 /* Movie-viewer list state; the task, movie-list node and packet-list owners
  * are external. */
 typedef struct MnuMovieList {
-    struct KwlnTask *task;
+    struct dds3ProcessID_t *task;
     MnuMovieListNode *head;
     s16 top;
     s16 cursor;
     s16 total;
     s8 playing;
     u8 pad0F;
-    struct SdfListHead *packets;
+    struct sdfDrawTag_t *packets;
 } MnuMovieList;
 
 typedef char MnuMovieList_size_must_be_0x14[

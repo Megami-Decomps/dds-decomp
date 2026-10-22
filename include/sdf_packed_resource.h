@@ -23,8 +23,8 @@ typedef char SdfPackedRelocationHeader_byteCount_offset_must_be_0x14[
 u8 *sdfRelocatePackedResourcePayload(SdfPackedRelocationHeader *resource);
 u8 *sdfRelocatePackedResourceWordsFromHeader(SdfPackedRelocationHeader *resource);
 
-struct SdfMemBlock;
-struct SdfMemBlock *sdfLoadPackedResourceWithRelocatedPayload(const char *name, u8 **outPayloadAddress);
-struct SdfMemBlock *sdfReadPackedResourceAndRelocateHeader(const char *name, u8 **outPayloadAddress);
+struct sdfMemHandle_t;
+struct sdfMemHandle_t *sdfLoadPackedResourceWithRelocatedPayload(const char *name, u8 **outPayloadAddress);
+struct sdfMemHandle_t *sdfReadPackedResourceAndRelocateHeader(const char *name, u8 **outPayloadAddress);
 
 #endif /* SDF_PACKED_RESOURCE_H */

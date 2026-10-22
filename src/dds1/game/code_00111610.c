@@ -16,12 +16,12 @@ typedef struct {
 extern SlotEntry dds3SlotRingEntries[];
 extern s32 dds3MoverCount;
 
-extern s32 MoverBasicMainprocuder(EffWorldNode *object);
+extern s32 MoverBasicMainprocuder(dds3Basic_t *object);
 
 
 /* Bind the owner, select a 16-byte ring entry, and advance the ten-entry cursor. */
-EffWorldNode *dds3AddMoverBasic(EffWorldNode *owner) {
-    EffWorldNode *object = dds3AddSceneBasicData(EFF_WORLD_KIND_SLOT_RING);
+dds3Basic_t *dds3AddMoverBasic(dds3Basic_t *owner) {
+    dds3Basic_t *object = dds3AddSceneBasicData(EFF_WORLD_KIND_SLOT_RING);
     Dds3SlotResource *resource = object->data;
     u32 sequence = dds3AllocObjectId();
     s32 slotIndex;
@@ -36,7 +36,7 @@ EffWorldNode *dds3AddMoverBasic(EffWorldNode *owner) {
 }
 
 /* Install the relative-transform callback used when no path is retained. */
-void dds3MoverBasicSetCallBackPrimaryControl(EffWorldNode *slotObject, Dds3MoverUpdate update) {
+void dds3MoverBasicSetCallBackPrimaryControl(dds3Basic_t *slotObject, Dds3MoverUpdate update) {
     Dds3SlotResource *resource = slotObject->data;
 
     resource->update = update;
@@ -44,7 +44,7 @@ void dds3MoverBasicSetCallBackPrimaryControl(EffWorldNode *slotObject, Dds3Mover
 
 /* Cache the source object address for the next curve-work replacement. */
 /* Cache the source address consumed by the slot's later path replacement. */
-void dds3MoverBasicSetPath(EffWorldNode *slotObject, EffWorldNode *sourceObject) {
+void dds3MoverBasicSetPath(dds3Basic_t *slotObject, dds3Basic_t *sourceObject) {
     Dds3SlotResource *resource = slotObject->data;
 
     resource->sourceObject = sourceObject;
@@ -52,9 +52,9 @@ void dds3MoverBasicSetPath(EffWorldNode *slotObject, EffWorldNode *sourceObject)
 
 /* Free the old curve work before constructing its replacement from the stored
  * source object address. The source is not an integer resource ID. */
-void dds3MoverBasicMakePath(EffWorldNode *slotObject) {
+void dds3MoverBasicMakePath(dds3Basic_t *slotObject) {
     Dds3SlotResource *resource;
-    Dds3PathCurveWork *pathWork;
+    dds3PathBasicControl_t *pathWork;
 
     resource = slotObject->data;
     if (resource->path != 0) {
@@ -65,9 +65,9 @@ void dds3MoverBasicMakePath(EffWorldNode *slotObject) {
 }
 
 /* Release nonzero curve work and clear its handle, retaining the source address. */
-void dds3MoverBasicFreePath(EffWorldNode *slotObject) {
+void dds3MoverBasicFreePath(dds3Basic_t *slotObject) {
     Dds3SlotResource *resource;
-    Dds3PathCurveWork *pathWork;
+    dds3PathBasicControl_t *pathWork;
 
     resource = slotObject->data;
     pathWork = resource->path;
@@ -78,13 +78,13 @@ void dds3MoverBasicFreePath(EffWorldNode *slotObject) {
 }
 
 /* Return the currently stored curve-work handle. */
-Dds3PathCurveWork *dds3MoverBasicGetPathControl(EffWorldNode *slotObject) {
+dds3PathBasicControl_t *dds3MoverBasicGetPathControl(dds3Basic_t *slotObject) {
     Dds3SlotResource *resource = slotObject->data;
 
     return resource->path;
 }
 
-void dds3MoverBasicUpdate(EffWorldNode *slotObject) {
+void dds3MoverBasicUpdate(dds3Basic_t *slotObject) {
     MoverBasicMainprocuder(slotObject);
 }
 
@@ -125,12 +125,12 @@ s32 BasicTypeToItemType(u32 kind)
 
 /* Initialize a kind-3 slot state and its index node.
  * Every slot and currentSlot start unused (-1). */
-ObjBase *dds3CreateSlotResourceState(void *owner) {
-    ObjBase *state = sdfChipAllocDirect(sizeof(ObjBase));
+dds3ObjectBaseControlWorkData_t *dds3CreateSlotResourceState(void *owner) {
+    dds3ObjectBaseControlWorkData_t *state = sdfChipAllocDirect(sizeof(dds3ObjectBaseControlWorkData_t));
     s32 i;
     WorldIndexNode *node;
 
-    memset(state, 0, sizeof(ObjBase));
+    memset(state, 0, sizeof(dds3ObjectBaseControlWorkData_t));
     state->resourceState = 3;
     node = dds3GetBasicArrayHandle(0);
     state->worldIndexNode = node;

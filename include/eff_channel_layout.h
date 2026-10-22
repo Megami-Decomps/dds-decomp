@@ -4,7 +4,7 @@
 #include "eff_channel.h"
 #include "eff_param.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* effCopyVertRows writes XYZ at a four-float stride, leaves +0x40..+0x57
  * untouched, then copies four scalars at +0x58. */
@@ -16,7 +16,7 @@ typedef struct EffFloatRows {
 
 /* Allocated interpolation cursor; effCreateChannel requests exactly 0x18 bytes. */
 typedef struct EffChan {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u32 recordCount;
     EffFloatRows *rows;
     u32 cursorIndex;
@@ -41,7 +41,7 @@ typedef struct EffEmit {
 /* Parameter template owner; the four-byte prefix is not read by channel work. */
 typedef struct EffChanSourceOwner {
     u8 opaque00[4];
-    EffParamWork *param;
+    effPartHandle_t *param;
 } EffChanSourceOwner;
 
 /* Source header followed by the owner used to duplicate each record parameter. */

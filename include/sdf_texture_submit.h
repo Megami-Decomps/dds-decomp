@@ -8,6 +8,6 @@
 u8 *sdfTexTransData(u32 destination, s32 width, s32 height, u32 format, u8 *pixels, s32 borrowPixels);
 
 /* Submit a palette using dimensions selected from the texture pixel format. */
-u8 *sdfTexTransCLUT(SdfTex *texture, u32 destination, u8 *pixels, s32 borrowPixels);
+u8 *sdfTexTransCLUT(sdfTexHandle_t *texture, u32 destination, u8 *pixels, s32 borrowPixels);
 
 #endif

@@ -4,7 +4,7 @@
 #include "common.h"
 
 struct ParSystem;
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Indexed-vector parameters retain a dispatch pointer and geometry widths. */
 typedef struct EffThunderVectorParams {
@@ -72,7 +72,7 @@ typedef struct EffThunderVectorWork {
     f32 baseRadiusScale;
     f32 baseHeightScale;
     struct ParSystem *cellSystem;
-    struct SdfMemBlock *allocationHandle;
+    struct sdfMemHandle_t *allocationHandle;
 } EffThunderVectorWork;
 
 typedef char EffThunderVectorParams_size_check[sizeof(EffThunderVectorParams) == 0x4C ? 1 : -1];

@@ -4,7 +4,7 @@
 #include "eff_track_poly_list.h"
 #include "par_kind_api.h"
 
-void dds3Particle_BlurDraw(struct ParTable *table);
+void dds3Particle_BlurDraw(struct dds3Particle_BlurBuff_t *table);
 void dds3TrackPolyDraw(struct ParSystem *system);
 
 /* Both particle render paths submit the resource selected by this shared kind. */

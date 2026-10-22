@@ -182,8 +182,8 @@ void itfGridStorePosition(MenuGridSlot *slot, EffectSlotSet *resource, s32 resou
 }
 
 void itfCreateGridPacketWithDefaultFlags(u32 packetHandle, s32 width, s32 height, u8 *data,
-                  SdfListHead *context) {
-    sdfLinkLoadImage(context, (SdfTexResource *)packetHandle,
+                  sdfDrawTag_t *context) {
+    sdfLinkLoadImage(context, (sdfGsMemSlice_t *)packetHandle,
                               0, 0, width, height, (s32)data, 0);
 }
 
@@ -193,7 +193,7 @@ u8 itfGridGetOverlayFlag(GridDrawWork *work) {
 }
 
 /* Two overlay kinds use a 16x16 region; other kinds use 8x2. */
-void itfDrawGridOverlayPacket(GridDrawWork *work, u8 *data, SdfListHead *context) {
+void itfDrawGridOverlayPacket(GridDrawWork *work, u8 *data, sdfDrawTag_t *context) {
     s32 width;
     s32 height;
     if (work->overlayKind == 0x13 || work->overlayKind == 0x1B) {
@@ -215,7 +215,7 @@ extern s32 sdf2DGetPrimPtr(s32 packet);
 
 /* Build the optional overlay and main packet, then dispatch their draw callback. */
 GridDrawWork *itfSubmitGridPacketsAndDraw(GridDrawWork *object, u8 *data, s32 kind) {
-    SdfListHead *context = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *context = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     u8 *cursor;
     SdfPoolNode *entry;
     sdfDrawTagInit(context);
@@ -249,18 +249,18 @@ u8 *itfGetGridResourceEntryData(ItfGridResource *resource, u32 entryIndex) {
     if (resource->handle == 0) {
         return 0;
     }
-    cursor = (void *)sdfMemLock((struct SdfMemBlock *)(resource->handle));
+    cursor = (void *)sdfMemLock((struct sdfMemHandle_t *)(resource->handle));
     base = cursor;
     count = resource->entryCount;
     cursor += *(u32 *)(cursor + 0xC);
     for (i = 0; i < count; i++, cursor += 8) {
         result = base + *(u32 *)(cursor + 4);
         if (entryIndex == i) {
-            sdfMemUnlock((struct SdfMemBlock *)resource->handle);
+            sdfMemUnlock((struct sdfMemHandle_t *)resource->handle);
             return result;
         }
     }
-    sdfMemUnlock((struct SdfMemBlock *)resource->handle);
+    sdfMemUnlock((struct sdfMemHandle_t *)resource->handle);
     return 0;
 }
 
@@ -625,9 +625,9 @@ void cmpExpandColor(u64 *channels, u32 color) {
     channels[1] = (blueBits >> 8) | ((u64)(color & 0xFF) << 32);
 }
 
-extern SdfListHead D_0045C380[2];
+extern sdfDrawTag_t D_0045C380[2];
 extern DmaPacketHeader D_0045C3C0[2];
-extern SdfListHead D_0045C400[2];
+extern sdfDrawTag_t D_0045C400[2];
 extern SdfLightingPacketStorage D_0045C440[2];
 extern ConsMatrixPacket D_0045C600[2];
 extern SdfLightSources D_0037F770;
@@ -636,7 +636,7 @@ extern u8 sdfViewMatrix[0x40];
 extern u8 aViewTarget[];
 extern u8 sdfViewTargetVector[];
 extern u8 aViewDown[];
-extern void sdf3DLinkInitPacket(SdfListHead *, DmaPacketHeader *);
+extern void sdf3DLinkInitPacket(sdfDrawTag_t *, DmaPacketHeader *);
 
 /* Rebuild the view matrix and both frame banks' matrix and lighting packet lists. */
 void itfInitDoubleBufferedScenePackets(void) {
@@ -660,7 +660,7 @@ void cmpDrawSpriteFlag(u8 enabled, s32 alternate, s32 kind) {
     u32 normalized = enabled != 0;
     SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
     u64 *descriptor;
-    SdfListHead *context;
+    sdfDrawTag_t *context;
     SdfPoolNode *entry;
 
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
@@ -671,7 +671,7 @@ void cmpDrawSpriteFlag(u8 enabled, s32 alternate, s32 kind) {
     } else {
         descriptor[1] = 0x4B;
     }
-    context = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    context = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
     entry = &sdfGrOtTable[kind];
@@ -685,7 +685,7 @@ void itfSetPrimaryFramebufferAlphaFlag(u8 value, u32 kind) {
 void cmpDrawSprite(u64 data, s32 alternate, s32 kind) {
     SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
     u64 *descriptor;
-    SdfListHead *context;
+    sdfDrawTag_t *context;
     SdfPoolNode *entry;
 
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
@@ -696,7 +696,7 @@ void cmpDrawSprite(u64 data, s32 alternate, s32 kind) {
     } else {
         descriptor[1] = 0x48;
     }
-    context = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    context = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
     entry = &sdfGrOtTable[kind];
@@ -710,7 +710,7 @@ void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind) {
 void cmpDrawSprite2(s32 data, s32 alternate, s32 kind) {
     SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
     u64 *descriptor;
-    SdfListHead *context;
+    sdfDrawTag_t *context;
     SdfPoolNode *entry;
 
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
@@ -721,7 +721,7 @@ void cmpDrawSprite2(s32 data, s32 alternate, s32 kind) {
     } else {
         descriptor[1] = 0x43;
     }
-    context = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    context = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
     entry = &sdfGrOtTable[kind];
@@ -735,14 +735,14 @@ void sdfSubmitGsAlphaOneRegisterPacket(u32 data, u32 kind) {
 void cmpDrawSpriteIndexed(s32 data, s32 kind) {
     SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
     u64 *descriptor;
-    SdfListHead *context;
+    sdfDrawTag_t *context;
     SdfPoolNode *entry;
 
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdf2DGetPrimPtr((s32)packet);
     descriptor[1] = 0x49;
     descriptor[0] = data;
-    context = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    context = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
     entry = &sdfGrOtTable[kind];
@@ -752,14 +752,14 @@ void cmpDrawSpriteIndexed(s32 data, s32 kind) {
 void cmpDrawSpriteIndexed2(s32 data, s32 kind) {
     SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
     u64 *descriptor;
-    SdfListHead *context;
+    sdfDrawTag_t *context;
     SdfPoolNode *entry;
 
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdf2DGetPrimPtr((s32)packet);
     descriptor[1] = 0x14;
     descriptor[0] = data;
-    context = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    context = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
     entry = &sdfGrOtTable[kind];
@@ -787,7 +787,7 @@ void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 sur
 {
     SdfDrawPacket *packet;
     GridPackedVertex *vertices;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     SdfPoolNode *surface;
 
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(6, 1));
@@ -802,7 +802,7 @@ void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 sur
     cmpExpandColor(vertices[2].colorChannels, colors[2]);
     vertices[2].packedXY = (xs[2] + 0x7000) | ((u64)(ys[2] + 0x7900) << 32);
     vertices[2].depth = z;
-    list = (SdfListHead *)sdfGrAllocPacketBuff(sizeof(SdfListHead));
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)packet);
     surface = &sdfGrOtTable[surfaceIndex];
@@ -828,7 +828,7 @@ void itfDrawVertexColoredRectangle(u32 x, u32 y, u32 z, u32 width, u32 height, c
     u64 topWord = (u64)top << 32;
     SdfDrawPacket *packet;
     GridPackedVertex *vertices;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     SdfPoolNode *surface;
     u64 right, bottom;
 
@@ -849,7 +849,7 @@ void itfDrawVertexColoredRectangle(u32 x, u32 y, u32 z, u32 width, u32 height, c
     cmpExpandColor(vertices[3].colorChannels, colors[3]);
     vertices[3].packedXY = right | bottom;
     vertices[3].depth = z;
-    list = (SdfListHead *)sdfGrAllocPacketBuff(sizeof(SdfListHead));
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)packet);
     surface = &sdfGrOtTable[surfaceIndex];
@@ -883,7 +883,7 @@ void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
 {
     SdfDrawPacket *packet;
     GridPackedVertex *vertices;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     SdfPoolNode *surface;
 
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(4, 1));
@@ -895,7 +895,7 @@ void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
     cmpExpandColor(vertices[1].colorChannels, colors[1]);
     vertices[1].packedXY = (x1 + 0x7000) | ((u64)(y1 + 0x7900) << 32);
     vertices[1].depth = z1;
-    list = (SdfListHead *)sdfGrAllocPacketBuff(sizeof(SdfListHead));
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)packet);
     surface = &sdfGrOtTable[surfaceIndex];
@@ -905,16 +905,16 @@ void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
 
 /* vu0 routine: the SDK quadword copies are present at 00308D20..00308D3C. */
 void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
-                   const u32 *colors, s32 unused, SdfAsset *asset, s32 surfaceIndex) {
+                   const u32 *colors, s32 unused, sdfMat_t *asset, s32 surfaceIndex) {
     SdfPrimitiveRequest request;
     u32 vertexColors[3];
     f32 textureCoordinates[3][2];
     f32 positions[3][4];
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     SdfPoolNode *surface;
     u32 firstColor, secondColor, thirdColor;
 
-    list = (SdfListHead *)sdfGrAllocPacketBuff(sizeof(SdfListHead));
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
     sdfDrawTagInit(list);
     sdf3DPrimLinkResetTm(list, 0);
     if (asset != NULL) {
@@ -950,7 +950,7 @@ void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
 }
 
 void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
-    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     SdfDmaReferenceChainPacket *texture;
     sdfDrawTagInit(list);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
@@ -967,7 +967,7 @@ extern void sdfBuildFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacke
 void sdfDispatchSurfaceWithPreparedTexturePacket(surfaceIndex)
     s32 surfaceIndex;
 {
-    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     SdfDmaReferenceChainPacket *texture;
     sdfDrawTagInit(list);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);

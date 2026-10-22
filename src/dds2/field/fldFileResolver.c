@@ -64,12 +64,12 @@ extern s32 fldSetEncounterMode(s32 encounterMode);
 extern FldFileResource *D_00438EC0;
 extern u32 D_00438EC4;
 #include "dds3_world_secondary.h"
-struct EffWorldNode;
-extern struct EffWorldNode *dds3AddMatterObjectBasic(s32 key, f32 *offset, f32 *rotation);
+struct dds3Basic_t;
+extern struct dds3Basic_t *dds3AddMatterObjectBasic(s32 key, f32 *offset, f32 *rotation);
 extern char D_00412FF0[]; 
-struct EffWorldNode *fldMakeDmyMatter(void) {
+struct dds3Basic_t *fldMakeDmyMatter(void) {
     u32 args[8];
-    struct EffWorldNode *matter;
+    struct dds3Basic_t *matter;
     args[0] = 0;
     args[1] = 0;
     args[2] = 0;
@@ -83,9 +83,9 @@ struct EffWorldNode *fldMakeDmyMatter(void) {
     return matter;
 }
 
-EffWorldNode *fldGetMatter_From_ModelRangeID(u32 resourceId) {
+dds3Basic_t *fldGetMatter_From_ModelRangeID(u32 resourceId) {
     u32 resourceIndex = 0;
-    EffWorldNode *secondaryWorld = dds3GetControlScene();
+    dds3Basic_t *secondaryWorld = dds3GetControlScene();
     FldFileResource *resource = D_00438EC0;
 
     for (; resourceIndex < D_00438EC4; resourceIndex++, resource++) {
@@ -95,13 +95,13 @@ EffWorldNode *fldGetMatter_From_ModelRangeID(u32 resourceId) {
                 u32 nameIndex = 0;
 
                 for (; nameIndex < resource->names->count; nameIndex++, nameEntry++) {
-                    EffWorldNode *resolvedObject = dds3SceneBasicSearchNameAndType(secondaryWorld, 6, (const u8 *)nameEntry->name);
+                    dds3Basic_t *resolvedObject = dds3SceneBasicSearchNameAndType(secondaryWorld, 6, (const u8 *)nameEntry->name);
                     if (resolvedObject != NULL) {
                         return resolvedObject;
                     }
                 }
             } else {
-                EffWorldNode *resolvedObject = fldFindMatterIndex(resource->id);
+                dds3Basic_t *resolvedObject = fldFindMatterIndex(resource->id);
                 if (resolvedObject == NULL) {
                     resolvedObject = fldMakeDmyMatter();
                     fldFindMatterIndexFrom(resource->id, resolvedObject);
@@ -113,9 +113,9 @@ EffWorldNode *fldGetMatter_From_ModelRangeID(u32 resourceId) {
     return NULL;
 }
 
-EffWorldNode *fldGetModelRange_From_MatterName(const char *resourceEntryName) {
+dds3Basic_t *fldGetModelRange_From_MatterName(const char *resourceEntryName) {
     u32 resourceIndex = 0;
-    EffWorldNode *secondaryWorld = dds3GetControlScene();
+    dds3Basic_t *secondaryWorld = dds3GetControlScene();
     FldFileResource *resource = D_00438EC0;
 
     for (; resourceIndex < D_00438EC4; resourceIndex++, resource++) {
@@ -125,7 +125,7 @@ EffWorldNode *fldGetModelRange_From_MatterName(const char *resourceEntryName) {
 
             for (; nameIndex < resource->names->count; nameIndex++, nameEntry++) {
                 if (strcmp(resourceEntryName, nameEntry->name) == 0) {
-                    EffWorldNode *resolvedObject = dds3SceneBasicSearchNameAndType(secondaryWorld, 11, (const u8 *)resource->name);
+                    dds3Basic_t *resolvedObject = dds3SceneBasicSearchNameAndType(secondaryWorld, 11, (const u8 *)resource->name);
                     if (resolvedObject != NULL) {
                         return resolvedObject;
                     }
@@ -154,24 +154,24 @@ extern u32 D_00438EBC;
 extern u32 D_00444920[];
 extern u32 D_00444940[];
 extern char D_00435FD0[];
-extern EffWorldNode *effObjCreateResourceKindZero(const char *, void *, s32);
-extern EffWorldNode *dds3AddP2AEffectObjectBasic(const char *, void *, s32);
-extern EffWorldNode *dds3AddTMXEffectObjectBasic3(EffWorldNode *, void *, s32);
-extern EffWorldNode *dds3AddP2AEffectObjectBasic3(EffWorldNode *, void *, s32);
-extern EffWorldNode *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *, void *, void *);
-extern EffWorldNode *dds3AddESPEffectObjectBasic(const char *, void *, void *, f32);
-extern void dds3EffectObjectBasicStatOn(EffWorldNode *, u32);
-extern void dds3EffectObjectBasicStatOff(EffWorldNode *, u32);
-extern void dds3EffectObjectBasicSetFldEx(EffWorldNode *, BillConfig *);
-extern EffWorldNode *dds3AddLightObjectBasic(s32);
-extern EffWorldNode *dds3AddPathBasic(s32 key, void *work, const char *name);
-extern EffWorldNode *dds3AddModelRangeBasicNew(s32, s32, s32, s32);
-extern void dds3GetRadiusPoseSet(EffWorldNode *, f32);
-extern void dds3SetLightObjectResoruce(EffWorldNode *, WorldTransformSetup *);
+extern dds3Basic_t *effObjCreateResourceKindZero(const char *, void *, s32);
+extern dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *, void *, s32);
+extern dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *, void *, s32);
+extern dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *, void *, s32);
+extern dds3Basic_t *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *, void *, void *);
+extern dds3Basic_t *dds3AddESPEffectObjectBasic(const char *, void *, void *, f32);
+extern void dds3EffectObjectBasicStatOn(dds3Basic_t *, u32);
+extern void dds3EffectObjectBasicStatOff(dds3Basic_t *, u32);
+extern void dds3EffectObjectBasicSetFldEx(dds3Basic_t *, BillConfig *);
+extern dds3Basic_t *dds3AddLightObjectBasic(s32);
+extern dds3Basic_t *dds3AddPathBasic(s32 key, void *work, const char *name);
+extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, s32, s32, s32);
+extern void dds3GetRadiusPoseSet(dds3Basic_t *, f32);
+extern void dds3SetLightObjectResoruce(dds3Basic_t *, WorldTransformSetup *);
 extern void fldMakePlane(FldCollisionDescriptor *geometry, f32 *translation,
                                                u32 id, s32 sceneFlag, s32 ownerIndex);
 extern s32 fldCommand_GetHojiID(char *);
-extern void dds3SetPathBasicSpline(EffWorldNode *path, u32 value);
+extern void dds3SetPathBasicSpline(dds3Basic_t *path, u32 value);
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00412FF0);
 
@@ -310,7 +310,7 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
                 dds3GetRadiusPoseSet(spawnedObject, ((WorldTransformSetup *)resource->data)->transform.rotation[1]);
                 dds3SetLightObjectResoruce(spawnedObject, resource->data);
                 if ((u32)fldGlobalBase.area - 200U < 300U) {
-                    ((EffLightData *)((EffWorldNode *)spawnedObject)->data)->flags |= 8;
+                    ((EffLightData *)((dds3Basic_t *)spawnedObject)->data)->flags |= 8;
                     dds3SetUnitObjectId(spawnedObject, (u32)"BTL_DEF_LIGHT");
                 }
             }
@@ -414,12 +414,12 @@ typedef char FldUnitLightColor_size_must_be_0x10[(sizeof(FldUnitLightColor) == 0
 extern FldUnitLightParams D_0038BB10;
 extern FldUnitLightColor D_0038BB60;
 
-extern MdlCtx *fldPlayerModelContext;
+extern dds3ModelHandle_t *fldPlayerModelContext;
 extern s32 D_00389888[];
 
 extern void fldFreeNextFile(void);
 
-extern MdlCtx *fldSecondarySceneModelContext;
+extern dds3ModelHandle_t *fldSecondarySceneModelContext;
 
 extern s32 fldSecondarySceneObject;
 
@@ -462,7 +462,7 @@ extern SdfFlagListWork *fldCameraColorEffect;
 
 extern u32 fldCameraColorEnabled;
 
-extern SdfTex *fldRainTextureReference;
+extern sdfTexHandle_t *fldRainTextureReference;
 
 extern s32 fldRainTextureResource;
 
@@ -480,7 +480,7 @@ extern u32 D_003897E8[];
 extern char D_00444950[];
 
 
-extern struct SdfMemBlock *fldFieldPackData;
+extern struct sdfMemHandle_t *fldFieldPackData;
 
 extern struct FileRequest *gFldFileF1;
 
@@ -509,20 +509,20 @@ extern u32 D_00436064;
 
 extern u32 D_0043607C;
 
-extern SdfTex *fldMarkerTexture;
+extern sdfTexHandle_t *fldMarkerTexture;
 
 extern u32 D_00438EC8;
 
 extern u8 D_0038A700[];
 
-extern SdfAsset *sdfMatNew(void);
+extern sdfMat_t *sdfMatNew(void);
 extern f32 D_004360B0;
 
 extern f32 D_00444980[];
 
 extern f32 D_00444970[];
 
-extern void dds3CameraObjectBasicGetTgtCam(EffWorldNode *camera, f32 *worldEyeOut,
+extern void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *camera, f32 *worldEyeOut,
                                                       f32 *targetPositionOut);
 
 extern f32 sdfAtan2(f32 y, f32 x);
@@ -584,7 +584,7 @@ extern u32 D_0038A9A0[];
 
 
 
-extern SdfGraphObj D_0040B290;
+extern sdfGrFrameSet_t D_0040B290;
 
 
 
@@ -606,7 +606,7 @@ extern u32 D_0043608C;
 
 extern s32 btlGetRuntimeResult(void);
 
-extern s32 fldEncProc(KwlnTask *task);
+extern s32 fldEncProc(dds3ProcessID_t *task);
 
 extern void btlUpdateRuntimeFadeState(void);
 
@@ -701,7 +701,7 @@ extern f32 D_0038BB00[];
 
 
 
-extern void dds3CameraObjectBasicSetFovy(EffWorldNode *, f32);
+extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *, f32);
 
 extern void fldToggleWorldNodeState(s64);
 
@@ -720,19 +720,19 @@ extern s16 D_00389874[];
 extern s32 fldCommand_GetHojiID(char *);
 extern void fldMakePlane(FldCollisionDescriptor *geometry, f32 *translation,
                                                u32 id, s32 sceneFlag, s32 ownerIndex);
-extern EffWorldNode *dds3AddModelRangeBasicNew(s32, s32, s32, s32);
-extern void dds3SetPathBasicSpline(EffWorldNode *path, u32 value);
-extern EffWorldNode *dds3AddEventBasic(s32 key, void *work, s32 name);
-extern EffWorldNode *dds3AddPathBasic(s32 key, void *work, const char *name);
-extern s32 fldEveHit_AddEveData(u32, EffWorldNode *);
-extern s32 fldRegisterRoomObject(FldFileResource *, EffWorldNode *);
+extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, s32, s32, s32);
+extern void dds3SetPathBasicSpline(dds3Basic_t *path, u32 value);
+extern dds3Basic_t *dds3AddEventBasic(s32 key, void *work, s32 name);
+extern dds3Basic_t *dds3AddPathBasic(s32 key, void *work, const char *name);
+extern s32 fldEveHit_AddEveData(u32, dds3Basic_t *);
+extern s32 fldRegisterRoomObject(FldFileResource *, dds3Basic_t *);
 extern void func_0014D380(s32 mode, u32 pointId, f32 *rotation,
                             f32 x, f32 y, f32 z);
 extern void func_0014C2B8(u32, f32 *, f32, f32, f32, s32, const char *, s32);
 extern void func_0014C9B0(u32, f32 *, f32, f32, f32);
 extern s32 fldSetSparkVectors(s32 index, const u128 *position, const u128 *rotation);
 extern void fldAppendPendingSoundForScene(s32 soundId, f32 radius, f32 sourceX, f32 sourceY, f32 sourceZ);
-extern EffWorldNode *dds3AddCameraObjectBasicTypeFree(s32, void *, void *);
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32, void *, void *);
 
 /* Serialized transforms leave the position W component zero. */
 static inline void fldCopySpawnTransform(f32 *position, f32 *rotation, const f32 *source) {
@@ -770,7 +770,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
     u32 *parameters;
     FldSpecialPoint *point;
     FldPendingSoundParams *pendingSound;
-    EffWorldNode *spawnedObject;
+    dds3Basic_t *spawnedObject;
     s32 room;
     u32 id;
 
@@ -922,7 +922,7 @@ typedef struct FldActionSpawn {
 
 void fldSpawnActionObjects(FldActionSpawn *spawnList, u32 spawnCount) {
     u32 spawnIndex;
-    struct EffWorldNode *spawnedObject;
+    struct dds3Basic_t *spawnedObject;
 
     dds3GetControlScene();
     for (spawnIndex = 0; spawnIndex < spawnCount; spawnIndex++, spawnList++) {
@@ -940,11 +940,11 @@ extern u32 D_00438EBC;
 extern FldFileResource *D_00438EC0;
 extern u32 D_00438EC4;
 extern struct DevRequest *fldRoomSoundResources;
-struct EffWorldNode;
-extern struct EffWorldNode *dds3AddMatterObjectBasic(s32 key, f32 *offset, f32 *rotation);
-extern void dds3MatterObjectBasicSetOt(struct EffWorldNode *, s32);
+struct dds3Basic_t;
+extern struct dds3Basic_t *dds3AddMatterObjectBasic(s32 key, f32 *offset, f32 *rotation);
+extern void dds3MatterObjectBasicSetOt(struct dds3Basic_t *, s32);
 extern s32 fldCommand_GetHojiID(char *);
-extern void dds3MatterObjectBasicSetHojiID(struct EffWorldNode *, u32);
+extern void dds3MatterObjectBasicSetHojiID(struct dds3Basic_t *, u32);
 extern void dds3ObjectBaseMakeMatter(void *);
 extern s32 dds3ObjectBaseRegistArea(void *);
 
@@ -954,7 +954,7 @@ void fldCreateResourceScriptObjects(void) {
     FldFileResource *resource = D_00438EB8;
     u32 resourceCount = D_00438EBC;
     void *secondaryWorld;
-    struct EffWorldNode *scriptObject;
+    struct dds3Basic_t *scriptObject;
     FldFileResource *bindingResource;
     FldFileNameEntry *nameEntry;
     FldScriptResource *scriptResource;
@@ -1048,10 +1048,10 @@ extern s32 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern s32 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern s32 fldCommand_SEARCH_ID(const char *);
 extern void dds3ObjectBaseCreateMover(void *);
-extern void dds3MoverBasicMakePath(EffWorldNode *object);
+extern void dds3MoverBasicMakePath(dds3Basic_t *object);
 extern void evtPathRate(void *object, f32 multiplier);
-extern void dds3MoverBasicUpdate(EffWorldNode *);
-extern void dds3MatterObjectBasicSetAlpMode(EffWorldNode *, u32);
+extern void dds3MoverBasicUpdate(dds3Basic_t *);
+extern void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *, u32);
 extern char D_004130A8[], D_004130B8[], D_004130C8[];
 
 /* Restore the room's named objects and enable their retained path controllers. */
@@ -1065,10 +1065,10 @@ void fldMakeObjectBasic3(void) {
     for (roomFlagIndex = 1; roomFlagIndex < 16; roomFlagIndex++) {
         if (fldTestMapSlotValueFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomFlagIndex)) {
             s32 modelKey, collisionKey;
-            EffWorldNode *object;
-            EffWorldNode *path;
-            ObjBase *data;
-            EffWorldNode *slot;
+            dds3Basic_t *object;
+            dds3Basic_t *path;
+            dds3ObjectBaseControlWorkData_t *data;
+            dds3Basic_t *slot;
             Dds3SlotResource *resource;
 
             sprintf(modelName, D_004130A8, roomFlagIndex);
@@ -1079,17 +1079,17 @@ void fldMakeObjectBasic3(void) {
             if (modelKey == -1) {
                 object = fldGetMatter_From_ModelRangeID(collisionKey);
             } else {
-                object = (EffWorldNode *)dds3SearchSceneBasic(world, modelKey, 6);
+                object = (dds3Basic_t *)dds3SearchSceneBasic(world, modelKey, 6);
                 if (object == NULL) {
                     object = fldGetMatter_From_ModelRangeID(collisionKey);
                 }
             }
-            path = (EffWorldNode *)dds3SceneBasicSearchNameAndType(world, 0x10, (const u8 *)pathName);
+            path = (dds3Basic_t *)dds3SceneBasicSearchNameAndType(world, 0x10, (const u8 *)pathName);
             data = dds3MatterObjectBasicGetControlWorkData(object);
-            slot = (EffWorldNode *)data->slots[1];
+            slot = (dds3Basic_t *)data->slots[1];
             if (slot == NULL) {
                 dds3ObjectBaseCreateMover(object);
-                slot = (EffWorldNode *)data->slots[1];
+                slot = (dds3Basic_t *)data->slots[1];
             }
             resource = (Dds3SlotResource *)slot->data;
             if (resource->sourceObject == 0) {
@@ -1102,11 +1102,11 @@ void fldMakeObjectBasic3(void) {
         }
         if (fldTestRoomModeFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomFlagIndex)) {
             s32 key;
-            EffWorldNode *object;
+            dds3Basic_t *object;
 
             sprintf(modelName, D_004130A8, roomFlagIndex);
             key = fldCommand_SEARCH_ID(modelName);
-            object = (EffWorldNode *)dds3SearchSceneBasic(world, key, 6);
+            object = (dds3Basic_t *)dds3SearchSceneBasic(world, key, 6);
             dds3MatterObjectBasicSetAlpMode(object, 2);
         }
     }
@@ -1260,7 +1260,7 @@ void fldFreeNextFile(void) {
 
         if (work != 0) {
             do {
-                sdfMemFreeDelayedDirect((struct SdfMemBlock *)work->resourceHandle);
+                sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)work->resourceHandle);
                 work = work->next;
             } while (work != 0);
         }
@@ -1311,12 +1311,12 @@ s32 fldLoadNextGetStatus3(s32 area, s32 room) {
     return fldGlobalBase.resourceFlag != 0;
 }
 
-struct SdfMemBlock *fldLoadCachedRoomResourceIfLocationMatches(void **destination, s32 area, s32 room) {
+struct sdfMemHandle_t *fldLoadCachedRoomResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldGlobalBase;
 
     if (state->resourceArea == area) {
         if (state->resourceFloor == room) {
-            struct SdfMemBlock *allocation = sdfMemAllocDirect(fldCachedRoomResourceSize);
+            struct sdfMemHandle_t *allocation = sdfMemAllocDirect(fldCachedRoomResourceSize);
             void *data = (void *)sdfMemLock(allocation);
             *destination = data;
             memcpy(data, (void *)fldCachedRoomResourceData, fldCachedRoomResourceSize);
@@ -1326,12 +1326,12 @@ struct SdfMemBlock *fldLoadCachedRoomResourceIfLocationMatches(void **destinatio
     return NULL;
 }
 
-struct SdfMemBlock *fldLoadCachedRoomF1ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
+struct sdfMemHandle_t *fldLoadCachedRoomF1ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldGlobalBase;
 
     if (state->resourceArea == area) {
         if (state->resourceFloor == room) {
-            struct SdfMemBlock *allocation = sdfMemAllocDirect(fldCachedRoomF1ResourceSize);
+            struct sdfMemHandle_t *allocation = sdfMemAllocDirect(fldCachedRoomF1ResourceSize);
             void *data = (void *)sdfMemLock(allocation);
             *destination = data;
             memcpy(data, (void *)fldCachedRoomF1ResourceData, fldCachedRoomF1ResourceSize);
@@ -1341,12 +1341,12 @@ struct SdfMemBlock *fldLoadCachedRoomF1ResourceIfLocationMatches(void **destinat
     return NULL;
 }
 
-struct SdfMemBlock *fldLoadCachedRoomF2ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
+struct sdfMemHandle_t *fldLoadCachedRoomF2ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldGlobalBase;
 
     if (state->resourceArea == area) {
         if (state->resourceFloor == room) {
-            struct SdfMemBlock *allocation = sdfMemAllocDirect(fldCachedRoomF2ResourceSize);
+            struct sdfMemHandle_t *allocation = sdfMemAllocDirect(fldCachedRoomF2ResourceSize);
             void *data = (void *)sdfMemLock(allocation);
             *destination = data;
             memcpy(data, (void *)fldCachedRoomF2ResourceData, fldCachedRoomF2ResourceSize);
@@ -1356,12 +1356,12 @@ struct SdfMemBlock *fldLoadCachedRoomF2ResourceIfLocationMatches(void **destinat
     return NULL;
 }
 
-struct SdfMemBlock *fldLoadCachedRoomKF2ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
+struct sdfMemHandle_t *fldLoadCachedRoomKF2ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldGlobalBase;
 
     if (state->resourceArea == area) {
         if (state->resourceFloor == room) {
-            struct SdfMemBlock *allocation = sdfMemAllocDirect(fldCachedRoomKF2ResourceSize);
+            struct sdfMemHandle_t *allocation = sdfMemAllocDirect(fldCachedRoomKF2ResourceSize);
             void *data = (void *)sdfMemLock(allocation);
             *destination = data;
             memcpy(data, (void *)fldCachedRoomKF2ResourceData, fldCachedRoomKF2ResourceSize);
@@ -1431,31 +1431,31 @@ void fldLoadFieldPack(void) {
             case FLD_PACKED_RESOURCE_INFO_TABLE:
                 fldInfLoadFromMem((FldInfTable *)work->dataCursor);
                 sdfMemFreeDelayedDirect(
-                    (struct SdfMemBlock *)work->resourceHandle);
+                    (struct sdfMemHandle_t *)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_NPC_PALETTE:
                 fldSetNpcPalette((const FldNpcPalette *)work->dataCursor);
                 sdfMemFreeDelayedDirect(
-                    (struct SdfMemBlock *)work->resourceHandle);
+                    (struct sdfMemHandle_t *)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_SKY_BUFFER:
                 fldUploadSkyBuffer((FldSkyBuffer *)work->dataCursor);
                 sdfMemFreeDelayedDirect(
-                    (struct SdfMemBlock *)work->resourceHandle);
+                    (struct sdfMemHandle_t *)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_ACTOR_WAYPOINT_TABLE:
                 fldGetDoorEntry((FldWaypointBlock *)work->dataCursor);
                 sdfMemFreeDelayedDirect(
-                    (struct SdfMemBlock *)work->resourceHandle);
+                    (struct sdfMemHandle_t *)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_RETAINED_COPY:
                 fldFieldPackData = sdfMemAllocDirect(
-                    sdfMemGetSize((struct SdfMemBlock *)work->resourceHandle));
+                    sdfMemGetSize((struct sdfMemHandle_t *)work->resourceHandle));
                 memcpy((void *)sdfMemGetPtr(fldFieldPackData),
-                       (void *)sdfMemGetPtr((struct SdfMemBlock *)work->resourceHandle),
-                       sdfMemGetSize((struct SdfMemBlock *)work->resourceHandle));
+                       (void *)sdfMemGetPtr((struct sdfMemHandle_t *)work->resourceHandle),
+                       sdfMemGetSize((struct sdfMemHandle_t *)work->resourceHandle));
                 sdfMemFreeDelayedDirect(
-                    (struct SdfMemBlock *)work->resourceHandle);
+                    (struct sdfMemHandle_t *)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_SCENE_RECORD_CHUNK:
                 fldSetSceneRecordChunk(work->dataCursor, (s32)work->resourceHandle);
@@ -1467,7 +1467,7 @@ void fldLoadFieldPack(void) {
 }
 
 void fldFreePac0(void) {
-    struct SdfMemBlock *cachedResource = fldFieldPackData;
+    struct sdfMemHandle_t *cachedResource = fldFieldPackData;
 
     if (cachedResource != NULL) {
         sdfMemFreeDelayedDirect(cachedResource);
@@ -1489,12 +1489,12 @@ extern u32 fldRoomF2Data;
 extern FldTransferChunk *fldRoomKF2Chunk;
 extern u32 fldRoomKF2Data;
 extern struct FileRequest *D_00435FC8;
-extern struct SdfMemBlock *D_00435FDC;
-extern struct SdfMemBlock *fldCachedRoomResourceAllocation;
-extern struct SdfMemBlock *fldCachedRoomF1ResourceAllocation;
-extern struct SdfMemBlock *fldCachedRoomF2ResourceAllocation;
-extern struct SdfMemBlock *fldCachedRoomKF2ResourceAllocation;
-extern struct SdfMemBlock *fldFieldPackData;
+extern struct sdfMemHandle_t *D_00435FDC;
+extern struct sdfMemHandle_t *fldCachedRoomResourceAllocation;
+extern struct sdfMemHandle_t *fldCachedRoomF1ResourceAllocation;
+extern struct sdfMemHandle_t *fldCachedRoomF2ResourceAllocation;
+extern struct sdfMemHandle_t *fldCachedRoomKF2ResourceAllocation;
+extern struct sdfMemHandle_t *fldFieldPackData;
 extern void fldSetSceneLocation(s32 area, s32 floor, s32 stage);
 extern void fldLoadPlayerModel(void);
 extern void fldInitSparkTable(void);
@@ -1503,7 +1503,7 @@ extern void fldUpdateSparkSlots(void);
 extern void fldMakeObjectBasic3(void);
 extern void fldInitializeActorMotionSlots(void);
 extern struct DevRequest *sndLoadNamedOffsetResourceList(const char *name);
-extern s32 dds3SceneBasicLoadScriptFile_FromMem(EffWorldNode *worldNode, void *resourceHandle);
+extern s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *worldNode, void *resourceHandle);
 extern char D_00436028[];
 extern char D_00436030[];
 extern char D_00436038[];
@@ -1594,7 +1594,7 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
             switch (index) {
             case 0:
                 fldRoomSoundResources = sdfTexSetTB((const SdfTextureOffsetListHeader *)work->dataCursor);
-                sdfMemFreeDelayedDirect((struct SdfMemBlock *)work->resourceHandle);
+                sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)work->resourceHandle);
                 fldCachedRoomResourceAllocation = NULL;
                 break;
             case 1:
@@ -1732,15 +1732,15 @@ extern u32 fldRoomKF2Data;
 
 extern struct FileRequest *D_00435FC8;
 
-extern struct SdfMemBlock *D_00435FDC;
+extern struct sdfMemHandle_t *D_00435FDC;
 
-extern struct SdfMemBlock *fldCachedRoomResourceAllocation;
+extern struct sdfMemHandle_t *fldCachedRoomResourceAllocation;
 
-extern struct SdfMemBlock *fldCachedRoomF1ResourceAllocation;
+extern struct sdfMemHandle_t *fldCachedRoomF1ResourceAllocation;
 
-extern struct SdfMemBlock *fldCachedRoomF2ResourceAllocation;
+extern struct sdfMemHandle_t *fldCachedRoomF2ResourceAllocation;
 
-extern struct SdfMemBlock *fldCachedRoomKF2ResourceAllocation;
+extern struct sdfMemHandle_t *fldCachedRoomKF2ResourceAllocation;
 
 void fldDrwZFree(void);
 void fldReleaseSkyResources(void);
@@ -1785,7 +1785,7 @@ void fldReleaseFieldResources(void) {
     fldRoomSoundResources = 0;
     for (i = 0; i < 4; i++) {
         if (D_00444930[i] != 0) {
-            sdfMemFreeDelayedDirect((struct SdfMemBlock *)D_00444930[i]);
+            sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)D_00444930[i]);
             D_00444930[i] = 0;
             D_00444940[i] = 0;
         }
@@ -1834,7 +1834,7 @@ void fldReleaseFieldResources(void) {
         if (work != 0) {
             do {
                 if (i > 0) {
-                    sdfMemFreeDelayedDirect((struct SdfMemBlock *)work->resourceHandle);
+                    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)work->resourceHandle);
                 }
                 work = work->next;
                 i++;
@@ -1963,7 +1963,7 @@ void fldFileAddrResetMode(u32 relocateOnRelease) {
 
 void fldDrawInit(void) {
     if (D_00436064 == 0) {
-        SdfAsset *object;
+        sdfMat_t *object;
         D_00436064 = 1;
         object = sdfMatNew();
         D_0043607C = (u32)object;
@@ -1979,14 +1979,14 @@ SdfPoolNode *fldDrawGetOt(void) {
 
 #include "fld_sprite_vertex.h"
 
-void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, SdfTex *texture) {
+void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, sdfTexHandle_t *texture) {
     void *handle = sdf2DAllocSprite(1);
     FldSpriteVertex *vtx = (FldSpriteVertex *)sdf2DGetPrimPtr((s32)handle);
     s32 ubase = u * 16;
     s32 xl = x * 16 + 0x7000;
     s32 vbase = v * 16;
     s32 yt = y * 8 + 0x7900;
-    SdfListHead *command;
+    sdfDrawTag_t *command;
     SdfPoolNode *descriptor;
 
     vtx->r = color & 0xFF;
@@ -2005,7 +2005,7 @@ void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 c
     vtx->corner[1].y = yt + h * 8;
     vtx->corner[1].mask = -1;
     vtx->corner[1].flag = 0;
-    command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
     sdf2DLinkTexPacket(command, texture, 0);
     sdfDrawTagLink(command, (u32)handle);
@@ -2015,8 +2015,8 @@ void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 c
 
 void DrwSprite2DC(s32 x, s32 y, s32 width, s32 height,
                    s32 u, s32 v, s32 textureWidth, s32 textureHeight,
-                   u32 color0, u32 color1, u32 color2, u32 color3, SdfTex *texture) {
-    SdfListHead *list;
+                   u32 color0, u32 color1, u32 color2, u32 color3, sdfTexHandle_t *texture) {
+    sdfDrawTag_t *list;
     SdfPoolNode *surface;
     s32 left, top, right, bottom;
     s32 uLeft, vTop, uRight, vBottom;
@@ -2042,7 +2042,7 @@ void DrwSprite2DC(s32 x, s32 y, s32 width, s32 height,
     surface->append(surface, list);
 }
 
-void DrwSprite2DF(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, SdfTex *texture) {
+void DrwSprite2DF(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, sdfTexHandle_t *texture) {
     void *handle = sdf2DAllocSprite(1);
     FldSpriteVertex *vtx = (FldSpriteVertex *)sdf2DGetPrimPtr((s32)handle);
     s32 r = color & 0xFF;
@@ -2053,7 +2053,7 @@ void DrwSprite2DF(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 
     s32 vbase = v * 16;
     s32 xl = (s32)(x * 16.0f) + 0x7000;
     s32 yt = (s32)(y * 8.0f) + 0x7900;
-    SdfListHead *command;
+    sdfDrawTag_t *command;
     SdfPoolNode *descriptor;
 
     vtx->r = r;
@@ -2072,7 +2072,7 @@ void DrwSprite2DF(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 
     vtx->corner[1].y = yt + (s32)(h * 8.0f);
     vtx->corner[1].mask = -1;
     vtx->corner[1].flag = 0;
-    command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
     sdf2DLinkTexPacket(command, texture, 0);
     sdfDrawTagLink(command, (u32)handle);
@@ -2148,7 +2148,7 @@ void rsetOtOfs(u32 displayIndex) {
 }
 
 void rsetTexa(s32 lower, s32 bits, u64 upper) {
-    SdfListHead *command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     s32 packet;
     u64 *entry;
     SdfPoolNode *descriptor;
@@ -2164,7 +2164,7 @@ void rsetTexa(s32 lower, s32 bits, u64 upper) {
 }
 
 void rsetTest(s32 flag0, s32 flag1, s32 field4, s32 field12, s32 flag14, s32 flag15, s32 unused, s32 field17) {
-    SdfListHead *command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     s32 packet;
     u64 *data;
     SdfPoolNode *descriptor;
@@ -2181,7 +2181,7 @@ void rsetTest(s32 flag0, s32 flag1, s32 field4, s32 field12, s32 flag14, s32 fla
 
 /* Write the selected blend equation to GS ALPHA_1, including DDS2's FIX mode. */
 void rsetAlpha(s32 mode) {
-    SdfListHead *command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     s32 packet;
     u64 *data;
     SdfPoolNode *descriptor;
@@ -2229,7 +2229,7 @@ void rsetAlpha(s32 mode) {
 
 void aDrawLineStripPrim(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2) {
     s32 coords[4];
-    SdfListHead *command;
+    sdfDrawTag_t *command;
     SdfDrawPacket *packet;
     u64 *dst;
     u64 lo;
@@ -2242,7 +2242,7 @@ void aDrawLineStripPrim(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1
     coords[1] = y0 * 16;
     coords[2] = x1 * 16;
     coords[3] = y1 * 16;
-    command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 2));
     sdf2DMakePrimPacketHeader(packet, 0x49, 2, 0x41, 2);
@@ -2266,7 +2266,7 @@ void aDrawLineStripPrim(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1
 
 void aDrawLineDirect(u32 x0, u32 y0, u32 x1, u32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2) {
     u32 coords[4];
-    SdfListHead *command;
+    sdfDrawTag_t *command;
     SdfDrawPacket *packet;
     u64 *dst;
     SdfPoolNode *descriptor;
@@ -2279,7 +2279,7 @@ void aDrawLineDirect(u32 x0, u32 y0, u32 x1, u32 y1, u32 gsWord0, u32 gsWord1, u
     coords[1] = y0;
     coords[2] = x1;
     coords[3] = y1;
-    command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 2));
     sdf2DMakePrimPacketHeader(packet, 0x49, 2, 0x41, 2);
@@ -2303,7 +2303,7 @@ void aDrawLineDirect(u32 x0, u32 y0, u32 x1, u32 y1, u32 gsWord0, u32 gsWord1, u
 
 void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3) {
     s32 coords[8];
-    SdfListHead *command;
+    sdfDrawTag_t *command;
     SdfDrawPacket *packet;
     u64 *dst;
     u64 lo;
@@ -2320,7 +2320,7 @@ void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2
     coords[5] = (y + h) * 16;
     coords[6] = x * 16;
     coords[7] = (y + h) * 16;
-    command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
@@ -2344,7 +2344,7 @@ void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2
 
 void aDrawBoxFZ(s32 x, s32 y, s32 w, s32 h, u32 vertexTag, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3) {
     s32 coords[8];
-    SdfListHead *command;
+    sdfDrawTag_t *command;
     SdfDrawPacket *packet;
     u64 *dst;
     u64 lo;
@@ -2362,7 +2362,7 @@ void aDrawBoxFZ(s32 x, s32 y, s32 w, s32 h, u32 vertexTag, u32 gsWord0, u32 gsWo
     coords[5] = (y + h) * 16;
     coords[6] = x * 16;
     coords[7] = (y + h) * 16;
-    command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
@@ -2387,7 +2387,7 @@ void aDrawBoxFZ(s32 x, s32 y, s32 w, s32 h, u32 vertexTag, u32 gsWord0, u32 gsWo
 
 void aDrawBoxF_Direct(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3) {
     u32 coords[8];
-    SdfListHead *command;
+    sdfDrawTag_t *command;
     SdfDrawPacket *packet;
     u64 *dst;
     u64 lo;
@@ -2404,7 +2404,7 @@ void aDrawBoxF_Direct(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, 
     coords[5] = y1;
     coords[6] = x0;
     coords[7] = y1;
-    command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
@@ -2428,7 +2428,7 @@ void aDrawBoxF_Direct(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, 
 
 void aDrawTriG(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2) {
     s32 coords[6];
-    SdfListHead *command;
+    sdfDrawTag_t *command;
     SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
@@ -2440,7 +2440,7 @@ void aDrawTriG(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, u32 r0, u32 g0, u
     coords[3] = y1 * 16;
     coords[4] = x2 * 16;
     coords[5] = y2 * 16;
-    command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 3));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 3);
@@ -2469,7 +2469,7 @@ void aDrawTriG(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, u32 r0, u32 g0, u
 
 void fldSubmitGsGradientQuad(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3) {
     s32 coords[8];
-    SdfListHead *command;
+    sdfDrawTag_t *command;
     SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
@@ -2484,7 +2484,7 @@ void fldSubmitGsGradientQuad(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0,
     coords[5] = (y + h) * 16;
     coords[6] = (x + w) * 16;
     coords[7] = (y + h) * 16;
-    command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
     sdf2DMakePrimPacketHeader(packet, 0x4C, 2, 0x41, 4);
@@ -2517,7 +2517,7 @@ void fldSubmitGsGradientQuad(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0,
 
 void aDrawBoxGF(u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3, f32 x, f32 y, f32 w, f32 h) {
     s32 coords[8];
-    SdfListHead *command;
+    sdfDrawTag_t *command;
     SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
@@ -2532,7 +2532,7 @@ void aDrawBoxGF(u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, 
     coords[5] = (s32)((y + h) * 8.0f);
     coords[6] = (s32)(x * 16.0f);
     coords[7] = (s32)((y + h) * 8.0f);
-    command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
@@ -2565,7 +2565,7 @@ void aDrawBoxGF(u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, 
 
 void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3, u32 vertexTag) {
     s32 coords[8];
-    SdfListHead *command;
+    sdfDrawTag_t *command;
     SdfDrawPacket *packet;
     u64 *dst;
     u64 lo;
@@ -2583,7 +2583,7 @@ void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsW
     coords[5] = (y + h) * 16;
     coords[6] = x * 16;
     coords[7] = (y + h) * 16;
-    command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
@@ -2606,8 +2606,8 @@ void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsW
     descriptor->append(descriptor, command);
 }
 
-void drawSprite3D(SdfTex *texture, FldMarkerPacket *modelData) {
-    SdfListHead *command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+void drawSprite3D(sdfTexHandle_t *texture, FldMarkerPacket *modelData) {
+    sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     DmaPacketHeader *header;
     u8 *packet;
     f32 mat[16];
@@ -2630,7 +2630,7 @@ void drawSprite3D(SdfTex *texture, FldMarkerPacket *modelData) {
 }
 
 void fldSubmitPrimaryFramePacket(void) {
-    SdfListHead *command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     SdfDmaReferenceChainPacket *texture;
     SdfPoolNode *descriptor;
     sdfDrawTagInit(command);
@@ -2642,7 +2642,7 @@ void fldSubmitPrimaryFramePacket(void) {
 }
 
 void fldSubmitAlternateFramePacket(void) {
-    SdfListHead *command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     SdfDmaReferenceChainPacket *texture;
     SdfPoolNode *descriptor;
     sdfDrawTagInit(command);
@@ -2654,7 +2654,7 @@ void fldSubmitAlternateFramePacket(void) {
 }
 
 void ooyTestLine3D(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     s32 record;
     SdfPoolNode *descriptor;
     D_0038A980[0][0] = x;
@@ -2665,7 +2665,7 @@ void ooyTestLine3D(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32
     D_0038A980[1][2] = w;
     D_0038A9A0[1] = second;
     D_0038A9A0[0] = first;
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     record = (s32)effDebugDrawWireModel(D_0038A980, D_0038A9A0, 2, 0x80);
     sdfDrawTagLink(list, record);
@@ -2680,13 +2680,13 @@ void fldDrawPoly3(s32 color0, s32 color1, s32 color2,
     SdfPrimitiveRequest desc;
     f32 verts[12];
     s32 indices[3];
-    SdfListHead *command;
+    sdfDrawTag_t *command;
     SdfPoolNode *descriptor;
 
-    command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
     sdf3DPrimLinkResetTm(command, 0);
-    sdf3DPrimLinkMat(command, (SdfAsset *)D_0043607C, 0);
+    sdf3DPrimLinkMat(command, (sdfMat_t *)D_0043607C, 0);
     memset(&desc, 0, 0x2C);
     desc.color = 0x80808080;
     desc.stripWordCount = 1;
@@ -2711,7 +2711,7 @@ void fldDrawPoly3(s32 color0, s32 color1, s32 color2,
 }
 
 void fldSubmitTexturedOverlaySprite(void) {
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
     SdfDmaNode *dmaPacket;
     s32 drawBufferIndex;
     u64 *firstPacket;
@@ -2720,7 +2720,7 @@ void fldSubmitTexturedOverlaySprite(void) {
     FldSpriteVertex *vertex;
     SdfPoolNode *surface;
 
-    packetList = (SdfListHead *)sdfPrimAllocDrawTag(0);
+    packetList = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
     dmaPacket = (SdfDmaNode *)sdfGrAllocPacketBuff(0x20);
     drawBufferIndex = (s32)dds3GetFrameID();
     sdfGrLinkDispFrameTex(packetList,
@@ -2776,7 +2776,7 @@ void fldSubmitTexturedOverlaySprite(void) {
 }
 
 void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
     SdfDmaNode *dmaPacket;
     s32 drawBufferIndex;
     u64 *firstPacket;
@@ -2785,7 +2785,7 @@ void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
     FldSpriteVertex *vertex;
     SdfPoolNode *surface;
 
-    packetList = (SdfListHead *)sdfPrimAllocDrawTag(0);
+    packetList = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
     dmaPacket = (SdfDmaNode *)sdfGrAllocPacketBuff(0x20);
     drawBufferIndex = (s32)dds3GetFrameID();
     sdfGrLinkDispFrameTex(packetList,
@@ -2846,7 +2846,7 @@ void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
 }
 
 void fldSubmitOverlayStateAndSprite(s32 alpha) {
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
     SdfDmaNode *dmaPacket;
     s32 drawBufferIndex;
     u64 *texturePacket;
@@ -2855,7 +2855,7 @@ void fldSubmitOverlayStateAndSprite(s32 alpha) {
     FldSpriteVertex *vertex;
     SdfPoolNode *surface;
 
-    packetList = (SdfListHead *)sdfPrimAllocDrawTag(0);
+    packetList = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
     dmaPacket = (SdfDmaNode *)sdfGrAllocPacketBuff(0x20);
     drawBufferIndex = (s32)dds3GetFrameID();
     sdfGrLinkDispFrameTex(packetList,
@@ -2993,7 +2993,7 @@ void fldDrwZFree(void) {
 
 void fldDrwZSave(void) {
     if (fldDrwZBuf != 0) {
-        SdfListHead *packet = sdfPrimAllocDrawTag(0);
+        sdfDrawTag_t *packet = sdfPrimAllocDrawTag(0);
         SdfPoolNode *descriptor;
         sdfLinkStoreImage(packet, D_0040B290.buffers[2],
                                 0, 0, 0x200, 0xE0, fldDrwZBuf, 0, 0, 0);
@@ -3004,7 +3004,7 @@ void fldDrwZSave(void) {
 
 void fldDrwZLoad(void) {
     if (fldDrwZBuf != 0) {
-        SdfListHead *packet = sdfPrimAllocDrawTag(0);
+        sdfDrawTag_t *packet = sdfPrimAllocDrawTag(0);
         SdfPoolNode *descriptor;
         sdfLinkLoadImage(packet, D_0040B290.buffers[2],
                                   0, 0, 0x200, 0xE0, fldDrwZBuf, 0);
@@ -3014,7 +3014,7 @@ void fldDrwZLoad(void) {
 }
 
 void fldKanjiDraw(s32 x, s32 y, u32 colors, const u8 *text) {
-    struct FrFontGlyph *object;
+    struct _FRQ *object;
 
     object = itfCreateConvertedTextGlyph(x << 4, y << 4, 0, colors, text, 0);
     frFontDrawGlyphInDefaultMode(object);
@@ -3027,12 +3027,12 @@ void LF(FldQuadState *quad) {
 
 void initDrawTag(FldQuadState *quad) {
     s32 packet;
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
 
     packetList = dds3FontReqAllocDrawTag();
     quad->packetList = packetList;
     packet = sdfGrAllocPacketBuff(0x40);
-    sdfPrimSetOpaquePacket((SdfGsBlendPacket *)packet);
+    sdfPrimSetOpaquePacket((sdfPrimTransPacket_t *)packet);
     sdfDrawTagLink(quad->packetList, packet);
 }
 
@@ -3261,7 +3261,7 @@ void fldDrawMaruKage(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
 }
 
 void fldDrawExpandedSpriteStrip(s32 alpha, s32 offset) {
-    SdfListHead *list = (SdfListHead *)sdfPrimAllocDrawTag(NULL);
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfPrimAllocDrawTag(NULL);
     SdfDmaNode *reference = (SdfDmaNode *)sdfGrAllocPacketBuff(0x20);
     u64 *texturePacket;
     u64 *blendPacket;
@@ -3340,7 +3340,7 @@ void fldSetEncounterPendingValue(u32 pendingValue) {
     D_00436088 = pendingValue;
 }
 
-s32 fldEncProc(KwlnTask *task) {
+s32 fldEncProc(dds3ProcessID_t *task) {
     s32 state = fldEncounterRuntimeState;
 
     if (state < 3) {
@@ -3379,7 +3379,7 @@ s32 fldSetEncounterMode(s32 encounterMode) {
     }
 }
 
-void fldResetEncounterAsyncState(KwlnTask *task) {
+void fldResetEncounterAsyncState(dds3ProcessID_t *task) {
     btlResetAsyncState();
 }
 
@@ -3408,7 +3408,7 @@ void fldProbeCameraSupportSurface(void) {
     f32 offset[3];
     f32 x;
     s32 index;
-    EffWorldNode *node;
+    dds3Basic_t *node;
 
     fldGlobalBase.unk5C = 0.0f;
     fldGlobalBase.unk17C = 0.0f;
@@ -3469,8 +3469,8 @@ void fldInitializeCameraViewFromPlayer(void) {
     FldLookAtVector farCopy;
     FldLookAtVector collisionPoint;
     FldLookAtVector playerPosition;
-    EffWorldNode *node;
-    EffWorldNode **sceneSlot = fldGetPlayerSceneStateAddress();
+    dds3Basic_t *node;
+    dds3Basic_t **sceneSlot = fldGetPlayerSceneStateAddress();
     f32 angle;
     f32 phase;
     f32 radiansPerHalfTurn;
@@ -3485,11 +3485,11 @@ void fldInitializeCameraViewFromPlayer(void) {
     f32 dy;
     f32 dz;
 
-    dds3GetRotPoseSet((EffWorldNode *)fldPlayerObject);
+    dds3GetRotPoseSet((dds3Basic_t *)fldPlayerObject);
     angle = EulerAngleAxisY() * 180.0f / 3.14f;
     fldGlobalBase.angle = angle;
     fldGlobalBase.targetAngle = angle;
-    dds3GetPosPoseSet((EffWorldNode *)fldPlayerObject);
+    dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
     VU0_STORE_VF_UNCLOBBERED(vf10, &playerPosition);
 
     radiansPerHalfTurn = 3.14f;
@@ -3587,10 +3587,10 @@ void fldCamUpdateFollow(void) {
         u128 q;
         f32 f[4];
     } nearPoint, farPoint;
-    EffWorldNode **world = fldGetPlayerSceneStateAddress();
+    dds3Basic_t **world = fldGetPlayerSceneStateAddress();
     f32 ratio = (f32)D_004360B4 / (f32)D_004360B8;
     f32 remaining = 1.0f - ratio;
-    EffWorldNode *node;
+    dds3Basic_t *node;
 
     nearPoint.f[0] = D_0038BAF0[0] * ratio + D_0038BAD0[0] * remaining;
     nearPoint.f[1] = D_0038BAF0[1] * ratio + D_0038BAD0[1] * remaining;
@@ -3611,19 +3611,19 @@ void fldCamUpdateFollow(void) {
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012FA58);
 
-extern void dds3CameraObjectBasicGetCameraTM(EffWorldNode *camera, u128 *worldEye);
+extern void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *camera, u128 *worldEye);
 extern f32 GetSphericalPosMove(f32 fromX, f32 fromZ, f32 toX, f32 toZ);
 extern f32 EulerAngleAxisY(void);
-extern void dds3GetTMPoseSet(EffWorldNode *object);
+extern void dds3GetTMPoseSet(dds3Basic_t *object);
 
 void fldUpdateCameraViewFromPlayer(void) {
     f32 nearPoint[4];
     f32 farPoint[4];
-    EffWorldNode **world = fldGetPlayerSceneStateAddress();
-    EffWorldNode *node;
+    dds3Basic_t **world = fldGetPlayerSceneStateAddress();
+    dds3Basic_t *node;
     f32 angle;
 
-    dds3GetRotPoseSet((EffWorldNode *)fldPlayerObject);
+    dds3GetRotPoseSet((dds3Basic_t *)fldPlayerObject);
     angle = EulerAngleAxisY() * 180.0f / 3.14f;
     nearPoint[0] = fldLookAtNearPoint[0] + (fldGlobalBase.x - fldLookAtNearPoint[0]);
     nearPoint[1] = fldLookAtNearPoint[1] + ((fldGlobalBase.y + fldCameraFollowRows[fldGlobalBase.rowIdx].y) - fldLookAtNearPoint[1]);
@@ -3631,7 +3631,7 @@ void fldUpdateCameraViewFromPlayer(void) {
     fldGlobalBase.angle = angle;
     fldGlobalBase.targetAngle = angle;
     dds3CameraObjectBasicGetCameraTM(*world, (u128 *)nearPoint);
-    dds3GetTMPoseSet((EffWorldNode *)fldPlayerObject);
+    dds3GetTMPoseSet((dds3Basic_t *)fldPlayerObject);
     farPoint[3] = 1.0f;
     farPoint[0] = fldGlobalBase.focusPos[0];
     farPoint[1] = fldGlobalBase.focusPos[1];
@@ -3653,9 +3653,9 @@ void fldUpdateCameraViewFromPlayer(void) {
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_001302A0);
 
-EffWorldNode *fldCamNowEveCamera(void) {
-    EffWorldNode *worldObject = dds3GetActiveScene();
-    EffWorldNode *object = dds3GetActiveCameraSceneBasic(worldObject);
+dds3Basic_t *fldCamNowEveCamera(void) {
+    dds3Basic_t *worldObject = dds3GetActiveScene();
+    dds3Basic_t *object = dds3GetActiveCameraSceneBasic(worldObject);
 
     if (fldGetPlayerSceneState() == object) {
         object = NULL;
@@ -3671,12 +3671,12 @@ void fldSetElvCameraScene(u32 mode) {
 }
 
 
-extern void dds3OnPoseSetFlag(ObjectTransform *node, u32 flags);
+extern void dds3OnPoseSetFlag(dds3PoseSet_t *node, u32 flags);
 
 void fldCamElvTask(void) {
     f32 direction = 0.0f;
     f32 phase = D_004360B0;
-    EffWorldNode *camera;
+    dds3Basic_t *camera;
 
     if (D_004360AC != 0) {
         if (D_004360AC == 1) {
@@ -3746,7 +3746,7 @@ void fldUpdateCameraProximity(void) {
             return;
         }
     }
-    slot = dds3GetBaseControlWorkData((EffWorldNode *)fldPlayerObject)->resourceSlots[4];
+    slot = dds3GetBaseControlWorkData((dds3Basic_t *)fldPlayerObject)->resourceSlots[4];
     modelRef = (u8 **)fldPlayerModelContext->inner;
     if (evtBitCheck(0x31)) {
         range = 56.0f;
@@ -3785,7 +3785,7 @@ extern void fldCamUpdateFollow(void);
 
 s32 fldUpdateCameraFollow(void) {
     FldAreaWork *cam;
-    EffWorldNode **world = fldGetPlayerSceneStateAddress();
+    dds3Basic_t **world = fldGetPlayerSceneStateAddress();
     if (*world != 0 && fldPlayerObject != 0) {
         fldRestoreSceneModelColors();
         if (fldCamNowEveCamera() != 0) {
@@ -3825,7 +3825,7 @@ s32 fldSyncObjectFlagsB(void) {
     if (fldSecondarySceneObject == 0) {
         return 0;
     }
-    result = dds3ObjectBaseCheckFlag((EffWorldNode *)fldPlayerObject, 1);
+    result = dds3ObjectBaseCheckFlag((dds3Basic_t *)fldPlayerObject, 1);
     if (result != 0) {
         dds3ObjectBaseOnFlag(fldSecondarySceneObject, 1);
         result = 0;
@@ -3968,7 +3968,7 @@ extern u32 dds3GetRandA(struct EffRandState *state);
 extern void fldSetSequenceVolume(s32 category, s32 volume);
 extern void fldQueuePrimaryEffectPosition(f32 x, f32 y, f32 z);
 extern void fldQueueSecondaryEffectPosition(f32 x, f32 y, f32 z);
-extern s32 sdfModelGetMarkPos(SdfModel *model, s32 id);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 id);
 
 /* Dispatch camera-model frame crossings to sequence sounds and queued effects. */
 void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
@@ -3976,7 +3976,7 @@ void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
         u128 q;
         f32 f[4];
     } position;
-    MdlCtx *cameraModel;
+    dds3ModelHandle_t *cameraModel;
     f32 previousFrame;
     f32 currentFrame;
     f32 dx;
@@ -4145,9 +4145,9 @@ void fldUpdateCameraTarget(void) {
             vec.f[0] = st->targetX;
             vec.f[1] = st->targetY;
             vec.f[2] = st->targetZ;
-            dds3SetPosPoseSet((EffWorldNode *)fldPlayerObject, (u128 *)vec.f);
+            dds3SetPosPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)vec.f);
             st->positionPending = 0;
-            dds3GetPosPoseSet((EffWorldNode *)fldPlayerObject);
+            dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
             VU0_STORE_VF(vf10, &vec);
             dst = (u128 *)(*(u32 *)(fldPlayerObject + 0x1C) + 0x70);
             PCP_COPY_VECTOR(dst, &vec);
@@ -4178,7 +4178,7 @@ void fldUpdateModeOneCameraPose(void) {
     if (fldGlobalBase.positionMode != 1) {
         return;
     }
-    dds3GetPosPoseSet((EffWorldNode *)fldPlayerObject);
+    dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
     VU0_STORE_VF_UNCLOBBERED(vf10, position);
     fldGlobalBase.previousX = fldGlobalBase.x;
     fldGlobalBase.previousY = fldGlobalBase.y;
@@ -4187,7 +4187,7 @@ void fldUpdateModeOneCameraPose(void) {
     fldGlobalBase.y = position[1];
     fldGlobalBase.z = position[2];
     if (D_00435F30 != 0) {
-        dds3OnPoseSetFlag(((EffWorldNode *)fldPlayerObject)->inner,
+        dds3OnPoseSetFlag(((dds3Basic_t *)fldPlayerObject)->inner,
                           OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
         if (D_00435F30 != 0) {
             if (fldGlobalBase.unk17C > 0.0f) {
@@ -4215,7 +4215,7 @@ void fldUpdateModeOneCameraPose(void) {
     while (fldGlobalBase.unk180 < 0.0f) {
         fldGlobalBase.unk180 += 360.0f;
     }
-    dds3GetRotPoseSet((EffWorldNode *)fldPlayerObject);
+    dds3GetRotPoseSet((dds3Basic_t *)fldPlayerObject);
     VU0_STORE_VF_UNCLOBBERED(vf10, quaternion);
     EulerAngleAxisY();
     VU0_LOAD_MATRIX(sdfViewMatrix);
@@ -4230,7 +4230,7 @@ void fldUpdateModeOneCameraPose(void) {
     position[0] = fldGlobalBase.x - sdfSin(-fldGlobalBase.unk180 * 3.14f / 180.0f) * distance;
     position[1] = fldGlobalBase.y;
     position[2] = fldGlobalBase.z - sdfCos(-fldGlobalBase.unk180 * 3.14f / 180.0f) * distance;
-    dds3SetPosPoseSet((EffWorldNode *)fldPlayerObject, (u128 *)position);
+    dds3SetPosPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)position);
     if (D_00435F30 != 0) {
         fldGlobalBase.x = position[0];
         fldGlobalBase.y = position[1];
@@ -4246,31 +4246,31 @@ void fldUpdateModeOneCameraPose(void) {
             position[0] = fldGlobalBase.x;
             position[1] = fldGlobalBase.y;
             position[2] = fldGlobalBase.z;
-            dds3SetPosPoseSet((EffWorldNode *)fldPlayerObject, (u128 *)position);
+            dds3SetPosPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)position);
             fldGlobalBase.positionPending = 0;
         }
-        dds3GetPosPoseSet((EffWorldNode *)fldPlayerObject);
+        dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
         VU0_STORE_VF_UNCLOBBERED(vf10, position);
-        PCP_COPY_VECTOR_F32(smoothed, ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition);
+        PCP_COPY_VECTOR_F32(smoothed, ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition);
         if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
-            ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[0] = position[0];
+            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[0] = position[0];
         } else {
-            ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[0] =
+            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[0] =
                 smoothed[0] + (position[0] - smoothed[0]) / 3.0f;
         }
         if (ffabsf(smoothed[1] - position[1]) < 1.0f) {
-            ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[1] = position[1];
+            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[1] = position[1];
         } else {
-            ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[1] =
+            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[1] =
                 smoothed[1] + (position[1] - smoothed[1]) / 3.0f;
         }
         if (ffabsf(smoothed[2] - position[2]) < 1.0f) {
-            ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[2] = position[2];
+            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[2] = position[2];
         } else {
-            ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[2] =
+            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[2] =
                 smoothed[2] + (position[2] - smoothed[2]) / 3.0f;
         }
-        ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[3] = 1.0f;
+        ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[3] = 1.0f;
     }
     difference = fldAngleDifference(fldGlobalBase.angle, fldGlobalBase.unk180);
     step = difference / 6.0f;
@@ -4292,7 +4292,7 @@ void fldUpdateModeOneCameraPose(void) {
     VU0_LOAD_VF(vf10, axis.components);
     FromRotation(fldGlobalBase.angle * 3.14f / 180.0f);
     VU0_STORE_VF_UNCLOBBERED(vf10, quaternion);
-    dds3SetRotPoseSet((EffWorldNode *)fldPlayerObject, (u128 *)quaternion);
+    dds3SetRotPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)quaternion);
     if (fldPlayerModelContext->current.h.motionIndex != motion) {
         fldPlayerModelContext->first->frameStep = 1.0f;
         mdlSmoothLoopMotion(fldPlayerModelContext, 0, motion, 5.0f, 5.0f);
@@ -4311,7 +4311,7 @@ void fldUpdateModeOneCameraPose(void) {
 s32 fldApplyPlayerVerticalStep(void) {
     f32 position[4] __attribute__((aligned(16)));
     if (fldGlobalBase.verticalStepDirection > 0) {
-        dds3GetPosPoseSet((EffWorldNode *)fldPlayerObject);
+        dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
         VU0_STORE_VF_UNCLOBBERED(vf10, position);
         fldGlobalBase.previousX = fldGlobalBase.x;
         fldGlobalBase.previousY = fldGlobalBase.y;
@@ -4322,11 +4322,11 @@ s32 fldApplyPlayerVerticalStep(void) {
         position[0] = fldGlobalBase.x;
         position[1] = fldGlobalBase.y;
         position[2] = fldGlobalBase.z;
-        dds3SetPosPoseSet((EffWorldNode *)fldPlayerObject, (u128 *)position);
+        dds3SetPosPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)position);
         fldClearCameraObjectTransitionFlags();
         fldClearCameraObjectHighlightFlag();
     } else if (fldGlobalBase.verticalStepDirection < 0) {
-        dds3GetPosPoseSet((EffWorldNode *)fldPlayerObject);
+        dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
         VU0_STORE_VF_UNCLOBBERED(vf10, position);
         fldGlobalBase.previousX = fldGlobalBase.x;
         fldGlobalBase.previousY = fldGlobalBase.y;
@@ -4337,7 +4337,7 @@ s32 fldApplyPlayerVerticalStep(void) {
         position[0] = fldGlobalBase.x;
         position[1] = fldGlobalBase.y;
         position[2] = fldGlobalBase.z;
-        dds3SetPosPoseSet((EffWorldNode *)fldPlayerObject, (u128 *)position);
+        dds3SetPosPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)position);
         fldClearCameraObjectTransitionFlags();
         fldClearCameraObjectHighlightFlag();
     } else {
@@ -4355,7 +4355,7 @@ extern void fldEncountSetFlag(u32 mask);
 /* Advance the field transition while the camera model's motion drives completion. */
 s32 fldUpdateFieldTransition(void) {
     FldAreaWork *work = &fldGlobalBase;
-    MdlCtx *model;
+    dds3ModelHandle_t *model;
     s16 node;
 
     if (work->unk188 > 0) {
@@ -4370,7 +4370,7 @@ s32 fldUpdateFieldTransition(void) {
         }
 
         {
-            Motion *const thresholdMotion = fldPlayerModelContext->first;
+            sdfMotionCtrlr_t *const thresholdMotion = fldPlayerModelContext->first;
             f32 currentFrame = thresholdMotion->currentFrame;
             if (work->previousCameraModelFrame < 13.0f && 13.0f <= currentFrame) {
                 dds3PadVibrationSet(0, 1, 10);
@@ -4379,7 +4379,7 @@ s32 fldUpdateFieldTransition(void) {
             }
         }
         {
-            Motion *const completionMotion = fldPlayerModelContext->first;
+            sdfMotionCtrlr_t *const completionMotion = fldPlayerModelContext->first;
             if (completionMotion->state == SDF_MOTION_STATE_TERMINAL) {
                 mnuMarkTitleStreamResetPending();
                 mnuResetTitleStreamLocked();
@@ -4402,7 +4402,7 @@ extern s32 fldPlaceAreaDamageEffect(f32 x, f32 y, f32 z);
 
 s32 fldUpdateAreaDamageReaction(void) {
     FldAreaWork *work = &fldGlobalBase;
-    MdlCtx *model;
+    dds3ModelHandle_t *model;
 
     if (work->unk190 > 0) {
         if (work->terrainAttritionKind == 0 && ptyAnyUnitFlagMatch(0x80, 1) != 0) {
@@ -4595,7 +4595,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
         snapInput = 0;
     }
 
-    dds3GetPosPoseSet((EffWorldNode *)fldPlayerObject);
+    dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
     VU0_STORE_VF_UNCLOBBERED(vf10, position);
     fldGlobalBase.previousX = fldGlobalBase.x;
     fldGlobalBase.previousY = fldGlobalBase.y;
@@ -4615,14 +4615,14 @@ s32 fldUpdateFieldPlayerMovement(void) {
     while (fldGlobalBase.angle < 0.0f) {
         fldGlobalBase.angle += 360.0f;
     }
-    dds3GetRotPoseSet((EffWorldNode *)fldPlayerObject);
+    dds3GetRotPoseSet((dds3Basic_t *)fldPlayerObject);
     VU0_STORE_VF_UNCLOBBERED(vf10, quaternion);
     VU0_LOAD_MATRIX(sdfViewMatrix);
     InversMatrix();
-    dds3OnPoseSetFlag(((EffWorldNode *)fldPlayerObject)->inner,
+    dds3OnPoseSetFlag(((dds3Basic_t *)fldPlayerObject)->inner,
                       OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
     if (fldSecondarySceneObject != 0) {
-        dds3OnPoseSetFlag(((EffWorldNode *)fldSecondarySceneObject)->inner,
+        dds3OnPoseSetFlag(((dds3Basic_t *)fldSecondarySceneObject)->inner,
                           OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
     }
     if (direction != -1 && D_00435F30 != 0) {
@@ -4638,7 +4638,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
         motion = 2;
     }
     oldMotion = fldPlayerModelContext->current.h.motionIndex;
-    dds3GetPosPoseSet((EffWorldNode *)fldPlayerObject);
+    dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
     heading = fldGlobalBase.targetAngle;
     if (direction != -1) {
         heading = directionAngles[direction] - fldGlobalBase.negatedAngle;
@@ -4660,7 +4660,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
             position[0] = fldGlobalBase.x;
             position[1] = fldGlobalBase.y;
             position[2] = fldGlobalBase.z;
-            dds3SetPosPoseSet((EffWorldNode *)fldPlayerObject, (u128 *)position);
+            dds3SetPosPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)position);
             if (fldGlobalBase.movementSoundActive == 0) {
                 p2sdPlaySE(0x690062, 0x7F, 0x3F);
             }
@@ -4684,7 +4684,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
             position[0] = fldGlobalBase.x - sdfSin(radians) * distance;
             position[1] = fldGlobalBase.y;
             position[2] = fldGlobalBase.z - sdfCos(radians) * distance;
-            dds3SetPosPoseSet((EffWorldNode *)fldPlayerObject, (u128 *)position);
+            dds3SetPosPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)position);
         }
     } else {
         if (fldIsCurrentGridGuideMarkerActive() != 0) {
@@ -4702,7 +4702,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
         position[0] = fldGlobalBase.x;
         position[1] = fldGlobalBase.y;
         position[2] = fldGlobalBase.z;
-        dds3SetPosPoseSet((EffWorldNode *)fldPlayerObject, (u128 *)position);
+        dds3SetPosPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)position);
     }
     while (heading >= 360.0f) {
         heading -= 360.0f;
@@ -4716,7 +4716,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
         position[0] = fldGlobalBase.x;
         position[1] = fldGlobalBase.y;
         position[2] = fldGlobalBase.z;
-        dds3SetPosPoseSet((EffWorldNode *)fldPlayerObject, (u128 *)position);
+        dds3SetPosPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)position);
     }
     if (D_00435F30 != 0) {
         if (direction != -1) {
@@ -4734,35 +4734,35 @@ s32 fldUpdateFieldPlayerMovement(void) {
                 position[0] = fldGlobalBase.x;
                 position[1] = fldGlobalBase.y;
                 position[2] = fldGlobalBase.z;
-                dds3SetPosPoseSet((EffWorldNode *)fldPlayerObject, (u128 *)position);
+                dds3SetPosPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)position);
                 fldGlobalBase.positionPending = 0;
             }
         }
-        dds3GetPosPoseSet((EffWorldNode *)fldPlayerObject);
+        dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
         VU0_STORE_VF_UNCLOBBERED(vf10, position);
-        PCP_COPY_VECTOR_F32(smoothed, ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition);
+        PCP_COPY_VECTOR_F32(smoothed, ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition);
         if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
-            ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[0] = position[0];
+            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[0] = position[0];
         } else {
-            ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[0] =
+            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[0] =
                 smoothed[0] + (position[0] - smoothed[0]) / 3.0f;
         }
         if (ffabsf(smoothed[1] - position[1]) < 1.0f) {
-            ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[1] = position[1];
+            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[1] = position[1];
         } else {
-            ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[1] =
+            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[1] =
                 smoothed[1] + (position[1] - smoothed[1]) / 3.0f;
         }
         if (ffabsf(smoothed[2] - position[2]) < 1.0f) {
-            ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[2] = position[2];
+            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[2] = position[2];
         } else {
-            ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[2] =
+            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[2] =
                 smoothed[2] + (position[2] - smoothed[2]) / 3.0f;
         }
-        ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[3] = 1.0f;
+        ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[3] = 1.0f;
         if (fldSecondarySceneObject != 0) {
-            ObjectTransform *source = ((EffWorldNode *)fldPlayerObject)->inner;
-            ObjectTransform *secondary = ((EffWorldNode *)fldSecondarySceneObject)->inner;
+            dds3PoseSet_t *source = ((dds3Basic_t *)fldPlayerObject)->inner;
+            dds3PoseSet_t *secondary = ((dds3Basic_t *)fldSecondarySceneObject)->inner;
             secondary->smoothedPosition[0] = source->smoothedPosition[0];
             secondary->smoothedPosition[1] = source->smoothedPosition[1] + 0.0f;
             secondary->smoothedPosition[2] = source->smoothedPosition[2];
@@ -4793,9 +4793,9 @@ s32 fldUpdateFieldPlayerMovement(void) {
     VU0_LOAD_VF(vf10, axis.components);
     FromRotation(fldGlobalBase.angle * 3.14f / 180.0f);
     VU0_STORE_VF_UNCLOBBERED(vf10, quaternion);
-    dds3SetRotPoseSet((EffWorldNode *)fldPlayerObject, (u128 *)quaternion);
+    dds3SetRotPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)quaternion);
     if (fldSecondarySceneObject != 0) {
-        dds3SetRotPoseSet((EffWorldNode *)fldSecondarySceneObject, (u128 *)quaternion);
+        dds3SetRotPoseSet((dds3Basic_t *)fldSecondarySceneObject, (u128 *)quaternion);
     }
     if (fldGlobalBase.mode != 3 && fldGlobalBase.mode != 1) {
         if (D_004360BC != 0) {
@@ -4893,7 +4893,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
         }
     }
 camera_input_done:
-    dds3ObjectBaseSetControlBasicSvs((EffWorldNode *)fldPlayerObject, 0);
+    dds3ObjectBaseSetControlBasicSvs((dds3Basic_t *)fldPlayerObject, 0);
     fldRestoreSceneModelColors();
     if (fldGlobalBase.dist < 20.0f) {
         fldClearSceneModelColors();
@@ -4916,14 +4916,14 @@ camera_input_done:
     fldGlobalBase.x = position[0];
     fldGlobalBase.y = position[1];
     fldGlobalBase.z = position[2];
-    D_0038A610[0] = ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[0];
-    D_0038A610[1] = ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[1];
-    D_0038A610[2] = ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[2];
-    D_0038A610[3] = ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[3];
-    D_0038A610[4] = ((EffWorldNode *)fldPlayerObject)->inner->rotation[0];
-    D_0038A610[5] = ((EffWorldNode *)fldPlayerObject)->inner->rotation[1];
-    D_0038A610[6] = ((EffWorldNode *)fldPlayerObject)->inner->rotation[2];
-    D_0038A610[7] = ((EffWorldNode *)fldPlayerObject)->inner->rotation[3];
+    D_0038A610[0] = ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[0];
+    D_0038A610[1] = ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[1];
+    D_0038A610[2] = ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[2];
+    D_0038A610[3] = ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[3];
+    D_0038A610[4] = ((dds3Basic_t *)fldPlayerObject)->inner->rotation[0];
+    D_0038A610[5] = ((dds3Basic_t *)fldPlayerObject)->inner->rotation[1];
+    D_0038A610[6] = ((dds3Basic_t *)fldPlayerObject)->inner->rotation[2];
+    D_0038A610[7] = ((dds3Basic_t *)fldPlayerObject)->inner->rotation[3];
     return 0;
 }
 
@@ -5042,16 +5042,16 @@ void fldClearCameraObjectTransitionFlags(void) {
     dds3ObjectBaseOffFlag(fldPlayerObject, 0x200);
 }
 
-extern void dds3OffPoseSetFlag(ObjectTransform *, u32);
+extern void dds3OffPoseSetFlag(dds3PoseSet_t *, u32);
 /* State-first XYZ publication; SDK snapshot audit: docs/idioms.md. */
 s32 fldSynchronizePlayerPositionAndAreaState(void) {
     f32 position[4] __attribute__((aligned(16)));
     f32 current[3];
-    ObjectTransform *inner;
+    dds3PoseSet_t *inner;
 
     fldGlobalBase.positionMode = 0;
     if (D_00435F30 == 0) return 0;
-    dds3GetPosPoseSet((EffWorldNode *)fldPlayerObject);
+    dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
     VU0_STORE_VF_UNCLOBBERED(vf10, position);
     fldGlobalBase.previousX = fldGlobalBase.x;
     fldGlobalBase.previousY = fldGlobalBase.y;
@@ -5070,12 +5070,12 @@ s32 fldSynchronizePlayerPositionAndAreaState(void) {
         position[0] = fldGlobalBase.x;
         position[1] = fldGlobalBase.y;
         position[2] = fldGlobalBase.z;
-        dds3SetPosPoseSet((EffWorldNode *)fldPlayerObject, (u128 *)position);
+        dds3SetPosPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)position);
         fldGlobalBase.positionPending = 0;
     }
-    dds3GetPosPoseSet((EffWorldNode *)fldPlayerObject);
+    dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
     VU0_STORE_VF_UNCLOBBERED(vf10, position);
-    inner = ((EffWorldNode *)fldPlayerObject)->inner;
+    inner = ((dds3Basic_t *)fldPlayerObject)->inner;
     PCP_COPY_VECTOR(inner->smoothedPosition, position);
     dds3OffPoseSetFlag(inner, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
     return 0;
@@ -5100,7 +5100,7 @@ void fldSetCameraNodeModeWithZero(void) {
 }
 
 void fldAddCameraModelEntry(s32 motionIndex) {
-    MdlCtx *model = fldPlayerModelContext;
+    dds3ModelHandle_t *model = fldPlayerModelContext;
     model->first->frameStep = 1.0f;
     mdlSmoothSingleMotion(model, 0, motionIndex, 2.0f, 5.0f);
 }
@@ -5175,7 +5175,7 @@ INCLUDE_RODATA(const s32, "field/fldFileResolver", D_004132E0);
 
 void fldLoadBattleSkyAndFilter(void) {
     s32 cameraSettingIndex;
-    DevState *command;
+    sdfFileCmdHandle_t *command;
 
     if (fldSkyLightSetBuffer == 0) {
         fldSkyLightSetBuffer = (void *)sdfMemLock(sdfMemAllocDirect(0xE000));
@@ -5219,7 +5219,7 @@ extern char D_00413350[];
 void fldLoadSkyResource(s32 area) {
     char path[64];
     char directory[32];
-    DevState *command;
+    sdfFileCmdHandle_t *command;
 
     gFilterAlpha = 0x80;
     if (area < 200) {
@@ -5249,7 +5249,7 @@ void fldReleaseSkyResources(void) {
         fldRainTextureReference = 0;
     }
     if (fldRainTextureResource != 0) {
-        sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldRainTextureResource);
+        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldRainTextureResource);
         fldRainTextureResource = 0;
     }
     if (fldCameraColorEffect != 0) {
@@ -5518,7 +5518,7 @@ void fldSkySetTableAnime(u32 transitionMode) {
 }
 
 void fldUpdateSelectedValueTransition(void) {
-    EvtUnit *player;
+    evtUnitHandle_t *player;
     f32 direction[4];
     s32 red, green, blue;
     u32 colorA, colorB;
@@ -5555,7 +5555,7 @@ void fldUpdateSelectedValueTransition(void) {
         break;
     }
     if (dds3SearchProcessName(D_00413388) != NULL) {
-        player = evtGetUnitHandle2((EffWorldNode *)fldPlayerObject);
+        player = evtGetUnitHandle2((dds3Basic_t *)fldPlayerObject);
         evtUnitLightOn(player);
         red = D_0038BB10.color[0] * 128.0f;
         green = D_0038BB10.color[1] * 128.0f;
@@ -5579,18 +5579,18 @@ void fldUpdateSelectedValueTransition(void) {
 void fldSetPlayerAndPeerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
                   f32 redB, f32 greenB, f32 blueB,
                   f32 x, f32 y, f32 z) {
-    EvtUnit *player;
-    EvtUnit *secondary = 0;
+    evtUnitHandle_t *player;
+    evtUnitHandle_t *secondary = 0;
     u32 colorA;
     u32 colorB;
     s32 red, green, blue;
     f32 direction[4];
 
     if (fldSecondarySceneObject != 0) {
-        secondary = evtGetUnitHandle2((EffWorldNode *)fldSecondarySceneObject);
+        secondary = evtGetUnitHandle2((dds3Basic_t *)fldSecondarySceneObject);
         evtUnitLightOn(secondary);
     }
-    player = evtGetUnitHandle2((EffWorldNode *)fldPlayerObject);
+    player = evtGetUnitHandle2((dds3Basic_t *)fldPlayerObject);
     evtUnitLightOn(player);
     red = redA * 128.0f;
     green = greenA * 128.0f;

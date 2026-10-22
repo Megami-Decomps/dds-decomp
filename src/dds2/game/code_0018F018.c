@@ -29,7 +29,7 @@ void dds3EffectRippleBlurReset(EffBlurScaleWork *work) {
 
 
 /* Allocate an owner and slot array from only the serialized parameter prefix. */
-EffBlurScaleWork *dds3EffectRippleBlurCreate(EffBlurScaleParams *src) {
+EffBlurScaleWork *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *src) {
     s32 count = src->count;
     void *allocation = sdfMemAllocDirect(count * 0x30 + 0x38);
     EffBlurScaleWork *work = (EffBlurScaleWork *)sdfMemLock(allocation);
@@ -66,8 +66,8 @@ extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern u64 *effPkt2DAllocF4(u32 flags);
 extern void effBlurBuildSamplingQuad();
 
-extern void effAppendBlurRenderState(void *, s32, SdfTex *);
-extern void effAppendBlurRectanglePackets(void *, const EffBlurQuad *, u8);
+extern void effAppendBlurRenderState(void *, s32, sdfTexHandle_t *);
+extern void effAppendBlurRectanglePackets(void *, const dds3Effect_Blur_t *, u8);
 extern void effDrawBlurListWithFramePacket(void *);
 extern void effBlurSecondUpdateSlotRect(EffBlurScaleWork *, EffBlurScaleSlot *);
 
@@ -113,7 +113,7 @@ void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
 
 
 void effBlurBuildSamplingQuad(source, data, fixedPoint)
-    const EffBlurQuad *source;
+    const dds3Effect_Blur_t *source;
     EffBlurDrawData *data;
     u8 fixedPoint;
 {
@@ -172,15 +172,15 @@ void effBlurBuildSamplingQuad(source, data, fixedPoint)
 }
 
 /* Submit a frame-buffer quad with sampling, texture-alpha, blend and clamp packets. */
-void effBlurDrawFramebufferQuad(const EffBlurQuad *source)
+void effBlurDrawFramebufferQuad(const dds3Effect_Blur_t *source)
 {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     void *tag;
     u64 *samplingPacket, *textureAlphaPacket, *blendPacket, *clampPacket;
     SdfDrawPacket *drawPacket;
 
     if (dds3NullDrawProc() == 0) {
-        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         tag = (void *)sdfGrAllocPacketBuff(0x20);
         sdfGrLinkDispFrameTex(list, (u32)kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag);
@@ -232,8 +232,8 @@ void effBlurDrawFramebufferQuad(const EffBlurQuad *source)
 }
 
 /* Queue blend state and a uniformly colored GS quad from two source corners. */
-void dds3EffectFilter(EffSolidRectParams *source) {
-    SdfListHead *list;
+void dds3EffectFilter(dds3Effect_Filter_t *source) {
+    sdfDrawTag_t *list;
     u64 *blendPacket;
     u64 *drawPacket;
     u64 color;
@@ -244,7 +244,7 @@ void dds3EffectFilter(EffSolidRectParams *source) {
     s32 x[4];
     s32 y[4];
 
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
     blendPacket[0] = 3;

@@ -3,8 +3,8 @@
 
 #include "common.h"
 
-struct SdfModel;
+struct sdfModelRootNode_t;
 
-u32 sdfGetUniqueChunkValue(const struct SdfModel *model);
+u32 sdfGetUniqueChunkValue(const struct sdfModelRootNode_t *model);
 
 #endif /* SDF_UNIQUE_CHUNK_VALUE_API_H */

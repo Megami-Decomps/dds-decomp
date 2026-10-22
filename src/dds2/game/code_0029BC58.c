@@ -23,7 +23,7 @@ extern s32 mnuSelectEventFlagCode(void);
 extern void evtStageTestSetPendingEffect(u32);
 
 void mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
-    DatPartyRecord *unit = work->selectedRewardRow->unit;
+    datUnitWork_t *unit = work->selectedRewardRow->unit;
     s32 mode = work->rewardMode;
     s32 rewardIndex;
 
@@ -82,13 +82,13 @@ void mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
 }
 
 
-extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
+extern void mnuRefreshSelectedUnitPanels(datUnitWork_t *, BrsSkillPackageWork *);
 
-extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
+extern s32 btlAddBaseStats(s32 *, datUnitWork_t *);
 
 void mnuTitleApplySequenceState(BrsSkillPackageWork *work) {
     s32 state = work->rewardMode;
-    DatPartyRecord *seq = work->selectedRewardRow->unit;
+    datUnitWork_t *seq = work->selectedRewardRow->unit;
 
     switch (state) {
     case 5:
@@ -130,7 +130,7 @@ extern void evtStageTestUpdateCamera(void);
 extern char brsPrimaryRewardPopupEntry[];
 
 /* Terminal panel poll: once the message window is idle, apply the pending reward step or open the popup. */
-s32 brsAdvanceRewardPanelAfterMessage(KwlnTask *request) {
+s32 brsAdvanceRewardPanelAfterMessage(dds3ProcessID_t *request) {
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)dds3GetProcessData(request);
     s32 result;
 
@@ -153,7 +153,7 @@ s32 brsAdvanceRewardPanelAfterMessage(KwlnTask *request) {
     return 0;
 }
 
-s32 itfRunPanelMode1(KwlnTask *request) {
+s32 itfRunPanelMode1(dds3ProcessID_t *request) {
     s32 context = dds3GetProcessData(request);
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
@@ -162,7 +162,7 @@ s32 itfRunPanelMode1(KwlnTask *request) {
     return menuSetHandler(panel, 1, request);
 }
 
-s32 itfRunPanelMode2(KwlnTask *request) {
+s32 itfRunPanelMode2(dds3ProcessID_t *request) {
     s32 context = dds3GetProcessData(request);
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
@@ -322,7 +322,7 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *re
     MenuIconRef *icon = res->icons;
     u16 id;
     u8 param;
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
     u32 packed;
     u32 i;
 
@@ -342,7 +342,7 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *re
             packed = (alpha & 0xFF) | 0x96FF9B00;
             glyph = itfCreateConvertedTextGlyph(x, y, z, packed, D_00435E5C[id], 0);
             frFontDrawGlyphChain(glyph, 1, surface);
-            frDestroyFontRequestAfter((struct FrFontGlyph *)(u32)glyph);
+            frDestroyFontRequestAfter((struct _FRQ *)(u32)glyph);
             effDrawSpriteWithCornerColors(x + 0x720, y + 0x20, 0, labelColor, 0, work->teardownResource, 0x20, 0x53);
             sprintf(name, D_004379C0, param);
             packed = (alpha & 0xFF) | 0xA09DC300;
@@ -363,7 +363,7 @@ extern u32 D_004379C8[];
 void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, s32 flags, BrsSkillPackageWork *work) {
     char name[32];
     u32 color[4];
-    struct FrFontGlyph *sprite;
+    struct _FRQ *sprite;
     u32 packed;
 
     packed = (alpha & 0xFF) | 0xA09DC300;
@@ -383,7 +383,7 @@ void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSum
 void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, s32 flags, BrsSkillPackageWork *work) {
     char name[32];
     u32 color[4];
-    struct FrFontGlyph *sprite;
+    struct _FRQ *sprite;
     u32 packed;
 
     if (evtBitCheck(0x290) != 0) {

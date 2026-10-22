@@ -9,13 +9,13 @@ extern u8 evtPictureQuadTexcoords[];
 extern u8 evtPictureQuadColor[];
 extern SdfPoolNode D_003255A8;
 #include "sdf_packet_alloc.h"
-extern void itfMiscDrawAlphaPrim(SdfListHead *packet, s32 index, s32 flag);
-extern void itfMiscDrawSpritePrim(void *vertexData, void *uvData, void *colorData, s32 tail, SdfTex *texture, s32 flag, SdfListHead *command);
+extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *packet, s32 index, s32 flag);
+extern void itfMiscDrawSpritePrim(void *vertexData, void *uvData, void *colorData, s32 tail, sdfTexHandle_t *texture, s32 flag, sdfDrawTag_t *command);
 
-void evtSubmitPictureDrawPacket(struct SdfTex *texture) {
-    SdfListHead *packet;
+void evtSubmitPictureDrawPacket(struct sdfTexHandle_t *texture) {
+    sdfDrawTag_t *packet;
 
-    packet = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packet);
     itfMiscDrawAlphaPrim(packet, 0, 0);
     itfMiscDrawSpritePrim(evtPictureQuadBounds, evtPictureQuadTexcoords, evtPictureQuadColor, 0xFFF, texture, 0, packet);
@@ -23,7 +23,7 @@ void evtSubmitPictureDrawPacket(struct SdfTex *texture) {
 }
 
 /* Run the picture's own update step while its active flag is set. */
-s32 evtUpdatePictureWhenFlagged(KwlnTask *task) {
+s32 evtUpdatePictureWhenFlagged(dds3ProcessID_t *task) {
     EvtPictureWork *picture;
 
     picture = (EvtPictureWork *)dds3GetProcessData(task);
@@ -37,7 +37,7 @@ s32 evtUpdatePictureWhenFlagged(KwlnTask *task) {
 }
 
 /* Drop the picture's texture, then free the task data. */
-void evtPictureShutdown(KwlnTask *task) {
+void evtPictureShutdown(dds3ProcessID_t *task) {
     EvtPictureWork *picture;
 
     picture = (EvtPictureWork *)dds3GetProcessData(task);

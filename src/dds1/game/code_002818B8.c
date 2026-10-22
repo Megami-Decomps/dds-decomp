@@ -133,8 +133,8 @@ extern void mnuDrawPartyRowFrameVariant(s32, s32, s32, MenuPageWindow *, s32, s3
 extern void uiDrawActiveSurfaceRegion(s32);
 extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 extern void uiDrawSurfaceAtNearDepth(u32);
-extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
-extern s32 frDestroyFontRequestAfter(struct FrFontGlyph *);
+extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
+extern s32 frDestroyFontRequestAfter(struct _FRQ *);
 /* Retail forwards the surface word; the selection helper uses five arguments. */
 extern s32 mnuClearWindowPendingFlagAfterSelection();
 extern void mnuDrawPartyPageContents(s32, s32, s32, s32, struct MenuPageResources *, s32);
@@ -161,7 +161,7 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     s32 selection;
     s32 level;
     s32 iconX, iconY;
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
 
     if (panel->flags & 1) {
         return;
@@ -260,7 +260,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     s32 iconX, iconY;
     s32 selection;
     s32 level;
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
 
     if (panel->flags & 1) {
         return;

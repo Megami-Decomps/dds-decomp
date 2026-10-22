@@ -4,7 +4,7 @@
 #include "common.h"
 #include "eff_pcp_spawn_range_event_row.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 struct SoundMixer;
 
 /* The radial event setup reads the typed tail and preserves its opaque prefix. */
@@ -38,7 +38,7 @@ typedef struct EffPCPSpawnRangeWork {
     u8 pad9D[3];
     f32 scale;
     u32 color;
-    struct SdfMemBlock *handle;
+    struct sdfMemHandle_t *handle;
 } EffPCPSpawnRangeWork;
 
 typedef char EffPCPSpawnRangeParams_size_must_be_0x94[

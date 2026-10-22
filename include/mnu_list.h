@@ -11,7 +11,7 @@ typedef struct MenuThresholdEntry {
     s32 requiredAmount;
 } MenuThresholdEntry;
 
-struct DatPartyRecord;
+struct datUnitWork_t;
 struct SdfCounterDisplay;
 
 /* Native list owner, shared by both games' allocator and window consumers. */
@@ -42,12 +42,12 @@ struct MenuListNode {
         MenuThresholdEntry terminal;
     };
     /* +0x70: terminal recovery panel at 267050; title at 2674C8.
-     * Mantra lists retain a DatPartyRecord address in the same word. */
+     * Mantra lists retain a datUnitWork_t address in the same word. */
     union {
         u32 userValue;
         void *childPanel;
         char *title;
-        struct DatPartyRecord *partyRecord;
+        struct datUnitWork_t *partyRecord;
         /* Separate 0x10-byte payload: DDS1 2C43F8 / DDS2 30C480. */
         struct SdfCounterDisplay *counterDisplay;
     };

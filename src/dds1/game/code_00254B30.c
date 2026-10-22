@@ -463,7 +463,7 @@ void itfDspDrawMarksB(s32 scale, s32 context) {
 }
 
 extern u32 prfGetCapValue(u16);
-extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
+extern u32 ptyGetProfileRecordValue(struct datUnitWork_t *, u16);
 extern u32 mnuGetProfileRequirementFlags(u16);
 
 u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *entry, MnuProfileProgress *target) {
@@ -527,7 +527,7 @@ void mnuDrawDisplayEntrySpriteFromLookup(s32 x, s32 y, s32 layer, DspEntry *entr
 }
 
 /* Draw both layers of a display entry and queue its formatted value. */
-void itfDspDrawPartyRecordWithLevel(s32 x, s32 y, s32 layer, DatPartyRecord *entry, s32 scale, s32 context) {
+void itfDspDrawPartyRecordWithLevel(s32 x, s32 y, s32 layer, datUnitWork_t *entry, s32 scale, s32 context) {
     DspEntrySpriteLookup lookup = D_003BC480[0];
     char text[0x10];
     u32 tag = scale | 0xA09DC300;

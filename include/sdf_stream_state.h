@@ -10,7 +10,7 @@ typedef struct SdfStreamReadRequest {
 } SdfStreamReadRequest;
 
 typedef struct SdfStreamState {
-    DevState *deviceState;
+    sdfFileCmdHandle_t *deviceState;
     s32 semaphore;
     s32 readResult;
     s32 remainingBytes;

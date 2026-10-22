@@ -157,7 +157,7 @@ void func_0020EA10(void) {
 
 
 
-extern s32 sdfModelGetMarkPos(SdfModel *model, s32 id);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 id);
 extern void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade);
 
 void btlDrawActorGroundDisc(BtlUnit *unit) {
@@ -166,7 +166,7 @@ void btlDrawActorGroundDisc(BtlUnit *unit) {
     f32 radius;
     s32 alpha;
     BtlActorStatusRecord *status;
-    MdlCtx *model;
+    dds3ModelHandle_t *model;
 
     if (!(unit->status.flags & 8)) {
         return;
@@ -206,7 +206,7 @@ void btlDrawActorGroundDisc(BtlUnit *unit) {
         break;
     }
 
-    dds3GetPosPoseSet((EffWorldNode *)unit->effectObject);
+    dds3GetPosPoseSet((dds3Basic_t *)unit->effectObject);
     VU0_STORE_VF(vf10, actorPosition);
     if (sdfModelGetMarkPos(model->inner, 0) == 0) {
         VU0_LOAD_VF(vf10, actorPosition);

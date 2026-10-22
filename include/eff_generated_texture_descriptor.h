@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-struct SdfTex;
+struct sdfTexHandle_t;
 
 /* Producer-built input shared with the generated-texture packet providers.
  * Bytes 0x18..0x1F remain opaque; the provider does not read them. */
@@ -14,7 +14,7 @@ typedef struct EffGeneratedTextureDescriptor {
     u8 opaque18[8];
     f32 angle;
     u32 color;
-    struct SdfTex *texture;
+    struct sdfTexHandle_t *texture;
 } EffGeneratedTextureDescriptor;
 
 typedef char EffGeneratedTextureDescriptorSizeAssert[

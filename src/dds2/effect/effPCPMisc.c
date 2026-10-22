@@ -103,13 +103,13 @@ extern EffPCPSharedTrail *pBlinkMultiBlurBase;
 
 /* Every compact timeline precedes one variant-specific SDK parameter payload.
    Respawn copies that payload only, not its live resource/allocation tail. */
-typedef EffBlurTemplateBody EffPCPTexturedBlurParams;
+typedef dds3Effect_PartialMultiBlurParam_t EffPCPTexturedBlurParams;
 
 
 
 typedef struct {
     EffPCPCompactTimelineParams timeline;
-    EffResourceRectParams res;
+    dds3Effect_PartialMultiFilterParam_t res;
 } EffPCPCompactRectParams;
 
 typedef struct {
@@ -119,12 +119,12 @@ typedef struct {
 
 typedef struct {
     EffPCPCompactTimelineParams timeline;
-    EffBlurScatterParams res;
+    dds3Effect_DistortionBlurParam_t res;
 } EffPCPCompactScatterParams;
 
 typedef struct {
     EffPCPCompactTimelineParams timeline;
-    EffBlurScaleParams res;
+    dds3Effect_RippleBlurParam_t res;
 } EffPCPCompactScaleParams;
 
 
@@ -200,7 +200,7 @@ typedef struct EffPCPSprayWork {
     s32 frame;        /* 0x1C current update frame */
     s32 startFrame[10]; /* 0x20 */
     f32 rotationY[10];  /* 0x48 random start angles */
-    EffParamWork *handle[10];   /* 0x70 */
+    effPartHandle_t *handle[10];   /* 0x70 */
 } EffPCPSprayWork; /* 0x98 */
 
 typedef char EffPCPSprayWork_size_must_be_0x98[
@@ -208,7 +208,7 @@ typedef char EffPCPSprayWork_size_must_be_0x98[
 
 
 
-extern s32 sdfModelGetMarkPos(SdfModel *model, s32 value);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 value);
 
 extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
@@ -236,7 +236,7 @@ typedef struct EffPCPRingWork {
     u32 color10;
     u32 color14;
     f32 scale;
-    BillObj *handle;
+    billHandle_t *handle;
 } EffPCPRingWork;
 void effPCPSparkleSphereDelete(EffPCPRingWork *work) {
     dds3BillboardDelete(work->handle);
@@ -245,7 +245,7 @@ void effPCPSparkleSphereDelete(EffPCPRingWork *work) {
 
 extern u8 aViewTarget[];
 extern u8 sdfViewTargetVector[];
-extern void dds3BillboardDraw(BillObj *effect);
+extern void dds3BillboardDraw(billHandle_t *effect);
 extern u32 effMagaCylinderCalcColor(u32 flags, u32 color);
 
 
@@ -255,7 +255,7 @@ void effPCPSparkleSphereDraw(EffPCPRingWork *work) {
     f32 pos[4];
     f32 dir[4];
     f32 size[4];
-    BillObj *handle;
+    billHandle_t *handle;
     f32 scale;
     u32 color;
     s32 i;
@@ -348,8 +348,8 @@ EffPCPTwinWork *effPCPHama01Create(void *src) {
 }
 
 void effPCPHama01Delete(EffPCPTwinWork *work) {
-    EffParamWork **sharedHandleCursor = work->shared;
-    EffParamWork **pairHandleCursor = &work->pair[0][0];
+    effPartHandle_t **sharedHandleCursor = work->shared;
+    effPartHandle_t **pairHandleCursor = &work->pair[0][0];
     s32 pairIndex;
 
     for (pairIndex = 0; pairIndex < 8; pairIndex++) {
@@ -386,7 +386,7 @@ EffPCPTwinWork *effPCPHama01Copy(EffPCPTwinWork *src) {
  * fires its handle pair; after frame 0x18 its position is pushed to the shared
  * handle. */
 void effPCPHama01Draw(EffPCPTwinWork *work) {
-    MdlCtx *obj[2];
+    dds3ModelHandle_t *obj[2];
     u128 pos;
     u128 *posp;
     s32 slotIndex;
@@ -449,7 +449,7 @@ void effPCPHama02PartInit(EffPCPStaggered *work, s32 index) {
 
 EffPCPStaggered *effPCPHama02Create(void *args) {
     EffPCPStaggered *work = sdfChipAllocDirect(0x98);
-    EffParamWork **handle = &work->handle[1];
+    effPartHandle_t **handle = &work->handle[1];
     s32 i = 0;
 
     do {
@@ -472,7 +472,7 @@ EffPCPStaggered *effPCPHama02Create(void *args) {
 }
 
 void effPCPHama02Delete(EffPCPStaggered *work) {
-    EffParamWork **p = &work->handle[1];
+    effPartHandle_t **p = &work->handle[1];
     s32 i;
 
     for (i = 0; i < 8; i++) {
@@ -485,7 +485,7 @@ void effPCPHama02Delete(EffPCPStaggered *work) {
 
 EffPCPStaggered *effPCPHama02Copy(EffPCPStaggered *source) {
     EffPCPStaggered *work = sdfChipAllocDirect(0x98);
-    EffParamWork **handle = &work->handle[1];
+    effPartHandle_t **handle = &work->handle[1];
     s32 i = 0;
 
     do {
@@ -504,7 +504,7 @@ EffPCPStaggered *effPCPHama02Copy(EffPCPStaggered *source) {
 }
 
 void effPCPHama02Draw(EffPCPStaggered *work) {
-    MdlCtx *obj[2];
+    dds3ModelHandle_t *obj[2];
     f32 pos[4];
     s32 i;
 
@@ -631,8 +631,8 @@ EffPCPCrossWork *effPCPHamaonCopy(EffPCPCrossWork *src) {
 /* Per-frame update of the cross effect: scales the anchor model and fires each
  * of the 12 slots whose countdown has expired. */
 void effPCPHamaonDraw(EffPCPCrossWork *work) {
-    MdlCtx *anchor;
-    MdlCtx *obj;
+    dds3ModelHandle_t *anchor;
+    dds3ModelHandle_t *obj;
     s32 i;
     s32 j;
 
@@ -681,7 +681,7 @@ void effPCPMHanma01PartInit(EffPCPDelayedPairs *work, s32 index) {
 
 EffPCPDelayedPairs *effPCPMHanma01Create(void *source) {
     EffPCPDelayedPairs *work = sdfChipAllocDirect(0x60);
-    EffParamWork **handle = &work->handle[1];
+    effPartHandle_t **handle = &work->handle[1];
     s32 i;
 
     for (i = 0; i < 6; i++) {
@@ -702,7 +702,7 @@ EffPCPDelayedPairs *effPCPMHanma01Create(void *source) {
 }
 
 void effPCPMHanma01Delete(EffPCPDelayedPairs *work) {
-    EffParamWork **p = &work->handle[1];
+    effPartHandle_t **p = &work->handle[1];
     s32 i;
 
     for (i = 0; i < 6; i++) {
@@ -714,8 +714,8 @@ void effPCPMHanma01Delete(EffPCPDelayedPairs *work) {
 }
 
 EffPCPDelayedPairs *effPCPMHanma01Copy(EffPCPDelayedPairs *source) {
-    EffParamWork **sourceHandle;
-    EffParamWork **workHandle;
+    effPartHandle_t **sourceHandle;
+    effPartHandle_t **workHandle;
     s32 i;
     EffPCPDelayedPairs *work = sdfChipAllocDirect(0x60);
     sourceHandle = &source->handle[1];
@@ -737,7 +737,7 @@ EffPCPDelayedPairs *effPCPMHanma01Copy(EffPCPDelayedPairs *source) {
 }
 
 void effPCPMHanma01Draw(EffPCPDelayedPairs *work) {
-    MdlCtx *obj[2];
+    dds3ModelHandle_t *obj[2];
     u128 vec;
     s32 i;
 
@@ -778,7 +778,7 @@ void effPCPMudoPartInit(EffPCPChargeWork *work) {
 }
 
 EffPCPChargeWork *effPCPMudoCreate(void *source) {
-    SdfMemBlock *resource = sdfMemAllocDirect(0x1354);
+    sdfMemHandle_t *resource = sdfMemAllocDirect(0x1354);
     EffPCPChargeWork *work = (void *)sdfMemLock(resource);
     work->allocationHandle = resource;
     work->primaryHandle = dds3EffectPCPDataPartCreate(source, 0);
@@ -801,9 +801,9 @@ void effPCPMudoDelete(EffPCPChargeWork *work) {
 /* Duplicate the parameter owners into fresh history storage; sampled arrays
  * are not copied from source. */
 EffPCPChargeWork *effPCPMudoCopy(EffPCPChargeWork *source) {
-    SdfMemBlock *resource = sdfMemAllocDirect(0x1354);
+    sdfMemHandle_t *resource = sdfMemAllocDirect(0x1354);
     EffPCPChargeWork *work = (void *)sdfMemLock(resource);
-    EffParamWork *firstHandle = source->primaryHandle;
+    effPartHandle_t *firstHandle = source->primaryHandle;
     work->allocationHandle = resource;
     work->primaryHandle = dds3EffectPartCopy(firstHandle);
     work->secondaryHandle = dds3EffectPartCopy(source->secondaryHandle);
@@ -824,8 +824,8 @@ void effPCPMudoDraw(EffPCPChargeWork *work) {
     f32 position[4] __attribute__((aligned(16)));
     u32 i;
     u32 color;
-    BillObj *bill;
-    MdlCtx *model;
+    billHandle_t *bill;
+    dds3ModelHandle_t *model;
     f32 scale;
     u32 count;
     u32 captureRow;
@@ -896,7 +896,7 @@ void effPCPMudoSetColor(EffPCPChargeWork *work, u32 value) {
 
 EffPCPSpawnOnceWork *effPCPHwave01Create(void *src) {
     EffPCPSpawnOnceWork *dst;
-    EffParamWork *handle;
+    effPartHandle_t *handle;
 
     dst = sdfChipAllocDirect(0x1C);
     dst->primaryHandle = dds3EffectPCPDataPartCreate(src, 0);
@@ -917,7 +917,7 @@ void effPCPHwave01Delete(EffPCPSpawnOnceWork *work) {
 
 EffPCPSpawnOnceWork *effPCPHwave01Copy(EffPCPSpawnOnceWork *src) {
     EffPCPSpawnOnceWork *dst;
-    EffParamWork *handle;
+    effPartHandle_t *handle;
 
     dst = sdfChipAllocDirect(0x1C);
     dst->primaryHandle = dds3EffectPartCopy(src->primaryHandle);
@@ -931,7 +931,7 @@ EffPCPSpawnOnceWork *effPCPHwave01Copy(EffPCPSpawnOnceWork *src) {
 }
 
 void effPCPHwave01Draw(EffPCPSpawnOnceWork *work) {
-    MdlCtx *obj;
+    dds3ModelHandle_t *obj;
     u128 vec;
 
     obj = effParamWorkGetData(work->primaryHandle);
@@ -2903,7 +2903,7 @@ void effPCPAgiraoFireSetColor(EffPCPTripleWork *work, u32 value) {
 /* Build a block-set work: copy the parameter block, then create one parameter handle per input block. */
 EffPCPBlockSetWork *effPCPAgiFireballCreate(const EffPCPBlockSetParams *params, void **blocks) {
     EffPCPBlockSetWork *work;
-    MdlCtx *model;
+    dds3ModelHandle_t *model;
     u32 i;
     u32 j;
     u32 n;
@@ -2927,7 +2927,7 @@ EffPCPBlockSetWork *effPCPAgiFireballCreate(const EffPCPBlockSetParams *params, 
         if (work->params.groupSize[i] > 0) {
             n = work->count * work->params.groupSize[i];
             work->alloc[i] = sdfMemAllocDirect(n * 4);
-            work->list[i] = (EffParamWork **)sdfMemLock(work->alloc[i]);
+            work->list[i] = (effPartHandle_t **)sdfMemLock(work->alloc[i]);
             work->list[i][0] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[6 + i]);
             for (j = 1; j < n; j++) {
                 work->list[i][j] = 0;
@@ -2967,7 +2967,7 @@ EffPCPBlockSetWork *effPCPAgiFireballCreatePCF(void *parameterTable) {
 
 /* Duplicate the block-set handles and allocate its three optional instance lists. */
 void effPCPAgiFireballCopySub(EffPCPBlockSetWork *work, EffPCPBlockSetWork *src) {
-    MdlCtx *headModel;
+    dds3ModelHandle_t *headModel;
     u32 handleIndex;
     u32 groupIndex;
     u32 groupHandleCount;
@@ -2982,7 +2982,7 @@ void effPCPAgiFireballCopySub(EffPCPBlockSetWork *work, EffPCPBlockSetWork *src)
         if (work->params.groupSize[groupIndex] > 0) {
             groupHandleCount = work->count * work->params.groupSize[groupIndex];
             work->alloc[groupIndex] = sdfMemAllocDirect(groupHandleCount * 4);
-            work->list[groupIndex] = (EffParamWork **)sdfMemLock(work->alloc[groupIndex]);
+            work->list[groupIndex] = (effPartHandle_t **)sdfMemLock(work->alloc[groupIndex]);
             work->list[groupIndex][0] = dds3EffectPartCopy(src->list[groupIndex][0]);
             for (handleIndex = 1; handleIndex < groupHandleCount; handleIndex++) {
                 work->list[groupIndex][handleIndex] = 0;
@@ -3058,7 +3058,7 @@ void effPcpBlockSetUpdate(EffPCPBlockSetWork *work) {
     s32 count;
     s32 frame = work->frame;
     u32 color;
-    MdlCtx *model;
+    dds3ModelHandle_t *model;
     u32 i;
     u32 j;
     u32 base;
@@ -3440,7 +3440,7 @@ void effPCPBufuIceDelete(EffPCPSpinWork *work) {
 }
 
 void effPCPBufuIceDraw(EffPCPSpinWork *work) {
-    EffParamWork *handle = work->handle0;
+    effPartHandle_t *handle = work->handle0;
     u128 mtx[4];
 
     dds3EffectPartSetPosition(handle, work);
@@ -3511,7 +3511,7 @@ void effPCPBufuraIceDelete(EffPCPSpinWork *work) {
  * handles, rebuilds the rotation matrix from the angle and hands it over. The
  * VU0 blocks are bare asm (no "memory" clobber), as the original macros were. */
 void effPCPBufuraIceDraw(EffPCPSpinWork *work) {
-    EffParamWork *handle[2];
+    effPartHandle_t *handle[2];
     u128 mtx[4];
 
     handle[0] = work->handle0;
@@ -3589,7 +3589,7 @@ void effPCPBufudnIceDelete(EffPCPSpinWork *work) {
 
 /* Identical update for the second spin effect. */
 void effPCPBufudnIceDraw(EffPCPSpinWork *work) {
-    EffParamWork *handle[2];
+    effPartHandle_t *handle[2];
     u128 mtx[4];
 
     handle[0] = work->handle0;
@@ -4009,7 +4009,7 @@ extern EffPacketParams effBeamDrawParams;
 EffPCPBeamNode *dds3RingPolyExpListCreate(u32 segments) {
     s32 count = segments * 4 + 4;
     EffPCPBeamNode *node = sdfChipAllocDirect(sizeof(EffPCPBeamNode));
-    SdfMemBlock *allocation = sdfMemAllocDirect(count * 20);
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(count * 20);
     f32 *points = (void *)sdfMemLock(allocation);
 
     memset(points, 0, count * 20);
@@ -4021,7 +4021,7 @@ EffPCPBeamNode *dds3RingPolyExpListCreate(u32 segments) {
     node->allocationHandle = allocation;
     node->scale = 1.0f;
     node->assetHandle = sdfMatNew();
-    sdfMatSetConstant((struct SdfAsset *)node->assetHandle, 1.0f);
+    sdfMatSetConstant((struct sdfMat_t *)node->assetHandle, 1.0f);
     EE_MMI_UNIT_MATRIX(node->localMatrix);
     EE_MMI_UNIT_MATRIX(node->matrix);
     memset(&effBeamDrawParams, 0, sizeof(effBeamDrawParams));
@@ -4044,14 +4044,14 @@ extern void *effPkt3DPrimMakePoly(EffPacketParams *params);
 /* vu0 routine: compose the beam transform and submit batches of its vertices. */
 void dds3RingPolyExpListDraw(EffPCPBeamNode *node) {
     f32 scaleMatrix[4][4];
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     s32 count;
     SdfPoolNode *entry;
 
     if (node->vertexCount == 0) {
         return;
     }
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     EE_MMI_UNIT_MATRIX(scaleMatrix);
     scaleMatrix[2][2] = scaleMatrix[1][1] = scaleMatrix[0][0] = node->scale;
@@ -4445,7 +4445,7 @@ void effPCPRingPolyExp2SetRotateMatrix(EffPCPBeamLargeWork *work, void *src) {
 
 EffPCPGroupSet *effPCPRadiateThunderCreate(EffPCPGroupHead *header, void **sourceResources) {
     u32 entryCount = header->count;
-    struct SdfMemBlock *workResource = sdfMemAllocDirect(entryCount * 0x18 + 0x180);
+    struct sdfMemHandle_t *workResource = sdfMemAllocDirect(entryCount * 0x18 + 0x180);
     EffPCPGroupSet *groupSet = (void *)sdfMemLock(workResource);
     EffPCPGroupEntry *groupEntryCursor;
     u32 index;
@@ -4471,13 +4471,13 @@ EffPCPGroupSet *effPCPRadiateThunderCreate(EffPCPGroupHead *header, void **sourc
         activeGroupFlags = header->activeGroups;
         groupByteOffset = 0;
         groupByteWidth = entryCount * 4;
-        groupSet->duplicates = (EffParamWork **)sdfMemLock(groupSet->duplicateHandle);
+        groupSet->duplicates = (effPartHandle_t **)sdfMemLock(groupSet->duplicateHandle);
         memset(groupSet->duplicates, 0, allocationBytes);
         for (; index < 4; index++) {
-            EffParamWork **destinationHandles = (EffParamWork **)((u8 *)groupSet->duplicates + groupByteOffset);
+            effPartHandle_t **destinationHandles = (effPartHandle_t **)((u8 *)groupSet->duplicates + groupByteOffset);
 
             if (*activeGroupFlags != 0) {
-                EffParamWork *firstCreatedHandle;
+                effPartHandle_t *firstCreatedHandle;
 
                 if (index < 2) {
                     *destinationHandles = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, *sourceResourceCursor);
@@ -4537,13 +4537,13 @@ EffPCPGroupSet *effPCPRadiateThunderCopy(EffPCPGroupSet *work) {
         activeGroupFlags = work->head.activeGroups;
         groupByteOffset = 0;
         groupSet->duplicateHandle = sdfMemAllocDirect(allocationBytes);
-        groupSet->duplicates = (EffParamWork **)sdfMemLock(groupSet->duplicateHandle);
+        groupSet->duplicates = (effPartHandle_t **)sdfMemLock(groupSet->duplicateHandle);
         memset(groupSet->duplicates, 0, allocationBytes);
         for (; groupIndex < 4; groupIndex++) {
-            EffParamWork **destinationHandles = (EffParamWork **)((u8 *)groupSet->duplicates + groupByteOffset);
+            effPartHandle_t **destinationHandles = (effPartHandle_t **)((u8 *)groupSet->duplicates + groupByteOffset);
 
             if (*activeGroupFlags != 0) {
-                EffParamWork *sourceHandle = *(EffParamWork **)(groupByteOffset + (u32)work->duplicates);
+                effPartHandle_t *sourceHandle = *(effPartHandle_t **)(groupByteOffset + (u32)work->duplicates);
                 for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
                     *destinationHandles++ = dds3EffectPartCopy(sourceHandle);
                 }
@@ -4559,8 +4559,8 @@ void effPCPRadiateThunderDelete(EffPCPGroupSet *work) {
     u32 releaseIndex = 0;
     u32 releaseCount = work->head.count;
     EffPCPGroupEntry *fragmentEntryCursor = work->entries;
-    EffParamWork **duplicateHandleBase;
-    EffParamWork **duplicate;
+    effPartHandle_t **duplicateHandleBase;
+    effPartHandle_t **duplicate;
 
     if (releaseCount != 0) {
         do {
@@ -4577,7 +4577,7 @@ void effPCPRadiateThunderDelete(EffPCPGroupSet *work) {
         releaseIndex = 0;
         if (releaseCount != 0) {
             do {
-                EffParamWork *currentHandle = *duplicate++;
+                effPartHandle_t *currentHandle = *duplicate++;
                 if (currentHandle != 0) {
                     dds3EffectPartDelete(currentHandle);
                 }
@@ -4613,7 +4613,7 @@ void effPCPRadiateThunderDraw(EffPCPGroupSet *work) {
     f32 point[3];
     f32 origin[4] __attribute__((aligned(16)));
     f32 direction[4] __attribute__((aligned(16)));
-    EffParamWork **followers = NULL;
+    effPartHandle_t **followers = NULL;
     u32 repeat;
     s32 duration;
     s32 fadeIn;
@@ -4777,8 +4777,8 @@ void effPCPMakkaDelete(EffPCPSprayWork *work) {
     sdfChipFreeDirect(work);
 }
 
-void effPCPMakkaUpdateNode(SdfDrawNode *node) {
-    SdfDrawNode *child;
+void effPCPMakkaUpdateNode(sdfModelNode_t *node) {
+    sdfModelNode_t *child;
 
     VU0_STORE_VF(vf10, node->scale);
     child = node->children;
@@ -4798,10 +4798,10 @@ extern const f32 D_00414610[4] __attribute__((aligned(16)));
 void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
     u32 i = 0;
     u32 count;
-    MdlCtx *data;
-    SdfModel *model;
-    Motion *child;
-    SdfDrawNode *root;
+    dds3ModelHandle_t *data;
+    sdfModelRootNode_t *model;
+    sdfMotionCtrlr_t *child;
+    sdfModelNode_t *root;
     f32 vec[4];
     s32 j;
 
@@ -4836,7 +4836,7 @@ void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
         }
         if (!(data->flags & MDL_SKIP_TRANSFORMS)) {
             model = data->inner;
-            root = ((SdfDrawNode **)model->list->buffer)[0];
+            root = ((sdfModelNode_t **)model->list->buffer)[0];
             VEC3_SPLAT(vec, 1.0f / work->scale);
             VU0_LOAD_VF(vf10, vec);
             effPCPMakkaUpdateNode(root);
@@ -4884,13 +4884,13 @@ typedef struct EffPCPDriftEventWork {
     u8 pad10D[3];
     f32 scale;
     u32 color;
-    struct SdfMemBlock *handle;
+    struct sdfMemHandle_t *handle;
 } EffPCPDriftEventWork;
 
 /* Clone the source header (a longer one with 0x18-byte entries), then give every entry one event and a random negative start delay. */
 EffPCPDriftEventWork *effPCPRadiateBEDCreate(EffPCPDriftEventParams *src, void *params) {
     u32 count = src->count;
-    struct SdfMemBlock *handle = sdfMemAllocDirect(count * 24 + 0x11C);
+    struct sdfMemHandle_t *handle = sdfMemAllocDirect(count * 24 + 0x11C);
     EffPCPDriftEventWork *work = (void *)sdfMemLock(handle);
     EffPCPEventPlace place;
     EffPCPDriftEventRow *entry;
@@ -4941,7 +4941,7 @@ EffPCPDriftEventWork *effPCPRadiateBEDCreatePCF(void *data) {
 
 EffPCPDriftEventWork *effPCPRadiateBEDCopy(EffPCPDriftEventWork *src) {
     u32 count = src->params.count;
-    struct SdfMemBlock *handle = sdfMemAllocDirect(count * 24 + 0x11C);
+    struct sdfMemHandle_t *handle = sdfMemAllocDirect(count * 24 + 0x11C);
     EffPCPDriftEventWork *work = (void *)sdfMemLock(handle);
     EffPCPEventPlace place;
     EffPCPDriftEventRow *entry;
@@ -5114,13 +5114,13 @@ typedef struct EffPCPPairedEventWork {
     u8 unk98;
     u8 pad99[3];
     u32 color;
-    struct SdfMemBlock *handle;
+    struct sdfMemHandle_t *handle;
 } EffPCPPairedEventWork;
 
 /* Clone the source effect header, then give every entry two events (placed at the unit scale) and a random negative start frame. */
 EffPCPPairedEventWork *effPCPRadiateTBCreate(EffPCPPairedEventParams *src, void *paramsA, void *paramsB) {
     u32 count = src->count;
-    struct SdfMemBlock *handle = sdfMemAllocDirect(count * 32 + 0xA4);
+    struct sdfMemHandle_t *handle = sdfMemAllocDirect(count * 32 + 0xA4);
     EffPCPPairedEventWork *work = (void *)sdfMemLock(handle);
     EffPCPEventPlace place;
     EffPCPPairedEventRow *entry;
@@ -5174,7 +5174,7 @@ EffPCPPairedEventWork *effPCPRadiateTBCreatePCF(void *data) {
 
 EffPCPPairedEventWork *effPCPRadiateTBCopy(EffPCPPairedEventWork *src) {
     u32 count = src->params.count;
-    struct SdfMemBlock *handle = sdfMemAllocDirect(count * 32 + 0xA4);
+    struct sdfMemHandle_t *handle = sdfMemAllocDirect(count * 32 + 0xA4);
     EffPCPPairedEventWork *work = (void *)sdfMemLock(handle);
     EffPCPEventPlace place;
     EffPCPPairedEventRow *entry;
@@ -5380,7 +5380,7 @@ void effPCPRadiateTBSetColor(EffPCPPairedEventWork *work, u32 value) {
 /* Clone the source header, then give every entry one event (placed at the unit scale) and a random negative start frame. */
 void *effPCPSpiralBEDCreate(EffPCPSpawnRangeParams *src, void *params) {
     u32 count = src->count;
-    struct SdfMemBlock *handle = sdfMemAllocDirect(count * 32 + 0xAC);
+    struct sdfMemHandle_t *handle = sdfMemAllocDirect(count * 32 + 0xAC);
     EffPCPSpawnRangeWork *work = (void *)sdfMemLock(handle);
     EffPCPEventPlace place;
     EffPCPSpawnRangeEventRow *entry;
@@ -5431,7 +5431,7 @@ void *effPCPSpiralBEDCreatePCF(void *data) {
 
 EffPCPSpawnRangeWork *effPCPSpiralBEDCopy(EffPCPSpawnRangeWork *src) {
     u32 count = src->params.count;
-    struct SdfMemBlock *handle = sdfMemAllocDirect(count * 32 + 0xAC);
+    struct sdfMemHandle_t *handle = sdfMemAllocDirect(count * 32 + 0xAC);
     EffPCPSpawnRangeWork *work = (void *)sdfMemLock(handle);
     EffPCPEventPlace place;
     EffPCPSpawnRangeEventRow *entry;
@@ -5600,7 +5600,7 @@ void effPCPHelperInit(EffPCPMapEventWork *work) {
     EffPCPEventPlace place;
     u32 i = 0;
     u32 count;
-    MdlCtx *model;
+    dds3ModelHandle_t *model;
     EffPCPMapEventEntry *entry;
 
     model = effParamWorkGetData(work->modelResource);
@@ -5715,13 +5715,13 @@ void effPCPHelperBEDDraw(EffPCPMapEventWork *work) {
     f32 scale[4] __attribute__((aligned(16)));
     s32 frame = work->frame;
     s32 frameLimit = work->frameLimit;
-    SdfModel *mapModel;
+    sdfModelRootNode_t *mapModel;
     s32 fadeIn;
     s32 fadeOut;
     u32 color;
     u32 count;
     u32 i;
-    MdlCtx *model;
+    dds3ModelHandle_t *model;
     EffPCPMapEventEntry *entry;
     f32 distance;
     f32 t;

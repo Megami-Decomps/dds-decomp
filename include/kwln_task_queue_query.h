@@ -8,6 +8,6 @@
 s32 dds3GetProcessCount(u32 state);
 
 /* Returns a borrowed queue node, or NULL for detached/unsupported states or exhaustion. */
-KwlnTask *dds3SearchProcessNumber(u32 taskState, s32 taskIndex);
+dds3ProcessID_t *dds3SearchProcessNumber(u32 taskState, s32 taskIndex);
 
 #endif /* KWLN_TASK_QUEUE_QUERY_H */

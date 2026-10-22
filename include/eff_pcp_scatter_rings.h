@@ -60,8 +60,8 @@ typedef struct PcpScatterInstanceA {
     PcpScatterParticle *particles;
     f32 scale;
     u32 color;
-    PcpScatterDraw *scatterObject;
-    SdfMemBlock *allocationHandle;
+    dds3WhirlwindPolyList_tag *scatterObject;
+    sdfMemHandle_t *allocationHandle;
 } PcpScatterInstanceA;
 
 typedef char PcpScatterParamsA_size_must_be_0x138[
@@ -118,8 +118,8 @@ typedef struct PcpScatterInstanceB {
     f32 scale;
     u32 color;
     s32 age;
-    PcpScatterDraw *scatterObject;
-    SdfMemBlock *allocationHandle;
+    dds3WhirlwindPolyList_tag *scatterObject;
+    sdfMemHandle_t *allocationHandle;
 } PcpScatterInstanceB;
 
 /* C adds staggered ring motion and two color keys to the copied parameters. */
@@ -166,8 +166,8 @@ typedef struct PcpScatterInstanceC {
     f32 scale;
     u32 color;
     s32 age;
-    PcpScatterDraw *scatterObject;
-    SdfMemBlock *allocationHandle;
+    dds3WhirlwindPolyList_tag *scatterObject;
+    sdfMemHandle_t *allocationHandle;
 } PcpScatterInstanceC;
 
 /* Plain is a distinct 0xE8-byte parameter and 0x28-byte particle variant. */
@@ -218,8 +218,8 @@ typedef struct PcpScatterPlainInstance {
     PcpScatterPlainParticle *particles;
     f32 scale;
     u32 color;
-    PcpScatterDraw *scatterObject;
-    SdfMemBlock *allocationHandle;
+    dds3WhirlwindPolyList_tag *scatterObject;
+    sdfMemHandle_t *allocationHandle;
 } PcpScatterPlainInstance;
 
 typedef char PcpScatterParamsB_size_must_be_0x13C[

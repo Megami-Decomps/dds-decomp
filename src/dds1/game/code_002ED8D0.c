@@ -31,16 +31,16 @@ typedef struct PacAlloc {
     s32 resource;
 } PacAlloc;
 
-extern DevState *sdfFileCmdReadOpen(const char *path, void *callback, s32 callbackContext);
+extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void *callback, s32 callbackContext);
 extern s32 movieStreamSema;
 extern s32 movieSemaCount;
 extern u8 D_003BD638[];
 
 
 /* Initialize an inline sound/IPU node and the selected linear or movie-PAC stream. */
-void movieOpenStream(MovObj *owner, SdfMovieDescriptor *descriptor, const char *name) {
+void movieOpenStream(movieStream_t *owner, SdfMovieDescriptor *descriptor, const char *name) {
     SoundFormat soundFormat;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     MovPacStream *pacWork;
     MovLinearStream *stream;
     char *extension;
@@ -110,11 +110,11 @@ void movieOpenStream(MovObj *owner, SdfMovieDescriptor *descriptor, const char *
 }
 
 extern void sdfCreateSemaphoreFromOptions(void);
-extern void sdfIpuFree(SdfStreamFrameNode *);
+extern void sdfIpuFree(sdfIpuDecodeCb_t *);
 extern void p2sdSyncMovie(void);
 
 /* Wait for active work's release phase, free its owned buffers, then deactivate it. */
-void movieCloseStream(MovObj *job) {
+void movieCloseStream(movieStream_t *job) {
     if (job->active != 0) {
         job->stopRequested = 1;
         /* Queue phase 5 as phase 7; phase 6 is the release gate below. */
@@ -144,7 +144,7 @@ void movieCloseStream(MovObj *job) {
 }
 
 /* Decoder completion requires drained input and no completed output buffers pending. */
-s32 sdfMovieIsFinished(MovObj *job) {
+s32 sdfMovieIsFinished(movieStream_t *job) {
     if (job->soundNode.drained == 0) {
         return 0;
     }

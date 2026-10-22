@@ -3,8 +3,8 @@
 
 #include "common.h"
 
-struct DatPartyRecord;
+struct datUnitWork_t;
 
-s32 datUnitHasSkill(const struct DatPartyRecord *unit, s32 skillId);
+s32 datUnitHasSkill(const struct datUnitWork_t *unit, s32 skillId);
 
 #endif /* DAT_UNIT_HAS_SKILL_API_H */

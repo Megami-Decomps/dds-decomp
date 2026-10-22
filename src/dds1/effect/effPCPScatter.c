@@ -69,8 +69,8 @@ extern void dds3ScatterPolyListCopyTex(PcpScatterPool *work, PcpScatterPool *src
 extern PcpScatterPool *dds3ScatterPolyListCreate(s32 groups);
 extern void dds3ScatterPolyListSetTex(PcpScatterPool *work, u32 resId);
 extern EffRandState effDefaultRandomState[];
-extern f32 *dds3WhirlwindPolyListGetVertex(PcpScatterDraw *object, s32 index);
-extern f32 *dds3WhirlwindPolyListGetUV(PcpScatterDraw *object, s32 index);
+extern f32 *dds3WhirlwindPolyListGetVertex(dds3WhirlwindPolyList_tag *object, s32 index);
+extern f32 *dds3WhirlwindPolyListGetUV(dds3WhirlwindPolyList_tag *object, s32 index);
 extern void SetRotateMatrixXYZ(f32 *rot);
 
 extern void dds3ScatterPolyListDelete(PcpScatterPool *work);
@@ -82,7 +82,7 @@ extern PcpScatterRadialWork *effPCPHamaCardSpiralCreate(
 
 
 
-extern void dds3WhirlwindPolyListCopyTex(PcpScatterDraw *object, PcpScatterDraw *source);
+extern void dds3WhirlwindPolyListCopyTex(dds3WhirlwindPolyList_tag *object, dds3WhirlwindPolyList_tag *source);
 
 
 
@@ -108,8 +108,8 @@ PcpScatterRadialWork *effPCPHamaCardSpiralCopy(source)
 {
     PcpScatterRadialWork *work;
     u32 count;
-    SdfMemBlock *allocation;
-    EffParamWork **handles;
+    sdfMemHandle_t *allocation;
+    effPartHandle_t **handles;
     u32 i;
 
     work = effPCPHamaCardSpiralCreate(&source->params, 0, 0);
@@ -121,7 +121,7 @@ PcpScatterRadialWork *effPCPHamaCardSpiralCopy(source)
         }
         count = work->duplicateGroupCount;
         allocation = sdfMemAllocDirect(count * EFF_SCATTER_WORD_BYTES);
-        handles = (EffParamWork **)sdfMemLock(allocation);
+        handles = (effPartHandle_t **)sdfMemLock(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         for (i = 0; i < count; i++) {
@@ -376,8 +376,8 @@ PcpScatterSpinWork *effPCPHamaCardSphereCreate(params, resource, particleParams)
 {
     PcpScatterSpinWork *work;
     PcpScatterSpinParticle *particle;
-    SdfMemBlock *allocation;
-    EffParamWork **handles;
+    sdfMemHandle_t *allocation;
+    effPartHandle_t **handles;
     u32 count;
     u32 i;
     s32 delaySpread;
@@ -406,7 +406,7 @@ PcpScatterSpinWork *effPCPHamaCardSphereCreate(params, resource, particleParams)
         }
         count = work->duplicateGroupCount;
         allocation = sdfMemAllocDirect(count * sizeof(u32));
-        handles = (EffParamWork **)sdfMemLock(allocation);
+        handles = (effPartHandle_t **)sdfMemLock(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         /* Native setup seeds group zero even when the computed group count is zero. */
@@ -440,8 +440,8 @@ PcpScatterSpinWork *effPCPHamaCardSphereCopy(source)
 {
     PcpScatterSpinWork *work;
     u32 count;
-    SdfMemBlock *allocation;
-    EffParamWork **handles;
+    sdfMemHandle_t *allocation;
+    effPartHandle_t **handles;
     u32 i;
 
     work = effPCPHamaCardSphereCreate(&source->params, 0, 0);
@@ -453,7 +453,7 @@ PcpScatterSpinWork *effPCPHamaCardSphereCopy(source)
         }
         count = work->duplicateGroupCount;
         allocation = sdfMemAllocDirect(count * EFF_SCATTER_WORD_BYTES);
-        handles = (EffParamWork **)sdfMemLock(allocation);
+        handles = (effPartHandle_t **)sdfMemLock(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         for (i = 0; i < count; i++) {
@@ -707,8 +707,8 @@ PcpScatterRibbonWork *effPCPHamaCardScatterCreate(params, resource, particlePara
 {
     PcpScatterRibbonWork *work;
     PcpScatterRibbonParticle *particle;
-    SdfMemBlock *allocation;
-    EffParamWork **handles;
+    sdfMemHandle_t *allocation;
+    effPartHandle_t **handles;
     u32 count;
     u32 i;
     s32 delaySpread;
@@ -737,7 +737,7 @@ PcpScatterRibbonWork *effPCPHamaCardScatterCreate(params, resource, particlePara
         }
         count = work->duplicateGroupCount;
         allocation = sdfMemAllocDirect(count * sizeof(u32));
-        handles = (EffParamWork **)sdfMemLock(allocation);
+        handles = (effPartHandle_t **)sdfMemLock(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         /* Native setup seeds group zero even when the computed group count is zero. */
@@ -772,8 +772,8 @@ PcpScatterRibbonWork *effPCPHamaCardScatterCopy(source)
 {
     PcpScatterRibbonWork *work;
     u32 count;
-    SdfMemBlock *allocation;
-    EffParamWork **handles;
+    sdfMemHandle_t *allocation;
+    effPartHandle_t **handles;
     u32 i;
 
     work = effPCPHamaCardScatterCreate(&source->params, 0, 0);
@@ -788,7 +788,7 @@ PcpScatterRibbonWork *effPCPHamaCardScatterCopy(source)
         }
         count = work->duplicateGroupCount;
         allocation = sdfMemAllocDirect(count * EFF_SCATTER_WORD_BYTES);
-        handles = (EffParamWork **)sdfMemLock(allocation);
+        handles = (effPartHandle_t **)sdfMemLock(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         for (i = 0; i < count; i++) {
@@ -1026,7 +1026,7 @@ extern void *effPkt3DPrimMakePoly(EffPacketParams *params);
  * Signed group arithmetic and allocation sizes are deliberately not validated here. */
 PcpScatterPool *dds3ScatterPolyListCreate(s32 groups) {
     PcpScatterPool *pool;
-    SdfMemBlock *allocation;
+    sdfMemHandle_t *allocation;
     u32 *recordBlock;
     s32 slotCount;
     s32 recordWords;
@@ -1069,7 +1069,7 @@ void dds3ScatterPolyListDelete(PcpScatterPool *work)
 /* Submit six-vertex scatter groups using the optional shared texture owner. */
 void dds3ScatterPolyListDraw(PcpScatterPool *pool) {
     f32 matrix[16];
-    SdfListHead *packet = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     s32 remainingVertices;
     SdfPoolNode *surface;
 
@@ -1167,9 +1167,9 @@ PcpScatterRes *dds3ScatterPolyListTexResourceCopy(PcpScatterRes *res)
 }
 
 /* The allocator stores 2 * segmentsPerParticle + 2 vectors for each particle. */
-extern PcpScatterDraw *dds3WhirlwindPolyListCreate(
+extern dds3WhirlwindPolyList_tag *dds3WhirlwindPolyListCreate(
     u32 particleCount, u32 segmentsPerParticle);
-extern void dds3WhirlwindPolyListSetTex(PcpScatterDraw *object, u32 resource);
+extern void dds3WhirlwindPolyListSetTex(dds3WhirlwindPolyList_tag *object, u32 resource);
 
 
 /* Return ring work with trailing particles and randomized negative initial ages.
@@ -1178,13 +1178,13 @@ PcpScatterInstanceA *effPCPWhirlwindPolyCreate(src, resource)
     PcpScatterParamsA *src;
     u32 resource;
 {
-    SdfMemBlock *allocation = sdfMemAllocDirect(src->particleCount * sizeof(PcpScatterParticle) + sizeof(PcpScatterInstanceA));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(src->particleCount * sizeof(PcpScatterParticle) + sizeof(PcpScatterInstanceA));
     PcpScatterInstanceA *inst = (PcpScatterInstanceA *)sdfMemLock(allocation);
     PcpScatterParticle *particle;
     u32 delayModulus;
     u32 count;
     u32 i;
-    PcpScatterDraw *object;
+    dds3WhirlwindPolyList_tag *object;
     u32 drawWord;
 
     particle = (PcpScatterParticle *)(inst + 1);
@@ -1360,7 +1360,7 @@ void effPCPWhirlwindPolyPartMove(PcpScatterInstanceA *work, s32 index)
 }
 
 extern s32 effMagaCylinderCalcColor(s32 color, s32 param);
-extern void dds3WhirlwindPolyListDraw(PcpScatterDraw *object);
+extern void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object);
 /* Advance delayed particles and submit the ring drawable.
  * Age zero seeds geometry without writing color; expired particles clear color and freeze.
  * Per-particle fade-in takes precedence over fade-out; duration equality still processes. */
@@ -1368,7 +1368,7 @@ void effPCPWhirlwindPolyDraw(PcpScatterInstanceA *work) {
     s32 loop;
     u32 i;
     u32 count = work->params.particleCount;
-    PcpScatterDraw *draw = work->scatterObject;
+    dds3WhirlwindPolyList_tag *draw = work->scatterObject;
     PcpScatterParticle *particle = work->particles;
     s32 duration = work->params.duration;
     s32 fadeIn;
@@ -1448,13 +1448,13 @@ PcpScatterInstanceB *effPCPWhirlwind2PolyCreate(src, resource)
     PcpScatterParamsB *src;
     u32 resource;
 {
-    SdfMemBlock *allocation = sdfMemAllocDirect(src->particleCount * sizeof(PcpScatterParticle) + sizeof(PcpScatterInstanceB));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(src->particleCount * sizeof(PcpScatterParticle) + sizeof(PcpScatterInstanceB));
     PcpScatterInstanceB *inst = (PcpScatterInstanceB *)sdfMemLock(allocation);
     PcpScatterParticle *particle;
     u32 delayModulus;
     u32 count;
     u32 i;
-    PcpScatterDraw *object;
+    dds3WhirlwindPolyList_tag *object;
     u32 drawWord;
     s32 delayLimit;
 
@@ -1642,7 +1642,7 @@ void effPCPWhirlwind2PolyPartMove(PcpScatterInstanceB *work, s32 index)
 void effPCPWhirlwind2PolyDraw(PcpScatterInstanceB *work) {
     s32 loop;
     s32 duration = work->params.duration;
-    PcpScatterDraw *draw = work->scatterObject;
+    dds3WhirlwindPolyList_tag *draw = work->scatterObject;
     PcpScatterParticle *particle = work->particles;
     u32 count = work->params.particleCount;
     s32 fadeIn;
@@ -1738,13 +1738,13 @@ PcpScatterInstanceC *effPCPWhirlwind3PolyCreate(src, resource)
     PcpScatterParamsC *src;
     u32 resource;
 {
-    SdfMemBlock *allocation = sdfMemAllocDirect(src->particleCount * sizeof(PcpScatterParticle) + sizeof(PcpScatterInstanceC));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(src->particleCount * sizeof(PcpScatterParticle) + sizeof(PcpScatterInstanceC));
     PcpScatterInstanceC *inst = (PcpScatterInstanceC *)sdfMemLock(allocation);
     PcpScatterParticle *particle;
     u32 delayModulus;
     u32 count;
     u32 i;
-    PcpScatterDraw *object;
+    dds3WhirlwindPolyList_tag *object;
     u32 drawWord;
     s32 delayLimit;
 
@@ -1929,7 +1929,7 @@ void effPCPWhirlwind3PolyPartMove(PcpScatterInstanceC *work, s32 index)
 void effPCPWhirlwind3PolyDraw(PcpScatterInstanceC *work) {
     s32 loop;
     s32 duration = work->params.duration;
-    PcpScatterDraw *draw = work->scatterObject;
+    dds3WhirlwindPolyList_tag *draw = work->scatterObject;
     PcpScatterParticle *particle = work->particles;
     u32 count = work->params.particleCount;
     s32 fadeIn;
@@ -2036,13 +2036,13 @@ PcpScatterPlainInstance *effPCPWwSpherePolyCreate(src, resource)
     PcpScatterPlainParams *src;
     u32 resource;
 {
-    SdfMemBlock *allocation = sdfMemAllocDirect(src->particleCount * sizeof(PcpScatterPlainParticle) + sizeof(PcpScatterPlainInstance));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(src->particleCount * sizeof(PcpScatterPlainParticle) + sizeof(PcpScatterPlainInstance));
     PcpScatterPlainInstance *inst = (PcpScatterPlainInstance *)sdfMemLock(allocation);
     PcpScatterPlainParticle *particle;
     u32 delayModulus;
     u32 count;
     u32 i;
-    PcpScatterDraw *object;
+    dds3WhirlwindPolyList_tag *object;
     u32 drawWord;
 
     particle = (PcpScatterPlainParticle *)(inst + 1);
@@ -2198,7 +2198,7 @@ void effPCPWwSpherePolyDraw(PcpScatterPlainInstance *work) {
     s32 loop;
     u32 i;
     u32 count = work->params.particleCount;
-    PcpScatterDraw *draw = work->scatterObject;
+    dds3WhirlwindPolyList_tag *draw = work->scatterObject;
     PcpScatterPlainParticle *particle = work->particles;
     s32 duration = work->params.duration;
     s32 fadeIn;

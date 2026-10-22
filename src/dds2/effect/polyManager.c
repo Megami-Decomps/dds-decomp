@@ -230,7 +230,7 @@ u32 dds3SpPoly_Color(u32 elapsed, u32 duration, u32 color) {
 /* Create a band from its template: the template body, then the 0x40-byte parameter tail that follows it, with eight-byte records after the header. */
 PolyBand *dds3SpPoly_RingCreate(PolyRingHead *templateHead) {
     u32 size = templateHead->entryCount * sizeof(PolyBandRecord) + sizeof(PolyBand);
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
     PolyBand *band = (PolyBand *)sdfMemLock(allocation);
 
     memset(band, 0, size);
@@ -481,7 +481,7 @@ void dds3SpPoly_RingDraw(PolyBand *band) {
 PolyArc *dds3SpPoly_SphereRingCreate(PolyArc *source) {
     s32 tailBytes = sizeof(PolyArc) - sizeof(PolyRingHead);
     s32 size = source->head.entryCount * sizeof(PolyArcRecord) + sizeof(PolyRingHead) + tailBytes;
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
     PolyArc *clone = (PolyArc *)sdfMemLock(allocation);
 
     memset(clone, 0, size);
@@ -672,7 +672,7 @@ void dds3SpPoly_SphereRingDraw(PolyArc *arc) {
 /* Rotating-band counterpart of dds3SpPoly_RingCreate: twenty-byte records follow the header. */
 PolyRotatingBand *dds3SpPoly_RollRingCreate(PolyRingHead *templateHead) {
     u32 size = templateHead->entryCount * sizeof(PolyRotatingBandRecord) + sizeof(PolyRotatingBand);
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
     PolyRotatingBand *band = (PolyRotatingBand *)sdfMemLock(allocation);
 
     memset(band, 0, size);

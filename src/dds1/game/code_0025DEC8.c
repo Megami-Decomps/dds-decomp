@@ -7,12 +7,12 @@
 
 extern u8 *D_003BAA9C;
 
-extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
+extern _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
 
 void itfEmitSelectedGlyph(ShopScene *context, s32 unused, s32 layoutFlags,
                    u32 color, u32 glyphAttribute) {
     struct MenuList *list;
-    FrFontGlyph *glyph;
+    _FRQ *glyph;
 
     list = context->window->list;
     if (list->count != 0) {

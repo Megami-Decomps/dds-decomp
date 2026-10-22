@@ -66,7 +66,7 @@ extern const char D_003A5D60[];
 
 extern BtlTask *btlFindUnitByActor(BtlUnit *);
 
-extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *, s32);
+extern void btlInitializePartyRecordFromEnemy(datUnitWork_t *, s32);
 
 extern void btlCopyUnitCurrentPosition(void *, void *);
 
@@ -95,11 +95,11 @@ extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
 
 extern void *btlSelectFlaggedIndexListEntry(BtlIndexList *, u16 *, u16);
 
-extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
+extern s32 btlReadCurrentUnitHp(datUnitWork_t *);
 
 extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
-extern s32 btlReadCurrentUnitMp(DatPartyRecord *);
+extern s32 btlReadCurrentUnitMp(datUnitWork_t *);
 
 extern s32 btlBuildEligibleTargetIndexList(void *, BtlIndexList *, s32, s32, s32);
 
@@ -383,7 +383,7 @@ s32 btlSelectLowestHealthRateTarget(s32 actor) {
         memset(flags, 0, sizeof(flags));
         bestIndex = 0x20;
         for (i = 0; i < count; i++) {
-            DatPartyRecord *stats = &((BtlUnit *)btlGetIndexListEntry(list, i))->partyRecord;
+            datUnitWork_t *stats = &((BtlUnit *)btlGetIndexListEntry(list, i))->partyRecord;
             s32 current = btlReadCurrentUnitHp(stats);
             s32 percent = current * 100 / (s32)btlComputeSkillAdjustedMaxHp(stats);
 
@@ -1344,9 +1344,9 @@ s32 btlDisableUnitsIfSpeciesFlagged(void) {
 /* The effect slot is reused for mode-specific work; keep each handler's payload view. */
 void btlSelectSlotEntries(void) {
     s32 *effectState = (s32 *)((BtlState *)btlGetRuntime())->effect;
-    DatPartyRecord *slotEntry;
-    DatPartyRecord *readyEntry = NULL;
-    DatPartyRecord *activeEntry = NULL;
+    datUnitWork_t *slotEntry;
+    datUnitWork_t *readyEntry = NULL;
+    datUnitWork_t *activeEntry = NULL;
     u32 i;
     slotEntry = DDS3_GBWK->party;
     for (i = 0; i < 5; i++) {
@@ -1378,7 +1378,7 @@ void btlSelectSlotEntries(void) {
 
 void btlRestoreSlotEntriesFromEffect(void) {
     s32 *effectState = (s32 *)((BtlState *)btlGetRuntime())->effect;
-    DatPartyRecord *activeEntry = NULL;
+    datUnitWork_t *activeEntry = NULL;
     u32 i;
 
     for (i = 0; i < 5; i++) {
@@ -2916,9 +2916,9 @@ s32 btlIsSpecialEnemyEffectLinkSatisfied(void) {
 extern s8 D_003BD86C;
 
 /* vu0 routine: normalize packed RGBA and fade the named chunk tree. */
-void btlFadeAndTintNamedChunkTree(SdfDrawNode *node, s32 color)
+void btlFadeAndTintNamedChunkTree(sdfModelNode_t *node, s32 color)
 {
-    SdfDrawNode *child;
+    sdfModelNode_t *child;
     u32 source[4];
     u32 tint[4];
     u32 packed[4];
@@ -2948,15 +2948,15 @@ void btlFadeAndTintNamedChunkTree(SdfDrawNode *node, s32 color)
     }
 }
 
-extern s32 sdfModelGetNodeIndexByName(SdfModel *, const char *);
+extern s32 sdfModelGetNodeIndexByName(sdfModelRootNode_t *, const char *);
 
 s32 btlDispatchNamedChunkNode(void *query) {
     u8 *effect = (u8 *)((BtlState *)btlGetRuntime())->effect;
     u8 *unit = *(u8 **)effect;
-    MdlCtx *model;
-    SdfModel *descriptor;
+    dds3ModelHandle_t *model;
+    sdfModelRootNode_t *descriptor;
     s32 index;
-    SdfDrawNode *selected;
+    sdfModelNode_t *selected;
     if (unit == 0) {
         return 1;
     }
@@ -2969,7 +2969,7 @@ s32 btlDispatchNamedChunkNode(void *query) {
     if (index == -1) {
         return 1;
     }
-    selected = ((SdfDrawNode **)descriptor->list->buffer)[index];
+    selected = ((sdfModelNode_t **)descriptor->list->buffer)[index];
     D_003BD86C = 1;
     btlFadeAndTintNamedChunkTree(selected, descriptor->color);
     return D_003BD86C;
@@ -3472,8 +3472,8 @@ void btlUpdateNidhoggrScaleAndPosition(void) {
     BtlScaleTransitionState *transition;
     BtlUnit *unit;
     BtlUnit *selected;
-    MdlCtx *model;
-    ObjectTransform *inner;
+    dds3ModelHandle_t *model;
+    dds3PoseSet_t *inner;
     BtlActorStatusRecord *modelA;
     BtlActorStatusRecord *modelB;
     f32 currentScale;
@@ -4219,7 +4219,7 @@ s32 btlQueueHariFormChangeOrPartyCommand(void) {
     BtlTask *task;
     BtlUnit *unit;
     BtlEffectHeader *effectState;
-    DatPartyRecord *stats;
+    datUnitWork_t *stats;
     u16 mode;
     s32 count;
 
@@ -4669,7 +4669,7 @@ extern s32 *datExternalAffinityTable;
 
 /* Unit 0x11B command hook: when the command's mapped skill is a present enemy
  * unit, return that command's entry from affinity row 0x175. */
-s32 func_0020AB08(DatPartyRecord *record, s32 command) {
+s32 func_0020AB08(datUnitWork_t *record, s32 command) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     s32 skill;

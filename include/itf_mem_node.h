@@ -13,9 +13,9 @@ typedef char MemNodeSizeCheck[(sizeof(MemNode) == 8) ? 1 : -1];
 typedef char MemNodeNextOffsetCheck[((u32)&((MemNode *)0)->next == 4) ? 1 : -1];
 
 /* Allocation prefix immediately before the returned node ring base. */
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 typedef struct MemRingHeader {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     MemNode first;
 } MemRingHeader;
 

@@ -4,7 +4,7 @@
 #include "sdf.h"
 
 /* Return borrowed endpoints; callers may inspect list nodes but do not own them. */
-SdfTexResource *sdfGsMemGetLinkHead(void);
-SdfTexResource *sdfGsMemGetLinkTail(void);
+sdfGsMemSlice_t *sdfGsMemGetLinkHead(void);
+sdfGsMemSlice_t *sdfGsMemGetLinkTail(void);
 
 #endif

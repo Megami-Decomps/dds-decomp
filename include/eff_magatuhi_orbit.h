@@ -43,7 +43,7 @@ typedef struct EffMagatuhiOrbitWork {
     EffMagatuhiOrbitParticle *particles;
     EffMagatuhiOwner *managedResource;
     u32 tintColor;
-    SdfMemBlock *allocationHandle;
+    sdfMemHandle_t *allocationHandle;
 } EffMagatuhiOrbitWork;
 
 typedef char EffMagatuhiOrbitParamsSizeCheck[

@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-struct SdfListHead;
+struct sdfDrawTag_t;
 
 /* Shared fog/depth state consumed by sdf3DMakeFogPacket (0x14).
  * The viewer config serializes fogNear, depthNear, fogFar, depthFar, fogColor;
@@ -19,11 +19,11 @@ typedef struct KwlnDrawVectorParams {
 typedef char KwlnDrawVectorParams_size[(sizeof(KwlnDrawVectorParams) == 0x14) ? 1 : -1];
 
 /* Scheduler task links, callbacks and hierarchy (0x50); DDS1/2 kernel/dds3KernelCore.c and game task units. */
-typedef struct KwlnTask KwlnTask;
-typedef s32 (*TaskUpdate)(KwlnTask *task);
-typedef void (*TaskDestroy)(KwlnTask *task);
+typedef struct dds3ProcessID_t dds3ProcessID_t;
+typedef s32 (*TaskUpdate)(dds3ProcessID_t *task);
+typedef void (*TaskDestroy)(dds3ProcessID_t *task);
 
-struct KwlnTask {
+struct dds3ProcessID_t {
     char name[0x18];          /* 0x00: NUL-padded task name, compared byte-wise */
     s32 nameSum;             /* 0x18 */
     u32 flags;               /* 0x1C */
@@ -35,26 +35,26 @@ struct KwlnTask {
     TaskUpdate update;       /* 0x30 */
     TaskDestroy destroy;     /* 0x34 */
     u32 userValue;           /* 0x38: caller-supplied value exposed by accessors. */
-    KwlnTask *listNext;      /* 0x3C */
-    KwlnTask *listPrev;      /* 0x40 */
-    KwlnTask *parent;        /* 0x44 */
-    KwlnTask *childList;     /* 0x48 */
-    KwlnTask *next;          /* 0x4C */
+    dds3ProcessID_t *listNext;      /* 0x3C */
+    dds3ProcessID_t *listPrev;      /* 0x40 */
+    dds3ProcessID_t *parent;        /* 0x44 */
+    dds3ProcessID_t *childList;     /* 0x48 */
+    dds3ProcessID_t *next;          /* 0x4C */
 };
 
-u32 dds3GetProcessRunTime(KwlnTask *task);
+u32 dds3GetProcessRunTime(dds3ProcessID_t *task);
 /* Return the task's low scheduler state when registered, otherwise DETACHED. */
-s32 dds3GetProcessStat(KwlnTask *task);
-void dds3SetProcessData(KwlnTask *task, u32 userValue);
-u32 dds3GetProcessData(KwlnTask *task);
-KwlnTask *dds3SearchProcessName(const char *name);
+s32 dds3GetProcessStat(dds3ProcessID_t *task);
+void dds3SetProcessData(dds3ProcessID_t *task, u32 userValue);
+u32 dds3GetProcessData(dds3ProcessID_t *task);
+dds3ProcessID_t *dds3SearchProcessName(const char *name);
 /* Detach task from its parent hierarchy; scheduler queue links are unchanged. */
-void dds3UnlinkProcess(KwlnTask *task);
-s32 dds3ExistProcess(KwlnTask *task);
+void dds3UnlinkProcess(dds3ProcessID_t *task);
+s32 dds3ExistProcess(dds3ProcessID_t *task);
 s32 kwlnTaskExists(const char *name);
 
 /* Append the common rectangle used to frame a grid of sprite cells. */
-void dds3ConsPanelTagLink(struct SdfListHead *packetList, s32 column, s32 row,
+void dds3ConsPanelTagLink(struct sdfDrawTag_t *packetList, s32 column, s32 row,
                         s32 columnCount, s32 rowCount);
 
 #endif /* KWLN_H */

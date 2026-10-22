@@ -66,7 +66,7 @@ typedef struct MemBlock MemBlock;
 
 
 extern s32 dds3BillboardTag;
-extern BillObj *hGeneralBillboard[];
+extern billHandle_t *hGeneralBillboard[];
 extern EffBillResourceInit D_003AA880[];
 extern char D_004142B0[];
 extern char D_004142C0[];
@@ -77,8 +77,8 @@ void effInitializeBillResourceOwners(void) {
     f32 *scale;
     u8 *configTable;
     f32 *scaleTable;
-    BillObj **owner;
-    BillObj *billboard;
+    billHandle_t **owner;
+    billHandle_t *billboard;
     BillChildPayload *payload;
     u32 configOffset;
 
@@ -93,14 +93,14 @@ void effInitializeBillResourceOwners(void) {
         configOffset = 0;
         do {
             billboard = dds3BillboardCreate(((EffBillResourceInit *)(configOffset + (u32)configTable))->billboardKind,
-                                          (u32)sdfMemGetPtr((struct SdfMemBlock *)node->resourceHandle));
+                                          (u32)sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle));
             scale = (f32 *)(configOffset + (u32)scaleTable);
             configOffset += sizeof(EffBillResourceInit);
             payload = billboard->child;
             *owner++ = billboard;
             payload->halfWidth = payload->halfWidth * *scale;
             payload->halfHeight = payload->halfHeight * *scale;
-            sdfMemFreeDirect((struct SdfMemBlock *)(node->resourceHandle));
+            sdfMemFreeDirect((struct sdfMemHandle_t *)(node->resourceHandle));
             node = node->next;
         } while (node != NULL);
     }
@@ -118,10 +118,10 @@ void effBillDispatchAll(void) {
 }
 
 BillChildPayload *BillboardLoadTex(SdfTextureFileHeader *resource) {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     BillPacketWork *work;
     BillChildPayload *child;
-    SdfTex *texture;
+    sdfTexHandle_t *texture;
     s16 widthUv;
     s16 heightUv;
     s32 pendingIndex;

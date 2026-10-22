@@ -3,8 +3,8 @@
 
 #include "common.h"
 
-struct SdfAsset;
-struct SdfMemBlock;
+struct sdfMat_t;
+struct sdfMemHandle_t;
 
 /* The allocator places this owner after its vertex and color arrays. */
 typedef struct ParBlock {
@@ -12,8 +12,8 @@ typedef struct ParBlock {
     u32 color;                // 0x04
     u128 *positions;          // 0x08: vertex quadwords
     u32 *colors;              // 0x0C: one packed color per vertex
-    struct SdfAsset *asset;    // 0x10
-    struct SdfMemBlock *allocation; // 0x14
+    struct sdfMat_t *asset;    // 0x10
+    struct sdfMemHandle_t *allocation; // 0x14
 } ParBlock;
 
 typedef char ParBlockSizeCheck[sizeof(ParBlock) == 0x18 ? 1 : -1];

@@ -213,8 +213,9 @@ python tools/names.py apply <v> names.tsv
 ```
 
 Function names recovered from SMT3 Nocturne HD and carried here through code
-pairing are described in [SMT3 names](smt3-names.md), and the globals in
-[SMT3 data names](smt3-data-names.md).
+pairing are described in [SMT3 names](smt3-names.md), the globals in
+[SMT3 data names](smt3-data-names.md), and the types in
+[SMT3 type names](smt3-type-names.md).
 
 Each row is `<old name|0xADDR> <new> <evidence|inferred> <note>`. The tool
 writes a curated row in `config/<v>/symbol_addrs.txt`, records provenance in
