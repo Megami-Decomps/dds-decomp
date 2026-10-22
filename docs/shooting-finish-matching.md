@@ -1,6 +1,6 @@
 # Shooting entry finish callback
 
-DDS2 `func_00319388` in `game/code_00316E08` is a 1,744-byte finish/deactivation
+DDS2 `mnuFinishOrDeactivateShootingEntry` in `game/code_00316E08` is a 1,744-byte finish/deactivation
 callback. It handles player reset, score/effect presentation, runtime pickup
 creation, and model/instance retirement. The debug message “ADD ITEM” refers
 to spawning a runtime pickup, not an immediate inventory award.

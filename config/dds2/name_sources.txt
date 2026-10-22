@@ -11166,3 +11166,4 @@
 0x0045C270	effSelectedJobHeader	inferred	The selected queue entry's first 0x80 bytes (its FileJob transform, scale and colour), copied when the preview job is made and read by the battle camera placement. DDS1 twin 0x003DF9A0.
 0x00439074	effPartsPreviewReload	inferred	Set when the battle camera snapshot is stored into the selected entry: effUpdatePartsListEditor then remakes the preview job and clears it. DDS1 twin 0x003BD954.
 0x00439075	effPartsListExitRequested	inferred	Set by effFlagFileQueueActive (the EXIT OK? confirmation): effUpdatePartsListEditor then closes the page (result 0) and clears it. DDS1 twin 0x003BD955.
+0x00319388	mnuFinishOrDeactivateShootingEntry	inferred	Registered finish/deactivate callback processes finished shooting entries and releases its render object
