@@ -22,6 +22,7 @@
 #include "prf_profile_cap.h"
 #include "prf_requirement.h"
 #include "prf_requirement_fallback.h"
+#include "prf_fallback_item_requirement.h"
 #include "mdl_flag_api.h"
 #include "script_flag_slot.h"
 #include "pty_preset_record.h"
@@ -85,24 +86,11 @@ extern DatProfileRecord *ptyGetProfileRecord(datUnitWork_t *, u16);
 
 extern FrFontTextBank frFontColoredGlyphResource;
 
-typedef struct PrfItemRequirement {
-    s32 id;
-    s32 minimum;
-} PrfItemRequirement;
-
-/* A24-byte prerequisite entry owns two inventory counts and its result flag. */
-typedef struct Entry24B {
-    u8 v0;
-    u8 pad01[3];
-    PrfItemRequirement requirement[2];
-    u32 flagId;
-} Entry24B;
-
 typedef struct Entry24W {
     u32 v0;            // 0x00
     u8 pad_0x04[0x14]; // 0x04
 } Entry24W; 
-extern Entry24B D_00393220[];
+extern PrfFallbackItemRequirement D_00393220[];
 
 extern Entry24W D_00393234[];
 
@@ -1124,7 +1112,7 @@ s32 prfSelectSatisfiedUnsetRequirementGroup(u32 start) {
     u32 i;
 
     for (i = start; i < PRF_FALLBACK_GROUP_COUNT; i++) {
-        if (D_00393220[i].v0 != 0) {
+        if (D_00393220[i].active != 0) {
             s32 met = 1;
             u32 j;
             u32 flagId = D_00393220[i].flagId;
@@ -1149,7 +1137,7 @@ s32 prfSelectSatisfiedUnsetRequirementGroup(u32 start) {
 
 /* Read the byte in an unchecked prerequisite-table entry. */
 u8 prfReq18GetWord3220(s32 entryIndex) {
-    return D_00393220[entryIndex].v0;
+    return D_00393220[entryIndex].active;
 }
 
 s32 prfReqGetPair(s32 entryIndex, s32 requirementIndex, s32 *minimum) {

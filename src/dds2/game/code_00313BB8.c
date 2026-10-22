@@ -4,6 +4,7 @@
 #include "sdf_line_pair_packet_api.h"
 #include "prf_requirement.h"
 #include "prf_requirement_fallback.h"
+#include "prf_fallback_item_requirement.h"
 #include "sdf_packet_list.h"
 #include "dsp_name.h"
 #include "common.h"
@@ -79,18 +80,7 @@ extern DspMantraName *D_00435E50;
 
 extern DatProfileRecord *ptyGetProfileRecordPointer(datUnitWork_t *, u16);
 
-/* 24-byte requirement table entries: an active byte, two (stat id, minimum) pairs and a flag id. */
-typedef struct Entry24B {
-    u8 active;         // 0x00
-    u8 pad_0x01[3];    // 0x01
-    struct {
-        s32 id;        // 0x00
-        s32 minimum;   // 0x04
-    } requirement[2];  // 0x04
-    u32 flagId;        // 0x14
-} Entry24B; // 0x18
-
-extern Entry24B D_00404A90[];
+extern PrfFallbackItemRequirement D_00404A90[];
 
 typedef struct Entry24W {
     u32 v0;            // 0x00
