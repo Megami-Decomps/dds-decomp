@@ -7,8 +7,8 @@
 typedef struct EvtSelState {
     u32 mode;          /* 0x00: 0 ramps the offset up, 1 holds it, 2 ramps it down */
     s32 limit;         /* 0x04: frame count at which the shake ends; -1 never ends */
-    s32 unk_08;        /* 0x08: frames to ramp up over */
-    s32 unk_0C;        /* 0x0C: frames to ramp down over */
+    s32 rampUpFrames;   /* 0x08: frames to ramp up over */
+    s32 rampDownFrames; /* 0x0C: frames to ramp down over */
     s16 amplitude[3];  /* 0x10: per-axis peak shake offset */
     u8 pad16[2];
     s32 count;         /* 0x18: frames elapsed */
