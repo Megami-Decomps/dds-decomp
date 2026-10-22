@@ -39,7 +39,7 @@ enum {
 /* Script VM helpers (see script/scrCommonCommand.c for the convention). */
 s32 scrGetIntPara(s32 idx);
 
-void *evtSearchBasic(s32 objectKind, s32 worldObjectKey);
+dds3Basic_t *evtSearchBasic(s32 objectKind, s32 worldObjectKey);
 
 s32 dds3EffectObjectBasicLinkObject(dds3Basic_t *obj, dds3Basic_t *owner);
 s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first,
@@ -190,7 +190,7 @@ s32 evtCommand_EFFMG2_POS(void) {
 s32 evtCommand_EFFECT_ON(void)
 {
     s32 effectId;
-    void *effectObject;
+    dds3Basic_t *effectObject;
 
     effectId = scrGetIntPara(0);
     effectObject = evtSearchBasic(7, effectId);
@@ -205,7 +205,7 @@ s32 evtCommand_EFFECT_ON(void)
  * Missing paths or owners complete the command without binding anything. */
 s32 evtCommand_EFFECT_LINK(void) {
     dds3Basic_t *effectPath = evtSearchBasic(7, scrGetIntPara(0));
-    void *owner;
+    dds3Basic_t *owner;
     s32 objectKind;
 
     if (effectPath == NULL) {
@@ -226,7 +226,7 @@ s32 evtCommand_EFFECT_LINK(void) {
 /* Search the same owner kinds, then bind with the VM's third entry argument. */
 s32 evtCommand_EFFECT_LINK2(void) {
     dds3Basic_t *effectPath = evtSearchBasic(7, scrGetIntPara(0));
-    void *owner;
+    dds3Basic_t *owner;
     s32 objectKind;
 
     if (effectPath == NULL) {
@@ -247,7 +247,7 @@ s32 evtCommand_EFFECT_LINK2(void) {
 s32 evtCommand_EFFECT_UNLINK(void)
 {
     s32 effectId;
-    void *effectObject;
+    dds3Basic_t *effectObject;
 
     effectId = scrGetIntPara(0);
     effectObject = evtSearchBasic(7, effectId);
@@ -261,7 +261,7 @@ s32 evtCommand_EFFECT_UNLINK(void)
 s32 evtCommand_EFFECT_OFF(void)
 {
     s32 effectId;
-    void *effectObject;
+    dds3Basic_t *effectObject;
 
     effectId = scrGetIntPara(0);
     effectObject = evtSearchBasic(7, effectId);
@@ -272,8 +272,8 @@ s32 evtCommand_EFFECT_OFF(void)
 }
 
 s32 evtCommand_EFFECT_PATH_MOVE(void) {
-    void *effect;
-    void *path;
+    dds3Basic_t *effect;
+    dds3Basic_t *path;
 
     effect = evtSearchBasic(7, scrGetIntPara(0));
     if (effect == NULL) {
@@ -293,7 +293,7 @@ extern s32 evtCheckPathStat(void *object);
 
 s32 evtCommand_EFFECT_PATH_WAIT(void) {
     s32 effectId = scrGetIntPara(0);
-    void *effectObject = evtSearchBasic(7, effectId);
+    dds3Basic_t *effectObject = evtSearchBasic(7, effectId);
     s32 scaleStatus;
 
     if (effectObject == NULL) {
@@ -640,8 +640,8 @@ s32 evtCommand_CAM_SEL_FOVY(void) {
 
 /* Relink the selected camera owner to its path, reporting any failure. */
 s32 evtCommand_CAM_PATH_MOVE(void) {
-    void *owner;
-    void *path;
+    dds3Basic_t *owner;
+    dds3Basic_t *path;
 
     if (scrGetIntPara(0) < 0) {
         owner = fldGetPlayerSceneState();
@@ -666,7 +666,7 @@ s32 evtCommand_CAM_PATH_MOVE(void) {
 
 
 s32 evtCommand_CAM_PATH_WAIT(void) {
-    void *cameraOwner;
+    dds3Basic_t *cameraOwner;
     s32 scaleStatus;
 
     if (scrGetIntPara(0) < 0) {
@@ -792,7 +792,7 @@ extern void dds3MoverBasicMakePath(dds3Basic_t *object);
 extern char D_00421E58[], D_00421E68[], D_00421E78[];
 
 s32 evtCommand_OBJ_PATH_MOVE(void) {
-    void *unit;
+    dds3Basic_t *unit;
     dds3Basic_t *target;
     dds3ObjectBaseControlWorkData_t *objectData;
     dds3Basic_t *slotNode;
@@ -851,7 +851,7 @@ s32 evtCommand_OBJ_PATH_MOVE(void) {
 extern char D_00421E98[]; /* "re attach...!\n" */
 
 s32 evtCommandReattachObjectPath(void) {
-    void *unit;
+    dds3Basic_t *unit;
     dds3Basic_t *target;
     dds3ObjectBaseControlWorkData_t *objectData;
     dds3Basic_t *slotNode;
@@ -917,7 +917,7 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_00421E98);
 
 s32 evtCommand_OBJ_PATH_WAIT(void) {
     s32 objectId = scrGetIntPara(0);
-    void *worldObject = evtSearchBasic(6, objectId);
+    dds3Basic_t *worldObject = evtSearchBasic(6, objectId);
     s32 scaleStatus;
 
     if (worldObject == NULL) {
@@ -1122,7 +1122,7 @@ s32 evtCommand_PMV_RUN(void) {
 
 /* Look up a world unit across the six kinds before trying the fallback slot. */
 s32 evtCommand_PATH_STOP(void) {
-    void *slotObject;
+    dds3Basic_t *slotObject;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
@@ -1141,7 +1141,7 @@ s32 evtCommand_PATH_STOP(void) {
 
 /* Clear the first matching unit's status flag, using the same fallback search. */
 s32 evtCommand_PATH_START(void) {
-    void *slotObject;
+    dds3Basic_t *slotObject;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
@@ -1230,7 +1230,7 @@ s32 evtCommand_PATH_DIR(void) {
 s32 evtCommand_PATH_LOOP_ON(void)
 {
     s32 objectKind;
-    void *slotObject;
+    dds3Basic_t *slotObject;
 
     objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
     do {
@@ -1251,7 +1251,7 @@ s32 evtCommand_PATH_LOOP_ON(void)
 s32 evtCommand_PATH_LOOP_OFF(void)
 {
     s32 objectKind;
-    void *slotObject;
+    dds3Basic_t *slotObject;
 
     objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
     do {
@@ -1269,7 +1269,7 @@ s32 evtCommand_PATH_LOOP_OFF(void)
 }
 
 s32 evtCommand_LIGHT_PATH_MOVE(void) {
-    void *pathOwner = evtSearchBasic(9, scrGetIntPara(0));
+    dds3Basic_t *pathOwner = evtSearchBasic(9, scrGetIntPara(0));
 
     if (evtPathLinkAndMake(evtSearchBasic(0x10, scrGetIntPara(1)), pathOwner) != 0) {
         return 1;

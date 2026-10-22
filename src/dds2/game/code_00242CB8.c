@@ -46,7 +46,7 @@ extern char D_00421FE8[];
 s32 evtLoadEventBgm(s32 id);
 s32 evtCheckEventBgmLoaded(s32 id);
 
-extern void *evtSearchBasic(s32 objectKind, s32 worldObjectKey);
+extern dds3Basic_t *evtSearchBasic(s32 objectKind, s32 worldObjectKey);
 extern s32 evtCheckPathStat(void *object);
 
 s32 evtCommand_LIGHT_PATH_WAIT(void) {
