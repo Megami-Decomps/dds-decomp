@@ -3607,7 +3607,7 @@ void func_0014C2B8(s32 key, f32 *orientation, s32 room, char *name, s32 argument
         effMiscAxisAngleToQuaternionVU(3.14159265f);
         VU0_LOAD_VF(vf11, orientation);
         effMiscQuatMultiplyVU();
-        /* Original SDK store: the complete output goes directly to opaque
+        /* Audited SDK-style store: the complete output goes directly to opaque
          * constructor calls, with no scalar C readback or loop reuse. */
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
         object = dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), position, rotation);
