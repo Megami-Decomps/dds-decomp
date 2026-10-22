@@ -40,7 +40,7 @@ enum {
 s32 scrGetIntPara(s32 idx);
 
 
-void *evtSearchBasic(s32 objectKind, s32 worldObjectKey);
+dds3Basic_t *evtSearchBasic(s32 objectKind, s32 worldObjectKey);
 
 s32 dds3EffectObjectBasicLinkObject(dds3Basic_t *obj, dds3Basic_t *owner);
 s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first,
