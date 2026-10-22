@@ -4636,7 +4636,7 @@ void btlUpdatePhasePanelAnimation(BattlePhasePanelWork *work) {
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416428);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BC618);
+INCLUDE_ASM(const s32, "game/code_001B2AF8", btlDrawPhaseChangePanelStrips);
 
 extern const s32 D_00436830[];
 extern const s32 D_00436838[];
@@ -4895,7 +4895,7 @@ extern s32 btlGetNamedTaskPairStatusOrUnavailable();
 
 extern void btlUpdatePhasePanelAnimation();
 
-extern void func_001BC618();
+extern void btlDrawPhaseChangePanelStrips();
 
 extern void btlUpdatePhasePanelSecondaryAnimation();
 
@@ -4909,7 +4909,7 @@ s32 btlUpdatePhaseGatedTaskUntilTimeout(KwlnTask *task) {
     }
     btlUpdatePhasePanelAnimation(state);
     if (btlTrackedTaskHandles->phaseGate == 0) {
-        func_001BC618(state);
+        btlDrawPhaseChangePanelStrips(state);
     }
     btlUpdatePhasePanelSecondaryAnimation(state);
     if (btlTrackedTaskHandles->phaseGate == 0) {
