@@ -835,13 +835,12 @@ f32 effLinePointLength(f32 *direction, f32 *origin, f32 *point) {
    Only the two native slot defaults are initialized; count/allocation validity is unchecked. */
 EffArrHdr *dds3Bezier4PCreate(s32 count) {
     struct sdfMemHandle_t *allocation = sdfMemAllocDirect(count * EFF_SLOT_BYTES + EFF_SLOT_HEADER_BYTES);
-    void *retainedAddress = (void *)sdfMemLock(allocation);
+    EffCubicBezierSlot *slot = (EffCubicBezierSlot *)sdfMemLock(allocation);
     u32 slotIndex = 0;
-    EffCubicBezierSlot *slot = retainedAddress;
     u8 *headerAddress = (u8 *)(slot + count);
 
     ((EffArrHdr *)headerAddress)->allocation = allocation;
-    ((EffArrHdr *)headerAddress)->slots = retainedAddress;
+    ((EffArrHdr *)headerAddress)->slots = slot;
     ((EffArrHdr *)headerAddress)->unk4 = count;
     if (count != 0) {
         do {
