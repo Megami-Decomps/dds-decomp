@@ -124,7 +124,7 @@ typedef struct BtlActiveSlot {
 
 
 
-extern void mdlSetAmountOnAllContextResources(MdlCtx *, f32);
+extern void mdlSetEffectScale(MdlCtx *, f32);
 
 extern struct BtlRuntimeTask *btlDeferredTaskTail;
 
@@ -170,7 +170,7 @@ extern void btlSetCameraCommandMode(u32, ActionStateLink *, BtlUnit *, BtlUnit *
 extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 
-extern void effMiscQuaternionNlerpVU(f32);
+extern void Lerp(f32);
 
 extern void btlClearRuntimeFlag2000(void);
 
@@ -191,7 +191,7 @@ extern u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *);
 
 extern u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *);
 
-extern void evtSetTransitionMotionScale(EvtUnit *, f32);
+extern void evtSetWaitMotionSpeed(EvtUnit *, f32);
 
 extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
 
@@ -210,9 +210,9 @@ extern s32 btlGetSlotRateKind(u8 *, s32);
 
 extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *, f32);
 
-extern void evtPrepareUnitMotionState(EvtUnit *, s32, s32, s32, s32);
+extern void evtSetUnitMotion(EvtUnit *, s32, s32, s32, s32);
 
-extern void evtStoreUnitMotionShortParameters(EvtUnit *, s32, s32);
+extern void evtSetWaitHokanFrame(EvtUnit *, s32, s32);
 
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 
@@ -1852,13 +1852,13 @@ void btlUpdateAutoMusic(void) {
     if (flags & 0x8000) {
         if ((s8)kwlnTaskPadButtonStates[0x22] < 0 || (s8)kwlnTaskPadButtonStates[0x23] < 0) {
             ((BtlState *)context)->battleFlags = flags & ~0x8000;
-            sndSetSequenceVolumePan(6, 0x7F, 0x3F);
+            p2sdPlaySE(6, 0x7F, 0x3F);
             btlSetTrackedTaskDisplayMode(0);
             btlBossDebugPrintf(D_004178A8);
         }
     } else if ((s8)kwlnTaskPadButtonStates[0x22] < 0) {
         ((BtlState *)context)->battleFlags = flags | 0x8000;
-        sndSetSequenceVolumePan(5, 0x7F, 0x3F);
+        p2sdPlaySE(5, 0x7F, 0x3F);
         btlSetTrackedTaskDisplayMode(1);
         btlBossDebugPrintf(D_004178B8);
     }
@@ -2404,8 +2404,8 @@ s32 btlHasMatchingModel(s32 effect, s32 model) {
         if ((unit->status.flags & 2) != 0 &&
             unit->ext != NULL &&
             unit->soundSlotOwner != 0 &&
-            mdlGetContextResourceGroup(unit->ext->owner) == effect &&
-            mdlGetContextResourceId(unit->ext->owner) == model) {
+            mdlGetMajorNum(unit->ext->owner) == effect &&
+            mdlGetMinorNum(unit->ext->owner) == model) {
             return 1;
         }
         unit = unit->nextActor;
@@ -2459,9 +2459,9 @@ void btlBindUnitModel(u8 *unitAddress, u32 kind, u32 index) {
         if (reused != NULL) {
             if (reused->resourceKind != kind || reused->resourceIndex != index) {
                 key = mdlSpawnCameraSlotViewerObject(kind, index);
-                object = dds3FindWorldObjectNodeByKey(
-                    (EffWorldNode *)dds3GetWorldObject(), (u32)key, 5);
-                dds3RemoveWorldObjectNode(object);
+                object = dds3SearchSceneBasic(
+                    (EffWorldNode *)dds3GetActiveScene(), (u32)key, 5);
+                dds3DeleteSceneBasicData(object);
             }
             btlInheritActorModelState(unit, reused);
         }
@@ -2471,8 +2471,8 @@ void btlBindUnitModel(u8 *unitAddress, u32 kind, u32 index) {
     }
     if (reused == NULL) {
         key = mdlSpawnCameraSlotViewerObject(kind, index);
-        unit->effectObject = dds3FindWorldObjectNodeByKey(
-            (EffWorldNode *)dds3GetWorldObject(), (u32)key, 5);
+        unit->effectObject = dds3SearchSceneBasic(
+            (EffWorldNode *)dds3GetActiveScene(), (u32)key, 5);
         objectData = (EffectObjectData *)unit->effectObject->data;
         unit->ext = objectData->transitionWork;
         model = unit->ext->owner;
@@ -2482,9 +2482,9 @@ void btlBindUnitModel(u8 *unitAddress, u32 kind, u32 index) {
         inner = unit->effectObject->inner;
         inner->flags = (inner->flags | 1) & ~2;
         VU0_STORE_VF(vf10, inner->scale);
-        mdlStoreTertiaryVectorVU(model);
+        mdlSetScale(model);
         if (unit->actorScale != 1.0f) {
-            mdlSetAmountOnAllContextResources(model, unit->actorScale);
+            mdlSetEffectScale(model, unit->actorScale);
         }
         dds3ObjectBaseOffFlag(unit->effectObject, 0x400);
         unit->status.flags |= 8;
@@ -2515,18 +2515,18 @@ void btlBindUnitModel(u8 *unitAddress, u32 kind, u32 index) {
         model = unit->ext->owner;
         unit->ext->motionState = EVT_UNIT_MOTION_STATE_IDLE;
         unit->ext->flags &= ~0xA0;
-        mdlAddEntryPlain(model, 0, 0xB);
+        mdlSingleMotion(model, 0, 0xB);
         unit->motionId = 0xB;
-        sdfMotionSampleAtFrame(model->first, (f32)model->first->frameCount);
+        sdfMotionSeek(model->first, (f32)model->first->frameCount);
         unit->status.flags = unit->status.flags & 0x7FFFFFFF & 0xBFFFFFFF;
     } else if (btlTestActorStatusPredicate(unit)) {
         unit->ext->motionState = EVT_UNIT_MOTION_STATE_IDLE;
         model = unit->ext->owner;
         unit->ext->flags &= ~0xA0;
         status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(kind, index);
-        mdlAddEntryPlain(model, 0, 1);
+        mdlSingleMotion(model, 0, 1);
         unit->motionId = 1;
-        sdfMotionSampleAtFrame(model->first, (f32)status->model);
+        sdfMotionSeek(model->first, (f32)status->model);
         btlResetUnitModelProgress(unit);
         unit->status.flags = (unit->status.flags | 0x2000) & 0x7FFFFFFF & 0xBFFFFFFF;
     }
@@ -2545,12 +2545,12 @@ void btlReleaseActorModelResources(BtlUnit *unit) {
             unit->soundSlotOwner = 0;
         }
         if (unit->transparencyModel != 0) {
-            sdfReleaseDevSlot(unit->transparencyModel, 1, 1);
+            sdfModelRootFree(unit->transparencyModel, 1, 1);
             unit->transparencyModel = 0;
             btlBossDebugPrintf(D_00417940, unit);
         }
         if (unit->effectObject != 0) {
-            dds3RemoveWorldObjectNode(unit->effectObject);
+            dds3DeleteSceneBasicData(unit->effectObject);
             unit->effectObject = 0;
             unit->ext = 0;
         }
@@ -2570,12 +2570,12 @@ extern s32 btlEnsureModelAndSoundReady(s32 kind, s32 id, s32 input);
 void btlRequestModelAssetByMode(u32 unused, u32 effect, u32 model) {
     s32 available;
 
-    available = mdlFlagTest(0xc0f);
+    available = evtBitCheck(0xc0f);
     if (available != 0) {
         btlEnsureModelAndSoundReady(effect, model, 0);
         return;
     }
-    mdlRequestAsset(effect, model, 0);
+    mdlPrepare(effect, model, 0);
 }
 
 extern void btlReleaseFoundModelEntry(s32 modelKind, s32 modelId);
@@ -2583,7 +2583,7 @@ extern void btlReleaseFoundModelEntry(s32 modelKind, s32 modelId);
 void btlReleaseModelAssetByMode(u32 unused, u32 effect, u32 model) {
     s32 available;
 
-    available = mdlFlagTest(0xc0f);
+    available = evtBitCheck(0xc0f);
     if (available != 0) {
         btlReleaseFoundModelEntry(effect, model);
         return;
@@ -2591,12 +2591,12 @@ void btlReleaseModelAssetByMode(u32 unused, u32 effect, u32 model) {
 }
 
 s32 btlCheckModelAssetByMode(u8 *object, u32 effect, u32 model) {
-    if (mdlFlagTest(0xC0F) != 0) {
+    if (evtBitCheck(0xC0F) != 0) {
         if (btlEnsureModelAndSoundReady(effect, model, 0) != 0) {
             return 1;
         }
     } else {
-        if (mdlRequestAsset(effect, model, 0) != 0 && mdlRequestAsset(effect, model, 0) != -1) {
+        if (mdlPrepare(effect, model, 0) != 0 && mdlPrepare(effect, model, 0) != -1) {
             return 1;
         }
     }
@@ -2683,8 +2683,8 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
     work = (BtlState *)btlGetRuntime();
     if (unit->updateFlags & 2) {
         color = (unit->overlayColor & 0xFFFFFF) | 0x80000000;
-        evtSetUnitRgbTransition(unit->ext, 0, color);
-        evtSetUnitAlphaTransition(unit->ext, 0, color);
+        evtSetUnitColorRGB(unit->ext, 0, color);
+        evtSetUnitColorA(unit->ext, 0, color);
         unit->overlayColor = color;
         unit->updateFlags &= ~4;
         unit->updateFlags &= ~2;
@@ -2728,7 +2728,7 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
         case 3: case 4: case 5: case 6: case 7: case 8:
         case 12: case 16: case 17: case 19: case 20: case 21:
         case 22: case 23: case 24:
-            node = mdlGetNodeMotionIndex(unit->ext->owner, 0);
+            node = mdlGetMotionNum(unit->ext->owner, 0);
             switch (node) {
             case 0: case 2: case 9: case 10: case 11:
                 start = 0;
@@ -2771,12 +2771,12 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
     if (work->prepareMotionHook != 0) {
         work->prepareMotionHook(unit, index, start, end, mode, rate);
     } else {
-        evtPrepareUnitMotionState(unit->ext, index, start, end, mode);
+        evtSetUnitMotion(unit->ext, index, start, end, mode);
         model = unit->ext->owner;
         model->first->frameStep = rate;
         if (end == 0) {
-            mdlAddEntryFlagged(model, 0, index);
-            sdfMotionSampleAtFrame(unit->ext->owner->first, 0.0f);
+            mdlLoopMotion(model, 0, index);
+            sdfMotionSeek(unit->ext->owner->first, 0.0f);
         }
     }
     unit->motionStartFrame = 0;
@@ -2788,7 +2788,7 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
     if (work->setMotionRangeHook != 0) {
         work->setMotionRangeHook(unit, 0, (s16)frameCount);
     } else {
-        evtStoreUnitMotionShortParameters(unit->ext, 0, (s16)frameCount);
+        evtSetWaitHokanFrame(unit->ext, 0, (s16)frameCount);
     }
     unit->motionStartFrame = 0;
     unit->motionEndFrame = table->nodes[unit->effectIndex].frameCount;
@@ -2816,8 +2816,8 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     work = (BtlState *)btlGetRuntime();
     if (unit->updateFlags & 2) {
         color = (unit->overlayColor & 0xFFFFFF) | 0x80000000;
-        evtSetUnitRgbTransition(unit->ext, 0, color);
-        evtSetUnitAlphaTransition(unit->ext, 0, color);
+        evtSetUnitColorRGB(unit->ext, 0, color);
+        evtSetUnitColorA(unit->ext, 0, color);
         unit->overlayColor = color;
         unit->updateFlags &= ~4;
         unit->updateFlags &= ~2;
@@ -2883,8 +2883,8 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     if (setMotion != 0) {
         setMotion(unit, index, speed);
     } else {
-        evtUnitSetStoredParameter(unit->ext, index);
-        evtSetTransitionMotionScale(unit->ext, speed);
+        evtSetWaitMotion(unit->ext, index);
+        evtSetWaitMotionSpeed(unit->ext, speed);
     }
     chooseMode = work->motionModeOverride;
     mode = index != 11 ? 1 : 2;
@@ -2952,7 +2952,7 @@ void btlUpdateUnitEffects(void) {
             u8 *resource = (u8 *)btlGetSideIndexedActorStatusTable(object->resourceKind,
                                                   object->resourceIndex);
             MdlCtx *model = object->ext->owner;
-            s32 node = mdlGetNodeMotionIndex(model, 0);
+            s32 node = mdlGetMotionNum(model, 0);
             if (((BtlEffectResource *)resource)->nodes[node].rateKind == 1 &&
                 btlIsActorModeAcceptedByBattleHook(object) == 0) {
                 btlRefreshUnitMotionSelection(object);
@@ -3005,7 +3005,7 @@ f32 btlGetUnitModelCurrentFrame(BtlUnit *unit) {
 
 void btlAdvanceUnitModelFrame(BtlUnit *unit, f32 frame) {
     if ((unit->status.flags & 2) != 0) {
-        sdfMotionSampleAtFrame(unit->ext->owner->first, frame);
+        sdfMotionSeek(unit->ext->owner->first, frame);
         return;
     }
 }
@@ -3019,7 +3019,7 @@ s32 btlGetUnitModelFrameCount(BtlUnit *unit) {
 
 void btlSeekUnitModelFrameZero(BtlUnit *unit) {
     if (unit->status.flags & 2) {
-        sdfMotionSampleAtFrame(unit->ext->owner->first, 0.0f);
+        sdfMotionSeek(unit->ext->owner->first, 0.0f);
     }
 }
 
@@ -3034,9 +3034,9 @@ void btlSeekRandomModelFrame(BtlUnit *object) {
     }
     duration = btlGetUnitModelFrameCount(object);
     if (duration > 0) {
-        randomFrame = sdfGetRandInt(0, duration);
+        randomFrame = dds3GetRandIntA(0, duration);
         frame = (f32)randomFrame;
-        sdfMotionSampleAtFrame(object->ext->owner->first, frame);
+        sdfMotionSeek(object->ext->owner->first, frame);
     }
 }
 
@@ -3078,7 +3078,7 @@ void btlGetUnitWorldPos(BtlUnit *unit, f32 *dst) {
     VU0_STORE_VF(vf10, dst);
 }
 
-extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
+extern s32 sdfModelGetMarkPos(SdfModel *, s32);
 
 
 extern void btlRefreshUnitFxVectors(BtlUnit *);
@@ -3093,10 +3093,10 @@ s8 btlSetActorEffectParameter(BtlUnit *unit, s32 mode) {
         mode = hook(unit, mode);
     }
     btlRefreshUnitFxVectors(unit);
-    return sdfLoadMapRecordPositionVector(unit->ext->owner->inner, mode);
+    return sdfModelGetMarkPos(unit->ext->owner->inner, mode);
 }
 
-void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode) {
+void effBTLModelGetMarkPosition2(BtlUnit *unit, s32 mode) {
     if (btlSetActorEffectParameter(unit, mode) == 0) {
         btlUnitGetMuzzlePosVU(unit);
     }
@@ -3118,23 +3118,23 @@ s32 btlSampleActorModelPositionVU(BtlUnit *unit, s32 value) {
     if (callback != NULL) {
         value = callback(unit, value);
     }
-    mdlLoadPrimaryVectorVU(unit->ext->owner);
+    mdlGetPosition(unit->ext->owner);
     VU0_STORE_VF_UNCLOBBERED(vf10, primaryVector);
-    mdlLoadRotationQuaternionVU(unit->ext->owner);
+    mdlGetRotate(unit->ext->owner);
     VU0_STORE_VF_UNCLOBBERED(vf10, rotationQuaternion);
     btlRefreshUnitFxVectors(unit);
-    result = sdfLoadMapRecordPositionVector(unit->ext->owner->inner, value);
+    result = sdfModelGetMarkPos(unit->ext->owner->inner, value);
     VU0_STORE_VF_UNCLOBBERED(vf10, currentVector);
     VU0_LOAD_VF(vf10, primaryVector);
-    mdlStorePrimaryVectorVU(unit->ext->owner);
+    mdlSetPosition(unit->ext->owner);
     VU0_LOAD_VF(vf10, rotationQuaternion);
-    mdlUpdateContextRotationBasisFromQuaternion(unit->ext->owner);
-    sdfModelUpdateCurrentFrameTransforms(unit->ext->owner->inner);
+    mdlSetRotate(unit->ext->owner);
+    sdfModelEvalTm(unit->ext->owner->inner);
     VU0_LOAD_VF(vf10, currentVector);
     return result;
 }
 
-extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *, s32);
+extern s32 sdfModelGetMarkPosMatrix(SdfModel *, s32);
 
 s8 btlSetActorAlternateEffectParameter(unit, mode)
     BtlUnit *unit;
@@ -3149,10 +3149,10 @@ s8 btlSetActorAlternateEffectParameter(unit, mode)
         mode = hook(unit, mode);
     }
     btlRefreshUnitFxVectors(unit);
-    return sdfLoadMapRecordLookAtBasis(unit->ext->owner->inner, mode);
+    return sdfModelGetMarkPosMatrix(unit->ext->owner->inner, mode);
 }
 
-void btlSetAlternateEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode) {
+void effBTLModelGetMarkMatrix2(BtlUnit *unit, s32 mode) {
     if (btlSetActorAlternateEffectParameter(unit, mode) == 0) {
         VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
     }
@@ -3197,7 +3197,7 @@ void btlSetUnitColor(BtlUnit *unit, u32 color, s32 mode) {
     if (unit->status.flags & 2) {
         color = (color & 0xFFFFFF) | 0x80000000;
         unit->baseColor = (unit->baseColor & 0xFF000000) | (color & 0xFFFFFF);
-        evtSetUnitRgbTransition(unit->ext, mode, color);
+        evtSetUnitColorRGB(unit->ext, mode, color);
     }
 }
 
@@ -3209,15 +3209,15 @@ void btlBlendUnitColor(BtlUnit *unit, u32 color, s32 mode) {
         base = (unit->baseColor & 0xFFFFFF) | 0x80000000;
         blended = (base & color) + (((base ^ color) & 0xFEFEFEFE) >> 1);
         unit->overlayColor = (unit->overlayColor & 0xFF000000) | (color & 0xFFFFFF);
-        evtSetUnitRgbTransition(unit->ext, mode, blended);
+        evtSetUnitColorRGB(unit->ext, mode, blended);
     }
 }
 
-extern void mdlReleaseInnerResourceHandle(MdlCtx *, s32, f32);
+extern void mdlSetClutColor(MdlCtx *, s32, f32);
 
 /* Forward the packed model-color word and its scalar to the inner resource list. */
 void btlReleaseUnitModelColorResource(BtlUnit *unit, u32 value, f32 scalar) {
-    mdlReleaseInnerResourceHandle(unit->ext->owner, (value & 0xFFFFFF) | 0x80000000, scalar);
+    mdlSetClutColor(unit->ext->owner, (value & 0xFFFFFF) | 0x80000000, scalar);
 }
 
 void btlRefreshUnitFxVectors(BtlUnit *unit) {
@@ -3225,10 +3225,10 @@ void btlRefreshUnitFxVectors(BtlUnit *unit) {
         return;
     }
     dds3GetPosPoseSet(unit->effectObject);
-    mdlStorePrimaryVectorVU(unit->ext->owner);
+    mdlSetPosition(unit->ext->owner);
     dds3GetRotPoseSet(unit->effectObject);
-    mdlUpdateContextRotationBasisFromQuaternion(unit->ext->owner);
-    sdfModelUpdateCurrentFrameTransforms(unit->ext->owner->inner);
+    mdlSetRotate(unit->ext->owner);
+    sdfModelEvalTm(unit->ext->owner->inner);
 }
 
 extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
@@ -3294,10 +3294,10 @@ void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source) {
 
 #include "sdf_packet_alloc.h"
 
-extern void sdfModelCopyRuntimeState(SdfModel *, SdfModel *);
+extern void sdfModelCopyStat(SdfModel *, SdfModel *);
 
 
-extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
+extern void mdlLinkEffect(MdlCtx *, MdlResourceItem *);
 
 extern u64 btlTransparencySurfaceTestValues[4];
 
@@ -3313,40 +3313,40 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, MdlCtx *model, SdfModel *overl
     if (model->flags & MDL_SKIP_TRANSFORMS) {
         return;
     }
-    mdlBroadcastMasked(model, color);
+    mdlSetColor(model, color);
     for (i = 0; i != 4; i++) {
-        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(list);
-        packet = (u64 *)sdfAllocPacketAligned(0x30);
+        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(list);
+        packet = (u64 *)sdfGrAllocPacketBuff(0x30);
         packet[0] = 2;
         packet[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
         packet[2] = ((u64)0x10000000 << 32) | 0x8001;
         packet[3] = 0xE;
         packet[4] = 0x72801;
         packet[5] = 0x47;
-        sdfAppendPacket(list, (u32)packet);
+        sdfDrawTagLink(list, (u32)packet);
         surfaces[i]->append(surfaces[i], list);
     }
     savedFlags = model->inner->drawFlags;
     model->flags |= MDL_SKIP_ANCHORS;
     model->inner->drawFlags = 0x2000;
-    mdlProcessContextNodesAndTransforms(model, surfaces);
+    mdlLink(model, surfaces);
     model->flags &= ~MDL_SKIP_ANCHORS;
     model->inner->drawFlags = savedFlags;
     for (i = 0; i != 4; i++) {
-        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(list);
-        packet = (u64 *)sdfAllocPacketAligned(0x30);
+        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(list);
+        packet = (u64 *)sdfGrAllocPacketBuff(0x30);
         packet[0] = 2;
         packet[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
         packet[2] = ((u64)0x10000000 << 32) | 0x8001;
         packet[3] = 0xE;
         packet[4] = 0x51801;
         packet[5] = 0x47;
-        sdfAppendPacket(list, (u32)packet);
+        sdfDrawTagLink(list, (u32)packet);
         surfaces[i]->append(surfaces[i], list);
     }
-    sdfModelCopyRuntimeState(overlay, model->inner);
+    sdfModelCopyStat(overlay, model->inner);
     if (unit->status.flags & 2) {
         overlay->lighting = (struct SdfDmaTagHeader *)unit->ext->endpointWork;
     } else {
@@ -3354,21 +3354,21 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, MdlCtx *model, SdfModel *overl
     }
     sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, surfaces, overlay);
     for (i = 0; i != 4; i++) {
-        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(list);
-        packet = (u64 *)sdfAllocPacketAligned(0x30);
+        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(list);
+        packet = (u64 *)sdfGrAllocPacketBuff(0x30);
         packet[0] = 2;
         packet[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
         packet[2] = ((u64)0x10000000 << 32) | 0x8001;
         packet[3] = 0xE;
         packet[4] = btlTransparencySurfaceTestValues[i];
         packet[5] = 0x47;
-        sdfAppendPacket(list, (u32)packet);
+        sdfDrawTagLink(list, (u32)packet);
         surfaces[i]->append(surfaces[i], list);
     }
-    mdlSetAllResourceFrames(model, color);
+    mdlSetEffectColor(model, color);
     for (item = model->resourceItems; item != NULL; item = item->next) {
-        mdlDispatchViewerAnchorRecord(model, item);
+        mdlLinkEffect(model, item);
     }
 }
 
@@ -3386,7 +3386,7 @@ void btlCreateUnitTransparency(BtlUnit *unit) {
         return;
     }
     shape = unit->ext->owner->sub;
-    unit->transparencyModel = sdfModelCreateWithItems(shape->resourceList, shape->itemList);
+    unit->transparencyModel = sdfModelMake(shape->resourceList, shape->itemList);
     dds3ObjectBaseOnFlag(unit->effectObject, 1);
     btlBossDebugPrintf("btl:unit transparency create[%p]\n", unit);
 }
@@ -3403,15 +3403,15 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
             alpha = color >> 24;
             if (!(flags & 0x20000)) {
                 if (unit->transparencyModel != 0) {
-                    sdfReleaseDevSlot(unit->transparencyModel, 1, 1);
+                    sdfModelRootFree(unit->transparencyModel, 1, 1);
                     unit->transparencyModel = 0;
                     if (unit->status.flags & 2) {
                         info->inner->lighting = (struct SdfDmaTagHeader *)unit->ext->endpointWork;
                     } else {
                         info->inner->lighting = 0;
                     }
-                    mdlBroadcastMasked(info, color);
-                    mdlProcessContextNodesAndTransforms(info, kwlnSceneSurfaceSets[0]);
+                    mdlSetColor(info, color);
+                    mdlLink(info, kwlnSceneSurfaceSets[0]);
                     dds3ObjectBaseOffFlag(unit->effectObject, 1);
                     btlBossDebugPrintf(D_00417940, unit);
                 }
@@ -3444,26 +3444,26 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
     if (unit->modelBorrowed != 0) {
         return;
     }
-    unit->mirror->transparencyBuffer = sdfAllocPacketAligned(0x70000);
+    unit->mirror->transparencyBuffer = sdfGrAllocPacketBuff(0x70000);
     list = sdfPrimAllocDrawTag(0);
-    sdfCreateResourcePacket(list, D_0040B290.buffers[2],
+    sdfLinkStoreImage(list, D_0040B290.buffers[2],
                             0, 0, 0x200, 0xE0, unit->mirror->transparencyBuffer, 0, 0, 0);
     btlMirrorSourceTransparencySurfaces[0]->append(btlMirrorSourceTransparencySurfaces[0], list);
     info = unit->ext->owner;
     if (unit->transparencyModel == 0) {
-        unit->transparencyModel = sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
+        unit->transparencyModel = sdfModelMake(info->sub->resourceList, info->sub->itemList);
         dds3ObjectBaseOnFlag(unit->effectObject, 1);
         return;
     }
     btlDrawUnitTransparencyPasses(unit, info, unit->transparencyModel, btlMirrorSourceTransparencySurfaces, unit->overlayColor);
     info = unit->mirror->ext->owner;
     if (unit->mirror->transparencyModel == 0) {
-        unit->mirror->transparencyModel = sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
+        unit->mirror->transparencyModel = sdfModelMake(info->sub->resourceList, info->sub->itemList);
         dds3ObjectBaseOnFlag(unit->mirror->effectObject, 1);
         return;
     }
     list = sdfPrimAllocDrawTag(0);
-    sdfCreateDescriptorPacket(list, D_0040B290.buffers[2],
+    sdfLinkLoadImage(list, D_0040B290.buffers[2],
                               0, 0, 0x200, 0xE0, unit->mirror->transparencyBuffer, 0);
     btlMirrorTargetTransparencySurfaces[0]->append(btlMirrorTargetTransparencySurfaces[0], list);
     btlDrawUnitTransparencyPasses(unit->mirror, info, unit->mirror->transparencyModel, btlMirrorTargetTransparencySurfaces, unit->mirror->overlayColor);
@@ -3555,7 +3555,7 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
     VU0_STORE_VF(vf10, world);
     if ((unit->status.flags & 2) != 0) {
         world[1] = 0;
-        if (sdfLoadMapRecordPositionVector(unit->ext->owner->inner, 0) == 0) {
+        if (sdfModelGetMarkPos(unit->ext->owner->inner, 0) == 0) {
             dds3GetPosPoseSet(unit->effectObject);
         }
         VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
@@ -3593,11 +3593,11 @@ void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit) {
         }
     } else {
         if (unit->effectIndex != 0xB) {
-            mdlAddEntryFlagged(unit->ext->owner, 0, unit->effectIndex);
+            mdlLoopMotion(unit->ext->owner, 0, unit->effectIndex);
         } else {
-            mdlAddEntryPlain(unit->ext->owner, 0, unit->effectIndex);
+            mdlSingleMotion(unit->ext->owner, 0, unit->effectIndex);
         }
-        sdfMotionSampleAtFrame(unit->ext->owner->first, 0.0f);
+        sdfMotionSeek(unit->ext->owner->first, 0.0f);
     }
 }
 
@@ -3819,7 +3819,7 @@ s32 btlStepUnitRotationNlerp(BtlSlerpTaskArgs *args) {
             }
             VU0_LOAD_VF(vf10, &args->from);
             VU0_LOAD_VF(vf11, &args->to);
-            effMiscQuaternionNlerpVU(args->t);
+            Lerp(args->t);
             VU0_STORE_VF(vf10, &quat);
             btlSetUnitRotation(unit, &quat);
             return 0;
@@ -3860,7 +3860,7 @@ void btlRequestModelOrReuse(u32 *arguments) {
         btlBindUnitModel(object, effect, model);
         if (*(char *)(arguments + 3) == 0) {
             btlClearUnitDefeatCandidate(object);
-            evtSetUnitAlphaTransition(((BtlUnit *)object)->ext, 0, 0);
+            evtSetUnitColorA(((BtlUnit *)object)->ext, 0, 0);
             ((BtlUnit *)object)->overlayColor = ((BtlUnit *)object)->baseColor & 0xFFFFFF;
         }
         btlBossDebugPrintf(D_00417AF0, effect, model);
@@ -3885,7 +3885,7 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
     }
     if (*(s8 *)(arguments + 3) == 0) {
         btlClearUnitDefeatCandidate(object);
-        evtSetUnitAlphaTransition(((BtlUnit *)object)->ext, 0, 0);
+        evtSetUnitColorA(((BtlUnit *)object)->ext, 0, 0);
         ((BtlUnit *)object)->overlayColor = ((BtlUnit *)object)->baseColor & 0xFFFFFF;
     }
     ((BtlUnit *)object)->gunResourceFlags = (((BtlUnit *)object)->gunResourceFlags & ~1) | 2;
@@ -3987,7 +3987,7 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
             if (!(unit->status.stateFlags & 0x100000)) {
                 btlSetUnitColor(unit->mirror, unit->baseColor, 0);
             } else {
-                color = mdlGetBroadcastValue(unit->mirror->ext->owner);
+                color = mdlGetColor(unit->mirror->ext->owner);
                 btlSetUnitColor(unit->mirror, (color & 0xFFFFFF) | 0x80000000, 0);
             }
             unit->mirror->status.flags |= 8;
@@ -4017,7 +4017,7 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
             VU0_LOAD_VF(vf10, unit->colorEnd);
             EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
             secondColor = packedEnd[0];
-            evtInitializeUnitColorTransition(unit->ext, 0, firstColor, secondColor);
+            evtSetUnitLightAndAmbient(unit->ext, 0, firstColor, secondColor);
         }
         unit->gunResourceFlags = (unit->gunResourceFlags & ~1) | 2;
         if (args->phase == 1) {
@@ -4025,7 +4025,7 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
 
             unit->overlayColor = baseRgb;
             unit->mirror->overlayColor = baseRgb | 0x80000000;
-            evtSetUnitAlphaTransition(unit->ext, 0, 0);
+            evtSetUnitColorA(unit->ext, 0, 0);
         }
         break;
     case 1:
@@ -4060,24 +4060,24 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
                     unit->mirror->overlayColor = ((128 - alpha) << 24) | color;
                 } else {
                     unit->mirror->overlayColor = ((128 - alpha) << 24) |
-                        (mdlGetBroadcastValue(unit->mirror->ext->owner) & 0xFFFFFF);
+                        (mdlGetColor(unit->mirror->ext->owner) & 0xFFFFFF);
                 }
                 unit->status.flags |= 0x10000;
             } else {
                 if (args->elapsed == 1) {
                     btlFlagUnitDefeatCandidate(unit->mirror);
-                    evtSetUnitRgbTransition(unit->mirror->ext, args->duration >> 2, 0x80000000);
+                    evtSetUnitColorRGB(unit->mirror->ext, args->duration >> 2, 0x80000000);
                 } else if ((u32)args->elapsed == (args->duration >> 2)) {
-                    evtSetUnitAlphaTransition(unit->mirror->ext, args->elapsed, 0);
+                    evtSetUnitColorA(unit->mirror->ext, args->elapsed, 0);
                     unit->mirror->status.flags |= 0x200000;
                     btlFlagUnitDefeatCandidate(unit);
                     alpha = unit->baseColor & 0xFF000000;
-                    evtSetUnitRgbTransition(unit->ext, 0, 0);
-                    evtSetUnitAlphaTransition(unit->ext, args->duration >> 2, alpha);
+                    evtSetUnitColorRGB(unit->ext, 0, 0);
+                    evtSetUnitColorA(unit->ext, args->duration >> 2, alpha);
                     unit->status.flags |= 0x100000;
                 } else if ((u32)args->elapsed == (args->duration >> 1)) {
                     unit->overlayColor = unit->baseColor;
-                    evtSetUnitRgbTransition(unit->ext, args->duration >> 1, unit->baseColor);
+                    evtSetUnitColorRGB(unit->ext, args->duration >> 1, unit->baseColor);
                 }
             }
         } else {
@@ -4132,14 +4132,14 @@ BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 re
 
 void btlApplyLinkedUnitStatusWhenActorActive(s32 taskArgs) {
     if ((((BtlRuntimeTaskArgs *)taskArgs)->unitC->status.flags & 2) != 0) {
-        evtSetUnitStatusFlags(((BtlRuntimeTaskArgs *)taskArgs)->unitC->ext);
+        evtUnitLightOn(((BtlRuntimeTaskArgs *)taskArgs)->unitC->ext);
         return;
     }
 }
 
 u32 btlApplyUnitFxWhenLoaded(u32 *taskArgs) {
     if ((btlUnitStatusPair((BtlUnit *)taskArgs[3]) & 0x1000000002) == 0x1000000002) {
-        evtInitializeUnitColorTransition(((BtlUnit *)taskArgs[3])->ext, taskArgs[2], *taskArgs, taskArgs[1]);
+        evtSetUnitLightAndAmbient(((BtlUnit *)taskArgs[3])->ext, taskArgs[2], *taskArgs, taskArgs[1]);
     }
     return 1;
 }
@@ -4163,7 +4163,7 @@ BtlRuntimeTask *btlCreateUnitTask0F(BtlUnit *unit, s32 firstColor, s32 secondCol
 
 void btlPrepareUnitStatusFxOnStart(s32 taskArgs) {
     if ((((FxTask *)taskArgs)->unit->status.flags & 2) != 0) {
-        evtSetUnitStatusFlags(((FxTask *)taskArgs)->unit->ext);
+        evtUnitLightOn(((FxTask *)taskArgs)->unit->ext);
         return;
     }
 }
@@ -4172,7 +4172,7 @@ s32 btlApplyUnitVectorFxWhenLoaded(FxTask *task) {
     BtlUnit *unit = task->unit;
     if (unit->status.flags & 2) {
         VU0_LOAD_VF_MEMORY(vf10, task);
-        evtSetUnitNormalizedDirection(unit->ext, task->unk10);
+        evtSetUnitLightDir(unit->ext, task->unk10);
     }
     return 1;
 }
@@ -4208,23 +4208,23 @@ s32 btlUnitFadeInTask(BtlFadeArgs *args) {
         if (args->count == 0) {
             args->color = (unit->overlayColor & 0xFFFFFF) | 0x80000000;
             btlFlagUnitDefeatCandidate(unit);
-            mdlBroadcastMasked(unit->ext->owner, 0);
-            evtSetUnitRgbTransition(unit->ext, 0, 0);
-            evtSetUnitAlphaTransition(unit->ext, 0, 0);
-            evtSetUnitAlphaTransition(unit->ext, args->fadeIn, args->color);
+            mdlSetColor(unit->ext->owner, 0);
+            evtSetUnitColorRGB(unit->ext, 0, 0);
+            evtSetUnitColorA(unit->ext, 0, 0);
+            evtSetUnitColorA(unit->ext, args->fadeIn, args->color);
             unit->status.flags |= 0x100000;
         }
         if (args->count == args->fadeIn - 1) {
             unit->overlayColor = args->color;
-            evtSetUnitRgbTransition(unit->ext, args->fadeOut, args->color);
+            evtSetUnitColorRGB(unit->ext, args->fadeOut, args->color);
         }
     } else {
         unit->overlayColor = args->color;
     }
     if (!(unit->status.flags & 0x100000)) {
         if (args->count >= total) {
-            evtSetUnitRgbTransition(unit->ext, 0, args->color);
-            evtSetUnitAlphaTransition(unit->ext, 0, args->color);
+            evtSetUnitColorRGB(unit->ext, 0, args->color);
+            evtSetUnitColorA(unit->ext, 0, args->color);
             return 1;
         }
     }
@@ -4256,13 +4256,13 @@ s32 btlUnitFadeOutTask(BtlFadeArgs *args) {
     if (total != 0) {
         if (args->count == 0) {
             btlFlagUnitDefeatCandidate(unit);
-            evtSetUnitRgbTransition(unit->ext, args->fadeOut, 0x80000000);
+            evtSetUnitColorRGB(unit->ext, args->fadeOut, 0x80000000);
             unit->status.flags |= 0x200000;
         }
         if (args->count == args->fadeOut - 1) {
             unit->overlayColor = 0x80000000;
-            evtSetUnitRgbTransition(unit->ext, 0, 0);
-            evtSetUnitAlphaTransition(unit->ext, args->fadeIn, 0);
+            evtSetUnitColorRGB(unit->ext, 0, 0);
+            evtSetUnitColorA(unit->ext, args->fadeIn, 0);
         }
     } else {
         unit->overlayColor = 0x80000000;
@@ -4300,8 +4300,8 @@ s32 btlStepUnitDefeatFadeIn(u32 *arguments) {
 
     if (taskArgs->durationOrMode == -1) {
         unit->overlayColor = (unit->baseColor & 0xFFFFFF) | 0x80000000;
-        evtSetUnitRgbTransition(unit->ext, 0, unit->overlayColor);
-        evtSetUnitAlphaTransition(unit->ext, 0, unit->overlayColor);
+        evtSetUnitColorRGB(unit->ext, 0, unit->overlayColor);
+        evtSetUnitColorA(unit->ext, 0, unit->overlayColor);
         btlClearUnitDefeatCandidate(unit);
         return 1;
     }
@@ -4309,8 +4309,8 @@ s32 btlStepUnitDefeatFadeIn(u32 *arguments) {
         btlFlagUnitDefeatCandidate(unit);
     }
     if (taskArgs->durationOrMode == 0) {
-        evtSetUnitRgbTransition(unit->ext, 0, unit->overlayColor);
-        evtSetUnitAlphaTransition(unit->ext, 0,
+        evtSetUnitColorRGB(unit->ext, 0, unit->overlayColor);
+        evtSetUnitColorA(unit->ext, 0,
                                   (unit->overlayColor & 0xFFFFFF) | 0x80000000);
     }
     if (taskArgs->elapsed >= taskArgs->durationOrMode) {
@@ -4396,10 +4396,10 @@ u32 btlStepUnitExitFade(u32 *arguments) {
     case 0:
         if (taskArgs->elapsed == 1) {
             btlFlagUnitDefeatCandidate(unit);
-            evtSetUnitRgbTransition(unit->ext, 10, 0x80000000);
+            evtSetUnitColorRGB(unit->ext, 10, 0x80000000);
         } else if (taskArgs->elapsed == 10) {
-            evtSetUnitRgbTransition(unit->ext, 0, 0x80000000);
-            evtSetUnitAlphaTransition(unit->ext, 6, 0);
+            evtSetUnitColorRGB(unit->ext, 0, 0x80000000);
+            evtSetUnitColorA(unit->ext, 6, 0);
             unit->status.flags |= 0x200000;
         }
         if ((unit->status.flags & 0x200000) == 0 && taskArgs->elapsed >= 16) {
@@ -4466,7 +4466,7 @@ s32 btlUpdateSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *args) {
             args->effect = effCreateBattleVoiceOwner(args->mixer, 2, unit, 0);
             args->duration = 0xE;
             args->effect->flags &= 0xFFF9;
-            effBattleUpdateSelectedValue(args->effect, 0xE);
+            effBTLCutSetDrawEndFrame(args->effect, 0xE);
             unit->status.flags &= ~8;
             if (unit->status.flags & 2) {
                 unit->ext->owner->flags |= MDL_SKIP_TRANSFORMS;
@@ -4485,7 +4485,7 @@ s32 btlUpdateSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *args) {
 void btlFinishSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *arguments) {
     BattleEffect *voice = arguments->effect;
     if (voice != 0) {
-        effReleaseBattleVoiceOwner(voice);
+        effBTLCutDelete(voice);
     }
     if (arguments->mixer != 0) {
         sndReleaseAllVoices(arguments->mixer);
@@ -4574,7 +4574,7 @@ u32 btlUnitBaseLightTask(BtlUnitBaseLightArgs *work) {
     if (unit->status.flags & 2) {
         if (work->delay >= 2) {
             ext = unit->ext;
-            evtSetUnitStatusFlags(ext);
+            evtUnitLightOn(ext);
             target = (EffWorldNode *)ext->currentTransitionValue;
             if (target != NULL && (ext->flags & 0x40000)) {
                 info = target->data;
@@ -4630,7 +4630,7 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
         return 1;
     }
     if (args->count == 0) {
-        node = mdlGetNodeMotionIndex(args->unit->ext->owner, 0);
+        node = mdlGetMotionNum(args->unit->ext->owner, 0);
         if (node < 0x1D) {
             u8 *resource = (u8 *)btlGetSideIndexedActorStatusTable(args->unit->resourceKind, args->unit->resourceIndex);
             if (((BtlEffectResource *)resource)->nodes[node].rateKind == 2) {
@@ -4641,7 +4641,7 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
     }
     if (0.5f < args->scale) {
         BtlUnit *actor;
-        scale = args->scale * (sdfGetRandFloat(effSharedRandomState) * 0.5f + 0.5f);
+        scale = args->scale * (dds3GetRandFloatA(effSharedRandomState) * 0.5f + 0.5f);
         if (args->count & 1) {
             scale = -scale;
         }
@@ -4826,11 +4826,11 @@ void btlStartGunFinishLoad(s32 *task) {
         return;
     }
     if (unit->gunResource != 0) {
-        sdfFreeMemoryFromEitherHeap(unit->gunResource);
+        sdfFreeAuto(unit->gunResource);
         unit->gunResource = 0;
     }
     if (btlFormatUnitBedName(unit, filename)) {
-        s32 handle = (s32)fileQueueAlternateCallbackRequest(filename);
+        s32 handle = (s32)fileLoadUseTail(filename);
         task[1] = handle;
         btlBossDebugPrintf("btl:gun & finish load start[%s][%p]\n", filename, handle);
     }
@@ -4848,12 +4848,12 @@ u32 btlPollGunLoad(s32 taskArgs) {
     if (loadArgs->handle == 0) {
         return 1;
     }
-    if (fileIsRequestReadyInCurrentMode((struct FileRequest *)loadArgs->handle) == 0) {
+    if (pacFileCheckEnd((struct FileRequest *)loadArgs->handle) == 0) {
         return 0;
     }
     btlBossDebugPrintf("btl:gun & finish load end[%p]\n", loadArgs->handle);
-    unit->gunResource = (void *)sdfMemLock(fileGetResourceHandle((struct FileRequest *)loadArgs->handle));
-    filePollEntryCleanup((struct FileRequest *)(u32)loadArgs->handle);
+    unit->gunResource = (void *)sdfMemLock(fileGetMemHandle((struct FileRequest *)loadArgs->handle));
+    fileHandleFree((struct FileRequest *)(u32)loadArgs->handle);
     unit->gunResourceFlags = (unit->gunResourceFlags & ~4) | 8;
     return 1;
 }
@@ -4928,7 +4928,7 @@ s32 btlAdvanceActorModelBlendTask(BtlActorModelBlendArgs *args) {
     target = args->target;
     if (args->stage == 0) {
         if (unit->status.flags & 2) {
-            args->previousModelValue = mdlGetNodeMotionIndex(unit->ext->owner, 0);
+            args->previousModelValue = mdlGetMotionNum(unit->ext->owner, 0);
         } else {
             args->previousModelValue = unit->motionId;
         }
@@ -5074,7 +5074,7 @@ void btlUpdateActiveActorModelState(void) {
             } else {
                 frame = (s32)btlGetUnitModelCurrentFrame(unit);
                 if (frame >= status->model) {
-                    sdfMotionSampleAtFrame(unit->ext->owner->first, (f32)status->model);
+                    sdfMotionSeek(unit->ext->owner->first, (f32)status->model);
                     btlResetUnitModelProgress(unit);
                     unit->status.flags &= ~0x80000000;
                 }
@@ -5084,9 +5084,9 @@ void btlUpdateActiveActorModelState(void) {
             if (unit->updateFlags & 4) {
                 frame = (s32)btlGetUnitModelCurrentFrame(unit);
                 index = unit->motionId;
-                if (index == mdlGetNodeMotionIndex(unit->ext->owner, 0)) {
+                if (index == mdlGetMotionNum(unit->ext->owner, 0)) {
                     if (frame >= status->motions[index].alphaStartFrame) {
-                        evtSetUnitAlphaTransition(unit->ext,
+                        evtSetUnitColorA(unit->ext,
                             (s32)((f32)status->motions[index].alphaDuration /
                                 (status->motions[index].alphaFrameScale * runtime->modelFrameScale)),
                             unit->overlayColor & 0xFFFFFF);
@@ -5094,7 +5094,7 @@ void btlUpdateActiveActorModelState(void) {
                     }
                 }
             }
-            unit->overlayColor = mdlGetBroadcastValue(unit->ext->owner);
+            unit->overlayColor = mdlGetColor(unit->ext->owner);
         }
         if (unit->status.flags & 0x8000) {
             /* The pulse uses the signed global counter at +0x214, not scene frame +0x234. */
@@ -5127,18 +5127,18 @@ void btlUpdateActorModelColorAndLinks(void) {
         if (unit->status.flags & 2) {
             MdlCtx *model = unit->ext->owner;
             if (!(unit->status.stateFlags & 0x20000)) {
-                unit->motionId = mdlGetNodeMotionIndex(model, 0);
+                unit->motionId = mdlGetMotionNum(model, 0);
             }
             if (!(unit->status.flags & 0x40000)) {
                 if (unit->status.flags & 0x100000) {
-                    color = mdlGetBroadcastValue(unit->ext->owner);
+                    color = mdlGetColor(unit->ext->owner);
                     unit->overlayColor = color;
                     if ((color & 0xFF000000) == 0x80000000) {
                         btlFlagUnitDefeatCandidate(unit);
                         unit->status.flags &= ~0x100000;
                     }
                 } else if (unit->status.flags & 0x200000) {
-                    color = mdlGetBroadcastValue(unit->ext->owner);
+                    color = mdlGetColor(unit->ext->owner);
                     unit->overlayColor = color;
                     if ((color & 0xFF000000) == 0) {
                         if (!(unit->status.flags & 0xC0)) {
@@ -5225,7 +5225,7 @@ void btlReleaseUnitResources(BtlUnit *unit) {
         unit->link = 0;
     }
     if (unit->gunResource != 0) {
-        sdfFreeMemoryFromEitherHeap(unit->gunResource);
+        sdfFreeAuto(unit->gunResource);
         unit->gunResource = 0;
         unit->gunResourceFlags &= ~4;
         unit->gunResourceFlags &= ~8;
@@ -5403,8 +5403,8 @@ void btlApplyUnitEffectScale(BtlUnit *unit) {
         inner->flags |= OBJECT_TRANSFORM_FLAG_UPDATE_PENDING;
         inner->flags &= ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
         VU0_STORE_VF(vf10, inner->scale);
-        mdlStoreTertiaryVectorVU(unit->ext->owner);
-        mdlSetAmountOnAllContextResources(unit->ext->owner, unit->actorScale);
+        mdlSetScale(unit->ext->owner);
+        mdlSetEffectScale(unit->ext->owner, unit->actorScale);
         btlSetUnitPosition(unit, unit->currentPosition);
     }
 }
@@ -5856,7 +5856,7 @@ BtlRuntimeTask *btlScheduleContextReset(void) {
     return task;
 }
 
-extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
+extern void dds3CameraObjectBasicSetFovy(EffWorldNode *, f32);
 extern f32 btlCameraLocalUpVector[4], btlCameraOutputRotation[4];
 
 /* Per-frame battle camera update: run the active camera mode's update hook,
@@ -5887,7 +5887,7 @@ void btlUpdateBattleCameraFrame(void) {
             btlCameraModeDefinitions[kind].update(&scene->cameraCommand);
         }
     }
-    camera = dds3GetWorldCameraObject(dds3GetWorldObject());
+    camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
     if (camera == NULL || camera->value == NULL) {
         return;
     }
@@ -5948,7 +5948,7 @@ void btlUpdateBattleCameraFrame(void) {
     VU0_STORE_VF(vf11, &data->worldEye);
     VU0_STORE_VF(vf10, position);
     dds3SetPosPoseSet(camera, (u128 *)position);
-    dds3SetCameraFieldOfView(camera, scene->cameraCommand.camera.fov);
+    dds3CameraObjectBasicSetFovy(camera, scene->cameraCommand.camera.fov);
     data->fovUpdatePending |= 1;
     dds3SetRotPoseSet(camera, (u128 *)btlCameraOutputRotation);
     PCP_COPY_VECTOR(&data->localUp, btlCameraLocalUpVector);
@@ -5961,12 +5961,12 @@ extern f32 btlCreatedCameraTarget[4], btlCreatedCameraRotation[4];
 
 extern u32 D_00436A98;
 
-extern EffWorldNode *dds3CreateCameraObject(s32, void *, void *);
+extern EffWorldNode *dds3AddCameraObjectBasicTypeFree(s32, void *, void *);
 
 
-extern void effObjSetInnerFloat(EffWorldNode *, f32);
+extern void dds3GetRadiusPoseSet(EffWorldNode *, f32);
 
-extern void dds3EnsureSlotData(void *);
+extern void dds3ObjectBaseCreateMover(void *);
 
 /* vu0 routine: add the battle origin to the default camera position. */
 void btlInitializeWorldCamera(void) {
@@ -5980,21 +5980,21 @@ void btlInitializeWorldCamera(void) {
     VU0_LOAD_VF(vf11, battle->position);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, position);
-    camera = dds3GetWorldCameraObject(dds3GetWorldObject());
+    camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
     if (camera != NULL) {
         dds3SetPosPoseSet(camera, (u128 *)position);
         dds3SetRotPoseSet(camera, (u128 *)btlWorldCameraStartRotation);
         data = camera->data;
-        dds3SetCameraFieldOfView(camera, 0.6981317f);
+        dds3CameraObjectBasicSetFovy(camera, 0.6981317f);
         data->fovUpdatePending |= 1;
     }
-    camera = dds3CreateCameraObject(dds3AdvanceWorldCounter(), btlCreatedCameraTarget, btlCreatedCameraRotation);
+    camera = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), btlCreatedCameraTarget, btlCreatedCameraRotation);
     camera->value = (const char *)D_00436A98;
-    effObjSetInnerFloat(camera, 10.0f);
-    dds3EnsureSlotData(camera);
-    dds3SetObjectSlot1MoverCallback(camera, 0);
-    dds3SetCameraFieldOfView(camera, 0.6981317f);
-    dds3SetWorldCameraObject(dds3GetWorldObject(), camera);
+    dds3GetRadiusPoseSet(camera, 10.0f);
+    dds3ObjectBaseCreateMover(camera);
+    dds3ObjectBaseSetPadControl(camera, 0);
+    dds3CameraObjectBasicSetFovy(camera, 0.6981317f);
+    dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), camera);
     battle->cameraObject = camera;
     battle->cameraCommand.targetList = btlAllocateIndexList(13);
     battle->battleFlags |= 0x10;
@@ -6121,25 +6121,25 @@ u32 btlIsRuntimeFlag2000Clear(void) {
     return ((((s32)((BtlState *)workAddress)->cameraCommand.flags >> 0xd)) ^ 1U) & 1;
 }
 
-extern f32 dds3GetCameraFieldOfView(EffWorldNode *);
+extern f32 dds3CameraObjectBasicGetFovy(EffWorldNode *);
 
-extern void sdfSetViewFieldOfView(f32);
+extern void dds3SetScreenFovy(f32);
 
 void btlRefreshWorldCameraHandle(void) {
     EffWorldNode *object;
     EffWorldNode *handle;
     if (((BtlState *)btlGetRuntime())->battleFlags & 2) {
-        object = dds3GetWorldObject();
+        object = dds3GetActiveScene();
         if (object != NULL) {
-            handle = dds3GetWorldCameraObject(object);
+            handle = dds3GetActiveCameraSceneBasic(object);
             if (handle != 0) {
                 if (handle->next != 0) {
                     handle = handle->next;
                 } else {
                     handle = ((EvtWorldTable *)object->data)->slots[EFF_WORLD_KIND_CAMERA].head;
                 }
-                dds3SetWorldCameraObject(object, handle);
-                sdfSetViewFieldOfView(dds3GetCameraFieldOfView(handle));
+                dds3SetActiveCameraSceneBasic(object, handle);
+                dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(handle));
             }
         }
     }
@@ -6154,7 +6154,7 @@ s32 btlGetWorldObjectDefault(void) {
     if (!(((BtlState *)btlGetRuntime())->battleFlags & 2)) {
         return D_00436AA0;
     }
-    data = dds3GetWorldCameraObject(dds3GetWorldObject());
+    data = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
     if (data == 0) {
         return D_00436AA0;
     }
@@ -6169,7 +6169,7 @@ s32 btlIsWorldMotionIdle(void) {
     if (!(((BtlState *)btlGetRuntime())->battleFlags & 2)) {
         return 0;
     }
-    data = dds3GetWorldCameraObject(dds3GetWorldObject());
+    data = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
     if (data == 0) {
         return 0;
     }
@@ -6234,7 +6234,7 @@ void btlResetCameraMotion(BtlLinkedCommand *action) {
                 if (unit->status.flags & 0x200) {
                     if (unit->status.flags & 2) {
                         if (unit->ext != 0) {
-                            s32 node = mdlGetNodeMotionIndex(unit->ext->owner, 0);
+                            s32 node = mdlGetMotionNum(unit->ext->owner, 0);
                             if (node == 0xD || node == 0x12) {
                                 current = btlGetUnitModelCurrentFrame(unit);
                                 limit = (f32)btlGetUnitModelFrameCount(unit);
@@ -6244,7 +6244,7 @@ void btlResetCameraMotion(BtlLinkedCommand *action) {
                                     limit = limit * 0.7f;
                                 }
                                 if (current < limit) {
-                                    sdfMotionSampleAtFrame(unit->ext->owner->first, limit);
+                                    sdfMotionSeek(unit->ext->owner->first, limit);
                                     btlBossDebugPrintf("btl:camera mot reset[%p]\n", unit);
                                 }
                             }
@@ -6288,7 +6288,7 @@ s32 btlPositionActorIndexUnits(BtlLinkedCommand *action) {
 void btlDebugPrintWorldTransform(s32 x, s32 y) {
     EffWorldNode *object;
     if (((BtlState *)btlGetRuntime())->battleFlags & 2) {
-        object = dds3GetWorldCameraObject(dds3GetWorldObject());
+        object = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
         if (object != 0) {
             btlBossDebugPrintfN(x, y, 0, "P:%.1f %.1f %.1f", (double)object->inner->position[0],
                                 (double)object->inner->position[1], (double)object->inner->position[2]);

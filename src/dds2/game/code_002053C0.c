@@ -189,16 +189,16 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
     s32 size;
     if (args->state == 0) {
         sprintf(path, D_00419468, D_003E0F60[args->entryIndex].fileName);
-        args->request = fileQueueDefaultCallbackRequest(path);
+        args->request = fileLoad(path);
         btlBossDebugPrintf("btl:atrac3 SE load[%s]\n", path);
-    } else if (fileIsRequestReadyInCurrentMode(args->request) != 0) {
+    } else if (pacFileCheckEnd(args->request) != 0) {
         if (mnuGetSoundBufferStateLocked() != 0) {
             mnuReleaseSoundBufferLocked();
         }
-        resource = fileGetResourceHandle(args->request);
+        resource = fileGetMemHandle(args->request);
         data = sdfMemLock(resource);
-        size = (s32)fileGetResourceSize(args->request);
-        filePollEntryCleanup(args->request);
+        size = (s32)fileGetLoadSize(args->request);
+        fileHandleFree(args->request);
         mnuInstallTitleSoundBufferFromData(data, size, D_003E0F60[args->entryIndex].volume);
         sdfMemFreeDirect(resource);
         btlBossDebugPrintf("btl:atrac3 SE load end\n");
@@ -244,7 +244,7 @@ void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
         } else {
             sprintf(path, D_00419318, D_00419308, unit->partyRecord.unitId);
         }
-        args->request = fileQueueDefaultCallbackRequest(path);
+        args->request = fileLoad(path);
         btlBossDebugPrintf("btl:ATRAC3 dead load start[%s]\n", path);
     }
     work->earringPlaybackCount++;
@@ -257,12 +257,12 @@ s32 sndDeadAtracPlaybackTask(BtlDeadLoadArgs *args) {
         return 1;
     }
     if (args->resourceAllocation == 0) {
-        if (fileIsRequestReadyInCurrentMode(args->request) != 0) {
+        if (pacFileCheckEnd(args->request) != 0) {
             args->resourceAllocation =
-                fileGetResourceHandle(args->request);
+                fileGetMemHandle(args->request);
             data = sdfMemLock(args->resourceAllocation);
-            size = (s32)fileGetResourceSize(args->request);
-            filePollEntryCleanup(args->request);
+            size = (s32)fileGetLoadSize(args->request);
+            fileHandleFree(args->request);
             mnuInstallTitleSoundBufferFromData(data, size, 2);
             mnuClearInactiveSoundBufferState();
             btlBossDebugPrintf("btl:ATRAC3 dead load end\n");
@@ -390,12 +390,12 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
     for (i = count - 1; i >= 0; i--) {
         unit = actors[i];
         if (unit->status.flags & 1) {
-            position[0] = center[0] - sdfSinPoly(angle) * radius;
+            position[0] = center[0] - sdfSin(angle) * radius;
             position[1] = center[1];
             position[2] = center[2] - sdfCos(angle) * radius;
         } else {
             adjustedAngle = angle - step * 0.25f;
-            position[0] = center[0] - sdfSinPoly(adjustedAngle) * radius;
+            position[0] = center[0] - sdfSin(adjustedAngle) * radius;
             position[1] = center[1];
             position[2] = center[2] - sdfCos(adjustedAngle) * radius;
         }
@@ -507,7 +507,7 @@ s32 btlArrangeFormationSlots(s32 filter) {
         unit = actors[i];
         halfAngle = atanf(unit->bodyRadius * unit->scale / radius);
         angle += halfAngle;
-        position[0] = sdfSinPoly(angle) * radius;
+        position[0] = sdfSin(angle) * radius;
         position[1] = 0.0f;
         position[2] = (distance - sdfCos(angle) * radius) * direction;
         PCP_COPY_VECTOR(unit->position, position);
@@ -584,7 +584,7 @@ void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, 
     angle = 30.0f * 0.017453293f;
     pos[0] = center[0] - sdfCos(angle) * radius;
     pos[1] = 0.0f;
-    pos[2] = center[2] - sdfSinPoly(angle) * radius;
+    pos[2] = center[2] - sdfSin(angle) * radius;
     btlSetUnitPosition(slot[0], pos);
     if (btlAimHorizontalDirectionVU((f32 *)pos, (f32 *)center) != 0) {
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
@@ -592,7 +592,7 @@ void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, 
     }
     pos[0] = center[0] + sdfCos(angle) * radius;
     pos[1] = 0.0f;
-    pos[2] = center[2] - sdfSinPoly(angle) * radius;
+    pos[2] = center[2] - sdfSin(angle) * radius;
     btlSetUnitPosition(slot[2], pos);
     if (btlAimHorizontalDirectionVU((f32 *)pos, (f32 *)center) != 0) {
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
@@ -719,9 +719,9 @@ void btlPlaceTripleFormationAroundMiddleActor(ActionStateLink *link, BtlUnit *fi
             radius += 100.0f;
             if (i != 1) {
                 if (i == 0) {
-                    sdfVuLoadRotationMatrixY(2.0943951f);
+                    SetRotateMatrixY(2.0943951f);
                 } else if (i == 2) {
-                    sdfVuLoadRotationMatrixY(-2.0943951f);
+                    SetRotateMatrixY(-2.0943951f);
                 }
                 VU0_LOAD_VF(vf10, dir);
                 VU0_ROTATE_VEC(vf10, vf10);
@@ -928,9 +928,9 @@ void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other)
         radius = slot[i]->bodyRadius * slot[i]->scale;
         radius += 100.0f;
         if (i == 0) {
-            sdfVuLoadRotationMatrixY(1.0471975f);
+            SetRotateMatrixY(1.0471975f);
         } else {
-            sdfVuLoadRotationMatrixY(-1.0471975f);
+            SetRotateMatrixY(-1.0471975f);
         }
         VU0_LOAD_VF(vf10, dir);
         VU0_ROTATE_VEC(vf10, vf10);
@@ -1052,9 +1052,9 @@ void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
             radius = slots[i]->bodyRadius * slots[i]->scale;
             radius += 100.0f;
             if (i == 0) {
-                sdfVuLoadRotationMatrixY(1.0471975f);
+                SetRotateMatrixY(1.0471975f);
             } else {
-                sdfVuLoadRotationMatrixY(-1.0471975f);
+                SetRotateMatrixY(-1.0471975f);
             }
             VU0_LOAD_VF(vf10, &D_003BE0C0);
             VU0_ROTATE_VEC(vf10, vf10);
@@ -1180,11 +1180,11 @@ void btlPlaceBothSidesInRadialFormation(ActionStateLink *link, BtlUnit *firstAct
     }
     PCP_COPY_VECTOR(firstDirection, D_003E9130);
     PCP_COPY_VECTOR(secondDirection, D_003E9130);
-    sdfVuLoadRotationMatrixY(1.0471975f);
+    SetRotateMatrixY(1.0471975f);
     VU0_LOAD_VF(vf10, firstDirection);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF_UNCLOBBERED(vf10, firstDirection);
-    sdfVuLoadRotationMatrixY(2.0943951f);
+    SetRotateMatrixY(2.0943951f);
 
     for (slot = 0; slot < 3; slot++) {
         if (second[slot] != NULL) {

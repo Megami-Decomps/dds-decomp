@@ -27,7 +27,7 @@ typedef struct EffLensFlareParams {
 typedef struct EffLensFlareElement {
     f32 positionScale; /* 0x00: distance along the line from the screen center */
     f32 sizeScale;     /* 0x04 */
-    u8 textureIndex;   /* 0x08: effGetBillResourceTexture index */
+    u8 textureIndex;   /* 0x08: dds3BillboardGetGeneralTex index */
     u8 pad09[3];
     u32 color;         /* 0x0C: RGBA; alpha 0 skips the element */
 } EffLensFlareElement;

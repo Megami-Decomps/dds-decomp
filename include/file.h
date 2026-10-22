@@ -68,7 +68,7 @@ void fileJobDestroy(FileJobPayload *job);
 void fileJobNotifyComplete(FileJobPayload *job);
 void fileJobInvokeTypeCallback(FileJobPayload *job);
 /* Word coordinates narrow only at the serialized reset-view fields. */
-void fileSetPreviewLocation(s32 x, s32 y);
+void slSetTmnlID(s32 x, s32 y);
 void fileJobInvokePositionCallback(FileJobPayload *job, f32 position[4]);
 void fileJobInvokeRotationCallback(FileJobPayload *job, f32 rotation[4]);
 void fileJobInvokeScaleCallback(FileJobPayload *job, f32 scale);
@@ -206,6 +206,6 @@ typedef char FileManWork_size_must_be_0x40[(sizeof(FileManWork) == 0x40) ? 1 : -
 extern FileManWork fileManagerWork;
 
 /* Queue a callback-kind request without a completion callback; return its work. */
-struct FileRequest *fileQueueDefaultCallbackRequest(const char *requestName);
+struct FileRequest *fileLoad(const char *requestName);
 
 #endif /* FILE_H */

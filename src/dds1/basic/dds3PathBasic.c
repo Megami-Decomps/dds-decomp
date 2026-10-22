@@ -7,15 +7,15 @@
 #include "eff_quaternion_nlerp.h"
 
 
-void effSplRelease(struct EffPrimitiveCurve *primitive);
+void dds3FreeSplineHandle(struct EffPrimitiveCurve *primitive);
 
-void dds3FreePathObject(Dds3PathCurveWork *path) {
-    effSplRelease(path->primitiveCurve);
+void dds3DeletePathControl(Dds3PathCurveWork *path) {
+    dds3FreeSplineHandle(path->primitiveCurve);
     sdfChipFreeDirect(path);
 }
 
 /* vu0 routine: interpolate the path's XYZ keys into vf10. */
-void dds3InterpolatePathVectorVU(Dds3PathCurveWork *path) {
+void dds3PathBasicControlGetPos(Dds3PathCurveWork *path) {
     u32 segmentIndex;
     f32 interpolationWeight;
     Dds3PathKeyframes *keyframes;
@@ -23,7 +23,7 @@ void dds3InterpolatePathVectorVU(Dds3PathCurveWork *path) {
 
     if (path->counter.flags & DDS3_PATH_POSITION_CHANNEL) {
         keyframes = path->positionKeys;
-        dds3SamplePathKeyframeInterval(&segmentIndex, &interpolationWeight, keyframes, path->counter.time);
+        dds3PathEvalSpline(&segmentIndex, &interpolationWeight, keyframes, path->counter.time);
         entries = keyframes->data.position;
         VU0_SET_VF10_COMPONENT(x, entries[segmentIndex + 1][0]);
         VU0_SET_VF10_COMPONENT(y, entries[segmentIndex + 1][1]);
@@ -41,7 +41,7 @@ void dds3InterpolatePathVectorVU(Dds3PathCurveWork *path) {
     }
 }
 
-void dds3InterpolatePathQuaternionVU(Dds3PathCurveWork *path) {
+void dds3PathBasicControlGetRot(Dds3PathCurveWork *path) {
     u32 segmentIndex;
     f32 interpolationWeight;
     Dds3PathKeyframes *keyframes;
@@ -50,20 +50,20 @@ void dds3InterpolatePathQuaternionVU(Dds3PathCurveWork *path) {
     Dds3PathRotationSample *secondKey;
     if (path->counter.flags & DDS3_PATH_ROTATION_CHANNEL) {
         keyframes = path->rotationKeys;
-        dds3SamplePathKeyframeInterval(&segmentIndex, &interpolationWeight, keyframes, path->counter.time);
+        dds3PathEvalSpline(&segmentIndex, &interpolationWeight, keyframes, path->counter.time);
         entries = keyframes->data.rotation;
         firstKey = &entries[segmentIndex];
         VU0_LOAD_VF_MEMORY(vf10, firstKey);
         secondKey = &entries[segmentIndex] + 1;
         VU0_LOAD_VF_MEMORY(vf11, secondKey);
-        effMiscQuaternionNlerpVU(interpolationWeight);
+        Lerp(interpolationWeight);
     } else {
         VU0_MOVE_VF(vf10, vf0);
     }
 }
 
 /* vu0 routine: lerp the three key vectors of adjacent path entries into transformParams, or clear it. */
-void dds3InterpolatePathOutput(Dds3PathCurveWork *path, WorldTransformParams *transformParams) {
+void dds3PathBasicControlNextStep(Dds3PathCurveWork *path, WorldTransformParams *transformParams) {
     u32 segmentIndex;
     f32 interpolationWeight;
     Dds3PathKeyframes *keyframes;
@@ -71,7 +71,7 @@ void dds3InterpolatePathOutput(Dds3PathCurveWork *path, WorldTransformParams *tr
 
     if (path->counter.flags & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {
         keyframes = path->transformKeys;
-        dds3SamplePathKeyframeInterval(&segmentIndex, &interpolationWeight, keyframes, path->counter.time);
+        dds3PathEvalSpline(&segmentIndex, &interpolationWeight, keyframes, path->counter.time);
         entries = keyframes->data.worldTransform;
         VU0_SET_VF10_COMPONENT(x, entries[segmentIndex + 1].rotation[0]);
         VU0_SET_VF10_COMPONENT(y, entries[segmentIndex + 1].rotation[1]);

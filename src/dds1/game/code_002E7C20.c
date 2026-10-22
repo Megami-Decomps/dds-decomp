@@ -19,13 +19,13 @@ void effMiscQuatMultiplyVU(void)
 
 /* VU-register calling convention: vf10 is the quaternion input and result. */
 /* vu0 routine: vf10 = inverse of quaternion vf10 (conjugate / |q|^2) */
-void effMiscInvertQuaternionVU(void)
+void Inverse(void)
 {
     VU0_QUAT_INVERSE_VF10();
 }
 
-/* Persona 4 effMiscNormalizeVU @ 004BCE80 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
-void effMiscNormalizeVU(void)
+/* Persona 4 Normalize @ 004BCE80 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
+void Normalize(void)
 {
     VU0_NORMALIZE_XYZW_VF10();
 }
@@ -39,7 +39,7 @@ f32 effMiscQuatLengthSqVU(void)
 }
 
 /* Return the component-wise dot product of quaternions in vf10 and vf11. */
-f32 effMiscQuaternionDotVU(void)
+f32 SDF_QUAT_INNERPRODUCT(void)
 {
     f32 dotProduct;
     VU0_DOT_XYZW(dotProduct, vf10, vf11);
@@ -47,20 +47,20 @@ f32 effMiscQuaternionDotVU(void)
 }
 
 /* vf10 initially holds the axis; write the sine-scaled axis and cosine W. */
-void effMiscAxisAngleToQuaternionVU(f32 angle)
+void FromRotation(f32 angle)
 {
     f32 halfAngle = angle * 0.5f;
-    f32 trigValue = sdfSinPoly(halfAngle);
+    f32 trigValue = sdfSin(halfAngle);
     VU0_SCALAR_OP(trigValue, "vmulx.xyzw vf10, vf10, vf2x");
     trigValue = sdfCos(halfAngle);
     VU0_SCALAR_OP(trigValue, "vmulx.w vf10, vf0, vf2x");
 }
 
 /* As above, but write the second VU quaternion register (vf11). */
-void effMiscAxisAngleToQuaternionVf11(f32 angle)
+void FromRotation_B(f32 angle)
 {
     f32 halfAngle = angle * 0.5f;
-    f32 trigValue = sdfSinPoly(halfAngle);
+    f32 trigValue = sdfSin(halfAngle);
     VU0_SCALAR_OP(trigValue, "vmulx.xyzw vf11, vf11, vf2x");
     trigValue = sdfCos(halfAngle);
     VU0_SCALAR_OP(trigValue, "vmulx.w vf11, vf0, vf2x");
@@ -76,7 +76,7 @@ void effMiscQuaternionToMatrixVU(void)
 
 /* The quaternion scratch is read only by the lqc2 asm through its address, so
  * it is volatile: retail stores its four components in program order. */
-void sdfConvertWrappedEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z) {
+void FromEulerXYZ(f32 x, f32 y, f32 z) {
     volatile f32 quaternion[4] __attribute__((aligned(16)));
     f32 half;
     f32 cx;
@@ -86,15 +86,15 @@ void sdfConvertWrappedEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z) {
     f32 cz;
     f32 sz;
 
-    half = sdfWrapAngle(-x) * 0.5f;
+    half = sdfClipAngleValuePI(-x) * 0.5f;
     cx = sdfCos(half);
-    sx = sdfSinPoly(half);
-    half = sdfWrapAngle(-y) * 0.5f;
+    sx = sdfSin(half);
+    half = sdfClipAngleValuePI(-y) * 0.5f;
     cy = sdfCos(half);
-    sy = sdfSinPoly(half);
-    half = sdfWrapAngle(-z) * 0.5f;
+    sy = sdfSin(half);
+    half = sdfClipAngleValuePI(-z) * 0.5f;
     cz = sdfCos(half);
-    sz = sdfSinPoly(half);
+    sz = sdfSin(half);
     quaternion[0] = sz * sy * cx + cz * cy * sx;
     quaternion[1] = cz * sy * cx - sz * cy * sx;
     quaternion[2] = sz * cy * cx + cz * sy * sx;
@@ -114,13 +114,13 @@ void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z) {
 
     half = -x * 0.5f;
     cx = sdfCos(half);
-    sx = sdfSinPoly(half);
+    sx = sdfSin(half);
     half = -y * 0.5f;
     cy = sdfCos(half);
-    sy = sdfSinPoly(half);
+    sy = sdfSin(half);
     half = -z * 0.5f;
     cz = sdfCos(half);
-    sz = sdfSinPoly(half);
+    sz = sdfSin(half);
     quaternion[0] = sz * sy * cx + cz * cy * sx;
     quaternion[1] = cz * sy * cx - sz * cy * sx;
     quaternion[2] = sz * cy * cx + cz * sy * sx;
@@ -133,7 +133,7 @@ extern f32 D_00398900[4];
 extern f32 D_00398910[4];
 
 /* vu0 routine: compose pitch and offset-adjusted planar direction quaternions. */
-void func_002E8038(f32 xOffset, f32 yOffset) {
+void LookAt(f32 xOffset, f32 yOffset) {
     f32 input[4];
     f32 quaternion[4];
     f32 x;
@@ -196,7 +196,7 @@ void func_002E8038(f32 xOffset, f32 yOffset) {
 
 /* vu0 routine: blend vf10/vf11 along the shorter quaternion arc into vf10.
  * blendAmount is used without clamping; the final step normalizes either blend. */
-void effMiscSlerpQuaternionVu(f32 blendAmount) {
+void Slerp(f32 blendAmount) {
     f32 dotProduct;
     f32 firstWeight;
     f32 secondWeight;
@@ -214,19 +214,19 @@ void effMiscSlerpQuaternionVu(f32 blendAmount) {
     secondWeight = blendAmount;
     /* Near-identical quaternions use linear weights; normalization still follows. */
     if (dotProduct < EFF_QUAT_SLERP_DOT_LIMIT) {
-        angleBetween = sdfAcosTable(dotProduct);
-        sineAngle = sdfSinPoly(angleBetween);
-        firstWeight = sdfSinPoly(firstWeight * angleBetween) / sineAngle;
-        secondWeight = sdfSinPoly(secondWeight * angleBetween) / sineAngle;
+        angleBetween = sdfAcos(dotProduct);
+        sineAngle = sdfSin(angleBetween);
+        firstWeight = sdfSin(firstWeight * angleBetween) / sineAngle;
+        secondWeight = sdfSin(secondWeight * angleBetween) / sineAngle;
     }
     VU0_SET_SCALARS_VF2_VF3(firstWeight, secondWeight);
     VU0_WEIGHTED_SUM_VF2X_VF3X(vf10, vf10, vf12);
-    effMiscNormalizeVU();
+    Normalize();
 }
 
 /* vu0 routine: shorter-arc linear blend of vf10/vf11 into vf10, then normalize.
  * blendAmount is used without clamping. */
-void effMiscQuaternionNlerpVU(f32 blendAmount)
+void Lerp(f32 blendAmount)
 {
     f32 dotProduct;
     VU0_DOT_XYZW(dotProduct, vf10, vf11);
@@ -240,12 +240,12 @@ void effMiscQuaternionNlerpVU(f32 blendAmount)
         VU0_SET_SCALARS_VF2_VF3(firstWeight, blendAmount);
         VU0_WEIGHTED_SUM_VF2X_VF3X(vf10, vf10, vf12);
     }
-    effMiscNormalizeVU();
+    Normalize();
 }
 
 /* vu0 routine: rotate the shared reference vector by vf10's quaternion;
  * return atan2(rotated Z, rotated X), its XZ-plane angle. */
-f32 effMiscComputeQuaternionRotatedReferenceAngle(void)
+f32 EulerAngleAxisY(void)
 {
     f32 rotatedZ;
     f32 rotatedX;
@@ -257,9 +257,9 @@ f32 effMiscComputeQuaternionRotatedReferenceAngle(void)
     return sdfAtan2(rotatedZ, rotatedX);
 }
 
-/* Persona 4 sdfGetRand @ 004BD050 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
+/* Persona 4 dds3GetRandA @ 004BD050 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 /* Four-word shift-register PRNG; NULL selects the shared effect RNG state. */
-u32 sdfGetRand(EffRandState* state)
+u32 dds3GetRandA(EffRandState* state)
 {
     u32 x0;
     u32 x1;

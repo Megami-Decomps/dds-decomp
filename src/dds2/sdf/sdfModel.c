@@ -18,14 +18,14 @@
 #include "sdf_packet_alloc.h"
 #include "sdf_packet_list.h"
 /* Declared before first use (were implicit int). */
-extern void sdfApplyResourceListEntriesWithForcedTexture(DevRequest *list, s32 entryIndex);
+extern void sdfMatListUpdatePacket(DevRequest *list, s32 entryIndex);
 extern void sdfResourceListApplyEntryChanges(DevRequest *list, s32 entryIndex);
 extern void sdfSetForcedAssetTextureMode(u32 mode);
-extern void sdfVuCacheObjectVector(u8 *sourceObject);
-extern void sdfVuSelectTransformMatrix(u32 matrixAddress);
+extern void sdfCoreDrawSetFog(u8 *sourceObject);
+extern void sdfCoreDrawSetLight(u32 matrixAddress);
 
-void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
-void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
+void sdfModelMakeLocalTm(SdfDrawNode *node);
+void sdfModelNodeBaseSet(SdfDrawNode *node, SdfItem *item);
 
 
 
@@ -37,7 +37,7 @@ extern vu8 sdfCurrentBufferIndex;
 
 /* Retail selects by nodeId when SDF_MODEL_FIND_DRAW_NODE_BY_ID is set,
  * otherwise by array index. */
-SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 nodeIdOrIndex) {
+SdfDrawNode *sdfModelSearchNode(SdfModel *model, s32 nodeIdOrIndex) {
     DevRequest *list = model->list;
     s16 entryCount;
     SdfDrawNode **entries;
@@ -61,7 +61,7 @@ SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 nodeIdOrIndex) {
 }
 
 /* Append a DMA REF for eight quadwords and a VIF V4-32 UNPACK for seven vectors. */
-SdfModelPacket *sdfModelWriteAddressPacket(SdfDrawNode *node, SdfModelPacket *packet, s32 frameIndex) {
+SdfModelPacket *sdfModelSetTmRefPacket(SdfDrawNode *node, SdfModelPacket *packet, s32 frameIndex) {
     u32 address = (u32)(node->workspace + (frameIndex << 7)) & 0x0FFFFFFF;
 
     packet->dmaTag.bits = ((s64)address << 32) | 0x30000008;
@@ -71,21 +71,21 @@ SdfModelPacket *sdfModelWriteAddressPacket(SdfDrawNode *node, SdfModelPacket *pa
 }
 
 /* Append a DMA RET tag with no transferred quadwords and zero VIF codes. */
-SdfModelPacket *sdfModelWriteFixedPacket(SdfModelPacket *packet) {
+SdfModelPacket *sdfModelSetTermPacket(SdfModelPacket *packet) {
     packet->vifCodes.bits = 0;
     packet->dmaTag.bits = 0x60000000;
     return packet + 1;
 }
 
 /* Select an asset packet from the root model's parsed resource table. */
-SdfDmaTagHeader *sdfModelWriteIndexedAssetPacket(SdfModel *model, s32 index, SdfDmaTagHeader *packet, s32 frame) {
-    return sdfInitAssetDrawEntryReferenceNode(((struct SdfAsset **)model->resources->buffer)[index], packet,
+SdfDmaTagHeader *sdfModelSetMatRefPacket(SdfModel *model, s32 index, SdfDmaTagHeader *packet, s32 frame) {
+    return sdfMatMakePacket(((struct SdfAsset **)model->resources->buffer)[index], packet,
                                               frame);
 }
 
 /* Walk a read-only command list and report its total packet byte size, the
  * number of kind-3 entries, and the kind 4-8 quadword total. */
-s32 sdfCommandListMeasure(const u32 *list, s32 *outCount, s32 *outQuadwords) {
+s32 sdfModelGetDrawPacketSize(const u32 *list, s32 *outCount, s32 *outQuadwords) {
     s32 remainingCommandCount;
     const SdfMeasureCommandPrefix *command;
     s32 bytes;
@@ -133,14 +133,14 @@ s32 sdfCommandListMeasure(const u32 *list, s32 *outCount, s32 *outQuadwords) {
     return bytes != 0 ? bytes + 0x20 : 0;
 }
 
-SdfDmaTagHeader *sdfModelBuildIndexedCommandPayload(SdfDrawNode *node, SdfIndexedCommandView *command,
+SdfDmaTagHeader *sdfModelSetNormalDrawPacket(SdfDrawNode *node, SdfIndexedCommandView *command,
                                                     SdfDmaTagHeader *packet, s32 frame) {
     u32 packed = command->assetIndexAndCount;
     u16 assetIndex = packed >> 16;
     u16 quadwordCount = packed;
     SdfDmaTagHeader *payload;
 
-    payload = sdfModelWriteIndexedAssetPacket(node->root, assetIndex, packet, frame);
+    payload = sdfModelSetMatRefPacket(node->root, assetIndex, packet, frame);
     payload->control = 0x30;
     payload->quadwordCount = quadwordCount;
     payload->address = command->address & 0x0FFFFFFF;
@@ -149,12 +149,12 @@ SdfDmaTagHeader *sdfModelBuildIndexedCommandPayload(SdfDrawNode *node, SdfIndexe
     return payload + 1;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelBuildIndexedCommandPackets);
+INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelSetOneSkinDrawPacket);
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelBuildClippedCommandPackets);
+INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelLinkShapedDrawPacket);
 
 /* Prepend a chip-allocated command node to one buffered draw list. */
-SdfCommandNode *sdfDrawNodePrependCommandNode(SdfDrawNode *drawNode, s32 packetSelector, s32 listIndex) {
+SdfCommandNode *sdfModelNewPacketHeader(SdfDrawNode *drawNode, s32 packetSelector, s32 listIndex) {
     SdfCommandNode *node = sdfChipAllocDirect(sizeof(*node));
     SdfCommandNode **head = (SdfCommandNode **)((u32)listIndex * sizeof(*drawNode->lists) + (u32)drawNode +
                                                (u32)&((SdfDrawNode *)0)->lists);
@@ -177,7 +177,7 @@ extern u32 sdfMemLock(struct SdfMemBlock *allocation);
  * kind/selector/payload stores ahead of the halfword/pointer stores by #dependents, reproducing retail's
  * sb kind, sb selector, sw payload, sh, sw next, sw alloc, sw head order. Loop cases 4/6/8 and 5/7 stay separate
  * bodies (a fall-through merges the argument moves). */
-void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList,
+void sdfModelLinkDrawPacket(SdfDrawNode *node, u32 *commandList,
                                 s32 packetSelector, s32 alternateSelector, s32 listIndex) {
     s32 commandNodeCount;
     s32 referenceQuadwords;
@@ -191,12 +191,12 @@ void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList,
     SdfCommandNode *next;
     void **head;
 
-    bytes = sdfCommandListMeasure(commandList, &commandNodeCount, &referenceQuadwords);
+    bytes = sdfModelGetDrawPacketSize(commandList, &commandNodeCount, &referenceQuadwords);
     if (bytes == 0 && commandNodeCount == 0 && referenceQuadwords == 0) {
         return;
     }
     cursor = commandList;
-    sdfEnsureFreeRootWorkspace(node);
+    sdfModelAllocTmPacket(node);
     count = *cursor++;
     if (alternateSelector != 0) {
         u16 headerSelector = count >> 16;
@@ -222,27 +222,27 @@ void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList,
         command = (SdfMeasureCommandPrefix *)*cursor++;
         switch (command->kind) {
         case 1:
-            packet = sdfModelBuildIndexedCommandPayload(node, (SdfIndexedCommandView *)command, packet, listIndex);
+            packet = sdfModelSetNormalDrawPacket(node, (SdfIndexedCommandView *)command, packet, listIndex);
             break;
         case 2:
-            packet = sdfModelBuildIndexedCommandPackets(node, command, packet, listIndex);
+            packet = sdfModelSetOneSkinDrawPacket(node, command, packet, listIndex);
             break;
         case 3:
-            listNode = sdfDrawNodePrependCommandNode(node, packetSelector, listIndex);
+            listNode = sdfModelNewPacketHeader(node, packetSelector, listIndex);
             listNode->kind = 2;
             listNode->payload = command;
             break;
         case 4:
         case 6:
         case 8:
-            listNode = sdfDrawNodePrependCommandNode(node, packetSelector, listIndex);
+            listNode = sdfModelNewPacketHeader(node, packetSelector, listIndex);
             listNode->kind = 3;
             listNode->payload = command;
             break;
         case 5:
         case 7:
-            sdfProcessReferencedObjects(node->root, (SdfObjectRefCommand *)command);
-            listNode = sdfDrawNodePrependCommandNode(node, packetSelector, listIndex);
+            sdfCoreDrawScanOneSkinNodes(node->root, (SdfObjectRefCommand *)command);
+            listNode = sdfModelNewPacketHeader(node, packetSelector, listIndex);
             listNode->kind = 3;
             listNode->payload = command;
             break;
@@ -250,12 +250,12 @@ void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList,
         count--;
     } while (count != 0);
     if (bytes != 0) {
-        sdfModelWriteFixedPacket((SdfModelPacket *)packet);
+        sdfModelSetTermPacket((SdfModelPacket *)packet);
     }
 }
 
 /* Build the local rotation basis and append its translation as the fourth row. */
-void sdfDrawNodeBuildMatrix(SdfDrawNode *node) {
+void sdfModelMakeLocalTm(SdfDrawNode *node) {
     VU0_LOAD_VF(vf10, node->quaternion);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf31, node->translation);
@@ -263,7 +263,7 @@ void sdfDrawNodeBuildMatrix(SdfDrawNode *node) {
 }
 
 /* Copy item identity, Euler rotation, translation, scale and optional clipping bounds. */
-void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item) {
+void sdfModelNodeBaseSet(SdfDrawNode *node, SdfItem *item) {
     node->sourceItem = item;
     node->nodeId = item->nodeId;
     sdfConvertEulerAnglesToQuaternionVU(item->rotationX, item->rotationY, item->rotationZ);
@@ -271,22 +271,22 @@ void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item) {
     PCP_COPY_VECTOR(node->translation, &item->translation);
     PCP_COPY_VECTOR(node->scale, &item->scale);
     node->translation[3] = 1.0f;
-    sdfDrawNodeBuildMatrix(node);
+    sdfModelMakeLocalTm(node);
     node->boundsCorners = item->boundsCorners;
 }
 
-void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item) {
+void sdfModelNodeSet(SdfDrawNode *node, SdfItem *item) {
     s32 pass;
     s32 slot;
     u32 **cursor;
     u32 *commandList;
 
-    sdfDrawNodeSetFromItem(node, item);
+    sdfModelNodeBaseSet(node, item);
     switch (item->commandSetupMode) {
     case SDF_ITEM_COMMAND_SETUP_INLINE_LISTS:
         for (pass = 0; pass != 2; pass++) {
             for (slot = 0; slot != 3; slot++) {
-                sdfDrawNodeBuildCommandList(node, item->commandData.inlineCommandLists[slot],
+                sdfModelLinkDrawPacket(node, item->commandData.inlineCommandLists[slot],
                               slot, 0, pass);
             }
         }
@@ -296,7 +296,7 @@ void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item) {
             for (pass = 0; pass != 2; pass++) {
                 cursor = item->commandData.commandList.commandLists;
                 while ((commandList = *cursor++) != NULL) {
-                    sdfDrawNodeBuildCommandList(node, commandList, 0, 1, pass);
+                    sdfModelLinkDrawPacket(node, commandList, 0, 1, pass);
                 }
             }
         }
@@ -305,21 +305,21 @@ void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item) {
 }
 
 /* Reset a draw node's command lists and initialize both buffered passes. */
-void sdfModelResetAndInitNodes(SdfDrawNode *node, u32 *commandList, s32 packetSelector) {
+void sdfModelNodeSetShape(SdfDrawNode *node, u32 *commandList, s32 packetSelector) {
     s32 passIndex;
 
     node->sourceItem = commandList;
-    sdfFreeNodeLists(node);
-    sdfEnsureFreeRootWorkspace(node);
-    sdfDrawNodeBuildMatrix(node);
+    sdfModelPacketFree(node);
+    sdfModelAllocTmPacket(node);
+    sdfModelMakeLocalTm(node);
     for (passIndex = 0; passIndex != 2; passIndex++) {
-        sdfDrawNodeBuildCommandList(node, commandList, packetSelector, 0, passIndex);
+        sdfModelLinkDrawPacket(node, commandList, packetSelector, 0, passIndex);
     }
 }
 
 
 /* Allocate `count` zeroed two-pair slot entries and attach them to the model. */
-void sdfModelAllocateSlotPairs(SdfModel *model, s32 count) {
+void sdfModelMakeMorphList(SdfModel *model, s32 count) {
     DevRequest *buf;
     SdfSlotEntry *entries;
     s32 slotIndex;
@@ -339,17 +339,17 @@ void sdfModelAllocateSlotPairs(SdfModel *model, s32 count) {
     }
 }
 
-SdfDrawNode *sdfCreateDrawNode(void);
-SdfModel *sdfCreateBufferedTransformSlot(void);
-void sdfResizeBufferedSlotRequest(SdfModel *model, s32 count);
-void sdfAppendBufferedRouteNode(SdfModel *list, SdfDrawNode *owner, SdfDrawNode *node);
-DevRequest *sdfAssetListParse(DevRequest *lookup, u32 *data);
+SdfDrawNode *sdfModelNodeNew(void);
+SdfModel *sdfModelRootNew(void);
+void sdfModelAllocNodeList(SdfModel *model, s32 count);
+void sdfModelNodeAdd(SdfModel *list, SdfDrawNode *owner, SdfDrawNode *node);
+DevRequest *sdfMatListMake(DevRequest *lookup, u32 *data);
 
 /* Build the buffered model, parse its asset records and create one draw node per
  * item, linking each node under its parent item's node when it has one. */
-SdfModel *sdfModelCreateFromAssetData(void *assetData, SdfItemListRef *listRef) {
+SdfModel *sdfModelMakeRoot(void *assetData, SdfItemListRef *listRef) {
     s32 itemIndex = 0;
-    SdfModel *model = sdfCreateBufferedTransformSlot();
+    SdfModel *model = sdfModelRootNew();
     SdfItemList *list;
     s32 count;
     SdfItem *item;
@@ -357,22 +357,22 @@ SdfModel *sdfModelCreateFromAssetData(void *assetData, SdfItemListRef *listRef) 
     SdfDrawNode *parent;
 
     model->assetData = assetData;
-    model->resources = sdfAssetListParse(assetData, listRef->serializedAssetData);
+    model->resources = sdfMatListMake(assetData, listRef->serializedAssetData);
     model->chunkTable = listRef->chunkTable;
-    sdfModelAllocateSlotPairs(model, listRef->slotPairCount);
+    sdfModelMakeMorphList(model, listRef->slotPairCount);
     list = listRef->items;
     count = list->count;
     list++;
-    sdfResizeBufferedSlotRequest(model, count);
+    sdfModelAllocNodeList(model, count);
     item = (SdfItem *)list;
     if (count != itemIndex) {
         do {
-            node = sdfCreateDrawNode();
+            node = sdfModelNodeNew();
             parent = NULL;
             if (item->parentNodeIndex >= 0) {
                 parent = ((SdfDrawNode **)model->list->buffer)[item->parentNodeIndex];
             }
-            sdfAppendBufferedRouteNode(model, parent, node);
+            sdfModelNodeAdd(model, parent, node);
             itemIndex++;
             node->nodeId = item->nodeId;
             item++;
@@ -382,16 +382,16 @@ SdfModel *sdfModelCreateFromAssetData(void *assetData, SdfItemListRef *listRef) 
 }
 
 /* Attach each 0x50-byte item to the corresponding model draw node. */
-SdfModel *sdfModelCreateWithItems(void *assetData, SdfItemListRef *listRef) {
+SdfModel *sdfModelMake(void *assetData, SdfItemListRef *listRef) {
     s32 itemIndex = 0;
-    SdfModel *model = sdfModelCreateFromAssetData(assetData, listRef);
+    SdfModel *model = sdfModelMakeRoot(assetData, listRef);
     SdfItemList *list = listRef->items;
     s32 count = list->count;
     SdfItem *item = list->firstItem;
 
     if (count != itemIndex) {
         do {
-            sdfDrawNodeBuildFromItemAndCommands(((SdfDrawNode **)model->list->buffer)[itemIndex], item);
+            sdfModelNodeSet(((SdfDrawNode **)model->list->buffer)[itemIndex], item);
             item++;
             itemIndex++;
         } while (itemIndex != count);
@@ -400,9 +400,9 @@ SdfModel *sdfModelCreateWithItems(void *assetData, SdfItemListRef *listRef) {
 }
 
 /* Attach each item using the alternate draw-node setup path. */
-SdfModel *sdfModelCreateWithAlternateItems(void *assetData, SdfItemListRef *listRef) {
+SdfModel *sdfModelMakeEarly(void *assetData, SdfItemListRef *listRef) {
     s32 itemIndex = 0;
-    SdfModel *model = sdfModelCreateFromAssetData(assetData, listRef);
+    SdfModel *model = sdfModelMakeRoot(assetData, listRef);
     SdfItemList *list;
     s32 count;
     SdfItem *item;
@@ -413,7 +413,7 @@ SdfModel *sdfModelCreateWithAlternateItems(void *assetData, SdfItemListRef *list
     item = list->firstItem;
     if (count != itemIndex) {
         do {
-            sdfDrawNodeSetFromItem(((SdfDrawNode **)model->list->buffer)[itemIndex], item);
+            sdfModelNodeBaseSet(((SdfDrawNode **)model->list->buffer)[itemIndex], item);
             item++;
             itemIndex++;
         } while (itemIndex != count);
@@ -422,7 +422,7 @@ SdfModel *sdfModelCreateWithAlternateItems(void *assetData, SdfItemListRef *list
 }
 
 /* Compose each draw node's VU transform and visit its circular child list. */
-void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, const f32 (*parentMatrix)[4], s32 frame) {
+void sdfModelEvalNode(SdfDrawNode *drawNode, const f32 (*parentMatrix)[4], s32 frame) {
     f32 *xAxis = drawNode->localMatrix[0];
     f32 *yAxis;
     f32 *zAxis;
@@ -443,25 +443,25 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, const f32 (*parentM
     translation = drawNode->translation;
     VU0_LOAD_VF_MEMORY(vf31, translation);
     VU0_LOAD_MATRIX_B(parentMatrix);
-    sdfMultiplyVuMatrixInPlace();
+    MultMatrixRevNoArg();
     transformed = drawNode->worldMatrix;
     VU0_STORE_MATRIX(transformed);
     workspace = drawNode->workspace;
     if (workspace != NULL) {
-        sdfWriteVuLightingPacket((VuLightingPacket *)(workspace + (frame << 7)));
+        sdf3DPrimSetTmPacket((VuLightingPacket *)(workspace + (frame << 7)));
     }
     child = drawNode->children;
     if (child == 0) {
         return;
     }
     do {
-        sdfModelUpdateDrawNodeTransforms(child, transformed, frame);
+        sdfModelEvalNode(child, transformed, frame);
         child = child->next;
     } while (child != drawNode->children);
 }
 
 /* Scale the root transform and propagate it into the first draw node. */
-void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame) {
+void sdfModelEvalTm2(SdfModel *model, s32 frame) {
     u128 rootMatrix[4];
     void *transform = model->matrix;
     f32 *scale;
@@ -473,12 +473,12 @@ void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame) {
     VU0_MUL_MATRIX_ROWS_VF10();
     VU0_STORE_MATRIX_M(rootMatrix[0], rootMatrix[1], rootMatrix[2], rootMatrix[3]);
     list = model->list;
-    sdfModelUpdateDrawNodeTransforms(((SdfDrawNode **)list->buffer)[0], (const f32 (*)[4])rootMatrix, frame);
+    sdfModelEvalNode(((SdfDrawNode **)list->buffer)[0], (const f32 (*)[4])rootMatrix, frame);
 }
 
 /* Update the model with the engine's current signed frame index. */
-void sdfModelUpdateCurrentFrameTransforms(SdfModel *model) {
-    sdfModelUpdateRootTransforms(model, (s8)sdfCurrentBufferIndex);
+void sdfModelEvalTm(SdfModel *model) {
+    sdfModelEvalTm2(model, (s8)sdfCurrentBufferIndex);
 }
 
 /* Store a provider's four draw surfaces and make the second a key-sorted pool. */
@@ -489,12 +489,12 @@ void sdfStoreMessageWordsAndNotifyConsumer(struct SdfPoolNode **surfaces, struct
     surfaces[0] = first;
     surfaces[2] = third;
     surfaces[1] = pool;
-    sdfInstallPoolNodeReleaseCallbacks((SdfPool *)pool);
+    sdfModelSetOtCallbacks((SdfPool *)pool);
 }
 
 /* Nonzero when the bounds box lies entirely outside one clip plane: each
  * plane's bit must be set in all four 6-bit clip-flag groups. */
-s32 sdfModelTestTransformedClipVectors(const f32 *bounds) {
+s32 sdfModelCheckBounds(const f32 *bounds) {
     s32 flags;
     s32 result;
 
@@ -505,7 +505,7 @@ s32 sdfModelTestTransformedClipVectors(const f32 *bounds) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelBuildVisibleNodePackets);
+INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelTempPacketLinkOt);
 
 #include "sdf.h"
 extern u8 D_00438A34;
@@ -513,7 +513,7 @@ extern void *D_00438A64;
 extern void *D_00438A68;
 extern f32 D_00438A48, D_00438A4C;
 extern f32 D_0040B620[16];
-extern void sdfVuSetGlobalScale(f32);
+extern void sdfCoreDrawSetZBias(f32);
 /* Build one per-frame packet list for each visible node resource variant. */
 void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
     s32 frame;
@@ -534,17 +534,17 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
 
     model->flags &= (u8)~0x10;
     if (model->flags & SDF_MODEL_ALTERNATE_ITEM_SETUP) {
-        sdfBuildModelPacketsVia(sdfModelBuildVisibleNodePackets, surfaces, model);
+        sdfBuildModelPacketsVia(sdfModelTempPacketLinkOt, surfaces, model);
     }
 
     frame = (s8)sdfCurrentBufferIndex;
     if (model->flags & 0x20) {
         sdfSetForcedAssetTextureMode(1);
-        sdfApplyResourceListEntriesWithForcedTexture(model->resources, frame);
+        sdfMatListUpdatePacket(model->resources, frame);
         sdfSetForcedAssetTextureMode(0);
     } else if (model->flags & 0x40) {
         sdfSetForcedAssetTextureMode(2);
-        sdfApplyResourceListEntriesWithForcedTexture(model->resources, frame);
+        sdfMatListUpdatePacket(model->resources, frame);
         sdfSetForcedAssetTextureMode(0);
     } else {
         sdfResourceListApplyEntryChanges(model->resources, frame);
@@ -594,7 +594,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
         VU0_LOAD_MATRIX(node->worldMatrix);
         sdfPostmultiplyVuMatrixFromMemory(D_0040B620);
         if (node->boundsCorners != NULL &&
-            sdfModelTestTransformedClipVectors(node->boundsCorners) != 0) {
+            sdfModelCheckBounds(node->boundsCorners) != 0) {
             continue;
         }
         VU0_MOVE_VF(vf10, vf31);
@@ -608,7 +608,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
         for (variant = 0; variant != 4; variant++) {
             variantLists[variant] = NULL;
         }
-        sdfVuSetGlobalScale(model->modelScale);
+        sdfCoreDrawSetZBias(model->modelScale);
 
         negativeColor = 0;
         if (color < 0) {
@@ -631,8 +631,8 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
                 *(f32 *)&packets->unkC = depth;
                 packets->firstReferenceSource = (u32)lighting;
                 packets->secondReferenceSource = (u32)secondaryLighting;
-                lightingPacket = (SdfModelLightingCallPacket *)sdfAllocPacketAligned(0x40);
-                sdfModelWriteAddressPacket(node, &lightingPacket->address, frame);
+                lightingPacket = (SdfModelLightingCallPacket *)sdfGrAllocPacketBuff(0x40);
+                sdfModelSetTmRefPacket(node, &lightingPacket->address, frame);
                 lightingPacket->firstHeader = 0x20000002;
                 lightingPacket->secondHeader = secondHeader;
                 lightingPacket->lightingCommand = 0x6E01C002;
@@ -649,29 +649,29 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
             switch (entry->kind) {
             case 1: {
                 if (!skipCommands) {
-                    u8 *referencePacket = (u8 *)sdfAllocPacketAligned(0x20);
+                    u8 *referencePacket = (u8 *)sdfGrAllocPacketBuff(0x20);
                     *(u16 *)referencePacket = 0;
                     *(u32 *)(referencePacket + 4) = ((u32)entry + 0x10) & 0x0FFFFFFF;
                     *(u64 *)(referencePacket + 8) = 0;
                     *(u128 *)(referencePacket + 16) = 0;
-                    sdfAppendCallPacket(packets, (u32)referencePacket);
+                    sdfDrawTagLinkCall(packets, (u32)referencePacket);
                 }
                 break;
             }
             case 2:
                 if (!skipCommands) {
-                    sdfModelBuildClippedCommandPackets(node, entry->payload, packets, frame);
+                    sdfModelLinkShapedDrawPacket(node, entry->payload, packets, frame);
                 }
                 break;
             case 3: {
                 u32 packet;
-                sdfVuSelectTransformMatrix((u32)lighting);
-                sdfVuCacheObjectVector((u8 *)secondaryLighting);
-                packet = sdfModelBuildKind3CommandPacket(node, entry->payload, nodeFlags, color,
+                sdfCoreDrawSetLight((u32)lighting);
+                sdfCoreDrawSetFog((u8 *)secondaryLighting);
+                packet = sdfCorePacketGen(node, entry->payload, nodeFlags, color,
                                        firstScalar, secondScalar,
                                        frame, skipCommands);
                 if (packet != 0) {
-                    sdfAppendPacket(packets, packet);
+                    sdfDrawTagLink(packets, packet);
                 }
                 break;
             }
@@ -696,7 +696,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
 }
 
 /* Copy the destination's declared number of 16-byte object entries. */
-void sdfModelCopyData(DevRequest *destination, const DevRequest *source) {
+void sdfModelMorphListCopyStat(DevRequest *destination, const DevRequest *source) {
     s16 count;
 
     if (destination == NULL) {

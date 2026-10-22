@@ -42,7 +42,7 @@ typedef char SdfGsGouraudTrianglePacket_drawing_at_0x10[
 typedef char SdfGsGouraudTrianglePacket_unwrittenTail_at_0x58[
     ((u32)&((SdfGsGouraudTrianglePacket *)0)->unwrittenTail == 0x58) ? 1 : -1];
 
-void sdfBuildPacket10C(SdfGsGouraudTrianglePayload *packet, s32 primitive,
+void sdfPrimSetG3Elem(SdfGsGouraudTrianglePayload *packet, s32 primitive,
     s32 x0, s32 y0, s32 color0, s32 x1, s32 y1, s32 color1,
     s32 x2, s32 y2, s32 color2, s32 depth);
 
@@ -74,7 +74,7 @@ typedef char SdfGsGouraudQuadPacket_drawing_at_0x10[
 typedef char SdfGsGouraudQuadPacket_unwrittenTail_at_0x68[
     ((u32)&((SdfGsGouraudQuadPacket *)0)->unwrittenTail == 0x68) ? 1 : -1];
 
-void sdfWriteGouraudQuadPacket(SdfGsGouraudQuadPayload *packet, s32 primitive,
+void sdfPrimSetG4Elem(SdfGsGouraudQuadPayload *packet, s32 primitive,
     s32 x0, s32 y0, s32 color0, s32 x1, s32 y1, s32 color1,
     s32 x2, s32 y2, s32 color2, s32 x3, s32 y3, s32 color3, s32 depth);
 

@@ -573,7 +573,7 @@ void mnuDrawPartyVitalsAndProfile(EffectSlotSet **sets, MenuEffectPair *hpBar, M
                    u32 iconOpacity, s32 dim) {
     u8 *name;
     s32 profile = ptyGetCurrentProfileId(entry);
-    u32 color = uiBlendColors(0xA09DC380, 0xA09DC300, opacity);
+    u32 color = fclBlendColor(0xA09DC380, 0xA09DC300, opacity);
     FrFontGlyph *glyph;
     s32 i;
 
@@ -586,7 +586,7 @@ void mnuDrawPartyVitalsAndProfile(EffectSlotSet **sets, MenuEffectPair *hpBar, M
                 sets[entry->unitId]->workEntries[0].savedColors[i];
         } else {
             sets[entry->unitId]->workEntries[0].geometry.cornerColors[i] =
-                uiBlendColors(sets[entry->unitId]->workEntries[0].savedColors[i],
+                fclBlendColor(sets[entry->unitId]->workEntries[0].savedColors[i],
                               sets[entry->unitId]->workEntries[0].savedColors[i] & 0xFF,
                               0x80);
         }
@@ -1057,7 +1057,7 @@ s32 mnuStaffSwitchPartyPage(KwlnTask *requestArgument) {
     mnuClearListFlagsOneAndTwo(&((CampMenuContext *)context)->partyWindow.lists[0]->stateFlags);
     if (pageChanged != 0) {
         mnuInitializeStaffPartyScene((KwlnTask *)requestArgument);
-        sndSetSequenceVolumePan(4, 0x7F, 0x3F);
+        p2sdPlaySE(4, 0x7F, 0x3F);
         menuWork->idleFrames = 0;
         if (menuWork->staffMode == 1) {
             mnuResetSelectedPanelOpacity(context);
@@ -1190,9 +1190,9 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param
 
     frEnableMode(1);
     item = frFontAppendTextToGlyphChain((const char *)(u32)textId, 0, 0, 0, 0);
-    frFontSetGlyphPosition(item, x, top);
+    frSetDrawPosition(item, x, top);
     frSetPriority(item, scale * 0x10);
-    frFontSetChildColors(item, color);
+    frSetFontColor(item, color);
     frDisableMode(1);
     frFontDrawGlyphChain(item, 1, param);
     frDestroyFontRequestAfter(item);
@@ -1276,7 +1276,7 @@ void mnuIdleVoiceTimer(StaffMenuRuntime *menu) {
         }
         if (menu->idleFrames >= MENU_IDLE_VOICE_TICKS) {
             voiceCount = evtStageTestCountFlags(0);
-            evtStageTestQueueMotion(0, sdfGetRand(0) % voiceCount);
+            evtStageTestQueueMotion(0, dds3GetRandA(0) % voiceCount);
             menu->idleFrames = 0;
         }
     }
@@ -1306,7 +1306,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     FrFontGlyph *glyph;
     u8 chainFlag;
 
-    color = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
+    color = fclBlendColor(0xA09DC380, 0xA09DC300, fade);
     if (rangeId >= 0x261) {
         return;
     }
@@ -1322,7 +1322,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     }
     chainFlag = style != 0 ? 4 : 0;
     if (dim != 0) {
-        color = uiBlendColors(color, color & 0xFFFFFF00, 0x80);
+        color = fclBlendColor(color, color & 0xFFFFFF00, 0x80);
     }
     sprintf(text, D_003BC700, value);
     glyph = itfCreateFont2TextGlyph(x - 0x90, y, depth, color, text, 0);

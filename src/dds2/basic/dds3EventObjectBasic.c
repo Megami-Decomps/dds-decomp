@@ -3,32 +3,32 @@
 #include "eff_event.h"
 
 
-void effObjFreeInner(EffWorldNode *object);
-void dds3DestroyObjectBase(ObjBase *resource);
-u8 effObjTestNodeFlags(ObjectTransform *node, u32 flags);
+void dds3FreePoseSet(EffWorldNode *object);
+void dds3ObjectBaseFreeControlWorkData(ObjBase *resource);
+u8 dds3CheckPoseSetFlag(ObjectTransform *node, u32 flags);
 
-void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
+void dds3OffPoseSetFlag(ObjectTransform *node, u32 flags);
 
-void effObjInnerVecBackup(ObjectTransform *node);
+void dds3SetRadiusPoseSet(ObjectTransform *node);
 
 /* Release the event-data handle and its allocation after the inner object. */
-void dds3ReleaseEventData(EffWorldNode *eventObject) {
+void EventObjectBasicDestructor(EffWorldNode *eventObject) {
     DdsSlotResourceBlock *eventData;
 
-    effObjFreeInner(eventObject);
+    dds3FreePoseSet(eventObject);
     eventData = eventObject->data;
-    dds3DestroyObjectBase(eventData->resourceState);
+    dds3ObjectBaseFreeControlWorkData(eventData->resourceState);
     sdfChipFreeDirect(eventData);
 }
 
 /* Snapshot the node's vectors once its pending flag is observed. */
-s32 dds3BackupEventNodeVectorsIfFlagged(EffWorldNode *eventObject) {
+s32 EventObjectBasicMainProcuder(EffWorldNode *eventObject) {
     ObjectTransform *eventNode;
 
     eventNode = eventObject->inner;
-    if (effObjTestNodeFlags(eventNode, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) == 1) {
-        effObjClearNodeFlags(eventNode, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
-        effObjInnerVecBackup(eventNode);
+    if (dds3CheckPoseSetFlag(eventNode, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) == 1) {
+        dds3OffPoseSetFlag(eventNode, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
+        dds3SetRadiusPoseSet(eventNode);
     }
     return 1;
 }

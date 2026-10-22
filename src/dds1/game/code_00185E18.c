@@ -21,13 +21,13 @@ typedef struct {
     u16 kind; /* 0x124: kind 0x109 selects separate slots for the two resources */
 } BlurActor;
 
-extern void effThunderUpdateChainSegments(EffThunderGroup *group);
-extern void effThunderGroupRelease(EffThunderGroup *group);
+extern void effPCP_ThunderPolyListDraw(EffThunderGroup *group);
+extern void effPCP_ThunderPolyListDelete(EffThunderGroup *group);
 
-void effFreePairedResources(PairedEffectResources *pair) {
+void effPCPBossMETATOBeamDelete(PairedEffectResources *pair) {
 
-    effThunderGroupRelease(pair->resource[1]);
-    effThunderGroupRelease(pair->resource[0]);
+    effPCP_ThunderPolyListDelete(pair->resource[1]);
+    effPCP_ThunderPolyListDelete(pair->resource[0]);
     sdfChipFreeDirect(pair);
 }
 
@@ -55,16 +55,16 @@ void effUpdatePairedResources(PairedEffectResources *work) {
             } else {
                 t = 1.0f;
             }
-            blendColor = effBlendColor(work->colorWithAlpha & 0xFFFFFF, work->colorWithAlpha, t);
+            blendColor = effColorBlend(work->colorWithAlpha & 0xFFFFFF, work->colorWithAlpha, t);
             resourceIndex = 0;
             do {
                 if (((BlurActor *)actor)->kind == 0x109) {
-                    btlSetActorEffectParameterOrMuzzlePosition((struct BtlUnit *)actor, resourceIndex + 0x14);
+                    effBTLModelGetMarkPosition2((struct BtlUnit *)actor, resourceIndex + 0x14);
                 } else {
-                    btlSetActorEffectParameterOrMuzzlePosition((struct BtlUnit *)actor, 0xB);
+                    effBTLModelGetMarkPosition2((struct BtlUnit *)actor, 0xB);
                 }
                 VU0_STORE_VF(vf10, actorPosition);
-                record = effGetPairedBlurResourceVectorRecordAddress(work->resource[resourceIndex]);
+                record = effPCP_ThunderPolyListGetParam(work->resource[resourceIndex]);
                 VU0_LOAD_VF(vf10, actorPosition);
                 VU0_MOVE_VF(vf12, vf10);
                 VU0_STORE_VF(vf10, record->points[0]);
@@ -75,8 +75,8 @@ void effUpdatePairedResources(PairedEffectResources *work) {
                 VU0_LERP_VF10(0.66f);
                 VU0_STORE_VF(vf10, record->points[2]);
                 VU0_STORE_VF(vf11, record->points[3]);
-                effSetResourceBlendColor(work->resource[resourceIndex], blendColor);
-                effThunderUpdateChainSegments(work->resource[resourceIndex]);
+                effPCP_ThunderPolyListSetColor(work->resource[resourceIndex], blendColor);
+                effPCP_ThunderPolyListDraw(work->resource[resourceIndex]);
                 resourceIndex++;
             } while (resourceIndex < 2);
         }
@@ -105,7 +105,7 @@ extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
 extern void sdfBuildFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
-extern u32 fldIsUpdateInhibited();
+extern u32 dds3NullDrawProc();
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 
 
@@ -176,7 +176,7 @@ void effBuildBlurTransformedQuad(const BlurSource *source, BlurPacketQuad *quad,
     }
     scale = source->displacement;
     cosine = sdfCos(source->angle);
-    sine = sdfSinPoly(source->angle);
+    sine = sdfSin(source->angle);
     scaledU = (quad->vertices[0].s - centerX) * scale;
     scaledV = (quad->vertices[0].t - centerY) * scale;
     u = scaledU * cosine - scaledV * sine;
@@ -255,20 +255,20 @@ void effDrawBlurRectangle(const EffBlurQuad *source)
     u64 *samplingPacket, *textureAlphaPacket, *blendPacket, *clampPacket;
     SdfDrawPacket *drawPacket;
 
-    if (fldIsUpdateInhibited() == 0) {
-        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(list);
-        tag = (void *)sdfAllocPacketAligned(0x20);
-        sdfAppendDmaPrimary(list, (u32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, tag);
-        samplingPacket = (void *)sdfAllocPacketAligned(0x30);
+    if (dds3NullDrawProc() == 0) {
+        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(list);
+        tag = (void *)sdfGrAllocPacketBuff(0x20);
+        sdfGrLinkDispFrameTex(list, (u32)kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag);
+        samplingPacket = (void *)sdfGrAllocPacketBuff(0x30);
         samplingPacket[0] = 2;
         samplingPacket[1] = 0x5000000210000000ULL;
         samplingPacket[2] = 0x1000000000008001ULL;
         samplingPacket[3] = 0xE;
         samplingPacket[4] = 0x61;
         samplingPacket[5] = 0x14;
-        sdfAppendPacket(list, (u32)samplingPacket);
-        textureAlphaPacket = (void *)sdfAllocPacketAligned(0x40);
+        sdfDrawTagLink(list, (u32)samplingPacket);
+        textureAlphaPacket = (void *)sdfGrAllocPacketBuff(0x40);
         textureAlphaPacket[0] = 3;
         textureAlphaPacket[1] = 0x5000000310000000ULL;
         textureAlphaPacket[2] = 0x1000000000008002ULL;
@@ -277,8 +277,8 @@ void effDrawBlurRectangle(const EffBlurQuad *source)
         textureAlphaPacket[5] = 0x3B;
         textureAlphaPacket[6] = 0;
         textureAlphaPacket[7] = 0x3F;
-        sdfAppendPacket(list, (u32)textureAlphaPacket);
-        blendPacket = (void *)sdfAllocPacketAligned(0x40);
+        sdfDrawTagLink(list, (u32)textureAlphaPacket);
+        blendPacket = (void *)sdfGrAllocPacketBuff(0x40);
         blendPacket[0] = 3;
         blendPacket[1] = 0x5000000310000000ULL;
         blendPacket[2] = 0x1000000000008002ULL;
@@ -287,8 +287,8 @@ void effDrawBlurRectangle(const EffBlurQuad *source)
         blendPacket[5] = 0x47;
         blendPacket[6] = source->blendControl;
         blendPacket[7] = 0x42;
-        sdfAppendPacket(list, (u32)blendPacket);
-        clampPacket = (void *)sdfAllocPacketAligned(0x30);
+        sdfDrawTagLink(list, (u32)blendPacket);
+        clampPacket = (void *)sdfGrAllocPacketBuff(0x30);
         clampPacket[0] = 2;
         clampPacket[1] = 0x5000000210000000ULL;
         clampPacket[2] = 0x1000000000008001ULL;
@@ -299,10 +299,10 @@ void effDrawBlurRectangle(const EffBlurQuad *source)
             clampPacket[4] = 0x37C00000009ULL;
         }
         clampPacket[5] = 8;
-        sdfAppendPacket(list, (u32)clampPacket);
-        drawPacket = effCreateSizedDrawPacket(1, 0);
-        effBuildBlurTransformedQuad(source, billGetWorkTransformMatrix(drawPacket), 0);
-        sdfAppendPacket(list, (u32)drawPacket);
+        sdfDrawTagLink(list, (u32)clampPacket);
+        drawPacket = effPkt2DAllocTriStrip(1, 0);
+        effBuildBlurTransformedQuad(source, effPkt2DGetPrimPtr(drawPacket), 0);
+        sdfDrawTagLink(list, (u32)drawPacket);
         D_003253E8.append(&D_003253E8, list);
     }
 }
@@ -316,11 +316,11 @@ void effAppendBlurRenderState(void *list, s32 blendControl, SdfTex *resource)
     u64 *samplingPacket, *textureAlphaPacket, *clampPacket;
     void *tag;
 
-    framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, framePacket, 1);
-    sdfAppendDmaTagToList(list, (u32)framePacket);
+    framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
+    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 1);
+    sdfDrawTagLinkRefGif(list, (u32)framePacket);
 
-    blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
+    blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
     blendPacket[0] = 3;
     blendPacket[1] = 0x5000000310000000ULL;
     blendPacket[2] = 0x1000000000008002ULL;
@@ -329,10 +329,10 @@ void effAppendBlurRenderState(void *list, s32 blendControl, SdfTex *resource)
     blendPacket[5] = 0x48;
     blendPacket[6] = 0x44;
     blendPacket[7] = 0x43;
-    sdfAppendPacket(list, (u32)blendPacket);
-    sdfConsCreateDrawPacket(list, resource, 1);
+    sdfDrawTagLink(list, (u32)blendPacket);
+    sdf2DLinkTexPacket(list, resource, 1);
 
-    blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
+    blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
     blendPacket[0] = 3;
     blendPacket[1] = 0x5000000310000000ULL;
     blendPacket[2] = 0x1000000000008002ULL;
@@ -341,21 +341,21 @@ void effAppendBlurRenderState(void *list, s32 blendControl, SdfTex *resource)
     blendPacket[5] = 0x47;
     blendPacket[6] = blendControl | 0x10;
     blendPacket[7] = 0x42;
-    sdfAppendPacket(list, (u32)blendPacket);
+    sdfDrawTagLink(list, (u32)blendPacket);
 
-    tag = (void *)sdfAllocPacketAligned(0x20);
-    sdfAppendDmaPrimary(list, (u32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, tag);
+    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfGrLinkDispFrameTex(list, (u32)kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag);
 
-    samplingPacket = (u64 *)sdfAllocPacketAligned(0x30);
+    samplingPacket = (u64 *)sdfGrAllocPacketBuff(0x30);
     samplingPacket[0] = 2;
     samplingPacket[1] = 0x5000000210000000ULL;
     samplingPacket[2] = 0x1000000000008001ULL;
     samplingPacket[3] = 0xE;
     samplingPacket[4] = 0x61;
     samplingPacket[5] = 0x14;
-    sdfAppendPacket(list, (u32)samplingPacket);
+    sdfDrawTagLink(list, (u32)samplingPacket);
 
-    textureAlphaPacket = (u64 *)sdfAllocPacketAligned(0x40);
+    textureAlphaPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
     textureAlphaPacket[0] = 3;
     textureAlphaPacket[1] = 0x5000000310000000ULL;
     textureAlphaPacket[2] = 0x1000000000008002ULL;
@@ -364,9 +364,9 @@ void effAppendBlurRenderState(void *list, s32 blendControl, SdfTex *resource)
     textureAlphaPacket[5] = 0x3B;
     textureAlphaPacket[6] = 0;
     textureAlphaPacket[7] = 0x3F;
-    sdfAppendPacket(list, (u32)textureAlphaPacket);
+    sdfDrawTagLink(list, (u32)textureAlphaPacket);
 
-    clampPacket = (u64 *)sdfAllocPacketAligned(0x30);
+    clampPacket = (u64 *)sdfGrAllocPacketBuff(0x30);
     clampPacket[0] = 2;
     clampPacket[1] = 0x5000000210000000ULL;
     clampPacket[2] = 0x1000000000008001ULL;
@@ -377,7 +377,7 @@ void effAppendBlurRenderState(void *list, s32 blendControl, SdfTex *resource)
         clampPacket[4] = 0x37C00000009ULL;
     }
     clampPacket[5] = 8;
-    sdfAppendPacket(list, (u32)clampPacket);
+    sdfDrawTagLink(list, (u32)clampPacket);
 }
 
 
@@ -386,41 +386,41 @@ void effAppendBlurRenderState(void *list, s32 blendControl, SdfTex *resource)
 void effAppendBlurRectanglePackets(void *list, const BlurSource *source, u8 fixedPointCoordinates) {
     SdfDrawPacket *packet;
 
-    packet = effCreateSizedDrawPacket(1, 0x200);
-    effBuildBlurUnitTextureQuad(source, billGetWorkTransformMatrix(packet), fixedPointCoordinates);
-    sdfAppendPacket(list, (u32)packet);
-    packet = effCreateSizedDrawPacket(1, 0);
-    effBuildBlurTransformedQuad(source, billGetWorkTransformMatrix(packet), fixedPointCoordinates);
-    sdfAppendPacket(list, (u32)packet);
+    packet = effPkt2DAllocTriStrip(1, 0x200);
+    effBuildBlurUnitTextureQuad(source, effPkt2DGetPrimPtr(packet), fixedPointCoordinates);
+    sdfDrawTagLink(list, (u32)packet);
+    packet = effPkt2DAllocTriStrip(1, 0);
+    effBuildBlurTransformedQuad(source, effPkt2DGetPrimPtr(packet), fixedPointCoordinates);
+    sdfDrawTagLink(list, (u32)packet);
 }
 
 
 /* Queue a 0x40-byte textured packet for the current frame buffer onto `list`, then let the filter ops draw it. */
 void effDrawBlurListWithFramePacket(void *list) {
-    SdfDmaReferenceChainPacket *packet = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
+    SdfDmaReferenceChainPacket *packet = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
 
-    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, packet, 1);
-    sdfAppendDmaTagToList(list, (u32)packet);
+    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, packet, 1);
+    sdfDrawTagLinkRefGif(list, (u32)packet);
     D_003253E8.append(&D_003253E8, list);
 }
 
-extern u32 fldIsUpdateInhibited();
+extern u32 dds3NullDrawProc();
 extern void effAppendBlurRenderState();
 
 /* Queue blend setup and both rectangle packets, then finish with the filter draw. */
 void effDrawBlurSource(const BlurSource *source, SdfTex *resource, u8 fixedPointCoordinates) {
     void *list;
 
-    if (fldIsUpdateInhibited(source) == 0) {
-        list = (void *)sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(list);
+    if (dds3NullDrawProc(source) == 0) {
+        list = (void *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(list);
         effAppendBlurRenderState(list, source->blendControl, resource);
         effAppendBlurRectanglePackets(list, source, fixedPointCoordinates);
         effDrawBlurListWithFramePacket(list);
     }
 }
 
-void effDrawBlurPixelRectangle(EffBlurTemplateBody *work) {
+void dds3EffectBlurSetRect(EffBlurTemplateBody *work) {
     s32 x = work->source.position[0] + 0x100;
     s32 y = work->source.position[1] + 0xE0;
     s32 extent = work->extent;
@@ -435,15 +435,15 @@ void effDrawBlurPixelRectangle(EffBlurTemplateBody *work) {
 
 
 /* Clone a blur template into a fresh allocation. */
-EffBlurTemplate *effCloneBlurTemplate(const EffBlurTemplateBody *src) {
+EffBlurTemplate *dds3EffectPartialMultiBlurCreate(const EffBlurTemplateBody *src) {
     EffBlurTemplate *dst = sdfChipAllocDirect(sizeof(EffBlurTemplate));
 
-    dst->texture = effGetBillResourceTexture(2);
+    dst->texture = dds3BillboardGetGeneralTex(2);
     memcpy(&dst->body, src, sizeof(*src));
     return dst;
 }
 
-void effReleaseBlurTemplate(EffBlurTemplate *owner) {
+void dds3EffectPartialMultiBlurDelete(EffBlurTemplate *owner) {
     sdfChipFreeDirect(owner);
 }
 
@@ -451,7 +451,7 @@ void effReleaseBlurTemplate(EffBlurTemplate *owner) {
 void effDrawBlurPixelRectWithResource(EffBlurTemplate *rect) {
     s32 centerX, centerY, halfExtent;
 
-    if (fldIsUpdateInhibited(rect) == 0) {
+    if (dds3NullDrawProc(rect) == 0) {
         centerX = rect->body.source.position[0] + 0x100;
         centerY = rect->body.source.position[1] + 0xE0;
         halfExtent = rect->body.extent;
@@ -467,7 +467,7 @@ void effDrawBlurPixelRectWithResource(EffBlurTemplate *rect) {
 void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner) {
     s32 centerX, centerY, halfExtent;
 
-    if (fldIsUpdateInhibited(owner) == 0) {
+    if (dds3NullDrawProc(owner) == 0) {
         centerX = owner->body.source.position[0] + 0x1000;
         centerY = (owner->body.source.position[1] + 0xE00) >> 1;
         halfExtent = owner->body.extent;

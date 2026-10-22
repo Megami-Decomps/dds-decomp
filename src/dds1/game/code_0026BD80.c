@@ -28,18 +28,18 @@ extern void mnuSelectFirstListNode(struct MenuList *);
 
 
 extern void mnuDrawMovieMenuListItem();
-extern void sndStartTrackExtended(s32);
+extern void p2sdPlayBGMFade(s32);
 extern void effDrawSpriteWithCornerFade(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
                                         s32 textureSetHandle, s32 slotIndex, s32 layer);
-extern f32 fldVectorLength(f32 *);
+extern f32 vecLength(f32 *);
 extern void sdfVec3SubtractInPlace(f32 *, const f32 *);
 extern void fldRotateVectorAroundY(f32 *, f32);
 extern void sdfVec3AddInPlace(f32 *, const f32 *);
 extern void sdfQuaternionNormalize(f32 *);
 extern void sdfQuatForwardVector(f32 *, f32 *);
-extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *);
+extern f32 vecNormalize(f32 *);
 extern void sdfQuatFromEuler(f32 *, f32, f32, f32);
-extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
+extern void vecTranslate(f32 *, f32 *, f32 *);
 
 
 /* Sprite rows: graphic slot, draw parameter, x offset, y offset. */
@@ -331,13 +331,13 @@ void mnuAdvanceMovieMenuIdleAnimation(void) {
     state->pulseTimer++;
     if (state->pulseTimer >= 61) {
         state->pulseTimer = 0;
-        if (state->slideOffset == 0 && sdfGetRandFloat(0) < 0.1f) {
+        if (state->slideOffset == 0 && dds3GetRandFloatA(0) < 0.1f) {
             mnuMovieMenuState->slideOffset = 0x400;
         }
     }
 
     pulse = (f32)mnuMovieMenuState->pulseTimer / 60.0f;
-    pulse = (sdfSinPoly(pulse * 6.2831853f - 1.5707963f) + 1.0f) * 0.5f;
+    pulse = (sdfSin(pulse * 6.2831853f - 1.5707963f) + 1.0f) * 0.5f;
     mnuDrawSprite(0, 0, 0, 0x80, 0, 8, 0x53);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 0xC, 0x53);
     mnuDrawSprite(0, 0, 0, 0x4C, 0, 0xA, 0x53);
@@ -423,8 +423,8 @@ void mnuUpdateMovieMenuCameraOrbit(f32 *position, f32 *rotation) {
     }
     elapsed = mnuMovieMenuState->orbitFrame - segment * 3600;
     center = D_003AFE80;
-    baseLength = fldVectorLength(path.points[0].v);
-    pointLength = fldVectorLength(path.points[segment].v);
+    baseLength = vecLength(path.points[0].v);
+    pointLength = vecLength(path.points[segment].v);
     *(MovieOrbitVec *)position = *(MovieOrbitVec *)path.points[segment].v;
     sdfVec3SubtractInPlace(position, center.v);
     fldRotateVectorAroundY(position, (f32)elapsed / 3600.0f * -6.2831850051879883f * baseLength / pointLength);
@@ -441,13 +441,13 @@ void mnuUpdateMovieMenuPoseFromInput(f32 *position, f32 *rotation) {
 
     if (kwlnTaskPadButtonStates[0x36] != 0) {
         sdfQuatForwardVector(rotation, forward);
-        sdfVec3NormalizeInPlaceAndGetLength(forward);
+        vecNormalize(forward);
         position[0] += forward[0] * 20.0f;
         position[2] += forward[2] * 20.0f;
     }
     if (kwlnTaskPadButtonStates[0x37] != 0) {
         sdfQuatForwardVector(rotation, forward);
-        sdfVec3NormalizeInPlaceAndGetLength(forward);
+        vecNormalize(forward);
         position[0] -= forward[0] * 20.0f;
         position[2] -= forward[2] * 20.0f;
     }
@@ -475,7 +475,7 @@ void mnuUpdateMovieMenuPoseFromInput(f32 *position, f32 *rotation) {
             axis[0] = 0.0f;
             axis[1] = -1.0f;
             axis[2] = 0.0f;
-            fldNormalizedVectorCross(axis, axis, forward);
+            vecTranslate(axis, axis, forward);
             position[0] += axis[0] * 20.0f;
             position[2] += axis[2] * 20.0f;
         }
@@ -484,7 +484,7 @@ void mnuUpdateMovieMenuPoseFromInput(f32 *position, f32 *rotation) {
             axis[0] = 0.0f;
             axis[1] = -1.0f;
             axis[2] = 0.0f;
-            fldNormalizedVectorCross(axis, axis, forward);
+            vecTranslate(axis, axis, forward);
             position[0] -= axis[0] * 20.0f;
             position[2] -= axis[2] * 20.0f;
         }
@@ -494,7 +494,7 @@ void mnuUpdateMovieMenuPoseFromInput(f32 *position, f32 *rotation) {
         sdfQuatForwardVector(rotation, forward);
         memcpy(axis, forward, sizeof(axis));
         axis[1] += -10.0f;
-        fldNormalizedVectorCross(axis, axis, forward);
+        vecTranslate(axis, axis, forward);
         sdfQuatFromAxisAngle(delta, axis[0], axis[1], axis[2], 0.017453293f);
         sdfQuatMultiply(rotation, rotation, delta);
         sdfQuaternionNormalize(rotation);
@@ -503,7 +503,7 @@ void mnuUpdateMovieMenuPoseFromInput(f32 *position, f32 *rotation) {
         sdfQuatForwardVector(rotation, forward);
         memcpy(axis, forward, sizeof(axis));
         axis[1] += 10.0f;
-        fldNormalizedVectorCross(axis, axis, forward);
+        vecTranslate(axis, axis, forward);
         sdfQuatFromAxisAngle(delta, axis[0], axis[1], axis[2], 0.017453293f);
         sdfQuatMultiply(rotation, rotation, delta);
         sdfQuaternionNormalize(rotation);
@@ -516,7 +516,7 @@ void mnuResetMovieMenuStateAndStartTrack(void) {
     state->transitionMode = 0;
     state->cursor = 0;
     state->idleTicks = 0;
-    sndStartTrackExtended(0x310000);
+    p2sdPlayBGMFade(0x310000);
 }
 
 void mnuClearGlobalMenuStateFields(void) {
@@ -527,7 +527,7 @@ void mnuClearGlobalMenuStateFields(void) {
     state->idleTicks = 0;
 }
 
-void mnuResetTitlePageAndPhase(void) {
+void dds3TitleClearFade(void) {
     MovieMenuState *state = mnuMovieMenuState;
 
     state->transitionMode = 0;
@@ -548,7 +548,7 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
             }
             return 0;
         }
-        sndSetSequenceVolumePan(8, 127, 63);
+        p2sdPlaySE(8, 127, 63);
         return 1;
     case 1:
         if (state->cursor < 90) {
@@ -557,7 +557,7 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
             state->cursor = 0;
         }
         if (mnuIsAnyMenuInputPressed() != 0) {
-            sndSetSequenceVolumePan(8, 127, 63);
+            p2sdPlaySE(8, 127, 63);
             return 1;
         }
         state = mnuMovieMenuState;

@@ -6,6 +6,6 @@
 struct EffWorldNode;
 
 /* Appends a linked kind-2 world node; both inputs remain generic words. */
-struct EffWorldNode *evtSpawnActionObj2(s32 key, s32 value);
+struct EffWorldNode *dds3AddAreaBasic(s32 key, s32 value);
 
 #endif /* EVT_ACTION_OBJECT_H */

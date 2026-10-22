@@ -236,7 +236,7 @@ typedef struct MenuPanelDrawLayout {
 extern const MenuPanelDrawLayout D_0042AD38;
 extern const u8 D_00437BF0[];
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
-extern void itfDrawVertexColoredTriangle(const u32 *, const u32 *, u32, const u32 *, u32);
+extern void cmpDrawTriG(const u32 *, const u32 *, u32, const u32 *, u32);
 extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
 extern u32 scrGetIndexedRecordAddress(u32, s32 *);
 extern void mnuDrawMenuTextById(s32, s32, s32, s32, s32, s32);
@@ -439,7 +439,7 @@ u32 mnuEnterSelectedResourceLabel(KwlnTask *task) {
     mnuSetStateValue(context + 0xaa50, 1);
     evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E5C +
                                     *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(resourceOwner + 0x18) + 0x18) + 0x1c) + 100) * 0x19));
-    dspStartEntry(8);
+    fclStartMessage(8);
     evtSetMessageWindowOptionWhenOpen(0);
     evtStoreValueAndCaptureWindowPanelValue(0xf);
     return 1;
@@ -484,9 +484,9 @@ s32 mnuApplyRandomStatItemEffect(u8 *menu, DatPartyRecord *entry, s32 itemId) {
      */
     cumulativeWeight = 0;
     weightCount = 0;
-    statIndex = eligibleStats[sdfGetRand(NULL) % eligibleCount];
+    statIndex = eligibleStats[dds3GetRandA(NULL) % eligibleCount];
     choices->thirdListIndex = statIndex;
-    roll = sdfGetRand(NULL) % 100;
+    roll = dds3GetRandA(NULL) % 100;
     choices->thirdListValue = 0;
     weightTable = mnuRingCustomizationBonusWeights + rowIndex * 0x1C;
     i = 0;
@@ -521,7 +521,7 @@ s32 mnuUpdatePartySlotAssignmentPopup(KwlnTask *callback) {
     if (state != 0) {
         return state;
     }
-    if (evtGetMessageWindowControlState() != 0) {
+    if (fclChkMessage() != 0) {
         return 0;
     }
     if (evtGetCapturedWindowPanelValue() == 0) {
@@ -570,7 +570,7 @@ u32 mnuEnterSlotLabel(KwlnTask *task) {
     mnuSetStateValue(context + 0xaa50, 1);
     selectedEntry = mnuGetPartyEntryCurrentId(slot);
     evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E5C + selectedEntry * 0x19));
-    dspStartEntry(0xd);
+    fclStartMessage(0xd);
     evtSetMessageWindowOptionWhenOpen(0);
     evtStoreValueAndCaptureWindowPanelValue(0xf);
     return 1;
@@ -590,14 +590,14 @@ s32 mnuPartySlotConfirmClearUpdate(KwlnTask *callback) {
     if (state != 0) {
         return state;
     }
-    if (evtGetMessageWindowControlState() != 0) {
+    if (fclChkMessage() != 0) {
         return 0;
     }
     if (evtGetCapturedWindowPanelValue() == 0) {
         selectedEntry = mnuGetPartyEntryCurrentId(slot);
         mnuClearPartySelectionValues(slot, selectedEntry);
         evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E5C + selectedEntry * 0x19));
-        dspStartEntry(0xE);
+        fclStartMessage(0xE);
         mnuInitPartyPanelSlots(&((MenuContext *)context)->partyPanel);
         mnuRefreshPartyPanelBars(&((MenuContext *)context)->partyWindow);
     }
@@ -981,30 +981,30 @@ void mnuDrawPartySelectionPreviewPanel(MenuContext *context, MenuPageBar *hpBar,
 
     labelId = ptyGetCurrentProfileId(entry);
     layout = D_0042AD38;
-    textColor = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
+    textColor = fclBlendColor(0xA09DC380, 0xA09DC300, fade);
     panelModels = context->panelModels;
 
     x[0] = 0x840;
     y[0] = 0xA30;
-    colors[0] = uiBlendColors(0x1A, 0, 0x100);
+    colors[0] = fclBlendColor(0x1A, 0, 0x100);
     x[1] = 0x840;
     y[1] = 0xDF8;
     colors[1] = colors[0];
     x[2] = 0xB0;
     y[2] = 0xDF8;
     colors[2] = colors[0];
-    itfDrawVertexColoredTriangle(x, y, 0, colors, 0x53);
+    cmpDrawTriG(x, y, 0, colors, 0x53);
 
     x[0] = 0;
     y[0] = 0x8C8;
-    colors[0] = uiBlendColors(0x1A, 0, 0x100);
+    colors[0] = fclBlendColor(0x1A, 0, 0x100);
     x[1] = 0x580;
     y[1] = 0xB88;
     colors[1] = colors[0];
     x[2] = 0;
     y[2] = 0xE50;
     colors[2] = colors[0];
-    itfDrawVertexColoredTriangle(x, y, 0, colors, 0x53);
+    cmpDrawTriG(x, y, 0, colors, 0x53);
 
     effDrawTextureSlotWithBlendedCornerColors(0x840, 0xA28, 0, 0x100, 1, panelModels[0], 0x10, 0x53);
 
@@ -1014,7 +1014,7 @@ void mnuDrawPartySelectionPreviewPanel(MenuContext *context, MenuPageBar *hpBar,
                 panelModels[entry->unitId]->workEntries->savedColors[i];
         } else {
             panelModels[entry->unitId]->workEntries->geometry.cornerColors[i] =
-                uiBlendColors(panelModels[entry->unitId]->workEntries->savedColors[i],
+                fclBlendColor(panelModels[entry->unitId]->workEntries->savedColors[i],
                               panelModels[entry->unitId]->workEntries->savedColors[i] & 0xFF,
                               0x80);
         }
@@ -1490,7 +1490,7 @@ s32 mnuStaffSwitchPartyPage(KwlnTask *requestArgument) {
     mnuClearListFlagsOneAndTwo(((MenuContext *)context)->partyWindow.lists[0]);
     if (pageChanged != 0) {
         mnuCreatePanels(requestArgument);
-        sndSetSequenceVolumePan(4, 0x7F, 0x3F);
+        p2sdPlaySE(4, 0x7F, 0x3F);
         menuWork->idleFrames = 0;
         if (menuWork->staffMode == 1) {
             mnuResetSelectedPanelOpacity(context);
@@ -1583,9 +1583,9 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags)
     FrFontGlyph *handle;
     frEnableMode(1);
     handle = frFontAppendTextToGlyphChain((const char *)(u32)model, 0, 0, 0, 0);
-    frFontSetGlyphPosition(handle, x, top);
+    frSetDrawPosition(handle, x, top);
     frSetPriority(handle, width << 4);
-    frFontSetChildColors(handle, color);
+    frSetFontColor(handle, color);
     frDisableMode(1);
     frFontDrawGlyphChain(handle, 1, flags);
     frDestroyFontRequestAfter(handle);
@@ -1660,7 +1660,7 @@ void mnuIdleVoiceTimer(StaffMenuRuntime *object) {
             }
             if (object->idleFrames >= 0x12d) {
                 count = evtStageTestCountFlags(0);
-                evtStageTestQueueMotion(0, sdfGetRand(0) % count);
+                evtStageTestQueueMotion(0, dds3GetRandA(0) % count);
                 object->idleFrames = 0;
             }
         }
@@ -1692,7 +1692,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     s32 kind;
     s32 hpOffset = 0;
 
-    color = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
+    color = fclBlendColor(0xA09DC380, 0xA09DC300, fade);
     if (rangeId >= 0x2A1) {
         return;
     }
@@ -1715,7 +1715,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     if (value != 0) {
         chainFlag = style != 0 ? 4 : 0;
         if (dim != 0) {
-            color = uiBlendColors(color, color & 0xFFFFFF00, 0x80);
+            color = fclBlendColor(color, color & 0xFFFFFF00, 0x80);
         }
         sprintf(text, D_00437BF8, value);
         glyph = itfCreateFont2TextGlyph(x + hpOffset, y - 8, depth, color, text, 0);
@@ -2772,7 +2772,7 @@ s32 ptySkillMenuHandlePageSwitch(KwlnTask *callback) {
     mnuClearListFlagsOneAndTwo(((MenuContext *)context)->partyWindow.lists[0]);
     if (changed != 0) {
         ptySkillMenuOpenPartyPage(callback);
-        sndSetSequenceVolumePan(4, 0x7F, 0x3F);
+        p2sdPlaySE(4, 0x7F, 0x3F);
         return 1;
     }
     return 0;
@@ -2906,7 +2906,7 @@ s32 mnuStepSkillDetailControl(KwlnTask *callback) {
 void mnuDrawSelectionLabel(u16 id) {
     FrFontGlyph *label = itfDrawTextWithSelectedFontMode(0x11B0, 0xA88, 0, 0, id, 1);
 
-    frFontSetChildColors(label, 0xA09DC35A);
+    frSetFontColor(label, 0xA09DC35A);
     frFontDrawGlyphChain(label, 1, 0x53);
     frDestroyFontRequestAfter(label);
 }
@@ -3387,14 +3387,14 @@ void mnuSpawnSpark(MenuCampEffect *fx) {
         }
     }
     if (slot >= 0) {
-        fx->direction[slot] = (sdfGetRand(0) & 1) + 1;
-        fx->life[slot] = ((sdfGetRand(0) & 3) + 4) << 4;
+        fx->direction[slot] = (dds3GetRandA(0) & 1) + 1;
+        fx->life[slot] = ((dds3GetRandA(0) & 3) + 4) << 4;
         if (fx->direction[slot] == 1) {
             fx->velocity[slot][0] = -0xFA0;
         } else {
             fx->velocity[slot][0] = 0x2FA0;
         }
-        fx->velocity[slot][1] = ((s32)(sdfGetRand(0) % 0x1C0) - 0x7D) << 3;
+        fx->velocity[slot][1] = ((s32)(dds3GetRandA(0) % 0x1C0) - 0x7D) << 3;
         fx->count += 1;
     }
 }
@@ -3423,10 +3423,10 @@ void mnuDrawAndAdvanceCampSparks(MenuCampEffect *fx, s32 surface) {
         }
     }
     if (fx->resources.packet.type & 4) {
-        if ((sdfGetRand(0) & 3) == 0) {
+        if ((dds3GetRandA(0) & 3) == 0) {
             mnuSpawnSpark(fx);
         }
-    } else if ((sdfGetRand(0) & 0x1F) == 0) {
+    } else if ((dds3GetRandA(0) & 0x1F) == 0) {
         mnuSpawnSpark(fx);
     }
 }

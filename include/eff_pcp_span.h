@@ -44,6 +44,6 @@ typedef char EffPCPSpanWork_color_offset_must_be_0x64[
 typedef char EffPCPSpanWork_optionalHandle_offset_must_be_0x74[
     ((u32)&((EffPCPSpanWork *)0)->optionalHandle == 0x74) ? 1 : -1];
 
-EffPCPSpanWork *effPcpSpanCreate(void *params, EffNodeDescriptor *handleParams);
+EffPCPSpanWork *effPCPBreathCreate(void *params, EffNodeDescriptor *handleParams);
 
 #endif /* EFF_PCP_SPAN_H */

@@ -3,7 +3,7 @@
 
 /* Rigid-invert the VU matrix in vf28-vf31 in place; translation becomes
  * -(R^T * t). The rotation input is assumed to contain no scale. */
-void sdfInvertRigidVuTransform(void);
+void ReverseMatrix(void);
 
 /* Invalidate the selected-matrix and cached-object-vector address keys. */
 void sdfVuClearTransformCache(void);

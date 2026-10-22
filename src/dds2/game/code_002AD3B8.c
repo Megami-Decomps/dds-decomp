@@ -477,7 +477,7 @@ void mnuPrepareStaffSelectionChangeDialog(MenuStaffContext *context,
         evtCopyEntryStringToActiveWindow(0, (const void *)(datUnitNames + entry->unitId * 0x11));
         evtCopyEntryStringToActiveWindow(1, (const void *)(D_00435E5C + current * 0x19));
         evtCopyEntryStringToActiveWindow(2, (const void *)(D_00435E5C + target * 0x19));
-        dspStartEntry(0);
+        fclStartMessage(0);
         if (current != 0) {
             ptyAdjustItemQuantity(current, 1);
         }
@@ -486,7 +486,7 @@ void mnuPrepareStaffSelectionChangeDialog(MenuStaffContext *context,
         menu->requested = target;
     } else {
         evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E5C + current * 0x19));
-        dspStartEntry(1);
+        fclStartMessage(1);
         menu->previous = 0;
         menu->requested = 0;
     }
@@ -535,7 +535,7 @@ s32 mnuStaffListInput(KwlnTask *task) {
         }
         mnuResetListNodeFadeCounters(menu->windows[2]->list);
     }
-    sndSetSequenceVolumePan(4, 0x7F, 0x3F);
+    p2sdPlaySE(4, 0x7F, 0x3F);
     return 1;
 }
 
@@ -563,7 +563,7 @@ s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
         return state;
     }
     menu->thirdListEnabled = 0;
-    if (evtGetMessageWindowControlState() != 0) {
+    if (fclChkMessage() != 0) {
         return 0;
     }
     mnuSetStateValue(&context->unkAA50, 0);
@@ -696,7 +696,7 @@ s32 mnuInitializeStaffPageWithSlotAsset(KwlnTask *task) {
                          context->resources.baseResources[1],
                          context->titleFrames[0]);
     mnuSetIndexedWindowPageSpriteFlags(index, (MenuPageWindow *)window, 0, 2);
-    if (mdlFlagTest(0x990) != 0) {
+    if (evtBitCheck(0x990) != 0) {
         mnuSetMenuPageFlags(slot->windowSprites, 1);
     }
     context->panelHandle = mnuCreatePanelGroup(context->resources.baseResources[1], context->resources.pairResources[0], 0);
@@ -742,7 +742,7 @@ void mnuStaffEntrySwapLabels(MenuStaffContext *context,
     if (target == 0) {
         evtCopyEntryStringToActiveWindow(0, (const void *)(datUnitNames + entry->unitId * 0x11));
         evtCopyEntryStringToActiveWindow(1, (const void *)(D_00435E5C + current * 0x19));
-        dspStartEntry(6);
+        fclStartMessage(6);
         menu->alternatePrevious = current;
         menu->alternateRequested = 0;
     } else if (current != target) {
@@ -750,17 +750,17 @@ void mnuStaffEntrySwapLabels(MenuStaffContext *context,
             evtCopyEntryStringToActiveWindow(0, (const void *)(datUnitNames + entry->unitId * 0x11));
             evtCopyEntryStringToActiveWindow(1, (const void *)(D_00435E5C + current * 0x19));
             evtCopyEntryStringToActiveWindow(2, (const void *)(D_00435E5C + target * 0x19));
-            dspStartEntry(3);
+            fclStartMessage(3);
         } else {
             evtCopyEntryStringToActiveWindow(0, (const void *)(datUnitNames + entry->unitId * 0x11));
             evtCopyEntryStringToActiveWindow(1, (const void *)(D_00435E5C + target * 0x19));
-            dspStartEntry(4);
+            fclStartMessage(4);
         }
         menu->alternatePrevious = current;
         menu->alternateRequested = target;
     } else {
         evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E5C + current * 0x19));
-        dspStartEntry(5);
+        fclStartMessage(5);
         menu->alternatePrevious = 0;
         menu->alternateRequested = 0;
     }
@@ -810,7 +810,7 @@ s32 mnuHandleStaffSelectionListNavigation(KwlnTask *task) {
         }
         mnuResetListNodeFadeCounters(menu->windows[3]->list);
     }
-    sndSetSequenceVolumePan(4, 0x7F, 0x3F);
+    p2sdPlaySE(4, 0x7F, 0x3F);
     return 1;
 }
 
@@ -832,7 +832,7 @@ s32 mnuHandleStaffSelectionPageInput(KwlnTask *task) {
     }
 
     menu->thirdListEnabled = 0;
-    if (evtGetMessageWindowControlState() != 0) {
+    if (fclChkMessage() != 0) {
         return 0;
     }
     mnuSetStateValue(&context->unkAA50, 0);
@@ -999,7 +999,7 @@ s32 mnuDrawStaffValuePage(KwlnTask *task) {
             mnuDrawCampGridAndLabelDefault(1, 0, 0, (s32)context, 1, 0x53);
         }
         mnuDrawStaffValueGrid(0, 0, selectionId, context);
-        if (owned != 0 && mdlFlagTest(0x990) != 0) {
+        if (owned != 0 && evtBitCheck(0x990) != 0) {
             glyph = itfCreateConvertedTextGlyph(0x2B0, 0xB80, 0, 0xA09DC340, slotsCaption, 0);
             frFontDrawGlyphChain(glyph, 1, 0x53);
             frDestroyFontRequestAfter(glyph);
@@ -1040,7 +1040,7 @@ s32 mnuInitializeStaffValuePage(KwlnTask *task) {
                          context->resources.baseResources[1],
                          context->titleFrames[0]);
     mnuSetIndexedWindowPageSpriteFlags(index, (MenuPageWindow *)window, 0, 2);
-    if (mdlFlagTest(0x990) != 0) {
+    if (evtBitCheck(0x990) != 0) {
         mnuSetMenuPageFlags(slot->windowSprites, 1);
     }
     context->panelHandle = mnuCreatePanelGroup(context->resources.baseResources[1], context->resources.pairResources[0], context->titleFrames[0]);
@@ -1098,9 +1098,9 @@ void mnuPrepareStaffValueChangeDialog(MenuStaffContext *context,
     sprintf(valueText, D_00437BD8, mnuGetItemRequirementValue(current) - base);
     evtCopyEntryStringToActiveWindow(3, valueText);
     if (flag == 0) {
-        dspStartEntry(9);
+        fclStartMessage(9);
     } else {
-        dspStartEntry(0xA);
+        fclStartMessage(0xA);
     }
 }
 
@@ -1148,7 +1148,7 @@ s32 mnuHandleStaffValuePageInput(KwlnTask *task) {
         }
         mnuResetListNodeFadeCounters(menu->windows[4]->list);
     }
-    sndSetSequenceVolumePan(4, 0x7F, 0x3F);
+    p2sdPlaySE(4, 0x7F, 0x3F);
     return 1;
 }
 
@@ -1192,7 +1192,7 @@ s32 mnuHandleStaffOwnedCatalogInput(KwlnTask *task) {
         return result;
     }
     menu->thirdListEnabled = 0;
-    if (evtGetMessageWindowControlState() != 0) {
+    if (fclChkMessage() != 0) {
         return 0;
     }
     mnuSetStateValue(&context->unkAA50, 0);
@@ -1232,21 +1232,21 @@ s32 mnuHandleStaffOwnedCatalogInput(KwlnTask *task) {
                     } else {
                         mnuSetStateValue(&context->unkAA50, 1);
                         evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E5C + current * 0x19));
-                        dspStartEntry(0xB);
+                        fclStartMessage(0xB);
                     }
                 } else if (menu->windows[4]->list->count != 0) {
                     if (mnuIsStaffRequirementUnmet(current) != 0) {
                         mnuSetPopupEntry(&context->popupState, mnuRingCustomizationApplyPopupEntry);
                     } else {
                         mnuSetStateValue(&context->unkAA50, 1);
-                        dspStartEntry(7);
+                        fclStartMessage(7);
                     }
                 } else {
                     input = 0;
                 }
             } else if (menu->windows[4]->list->cursor->index == 0) {
                 mnuSetStateValue(&context->unkAA50, 1);
-                dspStartEntry(0xC);
+                fclStartMessage(0xC);
             } else {
                 input = 0x8000;
             }

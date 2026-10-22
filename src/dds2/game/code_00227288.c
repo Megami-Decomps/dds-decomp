@@ -1051,7 +1051,7 @@ s32 btlSetLinkedPairActionCamera(BtlLinkedCommand *command) {
         } else {
             btlClearAllUnitDefeatCandidatesTask();
             btlFlagLinkedGroupDefeatCandidatesTask(command);
-            if (sdfGetRand(&effSharedRandomState) & 1) {
+            if (dds3GetRandA(&effSharedRandomState) & 1) {
                 btlSetEffectCameraKeys((s32)command, 237.1f, -287.8f, -460.5f, 0.021f, -0.127f, -0.022f, -0.982f, 841.4f,
                                        -406.5f, -442.7f, 0.108f, 0.293f, 0.013f, 0.94f, 40.0f, 30.0f);
             } else {
@@ -1102,7 +1102,7 @@ s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
     command->motionParameter = 10.0f;
     command->motionProgress = 1;
     command->state = 0;
-    btlSetActorEffectParameterOrMuzzlePosition((BtlUnit *)target, 0);
+    effBTLModelGetMarkPosition2((BtlUnit *)target, 0);
     VU0_STORE_VF_UNCLOBBERED(vf10, command->backCamera.position);
     command->backCamera.position[1] += 150.0f;
     btlInterpolateVectorStep(&command->frontCamera);
@@ -1141,7 +1141,7 @@ s32 btlAdvanceMarkedLinkedActionCamera(BtlLinkedCommand *command) {
         if (command->motionProgress >= 0x19) {
             btlClearRuntimeFlag2000();
             if (command->motionProgress == 0x19) {
-                choice = sdfGetRandInt(0, 2);
+                choice = dds3GetRandIntA(0, 2);
                 switch (choice) {
                 case 0:
                     btlSetEffectCameraKeys((s32)command,
@@ -1330,7 +1330,7 @@ void btlMarkBattleUnitEntryForActiveKind(BtlUnit *unit) {
 void btlInitializeSpecialUnitHpOverride(BtlUnit *unit) {
     if ((unit->status.flags & 0x400) &&
         unit->partyRecord.unitId == 0x144 &&
-        mdlFlagTest(0x841)) {
+        evtBitCheck(0x841)) {
         unit->partyRecord.hp = 1;
     }
 }
@@ -1621,7 +1621,7 @@ extern s64 btlMode311TurnEndCallback(ActionStateLink *unit);
 extern u32 btlResetSpiralEdgeMotionProgress(BtlLinkedCommand *unit);
 extern u32 btlUpdateSpiralEdgeMarkedCamera(BtlLinkedCommand *unit);
 extern void btlApplyRahuOperandEffects(BtlUnit *unit, BtlOperandEntry *entry);
-extern void mdlFlagClear(s32 flag);
+extern void evtBitOff(s32 flag);
 
 /* Audit artifact only; no repository edits. Consumer-complete DDS2 ABI. */
 extern void btlTrackSpecialEnemyCommandRestrictionByTurn(BtlUnit *, BtlOperandEntry *);
@@ -1667,7 +1667,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->scriptReturnHook, 0x0, btlGetSelectionEmptyValue);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlShiftUnitUpForScriptAction);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlFilterListedUnitMotionChoice);
-        allocation = sdfAllocateBlockBySizeThreshold(0x1);
+        allocation = sdfAllocAuto(0x1);
         battle->effect = allocation;
         memset(allocation, 0, 0x1);
         break;
@@ -1677,7 +1677,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
     case 0x32A:
     case 0x32B: {
         if (battleSceneId == 0x302) {
-            mdlFlagClear(0x804);
+            evtBitOff(0x804);
             battle->commandRestrictFlags |= 0x84000;
             BTL_INSTALL_CALLBACK(battle->selectScriptState, 0x0, btlFindReadyScriptResource);
             BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlCheckPhaseOnePartyStatusGate);
@@ -1707,7 +1707,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->completionHook, 0x0, btlStartReadyUnitAction);
         BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, btlStartPrevUnitScriptAction);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSelectAction211CameraPair);
-        allocation = sdfAllocateBlockBySizeThreshold(0x8);
+        allocation = sdfAllocAuto(0x8);
         battle->effect = allocation;
         memset(allocation, 0, 0x8);
         break;
@@ -1738,7 +1738,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->modelChangeSoundHook, 0x0, btlStartActionRecordSoundTask);
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlResetActionEffectOnUnit);
         BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, btlRefreshAbaddonPresentationAfterUnitUpdate);
-        allocation = sdfAllocateBlockBySizeThreshold(0xC);
+        allocation = sdfAllocAuto(0xC);
         battle->effect = allocation;
         memset(allocation, 0, 0xC);
         break;
@@ -1767,7 +1767,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->statusMotionOverride, 0x0, btlGetSpecialEnemyActionStatus);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapCommandKind);
         BTL_INSTALL_CALLBACK(battle->preserveMotionRange, 0x0, btlIsGateCoreAction19Request);
-        allocation = sdfAllocateBlockBySizeThreshold(0x10);
+        allocation = sdfAllocAuto(0x10);
         battle->effect = allocation;
         memset(allocation, 0, 0x10);
         break;
@@ -1815,7 +1815,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlPlayStationedSoundForActiveBossAction);
         BTL_INSTALL_CALLBACK(battle->actionCameraSetupHook, 0x0, btlSetupVritraCameraFromActionFlags);
         BTL_INSTALL_CALLBACK(battle->unk658, 0x0, btlSetupDefeatCameraFromAnimationFlags);
-        allocation = sdfAllocateBlockBySizeThreshold(0xC);
+        allocation = sdfAllocAuto(0xC);
         battle->effect = allocation;
         memset(allocation, 0, 0xC);
         break;
@@ -1827,7 +1827,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlResetBossRatioScale);
         BTL_INSTALL_CALLBACK(battle->pad634, 0x0, btlAccumulateBossRatioScale);
         BTL_INSTALL_CALLBACK(battle->commandAmountScaleHook, 0x0, btlGetBossRatioScale);
-        allocation = sdfAllocateBlockBySizeThreshold(0x4);
+        allocation = sdfAllocAuto(0x4);
         battle->effect = allocation;
         memset(allocation, 0, 0x4);
         break;
@@ -1850,7 +1850,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->pad694, 0x0, btlScheduleCherunShadowSkillPresentation);
         BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSpecialMotion);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlFilterListedUnitMotionChoice);
-        allocation = sdfAllocateBlockBySizeThreshold(0x8);
+        allocation = sdfAllocAuto(0x8);
         battle->effect = allocation;
         memset(allocation, 0, 0x8);
         break;
@@ -1867,7 +1867,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->statusMotionOverride, 0x0, btlGetHealthyAllyActionStatus);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlOffsetSpecialEnemyForCommand);
         BTL_INSTALL_CALLBACK(battle->preserveMotionRange, 0x0, btlIsSupportedActorAction);
-        allocation = sdfAllocateBlockBySizeThreshold(0x3);
+        allocation = sdfAllocAuto(0x3);
         battle->effect = allocation;
         memset(allocation, 0, 0x3);
         break;
@@ -1884,7 +1884,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->completionHook, 0x0, btlQueueLoneFreeTeamHandle);
         BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, btlQueueSelectedActorResourceAndSound);
         BTL_INSTALL_CALLBACK(battle->scriptReturnHook, 0x0, btlGetSelectedActorAction);
-        allocation = sdfAllocateBlockBySizeThreshold(0x4);
+        allocation = sdfAllocAuto(0x4);
         battle->effect = allocation;
         memset(allocation, 0, 0x4);
         break;
@@ -1902,7 +1902,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->preserveMotionRange, 0x0, btlAcceptLinkedActorCommand);
         BTL_INSTALL_CALLBACK(battle->hitChanceScale, 0x0, btlGetActionScaleFactor);
         BTL_INSTALL_CALLBACK(battle->actionEffectOverride, 0x0, btlQueryLinkedGroupResponse);
-        allocation = sdfAllocateBlockBySizeThreshold(0x4);
+        allocation = sdfAllocAuto(0x4);
         battle->effect = allocation;
         memset(allocation, 0, 0x4);
         break;
@@ -1963,7 +1963,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->unk658, 0x0, btlFinishBrahmanCameraByTableFlags);
         BTL_INSTALL_CALLBACK(battle->actionEffectOverride, 0x0, btlGetMarkedActionMotionCode);
         BTL_INSTALL_CALLBACK(battle->preActionHook, 0x0, btlSpawnBrahmaActionEffectTasks);
-        allocation = sdfAllocateBlockBySizeThreshold(0x10);
+        allocation = sdfAllocAuto(0x10);
         battle->effect = allocation;
         memset(allocation, 0, 0x10);
         break;
@@ -2016,7 +2016,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlFilterActionByUnitFlags);
         BTL_INSTALL_CALLBACK(battle->commandAmountScaleHook, 0x0, btlGetSatanCommandAmountScale);
         BTL_INSTALL_CALLBACK(battle->actionPointsOverride, 0x0, btlGetFutilityActionPoints);
-        allocation = sdfAllocateBlockBySizeThreshold(0x1);
+        allocation = sdfAllocAuto(0x1);
         battle->effect = allocation;
         memset(allocation, 0, 0x1);
         break;
@@ -2043,7 +2043,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, btlResetUnitPlacement);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlResetSpiralEdgeMotionProgress);
         BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlUpdateSpiralEdgeMarkedCamera);
-        allocation = sdfAllocateBlockBySizeThreshold(0x4);
+        allocation = sdfAllocAuto(0x4);
         battle->effect = allocation;
         memset(allocation, 0, 0x4);
         break;
@@ -2080,7 +2080,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlUnitStartAimAtTarget);
         BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlIsSpecialActionKind);
         BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlAdvanceMarkedLinkedActionCamera);
-        allocation = sdfAllocateBlockBySizeThreshold(0x18);
+        allocation = sdfAllocAuto(0x18);
         battle->effect = allocation;
         memset(allocation, 0, 0x18);
         break;
@@ -2093,7 +2093,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlArmEventResourceTrigger);
         BTL_INSTALL_CALLBACK(battle->sceneCallback, 0x0, btlMode313KeepDefaultSceneVariant);
         BTL_INSTALL_CALLBACK(battle->selectScriptState, 0x0, btlConsumeReadyEventScriptResource);
-        allocation = sdfAllocateBlockBySizeThreshold(0x2);
+        allocation = sdfAllocAuto(0x2);
         battle->effect = allocation;
         memset(allocation, 0, 0x2);
         break;
@@ -2118,7 +2118,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         break;
     }
     case 0x336: {
-        if (mdlFlagTest(0x841) == 0) {
+        if (evtBitCheck(0x841) == 0) {
             battle->commandRestrictFlags |= 0x40000;
         }
         battle->commandRestrictFlags |= 0x82800;
@@ -2182,7 +2182,7 @@ void btlReleaseBossData(void) {
     }
     btlRunCleanupAndLog();
     if (((BtlState *)battle)->effect != 0) {
-        sdfReleaseChipOrRetainedResource(((BtlState *)battle)->effect);
+        sdfFreeAutoDelayed(((BtlState *)battle)->effect);
         ((BtlState *)battle)->effect = 0;
     }
     ((BtlState *)battle)->battleFlags &= ~0x80000;

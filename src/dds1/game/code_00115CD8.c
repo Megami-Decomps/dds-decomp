@@ -13,7 +13,7 @@
 
 /* Clear the kind-7 owner link and entry, preserving every flag except 4 and 8.
  * The caller supplies an existing effect resource; this does not free its owner. */
-void dds3ResetWorldResourceState(EffWorldNode *owner) {
+void dds3EffectObjectBasicUnlinkObject(EffWorldNode *owner) {
     EffectDependencyState *resource = owner->data;
 
     resource->entryId = 0;
@@ -24,15 +24,15 @@ void dds3ResetWorldResourceState(EffWorldNode *owner) {
 }
 
 struct BillObj;
-extern void effObjSetFlags(EffWorldNode *object, s32 flags);
-extern void billSetKind1Entry(struct BillObj *billboard, u32 entry);
+extern void dds3EffectObjectBasicStatOn(EffWorldNode *object, s32 flags);
+extern void dds3BillboardSetAnimNumber(struct BillObj *billboard, u32 entry);
 
 /* Complete 0x30-byte FLD1 type-11 effect descriptor. The field resolver
  * passes its resource data pointer directly to the billboard binder. */
 
 
 /* Bind a billboard config to the owner's resource, copy the source vector and set up the billboard by config kind. */
-void billCopySourceVectorAndSetConfig(EffWorldNode *owner, BillConfig *config) {
+void dds3EffectObjectBasicSetFldEx(EffWorldNode *owner, BillConfig *config) {
     EffectDependencyState *resource = owner->data;
     ObjectTransform *source = owner->inner;
 
@@ -41,27 +41,27 @@ void billCopySourceVectorAndSetConfig(EffWorldNode *owner, BillConfig *config) {
     resource->sourcePosition[1] = source->position[1];
     resource->sourcePosition[2] = source->position[2];
     resource->sourcePosition[3] = source->position[3];
-    effObjSetFlags(owner, 0x10);
+    dds3EffectObjectBasicStatOn(owner, 0x10);
     switch (resource->config->kind) {
     case 0:
     case 3:
-        billSetChildHalfExtents((struct BillObj *)resource->handle, resource->config->width, resource->config->height);
+        dds3BillboardSetXYOffset((struct BillObj *)resource->handle, resource->config->width, resource->config->height);
         if (resource->config->kind == 3) {
-            billSetVariantValue(resource->handle, 1);
+            dds3BillboardSetDrawType(resource->handle, 1);
         }
         if (resource->config->flags & 1) {
-            billSetBillboardMode(resource->handle, 2);
+            dds3BillboardSetMode(resource->handle, 2);
             return;
         }
         if (resource->config->flags & 2) {
-            billSetBillboardMode(resource->handle, 3);
+            dds3BillboardSetMode(resource->handle, 3);
             return;
         }
         break;
     case 2:
         break;
     case 1:
-        billSetKind1Entry(resource->handle, resource->config->entry);
+        dds3BillboardSetAnimNumber(resource->handle, resource->config->entry);
         break;
     }
 }
@@ -70,7 +70,7 @@ extern s32 fldTestMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueIndex);
 extern f32 sdfViewTargetVector[4];
 
-void effUpdateConfiguredBillboard(EffWorldNode *object) {
+void dds3EffectObjectBasicCalcFldEx(EffWorldNode *object) {
     EffectDependencyState *resource = object->data;
     BillConfig *config;
     f32 direction[4] __attribute__((aligned(16)));
@@ -149,7 +149,7 @@ void effUpdateConfiguredBillboard(EffWorldNode *object) {
                 }
                 parameter = ((u32)alpha << 24) | 0x00808080;
             }
-            billSetChildParameter((struct BillObj *)resource->handle, parameter);
+            dds3BillboardSetRGBA((struct BillObj *)resource->handle, parameter);
         }
         break;
     case 2:
@@ -161,7 +161,7 @@ void effUpdateConfiguredBillboard(EffWorldNode *object) {
                                          config->mapSelector);
 
             if (entry != -1) {
-                billSetKind1Entry((struct BillObj *)resource->handle, (u32)entry);
+                dds3BillboardSetAnimNumber((struct BillObj *)resource->handle, (u32)entry);
             }
         }
         break;
@@ -173,11 +173,11 @@ void effUpdateConfiguredBillboard(EffWorldNode *object) {
 
 /* Attach a 16-byte slot block, then publish its newly created state handle.
  * The block is attached before the state constructor sees the object. Returns 1. */
-u32 dds3InitializeResourceOwner(EffWorldNode *object) {
+u32 EventObjectBasicConstructor(EffWorldNode *object) {
     DdsSlotResourceBlock *resource;
     ObjBase *handle;
 
-    effObjInnerCreate(object);
+    dds3InitPoseSet(object);
     resource = (DdsSlotResourceBlock *)sdfChipAllocDirect(sizeof(DdsSlotResourceBlock));
     object->data = resource;
     handle = dds3CreateSlotResourceState(object);

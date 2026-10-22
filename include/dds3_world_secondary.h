@@ -4,6 +4,6 @@
 struct EffWorldNode;
 
 /* Return the borrowed secondary world node, or NULL when no world is active. */
-struct EffWorldNode *dds3GetWorldSecondaryObject(void);
+struct EffWorldNode *dds3GetControlScene(void);
 
 #endif

@@ -376,7 +376,7 @@ void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
                     if (itemId == 0xF7) {
                         showUnknown = 0;
                     }
-                    if (!mdlFlagTest(0xBA0) && itemId == 0xF8) {
+                    if (!evtBitCheck(0xBA0) && itemId == 0xF8) {
                         showUnknown = 0;
                     }
                     if (showUnknown) {
@@ -731,7 +731,7 @@ s32 mnuHandleStaffInventoryListInput(KwlnTask *callback) {
     if (result != 0) {
         return result;
     }
-    if (evtGetMessageWindowControlState() != 0) {
+    if (fclChkMessage() != 0) {
         return 0;
     }
     mnuSetStateValue(&context->unkAA50, 0);

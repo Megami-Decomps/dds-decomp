@@ -336,7 +336,7 @@ void mnuTitlePickRandomSlot(PickList *list) {
         if (n >= 0x20) {
             return;
         }
-        id = sdfGetRand(0) % range;
+        id = dds3GetRandA(0) % range;
         found = 0;
         for (i = 0; i < list->count; i++) {
             if (list->entry[i].id == id) {
@@ -494,7 +494,7 @@ void mnuStartRandomMovieMenuPulse(PickList *work) {
     s32 selected = -1;
     s32 i;
 
-    if (sdfGetRand(0) % 60u == 0) {
+    if (dds3GetRandA(0) % 60u == 0) {
         for (i = 0; i < 4; i++) {
             if (work->effectSlots[i].active == 0) {
                 selected = i;

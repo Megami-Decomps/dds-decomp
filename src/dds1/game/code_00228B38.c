@@ -252,14 +252,14 @@ void evtAdvanceSolarPhaseParticles(SolarNoiseState *state) {
             state->activeCount++;
             for (i = 0; i < 10; i++) {
                 if (state->layers[i].active == 0) {
-                    angle = sdfGetRandFloat(0) * 6.2831852f;
+                    angle = dds3GetRandFloatA(0) * 6.2831852f;
                     state->layers[i].x = (s32)((f32)state->centerX +
                         (f32)state->radiusX * sdfCos(angle));
                     state->layers[i].y = (s32)((f32)state->centerY +
-                        (f32)state->radiusY * sdfSinPoly(angle));
+                        (f32)state->radiusY * sdfSin(angle));
                     state->layers[i].age = 0;
                     state->layers[i].active = 1;
-                    state->layers[i].scale = (s32)(sdfGetRandFloat(0) * 100.0f + 100.0f);
+                    state->layers[i].scale = (s32)(dds3GetRandFloatA(0) * 100.0f + 100.0f);
                     break;
                 }
             }
@@ -302,7 +302,7 @@ void evtAdvanceLongSolarNoiseLayers(SolarNoiseState *state) {
                     for (i = 0; i < 10; i++) {
                         if (state->layers[i].active == 0) {
                             s32 spawnIndex =
-                                sdfGetRand(0) % spawnCounts[phase - 2];
+                                dds3GetRandA(0) % spawnCounts[phase - 2];
                             state->layers[i].x = spawns[spawnIndex][0];
                             state->layers[i].y = spawns[spawnIndex][1];
                             state->layers[i].age = 0;
@@ -345,7 +345,7 @@ void evtDrawShortSolarNoiseLayers(s32 x, s32 y, s32 z, s32 width, SolarNoiseStat
             layerY = layer->y + y;
             value = (f32)layer->age;
             t = value / 60.0f;
-            t = sdfSinPoly(t * 3.14159265f);
+            t = sdfSin(t * 3.14159265f);
             value = (f32)width * 0.15f;
             value *= t;
             scale = (f32)layer->scale / 100.0f;
@@ -370,7 +370,7 @@ void evtDrawLongSolarNoiseLayers(s32 x, s32 y, s32 z, s32 width, SolarNoiseState
             layerY = layer->y + y;
             value = (f32)layer->age;
             t = value / 80.0f;
-            t = sdfSinPoly(t * 3.14159265f);
+            t = sdfSin(t * 3.14159265f);
             value = (f32)width * 0.6f;
             value *= t;
             scale = (f32)layer->scale / 100.0f;
@@ -441,7 +441,7 @@ void evtUpdateSolarPointTimers(SolarOverlayWork *overlay) {
             point->age = age;
             if ((s16)age > point->duration) {
                 point->age = 0;
-                point->duration = (s16)(sdfGetRandFloat(0) * 30.0f + 120.0f);
+                point->duration = (s16)(dds3GetRandFloatA(0) * 30.0f + 120.0f);
             }
         } else {
             point->age = 0;
@@ -471,7 +471,7 @@ void evtDrawSolarPointTransitionShapes(s32 unused0, s32 unused1, s32 alpha, s32 
             break;
         }
         t = (f32)(s16)points[i].age / ((f32)points[i].duration * 0.5f);
-        pulse = sdfSinPoly(t * 3.14159265f);
+        pulse = sdfSin(t * 3.14159265f);
 
         if (pulse < 0.0f) {
             pulse = -pulse;
@@ -489,7 +489,7 @@ void evtDrawSolarPointTransitionShapes(s32 unused0, s32 unused1, s32 alpha, s32 
             break;
         }
         t = (f32)(s16)points[i].age / ((f32)points[i].duration / 3.0f);
-        pulse = sdfSinPoly(t * 3.14159265f);
+        pulse = sdfSin(t * 3.14159265f);
 
         if (pulse < 0.0f) {
             pulse = -pulse;

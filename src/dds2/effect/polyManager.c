@@ -22,23 +22,23 @@ enum {
     POLY_RESET_DURATION = 0xFFFFFFF
 };
 
-void polyUpdateBasicRingCells(PolyNode *node);
-void polyBuildBasicRadialFan(PolyNode *node, s32 cellIndex);
-void polyStripPushPairsApart(PolyNode *node, s32 cellIndex);
+void dds3SpPoly_Ring_Old_Calc(PolyNode *node);
+void dds3SpPoly_Ring_Old_New(PolyNode *node, s32 cellIndex);
+void dds3SpPoly_Ring_Old_Move(PolyNode *node, s32 cellIndex);
 extern void memcpy(void *dst, const void *src, s32 size);
-extern void parDispatchSub(void *work, s32 sub, void *dispatchArgA, void *dispatchArgB);
-void polyInitializeBandRecordAges(PolyBand *band);
-void polyInitializeArcRecordAges(PolyArc *arc);
-void polyInitializeRotatingBandRecordAges(PolyRotatingBand *rotatingBand);
+extern void dds3TrackPolyVCSet(void *work, s32 sub, void *dispatchArgA, void *dispatchArgB);
+void dds3SpPoly_RingAllBuffInit(PolyBand *band);
+void dds3SpPoly_SphereRingAllBuffInit(PolyArc *arc);
+void dds3SpPoly_RollRingAllBuffInit(PolyRotatingBand *rotatingBand);
 
 /* Release the cell system, then the basic node itself. */
-void effPolyDestroyWork(PolyNode *node) {
-    parReleaseCellSystem(node->strip);
+void dds3SpPoly_Ring_Old_Delete(PolyNode *node) {
+    dds3TrackPolyDelete(node->strip);
     sdfChipFreeDirect(node);
 }
 
 /* The cell initializer writes the same ages that the basic-ring update reads. */
-void polyInitializeBasicRingCells(PolyNode *node) {
+void dds3SpPoly_Ring_Old_BuffInit(PolyNode *node) {
     u16 count;
     s32 age;
     s32 *ages;
@@ -66,13 +66,13 @@ void polyInitializeBasicRingCells(PolyNode *node) {
 }
 
 /* Scale the basic ring radius and its point-pair displacement. */
-void polyScaleTransformPair(f32 scale, PolyNode *node) {
+void dds3SpPoly_Ring_Old_SetScale(f32 scale, PolyNode *node) {
     node->radius = node->radius * scale;
     node->pairDisplacement = node->pairDisplacement * scale;
 }
 
 /* Fade active basic-ring cells, update their geometry, and restart or finish ages. */
-void polyUpdateBasicRingCells(PolyNode *node) {
+void dds3SpPoly_Ring_Old_Calc(PolyNode *node) {
     u16 index;
     u16 completed;
     u16 count;
@@ -94,11 +94,11 @@ void polyUpdateBasicRingCells(PolyNode *node) {
             s32 age = *ages;
 
             if (age == POLY_INACTIVE_ENTRY_AGE) {
-                polyBuildBasicRadialFan(node, index);
+                dds3SpPoly_Ring_Old_New(node, index);
                 *ages = 0;
             } else if (age >= 0) {
                 entry->color = ((u32)(alphaStep * (f32)(duration - age)) << 24) | 0x808080;
-                polyStripPushPairsApart(node, index);
+                dds3SpPoly_Ring_Old_Move(node, index);
             }
             if (age >= duration) {
                 entry->color = 0x808080;
@@ -121,12 +121,12 @@ void polyUpdateBasicRingCells(PolyNode *node) {
 }
 
 /* Run the shared finish step, then enqueue this node's cell system. */
-void polyFinishAndReleaseNodeHandle(PolyNode *node) {
-    polyUpdateBasicRingCells(node);
-    parPrependCellNode(node->strip);
+void dds3SpPoly_Ring_Old_Draw(PolyNode *node) {
+    dds3SpPoly_Ring_Old_Calc(node);
+    dds3TrackPolyDraw(node->strip);
 }
 
-void polyBuildBasicRadialFan(PolyNode *node, s32 cellIndex) {
+void dds3SpPoly_Ring_Old_New(PolyNode *node, s32 cellIndex) {
     ParSystem *strip = node->strip;
     ParCell *cell = &strip->cells[cellIndex];
     f32 radius = node->radius;
@@ -152,7 +152,7 @@ void polyBuildBasicRadialFan(PolyNode *node, s32 cellIndex) {
     pairs = half - 1;
     for (i = 0; i < pairs; i++) {
         cosine = sdfCos(angle);
-        sine = sdfSinPoly(angle);
+        sine = sdfSin(angle);
         VU0_LOAD_VF(vf11, origin);
         VU0_STORE_VF(vf11, p);
         offset[0] = cosine * radius;
@@ -171,7 +171,7 @@ void polyBuildBasicRadialFan(PolyNode *node, s32 cellIndex) {
 }
 
 /* Apply the same displacement to both points of each pair along their separation direction. */
-void polyStripPushPairsApart(PolyNode *node, s32 cellIndex) {
+void dds3SpPoly_Ring_Old_Move(PolyNode *node, s32 cellIndex) {
     ParSystem *strip = node->strip;
     ParCell *entry = &strip->cells[cellIndex];
     f32 scale[4];
@@ -205,7 +205,7 @@ extern f32 polyTimedTintEndColor[4];
 extern f32 polyTimedTintStartColor[4];
 
 /* Blend two constant colour vectors by elapsed/duration (1 once elapsed reaches duration) and tint the result with the packed colour. */
-u32 polyBlendTimedTintColor(u32 elapsed, u32 duration, u32 color) {
+u32 dds3SpPoly_Color(u32 elapsed, u32 duration, u32 color) {
     f32 ratio = 1.0f;
     s32 tint[4];
     u8 unused[16]; /* retail frame 0x20: unused local storage */
@@ -228,7 +228,7 @@ u32 polyBlendTimedTintColor(u32 elapsed, u32 duration, u32 color) {
 }
 
 /* Create a band from its template: the template body, then the 0x40-byte parameter tail that follows it, with eight-byte records after the header. */
-PolyBand *polyCreateBandNode(PolyRingHead *templateHead) {
+PolyBand *dds3SpPoly_RingCreate(PolyRingHead *templateHead) {
     u32 size = templateHead->entryCount * sizeof(PolyBandRecord) + sizeof(PolyBand);
     struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
     PolyBand *band = (PolyBand *)sdfMemLock(allocation);
@@ -242,23 +242,23 @@ PolyBand *polyCreateBandNode(PolyRingHead *templateHead) {
     if (((PolyRing *)band)->band.segments < 3) {
         ((PolyRing *)band)->band.segments = 3;
     }
-    band->strip = parAllocateCellSystem(band->head.entryCount, band->segments, 1, 0);
-    parDispatchSub(band->strip, 0, band->dispatchArgA, band->dispatchArgB);
-    polyInitializeBandRecordAges(band);
+    band->strip = dds3TrackPolyCreate(band->head.entryCount, band->segments, 1, 0);
+    dds3TrackPolyVCSet(band->strip, 0, band->dispatchArgA, band->dispatchArgB);
+    dds3SpPoly_RingAllBuffInit(band);
     VU0_LOAD_MATRIX(band->head.matrix);
     VU0_STORE_MATRIX(band->head.matrixCopy);
-    parSetCellDrawBucket(band->strip, band->head.drawBucket);
+    dds3TrackPolySetMode(band->strip, band->head.drawBucket);
     return band;
 }
 
 /* Release the band's cell system and backing allocation handle, not the node itself. */
-void polyReleaseBandNodeResources(PolyBand *band) {
-    parReleaseCellSystem(band->strip);
+void dds3SpPoly_RingDelete(PolyBand *band) {
+    dds3TrackPolyDelete(band->strip);
     sdfMemFreeDirect(band->allocation);
 }
 
 /* Seed band records with staggered inactive ages. */
-void polyInitializeBandRecordAges(PolyBand *band) {
+void dds3SpPoly_RingAllBuffInit(PolyBand *band) {
     u32 count = band->head.entryCount;
     PolyBandRecord *record = band->records;
     u32 delayStep = band->spawnDelayStep;
@@ -283,7 +283,7 @@ void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius);
 extern EffRandState effDefaultRandomState[];
 
 /* Randomize record `index`: pick jittered start and end radii, derive the per-frame radius step, and lay the ring out. */
-void polyRingRandomizeRecord(PolyBand *spawner, s32 index) {
+void dds3SpPoly_RingBuffInit(PolyBand *spawner, s32 index) {
     PolyBandRecord *record = spawner->records;
     f32 spread;
     f32 start;
@@ -291,9 +291,9 @@ void polyRingRandomizeRecord(PolyBand *spawner, s32 index) {
 
     record += index;
     spread = spawner->initialRadiusJitter;
-    start = spawner->initialRadius * (sdfGetRandFloat(effDefaultRandomState) * spread + (1.0f - spread));
+    start = spawner->initialRadius * (dds3GetRandFloatA(effDefaultRandomState) * spread + (1.0f - spread));
     spread = spawner->targetRadiusJitter;
-    end = spawner->targetRadius * (sdfGetRandFloat(effDefaultRandomState) * spread + (1.0f - spread));
+    end = spawner->targetRadius * (dds3GetRandFloatA(effDefaultRandomState) * spread + (1.0f - spread));
     record->age = 0;
     if (spawner->head.duration > 0) {
         record->radiusStep = (end - start) / (f32)spawner->head.duration;
@@ -330,7 +330,7 @@ void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius)
     for (i = 0; i < pairs - 1; i++) {
         radialDirection[0] = sdfCos(angle);
         radialDirection[1] = 0;
-        radialDirection[2] = sdfSinPoly(angle);
+        radialDirection[2] = sdfSin(angle);
         VU0_LOAD_VF(vf10, radialDirection);
         VU0_APPLY_MATRIX(vf10, vf10);
         VU0_STORE_VF(vf10, radialDirection);
@@ -352,7 +352,7 @@ void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius)
 }
 
 /* Add one radius step and local-y lift step to existing point pairs, then close the strip. */
-void polyStripBuildScaledRing(PolyBand *band, s32 index) {
+void dds3SpPoly_RingMove(PolyBand *band, s32 index) {
     ParSystem *strip = band->strip;
     PolyBandRecord *rec = &band->records[index];
     ParCell *entry = &strip->cells[index];
@@ -378,7 +378,7 @@ void polyStripBuildScaledRing(PolyBand *band, s32 index) {
     for (i = 0; i < pairs - 1; i++) {
         radialDirection[0] = sdfCos(angle);
         radialDirection[1] = 0;
-        radialDirection[2] = sdfSinPoly(angle);
+        radialDirection[2] = sdfSin(angle);
         VU0_LOAD_VF(vf10, radialDirection);
         VU0_APPLY_MATRIX(vf10, vf10);
         VU0_LOAD_VF(vf11, radiusStepVector);
@@ -403,7 +403,7 @@ void polyStripBuildScaledRing(PolyBand *band, s32 index) {
 }
 
 /* Scale the band's row width, lift step, and initial/target radii in retail order. */
-void effPolyScaleFourComponents(f32 scale, PolyBand *band) {
+void dds3SpPoly_RingSetScale(f32 scale, PolyBand *band) {
     band->radialWidth = band->radialWidth * scale;
     band->liftStep = band->liftStep * scale;
     band->initialRadius = band->initialRadius * scale;
@@ -411,7 +411,7 @@ void effPolyScaleFourComponents(f32 scale, PolyBand *band) {
 }
 
 /* Advance band ages, fades, geometry, and loop completion. */
-void polyUpdateBandCells(PolyBand *band) {
+void dds3SpPoly_RingDraw(PolyBand *band) {
     s32 recordIndex = 0;
     u32 completed = 0;
     u8 loop;
@@ -435,21 +435,21 @@ void polyUpdateBandCells(PolyBand *band) {
             s32 age = record->age;
 
             if (age == POLY_INACTIVE_ENTRY_AGE) {
-                polyRingRandomizeRecord(band, recordIndex);
+                dds3SpPoly_RingBuffInit(band, recordIndex);
                 age = record->age;
             }
             if (age < 0) {
                 age++;
             } else {
                 if ((u32)age < band->head.startColorRampFrames) {
-                    entry->color = polyBlendTimedTintColor(age, band->head.startColorRampFrames, color);
+                    entry->color = dds3SpPoly_Color(age, band->head.startColorRampFrames, color);
                 } else if (age <= duration &&
                            (u32)age >= duration - band->head.endColorRampFrames) {
-                    entry->color = polyBlendTimedTintColor(duration - age, band->head.endColorRampFrames, color);
+                    entry->color = dds3SpPoly_Color(duration - age, band->head.endColorRampFrames, color);
                 }
 
                 if (entry->color & 0xFF000000) {
-                    polyStripBuildScaledRing(band, recordIndex);
+                    dds3SpPoly_RingMove(band, recordIndex);
                     age++;
                 } else {
                     entry->vertexCount = 0;
@@ -475,10 +475,10 @@ void polyUpdateBandCells(PolyBand *band) {
             record++;
         } while (recordIndex < count);
     }
-    parPrependCellNode(band->strip);
+    dds3TrackPolyDraw(band->strip);
 }
 
-PolyArc *polyCreateArcRingNode(PolyArc *source) {
+PolyArc *dds3SpPoly_SphereRingCreate(PolyArc *source) {
     s32 tailBytes = sizeof(PolyArc) - sizeof(PolyRingHead);
     s32 size = source->head.entryCount * sizeof(PolyArcRecord) + sizeof(PolyRingHead) + tailBytes;
     struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
@@ -493,23 +493,23 @@ PolyArc *polyCreateArcRingNode(PolyArc *source) {
     if (((PolyRing *)clone)->arc.segments < 3) {
         ((PolyRing *)clone)->arc.segments = 3;
     }
-    clone->strip = parAllocateCellSystem(clone->head.entryCount, clone->segments, 1, 0);
-    parDispatchSub(clone->strip, 0, clone->dispatchArgA, clone->dispatchArgB);
-    polyInitializeArcRecordAges(clone);
+    clone->strip = dds3TrackPolyCreate(clone->head.entryCount, clone->segments, 1, 0);
+    dds3TrackPolyVCSet(clone->strip, 0, clone->dispatchArgA, clone->dispatchArgB);
+    dds3SpPoly_SphereRingAllBuffInit(clone);
     VU0_LOAD_MATRIX(clone->head.matrix);
     VU0_STORE_MATRIX(clone->head.matrixCopy);
-    parSetCellDrawBucket(clone->strip, clone->head.drawBucket);
+    dds3TrackPolySetMode(clone->strip, clone->head.drawBucket);
     return clone;
 }
 
 /* Release the arc's cell system and backing allocation handle, leaving the node alive. */
-void polyReleaseNodeCellSystemAndBuffer(PolyArc *arc) {
-    parReleaseCellSystem(arc->strip);
+void dds3SpPoly_SphereRingDelete(PolyArc *arc) {
+    dds3TrackPolyDelete(arc->strip);
     sdfMemFreeDirect(arc->allocation);
 }
 
 /* Seed arc records with staggered inactive ages. */
-void polyInitializeArcRecordAges(PolyArc *arc) {
+void dds3SpPoly_SphereRingAllBuffInit(PolyArc *arc) {
     u32 count = arc->head.entryCount;
     PolyArcRecord *record = arc->records;
     u32 delayStep = arc->spawnDelayStep;
@@ -528,19 +528,19 @@ void polyInitializeArcRecordAges(PolyArc *arc) {
 }
 
 /* Reset one arc record and choose its jittered radius. */
-void polyRandomizeArcRecord(PolyArc *arc, s32 recordIndex) {
+void dds3SpPoly_SphereRingBuffInit(PolyArc *arc, s32 recordIndex) {
     PolyArcRecord *record = arc->records;
     f32 spread = arc->radiusJitter;
 
     record += recordIndex;
     record->age = 0;
-    record->radius = arc->radius * (sdfGetRandFloat(effDefaultRandomState) * spread + (1.0f - spread));
+    record->radius = arc->radius * (dds3GetRandFloatA(effDefaultRandomState) * spread + (1.0f - spread));
 }
 
 
 /* Lay an arc ring's inner and outer point rows at the projected radius and
  * radial offset for this record's age. */
-void polyUpdateArcRingStripPoints(PolyArc *arc, s32 recordIndex) {
+void dds3SpPoly_SphereRingMove(PolyArc *arc, s32 recordIndex) {
     ParSystem *strip = arc->strip;
     PolyArcRecord *record = &arc->records[recordIndex];
     ParCell *stripEntry = &strip->cells[recordIndex];
@@ -562,7 +562,7 @@ void polyUpdateArcRingStripPoints(PolyArc *arc, s32 recordIndex) {
     pairs = strip->vertexWordCount >> 1;
     recordRadius = record->radius;
     angle = (f32)record->age / (f32)arc->head.duration * 3.14159265f;
-    projectedInnerRadius = recordRadius * sdfSinPoly(angle);
+    projectedInnerRadius = recordRadius * sdfSin(angle);
     verticalOffset = recordRadius * sdfCos(angle) - recordRadius;
     angleStep = 3.14159265f * 2.0f / (f32)arc->segments;
     VU0_LOAD_MATRIX(arc->head.matrix);
@@ -571,7 +571,7 @@ void polyUpdateArcRingStripPoints(PolyArc *arc, s32 recordIndex) {
     VU0_LOAD_VF(vf12, arc->head.origin);
     for (i = 0; i < pairs - 1; i++) {
         innerPointVector[0] = outerPointVector[0] = sdfCos(angle);
-        innerPointVector[2] = sdfSinPoly(angle);
+        innerPointVector[2] = sdfSin(angle);
         outerPointVector[1] = verticalOffset;
         outerPointVector[2] = innerPointVector[2] * (projectedInnerRadius + radialWidth);
         outerPointVector[0] *= projectedInnerRadius + radialWidth;
@@ -597,12 +597,12 @@ void polyUpdateArcRingStripPoints(PolyArc *arc, s32 recordIndex) {
 }
 
 /* Scale the arc's base radius, leaving its jitter fraction unchanged. */
-void polyScaleTransformFirstComponent(f32 scale, PolyArc *arc) {
+void dds3SpPoly_SphereRingSetScale(f32 scale, PolyArc *arc) {
     arc->radius = arc->radius * scale;
 }
 
 /* Advance arc ages, fades and geometry; no-ramp windows retain the prior tint. */
-void polyUpdateArcCells(PolyArc *arc) {
+void dds3SpPoly_SphereRingDraw(PolyArc *arc) {
     s32 index = 0;
     u32 completed = 0;
     u8 loop;
@@ -626,21 +626,21 @@ void polyUpdateArcCells(PolyArc *arc) {
             s32 age = record->age;
 
             if (age == POLY_INACTIVE_ENTRY_AGE) {
-                polyRandomizeArcRecord(arc, index);
+                dds3SpPoly_SphereRingBuffInit(arc, index);
                 age = record->age;
             }
             if (age < 0) {
                 age++;
             } else {
                 if ((u32)age < arc->head.startColorRampFrames) {
-                    entry->color = polyBlendTimedTintColor(age, arc->head.startColorRampFrames, color);
+                    entry->color = dds3SpPoly_Color(age, arc->head.startColorRampFrames, color);
                 } else if (age <= duration &&
                            (u32)age >= duration - arc->head.endColorRampFrames) {
-                    entry->color = polyBlendTimedTintColor(duration - age, arc->head.endColorRampFrames, color);
+                    entry->color = dds3SpPoly_Color(duration - age, arc->head.endColorRampFrames, color);
                 }
 
                 if (entry->color & 0xFF000000) {
-                    polyUpdateArcRingStripPoints(arc, index);
+                    dds3SpPoly_SphereRingMove(arc, index);
                     age++;
                 } else {
                     entry->vertexCount = 0;
@@ -666,11 +666,11 @@ void polyUpdateArcCells(PolyArc *arc) {
             record++;
         } while (index < count);
     }
-    parPrependCellNode(arc->strip);
+    dds3TrackPolyDraw(arc->strip);
 }
 
-/* Rotating-band counterpart of polyCreateBandNode: twenty-byte records follow the header. */
-PolyRotatingBand *polyCreateRotatingBand(PolyRingHead *templateHead) {
+/* Rotating-band counterpart of dds3SpPoly_RingCreate: twenty-byte records follow the header. */
+PolyRotatingBand *dds3SpPoly_RollRingCreate(PolyRingHead *templateHead) {
     u32 size = templateHead->entryCount * sizeof(PolyRotatingBandRecord) + sizeof(PolyRotatingBand);
     struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
     PolyRotatingBand *band = (PolyRotatingBand *)sdfMemLock(allocation);
@@ -684,23 +684,23 @@ PolyRotatingBand *polyCreateRotatingBand(PolyRingHead *templateHead) {
     if (((PolyRing *)band)->rotating.segments < 3) {
         ((PolyRing *)band)->rotating.segments = 3;
     }
-    band->strip = parAllocateCellSystem(band->head.entryCount, band->segments, 1, 0);
-    parDispatchSub(band->strip, 0, band->dispatchArgA, band->dispatchArgB);
-    polyInitializeRotatingBandRecordAges(band);
+    band->strip = dds3TrackPolyCreate(band->head.entryCount, band->segments, 1, 0);
+    dds3TrackPolyVCSet(band->strip, 0, band->dispatchArgA, band->dispatchArgB);
+    dds3SpPoly_RollRingAllBuffInit(band);
     VU0_LOAD_MATRIX(band->head.matrix);
     VU0_STORE_MATRIX(band->head.matrixCopy);
-    parSetCellDrawBucket(band->strip, band->head.drawBucket);
+    dds3TrackPolySetMode(band->strip, band->head.drawBucket);
     return band;
 }
 
 /* Release the rotating band's cell system and backing allocation handle, not the node. */
-void polyReleaseCellBoundNodeResources(PolyRotatingBand *rotatingBand) {
-    parReleaseCellSystem(rotatingBand->strip);
+void dds3SpPoly_RollRingDelete(PolyRotatingBand *rotatingBand) {
+    dds3TrackPolyDelete(rotatingBand->strip);
     sdfMemFreeDirect(rotatingBand->allocation);
 }
 
 /* Seed rotating-band records, advancing the age after each delay group. */
-void polyInitializeRotatingBandRecordAges(PolyRotatingBand *rotatingBand) {
+void dds3SpPoly_RollRingAllBuffInit(PolyRotatingBand *rotatingBand) {
     u32 count = rotatingBand->head.entryCount;
     PolyRotatingBandRecord *record = rotatingBand->records;
     u32 delayStep = rotatingBand->spawnDelayStep;
@@ -722,23 +722,23 @@ void polyInitializeRotatingBandRecordAges(PolyRotatingBand *rotatingBand) {
 
 
 /* Randomize record `index`: jittered start and end radii, radius step, start angle (degrees to radians) and the phase within its delay group. */
-void polyRotatingRandomizeRecord(PolyRotatingBand *spawner, u32 index) {
+void dds3SpPoly_RollRingBuffInit(PolyRotatingBand *spawner, u32 index) {
     PolyRotatingBandRecord *record = spawner->records;
     f32 spread;
 
     record += index;
     spread = spawner->initialRadiusJitter;
     record->age = 0;
-    record->radius = spawner->initialRadius * (sdfGetRandFloat(effDefaultRandomState) * spread + (1.0f - spread));
+    record->radius = spawner->initialRadius * (dds3GetRandFloatA(effDefaultRandomState) * spread + (1.0f - spread));
     spread = spawner->targetRadiusJitter;
-    record->radiusStep = (spawner->targetRadius * (sdfGetRandFloat(effDefaultRandomState) * spread + (1.0f - spread)) - record->radius) / (f32)spawner->head.duration;
+    record->radiusStep = (spawner->targetRadius * (dds3GetRandFloatA(effDefaultRandomState) * spread + (1.0f - spread)) - record->radius) / (f32)spawner->head.duration;
     record->rotationXRadians = spawner->rotationXDegrees * 0.017453292f;
     record->rotationYRadians = 6.2831852f / (f32)spawner->spawnDelayGroupSize * (f32)(index % spawner->spawnDelayGroupSize);
 }
 
 
 /* Build the paired ring using current radius/rotation, then retain their next-step values. */
-void polyBandLayoutRingRotated(PolyRotatingBand *rotatingBand, s32 index)
+void dds3SpPoly_RollRingMove(PolyRotatingBand *rotatingBand, s32 index)
 {
     ParSystem *strip = rotatingBand->strip;
     PolyRotatingBandRecord *rec = &rotatingBand->records[index];
@@ -756,15 +756,15 @@ void polyBandLayoutRingRotated(PolyRotatingBand *rotatingBand, s32 index)
     entry->vertexCount = strip->vertexWordCount;
     out = (f32 *)entry->history;
     pairs = strip->vertexWordCount >> 1;
-    sdfVuLoadRotationMatrixX(rec->rotationXRadians);
+    SetRotateMatrixX(rec->rotationXRadians);
     sdfVuLoadSecondaryRotationMatrixY(rec->rotationYRadians);
-    sdfMultiplyVuMatrixInPlace();
+    MultMatrixRevNoArg();
     rec->rotationYRadians += rotatingBand->rotationStepDegrees * (3.14159265f / 180.0f);
     value = rec->radius;
     rec->radius = value + rec->radiusStep;
     step = 3.14159265f * 2.0f / (f32)rotatingBand->segments;
     VU0_LOAD_MATRIX_B(rotatingBand->head.matrix);
-    sdfMultiplyVuMatrixInPlace();
+    MultMatrixRevNoArg();
     VEC3_SPLAT(baseRadiusVector, value);
     VEC3_SPLAT(offsetRadiusVector, value + rotatingBand->radialWidth);
     value = 0.0f;
@@ -772,7 +772,7 @@ void polyBandLayoutRingRotated(PolyRotatingBand *rotatingBand, s32 index)
     for (i = 0; i < pairs - 1; i++) {
         dir[0] = sdfCos(value);
         dir[1] = 0;
-        dir[2] = sdfSinPoly(value);
+        dir[2] = sdfSin(value);
         VU0_LOAD_VF(vf10, dir);
         VU0_APPLY_MATRIX(vf10, vf10);
         VU0_STORE_VF(vf10, dir);
@@ -793,7 +793,7 @@ void polyBandLayoutRingRotated(PolyRotatingBand *rotatingBand, s32 index)
     PCP_COPY_VECTOR(out + 4, first + 4);
 }
 /* Scale the rotating band's initial and target radii. */
-void polyScaleNodeFloatingParameters(f32 scale, PolyRotatingBand *rotatingBand) {
+void dds3SpPoly_RollRingSetScale(f32 scale, PolyRotatingBand *rotatingBand) {
     rotatingBand->initialRadius = rotatingBand->initialRadius * scale;
     rotatingBand->targetRadius = rotatingBand->targetRadius * scale;
 }
@@ -826,23 +826,23 @@ void polyUpdateRotatingBandCells(PolyRotatingBand *rotatingBand) {
             s32 age = record->age;
 
             if (age == inactiveAge) {
-                polyRotatingRandomizeRecord(rotatingBand, index);
+                dds3SpPoly_RollRingBuffInit(rotatingBand, index);
                 age = record->age;
             }
             if (age < 0) {
                 age++;
             } else {
                 if ((u32)age < rotatingBand->head.startColorRampFrames) {
-                    entry->color = polyBlendTimedTintColor(age, rotatingBand->head.startColorRampFrames, color);
+                    entry->color = dds3SpPoly_Color(age, rotatingBand->head.startColorRampFrames, color);
                 } else if (age <= duration &&
                            (u32)age >= duration - rotatingBand->head.endColorRampFrames) {
-                    entry->color = polyBlendTimedTintColor(duration - age, rotatingBand->head.endColorRampFrames, color);
+                    entry->color = dds3SpPoly_Color(duration - age, rotatingBand->head.endColorRampFrames, color);
                 } else {
                     entry->color = color;
                 }
 
                 if (entry->color & 0xFF000000) {
-                    polyBandLayoutRingRotated(rotatingBand, index);
+                    dds3SpPoly_RollRingMove(rotatingBand, index);
                 } else {
                     entry->vertexCount = 0;
                 }
@@ -867,11 +867,11 @@ void polyUpdateRotatingBandCells(PolyRotatingBand *rotatingBand) {
             record++;
         } while (index < count);
     }
-    parPrependCellNode(rotatingBand->strip);
+    dds3TrackPolyDraw(rotatingBand->strip);
 }
 
 /* Reset active records but leave inactive sentinel entries untouched. */
-void polyResetEntries(PolyRotatingBand *rotatingBand) {
+void dds3SpPoly_RollRingSetEndless(PolyRotatingBand *rotatingBand) {
     u32 count;
     PolyRotatingBandRecord *entry;
     u32 i;

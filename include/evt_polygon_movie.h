@@ -20,7 +20,7 @@ typedef char EvtPolygonMovieTaskState_size_must_be_0x0C[(sizeof(EvtPolygonMovieT
 typedef char EvtPolygonMovieTaskState_flags_at_0x8[((u32)&((EvtPolygonMovieTaskState *)0)->flags == 0x8) ? 1 : -1];
 
 /* PMD2 records and the complete 0x11C-byte owner cleared by both games'
- * evtPolygonMovieAllocWork. Movie parsing, asynchronous resource loading,
+ * InitPolygonMovieWorkData. Movie parsing, asynchronous resource loading,
  * viewer dialogs and message-window lifetime all use this single object. */
 typedef struct PmdEntry {
     u32 type;     /* 0x00 */
@@ -123,14 +123,14 @@ typedef char PolyMovieWork_task_at_0x108[((u32)&((PolyMovieWork *)0)->task == 0x
 typedef char PolyMovieWork_eventId_at_0x10C[((u32)&((PolyMovieWork *)0)->eventId == 0x10C) ? 1 : -1];
 typedef char PolyMovieState_clip_at_0x4[((u32)&((PolyMovieState *)0)->clip == 0x4) ? 1 : -1];
 
-PolyMovieWork *evtPolygonMovieAllocWork(void);
+PolyMovieWork *InitPolygonMovieWorkData(void);
 PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *, PmdHeader *, PmdHeader *, PmdHeader *);
-SdfMemBlock *evtPolygonMovieCreateHeader(PmdHeader **out);
+SdfMemBlock *evtAllocMovieWork(PmdHeader **out);
 SdfMemBlock *evtPolygonMovieSynthesizePmd3Header(PmdHeader **out);
 void evtPolygonMovieSetFlagBits(struct KwlnTask *task, u32 bits);
 void evtPolygonMovieClearFlagBits(struct KwlnTask *task, u32 bits);
 void evtPolygonMovieSetObjectMode(struct EffWorldNode *obj, u32 mode, s32 setFlags, s32 clearFlags);
-s32 evtPolygonMovieScaleByProgress(struct EffWorldNode *movie, s32 undo, s32 start, s32 end);
+s32 evtStopMover(struct EffWorldNode *movie, s32 undo, s32 start, s32 end);
 
 #ifdef VERSION_DDS1
 void evtPolygonMovieClampTime(struct EffWorldNode *movie, s32 unused, s32 start, s32 end);

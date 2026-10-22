@@ -12,17 +12,17 @@ extern EffRandState effDefaultRandomState[];
 
 
 
-void effReleaseBlurTemplate(EffBlurTemplate *owner) {
+void dds3EffectPartialMultiBlurDelete(EffBlurTemplate *owner) {
     sdfChipFreeDirect(owner);
 }
 
-extern u32 fldIsUpdateInhibited(void);
+extern u32 dds3NullDrawProc(void);
 
 /* Update pixel-coordinate edges and draw only when the eligibility check allows. */
 void effDrawBlurPixelRectWithResource(EffBlurTemplate *rect) {
     s32 x, y, w;
 
-    if (fldIsUpdateInhibited() == 0) {
+    if (dds3NullDrawProc() == 0) {
         x = rect->body.source.position[0] + 0x100;
         y = rect->body.source.position[1] + 0xE0;
         w = rect->body.extent;
@@ -38,7 +38,7 @@ void effDrawBlurPixelRectWithResource(EffBlurTemplate *rect) {
 void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner) {
     s32 x, y, w;
 
-    if (fldIsUpdateInhibited() == 0) {
+    if (dds3NullDrawProc() == 0) {
         x = owner->body.source.position[0] + 0x1000;
         y = (owner->body.source.position[1] + 0xE00) >> 1;
         w = owner->body.extent;
@@ -52,27 +52,27 @@ void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner) {
 }
 
 /* Copy only the serialized parameters, leaving the owned work tail intact. */
-void effBlurCopyParams(EffBlurScatterWork *dst, EffBlurScatterParams *src) {
+void dds3EffectPartialMultiBlurSetParam(EffBlurScatterWork *dst, EffBlurScatterParams *src) {
     dst->params = *src;
 }
 
 /* Select the source handle used by the first blur variant. */
-void effBlurSetHandle(EffBlurScatterWork *work, struct SdfTex *sourceHandle) {
+void dds3EffectPartialMultiBlurSetTex(EffBlurScatterWork *work, struct SdfTex *sourceHandle) {
     work->texture = sourceHandle;
 }
 
 /* Acquire the same handle through the effect resource manager. */
-void effBlurAcquireHandle(EffBlurScatterWork *work) {
-    work->texture = effGetBillResourceTexture(2);
+void dds3EffectPartialMultiBlurSetTexDef(EffBlurScatterWork *work) {
+    work->texture = dds3BillboardGetGeneralTex(2);
 }
 
-void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *slot) {
+void dds3EffectDistBlurPartInit(EffBlurScatterWork *work, EffBlurScatterSlot *slot) {
     EffBlurQuad *quad = &slot->quad;
     f32 spread;
     s32 halfSize;
     s32 centerX;
     s32 centerY;
-    slot->delay = sdfGetRand((EffRandState *)effDefaultRandomState) % (work->params.delaySpread + 1);
+    slot->delay = dds3GetRandA((EffRandState *)effDefaultRandomState) % (work->params.delaySpread + 1);
     slot->angle = -3.14159265f;
     quad->angle = work->params.uvDisplacementAngleDegrees;
     quad->color = work->params.color;
@@ -80,10 +80,10 @@ void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *
     spread = work->params.positionSpread;
     halfSize = work->params.size;
     quad->position[0] = work->params.position[0] +
-        (s32)(spread * ((sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f));
+        (s32)(spread * ((dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f));
     halfSize >>= 1;
     quad->position[1] = work->params.position[1] +
-        (s32)(spread * ((sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f));
+        (s32)(spread * ((dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f));
     centerX = quad->position[0] + 256;
     quad->corners[0][0] = centerX - halfSize;
     quad->corners[1][0] = centerX + halfSize;
@@ -92,7 +92,7 @@ void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *
     quad->corners[1][1] = centerY + halfSize;
 }
 
-EffBlurScatterWork *effBlurCreateScatterWork(EffBlurScatterParams *params)
+EffBlurScatterWork *dds3EffectDistortionBlurCreate(EffBlurScatterParams *params)
 {
     struct SdfMemBlock *allocation;
     EffBlurScatterWork *work;
@@ -104,17 +104,17 @@ EffBlurScatterWork *effBlurCreateScatterWork(EffBlurScatterParams *params)
     work->params = *params;
     work->allocation = allocation;
     work->slots = (EffBlurScatterSlot *)(work + 1);
-    work->texture = effGetBillResourceTexture(2);
+    work->texture = dds3BillboardGetGeneralTex(2);
     slot = work->slots;
     for (slotIndex = 0; slotIndex < 100; slotIndex++, slot++) {
-        effBlurInitializeScatterSlot(work, slot);
+        dds3EffectDistBlurPartInit(work, slot);
         slot->angle = 3.14159265f + 1.0f;
     }
     return work;
 }
 
 /* Release the first variant's owned effect resource. */
-void effBlurReleaseFirstResource(EffBlurScatterWork *work) {
+void dds3EffectDistortionBlurDelete(EffBlurScatterWork *work) {
     sdfMemFreeDirect(work->allocation);
 }
 
@@ -133,9 +133,9 @@ void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work)
     s32 count;
     u32 alpha;
 
-    if (fldIsUpdateInhibited() == 0) {
-        list = (void *)sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(list);
+    if (dds3NullDrawProc() == 0) {
+        list = (void *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(list);
         effAppendBlurRenderState(list, work->params.blendControl, work->texture);
         slot = work->slots;
         if (work->params.count > 0) {
@@ -143,9 +143,9 @@ void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work)
             do {
                 if (slot->delay == 0) {
                     if (slot->angle > 3.14159265f) {
-                        effBlurInitializeScatterSlot(work, slot);
+                        dds3EffectDistBlurPartInit(work, slot);
                     }
-                    slot->quad.displacement = work->params.uvDisplacementAmplitude * sdfSinPoly(slot->angle) + 1.0f;
+                    slot->quad.displacement = work->params.uvDisplacementAmplitude * sdfSin(slot->angle) + 1.0f;
                     alpha = (u32)((f32)(work->params.color >> 24) *
                                   (3.14159265f - fabs(slot->angle)) * (1.0f / 3.14159265f));
                     slot->quad.color = (slot->quad.color & 0xFFFFFF) | (alpha << 24);
@@ -164,7 +164,7 @@ void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work)
 
 
 /* Update scale parameters but preserve the allocated destination slot count. */
-void effBlurCopyParamsKeepHeader(EffBlurScaleWork *dst, EffBlurScaleParams *src) {
+void dds3EffectDistortionBlurSetParam(EffBlurScaleWork *dst, EffBlurScaleParams *src) {
     s32 count = dst->params.count;
 
     dst->params = *src;
@@ -177,8 +177,8 @@ void effBlurSetSecondSetting(EffBlurScaleWork *work, struct SdfTex *sourceHandle
 }
 
 /* Both acquisition callbacks request selector 2; the second factory uses 3. */
-void effBlurAcquireSecondHandle(EffBlurScaleWork *work) {
-    work->texture = effGetBillResourceTexture(2);
+void dds3EffectDistortionBlurSetTex(EffBlurScaleWork *work) {
+    work->texture = dds3BillboardGetGeneralTex(2);
 }
 
 /* Fixed-point edges: 16 units per x pixel and 8 per y pixel.
@@ -197,7 +197,7 @@ void effBlurSecondUpdateSlotRect(EffBlurScaleWork *work, EffBlurScaleSlot *slot)
 }
 
 /* Reset a slot for a new burst: zero phase and angle, then copy the colour, the two spare fields and the centre from the work parameters. */
-void effBlurResetScaleSlot(EffBlurScaleWork *work, EffBlurScaleSlot *slot) {
+void dds3EffectRipBlurPartInit(EffBlurScaleWork *work, EffBlurScaleSlot *slot) {
     EffBlurQuad *quad = &slot->quad;
 
     slot->phase = 0.0f;

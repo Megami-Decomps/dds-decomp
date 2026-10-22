@@ -45,9 +45,9 @@ extern u32 effDataDirectoryIndex;
 extern char D_003BB058[];
 extern char D_003BB060[];
 extern char *D_003557A8[];
-extern void dds3AdminSubmitModeRequest(s32 requestedMode, s32 requestData,
+extern void dds3AdminiCallSequence(s32 requestedMode, s32 requestData,
                                       s32 dataBytes, s32 markHistory);
-extern s32 sdfConsMeasurePacketWithHeader(s32 packetAddress);
+extern s32 sdf2DGetPrimPtr(s32 packetAddress);
 
 
 extern EffCreateHandler D_00355730[];
@@ -63,7 +63,7 @@ extern u8 sdfViewUpVector[];
 
 
 /* Allocate the dispatch owner before calling the selected payload constructor. */
-EffWork *effAllocDispatch(s32 type, void *params) {
+EffWork *dds3MagatuhiParCreate(s32 type, void *params) {
     EffWork *work = sdfChipAllocDirect(sizeof(*work));
     void *payload = D_00355730[type].handler(params);
 
@@ -73,23 +73,23 @@ EffWork *effAllocDispatch(s32 type, void *params) {
 }
 
 /* Invoke the primary type callback with the payload; no NULL or type bounds check. */
-void effTypeDispatch(EffWork *work) {
+void dds3MagatuhiParDraw(EffWork *work) {
     D_00355734[work->type].handler(work->payload);
 }
 
 /* Invoke the release callback, then free the outer work; no callback NULL check. */
-void effTypeDispatchFree(EffWork *work) {
+void dds3MagatuhiParDelete(EffWork *work) {
     D_00355738[work->type].handler(work->payload);
     sdfChipFreeDirect(work);
 }
 
 /* Return the retained payload passed to this type's callbacks. */
-void *effGetHandlerArg(EffWork *work) {
+void *dds3MagatuhiGetHandle(EffWork *work) {
     return work->payload;
 }
 
 /* Read the dispatch owner's type word; the pointer remains unchecked. */
-u32 effGetDispatchType(u32 *word) {
+u32 dds3MagatuhiGetType(u32 *word) {
     return *word;
 }
 
@@ -98,12 +98,12 @@ void effDispatchNodeRestartNoOp(void) {
 }
 
 /* Native node type-three condition slot: accept with the constant result one. */
-u32 effDispatchNodeConditionAlwaysTrue(void) {
+u32 dds3MagatuhiParIsActive(void) {
     return 1;
 }
 
 /* Node set-vector slot: invoke optional subtype callback A; preserve the one-formal surface. */
-void effDispatchNodeSetVector(EffWork *work) {
+void dds3MagatuhiParSetPosition(EffWork *work) {
     void (*handler)(void *) = D_0035573C[work->type].handler;
 
     if (handler != NULL) {
@@ -112,7 +112,7 @@ void effDispatchNodeSetVector(EffWork *work) {
 }
 
 /* Node set-matrix slot: invoke optional subtype callback B; preserve the one-formal surface. */
-void effDispatchNodeSetMatrix(EffWork *work) {
+void dds3MagatuhiParSetRotateMatrix(EffWork *work) {
     void (*handler)(void *) = D_00355744[work->type].handler;
 
     if (handler != NULL) {
@@ -121,7 +121,7 @@ void effDispatchNodeSetMatrix(EffWork *work) {
 }
 
 /* Node parameter-word slot: invoke optional subtype callback C; preserve the one-formal surface. */
-void effDispatchNodeSetParameterWord(EffWork *work) {
+void dds3MagatuhiParSetRGBA(EffWork *work) {
     void (*handler)(void *) = D_00355740[work->type].handler;
 
     if (handler != NULL) {
@@ -131,7 +131,7 @@ void effDispatchNodeSetParameterWord(EffWork *work) {
 
 /* Store the low byte of slotValue at the type-specific subslot.
    Types two through four share the same location; other types are left unchanged. */
-void effSetSubSlot(EffWork *work, s32 slotValue) {
+void dds3MagatuhiParSetByType(EffWork *work, s32 slotValue) {
     u8 slotByte = slotValue;
     u32 type = work->type;
 
@@ -179,7 +179,7 @@ u32 effGetSubSlot(EffWork *work, s32 unusedSlotValue) {
 
 /* Types zero/one dispatch from the payload base; two through four skip its prefix.
    Other types still dispatch with a zero argument; no type bounds check is added. */
-EffWork *effAllocSubWork(EffWork *work) {
+EffWork *dds3MagatuhiParCopy(EffWork *work) {
     u32 type = work->type;
     void *handlerArg = NULL;
 
@@ -202,15 +202,15 @@ EffWork *effAllocSubWork(EffWork *work) {
     default:
         break;
     }
-    return effAllocDispatch(type, handlerArg);
+    return dds3MagatuhiParCreate(type, handlerArg);
 }
 
 /* Native node type-three scale slot: no instance state is changed. */
 void effDispatchNodeScaleNoOp(void) {
 }
 
-void effSubmitAdminModeRequestZero(void) {
-    dds3AdminSubmitModeRequest(0, 0, 0, 0);
+void InitMagatuhiEditorProcess(void) {
+    dds3AdminiCallSequence(0, 0, 0, 0);
 }
 
 /* Return the setup-record address word unchanged; no record access or validation is made. */
@@ -286,7 +286,7 @@ s32 func_0018CE68(void) {
 
 /* Debug filesystem mode opens the formatted pfs0 directory; otherwise reset built-in iteration.
    Return the native directory-open result, or zero for built-in mode. */
-s32 effOpenDataDir(void *name) {
+s32 dds3EffectDirOpen(void *name) {
     u8 path[EFF_DIRECTORY_PATH_BYTES];
 
     if (sdfPfsDebugMode != 0) {
@@ -300,7 +300,7 @@ s32 effOpenDataDir(void *name) {
 
 
 /* Run the native directory callback only in debug filesystem mode; its result is ignored. */
-void effRunIfEnabled(s32 directory) {
+void dds3EffectDirClose(s32 directory) {
     if (sdfPfsDebugMode != 0) {
         sceDclose(directory);
     }
@@ -309,7 +309,7 @@ void effRunIfEnabled(s32 directory) {
 
 /* Debug mode delegates to the native iterator. Built-in mode copies the next name,
    clears flag mask 0x1000, and returns name length; zero also marks table exhaustion. */
-s32 effNextDataDirEntry(s32 directory, EffDirEnt *entry) {
+s32 dds3EffectDirRead(s32 directory, EffDirEnt *entry) {
     if (sdfPfsDebugMode != 0) {
         return sceDread(directory, entry);
     }
@@ -324,7 +324,7 @@ s32 effNextDataDirEntry(s32 directory, EffDirEnt *entry) {
 
 
 /* Enumerate enabled resource extensions into an owned doubly linked filename list. */
-EffResourceList *effBuildResourceDirectoryList(char *path, s32 flags) {
+EffResourceList *dds3EffectFileListCreate(char *path, s32 flags) {
     EffDirEnt entry;
     s32 directory;
     EffResourceList *list;
@@ -332,7 +332,7 @@ EffResourceList *effBuildResourceDirectoryList(char *path, s32 flags) {
     EffResourceListNode *tail;
     s32 length;
     s32 type;
-    directory = effOpenDataDir(path);
+    directory = dds3EffectDirOpen(path);
     list = sdfChipAllocDirect(sizeof(*list));
     if (sdfPfsDebugMode != 0) {
         list->directoryPath = sdfChipAllocDirect(strlen(path) + 1);
@@ -344,7 +344,7 @@ EffResourceList *effBuildResourceDirectoryList(char *path, s32 flags) {
     tail = NULL;
     list->head = NULL;
     list->resourceCount = 0;
-    while ((length = effNextDataDirEntry(directory, &entry)) > 0) {
+    while ((length = dds3EffectDirRead(directory, &entry)) > 0) {
         if ((entry.flags & 0xF000) == 0x1000) continue;
         if (length < 5) continue;
         if (length >= 0x2F) continue;
@@ -379,13 +379,13 @@ EffResourceList *effBuildResourceDirectoryList(char *path, s32 flags) {
         list->resourceCount++;
         tail = node;
     }
-    effRunIfEnabled(directory);
+    dds3EffectDirClose(directory);
     return list;
 }
 
 /* Free filename nodes, the copied directory path, then the list root.
    Each filename is inline; save the next link before releasing its node. */
-void effFreeWorkList(EffResourceList *root) {
+void dds3EffectFileListDelete(EffResourceList *root) {
     EffResourceListNode *node = root->head;
 
     if (node != NULL) {
@@ -404,7 +404,7 @@ void effFreeWorkList(EffResourceList *root) {
 
 /* Copy the source count, duplicate its head pointer, and store the source-list pointer.
    Other descriptor words retain their native defaults; no retain operation occurs here. */
-EffResourceDescriptor *effCreateResourceListDescriptor(EffResourceList *list) {
+EffResourceDescriptor *dds3EffectFileListWindowCreate(EffResourceList *list) {
     EffResourceDescriptor *resource = sdfChipAllocDirect(sizeof(*resource));
 
     resource->x = 0;
@@ -430,7 +430,7 @@ EffResourceDescriptor *effCreateResourceListDescriptor(EffResourceList *list) {
 
 /* Navigate the resource list, update its held preview, and submit fifteen rows. */
 /* Retail 0x0018D774 reloads selectedEntry after the case-1 texture update. */
-s32 effUpdateResourceBrowser(EffResourceDescriptor *descriptor) {
+s32 dds3EffectFileListWindowDraw(EffResourceDescriptor *descriptor) {
     EffResourceListNode *visibleEntry;
     SdfListHead *packetList;
     SdfPoolNode *surface;
@@ -523,7 +523,7 @@ s32 effUpdateResourceBrowser(EffResourceDescriptor *descriptor) {
                     char resourceName[0x70];
                     sprintf(resourceName, D_003BB060,
                         descriptor->resourceList->directoryPath, selectedEntry->name);
-                    effSetWorkTextureResource(descriptor, resourceName);
+                    dds3EffectListSetTexture(descriptor, resourceName);
                     descriptor->previewActive = category;
                     selectedEntry = descriptor->selectedEntry;
                     break;
@@ -541,24 +541,24 @@ s32 effUpdateResourceBrowser(EffResourceDescriptor *descriptor) {
                 descriptor->cachedEntry = selectedEntry;
             }
             if (descriptor->previewActive != 0) {
-                effDrawResourceTexturePreview(descriptor);
+                dds3EffectFileListWindowDrawSprite(descriptor);
             }
         }
     }
 
-    packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(packetList);
-    sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(
+    packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(packetList);
+    sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(
         0x8000 - (descriptor->x << 4), 0x8000 - (descriptor->y << 3),
         0xFEFFFF, 0xC00, 0x620, descriptor->fillColor, descriptor->borderColor));
     if (descriptor->previewActive != 0) {
-        sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(
+        sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(
             0x8000 - (descriptor->x << 4),
             0x8000 - ((descriptor->y - 0xC4) << 3),
             0xFEFFFF, 0x800, 0x400, 0, 0x40806020));
     }
     contentRow = descriptor->y - 2;
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x8000 - ((descriptor->x - 2) << 4),
         0x8000 - (contentRow << 3), 0xFF0000, 5,
         descriptor->resourceList->directoryPath));
@@ -567,7 +567,7 @@ s32 effUpdateResourceBrowser(EffResourceDescriptor *descriptor) {
     drawnRows = 0;
     while (visibleEntry != NULL) {
         s32 selectionFlags = visibleEntry == descriptor->selectedEntry ? 4 : 0;
-        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
             0x8000 - ((descriptor->x - 2) << 4),
             0x8000 - (contentRow << 3), 0xFF0000,
             selectionFlags, visibleEntry->name));
@@ -585,7 +585,7 @@ s32 effUpdateResourceBrowser(EffResourceDescriptor *descriptor) {
 
 
 /* Release any retained texture reference, clear its handle, and free the work block. */
-void effFreeWork(EffResourceDescriptor *work) {
+void dds3EffectFileListWindowDelete(EffResourceDescriptor *work) {
     SdfTex *texture = work->textureHandle;
 
     if (texture != NULL) {
@@ -596,7 +596,7 @@ void effFreeWork(EffResourceDescriptor *work) {
 }
 
 /* Set the browser screen coordinates. */
-void effSetMsgHeader(EffResourceDescriptor *message, s32 x, s32 y) {
+void dds3EffectFileListWindowSetPos(EffResourceDescriptor *message, s32 x, s32 y) {
     message->x = x;
     message->y = y;
 }
@@ -608,36 +608,36 @@ u32 effGetWorkParam(EffResourceDescriptor *work) {
 }
 
 /* Return the browser selection result as its native word. */
-u32 effGetWorkLink(EffResourceDescriptor *work) {
+u32 dds3EffectFileListWindowGetState(EffResourceDescriptor *work) {
     return work->result;
 }
 
 /* Format the prefix/name records through the native template and return the name record's first word.
    Buffer capacity and record pointers remain unchecked. */
-u32 effFormatMsgNames(EffResourceDescriptor *message, char *destination) {
+u32 dds3EffectFileListWindowGetFilename(EffResourceDescriptor *message, char *destination) {
     sprintf(destination, D_003BB060, message->resourceList->directoryPath, message->selectedEntry->name);
     return message->selectedEntry->type;
 }
 
 /* Set the navigation repeat delay. */
-void effSetWorkFirst(EffResourceDescriptor *work, u32 value) {
+void dds3EffectFileListWindowSetOt(EffResourceDescriptor *work, u32 value) {
     work->repeatDelay = value;
 }
 
 /* Select the draw surface for browser packets. */
-void effSetWorkSecond(EffResourceDescriptor *work, u32 value) {
+void dds3EffectFileListWindowSetPadWait(EffResourceDescriptor *work, u32 value) {
     work->drawSurface = value;
 }
 
 /* Set the browser border and fill colors. */
-void effSetMsgPair(EffResourceDescriptor *message, u32 borderColor, u32 fillColor) {
+void dds3EffectFileListWindowSetWindowColor(EffResourceDescriptor *message, u32 borderColor, u32 fillColor) {
     message->borderColor = borderColor;
     message->fillColor = fillColor;
 }
 
 /* Release the previous texture reference before loading/acquiring its replacement.
    Release the temporary loaded resource afterward; native failure results are unchecked. */
-void effSetWorkTextureResource(EffResourceDescriptor *work, const char *textureResource) {
+void dds3EffectListSetTexture(EffResourceDescriptor *work, const char *textureResource) {
     SdfTex *texture;
     SdfMemBlock *loadedResource;
     u32 resourceWords[4];
@@ -646,8 +646,8 @@ void effSetWorkTextureResource(EffResourceDescriptor *work, const char *textureR
         sdfTexReleaseReferenceViaHandler(work->textureHandle);
         work->textureHandle = NULL;
     }
-    loadedResource = sdfReadNamedResource(textureResource, resourceWords, 0);
-    texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceWords[0]));
+    loadedResource = sdfDevLoadFileEx(textureResource, resourceWords, 0);
+    texture = sdfTexSet((SdfTextureFileHeader *)(resourceWords[0]));
     work->textureHandle = texture;
     sdfMemFreeDirect(loadedResource);
 }
@@ -656,17 +656,17 @@ extern SdfPoolNode D_003255A8;
 
 
 /* Queue the overlay's texture as a quad at its screen position. */
-void effDrawResourceTexturePreview(EffResourceDescriptor *overlay) {
+void dds3EffectFileListWindowDrawSprite(EffResourceDescriptor *overlay) {
     SdfListHead *list;
     void *sprite;
     KwlnSpriteVertex *vertex;
     SdfTex *texture;
 
     if (overlay->textureHandle != 0) {
-        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(list);
-        sprite = sdfConsAllocateColumnPacket(1);
-        vertex = (KwlnSpriteVertex *)sdfConsMeasurePacketWithHeader((s32)sprite);
+        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(list);
+        sprite = sdf2DAllocSprite(1);
+        vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr((s32)sprite);
         vertex->a = 0x80;
         vertex->b = 0x80;
         vertex->g = 0x80;
@@ -684,24 +684,24 @@ void effDrawResourceTexturePreview(EffResourceDescriptor *overlay) {
         vertex->corner[1].x = vertex->corner[0].x + 0x800;
         vertex->corner[1].y = vertex->corner[0].y + 0x400;
         vertex->corner[1].mask = 0xFF0000;
-        sdfConsCreateDrawPacket(list, texture, 0);
-        sdfAppendPacket(list, (u32)sprite);
+        sdf2DLinkTexPacket(list, texture, 0);
+        sdfDrawTagLink(list, (u32)sprite);
         D_003255A8.append(&D_003255A8, list);
     }
 }
 
 
-void func_0018DB88(void) {
-    dds3AdminSubmitModeRequest(0, 0, 0, 0);
+void InitParticleEditorProcess(void) {
+    dds3AdminiCallSequence(0, 0, 0, 0);
 }
 
-void func_0018DBB0(void) {
-    dds3AdminSubmitModeRequest(0, 0, 0, 0);
+void InitSpriteViewerProcess(void) {
+    dds3AdminiCallSequence(0, 0, 0, 0);
 }
 
 /* vu0 routine: transform the point in vf10 by view/projection, divide by w, then scale/bias.
    No clipping or zero-w check is performed; the result remains in vf10. */
-void sdfProjectVuVectorToScreen(void) {
+void effScreenOffset(void) {
     u8 *projectionData;
     VU0_LOAD_MATRIX(sdfViewMatrix);
     projectionData = sdfProjectionMatrix;
@@ -716,7 +716,7 @@ void sdfProjectVuVectorToScreen(void) {
 }
 
 /* vu0 routine: project a point and its camera-right offset, returning their rounded screen distance. */
-s32 effMeasureCameraRightScreenOffsetVU(f32 scale) {
+s32 effPCPBlurScreenOffset(f32 scale) {
     f32 scaleVector[4];
     f32 projectedEnd[4];
     f32 projectedStart[4];
@@ -725,7 +725,7 @@ s32 effMeasureCameraRightScreenOffsetVU(f32 scale) {
     f32 dy;
 
     VU0_STORE_VF_UNCLOBBERED(vf10, original);
-    sdfProjectVuVectorToScreen();
+    effScreenOffset();
     VU0_STORE_VF(vf10, projectedStart);
 
     scaleVector[0] = scaleVector[1] = scaleVector[2] = scale;
@@ -741,7 +741,7 @@ s32 effMeasureCameraRightScreenOffsetVU(f32 scale) {
     VU0_MOVE_VF(vf11, vf12);
     VU0_ADD(vf10, vf10, vf11);
 
-    sdfProjectVuVectorToScreen();
+    effScreenOffset();
     VU0_STORE_VF(vf10, projectedEnd);
     dx = projectedEnd[0] - projectedStart[0];
     dy = projectedEnd[1] - projectedStart[1];
@@ -750,7 +750,7 @@ s32 effMeasureCameraRightScreenOffsetVU(f32 scale) {
 }
 
 /* vu0 routine: blend two RGBA8888 colours by t (lerp in float, packed back to RGBA8888) */
-u32 effBlendColor(u32 colorA, u32 colorB, f32 t) {
+u32 effColorBlend(u32 colorA, u32 colorB, f32 t) {
     s32 color1[4];
     s32 color2[4];
     s32 blended[4];
@@ -776,7 +776,7 @@ u32 effBlendColor(u32 colorA, u32 colorB, f32 t) {
 
 /* vu0 routine: multiply RGBA channels normalized by 128, then pack at the same scale.
    Native integer conversion/byte packing remains unclamped; quadword storage is unchanged. */
-u32 effMultiplyPackedColors(u32 colorA, u32 colorB) {
+u32 effMagaCylinderCalcColor(u32 colorA, u32 colorB) {
     s32 colorAWords[EFF_VECTOR_WORD_COUNT];
     s32 colorBWords[EFF_VECTOR_WORD_COUNT];
     s32 packedWords[EFF_VECTOR_WORD_COUNT];
@@ -795,7 +795,7 @@ u32 effMultiplyPackedColors(u32 colorA, u32 colorB) {
 
 /* vu0 routine: distance from point to the line through origin along a unit direction.
    Direction is not normalized here; dot/length use xyz despite full quadword loads. */
-f32 effPointToLineDistance(f32 *direction, f32 *origin, f32 *point) {
+f32 effLinePointLength(f32 *direction, f32 *origin, f32 *point) {
     f32 projectedOffset[EFF_VECTOR_WORD_COUNT];
     f32 pointOffset[EFF_VECTOR_WORD_COUNT];
     f32 projectionAmount;
@@ -820,7 +820,7 @@ f32 effPointToLineDistance(f32 *direction, f32 *origin, f32 *point) {
 
 /* Allocate/retain slot storage and return its header after the slots, not the slot base.
    Only the two native slot defaults are initialized; count/allocation validity is unchecked. */
-EffArrHdr *effAllocSlotArray(s32 count) {
+EffArrHdr *dds3Bezier4PCreate(s32 count) {
     struct SdfMemBlock *allocation = sdfMemAllocDirect(count * EFF_SLOT_BYTES + EFF_SLOT_HEADER_BYTES);
     void *retainedAddress = (void *)sdfMemLock(allocation);
     u32 slotIndex = 0;

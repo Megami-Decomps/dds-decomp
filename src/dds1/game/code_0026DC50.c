@@ -5,7 +5,7 @@
 #include "mnu_sprite_resource.h"
 
 
-extern void mnuRequestIndexedMovieResource(s32);
+extern void dds3PlayMovieByIndex(s32);
 
 extern void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode, s32 spriteIndex,
                           s32 drawContext);
@@ -22,7 +22,7 @@ void mnuDrawFixedSpriteLayerGroup(void) {
 }
 
 void mnuRequestDefaultMovieResource(void) {
-    mnuRequestIndexedMovieResource(0);
+    dds3PlayMovieByIndex(0);
 }
 
 extern char D_003AFEC8[];
@@ -50,8 +50,8 @@ SpriteSpawnNode *mnuCreateMovieParticleNode(MnuSpriteResourceGroup *group, Sprit
         node->direction = direction;
         node->framesLeft = node->duration = group->cueDuration - 5;
     } else {
-        node->x = sdfGetRandInt(NULL, 15) * 22 + 56;
-        node->y = sdfGetRandInt(NULL, 10) * 36 + 189;
+        node->x = dds3GetRandIntA(NULL, 15) * 22 + 56;
+        node->y = dds3GetRandIntA(NULL, 10) * 36 + 189;
         node->generations = group->initialGenerations;
         node->direction = 0;
         node->framesLeft = node->duration = group->cueDuration;

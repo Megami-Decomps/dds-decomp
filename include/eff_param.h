@@ -58,28 +58,28 @@ typedef char EffParamTable_records_at_0x10[
     ((u32)&((EffParamTable *)0)->records == 0x10) ? 1 : -1];
 
 /* Return a borrowed block at the selected record's signed relative offset. */
-void *effParamTableGetBlock(const EffParamTable *table, s32 recordIndex);
-u32 effParamTableGetWord(const EffParamTable *table, s32 recordIndex);
-u32 effParamTableGetWord2(const EffParamTable *table, s32 recordIndex);
-EffParamWork *effParamWorkCreate(u16 kind, void *source);
-EffParamWork *effParamCreateFromTable(const EffParamTable *table, s32 recordIndex);
-EffParamWork *effParamWorkDuplicate(EffParamWork *source);
+void *dds3EffectPCPDataGetData(const EffParamTable *table, s32 recordIndex);
+u32 dds3EffectPCPDataGetSize(const EffParamTable *table, s32 recordIndex);
+u32 dds3EffectPCPDataGetType(const EffParamTable *table, s32 recordIndex);
+EffParamWork *dds3EffectPartCreate(u16 kind, void *source);
+EffParamWork *dds3EffectPCPDataPartCreate(const EffParamTable *table, s32 recordIndex);
+EffParamWork *dds3EffectPartCopy(EffParamWork *source);
 void *effParamWorkGetData(EffParamWork *work);
-void effParamWorkInvokeCallback(EffParamWork *work);
+void dds3EffectPartDraw(EffParamWork *work);
 /* Optional source and matrix operations retain their generic pointer domains. */
-void effParamWorkCallback0(EffParamWork *work, void *source);
-void effParamWorkCallback1(EffParamWork *work, f32 scale);
-void effParamWorkCallback2(EffParamWork *work, void *matrix);
-void effParamWorkCallback3(EffParamWork *work, u32 value);
-void effParamWorkCallback4(EffParamWork *work, void *matrix);
-void effParamWorkCallback5(EffParamWork *work, f32 sizeInput);
-void effParamWorkExCallback0(EffParamWorkEx *work, void *source);
-void effParamWorkExCallback1(EffParamWorkEx *work, f32 scale);
-void effParamWorkExCallback2(EffParamWorkEx *work, void *matrix);
-void effParamWorkExCallback3(EffParamWorkEx *work, void *matrix);
+void dds3EffectPartSetPosition(EffParamWork *work, void *source);
+void dds3EffectPartSetScale(EffParamWork *work, f32 scale);
+void dds3EffectPartSetRotateMatrix(EffParamWork *work, void *matrix);
+void dds3EffectPartSetColor(EffParamWork *work, u32 value);
+void dds3EffectPartSetDirection(EffParamWork *work, void *matrix);
+void dds3EffectPartSetArea(EffParamWork *work, f32 sizeInput);
+void dds3EffectPCPSetPosition(EffParamWorkEx *work, void *source);
+void dds3EffectPCPSetScale(EffParamWorkEx *work, f32 scale);
+void dds3EffectPCPSetRotateMatrix(EffParamWorkEx *work, void *matrix);
+void dds3EffectPCPSetDirection(EffParamWorkEx *work, void *matrix);
 /* The extended value adapter uses slot 3 despite its historical suffix 4. */
-void effParamWorkExCallback4(EffParamWorkEx *work, u32 value);
-void effParamWorkExCallback5(EffParamWorkEx *work, f32 sizeInput);
-void effDispatchParameterDataAndFreeWork(EffParamWork *work);
+void dds3EffectPCPSetColor(EffParamWorkEx *work, u32 value);
+void dds3EffectPCPSetArea(EffParamWorkEx *work, f32 sizeInput);
+void dds3EffectPartDelete(EffParamWork *work);
 
 #endif

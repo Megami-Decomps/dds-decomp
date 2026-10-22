@@ -99,7 +99,7 @@ extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, u32, u32, u32,
 
 extern s32 frMeasureAndQueueCounterText(const char *text);
 
-extern void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors,
+extern void eglLinkKanji(s32 width, s32 height, s32 colors,
                                        const char *text);
 
 extern void sdfCounterDrawGlyphAtGridCell(s32, s32, u32, u8 *);
@@ -131,13 +131,13 @@ s32 sdfLoadMapCounterCameraVectorsForMask(s32 mask) {
     s8 count;
     s8 i;
 
-    world = dds3GetWorldSecondaryObject();
+    world = dds3GetControlScene();
     count = 0;
     for (i = 0; i != 13; i++) {
         if (i < 10) {
             if ((mask >> i) & 1) {
                 sprintf(name, "01cam_%02d", i + 1);
-                node = dds3FindIndexedObjectChainNodeByName(world, 4, (u8 *)name);
+                node = dds3SceneBasicSearchNameAndType(world, 4, (u8 *)name);
                 dds3GetPosPoseSet(node);
                 VU0_STORE_VF_UNCLOBBERED(vf10, position);
                 D_004009B0[count].v[0] = position[0];
@@ -154,7 +154,7 @@ s32 sdfLoadMapCounterCameraVectorsForMask(s32 mask) {
             }
         } else {
             sprintf(name, "01cam_%02d", i + 1);
-            node = dds3FindIndexedObjectChainNodeByName(world, 4, (u8 *)name);
+            node = dds3SceneBasicSearchNameAndType(world, 4, (u8 *)name);
             dds3GetPosPoseSet(node);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
             D_004008E0[i - 10][0] = position[0];
@@ -335,10 +335,10 @@ void sdfSetLocalMapCounterMarkerState(s32 index, s32 value) {
 
     if (index != 0) {
         modelIndex = index - 1;
-        node = dds3FindIndexedObjectChainNodeByName(dds3GetWorldSecondaryObject(), 6,
+        node = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 6,
                                                   (const u8 *)names[modelIndex]);
         if (node != NULL) {
-            dds3SetObjectPayloadWord8(node, value);
+            dds3MatterObjectBasicSetAlpMode(node, value);
         }
     }
 }
@@ -396,10 +396,10 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
 
 u8 *sdfResolveSceneCounterInfo(s32 scene) {
     if (scene == 4) {
-        if (mdlFlagTest(0x13)) {
+        if (evtBitCheck(0x13)) {
             scene = 10;
         }
-        if (mdlFlagTest(0x29)) {
+        if (evtBitCheck(0x29)) {
             scene = 11;
         }
     }
@@ -420,7 +420,7 @@ void sdfCounterDestroyRuntime(struct MenuList *rt) {
     }
 }
 
-void sdfDestroyActiveCounterRuntime(void) {
+void pbCheckPreviousRecord(void) {
     sdfCounterDestroyRuntime(sdfActiveCounterRuntime);
 }
 
@@ -454,7 +454,7 @@ s32 sdfPollCounterSelectionInput(void) {
                 channelIndex * (sdfActiveCounterRuntime->rowStep >> 3));
             sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(previousIndex) - 1, 10);
             sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(channelIndex) - 1, 11);
-            sndSetSequenceVolumePan(0, 127, 63);
+            p2sdPlaySE(0, 127, 63);
         }
     }
     if ((s8)kwlnTaskPadButtonStates[1][0][7] < 0 || (kwlnTaskPadButtonStates[1][0][7] & 2)) {
@@ -466,7 +466,7 @@ s32 sdfPollCounterSelectionInput(void) {
                 channelIndex * (sdfActiveCounterRuntime->rowStep >> 3));
             sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(previousIndex) - 1, 10);
             sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(channelIndex) - 1, 11);
-            sndSetSequenceVolumePan(0, 127, 63);
+            p2sdPlaySE(0, 127, 63);
         }
     }
     if ((s8)kwlnTaskPadButtonStates[1][0][3] < 0) {
@@ -479,10 +479,10 @@ s32 sdfPollCounterSelectionInput(void) {
             sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(D_00438894) - 1, 11);
         }
         sdfSetSelectedIndex(D_00438894);
-        sndSetSequenceVolumePan(10, 127, 63);
+        p2sdPlaySE(10, 127, 63);
     }
     if ((s8)kwlnTaskPadButtonStates[1][0][1] < 0) {
-        sndSetSequenceVolumePan(8, 127, 63);
+        p2sdPlaySE(8, 127, 63);
         sdfSetSelectedIndex(sdfActiveCounterRuntime->cursor->index);
         return -2;
     }
@@ -635,7 +635,7 @@ void sdfCounterDrawChannelPlate(s32 x, s32 y, s32 unused, struct MenuList *rt, s
                   PACK(base + 0x30, base + 0x30, base + 0x30, (u32)(fade * 64.0f)),
                   PACK(base + 0x60, base + 0x60, base + 0x60, (u32)((f32)(base + 0x70) * fade)));
     width = frMeasureAndQueueCounterText(channel->counterDisplay->label);
-    evtPrepareSizedDrawResource(x + (0x80 - width) / 2 + 1, y + 1,
+    eglLinkKanji(x + (0x80 - width) / 2 + 1, y + 1,
                                 PACK((u32)(fade * 128.0f), (u32)(fade * 128.0f), (u32)((f32)(base + 0x80) * fade), (u32)(fade * 128.0f)),
                                 channel->counterDisplay->label);
 }
@@ -814,7 +814,7 @@ s32 frMeasureAndQueueCounterText(const char *text) {
     s32 width;
 
     glyph = itfCreateMeasuredTextGlyph(0, 0, 0, 0, text, NULL);
-    width = frFontMeasureLines(glyph);
+    width = frGetStrWidth2(glyph);
     frDestroyFontRequestAfter(glyph);
     return width;
 }
@@ -1003,11 +1003,11 @@ s32 fldLoadLocalMapResources(void) {
 
     for (i = 0; i < 10; i++) {
         sprintf(name, "/lmap/sname_%02d.tmx", i + 1);
-        fldLoadMapResource(name, item);
+        texLoad(name, item);
         item++;
     }
-    fldLoadMapResource("/lmap/1006.tmx", &fldLocalMapAuxTextureResource);
-    fldLoadMapResource("/lmap/l_map00.tmx", &fldLocalMapTextureResource);
+    texLoad("/lmap/1006.tmx", &fldLocalMapAuxTextureResource);
+    texLoad("/lmap/l_map00.tmx", &fldLocalMapTextureResource);
     return 1;
 }
 
@@ -1015,12 +1015,12 @@ s32 fldReleaseLocalMapResources(void) {
     s32 i = 9;
     MapResource *item = fldLocalMapNameTextures;
     do {
-        fldReleaseMapResource(&item->texture);
+        texRelease(&item->texture);
         item++;
         --i;
     } while (i >= 0);
-    fldReleaseMapResource(&fldLocalMapAuxTextureResource.texture);
-    fldReleaseMapResource(&fldLocalMapTextureResource.texture);
+    texRelease(&fldLocalMapAuxTextureResource.texture);
+    texRelease(&fldLocalMapTextureResource.texture);
     return 1;
 }
 

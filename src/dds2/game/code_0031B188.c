@@ -68,15 +68,15 @@ extern u8 D_0040ABC0[];
 extern u8 D_0040ABB0[];
 extern s32 D_00438944;
 struct EffWorldNode;
-extern void dds3SetCameraVector(struct EffWorldNode *camera, u128 *worldEye);
+extern void dds3CameraObjectBasicGetCameraTM(struct EffWorldNode *camera, u128 *worldEye);
 
 /* Reload the camera vectors, invoke its update callback, then restore both copies
  * of the final vector in the camera data. */
-void mnuUpdateShootingCameraVectors(void) {
+void CalcCamera(void) {
     CameraData *cameraData;
     EffWorldNode *camera;
 
-    dds3SetCameraVector((EffWorldNode *)D_00438944, (u128 *)D_0040ABD0);
+    dds3CameraObjectBasicGetCameraTM((EffWorldNode *)D_00438944, (u128 *)D_0040ABD0);
     dds3SetPosPoseSet((EffWorldNode *)D_00438944, (u128 *)D_0040ABC0);
     camera = (EffWorldNode *)D_00438944;
     camera->ops->update(camera);
@@ -92,7 +92,7 @@ void dds3InitSoundSlotPool(void) {
         dds3ReleaseSoundSlotPool();
     }
     handle = (u32)sdfMemAllocDirect(0x32c);
-    dds3SoundSlotPool = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)handle);
+    dds3SoundSlotPool = (void *)sdfMemGetPtr((struct SdfMemBlock *)(u32)handle);
     memset(dds3SoundSlotPool, 0, 0x32c);
     pool = (SoundSlotPool *)dds3SoundSlotPool;
     pool->handle = handle;
@@ -140,7 +140,7 @@ void dds3UpdateSoundSlots(void) {
             do {
                 if (slot->sequence != 0) {
                     if (slot->remainingFrames == 0 || --slot->remainingFrames == 0) {
-                        sndSetSequenceVolumePan(slot->sequence, 0x7f, 0x3f);
+                        p2sdPlaySE(slot->sequence, 0x7f, 0x3f);
                         slot->sequence = 0;
                     }
                 }
@@ -191,7 +191,7 @@ s32 mnuApplyFrameKeyedModelMotion(MenuWorkEntry *work, MnuShootingWork *unusedCo
                             model = node->model;
                             model->first->frameStep = 0.5f;
                             node->savedModelValue = 0.5f;
-                            mdlAddEntryFlaggedEx(model, 0, record->parameters[1],
+                            mdlSmoothLoopMotion(model, 0, record->parameters[1],
                                                 0.0f, record->parameters[2]);
                         }
                     }
@@ -215,7 +215,7 @@ MnuEffectWork *mnuCreateEffectWork(s32 listCount, s32 *recordCounts) {
     for (i = 0; i < listCount; i++) allocationSize += recordCounts[i] * 32;
     evtPrintDeveloperConsoleMessage("EffectWork Object Size %d\n", allocationSize);
     allocation = sdfMemAllocDirect(allocationSize);
-    work = (MnuEffectWork *)sdfMemoryGetBlockAddress(allocation);
+    work = (MnuEffectWork *)sdfMemGetPtr(allocation);
     memset(work, 0, allocationSize);
     work->allocation = allocation;
     work->count = listCount;
@@ -385,8 +385,8 @@ s32 mnuStartPositionedEffectBurst(MnuEffectList *list, MnuEffectPositionStep *st
     for (i = 0; i < preset->count; i++) {
         delay = i * preset->spacing + baseDelay;
         mnuClaimPositionedEffectRecord(list,
-                                       x + preset->jitterX * (2.0f * sdfGetRandFloat(0) - 1.0f),
-                                       y + preset->jitterY * (2.0f * sdfGetRandFloat(0) - 1.0f), z, step, scale, delay);
+                                       x + preset->jitterX * (2.0f * dds3GetRandFloatA(0) - 1.0f),
+                                       y + preset->jitterY * (2.0f * dds3GetRandFloatA(0) - 1.0f), z, step, scale, delay);
         dds3ClaimSoundSlot(0x01E00002, delay);
     }
     return 0;
@@ -405,7 +405,7 @@ void mnuClearNodeBroadcastFlag(u8 *node) {
 u32 mnuLoadNodeModelFromResource(u32 *owner, u32 resource) {
     u32 handle;
     u32 other;
-    struct SdfMemBlock *data = sdfReadNamedResource((const char *)(u32)resource, &handle, &other);
+    struct SdfMemBlock *data = sdfDevLoadFileEx((const char *)(u32)resource, &handle, &other);
     *owner = (u32)fileCloneQueueEntries((FileQueue *)handle);
     fileQueueNotifyAllJobsComplete((FileQueue *)*owner);
     sdfMemFreeDirect(data);
@@ -516,7 +516,7 @@ MnuSectionModelWork *mnuCreateSectionModelWork(s32 listCount, s32 *nodeCounts) {
     for (i = 0; i < listCount; i++) allocationSize += nodeCounts[i] * sizeof(MnuModelNode);
     evtPrintDeveloperConsoleMessage(D_0042DAE8, allocationSize);
     handle = (u32)sdfMemAllocDirect(allocationSize);
-    work = (MnuSectionModelWork *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)handle);
+    work = (MnuSectionModelWork *)sdfMemGetPtr((struct SdfMemBlock *)(u32)handle);
     memset(work, 0, allocationSize);
     work->allocation = (struct SdfMemBlock *)handle;
     work->count = listCount;
@@ -567,7 +567,7 @@ void mnuDestroyAllModelNodeContexts(MnuNodeList *list) {
             MdlCtx *model = node->model;
             node++;
             if (model != NULL) {
-                mdlDestroyContext(model);
+                mdlFree(model);
             }
             index++;
         } while (index < list->count);
@@ -658,12 +658,12 @@ void mnuRestoreActiveNodeModelDepth(MnuNodeList *list) {
 
 /* Create the resource-backed model; -1 omits flagged-entry setup and scalar saving. */
 void mnuCreateNodeModelEntry(MnuModelNode *node, s32 resourceGroup, s32 resourceId, s32 entryFlags, f32 x, f32 y, f32 z) {
-    MdlCtx *model = mdlCreateContextFromResourceKey(resourceGroup, resourceId);
+    MdlCtx *model = mdlLoad(resourceGroup, resourceId);
     node->model = model;
     if (entryFlags != -1) {
         model->first->frameStep = z;
         node->savedModelValue = z;
-        mdlAddEntryFlaggedEx(model, 0, entryFlags, x, y);
+        mdlSmoothLoopMotion(model, 0, entryFlags, x, y);
     }
 }
 
@@ -695,7 +695,7 @@ void mnuSetNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z) {
     modelNode->primary[2] = z;
     modelNode->primary[3] = 0;
     VU0_LOAD_VF(vf10, modelNode->primary);
-    mdlStorePrimaryVectorVU(modelNode->model);
+    mdlSetPosition(modelNode->model);
 }
 
 /* Translate the primary (0x00) vector and load it into the model. */
@@ -705,7 +705,7 @@ void mnuTranslateNodePrimaryVector(MnuModelNode *node, f32 x, f32 y, f32 z) {
     node->primary[1] += y;
     node->primary[2] += z;
     VU0_LOAD_VF(vf10, node->primary);
-    mdlStorePrimaryVectorVU(node->model);
+    mdlSetPosition(node->model);
 }
 
 /* Build a quaternion from the incoming Euler angles and refresh the model basis. */
@@ -718,7 +718,7 @@ void mnuRefreshNodeSecondaryVector(u8 *node, f32 xAngle, f32 yAngle, f32 zAngle)
     ((MnuModelNode *)node)->rotationQuaternion[2] = quaternion[2];
     ((MnuModelNode *)node)->rotationQuaternion[3] = quaternion[3];
     VU0_LOAD_VF(vf10, node + 0x10);
-    mdlUpdateContextRotationBasisFromQuaternion(((MnuModelNode *)node)->model);
+    mdlSetRotate(((MnuModelNode *)node)->model);
 }
 
 void mnuSetViewFacingModelNodeRotation(MnuModelNode *node, f32 xAngle, f32 yAngle, f32 zAngle) {
@@ -753,7 +753,7 @@ void mnuSetViewFacingModelNodeRotation(MnuModelNode *node, f32 xAngle, f32 yAngl
     vector[2] = quaternion[2];
     vector[3] = quaternion[3];
     VU0_LOAD_VF(vf10, vector);
-    mdlUpdateContextRotationBasisFromQuaternion(node->model);
+    mdlSetRotate(node->model);
 }
 
 /* Fill the tertiary (0x20) vector with one value and load it into the model. */
@@ -765,11 +765,11 @@ void mnuSetNodeScaleVector(u8 *node, f32 value) {
     modelNode->tertiary[2] = value;
     modelNode->tertiary[3] = 0;
     VU0_LOAD_VF(vf10, modelNode->tertiary);
-    mdlStoreTertiaryVectorVU(modelNode->model);
+    mdlSetScale(modelNode->model);
 }
 
 void mnuBroadcastNodeModelState(u8 *node, u32 color) {
-    mdlApplyBroadcastVia(mdlBroadcastMasked, ((MnuModelNode *)node)->model, color);
+    mdlApplyBroadcastVia(mdlSetColor, ((MnuModelNode *)node)->model, color);
 }
 
 

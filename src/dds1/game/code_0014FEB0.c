@@ -15,7 +15,7 @@ extern BillObj *billCreateFromResource(s32 kind, const char *path);
 
 extern EffBillResourceInit effBillResourceInitTable[];
 
-EffNode *effCloneSourceWithTypeHandler(const EffNode *source) {
+EffNode *dds3EffectCopy(const EffNode *source) {
     EffNode *copy = (EffNode *)sdfChipAllocDirect(0x10);
     u32 argument = (u32)source->instance;
 
@@ -28,7 +28,7 @@ EffNode *effCloneSourceWithTypeHandler(const EffNode *source) {
 #include "sdf_debug_api.h"
 
 /* Normalize legacy payloads before the effect manager constructs their nodes. */
-void effConvertLegacyNodeDescriptor(EffNodeDescriptor *descriptor) {
+void dds3EffectDataRevision(EffNodeDescriptor *descriptor) {
     u8 *payload = descriptor->payload;
 
     if (descriptor->version == 1.0f) {
@@ -89,11 +89,11 @@ void effBillDispatchAll(void) {
 
     billPendingChildList = 0;
     for (billboardIndex = 0; billboardIndex < 15; billboardIndex++) {
-        billDispatchByKind(effBillResourceOwners[billboardIndex]);
+        dds3BillboardDelete(effBillResourceOwners[billboardIndex]);
     }
 }
 
-BillChildPayload *billCreateChildPayloadFromTextureResource(SdfTextureFileHeader *resource) {
+BillChildPayload *BillboardLoadTex(SdfTextureFileHeader *resource) {
     struct SdfMemBlock *allocation;
     BillPacketWork *work;
     BillChildPayload *child;
@@ -117,7 +117,7 @@ BillChildPayload *billCreateChildPayloadFromTextureResource(SdfTextureFileHeader
     }
     child->packetListIndex = 0;
 
-    texture = sdfTexAcquireResourceTexture(resource);
+    texture = sdfTexSet(resource);
     heightUv = (s16)((u16)texture->height << 4);
     widthUv = (s16)((u16)texture->width << 4);
 

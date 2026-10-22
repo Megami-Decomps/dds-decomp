@@ -10,7 +10,7 @@ typedef struct EffectValueData {
     u32 flags; /* +0x64 */
 } EffectValueData;
 
-/* Value-chain entry read by effUpdateValueTransitionProximity in both titles.
+/* Value-chain entry read by dds3UnitObjectBasicEL_Link in both titles.
  * The updater tracks valueId, tests source against the object's radius and
  * consults data->flags before starting or ending a transition. */
 typedef struct EffectValueObject {

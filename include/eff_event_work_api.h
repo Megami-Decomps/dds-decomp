@@ -5,7 +5,7 @@
 #include "eff_blur.h"
 
 /* Return the live work blocks owned by the corresponding event effect. */
-EffBlurScaleWork *effGetCh76Work(void);
-EffResourceRectWork *effGetCh75Work(void);
+EffBlurScaleWork *Eve_RippleBlurGetParams(void);
+EffResourceRectWork *Eve_PartialMultiFilterGetParams(void);
 
 #endif

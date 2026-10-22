@@ -7,7 +7,7 @@
 #define MDL_CONTEXT_WIDE_MOTION_SLOT (-1)
 
 /* Apply a viewer record list and associate created items with a motion slot. */
-void mdlApplyResourceEntries(MdlCtx *owner, s32 recordId, s32 motionSlotIndex);
-void mdlRemoveResourcesForMotionSlot(MdlCtx *owner, s32 motionSlotIndex);
+void mdlGenEffect(MdlCtx *owner, s32 recordId, s32 motionSlotIndex);
+void mdlStopEffect(MdlCtx *owner, s32 motionSlotIndex);
 
 #endif /* MDL_RESOURCE_ENTRIES_H */

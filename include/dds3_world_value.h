@@ -6,6 +6,6 @@
 struct EffWorldNode;
 
 /* Store a 32-bit value on the world node when the node is present. */
-void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
+void dds3SetUnitObjectId(struct EffWorldNode *node, u32 value);
 
 #endif /* DDS3_WORLD_VALUE_H */

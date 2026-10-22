@@ -22,17 +22,17 @@ extern u32 fldDisplayStateWords[];
 
 extern void *D_004360F0;
 
-extern void kwlnSetDrawColorTarget(s32, f32 *);
+extern void dds3SetFogColor(s32, f32 *);
 
-extern void kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, f32 *color);
+extern void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
 
-extern void kwlnSetBackgroundColorTarget(s32, f32 *);
+extern void dds3SetAmbientColor(s32, f32 *);
 
-extern void kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, f32 *direction);
+extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
 
-extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
+extern void dds3SetFogPara(s32, f32, f32, f32, f32);
 
-extern void fldSetSwayMode(u32);
+extern void fldSetFilterAnime(u32);
 
 extern void *fldSkyLightSetBuffer;
 
@@ -98,48 +98,48 @@ void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode) {
             fldDisplayStateWords[15] = value;
             fldDisplayStateWords[16] = light->swayMode;
             fldSetFadeTarget(area, value, duration);
-            fldSetSwayMode(fldDisplayStateWords[16]);
+            fldSetFilterAnime(fldDisplayStateWords[16]);
             vec[0] = light->drawColorFixedR * 0.00390625f;
             vec[1] = light->drawColorFixedG * 0.00390625f;
             vec[2] = light->drawColorFixedB * 0.00390625f;
             vec[3] = 0;
-            kwlnSetDrawColorTarget(duration, vec);
-            evtSetDrawVectorTarget(duration, light->fogNearValue, light->fogFarValue, light->depthNearValue, light->depthFarValue);
+            dds3SetFogColor(duration, vec);
+            dds3SetFogPara(duration, light->fogNearValue, light->fogFarValue, light->depthNearValue, light->depthFarValue);
             dir[0] = light->lightDirectionAX;
             dir[1] = light->lightDirectionAY;
             dir[2] = light->lightDirectionAZ;
             dir[3] = 0;
-            kwlnSetLightDirectionTarget(duration, 0, dir);
+            dds3SetLightDir(duration, 0, dir);
             vec[0] = light->lightColorAX;
             vec[1] = light->lightColorAY;
             vec[2] = light->lightColorAZ;
             vec[3] = 0;
-            kwlnSetLightColorTarget(duration, 0, vec);
+            dds3SetLightColor(duration, 0, vec);
             dir[0] = light->lightDirectionBX;
             dir[1] = light->lightDirectionBY;
             dir[2] = light->lightDirectionBZ;
             dir[3] = 0;
-            kwlnSetLightDirectionTarget(duration, 1, dir);
+            dds3SetLightDir(duration, 1, dir);
             vec[0] = light->lightColorBX;
             vec[1] = light->lightColorBY;
             vec[2] = light->lightColorBZ;
             vec[3] = 0;
-            kwlnSetLightColorTarget(duration, 1, vec);
+            dds3SetLightColor(duration, 1, vec);
             dir[0] = light->lightDirectionCX;
             dir[1] = light->lightDirectionCY;
             dir[2] = light->lightDirectionCZ;
             dir[3] = 0;
-            kwlnSetLightDirectionTarget(duration, 2, dir);
+            dds3SetLightDir(duration, 2, dir);
             vec[0] = light->lightColorCX;
             vec[1] = light->lightColorCY;
             vec[2] = light->lightColorCZ;
             vec[3] = 0;
-            kwlnSetLightColorTarget(duration, 2, vec);
+            dds3SetLightColor(duration, 2, vec);
             vec[0] = light->backgroundColorX;
             vec[1] = light->backgroundColorY;
             vec[2] = light->backgroundColorZ;
             vec[3] = 1.0f;
-            kwlnSetBackgroundColorTarget(duration, vec);
+            dds3SetAmbientColor(duration, vec);
             fldSetPlayerAndPeerLighting(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
                           light->unitColorB[0], light->unitColorB[1], light->unitColorB[2],
                           light->unitLightDirection[0], light->unitLightDirection[1],
@@ -151,7 +151,7 @@ void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode) {
 extern u32 D_00436158;
 extern s32 D_00436168;
 
-void fldSetDisplayState(u32 state) {
+void fldSetFileResolverIdx(u32 state) {
     D_00436128 = state;
     D_00436158 = 0;
     fldDisplayStateWords[12] = 0;
@@ -187,54 +187,54 @@ void fldApplySkyLightSetToPlayerVU(void) {
             light = &((FldLightSet *)fldSkyLightSetBuffer)[D_00436128];
         }
         fldSetFadeTarget(fldDisplayStateWords[13], fldDisplayStateWords[15], 0);
-        fldSetSwayMode(fldDisplayStateWords[16]);
+        fldSetFilterAnime(fldDisplayStateWords[16]);
 
         vec[0] = light->drawColorFixedR * 0.00390625f;
         vec[1] = light->drawColorFixedG * 0.00390625f;
         vec[2] = light->drawColorFixedB * 0.00390625f;
         vec[3] = 0.0f;
-        kwlnSetDrawColorTarget(0, vec);
-        evtSetDrawVectorTarget(0, light->fogNearValue, light->fogFarValue,
+        dds3SetFogColor(0, vec);
+        dds3SetFogPara(0, light->fogNearValue, light->fogFarValue,
                               light->depthNearValue, light->depthFarValue);
 
         dir[0] = light->lightDirectionAX;
         dir[1] = light->lightDirectionAY;
         dir[2] = light->lightDirectionAZ;
         dir[3] = 0.0f;
-        kwlnSetLightDirectionTarget(0, 0, dir);
+        dds3SetLightDir(0, 0, dir);
         vec[0] = light->lightColorAX;
         vec[1] = light->lightColorAY;
         vec[2] = light->lightColorAZ;
         vec[3] = 0.0f;
-        kwlnSetLightColorTarget(0, 0, vec);
+        dds3SetLightColor(0, 0, vec);
         dir[0] = light->lightDirectionBX;
         dir[1] = light->lightDirectionBY;
         dir[2] = light->lightDirectionBZ;
         dir[3] = 0.0f;
-        kwlnSetLightDirectionTarget(0, 1, dir);
+        dds3SetLightDir(0, 1, dir);
         vec[0] = light->lightColorBX;
         vec[1] = light->lightColorBY;
         vec[2] = light->lightColorBZ;
         vec[3] = 0.0f;
-        kwlnSetLightColorTarget(0, 1, vec);
+        dds3SetLightColor(0, 1, vec);
         dir[0] = light->lightDirectionCX;
         dir[1] = light->lightDirectionCY;
         dir[2] = light->lightDirectionCZ;
         dir[3] = 0.0f;
-        kwlnSetLightDirectionTarget(0, 2, dir);
+        dds3SetLightDir(0, 2, dir);
         vec[0] = light->lightColorCX;
         vec[1] = light->lightColorCY;
         vec[2] = light->lightColorCZ;
         vec[3] = 0.0f;
-        kwlnSetLightColorTarget(0, 2, vec);
+        dds3SetLightColor(0, 2, vec);
         vec[0] = light->backgroundColorX;
         vec[1] = light->backgroundColorY;
         vec[2] = light->backgroundColorZ;
         vec[3] = 1.0f;
-        kwlnSetBackgroundColorTarget(0, vec);
+        dds3SetAmbientColor(0, vec);
 
-        unit = evtUnitGetNestedValue((struct EffWorldNode *)fldPlayerObject);
-        evtSetUnitStatusFlags(unit);
+        unit = evtGetUnitHandle2((struct EffWorldNode *)fldPlayerObject);
+        evtUnitLightOn(unit);
         red = light->unitColorA[0] * 128.0f;
         green = light->unitColorA[1] * 128.0f;
         blue = light->unitColorA[2] * 128.0f;
@@ -243,16 +243,16 @@ void fldApplySkyLightSetToPlayerVU(void) {
         green = light->unitColorB[1] * 128.0f;
         blue = light->unitColorB[2] * 128.0f;
         colorB = red | (blue << 16) | (green << 8) | 0x80000000;
-        evtInitializeUnitColorTransition(unit, 0, colorA, colorB);
+        evtSetUnitLightAndAmbient(unit, 0, colorA, colorB);
         dir[0] = light->unitLightDirection[0];
         dir[1] = light->unitLightDirection[1];
         dir[2] = light->unitLightDirection[2];
         dir[3] = 0.0f;
         VU0_LOAD_VF(vf10, dir);
-        evtSetUnitNormalizedDirection(unit, 0);
+        evtSetUnitLightDir(unit, 0);
         /* The setter replaces vf10, so the second update reloads it. */
         VU0_LOAD_VF(vf10, dir);
-        evtSetUnitNormalizedDirection(unit, 0);
+        evtSetUnitLightDir(unit, 0);
     }
 }
 
@@ -267,9 +267,9 @@ void fldApplyLightSetToChaseCameraUnit(void) {
     s32 red, green, blue;
     s32 index;
 
-    unit = evtUnitGetNestedValue((struct EffWorldNode *)D_00435F1C);
+    unit = evtGetUnitHandle2((struct EffWorldNode *)D_00435F1C);
     index = 0;
-    evtSetUnitStatusFlags(unit);
+    evtUnitLightOn(unit);
     red = light->unitColorA[0] * 128.0f;
     green = light->unitColorA[1] * 128.0f;
     blue = light->unitColorA[2] * 128.0f;
@@ -278,18 +278,18 @@ void fldApplyLightSetToChaseCameraUnit(void) {
     green = light->unitColorB[1] * 128.0f;
     blue = light->unitColorB[2] * 128.0f;
     colorB = red | (blue << 16) | (green << 8) | 0x80000000;
-    evtInitializeUnitColorTransition(unit, 0, colorA, colorB);
+    evtSetUnitLightAndAmbient(unit, 0, colorA, colorB);
     dir[0] = light->unitLightDirection[0];
     dir[1] = light->unitLightDirection[1];
     dir[2] = light->unitLightDirection[2];
     dir[3] = 0.0f;
     VU0_LOAD_VF(vf10, dir);
-    evtSetUnitNormalizedDirection(unit, index);
+    evtSetUnitLightDir(unit, index);
     VU0_LOAD_VF(vf10, dir);
-    evtSetUnitNormalizedDirection(unit, 0);
+    evtSetUnitLightDir(unit, 0);
 }
 
-void fldApplyLightSetCurrent(void) {
+void fldSkyBattle(void) {
     FldLightSet *light = &((FldLightSet *)D_004360F0)[D_00436128];
     f32 vec[4];
     f32 dir[4];
@@ -303,48 +303,48 @@ void fldApplyLightSetCurrent(void) {
     fldDisplayStateWords[15] = value;
     fldDisplayStateWords[16] = light->swayMode;
     fldSetFadeTarget(area, value, 0);
-    fldSetSwayMode(fldDisplayStateWords[16]);
+    fldSetFilterAnime(fldDisplayStateWords[16]);
     vec[0] = light->drawColorFixedR * 0.00390625f;
     vec[1] = light->drawColorFixedG * 0.00390625f;
     vec[2] = light->drawColorFixedB * 0.00390625f;
     vec[3] = 0;
-    kwlnSetDrawColorTarget(0, vec);
-    evtSetDrawVectorTarget(0, light->fogNearValue, light->fogFarValue, light->depthNearValue, light->depthFarValue);
+    dds3SetFogColor(0, vec);
+    dds3SetFogPara(0, light->fogNearValue, light->fogFarValue, light->depthNearValue, light->depthFarValue);
     dir[0] = light->lightDirectionAX;
     dir[1] = light->lightDirectionAY;
     dir[2] = light->lightDirectionAZ;
     dir[3] = 0;
-    kwlnSetLightDirectionTarget(0, 0, dir);
+    dds3SetLightDir(0, 0, dir);
     vec[0] = light->lightColorAX;
     vec[1] = light->lightColorAY;
     vec[2] = light->lightColorAZ;
     vec[3] = 0;
-    kwlnSetLightColorTarget(0, 0, vec);
+    dds3SetLightColor(0, 0, vec);
     dir[0] = light->lightDirectionBX;
     dir[1] = light->lightDirectionBY;
     dir[2] = light->lightDirectionBZ;
     dir[3] = 0;
-    kwlnSetLightDirectionTarget(0, 1, dir);
+    dds3SetLightDir(0, 1, dir);
     vec[0] = light->lightColorBX;
     vec[1] = light->lightColorBY;
     vec[2] = light->lightColorBZ;
     vec[3] = 0;
-    kwlnSetLightColorTarget(0, 1, vec);
+    dds3SetLightColor(0, 1, vec);
     dir[0] = light->lightDirectionCX;
     dir[1] = light->lightDirectionCY;
     dir[2] = light->lightDirectionCZ;
     dir[3] = 0;
-    kwlnSetLightDirectionTarget(0, 2, dir);
+    dds3SetLightDir(0, 2, dir);
     vec[0] = light->lightColorCX;
     vec[1] = light->lightColorCY;
     vec[2] = light->lightColorCZ;
     vec[3] = 0;
-    kwlnSetLightColorTarget(0, 2, vec);
+    dds3SetLightColor(0, 2, vec);
     vec[0] = light->backgroundColorX;
     vec[1] = light->backgroundColorY;
     vec[2] = light->backgroundColorZ;
     vec[3] = 1.0f;
-    kwlnSetBackgroundColorTarget(0, vec);
+    dds3SetAmbientColor(0, vec);
 }
 
 void fldApplyLightSetIndex(s32 index) {
@@ -362,48 +362,48 @@ void fldApplyLightSetIndex(s32 index) {
     fldDisplayStateWords[15] = value;
     fldDisplayStateWords[16] = light->swayMode;
     fldSetFadeTarget(area, value, 0);
-    fldSetSwayMode(fldDisplayStateWords[16]);
+    fldSetFilterAnime(fldDisplayStateWords[16]);
     vec[0] = light->drawColorFixedR * 0.00390625f;
     vec[1] = light->drawColorFixedG * 0.00390625f;
     vec[2] = light->drawColorFixedB * 0.00390625f;
     vec[3] = 0;
-    kwlnSetDrawColorTarget(0, vec);
-    evtSetDrawVectorTarget(0, light->fogNearValue, light->fogFarValue, light->depthNearValue, light->depthFarValue);
+    dds3SetFogColor(0, vec);
+    dds3SetFogPara(0, light->fogNearValue, light->fogFarValue, light->depthNearValue, light->depthFarValue);
     dir[0] = light->lightDirectionAX;
     dir[1] = light->lightDirectionAY;
     dir[2] = light->lightDirectionAZ;
     dir[3] = 0;
-    kwlnSetLightDirectionTarget(0, 0, dir);
+    dds3SetLightDir(0, 0, dir);
     vec[0] = light->lightColorAX;
     vec[1] = light->lightColorAY;
     vec[2] = light->lightColorAZ;
     vec[3] = 0;
-    kwlnSetLightColorTarget(0, 0, vec);
+    dds3SetLightColor(0, 0, vec);
     dir[0] = light->lightDirectionBX;
     dir[1] = light->lightDirectionBY;
     dir[2] = light->lightDirectionBZ;
     dir[3] = 0;
-    kwlnSetLightDirectionTarget(0, 1, dir);
+    dds3SetLightDir(0, 1, dir);
     vec[0] = light->lightColorBX;
     vec[1] = light->lightColorBY;
     vec[2] = light->lightColorBZ;
     vec[3] = 0;
-    kwlnSetLightColorTarget(0, 1, vec);
+    dds3SetLightColor(0, 1, vec);
     dir[0] = light->lightDirectionCX;
     dir[1] = light->lightDirectionCY;
     dir[2] = light->lightDirectionCZ;
     dir[3] = 0;
-    kwlnSetLightDirectionTarget(0, 2, dir);
+    dds3SetLightDir(0, 2, dir);
     vec[0] = light->lightColorCX;
     vec[1] = light->lightColorCY;
     vec[2] = light->lightColorCZ;
     vec[3] = 0;
-    kwlnSetLightColorTarget(0, 2, vec);
+    dds3SetLightColor(0, 2, vec);
     vec[0] = light->backgroundColorX;
     vec[1] = light->backgroundColorY;
     vec[2] = light->backgroundColorZ;
     vec[3] = 1.0f;
-    kwlnSetBackgroundColorTarget(0, vec);
+    dds3SetAmbientColor(0, vec);
 }
 
 void fldActivateCameraColorSetting(s32 enable) {

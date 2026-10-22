@@ -7,6 +7,6 @@ typedef struct {
 } ModelObj;
 
 
-void dds3ReleaseModelAllocation(ModelObj *model) {
+void dds3PathBasicFreeControl(ModelObj *model) {
     sdfChipFreeDirect(model->allocation);
 }

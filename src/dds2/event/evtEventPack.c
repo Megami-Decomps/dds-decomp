@@ -17,8 +17,8 @@
 #include "sdf_texture_offset_list.h"
 
 #include "dds3_world_primary.h"
-extern Motion *mdlFindNodeById(MdlCtx *ctx, s32 searchId);
-extern s32 evtSetBgmVolumePan(s32 id, s32 fade);
+extern Motion *mdlGetMotionCtrlr(MdlCtx *ctx, s32 searchId);
+extern s32 evtPlaySe(s32 id, s32 fade);
 
 /* The selected script entry and the terminal value of the native load state. */
 enum {
@@ -26,14 +26,14 @@ enum {
     EVT_PACK_LOAD_COMPLETE = 2
 };
 
-extern s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
+extern s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
                                             const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
-extern void fldSetRelocateOnRelease(u32 relocateOnRelease);
+extern void fldFileAddrResetMode(u32 relocateOnRelease);
 extern u32 kwlnDrawControlFlags;
 
 extern s32 evtNextCameraSlotViewerKey;
 #include "sdf_debug_api.h"
-extern void mdlLoadViewerPackage(s32, s32, s32, s32, s32);
+extern void mdlPackDecode(s32, s32, s32, s32, s32);
 extern s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource);
 
 /* Keep the complete diagnostic records, including their native trailing zeros. */
@@ -41,7 +41,7 @@ const char D_00424830[0x20] __attribute__((aligned(8))) = "unit decode rid:%d, s
 const char D_00424850[0x20] __attribute__((aligned(8))) = "BE regist unit %d < %d >\n";
 
 /* Decode one retained unit payload and return its new viewer-object key. */
-s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
+s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
     EvtPackLoadState *packState;
     EvtPackEntry *entry;
     s32 packEntryIndex;
@@ -49,7 +49,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
     u8 *modelPayload;
     s32 viewerObjectKey;
 
-    packState = evtGetEventPackLoadState(eventId);
+    packState = evtGetPackProcessData(eventId);
     packEntryIndex = 0;
     if (packState->header->entryCount > 0) {
         entry = packState->entries;
@@ -65,10 +65,10 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
                     case 0x2AC:
                     case 0x2AE:
                     case 0x2B0:
-                        mdlLoadViewerPackage(3, evtNextCameraSlotViewerKey, 0x101, (s32)modelPayload, entrySize);
+                        mdlPackDecode(3, evtNextCameraSlotViewerKey, 0x101, (s32)modelPayload, entrySize);
                         break;
                     default:
-                        mdlLoadViewerPackage(3, evtNextCameraSlotViewerKey, 0x103, (s32)modelPayload, entrySize);
+                        mdlPackDecode(3, evtNextCameraSlotViewerKey, 0x103, (s32)modelPayload, entrySize);
                         break;
                     }
                     viewerObjectKey = mdlSpawnCameraSlotViewerObject(3, evtNextCameraSlotViewerKey);
@@ -87,7 +87,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
 }
 
 /* Start a field BE from the task's resource table when all four payloads exist. */
-s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
+s32 evtRegistBEField(s32 eventId, s32 resourceId) {
     EvtPackLoadState *packState;
     EvtPackEntry *entry;
     s32 entryCount;
@@ -97,7 +97,7 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
     s32 *resource1Data;
     const SdfTextureOffsetListHeader *textureOffsets;
 
-    packState = evtGetEventPackLoadState(eventId);
+    packState = evtGetPackProcessData(eventId);
     areaRoomIds = NULL;
     resource1Data = NULL;
     resource0Data = NULL;
@@ -128,15 +128,15 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
     }
 
     if (areaRoomIds != NULL && resource0Data != NULL && resource1Data != NULL && textureOffsets != NULL) {
-        evtCreateWorldObjectFromResource(areaRoomIds[0], areaRoomIds[1], (s32)resource0Data, (s32)resource1Data, textureOffsets, 0);
-        fldSetRelocateOnRelease(1);
+        evtLoadArea_FromMemory(areaRoomIds[0], areaRoomIds[1], (s32)resource0Data, (s32)resource1Data, textureOffsets, 0);
+        fldFileAddrResetMode(1);
         kwlnDrawControlFlags |= 0x02000000;
         return 1;
     }
     return 0;
 }
 
-s32 evtUpdateMotionSeTask(KwlnTask *task) {
+s32 evtMotionSeProcess1(KwlnTask *task) {
     EvtMotionSeTaskParams *motionSeParams;
     EffWorldNode *motionNode;
     EvtPackLoadState *packState;
@@ -148,14 +148,14 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
     EvtMotionSeCue *cues;
 
     motionSeParams = (EvtMotionSeTaskParams *)dds3GetProcessData(task);
-    if (dds3GetWorldObject() == NULL) {
+    if (dds3GetActiveScene() == NULL) {
         return -1;
     }
-    motionNode = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), motionSeParams->modelKey, EFF_WORLD_KIND_FOLLOW_MODEL);
+    motionNode = dds3SearchSceneBasic(dds3GetActiveScene(), motionSeParams->modelKey, EFF_WORLD_KIND_FOLLOW_MODEL);
     if (motionNode == NULL) {
         return -1;
     }
-    packState = evtGetEventPackLoadState(motionSeParams->eventTaskId);
+    packState = evtGetPackProcessData(motionSeParams->eventTaskId);
     if (packState == NULL) {
         return -1;
     }
@@ -166,7 +166,7 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
     if (unit == NULL) {
         return -1;
     }
-    motionId = mdlFindNodeById(unit->owner, 0)->motionIndex;
+    motionId = mdlGetMotionCtrlr(unit->owner, 0)->motionIndex;
     motionFrame = unit->owner->first->currentFrame;
     for (entryIndex = 0; entryIndex < packState->header->entryCount; entryIndex++) {
         if (packState->entries[entryIndex].kind == 6 &&
@@ -175,7 +175,7 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
             cues = (EvtMotionSeCue *)(packState->data + packState->entries[entryIndex].dataOffset);
             for (cueIndex = 0; cueIndex < packState->entries[entryIndex].cueCount; cueIndex++) {
                 if (cues[cueIndex].frame == motionFrame) {
-                    evtSetBgmVolumePan(motionSeParams->eventTaskId, cues[cueIndex].fade);
+                    evtPlaySe(motionSeParams->eventTaskId, cues[cueIndex].fade);
                     printf("EVE_SE motno = %d, frame = %d\n", motionId, motionFrame);
                 }
             }
@@ -185,7 +185,7 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
 }
 
 /* Free the three-word parameter block owned by the motion-SE task. */
-void evtFreeMotionSeTaskParams(KwlnTask *task) {
+void evtFreeScriptProcessData(KwlnTask *task) {
     void *params = (void *)(u32)dds3GetProcessData(task);
 
     sdfChipFreeDirect(params);
@@ -196,7 +196,7 @@ const char evtMotionSeTaskNameFormat[0x10] __attribute__((aligned(8))) = "mse_%d
 
 
 /* Allocate a three-word task parameter block and format its "mse_..." name. */
-KwlnTask *evtCreateMotionSeTask(s32 modelKey, s32 eventTaskId, s32 resourceId) {
+KwlnTask *evtLoadModelSe(s32 modelKey, s32 eventTaskId, s32 resourceId) {
     char taskName[0x20];
     EvtMotionSeTaskParams *params;
 
@@ -206,7 +206,7 @@ KwlnTask *evtCreateMotionSeTask(s32 modelKey, s32 eventTaskId, s32 resourceId) {
     params->modelKey = modelKey;
     params->eventTaskId = eventTaskId;
     params->resourceId = resourceId;
-    return dds3StartProcess(taskName, 0x3EC, 0, 0, evtUpdateMotionSeTask, evtFreeMotionSeTaskParams, (u32)params);
+    return dds3StartProcess(taskName, 0x3EC, 0, 0, evtMotionSeProcess1, evtFreeScriptProcessData, (u32)params);
 }
 
 const char evtPackScriptPathFormat[0x20] __attribute__((aligned(8))) = "/event/e%03d/e%03d/scr/e%03d.be";
@@ -214,7 +214,7 @@ extern char D_004377E0[];
 extern char evtPackScriptPathBuffer[];
 
 /* Resolve the event's script path ("/event/eNNN/eNNN/scr/eNNN.be", grouped by tens) and start loading it. */
-void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
+void evtLoadEventScript(EvtPackLoadState *state) {
     s32 eventId;
     s32 eventDirectoryId;
     struct FileRequest *request;
@@ -223,7 +223,7 @@ void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
     eventId = state->eventId;
     eventDirectoryId = eventId - eventId % 10;
     sprintf(evtPackScriptPathBuffer, evtPackScriptPathFormat, eventDirectoryId, eventId, eventId);
-    request = fileQueueDefaultCallbackRequest(evtPackScriptPathBuffer);
+    request = fileLoad(evtPackScriptPathBuffer);
     state->pendingRequest = request;
     state->loaded = 1;
 }
@@ -237,14 +237,14 @@ extern char D_004377E8[];
 /* Retain a ready pack and select its first entry-point record.
  * Clearing the request handle and marking completion occur on separate calls;
  * no entry-point record leaves the existing entryPoint value untouched. */
-void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
+void evtCheckEventScriptLoaded(EvtPackLoadState *state) {
     EvtPackHeader *header;
     s32 entryPointIndex;
 
     if (state->pendingRequest != NULL) {
-        if (fileIsRequestReadyInCurrentMode(state->pendingRequest) != 0) {
-            state->resourceAllocation = fileGetResourceHandle((struct FileRequest *)state->pendingRequest);
-            filePollEntryCleanup(state->pendingRequest);
+        if (pacFileCheckEnd(state->pendingRequest) != 0) {
+            state->resourceAllocation = fileGetMemHandle((struct FileRequest *)state->pendingRequest);
+            fileHandleFree(state->pendingRequest);
             state->pendingRequest = NULL;
             header = (EvtPackHeader *)sdfMemLock(state->resourceAllocation);
             state->data = (u8 *)header;
@@ -263,55 +263,55 @@ void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
     }
 }
 
-s32 evtTickPackLoad(KwlnTask *task) {
+s32 evtCheckScriptDone(KwlnTask *task) {
     EvtPackLoadState *packState = (EvtPackLoadState *)dds3GetProcessData(task);
 
     switch (packState->loaded) {
     default:
         if (packState->loaded < 2) {
             if (packState->loaded == 0) {
-                evtBeginEventPackScriptLoad(packState);
+                evtLoadEventScript(packState);
             }
         }
         break;
     case 1:
-        evtCompleteEventPackScriptLoad(packState);
+        evtCheckEventScriptLoaded(packState);
         break;
     }
     return 0;
 }
 
-extern void fileWaitIdle(void);
-extern void effInitCh72Id(void);
-extern void effInitCh71Id(void);
-extern void effInitCh76Id(void);
-extern void effInitCh75Id(void);
+extern void fileSyncAll(void);
+extern void Eve_DistortionBlurSetDefTex(void);
+extern void Eve_PartialMultiBlurSetDefTex(void);
+extern void Eve_RippleBlurSetDefTex(void);
+extern void Eve_PartialMultiFilterSetDefTex(void);
 /* Release the event task's owned handles, then free its state.
  * File I/O is waited on even when the user-value handle is zero. */
-void evtReleaseEventPackResources(KwlnTask *task) {
+void evtWaitEventPackLoad(KwlnTask *task) {
     s32 stateHandle = dds3GetProcessData(task);
     EvtPackLoadState *packState = (EvtPackLoadState *)stateHandle;
 
-    fileWaitIdle();
+    fileSyncAll();
     if (stateHandle != 0) {
         if (packState->effect72 != 0) {
-            effInitCh72Id();
+            Eve_DistortionBlurSetDefTex();
             sdfTexReleaseReferenceViaHandler(packState->effect72);
         }
         if (packState->effect71 != 0) {
-            effInitCh71Id();
+            Eve_PartialMultiBlurSetDefTex();
             sdfTexReleaseReferenceViaHandler(packState->effect71);
         }
         if (packState->effect76 != 0) {
-            effInitCh76Id();
+            Eve_RippleBlurSetDefTex();
             sdfTexReleaseReferenceViaHandler(packState->effect76);
         }
         if (packState->effect75 != 0) {
-            effInitCh75Id();
+            Eve_PartialMultiFilterSetDefTex();
             sdfTexReleaseReferenceViaHandler(packState->effect75);
         }
         if (packState->pendingRequest != NULL) {
-            filePollEntryCleanup(packState->pendingRequest);
+            fileHandleFree(packState->pendingRequest);
         }
         if (packState->resourceAllocation != NULL) {
             sdfMemFreeDelayedDirect(packState->resourceAllocation);

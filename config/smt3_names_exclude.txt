@@ -1,0 +1,41 @@
+# Addresses that keep their current name although the SMT3HD name is proven
+# (smt3-decomp tools/dds_names.py skips them). Record the reason.
+# <version> <address>  # reason
+dds2 0x00243330  # evtGetAgeOfMoon tips btlSortActorMuzzleDirections (game/code_001AF4A0) to CONTEXT
+dds1 0x002286C0  # evtGetAgeOfMoon: keeps the DDS1 twin on the same name as DDS2
+dds2 0x0032D340  # sdfGrOtClose, through its declaration, with the four below
+dds1 0x002D4490  # sdfGrOtClose twin
+#
+# These four spellings together change register allocation in sdfDrawTexturedQuad
+# (game/code_002DE248 in DDS2). Reverting any three does not help, so all four
+# stay back in both games until that function is reformulated to match with them.
+dds2 0x00340498  # sdfItemArrayNew
+dds1 0x002E75F0  # sdfItemArrayNew twin
+dds2 0x003332B8  # sdfMatSetRefMap
+dds1 0x002DA408  # sdfMatSetRefMap twin
+dds2 0x003332E8  # sdfMatSetTex
+dds1 0x002DA438  # sdfMatSetTex twin
+dds2 0x00333378  # sdfMatSetTexUvw
+dds1 0x002DA4C8  # sdfMatSetTexUvw twin
+#
+# Main's header changes re-tipped the same function on 2026-10-22, and these
+# seven more spellings had to join the set. The durable fix is to reformulate
+# sdfDrawTexturedQuad so it matches with the recovered names.
+dds2 0x00340AC8  # Mult
+dds1 0x002E7C20  # Mult twin
+dds2 0x00336AA8  # MultMatrixNoArg
+dds1 0x002DDBF8  # MultMatrixNoArg twin
+dds2 0x00336C10  # MultMatrixRev
+dds1 0x002DDD60  # MultMatrixRev twin
+dds2 0x00336818  # SetRotateMatrixY_B
+dds1 0x002DD968  # SetRotateMatrixY_B twin
+dds2 0x00340C40  # ToMatrix
+dds1 0x002E7D98  # ToMatrix twin
+dds2 0x00197A98  # dblurGetParam2
+dds1 0x0018FE60  # dblurGetParam2 twin
+dds2 0x00197AA8  # dblurSetParam2
+dds1 0x0018FE70  # dblurSetParam2 twin
+dds2 0x00340DC8  # FromEuler, which tips btlInitializeRandomCameraCursor (game/code_001DEFE0) in DDS1
+dds1 0x002E7F20  # FromEuler twin
+dds2 0x00159BD8  # dds3BillboardSetPosition, which joined the set when main's field and effect names landed
+dds1 0x00151FE8  # dds3BillboardSetPosition twin

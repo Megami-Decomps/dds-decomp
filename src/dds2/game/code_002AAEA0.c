@@ -13,12 +13,12 @@
 #include "ui_color.h"
 #include "eff.h"
 /* Declared before first use (were implicit int). */
-extern void mnuCreateConfigTasks(s32 mode);
+extern void dds3ConfigProcessStart(s32 mode);
 extern void mnuDrawCampIconBackdrop(MenuCampEffect *set, s32 surface);
 extern void mnuSwitchCampVisualCategory(s32 nextCategory, u8 *menuBytes);
 
 
-extern s32 fileConsumeConfigTaskReady(void);
+extern s32 checkConfigState(void);
 
 extern u8 mnuCampCommandReturnPopupEntry[];
 
@@ -143,7 +143,7 @@ u32 mnuOpenCampConfigPanelTasks(KwlnTask *task) {
     mnuSwitchCampVisualCategory(5, context);
     mnuConfigurePanelResource(((MenuStaffContext *)context)->scrollPanel,
                               ((MenuStaffContext *)context)->contextTitle, 0, 0);
-    mnuCreateConfigTasks(0);
+    dds3ConfigProcessStart(0);
     return 1;
 }
 
@@ -163,7 +163,7 @@ s32 mnuDispatchStaffMenuWithIdlePopup(KwlnTask *callback) {
     s32 *dispatchEntry = &((MenuStaffContext *)context)->popupState;
     s32 state = mnuDispatchPopupTransition(&((MenuStaffContext *)context)->transitionWork, dispatchEntry, 0, (void *)callback);
     if (state == 0) {
-        if (fileConsumeConfigTaskReady() == 0) {
+        if (checkConfigState() == 0) {
             mnuSetPopupEntryFlagged(dispatchEntry, mnuCampCommandReturnPopupEntry);
         }
         return 0;
@@ -267,7 +267,7 @@ s32 mtrHasEnoughOwnedMantras(void) {
     required -= D_00437B88;
     required--;
 
-    if (mdlFlagTest(0xBA0) == 0) {
+    if (evtBitCheck(0xBA0) == 0) {
         required--;
     }
     for (i = 0; i < D_00437B6E; i++) {
@@ -315,7 +315,7 @@ void mnuDrawCampGridEntry(s32 x, s32 y, s32 depth, s32 offset, struct MenuList *
     char buffer[32];
 
     context = (MenuStaffContext *)list->context;
-    color = uiBlendColors(0xA09DC380, 0xA09DC300, scale);
+    color = fclBlendColor(0xA09DC380, 0xA09DC300, scale);
     mnuDrawCampGridResourceSlot(x, y, depth, (s32)list, (u32)node, texture);
     markerY = y + 0x40;
     if (datGameState->inventory.counts[node->sortKeySecondary] != 0) {

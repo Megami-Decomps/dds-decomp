@@ -107,7 +107,7 @@ void btlHaritiUpdateCallback(void) {
 }
 #include "mdl.h"
 #include "eff_transform.h"
-extern void mdlSetAmountOnAllContextResources(MdlCtx *, f32);
+extern void mdlSetEffectScale(MdlCtx *, f32);
 void btlUpdateBossUnitScaleTransition(void) {
     /* Same 0x24-byte transition layout declared by the following initializer. */
     typedef struct {
@@ -194,7 +194,7 @@ void btlUpdateBossUnitScaleTransition(void) {
                         if (effectActor == 0) {
                             return;
                         }
-                        btlSetActorEffectParameterOrMuzzlePosition(effectActor, 0x1F);
+                        effBTLModelGetMarkPosition2(effectActor, 0x1F);
                         VU0_STORE_VF(vf10, effectPosition);
 
                         switch (transition->active) {
@@ -237,10 +237,10 @@ void btlUpdateBossUnitScaleTransition(void) {
                         position = unit->currentPosition;
                         if (unit->overlayColor != 0) {
                             unit->ext->owner->flags &= ~1;
-                            evtSetUnitAlphaTransition(unit->ext, 0, unit->overlayColor);
+                            evtSetUnitColorA(unit->ext, 0, unit->overlayColor);
                         } else {
                             unit->ext->owner->flags |= 1;
-                            evtSetUnitAlphaTransition(unit->ext, 0, 0);
+                            evtSetUnitColorA(unit->ext, 0, 0);
                         }
                         btlSetUnitPosition(unit, position);
                         VU0_SET_ONES_XYZ(vf10);
@@ -248,8 +248,8 @@ void btlUpdateBossUnitScaleTransition(void) {
                         inner = unit->effectObject->inner;
                         inner->flags = (inner->flags | 1) & ~2;
                         VU0_STORE_VF(vf10, inner->scale);
-                        mdlStoreTertiaryVectorVU(unit->ext->owner);
-                        mdlSetAmountOnAllContextResources(unit->ext->owner, unit->scale);
+                        mdlSetScale(unit->ext->owner);
+                        mdlSetEffectScale(unit->ext->owner, unit->scale);
                         transition->modelValue++;
                     }
                 }
@@ -309,7 +309,7 @@ void btlInitializeBossUnitScaleTransition(BtlUnit *unit) {
         }
     }
     if (actor != 0) {
-        evtSetUnitAlphaTransition(unit->ext, 0, 0);
+        evtSetUnitColorA(unit->ext, 0, 0);
         unit->overlayColor = unit->baseColor & 0xFFFFFF;
         transitionUnitId = unit->partyRecord.unitId;
         switch (transitionUnitId) {
@@ -635,7 +635,7 @@ s32 btlClassifyHuangLongAction(BtlUnit *unit, s32 action) {
 /* Select one of two fixed defeat-camera key sets for this motion command. */
 void btlSelectRandomDefeatCamera(BtlLinkedCommand *command) {
     btlFlagAllUnitDefeatCandidatesTask();
-    switch (sdfGetRandInt(0, 2)) {
+    switch (dds3GetRandIntA(0, 2)) {
     case 0:
         printf(D_003A5FF0);
         btlSetEffectCameraKeys(command, -307.2f, -72.7f, -1292.7f, -0.096f, -0.085f, -0.004f, 0.983f, 148.3f, -84.1f, -1407.1f,
@@ -708,16 +708,16 @@ u8 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camer
     if (rotate == 1 && runtime[0x122] == 3) {
         switch (kind) {
         case 0:
-            sdfVuLoadRotationMatrixX(-0.13089969f);
+            SetRotateMatrixX(-0.13089969f);
             sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
             sdfComposeVuMatrixFromRegisters();
             break;
         case 1:
-            sdfVuLoadRotationMatrixX(-0.13089969f);
+            SetRotateMatrixX(-0.13089969f);
             break;
         case 2:
             angle = -0.13089969f;
-            sdfVuLoadRotationMatrixX(angle);
+            SetRotateMatrixX(angle);
             sdfVuLoadSecondaryRotationMatrixY(angle);
             sdfComposeVuMatrixFromRegisters();
             break;
@@ -859,7 +859,7 @@ s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 
             if (btlCanUseActorCategoryFlag4(command) && btlCanUseLinkedActor(command)) {
                 btlClearAllUnitDefeatCandidatesTask();
                 btlApplyCombinedActorFlags((u8 *)command);
-                switch (sdfGetRandInt(0, 2)) {
+                switch (dds3GetRandIntA(0, 2)) {
                 case 0:
                     printf(D_003A6338);
                     btlSetEffectCameraKeys(command, 180.8f, -79.0f, 157.0f, -0.158f, -0.053f, -0.004f, 0.977f, 125.8f, -22.7f, -332.7f, -0.115f, -0.02f, -0.01f, 0.984f, 40.0f, 30.0f);
@@ -873,14 +873,14 @@ s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 
             }
             if (btlCanUseLinkedActor(command)) {
                 choice = 0;
-                if (!btlCanUseActorCategoryFlag2(command)) choice = sdfGetRandInt(0, 2);
+                if (!btlCanUseActorCategoryFlag2(command)) choice = dds3GetRandIntA(0, 2);
             } else {
                 choice = 1;
             }
             if (choice == 0) {
                 btlClearAllUnitDefeatCandidatesTask();
                 btlApplyCombinedActorFlags((u8 *)command);
-                switch (sdfGetRandInt(0, 2)) {
+                switch (dds3GetRandIntA(0, 2)) {
                 case 0:
                     printf(D_003A6398);
                     btlSetEffectCameraKeys(command, 55.7f, -307.7f, -1258.9f, -0.087f, -0.034f, -0.007f, 0.986f, 1388.6f, -73.1f, -784.7f, -0.137f, 0.146f, -0.029f, 0.969f, 40.0f, 25.0f);
@@ -901,7 +901,7 @@ s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 
     }
     if (btlCanUseLinkedActor(command)) {
         choice = 0;
-        if (!btlCanUseActorCategoryFlag2(command)) choice = sdfGetRandInt(0, 2);
+        if (!btlCanUseActorCategoryFlag2(command)) choice = dds3GetRandIntA(0, 2);
     } else {
         choice = 1;
     }
@@ -932,7 +932,7 @@ s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 
             return 1;
         }
         btlFlagAllUnitDefeatCandidatesTask();
-        switch (sdfGetRandInt(0, 3)) {
+        switch (dds3GetRandIntA(0, 3)) {
         case 0:
             printf("ITP0:++++++++++++++++++++++++++\n");
             btlSetEffectCameraKeys(command, -591.4f, -38.0f, -1158.0f, -0.124f, -0.211f, 0.018f, 0.96f, 251.8f, -58.2f, -1388.8f, -0.089f, 0.09f, -0.017f, 0.983f, 40.0f, 25.0f);

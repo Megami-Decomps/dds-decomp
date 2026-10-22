@@ -18,13 +18,13 @@ extern void effObjectListCountersReset(void);
 
 
 extern void effBillDispatchAll(void);
-extern void effInitializeEmitterSubsystem(void);
-extern void parInitializeParticleSubsystem(void);
+extern void dds3ParticleManagerExit(void);
+extern void dds3PolygonManagerExit(void);
 
 void effManagerInitializeSubsystems(KwlnTask *task) {
     (void)task;
-    effInitializeEmitterSubsystem();
-    parInitializeParticleSubsystem();
+    dds3ParticleManagerExit();
+    dds3PolygonManagerExit();
     effBillDispatchAll();
 }
 
@@ -35,9 +35,9 @@ s32 effSubmitFieldBlendStateTask(KwlnTask *task) {
     SdfPoolNode *surface;
 
     (void)task;
-    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
-    state = (SdfGsBlendPacket *)sdfAllocPacketAligned(0x40);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    state = (SdfGsBlendPacket *)sdfGrAllocPacketBuff(0x40);
     state->header.dmaTag = 3;
     state->header.vifCommands = 0x5000000310000000ULL;
     state->header.gifTag = 0x1000000000008002ULL;
@@ -46,13 +46,13 @@ s32 effSubmitFieldBlendStateTask(KwlnTask *task) {
     state->registers.test.registerId = 0x47;
     state->registers.alpha.value = 0x44;
     state->registers.alpha.registerId = 0x42;
-    sdfAppendPacket(list, (u32)state);
+    sdfDrawTagLink(list, (u32)state);
     surface = &kwlnDrawSurfaces[51];
     surface->append(surface, list);
 
-    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
-    state = (SdfGsBlendPacket *)sdfAllocPacketAligned(0x40);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    state = (SdfGsBlendPacket *)sdfGrAllocPacketBuff(0x40);
     state->header.dmaTag = 3;
     state->header.vifCommands = 0x5000000310000000ULL;
     state->header.gifTag = 0x1000000000008002ULL;
@@ -61,7 +61,7 @@ s32 effSubmitFieldBlendStateTask(KwlnTask *task) {
     state->registers.test.registerId = 0x47;
     state->registers.alpha.value = 0x42;
     state->registers.alpha.registerId = 0x42;
-    sdfAppendPacket(list, (u32)state);
+    sdfDrawTagLink(list, (u32)state);
     surface++;
     surface->append(surface, list);
 
@@ -74,10 +74,10 @@ extern void billFlushPendingRenderPairs(void);
 extern void dds3UpdateCrossfade(void);
 extern void effDispatchActive(void);
 
-s32 effManagerUpdateAndDispatch(KwlnTask *task) {
+s32 dds3EffectManagerRun(KwlnTask *task) {
     (void)task;
-    parDrawPendingParticleRecords();
-    parDrawPendingCellSystems();
+    dds3PolygonLinkOt();
+    dds3TrackPolyLinkOt();
     billFlushPendingChildPackets();
     billFlushPendingRenderPairs();
     dds3UpdateCrossfade();
@@ -86,24 +86,24 @@ s32 effManagerUpdateAndDispatch(KwlnTask *task) {
 }
 
 /* Parameter-node optional flag callback; the retail implementation is empty. */
-void effParamNodeOptionalFlagNoOp(void) {
+void dds3EffectPCFSetLoop(void) {
 }
 
 /* Parameter-node optional query always returns one. Keep its u32 surface. */
-u32 effParamNodeOptionalQueryAlwaysTrue(void) {
+u32 dds3EffectPCFGetLoop(void) {
     return 1;
 }
 
 /* Parameter-node restart callback; the retail implementation is empty. */
-void effParamNodeRestartNoOp(void) {
+void dds3EffectPCFReset(void) {
 }
 
 /* Parameter-node condition callback always accepts the instance. */
-u32 effParamNodeConditionAlwaysTrue(void) {
+u32 dds3EffectPCFGetState(void) {
     return 1;
 }
 
-EffNode *effCreateNode(u16 type, u16 arg, s32 param) {
+EffNode *dds3EffectCreate(u16 type, u16 arg, s32 param) {
     EffNode *node = (EffNode *)sdfChipAllocDirect(0x10);
 
     node->type = type;
@@ -113,20 +113,20 @@ EffNode *effCreateNode(u16 type, u16 arg, s32 param) {
     return node;
 }
 
-void effDestroyNode(EffNode *node) {
+void dds3EffectDelete(EffNode *node) {
     effNodeTypeOperations[node->type].destroy(node->instance);
     sdfChipFreeDirect(node);
 }
 
-void effUpdateNode(EffNode *node) {
+void dds3EffectDraw(EffNode *node) {
     effNodeTypeOperations[node->type].update(node->instance);
 }
 
-void effRestartNodeInstance(EffNode *node) {
+void dds3EffectReset(EffNode *node) {
     effNodeTypeOperations[node->type].restart(node->instance);
 }
 
-void effApplyNodeScale(EffNode *node, f32 factor) {
+void dds3EffectSetScale(EffNode *node, f32 factor) {
     effNodeTypeOperations[node->type].applyScale(node->instance, factor);
 }
 
@@ -165,15 +165,15 @@ s32 effInvokeOptionalNodeInstanceCallback(EffNode *node) {
 #include "sdf_debug_api.h"
 
 /* Build the effect node for a resource descriptor; descriptors older than 1.03 are converted first, and ones up to 1.02 get an identity matrix. */
-EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor) {
+EffNode *dds3EffectLoad(EffNodeDescriptor *descriptor) {
     EffNode *node;
     EffLegacyNodeInstanceView *instance;
 
     if (descriptor->version < 1.03f) {
         printf("old version!![%f]\n", descriptor->version);
-        effConvertLegacyNodeDescriptor(descriptor);
+        dds3EffectDataRevision(descriptor);
     }
-    node = effCreateNode((u16)descriptor->type, (u16)descriptor->arg, (s32)descriptor->payload);
+    node = dds3EffectCreate((u16)descriptor->type, (u16)descriptor->arg, (s32)descriptor->payload);
     if (descriptor->version <= 1.02f) {
         switch (node->type) {
         case 0:
@@ -192,17 +192,17 @@ EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor) {
 }
 
 EffNode *effCreateNodeFromParameter(u32 parameter) {
-    return effCreateNode(5, 0, parameter);
+    return dds3EffectCreate(5, 0, parameter);
 }
 
-struct EffNode *effLoadResourceNode(const char *resource) {
+struct EffNode *dds3EffectFileLoad(const char *resource) {
     u32 resolvedId;
     struct SdfMemBlock *resourceHandle;
     struct EffNode *node;
 
     printf("d3p file read...[%s]\n", resource);
-    resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
-    node = effCreateNodeFromDescriptor((EffNodeDescriptor *)resolvedId);
+    resourceHandle = sdfDevLoadFileEx(resource, &resolvedId, 0);
+    node = dds3EffectLoad((EffNodeDescriptor *)resolvedId);
     sdfMemFreeDirect(resourceHandle);
     return node;
 }

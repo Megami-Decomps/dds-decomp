@@ -59,7 +59,7 @@ extern s8 brsPendingRowsLatched;
 
 extern s8 brsTaskState;
 
-extern void sndEnsureMidiBankResident(s32);
+extern void p2sdLoadSMGFile(s32);
 
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
@@ -860,15 +860,15 @@ s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *work) {
     if (work->setupState != 0) {
         return 0;
     }
-    sndEnsureMidiBankResident(0x50000);
+    p2sdLoadSMGFile(0x50000);
     mnuInitPartyPanelSlots(&work->partyPanel);
     mnuAppendCampSpriteRequests(work->resourceList, &work->staffSlots);
     effRequestResourceByMode(D_00428358, D_00428368, 0,
                              (u32 *)&work->unitResource);
     mnuRequestEffectResources(&work->campEffect.resources);
     work->setupState = 1;
-    kwlnFadeInStart(0, 0, 0, 1);
-    kwlnFadeInStart(0, 0, 0, 0);
+    dds3FadeOut(0, 0, 0, 1);
+    dds3FadeOut(0, 0, 0, 0);
     return 1;
 }
 
@@ -896,7 +896,7 @@ s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
     }
     brsOpenSkillPackagePanel(ctx);
     ctx->setupState = 2;
-    kwlnFadeOutStart(0, 0, 0, 15);
+    dds3FadeIn(0, 0, 0, 15);
     return 0;
 }
 
@@ -969,7 +969,7 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     work->allocation = allocation;
     mnuClearPanelTransitionState(&work->transition.data);
     work->resourceList = mnuAllocateValueRecord(1);
-    evtCreateMessageWindowIfMissing(D_003D05C8);
+    fclInitMessage(D_003D05C8);
     evtSetMessageWindowPageValue(200);
     rewards = &work->rewards;
     btlCaptureRewardSummary(rewards);
@@ -1006,7 +1006,7 @@ void brsStaffTaskDestroy(KwlnTask *task) {
         brsCloseSkillPackagePanel(context);
     }
     effDestroyEffectList(context->resourceList);
-    dspCloseChannel();
+    fclDestroyMessage();
     sdfMemFreeDirect(context->allocation);
     brsTaskState = 2;
 }
@@ -1092,7 +1092,7 @@ void brsSetSkillProgressAnimations(BrsSkillPackageWork *work, s32 slot, s32 leve
 }
 
 s32 brsTaskIsFadeIdle(void) {
-    if (kwlnFadeIsActive() != 0) {
+    if (dds3FadeCheck() != 0) {
         return 0;
     }
     return evtStageTestAdvanceResourceWork() != 1;
@@ -1112,7 +1112,7 @@ extern s32 D_003D6308[];
 
 /* Choose a reward bucket using this mode's cumulative thresholds. */
 s32 mnuStaffPickRollByMode(u32 mode) {
-    u32 roll = sdfGetRand(0) & 0xFF;
+    u32 roll = dds3GetRandA(0) & 0xFF;
     u32 i;
 
     for (i = 0; i < 5; i++) {
@@ -1130,7 +1130,7 @@ extern void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused
                                  u32 retainScale);
 extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
-extern void sndQueueSoundId(u32 sequence);
+extern void p2sdStopSe(u32 sequence);
 
 void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
     if (selectLevelUp == 0) {
@@ -1169,8 +1169,8 @@ void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
             mnuForwardTableByte(
                 work->primaryRewards.rows[*selectedIndex].unit->unitId);
         }
-        sndQueueSoundId(0x50001);
-        sndStartTrackDefault(0x50001);
+        p2sdStopSe(0x50001);
+        p2sdPlayBGM(0x50001);
     }
 
     mnuStaffCopyPanelBlock(work->selectedRewardRow->unit, work);

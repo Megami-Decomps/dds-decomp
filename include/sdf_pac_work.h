@@ -25,8 +25,8 @@ typedef char PacWork_dataCursor_must_be_at_0x0C[
 typedef char PacWork_packet_must_be_at_0x10[
     ((u32)&((PacWork *)0)->packet == 0x10) ? 1 : -1];
 
-PacWork *sdfPacEnqueuePacket(struct PacState *state,
+PacWork *sdfPacNewResrc(struct PacState *state,
                              const struct SdfPacStreamPacketHeader *packet);
-PacWork *sdfPacRemovePacket(PacWork *work);
+PacWork *sdfPacFreeResrc(PacWork *work);
 
 #endif /* SDF_PAC_WORK_H */

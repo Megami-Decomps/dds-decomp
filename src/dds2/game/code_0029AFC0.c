@@ -74,7 +74,7 @@ s32 mnuHandleStatPointAssignment(KwlnTask *task) {
     if (result != 0) {
         return result;
     }
-    if (work->transition.state != 0 || evtGetMessageWindowControlState() != 0) {
+    if (work->transition.state != 0 || fclChkMessage() != 0) {
         return 0;
     }
     if (work->selectionInitialized == 0) {
@@ -83,7 +83,7 @@ s32 mnuHandleStatPointAssignment(KwlnTask *task) {
     }
     if (work->assignedStatPoints == work->availableStatPoints ||
         mnuCheckTableSums(entry, work) != 0) {
-        dspStartEntry(0x17);
+        fclStartMessage(0x17);
         evtSetMessageWindowOptionWhenOpen(0);
         evtStoreValueAndCaptureWindowPanelValue(0xA3);
         mnuSetPopupEntryFlagged(&work->transition.state, brsStatConfirmationPopupEntry);
@@ -154,7 +154,7 @@ u32 mnuResetGroupSelectionAndStartMessage(KwlnTask *task) {
 
     context = (BrsSkillPackageWork *)dds3GetProcessData(task);
     mnuSetPanelGroupSelection(context->panelHandle, -1);
-    dspStartEntry(0x17);
+    fclStartMessage(0x17);
     evtSetMessageWindowOptionWhenOpen(0);
     evtStoreValueAndCaptureWindowPanelValue(0xa3);
     return 1;
@@ -181,7 +181,7 @@ s32 mnuCommitAssignedStatPoints(KwlnTask *task) {
     if (result != 0) {
         return result;
     }
-    if (work->transition.state == 0 && evtGetMessageWindowControlState() == 0) {
+    if (work->transition.state == 0 && fclChkMessage() == 0) {
         s8 capturedValue = evtGetCapturedWindowPanelValue();
         s32 *stats = work->statGains;
 
@@ -233,8 +233,8 @@ s32 mnuShowProgressLevelChangePopup(KwlnTask *task) {
         sprintf(text, D_004379B0, brsGetLevelStepForValue(item->level));
         evtCopyEntryStringToActiveWindow(1, text);
         dspSetActive(1);
-        dspStartEntry(0x18);
-        sndSetSequenceVolumePan(7, 0x7F, 0x3F);
+        fclStartMessage(0x18);
+        p2sdPlaySE(7, 0x7F, 0x3F);
     }
     return 1;
 }
@@ -253,7 +253,7 @@ s32 mnuRunPanelWithIdleFallback(KwlnTask *request) {
     evtStageTestUpdateCamera();
     result = mnuDispatchPopupTransition(&context->transition, panelState, 0, request);
     if (result == 0) {
-        if ((*panelState == 0) && (result = evtGetMessageWindowControlState(), result == 0)) {
+        if ((*panelState == 0) && (result = fclChkMessage(), result == 0)) {
             mnuSetPopupEntryFlagged(panelState, brsRewardMessagePopupEntry);
         }
         result = 0;
@@ -279,7 +279,7 @@ s32 mnuAdvanceInactiveItemPanel(KwlnTask *request) {
 extern u16 mnuExtraLevelWeightedItemPairsView[][17];
 
 s32 mnuChooseWeightedItem(s32 rewardRowIndex) {
-    s32 random = (u8)sdfGetRand(NULL);
+    s32 random = (u8)dds3GetRandA(NULL);
     u16 *entry = mnuExtraLevelWeightedItemPairsView[rewardRowIndex];
     u32 i;
 
@@ -287,7 +287,7 @@ s32 mnuChooseWeightedItem(s32 rewardRowIndex) {
         if (random < entry[1]) {
             s32 item = entry[0];
 
-            if (mdlFlagTest(0x990) == 0 && (u32)(item - 0x6D) < 0x13) {
+            if (evtBitCheck(0x990) == 0 && (u32)(item - 0x6D) < 0x13) {
                 item = 9;
             }
             return item;
@@ -328,7 +328,7 @@ void mnuRollExtraLevelReward(DatPartyRecord *unit, BrsSkillPackageWork *work) {
         rollMode = 1;
     }
     work->rewardMode = 0;
-    if ((s32)(sdfGetRand(NULL) % modulus) < threshold) {
+    if ((s32)(dds3GetRandA(NULL) % modulus) < threshold) {
         work->rewardMode = mnuStaffPickRollByMode(rollMode);
         work->rewardIndex = -1;
         switch (work->rewardMode) {
@@ -342,7 +342,7 @@ void mnuRollExtraLevelReward(DatPartyRecord *unit, BrsSkillPackageWork *work) {
             if (count == 0) {
                 work->rewardMode = 2;
             } else {
-                work->rewardIndex = candidates[sdfGetRand(NULL) % count];
+                work->rewardIndex = candidates[dds3GetRandA(NULL) % count];
             }
             break;
         case 5:
@@ -367,7 +367,7 @@ u32 brsPrepareRewardMessage(KwlnTask *task) {
     mode = context->rewardMode;
     if (mode != 0 && mode != 5) {
         evtCopyEntryStringToActiveWindow(0, datUnitNames + item->unitId * 17);
-        dspStartEntry(0x19);
+        fclStartMessage(0x19);
     }
     memset(context->statGains, 0, sizeof(context->statGains));
     return 1;
@@ -380,10 +380,10 @@ u32 brsAcknowledgeRewardMessage(void) {
 
 
 s32 mnuSelectEventFlagCode(void) {
-    if (mdlFlagTest(0x31)) return 8;
-    if (mdlFlagTest(0x25)) return 1;
-    if (mdlFlagTest(0x1C)) return 2;
-    return mdlFlagTest(0x13) ? 5 : 1;
+    if (evtBitCheck(0x31)) return 8;
+    if (evtBitCheck(0x25)) return 1;
+    if (evtBitCheck(0x1C)) return 2;
+    return evtBitCheck(0x13) ? 5 : 1;
 }
 
 INCLUDE_SDATA(const s32, "game/code_0029AFC0", D_004379B8);

@@ -3,7 +3,7 @@
 
 #include "kwln.h"
 
-void kwlnTaskRemoveFromStateQueue(KwlnTask *task);
-void kwlnTaskInsertIntoOrderedStateQueue(KwlnTask *task);
+void DeleteProcessList(KwlnTask *task);
+void AddProcessList(KwlnTask *task);
 
 #endif /* KWLN_TASK_QUEUE_MUTATION_H */

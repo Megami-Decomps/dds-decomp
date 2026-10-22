@@ -31,11 +31,11 @@ typedef char SdfGsContextPacket_size_must_be_0x60[
 typedef char SdfGsContextPacket_registers_at_0x20[
     ((u32)&((SdfGsContextPacket *)0)->registers == 0x20) ? 1 : -1];
 
-void sdfBuildSceneDrawHeader(SdfGsContextPacket *packet, s32 frameAddress,
+void sdfGrSetDrawFrame(SdfGsContextPacket *packet, s32 frameAddress,
     s32 width, s32 height, s32 frameFormat, s32 depthAddress,
     s32 depthFormat, s32 gsContext);
 
-void sdfBuildFrameDepthScissorPacket(SdfGsContextRegisters *packet,
+void sdfGrSetDrawFramePacket(SdfGsContextRegisters *packet,
     s32 frameAddress, s32 width, s32 height, s32 frameFormat,
     s32 depthAddress, s32 depthFormat, s32 fieldOffset, s32 gsContext);
 

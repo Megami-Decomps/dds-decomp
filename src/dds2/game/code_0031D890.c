@@ -58,7 +58,7 @@ typedef char PoolLayoutAssert[
 WideSlotPool *itfCreateSpriteWorkPool(u32 count) {
     u32 size = count * 0x14 + 0xC;
     SdfMemBlock *allocation = sdfMemAllocDirect(size);
-    WideSlotPool *pool = (WideSlotPool *)sdfMemoryGetBlockAddress(allocation);
+    WideSlotPool *pool = (WideSlotPool *)sdfMemGetPtr(allocation);
     memset(pool, 0, size);
     pool->allocation = allocation;
     pool->count = count;
@@ -203,7 +203,7 @@ void itfUpdateAndDrawSpriteNumbers(WideSlotPool *pool, u32 flags) {
 CompactSlotPool *itfCreateSpriteHitEffectWorkPool(u32 count) {
     u32 size = count * 0x10 + 0xC;
     SdfMemBlock *allocation = sdfMemAllocDirect(size);
-    CompactSlotPool *pool = (CompactSlotPool *)sdfMemoryGetBlockAddress(allocation);
+    CompactSlotPool *pool = (CompactSlotPool *)sdfMemGetPtr(allocation);
 
     memset(pool, 0, size);
     pool->allocation = allocation;

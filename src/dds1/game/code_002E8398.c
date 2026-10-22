@@ -13,18 +13,18 @@ extern u16 D_00398910[];
 extern EffRandState D_00398938;
 
 void sdfRandomize(EffRandState *state, u32 seed);
-s32 effMiscReadCachedClockTime(ClockTime *now);
+s32 sdfGetCdClock(ClockTime *now);
 
 
 /* Uniform float in [0, 1): 24 random bits scaled by 2^-24. */
-f32 sdfGetRandFloat(EffRandState *state) {
-    u32 value = sdfGetRand(state) & 0xFFFFFF;
+f32 dds3GetRandFloatA(EffRandState *state) {
+    u32 value = dds3GetRandA(state) & 0xFFFFFF;
 
     return (f32)value * 5.9604644775390625e-8f;
 }
 
-u32 sdfGetRandInt(EffRandState *state, u32 modulus) {
-    return sdfGetRand(state) % modulus;
+u32 dds3GetRandIntA(EffRandState *state, u32 modulus) {
+    return dds3GetRandA(state) % modulus;
 }
 
 /* Seed the generator state (the shared effect state when `state` is NULL); each word is the previous one rotated right 8 bits and xored with a constant. */
@@ -49,20 +49,20 @@ void sdfRandomizeByTime(EffRandState *state) {
     ClockTime now;
     s32 secondsSinceEpoch;
 
-    effMiscReadCachedClockTime(&now);
+    sdfGetCdClock(&now);
     secondsSinceEpoch = now.year * 0x16E + now.day + D_00398910[now.month + 7] + 0xFFF4FF83;
     secondsSinceEpoch = secondsSinceEpoch * 0x18 + now.hour;
     secondsSinceEpoch = secondsSinceEpoch * 0x3C + now.min;
     sdfRandomize(state, secondsSinceEpoch * 0x3C + now.sec);
 }
 
-extern s32 sdfBcdStrToInt(s32);
+extern s32 sdfBcdToDecimal(s32);
 extern u8 D_003BD480;
 ClockTime D_003BD488 = {0};
 
 /* Copy cached time to now; return 0 for a valid refresh, -1 for failure, or 1 for reuse.
  * The native 20-tick refresh gate and month-as-year conversion are retained. */
-s32 effMiscReadCachedClockTime(ClockTime *now) {
+s32 sdfGetCdClock(ClockTime *now) {
     SdfCdClock clock;
     s32 result = 1;
     s32 year;
@@ -71,13 +71,13 @@ s32 effMiscReadCachedClockTime(ClockTime *now) {
         sceCdReadClock(&clock);
         result = -1;
         if ((clock.status & 0x103) == 0) {
-            D_003BD488.sec = sdfBcdStrToInt(clock.second);
-            D_003BD488.min = sdfBcdStrToInt(clock.minute);
-            D_003BD488.hour = sdfBcdStrToInt(clock.hour);
-            D_003BD488.day = sdfBcdStrToInt(clock.day);
-            D_003BD488.month = sdfBcdStrToInt(clock.month);
+            D_003BD488.sec = sdfBcdToDecimal(clock.second);
+            D_003BD488.min = sdfBcdToDecimal(clock.minute);
+            D_003BD488.hour = sdfBcdToDecimal(clock.hour);
+            D_003BD488.day = sdfBcdToDecimal(clock.day);
+            D_003BD488.month = sdfBcdToDecimal(clock.month);
             /* Retail reuses the month byte as the two-digit year input. */
-            year = sdfBcdStrToInt(clock.month);
+            year = sdfBcdToDecimal(clock.month);
             result = 0;
             D_003BD488.year = year + (year < 70 ? 2000 : 1900);
         }
@@ -115,7 +115,7 @@ s32 sndTryDispatchQueuedCommand(void) {
 
 
 
-void sdfServiceUnblockedWorkerThread(void) {
+void sdfSndCmdIFThread(void) {
     for (;;) {
         do {
             SleepThread();
@@ -131,8 +131,8 @@ extern u8 sndRpcServerThreadStack[];
 extern void *_gp;
 extern s32 sndCommandThreadId;
 extern s32 D_003BD4A4;
-extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
-extern void sdfSoundStartRpcServer(void);
+extern s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
+extern void SifRpcServerThreadProc(void);
 
 s32 sndStartIopCommandAndRpcWorkers(void) {
     s32 threadId;
@@ -140,7 +140,7 @@ s32 sndStartIopCommandAndRpcWorkers(void) {
     while (sceSifGetSreg(31) == 0) {
     }
 
-    sndCommandThreadParameters.entry = sdfServiceUnblockedWorkerThread;
+    sndCommandThreadParameters.entry = sdfSndCmdIFThread;
     sndCommandThreadParameters.stack = sndCommandThreadStack;
     sndCommandThreadParameters.stackSize = 0x1000;
     sndCommandThreadParameters.priority = 0x42;
@@ -150,7 +150,7 @@ s32 sndStartIopCommandAndRpcWorkers(void) {
     threadId = CreateThread(&sndCommandThreadParameters);
     sndCommandThreadId = threadId;
     _StartThread(threadId, 0);
-    threadId = sdfCreateThread(sdfSoundStartRpcServer, sndRpcServerThreadStack, 0x1000, 0x43);
+    threadId = CreateThreadSimple(SifRpcServerThreadProc, sndRpcServerThreadStack, 0x1000, 0x43);
     D_003BD4A4 = threadId;
     return _StartThread(threadId, 0);
 }

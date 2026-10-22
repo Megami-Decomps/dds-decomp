@@ -29,7 +29,7 @@ typedef struct SdfSlotSet SdfSlotSet;
 
 extern s32 fldAdvanceLmapResourceLoad(LmapTaskState *);
 
-extern void fldDrawSkyGradient(void);
+extern void fldSkyDrawFilter(void);
 extern void func_00137888(void);
 extern void sdfAdjustCounterValueAndRedraw(s32);
 extern void sdfDrawPositionedSlotImage(s32, s32, s32, s32, s32, s32, s32);
@@ -63,14 +63,14 @@ extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
 extern s32 fldLocalMapTrackSlotFromMode(s32);
 extern s32 fldLmapTaskUpdate(KwlnTask *);
 extern s32 D_00438890;
-extern void sndReleaseTrackHandle(u32);
+extern void p2sdStopBGM(u32);
 extern void sdfReleaseAllSpriteSlots(void);
-extern void sdfDestroyActiveCounterRuntime(void);
+extern void pbCheckPreviousRecord(void);
 extern void fldReleaseMapRequestQueues(void);
 extern void fldReleaseCameraColorEffect(void);
 extern void sdfDisableFlagListViewTargetRelativeMode(void);
-extern void evtSetSolarOverlayFullyTransparent(void);
-extern void evtDestroySecondaryWorldNode(void);
+extern void evtDisableMoonDraw(void);
+extern void evtFreeStage(void);
 extern SdfMemBlock *D_004388A4;
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern char D_004388A0[];
@@ -294,24 +294,24 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 
 /* Build one positioned SIF command and submit it on the requested draw surface. */
 void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z, s32 drawMode, const char *command, s32 surfaceIndex) {
-    SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    SdfListHead *packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
     SdfPoolNode *drawSurface;
     SifCommand packetHeader;
 
-    sdfInitPacketList(packetList);
+    sdfDrawTagInit(packetList);
     sdfPktInit(&packetHeader, x + 0x7000, y + 0x7900, z, drawMode);
-    sdfAppendPacket(packetList, (u32)sdfFormatSifPacket(&packetHeader, command));
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintfEx(&packetHeader, command));
     drawSurface = &kwlnDrawSurfaces[surfaceIndex];
     drawSurface->append(drawSurface, packetList);
 }
 
 /* Build an untextured rectangle with a separate outline color. */
 void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height, s32 fillColor, s32 borderColor, s32 surfaceIndex) {
-    SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    SdfListHead *packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
     SdfPoolNode *drawSurface;
 
-    sdfInitPacketList(packetList);
-    sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(x + 0x7000, y + 0x7900, z, width * 16, height * 8, fillColor, borderColor));
+    sdfDrawTagInit(packetList);
+    sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x + 0x7000, y + 0x7900, z, width * 16, height * 8, fillColor, borderColor));
     drawSurface = &kwlnDrawSurfaces[surfaceIndex];
     drawSurface->append(drawSurface, packetList);
 }
@@ -354,7 +354,7 @@ s32 fldLmapTaskUpdate(KwlnTask *task) {
 
 void fldStartLmapTask(s32 mode) {
     SdfMemBlock *allocation = sdfMemAllocDirect(0x88);
-    LmapTaskState *taskData = (LmapTaskState *)sdfMemoryGetBlockAddress(allocation);
+    LmapTaskState *taskData = (LmapTaskState *)sdfMemGetPtr(allocation);
 
     memset(taskData, 0, 0x88);
     if (mode != 0) {
@@ -422,10 +422,10 @@ void fldInitializeLmapTaskVariant(LmapTaskState *task) {
     D_004388AC = 1;
     D_00439090 = 0;
     D_004388B0 = 0;
-    flagSet = mdlFlagTest(0x1c);
+    flagSet = evtBitCheck(0x1c);
     variant = 3;
     if (flagSet == 0) {
-        flagSet = mdlFlagTest(0x13);
+        flagSet = evtBitCheck(0x13);
         variant = 2;
         if (flagSet == 0) {
             variant = 1;
@@ -436,16 +436,16 @@ void fldInitializeLmapTaskVariant(LmapTaskState *task) {
 }
 
 void fldShutdownLmapResources(void) {
-    sndReleaseTrackHandle(0x400001);
+    p2sdStopBGM(0x400001);
     sdfReleaseAllSpriteSlots();
-    sdfDestroyActiveCounterRuntime();
+    pbCheckPreviousRecord();
     fldReleaseMapRequestQueues();
     fldReleaseCameraColorEffect();
     sdfDisableFlagListViewTargetRelativeMode();
-    evtSetSolarOverlayFullyTransparent();
-    dspCloseChannel();
+    evtDisableMoonDraw();
+    fclDestroyMessage();
     sdfMemFreeDelayedDirect(D_004388A4);
-    evtDestroySecondaryWorldNode();
+    evtFreeStage();
 }
 
 u8 fldUpdateLmapResourceLoad(LmapTaskState *task) {
@@ -467,7 +467,7 @@ extern char D_0042D2B8[];
 extern void sdfInstallNonzeroSpriteSlots(SdfSlotSet *);
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 extern s32 sndFindPackedTrackLoadStatus(s32);
-extern void sndEnsureMidiBankResident(s32);
+extern void p2sdLoadSMGFile(s32);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
 INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D280);
@@ -511,11 +511,11 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
                 }
                 return 0;
             }
-            load->archive = fileQueuePlainDispatchRequest(files[load->entry].name);
+            load->archive = pacLoad(files[load->entry].name);
             break;
         case 4:
             if (sndFindPackedTrackLoadStatus(files[load->entry].argument) == 0) {
-                sndEnsureMidiBankResident(files[load->entry].argument);
+                p2sdLoadSMGFile(files[load->entry].argument);
             } else {
                 /* Native 0x0030AD7C stores 4 before the common phase-3 store. */
                 load->phase = 4;
@@ -523,7 +523,7 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
             break;
         case 5:
             if (files[load->entry].argument == 0) {
-                task->allocation = sdfReadNamedResource(files[load->entry].name, &task->resourceAddress, NULL);
+                task->allocation = sdfDevLoadFileEx(files[load->entry].name, &task->resourceAddress, NULL);
             }
             load->phase = 4;
             return 0;
@@ -533,7 +533,7 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
     case 3:
         switch (files[load->entry].kind) {
         case 3:
-            if (fileIsRequestReadyInCurrentMode(load->file)) {
+            if (pacFileCheckEnd(load->file)) {
                 load->phase = 4;
             }
             break;
@@ -543,7 +543,7 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
             }
             break;
         case 2:
-            if (fileRequestIsReady(load->archive)) {
+            if (pacCheckEnd(load->archive)) {
                 load->phase = 4;
             }
             break;
@@ -556,8 +556,8 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
         break;
     case 4:
         if (load->file != NULL) {
-            fileGetLoadedDataAddress(load->file);
-            evtPrintDeveloperConsoleMessage(D_0042D298, fileGetResourceSize(load->file));
+            fileGetLoadPtr(load->file);
+            evtPrintDeveloperConsoleMessage(D_0042D298, fileGetLoadSize(load->file));
         }
         if (files[load->entry].kind == 2) {
             node = ((FilePacRequest *)load->archive)->packet.queueHead;
@@ -567,7 +567,7 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
                 slotIndex = 0;
                 do {
                     if (node->packet[0] == 1) {
-                        evtPrintDeveloperConsoleMessage(D_0042D2A8, sdfPacGetExtensionData((SdfPacStreamPacketHeader *)node));
+                        evtPrintDeveloperConsoleMessage(D_0042D2A8, sdfPacGetResrcFileName((SdfPacStreamPacketHeader *)node));
                         if (task->variant == 1) {
                             task->spriteSlots[slotIndex + 1] = (u32)effCreateResourceSlotSetFromAllocation(node->resourceHandle, 0);
                         } else if (task->variant == 2) {
@@ -584,12 +584,12 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
         }
         evtPrintDeveloperConsoleMessage(D_0042D2A8, files[load->entry].name);
         if (load->file != NULL) {
-            sdfMemFreeDirect(fileGetResourceHandle(load->file));
-            filePollEntryCleanup(load->file);
+            sdfMemFreeDirect(fileGetMemHandle(load->file));
+            fileHandleFree(load->file);
             evtPrintDeveloperConsoleMessage(D_0042D2B8);
         }
         if (load->archive != NULL) {
-            btlStageTaskCleanupCallback(load->archive);
+            pacFileHandleFree_(load->archive);
             load->archive = NULL;
         }
         load->entry++;
@@ -609,18 +609,18 @@ void fldInitializeLocalMapScene(void) {
     s32 index;
     s32 mode = 3;
 
-    if (!mdlFlagTest(0x1C)) {
+    if (!evtBitCheck(0x1C)) {
         mode = 2;
-        if (!mdlFlagTest(0x13)) {
+        if (!evtBitCheck(0x13)) {
             mode = 1;
         }
     }
     kwlnDrawControlFlags |= 0x2000000;
     mask = 0x3FF;
-    evtCreateWorldObjectForKey(1, mode);
-    dds3SetWorldObject(NULL);
+    evtLoadArea(1, mode);
+    dds3SetActiveScene(NULL);
     fldCreateLocalMapCamera();
-    dds3SetWorldObject(dds3GetWorldSecondaryObject());
+    dds3SetActiveScene(dds3GetControlScene());
     D_00435CBC = 0x80000000;
     fldApplyLightSetIndex(mode);
     flags = fldPackLocalMapFlagStates();
@@ -632,17 +632,17 @@ void fldInitializeLocalMapScene(void) {
     sdfCreateMaskedCounterChannels(mask, index);
     sdfInitializeMapCounterSelection(D_00438894, sdfLoadMapCounterCameraVectorsForMask(mask));
     fldCreateMapRequestQueues();
-    dspCloseChannel();
-    D_004388A4 = sdfReadNamedResource("/lmap/lmpmsg.bmd", &D_004388A8, NULL);
-    evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_004388A8);
+    fclDestroyMessage();
+    D_004388A4 = sdfDevLoadFileEx("/lmap/lmpmsg.bmd", &D_004388A8, NULL);
+    fclInitMessage((struct ItfMesSub *)D_004388A8);
     evtSetSolarOverlayFullyVisible();
     fldInitializeCameraColorResource();
     sdfEnableFlagListViewTargetRelativeMode();
-    sndStartTrackDefault(0x400001);
-    if (mdlFlagTest(0x13)) {
-        kwlnFadeOutStart(0, 0, 0, 30);
+    p2sdPlayBGM(0x400001);
+    if (evtBitCheck(0x13)) {
+        dds3FadeIn(0, 0, 0, 30);
     } else {
-        kwlnFadeOutStart(255, 255, 255, 30);
+        dds3FadeIn(255, 255, 255, 30);
     }
     sdfCounterInitializeDisplayAnimation();
 }
@@ -657,7 +657,7 @@ extern s32 fldAdvanceLocalMapCameraTransition(void);
 extern s8 kwlnTaskPadButtonStates[];
 extern s32 D_00439094;
 extern void sdfCounterAdvanceBoundedAnimationValue(void);
-extern s32 fldLmapToggleOverlay(void);
+extern s32 pipeMessDraw(void);
 extern void fldDisplayLocalMapCounterMessage(void);
 extern s32 sdfUpdateSelectedCounterMapCameraTransition(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
@@ -667,7 +667,7 @@ extern s32 sdfCounterGetDisplayValue(void);
 extern void fldSetPendingSceneAction(u32);
 extern void sdfInitInnerVectors(void);
 extern void fldUpdateSelectedValueTransition(void);
-extern void fldUpdateSwayOffset(void);
+extern void fldSkyCalcFilter(void);
 
 s32 fldUpdateLocalMapCounterSelection(void) {
     s32 result = 0;
@@ -718,7 +718,7 @@ s32 fldUpdateLocalMapCounterSelection(void) {
         if (D_00439094 >= 35) {
             sdfCounterAdvanceBoundedAnimationValue();
         }
-        if (D_00439094 >= 55 && fldLmapToggleOverlay()) {
+        if (D_00439094 >= 55 && pipeMessDraw()) {
             if (D_0043908C == 0) {
                 fldDisplayLocalMapCounterMessage();
                 D_0043908C = 1;
@@ -738,10 +738,10 @@ s32 fldUpdateLocalMapCounterSelection(void) {
             D_00439094 = 0;
         } else {
             D_004388AC = 5;
-            if (mdlFlagTest(0x13)) {
-                kwlnFadeInStart(0, 0, 0, 30);
+            if (evtBitCheck(0x13)) {
+                dds3FadeOut(0, 0, 0, 30);
             } else {
-                kwlnFadeInStart(255, 255, 255, 30);
+                dds3FadeOut(255, 255, 255, 30);
             }
             D_00439094 = 0;
         }
@@ -761,12 +761,12 @@ s32 fldUpdateLocalMapCounterSelection(void) {
 
     sdfInitInnerVectors();
     fldUpdateSelectedValueTransition();
-    fldUpdateSwayOffset();
+    fldSkyCalcFilter();
     return result;
 }
 
 void fldDrawLocalMapOverlay(void) {
-    fldDrawSkyGradient();
+    fldSkyDrawFilter();
     sdfDrawPositionedSlotImage(0, 0, 0, 0x80, 0x21, 0, 0x53);
     sdfDrawPositionedSlotImage(0, 0, 0, 0x80, 0x22, 0, 0x53);
 
@@ -799,26 +799,26 @@ void fldDrawLocalMapOverlay(void) {
 s32 fldPackLocalMapFlagStates(void) {
     s32 bits;
 
-    bits = mdlFlagTest(0x400);
-    bits |= mdlFlagTest(0x402) << 1;
-    bits |= mdlFlagTest(0x401) << 2;
-    bits |= mdlFlagTest(0x405) << 3;
-    bits |= mdlFlagTest(0x407) << 4;
-    bits |= mdlFlagTest(0x406) << 5;
-    bits |= mdlFlagTest(0x403) << 6;
-    bits |= mdlFlagTest(0x404) << 7;
+    bits = evtBitCheck(0x400);
+    bits |= evtBitCheck(0x402) << 1;
+    bits |= evtBitCheck(0x401) << 2;
+    bits |= evtBitCheck(0x405) << 3;
+    bits |= evtBitCheck(0x407) << 4;
+    bits |= evtBitCheck(0x406) << 5;
+    bits |= evtBitCheck(0x403) << 6;
+    bits |= evtBitCheck(0x404) << 7;
     return bits;
 }
 
 s32 mdlCollectFlagBitsIntoMask(void) {
     s32 bits;
 
-    bits = mdlFlagTest(0x40F) << 1;
-    bits |= mdlFlagTest(0x410) << 6;
-    bits |= mdlFlagTest(0x411) << 7;
-    bits |= mdlFlagTest(0x412) << 3;
-    bits |= mdlFlagTest(0x413) << 5;
-    bits |= mdlFlagTest(0x414) << 4;
+    bits = evtBitCheck(0x40F) << 1;
+    bits |= evtBitCheck(0x410) << 6;
+    bits |= evtBitCheck(0x411) << 7;
+    bits |= evtBitCheck(0x412) << 3;
+    bits |= evtBitCheck(0x413) << 5;
+    bits |= evtBitCheck(0x414) << 4;
     return bits;
 }
 
@@ -832,14 +832,14 @@ void fldDisplayLocalMapCounterMessage(void) {
     sprintf(text, D_004388A0, sdfCounterGetDisplayWordPointer());
     evtCopyEntryStringToActiveWindow(0, text);
     evtSetMessageWindowOptionWhenOpen(0);
-    dspStartEntry(0);
+    fclStartMessage(0);
     evtStoreValueAndCaptureWindowPanelValue(1);
 }
 
-s32 fldLmapToggleOverlay(void) {
+s32 pipeMessDraw(void) {
     s32 result = 0;
 
-    if (evtGetMessageWindowControlState() != 0) {
+    if (fclChkMessage() != 0) {
         dspRequestMessageWindowModeOne();
     } else {
         evtFinishMessageWindowAndNotify();
@@ -854,22 +854,22 @@ void sdfClearCounterDisplayFlags(void) {
     u32 flags = 1 << (sdfCounterGetDisplayValue() - 1);
 
     if (flags & 2) {
-        mdlFlagClear(0x40F);
+        evtBitOff(0x40F);
     }
     if (flags & 8) {
-        mdlFlagClear(0x412);
+        evtBitOff(0x412);
     }
     if (flags & 0x10) {
-        mdlFlagClear(0x414);
+        evtBitOff(0x414);
     }
     if (flags & 0x20) {
-        mdlFlagClear(0x413);
+        evtBitOff(0x413);
     }
     if (flags & 0x40) {
-        mdlFlagClear(0x410);
+        evtBitOff(0x410);
     }
     if (flags & 0x80) {
-        mdlFlagClear(0x411);
+        evtBitOff(0x411);
     }
 }
 

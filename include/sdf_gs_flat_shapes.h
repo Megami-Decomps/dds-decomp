@@ -37,7 +37,7 @@ typedef char SdfGsFlatTrianglePacket_drawing_at_0x10[
 typedef char SdfGsFlatTrianglePacket_unwritten_word_at_0x48[
     ((u32)&((SdfGsFlatTrianglePacket *)0)->unwrittenAllocationWord == 0x48) ? 1 : -1];
 
-void sdfBuildTriPacket104(SdfGsFlatTrianglePayload *dst, s32 color,
+void sdfPrimSetF3Elem(SdfGsFlatTrianglePayload *dst, s32 color,
     s32 primitive, s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2,
     s32 depth);
 
@@ -71,7 +71,7 @@ typedef char SdfGsFlatQuadPacket_size_must_be_0x50[
 typedef char SdfGsFlatQuadPacket_drawing_at_0x10[
     ((u32)&((SdfGsFlatQuadPacket *)0)->drawing == 0x10) ? 1 : -1];
 
-void sdfBuildPacket104x4(SdfGsFlatQuadPayload *packet, s32 color,
+void sdfPrimSetF4Elem(SdfGsFlatQuadPayload *packet, s32 color,
     s32 primitive, s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2,
     s32 x3, s32 y3, s32 depth);
 
@@ -107,7 +107,7 @@ typedef char SdfGsClosedRectanglePacket_drawing_at_0x10[
 typedef char SdfGsClosedRectanglePacket_unwritten_word_at_0x58[
     ((u32)&((SdfGsClosedRectanglePacket *)0)->unwrittenAllocationWord == 0x58) ? 1 : -1];
 
-void sdfBuildQuadPacket(SdfGsClosedRectanglePayload *dst, s32 color,
+void sdfPrimSetBoxLineElem(SdfGsClosedRectanglePayload *dst, s32 color,
     s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth);
 
 #endif /* SDF_GS_FLAT_SHAPES_H */

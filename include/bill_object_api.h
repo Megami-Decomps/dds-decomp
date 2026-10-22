@@ -12,33 +12,33 @@ struct SdfTex;
 struct SdfTextureFileHeader;
 struct BlurPacketQuad;
 
-void billDispatchByKind(struct BillObj *obj);
-struct SdfTex *effGetBillResourceTexture(s32 index);
+void dds3BillboardDelete(struct BillObj *obj);
+struct SdfTex *dds3BillboardGetGeneralTex(s32 index);
 struct BillObj *effCreateBillboardSharingIndexedResource(s32 index);
-struct BlurPacketQuad *billGetWorkTransformMatrix(void *packet);
+struct BlurPacketQuad *effPkt2DGetPrimPtr(void *packet);
 
 /* The selected kind interprets the opaque payload word. */
-struct BillObj *billCreateIndexed(s32 kind, u32 data);
-struct BillObj *billCloneObjectRetainingSharedData(const struct BillObj *source);
-void billInitializeCommonDrawState(struct BillObj *billboard);
-struct BillChildPayload *billCreateChildPayloadFromTextureResource(
+struct BillObj *dds3BillboardCreate(s32 kind, u32 data);
+struct BillObj *dds3BillboardCopy(const struct BillObj *source);
+void dds3Billboard_BasicInit(struct BillObj *billboard);
+struct BillChildPayload *BillboardLoadTex(
     struct SdfTextureFileHeader *resource);
-void billMarkKindOneFlag(struct BillObj *billboard);
-void billSetChildParameter(struct BillObj *billboard, u32 parameter);
-void billSetVariantValue(struct BillObj *billboard, s32 variantValue);
-void billSetChildHalfExtents(struct BillObj *billboard, f32 width, f32 height);
-void billSetChildScaleComponents(struct BillObj *billboard, f32 x, f32 y);
+void dds3BillboardSetAnimColorAdvMode(struct BillObj *billboard);
+void dds3BillboardSetRGBA(struct BillObj *billboard, u32 parameter);
+void dds3BillboardSetDrawType(struct BillObj *billboard, s32 variantValue);
+void dds3BillboardSetXYOffset(struct BillObj *billboard, f32 width, f32 height);
+void dds3BillboardSetScale(struct BillObj *billboard, f32 x, f32 y);
 /* Radian rotation of the billboard quad in its plane. */
-void billSetRotationAngle(struct BillObj *billboard, f32 angle);
-void billSetBillboardMode(struct BillObj *billboard, s32 mode);
-void billSetAnimationEntry(struct BillObj *billboard, s32 entryIndex);
-void billSetAnimationFrameForImmediateAdvance(struct BillObj *billboard, u32 frame);
-void billSetAnimationFrameWithOneTickHold(struct BillObj *billboard, u32 frame);
-s32 billGetFirstEntryFramePeriod(const struct BillObj *billboard);
-u16 billGetKindOneParameter(const struct BillObj *billboard);
+void dds3BillboardSetRotate(struct BillObj *billboard, f32 angle);
+void dds3BillboardSetMode(struct BillObj *billboard, s32 mode);
+void dds3Billboard_P2ASetNumber(struct BillObj *billboard, s32 entryIndex);
+void dds3BillboardSetAnimKey(struct BillObj *billboard, u32 frame);
+void dds3BillboardSetAnimKey2(struct BillObj *billboard, u32 frame);
+s32 dds3BillboardGetAnimFrame(const struct BillObj *billboard);
+u16 dds3BillboardGetAnimState(const struct BillObj *billboard);
 void billReleaseSharedEntryBlock(struct BillData *data);
 void effReleaseSharedTextureRecord(struct BillChildPayload *child);
-struct BillChildPayload *billStepAnimationEntryAndUpdateChild(
+struct BillChildPayload *dds3Billboard_P2AAnimDraw(
     struct BillObj *billboard, struct BillOut *entry);
 void billCopyCurrentRecordToSnapshot(
     struct BillObj *billboard, struct BillSnapshot *snapshot);

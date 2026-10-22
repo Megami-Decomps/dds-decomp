@@ -8,7 +8,7 @@ struct SdfMemBlock;
 struct SdfTextureFileHeader;
 
 typedef struct MapResource {
-    struct SdfTex *texture;            /* 0x00: retained texture returned by sdfTexAcquireResourceTexture */
+    struct SdfTex *texture;            /* 0x00: retained texture returned by sdfTexSet */
     struct SdfMemBlock *allocation;    /* 0x04: named-resource allocation queued for release */
     struct SdfTextureFileHeader *resourceData; /* 0x08: loaded texture-file data consumed by the texture loader */
     u32 unknown0C;                     /* 0x0C: untouched by the paired loader/release providers */
@@ -28,7 +28,7 @@ extern MapResource fldLocalMapNameTextures[10];
 extern MapResource fldLocalMapAuxTextureResource;
 extern MapResource fldLocalMapTextureResource;
 
-s32 fldLoadMapResource(const char *name, MapResource *record);
-u32 fldReleaseMapResource(struct SdfTex **texture);
+s32 texLoad(const char *name, MapResource *record);
+u32 texRelease(struct SdfTex **texture);
 
 #endif /* DDS_FLD_MAP_RESOURCE_H */

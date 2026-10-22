@@ -174,7 +174,7 @@ MenuWindowContainer *mnuCreateFilteredStaffEntryWindow(void *const *entries, s32
             const s32 *flagCursor = flagIds;
             do {
                 s32 flag = *flagCursor;
-                if (flag == 0 || mdlFlagTest(flag) != 0) {
+                if (flag == 0 || evtBitCheck(flag) != 0) {
                     visibleCount++;
                 }
                 index++;
@@ -218,7 +218,7 @@ MenuWindowContainer *mnuCreateFilteredStaffEntryWindow(void *const *entries, s32
             if (flagIds != NULL) {
                 s32 flag = *(const s32 *)(entryOffset + (u32)flagIds);
                 if (flag != 0) {
-                    if (mdlFlagTest(flag) != 0) {
+                    if (evtBitCheck(flag) != 0) {
                         node = mnuAppendWindowListNode(window, *entryCursor);
                     }
                 } else {

@@ -34,8 +34,8 @@ extern void sdfRuntimeTaskTeardownHook(void);
 
 
 
-extern void scrClearProcessGlobals(void);
-extern void mdlResetViewerFlagsAndSolarOverlay(void);
+extern void dds3GlobalWorkClearFlags(void);
+extern void evtInitGlobalWork(void);
 extern void ptyClearProfileRecords(void);
 extern void ptyRebuildAllProfiles(void);
 extern void evtUpdateFlaggedEntries(void);
@@ -73,7 +73,7 @@ extern void scrDestroyWorkTask(void);
 
 
 /* Linearly interpolated curve sample at `time`; 0 when no curve is active. */
-f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *user) {
+f32 dds3PathBasicControlGetFovy(Dds3PathCurveWork *user) {
     u32 index;
     f32 fraction;
     Dds3PathKeyframes *curve;
@@ -81,7 +81,7 @@ f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *user) {
 
     if (user->counter.flags & DDS3_PATH_SCALAR_CHANNEL) {
         curve = user->scalarKeys;
-        dds3SamplePathKeyframeInterval(&index, &fraction, curve, user->counter.time);
+        dds3PathEvalSpline(&index, &fraction, curve, user->counter.time);
         values = curve->data.scalar;
         return values[index] * (1.0f - fraction) + values[index + 1] * fraction;
     }
@@ -92,7 +92,7 @@ f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *user) {
 #define SDF_FLOAT_COUNTER_WRAP_FLAG 0x00000020
 
 /* Step the counter by one; returns 0 when it ran out and does not wrap. */
-s32 sdfStepWrappingFloatCounter(SdfFloatCounter *counter) {
+s32 dds3PathBasicControlIsFinished(SdfFloatCounter *counter) {
     s32 result = 1;
 
     if (counter->flags & SDF_FLOAT_COUNTER_FROZEN_FLAG) {
@@ -118,40 +118,40 @@ s32 sdfStepWrappingFloatCounter(SdfFloatCounter *counter) {
     return result;
 }
 
-void sdfSetFloatCounterDirection(SdfFloatCounter *counter, u32 direction) {
+void dds3PathBasicControlAlterMode(SdfFloatCounter *counter, u32 direction) {
     counter->direction = direction;
 }
 
-u32 sdfGetFloatCounterDirection(const SdfFloatCounter *counter) {
+u32 dds3PathBasicControlGetMode(const SdfFloatCounter *counter) {
     return counter->direction;
 }
 
-void evtScaleValueByMultiplier(SdfFloatCounter *value, float multiplier) {
+void dds3PathBasicControlSetRatio(SdfFloatCounter *value, float multiplier) {
     value->time = multiplier * value->duration;
 }
 
-float evtGetValueScaleFactor(const SdfFloatCounter *value) {
+float dds3PathBasicControlGetRatio(const SdfFloatCounter *value) {
     return value->time / value->duration;
 }
 
-void sdfFreezeFloatCounter(SdfFloatCounter *value) {
+void dds3PathBasicPauseOn(SdfFloatCounter *value) {
     value->flags = value->flags | SDF_FLOAT_COUNTER_FROZEN_FLAG;
 }
 
-void sdfUnfreezeFloatCounter(SdfFloatCounter *value) {
+void dds3PathBasicPauseOff(SdfFloatCounter *value) {
     value->flags = value->flags & ~SDF_FLOAT_COUNTER_FROZEN_FLAG;
 }
 
-void sdfEnableFloatCounterWrap(SdfFloatCounter *value) {
+void dds3PathBasicLoopOn(SdfFloatCounter *value) {
     value->flags = value->flags | SDF_FLOAT_COUNTER_WRAP_FLAG;
 }
 
-void sdfDisableFloatCounterWrap(SdfFloatCounter *value) {
+void dds3PathBasicLoopOff(SdfFloatCounter *value) {
     value->flags = value->flags & ~SDF_FLOAT_COUNTER_WRAP_FLAG;
 }
 
-EffWorldNode *evtSpawnActionObj11(u32 key, EvtWorldSourceTransformPrefix *source, const char *name) {
-    EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_TRANSFORM_SOURCE);
+EffWorldNode *dds3AddPointBasic(u32 key, EvtWorldSourceTransformPrefix *source, const char *name) {
+    EffWorldNode *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_TRANSFORM_SOURCE);
 
     obj->data = source;
     obj->key = key;
@@ -222,8 +222,8 @@ extern void mtrLoadMantraNodePositions(void);
 extern void ptyInitRuntime(void);
 
 void evtResetWorldAndProfileRuntime(void) {
-    scrClearProcessGlobals();
-    mdlResetViewerFlagsAndSolarOverlay();
+    dds3GlobalWorkClearFlags();
+    evtInitGlobalWork();
     datGameState->world.updateMode = 8;
     ptyInitRuntime();
     fldResetFieldRuntimeState(0);
@@ -273,13 +273,13 @@ void sdfSaveResetSnapshot(void) {
     memset(D_0043E5B0, 0, sizeof(D_0043E5B0));
     D_00435DB8 = 0;
     D_00435DBC = 0;
-    if (mdlFlagTest(0xB8F)) {
+    if (evtBitCheck(0xB8F)) {
         D_00435DB5 = 1;
     }
-    if (mdlFlagTest(0xBA0)) {
+    if (evtBitCheck(0xBA0)) {
         D_00435DB6 = 1;
     }
-    if (mdlFlagTest(0xC0E)) {
+    if (evtBitCheck(0xC0E)) {
         D_00435DC4 = 1;
     }
     memcpy(D_0043E5B0, datGameState->battleFlags, sizeof(datGameState->battleFlags));
@@ -291,20 +291,20 @@ void sdfSaveResetSnapshot(void) {
     D_00385218.words[2] = datGameState->header.saveFlags2;
     D_00438E90 = mnuCreateFlagEntries();
     D_00438E94 = sdfMemAllocDirect(sizeof(datGameState->mantraBits));
-    copy = (void *)sdfMemoryGetBlockAddress(D_00438E94);
+    copy = (void *)sdfMemGetPtr(D_00438E94);
     memcpy(copy, datGameState->mantraBits, sizeof(datGameState->mantraBits));
     D_00438E98 = sdfMemAllocDirect(sizeof(datGameState->profileBanks));
-    copy = (void *)sdfMemoryGetBlockAddress(D_00438E98);
+    copy = (void *)sdfMemGetPtr(D_00438E98);
     memcpy(copy, datGameState->profileBanks, sizeof(datGameState->profileBanks));
     ptySaveActivePartyTemplates();
     D_00438E9C = sdfMemAllocDirect(sizeof(datGameState->templates));
-    copy = (void *)sdfMemoryGetBlockAddress(D_00438E9C);
+    copy = (void *)sdfMemGetPtr(D_00438E9C);
     memcpy(copy, datGameState->templates, sizeof(datGameState->templates));
     D_00438EA0 = sdfMemAllocDirect(0x40);
-    copy = (void *)sdfMemoryGetBlockAddress(D_00438EA0);
+    copy = (void *)sdfMemGetPtr(D_00438EA0);
     memcpy(copy, &datGameState->inventory.counts[0xC0], 0x40);
     D_00438EA4 = sdfMemAllocDirect(sizeof(datGameState->itemBlockedFlags));
-    copy = (void *)sdfMemoryGetBlockAddress(D_00438EA4);
+    copy = (void *)sdfMemGetPtr(D_00438EA4);
     memcpy(copy, datGameState->itemBlockedFlags, sizeof(datGameState->itemBlockedFlags));
     D_00438EA8 = mtrMantraEventBitPush();
     D_00438EAC = datGameState->world.slotFlags;
@@ -324,9 +324,9 @@ void sdfRestoreResetSnapshot(void) {
     DatGameState *state;
     u32 i;
 
-    if (D_00435DB6) mdlFlagSet(0xBA0);
-    if (D_00435DB5) mdlFlagSet(0xB8F);
-    if (D_00435DC4) mdlFlagSet(0xC0E);
+    if (D_00435DB6) evtBitOn(0xBA0);
+    if (D_00435DB5) evtBitOn(0xB8F);
+    if (D_00435DC4) evtBitOn(0xC0E);
     datGameState->header.status = D_00435DB8;
     memcpy(datGameState->battleFlags, D_0043E5B0, sizeof(datGameState->battleFlags));
     datGameState->header.secondTick = D_00435DBC;
@@ -339,27 +339,27 @@ void sdfRestoreResetSnapshot(void) {
     sdfMemFreeDirect(D_00438E90);
 
     mantra = datGameState->mantraBits;
-    memcpy(mantra, (void *)sdfMemoryGetBlockAddress(D_00438E94), sizeof(datGameState->mantraBits));
+    memcpy(mantra, (void *)sdfMemGetPtr(D_00438E94), sizeof(datGameState->mantraBits));
     sdfMemFreeDirect(D_00438E94);
     profiles = datGameState->profileBanks;
-    memcpy(profiles, (void *)sdfMemoryGetBlockAddress(D_00438E98), sizeof(datGameState->profileBanks));
+    memcpy(profiles, (void *)sdfMemGetPtr(D_00438E98), sizeof(datGameState->profileBanks));
     sdfMemFreeDirect(D_00438E98);
     templates = datGameState->templates;
-    memcpy(templates, (void *)sdfMemoryGetBlockAddress(D_00438E9C), sizeof(datGameState->templates));
+    memcpy(templates, (void *)sdfMemGetPtr(D_00438E9C), sizeof(datGameState->templates));
     sdfMemFreeDirect(D_00438E9C);
     for (i = 0; i < 16; i++) datGameState->templates[i].level = 0;
     state = datGameState;
-    bytes = (void *)sdfMemoryGetBlockAddress(D_00438EA0);
+    bytes = (void *)sdfMemGetPtr(D_00438EA0);
     memcpy(&state->inventory.counts[0xC0], bytes, 0x40);
     sdfMemFreeDirect(D_00438EA0);
     state = datGameState;
-    bytes = (void *)sdfMemoryGetBlockAddress(D_00438EA4);
+    bytes = (void *)sdfMemGetPtr(D_00438EA4);
     memcpy(state->itemBlockedFlags, bytes, sizeof(state->itemBlockedFlags));
     sdfMemFreeDirect(D_00438EA4);
     for (i = 0xC0; (s32)i < 0x100; i++) {
         if (datGameState->inventory.counts[i] != 0) mnuMarkEntryBlocked(i);
     }
-    mdlFlagSet(0x901);
+    evtBitOn(0x901);
     mtrMantraEventBitPop(D_00438EA8);
     dds3ForEachFlagged();
     ptyClearSelectedSkillFlagsFromActiveEntries();
@@ -379,12 +379,12 @@ void sdfResetGameRuntime(s32 fullReset) {
     }
     datGameState->header.firstTick = 0;
     datGameState->header.secondTick = 0;
-    scrClearProcessGlobals();
-    mdlResetViewerFlagsAndSolarOverlay();
+    dds3GlobalWorkClearFlags();
+    evtInitGlobalWork();
     datGameState->world.updateMode = 8;
     ptyInitRuntime();
-    mdlFlagClear(0xC0E);
-    mdlFlagSet(0x801);
+    evtBitOff(0xC0E);
+    evtBitOn(0x801);
     fldResetFieldRuntimeState(0);
     ptyClearProfileRecords();
     ptyRebuildAllProfiles();
@@ -431,9 +431,9 @@ void sdfReloadChannelSegments(SdfChannel *table) {
 
         size = *(s32 *)address;
         if (*slot != 0) {
-            sdfFreeMemoryFromEitherHeap(*slot);
+            sdfFreeAuto(*slot);
         }
-        *slot = sdfAllocateBlockBySizeThreshold(size);
+        *slot = sdfAllocAuto(size);
         memcpy(*slot, address + 4, size);
         segmentBytes = size + 4;
         blocks = segmentBytes >> 4;
@@ -446,12 +446,12 @@ void sdfReloadChannelSegments(SdfChannel *table) {
         return alignedBytes;
     }
 
-    command = sdfDevCreateCommandState(table->path);
-    size = sdfDevQueueControlAndWait(command);
-    block = sdfAllocGeneralBlockHigh(size);
+    command = sdfFileOpen(table->path);
+    size = sdfFileLength(command);
+    block = sdfMemAllocFromTailDirect(size);
     address = (u8 *)sdfMemLock(block);
-    sdfDevQueueReadAndWait(command, address, size);
-    sdfDevWaitThenReleaseCommandState(command);
+    sdfFileRead(command, address, size);
+    sdfFileClose(command);
     for (i = 0; table->entries[i].slot != 0; i++) {
         address += sdfLoadChannelFileSegment(table->entries[i].slot, table->entries[i].unused);
     }
@@ -634,7 +634,7 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *ite
         healing = power + base;
         break;
     case 15:
-        healing = sdfGetRandInt(0, power) + base;
+        healing = dds3GetRandIntA(0, power) + base;
         break;
     case 9:
         healing = current * power / 100 + base;
@@ -759,7 +759,7 @@ u32 sdfRollActionHit(s32 channel, s32 queryArg, DatPartyRecord *packed) {
                 count++;
             }
         }
-        mask = 1 << list[sdfGetRandInt(0, count)];
+        mask = 1 << list[dds3GetRandIntA(0, count)];
     }
     if (mask != 0 &&
         (datCommandRecords[channel].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_ELEMENT_MASK ||
@@ -813,7 +813,7 @@ u32 sdfRollActionHit(s32 channel, s32 queryArg, DatPartyRecord *packed) {
     if (datCommandRecords[channel].attribute.parts.hitChance < 100) {
         scaled = evtRunContext(0xC, queryArg, packed, channel, mask) * ((f32)ratio / 100.0f);
         printf(D_00412B08, scaled, ratio, mask);
-        roll = sdfGetRandInt(0, 100);
+        roll = dds3GetRandIntA(0, 100);
         hit = roll < scaled;
     }
     return hit ? mask : 0;
@@ -847,12 +847,12 @@ u32 sdfQueryChannelBits(s32 channel, s32 queryArg, DatPartyRecord *item) {
     return result;
 }
 
-extern void datClearUnitStatusBits(void *item, s32 mask);
+extern void datResetBadStat(void *item, s32 mask);
 /* HP/MP mutators deliberately have no prototypes in this TU; see docs/idioms.md. */
 void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 minimumValue);
 
-extern s32 datAdjustCurrentHp(DatPartyRecord *unit, s32 delta);
-extern s32 datAdjustCurrentMp(DatPartyRecord *unit, s32 delta);
+extern s32 datAddHp(DatPartyRecord *unit, s32 delta);
+extern s32 datAddMp(DatPartyRecord *unit, s32 delta);
 
 s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
     s32 hpDelta;
@@ -869,12 +869,12 @@ s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
             return 0;
         }
         sdfRaisePackedChannelValue(item, value);
-        datClearUnitStatusBits(item, bits);
+        datResetBadStat(item, bits);
         if (mpDelta != 0) {
-            datAdjustCurrentMp(item, mpDelta);
+            datAddMp(item, mpDelta);
         }
         if (hpDelta != 0) {
-            datAdjustCurrentHp(item, hpDelta);
+            datAddHp(item, hpDelta);
             if (item->hp == 0) {
                 sdfRaisePackedChannelValue(item, 0x4000);
             }

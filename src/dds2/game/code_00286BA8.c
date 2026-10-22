@@ -183,7 +183,7 @@ extern void mtrInitUnitSelectionWork(MnuStatusResource *);
  * Print the native load banner and initialize panel sound entries before returning the work pointer. */
 MnuStatusResource *mnuAllocateMantraResourceWork(void) {
     struct SdfMemBlock *allocation = sdfMemAllocDirect(MTR_STATUS_RESOURCE_BYTES);
-    MnuStatusResource *resourceWork = (MnuStatusResource *)sdfMemoryGetBlockAddress(allocation);
+    MnuStatusResource *resourceWork = (MnuStatusResource *)sdfMemGetPtr(allocation);
 
     memset(resourceWork, 0, MTR_STATUS_RESOURCE_BYTES);
     resourceWork->allocation = allocation;
@@ -198,7 +198,7 @@ MnuStatusResource *mnuAllocateMantraResourceWork(void) {
 void mnuReleaseMantraResourceWork(s32 unused, MnuStatusResource *resourceWork) {
     if (resourceWork != NULL) {
 
-        dspCloseChannel();
+        fclDestroyMessage();
         sdfMemFreeDelayedDirect(resourceWork->resourceAllocationA);
         sdfMemFreeDelayedDirect(resourceWork->resourceAllocationB);
         mnuReleaseFirstMantraSpriteSlots();
@@ -377,8 +377,8 @@ s32 mtrMantraEquipInit(void) {
 
     work->flags.equipApplied = 0;
     selector = mnuGetDefaultPanelSelector(work);
-    dspCloseChannel();
-    evtCreateMessageWindowIfMissing(work->messageWindow);
+    fclDestroyMessage();
+    fclInitMessage(work->messageWindow);
     mnuCloseCurrentProfilePanel(work->progressHost);
     memcpy(snapshot, work->list->cursor->items, sizeof(*snapshot));
     work->snapshot.profileId = ((u8 *)selector)[2];
@@ -525,7 +525,7 @@ s32 mtrMantraEquipUpdate(void) {
         sprintf(text, "%d", sourceAmount);
         evtCopyEntryStringToActiveWindow(3, text);
         evtSetMessageWindowOptionWhenOpen(0);
-        dspStartEntry(0);
+        fclStartMessage(0);
         evtStoreValueAndCaptureWindowPanelValue(8);
         equip->state = 4;
         break;
@@ -540,13 +540,13 @@ s32 mtrMantraEquipUpdate(void) {
         sprintf(text, "%d", sourceAmount);
         evtCopyEntryStringToActiveWindow(3, text);
         evtSetMessageWindowOptionWhenOpen(0);
-        dspStartEntry(1);
+        fclStartMessage(1);
         evtStoreValueAndCaptureWindowPanelValue(8);
         equip->state = 4;
         break;
 
     case 4:
-        if (evtGetMessageWindowControlState() != 0) {
+        if (fclChkMessage() != 0) {
             break;
         }
         if (evtGetCapturedWindowPanelValue() != 0) {
@@ -569,7 +569,7 @@ s32 mtrMantraEquipUpdate(void) {
         sourceAmount = mnuGetMantraSourceValue(sourceEntryId);
         sprintf(text, "%d", sourceAmount);
         evtCopyEntryStringToActiveWindow(3, text);
-        dspStartEntry(2);
+        fclStartMessage(2);
         equip->state = 12;
         if ((((u32)selectedPanelFlags >> 8) & 2) == 0) {
             sourceAmount = mnuGetMantraSourceValue(sourceEntryId);
@@ -580,32 +580,32 @@ s32 mtrMantraEquipUpdate(void) {
         break;
 
     case 7:
-        dspStartEntry(3);
+        fclStartMessage(3);
         equip->state = 12;
         break;
 
     case 8:
-        dspStartEntry(4);
+        fclStartMessage(4);
         equip->state = 12;
         break;
 
     case 9:
-        dspStartEntry(5);
+        fclStartMessage(5);
         equip->state = 12;
         break;
 
     case 10:
-        dspStartEntry(6);
+        fclStartMessage(6);
         equip->state = 12;
         break;
 
     case 11:
-        dspStartEntry(7);
+        fclStartMessage(7);
         equip->state = 12;
         break;
 
     case 12:
-        if (work->flags.fadeProgress == 0 || evtGetMessageWindowControlState() != 0) {
+        if (work->flags.fadeProgress == 0 || fclChkMessage() != 0) {
             break;
         }
         evtFinishMessageWindowAndNotify();
@@ -629,10 +629,10 @@ s32 mtrMantraEquipUpdate(void) {
 
     switch (resultKind) {
     case 1:
-        sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+        p2sdPlaySE(8, 0x7F, 0x3F);
         break;
     case 2:
-        sndSetSequenceVolumePan(10, 0x7F, 0x3F);
+        p2sdPlaySE(10, 0x7F, 0x3F);
         break;
     default:
         break;
@@ -760,10 +760,10 @@ void mtrInitUnitSelectionWork(MnuStatusResource *resourceWork) {
     resourceWork->list = unitList;
     resourceWork->flags.visible = 0;
 
-    if (mdlFlagTest(0x1B1) != 0) {
-        if (mdlFlagTest(0x995) == 0) {
+    if (evtBitCheck(0x1B1) != 0) {
+        if (evtBitCheck(0x995) == 0) {
             selectionState->state = 3;
-            kwlnFadeInStart(0, 0, 0, MTR_UNIT_FADE_FRAMES);
+            dds3FadeOut(0, 0, 0, MTR_UNIT_FADE_FRAMES);
         }
         mnuInitializeMantraSelectionWork(resourceWork);
         if (resourceWork->menu.src != 0 || resourceWork->menu.drawBits.hasQueuedMastery) {
@@ -776,7 +776,7 @@ void mtrInitUnitSelectionWork(MnuStatusResource *resourceWork) {
                 }
             }
             selectionState->state = 3;
-            kwlnFadeInStart(0, 0, 0, MTR_UNIT_FADE_FRAMES);
+            dds3FadeOut(0, 0, 0, MTR_UNIT_FADE_FRAMES);
         }
     }
 }
@@ -825,14 +825,14 @@ s32 mtrUnitSelectUpdateState(MnuStatusResource *resourceWork) {
         } else {
             selection->outcome = 2;
             selection->state = 3;
-            kwlnFadeInStart(0, 0, 0, 10);
+            dds3FadeOut(0, 0, 0, 10);
         }
         break;
     case 5:
         result = mnuHandleMantraSelectionInput(resourceWork);
         switch (result) {
         case 2:
-            if (mdlFlagTest(0x1B1) == 0) {
+            if (evtBitCheck(0x1B1) == 0) {
                 selection->state = 6;
                 result = 0;
                 break;
@@ -846,13 +846,13 @@ s32 mtrUnitSelectUpdateState(MnuStatusResource *resourceWork) {
         }
         break;
     case 6:
-        dspCloseChannel();
-        evtCreateMessageWindowIfMissing(resourceWork->messageDefinition);
-        dspStartEntry(2);
+        fclDestroyMessage();
+        fclInitMessage(resourceWork->messageDefinition);
+        fclStartMessage(2);
         selection->state = 7;
         break;
     case 7:
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             selection->state = 8;
         }
         break;
@@ -936,13 +936,13 @@ s32 mnuHandleMantraSelectionInput(MnuStatusResource *resourceWork) {
     }
     switch (sound) {
     case 1:
-        sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+        p2sdPlaySE(0, 0x7F, 0x3F);
         break;
     case 2:
-        sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+        p2sdPlaySE(8, 0x7F, 0x3F);
         break;
     case 3:
-        sndSetSequenceVolumePan(10, 0x7F, 0x3F);
+        p2sdPlaySE(10, 0x7F, 0x3F);
         break;
     }
     return action;

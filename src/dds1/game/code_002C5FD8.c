@@ -26,7 +26,7 @@ extern s32 sdfCounterGetDisplayValue(void);
 
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
-extern void fldProjectPointToGridCell(s32 *, s32 *, f32, f32, f32);
+extern void egl3Dto2D(s32 *, s32 *, f32, f32, f32);
 
 
 extern s32 D_003BD984;
@@ -173,11 +173,11 @@ s32 fldLoadLocalMapResources(void) {
 
     for (i = 0; i < 10; i++) {
         sprintf(name, "/lmap/sname_%02d.tmx", i + 1);
-        fldLoadMapResource(name, item);
+        texLoad(name, item);
         item++;
     }
-    fldLoadMapResource("/lmap/1006.tmx", &fldLocalMapAuxTextureResource);
-    fldLoadMapResource("/lmap/l_map00.tmx", &fldLocalMapTextureResource);
+    texLoad("/lmap/1006.tmx", &fldLocalMapAuxTextureResource);
+    texLoad("/lmap/l_map00.tmx", &fldLocalMapTextureResource);
     return 1;
 }
 
@@ -185,12 +185,12 @@ s32 fldReleaseLocalMapResources(void) {
     s32 i = 9;
     MapResource *item = fldLocalMapNameTextures;
     do {
-        fldReleaseMapResource(&item->texture);
+        texRelease(&item->texture);
         item++;
         --i;
     } while (i >= 0);
-    fldReleaseMapResource(&fldLocalMapAuxTextureResource.texture);
-    fldReleaseMapResource(&fldLocalMapTextureResource.texture);
+    texRelease(&fldLocalMapAuxTextureResource.texture);
+    texRelease(&fldLocalMapTextureResource.texture);
     return 1;
 }
 
@@ -329,7 +329,7 @@ void fldDrawLocalMapTransition(s32 opening) {
     fldDrawLocalMapFrame(slide, alpha1, alpha2, alpha3);
 }
 
-extern void evtSetDrawSurfaceIndex(u32);
+extern void eglSetOt(u32);
 typedef struct {
     s16 row[6][5];
 } LocalMapRectsTable;
@@ -355,7 +355,7 @@ void fldDrawLocalMapTransitionFrame(f32 progress) {
     LocalMapQuadsTable *quadsTable = &quads;
     u32 color, tint;
 
-    evtSetDrawSurfaceIndex(0x54);
+    eglSetOt(0x54);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 0, 1);
     evtSubmitPrimaryAlphaBlendMode(0);
     color = EDGE_ALPHA(0);
@@ -386,14 +386,14 @@ void fldDrawLocalMapTransitionFrame(f32 progress) {
 #undef QUAD
 #undef NAME_TEXTURE
 
-extern void evtSetDrawSurfaceIndex(u32);
+extern void eglSetOt(u32);
 
 /* Draw the supplied map texture with uniform grey/alpha and native asymmetric scaled extents. */
 void fldDrawScaledGrayTintMapTexture(s32 x, s32 y, s8 grey, s8 alpha, struct SdfTex *texture, f32 scale) {
     u32 color;
     f32 left, top, width, height;
 
-    evtSetDrawSurfaceIndex(0x54);
+    eglSetOt(0x54);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     left = (f32)x - scale * 154.0f;
     top = (f32)y - scale * 102.0f;
@@ -457,7 +457,7 @@ void fldDrawMapRequestHalo(s32 x, s32 y, s32 z, MapRequestState *state, MapReque
         }
     }
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-    fldProjectPointToGridCell(&gridX, &gridY, x, y, z);
+    egl3Dto2D(&gridX, &gridY, x, y, z);
     evtSubmitTexturedGradientQuad((s32)(gridX - scale * 16.0f), (s32)(gridY - scale * 16.0f),
                   (s32)(scale * 32.0f), (s32)(scale * 32.0f), 0, 0, 32, 32,
                   MAP_GREY_COLOR(progress * 24.0f), MAP_GREY_COLOR(progress * 24.0f),
@@ -482,7 +482,7 @@ void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, MapRequestState *state, MapRequ
     } else {
         progress /= 0.7f;
     }
-    fldProjectPointToGridCell(&gridX, &gridY, x, y, z);
+    egl3Dto2D(&gridX, &gridY, x, y, z);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     evtSubmitPrimaryAlphaBlendMode(1);
     evtSubmitTexturedGradientQuad((s32)(gridX - scale * 16.0f), (s32)(gridY - scale * 12.0f),
@@ -551,7 +551,7 @@ void fldDrawCounterMapMarker(void) {
         opacity = remaining;
     }
     fldDispatchMapRequestCallbacks(D_003BD98C);
-    fldProjectPointToGridCell(&x, &y, D_0038FE30[index][0], D_0038FE30[index][1], D_0038FE30[index][2]);
+    egl3Dto2D(&x, &y, D_0038FE30[index][0], D_0038FE30[index][1], D_0038FE30[index][2]);
     fldDrawScaledAuxMapTexture(x, y, MAP_GREY_COLOR(opacity * 32.0f), 5.0f);
 }
 
@@ -562,7 +562,7 @@ void fldDrawCounterMapMarker(void) {
 MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
     s32 size = count * 0x20 + 0x44;
     struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
-    MapRequestRing *pool = (MapRequestRing *)sdfMemoryGetBlockAddress(allocation);
+    MapRequestRing *pool = (MapRequestRing *)sdfMemGetPtr(allocation);
     MapRequestState *state = &pool->header;
     MapRequestNode *node;
     MapRequestNode *next;
@@ -716,10 +716,10 @@ done:
     return;
 }
 
-s32 fldLoadMapResource(const char *name, MapResource *record) {
-    struct SdfMemBlock *allocation = sdfReadNamedResource(name, (u32 *)&record->resourceData, 0);
+s32 texLoad(const char *name, MapResource *record) {
+    struct SdfMemBlock *allocation = sdfDevLoadFileEx(name, (u32 *)&record->resourceData, 0);
     record->allocation = allocation;
-    record->texture = sdfTexAcquireResourceTexture(record->resourceData);
+    record->texture = sdfTexSet(record->resourceData);
     if (record->allocation != NULL) {
         sdfMemFreeDelayedDirect(record->allocation);
         record->allocation = NULL;
@@ -728,7 +728,7 @@ s32 fldLoadMapResource(const char *name, MapResource *record) {
     return 1;
 }
 
-u32 fldReleaseMapResource(struct SdfTex **texture) {
+u32 texRelease(struct SdfTex **texture) {
     if (*texture != 0) {
         sdfTexReleaseReferenceViaHandler(*texture);
         *texture = 0;
@@ -746,7 +746,7 @@ extern u8 D_00324660[];
 
 
 /* vu0 routine: project a world point to the screen and return its GS grid cell. */
-void fldProjectPointToGridCell(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z) {
+void egl3Dto2D(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z) {
     f32 point[4];
     f32 screen[4];
 

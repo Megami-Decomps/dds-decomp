@@ -11,7 +11,7 @@
  * its matrices, a billboard and an asset reference. */
 typedef struct EffUnitObject {
     f32 localMatrix[4][4]; /* 0x00: VU0 matrix initialized on clone. */
-    f32 transform[4][4]; /* 0x40: VU0 matrix copied by effCopyMatrixToNext. */
+    f32 transform[4][4]; /* 0x40: VU0 matrix copied by dds3P2APolygonSetRotateMatrix. */
     BillObj *billboard; /* 0x80: scene-owned billboard */
     void *resource; /* 0x84 */
 } EffUnitObject;

@@ -28,15 +28,15 @@ extern f32 D_00352860[4];
 
 /* Release each nonzero parameter-work slot, unlink the owner, then drop its active count.
  * The diagnostic observes the decremented count before the owner is freed. */
-void effReleaseBattleVoiceOwner(BattleEffect *owner) {
+void effBTLCutDelete(BattleEffect *owner) {
     s32 workIndex;
 
     for (workIndex = 0; workIndex < EFF_BATTLE_PARAMETER_WORK_CAPACITY; workIndex++) {
         if (owner->parameterWorks[workIndex] != 0) {
-            effDispatchParameterDataAndFreeWork(owner->parameterWorks[workIndex]);
+            dds3EffectPartDelete(owner->parameterWorks[workIndex]);
         }
     }
-    sndUnlinkVoice(owner);
+    effBTLCutListRelease(owner);
     owner->state->active--;
     printf(D_003A0DB8, owner->kind, owner->state,
                   owner->state->active);
@@ -44,37 +44,37 @@ void effReleaseBattleVoiceOwner(BattleEffect *owner) {
 }
 
 /* Return the policy controlling trigger-frame copying and minimum ramp selection. */
-u16 effBattleGetMode(BattleEffect *work) {
+u16 effBTLCutGetCutNumber(BattleEffect *work) {
     return work->kind;
 }
 
 /* Read the frame counter that the native updater advances after callbacks. */
-u32 effBattleGetCurrentFrame(BattleEffect *work) {
+u32 effBTLCutGetFrame(BattleEffect *work) {
     return work->currentFrame;
 }
 
 /* Read one caller-provided word without interpreting it. */
-u32 effBattleReadInputWord(u32 *value) {
+u32 effBTLCutGetFormation(u32 *value) {
     return *value;
 }
 
 /* Store the callback; native code invokes it with this work at the source frame. */
-void effBattleSetSourceFrameCallback(BattleEffect *work, BattleEffectCallback callback) {
+void effBTLCutSetMotionChangeCallbackFunc(BattleEffect *work, BattleEffectCallback callback) {
     work->sourceFrameCallback = callback;
 }
 
 /* Store the callback used when the current frame reaches triggerFrame. */
-void effBattleSetTriggerFrameCallback(BattleEffect *work, BattleEffectCallback callback) {
+void effBTLCutSetCutEndCallbackFunc(BattleEffect *work, BattleEffectCallback callback) {
     work->triggerFrameCallback = callback;
 }
 
 /* Read the callback frame from the linked source. */
-s32 effBattleGetLinkedSourceValue(BattleEffect *work) {
+s32 effBTLCutGetMotionChangeFrame(BattleEffect *work) {
     return work->list->callbackFrame;
 }
 
 /* Set the trigger frame; mode 0 also copies its stored bits into the color-ramp endpoint. */
-void effBattleSetInputValue(BattleEffect *work, s32 triggerFrame) {
+void effBTLCutSetCutEndFrame(BattleEffect *work, s32 triggerFrame) {
     work->triggerFrame = triggerFrame;
     if (work->kind == EFF_BATTLE_COPY_TRIGGER_FRAME) {
         work->colorRampEndFrame = triggerFrame;
@@ -82,12 +82,12 @@ void effBattleSetInputValue(BattleEffect *work, s32 triggerFrame) {
 }
 
 /* Return the frame tested by the native trigger callback. */
-u32 effBattleGetInputValue(BattleEffect *work) {
+u32 effBTLCutGetCutEndFrame(BattleEffect *work) {
     return work->triggerFrame;
 }
 
 /* Select the ramp endpoint: mode 1 keeps the unsigned minimum; other modes replace it. */
-void effBattleUpdateSelectedValue(BattleEffect *work, u32 endFrame) {
+void effBTLCutSetDrawEndFrame(BattleEffect *work, u32 endFrame) {
     if (work->kind == EFF_BATTLE_MINIMUM_RAMP_END_FRAME) {
         if (endFrame < work->colorRampEndFrame) {
             work->colorRampEndFrame = endFrame;
@@ -98,22 +98,22 @@ void effBattleUpdateSelectedValue(BattleEffect *work, u32 endFrame) {
 }
 
 /* Return the selected endpoint used by native color-ramp calculation. */
-u32 effBattleGetSelectedValue(BattleEffect *work) {
+u32 effBTLCutGetDrawEndFrame(BattleEffect *work) {
     return work->colorRampEndFrame;
 }
 
 /* Store the opaque caller word without assigning it a stronger semantic role. */
-void effBattleStoreOpaqueWord(BattleEffect *work, u32 value) {
+void effBTLCutSetUserData(BattleEffect *work, u32 value) {
     work->unk120 = value;
 }
 
 /* Return the same opaque caller word. */
-u32 effBattleReadOpaqueWord(BattleEffect *work) {
+u32 effBTLCutGetUserData(BattleEffect *work) {
     return work->unk120;
 }
 
 /* Blend toward the neutral tint over the final six frames of the ramp. */
-u32 effBattleCalcFadeTint(u32 elapsed, u32 duration)
+u32 effBTLCutGetAllPartColor(u32 elapsed, u32 duration)
 {
     f32 ratio;
     u32 packedColor[4];
@@ -143,19 +143,19 @@ extern f32 D_004144A0[4]; extern f32 D_004144B0[4]; extern f32 D_004144C0[4];
 extern u32 effFieldColorFlags;
 extern void effMiscQuatMultiplyVU(void); extern void effMiscQuaternionToMatrixVU(void);
 extern void sdfComposeVuMatrixFromRegisters(void);
-extern void effBattleMiscQueryPosition(void *owner, EffectVectorRequest *request, u128 *out);
-extern void effBattleMiscBuildBasis(EffectVectorRequest *request, u128 *out);
+extern void effBTLPartGetPositionPtr(void *owner, EffectVectorRequest *request, u128 *out);
+extern void effBTLPartGetRotateMatrixPtr(EffectVectorRequest *request, u128 *out);
 extern f32 effBattleMiscQueryScalar(BtlUnit *unit, EffectVectorRequest *request);
 extern u32 effBTLFieldColorGetOverrideSelector(void); extern u32 effBTLFieldColorGetFinalSelector(void);
-extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB); extern u32 effBattleCalcFadeTint(u32, u32);
-extern void kwlnFadeSetupFrames(s32, s32); extern void mdlLoadTertiaryVectorVU(MdlCtx *);
-extern void btlSetAlternateEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode);
+extern u32 effMagaCylinderCalcColor(u32 colorA, u32 colorB); extern u32 effBTLCutGetAllPartColor(u32, u32);
+extern void dds3SetQuake(s32, s32); extern void mdlGetScale(MdlCtx *);
+extern void effBTLModelGetMarkMatrix2(BtlUnit *unit, s32 mode);
 extern void effBattleApplyUnitRgbKeyframe(BtlUnit *unit, EffBattleUnitRgbCommand *command, s32 frame);
-extern void effParamWorkCallback0(EffParamWork *, void *); extern void effParamWorkCallback2(EffParamWork *, void *);
-extern void effParamWorkCallback3(EffParamWork *, u32); extern void effParamWorkCallback4(EffParamWork *, void *);
-extern void effParamWorkCallback5(EffParamWork *, f32); extern void effParamWorkInvokeCallback(EffParamWork *);
+extern void dds3EffectPartSetPosition(EffParamWork *, void *); extern void dds3EffectPartSetRotateMatrix(EffParamWork *, void *);
+extern void dds3EffectPartSetColor(EffParamWork *, u32); extern void dds3EffectPartSetDirection(EffParamWork *, void *);
+extern void dds3EffectPartSetArea(EffParamWork *, f32); extern void dds3EffectPartDraw(EffParamWork *);
 extern void fileSetRenderFlag(u32); extern void fileClearRenderFlag(u32);
-extern void btlSetAlternateEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode);
+extern void effBTLModelGetMarkMatrix2(BtlUnit *unit, s32 mode);
 extern void effBattleApplyUnitColorDirection(BtlUnit *unit, EffBattleUnitColorCommand *command, u32 frame);
 
 INCLUDE_RODATA(const s32, "effect/effBattle", D_003A0DE0);
@@ -198,10 +198,10 @@ void effBattleUpdate(BattleEffect *work) {
 
         if (list->shake != 0 && list->shakeFrame == frame) {
             if (list->shake < 0x1F) {
-                kwlnFadeSetupFrames(list->shakeFade, list->shake * 10);
+                dds3SetQuake(list->shakeFade, list->shake * 10);
             } else {
                 printf("effBattle : shake over[%d]\n", list->shake);
-                kwlnFadeSetupFrames(list->shakeFade, 0x12C);
+                dds3SetQuake(list->shakeFade, 0x12C);
             }
         }
 
@@ -250,8 +250,8 @@ void effBattleUpdate(BattleEffect *work) {
         }
 
         if ((work->flags & 1) == 0) {
-            color = effMultiplyPackedColors(
-                effBattleCalcFadeTint(frame, work->colorRampEndFrame), work->color);
+            color = effMagaCylinderCalcColor(
+                effBTLCutGetAllPartColor(frame, work->colorRampEndFrame), work->color);
         } else {
             color = work->color;
         }
@@ -290,7 +290,7 @@ void effBattleUpdate(BattleEffect *work) {
 
             hidden = 1;
             if ((effFieldColorFlags & 1) != 0) {
-                effBattleMiscQueryPosition(unit, &entry->aimParams, (u128 *)localVector);
+                effBTLPartGetPositionPtr(unit, &entry->aimParams, (u128 *)localVector);
                 if (localVector[2] > -150.0f) {
                     hidden = 0;
                 }
@@ -302,94 +302,94 @@ void effBattleUpdate(BattleEffect *work) {
             }
             if ((work->flags & 0x10) == 0) {
                 EffectVectorRequest *request = &entry->aimParams;
-                effBattleMiscQueryPosition(unit, request, (u128 *)localVector);
-                effParamWorkCallback0(work->parameterWorks[entryIndex], localVector);
+                effBTLPartGetPositionPtr(unit, request, (u128 *)localVector);
+                dds3EffectPartSetPosition(work->parameterWorks[entryIndex], localVector);
                 switch (request->kind) {
                 case 0:
                 case 4:
-                    effParamWorkCallback2(work->parameterWorks[entryIndex], baseMatrix);
+                    dds3EffectPartSetRotateMatrix(work->parameterWorks[entryIndex], baseMatrix);
                     break;
                 case 6:
-                    effParamWorkCallback2(work->parameterWorks[entryIndex], overrideMatrix);
+                    dds3EffectPartSetRotateMatrix(work->parameterWorks[entryIndex], overrideMatrix);
                     break;
                 case 7:
-                    effParamWorkCallback2(work->parameterWorks[entryIndex], finalMatrix);
+                    dds3EffectPartSetRotateMatrix(work->parameterWorks[entryIndex], finalMatrix);
                     break;
                 case 1:
-                    effParamWorkCallback2(work->parameterWorks[entryIndex], alternateMatrix);
+                    dds3EffectPartSetRotateMatrix(work->parameterWorks[entryIndex], alternateMatrix);
                     break;
                 case 2:
-                    effParamWorkCallback2(work->parameterWorks[entryIndex], oppositeMatrix);
+                    dds3EffectPartSetRotateMatrix(work->parameterWorks[entryIndex], oppositeMatrix);
                     break;
                 case 3:
                     break;
                 case 5:
-                    btlSetAlternateEffectParameterOrMuzzlePosition(unit, entry->aimParams.count);
+                    effBTLModelGetMarkMatrix2(unit, entry->aimParams.count);
                     VU0_LOAD_MATRIX_B(baseMatrix);
                     sdfComposeVuMatrixFromRegisters();
                     VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
-                    effParamWorkCallback2(work->parameterWorks[entryIndex], matrixOutput);
+                    dds3EffectPartSetRotateMatrix(work->parameterWorks[entryIndex], matrixOutput);
                     break;
                 case 8:
                     if ((unit->status.flags & 2) != 0) {
-                        mdlLoadTertiaryVectorVU(unit->ext->owner);
+                        mdlGetScale(unit->ext->owner);
                         VU0_GET_VF10_X(scalar);
                     } else {
                         scalar = 0.0f;
                     }
-                    btlSetAlternateEffectParameterOrMuzzlePosition(unit, entry->aimParams.count);
+                    effBTLModelGetMarkMatrix2(unit, entry->aimParams.count);
                     if (scalar != 0.0f) {
                         VU0_SET_ONES_XYZ(vf10);
                         VU0_SCALE_VF(vf10, 1.0f / scalar);
                         VU0_SCALE_MATRIX_ROWS(vf10);
                     }
                     VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
-                    effParamWorkCallback2(work->parameterWorks[entryIndex], matrixOutput);
+                    dds3EffectPartSetRotateMatrix(work->parameterWorks[entryIndex], matrixOutput);
                     break;
 
                 case 9:
                     if ((overrideOwner->status.flags & 2) != 0) {
-                        mdlLoadTertiaryVectorVU(overrideOwner->ext->owner);
+                        mdlGetScale(overrideOwner->ext->owner);
                         VU0_GET_VF10_X(scalar);
                     } else {
                         scalar = 0.0f;
                     }
-                    btlSetAlternateEffectParameterOrMuzzlePosition(overrideOwner, entry->aimParams.count);
+                    effBTLModelGetMarkMatrix2(overrideOwner, entry->aimParams.count);
                     if (scalar != 0.0f) {
                         VU0_SET_ONES_XYZ(vf10);
                         VU0_SCALE_VF(vf10, 1.0f / scalar);
                         VU0_SCALE_MATRIX_ROWS(vf10);
                     }
                     VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
-                    effParamWorkCallback2(work->parameterWorks[entryIndex], matrixOutput);
+                    dds3EffectPartSetRotateMatrix(work->parameterWorks[entryIndex], matrixOutput);
                     break;
 
                 case 10:
                     if ((finalOwner->status.flags & 2) != 0) {
-                        mdlLoadTertiaryVectorVU(finalOwner->ext->owner);
+                        mdlGetScale(finalOwner->ext->owner);
                         VU0_GET_VF10_X(scalar);
                     } else {
                         scalar = 0.0f;
                     }
-                    btlSetAlternateEffectParameterOrMuzzlePosition(finalOwner, entry->aimParams.count);
+                    effBTLModelGetMarkMatrix2(finalOwner, entry->aimParams.count);
                     if (scalar != 0.0f) {
                         VU0_SET_ONES_XYZ(vf10);
                         VU0_SCALE_VF(vf10, 1.0f / scalar);
                         VU0_SCALE_MATRIX_ROWS(vf10);
                     }
                     VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
-                    effParamWorkCallback2(work->parameterWorks[entryIndex], matrixOutput);
+                    dds3EffectPartSetRotateMatrix(work->parameterWorks[entryIndex], matrixOutput);
                     break;
                 default:
                     break;
                 }
-                effBattleMiscBuildBasis(request, (u128 *)basisMatrix);
-                effParamWorkCallback4(work->parameterWorks[entryIndex], basisMatrix);
+                effBTLPartGetRotateMatrixPtr(request, (u128 *)basisMatrix);
+                dds3EffectPartSetDirection(work->parameterWorks[entryIndex], basisMatrix);
                 scalar = effBattleMiscQueryScalar(unit, request);
-                effParamWorkCallback5(work->parameterWorks[entryIndex], scalar);
-                effParamWorkCallback3(work->parameterWorks[entryIndex], color);
+                dds3EffectPartSetArea(work->parameterWorks[entryIndex], scalar);
+                dds3EffectPartSetColor(work->parameterWorks[entryIndex], color);
             }
-            effParamWorkInvokeCallback(work->parameterWorks[entryIndex]);
+            dds3EffectPartDraw(work->parameterWorks[entryIndex]);
         }
     }
 
@@ -402,14 +402,14 @@ void effBattleUpdate(BattleEffect *work) {
     work->currentFrame++;
 }
 
-void effBattleSetScale(BattleEffect *effect, f32 scale) {
+void effBTLCutSetScale(BattleEffect *effect, f32 scale) {
     s32 i;
     s32 count;
 
     if (scale != 1.0f) {
         count = effect->list->count;
         for (i = 0; i < count; i++) {
-            effParamWorkCallback1(effect->parameterWorks[i], scale);
+            dds3EffectPartSetScale(effect->parameterWorks[i], scale);
         }
     }
 }
@@ -436,7 +436,7 @@ s32 effBattleHasActiveKind(BattleEffect *owner) {
 
 /* Rebuild each cloned bank's parameter work, resolving shared-entry references
  * and preserving disabled descriptors. */
-void effBattleRebuildClonedParameterBanks(SoundMixer *destination, SoundMixer *source) {
+void effBTLPartCreate(SoundMixer *destination, SoundMixer *source) {
     u8 *sourceBytes = (u8 *)source;
     s32 bankIndex;
 
@@ -454,13 +454,13 @@ void effBattleRebuildClonedParameterBanks(SoundMixer *destination, SoundMixer *s
                         u32 sourceBank = index / 0x3C;
                         u32 sourceEntryIndex = index % 0x3C;
                         EffBattleEntry *sourceEntry = &destination->banks[sourceBank].list.entries[sourceEntryIndex];
-                        EffParamWork *duplicatedWork = effParamWorkDuplicate(sourceEntry->value.work);
+                        EffParamWork *duplicatedWork = dds3EffectPartCopy(sourceEntry->value.work);
                         u16 sourceKind = sourceEntry->paramKind;
 
                         entry->value.work = duplicatedWork;
                         entry->paramKind = sourceKind;
                     } else {
-                        entry->value.work = effParamWorkCreate(entry->paramKind, sourceBytes + entry->value.sourceOffset);
+                        entry->value.work = dds3EffectPartCreate(entry->paramKind, sourceBytes + entry->value.sourceOffset);
                     }
                     if (entry->paramKind == EFF_PARAM_WORK_KIND_EFFECT_NODE) {
                         entry->zeroKindCount++;
@@ -474,7 +474,7 @@ void effBattleRebuildClonedParameterBanks(SoundMixer *destination, SoundMixer *s
 }
 
 /* Release each initialized parameter-work entry in the mixer's two banks. */
-void effBattleReleaseParameterBanks(SoundMixer *mixer) {
+void effBTLPartDelete(SoundMixer *mixer) {
     s32 bankIndex;
 
     for (bankIndex = 0; bankIndex < 2; bankIndex++) {
@@ -486,7 +486,7 @@ void effBattleReleaseParameterBanks(SoundMixer *mixer) {
 
             do {
                 if (entry->paramKind != 0xFFFE) {
-                    effDispatchParameterDataAndFreeWork(entry->value.work);
+                    dds3EffectPartDelete(entry->value.work);
                 }
                 entry++;
                 remaining--;

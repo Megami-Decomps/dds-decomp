@@ -68,6 +68,6 @@ typedef char SdfSceneNode_textures_at_0x1A0[
     ((u32)&((SdfSceneNode *)0)->texturePackets == 0x1A0) ? 1 : -1];
 
 void sdfGrSetStdDrawEnv(SdfSceneNode *node, SdfGraphObj *view);
-void sdfRefreshSceneNodePackets(SdfSceneNode *node, s32 bufferIndex);
+void sdfGrStdDrawEnvPredraw(SdfSceneNode *node, s32 bufferIndex);
 
 #endif

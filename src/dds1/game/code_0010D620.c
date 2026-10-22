@@ -5,28 +5,28 @@
 #include "mdl_flag_api.h"
 
 
-extern s32 scrReadIntParameter(s32 idx);
+extern s32 scrGetIntPara(s32 idx);
 
 
 extern s8 D_00398629[];
 
-u32 scrGetProcedureAddress(s32 procedureIndex) {
+u32 scrGetProcedureCodeAddress(s32 procedureIndex) {
     return scrCurrentContext->procedures[procedureIndex].addr;
 }
 
-u32 scrGetLabelAddress(s32 labelIndex) {
+u32 scrGetLabelCodeAddress(s32 labelIndex) {
     return scrCurrentContext->labels[labelIndex].addr;
 }
 
-u32 scrGetProgramCounter(void) {
+u32 scrGetCodePointer(void) {
     return scrCurrentContext->pc;
 }
 
-void scrSetProgramCounter(u32 address) {
+void scrSetCodePointer(u32 address) {
     scrCurrentContext->pc = address;
 }
 
-u32 scrGetTimer(void) {
+u32 scrGetScriptTimer(void) {
     return scrCurrentContext->timer;
 }
 
@@ -34,19 +34,19 @@ u32 scrGetCommandTimer(void) {
     return scrCurrentContext->cmdTimer;
 }
 
-u32 scrGetWindow(void) {
+u32 scrGetMessageHandle(void) {
     return scrCurrentContext->resourceIndex;
 }
 
-ScrData *scrGetCurrentContext(void) {
+ScrData *scrGetScriptHandle(void) {
     return scrCurrentContext;
 }
 
-void *scrGetCurrentCommandWork(void) {
+void *scrGetData(void) {
     return scrCurrentContext->actor;
 }
 
-s32 scrHasNegativeMarkerDuringCommandTimer(void) {
+s32 scrCommand_KEY(void) {
     if (scrGetCommandTimer() == 0) {
         return 0;
     }
@@ -57,27 +57,27 @@ s32 scrHasNegativeMarkerDuringCommandTimer(void) {
 }
 
 /* Evaluate a script-supplied model flag and push the test result. */
-u32 scrOpcodeTestModelFlag(void) {
+u32 scrCommand_BIT_CHK(void) {
     s32 value;
 
-    value = scrReadIntParameter(0);
-    value = mdlFlagTest(value);
-    scrSetIntegerReturnValue(value);
+    value = scrGetIntPara(0);
+    value = evtBitCheck(value);
+    scrSetIntReturnValue(value);
     return 1;
 }
 
-u32 scrOpcodeSetModelFlag(void) {
+u32 scrCommand_BIT_ON(void) {
     s32 flagId;
 
-    flagId = scrReadIntParameter(0);
-    mdlFlagSet(flagId);
+    flagId = scrGetIntPara(0);
+    evtBitOn(flagId);
     return 1;
 }
 
-u32 scrOpcodeClearModelFlag(void) {
+u32 scrCommand_BIT_OFF(void) {
     s32 flagId;
 
-    flagId = scrReadIntParameter(0);
-    mdlFlagClear(flagId);
+    flagId = scrGetIntPara(0);
+    evtBitOff(flagId);
     return 1;
 }

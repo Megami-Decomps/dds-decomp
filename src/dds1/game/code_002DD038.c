@@ -16,31 +16,31 @@ extern s32 (*sdfMotionCommandHandlers[])(void *object, s32 command, s32 targetIn
 extern SdfMotionBindingDispatch sdfMotionSlotPairDispatch;
 
 /* Direct secondary-text sampling has an intentionally empty capturePrevious callback. */
-void sdfMotionCaptureSecondaryTextNoOp(void) {
+void sdfMotCLBK_matMultiUvw2InitBlend(void) {
 }
 
-s32 sdfDispatchMotionCommand(void *object, s32 command, s32 targetIndex) {
+s32 sdfMotGenMorphNode(void *object, s32 command, s32 targetIndex) {
     return sdfMotionCommandHandlers[(u16)command](object, command, targetIndex);
 }
 
 /* Bind the selected pair of model slot indices and weights. */
-void sdfSelectMotionPointerEntry(SdfMotionSlotPairBinding *destination,
+void sdfMotGenMorphInit(SdfMotionSlotPairBinding *destination,
                                  Motion *motion, SdfMotionBindingDispatch *dispatch, s32 entryIndex) {
-    sdfSetMotionPointerPair((SdfMotionBindingHead *)&destination->keys,
+    sdfMotionNodeBaseInit((SdfMotionBindingHead *)&destination->keys,
                             motion, dispatch);
     destination->current = &((SdfSlotEntry *)motion->owner->slotPairs->buffer)[entryIndex];
 }
 
-SdfMotionSlotPairBinding *sdfAllocateBoundMotionPointerEntry(Motion *motion,
+SdfMotionSlotPairBinding *sdfMotGenMorph(Motion *motion,
                                                            s32 unused, s32 entryIndex) {
     SdfMotionSlotPairBinding *entry = sdfChipAllocDirect(sizeof(SdfMotionSlotPairBinding));
 
-    sdfSelectMotionPointerEntry(entry, motion, &sdfMotionSlotPairDispatch, entryIndex);
+    sdfMotGenMorphInit(entry, motion, &sdfMotionSlotPairDispatch, entryIndex);
     return entry;
 }
 
 /* Sample the supplied frame and interpolate, retaining separate keys when IDs differ. */
-void sdfBlendMotionKeys(SdfMotionSlotPairBinding *motion, f32 frame) {
+void sdfMotCLBK_morphSeek(SdfMotionSlotPairBinding *motion, f32 frame) {
     SdfMotionKeyInterval sample;
     SdfSlotPair *out;
     s32 firstId;
@@ -50,7 +50,7 @@ void sdfBlendMotionKeys(SdfMotionSlotPairBinding *motion, f32 frame) {
     f32 weight;
     f32 inverse;
 
-    sdfFindMotionKeyInterval(&motion->keys, &sample, frame);
+    sdfMotGetKey(&motion->keys, &sample, frame);
     firstId = ((SdfSlotPair *)sample.firstKey)->index;
     secondId = ((SdfSlotPair *)sample.secondKey)->index;
     firstValue = ((SdfSlotPair *)sample.firstKey)->weight;
@@ -72,7 +72,7 @@ void sdfBlendMotionKeys(SdfMotionSlotPairBinding *motion, f32 frame) {
 }
 
 /* Blend sampled and retained weights, keeping at most two model slots. */
-void sdfBlendMotionSlotPairWeights(SdfMotionSlotPairBinding *motion, f32 frame, f32 amount) {
+void sdfMotCLBK_morphBlendSeek(SdfMotionSlotPairBinding *motion, f32 frame, f32 amount) {
     SdfMotionKeyInterval sample;
     SdfSlotEntry *current;
     SdfSlotPair *previous;
@@ -85,7 +85,7 @@ void sdfBlendMotionSlotPairWeights(SdfMotionSlotPairBinding *motion, f32 frame, 
     f32 contributionWeight;
     f32 secondWeight;
 
-    sdfFindMotionKeyInterval(&motion->keys, &sample, frame);
+    sdfMotGetKey(&motion->keys, &sample, frame);
     firstId = ((SdfSlotPair *)sample.firstKey)->index;
     secondId = ((SdfSlotPair *)sample.secondKey)->index;
     firstValue = ((SdfSlotPair *)sample.firstKey)->weight;
@@ -153,97 +153,97 @@ void sdfBlendMotionSlotPairWeights(SdfMotionSlotPairBinding *motion, f32 frame, 
 }
 
 /* Preserve the complete current pair for the next weighted transition. */
-void sdfCopyPoseRecord(SdfMotionSlotPairBinding *motion) {
+void sdfMotCLBK_morphInitBlend(SdfMotionSlotPairBinding *motion) {
     motion->previous = *motion->current;
 }
 
 /* Matrix registers: vf28-vf31 are the primary matrix, vf24-vf27 its
  * alternate bank, and vf20-vf23 a third bank copied between the two. */
 
-void sdfLoadPrimaryMatrixVU(void *matrix) {
+void LoadMatrix(void *matrix) {
     VU0_LOAD_MATRIX(matrix);
 }
 
-void sdfLoadAlternateMatrixVU(void *matrix) {
+void LoadMatrix_B(void *matrix) {
     VU0_LOAD_MATRIX_B(matrix);
 }
 
-void sdfStorePrimaryMatrixVU(void *matrix) {
+void StoreMatrix(void *matrix) {
     VU0_STORE_MATRIX(matrix);
 }
 
-void sdfStoreAlternateMatrixVU(void *matrix) {
+void StoreMatrix_B(void *matrix) {
     VU0_STORE_MATRIX_B(matrix);
 }
 
-void sdfCopyPrimaryToAlternateMatrixVU(void) {
+void CopyMatrixAtoB(void) {
     VU0_MOVE_VF(vf24, vf28);
     VU0_MOVE_VF(vf25, vf29);
     VU0_MOVE_VF(vf26, vf30);
     VU0_MOVE_VF(vf27, vf31);
 }
 
-void sdfCopyPrimaryToTertiaryMatrixVU(void) {
+void CopyMatrixAtoC(void) {
     VU0_MOVE_VF(vf20, vf28);
     VU0_MOVE_VF(vf21, vf29);
     VU0_MOVE_VF(vf22, vf30);
     VU0_MOVE_VF(vf23, vf31);
 }
 
-void sdfCopyAlternateToPrimaryMatrixVU(void) {
+void CopyMatrixBtoA(void) {
     VU0_MOVE_VF(vf28, vf24);
     VU0_MOVE_VF(vf29, vf25);
     VU0_MOVE_VF(vf30, vf26);
     VU0_MOVE_VF(vf31, vf27);
 }
 
-void sdfCopyAlternateToTertiaryMatrixVU(void) {
+void CopyMatrixBtoC(void) {
     VU0_MOVE_VF(vf20, vf24);
     VU0_MOVE_VF(vf21, vf25);
     VU0_MOVE_VF(vf22, vf26);
     VU0_MOVE_VF(vf23, vf27);
 }
 
-void sdfCopyTertiaryToPrimaryMatrixVU(void) {
+void CopyMatrixCtoA(void) {
     VU0_MOVE_VF(vf28, vf20);
     VU0_MOVE_VF(vf29, vf21);
     VU0_MOVE_VF(vf30, vf22);
     VU0_MOVE_VF(vf31, vf23);
 }
 
-void sdfCopyTertiaryToAlternateMatrixVU(void) {
+void CopyMatrixCtoB(void) {
     VU0_MOVE_VF(vf24, vf20);
     VU0_MOVE_VF(vf25, vf21);
     VU0_MOVE_VF(vf26, vf22);
     VU0_MOVE_VF(vf27, vf23);
 }
 
-void sdfSetPrimaryIdentityMatrixVU(void) {
+void LoadIdentity(void) {
     VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
 }
 
-void sdfSetAlternateIdentityMatrixVU(void) {
+void LoadIdentity_B(void) {
     VU0_SET_UNIT_MATRIX(vf24, vf25, vf26, vf27);
 }
 
 /* libvu0: sceVu0UnitMatrix */
-void sdfWriteIdentityMatrixToMemory(void *dst) {
+void StoreIdentity(void *dst) {
     EE_MMI_UNIT_MATRIX(dst);
 }
 
 /* Transpose the four VU rows; EE MMI interleave is needed for packed vectors. */
 /* libvu0: sceVu0TransposeMatrix, register form (vf28-vf31 in and out) */
-void sdfTransposeVuMatrix(void) {
+void DiagMatrix(void) {
     VU0_MATRIX4_TRANSPOSE();
 }
 
 /* vu0 routine: rigid inverse of vf28-vf31 (transpose the 3x3, translation = -(R^T * t)) */
-void sdfInvertRigidVuTransform(void) {
+void ReverseMatrix(void) {
     VU0_MATRIX4_INVERT_RIGID();
 }
 
 /* vu0 routine: inverse of vf28-vf31 with per-axis scale removed (transpose, rows / |row|^2, translation = -(R^T * t)) */
-void sdfInvertScaledVuTransform(void) {
+void InversMatrix(void) {
     VU0_MATRIX4_INVERT_SCALED();
 }
 
@@ -251,7 +251,7 @@ void sdfInvertScaledVuTransform(void) {
 /* Rotation loaders build the matrix in a volatile scratch array: it is read
  * only by the lqc2 asm through its address, and retail stores its four
  * elements in program order. */
-void sdfVuLoadRotationMatrixX(f32 angle) {
+void SetRotateMatrixX(f32 angle) {
     volatile f32 m[4][4] __attribute__((aligned(16)));
     f32 c = cosf(angle);
     f32 s = sinf(angle);
@@ -264,7 +264,7 @@ void sdfVuLoadRotationMatrixX(f32 angle) {
     VU0_LOAD_MATRIX((f32 *)m);
 }
 
-void sdfVuLoadRotationMatrixZ(f32 angle) {
+void SetRotateMatrixY(f32 angle) {
     volatile f32 m[4][4] __attribute__((aligned(16)));
     f32 c = cosf(angle);
     f32 s = sinf(angle);
@@ -277,7 +277,7 @@ void sdfVuLoadRotationMatrixZ(f32 angle) {
     VU0_LOAD_MATRIX((f32 *)m);
 }
 
-void sdfVuLoadRotationMatrixY(f32 angle) {
+void SetRotateMatrixZ(f32 angle) {
     volatile f32 m[4][4] __attribute__((aligned(16)));
     f32 c = cosf(angle);
     f32 s = sinf(angle);
@@ -292,7 +292,7 @@ void sdfVuLoadRotationMatrixY(f32 angle) {
 
 
 
-void sdfBuildRotationMatrixFromAxisAngle(f32 angle, const RwV3d *axis, RwMatrix *matrix) {
+void StoreRotateMatrixAxis(f32 angle, const RwV3d *axis, RwMatrix *matrix) {
     f32 normalizedAxis[4];
     f32 x;
     f32 y;

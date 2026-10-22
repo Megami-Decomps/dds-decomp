@@ -71,7 +71,7 @@ compiler flag or artificial producer is added to make either body match.
 
 ## Radius-damped ring allocation
 
-`effScatterCreateDampedRing` (DDS1 0x00173B48 / DDS2 0x0017B7A0)
+`effPCPWhirlwind2PolyCreate` (DDS1 0x00173B48 / DDS2 0x0017B7A0)
 matches 560 bytes per title. The existing 0x194-byte instance owns a contiguous
 array of 0x28-byte particles. Its 0x13C-byte serialized parameter copy starts at
 0x40 and ends exactly at the particles pointer at 0x17C. The allocation size
@@ -96,7 +96,7 @@ retain their existing native preconditions.
 
 ## Basic ring allocation
 
-`effPcpScatterCreateParticleInstance` (DDS1 0x001730D0 / DDS2 0x0017AD28)
+`effPCPWhirlwindPolyCreate` (DDS1 0x001730D0 / DDS2 0x0017AD28)
 matches 536 bytes per title. The 0x138-byte parameter block occupies
 [0x40, 0x178) inside the existing 0x18C-byte owner, followed by the runtime
 fields and its contiguous 0x28-byte particles. The constructor uses the same
@@ -111,7 +111,7 @@ count/alignment assumptions retain the established contracts.
 
 ## Two-color ring allocation
 
-`effScatterCreateTwoColorRing` (DDS1 0x00174680 / DDS2 0x0017C2D8)
+`effPCPWhirlwind3PolyCreate` (DDS1 0x00174680 / DDS2 0x0017C2D8)
 matches 512 bytes per title. The existing 0x19C-byte owner contains its
 0x144-byte parameter block at [0x40, 0x184), then runtime fields, followed
 by 0x28-byte particles. The complete byte copy and pointer owner retain the
@@ -126,7 +126,7 @@ No shared header, owner layout or primitive changes are required.
 
 ## Plain ring allocation
 
-`effPcpScatterCreatePlainInstance` (DDS1 0x00175230 / DDS2 0x0017CE88)
+`effPCPWwSpherePolyCreate` (DDS1 0x00175230 / DDS2 0x0017CE88)
 matches 496 bytes per title. The existing 0x13C-byte owner contains its
 0xE8-byte parameter block at [0x40, 0x128), then runtime fields, followed
 by 0x28-byte plain particles. Their age is at offset 0x0C; the other ring

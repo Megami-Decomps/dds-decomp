@@ -124,16 +124,16 @@ typedef char EffBlurScaleSlotsOffsetCheck[((u32)&((EffBlurScaleWork *)0)->slots 
 
 /* Reset burst state and selected quad fields from the owning work parameters;
  * corner coordinates remain for the slot's updater to recompute. */
-void effBlurResetScaleSlot(EffBlurScaleWork *work, EffBlurScaleSlot *slot);
+void dds3EffectRipBlurPartInit(EffBlurScaleWork *work, EffBlurScaleSlot *slot);
 /* Allocate the native effect draw packet from its height and GS flags. */
-SdfDrawPacket *effCreateSizedDrawPacket(s32 height, s32 flags);
+SdfDrawPacket *effPkt2DAllocTriStrip(s32 height, s32 flags);
 
 /* Factories accept the serialized parameter prefix used by effect callbacks. */
-EffBlurScatterWork *effBlurCreateScatterWork(EffBlurScatterParams *params);
-void effBlurReleaseFirstResource(EffBlurScatterWork *work);
+EffBlurScatterWork *dds3EffectDistortionBlurCreate(EffBlurScatterParams *params);
+void dds3EffectDistortionBlurDelete(EffBlurScatterWork *work);
 void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work);
-EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *params);
-void effBlurReleaseSecondResource(EffBlurScaleWork *work);
+EffBlurScaleWork *dds3EffectRippleBlurCreate(EffBlurScaleParams *params);
+void dds3EffectRippleBlurDelete(EffBlurScaleWork *work);
 
 void effAppendBlurRectanglePackets(void *list, const EffBlurQuad *source, u8 fixedPointCoordinates);
 void effDrawBlurSource(const EffBlurQuad *source, struct SdfTex *resource, u8 fixedPointCoordinates);
@@ -141,14 +141,14 @@ void effDrawBlurRectangle(const EffBlurQuad *source);
 void effBlurDrawFramebufferQuad(const EffBlurQuad *source);
 void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner);
 /* Borrow the live textured-blur owner; callers do not acquire or release it. */
-EffBlurTemplate *effGetCh71Work(void);
+EffBlurTemplate *Eve_PartialMultiBlurGetParams(void);
 /* Borrow the live scatter-blur owner; callers do not acquire or release it. */
-EffBlurScatterWork *effGetCh72Work(void);
-EffBlurTemplate *effCloneBlurTemplate(const EffBlurTemplateBody *body);
-void effCopyTexturedBlurParameters(EffBlurTemplateBody *parameters);
-void effCopyFilterBlurParameters(EffBlurScatterParams *parameters);
-void effCopyStaggeredBlurParameters(EffBlurScaleParams *parameters);
-void effReleaseBlurTemplate(EffBlurTemplate *owner);
+EffBlurScatterWork *Eve_DistortionBlurGetParams(void);
+EffBlurTemplate *dds3EffectPartialMultiBlurCreate(const EffBlurTemplateBody *body);
+void Eve_PartialMultiBlurSetParam(EffBlurTemplateBody *parameters);
+void Eve_DistortionBlurSetParam(EffBlurScatterParams *parameters);
+void Eve_RippleBlurSetParam(EffBlurScaleParams *parameters);
+void dds3EffectPartialMultiBlurDelete(EffBlurTemplate *owner);
 void effDrawBlurPixelRectWithResource(EffBlurTemplate *owner);
 
 #endif

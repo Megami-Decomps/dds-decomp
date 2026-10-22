@@ -59,7 +59,7 @@ EvtLoadedRecord *evtCreateLoadedRecord(u32 sourceAddress) {
     offset += sizeof(header);
     source = (u8 *)sourceAddress + offset;
     handle = sdfMemAllocDirect(header.dataBytes + sizeof(EvtLoadedRecord));
-    record = (EvtLoadedRecord *)sdfMemoryGetBlockAddress(handle);
+    record = (EvtLoadedRecord *)sdfMemGetPtr(handle);
     record->recordCount = header.recordCount;
     records = (u8 *)record + sizeof(EvtLoadedRecord);
     record->handle = handle;
@@ -69,7 +69,7 @@ EvtLoadedRecord *evtCreateLoadedRecord(u32 sourceAddress) {
     memcpy((u8 *)record + offset, source, header.dataBytes);
     source += header.dataBytes;
     relocationHandle = sdfMemAllocDirect(header.relocationBytes);
-    relocations = (u32 *)sdfMemoryGetBlockAddress(relocationHandle);
+    relocations = (u32 *)sdfMemGetPtr(relocationHandle);
     memset(relocations, 0, header.relocationBytes);
     memcpy(relocations, source, header.relocationBytes);
     dds3ApplyRelocationOffsets(records, (u32)records, relocations, header.relocationBytes);
@@ -87,13 +87,13 @@ void mtrLoadMantraNodePositions(void) {
     struct FileRequest *request;
 
     evtPrintDeveloperConsoleMessage("Mantra Table Load [/facility/data/mtrMantraBlockData.tbl]\n");
-    request = fileQueueDefaultCallbackRequest("/facility/data/mtrMantraBlockData.tbl");
-    while (!fileIsRequestReadyInCurrentMode(request)) {
+    request = fileLoad("/facility/data/mtrMantraBlockData.tbl");
+    while (!pacFileCheckEnd(request)) {
     }
-    mnuLoadMantraNodePositionTable((u32)fileGetLoadedDataAddress(request));
+    mnuLoadMantraNodePositionTable((u32)fileGetLoadPtr(request));
     mnuRebuildMantraCategoryAvailability();
-    sdfMemFreeDirect(fileGetResourceHandle(request));
-    filePollEntryCleanup(request);
+    sdfMemFreeDirect(fileGetMemHandle(request));
+    fileHandleFree(request);
 }
 
 void mnuReleaseMantraNodePositionTable(void);
@@ -182,7 +182,7 @@ typedef struct EvtMantraWork {
  * The existing initializer is called only for nonzero initialValue. */
 EvtMantraWork *evtAllocateMantraSelectionWork(s32 initialValue, s32 mode) {
     struct SdfMemBlock *allocation = sdfMemAllocDirect(MNU_MANTRA_SELECTION_WORK_BYTES);
-    EvtMantraWork *work = (EvtMantraWork *)sdfMemoryGetBlockAddress(allocation);
+    EvtMantraWork *work = (EvtMantraWork *)sdfMemGetPtr(allocation);
 
     memset(work, 0, MNU_MANTRA_SELECTION_WORK_BYTES);
     work->allocation = allocation;

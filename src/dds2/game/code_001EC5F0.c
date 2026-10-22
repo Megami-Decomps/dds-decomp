@@ -6,7 +6,7 @@
 extern void btlAdvanceSkillCameraCursor(BtlLinkedCommand *, BtlCamState *);
 extern void btlInitializeRandomCameraCursor(BtlLinkedCommand *, BtlCamState *);
 extern void btlAdvanceCommandCursor(BtlLinkedCommand *, BtlCamState *);
-extern void btlResetUnitEffectVector(BtlLinkedCommand *, BtlCamState *);
+extern void fldCamSetChase(BtlLinkedCommand *, BtlCamState *);
 extern void btlBuildGroupFramingCameraPose(BtlCamState *, BtlCamState *);
 extern void btlFrameEarliestAnimatedUnitCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
@@ -54,7 +54,7 @@ void btlUpdateLinkedActionEffectVectorByTarget(BtlLinkedCommand *action) {
         return;
     }
     if (action->actionKind != 0x10) {
-        btlResetUnitEffectVector(action, &action->camera);
+        fldCamSetChase(action, &action->camera);
         return;
     }
 }

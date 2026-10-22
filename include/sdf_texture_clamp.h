@@ -12,6 +12,6 @@ enum {
 };
 
 struct SdfTex;
-void sdfTexSetClampMode(struct SdfTex *texture, SdfTextureClampMode mode);
+void sdfTexSetWrapMode(struct SdfTex *texture, SdfTextureClampMode mode);
 
 #endif /* SDF_TEXTURE_CLAMP_H */

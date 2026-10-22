@@ -31,7 +31,7 @@ typedef char SdfGsTexturedTrianglePacket_size_must_be_0x60[
 typedef char SdfGsTexturedTrianglePacket_drawing_at_0x10[
     ((u32)&((SdfGsTexturedTrianglePacket *)0)->drawing == 0x10) ? 1 : -1];
 
-void sdfBuildPacket114(SdfGsTexturedTrianglePayload *packet, s32 color, s32 primitive,
+void sdfPrimSetFt3Elem(SdfGsTexturedTrianglePayload *packet, s32 color, s32 primitive,
     s32 x0, s32 y0, s32 u0, s32 v0,
     s32 x1, s32 y1, s32 u1, s32 v1,
     s32 x2, s32 y2, s32 u2, s32 v2, s32 depth);
@@ -64,7 +64,7 @@ typedef char SdfGsTexturedQuadPacket_size_must_be_0x70[
 typedef char SdfGsTexturedQuadPacket_drawing_at_0x10[
     ((u32)&((SdfGsTexturedQuadPacket *)0)->drawing == 0x10) ? 1 : -1];
 
-void sdfWriteTexturedQuadPacket(SdfGsTexturedQuadPayload *packet, s32 color, s32 primitive,
+void sdfPrimSetFt4Elem(SdfGsTexturedQuadPayload *packet, s32 color, s32 primitive,
     s32 x0, s32 y0, s32 u0, s32 v0,
     s32 x1, s32 y1, s32 u1, s32 v1,
     s32 x2, s32 y2, s32 u2, s32 v2,

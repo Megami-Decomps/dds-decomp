@@ -17,13 +17,13 @@ typedef char EffTrackPolyListCountOffsetCheck[
 typedef char EffTrackPolyListHandleOffsetCheck[
     ((u32)&((EffTrackPolyList *)0)->handle == 0x08) ? 1 : -1];
 
-EffTrackPolyList *effTrackPolyCreateModelWorkList(EffTrackPolyParams *params, u32 count);
-void effTrackPolyDestroyModelWorkList(EffTrackPolyList *list);
+EffTrackPolyList *Eff_ModelTrackPolyListCreate(EffTrackPolyParams *params, u32 count);
+void Eff_ModelTrackPolyListDelete(EffTrackPolyList *list);
 /* Read two caller-owned 128-bit endpoint vectors. */
-void effTrackPolyPushIndexedWorkEndpoints(EffTrackPolyList *list, s32 index, const u128 *endpoints);
-void effTrackPolyResetIndexedWork(EffTrackPolyList *list, s32 index);
+void Eff_ModelTrackPolyListVertexSet(EffTrackPolyList *list, s32 index, const u128 *endpoints);
+void Eff_ModelTrackPolyListReset(EffTrackPolyList *list, s32 index);
 void effTrackPolySetIndexedColor(EffTrackPolyList *list, s32 index, u32 color);
-void effTrackPolyDrawModelWorkList(EffTrackPolyList *list);
-void parUpdateTrackPolygonCrossAxes(EffTrackPolyList *list, s32 index, u32 color);
+void Eff_ModelTrackPolyListDrawOnly(EffTrackPolyList *list);
+void dds3Particle_Track3Set(EffTrackPolyList *list, s32 index, u32 color);
 
 #endif

@@ -18,13 +18,13 @@ typedef char EffCubicBezierSlotLayoutAssert[
      (u32)&((EffCubicBezierSlot *)0)->t == 0x30 &&
      (u32)&((EffCubicBezierSlot *)0)->step == 0x34) ? 1 : -1];
 
-struct EffArrHdr *effAllocSlotArray(s32 count);
-void effMathReleaseWorkResource(struct EffArrHdr *work);
-s32 effMathStepBezierSlot(struct EffArrHdr *table, s32 slotIndex, f32 *out);
-s32 effMathStepBezierSlotDirect(EffCubicBezierSlot *slot, f32 *out);
+struct EffArrHdr *dds3Bezier4PCreate(s32 count);
+void dds3Bezier4PDelete(struct EffArrHdr *work);
+s32 dds3Bezier4PPartRun(struct EffArrHdr *table, s32 slotIndex, f32 *out);
+s32 nbCameraLerpVec(EffCubicBezierSlot *slot, f32 *out);
 void effMathResetBezierSlot(struct EffArrHdr *table, s32 slotIndex);
-EffCubicBezierSlot *effMathGetSlotAt(struct EffArrHdr *table, s32 slotIndex);
+EffCubicBezierSlot *dds3Bezier4PGetPart(struct EffArrHdr *table, s32 slotIndex);
 /* Blend packed RGBA8888 colors; t >= 1 returns colorB unchanged. */
-u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
+u32 effColorBlend(u32 colorA, u32 colorB, f32 t);
 
 #endif

@@ -235,7 +235,7 @@ u32 btlResolvePackedAiRoute(u32 route) {
     }
     count = last - first + 1;
     first--;
-    result = first + ((count * (sdfGetRand(NULL) >> 8)) >> 24);
+    result = first + ((count * (dds3GetRandA(NULL) >> 8)) >> 24);
     return result;
 }
 
@@ -610,7 +610,7 @@ s32 btlIsModelGateActiveForEligibleUnit(BtlUnit *unit) {
             return 0;
         }
     }
-    return mdlFlagTest(0x290) != 0;
+    return evtBitCheck(0x290) != 0;
 }
 
 /* Check an inclusive upper bound on active party-side units with bit 0x20 clear. */

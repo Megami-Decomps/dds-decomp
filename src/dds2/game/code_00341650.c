@@ -24,7 +24,7 @@
 #define SND_TRACK_SLOT_COUNT 13
 #define SND_IOP_BUFFER_ALIGNMENT 16
 
-void sndEnsureMidiBankResident(s32 trackId);
+void p2sdLoadSMGFile(s32 trackId);
 
 /* Sound command work block: header, 16 channels/buffers, 13 track slots. */
 extern SndWork sndMidiTrackState;
@@ -32,7 +32,7 @@ extern u32 sndReserveIopWorkMemory(s32 size);
 extern s8 sndSynchronousCommandMode;
 extern s32 D_004391EC;
 extern s32 sndStartIopCommandAndRpcWorkers(void);
-extern void sndCopyToIopAndWait(s32, void *, s32);
+extern void sdfSndTransToIOP(s32, void *, s32);
 
 extern SndRingPacket sndCommandRing[SND_COMMAND_RING_ENTRY_COUNT];
 extern u32 D_00438B90;
@@ -42,7 +42,7 @@ extern vu16 sndCommandWriteIndex;
 extern s32 sndCommandThreadId;
 extern s32 sndTryDispatchQueuedCommand(void);
 
-u32 sndQueueCommandPacket(u32 command, u32 channel, const void *packet, s32 payloadBytes) {
+u32 sdfSndSendCmd(u32 command, u32 channel, const void *packet, s32 payloadBytes) {
     s32 nextWriteIndex;
     s32 wakeAttemptsRemaining;
     SndRingPacket *entry;
@@ -82,13 +82,13 @@ u32 sndQueueCommandPacket(u32 command, u32 channel, const void *packet, s32 payl
 }
 
 /* Ignore the post-queue sequence; this native entry does not wait or update state. */
-void sndPostQueueCommandNoOp(u32 unused) {
+void sdfSndSyncCmd(u32 unused) {
 }
 
-u32 sndSendCommandPacket(u32 command, u32 channel, const void *packet, u32 size) {
-    u32 result = sndQueueCommandPacket(command, channel, packet, size);
+u32 sdfSndSendSyncCmd(u32 command, u32 channel, const void *packet, u32 size) {
+    u32 result = sdfSndSendCmd(command, channel, packet, size);
 
-    sndPostQueueCommandNoOp(result);
+    sdfSndSyncCmd(result);
     return result;
 }
 
@@ -96,7 +96,7 @@ u32 sndSendCommandPacket(u32 command, u32 channel, const void *packet, u32 size)
 extern SifDmaTransfer sndIopDmaTransfer;
 
 /* Transfer an EE buffer to IOP memory, retrying submission and waiting for completion. */
-void sndCopyToIopAndWait(s32 destination, void *source, s32 size) {
+void sdfSndTransToIOP(s32 destination, void *source, s32 size) {
     s32 dmaId;
     s32 delay;
 
@@ -135,7 +135,7 @@ void sndLoadIopSoundModules(void) {
         (info.mode & 0xF000) == 0x2000) {
         module = "pfs:/userirx/SDFSDMAN.IRX";
     }
-    sdfSendNamedResourceRequest(module, 0, NULL, NULL);
+    SdfIopFileRpc(module, 0, NULL, NULL);
 }
 
 void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
@@ -208,98 +208,98 @@ void sndInitializeIopSoundSystem(s32 unused, s32 header, s32 *bufferSizes, s32 b
     D_004391EC = sndReserveIopWorkMemory(0x8D0);
     sndMidiTrackState.eeWorkAddress = &sndMidiTrackState;
     sndMidiTrackState.eeWorkByteCount = 0x8D0;
-    sndCopyToIopAndWait(D_004391EC, &sndMidiTrackState, 0x8D0);
-    sndSendCommandPacket(0, 0, &D_004391EC, 4);
+    sdfSndTransToIOP(D_004391EC, &sndMidiTrackState, 0x8D0);
+    sdfSndSendSyncCmd(0, 0, &D_004391EC, 4);
     sndSynchronousCommandMode = 0;
 }
 
 /* Starts a track with the default 0x7f setting after preparing its identifier. */
 
-void sndStartTrackDefault(s32 trackId) {
+void p2sdPlayBGM(s32 trackId) {
     CmdPacket packet;
 
-    sndEnsureMidiBankResident(trackId);
+    p2sdLoadSMGFile(trackId);
     packet.trackId = trackId;
     packet.unk4 = 0;
     packet.setting = 0x7F;
-    sndQueueCommandPacket(0x20, 0, &packet, 0x10);
+    sdfSndSendCmd(0x20, 0, &packet, 0x10);
 }
 
 /* Sends a single-word command payload in a 16-byte packet. */
 
-void sndSendSingleWordControlPacket(u32 controlWord) {
+void p2sdSendStopCmd(u32 controlWord) {
     u32 packet[4];
 
     packet[0] = controlWord;
-    sndQueueCommandPacket(0x30, 0, packet, 0x10);
+    sdfSndSendCmd(0x30, 0, packet, 0x10);
 }
 
 /* Starts the alternate track command, leaving the other packet fields untouched. */
 
-void sndStartTrackAlternate(s32 trackId) {
+void p2sdResumeBgm(s32 trackId) {
     CmdPacket packet;
 
-    sndEnsureMidiBankResident(trackId);
+    p2sdLoadSMGFile(trackId);
     packet.trackId = trackId;
     packet.setting = 0x7F;
-    sndQueueCommandPacket(0x130, 0, &packet, 0x10);
+    sdfSndSendCmd(0x130, 0, &packet, 0x10);
 }
 
-void sndQueueSoundId(u32 soundId) {
+void p2sdStopSe(u32 soundId) {
     u32 packet[4];
 
     packet[0] = soundId;
-    sndQueueCommandPacket(0x30, 0, packet, 0x10);
+    sdfSndSendCmd(0x30, 0, packet, 0x10);
 }
 
-void sndEnsureMidiBankResident(s32 packedTrackId);
+void p2sdLoadSMGFile(s32 packedTrackId);
 
-void sndQueueNoPayloadCommand1A0(void) {
-    sndQueueCommandPacket(0x1a0, 0, 0, 0);
+void p2sdStopAllBgm(void) {
+    sdfSndSendCmd(0x1a0, 0, 0, 0);
 }
 
 void sndQueueNoPayloadCommand210(void) {
-    sndQueueCommandPacket(0x210, 0, 0, 0);
+    sdfSndSendCmd(0x210, 0, 0, 0);
 }
 
-void sndQueueNoPayloadCommand40(void) {
-    sndQueueCommandPacket(0x40, 0, 0, 0);
+void p2sdStopAllSe(void) {
+    sdfSndSendCmd(0x40, 0, 0, 0);
 }
 
 /* Dispatch the command family selected by the caller, without a payload. */
 void sndDispatchCommandWithoutPayload(u32 command) {
-    sndQueueCommandPacket(command | 0x50, 0, 0, 0);
+    sdfSndSendCmd(command | 0x50, 0, 0, 0);
 }
 
 
 /* Send a NUL-terminated command string; the transport excludes the terminator. */
-u32 sndSubmitTextCommandPayload(s32 command, char *text) {
+u32 sdfSndLoadHDFile(s32 command, char *text) {
     u32 length = strlen(text);
 
-    return sndSendCommandPacket(command | 0x70, 0, text, length);
+    return sdfSndSendSyncCmd(command | 0x70, 0, text, length);
 }
 
-u32 sndSubmitTextCommandPayloadWithCommandBits60(s32 command, char *text) {
+u32 sdfSndLoadBDFile(s32 command, char *text) {
     u32 length = strlen(text);
 
-    return sndSendCommandPacket(command | 0x60, 0, text, length);
+    return sdfSndSendSyncCmd(command | 0x60, 0, text, length);
 }
 
 /* Send text with command bit 0x80; payload length excludes its NUL terminator. */
-u32 sndSubmitTextCommandPayloadWithCommandBits80(s32 command, char *text) {
+u32 sdfSndLoadSQFile(s32 command, char *text) {
     s32 cmd = command;
     u32 len = strlen(text);
-    return sndSendCommandPacket(cmd | 0x80, 0, text, len);
+    return sdfSndSendSyncCmd(cmd | 0x80, 0, text, len);
 }
 
 /* Send a 12-byte sequence command; the trailing struct word is not transmitted. */
-void sndSetSequenceVolumePan(s32 trackId, s32 volume, s32 pan) {
+void p2sdPlaySE(s32 trackId, s32 volume, s32 pan) {
     SndSequenceVolumePanPacket packet;
-    sndEnsureMidiBankResident(trackId);
+    p2sdLoadSMGFile(trackId);
     packet.trackId = trackId;
     packet.volume = volume;
     packet.pan = (u8)pan;
-    sndQueueCommandPacket(0x90, 0, &packet, 0xC);
+    sdfSndSendCmd(0x90, 0, &packet, 0xC);
 }
 
 /* Map a wrapped listener-relative angle and distance onto sequence volume/pan. */
@@ -332,10 +332,10 @@ void sndSetSpatialSequenceVolumePan(s32 trackId, f32 angle, f32 distance) {
     if (distance > 1.0f) {
         volume /= distance * 0.333f + 1.0f;
     }
-    sndSetSequenceVolumePan(trackId, (s32)(volume * 127.0f), pan);
+    p2sdPlaySE(trackId, (s32)(volume * 127.0f), pan);
 }
 
-void sndEnsureMidiBankResident(s32 trackId);
+void p2sdLoadSMGFile(s32 trackId);
 
 extern SndTrackSlot sndTrackBalanceEntries[];
 
@@ -350,11 +350,11 @@ extern u32 D_004391D0;
 extern void InvalidDCache(void *a0, void *a1);
 
 static inline u32 sndSendCommand(u32 command, const void *packet, u32 size) {
-    return sndSendCommandPacket(command, 0, packet, size);
+    return sdfSndSendSyncCmd(command, 0, packet, size);
 }
 
 /* Converts world coordinates to the sound engine's one-tenth scale. */
-void sndSendSpatialPosition(s32 trackId, s32 radiusInHundreds, f32 worldX, f32 worldY, f32 worldZ) {
+void p2sdPlaySe3DEx(s32 trackId, s32 radiusInHundreds, f32 worldX, f32 worldY, f32 worldZ) {
     u32 packet[8];
 
     packet[0] = trackId;
@@ -362,13 +362,13 @@ void sndSendSpatialPosition(s32 trackId, s32 radiusInHundreds, f32 worldX, f32 w
     packet[2] = (s32)(worldX * 0.1f);
     packet[3] = (s32)(worldY * 0.1f);
     packet[4] = (s32)(worldZ * 0.1f);
-    sndSendCommandPacket(0x170, 0, packet, 0x20);
+    sdfSndSendSyncCmd(0x170, 0, packet, 0x20);
 }
 
 extern SndListenerState sndCachedListenerState;
 
 /* Scale six world-space values and send them to the sound engine when they changed. */
-void sndUpdateScaledListenerState(f32 firstPointX, f32 firstPointY, f32 firstPointZ,
+void p2sdSetStandPos(f32 firstPointX, f32 firstPointY, f32 firstPointZ,
                                  f32 secondPointX, f32 secondPointY, f32 secondPointZ) {
     SndListenerState state;
 
@@ -381,7 +381,7 @@ void sndUpdateScaledListenerState(f32 firstPointX, f32 firstPointY, f32 firstPoi
     if (sndCachedListenerState.scaledValues[0] != state.scaledValues[0] || sndCachedListenerState.scaledValues[1] != state.scaledValues[1] ||
         sndCachedListenerState.scaledValues[2] != state.scaledValues[2] || sndCachedListenerState.scaledValues[3] != state.scaledValues[3] ||
         sndCachedListenerState.scaledValues[4] != state.scaledValues[4] || sndCachedListenerState.scaledValues[5] != state.scaledValues[5]) {
-        sndSendCommandPacket(0x160, 0, &state, 0x20);
+        sdfSndSendSyncCmd(0x160, 0, &state, 0x20);
         sndCachedListenerState = state;
     }
 }
@@ -408,7 +408,7 @@ s32 sndFindPackedTrackLoadStatus(s32 packed) {
 extern s32 (*fileIdleUpdateCallback)(void);
 
 /* Make sure the MIDI bank named by the packed track id is resident, loading it if not. */
-void sndEnsureMidiBankResident(s32 packed) {
+void p2sdLoadSMGFile(s32 packed) {
     char name[0x10];
     char path[0x100];
     s32 status = sndFindPackedTrackLoadStatus(packed);
@@ -419,14 +419,14 @@ void sndEnsureMidiBankResident(s32 packed) {
         id = packed >> 16;
         sprintf(name, "MIDI%04X.SMG", id);
         mnuBuildSoundResourcePath(path, name);
-        sndSendCommandPacket(0xA0, 0, path, strlen(path) + 1);
+        sdfSndSendSyncCmd(0xA0, 0, path, strlen(path) + 1);
         sndRequestedMidiBankId = id;
         break;
     case 1:
         break;
     case 2:
         do {
-            sdfSleepWithAlarm(2);
+            sdfDelayThread(2);
             if (fileIdleUpdateCallback != NULL) {
                 fileIdleUpdateCallback();
             }
@@ -447,7 +447,7 @@ typedef struct SndFileRequestState {
     u32 data;
 } SndFileRequestState;
 extern SndFileRequestState D_0047B310;
-void func_003422F8(u32 data, s32 size) {
+void p2sdSetPcmBuffer(u32 data, s32 size) {
     u32 *packet;
 
     D_0047B310.size = size;
@@ -456,7 +456,7 @@ void func_003422F8(u32 data, s32 size) {
     if (data != 0 && size > 0) {
         packet = &D_004391D0;
         *packet = data;
-        sndSendCommandPacket(0x1B0, 0, packet, 4);
+        sdfSndSendSyncCmd(0x1B0, 0, packet, 4);
     }
     sndRequestedMidiBankId = -1;
 }
@@ -478,7 +478,7 @@ void sndReleaseMidiTrack(s32 id) {
     u32 packet[4];
     if (sndFindPackedTrackLoadStatus(id) != 0) {
         packet[0] = id;
-        sndSendCommandPacket(0xB0, 0, packet, 0x10);
+        sdfSndSendSyncCmd(0xB0, 0, packet, 0x10);
         id >>= 16;
         if (sndRequestedMidiBankId == id) {
             sndRequestedMidiBankId = -1;
@@ -543,21 +543,21 @@ void sndCopyGroupedMidiStateBytes(u8 *out) {
 
 /* Sends a prepared track identifier with the 0x17f setting. */
 
-void sndStartTrackExtended(s32 trackId) {
+void p2sdPlayBGMFade(s32 trackId) {
     CmdPacket packet;
 
-    sndEnsureMidiBankResident(trackId);
+    p2sdLoadSMGFile(trackId);
     packet.trackId = trackId;
     packet.unk4 = 0;
     packet.setting = 0x17F;
-    sndQueueCommandPacket(0x20, 0, &packet, 0x10);
+    sdfSndSendCmd(0x20, 0, &packet, 0x10);
 }
 
-void sndReleaseTrackHandle(u32 trackHandle) {
+void p2sdStopBGM(u32 trackHandle) {
     u32 packet[4];
 
     packet[0] = trackHandle;
-    sndQueueCommandPacket(0xd0, 0, packet, 0x10);
+    sdfSndSendCmd(0xd0, 0, packet, 0x10);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00341650", sndRequestedMidiBankId);

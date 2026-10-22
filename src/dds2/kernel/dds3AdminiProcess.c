@@ -9,7 +9,7 @@
 extern char dds3AdminTaskName[];
 
 /* Return the named administration task's user state; the task must exist. */
-AdminWork *dds3GetAdminTaskWork(void) {
+AdminWork *GetAdminiProcessData(void) {
     return (AdminWork *)dds3GetProcessData(dds3SearchProcessName(dds3AdminTaskName));
 }
 
@@ -17,7 +17,7 @@ AdminWork *dds3GetAdminTaskWork(void) {
 u32 dds3GetAdminTaskValue(void) {
     AdminWork *work;
 
-    work = dds3GetAdminTaskWork();
+    work = GetAdminiProcessData();
     return work->value;
 }
 
@@ -33,13 +33,13 @@ u32 dds3GetAdminTaskValue(void) {
  * Mode and stored byte count retain their byte truncation (256 bytes records zero).
  * Previous data is released before copying; the history flag marks the old slot
  * when the requested mode is activated. */
-void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory) {
+void dds3AdminiCallSequence(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory) {
     AdminWork *work;
     void *previousRequestData;
     u32 flags;
 
     if (requestData == NULL || dataBytes <= DDS3_ADMIN_REQUEST_DATA_MAX_BYTES) {
-        work = dds3GetAdminTaskWork();
+        work = GetAdminiProcessData();
         previousRequestData = work->requestData;
         work->requestedMode = requestedMode;
         flags = work->flags;
@@ -72,50 +72,50 @@ void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBy
 extern s32 dds3AdminPollModeCompletion(KwlnTask *task);
 
 /* Configure administrative state from three caller-supplied parameters. */
-void dds3AdminSubmitMarkedRequest(s32 requestedMode, void *requestData, u32 dataBytes)
+void dds3AdminiOverwriteSequence(s32 requestedMode, void *requestData, u32 dataBytes)
 {
     AdminWork* work;
 
-    dds3AdminSubmitModeRequest(requestedMode, requestData, dataBytes, 0);
-    work = dds3GetAdminTaskWork();
+    dds3AdminiCallSequence(requestedMode, requestData, dataBytes, 0);
+    work = GetAdminiProcessData();
     work->flags |= 8;
 }
 
 /* Mark the admin state with its second independent control flag. */
-void dds3AdminSetControlFlag(void)
+void dds3AdminiExitSequence(void)
 {
     AdminWork* work;
 
-    work = dds3GetAdminTaskWork();
+    work = GetAdminiProcessData();
     work->flags |= 2;
 }
 
-s8 dds3AdminGetActiveMode(void)
+s8 dds3AdminiGetActiveSequence(void)
 {
-    return dds3GetAdminTaskWork()->activeMode;
+    return GetAdminiProcessData()->activeMode;
 }
 
-s8 dds3AdminGetRequestedMode(void)
+s8 dds3AdminiGetNextSequence(void)
 {
-    return dds3GetAdminTaskWork()->requestedMode;
+    return GetAdminiProcessData()->requestedMode;
 }
 
 /* Read the signed sample immediately before the ring buffer's write index. */
-s8 dds3AdminReadPreviousSignedSample(void)
+s8 dds3AdminiGetPrevSequence(void)
 {
     AdminWork* work;
 
-    work = dds3GetAdminTaskWork();
+    work = GetAdminiProcessData();
     return work->signedHistory[(work->historyIndex + 7) & 7];
 }
 
 /* Read the corresponding unsigned sample from the previous ring slot;
  * its callers read the zero-extended sample as a word. */
-u32 dds3AdminReadPreviousUnsignedSample(void)
+u32 dds3AdminiGetPrevHistoryFlag(void)
 {
     AdminWork* work;
 
-    work = dds3GetAdminTaskWork();
+    work = GetAdminiProcessData();
     return work->unsignedHistory[(work->historyIndex + 7) & 7];
 }
 
@@ -165,7 +165,7 @@ s32 dds3AdminActivateRequestedMode(KwlnTask *task) {
 /* Run the mode's destroy callback; a non-negative result is stored (+1) as
    the transition delay and the mode cleared. Return the next update address
    as a signed scheduler control word, or zero on failure. */
-s32 dds3AdminPollModeDestruction(KwlnTask *task) {
+s32 dds3AdminiEndCheck(KwlnTask *task) {
     AdminWork *work = (AdminWork *)dds3GetProcessData(task);
     s32 activeMode = work->activeMode;
     s32 (*destroy)(void);
@@ -217,19 +217,19 @@ s32 dds3AdminPollModeCompletion(KwlnTask *task) {
             }
         }
         if ((work->flags & 1) == 0) {
-            dds3AdminSubmitModeRequest(0, 0, 0, 0);
+            dds3AdminiCallSequence(0, 0, 0, 0);
         }
         work->flags &= ~2;
     }
     if ((work->flags & 1) != 0 && work->requestedMode >= 0) {
-        return (s32)dds3AdminPollModeDestruction;
+        return (s32)dds3AdminiEndCheck;
     }
     return 0;
 }
 
 /* Run the mode's destroy callback (the row's second pointer), then release the
  * attached data block and the task's AdminWork block. */
-void dds3AdminReleaseTaskWork(KwlnTask *task) {
+void dds3AdminiNeoShutdown(KwlnTask *task) {
     AdminWork *work = (AdminWork *)dds3GetProcessData(task);
     s32 activeMode = work->activeMode;
 

@@ -74,7 +74,7 @@ void mtrUpdateGridPropagation(MtrGrid *grid) {
         if (grid->unk14 < grid->unk16) {
             mtrSpawnGridPropagationCells(grid, NULL, 1);
         }
-        grid->remainingDelay = grid->delayRange * sdfGetRandFloat(0) + 1.0f;
+        grid->remainingDelay = grid->delayRange * dds3GetRandFloatA(0) + 1.0f;
     } else {
         grid->remainingDelay--;
     }
@@ -87,7 +87,7 @@ void mtrDrawGridPropagationCells(s32 x, s32 y, s32 z, s32 alpha, MtrGrid *grid, 
 
     for (i = 0; i < grid->count; i++, cell++) {
         if (cell->state != 0) {
-            f32 fade = sdfSinPoly((f32)cell->remainingFrames / (f32)cell->durationFrames * 3.141592503f);
+            f32 fade = sdfSin((f32)cell->remainingFrames / (f32)cell->durationFrames * 3.141592503f);
             grid->draw(x + cell->x, y + cell->y, z, (s32)((f32)alpha * fade), grid, flags, context);
         }
     }
@@ -136,9 +136,9 @@ MtrCell *mtrCreateGridPropagationCell(MtrGrid *grid, MtrCell *source, s8 mode) {
             cell->remainingFrames = cell->durationFrames = countdown;
         } else {
             s32 countdown;
-            f32 random = sdfGetRandFloat(NULL);
+            f32 random = dds3GetRandFloatA(NULL);
             cell->x = grid->originX + (s32)((f32)(grid->width / grid->cellWidth) * random) * grid->cellWidth;
-            random = sdfGetRandFloat(NULL);
+            random = dds3GetRandFloatA(NULL);
             cell->y = grid->originY + (s32)((f32)(grid->height / grid->cellHeight) * random) * grid->cellHeight;
             cell->remainingDepth = grid->initialDepth;
             cell->direction = 0;
@@ -164,7 +164,7 @@ void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode) {
         }
         break;
     case 2:
-        random = sdfGetRandFloat(0);
+        random = dds3GetRandFloatA(0);
         if (random < 0.8f) {
             cell = mtrCreateGridPropagationCell(grid, source, 0);
             if (cell == NULL) {
@@ -180,7 +180,7 @@ void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode) {
         }
         break;
     case 3:
-        if (sdfGetRandFloat(0) < 0.8f) {
+        if (dds3GetRandFloatA(0) < 0.8f) {
             cell = mtrCreateGridPropagationCell(grid, source, 0);
             if (cell != NULL) {
                 cell->state = mode;
@@ -228,16 +228,16 @@ struct SdfMemBlock *mtrMantraEventBitPush(void) {
     s32 i;
 
     allocation = sdfMemAllocDirect(0x76);
-    data = (s8 *)sdfMemoryGetBlockAddress(allocation);
+    data = (s8 *)sdfMemGetPtr(allocation);
     memset(data, 0, 0x76);
     for (i = 0; i < 0x70; i++) {
-        if (mdlFlagTest(i + 0x920)) {
+        if (evtBitCheck(i + 0x920)) {
             *data = 1;
         }
         data++;
     }
     for (i = 0; i < 6; i++) {
-        if (mdlFlagTest(i + 0x9A0)) {
+        if (evtBitCheck(i + 0x9A0)) {
             *data = 1;
         }
         data++;
@@ -249,21 +249,21 @@ struct SdfMemBlock *mtrMantraEventBitPush(void) {
 
 void mtrMantraEventBitPop(struct SdfMemBlock *allocation) {
     s32 i;
-    s8 *data = (s8 *)sdfMemoryGetBlockAddress(allocation);
+    s8 *data = (s8 *)sdfMemGetPtr(allocation);
 
     for (i = 0; i < 0x70; i++) {
         if (*data != 0) {
-            mdlFlagSet(i + 0x920);
+            evtBitOn(i + 0x920);
         } else {
-            mdlFlagClear(i + 0x920);
+            evtBitOff(i + 0x920);
         }
         data++;
     }
     for (i = 0; i < 6; i++) {
         if (*data != 0) {
-            mdlFlagSet(i + 0x9A0);
+            evtBitOn(i + 0x9A0);
         } else {
-            mdlFlagClear(i + 0x9A0);
+            evtBitOff(i + 0x9A0);
         }
         data++;
     }
@@ -297,10 +297,10 @@ void mtrMantraEventBitReset(void) {
     s32 i;
 
     for (i = 0; i < 0x70; i++) {
-        mdlFlagClear(i + 0x920);
+        evtBitOff(i + 0x920);
     }
     for (i = 0; i < 6; i++) {
-        mdlFlagClear(i + 0x9A0);
+        evtBitOff(i + 0x9A0);
     }
     mnuClearCampResourceFlagEntries();
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraEventBitReset()]*****************\n");
@@ -313,8 +313,8 @@ void mtrRefreshMantraStateForUnit2(void) {
     record.unitId = 2;
     mtrRecomputeMantraFlagsForPartyUnit(&record);
     mnuSynchronizeMantraModelFlags(0);
-    if (mdlFlagTest(0x9A0)) {
-        mdlFlagSet(0x9A1);
+    if (evtBitCheck(0x9A0)) {
+        evtBitOn(0x9A1);
     }
 }
 
@@ -325,8 +325,8 @@ void mtrRefreshMantraStateForUnit1(void) {
     record.unitId = 1;
     mtrRecomputeMantraFlagsForPartyUnit(&record);
     mnuSynchronizeMantraModelFlags(1);
-    if (mdlFlagTest(0x9A1)) {
-        mdlFlagSet(0x9A0);
+    if (evtBitCheck(0x9A1)) {
+        evtBitOn(0x9A0);
     }
 }
 

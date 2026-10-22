@@ -37,32 +37,32 @@ extern PanelHold itfHeldPanelCursor;
 
 extern PanelEntry itfWindowSlots[];
 
-extern void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
-extern u32 scrGetWindow(void);
+extern void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock);
+extern u32 scrGetMessageHandle(void);
 extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
-extern void itfMesResetWindow(s32 window);
-extern void itfScaleVectors(DrawColorRec *output, s32 scaleX, s32 scaleY, s32 scaleZ, s32 w, const TextVector *input, s32 count);
+extern void itfMesMngRequestSelectRelease(s32 window);
+extern void itfMiscSetRatioRGB(DrawColorRec *output, s32 scaleX, s32 scaleY, s32 scaleZ, s32 w, const TextVector *input, s32 count);
 extern TextVector itfPanelColorTemplates[];
 extern TextVector D_003B4548[];
 extern TextVector itfPanelGradientColorTemplate[];
 extern TextVector itfPanelGradientColorPair[];
-extern void itfDrawQuadFlat4(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, SdfListHead *command);
+extern void itfMiscDrawRectanglePrim(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, SdfListHead *command);
 extern u8 D_004365C8[8];
 extern u8 D_004365D0[8];
-extern void itfSendTablePacket(SdfListHead *command, s32 index, s32 flag);
-extern void itfEmitQuadListWide(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, SdfListHead *command);
+extern void itfMiscDrawAlphaPrim(SdfListHead *command, s32 index, s32 flag);
+extern void itfMiscDrawTriangleStripPrim(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, SdfListHead *command);
 extern u8 D_004365D8[8];
 extern u8 D_004365E0[8];
 extern void itfDrawThreePanelBorderBands(PanelRect *bounds, u32 *color, u32 tail, s32 borderWidth, SdfListHead *command);
 extern u32 D_003B4760[];
 #include "sdf_packet_alloc.h"
-extern u32 sdfConsFinalizePacketHeader(u32 packetAddress, s32 packetBytes);
-extern s32 scrReadIntParameter(s32);
+extern u32 sdf2DMakeStdPacket(u32 packetAddress, s32 packetBytes);
+extern s32 scrGetIntPara(s32);
 extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern u8 D_003B45E8[], D_003B4600[], D_003B4618[];
 extern u8 D_003B4630[], D_003B4648[], D_003B4660[];
 extern u8 D_004365A8[8], D_004365B0[8];
-extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, SdfListHead *);
+extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, SdfListHead *);
 extern u8 D_003B4670[];
 extern u8 D_003B4680[];
 extern u8 D_004365B8[8];
@@ -70,13 +70,13 @@ extern u8 D_004365C0[8];
 
 
 /* Invoke the indexed panel handler; panel and kind are trusted. */
-void itfPanelDispatchHandler(UiSprite *panel, SdfListHead *list) {
+void itfPnlDrawTag(UiSprite *panel, SdfListHead *list) {
     itfPanelHandlers[panel->kind](panel, list);
 }
 
 /* Emit top/bottom vertices for four columns; collapse overlapping inner columns to the midpoint.
    Coordinates and inset remain in the renderer's native integer units. */
-void itfPanelSetFourColumnVertices(DrawVertex *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexNormal(DrawVertex *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 columnX[ITF_PANEL_COLUMN_COUNT];
     s32 columnIndex;
 
@@ -101,7 +101,7 @@ void itfPanelSetFourColumnVertices(DrawVertex *vertices, s32 x0, s32 y0, s32 x1,
 extern s32 D_003B44D8[4];
 
 /* Emit the outer frame grid, then the table-spaced top/bottom edge rows. */
-void itfBuildPanelBorderVertexGrid(DrawVertex *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexMesWin(DrawVertex *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[ITF_PANEL_COLUMN_COUNT];
     s32 ys[4];
     s32 i;
@@ -145,7 +145,7 @@ void itfBuildPanelBorderVertexGrid(DrawVertex *vertices, s32 x0, s32 y0, s32 x1,
 }
 
 /* Emit the outer frame grid, then the close top/bottom edge rows. */
-void itfPanelSetInsetFrameVertices(DrawVertex *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexSelWin(DrawVertex *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[ITF_PANEL_COLUMN_COUNT];
     s32 ys[4];
     s32 i;
@@ -189,7 +189,7 @@ void itfPanelSetInsetFrameVertices(DrawVertex *vertices, s32 x0, s32 y0, s32 x1,
 }
 
 /* Write the rectangle corners in top-left, top-right, bottom-right, bottom-left order. */
-void itfPanelSetRectVerts(DrawVertex *v, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexPlain(DrawVertex *v, s32 x0, s32 y0, s32 x1, s32 y1) {
     DrawVertex *p;
     v->x = x0;
     v->y = y0;
@@ -205,7 +205,7 @@ void itfPanelSetRectVerts(DrawVertex *v, s32 x0, s32 y0, s32 x1, s32 y1) {
 }
 
 /* Write two rows of three columns; the middle column is the right edge minus a fixed strip width. */
-void itfSetPanelCornerGrid(DrawVertex *v, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexLeftFade(DrawVertex *v, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 columnX[ITF_PANEL_CORNER_COLUMN_COUNT];
     s32 rowY[ITF_PANEL_ROW_COUNT];
     s32 rowIndex;
@@ -227,7 +227,7 @@ void itfSetPanelCornerGrid(DrawVertex *v, s32 x0, s32 y0, s32 x1, s32 y1) {
 
 /* Write four fixed horizontal columns with inset top/bottom coordinates.
    x0 and x1 are intentionally unused; do not replace the fixed horizontal positions. */
-void itfSetPanelInsetVertexColumns(UiSpriteBandPayload *base, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexFacility(UiSpriteBandPayload *base, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 columnX[ITF_PANEL_COLUMN_COUNT];
     s32 rowY[ITF_PANEL_ROW_COUNT];
     DrawVertex *vertices = base->vertices;
@@ -250,7 +250,7 @@ void itfSetPanelInsetVertexColumns(UiSpriteBandPayload *base, s32 x0, s32 y0, s3
 
 /* Populate RGBA rows at bytes 0x40/0x50; the first row is transparent.
    The existing vertex-typed view addresses the same color records as the quad consumer. */
-void itfPanelSetVertexPairs(DrawVertex *panelData, s32 red, s32 green, s32 blue, s32 alpha) {
+void CreateColorNormal(DrawVertex *panelData, s32 red, s32 green, s32 blue, s32 alpha) {
     DrawVertex *colorRow = &panelData[8];
     colorRow->x = red;
     colorRow->y = green;
@@ -264,37 +264,37 @@ void itfPanelSetVertexPairs(DrawVertex *panelData, s32 red, s32 green, s32 blue,
 }
 
 /* Write the two color rows, then scale six template rows; the first fourth component is one. */
-void itfSetPanelColorAndAlphaVectors(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
+void CreateColorMesWin(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
     u32 *colorRow = (u32 *)(base + 0x140);
 
     panelSetVec4(colorRow, red, green, blue, 1);
     colorRow = (u32 *)(base + 0x150);
     panelSetVec4(colorRow, red, green, blue, alpha);
-    itfScaleVectors((DrawColorRec *)(base + 0x160), red, green, blue, alpha, itfPanelColorTemplates, 6);
+    itfMiscSetRatioRGB((DrawColorRec *)(base + 0x160), red, green, blue, alpha, itfPanelColorTemplates, 6);
 }
 
 /* Write the two color rows, then scale four template rows; the first fourth component is one. */
-void itfSetPanelColorVectors(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
+void CreateColorSelWin(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
     u32 *colorRow = (u32 *)(base + 0x100);
 
     panelSetVec4(colorRow, red, green, blue, 1);
     colorRow = (u32 *)(base + 0x110);
     panelSetVec4(colorRow, red, green, blue, alpha);
-    itfScaleVectors((DrawColorRec *)(base + 0x120), red, green, blue, alpha, D_003B4548, 4);
+    itfMiscSetRatioRGB((DrawColorRec *)(base + 0x120), red, green, blue, alpha, D_003B4548, 4);
 }
 
 /* Set the base color, one alpha-scaled gradient row, and two rows at full color scale. */
-void itfSetPanelGradientColor(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
+void CreateColorPlain(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
     u32 *colorRow = (u32 *)(base + 0x20);
 
     panelSetVec4(colorRow, red, green, blue, alpha);
-    itfScaleVectors((DrawColorRec *)(base + 0x30), red, green, blue, alpha, itfPanelGradientColorTemplate, 1);
-    itfScaleVectors((DrawColorRec *)(base + 0x40), red, green, blue, ITF_PANEL_FULL_COLOR_SCALE, itfPanelGradientColorPair, 2);
+    itfMiscSetRatioRGB((DrawColorRec *)(base + 0x30), red, green, blue, alpha, itfPanelGradientColorTemplate, 1);
+    itfMiscSetRatioRGB((DrawColorRec *)(base + 0x40), red, green, blue, ITF_PANEL_FULL_COLOR_SCALE, itfPanelGradientColorPair, 2);
 }
 
 /* Set the four color words at byte 0x20, consumed as a color record by the quad path.
    Preserve the existing vertex-typed access and signed arguments. */
-void itfPanelSetRectSpan(DrawVertex *panelData, s32 red, s32 green, s32 blue, s32 alpha) {
+void CreateColorPera1(DrawVertex *panelData, s32 red, s32 green, s32 blue, s32 alpha) {
     DrawVertex *colorRow = &panelData[4];
     colorRow->x = red;
     colorRow->y = green;
@@ -304,7 +304,7 @@ void itfPanelSetRectSpan(DrawVertex *panelData, s32 red, s32 green, s32 blue, s3
 
 /* Populate RGBA rows at bytes 0x30/0x40; the first row is transparent.
    The six-index quad path consumes its color rows from this same base offset. */
-void itfPanelInitRects30(DrawVertex *panelData, s32 red, s32 green, s32 blue, s32 alpha) {
+void CreateColorLeftFade(DrawVertex *panelData, s32 red, s32 green, s32 blue, s32 alpha) {
     DrawVertex *colorRow = &panelData[6];
     colorRow->x = red;
     colorRow->y = green;
@@ -320,7 +320,7 @@ void itfPanelInitRects30(DrawVertex *panelData, s32 red, s32 green, s32 blue, s3
 
 
 /* Set both panel colors to the same blue tint with zero alpha. */
-void itfPanelSetBlueTint(UiSpriteBandPayload *panel) {
+void CreateColorFacility(UiSpriteBandPayload *panel) {
     u32 *colorRow = panel->colors[0].components;
     colorRow[0] = 0x73;
     colorRow[1] = 0x87;
@@ -337,20 +337,20 @@ extern u8 D_003B45C8[];
 extern u8 D_003B45D8[];
 
 /* Draw the panel's three flat quads from one vertex/color buffer; each quad uses its own 4-byte index rows. */
-void itfDrawIndexedPanelFlatQuads(UiSprite *panel, SdfListHead *command) {
+void DrawNormal(UiSprite *panel, SdfListHead *command) {
     PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 4;
     s32 quadIndex;
 
     colors[1].alpha = panel->alpha;
     for (quadIndex = 0; quadIndex < ITF_PANEL_WIDE_PASS_COUNT; quadIndex++) {
-        itfDrawQuadFlat4(drawBuffer, colors, &D_003B45C8[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], &D_003B45D8[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], panel->renderValue, command);
+        itfMiscDrawRectanglePrim(drawBuffer, colors, &D_003B45C8[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], &D_003B45D8[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], panel->renderValue, command);
     }
 }
 
 /* Update seven alpha words, then emit three wide and six side strips.
    The first color row is deliberately excluded from the alpha update. */
-void itfDrawSevenColorPanelQuads(UiSprite *panel, SdfListHead *command) {
+void DrawMesWin(UiSprite *panel, SdfListHead *command) {
     PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 21;
     s32 alpha = panel->alpha;
@@ -361,16 +361,16 @@ void itfDrawSevenColorPanelQuads(UiSprite *panel, SdfListHead *command) {
     }
     colors = drawBuffer + 20;
     for (rowIndex = 0; rowIndex < ITF_PANEL_WIDE_PASS_COUNT; rowIndex++) {
-        itfEmitQuadListWide(drawBuffer, colors, &D_003B45E8[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_003B4600[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, panel->renderValue, command);
+        itfMiscDrawTriangleStripPrim(drawBuffer, colors, &D_003B45E8[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_003B4600[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, panel->renderValue, command);
     }
     for (rowIndex = 0; rowIndex < ITF_PANEL_SEVEN_SIDE_PASS_COUNT; rowIndex++) {
-        itfEmitQuadListA(drawBuffer + 8 + rowIndex * 2, colors, D_004365A8, &D_003B4618[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->renderValue, command);
+        itfMiscDrawLineStripPrim(drawBuffer + 8 + rowIndex * 2, colors, D_004365A8, &D_003B4618[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->renderValue, command);
     }
 }
 
 /* Update five alpha words, then emit three wide and two side strips.
    The first color row is deliberately excluded from the alpha update. */
-void itfDrawFiveColorPanelQuads(UiSprite *panel, SdfListHead *command) {
+void DrawSelWin(UiSprite *panel, SdfListHead *command) {
     PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 17;
     s32 alpha = panel->alpha;
@@ -381,14 +381,14 @@ void itfDrawFiveColorPanelQuads(UiSprite *panel, SdfListHead *command) {
     }
     colors = drawBuffer + 16;
     for (rowIndex = 0; rowIndex < ITF_PANEL_WIDE_PASS_COUNT; rowIndex++) {
-        itfEmitQuadListWide(drawBuffer, colors, &D_003B4630[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_003B4648[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, panel->renderValue, command);
+        itfMiscDrawTriangleStripPrim(drawBuffer, colors, &D_003B4630[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_003B4648[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, panel->renderValue, command);
     }
     for (rowIndex = 0; rowIndex < ITF_PANEL_FIVE_SIDE_PASS_COUNT; rowIndex++) {
-        itfEmitQuadListA(drawBuffer + 8 + rowIndex * 2, colors, D_004365B0, &D_003B4660[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->renderValue, command);
+        itfMiscDrawLineStripPrim(drawBuffer + 8 + rowIndex * 2, colors, D_004365B0, &D_003B4660[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->renderValue, command);
     }
 }
 
-void itfDrawPanelWithThreeInsetQuads(UiSprite *panel, SdfListHead *command) {
+void DrawPlain(UiSprite *panel, SdfListHead *command) {
     DrawVertex vertices[12];
     PktRec *buf = (PktRec *)panel->payload;
     PktRec *colors = buf + 2;
@@ -410,36 +410,36 @@ void itfDrawPanelWithThreeInsetQuads(UiSprite *panel, SdfListHead *command) {
         out[3].y = input[3].y - yOffset;
     }
 
-    itfDrawQuadFlat4(buf, colors, D_004365B8, D_004365C0, panel->renderValue, command);
+    itfMiscDrawRectanglePrim(buf, colors, D_004365B8, D_004365C0, panel->renderValue, command);
     for (i = 0; i < 3; i++) {
-        itfEmitQuadListA(vertices, colors, &D_003B4670[i * 5], &D_003B4680[i * 5], 5, panel->renderValue, command);
+        itfMiscDrawLineStripPrim(vertices, colors, &D_003B4670[i * 5], &D_003B4680[i * 5], 5, panel->renderValue, command);
     }
 }
 
 /* Update the first color row's alpha and emit one indexed quad. */
-void itfDrawPanelQuadWithCommand(UiSprite *panel, SdfListHead *command) {
+void DrawPera1(UiSprite *panel, SdfListHead *command) {
     PktRec *colors = (PktRec *)panel->payload + 2;
 
     colors->alpha = panel->alpha;
-    itfDrawQuadFlat4(panel->payload, colors, D_004365C8, D_004365D0, panel->renderValue, command);
+    itfMiscDrawRectanglePrim(panel->payload, colors, D_004365C8, D_004365D0, panel->renderValue, command);
 }
 
 /* Bracket the six-index panel draw with table-state two and its native reset to zero. */
-void itfEmitPanelQuadPacket(UiSprite *panel, SdfListHead *command) {
+void DrawLeftFade(UiSprite *panel, SdfListHead *command) {
     PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 3;
 
     colors[1].alpha = panel->alpha;
-    itfSendTablePacket(command, 2, 0);
-    itfEmitQuadListWide(drawBuffer, colors, D_004365D8, D_004365E0, 6, panel->renderValue, command);
-    itfSendTablePacket(command, 0, 0);
+    itfMiscDrawAlphaPrim(command, 2, 0);
+    itfMiscDrawTriangleStripPrim(drawBuffer, colors, D_004365D8, D_004365E0, 6, panel->renderValue, command);
+    itfMiscDrawAlphaPrim(command, 0, 0);
 }
 
 /*BEGIN itfDrawFramedPanelWithTextureStrips*/
 extern u32 D_003B4690[];
 extern DrawColorRec D_003B4700;
 extern DrawColorRec D_003B4710;
-extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
+extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 
 /* Draw the framed panel: two bordered bands, then six texture-bound strips whose
  * rectangles are rebuilt from the live panel bounds. */
@@ -468,7 +468,7 @@ void itfDrawFramedPanelWithTextureStrips(UiSprite *panel, SdfListHead *command) 
     rect.y0 = panel->top + 0x48;
     rect.x1 = panel->left + 0xB40;
     rect.y1 = panel->bottom;
-    itfQueueTextureBoundQuadPacket(&rect, &D_003B4700, color, panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim(&rect, &D_003B4700, color, panel->renderValue, payload->texture, 0, command);
     if (panel->scrollSpan > 0 && panel->screenY != panel->top) {
         alpha = 0x80 - ((panel->screenY - panel->top) << 7) / panel->scrollSpan;
     } else {
@@ -479,42 +479,42 @@ void itfDrawFramedPanelWithTextureStrips(UiSprite *panel, SdfListHead *command) 
     rect.y0 = panel->top;
     rect.x1 = panel->right + 0x140;
     rect.y1 = panel->bottom - 0x48;
-    itfQueueTextureBoundQuadPacket(&rect, &D_003B4710, &D_003B4690[12], panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim(&rect, &D_003B4710, &D_003B4690[12], panel->renderValue, payload->texture, 0, command);
     D_003B4690[11] = panel->alpha * 70 / 128;
     rect.x0 = panel->left - 0x140;
     rect.y0 = panel->top - 0xB8;
     rect.x1 = panel->left + 0x1A40;
     rect.y1 = panel->top + 8;
-    itfQueueTextureBoundQuadPacket(&rect, &D_003B4710 - 1, &D_003B4690[8], panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim(&rect, &D_003B4710 - 1, &D_003B4690[8], panel->renderValue, payload->texture, 0, command);
     rect.x0 = panel->left + 0x8B0;
     rect.y0 = panel->top - 0x10;
     rect.x1 = panel->left + 0xFC0;
     rect.y1 = panel->top;
-    itfQueueTextureBoundQuadPacket(&rect, &D_003B4710 - 3, color, panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim(&rect, &D_003B4710 - 3, color, panel->renderValue, payload->texture, 0, command);
     x = rect.x1;
     rect.x0 = x;
     rect.x1 = x + 0x1040;
-    itfQueueTextureBoundQuadPacket(&rect, &D_003B4710 - 2, color, panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim(&rect, &D_003B4710 - 2, color, panel->renderValue, payload->texture, 0, command);
     rect.x0 = panel->left + 0x1020;
     rect.y0 = panel->bottom - 0x10;
     rect.x1 = panel->left + 0x1730;
     rect.y1 = panel->bottom;
-    itfQueueTextureBoundQuadPacket(&rect, &D_003B4710 - 4, color, panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim(&rect, &D_003B4710 - 4, color, panel->renderValue, payload->texture, 0, command);
     x = rect.x0;
     rect.x1 = x;
     rect.x0 = x - 0x1220;
-    itfQueueTextureBoundQuadPacket(&rect, &D_003B4710 - 2, color, panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim(&rect, &D_003B4710 - 2, color, panel->renderValue, payload->texture, 0, command);
 }
 /*END itfDrawFramedPanelWithTextureStrips*/
 
 extern DrawColorRec D_003B4720;
 extern DrawColorRec D_003B4730;
-extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
-extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
+extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
+extern void itfMiscDrawSpritePrim2(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
 
 /* Bind the texture for the left cap, then draw the center and reversed right
  * cap. Insets are captured before the first submission; Y bounds are live. */
-void itfDrawThreePieceTexturedPanel(UiSprite *panel, SdfListHead *command) {
+void DrawSpkWin2(UiSprite *panel, SdfListHead *command) {
     DrawVertex rect[2];
     DrawColorRec *color = (DrawColorRec *)&panel->red;
     UiSpriteTexturePayload *payload = (UiSpriteTexturePayload *)panel->payload;
@@ -525,20 +525,20 @@ void itfDrawThreePieceTexturedPanel(UiSprite *panel, SdfListHead *command) {
     rect[0].y = panel->top;
     rect[1].x = leftInset;
     rect[1].y = panel->bottom;
-    itfQueueTextureBoundQuadPacket(rect, &D_003B4720, color, panel->renderValue,
+    itfMiscDrawSpritePrim(rect, &D_003B4720, color, panel->renderValue,
                                   payload->texture, 0, command);
 
     rect[0].x = leftInset;
     rect[0].y = panel->top;
     rect[1].x = rightInset;
     rect[1].y = panel->bottom;
-    itfQueueColoredTexturedQuadPacket(rect, &D_003B4730, color, panel->renderValue, 0, command);
+    itfMiscDrawSpritePrim2(rect, &D_003B4730, color, panel->renderValue, 0, command);
 
     rect[0].x = panel->right;
     rect[0].y = panel->top;
     rect[1].x = rightInset;
     rect[1].y = panel->bottom;
-    itfQueueColoredTexturedQuadPacket(rect, &D_003B4720, color, panel->renderValue, 0, command);
+    itfMiscDrawSpritePrim2(rect, &D_003B4720, color, panel->renderValue, 0, command);
 }
 
 
@@ -551,7 +551,7 @@ extern DrawColorRec D_003B44A0;
 
 /* Draw the three inset flat quads, then split a tall texture into top, stretch
  * and bottom bands. The short path uses the live rectangle in the panel. */
-void itfDrawThreeBandPanelTexture(UiSprite *panel, SdfListHead *command) {
+void DrawFacility(UiSprite *panel, SdfListHead *command) {
     DrawVertex rect[2];
     UiSpriteBandPayload *payload = (UiSpriteBandPayload *)panel->payload;
     DrawVertex *vertices = payload->vertices;
@@ -562,7 +562,7 @@ void itfDrawThreeBandPanelTexture(UiSprite *panel, SdfListHead *command) {
 
     colors[1].components[3] = (panel->alpha * 0x20) >> 7;
     for (i = 0; i < 3; i++) {
-        itfDrawQuadFlat4(vertices, colors, &D_003B4740[i * 4],
+        itfMiscDrawRectanglePrim(vertices, colors, &D_003B4740[i * 4],
                         &D_003B4750[i * 4], panel->renderValue, command);
     }
     bottom = panel->bottom;
@@ -576,18 +576,18 @@ void itfDrawThreeBandPanelTexture(UiSprite *panel, SdfListHead *command) {
         rect[0].y = top;
         rect[1].x = panel->right;
         rect[1].y = topEnd;
-        itfQueueTextureBoundQuadPacket(rect, &D_003B4470, color, panel->renderValue,
+        itfMiscDrawSpritePrim(rect, &D_003B4470, color, panel->renderValue,
                                       payload->texture, 0, command);
         rect[0].y = topEnd;
         rect[1].y = bottomStart;
-        itfQueueTextureBoundQuadPacket(rect, &D_003B4480, color, panel->renderValue,
+        itfMiscDrawSpritePrim(rect, &D_003B4480, color, panel->renderValue,
                                       payload->texture, 0, command);
         rect[0].y = bottomStart;
         rect[1].y = panel->bottom;
-        itfQueueTextureBoundQuadPacket(rect, &D_003B4490, color, panel->renderValue,
+        itfMiscDrawSpritePrim(rect, &D_003B4490, color, panel->renderValue,
                                       payload->texture, 0, command);
     } else {
-        itfQueueTextureBoundQuadPacket(&panel->left, &D_003B44A0,
+        itfMiscDrawSpritePrim(&panel->left, &D_003B44A0,
                                       &panel->red, panel->renderValue,
                                       payload->texture, 0, command);
     }
@@ -607,21 +607,21 @@ void itfDrawTintedPanelRect(UiSprite *panel, SdfListHead *command) {
 }
 
 /* Append two GS A+D state writes: TEST_1 (0x47), then ALPHA_1 (0x42). */
-void itfAppendGsPanelStatePacket(SdfListHead *list) {
-    s32 packet = sdfAllocPacketAligned(ITF_PANEL_STATE_PACKET_BYTES);
-    u64 *stateWords = (u64 *)sdfConsFinalizePacketHeader(packet, ITF_PANEL_STATE_PACKET_BYTES);
+void DrawTestAlphaPrim(SdfListHead *list) {
+    s32 packet = sdfGrAllocPacketBuff(ITF_PANEL_STATE_PACKET_BYTES);
+    u64 *stateWords = (u64 *)sdf2DMakeStdPacket(packet, ITF_PANEL_STATE_PACKET_BYTES);
 
     stateWords[4] = 0x5101B;
     stateWords[5] = 0x47;
     stateWords[6] = 0x44;
     stateWords[7] = 0x42;
-    sdfAppendPacket(list, packet);
+    sdfDrawTagLink(list, packet);
 }
 
 /* Poll/start an entry: one ends the command, zero keeps waiting.
    A negative signed status is consumed by clearing it; positive status keeps waiting. */
-s32 itfPanelStartEntry(void) {
-    s32 window = scrGetWindow();
+s32 itfMesMngMessage(void) {
+    s32 window = scrGetMessageHandle();
     PanelRec *record;
     PanelRecSub *entryState;
     s32 entryIndex;
@@ -631,7 +631,7 @@ s32 itfPanelStartEntry(void) {
         return 1;
     }
     record = itfWindowSlots[window].ptr;
-    entryIndex = scrReadIntParameter(0);
+    entryIndex = scrGetIntPara(0);
     entryState = &record->sub24;
     status = entryState->status;
     if (status == 0) {
@@ -646,17 +646,17 @@ s32 itfPanelStartEntry(void) {
 }
 
 /* Forward this record's layout sprite address and the supplied value; index is unchecked. */
-void itfPanelEmitRecord(s32 windowIndex, s32 topDelta) {
-    itfAdvancePanelLayoutAndNotify(itfWindowSlots[windowIndex].ptr->layoutSprite, 0, topDelta, 0, 0, 0);
+void itfMesMngSetOffsetY1(s32 windowIndex, s32 topDelta) {
+    itfPnlSetPositionOffset(itfWindowSlots[windowIndex].ptr->layoutSprite, 0, topDelta, 0, 0, 0);
 }
 
 /* Return the signed byte entry status; this is separate from the option-block s16 status. */
-s8 itfPanelGetStatus(s32 windowIndex) {
+s8 itfMesMngGetPhase(s32 windowIndex) {
     return itfWindowSlots[windowIndex].ptr->sub24.status;
 }
 
 /* Store the signed byte entry status; index and payload pointer are trusted. */
-void itfPanelSetStatus(s32 windowIndex, s8 status) {
+void itfMesMngSetPhase(s32 windowIndex, s8 status) {
     itfWindowSlots[windowIndex].ptr->sub24.status = status;
 }
 
@@ -666,7 +666,7 @@ s32 itfPanelAcquireHold(void) {
     PanelHold *hold;
     s32 window;
 
-    window = scrGetWindow();
+    window = scrGetMessageHandle();
     if (window < 0) {
         return 1;
     }
@@ -675,7 +675,7 @@ s32 itfPanelAcquireHold(void) {
     hold->unk4 = -1;
     hold->entryEndFrame = -1;
     hold->queuedCount = 0;
-    itfMesSetWindowPageAndRefresh(window, 3, 0);
+    itfMesMngChangeWindowType(window, 3, 0);
     return 1;
 }
 
@@ -686,7 +686,7 @@ s32 itfPanelReleaseHold(void) {
     if (hold->window < 0) {
         return 1;
     }
-    itfMesCleanupWindow(hold->window, 1);
+    itfMesMngRequestMessageRelease(hold->window, 1);
     hold->window = -1;
     hold->unk4 = -1;
     hold->entryEndFrame = -1;
@@ -708,9 +708,9 @@ s32 itfCommandQueueHeldPanelEntry(void) {
     if (cursor->queuedCount >= ITF_PANEL_HOLD_CAPACITY) {
         return 1;
     }
-    first = scrReadIntParameter(0);
-    second = scrReadIntParameter(1);
-    third = scrReadIntParameter(2);
+    first = scrGetIntPara(0);
+    second = scrGetIntPara(1);
+    third = scrGetIntPara(2);
     cursor->items[cursor->queuedCount].second = first;
     cursor->items[cursor->queuedCount].first = second;
     cursor->items[cursor->queuedCount].third = third;
@@ -746,7 +746,7 @@ s32 itfStepHeldPanelMessages(void) {
         }
     }
     if (frame == itfHeldPanelCursor.entryEndFrame) {
-        itfMesCleanupWindow(itfHeldPanelCursor.window, 1);
+        itfMesMngRequestMessageRelease(itfHeldPanelCursor.window, 1);
         itfHeldPanelCursor.unk4 = itfHeldPanelCursor.entryEndFrame = -1;
     }
     if (frame >= latest && frame >= itfHeldPanelCursor.entryEndFrame) {
@@ -757,34 +757,34 @@ s32 itfStepHeldPanelMessages(void) {
 }
 
 
-s32 itfMesScriptWaitForOptionSelection(void) {
+s32 itfMesMngSelect(void) {
     s32 window;
     s32 entry;
     PanelRec *record;
     PanelOptionBlock *options;
 
-    window = scrGetWindow();
+    window = scrGetMessageHandle();
     if (window < 0) {
         return 1;
     }
     record = itfWindowSlots[window].ptr;
-    entry = scrReadIntParameter(0);
+    entry = scrGetIntPara(0);
     options = &record->options;
     if (options->status == 0) {
         itfMesBuildOptionList(window, entry);
     } else if (options->status < 0) {
         options->status = 0;
-        scrSetIntegerReturnValue(options->clearBitCount);
-        itfMesResetWindow(window);
+        scrSetIntReturnValue(options->clearBitCount);
+        itfMesMngRequestSelectRelease(window);
         return 1;
     }
     return 0;
 }
 
-extern void kwlnDrawSetDc8Second(u32);
-extern void kwlnDrawSetDc8First(u32);
-extern void kwlnDrawSetupDc8(s32);
-extern void kwlnDrawEnableDc8(s32);
+extern void dds3SetFilter2Para(u32);
+extern void dds3SetFilter2RGBA(u32);
+extern void dds3Filter2On(s32);
+extern void dds3Filter2Off(s32);
 extern s32 D_00438F28;
 
 /* Configure the fade on timer zero, wait thirty ticks, then consume a negative option status.
@@ -796,15 +796,15 @@ s32 itfCommandSelectOptionWithFade(void) {
     PanelRec *record;
     PanelOptionBlock *options;
 
-    window = scrGetWindow();
+    window = scrGetMessageHandle();
     if (window < 0) {
         return 1;
     }
     elapsedTicks = scrGetCommandTimer();
     if (scrGetCommandTimer() == 0) {
-        kwlnDrawSetDc8Second(0x44);
-        kwlnDrawSetDc8First(0x5E1C1C1C);
-        kwlnDrawSetupDc8(ITF_PANEL_MESSAGE_FADE_TICKS);
+        dds3SetFilter2Para(0x44);
+        dds3SetFilter2RGBA(0x5E1C1C1C);
+        dds3Filter2On(ITF_PANEL_MESSAGE_FADE_TICKS);
         D_00438F28 = -1;
         return 0;
     }
@@ -812,18 +812,18 @@ s32 itfCommandSelectOptionWithFade(void) {
         return 0;
     }
     if (elapsedTicks == ITF_PANEL_MESSAGE_FADE_TICKS) {
-        itfMesSetWindowPageAndRefresh(window, 3, 0);
+        itfMesMngChangeWindowType(window, 3, 0);
     } else if (D_00438F28 == -1) {
         record = itfWindowSlots[window].ptr;
-        entryIndex = scrReadIntParameter(0);
+        entryIndex = scrGetIntPara(0);
         options = &record->options;
         if (options->status == 0) {
             itfMesBuildOptionList(window, entryIndex);
         } else if (options->status < 0) {
             options->status = 0;
-            scrSetIntegerReturnValue(options->clearBitCount);
-            itfMesResetWindow(window);
-            kwlnDrawEnableDc8(ITF_PANEL_MESSAGE_EXIT_TICKS);
+            scrSetIntReturnValue(options->clearBitCount);
+            itfMesMngRequestSelectRelease(window);
+            dds3Filter2Off(ITF_PANEL_MESSAGE_EXIT_TICKS);
             D_00438F28 = 0;
             return 1;
         }
@@ -833,18 +833,18 @@ s32 itfCommandSelectOptionWithFade(void) {
 
 /* Return the option-block signed status word, not the separate entry status byte;
  * its callers read the sign-extended halfword as a word. */
-s32 itfPanelGetPairFirst(s32 windowIndex) {
+s32 itfMesMngGetSelPhase(s32 windowIndex) {
     return itfWindowSlots[windowIndex].ptr->options.status;
 }
 
 /* Store the option-block signed status word without validating the slot. */
-void itfPanelSetPairFirst(s32 windowIndex, s16 status) {
+void itfMesMngSetSelPhase(s32 windowIndex, s16 status) {
     itfWindowSlots[windowIndex].ptr->options.status = status;
 }
 
 /* Return the same signed word forwarded as the script result when an option completes;
  * its callers read the sign-extended halfword as a word. */
-s32 itfPanelGetPairSecond(s32 windowIndex) {
+s32 itfMesMngGetSelectNo(s32 windowIndex) {
     return itfWindowSlots[windowIndex].ptr->options.clearBitCount;
 }
 

@@ -22,7 +22,7 @@ typedef struct SdfMotionBindingHead {
     Motion *motion;
 } SdfMotionBindingHead;
 
-void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, Motion *motion,
+void sdfMotionNodeBaseInit(SdfMotionBindingHead *binding, Motion *motion,
                              SdfMotionBindingDispatch *dispatch);
 
 typedef struct SdfMotionKeyInterval {
@@ -46,10 +46,10 @@ typedef struct SdfMotionKeyBinding {
     SdfMotionKeyTrack *track;
 } SdfMotionKeyBinding;
 
-void sdfFindMotionKeyInterval(SdfMotionKeyBinding *binding,
+void sdfMotGetKey(SdfMotionKeyBinding *binding,
                               SdfMotionKeyInterval *interval, f32 frame);
 
-void sdfMotionBindKeyTrack(SdfMotionKeyBinding *binding, SdfMotionKeyTrack *track);
+void sdfMotCLBK_SetCut(SdfMotionKeyBinding *binding, SdfMotionKeyTrack *track);
 
 /* Indexed asset bindings share the key prefix and retain the selected asset. */
 typedef struct SdfMotionIndexedBinding {
@@ -57,7 +57,7 @@ typedef struct SdfMotionIndexedBinding {
     SdfAsset *target;
 } SdfMotionIndexedBinding;
 
-void sdfMotionBindIndexedTrack(SdfMotionIndexedBinding *binding, Motion *motion,
+void sdfMotGenMatInit(SdfMotionIndexedBinding *binding, Motion *motion,
     SdfMotionBindingDispatch *dispatch, s32 options);
 
 /* Slot weights update a model entry and retain its complete previous pair. */
@@ -67,7 +67,7 @@ typedef struct SdfMotionSlotPairBinding {
     SdfSlotEntry previous;
 } SdfMotionSlotPairBinding;
 
-void sdfSelectMotionPointerEntry(SdfMotionSlotPairBinding *destination,
+void sdfMotGenMorphInit(SdfMotionSlotPairBinding *destination,
     Motion *motion, SdfMotionBindingDispatch *dispatch, s32 entryIndex);
 
 /* Color/word and scalar bindings capture one target word at +0x10. */
@@ -108,7 +108,7 @@ typedef struct SdfMotionDrawTargetBinding {
     SdfDrawNode *node;
 } SdfMotionDrawTargetBinding;
 
-void sdfMotionBindDrawNode(SdfMotionDrawTargetBinding *binding, Motion *motion,
+void sdfMotGenModelInit(SdfMotionDrawTargetBinding *binding, Motion *motion,
                           SdfMotionBindingDispatch *dispatch, s32 nodeIndex);
 
 typedef struct SdfMotionDrawBinding {

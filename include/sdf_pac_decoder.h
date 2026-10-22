@@ -17,8 +17,8 @@ typedef struct SdfPacDecoder {
     u8 pad11[3];          /* 0x11: opaque */
 } SdfPacDecoder;
 
-s32 sdfPacDecodeInputChunk(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes);
-void sdfStoreWordAndSetState(SdfPacDecoder *decoder, u8 *output);
+s32 sdfDecomp(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes);
+void sdfDecompInit(SdfPacDecoder *decoder, u8 *output);
 
 typedef char SdfPacDecoder_size_must_be_0x14[
     (sizeof(SdfPacDecoder) == 0x14) ? 1 : -1];

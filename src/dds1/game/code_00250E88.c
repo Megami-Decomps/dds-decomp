@@ -144,13 +144,13 @@ void mnuReleaseResourceSlots(MnuResourceTaskWork *unusedWork) {
 /* Allocate and clear resource-task work, load both message resources and prepare the mantra visuals. */
 MnuResourceTaskWork *mnuAllocateMantraResourceWork(void) {
     struct SdfMemBlock *allocation = sdfMemAllocDirect(sizeof(MnuResourceTaskWork));
-    MnuResourceTaskWork *resourceWork = (MnuResourceTaskWork *)sdfMemoryGetBlockAddress(allocation);
+    MnuResourceTaskWork *resourceWork = (MnuResourceTaskWork *)sdfMemGetPtr(allocation);
 
     memset(resourceWork, 0, sizeof(MnuResourceTaskWork));
     resourceWork->allocation = allocation;
-    resourceWork->messageResource1 = sdfReadNamedResource(D_003AF758,
+    resourceWork->messageResource1 = sdfDevLoadFileEx(D_003AF758,
                                                   &resourceWork->messageResourceInfo1, 0);
-    resourceWork->messageResource2 = sdfReadNamedResource(D_003AF780,
+    resourceWork->messageResource2 = sdfDevLoadFileEx(D_003AF780,
                                                   &resourceWork->messageResourceInfo2, 0);
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
@@ -175,7 +175,7 @@ void mnuReleaseMantraResourceWork(s32 unused, MnuResourceTaskWork *resourceWork)
     if (resourceWork->staffMenuContext != NULL) {
         mnuFinalizeProgressHostVia(resourceWork->staffMenuContext, mnuReleaseStaffMenuContextAndResources);
     }
-    dspCloseChannel();
+    fclDestroyMessage();
     sdfMemFreeDelayedDirect(resourceWork->messageResource1);
     sdfMemFreeDelayedDirect(resourceWork->messageResource2);
     sdfMemFreeDirect(resourceWork->allocation);
@@ -320,7 +320,7 @@ void mnuResetResourceAnimation(void) {
 /* Allocate the four-word list task work, construct its party list and clear both remaining words. */
 MnuResourceTask *mnuAllocateEmptyResourceListState(void) {
     struct SdfMemBlock *allocation = sdfMemAllocDirect(MNU_RESOURCE_LIST_WORK_BYTES);
-    MnuResourceTask *task = (MnuResourceTask *)sdfMemoryGetBlockAddress(allocation);
+    MnuResourceTask *task = (MnuResourceTask *)sdfMemGetPtr(allocation);
 
     memset(task, 0, MNU_RESOURCE_LIST_WORK_BYTES);
     task->allocation = allocation;
@@ -453,13 +453,13 @@ s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
         if (action != 0) {
             switch (action) {
             case 1:
-                sndSetSequenceVolumePan(0,0x7F,0x3F);
+                p2sdPlaySE(0,0x7F,0x3F);
                 break;
             case 2:
-                sndSetSequenceVolumePan(8,0x7F,0x3F);
+                p2sdPlaySE(8,0x7F,0x3F);
                 break;
             case 3:
-                sndSetSequenceVolumePan(10,0x7F,0x3F);
+                p2sdPlaySE(10,0x7F,0x3F);
                 break;
             }
         }
@@ -822,13 +822,13 @@ void mnuHandleMantraGridInput(MenuSceneWork *work) {
     }
     switch (feedback) {
     case 1:
-        return sndSetSequenceVolumePan(2, 127, 63);
+        return p2sdPlaySE(2, 127, 63);
     case 2:
-        return sndSetSequenceVolumePan(8, 127, 63);
+        return p2sdPlaySE(8, 127, 63);
     case 3:
-        return sndSetSequenceVolumePan(10, 127, 63);
+        return p2sdPlaySE(10, 127, 63);
     case 4:
-        sndSetSequenceVolumePan(4, 127, 63);
+        p2sdPlaySE(4, 127, 63);
         break;
     }
 }
@@ -924,7 +924,7 @@ void mnuUpdateMantraSceneScroll(MenuSceneWork *work) {
     work->scrollY = position[1];
 }
 
-extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *vector);
+extern f32 vecNormalize(f32 *vector);
 s32 D_003BC420 = 0;
 s32 D_003BC424 = 0;
 
@@ -963,7 +963,7 @@ void mnuUpdateMantraSelectionPositions(MenuSceneWork *work, s32 mode) {
     memset(vector, 0, sizeof(vector));
     vector[0] = (f32)(targetX - work->cursorPosition.x);
     vector[1] = (f32)(targetY - work->cursorPosition.y);
-    sdfVec3NormalizeInPlaceAndGetLength(vector);
+    vecNormalize(vector);
 
     deltaX = targetX - work->cursorPosition.x;
     if (deltaX != 0) {
@@ -988,7 +988,7 @@ void mnuUpdateMantraSelectionPositions(MenuSceneWork *work, s32 mode) {
     memset(vector, 0, sizeof(vector));
     vector[0] = (f32)(targetX - work->entryPosition.x);
     vector[1] = (f32)(targetY - work->entryPosition.y);
-    sdfVec3NormalizeInPlaceAndGetLength(vector);
+    vecNormalize(vector);
 
     deltaX = targetX - work->entryPosition.x;
     if (deltaX != 0) {
@@ -1049,17 +1049,17 @@ s32 mnuScheduleUnlockedMantraMessages(MenuSceneWork *work) {
     flagBase = &pendingFlagBases[selection->partyRecord->unitId];
 
     for (i = 0; i < 8; i++) {
-        if (mdlFlagTest(*flagBase + i) == 0 &&
+        if (evtBitCheck(*flagBase + i) == 0 &&
             (prfCheckRequirementRules(0, (ScrVmOperand *)selection->partyRecord,
                               requirementIds[i]) != 0 ||
-             (i == 6 && mdlFlagTest(0x908) != 0))) {
+             (i == 6 && evtBitCheck(0x908) != 0))) {
             cap = prfGetCapValue(requirementIds[i]);
             value = ptyGetProfileRecordValue(selection->partyRecord, requirementIds[i]);
             if (cap == value) {
-                mdlFlagSet(*flagBase + i);
+                evtBitOn(*flagBase + i);
             } else {
                 work->pendingMantras[i] = 1;
-                mdlFlagSet(*flagBase + i);
+                evtBitOn(*flagBase + i);
                 if (pending == 0) {
                     sdfGridGetCursorCoordinates(work->gridHandle,
                                                 &work->pendingGridColumn,
@@ -1106,7 +1106,7 @@ s32 mnuDisplayNextPendingMantra(s32 context) {
                 0, (s32)D_003BAA70[selection->partyRecord->unitId].encodedText);
             evtCopyEntryStringToActiveWindow(
                 1, (s32)D_003BAA78[mantraIds[i]].encodedText);
-            dspStartEntry(1);
+            fclStartMessage(1);
             pendingFlags[i] = 0;
             grid = ((MenuSceneWork *)context)->gridHandle;
             y = coordinates[i][1];
@@ -1123,7 +1123,7 @@ s32 mnuDisplayNextPendingMantra(s32 context) {
 /* Allocate and clear scene work before registering its grid and coordinates. */
 MenuSceneWork *mnuCreateSceneWork(void) {
     struct SdfMemBlock *allocation = sdfMemAllocDirect(MNU_SCENE_WORK_SIZE);
-    u8 *sceneWork = (u8 *)sdfMemoryGetBlockAddress(allocation);
+    u8 *sceneWork = (u8 *)sdfMemGetPtr(allocation);
 
     memset(sceneWork, 0, MNU_SCENE_WORK_SIZE);
     ((MenuSceneWork *)sceneWork)->allocation = allocation;
@@ -1204,10 +1204,10 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
         }
         break;
     case 10:
-        dspCloseChannel();
-        evtCreateMessageWindowIfMissing((struct ItfMesSub *)metadata->entryMessageWindowResource);
+        fclDestroyMessage();
+        fclInitMessage((struct ItfMesSub *)metadata->entryMessageWindowResource);
         if (mnuDisplayNextPendingMantra((s32)work)) {
-            dspCloseChannel();
+            fclDestroyMessage();
             work->phaseFrame = 0;
             work->unk52C = 0;
             work->scenePhase = 12;
@@ -1221,7 +1221,7 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
             work->phaseFrame++;
         }
         mnuUpdateMantraSelectionPositions(work, 0);
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             work->scenePhase = 10;
             evtFinishMessageWindowAndNotify();
         }
@@ -1264,11 +1264,11 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
         }
         break;
     case 6:
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             if (work->entryMessageInProgress == 0) {
-                dspCloseChannel();
-                evtCreateMessageWindowIfMissing((struct ItfMesSub *)metadata->entryMessageWindowResource);
-                dspStartEntry(0);
+                fclDestroyMessage();
+                fclInitMessage((struct ItfMesSub *)metadata->entryMessageWindowResource);
+                fclStartMessage(0);
                 work->entryMessageInProgress = 1;
             } else {
                 work->scenePhase = 3;
@@ -1460,7 +1460,7 @@ MnuMantraGridEntry *mnuCreateMantraGridEntry(s32 unused, u16 profileId, MnuProfi
     MnuMantraGridEntry *entry;
 
     if (prfReqCheckWithFallback(selection->partyRecord, profileId) == 0) {
-        if (profileId != 0x4E || mdlFlagTest(0x908) == 0) {
+        if (profileId != 0x4E || evtBitCheck(0x908) == 0) {
             return NULL;
         }
     }
@@ -1566,11 +1566,11 @@ void mnuBuildMantraGridAndGetProfileCoordinates(MenuSceneWork *work, s32 selecti
             if (prfReqCheckWithFallback(selection->partyRecord, groupC[j])) {
                 work->boundsFlags |= 4;
                 if (j == 0) {
-                    mdlFlagSet(0x908);
+                    evtBitOn(0x908);
                 }
             }
         }
-        if (mdlFlagTest(0x908)) {
+        if (evtBitCheck(0x908)) {
             work->boundsFlags |= 4;
         }
     }
@@ -1631,8 +1631,8 @@ s32 mnuBeginMantraProfileSelection(void) {
 
     scene->state = MENU_SCENE_STATE_SELECTING;
     scene->pendingProfileId = entry->sceneId;
-    dspCloseChannel();
-    evtCreateMessageWindowIfMissing((struct ItfMesSub *)scene->messageWindowResource);
+    fclDestroyMessage();
+    fclInitMessage((struct ItfMesSub *)scene->messageWindowResource);
     memcpy((u32 *)((u8 *)scene + 0x28), ((MnuProfileProgress *)mnuGetSelectedNodeValue())->partyRecord, 0x1A4);
     ((u8 *)scene)[0x7D] = (u8)scene->pendingProfileId;
     mnuSetupStaffMenuProfilePage((DatPartyRecord *)((u8 *)scene + 0x28), scene->attachedEffect);
@@ -1724,7 +1724,7 @@ s32 mnuUpdateMantraSceneState(void) {
         scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_WINDOW;
         break;
     case MENU_SCENE_STATE_WAITING_FOR_MESSAGE_WINDOW:
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             if (evtGetCapturedWindowPanelValue() != 0) {
                 scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
                 scene->pendingProfileId = 0;
@@ -1762,7 +1762,7 @@ s32 mnuUpdateMantraSceneState(void) {
         scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
         break;
     case MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION:
-        if (scene->stageFinished != 0 && evtGetMessageWindowControlState() == 0) {
+        if (scene->stageFinished != 0 && fclChkMessage() == 0) {
             evtFinishMessageWindowAndNotify();
             sdfSetTaskItemMode(mnuSceneResourceContext, 1,
                                SDF_TASK_ITEM_MODE_PENDING_ACTIVATION);
@@ -1806,7 +1806,7 @@ s32 mnuUpdateMantraSceneDisplay(void) {
     if (evtStageTestUpdate(kwlnSceneSurfaceSets[9]) >= 2) {
         sceneMetadata->stageFinished = 1;
     }
-    if (evtGetMessageWindowControlState() != 0) {
+    if (fclChkMessage() != 0) {
         if (sceneMetadata->messageShadeFrames < MNU_SCENE_SHADE_FRAME_LIMIT) {
             sceneMetadata->messageShadeFrames++;
         }
@@ -2039,16 +2039,16 @@ s32 mnuHandleMantraSceneInput(void) {
     if (feedback != 0) {
         switch (feedback) {
         case 1:
-            sndSetSequenceVolumePan(2, 127, 63);
+            p2sdPlaySE(2, 127, 63);
             break;
         case 2:
-            sndSetSequenceVolumePan(8, 127, 63);
+            p2sdPlaySE(8, 127, 63);
             break;
         case 3:
-            sndSetSequenceVolumePan(10, 127, 63);
+            p2sdPlaySE(10, 127, 63);
             break;
         case 4:
-            sndSetSequenceVolumePan(4, 127, 63);
+            p2sdPlaySE(4, 127, 63);
             break;
         }
     }
@@ -2126,7 +2126,7 @@ s32 mnuDrawMantraCostTransition(void) {
         } else if (raw < 0) {
             frac = (f32)(-raw) / 10.0f;
         }
-        frac = 1.0f - sdfSinPoly(frac * 3.14159265f);
+        frac = 1.0f - sdfSin(frac * 3.14159265f);
         mnuDrawScaledPlacedSprite(0, 0, 0, 0x80, 0x3A, 0x53, 1.5f, 1.5f);
         mnuDrawPanelWithPackedColorPattern(0, 0, 0, 0x80, 0x53);
         mnuDrawMantraProfileSelectionSurface(0, 0, 1, (s32)(frac * 128.0f), scene, 0x53);

@@ -35,7 +35,7 @@ typedef struct SdfPool {
     SdfKeyTreeNode *keyTree[1];                                /* 0x18: first root; allocation continues */
 } SdfPool;
 
-void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyPoolNode *item);
+void sdfSortOtAvlRegist(SdfKeyTreeNode **tree, SdfKeyPoolNode *item);
 
 typedef char SdfKeyPoolNode_size_must_be_0x10[(sizeof(SdfKeyPoolNode) == 0x10) ? 1 : -1];
 typedef char SdfKeyPoolNode_kind_must_be_at_C[
@@ -45,8 +45,8 @@ typedef char SdfKeyPoolNode_key_must_be_at_C[
 typedef char SdfKeyTreeNode_size_must_be_0x10[(sizeof(SdfKeyTreeNode) == 0x10) ? 1 : -1];
 typedef char SdfPool_size_must_be_0x1C[(sizeof(SdfPool) == 0x1C) ? 1 : -1];
 
-void sdfReleasePoolNode(SdfPool *pool, SdfKeyPoolNode *node);
-void sdfUpdatePoolFreeListByMode(SdfPool *pool, s32 mode, SdfKeyPoolNode *node);
-void sdfInstallPoolNodeReleaseCallbacks(SdfPool *pool);
+void sdfGrSortOtReg(SdfPool *pool, SdfKeyPoolNode *node);
+void sdfGrSortOtCallback(SdfPool *pool, s32 mode, SdfKeyPoolNode *node);
+void sdfModelSetOtCallbacks(SdfPool *pool);
 
 #endif

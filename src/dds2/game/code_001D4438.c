@@ -150,13 +150,13 @@ extern s32 btlArrangeOpponentFormationSlots(void);
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 extern s32 btlMarkInactiveActorCandidates();
 extern void btlRestorePartySlotSnapshots();
-extern void kwlnDrawSetOverlayTransition();
-extern void kwlnDrawEnableD88();
-extern void kwlnDrawEnableDc8();
-extern void kwlnDrawEnableE08();
-extern void kwlnDrawSetupC70B();
-extern void kwlnDrawEnableCd0();
-extern void kwlnDrawEnableD30();
+extern void dds3SetBlur();
+extern void dds3Blur2Off();
+extern void dds3Filter2Off();
+extern void dds3MFilterOff();
+extern void dds3MultiBlurOff();
+extern void dds3DistBlurOff();
+extern void dds3RipBlurOff();
 extern void btlMarkRuntimeUpdatePending();
 extern void evtSetSolarOverlayFullyVisible();
 extern void btlSyncModelFlagFromEventThresholds();
@@ -236,7 +236,7 @@ extern void btlSetActorPanelYForMode(s32);
 extern void itfMesClearFlags();
 extern void btlClearPartyRecordStatusBits(DatPartyRecord *, s32);
 extern s32 mnuIsTitleEntryAvailable(DatPartyRecord *);
-extern void datAdjustCurrentHp();
+extern void datAddHp();
 
 #include "brs_task_poll_done_api.h"
 
@@ -245,7 +245,7 @@ extern s32 btlResolveBattleTerminalOutcome(void);
 
 extern s32 mnuGetSoundBufferStateLocked(void);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
-extern f32 sdfGetRandFloat(EffRandState *state);
+extern f32 dds3GetRandFloatA(EffRandState *state);
 extern EffRandState effSharedRandomState[];
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 extern void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState *);
@@ -366,11 +366,11 @@ extern BtlRuntimeTask *btlCreateHookedUnitSoundTask(BtlUnit *, s32);
 extern u32 D_00436AD4;
 
 
-extern struct EffWorldNode *evtSpawnActionObj9(s32);
+extern struct EffWorldNode *dds3AddLightObjectBasic(s32);
 
 
 extern s32 btlUpdateBattleModelDebugEditor(void);
-extern void mdlSetAmountOnAllContextResources(f32, s32);
+extern void mdlSetEffectScale(f32, s32);
 
 extern f32 btlGetUnitCameraClearance(BtlUnit *, u8, f32, f32);
 
@@ -380,7 +380,7 @@ extern BtlRuntimeTask *btlDeferredTaskTail;
 
 extern BtlRuntimeTask *btlDeferredTaskHead;
 
-extern s32 sdfCheckPendingWorkWithInterrupts(void);
+extern s32 sdfDelayedResrcCheck(void);
 
 extern u32 kwlnDrawControlFlags;
 
@@ -496,7 +496,7 @@ extern char D_00418C58[];
 extern s32 sndHasActiveFileLoad(void);
 
 
-extern void func_003422F8(u32, s32);
+extern void p2sdSetPcmBuffer(u32, s32);
 
 
 
@@ -505,7 +505,7 @@ extern f32 *D_0037F770[];
 
 extern u8 kwlnDefaultColorVector[];
 
-extern void fldApplyLightSetCurrent(void);
+extern void fldSkyBattle(void);
 
 extern s32 sndGetEffectNodeParameter(SoundResourceNode *, u16);
 

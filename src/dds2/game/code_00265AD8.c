@@ -105,7 +105,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                 switch (state->phase) {
                 case 0:
                     mnuShopLoadSpriteAssets(state);
-                    kwlnFadeOutStart(0, 0, 0, 0xF);
+                    dds3FadeIn(0, 0, 0, 0xF);
                     state->prepared = 1;
                     state->phase = 1;
                     break;
@@ -117,11 +117,11 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                         state->phase = 8;
                     } else if (evtMenuSetTypeProgressFlagOnce(state) != 0) {
                         state->phase = 10;
-                    } else if (mdlFlagTest(4) == 0) {
+                    } else if (evtBitCheck(4) == 0) {
                         mnuSetPopupEntryFlagged(dispatchSlot, mnuTerminalMenuMessagePopupEntry);
                     } else if (state->options != 0) {
                         dspSetActive(1);
-                        dspStartEntry(state->options + 0xF);
+                        fclStartMessage(state->options + 0xF);
                         state->phase = 2;
                     } else {
                         state->phase = 5;
@@ -129,7 +129,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                     break;
 
                 case 2:
-                    if (evtGetMessageWindowControlState() == 0) {
+                    if (fclChkMessage() == 0) {
                         evtFinishMessageWindowAndNotify();
                         state->options = mnuGetTerminalMessageOption();
                         state->phase = 3;
@@ -158,7 +158,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                                 state->rewardCursor = index + 1;
                                 dspSetActive(1);
                                 evtCopyEntryStringToActiveWindow(0, D_00435E5C[itemId]);
-                                dspStartEntry(15);
+                                fclStartMessage(15);
                                 break;
                             }
                             index++;
@@ -173,7 +173,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                 }
 
                 case 4:
-                    if (evtGetMessageWindowControlState() == 0) {
+                    if (fclChkMessage() == 0) {
                         evtFinishMessageWindowAndNotify();
                         if (state->rewardCursor == -1) {
                             if (state->options == 2) {
@@ -189,7 +189,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
 
                 case 6:
                     dspSetActive(1);
-                    dspStartEntry(0x18);
+                    fclStartMessage(0x18);
                     state->phase = 7;
                     break;
 
@@ -206,7 +206,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                 case 7:
                 case 9:
                 case 11:
-                    if (evtGetMessageWindowControlState() == 0) {
+                    if (fclChkMessage() == 0) {
                         evtFinishMessageWindowAndNotify();
                         state->phase = 1;
                     }
@@ -251,7 +251,7 @@ s32 evtSetupDispatchSyncI(KwlnTask *callback) {
 
 u32 evtStartTerminalMenuMessage(void) {
     dspSetActive(1);
-    dspStartEntry(0xd);
+    fclStartMessage(0xd);
     return 1;
 }
 
@@ -269,7 +269,7 @@ s32 mnuPollMessageWindowBeforeClosing(KwlnTask *callback) {
 
     if (state == 0) {
         if (*window == 0) {
-            if (evtGetMessageWindowControlState() == 0) {
+            if (fclChkMessage() == 0) {
                 evtFinishMessageWindowAndNotify();
                 mnuSetPopupEntryFlagged(window, mnuShopReturnFadePopupEntry);
             }
@@ -293,19 +293,19 @@ s32 evtAdvanceTerminalMenuMessage(KwlnTask *callback) {
 }
 
 extern void evtClearActiveFlag(s32 flagIndex);
-extern void sndReleaseTrackHandle(u32 trackHandle);
+extern void p2sdStopBGM(u32 trackHandle);
 
 u32 mnuStartReturnFadeAndRestoreDisplay(void) {
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(0, 1);
     evtSetBoundedDisplayValue(1, 0);
-    kwlnFadeInStart(0, 0, 0, 0xF);
-    sndReleaseTrackHandle(0x300000);
+    dds3FadeOut(0, 0, 0, 0xF);
+    p2sdStopBGM(0x300000);
     return 1;
 }
 
 u32 evtStartFadeOut(void) {
-    kwlnFadeOutStart(0, 0, 0, 0);
+    dds3FadeIn(0, 0, 0, 0);
     return 1;
 }
 
@@ -315,7 +315,7 @@ s32 mnuWaitForFadeBeforePopup(KwlnTask *callback) {
     s32 state = mnuDispatchPopupTransition(&((EventCallbackContext *)context)->transitionWork, window, 0, (void *)callback);
     if (state == 0) {
         if (*window == 0) {
-            if (kwlnFadeIsActive() == 0) {
+            if (dds3FadeCheck() == 0) {
                 mnuSetPopupEntryFlagged(window, mnuShopFadeCompletePopupEntry);
             }
         }
@@ -370,15 +370,15 @@ struct SdfMemBlock *mnuCreateFlagEntries(void) {
 
     for (i = 0; i < MNU_SCENE_FLAG_ENTRY_COUNT; i++) {
         entries[i].firstFlag = mnuSceneFlagEventEntries[i].requiredFlag;
-        entries[i].firstOn = mdlFlagTest(entries[i].firstFlag);
+        entries[i].firstOn = evtBitCheck(entries[i].firstFlag);
         entries[i].secondFlag = mnuSceneFlagEventEntries[i].handledFlag;
-        entries[i].secondOn = mdlFlagTest(entries[i].secondFlag);
+        entries[i].secondOn = evtBitCheck(entries[i].secondFlag);
     }
     for (i = 0; i < MNU_PARTY_FLAG_ENTRY_COUNT; i++) {
         entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].firstFlag = mnuPartyFlagEventEntries[i].requiredFlag;
-        entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].firstOn = mdlFlagTest(entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].firstFlag);
+        entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].firstOn = evtBitCheck(entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].firstFlag);
         entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].secondFlag = mnuPartyFlagEventEntries[i].handledFlag;
-        entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].secondOn = mdlFlagTest(entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].secondFlag);
+        entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].secondOn = evtBitCheck(entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].secondFlag);
     }
     return handle;
 }
@@ -389,18 +389,18 @@ void mnuApplyCampResourceFlagEntries(struct SdfMemBlock *handle) {
 
     for (i = 0; i < MNU_SCENE_FLAG_ENTRY_COUNT; i++) {
         if (entries[i].firstOn != 0) {
-            mdlFlagSet(entries[i].firstFlag);
+            evtBitOn(entries[i].firstFlag);
         }
         if (entries[i].secondOn != 0) {
-            mdlFlagSet(entries[i].secondFlag);
+            evtBitOn(entries[i].secondFlag);
         }
     }
     for (i = 0; i < MNU_PARTY_FLAG_ENTRY_COUNT; i++) {
         if (entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].firstOn != 0) {
-            mdlFlagSet(entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].firstFlag);
+            evtBitOn(entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].firstFlag);
         }
         if (entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].secondOn != 0) {
-            mdlFlagSet(entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].secondFlag);
+            evtBitOn(entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].secondFlag);
         }
     }
 }
@@ -409,12 +409,12 @@ void mnuClearCampResourceFlagEntries(void) {
     u32 i;
 
     for (i = 0; i < MNU_SCENE_FLAG_ENTRY_COUNT; i++) {
-        mdlFlagClear(mnuSceneFlagEventEntries[i].requiredFlag);
-        mdlFlagClear(mnuSceneFlagEventEntries[i].handledFlag);
+        evtBitOff(mnuSceneFlagEventEntries[i].requiredFlag);
+        evtBitOff(mnuSceneFlagEventEntries[i].handledFlag);
     }
     for (i = 0; i < MNU_PARTY_FLAG_ENTRY_COUNT; i++) {
-        mdlFlagClear(mnuPartyFlagEventEntries[i].requiredFlag);
-        mdlFlagClear(mnuPartyFlagEventEntries[i].handledFlag);
+        evtBitOff(mnuPartyFlagEventEntries[i].requiredFlag);
+        evtBitOff(mnuPartyFlagEventEntries[i].handledFlag);
     }
 }
 
@@ -432,7 +432,7 @@ void mnuLoadCampEffectMapResources(struct EffectSlotSet *object, MenuEffectResou
     struct SdfMemBlock *allocation;
     struct EffMappedResource *mappedResource;
 
-    allocation = sdfReadNamedResource(mnuCampBackgroundMotionPath, &dataAddress, 0);
+    allocation = sdfDevLoadFileEx(mnuCampBackgroundMotionPath, &dataAddress, 0);
     mappedResource = effCreateMappedResource((const u8 *)dataAddress);
     sdfMemFreeDirect(allocation);
     mnuInitializeMapPacket(1, mapArguments.values, 11, &resources->packet);

@@ -18,7 +18,7 @@ extern u32 fldLoadAreaRoomResourcesFromRequest(u32, u32, u32, u32,
 
 extern EffWorldNode *dds3ActiveWorld;
 
-u32 dds3GrowWorldValueChain(WorldValueIndices *object, s32 count) {
+u32 dds3AddBasicArray(WorldValueIndices *object, s32 count) {
     WorldInfo *world;
     s16 firstIndex;
     s16 lastIndex;
@@ -63,7 +63,7 @@ u32 dds3GrowWorldValueChain(WorldValueIndices *object, s32 count) {
     return 1;
 }
 
-u16 dds3GetWorldValueCount(const WorldValueIndices *object) {
+u16 dds3GetBasicArrayCount(const WorldValueIndices *object) {
     u16 value;
 
     value = 0;
@@ -73,7 +73,7 @@ u16 dds3GetWorldValueCount(const WorldValueIndices *object) {
     return value;
 }
 
-u32 dds3WriteIndexedWorldObjectWord(WorldValueIndices *object, u32 wordValue) {
+u32 dds3SetBasicArray(WorldValueIndices *object, u32 wordValue) {
     if (object->entryCount == 0) {
         return 0;
     }
@@ -84,7 +84,7 @@ u32 dds3WriteIndexedWorldObjectWord(WorldValueIndices *object, u32 wordValue) {
     return 1;
 }
 
-u32 dds3ReadIndexedWorldObjectWord(const WorldValueIndices *object) {
+u32 dds3GetBasicArray(const WorldValueIndices *object) {
     if (object->entryCount == 0) {
         return 0;
     }
@@ -95,12 +95,12 @@ u32 dds3ReadIndexedWorldObjectWord(const WorldValueIndices *object) {
 }
 
 /* Signed comparison via complement-and-shift: zero counts as nonnegative. */
-u32 dds3ResetObjectValueCursor(WorldValueIndices *object) {
+u32 dds3SetFirstBasicArray(WorldValueIndices *object) {
     object->cursorIndex = object->headIndex;
     return (u32)~(s32)object->headIndex >> 0x1f;
 }
 
-u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object) {
+u32 dds3SetNextBasicArray(WorldValueIndices *object) {
     if (object->cursorIndex < 0) {
         return 0;
     }
@@ -109,17 +109,17 @@ u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object) {
 }
 
 /* Call `callback` with every value of the object's list in order; stop and return 0 as soon as one callback returns 0. Returns 1 when the object has no values, no callback is given, or all callbacks succeeded. */
-s32 dds3VisitWorldObjectValues(WorldValueIndices *object, s32 (*callback)(u32)) {
+s32 dds3ForEachBasicArray(WorldValueIndices *object, s32 (*callback)(u32)) {
     u32 more;
 
     if (callback == NULL) {
         return 1;
     }
-    if (dds3GetWorldValueCount(object) == 0) {
+    if (dds3GetBasicArrayCount(object) == 0) {
         return 1;
     }
-    for (more = dds3ResetObjectValueCursor(object); more != 0; more = dds3AdvanceObjectValueCursor(object)) {
-        if (callback(dds3ReadIndexedWorldObjectWord(object)) == 0) {
+    for (more = dds3SetFirstBasicArray(object); more != 0; more = dds3SetNextBasicArray(object)) {
+        if (callback(dds3GetBasicArray(object)) == 0) {
             return 0;
         }
     }
@@ -162,7 +162,7 @@ u32 dds3CreateWorldObjectData(EffWorldNode *object) {
     return 0;
 }
 
-extern void dds3ClearSceneObjectState(EffWorldNode *object);
+extern void dds3SceneBasicFreeScene(EffWorldNode *object);
 
 /* Destroy every node of every list, then release the data block and scene state. */
 void dds3DestroyWorldObjectData(EffWorldNode *object) {
@@ -172,20 +172,20 @@ void dds3DestroyWorldObjectData(EffWorldNode *object) {
     if (data != NULL) {
         for (listIndex = 0; listIndex <= 0x11; listIndex++) {
             while (data->slots[listIndex].head != NULL) {
-                dds3RemoveWorldObjectNode(data->slots[listIndex].head);
+                dds3DeleteSceneBasicData(data->slots[listIndex].head);
             }
         }
         if (data->resource != 0) {
             sdfMemFreeDirect(data->resource);
         }
-        dds3ClearSceneObjectState(object);
-        evtReleaseSceneResource(object);
+        dds3SceneBasicFreeScene(object);
+        dds3SceneBasicReleaseScriptFile(object);
         sdfChipFreeDirect(data);
     }
 }
 
 /* Cache the next link before calling an update that may remove the current node. */
-u32 dds3UpdateWorldObjectLists(EffWorldNode *object) {
+u32 scenemainprocuder(EffWorldNode *object) {
     EvtWorldTable *data = object->data;
     EffWorldNode *node;
     EffWorldNode *next;
@@ -209,10 +209,10 @@ u32 dds3UpdateWorldObjectLists(EffWorldNode *object) {
     return 1;
 }
 
-extern void fldSubmitVisibleWorldBackground(void);
+extern void drawSceneBasicList(void);
 
 /* Only kind 2 is drawn here; the remaining kinds participate in update traversal. */
-u32 dds3DrawWorldObjectList(EffWorldNode *object) {
+u32 scenedrawprocuder(EffWorldNode *object) {
     EvtWorldTable *data = object->data;
     EffWorldNode *node;
     EffWorldNode *next;
@@ -233,7 +233,7 @@ u32 dds3DrawWorldObjectList(EffWorldNode *object) {
     if (node->ops->draw == NULL) {
         return 1;
     }
-    fldSubmitVisibleWorldBackground();
+    drawSceneBasicList();
     do {
         next = node->next;
         node->ops->draw(node);
@@ -242,16 +242,16 @@ u32 dds3DrawWorldObjectList(EffWorldNode *object) {
     return 1;
 }
 
-void dds3SetWorldObjectDrawEnabled(EffWorldNode *object, s8 enabled) {
+void dds3VisibleSceneBasic(EffWorldNode *object, s8 enabled) {
     if (((EvtWorldTable *)object->data) != NULL) {
         ((EvtWorldTable *)object->data)->drawEnabled = (s32)enabled;
     }
 }
 #include "dds3_world_secondary.h"
-extern EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
+extern EffWorldNode *dds3AllocBasic(u32 kind);
 
 /* Create a member in the current secondary world's list for this kind. */
-EffWorldNode *dds3AppendWorldObjectNode(s32 kind) {
+EffWorldNode *dds3AddSceneBasicData(s32 kind) {
     EffWorldNode *world;
     EffWorldNode *node;
     EvtWorldSlot *list;
@@ -259,12 +259,12 @@ EffWorldNode *dds3AppendWorldObjectNode(s32 kind) {
     if ((u32)(kind - 2) >= 16) {
         return NULL;
     }
-    world = dds3GetWorldSecondaryObject();
+    world = dds3GetControlScene();
     if (world == NULL) {
         return NULL;
     }
     list = &((EvtWorldTable *)world->data)->slots[kind];
-    node = dds3CreateWorldNodeForKind(kind);
+    node = dds3AllocBasic(kind);
     if (node == NULL) {
         return NULL;
     }
@@ -281,10 +281,10 @@ EffWorldNode *dds3AppendWorldObjectNode(s32 kind) {
     return node;
 }
 
-extern void effObjNodeDestroy(EffWorldNode *node);
+extern void dds3DeleteBasic(EffWorldNode *node);
 
 /* Unlink a world list node from its kind's list in the owner's data and destroy it. */
-void dds3RemoveWorldObjectNode(EffWorldNode *node) {
+void dds3DeleteSceneBasicData(EffWorldNode *node) {
     EvtWorldSlot *list;
 
     if (node != NULL && (u32)((node->kindTag >> 24) - 2) < 0x10) {
@@ -295,43 +295,43 @@ void dds3RemoveWorldObjectNode(EffWorldNode *node) {
         if (list->tail == node) {
             list->tail = node->previous;
         }
-        effObjNodeDestroy(node);
+        dds3DeleteBasic(node);
         list->count--;
     }
 }
 
 
-EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *object, EffWorldNode *cameraObject) {
+EffWorldNode *dds3SetActiveCameraSceneBasic(EffWorldNode *object, EffWorldNode *cameraObject) {
     EvtWorldTable *data;
     EffWorldNode *previous;
 
     data = ((EvtWorldTable *)object->data);
-    previous = dds3GetWorldCameraObject(object);
+    previous = dds3GetActiveCameraSceneBasic(object);
     data->cameraObject = cameraObject;
     return previous;
 }
 
-EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *object) {
+EffWorldNode *dds3GetActiveCameraSceneBasic(EffWorldNode *object) {
     return ((EvtWorldTable *)object->data)->cameraObject;
 }
 
 
-EffWorldNode *dds3SetWorldPlayerObject(EffWorldNode *object, EffWorldNode *playerObject) {
+EffWorldNode *dds3SetActiveUnitSceneBasic(EffWorldNode *object, EffWorldNode *playerObject) {
     EvtWorldTable *data;
     EffWorldNode *previous;
 
     data = ((EvtWorldTable *)object->data);
-    previous = dds3GetWorldPlayerObject(object);
+    previous = dds3GetActiveUnitSceneBasic(object);
     data->playerObject = playerObject;
     return previous;
 }
 
-EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *object) {
+EffWorldNode *dds3GetActiveUnitSceneBasic(EffWorldNode *object) {
     return ((EvtWorldTable *)object->data)->playerObject;
 }
 
 /* Find the node with `key` in list `kind` of the object, or NULL. */
-EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *object, u32 key, s32 kind) {
+EffWorldNode *dds3SearchSceneBasic(EffWorldNode *object, u32 key, s32 kind) {
     EffWorldNode *node;
 
     if (((EvtWorldTable *)object->data)->slots[kind].count == 0) {
@@ -348,7 +348,7 @@ EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *object, u32 key, s32 ki
 }
 
 
-struct WorldIndexNode *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind) {
+struct WorldIndexNode *dds3SceneBasicGetList(EffWorldNode *object, s32 kind) {
     EvtWorldTable *data = object->data;
     struct WorldIndexNode *indexObject;
     EffWorldNode *node;
@@ -356,17 +356,17 @@ struct WorldIndexNode *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 k
     if (data->slots[kind].count == 0) {
         return NULL;
     }
-    indexObject = dds3AppendWorldIndexNode(0);
+    indexObject = dds3GetBasicArrayHandle(0);
     node = data->slots[kind].head;
     do {
-        dds3GrowWorldValueChain((WorldValueIndices *)indexObject, 1);
-        dds3WriteIndexedWorldObjectWord((WorldValueIndices *)indexObject, (u32)node);
+        dds3AddBasicArray((WorldValueIndices *)indexObject, 1);
+        dds3SetBasicArray((WorldValueIndices *)indexObject, (u32)node);
         node = node->next;
     } while (node != NULL);
     return indexObject;
 }
 
-void dds3AttachResourceHandleToWorldObject(EffWorldNode *object, u32 resourceId) {
+void dds3SceneBasicMakeScene(EffWorldNode *object, u32 resourceId) {
     EvtWorldTable *data;
     u32 handle;
 
@@ -375,7 +375,7 @@ void dds3AttachResourceHandleToWorldObject(EffWorldNode *object, u32 resourceId)
     data->indexedHandle = handle;
 }
 
-void dds3AttachConstructedResourceToWorldObject(EffWorldNode *object, u32 area, u32 room,
+void dds3SceneBasicMakeScene_FromMemory(EffWorldNode *object, u32 area, u32 room,
                                     u32 resource0Data, u32 resource1Data,
                                     const SdfTextureOffsetListHeader *textureOffsets, u32 flags) {
     EvtWorldTable *data;

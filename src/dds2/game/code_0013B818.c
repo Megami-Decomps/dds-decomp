@@ -39,7 +39,7 @@
 #include "dds3_world_counter.h"
 #include "fld_index_pair.h"
 /* Declared before first use (were implicit int). */
-extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
+extern void dds3AdminiCallSequence(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
 extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
 extern s32 fldRegisterRoomObject(FldFileResource *, EffWorldNode *);
 /* itfSetTextDrawLimit is void in the font TU; preserve C89 call scope here.
@@ -52,7 +52,7 @@ extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void datAddCurrencyClamped(s32 delta);
 extern void scrDestroyAllNamedProcesses(void);
 extern void evtSubmitEventRequestImmediate(s32 eventId);
-extern EffWorldNode *fldGetUnselectedWorldEntry(void);
+extern EffWorldNode *fldCamNowEveCamera(void);
 extern void fldShowSceneModels(void);
 extern void fldHideSceneModelsAndResetCamera(void);
 extern void fldInitializeCameraViewFromPlayer(void);
@@ -61,15 +61,15 @@ extern void fldUpdateCameraViewFromPlayer(void);
 extern FldInfTable D_0038E2D0;
 
 /* Field command providers: declarations agree with their owning definitions. */
-extern void fldLoadActorWaypointTable(s32 field);
+extern void fldDoorLoad(s32 field);
 
 extern void fldSetDeferredFieldCommand(u32 command, u32 parameter);
 
-extern void fldReleaseCurrentBgm(void);
+extern void fldBgmFadeOut(void);
 
 extern void fldSetFloorFlag(s32 area, s32 floor, s32 bit);
 
-extern void fldInitializeFieldSequenceRecord(FieldSequenceRecord *record,
+extern void fldSetSceneParam4(FieldSequenceRecord *record,
     s32 stage, s32 kind, const char *name, s32 code, s32 link, const char *subname);
 
 /* vu0 routine: normalize vf10 and return its original XYZ length. */
@@ -82,7 +82,7 @@ static inline f32 fldNormalizeProbeVector(void) {
 }
 
 
-extern void evtSetDrawSurfaceIndex();
+extern void eglSetOt();
 
 extern void evtSubmitPrimaryGsTest();
 
@@ -106,7 +106,7 @@ extern s32 fldTaskSlotCount;
 
 extern FldFileResource *fldRoomResources[];
 
-extern void fldDrawMarkerQuad(f32 *pos);
+extern void fldDrawPos(f32 *pos);
 
 extern s32 fldCurrentEventRoom;
 
@@ -146,21 +146,21 @@ extern s32 D_00399F60[];
 
 extern u8 D_00399EA0[][16];
 
-extern s32 fldGetCampSceneControlMode(void);
+extern s32 fldProcCampChk(void);
 
-extern s32 fldGetSceneReadyOrPendingState(void);
+extern s32 fldProcAmChk(void);
 
 extern s32 fileMenuTaskExists(void);
 
 extern s32 fldHasKiretaLabelProcess(void);
 
-extern s32 fldHasHirakenaiLabelProcess(void);
+extern s32 fldProcKiretaChk(void);
 
-extern s32 fldHasBadkaifukuLabelProcess(void);
+extern s32 fldProcHirakenaiChk(void);
 
 extern s32 fldIsEventPhaseAtLeastTwo(void);
 
-extern void fldDrawConvertedTextGlyph(s32 x, s32 y, u32 colors, const u8 *text);
+extern void fldKanjiDraw(s32 x, s32 y, u32 colors, const u8 *text);
 
 extern s16 D_00444C68[];
 
@@ -203,7 +203,7 @@ extern u8 D_00391F84[];
 extern s32 fldPickedActorTemplateKind;
 
 
-extern void fldFormatAreaDirectory(char *, s32, s32);
+extern void fldMakeFilePath(char *, s32, s32);
 
 extern s32 fldValueRecordCount;
 
@@ -215,7 +215,7 @@ extern u32 fldDisplayValues[];
 
 extern s32 fldTriggeredNpcRoom;
 
-extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
+extern f32 EulerAngleAxisY(void);
 
 extern s32 fldTriggeredRoom;
 
@@ -225,7 +225,7 @@ extern s32 fldTriggeredSavePointValue;
 
 extern s32 fldRoomTriggersHalted;
 
-extern f32 fldDotVector(f32 *, f32 *);
+extern f32 fldVecDot(f32 *, f32 *);
 
 extern FldRoomState fldRoomRecords[];
 
@@ -269,9 +269,9 @@ extern FldActorRow fldActorSlots[];
 
 extern s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
 
-extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
+extern void dds3MatterObjectBasicSetAlpMode(EffWorldNode *object, u32 value);
 
-/* Build a normalized plane from three vertices spaced four floats apart. * Snap near-zero normal components before deriving D from the third vertex. * Degenerate triangles retain the native divide-by-zero behavior. */ void fldCalcTrianglePlane(f32 *vertices, f32 *normalX, f32 *normalY, f32 *normalZ, f32 *planeConstant);
+/* Build a normalized plane from three vertices spaced four floats apart. * Snap near-zero normal components before deriving D from the third vertex. * Degenerate triangles retain the native divide-by-zero behavior. */ void fldMakeEveHitPlanes(f32 *vertices, f32 *normalX, f32 *normalY, f32 *normalZ, f32 *planeConstant);
 
 void evtMessageExtraActionNoOp(void);
 
@@ -329,7 +329,7 @@ void fldResetZoneRecordsAndActorSlots(void) {
 }
 
 /* Clear slot handles and destroy named tasks reached through linked display values. */
-void fldResetTaskSlots(void) {
+void fldEveHit_End(void) {
     s32 slotIndex;
     EffWorldNode *world;
     void *task;
@@ -342,14 +342,14 @@ void fldResetTaskSlots(void) {
     fldTriggeredRoom = -1;
     fldTriggeredNpcRoom = -1;
     fldTriggeredItemBoxRoom = -1;
-    world = dds3GetWorldSecondaryObject();
+    world = dds3GetControlScene();
     if (world != 0) {
         for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
             taskInfo = (FldTaskInfo *)fldRoomResources[slotIndex]->data;
             if (taskInfo->slot >= 0) {
-                task = dds3GetWorldObjectPayload(dds3FindWorldObjectNodeByKey(world, *(u32 *)fldDisplayValues[taskInfo->slot], 0xD));
-                if (scrFindNamedProcessNode(task) != 0) {
-                    evtDestroyNamedTask(dds3GetWorldObject(), task);
+                task = dds3EventBasicGetResource(dds3SearchSceneBasic(world, *(u32 *)fldDisplayValues[taskInfo->slot], 0xD));
+                if (scrSearchScriptName(task) != 0) {
+                    dds3SceneBasicEndScript(dds3GetActiveScene(), task);
                 }
             }
         }
@@ -357,7 +357,7 @@ void fldResetTaskSlots(void) {
 }
 
 /* Append a display value and return its index; no capacity check is performed. */
-s32 fldPushDisplayValue(u32 value, EffWorldNode *unusedObject) {
+s32 fldEveHit_AddEveData(u32 value, EffWorldNode *unusedObject) {
     s32 index = D_004361B8;
     fldDisplayValues[index] = value;
     D_004361B8 = index + 1;
@@ -423,7 +423,7 @@ s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
                 VU0_LOAD_VF(vf10, dir);
                 VU0_NORMALIZE_VF10();
                 VU0_STORE_VF(vf10, dir);
-                dot = fldDotVector(dir, fldRoomRecords[i].center);
+                dot = fldVecDot(dir, fldRoomRecords[i].center);
                 if (dot < 0.5f) {
                     return 0;
                 }
@@ -485,7 +485,7 @@ s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry) {
                 VU0_LOAD_VF(vf10, dir);
                 VU0_NORMALIZE_VF10();
                 VU0_STORE_VF(vf10, dir);
-                dot = fldDotVector(dir, fldRoomRecords[i].center);
+                dot = fldVecDot(dir, fldRoomRecords[i].center);
                 if (dot < 0.5f) {
                     return 0;
                 }
@@ -541,7 +541,7 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, EffWorldNode *actor, f32 *posi
         VU0_LOAD_VF(vf10, dir);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF(vf10, dir);
-        dot = fldDotVector(dir, fldRoomRecords[roomIndex].center);
+        dot = fldVecDot(dir, fldRoomRecords[roomIndex].center);
         if (dot < 0.5f) {
             return 0;
         }
@@ -569,7 +569,7 @@ s32 fldProbeRoomPlanes(f32 *direction, s32 roomIndex) {
         planar[1] = direction[1];
     }
     for (i = 0; i < 4; i++) {
-        if (fldDotVector(probe, fldRoomRecords[roomIndex].plane[i + 1]) - fldRoomRecords[roomIndex].limit[i + 1] < 0.0f) {
+        if (fldVecDot(probe, fldRoomRecords[roomIndex].plane[i + 1]) - fldRoomRecords[roomIndex].limit[i + 1] < 0.0f) {
             return -1;
         }
     }
@@ -580,7 +580,7 @@ s32 fldRoomContainsPoint(f32 *direction, s32 index) {
     s32 i;
 
     for (i = 0; i < 6; i++) {
-        if (fldDotVector(direction, fldRoomRecords[index].plane[i]) - fldRoomRecords[index].limit[i] > 0.0f) {
+        if (fldVecDot(direction, fldRoomRecords[index].plane[i]) - fldRoomRecords[index].limit[i] > 0.0f) {
             return 0;
         }
     }
@@ -589,16 +589,16 @@ s32 fldRoomContainsPoint(f32 *direction, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_0013B818", fldStartRoomEventTask);
 
-s32 fldDestroyFlaggedNamedTask(char *flag, u32 slot) {
+s32 fldEveHit_ScriptEnd(char *flag, u32 slot) {
     fldRoomTaskHandles[slot] = 0;
-    if (scrFindNamedProcessNode(flag) != 0) {
-        evtDestroyNamedTask(dds3GetWorldObject(), flag);
+    if (scrSearchScriptName(flag) != 0) {
+        dds3SceneBasicEndScript(dds3GetActiveScene(), flag);
         return 0;
     }
     return -1;
 }
 
-u32 fldDestroyTaskSlot(u32 index) {
+u32 fldEveHit_ScriptEnd2(u32 index) {
     u32 *taskSlot = &fldRoomTaskHandles[index];
 
     if (dds3ExistProcess((KwlnTask *)*taskSlot) != 0) {
@@ -614,20 +614,20 @@ extern u8 D_00435F24;
 
 extern u8 *fldSelectCurrentActorOnNextFloor(void);
 
-s32 fldRestartSceneResourceTask(void) {
+s32 fldEveHit_ChkEveHitAfter(void) {
     u8 *object;
     u32 state = D_00435F24;
     if (!(state & 1)) {
         return 0;
     }
     if ((state & 2) != 0 && D_00387D60[0] != 0) {
-        evtDestroyNamedTask(dds3GetWorldObject(), (const char *)D_00387D60);
+        dds3SceneBasicEndScript(dds3GetActiveScene(), (const char *)D_00387D60);
     }
     D_00387D60[0] = 0;
     D_00435F24 = 0;
     object = fldSelectCurrentActorOnNextFloor();
-    if (scrFindNamedProcessNode((const char *)object) == 0) {
-        evtStartSceneResourceTask(dds3GetWorldObject(), object);
+    if (scrSearchScriptName((const char *)object) == 0) {
+        evtStartSceneResourceTask(dds3GetActiveScene(), object);
     }
     return 1;
 }
@@ -640,7 +640,7 @@ void fldDrawTaskMarkers(void) {
     if (count > 0) {
         FldFileResource **entry = fldRoomResources;
         do {
-            fldDrawMarkerQuad((*entry)->transform);
+            fldDrawPos((*entry)->transform);
             i++;
             entry++;
         } while (i < fldTaskSlotCount);
@@ -648,7 +648,7 @@ void fldDrawTaskMarkers(void) {
 }
 
 /* Clear unregistered task handles; retain the native global-count loop bound. */
-void fldClearInactiveTaskSlots(void) {
+void fldPurgeEveRngProcesses(void) {
     s32 count = fldTaskSlotCount;
     s32 slotIndex = 0;
     if (count > 0) {
@@ -664,7 +664,7 @@ void fldClearInactiveTaskSlots(void) {
 }
 
 /* Return the first matching task slot's record ID; -1 denotes a miss. */
-s32 fldFindTaskRecordId(u32 task) {
+s32 fldEveHitResID_Find(u32 task) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
         if (fldRoomTaskHandles[slotIndex] == task) {
@@ -675,7 +675,7 @@ s32 fldFindTaskRecordId(u32 task) {
 }
 
 /* Return the first matching task slot's room ID; -1 denotes a miss. */
-s32 fldFindRoomByTask(u32 task) {
+s32 fldFindEveRngIndex(u32 task) {
     s32 slotIndex;
 
     for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
@@ -687,7 +687,7 @@ s32 fldFindRoomByTask(u32 task) {
 }
 
 /* Return the first matching task slot's record name; NULL on miss. */
-const char *fldGetTaskRecordValue(u32 task) {
+const char *fldEveHitResName_Find(u32 task) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
         if (fldRoomTaskHandles[slotIndex] == task) {
@@ -721,7 +721,7 @@ static inline void fldInitializeActionTransform(FldActionTransformFields *transf
     transform->rotation[3] = 0.0f;
 }
 
-extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
+extern EffWorldNode *dds3AddEventBasic(s32, void *, s32);
 
 void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
     FldActionTransformFields *transform;
@@ -733,10 +733,10 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
     s32 slot;
 
     index = fldActionRowCount;
-    counter = dds3AdvanceWorldCounter();
-    object = evtSpawnActionObjD(counter, D_0038BC20, (s32)D_0038BC00);
+    counter = dds3AllocObjectId();
+    object = dds3AddEventBasic(counter, D_0038BC20, (s32)D_0038BC00);
     fldActionRows[index].displayResource.id = counter;
-    slot = fldPushDisplayValue((u32)&fldActionRows[index].displayResource, object);
+    slot = fldEveHit_AddEveData((u32)&fldActionRows[index].displayResource, object);
     fldActionRows[index].prefix.task.shape.radius = triggerRadius;
     fldActionRows[index].prefix.shape.kind = 0;
     fldActionRows[index].prefix.task.info.unk0 = 1;
@@ -747,9 +747,9 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
     fldInitializeActionTransform(transform, x, y, z);
     fldActionRows[index].childResource.transform = transform->position;
     fldActionRows[index].childResource.data = &fldActionRows[index].prefix.task.info;
-    fldActionRows[index].childResource.id = dds3AdvanceWorldCounter();
+    fldActionRows[index].childResource.id = dds3AllocObjectId();
     fldActionRows[index].childResource.name = (const char *)D_0038BC00;
-    child = evtSpawnActionObj11(fldActionRows[index].childResource.id, (EvtWorldSourceTransformPrefix *)fldActionRows[index].childResource.transform, fldHitProgramName);
+    child = dds3AddPointBasic(fldActionRows[index].childResource.id, (EvtWorldSourceTransformPrefix *)fldActionRows[index].childResource.transform, fldHitProgramName);
     roomIndex = fldRegisterRoomObject(&fldActionRows[index].childResource, child);
     fldRoomRecords[roomIndex].roomId = roomId;
     fldRoomRecords[roomIndex].mode = 2;
@@ -767,17 +767,17 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
                                 f32 x, f32 y, f32 z, f32 radius) {
     s32 index = fldActionRowCount;
     FldActionTransform *transform;
-    s32 worldKey = dds3AdvanceWorldCounter();
+    s32 worldKey = dds3AllocObjectId();
     EffWorldNode *object;
     s32 taskIndex;
 
     if (kind == 0) {
-        object = evtSpawnActionObjD(worldKey, D_0038BC40, (s32)D_0038BC00);
+        object = dds3AddEventBasic(worldKey, D_0038BC40, (s32)D_0038BC00);
     } else {
-        object = evtSpawnActionObjD(worldKey, D_0038BC30, (s32)D_0038BC00);
+        object = dds3AddEventBasic(worldKey, D_0038BC30, (s32)D_0038BC00);
     }
     fldActionRows[index].displayResource.id = worldKey;
-    taskIndex = fldPushDisplayValue(
+    taskIndex = fldEveHit_AddEveData(
         (u32)&fldActionRows[index].displayResource, object);
     fldActionRows[index].prefix.task.shape.radius = radius;
     fldActionRows[index].prefix.task.shape.kind = 0;
@@ -800,9 +800,9 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
     transform->rotation[2] = 0.0f;
     transform->rotation[3] = 0.0f;
     transform->rotation[0] = 0.0f;
-    fldActionRows[index].childResource.id = dds3AdvanceWorldCounter();
+    fldActionRows[index].childResource.id = dds3AllocObjectId();
     fldActionRows[index].childResource.name = (const char *)D_0038BC00;
-    object = evtSpawnActionObj11(fldActionRows[index].childResource.id,
+    object = dds3AddPointBasic(fldActionRows[index].childResource.id,
                                  (EvtWorldSourceTransformPrefix *)fldActionRows[index].childResource.transform,
                                  fldHitProgramName);
     taskIndex = fldRegisterRoomObject(&fldActionRows[index].childResource, object);
@@ -835,7 +835,7 @@ s32 fldCheckEntryActive(s32 entry) {
 }
 
 /* Test for any nonzero slot handle, without consulting task registration. */
-s32 fldHasActiveTasks(void) {
+s32 fldCheckEveRngEncount(void) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
         if (fldRoomTaskHandles[slotIndex] != 0) {
@@ -859,7 +859,7 @@ extern s32 D_004361C8;
 extern const char D_0038E290[];
 
 
-const char *fldResolveEventSetByNameKindAreaOne(const char *eventName) {
+const char *fldCheckNpcTalk(const char *eventName) {
     s32 packOrSetIndex;
     s32 eventHitIndex;
     if (eventName == 0) return 0;
@@ -888,7 +888,7 @@ const char *fldResolveEventSetByNameKindAreaOne(const char *eventName) {
     return 0;
 }
 
-const char *fldResolveEventSetByNameKindAreaZero(const char *eventName) {
+const char *fldCheckNpcTalk2(const char *eventName) {
     s32 packOrSetIndex;
     s32 eventHitIndex;
     if (eventName == 0) return 0;
@@ -917,7 +917,7 @@ const char *fldResolveEventSetByNameKindAreaZero(const char *eventName) {
     return 0;
 }
 
-const char *fldResolveEventSetByNameEitherKindArea(const char *eventName) {
+const char *fldInf_FindTypeEveNpc(const char *eventName) {
     s32 packOrSetIndex;
     s32 eventHitIndex;
     if (eventName == 0) return 0;
@@ -958,7 +958,7 @@ s32 fldResolveEventSelectorTarget(s32 selector) {
         index = selector - 1;
         if (D_0038E2D0.sets[D_004361C8].flags[index].flag == 0) {
             target = (s8)D_0038E2D0.sets[D_004361C8].flags[index].offTarget;
-        } else if (mdlFlagTest(D_0038E2D0.sets[D_004361C8].flags[index].flag)) {
+        } else if (evtBitCheck(D_0038E2D0.sets[D_004361C8].flags[index].flag)) {
             target = (s8)D_0038E2D0.sets[D_004361C8].flags[index].onTarget;
         } else {
             target = (s8)D_0038E2D0.sets[D_004361C8].flags[index].offTarget;
@@ -971,7 +971,7 @@ s32 fldResolveEventSelectorTarget(s32 selector) {
     case 0:
         return 0;
     case 100:
-        fldResolveEventSetByNameEitherKindArea(fldRoomResources[fldCurrentEventRoom]->name);
+        fldInf_FindTypeEveNpc(fldRoomResources[fldCurrentEventRoom]->name);
         switch ((s8)D_0038E2D0.sets[D_004361C8].eventHit) {
         case 0: return 199;
         case 4: return 104;
@@ -1040,7 +1040,7 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
         row = messageId - 1;
         if (D_0038E2D0.sets[D_004361C8].flags[row].flag == 0) {
             target = (s8)D_0038E2D0.sets[D_004361C8].flags[row].offTarget;
-        } else if (mdlFlagTest(D_0038E2D0.sets[D_004361C8].flags[row].flag) != 0) {
+        } else if (evtBitCheck(D_0038E2D0.sets[D_004361C8].flags[row].flag) != 0) {
             target = (s8)D_0038E2D0.sets[D_004361C8].flags[row].onTarget;
         } else {
             target = (s8)D_0038E2D0.sets[D_004361C8].flags[row].offTarget;
@@ -1051,13 +1051,13 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
     }
     if (target >= 10) {
         if (D_0038E2D0.sets[D_004361C8].messages[target - 10].flags[0] != 0) {
-            mdlFlagClear(D_0038E2D0.sets[D_004361C8].messages[target - 10].flags[0]);
+            evtBitOff(D_0038E2D0.sets[D_004361C8].messages[target - 10].flags[0]);
         }
         if (D_0038E2D0.sets[D_004361C8].messages[target - 10].flags[1] != 0) {
-            mdlFlagSet(D_0038E2D0.sets[D_004361C8].messages[target - 10].flags[1]);
+            evtBitOn(D_0038E2D0.sets[D_004361C8].messages[target - 10].flags[1]);
         }
     }
-    world = dds3GetWorldObject();
+    world = dds3GetActiveScene();
     if (target >= 10) {
         extraAction = (s8)D_0038E2D0.sets[D_004361C8].messages[target - 10].extraAction;
     }
@@ -1084,21 +1084,21 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
             }
         }
         if (D_0038E2D0.views[viewIndex].positionName[0] != 0) {
-            node = dds3FindObjectChainNodeByName(world, (const u8 *)D_0038E2D0.views[viewIndex].positionName);
+            node = dds3SceneBasicSearchName(world, (const u8 *)D_0038E2D0.views[viewIndex].positionName);
             if (node != NULL) {
-                mdlAttachWorldObjectToSourceVector(((EffWorldNode *)fldPlayerObject)->key, node->key);
+                evtSetUnitPos(((EffWorldNode *)fldPlayerObject)->key, node->key);
             }
         }
         if (D_0038E2D0.views[viewIndex].cameraName[0] != 0) {
-            node = dds3FindObjectChainNodeByName(world, (const u8 *)D_0038E2D0.views[viewIndex].cameraName);
+            node = dds3SceneBasicSearchName(world, (const u8 *)D_0038E2D0.views[viewIndex].cameraName);
             if (node != NULL) {
-                camera = dds3FindWorldObjectNodeByKey(world, node->key, 4);
+                camera = dds3SearchSceneBasic(world, node->key, 4);
                 if (camera != NULL) {
-                    dds3SetWorldCameraObject(world, camera);
+                    dds3SetActiveCameraSceneBasic(world, camera);
                 }
             }
-        } else if (fldGetUnselectedWorldEntry() != 0) {
-            dds3SetWorldCameraObject(world, fldGetPlayerSceneState());
+        } else if (fldCamNowEveCamera() != 0) {
+            dds3SetActiveCameraSceneBasic(world, fldGetPlayerSceneState());
             switch (D_003897C0[0]) {
             case 0:
             case 3:
@@ -1135,7 +1135,7 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
         if (unit != NULL) {
             unit->owner->flags &= ~1;
         }
-        if (fldGetUnselectedWorldEntry() != 0) {
+        if (fldCamNowEveCamera() != 0) {
             switch (D_003897C0[0]) {
             case 0:
             case 3:
@@ -1176,31 +1176,31 @@ s32 fldGetActorSlotAttribute(s32 actorId, s32 attribute) {
     return value;
 }
 
-void fldLoadInfoTable(s32 field) {
+void fldInfLoad(s32 field) {
     char path[64];
     char directory[32];
     DevState *command;
     if (field < 200) {
-        fldFormatAreaDirectory(directory, field, 1);
+        fldMakeFilePath(directory, field, 1);
         sprintf(path, D_00413448, directory, field);
-        command = sdfDevCreateCommandState(path);
-        sdfDevQueueReadAndWait(command, &D_0038E2D0, sizeof(D_0038E2D0));
-        sdfDevWaitThenReleaseCommandState(command);
+        command = sdfFileOpen(path);
+        sdfFileRead(command, &D_0038E2D0, sizeof(D_0038E2D0));
+        sdfFileClose(command);
     }
 }
 
-void fldCopyInfoTable(FldInfTable *src) {
+void fldInfLoadFromMem(FldInfTable *src) {
     D_0038E2D0 = *src;
 }
 
-void fldStartSelectedActorTask(void) {
+void fldInfToWAP(void) {
     s32 slot = fldCurrentEventRoom;
     char *actor;
 
     fldEventActorTaskStarted = 1;
     actor = (char *)fldFindActorEntryByName(fldRoomResources[slot]->name);
-    if (scrFindNamedProcessNode(actor) == NULL) {
-        fldRoomTaskHandles[slot] = evtStartSceneResourceTask(dds3GetWorldObject(), actor);
+    if (scrSearchScriptName(actor) == NULL) {
+        fldRoomTaskHandles[slot] = evtStartSceneResourceTask(dds3GetActiveScene(), actor);
     }
 }
 
@@ -1220,7 +1220,7 @@ u8 *fldPickActorTemplateByName(const char *name) {
     do {
         entry = &fldActorEntries[i];
         flag = entry->requiredFlag;
-        if ((flag == 0 || mdlFlagTest(flag) != 0)
+        if ((flag == 0 || evtBitCheck(flag) != 0)
             && entry->floor == fldAreaState.floor + 1
             && strcmp(name, entry->name) == 0) {
             switch (entry->kind) {
@@ -1283,7 +1283,7 @@ u8 *fldFindActorEntryByName(const char *name) {
     do {
         entry = &fldActorEntries[i];
         flag = entry->requiredFlag;
-        if ((flag == 0 || mdlFlagTest(flag) != 0)
+        if ((flag == 0 || evtBitCheck(flag) != 0)
             && entry->floor == fldAreaState.floor + 1
             && strcmp(name, entry->name) == 0) {
             fldSelectedActorEntryIndex = i;
@@ -1376,7 +1376,7 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
     FldActorEntry *entry;
 
     if (useTaskRecord != 0) {
-        record = fldGetTaskRecordValue((u32)scrGetCurrentContext()->task);
+        record = fldEveHitResName_Find((u32)scrGetScriptHandle()->task);
         if (record == 0) {
             return;
         }
@@ -1398,10 +1398,10 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
             fldAreaState.positionMode = 1;
             fldAreaState.unk180 = fldActorSlots[index].firstValues[0];
             if (entry->motion == 1) {
-                kwlnFadeInStart(0xC0, 0xC0, 0xC0, 0xF);
+                dds3FadeOut(0xC0, 0xC0, 0xC0, 0xF);
                 return;
             }
-            kwlnFadeInStart(0, 0, 0, 0xF);
+            dds3FadeOut(0, 0, 0, 0xF);
             return;
         }
     } else if (kind == 3) {
@@ -1427,7 +1427,7 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
     }
 }
 
-void fldSelectCameraByActorName(const char *name) {
+void fldDoor_ExitCamera(const char *name) {
     FldActorEntry *entry;
     char *entryName;
     EffWorldNode *camera;
@@ -1438,7 +1438,7 @@ void fldSelectCameraByActorName(const char *name) {
     }
     for (i = 0; i < 0x100; i++) {
         entry = &fldActorEntries[i];
-        if (entry->requiredFlag != 0 && mdlFlagTest(entry->requiredFlag) == 0) {
+        if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) {
             continue;
         }
         if (entry->kind == 0) {
@@ -1451,8 +1451,8 @@ void fldSelectCameraByActorName(const char *name) {
                     return;
                 }
                 if (entry->variantMode == 0 && entry->linkKind == 3) {
-                    camera = dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(), 4, entry->linkName);
-                    dds3SetWorldCameraObject(dds3GetWorldObject(), camera);
+                    camera = dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 4, entry->linkName);
+                    dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), camera);
                     fldHideSceneModelsAndResetCamera();
                     return;
                 }
@@ -1461,7 +1461,7 @@ void fldSelectCameraByActorName(const char *name) {
     }
 }
 
-u8 fldIsSceneStateEight(void) {
+u8 fldDoor_ChkWarp(void) {
     return D_004361F8 == 8;
 }
 
@@ -1477,8 +1477,8 @@ extern s32 D_004361E8;
 extern char D_004134C0[];
 extern char D_004134D0[];
 extern void dds3WorkClear(void);
-extern void fldInitializeAlternateSequence(FieldSequenceRecord *, s32, s32, const char *);
-extern void fldInitializeSequenceWithNote(FieldSequenceRecord *, s32, s32, const char *, s32, const char *);
+extern void fldSetSceneParam3(FieldSequenceRecord *, s32, s32, const char *);
+extern void fldSetSceneParam5(FieldSequenceRecord *, s32, s32, const char *, s32, const char *);
 
 void fldApplyCurrentTaskScene(const char *name) {
     FieldSequenceRecord sequence;
@@ -1497,15 +1497,15 @@ void fldApplyCurrentTaskScene(const char *name) {
     u32 floorFlags;
     u32 flags;
 
-    if (name == NULL && !fldIsSceneStateEight()) {
+    if (name == NULL && !fldDoor_ChkWarp()) {
         return;
     }
     for (i = 0; i < FIELD_ACTOR_SLOT_COUNT; i++) {
-        if (fldIsSceneStateEight()) {
+        if (fldDoor_ChkWarp()) {
             i = D_00435F28;
         }
         entry = &fldActorWaypointRows.actors[i];
-        if (entry->requiredFlag != 0 && mdlFlagTest(entry->requiredFlag) == 0) {
+        if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) {
             continue;
         }
         if (entry->kind == 0) {
@@ -1516,7 +1516,7 @@ void fldApplyCurrentTaskScene(const char *name) {
             continue;
         }
         match = 0;
-        if (fldIsSceneStateEight()) {
+        if (fldDoor_ChkWarp()) {
             match = 1;
         }
         if (!match && strcmp(name, entryName) == 0) {
@@ -1571,27 +1571,27 @@ void fldApplyCurrentTaskScene(const char *name) {
             dds3WorkClear();
             switch (entry->variant) {
             case 0:
-                fldReleaseCurrentBgm();
+                fldBgmFadeOut();
                 event = entry->warpEntry;
-                dds3AdminSubmitModeRequest(0x14, &event, sizeof(event), 0);
+                dds3AdminiCallSequence(0x14, &event, sizeof(event), 0);
                 return;
             case 3:
-                fldReleaseCurrentBgm();
+                fldBgmFadeOut();
                 vr[0] = 0;
                 vr[1] = entry->warpEntry;
                 if (D_0038A3B8[vr[1]].requiredModelFlag != 0) {
-                    mdlFlagSet(D_0038A3B8[vr[1]].requiredModelFlag);
+                    evtBitOn(D_0038A3B8[vr[1]].requiredModelFlag);
                 }
                 datGameState->vr.previewX = vr[0];
                 datGameState->vr.previewY = vr[1];
-                dds3AdminSubmitModeRequest(0x15, vr, sizeof(vr), 0);
+                dds3AdminiCallSequence(0x15, vr, sizeof(vr), 0);
                 return;
             case 4:
                 vr[0] = 1;
                 vr[1] = entry->warpEntry;
                 datGameState->vr.previewX = vr[0];
                 datGameState->vr.previewY = vr[1];
-                dds3AdminSubmitModeRequest(0x15, vr, sizeof(vr), 0);
+                dds3AdminiCallSequence(0x15, vr, sizeof(vr), 0);
                 return;
             }
             return;
@@ -1599,9 +1599,9 @@ void fldApplyCurrentTaskScene(const char *name) {
         if (entry->variantMode == 0) {
             if (entry->variant == 1) {
                 dds3WorkClear();
-                fldReleaseCurrentBgm();
+                fldBgmFadeOut();
                 area[0] = fldAreaState.area;
-                dds3AdminSubmitModeRequest(0x1C, &area[0], sizeof(area[0]), 0);
+                dds3AdminiCallSequence(0x1C, &area[0], sizeof(area[0]), 0);
                 return;
             }
             if (entry->variant == 0) {
@@ -1615,7 +1615,7 @@ void fldApplyCurrentTaskScene(const char *name) {
                 floor = entry->warpEntry;
             }
             if (fldAreaState.area != area[0]) {
-                fldReleaseCurrentBgm();
+                fldBgmFadeOut();
             }
             fldApplySceneRoomSelection(entry);
             if (entry->flags54 != 0) {
@@ -1632,18 +1632,18 @@ void fldApplyCurrentTaskScene(const char *name) {
             }
             if (entry->kind == 3 || entry->kind == 4) {
                 fldAreaState.unk188 = 15;
-                kwlnFadeInStart(0, 0, 0, 0);
+                dds3FadeOut(0, 0, 0, 0);
                 if (entry->linkKind == 1 || entry->linkKind == 2) {
-                    fldInitializeFieldSequenceRecord(&sequence, area[0], floor, entry->warpName, entry->sequenceCode,
+                    fldSetSceneParam4(&sequence, area[0], floor, entry->warpName, entry->sequenceCode,
                                                      entry->linkKind, entry->linkName);
                 } else {
-                    fldInitializeAlternateSequence(&sequence, area[0], floor, entry->warpName);
+                    fldSetSceneParam3(&sequence, area[0], floor, entry->warpName);
                 }
             } else {
-                fldInitializeFieldSequenceRecord(&sequence, area[0], floor, entry->warpName, entry->sequenceCode,
+                fldSetSceneParam4(&sequence, area[0], floor, entry->warpName, entry->sequenceCode,
                                                  entry->linkKind, entry->linkName);
             }
-            dds3AdminSubmitModeRequest(5, &sequence, sizeof(sequence), 0);
+            dds3AdminiCallSequence(5, &sequence, sizeof(sequence), 0);
             return;
         }
         if (entry->variantMode == 1) {
@@ -1658,18 +1658,18 @@ void fldApplyCurrentTaskScene(const char *name) {
                             fldActorWaypointRows.headers[row].payload[headerFloor + 8]);
             entryName = D_004134C0;
             name = D_004134D0;
-            fldInitializeSequenceWithNote(&sequence, area[0], floor, entryName, 0, name);
-            dds3AdminSubmitModeRequest(5, &sequence, sizeof(sequence), 0);
+            fldSetSceneParam5(&sequence, area[0], floor, entryName, 0, name);
+            dds3AdminiCallSequence(5, &sequence, sizeof(sequence), 0);
             return;
         }
         if (entry->variantMode == 3) {
             command = entry->variant;
             fldSetDeferredFieldCommand(fldAreaState.area, command);
-            fldReleaseCurrentBgm();
+            fldBgmFadeOut();
             if (entry->warpEntry == 0 && entry->warpEntry2 != 0) {
                 fldSetDeferredFieldCommand(entry->warpEntry2, command);
             }
-            dds3AdminSubmitModeRequest(6, &command, sizeof(command), 0);
+            dds3AdminiCallSequence(6, &command, sizeof(command), 0);
             return;
         }
     }
@@ -1677,7 +1677,7 @@ void fldApplyCurrentTaskScene(const char *name) {
 
 /* Dispatch the first enabled field actor matching this action.
  * Elevator block IDs occupy the second six-halfword bank of body.data,
- * the same canonical header view used by fldGetRowValue below. */
+ * the same canonical header view used by fldDoor_GetElvTbl below. */
 void func_001411F8(s32 action) {
     FieldSequenceRecord sequence;
     s32 preview[2];
@@ -1705,7 +1705,7 @@ void func_001411F8(s32 action) {
         D_004361F0 = 0;
         datGameState->vr.previewX = preview[0];
         datGameState->vr.previewY = preview[1];
-        dds3AdminSubmitModeRequest(0x15, preview, 8, 0);
+        dds3AdminiCallSequence(0x15, preview, 8, 0);
         return;
     }
     if (action == 0x385) {
@@ -1719,12 +1719,12 @@ void func_001411F8(s32 action) {
         D_004361F0 = fldTriggeredSavePointValue;
         datGameState->vr.previewX = preview[0];
         datGameState->vr.previewY = preview[1];
-        dds3AdminSubmitModeRequest(0x15, preview, 8, 0);
+        dds3AdminiCallSequence(0x15, preview, 8, 0);
         return;
     }
     for (index = 0; index < 256; index++) {
         entry = &fldActorEntries[index];
-        if (entry->requiredFlag != 0 && !mdlFlagTest(entry->requiredFlag)) continue;
+        if (entry->requiredFlag != 0 && !evtBitCheck(entry->requiredFlag)) continue;
         if (entry->kind != 9 || entry->motion != action) continue;
         floorFlags = entry->flags64;
         if (floorFlags & 1) {
@@ -1749,42 +1749,42 @@ void func_001411F8(s32 action) {
             dds3WorkClear();
             switch (entry->variant) {
             case 0:
-                fldReleaseCurrentBgm();
+                fldBgmFadeOut();
                 event = entry->warpEntry;
-                dds3AdminSubmitModeRequest(0x14, &event, 4, 0);
+                dds3AdminiCallSequence(0x14, &event, 4, 0);
                 return;
             case 3:
-                fldReleaseCurrentBgm();
+                fldBgmFadeOut();
                 preview[0] = 0;
                 preview[1] = entry->warpEntry;
                 if (D_0038A3B8[preview[1]].requiredModelFlag != 0) {
-                    mdlFlagSet(D_0038A3B8[preview[1]].requiredModelFlag);
+                    evtBitOn(D_0038A3B8[preview[1]].requiredModelFlag);
                 }
                 datGameState->vr.previewX = preview[0];
                 datGameState->vr.previewY = preview[1];
-                dds3AdminSubmitModeRequest(0x15, preview, 8, 0);
+                dds3AdminiCallSequence(0x15, preview, 8, 0);
                 return;
             case 4:
                 preview[0] = 1;
                 preview[1] = entry->warpEntry;
                 datGameState->vr.previewX = preview[0];
                 datGameState->vr.previewY = preview[1];
-                dds3AdminSubmitModeRequest(0x15, preview, 8, 0);
+                dds3AdminiCallSequence(0x15, preview, 8, 0);
                 return;
             }
             return;
         } else if (entry->variantMode == 0) {
             if (entry->variant == 1) {
-                fldReleaseCurrentBgm();
+                fldBgmFadeOut();
                 area[0] = fldAreaState.area;
-                dds3AdminSubmitModeRequest(0x1C, &area[0], 4, 0);
+                dds3AdminiCallSequence(0x1C, &area[0], 4, 0);
                 return;
             }
             if (entry->variant == 0) area[0] = fldAreaState.area;
             else area[0] = entry->variant;
             if (entry->warpEntry == 0) room = fldAreaState.floor + 1;
             else room = entry->warpEntry;
-            if (fldAreaState.area != area[0]) fldReleaseCurrentBgm();
+            if (fldAreaState.area != area[0]) fldBgmFadeOut();
             fldApplySceneRoomSelection(entry);
             if (entry->flags54 != 0) {
                 D_00435F24 = entry->flags54;
@@ -1797,16 +1797,16 @@ void func_001411F8(s32 action) {
             if ((u32)((u8)entry->kind - 3) < 2U) {
                 fldAreaState.unk188 = 15;
                 if (entry->linkKind == 1) {
-                    fldInitializeFieldSequenceRecord(&sequence, area[0], room, entry->warpName,
+                    fldSetSceneParam4(&sequence, area[0], room, entry->warpName,
                         entry->sequenceCode, 1, entry->linkName);
                 } else {
-                    fldInitializeAlternateSequence(&sequence, area[0], room, entry->warpName);
+                    fldSetSceneParam3(&sequence, area[0], room, entry->warpName);
                 }
             } else {
-                fldInitializeFieldSequenceRecord(&sequence, area[0], room, entry->warpName,
+                fldSetSceneParam4(&sequence, area[0], room, entry->warpName,
                     entry->sequenceCode, entry->linkKind, entry->linkName);
             }
-            dds3AdminSubmitModeRequest(5, &sequence, 0xA0, 0);
+            dds3AdminiCallSequence(5, &sequence, 0xA0, 0);
             return;
         } else if (entry->variantMode == 1) {
             headerIndex = entry->variant - 1;
@@ -1818,17 +1818,17 @@ void func_001411F8(s32 action) {
             D_004361E0 = headerFloor;
             fldSetFloorFlag(area[0], fldAreaState.floor + 1,
                 fldActorWaypointRows.headers[headerIndex].body.data[headerFloor + 6]);
-            fldInitializeSequenceWithNote(&sequence, area[0], room, D_004134C0, 0, D_004134D0);
-            dds3AdminSubmitModeRequest(5, &sequence, 0xA0, 0);
+            fldSetSceneParam5(&sequence, area[0], room, D_004134C0, 0, D_004134D0);
+            dds3AdminiCallSequence(5, &sequence, 0xA0, 0);
             return;
         } else if (entry->variantMode == 3) {
             warp = entry->variant;
             fldSetDeferredFieldCommand(fldAreaState.area, warp);
-            fldReleaseCurrentBgm();
+            fldBgmFadeOut();
             if (entry->warpEntry == 0 && entry->warpEntry2 != 0) {
                 fldSetDeferredFieldCommand(entry->warpEntry2, warp);
             }
-            dds3AdminSubmitModeRequest(6, &warp, 4, 0);
+            dds3AdminiCallSequence(6, &warp, 4, 0);
             return;
         }
     }
@@ -1871,10 +1871,10 @@ void fldSubmitSelectedActorWaypointTransition(void) {
     extra = D_004361E8;
     motion = D_004361EC;
     index = D_004361F0;
-    fldLoadActorWaypointTable(D_004361E4);
+    fldDoorLoad(D_004361E4);
     for (i = 0; i < 0x100; i++) {
         entry = &fldActorEntries[i];
-        if (entry->requiredFlag != 0 && !mdlFlagTest(entry->requiredFlag)) {
+        if (entry->requiredFlag != 0 && !evtBitCheck(entry->requiredFlag)) {
             continue;
         }
         if (entry->kind != 7) {
@@ -1904,9 +1904,9 @@ void fldSubmitSelectedActorWaypointTransition(void) {
                                                 entry->explorationColumnCount, entry->explorationRowCount);
         }
         if (entry->variant == 1) {
-            fldReleaseCurrentBgm();
+            fldBgmFadeOut();
             stage = fldAreaState.area;
-            dds3AdminSubmitModeRequest(0x1C, &stage, 4, 0);
+            dds3AdminiCallSequence(0x1C, &stage, 4, 0);
             return;
         }
         if (entry->variant == 0) {
@@ -1919,7 +1919,7 @@ void fldSubmitSelectedActorWaypointTransition(void) {
             room = D_004361E8;
         }
         if (fldAreaState.area != stage) {
-            fldReleaseCurrentBgm();
+            fldBgmFadeOut();
         }
         fldApplySceneRoomSelection(entry);
         if (entry->flags54 != 0) {
@@ -1927,7 +1927,7 @@ void fldSubmitSelectedActorWaypointTransition(void) {
             strcpy((char *)D_00387D60, entry->taskName);
             D_00435F28 = i + 1;
         }
-        fldInitializeFieldSequenceRecord(&record, stage, room, entry->warpName, entry->sequenceCode, entry->linkKind, entry->linkName);
+        fldSetSceneParam4(&record, stage, room, entry->warpName, entry->sequenceCode, entry->linkKind, entry->linkName);
         if ((u32)(motion - 3) < 2) {
             record.mode = 5;
         } else {
@@ -1937,12 +1937,12 @@ void fldSubmitSelectedActorWaypointTransition(void) {
         D_004361E8 = 0;
         D_004361EC = 0;
         D_004361F0 = 0;
-        dds3AdminSubmitModeRequest(5, &record, 0xA0, 0);
+        dds3AdminiCallSequence(5, &record, 0xA0, 0);
         return;
     }
 }
 
-extern void fldInitializeLinkedSequence(FieldSequenceRecord *, s32, s32, const char *, s32, s32, const char *);
+extern void fldSetSceneParamLoad(FieldSequenceRecord *, s32, s32, const char *, s32, s32, const char *);
 
 /* Start the linked sequence of the first enabled waypoint actor that matches this field transition. */
 void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *sequence) {
@@ -1962,10 +1962,10 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *
     if (field == 0) {
         return;
     }
-    fldLoadActorWaypointTable(field);
+    fldDoorLoad(field);
     for (i = 0; i < 0x100; i++) {
         entry = &fldActorEntries[i];
-        if (entry->requiredFlag != 0 && !mdlFlagTest(entry->requiredFlag)) {
+        if (entry->requiredFlag != 0 && !evtBitCheck(entry->requiredFlag)) {
             continue;
         }
         if (entry->kind != 7 || motion != entry->motion ||
@@ -1987,7 +1987,7 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *
             kind = 1;
         }
         if (field != 0 && kind != 0) {
-            fldInitializeLinkedSequence(sequence, field, kind, entry->warpName,
+            fldSetSceneParamLoad(sequence, field, kind, entry->warpName,
                                         entry->sequenceCode, entry->linkKind, entry->linkName);
             sequence->mode = 5;
             if (fldAreaState.sequenceCode != entry->sequenceCode && entry->sequenceCode != 0) {
@@ -2015,10 +2015,10 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
     FldActorEntry *entry;
     char *taskName;
 
-    fldLoadActorWaypointTable(command);
+    fldDoorLoad(command);
     for (i = 0; i < 0x100; i++) {
         entry = &fldActorEntries[i];
-        if (entry->requiredFlag != 0 && !mdlFlagTest(entry->requiredFlag)) {
+        if (entry->requiredFlag != 0 && !evtBitCheck(entry->requiredFlag)) {
             continue;
         }
         if (entry->kind != 8 || entry->motion != parameter) {
@@ -2027,11 +2027,11 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
         if (entry->variantMode == 3) {
             warp = entry->variant;
             fldSetDeferredFieldCommand(command, warp);
-            fldReleaseCurrentBgm();
+            fldBgmFadeOut();
             if (entry->warpEntry == 0 && entry->warpEntry2 != 0) {
                 fldSetDeferredFieldCommand(entry->warpEntry2, warp);
             }
-            dds3AdminSubmitModeRequest(6, &warp, 4, 0);
+            dds3AdminiCallSequence(6, &warp, 4, 0);
             return 1;
         }
         if (entry->variantMode != 0) {
@@ -2056,9 +2056,9 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
                                                 entry->explorationColumnCount, entry->explorationRowCount);
         }
         if (entry->variant == 1) {
-            fldReleaseCurrentBgm();
+            fldBgmFadeOut();
             stagePayload.value = fldAreaState.area;
-            dds3AdminSubmitModeRequest(0x1C, stagePayload.bytes, sizeof(stagePayload.bytes), 0);
+            dds3AdminiCallSequence(0x1C, stagePayload.bytes, sizeof(stagePayload.bytes), 0);
             return 0;
         }
         if (entry->variant == 0) {
@@ -2068,7 +2068,7 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
         }
         room = entry->warpEntry;
         if (fldAreaState.area != stagePayload.value) {
-            fldReleaseCurrentBgm();
+            fldBgmFadeOut();
         }
         fldApplySceneRoomSelection(entry);
         if (entry->flags54 != 0) {
@@ -2077,9 +2077,9 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
             strcpy((char *)D_00387D60, taskName);
             D_00435F28 = i + 1;
         }
-        fldInitializeFieldSequenceRecord(&record, stagePayload.value, room, entry->warpName, entry->sequenceCode, entry->linkKind, entry->linkName);
+        fldSetSceneParam4(&record, stagePayload.value, room, entry->warpName, entry->sequenceCode, entry->linkKind, entry->linkName);
         record.mode = 6;
-        dds3AdminSubmitModeRequest(5, &record, 0xA0, 0);
+        dds3AdminiCallSequence(5, &record, 0xA0, 0);
         return 0;
     }
     return 0;
@@ -2088,7 +2088,7 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
 extern void fldRequestAreaResource(s32 area, s32 room);
 
 /* Each warp kind keeps its own arm; retail compiles them separately and merges the tails. */
-void func_00141F58(const char *name) {
+void fldDoor_WarpCash(const char *name) {
     FldActorEntry *entry;
     s32 area;
     s32 room;
@@ -2099,7 +2099,7 @@ void func_00141F58(const char *name) {
     }
     for (i = 0; i < 0x100; i++) {
         entry = &fldActorEntries[i];
-        if (entry->requiredFlag != 0 && mdlFlagTest(entry->requiredFlag) == 0) {
+        if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) {
             continue;
         }
         if (entry->kind == 1 && entry->variantMode == 0) {
@@ -2167,12 +2167,12 @@ s32 fldGetActorStat0(s32 attribute) {
     case 0:
         return actor->motion;
     case 1:
-        objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->motionName);
+        objectNode = dds3SceneBasicSearchName(dds3GetActiveScene(), actor->motionName);
         if (objectNode != NULL) {
             return objectNode->key;
         }
     case 2:
-        objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->otherName);
+        objectNode = dds3SceneBasicSearchName(dds3GetActiveScene(), actor->otherName);
         if (objectNode != NULL) {
             return objectNode->key;
         }
@@ -2213,12 +2213,12 @@ s32 fldGetMappedActorStateAttribute(u32 attribute) {
         }
         return 0;
     case 1:
-        objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->motionName);
+        objectNode = dds3SceneBasicSearchName(dds3GetActiveScene(), actor->motionName);
         if (objectNode != NULL) {
             return objectNode->key;
         }
     case 2:
-        objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->otherName);
+        objectNode = dds3SceneBasicSearchName(dds3GetActiveScene(), actor->otherName);
         if (objectNode != NULL) {
             return objectNode->key;
         }
@@ -2245,12 +2245,12 @@ s32 fldGetActorMotionEntry(u32 attribute) {
     case 0:
         return D_00391FA0[motionIndex].defaultMotionId;
     case 1:
-        objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), D_00391FA0[motionIndex].motionObjectName);
+        objectNode = dds3SceneBasicSearchName(dds3GetActiveScene(), D_00391FA0[motionIndex].motionObjectName);
         if (objectNode != NULL) {
             return objectNode->key;
         }
     case 2:
-        objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), D_00391FA0[motionIndex].secondaryMotionObjectName);
+        objectNode = dds3SceneBasicSearchName(dds3GetActiveScene(), D_00391FA0[motionIndex].secondaryMotionObjectName);
         if (objectNode != NULL) {
             return objectNode->key;
         }
@@ -2272,7 +2272,7 @@ s32 fldGetActorMotionEntry(u32 attribute) {
     return 0;
 }
 
-s32 fldGetRowValue(u32 kind) {
+s32 fldDoor_GetElvTbl(u32 kind) {
     s32 slot = D_004361DC;
 
     switch (kind) {
@@ -2310,7 +2310,7 @@ s32 fldGetRowValue(u32 kind) {
     return 0;
 }
 
-s32 fldFindTableEntry(s32 index) {
+s32 fldDoor_ElvTakasaToFloor(s32 index) {
     s32 slot = D_004361DC;
     s32 count = fldActorWaypointRows.headers[slot].floorCount;
 
@@ -2350,7 +2350,7 @@ void fldDispatchSceneRoomSelection(s32 index) {
     }
     for (i = 0; i < FIELD_ACTOR_SLOT_COUNT; i++) {
         entry = &fldActorEntries[i];
-        if (entry->requiredFlag != 0 && mdlFlagTest(entry->requiredFlag) == 0) {
+        if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) {
             continue;
         }
         if (entry->kind == 6 && entry->motion - 1 == D_004361DC &&
@@ -2366,7 +2366,7 @@ void fldDispatchSceneRoomSelection(s32 index) {
                 floor = entry->warpEntry;
             }
             if (fldAreaState.area != area) {
-                fldReleaseCurrentBgm();
+                fldBgmFadeOut();
             }
             fldApplySceneRoomSelection(entry);
             floorFlags = entry->flags64;
@@ -2400,18 +2400,18 @@ void fldDispatchSceneRoomSelection(s32 index) {
                 fldAreaState.unk100 = 0;
             }
             fldSetFloorFlag(area, floor, D_003931A4[D_004361DC * 16 + sourceRoom + 8]);
-            fldInitializeFieldSequenceRecord(&sequence, area, floor, entry->warpName, entry->sequenceCode, entry->linkKind, entry->linkName);
-            dds3AdminSubmitModeRequest(5, &sequence, sizeof(sequence), 0);
+            fldSetSceneParam4(&sequence, area, floor, entry->warpName, entry->sequenceCode, entry->linkKind, entry->linkName);
+            dds3AdminiCallSequence(5, &sequence, sizeof(sequence), 0);
             break;
         } else if (entry->kind == 6 && entry->motion - 1 == D_004361DC &&
                    entry->secondaryMotion == sourceRoom && entry->variantMode == 3) {
             command = entry->variant;
             fldSetDeferredFieldCommand(fldAreaState.area, command);
-            fldReleaseCurrentBgm();
+            fldBgmFadeOut();
             if (entry->warpEntry == 0 && entry->warpEntry2 != 0) {
                 fldSetDeferredFieldCommand(entry->warpEntry2, command);
             }
-            dds3AdminSubmitModeRequest(6, &command, sizeof(command), 0);
+            dds3AdminiCallSequence(6, &command, sizeof(command), 0);
             break;
         }
     }
@@ -2448,22 +2448,22 @@ void fldResetActorSlots(void) {
     fldSelectedActorEntryIndex = -1;
 }
 
-void fldLoadActorWaypointTable(s32 field) {
+void fldDoorLoad(s32 field) {
     char path[64];
     char directory[32];
     DevState *command;
     if (field >= 100) {
         memset(&fldActorWaypointRows, 0, 0x6D00);
     } else {
-        fldFormatAreaDirectory(directory, field, 1);
+        fldMakeFilePath(directory, field, 1);
         sprintf(path, "%sF%03d.WAP", directory, field);
-        command = sdfDevCreateCommandState(path);
-        sdfDevQueueReadAndWait(command, &fldActorWaypointRows, 0x6D00);
-        sdfDevWaitThenReleaseCommandState(command);
+        command = sdfFileOpen(path);
+        sdfFileRead(command, &fldActorWaypointRows, 0x6D00);
+        sdfFileClose(command);
     }
 }
 
-void fldCopyActorWaypointTable(FldWaypointBlock *src) {
+void fldGetDoorEntry(FldWaypointBlock *src) {
     fldActorWaypointRows = *src;
 }
 
@@ -2482,7 +2482,7 @@ void fldInitializeActorMotionSlots(void) {
 
     memset(rotation, 0, sizeof(rotation));
     rotation[3] = 1.0f;
-    world = (EffWorldNode *)dds3GetWorldSecondaryObject();
+    world = (EffWorldNode *)dds3GetControlScene();
     for (actorIndex = 0; actorIndex < FIELD_ACTOR_SLOT_COUNT; actorIndex++) {
         actor = &fldActorEntries[actorIndex];
         row = &fldActorSlots[actorIndex];
@@ -2499,7 +2499,7 @@ void fldInitializeActorMotionSlots(void) {
                         rotation[2] = transform[6];
                         rotation[3] = transform[7];
                         VU0_LOAD_VF(vf10, rotation);
-                        angle = effMiscComputeQuaternionRotatedReferenceAngle() * 180.0f / 3.14f;
+                        angle = EulerAngleAxisY() * 180.0f / 3.14f;
                         while (angle < 0.0f) {
                             angle += 360.0f;
                         }
@@ -2524,7 +2524,7 @@ void fldInitializeActorMotionSlots(void) {
             }
             row->firstKey = -1;
             if (actor->motion != 0) {
-                node = dds3FindIndexedObjectChainNodeByName(world, 6, (const u8 *)actor->motionName);
+                node = dds3SceneBasicSearchNameAndType(world, 6, (const u8 *)actor->motionName);
                 if (node != NULL) {
                     row->firstKey = node->key;
                     for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
@@ -2538,7 +2538,7 @@ void fldInitializeActorMotionSlots(void) {
                             rotation[2] = transform[6];
                             rotation[3] = transform[7];
                             VU0_LOAD_VF(vf10, rotation);
-                            angle = effMiscComputeQuaternionRotatedReferenceAngle() * 180.0f / 3.14f;
+                            angle = EulerAngleAxisY() * 180.0f / 3.14f;
                             while (angle < 0.0f) {
                                 angle += 360.0f;
                             }
@@ -2560,7 +2560,7 @@ void fldInitializeActorMotionSlots(void) {
             }
             row->secondKey = -1;
             if (actor->secondaryMotion != 0) {
-                node = dds3FindIndexedObjectChainNodeByName(world, 6, (const u8 *)actor->otherName);
+                node = dds3SceneBasicSearchNameAndType(world, 6, (const u8 *)actor->otherName);
                 if (node != NULL) {
                     row->secondKey = node->key;
                     for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
@@ -2574,7 +2574,7 @@ void fldInitializeActorMotionSlots(void) {
                             rotation[2] = transform[6];
                             rotation[3] = transform[7];
                             VU0_LOAD_VF(vf10, rotation);
-                            angle = effMiscComputeQuaternionRotatedReferenceAngle() * 180.0f / 3.14f;
+                            angle = EulerAngleAxisY() * 180.0f / 3.14f;
                             while (angle < 0.0f) {
                                 angle += 360.0f;
                             }
@@ -2596,7 +2596,7 @@ void fldInitializeActorMotionSlots(void) {
             }
             row->transitionKey = -1;
             if ((actor->flags54 & 2) == 0 && actor->taskName[0] != '\0') {
-                node = dds3FindIndexedObjectChainNodeByName(world, 6, (const u8 *)actor->taskName);
+                node = dds3SceneBasicSearchNameAndType(world, 6, (const u8 *)actor->taskName);
                 if (node != NULL) {
                     row->transitionKey = node->key;
                 }
@@ -2925,7 +2925,7 @@ void fldBeginNpcInteractionById(s32 id) {
 
 #include "sdf_debug_api.h"
 
-extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
+extern void dds3MatterObjectBasicSetAlpMode(EffWorldNode *object, u32 value);
 
 s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
     f32 weights[50] = {
@@ -2989,10 +2989,10 @@ s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
                 continue;
             }
             if (row->transitionFrame == 0) {
-                node = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), key, 6);
+                node = dds3SearchSceneBasic(dds3GetControlScene(), key, 6);
                 if (node != NULL) {
                     printf("DOOR SISETU FADE 6\n");
-                    dds3SetObjectPayloadWord8(node, 9);
+                    dds3MatterObjectBasicSetAlpMode(node, 9);
                 }
             }
             row->transitionFrame++;
@@ -3028,7 +3028,7 @@ void fldApplyCurrentAreaActorEntries(void) {
 extern s32 D_00399F90[];
 
 void fldDrawTitleBannerFrame(s32 mode) {
-    evtSetDrawSurfaceIndex(0x53);
+    eglSetOt(0x53);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     evtSubmitTexturedGradientQuad(0x97, 0x128, 0x3A, 0x24, 1, 2, 0x3A, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
@@ -3050,7 +3050,7 @@ void fldDrawTitleBannerFrame(s32 mode) {
 extern s32 D_00389978[];
 
 void fldDrawTitleBannerCursor(s32 x, s32 y) {
-    evtSetDrawSurfaceIndex(0x53);
+    eglSetOt(0x53);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     evtSubmitTexturedGradientQuad(x, y, 0x12, 0x13, 1, 0x25, 0x12, 0x13, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00389978[0]));
@@ -3069,10 +3069,10 @@ s32 fldUpdateTitleBannerTask(void *task) {
     if (D_00389780[0] >= 200) {
         return 0;
     }
-    if (fldGetCampSceneControlMode() != 0) {
+    if (fldProcCampChk() != 0) {
         return 0;
     }
-    if (fldGetSceneReadyOrPendingState() != 0) {
+    if (fldProcAmChk() != 0) {
         return 0;
     }
     if (fileMenuTaskExists() != 0) {
@@ -3081,10 +3081,10 @@ s32 fldUpdateTitleBannerTask(void *task) {
     if (fldHasKiretaLabelProcess() != 0) {
         return 0;
     }
-    if (fldHasHirakenaiLabelProcess() != 0) {
+    if (fldProcKiretaChk() != 0) {
         return 0;
     }
-    if (fldHasBadkaifukuLabelProcess() != 0) {
+    if (fldProcHirakenaiChk() != 0) {
         return 0;
     }
     if (fldIsEventPhaseAtLeastTwo() != 0) {
@@ -3095,7 +3095,7 @@ s32 fldUpdateTitleBannerTask(void *task) {
         fldDrawTitleBannerFrame(menu->position);
         fldDrawTitleBannerCursor(D_00399F60[menu->choice] - 9, 0x130);
         itfSetTextDrawLimit(0x13);
-        fldDrawConvertedTextGlyph(D_00399F60[menu->choice] + 10, 0x98, 0xA09DC380, D_00399EA0[menu->choice]);
+        fldKanjiDraw(D_00399F60[menu->choice] + 10, 0x98, 0xA09DC380, D_00399EA0[menu->choice]);
         itfSetTextDrawLimit(-1);
         menu->position++;
         menu->pending = 0;
@@ -3105,7 +3105,7 @@ s32 fldUpdateTitleBannerTask(void *task) {
     return 0;
 }
 
-s32 fldInitializeTitleBannerTask(KwlnTask *task) {
+s32 fldInputPanelProcess1(KwlnTask *task) {
     s16 *node = sdfChipAllocDirect(8);
     node[1] = 1;
     node[0] = 0;

@@ -65,15 +65,15 @@
 /* Declared before first use (were implicit int). */
 extern void dds3WorkClear(void);
 extern void sdfDrawSync(void);
-extern void sndSendSingleWordControlPacket(u32 controlWord);
+extern void p2sdSendStopCmd(u32 controlWord);
 
-extern void sndQueueNoPayloadCommand1A0(void);
+extern void p2sdStopAllBgm(void);
 extern u8 kwlnTaskPadButtonStates[2][2][16];
 extern u8 D_003BA878[2][2];
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewUpVector[4];
-extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
+extern void fldAutoMapGetBBox(f32 *, f32 *, f32 *, f32 *);
 
 
 
@@ -147,12 +147,12 @@ extern s32 D_0032E474[];
 
 extern s32 D_0033EB78[];
 
-extern void sndReleaseTrackHandle(s32 trackHandle);
+extern void p2sdStopBGM(s32 trackHandle);
 
 
 
 
-extern void fldRelocatePackedTransferChunk(u32 buffer, FldTransferChunk *chunk);
+extern void fldAddressResolver(u32 buffer, FldTransferChunk *chunk);
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 
@@ -171,10 +171,10 @@ extern struct SdfMemBlock *D_003BAFEC;
 extern u32 D_003BAFF0;
 extern void fldSetCameraModelMotionRequest(u32, u32);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
-extern void *effObjCreateEventNode(void *, f32 *, f32 *);
-extern void effObjClearFlags(void *, s32);
-extern void effObjSetFlags(void *, s32);
-extern void effObjReplaceActiveEventNode(void *, u32);
+extern void *dds3AddBEDEffectObjectBasic2(void *, f32 *, f32 *);
+extern void dds3EffectObjectBasicStatOff(void *, s32);
+extern void dds3EffectObjectBasicStatOn(void *, s32);
+extern void dds3StartBEDEffectObjectBasic(void *, u32);
 extern void fldSetCameraNodeModeWithTen(void);
 extern u8 D_003A0978[];
 extern void sdfMemFreeDelayedDirect(struct SdfMemBlock *);
@@ -202,7 +202,7 @@ extern s32 D_003D62A8[];
 
 extern s32 fldCurrentBgmId[];
 
-extern void sndQueueSoundId();
+extern void p2sdStopSe();
 
 
 
@@ -212,7 +212,7 @@ extern s32 D_0032E3C0[];
 
 extern s32 fldSceneSoundBase;
 
-extern void ddsReleaseUnitObject(EffWorldNode *node);
+extern void dds3DeleteUnitObjectBasic(EffWorldNode *node);
 
 extern FldSparkObjectEntry fldSparkObjectEntries[];
 
@@ -266,25 +266,25 @@ typedef struct {
 extern FldClear18 fldPendingSounds[];
 
 
-extern void fldSelectDisplayBuffer(u32);
+extern void rsetOtOfs(u32);
 
-extern void fldSetGsAlphaBlendEquation(s32);
+extern void rsetAlpha(s32);
 
-extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern void fldSubmitSpriteRect(s32, s32, s32, s32, s32, s32, s32, s32, s32, SdfTex *);
+extern void DrwSprite2D(s32, s32, s32, s32, s32, s32, s32, s32, s32, SdfTex *);
 
 #include "fld_title_banner_menu.h"
 
 extern KwlnTask *fldInputPanelTaskHandle;
 extern u32 fldDisplayStateWords[];
 extern s32 fldEventActorTaskStarted;
-extern u8 fldGetCampSceneControlMode(void);
-extern u8 fldGetSceneReadyOrPendingState(void);
+extern u8 fldProcCampChk(void);
+extern u8 fldProcAmChk(void);
 extern s32 fileMenuTaskExists(void);
 extern u8 fldHasKiretaLabelProcess(void);
-extern u8 fldHasHirakenaiLabelProcess(void);
-extern u8 fldHasBadkaifukuLabelProcess(void);
+extern u8 fldProcKiretaChk(void);
+extern u8 fldProcHirakenaiChk(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
 extern void fldApplyCameraFacingPoint(void);
 
@@ -292,10 +292,10 @@ s32 fldResolvePendingTitleBanner(void) {
     FldTitleBannerMenu *menu;
     FldAreaWork *area;
 
-    if (fldGetCampSceneControlMode() != 0) {
+    if (fldProcCampChk() != 0) {
         return 0;
     }
-    if (fldGetSceneReadyOrPendingState() != 0) {
+    if (fldProcAmChk() != 0) {
         return 0;
     }
     if (fldDisplayStateWords[0] != 0) {
@@ -307,10 +307,10 @@ s32 fldResolvePendingTitleBanner(void) {
     if (fldHasKiretaLabelProcess() != 0) {
         return 0;
     }
-    if (fldHasHirakenaiLabelProcess() != 0) {
+    if (fldProcKiretaChk() != 0) {
         return 0;
     }
-    if (fldHasBadkaifukuLabelProcess() != 0) {
+    if (fldProcHirakenaiChk() != 0) {
         return 0;
     }
     if (fldIsEventPhaseAtLeastTwo() != 0) {
@@ -329,7 +329,7 @@ s32 fldResolvePendingTitleBanner(void) {
         menu->pending = 0;
         area = &fldAreaState;
         if (area->titleFade != 0) {
-            kwlnFadeStartIn(8);
+            dds3FadeIn2(8);
             area->titleFade = 0;
         }
         return 1;
@@ -346,10 +346,10 @@ extern void func_00147188(s32);
 extern s32 fldCameraMoveTrackingCurrent;
 
 s32 fldFieldTaskUpdate(void) {
-    if (fldGetCampSceneControlMode() != 0) {
+    if (fldProcCampChk() != 0) {
         return 0;
     }
-    if (fldGetSceneReadyOrPendingState() != 0) {
+    if (fldProcAmChk() != 0) {
         return 0;
     }
     if (fileMenuTaskExists() != 0) {
@@ -366,7 +366,7 @@ s32 fldFieldTaskUpdate(void) {
     return 0;
 }
 
-void *fldFieldTaskCreate(KwlnTask *task) {
+void *fldAddressProcess1(KwlnTask *task) {
     s32 *work;
 
     work = sdfChipAllocDirect(0x10);
@@ -378,7 +378,7 @@ void *fldFieldTaskCreate(KwlnTask *task) {
     return fldFieldTaskUpdate;
 }
 
-void fldFieldTaskDestroy(KwlnTask *task) {
+void fldAddressShutdown(KwlnTask *task) {
     void *work;
 
     work = (void *)dds3GetProcessData(task);
@@ -386,19 +386,19 @@ void fldFieldTaskDestroy(KwlnTask *task) {
     fldFieldTaskHandle = 0;
 }
 
-void fldEnsureTask(void) {
+void fldInitAddressProcess(void) {
     if (fldFieldTaskHandle == 0) {
-        fldFieldTaskHandle = dds3StartProcess(D_003BAE78, 0x2B0B, 1, 1, fldFieldTaskCreate, fldFieldTaskDestroy, 0);
+        fldFieldTaskHandle = dds3StartProcess(D_003BAE78, 0x2B0B, 1, 1, fldAddressProcess1, fldAddressShutdown, 0);
     }
 }
 
-void fldDestroyTask(void) {
+void fldFreeAddressProcess(void) {
     if (fldFieldTaskHandle != 0) {
         dds3KillProcess((KwlnTask *)fldFieldTaskHandle, 1);
     }
 }
 
-void fldResetPendingSounds(void) {
+void fldSe_Init(void) {
     FldClear18 *entry = fldPendingSounds;
     s32 remaining = 7;
 
@@ -412,7 +412,7 @@ void fldResetPendingSounds(void) {
     fldPendingSoundCount = 0;
 }
 
-void fldAppendClearEntry(s32 soundId, f32 radius, f32 sourceX, f32 sourceY, f32 sourceZ) {
+void fldAddSe3D(s32 soundId, f32 radius, f32 sourceX, f32 sourceY, f32 sourceZ) {
     s32 i = fldPendingSoundCount;
 
     fldPendingSounds[i].flags = 0;
@@ -433,18 +433,18 @@ void fldPlayPendingSounds(void) {
 
     stage = D_0032E3C0[0];
     if (stage == 11) {
-        stage = mdlFlagTest(0x28) != 0 ? 2 : stage;
+        stage = evtBitCheck(0x28) != 0 ? 2 : stage;
     }
     for (i = 0; i < fldPendingSoundCount; i++) {
         if (fldPendingSounds[i].flags & 1) {
             fldPendingSounds[i].flags &= ~1;
-            sndQueueSoundId(fldStageSoundBaseTable[stage] + fldPendingSounds[i].soundId);
+            p2sdStopSe(fldStageSoundBaseTable[stage] + fldPendingSounds[i].soundId);
         }
     }
 }
 
 extern f32 fldLookAtFarPoint[];
-extern void sndQueueSoundId(u32);
+extern void p2sdStopSe(u32);
 extern s32 D_003BAE90;
 extern s32 D_003BAE94;
 extern f32 fldLookAtNearPoint[];
@@ -452,8 +452,8 @@ typedef struct SoundPosition {
     f32 v[4];
 } SoundPosition;
 extern const SoundPosition D_003A0470;
-extern void sndSendSpatialPosition(s32, s32, f32, f32, f32);
-extern void sndUpdateScaledListenerState(f32, f32, f32, f32, f32, f32);
+extern void p2sdPlaySe3DEx(s32, s32, f32, f32, f32);
+extern void p2sdSetStandPos(f32, f32, f32, f32, f32, f32);
 void func_001415F8(void) {
     SoundPosition position = D_003A0470;
     f32 listenerX, listenerY, listenerZ;
@@ -503,16 +503,16 @@ void func_001415F8(void) {
     }
     if (nearby != 0 && (tick & 1)) {
         if (fldAreaState.mode == 0) {
-            sndUpdateScaledListenerState(listenerX, listenerY, listenerZ,
+            p2sdSetStandPos(listenerX, listenerY, listenerZ,
                 fldLookAtNearPoint[0], fldLookAtNearPoint[1], fldLookAtNearPoint[2]);
         } else {
-            sndUpdateScaledListenerState(fldLookAtFarPoint[0], fldLookAtFarPoint[1], fldLookAtFarPoint[2],
+            p2sdSetStandPos(fldLookAtFarPoint[0], fldLookAtFarPoint[1], fldLookAtFarPoint[2],
                 fldLookAtNearPoint[0], fldLookAtNearPoint[1], fldLookAtNearPoint[2]);
         }
     }
     stage = fldAreaState.area;
     if (stage == 11) {
-        stage = mdlFlagTest(0x28) != 0 ? 2 : stage;
+        stage = evtBitCheck(0x28) != 0 ? 2 : stage;
     }
     for (i = 0; i < fldPendingSoundCount; i++) {
         entry = &fldPendingSounds[i];
@@ -534,7 +534,7 @@ void func_001415F8(void) {
                 position.v[1] = sourceY;
                 position.v[2] = sourceZ;
                 entry->flags = flags | 1;
-                sndSendSpatialPosition(fldStageSoundBaseTable[stage] + entry->soundId,
+                p2sdPlaySe3DEx(fldStageSoundBaseTable[stage] + entry->soundId,
                     (s32)(entry->x / 100.0f), position.v[0], position.v[1], position.v[2]);
             }
         } else if (distance < entry->x + extraRadius) {
@@ -543,7 +543,7 @@ void func_001415F8(void) {
             position.v[2] = sourceZ;
         } else {
             entry->flags = flags & ~1;
-            sndQueueSoundId(fldStageSoundBaseTable[stage] + entry->soundId);
+            p2sdStopSe(fldStageSoundBaseTable[stage] + entry->soundId);
         }
     }
     D_003BAE90++;
@@ -614,7 +614,7 @@ s8 fldFindSceneEntryData(s32 id, s32 idx) {
     s32 i;
 
     for (i = 0; i < 32; i++) {
-        if (D_0032E5C8[i].id == id && (D_0032E5C8[i].flag == 0 || mdlFlagTest(D_0032E5C8[i].flag) != 0)) {
+        if (D_0032E5C8[i].id == id && (D_0032E5C8[i].flag == 0 || evtBitCheck(D_0032E5C8[i].flag) != 0)) {
             return D_0032E5C8[i].data[idx];
         }
     }
@@ -630,7 +630,7 @@ void fldStartSceneBgm(void) {
         if (handle == -1) {
             stage = fldAreaState.area;
             if (stage == 11) {
-                stage = mdlFlagTest(0x28) != 0 ? 2 : stage;
+                stage = evtBitCheck(0x28) != 0 ? 2 : stage;
             }
             idx = fldFindSceneEntryData(stage, fldAreaState.floor + 1);
             fldSceneSoundBase = fldStageSoundBaseTable[stage];
@@ -639,23 +639,23 @@ void fldStartSceneBgm(void) {
         }
         if (fldAreaState.sceneBgmSuppressed != 1) {
             if (fldCurrentBgmHandle != handle) {
-                sndReleaseTrackHandle(fldCurrentBgmHandle);
+                p2sdStopBGM(fldCurrentBgmHandle);
             }
             fldCurrentBgmHandle = handle;
-            sndStartTrackDefault(handle);
+            p2sdPlayBGM(handle);
         }
     }
 }
 
-void fldStartTitleBgmIfSelected(void) {
+void fldPlayFieldBgm(void) {
     if (fldCurrentBgmId[0] == 0x80) {
-        sndStartTrackDefault(D_0033EB78[0] + 1);
+        p2sdPlayBGM(D_0033EB78[0] + 1);
     }
 }
 
 extern s32 fldResolveSpecialBgmTrack(s32);
 
-extern u64 sndStartTrackAlternate(s32);
+extern u64 p2sdResumeBgm(s32);
 
 void fldStartSceneBgmAlternate(void) {
     s32 handle = fldResolveSpecialBgmTrack(fldAreaState.sequenceCode);
@@ -666,7 +666,7 @@ void fldStartSceneBgmAlternate(void) {
         if (handle == -1) {
             stage = fldAreaState.area;
             if (stage == 11) {
-                stage = mdlFlagTest(0x28) != 0 ? 2 : stage;
+                stage = evtBitCheck(0x28) != 0 ? 2 : stage;
             }
             idx = fldFindSceneEntryData(stage, fldAreaState.floor + 1);
             fldSceneSoundBase = fldStageSoundBaseTable[stage];
@@ -675,43 +675,43 @@ void fldStartSceneBgmAlternate(void) {
         }
         if (fldAreaState.sceneBgmSuppressed != 1) {
             fldCurrentBgmHandle = handle;
-            sndStartTrackAlternate(handle);
+            p2sdResumeBgm(handle);
         }
     }
 }
 
-void fldStopCurrentBgm(void) {
-    sndSendSingleWordControlPacket(fldCurrentBgmHandle);
+void fldPauseBgm(void) {
+    p2sdSendStopCmd(fldCurrentBgmHandle);
     fldCurrentBgmHandle = 0;
 }
 
-void fldReleaseCurrentBgm(void) {
-    sndReleaseTrackHandle(fldCurrentBgmHandle);
+void fldBgmFadeOut(void) {
+    p2sdStopBGM(fldCurrentBgmHandle);
     if (fldAreaState.sequenceCode >= 0x80) {
         fldAreaState.sequenceCode = 1;
     }
     fldCurrentBgmHandle = 0;
 }
 
-void func_00141D80(void) {
-    sndQueueNoPayloadCommand1A0();
+void fldBgmStopAll(void) {
+    p2sdStopAllBgm();
 }
 
-void fldPlayCurrentBgmSound(void) {
-    sndQueueSoundId(fldCurrentBgmHandle);
+void fldBgmStop(void) {
+    p2sdStopSe(fldCurrentBgmHandle);
     fldCurrentBgmId[0] = 0;
 }
 
 void fldPlayFieldSeVolumePan(s32 soundId) {
     if (D_0032E3C0[0] < 50 && soundId >= 16) {
         if (soundId == 0x80) {
-            sndSetSequenceVolumePan(0x6C0060, 0x7F, 0x3F);
+            p2sdPlaySE(0x6C0060, 0x7F, 0x3F);
         } else if (soundId == 0x81) {
-            sndSetSequenceVolumePan(0x6C0061, 0x7F, 0x3F);
+            p2sdPlaySE(0x6C0061, 0x7F, 0x3F);
         } else if (soundId == 0x82) {
-            sndSetSequenceVolumePan(0x6C0064, 0x7F, 0x3F);
+            p2sdPlaySE(0x6C0064, 0x7F, 0x3F);
         } else {
-            sndSetSequenceVolumePan(fldSceneSoundBase + soundId, 0x7F, 0x3F);
+            p2sdPlaySE(fldSceneSoundBase + soundId, 0x7F, 0x3F);
         }
     }
 }
@@ -719,20 +719,20 @@ void fldPlayFieldSeVolumePan(s32 soundId) {
 void fldPlayFieldSe(s32 soundId) {
     if (D_0032E3C0[0] < 50) {
         if (soundId == 0x100) {
-            sndQueueSoundId(0x6C0060);
+            p2sdStopSe(0x6C0060);
         } else if (soundId == 0x101) {
-            sndQueueSoundId(0x6C0061);
+            p2sdStopSe(0x6C0061);
         } else if (soundId == 0x102) {
-            sndQueueSoundId(0x6C0064);
+            p2sdStopSe(0x6C0064);
         } else {
-            sndQueueSoundId(fldSceneSoundBase + soundId);
+            p2sdStopSe(fldSceneSoundBase + soundId);
         }
     }
 }
 
 void fldSetSequenceVolume(s32 category, s32 volume) {
     if (D_0032E3C0[0] < 0x32) {
-        sndSetSequenceVolumePan(fldSceneSoundBase + category, volume, 0x3F);
+        p2sdPlaySE(fldSceneSoundBase + category, volume, 0x3F);
     }
 }
 
@@ -740,31 +740,31 @@ extern s32 fldCurrentBgmMode;
 
 extern s32 D_0033EAE8[];
 
-extern void sndReleaseTrackHandle(s32 trackHandle);
+extern void p2sdStopBGM(s32 trackHandle);
 
 void fldSetBgmMode(s32 mode) {
     switch (mode) {
     case -1:
         if (fldCurrentBgmMode != mode) {
-            sndQueueSoundId(fldCurrentBgmMode);
+            p2sdStopSe(fldCurrentBgmMode);
             fldCurrentBgmMode = mode;
         }
         break;
     case 0:
         mode = -1;
         if (fldCurrentBgmMode != mode) {
-            sndReleaseTrackHandle(fldCurrentBgmMode);
+            p2sdStopBGM(fldCurrentBgmMode);
             fldCurrentBgmMode = mode;
         }
         break;
     case 1:
         mode = D_0033EB78[0] + 1;
-        sndStartTrackDefault(mode);
+        p2sdPlayBGM(mode);
         fldCurrentBgmMode = mode;
         break;
     case 2:
         mode = D_0033EAE8[0] + 1;
-        sndStartTrackDefault(mode);
+        p2sdPlayBGM(mode);
         fldCurrentBgmMode = mode;
         break;
     }
@@ -787,7 +787,7 @@ void fldPrepareSceneBgmArchive(void) {
         }
         stage = fldAreaState.area;
         if (stage == 11) {
-            stage = mdlFlagTest(0x28) != 0 ? 2 : stage;
+            stage = evtBitCheck(0x28) != 0 ? 2 : stage;
         }
         idx = fldFindSceneEntryData(stage, fldAreaState.floor + 1);
         fldSceneSoundBase = fldStageSoundBaseTable[stage];
@@ -800,13 +800,13 @@ void fldPrepareSceneBgmArchive(void) {
 
 extern s32 sndFindPackedTrackLoadStatus(s32);
 
-extern void sndEnsureMidiBankResident(s32);
+extern void p2sdLoadSMGFile(s32);
 
 s32 fldStepSceneBgmArchive(void) {
     switch (fldSceneBgmArchivePhase) {
     case 0:
         if (sndFindPackedTrackLoadStatus(fldSceneBgmArchiveTrack) == 0) {
-            sndEnsureMidiBankResident(fldSceneBgmArchiveTrack);
+            p2sdLoadSMGFile(fldSceneBgmArchiveTrack);
             fldSceneBgmArchivePhase = fldSceneBgmArchivePhase + 1;
         } else {
             fldSceneBgmArchivePhase = fldSceneBgmArchivePhase + 2;
@@ -832,7 +832,7 @@ s32 fldPollArchiveLoad(s32 archiveId) {
     s32 name = 0x30000000 + (archiveId << 16);
     s32 result = sndFindPackedTrackLoadStatus(name);
     if (result == 0) {
-        sndEnsureMidiBankResident(name);
+        p2sdLoadSMGFile(name);
         fldArchiveLoadPending = 1;
         return 0;
     }
@@ -844,11 +844,11 @@ s32 fldPollArchiveLoad(s32 archiveId) {
 }
 
 void fldSetArchiveSoundVolumePan(s32 archiveId, s32 soundId) {
-    sndSetSequenceVolumePan(archiveId * 0x10000 + soundId + 0x30000000, 0x7f, 0x3f);
+    p2sdPlaySE(archiveId * 0x10000 + soundId + 0x30000000, 0x7f, 0x3f);
 }
 
 void fldPlayArchiveSound(s32 archiveId, s32 soundId) {
-    sndQueueSoundId(archiveId * 0x10000 + soundId + 0x30000000);
+    p2sdStopSe(archiveId * 0x10000 + soundId + 0x30000000);
 }
 
 void fldResetArchiveLoadPhase(void) {
@@ -859,7 +859,7 @@ s32 fldStepArchiveLoad(void) {
     switch (fldFixedArchiveLoadPhase) {
     case 0:
         if (sndFindPackedTrackLoadStatus(0x670000) == 0) {
-            sndEnsureMidiBankResident(0x670000);
+            p2sdLoadSMGFile(0x670000);
             fldFixedArchiveLoadPhase = fldFixedArchiveLoadPhase + 1;
         } else {
             fldFixedArchiveLoadPhase = fldFixedArchiveLoadPhase + 2;
@@ -932,16 +932,16 @@ void fldLoadSceneRecordTable(void) {
     FldSceneRecord *rows;
     s32 count;
 
-    fldFormatAreaDirectory(directory, fldAreaState.area, 1);
+    fldMakeFilePath(directory, fldAreaState.area, 1);
     area = fldAreaState.area;
     if (area == 0x1C) {
-        if (mdlFlagTest(0x5E1)) {
+        if (evtBitCheck(0x5E1)) {
             sprintf(path, D_003A04B0, directory, fldAreaState.area);
-        } else if (mdlFlagTest(0x5E2)) {
+        } else if (evtBitCheck(0x5E2)) {
             sprintf(path, "%sf%03da.amb", directory, fldAreaState.area);
-        } else if (mdlFlagTest(0x5E3)) {
+        } else if (evtBitCheck(0x5E3)) {
             sprintf(path, "%sf%03db.amb", directory, fldAreaState.area);
-        } else if (mdlFlagTest(0x5E4)) {
+        } else if (evtBitCheck(0x5E4)) {
             sprintf(path, "%sf%03dc.amb", directory, fldAreaState.area);
         } else {
             sprintf(path, "%sf%03dd.amb", directory, fldAreaState.area);
@@ -971,7 +971,7 @@ void fldLoadSceneRecordTable(void) {
         case 22:
         case 23:
         case 27:
-            if (mdlFlagTest(0x58D)) {
+            if (evtBitCheck(0x58D)) {
                 sprintf(path, "%sf%03dd.amb", directory, fldAreaState.area);
             } else {
                 sprintf(path, "%sf%03dc.amb", directory, fldAreaState.area);
@@ -988,10 +988,10 @@ void fldLoadSceneRecordTable(void) {
         sprintf(path, D_003A04B0, directory, fldAreaState.area);
     }
 
-    fldSceneRecordResource = sdfReadNamedResource(path, &resourceAddress, 0);
+    fldSceneRecordResource = sdfDevLoadFileEx(path, &resourceAddress, 0);
     transferStart = resourceAddress + 8;
-    fldRelocatePackedTransferChunk(resourceAddress, (FldTransferChunk *)transferStart);
-    header = (FldSceneRecordTableHeader *)fldGetTransferChunkPayload((FldTransferChunk *)transferStart);
+    fldAddressResolver(resourceAddress, (FldTransferChunk *)transferStart);
+    header = (FldSceneRecordTableHeader *)fldGetInfoHeader((FldTransferChunk *)transferStart);
     rows = header->rows;
     count = header->count;
     fldSceneRecordCount = count;
@@ -1003,10 +1003,10 @@ void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
         u8 *transferStart = chunk + 8;
 
         fldSceneRecordResource = (struct SdfMemBlock *)(u32)resourceHandle;
-        fldRelocatePackedTransferChunk((u32)chunk, (FldTransferChunk *)transferStart);
+        fldAddressResolver((u32)chunk, (FldTransferChunk *)transferStart);
         {
             FldSceneRecordTableHeader *header =
-                (FldSceneRecordTableHeader *)fldGetTransferChunkPayload((FldTransferChunk *)transferStart);
+                (FldSceneRecordTableHeader *)fldGetInfoHeader((FldTransferChunk *)transferStart);
             FldSceneRecord *rows = header->rows;
             s32 count = header->count;
 
@@ -1064,7 +1064,7 @@ void fldResetSceneResourceTables(void) {
 extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 
-void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
+void fldAutoMapDrawMdl1(SdfModel *emitter, f32 x, f32 y, f32 z) {
     f32 pos[4];
     SdfDrawNode *handle;
 
@@ -1077,8 +1077,8 @@ void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
         VU0_LOAD_VF_MEMORY(vf10, pos);
         VU0_SET_W_ONE(vf10);
         VU0_STORE_VF(vf10, emitter->matrix[3]);
-    sdfDrawNodeBuildMatrix(handle);
-    sdfModelUpdateCurrentFrameTransforms(emitter);
+    sdfModelMakeLocalTm(handle);
+    sdfModelEvalTm(emitter);
     sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, kwlnSceneSurfaceSets[11], emitter);
 }
 
@@ -1096,15 +1096,15 @@ void fldDrawProjectedMapIcon(f32 x, f32 y, s32 index, u32 color) {
     y += y;
     y += 224.0f;
     x += 256.0f;
-    fldSubmitSpriteRect((s32)(x - sprite->anchorX), (s32)(y - anchorY),
+    DrwSprite2D((s32)(x - sprite->anchorX), (s32)(y - anchorY),
                         sprite->width, sprite->height, u, v,
                         sprite->width, sprite->height, color,
                         D_003D40A0[D_0033EBA0[index].textureSlot]);
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_001428C0);
+INCLUDE_ASM(const s32, "game/code_001411F0", fldAutoMapDrawIconOfsRF);
 
-s32 fldFindRecordItem(s32 scene, u32 index) {
+s32 fldAutoMap_GetFloor(s32 scene, u32 index) {
     s32 result = 1;
     FldSceneRecord *rec = fldSceneRecords;
     s32 i;
@@ -1124,7 +1124,7 @@ s32 fldFindRecordItem(s32 scene, u32 index) {
 
 
 /* Model request buffers contain the root followed by indexed draw nodes. */
-void sdfSetModelChildChainVisibility(SdfModel *model, s32 index, s32 clearFlag) {
+void fldAutoMapNodeSet(SdfModel *model, s32 index, s32 clearFlag) {
     SdfDrawNode *parent = ((SdfDrawNode **)model->list->buffer)[index + 1];
     SdfDrawNode *first;
     SdfDrawNode *node;
@@ -1170,7 +1170,7 @@ void sdfSetModelChildChainVisibility(SdfModel *model, s32 index, s32 clearFlag) 
     }
 }
 
-s32 fldGetMaxItemValue(void) {
+s32 fldAutoMapGetFloorMax(void) {
     s32 max = 0;
     FldSceneRecord *rec = fldSceneRecords;
     s32 i;
@@ -1199,20 +1199,20 @@ extern f32 D_00329790[4][4], sdfViewMatrix[4][4];
 extern f32 D_00324A20[4] __attribute__((aligned(16)));
 extern SdfModel *D_00348F30[];
 extern void frSetFontDrawOT(u32);
-extern void sdfInvertScaledVuTransform(void);
-extern s32 fldFindNextMarkedValue(s32), fldFindPreviousMarkedValue(s32);
-extern void fldSubmitGsQuadTagged(s32, s32, s32, s32, u32, u32, u32, u32);
-extern void evtSetDrawSurfaceIndex(u32);
+extern void InversMatrix(void);
+extern s32 fldAutoMapGetFloorNext(s32), fldAutoMapGetFloorPrev(s32);
+extern void aDrawBoxF(s32, s32, s32, s32, u32, u32, u32, u32);
+extern void eglSetOt(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
-extern void evtSubmitQuadFromVertices(f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,u32,u32,u32,u32);
+extern void eglLinkPoly4(f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,u32,u32,u32,u32);
 extern s32 fldTestStageExplorationCell(s32 floor, f32 x, f32 z);
 extern s32 fldGetFloorFlag(s32 area, s32 floor, s32 bit);
 extern void fldSubmitPrimaryFramePacket(void), fldSubmitAlternateFramePacket(void);
-extern void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z);
-extern void fldProjectPointSetupAlt(f32 *, f32 *, f32, f32, f32);
-extern void func_001428C0(s32, f32, f32, f32);
-extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
+extern void fldAllIconDel(s32 index, f32 *x, f32 *z);
+extern void fldPoint3To2H(f32 *, f32 *, f32, f32, f32);
+extern void fldAutoMapDrawIconOfsRF(s32, f32, f32, f32);
+extern void fldAutoMapGetBBox(f32 *, f32 *, f32 *, f32 *);
 extern s32 fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex);
 extern void frSetPriority(FrFontGlyph *, u32);
 extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
@@ -1235,16 +1235,16 @@ void fldDrawAutomapScene(void) {
     s32 labelAlpha;
     u32 labelColor;
 
-    proposed = fldGetMaxItemValue();
+    proposed = fldAutoMapGetFloorMax();
     frSetFontDrawOT(0x5E);
     VU0_LOAD_MATRIX(D_00329790);
-    sdfInvertScaledVuTransform();
+    InversMatrix();
     D_003BAEF0 = D_003BAEB8;
     if ((s8)kwlnTaskPadButtonStates[1][0][8] < 0 && D_003BAEF0 < proposed) {
         proposed = D_003BAEF0 + 1;
-        if (!D_003BAEAC) proposed = fldFindNextMarkedValue(D_003BAEF0);
+        if (!D_003BAEAC) proposed = fldAutoMapGetFloorNext(D_003BAEF0);
         if (D_003BAEF0 != proposed) {
-            sndSetSequenceVolumePan(2, 127, 63);
+            p2sdPlaySE(2, 127, 63);
             D_003BAEF4 = D_003BAEF0;
             D_003BAEF0 = proposed;
             D_003BAEF8 = -2500.0f;
@@ -1256,9 +1256,9 @@ void fldDrawAutomapScene(void) {
     }
     if ((s8)kwlnTaskPadButtonStates[1][0][10] < 0 && D_003BAEF0 >= 2) {
         proposed = D_003BAEF0 - 1;
-        if (!D_003BAEAC) proposed = fldFindPreviousMarkedValue(D_003BAEF0);
+        if (!D_003BAEAC) proposed = fldAutoMapGetFloorPrev(D_003BAEF0);
         if (D_003BAEF0 != proposed) {
-            sndSetSequenceVolumePan(2, 127, 63);
+            p2sdPlaySE(2, 127, 63);
             D_003BAEF4 = D_003BAEF0;
             D_003BAEF0 = proposed;
             D_003BAEF8 = 2500.0f;
@@ -1279,21 +1279,21 @@ void fldDrawAutomapScene(void) {
         D_003BAEF8 += 500.0f; D_003BAEFC += 500.0f;
     } else { D_003BAEF8 = 0.0f; }
     D_003BAEB8 = D_003BAEF0;
-    sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, D_00329790);
-    fldSelectDisplayBuffer(0x56);
-    fldSetGsAlphaBlendEquation(0);
-    fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
-    fldSubmitGsQuadTagged(0, 0, 512, 224, 0, 0, 0, 0);
-    fldSelectDisplayBuffer(0x57);
-    fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
-    fldSelectDisplayBuffer(0x56);
-    fldSubmitFrameQuad(1, 1, 128, 1, 0, 0, 1, 1);
+    sdf3DSetCamera(&sdfSceneProjectionParameters, D_00329790);
+    rsetOtOfs(0x56);
+    rsetAlpha(0);
+    rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
+    aDrawBoxF(0, 0, 512, 224, 0, 0, 0, 0);
+    rsetOtOfs(0x57);
+    rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
+    rsetOtOfs(0x56);
+    rsetTest(1, 1, 128, 1, 0, 0, 1, 1);
     stage = fldFindStageCoordinateRecord(fldAreaState.area, D_003BAEF0);
     if (stage != NULL) {
         s32 run;
         f32 step = (f32)stage->cellSize;
         u32 color;
-        evtSetDrawSurfaceIndex(0x56);
+        eglSetOt(0x56);
         evtSubmitPrimaryGsTest(1, 0, 128, 1, 0, 0, 1, 1);
         evtSubmitPrimaryAlphaBlendMode(1);
         color = D_003BAEAC ? 0x80000080 : 0x80000000;
@@ -1312,14 +1312,14 @@ void fldDrawAutomapScene(void) {
                     right = sceneX + step + 50.0f;
                     run++;
                 } else {
-                    if (run > 0) evtSubmitQuadFromVertices(left, D_003BAEF8 - 10.0f, top,
+                    if (run > 0) eglLinkPoly4(left, D_003BAEF8 - 10.0f, top,
                     right, D_003BAEF8 - 10.0f, top,
                     left, D_003BAEF8 - 10.0f, bottom,
                     right, D_003BAEF8 - 10.0f, bottom, color, color, 0x80000000, 0x80000000);
                     run = 0;
                 }
             }
-            if (run > 0) evtSubmitQuadFromVertices(left, D_003BAEF8 - 10.0f, top,
+            if (run > 0) eglLinkPoly4(left, D_003BAEF8 - 10.0f, top,
                     right, D_003BAEF8 - 10.0f, top,
                     left, D_003BAEF8 - 10.0f, bottom,
                     right, D_003BAEF8 - 10.0f, bottom, color, color, 0x80000000, 0x80000000);
@@ -1331,7 +1331,7 @@ void fldDrawAutomapScene(void) {
 
 
     if (D_003BAEAC != 0) {
-        fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
+        rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
     }
 
     selectedFloor = D_003BAEF0 - 1;
@@ -1348,19 +1348,19 @@ void fldDrawAutomapScene(void) {
                     itemVisible = 1;
                 }
             }
-            sdfSetModelChildChainVisibility(D_00348F30[i], item->nodeIndex, itemVisible);
+            fldAutoMapNodeSet(D_00348F30[i], item->nodeIndex, itemVisible);
         }
     }
     for (i = 0; i < fldSceneRecordCount; i++) {
         D_00348F30[i]->color = 0x80808080;
-        fldSetEmitterPosition(D_00348F30[i], 0.0f, D_003BAEF8, 0.0f);
+        fldAutoMapDrawMdl1(D_00348F30[i], 0.0f, D_003BAEF8, 0.0f);
     }
 
-    fldSelectDisplayBuffer(0x56);
-    fldSetGsAlphaBlendEquation(0);
+    rsetOtOfs(0x56);
+    rsetAlpha(0);
     fldSubmitPrimaryFramePacket();
-    fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
-    fldSubmitGsQuadTagged(0, 0, 512, 224, 0, 0, 0, 0);
+    rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
+    aDrawBoxF(0, 0, 512, 224, 0, 0, 0, 0);
 
     record = fldSceneRecords;
     selectedFloor = D_003BAEF0 - 1;
@@ -1376,31 +1376,31 @@ void fldDrawAutomapScene(void) {
                     itemVisible = 1;
                 }
             }
-            sdfSetModelChildChainVisibility(D_00348F30[i], item->nodeIndex, itemVisible);
+            fldAutoMapNodeSet(D_00348F30[i], item->nodeIndex, itemVisible);
         }
         D_00348F30[i]->color = 0x80808080;
-        fldSetEmitterPosition(D_00348F30[i], -50.0f, D_003BAEF8, 50.0f);
-        fldSetEmitterPosition(D_00348F30[i], 50.0f, D_003BAEF8, 50.0f);
-        fldSetEmitterPosition(D_00348F30[i], -50.0f, D_003BAEF8, -50.0f);
-        fldSetEmitterPosition(D_00348F30[i], 50.0f, D_003BAEF8, -50.0f);
+        fldAutoMapDrawMdl1(D_00348F30[i], -50.0f, D_003BAEF8, 50.0f);
+        fldAutoMapDrawMdl1(D_00348F30[i], 50.0f, D_003BAEF8, 50.0f);
+        fldAutoMapDrawMdl1(D_00348F30[i], -50.0f, D_003BAEF8, -50.0f);
+        fldAutoMapDrawMdl1(D_00348F30[i], 50.0f, D_003BAEF8, -50.0f);
 
         item = record->items;
         for (j = 0; j < record->count; j++, item++) {
-            sdfSetModelChildChainVisibility(D_00348F30[i], item->nodeIndex,
+            fldAutoMapNodeSet(D_00348F30[i], item->nodeIndex,
                           selectedFloor == item->floor);
         }
         D_00348F30[i]->color = 0x10101010;
-        fldSetEmitterPosition(D_00348F30[i], 0.0f, D_003BAEF8, 0.0f);
+        fldAutoMapDrawMdl1(D_00348F30[i], 0.0f, D_003BAEF8, 0.0f);
         D_00348F30[i]->color = 0x80808080;
     }
 
-    fldSelectDisplayBuffer(0x5A);
+    rsetOtOfs(0x5A);
     fldSubmitAlternateFramePacket();
     if (stage != NULL) {
         f32 step;
         s32 run;
 
-        evtSetDrawSurfaceIndex(0x5A);
+        eglSetOt(0x5A);
         evtSubmitPrimaryGsTest(1, 0, 128, 1, 1, 1, 1, 1);
         evtSubmitPrimaryAlphaBlendMode(0);
         step = stage->cellSize;
@@ -1431,7 +1431,7 @@ void fldDrawAutomapScene(void) {
                     run++;
                 } else {
                     if (run > 0) {
-                        evtSubmitQuadFromVertices(
+                        eglLinkPoly4(
                             left, D_003BAEF8 - 10.0f, top,
                             right, D_003BAEF8 - 10.0f, top,
                             left, D_003BAEF8 - 10.0f, bottom,
@@ -1442,7 +1442,7 @@ void fldDrawAutomapScene(void) {
                 }
             }
             if (run > 0) {
-                evtSubmitQuadFromVertices(
+                eglLinkPoly4(
                     left, D_003BAEF8 - 10.0f, top,
                     right, D_003BAEF8 - 10.0f, top,
                     left, D_003BAEF8 - 10.0f, bottom,
@@ -1454,9 +1454,9 @@ void fldDrawAutomapScene(void) {
         evtSubmitPrimaryAlphaBlendMode(0);
     }
 
-    fldSetGsAlphaBlendEquation(0);
-    fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
-    sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
+    rsetAlpha(0);
+    rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
+    sdf3DSetCamera(&sdfSceneProjectionParameters, sdfViewMatrix);
     D_003BAF10 += 0.4f;
     D_003BAF14 += 0.2f;
     PCP_COPY_VECTOR_F32(focus, D_00324A20);
@@ -1580,7 +1580,7 @@ void fldDrawAutomapScene(void) {
                             case 11:
                                 spriteIndex = 11;
                                 iconVisible = 1;
-                                offsetZ = sdfSinPoly(D_003BAF14 + (i + k) * 3.3f) * 30.0f;
+                                offsetZ = sdfSin(D_003BAF14 + (i + k) * 3.3f) * 30.0f;
                                 break;
                             case 12:
                                 if (D_003BAEAC != 0 ||
@@ -1619,7 +1619,7 @@ void fldDrawAutomapScene(void) {
                                     offsetZ = -offsetZ;
                                 }
                                 if (offsetX < 80000.0f && offsetZ < 80000.0f) {
-                                    fldProjectPointSetupAlt(&projectedX, &projectedY,
+                                    fldPoint3To2H(&projectedX, &projectedY,
                                                             x, D_003BAEF8, z);
                                     fldDrawProjectedMapIcon(projectedX, projectedY,
                                                   spriteIndex, 0x80808080);
@@ -1642,9 +1642,9 @@ void fldDrawAutomapScene(void) {
             f32 distanceX;
             f32 distanceZ;
 
-            fldGetSceneEntryPosition(D_003BAEB4, &sceneX, &sceneZ);
-            fldSubmitFrameQuad(1, 0, 128, 3, 0, 0, 1, 1);
-            fldSetGsAlphaBlendEquation(1);
+            fldAllIconDel(D_003BAEB4, &sceneX, &sceneZ);
+            rsetTest(1, 0, 128, 3, 0, 0, 1, 1);
+            rsetAlpha(1);
             worldX = fldAreaState.x + sceneX;
             distanceX = focus[0] - worldX;
             if (distanceX < 0.0f) {
@@ -1655,69 +1655,69 @@ void fldDrawAutomapScene(void) {
             if (distanceZ < 0.0f) {
                 distanceZ = -distanceZ;
             }
-            fldProjectPointSetupAlt(&playerX, &playerY,
+            fldPoint3To2H(&playerX, &playerY,
                                     worldX, D_003BAEF8, worldZ);
             if (distanceX < 80000.0f && distanceZ < 80000.0f) {
-                fldSetGsAlphaBlendEquation(1);
-                func_001428C0(1, playerX, playerY, -fldAreaState.negatedAngle);
-                fldSetGsAlphaBlendEquation(0);
-                func_001428C0(0, playerX, playerY, fldAreaState.angle);
+                rsetAlpha(1);
+                fldAutoMapDrawIconOfsRF(1, playerX, playerY, -fldAreaState.negatedAngle);
+                rsetAlpha(0);
+                fldAutoMapDrawIconOfsRF(0, playerX, playerY, fldAreaState.angle);
             }
         }
     }
 
-    fldSelectDisplayBuffer(0x5E);
-    fldSetGsAlphaBlendEquation(0);
-    fldSetGsAlphaBlendEquation(1);
-    fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
-    fldSubmitSpriteRect(0, 0, 512, 448, 32, 59, 22, 22,
+    rsetOtOfs(0x5E);
+    rsetAlpha(0);
+    rsetAlpha(1);
+    rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
+    DrwSprite2D(0, 0, 512, 448, 32, 59, 22, 22,
                         0x40808080, D_003D40A0[1]);
-    fldSetGsAlphaBlendEquation(0);
-    fldSetGsAlphaBlendEquation(0);
-    fldSubmitSpriteRect(332, 410, 156, 27, 2, 83, 156, 27,
+    rsetAlpha(0);
+    rsetAlpha(0);
+    DrwSprite2D(332, 410, 156, 27, 2, 83, 156, 27,
                         0x80808080, D_003D40A0[0]);
 
-    top = sdfSinPoly(D_003BAF0C);
+    top = sdfSin(D_003BAF0C);
     i = (s32)(top * 32.0f) + 96;
     D_003BAF0C += 0.2f;
     i = i + (i << 8) + (i << 16)
                  + 0x80000000U;
-    fldGetVisibleSceneBounds(&minX, &maxZ, &maxX, &minZ);
+    fldAutoMapGetBBox(&minX, &maxZ, &maxX, &minZ);
     minX = (s32)((minX - 600.0f) / 600.0f) * 600;
     maxX = (s32)((maxX + 600.0f) / 600.0f) * 600;
     maxZ = (s32)((maxZ - 600.0f) / 600.0f) * 600;
     minZ = (s32)((minZ + 600.0f) / 600.0f) * 600;
-    fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
-    fldSetGsAlphaBlendEquation(0);
+    rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
+    rsetAlpha(0);
 
-    fldSubmitSpriteRect(242, 63, 28, 27, 172, 61, 28, 27,
+    DrwSprite2D(242, 63, 28, 27, 172, 61, 28, 27,
                         0x80808080, D_003D40A0[0]);
-    fldSubmitSpriteRect(20, 222, 28, 27, 201, 89, 28, 27,
+    DrwSprite2D(20, 222, 28, 27, 201, 89, 28, 27,
                         0x80808080, D_003D40A0[0]);
-    fldSubmitSpriteRect(242, 386, 28, 27, 172, 89, 28, 27,
+    DrwSprite2D(242, 386, 28, 27, 172, 89, 28, 27,
                         0x80808080, D_003D40A0[0]);
-    fldSubmitSpriteRect(464, 222, 28, 27, 201, 61, 28, 27,
+    DrwSprite2D(464, 222, 28, 27, 201, 61, 28, 27,
                         0x80808080, D_003D40A0[0]);
 
     if ((f32)D_003BAEC0 < maxZ) {
-        fldSubmitSpriteRect(242, 53, 28, 40, 2, 2, 28, 40,
+        DrwSprite2D(242, 53, 28, 40, 2, 2, 28, 40,
                             i, D_003D40A0[1]);
     }
     if (minZ < (f32)D_003BAEC0) {
-        fldSubmitSpriteRect(242, 383, 28, 40, 2, 43, 28, 40,
+        DrwSprite2D(242, 383, 28, 40, 2, 43, 28, 40,
                             i, D_003D40A0[1]);
     }
     if (minX < (f32)D_003BAEBC) {
-        fldSubmitSpriteRect(11, 222, 39, 27, 31, 30, 39, 27,
+        DrwSprite2D(11, 222, 39, 27, 31, 30, 39, 27,
                             i, D_003D40A0[1]);
     }
     if ((f32)D_003BAEBC < maxX) {
-        fldSubmitSpriteRect(462, 222, 39, 27, 31, 2, 39, 27,
+        DrwSprite2D(462, 222, 39, 27, 31, 2, 39, 27,
                             i, D_003D40A0[1]);
     }
-    fldSubmitSpriteRect(173, 0, 166, 80, 2, 2, 166, 80,
+    DrwSprite2D(173, 0, 166, 80, 2, 2, 166, 80,
                         0x80808080, D_003D40A0[0]);
-    fldSubmitSpriteRect(339, 0, 190, 80, 167, 2, 1, 80,
+    DrwSprite2D(339, 0, 190, 80, 167, 2, 1, 80,
                         0x80808080, D_003D40A0[0]);
 
     {
@@ -1731,10 +1731,10 @@ void fldDrawAutomapScene(void) {
         frDestroyFontRequestAfter(D_003BD7CC);
     }
 
-    fldSelectDisplayBuffer(0x5E);
-    fldSetGsAlphaBlendEquation(0);
-    fldSubmitFrameQuad(1, 0, 128, 2, 0, 0, 1, 2);
-    fldSubmitFrameQuad(1, 5, 128, 3, 0, 0, 1, 2);
+    rsetOtOfs(0x5E);
+    rsetAlpha(0);
+    rsetTest(1, 0, 128, 2, 0, 0, 1, 2);
+    rsetTest(1, 5, 128, 3, 0, 0, 1, 2);
 
     if (D_003BAF04 != 0 && (u32)D_003BAEF4 - 1U < 40U
         && D_003D4408[D_003BAEF4] >= 2) {
@@ -1787,8 +1787,8 @@ void fldDrawAutomapScene(void) {
 extern f32 D_003BAF18;
 extern f32 D_00329790[4][4];
 extern f32 sdfViewMatrix[4][4];
-extern void sdfInvertScaledVuTransform(void);
-extern void fldSubmitGsQuadTagged(s32, s32, s32, s32, u32, u32, u32, u32);
+extern void InversMatrix(void);
+extern void aDrawBoxF(s32, s32, s32, s32, u32, u32, u32, u32);
 
 void fldDrawFieldBackdropFrame(void) {
     s32 i;
@@ -1800,80 +1800,80 @@ void fldDrawFieldBackdropFrame(void) {
     /* The stored single-precision phase step is just below 0.1. */
     D_003BAF18 += 0x1.999998p-4f;
     VU0_LOAD_MATRIX(D_00329790);
-    sdfInvertScaledVuTransform();
-    sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, D_00329790);
+    InversMatrix();
+    sdf3DSetCamera(&sdfSceneProjectionParameters, D_00329790);
 
-    fldSelectDisplayBuffer(0x56);
-    fldSubmitFrameQuad(1, 0, 0x80, 1, 0, 0, 1, 1);
-    fldSetGsAlphaBlendEquation(0);
-    fldSubmitGsQuadTagged(0, 0, 0x200, 0xE0, 0, 0, 0, 0x80);
-    fldSubmitSpriteRect(0, 0, 0x200, 0x1C0, 0, 0, 0x40, 0x40,
+    rsetOtOfs(0x56);
+    rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+    rsetAlpha(0);
+    aDrawBoxF(0, 0, 0x200, 0xE0, 0, 0, 0, 0x80);
+    DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x40, 0x40,
                         0x80404040, D_003D40A0[2]);
-    fldSetGsAlphaBlendEquation(1);
+    rsetAlpha(1);
 
-    alpha = 0x5C - (s32)(sdfSinPoly(D_003BAF18 + 3.0f) * 32.0f + 32.0f);
+    alpha = 0x5C - (s32)(sdfSin(D_003BAF18 + 3.0f) * 32.0f + 32.0f);
     color = ((u32)alpha << 24) | 0x00808080;
-    fldSubmitSpriteRect(0x0E, 6, 0x100, 0x100, 0, 0, 0x100, 0x100,
+    DrwSprite2D(0x0E, 6, 0x100, 0x100, 0, 0, 0x100, 0x100,
                         color, D_003D40A0[3]);
-    alpha = 0x5C - (s32)(sdfSinPoly(D_003BAF18 + 1.5f) * 32.0f + 32.0f);
+    alpha = 0x5C - (s32)(sdfSin(D_003BAF18 + 1.5f) * 32.0f + 32.0f);
     color = ((u32)alpha << 24) | 0x00808080;
-    fldSubmitSpriteRect(0x25, 0x1D, 0x100, 0x100, 0, 0, 0x100, 0x100,
+    DrwSprite2D(0x25, 0x1D, 0x100, 0x100, 0, 0, 0x100, 0x100,
                         color, D_003D40A0[3]);
-    alpha = 0x5C - (s32)(sdfSinPoly(D_003BAF18) * 32.0f + 32.0f);
+    alpha = 0x5C - (s32)(sdfSin(D_003BAF18) * 32.0f + 32.0f);
     color = ((u32)alpha << 24) | 0x00808080;
-    fldSubmitSpriteRect(0x3C, 0x34, 0x100, 0x100, 0, 0, 0x100, 0x100,
+    DrwSprite2D(0x3C, 0x34, 0x100, 0x100, 0, 0, 0x100, 0x100,
                         color, D_003D40A0[3]);
-    alpha = 0x5C - (s32)(sdfSinPoly(D_003BAF18) * 32.0f + 32.0f);
+    alpha = 0x5C - (s32)(sdfSin(D_003BAF18) * 32.0f + 32.0f);
     color = ((u32)alpha << 24) | 0x00808080;
-    fldSubmitSpriteRect(0xC4, 0x8C, 0x100, 0x100, 0x100, 0x100, -0x100, -0x100,
+    DrwSprite2D(0xC4, 0x8C, 0x100, 0x100, 0x100, 0x100, -0x100, -0x100,
                         color, D_003D40A0[3]);
-    alpha = 0x5C - (s32)(sdfSinPoly(D_003BAF18 + 2.0f) * 32.0f + 32.0f);
+    alpha = 0x5C - (s32)(sdfSin(D_003BAF18 + 2.0f) * 32.0f + 32.0f);
     color = ((u32)alpha << 24) | 0x00808080;
-    fldSubmitSpriteRect(0xDB, 0xA3, 0x100, 0x100, 0x100, 0x100, -0x100, -0x100,
+    DrwSprite2D(0xDB, 0xA3, 0x100, 0x100, 0x100, 0x100, -0x100, -0x100,
                         color, D_003D40A0[3]);
-    alpha = 0x5C - (s32)(sdfSinPoly(D_003BAF18 + 3.0f) * 32.0f + 32.0f);
+    alpha = 0x5C - (s32)(sdfSin(D_003BAF18 + 3.0f) * 32.0f + 32.0f);
     color = ((u32)alpha << 24) | 0x00808080;
-    fldSubmitSpriteRect(0xF2, 0xBA, 0x100, 0x100, 0x100, 0x100, -0x100, -0x100,
+    DrwSprite2D(0xF2, 0xBA, 0x100, 0x100, 0x100, 0x100, -0x100, -0x100,
                         color, D_003D40A0[3]);
-    fldSetGsAlphaBlendEquation(1);
+    rsetAlpha(1);
 
     for (i = 0; i < 9; i++) {
         x = 0x0C + i * 0x17;
         y = -(i * 0x32);
-        fldSubmitSpriteRect(x, y, 5, 0x1A3, 3, 0x56, 5, 0x1C,
+        DrwSprite2D(x, y, 5, 0x1A3, 3, 0x56, 5, 0x1C,
                             0x20808080, D_003D40A0[1]);
     }
     for (i = 0; i < 19; i++) {
         x = -(i * 0x0A);
         y = 4 + i * 0x17;
-        fldSubmitSpriteRect(x, y, 0xC3, 5, 0x0B, 0x56, 0x19, 5,
+        DrwSprite2D(x, y, 0xC3, 5, 0x0B, 0x56, 0x19, 5,
                             0x20808080, D_003D40A0[1]);
     }
     for (i = 0; i < 9; i++) {
         x = 0x1EF - i * 0x17;
         y = 0x1D + i * 0x32;
-        fldSubmitSpriteRect(x, y, 5, 0x1A3, 3, 0x72, 5, -0x1C,
+        DrwSprite2D(x, y, 5, 0x1A3, 3, 0x72, 5, -0x1C,
                             0x20808080, D_003D40A0[1]);
     }
     for (i = 0; i < 19; i++) {
         x = 0x13D + i * 0x0A;
         y = 0x1B7 - i * 0x17;
-        fldSubmitSpriteRect(x, y, 0xC3, 5, 0x24, 0x56, -0x19, 5,
+        DrwSprite2D(x, y, 0xC3, 5, 0x24, 0x56, -0x19, 5,
                             0x20808080, D_003D40A0[1]);
     }
 
-    fldSetGsAlphaBlendEquation(0);
-    sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
+    rsetAlpha(0);
+    sdf3DSetCamera(&sdfSceneProjectionParameters, sdfViewMatrix);
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    fldSelectDisplayBuffer(0x5E);
-    fldSubmitFrameQuad(1, 5, 0x81, 1, 0, 0, 1, 2);
-    fldSetGsAlphaBlendEquation(0);
+    rsetOtOfs(0x5E);
+    rsetTest(1, 5, 0x81, 1, 0, 0, 1, 2);
+    rsetAlpha(0);
 }
 
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00144D30);
 
-extern void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z);
+extern void fldAllIconDel(s32 index, f32 *x, f32 *z);
 
 extern KwlnDrawVectorParams kwlnOverlayFrustumParameters;
 
@@ -1899,9 +1899,9 @@ extern s32 D_003BAECC;
 
 extern s32 D_003BAED4;
 
-extern u8 fldTestSceneLifecycleFlags(u32 mask);
-extern void fldSetSceneLifecycleFlags(u32);
-extern void evtSetSolarOverlayFullyTransparent(void);
+extern u8 fldAutoMapSeqTestFlag(u32 mask);
+extern void fldAutoMapSeqSetFlag(u32);
+extern void evtDisableMoonDraw(void);
 extern KwlnDrawVectorParams kwlnDrawVector;
 extern SdfMathVector4 D_003A05D8[];
 
@@ -1919,20 +1919,20 @@ void func_00145B18(void) {
     s32 cx;
     s32 cz;
 
-    if (fldTestSceneLifecycleFlags(1) == 1) {
+    if (fldAutoMapSeqTestFlag(1) == 1) {
         return;
     }
-    dds3SetWorldObjectDrawEnabled((EffWorldNode *)(u32)dds3GetWorldObject(), 0);
-    sndSetSequenceVolumePan(0xE, 0x7F, 0x3F);
+    dds3VisibleSceneBasic((EffWorldNode *)(u32)dds3GetActiveScene(), 0);
+    p2sdPlaySE(0xE, 0x7F, 0x3F);
     cam = &fldAreaState;
-    D_003D40A0[2] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[2].resourceAddress));
-    D_003D40A0[3] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[3].resourceAddress));
+    D_003D40A0[2] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[2].resourceAddress));
+    D_003D40A0[3] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[3].resourceAddress));
     D_003BAED4 = 0;
     D_003BAEB4 = cam->floor;
     fldSceneReady = 1;
     D_003BAEB8 = cam->flagStage;
     D_003BAED0 = cam->flagStage;
-    fldGetSceneEntryPosition(cam->floor, &entry[0], &entry[1]);
+    fldAllIconDel(cam->floor, &entry[0], &entry[1]);
     cx = cam->x;
     cz = cam->z;
     D_003BAECC = 0;
@@ -1942,9 +1942,9 @@ void func_00145B18(void) {
     D_003BAEC8 = iz;
     D_003BAEC0 = iz;
     D_003BAEBC = ix;
-    fldSetSceneLifecycleFlags(1);
+    fldAutoMapSeqSetFlag(1);
     fldResetPlayerSceneObjectState();
-    evtSetSolarOverlayFullyTransparent();
+    evtDisableMoonDraw();
     memcpy(&up, &D_003A05D8[0], sizeof(up));
     focus[1] = 0.0f;
     focus[0] = D_003BAEBC;
@@ -1968,7 +1968,7 @@ void func_00145B18(void) {
     kwlnDrawVector.depthFar = 20000.0f;
     kwlnDrawVector.fogColor = 0x108010;
 }
-extern s32 sdfCheckPendingWorkWithInterrupts(void);
+extern s32 sdfDelayedResrcCheck(void);
 
 extern void frSetFontDrawOT(u32);
 
@@ -1981,7 +1981,7 @@ void fldReleaseTitleSlots(void) {
     }
     D_003D40A0[2] = 0;
     D_003D40A0[3] = 0;
-    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    while (sdfDelayedResrcCheck() != 0) {
         sdfDrawSync();
     }
     fldSceneReady = 0;
@@ -1992,14 +1992,14 @@ extern SdfModel *D_00348F30[];
 
 extern FldPoint D_003D40B0[];
 
-extern void sdfReleaseDevSlot(SdfModel *slot, s32 recycle, s32 release);
+extern void sdfModelRootFree(SdfModel *slot, s32 recycle, s32 release);
 
 void fldReleaseMenuSlots(void) {
     s32 i;
 
     for (i = 0; i < fldSceneRecordCount; i++) {
         if (D_00348F30[i] != 0) {
-            sdfReleaseDevSlot(D_00348F30[i], 1, 1);
+            sdfModelRootFree(D_00348F30[i], 1, 1);
         }
     }
     for (i = 0; i < 64; i++) {
@@ -2016,13 +2016,13 @@ void fldReleaseMenuSlots(void) {
         sdfTexReleaseReferenceViaHandler(D_003D40A0[1]);
     }
     D_003D40A0[1] = 0;
-    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    while (sdfDelayedResrcCheck() != 0) {
         sdfDrawSync();
     }
     fldSceneReady = 0;
 }
 
-extern void fldClearSceneLifecycleFlags(s32);
+extern void fldAutoMapSeqClearFlag(s32);
 
 
 extern SdfMathVector4 D_003A05D8[]; /* default camera up vectors (3 copies), the first read by func_00145B18 */
@@ -2047,18 +2047,18 @@ void fldEnterSceneCamera(void) {
     sdfDrawSync();
     fldReleaseTitleSlots();
     fldSceneReady = 0;
-    fldClearSceneLifecycleFlags(1);
+    fldAutoMapSeqClearFlag(1);
     fldPreparePlayerSceneCameraTarget();
     evtSetSolarOverlayFullyVisible();
     fldApplySkyLightSetToPlayerVU();
     cam->sceneMode = 4;
     frSetFontDrawOT(0x54);
-    dds3SetWorldObjectDrawEnabled((EffWorldNode *)(u32)dds3GetWorldObject(), 1);
+    dds3VisibleSceneBasic((EffWorldNode *)(u32)dds3GetActiveScene(), 1);
     D_003BAED4 = 0;
     D_003BAEB4 = cam->floor;
     D_003BAEB8 = cam->flagStage;
     D_003BAED0 = cam->flagStage;
-    fldGetSceneEntryPosition(cam->floor, &entry[0], &entry[1]);
+    fldAllIconDel(cam->floor, &entry[0], &entry[1]);
     cx = cam->x;
     cz = cam->z;
     iz = cz + entry[1];
@@ -2104,19 +2104,19 @@ void fldLoadSceneModelsAndCamera(void) {
 
     rec = fldSceneRecords;
     for (i = 0; i < fldSceneRecordCount; i++, rec++) {
-        D_00348F30[i] = sdfModelCreateWithAlternateItems(0, rec->model);
+        D_00348F30[i] = sdfModelMakeEarly(0, rec->model);
         D_003D40B0[i].x = rec->pos->x;
         D_003D40B0[i].y = rec->pos->y;
         D_003D40B0[i].z = rec->pos->z;
     }
     cam = &fldAreaState;
-    D_003D40A0[0] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[0].resourceAddress));
-    D_003D40A0[1] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[1].resourceAddress));
+    D_003D40A0[0] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[0].resourceAddress));
+    D_003D40A0[1] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[1].resourceAddress));
     D_003BAED4 = 0;
     D_003BAEB4 = cam->floor;
     D_003BAEB8 = cam->flagStage;
     D_003BAED0 = cam->flagStage;
-    fldGetSceneEntryPosition(cam->floor, &entry[0], &entry[1]);
+    fldAllIconDel(cam->floor, &entry[0], &entry[1]);
     cx = cam->x;
     cz = cam->z;
     iz = cz + entry[1];
@@ -2183,12 +2183,12 @@ void fldUpdateAutomapInput(void) {
     if (closeRequested != 0 ||
         ((s8)kwlnTaskPadButtonStates[1][0][3] < 0 && D_003BAED4 == 0)) {
         fldEnterSceneCamera();
-        kwlnFadeStartOut(0);
-        kwlnFadeStartIn(8);
+        dds3FadeOut2(0);
+        dds3FadeIn2(8);
         return;
     }
     if ((s8)kwlnTaskPadButtonStates[1][0][3] < 0) {
-        sndSetSequenceVolumePan(10, 127, 63);
+        p2sdPlaySE(10, 127, 63);
         D_003BAEBC = D_003BAEC4;
         D_003BAEC0 = D_003BAEC8;
         D_003BAEB8 = D_003BAED0;
@@ -2279,7 +2279,7 @@ void fldUpdateAutomapInput(void) {
         }
     }
 
-    fldGetVisibleSceneBounds(&minX, &maxZ, &maxX, &minZ);
+    fldAutoMapGetBBox(&minX, &maxZ, &maxX, &minZ);
     /* Quantize the two X endpoints, then the two Z endpoints. */
     minX = (s32)((minX - 600.0f) / 600.0f) * 600;
     maxX = (s32)((maxX + 600.0f) / 600.0f) * 600;
@@ -2331,7 +2331,7 @@ void fldCenterCameraOnEntry(void) {
     D_003BAEB4 = cam->floor;
     D_003BAEB8 = cam->flagStage;
     D_003BAED0 = cam->flagStage;
-    fldGetSceneEntryPosition(cam->floor, &entry[0], &entry[1]);
+    fldAllIconDel(cam->floor, &entry[0], &entry[1]);
     ix = (f32)(s32)cam->x + entry[0];
     iz = (f32)(s32)cam->z + entry[1];
     D_003BAEC8 = iz;
@@ -2385,7 +2385,7 @@ void fldSetFlagAndFindRecord(s32 flagNumber) {
             fldAreaState.unk18 = bit;
             fldAreaState.flagNumber = flagNumber;
             datGameState->areaFlags[areaIndex][fldAreaState.floor] |= 1ULL << bit;
-            fldAreaState.flagStage = fldFindRecordItem(fldAreaState.floor, bit);
+            fldAreaState.flagStage = fldAutoMap_GetFloor(fldAreaState.floor, bit);
         }
     }
 }
@@ -2413,7 +2413,7 @@ void fldClearFloorFlag(s32 area, s32 floor, s32 bit) {
     }
 }
 
-void fldSetPrimaryMapLabelSelection(s32 labelIndex) {
+void fldAutoMapNameU(s32 labelIndex) {
     if (labelIndex >= 0x40) {
         D_0032E474[0] = -1;
     } else {
@@ -2421,7 +2421,7 @@ void fldSetPrimaryMapLabelSelection(s32 labelIndex) {
     }
 }
 
-void fldSetSecondaryMapLabelSelection(s32 labelIndex) {
+void fldAutoMapNameD(s32 labelIndex) {
     if (labelIndex >= 0x40) {
         D_0032E478[0] = -1;
     } else {
@@ -2430,9 +2430,9 @@ void fldSetSecondaryMapLabelSelection(s32 labelIndex) {
 }
 
 
-extern s32 fldFindRecordItem(s32 scene, u32 index);
+extern s32 fldAutoMap_GetFloor(s32 scene, u32 index);
 
-s32 fldFindPreviousMarkedValue(s32 limit) {
+s32 fldAutoMapGetFloorPrev(s32 limit) {
     s32 i;
     u32 j;
     s32 item;
@@ -2442,7 +2442,7 @@ s32 fldFindPreviousMarkedValue(s32 limit) {
     for (i = 0; i < (s32)fldSceneRecordCount; i++, entry++) {
         for (j = 0; j < entry->count; j++) {
             if (fldGetFloorFlag(fldAreaFlagIndex, i, j) != 0) {
-                item = fldFindRecordItem(i, j);
+                item = fldAutoMap_GetFloor(i, j);
                 if (item < limit && best < item) {
                     best = item;
                 }
@@ -2455,7 +2455,7 @@ s32 fldFindPreviousMarkedValue(s32 limit) {
     return best;
 }
 
-s32 fldFindNextMarkedValue(s32 limit) {
+s32 fldAutoMapGetFloorNext(s32 limit) {
     s32 i;
     u32 j;
     s32 item;
@@ -2465,7 +2465,7 @@ s32 fldFindNextMarkedValue(s32 limit) {
     for (i = 0; i < (s32)fldSceneRecordCount; i++, entry++) {
         for (j = 0; j < entry->count; j++) {
             if (fldGetFloorFlag(fldAreaFlagIndex, i, j) != 0) {
-                item = fldFindRecordItem(i, j);
+                item = fldAutoMap_GetFloor(i, j);
                 if (limit < item && item < best) {
                     best = item;
                 }
@@ -2478,7 +2478,7 @@ s32 fldFindNextMarkedValue(s32 limit) {
     return best;
 }
 
-void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z) {
+void fldAllIconDel(s32 index, f32 *x, f32 *z) {
     s32 i;
     FldSceneRecord *entry = fldSceneRecords;
     for (i = 0; i < (s32)fldSceneRecordCount; i++, entry++) {
@@ -2495,7 +2495,7 @@ void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z) {
 
 extern s32 D_003BAEAC;
 
-void fldGetVisibleSceneBounds(f32 *minX, f32 *maxZ, f32 *maxX, f32 *minZ) {
+void fldAutoMapGetBBox(f32 *minX, f32 *maxZ, f32 *maxX, f32 *minZ) {
     s32 room;
     u32 i;
     FldSceneRecord *rec;
@@ -2598,7 +2598,7 @@ void fldClearAllAreaFloorFlags(void) {
 
 extern f32 D_003BAEE8;
 extern s32 frFontMeasureTextAdvance(const u8 *, u8, u8);
-extern void fldDrawConvertedTextGlyph(s32 x, s32 y, u32 colors, const u8 *text);
+extern void fldKanjiDraw(s32 x, s32 y, u32 colors, const u8 *text);
 void func_00147188(s32 unused) {
     FldAreaWork *work;
     s32 mode;
@@ -2693,7 +2693,7 @@ interpolate:
             x = 0x1A3 - textWidth / 2;
         }
         y = (yOffset + 0x12) / 2;
-        fldDrawConvertedTextGlyph(xOffset + x, y, 0xF0DC6480, (const u8 *)D_0034286C[record]);
+        fldKanjiDraw(xOffset + x, y, 0xF0DC6480, (const u8 *)D_0034286C[record]);
     } else {
         lookupIndex = work->unkC4;
         if (lookupIndex == map || D_003D43B0[lookupIndex] < 2) {
@@ -2712,7 +2712,7 @@ interpolate:
             x = 0x1A3 - textWidth / 2;
         }
         y = (yOffset + 0x12) / 2;
-        fldDrawConvertedTextGlyph(xOffset + x, y, 0xA09DC380, (const u8 *)D_0033F06C[record]);
+        fldKanjiDraw(xOffset + x, y, 0xA09DC380, (const u8 *)D_0033F06C[record]);
     }
 }
 
@@ -2733,7 +2733,7 @@ void fldLoadFieldEffectTextureSlots(void) {
 
     memcpy(names, D_003A06B0, sizeof(names));
     for (i = 0; i < 4; i++) {
-        fldEffectTextureLoadHandles[i] = (s32)sdfReadNamedResource(names[i], (u32 *)&fldEffectTextureData[i], 0);
+        fldEffectTextureLoadHandles[i] = (s32)sdfDevLoadFileEx(names[i], (u32 *)&fldEffectTextureData[i], 0);
         fldEffectTextureNodes[i] = (s32)effCreateNodeFromParameter(fldEffectTextureData[i]);
         D_0034C8A0[i] = 0;
     }
@@ -2750,7 +2750,7 @@ void fldReleaseTextureSlots(void) {
 
     for (i = 0; i < 4; i++) {
         if (fldEffectTextureNodes[i] != 0) {
-            effDestroyNode((EffNode *)(u32)fldEffectTextureNodes[i]);
+            dds3EffectDelete((EffNode *)(u32)fldEffectTextureNodes[i]);
             fldEffectTextureNodes[i] = 0;
             sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldEffectTextureLoadHandles[i]);
             fldEffectTextureLoadHandles[i] = 0;
@@ -2761,9 +2761,9 @@ void fldReleaseTextureSlots(void) {
 
 extern u32 fldPlayerObject;
 
-extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
+extern f32 EulerAngleAxisY(void);
 
-extern void sdfVuLoadRotationMatrixZ(f32 angle);
+extern void SetRotateMatrixY(f32 angle);
 
 void fldUpdateEffectTextureTransforms(void) {
     f32 vec[4];
@@ -2774,7 +2774,7 @@ void fldUpdateEffectTextureTransforms(void) {
     memset(vec, 0, sizeof(vec));
     vec[3] = 1.0f;
     dds3GetRotPoseSet((EffWorldNode *)fldPlayerObject);
-    angle = effMiscComputeQuaternionRotatedReferenceAngle();
+    angle = EulerAngleAxisY();
     for (i = 0; i < 4; i++) {
         if (fldEffectTextureNodes[i] != 0) {
             vec[0] = fldAreaState.x;
@@ -2784,10 +2784,10 @@ void fldUpdateEffectTextureTransforms(void) {
                 vec[1] = fldAreaState.y - 100.0f;
             }
             effCopyVectorToNodeInstance((EffNode *)(u32)fldEffectTextureNodes[i], vec);
-            sdfVuLoadRotationMatrixZ(-angle);
+            SetRotateMatrixY(-angle);
             VU0_STORE_MATRIX_UNCLOBBERED(mat);
             effApplyNodeTransformMatrix((EffNode *)(u32)fldEffectTextureNodes[i], mat);
-            effUpdateNode((EffNode *)(u32)fldEffectTextureNodes[i]);
+            dds3EffectDraw((EffNode *)(u32)fldEffectTextureNodes[i]);
         }
     }
 }
@@ -2819,7 +2819,7 @@ void mnuSpawnResourceAtPosition(f32 x, f32 y, f32 z) {
         pos[0] = x;
         pos[1] = y;
         pos[2] = z;
-        effRestartNodeInstance((EffNode *)(u32)handle);
+        dds3EffectReset((EffNode *)(u32)handle);
         effCopyVectorToNodeInstance((EffNode *)(u32)mnuPositionedResourceNodes[mnuPositionedResourceCursor], pos);
         mnuPositionedResourceActive[mnuPositionedResourceCursor] = 1;
         mnuPositionedResourceCursor = (mnuPositionedResourceCursor + 1) % 4;
@@ -2846,7 +2846,7 @@ void mnuReleaseResourceEntries(void) {
     fldSecondaryEffectPositionPending = 0;
     for (i = 0; i < 4; i++) {
         if (mnuPositionedResourceNodes[i] != 0) {
-            effDestroyNode((EffNode *)(u32)mnuPositionedResourceNodes[i]);
+            dds3EffectDelete((EffNode *)(u32)mnuPositionedResourceNodes[i]);
             mnuPositionedResourceNodes[i] = 0;
         }
     }
@@ -2856,7 +2856,7 @@ void fldUpdateMenuResourceEffects(void) {
     s32 index;
     for (index = 0; index < 4; index++) {
         if (mnuPositionedResourceNodes[index] != 0 && mnuPositionedResourceActive[index] != 0) {
-            effUpdateNode((EffNode *)(u32)mnuPositionedResourceNodes[index]);
+            dds3EffectDraw((EffNode *)(u32)mnuPositionedResourceNodes[index]);
         }
     }
 }
@@ -2891,83 +2891,83 @@ void fldParseMixLb(void) {
     struct SdfMemBlock *allocation;
 
     index = 0;
-    lb = (FilePacRequest *)fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
-    fileWaitForRequestReady((struct FileRequest *)lb);
+    lb = (FilePacRequest *)pacLoad("/fld/f/bin/fldmix.LB");
+    pacSync((struct FileRequest *)lb);
     for (node = lb->packet.queueHead; node != NULL; node = node->next, index++) {
         switch (index) {
         case 0:
             allocation = node->resourceHandle;
             D_003BD7EC = (s32)(u32)allocation;
-            D_003BD7F0 = sdfMemoryGetBlockAddress(allocation);
+            D_003BD7F0 = sdfMemGetPtr(allocation);
             break;
         case 1:
             allocation = node->resourceHandle;
             D_003BAF68 = (s32)(u32)allocation;
-            D_003BAF6C = sdfMemoryGetBlockAddress(allocation);
+            D_003BAF6C = sdfMemGetPtr(allocation);
             break;
         case 2:
             allocation = node->resourceHandle;
             D_003BAF50 = (s32)(u32)allocation;
-            D_003BAF54 = sdfMemoryGetBlockAddress(allocation);
+            D_003BAF54 = sdfMemGetPtr(allocation);
             break;
         case 3:
             allocation = node->resourceHandle;
             D_003BAF74 = (s32)(u32)allocation;
-            D_003BAF78 = sdfMemoryGetBlockAddress(allocation);
+            D_003BAF78 = sdfMemGetPtr(allocation);
             break;
         case 4:
             allocation = node->resourceHandle;
             D_003BAF5C = (s32)(u32)allocation;
-            D_003BAF60 = sdfMemoryGetBlockAddress(allocation);
+            D_003BAF60 = sdfMemGetPtr(allocation);
             break;
         case 5:
             allocation = node->resourceHandle;
             D_003BAF84 = (s32)(u32)allocation;
-            D_003BAF88 = sdfMemoryGetBlockAddress(allocation);
+            D_003BAF88 = sdfMemGetPtr(allocation);
             break;
         case 6:
             allocation = node->resourceHandle;
             D_003BAF44 = (s32)(u32)allocation;
-            D_003BAF48 = sdfMemoryGetBlockAddress(allocation);
+            D_003BAF48 = sdfMemGetPtr(allocation);
             break;
         case 7:
             allocation = node->resourceHandle;
             D_003BD7D4 = (s32)(u32)allocation;
-            D_003BD7D8 = sdfMemoryGetBlockAddress(allocation);
+            D_003BD7D8 = sdfMemGetPtr(allocation);
             break;
         case 8:
             allocation = node->resourceHandle;
             D_003BD7DC = (s32)(u32)allocation;
-            D_003BD7E0 = sdfMemoryGetBlockAddress(allocation);
+            D_003BD7E0 = sdfMemGetPtr(allocation);
             break;
         case 9:
             allocation = node->resourceHandle;
             D_003BD7E4 = (s32)(u32)allocation;
-            D_003BD7E8 = sdfMemoryGetBlockAddress(allocation);
+            D_003BD7E8 = sdfMemGetPtr(allocation);
             break;
         case 10:
             allocation = node->resourceHandle;
             fldAreaState.mapResources[0].allocation = allocation;
-            fldAreaState.mapResources[0].resourceAddress = sdfMemoryGetBlockAddress(allocation);
+            fldAreaState.mapResources[0].resourceAddress = sdfMemGetPtr(allocation);
             break;
         case 11:
             allocation = node->resourceHandle;
             fldAreaState.mapResources[1].allocation = allocation;
-            fldAreaState.mapResources[1].resourceAddress = sdfMemoryGetBlockAddress(allocation);
+            fldAreaState.mapResources[1].resourceAddress = sdfMemGetPtr(allocation);
             break;
         case 12:
             allocation = node->resourceHandle;
             fldAreaState.mapResources[2].allocation = allocation;
-            fldAreaState.mapResources[2].resourceAddress = sdfMemoryGetBlockAddress(allocation);
+            fldAreaState.mapResources[2].resourceAddress = sdfMemGetPtr(allocation);
             break;
         case 13:
             allocation = node->resourceHandle;
             fldAreaState.mapResources[3].allocation = allocation;
-            fldAreaState.mapResources[3].resourceAddress = sdfMemoryGetBlockAddress(allocation);
+            fldAreaState.mapResources[3].resourceAddress = sdfMemGetPtr(allocation);
             break;
         }
     }
-    btlStageTaskCleanupCallback(lb);
+    pacFileHandleFree_(lb);
 }
 
 extern s32 D_003BAF48, D_003BAF4C, D_003BAF40, D_003BAF3C;
@@ -2978,12 +2978,12 @@ extern s32 D_003BD7F0, D_003BD7D8, D_003BD7E0, D_003BD7E8;
 
 void fldInitializeMenuResources(void) {
     if (D_0032E3C0[0] < 200) {
-        D_003BAF4C = (s32)effCreateNodeFromDescriptor((EffNodeDescriptor *)(u32)D_003BAF48);
-        D_003BAF3C = (s32)effCreateNodeFromDescriptor((EffNodeDescriptor *)(u32)D_003BD7F0);
+        D_003BAF4C = (s32)dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BAF48);
+        D_003BAF3C = (s32)dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BD7F0);
         D_003BAF40 = 0;
-        D_003BAF30 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(D_003BD7D8));
-        D_003BAF34 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(D_003BD7E0));
-        D_003BAF38 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(D_003BD7E8));
+        D_003BAF30 = sdfTexSet((SdfTextureFileHeader *)(D_003BD7D8));
+        D_003BAF34 = sdfTexSet((SdfTextureFileHeader *)(D_003BD7E0));
+        D_003BAF38 = sdfTexSet((SdfTextureFileHeader *)(D_003BD7E8));
     }
 }
 
@@ -3009,19 +3009,19 @@ void fldReleaseResourceHandles(void) {
         D_003BAF38 = 0;
     }
     if (D_003BAF4C != 0) {
-        effDestroyNode((EffNode *)(u32)D_003BAF4C);
+        dds3EffectDelete((EffNode *)(u32)D_003BAF4C);
         D_003BAF4C = 0;
     }
     if (D_003BAF58 != 0) {
-        effDestroyNode((EffNode *)(u32)D_003BAF58);
+        dds3EffectDelete((EffNode *)(u32)D_003BAF58);
         D_003BAF58 = 0;
     }
     if (D_003BAF64 != 0) {
-        effDestroyNode((EffNode *)(u32)D_003BAF64);
+        dds3EffectDelete((EffNode *)(u32)D_003BAF64);
         D_003BAF64 = 0;
     }
     if (D_003BAF3C != 0) {
-        effDestroyNode((EffNode *)(u32)D_003BAF3C);
+        dds3EffectDelete((EffNode *)(u32)D_003BAF3C);
         D_003BAF3C = 0;
     }
 }
@@ -3060,7 +3060,7 @@ void fldResetObjectSlots(void) {
         fldObjectSlots[i].activationState = 0;
         fldObjectSlots[i].activationRequested = 0;
         if (fldObjectSlots[i].effectNode != 0) {
-            effDestroyNode((EffNode *)(u32)fldObjectSlots[i].effectNode);
+            dds3EffectDelete((EffNode *)(u32)fldObjectSlots[i].effectNode);
         }
         fldObjectSlots[i].effectNode = 0;
     }
@@ -3069,7 +3069,7 @@ void fldResetObjectSlots(void) {
 }
 
 extern void dds3ObjectBaseOnFlag(void *object, s32 mask);
-extern void sdfSetModelScalarOverrides(struct SdfModel *model, f32 first, f32 second);
+extern void sdfModelSetFaceDivParm(struct SdfModel *model, f32 first, f32 second);
 extern s32 D_0032E3C4[];
 extern u8 D_003D44A0[0x200];
 extern f32 sdfCos(f32);
@@ -3093,7 +3093,7 @@ void fldInitializeHuntSparkUnit(EvtUnit *unit) {
     }
     row = D_003D44A0 + index * 8;
     height = 0.0f;
-    angle = -effMiscComputeQuaternionRotatedReferenceAngle();
+    angle = -EulerAngleAxisY();
     if (row[7] >= 20) {
         angle = (f32)((row[7] - 20) % 20);
         angle = angle * 360.0f * 0.0625f;
@@ -3126,18 +3126,18 @@ void fldInitializeHuntSparkUnit(EvtUnit *unit) {
             height = 0.6f;
         }
     }
-    evtSetUnitStatusFlags(unit);
+    evtUnitLightOn(unit);
     radians = angle * 3.14f;
     dds3ObjectBaseOnFlag(object, 0x100);
-    sdfSetModelScalarOverrides(resource->inner, (f32)(row[6] >> 4), (f32)(row[6] & 15));
+    sdfModelSetFaceDivParm(resource->inner, (f32)(row[6] >> 4), (f32)(row[6] & 15));
     radians /= 180.0f;
-    direction[0] = sdfSinPoly(radians);
+    direction[0] = sdfSin(radians);
     direction[1] = height;
     direction[2] = sdfCos(radians);
     direction[3] = 0.0f;
     VU0_LOAD_VF(vf10, direction);
     VU0_NORMALIZE_VF10();
-    evtSetUnitNormalizedDirection(unit, 0);
+    evtSetUnitLightDir(unit, 0);
     red = row[0];
     green = row[1];
     blue = row[2];
@@ -3146,11 +3146,11 @@ void fldInitializeHuntSparkUnit(EvtUnit *unit) {
     green = row[4];
     blue = row[5];
     colorB = red | (blue << 16) | (green << 8) | 0x80000000;
-    evtInitializeUnitColorTransition(unit, 0, colorA, colorB);
+    evtSetUnitLightAndAmbient(unit, 0, colorA, colorB);
     VU0_LOAD_VF(vf10, direction);
     VU0_NORMALIZE_VF10();
-    evtSetUnitNormalizedDirection(unit, 0);
-    evtInitializeUnitColorTransition(unit, 0, colorA, colorB);
+    evtSetUnitLightDir(unit, 0);
+    evtSetUnitLightAndAmbient(unit, 0, colorA, colorB);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0718);
@@ -3165,7 +3165,7 @@ INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0768);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_001486D0);
 
-void fldActivateObjectById(s32 id) {
+void fldFindTakaraSlot(s32 id) {
     s32 i;
 
     for (i = 0; i < fldObjectSlotCount; i++) {
@@ -3180,7 +3180,7 @@ void fldReleaseObjectSlots(void) {
 
     for (i = 0; i < 32; i++) {
         if (fldObjectSlots[i].effectNode != 0) {
-            effDestroyNode((EffNode *)(u32)fldObjectSlots[i].effectNode);
+            dds3EffectDelete((EffNode *)(u32)fldObjectSlots[i].effectNode);
             fldObjectSlots[i].effectNode = 0;
         }
     }
@@ -3193,7 +3193,7 @@ void fldReleaseObjectSlots(void) {
     }
 }
 
-extern u8 fldTestSceneControlFlags(u32 mask);
+extern u8 fldEncountTestFlag(u32 mask);
 
 void fldUpdateObjectSlotActivation(void) {
     s32 i;
@@ -3204,54 +3204,54 @@ void fldUpdateObjectSlotActivation(void) {
         case 0:
             if (fldObjectSlots[i].activationRequested == 1) {
                 resource = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
-                mdlAddEntryPlain(resource, 0, 1);
+                mdlSingleMotion(resource, 0, 1);
                 fldObjectSlots[i].activationState = fldObjectSlots[i].activationRequested;
                 switch (fldObjectSlots[i].effectVariant) {
                 case 0:
                 case 3:
                     if (D_003BAF58 != 0) {
-                        effDestroyNode((EffNode *)(u32)D_003BAF58);
+                        dds3EffectDelete((EffNode *)(u32)D_003BAF58);
                         D_003BAF58 = 0;
                     }
-                    D_003BAF58 = (s32)effCreateNodeFromDescriptor((EffNodeDescriptor *)(u32)D_003BAF54);
-                    effRestartNodeInstance((EffNode *)(u32)D_003BAF4C);
+                    D_003BAF58 = (s32)dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BAF54);
+                    dds3EffectReset((EffNode *)(u32)D_003BAF4C);
                     break;
                 case 1:
                     if (D_003BAF64 != 0) {
-                        effDestroyNode((EffNode *)(u32)D_003BAF64);
+                        dds3EffectDelete((EffNode *)(u32)D_003BAF64);
                         D_003BAF64 = 0;
                     }
-                    D_003BAF64 = (s32)effCreateNodeFromDescriptor((EffNodeDescriptor *)(u32)D_003BAF60);
-                    effRestartNodeInstance((EffNode *)(u32)D_003BAF4C);
+                    D_003BAF64 = (s32)dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BAF60);
+                    dds3EffectReset((EffNode *)(u32)D_003BAF4C);
                     break;
                 }
             } else {
                 resource = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
                 if (resource->first->state == SDF_MOTION_STATE_TERMINAL) {
-                    mdlAddEntryPlain(resource, 0, 0);
+                    mdlSingleMotion(resource, 0, 0);
                 }
             }
             break;
         case 1:
             resource = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
             if (resource->first->state == SDF_MOTION_STATE_TERMINAL) {
-                mdlAddEntryFlagged(resource, 0, 2);
+                mdlLoopMotion(resource, 0, 2);
                 fldObjectSlots[i].activationRequested = 2;
                 fldObjectSlots[i].activationState = 2;
             }
             break;
         case 2:
-            if (fldTestSceneControlFlags(0x40)) {
+            if (fldEncountTestFlag(0x40)) {
                 resource = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
-                mdlAddEntryFlagged(resource, 0, 3);
+                mdlLoopMotion(resource, 0, 3);
                 fldObjectSlots[i].activationRequested = 3;
                 fldObjectSlots[i].activationState = 3;
                 if (D_003BAF58 != 0) {
-                    effDestroyNode((EffNode *)(u32)D_003BAF58);
+                    dds3EffectDelete((EffNode *)(u32)D_003BAF58);
                     D_003BAF58 = 0;
                 }
                 if (D_003BAF64 != 0) {
-                    effDestroyNode((EffNode *)(u32)D_003BAF64);
+                    dds3EffectDelete((EffNode *)(u32)D_003BAF64);
                     D_003BAF64 = 0;
                 }
             }
@@ -3273,32 +3273,32 @@ extern f32 fldBannerColorPhase;
 extern s32 ptyAnyUnitFlagMatch(s32 statusMask, s32 flagMode);
 
 
-extern void evtSubmitTexturedRectPacket(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, SdfTex *);
+extern void DrwSprite2DC(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, SdfTex *);
 
 void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
     u32 color;
 
     if (D_0032E4C8[0] != 1) {
-        fldSelectDisplayBuffer(0x53);
-        fldSetGsAlphaBlendEquation(0);
-        fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
-        fldSubmitSpriteRect(x + 0x123, y, 0x7D, 0x34, 1, 0x31, 0x7D, 0x34, 0x80808080, D_003BAF30);
-        fldSubmitSpriteRect(x + 0x1A0, y, 0x62, 0x34, 0x7D, 0x31, 1, 0x34, 0x80808080, D_003BAF30);
+        rsetOtOfs(0x53);
+        rsetAlpha(0);
+        rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+        DrwSprite2D(x + 0x123, y, 0x7D, 0x34, 1, 0x31, 0x7D, 0x34, 0x80808080, D_003BAF30);
+        DrwSprite2D(x + 0x1A0, y, 0x62, 0x34, 0x7D, 0x31, 1, 0x34, 0x80808080, D_003BAF30);
         if (ptyAnyUnitFlagMatch(0x5D0, 0) != 0) {
             color = 0x808080;
-            fldSubmitSpriteRect(x + 0x17F, y + 0x28, 0x73, 0x1A, 1, 0x66, 0x73, 0x1A, 0x80808080, D_003BAF30);
+            DrwSprite2D(x + 0x17F, y + 0x28, 0x73, 0x1A, 1, 0x66, 0x73, 0x1A, 0x80808080, D_003BAF30);
             if (fldBannerColorPhase < 45.0f) {
-                color = (s32)(sdfSinPoly(fldBannerColorPhase * 4.0f * 3.14f / 180.0f) * 128.0f) + 0x80;
+                color = (s32)(sdfSin(fldBannerColorPhase * 4.0f * 3.14f / 180.0f) * 128.0f) + 0x80;
                 color |= (color << 8) | (color << 16);
             }
-            fldSetGsAlphaBlendEquation(1);
-            evtSubmitTexturedRectPacket(x + 0x17F, y + 0x28, 0x73, 0x1A, 1, 0x66, 0x73, 0x1A, color, color | 0x5A000000, color | 0x5A000000, color, D_003BAF30);
+            rsetAlpha(1);
+            DrwSprite2DC(x + 0x17F, y + 0x28, 0x73, 0x1A, 1, 0x66, 0x73, 0x1A, color, color | 0x5A000000, color | 0x5A000000, color, D_003BAF30);
             fldBannerColorPhase += 1.0f;
             if (fldBannerColorPhase > 90.0f) {
                 fldBannerColorPhase = 0.0f;
             }
         }
-        fldSetGsAlphaBlendEquation(0);
+        rsetAlpha(0);
     }
 }
 
@@ -3306,31 +3306,31 @@ void fldDrawGaugeBar(s32 width) {
     s32 x;
 
     if (D_0032E3C0[0] < 200) {
-        fldSelectDisplayBuffer(0x53);
-        fldSetGsAlphaBlendEquation(0);
-        fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
+        rsetOtOfs(0x53);
+        rsetAlpha(0);
+        rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
         x = 0x9D - (width >> 1);
-        fldSubmitSpriteRect(x, 0x123, 0x63, 0x2E, 2, 1, 0x63, 0x2E, 0x80808080, D_003BAF30);
-        fldSubmitSpriteRect(x + 0x63, 0x123, width, 0x2E, 0x64, 1, 1, 0x2E, 0x80808080, D_003BAF30);
+        DrwSprite2D(x, 0x123, 0x63, 0x2E, 2, 1, 0x63, 0x2E, 0x80808080, D_003BAF30);
+        DrwSprite2D(x + 0x63, 0x123, width, 0x2E, 0x64, 1, 1, 0x2E, 0x80808080, D_003BAF30);
         x += width;
-        fldSubmitSpriteRect(x + 0x63, 0x123, 0x63, 0x2E, 0x65, 1, -0x63, 0x2E, 0x80808080, D_003BAF30);
-        fldSetGsAlphaBlendEquation(0);
+        DrwSprite2D(x + 0x63, 0x123, 0x63, 0x2E, 0x65, 1, -0x63, 0x2E, 0x80808080, D_003BAF30);
+        rsetAlpha(0);
     }
 }
 
-extern void fldSelectDisplayBuffer(u32);
+extern void rsetOtOfs(u32);
 
-extern void fldSetGsAlphaBlendEquation(s32);
+extern void rsetAlpha(s32);
 
-extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
 
-void fldDrawTitleBanner(s32 x, s32 y) {
+void fldDrawInputCursor(s32 x, s32 y) {
     if (D_0032E3C0[0] < 200) {
-        fldSelectDisplayBuffer(0x53);
-        fldSetGsAlphaBlendEquation(0);
-        fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
-        fldSubmitSpriteRect(x, y, 0x10, 0x11, 0x68, 1, 0x10, 0x11, 0x80808080, D_003BAF30);
-        fldSetGsAlphaBlendEquation(0);
+        rsetOtOfs(0x53);
+        rsetAlpha(0);
+        rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+        DrwSprite2D(x, y, 0x10, 0x11, 0x68, 1, 0x10, 0x11, 0x80808080, D_003BAF30);
+        rsetAlpha(0);
     }
 }
 
@@ -3364,36 +3364,36 @@ void fldDrawLocationPanel(void) {
     case 5:
     case 7:
         color = 0x80808080;
-        fldSelectDisplayBuffer(0x53);
-        fldSetGsAlphaBlendEquation(0);
-        fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
+        rsetOtOfs(0x53);
+        rsetAlpha(0);
+        rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
         fldSubmitGsGradientQuad(0x194, 0x91, 0x5F, 0x47, 0, 0, 0, 0x26,
             0, 0, 0, 0x26, 0, 0, 0, 0x26, 0, 0, 0, 0x26);
-        fldSubmitSpriteRect(0x188, 0x117, 0x78, 0x80, 1, 0, 0x78, 0x80, color, D_003BAF34);
-        fldSubmitSpriteRect(0x188, 0x197, 0x78, 0x1C, 1, 0x7F, 0x78, 1, color, D_003BAF34);
-        fldSetGsAlphaBlendEquation(0);
+        DrwSprite2D(0x188, 0x117, 0x78, 0x80, 1, 0, 0x78, 0x80, color, D_003BAF34);
+        DrwSprite2D(0x188, 0x197, 0x78, 0x1C, 1, 0x7F, 0x78, 1, color, D_003BAF34);
+        rsetAlpha(0);
         fldSubmitGsGradientQuad(0x190, 0x8F, 0x70, 0x49, 0, 0xD, 0xA2, 0x18,
             0, 0xD, 0xA2, 0, 0, 0xD, 0xA2, 0, 0, 0xD, 0xA2, 0);
         fldSubmitGsGradientQuad(0x193, 0x90, 0x6D, 0x4E, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x18);
-        fldSubmitSpriteRect(0x1B4, 0x112, 0x1F, 0x10, 1, 1, 0x1F, 0x10, color, D_003BAF38);
-        fldSetGsAlphaBlendEquation(0);
+        DrwSprite2D(0x1B4, 0x112, 0x1F, 0x10, 1, 1, 0x1F, 0x10, color, D_003BAF38);
+        rsetAlpha(0);
         fldResetCameraAndSceneView();
         break;
     }
 }
 
-extern u8 fldTestSceneLifecycleFlags(u32 mask);
+extern u8 fldAutoMapSeqTestFlag(u32 mask);
 
 void fldFlushQueuedEffectPositions(void) {
     if (fldAreaState.area < 0xC8) {
-        if (fldTestSceneLifecycleFlags(1) != 0) {
+        if (fldAutoMapSeqTestFlag(1) != 0) {
             return;
         }
-        if (fldGetCampSceneControlMode() != 0) {
+        if (fldProcCampChk() != 0) {
             return;
         }
-        if (fldGetSceneReadyOrPendingState() != 0) {
+        if (fldProcAmChk() != 0) {
             return;
         }
         if (fldSecondaryEffectPositionPending != 0) {
@@ -3417,7 +3417,7 @@ extern s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 extern void dds3ObjectBaseOnFlag();
 
-void fldFireRoomEffects(void) {
+void fldNpcHojiRefresh(void) {
     s32 i;
 
     for (i = 0; i < fldRoomEffectEntryCount; i++) {
@@ -3443,11 +3443,11 @@ void fldLoadNpcPalette(s32 field) {
     DevState *command;
 
     if (field < 100) {
-        fldFormatAreaDirectory(directory, field, 1);
+        fldMakeFilePath(directory, field, 1);
         sprintf(path, "%sF%03d.NPL", directory, field);
-        command = sdfDevCreateCommandState(path);
-        sdfDevQueueReadAndWait(command, D_003D44A0, 0x200);
-        sdfDevWaitThenReleaseCommandState(command);
+        command = sdfFileOpen(path);
+        sdfFileRead(command, D_003D44A0, 0x200);
+        sdfFileClose(command);
     }
 }
 
@@ -3484,7 +3484,7 @@ s32 fldTitleIsActive(void) {
     return dds3SearchProcessName(fldTitleTaskName) != 0;
 }
 
-void fldBeginTitleAnimation(void) {
+void nbPanelAnalyzeStart(void) {
     D_003BAFA8 = 0;
     D_003BAFA0 = 1;
 }
@@ -3495,12 +3495,12 @@ s32 fldTitle(void) {
     s32 nextPhase;
 
     if (D_003BAFB0 == 0) {
-        fldSelectDisplayBuffer(0x53);
+        rsetOtOfs(0x53);
     } else {
-        fldSelectDisplayBuffer(0x5E);
+        rsetOtOfs(0x5E);
     }
-    fldSubmitFrameQuad(1, 5, 0x80, 3, 0, 0, 1, 1);
-    fldSetGsAlphaBlendEquation(0);
+    rsetTest(1, 5, 0x80, 3, 0, 0, 1, 1);
+    rsetAlpha(0);
     /* The next phase is staged before the dispatch: the scheduler issues the
      * constant-1 pseudo ahead of the phase load (see docs/idioms.md,
      * "Trace-justified staging: fldTitle next phase"). */
@@ -3523,10 +3523,10 @@ s32 fldTitle(void) {
             }
             fldSubmitGsGradientQuad(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, alpha * 12 / 128, 0, 0, 0,
                                     alpha / 64, 0, 0, 0, alpha / 2);
-            fldSubmitSpriteRect(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x808080, D_003BAFB4);
+            DrwSprite2D(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x808080, D_003BAFB4);
         }
         if (D_003BAF9C >= 20 && D_003BAF9C < 30) {
-            fldSetGsAlphaBlendEquation(1);
+            rsetAlpha(1);
             alpha = (D_003BAF9C - 20) * 128 / 10;
             if (alpha > 0x80) {
                 alpha = 0x80;
@@ -3536,11 +3536,11 @@ s32 fldTitle(void) {
             }
             fldSubmitGsGradientQuad(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, alpha * 12 / 128, 0, 0, 0,
                                     alpha / 64, 0, 0, 0, alpha / 2);
-            fldSubmitSpriteRect(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x807060, D_003BAFB4);
-            fldSetGsAlphaBlendEquation(0);
+            DrwSprite2D(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x807060, D_003BAFB4);
+            rsetAlpha(0);
         }
         if (D_003BAF9C >= 30) {
-            fldSetGsAlphaBlendEquation(1);
+            rsetAlpha(1);
             alpha = (0x30 - D_003BAF9C) * 128 / 18;
             if (alpha > 0x80) {
                 alpha = 0x80;
@@ -3550,8 +3550,8 @@ s32 fldTitle(void) {
             }
             fldSubmitGsGradientQuad(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, alpha * 12 / 128, 0, 0, 0,
                                     alpha / 64, 0, 0, 0, alpha / 2);
-            fldSubmitSpriteRect(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x807060, D_003BAFB4);
-            fldSetGsAlphaBlendEquation(0);
+            DrwSprite2D(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x807060, D_003BAFB4);
+            rsetAlpha(0);
         }
         nextFrame = D_003BAF9C + 1;
         if (nextFrame > 60) {
@@ -3563,7 +3563,7 @@ s32 fldTitle(void) {
         break;
     case 2:
         fldSubmitGsGradientQuad(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, 0xC, 0, 0, 0, 2, 0, 0, 0, 0x40);
-        fldSubmitSpriteRect(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, 0x80808080, D_003BAFB4);
+        DrwSprite2D(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, 0x80808080, D_003BAFB4);
         nextFrame = D_003BAF9C + 1;
         if (nextFrame > 60) {
             D_003BAF9C = 0;
@@ -3582,7 +3582,7 @@ s32 fldTitle(void) {
         }
         fldSubmitGsGradientQuad(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, alpha * 12 / 128, 0, 0, 0,
                                 alpha / 64, 0, 0, 0, alpha / 2);
-        fldSubmitSpriteRect(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x808080, D_003BAFB4);
+        DrwSprite2D(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x808080, D_003BAFB4);
         nextFrame = D_003BAF9C + 1;
         if (nextFrame > D_003BAFAC) {
             D_003BAF9C = 0;
@@ -3626,8 +3626,8 @@ void fldStartTitle(s32 field, s32 mode, s32 option) {
     D_003BAFA0 = 0;
     D_003BAFB0 = 0;
     sprintf(path, D_003A0810, field);
-    handle = (s32)sdfReadNamedResource(path, (u32 *)&resourceAddress, 0);
-    D_003BAFB4 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceAddress));
+    handle = (s32)sdfDevLoadFileEx(path, (u32 *)&resourceAddress, 0);
+    D_003BAFB4 = sdfTexSet((SdfTextureFileHeader *)(resourceAddress));
     sdfMemFreeDirect((struct SdfMemBlock *)(u32)(handle));
     if (fldTitleIsActive() == 0) {
         dds3StartProcess(fldTitleTaskName, 0x2B0A, 0, 1, fldTitle, fldReleaseTitleTextureReference, 0);
@@ -3655,12 +3655,12 @@ s32 fldTitleMini(void) {
     s32 nextFrame;
     u32 highlightRgb;
 
-    if (fldGetCampSceneControlMode() == 1) {
+    if (fldProcCampChk() == 1) {
         return 0;
     }
-    fldSelectDisplayBuffer(0x53);
-    fldSubmitFrameQuad(1, 5, 0x80, 3, 0, 0, 1, 2);
-    fldSetGsAlphaBlendEquation(0);
+    rsetOtOfs(0x53);
+    rsetTest(1, 5, 0x80, 3, 0, 0, 1, 2);
+    rsetAlpha(0);
     switch (D_003BAFBC) {
     case 0:
         nextFrame = D_003BAFB8 + 1;
@@ -3685,24 +3685,24 @@ s32 fldTitleMini(void) {
         }
         color = (alpha << 24) | 0x808080;
         x = 218 - D_003BAFB8 * 6;
-        fldSubmitSpriteRect(x < 128 ? 128 : x, 0x152, 0x80, 0x1C,
+        DrwSprite2D(x < 128 ? 128 : x, 0x152, 0x80, 0x1C,
             0, 0x24, 0x80, 0x1C, color, D_003BAFC4);
         x = 166 + D_003BAFB8 * 6;
-        fldSubmitSpriteRect(x > 256 ? 256 : x, 0x152, 0x80, 0x1C,
+        DrwSprite2D(x > 256 ? 256 : x, 0x152, 0x80, 0x1C,
             0x80, 0x24, 0x80, 0x1C, color, D_003BAFC4);
         if (D_003BAFB8 >= 10) {
             alpha = (D_003BAFB8 - 10) * 25;
             if (alpha > 128) {
                 alpha = 128;
             }
-            fldSetGsAlphaBlendEquation(1);
-            fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x1C, 0, 0x24, 0x100, 0x1C,
+            rsetAlpha(1);
+            DrwSprite2D(0x80, 0x152, 0x100, 0x1C, 0, 0x24, 0x100, 0x1C,
                 (alpha << 24) | 0x808080, D_003BAFC4);
         }
         if (D_003BAFB8 >= 8) {
             alpha = (D_003BAFB8 - 8) * 16;
-            fldSetGsAlphaBlendEquation(0);
-            fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x24, 0, 0, 0x100, 0x24,
+            rsetAlpha(0);
+            DrwSprite2D(0x80, 0x152, 0x100, 0x24, 0, 0, 0x100, 0x24,
                 (alpha << 24) | 0x808080, D_003BAFC4);
         }
         nextFrame = D_003BAFB8 + 1;
@@ -3721,27 +3721,27 @@ s32 fldTitleMini(void) {
             0, 0, 0, 0, 0, 0, 0, alpha * 0x33 / 128, 0, 0, 0, 0);
         alpha -= D_003BAFB8 * 8;
         if (alpha > 0) {
-            fldSetGsAlphaBlendEquation(1);
-            fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x1C, 0, 0x24, 0x100, 0x1C,
+            rsetAlpha(1);
+            DrwSprite2D(0x80, 0x152, 0x100, 0x1C, 0, 0x24, 0x100, 0x1C,
                 (alpha << 24) | 0x808080, D_003BAFC4);
         }
-        fldSetGsAlphaBlendEquation(0);
-        fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x1C, 0, 0x24, 0x100, 0x1C,
+        rsetAlpha(0);
+        DrwSprite2D(0x80, 0x152, 0x100, 0x1C, 0, 0x24, 0x100, 0x1C,
             0x80808080, D_003BAFC4);
-        fldSetGsAlphaBlendEquation(0);
-        fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x24, 0, 0, 0x100, 0x24,
+        rsetAlpha(0);
+        DrwSprite2D(0x80, 0x152, 0x100, 0x24, 0, 0, 0x100, 0x24,
             0x80808080, D_003BAFC4);
         highlightRgb = 0x808080;
         if (D_003BAFB8 < 4) {
             alpha = D_003BAFB8 * 40 / 3;
-            fldSetGsAlphaBlendEquation(1);
-            fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x24, 0, 0, 0x100, 0x24,
+            rsetAlpha(1);
+            DrwSprite2D(0x80, 0x152, 0x100, 0x24, 0, 0, 0x100, 0x24,
                 (alpha << 24) | highlightRgb, D_003BAFC4);
         } else {
             alpha = 56 - D_003BAFB8 * 4;
             if (alpha > 0) {
-                fldSetGsAlphaBlendEquation(1);
-                fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x24, 0, 0, 0x100, 0x24,
+                rsetAlpha(1);
+                DrwSprite2D(0x80, 0x152, 0x100, 0x24, 0, 0, 0x100, 0x24,
                     (alpha << 24) | highlightRgb, D_003BAFC4);
             }
         }
@@ -3767,8 +3767,8 @@ s32 fldTitleMini(void) {
         if (D_003BAFB8 < 10) {
             alpha = 128 - D_003BAFB8 * 16;
             if (alpha > 0) {
-                fldSetGsAlphaBlendEquation(0);
-                fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x1C, 0, 0x24, 0x100, 0x1C,
+                rsetAlpha(0);
+                DrwSprite2D(0x80, 0x152, 0x100, 0x1C, 0, 0x24, 0x100, 0x1C,
                     (alpha << 24) | 0x808080, D_003BAFC4);
             }
         }
@@ -3790,8 +3790,8 @@ s32 fldTitleMini(void) {
             height = 36 - height;
         }
         if (alpha > 0) {
-            fldSetGsAlphaBlendEquation(0);
-            fldSubmitSpriteRect(x, y, width, height, 0, 0, 0x100, 0x24,
+            rsetAlpha(0);
+            DrwSprite2D(x, y, width, height, 0, 0, 0x100, 0x24,
                 (alpha << 24) | 0x808080, D_003BAFC4);
         }
         nextFrame = D_003BAFB8 + 1;
@@ -3831,77 +3831,77 @@ void fldStartMiniTitleForUnlock(s32 id) {
 
     switch (id) {
     case 22:
-        if (mdlFlagTest(0x440) == 0) {
+        if (evtBitCheck(0x440) == 0) {
             return;
         }
         break;
     case 23:
-        if (mdlFlagTest(0x480) == 0) {
+        if (evtBitCheck(0x480) == 0) {
             return;
         }
         break;
     case 24:
-        if (mdlFlagTest(0x4C0) == 0) {
+        if (evtBitCheck(0x4C0) == 0) {
             return;
         }
         break;
     case 25:
-        if (mdlFlagTest(0x500) == 0) {
+        if (evtBitCheck(0x500) == 0) {
             return;
         }
         break;
     case 26:
-        if (mdlFlagTest(0x560) == 0) {
+        if (evtBitCheck(0x560) == 0) {
             return;
         }
         break;
     case 27:
-        if (mdlFlagTest(0x580) == 0) {
+        if (evtBitCheck(0x580) == 0) {
             return;
         }
         break;
     case 28:
-        if (mdlFlagTest(0x5A0) == 0) {
+        if (evtBitCheck(0x5A0) == 0) {
             return;
         }
         break;
     case 29:
-        if (mdlFlagTest(0x600) == 0) {
+        if (evtBitCheck(0x600) == 0) {
             return;
         }
         break;
     case 30:
-        if (mdlFlagTest(0x620) == 0) {
+        if (evtBitCheck(0x620) == 0) {
             return;
         }
         break;
     case 31:
-        if (mdlFlagTest(0x6E0) == 0) {
+        if (evtBitCheck(0x6E0) == 0) {
             return;
         }
         break;
     case 32:
-        if (mdlFlagTest(0x6E1) == 0) {
+        if (evtBitCheck(0x6E1) == 0) {
             return;
         }
         break;
     case 33:
-        if (mdlFlagTest(0x6E2) == 0) {
+        if (evtBitCheck(0x6E2) == 0) {
             return;
         }
         break;
     case 34:
-        if (mdlFlagTest(0x6E3) == 0) {
+        if (evtBitCheck(0x6E3) == 0) {
             return;
         }
         break;
     case 35:
-        if (mdlFlagTest(0x6E4) == 0) {
+        if (evtBitCheck(0x6E4) == 0) {
             return;
         }
         break;
     case 38:
-        if (mdlFlagTest(0x6E5) == 0) {
+        if (evtBitCheck(0x6E5) == 0) {
             return;
         }
         break;
@@ -3912,8 +3912,8 @@ void fldStartMiniTitleForUnlock(s32 id) {
     D_003BAFB8 = 0;
     D_003BAFBC = 0;
     sprintf(path, "/fld/f/pnl/ds%03d.tmx", id);
-    handle = (s32)sdfReadNamedResource(path, (u32 *)&data, 0);
-    D_003BAFC4 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(data));
+    handle = (s32)sdfDevLoadFileEx(path, (u32 *)&data, 0);
+    D_003BAFC4 = sdfTexSet((SdfTextureFileHeader *)(data));
     sdfMemFreeDirect((struct SdfMemBlock *)(u32)(handle));
     if (fldTitleIsActive() == 0) {
         dds3StartProcess(D_003A0828, 0x2B0A, 0, 1, fldTitleMini, fldReleaseTitleMiniTexture, 0);
@@ -3922,7 +3922,7 @@ void fldStartMiniTitleForUnlock(s32 id) {
 
 static const char s_fieldWeatherLimitPath[] __attribute__((aligned(16))) = "/fld/f/bin/limit_00.tmx";
 
-void fldRequestMiniTitleDismiss(void) {
+void fldSetSnowActive(void) {
     if (D_003BAFBC == 0) {
         D_003BAFBC = 1;
     }
@@ -3933,13 +3933,13 @@ void fldLoadWeatherEffects(void) {
     s32 handle;
     s32 resourceAddress;
 
-    handle = (s32)sdfReadNamedResource(s_fieldWeatherLimitPath, (u32 *)&resourceAddress, 0);
-    fldWeatherLimitTexture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceAddress));
+    handle = (s32)sdfDevLoadFileEx(s_fieldWeatherLimitPath, (u32 *)&resourceAddress, 0);
+    fldWeatherLimitTexture = sdfTexSet((SdfTextureFileHeader *)(resourceAddress));
     sdfMemFreeDelayedDirect((struct SdfMemBlock *)handle);
-    fldDamEffectResource = (u32)sdfReadNamedResource("/fld/f/bin/FH_DAM_2.EPL", &fldDamEffectData, 0);
+    fldDamEffectResource = (u32)sdfDevLoadFileEx("/fld/f/bin/FH_DAM_2.EPL", &fldDamEffectData, 0);
     fldDamEffectNode = (u32)effCreateNodeFromParameter(fldDamEffectData);
     fldDamEffectPositioned = 0;
-    fldYukEffectResource = (u32)sdfReadNamedResource("/fld/f/bin/YUK_2.EPL", &fldYukEffectData, 0);
+    fldYukEffectResource = (u32)sdfDevLoadFileEx("/fld/f/bin/YUK_2.EPL", &fldYukEffectData, 0);
     fldYukEffectNode = (u32)effCreateNodeFromParameter(fldYukEffectData);
     fldYukEffectPositioned = 0;
 }
@@ -3949,13 +3949,13 @@ void fldReleaseWeatherEffects(void) {
         sdfTexReleaseReferenceViaHandler(fldWeatherLimitTexture);
         fldWeatherLimitTexture = 0;
     }
-    effDestroyNode((EffNode *)(u32)fldDamEffectNode);
+    dds3EffectDelete((EffNode *)(u32)fldDamEffectNode);
     fldDamEffectNode = 0;
     fldDamEffectPositioned = 0;
     sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldDamEffectResource);
     fldDamEffectResource = 0;
     fldDamEffectData = 0;
-    effDestroyNode((EffNode *)(u32)fldYukEffectNode);
+    dds3EffectDelete((EffNode *)(u32)fldYukEffectNode);
     fldYukEffectNode = 0;
     fldYukEffectPositioned = 0;
     sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldYukEffectResource);
@@ -3972,7 +3972,7 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
         pos[0] = x;
         pos[1] = y;
         pos[2] = z;
-        effRestartNodeInstance((EffNode *)(u32)fldDamEffectNode);
+        dds3EffectReset((EffNode *)(u32)fldDamEffectNode);
         effCopyVectorToNodeInstance((EffNode *)(u32)fldDamEffectNode, pos);
         fldDamEffectPositioned = 1;
     }
@@ -3980,7 +3980,7 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
         pos[0] = x;
         pos[1] = y;
         pos[2] = z;
-        effRestartNodeInstance((EffNode *)(u32)fldYukEffectNode);
+        dds3EffectReset((EffNode *)(u32)fldYukEffectNode);
         effCopyVectorToNodeInstance((EffNode *)(u32)fldYukEffectNode, pos);
         fldYukEffectPositioned = 1;
     }
@@ -3988,10 +3988,10 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
 
 void fldUpdateWeatherEffectNodes(void) {
     if (fldDamEffectNode != 0 && fldDamEffectPositioned != 0) {
-        effUpdateNode((EffNode *)(u32)fldDamEffectNode);
+        dds3EffectDraw((EffNode *)(u32)fldDamEffectNode);
     }
     if (fldYukEffectNode != 0 && fldYukEffectPositioned != 0) {
-        effUpdateNode((EffNode *)(u32)fldYukEffectNode);
+        dds3EffectDraw((EffNode *)(u32)fldYukEffectNode);
     }
 }
 
@@ -4037,7 +4037,7 @@ typedef struct FldSparkEntryInfo {
     s16 modelId;
 } FldSparkEntryInfo;
 
-extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 value, void *position, void *rotation);
+extern EffWorldNode *dds3AddUnitObjectBasic(s32 value, void *position, void *rotation);
 extern void dds3RebuildObjectModelContext(EffWorldNode *node, s32 kind, s32 resource);
 extern void dds3SetSclPoseSet(EffWorldNode *node, u128 *vector);
 
@@ -4066,8 +4066,8 @@ void fldCreateSparkSlotObjects(void) {
             *(s32 *)fldSparkObjectEntries[i].pad8 = 0;
         }
         for (i = 0; i < 17; i++) {
-            fldSparkObjectEntries[i].objectHandle = dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), &position, &rotation);
-            dds3SetWorldNodeValue(fldSparkObjectEntries[i].objectHandle, (u32)D_003A0908);
+            fldSparkObjectEntries[i].objectHandle = dds3AddUnitObjectBasic(dds3AllocObjectId(), &position, &rotation);
+            dds3SetUnitObjectId(fldSparkObjectEntries[i].objectHandle, (u32)D_003A0908);
             if (i == 16) {
                 dds3RebuildObjectModelContext(fldSparkObjectEntries[i].objectHandle, 1, ((FldSparkEntryInfo *)fldSparkControlState.entry)->modelId);
             } else {
@@ -4076,10 +4076,10 @@ void fldCreateSparkSlotObjects(void) {
             dds3SetSclPoseSet(fldSparkObjectEntries[i].objectHandle, (u128 *)&scale);
             resource = (MdlCtx *)dds3ObjectBaseGetModelHandle(fldSparkObjectEntries[i].objectHandle);
             resource->first->frameStep = 1.0f;
-            mdlAddEntryFlagged(resource, 0, 0);
+            mdlLoopMotion(resource, 0, 0);
             resource->flags |= 1;
             dds3ObjectBaseOnFlag(fldSparkObjectEntries[i].objectHandle, 0x400);
-            fldInitializeHuntSparkUnit(evtUnitGetNestedValue(fldSparkObjectEntries[i].objectHandle));
+            fldInitializeHuntSparkUnit(evtGetUnitHandle2(fldSparkObjectEntries[i].objectHandle));
         }
     }
 }
@@ -4093,7 +4093,7 @@ void fldClearObjectEntryHandles(void) {
 
         i--;
         if (objectHandle != NULL) {
-            ddsReleaseUnitObject(objectHandle);
+            dds3DeleteUnitObjectBasic(objectHandle);
             entry->objectHandle = NULL;
         }
         entry++;
@@ -4114,7 +4114,7 @@ void fldInitSparkTable(void) {
             fldSparkSlots[i].active = 0;
             fldSparkSlots[i].reservedObjectSlot = 0;
             fldSparkSlots[i].objectSlot = -1;
-            fldSparkSlots[i].tickCounter = sdfGetRand(0) % 60 + 15;
+            fldSparkSlots[i].tickCounter = dds3GetRandA(0) % 60 + 15;
         }
     } else {
         for (i = 0; i < 64; i++) {
@@ -4131,7 +4131,7 @@ void fldResetSparkTable(void) {
         fldSparkSlots[i].active = 0;
         fldSparkSlots[i].reservedObjectSlot = 0;
         fldSparkSlots[i].objectSlot = -1;
-        fldSparkSlots[i].tickCounter = sdfGetRand(0) % 60 + 15;
+        fldSparkSlots[i].tickCounter = dds3GetRandA(0) % 60 + 15;
     }
 }
 
@@ -4249,7 +4249,7 @@ void fldUpdateSparkSequence(void) {
             fldSparkSlots[slot].active = 1;
             fldSparkSlots[slot].tickCounter = 0;
             fldSparkControlState.sequenceRemaining = 1;
-            sndSetSequenceVolumePan(0x670015, 0x7F, 0x3F);
+            p2sdPlaySE(0x670015, 0x7F, 0x3F);
         } else {
             for (i = 0; i < sequence->count; i++) {
                 slot = sequence->slots[i];
@@ -4258,7 +4258,7 @@ void fldUpdateSparkSequence(void) {
                 fldSparkSlots[slot].active = 1;
                 fldSparkSlots[slot].tickCounter = 0;
             }
-            sndSetSequenceVolumePan(0x670014, 0x7F, 0x3F);
+            p2sdPlaySE(0x670014, 0x7F, 0x3F);
         }
         fldSparkControlState.sequenceIndex++;
     }
@@ -4279,13 +4279,13 @@ void fldUpdateSparkSequence(void) {
                     fldAreaState.collectedCount++;
                     fldAreaState.score += 0x32;
                     fldSparkControlState.sequenceRemaining--;
-                    sndSetSequenceVolumePan(0x670013, 0x7F, 0x3F);
+                    p2sdPlaySE(0x670013, 0x7F, 0x3F);
                     fldReleaseCameraModel(3);
                     fldSparkControlState.modeCountdown += 3;
                     fldFreeSparkSlot(i);
                     fldSparkSlots[i].reservedObjectSlot = 0;
                     fldSparkSlots[i].active = 0;
-                    fldSparkSlots[i].tickCounter = sdfGetRand(0) % 270 + 30;
+                    fldSparkSlots[i].tickCounter = dds3GetRandA(0) % 270 + 30;
                     fldSparkControlState.pulse = 0;
                 }
             }
@@ -4316,7 +4316,7 @@ s32 fldIsNearSpark(f32 x, f32 y, f32 z) {
 
 /* Ten atlas origins for digits 0-9, each stored as a U/V atlas coordinate pair. */
 extern const s32 D_003A0928[10][2];
-extern void evtSetDrawSurfaceIndex(u32);
+extern void eglSetOt(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 
@@ -4330,7 +4330,7 @@ void fldDrawWeatherLimitTimer(void) {
     memcpy(digitOrigins, D_003A0928, sizeof(digitOrigins));
     remainingFrames = fldSparkControlState.countdown;
     vertexColor = 0x80808080;
-    evtSetDrawSurfaceIndex(0x53);
+    eglSetOt(0x53);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 1);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitTexturedGradientQuad(20, 20, 113, 31, 1, 0, 113, 31,
@@ -4364,9 +4364,9 @@ void func_0014C468(void) {
     if (D_0032E5C4[0] != 0) {
         return;
     }
-    if (mdlFlagTest(0x819) != 0) {
-        evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_0034D8F0);
-        dspStartEntry(6);
+    if (evtBitCheck(0x819) != 0) {
+        fclInitMessage((struct ItfMesSub *)D_0034D8F0);
+        fclStartMessage(6);
         D_0032E4B4[0] = 1;
         fldSparkControlState.dialogPhase = 12;
         fldSparkControlState.phase = 0;
@@ -4374,15 +4374,15 @@ void func_0014C468(void) {
         fldResetPlayerSceneObjectState();
         return;
     }
-    evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_0034D8F0);
-    if (mdlFlagTest(0x81A) != 0) {
-        dspStartEntry(1);
+    fclInitMessage((struct ItfMesSub *)D_0034D8F0);
+    if (evtBitCheck(0x81A) != 0) {
+        fclStartMessage(1);
     } else {
-        dspStartEntry(0);
+        fclStartMessage(0);
     }
     evtStoreValueAndCaptureWindowPanelValue(2);
     evtSetMessageWindowOptionWhenOpen(0);
-    mdlFlagSet(0x81A);
+    evtBitOn(0x81A);
     entry = (FldEnt110 *)fldFindFieldEntryByKeyPair(fldAreaState.area, fldAreaState.floor + 1);
     fldSparkControlState.phase = 0;
     fldAreaState.score = 0;
@@ -4446,7 +4446,7 @@ extern s8 evtGetCapturedWindowPanelValue(void);
 extern void fldAddCameraModelEntry(s32);
 extern void fldCreateSparkSlotObjects(void);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
-extern void evtSetSolarOverlayFullyTransparent(void);
+extern void evtDisableMoonDraw(void);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0918);
 
@@ -4463,9 +4463,9 @@ void fldUpdateSparkMessageSequence(void) {
     switch (fldSparkControlState.dialogPhase) {
     case 12:
         dspRequestMessageWindowModeOne();
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             evtFinishMessageWindowAndNotify();
-            dspCloseChannel();
+            fclDestroyMessage();
             fldSparkControlState.dialogPhase = 11;
             fldAreaState.transitionMode = 0;
             evtSetSolarOverlayFullyVisible();
@@ -4473,26 +4473,26 @@ void fldUpdateSparkMessageSequence(void) {
         break;
     case 1:
         dspRequestMessageWindowModeOne();
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             choice = evtGetCapturedWindowPanelValue();
             if (choice == 0) {
                 evtFinishMessageWindowAndNotify();
-                dspCloseChannel();
+                fclDestroyMessage();
                 fldSparkControlState.dialogPhase = 5;
                 fldSparkControlState.dialogTimer = 0;
             } else if (choice == 1) {
                 evtFinishMessageWindowAndNotify();
-                dspCloseChannel();
+                fclDestroyMessage();
                 fldSparkControlState.dialogPhase = 11;
                 fldAreaState.transitionMode = 0;
                 evtSetSolarOverlayFullyVisible();
             } else {
                 evtFinishMessageWindowAndNotify();
-                dspCloseChannel();
+                fclDestroyMessage();
                 fldSparkControlState.dialogPhase = 4;
                 fldSparkControlState.dialogTimer = 0;
-                evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_0034D8F0);
-                dspStartEntry(3);
+                fclInitMessage((struct ItfMesSub *)D_0034D8F0);
+                fclStartMessage(3);
                 evtStoreValueAndCaptureWindowPanelValue(2);
                 evtSetMessageWindowOptionWhenOpen(0);
             }
@@ -4500,31 +4500,31 @@ void fldUpdateSparkMessageSequence(void) {
         break;
     case 4:
         dspRequestMessageWindowModeOne();
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             evtFinishMessageWindowAndNotify();
-            dspCloseChannel();
+            fclDestroyMessage();
             fldSparkControlState.dialogPhase = 1;
             fldSparkControlState.dialogTimer = 0;
         }
         break;
     case 5:
         dds3WorkClear();
-        fldReleaseCurrentBgm();
-        D_003BAFE8 = fileQueueDefaultCallbackRequest((const char *)D_003A0978);
+        fldBgmFadeOut();
+        D_003BAFE8 = fileLoad((const char *)D_003A0978);
         fldSparkControlState.dialogPhase = 6;
         fldSparkControlState.dialogTimer = 0;
         break;
     case 6:
-        if (fileIsRequestReadyInCurrentMode(D_003BAFE8) != 0) {
-            D_003BAFF0 = (u32)fileGetLoadedDataAddress(D_003BAFE8);
-            D_003BAFEC = fileGetResourceHandle(D_003BAFE8);
+        if (pacFileCheckEnd(D_003BAFE8) != 0) {
+            D_003BAFF0 = (u32)fileGetLoadPtr(D_003BAFE8);
+            D_003BAFEC = fileGetMemHandle(D_003BAFE8);
             position[0] = fldAreaState.x;
             position[1] = fldAreaState.y;
             position[2] = fldAreaState.z;
-            node = effObjCreateEventNode((void *)D_003BAFF0, position, rotation);
+            node = dds3AddBEDEffectObjectBasic2((void *)D_003BAFF0, position, rotation);
             fldSparkControlState.object = node;
-            effObjClearFlags(node, 1);
-            filePollEntryCleanup(D_003BAFE8);
+            dds3EffectObjectBasicStatOff(node, 1);
+            fileHandleFree(D_003BAFE8);
             fldAddCameraModelEntry(0xD);
             D_0032E5C4[0] = 1;
             fldResetArchiveLoadPhase();
@@ -4534,8 +4534,8 @@ void fldUpdateSparkMessageSequence(void) {
         break;
     case 2:
         if (fldSparkControlState.dialogTimer == 20) {
-            effObjSetFlags(fldSparkControlState.object, 1);
-            effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
+            dds3EffectObjectBasicStatOn(fldSparkControlState.object, 1);
+            dds3StartBEDEffectObjectBasic(fldSparkControlState.object, 0);
         }
         fldSparkControlState.dialogTimer++;
         if (fldStepArchiveLoad() != 0) {
@@ -4545,22 +4545,22 @@ void fldUpdateSparkMessageSequence(void) {
         break;
     case 3:
         if (fldSparkControlState.dialogTimer == 20) {
-            effObjSetFlags(fldSparkControlState.object, 1);
-            effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
+            dds3EffectObjectBasicStatOn(fldSparkControlState.object, 1);
+            dds3StartBEDEffectObjectBasic(fldSparkControlState.object, 0);
         }
         fldSparkControlState.dialogTimer++;
         if (mnuPollTitleStreamStateLocked() == 2) {
-            sndSetSequenceVolumePan(0x670010, 0x7F, 0x3F);
+            p2sdPlaySE(0x670010, 0x7F, 0x3F);
             fldSparkControlState.dialogPhase = 8;
         }
         break;
     case 8:
         if (fldSparkControlState.dialogTimer == 46) {
-            kwlnFadeInStart(0xFF, 0xFF, 0xFF, 4);
+            dds3FadeOut(0xFF, 0xFF, 0xFF, 4);
         }
         if (fldSparkControlState.dialogTimer == 20) {
-            effObjSetFlags(fldSparkControlState.object, 1);
-            effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
+            dds3EffectObjectBasicStatOn(fldSparkControlState.object, 1);
+            dds3StartBEDEffectObjectBasic(fldSparkControlState.object, 0);
         }
         if (++fldSparkControlState.dialogTimer > 50) {
             fldSparkControlState.dialogTimer = 0;
@@ -4574,14 +4574,14 @@ void fldUpdateSparkMessageSequence(void) {
         fldSetCameraModelMotionRequest(0x66, 0);
         fldSparkControlState.dialogTimer = 0;
         fldSparkControlState.dialogPhase = 10;
-        evtSetSolarOverlayFullyTransparent();
-        kwlnFadeOutStart(0xFF, 0xFF, 0xFF, 4);
+        evtDisableMoonDraw();
+        dds3FadeIn(0xFF, 0xFF, 0xFF, 4);
         break;
     case 10:
         fldDrawWeatherLimitTimer();
         if (++fldSparkControlState.dialogTimer > 10) {
-            effObjClearFlags(fldSparkControlState.object, 1);
-            dds3RemoveWorldObjectNode(fldSparkControlState.object);
+            dds3EffectObjectBasicStatOff(fldSparkControlState.object, 1);
+            dds3DeleteSceneBasicData(fldSparkControlState.object);
             sdfMemFreeDelayedDirect(D_003BAFEC);
             fldSparkControlState.dialogTimer = 0;
             fldSparkControlState.dialogPhase = 7;
@@ -4624,7 +4624,7 @@ void fldUpdateSparkEncounterScene(void) {
         if (fldSparkControlState.mode == 0) {
             if (D_00324530[0] < 0) {
                 fldSetCameraModelMotionRequest(6, 20);
-                sndSetSequenceVolumePan(0x670012, 0x7F, 0x3F);
+                p2sdPlaySE(0x670012, 0x7F, 0x3F);
                 fldSparkControlState.mode = 1;
                 fldSparkControlState.pulse = 1;
                 fldSparkControlState.modeCountdown = 20;
@@ -4644,16 +4644,16 @@ void fldUpdateSparkEncounterScene(void) {
                 }
             } else if (fldSparkControlState.mode == 1 && fldSparkControlState.pendingMode == 0 && value < 14 && D_00324530[0] < 0) {
                 fldSetCameraModelMotionRequest(6, 20);
-                sndSetSequenceVolumePan(0x670012, 0x7F, 0x3F);
+                p2sdPlaySE(0x670012, 0x7F, 0x3F);
                 fldSparkControlState.mode = 1;
                 fldSparkControlState.pulse = 1;
                 fldSparkControlState.modeCountdown = 20;
             }
         }
 
-        if (fldGetSparkDialogPhase() == 0 && fldTestSceneControlFlags(0x40) != 0) {
+        if (fldGetSparkDialogPhase() == 0 && fldEncountTestFlag(0x40) != 0) {
             if (fldSparkControlState.countdown == 300) {
-                sndSetSequenceVolumePan(0x670017, 0x7F, 0x3F);
+                p2sdPlaySE(0x670017, 0x7F, 0x3F);
             }
             if (fldSparkControlState.countdown > 0) {
                 fldSparkControlState.countdown--;
@@ -4663,14 +4663,14 @@ void fldUpdateSparkEncounterScene(void) {
         fldDrawWeatherLimitTimer();
         if (fldSparkControlState.countdown < 31) {
             fldSparkControlState.countdown = 0;
-            sndQueueSoundId(0x670017);
-            sndSetSequenceVolumePan(0x670016, 0x7F, 0x3F);
+            p2sdStopSe(0x670017);
+            p2sdPlaySE(0x670016, 0x7F, 0x3F);
             fldReleaseCameraModel(0);
             fldSetCameraModelMotionRequest(2, 0);
             fldSetCameraNodeModeWithTen();
             fldSparkControlState.phase = 3;
-            evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_0034D8F0);
-            dspStartEntry(4);
+            fclInitMessage((struct ItfMesSub *)D_0034D8F0);
+            fclStartMessage(4);
             fldResetPlayerSceneObjectState();
             fldClearObjectEntryHandles();
             fldReleaseWeatherEffects();
@@ -4679,54 +4679,54 @@ void fldUpdateSparkEncounterScene(void) {
         }
 
         if (fldSparkControlState.terminated != 0) {
-            sndQueueSoundId(0x670017);
+            p2sdStopSe(0x670017);
             mnuMarkTitleStreamResetPending();
             D_0032E4C0[0] = 1;
             fldResetPlayerSceneObjectState();
             fldSparkControlState.phase = 7;
-            mdlFlagSet(0x819);
+            evtBitOn(0x819);
         }
         return;
     } else if (phase == 3) {
         dspRequestMessageWindowModeOne();
-        if (evtGetMessageWindowControlState() != 0) {
+        if (fclChkMessage() != 0) {
             return;
         }
         evtFinishMessageWindowAndNotify();
-        dspCloseChannel();
+        fclDestroyMessage();
         fldSparkControlState.frame = 0;
         fldSparkControlState.phase = 6;
         mnuAdvanceTitleStateUnderSemaphore();
-        D_003BAFE8 = fileQueueDefaultCallbackRequest(D_003A0978);
+        D_003BAFE8 = fileLoad(D_003A0978);
     } else if (phase == 6) {
-        if (fileIsRequestReadyInCurrentMode(D_003BAFE8) == 0) {
+        if (pacFileCheckEnd(D_003BAFE8) == 0) {
             return;
         }
-        D_003BAFF0 = (u32)fileGetLoadedDataAddress(D_003BAFE8);
-        D_003BAFEC = fileGetResourceHandle(D_003BAFE8);
+        D_003BAFF0 = (u32)fileGetLoadPtr(D_003BAFE8);
+        D_003BAFEC = fileGetMemHandle(D_003BAFE8);
         area = &fldAreaState;
         firstVector[0] = area->x;
         firstVector[1] = area->y;
         firstVector[2] = area->z;
-        node = effObjCreateEventNode((void *)D_003BAFF0, firstVector, secondVector);
+        node = dds3AddBEDEffectObjectBasic2((void *)D_003BAFF0, firstVector, secondVector);
         fldSparkControlState.object = node;
-        effObjClearFlags(node, 1);
-        filePollEntryCleanup(D_003BAFE8);
+        dds3EffectObjectBasicStatOff(node, 1);
+        fileHandleFree(D_003BAFE8);
         fldSetCameraModelMotionRequest(5, 0);
-        effObjSetFlags(fldSparkControlState.object, 1);
-        effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
+        dds3EffectObjectBasicStatOn(fldSparkControlState.object, 1);
+        dds3StartBEDEffectObjectBasic(fldSparkControlState.object, 0);
         fldSparkControlState.phase = 7;
     } else if (phase == 7) {
         fldSparkControlState.frame++;
         if (fldSparkControlState.frame == 40) {
-            kwlnFadeInStart(255, 255, 255, 4);
+            dds3FadeOut(255, 255, 255, 4);
         }
         if (fldSparkControlState.frame < 45) {
             return;
         }
         fldSparkControlState.phase = 8;
     } else if (phase == 8) {
-        sndSetSequenceVolumePan(0x670011, 0x7F, 0x3F);
+        p2sdPlaySE(0x670011, 0x7F, 0x3F);
         fldTogglePlayerModel();
         fldStartSceneBgmAlternate();
         evtSetSolarOverlayFullyVisible();
@@ -4736,12 +4736,12 @@ void fldUpdateSparkEncounterScene(void) {
     } else if (phase == 9) {
         fldSparkControlState.frame++;
         if (fldSparkControlState.frame == 1) {
-            kwlnFadeOutStart(255, 255, 255, 4);
+            dds3FadeIn(255, 255, 255, 4);
         }
         if (fldSparkControlState.frame == 6) {
             node = fldSparkControlState.object;
-            effObjClearFlags(node, 1);
-            dds3RemoveWorldObjectNode(fldSparkControlState.object);
+            dds3EffectObjectBasicStatOff(node, 1);
+            dds3DeleteSceneBasicData(fldSparkControlState.object);
             sdfMemFreeDelayedDirect(D_003BAFEC);
         }
         if (fldSparkControlState.frame >= 11) {
@@ -4772,8 +4772,8 @@ void fldResetEventSceneState(void) {
 }
 
 void fldStartDeferredFieldExit(void) {
-    evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_0034D8F0);
-    dspStartEntry(5);
+    fclInitMessage((struct ItfMesSub *)D_0034D8F0);
+    fclStartMessage(5);
     fldResetPlayerSceneObjectState();
     D_0032E4C4[0] = 2;
 }
@@ -4783,9 +4783,9 @@ void fldStartDeferredFieldExit(void) {
 void fldFinishDeferredExit(void) {
     if (fldAreaState.deferredExit == 2) {
         dspRequestMessageWindowModeOne();
-        if (!evtGetMessageWindowControlState()) {
+        if (!fclChkMessage()) {
             evtFinishMessageWindowAndNotify();
-            dspCloseChannel();
+            fclDestroyMessage();
             fldPreparePlayerSceneCameraTarget();
             fldAreaState.deferredExit = 0;
         }

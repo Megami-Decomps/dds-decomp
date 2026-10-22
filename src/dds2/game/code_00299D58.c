@@ -184,7 +184,7 @@ void prfCapPresentMessages(BrsSkillPackageWork *scene) {
         scrGetIndexedRecordAddress(profileId & 0xFFFF, &message);
         evtCopyEntryStringToActiveWindow(1, (const void *)(message));
         dspSetActive(1);
-        dspStartEntry(item->unitId + 3);
+        fclStartMessage(item->unitId + 3);
         scene->selectionApplied = 0;
     } else if (scene->pendingSkillCount > 0) {
         skillId = scene->skillList.skills[scene->pendingSkillIndex];
@@ -193,7 +193,7 @@ void prfCapPresentMessages(BrsSkillPackageWork *scene) {
         evtCopyEntryStringToActiveWindow(
             1, datSkillNames[skillId].encodedText);
         dspSetActive(1);
-        dspStartEntry(0);
+        fclStartMessage(0);
         scene->pendingSkillIndex++;
         scene->pendingSkillCount--;
     }
@@ -206,14 +206,14 @@ u32 mnuShouldDeferProfileSelection(BrsSkillPackageWork *scene) {
 
 s32 mnuRequestContextLatchedSceneDsp(BrsSkillPackageWork *state)
 {
-    if (mdlFlagTest(0xB8F) == 0) {
+    if (evtBitCheck(0xB8F) == 0) {
         if (state->overlayFlags & 1) {
-            if (mdlFlagTest(0x915) != 0) {
+            if (evtBitCheck(0x915) != 0) {
                 return 0;
             }
             dspSetActive(1);
-            dspStartEntry(1);
-            mdlFlagSet(0x915);
+            fclStartMessage(1);
+            evtBitOn(0x915);
             state->overlayFlags |= 2;
             return 1;
         }
@@ -223,17 +223,17 @@ s32 mnuRequestContextLatchedSceneDsp(BrsSkillPackageWork *state)
 
 s32 mnuRequestContextClearSceneDsp(BrsSkillPackageWork *state)
 {
-    if (mdlFlagTest(0xB8F) == 0) {
-        if (mdlFlagTest(0x290) != 0) {
+    if (evtBitCheck(0xB8F) == 0) {
+        if (evtBitCheck(0x290) != 0) {
             if (state->overlayFlags & 2) {
                 return 0;
             }
-            if (mdlFlagTest(0x817) != 0) {
+            if (evtBitCheck(0x817) != 0) {
                 return 0;
             }
             dspSetActive(1);
-            dspStartEntry(2);
-            mdlFlagSet(0x817);
+            fclStartMessage(2);
+            evtBitOn(0x817);
             return 1;
         }
         return 0;
@@ -261,7 +261,7 @@ s32 mnuRequestWeightedProfileMessage(BrsSkillPackageWork *scene) {
             rank++;
         }
         dspSetActive(1);
-        dspStartEntry(rank + 0x9E);
+        fclStartMessage(rank + 0x9E);
         scene->thresholdMessageShown = 1;
         return 1;
     }
@@ -277,7 +277,7 @@ s32 mnuDispatchProfileSelectionScene(void *task) {
     result = mnuDispatchPopupTransition(&scene->transition, dispatchStatus, 0, task);
     if (result == 0) {
         if (*dispatchStatus == 0 &&
-            (result = evtGetMessageWindowControlState(), result == 0)) {
+            (result = fclChkMessage(), result == 0)) {
             if (scene->selectedRow < scene->secondaryRewards.count ||
                 scene->pendingSkillCount > 0 ||
                 scene->selectionApplied != 0) {
@@ -303,7 +303,7 @@ s32 mnuDispatchProfileSelectionScene(void *task) {
                 return 0;
             }
             if (scene->primaryRewards.count == 0) {
-                kwlnFadeInStart(0, 0, 0, 0xF);
+                dds3FadeOut(0, 0, 0, 0xF);
                 mnuSetPopupEntryFlagged(dispatchStatus, brsRewardFadeWaitPopupEntry);
                 return 0;
             }
@@ -312,7 +312,7 @@ s32 mnuDispatchProfileSelectionScene(void *task) {
             }
             brsStartPartyPanelResourcesOnce((s32)scene);
             mnuSetPopupEntryFlagged(dispatchStatus, brsPrimaryRewardPopupEntry);
-            sndQueueNoPayloadCommand40();
+            p2sdStopAllSe();
         }
         result = 0;
     }
@@ -368,9 +368,9 @@ void brsShowStatSelectionStatus(BrsSkillPackageWork *scene) {
     evtCopyEntryStringToActiveWindow(0, datUnitNames[item->unitId].encodedText);
     dspSetActive(1);
     if (scene->extentExhausted == 0) {
-        dspStartEntry(0x15);
+        fclStartMessage(0x15);
     } else {
-        dspStartEntry(0x16);
+        fclStartMessage(0x16);
     }
 }
 
@@ -412,9 +412,9 @@ void brsUpdateStatSelectionExtent(BrsSkillPackageWork *scene) {
         evtCopyEntryStringToActiveWindow(1, text);
         dspSetActive(1);
         if (scene->extentExhausted == 0) {
-            dspStartEntry(0x13);
+            fclStartMessage(0x13);
         } else {
-            dspStartEntry(0x14);
+            fclStartMessage(0x14);
         }
     } else {
         brsShowStatSelectionStatus(scene);
@@ -428,7 +428,7 @@ extern s32 mnuAdvanceTitleEntryAnimation(DatPartyRecord *);
 extern void mnuStaffCopyPanelBlock(DatPartyRecord *, BrsSkillPackageWork *);
 extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
-extern void sndReleaseTrackHandle(u32);
+extern void p2sdStopBGM(u32);
 extern char brsStatAssignmentPopupEntry[];
 extern char brsLevelChangePopupEntry[];
 
@@ -441,7 +441,7 @@ s32 brsProcessNextPrimaryReward(KwlnTask *task) {
     DatPartyRecord *item;
 
     evtStageTestUpdateCamera();
-    if (evtGetMessageWindowControlState() != 0) {
+    if (fclChkMessage() != 0) {
         return 0;
     }
     dispatchStatus = &scene->transition.state;
@@ -475,8 +475,8 @@ s32 brsProcessNextPrimaryReward(KwlnTask *task) {
             }
             mnuSetPopupEntry(dispatchStatus, brsLevelChangePopupEntry);
         } else {
-            sndReleaseTrackHandle(0x50001);
-            kwlnFadeInStart(0, 0, 0, 0xF);
+            p2sdStopBGM(0x50001);
+            dds3FadeOut(0, 0, 0, 0xF);
             mnuSetPopupEntryFlagged(dispatchStatus, brsRewardFadeWaitPopupEntry);
         }
     }

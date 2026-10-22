@@ -3,7 +3,7 @@
 
 #include "sdf.h"
 
-/* Variable-sized packet header initialized by sdfConsInitPacketHeader. */
+/* Variable-sized packet header initialized by sdf2DMakePrimPacketHeader. */
 typedef struct SdfDrawPacket {
     u16 quadwords;
     u8 pad02[6];
@@ -53,9 +53,9 @@ typedef char SdfTextureDrawPacket_textureWordC_at_40[
 typedef char SdfTextureDrawPacket_registerAddressC_at_48[
     ((u32)&((SdfTextureDrawPacket *)0)->registerAddressC == 0x48) ? 1 : -1];
 
-u32 sdfConsGetTextureDrawPacketSize(SdfTex *texture);
-SdfTextureDrawPacket *sdfConsInitTextureDrawPacket(SdfTextureDrawPacket *drawPacket,
+u32 sdf2DGetTexPacketSize(SdfTex *texture);
+SdfTextureDrawPacket *sdf2DMakeTexPacket(SdfTextureDrawPacket *drawPacket,
                                                    SdfTex *texture, s32 contextOffset);
-s32 sdfConsCreateDrawPacket(SdfListHead *packetList, SdfTex *texture, s32 contextOffset);
+s32 sdf2DLinkTexPacket(SdfListHead *packetList, SdfTex *texture, s32 contextOffset);
 
 #endif

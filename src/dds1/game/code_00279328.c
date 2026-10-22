@@ -300,7 +300,7 @@ s32 ptySkillMenuHandlePageSwitch(KwlnTask *callback) {
     mnuClearListFlagsOneAndTwo(((SkillMenuContext *)context)->selection);
     if (changed != 0) {
         ptySkillMenuOpenPartyPage(callback);
-        sndSetSequenceVolumePan(4, 0x7F, 0x3F);
+        p2sdPlaySE(4, 0x7F, 0x3F);
         return 1;
     }
     return 0;

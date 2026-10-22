@@ -71,7 +71,7 @@ void mnuUpdateMovieSpriteResourceGroup(MnuSpriteResourceGroup *resources) {
                 }
             }
         }
-        resources->spawnCountdown = (s32)(sdfGetRandFloat(0) * 20.0f + 1.0f);
+        resources->spawnCountdown = (s32)(dds3GetRandFloatA(0) * 20.0f + 1.0f);
     } else {
         resources->spawnCountdown--;
     }
@@ -110,7 +110,7 @@ void mnuDrawMovieSpriteGroup(s32 x, s32 y, s32 z, s32 alpha, MnuSpriteResourceGr
         do {
             elem = node->value;
             wave = (f32)elem->framesLeft / (f32)elem->duration;
-            wave = sdfSinPoly(wave * scale);
+            wave = sdfSin(wave * scale);
             switch (elem->variant) {
             case 0:
                 /* retail arm 0x0026E448 */
@@ -132,13 +132,13 @@ MnuSpriteResourceGroup *mnuCreateMovieSpriteResource(s32 cueDuration,
                                                      u8 initialGenerations,
                                                      u8 variant) {
     struct SdfMemBlock *allocation = sdfMemAllocDirect(0x48);
-    MnuSpriteResourceGroup *resource = (MnuSpriteResourceGroup *)sdfMemoryGetBlockAddress(allocation);
+    MnuSpriteResourceGroup *resource = (MnuSpriteResourceGroup *)sdfMemGetPtr(allocation);
     memset(resource, 0, 0x48);
     resource->allocation = allocation;
     resource->cueDuration = cueDuration;
     resource->initialGenerations = initialGenerations;
     resource->variant = variant;
-    resource->spawnCountdown = (s32)(sdfGetRandFloat(0) * 30.0f + 10.0f);
+    resource->spawnCountdown = (s32)(dds3GetRandFloatA(0) * 30.0f + 10.0f);
     return resource;
 }
 
@@ -211,32 +211,32 @@ void mnuInitializeMovieRollEntry(void) {
 
     for (i = 0; i < 1; i++) {
         mnuMovieRollEntries[n].column = 1;
-        mnuMovieRollEntries[n].timer = sdfGetRandInt(0, 1000) + 600;
+        mnuMovieRollEntries[n].timer = dds3GetRandIntA(0, 1000) + 600;
         n++;
     }
     for (i = 0; i < 1; i++) {
         mnuMovieRollEntries[n].column = 2;
-        mnuMovieRollEntries[n].timer = sdfGetRandInt(0, 1000) + 600;
+        mnuMovieRollEntries[n].timer = dds3GetRandIntA(0, 1000) + 600;
         n++;
     }
     for (i = 0; i < 4; i++) {
         mnuMovieRollEntries[n].column = 3;
-        mnuMovieRollEntries[n].timer = sdfGetRandInt(0, 1000) + 600;
+        mnuMovieRollEntries[n].timer = dds3GetRandIntA(0, 1000) + 600;
         n++;
     }
     for (i = 0; i < 5; i++) {
         mnuMovieRollEntries[n].column = 4;
-        mnuMovieRollEntries[n].timer = sdfGetRandInt(0, 1000) + 600;
+        mnuMovieRollEntries[n].timer = dds3GetRandIntA(0, 1000) + 600;
         n++;
     }
     for (i = 0; i < 9; i++) {
         mnuMovieRollEntries[n].column = 5;
-        mnuMovieRollEntries[n].timer = sdfGetRandInt(0, 1000) + 600;
+        mnuMovieRollEntries[n].timer = dds3GetRandIntA(0, 1000) + 600;
         n++;
     }
     for (i = 0; i < 12; i++) {
         mnuMovieRollEntries[n].column = 6;
-        mnuMovieRollEntries[n].timer = sdfGetRandInt(0, 1000) + 600;
+        mnuMovieRollEntries[n].timer = dds3GetRandIntA(0, 1000) + 600;
         n++;
     }
 }
@@ -247,14 +247,14 @@ void mnuUpdateMovieRollEntry(MnuMovieRollEntry *entry) {
     entry->timer--;
     if (entry->active && entry->y < -256.0f) {
         entry->active = 0;
-        entry->duration = (s32)sdfGetRandInt(0, 200) + 1;
+        entry->duration = (s32)dds3GetRandIntA(0, 200) + 1;
         entry->timer = entry->duration;
     } else if (entry->timer < 0) {
         if (entry->active) {
             entry->active = 0;
         } else if (mnuMovieWork->scrollTicks < 17000) {
             entry->active = 1;
-            switch ((s32)sdfGetRandInt(0, 8)) {
+            switch ((s32)dds3GetRandIntA(0, 8)) {
             case 0:
             case 1:
                 entry->sprite = 2;
@@ -266,10 +266,10 @@ void mnuUpdateMovieRollEntry(MnuMovieRollEntry *entry) {
                 entry->sprite = 0;
                 break;
             }
-            entry->duration = (s32)sdfGetRandInt(0, 800) + 4000;
+            entry->duration = (s32)dds3GetRandIntA(0, 800) + 4000;
             entry->timer = entry->duration;
-            entry->velocity = -(sdfGetRandFloat(0) + 0.5f) * 0.5f;
-            entry->x = sdfGetRandFloat(0) * 768.0f / 6.0f + (-256.0f);
+            entry->velocity = -(dds3GetRandFloatA(0) + 0.5f) * 0.5f;
+            entry->x = dds3GetRandFloatA(0) * 768.0f / 6.0f + (-256.0f);
             if (entry->column >= 2) {
                 entry->x += 128.0f;
             }
@@ -285,7 +285,7 @@ void mnuUpdateMovieRollEntry(MnuMovieRollEntry *entry) {
             if (entry->column >= 6) {
                 entry->x += 128.0f;
             }
-            entry->y = sdfGetRandFloat(0) * 112.0f + 448.0f;
+            entry->y = dds3GetRandFloatA(0) * 112.0f + 448.0f;
         }
     }
 }

@@ -202,7 +202,7 @@ void effDrawSpriteWithCornerFade(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        colors[i] = uiBlendColors(work->geometry.cornerColors[i],
+        colors[i] = fclBlendColor(work->geometry.cornerColors[i],
                                   work->geometry.cornerColors[i] & 0xFFFFFF00, blend);
     }
     effDrawTextureSlot(x, y, depth, (s32)colors, (u32)flags, set, slotIndex, work, layer);
@@ -218,7 +218,7 @@ void effDrawRepeatedSpriteTiles(s32 x, s32 y, s32 z, s32 length, u32 weight, u32
     draw = effGetSlotWorkOrOverride(set, slot);
     for (i = 0; i < 4; i++) {
         u32 color = ((EffectSlotGeometry *)((u8 *)draw + 4))->cornerColors[i];
-        colors[i] = uiBlendColors(color, color & ~0xFF, weight);
+        colors[i] = fclBlendColor(color, color & ~0xFF, weight);
     }
     {
         /* Start with the complete tile; draw callbacks may replace the work array. */

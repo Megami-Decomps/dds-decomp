@@ -16,11 +16,11 @@
 
 
 
-void sdfDevConsStoreCharacter(DevConsState *console, s32 character, s32 attribute);
+void sdfDevConsPutInside(DevConsState *console, s32 character, s32 attribute);
 
 
 /* Scroll only at the last row; otherwise advance it. Always reset the column. */
-void sdfDevConsAdvanceRow(DevConsState *console) {
+void sdfDevConsNewLine(DevConsState *console) {
     if (console->cursorRow == console->rows - 1) {
         s32 rowBytes = console->columns * SDF_DEVCONS_CELL_BYTES;
         s32 copyBytes = rowBytes * console->cursorRow;
@@ -35,7 +35,7 @@ void sdfDevConsAdvanceRow(DevConsState *console) {
 }
 
 /* Store one character/attribute cell, interpreting cursor controls and row wrap. */
-void sdfDevConsStoreCharacter(DevConsState *console, s32 character, s32 attribute) {
+void sdfDevConsPutInside(DevConsState *console, s32 character, s32 attribute) {
     s32 tabCellsRemaining;
     s32 cursorColumnRemainder;
     s32 tabWidth;
@@ -53,13 +53,13 @@ void sdfDevConsStoreCharacter(DevConsState *console, s32 character, s32 attribut
             offset += SDF_DEVCONS_CELL_BYTES;
             console->cursorColumn = (u16)console->cursorColumn + 1;
             if (console->cursorColumn == console->columns) {
-                sdfDevConsAdvanceRow(console);
+                sdfDevConsNewLine(console);
                 break;
             }
         } while (--tabCellsRemaining != 0);
         break;
     case 10:
-        sdfDevConsAdvanceRow(console);
+        sdfDevConsNewLine(console);
         return;
     case 13:
         console->cursorColumn = 0;
@@ -75,7 +75,7 @@ void sdfDevConsStoreCharacter(DevConsState *console, s32 character, s32 attribut
         console->cells[offset + 1] = attribute;
         console->cursorColumn = (u16)console->cursorColumn + 1;
         if (console->cursorColumn == console->columns) {
-            sdfDevConsAdvanceRow(console);
+            sdfDevConsNewLine(console);
         }
         break;
     }
@@ -83,8 +83,8 @@ void sdfDevConsStoreCharacter(DevConsState *console, s32 character, s32 attribut
 
 
 /* Forward a character and explicit attribute to the console renderer. */
-void sdfDevConsWriteCharacter(DevConsState *console, s32 character, s32 attribute) {
-    sdfDevConsStoreCharacter(console, character, attribute);
+void sdfDevConsPut(DevConsState *console, s32 character, s32 attribute) {
+    sdfDevConsPutInside(console, character, attribute);
 }
 
 /* Return the emitted character count. The formatter receives no buffer limit. */
@@ -100,7 +100,7 @@ s32 sdfDevConsPrintf(DevConsState *console, const char *format, ...) {
     if (character != 0) {
         do {
             characterCount++;
-            sdfDevConsStoreCharacter(console, character, console->textAttribute);
+            sdfDevConsPutInside(console, character, console->textAttribute);
             textCursor = textBuffer + characterCount;
             character = *textCursor;
         } while (character != 0);
@@ -109,23 +109,23 @@ s32 sdfDevConsPrintf(DevConsState *console, const char *format, ...) {
 }
 
 /* Set the next cell coordinates without clamping them to the grid. */
-void sdfDevConsSetCursor(DevConsState *console, s16 column, s16 row) {
+void sdfDevConsLocate(DevConsState *console, s16 column, s16 row) {
     console->cursorColumn = column;
     console->cursorRow = row;
 }
 
 /* Select the attribute passed to each subsequently printed character. */
-void sdfDevConsSetTextAttribute(DevConsState *console, u8 attribute) {
+void sdfDevConsAttribute(DevConsState *console, u8 attribute) {
     console->textAttribute = attribute;
 }
 
 /* Read or write the console control byte at offset 0x14. */
-u8 sdfDevConsGetControlByte(DevConsState *console) {
+u8 sdfDevConsGetMode(DevConsState *console) {
     return console->controlByte;
 }
 
 /* Store the control byte unchanged; its individual bits are not decoded here. */
-void sdfDevConsSetControlByte(DevConsState *console, u8 controlByte) {
+void sdfDevConsSetMode(DevConsState *console, u8 controlByte) {
     console->controlByte = controlByte;
 }
 
@@ -134,7 +134,7 @@ extern u32 sdfConsoleFontTexture;
 
 /* Close the ordered register-list tag in the console's uncached DMA buffer.
  * Five eight-byte register values form one sprite; pad an odd value count. */
-void sdfDevConsFinalizeGlyphTag(ConsBuf *buffers) {
+void sdfDevConsTagClose(ConsBuf *buffers) {
     u8 *cursor = buffers->writeCursor;
     vu64 *tag = (vu64 *)buffers->currentTag;
     s32 registerCount = ((cursor - buffers->currentTag) >> 3) - 2;
@@ -154,12 +154,12 @@ void sdfDevConsFinalizeGlyphTag(ConsBuf *buffers) {
 /* Finalize the current GIF tag and submit completed packets, then rotate buffers.
  * Keep the eight-byte pending-data test distinct from the quadword DMA count.
  */
-void sdfDevConsKickPacketDma(ConsBuf *packetBuffers) {
+void sdfDevConsDrawFlush(ConsBuf *packetBuffers) {
     s32 packetBytes;
     u32 *channelRegisters;
     u32 nextBufferIndex;
 
-    sdfDevConsFinalizeGlyphTag(packetBuffers);
+    sdfDevConsTagClose(packetBuffers);
     packetBytes = packetBuffers->currentTag - packetBuffers->packetStart;
     if ((packetBytes >> SDF_DEVCONS_NONEMPTY_SHIFT) != 0) {
         channelRegisters = packetBuffers->dmaChannel;
@@ -178,14 +178,14 @@ void sdfDevConsKickPacketDma(ConsBuf *packetBuffers) {
 
 /* Append the console background sprite, then reserve the next glyph tag.
  * Packed coordinates wrap as words before their zero-extended packet writes. */
-void sdfDevConsAppendBackgroundSprite(DevConsState *console, ConsBuf *packetBuffers) {
+void sdfDevConsDrawBG(DevConsState *console, ConsBuf *packetBuffers) {
     vu64 *packet;
     u32 origin;
     u32 extent;
 
-    sdfDevConsFinalizeGlyphTag(packetBuffers);
+    sdfDevConsTagClose(packetBuffers);
     if (packetBuffers->bufferBytes < packetBuffers->currentTag - packetBuffers->packetStart + 0x80) {
-        sdfDevConsKickPacketDma(packetBuffers);
+        sdfDevConsDrawFlush(packetBuffers);
     }
     packet = (vu64 *)packetBuffers->currentTag;
     origin = (u16)(console->screenOriginX - 0x30) | ((u32)console->screenOriginY << 16);
@@ -213,7 +213,7 @@ extern u32 sdfConsoleColorPalette[];
 
 /* Emit five ordered register values per glyph into the console DMA buffer.
  * The native do-loops have no zero-dimension guard. */
-void sdfDevConsDrawGlyphGrid(DevConsState *console, ConsBuf *buffers) {
+void sdfDevConsDraw(DevConsState *console, ConsBuf *buffers) {
     u8 *cells;
     vu64 *writeCursor;
     u8 *packetStart;
@@ -232,7 +232,7 @@ void sdfDevConsDrawGlyphGrid(DevConsState *console, ConsBuf *buffers) {
     }
     buffers->rowStep = (console->controlByte & 4) ? 0xC0 : 0x60;
     if (console->controlByte & 2) {
-        sdfDevConsAppendBackgroundSprite(console, buffers);
+        sdfDevConsDrawBG(console, buffers);
     }
     cellStep = ((u32)buffers->rowStep << 16) | 0xC0;
     row = 0;
@@ -250,7 +250,7 @@ void sdfDevConsDrawGlyphGrid(DevConsState *console, ConsBuf *buffers) {
             if (character >= 0x20) {
                 if (buffers->bufferBytes < (u8 *)writeCursor - packetStart + 0x50) {
                     buffers->writeCursor = (u8 *)writeCursor;
-                    sdfDevConsKickPacketDma(buffers);
+                    sdfDevConsDrawFlush(buffers);
                     writeCursor = (vu64 *)buffers->writeCursor;
                     packetStart = buffers->packetStart;
                 }
@@ -274,7 +274,7 @@ void sdfDevConsDrawGlyphGrid(DevConsState *console, ConsBuf *buffers) {
 
 /* Initialize both uncached packet buffers and complete the GS setup packet.
  * Reserve the first glyph tag only after the setup values have been written. */
-void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, u8 *storageBase, s32 storageCapacityBytes) {
+void sdfDevConsDrawInit(ConsBuf *packetBuffers, u8 *storageBase, s32 storageCapacityBytes) {
     u32 ringAddress;
     u8 *ring;
     vu64 *packet;
@@ -288,7 +288,7 @@ void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, u8 *storageBase, s32 st
     packetBuffers->bufferAddresses[1] = ring + halfBufferBytes;
     packetBuffers->packetStart = ring;
     packetBuffers->activeBufferIndex = 0;
-    textureState = sdfTexGetPrimaryTextureState((struct SdfTex *)sdfConsoleFontTexture);
+    textureState = sdfTexGetTex0Reg((struct SdfTex *)sdfConsoleFontTexture);
     packet = (vu64 *)ring;
     packet[0] = 0x10AB400000008005ULL;
     packet[1] = 0xE;
@@ -308,20 +308,20 @@ void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, u8 *storageBase, s32 st
 }
 
 extern DevConsState *D_00438AB0;
-void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, u8 *storageBase, s32 storageCapacityBytes);
-void sdfDevConsDrawGlyphGrid(DevConsState *console, ConsBuf *buffers);
+void sdfDevConsDrawInit(ConsBuf *packetBuffers, u8 *storageBase, s32 storageCapacityBytes);
+void sdfDevConsDraw(DevConsState *console, ConsBuf *buffers);
 
 /* Render every console in the global chain into a stack packet buffer and submit it. */
-void sdfDevConsRenderAll(void) {
+void sdfDevConsDrawAll(void) {
     DevConsStackPackets storage;
     ConsBuf packetBuffers;
     DevConsState *console;
 
     if (D_00438AB0 != NULL) {
-        sdfDevConsInitPacketBuffers(&packetBuffers, storage.data, 0x1000);
+        sdfDevConsDrawInit(&packetBuffers, storage.data, 0x1000);
         for (console = D_00438AB0; console != NULL; console = console->previousNode) {
-            sdfDevConsDrawGlyphGrid(console, &packetBuffers);
+            sdfDevConsDraw(console, &packetBuffers);
         }
-        sdfDevConsKickPacketDma(&packetBuffers);
+        sdfDevConsDrawFlush(&packetBuffers);
     }
 }

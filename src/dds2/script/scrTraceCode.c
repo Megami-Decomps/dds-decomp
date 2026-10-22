@@ -8,51 +8,51 @@
 extern u32 (*scrOpcodeHandlers[])(ScrData *scr);
 extern const ScrCommand D_00411408[];
 
-u32 scrPushImmediateInteger(ScrData *scr) {
-    scrPushInteger(scr, scr->instructions[scr->pc].parts.sOperand);
+u32 CodeFunc_PushIS(ScrData *scr) {
+    PushInt(scr, scr->instructions[scr->pc].parts.sOperand);
     scr->pc++;
     return 1;
 }
 
-u32 scrPushImmediateFloat(ScrData *scr) {
+u32 CodeFunc_PushF(ScrData *scr) {
     scr->pc++;
-    bfStackPushFloat(scr, scr->instructions[scr->pc].fOperand);
-    scr->pc++;
-    return 1;
-}
-
-u32 scrPushGlobalInteger(ScrData *scr) {
-    scrPushInteger(scr, datGameState->script.ints[scr->instructions[scr->pc].parts.sOperand]);
+    PushFloat(scr, scr->instructions[scr->pc].fOperand);
     scr->pc++;
     return 1;
 }
 
-u32 scrPushGlobalFloat(ScrData *scr) {
-    bfStackPushFloat(scr, datGameState->script.floats[scr->instructions[scr->pc].parts.sOperand]);
+u32 CodeFunc_PushIX(ScrData *scr) {
+    PushInt(scr, datGameState->script.ints[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
 
-u32 scrPushLocalInteger(ScrData *scr) {
-    scrPushInteger(scr, scr->localInt[scr->instructions[scr->pc].parts.sOperand]);
+u32 CodeFunc_PushFX(ScrData *scr) {
+    PushFloat(scr, datGameState->script.floats[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
 
-u32 scrPushLocalFloat(ScrData *scr) {
-    bfStackPushFloat(scr, scr->localFloat[scr->instructions[scr->pc].parts.sOperand]);
+u32 CodeFunc_PushLIX(ScrData *scr) {
+    PushInt(scr, scr->localInt[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
 
-u32 scrPushStringLiteral(ScrData *scr) {
-    scrPushString(scr, scr->strings + scr->instructions[scr->pc].parts.sOperand);
+u32 CodeFunc_PushLFX(ScrData *scr) {
+    PushFloat(scr, scr->localFloat[scr->instructions[scr->pc].parts.sOperand]);
+    scr->pc++;
+    return 1;
+}
+
+u32 CodeFunc_PushSTR(ScrData *scr) {
+    PushStr(scr, scr->strings + scr->instructions[scr->pc].parts.sOperand);
     scr->pc++;
     return 1;
 }
 
 /* Copy the VM's reserved return slot back onto its active operand stack. */
-u32 scrPushReturnValue(ScrData *scr) {
+u32 CodeFunc_PushReg(ScrData *scr) {
     scr->stackTypes[scr->sp] = scr->stackTypes[SCR_STACK_RET];
     scr->stackValues[scr->sp].i = scr->stackValues[SCR_STACK_RET].i;
     scr->sp++;
@@ -60,43 +60,43 @@ u32 scrPushReturnValue(ScrData *scr) {
     return 1;
 }
 
-u32 scrStoreGlobalInteger(ScrData *scr) {
-    datGameState->script.ints[scr->instructions[scr->pc].parts.sOperand] = bfStackPopInt(scr);
+u32 CodeFunc_PopIX(ScrData *scr) {
+    datGameState->script.ints[scr->instructions[scr->pc].parts.sOperand] = PopInt(scr);
     scr->pc++;
     return 1;
 }
 
-u32 scrStoreGlobalFloat(ScrData *scr) {
+u32 CodeFunc_PopFX(ScrData *scr) {
     f32 floatValue;
 
-    floatValue = bfStackPopFloat(scr);
+    floatValue = PopFloat(scr);
     datGameState->script.floats[scr->instructions[scr->pc].parts.sOperand] = floatValue;
     scr->pc++;
     return 1;
 }
 
-u32 scrStoreLocalInteger(ScrData *scr) {
+u32 CodeFunc_PopLIX(ScrData *scr) {
     u32 integerValue;
 
-    integerValue = bfStackPopInt(scr);
+    integerValue = PopInt(scr);
     scr->localInt[scr->instructions[scr->pc].parts.sOperand] = integerValue;
     scr->pc++;
     return 1;
 }
 
-u32 scrStoreLocalFloat(ScrData *scr) {
-    scr->localFloat[scr->instructions[scr->pc].parts.sOperand] = bfStackPopFloat(scr);
+u32 CodeFunc_PopLFX(ScrData *scr) {
+    scr->localFloat[scr->instructions[scr->pc].parts.sOperand] = PopFloat(scr);
     scr->pc++;
     return 1;
 }
 
-u32 scrAdvanceTraceProgramCounter(ScrData *scr) {
+u32 CodeFunc_Proc(ScrData *scr) {
     scr->pc++;
     return 1;
 }
 
 /* Yield without consuming operands until the command completes. */
-u32 bfOpWaitDispatch(ScrData *scr) {
+u32 CodeFunc_Comm(ScrData *scr) {
     s32 programCounter = scr->pc;
     s32 commandIndex = scr->instructions[programCounter].parts.sOperand;
 
@@ -111,33 +111,33 @@ u32 bfOpWaitDispatch(ScrData *scr) {
     return 1;
 }
 
-u32 scrReturnToStackAddress(ScrData *scr)
+u32 CodeFunc_End(ScrData *scr)
 {
     if (scr->sp == 0) {
         return 0;
     }
-    scr->pc = bfStackPopInt(scr) + 1;
+    scr->pc = PopInt(scr) + 1;
     return 1;
 }
 
-u32 scrJumpProcedure(ScrData *scr) {
+u32 CodeFunc_Jump(ScrData *scr) {
     scr->pc = scr->procedures[scr->instructions[scr->pc].parts.sOperand].addr;
     return 1;
 }
 
 /* Save the return PC before transferring control to a procedure. */
-u32 scrCallProcedure(ScrData *scr) {
-    scrPushTypeFourValue(scr, scr->pc);
+u32 CodeFunc_Call(ScrData *scr) {
+    PushRet(scr, scr->pc);
     scr->pc = scr->procedures[scr->instructions[scr->pc].parts.sOperand].addr;
     return 1;
 }
 
-u32 scrTraceAdvanceProgramCounter(ScrData *scr) {
+u32 CodeFunc_Run(ScrData *scr) {
     scr->pc++;
     return 1;
 }
 
-u32 scrJumpLabel(ScrData *scr) {
+u32 CodeFunc_Goto(ScrData *scr) {
     scr->pc = scr->labels[scr->instructions[scr->pc].parts.sOperand].addr;
     return 1;
 }
@@ -151,13 +151,13 @@ extern f32 scrBinaryFloatResult;
 extern s32 scrBinaryLeftOperandType;
 extern s32 scrBinaryRightOperandType;
 
-void bfOpBinaryEval(ScrData *scr, s32 operatorCode)
+void CodeFunc_2Operation(ScrData *scr, s32 operatorCode)
 {
     scrBinaryLeftOperandType = scr->stackTypes[scr->sp - 1];
     scrBinaryRightOperandType = scr->stackTypes[scr->sp - 2];
     if ((scrBinaryLeftOperandType == 0 || scrBinaryLeftOperandType == 2) && (scrBinaryRightOperandType == 0 || scrBinaryRightOperandType == 2)) {
-        scrBinaryIntegerLeftOperand = bfStackPopInt(scr);
-        scrBinaryIntegerRightOperand = bfStackPopInt(scr);
+        scrBinaryIntegerLeftOperand = PopInt(scr);
+        scrBinaryIntegerRightOperand = PopInt(scr);
         switch (operatorCode) {
         case 0:
             scrBinaryIntegerResult = scrBinaryIntegerLeftOperand + scrBinaryIntegerRightOperand;
@@ -228,10 +228,10 @@ void bfOpBinaryEval(ScrData *scr, s32 operatorCode)
             }
             break;
         }
-        scrPushInteger(scr, scrBinaryIntegerResult);
+        PushInt(scr, scrBinaryIntegerResult);
     } else {
-        scrBinaryFloatLeftOperand = bfStackPopFloat(scr);
-        scrBinaryFloatRightOperand = bfStackPopFloat(scr);
+        scrBinaryFloatLeftOperand = PopFloat(scr);
+        scrBinaryFloatRightOperand = PopFloat(scr);
         switch (operatorCode) {
         case 0:
             scrBinaryFloatResult = scrBinaryFloatLeftOperand + scrBinaryFloatRightOperand;
@@ -251,7 +251,7 @@ void bfOpBinaryEval(ScrData *scr, s32 operatorCode)
             } else {
                 scrBinaryIntegerResult = 0;
             }
-            scrPushInteger(scr, scrBinaryIntegerResult);
+            PushInt(scr, scrBinaryIntegerResult);
             return;
         case 5:
             if (scrBinaryFloatLeftOperand != 0.0 && scrBinaryFloatRightOperand != 0.0) {
@@ -259,7 +259,7 @@ void bfOpBinaryEval(ScrData *scr, s32 operatorCode)
             } else {
                 scrBinaryIntegerResult = 0;
             }
-            scrPushInteger(scr, scrBinaryIntegerResult);
+            PushInt(scr, scrBinaryIntegerResult);
             return;
         case 6:
             if (scrBinaryFloatLeftOperand == scrBinaryFloatRightOperand) {
@@ -267,7 +267,7 @@ void bfOpBinaryEval(ScrData *scr, s32 operatorCode)
             } else {
                 scrBinaryIntegerResult = 0;
             }
-            scrPushInteger(scr, scrBinaryIntegerResult);
+            PushInt(scr, scrBinaryIntegerResult);
             return;
         case 7:
             if (scrBinaryFloatLeftOperand != scrBinaryFloatRightOperand) {
@@ -275,7 +275,7 @@ void bfOpBinaryEval(ScrData *scr, s32 operatorCode)
             } else {
                 scrBinaryIntegerResult = 0;
             }
-            scrPushInteger(scr, scrBinaryIntegerResult);
+            PushInt(scr, scrBinaryIntegerResult);
             return;
         case 8:
             if (scrBinaryFloatLeftOperand < scrBinaryFloatRightOperand) {
@@ -283,7 +283,7 @@ void bfOpBinaryEval(ScrData *scr, s32 operatorCode)
             } else {
                 scrBinaryIntegerResult = 0;
             }
-            scrPushInteger(scr, scrBinaryIntegerResult);
+            PushInt(scr, scrBinaryIntegerResult);
             return;
         case 9:
             if (scrBinaryFloatLeftOperand > scrBinaryFloatRightOperand) {
@@ -291,7 +291,7 @@ void bfOpBinaryEval(ScrData *scr, s32 operatorCode)
             } else {
                 scrBinaryIntegerResult = 0;
             }
-            scrPushInteger(scr, scrBinaryIntegerResult);
+            PushInt(scr, scrBinaryIntegerResult);
             return;
         case 10:
             if (scrBinaryFloatLeftOperand <= scrBinaryFloatRightOperand) {
@@ -299,7 +299,7 @@ void bfOpBinaryEval(ScrData *scr, s32 operatorCode)
             } else {
                 scrBinaryIntegerResult = 0;
             }
-            scrPushInteger(scr, scrBinaryIntegerResult);
+            PushInt(scr, scrBinaryIntegerResult);
             return;
         case 11:
             if (scrBinaryFloatLeftOperand >= scrBinaryFloatRightOperand) {
@@ -307,38 +307,38 @@ void bfOpBinaryEval(ScrData *scr, s32 operatorCode)
             } else {
                 scrBinaryIntegerResult = 0;
             }
-            scrPushInteger(scr, scrBinaryIntegerResult);
+            PushInt(scr, scrBinaryIntegerResult);
             return;
         }
-        bfStackPushFloat(scr, scrBinaryFloatResult);
+        PushFloat(scr, scrBinaryFloatResult);
     }
 }
 
-u32 scrOpAdd(ScrData *scr) {
-    bfOpBinaryEval(scr, 0);
+u32 CodeFunc_Add(ScrData *scr) {
+    CodeFunc_2Operation(scr, 0);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 scrOpSubtract(ScrData *scr) {
-    bfOpBinaryEval(scr, 1);
+u32 CodeFunc_Sub(ScrData *scr) {
+    CodeFunc_2Operation(scr, 1);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 scrOpMultiply(ScrData *scr) {
-    bfOpBinaryEval(scr, 2);
+u32 CodeFunc_Mul(ScrData *scr) {
+    CodeFunc_2Operation(scr, 2);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 scrOpDivide(ScrData *scr) {
-    bfOpBinaryEval(scr, 3);
+u32 CodeFunc_Div(ScrData *scr) {
+    CodeFunc_2Operation(scr, 3);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 bfOpNegate(ScrData *scr) {
+u32 CodeFunc_Minus(ScrData *scr) {
     switch (scr->stackTypes[scr->sp - 1]) {
     case 0:
         scr->stackValues[scr->sp - 1].i = -scr->stackValues[scr->sp - 1].i;
@@ -361,15 +361,15 @@ u32 bfOpNegate(ScrData *scr) {
     return 1;
 }
 
-u32 bfOpNot(ScrData *scr) {
+u32 CodeFunc_Not(ScrData *scr) {
     switch (scr->stackTypes[scr->sp - 1]) {
     case 0:
     case 2:
-        scrPushInteger(scr, bfStackPopInt(scr) == 0);
+        PushInt(scr, PopInt(scr) == 0);
         break;
     case 1:
     case 3:
-        scrPushInteger(scr, bfStackPopFloat(scr) == 0.0f);
+        PushInt(scr, PopFloat(scr) == 0.0f);
         break;
     case 4:
         break;
@@ -378,66 +378,66 @@ u32 bfOpNot(ScrData *scr) {
     return 1;
 }
 
-u32 scrOpLogicalOr(ScrData *scr) {
-    bfOpBinaryEval(scr, 4);
+u32 CodeFunc_Or(ScrData *scr) {
+    CodeFunc_2Operation(scr, 4);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 scrOpLogicalAnd(ScrData *scr) {
-    bfOpBinaryEval(scr, 5);
+u32 CodeFunc_And(ScrData *scr) {
+    CodeFunc_2Operation(scr, 5);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 scrOpCompareEqual(ScrData *scr) {
-    bfOpBinaryEval(scr, 6);
+u32 CodeFunc_EQ(ScrData *scr) {
+    CodeFunc_2Operation(scr, 6);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 scrOpCompareNotEqual(ScrData *scr) {
-    bfOpBinaryEval(scr, 7);
+u32 CodeFunc_NEQ(ScrData *scr) {
+    CodeFunc_2Operation(scr, 7);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 scrOpCompareLess(ScrData *scr) {
-    bfOpBinaryEval(scr, 8);
+u32 CodeFunc_S(ScrData *scr) {
+    CodeFunc_2Operation(scr, 8);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 scrOpCompareGreater(ScrData *scr) {
-    bfOpBinaryEval(scr, 9);
+u32 CodeFunc_L(ScrData *scr) {
+    CodeFunc_2Operation(scr, 9);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 scrOpCompareLessEqual(ScrData *scr) {
-    bfOpBinaryEval(scr, 10);
+u32 CodeFunc_SE(ScrData *scr) {
+    CodeFunc_2Operation(scr, 10);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 scrOpCompareGreaterEqual(ScrData *scr) {
-    bfOpBinaryEval(scr, 0xb);
+u32 CodeFunc_LE(ScrData *scr) {
+    CodeFunc_2Operation(scr, 0xb);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 bfOpJumpIfFalse(ScrData *scr)
+u32 CodeFunc_IF(ScrData *scr)
 {
     s32 conditionIsTruthy;
 
     switch (scr->stackTypes[scr->sp - 1]) {
     case 0:
     case 2:
-        conditionIsTruthy = bfStackPopInt(scr);
+        conditionIsTruthy = PopInt(scr);
         break;
     case 1:
     case 3:
-        conditionIsTruthy = (bfStackPopFloat(scr) != 0.0f);
+        conditionIsTruthy = (PopFloat(scr) != 0.0f);
         break;
     case 4:
         conditionIsTruthy = 0;
@@ -455,7 +455,7 @@ u32 bfOpJumpIfFalse(ScrData *scr)
 
 /* Run instructions until one stops the context: returns 2 when a handler returns 0 (finished),
  * 1 when a handler returns 2 (yield for one tick). */
-s32 bfContextStep(ScrData *scr) {
+s32 scrTraceCode(ScrData *scr) {
     u32 handlerResult;
 
     while (1) {
@@ -478,7 +478,7 @@ s32 bfContextStep(ScrData *scr) {
 
 /* Script command parameter `parameterIndex` (0 = first) as an int, converting floats and
  * dereferencing global variable references. */
-s32 scrReadIntParameter(s32 parameterIndex) {
+s32 scrGetIntPara(s32 parameterIndex) {
     ScrData *scr = scrCurrentContext;
     s32 stackIndex = scr->sp - parameterIndex - 1;
 
@@ -496,7 +496,7 @@ s32 scrReadIntParameter(s32 parameterIndex) {
     return 0;
 }
 
-f32 bfWaitReadArgFloat(s32 parameterIndex)
+f32 scrGetFloatPara(s32 parameterIndex)
 {
     ScrData *scr = scrCurrentContext;
     s32 stackIndex = scr->sp - parameterIndex - 1;
@@ -516,7 +516,7 @@ f32 bfWaitReadArgFloat(s32 parameterIndex)
 }
 
 /* Return a string parameter only when its VM stack tag is STRING. */
-char *scrReadStringParameter(s32 parameterIndex)
+char *scrGetStrPara(s32 parameterIndex)
 {
     ScrData *scr = scrCurrentContext;
     s32 stackIndex = scr->sp - parameterIndex - 1;
@@ -544,8 +544,8 @@ char *scrReadStringParameter(s32 parameterIndex)
 
 /* The setters return the context they set the value in, which retail
  * leaves in v0: a command that ends by setting its value returns it as its
- * result, and a nonzero result tells bfOpWaitDispatch the command is done. */
-ScrData *scrSetIntegerReturnValue(s32 retVal)
+ * result, and a nonzero result tells CodeFunc_Comm the command is done. */
+ScrData *scrSetIntReturnValue(s32 retVal)
 {
     ScrData *scr = scrCurrentContext;
     SCR_SET_RETURN_VALUE(scr, 0, i, retVal);

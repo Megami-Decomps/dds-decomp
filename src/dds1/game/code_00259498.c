@@ -50,7 +50,7 @@ void mnuDrawMantraGridEntry(s32 x, s32 y, s32 depth, s32 alpha,
     memcpy(mappedIds, D_003BC4A0, sizeof(mappedIds));
     display = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     scene = (MnuMantraGridEntry *)entry->value;
-    pulse = (sdfSinPoly(((f32)scene->frame / 60.0f) * 6.2831853f -
+    pulse = (sdfSin(((f32)scene->frame / 60.0f) * 6.2831853f -
                        1.5707963f) + 1.0f) * 0.5f;
     progress = (f32)(scene->frame - 20) / 20.0f;
     if (progress > 1.0f) {
@@ -59,7 +59,7 @@ void mnuDrawMantraGridEntry(s32 x, s32 y, s32 depth, s32 alpha,
     if (progress < 0.0f) {
         progress = 0.0f;
     }
-    progress = sdfSinPoly(progress * 3.1415926f) * 0.3f;
+    progress = sdfSin(progress * 3.1415926f) * 0.3f;
     drawX = x + mnuMantraVariantSpritePlacements[scene->sceneId][2];
     drawY = y + mnuMantraVariantSpritePlacements[scene->sceneId][3];
     flags = mnuGetMantraDisplayFlags(scene, profileOwner);
@@ -138,7 +138,7 @@ void mnuDrawScaledMantraGridEntry(s32 x, s32 y, s32 depth, s32 alpha,
         if ((f32)scene->frame > 60.0f) {
             scene->frame = 0;
         }
-        pulse = sdfSinPoly(pulse);
+        pulse = sdfSin(pulse);
         drawX = x + mnuMantraVariantSpritePlacements[scene->sceneId][2];
         drawY = y + mnuMantraVariantSpritePlacements[scene->sceneId][3];
         flags = mnuGetMantraDisplayFlags(scene, profileOwner);
@@ -257,10 +257,10 @@ void mnuDrawMantraUpNavigationPulse(s32 frame, s32 size, s32 context) {
     f32 t;
 
     t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
-    t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
+    t = sdfSin(t * 3.14159265f) * 0.2f + 0.1f;
     mnuDrawPlacedSpriteFromTable(0, -10, 0, (s32)(scale * t), 0, context);
     t = x < 35.0f ? x / 35.0f : 0.0f;
-    t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
+    t = sdfSin(t * 3.14159265f) * 0.5f + 0.5f;
     mnuDrawPlacedSpriteFromTable(0, 0, 0, (s32)(scale * t), 0, context);
 }
 
@@ -270,10 +270,10 @@ void mnuDrawMantraRightNavigationPulse(s32 frame, s32 size, s32 context) {
     f32 t;
 
     t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
-    t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
+    t = sdfSin(t * 3.14159265f) * 0.2f + 0.1f;
     mnuDrawPlacedSpriteFromTable(10, 0, 0, (s32)(scale * t), 1, context);
     t = x < 35.0f ? x / 35.0f : 0.0f;
-    t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
+    t = sdfSin(t * 3.14159265f) * 0.5f + 0.5f;
     mnuDrawPlacedSpriteFromTable(0, 0, 0, (s32)(scale * t), 1, context);
 }
 
@@ -283,10 +283,10 @@ void mnuDrawMantraDownNavigationPulse(s32 frame, s32 size, s32 context) {
     f32 t;
 
     t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
-    t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
+    t = sdfSin(t * 3.14159265f) * 0.2f + 0.1f;
     mnuDrawPlacedSpriteFromTable(0, 10, 0, (s32)(scale * t), 2, context);
     t = x < 35.0f ? x / 35.0f : 0.0f;
-    t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
+    t = sdfSin(t * 3.14159265f) * 0.5f + 0.5f;
     mnuDrawPlacedSpriteFromTable(0, 0, 0, (s32)(scale * t), 2, context);
 }
 
@@ -296,10 +296,10 @@ void mnuDrawMantraLeftNavigationPulse(s32 frame, s32 size, s32 context) {
     f32 t;
 
     t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
-    t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
+    t = sdfSin(t * 3.14159265f) * 0.2f + 0.1f;
     mnuDrawPlacedSpriteFromTable(-10, 0, 0, (s32)(scale * t), 3, context);
     t = x < 35.0f ? x / 35.0f : 0.0f;
-    t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
+    t = sdfSin(t * 3.14159265f) * 0.5f + 0.5f;
     mnuDrawPlacedSpriteFromTable(0, 0, 0, (s32)(scale * t), 3, context);
 }
 
@@ -403,7 +403,7 @@ void mnuDrawAnimatedCurrencyCounter(s32 x, s32 y, s32 depth, s32 alpha,
                   (s32)resource,
                   mnuMantraCommonSpritePlacements[34].spriteIndex, context);
     if (datGameState->header.currency != scene->displayedCurrency) {
-        sndSetSequenceVolumePan(0x13, 0x7F, 0x3F);
+        p2sdPlaySE(0x13, 0x7F, 0x3F);
         scene->currencyFrame++;
         sprintf(currencyText, D_003BC4C8,
                       scene->displayedCurrency +
@@ -509,13 +509,13 @@ MnuSpriteResourceGroup *mnuCreateSpriteResource(s32 cueDuration,
                                                 u8 initialGenerations,
                                                 u8 variant) {
     struct SdfMemBlock *allocation = sdfMemAllocDirect(0x48);
-    MnuSpriteResourceGroup *resource = (MnuSpriteResourceGroup *)sdfMemoryGetBlockAddress(allocation);
+    MnuSpriteResourceGroup *resource = (MnuSpriteResourceGroup *)sdfMemGetPtr(allocation);
     memset(resource, 0, 0x48);
     resource->allocation = allocation;
     resource->cueDuration = cueDuration;
     resource->initialGenerations = initialGenerations;
     resource->variant = variant;
-    resource->spawnCountdown = (s32)(sdfGetRandFloat(0) * 30.0f + 10.0f);
+    resource->spawnCountdown = (s32)(dds3GetRandFloatA(0) * 30.0f + 10.0f);
     return resource;
 }
 
@@ -543,8 +543,8 @@ SpriteSpawnNode *mnuCreateSpriteSpawnNode(MnuSpriteResourceGroup *group, SpriteS
         node->direction = direction;
         node->framesLeft = node->duration = group->cueDuration - 5;
     } else {
-        node->x = (s32)(sdfGetRandFloat(0) * 30.0f) * 26 + 16;
-        node->y = (s32)(sdfGetRandFloat(0) * 20.0f) * 18 + 50;
+        node->x = (s32)(dds3GetRandFloatA(0) * 30.0f) * 26 + 16;
+        node->y = (s32)(dds3GetRandFloatA(0) * 20.0f) * 18 + 50;
         node->generations = group->initialGenerations;
         node->direction = 0;
         node->framesLeft = node->duration = group->cueDuration;

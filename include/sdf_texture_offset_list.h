@@ -26,7 +26,7 @@ typedef char SdfTextureOffsetListHeader_count_at_0x10[
     ((u32)&((SdfTextureOffsetListHeader *)0)->textureCount == 0x10) ? 1 : -1];
 
 struct DevRequest;
-struct DevRequest *sndBuildResourceHandleListFromOffsets(
+struct DevRequest *sdfTexSetTB(
     const SdfTextureOffsetListHeader *resource);
 
 #endif /* SDF_TEXTURE_OFFSET_LIST_H */

@@ -6,7 +6,7 @@
 #include "dds3_owned_node.h"
 #include "pty_roster_api.h"
 
-extern s32 scrReadIntParameter(s32);
+extern s32 scrGetIntPara(s32);
 /* The native VM commands pass operands to these parameterless party stubs. */
 extern u32 ptyReturnZero();
 extern u32 ptyReturnOneForCommand193();
@@ -15,7 +15,7 @@ extern u32 ptyReturnOne();
 /* Remove the party unit specified by script operand 0 and return success to
  * the script VM, while writing whether a unit was actually removed. */
 u32 ptyScriptRemoveUnitAndReturnResult(void) {
-    scrSetIntegerReturnValue(ptyRemoveUnit(scrReadIntParameter(0)) == 1);
+    scrSetIntReturnValue(ptyRemoveUnit(scrGetIntPara(0)) == 1);
     return 1;
 }
 
@@ -24,10 +24,10 @@ u32 ptyScriptSetZeroResultCommand192(void) {
     s32 firstOperand;
     s32 secondOperand;
 
-    firstOperand = scrReadIntParameter(0);
-    secondOperand = scrReadIntParameter(1);
+    firstOperand = scrGetIntPara(0);
+    secondOperand = scrGetIntPara(1);
     firstOperand = ptyReturnZero(firstOperand, secondOperand);
-    scrSetIntegerReturnValue(firstOperand);
+    scrSetIntReturnValue(firstOperand);
     return 1;
 }
 
@@ -35,19 +35,19 @@ u32 ptyScriptSetOneResultCommand193(void) {
     s32 firstOperand;
     s32 secondOperand;
 
-    firstOperand = scrReadIntParameter(0);
-    secondOperand = scrReadIntParameter(1);
-    scrSetIntegerReturnValue(ptyReturnOneForCommand193(firstOperand, secondOperand) == 1);
+    firstOperand = scrGetIntPara(0);
+    secondOperand = scrGetIntPara(1);
+    scrSetIntReturnValue(ptyReturnOneForCommand193(firstOperand, secondOperand) == 1);
     return 1;
 }
 
 u32 ptyScriptSetOneResultCommand194(void) {
-    scrSetIntegerReturnValue(ptyReturnOne(scrReadIntParameter(0)) == 1);
+    scrSetIntReturnValue(ptyReturnOne(scrGetIntPara(0)) == 1);
     return 1;
 }
 
 /* Append an intrusive node; linkOffset selects its previous/next pair. */
-void dds3AppendIntrusiveNode(Dds3IntrusiveNodeList *list,
+void dds3FontReqListInsert(Dds3IntrusiveNodeList *list,
                              Dds3IntrusiveNode *node, s32 linkOffset) {
     Dds3IntrusiveNode *last = list->tail;
     u8 *nodeLinks = (u8 *)node + linkOffset;
@@ -62,7 +62,7 @@ void dds3AppendIntrusiveNode(Dds3IntrusiveNodeList *list,
     list->tail = node;
 }
 
-void dds3UnlinkNodeFromList(Dds3IntrusiveNodeList *list,
+void dds3FontReqListRemove(Dds3IntrusiveNodeList *list,
                             Dds3IntrusiveNode *node, s32 linkOffset) {
     u8 *nodeLinks = (u8 *)node + linkOffset;
     Dds3IntrusiveNode *prev = *(Dds3IntrusiveNode **)nodeLinks;
@@ -80,21 +80,21 @@ void dds3UnlinkNodeFromList(Dds3IntrusiveNodeList *list,
     }
 }
 
-void dds3RegisterOwnedIntrusiveNode(Dds3IntrusiveNode *node,
+void dds3FontReqListAdd(Dds3IntrusiveNode *node,
                                     Dds3IntrusiveNodeCallbacks *vtable) {
-    dds3AppendIntrusiveNode(&dds3OwnedNodeListHead, node, 0);
+    dds3FontReqListInsert(&dds3OwnedNodeListHead, node, 0);
     node->vtable = vtable;
 }
 
-void dds3DestroyLinkedNode(Dds3IntrusiveNode *node) {
-    dds3UnlinkNodeFromList(&dds3OwnedNodeListHead, node, 0);
+void dds3FontReqListRunOne(Dds3IntrusiveNode *node) {
+    dds3FontReqListRemove(&dds3OwnedNodeListHead, node, 0);
     node->vtable->destroy(node);
 }
 
-void dds3DestroyAllOwnedIntrusiveNodes(void) {
+void dds3FontReqListRunAll(void) {
     Dds3IntrusiveNode *current;
     while ((current = dds3OwnedNodeListHead.head) != NULL) {
-        dds3DestroyLinkedNode(current);
+        dds3FontReqListRunOne(current);
     }
 }
 
@@ -102,19 +102,19 @@ void dds3SetLinkedNodeValue(Dds3IntrusiveNode *node, u32 nodeValue) {
     node->value = nodeValue;
 }
 
-void dds3DestroyNodesWithValue(s32 nodeValue) {
+void dds3FontReqListRunTo(s32 nodeValue) {
     Dds3IntrusiveNode *node = dds3OwnedNodeListHead.head;
 
     while (node != NULL) {
         Dds3IntrusiveNode *next = node->next;
         if (node->value == nodeValue) {
-            dds3DestroyLinkedNode(node);
+            dds3FontReqListRunOne(node);
         }
         node = next;
     }
 }
 
-void dds3UpdateLinkedNodes(void) {
+void dds3FontReqListCount(void) {
     Dds3IntrusiveNode *node = dds3OwnedNodeListHead.head;
 
     while (node != NULL) {
@@ -123,14 +123,14 @@ void dds3UpdateLinkedNodes(void) {
     }
 }
 
-void frFontSubmitAndFreeGlyphOwner(void *owner) {
+void dds3FontReqDestroy(void *owner) {
     Dds3FontNode *node = owner;
 
     frDestroyFontRequestAfter(node->glyph);
     sdfChipFreeDirect(node);
 }
 
-s32 frFontDrawOwnedGlyph(void *owner) {
+s32 dds3FontReqDrawFont(void *owner) {
     Dds3FontNode *node = owner;
 
     return frFontDrawGlyphInDefaultMode(node->glyph);
@@ -146,22 +146,22 @@ Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, void *text) {
     if (x == 0x800000) {
         x = (0x200 - glyph->advance) * 8;
     }
-    frFontSetGlyphPosition(glyph, x, y);
+    frSetDrawPosition(glyph, x, y);
     node = sdfAllocAndClearQuadwords(sizeof(*node));
     node->glyph = glyph;
-    dds3RegisterOwnedIntrusiveNode(&node->owner, &dds3FontNodeVTable);
+    dds3FontReqListAdd(&node->owner, &dds3FontNodeVTable);
     return node;
 }
 
-void itfConfigureOwnedGlyphChainFlag(Dds3FontNode *node, u8 value) {
+void dds3FontReqSetColorNo(Dds3FontNode *node, u8 value) {
     frSetFontColorNo(node->glyph, value);
 }
 
-void frFontReleaseOwnerStorage(void *memory) {
+void dds3FontReqFree(void *memory) {
     sdfChipFreeDirect(memory);
 }
 
 Dds3IntrusiveNodeCallbacks dds3FontNodeVTable __attribute__((section(".sdata"))) = {
-    frFontSubmitAndFreeGlyphOwner,
-    frFontDrawOwnedGlyph,
+    dds3FontReqDestroy,
+    dds3FontReqDrawFont,
 };

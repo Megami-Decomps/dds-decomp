@@ -79,11 +79,11 @@ typedef struct VuGeomRef {
 
 extern VuGeomRef D_00468210[];
 
-extern void sdfVuEmitSelectedNodePacket(VuWork *work);
+extern void corePktEmitBase(VuWork *work);
 
-void sdfVuBlendNodeXY(VuBlendNode *node);
+void corePktLerpUVChain(VuBlendNode *node);
 
-void sdfVuMultiplyNodeColors(VuWork *work, u32 color) {
+void corePktSetConstColor(VuWork *work, u32 color) {
     f32 colorScale = 1.0f / 128.0f;
     VuBlendNode *node;
     s32 remaining;
@@ -109,7 +109,7 @@ void sdfVuMultiplyNodeColors(VuWork *work, u32 color) {
     }
 }
 
-void sdfVuInterpolateClipVertex(VuBlendNode *out, VuBlendNode *first, VuBlendNode *second) {
+void corePktMakeEdgePoint(VuBlendNode *out, VuBlendNode *first, VuBlendNode *second) {
     out->sourceA = first;
     out->sourceB = second;
     VU0_INTERPOLATE_CLIP_VERTEX(out, first, second);
@@ -133,7 +133,7 @@ static inline VuBlendNode *sdfVuAllocClipNode(VuWork *work) {
     return node;
 }
 /* vu0 routine: native clip-facing test and ordinary triangle fans. */
-void sdfVuBuildClippedTriangleRefs(VuWork *work) {
+void corePktClipFace(VuWork *work) {
     s32 triangleCount;
     s32 i;
     u16 *triangles;
@@ -194,8 +194,8 @@ void sdfVuBuildClippedTriangleRefs(VuWork *work) {
                 d = sdfVuAllocClipNode(work);
                 e = sdfVuAllocClipNode(work);
                 if (aRegion == 0) {
-                    sdfVuInterpolateClipVertex(d, b, a);
-                    sdfVuInterpolateClipVertex(e, c, a);
+                    corePktMakeEdgePoint(d, b, a);
+                    corePktMakeEdgePoint(e, c, a);
                     out[0].a = (u128 *)a;
                     out[0].b = (u128 *)d;
                     out[0].c = (u128 *)e;
@@ -208,8 +208,8 @@ void sdfVuBuildClippedTriangleRefs(VuWork *work) {
                     out += 3;
                     break;
                 }
-                sdfVuInterpolateClipVertex(d, a, b);
-                sdfVuInterpolateClipVertex(e, a, c);
+                corePktMakeEdgePoint(d, a, b);
+                corePktMakeEdgePoint(e, a, c);
                 out[0].a = (u128 *)a;
                 out[0].b = (u128 *)d;
                 out[0].c = (u128 *)e;
@@ -225,8 +225,8 @@ void sdfVuBuildClippedTriangleRefs(VuWork *work) {
                 } else {
                     f = sdfVuAllocClipNode(work);
                     g = sdfVuAllocClipNode(work);
-                    sdfVuInterpolateClipVertex(f, b, a);
-                    sdfVuInterpolateClipVertex(g, c, a);
+                    corePktMakeEdgePoint(f, b, a);
+                    corePktMakeEdgePoint(g, c, a);
                     out[0].a = (u128 *)e;
                     out[0].b = (u128 *)d;
                     out[0].c = (u128 *)f;
@@ -248,10 +248,10 @@ void sdfVuBuildClippedTriangleRefs(VuWork *work) {
                 e = sdfVuAllocClipNode(work);
                 f = sdfVuAllocClipNode(work);
                 g = sdfVuAllocClipNode(work);
-                sdfVuInterpolateClipVertex(d, b, a);
-                sdfVuInterpolateClipVertex(e, c, a);
-                sdfVuInterpolateClipVertex(f, b, c);
-                sdfVuInterpolateClipVertex(g, c, b);
+                corePktMakeEdgePoint(d, b, a);
+                corePktMakeEdgePoint(e, c, a);
+                corePktMakeEdgePoint(f, b, c);
+                corePktMakeEdgePoint(g, c, b);
                 out[0].a = (u128 *)a;
                 out[0].b = (u128 *)d;
                 out[0].c = (u128 *)e;
@@ -286,7 +286,7 @@ void sdfVuBuildClippedTriangleRefs(VuWork *work) {
 }
 
 /* vu0 routine: native clip projection and ordinary triangle fans. */
-void sdfVuBuildRingTriangleRefs(VuWork *work) {
+void corePktBuildFaceList(VuWork *work) {
     s32 triangleCount;
     u16 *triangles;
     VuBlendNode *nodes;
@@ -299,7 +299,7 @@ void sdfVuBuildRingTriangleRefs(VuWork *work) {
 
     VU0_SET_CLIP_PLANES(clipBias, clipPlane, projection);
     if (work->selectedFlags & 0x4000) {
-        sdfVuBuildClippedTriangleRefs(work);
+        corePktClipFace(work);
     }
     triangleCount = (s16)work->param0;
     acceptAll = D_00438A34;
@@ -349,8 +349,8 @@ void sdfVuBuildRingTriangleRefs(VuWork *work) {
                 d = sdfVuAllocClipNode(work);
                 e = sdfVuAllocClipNode(work);
                 if (aRegion == 0) {
-                    sdfVuInterpolateClipVertex(d, b, a);
-                    sdfVuInterpolateClipVertex(e, c, a);
+                    corePktMakeEdgePoint(d, b, a);
+                    corePktMakeEdgePoint(e, c, a);
                     out[0].a = (u128 *)a;
                     out[0].b = (u128 *)d;
                     out[0].c = (u128 *)e;
@@ -363,8 +363,8 @@ void sdfVuBuildRingTriangleRefs(VuWork *work) {
                     out += 3;
                     break;
                 }
-                sdfVuInterpolateClipVertex(d, a, b);
-                sdfVuInterpolateClipVertex(e, a, c);
+                corePktMakeEdgePoint(d, a, b);
+                corePktMakeEdgePoint(e, a, c);
                 out[0].a = (u128 *)a;
                 out[0].b = (u128 *)d;
                 out[0].c = (u128 *)e;
@@ -380,8 +380,8 @@ void sdfVuBuildRingTriangleRefs(VuWork *work) {
                 } else {
                     f = sdfVuAllocClipNode(work);
                     g = sdfVuAllocClipNode(work);
-                    sdfVuInterpolateClipVertex(f, b, a);
-                    sdfVuInterpolateClipVertex(g, c, a);
+                    corePktMakeEdgePoint(f, b, a);
+                    corePktMakeEdgePoint(g, c, a);
                     out[0].a = (u128 *)e;
                     out[0].b = (u128 *)d;
                     out[0].c = (u128 *)f;
@@ -403,10 +403,10 @@ void sdfVuBuildRingTriangleRefs(VuWork *work) {
                 e = sdfVuAllocClipNode(work);
                 f = sdfVuAllocClipNode(work);
                 g = sdfVuAllocClipNode(work);
-                sdfVuInterpolateClipVertex(d, b, a);
-                sdfVuInterpolateClipVertex(e, c, a);
-                sdfVuInterpolateClipVertex(f, b, c);
-                sdfVuInterpolateClipVertex(g, c, b);
+                corePktMakeEdgePoint(d, b, a);
+                corePktMakeEdgePoint(e, c, a);
+                corePktMakeEdgePoint(f, b, c);
+                corePktMakeEdgePoint(g, c, b);
                 out[0].a = (u128 *)a;
                 out[0].b = (u128 *)d;
                 out[0].c = (u128 *)e;
@@ -441,7 +441,7 @@ void sdfVuBuildRingTriangleRefs(VuWork *work) {
 
 
 /* vu0 routine: native projection setup with ordinary C clipping. */
-void sdfVuBuildIndexedTriangleRefs(VuWork *work) {
+void corePktBuildBackFaceList(VuWork *work) {
     f32 scale = D_00439190;
     s32 remaining;
     u16 *triangles;
@@ -484,8 +484,8 @@ void sdfVuBuildIndexedTriangleRefs(VuWork *work) {
                 d = sdfVuAllocClipNode(work);
                 e = sdfVuAllocClipNode(work);
                 if (aRegion == 0) {
-                    sdfVuInterpolateClipVertex(d, b, a);
-                    sdfVuInterpolateClipVertex(e, c, a);
+                    corePktMakeEdgePoint(d, b, a);
+                    corePktMakeEdgePoint(e, c, a);
                     out[0].a = (u128 *)a;
                     out[0].b = (u128 *)d;
                     out[0].c = (u128 *)e;
@@ -498,8 +498,8 @@ void sdfVuBuildIndexedTriangleRefs(VuWork *work) {
                     out += 3;
                     break;
                 }
-                sdfVuInterpolateClipVertex(d, a, b);
-                sdfVuInterpolateClipVertex(e, a, c);
+                corePktMakeEdgePoint(d, a, b);
+                corePktMakeEdgePoint(e, a, c);
                 out[0].a = (u128 *)a;
                 out[0].b = (u128 *)d;
                 out[0].c = (u128 *)e;
@@ -515,8 +515,8 @@ void sdfVuBuildIndexedTriangleRefs(VuWork *work) {
                 } else {
                     f = sdfVuAllocClipNode(work);
                     g = sdfVuAllocClipNode(work);
-                    sdfVuInterpolateClipVertex(f, b, a);
-                    sdfVuInterpolateClipVertex(g, c, a);
+                    corePktMakeEdgePoint(f, b, a);
+                    corePktMakeEdgePoint(g, c, a);
                     out[0].a = (u128 *)e;
                     out[0].b = (u128 *)d;
                     out[0].c = (u128 *)f;
@@ -538,10 +538,10 @@ void sdfVuBuildIndexedTriangleRefs(VuWork *work) {
                 e = sdfVuAllocClipNode(work);
                 f = sdfVuAllocClipNode(work);
                 g = sdfVuAllocClipNode(work);
-                sdfVuInterpolateClipVertex(d, b, a);
-                sdfVuInterpolateClipVertex(e, c, a);
-                sdfVuInterpolateClipVertex(f, b, c);
-                sdfVuInterpolateClipVertex(g, c, b);
+                corePktMakeEdgePoint(d, b, a);
+                corePktMakeEdgePoint(e, c, a);
+                corePktMakeEdgePoint(f, b, c);
+                corePktMakeEdgePoint(g, c, b);
                 out[0].a = (u128 *)a;
                 out[0].b = (u128 *)d;
                 out[0].c = (u128 *)e;
@@ -574,7 +574,7 @@ void sdfVuBuildIndexedTriangleRefs(VuWork *work) {
     *work->ringEnd = NULL;
 }
 
-void sdfVuEmitTexturedTriangleBatches(work)
+void corePktEmitTexTris(work)
     VuWork *work;
 {
     s32 remaining = work->nodeCount;
@@ -647,7 +647,7 @@ void sdfVuEmitTexturedTriangleBatches(work)
 
 /* Emit up to 16 triangles per batch; TEX1/TEX0/CLAMP/ALPHA context 2 state
  * precedes the first batch only. clearPrimitiveFlags filters GIF PRIM bits. */
-void sdfBuildChunkedVuNodeTransfer(VuWork *work, u64 samplingState, u64 textureState, u64 clampState, u64 alphaState, s32 clearPrimitiveFlags) {
+void corePktEmitTexTrisCtx2(VuWork *work, u64 samplingState, u64 textureState, u64 clampState, u64 alphaState, s32 clearPrimitiveFlags) {
     s32 remainingTriangles = work->nodeCount;
     s32 batchTriangles;
     s32 firstBatch;
@@ -724,7 +724,7 @@ void sdfBuildChunkedVuNodeTransfer(VuWork *work, u64 samplingState, u64 textureS
 
 /* Emit up to 24 colored triangles per batch, copying vertex quadwords 0 and 2.
  * Keep the native K&R declaration and caller convention. */
-void sdfVuEmitColoredTriangleBatches(work)
+void corePktEmitTris(work)
     VuWork *work;
 {
     s32 remainingTriangles = work->nodeCount;
@@ -766,26 +766,26 @@ void sdfVuEmitColoredTriangleBatches(work)
 }
 
 /* Select textured or colored emission. */
-void sdfVuEmitSelectedNodePacket(VuWork *work) {
+void corePktEmitBase(VuWork *work) {
     if ((work->selectedFlags & SDF_VU_TEXTURED_FLAG) != 0) {
-        sdfVuEmitTexturedTriangleBatches(work);
+        corePktEmitTexTris(work);
         return;
     }
-    sdfVuEmitColoredTriangleBatches(work);
+    corePktEmitTris(work);
 }
 
 /* Finish the selected node's transformed rows and emit its textured geometry. */
-void sdfVuVertexAlphaClamp(VuWork *work, const u128 *parameters);
+void corePktApplyFaceDivColor(VuWork *work, const u128 *parameters);
 
-void sdfVuUpdateSelectedNodeGeometry(VuWork *work) {
+void corePktEmitMultiTexPass(VuWork *work) {
     SdfAssetEntry *asset;
     u32 mode;
     u32 secondaryColor;
     u32 primaryStateWordSecond;
 
-    sdfVuTransformTextureCoordinates((void *)work->ringSrc, work->param1, work->secondCoordinates,
+    corePktXfmUV((void *)work->ringSrc, work->param1, work->secondCoordinates,
                   (u8 *)work->asset + 0x80);
-    sdfVuBlendNodeXY(work->blend);
+    corePktLerpUVChain(work->blend);
     asset = work->asset;
     mode = asset->secondaryMode;
     secondaryColor = asset->secondaryColor;
@@ -797,17 +797,17 @@ void sdfVuUpdateSelectedNodeGeometry(VuWork *work) {
             if (primaryStateWordSecond != secondaryColor) {
                 u128 parameters[3];
 
-                sdfVuBuildPackedColorTransform((SdfVuColorTransform *)parameters, sdfVuSelectedTransformMatrix, work->packedColor,
+                corePktMakeFaceDivParm((SdfVuColorTransform *)parameters, sdfVuSelectedTransformMatrix, work->packedColor,
                               secondaryColor, asset->unk04, asset->unk1C,
                               asset->x + work->offsetX, asset->y + work->offsetY);
-                sdfVuVertexAlphaClamp(work, parameters);
+                corePktApplyFaceDivColor(work, parameters);
             }
             break;
         case 3:
-            sdfVuMultiplyNodeColors(work, secondaryColor);
+            corePktSetConstColor(work, secondaryColor);
             break;
     }
-    sdfBuildChunkedVuNodeTransfer(work, asset->secondaryTextureState.sampling,
+    corePktEmitTexTrisCtx2(work, asset->secondaryTextureState.sampling,
                                   asset->secondaryTextureState.texture,
                                   asset->secondaryTextureState.clamp, asset->alphaState, 0);
 }

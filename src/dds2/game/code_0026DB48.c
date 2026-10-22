@@ -65,7 +65,7 @@ void scrClearEntryFlagAtZeroBit1(DatPartyRecord *context) {
 }
 
 /* Call the existing flag routine with entry zero and selector one; ignore its result. */
-void scrTestEntryFlagAtZeroBit1(DatPartyRecord *context) {
+void nbCameraHelperModelSet(DatPartyRecord *context) {
     scrTestEntryFlag(context, 0, 1);
 }
 

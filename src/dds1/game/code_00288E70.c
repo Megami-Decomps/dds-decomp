@@ -17,15 +17,15 @@ extern char fileManagerTaskName[];
 extern s32 D_003BC7D8;
 
 extern s32 (*fileIdleUpdateCallback)(void);
-s32 fileMan(KwlnTask *task);
+s32 fileManagerProc(KwlnTask *task);
 
 extern s32 sdfFileCmdFileSize(DevState *);
 
-extern void fileQueuePendingRequestInFreeSlot(FileTransferJob *);
+extern void pacRead(FileTransferJob *);
 
-extern void filePrependNode(FileManWork *work, FileRequest *job);
+extern void fileLinkCloseWait(FileManWork *work, FileRequest *job);
 
-extern void fileUnlinkNode(FileManWork *work, FileRequest *job);
+extern void fileUnlinkCloseWait(FileManWork *work, FileRequest *job);
 
 extern DevState *sdfFileCmdReadOpen(const char *path,
                         s32 (*callback)(void *, s32, s32, s32, FileTransferJob *), FileTransferJob *job);
@@ -34,9 +34,9 @@ extern DevState *sdfFileCmdWriteOpen(const char *path,
                         s32 (*callback)(void *, s32, s32, s32, FileTransferJob *), FileTransferJob *job,
                         s32 options);
 
-extern s32 sdfPrintFormattedDevMessage(const char *fmt, ...);
+extern s32 sdfPrintf(const char *fmt, ...);
 
-s32 fileHandleFixedSlotReadEvent(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
+s32 pacLoadCallback(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
     FileManWork *work = &fileManagerWork;
     s32 saved;
 
@@ -50,7 +50,7 @@ s32 fileHandleFixedSlotReadEvent(void *deviceRequest, s32 event, s32 unused, s32
         job->transferBytes = byteCount;
         job->state = FILE_JOB_READY;
         job->totalBytes = byteCount;
-        fileQueuePendingRequestInFreeSlot(job);
+        pacRead(job);
         break;
     case SDF_DEV_EVENT_READ_REPLY:
         WaitSema(work->sema);
@@ -71,7 +71,7 @@ s32 fileHandleFixedSlotReadEvent(void *deviceRequest, s32 event, s32 unused, s32
         }
         work->activeSlots++;
         if (job->state == 5) {
-            filePrependNode(work, (FileRequest *)job);
+            fileLinkCloseWait(work, (FileRequest *)job);
             SignalSema(work->sema);
             sdfFileCmdClose(deviceRequest);
         } else {
@@ -79,12 +79,12 @@ s32 fileHandleFixedSlotReadEvent(void *deviceRequest, s32 event, s32 unused, s32
         }
         saved = D_003BC7D8;
         D_003BC7D8 = 1;
-        fileStartOrResumeQueuedJob();
+        fileExecQueue();
         D_003BC7D8 = saved;
         break;
     case SDF_DEV_EVENT_CLOSED:
         WaitSema(work->sema);
-        fileUnlinkNode(work, (FileRequest *)job);
+        fileUnlinkCloseWait(work, (FileRequest *)job);
         SignalSema(work->sema);
         sdfFileCmdFree(deviceRequest);
         job->deviceRequest = NULL;
@@ -94,7 +94,7 @@ s32 fileHandleFixedSlotReadEvent(void *deviceRequest, s32 event, s32 unused, s32
     return 0;
 }
 
-void fileStartChunkedReadWhenReady(FileTransferJob *job) {
+void fileRead(FileTransferJob *job) {
     WaitSema(fileManagerWork.sema);
     if (job->state != FILE_JOB_READY) {
         SignalSema(fileManagerWork.sema);
@@ -107,7 +107,7 @@ void fileStartChunkedReadWhenReady(FileTransferJob *job) {
 }
 
 /* Drive allocation, chunked reads, close, and completion-list handoff. */
-s32 fileHandleAllocatedResourceReadEvent(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
+s32 fileLoadCallback(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
     FileManWork *work = &fileManagerWork;
     s32 saved;
 
@@ -123,7 +123,7 @@ s32 fileHandleAllocatedResourceReadEvent(void *deviceRequest, s32 event, s32 unu
         job->transferBytes = byteCount;
         job->totalBytes = byteCount;
         if (job->allocationMode == 0) {
-            allocationHandle = sdfTryAllocGeneralBlock(byteCount);
+            allocationHandle = sdfMemAlloc2Direct(byteCount);
             job->allocationHandle = allocationHandle;
             if (allocationHandle == NULL) {
                 job->retryCount = 10;
@@ -131,7 +131,7 @@ s32 fileHandleAllocatedResourceReadEvent(void *deviceRequest, s32 event, s32 unu
                 break;
             }
         } else {
-            allocationHandle = sdfAllocGeneralBlockHigh(byteCount);
+            allocationHandle = sdfMemAllocFromTailDirect(byteCount);
             job->allocationHandle = allocationHandle;
         }
         {
@@ -141,7 +141,7 @@ s32 fileHandleAllocatedResourceReadEvent(void *deviceRequest, s32 event, s32 unu
             job->retainedAddress = address;
             job->state = FILE_JOB_READY;
         }
-        fileStartChunkedReadWhenReady(job);
+        fileRead(job);
         break;
     }
     case SDF_DEV_EVENT_READ_REPLY:
@@ -160,16 +160,16 @@ s32 fileHandleAllocatedResourceReadEvent(void *deviceRequest, s32 event, s32 unu
             job->transferAddress += byteCount;
         }
         if (job->state == 5) {
-            filePrependNode(work, (FileRequest *)job);
+            fileLinkCloseWait(work, (FileRequest *)job);
             SignalSema(work->sema);
             sdfFileCmdClose(deviceRequest);
             saved = D_003BC7D8;
             D_003BC7D8 = 2;
-            fileStartOrResumeQueuedJob();
+            fileExecQueue();
             D_003BC7D8 = saved;
         } else {
             SignalSema(work->sema);
-            fileStartChunkedReadWhenReady(job);
+            fileRead(job);
         }
         break;
     case SDF_DEV_EVENT_CLOSED:
@@ -177,7 +177,7 @@ s32 fileHandleAllocatedResourceReadEvent(void *deviceRequest, s32 event, s32 unu
         job->deviceRequest = NULL;
         job->state = 6;
         WaitSema(work->sema);
-        fileUnlinkNode(work, (FileRequest *)job);
+        fileUnlinkCloseWait(work, (FileRequest *)job);
         if (job->completionCallback != NULL) {
             FileTransferJob **link = &work->done;
             FileTransferJob *next;
@@ -193,7 +193,7 @@ s32 fileHandleAllocatedResourceReadEvent(void *deviceRequest, s32 event, s32 unu
     return 0;
 }
 
-void fileStartChunkedWriteWhenReady(FileTransferJob *job) {
+void fileWrite(FileTransferJob *job) {
     WaitSema(fileManagerWork.sema);
     if (job->state != FILE_JOB_READY) {
         SignalSema(fileManagerWork.sema);
@@ -206,14 +206,14 @@ void fileStartChunkedWriteWhenReady(FileTransferJob *job) {
 }
 
 /* Advance a chunked write, then close and queue its completion callback. */
-s32 fileHandleChunkedWriteEvent(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
+s32 fileSaveCallback(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
     FileManWork *work = &fileManagerWork;
     s32 saved;
 
     switch (event) {
     case SDF_DEV_EVENT_OPENED:
         job->state = FILE_JOB_READY;
-        fileStartChunkedWriteWhenReady(job);
+        fileWrite(job);
         break;
     case SDF_DEV_EVENT_WRITE_REPLY:
         WaitSema(work->sema);
@@ -231,16 +231,16 @@ s32 fileHandleChunkedWriteEvent(void *deviceRequest, s32 event, s32 unused, s32 
             job->state = FILE_JOB_READY;
         }
         if (job->state == 5) {
-            filePrependNode(work, (FileRequest *)job);
+            fileLinkCloseWait(work, (FileRequest *)job);
             SignalSema(work->sema);
             sdfFileCmdClose(deviceRequest);
             saved = D_003BC7D8;
             D_003BC7D8 = 3;
-            fileStartOrResumeQueuedJob();
+            fileExecQueue();
             D_003BC7D8 = saved;
         } else {
             SignalSema(work->sema);
-            fileStartChunkedWriteWhenReady(job);
+            fileWrite(job);
         }
         break;
     case SDF_DEV_EVENT_CLOSED:
@@ -248,7 +248,7 @@ s32 fileHandleChunkedWriteEvent(void *deviceRequest, s32 event, s32 unused, s32 
         job->deviceRequest = NULL;
         job->state = 6;
         WaitSema(work->sema);
-        fileUnlinkNode(work, (FileRequest *)job);
+        fileUnlinkCloseWait(work, (FileRequest *)job);
         if (job->completionCallback != NULL) {
             FileTransferJob **link = &work->done;
             FileTransferJob *next;
@@ -265,7 +265,7 @@ s32 fileHandleChunkedWriteEvent(void *deviceRequest, s32 event, s32 unused, s32 
 }
 
 /* Start or resume the read, PAC, or write job at the head of the queue. */
-void fileStartOrResumeQueuedJob(void) {
+void fileExecQueue(void) {
     FileManWork *work = &fileManagerWork;
     FileTransferJob *job;
     s32 locked;
@@ -284,12 +284,12 @@ void fileStartOrResumeQueuedJob(void) {
             job->state = 1;
             locked = 0;
             SignalSema(work->sema);
-            job->deviceRequest = sdfFileCmdReadOpen(job->name, fileHandleAllocatedResourceReadEvent, job);
+            job->deviceRequest = sdfFileCmdReadOpen(job->name, fileLoadCallback, job);
             break;
         case 7:
-            job->allocationHandle = sdfTryAllocGeneralBlock(job->totalBytes);
+            job->allocationHandle = sdfMemAlloc2Direct(job->totalBytes);
             if (job->allocationHandle == NULL) {
-                sdfPrintFormattedDevMessage("alloc retry for %s\n",
+                sdfPrintf("alloc retry for %s\n",
                                             ((DevState *)job->deviceRequest)->resolvedPath);
                 job->retryCount--;
             } else {
@@ -298,7 +298,7 @@ void fileStartOrResumeQueuedJob(void) {
                 job->transferAddress = address;
                 job->retainedAddress = address;
                 job->state = FILE_JOB_READY;
-                fileStartChunkedReadWhenReady(job);
+                fileRead(job);
             }
             break;
         }
@@ -309,12 +309,12 @@ void fileStartOrResumeQueuedJob(void) {
             job->state = 1;
             locked = 0;
             SignalSema(work->sema);
-            job->deviceRequest = sdfFileCmdReadOpen(job->name, fileHandleFixedSlotReadEvent, job);
+            job->deviceRequest = sdfFileCmdReadOpen(job->name, pacLoadCallback, job);
             break;
         case FILE_JOB_READY:
             locked = 0;
             SignalSema(work->sema);
-            fileQueuePendingRequestInFreeSlot(job);
+            pacRead(job);
             break;
         }
         break;
@@ -323,7 +323,7 @@ void fileStartOrResumeQueuedJob(void) {
             job->state = 1;
             locked = 0;
             SignalSema(work->sema);
-            job->deviceRequest = sdfFileCmdWriteOpen(job->name, fileHandleChunkedWriteEvent, job, 0x180);
+            job->deviceRequest = sdfFileCmdWriteOpen(job->name, fileSaveCallback, job, 0x180);
         }
         break;
     }
@@ -332,7 +332,7 @@ void fileStartOrResumeQueuedJob(void) {
     }
 }
 
-void fileManDispatchDone(void) {
+void fileExecCallback(void) {
     FileManWork *work = &fileManagerWork;
     FileTransferJob *node;
 
@@ -346,16 +346,16 @@ void fileManDispatchDone(void) {
     SignalSema(work->sema);
 }
 
-extern void fileManCancelRequest(FileRequest *request);
+extern void fileUnlinkQueue(FileRequest *request);
 
 /* Deliver callbacks queued after PAC input completes. */
-s32 fileManUpdate(void) {
+s32 fileManager(void) {
     FileManWork *work = &fileManagerWork;
     u32 activeSlots;
     FilePacRequest **link;
     FilePacRequest *request;
 
-    fileManDispatchDone();
+    fileExecCallback();
     activeSlots = work->activeSlots;
     while (activeSlots != 0) {
         u32 slot = work->currentSlot;
@@ -366,8 +366,8 @@ s32 fileManUpdate(void) {
         if (kind == 1) {
             FilePacRequest *request = (FilePacRequest *)job;
             if (request != NULL &&
-                sdfPacFeedInput(&request->packet, input, work->slots[slot].value) == -1) {
-                fileManCancelRequest((FileRequest *)request);
+                sdfPacDecode(&request->packet, input, work->slots[slot].value) == -1) {
+                fileUnlinkQueue((FileRequest *)request);
                 request->readinessEnabled = kind;
                 if (request->completionCallback != NULL) {
                     FilePacRequest **append = &work->pacCallbackHead;
@@ -391,7 +391,7 @@ s32 fileManUpdate(void) {
             activeSlots = work->activeSlots;
         }
     }
-    fileStartOrResumeQueuedJob();
+    fileExecQueue();
     link = &work->pacCallbackHead;
     while ((request = *link) != NULL) {
         if (request->state == 6) {
@@ -405,18 +405,18 @@ s32 fileManUpdate(void) {
 }
 
 /* Task callback driving asynchronous file work. */
-s32 fileMan(KwlnTask *task) {
-    fileManUpdate();
+s32 fileManagerProc(KwlnTask *task) {
+    fileManager();
     return 0;
 }
 
-void fileManInit(void) {
+void fileSysInit(void) {
     memset(&fileManagerWork, 0, 0x40);
     fileManagerWork.freeSlots = 4;
-    fileManagerWork.sema = sdfCreateSemaphore(1, 0x7F, 0);
+    fileManagerWork.sema = sdfCreateSema(1, 0x7F, 0);
     fileManagerWork.buffer = (u8 *)sdfMemLock(sdfMemAllocDirect(0x40000));
-    dds3StartProcess(fileManagerTaskName, 0x384, 1, 0, fileMan, 0, 0);
-    fileIdleUpdateCallback = fileManUpdate;
+    dds3StartProcess(fileManagerTaskName, 0x384, 1, 0, fileManagerProc, 0, 0);
+    fileIdleUpdateCallback = fileManager;
 }
 
 s32 D_003BC7D8 __attribute__((section(".sdata"))) = 0;

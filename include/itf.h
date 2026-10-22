@@ -208,14 +208,14 @@ typedef struct FrFontTextBank {
     FrFontTextIndex entries[1];
 } FrFontTextBank;
 
-void frFontSetContextEncodedByte(FrFontGlyph *glyph, s32 inputValue);
+void frSetDrawSpeed(FrFontGlyph *glyph, s32 inputValue);
 void frFontEnableContextMode(FrFontGlyph *glyph);
-void frFontSetSpacingAndMeasureGlyphs(FrFontGlyph *glyph, s32 spacing);
-void frFontSetGlyphPosition(FrFontGlyph *glyph, u32 x, u32 y);
+void frSetFontSpace(FrFontGlyph *glyph, s32 spacing);
+void frSetDrawPosition(FrFontGlyph *glyph, u32 x, u32 y);
 void frSetPriority(FrFontGlyph *glyph, u32 unshiftedValue);
-void frFontSetChildColors(FrFontGlyph *parentGlyph, u32 colorWord);
+void frSetFontColor(FrFontGlyph *parentGlyph, u32 colorWord);
 void frSetFontColorNo(FrFontGlyph *glyph, u8 firstOption);
-void frFontSetGlyphChainDimensions(FrFontGlyph *glyph, s32 cellAdvance, s32 cellHeight);
+void frSetFontSize(FrFontGlyph *glyph, s32 cellAdvance, s32 cellHeight);
 
 typedef struct ItfMesBlk14 {
     u32 x;
@@ -231,7 +231,7 @@ typedef struct ItfMesEntryBlock {
     ItfMesTable *table;
     FrFontGlyph *glyphChain;
     s8 textState;
-    u8 textInterfaceMask; /* 0x11: result of itfTestTextInterfaceMask(3). */
+    u8 textInterfaceMask; /* 0x11: result of frGetMessageResult(3). */
     u8 color[4];
     s16 lineCount;
     s16 itemIndex;
@@ -306,24 +306,24 @@ typedef struct ItfMesSlot {
     u8 unk4[0x10];
 } ItfMesSlot;
 
-void itfResetCursorPositionAndState(ItfMesBlk14 *cursor, s32 resetPosition);
-void itfMesResetCursorState(ItfMesEntryBlock *cursor, s32 resetPosition);
+void InitializeSpeaker(ItfMesBlk14 *cursor, s32 resetPosition);
+void InitializeMessage(ItfMesEntryBlock *cursor, s32 resetPosition);
 
 FrFontGlyph *itfMesBuildNodeRows(u32 *items, s32 itemCount, u32 mask,
     s32 x, s32 y, s32 renderValue);
-FrFontGlyph *itfMesTrimGlyphChainToRow(FrFontGlyph *glyph, s32 from, s32 to);
-FrFontGlyph *itfMesGetLastNode(FrFontGlyph *glyph);
-void itfMesSetNodeChainRenderValue(FrFontGlyph *glyph, s32 renderValue);
-void itfMesRecolorNodeChildren(FrFontGlyph *glyph, u32 color);
-s32 itfMesCountSpanSteps(FrFontGlyph *last, FrFontGlyph *first);
-void itfMesCopyGlyphShade(FrFontGlyph *glyph, ItfMesEntryBlock *entryBlock);
+FrFontGlyph *UnchainFontHandleUnit(FrFontGlyph *glyph, s32 from, s32 to);
+FrFontGlyph *GetLastLinkFontHandle(FrFontGlyph *glyph);
+void ChangeZBuffer(FrFontGlyph *glyph, s32 renderValue);
+void ChangeFontAlpha(FrFontGlyph *glyph, u32 color);
+s32 CountLineMessage(FrFontGlyph *last, FrFontGlyph *first);
+void GetLastMessagePara(FrFontGlyph *glyph, ItfMesEntryBlock *entryBlock);
 void itfMesEnableUnflaggedNodeContexts(FrFontGlyph *glyph);
 
-void itfPanelReleasePrimitiveResources(UiSprite *sprite);
-FrFontGlyph *itfDrawDefaultColorText(s32 x, s32 y, u8 *encodedText, FrFontGlyph *sub);
-FrFontGlyph *itfDrawCustomColorText(s32 x, s32 y, s32 channel0, s32 channel1,
+void itfPnlRelease(UiSprite *sprite);
+FrFontGlyph *MessageRequest(s32 x, s32 y, u8 *encodedText, FrFontGlyph *sub);
+FrFontGlyph *MessageRequestEx(s32 x, s32 y, s32 channel0, s32 channel1,
     s32 channel2, s32 channel3, u8 *encodedText, FrFontGlyph *sub);
-FrFontGlyph *itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0,
+FrFontGlyph *MessageRequestEx2(s32 x, s32 y, s32 depth, s32 channel0,
     s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, FrFontGlyph *sub);
 FrFontGlyph *itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
     s32 channel2, s32 channel3, u8 *encodedText, FrFontGlyph *unusedSub);
@@ -388,12 +388,12 @@ typedef char ItfMesGlobals_firstStateAddress_offset_must_be_0x2C[
 /* Message-window pool operations move nodes between the free and active lists.
  * Acquire returns NULL when the free list is empty; release expects an active
  * node belonging to the supplied pool and appends it to the free-list tail. */
-void itfInitPool(ItfMesPool *pool, ItfMesPoolNode *nodes, s32 count, s32 stride);
-ItfMesPoolNode *itfAcquirePoolNode(ItfMesPool *pool);
-void itfReleasePoolNode(ItfMesPoolNode *node, ItfMesPool *pool);
+void itfMiscLinkInitialize(ItfMesPool *pool, ItfMesPoolNode *nodes, s32 count, s32 stride);
+ItfMesPoolNode *itfMiscLinkTake(ItfMesPool *pool);
+void itfMiscLinkGive(ItfMesPoolNode *node, ItfMesPool *pool);
 
 /* Return a retained texture handle after releasing the temporary asset allocation. */
-SdfTex *itfLoadTextureFromAsset(const char *path);
+SdfTex *itfMiscLoadTexture(const char *path);
 
 
 

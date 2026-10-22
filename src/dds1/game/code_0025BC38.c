@@ -111,7 +111,7 @@ void mnuUpdateMantraSpriteCueGroups(MnuSpriteResourceGroup *resources) {
                 }
             }
         }
-        resources->spawnCountdown = (s32)(sdfGetRandFloat(0) * 20.0f + 1.0f);
+        resources->spawnCountdown = (s32)(dds3GetRandFloatA(0) * 20.0f + 1.0f);
     } else {
         resources->spawnCountdown--;
     }
@@ -144,7 +144,7 @@ void mnuDrawMantraSpriteCueGroups(s32 x, s32 y, s32 depth, s32 alpha,
             if (link != NULL) {
                 do {
                     MovieCueNode *cue = link->value;
-                    f32 fade = sdfSinPoly(((f32)cue->framesLeft /
+                    f32 fade = sdfSin(((f32)cue->framesLeft /
                                            (f32)cue->duration) * 3.14159265f);
 
                     mnuDrawIconAlpha(x + cue->x, y + cue->y, depth,
@@ -194,7 +194,7 @@ void mnuDrawMantraPulseAndSparks(MnuSparkleSpriteWork *work, s32 alpha, s32 cont
     mnuDrawSpriteAtPlacement(0, 0, 0, alpha, work->sprite, 0x2A, 0, context);
     factor = (f32)work->sparkles.countdown / (f32)work->sparkles.period;
     factor = 1.0f - factor;
-    factor = work->sparkles.strength * sdfSinPoly(factor * 3.14159265f) + 0.2f;
+    factor = work->sparkles.strength * sdfSin(factor * 3.14159265f) + 0.2f;
     mnuDrawSpriteAtPlacement(0, 0, 0, (f32)alpha * factor, work->sprite, 0x2B, 0, context);
     sparkles = &work->sparkles;
     mnuTickMantraSparkParticles(sparkles);
@@ -605,7 +605,7 @@ void mnuDrawMantraProfileSelectionSurface(s32 x, s32 y, s32 unusedDepth, s32 alp
         }
 
         if (prfReqCheckWithFallback(profileOwner->partyRecord, 0x4E) != 0 ||
-            mdlFlagTest(0x908) != 0) {
+            evtBitCheck(0x908) != 0) {
             uiDrawUniformColorRect(0x1C90, 0x640, 0, 0x200, 0xA0, 0x80,
                                    context);
         }
@@ -638,7 +638,7 @@ void mnuDrawMantraProfileSelectionSurface(s32 x, s32 y, s32 unusedDepth, s32 alp
     sdfSubmitGsTestOneRegisterPacket(0x5100DL, context);
 }
 
-extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *);
+extern f32 vecNormalize(f32 *);
 extern s32 D_003BC4E0;
 
 /* Ease the live cursor toward the selected scene row and track whether it moved. */
@@ -661,7 +661,7 @@ void mnuUpdateMantraSelectionCursorPosition(MenuSceneWork *work) {
     memset(direction, 0, sizeof(direction));
     direction[0] = targetX - work->entryPosition.x;
     direction[1] = targetY - work->entryPosition.y;
-    sdfVec3NormalizeInPlaceAndGetLength(direction);
+    vecNormalize(direction);
 
     current = work->entryPosition.x;
     difference = targetX - current;
@@ -744,7 +744,7 @@ s32 mnuUpdateMantraCostNotification(MnuSceneListNode *node, s32 index, s32 drawA
     if (frame >= 4) {
         if (frame < 9) {
             progress = (f32)(frame - 3) / 6.0f;
-            progress = sdfSinPoly(progress * 3.14159265f);
+            progress = sdfSin(progress * 3.14159265f);
             if (node->payload.timedDraw.kind == 1) {
                 mnuDrawPlacedSpriteFromTable(-27, 52, 1, (s32)(progress * 128.0f),
                               0x16, context);
@@ -806,7 +806,7 @@ s32 mnuDrawMantraSineFade(s32 frame, s32 amount, s32 drawArg) {
     s32 shown;
     s32 halfShown;
 
-    wave = sdfSinPoly(wave * 3.14159265f);
+    wave = sdfSin(wave * 3.14159265f);
     shown = (f32)amount * (wave * 0.5f + 0.5f);
     mnuDrawPlacedSpriteFromTable(-27, 52, 0, shown, 0x16, drawArg);
     mnuDrawPlacedSpriteFromTable(-27, 52, 0, shown, 0x17, drawArg);
@@ -863,7 +863,7 @@ void mnuCollectFlagArray(u8 *flags) {
     u32 i;
 
     for (i = 0; i < 0x29; i++, flags++) {
-        if (mdlFlagTest(mnuFlagSnapshotIds[i]) != 0) {
+        if (evtBitCheck(mnuFlagSnapshotIds[i]) != 0) {
             *flags = 1;
         }
     }
@@ -876,7 +876,7 @@ void mnuApplyFlagArray(u8 *flags) {
 
     for (i = 0; i < 0x29; i++) {
         if (*flags++ != 0) {
-            mdlFlagSet(mnuFlagSnapshotIds[i]);
+            evtBitOn(mnuFlagSnapshotIds[i]);
         }
     }
 }

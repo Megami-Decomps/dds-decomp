@@ -34,14 +34,14 @@ extern s32 D_003BD974;
 
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern char D_003BD250[];
-extern void sndReleaseTrackHandle(u32);
+extern void p2sdStopBGM(u32);
 extern s32 fldReleaseLocalMapResources(void);
-extern s64 sdfDestroyActiveCounterRuntime(void);
+extern s64 pbCheckPreviousRecord(void);
 extern void fldReleaseMapRequestQueues(void);
 extern void fldReleaseCameraColorEffect(void);
 extern void sdfDisableFlagListViewTargetRelativeMode(void);
-extern void evtSetSolarOverlayFullyTransparent(void);
-extern void evtDestroySecondaryWorldNode(void);
+extern void evtDisableMoonDraw(void);
+extern void evtFreeStage(void);
 extern SdfMemBlock *D_003BD254;
 extern s32 fldLocalMapTrackSlotFromMode(s32 mode);
 extern s32 fldLmapTaskUpdate(KwlnTask *task);
@@ -53,7 +53,7 @@ extern void fldInitializeLocalMapScene(void);
 extern s32 fldUpdateLocalMapController(void);
 extern void fldDrawLocalMapOverlay(void);
 extern s32 sndFindPackedTrackLoadStatus(s32);
-extern void sndEnsureMidiBankResident(s32);
+extern void p2sdLoadSMGFile(s32);
 extern s32 fldLocalMapTrackState;
 
 #include "dds3_world_secondary.h"
@@ -77,7 +77,7 @@ extern void sdfLatchBaseVectorsForSelection(void);
 extern s32 sdfStepSelectedMapCameraTransition(void);
 extern s32 fldAdvanceLocalMapCameraTransition(void);
 extern void sdfCounterAdvanceBoundedAnimationValue(void);
-extern s32 fldLmapToggleOverlay(void);
+extern s32 pipeMessDraw(void);
 extern void fldDisplayLocalMapCounterMessage(void);
 extern s32 sdfUpdateSelectedCounterMapCameraTransition(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
@@ -87,7 +87,7 @@ extern s32 sdfCounterGetDisplayValue(void);
 extern void fldSetPendingSceneAction(u32);
 extern void sdfInitInnerVectors(void);
 extern void fldUpdateSelectedValueTransition(void);
-extern void fldUpdateSwayOffset(void);
+extern void fldSkyCalcFilter(void);
 extern u32 D_003BA8EC;
 extern s32 D_003BD240;
 extern u32 D_003BD258;
@@ -303,24 +303,24 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 
 /* Build one positioned SIF command and submit it on the requested draw surface. */
 void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z, s32 drawMode, const char *command, s32 surfaceIndex) {
-    SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    SdfListHead *packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
     SdfPoolNode *drawSurface;
     SifCommand packetHeader;
 
-    sdfInitPacketList(packetList);
+    sdfDrawTagInit(packetList);
     sdfPktInit(&packetHeader, x + 0x7000, y + 0x7900, z, drawMode);
-    sdfAppendPacket(packetList, (u32)sdfFormatSifPacket(&packetHeader, command));
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintfEx(&packetHeader, command));
     drawSurface = &kwlnDrawSurfaces[surfaceIndex];
     drawSurface->append(drawSurface, packetList);
 }
 
 /* Build an untextured rectangle with a separate outline color. */
 void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height, s32 fillColor, s32 borderColor, s32 surfaceIndex) {
-    SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    SdfListHead *packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
     SdfPoolNode *drawSurface;
 
-    sdfInitPacketList(packetList);
-    sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(x + 0x7000, y + 0x7900, z, width * 16, height * 8, fillColor, borderColor));
+    sdfDrawTagInit(packetList);
+    sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x + 0x7000, y + 0x7900, z, width * 16, height * 8, fillColor, borderColor));
     drawSurface = &kwlnDrawSurfaces[surfaceIndex];
     drawSurface->append(drawSurface, packetList);
 }
@@ -422,27 +422,27 @@ void fldInitializeLmapState(void) {
     D_003BD25C = 1;
     D_003BD970 = 0;
     D_003BD974 = 0;
-    flagSet = mdlFlagTest(0x413);
+    flagSet = evtBitCheck(0x413);
     D_003BD260 = (u32)(flagSet == 0);
 }
 
 void fldShutdownLmapResources(void) {
-    sndReleaseTrackHandle(0x400001);
+    p2sdStopBGM(0x400001);
     fldReleaseLocalMapResources();
-    sdfDestroyActiveCounterRuntime();
+    pbCheckPreviousRecord();
     fldReleaseMapRequestQueues();
     fldReleaseCameraColorEffect();
     sdfDisableFlagListViewTargetRelativeMode();
-    evtSetSolarOverlayFullyTransparent();
-    dspCloseChannel();
+    evtDisableMoonDraw();
+    fclDestroyMessage();
     sdfMemFreeDelayedDirect(D_003BD254);
-    evtDestroySecondaryWorldNode();
+    evtFreeStage();
 }
 
 s32 fldStartAndPollLocalMapTrack(void) {
     if (fldLocalMapTrackState == 1) {
         if (sndFindPackedTrackLoadStatus(0x400000) == 0) {
-            sndEnsureMidiBankResident(0x400000);
+            p2sdLoadSMGFile(0x400000);
             fldLocalMapTrackState = 2;
         } else {
             fldLocalMapTrackState = 0xFF;
@@ -466,15 +466,15 @@ void fldInitializeLocalMapScene(void) {
     s32 flags;
     s32 index;
 
-    if (mdlFlagTest(0x27)) {
-        evtCreateWorldObjectForKey(1, 2);
+    if (evtBitCheck(0x27)) {
+        evtLoadArea(1, 2);
     } else {
-        evtCreateWorldObjectForKey(1, 1);
+        evtLoadArea(1, 1);
     }
     mask = 0x3FF;
-    dds3SetWorldObject(NULL);
+    dds3SetActiveScene(NULL);
     fldCreateLocalMapCamera();
-    dds3SetWorldObject(dds3GetWorldSecondaryObject());
+    dds3SetActiveScene(dds3GetControlScene());
     D_003BA8EC = 0x80000000;
     flags = mdlCollectLowFlagBits();
     if (flags != 0) {
@@ -486,15 +486,15 @@ void fldInitializeLocalMapScene(void) {
     sdfInitializeMapCounterSelection(D_003BD240, sdfLoadMapCounterCameraVectorsForMask(mask));
     fldLoadLocalMapResources(mask);
     fldCreateMapRequestQueues();
-    dspCloseChannel();
-    D_003BD254 = sdfReadNamedResource("/lmap/lmpmsg.bmd", &D_003BD258, NULL);
-    evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_003BD258);
+    fclDestroyMessage();
+    D_003BD254 = sdfDevLoadFileEx("/lmap/lmpmsg.bmd", &D_003BD258, NULL);
+    fclInitMessage((struct ItfMesSub *)D_003BD258);
     evtSetSolarOverlayFullyVisible();
     fldApplyLightSetIndex(1);
     fldInitializeCameraColorResource();
     sdfEnableFlagListViewTargetRelativeMode();
-    sndStartTrackDefault(0x400001);
-    kwlnFadeOutStart(255, 255, 255, 30);
+    p2sdPlayBGM(0x400001);
+    dds3FadeIn(255, 255, 255, 30);
     sdfCounterInitializeDisplayAnimation();
 }
 
@@ -539,7 +539,7 @@ s32 fldUpdateLocalMapController(void) {
         sdfCounterTickCountdownAndMapTimers();
         fldUpdateMapRequestQueues(0);
         sdfCounterAdvanceBoundedAnimationValue();
-        if (fldLmapToggleOverlay() != 0) {
+        if (pipeMessDraw() != 0) {
             if (D_003BD970 == 0) {
                 fldDisplayLocalMapCounterMessage();
                 D_003BD970 = 1;
@@ -557,7 +557,7 @@ s32 fldUpdateLocalMapController(void) {
             D_003BD25C = 1;
         } else {
             D_003BD25C = 5;
-            kwlnFadeInStart(255, 255, 255, 30);
+            dds3FadeOut(255, 255, 255, 30);
         }
         break;
     case 5:
@@ -574,12 +574,12 @@ s32 fldUpdateLocalMapController(void) {
     }
     sdfInitInnerVectors();
     fldUpdateSelectedValueTransition();
-    fldUpdateSwayOffset();
+    fldSkyCalcFilter();
     return result;
 }
 
-extern void fldDrawSkyGradient(void);
-extern void evtSetDrawSurfaceIndex(u32);
+extern void fldSkyDrawFilter(void);
+extern void eglSetOt(u32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, u32, s32, s32, s32);
 extern void sdfAdjustCounterValueAndRedraw(s32);
@@ -588,8 +588,8 @@ extern void fldDrawLocalMapTransition(s32);
 extern s32 fldDrawCameraColorLayerPass(void);
 
 void fldDrawLocalMapOverlay(void) {
-    fldDrawSkyGradient();
-    evtSetDrawSurfaceIndex(84);
+    fldSkyDrawFilter();
+    eglSetOt(84);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitDefaultDepthGradientRect(0, 0, 170, 195, 0x3300101E, 0x101E, 0x101E, 0x101E);
 
@@ -621,28 +621,28 @@ void fldDrawLocalMapOverlay(void) {
 s32 mdlCollectLowFlagBits(void) {
     s32 bits;
 
-    bits = mdlFlagTest(0x400);
-    bits |= mdlFlagTest(0x401) << 1;
-    bits |= mdlFlagTest(0x402) << 2;
-    bits |= mdlFlagTest(0x403) << 3;
-    bits |= mdlFlagTest(0x404) << 4;
-    bits |= mdlFlagTest(0x405) << 5;
-    bits |= mdlFlagTest(0x406) << 6;
-    bits |= mdlFlagTest(0x407) << 7;
-    bits |= mdlFlagTest(0x408) << 8;
-    bits |= mdlFlagTest(0x409) << 9;
+    bits = evtBitCheck(0x400);
+    bits |= evtBitCheck(0x401) << 1;
+    bits |= evtBitCheck(0x402) << 2;
+    bits |= evtBitCheck(0x403) << 3;
+    bits |= evtBitCheck(0x404) << 4;
+    bits |= evtBitCheck(0x405) << 5;
+    bits |= evtBitCheck(0x406) << 6;
+    bits |= evtBitCheck(0x407) << 7;
+    bits |= evtBitCheck(0x408) << 8;
+    bits |= evtBitCheck(0x409) << 9;
     return bits;
 }
 
 s32 mdlCollectFlagBitsIntoMask(void) {
     s32 bits;
 
-    bits = mdlFlagTest(0x40A) << 3;
-    bits |= mdlFlagTest(0x40B) << 5;
-    bits |= mdlFlagTest(0x40C) << 6;
-    bits |= mdlFlagTest(0x40D) << 7;
-    bits |= mdlFlagTest(0x40E) << 8;
-    bits |= mdlFlagTest(0x40F) << 9;
+    bits = evtBitCheck(0x40A) << 3;
+    bits |= evtBitCheck(0x40B) << 5;
+    bits |= evtBitCheck(0x40C) << 6;
+    bits |= evtBitCheck(0x40D) << 7;
+    bits |= evtBitCheck(0x40E) << 8;
+    bits |= evtBitCheck(0x40F) << 9;
     return bits;
 }
 
@@ -652,13 +652,13 @@ u32 fldGetLmapStage(void) {
     s32 flagSet;
     u32 stage;
 
-    flagSet = mdlFlagTest(0x412);
+    flagSet = evtBitCheck(0x412);
     stage = 2;
     if (flagSet == 0) {
-        flagSet = mdlFlagTest(0x411);
+        flagSet = evtBitCheck(0x411);
         stage = 1;
         if (flagSet == 0) {
-            mdlFlagTest(0x410);
+            evtBitCheck(0x410);
             stage = 0;
         }
     }
@@ -671,14 +671,14 @@ void fldDisplayLocalMapCounterMessage(void) {
     sprintf(text, D_003BD250, sdfCounterGetDisplayWordPointer());
     evtCopyEntryStringToActiveWindow(0, text);
     evtSetMessageWindowOptionWhenOpen(0);
-    dspStartEntry(0);
+    fclStartMessage(0);
     evtStoreValueAndCaptureWindowPanelValue(1);
 }
 
-s32 fldLmapToggleOverlay(void) {
+s32 pipeMessDraw(void) {
     s32 result = 0;
 
-    if (evtGetMessageWindowControlState() != 0) {
+    if (fclChkMessage() != 0) {
         dspRequestMessageWindowModeOne();
     } else {
         evtFinishMessageWindowAndNotify();
@@ -692,26 +692,26 @@ void sdfClearCounterDisplayFlags(void) {
     u32 flags = 1 << (sdfCounterGetDisplayValue() - 1);
 
     if (flags & 8) {
-        mdlFlagClear(0x40A);
+        evtBitOff(0x40A);
     }
     if (flags & 0x20) {
-        mdlFlagClear(0x40B);
-        mdlFlagSet(0x23A);
-        mdlFlagClear(0x23C);
+        evtBitOff(0x40B);
+        evtBitOn(0x23A);
+        evtBitOff(0x23C);
     }
     if (flags & 0x40) {
-        mdlFlagClear(0x40C);
+        evtBitOff(0x40C);
     }
     if (flags & 0x80) {
-        mdlFlagClear(0x40D);
+        evtBitOff(0x40D);
     }
     if (flags & 0x100) {
-        mdlFlagClear(0x40E);
-        mdlFlagSet(0x23B);
-        mdlFlagClear(0x239);
+        evtBitOff(0x40E);
+        evtBitOn(0x23B);
+        evtBitOff(0x239);
     }
     if (flags & 0x200) {
-        mdlFlagClear(0x40F);
+        evtBitOff(0x40F);
     }
 }
 
