@@ -299,7 +299,7 @@ extern SoundEntry D_003BDE18[];
 
 extern s128 btlDefaultUnitBodyOffset;
 
-extern u8 D_003BD7D0[];
+extern u8 btlCameraCursor[];
 
 typedef struct XformData {
     s128 vec0;
@@ -516,7 +516,7 @@ extern void btlClearAllActorEntrySlots(BtlUnit *);
 extern void btlReleaseUnitResources(BtlUnit *);
 extern void btlInitUnitFxDefaults(BtlUnit *);
 
-extern void func_001F5868(BtlLinkedCommand *, BtlCamState *, s16, s16);
+extern void btlBuildPresetCameraPose(BtlLinkedCommand *, BtlCamState *, s16, s16);
 extern void mnuReleaseSoundBufferLocked(void);
 
 extern void mnuInstallTitleSoundBufferFromData(s32, s32, u8);
