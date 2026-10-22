@@ -39,7 +39,7 @@ void evtFreeStage(void);
 extern u32 D_00435CBC;
 
 
-extern s32 D_0043722C;
+extern s32 dpy;
 
 INCLUDE_ASM(const s32, "game/code_00244F00", evtDrawFadingSolarOverlayFrame);
 
@@ -179,7 +179,7 @@ void evtChkEndProcess(void) {
 INCLUDE_ASM(const s32, "game/code_00244F00", evtSceneDispProcess);
 
 void func_00245F80(void) {
-    D_0043722C = 0;
+    dpy = 0;
 }
 
 
@@ -462,11 +462,11 @@ EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *group, s32 frame, E
     return key;
 }
 
-INCLUDE_SDATA(const s32, "game/code_00244F00", D_0043722C);
+INCLUDE_SDATA(const s32, "game/code_00244F00", dpy);
 
-INCLUDE_SDATA(const s32, "game/code_00244F00", D_00437230);
+INCLUDE_SDATA(const s32, "game/code_00244F00", curbase);
 
-INCLUDE_SDATA(const s32, "game/code_00244F00", D_00437234);
+INCLUDE_SDATA(const s32, "game/code_00244F00", curpoint);
 
 INCLUDE_SDATA(const s32, "game/code_00244F00", D_00437238);
 

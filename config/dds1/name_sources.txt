@@ -5219,7 +5219,7 @@
 0x00229410	evtDrawSolarLayerPair	inferred	Draws the requested solar layer and its companion layer for non-base cases.
 0x002294C0	evtAdvanceSolarShortLayerTimer	inferred	Increments a solar layer timer and disables it after 60 frames, shorter than the companion 80-frame timer.
 0x00229500	evtAdvanceSolarLongLayerTimer	inferred	Increments the companion solar layer timer and disables it after 80 frames.
-0x00229540	evtAdvanceSolarPhaseParticles	inferred	Inferred from the current C implementation in game/code_00228B38.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00229540	evtAdvanceShortSolarNoiseLayers	inferred	Spawns and ages the solar overlay's short noise layers (SolarNoiseState.layers) up to a cap that grows with the mirrored phase; named as in DDS2, beside its sibling evtAdvanceLongSolarNoiseLayers, since the two games' routines are the same. DDS2 twin 0x002441F8.
 0x00229750	evtAdvanceLongSolarNoiseLayers	inferred	Updates the long-duration solar-noise layers, spawns from the 15-point position/scale table under the mirrored phase cap, and expires active layers through the long timer. Paired with DDS2 0x00244408. [code-quality cleanup, 2026-10-13]
 0x00229A10	evtDrawShortSolarNoiseLayers	inferred	confidence=high; matched-C; src/dds1/game/code_00228B38.c:168:func_00229A10; Draws active solar-noise layers with a sine envelope over sixty frames and a narrow width scale.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00229B70	evtDrawLongSolarNoiseLayers	inferred	confidence=high; matched-C; src/dds1/game/code_00228B38.c:193:func_00229B70; Draws active solar-noise layers with a sine envelope over eighty frames and a wider width scale.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
@@ -10450,3 +10450,6 @@
 0x003FE0C0	sdfSndMap	inferred	SMT3HD data name via SLUS_209.11 0x00593880, 3 agreeing references; was sdfSndMap
 0x003FE250	LastLoad	inferred	SMT3HD data name via SLUS_209.11 0x00593A10, 2 agreeing references; was LastLoad
 0x003FEB00	sdfIpuDecodeThStack	inferred	SMT3HD data name via SLUS_209.11 0x00593F80, 1 agreeing references; was sdfIpuDecodeThStack
+0x003BBDF0	dpy	inferred	The scene display panel's scroll (evtSceneDispProcess): the text line shown at its top, each line drawn at (line - dpy) * 96 + 0x7900; stepping between kinds moves it by the kind's wrapped rows. The panel's reset clears it. Named the original name, from Nocturne HD's evtDebug.c, where the same panel keeps it. DDS2 twin 0x0043722C.
+0x003BBDF4	curbase	inferred	The scene display panel's selected kind (evtSceneDispProcess): an index into its table of world object kinds, stepped by up and down. Named the original name, from Nocturne HD's evtDebug.c, where the same panel keeps it. DDS2 twin 0x00437230.
+0x003BBDF8	curpoint	inferred	The scene display panel's selection within the selected kind (evtSceneDispProcess): 0 selects the kind's row, n its nth node; left and right step it by one, up and down by four, and cancel returns it to the row. Named the original name, from Nocturne HD's evtDebug.c, where the same panel keeps it. DDS2 twin 0x00437234.

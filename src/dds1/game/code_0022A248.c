@@ -26,7 +26,7 @@ extern void scrDestroyAllNamedProcesses(void);
 
 extern s8 evtSolarOverlayFadeFlags;
 
-extern u32 D_003BBDF0;
+extern s32 dpy;
 
 
 s32 EventDebugProcess1(KwlnTask *task);
@@ -263,7 +263,7 @@ INCLUDE_RODATA(const s32, "game/code_0022A248", D_003ACD78);
 INCLUDE_ASM(const s32, "game/code_0022A248", evtSceneDispProcess);
 
 void func_0022B618(void) {
-    D_003BBDF0 = 0;
+    dpy = 0;
 }
 
 /* Insert after existing equal keys, keeping ascending order and incrementing count. */
@@ -541,11 +541,11 @@ EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, Evt
 
 INCLUDE_SDATA(const s32, "game/code_0022A248", D_003BBDEC);
 
-INCLUDE_SDATA(const s32, "game/code_0022A248", D_003BBDF0);
+INCLUDE_SDATA(const s32, "game/code_0022A248", dpy);
 
-INCLUDE_SDATA(const s32, "game/code_0022A248", D_003BBDF4);
+INCLUDE_SDATA(const s32, "game/code_0022A248", curbase);
 
-INCLUDE_SDATA(const s32, "game/code_0022A248", D_003BBDF8);
+INCLUDE_SDATA(const s32, "game/code_0022A248", curpoint);
 
 INCLUDE_SDATA(const s32, "game/code_0022A248", D_003BBE00);
 
