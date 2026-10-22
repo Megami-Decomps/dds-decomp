@@ -76,7 +76,7 @@ extern f32 D_00415F80[4];
 
 extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
-extern u32 D_004367F8;
+extern BtlCommandHintWork *D_004367F8;
 
 extern const char *D_004367CC;
 
@@ -5479,8 +5479,8 @@ void btlReleaseDialogTaskData(dds3ProcessID_t *handle) {
 void btlCreateMessageWindow(void) {
     BtlCommandHintWork *window;
     btlGetRuntime();
-    window = (BtlCommandHintWork *)sdfAllocAndClearQuadwords(sizeof(*window));
-    D_004367F8 = (u32)window;
+    window = sdfAllocAndClearQuadwords(sizeof(*window));
+    D_004367F8 = window;
     window->unk10 = 0x14;
     window->colors[0] = 0x1800080;
     window->colors[1] = 0x40800080;
@@ -5556,7 +5556,7 @@ s32 func_001BFB58(dds3ProcessID_t *task) {
 
     {
         BtlCommandHintWork *fadeWindow;
-    fadeWindow = (BtlCommandHintWork *)D_004367F8;
+    fadeWindow = D_004367F8;
     fadeWindow->fade += 0x20;
     fadeWindow->fade = fadeWindow->fade <= 0 ? 0 :
                    fadeWindow->fade > 0x80 ? 0x80 : fadeWindow->fade;
@@ -5579,7 +5579,7 @@ s32 func_001BFB58(dds3ProcessID_t *task) {
             } else {
                 selector = 3;
             }
-            hintWindow = (BtlCommandHintWork *)D_004367F8;
+            hintWindow = D_004367F8;
             btlDrawWindowHelpLine(hintWindow->x + 0x13, hintWindow->y - 6, 0xFF0000,
                           (s16)hintWindow->fade | 0x80808000, 0, selector);
         } else {
@@ -5587,7 +5587,7 @@ s32 func_001BFB58(dds3ProcessID_t *task) {
             u16 textId;
             u16 *entries = btlGatherActorCommandsByKind((s32)object, &count, 0, 2, 3);
             textId = entries[row - 1];
-            entryWindow = (BtlCommandHintWork *)D_004367F8;
+            entryWindow = D_004367F8;
             btlDrawWindowHelpLine(entryWindow->x + 0x13, entryWindow->y - 6, 0xFF0000,
                           (s16)entryWindow->fade | 0x80808000, textId, 0);
         }
@@ -5598,7 +5598,7 @@ s32 func_001BFB58(dds3ProcessID_t *task) {
         u16 textId;
         BattleRosterTable *entries = btlGetActorLinkageSkillList((s32)object, (u16 *)&count);
         textId=entries->entries[row].skill;
-        skillWindow = (BtlCommandHintWork *)D_004367F8;
+        skillWindow = D_004367F8;
         draw = 1;
         btlDrawWindowHelpLine(skillWindow->x + 0x13, skillWindow->y - 6, 0xFF0000,
                       (s16)skillWindow->fade | 0x80808000, textId, 0);
@@ -5609,7 +5609,7 @@ s32 func_001BFB58(dds3ProcessID_t *task) {
         u16 textId;
         fldCollectAvailableRosterEntries((s32)object,&count);
         textId=D_003B5B10[row*2];
-        drawWindow=(BtlCommandHintWork *)D_004367F8;
+        drawWindow=D_004367F8;
         draw=1;
         btlDrawWindowHelpLine(drawWindow->x+0x13,drawWindow->y-6,0xFF0000,(s16)drawWindow->fade|0x80808000,textId,9);
         break;
@@ -5622,13 +5622,13 @@ s32 func_001BFB58(dds3ProcessID_t *task) {
         } else {
             textKind=row==1?6:7;
         }
-        drawWindow=(BtlCommandHintWork *)D_004367F8;
+        drawWindow=D_004367F8;
         draw=1;
         btlDrawWindowHelpLine(drawWindow->x+0x13,drawWindow->y-6,0xFF0000,(s16)drawWindow->fade|0x80808000,0,textKind);
         break;
     }
     case 6: {
-        BtlCommandHintWork *backdropWindow = (BtlCommandHintWork *)D_004367F8;
+        BtlCommandHintWork *backdropWindow = D_004367F8;
         draw = 1;
         btlDrawWindowHelpLine(backdropWindow->x + 0x13, backdropWindow->y - 6, 0xFF0000,
                       (s16)backdropWindow->fade | 0x80808000, 0, 8);
@@ -5642,9 +5642,9 @@ s32 func_001BFB58(dds3ProcessID_t *task) {
         for (i = 0; i < 4; i++) {
             colors.values[i] = btlSetSlotLowByteClamped(
                 btlResourceBlock->resA, 0x2A, i,
-                (s16)((BtlCommandHintWork *)D_004367F8)->fade);
+                (s16)D_004367F8->fade);
         }
-        spriteWindow = (BtlCommandHintWork *)D_004367F8;
+        spriteWindow = D_004367F8;
         effDrawSpriteWithCornerColors(spriteWindow->x << 4, spriteWindow->y << 3, 0,
                                       colors.values, 0, btlResourceBlock->resA, 0x2A, 0x53);
     }
@@ -5659,8 +5659,8 @@ s32 func_001BFB58(dds3ProcessID_t *task) {
 
 void btlReleaseRegisteredTaskBuffer(s32 unused) {
     btlGetRuntime();
-    sdfChipFreeDirect((void *)D_004367F8);
-    D_004367F8 = 0;
+    sdfChipFreeDirect(D_004367F8);
+    D_004367F8 = NULL;
     btlSetTrackedTaskHandle(4, 0);
 }
 
