@@ -10,6 +10,7 @@
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "eff.h"
+#include "eff_pcp_ring_block.h"
 #include "eff_math.h"
 #include "eff_param.h"
 #include "eff_pcp_scatter_radial.h"
@@ -64,12 +65,6 @@ extern SdfPoolNode D_00325248;
 extern void *effPkt3DPrimMakePoly(EffPacketParams *);
 
 
-/* The vertex array starts immediately after the 0x80-byte header in this block. */
-typedef struct EffectRingBlock {
-    EffRingWork header;            /* 0x00, 0x80 bytes */
-    EffRingParticle vertices[1];   /* 0x80 */
-} EffectRingBlock;
-
 extern dds3FlashPolyList_t *dds3FlashPolyListHCreate(u32 count);
 extern EffRandState effDefaultRandomState[];
 
@@ -79,14 +74,14 @@ EffRingWork *effPCPFlashPolyRingExpHCreate(EffRingWork *source)
 {
     sdfMemHandle_t *allocation;
     EffRingWork *ring;
-    EffectRingBlock *block;
+    EffPcpRingBlock *block;
     f32 angle;
     f32 step;
     u32 spread;
     u32 i;
 
     allocation = sdfMemAllocDirect(source->count * EFF_RING_VERTEX_BYTES + EFF_RING_HEADER_BYTES);
-    block = (EffectRingBlock *)sdfMemLock(allocation);
+    block = (EffPcpRingBlock *)sdfMemLock(allocation);
     ring = &block->header;
     memcpy(ring, source, EFF_RING_PARAM_BYTES);
     ring->vertices = &block->vertices[0];

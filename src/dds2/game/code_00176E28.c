@@ -10,6 +10,7 @@
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "eff.h"
+#include "eff_pcp_ring_block.h"
 #include "eff_math.h"
 #include "eff_param.h"
 #include "eff_pcp_scatter_radial.h"
@@ -57,14 +58,6 @@ extern u32 *dds3FlashPolyListHGetVC(dds3FlashPolyList_t *pool, s32 index);
 
 
 
-/* The vertex array starts immediately after the 0x80-byte header in this block. */
-typedef struct EffRingBlock {
-    EffRingWork header;
-    EffRingParticle vertices[1];
-} EffRingBlock;
-
-
-
 extern dds3FlashPolyList_t *dds3FlashPolyListHCreate(u32 count);
 
 
@@ -81,7 +74,7 @@ EffRingWork *source;
 
 {
     sdfMemHandle_t *handle;
-    EffRingBlock *block;
+    EffPcpRingBlock *block;
     EffRingWork *ring;
     f32 angle;
     f32 step;
@@ -89,7 +82,7 @@ EffRingWork *source;
     u32 i;
 
     handle = sdfMemAllocDirect(source->count * EFF_RING_VERTEX_BYTES + EFF_RING_HEADER_BYTES);
-    block = (EffRingBlock *)sdfMemLock(handle);
+    block = (EffPcpRingBlock *)sdfMemLock(handle);
     ring = &block->header;
     memcpy(ring, source, EFF_RING_PARAM_BYTES);
     ring->vertices = block->vertices;
