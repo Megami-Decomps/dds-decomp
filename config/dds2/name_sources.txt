@@ -10022,3 +10022,7 @@
 0x00345810	sdfMoviePacReserveRingBlock	inferred	The sound driver's block allocator for a PAC movie: reserves bytes of the stream's ring, wrapping at 64 KB, or none when it is full. DDS1 twin 0x002EC968.
 0x00345928	sdfMovieQueueFrameSprite	inferred	Queues the decoded movie frame as a sprite over the movie's draw bounds, starting the PAC stream's sound once the ring holds a page. DDS1 twin 0x002ECA80.
 0x001D22D8	btlUpdateBattleEnd	inferred	The battle's end: the end jingle by its outcome, then, once sound and the units are idle, the next mode (the field, or the event a loss starts). DDS1 twin 0x001C6888.
+0x00452380	frFontSetupPacketLists	inferred	Per draw buffer, the packet list (SdfListHead) frFontSubmitAtlasSetupPackets puts the font's GS setup packet on and submits through kwlnDrawSurfaces[83]. DDS1 twin 0x003D68E0.
+0x004523C0	frFontSetupPackets	inferred	Per draw buffer, the font's GS setup packet (FrFontGsPacket) that frFontSubmitAtlasSetupPackets builds with frFontBuildGsSetupPacket. DDS1 twin 0x003D6920.
+0x004524C0	frFontAtlasPacketLists	inferred	Per draw buffer, the packet list (SdfListHead) frFontSubmitAtlasSetupPackets puts the atlas strip's packet on and submits through kwlnDrawSurfaces[83]. DDS1 twin 0x003D6A20.
+0x00452500	frFontAtlasPackets	inferred	Per draw buffer, the packet (FrFontAtlasPacket) frFontSubmitAtlasSetupPackets draws the whole glyph atlas with, as a textured four-corner strip. DDS1 twin 0x003D6A60.

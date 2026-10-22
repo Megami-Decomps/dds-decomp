@@ -99,8 +99,6 @@ void frFontBuildGsSetupPacket(FrFontGsPacket *packet) {
     packet->writes[5].reg = 0x47;
 }
 
-void frFontDrawAtlasGlyph(s32 x, s32 y, s32 width, s32 height, u8 style, u32 color, u32 depth, s32 filtered,
-                          const FrFontUvRect *uv, const FrFontAtlas *atlas, s32 surface);
 INCLUDE_ASM(const s32, "game/code_00193C08", frFontDrawAtlasGlyph);
 
 
