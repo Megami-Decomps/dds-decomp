@@ -906,7 +906,7 @@ s32 mtrDrawUnitSelectionOverlay(MnuStatusResource *resourceWork) {
 extern s8 dds3PadButtonState[];
 extern MenuListNode *mnuRetreatListCursorDefault(MenuList *);
 extern MenuListNode *mnuAdvanceListCursorDefault(MenuList *);
-extern void mnuClearListFlagsOneAndTwo(MenuList *);
+extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 /* Move the mantra selection, rebuild its panel, or report confirm/cancel. */
 s32 mnuHandleMantraSelectionInput(MnuStatusResource *resourceWork) {
     s32 sound = 0;
@@ -932,7 +932,7 @@ s32 mnuHandleMantraSelectionInput(MnuStatusResource *resourceWork) {
     }
     if (dds3PadButtonState[0x21] < 0 ||
         (dds3PadButtonState[0x26] == 0 && dds3PadButtonState[0x27] == 0)) {
-        mnuClearListFlagsOneAndTwo(list);
+        mnuClearListFlagsOneAndTwo(&list->stateFlags);
     }
     switch (sound) {
     case 1:
@@ -1027,4 +1027,3 @@ char mnuMantraUnitLevelTextFormat[] __attribute__((section(".sdata"))) = "%2d";
 MenuMantraRecord *mnuMantraPublishedSourceRecords __attribute__((section(".sdata"))) = NULL;
 
 INCLUDE_RODATA(const s32, "game/code_00286BA8", D_004262B0);
-
