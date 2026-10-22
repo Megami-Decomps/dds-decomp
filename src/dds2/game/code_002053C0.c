@@ -1143,7 +1143,7 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
     }
 }
 
-extern f32 D_003E9110[4];
+extern f32 effZeroVector[4];
 
 /* Arrange the two marked three-slot groups around the battle origin. */
 void btlPlaceBothSidesInRadialFormation(ActionStateLink *link, BtlUnit *firstActor, BtlUnit *secondActor) {
@@ -1192,11 +1192,11 @@ void btlPlaceBothSidesInRadialFormation(ActionStateLink *link, BtlUnit *firstAct
             radius += 500.0f;
             VU0_LOAD_VF(vf10, secondDirection);
             VU0_SCALE_VF(vf10, radius);
-            VU0_LOAD_VF(vf11, D_003E9110);
+            VU0_LOAD_VF(vf11, effZeroVector);
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
             btlSetUnitPosition(second[slot], position);
-            if (btlAimHorizontalDirectionVU(position, D_003E9110)) {
+            if (btlAimHorizontalDirectionVU(position, effZeroVector)) {
                 VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
                 btlSetUnitRotation(second[slot], (s128 *)rotation);
             }
@@ -1210,7 +1210,7 @@ void btlPlaceBothSidesInRadialFormation(ActionStateLink *link, BtlUnit *firstAct
             VU0_SCALE_VF(vf11, 200.0f);
             VU0_ADD(vf11, vf11, vf10);
             VU0_STORE_VF_UNCLOBBERED(vf11, target);
-            VU0_LOAD_VF(vf11, D_003E9110);
+            VU0_LOAD_VF(vf11, effZeroVector);
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
             btlSetUnitPosition(first[slot], position);

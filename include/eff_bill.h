@@ -23,7 +23,7 @@ typedef struct EffLensFlareParams {
     u8 pad3D[3];
 } EffLensFlareParams;
 
-/* Lens-flare table row (16 bytes); D_0037E5D0 holds sets of thirteen rows, selected by EffLensFlareParams.flareSet. */
+/* Lens-flare table row (16 bytes); effLensFlareSets holds sets of thirteen rows, selected by EffLensFlareParams.flareSet. */
 typedef struct EffLensFlareElement {
     f32 positionScale; /* 0x00: distance along the line from the screen center */
     f32 sizeScale;     /* 0x04 */

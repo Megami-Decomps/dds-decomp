@@ -13,4 +13,16 @@ typedef struct EffGsPacket {
     u64 registerAddress;
 } EffGsPacket;
 
+/* Two GS register writes carried by one complete four-qword packet. */
+typedef struct EffGsPairPacket {
+    u64 dmaTag;
+    u64 vifTag;
+    u64 gifTag;
+    u64 registerList;
+    u64 firstValue;
+    u64 firstAddress;
+    u64 secondValue;
+    u64 secondAddress;
+} EffGsPairPacket;
+
 #endif

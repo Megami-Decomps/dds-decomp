@@ -166,7 +166,7 @@ typedef struct EffectAssetLink {
 
 extern void camFollowOffsetVec(u8 *, void *);
 
-extern EffQueuedFileObject D_003FFA78;
+extern EffQueuedFileObject effPartsListMenu;
 
 extern u32 D_003FF1C4[];
 
@@ -251,7 +251,7 @@ extern u32 effBTLFieldColorGetFinalSelector(void);
 
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 
-extern u8 D_0045C270[];
+extern u8 effSelectedJobHeader[];
 
 extern void effComputeBattleCameraPositionVU(u8 *);
 
@@ -260,7 +260,7 @@ extern void effComputeBattleCameraPositionVU(u8 *);
 
 extern void effPollResourceBankSlot(char *, u32, EffResourceBankSlot *);
 
-extern EffectBlock128 D_0045C1F0;
+extern EffectBlock128 effEditedQueueHeader;
 
 
 typedef char EffModelResource_size_must_be_0x40[
@@ -335,9 +335,9 @@ extern void effSetCurveEmitterStartPosition(s32, void *);
 
 extern void sdfVuMatrixToQuaternion(f32 matrix[4][4]);
 
-extern u8 effWorldUpVector[];
+extern f32 effWorldUpVector[4];
 
-extern u8 D_003E9110[];
+extern u8 effZeroVector[];
 
 extern void effSetCurveEmitterEndPosition(s32, void *);
 
@@ -351,7 +351,7 @@ extern void dds3BillboardDraw(billHandle_t *);
 
 extern f32 D_0042BC10[4];
 
-extern u8 D_003E9100[];
+extern u8 effOnesVector[];
 
 struct Matrix4;
 extern void effDrawTrackSet(EffTrackSet *, struct Matrix4 *);
@@ -437,9 +437,9 @@ extern FileJobPayload *effTemporaryFileJob;
 
 extern FileQueue *effAuxiliaryFileQueue;
 
-extern s8 D_00439075;
+extern s8 effPartsListExitRequested;
 
-extern s32 D_004386F0;
+extern s32 effEditorCurrentMenu;
 
 extern void *effQueuedFileObject;
 
@@ -449,11 +449,11 @@ extern struct BtlResourceDescriptor *effResourceBankDescriptor;
 
 extern struct BtlResourceNameRecord *effQueuedResourceNameRecord;
 
-extern u32 D_0043876C;
+extern u32 effColorEditRgbMenuOpen;
 
-extern u32 D_00438770;
+extern u32 effColorEditSelectedKey;
 
-extern s32 D_00438778;
+extern s32 effColorEditPage;
 
 extern u32 D_004387A8;
 
@@ -461,7 +461,7 @@ extern u32 D_004387AC;
 
 extern u32 D_004387B0;
 
-extern u32 D_00438774;
+extern u32 effColorEditSelectedAlphaKey;
 
 
 
@@ -558,7 +558,7 @@ extern u8 *effAllocateTexturedStripWork(u32 count, u32 repeat);
 extern u32 D_00437E7C;
 
 
-extern u32 D_004386B0;
+extern u32 effPartsListScroll;
 
 extern u32 D_003FFA84[];
 
@@ -592,7 +592,7 @@ extern char D_0045C1A0[];
 
 extern u8 D_003FFA40[];
 
-extern u8 D_0045C1E0[];
+extern u8 effBattleOffset[];
 
 extern u8 *D_004386CC;
 
@@ -726,7 +726,7 @@ void effResetFadeVectorFrame(EffFadeVectorWork *work) {
     work->frame = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002DE460);
+INCLUDE_ASM(const s32, "game/code_002DE248", effDrawLensFlare);
 
 void effCopyFadeWorkVector(f32 *dst, const f32 *src) {
     PCP_COPY_VECTOR(dst, src);
@@ -1757,7 +1757,7 @@ typedef char EffBillFrameEntry_innerWidth_offset_check[((u32)&((EffBillFrameEntr
 typedef char EffBillFrameEntry_outerWidth_offset_check[((u32)&((EffBillFrameEntry *)0)->outerWidth == 0x14) ? 1 : -1];
 
 extern EffRandState effSharedRandomState[];
-extern u8 D_003E9100[];
+extern u8 effOnesVector[];
 
 void billAdvanceFrameInstances(EffClassWork *work) {
     EffBillFrameConfig *config = (EffBillFrameConfig *)work->payload;
@@ -1866,7 +1866,7 @@ void billAdvanceFrameInstances(EffClassWork *work) {
             if (spin > 0.0f) angle = (spin + (acceleration * time) * 0.5f) * time;
             else angle = (spin - (acceleration * time) * 0.5f) * time;
             angle += entry->angle;
-            VU0_LOAD_VF(vf10, D_003E9100);
+            VU0_LOAD_VF(vf10, effOnesVector);
             VU0_MOVE_VF(vf11, vf10);
             VU0_SCALE_VF(vf10, entry->radius);
             VU0_STORE_VF_UNCLOBBERED(vf10, radius);
@@ -1910,7 +1910,7 @@ void billAdvanceFrameInstances(EffClassWork *work) {
             if (age < fadeStart) alpha = time / (f32)fadeStart;
             else if (fadeEnd < age) alpha = (f32)(s32)((u32)lifetime - (u32)age) / (f32)(s32)((u32)lifetime - (u32)fadeEnd);
             else alpha = 1.0f;
-            VU0_LOAD_VF(vf11, D_003E9100);
+            VU0_LOAD_VF(vf11, effOnesVector);
             VU0_SCALE_VF(vf11, alpha);
             VU0_LOAD_VF(vf10, outerVector);
             VU0_MUL(vf10, vf10, vf11);
@@ -1963,7 +1963,7 @@ void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
     out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
     VU0_LOAD_VF(vf10, work);
@@ -2009,8 +2009,8 @@ void billReleaseCellNode(s32 work) {
     sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
 }
 
-extern f32 D_003E98E0[12];
-extern f32 D_003E9918[12];
+extern f32 billRingCosines[12];
+extern f32 billRingSines[12];
 
 /* Spawn and advance the kind-2 cell instances: each live cell moves out
  * along its heading and is drawn as a 13-vertex fan (center plus two
@@ -2157,7 +2157,7 @@ void billAdvanceCellInstances(EffClassWork *work) {
             }
             distance = (speed + (acceleration * motionTime) * 0.5f) * motionTime;
             distance += entry->centerOffset;
-            VU0_LOAD_VF(vf10, D_003E9100);
+            VU0_LOAD_VF(vf10, effOnesVector);
             VU0_SCALE_VF(vf10, entry->extent);
             VU0_STORE_VF_UNCLOBBERED(vf10, width);
             direction[0] = sdfCos(angle);
@@ -2186,26 +2186,26 @@ void billAdvanceCellInstances(EffClassWork *work) {
             VU0_STORE_VF(vf12, vertices);
             for (outputCount = 0; outputCount < 6; outputCount++) {
                 VU0_LOAD_VF(vf10, radialA);
-                VU0_SCALE_VF(vf10, D_003E9918[outputCount]);
+                VU0_SCALE_VF(vf10, billRingSines[outputCount]);
                 VU0_ADD(vf10, vf10, vf12);
                 VU0_LOAD_VF(vf11, width);
-                VU0_SCALE_VF(vf11, D_003E98E0[outputCount]);
+                VU0_SCALE_VF(vf11, billRingCosines[outputCount]);
                 VU0_ADD(vf10, vf10, vf11);
                 VU0_STORE_VF(vf10, vertices + 1 + outputCount);
             }
             for (outputCount = 0; outputCount < 6; outputCount++) {
                 VU0_LOAD_VF(vf10, radialB);
-                VU0_SCALE_VF(vf10, D_003E9918[outputCount + 6]);
+                VU0_SCALE_VF(vf10, billRingSines[outputCount + 6]);
                 VU0_ADD(vf10, vf10, vf12);
                 VU0_LOAD_VF(vf11, width);
-                VU0_SCALE_VF(vf11, D_003E98E0[outputCount + 6]);
+                VU0_SCALE_VF(vf11, billRingCosines[outputCount + 6]);
                 VU0_ADD(vf10, vf10, vf11);
                 VU0_STORE_VF(vf10, vertices + 7 + outputCount);
             }
             if (age < fadeStart) alpha = time / (f32)fadeStart;
             else if (fadeEnd < age) alpha = (f32)(s32)((u32)lifetime - (u32)age) / (f32)(s32)((u32)lifetime - (u32)fadeEnd);
             else alpha = 1.0f;
-            VU0_LOAD_VF(vf11, D_003E9100);
+            VU0_LOAD_VF(vf11, effOnesVector);
             VU0_SCALE_VF(vf11, alpha);
             VU0_LOAD_VF(vf10, secondVector);
             VU0_MUL(vf10, vf10, vf11);
@@ -2252,7 +2252,7 @@ void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
     out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
     VU0_LOAD_VF(vf10, work);
@@ -2326,7 +2326,7 @@ void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
     VU0_LOAD_VF(vf10, work);
@@ -2548,7 +2548,7 @@ void billAdvanceAnimatedFrameTransforms(EffClassWork *work) {
             else angle = (spin - (acceleration * time) * 0.5f) * time;
             angle += entry->angle;
             if (age < frames) entry->radius += entry->radiusStep;
-            VU0_LOAD_VF(vf10, D_003E9100);
+            VU0_LOAD_VF(vf10, effOnesVector);
             VU0_MOVE_VF(vf11, vf10);
             VU0_SCALE_VF(vf10, entry->radius);
             VU0_STORE_VF_UNCLOBBERED(vf10, radius);
@@ -2587,7 +2587,7 @@ void billAdvanceAnimatedFrameTransforms(EffClassWork *work) {
             if (age < fadeStart) alpha = time / (f32)fadeStart;
             else if (fadeEnd < age) alpha = (f32)(s32)((u32)lifetime - (u32)age) / (f32)(s32)((u32)lifetime - (u32)fadeEnd);
             else alpha = 1.0f;
-            VU0_LOAD_VF(vf11, D_003E9100);
+            VU0_LOAD_VF(vf11, effOnesVector);
             VU0_SCALE_VF(vf11, alpha);
             VU0_LOAD_VF(vf10, secondVector);
             VU0_MUL(vf10, vf10, vf11);
@@ -2630,7 +2630,7 @@ void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
     VU0_LOAD_VF(vf10, work);
@@ -2893,7 +2893,7 @@ void billAdvanceEmitterInstances(EffClassWork *work) {
             if (age < fadeStart) alpha = time / (f32)fadeStart;
             else if (fadeEnd < age) alpha = (f32)(s32)((u32)lifetime - (u32)age) / (f32)(s32)((u32)lifetime - (u32)fadeEnd);
             else alpha = 1.0f;
-            VU0_LOAD_VF(vf11, D_003E9100);
+            VU0_LOAD_VF(vf11, effOnesVector);
             VU0_SCALE_VF(vf11, alpha);
             VU0_LOAD_VF(vf10, secondVector);
             VU0_MUL(vf10, vf10, vf11);
@@ -2936,7 +2936,7 @@ void billUpdateEmitterDrawColorAndTransform(u8 *work) {
     out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
     VU0_LOAD_VF(vf10, work);
@@ -3221,7 +3221,7 @@ void billAdvanceStripInstances(EffClassWork *work) {
             } else {
                 alpha = 1.0f;
             }
-            VU0_LOAD_VF(vf11, D_003E9100);
+            VU0_LOAD_VF(vf11, effOnesVector);
             VU0_SCALE_VF(vf11, alpha);
             VU0_LOAD_VF(vf10, colorVectorB);
             VU0_MUL(vf10, vf10, vf11);
@@ -3272,7 +3272,7 @@ void billUpdateStripDrawColorAndTransform(u8 *work) {
     out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
     VU0_LOAD_VF(vf10, work);
@@ -3345,7 +3345,7 @@ void billUpdateTrailDrawColorAndTransform(u8 *work) {
     out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
     VU0_LOAD_VF(vf10, work);
@@ -3662,7 +3662,7 @@ void billAdvanceQuadInstances(EffClassWork *work) {
             } else {
                 alpha = 1.0f;
             }
-            VU0_LOAD_VF(vf11, D_003E9100);
+            VU0_LOAD_VF(vf11, effOnesVector);
             VU0_SCALE_VF(vf11, alpha);
             VU0_LOAD_VF(vf10, colorVectorB);
             VU0_MUL(vf10, vf10, vf11);
@@ -3708,7 +3708,7 @@ void billUpdateQuadDrawColorAndTransform(u8 *work) {
     out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
     VU0_LOAD_VF(vf10, work);
@@ -4323,7 +4323,7 @@ void effUpdateExpandingRingPoints(EffClassWork *work) {
     firstBand = config->widths[0] + radius;
     secondBand = firstBand + config->widths[1];
     thirdBand = secondBand + config->widths[2];
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_MOVE_VF(vf11, vf10);
     VU0_SCALAR_OP_CLOBBER(firstBand, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_STORE_VF(vf10, bands[0]);
@@ -4380,7 +4380,7 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
         out->flag = ((EffBillOutputHeader *)config)->outputMode;
         VU0_LOAD_VF(vf10, work->transform);
         effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, D_003E9100);
+        VU0_LOAD_VF(vf10, effOnesVector);
         VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_SCALE_MATRIX_ROWS(vf10);
         VU0_LOAD_VF(vf10, work);
@@ -4565,7 +4565,7 @@ void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
         out->flag = ((EffBillOutputHeader *)config)->outputMode;
         VU0_LOAD_VF(vf10, work->transform);
         effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, D_003E9100);
+        VU0_LOAD_VF(vf10, effOnesVector);
         VU0_SCALAR_OP(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_SCALE_MATRIX_ROWS(vf10);
         VU0_LOAD_VF(vf10, work);
@@ -4683,7 +4683,7 @@ void effUpdateRadialFanVertices(EffClassWork *work) {
     firstBand = config->widths[0] + radius;
     secondBand = firstBand + config->widths[1];
     thirdBand = secondBand + config->widths[2];
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_MOVE_VF(vf11, vf10);
     VU0_SCALAR_OP_CLOBBER(firstBand, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_STORE_VF(vf10, bands[0]);
@@ -4738,7 +4738,7 @@ void billDrawCellBlendB(EffClassWork *work) {
         out->flag = config->flag;
         VU0_LOAD_VF(vf10, work->vectors.orientation);
         effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, D_003E9100);
+        VU0_LOAD_VF(vf10, effOnesVector);
         VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_SCALE_MATRIX_ROWS(vf10);
         VU0_LOAD_VF(vf10, work);
@@ -5313,11 +5313,11 @@ void effAcquireSurfaceRecord(s32 node) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002E8770);
+INCLUDE_ASM(const s32, "game/code_002DE248", effDrawSurfaceNode);
 
 void effUpdateSurfaceRecordAndDraw(u32 node) {
     effAcquireSurfaceRecord(node);
-    func_002E8770(node);
+    effDrawSurfaceNode(node);
 }
 
 void effMenuRecordVectorSet(void *node, f32 vector[4]) {
@@ -6085,7 +6085,7 @@ void effDrawTintedFivePointGroupRows(EffClassWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, tint);
     VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
     VU0_LOAD_VF(vf10, work);
@@ -6630,7 +6630,7 @@ void effDrawRetainedPointSetRows(EffClassWork *work) {
     VU0_STORE_VF_UNCLOBBERED(vf10, colorFactor);
     VU0_LOAD_VF(vf10, work->vectors.orientation);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
     VU0_LOAD_VF(vf10, work->vectors.position);
@@ -6658,16 +6658,6 @@ void effDrawRetainedPointSetRows(EffClassWork *work) {
         } while (remaining != 0);
     }
 }
-
-typedef struct EffAlternatingPointSetRow {
-    EffPointSet *set;
-    s32 key;
-    u32 color;
-} EffAlternatingPointSetRow;
-
-typedef struct EffAlternatingPointSetTable {
-    EffAlternatingPointSetRow *rows;
-} EffAlternatingPointSetTable;
 
 void effSeedBillboardFrameCounters(EffClassWork *work) {
     u32 count = ((EffBillTimedHeader *)work->payload)->count;
@@ -6761,7 +6751,7 @@ void effReleaseBillboardFramePointSets(EffClassWork *work) {
     sdfChipFreeDirect(table);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002ED3D0);
+INCLUDE_ASM(const s32, "game/code_002DE248", effUpdateLightningPointSetRows);
 
 typedef struct EffPointSetCompactRow {
     EffPointSet *set; /* 0x00 */
@@ -6806,7 +6796,7 @@ void effDrawTintedCompactPointGroups(EffClassWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, tint);
     VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
     VU0_LOAD_VF(vf10, work);
@@ -7446,7 +7436,7 @@ void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     out->drawMode = config->common.drawMode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
     VU0_LOAD_VF(vf10, work);
@@ -7829,7 +7819,7 @@ void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
     out->drawMode = config->common.drawMode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
     VU0_LOAD_VF(vf10, work);
@@ -8161,7 +8151,7 @@ void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
     out->drawMode = config->common.drawMode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
     VU0_LOAD_VF(vf10, work);
@@ -8577,7 +8567,7 @@ void effReleaseTextureAnimationWork(s32 work) {
     sdfMemFreeDirect(state->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002F2050);
+INCLUDE_ASM(const s32, "game/code_002DE248", effUpdateBillFlame);
 
 typedef struct EffMeshOutput {
     u32 field_00;       // 0x00
@@ -8615,7 +8605,7 @@ void effUpdateTintedScaledMesh(BillCellDrawWork *work) {
     ((EffMeshOutput *)out)->mode = ((EffBillFlameConfig *)config)->meshMode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
     VU0_LOAD_VF(vf10, work);
@@ -8934,7 +8924,7 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
     scale = effSampleScalarCurve(&((EffBillQuantizedConfig *)config)->scaleCurve, limit, progress) * work->scale;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
     VU0_LOAD_VF(vf10, work);
@@ -9103,18 +9093,6 @@ u8 *effAllocateStripFromWorkAndRetainTexture(u8 *work) {
     effSharedStripReferenceCount++;
     return strip;
 }
-
-/* Two GS register writes carried by one complete four-qword packet. */
-typedef struct EffGsPairPacket {
-    u64 dmaTag;
-    u64 vifTag;
-    u64 gifTag;
-    u64 registerList;
-    u64 firstValue;
-    u64 firstAddress;
-    u64 secondValue;
-    u64 secondAddress;
-} EffGsPairPacket;
 
 extern SdfPoolNode *D_003E9EF0[];
 extern vu8 sdfFrameId;
@@ -9432,7 +9410,7 @@ void effDrawParticleSpanPointsAndReferences(EffModelResource *work) {
 
     VU0_LOAD_VF(vf10, work->orientation);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
     VU0_LOAD_VF(vf10, work->position);
@@ -10779,7 +10757,7 @@ void effUpdateAimedClassResource(u8 *work) {
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf28, vf10);
-    VU0_LOAD_VF(vf31, D_003E9110);
+    VU0_LOAD_VF(vf31, effZeroVector);
     VU0_SET_W_ONE(vf31);
     VU0_STORE_MATRIX_UNCLOBBERED(mtx);
     sdfVuMatrixToQuaternion((f32 (*)[4])mtx);
@@ -10868,7 +10846,7 @@ void effResolveAndApplySurfaceEndpoints(u8 *work) {
 
 /* Draw through the active owner's retained surface-resource handle. */
 void effDrawActiveSurfaceNode(s32 owner) {
-    func_002E8770(*(u32 *)((EffActiveResource *)owner)->resource);
+    effDrawSurfaceNode(*(u32 *)((EffActiveResource *)owner)->resource);
 }
 
 dds3ModelHandle_t **effAllocateModelObjectSlot(u32 owner) {
@@ -11094,7 +11072,7 @@ void effOrientClassResourceAlongTargetOffset(u8 *work) {
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf28, vf10);
-    VU0_LOAD_VF(vf31, D_003E9110);
+    VU0_LOAD_VF(vf31, effZeroVector);
     VU0_SET_W_ONE(vf31);
     VU0_STORE_MATRIX_UNCLOBBERED(mtx);
     sdfVuMatrixToQuaternion((f32 (*)[4])mtx);
@@ -12279,7 +12257,7 @@ void func_002FAD98(EffectSlotNode80 *node) {
                 EE_MMI_RGBA_PACK_UNIT(modelPacked[0], unit);
                 color = modelPacked[0];
                 model->color = color;
-                VU0_LOAD_VF(vf10, D_003E9100);
+                VU0_LOAD_VF(vf10, effOnesVector);
                 if (node->scaleByOpacity == 0) {
                     VU0_SCALE_VF(vf10, slot->scale);
                 } else {
@@ -12321,7 +12299,7 @@ void func_002FAD98(EffectSlotNode80 *node) {
                 VU0_MUL(vf10, vf10, vf11);
                 EE_MMI_RGBA_PACK_UNIT(orientedPacked[0], 128.0f);
                 model->color = orientedPacked[0];
-                VU0_LOAD_VF(vf10, D_003E9100);
+                VU0_LOAD_VF(vf10, effOnesVector);
                 if (node->scaleByOpacity == 0) {
                     VU0_SCALE_VF(vf10, slot->scale);
                 } else {
@@ -12779,16 +12757,16 @@ void effSetSharedEffectUniformScale(s32 *work, f32 value) {
 void btlInitializeEffectWork(void) {
     D_004386CC = D_003FFA40;
     D_0045C1A0[0] = 0;
-    D_004386B0 = 0;
-    D_00439075 = 0;
-        VU0_STORE_VF(vf0, D_0045C1E0);
+    effPartsListScroll = 0;
+    effPartsListExitRequested = 0;
+        VU0_STORE_VF(vf0, effBattleOffset);
 }
 
 void effResetFileResourceStores(void);
 
 s32 btlUpdateEffectWork(void) {
     if (D_004386CC != NULL) {
-        if ((func_002FCA58(0) & 1) == 0) {
+        if ((effUpdatePartsListEditor(0) & 1) == 0) {
             effResetFileResourceStores();
             return 0;
         }
@@ -12807,7 +12785,7 @@ void effResetFileResourceStores(void) {
 }
 
 void effSetBattleOffset(void *src) {
-    PCP_COPY_VECTOR(D_0045C1E0, src);
+    PCP_COPY_VECTOR(effBattleOffset, src);
 }
 
 void effComputeBattleCameraPositionVU(u8 *effect) {
@@ -12824,7 +12802,7 @@ void effComputeBattleCameraPositionVU(u8 *effect) {
     if ((flags & 0x80) != 0) {
         VU0_SCALAR_OP_CLOBBER(effFileQueue->scaleMultiplier, "vmulx.xyzw vf10, vf10, vf2x");
     }
-    VU0_LOAD_VF(vf11, D_0045C1E0);
+    VU0_LOAD_VF(vf11, effBattleOffset);
     VU0_ADD(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, effFileQueue->offset);
     VU0_ADD(vf10, vf10, vf11);
@@ -12855,14 +12833,14 @@ void effApplyBattleCameraToObject(work)
 {
     f32 rotation[2][4] __attribute__((aligned(16)));
 
-    effComputeBattleCameraPositionVU(D_0045C270);
+    effComputeBattleCameraPositionVU(effSelectedJobHeader);
     VU0_STORE_VF_UNCLOBBERED(vf10, rotation[0]);
     fileJobInvokePositionCallback(work, rotation[0]);
-    effMultiplyQuatWithFlag(D_0045C270);
+    effMultiplyQuatWithFlag(effSelectedJobHeader);
     VU0_STORE_VF_UNCLOBBERED(vf10, rotation[1]);
     fileJobInvokeRotationCallback(work, rotation[1]);
-    fileJobInvokeScaleCallback(work, ((FileJob *)D_0045C270)->scale * effFileQueue->scaleMultiplier);
-    fileDispatchJobTypeCallback(work, ((FileJob *)D_0045C270)->color);
+    fileJobInvokeScaleCallback(work, ((FileJob *)effSelectedJobHeader)->scale * effFileQueue->scaleMultiplier);
+    fileDispatchJobTypeCallback(work, ((FileJob *)effSelectedJobHeader)->color);
 }
 
 /* Debug parameter table: each 0x18-byte row points at the variable it edits. */
@@ -13101,7 +13079,7 @@ void *effFindAssetObject(FileJob *entry) {
 
 /* Return the selected queue row plus the offset of its visible window. */
 u32 effGetSelectedFileQueueIndex(void) {
-    return D_003FFA84[0] + D_004386B0;
+    return D_003FFA84[0] + effPartsListScroll;
 }
 
 INCLUDE_RODATA(const s32, "game/code_002DE248", D_0042BEA0);
@@ -13446,7 +13424,7 @@ INCLUDE_RODATA(const s32, "game/code_002DE248", D_0042CF80);
 
 INCLUDE_RODATA(const s32, "game/code_002DE248", D_0042CF90);
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002FCA58);
+INCLUDE_ASM(const s32, "game/code_002DE248", effUpdatePartsListEditor);
 
 
 extern void fileQueueInitTransform(void *);
@@ -13459,7 +13437,7 @@ u32 effAppendPositionedCameraFileJob(const EffCameraCreateRequest *request) {
     FileJob *entry;
     u32 count;
 
-    fileQueueInitTransform(D_0045C270);
+    fileQueueInitTransform(effSelectedJobHeader);
     entry = fileAppendJob(effFileQueue, (u32)effLoadFileJobPayload(request->resource, request->existingJob));
     effCurrentFileQueueEntry = entry;
     strcpy(entry->name, request->resource->name);
@@ -13469,19 +13447,19 @@ u32 effAppendPositionedCameraFileJob(const EffCameraCreateRequest *request) {
     entry->unk88[0] = 8;
     entry->unk88[1] = 0;
     entry->unk88[2] = 0;
-    memcpy(D_0045C270, entry, 0x80);
+    memcpy(effSelectedJobHeader, entry, 0x80);
     effQueuedFileHandle = (FileJobPayload *)entry->id;
     D_004386BC = effQueueEffectFileJob((u8 *)request->resource);
     effQueuedFileObject = request->object;
     count = fileQueueCountLinkedJobs(effFileQueue);
     if (count > 21) {
-        D_003FFA78.cursor = 20;
-        D_004386B0 = count - 21;
+        effPartsListMenu.cursor = 20;
+        effPartsListScroll = count - 21;
     } else {
-        D_004386B0 = 0;
-        D_003FFA78.cursor = count - 1;
+        effPartsListScroll = 0;
+        effPartsListMenu.cursor = count - 1;
     }
-    request->object->linkedState = (u8 *)&D_003FFA78;
+    request->object->linkedState = (u8 *)&effPartsListMenu;
     effResetFileResourceManager();
     return 0x800000;
 }
@@ -13497,7 +13475,7 @@ u32 effLoadSelectedFileJob(void) {
 
     /* These independent snapshots cover the queue header and camera transform. */
     memcpy(D_0045C110, entry, 0x90);
-    memcpy(D_0045C270, entry, 0x80);
+    memcpy(effSelectedJobHeader, entry, 0x80);
 
     effQueuedFileHandle = (FileJobPayload *)entry->id;
     request = (EffFileJobRequest *)effFindAssetData(entry);
@@ -13533,7 +13511,7 @@ u32 effLoadSelectedFileJob(void) {
     job = (u32)effQueueEffectFileJob(request);
     D_004386BC = job;
     effQueuedFileObject = effFindAssetObject(entry);
-    ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&D_003FFA78;
+    ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&effPartsListMenu;
     effResetFileResourceManager();
     if (effTemporaryFileJob != 0) {
         fileJobDestroy(effTemporaryFileJob);
@@ -13557,9 +13535,9 @@ u32 effReinitializeFileQueue(void) {
     effFileQueue = fileQueueCreate();
     D_003FF1C4[0] = 0;
     D_0045C1A0[0] = 0;
-    D_004386B0 = 0;
-    D_003FFA78.cursor = 0;
-    effQueuedFileObject = &D_003FFA78;
+    effPartsListScroll = 0;
+    effPartsListMenu.cursor = 0;
+    effQueuedFileObject = &effPartsListMenu;
     return 0;
 }
 
@@ -13571,9 +13549,9 @@ extern u32 D_003FF22C[11];
 u32 effResetFileQueueState(void) {
     fileQueueRemoveAndDestroyJob(effFileQueue, fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex()));
     D_003FF294[0] = 0;
-    D_004386B0 = 0;
-    D_003FFA78.cursor = 0;
-    effQueuedFileObject = &D_003FFA78;
+    effPartsListScroll = 0;
+    effPartsListMenu.cursor = 0;
+    effQueuedFileObject = &effPartsListMenu;
     return 0;
 }
 
@@ -13584,7 +13562,7 @@ u32 effFinalizeQueuedFile(void) {
     resource = fileJobDuplicateAfter(effFileQueue, entry);
     D_003FF22C[0] = 0;
     fileJobCopyHeader(resource, entry);
-    effQueuedFileObject = &D_003FFA78;
+    effQueuedFileObject = &effPartsListMenu;
     return 0;
 }
 
@@ -13614,7 +13592,7 @@ u32 effCloneSelectedFileJob(void) {
     fileQueueLinkJobToSectorLeader(effFileQueue, job, leader);
 
     memcpy(D_0045C110, job, 0x90);
-    memcpy(D_0045C270, job, 0x80);
+    memcpy(effSelectedJobHeader, job, 0x80);
     effQueuedFileHandle = (FileJobPayload *)job->id;
     asset = (EffFileJobRequest *)effFindAssetData(job);
     strcpy(job->name, asset->name);
@@ -13648,14 +13626,14 @@ u32 effCloneSelectedFileJob(void) {
     D_004386BC = (u32)effQueueEffectFileJob(asset);
     object = (EffQueuedFileObject *)effFindAssetObject(job);
     effQueuedFileObject = object;
-    object->linkedState = (u8 *)&D_003FFA78;
+    object->linkedState = (u8 *)&effPartsListMenu;
     count = fileQueueCountLinkedJobs(effFileQueue);
     if (count >= 22) {
-        D_003FFA78.cursor = 20;
-        D_004386B0 = count - 21;
+        effPartsListMenu.cursor = 20;
+        effPartsListScroll = count - 21;
     } else {
-        D_004386B0 = 0;
-        D_003FFA78.cursor = count - 1;
+        effPartsListScroll = 0;
+        effPartsListMenu.cursor = count - 1;
     }
     effResetFileResourceManager();
     if (effTemporaryFileJob != NULL) {
@@ -13668,15 +13646,15 @@ u32 effCloneSelectedFileJob(void) {
 u32 effSelectLinkedFileState(); /* no prototype: called here with an argument */
 
 u32 effFlagFileQueueActive(void) {
-    D_00439075 = 1;
+    effPartsListExitRequested = 1;
     effSelectLinkedFileState(0);
     return 0;
 }
 
 /* Select the queued file object's linked state when present; return zero in either case. */
 u32 effSelectLinkedFileState(void) {
-    if (((EffQueuedFileObject *)D_004386F0)->linkedState != NULL) {
-        effQueuedFileObject = ((EffQueuedFileObject *)D_004386F0)->linkedState;
+    if (((EffQueuedFileObject *)effEditorCurrentMenu)->linkedState != NULL) {
+        effQueuedFileObject = ((EffQueuedFileObject *)effEditorCurrentMenu)->linkedState;
     }
     return 0;
 }
@@ -13684,8 +13662,8 @@ u32 effSelectLinkedFileState(void) {
 extern EffQueuedFileObject effBattleCameraSnapshotSelection;
 
 extern EffEditorRow D_003FF390[], D_003FF3D8[];
-extern u8 D_0045C270[];
-extern s8 D_00439074;
+extern u8 effSelectedJobHeader[];
+extern s8 effPartsPreviewReload;
 
 typedef struct EffectBlock90 {
     u32 word[36];
@@ -13699,7 +13677,7 @@ u32 effLoadBattleCameraSnapshot(u32 value) {
     FileJob *record = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
 
     *(EffectBlock90 *)D_0045C110 = *(EffectBlock90 *)record;
-    *(EffectAlignedBlock128 *)D_0045C110 = *(EffectAlignedBlock128 *)D_0045C270;
+    *(EffectAlignedBlock128 *)D_0045C110 = *(EffectAlignedBlock128 *)effSelectedJobHeader;
     if (((EffectBlock90 *)D_0045C110)->word[26] & 2) {
         effBattleCameraSnapshotSelection.rows = D_003FF390;
         effBattleCameraSnapshotSelection.count = 3;
@@ -13720,8 +13698,8 @@ u32 effStoreBattleCameraSnapshot(u32 value) {
     FileJob *record = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
 
     *(EffectBlock90 *)record = *(EffectBlock90 *)D_0045C110;
-    *(EffectAlignedBlock128 *)D_0045C270 = *(EffectAlignedBlock128 *)D_0045C110;
-    D_00439074 = 1;
+    *(EffectAlignedBlock128 *)effSelectedJobHeader = *(EffectAlignedBlock128 *)D_0045C110;
+    effPartsPreviewReload = 1;
     if (((EffectBlock90 *)D_0045C110)->word[26] & 2) {
         effBattleCameraSnapshotSelection.rows = D_003FF390;
         effBattleCameraSnapshotSelection.count = 3;
@@ -13786,7 +13764,7 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const void *sourceRows, 
         }
     }
 
-    menuObject = (EffQueuedFileObject *)D_004386F0;
+    menuObject = (EffQueuedFileObject *)effEditorCurrentMenu;
     state = &D_003FFBB0;
     state->count = count;
     oldIndex = state->cursor;
@@ -13843,10 +13821,10 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const void *sourceRows, 
                     fileQueueDestroy(effAuxiliaryFileQueue);
                     effAuxiliaryFileQueue = 0;
                 }
-                fileQueueInitTransform(D_0045C270);
-                ((FileJob *)D_0045C270)->offset[0] = request->position[0];
-                ((FileJob *)D_0045C270)->offset[1] = request->position[1];
-                ((FileJob *)D_0045C270)->offset[2] = request->position[2];
+                fileQueueInitTransform(effSelectedJobHeader);
+                ((FileJob *)effSelectedJobHeader)->offset[0] = request->position[0];
+                ((FileJob *)effSelectedJobHeader)->offset[1] = request->position[1];
+                ((FileJob *)effSelectedJobHeader)->offset[2] = request->position[2];
                 sourceJob = fileJobCreateFromCommandState((const char *)request->existingJob);
                 effTemporaryFileJob = fileJobCreateFromJob(sourceJob);
                 fileJobDestroy(sourceJob);
@@ -14030,8 +14008,8 @@ u32 effPollNamedFileJob(void) {
         }
         strcpy(D_0045C1A0, record.name);
         effFileQueue = fileQueueCreateFromCommandState((const char *)&record);
-        D_0045C1F0 = *(EffectBlock128 *)effFileQueue;
-        D_004386B0 = 0;
+        effEditedQueueHeader = *(EffectBlock128 *)effFileQueue;
+        effPartsListScroll = 0;
         D_003FFA84[0] = 0;
         result = 0x400002;
     }
@@ -14164,7 +14142,7 @@ s32 effUpdateCameraDiagnostics(EffectStateSnapshot *state, s8 mode) {
 
     if (selectedMode != 0) {
         effComputeBattleCameraPositionVU((u8 *)state);
-        VU0_LOAD_VF(vf11, &D_0045C1F0);
+        VU0_LOAD_VF(vf11, &effEditedQueueHeader);
         VU0_SUB(vf10, vf10, vf11);
     } else {
         VU0_LOAD_VF(vf10, state->position);
@@ -14173,9 +14151,9 @@ s32 effUpdateCameraDiagnostics(EffectStateSnapshot *state, s8 mode) {
     VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
     VU0_LENGTH_VF10(length);
 
-    VU0_LOAD_VF(vf10, D_0045C1E0);
+    VU0_LOAD_VF(vf10, effBattleOffset);
     if (selectedMode != 0) {
-        VU0_LOAD_VF(vf11, &D_0045C1F0);
+        VU0_LOAD_VF(vf11, &effEditedQueueHeader);
         VU0_ADD(vf10, vf10, vf11);
     }
     VU0_STORE_VF(vf10, vectors[5]);
@@ -14314,7 +14292,7 @@ decreaseRoll:
         flags |= 2;
     }
     VU0_LOAD_VF(vf10, D_0045C2F0);
-    VU0_LOAD_VF(vf11, D_0045C1E0);
+    VU0_LOAD_VF(vf11, effBattleOffset);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, center);
     VU0_STORE_VF(vf10, point);
@@ -14414,7 +14392,7 @@ u32 effUpdateCameraSnapshotGuides(EffectStateSnapshot *state, s8 useBattlePositi
         result |= 2;
     }
     VU0_LOAD_VF(vf10, &scratch.basePosition);
-    VU0_LOAD_VF(vf11, D_0045C1E0);
+    VU0_LOAD_VF(vf11, effBattleOffset);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.segmentStart);
 
@@ -14433,7 +14411,7 @@ u32 effUpdateCameraSnapshotGuides(EffectStateSnapshot *state, s8 useBattlePositi
     btlDebugDrawSegment((f32 *)&scratch.segmentStart, (f32 *)&scratch.segmentEnd, 0x80000080);
     btlDebugDrawPoint((f32 *)&scratch.segmentStart);
 
-    VU0_LOAD_VF(vf11, D_0045C1E0);
+    VU0_LOAD_VF(vf11, effBattleOffset);
     VU0_LOAD_MATRIX(scratch.rotationMatrix);
     VU0_LOAD_VF(vf31, &scratch.basePosition);
     VU0_MOVE_VF(vf10, vf0);
@@ -14448,7 +14426,7 @@ u32 effUpdateCameraSnapshotGuides(EffectStateSnapshot *state, s8 useBattlePositi
     VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.segmentEnd);
     btlDebugDrawSegment((f32 *)&scratch.segmentStart, (f32 *)&scratch.segmentEnd, 0x80006060);
 
-    VU0_LOAD_VF(vf11, D_0045C1E0);
+    VU0_LOAD_VF(vf11, effBattleOffset);
     VU0_LOAD_MATRIX(scratch.rotationMatrix);
     VU0_LOAD_VF(vf31, &scratch.basePosition);
     VU0_MOVE_VF(vf10, vf0);
@@ -14480,13 +14458,13 @@ u32 effLoadFileSlotAndPoll(void) {
 }
 
 s32 effRunWithStateBackup(void) {
-    EffectStateSnapshot snapshot = *(EffectStateSnapshot *)&D_0045C1F0;
+    EffectStateSnapshot snapshot = *(EffectStateSnapshot *)&effEditedQueueHeader;
     f32 *backup = snapshot.position;
     s32 result;
 
-    PCP_COPY_VECTOR(backup, &D_0045C1F0);
+    PCP_COPY_VECTOR(backup, &effEditedQueueHeader);
     result = effUpdateCameraDiagnostics(&snapshot, 0);
-    PCP_COPY_VECTOR(&D_0045C1F0, backup);
+    PCP_COPY_VECTOR(&effEditedQueueHeader, backup);
     if (result & 1) {
         result |= 0x800000;
     }
@@ -14507,12 +14485,12 @@ u32 effProcessQueuedFileRecordAndPersistChanges(void) {
     return result;
 }
 
-extern s8 D_00439074;
+extern s8 effPartsPreviewReload;
 
 void effResetFileResources(void) {
     D_003FFA84[0] = 0;
-    D_00439074 = 0;
-    D_004386B0 = 0;
+    effPartsPreviewReload = 0;
+    effPartsListScroll = 0;
     if (effFileQueue != 0) {
         fileQueueDestroy(effFileQueue);
         effFileQueue = 0;
@@ -14679,10 +14657,10 @@ void effPollResourceBank(u32 mode, EffBankStatus *status) {
 }
 
 void effResetMappingFlags(void) {
-    D_0043876C = 0;
-    D_00438778 = 0;
-    D_00438770 = 0;
-    D_00438774 = 1;
+    effColorEditRgbMenuOpen = 0;
+    effColorEditPage = 0;
+    effColorEditSelectedKey = 0;
+    effColorEditSelectedAlphaKey = 1;
     effMappingState.cursor = 1;
     effMappingState.flags |= 0x10;
 }
@@ -15370,14 +15348,14 @@ s32 effEditMScaleTrack(s32 *work) {
 
 /* Reset the color/alpha editor's selected curve key to one, not a pending flag. */
 void effResetCurveEditorSelection(void) {
-    D_00438774 = 1;
+    effColorEditSelectedAlphaKey = 1;
 }
 
-extern SdfAlphaTrack D_0045C338;
+extern SdfAlphaTrack effColorEditAlphaTrack;
 extern u8 D_004002B8[];
-extern s32 D_00439080;
-extern s32 D_00439084;
-extern char D_004387A0[];
+extern s32 effColorEditFadeInFrame;
+extern s32 effColorEditFadeOutFrame;
+extern char effColorEditFrameCountFormat[];
 extern void btlDebugDrawMappingColorSpan(s32, s32, s32, s32, u32, u32);
 
 /* Edit the alpha fade interval and its four-breakpoint graph. */
@@ -15395,64 +15373,64 @@ s32 func_003025A8(SdfAlphaTrack *range, s32 frames) {
     u32 c1;
     u32 i;
 
-    D_0045C338 = *range;
+    effColorEditAlphaTrack = *range;
     btlReturnDebugMenuSetupWord((u32)D_004002B8);
     if (dds3PadBitTable[0xB] & 2) {
-        if (D_00438774 == 1) {
-            D_0045C338.fadeInFraction += step * 10.0f;
+        if (effColorEditSelectedAlphaKey == 1) {
+            effColorEditAlphaTrack.fadeInFraction += step * 10.0f;
         } else {
-            D_0045C338.fadeOutFraction += step * 10.0f;
+            effColorEditAlphaTrack.fadeOutFraction += step * 10.0f;
         }
         flags = 0x400003;
     } else if (dds3PadBitTable[9] & 2) {
-        if (D_00438774 == 1) {
-            D_0045C338.fadeInFraction -= step * 10.0f;
+        if (effColorEditSelectedAlphaKey == 1) {
+            effColorEditAlphaTrack.fadeInFraction -= step * 10.0f;
         } else {
-            D_0045C338.fadeOutFraction -= step * 10.0f;
+            effColorEditAlphaTrack.fadeOutFraction -= step * 10.0f;
         }
         flags = 0x400003;
     } else if (dds3PadBitTable[5] & 2) {
-        if (D_00438774 == 1) {
-            D_0045C338.fadeInFraction += step;
+        if (effColorEditSelectedAlphaKey == 1) {
+            effColorEditAlphaTrack.fadeInFraction += step;
         } else {
-            D_0045C338.fadeOutFraction += step;
+            effColorEditAlphaTrack.fadeOutFraction += step;
         }
         flags = 0x400003;
     } else if (dds3PadBitTable[4] & 2) {
-        if (D_00438774 == 1) {
-            D_0045C338.fadeInFraction -= step;
+        if (effColorEditSelectedAlphaKey == 1) {
+            effColorEditAlphaTrack.fadeInFraction -= step;
         } else {
-            D_0045C338.fadeOutFraction -= step;
+            effColorEditAlphaTrack.fadeOutFraction -= step;
         }
         flags = 0x400003;
     } else if ((dds3PadBitTable[6] & 2) || (dds3PadBitTable[7] & 2)) {
-        if (D_00438774 == 1) {
-            D_00438774 = 2;
+        if (effColorEditSelectedAlphaKey == 1) {
+            effColorEditSelectedAlphaKey = 2;
         } else {
-            D_00438774 = 1;
+            effColorEditSelectedAlphaKey = 1;
         }
     }
-    if (D_0045C338.fadeInFraction < 0.0f) {
-        D_0045C338.fadeInFraction = 0.0f;
-    } else if (1.0f < D_0045C338.fadeInFraction) {
-        D_0045C338.fadeInFraction = 1.0f;
+    if (effColorEditAlphaTrack.fadeInFraction < 0.0f) {
+        effColorEditAlphaTrack.fadeInFraction = 0.0f;
+    } else if (1.0f < effColorEditAlphaTrack.fadeInFraction) {
+        effColorEditAlphaTrack.fadeInFraction = 1.0f;
     }
-    if (D_0045C338.fadeOutFraction < 0.0f) {
-        D_0045C338.fadeOutFraction = 0.0f;
-    } else if (1.0f < D_0045C338.fadeOutFraction) {
-        D_0045C338.fadeOutFraction = 1.0f;
+    if (effColorEditAlphaTrack.fadeOutFraction < 0.0f) {
+        effColorEditAlphaTrack.fadeOutFraction = 0.0f;
+    } else if (1.0f < effColorEditAlphaTrack.fadeOutFraction) {
+        effColorEditAlphaTrack.fadeOutFraction = 1.0f;
     }
-    if (D_0045C338.fadeInFraction > D_0045C338.fadeOutFraction) {
-        if (effMappingState.rows[effMappingState.cursor].payload.numeric.target == &D_0045C338.fadeInFraction ||
-            (D_00438778 == 1 && D_00438774 == D_00438778)) {
-            D_0045C338.fadeOutFraction = D_0045C338.fadeInFraction;
+    if (effColorEditAlphaTrack.fadeInFraction > effColorEditAlphaTrack.fadeOutFraction) {
+        if (effMappingState.rows[effMappingState.cursor].payload.numeric.target == &effColorEditAlphaTrack.fadeInFraction ||
+            (effColorEditPage == 1 && effColorEditSelectedAlphaKey == effColorEditPage)) {
+            effColorEditAlphaTrack.fadeOutFraction = effColorEditAlphaTrack.fadeInFraction;
         } else {
-            D_0045C338.fadeInFraction = D_0045C338.fadeOutFraction;
+            effColorEditAlphaTrack.fadeInFraction = effColorEditAlphaTrack.fadeOutFraction;
         }
     }
-    D_00439080 = D_0045C338.fadeInFraction * frames;
-    D_00439084 = D_0045C338.fadeOutFraction * frames;
-    *range = D_0045C338;
+    effColorEditFadeInFrame = effColorEditAlphaTrack.fadeInFraction * frames;
+    effColorEditFadeOutFrame = effColorEditAlphaTrack.fadeOutFraction * frames;
+    *range = effColorEditAlphaTrack;
     btlDebugDrawRectangle(8, 0x164, 0xDC, 0x4C);
     btlDebugMenuBeforeRecordNoOp();
     btlDebugMenuRecordNoOp((u32)D_004002B8);
@@ -15474,7 +15452,7 @@ s32 func_003025A8(SdfAlphaTrack *range, s32 frames) {
         c1 = shade[1];
         btlDebugDrawMappingColorSpan(x0 + 0x10, graphY, x1 - x0, 0x10, (c0 << 16) | (c0 | (c0 << 8)) | 0x80000000,
                       (c1 << 16) | (c1 | (c1 << 8)) | 0x80000000);
-        if (i == D_00438774) {
+        if (i == effColorEditSelectedAlphaKey) {
             btlDebugDrawLine2D(x0 + 0xF, graphY - 4, x0 + 0xF, graphY + 20, 0x8000FF00);
             btlDebugDrawLine2D(x0 + 0x10, graphY - 4, x0 + 0x10, graphY + 20, 0x8000FF00);
         } else {
@@ -15482,7 +15460,7 @@ s32 func_003025A8(SdfAlphaTrack *range, s32 frames) {
         }
     }
     btlDebugDrawLine2D(0xC8, graphY - 4, 0xC8, graphY + 20, 0x80808080);
-    btlBossDebugPrintfN(0xC, graphY + 24, 8, D_004387A0, frames);
+    btlBossDebugPrintfN(0xC, graphY + 24, 8, effColorEditFrameCountFormat, frames);
     if (dds3PadBitTable[3] < 0) {
         flags &= ~1;
     }
@@ -15686,7 +15664,7 @@ u32 fileLoadEffectSlotA(void) {
                       effClassifyResourceMask(fileInfo.type));
         entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = entry;
-        memcpy(D_0045C270, entry, 0x80);
+        memcpy(effSelectedJobHeader, entry, 0x80);
         effQueuedFileHandle = (FileJobPayload *)entry->id;
         resource = (EffFileJobRequest *)effFindAssetData(entry);
         strcpy(entry->name, resource->name);
@@ -15694,7 +15672,7 @@ u32 fileLoadEffectSlotA(void) {
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob((u8 *)resource);
         effQueuedFileObject = effFindAssetObject(entry);
-        ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&D_003FFA78;
+        ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&effPartsListMenu;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
             fileJobDestroy(effTemporaryFileJob);
@@ -15705,7 +15683,7 @@ u32 fileLoadEffectSlotA(void) {
     return result;
 }
 
-extern u8 D_0045C270[];
+extern u8 effSelectedJobHeader[];
 
 extern FileJob *effCurrentFileQueueEntry;
 
@@ -15751,7 +15729,7 @@ u32 effQueueGeneratedFileJob(void) {
         effCurrentFileQueueEntry = entry;
         resource = (EffFileJobRequest *)effFindAssetData(entry);
         strcpy(entry->name, resource->name);
-        memcpy(D_0045C270, entry, 0x80);
+        memcpy(effSelectedJobHeader, entry, 0x80);
         queuedFile = entry->id;
         oldAllocation = resource->allocation;
         effQueuedFileHandle = (FileJobPayload *)queuedFile;
@@ -15765,7 +15743,7 @@ u32 effQueueGeneratedFileJob(void) {
         memcpy(D_00459E30, D_003F0DA8, 0x74);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
-        ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&D_003FFA78;
+        ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&effPartsListMenu;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
             fileJobDestroy(effTemporaryFileJob);
@@ -15800,7 +15778,7 @@ u32 effPollAndQueueCopiedFileResource(void) {
                       effClassifyResourceMask(fileInfo.type));
         entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = entry;
-        memcpy(D_0045C270, entry, 0x80);
+        memcpy(effSelectedJobHeader, entry, 0x80);
         effQueuedFileHandle = (FileJobPayload *)entry->id;
         resource = (EffFileJobRequest *)effFindAssetData(entry);
         strcpy(entry->name, resource->name);
@@ -15808,7 +15786,7 @@ u32 effPollAndQueueCopiedFileResource(void) {
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
-        ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&D_003FFA78;
+        ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&effPartsListMenu;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
             fileJobDestroy(effTemporaryFileJob);
@@ -15859,7 +15837,7 @@ u32 effLoadFileSlotF2(void) {
                       effClassifyResourceMask(fileInfo.type));
         entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = entry;
-        memcpy(D_0045C270, entry, 0x80);
+        memcpy(effSelectedJobHeader, entry, 0x80);
         effQueuedFileHandle = (FileJobPayload *)entry->id;
         resource = (EffFileJobRequest *)effFindAssetData(entry);
         strcpy(entry->name, resource->name);
@@ -15867,7 +15845,7 @@ u32 effLoadFileSlotF2(void) {
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
-        ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&D_003FFA78;
+        ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&effPartsListMenu;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
             fileJobDestroy(effTemporaryFileJob);
@@ -15902,7 +15880,7 @@ u32 effLoadMaterialFile(void) {
                       effClassifyResourceMask(fileInfo.type));
         entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = entry;
-        memcpy(D_0045C270, entry, 0x80);
+        memcpy(effSelectedJobHeader, entry, 0x80);
         effQueuedFileHandle = (FileJobPayload *)entry->id;
         resource = (EffFileJobRequest *)effFindAssetData(entry);
         strcpy(entry->name, resource->name);
@@ -15910,7 +15888,7 @@ u32 effLoadMaterialFile(void) {
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
-        ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&D_003FFA78;
+        ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&effPartsListMenu;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
             fileJobDestroy(effTemporaryFileJob);
@@ -15951,7 +15929,7 @@ u32 effPollAndQueueFileResourceWithUnitFloats(void) {
                       effClassifyResourceMask(fileInfo.type));
         entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = entry;
-        memcpy(D_0045C270, entry, 0x80);
+        memcpy(effSelectedJobHeader, entry, 0x80);
         effQueuedFileHandle = (FileJobPayload *)entry->id;
         resource = (EffFileJobRequest *)effFindAssetData(entry);
         strcpy(entry->name, resource->name);
@@ -15959,7 +15937,7 @@ u32 effPollAndQueueFileResourceWithUnitFloats(void) {
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
-        ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&D_003FFA78;
+        ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&effPartsListMenu;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
             fileJobDestroy(effTemporaryFileJob);
@@ -15971,10 +15949,10 @@ u32 effPollAndQueueFileResourceWithUnitFloats(void) {
 }
 
 void effResetFileResourceManager(void) {
-    D_0043876C = 0;
-    D_00438774 = 1;
-    D_00438770 = 0;
-    D_00438778 = 0;
+    effColorEditRgbMenuOpen = 0;
+    effColorEditSelectedAlphaKey = 1;
+    effColorEditSelectedKey = 0;
+    effColorEditPage = 0;
     D_004387A8 = 0;
     D_004387AC = 0;
     D_004387B0 = 0;
@@ -17783,7 +17761,7 @@ INCLUDE_SDATA(const s32, "game/code_002DE248", D_004386A0);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_004386A8);
 
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_004386B0);
+INCLUDE_SDATA(const s32, "game/code_002DE248", effPartsListScroll);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", effAuxiliaryFileQueue);
 
@@ -17807,7 +17785,7 @@ INCLUDE_SDATA(const s32, "game/code_002DE248", D_004386E0);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_004386E8);
 
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_004386F0);
+INCLUDE_SDATA(const s32, "game/code_002DE248", effEditorCurrentMenu);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", effQueuedFileObject);
 
@@ -17851,15 +17829,15 @@ INCLUDE_SDATA(const s32, "game/code_002DE248", effFileQueueNameRecord);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", effQueuedResourceNameRecord);
 
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_0043876C);
+INCLUDE_SDATA(const s32, "game/code_002DE248", effColorEditRgbMenuOpen);
 
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438770);
+INCLUDE_SDATA(const s32, "game/code_002DE248", effColorEditSelectedKey);
 
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438774);
+INCLUDE_SDATA(const s32, "game/code_002DE248", effColorEditSelectedAlphaKey);
 
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438778);
+INCLUDE_SDATA(const s32, "game/code_002DE248", effColorEditPage);
 
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_0043877C);
+INCLUDE_SDATA(const s32, "game/code_002DE248", effColorEditKeyColor);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438780);
 
@@ -17869,7 +17847,7 @@ INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438790);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438798);
 
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_004387A0);
+INCLUDE_SDATA(const s32, "game/code_002DE248", effColorEditFrameCountFormat);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_004387A8);
 
