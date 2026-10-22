@@ -25,7 +25,8 @@ typedef struct BattleRuntimeState {
     s32 cellWidth;
     s32 cellHeight;
     u8 *ownedData;
-    u8 unk_3C[4];
+    u8 fadeOrderCursor;
+    u8 pad3D[3];
     RefObj *resource;
     u8 *frameBuffer;
     struct sdfMemHandle_t *frameBufferAllocation;
