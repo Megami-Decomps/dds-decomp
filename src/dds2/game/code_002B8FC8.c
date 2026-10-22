@@ -98,7 +98,7 @@ extern s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key);
 
 extern u8 *D_00435E5C;
 
-extern void mnuClearListFlagsOneAndTwo();
+extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 
 extern s32 evtStageTestAdvanceResourceWork(void);
 
@@ -710,8 +710,6 @@ MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade);
 
 
 
-void mnuClearListFlagsOneAndTwo(u32 *flags);
-
 u32 mnuTestListFlagTwo(u32 *flags);
 
 /* Return the stored row step times the visible row count, in native units. */
@@ -979,11 +977,11 @@ MenuListNode *mnuRetreatWindowListSelection(MenuWindowContainer *menu) {
 }
 
 void mnuClearWindowListSelectionFlags(MenuWindowContainer *menu) {
-    mnuClearListFlagsOneAndTwo((u32)menu->list);
+    mnuClearListFlagsOneAndTwo(&menu->list->stateFlags);
 }
 
 void mnuCheckWindowListStatus(MenuWindowContainer *menu) {
-    mnuTestListFlagTwo((u32)menu->list);
+    mnuTestListFlagTwo(&menu->list->stateFlags);
 }
 
 
@@ -2535,16 +2533,16 @@ void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window) {
     window->flags = state;
     if (!(state & 0x30)) {
         if (!(input & 0x300000)) {
-            mnuClearListFlagsOneAndTwo((u32 *)list);
+            mnuClearListFlagsOneAndTwo(&list->stateFlags);
         }
         if (input & 0x10) {
-            if (mnuTestListFlagTwo((u32 *)list) == 0) {
+            if (mnuTestListFlagTwo(&list->stateFlags) == 0) {
                 window->fade = 0x100;
             }
             mnuRetreatListCursorDefault(list);
         }
         if (input & 0x20) {
-            if (mnuTestListFlagTwo((u32 *)list) == 0) {
+            if (mnuTestListFlagTwo(&list->stateFlags) == 0) {
                 window->fade = 0x100;
             }
             mnuAdvanceListCursorDefault(list);
@@ -2564,4 +2562,3 @@ INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AFB8);
 const MenuIconLayout D_0042AFD8 = {
     { { 3, 0xCA0, 0xA8 }, { 17, 0xDD0, 0xE0 }, { 1, 0x14C0, 0xE0 } }
 };
-
