@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "eff_texture_table.h"
 #include "eff_object_node.h"
 #include "eff_model_owner.h"
 #include "sdf_motion.h"
@@ -209,11 +210,6 @@ void effApplyScaledModelTertiaryVector(EffModelOwner *owner, float scale) {
     mdlSetScale(owner->model);
 }
 
-
-typedef struct EffTexTable {
-    u8 pad_00[0xC];
-    sdfTexHandle_t **entries; // 0x0C
-} EffTexTable;
 
 /* Battle state: resource headers for texture slots 1 and 2. */
 typedef struct EffBattleTexHeaders {
