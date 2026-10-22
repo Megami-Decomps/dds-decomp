@@ -12,13 +12,7 @@
 
 
 
-enum {
-    BRS_ICON_ID = 1,
-    BRS_ICON_X = 2,
-    BRS_ICON_Y = 3,
-};
 
-extern BrsIconRecord mnuCommonIconPlacements[];
 extern struct EffectSlotSet *D_003BC520;
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
