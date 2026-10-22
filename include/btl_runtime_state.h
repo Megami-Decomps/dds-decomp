@@ -27,8 +27,8 @@ typedef struct BattleRuntimeState {
     u8 *ownedData;
     u8 unk_3C[4];
     RefObj *resource;
-    void *request;
-    void *handle;
+    u8 *frameBuffer;
+    struct sdfMemHandle_t *frameBufferAllocation;
 } BattleRuntimeState;
 #else
 /* Native 32-byte overlay particle, initialized at 0x22D040 and drawn at 0x22D8A8. */
@@ -63,8 +63,8 @@ typedef struct BattleRuntimeState {
     f32 unk30;
     f32 unk34;
     BtlFadeParticle *ownedData;
-    void *resource;
-    void *handle;
+    u8 *frameBuffer;
+    struct sdfMemHandle_t *frameBufferAllocation;
 } BattleRuntimeState;
 #endif
 

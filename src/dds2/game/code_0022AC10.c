@@ -1883,12 +1883,12 @@ void btlInitializeGraphicsRuntime(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
     sdfDrawTag_t *packetList;
     sdfPreDrawTag_t *context;
-    runtime->handle = sdfMemAllocFromTailDirect(0x70000);
-    runtime->resource = (void *)sdfMemLock(runtime->handle);
+    runtime->frameBufferAllocation = sdfMemAllocFromTailDirect(0x70000);
+    runtime->frameBuffer = (u8 *)sdfMemLock(runtime->frameBufferAllocation);
     packetList = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
     context = (sdfPreDrawTag_t *)sdfGrAllocPacketBuff(16);
     sdfPreDrawTagInit(context);
-    sdfLinkStoreFrameImage(packetList, context, 0, 0, 0x200, 0xe0, (s32)runtime->resource, 0, 0, 0);
+    sdfLinkStoreFrameImage(packetList, context, 0, 0, 0x200, 0xe0, (s32)runtime->frameBuffer, 0, 0, 0);
     sdfPreDrawChainLink((SdfPacketChain *)D_00380860, context);
     D_00380608.append(&D_00380608, packetList);
 }
@@ -1897,11 +1897,11 @@ void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
     sdfLinkLoadImage(packetList, dds3RenderTexture->primaryResource,
-                              0, 0, 0x200, 0xe0, (s32)runtime->resource, 0);
+                              0, 0, 0x200, 0xe0, (s32)runtime->frameBuffer, 0);
     D_00380608.append(&D_00380608, packetList);
-    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)runtime->handle);
-    runtime->handle = 0;
-    runtime->resource = 0;
+    sdfMemFreeDelayedDirect(runtime->frameBufferAllocation);
+    runtime->frameBufferAllocation = 0;
+    runtime->frameBuffer = 0;
     runtime->options |= 1;
 }
 
@@ -2009,16 +2009,16 @@ void btlClearRuntimeState(void) {
     state->pending = 0;
     state->active = 0;
     state->options = 0;
-    state->handle = 0;
-    state->resource = 0;
+    state->frameBufferAllocation = 0;
+    state->frameBuffer = 0;
 }
 
 void btlResetAsyncState(void) {
-    void *handle = btlRuntimeState.handle;
-    if (handle != 0) {
-        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)handle);
-        btlRuntimeState.handle = 0;
-        btlRuntimeState.resource = 0;
+    struct sdfMemHandle_t *frameBufferAllocation = btlRuntimeState.frameBufferAllocation;
+    if (frameBufferAllocation != 0) {
+        sdfMemFreeDelayedDirect(frameBufferAllocation);
+        btlRuntimeState.frameBufferAllocation = 0;
+        btlRuntimeState.frameBuffer = 0;
     }
     btlResetRuntimeState();
 }
