@@ -478,7 +478,8 @@ void evtViewerBindNamedOwner(EffWorldNode *effectObject, s32 ownerNameIndex, s32
 }
 
 
-extern void effObjSetFlags(s32 obj, s32 flags);
+struct EffectObj;
+extern void effObjSetFlags(struct EffectObj *obj, u32 flags);
 extern void *effObjCreateEventNode(void *resource, void *position, void *scale);
 extern void effObjReplaceActiveEventNode(void *obj, u32 entryId);
 struct EffNodeDescriptor;
@@ -549,7 +550,7 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *track, EvtRunti
     }
     viewer->objects[slot] = (void *)handle;
     if (handle != 0) {
-        effObjSetFlags(handle, 1);
+        effObjSetFlags((struct EffectObj *)handle, 1);
     }
     return slot;
 }
@@ -577,7 +578,7 @@ void *evtEventViewerCreateOriginEffect(void *resource, u32 entryId, s32 ownerNam
     memset(scale, 0, 0x10);
     scale[3] = 1.0f;
     effect = effObjCreateEventNode(resource, position, scale);
-    effObjSetFlags((s32)effect, 1);
+    effObjSetFlags((struct EffectObj *)effect, 1);
     effObjReplaceActiveEventNode(effect, entryId);
     evtViewerBindNamedOwner((EffWorldNode *)effect, ownerNameIndex, billboardEntry, startFrame, viewer);
     return effect;
