@@ -148,7 +148,7 @@ s32 sdfDecomp(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes) {
                         if (command == SDF_DECODE_COMMAND_END_MARKER) {
                             decoder->output = output;
                             decoder->input = input;
-                            decoder->inputBytes = inputBytes;
+                            decoder->remainingInputBytes = inputBytes;
                             decoder->state = 0;
                             return 1;
                         }
@@ -272,7 +272,7 @@ s32 sdfDecomp(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes) {
         } while (inputBytes > 0);
     }
     decoder->input = input;
-    decoder->inputBytes = inputBytes;
+    decoder->remainingInputBytes = inputBytes;
     decoder->output = output;
     return 0;
 }

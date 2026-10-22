@@ -12,7 +12,7 @@ typedef struct SdfPacDecoder {
     u16 pendingBytes;     /* 0x02 */
     u8 *output;           /* 0x04 */
     const u8 *input;      /* 0x08 */
-    s32 inputBytes;       /* 0x0C */
+    s32 remainingInputBytes; /* 0x0C: bytes left in the current input span */
     u8 backrefLow;        /* 0x10 */
     u8 pad11[3];          /* 0x11: opaque */
 } SdfPacDecoder;
@@ -28,8 +28,8 @@ typedef char SdfPacDecoder_output_must_be_at_4[
     ((u32)&((SdfPacDecoder *)0)->output == 0x04) ? 1 : -1];
 typedef char SdfPacDecoder_input_must_be_at_8[
     ((u32)&((SdfPacDecoder *)0)->input == 0x08) ? 1 : -1];
-typedef char SdfPacDecoder_inputBytes_must_be_at_C[
-    ((u32)&((SdfPacDecoder *)0)->inputBytes == 0x0C) ? 1 : -1];
+typedef char SdfPacDecoder_remainingInputBytes_must_be_at_C[
+    ((u32)&((SdfPacDecoder *)0)->remainingInputBytes == 0x0C) ? 1 : -1];
 typedef char SdfPacDecoder_backrefLow_must_be_at_10[
     ((u32)&((SdfPacDecoder *)0)->backrefLow == 0x10) ? 1 : -1];
 
