@@ -24,12 +24,11 @@ void mnuSetNodeModelBroadcastByte(MnuModelNode *node, u8 highByte) {
     mdlApplyBroadcastVia(mdlSetColor, node->model, broadcastLowBytes | ((u32)highByte << 24));
 }
 
-void mnuSetModelNodeVisibility(u8 *node, s8 selector) {
-    MnuModelNode *entry = (MnuModelNode *)node;
+void mnuSetModelNodeVisibility(MnuModelNode *node, s8 selector) {
     if (selector == 1) {
-        entry->model->flags &= ~MDL_SKIP_TRANSFORMS;
+        node->model->flags &= ~MDL_SKIP_TRANSFORMS;
     } else {
-        entry->model->flags |= MDL_SKIP_TRANSFORMS;
+        node->model->flags |= MDL_SKIP_TRANSFORMS;
     }
 }
 
