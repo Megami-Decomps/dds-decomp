@@ -341,7 +341,7 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
 extern void effObjApplyTransformParameters(SdfPoolNode **, EffWorldNode *);
 extern void fldDrawEffectObjectShadow(EffWorldNode *);
 extern void fldDrawShadowDisc(f32, f32, f32, f32, s32);
-extern SdfPoolNode *D_00380788[13][4];
+extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
     f32 vec[4];
@@ -360,9 +360,9 @@ s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
         fldDrawEffectObjectShadow(obj);
     }
     if ((s32)((EffectObjectData *)obj->data)->followParameterIndex == -1) {
-        effObjApplyTransformParameters(D_00380788[0], obj);
+        effObjApplyTransformParameters(kwlnSceneSurfaceSets[0], obj);
     } else {
-        effObjApplyTransformParameters(D_00380788[(s32)((EffectObjectData *)obj->data)->followParameterIndex], obj);
+        effObjApplyTransformParameters(kwlnSceneSurfaceSets[(s32)((EffectObjectData *)obj->data)->followParameterIndex], obj);
     }
     if (!dds3ObjectBaseCheckFlag(obj, 0x400)) {
         return 1;
@@ -735,7 +735,6 @@ s32 effUpdateFadingModelTransform(EffWorldNode *object) {
 extern void fldSelectDisplayBuffer(u32);
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 extern u32 fldPlayerObject;
-extern u8 D_00380808[];
 
 /* Submit the normal pass and the opacity-mode pass, temporarily neutralizing
  * the tint while the player is hidden. */
@@ -750,7 +749,7 @@ s32 effObjSubmitTransformOpacityPasses(EffWorldNode *object) {
     if (data->activeId == -1) {
         fldSelectDisplayBuffer(0x27);
         fldSubmitFrameQuad(1, 5, 0x60, 1, 0, 0, 1, 2);
-        effObjApplyTransformParameters(D_00380788[0], object);
+        effObjApplyTransformParameters(kwlnSceneSurfaceSets[0], object);
         fldSelectDisplayBuffer(0x27);
         fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
     } else {
@@ -764,17 +763,17 @@ s32 effObjSubmitTransformOpacityPasses(EffWorldNode *object) {
                         u32 savedColor = object->color;
 
                         object->color = EFFECT_OPACITY_COLOR_NEUTRAL;
-                        effObjApplyTransformParameters(D_00380788[data->activeId], object);
+                        effObjApplyTransformParameters(kwlnSceneSurfaceSets[data->activeId], object);
                         object->color = savedColor;
                     } else {
-                        effObjApplyTransformParameters(D_00380808, object);
+                        effObjApplyTransformParameters(kwlnSceneSurfaceSets[8], object);
                     }
                 } else {
-                    effObjApplyTransformParameters(D_00380788[data->activeId], object);
+                    effObjApplyTransformParameters(kwlnSceneSurfaceSets[data->activeId], object);
                 }
             }
         }
-        effObjApplyTransformParameters(D_00380788[data->activeId], object);
+        effObjApplyTransformParameters(kwlnSceneSurfaceSets[data->activeId], object);
         fldSelectDisplayBuffer(0x22);
         fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
     }

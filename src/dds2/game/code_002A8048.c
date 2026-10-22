@@ -180,12 +180,11 @@ void mnuDrawMovieList(void) {
 }
 
 
-extern s32 D_00457E58[];
 
 void mnuDrawMovieProgressCounter(void) {
     SdfListHead *list;
     if (mnuCheckMovieDecoderStatus() == 0) {
-        list = (SdfListHead *)D_00457E58[0];
+        list = mnuMovieList.packets;
         sdfAppendPacket(list, (u32)sdfCreateBorderedRectanglePacket(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
         sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", mnuMovieDrawContext.soundNode.playbackFrameIndex, (s32)mnuMovieDrawContext.soundNode.cycleLength));
     }

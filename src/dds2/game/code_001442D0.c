@@ -503,7 +503,7 @@ extern s32 D_004361D0;
 
 #include "fld_title_banner_menu.h"
 
-extern SdfPoolNode *D_00380838[4];
+extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 
 s32 fldResolvePendingTitleBanner(void) {
@@ -1253,7 +1253,7 @@ void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
     VU0_STORE_VF(vf10, emitter->matrix[3]);
     sdfDrawNodeBuildMatrix(handle);
     sdfModelUpdateCurrentFrameTransforms(emitter);
-    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, D_00380838, emitter);
+    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, kwlnSceneSurfaceSets[11], emitter);
 }
 
 extern void fldSubmitSpriteRect(s32, s32, s32, s32, s32, s32, s32, s32,

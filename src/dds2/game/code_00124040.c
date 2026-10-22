@@ -329,7 +329,7 @@ extern s32 D_00435F30;
 
 extern SdfPoolNode D_0037FF88[];
 
-extern SdfPoolNode *D_00380788[13][4];
+extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 
 #include "fld_encounter_roll_entry.h"
@@ -1753,7 +1753,7 @@ u8 fldIsFlagActive(void) {
 }
 
 void fldConfigureRenderCleanupMessage(void) {
-    sdfStoreMessageWordsAndNotifyConsumer(D_00380788[7], &D_0037FF88[0], &D_0037FF88[6], &D_0037FF88[8], &D_0037FF88[7]);
+    sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[7], &D_0037FF88[0], &D_0037FF88[6], &D_0037FF88[8], &D_0037FF88[7]);
 }
 
 enum {

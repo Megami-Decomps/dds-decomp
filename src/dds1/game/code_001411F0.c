@@ -1061,7 +1061,7 @@ void fldResetSceneResourceTables(void) {
 }
 
 
-extern SdfPoolNode *D_00325838[];
+extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 
 void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
@@ -1079,7 +1079,7 @@ void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
         VU0_STORE_VF(vf10, emitter->matrix[3]);
     sdfDrawNodeBuildMatrix(handle);
     sdfModelUpdateCurrentFrameTransforms(emitter);
-    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, D_00325838, emitter);
+    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, kwlnSceneSurfaceSets[11], emitter);
 }
 
 extern FldProjectedSprite D_0033EBA0[];

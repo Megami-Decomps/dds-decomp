@@ -33,7 +33,7 @@ extern u8 effModelDefaultScale[];
 
 
 extern u32 effBattleMiscGetTableEntry(s32 index);
-extern struct SdfPoolNode *D_00380828[4];
+extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 
 
@@ -334,7 +334,7 @@ void *effParamCreateViewerWork(s32 *package) {
 
 /* Run the context/node update with this game's fixed global argument. */
 void effParamInitFromGlobal(void *work) {
-    mdlProcessContextNodesAndTransforms(work, D_00380828);
+    mdlProcessContextNodesAndTransforms(work, kwlnSceneSurfaceSets[10]);
 }
 
 /* Release the model context owned by parameter work. */

@@ -86,7 +86,7 @@ extern void btlDrawUnitTransparencyPasses(BtlUnit *, MdlCtx *, SdfModel *, SdfPo
 
 extern void dds3ObjectBaseOffFlag(void *, u32);
 
-extern struct SdfPoolNode *D_00380788[13][4];
+extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 extern SdfPoolNode *btlUnitTransparencySurfaces[];
 
@@ -3411,7 +3411,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
                         info->inner->lighting = 0;
                     }
                     mdlBroadcastMasked(info, color);
-                    mdlProcessContextNodesAndTransforms(info, D_00380788[0]);
+                    mdlProcessContextNodesAndTransforms(info, kwlnSceneSurfaceSets[0]);
                     dds3ObjectBaseOffFlag(unit->effectObject, 1);
                     btlBossDebugPrintf(D_00417940, unit);
                 }

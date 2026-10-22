@@ -210,7 +210,7 @@ typedef char EffPCPSprayWork_size_must_be_0x98[
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
 
-extern struct SdfPoolNode *D_00380828[4];
+extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 
 
@@ -403,12 +403,12 @@ void effTwinEffectUpdate(EffPCPTwinWork *work) {
         effParamWorkCallback1(work->pair[slotIndex][0], work->scale * 1.5f);
         effParamWorkCallback1(work->pair[slotIndex][1], 1.75f);
         mdlBroadcastMasked(obj[1], work->color);
-        mdlProcessContextNodesAndTransforms(obj[0], D_00380828);
+        mdlProcessContextNodesAndTransforms(obj[0], kwlnSceneSurfaceSets[10]);
         sdfLoadMapRecordPositionVector(obj[0]->inner, 1);
         posp = &pos;
         VU0_STORE_VF_UNCLOBBERED(vf10, posp);
         mdlStorePrimaryVectorVU(obj[1]);
-        mdlProcessContextNodesAndTransforms(obj[1], D_00380828);
+        mdlProcessContextNodesAndTransforms(obj[1], kwlnSceneSurfaceSets[10]);
         if (work->frame > 0x18) {
             effParamWorkCallback0(work->shared[slotIndex], posp);
             effParamWorkInvokeCallback(work->shared[slotIndex]);
@@ -522,10 +522,10 @@ void effPcpStaggerUpdate(EffPCPStaggered *work) {
             effParamWorkCallback1(work->handle[i * 2], work->scale * 1.5f);
             effParamWorkCallback1(work->handle[i * 2 + 1], 1.5f);
             mdlBroadcastMasked(obj[1], work->color);
-            mdlProcessContextNodesAndTransforms(obj[0], D_00380828);
+            mdlProcessContextNodesAndTransforms(obj[0], kwlnSceneSurfaceSets[10]);
             sdfLoadMapRecordPositionVector(obj[0]->inner, 1);
             mdlStorePrimaryVectorVU(obj[1]);
-            mdlProcessContextNodesAndTransforms(obj[1], D_00380828);
+            mdlProcessContextNodesAndTransforms(obj[1], kwlnSceneSurfaceSets[10]);
         }
     }
 }
@@ -640,7 +640,7 @@ void effCrossEffectUpdate(EffPCPCrossWork *work) {
     VU0_LOAD_VF(vf10, work);
     mdlStorePrimaryVectorVU(anchor);
     effParamWorkCallback1(work->base, work->scale);
-    mdlProcessContextNodesAndTransforms(anchor, D_00380828);
+    mdlProcessContextNodesAndTransforms(anchor, kwlnSceneSurfaceSets[10]);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             if (work->remainingDelay[i][j] != 0) {
@@ -651,7 +651,7 @@ void effCrossEffectUpdate(EffPCPCrossWork *work) {
             mdlBroadcastMasked(obj, work->color);
             sdfLoadMapRecordPositionVector(anchor->inner, i * 4 + j + 1);
             mdlStorePrimaryVectorVU(obj);
-            mdlProcessContextNodesAndTransforms(obj, D_00380828);
+            mdlProcessContextNodesAndTransforms(obj, kwlnSceneSurfaceSets[10]);
         }
     }
 }
@@ -750,11 +750,11 @@ void effPcpDelayedPairsUpdate(EffPCPDelayedPairs *work) {
                         VU0_LOAD_VF_MEMORY(vf10, work);
             mdlStorePrimaryVectorVU(obj[0]);
             mdlBroadcastMasked(obj[1], work->color);
-            mdlProcessContextNodesAndTransforms(obj[0], D_00380828);
+            mdlProcessContextNodesAndTransforms(obj[0], kwlnSceneSurfaceSets[10]);
             sdfLoadMapRecordPositionVector(obj[0]->inner, 1);
                         VU0_STORE_VF_UNCLOBBERED(vf10, &vec);
             mdlStorePrimaryVectorVU(obj[1]);
-            mdlProcessContextNodesAndTransforms(obj[1], D_00380828);
+            mdlProcessContextNodesAndTransforms(obj[1], kwlnSceneSurfaceSets[10]);
         }
     }
 }
@@ -843,7 +843,7 @@ void effPcpChargeUpdateAndDrawHistory(EffPCPChargeWork *work) {
     scale = work->scale * 1.5f;
     effParamWorkCallback1(work->secondaryHandle, scale);
     effParamWorkCallback0(work->secondaryHandle, work->vectorWords);
-    mdlProcessContextNodesAndTransforms(model, D_00380828);
+    mdlProcessContextNodesAndTransforms(model, kwlnSceneSurfaceSets[10]);
     captureRow = work->historyCount;
     if (captureRow < 25) {
         for (point = 0; point < 7; point++) {
@@ -938,7 +938,7 @@ void effPcpSpawnOnce(EffPCPSpawnOnceWork *work) {
         VU0_LOAD_VF_MEMORY(vf10, work->vector);
     mdlStorePrimaryVectorVU(obj);
     effParamWorkCallback3(work->secondaryHandle, work->color);
-    mdlProcessContextNodesAndTransforms(obj, D_00380828);
+    mdlProcessContextNodesAndTransforms(obj, kwlnSceneSurfaceSets[10]);
     sdfLoadMapRecordPositionVector(obj->inner, 1);
         VU0_STORE_VF_TO_MEMORY(vf10, vec);
     effParamWorkCallback0(work->secondaryHandle, &vec);
@@ -3109,7 +3109,7 @@ void effPcpBlockSetUpdate(EffPCPBlockSetWork *work) {
     }
     effParamWorkCallback2(work->headHandle, matrix);
     effParamWorkCallback3(work->headHandle, color);
-    mdlProcessContextNodesAndTransforms(model, D_00380828);
+    mdlProcessContextNodesAndTransforms(model, kwlnSceneSurfaceSets[10]);
     PCP_COPY_VECTOR(work->previousPosition, work->currentPosition);
     sdfLoadMapRecordPositionVector(model->inner, 1);
     VU0_STORE_VF(vf10, work->currentPosition);
@@ -4841,7 +4841,7 @@ void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
             VU0_LOAD_VF(vf10, vec);
             effPcpCaptureNodeVectors(root);
             sdfModelUpdateCurrentFrameTransforms(model);
-            sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, D_00380828, model);
+            sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, kwlnSceneSurfaceSets[10], model);
         }
     }
     work->frame++;
@@ -5743,7 +5743,7 @@ void effPcpUpdateMapMotionEvents(EffPCPMapEventWork *work) {
         mdlStorePrimaryVectorVU(model);
         VU0_LOAD_VF(vf10, scale);
         mdlStoreTertiaryVectorVU(model);
-        mdlProcessContextNodesAndTransforms(model, D_00380828);
+        mdlProcessContextNodesAndTransforms(model, kwlnSceneSurfaceSets[10]);
         count = work->count;
         fadeIn = work->params.fadeIn;
         fadeOut = work->params.fadeOut;

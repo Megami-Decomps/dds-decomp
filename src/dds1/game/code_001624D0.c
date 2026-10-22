@@ -24,7 +24,7 @@ extern u8 effModelDefaultQuaternion[];
 
 extern u8 effModelDefaultScale[];
 
-extern struct SdfPoolNode *D_00325828[4];
+extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 extern u16 D_003BB044;
 
@@ -324,7 +324,7 @@ void *effParamCreateInitWork(void *package) {
 
 /* Run the context/node update with this game's fixed global argument. */
 void effParamInitFromGlobal(void *work) {
-    mdlProcessContextNodesAndTransforms(work, D_00325828);
+    mdlProcessContextNodesAndTransforms(work, kwlnSceneSurfaceSets[10]);
 }
 
 /* Release the model context owned by parameter work. */

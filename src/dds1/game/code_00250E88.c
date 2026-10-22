@@ -1782,7 +1782,7 @@ extern s32 mnuDrawLoadedProgressPanels(void *control, MenuProgressHost *work, s3
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
 struct SdfPoolNode;
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);
-extern struct SdfPoolNode *D_00325818[4];
+extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 
 /* Update attached visuals and stage completion, then ramp the message-window shade over ten frames.
@@ -1803,7 +1803,7 @@ s32 mnuUpdateMantraSceneDisplay(void) {
         sceneMetadata->stageStarted = 1;
     }
     effUpdateAttached(0x1200, 0x730, 1, sceneMetadata->attachedEffect, MNU_SCENE_DRAW_CONTEXT);
-    if (evtStageTestUpdate(D_00325818) >= 2) {
+    if (evtStageTestUpdate(kwlnSceneSurfaceSets[9]) >= 2) {
         sceneMetadata->stageFinished = 1;
     }
     if (evtGetMessageWindowControlState() != 0) {

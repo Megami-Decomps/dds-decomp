@@ -369,7 +369,7 @@ extern void evtSubmitPrimaryAlphaBlendMode(s32 blendMode);
 extern void evtSubmitPrimaryFramePacket(void);
 extern void evtSubmitAlternateFramePacket(void);
 struct SdfPoolNode;
-extern struct SdfPoolNode *D_00325818[4];
+extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 
 void dds3DrawObjectWithGradientOverlay(void *object) {
@@ -394,7 +394,7 @@ void dds3DrawObjectWithGradientOverlay(void *object) {
     context = (MdlCtx *)base->resourceHandle;
     inner = context->inner;
     inner->flags |= 0x20;
-    mdlProcessContextNodesAndTransforms(context, D_00325818);
+    mdlProcessContextNodesAndTransforms(context, kwlnSceneSurfaceSets[9]);
     inner->flags &= ~0x20;
     dds3ObjectBaseOnFlag(object, 0x10000);
 
@@ -448,7 +448,7 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, EffWorldNode 
         if (dds3ObjectBaseCheckFlag(object, 0x10000)) {
             model = ((MdlCtx *)base->resourceHandle)->inner;
             model->flags |= 0x40;
-            mdlProcessContextNodesAndTransforms((MdlCtx *)base->resourceHandle, D_00325818);
+            mdlProcessContextNodesAndTransforms((MdlCtx *)base->resourceHandle, kwlnSceneSurfaceSets[9]);
             model->flags &= ~0x40;
             dds3ObjectBaseOffFlag(object, 0x10000);
             return;
