@@ -116,7 +116,7 @@ extern char D_00437BF8[];
 
 extern u8 *D_00435E5C;
 
-extern void mnuClearListFlagsOneAndTwo();
+extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 
 extern s32 evtStageTestAdvanceResourceWork(void);
 
@@ -1487,7 +1487,7 @@ s32 mnuStaffSwitchPartyPage(dds3ProcessID_t *requestArgument) {
         mnuAdvanceListCursorDefault(((MenuContext *)context)->partyWindow.lists[0]);
         pageChanged = 1;
     }
-    mnuClearListFlagsOneAndTwo(((MenuContext *)context)->partyWindow.lists[0]);
+    mnuClearListFlagsOneAndTwo(&((MenuContext *)context)->partyWindow.lists[0]->stateFlags);
     if (pageChanged != 0) {
         mnuCreatePanels(requestArgument);
         p2sdPlaySE(4, 0x7F, 0x3F);
@@ -2769,7 +2769,7 @@ s32 ptySkillMenuHandlePageSwitch(dds3ProcessID_t *callback) {
         mnuAdvanceListCursorDefault(((MenuContext *)context)->partyWindow.lists[0]);
         changed = 1;
     }
-    mnuClearListFlagsOneAndTwo(((MenuContext *)context)->partyWindow.lists[0]);
+    mnuClearListFlagsOneAndTwo(&((MenuContext *)context)->partyWindow.lists[0]->stateFlags);
     if (changed != 0) {
         ptySkillMenuOpenPartyPage(callback);
         p2sdPlaySE(4, 0x7F, 0x3F);
@@ -2843,7 +2843,7 @@ s32 ptySkillMenuBrowseCandidatePages(dds3ProcessID_t *callback) {
     }
     mnuHandlePanelListPageJumpInput(window, &input);
     if (!(buttons & 0xC00000)) {
-        mnuClearListFlagsOneAndTwo(menu[3]);
+        mnuClearListFlagsOneAndTwo(&((MenuList *)(u32)menu[3])->stateFlags);
     }
     offset = window->list->windowOffset;
     if (buttons & 0x40) {
@@ -4428,4 +4428,3 @@ INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C20);
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C28);
 
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C30);
-
