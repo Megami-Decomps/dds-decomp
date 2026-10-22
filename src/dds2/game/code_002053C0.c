@@ -7,6 +7,7 @@
 #include "sdf_packet_builders.h"
 #include "btl_effect_position.h"
 #include "btl_effect_table.h"
+#include "btl_formation_spacing_cell.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
 #include "btl_task_state.h"
@@ -1070,17 +1071,6 @@ void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
         }
     }
 }
-
-
-
-/* Read-only spacing cells from the actor resource archive: first float at
- * +0x38, then one cell per 0x14-byte slot. This view owns no archive storage. */
-typedef struct BtlFormationSpacingCell {
-    f32 spacing;
-    u8 unread04[0x10];
-} BtlFormationSpacingCell;
-
-typedef char BtlFormationSpacingCellSizeCheck[(sizeof(BtlFormationSpacingCell) == 0x14) ? 1 : -1];
 
 void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
     BtlUnit *participants[3];

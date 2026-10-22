@@ -11,6 +11,7 @@
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_action_camera_preset.h"
 #include "btl_actor_status_table_api.h"
+#include "btl_formation_spacing_cell.h"
 #include "btl_rain_effect_api.h"
 #include "btl_blend_color_api.h"
 #include "kwln_fade.h"
@@ -11226,15 +11227,6 @@ typedef struct BattleFormationActionTable {
 typedef char BattleFormationActionTableSizeCheck[(sizeof(BattleFormationActionTable) == 0x2A8) ? 1 : -1];
 
 extern BattleFormationActionTable *D_003BAA64;
-
-/* Read-only spacing cells from the actor resource archive: first float at
- * +0x38, then one cell per 0x14-byte slot. This view owns no archive storage. */
-typedef struct BtlFormationSpacingCell {
-    f32 spacing;
-    u8 unread04[0x10];
-} BtlFormationSpacingCell;
-
-typedef char BtlFormationSpacingCellSizeCheck[(sizeof(BtlFormationSpacingCell) == 0x14) ? 1 : -1];
 
 void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
     BtlUnit *participants[3];
