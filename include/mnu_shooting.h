@@ -10,6 +10,14 @@ struct dds3ModelHandle_t;
 struct FileQueue;
 struct FileRequest;
 
+typedef enum MnuShootingPackageLoadState {
+    MNU_SHOOTING_PACKAGE_LOAD_INITIALIZE = 0,
+    MNU_SHOOTING_PACKAGE_LOAD_FINISHED = 1,
+    MNU_SHOOTING_PACKAGE_LOAD_REQUEST_ENTRY = 2,
+    MNU_SHOOTING_PACKAGE_LOAD_WAIT_ENTRY = 3,
+    MNU_SHOOTING_PACKAGE_LOAD_PROCESS_ENTRY = 4
+} MnuShootingPackageLoadState;
+
 /* Records are 0x34 bytes; bit 0 of flags marks a claimed slot. */
 typedef struct ModelInstance {
     f32 position[3];
@@ -217,7 +225,7 @@ typedef struct MnuShootingWork {
     s32 (*initialize)(u8 *work);
     s32 (*update)(u8 *work);
     struct FileRequest *packageRequest; /* 0x64 */
-    u32 packageLoadState;
+    MnuShootingPackageLoadState packageLoadState; /* 0x68: package-entry loader state machine. */
     u32 packageEntryIndex;
     /* The pause bitfield and round transitions share this complete flag word. */
     union {
@@ -265,10 +273,13 @@ typedef struct MnuShootingWork {
 
 typedef char MnuShootingWork_size_must_be_0x1E0[
     (sizeof(MnuShootingWork) == 0x1E0) ? 1 : -1];
+typedef char MnuShootingPackageLoadState_size_must_be_4[
+    (sizeof(MnuShootingPackageLoadState) == 4) ? 1 : -1];
 
 typedef char ShootingPackageOffsetsAssert[
     ((unsigned long)&((MnuShootingWork *)0)->queueCopies == 0x4C &&
      (unsigned long)&((MnuShootingWork *)0)->packageRequest == 0x64 &&
+     (unsigned long)&((MnuShootingWork *)0)->packageLoadState == 0x68 &&
      (unsigned long)&((MnuShootingWork *)0)->packageDataRequest == 0x1DC) ? 1 : -1];
 
 typedef char ShootingInputOffsetsAssert[

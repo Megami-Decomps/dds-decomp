@@ -166,7 +166,7 @@ MnuShootingWork *mdlAllocateViewerPackageWork(void) {
 
     memset(work, 0, 0x1E0);
     work->allocation = block;
-    work->packageLoadState = 0;
+    work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_INITIALIZE;
     work->unk1D8 = 0x80;
     work->round = 0;
     work->currentScore = 0;
@@ -257,18 +257,18 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
     void *data = NULL;
 
     switch (work->packageLoadState) {
-    case 0:
+    case MNU_SHOOTING_PACKAGE_LOAD_INITIALIZE:
         work->packageEntryIndex = 0;
-        work->packageLoadState = 2;
+        work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_REQUEST_ENTRY;
         break;
 
-    case 1:
-        work->packageLoadState = 0;
+    case MNU_SHOOTING_PACKAGE_LOAD_FINISHED:
+        work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_INITIALIZE;
         work->state = 1;
         evtPrintDeveloperConsoleMessage(D_0042D500);
         return 1;
 
-    case 2:
+    case MNU_SHOOTING_PACKAGE_LOAD_REQUEST_ENTRY:
         switch (D_0040A970[work->packageEntryIndex].kind) {
         case 0:
             if (work->round == D_0040A970[work->packageEntryIndex].value) {
@@ -277,9 +277,9 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             } else {
                 work->packageEntryIndex++;
                 if (work->packageEntryIndex < 13) {
-                    work->packageLoadState = 2;
+                    work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_REQUEST_ENTRY;
                 } else {
-                    work->packageLoadState = 1;
+                    work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_FINISHED;
                 }
                 return 0;
             }
@@ -290,7 +290,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
                     D_0040A970[work->packageEntryIndex].name, 0,
                     &work->resourceSlots[D_0040A970[work->packageEntryIndex].value]);
             } else {
-                work->packageLoadState = 4;
+                work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_PROCESS_ENTRY;
             }
             break;
         case 2: {
@@ -299,7 +299,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             if (status == 0) {
                 p2sdLoadSMGFile(D_0040A970[work->packageEntryIndex].value);
             } else {
-                work->packageLoadState = 4;
+                work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_PROCESS_ENTRY;
                 evtPrintDeveloperConsoleMessage(D_0042D518,
                     D_0040A970[work->packageEntryIndex].name);
             }
@@ -312,9 +312,9 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             } else {
                 work->packageEntryIndex++;
                 if (work->packageEntryIndex < 13) {
-                    work->packageLoadState = 2;
+                    work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_REQUEST_ENTRY;
                 } else {
-                    work->packageLoadState = 1;
+                    work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_FINISHED;
                 }
                 return 0;
             }
@@ -327,32 +327,32 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             } else {
                 work->packageEntryIndex++;
                 if (work->packageEntryIndex < 13) {
-                    work->packageLoadState = 2;
+                    work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_REQUEST_ENTRY;
                 } else {
-                    work->packageLoadState = 1;
+                    work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_FINISHED;
                 }
                 return 0;
             }
             break;
         }
-        work->packageLoadState = 3;
+        work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_WAIT_ENTRY;
         break;
 
-    case 3:
+    case MNU_SHOOTING_PACKAGE_LOAD_WAIT_ENTRY:
         switch (D_0040A970[work->packageEntryIndex].kind) {
         case 0:
             if (pacFileCheckEnd(work->packageRequest) != 0) {
-                work->packageLoadState = 4;
+                work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_PROCESS_ENTRY;
             }
             break;
         case 1:
             if (work->resourceSlots[D_0040A970[work->packageEntryIndex].value] != 0) {
-                work->packageLoadState = 4;
+                work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_PROCESS_ENTRY;
             }
             break;
         case 2:
             if (sndFindPackedTrackLoadStatus(D_0040A970[work->packageEntryIndex].value) == 1) {
-                work->packageLoadState = 4;
+                work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_PROCESS_ENTRY;
             }
             break;
         case 3:
@@ -360,13 +360,13 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
         case 5:
             if (pacCheckEnd(work->packageDataRequest) != 0) {
                 evtPrintDeveloperConsoleMessage(D_0042D530);
-                work->packageLoadState = 4;
+                work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_PROCESS_ENTRY;
             }
             break;
         }
         break;
 
-    case 4: {
+    case MNU_SHOOTING_PACKAGE_LOAD_PROCESS_ENTRY: {
         struct FileRequest *request = work->packageRequest;
 
         if (request != NULL) {
@@ -520,9 +520,9 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
 
         work->packageEntryIndex++;
         if (work->packageEntryIndex < 13) {
-            work->packageLoadState = 2;
+            work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_REQUEST_ENTRY;
         } else {
-            work->packageLoadState = 1;
+            work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_FINISHED;
         }
         break;
     }
