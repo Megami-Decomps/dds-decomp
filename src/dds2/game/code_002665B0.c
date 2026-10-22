@@ -131,7 +131,7 @@ extern const char *mnuTerminalReducedModeSpriteNames[]; /* Two entries in extern
 extern const char *mnuTerminalCharacterBackgroundSpriteNames[4];
 
 
-extern void evtLoadResourcePair(u32, EvtResourcePair *);
+extern void evtLoadResourcePair(const char *, EvtResourcePair *);
 extern void mnuSnapshotCampTextureHandles(u32 *);
 extern void mnuBuildEligibleSlotList();
 extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
@@ -1038,7 +1038,7 @@ MenuSlotState *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     obj->slot = slot;
     obj->slotCopy = slot;
     mnuTerminalBuildMenus(obj);
-    evtLoadResourcePair((u32)"/facility/msg/terminal/mes_data.bmd", &obj->messageResources);
+    evtLoadResourcePair("/facility/msg/terminal/mes_data.bmd", &obj->messageResources);
     fclInitMessage((struct ItfMesSub *)obj->messageResources.dataAddress);
     for (i = 0; i < MNU_SELECTED_SLOT_COUNT; i++) {
         obj->selectedSlots[i] = -1;
