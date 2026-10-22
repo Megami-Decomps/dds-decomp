@@ -42,7 +42,7 @@ extern s32 itfMesCountZeroBits(s32 bitCount, u32 remainingMask);
 extern u32 itfMessageFlags;
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
-extern SndPad D_0037F510;
+extern SndPad kwlnTaskPadButtonStates;
 
 typedef ItfMesPoolNode ItfMesWindowRec;
 
@@ -1021,16 +1021,16 @@ s32 itfMesRunPanelLayoutInspector(void) {
         panel = &(debug->window->state)->blkA4;
         switch (debug->mode) {
         case 0:
-            if (D_0037F510.secondaryUp & 2) {
+            if (kwlnTaskPadButtonStates.secondaryUp & 2) {
                 if (--debug->selectedItem < 0) {
                     debug->selectedItem = 2;
                 }
-            } else if (D_0037F510.secondaryDown & 2) {
+            } else if (kwlnTaskPadButtonStates.secondaryDown & 2) {
                 if (++debug->selectedItem >= 5) {
                     debug->selectedItem = 0;
                 }
             }
-            if (D_0037F510.secondaryCross < 0) {
+            if (kwlnTaskPadButtonStates.secondaryCross < 0) {
                 ItfMesDebugState *confirmDebug = &D_003B4770;
 
                 switch (confirmDebug->selectedItem) {
@@ -1046,19 +1046,19 @@ s32 itfMesRunPanelLayoutInspector(void) {
                     confirmDebug->window = itfMesFindPreviousWindowWithPanelSprite(confirmDebug->window);
                     break;
                 }
-            } else if (D_0037F510.secondaryCancel < 0) {
+            } else if (kwlnTaskPadButtonStates.secondaryCancel < 0) {
                 return -1;
             }
             break;
         case 1:
             itfAdjustPanelBoundsWithPad(panel, debug->selectedItem);
-            if (D_0037F510.secondaryCancel < 0) {
+            if (kwlnTaskPadButtonStates.secondaryCancel < 0) {
                 debug->mode = 0;
             }
             break;
         case 2:
             sndStepIndexByPad(panel);
-            if (D_0037F510.secondaryCancel < 0) {
+            if (kwlnTaskPadButtonStates.secondaryCancel < 0) {
                 D_003B4770.mode = 0;
             }
             break;
@@ -1891,8 +1891,8 @@ void itfMesAdvanceEntryText(ItfMesState *mes) {
         if (!(mes->flags & 0x100000)) {
             mes->fade.kind = 1;
         }
-        if (!(D_0037F510.confirm < 0 || D_0037F510.primaryCancel < 0 ||
-              (D_0037F510.primaryTriangle != 0 && mes->fade.textAdvanceFrameCount >= 5 && !(itfMessageFlags & 1))) &&
+        if (!(kwlnTaskPadButtonStates.confirm < 0 || kwlnTaskPadButtonStates.primaryCancel < 0 ||
+              (kwlnTaskPadButtonStates.primaryTriangle != 0 && mes->fade.textAdvanceFrameCount >= 5 && !(itfMessageFlags & 1))) &&
               entryBlock->textInterfaceMask != 0) {
             return;
         }
@@ -1914,7 +1914,7 @@ void itfMesAdvanceEntryText(ItfMesState *mes) {
         mes->flags = (mes->flags & ~7) | 3;
         return;
     }
-    if ((D_0037F510.confirm < 0 || D_0037F510.primaryCancel < 0 || (D_0037F510.primaryTriangle != 0 && !(itfMessageFlags & 1))) &&
+    if ((kwlnTaskPadButtonStates.confirm < 0 || kwlnTaskPadButtonStates.primaryCancel < 0 || (kwlnTaskPadButtonStates.primaryTriangle != 0 && !(itfMessageFlags & 1))) &&
         !(mes->flags & 0x1000000) && !(mes->flags & 0x400000)) {
         frFontEnableNodeContextModes(entryBlock->glyphChain);
         if (mes->blk14.glyphChain != NULL) {
@@ -2022,14 +2022,14 @@ s32 sndSeqSelectPoll(ItfMesState *panel) {
     ItfMesBlk40 *sel = &panel->blk40;
     s32 dir = 0;
     s32 index;
-    if (D_0037F510.prev & 2) {
+    if (kwlnTaskPadButtonStates.prev & 2) {
         if (sel->selectedIndex != 0) {
             dir = -1;
-        } else if (D_0037F510.prev < 0) {
+        } else if (kwlnTaskPadButtonStates.prev < 0) {
             dir = -1;
         }
-    } else if (D_0037F510.next & 2) {
-        if (sel->selectedIndex != sel->rowCount - 1 || D_0037F510.next < 0) {
+    } else if (kwlnTaskPadButtonStates.next & 2) {
+        if (sel->selectedIndex != sel->rowCount - 1 || kwlnTaskPadButtonStates.next < 0) {
             dir = 1;
         }
     }
@@ -2037,7 +2037,7 @@ s32 sndSeqSelectPoll(ItfMesState *panel) {
         sndStepSequenceIndex(sel, dir);
         itfResetBattleFadeState(&panel->fade, 1);
     }
-    if (D_0037F510.confirm < 0) {
+    if (kwlnTaskPadButtonStates.confirm < 0) {
         sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         return 1;
     }
@@ -2080,7 +2080,7 @@ s32 itfMesFindPressedOptionRank(ItfMesBlk40 *selection) {
     for (i = 0; i < selection->optionCount; i++) {
         ItfMesOption *option = &selection->options[i];
 
-        if (D_0037F510.buttons[option->id] < 0) {
+        if (kwlnTaskPadButtonStates.buttons[option->id] < 0) {
             s32 prefixLength = option->value;
             s32 rank = 0;
             u32 mask = selection->panelValue;
@@ -2397,17 +2397,17 @@ void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 boundsMode) {
 
     if (sprite != NULL) {
         bounds = panel->bounds;
-        if (D_0037F510.coarseDown & 2) {
+        if (kwlnTaskPadButtonStates.coarseDown & 2) {
             dx = -16;
         } else {
-            dx = ((u8)D_0037F510.coarseUp << 3) & 0x10;
+            dx = ((u8)kwlnTaskPadButtonStates.coarseUp << 3) & 0x10;
         }
-        if (D_0037F510.secondaryUp & 2) {
+        if (kwlnTaskPadButtonStates.secondaryUp & 2) {
             dy = -8;
         } else {
-            dy = ((u8)D_0037F510.secondaryDown << 2) & 8;
+            dy = ((u8)kwlnTaskPadButtonStates.secondaryDown << 2) & 8;
         }
-        if (D_0037F510.secondaryCross != 0) {
+        if (kwlnTaskPadButtonStates.secondaryCross != 0) {
             dx *= 8;
             dy *= 8;
         }
@@ -2439,17 +2439,17 @@ void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 boundsMode) {
 void sndStepIndexByPad(ItfMesBlkA4 *panel) {
     s32 step;
 
-    if (D_0037F510.coarseDown & 2) {
+    if (kwlnTaskPadButtonStates.coarseDown & 2) {
         step = -1;
     } else {
-        step = (D_0037F510.coarseUp & 2) > 0;
+        step = (kwlnTaskPadButtonStates.coarseUp & 2) > 0;
     }
-    if (D_0037F510.secondaryUp & 2) {
+    if (kwlnTaskPadButtonStates.secondaryUp & 2) {
         step = -1;
-    } else if (D_0037F510.secondaryDown & 2) {
+    } else if (kwlnTaskPadButtonStates.secondaryDown & 2) {
         step = 1;
     }
-    if (D_0037F510.secondaryCross != 0) {
+    if (kwlnTaskPadButtonStates.secondaryCross != 0) {
         step *= 10;
     }
     if (step != 0) {
@@ -2677,7 +2677,7 @@ void itfUpdateSoundSelectorOptions(void) {
         value /= 10;
     }
     itfMesDrawWindowBackground(1);
-    if (D_0037F510.prev & 2) {
+    if (kwlnTaskPadButtonStates.prev & 2) {
         if (cursorDigit == 9) {
             D_00438F2C -= step * 9;
         } else {
@@ -2686,7 +2686,7 @@ void itfUpdateSoundSelectorOptions(void) {
         D_00452E60[D_00438F30] = 0x100;
         sndSetSequenceVolumePan(0, 0x7F, 0x3F);
     }
-    if (D_0037F510.next & 2) {
+    if (kwlnTaskPadButtonStates.next & 2) {
         if (cursorDigit == 0) {
             D_00438F2C += step * 9;
         } else {
@@ -2695,7 +2695,7 @@ void itfUpdateSoundSelectorOptions(void) {
         D_00452E60[D_00438F30] = 0x100;
         sndSetSequenceVolumePan(0, 0x7F, 0x3F);
     }
-    if (D_0037F510.alternatePrev & 2) {
+    if (kwlnTaskPadButtonStates.alternatePrev & 2) {
         if (D_00438F30 > 0) {
             D_00438F30--;
             D_00438F38 = 0x80;
@@ -2704,7 +2704,7 @@ void itfUpdateSoundSelectorOptions(void) {
             sndSetSequenceVolumePan(0xD, 0x7F, 0x3F);
         }
     }
-    if (D_0037F510.alternateNext & 2) {
+    if (kwlnTaskPadButtonStates.alternateNext & 2) {
         if (D_00438F30 < 7) {
             D_00438F30++;
             D_00438F38 = 0x80;

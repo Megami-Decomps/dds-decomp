@@ -349,7 +349,7 @@ mnuDrawMovieMenuListItem(s32 x, s32 y, s32 unused, struct MenuList *list, struct
     }
 }
 
-extern s8 D_0037F510[];
+extern s8 kwlnTaskPadButtonStates[];
 extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern u32 mnuGetMovieMenuSelectionIndex(void);
 
@@ -357,21 +357,21 @@ s32 mnuHandleMovieMenuInput(void) {
     s32 moved = 0;
     s32 selection;
 
-    if (D_0037F510[0x26] & 2) {
+    if (kwlnTaskPadButtonStates[0x26] & 2) {
         if (mnuRetreatListCursorDefault(mnuMovieMenuState->selectionList) != NULL) {
             sndSetSequenceVolumePan(0, 127, 63);
         }
         moved = 1;
-    } else if (D_0037F510[0x27] & 2) {
+    } else if (kwlnTaskPadButtonStates[0x27] & 2) {
         if (mnuAdvanceListCursorDefault(mnuMovieMenuState->selectionList) != NULL) {
             sndSetSequenceVolumePan(0, 127, 63);
         }
         moved = 1;
     }
-    if ((D_0037F510[0x26] == 0) & (D_0037F510[0x27] == 0)) {
+    if ((kwlnTaskPadButtonStates[0x26] == 0) & (kwlnTaskPadButtonStates[0x27] == 0)) {
         mnuClearListFlagsOneAndTwo(&mnuMovieMenuState->selectionList->stateFlags);
     }
-    if (D_0037F510[0x21] < 0) {
+    if (kwlnTaskPadButtonStates[0x21] < 0) {
         selection = mnuGetMovieMenuSelectionIndex();
         if (selection < 0) {
             return 1;
@@ -385,7 +385,7 @@ s32 mnuHandleMovieMenuInput(void) {
         }
         return 1;
     }
-    if (D_0037F510[0x23] < 0) {
+    if (kwlnTaskPadButtonStates[0x23] < 0) {
         sndSetSequenceVolumePan(10, 127, 63);
         return 2;
     }
@@ -1089,11 +1089,11 @@ s32 mnuStaffImageProc(void) {
                 mnuMovieWork->imageAlpha = 256;
             }
         } else {
-            if (D_0037F510[0x21] < 0 || D_0037F510[0x23] < 0 ||
-                D_0037F510[0x22] < 0 || D_0037F510[0x20] < 0 ||
-                D_0037F510[0x2A] < 0 || D_0037F510[0x2B] < 0 ||
-                D_0037F510[0x28] < 0 || D_0037F510[0x29] < 0 ||
-                D_0037F510[0x2D] < 0 || D_0037F510[0x2C] < 0) {
+            if (kwlnTaskPadButtonStates[0x21] < 0 || kwlnTaskPadButtonStates[0x23] < 0 ||
+                kwlnTaskPadButtonStates[0x22] < 0 || kwlnTaskPadButtonStates[0x20] < 0 ||
+                kwlnTaskPadButtonStates[0x2A] < 0 || kwlnTaskPadButtonStates[0x2B] < 0 ||
+                kwlnTaskPadButtonStates[0x28] < 0 || kwlnTaskPadButtonStates[0x29] < 0 ||
+                kwlnTaskPadButtonStates[0x2D] < 0 || kwlnTaskPadButtonStates[0x2C] < 0) {
                 /* 0x002A6330..0x002A6370: predicate retained in retail; body compiled out */
             }
             if (mnuMovieWork->imageHoldFrames >= timing[mnuMovieWork->scrollPaused - 1].holdFrames) {

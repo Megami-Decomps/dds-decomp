@@ -4211,7 +4211,7 @@ s32 evtViewerPickNextHandler(KwlnTask *task) {
 }
 
 extern s16 D_004372B4;
-extern s8 D_0037F510[];
+extern s8 kwlnTaskPadButtonStates[];
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void evtUpdateViewerMessageWindow(EvtRuntime *);
 extern void mnuAdvanceShopMenuState();
@@ -4231,7 +4231,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
     evtEventViewerApplyEffectToggles(viewer);
     flags = viewer->flags;
     if (!(flags & 8)) {
-        if (D_0037F510[0x22] < 0) {
+        if (kwlnTaskPadButtonStates[0x22] < 0) {
             viewer->flags = flags | 1;
             evtViewerDispatchFlagMode(viewer);
             viewer->actionMode = 0;
@@ -4246,7 +4246,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
             viewer->flags = flags & ~1;
             evtViewerDispatchFlagMode(viewer);
         }
-        if (D_0037F510[0x22] >= 0 && D_0037F510[0x2C] < 0 &&
+        if (kwlnTaskPadButtonStates[0x22] >= 0 && kwlnTaskPadButtonStates[0x2C] < 0 &&
             evtViewerHasUpdateFlag(viewer) == 0) {
             evtEventViewerStartEndCountdown(viewer);
         }

@@ -694,7 +694,7 @@ void evtSubmitAlternateFramePacket(void) {
     }
 }
 
-void kwlnDrawTexturedColorQuad(s32 x, s32 y, s32 width, s32 height,
+void evtSubmitTexturedGradientQuad(s32 x, s32 y, s32 width, s32 height,
                    s32 u, s32 v, s32 textureWidth, s32 textureHeight,
                    u32 color0, u32 color1, u32 color2, u32 color3, SdfTex *texture) {
     SdfListHead *list;

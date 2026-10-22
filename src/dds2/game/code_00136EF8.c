@@ -911,7 +911,7 @@ s32 fldClassifyPositionInZoneWithMargin(f32 *out, s32 mode, s32 count, f32 margi
     return inside;
 }
 
-extern f32 D_0038BBF0[3];
+extern f32 fldResolvedPosition[3];
 
 extern s32 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit);
 
@@ -933,14 +933,14 @@ void fldHitChkUnitElvOnly(f32 *input) {
     s32 index;
     f32 margin;
 
-    previous[1] = D_0038BBF0[1];
+    previous[1] = fldResolvedPosition[1];
     position[1] = input[1] - 35.0f;
     position[0] = input[0];
     position[2] = input[2];
-    previous[0] = D_0038BBF0[0];
-    previous[2] = D_0038BBF0[2];
-    absoluteDelta[0] = ffabsf(input[0] - D_0038BBF0[0]);
-    absoluteDelta[2] = ffabsf(input[2] - D_0038BBF0[2]);
+    previous[0] = fldResolvedPosition[0];
+    previous[2] = fldResolvedPosition[2];
+    absoluteDelta[0] = ffabsf(input[0] - fldResolvedPosition[0]);
+    absoluteDelta[2] = ffabsf(input[2] - fldResolvedPosition[2]);
     margin = 45.0f;
     for (index = 0; index < fldValueRecordCount; index++) {
         if (!(fldValueRecords[index].face->attributes & 0x80)) {
@@ -1056,9 +1056,9 @@ void fldHitChkUnitElv(f32 *position) {
             newPosition[0] = position[0] + movement[0];
             newPosition[1] = position[1] + movement[1];
             newPosition[2] = position[2] + movement[2];
-            previous[0] = D_0038BBF0[0];
-            previous[1] = D_0038BBF0[1];
-            previous[2] = D_0038BBF0[2];
+            previous[0] = fldResolvedPosition[0];
+            previous[1] = fldResolvedPosition[1];
+            previous[2] = fldResolvedPosition[2];
             fldAreaState.positionPending = 1;
             fldAreaState.targetX = newPosition[0];
             fldAreaState.targetY = newPosition[1];
@@ -1066,9 +1066,9 @@ void fldHitChkUnitElv(f32 *position) {
             position[0] = newPosition[0];
             position[1] = newPosition[1];
             position[2] = newPosition[2];
-            D_0038BBF0[0] = newPosition[0];
-            D_0038BBF0[1] = newPosition[1];
-            D_0038BBF0[2] = newPosition[2];
+            fldResolvedPosition[0] = newPosition[0];
+            fldResolvedPosition[1] = newPosition[1];
+            fldResolvedPosition[2] = newPosition[2];
         }
     }
 }
@@ -1098,9 +1098,9 @@ void fldHitChkUnitDamage(f32 *position) {
     point[0] = position[0];
     point[1] = position[1];
     point[2] = position[2];
-    reference[0] = D_0038BBF0[0];
-    reference[1] = D_0038BBF0[1];
-    reference[2] = D_0038BBF0[2];
+    reference[0] = fldResolvedPosition[0];
+    reference[1] = fldResolvedPosition[1];
+    reference[2] = fldResolvedPosition[2];
     point[1] -= 35.0f;
     distanceVector[0] = point[0] - reference[0];
     distanceVector[1] = point[1] - reference[1];
@@ -1611,7 +1611,7 @@ void fldHitProgramAdd(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
 
 void evtMessageExtraActionNoOp(void) {
 }
-INCLUDE_SDATA(const s32, "game/code_00136EF8", D_00436174);
+INCLUDE_SDATA(const s32, "game/code_00136EF8", fldCameraColorLayerScroll);
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", fldAuxRecordBuffer);
 

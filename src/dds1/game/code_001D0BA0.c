@@ -108,7 +108,7 @@ extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
 
 
-extern SndPad D_00324510;
+extern SndPad kwlnTaskPadButtonStates;
 
 extern u32 kwlnDrawControlFlags;
 
@@ -143,7 +143,7 @@ u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *object);
 
 extern EffRandState effSharedRandomState[];
 
-extern SndPad D_00324510;
+extern SndPad kwlnTaskPadButtonStates;
 
 extern void btlInitializeWorldCamera(void);
 
@@ -1738,13 +1738,13 @@ void btlUpdateAutoMusic(void) {
         return;
     }
     if (flags & 0x8000) {
-        if (D_00324510.primaryTriangle < 0 || D_00324510.primaryCancel < 0) {
+        if (kwlnTaskPadButtonStates.primaryTriangle < 0 || kwlnTaskPadButtonStates.primaryCancel < 0) {
             *(u32 *)(context + 0x1F4) = flags & ~0x8000;
             sndSetSequenceVolumePan(6, 0x7F, 0x3F);
             btlSetTrackedTaskDisplayMode(0);
             btlBossDebugPrintf(D_003A3A40);
         }
-    } else if (D_00324510.primaryTriangle < 0) {
+    } else if (kwlnTaskPadButtonStates.primaryTriangle < 0) {
         *(u32 *)(context + 0x1F4) = flags | 0x8000;
         sndSetSequenceVolumePan(5, 0x7F, 0x3F);
         btlSetTrackedTaskDisplayMode(1);

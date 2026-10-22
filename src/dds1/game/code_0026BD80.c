@@ -19,7 +19,7 @@ extern char mnuMovieMenuSpriteResourceNames[];
 extern void mnuAdvanceMovieMenuIdleAnimation();
 
 
-extern s8 D_00324510[];
+extern s8 kwlnTaskPadButtonStates[];
 
 extern void mnuReleaseMenuResourceSlots(void);
 
@@ -92,11 +92,11 @@ void mnuSelectMenuListCursorByAdvance(s32 advanceCount) {
 }
 
 s32 mnuIsAnyMenuInputPressed(void) {
-    if (D_00324510[0x21] < 0 || D_00324510[0x23] < 0 ||
-        D_00324510[0x22] < 0 || D_00324510[0x20] < 0 ||
-        D_00324510[0x2a] < 0 || D_00324510[0x2b] < 0 ||
-        D_00324510[0x28] < 0 || D_00324510[0x29] < 0 ||
-        D_00324510[0x2d] < 0 || D_00324510[0x2c] < 0) {
+    if (kwlnTaskPadButtonStates[0x21] < 0 || kwlnTaskPadButtonStates[0x23] < 0 ||
+        kwlnTaskPadButtonStates[0x22] < 0 || kwlnTaskPadButtonStates[0x20] < 0 ||
+        kwlnTaskPadButtonStates[0x2a] < 0 || kwlnTaskPadButtonStates[0x2b] < 0 ||
+        kwlnTaskPadButtonStates[0x28] < 0 || kwlnTaskPadButtonStates[0x29] < 0 ||
+        kwlnTaskPadButtonStates[0x2d] < 0 || kwlnTaskPadButtonStates[0x2c] < 0) {
         return 1;
     }
     return 0;
@@ -439,38 +439,38 @@ void mnuUpdateMovieMenuPoseFromInput(f32 *position, f32 *rotation) {
     f32 forward[4];
     f32 axis[4];
 
-    if (D_00324510[0x36] != 0) {
+    if (kwlnTaskPadButtonStates[0x36] != 0) {
         sdfQuatForwardVector(rotation, forward);
         sdfVec3NormalizeInPlaceAndGetLength(forward);
         position[0] += forward[0] * 20.0f;
         position[2] += forward[2] * 20.0f;
     }
-    if (D_00324510[0x37] != 0) {
+    if (kwlnTaskPadButtonStates[0x37] != 0) {
         sdfQuatForwardVector(rotation, forward);
         sdfVec3NormalizeInPlaceAndGetLength(forward);
         position[0] -= forward[0] * 20.0f;
         position[2] -= forward[2] * 20.0f;
     }
-    if (D_00324510[0x34] != 0) {
+    if (kwlnTaskPadButtonStates[0x34] != 0) {
         sdfQuatFromEuler(delta, 0.0f, -0.017453293f, 0.0f);
         sdfQuatMultiply(rotation, rotation, delta);
         sdfQuaternionNormalize(rotation);
     }
-    if (D_00324510[0x35] != 0) {
+    if (kwlnTaskPadButtonStates[0x35] != 0) {
         sdfQuatFromEuler(delta, 0.0f, 0.017453293f, 0.0f);
         sdfQuatMultiply(rotation, rotation, delta);
         sdfQuaternionNormalize(rotation);
     }
 
-    if (D_00324510[0x33] != 0) {
-        if (D_00324510[0x38] != 0) {
+    if (kwlnTaskPadButtonStates[0x33] != 0) {
+        if (kwlnTaskPadButtonStates[0x38] != 0) {
             position[1] -= 20.0f;
         }
-        if (D_00324510[0x3a] != 0) {
+        if (kwlnTaskPadButtonStates[0x3a] != 0) {
             position[1] += 20.0f;
         }
     } else {
-        if (D_00324510[0x38] != 0) {
+        if (kwlnTaskPadButtonStates[0x38] != 0) {
             sdfQuatForwardVector(rotation, forward);
             axis[0] = 0.0f;
             axis[1] = -1.0f;
@@ -479,7 +479,7 @@ void mnuUpdateMovieMenuPoseFromInput(f32 *position, f32 *rotation) {
             position[0] += axis[0] * 20.0f;
             position[2] += axis[2] * 20.0f;
         }
-        if (D_00324510[0x3a] != 0) {
+        if (kwlnTaskPadButtonStates[0x3a] != 0) {
             sdfQuatForwardVector(rotation, forward);
             axis[0] = 0.0f;
             axis[1] = -1.0f;
@@ -490,7 +490,7 @@ void mnuUpdateMovieMenuPoseFromInput(f32 *position, f32 *rotation) {
         }
     }
 
-    if (D_00324510[0x39] != 0) {
+    if (kwlnTaskPadButtonStates[0x39] != 0) {
         sdfQuatForwardVector(rotation, forward);
         memcpy(axis, forward, sizeof(axis));
         axis[1] += -10.0f;
@@ -499,7 +499,7 @@ void mnuUpdateMovieMenuPoseFromInput(f32 *position, f32 *rotation) {
         sdfQuatMultiply(rotation, rotation, delta);
         sdfQuaternionNormalize(rotation);
     }
-    if (D_00324510[0x3b] != 0) {
+    if (kwlnTaskPadButtonStates[0x3b] != 0) {
         sdfQuatForwardVector(rotation, forward);
         memcpy(axis, forward, sizeof(axis));
         axis[1] += 10.0f;

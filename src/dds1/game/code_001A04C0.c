@@ -71,7 +71,7 @@ typedef char ItfColorPanelWorkSizeCheck[sizeof(ItfColorPanelWork) == 0x10 ? 1 : 
 
 extern ItfColorPanelWork itfOverlayColorEditorWork;
 extern ItfColorPanelRow itfOverlayColorEditorRows[6];
-extern SndPad D_00324510;
+extern SndPad kwlnTaskPadButtonStates;
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 itfTestOverlayPhaseStep;
 extern u8 D_003BB2B4;
@@ -127,18 +127,18 @@ s32 itfEditOverlayColor(void) {
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     itfTestOverlayPhase += itfTestOverlayPhaseStep;
     itfDrawPulsingTestOverlay(0x52);
-    if ((s8)D_00324510.secondaryTriangle < 0) {
+    if ((s8)kwlnTaskPadButtonStates.secondaryTriangle < 0) {
         D_003BB2B4 ^= 1;
     }
     if (itfOverlayColorEditorWork.editing == 0) {
         previousSelection = itfOverlayColorEditorWork.selection;
-        if ((u8)D_00324510.secondaryUp & 2) {
+        if ((u8)kwlnTaskPadButtonStates.secondaryUp & 2) {
             itfOverlayColorEditorWork.selection--;
             if (itfOverlayColorEditorWork.selection < 0) {
                 itfOverlayColorEditorWork.selection = 3;
             }
         }
-        if ((u8)D_00324510.secondaryDown & 2) {
+        if ((u8)kwlnTaskPadButtonStates.secondaryDown & 2) {
             itfOverlayColorEditorWork.selection++;
             if (itfOverlayColorEditorWork.selection >= 4) {
                 itfOverlayColorEditorWork.selection = 0;
@@ -147,22 +147,22 @@ s32 itfEditOverlayColor(void) {
         if (previousSelection != itfOverlayColorEditorWork.selection) {
             itfOverlayColorEditorWork.blink = 0;
         }
-        if (D_00324510.secondaryCross < 0) {
+        if (kwlnTaskPadButtonStates.secondaryCross < 0) {
             itfOverlayColorEditorWork.editing ^= 1;
             itfOverlayColorEditorWork.blink = 0;
         }
-        if ((u8)D_00324510.secondaryCancel & 2) {
+        if ((u8)kwlnTaskPadButtonStates.secondaryCancel & 2) {
             return -1;
         }
     } else {
         if (itfOverlayColorEditorWork.selection < 4) {
-            if ((u8)D_00324510.coarseDown & 2) {
+            if ((u8)kwlnTaskPadButtonStates.coarseDown & 2) {
                 itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] -= 10;
                 if (itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] < 0) {
                     itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] = 0;
                 }
             }
-            if ((u8)D_00324510.coarseUp & 2) {
+            if ((u8)kwlnTaskPadButtonStates.coarseUp & 2) {
                 itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] += 10;
                 if (itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] > 255) {
                     itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] = 255;
@@ -170,13 +170,13 @@ s32 itfEditOverlayColor(void) {
             }
         } else {
             previousRate = itfTestOverlayPhaseStep;
-            if ((u8)D_00324510.coarseDown & 2) {
+            if ((u8)kwlnTaskPadButtonStates.coarseDown & 2) {
                 itfTestOverlayPhaseStep -= 0x100;
                 if (itfTestOverlayPhaseStep < 0) {
                     itfTestOverlayPhaseStep = 0;
                 }
             }
-            if ((u8)D_00324510.coarseUp & 2) {
+            if ((u8)kwlnTaskPadButtonStates.coarseUp & 2) {
                 itfTestOverlayPhaseStep += 0x100;
                 if (itfTestOverlayPhaseStep > 0x800) {
                     itfTestOverlayPhaseStep = 0x800;
@@ -186,7 +186,7 @@ s32 itfEditOverlayColor(void) {
                 itfTestOverlayPhase = 0;
             }
         }
-        if (D_00324510.secondaryCancel < 0) {
+        if (kwlnTaskPadButtonStates.secondaryCancel < 0) {
             itfOverlayColorEditorWork.editing ^= 1;
             itfOverlayColorEditorWork.blink = 0;
         }

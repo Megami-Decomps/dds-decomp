@@ -94,32 +94,32 @@ extern void fldDrawSkyGradient(void);
 
 extern void fldSubmitTexturedOverlaySprite(void);
 
-extern u32 D_00389988[];
+extern u32 fldDisplayStateWords[];
 
 extern void fldSelectDisplayBuffer(u32);
 
 extern void fldSelectDisplayBuffer(u32);
 
-extern u32 D_00389988[];
+extern u32 fldDisplayStateWords[];
 
-extern u32 D_00389988[];
+extern u32 fldDisplayStateWords[];
 
 extern char D_00412B90[];
 
 
-extern s32 D_00435EE0;
+extern s32 fldCameraMoveTrackingCurrent;
 
-extern s32 D_00435EE4;
+extern s32 fldCameraMoveTrackingStart;
 
-extern s32 D_00435EE8;
+extern s32 fldCameraMoveTrackingStartLabel;
 
-extern s32 D_00435EEC;
+extern s32 fldCameraMoveTrackingTarget;
 
-extern s32 D_00435EF0;
+extern s32 fldCameraMoveTrackingTargetLabel;
 
-extern s32 D_00435EF4;
+extern s32 fldCameraMoveTrackingStepFrames;
 
-extern s32 D_00435EF8;
+extern s32 fldCameraMoveTrackingCancelPressed;
 
 extern void fldSetCameraMoveMode(s32 mode);
 
@@ -698,7 +698,7 @@ s32 fldTestDrawUpdate(KwlnTask *task) {
     fldSetGsAlphaBlendEquation(0);
     fldDrawCameraColorScrollingGradient();
     fldDrawSkyGradient();
-    if (D_00389988[9] != 0) {
+    if (fldDisplayStateWords[9] != 0) {
         if (fldGetSceneReadyFlag() == 0) {
             fldSelectDisplayBuffer(0x53);
         } else {
@@ -772,36 +772,36 @@ void fldConfigureCameraMoveTracking(s32 start, s32 end) {
     s32 endEntry;
 
     first = fldFindTableEntry(start);
-    D_00435EF8 = 0;
-    D_00435EE4 = first;
+    fldCameraMoveTrackingCancelPressed = 0;
+    fldCameraMoveTrackingStart = first;
     if (first > 1000) {
-        D_00435EE0 = first % 1000;
+        fldCameraMoveTrackingCurrent = first % 1000;
     } else {
-        D_00435EE0 = first;
+        fldCameraMoveTrackingCurrent = first;
     }
     if (first > 1000) {
-        D_00435EE8 = first;
-        D_00435EE4 = first % 1000;
+        fldCameraMoveTrackingStartLabel = first;
+        fldCameraMoveTrackingStart = first % 1000;
     } else {
-        D_00435EE8 = -999;
+        fldCameraMoveTrackingStartLabel = -999;
     }
 
     endEntry = fldFindTableEntry(end);
-    D_00435EEC = endEntry;
+    fldCameraMoveTrackingTarget = endEntry;
     if (endEntry > 1000) {
-        D_00435EF0 = endEntry;
-        D_00435EEC = endEntry % 1000;
+        fldCameraMoveTrackingTargetLabel = endEntry;
+        fldCameraMoveTrackingTarget = endEntry % 1000;
     } else {
-        D_00435EF0 = -999;
+        fldCameraMoveTrackingTargetLabel = -999;
     }
     if (start == end) {
-        D_00435EF4 = -999;
+        fldCameraMoveTrackingStepFrames = -999;
     } else {
-        D_00435EF4 = 0;
+        fldCameraMoveTrackingStepFrames = 0;
     }
-    if (D_00435EE0 != -999 && D_00435EF4 != -999) {
-        D_00435EF4++;
-        if (D_00435EE4 < D_00435EEC) {
+    if (fldCameraMoveTrackingCurrent != -999 && fldCameraMoveTrackingStepFrames != -999) {
+        fldCameraMoveTrackingStepFrames++;
+        if (fldCameraMoveTrackingStart < fldCameraMoveTrackingTarget) {
             fldSetCameraMoveMode(1);
         } else {
             fldSetCameraMoveMode(-1);
@@ -811,24 +811,24 @@ void fldConfigureCameraMoveTracking(s32 start, s32 end) {
 
 /* Clear the move mode and invalidate all six stored tracking values. */
 void fldResetCameraMoveTracking(void) {
-    D_00435EF8 = 0;
-    D_00435EE0 = FIELD_CAMERA_TRACKING_UNSET;
-    D_00435EE4 = FIELD_CAMERA_TRACKING_UNSET;
-    D_00435EE8 = FIELD_CAMERA_TRACKING_UNSET;
-    D_00435EEC = FIELD_CAMERA_TRACKING_UNSET;
-    D_00435EF0 = FIELD_CAMERA_TRACKING_UNSET;
-    D_00435EF4 = FIELD_CAMERA_TRACKING_UNSET;
+    fldCameraMoveTrackingCancelPressed = 0;
+    fldCameraMoveTrackingCurrent = FIELD_CAMERA_TRACKING_UNSET;
+    fldCameraMoveTrackingStart = FIELD_CAMERA_TRACKING_UNSET;
+    fldCameraMoveTrackingStartLabel = FIELD_CAMERA_TRACKING_UNSET;
+    fldCameraMoveTrackingTarget = FIELD_CAMERA_TRACKING_UNSET;
+    fldCameraMoveTrackingTargetLabel = FIELD_CAMERA_TRACKING_UNSET;
+    fldCameraMoveTrackingStepFrames = FIELD_CAMERA_TRACKING_UNSET;
     fldClearCameraMoveMode();
 }
 
 /* Report the pending camera move mode, kicking the field camera when the
  * stored start and end indices agree. */
 s32 fldEvaluateCameraMoveTracking(void) {
-    if (D_00435EF8 == 1) {
+    if (fldCameraMoveTrackingCancelPressed == 1) {
         return 2;
     }
-    if (D_00435EF4 != FIELD_CAMERA_TRACKING_UNSET && D_00435EE0 == D_00435EEC) {
-        if (D_00435EE4 < D_00435EE0) {
+    if (fldCameraMoveTrackingStepFrames != FIELD_CAMERA_TRACKING_UNSET && fldCameraMoveTrackingCurrent == fldCameraMoveTrackingTarget) {
+        if (fldCameraMoveTrackingStart < fldCameraMoveTrackingCurrent) {
             fldSetCameraMoveMode(2);
         } else {
             fldSetCameraMoveMode(-2);
@@ -840,7 +840,7 @@ s32 fldEvaluateCameraMoveTracking(void) {
 
 INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412B90);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_001208D0);
+INCLUDE_ASM(const s32, "game/code_0011F208", fldUpdateCameraMoveTracking);
 
 enum {
     FIELD_BACKGROUND_REQUIRED_OBJECT_FLAG = 0x200,
@@ -1665,7 +1665,7 @@ void fldResetFieldMapState(void) {
 
 #include "fld_vr_reset_view.h"
 
-extern u32 D_00389988[];
+extern u32 fldDisplayStateWords[];
 void fldResetFieldRuntimeState(s32 mode) {
     FldAreaWork *area = &fldAreaState;
     s32 i;
@@ -1755,30 +1755,30 @@ void fldResetFieldRuntimeState(s32 mode) {
     area->fieldTextures[1].texture = NULL;
     area->fieldTextures[2].texture = NULL;
     area->fieldTextures[3].texture = NULL;
-    D_00389988[0] = 0;
-    D_00389988[1] = 0;
-    D_00389988[2] = 0;
-    D_00389988[3] = 0;
-    D_00389988[4] = 0;
-    D_00389988[5] = 0;
-    D_00389988[6] = 0;
-    D_00389988[7] = 0;
-    D_00389988[8] = 0;
-    D_00389988[9] = 1;
-    D_00389988[10] = 1;
-    D_00389988[11] = 0;
-    D_00389988[12] = 0;
-    D_00389988[13] = 0;
-    D_00389988[14] = 0;
-    D_00389988[15] = 0;
-    D_00389988[16] = 0;
-    D_00389988[19] = 1;
-    D_00389988[18] = 0;
-    D_00389988[21] = 0;
-    D_00389988[22] = 0;
-    D_00389988[23] = 1;
-    D_00389988[24] = 1;
-    D_00389988[20] = 1;
+    fldDisplayStateWords[0] = 0;
+    fldDisplayStateWords[1] = 0;
+    fldDisplayStateWords[2] = 0;
+    fldDisplayStateWords[3] = 0;
+    fldDisplayStateWords[4] = 0;
+    fldDisplayStateWords[5] = 0;
+    fldDisplayStateWords[6] = 0;
+    fldDisplayStateWords[7] = 0;
+    fldDisplayStateWords[8] = 0;
+    fldDisplayStateWords[9] = 1;
+    fldDisplayStateWords[10] = 1;
+    fldDisplayStateWords[11] = 0;
+    fldDisplayStateWords[12] = 0;
+    fldDisplayStateWords[13] = 0;
+    fldDisplayStateWords[14] = 0;
+    fldDisplayStateWords[15] = 0;
+    fldDisplayStateWords[16] = 0;
+    fldDisplayStateWords[19] = 1;
+    fldDisplayStateWords[18] = 0;
+    fldDisplayStateWords[21] = 0;
+    fldDisplayStateWords[22] = 0;
+    fldDisplayStateWords[23] = 1;
+    fldDisplayStateWords[24] = 1;
+    fldDisplayStateWords[20] = 1;
     if (mode == 0) {
         fldResetFieldMapState();
         datGameState->vr.previewX = 0;
@@ -1852,17 +1852,17 @@ void fldInitializeAreaWork(void) {
     area->frameTravelDistance = 0.0f;
     area->nextFloor = -1;
     area->unkD4 = 1;
-    D_00389988[0] = 0;
-    D_00389988[1] = 0;
-    D_00389988[2] = 0;
-    D_00389988[3] = 0;
-    D_00389988[4] = 0;
-    D_00389988[5] = 0;
-    D_00389988[11] = 0;
-    D_00389988[12] = 0;
-    D_00389988[13] = 0;
-    D_00389988[14] = 0;
-    D_00389988[16] = 0;
+    fldDisplayStateWords[0] = 0;
+    fldDisplayStateWords[1] = 0;
+    fldDisplayStateWords[2] = 0;
+    fldDisplayStateWords[3] = 0;
+    fldDisplayStateWords[4] = 0;
+    fldDisplayStateWords[5] = 0;
+    fldDisplayStateWords[11] = 0;
+    fldDisplayStateWords[12] = 0;
+    fldDisplayStateWords[13] = 0;
+    fldDisplayStateWords[14] = 0;
+    fldDisplayStateWords[16] = 0;
     fldClearCameraFacingPointRequest();
     fldClearCameraHeadingRequest();
 }
@@ -2284,19 +2284,19 @@ INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435ED0);
 
 INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435ED8);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435EE0);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldCameraMoveTrackingCurrent);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435EE4);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldCameraMoveTrackingStart);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435EE8);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldCameraMoveTrackingStartLabel);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435EEC);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldCameraMoveTrackingTarget);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435EF0);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldCameraMoveTrackingTargetLabel);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435EF4);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldCameraMoveTrackingStepFrames);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435EF8);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldCameraMoveTrackingCancelPressed);
 
 INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435EFC);
 

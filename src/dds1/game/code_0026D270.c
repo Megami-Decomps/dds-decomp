@@ -5,7 +5,7 @@
 #include "mnu_list.h"
 
 extern MovieMenuState *mnuMovieMenuState;
-extern s8 D_00324510[];
+extern s8 kwlnTaskPadButtonStates[];
 extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern u32 mnuGetMovieMenuSelectionIndex(void);
 
@@ -61,21 +61,21 @@ s32 mnuHandleMovieMenuInput(void) {
     s32 moved = 0;
     s32 selection;
 
-    if (D_00324510[0x26] & 2) {
+    if (kwlnTaskPadButtonStates[0x26] & 2) {
         if (mnuRetreatListCursorDefault(mnuMovieMenuState->selectionList) != NULL) {
             sndSetSequenceVolumePan(0, 127, 63);
         }
         moved = 1;
-    } else if (D_00324510[0x27] & 2) {
+    } else if (kwlnTaskPadButtonStates[0x27] & 2) {
         if (mnuAdvanceListCursorDefault(mnuMovieMenuState->selectionList) != NULL) {
             sndSetSequenceVolumePan(0, 127, 63);
         }
         moved = 1;
     }
-    if ((D_00324510[0x26] == 0) & (D_00324510[0x27] == 0)) {
+    if ((kwlnTaskPadButtonStates[0x26] == 0) & (kwlnTaskPadButtonStates[0x27] == 0)) {
         mnuClearListFlagsOneAndTwo(&mnuMovieMenuState->selectionList->stateFlags);
     }
-    if (D_00324510[0x21] < 0) {
+    if (kwlnTaskPadButtonStates[0x21] < 0) {
         selection = mnuGetMovieMenuSelectionIndex();
         if (selection < 0) {
             return 1;
@@ -89,7 +89,7 @@ s32 mnuHandleMovieMenuInput(void) {
         }
         return 1;
     }
-    if (D_00324510[0x23] < 0) {
+    if (kwlnTaskPadButtonStates[0x23] < 0) {
         sndSetSequenceVolumePan(10, 127, 63);
         return 2;
     }

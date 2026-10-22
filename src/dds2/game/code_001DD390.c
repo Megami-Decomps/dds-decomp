@@ -149,7 +149,7 @@ extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 
 
 extern BtlRuntimeTask *btlAllocTask(s32);
-extern u8 D_0037F510[];
+extern u8 kwlnTaskPadButtonStates[];
 
 extern char D_004178A8[];
 
@@ -1850,13 +1850,13 @@ void btlUpdateAutoMusic(void) {
         return;
     }
     if (flags & 0x8000) {
-        if ((s8)D_0037F510[0x22] < 0 || (s8)D_0037F510[0x23] < 0) {
+        if ((s8)kwlnTaskPadButtonStates[0x22] < 0 || (s8)kwlnTaskPadButtonStates[0x23] < 0) {
             ((BtlState *)context)->battleFlags = flags & ~0x8000;
             sndSetSequenceVolumePan(6, 0x7F, 0x3F);
             btlSetTrackedTaskDisplayMode(0);
             btlBossDebugPrintf(D_004178A8);
         }
-    } else if ((s8)D_0037F510[0x22] < 0) {
+    } else if ((s8)kwlnTaskPadButtonStates[0x22] < 0) {
         ((BtlState *)context)->battleFlags = flags | 0x8000;
         sndSetSequenceVolumePan(5, 0x7F, 0x3F);
         btlSetTrackedTaskDisplayMode(1);

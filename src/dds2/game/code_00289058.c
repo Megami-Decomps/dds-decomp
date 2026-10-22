@@ -508,7 +508,7 @@ s32 mnuDrawMantraPhaseOpacity(MnuStatusResource *resource) {
 }
 
 
-extern s8 D_0037F510[64];
+extern s8 kwlnTaskPadButtonStates[64];
 extern s32 mnuNavigateMantraSelector(MnuStatusResource *, s8);
 extern u16 mnuGetSelectedPanelValue(MnuStatusResource *);
 s32 mnuPollMantraNodeNavigation(MnuStatusResource *resource) {
@@ -517,18 +517,18 @@ s32 mnuPollMantraNodeNavigation(MnuStatusResource *resource) {
     s32 result = 0;
     s32 directionFlags = 0;
 
-    if (D_0037F510[0x26] != 0) {
+    if (kwlnTaskPadButtonStates[0x26] != 0) {
         directionFlags = 1;
-    } else if (D_0037F510[0x27] != 0) {
+    } else if (kwlnTaskPadButtonStates[0x27] != 0) {
         directionFlags |= 4;
     }
-    if (D_0037F510[0x24] != 0) {
+    if (kwlnTaskPadButtonStates[0x24] != 0) {
         directionFlags |= 8;
-    } else if (D_0037F510[0x25] != 0) {
+    } else if (kwlnTaskPadButtonStates[0x25] != 0) {
         directionFlags |= 2;
     }
-    if (D_0037F510[0x26] < 0 || D_0037F510[0x27] < 0 ||
-        D_0037F510[0x24] < 0 || D_0037F510[0x25] < 0) {
+    if (kwlnTaskPadButtonStates[0x26] < 0 || kwlnTaskPadButtonStates[0x27] < 0 ||
+        kwlnTaskPadButtonStates[0x24] < 0 || kwlnTaskPadButtonStates[0x25] < 0) {
         if (work->navigationState != 0) {
             work->navigationState = 9;
         }
@@ -550,8 +550,8 @@ s32 mnuPollMantraNodeNavigation(MnuStatusResource *resource) {
     } else {
         work->navigationMask = 0;
     }
-    if (((work->drawFlags >> 26) & 1) != 0 || D_0037F510[0x26] != 0 ||
-        D_0037F510[0x27] != 0 || D_0037F510[0x24] != 0 || D_0037F510[0x25] != 0) {
+    if (((work->drawFlags >> 26) & 1) != 0 || kwlnTaskPadButtonStates[0x26] != 0 ||
+        kwlnTaskPadButtonStates[0x27] != 0 || kwlnTaskPadButtonStates[0x24] != 0 || kwlnTaskPadButtonStates[0x25] != 0) {
         if (mnuNavigateMantraSelector(resource, (s8)work->navigationMask) != 0) {
             MantraNodePos *position = (MantraNodePos *)work->defaultSelector;
             sound = 1;
@@ -563,17 +563,17 @@ s32 mnuPollMantraNodeNavigation(MnuStatusResource *resource) {
         }
     }
     if (work->navigationState == 0) {
-        if (D_0037F510[0x28] < 0) {
+        if (kwlnTaskPadButtonStates[0x28] < 0) {
             sound = 4;
             mnuSelectPreviousMantraUnit(resource);
             work->navigationState = 5;
-        } else if (D_0037F510[0x2A] < 0) {
+        } else if (kwlnTaskPadButtonStates[0x2A] < 0) {
             sound = 4;
             mnuSelectNextMantraUnit(resource);
             work->navigationState = 5;
         }
     }
-    if (D_0037F510[0x21] < 0 && work->navigationState < 3) {
+    if (kwlnTaskPadButtonStates[0x21] < 0 && work->navigationState < 3) {
         work->navigationState = 0;
         if (work->drawBits.iconFade != 0) {
             sound = 3;
@@ -592,17 +592,17 @@ s32 mnuPollMantraNodeNavigation(MnuStatusResource *resource) {
                 break;
             }
         }
-    } else if (D_0037F510[0x23] < 0 && work->navigationState == 0) {
+    } else if (kwlnTaskPadButtonStates[0x23] < 0 && work->navigationState == 0) {
         sound = 3;
         if (work->drawBits.iconFade != 0) {
             work->drawBits.iconFade ^= 1;
         } else {
             result = 3;
         }
-    } else if (D_0037F510[0x20] < 0 && work->navigationState == 0) {
+    } else if (kwlnTaskPadButtonStates[0x20] < 0 && work->navigationState == 0) {
         sound = 2;
         result = 5;
-    } else if (D_0037F510[0x2D] < 0) {
+    } else if (kwlnTaskPadButtonStates[0x2D] < 0) {
         sound = 2;
         result = 6;
     }
@@ -1025,18 +1025,18 @@ s32 mnuHandleMantraGridInput(MnuStatusResource *object) {
     s32 x;
     s32 y;
 
-    if (D_0037F510[0x26] != 0) {
+    if (kwlnTaskPadButtonStates[0x26] != 0) {
         directions |= 1;
-    } else if (D_0037F510[0x27] != 0) {
+    } else if (kwlnTaskPadButtonStates[0x27] != 0) {
         directions |= 4;
     }
-    if (D_0037F510[0x24] != 0) {
+    if (kwlnTaskPadButtonStates[0x24] != 0) {
         directions |= 8;
-    } else if (D_0037F510[0x25] != 0) {
+    } else if (kwlnTaskPadButtonStates[0x25] != 0) {
         directions |= 2;
     }
-    if (D_0037F510[0x26] < 0 || D_0037F510[0x27] < 0 ||
-        D_0037F510[0x24] < 0 || D_0037F510[0x25] < 0) {
+    if (kwlnTaskPadButtonStates[0x26] < 0 || kwlnTaskPadButtonStates[0x27] < 0 ||
+        kwlnTaskPadButtonStates[0x24] < 0 || kwlnTaskPadButtonStates[0x25] < 0) {
         if (work->navigationState != 0) {
             work->navigationState = 9;
         }
@@ -1058,9 +1058,9 @@ s32 mnuHandleMantraGridInput(MnuStatusResource *object) {
     } else {
         work->navigationMask = 0;
     }
-    if (((work->drawFlags >> 26) & 1) || D_0037F510[0x26] != 0 ||
-        D_0037F510[0x27] != 0 || D_0037F510[0x24] != 0 ||
-        D_0037F510[0x25] != 0) {
+    if (((work->drawFlags >> 26) & 1) || kwlnTaskPadButtonStates[0x26] != 0 ||
+        kwlnTaskPadButtonStates[0x27] != 0 || kwlnTaskPadButtonStates[0x24] != 0 ||
+        kwlnTaskPadButtonStates[0x25] != 0) {
         if (mnuNavigateMantraSelector(object, directions)) {
             sound = 1;
             position = work->defaultSelector;
@@ -1069,15 +1069,15 @@ s32 mnuHandleMantraGridInput(MnuStatusResource *object) {
             mnuSpawnMantraVariantIconAtPosition(x, y, object->menu.selectionController);
         }
     }
-    if (D_0037F510[0x28] < 0) {
+    if (kwlnTaskPadButtonStates[0x28] < 0) {
         mnuSelectAvailableMantraNeighbor(object);
         sound = 4;
-    } else if (D_0037F510[0x2A] < 0) {
+    } else if (kwlnTaskPadButtonStates[0x2A] < 0) {
         mnuSelectNextUnitWithAvailableMantraNode(object);
         sound = 4;
     }
-    if (D_0037F510[0x23] < 0 || D_0037F510[0x20] < 0 ||
-        D_0037F510[0x21] < 0) {
+    if (kwlnTaskPadButtonStates[0x23] < 0 || kwlnTaskPadButtonStates[0x20] < 0 ||
+        kwlnTaskPadButtonStates[0x21] < 0) {
         sound = 3;
         result = 1;
     }

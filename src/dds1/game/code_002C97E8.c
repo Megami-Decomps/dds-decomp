@@ -19,7 +19,7 @@
 #include "kwln_task_lifecycle.h"
 #include "fr_font.h"
 
-extern s8 D_00324510[];
+extern s8 kwlnTaskPadButtonStates[];
 
 extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
@@ -663,40 +663,40 @@ SdfListNode *sdfFindTaskListNodeByKey(SdfList *list, s32 key) {
 u32 sdfReadPadDirectionMask(void) {
     u32 flags = 0;
 
-    if (D_00324510[0x26] < 0) {
+    if (kwlnTaskPadButtonStates[0x26] < 0) {
         flags |= 1;
     }
-    if (D_00324510[0x26] & 2) {
+    if (kwlnTaskPadButtonStates[0x26] & 2) {
         flags |= 1;
     }
-    if (D_00324510[0x26]) {
+    if (kwlnTaskPadButtonStates[0x26]) {
         flags |= 2;
     }
-    if (D_00324510[0x27] < 0) {
+    if (kwlnTaskPadButtonStates[0x27] < 0) {
         flags |= 4;
     }
-    if (D_00324510[0x27] & 2) {
+    if (kwlnTaskPadButtonStates[0x27] & 2) {
         flags |= 4;
     }
-    if (D_00324510[0x27]) {
+    if (kwlnTaskPadButtonStates[0x27]) {
         flags |= 8;
     }
-    if (D_00324510[0x24] < 0) {
+    if (kwlnTaskPadButtonStates[0x24] < 0) {
         flags |= 0x10;
     }
-    if (D_00324510[0x24] & 2) {
+    if (kwlnTaskPadButtonStates[0x24] & 2) {
         flags |= 0x10;
     }
-    if (D_00324510[0x24]) {
+    if (kwlnTaskPadButtonStates[0x24]) {
         flags |= 0x20;
     }
-    if (D_00324510[0x25] < 0) {
+    if (kwlnTaskPadButtonStates[0x25] < 0) {
         flags |= 0x40;
     }
-    if (D_00324510[0x25] & 2) {
+    if (kwlnTaskPadButtonStates[0x25] & 2) {
         flags |= 0x40;
     }
-    if (D_00324510[0x25]) {
+    if (kwlnTaskPadButtonStates[0x25]) {
         flags |= 0x80;
     }
     return flags;

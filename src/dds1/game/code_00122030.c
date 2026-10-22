@@ -78,19 +78,19 @@ extern EffWorldNode *D_003BABD0;
 
 extern u32 fldDeferredCommandParameter;
 
-extern s32 D_003BAB08;
+extern s32 fldCameraMoveTrackingCurrent;
 
-extern s32 D_003BAB0C;
+extern s32 fldCameraMoveTrackingStart;
 
-extern s32 D_003BAB10;
+extern s32 fldCameraMoveTrackingStartLabel;
 
-extern s32 D_003BAB14;
+extern s32 fldCameraMoveTrackingTarget;
 
-extern s32 D_003BAB18;
+extern s32 fldCameraMoveTrackingTargetLabel;
 
-extern s32 D_003BAB1C;
+extern s32 fldCameraMoveTrackingStepFrames;
 
-extern s32 D_003BAB20;
+extern s32 fldCameraMoveTrackingCancelPressed;
 
 extern s32 D_0032E4DC[];
 
@@ -213,11 +213,11 @@ extern char D_003BAB00[];
 
 extern u8 fldGetCampSceneControlMode(void);
 
-extern u32 D_0032E570[];
+extern u32 fldDisplayStateWords[];
 
 
 
-extern u32 D_0032E570[];
+extern u32 fldDisplayStateWords[];
 
 /* Search location records 1..639; a miss returns the reserved first record, * not NULL, so callers can read the fallback record's fields. */ s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex);
 
@@ -547,7 +547,7 @@ void fldToggleWorldNodeState(s64 clearMode) {
     dds3DestroyWorldIndexNode(valueChain);
 }
 
-extern u32 D_0032E570[];
+extern u32 fldDisplayStateWords[];
 
 extern void sdfResetGameRuntime(s32);
 
@@ -575,9 +575,9 @@ void fldPrepareDeferredSceneTransition(void) {
     mdlFlagSet(0xc0f);
     {
         s32 code;
-        D_0032E570[0x44 / 4] = 1;
+        fldDisplayStateWords[0x44 / 4] = 1;
         code = 0x259;
-        D_0032E570[0x4c / 4] = 0;
+        fldDisplayStateWords[0x4c / 4] = 0;
         fldSetDeferredFieldCommand(0x15, 0x259);
         dds3AdminSubmitModeRequest(6, &code, 4, 0);
     }
@@ -600,8 +600,8 @@ void fldStartSequenceRecord(void) {
         return;
     }
     fldResetFieldRuntimeState(1);
-    D_0032E570[0x4C / 4] = 0;
-    D_0032E570[0x44 / 4] = 1;
+    fldDisplayStateWords[0x4C / 4] = 0;
+    fldDisplayStateWords[0x44 / 4] = 1;
     mdlFlagSet(0xC0F);
     fldSetDeferredFieldCommand(0, 0);
     fldInitializeSequenceAndResetFlags(&record, 1, 1, D_003BAB68);
@@ -1117,8 +1117,8 @@ void fldTogglePlayerModel(void) {
         fldUnloadPlayerModel();
     }
     fldApplySceneLightSet(0, 0);
-    fldApplySkyLightSet(D_0032E570[0x2C / 4], 0);
-    fldBeginSelectedValueTransition(D_0032E570[0x30 / 4]);
+    fldApplySkyLightSet(fldDisplayStateWords[0x2C / 4], 0);
+    fldBeginSelectedValueTransition(fldDisplayStateWords[0x30 / 4]);
     fldUpdateCameraObjectPose();
 }
 
@@ -1338,16 +1338,16 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
     dds3ObjectBaseOnFlag((void *)fldPlayerObject, 0x200);
     if (fldAreaState.area < 200) {
         fldApplySceneLightSet(0, 0);
-        fldApplySkyLightSet(D_0032E570[11], 0);
-        fldBeginSelectedValueTransition(D_0032E570[12]);
+        fldApplySkyLightSet(fldDisplayStateWords[11], 0);
+        fldBeginSelectedValueTransition(fldDisplayStateWords[12]);
         if (fldGetSceneCommandState() == 1) {
             if (fldAreaState.commandEnabled != 0) {
                 fldEnterSceneCommand();
             } else {
                 fldAreaState.sceneCommand = 0;
                 fldApplySceneLightSet(0, 0);
-                fldApplySkyLightSet(D_0032E570[11], 0);
-                fldBeginSelectedValueTransition(D_0032E570[12]);
+                fldApplySkyLightSet(fldDisplayStateWords[11], 0);
+                fldBeginSelectedValueTransition(fldDisplayStateWords[12]);
             }
         } else if (fldAreaState.commandEnabled == 0) {
             fldAreaState.sceneCommand = 0;
@@ -1710,7 +1710,7 @@ s32 fldUpdateTravelAndEncounters(void) {
         fldAreaState.attritionDistance = 450.0f;
     }
     if (fldGetResourceReadyFlag() == 1) return 0;
-    if (!fldAreaState.transitionMode && !D_0032E570[0x44 / 4]) return 0;
+    if (!fldAreaState.transitionMode && !fldDisplayStateWords[0x44 / 4]) return 0;
     if (!fldTestSceneControlFlags(0x10)) return 0;
     fldAreaState.encounterMode = 0;
     encounter = fldAreaState.unkE0;
@@ -1724,7 +1724,7 @@ s32 fldUpdateTravelAndEncounters(void) {
             *selection = btlAdvanceConditionalEncounterRoll(99999.0f, encounter);
             fldAreaState.encounterMode = 1;
         }
-        if (D_0032E570[0x44 / 4] == 1) {
+        if (fldDisplayStateWords[0x44 / 4] == 1) {
             fldAreaState.nextFloor = fldAreaState.floor + 1;
             fldAreaState.nextArea = fldAreaState.area;
             fldResetTaskSlots();
@@ -1887,7 +1887,7 @@ s32 fldUpdateNextFloorTransition(void) {
     if (fldGetCampSceneControlMode() != 0) {
         return 0;
     }
-    if (D_0032E570[0x54 / 4] & fldTestSceneControlFlags(0x40)) {
+    if (fldDisplayStateWords[0x54 / 4] & fldTestSceneControlFlags(0x40)) {
         if ((s8)D_00324530[2] != 0) {
             transitionInput = 1;
         }
@@ -1922,7 +1922,7 @@ s32 fldUpdateNextFloorTransition(void) {
             if (fldHasPendingSceneFlags() != 0) {
                 return 0;
             }
-            if (fldTestSceneControlFlags(0x40) != 0 && transitionInput != 0 && D_0032E570[0x48 / 4] == 0) {
+            if (fldTestSceneControlFlags(0x40) != 0 && transitionInput != 0 && fldDisplayStateWords[0x48 / 4] == 0) {
                 scene->sceneMode = 4;
                 scene->sceneState = 5;
                 fldResetPlayerSceneObjectState();
@@ -2104,10 +2104,10 @@ s32 fldProcSequence(KwlnTask *task) {
         if (fldAreaState.transitionMode == 0) evtSetSolarOverlayFullyVisible();
         fldEnsureTask();
         if (fldAreaState.area >= 200) {
-            D_0032E570[11] = 0;
-            D_0032E570[12] = 0;
+            fldDisplayStateWords[11] = 0;
+            fldDisplayStateWords[12] = 0;
             fldApplySkyLightSet(0, 0);
-            fldBeginSelectedValueTransition(D_0032E570[12]);
+            fldBeginSelectedValueTransition(fldDisplayStateWords[12]);
         }
         coordinateFlags = fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1);
         if (coordinateFlags & 0x40) {
@@ -2191,10 +2191,10 @@ s32 fldProcSequence(KwlnTask *task) {
             fldUpdateSparkEncounterScene();
             fldMarkStageExplorationCellsAroundPosition(fldAreaState.floor, fldAreaState.flagStage,
                          fldAreaState.x, fldAreaState.z, 50.0f);
-        } else if (D_0032E570[0] == 0) {
+        } else if (fldDisplayStateWords[0] == 0) {
             fldUpdateCampMenuTransition();
             if (fldTestSceneControlFlags(0x20) == 0) break;
-            if (D_0032E570[0] == 0) fldUpdateNextFloorTransition();
+            if (fldDisplayStateWords[0] == 0) fldUpdateNextFloorTransition();
         }
         if (fldGetSparkDialogPhase() != 0) fldUpdateSparkMessageSequence();
         if (fldAreaState.pendingSceneRequest == 1) fldAdvanceToNextScene();
@@ -2254,7 +2254,7 @@ s32 fldProcSequence(KwlnTask *task) {
     }
     if (controller->stage >= 4) {
         func_001415F8();
-        if (D_0032E570[0] == 0) {
+        if (fldDisplayStateWords[0] == 0) {
             fldCheckSceneReady();
             fldGetSceneReadyFlag();
         }
@@ -2274,7 +2274,7 @@ extern void fldDrawFloorQuad(s32, s32, const char *);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
 extern void func_00149B68(void);
 extern void fldDrawAutomapWhenReady(void);
-extern void func_0011EA10(void);
+extern void fldUpdateCameraMoveTracking(void);
 extern void fldTickWeatherEffectNodes(void);
 extern s32 D_0032E590[];
 extern s32 D_0032E598[];
@@ -2312,7 +2312,7 @@ s32 fldProcDraw(KwlnTask *task) {
         func_00149B68();
     }
     fldDrawAutomapWhenReady();
-    func_0011EA10();
+    fldUpdateCameraMoveTracking();
     if (fldAreaState.transitionMode != 0) {
         fldTickWeatherEffectNodes();
     }

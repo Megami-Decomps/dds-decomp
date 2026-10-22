@@ -229,15 +229,15 @@ static inline void fldDrawLocalMapFrame(f32 slide, f32 alpha1, f32 alpha2, f32 a
     };
 
     evtSubmitPrimaryAlphaBlendMode(1);
-    kwlnDrawTexturedColorQuad((s32)(slide * 427.0f + rects[1][0] * (1.0f - slide)), rects[1][1], rects[1][2], rects[1][3],
+    evtSubmitTexturedGradientQuad((s32)(slide * 427.0f + rects[1][0] * (1.0f - slide)), rects[1][1], rects[1][2], rects[1][3],
                   rects[1][4], rects[1][5], rects[1][6], rects[1][7], ((s32)(alpha1 * 128.0f) << 24) | 0x808080,
                   ((s32)(alpha1 * 128.0f) << 24) | 0x808080, ((s32)(alpha1 * 128.0f) << 24) | 0x808080,
                   ((s32)(alpha1 * 128.0f) << 24) | 0x808080, fldLocalMapTextureResource.texture);
-    kwlnDrawTexturedColorQuad(rects[2][0], rects[2][1], rects[2][2], rects[2][3], rects[2][4], rects[2][5], rects[2][6],
+    evtSubmitTexturedGradientQuad(rects[2][0], rects[2][1], rects[2][2], rects[2][3], rects[2][4], rects[2][5], rects[2][6],
                   rects[2][7], ((s32)(alpha2 * 128.0f) << 24) | 0x808080, ((s32)(alpha2 * 128.0f) << 24) | 0x808080,
                   ((s32)(alpha2 * 128.0f) << 24) | 0x808080, ((s32)(alpha2 * 128.0f) << 24) | 0x808080,
                   fldLocalMapTextureResource.texture);
-    kwlnDrawTexturedColorQuad((s32)(slide * 353.0f + rects[3][0] * (1.0f - slide)), rects[3][1], rects[3][2], rects[3][3],
+    evtSubmitTexturedGradientQuad((s32)(slide * 353.0f + rects[3][0] * (1.0f - slide)), rects[3][1], rects[3][2], rects[3][3],
                   rects[3][4], rects[3][5], rects[3][6], rects[3][7], ((s32)(alpha3 * 128.0f) << 24) | 0x808080,
                   ((s32)(alpha3 * 128.0f) << 24) | 0x808080, ((s32)(alpha3 * 128.0f) << 24) | 0x808080,
                   ((s32)(alpha3 * 128.0f) << 24) | 0x808080, fldLocalMapTextureResource.texture);
@@ -365,19 +365,19 @@ void fldDrawLocalMapTransitionFrame(f32 progress) {
     color = EDGE_ALPHA(2);
     evtSubmitDefaultDepthGradientRect(RECT(2), FADED_CORNER(2), FADED_CORNER(2), color, FADED_CORNER(2));
     tint = ((s32)(progress * 128.0f) << 24) | 0x808080;
-    kwlnDrawTexturedColorQuad(QUAD(3), tint, tint, tint, tint, NAME_TEXTURE);
+    evtSubmitTexturedGradientQuad(QUAD(3), tint, tint, tint, tint, NAME_TEXTURE);
     color = EDGE_ALPHA(3);
     evtSubmitDefaultDepthGradientRect(RECT(3), color, FADED_CORNER(3), FADED_CORNER(3), FADED_CORNER(3));
     color = EDGE_ALPHA(4);
     evtSubmitDefaultDepthGradientRect(RECT(4), FADED_CORNER(4), FADED_CORNER(4), FADED_CORNER(4), color);
     color = EDGE_ALPHA(5);
     evtSubmitDefaultDepthGradientRect(RECT(5), FADED_CORNER(5), color, FADED_CORNER(5), FADED_CORNER(5));
-    kwlnDrawTexturedColorQuad(QUAD(0), tint, tint, tint, tint, NAME_TEXTURE);
-    kwlnDrawTexturedColorQuad(QUAD(8), tint, tint, tint, tint, NAME_TEXTURE);
-    kwlnDrawTexturedColorQuad(QUAD(9), tint, tint, tint, tint, NAME_TEXTURE);
-    kwlnDrawTexturedColorQuad(QUAD(1), tint, tint, tint, tint, NAME_TEXTURE);
-    kwlnDrawTexturedColorQuad(QUAD(2), tint, tint, tint, tint, NAME_TEXTURE);
-    kwlnDrawTexturedColorQuad(QUAD(4), tint, tint, tint, tint, NAME_TEXTURE);
+    evtSubmitTexturedGradientQuad(QUAD(0), tint, tint, tint, tint, NAME_TEXTURE);
+    evtSubmitTexturedGradientQuad(QUAD(8), tint, tint, tint, tint, NAME_TEXTURE);
+    evtSubmitTexturedGradientQuad(QUAD(9), tint, tint, tint, tint, NAME_TEXTURE);
+    evtSubmitTexturedGradientQuad(QUAD(1), tint, tint, tint, tint, NAME_TEXTURE);
+    evtSubmitTexturedGradientQuad(QUAD(2), tint, tint, tint, tint, NAME_TEXTURE);
+    evtSubmitTexturedGradientQuad(QUAD(4), tint, tint, tint, tint, NAME_TEXTURE);
 }
 
 #undef RECT
@@ -401,7 +401,7 @@ void fldDrawScaledGrayTintMapTexture(s32 x, s32 y, s8 grey, s8 alpha, struct Sdf
     height = scale * 205.0f;
     color = ((u8)grey | ((u32)alpha << 24)) |
             (((u8)grey << 16) | ((u8)grey << 8));
-    kwlnDrawTexturedColorQuad((s32)left, (s32)top, (s32)width, (s32)height,
+    evtSubmitTexturedGradientQuad((s32)left, (s32)top, (s32)width, (s32)height,
                   0, 0, 0x100, 0xC0, color, color, color, color, texture);
 }
 
@@ -431,7 +431,7 @@ void fldReleaseMapRequestQueues(void) {
 /* Draw the auxiliary map texture centred on the requested position. */
 void fldDrawScaledAuxMapTexture(s32 x, s32 y, u32 colour, f32 scale) {
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-    kwlnDrawTexturedColorQuad((s32)(x - scale * 16.0f), (s32)(y - scale * 12.0f),
+    evtSubmitTexturedGradientQuad((s32)(x - scale * 16.0f), (s32)(y - scale * 12.0f),
                   (s32)(scale * 32.0f), (s32)(scale * 24.0f),
                   0, 0, 32, 32, colour, colour, colour, colour,
                   fldLocalMapAuxTextureResource.texture);
@@ -458,7 +458,7 @@ void fldDrawMapRequestHalo(s32 x, s32 y, s32 z, MapRequestState *state, MapReque
     }
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     fldProjectPointToGridCell(&gridX, &gridY, x, y, z);
-    kwlnDrawTexturedColorQuad((s32)(gridX - scale * 16.0f), (s32)(gridY - scale * 16.0f),
+    evtSubmitTexturedGradientQuad((s32)(gridX - scale * 16.0f), (s32)(gridY - scale * 16.0f),
                   (s32)(scale * 32.0f), (s32)(scale * 32.0f), 0, 0, 32, 32,
                   MAP_GREY_COLOR(progress * 24.0f), MAP_GREY_COLOR(progress * 24.0f),
                   MAP_GREY_COLOR(progress * 24.0f), MAP_GREY_COLOR(progress * 24.0f),
@@ -485,7 +485,7 @@ void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, MapRequestState *state, MapRequ
     fldProjectPointToGridCell(&gridX, &gridY, x, y, z);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     evtSubmitPrimaryAlphaBlendMode(1);
-    kwlnDrawTexturedColorQuad((s32)(gridX - scale * 16.0f), (s32)(gridY - scale * 12.0f),
+    evtSubmitTexturedGradientQuad((s32)(gridX - scale * 16.0f), (s32)(gridY - scale * 12.0f),
                   (s32)(scale * 32.0f), (s32)(scale * 24.0f), 0, 0, 32, 32,
                   MAP_GREY_COLOR(progress * 64.0f), MAP_GREY_COLOR(progress * 64.0f),
                   MAP_GREY_COLOR(progress * 64.0f), MAP_GREY_COLOR(progress * 64.0f),

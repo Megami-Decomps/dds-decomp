@@ -432,7 +432,7 @@ extern SoundCommand D_003BDC90;
 extern u32 btlTintTransitionHoldCount;
 
 extern BtlRuntimeTask *btlAllocTask(s32);
-extern u8 D_0037F510[];
+extern u8 kwlnTaskPadButtonStates[];
 
 extern char D_004178A8[];
 

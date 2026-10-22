@@ -157,7 +157,7 @@ extern void itfSendTablePacket(SdfListHead *list, s32 context, s32 mode);
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
-extern SndPad D_0037F510;
+extern SndPad kwlnTaskPadButtonStates;
 
 extern SdfPoolNode kwlnDrawSurfaces[];
 

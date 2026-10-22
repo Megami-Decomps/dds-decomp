@@ -102,30 +102,30 @@ void mnuCleanupShootingPauseNoOp(void) {
 
 typedef struct SoundSlot SoundSlot;
 extern SoundSlot *dds3ClaimSoundSlot(u32 sequence, u32 frames);
-extern s8 D_0037F510[];
+extern s8 kwlnTaskPadButtonStates[];
 
 /* Clamp cursor movement before confirm/cancel override the navigation sound. */
 s32 mnuPollPauseChoiceInput(MnuShootingWork *object) {
     s32 result = -1;
     s32 sound = 0;
 
-    if (D_0037F510[0x26] < 0) {
+    if (kwlnTaskPadButtonStates[0x26] < 0) {
         if (--object->choiceIndex < 0) {
             object->choiceIndex = 0;
         } else {
             sound = 1;
         }
-    } else if (D_0037F510[0x27] < 0) {
+    } else if (kwlnTaskPadButtonStates[0x27] < 0) {
         if (++object->choiceIndex < 3) {
             sound = 1;
         } else {
             object->choiceIndex = 2;
         }
     }
-    if (D_0037F510[0x21] < 0) {
+    if (kwlnTaskPadButtonStates[0x21] < 0) {
         result = object->choiceIndex;
         sound = 2;
-    } else if (D_0037F510[0x23] < 0) {
+    } else if (kwlnTaskPadButtonStates[0x23] < 0) {
         result = 0;
         sound = 3;
     }

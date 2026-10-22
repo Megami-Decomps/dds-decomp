@@ -438,7 +438,7 @@ void mtrMantraEquipRelease(s32 key, s32 initResult) {
 
 extern DspUnitName *datUnitNames;
 extern DspMantraName *D_00435E50;
-extern s8 D_0037F510[];
+extern s8 kwlnTaskPadButtonStates[];
 extern DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *);
 extern u16 mnuGetSelectedPanelValue(MnuStatusResource *);
 extern MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *);
@@ -482,7 +482,7 @@ s32 mtrMantraEquipUpdate(void) {
     selectedPanelFlags = mnuGetSelectedPanelValue(work);
     switch (equip->state) {
     case 1:
-        if (D_0037F510[0x21] < 0) {
+        if (kwlnTaskPadButtonStates[0x21] < 0) {
             resultKind = 1;
             if (scrGetSelectedScriptEntryId(selectedRecord) == (u32)selectedEntryId) {
                 if (((u32)selectedPanelFlags >> 8) & 1) {
@@ -505,7 +505,7 @@ s32 mtrMantraEquipUpdate(void) {
                     }
                 }
             }
-        } else if (D_0037F510[0x23] >= 0) {
+        } else if (kwlnTaskPadButtonStates[0x23] >= 0) {
             break;
         } else {
             resultKind = 2;
@@ -903,7 +903,7 @@ s32 mtrDrawUnitSelectionOverlay(MnuStatusResource *resourceWork) {
     return 0;
 }
 
-extern s8 D_0037F510[];
+extern s8 kwlnTaskPadButtonStates[];
 extern MenuListNode *mnuRetreatListCursorDefault(MenuList *);
 extern MenuListNode *mnuAdvanceListCursorDefault(MenuList *);
 extern void mnuClearListFlagsOneAndTwo(MenuList *);
@@ -913,25 +913,25 @@ s32 mnuHandleMantraSelectionInput(MnuStatusResource *resourceWork) {
     s32 action = 0;
     MenuList *list = resourceWork->list;
 
-    if (D_0037F510[0x26] & 2) {
+    if (kwlnTaskPadButtonStates[0x26] & 2) {
         if (mnuRetreatListCursorDefault(list) != NULL) {
             sound = 1;
             mnuRebuildProfilePanelFromRenderSnapshot(resourceWork);
         }
-    } else if (D_0037F510[0x27] & 2) {
+    } else if (kwlnTaskPadButtonStates[0x27] & 2) {
         if (mnuAdvanceListCursorDefault(list) != NULL) {
             sound = 1;
             mnuRebuildProfilePanelFromRenderSnapshot(resourceWork);
         }
-    } else if (D_0037F510[0x21] < 0) {
+    } else if (kwlnTaskPadButtonStates[0x21] < 0) {
         action = 2;
         sound = 2;
-    } else if (D_0037F510[0x23] < 0) {
+    } else if (kwlnTaskPadButtonStates[0x23] < 0) {
         action = 3;
         sound = 3;
     }
-    if (D_0037F510[0x21] < 0 ||
-        (D_0037F510[0x26] == 0 && D_0037F510[0x27] == 0)) {
+    if (kwlnTaskPadButtonStates[0x21] < 0 ||
+        (kwlnTaskPadButtonStates[0x26] == 0 && kwlnTaskPadButtonStates[0x27] == 0)) {
         mnuClearListFlagsOneAndTwo(list);
     }
     switch (sound) {

@@ -68,7 +68,7 @@ extern void sdfDrawSync(void);
 extern void sndSendSingleWordControlPacket(u32 controlWord);
 
 extern void sndQueueNoPayloadCommand1A0(void);
-extern u8 D_00324510[2][2][16];
+extern u8 kwlnTaskPadButtonStates[2][2][16];
 extern u8 D_003BA878[2][2];
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
@@ -277,7 +277,7 @@ extern void fldSubmitSpriteRect(s32, s32, s32, s32, s32, s32, s32, s32, s32, Sdf
 #include "fld_title_banner_menu.h"
 
 extern KwlnTask *fldInputPanelTaskHandle;
-extern u32 D_0032E570[];
+extern u32 fldDisplayStateWords[];
 extern s32 D_003BAE40;
 extern u8 fldGetCampSceneControlMode(void);
 extern u8 fldGetSceneReadyOrPendingState(void);
@@ -298,7 +298,7 @@ s32 fldResolvePendingTitleBanner(void) {
     if (fldGetSceneReadyOrPendingState() != 0) {
         return 0;
     }
-    if (D_0032E570[0] != 0) {
+    if (fldDisplayStateWords[0] != 0) {
         return 0;
     }
     if (fileMenuTaskExists() != 0) {
@@ -322,8 +322,8 @@ s32 fldResolvePendingTitleBanner(void) {
         return -1;
     }
 
-    if (fldAreaState.titleFade != 0 || D_003BAE40 == 1 || (s8)D_00324510[1][0][1] < 0) {
-        if ((s8)D_00324510[1][0][1] < 0) {
+    if (fldAreaState.titleFade != 0 || D_003BAE40 == 1 || (s8)kwlnTaskPadButtonStates[1][0][1] < 0) {
+        if ((s8)kwlnTaskPadButtonStates[1][0][1] < 0) {
             fldApplyCameraFacingPoint();
         }
         menu->pending = 0;
@@ -343,7 +343,7 @@ extern void fldDrawAnimatedFieldBanner(s32, s32, s32);
 
 extern void func_00147188(s32);
 
-extern s32 D_003BAB08;
+extern s32 fldCameraMoveTrackingCurrent;
 
 s32 fldFieldTaskUpdate(void) {
     if (fldGetCampSceneControlMode() != 0) {
@@ -358,7 +358,7 @@ s32 fldFieldTaskUpdate(void) {
     if (fldTitleIsActive() != 0) {
         return 0;
     }
-    if (D_003BAB08 != -999) {
+    if (fldCameraMoveTrackingCurrent != -999) {
         fldDrawAnimatedFieldBanner(0x80, 0, 0);
     } else {
         func_00147188(0);
@@ -1194,7 +1194,7 @@ extern FrFontGlyph *D_003BD7CC;
 extern s32 D_003BAEAC, D_003BAEB8, D_003BAEBC, D_003BAEC0;
 extern s32 D_003BAEF0, D_003BAEF4, D_003BAF00, D_003BAF04, D_003BAF08;
 extern f32 D_003BAEF8, D_003BAEFC, D_003BAF0C, D_003BAF10, D_003BAF14;
-extern u8 D_00324510[2][2][16];
+extern u8 kwlnTaskPadButtonStates[2][2][16];
 extern f32 D_00329790[4][4], sdfViewMatrix[4][4];
 extern f32 D_00324A20[4] __attribute__((aligned(16)));
 extern SdfModel *D_00348F30[];
@@ -1240,7 +1240,7 @@ void fldDrawAutomapScene(void) {
     VU0_LOAD_MATRIX(D_00329790);
     sdfInvertScaledVuTransform();
     D_003BAEF0 = D_003BAEB8;
-    if ((s8)D_00324510[1][0][8] < 0 && D_003BAEF0 < proposed) {
+    if ((s8)kwlnTaskPadButtonStates[1][0][8] < 0 && D_003BAEF0 < proposed) {
         proposed = D_003BAEF0 + 1;
         if (!D_003BAEAC) proposed = fldFindNextMarkedValue(D_003BAEF0);
         if (D_003BAEF0 != proposed) {
@@ -1254,7 +1254,7 @@ void fldDrawAutomapScene(void) {
             D_003BAF08 = 0;
         }
     }
-    if ((s8)D_00324510[1][0][10] < 0 && D_003BAEF0 >= 2) {
+    if ((s8)kwlnTaskPadButtonStates[1][0][10] < 0 && D_003BAEF0 >= 2) {
         proposed = D_003BAEF0 - 1;
         if (!D_003BAEAC) proposed = fldFindPreviousMarkedValue(D_003BAEF0);
         if (D_003BAEF0 != proposed) {
@@ -2169,10 +2169,10 @@ void fldUpdateAutomapInput(void) {
         return;
     }
     if (D_0032E5C4[0] != 0) {
-        if ((s8)D_00324510[1][0][2] != 0) {
+        if ((s8)kwlnTaskPadButtonStates[1][0][2] != 0) {
             closeRequested = 1;
         }
-    } else if ((s8)D_00324510[1][0][2] < 0) {
+    } else if ((s8)kwlnTaskPadButtonStates[1][0][2] < 0) {
         closeRequested = 1;
     }
 
@@ -2181,13 +2181,13 @@ void fldUpdateAutomapInput(void) {
         D_003BAECC++;
     }
     if (closeRequested != 0 ||
-        ((s8)D_00324510[1][0][3] < 0 && D_003BAED4 == 0)) {
+        ((s8)kwlnTaskPadButtonStates[1][0][3] < 0 && D_003BAED4 == 0)) {
         fldEnterSceneCamera();
         kwlnFadeStartOut(0);
         kwlnFadeStartIn(8);
         return;
     }
-    if ((s8)D_00324510[1][0][3] < 0) {
+    if ((s8)kwlnTaskPadButtonStates[1][0][3] < 0) {
         sndSetSequenceVolumePan(10, 127, 63);
         D_003BAEBC = D_003BAEC4;
         D_003BAEC0 = D_003BAEC8;
@@ -2198,36 +2198,36 @@ void fldUpdateAutomapInput(void) {
     if (D_003BAECC >= 11) {
         if ((s8)D_003BA878[0][1] != 0) {
             if (D_003BA878[0][1] & 2) {
-                if ((s8)D_00324510[1][0][5] != 0 &&
-                    (s8)D_00324510[1][0][7] != 0) {
+                if ((s8)kwlnTaskPadButtonStates[1][0][5] != 0 &&
+                    (s8)kwlnTaskPadButtonStates[1][0][7] != 0) {
                     D_003BAED4 = 1;
                     D_003BAEBC += 600;
                     D_003BAEC0 -= 600;
-                } else if ((s8)D_00324510[1][0][5] != 0 &&
-                           (s8)D_00324510[1][0][6] != 0) {
+                } else if ((s8)kwlnTaskPadButtonStates[1][0][5] != 0 &&
+                           (s8)kwlnTaskPadButtonStates[1][0][6] != 0) {
                     D_003BAED4 = 1;
                     D_003BAEBC += 600;
                     D_003BAEC0 += 600;
-                } else if ((s8)D_00324510[1][0][4] != 0 &&
-                           (s8)D_00324510[1][0][7] != 0) {
+                } else if ((s8)kwlnTaskPadButtonStates[1][0][4] != 0 &&
+                           (s8)kwlnTaskPadButtonStates[1][0][7] != 0) {
                     D_003BAED4 = 1;
                     D_003BAEBC -= 600;
                     D_003BAEC0 -= 600;
-                } else if ((s8)D_00324510[1][0][4] != 0 &&
-                           (s8)D_00324510[1][0][6] != 0) {
+                } else if ((s8)kwlnTaskPadButtonStates[1][0][4] != 0 &&
+                           (s8)kwlnTaskPadButtonStates[1][0][6] != 0) {
                     D_003BAED4 = 1;
                     D_003BAEBC -= 600;
                     D_003BAEC0 += 600;
-                } else if ((s8)D_00324510[1][0][5] != 0) {
+                } else if ((s8)kwlnTaskPadButtonStates[1][0][5] != 0) {
                     D_003BAED4 = 1;
                     D_003BAEBC += 600;
-                } else if ((s8)D_00324510[1][0][4] != 0) {
+                } else if ((s8)kwlnTaskPadButtonStates[1][0][4] != 0) {
                     D_003BAED4 = 1;
                     D_003BAEBC -= 600;
-                } else if ((s8)D_00324510[1][0][7] != 0) {
+                } else if ((s8)kwlnTaskPadButtonStates[1][0][7] != 0) {
                     D_003BAED4 = 1;
                     D_003BAEC0 -= 600;
-                } else if ((s8)D_00324510[1][0][6] != 0) {
+                } else if ((s8)kwlnTaskPadButtonStates[1][0][6] != 0) {
                     D_003BAED4 = 1;
                     D_003BAEC0 += 600;
                 }
@@ -2235,44 +2235,44 @@ void fldUpdateAutomapInput(void) {
         } else {
             /* A held diagonal consumes the direction choice even when its
              * Z-repeat bit is absent; do not fall back to a cardinal step. */
-            if ((s8)D_00324510[1][0][5] != 0 &&
-                (s8)D_00324510[1][0][7] != 0) {
-                if (D_00324510[1][0][7] & 2) {
+            if ((s8)kwlnTaskPadButtonStates[1][0][5] != 0 &&
+                (s8)kwlnTaskPadButtonStates[1][0][7] != 0) {
+                if (kwlnTaskPadButtonStates[1][0][7] & 2) {
                     D_003BAED4 = 1;
                     D_003BAEBC += 600;
                     D_003BAEC0 -= 600;
                 }
-            } else if ((s8)D_00324510[1][0][5] != 0 &&
-                       (s8)D_00324510[1][0][6] != 0) {
-                if (D_00324510[1][0][6] & 2) {
+            } else if ((s8)kwlnTaskPadButtonStates[1][0][5] != 0 &&
+                       (s8)kwlnTaskPadButtonStates[1][0][6] != 0) {
+                if (kwlnTaskPadButtonStates[1][0][6] & 2) {
                     D_003BAED4 = 1;
                     D_003BAEBC += 600;
                     D_003BAEC0 += 600;
                 }
-            } else if ((s8)D_00324510[1][0][4] != 0 &&
-                       (s8)D_00324510[1][0][7] != 0) {
-                if (D_00324510[1][0][7] & 2) {
+            } else if ((s8)kwlnTaskPadButtonStates[1][0][4] != 0 &&
+                       (s8)kwlnTaskPadButtonStates[1][0][7] != 0) {
+                if (kwlnTaskPadButtonStates[1][0][7] & 2) {
                     D_003BAED4 = 1;
                     D_003BAEBC -= 600;
                     D_003BAEC0 -= 600;
                 }
-            } else if ((s8)D_00324510[1][0][4] != 0 &&
-                       (s8)D_00324510[1][0][6] != 0) {
-                if (D_00324510[1][0][6] & 2) {
+            } else if ((s8)kwlnTaskPadButtonStates[1][0][4] != 0 &&
+                       (s8)kwlnTaskPadButtonStates[1][0][6] != 0) {
+                if (kwlnTaskPadButtonStates[1][0][6] & 2) {
                     D_003BAED4 = 1;
                     D_003BAEBC -= 600;
                     D_003BAEC0 += 600;
                 }
-            } else if (D_00324510[1][0][5] & 2) {
+            } else if (kwlnTaskPadButtonStates[1][0][5] & 2) {
                 D_003BAED4 = 1;
                 D_003BAEBC += 600;
-            } else if (D_00324510[1][0][4] & 2) {
+            } else if (kwlnTaskPadButtonStates[1][0][4] & 2) {
                 D_003BAED4 = 1;
                 D_003BAEBC -= 600;
-            } else if (D_00324510[1][0][7] & 2) {
+            } else if (kwlnTaskPadButtonStates[1][0][7] & 2) {
                 D_003BAED4 = 1;
                 D_003BAEC0 -= 600;
-            } else if (D_00324510[1][0][6] & 2) {
+            } else if (kwlnTaskPadButtonStates[1][0][6] & 2) {
                 D_003BAED4 = 1;
                 D_003BAEC0 += 600;
             }
@@ -4333,7 +4333,7 @@ void fldDrawWeatherLimitTimer(void) {
     evtSetDrawSurfaceIndex(0x53);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 1);
     evtSubmitPrimaryAlphaBlendMode(0);
-    kwlnDrawTexturedColorQuad(20, 20, 113, 31, 1, 0, 113, 31,
+    evtSubmitTexturedGradientQuad(20, 20, 113, 31, 1, 0, 113, 31,
                   vertexColor, vertexColor, vertexColor, vertexColor, fldWeatherLimitTexture);
     remainingSeconds = remainingFrames / 30;
     if (remainingSeconds >= 100) {
@@ -4341,11 +4341,11 @@ void fldDrawWeatherLimitTimer(void) {
     }
     digit = remainingSeconds / 10;
     if (digit > 0) {
-        kwlnDrawTexturedColorQuad(92, 37, 15, 16, digitOrigins[digit][0], digitOrigins[digit][1], 15, 16,
+        evtSubmitTexturedGradientQuad(92, 37, 15, 16, digitOrigins[digit][0], digitOrigins[digit][1], 15, 16,
                       vertexColor, vertexColor, vertexColor, vertexColor, fldWeatherLimitTexture);
     }
     digit = remainingSeconds % 10;
-    kwlnDrawTexturedColorQuad(105, 37, 15, 16, digitOrigins[digit][0], digitOrigins[digit][1], 15, 16,
+    evtSubmitTexturedGradientQuad(105, 37, 15, 16, digitOrigins[digit][0], digitOrigins[digit][1], 15, 16,
                   vertexColor, vertexColor, vertexColor, vertexColor, fldWeatherLimitTexture);
 }
 

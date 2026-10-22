@@ -142,7 +142,7 @@ void mnuTickScoreProgressState(MnuShootingWork *work) {
 
 
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
-extern s8 D_0037F510[];
+extern s8 kwlnTaskPadButtonStates[];
 
 s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
     switch (work->phase) {
@@ -201,10 +201,10 @@ s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
         }
         break;
     case 10:
-        if (D_0037F510[0x26] < 0) {
+        if (kwlnTaskPadButtonStates[0x26] < 0) {
             work->choiceIndex--;
         }
-        if (D_0037F510[0x27] < 0) {
+        if (kwlnTaskPadButtonStates[0x27] < 0) {
             work->choiceIndex++;
         }
         if (work->choiceIndex < 0) {
@@ -214,7 +214,7 @@ s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
             work->choiceIndex = 1;
         }
         itfSetTwoChoiceFadeSelection(&work->choiceFade, work->choiceIndex);
-        if (D_0037F510[0x21] < 0) {
+        if (kwlnTaskPadButtonStates[0x21] < 0) {
             work->phase = 11;
             work->result = work->choiceIndex;
         }

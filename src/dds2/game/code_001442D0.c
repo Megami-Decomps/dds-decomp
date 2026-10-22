@@ -497,8 +497,8 @@ extern u8 fldHasBadkaifukuLabelProcess(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
 extern KwlnTask *fldInputPanelTaskHandle;
 extern void fldUpdateCameraHeadingFromXY(void);
-extern u32 D_00389988[];
-extern u8 D_0037F510[2][2][16];
+extern u32 fldDisplayStateWords[];
+extern u8 kwlnTaskPadButtonStates[2][2][16];
 extern s32 D_004361D0;
 
 #include "fld_title_banner_menu.h"
@@ -516,7 +516,7 @@ s32 fldResolvePendingTitleBanner(void) {
     if (fldGetSceneReadyOrPendingState() != 0) {
         return 0;
     }
-    if (D_00389988[0] != 0) {
+    if (fldDisplayStateWords[0] != 0) {
         return 0;
     }
     if (fileMenuTaskExists() != 0) {
@@ -540,8 +540,8 @@ s32 fldResolvePendingTitleBanner(void) {
         return -1;
     }
     if (fldAreaState.titleFade != 0 ||
-        D_004361D0 == 1 || (s8)D_0037F510[1][0][1] < 0) {
-        if ((s8)D_0037F510[1][0][1] < 0) {
+        D_004361D0 == 1 || (s8)kwlnTaskPadButtonStates[1][0][1] < 0) {
+        if ((s8)kwlnTaskPadButtonStates[1][0][1] < 0) {
             fldUpdateCameraHeadingFromXY();
         }
         area = &fldAreaState;
@@ -555,7 +555,7 @@ s32 fldResolvePendingTitleBanner(void) {
     return 0;
 }
 
-extern s32 D_00435EE0;
+extern s32 fldCameraMoveTrackingCurrent;
 
 extern void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y);
 
@@ -577,7 +577,7 @@ s32 fldFieldTaskUpdate(void) {
     if (D_00389884[0] == 1) {
         return 0;
     }
-    if (D_00435EE0 != -0x3e7) {
+    if (fldCameraMoveTrackingCurrent != -0x3e7) {
         fldDrawAnimatedFieldBanner(0x80, 0, 0);
     } else {
         func_0014B0F8(0);
@@ -1433,7 +1433,7 @@ void fldDrawAutomapScene(void) {
     VU0_LOAD_MATRIX(D_00384790);
     sdfInvertScaledVuTransform();
     D_00436288 = D_0043624C;
-    if ((s8)D_0037F510[1][0][8] < 0 && D_00436288 < proposed) {
+    if ((s8)kwlnTaskPadButtonStates[1][0][8] < 0 && D_00436288 < proposed) {
         proposed = D_00436288 + 1;
         if (!D_00436240) proposed = fldFindNextMarkedValue(D_00436288);
         if (D_00436288 != proposed) {
@@ -1447,7 +1447,7 @@ void fldDrawAutomapScene(void) {
             D_004362A0 = 0;
         }
     }
-    if ((s8)D_0037F510[1][0][10] < 0 && D_00436288 >= 2) {
+    if ((s8)kwlnTaskPadButtonStates[1][0][10] < 0 && D_00436288 >= 2) {
         proposed = D_00436288 - 1;
         if (!D_00436240) proposed = fldFindPreviousMarkedValue(D_00436288);
         if (D_00436288 != proposed) {
@@ -2540,10 +2540,10 @@ void fldUpdateAutomapInput(void) {
         return;
     }
     if (D_003899E0[0] != 0) {
-        if ((s8)D_0037F510[1][0][2] != 0) {
+        if ((s8)kwlnTaskPadButtonStates[1][0][2] != 0) {
             closeRequested = 1;
         }
-    } else if ((s8)D_0037F510[1][0][2] < 0) {
+    } else if ((s8)kwlnTaskPadButtonStates[1][0][2] < 0) {
         closeRequested = 1;
     }
 
@@ -2552,13 +2552,13 @@ void fldUpdateAutomapInput(void) {
         D_00436260++;
     }
     if (closeRequested != 0 ||
-        ((s8)D_0037F510[1][0][3] < 0 && D_00436268 == 0)) {
+        ((s8)kwlnTaskPadButtonStates[1][0][3] < 0 && D_00436268 == 0)) {
         fldEnterSceneCamera();
         kwlnFadeStartOut(0);
         kwlnFadeStartIn(8);
         return;
     }
-    if ((s8)D_0037F510[1][0][3] < 0) {
+    if ((s8)kwlnTaskPadButtonStates[1][0][3] < 0) {
         sndSetSequenceVolumePan(10, 127, 63);
         D_00436250 = D_00436258;
         D_00436254 = D_0043625C;
@@ -2569,36 +2569,36 @@ void fldUpdateAutomapInput(void) {
     if (D_00436260 >= 11) {
         if ((s8)D_00435C48[0][1] != 0) {
             if (D_00435C48[0][1] & 2) {
-                if ((s8)D_0037F510[1][0][5] != 0 &&
-                    (s8)D_0037F510[1][0][7] != 0) {
+                if ((s8)kwlnTaskPadButtonStates[1][0][5] != 0 &&
+                    (s8)kwlnTaskPadButtonStates[1][0][7] != 0) {
                     D_00436268 = 1;
                     D_00436250 += 600;
                     D_00436254 -= 600;
-                } else if ((s8)D_0037F510[1][0][5] != 0 &&
-                           (s8)D_0037F510[1][0][6] != 0) {
+                } else if ((s8)kwlnTaskPadButtonStates[1][0][5] != 0 &&
+                           (s8)kwlnTaskPadButtonStates[1][0][6] != 0) {
                     D_00436268 = 1;
                     D_00436250 += 600;
                     D_00436254 += 600;
-                } else if ((s8)D_0037F510[1][0][4] != 0 &&
-                           (s8)D_0037F510[1][0][7] != 0) {
+                } else if ((s8)kwlnTaskPadButtonStates[1][0][4] != 0 &&
+                           (s8)kwlnTaskPadButtonStates[1][0][7] != 0) {
                     D_00436268 = 1;
                     D_00436250 -= 600;
                     D_00436254 -= 600;
-                } else if ((s8)D_0037F510[1][0][4] != 0 &&
-                           (s8)D_0037F510[1][0][6] != 0) {
+                } else if ((s8)kwlnTaskPadButtonStates[1][0][4] != 0 &&
+                           (s8)kwlnTaskPadButtonStates[1][0][6] != 0) {
                     D_00436268 = 1;
                     D_00436250 -= 600;
                     D_00436254 += 600;
-                } else if ((s8)D_0037F510[1][0][5] != 0) {
+                } else if ((s8)kwlnTaskPadButtonStates[1][0][5] != 0) {
                     D_00436268 = 1;
                     D_00436250 += 600;
-                } else if ((s8)D_0037F510[1][0][4] != 0) {
+                } else if ((s8)kwlnTaskPadButtonStates[1][0][4] != 0) {
                     D_00436268 = 1;
                     D_00436250 -= 600;
-                } else if ((s8)D_0037F510[1][0][7] != 0) {
+                } else if ((s8)kwlnTaskPadButtonStates[1][0][7] != 0) {
                     D_00436268 = 1;
                     D_00436254 -= 600;
-                } else if ((s8)D_0037F510[1][0][6] != 0) {
+                } else if ((s8)kwlnTaskPadButtonStates[1][0][6] != 0) {
                     D_00436268 = 1;
                     D_00436254 += 600;
                 }
@@ -2606,44 +2606,44 @@ void fldUpdateAutomapInput(void) {
         } else {
             /* A held diagonal consumes the direction choice even when its
              * Z-repeat bit is absent; do not fall back to a cardinal step. */
-            if ((s8)D_0037F510[1][0][5] != 0 &&
-                (s8)D_0037F510[1][0][7] != 0) {
-                if (D_0037F510[1][0][7] & 2) {
+            if ((s8)kwlnTaskPadButtonStates[1][0][5] != 0 &&
+                (s8)kwlnTaskPadButtonStates[1][0][7] != 0) {
+                if (kwlnTaskPadButtonStates[1][0][7] & 2) {
                     D_00436268 = 1;
                     D_00436250 += 600;
                     D_00436254 -= 600;
                 }
-            } else if ((s8)D_0037F510[1][0][5] != 0 &&
-                       (s8)D_0037F510[1][0][6] != 0) {
-                if (D_0037F510[1][0][6] & 2) {
+            } else if ((s8)kwlnTaskPadButtonStates[1][0][5] != 0 &&
+                       (s8)kwlnTaskPadButtonStates[1][0][6] != 0) {
+                if (kwlnTaskPadButtonStates[1][0][6] & 2) {
                     D_00436268 = 1;
                     D_00436250 += 600;
                     D_00436254 += 600;
                 }
-            } else if ((s8)D_0037F510[1][0][4] != 0 &&
-                       (s8)D_0037F510[1][0][7] != 0) {
-                if (D_0037F510[1][0][7] & 2) {
+            } else if ((s8)kwlnTaskPadButtonStates[1][0][4] != 0 &&
+                       (s8)kwlnTaskPadButtonStates[1][0][7] != 0) {
+                if (kwlnTaskPadButtonStates[1][0][7] & 2) {
                     D_00436268 = 1;
                     D_00436250 -= 600;
                     D_00436254 -= 600;
                 }
-            } else if ((s8)D_0037F510[1][0][4] != 0 &&
-                       (s8)D_0037F510[1][0][6] != 0) {
-                if (D_0037F510[1][0][6] & 2) {
+            } else if ((s8)kwlnTaskPadButtonStates[1][0][4] != 0 &&
+                       (s8)kwlnTaskPadButtonStates[1][0][6] != 0) {
+                if (kwlnTaskPadButtonStates[1][0][6] & 2) {
                     D_00436268 = 1;
                     D_00436250 -= 600;
                     D_00436254 += 600;
                 }
-            } else if (D_0037F510[1][0][5] & 2) {
+            } else if (kwlnTaskPadButtonStates[1][0][5] & 2) {
                 D_00436268 = 1;
                 D_00436250 += 600;
-            } else if (D_0037F510[1][0][4] & 2) {
+            } else if (kwlnTaskPadButtonStates[1][0][4] & 2) {
                 D_00436268 = 1;
                 D_00436250 -= 600;
-            } else if (D_0037F510[1][0][7] & 2) {
+            } else if (kwlnTaskPadButtonStates[1][0][7] & 2) {
                 D_00436268 = 1;
                 D_00436254 -= 600;
-            } else if (D_0037F510[1][0][6] & 2) {
+            } else if (kwlnTaskPadButtonStates[1][0][6] & 2) {
                 D_00436268 = 1;
                 D_00436254 += 600;
             }
@@ -5121,7 +5121,7 @@ void fldUpdateSparkEncounterScene(void) {
     phase = fldSparkControlState.phase;
     if (phase == 1) {
         if (fldSparkControlState.mode == 0) {
-            if ((s8)D_0037F510[1][0][0] < 0) {
+            if ((s8)kwlnTaskPadButtonStates[1][0][0] < 0) {
                 fldSetCameraModelMotionRequest(6, 20);
                 sndSetSequenceVolumePan(0x680012, 0x7F, 0x3F);
                 fldSparkControlState.mode = 1;
@@ -5143,7 +5143,7 @@ void fldUpdateSparkEncounterScene(void) {
                 }
             } else if (fldSparkControlState.mode == 1 &&
                        fldSparkControlState.pendingMode == 0 && value < 14 &&
-                       (s8)D_0037F510[1][0][0] < 0) {
+                       (s8)kwlnTaskPadButtonStates[1][0][0] < 0) {
                 fldSetCameraModelMotionRequest(6, 20);
                 sndSetSequenceVolumePan(0x680012, 0x7F, 0x3F);
                 fldSparkControlState.mode = 1;

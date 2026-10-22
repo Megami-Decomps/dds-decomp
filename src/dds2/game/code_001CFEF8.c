@@ -1223,7 +1223,7 @@ const char D_004171B8[] __attribute__((aligned(8))) = "btl:end [BTL_END_LOSE or 
 const char D_004171E0[] __attribute__((aligned(8))) = "btl:end [BTL_END_ESCAPE]\n";
 const char D_00417200[] __attribute__((aligned(8))) = "btl:end [BTL_END_SERIAL]\n";
 const char D_00417220[] __attribute__((aligned(8))) = "btl:end [BTL_END_COMPULSORY]\n";
-extern s8 D_0037F510[];
+extern s8 kwlnTaskPadButtonStates[];
 extern s32 btlAllActiveUnitsReady(void);
 extern s32 btlCountRegisteredTasks(void);
 extern s32 btlReleaseScriptResourceB(void);
@@ -1285,7 +1285,7 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
     if (!((scene->scriptState != 0xF000003 || scene->scriptState != state) &&
           scene->frame < scene->sceneState &&
           (scene->eventReady != 1 || scene->frame < 37 ||
-           ((s8)D_0037F510[0x21] >= 0 && (s8)D_0037F510[0x23] >= 0))) &&
+           ((s8)kwlnTaskPadButtonStates[0x21] >= 0 && (s8)kwlnTaskPadButtonStates[0x23] >= 0))) &&
         scene->endDelay == 0) {
         switch (scene->eventReady) {
         case 0:

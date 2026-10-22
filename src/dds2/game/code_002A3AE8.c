@@ -99,14 +99,14 @@ void mnuSelectMenuListCursorByAdvance(s32 advanceCount) {
     }
 }
 
-extern s8 D_0037F510[];
+extern s8 kwlnTaskPadButtonStates[];
 
 s32 mnuIsAnyMenuInputPressed(void) {
-    if (D_0037F510[0x21] < 0 || D_0037F510[0x23] < 0 ||
-        D_0037F510[0x22] < 0 || D_0037F510[0x20] < 0 ||
-        D_0037F510[0x2a] < 0 || D_0037F510[0x2b] < 0 ||
-        D_0037F510[0x28] < 0 || D_0037F510[0x29] < 0 ||
-        D_0037F510[0x2d] < 0 || D_0037F510[0x2c] < 0) {
+    if (kwlnTaskPadButtonStates[0x21] < 0 || kwlnTaskPadButtonStates[0x23] < 0 ||
+        kwlnTaskPadButtonStates[0x22] < 0 || kwlnTaskPadButtonStates[0x20] < 0 ||
+        kwlnTaskPadButtonStates[0x2a] < 0 || kwlnTaskPadButtonStates[0x2b] < 0 ||
+        kwlnTaskPadButtonStates[0x28] < 0 || kwlnTaskPadButtonStates[0x29] < 0 ||
+        kwlnTaskPadButtonStates[0x2d] < 0 || kwlnTaskPadButtonStates[0x2c] < 0) {
         return 1;
     }
     return 0;

@@ -118,7 +118,7 @@ extern s32 D_0032E3C0[];
 
 extern s32 fldSceneSoundBase;
 
-extern s32 D_0032E570[];
+extern s32 fldDisplayStateWords[];
 
 extern u8 D_003BAE78[];
 #include "dds3_world_secondary.h"
@@ -591,9 +591,9 @@ extern void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode);
 s32 fldCmdSetFieldParameterPair(void) {
     s32 durationMode;
 
-    D_0032E570[11] = scrReadIntParameter(0);
+    fldDisplayStateWords[11] = scrReadIntParameter(0);
     durationMode = scrReadIntParameter(1);
-    fldApplySkyLightSet(D_0032E570[11], durationMode);
+    fldApplySkyLightSet(fldDisplayStateWords[11], durationMode);
     return 1;
 }
 
@@ -604,10 +604,10 @@ extern void fldSetSwayMode(u32 mode);
 s32 fldCmdSetFadeAndSway(void) {
     s32 second;
     s32 third;
-    D_0032E570[13] = scrReadIntParameter(0) & 0xFF;
+    fldDisplayStateWords[13] = scrReadIntParameter(0) & 0xFF;
     second = scrReadIntParameter(1);
     third = scrReadIntParameter(2);
-    fldSetFadeTarget(D_0032E570[13], second, third);
+    fldSetFadeTarget(fldDisplayStateWords[13], second, third);
     fldSetSwayMode(scrReadIntParameter(3));
     return 1;
 }

@@ -248,7 +248,7 @@ extern s32 filePrepareMainBlobWrite(void);
 extern s32 fileOnAllWritten(void);
 
 extern void fileSetMemoryCardOperationActive(void);
-extern s8 D_0037F510[];
+extern s8 kwlnTaskPadButtonStates[];
 extern void sndReleaseTrackHandle(s32 command);
 extern s32 fileBeginWait(void *callback);
 
@@ -1303,8 +1303,8 @@ s32 filePollSlotDetectionAndBranch(void) {
 
     D_00437CF8 = 0;
     if (D_00437D40 == 0) {
-        if (fileIsLoadedAndConditionTrue(D_0037F510[0x21] < 0) ||
-            fileIsLoadedAndConditionTrue(D_0037F510[0x23] < 0)) {
+        if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) ||
+            fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0)) {
             sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
             D_00437D40 = 1;
         }
@@ -1370,8 +1370,8 @@ s32 filePollSlotDetectionAndBranch(void) {
 
 s32 filePollSlotScanOrReset(void) {
     if (D_00437D40 == 0) {
-        if (fileIsLoadedAndConditionTrue(D_0037F510[0x21] < 0) ||
-            fileIsLoadedAndConditionTrue(D_0037F510[0x23] < 0)) {
+        if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) ||
+            fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0)) {
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
             D_00437D40 = 1;
         }
@@ -1392,8 +1392,8 @@ s32 filePollSlotScanOrReset(void) {
 }
 
 s32 fileAbortSlotScanOnInput(void) {
-    if (fileIsLoadedAndConditionTrue(D_0037F510[0x21] < 0) ||
-        fileIsLoadedAndConditionTrue(D_0037F510[0x23] < 0)) {
+    if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) ||
+        fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0)) {
         sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         D_00437D3C = 0;
         D_00437CF8 = 0;
@@ -1420,8 +1420,8 @@ s32 fileSetMenuCallbackAndClearResult(u32 menuCallback) {
 }
 
 s32 mcdFinishFileDetection(void) {
-    if (fileIsLoadedAndConditionTrue((u32)D_0037F510[0x21] >> 31) ||
-        fileIsLoadedAndConditionTrue((u32)D_0037F510[0x23] >> 31)) {
+    if (fileIsLoadedAndConditionTrue((u32)kwlnTaskPadButtonStates[0x21] >> 31) ||
+        fileIsLoadedAndConditionTrue((u32)kwlnTaskPadButtonStates[0x23] >> 31)) {
         fileSetMenuFlowState(0);
         D_00437D3C = 0;
         D_00437CF8 = 0;
@@ -1447,8 +1447,8 @@ s32 filePollSlotRequestAndResumeFlow(void) {
     s32 reqStatus;
 
     if (D_00437D40 == 0) {
-        if (fileIsLoadedAndConditionTrue(D_0037F510[0x21] < 0) ||
-            fileIsLoadedAndConditionTrue(D_0037F510[0x23] < 0)) {
+        if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) ||
+            fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0)) {
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
             D_00437D40 = 1;
         }
@@ -2131,7 +2131,7 @@ s32 fileSlotBrowserUpdate(void) {
         fileLoadMenuState.inputRepeatTimer =
             fileLoadMenuState.inputRepeatTimer <= 0 ? 0 :
             fileLoadMenuState.inputRepeatTimer > 3 ? 3 : fileLoadMenuState.inputRepeatTimer;
-        if (fileIsLoadedWithActiveFlow(((u8)D_0037F510[0x26] >> 1) & 1) != 0 &&
+        if (fileIsLoadedWithActiveFlow(((u8)kwlnTaskPadButtonStates[0x26] >> 1) & 1) != 0 &&
             fileLoadMenuState.inputRepeatTimer >= 3) {
             selection = D_00437D28;
             fileLoadMenuState.inputRepeatTimer = 0;
@@ -2147,7 +2147,7 @@ s32 fileSlotBrowserUpdate(void) {
                 offset -= offset > 0;
             }
         }
-        if (fileIsLoadedWithActiveFlow(((u8)D_0037F510[0x27] >> 1) & 1) != 0 &&
+        if (fileIsLoadedWithActiveFlow(((u8)kwlnTaskPadButtonStates[0x27] >> 1) & 1) != 0 &&
             fileLoadMenuState.inputRepeatTimer >= 3) {
             selection = D_00437D28;
             fileLoadMenuState.inputRepeatTimer = 0;
@@ -2172,10 +2172,10 @@ s32 fileSlotBrowserUpdate(void) {
         } else if (oldSelection < fileSelectedSlotIndex) {
             D_00437D00 = 8;
         }
-        if (fileIsLoadedAndConditionTrue(D_0037F510[0x21] < 0) != 0) {
+        if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) != 0) {
             D_00437D14 = 1;
         }
-        if (fileIsLoadedAndConditionTrue(D_0037F510[0x23] < 0) != 0) {
+        if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0) != 0) {
             D_00437D14 = 2;
         }
     }
@@ -2858,17 +2858,17 @@ extern u32 D_00439024, D_00439028;
 /* Yes/no cursor input while the card request is idle. */
 static inline void filePollPromptChoice(void) {
     if (D_00437D20 == 0 && fileIsLoadStepComplete() != 0) {
-        if (fileIsLoadedAndConditionTrue(D_0037F510[0x27] < 0) != 0) {
+        if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x27] < 0) != 0) {
             if (D_00437D18 != 1) {
                 sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             }
             D_00437D18 = 1;
-        } else if (fileIsLoadedAndConditionTrue(D_0037F510[0x26] < 0) != 0) {
+        } else if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x26] < 0) != 0) {
             if (D_00437D18 != 0) {
                 sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             }
             D_00437D18 = 0;
-        } else if (fileIsLoadedAndConditionTrue(D_0037F510[0x21] < 0) != 0) {
+        } else if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) != 0) {
             if (D_00437D18 == 0 && (D_00437D1C == 1 || D_00437D1C == 3)) {
                 sndSetSequenceVolumePan(0x11, 0x7F, 0x3F);
             } else {
@@ -2879,7 +2879,7 @@ static inline void filePollPromptChoice(void) {
             } else {
                 D_00437D20 = 1;
             }
-        } else if (fileIsLoadedAndConditionTrue(D_0037F510[0x23] < 0) != 0) {
+        } else if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0) != 0) {
             sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
             D_00437D20 = 2;
         }
@@ -2938,17 +2938,17 @@ s32 fileUpdatePromptDialog(void) {
         return 0;
     }
     if (D_00437D1C == 4 || D_00437D1C == 8) {
-        if (D_0037F510[0x27] < 0) {
+        if (kwlnTaskPadButtonStates[0x27] < 0) {
             if (D_00437D18 != 1) {
                 sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             }
             D_00437D18 = 1;
-        } else if (D_0037F510[0x26] < 0) {
+        } else if (kwlnTaskPadButtonStates[0x26] < 0) {
             if (D_00437D18 != 0) {
                 sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             }
             D_00437D18 = 0;
-        } else if (D_0037F510[0x21] < 0) {
+        } else if (kwlnTaskPadButtonStates[0x21] < 0) {
             if (D_00437D18 == 0 && (D_00437D1C == 1 || D_00437D1C == 3 || D_00437D1C == 9)) {
                 sndSetSequenceVolumePan(0x11, 0x7F, 0x3F);
             } else {
@@ -2962,7 +2962,7 @@ s32 fileUpdatePromptDialog(void) {
             /* Retail 0x002CEC18 bnez: enters the shared no tail mid-block at .L002CEE04;
              * its delay slot (addiu $2,$0,-1) is the tail's first step. */
             goto no;
-        } else if (D_0037F510[0x23] < 0) {
+        } else if (kwlnTaskPadButtonStates[0x23] < 0) {
             sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
             D_00437D18 = -1;
             D_00437D1C = 0;
@@ -3268,8 +3268,8 @@ void fileLoadCtxSlideUpdate(void) {
 }
 
 s32 mcdFinishFileDetectionWithAudio(void) {
-    if (fileIsLoadedAndConditionTrue((u32)D_0037F510[0x21] >> 31) ||
-        fileIsLoadedAndConditionTrue((u32)D_0037F510[0x23] >> 31)) {
+    if (fileIsLoadedAndConditionTrue((u32)kwlnTaskPadButtonStates[0x21] >> 31) ||
+        fileIsLoadedAndConditionTrue((u32)kwlnTaskPadButtonStates[0x23] >> 31)) {
         fileSetMenuFlowState(0);
         sndSetSequenceVolumePan(8, 0x7f, 0x3f);
         return ((s32 (*)())fileMenuContinuation)();
@@ -3289,23 +3289,23 @@ s32 fileFourWayDialogPoll(void) {
     if (fileIsLoadStepComplete() == 0) {
         return 0;
     }
-    if (D_0037F510[0x27] < 0) {
+    if (kwlnTaskPadButtonStates[0x27] < 0) {
         if (D_00437D18 != 1) {
             sndSetSequenceVolumePan(0, 0x7f, 0x3f);
         }
         D_00437D18 = 1;
-    } else if (D_0037F510[0x26] < 0) {
+    } else if (kwlnTaskPadButtonStates[0x26] < 0) {
         if (D_00437D18 != 0) {
             sndSetSequenceVolumePan(0, 0x7f, 0x3f);
         }
         D_00437D18 = 0;
-    } else if (D_0037F510[0x21] < 0) {
+    } else if (kwlnTaskPadButtonStates[0x21] < 0) {
         sndSetSequenceVolumePan(8, 0x7f, 0x3f);
         if (D_00437D18 == 0) {
             return ((s32 (*)())D_00439024)();
         }
         return ((s32 (*)())D_00439028)();
-    } else if (D_0037F510[0x23] < 0) {
+    } else if (kwlnTaskPadButtonStates[0x23] < 0) {
         if (fileFourWayDialogCancelCallback != 0) {
             sndSetSequenceVolumePan(0xA, 0x7f, 0x3f);
             return ((s32 (*)())fileFourWayDialogCancelCallback)();
@@ -4002,14 +4002,14 @@ s32 fileUpdateConfigurationMenu(KwlnTask *task) {
     }
 
     oldIndex = fileConfigTaskWork->frame->cursor->index;
-    if ((u8)D_0037F510[0x26] & 2) {
+    if ((u8)kwlnTaskPadButtonStates[0x26] & 2) {
         if (mnuRetreatListCursorDefault(fileConfigTaskWork->frame) != NULL) {
             sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             fileConfigTaskWork->transitionTicks = 8;
             fileConfigTaskWork->previousIndex = oldIndex;
         }
     }
-    if ((u8)D_0037F510[0x27] & 2) {
+    if ((u8)kwlnTaskPadButtonStates[0x27] & 2) {
         if (mnuAdvanceListCursorDefault(fileConfigTaskWork->frame) != NULL) {
             sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             fileConfigTaskWork->previousIndex = oldIndex;
@@ -4018,13 +4018,13 @@ s32 fileUpdateConfigurationMenu(KwlnTask *task) {
     }
     index = fileConfigTaskWork->frame->cursor->index;
     if (index < 4) {
-        if (D_0037F510[0x24] < 0 && fileTestSlotFlagsBit(index, (s32 *)&datGameState->world.slotFlags) == 0) {
+        if (kwlnTaskPadButtonStates[0x24] < 0 && fileTestSlotFlagsBit(index, (s32 *)&datGameState->world.slotFlags) == 0) {
             fileToggleSlotFlagsBit(fileConfigTaskWork->frame->cursor->index, (s32 *)&datGameState->world.slotFlags);
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
             cursor = (FileConfigListNode *)fileConfigTaskWork->frame->cursor;
             cursor->resource->ticks = 8;
         }
-        if (D_0037F510[0x25] < 0) {
+        if (kwlnTaskPadButtonStates[0x25] < 0) {
             if (fileTestSlotFlagsBit(fileConfigTaskWork->frame->cursor->index, (s32 *)&datGameState->world.slotFlags) != 0) {
                 fileToggleSlotFlagsBit(fileConfigTaskWork->frame->cursor->index, (s32 *)&datGameState->world.slotFlags);
                 sndSetSequenceVolumePan(8, 0x7F, 0x3F);
@@ -4033,15 +4033,15 @@ s32 fileUpdateConfigurationMenu(KwlnTask *task) {
             }
         }
     }
-    if (D_0037F510[0x26] == 0 && D_0037F510[0x27] == 0) {
+    if (kwlnTaskPadButtonStates[0x26] == 0 && kwlnTaskPadButtonStates[0x27] == 0) {
         mnuClearListFlagsOneAndTwo((u32 *)fileConfigTaskWork->frame);
     }
-    if (D_0037F510[0x21] < 0) {
+    if (kwlnTaskPadButtonStates[0x21] < 0) {
         if (fileConfigTaskWork->frame->cursor->index == 4) {
             fileConfigTaskWork->result = 3;
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         }
-    } else if (D_0037F510[0x23] < 0) {
+    } else if (kwlnTaskPadButtonStates[0x23] < 0) {
         fileConfigTaskWork->result = 3;
         fileRestoreSlotFlagsToState();
         sndSetSequenceVolumePan(10, 0x7F, 0x3F);
