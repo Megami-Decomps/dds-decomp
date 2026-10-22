@@ -192,9 +192,9 @@ extern u32 fldItemBoxObjBuf;
 
 extern FldValueRecord *fldMatterTable;
 
-extern u32 fldAuxRecordResource;
+extern struct sdfMemHandle_t *fldAuxRecordResource;
 
-extern u32 fldValueRecordResource;
+extern struct sdfMemHandle_t *fldValueRecordResource;
 
 extern u32 gFilterAlpha;
 
