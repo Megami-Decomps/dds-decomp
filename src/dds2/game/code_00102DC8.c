@@ -103,7 +103,7 @@ extern dds3ProcessID_t *kwlnDebugGraphTask;
 extern f32 D_0037F5EC[];
 
 
-extern s32 kwlnCurrentIncompleteResource;
+extern sdfTexHandle_t *kwlnCurrentIncompleteResource;
 
 extern s32 kwlnTextureViewerHandlePad(void);
 
@@ -111,7 +111,7 @@ extern s8 dds3PadBitTable[32];
 
 extern s32 kwlnSelectIncompleteResourceAtPageIndex(s32);
 
-extern void kwlnDrawTextureViewerFrame(void *data, s32 handle);
+extern void kwlnDrawTextureViewerFrame(void *data, sdfTexHandle_t *image);
 
 extern SdfPoolNode kwlnPositionedTextSurface;
 
@@ -958,7 +958,7 @@ s32 kwlnSelectIncompleteResourceAtPageIndex(s32 requestedIndex) {
         requestedIndex = 0;
     }
     while (texture != NULL && visitedIndex != requestedIndex) {
-        kwlnCurrentIncompleteResource = (s32)texture;
+        kwlnCurrentIncompleteResource = texture;
         while (texture->reference != NULL && texture->reference->cloneSource != NULL) {
             previousTexture = texture->prev;
             if (previousTexture == NULL) {
@@ -973,7 +973,7 @@ s32 kwlnSelectIncompleteResourceAtPageIndex(s32 requestedIndex) {
         visitedIndex++;
         texture = previousTexture;
     }
-    kwlnCurrentIncompleteResource = (s32)texture;
+    kwlnCurrentIncompleteResource = texture;
     return visitedIndex;
 }
 
@@ -1003,16 +1003,14 @@ extern s32 D_00435CB0;
 
 void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, sdfGsMemSlice_t *block, u8 mode);
 
-void kwlnDrawTextureViewerFrame(void *surfaceContext, s32 handle) {
+void kwlnDrawTextureViewerFrame(void *surfaceContext, sdfTexHandle_t *image) {
     SdfPoolNode *surface;
-    sdfTexHandle_t *image;
     sdfDrawTag_t *packetList;
     s32 counter;
     s32 mode;
 
     surface = (SdfPoolNode *)surfaceContext;
-    image = (sdfTexHandle_t *)handle;
-    if (handle == 0) {
+    if (image == NULL) {
         return;
     }
     packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
@@ -1074,15 +1072,15 @@ s32 (*kwlnTextureFindIncompleteResource(void))(void) {
     if (texture == NULL) {
         return NULL;
     }
-    kwlnCurrentIncompleteResource = (s32)texture;
+    kwlnCurrentIncompleteResource = texture;
     D_00435C60 = 1;
     kwlnTextureViewerPageIndex = 0;
     while (texture->reference != NULL && texture->reference->cloneSource != NULL) {
-        texture = ((sdfTexHandle_t *)(u32)kwlnCurrentIncompleteResource)->prev;
+        texture = kwlnCurrentIncompleteResource->prev;
         if (texture == NULL) {
             return NULL;
         }
-        kwlnCurrentIncompleteResource = (s32)texture;
+        kwlnCurrentIncompleteResource = texture;
     }
     return kwlnLoadDefaultResource;
 }
