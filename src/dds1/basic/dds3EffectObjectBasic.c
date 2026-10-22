@@ -540,7 +540,7 @@ dds3Basic_t *AddBEDEffect(source, firstVector, secondVector)
 }
 
 
-void *dds3AddBEDEffectObjectBasic2(void *resource, void *position, void *scale) {
+dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *resource, void *position, void *scale) {
     return AddBEDEffect(resource, position, scale);
 }
 

@@ -1089,7 +1089,7 @@ void evtCopyUnitTargetVector(evtUnitHandle_t *work, void *src) {
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
 /* Declared before first use (were implicit int). */
-extern void * dds3AddBEDEffectObjectBasic2(void *resource, void *position, void *scale);
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *resource, void *position, void *scale);
 /* Original-style implicit int, kept: matched code depends on it: dds3AddMG12EffectObjectBasic2. */
 
 

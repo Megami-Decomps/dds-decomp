@@ -47,7 +47,7 @@ extern s32 sndFindPackedTrackLoadStatus(s32 sequence);
 extern void p2sdLoadSMGFile(s32 sequence);
 extern s32 evtUpdateFrameVariableTask(dds3ProcessID_t *task);
 extern void dds3EffectObjectBasicStatOn(void *object, s32 flags);
-extern void *dds3AddBEDEffectObjectBasic2(void *obj, void *vecA, void *vecB);
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *obj, void *vecA, void *vecB);
 extern void fldSetFilterAnime(u32 mode);
 extern void fldSkySetAlpha(u32 drawState);
 extern void fldSkySetAlphaOfs(u32 alpha);
