@@ -128,7 +128,7 @@ void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 
 /* Return the number of live entries, not the allocated capacity. */ u32 btlGetIndexListCount(BtlIndexList *list);
 
-/* The caller supplies an in-range index. */ void *btlGetIndexListEntry(BtlIndexList *list, s32 index);
+/* The caller supplies an in-range index. */ BtlUnit *btlGetIndexListEntry(BtlIndexList *list, s32 index);
 
 /* Return the argument address recorded by allocation (zero for no arguments). */ void *btlGetTaskArguments(void *task);
 
@@ -1338,4 +1338,3 @@ BtlRuntimeTask *btlCreateLinkageFormationTask(ActionStateLink *link, u32 firstAc
 }
 
 INCLUDE_RODATA(const s32, "game/code_002053C0", D_00419540);
-

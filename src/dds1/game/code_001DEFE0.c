@@ -313,7 +313,7 @@ s32 btlAdjustCameraDirectionForDefaultPlane(BtlCamState *state);
 
 /* Allocate a native header followed by capacity pointer entries. */ BtlIndexList *btlAllocateIndexList(s32 capacity);
 
-/* The caller keeps the live count within the allocated capacity. */ void btlAppendIndexListEntry(BtlIndexList *list, void *entry);
+/* The caller keeps the live count within the allocated capacity. */ void btlAppendIndexListEntry(BtlIndexList *list, BtlUnit *entry);
 
 void btlApplyCombinedActorFlags(u8 *resource);
 
@@ -11383,4 +11383,3 @@ INCLUDE_SDATA(const s32, "game/code_001DEFE0", D_003BB6A0);
 INCLUDE_SDATA(const s32, "game/code_001DEFE0", D_003BB6A8);
 
 INCLUDE_SDATA(const s32, "game/code_001DEFE0", D_003BB6B0);
-

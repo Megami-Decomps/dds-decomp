@@ -362,7 +362,7 @@ extern void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *, BtlCamState 
 
 /* Allocate a native header followed by capacity pointer entries. */ BtlIndexList *btlAllocateIndexList(s32 capacity);
 
-/* The caller keeps the live count within the allocated capacity. */ void btlAppendIndexListEntry(BtlIndexList *list, void *entry);
+/* The caller keeps the live count within the allocated capacity. */ void btlAppendIndexListEntry(BtlIndexList *list, BtlUnit *entry);
 
 void btlApplyCombinedActorFlags(u8 *fx);
 
@@ -9739,4 +9739,3 @@ INCLUDE_SDATA(const s32, "game/code_001EC868", btlTintTransitionHoldCount);
 INCLUDE_SDATA(const s32, "game/code_001EC868", D_00436AE0);
 
 INCLUDE_SDATA(const s32, "game/code_001EC868", D_00436AE8);
-

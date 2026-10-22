@@ -84,7 +84,7 @@ s32 btlSetupDefeatCameraFromAnimationFlags(BtlLinkedCommand *command) {
         btlSetLinkedDefeatCameraPresetA(command, &command->camera, 0);
     } else if (flags & 8) {
         if (btlGetIndexListCount(command->task->indexWork.indices) == 1) {
-            void *target = btlGetIndexListEntry(command->task->indexWork.indices, 0);
+            BtlUnit *target = btlGetIndexListEntry(command->task->indexWork.indices, 0);
             btlFlagAllUnitDefeatCandidatesTask();
             btlSetLinkedCameraForCommandMode(command, target);
             command->state = 0;
@@ -1189,4 +1189,3 @@ INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BBB48);
 INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BBB50);
 
 INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BBB58);
-

@@ -5159,7 +5159,7 @@ void btlFreeIndexList(BtlIndexList *list) {
 }
 
 /* The caller keeps the live count within the allocated capacity. */
-void btlAppendIndexListEntry(BtlIndexList *list, void *entry) {
+void btlAppendIndexListEntry(BtlIndexList *list, BtlUnit *entry) {
     s32 index;
 
     index = list->count;
@@ -5178,7 +5178,7 @@ u32 btlGetIndexListCount(BtlIndexList *list) {
 }
 
 /* The caller supplies an in-range index. */
-void *btlGetIndexListEntry(BtlIndexList *list, s32 index) {
+BtlUnit *btlGetIndexListEntry(BtlIndexList *list, s32 index) {
     return list->entries[index];
 }
 
@@ -5195,9 +5195,9 @@ void btlCopyIndexList(BtlIndexList *destination, BtlIndexList *source) {
 
 /* Swap two entries without changing the live count. */
 void btlSwapIndexListEntries(BtlIndexList *list, s32 firstIndex, s32 secondIndex) {
-    void **entries;
-    void *first;
-    void *second;
+    BtlUnit **entries;
+    BtlUnit *first;
+    BtlUnit *second;
 
     if (firstIndex == secondIndex) {
         return;
@@ -5209,7 +5209,7 @@ void btlSwapIndexListEntries(BtlIndexList *list, s32 firstIndex, s32 secondIndex
     entries[secondIndex] = first;
 }
 
-s32 btlFindListIndex(BtlIndexList *list, void *entry) {
+s32 btlFindListIndex(BtlIndexList *list, BtlUnit *entry) {
     u32 count = btlGetIndexListCount(list);
     u32 index;
 
@@ -6203,4 +6203,3 @@ INCLUDE_SDATA(const s32, "game/code_001D0BA0", D_003BB660);
 INCLUDE_SDATA(const s32, "game/code_001D0BA0", D_003BB664);
 
 INCLUDE_SDATA(const s32, "game/code_001D0BA0", D_003BB668);
-
