@@ -51,9 +51,9 @@ extern u32 fldItemBoxObjBuf;
 
 extern FldValueRecord *fldMatterTable;
 
-extern u32 fldAuxRecordResource;
+extern struct sdfMemHandle_t *fldAuxRecordResource;
 
-extern u32 fldValueRecordResource;
+extern struct sdfMemHandle_t *fldValueRecordResource;
 
 
 extern s32 fldRainTextureResource;
@@ -141,12 +141,12 @@ void fldAllocPlaneTable(void) {
     struct sdfMemHandle_t *allocation = sdfMemAllocDirect(FIELD_VALUE_RECORD_STORAGE_SIZE);
     void *storage;
 
-    fldValueRecordResource = (u32)allocation;
+    fldValueRecordResource = allocation;
     storage = (void *)sdfMemLock(allocation);
     fldMatterTable = storage;
     memset(storage, 0, FIELD_VALUE_RECORD_STORAGE_SIZE);
     allocation = sdfMemAllocDirect(FIELD_AUX_RECORD_STORAGE_SIZE);
-    fldAuxRecordResource = (u32)allocation;
+    fldAuxRecordResource = allocation;
     storage = (void *)sdfMemLock(allocation);
     fldItemBoxObjBuf = (u32)storage;
     memset(storage, 0, FIELD_AUX_RECORD_STORAGE_SIZE);
@@ -154,11 +154,11 @@ void fldAllocPlaneTable(void) {
 
 /* Release both retained resources and clear the usable buffer addresses. */
 void fldFreeMatterTable(void) {
-    sdfMemUnlock((struct sdfMemHandle_t *)fldValueRecordResource);
-    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldValueRecordResource);
+    sdfMemUnlock(fldValueRecordResource);
+    sdfMemFreeDelayedDirect(fldValueRecordResource);
     fldMatterTable = NULL;
-    sdfMemUnlock((struct sdfMemHandle_t *)fldAuxRecordResource);
-    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldAuxRecordResource);
+    sdfMemUnlock(fldAuxRecordResource);
+    sdfMemFreeDelayedDirect(fldAuxRecordResource);
     fldItemBoxObjBuf = 0;
 }
 
@@ -1623,7 +1623,6 @@ INCLUDE_SDATA(const s32, "game/code_00136EF8", fldValueRecordCount);
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_00436188);
 
-INCLUDE_SDATA(const s32, "game/code_00136EF8", fldAuxRecordResource);
+INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_00136EF8", fldAuxRecordResource);
 
-INCLUDE_SDATA(const s32, "game/code_00136EF8", fldValueRecordResource);
-
+INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_00136EF8", fldValueRecordResource);
