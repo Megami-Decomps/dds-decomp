@@ -8,6 +8,6 @@
  * definition (scrTraceCode.c) returns the context it set the value in, for
  * the script commands that pass it on as their result; their units declare
  * it so. */
-void scrSetIntegerReturnValue(s32 retVal);
+void scrSetIntReturnValue(s32 retVal);
 
 #endif /* SCR_INTEGER_RETURN_VALUE_API_H */

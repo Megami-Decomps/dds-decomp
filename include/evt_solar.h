@@ -113,7 +113,7 @@ typedef char SolarOverlayWork_size_must_be_0x104[(sizeof(SolarOverlayWork) == 0x
 typedef char SolarOverlayState_pulseFrame_offset_check[
     ((u32)&((SolarOverlayState *)0)->pulseFrame == 0xFC) ? 1 : -1];
 
-s32 evtGetSolarPhase(void);
+s32 evtGetAgeOfMoon16(void);
 s32 evtGetMirroredSolarPhase(void);
 void evtInitializeVisualData(SolarOverlayWork *overlay);
 void evtUpdateSolarPhaseTransition(SolarOverlayWork *overlay);

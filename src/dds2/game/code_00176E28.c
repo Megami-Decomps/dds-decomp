@@ -50,10 +50,10 @@ extern SdfPoolNode *effQuadPoolDrawSurfaces[];
 extern u32 effQuadPoolTriangleIndices[];
 extern SdfPoolNode D_00380248;
 #include "sdf_packet_alloc.h"
-extern void *effCreateVertexDrawPacket(EffPacketParams *);
-extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count);
-extern void effReleaseRingRecordPool(EffRecordPool *pool);
-extern u32 *effGetExtendedGroupAuxEntry(EffRecordPool *pool, s32 index);
+extern void *effPkt3DPrimMakePoly(EffPacketParams *);
+extern EffRecordPool *dds3FlashPolyListCreate(u32 count);
+extern void dds3FlashPolyListHDelete(EffRecordPool *pool);
+extern u32 *dds3FlashPolyListHGetVC(EffRecordPool *pool, s32 index);
 
 
 
@@ -65,18 +65,18 @@ typedef struct EffRingBlock {
 
 
 
-extern EffRecordPool *effAllocateIdentityMatrixWork(u32 count);
+extern EffRecordPool *dds3FlashPolyListHCreate(u32 count);
 
 
 extern EffRandState effDefaultRandomState[];
-extern void *effGetExtendedGroupElement(EffRecordPool *pool, s32 index);
+extern void *dds3FlashPolyListHGetVertex(EffRecordPool *pool, s32 index);
 extern f32 effRingBasisScratchVector[];
 
 /* Allocate a circular fan group. Zero spread becomes one; count is not guarded. */
-extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
+extern u32 effMagaCylinderCalcColor(u32 colorA, u32 colorB);
 
 
-EffRingWork *effCreateRingFan(source)
+EffRingWork *effPCPFlashPolyRingExpHCreate(source)
 EffRingWork *source;
 
 {
@@ -104,13 +104,13 @@ EffRingWork *source;
         ring->spread = 1;
     }
     angle = EFFECT_RING_START_ANGLE;
-    ring->recordPool = effAllocateIdentityMatrixWork(ring->count);
+    ring->recordPool = dds3FlashPolyListHCreate(ring->count);
     ring->recordPool->scale = 1.0f;
     ring->recordPool->drawMode = ring->drawMode;
     step = EFFECT_RING_FULL_TURN / ring->count;
     spread = ring->spread;
     for (i = 0; i < ring->count; i++) {
-        ring->vertices[i].age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % spread);
+        ring->vertices[i].age = -(dds3GetRandA((EffRandState *)effDefaultRandomState) % spread);
         ring->vertices[i].angle = angle;
         angle += step;
     }
@@ -118,72 +118,72 @@ EffRingWork *source;
 }
 
 /* Create a ring from the first parameter-table block. */
-EffRingWork *effCreateRingFanFromParams(void *table) {
+EffRingWork *effPCPFlashPolyRingExpHCreatePCF(void *table) {
     void *parameterBlock;
 
-    parameterBlock = effParamTableGetBlock(table, 0);
-    return effCreateRingFan(parameterBlock);
+    parameterBlock = dds3EffectPCPDataGetData(table, 0);
+    return effPCPFlashPolyRingExpHCreate(parameterBlock);
 }
 
 /* Kind 85 duplicate: recreate the parameter prefix, not the live vertex state. */
-EffRingWork *effDuplicateRingFan(EffRingWork *ring) {
-    return effCreateRingFan(ring);
+EffRingWork *effPCPFlashPolyRingExpHCopy(EffRingWork *ring) {
+    return effPCPFlashPolyRingExpHCreate(ring);
 }
 
 /* Release the matrix pool's resources before the ring's backing allocation. */
-void effReleaseRingResources(EffRingWork *ring) {
-    effReleaseRingRecordPool(ring->recordPool);
+void effPCPFlashPolyRingExpHDelete(EffRingWork *ring) {
+    dds3FlashPolyListHDelete(ring->recordPool);
     sdfMemFreeDirect(ring->allocationHandle);
 }
 
 /* Copy one quadword; the fourth component is copied along with XYZ. */
-void effCopyRingVector(void *destination, void *source) {
+void effPCPFlashPolyRingExpHSetPosition(void *destination, void *source) {
     PCP_COPY_VECTOR(destination, source);
 }
 
 /* Replace the ring's packed modulation color without touching vertex colors. */
-void effSetRingColor(EffRingWork *ring, u32 color) {
+void effPCPFlashPolyRingExpHSetColor(EffRingWork *ring, u32 color) {
     ring->color = color;
 }
 
 /* Set the ring's scale factor. */
-void effSetRingScale(EffRingWork *ring, f32 scale) {
+void effPCPFlashPolyRingExpHSetScale(EffRingWork *ring, f32 scale) {
     ring->scale = scale;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effCopyRingTransformMatrix(EffRingWork *ring, void *matrixSource) {
+void effPCPFlashPolyRingExpHSetRotateMatrix(EffRingWork *ring, void *matrixSource) {
     VU0_LOAD_MATRIX(matrixSource);
     VU0_STORE_MATRIX(ring->recordPool->matrix);
 }
 
 /* Fill five fan-vertex colors; odd and even groups use different alpha values. */
-void effFlashWriteRingColorSlots(EffRingWork *work, s32 index, s32 modulationColor) {
+void effPCPFlashPolyRingExpHPartSetVC(EffRingWork *work, s32 index, s32 modulationColor) {
     EffRingColorSlot *slot;
     s32 firstRgb;
     s32 secondRgb;
 
-    slot = (EffRingColorSlot *)effGetExtendedGroupAuxEntry(work->recordPool, index);
+    slot = (EffRingColorSlot *)dds3FlashPolyListHGetVC(work->recordPool, index);
     firstRgb = work->firstColor & EFF_RGB_MASK;
     secondRgb = work->secondColor & EFF_RGB_MASK;
-    slot->colors[0] = effMultiplyPackedColors(secondRgb, modulationColor);
-    slot->colors[1] = effMultiplyPackedColors(secondRgb, modulationColor);
+    slot->colors[0] = effMagaCylinderCalcColor(secondRgb, modulationColor);
+    slot->colors[1] = effMagaCylinderCalcColor(secondRgb, modulationColor);
     if (index & 1) {
-        slot->colors[2] = effMultiplyPackedColors(0x80000000, modulationColor);
-        slot->colors[3] = effMultiplyPackedColors(firstRgb | 0xFF000000, modulationColor);
-        slot->colors[4] = effMultiplyPackedColors(0x80000000, modulationColor);
+        slot->colors[2] = effMagaCylinderCalcColor(0x80000000, modulationColor);
+        slot->colors[3] = effMagaCylinderCalcColor(firstRgb | 0xFF000000, modulationColor);
+        slot->colors[4] = effMagaCylinderCalcColor(0x80000000, modulationColor);
     } else {
-        slot->colors[2] = effMultiplyPackedColors(0xFF000000, modulationColor);
-        slot->colors[3] = effMultiplyPackedColors(firstRgb | 0x40000000, modulationColor);
-        slot->colors[4] = effMultiplyPackedColors(0xFF000000, modulationColor);
+        slot->colors[2] = effMagaCylinderCalcColor(0xFF000000, modulationColor);
+        slot->colors[3] = effMagaCylinderCalcColor(firstRgb | 0x40000000, modulationColor);
+        slot->colors[4] = effMagaCylinderCalcColor(0xFF000000, modulationColor);
     }
 }
 
 /* vu0 routine: build five orbiting fan positions from a phase-derived basis.
  * No camera matrix is read. Quadword loads retain the native scratch W values. */
-void effBuildOrbitingArcQuadPoints(EffRingWork *work, s32 index) {
+void effPCPFlashPolyRingExpHPartSetVertex(EffRingWork *work, s32 index) {
     EffRingParticle *part = &work->vertices[index];
-    f32 *positions = (f32 *)effGetExtendedGroupElement(work->recordPool, index);
+    f32 *positions = (f32 *)dds3FlashPolyListHGetVertex(work->recordPool, index);
     f32 orbitOffset[4];
     f32 radialDirection[4];
     f32 axisOffset[4];
@@ -197,7 +197,7 @@ void effBuildOrbitingArcQuadPoints(EffRingWork *work, s32 index) {
     VEC3_SPLAT(sideOffsetB, work->currentSideOffsetB);
     radialDirection[0] = sdfCos(part->angle);
     radialDirection[1] = 0;
-    sine = sdfSinPoly(part->angle);
+    sine = sdfSin(part->angle);
     radialDirection[2] = sine;
     orbitOffset[0] = radialDirection[0] * work->currentRadius;
     orbitOffset[1] = 0;
@@ -243,15 +243,15 @@ void effBuildOrbitingArcQuadPoints(EffRingWork *work, s32 index) {
 }
 
 /* Add the group's increment to one accumulated scalar; index is unchecked. */
-void effAdvanceVectorRecord(EffRingWork *work, s32 index) {
+void effPCPFlashPolyRingExpHPartRotate(EffRingWork *work, s32 index) {
     EffRingParticle *part;
 
     part = &work->vertices[index];
     part->angle = part->angle + work->increment;
 }
-extern void effDrawTransformedRecordPool(EffRecordPool *);
+extern void dds3FlashPolyListHDraw(EffRecordPool *);
 
-void effUpdateOrbitingRingFan(EffRingWork *work)
+void effPCPFlashPolyRingExpHDraw(EffRingWork *work)
 {
     s32 index;
     s32 count;
@@ -316,20 +316,20 @@ void effUpdateOrbitingRingFan(EffRingWork *work)
 
         if (age == 0) {
             part->basisFactor = work->param48;
-            effBuildOrbitingArcQuadPoints(work, index);
-            effFlashWriteRingColorSlots(work, index, 0);
+            effPCPFlashPolyRingExpHPartSetVertex(work, index);
+            effPCPFlashPolyRingExpHPartSetVC(work, index, 0);
             part->color = 0x80808080;
         } else if (age >= lifetime) {
             if (restart != 0) {
-                part->age = ~(sdfGetRand((EffRandState *)effDefaultRandomState) % randomRange);
+                part->age = ~(dds3GetRandA((EffRandState *)effDefaultRandomState) % randomRange);
             }
             color = 0;
-            effFlashWriteRingColorSlots(work, index, color);
+            effPCPFlashPolyRingExpHPartSetVC(work, index, color);
         } else if (age > 0) {
             progress = (f32)age / (f32)lifetime;
             part->basisFactor = heightDelta * progress + work->param48;
-            effAdvanceVectorRecord(work, index);
-            effBuildOrbitingArcQuadPoints(work, index);
+            effPCPFlashPolyRingExpHPartRotate(work, index);
+            effPCPFlashPolyRingExpHPartSetVertex(work, index);
             if (part->age < fadeIn && fadeIn != 0) {
                 factor = (f32)part->age / (f32)fadeIn;
             } else if (fadeOut >= lifetime - part->age && fadeOut != 0) {
@@ -337,8 +337,8 @@ void effUpdateOrbitingRingFan(EffRingWork *work)
             } else {
                 factor = 1.0f;
             }
-            color = effMultiplyPackedColors(effBlendColor(0, part->color, factor), tintColor);
-            effFlashWriteRingColorSlots(work, index, color);
+            color = effMagaCylinderCalcColor(effColorBlend(0, part->color, factor), tintColor);
+            effPCPFlashPolyRingExpHPartSetVC(work, index, color);
         }
         part->age = part->age + 1;
     }
@@ -352,12 +352,12 @@ void effUpdateOrbitingRingFan(EffRingWork *work)
     handle->origin[1] = work->origin[1];
     handle->origin[2] = work->origin[2];
     handle->scale = work->scale;
-    effDrawTransformedRecordPool(handle);
+    dds3FlashPolyListHDraw(handle);
 }
 
 
 /* Allocate five 16-byte positions and five color words per group, then the 0x70-byte header. */
-EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count) {
+EffRecordPool *dds3FlashPolyListCreate(u32 count) {
     EffRecordPool *pool;
     SdfMemBlock *handle;
     u8 *block;
@@ -382,22 +382,22 @@ EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count) {
     pool->vertexCount = vertexCount;
     pool->buffer = handle;
     pool->scale = 1.0f;
-    pool->resource = sdfCreateAssetWithDrawEntries();
-    sdfSetPrimaryStateFloat(pool->resource, 1.0f);
+    pool->resource = sdfMatNew();
+    sdfMatSetConstant(pool->resource, 1.0f);
     memset(effRecordPoolDrawParams, 0, EFF_PACKET_PARAMS_BYTES);
     effRecordPoolDrawParams->primitive = 0x4000;
     return pool;
 }
 
 /* Queue asset release, then free the pool allocation; neither handle is cleared. */
-void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool) {
-    sdfQueueAssetRelease(pool->resource);
+void dds3FlashPolyListDelete(EffRecordPool *pool) {
+    sdfMatFreeDelayed(pool->resource);
     sdfMemFreeDirect(pool->buffer);
 }
 
 /* Build scale/origin transform and submit five-vertex groups in batches of 25.
  * The remainder path retains its native vertex count, even for a partial group. */
-void effDrawScaledRecordPool(EffRecordPool *work)
+void dds3FlashPolyListDraw(EffRecordPool *work)
 {
     f32 matrix[EFF_MATRIX_WORD_COUNT] __attribute__((aligned(16)));
     SdfListHead *list;
@@ -406,8 +406,8 @@ void effDrawScaledRecordPool(EffRecordPool *work)
     u64 *packet;
     SdfListHead *stateList;
 
-    list = (SdfListHead *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
-    sdfInitPacketList(list);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
+    sdfDrawTagInit(list);
     EE_MMI_UNIT_MATRIX(matrix);
     matrix[0] = work->scale;
     matrix[5] = work->scale;
@@ -416,8 +416,8 @@ void effDrawScaledRecordPool(EffRecordPool *work)
     matrix[13] = work->origin[1];
     matrix[14] = work->origin[2];
     VU0_LOAD_MATRIX(matrix);
-    sdfConsAppendVuPacket(list, 0);
-    sdfConsAppendAssetPacket(list, work->resource, 0);
+    sdf3DPrimLinkTm(list, 0);
+    sdf3DPrimLinkMat(list, work->resource, 0);
     remaining = work->vertexCount;
     effRecordPoolDrawParams->colors = (u32 *)work->auxRecordBase;
     effRecordPoolDrawParams->positions = (u128 *)work->recordBase;
@@ -427,7 +427,7 @@ void effDrawScaledRecordPool(EffRecordPool *work)
     effRecordPoolDrawParams->parameters = effFanPoolTriangleIndices;
     while (remaining >= EFF_FAN_BATCH_VERTICES) {
         remaining -= EFF_FAN_BATCH_VERTICES;
-        sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(effRecordPoolDrawParams));
+        sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(effRecordPoolDrawParams));
         effRecordPoolDrawParams->positions += EFF_FAN_BATCH_VERTICES;
         effRecordPoolDrawParams->colors += EFF_FAN_BATCH_VERTICES;
     }
@@ -435,63 +435,63 @@ void effDrawScaledRecordPool(EffRecordPool *work)
         fanCount = remaining / EFF_FAN_VERTEX_COUNT;
         effRecordPoolDrawParams->vertexCount = remaining;
         effRecordPoolDrawParams->parameterCount = fanCount * 3;
-        sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(effRecordPoolDrawParams));
+        sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(effRecordPoolDrawParams));
     }
     if (work->drawMode < EFF_DIRECT_SURFACE_COUNT) {
         effScaledFanDrawSurfaces[work->drawMode]->append(effScaledFanDrawSurfaces[work->drawMode], list);
     } else {
-        stateList = (SdfListHead *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
-        sdfInitPacketList(stateList);
-        packet = (u64 *)sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
+        stateList = (SdfListHead *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
+        sdfDrawTagInit(stateList);
+        packet = (u64 *)sdfGrAllocPacketBuff(EFF_STATE_PACKET_BYTES);
         packet[4] = 6;
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
         packet[2] = 0x1000000000008001ULL;
         packet[3] = 0xE;
         packet[5] = 0x42;
-        sdfAppendPacket(stateList, (u32)packet);
+        sdfDrawTagLink(stateList, (u32)packet);
         D_00380248.append(&D_00380248, stateList);
-        packet = (u64 *)sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
+        packet = (u64 *)sdfGrAllocPacketBuff(EFF_STATE_PACKET_BYTES);
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
         packet[2] = 0x1000000000008001ULL;
         packet[3] = 0xE;
         packet[4] = 0x42;
         packet[5] = 0x42;
-        sdfAppendPacket(list, (u32)packet);
+        sdfDrawTagLink(list, (u32)packet);
         D_00380248.append(&D_00380248, list);
     }
 }
 
 /* Address the five-position record for a group; no index bounds check. */
-void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 groupIndex) {
+void *dds3FlashPolyListGetVertex(EffRecordPool *pool, s32 groupIndex) {
     return pool->recordBase + groupIndex * EFF_FAN_POSITION_BYTES;
 }
 
 /* Address the group's five packed color words. */
-void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 groupIndex) {
+void *dds3FlashPolyListGetVC(EffRecordPool *pool, s32 groupIndex) {
     return pool->auxRecordBase + groupIndex * EFF_FAN_COLOR_BYTES;
 }
 
 /* Store raw control bits: this view interprets them as a submission mode. */
-void effSetVectorIncrementBits(EffRecordPool *pool, u32 controlBits) {
+void dds3FlashPolyListSetBlend(EffRecordPool *pool, u32 controlBits) {
     pool->drawMode = controlBits;
 }
 
 /* This pool view uses the control word as a packed modulation color. */
-void effSetFanRecordPoolColor(EffRecordPool *pool, u32 color) {
+void dds3FlashPolyListSetABGR(EffRecordPool *pool, u32 color) {
     pool->color = color;
 }
 
 /* Set the pool scale without changing the native byte-pointer interface. */
-void effSetFanRecordPoolScale(u8 *work, f32 scale) {
+void dds3FlashPolyListSetScale(u8 *work, f32 scale) {
     ((EffRecordPool *)work)->scale = scale;
 }
 
 
 /* Allocate three positions and three colors per triangle, then the header.
  * The complete block and shared packet-parameter record are cleared. */
-EffRecordPool *effRecordPoolCreateTriple(s32 triangleCount) {
+EffRecordPool *dds3FlashPolyList2Create(s32 triangleCount) {
     EffRecordPool *pool;
     SdfMemBlock *handle;
     u32 *block;
@@ -515,28 +515,28 @@ EffRecordPool *effRecordPoolCreateTriple(s32 triangleCount) {
     pool->vertexCount = colorWordCount;
     pool->buffer = handle;
     pool->scale = 1.0f;
-    pool->resource = sdfCreateAssetWithDrawEntries();
-    sdfSetPrimaryStateFloat(pool->resource, 1.0f);
+    pool->resource = sdfMatNew();
+    sdfMatSetConstant(pool->resource, 1.0f);
     memset(effRecordPoolDrawParams, 0, EFF_PACKET_PARAMS_BYTES);
     effRecordPoolDrawParams->primitive = 0x4000;
     return pool;
 }
 
 /* Release the asset and backing allocation; the header points into that block. */
-void effReleaseRecordPoolResourceAndBuffer(EffRecordPool *pool) {
-    sdfQueueAssetRelease(pool->resource);
+void dds3FlashPolyList2Delete(EffRecordPool *pool) {
+    sdfMatFreeDelayed(pool->resource);
     sdfMemFreeDirect(pool->buffer);
 }
 
 /* Submit the position/color pool in triangle batches of at most 48 vertices. */
-void effDrawTriangleRecordPool(EffRecordPool *pool)
+void dds3FlashPolyList2Draw(EffRecordPool *pool)
 {
     f32 matrix[EFF_MATRIX_WORD_COUNT];
-    SdfListHead *packet = (SdfListHead *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
+    SdfListHead *packet = (SdfListHead *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
     s32 remainingVertices;
     SdfPoolNode *surface;
 
-    sdfInitPacketList(packet);
+    sdfDrawTagInit(packet);
     EE_MMI_UNIT_MATRIX(matrix);
     matrix[0] = pool->scale;
     matrix[5] = pool->scale;
@@ -545,8 +545,8 @@ void effDrawTriangleRecordPool(EffRecordPool *pool)
     matrix[13] = pool->origin[1];
     matrix[14] = pool->origin[2];
     VU0_LOAD_MATRIX(matrix);
-    sdfConsAppendVuPacket(packet, 0);
-    sdfConsAppendAssetPacket(packet, pool->resource, 0);
+    sdf3DPrimLinkTm(packet, 0);
+    sdf3DPrimLinkMat(packet, pool->resource, 0);
     remainingVertices = pool->vertexCount;
     effRecordPoolDrawParams->colors = (u32 *)pool->auxRecordBase;
     effRecordPoolDrawParams->positions = (u128 *)pool->recordBase;
@@ -556,32 +556,32 @@ void effDrawTriangleRecordPool(EffRecordPool *pool)
     effRecordPoolDrawParams->parameters = NULL;
     while (remainingVertices >= EFF_TRIANGLE_BATCH_VERTICES) {
         remainingVertices -= EFF_TRIANGLE_BATCH_VERTICES;
-        sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(effRecordPoolDrawParams));
+        sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(effRecordPoolDrawParams));
         effRecordPoolDrawParams->positions += EFF_TRIANGLE_BATCH_VERTICES;
         effRecordPoolDrawParams->colors += EFF_TRIANGLE_BATCH_VERTICES;
     }
     if (remainingVertices >= EFF_TRIANGLE_VERTEX_COUNT) {
         effRecordPoolDrawParams->parameterCount = remainingVertices / EFF_TRIANGLE_VERTEX_COUNT;
         effRecordPoolDrawParams->vertexCount = remainingVertices;
-        sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(effRecordPoolDrawParams));
+        sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(effRecordPoolDrawParams));
     }
     surface = effTrianglePoolDrawSurfaces[pool->drawMode];
     surface->append(surface, packet);
 }
 
 /* Address three quadword positions for one triangle. */
-void *effGetGroupRecordByIndex(EffRecordPool *pool, s32 groupIndex) {
+void *dds3FlashPolyList2GetVertex(EffRecordPool *pool, s32 groupIndex) {
     return pool->recordBase + groupIndex * EFF_TRIANGLE_POSITION_BYTES;
 }
 
 /* Address three packed color words for one triangle. */
-void *effGetGroupIndexRecord(EffRecordPool *pool, s32 groupIndex) {
+void *dds3FlashPolyList2GetVC(EffRecordPool *pool, s32 groupIndex) {
     return pool->auxRecordBase + groupIndex * EFF_TRIANGLE_COLOR_BYTES;
 }
 
 /* Allocate four positions and four colors per quad, followed by the header.
  * Both allocation and shared packet parameters are cleared before defaults. */
-EffRecordPool *effRecordPoolCreate(s32 quadCount) {
+EffRecordPool *dds3FlashPolyList3Create(s32 quadCount) {
     EffRecordPool *pool;
     SdfMemBlock *handle;
     u32 *block;
@@ -603,28 +603,28 @@ EffRecordPool *effRecordPoolCreate(s32 quadCount) {
     pool->buffer = handle;
     pool->scale = 1.0f;
     pool->color = EFF_NEUTRAL_COLOR;
-    pool->resource = sdfCreateAssetWithDrawEntries();
-    sdfSetPrimaryStateFloat(pool->resource, 1.0f);
+    pool->resource = sdfMatNew();
+    sdfMatSetConstant(pool->resource, 1.0f);
     memset(effRecordPoolDrawParams, 0, EFF_PACKET_PARAMS_BYTES);
     effRecordPoolDrawParams->primitive = 0x4000;
     return pool;
 }
 
 /* Queue the asset before releasing the allocation containing this header. */
-void effReleaseRecordGroupResources(EffRecordPool *pool) {
-    sdfQueueAssetRelease(pool->resource);
+void dds3FlashPolyList3Delete(EffRecordPool *pool) {
+    sdfMatFreeDelayed(pool->resource);
     sdfMemFreeDirect(pool->buffer);
 }
 
 /* Submit the position/color pool in quad batches of at most 32 vertices. */
-void effDrawQuadRecordPool(EffRecordPool *pool)
+void dds3FlashPolyList3Draw(EffRecordPool *pool)
 {
     f32 matrix[EFF_MATRIX_WORD_COUNT];
-    SdfListHead *packet = (SdfListHead *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
+    SdfListHead *packet = (SdfListHead *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
     s32 remainingVertices;
     SdfPoolNode *surface;
 
-    sdfInitPacketList(packet);
+    sdfDrawTagInit(packet);
     EE_MMI_UNIT_MATRIX(matrix);
     matrix[0] = pool->scale;
     matrix[5] = pool->scale;
@@ -633,8 +633,8 @@ void effDrawQuadRecordPool(EffRecordPool *pool)
     matrix[13] = pool->origin[1];
     matrix[14] = pool->origin[2];
     VU0_LOAD_MATRIX(matrix);
-    sdfConsAppendVuPacket(packet, 0);
-    sdfConsAppendAssetPacket(packet, pool->resource, 0);
+    sdf3DPrimLinkTm(packet, 0);
+    sdf3DPrimLinkMat(packet, pool->resource, 0);
     remainingVertices = pool->vertexCount;
     effRecordPoolDrawParams->colors = (u32 *)pool->auxRecordBase;
     effRecordPoolDrawParams->positions = (u128 *)pool->recordBase;
@@ -644,45 +644,45 @@ void effDrawQuadRecordPool(EffRecordPool *pool)
     effRecordPoolDrawParams->parameters = effQuadPoolTriangleIndices;
     while (remainingVertices >= EFF_QUAD_BATCH_VERTICES) {
         remainingVertices -= EFF_QUAD_BATCH_VERTICES;
-        sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(effRecordPoolDrawParams));
+        sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(effRecordPoolDrawParams));
         effRecordPoolDrawParams->positions += EFF_QUAD_BATCH_VERTICES;
         effRecordPoolDrawParams->colors += EFF_QUAD_BATCH_VERTICES;
     }
     if (remainingVertices >= EFF_QUAD_VERTEX_COUNT) {
         effRecordPoolDrawParams->parameterCount = remainingVertices / EFF_QUAD_VERTEX_COUNT * 2;
         effRecordPoolDrawParams->vertexCount = remainingVertices;
-        sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(effRecordPoolDrawParams));
+        sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(effRecordPoolDrawParams));
     }
     surface = effQuadPoolDrawSurfaces[pool->drawMode];
     surface->append(surface, packet);
 }
 
 /* Address four quadword positions for one quad. */
-void *effGetRecordGroupElement(EffRecordPool *pool, s32 groupIndex) {
+void *dds3FlashPolyList3GetVertex(EffRecordPool *pool, s32 groupIndex) {
     return pool->recordBase + groupIndex * EFF_QUAD_POSITION_BYTES;
 }
 
 /* Address four packed color words for one quad. */
-void *effGetRecordGroupAuxEntry(EffRecordPool *pool, s32 groupIndex) {
+void *dds3FlashPolyList3GetVC(EffRecordPool *pool, s32 groupIndex) {
     return pool->auxRecordBase + groupIndex * EFF_QUAD_COLOR_BYTES;
 }
 
 /* Allocate five-vertex fan groups, then set the returned header's matrix. */
-EffRecordPool *effAllocateIdentityMatrixWork(u32 fanCount) {
+EffRecordPool *dds3FlashPolyListHCreate(u32 fanCount) {
     EffRecordPool *pool;
 
-    pool = effRecordPoolCreateFiveVertexGroups(fanCount);
+    pool = dds3FlashPolyListCreate(fanCount);
     EE_MMI_UNIT_MATRIX(pool->matrix);
     return pool;
 }
 
-void effReleaseRingRecordPool(EffRecordPool *work) {
-    effReleaseRecordGroupAssetAndHandle(work);
+void dds3FlashPolyListHDelete(EffRecordPool *work) {
+    dds3FlashPolyListDelete(work);
 }
 
 /* Apply the stored matrix/origin, then submit batches of five-vertex groups.
  * Native state-only and drawing lists remain separate for non-direct modes. */
-void effDrawTransformedRecordPool(EffRecordPool *work)
+void dds3FlashPolyListHDraw(EffRecordPool *work)
 {
     f32 matrix[EFF_MATRIX_WORD_COUNT] __attribute__((aligned(16)));
     SdfListHead *list;
@@ -691,15 +691,15 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
     u64 *packet;
     SdfListHead *stateList;
 
-    list = (SdfListHead *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
-    sdfInitPacketList(list);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
+    sdfDrawTagInit(list);
     VU0_COPY_MATRIX(matrix, work->matrix);
     matrix[12] = work->origin[0];
     matrix[13] = work->origin[1];
     matrix[14] = work->origin[2];
     VU0_LOAD_MATRIX(matrix);
-    sdfConsAppendVuPacket(list, 0);
-    sdfConsAppendAssetPacket(list, work->resource, 0);
+    sdf3DPrimLinkTm(list, 0);
+    sdf3DPrimLinkMat(list, work->resource, 0);
     remaining = work->vertexCount;
     effRecordPoolDrawParams->colors = (u32 *)work->auxRecordBase;
     effRecordPoolDrawParams->positions = (u128 *)work->recordBase;
@@ -709,7 +709,7 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
     effRecordPoolDrawParams->parameters = effFanPoolTriangleIndices;
     while (remaining >= EFF_FAN_BATCH_VERTICES) {
         remaining -= EFF_FAN_BATCH_VERTICES;
-        sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(effRecordPoolDrawParams));
+        sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(effRecordPoolDrawParams));
         effRecordPoolDrawParams->positions += EFF_FAN_BATCH_VERTICES;
         effRecordPoolDrawParams->colors += EFF_FAN_BATCH_VERTICES;
     }
@@ -717,63 +717,63 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
         fanCount = remaining / EFF_FAN_VERTEX_COUNT;
         effRecordPoolDrawParams->vertexCount = remaining;
         effRecordPoolDrawParams->parameterCount = fanCount * 3;
-        sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(effRecordPoolDrawParams));
+        sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(effRecordPoolDrawParams));
     }
     if (work->drawMode < EFF_DIRECT_SURFACE_COUNT) {
         effTransformedFanDrawSurfaces[work->drawMode]->append(effTransformedFanDrawSurfaces[work->drawMode], list);
     } else {
-        stateList = (SdfListHead *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
-        sdfInitPacketList(stateList);
-        packet = (u64 *)sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
+        stateList = (SdfListHead *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
+        sdfDrawTagInit(stateList);
+        packet = (u64 *)sdfGrAllocPacketBuff(EFF_STATE_PACKET_BYTES);
         packet[4] = 6;
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
         packet[2] = 0x1000000000008001ULL;
         packet[3] = 0xE;
         packet[5] = 0x42;
-        sdfAppendPacket(stateList, (u32)packet);
+        sdfDrawTagLink(stateList, (u32)packet);
         D_00380248.append(&D_00380248, stateList);
-        packet = (u64 *)sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
+        packet = (u64 *)sdfGrAllocPacketBuff(EFF_STATE_PACKET_BYTES);
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
         packet[2] = 0x1000000000008001ULL;
         packet[3] = 0xE;
         packet[4] = 0x42;
         packet[5] = 0x42;
-        sdfAppendPacket(list, (u32)packet);
+        sdfDrawTagLink(list, (u32)packet);
         D_00380248.append(&D_00380248, list);
     }
 }
 
 /* Address the five-position record for one fan group. */
-void *effGetExtendedGroupElement(EffRecordPool *pool, s32 groupIndex) {
+void *dds3FlashPolyListHGetVertex(EffRecordPool *pool, s32 groupIndex) {
     return pool->recordBase + groupIndex * EFF_FAN_POSITION_BYTES;
 }
 
 /* Address the five color words for one fan group. */
-u32 *effGetExtendedGroupAuxEntry(EffRecordPool *pool, s32 groupIndex) {
+u32 *dds3FlashPolyListHGetVC(EffRecordPool *pool, s32 groupIndex) {
     return (u32 *)(pool->auxRecordBase + groupIndex * EFF_FAN_COLOR_BYTES);
 }
 
 /* Select the record pool's packet submission mode. */
-void effSetRecordPoolDrawMode(EffRecordPool *pool, u32 mode) {
+void dds3FlashPolyListHSetBlend(EffRecordPool *pool, u32 mode) {
     pool->drawMode = mode;
 }
 
 /* Set the packed color word passed to the pool's packet builder. */
-void effSetRecordPoolColor(EffRecordPool *pool, u32 color) {
+void dds3FlashPolyListHSetABGR(EffRecordPool *pool, u32 color) {
     pool->color = color;
 }
 
 /* Set the scalar used by the scale/origin rendering path. */
-void effSetRecordPoolScale(EffRecordPool *work, f32 scale) {
+void dds3FlashPolyListHSetScale(EffRecordPool *work, f32 scale) {
     work->scale = scale;
 }
 
 
-extern PcpScatterPool *effPcpScatterPoolCreate(s32 groups);
-extern void effPcpScatterCreatePoolResource(PcpScatterPool *work, u32 resource);
-PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParams)
+extern PcpScatterPool *dds3ScatterPolyListCreate(s32 groups);
+extern void dds3ScatterPolyListSetTex(PcpScatterPool *work, u32 resource);
+PcpScatterRadialWork *effPCPHamaCardSpiralCreate(params, resource, particleParams)
     const PcpScatterRadialParams *params;
     u32 resource;
     void *particleParams;
@@ -797,10 +797,10 @@ PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParam
     work->scale = 1.0f;
     work->duplicatedHandles = NULL;
     work->duplicateAllocation = NULL;
-    work->childWork = effPcpScatterPoolCreate(params->particleCount);
+    work->childWork = dds3ScatterPolyListCreate(params->particleCount);
     work->childWork->poolMode = params->poolMode;
     if (resource != 0) {
-        effPcpScatterCreatePoolResource(work->childWork, resource);
+        dds3ScatterPolyListSetTex(work->childWork, resource);
     }
     if (particleParams != NULL && work->params.duplicateParticles != 0) {
         if (work->params.particlesPerGroup == 0) {
@@ -815,9 +815,9 @@ PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParam
         handles = (EffParamWork **)sdfMemLock(handle);
         work->duplicateAllocation = handle;
         work->duplicatedHandles = handles;
-        work->duplicatedHandles[0] = effParamWorkCreate(EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK, particleParams);
+        work->duplicatedHandles[0] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK, particleParams);
         for (i = 1; i < count; i++) {
-            work->duplicatedHandles[i] = effParamWorkDuplicate(work->duplicatedHandles[0]);
+            work->duplicatedHandles[i] = dds3EffectPartCopy(work->duplicatedHandles[0]);
         }
     }
     delaySpread = work->params.delaySpread;
@@ -829,7 +829,7 @@ PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParam
     }
     segments = work->params.radialSegments;
     for (i = 0; i < count; i++, particle++) {
-        particle->age = ageOffset - sdfGetRand((EffRandState *)effDefaultRandomState) % delaySpread;
+        particle->age = ageOffset - dds3GetRandA((EffRandState *)effDefaultRandomState) % delaySpread;
         if ((i + 1) % segments == 0) {
             ageOffset -= delaySpread;
         }

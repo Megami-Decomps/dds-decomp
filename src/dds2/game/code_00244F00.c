@@ -33,7 +33,7 @@ extern char D_004221D8[]; /* "EventTest" */
 extern char D_004221E8[]; /* "PolygonMovie" */
 
 
-void evtDestroySecondaryWorldNode(void);
+void evtFreeStage(void);
 
 
 extern u32 D_00435CBC;
@@ -45,7 +45,7 @@ INCLUDE_ASM(const s32, "game/code_00244F00", evtDrawFadingSolarOverlayFrame);
 
 /* Seed both noise-state geometries and cache the current solar phase. */
 void evtInitializeVisualData(SolarOverlayWork *overlay) {
-    s8 solarPhase = evtGetSolarPhase();
+    s8 solarPhase = evtGetAgeOfMoon16();
     SolarNoiseState *noise = &overlay->state.firstNoise;
     overlay->state.solarPhase = solarPhase;
     noise->centerX = 0x39;
@@ -70,7 +70,7 @@ void evtUpdateSolarPhaseTransition(SolarOverlayWork *overlay) {
     u32 flags;
     s32 remaining;
 
-    solarPhase = evtGetSolarPhase();
+    solarPhase = evtGetAgeOfMoon16();
     if (state->solarPhase != solarPhase) {
         flags = state->flags;
         state->transitionTimer = 20;
@@ -156,27 +156,27 @@ void func_00245810(void) {
 }
 
 /* Retail test-task update is idle from creation; return 0 each tick. */
-s32 evtUpdateIdleTestTask(KwlnTask *task) {
+s32 evtDebugCameraStep(KwlnTask *task) {
     return 0;
 }
 
 /* Test-task teardown destroys the named script processes. */
-void evtDestroyTestTaskScripts(KwlnTask *task) {
+void EventDebugShutdown(KwlnTask *task) {
     scrDestroyAllNamedProcesses();
 }
 
-void evtStartTestTask(void) {
+void evtInitEventTest(void) {
     D_00435CBC = 0x80000000;
-    dds3StartProcess(D_004221D8, 0x2AF9, 1, 1, evtUpdateIdleTestTask, evtDestroyTestTaskScripts, 0);
+    dds3StartProcess(D_004221D8, 0x2AF9, 1, 1, evtDebugCameraStep, EventDebugShutdown, 0);
 }
 
-void evtStopTestTasks(void) {
+void evtChkEndProcess(void) {
     dds3KillProcessName(D_004221D8, 1);
     dds3KillProcessName(D_004221E8, 0);
-    evtDestroySecondaryWorldNode();
+    evtFreeStage();
 }
 
-INCLUDE_ASM(const s32, "game/code_00244F00", dds3DrawWorldNodeChainDiagnosticPanel);
+INCLUDE_ASM(const s32, "game/code_00244F00", evtSceneDispProcess);
 
 void func_00245F80(void) {
     D_0043722C = 0;
@@ -187,7 +187,7 @@ void func_00245F80(void) {
 
 
 /* Insert after existing equal keys, keeping ascending order and incrementing count. */
-void evtInsertListNodeByOrderKey(EvtRuntimeGroup *list, EvtRuntimeChild *insertedNode) {
+void LinkFrameInfo(EvtRuntimeGroup *list, EvtRuntimeChild *insertedNode) {
     EvtRuntimeChild *cursor = list->children;
 
     if (cursor == 0) {
@@ -225,7 +225,7 @@ void evtInsertListNodeByOrderKey(EvtRuntimeGroup *list, EvtRuntimeChild *inserte
 }
 
 /* Unlink an attached node, clear its links, and decrement the owning list's count. */
-void evtUnlinkListNode(EvtRuntimeGroup *list, EvtRuntimeChild *removedNode) {
+void UnlinkFrameInfo(EvtRuntimeGroup *list, EvtRuntimeChild *removedNode) {
     EvtRuntimeChild *nextNode = removedNode->next;
     EvtRuntimeChild *previousNode = removedNode->prev;
     if (previousNode == 0) {
@@ -251,7 +251,7 @@ void evtUnlinkListNode(EvtRuntimeGroup *list, EvtRuntimeChild *removedNode) {
 }
 
 /* Walk the linked list and reinsert the first out-of-order successor. */
-void evtReorderListNodes(EvtRuntimeGroup *list) {
+void SortFrameInfo(EvtRuntimeGroup *list) {
     if (list != 0) {
         EvtRuntimeChild *anchorNode = list->children;
         while (anchorNode != 0) {
@@ -259,8 +259,8 @@ void evtReorderListNodes(EvtRuntimeGroup *list) {
             EvtRuntimeChild *candidateNode = resumeNode;
             while (candidateNode != 0) {
                 if (candidateNode->frame < anchorNode->frame) {
-                    evtUnlinkListNode(list, candidateNode);
-                    evtInsertListNodeByOrderKey(list, candidateNode);
+                    UnlinkFrameInfo(list, candidateNode);
+                    LinkFrameInfo(list, candidateNode);
                     /* Resume from the relocated node's new successor, not its old one. */
                     resumeNode = candidateNode->next;
                     break;
@@ -304,7 +304,7 @@ EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *group, s32 frame, E
     memset(key, 0, sizeof(*key));
     key->frame = frame;
     key->serializedValue = -1;
-    evtInsertListNodeByOrderKey(group, key);
+    LinkFrameInfo(group, key);
 
     switch (group->type) {
     case 2:
@@ -384,7 +384,7 @@ EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *group, s32 frame, E
     case 14: {
         void *payload = sdfChipAllocDirect(0x2C);
         key->payload = payload;
-        memcpy(payload, &effGetCh71Work()->body, sizeof(EffBlurTemplateBody));
+        memcpy(payload, &Eve_PartialMultiBlurGetParams()->body, sizeof(EffBlurTemplateBody));
         key->p08.h[0] = 1;
         key->p10.h[0] = 0;
         break;
@@ -392,14 +392,14 @@ EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *group, s32 frame, E
     case 15: {
         void *payload = sdfChipAllocDirect(0x2C);
         key->payload = payload;
-        memcpy(payload, &effGetCh72Work()->params, sizeof(EffBlurScatterParams));
+        memcpy(payload, &Eve_DistortionBlurGetParams()->params, sizeof(EffBlurScatterParams));
         key->p08.h[0] = 1;
         break;
     }
     case 23: {
         void *payload = sdfChipAllocDirect(0x2C);
         key->payload = payload;
-        memcpy(payload, effGetCh76Work(), 0x2C);
+        memcpy(payload, Eve_RippleBlurGetParams(), 0x2C);
         key->p08.h[0] = 1;
         break;
     }
@@ -413,14 +413,14 @@ EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *group, s32 frame, E
     case 16: {
         void *payload = sdfChipAllocDirect(0x18);
         key->payload = payload;
-        memcpy(payload, effGetCh74Params(), 0x18);
+        memcpy(payload, Eve_FilterGetParams(), 0x18);
         key->p08.h[0] = 1;
         break;
     }
     case 17: {
         void *payload = sdfChipAllocDirect(0x24);
         key->payload = payload;
-        memcpy(payload, effGetCh75Work(), 0x24);
+        memcpy(payload, Eve_PartialMultiFilterGetParams(), 0x24);
         key->p08.h[0] = 1;
         break;
     }

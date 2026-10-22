@@ -23,8 +23,8 @@
 #include "btl.h"
 #include "fr_font.h"
 /* Declared before first use (were implicit int). */
-extern FrFontGlyph * frFontAdvanceOrRetainFadingGlyph(FrFontGlyph *glyph);
-extern void frFontFreeEntry(s32 slotId);
+extern FrFontGlyph * frDestroyFontRequest(FrFontGlyph *glyph);
+extern void frDelFontStyle(s32 slotId);
 /* Original-style implicit int, kept: matched code depends on it: itfDrawTexturedSpriteRect. */
 
 
@@ -54,7 +54,7 @@ extern void frFontFreeEntry(s32 slotId);
 #define ITF_TRIANGLE_STRIP_PRIMITIVE_BITS 0x4C
 #define ITF_LINE_STRIP_PRIMITIVE_BITS 0x14A
 #define ITF_LINES_PRIMITIVE_BITS 0x49
-extern s8 dds3AdminGetActiveMode(void);
+extern s8 dds3AdminiGetActiveSequence(void);
 #include "sdf_debug_api.h"
 
 extern u32 itfFontTestScriptTask;
@@ -64,17 +64,17 @@ extern SdfTex *itfBackgroundSpriteTexture;
 
 extern u8 D_003BB188[];
 extern void frFontCheckPendingGlyphState(FrFontCtx *);
-extern void frFontAdvanceContextCursor(FrFontCtx *);
+extern void frMessageReturnCode(FrFontCtx *);
 extern void frFontAppendIndexedTextToGlyphChain(u8, FrFontCtx *);
 extern u8 frFontSharedGlyphFlags;
 extern void mnuSetTitleVoicePrefixIndex(s32);
 extern void mnuPlayTitleVoiceFile(char *);
 extern s32 mnuGetTitleEffectFrameCounter(void);
 
-extern FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *, FrFontGlyph *);
+extern FrFontGlyph *frCombineFontRequest(FrFontGlyph *, FrFontGlyph *);
 extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *, FrFontGlyph *, s32);
 
-extern void frFontSetEntryFlag(s32 kind, u64 flag);
+extern void frSetWhiteSpaceW(s32 kind, u64 flag);
 
 extern void frEnableMode(s32 value);
 
@@ -188,7 +188,7 @@ checkAutomaticLine:
             break;
         }
 advanceLine:
-        frFontAdvanceContextCursor(stream);
+        frMessageReturnCode(stream);
         break;
     case 0xF112:
         D_003BB15C |= 4;
@@ -273,7 +273,7 @@ FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
             if (!(frFontSharedGlyphFlags & 4)) {
                 continue;
             }
-            frFontAdvanceContextCursor(stream);
+            frMessageReturnCode(stream);
         } else {
             frFontCheckPendingGlyphState(stream);
             if (value < 0x80) {
@@ -298,7 +298,7 @@ FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
                         stream->firstOption, stream->secondOption, stream->glyphChain);
                 }
             }
-            frFontSetSpacingAndMeasureGlyphs(stream->glyphChain, frFontEncodedTextGlyphSpacing);
+            frSetFontSpace(stream->glyphChain, frFontEncodedTextGlyphSpacing);
             frSetPriority(stream->glyphChain, stream->z);
         }
         bytes = stream->encodedText;
@@ -308,17 +308,17 @@ FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
     return stream->glyphChain;
 }
 
-FrFontGlyph *itfDrawDefaultColorText(s32 x, s32 y, u8 *encodedText, FrFontGlyph *sub) {
-    return itfDrawEncodedTextStream(x, y, 0, 0, 0, 0, 0x80, encodedText, sub);
+FrFontGlyph *MessageRequest(s32 x, s32 y, u8 *encodedText, FrFontGlyph *sub) {
+    return MessageRequestEx2(x, y, 0, 0, 0, 0, 0x80, encodedText, sub);
 }
 
-FrFontGlyph *itfDrawCustomColorText(s32 x, s32 y, s32 channel0, s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, FrFontGlyph *sub) {
-    return itfDrawEncodedTextStream(x, y, 0, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, sub);
+FrFontGlyph *MessageRequestEx(s32 x, s32 y, s32 channel0, s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, FrFontGlyph *sub) {
+    return MessageRequestEx2(x, y, 0, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, sub);
 }
 
 extern FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *);
 
-FrFontGlyph *itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, FrFontGlyph *sub) {
+FrFontGlyph *MessageRequestEx2(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, FrFontGlyph *sub) {
     FrFontCtx args;
 
     args.x = x;
@@ -338,16 +338,16 @@ FrFontGlyph *itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32
 
 FrFontGlyph *itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
                    s32 channel2, s32 channel3, u8 *encodedText, FrFontGlyph *unusedSub) {
-    return itfDrawEncodedTextStream(x, y, depth, channel0 & 0xff, channel1 & 0xff,
+    return MessageRequestEx2(x, y, depth, channel0 & 0xff, channel1 & 0xff,
                   channel2 & 0xff, channel3 & 0xff, encodedText, 0);
 }
 
-u32 itfTestTextInterfaceMask(u32 mask) {
+u32 frGetMessageResult(u32 mask) {
     return D_003BB15C & mask;
 }
 
 /* Store an unchecked replacement-text address word in the font's indexed table. */
-void itfSetIndexedTextSlot(s32 slotIndex, s32 encodedTextAddress) {
+void frSetVariableRequest(s32 slotIndex, s32 encodedTextAddress) {
     frFontIndexedTextSlots[slotIndex] = encodedTextAddress;
 }
 
@@ -361,7 +361,7 @@ u32 itfGetTextLipsMotionId(void) {
     return itfTextLipsMotionId;
 }
 
-INCLUDE_ASM(const s32, "game/code_00196478", frFontSubmitAtlasSetupPackets);
+INCLUDE_ASM(const s32, "game/code_00196478", frDumpFontTexture);
 
 s32 itfSkipEncodedTextOpcode(s32 code, FrFontCtx *stream) {
     s32 *position = &stream->encodedTextOffset;
@@ -506,14 +506,14 @@ void itfSetTextDrawLimit(s32 limit) {
     frFontDefaultGlyphCellSize = limit;
 }
 
-FrFontGlyph *frFontBuildColoredGlyphWithSharedFlags(u32 x, u32 y, s32 depth, s32 alt, s32 measureFlag, u64 entryFlag, u32 colors, void *source) {
+FrFontGlyph *frwGetStaffFontFRQ(u32 x, u32 y, s32 depth, s32 alt, s32 measureFlag, u64 entryFlag, u32 colors, void *source) {
     FrFontGlyph *glyph;
     s32 kind = 4;
 
     if (alt) {
         kind = 5;
     }
-    frFontSetEntryFlag(kind, entryFlag);
+    frSetWhiteSpaceW(kind, entryFlag);
     frEnableMode(1);
     frDisableMode(2);
     frDisableMode(0x10);
@@ -521,22 +521,22 @@ FrFontGlyph *frFontBuildColoredGlyphWithSharedFlags(u32 x, u32 y, s32 depth, s32
     frEnableMode(0x10);
     frEnableMode(2);
     frDisableMode(1);
-    frFontSetSpacingAndMeasureGlyphs(glyph, measureFlag);
-    frFontSetGlyphPosition(glyph, x, y);
+    frSetFontSpace(glyph, measureFlag);
+    frSetDrawPosition(glyph, x, y);
     frSetPriority(glyph, depth << 4);
-    frFontSetChildColors(glyph, colors);
+    frSetFontColor(glyph, colors);
     frSetFontColorNo(glyph, 5);
     return glyph;
 }
 
-void mnuLoadStaffFonts(void) {
+void frwLoadStaffFont(void) {
     frFontEnsureSlotLoaded(4, "/font/staff1.fnt");
     frFontEnsureSlotLoaded(5, "/font/staff2.fnt");
 }
 
-void mnuUnloadStaffFonts(void) {
-    frFontFreeEntry(4);
-    frFontFreeEntry(5);
+void frwFreeStaffFont(void) {
+    frDelFontStyle(4);
+    frDelFontStyle(5);
 }
 
 /* Decode a two-byte glyph through the DDS1 lookup table; 0xFFFF is missing. */
@@ -579,15 +579,15 @@ void itfAttachGlyph16x18(u32 x, u32 y, s32 depth, u32 colors,
     FrFontGlyph *glyph;
 
     glyph = frFontAppendTextToGlyphChain(glyphSource, 0, 0, 0, 0);
-    frFontSetGlyphChainDimensions(glyph, 0x10, 0x12);
-    frFontSetGlyphPosition(glyph, x, y);
+    frSetFontSize(glyph, 0x10, 0x12);
+    frSetDrawPosition(glyph, x, y);
     frSetPriority(glyph, depth << 4);
-    frFontSetChildColors(glyph, colors);
-    frFontSetSpacingAndMeasureGlyphs(glyph, -4);
+    frSetFontColor(glyph, colors);
+    frSetFontSpace(glyph, -4);
     frFontLinkGlyph(parent, glyph, 0);
 }
 
-FrFontGlyph *itfAppendTextGlyphChain(s32 x, s32 y, s32 depth, u32 colors, const char *text,
+FrFontGlyph *frwGetFontEx(s32 x, s32 y, s32 depth, u32 colors, const char *text,
                          s8 glyphMode, s8 sharedFlag, FrFontGlyph *previousGlyph) {
     char glyphData[3];
     s32 length;
@@ -618,9 +618,9 @@ FrFontGlyph *itfAppendTextGlyphChain(s32 x, s32 y, s32 depth, u32 colors, const 
             }
             glyph = frFontAppendTextToGlyphChain(glyphData, glyphMode, 0, 0, 0);
             frSetPriority(glyph, depth << 4);
-            frFontSetChildColors(glyph, colors);
-            frFontSetSpacingAndMeasureGlyphs(glyph, 3);
-            chain = frFontLinkGlyphAfterPrevious(chain, glyph);
+            frSetFontColor(glyph, colors);
+            frSetFontSpace(glyph, 3);
+            chain = frCombineFontRequest(chain, glyph);
             if (position == 0) {
                 glyph->x = x;
             }
@@ -636,7 +636,7 @@ FrFontGlyph *itfAppendTextGlyphChain(s32 x, s32 y, s32 depth, u32 colors, const 
     return chain;
 }
 
-FrFontGlyph *frFontCreateMeasuredFlaggedGlyph(x, y, depth, colors, text, parent)
+FrFontGlyph *frwGetSmallFontFRQ(x, y, depth, colors, text, parent)
 s32 x;
 s32 y;
 s32 depth;
@@ -644,16 +644,16 @@ s32 colors;
 const char *text;
 FrFontGlyph *parent;
 {
-    FrFontGlyph *handle = itfAppendTextGlyphChain(x, y, depth, colors, text, 1, 0, parent);
+    FrFontGlyph *handle = frwGetFontEx(x, y, depth, colors, text, 1, 0, parent);
 
-    frFontSetSpacingAndMeasureGlyphs(handle, 3);
+    frSetFontSpace(handle, 3);
     return handle;
 }
 
 /* Create positioned, colored text with measured spacing and link it to parent. */
 FrFontGlyph *itfCreateMeasuredTextGlyph(s32 x, s32 y, s32 depth, s32 colors,
                            const char *text, FrFontGlyph *parent) {
-    return frFontCreateMeasuredFlaggedGlyph(x, y, depth, colors, text, parent);
+    return frwGetSmallFontFRQ(x, y, depth, colors, text, parent);
 }
 
 /* Decode two-byte glyph codes before building and linking the text glyph. */
@@ -688,9 +688,9 @@ FrFontGlyph *itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth, u32 colors, co
     glyph = frFontAppendTextToGlyphChain(buffer, 1, 0, 0, 0);
     frEnableMode(2);
     frDisableMode(1);
-    frFontSetGlyphPosition(glyph, x, y);
+    frSetDrawPosition(glyph, x, y);
     frSetPriority(glyph, depth << 4);
-    frFontSetChildColors(glyph, colors);
+    frSetFontColor(glyph, colors);
     return frFontLinkGlyph(parent, glyph, 0);
 }
 
@@ -700,11 +700,11 @@ FrFontGlyph *itfCreateFont2TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *
     glyph = frFontAppendTextToGlyphChain((const char *)D_003BB188, 0, 0, 0, previousGlyph);
     frDisableMode(2);
     glyph = frFontBuildGlyphChain(text, 2, 0, 0, glyph);
-    frFontSetSpacingAndMeasureGlyphs(glyph, -1);
+    frSetFontSpace(glyph, -1);
     frEnableMode(2);
-    frFontSetGlyphPosition(glyph, x, y);
+    frSetDrawPosition(glyph, x, y);
     frSetPriority(glyph, depth << 4);
-    frFontSetChildColors(glyph, colors);
+    frSetFontColor(glyph, colors);
     return glyph;
 }
 
@@ -716,9 +716,9 @@ FrFontGlyph *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *
     frDisableMode(2);
     glyph = frFontBuildGlyphChain(text, 3, 0, 0, glyph);
     frEnableMode(2);
-    frFontSetGlyphPosition(glyph, x, y);
+    frSetDrawPosition(glyph, x, y);
     frSetPriority(glyph, depth << 4);
-    frFontSetChildColors(glyph, colors);
+    frSetFontColor(glyph, colors);
     return glyph;
 }
 
@@ -729,11 +729,11 @@ FrFontGlyph *itfCreateTightFont3TextGlyph(s32 x, s32 y, s32 depth, s32 colors, c
     glyph = frFontAppendTextToGlyphChain((const char *)D_003BB188, 0, 0, 0, previousGlyph);
     frDisableMode(2);
     glyph = frFontBuildGlyphChain(text, 3, 0, 0, glyph);
-    frFontSetSpacingAndMeasureGlyphs(glyph, -2);
+    frSetFontSpace(glyph, -2);
     frEnableMode(2);
-    frFontSetGlyphPosition(glyph, x, y);
+    frSetDrawPosition(glyph, x, y);
     frSetPriority(glyph, depth << 4);
-    frFontSetChildColors(glyph, colors);
+    frSetFontColor(glyph, colors);
     return glyph;
 }
 
@@ -743,20 +743,20 @@ void itfAttachGlyph12x16(u32 x, u32 y, s32 depth, u32 colors,
     FrFontGlyph *glyph;
 
     glyph = frFontBuildGlyphChain(glyphSource, 0, 0, 0, 0);
-    frFontSetGlyphChainDimensions(glyph, 0xc, 0x10);
-    frFontSetSpacingAndMeasureGlyphs(glyph, 3);
-    frFontSetGlyphPosition(glyph, x, y);
+    frSetFontSize(glyph, 0xc, 0x10);
+    frSetFontSpace(glyph, 3);
+    frSetDrawPosition(glyph, x, y);
     frSetPriority(glyph, depth << 4);
-    frFontSetChildColors(glyph, colors);
+    frSetFontColor(glyph, colors);
     frFontLinkGlyph(parent, glyph, 0);
 }
 
-extern u8 *frFontGetEncodedTextData(s32 textId, FrFontTextBank *bank, s32 mode);
+extern u8 *MessageNumSearch(s32 textId, FrFontTextBank *bank, s32 mode);
 extern s32 frFontMeasureGlyphStripWidth(s32 line, FrFontGlyph *text);
 extern void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *text);
 
 FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, FrFontTextBank *bank, s32 flags) {
-    u8 *text = frFontGetEncodedTextData(textId, bank, 0);
+    u8 *text = MessageNumSearch(textId, bank, 0);
     u32 mode;
     FrFontGlyph *handle;
 
@@ -882,12 +882,12 @@ u32 itfGetLastDecodedByteCount(void) {
     return D_003BD818;
 }
 
-u32 itfReturnPackedResourceBase(u32 resourceBase) {
+u32 frGetFontHeader(u32 resourceBase) {
     return resourceBase;
 }
 
 /* Resolve three signed, cumulative relative offsets without validating bounds. */
-void itfSplitRelativeSegments(ItfRelativeSegmentResourceView *block, ItfPackedResourceSegments *out) {
+void frGetFontImagePtrs(ItfRelativeSegmentResourceView *block, ItfPackedResourceSegments *out) {
     s32 firstOffset = block->firstOffset;
     s32 secondOffset = firstOffset + block->secondDelta;
     s32 thirdOffset = secondOffset + block->thirdDelta;
@@ -899,13 +899,13 @@ void itfSplitRelativeSegments(ItfRelativeSegmentResourceView *block, ItfPackedRe
 
 /* Read the opaque header word at 0x10; its role is not established. */
 u32 itfGetPackedResourceHeaderWord(u32 resourceBase) {
-    return *(u32 *)(itfReturnPackedResourceBase(resourceBase) + 0x10);
+    return *(u32 *)(frGetFontHeader(resourceBase) + 0x10);
 }
 
 /* Decode entryIndex's bit span through the resource's six-byte prefix-tree records.
  * Write terminal bytes to decodedBytes and return/cache the count. The font atlas
  * uses these bytes as pixels; neither entry nor output bounds are checked. */
-s32 itfDecodePackedResourceEntry(u8 *decodedBytes, s32 entryIndex, void *resourceBase, ItfPackedResourceSegments *segments) {
+s32 frDecodeFontRow(u8 *decodedBytes, s32 entryIndex, void *resourceBase, ItfPackedResourceSegments *segments) {
     ItfBitRange range;
     s32 produced;
     u8 *table = segments->treeNodes;
@@ -920,7 +920,7 @@ s32 itfDecodePackedResourceEntry(u8 *decodedBytes, s32 entryIndex, void *resourc
     memcpy(&range.start, (u8 *)segments->entryBitOffsets + entryIndex * 4, 4);
     memcpy(&range.end, (u8 *)segments->entryBitOffsets + entryIndex * 4 + 4, 4);
     produced = 0;
-    itfReturnPackedResourceBase((u32)resourceBase);
+    frGetFontHeader((u32)resourceBase);
     start = range.start;
     bitWords = segments->packedBitstream;
     wordIndex = start >> 4;
@@ -949,7 +949,7 @@ s32 itfDecodePackedResourceEntry(u8 *decodedBytes, s32 entryIndex, void *resourc
 
 /* Build count usable nodes plus index-zero sentinel, retaining each payload gap.
  * The allocation handle is stored four bytes before the returned ring base. */
-MemNode *itfCreateMemNodeRing(s32 payloadBytes, s32 count) {
+MemNode *frAllocFontTable(s32 payloadBytes, s32 count) {
     SdfMemBlock *buffer;
     u8 *list;
     MemNode *cursor;
@@ -974,7 +974,7 @@ MemNode *itfCreateMemNodeRing(s32 payloadBytes, s32 count) {
 }
 
 /* Remove the next free node, or return NULL at the index-zero sentinel. */
-void *itfDequeueMemNode(MemNode *queue) {
+void *frAllocFontNode(MemNode *queue) {
     MemNode *head = queue->next;
 
     if (head->slotIndex == 0) {
@@ -987,7 +987,7 @@ void *itfDequeueMemNode(MemNode *queue) {
 
 /* Prepend a detached payload's header; NULL or an already linked node fails.
  * Header pointer formation before the NULL test is retained unchanged. */
-s32 itfEnqueueMemNode(void *payload, MemNode *queue) {
+s32 frFreeFontNode(void *payload, MemNode *queue) {
     MemNode *node = (MemNode *)payload - 1;
     if (payload == NULL) {
         return 0;
@@ -1001,17 +1001,17 @@ s32 itfEnqueueMemNode(void *payload, MemNode *queue) {
 }
 
 /* Release the handle preceding the original ring base, not an acquired payload. */
-u32 itfReleaseMemNodeBuffer(MemNode *ringBase) {
+u32 frFreeFontTable(MemNode *ringBase) {
     sdfMemFreeDirect(((MemRingHeader *)((u8 *)ringBase - ITF_ALLOCATION_HANDLE_BYTES))->allocation);
     return 1;
 }
 
 /* Acquire the background texture, then release the temporary file allocation. */
-void itfLoadBackgroundSprite(void) {
+void nbLoadDeadMoonTex(void) {
     u32 resource;
-    SdfMemBlock *fileAllocation = sdfReadNamedResource("/sprite/bg00.tmx", &resource, 0);
+    SdfMemBlock *fileAllocation = sdfDevLoadFileEx("/sprite/bg00.tmx", &resource, 0);
 
-    itfBackgroundSpriteTexture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resource));
+    itfBackgroundSpriteTexture = sdfTexSet((SdfTextureFileHeader *)(resource));
     sdfMemFreeDirect(fileAllocation);
 }
 
@@ -1048,20 +1048,20 @@ void itfDrawBackgroundSprite(void) {
     }
 }
 
-extern s32 scrCreateProcessTaskFromResource(s32, char *, s32);
+extern s32 scrStartScriptByName(s32, char *, s32);
 extern s32 itfDrawBackgroundAndGetTaskReadyMask(KwlnTask *task);
 extern void itfReleaseFontTestTaskResources(KwlnTask *task);
 
 /* Start the background draw task and host-file font-test process. */
 void itfStartFontTestScene(void) {
-    itfLoadBackgroundSprite();
+    nbLoadDeadMoonTex();
     dds3StartProcess("test_font", 0x2B06, 0, 0, itfDrawBackgroundAndGetTaskReadyMask, itfReleaseFontTestTaskResources, 0);
-    itfFontTestScriptTask = scrCreateProcessTaskFromResource(0x258, "host0:../../../dds3data/font/test.bf", 0);
+    itfFontTestScriptTask = scrStartScriptByName(0x258, "host0:../../../dds3data/font/test.bf", 0);
 }
 
 /* Advance/retain the test glyph and release its background texture reference. */
 void itfReleaseFontTestTaskResources(KwlnTask *task) {
-    frFontAdvanceOrRetainFadingGlyph(D_003BB18C);
+    frDestroyFontRequest(D_003BB18C);
     itfReleaseBackgroundSpriteTexture();
 }
 
@@ -1081,7 +1081,7 @@ s32 itfDrawBackgroundAndGetTaskReadyMask(KwlnTask *task) {
 
 /* Initialize a FIFO free list and empty active list.
  * Native do/while writes at least two nodes; the s8 index can wrap. */
-void itfInitPool(ItfMesPool *pool, ItfMesPoolNode *nodes, s32 count, s32 stride) {
+void itfMiscLinkInitialize(ItfMesPool *pool, ItfMesPoolNode *nodes, s32 count, s32 stride) {
     s8 index = 0;
     ItfMesPoolNode *previous = NULL;
     ItfMesPoolNode *node = nodes;
@@ -1107,7 +1107,7 @@ void itfInitPool(ItfMesPool *pool, ItfMesPoolNode *nodes, s32 count, s32 stride)
 }
 
 /* Move the free-list head to the active-list tail; exhausted pools return NULL. */
-ItfMesPoolNode *itfAcquirePoolNode(ItfMesPool *pool) {
+ItfMesPoolNode *itfMiscLinkTake(ItfMesPool *pool) {
     ItfMesPoolNode *node = pool->firstFree;
     ItfMesPoolNode *next;
 
@@ -1134,7 +1134,7 @@ ItfMesPoolNode *itfAcquirePoolNode(ItfMesPool *pool) {
 }
 
 /* Unlink an active node and append it to the free-list tail; membership is trusted. */
-void itfReleasePoolNode(ItfMesPoolNode *node, ItfMesPool *pool) {
+void itfMiscLinkGive(ItfMesPoolNode *node, ItfMesPool *pool) {
     ItfMesPoolNode *previous = node->previous;
     ItfMesPoolNode *next = node->next;
 
@@ -1164,7 +1164,7 @@ void itfReleasePoolNode(ItfMesPoolNode *node, ItfMesPool *pool) {
 
 /* Multiply XYZ, cap only the positive product at 255 << 16, then shift by 16.
  * Negative products are not clamped; W comes from the argument. */
-void itfScaleVectors(DrawColorRec *output, s32 scaleX, s32 scaleY, s32 scaleZ,
+void itfMiscSetRatioRGB(DrawColorRec *output, s32 scaleX, s32 scaleY, s32 scaleZ,
                    s32 w, const TextVector *input, s32 count) {
     while (count > 0) {
         s32 x = scaleX * input->x;
@@ -1185,7 +1185,7 @@ void itfScaleVectors(DrawColorRec *output, s32 scaleX, s32 scaleY, s32 scaleZ,
 }
 
 /* Replace each child color; parent color words are not modified. */
-void itfSetStyleColor(FrFontGlyph *entry, u32 color) {
+void itfMiscChangeFontVertexColor(FrFontGlyph *entry, u32 color) {
     for (; entry != NULL; entry = entry->previous) {
         FrFontChildGlyph *child;
         for (child = entry->firstChild; child != NULL; child = child->next) {
@@ -1195,7 +1195,7 @@ void itfSetStyleColor(FrFontGlyph *entry, u32 color) {
 }
 
 /* Clear each child's low byte, then OR unmasked bits into the full color word. */
-void itfSetStyleColorBits(FrFontGlyph *entry, u32 colorBits) {
+void itfMiscChangeFontAlpha(FrFontGlyph *entry, u32 colorBits) {
     for (; entry != NULL; entry = entry->previous) {
         FrFontChildGlyph *child;
         for (child = entry->firstChild; child != NULL; child = child->next) {
@@ -1205,7 +1205,7 @@ void itfSetStyleColorBits(FrFontGlyph *entry, u32 colorBits) {
 }
 
 /* Translate parent entries only; child coordinates are left unchanged. */
-void itfTranslateStyleEntries(FrFontGlyph *entry, u32 xOffset, u32 yOffset) {
+void itfMiscMoveFontPosition(FrFontGlyph *entry, u32 xOffset, u32 yOffset) {
     for (; entry != NULL; entry = entry->previous) {
         entry->x += xOffset;
         entry->y += yOffset;
@@ -1213,33 +1213,33 @@ void itfTranslateStyleEntries(FrFontGlyph *entry, u32 xOffset, u32 yOffset) {
 }
 
 #include "sdf_packet_alloc.h"
-extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
-extern s32 sdfConsMeasurePacketWithHeader(s32);
-extern u32 sdfConsFinalizePacketHeader(u32, s32);
+extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
+extern s32 sdf2DGetPrimPtr(s32);
+extern u32 sdf2DMakeStdPacket(u32, s32);
 extern u64 D_00357998[];
 
 /* Keep the sprite texture handle while releasing the temporary file allocation. */
-SdfTex *itfLoadTextureFromAsset(const char *path) {
+SdfTex *itfMiscLoadTexture(const char *path) {
     SdfMemBlock *fileAllocation;
     SdfTex *textureHandle;
     u32 assetInfo[ITF_VECTOR_WORD_COUNT];
 
-    fileAllocation = sdfReadNamedResource(path, assetInfo, 0);
-    textureHandle = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(assetInfo[0]));
+    fileAllocation = sdfDevLoadFileEx(path, assetInfo, 0);
+    textureHandle = sdfTexSet((SdfTextureFileHeader *)(assetInfo[0]));
     sdfMemFreeDirect(fileAllocation);
     return textureHandle;
 }
 
 /* Emit three per-vertex RGBA/XYZ2 records; PRIM's low bits select a triangle.
  * Coordinates receive the native GS screen biases; no clipping is performed. */
-void itfDrawTriFlat3(DrawVertex *vertices, DrawColorRec *colors, s32 xOffset, s32 yOffset, u32 tail, SdfListHead *command) {
+void itfMiscDrawTrianglePrim(DrawVertex *vertices, DrawColorRec *colors, s32 xOffset, s32 yOffset, u32 tail, SdfListHead *command) {
     SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
 
-    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, ITF_TRIANGLE_VERTEX_COUNT));
-    sdfConsInitPacketHeader(packet, ITF_TRIANGLE_PRIMITIVE_BITS, 2, 0x51, ITF_TRIANGLE_VERTEX_COUNT);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, ITF_TRIANGLE_VERTEX_COUNT));
+    sdf2DMakePrimPacketHeader(packet, ITF_TRIANGLE_PRIMITIVE_BITS, 2, 0x51, ITF_TRIANGLE_VERTEX_COUNT);
+    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
     for (i = 0; i < ITF_TRIANGLE_VERTEX_COUNT; i++) {
         dst[0] = (u64)colors->components[0] | ((u64)colors->components[1] << 32);
         dst[1] = (u64)colors->components[2] | ((u64)colors->components[3] << 32);
@@ -1250,18 +1250,18 @@ void itfDrawTriFlat3(DrawVertex *vertices, DrawColorRec *colors, s32 xOffset, s3
         vertices++;
         dst += 2;
     }
-    sdfAppendPacket(command, (u32)packet);
+    sdfDrawTagLink(command, (u32)packet);
 }
 
 /* Emit an indexed four-vertex triangle fan with a color record per vertex. */
-void itfDrawQuadFlat4(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, SdfListHead *command) {
+void itfMiscDrawRectanglePrim(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, SdfListHead *command) {
     SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
 
-    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, ITF_QUAD_VERTEX_COUNT));
-    sdfConsInitPacketHeader(packet, ITF_QUAD_FAN_PRIMITIVE_BITS, 2, 0x51, ITF_QUAD_VERTEX_COUNT);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, ITF_QUAD_VERTEX_COUNT));
+    sdf2DMakePrimPacketHeader(packet, ITF_QUAD_FAN_PRIMITIVE_BITS, 2, 0x51, ITF_QUAD_VERTEX_COUNT);
+    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
     for (i = 0; i < ITF_QUAD_VERTEX_COUNT; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
         DrawColorRec *color = &colors[*colorIndex++];
@@ -1273,7 +1273,7 @@ void itfDrawQuadFlat4(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
         dst[0] = (u64)(u32)(vertex->x + ITF_GS_X_BIAS) | ((u64)(vertex->y + ITF_GS_Y_BIAS) << 32);
         dst += 2;
     }
-    sdfAppendPacket(command, (u32)packet);
+    sdfDrawTagLink(command, (u32)packet);
 }
 
 /* Draw three adjacent quads using zero-alpha/source-alpha edge color records.
@@ -1302,29 +1302,29 @@ void itfDrawThreePanelBorderBands(DrawVertex *bounds, DrawColorRec *color, u32 t
     vertices[3].x = bounds[0].x;
     vertices[3].y = bounds[1].y;
 
-    itfDrawQuadFlat4(vertices, colors, D_00357980, D_00357988, tail, command);
+    itfMiscDrawRectanglePrim(vertices, colors, D_00357980, D_00357988, tail, command);
     vertices[0].x += borderWidth;
     vertices[1].x += middleWidth;
     vertices[2].x += middleWidth;
     vertices[3].x += borderWidth;
-    itfDrawQuadFlat4(vertices, colors, D_00357980, D_00357988 + 4, tail, command);
+    itfMiscDrawRectanglePrim(vertices, colors, D_00357980, D_00357988 + 4, tail, command);
     vertices[0].x += middleWidth;
     vertices[1].x += borderWidth;
     vertices[2].x += borderWidth;
     vertices[3].x += middleWidth;
-    itfDrawQuadFlat4(vertices, colors, D_00357980, D_00357988 + 8, tail, command);
+    itfMiscDrawRectanglePrim(vertices, colors, D_00357980, D_00357988 + 8, tail, command);
 }
 
 /* Emit a textured triangle fan: each four-float input supplies S/T/Q only.
  * The fourth float is skipped, and the context word is shifted without masking. */
-void itfDrawQuadTextured4(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, u32 tail, s32 flag, SdfListHead *command) {
+void itfMiscDrawTexPoly(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, u32 tail, s32 flag, SdfListHead *command) {
     SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
 
-    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(3, ITF_QUAD_VERTEX_COUNT));
-    sdfConsInitPacketHeader(packet, (flag << 9) | ITF_TEXTURED_FAN_PRIMITIVE_BITS, 3, 0x512, ITF_QUAD_VERTEX_COUNT);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(3, ITF_QUAD_VERTEX_COUNT));
+    sdf2DMakePrimPacketHeader(packet, (flag << 9) | ITF_TEXTURED_FAN_PRIMITIVE_BITS, 3, 0x512, ITF_QUAD_VERTEX_COUNT);
+    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
     for (i = 0; i < ITF_QUAD_VERTEX_COUNT; i++) {
         f32 *uvDst = (f32 *)dst;
 
@@ -1342,12 +1342,12 @@ void itfDrawQuadTextured4(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, 
         vertices++;
         dst += 2;
     }
-    sdfAppendPacket(command, (u32)packet);
+    sdfDrawTagLink(command, (u32)packet);
 }
 
 /* Bind the texture and emit one two-corner sprite using two packed UV pairs.
  * Unwritten padding words in the native packet remain untouched. */
-void itfQueueTextureBoundQuadPacket(void *vertexData, void *uvData, void *colorData, s32 tail, SdfTex *texture, s32 flag, SdfListHead *command) {
+void itfMiscDrawSpritePrim(void *vertexData, void *uvData, void *colorData, s32 tail, SdfTex *texture, s32 flag, SdfListHead *command) {
     DrawVertex *vertices = vertexData;
     DrawColorRec *uv = uvData;
     DrawColorRec *colors = colorData;
@@ -1355,13 +1355,13 @@ void itfQueueTextureBoundQuadPacket(void *vertexData, void *uvData, void *colorD
     u64 *dst;
     s32 x0, y0, x1, y1;
 
-    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, 1));
-    sdfConsInitPacketHeader(packet, (flag << 9) | ITF_TEXTURED_SPRITE_PRIMITIVE_BITS, 5, 0x53531, 1);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, 1));
+    sdf2DMakePrimPacketHeader(packet, (flag << 9) | ITF_TEXTURED_SPRITE_PRIMITIVE_BITS, 5, 0x53531, 1);
     x0 = vertices[0].x + ITF_GS_X_BIAS;
     y0 = vertices[0].y + ITF_GS_Y_BIAS;
     x1 = vertices[1].x + ITF_GS_X_BIAS;
     y1 = vertices[1].y + ITF_GS_Y_BIAS;
-    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
     dst[0] = (u64)colors->components[0] | ((u64)colors->components[1] << 32);
     dst[1] = (u64)colors->components[2] | ((u64)colors->components[3] << 32);
     dst[2] = (u64)uv->components[0] | ((u64)uv->components[1] << 32);
@@ -1370,23 +1370,23 @@ void itfQueueTextureBoundQuadPacket(void *vertexData, void *uvData, void *colorD
     dst[6] = (u64)uv->components[2] | ((u64)uv->components[3] << 32);
     dst[8] = (u64)(u32)x1 | ((u64)y1 << 32);
     dst[9] = (u64)(u32)tail;
-    sdfConsCreateDrawPacket(command, texture, flag);
-    sdfAppendPacket(command, (u32)packet);
+    sdf2DLinkTexPacket(command, texture, flag);
+    sdfDrawTagLink(command, (u32)packet);
 }
 
 /* Emit a colored textured sprite without binding a texture in this function. */
-void itfQueueColoredTexturedQuadPacket(DrawVertex *vertices, DrawColorRec *uv, DrawColorRec *colors, u32 tail, s32 flag, SdfListHead *command) {
+void itfMiscDrawSpritePrim2(DrawVertex *vertices, DrawColorRec *uv, DrawColorRec *colors, u32 tail, s32 flag, SdfListHead *command) {
     SdfDrawPacket *packet;
     u64 *dst;
     s32 x0, y0, x1, y1;
 
-    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, 1));
-    sdfConsInitPacketHeader(packet, (flag << 9) | ITF_COLORED_SPRITE_PRIMITIVE_BITS, 5, 0x53531, 1);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, 1));
+    sdf2DMakePrimPacketHeader(packet, (flag << 9) | ITF_COLORED_SPRITE_PRIMITIVE_BITS, 5, 0x53531, 1);
     x0 = vertices[0].x + ITF_GS_X_BIAS;
     y0 = vertices[0].y + ITF_GS_Y_BIAS;
     x1 = vertices[1].x + ITF_GS_X_BIAS;
     y1 = vertices[1].y + ITF_GS_Y_BIAS;
-    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
     dst[0] = (u64)colors->components[0] | ((u64)colors->components[1] << 32);
     dst[1] = (u64)colors->components[2] | ((u64)colors->components[3] << 32);
     dst[2] = (u64)uv->components[0] | ((u64)uv->components[1] << 32);
@@ -1395,17 +1395,17 @@ void itfQueueColoredTexturedQuadPacket(DrawVertex *vertices, DrawColorRec *uv, D
     dst[6] = (u64)uv->components[2] | ((u64)uv->components[3] << 32);
     dst[8] = (u64)(u32)x1 | ((u64)y1 << 32);
     dst[9] = (u64)tail;
-    sdfAppendPacket(command, (u32)packet);
+    sdfDrawTagLink(command, (u32)packet);
 }
 
 /* Despite the current name, PRIM selects a two-corner sprite, not a line. */
-void itfEmitColoredLinePacket(DrawVertex *vertices, DrawColorRec *colors, u32 tail, s32 flag, SdfListHead *command) {
+void itfMiscDrawSpritePlanePrim(DrawVertex *vertices, DrawColorRec *colors, u32 tail, s32 flag, SdfListHead *command) {
     SdfDrawPacket *packet;
     u64 *dst;
 
-    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(3, 1));
-    sdfConsInitPacketHeader(packet, (flag << 9) | ITF_SPRITE_PRIMITIVE_BITS, 3, 0x551, 1);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(3, 1));
+    sdf2DMakePrimPacketHeader(packet, (flag << 9) | ITF_SPRITE_PRIMITIVE_BITS, 3, 0x551, 1);
+    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
     dst[0] = (u64)colors->components[0] | ((u64)colors->components[1] << 32);
     dst[1] = (u64)colors->components[2] | ((u64)colors->components[3] << 32);
     dst += 2;
@@ -1414,20 +1414,20 @@ void itfEmitColoredLinePacket(DrawVertex *vertices, DrawColorRec *colors, u32 ta
     dst += 2;
     dst[1] = (u64)tail;
     dst[0] = (u64)(u32)(vertices[1].x + ITF_GS_X_BIAS) | ((u64)(vertices[1].y + ITF_GS_Y_BIAS) << 32);
-    sdfAppendPacket(command, (u32)packet);
+    sdfDrawTagLink(command, (u32)packet);
 }
 
 /* Emit an indexed triangle strip, packing two vertices per GIF loop.
  * Header loop count truncates odd vertex counts; the native writer does not. */
-void itfEmitQuadListWide(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, SdfListHead *command) {
+void itfMiscDrawTriangleStripPrim(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, SdfListHead *command) {
     SdfDrawPacket *packet;
     u64 *dst;
     s32 pairCount = count >> 1;
     s32 i;
 
-    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(4, pairCount));
-    sdfConsInitPacketHeader(packet, ITF_TRIANGLE_STRIP_PRIMITIVE_BITS, 4, 0x5151, pairCount);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(4, pairCount));
+    sdf2DMakePrimPacketHeader(packet, ITF_TRIANGLE_STRIP_PRIMITIVE_BITS, 4, 0x5151, pairCount);
+    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
     for (i = 0; i < count; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
         DrawColorRec *color = &colors[*colorIndex++];
@@ -1439,18 +1439,18 @@ void itfEmitQuadListWide(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexI
         dst[0] = (u64)(u32)(vertex->x + ITF_GS_X_BIAS) | ((u64)(vertex->y + ITF_GS_Y_BIAS) << 32);
         dst += 2;
     }
-    sdfAppendPacket(command, (u32)packet);
+    sdfDrawTagLink(command, (u32)packet);
 }
 
 /* Emit indexed RGBA/XYZ2 records with the line-strip primitive. */
-void itfEmitQuadListA(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, SdfListHead *command) {
+void itfMiscDrawLineStripPrim(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, SdfListHead *command) {
     SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
 
-    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, count));
-    sdfConsInitPacketHeader(packet, ITF_LINE_STRIP_PRIMITIVE_BITS, 2, 0x51, count);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, count));
+    sdf2DMakePrimPacketHeader(packet, ITF_LINE_STRIP_PRIMITIVE_BITS, 2, 0x51, count);
+    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
     for (i = 0; i < count; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
         DrawColorRec *color = &colors[*colorIndex++];
@@ -1462,18 +1462,18 @@ void itfEmitQuadListA(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
         dst[0] = (u64)(u32)(vertex->x + ITF_GS_X_BIAS) | ((u64)(vertex->y + ITF_GS_Y_BIAS) << 32);
         dst += 2;
     }
-    sdfAppendPacket(command, (u32)packet);
+    sdfDrawTagLink(command, (u32)packet);
 }
 
 /* Emit indexed RGBA/XYZ2 records with independent line primitives. */
-void itfEmitQuadListB(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, SdfListHead *command) {
+void itfMiscDrawLinePrim(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, SdfListHead *command) {
     SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
 
-    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, count));
-    sdfConsInitPacketHeader(packet, ITF_LINES_PRIMITIVE_BITS, 2, 0x51, count);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, count));
+    sdf2DMakePrimPacketHeader(packet, ITF_LINES_PRIMITIVE_BITS, 2, 0x51, count);
+    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
     for (i = 0; i < count; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
         DrawColorRec *color = &colors[*colorIndex++];
@@ -1485,37 +1485,37 @@ void itfEmitQuadListB(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
         dst[0] = (u64)(u32)(vertex->x + ITF_GS_X_BIAS) | ((u64)(vertex->y + ITF_GS_Y_BIAS) << 32);
         dst += 2;
     }
-    sdfAppendPacket(command, (u32)packet);
+    sdfDrawTagLink(command, (u32)packet);
 }
 
 /* Write TEST for the selected GS context, not the ALPHA blend register. */
-void itfSendBlendPacket(SdfListHead *command, u64 value, s32 flag) {
-    s32 packet = sdfAllocPacketAligned(ITF_STATE_PACKET_BYTES);
-    ItfGsStatePacket *dst = (ItfGsStatePacket *)sdfConsFinalizePacketHeader(packet, ITF_STATE_PACKET_BYTES);
+void itfMiscDrawTestPrim(SdfListHead *command, u64 value, s32 flag) {
+    s32 packet = sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
+    ItfGsStatePacket *dst = (ItfGsStatePacket *)sdf2DMakeStdPacket(packet, ITF_STATE_PACKET_BYTES);
 
     dst->value = value;
     dst->registerCode = flag ? ITF_TEST_SECOND_CONTEXT : ITF_TEST_FIRST_CONTEXT;
-    sdfAppendPacket(command, packet);
+    sdfDrawTagLink(command, packet);
 }
 
 /* Write an unchecked table entry to ALPHA for the selected GS context. */
-void itfSendTablePacket(SdfListHead *command, s32 index, s32 flag) {
-    s32 packet = sdfAllocPacketAligned(ITF_STATE_PACKET_BYTES);
-    ItfGsStatePacket *dst = (ItfGsStatePacket *)sdfConsFinalizePacketHeader(packet, ITF_STATE_PACKET_BYTES);
+void itfMiscDrawAlphaPrim(SdfListHead *command, s32 index, s32 flag) {
+    s32 packet = sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
+    ItfGsStatePacket *dst = (ItfGsStatePacket *)sdf2DMakeStdPacket(packet, ITF_STATE_PACKET_BYTES);
 
     dst->value = D_00357998[index];
     dst->registerCode = flag ? ITF_ALPHA_SECOND_CONTEXT : ITF_ALPHA_FIRST_CONTEXT;
-    sdfAppendPacket(command, packet);
+    sdfDrawTagLink(command, packet);
 }
 
 /* Write CLAMP for the selected GS context. */
-void func_00199560(SdfListHead *command, s32 flag, s32 wms, s32 wmt, s32 minu, s32 maxu, s32 minv, s32 maxv) {
-    s32 packet = sdfAllocPacketAligned(ITF_STATE_PACKET_BYTES);
-    ItfGsStatePacket *dst = (ItfGsStatePacket *)sdfConsFinalizePacketHeader(packet, ITF_STATE_PACKET_BYTES);
+void itfMiscDrawClampPrim(SdfListHead *command, s32 flag, s32 wms, s32 wmt, s32 minu, s32 maxu, s32 minv, s32 maxv) {
+    s32 packet = sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
+    ItfGsStatePacket *dst = (ItfGsStatePacket *)sdf2DMakeStdPacket(packet, ITF_STATE_PACKET_BYTES);
 
     dst->value = ((u64)maxv << 34) | ((u64)minv << 24) | (maxu << 14) | (minu << 4) | (wmt << 2) | wms;
     dst->registerCode = flag ? SDF_GS_CLAMP_2 : SDF_GS_CLAMP_1;
-    sdfAppendPacket(command, packet);
+    sdfDrawTagLink(command, packet);
 }
 
 extern u8 D_003BB198[8];
@@ -1526,7 +1526,7 @@ extern TextVector D_003579C0[4];
 
 /* Draw filled and remaining quad regions. The optional highlight is produced
  * as signed fixed-point vectors and passed as their four-word RGBA image. */
-void itfDrawFixedPointProgressBar(s32 value, s32 limit, s32 highlight,
+void itfMiscDrawGauge(s32 value, s32 limit, s32 highlight,
                    DrawVertex *bounds, u32 tail, DrawColorRec *filledColor,
                    DrawColorRec *remainingColor, SdfListHead *command) {
     DrawVertex vertices[6];
@@ -1553,34 +1553,34 @@ void itfDrawFixedPointProgressBar(s32 value, s32 limit, s32 highlight,
     vertices[4].y = bounds[1].y;
     vertices[5].x = right;
     vertices[5].y = bounds[1].y;
-    itfDrawQuadFlat4(vertices, filledColor, D_003BB198, D_003BB1A0, tail, command);
-    itfDrawQuadFlat4(vertices, remainingColor, D_003BB198 + 4, D_003BB1A0, tail, command);
+    itfMiscDrawRectanglePrim(vertices, filledColor, D_003BB198, D_003BB1A0, tail, command);
+    itfMiscDrawRectanglePrim(vertices, remainingColor, D_003BB198 + 4, D_003BB1A0, tail, command);
     if (highlight != 0 && filledWidth >= 3) {
-        itfScaleVectors(highlightColors, filledColor->components[0],
+        itfMiscSetRatioRGB(highlightColors, filledColor->components[0],
                         filledColor->components[1], filledColor->components[2],
                         filledColor->components[3], D_003579C0, 4);
-        itfEmitQuadListA(vertices, highlightColors,
+        itfMiscDrawLineStripPrim(vertices, highlightColors,
                         D_003579B0, D_003579B8, 3, tail, command);
-        itfEmitQuadListA(vertices, highlightColors,
+        itfMiscDrawLineStripPrim(vertices, highlightColors,
                         D_003579B0 + 3, D_003579B8 + 3, 3, tail, command);
     }
 }
 
 
 /* Retail "DbgDevDump" task callback: perform no dump work and return zero. */
-s32 kwlnUpdateDevelopmentDumpTask(KwlnTask *task) {
+s32 dds3DebugDevDumpProcess(KwlnTask *task) {
     return 0;
 }
 
-u32 scrCmdCompleteImmediately(void) {
+u32 itfCamp(void) {
     return 1;
 }
 
 extern char D_003A13F0[]; /* "Camp process halted.\n", followed by padding no C emits */
 
-void mnuReportCampProcessHalted(void) {
-    if (dds3AdminGetActiveMode() != 5) {
-        dds3AdminSetControlFlag();
+void itfCampStartProcess(void) {
+    if (dds3AdminiGetActiveSequence() != 5) {
+        dds3AdminiExitSequence();
     }
     printf(D_003A13F0);
 }

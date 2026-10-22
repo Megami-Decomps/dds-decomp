@@ -4,6 +4,6 @@
 struct EffWorldNode;
 
 /* Return the borrowed primary world node, or NULL when no world is active. */
-struct EffWorldNode *dds3GetWorldObject(void);
+struct EffWorldNode *dds3GetActiveScene(void);
 
 #endif

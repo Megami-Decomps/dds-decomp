@@ -29,9 +29,9 @@ typedef char SdfGsTwoVertexPacket_size_must_be_0x40[
 typedef char SdfGsTwoVertexPacket_drawing_at_0x10[
     ((u32)&((SdfGsTwoVertexPacket *)0)->drawing == 0x10) ? 1 : -1];
 
-void sdfBuildFillPacket101(SdfGsTwoVertexPayload *packet, s32 color, s32 primitive,
+void sdfPrimSetLineElem(SdfGsTwoVertexPayload *packet, s32 color, s32 primitive,
     s32 left, s32 top, s32 right, s32 bottom, s32 depth);
-void sdfBuildFillPacket106(SdfGsTwoVertexPayload *packet, s32 color, s32 primitive,
+void sdfPrimSetRectElem(SdfGsTwoVertexPayload *packet, s32 color, s32 primitive,
     s32 left, s32 top, s32 right, s32 bottom, s32 depth);
 
 /* GIF REGLIST stream: PRIM, RGBAQ, then UV/XYZ2 for each vertex. */
@@ -63,7 +63,7 @@ typedef char SdfGsTexturedPairPacket_size_must_be_0x50[
 typedef char SdfGsTexturedPairPacket_drawing_at_0x10[
     ((u32)&((SdfGsTexturedPairPacket *)0)->drawing == 0x10) ? 1 : -1];
 
-void sdfBuildPacket116(SdfGsTexturedPairPayload *packet, s32 color,
+void sdfPrimSetSpriteElem(SdfGsTexturedPairPayload *packet, s32 color,
     s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
     s32 x1, s32 y1, s32 u1, s32 v1, s32 depth);
 

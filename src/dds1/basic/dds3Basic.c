@@ -6,7 +6,7 @@
 
 /* vu0 routine: build the world matrix in vf28-vf31 from rotation (quaternion),
    per-row scale and translation. */
-void dds3BuildVuTransformFromComponents(const f32 scale[4],
+void dds3MakeMatrix(const f32 scale[4],
                                        const f32 rotation[4],
                                        const f32 translation[4]) {
     VU0_LOAD_VF(vf10, rotation);

@@ -26,15 +26,15 @@
 extern void effSplCalc(EffVert *vertex, EffPrimitiveCurve *primitive, s32 recordIndex, f32 t);
 extern void effSampleChannelBezier(EffVert *vertex, EffChan *channel, s32 recordIndex, f32 t);
 extern EffRandState effDefaultRandomState[];
-extern void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex);
-extern void effBuildPrimitiveCurveTangents(f32 *tangents, f32 *keys, u32 recordCount);
-extern void effSolveCubicTangents(f32 *solution, f32 *rhs, s32 count);
-extern void effBuildPrimitiveCurveCoefficients(EffPrimitiveCurve *primitive, f32 *tangents);
-extern void effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents(EffPrimitiveCurve *primitive, f32 *tangents);
+extern void effAPPoint4PartInit(EffChanWork *work, u32 recordIndex);
+extern void dds3BuildSplinePoints(f32 *tangents, f32 *keys, u32 recordCount);
+extern void SolveTridiagonal(f32 *solution, f32 *rhs, s32 count);
+extern void dds3BuildSplineCoefs(EffPrimitiveCurve *primitive, f32 *tangents);
+extern void dds3BuildSplineCoefsSkipDup(EffPrimitiveCurve *primitive, f32 *tangents);
 
 /* Clone channel work, allocate slots and duplicate a parameter template per record.
  * The record count is captured before allocation; a nonpositive delay modulus becomes one. */
-EffChanWork *effChanWorkCreate(EffChanSource *source) {
+EffChanWork *effAPPoint4Copy(EffChanSource *source) {
     u32 recordCount = source->head.count;
     SdfMemBlock *allocationHandle = sdfMemAllocDirect(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
     EffChanWork *work = (EffChanWork *)sdfMemLock(allocationHandle);
@@ -49,13 +49,13 @@ EffChanWork *effChanWorkCreate(EffChanSource *source) {
     if (work->head.spread <= 0) {
         work->head.spread = 1;
     }
-    work->slots = effAllocSlotArray(recordCount);
+    work->slots = dds3Bezier4PCreate(recordCount);
     if (recordCount != 0) {
         parameterTemplate = source->owner->param;
         delayModulus = work->head.spread;
         for (recordIndex = 0; recordIndex < recordCount; recordIndex++) {
-            recordCursor->param = effParamWorkDuplicate(parameterTemplate);
-            recordCursor->delay = -(sdfGetRand((EffRandState *)effDefaultRandomState) % delayModulus);
+            recordCursor->param = dds3EffectPartCopy(parameterTemplate);
+            recordCursor->delay = -(dds3GetRandA((EffRandState *)effDefaultRandomState) % delayModulus);
             recordCursor++;
         }
     }
@@ -63,17 +63,17 @@ EffChanWork *effChanWorkCreate(EffChanSource *source) {
 }
 
 /* Release slot storage, every duplicated parameter and the backing allocation in native order. */
-void effDestroyChannelWork(EffChanWork *work) {
+void effAPPoint4Delete(EffChanWork *work) {
     EffChanRecord *recordCursor;
     u32 recordIndex = 0;
     u32 recordCount;
 
-    effMathReleaseWorkResource(work->slots);
+    dds3Bezier4PDelete(work->slots);
     recordCount = work->head.count;
     recordCursor = work->records;
     if (recordCount != 0) {
         do {
-            effDispatchParameterDataAndFreeWork(recordCursor->param);
+            dds3EffectPartDelete(recordCursor->param);
             recordCursor++;
             recordIndex++;
         } while (recordIndex < recordCount);
@@ -86,7 +86,7 @@ extern f32 sdfViewEyeVector[4];
 
 /* vu0 routine: Jitter four control points normal to the path and viewing direction.
  * Reuse the final edge normal for the endpoint; retain XYZ-only scale initialization. */
-void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
+void effAPPoint4PartInit(EffChanWork *work, u32 recordIndex) {
     f32 jitterScale[4];
     f32 lastNormal[4];
     f32 viewDirection[4];
@@ -101,11 +101,11 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, viewDirection);
     cursorStep = 1.0f / (f32)work->head.steps;
-    bezierSlot = effMathGetSlotAt(work->slots, recordIndex);
+    bezierSlot = dds3Bezier4PGetPart(work->slots, recordIndex);
     bezierSlot->t = 0;
     bezierSlot->step = cursorStep;
 
-    centeredRandom = sdfGetRandFloat(effDefaultRandomState) - 0.5f;
+    centeredRandom = dds3GetRandFloatA(effDefaultRandomState) - 0.5f;
     jitterScale[0] = work->head.jitter[0] * (centeredRandom + centeredRandom);
     jitterScale[1] = jitterScale[0];
     jitterScale[2] = jitterScale[0];
@@ -124,7 +124,7 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
     bezierSlot->controlPoints[0][1] = jitteredPoint[1];
     bezierSlot->controlPoints[0][2] = jitteredPoint[2];
 
-    centeredRandom = sdfGetRandFloat(effDefaultRandomState) - 0.5f;
+    centeredRandom = dds3GetRandFloatA(effDefaultRandomState) - 0.5f;
     jitterScale[0] = work->head.jitter[1] * (centeredRandom + centeredRandom);
     jitterScale[1] = jitterScale[0];
     jitterScale[2] = jitterScale[0];
@@ -143,7 +143,7 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
     bezierSlot->controlPoints[1][1] = jitteredPoint[1];
     bezierSlot->controlPoints[1][2] = jitteredPoint[2];
 
-    centeredRandom = sdfGetRandFloat(effDefaultRandomState) - 0.5f;
+    centeredRandom = dds3GetRandFloatA(effDefaultRandomState) - 0.5f;
     jitterScale[0] = work->head.jitter[2] * (centeredRandom + centeredRandom);
     jitterScale[1] = jitterScale[0];
     jitterScale[2] = jitterScale[0];
@@ -163,7 +163,7 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
     bezierSlot->controlPoints[2][1] = jitteredPoint[1];
     bezierSlot->controlPoints[2][2] = jitteredPoint[2];
 
-    centeredRandom = sdfGetRandFloat(effDefaultRandomState) - 0.5f;
+    centeredRandom = dds3GetRandFloatA(effDefaultRandomState) - 0.5f;
     jitterScale[0] = work->head.jitter[3] * (centeredRandom + centeredRandom);
     jitterScale[1] = jitterScale[0];
     jitterScale[2] = jitterScale[0];
@@ -176,12 +176,12 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
     bezierSlot->controlPoints[3][0] = jitteredPoint[0];
     bezierSlot->controlPoints[3][1] = jitteredPoint[1];
     bezierSlot->controlPoints[3][2] = jitteredPoint[2];
-    effParamWorkCallback3(record->param, 0);
+    dds3EffectPartSetColor(record->param, 0);
 }
 
 /* Step active records, update their packed color/position callbacks, and optionally recycle.
  * The slot-zero lookup precedes the empty-count check; retain the time snapshot and later stored increments. */
-void effUpdateChannelWork(EffChanWork *work) {
+void effAPPoint4Draw(EffChanWork *work) {
     EffChanRecord *recordCursor = work->records;
     EffArrHdr *bezierSlots = work->slots;
     u32 recordCount = work->head.count;
@@ -193,7 +193,7 @@ void effUpdateChannelWork(EffChanWork *work) {
     s32 fadeOutSteps = work->head.fadeOut;
     f32 position[3];
 
-    (void)effMathGetSlotAt(bezierSlots, 0);
+    (void)dds3Bezier4PGetPart(bezierSlots, 0);
     if (recordCount == 0) {
         return;
     }
@@ -201,7 +201,7 @@ void effUpdateChannelWork(EffChanWork *work) {
         s32 recordTime = recordCursor->delay;
 
         if (recordTime == 0) {
-            effJitterChannelControlPoints(work, recordIndex);
+            effAPPoint4PartInit(work, recordIndex);
         }
         if (recordTime > 0 && recordTime <= activeSteps) {
             f32 opacity;
@@ -209,7 +209,7 @@ void effUpdateChannelWork(EffChanWork *work) {
             u32 alpha;
             u32 color;
 
-            effMathStepBezierSlot(bezierSlots, recordIndex, position);
+            dds3Bezier4PPartRun(bezierSlots, recordIndex, position);
             fadePhase = fadeInSteps > recordTime;
             if (fadePhase) {
                 opacity = (f32)recordTime / (f32)fadeInSteps;
@@ -223,14 +223,14 @@ void effUpdateChannelWork(EffChanWork *work) {
             }
             alpha = (u32)(opacity * EFF_CHANNEL_ALPHA_SCALE);
             color = (alpha << EFF_CHANNEL_ALPHA_SHIFT) | EFF_CHANNEL_RGB_COLOR;
-            effParamWorkCallback3(recordCursor->param, color);
-            effParamWorkCallback0(recordCursor->param, position);
-            effParamWorkInvokeCallback(recordCursor->param);
+            dds3EffectPartSetColor(recordCursor->param, color);
+            dds3EffectPartSetPosition(recordCursor->param, position);
+            dds3EffectPartDraw(recordCursor->param);
         }
         if (recordTime < activeSteps) {
             recordCursor->delay++;
         } else if (cycleEnabled != 0) {
-            recordCursor->delay = -(sdfGetRand((EffRandState *)effDefaultRandomState) % delayModulus);
+            recordCursor->delay = -(dds3GetRandA((EffRandState *)effDefaultRandomState) % delayModulus);
         } else {
             recordCursor->delay++;
         }
@@ -265,7 +265,7 @@ void effCopyVertRows(EffChan *channel, f32 *source) {
 
 /* Jitter each slot and choose its initial unsigned-modulo step.
  * Stored record time is one ahead of the Bezier cursor parameter's sampled step. */
-void effFillRandRecords(EffEmit *emitter) {
+void effEveAPP4Randomize(EffEmit *emitter) {
     EffChanWork *channelWork = emitter->primitive;
     u32 stepModulus = channelWork->head.steps;
     u32 recordCount = channelWork->head.count;
@@ -279,9 +279,9 @@ void effFillRandRecords(EffEmit *emitter) {
         return;
     }
     do {
-        effJitterChannelControlPoints(channelWork, recordIndex);
-        recordCursor->delay = sdfGetRand((EffRandState *)effDefaultRandomState) % stepModulus;
-        bezierSlot = effMathGetSlotAt(channelWork->slots, recordIndex);
+        effAPPoint4PartInit(channelWork, recordIndex);
+        recordCursor->delay = dds3GetRandA((EffRandState *)effDefaultRandomState) % stepModulus;
+        bezierSlot = dds3Bezier4PGetPart(channelWork->slots, recordIndex);
         recordIndex++;
         randomStep = recordCursor->delay;
         cursorStep = bezierSlot->step;
@@ -291,9 +291,9 @@ void effFillRandRecords(EffEmit *emitter) {
     } while (recordIndex < recordCount);
 }
 
-extern void effBuildAndDispatch(EffPrimitiveCurve *primitive, s32 flattenEqualComponents);
+extern void dds3AllocSplinePoints(EffPrimitiveCurve *primitive, s32 flattenEqualComponents);
 
-EffPrimitiveCurve *effCreatePrimitiveCurve(f32 *keys, u32 recordCount, s32 flattenEqualComponents) {
+EffPrimitiveCurve *dds3AllocSplineHandle(f32 *keys, u32 recordCount, s32 flattenEqualComponents) {
     SdfMemBlock *primaryResource = sdfMemAllocDirect(0x2C);
     f32 step = EFF_CHANNEL_DEFAULT_STEP;
     EffPrimitiveCurve *primitive = (EffPrimitiveCurve *)sdfMemLock(primaryResource);
@@ -323,13 +323,13 @@ EffPrimitiveCurve *effCreatePrimitiveCurve(f32 *keys, u32 recordCount, s32 flatt
         primitive->cursorIndex = 0;
         primitive->cursorPosition = 0.0f;
         primitive->cursorStep = step;
-        effBuildAndDispatch(primitive, flattenEqualComponents);
+        dds3AllocSplinePoints(primitive, flattenEqualComponents);
     }
     return primitive;
 }
 
 /* Release the optional coefficient allocation, then the primary buffer; do not free or clear the object. */
-void effSplRelease(EffPrimitiveCurve *primitive) {
+void dds3FreeSplineHandle(EffPrimitiveCurve *primitive) {
     if (primitive != NULL) {
         if (primitive->cubicCoefficients != NULL) {
             sdfMemFreeDirect(primitive->coefficientAllocation);
@@ -427,15 +427,15 @@ void effSplSetStep(EffPrimitiveCurve *primitive, f32 step) {
 }
 
 /* Build temporary coordinate-major tangents, select a coefficient policy, then release the temporary buffer. */
-void effBuildAndDispatch(EffPrimitiveCurve *primitive, s32 flattenEqualComponents) {
+void dds3AllocSplinePoints(EffPrimitiveCurve *primitive, s32 flattenEqualComponents) {
     SdfMemBlock *allocation = sdfMemAllocDirect(primitive->recordCount * EFF_CURVE_POINT_BYTES);
     f32 *tangentData = (f32 *)sdfMemLock(allocation);
 
-    effBuildPrimitiveCurveTangents(tangentData, primitive->keys, primitive->recordCount);
+    dds3BuildSplinePoints(tangentData, primitive->keys, primitive->recordCount);
     if (flattenEqualComponents == 0) {
-        effBuildPrimitiveCurveCoefficients(primitive, tangentData);
+        dds3BuildSplineCoefs(primitive, tangentData);
     } else {
-        effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents(primitive, tangentData);
+        dds3BuildSplineCoefsSkipDup(primitive, tangentData);
     }
     sdfMemFreeDirect(allocation);
 }
@@ -443,7 +443,7 @@ void effBuildAndDispatch(EffPrimitiveCurve *primitive, s32 flattenEqualComponent
 /* Per coordinate, estimate the slope at every key (one-sided at the ends, the
  * sum of both neighbour differences inside) and solve those into cubic
  * tangents, writing one coordinate-major run of recordCount values each. */
-void effBuildPrimitiveCurveTangents(f32 *tangents, f32 *keys, u32 recordCount)
+void dds3BuildSplinePoints(f32 *tangents, f32 *keys, u32 recordCount)
 {
     s32 count = recordCount;
     SdfMemBlock *allocation = sdfMemAllocDirect(count * sizeof(f32));
@@ -459,14 +459,14 @@ void effBuildPrimitiveCurveTangents(f32 *tangents, f32 *keys, u32 recordCount)
             slopes[i] = ((key[i][component] - key[i - 1][component]) +
                          (key[i + 1][component] - key[i][component])) * 3.0f;
         }
-        effSolveCubicTangents(tangents, slopes, count);
+        SolveTridiagonal(tangents, slopes, count);
         tangents += count;
     }
     sdfMemFreeDirect(allocation);
 }
 
 /* Solve the cubic tangent system: endpoint diagonal 2, interior diagonal 4. */
-void effSolveCubicTangents(f32 *solution, f32 *rhs, s32 count) {
+void SolveTridiagonal(f32 *solution, f32 *rhs, s32 count) {
     s32 byteCount = count * sizeof(f32);
     void *allocation = sdfMemAllocDirect(byteCount);
     f32 *upper;
@@ -499,7 +499,7 @@ void effSolveCubicTangents(f32 *solution, f32 *rhs, s32 count) {
 }
 
 /* Build Hermite power-basis XYZ coefficients from interleaved points and coordinate-major tangents. */
-void effBuildPrimitiveCurveCoefficients(EffPrimitiveCurve *primitive, f32 *tangents) {
+void dds3BuildSplineCoefs(EffPrimitiveCurve *primitive, f32 *tangents) {
     f32 *cubic = primitive->cubicCoefficients;
     f32 *quadratic = primitive->quadraticCoefficients;
     f32 *linear = primitive->linearCoefficients;
@@ -523,7 +523,7 @@ void effBuildPrimitiveCurveCoefficients(EffPrimitiveCurve *primitive, f32 *tange
 }
 
 /* Build Hermite coefficients, but flatten exactly equal endpoint components even when tangents are nonzero. */
-void effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents(EffPrimitiveCurve *primitive, f32 *tangents) {
+void dds3BuildSplineCoefsSkipDup(EffPrimitiveCurve *primitive, f32 *tangents) {
     f32 *cubic = primitive->cubicCoefficients;
     f32 *quadratic = primitive->quadraticCoefficients;
     f32 *linear = primitive->linearCoefficients;
@@ -645,11 +645,11 @@ s32 effGetFontListCount(void) {
 }
 
 extern s8 D_003BB150;
-extern s32 fmGslReleaseActiveResourceBuffers(void);
+extern s32 fmDestroyFontMemControl(void);
 
 /* Build the glyph atlas once: COLUMNS x ROWS cells in a circular node list, each with its
  * UV rectangle in 1/16-texel units and an optional RECORDBYTES-sized per-cell record. */
-s32 frFontInitializeGlyphAtlas(u32 unused, s32 columns, s32 rows, s32 cellWidth, s32 cellHeight,
+s32 fmInitFontMemControl(u32 unused, s32 columns, s32 rows, s32 cellWidth, s32 cellHeight,
                                s32 recordBytes) {
     u8 *records = NULL;
     FntNode *node;
@@ -686,7 +686,7 @@ s32 frFontInitializeGlyphAtlas(u32 unused, s32 columns, s32 rows, s32 cellWidth,
         for (column = 0; column < columns; column++) {
             node = &frFontResourceList.head[i];
             if (node == NULL) {
-                fmGslReleaseActiveResourceBuffers();
+                fmDestroyFontMemControl();
                 return 0;
             }
             node->nodeIndex = i;

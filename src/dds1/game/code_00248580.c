@@ -32,7 +32,7 @@
 #include "btl.h"
 /* Declared before first use (were implicit int). */
 extern void datAddCurrencyClamped(s32 delta);
-/* Original-style implicit int, kept: matched code depends on it: fileSetPreviewLocation. */
+/* Original-style implicit int, kept: matched code depends on it: slSetTmnlID. */
 
 #define MNU_PARTY_SLOT_COUNT 5
 #define MNU_PERCENT_PAIR_BYTES 0xA8
@@ -191,7 +191,7 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
     struct FrFontGlyph *sprite;
 
     sprintf(text, mnuNumberSpriteFormat, number);
-    sprite = itfCreateFont2TextGlyph(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
+    sprite = itfCreateFont2TextGlyph(x, y, layer, fclBlendColor(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
     frFontDrawGlyphChain(sprite, 1, priority);
     frDestroyFontRequestAfter(sprite);
 }
@@ -221,7 +221,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, struct Me
         effDrawSpriteWithCornerFade(0, rowY, depth, scale, 0, host->resourceSets[0], 0x1C, priority);
         sprintf(text, D_003BC3F0, entry->requiredAmount);
         glyph = itfCreateFont3TextGlyph(0x1740, 0x2D8, depth,
-            uiBlendColors(0xA09DC380, 0xA09DC300, scale), text, 0);
+            fclBlendColor(0xA09DC380, 0xA09DC300, scale), text, 0);
         frSetFontColorNo(glyph, 4);
         frFontDrawGlyphChain(glyph, 1, priority);
         frDestroyFontRequestAfter(glyph);
@@ -375,7 +375,7 @@ void mnuDrawTerminalListEntry(s32 x, s32 y, s32 unused, struct MenuList *list,
     }
     color = (node->flags48 & 1) ? 0xA09DC340 : 0xA09DC380;
     color = mnuDispatchByFlag(color, node);
-    color = uiBlendColors(color, color & ~0xFF, list->scale);
+    color = fclBlendColor(color, color & ~0xFF, list->scale);
     glyph = itfCreateConvertedTextGlyph(x + 0x1C0, y + 0xD0, 0, color, node->title, 0);
     frSetFontColorNo(glyph, chainFlags);
     frFontDrawGlyphChain(glyph, 1, priority);
@@ -431,7 +431,7 @@ void mnuBuildEligibleSlotList(MenuTerminalWork *host) {
         if (host->mode == 0 && host->initState == i) {
             continue;
         }
-        if (mdlFlagTest(D_0032EF18[i].requiredModelFlag) == 0 &&
+        if (evtBitCheck(D_0032EF18[i].requiredModelFlag) == 0 &&
             D_0032EF18[i].requiredModelFlag != 0) {
             continue;
         }
@@ -452,7 +452,7 @@ void mnuBuildEligibleSlotList(MenuTerminalWork *host) {
 u8 mnuShouldExcludeTerminalMenuEntry(void) {
     s32 flagSet;
 
-    flagSet = mdlFlagTest(0x902);
+    flagSet = evtBitCheck(0x902);
     return flagSet == 0;
 }
 
@@ -604,7 +604,7 @@ void mnuReleaseWorkResources(u8 *work) {
 }
 
 
-extern void evtCreateEventScriptProcess(s32);
+extern void evtStartEvent(s32);
 
 extern void evtClearActiveFlag(s32);
 
@@ -617,15 +617,15 @@ void mnuFadeOrPlayCloseSfx(s32 skip, u8 *work) {
 
         if (mode < 3) {
             if (mode > 0) {
-                kwlnFadeOutStart(0, 0, 0, 15);
+                dds3FadeIn(0, 0, 0, 15);
             } else {
-                evtCreateEventScriptProcess(MNU_TERMINAL_EXIT_PROCESS);
+                evtStartEvent(MNU_TERMINAL_EXIT_PROCESS);
             }
         } else {
-            evtCreateEventScriptProcess(MNU_TERMINAL_EXIT_PROCESS);
+            evtStartEvent(MNU_TERMINAL_EXIT_PROCESS);
         }
     } else {
-        evtCreateEventScriptProcess(MNU_TERMINAL_EXIT_PROCESS);
+        evtStartEvent(MNU_TERMINAL_EXIT_PROCESS);
     }
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(1, 1);
@@ -767,12 +767,12 @@ s32 mnuAdvanceTerminalTransition(s8 closing) {
             if (work->effectHandle == 0) {
                 work->effectHandle = (u32)mnuRequestEffectResource(mnuTerminalSpriteDirectory, D_003AF620);
             } else if (mnuHasEffectResourceHandle((MenuResourceWork *)work->effectHandle) != 0) {
-                kwlnFadeOutStart(0, 0, 0, 15);
+                dds3FadeIn(0, 0, 0, 15);
                 D_003BC3E1 = 1;
                 work->effectStage = 1;
             }
         } else {
-            if (kwlnFadeIsActive() == 0) {
+            if (dds3FadeCheck() == 0) {
                 return 1;
             }
         }
@@ -786,9 +786,9 @@ s32 mnuAdvanceTerminalTransition(s8 closing) {
             return 1;
         }
     } else if (D_003BC3E1 == 1) {
-        kwlnFadeInStart(0, 0, 0, 15);
+        dds3FadeOut(0, 0, 0, 15);
         D_003BC3E1 = -1;
-    } else if (kwlnFadeIsActive() == 0) {
+    } else if (dds3FadeCheck() == 0) {
         if (work->effectHandle != 0) {
             mnuReleaseEffectResource((MenuResourceWork *)work->effectHandle);
             work->effectHandle = 0;
@@ -805,16 +805,16 @@ void mnuSetWorldObjectAndMenuEnabled(s8 enabled) {
     EffWorldNode *worldObject;
 
     if (enabled == '\x01') {
-        worldObject = (EffWorldNode *)(u32)dds3GetWorldObject();
+        worldObject = (EffWorldNode *)(u32)dds3GetActiveScene();
         if (worldObject != 0) {
-            dds3SetWorldObjectDrawEnabled(worldObject, 1);
+            dds3VisibleSceneBasic(worldObject, 1);
         }
         D_003BC3E1 = 1;
     }
     else {
-        worldObject = (EffWorldNode *)(u32)dds3GetWorldObject();
+        worldObject = (EffWorldNode *)(u32)dds3GetActiveScene();
         if (worldObject != 0) {
-            dds3SetWorldObjectDrawEnabled(worldObject, 0);
+            dds3VisibleSceneBasic(worldObject, 0);
         }
         D_003BC3E1 = 0;
     }
@@ -866,7 +866,7 @@ void mnuDestroyAllMenuSlotEffectBatches(s32 workAddress) {
 }
 
 extern s32 fldGetCurrentBgmHandle(void);
-extern void sndEnsureMidiBankResident(u32);
+extern void p2sdLoadSMGFile(u32);
 
 /* Select the native default/current BGM handle and make only its bank bits resident.
  * DDS1's default includes track one; DDS2's default has a zero low halfword. */
@@ -876,7 +876,7 @@ void mnuTerminalSelectResourceBank(MenuTerminalWork *work) {
     } else {
         work->bgmHandle = fldGetCurrentBgmHandle();
     }
-    sndEnsureMidiBankResident(work->bgmHandle & MNU_BGM_BANK_MASK);
+    p2sdLoadSMGFile(work->bgmHandle & MNU_BGM_BANK_MASK);
 }
 
 
@@ -912,7 +912,7 @@ u8 *mnuTerminalCreateScene(reduced, slot)
     obj->selectedSlot = slot;
     mnuTerminalBuildMenus(obj);
     evtLoadResourcePair("/facility/msg/terminal/mes_data.bmd", &obj->messageResources);
-    evtCreateMessageWindowIfMissing((struct ItfMesSub *)obj->messageResources.dataAddress);
+    fclInitMessage((struct ItfMesSub *)obj->messageResources.dataAddress);
     for (i = 0; i < MNU_SELECTED_SLOT_COUNT; i++) {
         obj->cursor[i] = -1;
     }
@@ -924,7 +924,7 @@ extern void evtReleaseResourcePairHandle(EvtResourcePair *record);
 extern s32 mnuCheckResourceTask(void);
 extern void mnuStopResourceTask(void);
 extern void fldApplyTerminalActorSelection(s32 a, s32 b);
-extern void fldProcessDeferredSceneCommand(void);
+extern void fldProc_CallSisetuReturn(void);
 extern s8 mnuTerminalTaskState;
 
 /* Release the terminal task's resources/effects, then hand its mode/slot to the field.
@@ -937,7 +937,7 @@ void mnuReleaseTerminalWorkAndResumeField(KwlnTask *task) {
         mnuReleaseResourceHandles(work);
         mnuDestroyAllMenuSlotEffectBatches((s32)work);
         mnuDrainPanelTransitions(&work->transitionWork, task);
-        dspCloseChannel();
+        fclDestroyMessage();
         evtReleaseResourcePairHandle(&work->messageResources);
         sdfMemFreeDirect(work->allocation);
         mnuTerminalTaskState = 2;
@@ -946,7 +946,7 @@ void mnuReleaseTerminalWorkAndResumeField(KwlnTask *task) {
         mnuStopResourceTask();
     }
     fldApplyTerminalActorSelection(work->mode, work->initState);
-    fldProcessDeferredSceneCommand();
+    fldProc_CallSisetuReturn();
 }
 
 
@@ -1033,12 +1033,12 @@ s32 evtRunTerminalPanelSync(KwlnTask *task) {
 
 /* Require the fade to be inactive before testing message-window control for idle. */
 s32 evtIsFadeCompleteAndMessageWindowIdle(void) {
-    s32 fadeActive = kwlnFadeIsActive();
+    s32 fadeActive = dds3FadeCheck();
 
     if (fadeActive != 0) {
         return 0;
     }
-    return evtGetMessageWindowControlState() == 0;
+    return fclChkMessage() == 0;
 }
 
 extern u8 mnuTerminalPopupEntries[];
@@ -1262,13 +1262,13 @@ u8 mnuGetTerminalFrameFade(MenuTerminalWork *scene) {
 
 
 
-extern void sndStartTrackExtended(s32);
+extern void p2sdPlayBGMFade(s32);
 
-extern void sndStartReducedBgm(void);
+extern void p2sdBgmVolDown(void);
 
-extern void sndReleaseTrackHandle(s32);
+extern void p2sdStopBGM(s32);
 
-extern void sndStopReducedBgm(void);
+extern void p2sdBgmVolUp(void);
 
 
 struct EffectSlotSet;
@@ -1625,14 +1625,14 @@ void mnuDispatchTransitionHostCallbacks(MenuTerminalWork *host) {
 void mnuApplyFadeTrackMode(s32 mode, MenuTerminalWork *host) {
     if (mode == 0) {
         if (host->mode == 0) {
-            sndStartTrackExtended(host->bgmHandle);
+            p2sdPlayBGMFade(host->bgmHandle);
         } else {
-            sndStartReducedBgm();
+            p2sdBgmVolDown();
         }
     } else if (host->mode == 0) {
-        sndReleaseTrackHandle(host->bgmHandle);
+        p2sdStopBGM(host->bgmHandle);
     } else {
-        sndStopReducedBgm();
+        p2sdBgmVolUp();
     }
 }
 
@@ -1731,7 +1731,7 @@ s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
                         }
                         break;
                     case 1:
-                        kwlnFadeInStart(0, 0, 0, 0xF);
+                        dds3FadeOut(0, 0, 0, 0xF);
                     default:
                         mnuSetPopupEntryFlagged(state, mnuTerminalPopupEntries + action * 28);
                         break;
@@ -1799,14 +1799,14 @@ u32 evtBeginSelectionExitFade(KwlnTask *task) {
     mnuTerminalSelectSlot(0, -2, context);
     mnuSetWorldObjectAndMenuEnabled(1);
     mnuReleaseVisualResources((MenuTerminalWork *)context);
-    kwlnFadeOutStart(0, 0, 0, 15);
+    dds3FadeIn(0, 0, 0, 15);
     return 1;
 }
 
-extern s32 sdfCheckPendingWorkWithInterrupts(void);
+extern s32 sdfDelayedResrcCheck(void);
 extern s32 fileMenuTaskExists(void);
 extern void fileEnterMcPackScene(s32 mode);
-extern void fileSetPreviewLocation(s32 x, s32 y);
+extern void slSetTmnlID(s32 x, s32 y);
 
 s32 mnuOpenFileMenuFromTerminal(KwlnTask *request) {
     s32 context = dds3GetProcessData(request);
@@ -1817,18 +1817,18 @@ s32 mnuOpenFileMenuFromTerminal(KwlnTask *request) {
     if (result != 0) {
         return result;
     }
-    if (kwlnFadeIsActive() != 0) {
+    if (dds3FadeCheck() != 0) {
         return 0;
     }
     if (*(s32 *)(context + 0x94) == 0 &&
-        sdfCheckPendingWorkWithInterrupts() == 0) {
+        sdfDelayedResrcCheck() == 0) {
         mnuReleaseBothVisualResourceTextures((MenuTerminalWork *)context);
-        fileSetPreviewLocation(work->mode, work->initState);
+        slSetTmnlID(work->mode, work->initState);
         fileEnterMcPackScene(0);
         *(s32 *)(context + 0x94) = 1;
     }
     if (work->popupState == 0 && fileMenuTaskExists() == 0 &&
-        sdfCheckPendingWorkWithInterrupts() == 0) {
+        sdfDelayedResrcCheck() == 0) {
         *(s32 *)(context + 0x94) = 0;
         mnuSetPopupEntryFlagged(dispatch, mnuTerminalPopupEntries);
     }
@@ -1985,7 +1985,7 @@ s32 mnuHandleTerminalRecoverySelection(KwlnTask *request) {
                 entry = &node->terminal;
                 buttons = 0;
                 fldSaveSceneOptionsAndClearFlags(&datGameState->party[entry->entryId]);
-                sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+                p2sdPlaySE(0x10, 0x7F, 0x3F);
                 mnuReleaseSelectedProgressPanel(host);
                 datAddCurrencyClamped(-entry->requiredAmount);
                 mnuRefreshThresholdNodeFlags(host->list);
@@ -2026,7 +2026,7 @@ void mnuDrawTerminalAmountText(s32 fading, s32 state) {
     if (fading == 0) {
         color = (*(u8 *)&work->resourceSets[0]->workEntries[index].geometry.cornerColors[0]) | 0xA09DC300;
     } else {
-        color = uiBlendColors(0xA09DC380, 0xA09DC300, work->list->scale);
+        color = fclBlendColor(0xA09DC380, 0xA09DC300, work->list->scale);
     }
     sprite = itfCreateFont3TextGlyph(0x1740, 0x210, 0, color, text, 0);
     frFontDrawGlyphChain(sprite, 1, 0x53);
@@ -2075,7 +2075,7 @@ s32 evtOpenTerminalFollowupPopupWhenIdle(KwlnTask *request) {
         return result;
     }
     if (*panel == 0) {
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             if (fldClassifyRemainingFrames(state) == 0) {
                 mnuSetPopupEntry(panel, (void *)mnuTerminalFollowupFadePopupEntry);
             }
@@ -2089,7 +2089,7 @@ s32 evtOpenTerminalFollowupPopupWhenIdle(KwlnTask *request) {
 s32 mnuBeginTerminalExitTransition(KwlnTask *item) {
     s32 state = dds3GetProcessData(item);
 
-    if (evtGetMessageWindowControlState() == 0 && ((MenuTerminalWork *)state)->exitPending == 0) {
+    if (fclChkMessage() == 0 && ((MenuTerminalWork *)state)->exitPending == 0) {
         mnuConfigureTerminalSlotEffects(2, (MenuTerminalWork *)state);
         mnuTerminalSelectSlot(2, -1, (MenuTerminalWork *)state);
         mnuAnimateTerminalSelection(2, (MenuTerminalWork *)state);
@@ -2129,8 +2129,8 @@ u32 evtBReleaseImagesAndQueueMenuTransition(KwlnTask *task) {
     work->exitPending = 1;
     work->resourcePhase = 0;
     evtFinishMessageWindowAndNotify();
-    dspCloseChannel();
-    sndReleaseTrackHandle(work->bgmHandle);
+    fclDestroyMessage();
+    p2sdStopBGM(work->bgmHandle);
     return 1;
 }
 
@@ -2143,9 +2143,9 @@ s32 mnuOpenTerminalSelectionMessageWindow(KwlnTask *task) {
     mnuAnimateTerminalSelection(1, (MenuTerminalWork *)context);
     evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (MenuTerminalWork *)context);
     ((MenuTerminalWork *)context)->exitPending = 0;
-    evtCreateMessageWindowIfMissing((struct ItfMesSub *)((MenuTerminalWork *)context)->messageResources.dataAddress);
+    fclInitMessage((struct ItfMesSub *)((MenuTerminalWork *)context)->messageResources.dataAddress);
     if (((MenuTerminalWork *)context)->mode != 0) {
-        sndStartTrackExtended(((MenuTerminalWork *)context)->bgmHandle);
+        p2sdPlayBGMFade(((MenuTerminalWork *)context)->bgmHandle);
     }
     return 1;
 }
@@ -2158,7 +2158,7 @@ s32 evtPollTerminalResourceTransition(KwlnTask *request) {
     if (result != 0) {
         return result;
     }
-    if (kwlnFadeIsActive() != 0) {
+    if (dds3FadeCheck() != 0) {
         return 0;
     }
     if (work->resourcePhase == 0) {
@@ -2168,15 +2168,15 @@ s32 evtPollTerminalResourceTransition(KwlnTask *request) {
             work->resourcePhase = 1;
         }
     } else if (work->resourcePhase == 1) {
-        if (mnuAdvanceTerminalTransition(0) != 0 && sdfCheckPendingWorkWithInterrupts() == 0) {
+        if (mnuAdvanceTerminalTransition(0) != 0 && sdfDelayedResrcCheck() == 0) {
             mnuCreateResourceTask();
-            kwlnFadeOutStart(0, 0, 0, 0);
+            dds3FadeIn(0, 0, 0, 0);
             work->resourcePhase = 2;
         }
     }
     if (work->popupState == 0) {
         if (work->resourcePhase == 2) {
-            if (mnuCheckResourceTask() != 0 || sdfCheckPendingWorkWithInterrupts() != 0) {
+            if (mnuCheckResourceTask() != 0 || sdfDelayedResrcCheck() != 0) {
                 return 0;
             }
             mnuReleaseVisualResources(work);
@@ -2232,7 +2232,7 @@ u32 evtPrepareSelectedMenuEntry(KwlnTask *task) {
     }
     evtCopyEntryStringToActiveWindow(0, D_00347C68[*selectionIndex].encodedText);
     dspSetActive(1);
-    dspStartEntry(0);
+    fclStartMessage(0);
     evtSetMessageWindowOptionWhenOpen(1);
     evtStoreValueAndCaptureWindowPanelValue(6);
     return 1;
@@ -2256,7 +2256,7 @@ s32 evtBChooseSelectionCompletionPopup(KwlnTask *input) {
     result = menuRunPanel(context, 0, input);
     if (result == 0) {
         if (*state == 0) {
-            result = evtGetMessageWindowControlState();
+            result = fclChkMessage();
             if (result == 0) {
                 if (evtGetCapturedWindowPanelValue() == 0) {
                     mnuResetProgressModeFromOwner((u8 *)context);
@@ -2298,10 +2298,10 @@ u32 evtBCheckPanelMode(KwlnTask *task) {
     dspSetActive(1);
     switch (((MenuTerminalWork *)context)->panelMode) {
     case 1:
-        dspStartEntry(1);
+        fclStartMessage(1);
         break;
     case 2:
-        dspStartEntry(2);
+        fclStartMessage(2);
         break;
     }
     return 1;
@@ -2316,7 +2316,7 @@ s32 evtBContinueDispatchOrRestoreTable(KwlnTask *input) {
     dispatchState = &((MenuTerminalWork *)context)->popupState;
     dispatchResult = menuRunPanel((void *)context, 0, input);
     if (dispatchResult == 0) {
-        if ((*dispatchState == 0) && (dispatchResult = evtGetMessageWindowControlState(), dispatchResult == 0)) {
+        if ((*dispatchState == 0) && (dispatchResult = fclChkMessage(), dispatchResult == 0)) {
             mnuSetPopupEntry(dispatchState, ((MenuTerminalWork *)context)->dispatchTable);
         }
         dispatchResult = 0;
@@ -2355,7 +2355,7 @@ u32 evtExitSelectionMenuAndSendSoundCommand(KwlnTask *task) {
     }
     evtRememberDispatchCallback(0, (MenuTerminalWork *)context);
     ((MenuTerminalWork *)context)->exitPending = 1;
-    sndReleaseTrackHandle(((MenuTerminalWork *)context)->bgmHandle);
+    p2sdStopBGM(((MenuTerminalWork *)context)->bgmHandle);
     evtClearActiveFlag(0);
     return 1;
 }
@@ -2392,11 +2392,11 @@ s32 mnuUpdateTerminalActionPopup(KwlnTask *input) {
             } else {
                 switch (context->effectStage) {
                 case 1:
-                    kwlnFadeInStart(0, 0, 0, 15);
+                    dds3FadeOut(0, 0, 0, 15);
                     context->effectStage = 2;
                     break;
                 case 2:
-                    if (kwlnFadeIsActive() == 0) {
+                    if (dds3FadeCheck() == 0) {
                         if (context->effectHandle != 0) {
                             mnuReleaseEffectResource((MenuResourceWork *)context->effectHandle);
                             context->effectHandle = 0;
@@ -2481,12 +2481,12 @@ s32 evtOpenTerminalActionPopupWhenReady(KwlnTask *input) {
             } else {
                 if (mnuHasEffectResourceHandle((MenuResourceWork *)context->effectHandle) != 0) {
                     if (context->effectStage == 0) {
-                        kwlnFadeOutStart(0, 0, 0, 15);
+                        dds3FadeIn(0, 0, 0, 15);
                         context->effectStage = 1;
                     }
                 }
                 if (context->effectStage != 0) {
-                    canOpen = kwlnFadeIsActive() == 0;
+                    canOpen = dds3FadeCheck() == 0;
                 }
             }
             if (canOpen != 0) {

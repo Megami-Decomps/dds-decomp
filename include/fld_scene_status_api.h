@@ -3,6 +3,6 @@
 
 #include "common.h"
 
-u32 fldGetSceneStatusCode(void);
+u32 fldGetRestoreMode(void);
 
 #endif

@@ -4,7 +4,7 @@
 #include "common.h"
 #include "sdf_mat4.h"
 
-/* Matrix slots written by effCreateNodeFromDescriptor for legacy node records.
+/* Matrix slots written by dds3EffectLoad for legacy node records.
  * The intervening type-specific state and prefix remain opaque here. */
 typedef struct EffLegacyNodeInstanceView {
     u8 opaquePrefix[0x20];

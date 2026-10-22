@@ -16,41 +16,41 @@ extern u8 sdfCurrentDisplayModeIndex;
 extern u8 sdfGraphBufferRecreationPending;
 
 
-void sdfGraphSetDisplayMode(s32 displayModeIndex) {
+void sdfGrSetScreen(s32 displayModeIndex) {
     sdfCurrentDisplayModeIndex = (u8)displayModeIndex;
     sdfGrSetFrameSetMode(&D_003980E0, displayModeIndex, 0);
     sdfGraphBufferRecreationPending = 1;
 }
 
 /* Release buffers in slot order, clearing each slot immediately afterward. */
-void sdfGraphReleaseBuffers(SdfGraphObj *graph) {
-    sdfUpdateTextureHeadsWithInterruptsMasked(graph->buffers[0]);
+void sdfGrFreeFrameSet(SdfGraphObj *graph) {
+    sdfGsMemFree(graph->buffers[0]);
     graph->buffers[0] = NULL;
-    sdfUpdateTextureHeadsWithInterruptsMasked(graph->buffers[1]);
+    sdfGsMemFree(graph->buffers[1]);
     graph->buffers[1] = NULL;
-    sdfUpdateTextureHeadsWithInterruptsMasked(graph->buffers[SDF_GRAPH_AUXILIARY_BUFFER]);
+    sdfGsMemFree(graph->buffers[SDF_GRAPH_AUXILIARY_BUFFER]);
     graph->buffers[SDF_GRAPH_AUXILIARY_BUFFER] = NULL;
 }
 
 /* Rebuild the auxiliary buffer with its own PSM; both others share a PSM. */
-void sdfGraphRecreateBuffers(SdfGraphObj *graph) {
+void sdfGrMakeFrameSet(SdfGraphObj *graph) {
     s16 width;
     s16 height;
     u8 bufferFormat;
 
-    sdfGraphReleaseBuffers(graph);
+    sdfGrFreeFrameSet(graph);
     width = graph->width;
     height = graph->height;
-    graph->buffers[SDF_GRAPH_AUXILIARY_BUFFER] = sdfAllocImageBuffer(width, height, graph->auxiliaryFormat);
+    graph->buffers[SDF_GRAPH_AUXILIARY_BUFFER] = sdfGsAllocFrameBuff(width, height, graph->auxiliaryFormat);
     bufferFormat = graph->bufferFormat;
-    graph->buffers[0] = sdfAllocImageBuffer(width, height, bufferFormat);
-    graph->buffers[1] = sdfAllocImageBuffer(width, height, bufferFormat);
+    graph->buffers[0] = sdfGsAllocFrameBuff(width, height, bufferFormat);
+    graph->buffers[1] = sdfGsAllocFrameBuff(width, height, bufferFormat);
 }
 
 extern SdfDisplayEnvView sdfDisplayEnvironment;
 
 /* Select the indexed image buffer for display; the index and pointer are unchecked. */
-void sdfGraphSelectDisplayBuffer(s32 bufferIndex) {
+void sdfGrSetDisp(s32 bufferIndex) {
     SdfTexResource *displayBuffer = D_003980E0.buffers[bufferIndex];
 
     /* Initialize the environment through its uncached main-RAM alias. */
@@ -65,7 +65,7 @@ extern SdfGraphModeDefaults sdfGraphModeDefaults[];
 extern u8 D_003BD2E9;
 
 /* Reset the GS with the interlace setting of the current display mode. */
-void sdfGraphResetDeviceForCurrentMode(void) {
+void sdfGrGsReset(void) {
     s32 inter;
     s32 ffmode;
     u16 interlace = sdfGraphModeDefaults[sdfCurrentDisplayModeIndex].interlace;
@@ -89,7 +89,7 @@ void sdfGraphResetDeviceForCurrentMode(void) {
 }
 
 
-s32 sdfGraphWakeDisplayThread(s32 channel) {
+s32 sdfDrawThIntHandler(s32 channel) {
     if (channel == 1) {
         iWakeupThread(sdfGraphicsTransferThreadId);
     }

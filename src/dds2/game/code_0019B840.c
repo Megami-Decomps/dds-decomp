@@ -9,8 +9,8 @@
 #include "itf_mem_node.h"
 #include "kwln.h"
 /* Declared before first use (were implicit int). */
-extern void frFontLoadDefaultFonts(void);
-extern SdfTexResource * sdfTexAllocHeadHigh(s32 size, s32 allocationMode);
+extern void frLoadStyleAll(void);
+extern SdfTexResource * sdfGsMemAllocFromTail(s32 size, s32 allocationMode);
 
 #define FR_FONT_BYTE_MASK 0xFF
 #define FR_FONT_ENTRY_ENABLED 1
@@ -29,19 +29,19 @@ extern SdfTexResource * sdfTexAllocHeadHigh(s32 size, s32 allocationMode);
 extern s32 frFontDefaultGlyphCellSize;
 
 
-extern void frFontFreeAllEntries(void);
+extern void frDelStyleAll(void);
 
 extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
 
 
-extern s32 fmGslReleaseActiveResourceBuffers(void);
+extern s32 fmDestroyFontMemControl(void);
 
 
 extern u32 frFontSlotLoadedFlags[];
 
 
 /* Insert after the list's fixed anchor and update the entry count. */
-void frFontListInsert(FntNode *node) {
+void fmRetFontMem(FntNode *node) {
     FntNode *anchor = frFontResourceList.head;
     FntNode *nextNode = anchor->next;
 
@@ -70,7 +70,7 @@ void itfSetTextDrawLimit(s32 limit) {
 }
 
 /* Select by the low byte of slotId; enable the entry and store value + 1 as a byte. */
-void frFontSetEntryFlag(s32 slotId, s32 entryFlag) {
+void frSetWhiteSpaceW(s32 slotId, s32 entryFlag) {
     FrFontEntry *entry = &frFontWork.entries[slotId & FR_FONT_BYTE_MASK];
 
     entry->flagBytes[0] = FR_FONT_ENTRY_ENABLED;
@@ -78,7 +78,7 @@ void frFontSetEntryFlag(s32 slotId, s32 entryFlag) {
 }
 
 /* Reverse the four byte positions of a 32-bit word. */
-u32 frFontReverseWordBytes(u32 word) {
+u32 frSwapColor(u32 word) {
     u32 shiftedWord = word >> FR_FONT_BYTE_SHIFT;
     u32 lowerMiddleByte = word & FR_FONT_MIDDLE_BYTE_MASK;
     u32 outerBytes = word << FR_FONT_OUTER_BYTE_SHIFT;
@@ -92,7 +92,7 @@ u32 frFontReverseWordBytes(u32 word) {
 }
 
 /* Return the zero-based highest set bit; both zero and one return zero. */
-s32 frFontHighestSetBitIndex(u32 bitValue) {
+s32 frConvertVal2N(u32 bitValue) {
     s32 shiftCount = 0;
 
     if (bitValue == 0) {
@@ -106,7 +106,7 @@ s32 frFontHighestSetBitIndex(u32 bitValue) {
 }
 
 
-void frFontBuildGsSetupPacket(FrFontGsPacket *packet) {
+void frCreateDrawEnvPacket(FrFontGsPacket *packet) {
     packet->dma.value = 0;
     packet->dma.words[0] = 0x70000007;
     packet->dma.words[2] = 0;
@@ -159,8 +159,8 @@ void frFontDrawAtlasGlyph(s32 x, s32 y, s32 width, s32 height, u8 style,
     u64 z;
     u64 texBase, texWidth, texBuffer, texHeight;
 
-    reversedColor = frFontReverseWordBytes(color);
-    packet = (FrFontSpritePacketView *)sdfAllocPacketAligned(sizeof(FrFontSpritePacketView));
+    reversedColor = frSwapColor(color);
+    packet = (FrFontSpritePacketView *)sdfGrAllocPacketBuff(sizeof(FrFontSpritePacketView));
     packet->words[0] = 0x70000008;
     packet->words[3] = 0x50000008;
     packet->sprite.tex1.value = ((u64)filtered << 5) | ((u64)filtered << 6);
@@ -195,16 +195,16 @@ void frFontDrawAtlasGlyph(s32 x, s32 y, s32 width, s32 height, u8 style,
     packet->sprite.corners[1].uv = (uv->v0 << 16) | uv->u0;
     packet->sprite.corners[1].rgbaq = rgbaq;
     packet->sprite.corners[1].xyz = (u32)((x & 0xFFFF) | (y << 16)) | z;
-    list = (SdfListHead *)sdfAllocPacketAligned(sizeof(SdfListHead));
-    sdfInitPacketList(list);
-    sdfAppendPacket(list, (u32)packet);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(sizeof(SdfListHead));
+    sdfDrawTagInit(list);
+    sdfDrawTagLink(list, (u32)packet);
     drawSurface = &kwlnDrawSurfaces[surface];
     drawSurface->append(drawSurface, list);
 }
 
 
 /* Submit glyph-relative coordinates and the cache node's owned UV rectangle. */
-void frFontDrawCachedGlyphRelative(s32 x, s32 y, s32 depth, FrFontChildGlyph *glyph,
+void frCreateUserFontPacket(s32 x, s32 y, s32 depth, FrFontChildGlyph *glyph,
                   s32 drawFlags) {
     frFontDrawAtlasGlyph(x + glyph->x, y + glyph->y,
                  glyph->cellDimensions.cellWidth,
@@ -215,7 +215,7 @@ void frFontDrawCachedGlyphRelative(s32 x, s32 y, s32 depth, FrFontChildGlyph *gl
 
 extern volatile s32 sdfGsImageUploadSemaphore; 
 /* Upload an image to GS memory at the given buffer, serialized by the GS semaphore. */
-void sdfUploadGsImageUnderSemaphore(s32 buffer, s32 image) {
+void frCopyFontClutToVram(s32 buffer, s32 image) {
     u8 loadImage[0x60];
 
     sceGsSetDefLoadImage(loadImage, (s16)buffer, 1, 0, 0, 0, 8, 2);
@@ -255,17 +255,17 @@ void frFontEnsureSlotLoaded(s32 slotId, const char *path) {
 
     if (frFontSlotLoadedFlags[slotIndex] != FR_FONT_LOADED_STATE) {
         if (slotIndex == FR_FONT_SYSTEM_SLOT) {
-            frFontBindResourceSections(FR_FONT_SYSTEM_SLOT, 0, fontSystem->entries[0].allocation);
+            frAddFontStyle(FR_FONT_SYSTEM_SLOT, 0, fontSystem->entries[0].allocation);
         } else {
-            frFontBindResourceSections(slotIndex, 0, sdfReadNamedResource(path, 0, 0));
+            frAddFontStyle(slotIndex, 0, sdfDevLoadFileEx(path, 0, 0));
         }
         frFontSlotLoadedFlags[slotIndex] = FR_FONT_LOADED_STATE;
     }
 }
 
-extern s32 frFontInitializeGlyphAtlas(u32 bufferBase, s32 columns, s32 rows, s32 cellWidth,
+extern s32 fmInitFontMemControl(u32 bufferBase, s32 columns, s32 rows, s32 cellWidth,
                                        s32 cellHeight, s32 recordBytes);
-extern void frFontUploadImageBlocks(void);
+extern void frSetFontClut(void);
 /* Native interior labels refer to fields of this single font-system owner. */
 typedef char FrFontResourceHeaderAliasCheck[((u32)&((FrFontSystem *)0)->entries[0].resourceHeader == 0x4) ? 1 : -1];
 typedef char FrFontCachedCountAliasCheck[((u32)&((FrFontSystem *)0)->cachedItemCount == 0x144) ? 1 : -1];
@@ -278,7 +278,7 @@ FrFontSystem frFontWork __attribute__((section(".bss"))) = {0};
 u32 frFontIndexedTextSlots[FR_FONT_INDEXED_TEXT_SLOT_COUNT] __attribute__((section(".bss")));
 extern s32 D_00438F1C;
 
-void frFontInitializeSystem(s32 rowBudget, s32 poolCount) {
+void frInitFontTable(s32 rowBudget, s32 poolCount) {
     s32 i;
     s32 rowCount;
     s32 glyphsPerRow;
@@ -298,25 +298,25 @@ void frFontInitializeSystem(s32 rowBudget, s32 poolCount) {
     glyphRingCount = poolCount;
     poolCount = glyphRingCount * 4;
     frFontWork.atlas.width = 0x200;
-    frFontWork.atlas.widthExponent = frFontHighestSetBitIndex(0x200);
-    frFontWork.atlas.height = 1 << (frFontHighestSetBitIndex(rowTotal * 0x18) + 1);
-    frFontWork.atlas.heightExponent = frFontHighestSetBitIndex(frFontWork.atlas.height);
-    frFontWork.textureHead1 = sdfTexAllocHeadHigh(0x180, 3);
+    frFontWork.atlas.widthExponent = frConvertVal2N(0x200);
+    frFontWork.atlas.height = 1 << (frConvertVal2N(rowTotal * 0x18) + 1);
+    frFontWork.atlas.heightExponent = frConvertVal2N(frFontWork.atlas.height);
+    frFontWork.textureHead1 = sdfGsMemAllocFromTail(0x180, 3);
     for (i = 0; i < 6; i++) {
         frFontWork.imageBuffers[i] = (frFontWork.textureHead1->word >> 6) + i;
     }
-    atlasHead = sdfTexAllocHeadHigh((u32)(frFontWork.atlas.width * frFontWork.atlas.height) >> 3, 2);
+    atlasHead = sdfGsMemAllocFromTail((u32)(frFontWork.atlas.width * frFontWork.atlas.height) >> 3, 2);
     frFontWork.textureHead0 = atlasHead;
     frFontWork.atlas.bufferBase = atlasHead->word >> 6;
     frFontWork.atlas.bufferWidth = (u32)frFontWork.atlas.width >> 6;
     for (i = 0; i < 2; i++) {
         frFontWork.glyphSlots[i] = NULL;
     }
-    frFontInitializeGlyphAtlas(frFontWork.atlas.bufferBase, glyphsPerRow, rowCount, 0x18, 0x18, 0xC);
-    frFontWork.itemPool = itfCreateMemNodeRing(0x2C, poolCount);
-    frFontWork.glyphPool = itfCreateMemNodeRing(0x44, glyphRingCount);
-    frFontLoadDefaultFonts();
-    frFontUploadImageBlocks();
+    fmInitFontMemControl(frFontWork.atlas.bufferBase, glyphsPerRow, rowCount, 0x18, 0x18, 0xC);
+    frFontWork.itemPool = frAllocFontTable(0x2C, poolCount);
+    frFontWork.glyphPool = frAllocFontTable(0x44, glyphRingCount);
+    frLoadStyleAll();
+    frSetFontClut();
     for (i = 0; i < FR_FONT_INDEXED_TEXT_SLOT_COUNT; i++) {
         frFontIndexedTextSlots[i] = 0;
     }
@@ -325,22 +325,22 @@ void frFontInitializeSystem(s32 rowBudget, s32 poolCount) {
 }
 
 /* Release slot allocations, both glyph chains/rings, and the shared GS resource buffers. */
-void frFontReleaseAll(KwlnTask *task) {
-    frFontFreeAllEntries();
+void frDestroyFontTable(KwlnTask *task) {
+    frDelStyleAll();
     frFontReleaseGlyphChain(frFontWork.glyphSlots[0]);
     frFontReleaseGlyphChain(frFontWork.glyphSlots[1]);
-    itfReleaseMemNodeBuffer(frFontWork.itemPool);
-    itfReleaseMemNodeBuffer(frFontWork.glyphPool);
-    fmGslReleaseActiveResourceBuffers();
-    sdfUpdateTextureHeadsWithInterruptsMasked(frFontWork.textureHead0);
-    sdfUpdateTextureHeadsWithInterruptsMasked(frFontWork.textureHead1);
+    frFreeFontTable(frFontWork.itemPool);
+    frFreeFontTable(frFontWork.glyphPool);
+    fmDestroyFontMemControl();
+    sdfGsMemFree(frFontWork.textureHead0);
+    sdfGsMemFree(frFontWork.textureHead1);
 }
 
 /* Bind sections from resource bytes or a retained allocation.
  * Optional flag/value sections each start with a byte-length word; their data
  * precedes the word table and remaining resource data. Offsets are unchecked.
  */
-void frFontBindResourceSections(
+void frAddFontStyle(
     u8 slotIndex, u8 *resourceBytes, struct SdfMemBlock *allocation
 ) {
     FrFontEntry *entry;
@@ -392,7 +392,7 @@ void frFontBindResourceSections(
 }
 
 /* Slots zero/one are not freed here; clear the data pointer only when an allocation exists. */
-void frFontFreeEntry(s32 slotId) {
+void frDelFontStyle(s32 slotId) {
     u32 slotIndex = slotId & FR_FONT_BYTE_MASK;
     FrFontEntry *entry;
 

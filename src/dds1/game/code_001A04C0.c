@@ -41,7 +41,7 @@ typedef char UiQuadColorSizeCheck[sizeof(UiQuadColor) == 0x10 ? 1 : -1];
 extern SdfPoolNode kwlnDrawSurfaces[];
 extern s32 itfTestOverlayPhase;
 extern UiQuadColor itfTestOverlayColor;
-extern u64 *itfCreateVerticalGradientQuadPacket(u32, u32, u32, u32, u32, u32, u32);
+extern u64 *pbAllocPrimPacket(u32, u32, u32, u32, u32, u32, u32);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
@@ -80,12 +80,12 @@ extern char D_003BB2C0[]; /* ">" */
 extern char D_003BB2C8[]; /* " %s" */
 extern char D_003BB2D0[]; /* "%3d" */
 extern char D_003BB2D8[]; /* "%4d" */
-extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
-void itfDrawPulsingTestOverlay(s32 surfaceIndex);
+extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
+void pbDrawRotatedPrim(s32 surfaceIndex);
 
 /* Draw the four color channels and handle selection and value editing. */
 /* Retail 0x001A0680 keeps the row < 4 select inside the four-row loop. */
-s32 itfEditOverlayColor(void) {
+s32 pbDebugPrintPanel3(void) {
     SifCommand packet;
     SdfListHead *list;
     s32 row;
@@ -94,39 +94,39 @@ s32 itfEditOverlayColor(void) {
     s32 previousRate;
     s32 highlight;
 
-    list = sdfCreateResetPacketList();
-    sdfAppendPacket(list,
-        (u32)sdfCreateBorderedRectanglePacket(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020));
+    list = dds3FontReqAllocDrawTag();
+    sdfDrawTagLink(list,
+        (u32)dds3PrimFrameRect(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x8980, 0x79C0, 0xFF0000, 0);
-    sdfAppendPacket(list, (u32)sdfFormatSifPacket(&packet, D_003BB2B8));
+    sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_003BB2B8));
     if (itfOverlayColorEditorWork.editing == 0) {
         sdfPktInit(&packet, 0x8980, itfOverlayColorEditorWork.selection * 0x60 + 0x7A20, 0xFF0000, 0);
         itfOverlayColorEditorWork.blink++;
         if (itfOverlayColorEditorWork.blink < 32 || (itfOverlayColorEditorWork.blink & 31) < 18) {
-            sdfAppendPacket(list, (u32)sdfFormatSifPacket(&packet, D_003BB2C0));
+            sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_003BB2C0));
         }
     }
     for (row = 0; row != 4; row++) {
         sdfPktInit(&packet, 0x8980, y, 0xFF0000, itfOverlayColorEditorRows[row].highlight);
-        sdfAppendPacket(list,
-            (u32)sdfFormatSifPacket(&packet, D_003BB2C8, itfOverlayColorEditorRows[row].title));
+        sdfDrawTagLink(list,
+            (u32)sdfDevPrintfEx(&packet, D_003BB2C8, itfOverlayColorEditorRows[row].title));
         highlight = 0;
         if (itfOverlayColorEditorWork.editing != 0 && row == itfOverlayColorEditorWork.selection) {
             highlight = 6;
         }
         sdfPktInit(&packet, 0x8C80, y, 0xFF0000, highlight);
         if (row < 4) {
-            sdfAppendPacket(list,
-                (u32)sdfFormatSifPacket(&packet, D_003BB2D0, itfTestOverlayColor.channels[row]));
+            sdfDrawTagLink(list,
+                (u32)sdfDevPrintfEx(&packet, D_003BB2D0, itfTestOverlayColor.channels[row]));
         } else {
-            sdfAppendPacket(list,
-                (u32)sdfFormatSifPacket(&packet, D_003BB2D8, itfTestOverlayPhaseStep));
+            sdfDrawTagLink(list,
+                (u32)sdfDevPrintfEx(&packet, D_003BB2D8, itfTestOverlayPhaseStep));
         }
         y += 0x60;
     }
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     itfTestOverlayPhase += itfTestOverlayPhaseStep;
-    itfDrawPulsingTestOverlay(0x52);
+    pbDrawRotatedPrim(0x52);
     if ((s8)kwlnTaskPadButtonStates.secondaryTriangle < 0) {
         D_003BB2B4 ^= 1;
     }
@@ -195,8 +195,8 @@ s32 itfEditOverlayColor(void) {
 }
 
 
-u64 *itfCreateVerticalGradientQuadPacket(u32 x, u32 y, u32 depth, u32 width, u32 height, u32 color0, u32 color1) {
-    u64 *packet = (u64 *)sdfAllocPacketAligned(0x80);
+u64 *pbAllocPrimPacket(u32 x, u32 y, u32 depth, u32 width, u32 height, u32 color0, u32 color1) {
+    u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x80);
 
     packet[0] = 7;
     packet[1] = 0x5000000700000000ULL;
@@ -215,23 +215,23 @@ u64 *itfCreateVerticalGradientQuadPacket(u32 x, u32 y, u32 depth, u32 width, u32
     return packet;
 }
 
-extern u32 sdfConsFinalizePacketHeader(u32 packetAddress, s32 packetBytes);
+extern u32 sdf2DMakeStdPacket(u32 packetAddress, s32 packetBytes);
 
-u64 *btlCreateGsTestRegisterPacket(u64 owner, s32 alternative) {
-    u64 *entry = (u64 *)sdfConsFinalizePacketHeader(sdfAllocPacketAligned(0x30), 0x30);
+u64 *pbMakeSpritePacket(u64 owner, s32 alternative) {
+    u64 *entry = (u64 *)sdf2DMakeStdPacket(sdfGrAllocPacketBuff(0x30), 0x30);
     entry[4] = owner;
     entry[5] = alternative ? 0x48 : 0x47;
     return entry;
 }
 
-u64 *btlCreateGsAlphaRegisterPacket(u64 owner, s32 alternative) {
-    u64 *entry = (u64 *)sdfConsFinalizePacketHeader(sdfAllocPacketAligned(0x30), 0x30);
+u64 *pbMakePrimPacket(u64 owner, s32 alternative) {
+    u64 *entry = (u64 *)sdf2DMakeStdPacket(sdfGrAllocPacketBuff(0x30), 0x30);
     entry[4] = owner;
     entry[5] = alternative ? 0x43 : 0x42;
     return entry;
 }
 
-void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
+void pbDrawRotatedPrim(s32 surfaceIndex) {
     u32 color = 0;
     s32 alpha;
     s32 i;
@@ -242,16 +242,16 @@ void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
 
     phase = (f32)(itfTestOverlayPhase % 4096) * (1.0f / 4096.0f);
     phase = phase * 6.2831852f + 1.5707963f + 0.78539815f;
-    alpha = (s32)((sdfSinPoly(phase) + 1.0f) * 0.5f * itfTestOverlayColor.alpha);
+    alpha = (s32)((sdfSin(phase) + 1.0f) * 0.5f * itfTestOverlayColor.alpha);
     component = (u8 *)&itfTestOverlayColor;
     for (i = 0; i != 3; i++, component += 4) {
         color |= *component << (i * 8);
     }
     color |= (u32)alpha << 24;
-    list = sdfCreateResetPacketList();
-    sdfAppendPacket(list, (u32)btlCreateGsTestRegisterPacket(0x33001, 0));
-    sdfAppendPacket(list, (u32)btlCreateGsAlphaRegisterPacket(6, 0));
-    sdfAppendPacket(list, (u32)itfCreateVerticalGradientQuadPacket(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
+    list = dds3FontReqAllocDrawTag();
+    sdfDrawTagLink(list, (u32)pbMakeSpritePacket(0x33001, 0));
+    sdfDrawTagLink(list, (u32)pbMakePrimPacket(6, 0));
+    sdfDrawTagLink(list, (u32)pbAllocPrimPacket(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
     surface = &kwlnDrawSurfaces[surfaceIndex];
     surface->append(surface, list);
 }
@@ -280,7 +280,7 @@ void btlClearModelFlagRange(void) {
     flagIndex = 0xBE0;
     do {
         nextFlagIndex = flagIndex + 1;
-        mdlFlagClear(flagIndex);
+        evtBitOff(flagIndex);
         flagIndex = nextFlagIndex;
     } while (nextFlagIndex < 0xBFF);
 }
@@ -417,9 +417,9 @@ extern EffRandState effSharedRandomState[];
 
 extern void sdfRandomize(s8 *, s32);
 
-extern u32 kwlnGetFrameCounter(void);
+extern u32 dds3GetKernelCount(void);
 
-extern s32 itfMesCreateWindow(ItfMesSub *);
+extern s32 itfMesMngInitialize(ItfMesSub *);
 
 extern void btlResetActorEntryState(void);
 
@@ -472,12 +472,12 @@ void btlInitializeBattleRuntime(void) {
     ((BattleInitState *)btlRuntime)->backgroundB = 1;
     ((BattleInitState *)btlRuntime)->unk28C = 0;
 
-    sdfRandomize(effSharedRandomState, kwlnGetFrameCounter());
+    sdfRandomize(effSharedRandomState, dds3GetKernelCount());
     btlResetActorEntryState();
     ((BattleInitState *)btlRuntime)->messageWindows[0] =
-        itfMesCreateWindow(D_003BAAA4);
-    ((BattleInitState *)btlRuntime)->messageWindows[1] = itfMesCreateWindow(&D_0032A520);
-    ((BattleInitState *)btlRuntime)->messageWindows[2] = itfMesCreateWindow(&D_0032A210);
+        itfMesMngInitialize(D_003BAAA4);
+    ((BattleInitState *)btlRuntime)->messageWindows[1] = itfMesMngInitialize(&D_0032A520);
+    ((BattleInitState *)btlRuntime)->messageWindows[2] = itfMesMngInitialize(&D_0032A210);
     sndResetTransition();
     btlResetMotionSoundFrameCounters();
     btlResetDeferredTaskQueue();
@@ -495,7 +495,7 @@ extern char D_003A15A8[];
 
 extern char D_003A15C8[];
 
-extern void itfMesDestroyWindowIfPresent(s32);
+extern void itfMesMngRelease(s32);
 
 extern s32 btlCountRegisteredTasks(void);
 extern s32 sndHasOccupiedNodeSlots(void);
@@ -514,10 +514,10 @@ extern void btlReleaseButtonTexture(void);
 extern void btlStopRainSoundTransition(void);
 extern void effResetSlots(void);
 extern void evtDestroySelectionState(void);
-extern void evtSetSolarOverlayFullyTransparent(void);
+extern void evtDisableMoonDraw(void);
 extern void fldDestroySceneTasksAndBuffers(void);
 extern void itfMesClearFlags(u32 mask);
-extern void kwlnCancelConfiguredFadeFrames(void);
+extern void dds3StopQuake(void);
 extern void sndClearList(void);
 extern void sndFreeBattleSoundEntries(void);
 
@@ -558,14 +558,14 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     brsTaskTryDestroy();
     btlClearSoundAndModelResources();
     btlDestroyDrawTaskAtPriorityWhenPresent();
-    itfMesDestroyWindowIfPresent(((BattleInitState *)btlRuntime)->messageWindows[2]);
-    itfMesDestroyWindowIfPresent(((BattleInitState *)btlRuntime)->messageWindows[1]);
-    itfMesDestroyWindowIfPresent(((BattleInitState *)btlRuntime)->messageWindows[0]);
+    itfMesMngRelease(((BattleInitState *)btlRuntime)->messageWindows[2]);
+    itfMesMngRelease(((BattleInitState *)btlRuntime)->messageWindows[1]);
+    itfMesMngRelease(((BattleInitState *)btlRuntime)->messageWindows[0]);
     btlAdvanceTitleStateWithAudioCleanup();
-    kwlnCancelConfiguredFadeFrames();
+    dds3StopQuake();
     evtDestroySelectionState();
     effResetSlots();
-    evtSetSolarOverlayFullyTransparent();
+    evtDisableMoonDraw();
     itfMesClearFlags(1);
     sdfMemFreeDirect((struct SdfMemBlock *)(u32)(D_003BB2E0));
     D_003BB2E0 = 0;
@@ -634,7 +634,7 @@ void btlStart(s32 mode, s32 pack, s32 encounter) {
         btlRuntime->encounterParamB = 1;
     }
     itfMesSetFlags(1);
-    mdlFlagSet(0xC0F);
+    evtBitOn(0xC0F);
     btlRuntime->battleFlags |= 0x701C1;
     btlRuntime->commandRestrictFlags |= 2;
     btlBossDebugPrintf("** btlStart **************\n");
@@ -744,12 +744,12 @@ s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
         }
         *outCode = D_003BAA44[i].mapIdBase + 0xC8;
         if (D_003BAA44[i].entries[buffer[1]].flagB != -1 &&
-            mdlFlagTest(D_003BAA44[i].entries[buffer[1]].flagB) != 0) {
+            evtBitCheck(D_003BAA44[i].entries[buffer[1]].flagB) != 0) {
             *outParameter = D_003BAA44[i].entries[buffer[1]].parameterB;
             return 1;
         }
         if (D_003BAA44[i].entries[buffer[1]].flagA != -1 &&
-            mdlFlagTest(D_003BAA44[i].entries[buffer[1]].flagA) != 0) {
+            evtBitCheck(D_003BAA44[i].entries[buffer[1]].flagA) != 0) {
             *outParameter = D_003BAA44[i].entries[buffer[1]].parameterA;
             return 1;
         }
@@ -795,15 +795,15 @@ u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *object) {
     return datComputeSkillBoostedMaxMp(object);
 }
 
-extern s32 datAdjustCurrentHp(DatPartyRecord *, s32);
-extern s32 datAdjustCurrentMp(DatPartyRecord *, s32);
+extern s32 datAddHp(DatPartyRecord *, s32);
+extern s32 datAddMp(DatPartyRecord *, s32);
 
 s32 btlAdjustUnitHp(DatPartyRecord *object, s32 delta) {
-    return datAdjustCurrentHp(object, delta);
+    return datAddHp(object, delta);
 }
 
 s32 btlAdjustUnitMp(DatPartyRecord *object, s32 delta) {
-    return datAdjustCurrentMp(object, delta);
+    return datAddMp(object, delta);
 }
 
 /* Cache the skill-adjusted maximum and return current HP clamped to it.

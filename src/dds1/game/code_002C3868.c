@@ -17,7 +17,7 @@
 #include "dds3_world_secondary.h"
 /* Declared before first use (were implicit int). */
 extern s32 abs(s32);
-extern void evtSetDrawSurfaceIndex(u32 surfaceIndex);
+extern void eglSetOt(u32 surfaceIndex);
 
 extern void sdfCounterTickCountdown(void);
 
@@ -66,7 +66,7 @@ extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32,
 
 extern s32 sdfCounterMeasureLabelWidth(u32);
 
-extern void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors,
+extern void eglLinkKanji(s32 width, s32 height, s32 colors,
                                         const char *text);
 
 void sdfInitInnerVectors(void) {
@@ -86,13 +86,13 @@ s32 sdfLoadMapCounterCameraVectorsForMask(s32 mask) {
     s8 count;
     s8 i;
 
-    world = dds3GetWorldSecondaryObject();
+    world = dds3GetControlScene();
     count = 0;
     for (i = 0; i != 13; i++) {
         if (i < 10) {
             if ((mask >> i) & 1) {
                 sprintf(name, D_003B3D48, i + 1);
-                node = dds3FindIndexedObjectChainNodeByName(world, 4, (u8 *)name);
+                node = dds3SceneBasicSearchNameAndType(world, 4, (u8 *)name);
                 dds3GetPosPoseSet(node);
                 VU0_STORE_VF_UNCLOBBERED(vf10, position);
                 D_003900E0[count].v[0] = position[0];
@@ -109,7 +109,7 @@ s32 sdfLoadMapCounterCameraVectorsForMask(s32 mask) {
             }
         } else {
             sprintf(name, D_003B3D48, i + 1);
-            node = dds3FindIndexedObjectChainNodeByName(world, 4, (u8 *)name);
+            node = dds3SceneBasicSearchNameAndType(world, 4, (u8 *)name);
             dds3GetPosPoseSet(node);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
             D_00390010[i - 10][0] = position[0];
@@ -359,32 +359,32 @@ extern u8 D_00390310[][52];
 u8 *sdfResolveSceneCounterInfo(s32 scene) {
     switch (scene) {
     case 3:
-        if (mdlFlagTest(7)) {
+        if (evtBitCheck(7)) {
             scene = 15;
         }
         break;
     case 4:
-        if (mdlFlagTest(6)) {
+        if (evtBitCheck(6)) {
             scene = 11;
         }
         break;
     case 5:
-        if (mdlFlagTest(0x31)) {
+        if (evtBitCheck(0x31)) {
             scene = 12;
         }
         break;
     case 6:
-        if (mdlFlagTest(0x1F)) {
+        if (evtBitCheck(0x1F)) {
             scene = 13;
         }
         break;
     case 7:
-        if (mdlFlagTest(0x1E)) {
+        if (evtBitCheck(0x1E)) {
             scene = 16;
         }
         break;
     case 9:
-        if (mdlFlagTest(0x16)) {
+        if (evtBitCheck(0x16)) {
             scene = 14;
         }
         break;
@@ -406,7 +406,7 @@ void sdfCounterDestroyRuntime(struct MenuList *rt) {
     }
 }
 
-void sdfDestroyActiveCounterRuntime(void) {
+void pbCheckPreviousRecord(void) {
     sdfCounterDestroyRuntime(sdfActiveCounterRuntime);
 }
 
@@ -437,7 +437,7 @@ s32 sdfHandleMapCounterSelectionInput(void) {
             sdfCounterSetMode(previousIndex);
             sdfCounterStartTimerPositionTransition(0,
                 channelIndex * (sdfActiveCounterRuntime->rowStep >> 3));
-            sndSetSequenceVolumePan(0, 127, 63);
+            p2sdPlaySE(0, 127, 63);
         }
     }
     if (kwlnTaskPadButtonStates[0x27] < 0 || (kwlnTaskPadButtonStates[0x27] & 2)) {
@@ -445,7 +445,7 @@ s32 sdfHandleMapCounterSelectionInput(void) {
         if (mnuAdvanceListCursorDefault(sdfActiveCounterRuntime) != NULL) {
             channelIndex = sdfActiveCounterRuntime->cursor->index;
             sdfCounterSetMode(previousIndex);
-            sndSetSequenceVolumePan(0, 127, 63);
+            p2sdPlaySE(0, 127, 63);
             sdfCounterStartTimerPositionTransition(0,
                 channelIndex * (sdfActiveCounterRuntime->rowStep >> 3));
         }
@@ -458,10 +458,10 @@ s32 sdfHandleMapCounterSelectionInput(void) {
                 D_003BD240);
         }
         sdfSetSelectedIndex(D_003BD240);
-        sndSetSequenceVolumePan(10, 127, 63);
+        p2sdPlaySE(10, 127, 63);
     }
     if (kwlnTaskPadButtonStates[0x21] < 0) {
-        sndSetSequenceVolumePan(8, 127, 63);
+        p2sdPlaySE(8, 127, 63);
         sdfSetSelectedIndex(sdfActiveCounterRuntime->cursor->index);
         return -2;
     }
@@ -495,12 +495,12 @@ s32 sdfAdjustCounterValueAndRedraw(s32 decrease) {
     } else {
         sdfCounterIncrease();
     }
-    evtSetDrawSurfaceIndex(0x53);
+    eglSetOt(0x53);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     color = ((u32)((1.0f - progress) * 128.0f) << 24) | 0x808080U;
     evtSubmitTexturedGradientQuad(x, 0x77, 0xAA, 0xA3, 9, 0x151, 0xAA, 0xA3,
                   color, color, color, color, fldLocalMapTextureResource.texture);
-    evtSetDrawSurfaceIndex(0x54);
+    eglSetOt(0x54);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     sdfCounterDrawFadingLabelPanel(0x100, 0x180);
     mnuDrawMapCounterTimerHints();
@@ -576,7 +576,7 @@ void sdfCounterDrawChannelPlate(s32 x, s32 y, s32 unused, struct MenuList *rt, s
                   PACK(base + 0x30, base + 0x30, base + 0x30, (u32)(fade * 64.0f)),
                   PACK(base + 0x60, base + 0x60, base + 0x60, (u32)((f32)(base + 0x70) * fade)));
     width = sdfCounterMeasureLabelWidth((u32)channel->counterDisplay->label);
-    evtPrepareSizedDrawResource(x + (0x80 - width) / 2 + 1, y + 1,
+    eglLinkKanji(x + (0x80 - width) / 2 + 1, y + 1,
                                 PACK((u32)(fade * 128.0f), (u32)(fade * 128.0f), (u32)((f32)(base + 0x80) * fade), (u32)(fade * 128.0f)),
                                 channel->counterDisplay->label);
 }

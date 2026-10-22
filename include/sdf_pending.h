@@ -27,8 +27,8 @@ typedef char SdfPendingBuffer_size_must_be_0x100[(sizeof(SdfPendingBuffer) == 0x
 typedef char SdfPendingBuffer_entry_offset_must_be_0x04[
     ((u32)&((SdfPendingBuffer *)0)->entry == 0x04) ? 1 : -1];
 
-void sdfInitializeSynchronizedRequest(SdfPendingRequest *request, SdfPendingCallback callback);
-void sdfPendingQueuePush(SdfPendingRequest *owner, void *entry);
-SdfPendingNode *sdfDetachQueue(void);
+void sdfDelayedResrcInitCB(SdfPendingRequest *request, SdfPendingCallback callback);
+void sdfDelayedResrcEntry(SdfPendingRequest *owner, void *entry);
+SdfPendingNode *sdfDelayedResrcClose(void);
 
 #endif

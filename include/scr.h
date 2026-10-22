@@ -74,27 +74,27 @@ extern ScrData *scrCurrentContext;
 extern ScrData *scrNamedProcessHead;
 extern ScrData *scrNamedProcessTail;
 
-ScrData *scrGetCurrentContext(void);
-ScrData *scrFindNamedProcessNode(const char *name);
-void *scrGetCurrentCommandWork(void);
-void *scrGetCurrentActor(KwlnTask *task);
-void scrSetCurrentActor(KwlnTask *task, void *actor);
-void scrReplaceCurrentTask(KwlnTask *task);
-void bfStepContext(ScrData *context);
-s32 bfTaskUpdate(KwlnTask *task);
-s32 bfContextStep(ScrData *context);
+ScrData *scrGetScriptHandle(void);
+ScrData *scrSearchScriptName(const char *name);
+void *scrGetData(void);
+void *scrGetUserData(KwlnTask *task);
+void scrSetUserData(KwlnTask *task, void *actor);
+void scrScriptShutdown(KwlnTask *task);
+void scrRunScript(ScrData *context);
+s32 scrScriptProcess(KwlnTask *task);
+s32 scrTraceCode(ScrData *context);
 void scrProcDestroyTask(ScrData *process);
 ScrData *bfContextCreate(void *header, ScrSection *sections, ScrLabel *procedures,
                         ScrLabel *labels, ScrInstr *instructions, void *auxiliaryData,
                         char *strings, s32 procedureIndex);
 ScrData *scrCreateTaskWithDefaultOption(void *header);
-void scrPushInteger(ScrData *script, s32 value);
-void bfStackPushFloat(ScrData *script, f32 value);
-void scrPushString(ScrData *script, char *value);
-void scrPushTypeFourValue(ScrData *script, s32 value);
-s32 bfStackPopInt(ScrData *script);
-f32 bfStackPopFloat(ScrData *script);
-KwlnTask *scrCreateTaskFromContextParameters(u32 priority, void *header,
+void PushInt(ScrData *script, s32 value);
+void PushFloat(ScrData *script, f32 value);
+void PushStr(ScrData *script, char *value);
+void PushRet(ScrData *script, s32 value);
+s32 PopInt(ScrData *script);
+f32 PopFloat(ScrData *script);
+KwlnTask *scrRunScriptEx(u32 priority, void *header,
     ScrSection *sections, ScrLabel *procedures, ScrLabel *labels,
     ScrInstr *instructions, void *auxiliaryData, char *strings, s32 procedureIndex);
 

@@ -12,14 +12,14 @@ typedef enum McPollResult {
     MC_POLL_SPECIAL_ERROR = -2
 } McPollResult;
 
-McPollResult mcPollStrictSuccess(void);
-McPollResult mcPollSyncResult(void);
-McPollResult mcPollWithExtendedErrors(void);
-McPollResult mcPollNonnegativeResult(s32 *resultOut);
-McPollResult mcPollNormalizedCommandStatus(void);
-McPollResult mcPollCommandStatusWithResult(s32 *resultOut);
-McPollResult mcPollZeroCommandResult(void);
-McPollResult mcPollCompletionStatus(void);
-McPollResult mcPollWriteCompletion(void);
+McPollResult sdfMcFuncFormat1(void);
+McPollResult sdfMcFuncChdir1(void);
+McPollResult sdfMcFuncMkdir1(void);
+McPollResult sdfMcFuncGetDir1(s32 *resultOut);
+McPollResult sdfMcFuncDelete1(void);
+McPollResult sdfMcFuncOpen1(s32 *resultOut);
+McPollResult sdfMcFuncClose1(void);
+McPollResult sdfMcFuncRead1(void);
+McPollResult sdfMcFuncWrite1(void);
 
 #endif

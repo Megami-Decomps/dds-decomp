@@ -14,8 +14,8 @@ extern void mnuTransitionActivePanelAnimations(MantraPanelPool *pool, s32 mode);
 /* Original-style implicit int, kept: matched code depends on it: mnuHideMantraLimitLine, mnuHideMantraScrollCursor, mnuQueueUnitPanelSelection, mnuShowMantraLimitLine, mnuShowMantraScrollCursor. */
 
 extern u32 evtFinishMessageWindowAndNotify(void);
-extern s32 dspStartEntry(s32);
-extern s32 dspCloseChannel(void);
+extern s32 fclStartMessage(s32);
+extern s32 fclDestroyMessage(void);
 extern void mnuDisableMantraBackground(struct MantraDrawPool *pool);
 extern void mnuEnableMantraBackground(struct MantraDrawPool *pool);
 extern void mnuToggleMantraTitleVariant(struct MantraDrawPool *pool);
@@ -214,7 +214,7 @@ s32 mnuHandleMantraSourceDialogResult(MantraMenuSrc *source, MnuStatusResource *
         evtCopyEntryStringToActiveWindow(0, datUnitNames[party->unitId].encodedText);
         evtCopyEntryStringToActiveWindow(1, D_00435E50[source->fields.unitIndex].encodedText);
         *sourceBits &= ~0x2000;
-        dspStartEntry(messageEntries.entries[0][activeVariant]);
+        fclStartMessage(messageEntries.entries[0][activeVariant]);
         return -1;
     }
 
@@ -242,16 +242,16 @@ s32 mnuHandleMantraSourceDialogResult(MantraMenuSrc *source, MnuStatusResource *
         } else {
             messageEntry = messageEntries.entries[3][activeVariant];
         }
-        dspStartEntry(messageEntry);
+        fclStartMessage(messageEntry);
         /* The dialog callback can update the caller-owned acquisition record. */
         currentFlags = *sourceBits;
     } else if (mode == 0x0300) {
         messageEntry = messageEntries.entries[4][activeVariant];
-        dspStartEntry(messageEntry);
+        fclStartMessage(messageEntry);
         currentFlags = *sourceBits;
     } else if (mode == 0x0400) {
         messageEntry = messageEntries.entries[5][activeVariant];
-        dspStartEntry(messageEntry);
+        fclStartMessage(messageEntry);
         currentFlags = *sourceBits;
     }
 
@@ -429,7 +429,7 @@ s32 mnuNavigateMantraSelector(MnuStatusResource *resource, s8 directionFlags) {
 }
 
 extern s32 mnuGetActiveMantraModelFlagState(void);
-extern s32 mdlFlagTest(s32);
+extern s32 evtBitCheck(s32);
 
 extern const s16 mnuMantraBridgeDestinationIds[4][3];
 extern const u16 mnuMantraBridgeNodesForDirections0And5[3][5];
@@ -455,7 +455,7 @@ MantraNodePos *mnuResolveSpecialMantraNeighbor(MnuStatusResource *unused, u16 no
         return NULL;
     }
     for (i = 0; i < 4; i++) {
-        if (mdlFlagTest(0x977 + i)) {
+        if (evtBitCheck(0x977 + i)) {
             activeFlags |= 1 << i;
         }
     }
@@ -597,8 +597,8 @@ typedef struct MantraModelFlag {
     u8 pad05[3];
 } MantraModelFlag;
 
-extern s32 mdlFlagTest(s32);
-extern void mdlFlagSet(s32);
+extern s32 evtBitCheck(s32);
+extern void evtBitOn(s32);
 
 void mnuSynchronizeMantraModelFlags(s32 mode) {
     MantraModelFlag flags[112];
@@ -642,14 +642,14 @@ void mnuSynchronizeMantraModelFlags(s32 mode) {
         if (flags[i].kind == 3) {
             switch (mode) {
             case 0:
-                if (mdlFlagTest(flags[i].modelFlag)) {
-                    mdlFlagSet(flags[i].modelFlag + 1);
+                if (evtBitCheck(flags[i].modelFlag)) {
+                    evtBitOn(flags[i].modelFlag + 1);
                 }
                 i += 5;
                 break;
             case 1:
-                if (mdlFlagTest(flags[i].modelFlag + 1)) {
-                    mdlFlagSet(flags[i].modelFlag);
+                if (evtBitCheck(flags[i].modelFlag + 1)) {
+                    evtBitOn(flags[i].modelFlag);
                 }
                 i += 5;
                 break;
@@ -1136,7 +1136,7 @@ extern void mnuBeginMantraBackgroundMaskFadeOut(struct MantraDrawPool *pool);
 extern void mnuBeginMantraBackgroundMaskFadeIn(struct MantraDrawPool *pool);
 extern struct MantraDrawItem *mnuRegisterMantraIconListCDraw(struct MantraDrawPool *pool, u32);
 extern void mnuBeginMantraIconListExit(struct MantraDrawPool *pool);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
+extern void p2sdPlaySE(s32, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427720);
 
@@ -1250,7 +1250,7 @@ s32 mnuDispatchMantraPanelCommand(void *context, s32 panelId, s32 action) {
     case 13:
         mnuSetPanelSelection(object, state->flagBytes[3] & 15);
 play_selection_sound:
-        sndSetSequenceVolumePan(4, 127, 63);
+        p2sdPlaySE(4, 127, 63);
         return 0;
     case 14:
         mnuSpawnMantraPanelSequence(object, 0);
@@ -1567,8 +1567,8 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         mnuInitializeMantraTutorialParty(object);
         object->menu.scrollX = 124;
         object->menu.scrollY = 160;
-        dspCloseChannel();
-        evtCreateMessageWindowIfMissing(object->messageDefinition);
+        fclDestroyMessage();
+        fclInitMessage(object->messageDefinition);
         state->tutorialNextState = 2;
         state->tutorialWaitFrames = 0;
         state->flagBytes[0] = 37;
@@ -1593,14 +1593,14 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         break;
     case 8:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_000\n");
-        dspStartEntry(6);
+        fclStartMessage(6);
         state->tutorialNextState = 9;
         state->tutorialWaitFrames = 0;
         state->flagBytes[0] = 37;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_000 ...->MTR_MSL_TUTORIAL_000_WAIT\n");
         break;
     case 9:
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             state->tutorialNextState = 10;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
@@ -1627,14 +1627,14 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         break;
     case 12:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001\n");
-        dspStartEntry(7);
+        fclStartMessage(7);
         state->tutorialNextState = 13;
         state->tutorialWaitFrames = 0;
         state->flagBytes[0] = 37;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001 ...->MTR_MSL_TUTORIAL_001_WAIT\n");
         break;
     case 13:
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             state->tutorialNextState = 14;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
@@ -1661,14 +1661,14 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         break;
     case 16:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_002\n");
-        dspStartEntry(8);
+        fclStartMessage(8);
         state->tutorialNextState = 17;
         state->tutorialWaitFrames = 0;
         state->flagBytes[0] = 37;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_002 ...->MTR_MSL_TUTORIAL_003_WAIT\n");
         break;
     case 17:
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             state->tutorialNextState = 18;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
@@ -1687,14 +1687,14 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         break;
     case 19:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_003\n");
-        dspStartEntry(9);
+        fclStartMessage(9);
         state->tutorialNextState = 20;
         state->tutorialWaitFrames = 0;
         state->flagBytes[0] = 37;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_003 ...->MTR_MSL_TUTORIAL_004_WAIT\n");
         break;
     case 20:
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             state->tutorialNextState = 21;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
@@ -1713,14 +1713,14 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         break;
     case 22:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_004\n");
-        dspStartEntry(10);
+        fclStartMessage(10);
         state->tutorialNextState = 23;
         state->tutorialWaitFrames = 0;
         state->flagBytes[0] = 37;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_004 ...->MTR_MSL_TUTORIAL_004_WAIT\n");
         break;
     case 23:
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             state->tutorialNextState = 24;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
@@ -1739,14 +1739,14 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         break;
     case 25:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_005\n");
-        dspStartEntry(11);
+        fclStartMessage(11);
         state->tutorialNextState = 26;
         state->tutorialWaitFrames = 0;
         state->flagBytes[0] = 37;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_005 ...->MTR_MSL_TUTORIAL_005_WAIT\n");
         break;
     case 26:
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             state->tutorialNextState = 27;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
@@ -1765,14 +1765,14 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         break;
     case 28:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_006\n");
-        dspStartEntry(12);
+        fclStartMessage(12);
         state->tutorialNextState = 29;
         state->tutorialWaitFrames = 0;
         state->flagBytes[0] = 37;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_006 ...->MTR_MSL_TUTORIAL_006_WAIT\n");
         break;
     case 29:
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             state->tutorialNextState = 30;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
@@ -1791,14 +1791,14 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         break;
     case 31:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_007\n");
-        dspStartEntry(13);
+        fclStartMessage(13);
         state->tutorialNextState = 32;
         state->tutorialWaitFrames = 0;
         state->flagBytes[0] = 37;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_007 ...->MTR_MSL_TUTORIAL_007_WAIT\n");
         break;
     case 32:
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             state->tutorialNextState = 1;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
@@ -1958,7 +1958,7 @@ void mnuInitPanelSoundEntries(void) {
     if (mnuPanelSoundEntryPool == 0) {
         allocation = sdfMemAllocDirect(0xAC);
         mnuPanelSoundEntryPool =
-            (MenuPanelEntryPool *)(u32)sdfMemoryGetBlockAddress(allocation);
+            (MenuPanelEntryPool *)(u32)sdfMemGetPtr(allocation);
         memset(mnuPanelSoundEntryPool, 0, 0xAC);
         pool = mnuPanelSoundEntryPool;
         pool->entries = (MenuPanelEntry *)(pool + 1);
@@ -1974,7 +1974,7 @@ void mnuReleasePanelEntryPool(void) {
     mnuPanelSoundEntryPool = 0;
 }
 
-extern void sndSetSequenceVolumePan(s32, s32, s32);
+extern void p2sdPlaySE(s32, s32, s32);
 void mnuTickPanelSoundEntries(void) {
     s32 i;
     MenuPanelEntry *entry = mnuPanelSoundEntryPool->entries;
@@ -1982,7 +1982,7 @@ void mnuTickPanelSoundEntries(void) {
     for (i = 0; i < mnuPanelSoundEntryPool->count; i++, entry++) {
         if (entry->soundHandle != 0) {
             if (entry->framesRemaining == 0) {
-                sndSetSequenceVolumePan(entry->soundHandle, 0x7F, 0x3F);
+                p2sdPlaySE(entry->soundHandle, 0x7F, 0x3F);
                 entry->soundHandle = 0;
             }
             if (entry->framesRemaining > 0) {

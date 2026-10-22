@@ -52,7 +52,7 @@ typedef struct Dds3PathCurveTable {
     Dds3PathCurveEntry entries[1];
 } Dds3PathCurveTable;
 
-/* Complete 0x24-byte state allocated by dds3CreatePathCurveWork. */
+/* Complete 0x24-byte state allocated by dds3AllocPathBasicWorkData. */
 typedef struct Dds3PathCurveWork {
     SdfFloatCounter counter; /* Duration is the greatest final channel frame. */
     struct EffPrimitiveCurve *primitiveCurve; /* 0x10: derived from position samples. */
@@ -87,7 +87,7 @@ struct WorldTransformParams;
 
 typedef s32 (*Dds3MoverUpdate)(struct ObjectTransform *, struct EffWorldNode *);
 
-/* Kind 3 allocates 0x10 bytes in dds3AllocateClearedObjectWork. */
+/* Kind 3 allocates 0x10 bytes in MoverBasicConstructor. */
 typedef struct Dds3SlotResource {
     struct EffWorldNode *target; /* 0x00: object whose transform is updated. */
     Dds3PathCurveWork *path; /* 0x04: retained curve work. */
@@ -98,15 +98,15 @@ typedef struct Dds3SlotResource {
 typedef char Dds3SlotResource_size_must_be_0x10[
     (sizeof(Dds3SlotResource) == 0x10) ? 1 : -1];
 
-void dds3SamplePathKeyframeInterval(u32 *segment, f32 *weight, const Dds3PathKeyframes *keys, f32 frame);
-Dds3PathCurveWork *dds3CreatePathCurveWork(struct EffWorldNode *object);
-Dds3PathCurveWork *dds3GetSlot1Data(struct EffWorldNode *object);
-void dds3FreePathObject(Dds3PathCurveWork *path);
-Dds3PathCurveWork *dds3GetObjectResourceHandle(struct EffWorldNode *object);
-void dds3InterpolatePathVectorVU(Dds3PathCurveWork *path);
-void dds3InterpolatePathQuaternionVU(Dds3PathCurveWork *path);
-void dds3InterpolatePathOutput(Dds3PathCurveWork *path, struct WorldTransformParams *out);
-f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *path);
-f32 evtMeasurePathTrajectoryLength(Dds3PathCurveWork *path);
+void dds3PathEvalSpline(u32 *segment, f32 *weight, const Dds3PathKeyframes *keys, f32 frame);
+Dds3PathCurveWork *dds3AllocPathBasicWorkData(struct EffWorldNode *object);
+Dds3PathCurveWork *dds3ObjectBaseGetPathControl(struct EffWorldNode *object);
+void dds3DeletePathControl(Dds3PathCurveWork *path);
+Dds3PathCurveWork *dds3MoverBasicGetPathControl(struct EffWorldNode *object);
+void dds3PathBasicControlGetPos(Dds3PathCurveWork *path);
+void dds3PathBasicControlGetRot(Dds3PathCurveWork *path);
+void dds3PathBasicControlNextStep(Dds3PathCurveWork *path, struct WorldTransformParams *out);
+f32 dds3PathBasicControlGetFovy(Dds3PathCurveWork *path);
+f32 GetSplineLength(Dds3PathCurveWork *path);
 
 #endif

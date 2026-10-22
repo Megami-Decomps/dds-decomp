@@ -16,7 +16,7 @@ extern u32 D_0045F0FC[];
 
 
 /* Allocate the chip heap and page records, initialize free pages and size classes. */
-void sdfInitChipHeap(u32 heapSize) {
+void sdfChipInit(u32 heapSize) {
     u32 recordBytes;
     s32 alignment;
     s32 remaining;
@@ -70,11 +70,11 @@ void sdfInitChipHeap(u32 heapSize) {
         sizeClass->availablePages = NULL;
         sizeClass++;
     } while (pageCount != 0);
-    sdfInitializeSynchronizedRequest(&sdfChipReleaseRequest, sdfChipFreeDirect);
+    sdfDelayedResrcInitCB(&sdfChipReleaseRequest, sdfChipFreeDirect);
 }
 
 /* Fill `stats` with the chip heap's block totals and per-size-class usage. */
-void sdfGetChipHeapStats(SdfChipHeapStats *stats) {
+void sdfChipGetInfo(SdfChipHeapStats *stats) {
     SdfChipPage *block;
     s32 blocksRemaining;
     s32 classIndex;
@@ -117,7 +117,7 @@ extern s32 D_004389CC;
 extern SdfPendingRequest sdfGeneralReleaseRequest;
 
 /* Align the usable span to 128 bytes and link one free block between sentinels. */
-void sdfInitGeneralHeap(u32 heapSize) {
+void sdfMemInit(u32 heapSize) {
     SdfMemHeap *heap = &sdfGeneralHeap;
     SdfMemBlock *freeBlock;
     u32 alignedStart;
@@ -144,15 +144,15 @@ void sdfInitGeneralHeap(u32 heapSize) {
     freeBlock->address = alignedStart;
     freeBlock->referenceCount = 0;
     D_004389CC = 0;
-    sdfInitializeSynchronizedRequest(&sdfGeneralReleaseRequest, sdfMemFreeDirect);
+    sdfDelayedResrcInitCB(&sdfGeneralReleaseRequest, sdfMemFreeDirect);
 }
 
-u16 sdfGetMemoryBlockState(SdfMemBlock *block) {
+u16 sdfMemGetType(SdfMemBlock *block) {
     return block->state;
 }
 
 /* Return the first general-heap allocation descriptor. */
-SdfMemBlock *sdfGetFirstGeneralHeapBlock(void) {
+SdfMemBlock *sdfMemGetTop(void) {
     return sdfGeneralHeap.head.next;
 }
 

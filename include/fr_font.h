@@ -155,7 +155,7 @@ struct FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex,
 /* Update the first-option byte of every child on this glyph chain. */
 void frSetFontColorNo(struct FrFontGlyph *glyph, u8 firstOption);
 /* Replace each child render word along the borrowed glyph chain. */
-void frFontSetChildColors(struct FrFontGlyph *parentNode, u32 colorWord);
+void frSetFontColor(struct FrFontGlyph *parentNode, u32 colorWord);
 
 /* Decode encoded text and append the resulting glyph to an optional parent. */
 struct FrFontGlyph *itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth,
@@ -175,7 +175,7 @@ struct FrFontGlyph *itfCreateMeasuredTextGlyph(s32 x, s32 y, s32 depth, s32 colo
     const char *text, struct FrFontGlyph *parent);
 #endif
 
-void frFontBindResourceSections(u8 slotIndex, u8 *resourceBytes,
+void frAddFontStyle(u8 slotIndex, u8 *resourceBytes,
     struct SdfMemBlock *allocation);
 
 void frFontDrawAtlasGlyph(s32 x, s32 y, s32 width, s32 height, u8 style,

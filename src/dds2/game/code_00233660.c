@@ -59,7 +59,7 @@ extern s32 D_003C88C0[];
 extern s32 D_003C88C8[];
 
 
-extern void kwlnConfigureNamedSlotMode1(s32, s32, s32, s32);
+extern void fclEncycAllocEntry(s32, s32, s32, s32);
 
 
 
@@ -117,7 +117,7 @@ typedef struct MdlViewState {
     s16 selectionCursor; /* 0x20: selects one of five controls in the asset panel. */
     s16 activeEntryId;   /* 0x22: record key most recently added to the viewer */
     u16 selectedEntryId; /* 0x24: key passed to mdlAddEntry* */
-    s16 selectedNodeId;  /* 0x26: checked by mdlHasNode */
+    s16 selectedNodeId;  /* 0x26: checked by mdlHasMotionEx */
     s16 unk28;
     s16 unk2A;
     s16 unk2C;
@@ -197,7 +197,7 @@ typedef struct MdlCountNode {
 
 
 
-extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 world, void *pos, void *rot);
+extern EffWorldNode *dds3AddUnitObjectBasic(s32 world, void *pos, void *rot);
 
 extern void dds3ObjectBaseOnFlag(s32 obj, u32 flags);
 
@@ -221,15 +221,15 @@ extern void kwlnDebugGraphSetEnabled(s8 mode);
 
 extern s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *pad);
 
-extern void fldAdjustIntegerUsingMainPad(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep);
+extern void dds3DebugIntEdit(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep);
 
 extern s8 kwlnTaskPadButtonStates[64];
 
 extern void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, s8 *pad);
 
 
-void sdfStreamCreateWithParams(SdfStreamFrameNode *, SdfStreamParams *, u8 *, s32, SdfTex *);
-void sdfDestroyStreamFrameNode(SdfStreamFrameNode *);
+void sdfIpuSetOutputTex(SdfStreamFrameNode *, SdfStreamParams *, u8 *, s32, SdfTex *);
+void sdfIpuFree(SdfStreamFrameNode *);
 
 extern f32 D_00453620[4] __attribute__((aligned(16)));
 
@@ -270,7 +270,7 @@ typedef struct MdlCtrlState {
 
 extern MdlCtrlState mdlViewerControlState;
 
-void fldDrawPackedRgbEditor(void *packetList, s32 x, s32 y, s32 selectedChannel,
+void dds3PrimDebugTextBoxRGB(void *packetList, s32 x, s32 y, s32 selectedChannel,
                             u32 packedColor, s32 showNormalizedValues);
 
 
@@ -291,26 +291,26 @@ extern char D_004370C0[]; /* "%5.2f" */
 extern u8 sdfViewTargetVector[];
 
 
-extern void billInvokeCallback(BillObj *billboard);
+extern void dds3BillboardDraw(BillObj *billboard);
 
 
 
 
 /* Load a viewer package; flag 2 enables the extra request-preparation step. */
-void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, s32 requestFirst, s32 requestSecond) {
+void mdlPackDecode(s32 first, s32 second, s32 flags, s32 requestFirst, s32 requestSecond) {
     PacState request;
 
-    sdfPacInitializeDispatchPacket(&request, 0);
+    sdfPacInit(&request, 0);
     if (flags & 2) {
-        sdfPacUsePacketPayloadMemory(&request);
+        sdfPacSetStay(&request);
     }
-    sdfPacFeedInput(&request, (const u8 *)(u32)requestFirst, requestSecond);
-    mdlApplyGroupedPartPackets(request.queueHead, first, second, flags);
-    sdfPacReleasePacketQueueNodes(&request);
+    sdfPacDecode(&request, (const u8 *)(u32)requestFirst, requestSecond);
+    mdlPackSet(request.queueHead, first, second, flags);
+    sdfPacFree(&request);
 }
 
 /* Release the chip-cell allocation itself, not a pointer-to-pointer wrapper. */
-void mdlReleaseViewerAllocation(void *memory) {
+void mdlFreeFileItem(void *memory) {
     sdfChipFreeDirect(memory);
 }
 
@@ -325,7 +325,7 @@ extern s32 D_00436FB0;
 
 
 /* Release the three copied filename paths, then their tables and backing allocations. */
-void mdlReleaseViewerSlotResources(void) {
+void mdlReleaseHddFileList(void) {
     MdlResourcePath *slotEntry;
     s32 entryCount;
     s32 entryIndex;
@@ -346,8 +346,8 @@ void mdlReleaseViewerSlotResources(void) {
     D_003C86B0[MDL_VIEWER_TABLE_SLOT].count = 0;
     D_003C6588[MDL_VIEWER_TABLE_SLOT].entries = NULL;
     D_003C6588[MDL_VIEWER_TABLE_SLOT].count = 0;
-    sdfReleaseMemorySlot(&D_00436FAC);
-    sdfReleaseMemorySlot(&D_00436FB0);
+    sdfMemFreeHandleDirect(&D_00436FAC);
+    sdfMemFreeHandleDirect(&D_00436FB0);
 }
 
 
@@ -355,12 +355,12 @@ extern MdlResourceSelection *D_00438F98;
 extern MdlResourcePath *D_00438F9C;
 
 /* Copy the model, resource-list and motion filenames into the viewer's path table. */
-void mdlInitializeViewerResourceTable(void) {
+void mdlMakeHddFileListDummy(void) {
     s32 sourceIndex;
     const char *sourceText;
     char *copiedText;
 
-    mdlReleaseViewerSlotResources();
+    mdlReleaseHddFileList();
     D_00436FAC = (u32)sdfMemAllocDirect(MDL_VIEWER_HEADER_BYTES);
     D_00438F98 = (MdlResourceSelection *)sdfMemLock((struct SdfMemBlock *)(D_00436FAC));
     D_00438F98->pathTable = 5;
@@ -439,7 +439,7 @@ static inline s32 debugFileUpper(s32 c) {
 }
 
 
-void mdlRefreshDebugModelWorkFileList(void) {
+void mdlMakeHddFileList(void) {
     DebugDirectoryEntry directory;
     s32 index;
     s32 count;
@@ -451,7 +451,7 @@ void mdlRefreshDebugModelWorkFileList(void) {
     DebugModelFile **link;
 
     if (sdfPfsDebugMode && (handle = sceDopen(D_00420FD8)) >= 0) {
-        mdlReleaseViewerSlotResources();
+        mdlReleaseHddFileList();
         while ((length = sceDread(handle, &directory)) > 0) {
             if ((directory.mode & 0xF000) != 0x1000 && length >= 4 && length < 49) {
                 s32 kind = -1;
@@ -504,7 +504,7 @@ void mdlRefreshDebugModelWorkFileList(void) {
             next = file->next;
             if (!file->available[0]) {
                 *link = next;
-                mdlReleaseViewerAllocation(file);
+                mdlFreeFileItem(file);
             } else {
                 if (debugFileUpper(file->extension[0][0]) == 'P') {
                     file->available[1] = 0;
@@ -564,7 +564,7 @@ void mdlRefreshDebugModelWorkFileList(void) {
             return;
         }
     }
-    mdlInitializeViewerResourceTable();
+    mdlMakeHddFileListDummy();
 }
 
 s32 mdlSetViewerSlotResourceHandles(s32 table, s32 slot, const char *resourceListPath, const char *path, const char *motionPath) {
@@ -583,7 +583,7 @@ s32 mdlSetViewerSlotResourceHandles(s32 table, s32 slot, const char *resourceLis
 }
 
 
-s32 mdlCountRecords(MdlRecord *listHeader);
+s32 mdlPibGetChunkItemCount(MdlRecord *listHeader);
 
 
 
@@ -602,17 +602,17 @@ typedef struct MdlItemCfg {
 
 
 /* Read the model record's payload word without advancing its relative link. */
-u32 mdlGetViewerRecordPayloadWord(MdlRecord *record) {
+u32 mdlPibGetVersion(MdlRecord *record) {
     return record->payload.word;
 }
 
 /* The part-list count is the low half of the packed parameter word. */
-u16 mdlGetViewerRecordListCount(MdlRecord *record) {
+u16 mdlPibGetChunkCount(MdlRecord *record) {
     return record->parameter.part.count;
 }
 
 /* Follow relative links in the resource's record table to find an ID. */
-MdlRecord *mdlFindViewerRecord(MdlCtx *resource, s32 recordId) {
+MdlRecord *mdlPibGetChunk(MdlCtx *resource, s32 recordId) {
     MdlRecord *recordTable = resource->sub->partInfo;
     MdlRecord *recordCursor;
     s32 remainingRecords;
@@ -621,7 +621,7 @@ MdlRecord *mdlFindViewerRecord(MdlCtx *resource, s32 recordId) {
         return NULL;
     }
     recordCursor = recordTable;
-    remainingRecords = mdlGetViewerRecordListCount(recordCursor);
+    remainingRecords = mdlPibGetChunkCount(recordCursor);
     while (1) {
         remainingRecords--;
         recordCursor = (MdlRecord *)((u8 *)recordCursor + recordCursor->nextOffset);
@@ -635,7 +635,7 @@ MdlRecord *mdlFindViewerRecord(MdlCtx *resource, s32 recordId) {
 }
 
 /* The first eight bytes belong to the enclosing list, not its first record. */
-MdlRecord *mdlGetFirstRecord(MdlRecord *listHeader) {
+MdlRecord *mdlPibGetFirstChunkItem(MdlRecord *listHeader) {
     MdlRecord *firstRecord;
 
     firstRecord = (MdlRecord *)((u8 *)listHeader + MDL_RECORD_LIST_HEADER_BYTES);
@@ -646,7 +646,7 @@ MdlRecord *mdlGetFirstRecord(MdlRecord *listHeader) {
 }
 
 /* A terminal kind returns NULL; the link is a byte offset, not a pointer. */
-MdlRecord *mdlGetNextRecord(MdlRecord *currentRecord) {
+MdlRecord *mdlPibGetNextChunkItem(MdlRecord *currentRecord) {
     MdlRecord *nextRecord;
 
     nextRecord = (MdlRecord *)((s32)currentRecord + currentRecord->nextOffset);
@@ -657,32 +657,32 @@ MdlRecord *mdlGetNextRecord(MdlRecord *currentRecord) {
 }
 
 /* Count relative-offset records until the 0xffff sentinel. */
-s32 mdlCountRecords(MdlRecord *listHeader) {
+s32 mdlPibGetChunkItemCount(MdlRecord *listHeader) {
     s32 recordCount;
     MdlRecord *recordCursor;
 
     if (listHeader == NULL) {
         return 0;
     }
-    recordCursor = mdlGetFirstRecord(listHeader);
+    recordCursor = mdlPibGetFirstChunkItem(listHeader);
     recordCount = 0;
     while (recordCursor != NULL) {
         recordCount++;
-        recordCursor = mdlGetNextRecord(recordCursor);
+        recordCursor = mdlPibGetNextChunkItem(recordCursor);
     }
     return recordCount;
 }
 
-s32 mdlRecordHasKind(MdlRecord *record, s32 kind) {
+s32 mdlPibCheckItemType(MdlRecord *record, s32 kind) {
     return record->kind == kind;
 }
 
-u16 mdlGetRecordPartIndex(MdlRecord *record) {
+u16 mdlPibGetEffectCount(MdlRecord *record) {
     return record->parameter.part.partIndex;
 }
 
 /* Read the counted group record's number of following entity-slot packets. */
-u16 mdlGetRecordSlotCount(const MdlRecord *record) {
+u16 mdlPibGetMotionCount(const MdlRecord *record) {
     return record->tail.half.slotCount;
 }
 
@@ -703,7 +703,7 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_00421030);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421040);
 
-void mdlAppendViewerRecordSummary(SdfListHead *packetList, s32 x, s32 y, s32 depth, s32 textStyle, MdlRecord *record) {
+void mdlPibDrawEffectInfo(SdfListHead *packetList, s32 x, s32 y, s32 depth, s32 textStyle, MdlRecord *record) {
     if (record->kind >= MDL_VIEWER_RECORD_KIND_BILLBOARD_PART &&
         record->kind <= MDL_VIEWER_RECORD_KIND_OBJECT_PART) {
         switch (record->kind) {
@@ -712,71 +712,71 @@ void mdlAppendViewerRecordSummary(SdfListHead *packetList, s32 x, s32 y, s32 dep
             char *label = record->kind == MDL_VIEWER_RECORD_KIND_BILLBOARD_PART ? D_00436FC0 : D_00436FC8;
 
             if (record->parameter.part.count == 1) {
-                sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x, y, depth, textStyle,
+                sdfDrawTagLink(packetList, (u32)sdfDevPrintf(x, y, depth, textStyle,
                                                                     D_00420FF0, label, record->payload.word,
                                                                     record->parameter.part.partIndex));
                 return;
             }
-            sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x, y, depth, textStyle,
+            sdfDrawTagLink(packetList, (u32)sdfDevPrintf(x, y, depth, textStyle,
                                                                 D_00421000, label, record->payload.word,
                                                                 record->payload.word + record->parameter.part.count - 1,
                                                                 record->parameter.part.partIndex));
             return;
         }
         case MDL_VIEWER_RECORD_KIND_TRACK_POLY:
-            sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x, y, depth, textStyle,
+            sdfDrawTagLink(packetList, (u32)sdfDevPrintf(x, y, depth, textStyle,
                                                                 D_00421010, record->payload.word,
                                                                 record->parameter.word));
             return;
         case MDL_VIEWER_RECORD_KIND_STREAM:
-            sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x, y, depth, textStyle,
+            sdfDrawTagLink(packetList, (u32)sdfDevPrintf(x, y, depth, textStyle,
                                                                 D_00421020, record->payload.stream.selectorA,
                                                                 record->payload.stream.selectorB));
             return;
         case MDL_VIEWER_RECORD_KIND_OBJECT_PART:
-            sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x, y, depth, textStyle,
+            sdfDrawTagLink(packetList, (u32)sdfDevPrintf(x, y, depth, textStyle,
                                                                 D_00421030, record->payload.word));
             return;
         }
     } else {
-        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x, y, depth, textStyle,
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(x, y, depth, textStyle,
                                                             D_00421040, record->kind));
     }
 }
 
 /* Draw the scalar marker fields, then four colors with four byte channels each; negative selection hides the cursor. */
-void mdlDrawMarkParamsPanel(SdfListHead *packetList, s32 x, s32 y, s32 depth, EffMarkParams *params, s32 selectedField) {
+void mdlPibDrawTrackInfo(SdfListHead *packetList, s32 x, s32 y, s32 depth, EffMarkParams *params, s32 selectedField) {
     s32 colorY = y + 0x300;
     s32 labelX = x + 0xC0;
     u32 packedColor;
     s32 colorIndex;
     s32 channelIndex;
 
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(labelX, y, depth, 0, "MARK0:%d", params->mark0));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(labelX, y + 0x60, depth, 0, "MARK1:%d", params->mark1));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(labelX, y + 0xC0, depth, 0, "START:%d", params->start));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(labelX, y + 0x120, depth, 0, "END  :%d", params->end));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(labelX, y + 0x180, depth, 0, "ITRVL:%d", params->interval));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(labelX, y + 0x1E0, depth, 0, "FACE :%d", params->face));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(labelX, y + 0x240, depth, 0, "BLEND:%d", params->blend));
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(labelX, y, depth, 0, "MARK0:%d", params->mark0));
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(labelX, y + 0x60, depth, 0, "MARK1:%d", params->mark1));
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(labelX, y + 0xC0, depth, 0, "START:%d", params->start));
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(labelX, y + 0x120, depth, 0, "END  :%d", params->end));
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(labelX, y + 0x180, depth, 0, "ITRVL:%d", params->interval));
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(labelX, y + 0x1E0, depth, 0, "FACE :%d", params->face));
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(labelX, y + 0x240, depth, 0, "BLEND:%d", params->blend));
     for (colorIndex = 0; colorIndex != MDL_MARK_COLOR_COUNT; colorIndex++) {
         packedColor = params->colors[colorIndex];
-        sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(x + 0x480, colorY, depth, 0x300, 0x180, (packedColor & 0xFFFFFF) | 0x80000000, 0x60404040));
+        sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x + 0x480, colorY, depth, 0x300, 0x180, (packedColor & 0xFFFFFF) | 0x80000000, 0x60404040));
         for (channelIndex = 0; channelIndex != MDL_COLOR_CHANNEL_COUNT; channelIndex++) {
-            sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(labelX, colorY, depth, D_003C8760[channelIndex], D_003C8768[channelIndex]));
-            sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x + 0x240, colorY, depth, 0, D_00436FF0, packedColor & MDL_COLOR_BYTE_MASK));
+            sdfDrawTagLink(packetList, (u32)sdfDevPrintf(labelX, colorY, depth, D_003C8760[channelIndex], D_003C8768[channelIndex]));
+            sdfDrawTagLink(packetList, (u32)sdfDevPrintf(x + 0x240, colorY, depth, 0, D_00436FF0, packedColor & MDL_COLOR_BYTE_MASK));
             packedColor >>= MDL_COLOR_BYTE_BITS;
             colorY += 0x60;
         }
         colorY += 0x60;
     }
     if (selectedField >= 0) {
-        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x, y + D_003C8730[selectedField], depth, 0, D_00436FF8));
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(x, y + D_003C8730[selectedField], depth, 0, D_00436FF8));
     }
 }
 
 /* Edit the marker parameters with the pad: rows 0-6 are the scalar fields, 7-22 the color bytes. */
-void mdlEditMarkParametersWithPad(EffMarkParams *params, s16 *fieldCursor) {
+void mdlPibEditTrackInfo(EffMarkParams *params, s16 *fieldCursor) {
     s32 selectedField = *fieldCursor;
     u8 *colorChannel;
 
@@ -829,26 +829,26 @@ void mdlEditMarkParametersWithPad(EffMarkParams *params, s16 *fieldCursor) {
 }
 
 /* Append a newly created billboard to the next part-list slot. */
-void mdlAddBillboardPart(DevRequest *partList, void *descriptor) {
+void mdlCreateEffectResrc_P2A(DevRequest *partList, void *descriptor) {
     MdlPartEntry *partEntry = &((MdlPartEntry *)partList->buffer)[partList->usedCount];
 
     partEntry->state = 0;
     partEntry->kind = MDL_PART_BILLBOARD;
-    partEntry->object = billCreateIndexed(1, (u32)descriptor);
+    partEntry->object = dds3BillboardCreate(1, (u32)descriptor);
     partList->usedCount += 1;
 }
 
 /* Append a newly created effect to the next part-list slot. */
-void mdlAddEffectPart(DevRequest *partList, EffNodeDescriptor *descriptor) {
+void mdlCreateEffectResrc_D3P(DevRequest *partList, EffNodeDescriptor *descriptor) {
     MdlPartEntry *partEntry = &((MdlPartEntry *)partList->buffer)[partList->usedCount];
 
     partEntry->kind = MDL_PART_EFFECT;
     partEntry->state = 0;
-    partEntry->object = effCreateNodeFromDescriptor(descriptor);
+    partEntry->object = dds3EffectLoad(descriptor);
     partList->usedCount += 1;
 }
 
-void mdlAppendObjectPart(DevRequest *list, u8 *sourceAddress, SdfMemBlock *backingAllocation, s32 sourceSize) {
+void mdlCreateEffectResrc_IPU(DevRequest *list, u8 *sourceAddress, SdfMemBlock *backingAllocation, s32 sourceSize) {
     MdlObj *node = sdfAllocAndClearQuadwords(sizeof(*node));
     MdlPartEntry *entry = &((MdlPartEntry *)list->buffer)[list->usedCount];
 
@@ -862,28 +862,28 @@ void mdlAppendObjectPart(DevRequest *list, u8 *sourceAddress, SdfMemBlock *backi
     list->usedCount += 1;
 }
 
-void mdlObjDestroy(MdlObj *obj) {
+void mdlDeleteEffectResrc_IPU(MdlObj *obj) {
     if (obj->initialized != 0) {
-        sdfDestroyStreamFrameNode(&obj->soundNode);
+        sdfIpuFree(&obj->soundNode);
     }
     sdfMemFreeDirect(obj->backingAllocation);
     sdfChipFreeDirect(obj);
 }
 
-void mdlObjInit(MdlObj *obj, SdfTex *resource, SdfStreamParams *params) {
+void mdlStartEffectResrc_IPU(MdlObj *obj, SdfTex *resource, SdfStreamParams *params) {
     if (obj->initialized == 0) {
         obj->initialized = 1;
-        sdfStreamCreateWithParams(&obj->soundNode, params, obj->sourceAddress, obj->sourceSize, resource);
+        sdfIpuSetOutputTex(&obj->soundNode, params, obj->sourceAddress, obj->sourceSize, resource);
     }
 }
 
 
-DevRequest *mdlCreateBufferedPartRequest(u32 request) {
+DevRequest *mdlEffectResrcListNew(u32 request) {
     return sdfDevCreateBufferedRequest(request, 0x10, 4);
 }
 
 /* Destroy each part according to its stored kind, then release the owning request. */
-void mdlDestroyPartList(DevRequest *partList) {
+void mdlEffectResrcListFree(DevRequest *partList) {
     s32 partIndex;
 
     if (partList != NULL) {
@@ -892,22 +892,22 @@ void mdlDestroyPartList(DevRequest *partList) {
 
             switch (partEntry->kind) {
             case MDL_PART_BILLBOARD:
-                billDispatchByKind(mdlPartObjectFromStorage(partEntry->object).billboard);
+                dds3BillboardDelete(mdlPartObjectFromStorage(partEntry->object).billboard);
                 break;
             case MDL_PART_EFFECT:
-                effDestroyNode(mdlPartObjectFromStorage(partEntry->object).effect);
+                dds3EffectDelete(mdlPartObjectFromStorage(partEntry->object).effect);
                 break;
             case MDL_PART_OBJECT:
-                mdlObjDestroy(mdlPartObjectFromStorage(partEntry->object).model);
+                mdlDeleteEffectResrc_IPU(mdlPartObjectFromStorage(partEntry->object).model);
                 break;
             }
         }
-        sdfDestroyDevRequest(partList);
+        sdfItemArrayFree(partList);
     }
 }
 
 /* Prepend a cleared, typed resource item to the owner's list. */
-MdlResourceItem *mdlInsertResourceItem(MdlCtx *owner, s32 type, s32 motionSlotIndex) {
+MdlResourceItem *mdlCreateEffectCtrlr(MdlCtx *owner, s32 type, s32 motionSlotIndex) {
     MdlResourceItem *item = sdfAllocAndClearQuadwords(sizeof(MdlResourceItem));
     MdlResourceItem *previousHead = owner->resourceItems;
     item->type = type;
@@ -917,20 +917,20 @@ MdlResourceItem *mdlInsertResourceItem(MdlCtx *owner, s32 type, s32 motionSlotIn
     return item;
 }
 
-void *mdlAdvanceBillboardPart(MdlPartEntry *entry) {
-    struct BillObj *clone = billCloneObjectRetainingSharedData(mdlPartObjectFromStorage(entry->object).billboard);
+void *mdlEffectDup_P2A(MdlPartEntry *entry) {
+    struct BillObj *clone = dds3BillboardCopy(mdlPartObjectFromStorage(entry->object).billboard);
     entry->state = entry->state + 1;
     return clone;
 }
 
-void *mdlAdvanceEffectPart(MdlPartEntry *entry) {
-    EffNode *clone = effCloneSourceWithTypeHandler(mdlPartObjectFromStorage(entry->object).effect);
+void *mdlEffectDup_D3P(MdlPartEntry *entry) {
+    EffNode *clone = dds3EffectCopy(mdlPartObjectFromStorage(entry->object).effect);
     entry->state = entry->state + 1;
     return clone;
 }
 
 /* Resolve a native fixed-size slot when its table exists and index is below the upper bound; no lower-bound check. */
-MdlPartEntry *mdlFindViewerPartSlot(MdlCtx *resource, s32 slotIndex) {
+MdlPartEntry *mdlGetEffectResrc(MdlCtx *resource, s32 slotIndex) {
     DevRequest *slotTable;
 
     slotTable = resource->sub->partList;
@@ -944,8 +944,8 @@ MdlPartEntry *mdlFindViewerPartSlot(MdlCtx *resource, s32 slotIndex) {
 }
 
 /* Bind each consecutive record ID to a newly created part when the chunk contains it. */
-void mdlBindViewerPartRecords(MdlCtx *owner, MdlRecord *partRecord, s32 motionSlotIndex, s32 resourceType, void *(*createPart)(MdlPartEntry *)) {
-    MdlPartEntry *partSlot = mdlFindViewerPartSlot(owner, partRecord->parameter.part.partIndex);
+void mdlCreateEffect_P2A_D3P(MdlCtx *owner, MdlRecord *partRecord, s32 motionSlotIndex, s32 resourceType, void *(*createPart)(MdlPartEntry *)) {
+    MdlPartEntry *partSlot = mdlGetEffectResrc(owner, partRecord->parameter.part.partIndex);
 
     if (partSlot != NULL) {
         SdfModel *model = owner->inner;
@@ -958,10 +958,10 @@ void mdlBindViewerPartRecords(MdlCtx *owner, MdlRecord *partRecord, s32 motionSl
             optionalAnchorScale = partRecord->tail.anchorScale;
         }
         do {
-            SdfMapPositionRecord *chunkRecord = sdfChunkFindRecordById(model, recordId++);
+            SdfMapPositionRecord *chunkRecord = sdfModelSearchMarkPosData(model, recordId++);
 
             if (chunkRecord != NULL) {
-                MdlResourceItem *resourceItem = mdlInsertResourceItem(owner, resourceType, motionSlotIndex);
+                MdlResourceItem *resourceItem = mdlCreateEffectCtrlr(owner, resourceType, motionSlotIndex);
 
                 resourceItem->payload.part.instance = createPart(partSlot);
                 resourceItem->payload.part.slot = partSlot;
@@ -973,7 +973,7 @@ void mdlBindViewerPartRecords(MdlCtx *owner, MdlRecord *partRecord, s32 motionSl
 }
 
 /* Convert the effect record to native track parameters and retain its work pointer. */
-void mdlCreateViewerEffectPart(MdlCtx *owner, MdlTrackPolyRecordView *record, s32 motionSlotIndex) {
+void mdlCreateEffect_TRACK(MdlCtx *owner, MdlTrackPolyRecordView *record, s32 motionSlotIndex) {
     MdlResourceItem *resourceItem;
     EffTrackPolyParams effectParams;
 
@@ -990,32 +990,32 @@ void mdlCreateViewerEffectPart(MdlCtx *owner, MdlTrackPolyRecordView *record, s3
     effectParams.gradientColors[1] = record->gradientColors[1];
     effectParams.gradientColors[2] = record->gradientColors[2];
     effectParams.gradientColors[3] = record->gradientColors[3];
-    resourceItem = mdlInsertResourceItem(owner, MDL_RESOURCE_TRACK_POLY, motionSlotIndex);
+    resourceItem = mdlCreateEffectCtrlr(owner, MDL_RESOURCE_TRACK_POLY, motionSlotIndex);
     resourceItem->payload.part.track = effTrackPolyCreateWork(&effectParams);
 }
 
-extern void mdlCreateDevSlotList(MdlCtx *, s32, s32, u32, u32);
+extern void mdlSetBlur(MdlCtx *, s32, s32, u32, u32);
 
-void mdlLoadViewerStreamRecord(MdlCtx *owner, MdlRecord *record) {
-    mdlCreateDevSlotList(owner, record->payload.stream.selectorA,
+void mdlCreateEffect_BLUR(MdlCtx *owner, MdlRecord *record) {
+    mdlSetBlur(owner, record->payload.stream.selectorA,
                   record->payload.stream.selectorB,
                   record->parameter.word, record->tail.word10);
 }
 
 
 /* Claim an unused object only after its data resource resolves, retaining record flags and deferred-init parameters. */
-void mdlClaimViewerObjectPart(MdlCtx *owner, MdlRecord *entryRecord, s32 motionSlotIndex) {
-    MdlPartEntry *partSlot = mdlFindViewerPartSlot(owner, entryRecord->tail.object.partIndex);
+void mdlCreateEffect_IPU(MdlCtx *owner, MdlRecord *entryRecord, s32 motionSlotIndex) {
+    MdlPartEntry *partSlot = mdlGetEffectResrc(owner, entryRecord->tail.object.partIndex);
 
     if (partSlot != 0) {
         MdlObj *object = mdlPartObjectFromStorage(partSlot->object).model;
         if (object->inUse == 0) {
-            SdfTex *texture = sdfFindTextureByResourceKey(entryRecord->payload.id);
+            SdfTex *texture = sdfTexSearch(entryRecord->payload.id);
             if (texture != 0) {
                 MdlResourceItem *resourceItem;
                 u8 *attributes;
                 object->inUse = 1;
-                resourceItem = mdlInsertResourceItem(owner, MDL_RESOURCE_OBJECT, motionSlotIndex);
+                resourceItem = mdlCreateEffectCtrlr(owner, MDL_RESOURCE_OBJECT, motionSlotIndex);
                 /* Fill the object and resource data before attaching the owner. */
                 resourceItem->payload.object.object = object;
                 attributes = resourceItem->payload.object.attributes;
@@ -1031,7 +1031,7 @@ void mdlClaimViewerObjectPart(MdlCtx *owner, MdlRecord *entryRecord, s32 motionS
 }
 
 /* Initialize once the owner's motion reaches the stored threshold; retain native float-to-signed-to-unsigned conversion. */
-void mdlCondInitEntry(MdlResourceItem *item) {
+void mdlDrawEffect_IPU(MdlResourceItem *item) {
     MdlObj *object = item->payload.object.object;
     if (object->initialized == 0) {
         s32 minimumTime = item->payload.object.minimumTime;
@@ -1039,53 +1039,53 @@ void mdlCondInitEntry(MdlResourceItem *item) {
         if ((u32)(s32)motionTime < (u32)minimumTime) {
             return;
         }
-        mdlObjInit(object, item->payload.object.texture,
+        mdlStartEffectResrc_IPU(object, item->payload.object.texture,
                    (SdfStreamParams *)item->payload.object.attributes);
     }
 }
 
 
 /* Dispatch the five record kinds; resource application ignores any callee return value. */
-void mdlDispatchResourceEntry(MdlCtx *owner, MdlRecord *record, s32 motionSlotIndex) {
+void mdlCreateEffect(MdlCtx *owner, MdlRecord *record, s32 motionSlotIndex) {
     switch (record->kind) {
     case MDL_VIEWER_RECORD_KIND_BILLBOARD_PART:
-        mdlBindViewerPartRecords(owner, record, motionSlotIndex, MDL_RESOURCE_BILLBOARD, mdlAdvanceBillboardPart);
+        mdlCreateEffect_P2A_D3P(owner, record, motionSlotIndex, MDL_RESOURCE_BILLBOARD, mdlEffectDup_P2A);
         return;
     case MDL_VIEWER_RECORD_KIND_EFFECT_PART:
-        mdlBindViewerPartRecords(owner, record, motionSlotIndex, MDL_RESOURCE_EFFECT, mdlAdvanceEffectPart);
+        mdlCreateEffect_P2A_D3P(owner, record, motionSlotIndex, MDL_RESOURCE_EFFECT, mdlEffectDup_D3P);
         return;
     case MDL_VIEWER_RECORD_KIND_TRACK_POLY:
-        mdlCreateViewerEffectPart(owner, (MdlTrackPolyRecordView *)record, motionSlotIndex);
+        mdlCreateEffect_TRACK(owner, (MdlTrackPolyRecordView *)record, motionSlotIndex);
         return;
     case MDL_VIEWER_RECORD_KIND_STREAM:
-        mdlLoadViewerStreamRecord(owner, record);
+        mdlCreateEffect_BLUR(owner, record);
         return;
     case MDL_VIEWER_RECORD_KIND_OBJECT_PART:
-        mdlClaimViewerObjectPart(owner, record, motionSlotIndex);
+        mdlCreateEffect_IPU(owner, record, motionSlotIndex);
         break;
     }
 }
 
 /* Find the requested record list and associate each entry with this motion slot. */
-void mdlApplyResourceEntries(MdlCtx *owner, s32 recordId, s32 motionSlotIndex) {
-    MdlRecord *recordList = mdlFindViewerRecord(owner, recordId);
+void mdlGenEffect(MdlCtx *owner, s32 recordId, s32 motionSlotIndex) {
+    MdlRecord *recordList = mdlPibGetChunk(owner, recordId);
     if (recordList != NULL) {
-        MdlRecord *recordCursor = mdlGetFirstRecord(recordList);
+        MdlRecord *recordCursor = mdlPibGetFirstChunkItem(recordList);
         while (recordCursor != NULL) {
-            mdlDispatchResourceEntry(owner, recordCursor, motionSlotIndex);
-            recordCursor = mdlGetNextRecord(recordCursor);
+            mdlCreateEffect(owner, recordCursor, motionSlotIndex);
+            recordCursor = mdlPibGetNextChunkItem(recordCursor);
         }
     }
 }
 
 /* Release billboard, effect, or tracked-poly handles when applicable, then always free the list item. */
-void mdlDestroyResourceItem(MdlResourceItem *item) {
+void mdlFreeEffect(MdlResourceItem *item) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
-        billDispatchByKind((BillObj *)item->payload.part.instance);
+        dds3BillboardDelete((BillObj *)item->payload.part.instance);
         break;
     case MDL_RESOURCE_EFFECT:
-        effDestroyNode((EffNode *)item->payload.part.instance);
+        dds3EffectDelete((EffNode *)item->payload.part.instance);
         break;
     case MDL_RESOURCE_TRACK_POLY:
         effTrackPolyRelease(item->payload.part.track);
@@ -1095,13 +1095,13 @@ void mdlDestroyResourceItem(MdlResourceItem *item) {
 }
 
 /* Release all items for this slot without losing the link across consecutive matches. */
-void mdlRemoveResourcesForMotionSlot(MdlCtx *owner, s32 motionSlotIndex) {
+void mdlStopEffect(MdlCtx *owner, s32 motionSlotIndex) {
     MdlResourceItem **itemLink = &owner->resourceItems;
     MdlResourceItem *item = *itemLink;
     while (item != 0) {
         if (item->motionSlotIndex == motionSlotIndex) {
             MdlResourceItem *nextItem = item->next;
-            mdlDestroyResourceItem(item);
+            mdlFreeEffect(item);
             *itemLink = nextItem;
             item = nextItem;
         } else {
@@ -1112,9 +1112,9 @@ void mdlRemoveResourcesForMotionSlot(MdlCtx *owner, s32 motionSlotIndex) {
 }
 
 /* vu0 routine: positionOut = p + normalize(p - sdfViewTargetVector) * scale, p = transformed node position. */
-void mdlResolveAnchorPosition(SdfModel *model, MdlResourceItem *anchorRecord, f32 *positionOut) {
+void mdlEffect_P2A_D3P_GetPos(SdfModel *model, MdlResourceItem *anchorRecord, f32 *positionOut) {
     SdfMapPositionRecord *mapPosition = anchorRecord->payload.part.mapPositionRecord;
-    SdfDrawNode *drawNode = sdfModelFindDrawNode(model, mapPosition->nodeId);
+    SdfDrawNode *drawNode = sdfModelSearchNode(model, mapPosition->nodeId);
     f32 scale = anchorRecord->payload.part.anchorScale;
 
     VU0_LOAD_MATRIX(drawNode->worldMatrix);
@@ -1131,38 +1131,38 @@ void mdlResolveAnchorPosition(SdfModel *model, MdlResourceItem *anchorRecord, f3
 }
 
 /* Update anchored billboard/effect positions, tracked polygons, or deferred object initialization by type. */
-void mdlDispatchViewerAnchorRecord(MdlCtx *owner, MdlResourceItem *anchorRecord) {
+void mdlLinkEffect(MdlCtx *owner, MdlResourceItem *anchorRecord) {
     SdfModel *model = owner->inner;
     f32 position[4];
     void *resourceInstance;
 
     switch (anchorRecord->type) {
     case MDL_RESOURCE_BILLBOARD:
-        mdlResolveAnchorPosition(model, anchorRecord, position);
+        mdlEffect_P2A_D3P_GetPos(model, anchorRecord, position);
         resourceInstance = anchorRecord->payload.part.instance;
         effCopyVector(resourceInstance, position);
-        billInvokeCallback((BillObj *)resourceInstance);
+        dds3BillboardDraw((BillObj *)resourceInstance);
         break;
     case MDL_RESOURCE_EFFECT:
-        mdlResolveAnchorPosition(model, anchorRecord, position);
+        mdlEffect_P2A_D3P_GetPos(model, anchorRecord, position);
         resourceInstance = anchorRecord->payload.part.instance;
         effCopyVectorToNodeInstance((EffNode *)resourceInstance, position);
-        effUpdateNode((EffNode *)resourceInstance);
+        dds3EffectDraw((EffNode *)resourceInstance);
         break;
     case MDL_RESOURCE_TRACK_POLY:
         effTrackPolyUpdate(anchorRecord->payload.part.track);
         break;
     case MDL_RESOURCE_OBJECT:
-        mdlCondInitEntry(anchorRecord);
+        mdlDrawEffect_IPU(anchorRecord);
         break;
     }
 }
 
 /* Set a billboard/effect frame; other resource-item kinds have no frame dispatch. */
-void mdlSetResourceFrame(MdlCtx *owner, MdlResourceItem *item, s32 frame) {
+void mdlSetEffectColorSub(MdlCtx *owner, MdlResourceItem *item, s32 frame) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
-        billSetChildParameter((BillObj *)item->payload.part.instance, frame);
+        dds3BillboardSetRGBA((BillObj *)item->payload.part.instance, frame);
         return;
     case MDL_RESOURCE_EFFECT:
         effSetNodeParameterValue((EffNode *)item->payload.part.instance, frame);
@@ -1171,26 +1171,26 @@ void mdlSetResourceFrame(MdlCtx *owner, MdlResourceItem *item, s32 frame) {
 }
 
 /* Apply amount to billboard/effect scale; other resource-item kinds are ignored. */
-void mdlSetResourceAmount(MdlCtx *owner, MdlResourceItem *item, float amount) {
+void mdlSetEffectScaleSub(MdlCtx *owner, MdlResourceItem *item, float amount) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
-        billSetChildScaleComponents((struct BillObj *)item->payload.part.instance, amount, amount);
+        dds3BillboardSetScale((struct BillObj *)item->payload.part.instance, amount, amount);
         return;
     case MDL_RESOURCE_EFFECT:
-        effApplyNodeScale((EffNode *)item->payload.part.instance, amount);
+        dds3EffectSetScale((EffNode *)item->payload.part.instance, amount);
         break;
     }
 }
 
 u64 *mdlBuildViewerRectanglePacket(s32 x, s32 y, s32 depth, s32 width, s32 height) {
-    return sdfCreateBorderedRectanglePacket(x, y, depth, width, height, 0x30000000, 0x60404040);
+    return dds3PrimFrameRect(x, y, depth, width, height, 0x30000000, 0x60404040);
 }
 
 void mdlAppendViewerRectToDrawList(s32 x, s32 y, s32 depth, s32 width, s32 height, s32 unused) {
     SdfListHead *packet;
 
     packet = mdlViewerState.packetList;
-    sdfAppendPacket(packet, (u32)mdlBuildViewerRectanglePacket(x, y, depth, width, height));
+    sdfDrawTagLink(packet, (u32)mdlBuildViewerRectanglePacket(x, y, depth, width, height));
 }
 
 extern s8 sdfPadButtonStates[];
@@ -1310,7 +1310,7 @@ s32 mdlUpdateViewerCursorWithPageStep(s16 *cursor, s32 entryCount, s32 pageStep)
 void mdlLoadViewerResourceAndResetCursors(void) {
     MdlCtx *loaded;
 
-    loaded = mdlCreateContextFromResourceKey(mdlViewerState.resourceGroup, mdlViewerState.resourceId);
+    loaded = mdlLoad(mdlViewerState.resourceGroup, mdlViewerState.resourceId);
     mdlViewerState.resources[0] = loaded;
     mdlViewerState.activeEntryId = 0;
     mdlViewerState.selectedEntryId = 0;
@@ -1319,7 +1319,7 @@ void mdlLoadViewerResourceAndResetCursors(void) {
     mdlViewerState.unk2A = 0;
     mdlViewerState.unk2C = 0;
     if (loaded->first != NULL) {
-        mdlAddEntryFlagged(loaded, 0, 0);
+        mdlLoopMotion(loaded, 0, 0);
     }
     mdlViewerState.nodeCursor = 0;
 }
@@ -1367,14 +1367,14 @@ void mdlDrawViewerModeLabel(void) {
 
     mdlAppendViewerRectToDrawList(0x7150, 0x7948, 0xFF0080, 0xBA0, 0x90, 0);
     sdfPktInit(&packet, 0x7180, 0x7960, 0xFF0080, 0);
-    sdfAppendPacket(mdlViewerState.packetList, (u32)(sdfFormatSifPacket(&packet, D_00437060)));
+    sdfDrawTagLink(mdlViewerState.packetList, (u32)(sdfDevPrintfEx(&packet, D_00437060)));
     phase = mdlViewerState.taskPhase;
     if (phase == 0) {
         phase = mdlViewerState.unk0B - 1;
     } else {
         phase = phase - 1;
     }
-    sdfAppendPacket(mdlViewerState.packetList, (u32)(sdfFormatSifPacket(&packet, D_003C8780[phase])));
+    sdfDrawTagLink(mdlViewerState.packetList, (u32)(sdfDevPrintfEx(&packet, D_003C8780[phase])));
 }
 
 
@@ -1404,11 +1404,11 @@ void mdlDrawViewerOptionLabels(void) {
             xOffset = 0;
             row = i;
         }
-        packet = (u32)sdfCreateFormattedSifCommand(0x76C0 + xOffset,
+        packet = (u32)sdfDevPrintf(0x76C0 + xOffset,
                                                    0x7A20 + row * 0x60,
                                                    0xFF0080, style, *label);
         i++;
-        sdfAppendPacket(mdlViewerState.packetList, packet);
+        sdfDrawTagLink(mdlViewerState.packetList, packet);
         label++;
     } while (i != 13);
 }
@@ -1428,22 +1428,22 @@ void mdlDrawViewerModelAndMotionSummary(void) {
     } else {
         format = D_00421220;
     }
-    sdfAppendPacket(mdlViewerState.packetList,
-                    (u32)sdfFormatSifPacket(&packet, format, mdlViewerState.resourceGroup, mdlViewerState.resourceId));
+    sdfDrawTagLink(mdlViewerState.packetList,
+                    (u32)sdfDevPrintfEx(&packet, format, mdlViewerState.resourceGroup, mdlViewerState.resourceId));
 
-    nodeCount = mdlGetNodeRefHalf(mdlViewerState.resources[0], 0);
+    nodeCount = mdlGetNumOfCut(mdlViewerState.resources[0], 0);
     if (nodeCount == 0) {
-        formatted = sdfFormatSifPacket(&packet, D_00437068);
+        formatted = sdfDevPrintfEx(&packet, D_00437068);
     } else {
         if (mdlViewerState.assetDisplayMode == 0) {
             format = D_00421238;
         } else {
             format = D_00421248;
         }
-        formatted = sdfFormatSifPacket(&packet, format,
-                                       mdlGetNodeMotionIndex(mdlViewerState.resources[0], 0), nodeCount - 1);
+        formatted = sdfDevPrintfEx(&packet, format,
+                                       mdlGetMotionNum(mdlViewerState.resources[0], 0), nodeCount - 1);
     }
-    sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
+    sdfDrawTagLink(mdlViewerState.packetList, (u32)formatted);
 }
 
 void mdlAddViewEntryFlagged(void) {
@@ -1451,7 +1451,7 @@ void mdlAddViewEntryFlagged(void) {
     f32 width;
     f32 height;
 
-    if (mdlHasNode(state->resources[0], state->selectedNodeId) == 0) {
+    if (mdlHasMotionEx(state->resources[0], state->selectedNodeId) == 0) {
         return;
     }
     height = (f32)state->entryHeight;
@@ -1460,7 +1460,7 @@ void mdlAddViewEntryFlagged(void) {
         width = height;
     }
     state->activeEntryId = state->selectedEntryId;
-    mdlAddEntryFlaggedEx(state->resources[0], state->selectedNodeId, (s16)state->selectedEntryId, width, height);
+    mdlSmoothLoopMotion(state->resources[0], state->selectedNodeId, (s16)state->selectedEntryId, width, height);
 }
 
 void mdlAddPlainViewerEntryForSelectedNode(void) {
@@ -1468,7 +1468,7 @@ void mdlAddPlainViewerEntryForSelectedNode(void) {
     f32 width;
     f32 height;
 
-    if (mdlHasNode(state->resources[0], state->selectedNodeId) == 0) {
+    if (mdlHasMotionEx(state->resources[0], state->selectedNodeId) == 0) {
         return;
     }
     height = (f32)state->entryHeight;
@@ -1477,12 +1477,12 @@ void mdlAddPlainViewerEntryForSelectedNode(void) {
         width = height;
     }
     state->activeEntryId = state->selectedEntryId;
-    mdlAddEntryPlainEx(state->resources[0], state->selectedNodeId, (s16)state->selectedEntryId, width, height);
+    mdlSmoothSingleMotion(state->resources[0], state->selectedNodeId, (s16)state->selectedEntryId, width, height);
 }
 
-extern u32 mdlGetResourceTableCount(void);
-extern u32 mdlGetTableWord(s32 tableIndex);
-extern void mdlRefreshDebugModelWorkFileList(void);
+extern u32 mdlGetNumOfMajor(void);
+extern u32 mdlGetNumOfMinor(s32 tableIndex);
+extern void mdlMakeHddFileList(void);
 extern void mdlFreeViewResources(void);
 extern u8 sdfPfsDebugMode;
 
@@ -1539,7 +1539,7 @@ void mdlHandleViewerAssetSelection(void) {
         if (mdlViewerState.selectedNodeId == 4) {
             mdlViewerState.selectedNodeId = 0;
         }
-        motionIndex = mdlGetNodeMotionIndex(mdlViewerState.resources[0], mdlViewerState.selectedNodeId);
+        motionIndex = mdlGetMotionNum(mdlViewerState.resources[0], mdlViewerState.selectedNodeId);
         if (motionIndex < 0) {
             motionIndex = 0;
         }
@@ -1547,8 +1547,8 @@ void mdlHandleViewerAssetSelection(void) {
     }
     switch (mdlViewerState.selectionCursor) {
     case 0:
-        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.selectedResourceGroup, mdlGetResourceTableCount(), 1) != 0) {
-            entryCount = mdlGetTableWord(mdlViewerState.selectedResourceGroup);
+        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.selectedResourceGroup, mdlGetNumOfMajor(), 1) != 0) {
+            entryCount = mdlGetNumOfMinor(mdlViewerState.selectedResourceGroup);
             if (mdlViewerState.selectedResourceId < entryCount) {
                 return;
             }
@@ -1557,12 +1557,12 @@ void mdlHandleViewerAssetSelection(void) {
         }
         break;
     case 1:
-        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.selectedResourceId, mdlGetTableWord(mdlViewerState.selectedResourceGroup), pageStep) != 0) {
+        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.selectedResourceId, mdlGetNumOfMinor(mdlViewerState.selectedResourceGroup), pageStep) != 0) {
             return;
         }
         break;
     case 2:
-        referenceCount = mdlGetNodeRefHalf(mdlViewerState.resources[0], mdlViewerState.selectedNodeId);
+        referenceCount = mdlGetNumOfCut(mdlViewerState.resources[0], mdlViewerState.selectedNodeId);
         if (referenceCount == 0) {
             return;
         }
@@ -1586,8 +1586,8 @@ void mdlHandleViewerAssetSelection(void) {
             return;
         }
         mdlFreeViewResources();
-        mdlRefreshDebugModelWorkFileList();
-        if (mdlViewerState.resourceGroup == mdlGetResourceTableCount() - 1) {
+        mdlMakeHddFileList();
+        if (mdlViewerState.resourceGroup == mdlGetNumOfMajor() - 1) {
             mdlViewerState.resourceId = 0;
             mdlViewerState.selectedResourceGroup = mdlViewerState.resourceGroup;
             mdlViewerState.selectedResourceId = 0;
@@ -1602,7 +1602,7 @@ void mdlHandleViewerAssetSelection(void) {
         if (mdlViewerState.resourceGroup == mdlViewerState.selectedResourceGroup && mdlViewerState.resourceId == mdlViewerState.selectedResourceId) {
             return;
         }
-        mdlDestroyContext(mdlViewerState.resources[0]);
+        mdlFree(mdlViewerState.resources[0]);
         mdlViewerState.resources[0] = NULL;
         mdlViewerState.resourceGroup = mdlViewerState.selectedResourceGroup;
         mdlViewerState.resourceId = mdlViewerState.selectedResourceId;
@@ -1624,7 +1624,7 @@ extern char D_00437098[];
 extern char D_004370A0[];
 extern char D_004370A8[];
 
-extern void mdlCopyResourceBasename(s32 selectionListIndex, s32 selectionIndex, char *destination, s32 capacity);
+extern void mdlGetFilebase(s32 selectionListIndex, s32 selectionIndex, char *destination, s32 capacity);
 
 /* Draw the pending resource details and the current selection in each model node. */
 void mdlDrawViewerAssetSelection(void) {
@@ -1648,24 +1648,24 @@ void mdlDrawViewerAssetSelection(void) {
     mdlAppendViewerRectToDrawList(0x8410, panelTop - 0x18, 0xFF0080, 0xAE0,
                                  panelHeight, 0);
 
-    mdlCopyResourceBasename(mdlViewerState.selectedResourceGroup, mdlViewerState.selectedResourceId, basename, 0x20);
+    mdlGetFilebase(mdlViewerState.selectedResourceGroup, mdlViewerState.selectedResourceId, basename, 0x20);
     basenameWidth = (s32)strlen(basename) * 3 << 6;
     mdlAppendViewerRectToDrawList(0x8E90 - basenameWidth,
                                  panelTop - 0xD8, 0xFF0080,
                                  basenameWidth + 0x60, 0x90, 0);
-    formatted = sdfCreateFormattedSifCommand(0x8EC0 - basenameWidth,
+    formatted = sdfDevPrintf(0x8EC0 - basenameWidth,
                                              panelTop - 0xC0, 0xFF0080, 0,
                                              basename);
-    sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
+    sdfDrawTagLink(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktInit(&packet, 0x8440, panelTop + mdlViewerState.selectedNodeId * 0x60,
                0xFF0080, mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 0 ? 4 : 0);
-    formatted = sdfFormatSifPacket(&packet, D_00437070, mdlViewerState.selectedResourceGroup + 0x30);
-    sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
+    formatted = sdfDevPrintfEx(&packet, D_00437070, mdlViewerState.selectedResourceGroup + 0x30);
+    sdfDrawTagLink(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktSetCmd(&packet, 0);
-    formatted = sdfFormatSifPacket(&packet, D_00437078);
-    sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
+    formatted = sdfDevPrintfEx(&packet, D_00437078);
+    sdfDrawTagLink(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktSetCmd(&packet,
                  mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 1 ? 4 : 0);
@@ -1674,29 +1674,29 @@ void mdlDrawViewerAssetSelection(void) {
     } else {
         format = D_00437088;
     }
-    formatted = sdfFormatSifPacket(&packet, format, mdlViewerState.selectedResourceId);
-    sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
+    formatted = sdfDevPrintfEx(&packet, format, mdlViewerState.selectedResourceId);
+    sdfDrawTagLink(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktSetCmd(&packet,
                  mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 3 ? 4 : 0);
-    formatted = sdfFormatSifPacket(&packet, D_00421278, mdlViewerState.entryHeight);
-    sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
+    formatted = sdfDevPrintfEx(&packet, D_00421278, mdlViewerState.entryHeight);
+    sdfDrawTagLink(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktSetCmd(&packet,
                  mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 4 ? 4 : 0);
-    formatted = sdfFormatSifPacket(&packet, D_00437090, mdlViewerState.entryWidth);
-    sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
+    formatted = sdfDevPrintfEx(&packet, D_00437090, mdlViewerState.entryWidth);
+    sdfDrawTagLink(mdlViewerState.packetList, (u32)formatted);
 
     rowY = panelTop;
     index = 0;
     while (mdlViewerState.selectedNodeId == 0 ? index <= 0 : index < 4) {
-        s32 referenceCount = mdlGetNodeRefHalf(mdlViewerState.resources[0], index);
+        s32 referenceCount = mdlGetNumOfCut(mdlViewerState.resources[0], index);
 
         if (mdlViewerState.selectedNodeId == index) {
             s32 style = mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 2 ? 4 : 0;
 
             if (referenceCount == 0) {
-                formatted = sdfCreateFormattedSifCommand(
+                formatted = sdfDevPrintf(
                     0x88C0, rowY, 0xFF0080, style, D_00437098);
             } else {
                 if (mdlViewerState.assetDisplayMode == 0) {
@@ -1704,33 +1704,33 @@ void mdlDrawViewerAssetSelection(void) {
                 } else {
                     format = D_004370A8;
                 }
-                formatted = sdfCreateFormattedSifCommand(
+                formatted = sdfDevPrintf(
                     0x88C0, rowY, 0xFF0080, style, format,
                     (s16)mdlViewerState.selectedEntryId);
             }
         } else {
-            referenceCount = mdlGetNodeRefHalf(mdlViewerState.resources[0], index);
+            referenceCount = mdlGetNumOfCut(mdlViewerState.resources[0], index);
             if (referenceCount == 0) {
-                formatted = sdfCreateFormattedSifCommand(
+                formatted = sdfDevPrintf(
                     0x88C0, rowY, 0xFF0080, 0, D_00437068);
             } else {
                 s32 motionIndex;
 
                 referenceCount--;
-                motionIndex = mdlGetNodeMotionIndex(mdlViewerState.resources[0], index);
+                motionIndex = mdlGetMotionNum(mdlViewerState.resources[0], index);
                 if (mdlViewerState.assetDisplayMode == 0) {
                     format = D_00421238;
                 } else {
                     format = D_00421248;
                 }
-                formatted = sdfCreateFormattedSifCommand(
+                formatted = sdfDevPrintf(
                     0x88C0, rowY, 0xFF0080, 0, format,
                     motionIndex, referenceCount);
             }
         }
         rowY += 0x60;
         index++;
-        sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
+        sdfDrawTagLink(mdlViewerState.packetList, (u32)formatted);
     }
 }
 
@@ -1740,7 +1740,7 @@ u32 mdlRunViewerAssetSelectionTask(void) {
     return 0;
 }
 
-extern void effMiscAxisAngleToQuaternionVf11(f32 angle);
+extern void FromRotation_B(f32 angle);
 extern f32 sdfViewMatrix[];
 
 /* vu0 routine: move the viewer camera or orbit it about the look-at point. */
@@ -1806,34 +1806,34 @@ void mdlUpdateViewerCameraFromPad(void) {
         VU0_MOVE_VF(vf10, vf0);
         if (sdfPadButtonStates[5] != 0) {
             EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 1);
-            effMiscAxisAngleToQuaternionVf11(speed);
+            FromRotation_B(speed);
             effMiscQuatMultiplyVU();
             rotated = 1;
         } else if (sdfPadButtonStates[4] != 0) {
             EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 1);
-            effMiscAxisAngleToQuaternionVf11(-speed);
+            FromRotation_B(-speed);
             effMiscQuatMultiplyVU();
             rotated = 1;
         }
         if (sdfPadButtonStates[6] != 0) {
             EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix);
-            effMiscAxisAngleToQuaternionVf11(speed);
+            FromRotation_B(speed);
             effMiscQuatMultiplyVU();
             rotated = 1;
         } else if (sdfPadButtonStates[7] != 0) {
             EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix);
-            effMiscAxisAngleToQuaternionVf11(-speed);
+            FromRotation_B(-speed);
             effMiscQuatMultiplyVU();
             rotated = 1;
         }
         if (sdfPadButtonStates[8] != 0) {
             EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 2);
-            effMiscAxisAngleToQuaternionVf11(speed);
+            FromRotation_B(speed);
             effMiscQuatMultiplyVU();
             rotated = 1;
         } else if (sdfPadButtonStates[9] != 0) {
             EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 2);
-            effMiscAxisAngleToQuaternionVf11(-speed);
+            FromRotation_B(-speed);
             effMiscQuatMultiplyVU();
             rotated = 1;
         }
@@ -1857,7 +1857,7 @@ void mdlDrawViewerIndexedLabelOverlay(void) {
 
     mdlAppendViewerRectToDrawList(0x8A10L, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
     packets = mdlViewerState.packetList;
-    sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(0x8A40L, 0x7960, 0xFF0080, 0, D_003C88C0[mdlViewerState.labelIndexA]));
+    sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x8A40L, 0x7960, 0xFF0080, 0, D_003C88C0[mdlViewerState.labelIndexA]));
 }
 
 u32 mdlRunViewerIndexedLabelTask(void) {
@@ -1884,12 +1884,12 @@ void mdlUpdateViewerSelectedModelFromPad(void) {
     }
     if (sdfPadButtonStates[0xC] < 0) {
         VU0_MOVE_VF(vf10, vf0);
-        mdlStorePrimaryVectorVU(mdlViewerState.resources[0]);
-        mdlUpdateContextRotationBasisFromQuaternion(mdlViewerState.resources[0]);
+        mdlSetPosition(mdlViewerState.resources[0]);
+        mdlSetRotate(mdlViewerState.resources[0]);
         return;
     }
     if (mdlViewerState.yawStepMode != 0) {
-        mdlLoadRotationQuaternionVU(mdlViewerState.resources[0]);
+        mdlGetRotate(mdlViewerState.resources[0]);
         if (sdfPadButtonStates[5] < 0) {
             VU0_LOAD_VF(vf11, D_0040B540);
             angle = 5.0f * 3.14159265f / 180.0f;
@@ -1899,9 +1899,9 @@ void mdlUpdateViewerSelectedModelFromPad(void) {
         } else {
             return;
         }
-        effMiscAxisAngleToQuaternionVf11(angle);
+        FromRotation_B(angle);
         effMiscQuatMultiplyVU();
-        mdlUpdateContextRotationBasisFromQuaternion(mdlViewerState.resources[0]);
+        mdlSetRotate(mdlViewerState.resources[0]);
     } else if (mdlViewerState.labelIndexB == 0) {
         speed = 1.25f;
         if (sdfPadButtonStates[1] == 0) {
@@ -1910,7 +1910,7 @@ void mdlUpdateViewerSelectedModelFromPad(void) {
                 speed = 5.0f;
             }
         }
-        mdlLoadPrimaryVectorVU(mdlViewerState.resources[0]);
+        mdlGetPosition(mdlViewerState.resources[0]);
         EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix);
         VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
         if (sdfPadButtonStates[5] != 0) {
@@ -1932,7 +1932,7 @@ void mdlUpdateViewerSelectedModelFromPad(void) {
         } else if (sdfPadButtonStates[8] != 0) {
             VU0_SUB(vf10, vf10, vf11);
         }
-        mdlStorePrimaryVectorVU(mdlViewerState.resources[0]);
+        mdlSetPosition(mdlViewerState.resources[0]);
     } else {
         speed = 0.5f * 3.14159265f / 180.0f;
         if (sdfPadButtonStates[1] == 0) {
@@ -1941,35 +1941,35 @@ void mdlUpdateViewerSelectedModelFromPad(void) {
                 speed = 2.0f * 3.14159265f / 180.0f;
             }
         }
-        mdlLoadRotationQuaternionVU(mdlViewerState.resources[0]);
+        mdlGetRotate(mdlViewerState.resources[0]);
         if (sdfPadButtonStates[5] != 0) {
             VU0_LOAD_VF(vf11, D_0040B540);
-            effMiscAxisAngleToQuaternionVf11(speed);
+            FromRotation_B(speed);
             effMiscQuatMultiplyVU();
         } else if (sdfPadButtonStates[4] != 0) {
             VU0_LOAD_VF(vf11, D_0040B540);
-            effMiscAxisAngleToQuaternionVf11(-speed);
+            FromRotation_B(-speed);
             effMiscQuatMultiplyVU();
         }
         if (sdfPadButtonStates[6] != 0) {
             VU0_LOAD_VF(vf11, D_0040B530);
-            effMiscAxisAngleToQuaternionVf11(speed);
+            FromRotation_B(speed);
             effMiscQuatMultiplyVU();
         } else if (sdfPadButtonStates[7] != 0) {
             VU0_LOAD_VF(vf11, D_0040B530);
-            effMiscAxisAngleToQuaternionVf11(-speed);
+            FromRotation_B(-speed);
             effMiscQuatMultiplyVU();
         }
         if (sdfPadButtonStates[9] != 0) {
             VU0_LOAD_VF(vf11, D_0040B550);
-            effMiscAxisAngleToQuaternionVf11(speed);
+            FromRotation_B(speed);
             effMiscQuatMultiplyVU();
         } else if (sdfPadButtonStates[8] != 0) {
             VU0_LOAD_VF(vf11, D_0040B550);
-            effMiscAxisAngleToQuaternionVf11(-speed);
+            FromRotation_B(-speed);
             effMiscQuatMultiplyVU();
         }
-        mdlUpdateContextRotationBasisFromQuaternion(mdlViewerState.resources[0]);
+        mdlSetRotate(mdlViewerState.resources[0]);
     }
 }
 
@@ -1978,7 +1978,7 @@ void mdlDrawViewerSelectionLabel(void) {
 
     mdlAppendViewerRectToDrawList(0x8A10L, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
     packets = mdlViewerState.packetList;
-    sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(0x8A40L, 0x7960, 0xFF0080, 0, D_003C88C8[mdlViewerState.labelIndexB]));
+    sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x8A40L, 0x7960, 0xFF0080, 0, D_003C88C8[mdlViewerState.labelIndexB]));
 }
 
 s32 mdlRunViewerSelectionLabelTask(void) {
@@ -2044,9 +2044,9 @@ void mdlDrawViewerMotionTimeline(void) {
 
     mdlAppendViewerRectToDrawList(0x81D0, 0x7948, 0xFF007F, 0xD20, 0xF0, 0);
     packetList = mdlViewerState.packetList;
-    sdfAppendFillRectanglePacket(packetList, 0x80303030, 0, 0x8200, 0x7990, 0x8EC0, 0x7990, 0xFF0080, 0);
-    sdfAppendFillRectanglePacket(packetList, 0x80303030, 0, 0x8200, 0x7960, 0x8200, 0x79C0, 0xFF0080, 0);
-    sdfAppendFillRectanglePacket(packetList, 0x80303030, 0, 0x8EC0, 0x7960, 0x8EC0, 0x79C0, 0xFF0080, 0);
+    sdfPrimLinkLine(packetList, 0x80303030, 0, 0x8200, 0x7990, 0x8EC0, 0x7990, 0xFF0080, 0);
+    sdfPrimLinkLine(packetList, 0x80303030, 0, 0x8200, 0x7960, 0x8200, 0x79C0, 0xFF0080, 0);
+    sdfPrimLinkLine(packetList, 0x80303030, 0, 0x8EC0, 0x7960, 0x8EC0, 0x79C0, 0xFF0080, 0);
     resource = mdlViewerState.resources[0];
     motion = resource->first;
     if (motion != NULL) {
@@ -2055,13 +2055,13 @@ void mdlDrawViewerMotionTimeline(void) {
             playheadX = 0;
         }
         playheadX += 0x8200;
-        sdfAppendFillRectanglePacket(packetList, 0x800000E0, 0, playheadX, 0x7960, playheadX, 0x79C0, 0xFF0090, 0);
-        sdfAppendPacket(mdlViewerState.packetList, (u32)sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[%5.1f/%-3d]", motion->currentFrame, motion->frameCount));
+        sdfPrimLinkLine(packetList, 0x800000E0, 0, playheadX, 0x7960, playheadX, 0x79C0, 0xFF0090, 0);
+        sdfDrawTagLink(mdlViewerState.packetList, (u32)sdfDevPrintf(0x8200, 0x79C0, 0xFF0080, 0, "[%5.1f/%-3d]", motion->currentFrame, motion->frameCount));
     } else {
-        sdfAppendPacket(mdlViewerState.packetList, (u32)sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[---.-/---]"));
+        sdfDrawTagLink(mdlViewerState.packetList, (u32)sdfDevPrintf(0x8200, 0x79C0, 0xFF0080, 0, "[---.-/---]"));
     }
     textStyle = mdlViewerState.unitStepMode != 0 ? 2 : 0;
-    sdfAppendPacket(mdlViewerState.packetList, (u32)sdfCreateFormattedSifCommand(0x8B00, 0x79C0, 0xFF0080, textStyle, D_004370C0, mdlViewerState.viewerScale));
+    sdfDrawTagLink(mdlViewerState.packetList, (u32)sdfDevPrintf(0x8B00, 0x79C0, 0xFF0080, textStyle, D_004370C0, mdlViewerState.viewerScale));
 }
 
 u32 mdlUpdateViewerScaleTask(void) {
@@ -2145,7 +2145,7 @@ void mdlApplyViewerResourceMenuAction(void) {
         break;
     case 1:
         if (mdlViewerState.resourceCount >= 2) {
-            mdlDestroyContext(mdlViewerState.resources[0]);
+            mdlFree(mdlViewerState.resources[0]);
             mdlViewerState.resources[0] = 0;
             mdlRotateViewList();
             mdlViewerState.resourceCount--;
@@ -2168,16 +2168,16 @@ void mdlApplyViewerResourceMenuAction(void) {
             if (motion != NULL) {
                 entryId = resource->current.h.motionIndex;
                 if (motion->loopEnabled == 0) {
-                    sdfMotionInitializeAtZeroTime(motion, entryId, 0);
+                    sdfMotionChange(motion, entryId, 0);
                 } else {
-                    sdfMotionInitializeAtZeroTime(motion, entryId, 1);
+                    sdfMotionChange(motion, entryId, 1);
                 }
             }
         }
         break;
     }
-    mdlViewerState.selectedResourceGroup = mdlViewerState.resourceGroup = mdlGetContextResourceGroup(mdlViewerState.resources[0]);
-    mdlViewerState.selectedResourceId = mdlViewerState.resourceId = mdlGetContextResourceId(mdlViewerState.resources[0]);
+    mdlViewerState.selectedResourceGroup = mdlViewerState.resourceGroup = mdlGetMajorNum(mdlViewerState.resources[0]);
+    mdlViewerState.selectedResourceId = mdlViewerState.resourceId = mdlGetMinorNum(mdlViewerState.resources[0]);
     i = mdlViewerState.resources[0]->current.h.motionIndex;
     if (i < 0) {
         i = 0;
@@ -2218,8 +2218,8 @@ void mdlDrawViewerResourceMenu(void) {
             style = enabled ? 0 : 8;
         }
         sdfPktInit(&packet, 0x85C0, 0x7960 + row * 0x60, 0xFF0080, style);
-        sdfAppendPacket(mdlViewerState.packetList,
-            (u32)sdfFormatSifPacket(&packet, D_003C88D0[row]));
+        sdfDrawTagLink(mdlViewerState.packetList,
+            (u32)sdfDevPrintfEx(&packet, D_003C88D0[row]));
     }
 }
 
@@ -2260,14 +2260,14 @@ void mdlDrawViewerTexturePreview(void) {
         selectedNumber = index + (count > 0);
     }
     packetList = mdlViewerState.packetList;
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7180, 0x7A20,
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7180, 0x7A20,
         0xFF0080, 0, D_00421318, selectedNumber, count));
     if (count > 0) {
         width = node->textures[index]->width;
         height = node->textures[index]->height;
-        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7780, 0x7A20,
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7780, 0x7A20,
             0xFF0080, 0, D_004370C8, width, height));
-        sdfConsCreateDrawPacket(packetList, node->textures[index], 0);
+        sdf2DLinkTexPacket(packetList, node->textures[index], 0);
         displayWidth = width << 4;
         displayHeight = height << 3;
         if (width < height) {
@@ -2281,7 +2281,7 @@ void mdlDrawViewerTexturePreview(void) {
                 displayHeight = ((height << 8) / width) << 3;
             }
         }
-        sdfAppendTexturedLinePacket(packetList, 0x80808080, 0, 0x7180, 0x7AE0,
+        sdfPrimLinkSprite(packetList, 0x80808080, 0, 0x7180, 0x7AE0,
             0, 0, displayWidth + 0x7180, displayHeight + 0x7AE0,
             width << 4, height << 4, 0xFF0080, 0);
     }
@@ -2358,21 +2358,21 @@ void mdlUpdateViewerSettingsInput(void) {
         if (sdfPadButtonStates[1] < 0 || sdfPadButtonStates[3] < 0) {
             mdlViewerState.unk3E = 0;
         } else {
-            fldAdjustIntegerUsingMainPad(&mdlViewerState.captureScale, 2, 1, 8, 1, 1);
+            dds3DebugIntEdit(&mdlViewerState.captureScale, 2, 1, 8, 1, 1);
         }
         break;
     case 3:
         if (sdfPadButtonStates[1] < 0 || sdfPadButtonStates[3] < 0) {
             mdlViewerState.unk3E = 0;
         } else {
-            fldAdjustIntegerUsingMainPad(&mdlViewerState.captureDivX, 2, 1, 8, 1, 1);
+            dds3DebugIntEdit(&mdlViewerState.captureDivX, 2, 1, 8, 1, 1);
         }
         break;
     case 4:
         if (sdfPadButtonStates[1] < 0 || sdfPadButtonStates[3] < 0) {
             mdlViewerState.unk3E = 0;
         } else {
-            fldAdjustIntegerUsingMainPad(&mdlViewerState.captureDivY, 2, 1, 8, 1, 1);
+            dds3DebugIntEdit(&mdlViewerState.captureDivY, 2, 1, 8, 1, 1);
         }
         break;
     }
@@ -2415,18 +2415,18 @@ void mdlDrawViewerSettings(void) {
     enabled[1] = mdlIsDebugTimeGraph();
     enabled[2] = mdlViewerState.assetDisplayMode;
     for (i = 0, y = 0x7A80; i < 3; i++, y += 0x60) {
-        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
             0x7300, y, 0xFF0080, 0, D_003C8910[i],
             enabled[i] == 0 ? D_004370D0 : D_004370D8));
     }
     if (mdlViewerState.unk09 < 20) {
-        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
             0x7240, D_003C88E8[mdlViewerState.settingsCursor], 0xFF0080, 0, D_004370E0));
     }
-    fldDrawPackedRgbEditor(packetList, 0x7300, D_003C88E8[3],
+    dds3PrimDebugTextBoxRGB(packetList, 0x7300, D_003C88E8[3],
                            mdlViewerState.unk3E == 1 ? mdlViewerState.settingsCursor - 3 : -1,
                            D_00435CBC, 0);
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7B40, 0x7C60, 0xFF0080, 0, "BACK COLOR"));
     for (i = 0; i < 3; i++) {
         /* Retail002378B8 clears the selected channel value before the switch. */
@@ -2436,13 +2436,13 @@ void mdlDrawViewerSettings(void) {
         case 1: value = mdlViewerState.captureDivX; break;
         case 2: value = mdlViewerState.captureDivY; break;
         }
-        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
             0x7300, 0x7D80 + i * 0x60, 0xFF0080, 0, D_003C8920[i], value));
         style = i == mdlViewerState.settingsCursor - 6 && i == mdlViewerState.unk3E - 2 ? 6 : 0;
-        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
             0x7F00, 0x7D80 + i * 0x60, 0xFF0080, style, D_004370E8, value));
     }
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7300, 0x7F00, 0xFF0080, 0, "SAVE CONFIG"));
 }
 
@@ -2455,8 +2455,8 @@ u32 mdlRunViewerSettingsTask(void) {
 /* Sum list -1 and active-entry counts, retaining both independent lookups. */
 s32 mdlCountActiveRecords(void) {
     MdlCtx *resource = mdlViewerState.resources[0];
-    s32 firstListCount = mdlCountRecords(mdlFindViewerRecord(resource, -1));
-    s32 activeListCount = mdlCountRecords(mdlFindViewerRecord(resource, mdlViewerState.activeEntryId));
+    s32 firstListCount = mdlPibGetChunkItemCount(mdlPibGetChunk(resource, -1));
+    s32 activeListCount = mdlPibGetChunkItemCount(mdlPibGetChunk(resource, mdlViewerState.activeEntryId));
 
     return firstListCount + activeListCount;
 }
@@ -2464,31 +2464,31 @@ s32 mdlCountActiveRecords(void) {
 /* Record at the cursor index, counting list -1 first and then the active entry's list. */
 MdlRecord *mdlGetSelectedRecord(void) {
     MdlCtx *resource = mdlViewerState.resources[0];
-    MdlRecord *firstList = mdlFindViewerRecord(resource, -1);
-    MdlRecord *secondList = mdlFindViewerRecord(resource, mdlViewerState.activeEntryId);
+    MdlRecord *firstList = mdlPibGetChunk(resource, -1);
+    MdlRecord *secondList = mdlPibGetChunk(resource, mdlViewerState.activeEntryId);
     s32 index = mdlViewerState.selectedRecordIndex;
     MdlRecord *record;
 
     if (firstList != NULL) {
-        record = mdlGetFirstRecord(firstList);
+        record = mdlPibGetFirstChunkItem(firstList);
         while (record != NULL) {
             if (index == 0) {
                 return record;
             }
             index--;
-            record = mdlGetNextRecord(record);
+            record = mdlPibGetNextChunkItem(record);
         }
     }
     if (secondList == NULL) {
         return NULL;
     }
-    record = mdlGetFirstRecord(secondList);
+    record = mdlPibGetFirstChunkItem(secondList);
     while (record != NULL) {
         if (index == 0) {
             return record;
         }
         index--;
-        record = mdlGetNextRecord(record);
+        record = mdlPibGetNextChunkItem(record);
     }
     return NULL;
 }
@@ -2524,18 +2524,18 @@ void mdlUpdateViewerMarkEditorInput(void) {
             }
         } else if (kwlnTaskPadButtonStates[0x21] < 0) {
             record = mdlGetSelectedRecord();
-            if (record != NULL && mdlRecordHasKind(record, MDL_VIEWER_RECORD_KIND_TRACK_POLY)) {
+            if (record != NULL && mdlPibCheckItemType(record, MDL_VIEWER_RECORD_KIND_TRACK_POLY)) {
                 state->editorMode = 1;
             }
         }
         break;
     case 1:
         record = mdlGetSelectedRecord();
-        if (kwlnTaskPadButtonStates[0x23] >= 0 && record != NULL && mdlRecordHasKind(record, MDL_VIEWER_RECORD_KIND_TRACK_POLY)) {
+        if (kwlnTaskPadButtonStates[0x23] >= 0 && record != NULL && mdlPibCheckItemType(record, MDL_VIEWER_RECORD_KIND_TRACK_POLY)) {
             if (kwlnTaskPadButtonStates[0x21] < 0) {
                 mdlAddPlainViewerEntryForSelectedNode();
             } else {
-                mdlEditMarkParametersWithPad((EffMarkParams *)record, &state->markFieldCursor);
+                mdlPibEditTrackInfo((EffMarkParams *)record, &state->markFieldCursor);
             }
         } else {
             state->editorMode = 0;
@@ -2567,15 +2567,15 @@ void mdlDrawViewerEffectRecordList(void) {
     mdlAppendViewerRectToDrawList(0x7150, 0x7A08, 0xFF007F, 0xF60, 0x270, 0);
     resource = state->resources[0];
     packetList = state->packetList;
-    firstList = mdlFindViewerRecord(resource, -1);
-    firstCount = mdlCountRecords(firstList);
-    secondList = mdlFindViewerRecord(resource, state->activeEntryId);
-    secondCount = mdlCountRecords(secondList);
+    firstList = mdlPibGetChunk(resource, -1);
+    firstCount = mdlPibGetChunkItemCount(firstList);
+    secondList = mdlPibGetChunk(resource, state->activeEntryId);
+    secondCount = mdlPibGetChunkItemCount(secondList);
     totalCount = firstCount + secondCount;
 
     if (totalCount == 0) {
-        sdfAppendPacket(packetList,
-                        (u32)sdfCreateFormattedSifCommand(0x7300, 0x7A20,
+        sdfDrawTagLink(packetList,
+                        (u32)sdfDevPrintf(0x7300, 0x7A20,
                                                          0xFF0080, 0,
                                                          D_00421420));
     } else {
@@ -2591,9 +2591,9 @@ void mdlDrawViewerEffectRecordList(void) {
 
         firstRemaining = firstCount;
         if (firstCount != 0) {
-            record = mdlGetFirstRecord(firstList);
+            record = mdlPibGetFirstChunkItem(firstList);
         } else {
-            record = mdlGetFirstRecord(secondList);
+            record = mdlPibGetFirstChunkItem(secondList);
         }
 
         selected = mdlViewerState.selectedRecordIndex;
@@ -2635,22 +2635,22 @@ void mdlDrawViewerEffectRecordList(void) {
 
                     markerY = 0x7A20 + rowCount * 0x60;
                     if (selectionMarker != ' ' || listMarker != ' ') {
-                        sdfAppendPacket(packetList,
-                                        (u32)sdfCreateFormattedSifCommand(
+                        sdfDrawTagLink(packetList,
+                                        (u32)sdfDevPrintf(
                                             0x7180, markerY, 0xFF0080, selectedStyle,
                                             D_004370F0, selectionMarker, listMarker));
                     }
 
-                    mdlAppendViewerRecordSummary(packetList, 0x7300, descriptionY, 0xFF0080,
+                    mdlPibDrawEffectInfo(packetList, 0x7300, descriptionY, 0xFF0080,
                                   selectedStyle, record);
                     descriptionY += 0x60;
                     rowCount++;
                 }
 
                 if (firstRemaining > 0 && --firstRemaining == 0) {
-                    record = secondList != NULL ? mdlGetFirstRecord(secondList) : NULL;
+                    record = secondList != NULL ? mdlPibGetFirstChunkItem(secondList) : NULL;
                 } else {
-                    record = mdlGetNextRecord(record);
+                    record = mdlPibGetNextChunkItem(record);
                 }
                 selected--;
                 if (rowCount >= 6) {
@@ -2660,12 +2660,12 @@ void mdlDrawViewerEffectRecordList(void) {
         }
 
         if (scroll != 0) {
-            sdfQueueFlatTriangle(packetList, 0x8000A0C0, 0,
+            sdfPrimLinkF3(packetList, 0x8000A0C0, 0,
                                  0x8040, 0x7A30, 0x8000, 0x7A70,
                                  0x8080, 0x7A70, 0xFF0080, NULL);
         }
         if (record != NULL) {
-            sdfQueueFlatTriangle(packetList, 0x8000A0C0, 0,
+            sdfPrimLinkF3(packetList, 0x8000A0C0, 0,
                                  0x8000, 0x7C10, 0x8080, 0x7C10,
                                  0x8040, 0x7C50, 0xFF0080, NULL);
         }
@@ -2674,9 +2674,9 @@ void mdlDrawViewerEffectRecordList(void) {
     if (mdlViewerState.editorMode == 1) {
         MdlRecord *markRecord = mdlGetSelectedRecord();
 
-        if (markRecord != NULL && mdlRecordHasKind(markRecord, MDL_VIEWER_RECORD_KIND_TRACK_POLY)) {
+        if (markRecord != NULL && mdlPibCheckItemType(markRecord, MDL_VIEWER_RECORD_KIND_TRACK_POLY)) {
             mdlAppendViewerRectToDrawList(0x8590, 0x7A08, 0xFF007F, 0x960, 0xA50, 0);
-            mdlDrawMarkParamsPanel(packetList, 0x85C0, 0x7A20, 0xFF0080,
+            mdlPibDrawTrackInfo(packetList, 0x85C0, 0x7A20, 0xFF0080,
                                    (EffMarkParams *)markRecord,
                                    mdlViewerState.markFieldCursor);
         }
@@ -2693,7 +2693,7 @@ s32 mdlRequestViewerExitOnce(void) {
     if (mdlViewerState.exitCleanupStarted == 0) {
         mdlViewerState.exitCleanupStarted = 1;
         mdlCleanupViewerTasksAndResources();
-        dds3AdminSetControlFlag();
+        dds3AdminiExitSequence();
     }
     return 0;
 }
@@ -2716,9 +2716,9 @@ void mdlSubmitViewerIntermediateDrawPacket(void) {
 
     if (mdlViewerState.taskPhase < 4) {
         if (mdlViewerState.taskPhase >= 2) {
-            packetList = sdfCreateResetPacketList();
+            packetList = dds3FontReqAllocDrawTag();
             VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
-            sdfAppendPacket(packetList, (u32)sdfDrawPostmultipliedLinePairsVU(D_003C8930, D_003C8990, 6, 0x80));
+            sdfDrawTagLink(packetList, (u32)sdfDrawRotatedModel(D_003C8930, D_003C8990, 6, 0x80));
             D_00380048.append(&D_00380048, packetList);
         }
     }
@@ -2730,7 +2730,7 @@ extern f32 D_003C89B0[][4];
 
 extern u32 D_003C89F0[];
 
-extern s32 sdfPrintHexMemoryDump(s32, s32);
+extern s32 sdfDumpHexLine(s32, s32);
 
 /* Submit the selected resource in phase 3; keep the native bitwise input/once-flag test. */
 void mdlSubmitViewerResourceDrawPacket(void) {
@@ -2739,15 +2739,15 @@ void mdlSubmitViewerResourceDrawPacket(void) {
     MdlCtx *resource;
 
     if (mdlViewerState.taskPhase == 3) {
-        packetList = sdfCreateResetPacketList();
+        packetList = dds3FontReqAllocDrawTag();
         resource = mdlViewerState.resources[0];
         VU0_LOAD_MATRIX(resource->inner->matrix);
-        drawPacket = (s32)sdfDrawPostmultipliedLinePairsVU(D_003C89B0, D_003C89F0, 4, 0x80);
+        drawPacket = (s32)sdfDrawRotatedModel(D_003C89B0, D_003C89F0, 4, 0x80);
         if ((sdfPadButtonStates[13] < 0) & (D_004370F8 == 0)) {
             D_004370F8 = 1;
-            sdfPrintHexMemoryDump(drawPacket, 0x100);
+            sdfDumpHexLine(drawPacket, 0x100);
         }
-        sdfAppendPacket(packetList, (u32)drawPacket);
+        sdfDrawTagLink(packetList, (u32)drawPacket);
         D_00380048.append(&D_00380048, packetList);
     }
 }
@@ -2784,7 +2784,7 @@ extern s8 D_0037F532[];
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];
 extern u32 sdfGetLodChunkValue(SdfModel *);
-extern s32 sdfAllocPacketAligned(s32 size);
+extern s32 sdfGrAllocPacketBuff(s32 size);
 
 s32 mdlViewer(KwlnTask *task) {
     SdfModel *model;
@@ -2840,14 +2840,14 @@ s32 mdlViewer(KwlnTask *task) {
     PCP_COPY_VECTOR(sdfViewTargetVector, &D_00453620);
     PCP_COPY_VECTOR(sdfViewEyeVector, &D_00453630);
     PCP_COPY_VECTOR(sdfViewUpVector, &D_00453640);
-    mdlViewerState.packetList = sdfCreateResetPacketList();
-    packet = sdfAllocPacketAligned(0x40);
-    sdfInitializeDmaReferenceTag(packet, 2);
+    mdlViewerState.packetList = dds3FontReqAllocDrawTag();
+    packet = sdfGrAllocPacketBuff(0x40);
+    sdfGrSetRegsPacketHeader(packet, 2);
     ((u64*)packet)[4] = 0x44;
     ((u64*)packet)[5] = 0x42;
     ((u64*)packet)[6] = 0x3000D;
     ((u64*)packet)[7] = 0x47;
-    sdfAppendPacket(mdlViewerState.packetList, (u32)packet);
+    sdfDrawTagLink(mdlViewerState.packetList, (u32)packet);
     if (mdlViewerState.yawStepMode == 0) {
         mdlDrawViewerModeLabel();
         mdlDrawViewerModelAndMotionSummary();
@@ -2860,11 +2860,11 @@ s32 mdlViewer(KwlnTask *task) {
 
 /* Walk native 64-byte map-position records and submit their visualization in one packet list. */
 void mdlDrawMapPositionRecords(MdlCtx *resource) {
-    s32 recordCount = sdfCountMapPositionRecords(resource->inner);
+    s32 recordCount = sdfModelGetMarkPosCount(resource->inner);
 
     if (recordCount > 0) {
         s32 recordIndex = 0;
-        SdfListHead *packetList = sdfCreateResetPacketList();
+        SdfListHead *packetList = dds3FontReqAllocDrawTag();
         SdfMapPositionRecord *recordCursor = (SdfMapPositionRecord *)(
             (SdfMapPositionChunkPrefix *)sdfChunkFindByTag(resource->inner, MDL_MAP_POSITION_TAG) + 1);
 
@@ -2873,8 +2873,8 @@ void mdlDrawMapPositionRecords(MdlCtx *resource) {
 
             recordIndex++;
             recordCursor++;
-            sdfSetLookAtBasisFromRecord(resource->inner, currentRecord);
-            sdfAppendPacket(packetList, (u32)sdfDrawPostmultipliedLinePairsVU(D_003C8A00, D_003C8A60, 6, 0x80));
+            sdfModelMakeMarkPosMatrix(resource->inner, currentRecord);
+            sdfDrawTagLink(packetList, (u32)sdfDrawRotatedModel(D_003C8A00, D_003C8A60, 6, 0x80));
         } while (recordIndex != recordCount);
         D_00380048.append(&D_00380048, packetList);
     }
@@ -2915,12 +2915,12 @@ s32 mdlViewerEnd(KwlnTask *task)
                 }
                 while (frame < motion->frameStep);
               }
-              sdfMotionSampleAtFrame(motion, frame);
+              sdfMotionSeek(motion, frame);
               break;
             }
           }
         }
-        mdlProcessContextNodesAndTransforms(mdlViewerState.resources[i], kwlnSceneSurfaceSets[0]);
+        mdlLink(mdlViewerState.resources[i], kwlnSceneSurfaceSets[0]);
         if (((s8) mdlViewerState.unk0E) != 0)
         {
           mdlDrawMapPositionRecords(mdlViewerState.resources[i]);
@@ -2941,7 +2941,7 @@ s32 mdlViewerEnd(KwlnTask *task)
         {
           mdlViewerState.resources[i]->first->frameStep = step;
         }
-        mdlProcessContextNodesAndTransforms(mdlViewerState.resources[i], kwlnSceneSurfaceSets[0]);
+        mdlLink(mdlViewerState.resources[i], kwlnSceneSurfaceSets[0]);
         if (((s8) mdlViewerState.unk0E) != 0)
         {
           mdlDrawMapPositionRecords(mdlViewerState.resources[i]);
@@ -2962,7 +2962,7 @@ extern char D_00437108[]; /* "fovy=" */
 extern char D_00437110[]; /* "%f" */
 extern char D_00437118[]; /* "fog=" */
 extern KwlnDrawVectorParams kwlnDrawVector;
-extern s32 sdfPathExists(char *path);
+extern s32 sdfFileCheckExist(char *path);
 
 
 /* Read the viewer's config text file: bg-color=, eye-position=, target-position=, fovy=, fog= lines. */
@@ -2986,15 +2986,15 @@ void mdlLoadViewerPresentationConfig(void) {
     s32 fogFar;
     f32 fogFarB;
 
-    if (sdfPathExists(D_003C88A8) == 0) {
+    if (sdfFileCheckExist(D_003C88A8) == 0) {
         return;
     }
-    fileRequest = (s32)fileQueueDefaultCallbackRequest(D_003C88A8);
-    fileWaitReady((struct FileRequest *)(u32)fileRequest);
-    resourceHandle = fileGetResourceHandle((struct FileRequest *)(u32)fileRequest);
-    fileData = (char *)fileGetLoadedDataAddress((struct FileRequest *)(u32)fileRequest);
-    fileSize = (s32)fileGetResourceSize((struct FileRequest *)(u32)fileRequest);
-    filePollEntryCleanup((struct FileRequest *)(u32)fileRequest);
+    fileRequest = (s32)fileLoad(D_003C88A8);
+    fileSync((struct FileRequest *)(u32)fileRequest);
+    resourceHandle = fileGetMemHandle((struct FileRequest *)(u32)fileRequest);
+    fileData = (char *)fileGetLoadPtr((struct FileRequest *)(u32)fileRequest);
+    fileSize = (s32)fileGetLoadSize((struct FileRequest *)(u32)fileRequest);
+    fileHandleFree((struct FileRequest *)(u32)fileRequest);
     lineOffset = 0;
     while (lineOffset < fileSize) {
         nextLineOffset = lineOffset;
@@ -3051,9 +3051,9 @@ void mdlSaveViewerPresentationConfig(void) {
                         sdfSceneProjectionParameters.camera.fov, (s32)kwlnDrawVector.fogNear,
                         kwlnDrawVector.depthNear, (s32)kwlnDrawVector.fogFar,
                         kwlnDrawVector.depthFar, kwlnDrawVector.fogColor);
-    request = fileQueueWindowSlotRequest(D_003C88A8, buffer, size);
-    fileWaitReady(request);
-    filePollEntryCleanup((struct FileRequest *)request);
+    request = fileSave(D_003C88A8, buffer, size);
+    fileSync(request);
+    fileHandleFree((struct FileRequest *)request);
 }
 
 typedef struct MdlTaskDef {
@@ -3069,8 +3069,8 @@ extern char D_004214F8[];
 
 extern s32 mdlViewer(KwlnTask *);
 extern s32 mdlViewerEnd(KwlnTask *);
-extern void mdlRefreshDebugModelWorkFileList(void);
-extern s32 kwlnUnregisterNamedSlot(const char *);
+extern void mdlMakeHddFileList(void);
+extern s32 fclEncycFreeEntries(const char *);
 extern MdlEyeVec D_003C8A80;
 extern MdlEyeVec D_0037F6C0;
 
@@ -3103,9 +3103,9 @@ void mdlInitializeViewerTasksAndResources(void) {
     }
     mdlLoadViewerResourceAndResetCursors();
     mdlViewerState.resourceCount = 1;
-    mdlRefreshDebugModelWorkFileList();
+    mdlMakeHddFileList();
     for (i = 0, task = D_003C8890; i != 3; i++, task++) {
-        kwlnUnregisterNamedSlot(task->name);
+        fclEncycFreeEntries(task->name);
     }
     mdlViewerState.unk00 = (s32)dds3StartProcess(D_004214E8, 0x2AFF, 1, 0, mdlViewer, NULL, 0);
     dds3StartProcess(D_004214F8, 0x2B01, 1, 0, mdlViewerEnd, NULL, 0);
@@ -3125,7 +3125,7 @@ void mdlFreeViewResources(void) {
 
         if (resource != 0) {
             *resourceSlot = 0;
-            mdlDestroyContext(resource);
+            mdlFree(resource);
         }
         resourceSlot++;
     }
@@ -3141,7 +3141,7 @@ void mdlCleanupViewerTasksAndResources(void) {
     def = D_003C8890;
     do {
         if (dds3SearchProcessName(def->name) == NULL) {
-            kwlnConfigureNamedSlotMode1(def->name, def->arg, 0, 0);
+            fclEncycAllocEntry(def->name, def->arg, 0, 0);
         }
         i++;
         def++;
@@ -3158,18 +3158,18 @@ extern char D_00437138[]; /* ">" in .sdata */
 extern char D_00437140[]; /* "%6.2f" in .sdata */
 extern SdfPoolNode D_00380708;
 extern void fldStepValueByPad(f32 *value, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
-extern void fldDrawRgbEditor(void *packetList, s32 x, s32 y, s32 selected, f32 *values);
+extern void dds3PrimDebugTextBox(void *packetList, s32 x, s32 y, s32 selected, f32 *values);
 /* Direction-preview packet builder consumes the vector loaded in vf10. */
-extern void *func_0011F518(s32, s32, s32, s32);
+extern void *dds3PrimLine3D(s32, s32, s32, s32);
 
-extern void effMiscAxisAngleToQuaternionVU(f32 angle);
+extern void FromRotation(f32 angle);
 
 /* vu0 routine: rotate the light editor vector by two degrees about pad-selected camera axes. */
-void dds3LightEditorAngleEdit(MdlLightEditorState *context, f32 *position)
+void mdlSetDebugMatrix(MdlLightEditorState *context, f32 *position)
 {
     if (context->pad->stepUpA != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
-        effMiscAxisAngleToQuaternionVU(2.0f * 3.14159265f / 180.0f);
+        FromRotation(2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, position);
         VU0_TRANSFORM_POINT(vf10, vf10);
@@ -3177,7 +3177,7 @@ void dds3LightEditorAngleEdit(MdlLightEditorState *context, f32 *position)
         VU0_STORE_VF(vf10, position);
     } else if (context->pad->stepDownA != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
-        effMiscAxisAngleToQuaternionVU(-2.0f * 3.14159265f / 180.0f);
+        FromRotation(-2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, position);
         VU0_TRANSFORM_POINT(vf10, vf10);
@@ -3186,7 +3186,7 @@ void dds3LightEditorAngleEdit(MdlLightEditorState *context, f32 *position)
     }
     if (context->pad->stepUpB != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix);
-        effMiscAxisAngleToQuaternionVU(-2.0f * 3.14159265f / 180.0f);
+        FromRotation(-2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, position);
         VU0_TRANSFORM_POINT(vf10, vf10);
@@ -3194,7 +3194,7 @@ void dds3LightEditorAngleEdit(MdlLightEditorState *context, f32 *position)
         VU0_STORE_VF(vf10, position);
     } else if (context->pad->stepDownB != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix);
-        effMiscAxisAngleToQuaternionVU(2.0f * 3.14159265f / 180.0f);
+        FromRotation(2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, position);
         VU0_TRANSFORM_POINT(vf10, vf10);
@@ -3204,7 +3204,7 @@ void dds3LightEditorAngleEdit(MdlLightEditorState *context, f32 *position)
 }
 
 /* Update/draw the task-selected light and ambient editor; return zero. */
-s32 dds3LightEditorProcess(KwlnTask *task) {
+s32 mdlDebugPrintEffectScale(KwlnTask *task) {
     MdlLightEditorState *state = (MdlLightEditorState *)dds3GetProcessData(task);
     f32 (*light)[4];
     MdlOptionLabel *label;
@@ -3234,7 +3234,7 @@ s32 dds3LightEditorProcess(KwlnTask *task) {
     if (state->ambient == NULL) {
         state->ambient = kwlnDefaultColorVector;
     }
-    state->packetList = sdfCreateResetPacketList();
+    state->packetList = dds3FontReqAllocDrawTag();
     if (state->editing == 0) {
         changed = 1;
         if (state->pad->stepUpB & 0x80) {
@@ -3274,7 +3274,7 @@ s32 dds3LightEditorProcess(KwlnTask *task) {
             light = state->lights[state->selection >> 2];
             if (light != NULL) {
                 if ((state->selection & 3) == 3) {
-                    dds3LightEditorAngleEdit(state, light[1]);
+                    mdlSetDebugMatrix(state, light[1]);
                 } else {
                     fldStepValueByPad(&light[0][state->selection & 3], (u8 *)state->pad,
                                       0.0f, 2.0f, 0.1f, 0.01f);
@@ -3289,19 +3289,19 @@ s32 dds3LightEditorProcess(KwlnTask *task) {
     if (state->blinkTick == 30) {
         state->blinkTick = 0;
     }
-    sdfAppendPacket(state->packetList,
-                    (u32)sdfCreateBorderedRectanglePacket(0x8650, 0x79A8, 0xFF007F, 0x8A0, 0xAB0,
+    sdfDrawTagLink(state->packetList,
+                    (u32)dds3PrimFrameRect(0x8650, 0x79A8, 0xFF007F, 0x8A0, 0xAB0,
                                   0x60000000, 0x40806020));
     label = D_003C8A90;
     for (labelIndex = 0; labelIndex != 4; labelIndex++, label++) {
-        sdfAppendPacket(state->packetList,
-                        (u32)sdfCreateFormattedSifCommand(label->x, label->y,
+        sdfDrawTagLink(state->packetList,
+                        (u32)sdfDevPrintf(label->x, label->y,
                                                          0xFF0080, label->style,
                                                          label->format));
     }
     if (state->editing == 0 && state->blinkTick < 20) {
-        sdfAppendPacket(state->packetList,
-                        (u32)sdfCreateFormattedSifCommand(0x8680, D_003C8AC0[state->selection],
+        sdfDrawTagLink(state->packetList,
+                        (u32)sdfDevPrintf(0x8680, D_003C8AC0[state->selection],
                                                          0xFF0080, 0, D_00437138));
     }
     selected = state->selection;
@@ -3315,21 +3315,21 @@ s32 dds3LightEditorProcess(KwlnTask *task) {
             if (state->editing == 1) {
                 directionStyle = selected == 3;
             }
-            sdfAppendPacket(state->packetList,
-                            (u32)func_0011F518(0x88C0, directionY, 0xFF0080, directionStyle));
+            sdfDrawTagLink(state->packetList,
+                            (u32)dds3PrimLine3D(0x88C0, directionY, 0xFF0080, directionStyle));
             for (j = 0; j != 3; j++) {
-                sdfAppendPacket(state->packetList,
-                                (u32)sdfCreateFormattedSifCommand(0x8A40, y + 0x120 + j * 0x60, 0xFF0080,
+                sdfDrawTagLink(state->packetList,
+                                (u32)sdfDevPrintf(0x8A40, y + 0x120 + j * 0x60, 0xFF0080,
                                                                  0, D_00437140, light[1][j]));
             }
             color = light[0];
         } else {
             color = NULL;
         }
-        fldDrawRgbEditor(state->packetList, 0x8740, y,
+        dds3PrimDebugTextBox(state->packetList, 0x8740, y,
                           state->editing == 1 ? selected : -1, color);
     }
-    fldDrawRgbEditor(state->packetList, 0x8740, 0x8320,
+    dds3PrimDebugTextBox(state->packetList, 0x8740, 0x8320,
                       state->editing == 1 ? state->selection - 12 : -1, state->ambient);
     D_00380708.append(&D_00380708, state->packetList);
     return 0;
@@ -3338,10 +3338,10 @@ s32 dds3LightEditorProcess(KwlnTask *task) {
 
 
 
-void mdlDrawViewerLabelWithPackedColor(s32 first, s32 second, s32 color, s32 variant) {
+void mdlDebugTextBox(s32 first, s32 second, s32 color, s32 variant) {
     s32 packedColor = color & 0xffffff;
 
-    fldDrawPackedRgbEditor(mdlViewerControlState.packetList, first, second,
+    dds3PrimDebugTextBoxRGB(mdlViewerControlState.packetList, first, second,
                   (mdlViewerControlState.editing == 0) ? -1 : variant, packedColor | 0x80000000, 1);
 }
 
@@ -3358,7 +3358,7 @@ extern MdlValueEdit D_003C8B08[];
 
 /* Step the number being edited in table slot `index`: coarse steps (A) and fine steps (B),
    held-button repeat, wrapping from one end of [min, max] to the other on a fresh press. */
-void mdlViewerStepEditedNumericValue(s32 valueEditIndex) {
+void mdlGetDebugEntry(s32 valueEditIndex) {
     MdlValueEdit *edit = &D_003C8B08[valueEditIndex];
     f32 *target = edit->target;
     s32 value = (s32)(*target + 0.5f);
@@ -3444,13 +3444,13 @@ void mdlViewerStepEditedNumericValue(s32 valueEditIndex) {
 }
 
 struct KwlnTask;
-extern s32 evtEventViewerEditDrawVectorTargetTask(struct KwlnTask *);
+extern s32 mdlDebugPrintEffectScale2(struct KwlnTask *);
 extern MdlOptionLabel D_003C8AF8;
 extern char D_00437178[];
 extern s8 D_0040B7E8[16];
 
 /* Edit the draw-vector target: four numeric rows and three packed-colour channels. */
-s32 evtEventViewerEditDrawVectorTargetTask(KwlnTask *task) {
+s32 mdlDebugPrintEffectScale2(KwlnTask *task) {
     MdlCtrlState *state = &mdlViewerControlState;
     s8 *pad;
     s32 changed;
@@ -3463,7 +3463,7 @@ s32 evtEventViewerEditDrawVectorTargetTask(KwlnTask *task) {
         pad = kwlnTaskPadButtonStates;
     }
     state->pad = (MdlPadState *)pad;
-    mdlViewerControlState.packetList = sdfCreateResetPacketList();
+    mdlViewerControlState.packetList = dds3FontReqAllocDrawTag();
     if (++mdlViewerControlState.blinkTick == 30) {
         mdlViewerControlState.blinkTick = 0;
     }
@@ -3503,15 +3503,15 @@ s32 evtEventViewerEditDrawVectorTargetTask(KwlnTask *task) {
         } else if (mdlViewerControlState.pad->cancel & 0x80) {
             mdlViewerControlState.editing = 0;
         } else if (mdlViewerControlState.selection < 4) {
-            mdlViewerStepEditedNumericValue(mdlViewerControlState.selection);
+            mdlGetDebugEntry(mdlViewerControlState.selection);
         } else {
             fldStepColorChannelByPad(&kwlnDrawVector.fogColor, mdlViewerControlState.selection - 4, (s8 *)mdlViewerControlState.pad);
         }
     }
-    sdfAppendPacket(mdlViewerControlState.packetList,
-                    (u32)sdfCreateBorderedRectanglePacket(0x8590, 0x79A8, 0xFF007F, 0x960, 0x570, 0x60000000, 0x40806020));
-    sdfAppendPacket(mdlViewerControlState.packetList,
-                    (u32)sdfCreateFormattedSifCommand(D_003C8AF8.x, D_003C8AF8.y, 0xFF0080, D_003C8AF8.style, D_003C8AF8.format));
+    sdfDrawTagLink(mdlViewerControlState.packetList,
+                    (u32)dds3PrimFrameRect(0x8590, 0x79A8, 0xFF007F, 0x960, 0x570, 0x60000000, 0x40806020));
+    sdfDrawTagLink(mdlViewerControlState.packetList,
+                    (u32)sdfDevPrintf(D_003C8AF8.x, D_003C8AF8.y, 0xFF0080, D_003C8AF8.style, D_003C8AF8.format));
     if (mdlViewerControlState.editing == 0 && mdlViewerControlState.blinkTick < 0x14) {
         s32 y;
 
@@ -3520,19 +3520,19 @@ s32 evtEventViewerEditDrawVectorTargetTask(KwlnTask *task) {
         } else {
             y = mdlViewerControlState.selection * 0x60 + 0x7AE0;
         }
-        sdfAppendPacket(mdlViewerControlState.packetList, (u32)sdfCreateFormattedSifCommand(0x85C0, y, 0xFF0080, 0, D_00437178));
+        sdfDrawTagLink(mdlViewerControlState.packetList, (u32)sdfDevPrintf(0x85C0, y, 0xFF0080, 0, D_00437178));
     }
     for (i = 0; i != 4; i++) {
         s32 y = D_003C8B08[i].y;
 
-        sdfAppendPacket(mdlViewerControlState.packetList, (u32)sdfCreateFormattedSifCommand(0x8680, y, 0xFF0080, 0, D_003C8B08[i].label));
+        sdfDrawTagLink(mdlViewerControlState.packetList, (u32)sdfDevPrintf(0x8680, y, 0xFF0080, 0, D_003C8B08[i].label));
         value = *D_003C8B08[i].target + 0.5f;
-        sdfAppendPacket(mdlViewerControlState.packetList,
-                        (u32)sdfCreateFormattedSifCommand(0x8A40, y, 0xFF0080,
+        sdfDrawTagLink(mdlViewerControlState.packetList,
+                        (u32)sdfDevPrintf(0x8A40, y, 0xFF0080,
                                                           (mdlViewerControlState.editing == 1 && mdlViewerControlState.selection == i) ? 6 : 0,
                                                           D_003C8B08[i].format, value));
     }
-    mdlDrawViewerLabelWithPackedColor(0x8680, 0x7C60, kwlnDrawVector.fogColor, mdlViewerControlState.selection - 4);
+    mdlDebugTextBox(0x8680, 0x7C60, kwlnDrawVector.fogColor, mdlViewerControlState.selection - 4);
     D_00380708.append(&D_00380708, mdlViewerControlState.packetList);
     return 0;
 }
@@ -3575,7 +3575,7 @@ extern const char D_004371B0[];
 extern const char D_004371B8[];
 
 /* Update/draw the FACE-DIV soften, bias and divide controls; return zero. */
-s32 mdlUpdateFaceDivisionEditorTask(KwlnTask *task) {
+s32 soften_bias_Process(KwlnTask *task) {
     MdlOptionState *state = &D_00453660;
     MdlOptionLabel *label;
     s8 *pad;
@@ -3597,7 +3597,7 @@ s32 mdlUpdateFaceDivisionEditorTask(KwlnTask *task) {
     state->pad = pad;
     D_00453660.value = value;
     D_00453660.adjustment = adjustment;
-    D_00453660.packetList = sdfCreateResetPacketList();
+    D_00453660.packetList = dds3FontReqAllocDrawTag();
     D_00453660.control.fields.blink++;
     if (D_00453660.control.fields.blink == 30) {
         D_00453660.control.fields.blink = 0;
@@ -3656,35 +3656,35 @@ s32 mdlUpdateFaceDivisionEditorTask(KwlnTask *task) {
         }
     }
 
-    sdfAppendPacket(D_00453660.packetList,
-                    (u32)sdfCreateBorderedRectanglePacket(0x84D0, 0x79A8, 0xFF007F, 0xA20, 0x270,
+    sdfDrawTagLink(D_00453660.packetList,
+                    (u32)dds3PrimFrameRect(0x84D0, 0x79A8, 0xFF007F, 0xA20, 0x270,
                                   0x60000000, 0x40806020));
     label = D_003C8B68;
     for (i = 0; i != 4; i++, label++) {
-        sdfAppendPacket(D_00453660.packetList,
-                        (u32)sdfCreateFormattedSifCommand(label->x, label->y,
+        sdfDrawTagLink(D_00453660.packetList,
+                        (u32)sdfDevPrintf(label->x, label->y,
                                                          0xFF0080, label->style,
                                                          label->format));
     }
     if (D_00453660.control.fields.active == 0 && D_00453660.control.fields.blink < 20) {
-        sdfAppendPacket(D_00453660.packetList,
-                        (u32)sdfCreateFormattedSifCommand(0x8500,
+        sdfDrawTagLink(D_00453660.packetList,
+                        (u32)sdfDevPrintf(0x8500,
                                                          D_003C8B98[D_00453660.control.fields.cursor],
                                                          0xFF0080, 0, D_00437198));
     }
 
     /* Ignore the blink byte when testing the active mode and selected row. */
     valueStyle = (D_00453660.control.packed & 0xFFFF00FF) == 1 ? 6 : 0;
-    sdfAppendPacket(D_00453660.packetList,
-                    (u32)sdfCreateFormattedSifCommand(0x8B00, 0x7A80, 0xFF0080,
+    sdfDrawTagLink(D_00453660.packetList,
+                    (u32)sdfDevPrintf(0x8B00, 0x7A80, 0xFF0080,
                                                      valueStyle, D_004371A0, D_00453660.value));
     adjustmentStyle = (D_00453660.control.packed & 0xFFFF00FF) == 0x10001 ? 6 : 0;
-    sdfAppendPacket(D_00453660.packetList,
-                    (u32)sdfCreateFormattedSifCommand(0x8B00, 0x7AE0, 0xFF0080,
+    sdfDrawTagLink(D_00453660.packetList,
+                    (u32)sdfDevPrintf(0x8B00, 0x7AE0, 0xFF0080,
                                                      adjustmentStyle, D_004371A8, D_00453660.adjustment));
     format = D_00438A34 == 0 ? D_004371B0 : D_004371B8;
-    sdfAppendPacket(D_00453660.packetList,
-                    (u32)sdfCreateFormattedSifCommand(0x8B00, 0x7BA0, 0xFF0080,
+    sdfDrawTagLink(D_00453660.packetList,
+                    (u32)sdfDevPrintf(0x8B00, 0x7BA0, 0xFF0080,
                                                      0, format));
     D_00380708.append(&D_00380708,
                       D_00453660.packetList);
@@ -3696,19 +3696,19 @@ s32 mdlUpdateFaceDivisionEditorTask(KwlnTask *task) {
 
 
 
-extern void evtDisableSolarPhaseAdvance(void);
-extern void evtSetSolarOverlayFullyTransparent(void);
-extern void evtSetSolarPhase(s32 phase);
+extern void evtDisableMoonCalc(void);
+extern void evtDisableMoonDraw(void);
+extern void evtSetAgeOfMoon(s32 phase);
 
-void mdlResetViewerFlagsAndSolarOverlay(void) {
-    mdlFlagClearAll();
-    evtSetSolarPhase(0);
-    evtSetSolarOverlayFullyTransparent();
-    evtDisableSolarPhaseAdvance();
+void evtInitGlobalWork(void) {
+    evtBitAllOff();
+    evtSetAgeOfMoon(0);
+    evtDisableMoonDraw();
+    evtDisableMoonCalc();
 }
 
 
-void mdlFlagClearAll(void) {
+void evtBitAllOff(void) {
     u32 *word;
     s32 remaining;
 
@@ -3721,36 +3721,36 @@ void mdlFlagClearAll(void) {
     } while (-1 < remaining);
 }
 
-void mdlClearFlagRanges(void) {
+void evtBitAllOff_FieldDebug(void) {
     s32 i = 0;
     do {
-        mdlFlagClear(i++);
+        evtBitOff(i++);
     } while (i < 0xC00);
     i = 0xD00;
     do {
-        mdlFlagClear(i++);
+        evtBitOff(i++);
     } while (i < 0x1000);
 }
 
 /* Signed flag indices need a bias before arithmetic right shift divides by 32. */
-void mdlFlagSet(s32 flag) {
+void evtBitOn(s32 flag) {
     s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
     datGameState->modelFlags.words[adjustedFlag >> 5] |= 1 << flag;
 }
 
-void mdlFlagClear(s32 flag) {
+void evtBitOff(s32 flag) {
     s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
     datGameState->modelFlags.words[adjustedFlag >> 5] &= ~(1 << flag);
 }
 
-s32 mdlFlagTest(s32 flag) {
+s32 evtBitCheck(s32 flag) {
     s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
     return (((s32)datGameState->modelFlags.words[adjustedFlag >> 5] >> flag) & 1);
 }
 
 extern s32 D_004371C0, D_004371C4, D_004371C8;
 extern char D_004371D0[], D_004371D8[], D_004371E0[];
-extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32,
+extern s32 dds3SelectMenu(s32, s32, s32, s32, s32,
     s32 *, s32 *, s32 *, s32 *);
 
 /* Draw and toggle model-flag bits; return -1 on cursor exit, otherwise 0. */
@@ -3762,7 +3762,7 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_00421508);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421518);
 
-s32 mdlUpdateFlagBitEditor(void) {
+s32 dds3BitEditorProcess(void) {
     char glyph[2];
     SdfListHead *packets;
     s32 column, row, style, result;
@@ -3771,33 +3771,33 @@ s32 mdlUpdateFlagBitEditor(void) {
     /* Native 0023A1D4..E4 copies this space/NUL template as one block;
      * see docs/idioms.md, "Bit-editor glyph template block copy". */
     memcpy(glyph, D_004371D0, sizeof(glyph));
-    packets = (SdfListHead *)sdfAllocPacketAligned(sizeof(*packets));
-    sdfInitPacketList(packets);
-    kwlnDrawSpriteCell(packets, 50, 50, 23, 20);
-    sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(
+    packets = (SdfListHead *)sdfGrAllocPacketBuff(sizeof(*packets));
+    sdfDrawTagInit(packets);
+    dds3ConsPanelTagLink(packets, 50, 50, 23, 20);
+    sdfDrawTagLink(packets, (u32)sdfDevPrintf(
         0x7320, 0x7A90, 0xFF0000, 0, "BitEditor"));
-    if (mdlFlagTest((D_004371C0 + D_004371C8) * 16 + D_004371C4)) {
-        sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(
+    if (evtBitCheck((D_004371C0 + D_004371C8) * 16 + D_004371C4)) {
+        sdfDrawTagLink(packets, (u32)sdfDevPrintf(
             0x7AA0, 0x7A90, 0xFF0000, 7, "%04X = ON",
             (D_004371C0 + D_004371C8) * 16 + D_004371C4));
     } else {
-        sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink(packets, (u32)sdfDevPrintf(
             0x7AA0, 0x7A90, 0xFF0000, 7, "%04X = OFF",
             (D_004371C0 + D_004371C8) * 16 + D_004371C4));
     }
     for (column = 0; column < 16; column++) {
         style = D_004371C4 == column ? 14 : 7;
-        sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink(packets, (u32)sdfDevPrintf(
             0x7320 + (column + 6) * cellWidth, 0x7A90 + cellHeight * 2,
             0xFF0000, style, D_004371D8, column));
     }
     for (row = 0; row < 16; row++) {
         style = D_004371C8 == row ? 14 : 7;
-        sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink(packets, (u32)sdfDevPrintf(
             0x73E0, 0x7A90 + (row + 3) * cellHeight, 0xFF0000,
             style, D_004371E0, (D_004371C0 + row) * 16));
         for (column = 0; column < 16; column++) {
-            if (mdlFlagTest((D_004371C0 + row) * 16 + column)) {
+            if (evtBitCheck((D_004371C0 + row) * 16 + column)) {
                 glyph[0] = 'O';
                 style = D_004371C4 == column || D_004371C8 == row ? 6 : 0;
             } else {
@@ -3807,7 +3807,7 @@ s32 mdlUpdateFlagBitEditor(void) {
             if (D_004371C4 == column && D_004371C8 == row) {
                 style = 4;
             }
-            sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(
+            sdfDrawTagLink(packets, (u32)sdfDevPrintf(
                 0x7320 + (column + 6) * cellWidth,
                 0x7A90 + (row + 3) * cellHeight, 0xFF0000, style, glyph));
         }
@@ -3823,33 +3823,33 @@ s32 mdlUpdateFlagBitEditor(void) {
             else D_004371C0 += 16;
         }
     }
-    result = kwlnStepTwoListCursors(1, 16, 256, 16, 16, NULL,
+    result = dds3SelectMenu(1, 16, 256, 16, 16, NULL,
         &D_004371C0, &D_004371C4, &D_004371C8);
     if (result == -1) return -1;
     if (result == 1) {
-        if (mdlFlagTest((D_004371C0 + D_004371C8) * 16 + D_004371C4)) {
-            mdlFlagClear((D_004371C0 + D_004371C8) * 16 + D_004371C4);
+        if (evtBitCheck((D_004371C0 + D_004371C8) * 16 + D_004371C4)) {
+            evtBitOff((D_004371C0 + D_004371C8) * 16 + D_004371C4);
         } else {
-            mdlFlagSet((D_004371C0 + D_004371C8) * 16 + D_004371C4);
+            evtBitOn((D_004371C0 + D_004371C8) * 16 + D_004371C4);
         }
     }
     return 0;
 }
 
-extern EffWorldNode *dds3CreateCameraObject(s32 world, void *pos, void *rot);
+extern EffWorldNode *dds3AddCameraObjectBasicTypeFree(s32 world, void *pos, void *rot);
 
-s32 mdlSpawnViewerWorldObject(void) {
+s32 evtSetTestCamera(void) {
     f32 pos[4] = {0.0f, -100.0f, -600.0f, 0.0f};
     f32 rot[4];
     EffWorldNode *obj;
 
     memset(rot, 0, 0x10);
     rot[3] = 1.0f;
-    obj = dds3CreateCameraObject(dds3AdvanceWorldCounter(), pos, rot);
-    effObjSetInnerFloat(obj, 10.0f);
-    dds3EnsureSlotData(obj);
-    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), obj);
-    dds3SetObjectSlot1MoverCallback(obj, 0);
+    obj = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), pos, rot);
+    dds3GetRadiusPoseSet(obj, 10.0f);
+    dds3ObjectBaseCreateMover(obj);
+    dds3SetActiveCameraSceneBasic(dds3GetControlScene(), obj);
+    dds3ObjectBaseSetPadControl(obj, 0);
 }
 
 s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
@@ -3862,22 +3862,22 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     pos[3] = 1.0f;
     memset(rot, 0, 0x10);
     rot[3] = 1.0f;
-    world = dds3AdvanceWorldCounter();
-    obj = dds3SpawnCameraSlotObj5(world, pos, rot);
+    world = dds3AllocObjectId();
+    obj = dds3AddUnitObjectBasic(world, pos, rot);
     dds3ObjectBaseOnFlag((u32)obj, 0x20);
-    effObjSetInnerFloat(obj, 10.0f);
+    dds3GetRadiusPoseSet(obj, 10.0f);
     dds3RebuildObjectModelContext(obj, slotKind, resource);
     if (((MdlCtx *)dds3ObjectBaseGetModelHandle(obj))->first != NULL) {
-        mdlAddEntryFlagged((MdlCtx *)dds3ObjectBaseGetModelHandle(obj), 0, 0);
+        mdlLoopMotion((MdlCtx *)dds3ObjectBaseGetModelHandle(obj), 0, 0);
     }
-    dds3SetObjectSlot1MoverCallback(obj, 0);
+    dds3ObjectBaseSetPadControl(obj, 0);
     return world;
 }
 
 
-extern s32 dds3RegisterObjectInHandlerIndex(void *obj);
+extern s32 dds3ObjectBaseRegistArea(void *obj);
 
-s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
+s32 evtLoadUnit(s32 slotKind, s32 resource) {
     f32 pos[4];
     f32 rot[4];
     s32 world;
@@ -3887,33 +3887,33 @@ s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
     pos[3] = 1.0f;
     memset(rot, 0, 0x10);
     rot[3] = 1.0f;
-    world = dds3AdvanceWorldCounter();
-    obj = dds3SpawnCameraSlotObj5(world, pos, rot);
+    world = dds3AllocObjectId();
+    obj = dds3AddUnitObjectBasic(world, pos, rot);
     dds3ObjectBaseOnFlag((u32)obj, 0x20);
-    effObjSetInnerFloat(obj, 10.0f);
+    dds3GetRadiusPoseSet(obj, 10.0f);
     dds3RebuildObjectModelContext(obj, slotKind, resource);
-    mdlAddEntryFlagged((MdlCtx *)dds3ObjectBaseGetModelHandle(obj), 0, 0);
-    dds3SetSlotByKind(obj, dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), 0x10000, 2));
-    dds3RegisterObjectInHandlerIndex(obj);
-    dds3SetObjectSlot1MoverCallback(obj, 0);
+    mdlLoopMotion((MdlCtx *)dds3ObjectBaseGetModelHandle(obj), 0, 0);
+    dds3ObjectBaseSetControlBasic(obj, dds3SearchSceneBasic(dds3GetControlScene(), 0x10000, 2));
+    dds3ObjectBaseRegistArea(obj);
+    dds3ObjectBaseSetPadControl(obj, 0);
     dds3ObjectBaseOnFlag((u32)obj, 0x400);
     return world;
 }
 
-void mdlAttachWorldObjectToSourceVector(u32 targetKey, u32 sourceKey) {
+void evtSetUnitPos(u32 targetKey, u32 sourceKey) {
     f32 axis[4] = {0.0f, 1.0f, 0.0f, 1.0f};
     EffWorldNode *obj;
     EffWorldNode *src;
     EvtWorldSourceTransformPrefix *sourceTransform;
 
-    obj = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), targetKey, 5);
+    obj = dds3SearchSceneBasic(dds3GetControlScene(), targetKey, 5);
     if (obj != NULL) {
-        src = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), sourceKey, 0x11);
+        src = dds3SearchSceneBasic(dds3GetControlScene(), sourceKey, 0x11);
         if (src != NULL) {
             sourceTransform = src->data;
             dds3SetPosPoseSet(obj, (u128 *)&sourceTransform->position);
             VU0_LOAD_VF(vf10, axis);
-            effMiscAxisAngleToQuaternionVU(3.14159265f);
+            FromRotation(3.14159265f);
             VU0_LOAD_VF(vf11, sourceTransform->rotation);
             effMiscQuatMultiplyVU();
             VU0_STORE_VF(vf10, axis);

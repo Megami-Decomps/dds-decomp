@@ -3,7 +3,7 @@
 #include "sdf_resource.h"
 
 /* Release the group's handles once and clear its active-node flag. */
-s32 fmGslReleaseActiveResourceBuffers(void) {
+s32 fmDestroyFontMemControl(void) {
     if (frFontResourceList.head == 0) {
         return 0;
     }
@@ -14,7 +14,7 @@ s32 fmGslReleaseActiveResourceBuffers(void) {
 }
 
 /* Unlink the first live node after the sentinel, or NULL when its slot is empty. */
-FntNode *frFontDetachFirstResourceNode(void) {
+FntNode *fmRentFontMem(void) {
     FntNode *resourceNode = frFontResourceList.head->next;
 
     if (resourceNode->nodeIndex == 0) {

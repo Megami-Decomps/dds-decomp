@@ -774,7 +774,7 @@ u32 mnuBlendListNodeColorByFlags(u32 previousColor, MenuListNode *entry) {
     if (!(flags & 1)) {
         color = (flags & 4) ? MNU_ENTRY_ALTERNATE_COLOR : MNU_ENTRY_DEFAULT_COLOR;
     }
-    return uiBlendColors(color, previousColor, entry->animationTimer);
+    return fclBlendColor(color, previousColor, entry->animationTimer);
 }
 
 
@@ -814,7 +814,7 @@ void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
         }
         color = mnuBlendListNodeColorByFlags(color, node);
         chainFlag = 0;
-        color = uiBlendColors(color, color & 0xFFFFFF00, fadeScale);
+        color = fclBlendColor(color, color & 0xFFFFFF00, fadeScale);
         if ((node == list->cursor && (list->stateFlags & 8) == 0) ||
             (node->flags48 & 2) != 0) {
             chainFlag = 4;
@@ -1885,7 +1885,7 @@ MenuSprites *mnuCreatePageSpriteSet(s32 kind, EffectSlotSet *mainResource,
                                     EffectSlotSet *cursorResource,
                                     EffectSlotSet *alternateResource) {
     u32 i;
-    s32 enabled = mdlFlagTest(0x901);
+    s32 enabled = evtBitCheck(0x901);
     MenuSpritePlacement icons[5] = {
         {iconResource, 7, 0x170, 0xA0},
         {mainResource, 0x14, 0x8A0, 0xE8},

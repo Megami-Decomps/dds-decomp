@@ -6,13 +6,13 @@
 struct EffWorldNode;
 
 /* Read or update the cached world object associated with a resource record ID. */
-struct EffWorldNode *fldHitGetMatter(s32 id);
-void fldHitLinkMatter(s32 id, struct EffWorldNode *worldNode);
+struct EffWorldNode *fldFindMatterIndex(s32 id);
+void fldFindMatterIndexFrom(s32 id, struct EffWorldNode *worldNode);
 
 /* Resolves a named world object or lazily creates/caches a dummy matter object. */
-struct EffWorldNode *fldResolveWorldObjectByResourceId(u32 resourceId);
+struct EffWorldNode *fldGetMatter_From_ModelRangeID(u32 resourceId);
 
 /* Matches a resource name entry, then resolves its owner by the resource name. */
-struct EffWorldNode *fldResolveWorldObjectByResourceEntryName(const char *entryName);
+struct EffWorldNode *fldGetModelRange_From_MatterName(const char *entryName);
 
 #endif

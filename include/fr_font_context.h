@@ -5,10 +5,10 @@
 
 struct FrFontGlyph;
 
-void frFontSetContextEncodedByte(struct FrFontGlyph *glyph, s32 inputValue);
+void frSetDrawSpeed(struct FrFontGlyph *glyph, s32 inputValue);
 void frFontEnableContextMode(struct FrFontGlyph *glyph);
-void frFontSetSpacingAndMeasureGlyphs(struct FrFontGlyph *glyph, s32 spacing);
-void frFontSetGlyphPosition(struct FrFontGlyph *glyph, u32 x, u32 y);
+void frSetFontSpace(struct FrFontGlyph *glyph, s32 spacing);
+void frSetDrawPosition(struct FrFontGlyph *glyph, u32 x, u32 y);
 void frSetPriority(struct FrFontGlyph *glyph, u32 unshiftedValue);
 
 #endif

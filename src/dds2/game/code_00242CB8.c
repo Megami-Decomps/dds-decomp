@@ -16,9 +16,9 @@
 #include "mdl_flag_api.h"
 
 extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
-extern void evtBeginSkyParameterTransition(s32 duration, s32 target);
+extern void evtSetSkyAlpha(s32 duration, s32 target);
 
-extern s32 scrReadIntParameter(s32 idx);
+extern s32 scrGetIntPara(s32 idx);
 
 
 
@@ -38,20 +38,20 @@ extern char D_00422050[];
 
 
 extern s32 fileMenuTaskExists(void);
-extern u32 fldIsUpdateInhibited(void);
+extern u32 dds3NullDrawProc(void);
 #include "sdf_debug_api.h"
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern char D_00422030[];
 extern char D_00421FE8[];
-s32 evtPreloadBgm(s32 id);
-s32 evtIsBgmLoaded(s32 id);
+s32 evtLoadEventBgm(s32 id);
+s32 evtCheckEventBgmLoaded(s32 id);
 
-extern void *evtFindWorldObjectByIdAndKind(s32 objectKind, s32 worldObjectKey);
-extern s32 evtCheckWorldObjectResourceScale(void *object);
+extern void *evtSearchBasic(s32 objectKind, s32 worldObjectKey);
+extern s32 evtCheckPathStat(void *object);
 
-s32 evtCommandWaitLightResourceScale(void) {
-    s32 status = evtCheckWorldObjectResourceScale(
-        evtFindWorldObjectByIdAndKind(9, scrReadIntParameter(0)));
+s32 evtCommand_LIGHT_PATH_WAIT(void) {
+    s32 status = evtCheckPathStat(
+        evtSearchBasic(9, scrGetIntPara(0)));
 
     switch (status) {
     case 0:
@@ -65,13 +65,13 @@ s32 evtCommandWaitLightResourceScale(void) {
     }
 }
 
-u32 evtCreateTextureEntryChildTask(void) {
+u32 evtCommand_TEX_BE(void) {
     ScrData *work;
     s32 id;
     struct SdfTex *entry;
     KwlnTask *task;
 
-    work = scrGetCurrentContext();
+    work = scrGetScriptHandle();
     if (work == NULL) {
         return 1;
     }
@@ -79,23 +79,23 @@ u32 evtCreateTextureEntryChildTask(void) {
         printf(D_00421FE8);
         return 1;
     }
-    id = scrReadIntParameter(0);
-    entry = evtFindTaskResourceEntryByKey(id, scrReadIntParameter(1));
+    id = scrGetIntPara(0);
+    entry = evtGetResorceData(id, scrGetIntPara(1));
     if (entry == 0) {
-        evtPrintDeveloperConsoleMessage(D_00422030, scrReadIntParameter(1));
+        evtPrintDeveloperConsoleMessage(D_00422030, scrGetIntPara(1));
         return 1;
     }
-    task = evtCreateTaskWithValue(0x2AFE, entry);
+    task = evtStartPictureProcess(0x2AFE, entry);
     dds3LinkProcess(work->task, task);
-    scrSetIntegerReturnValue((s32)task);
+    scrSetIntReturnValue((s32)task);
     return 1;
 }
 
-u32 evtOpcodeCreateWorldChildTask(void) {
+u32 evtCommand_TEX_LOAD(void) {
     ScrData *work;
     KwlnTask *childTask;
 
-    work = scrGetCurrentContext();
+    work = scrGetScriptHandle();
     if (work == NULL) {
         return 1;
     }
@@ -103,63 +103,63 @@ u32 evtOpcodeCreateWorldChildTask(void) {
         printf(D_00422050);
         return 1;
     }
-    childTask = evtCreateTask(0x2afe, scrReadStringParameter(0));
+    childTask = evtStartPictureProcess2(0x2afe, scrGetStrPara(0));
     dds3LinkProcess(work->task, childTask);
-    scrSetIntegerReturnValue((s32)childTask);
+    scrSetIntReturnValue((s32)childTask);
     return 1;
 }
 
-u32 evtOpcodeSetTaskContextFlag(void) {
+u32 evtCommand_TEX_ON(void) {
     u32 task;
     s32 registered;
 
-    task = scrReadIntParameter(0);
+    task = scrGetIntPara(0);
     registered = dds3ExistProcess((KwlnTask *)task);
     if (registered != 0) {
-        evtSetContextFlag((KwlnTask *)task);
+        evtPictureDrawOn((KwlnTask *)task);
     }
     return 1;
 }
 
-u32 evtOpcodeClearTaskContextFlag(void) {
+u32 evtCommand_TEX_OFF(void) {
     u32 task;
     s32 registered;
 
-    task = scrReadIntParameter(0);
+    task = scrGetIntPara(0);
     registered = dds3ExistProcess((KwlnTask *)task);
     if (registered != 0) {
-        evtClearContextFlag((KwlnTask *)task);
+        evtPictureDrawOff((KwlnTask *)task);
     }
     return 1;
 }
 
-extern void evtDestroyTaskHierarchy(u32 taskHandle);
+extern void evtKillPictureProcess(u32 taskHandle);
 
-u32 evtOpcodeDestroyTask(void) {
+u32 evtCommand_TEX_CLS(void) {
     u32 task;
     s32 registered;
 
-    task = scrReadIntParameter(0);
+    task = scrGetIntPara(0);
     registered = dds3ExistProcess((KwlnTask *)task);
     if (registered != 0) {
-        evtDestroyTaskHierarchy(task);
+        evtKillPictureProcess(task);
     }
     return 1;
 }
 
-extern void fldSetSkyDrawState(u32 drawState);
-extern void fldSetSwayMode(u32 mode);
+extern void fldSkySetAlpha(u32 drawState);
+extern void fldSetFilterAnime(u32 mode);
 
-u32 evtOpcodeSetFadeTarget(void) {
+u32 evtCommand_SET_SKY(void) {
     s32 area;
     s32 target;
     s32 duration;
 
-    fldSetSwayMode(0);
-    fldSetSkyDrawState(0x80);
-    area = scrReadIntParameter(0);
-    target = scrReadIntParameter(1);
-    duration = scrReadIntParameter(2);
+    fldSetFilterAnime(0);
+    fldSkySetAlpha(0x80);
+    area = scrGetIntPara(0);
+    target = scrGetIntPara(1);
+    duration = scrGetIntPara(2);
     fldSetFadeTarget(area, target, duration);
     return 1;
 }
@@ -170,10 +170,10 @@ INCLUDE_RODATA(const s32, "game/code_00242CB8", D_00422030);
 
 INCLUDE_RODATA(const s32, "game/code_00242CB8", D_00422050);
 
-u32 evtSetSkyAlpha(void) {
+u32 evtCommand_SET_SKY_A(void) {
     s32 alpha;
 
-    alpha = scrReadIntParameter(1);
+    alpha = scrGetIntPara(1);
     if (alpha < -255) {
         evtPrintDeveloperConsoleMessage("warning : SET_SKY_A alpha < -255\n");
         alpha = -255;
@@ -182,96 +182,96 @@ u32 evtSetSkyAlpha(void) {
         evtPrintDeveloperConsoleMessage("warning : SET_SKY_A alpha > 255\n");
         alpha = 255;
     }
-    evtBeginSkyParameterTransition(scrReadIntParameter(0), alpha);
+    evtSetSkyAlpha(scrGetIntPara(0), alpha);
     return 1;
 }
 
-extern void evtSetSkyOverlayEnabled(u32 enabled);
+extern void evtSetBokasi(u32 enabled);
 
-u32 evtShowSky(void) {
-    evtSetSkyOverlayEnabled(1);
+u32 evtCommand_BOKASI_ON(void) {
+    evtSetBokasi(1);
     return 1;
 }
 
-u32 evtHideSky(void) {
-    evtSetSkyOverlayEnabled(0);
+u32 evtCommand_BOKASI_OFF(void) {
+    evtSetBokasi(0);
     return 1;
 }
 
-u32 evtCommandAwaitBgmPreload(void) {
+u32 evtCommand_LOAD_SOUND_E(void) {
     s32 eventId;
 
     /* One parameter call per arm; retail has two call sites and sharing one changes the code. */
     if (scrGetCommandTimer() == 0) {
-        evtPreloadBgm(scrReadIntParameter(0));
+        evtLoadEventBgm(scrGetIntPara(0));
     } else {
-        eventId = scrReadIntParameter(0);
-        if (evtIsBgmLoaded(eventId) != 0) {
+        eventId = scrGetIntPara(0);
+        if (evtCheckEventBgmLoaded(eventId) != 0) {
             return 1;
         }
     }
     return 0;
 }
 
-extern s32 evtPlayBgm(s32 eventId, s32 fade);
+extern s32 evtPlayEventBgm(s32 eventId, s32 fade);
 
-u32 evtOpcodePlayBgm(void) {
+u32 evtCommand_BGM_PLAY_E(void) {
     s32 eventId;
     s32 fade;
 
-    eventId = scrReadIntParameter(0);
-    fade = scrReadIntParameter(1);
-    evtPlayBgm(eventId, fade);
+    eventId = scrGetIntPara(0);
+    fade = scrGetIntPara(1);
+    evtPlayEventBgm(eventId, fade);
     return 1;
 }
 
-extern void evtTransitionBgm(s32 eventId, s32 fade);
+extern void evtTransEventBgm(s32 eventId, s32 fade);
 
-u32 evtOpcodeTransitionBgm(void) {
+u32 evtCommand_BGM_TRANS_E(void) {
     s32 eventId;
     s32 fade;
 
-    eventId = scrReadIntParameter(0);
-    fade = scrReadIntParameter(1);
-    evtTransitionBgm(eventId, fade);
+    eventId = scrGetIntPara(0);
+    fade = scrGetIntPara(1);
+    evtTransEventBgm(eventId, fade);
     return 1;
 }
 
-extern s32 evtQueueValidatedBgmSoundCode(s32 eventId, s32 fade);
+extern s32 evtStopEventBgm(s32 eventId, s32 fade);
 
-u32 evtCommandQueueBgmWithFade(void) {
+u32 evtCommand_FADEOUT_E(void) {
     s32 eventId;
     s32 second;
 
-    eventId = scrReadIntParameter(0);
-    second = scrReadIntParameter(1);
-    evtQueueValidatedBgmSoundCode(eventId, second);
+    eventId = scrGetIntPara(0);
+    second = scrGetIntPara(1);
+    evtStopEventBgm(eventId, second);
     return 1;
 }
 
-extern void sndStartReducedBgm(void);
+extern void p2sdBgmVolDown(void);
 
-u32 evtOpcodeStartReducedBgm(void) {
-    sndStartReducedBgm();
+u32 evtCommand_BGM_VOL_DOWN(void) {
+    p2sdBgmVolDown();
     return 1;
 }
 
-extern void sndStopReducedBgm(void);
+extern void p2sdBgmVolUp(void);
 
-u32 evtOpcodeStopReducedBgm(void) {
-    sndStopReducedBgm();
+u32 evtCommand_BGM_VOL_UP(void) {
+    p2sdBgmVolUp();
     return 1;
 }
 
-extern s32 evtSetBgmVolumePan(s32 eventId, s32 fade);
+extern s32 evtPlaySe(s32 eventId, s32 fade);
 
 u32 evtOpcodeSetBgmVolumePan(void) {
     s32 volume;
     s32 pan;
 
-    volume = scrReadIntParameter(0);
-    pan = scrReadIntParameter(1);
-    evtSetBgmVolumePan(volume, pan);
+    volume = scrGetIntPara(0);
+    pan = scrGetIntPara(1);
+    evtPlaySe(volume, pan);
     return 1;
 }
 
@@ -281,8 +281,8 @@ u32 evtCommandStartBgmWithFade(void) {
     s32 eventId;
     s32 second;
 
-    eventId = scrReadIntParameter(0);
-    second = scrReadIntParameter(1);
+    eventId = scrGetIntPara(0);
+    second = scrGetIntPara(1);
     evtStartBgmBySoundIdAndFade(eventId, second);
     return 1;
 }
@@ -293,25 +293,25 @@ u32 evtOpcodeRefreshTaskData(void) {
     s32 task;
     s32 value;
 
-    task = scrReadIntParameter(0);
-    value = scrReadIntParameter(1);
+    task = scrGetIntPara(0);
+    value = scrGetIntPara(1);
     evtRefreshTaskEffectTexture(task, value);
     return 1;
 }
 
-extern void effInitCh72Id(void);
+extern void Eve_DistortionBlurSetDefTex(void);
 
 u32 evtOpcodeInitializeEffectSoundChannel(void) {
-    effInitCh72Id();
+    Eve_DistortionBlurSetDefTex();
     return 1;
 }
 
 u32 evtCommandSetDrawFlagWhileWaiting(void) {
-    if (scrReadIntParameter(0) <= 0) {
+    if (scrGetIntPara(0) <= 0) {
         kwlnDrawControlFlags |= 0x2000000;
         return 1;
     }
-    if ((s32)scrGetCommandTimer() < scrReadIntParameter(0)) {
+    if ((s32)scrGetCommandTimer() < scrGetIntPara(0)) {
         kwlnDrawControlFlags |= 0x2000000;
         return 0;
     }
@@ -340,20 +340,20 @@ s32 evtGetMirroredSolarPhase(void) {
     return phase;
 }
 
-s32 evtGetSolarPhase(void) {
+s32 evtGetAgeOfMoon16(void) {
     return datGameState->world.phase;
 }
 
-void evtSetSolarPhase(s32 phase) {
+void evtSetAgeOfMoon(s32 phase) {
     datGameState->world.phase = phase & 0xf;
     datGameState->world.phaseTimer = 0;
 }
 
-void evtEnableSolarPhaseAdvance(void) {
+void evtEnableMoonCalc(void) {
     datGameState->world.flags = datGameState->world.flags | 1;
 }
 
-void evtDisableSolarPhaseAdvance(void) {
+void evtDisableMoonCalc(void) {
     datGameState->world.flags = datGameState->world.flags & 0xfe;
 }
 
@@ -363,16 +363,16 @@ void evtSetSolarOverlayFullyVisible(void) {
     evtBeginSolarOverlayFadeIn(0);
 }
 
-void evtSetSolarOverlayFullyTransparent(void) {
+void evtDisableMoonDraw(void) {
     datGameState->world.flags = datGameState->world.flags & 0xfd;
     evtSolarOverlayAlpha = 0.0f;
 }
 
-void evtEnableSolarOverlayAlpha(void) {
+void evtEnableMoonDraw2(void) {
     datGameState->world.flags = datGameState->world.flags | 2;
 }
 
-void evtDisableSolarOverlayAlpha(void) {
+void evtDisableMoonDraw2(void) {
     datGameState->world.flags = datGameState->world.flags & 0xfd;
 }
 
@@ -383,7 +383,7 @@ s32 evtUpdateSolarOverlayFade(KwlnTask *task) {
     f32 f;
 
     f = 0.0f;
-    if ((fileMenuTaskExists() != 0) || (fldIsUpdateInhibited() != 0)) {
+    if ((fileMenuTaskExists() != 0) || (dds3NullDrawProc() != 0)) {
         return 0;
     }
     overlay = (SolarOverlayWork *)dds3GetProcessData(task);
@@ -416,10 +416,10 @@ s32 evtUpdateSolarOverlayFade(KwlnTask *task) {
 }
 
 extern s32 D_004371FC;
-extern void fldConsumePrimarySceneFlag(void);
-extern void fldConsumeSecondarySceneFlag(void);
-extern void fldConsumeFieldTransitionFlag(void);
-extern void fldConsumeSceneCommandFlag(void);
+extern void fldEsutoMaClearMsg(void);
+extern void fldRiberaMaClearMsg(void);
+extern void fldRifutoMaClearMsg(void);
+extern void fldLightMaClearMsg(void);
 
 /* Advance the enabled solar clock and expire its associated field controls. */
 void evtAdvanceSolarClockAndExpireControls(f32 travelDistance) {
@@ -427,30 +427,30 @@ void evtAdvanceSolarClockAndExpireControls(f32 travelDistance) {
         datGameState->world.phaseTimer += travelDistance;
         if (datGameState->world.phaseTimer > 4500.0f) {
             datGameState->world.phaseTimer = 0;
-            evtSetSolarPhase((datGameState->world.phase + 1) & 0xF);
+            evtSetAgeOfMoon((datGameState->world.phase + 1) & 0xF);
             D_004371FC = 30;
             if (evtGetMirroredSolarPhase() == 0) {
-                fldConsumePrimarySceneFlag();
-                fldConsumeSecondarySceneFlag();
+                fldEsutoMaClearMsg();
+                fldRiberaMaClearMsg();
             }
             if (datGameState->world.fieldFlags & 4) {
                 datGameState->world.fieldTransitionCycleCount++;
                 if (datGameState->world.fieldTransitionCycleCount >= 6U) {
-                    fldConsumeFieldTransitionFlag();
+                    fldRifutoMaClearMsg();
                     datGameState->world.fieldTransitionCycleCount = 0;
                 }
             }
             if (datGameState->world.fieldFlags & 8) {
                 datGameState->world.overlayFlag++;
                 if (datGameState->world.overlayFlag >= 6) {
-                    fldConsumeSceneCommandFlag();
+                    fldLightMaClearMsg();
                     datGameState->world.overlayFlag = 0;
                 }
             }
-            if (mdlFlagTest(0x802)) {
+            if (evtBitCheck(0x802)) {
                 datGameState->world.secondaryPhase++;
                 if (datGameState->world.secondaryPhase >= 81) {
-                    mdlFlagClear(0x802);
+                    evtBitOff(0x802);
                     datGameState->world.secondaryPhase = 0;
                 }
             }
@@ -486,9 +486,9 @@ void evtEnsureSolarOverlayTaskAndResetPhase(void) {
         return;
     }
     evtSolarOverlayTask = dds3StartProcess(D_00437208, 0x2B0B, 1, 1, evtCreateSolarOverlayWork, evtFreeSolarOverlayWork, 0);
-    evtEnableSolarPhaseAdvance();
-    evtSetSolarOverlayFullyTransparent();
-    evtSetSolarPhase(0);
+    evtEnableMoonCalc();
+    evtDisableMoonDraw();
+    evtSetAgeOfMoon(0);
     datGameState->world.secondaryPhase = 0;
     datGameState->world.overlayFlag = 0;
     datGameState->world.fieldTransitionCycleCount = 0;

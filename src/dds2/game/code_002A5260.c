@@ -24,12 +24,12 @@
 #include "sdf_packet_list.h"
 #include "ee_mmi.h"
 /* Declared before first use (were implicit int). */
-extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
+extern void dds3AdminiCallSequence(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
 extern void frFontUploadClearedTexture(void);
-extern void mnuLoadStaffFonts(void);
-extern void mnuUnloadStaffFonts(void);
+extern void frwLoadStaffFont(void);
+extern void frwFreeStaffFont(void);
 #include "sdf_debug_api.h"
-extern s32 sdfPacCheckDecoderStatus(MovObj *job);
+extern s32 sdfMovieIsFinished(MovObj *job);
 
 
 /* Title menu's selected page, sequence timers and draw-task state. */
@@ -101,7 +101,7 @@ extern MnuStaffTextRow D_003E3970[273];
 extern u32 D_00437AB8;
 extern void mnuDrawScrollingStaffBackdrop(StaffSparkleState *);
 
-extern s32 sdfCheckPendingWorkWithInterrupts(void);
+extern s32 sdfDelayedResrcCheck(void);
 
 extern char D_00429938[]; /* "staffImageProc" */
 
@@ -109,7 +109,7 @@ extern char D_00429968[]; /* "staffProc" */
 
 extern MovObj mnuMovieDrawContext;
 void mnuRequestIndexedMovieResource(s32 index);
-void mnuStopMovieDrawTask(void);
+void movieStop(void);
 
 extern SdfPoolNode D_003803C8;
 
@@ -148,7 +148,7 @@ void mnuDrawTitleMenuFadeOverlay(s32 mode, s32 frame) {
     case 0:
         if (frame < 10) {
             factor = frame / 10.0f;
-            alpha = sdfSinPoly(factor * 1.5707963f) * 128.0f;
+            alpha = sdfSin(factor * 1.5707963f) * 128.0f;
         } else {
             factor = (30 - frame) / 20.0f;
             alpha = factor * 64.0f + 48.0f;
@@ -158,7 +158,7 @@ void mnuDrawTitleMenuFadeOverlay(s32 mode, s32 frame) {
             factor = 0.0f;
         } else if (frame < 10) {
             factor = (frame - 5) / 5.0f;
-            factor = sdfSinPoly(factor * 1.5707963f);
+            factor = sdfSin(factor * 1.5707963f);
         } else {
             factor = (30 - frame) / 20.0f;
         }
@@ -166,7 +166,7 @@ void mnuDrawTitleMenuFadeOverlay(s32 mode, s32 frame) {
         return;
     case 1:
         factor = frame / 90.0f;
-        factor = sdfSinPoly(factor * 6.2831852f - 1.5707963f);
+        factor = sdfSin(factor * 6.2831852f - 1.5707963f);
         factor = (factor + 1.0f) * 0.5f;
         mnuDrawSprite(0, 0, 0, (s32)(factor * 64.0f + 48.0f), 0, 4, 0x53);
         return;
@@ -182,7 +182,7 @@ void mnuDrawTitleMenuFadeOverlay(s32 mode, s32 frame) {
     mnuDrawIndexedSpriteWith(mnuDrawSprite, 0, 0, 0, (s32)(factor * 128.0f), 0, 4, 0x53);
     if (frame < 5) {
         factor = frame / 5.0f;
-        factor = sdfSinPoly(factor * 1.5707963f);
+        factor = sdfSin(factor * 1.5707963f);
     } else if (frame < 20) {
         factor = (frame - 5) / 15.0f;
         factor = 1.0f - factor;
@@ -251,7 +251,7 @@ void mnuDrawMovieChoiceTransition(s32 mode, s32 frame) {
     }
 }
 
-extern void sndStartTrackExtended(s32 trackId);
+extern void p2sdPlayBGMFade(s32 trackId);
 
 void mnuResetTitleMovieMenuStateAndStartTrack(void) {
     MenuTitleState *state = mnuMovieMenuState;
@@ -259,7 +259,7 @@ void mnuResetTitleMovieMenuStateAndStartTrack(void) {
     state->phase = 0;
     state->selectedPage = 0;
     state->sequenceTimer = 0;
-    sndApplyTrackOperation(sndStartTrackExtended, 0x310000);
+    sndApplyTrackOperation(p2sdPlayBGMFade, 0x310000);
 }
 
 void mnuClearGlobalMenuStateFields(void) {
@@ -270,7 +270,7 @@ void mnuClearGlobalMenuStateFields(void) {
     state->sequenceTimer = 0;
 }
 
-void mnuResetTitlePageAndPhase(void) {
+void dds3TitleClearFade(void) {
     MenuTitleState *state = (MenuTitleState *)mnuMovieMenuState;
 
     state->phase = 0;
@@ -292,7 +292,7 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
             mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 0, 1);
             return 0;
         }
-        sndSetSequenceVolumePan(8, 127, 63);
+        p2sdPlaySE(8, 127, 63);
         mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 0, 0);
         return 1;
     case 1:
@@ -302,7 +302,7 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
             state->selectedPage = 0;
         }
         if (mnuIsAnyMenuInputPressed() != 0) {
-            sndSetSequenceVolumePan(8, 127, 63);
+            p2sdPlaySE(8, 127, 63);
             mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 0, 0);
             return 1;
         }
@@ -359,12 +359,12 @@ s32 mnuHandleMovieMenuInput(void) {
 
     if (kwlnTaskPadButtonStates[0x26] & 2) {
         if (mnuRetreatListCursorDefault(mnuMovieMenuState->selectionList) != NULL) {
-            sndSetSequenceVolumePan(0, 127, 63);
+            p2sdPlaySE(0, 127, 63);
         }
         moved = 1;
     } else if (kwlnTaskPadButtonStates[0x27] & 2) {
         if (mnuAdvanceListCursorDefault(mnuMovieMenuState->selectionList) != NULL) {
-            sndSetSequenceVolumePan(0, 127, 63);
+            p2sdPlaySE(0, 127, 63);
         }
         moved = 1;
     }
@@ -378,15 +378,15 @@ s32 mnuHandleMovieMenuInput(void) {
         }
         if (selection >= 2) {
             if (selection == 2) {
-                sndSetSequenceVolumePan(2, 127, 63);
+                p2sdPlaySE(2, 127, 63);
             }
         } else {
-            sndSetSequenceVolumePan(0x310001, 127, 63);
+            p2sdPlaySE(0x310001, 127, 63);
         }
         return 1;
     }
     if (kwlnTaskPadButtonStates[0x23] < 0) {
-        sndSetSequenceVolumePan(10, 127, 63);
+        p2sdPlaySE(10, 127, 63);
         return 2;
     }
     return moved ? -1 : 0;
@@ -522,7 +522,7 @@ void mnuArmTitleMovieDrawAndResetFrame(u32 movieIndex, s32 startTransparent) {
 }
 
 void mnuStopTitleMovieDraw(void) {
-    mnuStopMovieDrawTask();
+    movieStop();
     if (mnuMovieMenuState != 0) {
         ((MenuTitleState *)mnuMovieMenuState)->movieDrawActive = 0;
     }
@@ -994,16 +994,16 @@ void mnuLoadMovieRollSprite(void) {
 }
 
 void mnuPrepareStaffRollText(void) {
-    mnuLoadStaffFonts();
+    frwLoadStaffFont();
 }
 
 void mnuReleaseStaffRollText(void) {
-    mnuUnloadStaffFonts();
+    frwFreeStaffFont();
 }
 
 struct FrFontGlyph;
 /* This legacy call supplies an unused ninth word to the eight-word builder. */
-extern struct FrFontGlyph *frFontBuildColoredGlyphWithSharedFlags();
+extern struct FrFontGlyph *frwGetStaffFontFRQ();
 extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
 s32 mnuDrawStaffRollText(f32 x, f32 y, s32 font, u32 color, const char *text) {
     s32 byteAlpha = color & 0xFF;
@@ -1019,13 +1019,13 @@ s32 mnuDrawStaffRollText(f32 x, f32 y, s32 font, u32 color, const char *text) {
     byteAlpha = (s32)(alpha * opacity);
     color = (color & 0xFFFFFF00) | byteAlpha;
     if (font == 0) {
-        glyph = frFontBuildColoredGlyphWithSharedFlags((s32)(x * 16.0f),
+        glyph = frwGetStaffFontFRQ((s32)(x * 16.0f),
             (s32)(y * 8.0f), 0, 1, 1, 10, color, text, 0);
     } else {
-        glyph = frFontBuildColoredGlyphWithSharedFlags((s32)(x * 16.0f),
+        glyph = frwGetStaffFontFRQ((s32)(x * 16.0f),
             (s32)(y * 8.0f), 0, 0, 1, 8, color, text, 0);
     }
-    frFontMeasureLines(glyph);
+    frGetStrWidth2(glyph);
     frFontDrawGlyphWithSharedFlags(glyph, 1);
     return frDestroyFontRequestAfter(glyph);
 }
@@ -1080,7 +1080,7 @@ s32 mnuStaffImageProc(void) {
     }
     if (phase == 1) {
         if (mnuMovieWork->imageHoldFrames == 0) {
-            kwlnFadeOutStart(0, 0, 0, 0);
+            dds3FadeIn(0, 0, 0, 0);
             if (mnuMovieWork->imageAlpha < 256) {
                 mnuMovieWork->imageAlpha += timing[mnuMovieWork->scrollPaused - 1].fadeInStep;
             }
@@ -1176,7 +1176,7 @@ s32 mnuUpdateStaffRoll(KwlnTask *task) {
         mnuInitializeMovieRollViewport();
         dds3StartProcess(D_00429938, 0x2B19, 0, 0, mnuUpdateStaffMoviePresentation,
                        mnuReleaseMovieResourceAfterPendingWork, 0);
-        kwlnFadeOutStart(0, 0, 0, 0x1E);
+        dds3FadeIn(0, 0, 0, 0x1E);
         mnuMovieWork->state = 3;
         mnuMovieWork->frame = 0;
         break;
@@ -1202,7 +1202,7 @@ s32 mnuUpdateStaffRoll(KwlnTask *task) {
             }
             mnuMovieWork->frame++;
             if (mnuMovieWork->frame == D_003E3970[0x110].offsetY / 60 * 60 + 0x12C) {
-                kwlnFadeInStart(0, 0, 0, 0x28);
+                dds3FadeOut(0, 0, 0, 0x28);
             }
             /* Retail evaluates this test, but nothing in this build depends on it. */
             if (mnuMovieWork->frame / 60 == D_003E3970[0x110].offsetY / 60 + 5) {
@@ -1214,7 +1214,7 @@ s32 mnuUpdateStaffRoll(KwlnTask *task) {
                 return 0;
             }
             if (D_00437AB8 == 4 || D_00437AB8 == 5) {
-                dds3AdminSubmitModeRequest(4, 0, 0, 0);
+                dds3AdminiCallSequence(4, 0, 0, 0);
                 return 0;
             }
             return result;
@@ -1271,7 +1271,7 @@ void mnuAdvanceStaffImageSequence(void) {
     case 3:
         mnuMovieWork->movieFrame++;
         if (mnuMovieWork->movieFrame >= 230) {
-            mnuStopMovieDrawTask();
+            movieStop();
             i = ++D_00437AB4;
             if (i == 19) {
                 D_00437AB8 = 5;
@@ -1366,9 +1366,9 @@ void mnuUpdateStaffSparkleEffects(StaffSparkleState *state) {
     s32 j;
     s32 age;
 
-    if (sdfGetRand(0) % 60 == 0 && state->count < 8) {
-        s32 x = sdfGetRand(0) % 60 - 100;
-        u32 y = sdfGetRand(0) % 448;
+    if (dds3GetRandA(0) % 60 == 0 && state->count < 8) {
+        s32 x = dds3GetRandA(0) % 60 - 100;
+        u32 y = dds3GetRandA(0) % 448;
         state->positions[state->count][0] = x * 16;
         state->positions[state->count][1] = y * 8;
         state->ages[state->count] = 0;
@@ -1481,8 +1481,8 @@ void mnuShuffleTitlePaletteSpriteOrder(MnuTitlePaletteTransition *transition, s3
     i = 19;
     while (i >= 0) {
         i--;
-        first = sdfGetRand(0) % count;
-        second = sdfGetRand(0) % count;
+        first = dds3GetRandA(0) % count;
+        second = dds3GetRandA(0) % count;
         savedSpriteIndex = transition->spriteIndices[first + skip];
         transition->spriteIndices[first + skip] = transition->spriteIndices[second + skip];
         transition->spriteIndices[second + skip] = savedSpriteIndex;
@@ -1566,7 +1566,7 @@ void mnuAdvanceStaffTextScroll(StaffScrollTransition *state) {
     uiDrawSurfaceAtNearDepth(0x53);
     if (state->scrolling == 0) {
         if (state->countdown == 0) {
-            if (sdfGetRand(0) % 180U == 0) {
+            if (dds3GetRandA(0) % 180U == 0) {
                 state->scrolling = 1;
                 state->y = (sprites->workEntries[7].sourceHeight + 0x1C0) << 3;
             }
@@ -1637,7 +1637,7 @@ void mnuFinishStaffMovieAndFreeState(KwlnTask *task) {
     mnuResetTitleStreamLocked();
     mnuReleaseStaffRollText();
     do {
-        pending = sdfCheckPendingWorkWithInterrupts();
+        pending = sdfDelayedResrcCheck();
     } while (pending != 0);
     sdfMemFreeDelayedDirect(mnuMovieWork->handle);
     mnuMovieWork = NULL;
@@ -1645,7 +1645,7 @@ void mnuFinishStaffMovieAndFreeState(KwlnTask *task) {
 
 void mnuReleaseMovieResourceAfterPendingWork(KwlnTask *task) {
     effDestroyResourceSlotSet(mnuMovieWork->sprite);
-    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    while (sdfDelayedResrcCheck() != 0) {
     }
     sdfSetStreamFrameDrawMode(0);
 }
@@ -1689,7 +1689,7 @@ s32 mnuStopStaffTasks(void) {
     return 0;
 }
 
-s32 mnuMovieDraw(KwlnTask *task) {
+s32 movieDrawProc(KwlnTask *task) {
     sdfMovieDrawFrame(&mnuMovieDrawContext, &D_003803C8);
     return 0;
 }
@@ -1698,8 +1698,8 @@ extern char D_0042A338[]; /* "mnuMovieDraw" */
 
 void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *descriptor) {
     if (mnuMovieDrawTask == 0) {
-        sdfMovieInitializeStreamWork(&mnuMovieDrawContext, descriptor, fileName);
-        mnuMovieDrawTask = dds3StartProcess(D_0042A338, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
+        movieOpenStream(&mnuMovieDrawContext, descriptor, fileName);
+        mnuMovieDrawTask = dds3StartProcess(D_0042A338, 0x2afb, 1, 1, movieDrawProc, 0, 0);
     }
 }
 
@@ -1737,7 +1737,7 @@ void mnuSubmitMovieDrawPacket(MovObj *movie, SdfPoolNode *pool) {
     u32 bufferWidth;
     u32 basePointer;
 
-    packet = (MnuMovieDrawPacket *)sdfAllocPacketAligned(sizeof(MnuMovieDrawPacket));
+    packet = (MnuMovieDrawPacket *)sdfGrAllocPacketBuff(sizeof(MnuMovieDrawPacket));
     height = movie->soundNode.height;
     width = movie->soundNode.width;
     packet->header.dmaTag = 0x100000A;
@@ -1777,7 +1777,7 @@ void mnuSubmitMovieDrawPacket(MovObj *movie, SdfPoolNode *pool) {
         (u32)(movie->unk04 + movie->unk0C);
     packet->vertexExtent.registerId = SDF_GS_XYZ2;
     list = sdfPrimAllocDrawTag(0);
-    sdfAppendPacket(list, (u32)packet);
+    sdfDrawTagLink(list, (u32)packet);
     pool->append(pool, list);
 }
 
@@ -1813,14 +1813,14 @@ s32 mnuRestartMovieStreamAfterStop(KwlnTask *task) {
 
     if (mnuMovieDrawTask == 0) {
         if (D_00437AD4 != 0) {
-            sdfUpdateTextureHeadsWithInterruptsMasked(D_00437AD8);
+            sdfGsMemFree(D_00437AD8);
             D_00437AD4 = 0;
         }
         return -1;
     }
     if (sdfSoundGetCommandStatus() == 0) {
         movie = &mnuMovieDrawContext;
-        sdfMovieInitializeStreamWork(movie, &mnuMoviePlaybackDescriptor, mnuMovieRestartFileNameBuffer);
+        movieOpenStream(movie, &mnuMoviePlaybackDescriptor, mnuMovieRestartFileNameBuffer);
         movie->soundNode.textureHead = D_00437AD8;
         movie->soundNode.width = D_00437ADC;
         movie->soundNode.height = D_00437AE0;
@@ -1848,34 +1848,34 @@ KwlnTask *mnuRequestMoviePlayback(const char *file, const SdfMovieDescriptor *pa
         D_00437AE4 = context->soundNode.audioMode;
         strcpy(mnuMovieRestartFileNameBuffer, file);
         context->soundNode.textureHead = 0;
-        sdfCancelAndReleaseMovieStreamWork(context);
+        movieCloseStream(context);
         mnuMoviePlaybackDescriptor.source = D_00437AD8->word;
         D_00437AD0 = 0;
         return dds3StartProcess(D_0042A3B0, 0x2AFB, 0, 0, mnuRestartMovieStreamAfterStop, 0, 0);
     } else {
         D_00437AD4 = 0;
-        sdfMovieInitializeStreamWork(&mnuMovieDrawContext, &mnuMoviePlaybackDescriptor, file);
-        mnuMovieDrawTask = dds3StartProcess(D_0042A338, 0x2AFB, 1, 1, mnuMovieDraw, 0, 0);
+        movieOpenStream(&mnuMovieDrawContext, &mnuMoviePlaybackDescriptor, file);
+        mnuMovieDrawTask = dds3StartProcess(D_0042A338, 0x2AFB, 1, 1, movieDrawProc, 0, 0);
     }
     return mnuMovieDrawTask;
 }
 
-void mnuStartMoviePlaybackByResourceIndex(s32 index) {
+void dds3PlayMovieByIndex(s32 index) {
     MnuMovieResourceEntry *entry = &mnuMovieResourceEntries[index];
     mnuRequestMoviePlayback(entry->fileName, &entry->descriptor);
 }
 
-void mnuStopMovieDrawTask(void) {
+void movieStop(void) {
     if (mnuMovieDrawTask == 0) {
         return;
     }
-    sdfCancelAndReleaseMovieStreamWork(&mnuMovieDrawContext);
+    movieCloseStream(&mnuMovieDrawContext);
     dds3KillProcess(mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }
 
 s32 mnuCheckMovieDecoderStatus(void) {
-    return sdfPacCheckDecoderStatus(&mnuMovieDrawContext);
+    return sdfMovieIsFinished(&mnuMovieDrawContext);
 }
 
 extern u8 D_003E563C[];

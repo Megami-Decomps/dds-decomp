@@ -19,9 +19,9 @@ enum {
     SDF_MOVIE_STATE_STOP_REQUESTED = 7
 };
 
-s32 sdfMovieHandleLinearDeviceEvent(struct DevState *deviceState, s32 operation,
+s32 movieGetStreamSize(struct DevState *deviceState, s32 operation,
                                     void *data, s32 bytesRead, struct MovObj *movie);
-s32 sdfMovieHandlePacDeviceEvent(struct DevState *deviceState, s32 operation,
+s32 movieReadChunk(struct DevState *deviceState, s32 operation,
                                  void *readBuffer, s32 bytesRead, struct MovObj *movie);
 
 #endif /* SDF_MOVIE_STATE_H */

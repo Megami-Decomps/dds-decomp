@@ -5,7 +5,7 @@
 
 struct SdfListHead;
 
-/* Shared fog/depth state consumed by sdfConsBuildFrustumPacket (0x14).
+/* Shared fog/depth state consumed by sdf3DMakeFogPacket (0x14).
  * The viewer config serializes fogNear, depthNear, fogFar, depthFar, fogColor;
  * timeline payloads store fogFar before fogNear instead. */
 typedef struct KwlnDrawVectorParams {
@@ -49,12 +49,12 @@ void dds3SetProcessData(KwlnTask *task, u32 userValue);
 u32 dds3GetProcessData(KwlnTask *task);
 KwlnTask *dds3SearchProcessName(const char *name);
 /* Detach task from its parent hierarchy; scheduler queue links are unchanged. */
-void kwlnUnlinkListNode(KwlnTask *task);
+void dds3UnlinkProcess(KwlnTask *task);
 s32 dds3ExistProcess(KwlnTask *task);
 s32 kwlnTaskExists(const char *name);
 
 /* Append the common rectangle used to frame a grid of sprite cells. */
-void kwlnDrawSpriteCell(struct SdfListHead *packetList, s32 column, s32 row,
+void dds3ConsPanelTagLink(struct SdfListHead *packetList, s32 column, s32 row,
                         s32 columnCount, s32 rowCount);
 
 #endif /* KWLN_H */

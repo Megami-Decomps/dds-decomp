@@ -36,7 +36,7 @@ Endpoint returns are signed status values. The DDS2 bounds provider returns an `
 
 The mapper requires complete scalar effect-link ownership: `u16 flags`, two padding bytes and `s32 referenceCount`, totaling eight bytes. Both existing packed observations copy the complete record into a local `u64` through `memcpy`, at their original read points. The previous union representation shared physical offsets but did not reproduce the qualified scalar alias behavior. The record-size/reference-offset and actor-size/alignment checks remain intact.
 
-The typed PCP updater also requires removing obsolete integer casts from its two existing `effPcpRotateFireIds` callers. Both casts were removed and both complete owners rechecked at 368/0.
+The typed PCP updater also requires removing obsolete integer casts from its two existing `effPCPAgiFireball2Draw` callers. Both casts were removed and both complete owners rechecked at 368/0.
 
 ## Equivalent DDS2 camera merge choice
 

@@ -29,14 +29,14 @@ extern s8 evtSolarOverlayFadeFlags;
 extern u32 D_003BBDF0;
 
 
-s32 evtUpdateScriptTestSelection(KwlnTask *task);
+s32 EventDebugProcess1(KwlnTask *task);
 
 extern s32 evtSolarOverlayFadeCounter;
 
 extern s32 evtSolarOverlayFadeDuration;
 extern u32 D_003BA8EC;
 extern char D_003ACD18[]; /* "EventTest" */
-void evtDestroySecondaryWorldNode(void);
+void evtFreeStage(void);
 
 
 
@@ -46,7 +46,7 @@ INCLUDE_ASM(const s32, "game/code_0022A248", evtDrawFadingSolarOverlayFrame);
 
 /* Seed both noise-state geometries and cache the current solar phase. */
 void evtInitializeVisualData(SolarOverlayWork *overlay) {
-    s8 solarPhase = evtGetSolarPhase();
+    s8 solarPhase = evtGetAgeOfMoon16();
     SolarNoiseState *noise = &overlay->state.firstNoise;
     overlay->state.solarPhase = solarPhase;
     noise->centerX = 0x39;
@@ -71,7 +71,7 @@ void evtUpdateSolarPhaseTransition(SolarOverlayWork *overlay) {
     u32 flags;
     s32 remaining;
 
-    solarPhase = evtGetSolarPhase();
+    solarPhase = evtGetAgeOfMoon16();
     if (state->solarPhase != solarPhase) {
         flags = state->flags;
         state->transitionTimer = 20;
@@ -157,19 +157,19 @@ void func_0022AB58(void) {
 }
 
 /* After launching a test script, keep the test task idle and return 0. */
-s32 evtUpdateIdleTestTask(KwlnTask *task) {
+s32 evtDebugCameraStep(KwlnTask *task) {
     func_0022AB58();
     return 0;
 }
 
-/* Return the same update callback installed by evtStartTestTask. */
-void *evtGetTestTaskUpdateCallback(void) {
-    return (void *)evtUpdateScriptTestSelection;
+/* Return the same update callback installed by evtInitEventTest. */
+void *evtGetDebugProcess(void) {
+    return (void *)EventDebugProcess1;
 }
 
 #include "sdf_packet_alloc.h"
-extern s32 sdfPathExists(char *);
-extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
+extern s32 sdfFileCheckExist(char *);
+extern s32 scrStartScriptByName(s32, const char *, s32);
 extern SdfPoolNode D_00325708;
 extern u8 kwlnTaskPadButtonStates[2][2][16];
 extern s32 D_003BBDEC;
@@ -177,35 +177,35 @@ extern const char D_003ACC68[];
 extern const char D_003ACC78[];
 extern const char D_003ACC88[];
 
-s32 evtUpdateScriptTestSelection(KwlnTask *task) {
+s32 EventDebugProcess1(KwlnTask *task) {
     char path[0x40];
     SdfListHead *list;
 
-    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
-    kwlnDrawSpriteCell(list, 0x84, 0x54, 0x15, 10);
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7840, 0x7BA0, 0xFEFFFF, 0, D_003ACC68));
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7A80, 0x7C60, 0xFEFFFF, 6, D_003ACC78, D_003BBDEC));
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D20, 0xFEFFFF, 0, D_003ACC88));
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D80, 0xFEFFFF, 0, "RR   = ENTER"));
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7DE0, 0xFEFFFF, 0, "RU   = SET E500"));
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7E40, 0xFEFFFF, 0, "RL   = SET E600"));
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7EA0, 0xFEFFFF, 0, "RD   = RESET FLAG"));
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7F00, 0xFEFFFF, 0, "L1R1 = +-100"));
+    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    dds3ConsPanelTagLink(list, 0x84, 0x54, 0x15, 10);
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7840, 0x7BA0, 0xFEFFFF, 0, D_003ACC68));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7A80, 0x7C60, 0xFEFFFF, 6, D_003ACC78, D_003BBDEC));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7900, 0x7D20, 0xFEFFFF, 0, D_003ACC88));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7900, 0x7D80, 0xFEFFFF, 0, "RR   = ENTER"));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7900, 0x7DE0, 0xFEFFFF, 0, "RU   = SET E500"));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7900, 0x7E40, 0xFEFFFF, 0, "RL   = SET E600"));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7900, 0x7EA0, 0xFEFFFF, 0, "RD   = RESET FLAG"));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7900, 0x7F00, 0xFEFFFF, 0, "L1R1 = +-100"));
     D_00325708.append(&D_00325708, list);
 
     if ((s8)kwlnTaskPadButtonStates[1][0][1] < 0) {
         sprintf(path, "/event/e%03d/e%03d/scr/e%03d.bf",
                       D_003BBDEC - D_003BBDEC % 10, D_003BBDEC, D_003BBDEC);
-        if (sdfPathExists(path) != 0) {
+        if (sdfFileCheckExist(path) != 0) {
             D_003BA8EC = 0x80000000;
-            scrCreateProcessTaskFromResource(0x3EB, path, 0);
-            return (s32)evtUpdateIdleTestTask;
+            scrStartScriptByName(0x3EB, path, 0);
+            return (s32)evtDebugCameraStep;
         }
     }
     if ((s8)kwlnTaskPadButtonStates[1][0][3] < 0) {
-        mdlFlagClearAll();
-        return (s32)evtGetTestTaskUpdateCallback;
+        evtBitAllOff();
+        return (s32)evtGetDebugProcess;
     }
     if (kwlnTaskPadButtonStates[1][0][5] & 2) {
         D_003BBDEC++;
@@ -233,21 +233,21 @@ s32 evtUpdateScriptTestSelection(KwlnTask *task) {
 
 
 /* Test-task teardown destroys the named script processes. */
-void evtDestroyTestTaskScripts(KwlnTask *task) {
+void EventDebugShutdown(KwlnTask *task) {
     scrDestroyAllNamedProcesses();
 }
 
-void evtStartTestTask(void) {
+void evtInitEventTest(void) {
     D_003BA8EC = 0x80000000;
-    dds3StartProcess(D_003ACD18, 0x2AF9, 1, 1, evtUpdateScriptTestSelection, evtDestroyTestTaskScripts, 0);
+    dds3StartProcess(D_003ACD18, 0x2AF9, 1, 1, EventDebugProcess1, EventDebugShutdown, 0);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0022A248", D_003ACD18);
 
-void evtStopTestTasks(void) {
+void evtChkEndProcess(void) {
     dds3KillProcessName(D_003ACD18, 1);
     dds3KillProcessName("PolygonMovie", 0);
-    evtDestroySecondaryWorldNode();
+    evtFreeStage();
 }
 
 INCLUDE_RODATA(const s32, "game/code_0022A248", D_003ACD38);
@@ -260,14 +260,14 @@ INCLUDE_RODATA(const s32, "game/code_0022A248", D_003ACD68);
 
 INCLUDE_RODATA(const s32, "game/code_0022A248", D_003ACD78);
 
-INCLUDE_ASM(const s32, "game/code_0022A248", dds3UpdateWorldNodeDiagnosticListTask);
+INCLUDE_ASM(const s32, "game/code_0022A248", evtSceneDispProcess);
 
 void func_0022B618(void) {
     D_003BBDF0 = 0;
 }
 
 /* Insert after existing equal keys, keeping ascending order and incrementing count. */
-void evtInsertListNodeByOrderKey(EvtRuntimeGroup *list, EvtRuntimeChild *insertedNode) {
+void LinkFrameInfo(EvtRuntimeGroup *list, EvtRuntimeChild *insertedNode) {
     EvtRuntimeChild *cursor = list->children;
 
     if (cursor == 0) {
@@ -305,7 +305,7 @@ void evtInsertListNodeByOrderKey(EvtRuntimeGroup *list, EvtRuntimeChild *inserte
 }
 
 /* Unlink an attached node, clear its links, and decrement the owning list's count. */
-void evtUnlinkListNode(EvtRuntimeGroup *list, EvtRuntimeChild *removedNode) {
+void UnlinkFrameInfo(EvtRuntimeGroup *list, EvtRuntimeChild *removedNode) {
     EvtRuntimeChild *nextNode = removedNode->next;
     EvtRuntimeChild *previousNode = removedNode->prev;
     if (previousNode == 0) {
@@ -331,7 +331,7 @@ void evtUnlinkListNode(EvtRuntimeGroup *list, EvtRuntimeChild *removedNode) {
 }
 
 /* Walk the linked list and reinsert the first out-of-order successor. */
-void evtReorderListNodes(EvtRuntimeGroup *list) {
+void SortFrameInfo(EvtRuntimeGroup *list) {
     if (list != 0) {
         EvtRuntimeChild *anchorNode = list->children;
         while (anchorNode != 0) {
@@ -339,8 +339,8 @@ void evtReorderListNodes(EvtRuntimeGroup *list) {
             EvtRuntimeChild *candidateNode = resumeNode;
             while (candidateNode != 0) {
                 if (candidateNode->frame < anchorNode->frame) {
-                    evtUnlinkListNode(list, candidateNode);
-                    evtInsertListNodeByOrderKey(list, candidateNode);
+                    UnlinkFrameInfo(list, candidateNode);
+                    LinkFrameInfo(list, candidateNode);
                     /* Resume from the relocated node's new successor, not its old one. */
                     resumeNode = candidateNode->next;
                     break;
@@ -384,7 +384,7 @@ EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, Evt
     memset(key, 0, sizeof(*key));
     key->frame = frame;
     key->serializedValue = -1;
-    evtInsertListNodeByOrderKey(group, key);
+    LinkFrameInfo(group, key);
 
     switch (group->type) {
     case 2:
@@ -462,7 +462,7 @@ EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, Evt
     case 14: {
         void *payload = sdfChipAllocDirect(0x2C);
         key->payload = payload;
-        memcpy(payload, &effGetCh71Work()->body, sizeof(EffBlurTemplateBody));
+        memcpy(payload, &Eve_PartialMultiBlurGetParams()->body, sizeof(EffBlurTemplateBody));
         key->p08.h[0] = 1;
         key->p10.h[0] = 0;
         break;
@@ -470,14 +470,14 @@ EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, Evt
     case 15: {
         void *payload = sdfChipAllocDirect(0x2C);
         key->payload = payload;
-        memcpy(payload, &effGetCh72Work()->params, sizeof(EffBlurScatterParams));
+        memcpy(payload, &Eve_DistortionBlurGetParams()->params, sizeof(EffBlurScatterParams));
         key->p08.h[0] = 1;
         break;
     }
     case 23: {
         void *payload = sdfChipAllocDirect(0x2C);
         key->payload = payload;
-        memcpy(payload, effGetCh76Work(), 0x2C);
+        memcpy(payload, Eve_RippleBlurGetParams(), 0x2C);
         key->p08.h[0] = 1;
         break;
     }
@@ -491,14 +491,14 @@ EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, Evt
     case 16: {
         void *payload = sdfChipAllocDirect(0x18);
         key->payload = payload;
-        memcpy(payload, effGetCh74Params(), 0x18);
+        memcpy(payload, Eve_FilterGetParams(), 0x18);
         key->p08.h[0] = 1;
         break;
     }
     case 17: {
         void *payload = sdfChipAllocDirect(0x24);
         key->payload = payload;
-        memcpy(payload, effGetCh75Work(), 0x24);
+        memcpy(payload, Eve_PartialMultiFilterGetParams(), 0x24);
         key->p08.h[0] = 1;
         break;
     }

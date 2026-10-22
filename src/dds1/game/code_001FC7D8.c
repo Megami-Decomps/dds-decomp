@@ -112,7 +112,7 @@ void btlDrawUnitStatusShadowDisc(BtlUnit *unit) {
         }
         dds3GetPosPoseSet(unit->effectObject);
         VU0_STORE_VF(vf10, ownPosition);
-        if (sdfLoadMapRecordPositionVector(model->inner, 0) == 0) {
+        if (sdfModelGetMarkPos(model->inner, 0) == 0) {
             VU0_LOAD_VF(vf10, ownPosition);
         }
         VU0_STORE_VF(vf10, position);
@@ -183,7 +183,7 @@ s32 btlAiCheckStatusRollEligibility(BtlTask *task) {
 }
 
 extern f32 btlUnitGetTopY(BtlUnit *unit);
-extern s32 btlProjectForwardPositionToPackedScreen(s32 screen[4]);
+extern s32 nbClipEffectNum(s32 screen[4]);
 extern void btlBossDebugPrintf(const char *format, ...);
 
 /* vu0 routine: choose an on-screen HP/MP label anchor, leaving it in vf10. */
@@ -215,13 +215,13 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
         return;
     }
     VU0_LOAD_VF(vf10, baseline);
-    visible = btlProjectForwardPositionToPackedScreen(screen);
+    visible = nbClipEffectNum(screen);
     x = screen[0] >> 4;
     y = screen[1] >> 3;
     if (!visible || x < 12 || x >= 501 || y < 48 || y >= 324) {
         if (btlSetActorEffectParameter(unit, 1) != 0) {
             VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
-            visible = btlProjectForwardPositionToPackedScreen(screen);
+            visible = nbClipEffectNum(screen);
             x = screen[0] >> 4;
             y = screen[1] >> 3;
             if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
@@ -240,7 +240,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
             candidate[2] = baseline[2];
             candidate[1] -= unit->height * unit->scale * 0.25f;
             VU0_LOAD_VF(vf10, candidate);
-            visible = btlProjectForwardPositionToPackedScreen(screen);
+            visible = nbClipEffectNum(screen);
             x = screen[0] >> 4;
             y = screen[1] >> 3;
             if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
@@ -251,7 +251,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
         }
         btlUnitGetMuzzlePosVU(unit);
         VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
-        visible = btlProjectForwardPositionToPackedScreen(screen);
+        visible = nbClipEffectNum(screen);
         x = screen[0] >> 4;
         y = screen[1] >> 3;
         if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
@@ -261,7 +261,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
         }
         candidate[1] += unit->height * unit->scale * 0.5f;
         VU0_LOAD_VF(vf10, candidate);
-        visible = btlProjectForwardPositionToPackedScreen(screen);
+        visible = nbClipEffectNum(screen);
         x = screen[0] >> 4;
         y = screen[1] >> 3;
         if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
@@ -273,7 +273,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
         VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
         candidate[1] -= unit->height * unit->scale * 0.5f;
         VU0_LOAD_VF(vf10, candidate);
-        visible = btlProjectForwardPositionToPackedScreen(screen);
+        visible = nbClipEffectNum(screen);
         x = screen[0] >> 4;
         y = screen[1] >> 3;
         if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
@@ -559,7 +559,7 @@ s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args) {
         }
         VU0_LOAD_VF(vf11, args->anchorOffset);
         VU0_ADD(vf10, vf10, vf11);
-        if (btlProjectForwardPositionToPackedScreen(screen) != 0) {
+        if (nbClipEffectNum(screen) != 0) {
             screen[0] += (s32)(btlLinkedNumberScreenOffsets[args->payload.linked.offsetIndex][0] * 32.0f) << 4;
             screen[1] += ((s32)(btlLinkedNumberScreenOffsets[args->payload.linked.offsetIndex][1] * 32.0f) << 3) + 256;
             btlDrawCenteredUnsignedNumber(screen[0], screen[1] - rise, value, color, offsets);
@@ -718,7 +718,7 @@ s32 func_001FDA78(BtlLinkedEffectArgs *args) {
         VU0_LOAD_VF(vf11, args->anchorOffset);
         VU0_ADD(vf10, vf10, vf11);
 
-        if (btlProjectForwardPositionToPackedScreen(screen)) {
+        if (nbClipEffectNum(screen)) {
             screen[0] += (s32)(btlLinkedNumberScreenOffsets[args->payload.counter.offsetIndex][0] * 32.0f) << 4;
             screen[1] += ((s32)(btlLinkedNumberScreenOffsets[args->payload.counter.offsetIndex][1] * 32.0f) << 3) + 0x100;
 

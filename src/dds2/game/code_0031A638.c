@@ -23,7 +23,7 @@ void mnuAdvanceShootingProgressFromRecord(MenuRuntimeRecord *record, MenuRuntime
 
 /* Seed the saved-score floor and score snapshots, then clear the current score. */
 void mnuInitializeHighScoreState(MnuShootingWork *work) {
-    u32 minimum = mdlFlagTest(0x80E) == 0 ? 300000U : 600000U;
+    u32 minimum = evtBitCheck(0x80E) == 0 ? 300000U : 600000U;
     if (datGameState->highScore < minimum) {
         datGameState->highScore = minimum;
     }
@@ -54,9 +54,9 @@ void mnuUpdateHighScoreFlag(MnuShootingWork *work) {
 
     if (datGameState->highScore < pendingScore) {
         datGameState->highScore = pendingScore;
-        mdlFlagSet(0x815);
+        evtBitOn(0x815);
     } else {
-        mdlFlagClear(0x815);
+        evtBitOff(0x815);
     }
     printf("************************Score Update!![%d / %d]\n",
                   datGameState->highScore, work->pendingScore);
@@ -149,7 +149,7 @@ s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
     case 0:
         work->phaseTicks = 0;
         work->phase = 1;
-        kwlnFadeOutStart(0, 0, 0, 30);
+        dds3FadeIn(0, 0, 0, 30);
         break;
     case 1:
         if (++work->phaseTicks > 180) {
@@ -173,7 +173,7 @@ s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
         if (++work->phaseTicks > 180) {
             work->phaseTicks = 0;
             work->phase = 6;
-            kwlnFadeInStart(0, 0, 0, 30);
+            dds3FadeOut(0, 0, 0, 30);
             mnuAdvanceTitleStateUnderSemaphore();
         }
         break;
@@ -223,7 +223,7 @@ s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
         work->phaseTicks = 0;
         work->phase = 12;
         itfSetFadeMode(&work->choiceFade.fade, 0, 8);
-        kwlnFadeInStart(0, 0, 0, 120);
+        dds3FadeOut(0, 0, 0, 120);
         mnuAdvanceTitleStateUnderSemaphore();
         break;
     case 12:

@@ -11,14 +11,14 @@ enum {
 
 extern char evtPictureTaskName[];
 
-void evtSetContextFlag(KwlnTask *task);
-void evtClearContextFlag(KwlnTask *task);
+void evtPictureDrawOn(KwlnTask *task);
+void evtPictureDrawOff(KwlnTask *task);
 EvtPictureWork *evtAllocateContext(void);
-void evtSetConvertedContextValue(EvtPictureWork *context, const char *path);
+void LoadTexture(EvtPictureWork *context, const char *path);
 void evtSubmitPictureDrawPacket(struct SdfTex *texture);
 s32 evtUpdatePictureWhenFlagged(KwlnTask *task);
-void evtPictureReleaseTaskTextureAndState(KwlnTask *task);
-KwlnTask *evtCreateTask(s32 taskId, const char *path);
-KwlnTask *evtCreateTaskWithValue(s32 taskId, struct SdfTex *texture);
+void evtPictureShutdown(KwlnTask *task);
+KwlnTask *evtStartPictureProcess2(s32 taskId, const char *path);
+KwlnTask *evtStartPictureProcess(s32 taskId, struct SdfTex *texture);
 
 #endif /* EVT_PICTURE_H */

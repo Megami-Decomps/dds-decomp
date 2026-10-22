@@ -1,6 +1,6 @@
 # Boss geometry: complete publication and input-acquisition stages
 
-`effBossUpdateGeometry` emits 2,544 bytes with the native `0x130` frame.
+`effPCPCrackDraw` emits 2,544 bytes with the native `0x130` frame.
 The DDS1 owner gate is **71 match, 0 differ** on the pinned EE GCC 2.96.
 
 ## Source and investigation credit

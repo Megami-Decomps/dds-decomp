@@ -285,7 +285,7 @@ typedef char Atrac3LoadTaskArgs_entryIndex_offset_must_be_8[
     ((u32)&((Atrac3LoadTaskArgs *)0)->entryIndex == 8) ? 1 : -1];
 
 SoundMixer *sndMixerClone(SoundMixer *source);
-s32 sndReadSelectedMixerBankValue(SoundMixer *mixer, u16 kind);
+s32 effBTLGetDrawEndFrame(SoundMixer *mixer, u16 kind);
 void sndReleaseAllVoices(SoundMixer *mixer);
 void sndCreateSystemEffect(SoundResourceNode *effect);
 void sndDeleteSystemEffect(SoundResourceNode *effect);
@@ -299,10 +299,10 @@ struct BtlRuntimeTask *sndCreateStationedSeTask(u32 soundId);
 struct BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *source, struct BtlUnit *owner, u64 resource);
 BattleEffect *func_00160958(SoundMixer *mixer, u16 kind, void *owner, s32 value);
 BattleEffect *func_00168548(SoundMixer *mixer, u16 kind, void *owner, s32 value);
-void sndUnlinkVoice(BattleEffect *effect);
-void effReleaseBattleVoiceOwner(BattleEffect *effect);
-u32 effBattleGetCurrentFrame(BattleEffect *effect);
-void effBattleUpdateSelectedValue(BattleEffect *effect, u32 endFrame);
+void effBTLCutListRelease(BattleEffect *effect);
+void effBTLCutDelete(BattleEffect *effect);
+u32 effBTLCutGetFrame(BattleEffect *effect);
+void effBTLCutSetDrawEndFrame(BattleEffect *effect, u32 endFrame);
 
 /* The data-file task allocates four argument bytes for its borrowed unit. */
 typedef struct SoundDataFileArgs {

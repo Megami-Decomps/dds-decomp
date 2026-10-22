@@ -64,10 +64,10 @@ typedef char EvtPackLoadState_effect75_at_0x44[
     ((u32)&((EvtPackLoadState *)0)->effect75 == 0x44) ? 1 : -1];
 
 /* These numeric task IDs resolve to the camp-owned event-pack state. */
-EvtPackLoadState *evtGetEventPackLoadState(u32 taskId);
-s32 evtGetEventPackLoadedState(u32 taskId);
+EvtPackLoadState *evtGetPackProcessData(u32 taskId);
+s32 evtGetEventPackStat(u32 taskId);
 
 /* Entry payload layouts vary by resource kind and remain opaque here. */
-void *evtFindTaskResourceEntryByKey(u32 taskId, s32 key);
+void *evtGetResorceData(u32 taskId, s32 key);
 
 #endif /* EVT_EVENT_PACK_H */

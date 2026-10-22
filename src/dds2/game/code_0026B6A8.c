@@ -43,33 +43,33 @@ s32 dspStartFlagEvent(void *context) {
 
     if (kind < 2) {
         if (kind >= 0) {
-            if (mdlFlagTest(0x1B1) != 0 && mdlFlagTest(0x916) == 0) {
+            if (evtBitCheck(0x1B1) != 0 && evtBitCheck(0x916) == 0) {
                 dspSetActive(1);
-                dspStartEntry(5);
-                mdlFlagSet(0x916);
+                fclStartMessage(5);
+                evtBitOn(0x916);
                 return 1;
             }
             for (i = 0; i < sizeof(mnuSceneFlagEventEntries) / sizeof(mnuSceneFlagEventEntries[0]); i++) {
-                if (mdlFlagTest(mnuSceneFlagEventEntries[i].requiredFlag) != 0 && mdlFlagTest(mnuSceneFlagEventEntries[i].handledFlag) == 0) {
+                if (evtBitCheck(mnuSceneFlagEventEntries[i].requiredFlag) != 0 && evtBitCheck(mnuSceneFlagEventEntries[i].handledFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
                     evtCopyEntryStringToActiveWindow(0, (void *)(D_00435E5C + mnuSceneFlagEventEntries[i].areaIndex * 0x19));
                     evtCopyEntryStringToActiveWindow(1, D_00435E50[mnuSceneFlagEventEntries[i].nameIndex].encodedText);
                     evtCopyEntryStringToActiveWindow(2, (void *)(D_00435E4C + mnuSceneFlagEventEntries[i].dialogIndex * 0x11));
-                    dspStartEntry(3);
-                    mdlFlagSet(mnuSceneFlagEventEntries[i].handledFlag);
+                    fclStartMessage(3);
+                    evtBitOn(mnuSceneFlagEventEntries[i].handledFlag);
                     return 1;
                 }
             }
             for (i = 0; i < 5; i++) {
                 slot = &datGameState->party[i];
-                if ((slot->flags & 1) != 0 && mdlFlagTest(mnuPartyFlagEventEntries[slot->unitId].requiredFlag) != 0
-                    && mdlFlagTest(mnuPartyFlagEventEntries[slot->unitId].handledFlag) == 0) {
+                if ((slot->flags & 1) != 0 && evtBitCheck(mnuPartyFlagEventEntries[slot->unitId].requiredFlag) != 0
+                    && evtBitCheck(mnuPartyFlagEventEntries[slot->unitId].handledFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
                     evtCopyEntryStringToActiveWindow(0, datUnitNames[slot->unitId].encodedText);
-                    dspStartEntry(4);
-                    mdlFlagSet(mnuPartyFlagEventEntries[slot->unitId].handledFlag);
+                    fclStartMessage(4);
+                    evtBitOn(mnuPartyFlagEventEntries[slot->unitId].handledFlag);
                     return 1;
                 }
             }
@@ -100,7 +100,7 @@ s32 dspUpdateFlagEvent(KwlnTask *request) {
         return result;
     }
     if (*panel == 0) {
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             if (dspStartFlagEvent((void *)(u32)state) == 0) {
                 mnuSetPopupEntryFlagged(panel, mnuTerminalPopupEntries);
             }
@@ -129,10 +129,10 @@ u32 mnuStartTaskFadeIn(KwlnTask *task) {
     state = dds3GetProcessData(task);
     /* Both arms are identical in retail; kept as written. */
     if (*(s32 *)(state + 0xe4) == 0) {
-        kwlnFadeInStart(0, 0, 0, 0xf);
+        dds3FadeOut(0, 0, 0, 0xf);
     }
     else {
-        kwlnFadeInStart(0, 0, 0, 0xf);
+        dds3FadeOut(0, 0, 0, 0xf);
     }
     return 1;
 }
@@ -141,7 +141,7 @@ s32 mnuStartTerminalPanelFadeOut(KwlnTask *task) {
     struct MenuSlotState *state = (struct MenuSlotState *)dds3GetProcessData(task);
 
     mnuApplyFadeTrackMode(1, state);
-    kwlnFadeOutStart(0, 0, 0, 0);
+    dds3FadeIn(0, 0, 0, 0);
     return 1;
 }
 
@@ -154,7 +154,7 @@ s32 mnuUpdateTerminalPanelPopupWhenIdle(KwlnTask *request) {
     s32 *panelState = (s32 *)(state + 0x54);
     s32 result = mnuDispatchPopupTransition((u8 *)state + 8, panelState, 0, request);
     if (result == 0) {
-        if (*panelState == 0 && kwlnFadeIsActive() == 0) {
+        if (*panelState == 0 && dds3FadeCheck() == 0) {
             mnuSetPopupEntryFlagged(panelState, D_003CE998);
         }
         result = 0;
@@ -281,7 +281,7 @@ void mnuSetScrollingStripSpeedsRandomly(DspScrollingStripState *state, s32 negat
     s32 i = 5;
 
     for (; i >= 0; i--) {
-        s32 offset = sdfGetRand(NULL) % range + minimum;
+        s32 offset = dds3GetRandA(NULL) % range + minimum;
         if (negate == 0) {
             *offsets = offset;
         } else {
@@ -363,7 +363,7 @@ s32 evtCopyWorldObjectEntryValue(s32 id, s32 dst) {
     EffWorldNode *src;
     EffWorldNode *destinationNode;
 
-    src = dds3FindIndexedObjectChainNodeByName((EffWorldNode *)dds3GetWorldSecondaryObject(), 9,
+    src = dds3SceneBasicSearchNameAndType((EffWorldNode *)dds3GetControlScene(), 9,
                                                (const u8 *)id);
     if (src != NULL) {
         destinationNode = (EffWorldNode *)dst;

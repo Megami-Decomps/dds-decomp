@@ -30,7 +30,7 @@ typedef struct FldRoomState {
     s32 savePointValue; /* 0x120: a save point's (mode 3) spawn value, else -1 */
     u8 pad124[0xC];
     s16 unk130;
-    s16 roomId;       /* 0x132: returned by fldFindRoomByTask */
+    s16 roomId;       /* 0x132: returned by fldFindEveRngIndex */
     s16 mapSlot;      /* 0x134: above 0, the map slot whose flag hides the trigger */
     s16 mode;         /* 0x136: 1 NPC, 2 item box, 3 save point, 4 heal point; 0 otherwise */
     s16 entryIndex; /* 0x138: active entry index when mode is 1. */

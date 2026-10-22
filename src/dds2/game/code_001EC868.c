@@ -78,30 +78,30 @@ extern void effBTLFieldColorResetFlags(void);
 extern BattleEffect * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
 extern void effSweepFloorModelList(void);
 extern void effTickSlotVolumeFade(void);
-extern s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 resource1Data, const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
-extern void evtDestroySecondaryWorldNode(void);
-extern void evtDrainSecondaryWorldNodes(void);
+extern s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1Data, const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
+extern void evtFreeStage(void);
+extern void evtFreeAllUnit(void);
 extern u32 fileClearRenderFlag(u32 mask);
 extern void fileResetRenderFlags(void);
 extern void fileSetRenderFlag(u32 mask);
-extern void fldDrawSkyGradient(void);
-extern u32 fldGetSkyDrawState(void);
-extern void fldSetSkyDrawState(u32 drawState);
+extern void fldSkyDrawFilter(void);
+extern u32 fldSkyGetAlpha(void);
+extern void fldSkySetAlpha(u32 drawState);
 extern void fldUpdateSelectedValueTransition(void);
-extern void fldUpdateSwayOffset(void);
+extern void fldSkyCalcFilter(void);
 extern void mdlClearListedObjectFlag(void);
 extern void mdlMarkAndProcessObjectNodes(void);
 extern void mdlSetListedObjectFlag(void);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
-extern u32 sdfSoundIsCommandBusy(void);
-extern s32 sdfSoundSendNamedCommand(const char *name, u8 channel);
-extern void sndEnsureMidiBankResident(s32 packed);
-extern s32 sndGetMixerBankCallbackFrame(SoundMixer *mixer, u16 kind);
+extern u32 p2sdGetPcmState(void);
+extern s32 p2sdLoadPcmFile(const char *name, u8 channel);
+extern void p2sdLoadSMGFile(s32 packed);
+extern s32 effBTLGetMotionChangeFrame(SoundMixer *mixer, u16 kind);
 extern s32 sndIsCommandBusySigned(void);
-extern void sndQueueNoPayloadCommand1A0(void);
+extern void p2sdStopAllBgm(void);
 extern void sndQueueNoPayloadCommand210(void);
-/* Original-style implicit int, kept: matched code depends on it: btlStartTask, effDrawSolidRectangle. */
+/* Original-style implicit int, kept: matched code depends on it: btlStartTask, dds3EffectFilter. */
 
 extern f32 D_003B6DC0[4];
 
@@ -119,7 +119,7 @@ extern void btlInitializeActorCameraPreset(BtlLinkedCommand *action);
 
 extern s32 mnuGetSoundBufferStateLocked(void);
 
-extern void sdfVuLoadRotationMatrixX(f32);
+extern void SetRotateMatrixX(f32);
 
 extern EffRandState effSharedRandomState[];
 
@@ -127,9 +127,9 @@ extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 
 extern void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState *);
 
-extern void btlSetDefaultActionCameraPose();
+extern void fldCamUpdateDefault();
 
-extern void btlResetUnitEffectVector(BtlLinkedCommand *, BtlCamState *);
+extern void fldCamSetChase(BtlLinkedCommand *, BtlCamState *);
 
 typedef struct BtlUnit BtlUnit;
 
@@ -152,13 +152,13 @@ extern struct BtlRuntimeTask *btlCreateHookedUnitSoundTask(BtlUnit *unit, s32 op
 extern u32 D_00436AD4;
 
 
-extern struct EffWorldNode *evtSpawnActionObj9(s32);
+extern struct EffWorldNode *dds3AddLightObjectBasic(s32);
 
 extern f32 btlGetUnitCameraClearance(BtlUnit *, u8, f32, f32);
 
 extern f32 btlCombineCameraSpheresVU(f32 *, f32, f32, f32 *);
 
-extern s32 sdfCheckPendingWorkWithInterrupts(void);
+extern s32 sdfDelayedResrcCheck(void);
 
 extern u32 kwlnDrawControlFlags;
 
@@ -250,13 +250,13 @@ extern char D_00418C58[];
 
 extern s32 sndHasActiveFileLoad(void);
 
-extern void func_003422F8(u32, s32);
+extern void p2sdSetPcmBuffer(u32, s32);
 
 extern f32 *D_0037F770[];
 
 extern u8 kwlnDefaultColorVector[];
 
-extern void fldApplyLightSetCurrent(void);
+extern void fldSkyBattle(void);
 
 extern f32 *D_0037F770[];
 
@@ -304,9 +304,9 @@ extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
 
 
 
-extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
+extern s32 sdfModelGetMarkPos(SdfModel *, s32);
 
-extern void mdlLoadPrimaryVectorVU(MdlCtx *);
+extern void mdlGetPosition(MdlCtx *);
 
 extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
 
@@ -408,7 +408,7 @@ void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit);
 
 /* Forward the packed model-color word and its scalar to the inner resource list. */ void btlReleaseUnitModelColorResource(BtlUnit *unit, u32 value, f32 scalar);
 
-void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode);
+void effBTLModelGetMarkPosition2(BtlUnit *unit, s32 mode);
 
 void btlSetUnitColor(BtlUnit *unit, u32 color, s32 mode);
 
@@ -477,7 +477,7 @@ extern f32 fabsf(f32);
 extern f32 btlUnitGetBottomY(BtlUnit *);
 extern void btlFlagAllUnitsDefeatCandidate(void);
 
-extern void sdfVuLoadRotationMatrixY(f32);
+extern void SetRotateMatrixY(f32);
 
 void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *action, BtlCamState *out, f32 tiltDegrees) {
     BtlState *state;
@@ -582,9 +582,9 @@ void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *action, BtlCamState *
     VU0_STORE_VF(vf10, out->position);
 
     if (action->camera.direction[0] > 0.0f) {
-        sdfVuLoadRotationMatrixY(tiltDegrees * 0x1.1df46ap-6f);
+        SetRotateMatrixY(tiltDegrees * 0x1.1df46ap-6f);
     } else {
-        sdfVuLoadRotationMatrixY(-tiltDegrees * 0x1.1df46ap-6f);
+        SetRotateMatrixY(-tiltDegrees * 0x1.1df46ap-6f);
     }
     VU0_LOAD_VF(vf10, centers[2]);
     VU0_LOAD_VF(vf11, centers[1]);
@@ -597,7 +597,7 @@ void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *action, BtlCamState *
     btlAdjustCameraDirectionForDefaultPlane(out);
 }
 
-void btlSetDefaultActionCameraPose(BtlLinkedCommand *command, BtlCamState *pose) {
+void fldCamUpdateDefault(BtlLinkedCommand *command, BtlCamState *pose) {
     btlBuildBattleUnitFramingCameraPose(command, pose, 27.5f);
 }
 
@@ -605,9 +605,9 @@ void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *command, BtlCamState *
     btlBuildBattleUnitFramingCameraPose(command, pose, 20.0f);
     btlCopyMotionTransform(out, pose);
     if (pose->direction[0] > 0.0f) {
-        sdfVuLoadRotationMatrixY(-(20.0f * 0.017453293f));
+        SetRotateMatrixY(-(20.0f * 0.017453293f));
     } else {
-        sdfVuLoadRotationMatrixY(20.0f * 0.017453293f);
+        SetRotateMatrixY(20.0f * 0.017453293f);
     }
     VU0_STORE_VF(vf10, pose->direction);
     VU0_ROTATE_VEC(vf10, vf10);
@@ -649,7 +649,7 @@ void btlPrepareHeightScaledActionCameraPose(BtlLinkedCommand *action, BtlCamStat
         btlClearAllUnitDefeatCandidates();
         btlFlagMatchingUnitsDefeatCandidate(unit->status.flags & 0x600);
         btlCopyUnitRotationQuaternion(unit, quaternion);
-        pose = sdfGetRandInt(0, 4);
+        pose = dds3GetRandIntA(0, 4);
         fov = action->camera.fov;
         from->fov = fov;
         to->fov = fov;
@@ -724,7 +724,7 @@ void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *action, BtlCamState 
         btlClearAllUnitDefeatCandidates();
         btlFlagMatchingUnitsDefeatCandidate(flags & 0x600);
         btlCopyUnitRotationQuaternion(unit, quat);
-        pose = sdfGetRandInt(0, 4);
+        pose = dds3GetRandIntA(0, 4);
         fov = action->camera.fov;
         from->fov = fov;
         to->fov = fov;
@@ -1021,9 +1021,9 @@ void btlBuildRandomTargetCameraStates(BtlLinkedCommand *action, BtlCamState *fro
                 candidates[count++] = i;
             }
         }
-        selected = candidates[sdfGetRandInt(0, count) & 0xFFFF];
+        selected = candidates[dds3GetRandIntA(0, count) & 0xFFFF];
     } else {
-        selected = sdfGetRandInt(0, 8);
+        selected = dds3GetRandIntA(0, 8);
     }
     btlCopyUnitRotationQuaternion(unit, quaternion);
     fov = action->camera.fov;
@@ -1110,9 +1110,9 @@ void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *action, BtlCamState *from
                 candidates[count++] = i;
             }
         }
-        selected = candidates[sdfGetRandInt(0, count) & 0xFFFF];
+        selected = candidates[dds3GetRandIntA(0, count) & 0xFFFF];
     } else {
-        selected = sdfGetRandInt(0, 8);
+        selected = dds3GetRandIntA(0, 8);
     }
     if (btlGetIndexListCount(action->targetList) == 1 && allowSingle != 0) {
         btlBuildRandomTargetCameraStates(action, &action->frontCamera, &action->backCamera);
@@ -1330,10 +1330,10 @@ f32 angle, f32 blend) {
         }
     }
     if (first == NULL || last == NULL) {
-        btlSetDefaultActionCameraPose(command, pose);
+        fldCamUpdateDefault(command, pose);
         return;
     }
-    if (mode == 3 || (mode == 1 && (sdfGetRand((EffRandState *)effSharedRandomState) & 1))) {
+    if (mode == 3 || (mode == 1 && (dds3GetRandA((EffRandState *)effSharedRandomState) & 1))) {
         unit = first;
         first = last;
         last = unit;
@@ -1410,7 +1410,7 @@ f32 angle, f32 blend) {
 }
 
 extern f32 atanf(f32);
-extern void sdfVuLoadRotationMatrixY(f32);
+extern void SetRotateMatrixY(f32);
 void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *action, BtlCamState *pose, u8 mode) {
     BtlUnit *actor;
     BtlUnit *target;
@@ -1530,7 +1530,7 @@ void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *action, BtlCamState *p
         angle = -angle;
     }
 
-    sdfVuLoadRotationMatrixY(angle);
+    SetRotateMatrixY(angle);
     VU0_LOAD_VF(vf10, actorMuzzle);
     VU0_LOAD_VF(vf11, midpoint);
     VU0_SUB(vf10, vf10, vf11);
@@ -1603,7 +1603,7 @@ void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState
         flags |= ((BtlUnit *)btlGetIndexListEntry(command->targetList, i))->status.flags & 0x600;
     }
     if (flags == 0 || flags == 0x600) {
-        btlSetDefaultActionCameraPose(command, pose);
+        fldCamUpdateDefault(command, pose);
         return;
     }
     span = btlMeasureFilteredUnitGroupBounds(flags, 0, &selectorScalar);
@@ -1658,7 +1658,7 @@ void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState
         }
     }
     if (firstActor == 0 || secondActor == 0) {
-        btlSetDefaultActionCameraPose(command, pose);
+        fldCamUpdateDefault(command, pose);
         return;
     }
     btlUnitGetMuzzlePosVU(actor);
@@ -1768,7 +1768,7 @@ void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out
 
     user = action->link->unit;
     if (btlGetIndexListCount(action->targetList) >= 2U) {
-        btlSetDefaultActionCameraPose(action, out);
+        fldCamUpdateDefault(action, out);
         return;
     }
     target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
@@ -2029,9 +2029,9 @@ void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *action, BtlCamStat
     }
     scale = (animationFlags & 0x200) ? 320.0f : 300.0f;
     if (animationFlags & 0x200) {
-        pose = sdfGetRandInt(0, 2) + 2;
+        pose = dds3GetRandIntA(0, 2) + 2;
     } else {
-        pose = sdfGetRandInt(0, 2);
+        pose = dds3GetRandIntA(0, 2);
     }
     groups = 0;
     count = btlGetIndexListCount(action->targetList);
@@ -2157,7 +2157,7 @@ void btlBuildApproachCamera(BtlLinkedCommand *action, BtlCamState *out) {
     if (action->flags & 0x200) {
         angle = -angle;
     }
-    sdfVuLoadRotationMatrixY(angle);
+    SetRotateMatrixY(angle);
     VU0_LOAD_VF(vf10, dir);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_STORE_VF(vf10, out->direction);
@@ -2176,7 +2176,7 @@ void btlSetupActionCameraPair(BtlLinkedCommand *command) {
     if (!(user->status.flags & target->status.flags & 0x600)) {
         btlFlagAllUnitsDefeatCandidate();
     } else {
-        btlSetDefaultActionCameraPose(command, &command->camera);
+        fldCamUpdateDefault(command, &command->camera);
         return;
     }
     btlFrameSingleTargetActionCamera(command, command->frontCamera.position);
@@ -2270,7 +2270,7 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
         if (!(action->flags & 0x200)) {
             angle = -0.34906585f;
         }
-        sdfVuLoadRotationMatrixY(angle);
+        SetRotateMatrixY(angle);
         VU0_LOAD_VF(vf10, dir);
         VU0_APPLY_MATRIX(vf10, vf10);
         VU0_STORE_VF(vf10, out->direction);
@@ -2829,7 +2829,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
     if (target != NULL && (target->status.flags & 2) != 0 &&
         (runtime->unk268 == 1 ||
          (runtime->unk268 == 3 && target->lookupId == 1))) {
-        s32 field = mdlGetNodeMotionIndex(target->ext->owner, 0);
+        s32 field = mdlGetMotionNum(target->ext->owner, 0);
 
         if (field == 0xD || field == 0x12) {
             btlRefreshUnitEffectMotionAndEntry(target);
@@ -2940,9 +2940,9 @@ void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
     }
     if (mode == 0) {
         if (action->camera.direction[0] > 0.0f) {
-            sdfVuLoadRotationMatrixY(27.5f * 0.017453293f);
+            SetRotateMatrixY(27.5f * 0.017453293f);
         } else {
-            sdfVuLoadRotationMatrixY(-(27.5f * 0.017453293f));
+            SetRotateMatrixY(-(27.5f * 0.017453293f));
         }
     }
 
@@ -2984,7 +2984,7 @@ void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *command, Btl
             break;
         }
     }
-    btlSetDefaultActionCameraPose(command, out);
+    fldCamUpdateDefault(command, out);
     btlCopyMotionTransform(pose, out);
     span = btlMeasureFilteredUnitGroupBounds(0x200, 0, 0) * 0.5f;
     pose->position[0] -= span;
@@ -3061,7 +3061,7 @@ void btlFrameLeftmostUnitCameraPair(BtlCamState *source, BtlCamState *from, BtlC
     from->distance = length + selected->cameraRadius * selected->scale * 3.5f /
                               tanf(fov * 0.5f);
     btlCopyMotionTransform(to, from);
-    sdfVuLoadRotationMatrixY(-(45.0f * 0.017453293f));
+    SetRotateMatrixY(-(45.0f * 0.017453293f));
     VU0_LOAD_VF(vf10, to->direction);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, to->direction);
@@ -3153,7 +3153,7 @@ void func_001F2308(BtlCamState *source, BtlCamState *from, BtlCamState *to) {
     }
     to->distance = from->distance;
     btlCopyMotionTransform(to, from);
-    sdfVuLoadRotationMatrixY(-(45.0f * 0.017453293f));
+    SetRotateMatrixY(-(45.0f * 0.017453293f));
     VU0_LOAD_VF(vf10, to->direction);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, to->direction);
@@ -3195,7 +3195,7 @@ void btlBuildGroupFramingCameraPose(BtlCamState *source, BtlCamState *out) {
     btlAdjustCameraDirectionForDefaultPlane(out);
 }
 
-void btlResetUnitEffectVector(BtlLinkedCommand *command, BtlCamState *pose) {
+void fldCamSetChase(BtlLinkedCommand *command, BtlCamState *pose) {
     btlBuildBattleUnitFramingCameraPose(command, pose, 0.0f);
 }
 
@@ -3246,7 +3246,7 @@ void btlFrameEarliestAnimatedUnitCameraPair(BtlLinkedCommand *action, BtlCamStat
         }
     }
     if (selected == NULL) {
-        btlSetDefaultActionCameraPose(action, &action->camera);
+        fldCamUpdateDefault(action, &action->camera);
         return;
     }
     btlFlagAllUnitsDefeatCandidate();
@@ -3445,7 +3445,7 @@ void btlBuildSpeciesFramedCameraPair(BtlLinkedCommand *action, BtlCamState *from
     }
     width = unit->reach * unit->scale;
     height = unit->height * unit->scale;
-    pose = sdfGetRandInt(NULL, 2);
+    pose = dds3GetRandIntA(NULL, 2);
     btlCopyUnitRotationQuaternion(unit, quaternion);
     fov = action->camera.fov;
     from->fov = fov;
@@ -3574,7 +3574,7 @@ void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *action, BtlCamState *
     if (action->flags & 0x200) {
         angle = -angle;
     }
-    sdfVuLoadRotationMatrixY(angle);
+    SetRotateMatrixY(angle);
     VU0_LOAD_VF(vf10, dir);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_STORE_VF(vf10, out->direction);
@@ -3632,7 +3632,7 @@ void btlBuildActorRotatedCameraPresets(BtlLinkedCommand *action, BtlCamState *fr
         btlClearAllUnitDefeatCandidates();
         btlFlagMatchingUnitsDefeatCandidate(unit->status.flags & 0x600);
         btlCopyUnitRotationQuaternion(unit, quat);
-        pose = sdfGetRandInt(0, 2);
+        pose = dds3GetRandIntA(0, 2);
         fov = action->camera.fov;
         from->fov = fov;
         to->fov = fov;
@@ -3901,9 +3901,9 @@ void btlAdvanceActorCameraPreset(BtlLinkedCommand *action) {
         btlBuildApproachCamera(action, &action->camera);
 
         if (selectedMode != 0) {
-            sdfVuLoadRotationMatrixY((1.0f - action->progress) * 0.27925268f);
+            SetRotateMatrixY((1.0f - action->progress) * 0.27925268f);
         } else {
-            sdfVuLoadRotationMatrixY((1.0f - action->progress) * -0.27925268f);
+            SetRotateMatrixY((1.0f - action->progress) * -0.27925268f);
         }
         VU0_LOAD_VF(vf10, action->camera.direction);
         VU0_APPLY_MATRIX(vf10, vf10);
@@ -4597,7 +4597,7 @@ void btlUnitGetPosVU(BtlUnit *unit, u8 mode) {
     s128 pos;
     switch (mode) {
     case 1:
-        btlSetActorEffectParameterOrMuzzlePosition(unit, 1);
+        effBTLModelGetMarkPosition2(unit, 1);
         VU0_STORE_VF(vf10, &pos);
         break;
     case 0:
@@ -5710,7 +5710,7 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                     VU0_LOAD_VF(vf11, pose->position);
                     VU0_ADD(vf10, vf10, vf11);
                     VU0_STORE_VF_UNCLOBBERED(vf10, savedPosition);
-                    sdfVuLoadRotationMatrixX(value[0]);
+                    SetRotateMatrixX(value[0]);
                     VU0_LOAD_VF(vf10, pose->direction);
                     VU0_APPLY_MATRIX(vf10, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
@@ -5728,7 +5728,7 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                     VU0_ADD(vf10, vf10, vf11);
                     VU0_STORE_VF_UNCLOBBERED(vf10, savedPosition);
                     if (command->flags & 0x200) value[1] = -value[1];
-                    sdfVuLoadRotationMatrixY(value[1]);
+                    SetRotateMatrixY(value[1]);
                     VU0_LOAD_VF(vf10, pose->direction);
                     VU0_APPLY_MATRIX(vf10, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
@@ -5740,7 +5740,7 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                     break;
                 case 2:
                     if (command->flags & 0x200) value[1] = -value[1];
-                    sdfVuLoadRotationMatrixY(value[1]);
+                    SetRotateMatrixY(value[1]);
                     VU0_LOAD_VF(vf10, pose->direction);
                     VU0_APPLY_MATRIX(vf10, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
@@ -5871,10 +5871,10 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                     }
                     break;
                 case 8:
-                    btlSetActorEffectParameterOrMuzzlePosition(command->link->unit, 1);
+                    effBTLModelGetMarkPosition2(command->link->unit, 1);
                     VU0_STORE_VF_UNCLOBBERED(vf10, savedPosition);
                     savedPosition[1] -= 200.0f;
-                    btlSetActorEffectParameterOrMuzzlePosition(command->targetList->entries[0], 1);
+                    effBTLModelGetMarkPosition2(command->targetList->entries[0], 1);
                     VU0_STORE_VF_UNCLOBBERED(vf10, focus);
                     VU0_LOAD_VF(vf10, focus);
                     VU0_LOAD_VF(vf11, savedPosition);
@@ -6219,7 +6219,7 @@ f32 btlMeasureBattleSideBoundsWithSeed(s32 sides, f32 *top, f32 *bottom, const f
         f32 x;
         f32 z;
         f32 shift;
-        sdfVuLoadRotationMatrixY(4.71225f);
+        SetRotateMatrixY(4.71225f);
         VU0_LOAD_VF_PTR(vf10, direction);
         VU0_APPLY_MATRIX(vf10, vf10);
         /* Same SDK side scratch contract as the adjacent group-bounds routine. */
@@ -6331,7 +6331,7 @@ f32 btlMeasureFilteredActorBounds(s32 mask, BtlUnit *included, BtlUnit *excluded
             continue;
         }
         if (mode == 1) {
-            btlSetActorEffectParameterOrMuzzlePosition(unit, 1);
+            effBTLModelGetMarkPosition2(unit, 1);
             VU0_STORE_VF(vf10, center);
             radius = unit->cameraRadius * unit->scale;
             verticalOffset = radius * 0.5f;
@@ -6419,7 +6419,7 @@ f32 btlMeasureFilteredActorBounds(s32 mask, BtlUnit *included, BtlUnit *excluded
         f32 x;
         f32 z;
         f32 shift;
-        sdfVuLoadRotationMatrixY(0x1.2d958p+2f);
+        SetRotateMatrixY(0x1.2d958p+2f);
         VU0_LOAD_VF(vf10, direction);
         VU0_APPLY_MATRIX(vf10, vf10);
         VU0_STORE_VF_UNCLOBBERED(vf10, rotated);
@@ -6457,7 +6457,7 @@ f32 btlMeasureFilteredActorBounds(s32 mask, BtlUnit *included, BtlUnit *excluded
         unit = maxActor;
         if (!(absMin <= absMax)) unit = minActor;
         if (mode == 1) {
-            btlSetActorEffectParameterOrMuzzlePosition(unit, 1);
+            effBTLModelGetMarkPosition2(unit, 1);
             VU0_STORE_VF(vf10, edge);
             extent = unit->cameraRadius * unit->scale;
         } else {
@@ -6552,7 +6552,7 @@ f32 btlMeasureSideFilteredActorBounds(s32 mask, BtlUnit *included, BtlUnit *excl
             continue;
         }
         if (mode == 1) {
-            btlSetActorEffectParameterOrMuzzlePosition(unit, 1);
+            effBTLModelGetMarkPosition2(unit, 1);
             VU0_STORE_VF(vf10, center);
             radius = unit->cameraRadius * unit->scale;
             verticalOffset = radius * 0.5f;
@@ -6623,7 +6623,7 @@ f32 btlMeasureSideFilteredActorBounds(s32 mask, BtlUnit *included, BtlUnit *excl
         f32 x;
         f32 z;
         f32 shift;
-        sdfVuLoadRotationMatrixY(0x1.2d958p+2f);
+        SetRotateMatrixY(0x1.2d958p+2f);
         VU0_LOAD_VF(vf10, direction);
         VU0_APPLY_MATRIX(vf10, vf10);
         VU0_STORE_VF_UNCLOBBERED(vf10, rotated);
@@ -6737,7 +6737,7 @@ f32 btlBuildProjectedActorPairBoundsVU(s32 mask, BtlUnit *first, BtlUnit *second
         }
 
         if (mode == 1) {
-            btlSetActorEffectParameterOrMuzzlePosition(unit, 1);
+            effBTLModelGetMarkPosition2(unit, 1);
             radius = unit->cameraRadius * unit->scale;
             halfHeight = radius * 0.5f;
         } else {
@@ -7100,8 +7100,8 @@ void btlSpawnBattleWorldAction(void) {
     EffWorldNode *action;
 
     work = (s32)(u32)btlGetRuntime();
-    worldCounter = dds3AdvanceWorldCounter();
-    action = evtSpawnActionObj9(worldCounter);
+    worldCounter = dds3AllocObjectId();
+    action = dds3AddLightObjectBasic(worldCounter);
     ((BtlState *)work)->sceneLightNode = action;
     D_00436AD4 = 0;
 }
@@ -7119,11 +7119,11 @@ s32 btlAreWorkBuffersReady(void) {
 void btlReleaseWorkBuffers(void) {
     BtlState *work = (BtlState *)btlGetRuntime();
     if (work->secondaryBuffer != 0) {
-        sdfReleaseChipOrRetainedResource(work->secondaryBuffer);
+        sdfFreeAutoDelayed(work->secondaryBuffer);
         work->secondaryBuffer = 0;
     }
     if (work->primaryBuffer != 0) {
-        sdfReleaseChipOrRetainedResource(work->primaryBuffer);
+        sdfFreeAutoDelayed(work->primaryBuffer);
         work->primaryBuffer = 0;
     }
 }
@@ -7132,13 +7132,13 @@ void btlWaitForPendingWorkAndReleaseBuffers(void) {
     s32 pending;
     s32 work;
 
-    evtDrainSecondaryWorldNodes();
+    evtFreeAllUnit();
     do {
-        pending = sdfCheckPendingWorkWithInterrupts();
+        pending = sdfDelayedResrcCheck();
     } while (pending != 0);
-    evtDestroySecondaryWorldNode();
+    evtFreeStage();
     do {
-        pending = sdfCheckPendingWorkWithInterrupts();
+        pending = sdfDelayedResrcCheck();
     } while (pending != 0);
     btlReleaseWorkBuffers();
     work = (s32)(u32)btlGetRuntime();
@@ -7173,7 +7173,7 @@ void btlInitTintTransitionResource(u32 resource, u16 soundId);
 
 void btlInitializeSceneLightingAndTint(void) {
     u8 *context = (u8 *)btlGetRuntime();
-    fldApplyLightSetCurrent();
+    fldSkyBattle();
     btlInitTintTransitionResource(0x80, 0);
     VU0_LOAD_VF(vf10, (u8 *)D_0037F770[0] + 0x10);
     VU0_STORE_VF_UNCLOBBERED(vf10, context + 0x10);
@@ -7254,7 +7254,7 @@ void btlInitTintTransitionResource(u32 resource, u16 soundId) {
     u32 handle;
     D_003BDC90.currentId = soundId;
     D_003BDC90.nextId = soundId;
-    handle = fldGetSkyDrawState();
+    handle = fldSkyGetAlpha();
     D_003BDC90.resource = resource;
     D_003BDC90.handle = handle;
 }
@@ -7263,7 +7263,7 @@ void btlInitTintTransitionDefault(u16 soundId) {
     u32 handle;
     D_003BDC90.currentId = soundId;
     D_003BDC90.nextId = soundId;
-    handle = fldGetSkyDrawState();
+    handle = fldSkyGetAlpha();
     D_003BDC90.handle = handle;
     D_003BDC90.resource = 0x80;
 }
@@ -7276,9 +7276,9 @@ void btlStepTintTransition(void) {
         cmd->currentId += 0xFFFF;
         start = cmd->resource;
         value = (f32)(s32)(cmd->handle - start) * ((f32)cmd->currentId / (f32)cmd->nextId);
-        fldSetSkyDrawState(value + D_003BDC90.resource);
+        fldSkySetAlpha(value + D_003BDC90.resource);
     } else {
-        fldSetSkyDrawState(cmd->resource);
+        fldSkySetAlpha(cmd->resource);
     }
 }
 
@@ -7327,12 +7327,12 @@ void btlStepBlendColor(void) {
 }
 
 struct EffSolidRectParams;
-extern void effDrawSolidRectangle(struct EffSolidRectParams *source);
+extern void dds3EffectFilter(struct EffSolidRectParams *source);
 
-void btlDrawTintIfVisible(void) {
+void effBTLFieldFilterDraw(void) {
     BtlTintTransition *transition = (BtlTintTransition *)D_003BDCA0;
     if (transition->currentColor & 0xFF000000) {
-        effDrawSolidRectangle(transition);
+        dds3EffectFilter(transition);
     }
 }
 
@@ -7372,17 +7372,17 @@ void btlTickFieldSwayAndTint(void) {
     if ((((((BtlState *)work)->battleFlags & 0x20000) != 0) && ((((BtlState *)work)->commandRestrictFlags & 0x20) == 0)) &&
           ((((BtlState *)work)->unk220 & 0x4000000) == 0)) {
         fldUpdateSelectedValueTransition();
-        fldUpdateSwayOffset();
-        fldDrawSkyGradient();
+        fldSkyCalcFilter();
+        fldSkyDrawFilter();
     }
-    btlDrawTintIfVisible();
+    effBTLFieldFilterDraw();
 }
 
 extern WorldTransformSetup D_00452F50;
 
-extern void dds3LoadWorldTransformSetup(EffWorldNode *, WorldTransformSetup *);
+extern void dds3SetLightObjectResoruce(EffWorldNode *, WorldTransformSetup *);
 
-extern void evtBeginUnitValueColorTransition(EffWorldNode *object, s32 blendFrames);
+extern void dds3LinkSceneLight(EffWorldNode *object, s32 blendFrames);
 
 /* Stage light/ambient RGB on the scene node and start its frames-long blend. */
 void btlBeginSceneLightColorTransition(f32 *lightColor, f32 *ambientColor, s32 frames) {
@@ -7402,8 +7402,8 @@ void btlBeginSceneLightColorTransition(f32 *lightColor, f32 *ambientColor, s32 f
     D_00452F50.transform.rotation[1] = 0.0f;
     D_00452F50.transform.rotation[2] = 0.0f;
     D_00452F50.transform.rotation[3] = 0.0f;
-    dds3LoadWorldTransformSetup(listener, &D_00452F50);
-    evtBeginUnitValueColorTransition(work->sceneLightNode, frames);
+    dds3SetLightObjectResoruce(listener, &D_00452F50);
+    dds3LinkSceneLight(work->sceneLightNode, frames);
 }
 
 void btlCreateRainEffect(u32 majorId, u32 minorId) {
@@ -7459,15 +7459,15 @@ u32 btlPollFieldArchiveLoad(args)
 
     if (args->frame == 0) {
         btlFreeFieldBlocks();
-        fldFormatAreaDirectory(directory, args->stage, 1);
+        fldMakeFilePath(directory, args->stage, 1);
         sprintf(path, "%sf%03d_%03d.LB", directory, args->stage, args->variant);
         btlBossDebugPrintf("btl:field load[%s]\n", path);
-        args->request = (struct FilePacRequest *)fileQueuePlainDispatchRequest(path);
+        args->request = (struct FilePacRequest *)pacLoad(path);
         args->fieldF1 = NULL;
         args->fieldF2 = NULL;
         args->fieldTB = NULL;
     } else {
-        if (args->request != NULL && fileRequestIsReady((struct FileRequest *)args->request)) {
+        if (args->request != NULL && pacCheckEnd((struct FileRequest *)args->request)) {
             FilePacRequest *request = args->request;
             node = request->packet.queueHead;
             i = 0;
@@ -7489,11 +7489,11 @@ u32 btlPollFieldArchiveLoad(args)
                 node = node->next;
                 i++;
             }
-            btlStageTaskCleanupCallback(request);
+            pacFileHandleFree_(request);
             args->request = NULL;
         }
         if (args->fieldF1 != NULL && args->fieldF2 != NULL && args->fieldTB != NULL) {
-            evtCreateWorldObjectFromResource(args->stage, args->variant,
+            evtLoadArea_FromMemory(args->stage, args->variant,
                                              args->fieldF1, args->fieldF2,
                                              args->fieldTB, 0);
             btlInitializeSceneLightingAndTint();
@@ -7538,16 +7538,16 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     if (args->state == 0) {
         sprintf(path, "/fld/b/f%03d/f%03d_%03df.tmx", stage, stage, variant);
         result = 0;
-        args->frontHandle = fileQueueDefaultCallbackRequest(path);
+        args->frontHandle = fileLoad(path);
         btlBossDebugPrintf("btl:load 0[%s]\n", path);
         sprintf(path, "/fld/b/f%03d/f%03d_%03ds.tmx", stage, stage, variant);
-        args->sideHandle = fileQueueDefaultCallbackRequest(path);
+        args->sideHandle = fileLoad(path);
         btlBossDebugPrintf("btl:load 1[%s]\n", path);
     } else {
         if (args->frontHandle != 0) {
-            if (fileIsRequestReadyInCurrentMode(args->frontHandle) != 0) {
-                work->primaryBuffer = (void *)sdfMemLock(fileGetResourceHandle(args->frontHandle));
-                filePollEntryCleanup(args->frontHandle);
+            if (pacFileCheckEnd(args->frontHandle) != 0) {
+                work->primaryBuffer = (void *)sdfMemLock(fileGetMemHandle(args->frontHandle));
+                fileHandleFree(args->frontHandle);
                 args->frontHandle = 0;
                 btlBossDebugPrintf("btl:floor load end 0\n");
             } else {
@@ -7555,9 +7555,9 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
             }
         }
         if (args->sideHandle != 0) {
-            if (fileIsRequestReadyInCurrentMode(args->sideHandle) != 0) {
-                work->secondaryBuffer = (void *)sdfMemLock(fileGetResourceHandle(args->sideHandle));
-                filePollEntryCleanup(args->sideHandle);
+            if (pacFileCheckEnd(args->sideHandle) != 0) {
+                work->secondaryBuffer = (void *)sdfMemLock(fileGetMemHandle(args->sideHandle));
+                fileHandleFree(args->sideHandle);
                 args->sideHandle = 0;
                 btlBossDebugPrintf("btl:floor load end 1\n");
             } else {
@@ -7614,10 +7614,10 @@ u32 btlApplySceneLightingTransition(SceneLightTransitionArgs *args) {
             continue;
         }
         if (unit->ext != NULL) {
-            evtSetUnitStatusFlags(unit->ext);
+            evtUnitLightOn(unit->ext);
             firstColor = btlBlendColorVec(lightColor, unit->colorStart, 0.3f);
             secondColor = btlBlendColorVec(ambientColor, unit->colorEnd, 0.3f);
-            evtInitializeUnitColorTransition(unit->ext, args->value, firstColor, secondColor);
+            evtSetUnitLightAndAmbient(unit->ext, args->value, firstColor, secondColor);
         }
     }
     transitionCount = D_00436AD4;
@@ -7682,8 +7682,8 @@ s32 btlRestoreSceneTransformLighting(SceneLightRestoreArgs *args) {
         D_00452F50.transform.rotation[1] = 0.0f;
         D_00452F50.transform.rotation[2] = 0.0f;
         D_00452F50.transform.rotation[3] = 0.0f;
-        dds3LoadWorldTransformSetup(listener, &D_00452F50);
-        evtBeginUnitValueColorTransition(work->sceneLightNode, args->value);
+        dds3SetLightObjectResoruce(listener, &D_00452F50);
+        dds3LinkSceneLight(work->sceneLightNode, args->value);
         PCP_COPY_VECTOR_F32(work->lightColor, work->baselineLightColor);
         PCP_COPY_VECTOR_F32(work->ambientColor, work->baselineAmbientColor);
         PCP_COPY_VECTOR_F32(work->lightDirection, work->baselineLightDirection);
@@ -7695,16 +7695,16 @@ s32 btlRestoreSceneTransformLighting(SceneLightRestoreArgs *args) {
                 continue;
             }
             if (unit->ext != NULL) {
-                evtSetUnitStatusFlags(unit->ext);
+                evtUnitLightOn(unit->ext);
                 VU0_LOAD_VF(vf10, unit->colorStart);
                 EE_MMI_RGBA_PACK_UNIT(packedStart[0], 128.0f);
                 firstColor = packedStart[0];
                 VU0_LOAD_VF(vf10, unit->colorEnd);
                 EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
                 secondColor = packedEnd[0];
-                evtInitializeUnitColorTransition(unit->ext, args->value, firstColor, secondColor);
+                evtSetUnitLightAndAmbient(unit->ext, args->value, firstColor, secondColor);
                 VU0_LOAD_VF(vf10, unit->lightDirection);
-                evtSetUnitNormalizedDirection(unit->ext, args->value);
+                evtSetUnitLightDir(unit->ext, args->value);
             }
         }
         D_0037F770[0][4] = work->baselineLightDirection[0];
@@ -8011,7 +8011,7 @@ void sndAddEffectReferences(SoundEffectReferenceArgs *args) {
     target->effectLink.referenceCount = target->effectLink.referenceCount + 1;
 }
 
-extern void effBattleSetInputValue(BattleEffect *, s32);
+extern void effBTLCutSetCutEndFrame(BattleEffect *, s32);
 
 /* Advance the referenced battle effect; return one when its battle or duration ends. */
 s32 btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
@@ -8029,13 +8029,13 @@ s32 btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
             args->duration = sndSetEffectNodeParameter(args->source, args->option);
             if ((owner->effectLink.packed & 0xA) == 8) {
                 args->duration = 35;
-                effBattleSetInputValue(args->effect, 35);
-                effBattleUpdateSelectedValue(args->effect, args->duration);
+                effBTLCutSetCutEndFrame(args->effect, 35);
+                effBTLCutSetDrawEndFrame(args->effect, args->duration);
             }
             btlExtendTaskFrameLimit(args->source, args->duration);
             return 0;
         }
-        if (effBattleGetCurrentFrame(args->effect) >= args->duration) {
+        if (effBTLCutGetFrame(args->effect) >= args->duration) {
             return 1;
         }
         effBTLFieldColorSetSelectors(args->sourceOwner.selectorKey, args->targetOwner.selectorKey,
@@ -8074,7 +8074,7 @@ void sndReleaseEffectReferences(SoundEffectReferenceArgs *args) {
     BtlUnit *target;
     BtlUnit *source;
     if (args->effect != 0) {
-        effReleaseBattleVoiceOwner(args->effect);
+        effBTLCutDelete(args->effect);
     }
     effect = args->source;
     target = args->targetOwner.unit;
@@ -8168,9 +8168,9 @@ s32 btlUpdateActorSystemEffect(ActorEffectTaskArgs *args) {
     }
     if (args->effect == 0) {
         args->effect = effCreateBattleVoiceOwner(args->source->resourceHandle, 0, unit, 0);
-        effBattleUpdateSelectedValue(args->effect, args->duration);
+        effBTLCutSetDrawEndFrame(args->effect, args->duration);
     }
-    if (effBattleGetCurrentFrame(args->effect) >= args->duration) {
+    if (effBTLCutGetFrame(args->effect) >= args->duration) {
         return 1;
     }
     if (args->counter < 6) {
@@ -8196,7 +8196,7 @@ void sndFinishActorEffectTask(ActorEffectTaskArgs *args) {
     BtlUnit *unit;
 
     if (args->effect != 0) {
-        effReleaseBattleVoiceOwner(args->effect);
+        effBTLCutDelete(args->effect);
     }
     source = args->source;
     unit = args->owner.unit;
@@ -8279,7 +8279,7 @@ void sndBeginEffectLoad(EffectLoadArgs *args) {
         }
         effect->flags &= ~2;
     }
-    args->request = fileQueueDefaultCallbackRequest(args->name);
+    args->request = fileLoad(args->name);
     effect->flags |= 1;
     btlBossDebugPrintf("btl:effect load start[%s]\n", args->name);
 }
@@ -8290,14 +8290,14 @@ s32 sndPollEffectLoad(EffectLoadArgs *args) {
     if (effect->flags & 2) {
         return 1;
     }
-    if (fileIsRequestReadyInCurrentMode(args->request) == 0) {
+    if (pacFileCheckEnd(args->request) == 0) {
         return 0;
     }
     btlBossDebugPrintf("btl:effect load end[%s]\n", args->name);
-    resource = fileGetResourceHandle(args->request);
+    resource = fileGetMemHandle(args->request);
     effect->resourceHandle = sndMixerClone((void *)sdfMemLock(resource));
     sdfMemFreeDirect(resource);
-    filePollEntryCleanup(args->request);
+    fileHandleFree(args->request);
     effect->flags = (effect->flags & ~1) | 2;
     return 0;
 }
@@ -8374,7 +8374,7 @@ BtlRuntimeTask *btlCreateApplyToActiveActorsTask(u32 value) {
 }
 
 u32 btlCancelTimedFadeTask(void) {
-    kwlnCancelConfiguredFadeFrames();
+    dds3StopQuake();
     return 1;
 }
 
@@ -8440,7 +8440,7 @@ void sndFinishEffectSourceTask(SoundEffectSourceArgs *args) {
     BtlUnit *unit;
 
     if (args->effect != 0) {
-        effReleaseBattleVoiceOwner(args->effect);
+        effBTLCutDelete(args->effect);
     }
     effect = args->source;
     unit = args->owner.unit;
@@ -8473,7 +8473,7 @@ BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *effect, BtlUnit *ow
 }
 
 u32 btlTaskStartFadeIn(u32 *taskArgs) {
-    kwlnFadeStartIn(*taskArgs);
+    dds3FadeIn2(*taskArgs);
     return 1;
 }
 
@@ -8491,7 +8491,7 @@ BtlRuntimeTask *btlCreateFadeInTask(u32 value) {
 }
 
 u32 btlTaskStartCustomFadeIn(u8 *taskArgs) {
-    kwlnFadeInStart(*taskArgs, taskArgs[1], taskArgs[2], *(u32 *)(taskArgs + 4));
+    dds3FadeOut(*taskArgs, taskArgs[1], taskArgs[2], *(u32 *)(taskArgs + 4));
     return 1;
 }
 
@@ -8568,11 +8568,11 @@ s32 btlFormatActionEventFilename(s32 skillIndex, char *output) {
 }
 
 s32 sndSetEffectNodeParameter(SoundResourceNode *effect, u16 option) {
-    return sndReadSelectedMixerBankValue(effect->resourceHandle, option);
+    return effBTLGetDrawEndFrame(effect->resourceHandle, option);
 }
 
 s32 sndGetEffectNodeParameter(SoundResourceNode *effect, u16 option) {
-    return sndGetMixerBankCallbackFrame(effect->resourceHandle, option);
+    return effBTLGetMotionChangeFrame(effect->resourceHandle, option);
 }
 
 s32 sndIsResourceNodeReferencedOrActive(SoundResourceNode *effect) {
@@ -8757,7 +8757,7 @@ SoundResourceLink *sndAllocResourceLink(BtlUnit *owner) {
 
 void sndFreeResourceLink(SoundResourceLink *link) {
     if (link->effectHandle != 0) {
-        effReleaseBattleVoiceOwner(link->effectHandle);
+        effBTLCutDelete(link->effectHandle);
         link->effect->referenceCount--;
         sndDeleteSystemEffect(link->effect);
     }
@@ -8781,7 +8781,7 @@ SoundLink *sndAllocLink(BtlUnit *owner) {
 
 void sndFreeLink(SoundLink *link) {
     if (link->effectHandle != 0) {
-        effReleaseBattleVoiceOwner(link->effectHandle);
+        effBTLCutDelete(link->effectHandle);
         link->effect->referenceCount = link->effect->referenceCount - 1;
         sndDeleteSystemEffect(link->effect);
     }
@@ -8809,7 +8809,7 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
         }
         link->commandEffectId = effectId;
     } else if (link->effectHandle != 0) {
-        effReleaseBattleVoiceOwner(link->effectHandle);
+        effBTLCutDelete(link->effectHandle);
         link->effect->referenceCount--;
         sndDeleteSystemEffect(link->effect);
         link->effectHandle = 0;
@@ -8949,11 +8949,11 @@ INCLUDE_RODATA(const s32, "game/code_001EC868", D_00419170);
 
 void sndLoadSysEffLb(void) {
     const char *path = "/battle/SYSEFF.LB";
-    FilePacRequest *archive = (FilePacRequest *)fileQueuePlainDispatchRequest(path);
+    FilePacRequest *archive = (FilePacRequest *)pacLoad(path);
     PacWork *node;
     u32 i;
 
-    fileWaitForRequestReady((struct FileRequest *)archive);
+    pacSync((struct FileRequest *)archive);
     btlBossDebugPrintf("btl:[%s]\n", path);
     node = archive->packet.queueHead;
     i = 0;
@@ -8974,7 +8974,7 @@ void sndLoadSysEffLb(void) {
         D_003BDE18[i].archiveData = 0;
         D_003BDE18[i].opaque08 = 0;
     }
-    btlStageTaskCleanupCallback(archive);
+    pacFileHandleFree_(archive);
 }
 
 void btlCreateIndexedSoundResourceNode(s32 slotIndex, void * handle);
@@ -9030,8 +9030,8 @@ SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
 void btlUpdateJobPositionFromModel(s32 *args) {
     SoundHandleNode *node = (SoundHandleNode *)args;
     f32 pos[4];
-    if (sdfLoadMapRecordPositionVector(((MdlCtx *)node->actor)->inner, 1) == 0) {
-        mdlLoadPrimaryVectorVU((MdlCtx *)node->actor);
+    if (sdfModelGetMarkPos(((MdlCtx *)node->actor)->inner, 1) == 0) {
+        mdlGetPosition((MdlCtx *)node->actor);
         VU0_STORE_VF(vf10, pos);
         pos[1] -= 150.0f;
     } else {
@@ -9051,11 +9051,11 @@ void func_00203EC0(void) {
 }
 
 void sndSetStationedSeVolume(u32 sequence) {
-    sndSetSequenceVolumePan(sequence, 0x58, 0x3f);
+    p2sdPlaySE(sequence, 0x58, 0x3f);
 }
 
 void sndSetStationedSeHighVolume(u32 sequence) {
-    sndSetSequenceVolumePan(sequence, 0x319c, 0x3f);
+    p2sdPlaySE(sequence, 0x319c, 0x3f);
 }
 
 void btlSelectSceneAudioTrack(s32 soundIndex, s32 sceneIndex) {
@@ -9106,7 +9106,7 @@ void btlAdvanceTitleState(void) {
 void btlAdvanceTitleStateWithAudioCleanup(void) {
     mnuAdvanceTitleStateUnderSemaphore();
     sndQueueNoPayloadCommand210();
-    sndQueueNoPayloadCommand1A0();
+    p2sdStopAllBgm();
 }
 
 void btlAdvanceTitleStateTask(void) {
@@ -9206,7 +9206,7 @@ BtlRuntimeTask *sndCreateSkillSeTask(s32 *taskArgs, u16 optionId) {
 
 void sndStartFileLoad(SoundFileTaskArgs *args) {
     ActiveSoundNode *node = args->node;
-    args->request = fileQueueDefaultCallbackRequest(args->filename);
+    args->request = fileLoad(args->filename);
     node->flags |= SOUND_FILE_STATE_REQUEST_PENDING;
     node->packedTrackPosition = (args->frames + 0x200) << 16;
     node->loadState = 2;
@@ -9220,15 +9220,15 @@ u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
         return 0;
     }
     if ((node->flags & SOUND_FILE_STATE_SOURCE_REQUEST_RESOLVED) == 0) {
-        if (fileIsRequestReadyInCurrentMode(request->request)) {
+        if (pacFileCheckEnd(request->request)) {
             s32 size;
             u32 data;
             btlBossDebugPrintf("btl:sound file load end[%s]\n", request->filename);
-            request->resourceAllocation = fileGetResourceHandle(request->request);
-            size = (s32)fileGetResourceSize(request->request);
+            request->resourceAllocation = fileGetMemHandle(request->request);
+            size = (s32)fileGetLoadSize(request->request);
             data = sdfMemLock(request->resourceAllocation);
             if (sndFindPackedTrackLoadStatus(node->packedTrackPosition) == 0) {
-                func_003422F8(data, size);
+                p2sdSetPcmBuffer(data, size);
                 node->flags |= SOUND_FILE_STATE_SPU_LOAD_PENDING;
                 btlBossDebugPrintf("btl:sound SPU load start[%X][size:%d]\n", (u16)(node->packedTrackPosition >> 16), size);
             }
@@ -9238,7 +9238,7 @@ u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
     } else if (sndFindPackedTrackLoadStatus(node->packedTrackPosition) != 0) {
         btlBossDebugPrintf("btl:sound SPU load end[%X]\n", (u16)(node->packedTrackPosition >> 16));
         sdfMemFreeDirect(request->resourceAllocation);
-        filePollEntryCleanup(request->request);
+        fileHandleFree(request->request);
         node->flags = (node->flags & ~SOUND_FILE_STATE_SPU_LOAD_PENDING) |
                       SOUND_FILE_STATE_COMPLETE;
         return 1;
@@ -9271,7 +9271,7 @@ s32 sndLoadDataFile(const SoundDataFileArgs *data) {
         return 1;
     }
     sndFormatResourceNameFromUnitMode(data->unit, filename);
-    sdfSoundSendNamedCommand(filename, 0x34);
+    p2sdLoadPcmFile(filename, 0x34);
     return 1;
 }
 
@@ -9290,7 +9290,7 @@ BtlRuntimeTask *sndCreateDataFileLoadTask(BtlUnit *unit) {
 }
 
 s32 sndIsCommandBusySigned(void) {
-    return (s8)sdfSoundIsCommandBusy();
+    return (s8)p2sdGetPcmState();
 }
 
 s32 sndHasResourceFlagsOneOrEight(ActiveSoundNode *resource) {
@@ -9430,7 +9430,7 @@ void sndLoadMotSeFiles(SoundSlotOwner *sound) {
             } else {
                 sprintf(filename, D_00419318, D_00419308, sound->work.id);
             }
-            *(struct FileRequest **)(handleTable + offset) = fileQueueDefaultCallbackRequest(filename);
+            *(struct FileRequest **)(handleTable + offset) = fileLoad(filename);
             btlBossDebugPrintf("btl:motSE file load start[%d][%p][%s]\n", slot, sound, filename);
         }
         slot++;
@@ -9473,7 +9473,7 @@ SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id) {
         owner->next = 0;
     }
     work->soundSlotOwners = owner;
-    if (mdlFlagTest(0xC0F) == 0) {
+    if (evtBitCheck(0xC0F) == 0) {
         sndLoadMotSeFiles(owner);
     }
     return owner;
@@ -9485,7 +9485,7 @@ void sndReleaseSlotOwner(SoundSlotOwner *owner) {
     if (--owner->work.refCount == 0) {
         for (i = 0; i < 0x1D; i++) {
             if (owner->work.fileRequests[i] != 0) {
-                filePollEntryCleanup(owner->work.fileRequests[i]);
+                fileHandleFree(owner->work.fileRequests[i]);
             }
             if (owner->work.resourceHandles[i] != 0) {
                 sdfMemFreeDirect(owner->work.resourceHandles[i]);
@@ -9603,8 +9603,8 @@ u32 sndPollMotionSePlayback(BtlRuntimeTaskArgs *args) {
                 mnuResetSoundBufferLocked();
                 mnuReleaseSoundBufferLocked();
             }
-            data = (void *)sdfMemoryGetBlockAddress(soundWork->resourceHandles[args->resourceIndex]);
-            size = sdfMemoryGetBlockSize(soundWork->resourceHandles[args->resourceIndex]);
+            data = (void *)sdfMemGetPtr(soundWork->resourceHandles[args->resourceIndex]);
+            size = sdfMemGetSize(soundWork->resourceHandles[args->resourceIndex]);
             mnuInstallTitleSoundBufferFromData(data, size, 2);
             mnuClearInactiveSoundBufferState();
             work->motionSeLoadFrame = 0;
@@ -9660,7 +9660,7 @@ extern char D_00419408[]; /* "btl:sound load BSE SMG\n" */
 
 void sndLoadBattleBank(void) {
     if (sndFindPackedTrackLoadStatus(0x10000) == 0) {
-        sndEnsureMidiBankResident(0x10000);
+        p2sdLoadSMGFile(0x10000);
         btlBossDebugPrintf(D_00419408);
     }
 }
@@ -9686,15 +9686,15 @@ void btlUpdateMotionSoundLoading(void) {
 
             for (slot = 0; slot < 0x1D; slot++) {
                 if (owner->work.fileRequests[slot] != 0) {
-                    if (fileIsRequestReadyInCurrentMode(
+                    if (pacFileCheckEnd(
                             owner->work.fileRequests[slot]) != 0) {
-                        struct SdfMemBlock *resource = fileGetResourceHandle(
+                        struct SdfMemBlock *resource = fileGetMemHandle(
                             owner->work.fileRequests[slot]);
 
                         struct FileRequest *completedRequest = owner->work.fileRequests[slot];
 
                         owner->work.resourceHandles[slot] = resource;
-                        filePollEntryCleanup(completedRequest);
+                        fileHandleFree(completedRequest);
                         owner->work.fileRequests[slot] = 0;
                     } else {
                         requestsPending = 1;
@@ -9741,11 +9741,11 @@ void btlUpdateMotionSoundLoading(void) {
                 if (owner->flags & SOUND_SLOT_TRACK_LOAD_REQUESTED) {
                     SoundSlotWork *work = &owner->work;
                     struct SdfMemBlock *block = work->resourceHandles[owner->work.pendingSlot];
-                    s32 size = sdfMemoryGetBlockSize(block);
-                    u32 address = sdfMemoryGetBlockAddress(
+                    s32 size = sdfMemGetSize(block);
+                    u32 address = sdfMemGetPtr(
                         work->resourceHandles[owner->work.pendingSlot]);
 
-                    func_003422F8(address, size);
+                    p2sdSetPcmBuffer(address, size);
                     owner->flags = (owner->flags & ~SOUND_SLOT_TRACK_LOAD_REQUESTED) | SOUND_SLOT_TRACK_LOADING;
                     owner->flags &= ~SOUND_SLOT_TRACK_READY;
                     break;

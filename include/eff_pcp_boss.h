@@ -10,7 +10,7 @@ typedef struct {
     f32 position[4]; /* 0x00 */
     u32 parameterVector[4]; /* 0x10 copied from the parameter block */
     s32 frame;      /* 0x20 counts updates */
-    u32 color;      /* 0x24 set by effPCPBossSetParameter, starts 0x80808080 */
+    u32 color;      /* 0x24 set by effPCPBossBaelSetColor, starts 0x80808080 */
     EffParamWork *modelResource; /* Kind 3: supplies the model effect. */
     EffParamWork *auxiliaryResource; /* Kind 6: receives the same basis, vector and tint. */
 } EffPCPBossWork;
@@ -57,7 +57,7 @@ typedef struct {
     u8 pad89[3];
 } EffBossHead; /* 0x8C */
 
-/* Parameter block as read by effBossCreateWithGroups: two words follow the head. */
+/* Parameter block as read by effPCPCrack2Create: two words follow the head. */
 typedef struct {
     EffBossHead head;
     s32 rotationStartAge;

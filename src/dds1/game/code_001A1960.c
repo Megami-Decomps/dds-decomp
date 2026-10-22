@@ -50,7 +50,7 @@ extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
 
 extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 
-extern void datClearUnitStatusBits(DatPartyRecord *record, s32 mask);
+extern void datResetBadStat(DatPartyRecord *record, s32 mask);
 
 extern s32 datGetClampedProfileAdjustedStat(DatPartyRecord *, s32);
 
@@ -92,7 +92,7 @@ extern EffRandState effSharedRandomState[];
 
 /* Clear the supplied party-record status mask. */
 void btlClearPartyRecordStatusBits(DatPartyRecord *record, s32 mask) {
-    datClearUnitStatusBits(record, mask);
+    datResetBadStat(record, mask);
 }
 
 /* Set the actor's selected entry index. */
@@ -1128,7 +1128,7 @@ extern s32 btlSelectEnemyDropItem(s32 actorAddress, s32 mode);
 s32 btlSelectActorAction(s32 object) {
     s32 result = btlSelectEnemyDropItem(object, 1);
     if (result == 0) {
-        result = (sdfGetRand((EffRandState *)effSharedRandomState) & 1) != 0 ? 2 : 7;
+        result = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) != 0 ? 2 : 7;
     }
     return result;
 }
@@ -1144,7 +1144,7 @@ s32 btlSelectEnemyDropItem(s32 actorAddress, s32 mode) {
 
 
     if (mode != 1 && enemy->overrideAction != 0 && enemy->overrideFlag != 0 &&
-        mdlFlagTest(enemy->overrideFlag) != 0) {
+        evtBitCheck(enemy->overrideFlag) != 0) {
         if ((u8)btlRollAiBucket() < enemy->overrideChance) {
             item = enemy->overrideAction;
         }
@@ -1305,7 +1305,7 @@ s32 btlChooseAvailableUnit(void) {
         }
     }
     if (count != 0) {
-        return candidates[sdfGetRandInt(0, count)];
+        return candidates[dds3GetRandIntA(0, count)];
     }
     return 0;
 }

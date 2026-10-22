@@ -799,7 +799,7 @@ void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
 
 extern char D_003AFA88[];
 extern char D_003AFA98[];
-extern void sndEnsureMidiBankResident(s32);
+extern void p2sdLoadSMGFile(s32);
 extern void effRequestResourceByMode(char *, char *, s32, u32 *);
 extern void mnuRequestBaseAssets(MenuAssets *);
 
@@ -807,15 +807,15 @@ s32 mnuStaffInitPanel(BrsSkillPackageWork *work) {
     if (work->setupState != 0) {
         return 0;
     }
-    sndEnsureMidiBankResident(0x50000);
+    p2sdLoadSMGFile(0x50000);
     mnuInitPartyPanelSlots(&work->partyPanel);
     mnuAppendCampSpriteRequests(work->resourceList, &work->staffSlots);
     effRequestResourceByMode(D_003AFA88, D_003AFA98, 0,
                              (u32 *)&work->unitResource);
     mnuRequestBaseAssets(&work->assets);
     work->setupState = 1;
-    kwlnFadeInStart(0, 0, 0, 1);
-    kwlnFadeInStart(0, 0, 0, 0);
+    dds3FadeOut(0, 0, 0, 1);
+    dds3FadeOut(0, 0, 0, 0);
     return 1;
 }
 
@@ -844,7 +844,7 @@ s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
     }
     brsOpenSkillPackagePanel(ctx);
     ctx->setupState = 2;
-    kwlnFadeOutStart(0, 0, 0, 15);
+    dds3FadeIn(0, 0, 0, 15);
     return 0;
 }
 
@@ -914,7 +914,7 @@ BrsSkillPackageWork *brsCreateTaskContext(void) {
     work->allocation = allocation;
     mnuClearPanelTransitionState(&work->transition.data);
     work->resourceList = mnuAllocateValueRecord(1);
-    evtCreateMessageWindowIfMissing(D_0036C858);
+    fclInitMessage(D_0036C858);
     evtSetMessageWindowPageValue(200);
     rewards = &work->rewards;
     btlSnapshotResultRewards(rewards);
@@ -948,7 +948,7 @@ void brsStaffTaskDestroy(KwlnTask *task) {
         brsCloseSkillPackagePanel(context);
     }
     effDestroyEffectList(context->resourceList);
-    dspCloseChannel();
+    fclDestroyMessage();
     sdfMemFreeDirect(context->allocation);
     brsTaskState = 2;
 }
@@ -1036,7 +1036,7 @@ void brsSetSkillProgressAnimations(BrsSkillPackageWork *work, s32 index, s32 lev
 }
 
 s32 brsTaskIsFadeIdle(void) {
-    if (kwlnFadeIsActive() != 0) {
+    if (dds3FadeCheck() != 0) {
         return 0;
     }
     return evtStageTestPollModelRequest() != 1;
@@ -1058,7 +1058,7 @@ void mnuStaffCopyPanelBlock(DatPartyRecord *src, BrsSkillPackageWork *base) {
 extern s32 mnuStaffRollThresholds[];
 
 s32 mnuStaffPickRoll(void) {
-    u32 roll = sdfGetRand(0) & 0xFF;
+    u32 roll = dds3GetRandA(0) & 0xFF;
     u32 i;
 
     for (i = 0; i < 4; i++) {
@@ -1077,7 +1077,7 @@ void brsSelectLevelBonusMode(DatPartyRecord *source, BrsSkillPackageWork *work) 
     s32 i;
 
     work->rewardMode = 0;
-    if (((s32)sdfGetRand(0) & 1) > 0) {
+    if (((s32)dds3GetRandA(0) & 1) > 0) {
         return;
     }
 
@@ -1101,7 +1101,7 @@ void brsSelectLevelBonusMode(DatPartyRecord *source, BrsSkillPackageWork *work) 
         return;
     }
 
-    work->rewardIndex = eligible[(u32)sdfGetRand(0) % (u32)eligibleCount];
+    work->rewardIndex = eligible[(u32)dds3GetRandA(0) % (u32)eligibleCount];
 }
 
 extern void mnuSelectPage(MenuPageWindow *window, s32 index);
@@ -1112,7 +1112,7 @@ extern void mnuSetWindowResource(s32 index, MenuPageWindow *window, s32 resource
 extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
 extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window, u32 resource);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
-extern void sndQueueSoundId(u32 sequence);
+extern void p2sdStopSe(u32 sequence);
 
 void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
     if (selectLevelUp == 0) {
@@ -1148,8 +1148,8 @@ void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
             mnuForwardTableByte(
                 work->primaryRewards.rows[*selectedIndex].unit->unitId);
         }
-        sndQueueSoundId(0x50001);
-        sndStartTrackDefault(0x50001);
+        p2sdStopSe(0x50001);
+        p2sdPlayBGM(0x50001);
     }
 
     mnuStaffCopyPanelBlock(work->selectedRewardRow->unit, work);

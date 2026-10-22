@@ -8,7 +8,7 @@
 #include "mnu_sprite_resource.h"
 
 
-extern void mnuStopMovieDrawTask(void);
+extern void movieStop(void);
 extern void mnuRecreateMenuSelectionList(void);
 extern void mnuSelectMenuListCursorByAdvance(s32);
 extern void mnuLoadTitleMenuAssets(void);
@@ -23,7 +23,7 @@ KwlnTask *mnuCreateTitleMenuTask(s32 mode) {
     struct SdfMemBlock *allocation;
 
     kwlnFadeBackgroundStartOut(0);
-    mnuStopMovieDrawTask();
+    movieStop();
     allocation = sdfMemAllocDirect(0x40);
     mnuMovieMenuState = (void *)sdfMemLock(allocation);
     memset(mnuMovieMenuState, 0, 0x40);

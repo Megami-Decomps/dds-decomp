@@ -49,7 +49,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
             x = 0x1AA0;
         }
     }
-    color = uiBlendColors(0xA09DC380, 0xA09DC300, iconFade);
+    color = fclBlendColor(0xA09DC380, 0xA09DC300, iconFade);
     sprintf(text, D_004379B0, delta);
     glyph = itfCreateFont3TextGlyph(x, 0x8E8, 0, color, text, 0);
     frSetFontColorNo(glyph, 3);

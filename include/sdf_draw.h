@@ -53,7 +53,7 @@ typedef char SdfLightingPacketStorage_combinedColor_offset_check[
 typedef char SdfLightingPacketStorage_basis_offset_check[
     ((u32)&((SdfLightingPacketStorage *)0)->basis == 0xA0) ? 1 : -1];
 
-void sdfBuildLightingPacket(SdfLightingPacketStorage *packet,
+void sdf3DMakeLightParallelPacket(SdfLightingPacketStorage *packet,
                             SdfLightSources sources, f32 *ambient);
 
 /* Buffered SDK storage: live entries are distinct from allocated capacity. */
@@ -114,7 +114,7 @@ typedef struct SdfDrawNode {
     struct SdfDrawNode *next;     /* 0x04 */
     struct SdfDrawNode *parent;   /* 0x08 */
     struct SdfDrawNode *children; /* 0x0C */
-    struct SdfModel *root;        /* 0x10: backlink installed by sdfAppendBufferedRouteNode */
+    struct SdfModel *root;        /* 0x10: backlink installed by sdfModelNodeAdd */
     u16 flags;                   /* 0x14 */
     u16 drawFlagMask;             /* 0x16: all model draw flags enabled by default */
     s32 nodeId;                   /* 0x18: lookup key when model flags bit 0 is set */
@@ -181,7 +181,7 @@ typedef struct SdfModel {
     f32 scalarOverrideFirst;
     f32 scalarOverrideSecond;
     struct SdfChunkHeader *chunkTable; /* Borrowed from the model resource data. */
-    /* Model scale read by sdfVuSetGlobalScale and copied unchanged into the
+    /* Model scale read by sdfCoreDrawSetZBias and copied unchanged into the
      * three-scalar VIF payload (DDS1 0x2D9530). */
     f32 modelScale;
     u8 lodIndex; /* Native model-viewer and MODEL_LOD_CHG setters use byte 0x98. */
@@ -202,8 +202,8 @@ typedef char SdfModel_scalarOverrideFirst_at_88[
 typedef char SdfModel_scalarOverrideSecond_at_8C[
     ((u32)&((SdfModel *)0)->scalarOverrideSecond == 0x8C) ? 1 : -1];
 
-SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 nodeIdOrIndex);
-void sdfProcessReferencedObjects(SdfModel *model, SdfObjectRefCommand *source);
+SdfDrawNode *sdfModelSearchNode(SdfModel *model, s32 nodeIdOrIndex);
+void sdfCoreDrawScanOneSkinNodes(SdfModel *model, SdfObjectRefCommand *source);
 
 
 /* Serialized clip duration/reserved remain halfwords (tools/fld.py).
@@ -242,7 +242,7 @@ typedef char SdfMotionCommand_size_must_be_8[
 
 /* Resource header followed by the binding commands used to construct a motion. */
 typedef struct MotionTable {
-    u16 entryCount; /* Motion-index upper bound returned by mdlGetNodeRefHalf. */
+    u16 entryCount; /* Motion-index upper bound returned by mdlGetNumOfCut. */
     u16 commandCount;
     MotionEntry **entries;
     SdfMotionCommand commands[1];

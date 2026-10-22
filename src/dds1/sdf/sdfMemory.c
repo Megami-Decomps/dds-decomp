@@ -15,7 +15,7 @@ extern void (*D_003BD2DC)(s32);
 
 
 /* Return the next descriptor unless it is the end marker; used blocks are not filtered. */
-SdfMemBlock *sdfMemoryNextBlock(SdfMemBlock *block) {
+SdfMemBlock *sdfMemGetNext(SdfMemBlock *block) {
     SdfMemBlock *nextBlock = block->next;
     if (nextBlock->state == SDF_HEAP_BLOCK_END) {
         return NULL;
@@ -24,7 +24,7 @@ SdfMemBlock *sdfMemoryNextBlock(SdfMemBlock *block) {
 }
 
 /* Derive the byte count from adjacent addresses while preserving the interrupt state. */
-s32 sdfMemoryGetBlockSize(const SdfMemBlock *block) {
+s32 sdfMemGetSize(const SdfMemBlock *block) {
     const SdfMemBlock *nextBlock;
     s32 blockBytes;
     s32 interruptsWereEnabled;
@@ -39,7 +39,7 @@ s32 sdfMemoryGetBlockSize(const SdfMemBlock *block) {
 }
 
 /* Return the represented address, not the allocation descriptor's address. */
-u8 *sdfMemoryGetBlockAddress(const SdfMemBlock *block) {
+u8 *sdfMemGetPtr(const SdfMemBlock *block) {
     return (u8 *)(u32)block->address;
 }
 
@@ -89,7 +89,7 @@ SdfMemBlock *sdfMemAllocDirect(s32 requestedBytes) {
 
 /* Search backward and carve the upper end of a free span with 128-byte rounding.
  * End markers restore interrupts but do not terminate the search or invoke the hook. */
-SdfMemBlock *sdfAllocGeneralBlockHigh(s32 requestedBytes) {
+SdfMemBlock *sdfMemAllocFromTailDirect(s32 requestedBytes) {
     SdfMemHeap *heap = &sdfGeneralHeap;
     s32 alignedBytes = (requestedBytes + SDF_HEAP_ALIGNMENT_MASK) & ~SDF_HEAP_ALIGNMENT_MASK;
     s32 interruptsWereEnabled;
@@ -132,7 +132,7 @@ SdfMemBlock *sdfAllocGeneralBlockHigh(s32 requestedBytes) {
 
 /* Low-end first-fit without the out-of-memory hook; return NULL at the end marker.
  * Rounding and split layout are the same as the normal low-end allocator. */
-SdfMemBlock *sdfTryAllocGeneralBlock(s32 requestedBytes) {
+SdfMemBlock *sdfMemAlloc2Direct(s32 requestedBytes) {
     SdfMemHeap *heap = &sdfGeneralHeap;
     s32 alignedBytes = (requestedBytes + SDF_HEAP_ALIGNMENT_MASK) & ~SDF_HEAP_ALIGNMENT_MASK;
     s32 interruptsWereEnabled;

@@ -298,12 +298,12 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
     switch (battleSceneId) {
     case 0x101:
         battle->commandRestrictFlags |= 0x2000;
-        mdlFlagSet(0x802);
+        evtBitOn(0x802);
         BTL_INSTALL_CALLBACK(battle->pad598, 0x0, btlSelectNoBossScriptArgument);
         BTL_INSTALL_CALLBACK(battle->hitResultOverride, 0x0, btlClassifyLinkedSkillRequest);
         break;
     case 0x102:
-        mdlFlagSet(0x803);
+        evtBitOn(0x803);
         battle->commandRestrictFlags |= 5;
         BTL_INSTALL_CALLBACK(battle->pad598, 0x0, btlSelectNoBossScriptArgumentDuplicate);
         break;
@@ -326,7 +326,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         if (battleSceneId == 0x106) {
             BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlDisableNonBossUnits);
         }
-        allocation = sdfAllocateBlockBySizeThreshold(4);
+        allocation = sdfAllocAuto(4);
         battle->effect = allocation;
         memset(allocation, 0, 4);
         break;
@@ -349,7 +349,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         if (battleSceneId == 0x107) {
             BTL_INSTALL_CALLBACK(battle->pad5B0, 0x0, btlMode107SelectSceneVariant);
         }
-        allocation = sdfAllocateBlockBySizeThreshold(0x44);
+        allocation = sdfAllocAuto(0x44);
         battle->effect = allocation;
         memset(allocation, 0, 0x44);
         break;
@@ -383,7 +383,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         battle->cameraPoseBlendHook = btlSetLinkedPairActionCamera;
         BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlUnitStartAimAtTarget);
         BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlIsSpecialActionKind);
-        allocation = sdfAllocateBlockBySizeThreshold(0x18);
+        allocation = sdfAllocAuto(0x18);
         battle->effect = allocation;
         memset(allocation, 0, 0x18);
         break;
@@ -405,7 +405,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->pad644, 0x0, btlCerberDeclineResourceTypeOverride);
         BTL_INSTALL_CALLBACK(battle->commandAvailabilityOverride, 0x0, btlCerberAllowsNonPartyActor);
         BTL_INSTALL_CALLBACK(battle->commandRangeOverride, 0x0, btlCerberGetCommandHitCount);
-        allocation = sdfAllocateBlockBySizeThreshold(4);
+        allocation = sdfAllocAuto(4);
         battle->effect = allocation;
         memset(allocation, 0, 4);
         break;
@@ -418,7 +418,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->updateCallback, 0x0, btlUpdateNidhoggrOpponentSlots);
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlTriggerSpecialUnitAction);
         BTL_INSTALL_CALLBACK(battle->actionPointsOverride, 0x0, btlIsInSpecialModeRange);
-        allocation = sdfAllocateBlockBySizeThreshold(8);
+        allocation = sdfAllocAuto(8);
         battle->effect = allocation;
         memset(allocation, 0, 8);
         break;
@@ -445,7 +445,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->pad644, 0x0, btlCheckBossOptionAllowed);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapSelectedBossCommand);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlSyncEffectActorToUnit);
-        allocation = sdfAllocateBlockBySizeThreshold(0x10);
+        allocation = sdfAllocAuto(0x10);
         battle->effect = allocation;
         memset(allocation, 0, 0x10);
         break;
@@ -457,7 +457,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->pad590, 0x0, btlArmEventResourceTrigger);
         BTL_INSTALL_CALLBACK(battle->pad5B0, 0x0, btlPickRandomMarkedTask);
         BTL_INSTALL_CALLBACK(battle->pad5F4, 0x0, btlConsumeReadyEventScriptResource);
-        allocation = sdfAllocateBlockBySizeThreshold(2);
+        allocation = sdfAllocAuto(2);
         battle->effect = allocation;
         memset(allocation, 0, 2);
         break;
@@ -471,7 +471,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->pad5B0, 0x0, btlQueueHariFormChangeOrPartyCommand);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlDispatchSpecialEnemyActionWhenPhaseAllows);
         BTL_INSTALL_CALLBACK(battle->pad65C, 0x4, func_00209EB8);
-        allocation = sdfAllocateBlockBySizeThreshold(2);
+        allocation = sdfAllocAuto(2);
         battle->effect = allocation;
         memset(allocation, 0, 2);
         break;
@@ -505,7 +505,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->pad680, 0x0, btlAllowsSpeciesCondition);
         battle->actionResourceNameHook = btlFormatBattleEffectResourceName;
         BTL_INSTALL_CALLBACK(battle->pad688, 0x0, btlGetHaritiActiveEnemyLimit);
-        allocation = sdfAllocateBlockBySizeThreshold(0x24);
+        allocation = sdfAllocAuto(0x24);
         battle->effect = allocation;
         memset(allocation, 0, 0x24);
         break;
@@ -609,7 +609,7 @@ void btlReleaseBossData(void) {
     }
     btlRunCleanupAndLog();
     if (battle->effect != 0) {
-        sdfReleaseChipOrRetainedResource(battle->effect);
+        sdfFreeAutoDelayed(battle->effect);
         battle->effect = 0;
     }
     battle->battleFlags &= ~0x80000;

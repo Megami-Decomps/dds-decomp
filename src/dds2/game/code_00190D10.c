@@ -8,28 +8,28 @@
 extern s16 D_00452110[];
 
 
-EffMagatuhiOwner *effCloneMagatuhiWithColorResource(const u32 *source) {
+EffMagatuhiOwner *effMagaCylinderAllocPart(const u32 *source) {
     EffMagatuhiOwner *effect;
 
     effect = sdfChipAllocDirect(sizeof(*effect));
     memcpy(&effect->params, source, sizeof(effect->params));
-    effect->valueWork = effCreateMagatuhiValueWork(effect->params.count, effect->params.historyCount, effect->params.historyDistanceScale, effect->params.unk14, effect->params.historyAngleStep);
-    effMagatuhiFillColorTable(effect->valueWork, effect->params.colorA, effect->params.colorB);
+    effect->valueWork = effMagaCylinderAllocTex(effect->params.count, effect->params.historyCount, effect->params.historyDistanceScale, effect->params.unk14, effect->params.historyAngleStep);
+    effMagaCylinderBlendColor(effect->valueWork, effect->params.colorA, effect->params.colorB);
     return effect;
 }
 
-void effReleaseMagatuhiOwner(EffMagatuhiOwner *effect) {
-    effMagatuhiReleaseResource(effect->valueWork);
+void effMagaCylinderFree(EffMagatuhiOwner *effect) {
+    effMagaCylinderFreeParts(effect->valueWork);
     sdfChipFreeDirect(effect);
 }
 
-extern void effMagatuhiDrawHistoryTrails(EffMagatuhiValueWork *work);
+extern void effSwordTrackDrawTex(EffMagatuhiValueWork *work);
 
-void effMagatuhiDrawOwnerHistoryTrails(EffMagatuhiOwner *effect) {
-    effMagatuhiDrawHistoryTrails(effect->valueWork);
+void effMagaCylinderDrawTrack(EffMagatuhiOwner *effect) {
+    effSwordTrackDrawTex(effect->valueWork);
 }
 
-void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 slotIndex) {
+void effMagaCylinderSetPartPtrs(EffMagatuhiValueWork *work, s32 slotIndex) {
     f32 *angleRow;
 
     work->writeIndices[slotIndex] = 0;
@@ -42,7 +42,7 @@ void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 slotIndex) {
     angleRow[3] = 0.0f;
 }
 
-EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 historyCount, f32 historyDistanceScale, s32 param, f32 historyAngleStep) {
+EffMagatuhiValueWork *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 historyDistanceScale, s32 param, f32 historyAngleStep) {
     s32 countFrames;
     s32 frameTerm;
     s32 countTerm;
@@ -86,7 +86,7 @@ EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 historyCount, f3
     resource->validCounts = (u16 *)validCounts;
     resource->angleRows = (f32 (*)[4])angleValues;
     resource->allocationHandle = allocation;
-    resource->texture = effGetBillResourceTexture(0);
+    resource->texture = dds3BillboardGetGeneralTex(0);
 
     defaults = D_00452110;
     i = 0;
@@ -106,7 +106,7 @@ EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 historyCount, f3
     if (count != 0) {
         i = 0;
         do {
-            effResetMagatuhiValueSlot(resource, i);
+            effMagaCylinderSetPartPtrs(resource, i);
             i++;
         } while (i < count);
     }

@@ -140,7 +140,7 @@ extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 extern s32 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity);
 
 
-extern s32 sndUpdateTestMsgTask(KwlnTask *task);
+extern s32 TestMsgMngD_Process(KwlnTask *task);
 
 extern SdfPoolNode D_003805A8;
 
@@ -152,9 +152,9 @@ extern u8 D_003B4D28[];
 
 #include "sdf_packet_alloc.h"
 
-extern void itfSendTablePacket(SdfListHead *list, s32 context, s32 mode);
+extern void itfMiscDrawAlphaPrim(SdfListHead *list, s32 context, s32 mode);
 
-extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
+extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
 extern SndPad kwlnTaskPadButtonStates;
@@ -173,15 +173,15 @@ extern SdfPoolNode D_00380708;
 extern s32 D_00435CBC;
 
 
-extern void itfPrintTestMessageCallback();
+extern void itfDebugPrintMark();
 
-extern s32 itfUpdateTestMessageResourceInput(KwlnTask *task);
+extern s32 TestMsgMngC_Process(KwlnTask *task);
 
 extern u8 D_003B4A28[];
 
-extern s32 scrCreateTaskForProcessId();
+extern s32 scrStartScript2();
 
-void sndCycleTestMessageResource(void);
+void TestMsgReloadTexture(void);
 
 /* Functions defined earlier in the previous translation unit. */
 void *btlGetRuntime(void);
@@ -342,7 +342,7 @@ s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
         btlDoesEnabledStatusMatchCurrentId(&source->partyRecord, 0xE7) &&
         datCommandRecords[command].hpType != 8 &&
         datCommandRecords[command].hpType != 10) {
-        f32 varied = ((sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f) *
+        f32 varied = ((dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f) *
                      0.5f * automatic + automatic;
         automatic = varied;
     }
@@ -368,7 +368,7 @@ s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
         automatic *= scaleHook(source, target, command, side);
     }
     if (datCommandRecords[command].hpType != 8 &&
-        datCommandRecords[command].hpType != 10 && mdlFlagTest(0x80E) &&
+        datCommandRecords[command].hpType != 10 && evtBitCheck(0x80E) &&
         (source->status.flags & 0x400) && (target->status.flags & 0x200)) {
         attack *= datBattleParameters->unkB64;
     }
@@ -398,9 +398,9 @@ s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
     }
     limit = datCommandRecords[command].stat36;
     if (amount < -limit) {
-        amount = -(limit * ((s32)sdfGetRandInt(0, 11) + 95)) / 100;
+        amount = -(limit * ((s32)dds3GetRandIntA(0, 11) + 95)) / 100;
     } else if (amount > limit) {
-        amount = limit * ((s32)sdfGetRandInt(0, 11) + 95) / 100;
+        amount = limit * ((s32)dds3GetRandIntA(0, 11) + 95) / 100;
     }
     if (amount == 0 && base != 0) {
         amount = base < 0 ? -1 : 1;
@@ -550,7 +550,7 @@ s32 btlCalculateMpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
         automatic *= scaleHook(source, target, command, side);
     }
     if (datCommandRecords[command].mpType != 8 &&
-        datCommandRecords[command].mpType != 10 && mdlFlagTest(0x80E) &&
+        datCommandRecords[command].mpType != 10 && evtBitCheck(0x80E) &&
         (source->status.flags & 0x400) && (target->status.flags & 0x200)) {
         attack *= datBattleParameters->unkB64;
     }
@@ -580,9 +580,9 @@ s32 btlCalculateMpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
     }
     limit = datCommandRecords[command].stat36;
     if (amount < -limit) {
-        amount = -(limit * ((s32)sdfGetRandInt(0, 11) + 95)) / 100;
+        amount = -(limit * ((s32)dds3GetRandIntA(0, 11) + 95)) / 100;
     } else if (amount > limit) {
-        amount = limit * ((s32)sdfGetRandInt(0, 11) + 95) / 100;
+        amount = limit * ((s32)dds3GetRandIntA(0, 11) + 95) / 100;
     }
     if (amount == 0 && base != 0) {
         amount = base < 0 ? -1 : 1;
@@ -766,7 +766,7 @@ u8 btlSelectCommandHitCount(BtlUnit *unit, s32 command) {
         maximum = datCommandRecords[command].rangeMax;
     }
     if (minimum < maximum) {
-        result = minimum + sdfGetRandInt(0, maximum - minimum + 1);
+        result = minimum + dds3GetRandIntA(0, maximum - minimum + 1);
     } else {
         result = minimum;
     }
@@ -903,8 +903,8 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
         } while (sorted == 0);
     } else {
         for (i = 0; i < 13; i++) {
-            randomIndices[0] = sdfGetRandInt(0, count);
-            randomIndices[1] = sdfGetRandInt(0, count);
+            randomIndices[0] = dds3GetRandIntA(0, count);
+            randomIndices[1] = dds3GetRandIntA(0, count);
             if (randomIndices[0] != randomIndices[1]) {
                 btlSwapIndexListEntries(targets, randomIndices[0], randomIndices[1]);
             }
@@ -948,7 +948,7 @@ void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
 
     targetCount = btlGetIndexListCount(targets);
     allowConsecutiveHits = targetCount < 2;
-    maximumHits = targetCount + sdfGetRandInt(0, 2);
+    maximumHits = targetCount + dds3GetRandIntA(0, 2);
     if (allowConsecutiveHits) {
         results[0].hitCount = maximumHits;
         return;
@@ -962,10 +962,10 @@ void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
     hitCount = btlSelectCommandHitCount(unit, command);
     memset(selected, 0, sizeof(selected));
     while (i < hitCount) {
-        index = sdfGetRandInt(0, targetCount);
+        index = dds3GetRandIntA(0, targetCount);
         entry = btlGetIndexListEntry(copy, index);
         if (!allowConsecutiveHits && entry == previous) {
-            index = (index + sdfGetRandInt(0, targetCount - 1) + 1) % targetCount;
+            index = (index + dds3GetRandIntA(0, targetCount - 1) + 1) % targetCount;
             entry = btlGetIndexListEntry(copy, index);
         }
         previous = entry;

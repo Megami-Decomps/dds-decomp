@@ -119,7 +119,7 @@ void fldCreateMapRequestQueues(void) {
 extern void sdfDrawUniformlyScaledSlotImage(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                                             s32 flags, s32 context, f32 scale);
 
-extern void fldProjectPointToGridCell(s32 *, s32 *, f32, f32, f32);
+extern void egl3Dto2D(s32 *, s32 *, f32, f32, f32);
 
 void fldReleaseMapRequestQueue(MapRequestState *state);
 
@@ -164,7 +164,7 @@ void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, MapRequestState *queue, MapRequ
     } else {
         progress /= 0.7f;
     }
-    fldProjectPointToGridCell(&gridX, &gridY, x, y, z);
+    egl3Dto2D(&gridX, &gridY, x, y, z);
     sdfDrawUniformlyScaledSlotImage(gridX, gridY, 0, (s32)(progress * 64.0f), 0x20, 0, 0x54, scale);
 }
 
@@ -236,7 +236,7 @@ void fldDrawSelectedMapMarker(void) {
         alpha = remaining;
     }
     fldDispatchMapRequestCallbacks(fldMapPulseRequest);
-    fldProjectPointToGridCell(&gridX, &gridY, D_00400700[index][0], D_00400700[index][1], D_00400700[index][2]);
+    egl3Dto2D(&gridX, &gridY, D_00400700[index][0], D_00400700[index][1], D_00400700[index][2]);
     opacity = alpha * 32.0f;
     sdfDrawUniformlyScaledSlotImage(gridX, gridY, 0, opacity, 0x20, 0, 0x54, 2.0f);
     sdfDrawUniformlyScaledSlotImage(gridX, gridY, 0, opacity, 0x23, 0, 0x54, 1.0f);
@@ -247,7 +247,7 @@ void fldDrawSelectedMapMarker(void) {
 MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
     s32 size = count * 0x20 + 0x44;
     struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
-    MapRequestRing *block = (MapRequestRing *)sdfMemoryGetBlockAddress(allocation);
+    MapRequestRing *block = (MapRequestRing *)sdfMemGetPtr(allocation);
     MapRequestState *ring = &block->header;
     MapRequestNode *node;
     MapRequestNode *next;
@@ -400,10 +400,10 @@ done:
     return;
 }
 
-s32 fldLoadMapResource(const char *name, MapResource *record) {
-    struct SdfMemBlock *allocation = sdfReadNamedResource(name, (u32 *)&record->resourceData, 0);
+s32 texLoad(const char *name, MapResource *record) {
+    struct SdfMemBlock *allocation = sdfDevLoadFileEx(name, (u32 *)&record->resourceData, 0);
     record->allocation = allocation;
-    record->texture = sdfTexAcquireResourceTexture(record->resourceData);
+    record->texture = sdfTexSet(record->resourceData);
     if (record->allocation != NULL) {
         sdfMemFreeDelayedDirect(record->allocation);
         record->allocation = NULL;
@@ -412,7 +412,7 @@ s32 fldLoadMapResource(const char *name, MapResource *record) {
     return 1;
 }
 
-u32 fldReleaseMapResource(struct SdfTex **texture) {
+u32 texRelease(struct SdfTex **texture) {
     if (*texture != 0) {
         sdfTexReleaseReferenceViaHandler(*texture);
         *texture = 0;
@@ -430,7 +430,7 @@ extern u8 D_0037F660[];
 
 
 /* vu0 routine: project a world point to the screen and return its GS grid cell. */
-void fldProjectPointToGridCell(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z) {
+void egl3Dto2D(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z) {
     f32 point[4];
     f32 screen[4];
 

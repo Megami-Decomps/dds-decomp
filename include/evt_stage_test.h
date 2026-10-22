@@ -20,7 +20,7 @@ typedef struct StageTestSlot {
     s32 entryIndex;          /* 0x00 */
     s32 assetResource;       /* 0x04: mode-selected model resource */
     s32 modelId;             /* 0x08 */
-    s32 assetOption;         /* 0x0C: third argument to mdlRequestAsset */
+    s32 assetOption;         /* 0x0C: third argument to mdlPrepare */
     s32 initialMotionIndex;  /* 0x10: negative selects entry motionIndex */
     u32 flags;               /* 0x14: bit 0 suppresses fallback motion */
     s32 state;               /* 0x18: idle/queued/playing/fallback state */

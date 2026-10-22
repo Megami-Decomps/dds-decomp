@@ -44,8 +44,8 @@ void sdfRuntimeTaskTeardownHook(void);
 s32 sdfBumpTickCounters(KwlnTask *task);
 void evtResetWorldAndProfileRuntime(void);
 
-extern void scrClearProcessGlobals(void);
-extern void mdlResetViewerFlagsAndSolarOverlay(void);
+extern void dds3GlobalWorkClearFlags(void);
+extern void evtInitGlobalWork(void);
 extern void ptyClearProfileRecords(void);
 extern void ptyRebuildAllProfiles(void);
 extern void evtUpdateFlaggedEntries(void);
@@ -57,7 +57,7 @@ extern void sdfRestoreResetSnapshot(void);
 s32 sdfDispatchUnitScriptDefault5(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
 
 /* Linearly interpolated curve sample at `time`; 0 when no curve is active. */
-f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *user) {
+f32 dds3PathBasicControlGetFovy(Dds3PathCurveWork *user) {
     u32 index;
     f32 fraction;
     Dds3PathKeyframes *curve;
@@ -65,7 +65,7 @@ f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *user) {
 
     if (user->counter.flags & DDS3_PATH_SCALAR_CHANNEL) {
         curve = user->scalarKeys;
-        dds3SamplePathKeyframeInterval(&index, &fraction, curve, user->counter.time);
+        dds3PathEvalSpline(&index, &fraction, curve, user->counter.time);
         values = curve->data.scalar;
         return values[index] * (1.0f - fraction) + values[index + 1] * fraction;
     }
@@ -76,7 +76,7 @@ f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *user) {
 #define SDF_FLOAT_COUNTER_WRAP_FLAG 0x00000020
 
 /* Step the counter by one; returns 0 when it ran out and does not wrap. */
-s32 sdfStepWrappingFloatCounter(SdfFloatCounter *counter) {
+s32 dds3PathBasicControlIsFinished(SdfFloatCounter *counter) {
     s32 result = 1;
 
     if (counter->flags & SDF_FLOAT_COUNTER_FROZEN_FLAG) {
@@ -102,42 +102,42 @@ s32 sdfStepWrappingFloatCounter(SdfFloatCounter *counter) {
     return result;
 }
 
-void sdfSetFloatCounterDirection(SdfFloatCounter *counter, u32 direction) {
+void dds3PathBasicControlAlterMode(SdfFloatCounter *counter, u32 direction) {
     counter->direction = direction;
 }
 
-u32 sdfGetFloatCounterDirection(const SdfFloatCounter *counter) {
+u32 dds3PathBasicControlGetMode(const SdfFloatCounter *counter) {
     return counter->direction;
 }
 
-void evtScaleValueByMultiplier(SdfFloatCounter *value, float multiplier) {
+void dds3PathBasicControlSetRatio(SdfFloatCounter *value, float multiplier) {
     value->time = multiplier * value->duration;
 }
 
-float evtGetValueScaleFactor(const SdfFloatCounter *value) {
+float dds3PathBasicControlGetRatio(const SdfFloatCounter *value) {
     return value->time / value->duration;
 }
 
-void sdfFreezeFloatCounter(SdfFloatCounter *value) {
+void dds3PathBasicPauseOn(SdfFloatCounter *value) {
     value->flags = value->flags | SDF_FLOAT_COUNTER_FROZEN_FLAG;
 }
 
-void sdfUnfreezeFloatCounter(SdfFloatCounter *value) {
+void dds3PathBasicPauseOff(SdfFloatCounter *value) {
     value->flags = value->flags & ~SDF_FLOAT_COUNTER_FROZEN_FLAG;
 }
 
-void sdfEnableFloatCounterWrap(SdfFloatCounter *value) {
+void dds3PathBasicLoopOn(SdfFloatCounter *value) {
     value->flags = value->flags | SDF_FLOAT_COUNTER_WRAP_FLAG;
 }
 
-void sdfDisableFloatCounterWrap(SdfFloatCounter *value) {
+void dds3PathBasicLoopOff(SdfFloatCounter *value) {
     value->flags = value->flags & ~SDF_FLOAT_COUNTER_WRAP_FLAG;
 }
 
 
 
-EffWorldNode *evtSpawnActionObj11(u32 key, EvtWorldSourceTransformPrefix *source, const char *name) {
-    EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_TRANSFORM_SOURCE);
+EffWorldNode *dds3AddPointBasic(u32 key, EvtWorldSourceTransformPrefix *source, const char *name) {
+    EffWorldNode *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_TRANSFORM_SOURCE);
 
     obj->data = source;
     obj->key = key;
@@ -211,8 +211,8 @@ extern void btlClearSharedBattleStateWords(void);
 extern void ptyInitRuntime(void);
 
 void evtResetWorldAndProfileRuntime(void) {
-    scrClearProcessGlobals();
-    mdlResetViewerFlagsAndSolarOverlay();
+    dds3GlobalWorkClearFlags();
+    evtInitGlobalWork();
     datGameState->world.updateMode = 8;
     ptyInitRuntime();
     fldResetFieldRuntimeState(0);
@@ -265,25 +265,25 @@ void sdfSaveResetSnapshot(void) {
     memset(D_003C2E30, 0, sizeof(D_003C2E30));
     D_003BA9EC = 0;
     D_003BA9F0 = 0;
-    if (mdlFlagTest(0xB90)) {
+    if (evtBitCheck(0xB90)) {
         D_003BA9E5 = 1;
     }
-    if (mdlFlagTest(0xB91)) {
+    if (evtBitCheck(0xB91)) {
         D_003BA9E6 = 1;
     }
-    if (mdlFlagTest(0xB92)) {
+    if (evtBitCheck(0xB92)) {
         D_003BA9E7 = 1;
     }
-    if (mdlFlagTest(0xB93)) {
+    if (evtBitCheck(0xB93)) {
         D_003BA9E8 = 1;
     }
-    if (mdlFlagTest(0xB94)) {
+    if (evtBitCheck(0xB94)) {
         D_003BA9E9 = 1;
     }
-    if (mdlFlagTest(0xB95)) {
+    if (evtBitCheck(0xB95)) {
         D_003BA9EA = 1;
     }
-    if (mdlFlagTest(0xC0E)) {
+    if (evtBitCheck(0xC0E)) {
         D_003BA9F8 = 1;
     }
     memcpy(D_003C2E30, datGameState->battleFlags, sizeof(datGameState->battleFlags));
@@ -295,14 +295,14 @@ void sdfSaveResetSnapshot(void) {
     D_0032A200.words[2] = datGameState->header.saveFlags2;
     D_003BD790 = mnuCreateFlagEntries();
     D_003BD794 = sdfMemAllocDirect(sizeof(datGameState->mantraBits));
-    copy = (void *)sdfMemoryGetBlockAddress(D_003BD794);
+    copy = (void *)sdfMemGetPtr(D_003BD794);
     memcpy(copy, datGameState->mantraBits, sizeof(datGameState->mantraBits));
     D_003BD798 = sdfMemAllocDirect(sizeof(datGameState->profileRecords));
-    copy = (void *)sdfMemoryGetBlockAddress(D_003BD798);
+    copy = (void *)sdfMemGetPtr(D_003BD798);
     memcpy(copy, datGameState->profileRecords, sizeof(datGameState->profileRecords));
     ptySaveActiveUnitsToStock();
     D_003BD79C = sdfMemAllocDirect(sizeof(datGameState->templates));
-    copy = (void *)sdfMemoryGetBlockAddress(D_003BD79C);
+    copy = (void *)sdfMemGetPtr(D_003BD79C);
     memcpy(copy, datGameState->templates, sizeof(datGameState->templates));
     memset(D_003C2E40, 0, sizeof(D_003C2E40));
     mnuCollectFlagArray(D_003C2E40);
@@ -316,25 +316,25 @@ void sdfRestoreResetSnapshot(void) {
     u32 index;
 
     if (D_003BA9E5 != 0) {
-        mdlFlagSet(0xB90);
+        evtBitOn(0xB90);
     }
     if (D_003BA9E6 != 0) {
-        mdlFlagSet(0xB91);
+        evtBitOn(0xB91);
     }
     if (D_003BA9E7 != 0) {
-        mdlFlagSet(0xB92);
+        evtBitOn(0xB92);
     }
     if (D_003BA9E8 != 0) {
-        mdlFlagSet(0xB93);
+        evtBitOn(0xB93);
     }
     if (D_003BA9E9 != 0) {
-        mdlFlagSet(0xB94);
+        evtBitOn(0xB94);
     }
     if (D_003BA9EA != 0) {
-        mdlFlagSet(0xB95);
+        evtBitOn(0xB95);
     }
     if (D_003BA9F8 != 0) {
-        mdlFlagSet(0xC0E);
+        evtBitOn(0xC0E);
     }
 
     datGameState->header.status = D_003BA9EC;
@@ -348,13 +348,13 @@ void sdfRestoreResetSnapshot(void) {
     mnuApplyFlagEntries(D_003BD790);
     sdfMemFreeDirect((SdfMemBlock *)D_003BD790);
 
-    memcpy(datGameState->mantraBits, (void *)sdfMemoryGetBlockAddress(D_003BD794), sizeof(datGameState->mantraBits));
+    memcpy(datGameState->mantraBits, (void *)sdfMemGetPtr(D_003BD794), sizeof(datGameState->mantraBits));
     sdfMemFreeDirect(D_003BD794);
 
-    memcpy(datGameState->profileRecords, (void *)sdfMemoryGetBlockAddress(D_003BD798), sizeof(datGameState->profileRecords));
+    memcpy(datGameState->profileRecords, (void *)sdfMemGetPtr(D_003BD798), sizeof(datGameState->profileRecords));
     sdfMemFreeDirect(D_003BD798);
 
-    memcpy(datGameState->templates, (void *)sdfMemoryGetBlockAddress(D_003BD79C), sizeof(datGameState->templates));
+    memcpy(datGameState->templates, (void *)sdfMemGetPtr(D_003BD79C), sizeof(datGameState->templates));
     sdfMemFreeDirect(D_003BD79C);
 
     for (index = 0; index < 16; index++) {
@@ -377,11 +377,11 @@ void sdfResetGameRuntime(s32 fullReset) {
     }
     datGameState->header.firstTick = 0;
     datGameState->header.secondTick = 0;
-    scrClearProcessGlobals();
-    mdlResetViewerFlagsAndSolarOverlay();
+    dds3GlobalWorkClearFlags();
+    evtInitGlobalWork();
     datGameState->world.updateMode = 8;
     ptyInitRuntime();
-    mdlFlagClear(0xC0E);
+    evtBitOff(0xC0E);
     fldResetFieldRuntimeState(0);
     ptyClearProfileRecords();
     ptyRebuildAllProfiles();
@@ -431,9 +431,9 @@ void sdfReloadChannelSegments(SdfChannel *table) {
 
         size = *(s32 *)address;
         if (*slot != 0) {
-            sdfFreeMemoryFromEitherHeap(*slot);
+            sdfFreeAuto(*slot);
         }
-        *slot = sdfAllocateBlockBySizeThreshold(size);
+        *slot = sdfAllocAuto(size);
         memcpy(*slot, address + 4, size);
         segmentBytes = size + 4;
         blocks = segmentBytes >> 4;
@@ -446,12 +446,12 @@ void sdfReloadChannelSegments(SdfChannel *table) {
         return alignedBytes;
     }
 
-    command = sdfDevCreateCommandState(table->path);
-    size = sdfDevQueueControlAndWait(command);
-    block = sdfAllocGeneralBlockHigh(size);
+    command = sdfFileOpen(table->path);
+    size = sdfFileLength(command);
+    block = sdfMemAllocFromTailDirect(size);
     address = (u8 *)sdfMemLock(block);
-    sdfDevQueueReadAndWait(command, address, size);
-    sdfDevWaitThenReleaseCommandState(command);
+    sdfFileRead(command, address, size);
+    sdfFileClose(command);
     for (i = 0; table->entries[i].slot != 0; i++) {
         address += sdfLoadChannelFileSegment(table->entries[i].slot, table->entries[i].unused);
     }
@@ -607,7 +607,7 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *ite
         healing = power + base;
         break;
     case 15:
-        healing = sdfGetRandInt(0, power) + base;
+        healing = dds3GetRandIntA(0, power) + base;
         break;
     case 9:
         healing = current * power / 100 + base;
@@ -727,7 +727,7 @@ u32 sdfRollActionHit(s32 channel, s32 queryArg, DatPartyRecord *packed) {
                 count++;
             }
         }
-        mask = 1 << list[sdfGetRandInt(0, count)];
+        mask = 1 << list[dds3GetRandIntA(0, count)];
     }
     if (mask != 0 &&
         (datCommandRecords[channel].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_ELEMENT_MASK ||
@@ -779,7 +779,7 @@ u32 sdfRollActionHit(s32 channel, s32 queryArg, DatPartyRecord *packed) {
     if (datCommandRecords[channel].attribute.parts.hitChance < 100) {
         scaled = evtRunContext(0xC, queryArg, packed, channel, mask) * ((f32)ratio / 100.0f);
         printf(D_0039F980, scaled, ratio, mask);
-        hit = (s32)sdfGetRandInt(0, 100) < scaled;
+        hit = (s32)dds3GetRandIntA(0, 100) < scaled;
     }
     return hit ? mask : 0;
 }
@@ -813,12 +813,12 @@ u32 sdfQueryChannelBits(s32 channel, s32 queryArg, DatPartyRecord *item) {
 }
 
 extern s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital);
-extern void datClearUnitStatusBits(void *item, s32 mask);
+extern void datResetBadStat(void *item, s32 mask);
 /* These unused-result legacy mutator calls had no prototype in scope. */
 void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 minimumValue);
 
-extern s32 datAdjustCurrentHp(DatPartyRecord *unit, s32 delta);
-extern s32 datAdjustCurrentMp(DatPartyRecord *unit, s32 delta);
+extern s32 datAddHp(DatPartyRecord *unit, s32 delta);
+extern s32 datAddMp(DatPartyRecord *unit, s32 delta);
 
 s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
     s32 hpDelta;
@@ -835,12 +835,12 @@ s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
             return 0;
         }
         sdfRaisePackedChannelValue(item, value);
-        datClearUnitStatusBits(item, bits);
+        datResetBadStat(item, bits);
         if (mpDelta != 0) {
-            datAdjustCurrentMp(item, mpDelta);
+            datAddMp(item, mpDelta);
         }
         if (hpDelta != 0) {
-            datAdjustCurrentHp(item, hpDelta);
+            datAddHp(item, hpDelta);
             if (item->hp == 0) {
                 sdfRaisePackedChannelValue(item, 0x4000);
             }

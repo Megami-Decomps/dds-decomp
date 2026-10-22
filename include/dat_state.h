@@ -21,9 +21,9 @@ typedef struct DatStateHeader {
     s8 partyIds[8];
     s8 partyLevels[8];
     u32 savedMoney; /* 0x20: save-slot money copied to and from the live currency. */
-    u32 saveFlags; /* 0x24: packed mdlFlagTest bits persisted in save word 0. */
-    u32 saveFlags1; /* 0x28: packed mdlFlagTest bits persisted in save word 1. */
-    u32 saveFlags2; /* 0x2C: packed mdlFlagTest bits persisted in save word 2. */
+    u32 saveFlags; /* 0x24: packed evtBitCheck bits persisted in save word 0. */
+    u32 saveFlags1; /* 0x28: packed evtBitCheck bits persisted in save word 1. */
+    u32 saveFlags2; /* 0x2C: packed evtBitCheck bits persisted in save word 2. */
     struct SdfMemBlock *backingAllocation;
     u32 firstTick;
     u32 secondTick;

@@ -64,7 +64,7 @@ s32 mnuHandleStatPointAssignment(KwlnTask *task) {
     if (result != 0) {
         return result;
     }
-    if (work->transition.state != 0 || evtGetMessageWindowControlState() != 0) {
+    if (work->transition.state != 0 || fclChkMessage() != 0) {
         return 0;
     }
 
@@ -75,7 +75,7 @@ s32 mnuHandleStatPointAssignment(KwlnTask *task) {
 
     if (work->assignedStatPoints == work->availableStatPoints ||
         mnuCheckTableSums(entry, work) != 0) {
-        dspStartEntry(0x16);
+        fclStartMessage(0x16);
         evtSetMessageWindowOptionWhenOpen(0);
         evtStoreValueAndCaptureWindowPanelValue(0x1D);
         mnuSetPopupEntryFlagged(&work->transition.state, brsStatConfirmationPopupEntry);
@@ -149,7 +149,7 @@ u32 mnuBeginPanelEntryAndCaptureSoundMode(KwlnTask *task) {
 
     context = (BrsSkillPackageWork *)dds3GetProcessData(task);
     mnuSetPanelGroupSelection(context->panelHandle, -1);
-    dspStartEntry(0x16);
+    fclStartMessage(0x16);
     evtSetMessageWindowOptionWhenOpen(0);
     evtStoreValueAndCaptureWindowPanelValue(0x1d);
     return 1;
@@ -176,7 +176,7 @@ s32 mnuCommitAssignedStatPoints(KwlnTask *task) {
     if (result != 0) {
         return result;
     }
-    if (work->transition.state == 0 && evtGetMessageWindowControlState() == 0) {
+    if (work->transition.state == 0 && fclChkMessage() == 0) {
         s8 capturedValue = evtGetCapturedWindowPanelValue();
         s32 *stats = work->statGains;
 
@@ -226,8 +226,8 @@ u32 mnuShowProgressLevelChangePopup(KwlnTask *task) {
         sprintf(text, D_003BC550, brsGetLevelStepForValue(entry->level));
         evtCopyEntryStringToActiveWindow(1, text);
         dspSetActive(1);
-        dspStartEntry(0x17);
-        sndSetSequenceVolumePan(7, 0x7F, 0x3F);
+        fclStartMessage(0x17);
+        p2sdPlaySE(7, 0x7F, 0x3F);
     }
     return 1;
 }
@@ -251,7 +251,7 @@ s32 mnuRunPanelWithIdleFallback(KwlnTask *request) {
     if (result != 0) {
         return result;
     }
-    if (*panelState == 0 && evtGetMessageWindowControlState() == 0) {
+    if (*panelState == 0 && fclChkMessage() == 0) {
         mnuSetPopupEntryFlagged(panelState, brsRewardMessagePopupEntry);
     }
     return 0;
@@ -280,7 +280,7 @@ u32 brsPrepareRewardMessage(KwlnTask *task) {
 
     if (context->rewardMode != 0) {
         evtCopyEntryStringToActiveWindow(0, D_003BAA70 + item->unitId * 17);
-        dspStartEntry(0x18);
+        fclStartMessage(0x18);
     }
     memset(context->statGains, 0, sizeof(context->statGains));
     return 1;
@@ -308,7 +308,7 @@ void mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
     case 2:
     case 3:
         evtCopyEntryStringToActiveWindow(0, D_003BAA70 + entry->unitId * 17);
-        dspStartEntry(work->rewardMode + 0x18);
+        fclStartMessage(work->rewardMode + 0x18);
         break;
     default:
         break;
@@ -335,21 +335,21 @@ void kwlnItemUpdateDisplay(BrsSkillPackageWork *scene) {
     switch (scene->rewardMode) {
     case 4:
         btlAddBaseStats(scene->statGains, item);
-        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        p2sdPlaySE(0x10, 0x7F, 0x3F);
         break;
     case 1:
         item->hp = item->maxHp;
         item->mp = item->maxMp;
         item->status = 0;
-        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        p2sdPlaySE(0x10, 0x7F, 0x3F);
         break;
     case 2:
         item->hp = item->maxHp;
-        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        p2sdPlaySE(0x10, 0x7F, 0x3F);
         break;
     case 3:
         item->mp = item->maxMp;
-        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        p2sdPlaySE(0x10, 0x7F, 0x3F);
         break;
     }
     mnuRefreshSelectedUnitPanels(item, scene);
@@ -377,7 +377,7 @@ s32 brsAdvanceRewardPanelAfterMessage(KwlnTask *request) {
         return result;
     }
     if (panel->transition.state == 0) {
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             if (panel->rewardMode != 0) {
                 mnuStartRewardDialogAndMotion(panel);
                 kwlnItemUpdateDisplay(panel);
@@ -431,7 +431,7 @@ void brsAnimateSkillIconRows(BrsSkillPackageWork *work) {
         work->leadIconRow.x = 12;
         work->leadIconRow.y = 54;
         work->leadIconRow.opacity =
-            uiBlendColors(0x80808080, 0x80808000, weight) & 0xFF;
+            fclBlendColor(0x80808080, 0x80808000, weight) & 0xFF;
         if (work->leadIconRow.opacity >= 0x40) {
             for (i = 0; i < 4; i++) {
                 if (work->followIconRows[i].count == 0 && work->followIconRows[i].holdTicks == 0) {
@@ -525,7 +525,7 @@ void itfUpdateFadeColor(BrsSkillPackageWork *work) {
     s32 remaining = 0x100 - work->fadeProgress;
 
     if (work->opacityReady == 0) {
-        u32 opacity = uiBlendColors(0x80808080, 0x80808000, remaining) & 0xFF;
+        u32 opacity = fclBlendColor(0x80808080, 0x80808000, remaining) & 0xFF;
 
         work->opacity = opacity;
         if (opacity >= 0x80) {
@@ -633,7 +633,7 @@ void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, 
 
     sprintf(text, D_003BC568, info->totalExp);
     glyph = itfCreateFont3TextGlyph(x, y, z, w, text, 0);
-    frFontSetGlyphPosition(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
+    frSetDrawPosition(glyph, x + ((0xBE - frGetStrWidth2(glyph)) << 4), y);
     frFontDrawGlyphChain(glyph, 1, flags);
     frDestroyFontRequestAfter(glyph);
 }
@@ -644,7 +644,7 @@ void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary 
 
     sprintf(text, D_003BC568, info->macca);
     glyph = itfCreateFont3TextGlyph(x, y, z, w, text, 0);
-    frFontSetGlyphPosition(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
+    frSetDrawPosition(glyph, x + ((0xBE - frGetStrWidth2(glyph)) << 4), y);
     frFontDrawGlyphChain(glyph, 1, flags);
     frDestroyFontRequestAfter(glyph);
 }

@@ -11,7 +11,7 @@
 
 extern f32 sdfVec3Normalize(f32 *);
 
-extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
+extern s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 
 
 extern void (*sdfTickCallback)(void);
@@ -243,7 +243,7 @@ void sdfConvertEulerAnglesToQuaternionScalar(f32 *out, f32 x, f32 y, f32 z) {
 void sdfCreateSemaphoreFromOptions(void) {
 }
 
-s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {
+s32 sdfCreateSema(u32 initial, u32 option, u32 maximum) {
     struct {
         u32 attr;
         u32 option;
@@ -263,7 +263,7 @@ extern void *_gp;
 
 /* Create a kernel thread from a zeroed descriptor that uses the caller's
  * workspace as its stack and the program's GP. */
-s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority) {
+s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority) {
     SdfKernelThreadParam param;
 
     memset(&param, 0, sizeof(param));
@@ -275,10 +275,10 @@ s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 pri
     return CreateThread(&param);
 }
 
-s32 sdfCreateThreadWithAllocatedWorkspace(void (*entryAddress)(), s32 stackBytes, s32 priority) {
+s32 sdfCreateThreadWithStack(void (*entryAddress)(), s32 stackBytes, s32 priority) {
     void *workspace;
 
-    workspace = sdfAllocateBlockBySizeThreshold(stackBytes);
-    return sdfCreateThread((void *)entryAddress, workspace, stackBytes, priority);
+    workspace = sdfAllocAuto(stackBytes);
+    return CreateThreadSimple((void *)entryAddress, workspace, stackBytes, priority);
 }
 

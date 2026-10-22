@@ -16,8 +16,8 @@ callbacks and bitmap flags reloaded afterward are distinct values/epochs.
 
 The final address expression uses the existing `FldWaypointHeaderValues.data`
 view, `body.data[headerFloor + 6]`. It accesses the second six-halfword bank of
-the real 12-halfword union, as already used by `fldGetRowValue` and
-`fldFindTableEntry`. Valid elevator inputs remain header index 0..7 and floor
+the real 12-halfword union, as already used by `fldDoor_GetElvTbl` and
+`fldDoor_ElvTakasaToFloor`. Valid elevator inputs remain header index 0..7 and floor
 index 0..5. This does not extend the supported input domain or flatten records.
 
 Stock cc1 `-da` explains the last word: the equivalent nested `elevator.blocks`

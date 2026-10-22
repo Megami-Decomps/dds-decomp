@@ -4,6 +4,6 @@
 #include "common.h"
 
 /* Bind caller-owned, relocated font resource bytes into the temporary slot. */
-void frFontLoadTemporaryEntry(u8 *fontData);
+void frSetExtDic(u8 *fontData);
 
 #endif /* FR_FONT_TEMPORARY_ENTRY_API_H */

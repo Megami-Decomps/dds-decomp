@@ -26,7 +26,7 @@ extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
 
-extern f32 fldNormalizedVectorDot(f32 *, f32 *);
+extern f32 vecDot(f32 *, f32 *);
 
 
 
@@ -35,11 +35,11 @@ extern void sdfConvertQuaternionRotationMatrix(f32 *, f32 *);
 
 #include "sdf_vector_transform.h"
 
-extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *vector);
+extern f32 vecNormalize(f32 *vector);
 
-extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
+extern void vecTranslate(f32 *, f32 *, f32 *);
 
-extern void sdfVec3ScaleInPlace(f32 scale, f32 *vector);
+extern void vecScale(f32 scale, f32 *vector);
 
 extern void sdfGridFollowCursorWithinMargins(SdfGrid *);
 
@@ -95,7 +95,7 @@ void sdfQuatFromAxisAngle(f32 *out, f32 x, f32 y, f32 z, f32 angle) {
     axis[3] = 1.0f;
     a = fsqrtf((1.0f - sdfCos(angle)) * 0.5f);
     b = fsqrtf((1.0f + sdfCos(angle)) * 0.5f);
-    sdfVec3NormalizeInPlaceAndGetLength(axis);
+    vecNormalize(axis);
     out[0] = axis[0] * a;
     out[1] = axis[1] * a;
     out[2] = axis[2] * a;
@@ -107,10 +107,10 @@ void sdfQuatFromVectors(f32 *out, f32 *from, f32 *to) {
     f32 cross[4];
     f32 scale;
 
-    sdfVec3NormalizeInPlaceAndGetLength(from);
-    sdfVec3NormalizeInPlaceAndGetLength(to);
-    fldNormalizedVectorCross(cross, from, to);
-    scale = fsqrtf(2.0f * (fldNormalizedVectorDot(from, to) + 1.0f));
+    vecNormalize(from);
+    vecNormalize(to);
+    vecTranslate(cross, from, to);
+    scale = fsqrtf(2.0f * (vecDot(from, to) + 1.0f));
     out[0] = cross[0] / scale;
     out[1] = cross[1] / scale;
     out[2] = cross[2] / scale;
@@ -129,13 +129,13 @@ void sdfQuatFromEuler(f32 *out, f32 x, f32 y, f32 z) {
 
     half = -x * 0.5f;
     cx = sdfCos(half);
-    sx = sdfSinPoly(half);
+    sx = sdfSin(half);
     half = -y * 0.5f;
     cy = sdfCos(half);
-    sy = sdfSinPoly(half);
+    sy = sdfSin(half);
     half = -z * 0.5f;
     cz = sdfCos(half);
-    sz = sdfSinPoly(half);
+    sz = sdfSin(half);
     out[0] = sz * sy * cx + cz * cy * sx;
     out[1] = cz * sy * cx - sz * cy * sx;
     out[2] = sz * cy * cx + cz * sy * sx;
@@ -226,7 +226,7 @@ void sdfQuatSquad(f32 *out, f32 *first, f32 *second, f32 *third, f32 *fourth, f3
 
 void sdfQuatLog(f32 *out, f32 *in) {
     f32 angle = acosf(in[3]);
-    f32 sine = sdfSinPoly(angle);
+    f32 sine = sdfSin(angle);
     out[3] = 0.0f;
     if (out[3] < sine) {
         out[0] = angle * in[0] / sine;
@@ -240,7 +240,7 @@ void sdfQuatLog(f32 *out, f32 *in) {
 void sdfQuatExp(f32 *out, f32 *in) {
     f32 x = in[0], y = in[1], z = in[2];
     f32 length = fsqrtf(x * x + y * y + z * z);
-    f32 sine = sdfSinPoly(length);
+    f32 sine = sdfSin(length);
     out[3] = sdfCos(length);
     if (length > 0.0f) {
         out[0] = sine * in[0] / length;
@@ -277,7 +277,7 @@ void sdfQuatForwardVector(f32 *rotation, f32 *out) {
     vector[2] = 1.0f;
     sdfConvertQuaternionRotationMatrix(matrix, rotation);
     sdfTransformDirectionByMatrix(vector, matrix);
-    sdfVec3NormalizeInPlaceAndGetLength(vector);
+    vecNormalize(vector);
     memcpy(out, vector, sizeof(vector));
 }
 
@@ -286,7 +286,7 @@ f32 sdfQuatForwardDot(f32 *direction, f32 *target) {
     memset(quaternion, 0, sizeof(quaternion));
     quaternion[2] = 1.0f;
     sdfQuatForwardVector(direction, quaternion);
-    return fldNormalizedVectorDot(quaternion, target);
+    return vecDot(quaternion, target);
 }
 
 f32 sdfDivideVerticalMagnitudeByForwardDot(f32 *direction, f32 *target) {
@@ -313,15 +313,15 @@ void sdfRayPlaneHit(f32 *plane, f32 *rotation, f32 *out) {
 
     sdfConvertQuaternionRotationMatrix(matrix, rotation);
     sdfTransformDirectionByMatrix(forward, matrix);
-    dot = fldNormalizedVectorDot(up, forward);
-    sdfVec3NormalizeInPlaceAndGetLength(forward);
+    dot = vecDot(up, forward);
+    vecNormalize(forward);
     dist = plane[1];
     if (dist < 0.0f) {
         dist = -dist / dot;
     } else {
         dist = dist / dot;
     }
-    sdfVec3ScaleInPlace(dist, forward);
+    vecScale(dist, forward);
     memcpy(out, forward, 16);
 }
 
@@ -333,7 +333,7 @@ void sdfFontRegisterShort(s32 x, s32 y, u32 colors, const u8 *text) {
 
 s32 frFontMeasureAndQueueGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *text, s32 option) {
     FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, depth, colors, text, 0);
-    s32 result = frFontMeasureGlyphChain(handle);
+    s32 result = frGetStrWidth(handle);
     frFontDrawGlyphChain(handle, 1, option);
     frDestroyFontRequestAfter(handle);
     return result;
@@ -344,11 +344,11 @@ extern FrFontGlyph * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 fi
 s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 first, u32 second, s8 type, void *name, s32 flag, s32 option) {
     FrFontGlyph *handle = frFontBuildGlyphChain(name, 0, type, 0, 0);
     s32 result = 0;
-    frFontSetChildColors(handle, second);
-    frFontSetGlyphPosition(handle, x << 4, y << 3);
+    frSetFontColor(handle, second);
+    frSetDrawPosition(handle, x << 4, y << 3);
     frSetPriority(handle, first);
     if (flag < 0) {
-        result = frFontMeasureGlyphChain(handle);
+        result = frGetStrWidth(handle);
     }
     frFontDrawGlyphChain(handle, 1, option);
     frDestroyFontRequestAfter(handle);
@@ -363,7 +363,7 @@ s32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, c
     if (width >= 0) {
         result = 0;
     } else {
-        result = frFontMeasureGlyphChain(handle);
+        result = frGetStrWidth(handle);
     }
     frFontDrawGlyphChain(handle, 1, color);
     frDestroyFontRequestAfter(handle);
@@ -380,7 +380,7 @@ s32 itfDrawGlyphChainWithWidthQuery(s32 x, s32 y, s32 z, u32 w, u8 flags, char *
     if (width >= 0) {
         result = 0;
     } else {
-        result = frFontMeasureGlyphChain(handle);
+        result = frGetStrWidth(handle);
     }
     frFontDrawGlyphChain(handle, 1, color);
     frDestroyFontRequestAfter(handle);
@@ -397,7 +397,7 @@ s32 frFontQueueFlaggedGlyphAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char
     if (width >= 0) {
         result = 0;
     } else {
-        result = frFontMeasureGlyphChain(handle);
+        result = frGetStrWidth(handle);
     }
     frFontDrawGlyphChain(handle, 1, color);
     frDestroyFontRequestAfter(handle);
@@ -408,9 +408,9 @@ s32 frFontDrawColoredGlyphChainAndMeasure(s32 x, s32 y, u32 first, u32 second, u
     FrFontGlyph *handle = itfDrawBankTextWithLayoutFlags(x << 4, y << 3, first, width, name, extra);
     s32 result = 0;
     frSetFontColorNo(handle, opacity);
-    frFontSetChildColors(handle, second);
+    frSetFontColor(handle, second);
     if (flag < 0) {
-        result = frFontMeasureGlyphChain(handle);
+        result = frGetStrWidth(handle);
     }
     frFontDrawGlyphChain(handle, 1, option);
     frDestroyFontRequestAfter(handle);
@@ -419,15 +419,15 @@ s32 frFontDrawColoredGlyphChainAndMeasure(s32 x, s32 y, u32 first, u32 second, u
 
 
 #include "sdf_packet_alloc.h"
-extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
-extern s32 sdfConsMeasurePacketWithHeader(s32);
+extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
+extern s32 sdf2DGetPrimPtr(s32);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 /* Submit count XY pairs as a colored GS triangle fan to surfaceIndex.
  * useFirstColor bit 0 selects colors[0] instead of a color per vertex. */
 void sdfDrawColoredTriangleFan(s32 *points, u32 tail, u32 *colors, s32 count,
                    s32 useFirstColor, s32 surfaceIndex) {
-    SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
     SdfDrawPacket *packet;
     u64 *vertex;
     SdfPoolNode *surface;
@@ -437,10 +437,10 @@ void sdfDrawColoredTriangleFan(s32 *points, u32 tail, u32 *colors, s32 count,
     s32 y;
     u32 color;
 
-    sdfInitPacketList(list);
-    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, count));
-    sdfConsInitPacketHeader(packet, 0x14D, 2, 0x41, count);
-    vertex = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    sdfDrawTagInit(list);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, count));
+    sdf2DMakePrimPacketHeader(packet, 0x14D, 2, 0x41, count);
+    vertex = (u64 *)sdf2DGetPrimPtr((s32)packet);
     for (i = 0; i < count; i++) {
         if (useFirstColor & 1) {
             selectedColors = colors;
@@ -460,7 +460,7 @@ void sdfDrawColoredTriangleFan(s32 *points, u32 tail, u32 *colors, s32 count,
         vertex[1] = tail;
         vertex += 2;
     }
-    sdfAppendPacket(list, (u32)packet);
+    sdfDrawTagLink(list, (u32)packet);
     surface = &kwlnDrawSurfaces[surfaceIndex];
     surface->append(surface, list);
 }
@@ -469,7 +469,7 @@ void sdfDrawColoredTriangleFan(s32 *points, u32 tail, u32 *colors, s32 count,
 /* Return a callback-list header with its allocation descriptor and teardown userData. */
 SdfList *sdfCreateTaskHeader(void *userData) {
     SdfMemBlock *allocation = sdfMemAllocDirect(sizeof(SdfList));
-    SdfList *obj = (SdfList *)sdfMemoryGetBlockAddress(allocation);
+    SdfList *obj = (SdfList *)sdfMemGetPtr(allocation);
 
     memset(obj, 0, sizeof(SdfList));
     obj->allocation = allocation;
@@ -811,7 +811,7 @@ void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 taskItemMode) {
 /* Create a task resource work block with the name copied to two formatted buffers. */
 TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, void *userData) {
     struct SdfMemBlock *allocation = sdfMemAllocDirect(0x14);
-    TaskWork *work = (TaskWork *)sdfMemoryGetBlockAddress(allocation);
+    TaskWork *work = (TaskWork *)sdfMemGetPtr(allocation);
 
     memset(work, 0, 0x14);
     work->allocation = allocation;
@@ -987,7 +987,7 @@ SdfGrid *sdfGridCreate(s32 width, s32 height, u16 cellWidth, u16 cellHeight, u16
     u32 cellCount = width * height;
     s32 size = sizeof(SdfGrid) + cellCount * sizeof(SdfGridCell);
     struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
-    SdfGrid *grid = (SdfGrid *)sdfMemoryGetBlockAddress(allocation);
+    SdfGrid *grid = (SdfGrid *)sdfMemGetPtr(allocation);
 
     memset(grid, 0, size);
     grid->allocation = allocation;

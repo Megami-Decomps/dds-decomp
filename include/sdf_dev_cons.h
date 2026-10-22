@@ -34,8 +34,8 @@ typedef struct ConsBuf {
 } ConsBuf;
 
 /* Update the console state stored at the corresponding field offsets. */
-void sdfDevConsSetControlByte(DevConsState *console, u8 controlByte);
-void sdfDevConsSetTextAttribute(DevConsState *console, u8 attribute);
+void sdfDevConsSetMode(DevConsState *console, u8 controlByte);
+void sdfDevConsAttribute(DevConsState *console, u8 attribute);
 s32 sdfDevConsPrintf(DevConsState *console, const char *format, ...);
 
 typedef char DevConsState_size_must_be_0x20[(sizeof(DevConsState) == 0x20) ? 1 : -1];

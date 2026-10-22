@@ -135,7 +135,7 @@ s32 mnuInitMantraMapScroll(MnuStatusResource *object) {
     memcpy(layouts, D_00427218, sizeof(layouts));
     memcpy(requirements, D_00427258, sizeof(requirements));
     for (i = 0; i < 4; i++) {
-        if (mdlFlagTest(requirements[i][1])) {
+        if (evtBitCheck(requirements[i][1])) {
             enabled |= 1 << i;
         }
     }
@@ -199,7 +199,7 @@ s32 mnuAdvanceMantraSelectionCursor(MnuStatusResource *object, s32 centerOnNode)
 
     work = &object->menu;
     for (i = 0; i < 4; i++) {
-        mdlFlagTest(requirements[i][1]);
+        evtBitCheck(requirements[i][1]);
     }
     layout = 3;
     if (work->drawBits.drawRank >= 2) {
@@ -285,11 +285,11 @@ void mnuBuildMantraSourceList(MnuStatusResource *status) {
     memset(list, 0, 0x70 * sizeof(MenuMantraRecord));
     node = mnuGetMantraNodePositionRecord(0);
     list->flags |= 0x8000;
-    if (mdlFlagTest(0x922)) {
+    if (evtBitCheck(0x922)) {
         list->flags = (list->flags & 0xF0FF) | 0x4300;
-    } else if (mdlFlagTest(0x921)) {
+    } else if (evtBitCheck(0x921)) {
         list->flags = (list->flags & 0xF0FF) | 0x200;
-    } else if (mdlFlagTest(0x920)) {
+    } else if (evtBitCheck(0x920)) {
         list->flags = (list->flags & 0xF0FF) | 0x100;
     }
     record++;
@@ -353,22 +353,22 @@ s32 mnuIsMantraNodeModelFlagSetForMember(u16 nodeId, s8 member) {
     memcpy(memberOffsets, mnuMantraMemberFlagOffsets, sizeof(memberOffsets));
     for (i = 0; i < 14; i++) {
         if (memberFlags[i][0] == nodeId) {
-            return mdlFlagTest(memberFlags[i][1] + memberOffsets[member]);
+            return evtBitCheck(memberFlags[i][1] + memberOffsets[member]);
         }
     }
     for (i = 0; i < 4; i++) {
         if (flagsA[i][0] == nodeId) {
-            return mdlFlagTest(flagsA[i][1]);
+            return evtBitCheck(flagsA[i][1]);
         }
     }
     for (i = 0; i < 8; i++) {
         if (flagsB[i][0] == nodeId) {
-            return mdlFlagTest(flagsB[i][1]);
+            return evtBitCheck(flagsB[i][1]);
         }
     }
     for (i = 0; i < 8; i++) {
         if (flagsC[i][0] == nodeId) {
-            return mdlFlagTest(flagsC[i][1]);
+            return evtBitCheck(flagsC[i][1]);
         }
     }
     return 0;

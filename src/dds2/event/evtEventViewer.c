@@ -45,7 +45,7 @@
 #include "itf.h"
 #include "sdf_packet_list.h"
 /* Declared before first use (were implicit int). */
-extern s32 evtCreateSkyTask(void);
+extern s32 evtInitSky(void);
 extern void mnuCampSetPrimaryOption(EvtRuntime *scene, u32 option);
 extern void mnuCampSetSecondaryOption(EvtRuntime *scene, u32 option);
 extern s32 mnuGetSelectedTableValue(EvtRuntime *runtime);
@@ -62,23 +62,23 @@ extern s32 mnuGetSelectedTableValue(EvtRuntime *runtime);
 
 
 
-void evtUnlinkListNode(EvtRuntimeGroup *entry, EvtRuntimeChild *node);
-s32 sdfCheckPendingWorkWithInterrupts();
-void effInitCh71Id(void);
-void effInitCh72Id(void);
-void effInitCh76Id(void);
-void effInitCh75Id(void);
+void UnlinkFrameInfo(EvtRuntimeGroup *entry, EvtRuntimeChild *node);
+s32 sdfDelayedResrcCheck();
+void Eve_PartialMultiBlurSetDefTex(void);
+void Eve_DistortionBlurSetDefTex(void);
+void Eve_RippleBlurSetDefTex(void);
+void Eve_PartialMultiFilterSetDefTex(void);
 void evtPolygonMovieFreeWork(PolyMovieWork *table);
-void btlRemoveCurrentGroupedEntity(s32 group, s32 type);
+void mdlUnRegist(s32 group, s32 type);
 void kwlnPadResetMotorLevelsAndOutput(void);
 EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *viewer);
 void evtEventViewerReleasePendingNode(EvtRuntime *viewer);
 void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer);
-void evtEventViewerFreeBuffer(EvtRuntimeChild *node);
+void DelBED(EvtRuntimeChild *node);
 
 extern EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer);
 
-EvtRuntimeChild *evtEventViewerCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer) {
+EvtRuntimeChild *AddFrameInfo2(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer) {
     return evtCreateViewerTimelineKey(group, frame, viewer);
 }
 
@@ -100,8 +100,8 @@ EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *viewer) {
 }
 
 /* Release a queued node from its entry, freeing its buffer unless the entry id is 0x12. */
-void evtEventViewerReleaseNode(EvtRuntimeGroup *entry, EvtRuntimeChild *node) {
-    evtUnlinkListNode(entry, node);
+void DelFrameInfo(EvtRuntimeGroup *entry, EvtRuntimeChild *node) {
+    UnlinkFrameInfo(entry, node);
     if (node->payload != NULL) {
         if (entry->type != 0x12) {
             sdfChipFreeDirect(node->payload);
@@ -128,10 +128,10 @@ void evtEventViewerReleasePendingNode(EvtRuntime *viewer) {
         }
         break;
     case 18:
-        evtEventViewerFreeBuffer(node);
+        DelBED(node);
         break;
     }
-    evtEventViewerReleaseNode(entry, node);
+    DelFrameInfo(entry, node);
     if (viewer->frameCursor == 0) {
         if (viewer->frameFirst > 0) {
             viewer->frameFirst--;
@@ -157,10 +157,10 @@ void evtEventViewerReleaseQueuedNode(EvtRuntime *viewer, EvtRuntimeGroup *entry,
         }
         break;
     case 18:
-        evtEventViewerFreeBuffer(node);
+        DelBED(node);
         break;
     }
-    evtEventViewerReleaseNode(entry, node);
+    DelFrameInfo(entry, node);
     if (viewer->frameCursor == 0) {
         if (viewer->frameFirst > 0) {
             viewer->frameFirst--;
@@ -305,12 +305,12 @@ s32 evtEventViewerSumNodeCounts(s32 mode, EvtRuntime *viewer) {
 /* Destroy an entry: free its nodes, drop a type-0x18 texture, unlink it, free it. */
 void evtEventViewerDestroyEntry(EvtRuntimeGroup *entry, EvtRuntime *viewer) {
     while (entry->children != NULL) {
-        evtEventViewerReleaseNode(entry, entry->children);
+        DelFrameInfo(entry, entry->children);
     }
     if (entry->type == 0x18) {
         sdfTexReleaseReference(entry->texture);
         entry->texture = 0;
-        while (sdfCheckPendingWorkWithInterrupts() != 0) {
+        while (sdfDelayedResrcCheck() != 0) {
         }
     }
     evtEventViewerUnlinkEntry(entry, viewer);
@@ -355,10 +355,10 @@ void evtEventViewerReset(EvtRuntime *viewer) {
 
 /* Shut the viewer down: reset effect channels, destroy entries, release the handle. */
 void evtEventViewerShutdown(EvtRuntime *viewer) {
-    effInitCh71Id();
-    effInitCh72Id();
-    effInitCh76Id();
-    effInitCh75Id();
+    Eve_PartialMultiBlurSetDefTex();
+    Eve_DistortionBlurSetDefTex();
+    Eve_RippleBlurSetDefTex();
+    Eve_PartialMultiFilterSetDefTex();
     while (viewer->groups != NULL) {
         evtEventViewerDestroyEntry(viewer->groups, viewer);
     }
@@ -375,7 +375,7 @@ void evtEventViewerReleaseGroups(EvtRuntime *viewer) {
 
     if (viewer->windowContext != NULL) {
         for (groupIndex = 0; groupIndex < (s32)viewer->windowContext->mainEntry3Count; groupIndex++) {
-            btlRemoveCurrentGroupedEntity(((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[groupIndex].group, ((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[groupIndex].type);
+            mdlUnRegist(((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[groupIndex].group, ((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[groupIndex].type);
         }
     }
 }
@@ -420,15 +420,15 @@ EffWorldNode *evtEventViewerGetNameObject(s32 index, EvtRuntime *viewer) {
     if (index < 0) {
         return NULL;
     }
-    return dds3FindIndexedObjectChainNodeByName(
-        (EffWorldNode *)dds3GetWorldObject(),
+    return dds3SceneBasicSearchNameAndType(
+        (EffWorldNode *)dds3GetActiveScene(),
         EFF_WORLD_KIND_EFFECT_OBJECT,
         (const u8 *)viewer->entryName[index]);
 }
 
-extern s32 effObjBindOwnerBillEntry(EffWorldNode *, EffWorldNode *, s32);
-extern s32 effObjBindValidatedOwner(EffWorldNode *, EffWorldNode *);
-extern s32 evtStageRelinkOwnedNodeResource(void *object, void *owner);
+extern s32 dds3EffectObjectBasicLinkObjectIndex(EffWorldNode *, EffWorldNode *, s32);
+extern s32 dds3EffectObjectBasicLinkObject(EffWorldNode *, EffWorldNode *);
+extern s32 evtPathLinkAndMake(void *object, void *owner);
 
 /* Billboard entries and polygon movies use distinct owner attachment paths. */
 void evtViewerBindNamedOwner(EffWorldNode *effectObject, s32 ownerNameIndex, s32 billboardEntry, u32 startFrame, EvtRuntime *viewer) {
@@ -443,8 +443,8 @@ void evtViewerBindNamedOwner(EffWorldNode *effectObject, s32 ownerNameIndex, s32
     if (ownerNameIndex < 0) {
         return;
     }
-    owner = dds3FindObjectChainNodeByName(
-        (EffWorldNode *)dds3GetWorldObject(),
+    owner = dds3SceneBasicSearchName(
+        (EffWorldNode *)dds3GetActiveScene(),
         (const u8 *)viewer->entryName[ownerNameIndex]);
     if (owner == NULL) {
         return;
@@ -452,7 +452,7 @@ void evtViewerBindNamedOwner(EffWorldNode *effectObject, s32 ownerNameIndex, s32
     switch (owner->kindTag >> 24) {
     case EFF_WORLD_KIND_FOLLOW_MODEL:
         if (billboardEntry >= 0) {
-            effObjBindOwnerBillEntry(effectObject,
+            dds3EffectObjectBasicLinkObjectIndex(effectObject,
                                     owner, billboardEntry);
             break;
         }
@@ -463,15 +463,15 @@ void evtViewerBindNamedOwner(EffWorldNode *effectObject, s32 ownerNameIndex, s32
     case EFF_WORLD_KIND_RESOURCE_OWNER:
     case EFF_WORLD_KIND_LIGHT:
     case EFF_WORLD_KIND_TRANSFORM_SOURCE:
-        effObjBindValidatedOwner(effectObject, owner);
+        dds3EffectObjectBasicLinkObject(effectObject, owner);
         break;
     case EFF_WORLD_KIND_ACTION_10:
-        evtStageRelinkOwnedNodeResource(owner, (void *)effectObject);
-        movieObject = dds3GetObjectOwnedHandle(effectObject)->slots[1];
+        evtPathLinkAndMake(owner, (void *)effectObject);
+        movieObject = dds3GetBaseControlWorkData(effectObject)->slots[1];
         if (viewer->flags & 1) {
-            evtPolygonMovieScaleByProgress(movieObject, 0, startFrame, currentFrame);
+            evtStopMover(movieObject, 0, startFrame, currentFrame);
         } else {
-            evtPolygonMovieScaleByProgress(movieObject, 1, startFrame, currentFrame);
+            evtStopMover(movieObject, 1, startFrame, currentFrame);
         }
         break;
     }
@@ -479,14 +479,14 @@ void evtViewerBindNamedOwner(EffWorldNode *effectObject, s32 ownerNameIndex, s32
 
 
 struct EffectObj;
-extern void effObjSetFlags(struct EffectObj *obj, u32 flags);
-extern void *effObjCreateEventNode(void *resource, void *position, void *scale);
-extern void effObjReplaceActiveEventNode(void *obj, u32 entryId);
+extern void dds3EffectObjectBasicStatOn(struct EffectObj *obj, u32 flags);
+extern void *dds3AddBEDEffectObjectBasic2(void *resource, void *position, void *scale);
+extern void dds3StartBEDEffectObjectBasic(void *obj, u32 entryId);
 struct EffNodeDescriptor;
 extern EffWorldNode *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
-extern s32 effObjCreateBillboardFromFactory(s32 arg, f32 *vec0, f32 *vec1);
-extern EffWorldNode *effForwardMagatuhiDescriptor(s32 kind, struct EffNodeDescriptor *descriptor);
-extern s32 effObjCopyMagatuhiSourceParameters(EffWorldNode *obj, EffWorldNode *first,
+extern s32 dds3AddD3PEffectObjectBasic(s32 arg, f32 *vec0, f32 *vec1);
+extern EffWorldNode *dds3AddMG12EffectObjectBasic2(s32 kind, struct EffNodeDescriptor *descriptor);
+extern s32 dds3EffectObjectSetMG12Pos(EffWorldNode *obj, EffWorldNode *first,
                                                EffWorldNode *second, EffWorldNode *third,
                                                EffWorldNode *fourth);
 
@@ -517,10 +517,10 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *track, EvtRunti
         if (track->type == 3) {
             handle = (s32)effObjSpawnDescriptorBoundEffect((struct EffNodeDescriptor *)track->resourceData, vec0, vec1);
         } else {
-            handle = effObjCreateBillboardFromFactory((s32)track->resourceData, vec0, vec1);
+            handle = dds3AddD3PEffectObjectBasic((s32)track->resourceData, vec0, vec1);
         }
         if (key->p0C.sb[0] != 0) {
-            effObjDispatchReadyState((EffWorldNode *)handle);
+            dds3EffectObjectPresetMG12((EffWorldNode *)handle);
         }
         if (track->metadata.option == 0) {
             evtViewerBindNamedOwner((EffWorldNode *)handle, key->p0C.sh[1], key->p0C.sb[1], key->frame, viewer);
@@ -532,25 +532,25 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *track, EvtRunti
     case 0x15:
         switch (track->type) {
         case 0x14:
-            handle = (s32)effForwardMagatuhiDescriptor(1, (struct EffNodeDescriptor *)track->resourceData);
+            handle = (s32)dds3AddMG12EffectObjectBasic2(1, (struct EffNodeDescriptor *)track->resourceData);
             break;
         case 0x15:
-            handle = (s32)effForwardMagatuhiDescriptor(2, (struct EffNodeDescriptor *)track->resourceData);
+            handle = (s32)dds3AddMG12EffectObjectBasic2(2, (struct EffNodeDescriptor *)track->resourceData);
             break;
         }
         n0 = evtEventViewerGetNameObject(key->p0C.sb[0], viewer);
         n1 = evtEventViewerGetNameObject(key->p0C.sb[1], viewer);
         n2 = evtEventViewerGetNameObject(key->p0C.sb[2], viewer);
-        effObjCopyMagatuhiSourceParameters((EffWorldNode *)handle, n0, n1, n2,
+        dds3EffectObjectSetMG12Pos((EffWorldNode *)handle, n0, n1, n2,
                                            evtEventViewerGetNameObject(key->p0C.sb[3], viewer));
         if (key->p08.sb[1] != 0) {
-            effObjDispatchReadyState((EffWorldNode *)handle);
+            dds3EffectObjectPresetMG12((EffWorldNode *)handle);
         }
         break;
     }
     viewer->objects[slot] = (void *)handle;
     if (handle != 0) {
-        effObjSetFlags((struct EffectObj *)handle, 1);
+        dds3EffectObjectBasicStatOn((struct EffectObj *)handle, 1);
     }
     return slot;
 }
@@ -562,7 +562,7 @@ void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer) {
     slot = (s32 *)(index * 4 + (s32)viewer + 0x203c);
     resource = *slot;
     if (resource != 0) {
-        dds3RemoveWorldObjectNode((struct EffWorldNode *)resource);
+        dds3DeleteSceneBasicData((struct EffWorldNode *)resource);
         *slot = 0;
     }
 }
@@ -577,22 +577,22 @@ void *evtEventViewerCreateOriginEffect(void *resource, u32 entryId, s32 ownerNam
     memset(position, 0, 0x10);
     memset(scale, 0, 0x10);
     scale[3] = 1.0f;
-    effect = effObjCreateEventNode(resource, position, scale);
-    effObjSetFlags((struct EffectObj *)effect, 1);
-    effObjReplaceActiveEventNode(effect, entryId);
+    effect = dds3AddBEDEffectObjectBasic2(resource, position, scale);
+    dds3EffectObjectBasicStatOn((struct EffectObj *)effect, 1);
+    dds3StartBEDEffectObjectBasic(effect, entryId);
     evtViewerBindNamedOwner((EffWorldNode *)effect, ownerNameIndex, billboardEntry, startFrame, viewer);
     return effect;
 }
 
-void evtEventViewerFreeBuffer(EvtRuntimeChild *node) {
+void DelBED(EvtRuntimeChild *node) {
     if (node->payload != NULL) {
-        dds3RemoveWorldObjectNode(node->payload);
+        dds3DeleteSceneBasicData(node->payload);
     }
     node->payload = NULL;
 }
 
-extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
-extern void sdfSetViewFieldOfView(f32 fieldOfView);
+extern f32 dds3CameraObjectBasicGetFovy(EffWorldNode *camera);
+extern void dds3SetScreenFovy(f32 fieldOfView);
 extern s32 evtViewerHasUpdateFlag(EvtRuntime *);
 
 typedef struct CampDisplayDefaults CampDisplayDefaults;
@@ -659,8 +659,8 @@ extern f32 D_00438A48;
 extern f32 D_00438A4C;
 extern EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void);
 extern EffBlurScatterParams *effEventGetScatterBlurSetupParams(void);
-extern EffBlurScaleParams *effEventGetScaleBlurSetupParams(void);
-extern EffResourceRectParams *effEventGetResourceTemplateSetupParams(void);
+extern EffBlurScaleParams *rblurGetParam(void);
+extern EffResourceRectParams *mfilterGetParam(void);
 
 
 void evtEventViewerApplyEffectToggles(EvtRuntime *viewer) {
@@ -668,24 +668,24 @@ void evtEventViewerApplyEffectToggles(EvtRuntime *viewer) {
         effDrawBlurRectangle(&effGetLoadDescA()->source);
     }
     if (viewer->texturedBlurEnabled != 0) {
-        effEnableTexturedBlur();
+        Eve_PartialMultiBlurON();
     } else {
-        effDisableTexturedBlur();
+        Eve_PartialMultiBlurOFF();
     }
     if (viewer->texturedSquareEnabled != 0) {
-        effEnableTexturedSquare();
+        Eve_PartialMultiFilterON();
     } else {
-        effDisableTexturedSquare();
+        Eve_PartialMultiFilterOFF();
     }
     if (viewer->filterBlurEnabled != 0) {
-        effEnableFilterBlur();
+        Eve_DistortionBlurON();
     } else {
-        effDisableFilterBlur();
+        Eve_DistortionBlurOFF();
     }
     if (viewer->staggeredBlurEnabled != 0) {
-        effEnableStaggeredBlur();
+        Eve_RippleBlurON();
     } else {
-        effDisableStaggeredBlur();
+        Eve_RippleBlurOFF();
     }
     if (viewer->framebufferQuadEnabled != 0) {
         effEnableFramebufferQuad();
@@ -693,9 +693,9 @@ void evtEventViewerApplyEffectToggles(EvtRuntime *viewer) {
         effDisableFramebufferQuad();
     }
     if (viewer->colorRectangleEnabled != 0) {
-        effEnableColorRectangle();
+        Eve_FilterON();
     } else {
-        effDisableColorRectangle();
+        Eve_FilterOFF();
     }
     evtUpdateCameraColorTrackEffect(viewer);
     evtViewerApplyParameterKeyTracks(viewer);
@@ -712,28 +712,28 @@ void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
         selectedEntry = (EffWorldNode *)viewer->fallbackEntry;
     }
     if (selectedEntry != 0) {
-        dds3SetWorldCameraObject(dds3GetWorldObject(), selectedEntry);
-        sdfSetViewFieldOfView(dds3GetCameraFieldOfView(selectedEntry));
+        dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), selectedEntry);
+        dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(selectedEntry));
     }
 }
 
 extern u16 D_004372B0;
 extern s32 evtViewerTestIndexedCondition(u32 encodedCondition);
 extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsOut);
-extern s32 evtSetBgmVolumePan(s32 id, s32 fade);
-extern s32 evtPlayBgm(s32 id, s32 fade);
-extern s32 evtFadeInBgm(s32 id, s32 fade);
-extern s32 evtQueueValidatedBgmSoundCode(s32 id, s32 fade);
-extern void evtTransitionBgm(s32 id, s32 fade);
+extern s32 evtPlaySe(s32 id, s32 fade);
+extern s32 evtPlayEventBgm(s32 id, s32 fade);
+extern s32 evtFadeInEventBgm(s32 id, s32 fade);
+extern s32 evtStopEventBgm(s32 id, s32 fade);
+extern void evtTransEventBgm(s32 id, s32 fade);
 extern void fldRegisterCampSceneId(EvtRuntime *viewer, s32 identifier);
-extern void sndStartReducedBgm(void);
-extern void sndStopReducedBgm(void);
-extern void sndQueueNoPayloadCommand1A0(void);
-extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
-extern void mnuStartMoviePlaybackByResourceIndex(s32 value);
+extern void p2sdBgmVolDown(void);
+extern void p2sdBgmVolUp(void);
+extern void p2sdStopAllBgm(void);
+extern void dds3PadVibrationSet(u32 motor, u8 level, s32 duration);
+extern void dds3PlayMovieByIndex(s32 value);
 extern s32 fldTitleIsActive(void);
 extern void fldSetTitleDrawMode(u32 enabled);
-extern void fldBeginTitleAnimation(void);
+extern void nbPanelAnalyzeStart(void);
 extern void kwlnFadeBackgroundStartIn(s32 duration);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern s32 itfMesSelectTableItemText(s32 window, s32 entry, s32 unused);
@@ -798,13 +798,13 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             EffWorldNode *third = evtEventViewerGetNameObject(key->p0C.sb[2], viewer);
             EffWorldNode *fourth = evtEventViewerGetNameObject(key->p0C.sb[3], viewer);
 
-            effObjCopyMagatuhiSourceParameters((EffWorldNode *)object, first, second, third, fourth);
+            dds3EffectObjectSetMG12Pos((EffWorldNode *)object, first, second, third, fourth);
         }
         break;
     }
     case 18:
         if (currentFrame == key->frame) {
-            evtEventViewerFreeBuffer(key);
+            DelBED(key);
             if (track->metadata.option == 0) {
                 key->payload = evtEventViewerCreateOriginEffect((void *)track->resourceData,
                     (s32)key->p0C.sb[0], key->p08.sh[1], -1, key->frame, viewer);
@@ -819,7 +819,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             evtViewerTestIndexedCondition((u32)(s32)key->p08.sh[1]) == 0) {
             break;
         }
-        evtSetBgmVolumePan(D_004372B0, key->p08.sh[0]);
+        evtPlaySe(D_004372B0, key->p08.sh[0]);
         fldRegisterCampSceneId(viewer, key->p08.sh[0]);
         break;
     case 19:
@@ -829,37 +829,37 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         }
         switch (key->p08.sh[0]) {
         case 0:
-            evtPlayBgm(D_004372B0, key->p08.sh[1]);
+            evtPlayEventBgm(D_004372B0, key->p08.sh[1]);
             fldRegisterCampSceneId(viewer, key->p08.sh[1]);
             break;
         case 1:
-            evtFadeInBgm(D_004372B0, key->p08.sh[1]);
+            evtFadeInEventBgm(D_004372B0, key->p08.sh[1]);
             fldRegisterCampSceneId(viewer, key->p08.sh[1]);
             break;
         case 2:
-            evtQueueValidatedBgmSoundCode(D_004372B0, key->p08.sh[1]);
+            evtStopEventBgm(D_004372B0, key->p08.sh[1]);
             break;
         case 3:
-            evtTransitionBgm(D_004372B0, key->p08.sh[1]);
+            evtTransEventBgm(D_004372B0, key->p08.sh[1]);
             break;
         case 4:
-            sndStartReducedBgm();
+            p2sdBgmVolDown();
             break;
         case 5:
-            sndStopReducedBgm();
+            p2sdBgmVolUp();
             break;
         case 6:
-            sndQueueNoPayloadCommand1A0();
+            p2sdStopAllBgm();
             break;
         }
         break;
     case 7:
         if (key->duration == 0 && key->p08.sh[0] == 0) {
             viewer->flags &= ~2;
-            kwlnCancelConfiguredFadeFrames();
+            dds3StopQuake();
         } else if (currentFrame == key->frame) {
             viewer->flags |= 2;
-            kwlnFadeSetupFrames(key->duration, key->p08.sh[0]);
+            dds3SetQuake(key->duration, key->p08.sh[0]);
         }
         break;
     case 4: {
@@ -898,14 +898,14 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
     }
     case 28:
         if (currentFrame == (s32)key->frame + track->metadata.value) {
-            kwlnPadStartMotor(key->p08.sh[0], key->p08.b[2], key->duration);
+            dds3PadVibrationSet(key->p08.sh[0], key->p08.b[2], key->duration);
         }
         break;
     case 29:
         if (evtViewerHasUpdateFlag(viewer) == 1 || currentFrame != key->frame) {
             break;
         }
-        mnuStartMoviePlaybackByResourceIndex(key->p08.sh[0]);
+        dds3PlayMovieByIndex(key->p08.sh[0]);
         viewer->timedStart = key->frame;
         if (key->duration == 0) {
             if (key->p0C.sb[0] == 0) {
@@ -925,7 +925,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             } else {
                 fldSetTitleDrawMode(0);
             }
-            fldBeginTitleAnimation();
+            nbPanelAnalyzeStart();
         }
         break;
     case 32:
@@ -949,8 +949,8 @@ extern u16 D_004372B0;
 extern u16 D_004372B2;
 extern u8 D_00423050[];
 extern s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime);
-extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
-extern void sdfSetViewFieldOfView(f32 fieldOfView);
+extern f32 dds3CameraObjectBasicGetFovy(EffWorldNode *camera);
+extern void dds3SetScreenFovy(f32 fieldOfView);
 
 
 
@@ -958,20 +958,20 @@ extern s32 evtViewerHasUpdateFlag(EvtRuntime *);
 extern void evtEventViewerApplyEffectToggles(EvtRuntime *viewer);
 extern void evtViewerApplySelectedEntry(EvtRuntime *viewer);
 extern u8 D_004372C0[3];
-extern u32 kwlnGetDrawBufferIndex(void);
-extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
+extern u32 dds3GetFrameID(void);
+extern void dds3FadeSet(s32 red, s32 green, s32 blue, s32 alpha);
 
 /* Effect-channel assignments driven by the viewer's timeline tracks. */
 
 extern s32 evtViewerTestIndexedCondition(u32 encodedCondition);
-extern void effInitCh71Id(void);
-extern void effInitCh72Id(void);
-extern void effInitCh75Id(void);
-extern void effInitCh76Id(void);
-extern void effSetCh71Id(SdfTex *texture);
-extern void effSetCh72Id(SdfTex *sourceHandle);
-extern void effSetCh75Id(SdfTex *texture);
-extern void effSetCh76Id(SdfTex *sourceHandle);
+extern void Eve_PartialMultiBlurSetDefTex(void);
+extern void Eve_DistortionBlurSetDefTex(void);
+extern void Eve_PartialMultiFilterSetDefTex(void);
+extern void Eve_RippleBlurSetDefTex(void);
+extern void Eve_PartialMultiBlurSetTex(SdfTex *texture);
+extern void Eve_DistortionBlurSetTex(SdfTex *sourceHandle);
+extern void Eve_PartialMultiFilterSetTex(SdfTex *texture);
+extern void Eve_RippleBlurSetTex(SdfTex *sourceHandle);
 
 
 
@@ -984,7 +984,7 @@ void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRunti
 s32 evtViewerUpdateFrame(KwlnTask *task);
 
 
-s32 evtCreateFrameVariableTask(void);
+s32 evtInitFrameVar(void);
 
 s32 evtViewerScheduleFrameVariableTask(KwlnTask *task);
 
@@ -1031,7 +1031,7 @@ extern char evtViewerTaskName[]; /* "EventViewer" */
  * kind-1 world-object tracks; the vectors keep their original embedded layout. */
 
 extern s8 D_003C953A[];
-extern void evtReorderListNodes(EvtRuntimeGroup *track);
+extern void SortFrameInfo(EvtRuntimeGroup *track);
 
 typedef struct CampDisplayDefaults CampDisplayDefaults;
 extern void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
@@ -1046,8 +1046,8 @@ extern f32 D_00438A48;
 extern f32 D_00438A4C;
 extern EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void);
 extern EffBlurScatterParams *effEventGetScatterBlurSetupParams(void);
-extern EffBlurScaleParams *effEventGetScaleBlurSetupParams(void);
-extern EffResourceRectParams *effEventGetResourceTemplateSetupParams(void);
+extern EffBlurScaleParams *rblurGetParam(void);
+extern EffResourceRectParams *mfilterGetParam(void);
 
 
 #include "sdf_debug_api.h"
@@ -1083,7 +1083,7 @@ void evtEventViewerApplyDurationScaledEffectAlpha(EvtRuntimeGroup *group, EvtRun
 }
 
 extern void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer);
-extern void evtEventViewerFreeBuffer(EvtRuntimeChild *key);
+extern void DelBED(EvtRuntimeChild *key);
 
 void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 time,
                    s32 interval, EvtRuntime *viewer) {
@@ -1124,7 +1124,7 @@ void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, 
         }
         break;
     case 18:
-        evtEventViewerFreeBuffer(key);
+        DelBED(key);
         break;
     }
 }
@@ -1142,34 +1142,34 @@ extern EffBlurQuad D_00453AC0;
 extern u8 kwlnDrawOverlayEnabled;
 extern s16 kwlnDrawOverlayAlpha;
 extern s16 kwlnDrawOverlayScale;
-extern void evtSetSkyOverlayEnabled(u32 enabled);
-extern void evtBeginSkyParameterTransition(s32 duration, s32 state);
-extern u16 evtIsSkyTransitionActive(void);
+extern void evtSetBokasi(u32 enabled);
+extern void evtSetSkyAlpha(s32 duration, s32 state);
+extern u16 evtCheckSkyAlphaAnime(void);
 extern void fldSetFadeTarget(s32 id, s32 mode, s32 duration);
-extern u32 fldGetSkyDrawState(void);
-extern void kwlnFadeClear(void);
-extern void kwlnSetLightColorTarget(s32, s32, f32 *);
-extern void kwlnSetLightDirectionTarget(s32, s32, f32 *);
-extern void kwlnSetBackgroundColorTarget(s32, f32 *);
+extern u32 fldSkyGetAlpha(void);
+extern void dds3FadeClear(void);
+extern void dds3SetLightColor(s32, s32, f32 *);
+extern void dds3SetLightDir(s32, s32, f32 *);
+extern void dds3SetAmbientColor(s32, f32 *);
 extern void evtSetSlotVectors(s32, s32, s32, f32 *, f32 *, f32 *);
 extern void evtSetSlotVector(s32, f32, f32);
-extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
-extern f32 evtMovieInterpolateFloatIfEnabled(s32, f32, f32, f32);
-extern void evtBlendVectorRows(s32, f32, f32 *, f32 *, f32 *);
-extern void evtBlendParamsC(s32, f32, EvtBlendVecColor *, EvtBlendVecColor *, EvtBlendVecColor *);
-extern void evtBlendParamsA(s32, f32, EffBlurQuad *, EffBlurQuad *, EffBlurQuad *);
-extern void evtBlendParamsB(s32, f32, EffBlurTemplateBody *, EffBlurTemplateBody *, EffBlurTemplateBody *);
-extern void evtBlendParamsD(s32, f32, EffResourceRectParams *, EffResourceRectParams *, EffResourceRectParams *);
-extern void evtBlendParamsE(s32, f32, EffBlurScatterParams *, EffBlurScatterParams *, EffBlurScatterParams *);
-extern void evtBlendParamsF(s32, f32, EffBlurScaleParams *, EffBlurScaleParams *, EffBlurScaleParams *);
+extern void dds3SetFogPara(s32, f32, f32, f32, f32);
+extern f32 evtHokanFloat(s32, f32, f32, f32);
+extern void evtHokanSceneLight(s32, f32, f32 *, f32 *, f32 *);
+extern void evtHokanSceneFog(s32, f32, EvtBlendVecColor *, EvtBlendVecColor *, EvtBlendVecColor *);
+extern void evtHokanBlur2(s32, f32, EffBlurQuad *, EffBlurQuad *, EffBlurQuad *);
+extern void evtHokanMultBlur(s32, f32, EffBlurTemplateBody *, EffBlurTemplateBody *, EffBlurTemplateBody *);
+extern void evtHokanMultFilter(s32, f32, EffResourceRectParams *, EffResourceRectParams *, EffResourceRectParams *);
+extern void evtHokanDistBlur(s32, f32, EffBlurScatterParams *, EffBlurScatterParams *, EffBlurScatterParams *);
+extern void evtHokanRipBlur(s32, f32, EffBlurScaleParams *, EffBlurScaleParams *, EffBlurScaleParams *);
 extern void evtBlendParamsG(s32, f32, EffBlurQuad *, EffBlurQuad *, EffBlurQuad *);
-extern void evtPolygonMovieBlendMatrixParam(s32, f32, EffSolidRectParams *, EffSolidRectParams *, EffSolidRectParams *);
+extern void evtHokanFilter(s32, f32, EffSolidRectParams *, EffSolidRectParams *, EffSolidRectParams *);
 extern void effSetLoadDescA(void *);
-extern void effCopyTexturedBlurParameters(EffBlurTemplateBody *);
-extern void effCopyFilterBlurParameters(EffBlurScatterParams *);
-extern void effCopyStaggeredBlurParameters(EffBlurScaleParams *);
+extern void Eve_PartialMultiBlurSetParam(EffBlurTemplateBody *);
+extern void Eve_DistortionBlurSetParam(EffBlurScatterParams *);
+extern void Eve_RippleBlurSetParam(EffBlurScaleParams *);
 extern void effCopyFramebufferQuadParameters(void *);
-extern void effCopyTexturedSquareParameters(EffResourceRectParams *);
+extern void Eve_PartialMultiFilterSetParam(EffResourceRectParams *);
 extern s32 mnuSolveCubicBezierYForX(s32,const s32 *,const s32 *);
 void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *future,
         EvtRuntimeChild *previous, s32 time, s32 *bestDistance, EvtRuntime *viewer,
@@ -1203,20 +1203,20 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
     case 22:
         if (previous != NULL) {
             if (previous->p08.sh[0] != 0) {
-                return evtSetSkyOverlayEnabled(1);
+                return evtSetBokasi(1);
             }
-            return evtSetSkyOverlayEnabled(0);
+            return evtSetBokasi(0);
         }
-        return evtSetSkyOverlayEnabled(0);
+        return evtSetBokasi(0);
     case 12:
         if (previous != NULL) {
             if (viewer->unk2288 != previous->p0C.i) {
                 fldSetFadeTarget(previous->p0C.i, previous->p08.sh[0], previous->duration);
-                evtBeginSkyParameterTransition(previous->duration, previous->p08.sh[1]);
+                evtSetSkyAlpha(previous->duration, previous->p08.sh[1]);
                 viewer->unk2288 = previous->p0C.i;
-            } else if (evtIsSkyTransitionActive() == 0) {
-                if (fldGetSkyDrawState() != previous->p08.sh[1]) {
-                    return evtBeginSkyParameterTransition(previous->duration, previous->p08.sh[1]);
+            } else if (evtCheckSkyAlphaAnime() == 0) {
+                if (fldSkyGetAlpha() != previous->p08.sh[1]) {
+                    return evtSetSkyAlpha(previous->duration, previous->p08.sh[1]);
                 }
             }
         } else if (viewer->unk2288 != 0) {
@@ -1335,10 +1335,10 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
                 break;
             }
             viewer->backgroundFadeStartAlpha = alpha;
-            return kwlnFadeSetColor(color, color, color, alpha);
+            return dds3FadeSet(color, color, color, alpha);
         }
         viewer->backgroundFadeStartAlpha = 0;
-        return kwlnFadeClear();
+        return dds3FadeClear();
     case 10: {
         f32 *from, *to;
         f32 firstFrom, secondFrom, firstTo, secondTo;
@@ -1366,26 +1366,26 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         if (from == NULL && to == NULL) {
             break;
         }
-        evtBlendVectorRows(enable, ratio, from, to, D_00453960[0]);
+        evtHokanSceneLight(enable, ratio, from, to, D_00453960[0]);
         kind = group->metadata.option;
         if (kind == 0) {
             break;
         }
         if (kind == 1) {
-            kwlnSetLightColorTarget(0, 0, D_00453960[0]);
-            kwlnSetLightDirectionTarget(0, 0, D_00453960[1]);
-            kwlnSetBackgroundColorTarget(0, D_00453960[2]);
-            D_00438A48 = evtMovieInterpolateFloatIfEnabled(enable, ratio, firstFrom, firstTo);
-            D_00438A4C = evtMovieInterpolateFloatIfEnabled(enable, ratio, secondFrom, secondTo);
+            dds3SetLightColor(0, 0, D_00453960[0]);
+            dds3SetLightDir(0, 0, D_00453960[1]);
+            dds3SetAmbientColor(0, D_00453960[2]);
+            D_00438A48 = evtHokanFloat(enable, ratio, firstFrom, firstTo);
+            D_00438A4C = evtHokanFloat(enable, ratio, secondFrom, secondTo);
             break;
         }
         unit = NULL;
         if (kind == 3) {
-            void *world = dds3GetWorldObject();
-            EffWorldNode *node = dds3FindIndexedObjectChainNodeByName(world, 5,
+            void *world = dds3GetActiveScene();
+            EffWorldNode *node = dds3SceneBasicSearchNameAndType(world, 5,
                     viewer->entryName[group->metadata.extra2]);
             if (node != NULL) {
-                unit = evtUnitGetNestedValue(node);
+                unit = evtGetUnitHandle2(node);
             } else {
                 /* Retail halts on a missing named unit: 0x002485C8-0x002485E0. */
                 while (1) {
@@ -1410,8 +1410,8 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         evtSetSlotVectors(group->setterId, group->metadata.option, (s32)unit,
                 D_00453960[0], D_00453960[1], D_00453960[2]);
         {
-            f32 first = evtMovieInterpolateFloatIfEnabled(enable, ratio, firstFrom, firstTo);
-            f32 second = evtMovieInterpolateFloatIfEnabled(enable, ratio, secondFrom, secondTo);
+            f32 first = evtHokanFloat(enable, ratio, firstFrom, firstTo);
+            f32 second = evtHokanFloat(enable, ratio, secondFrom, secondTo);
             return evtSetSlotVector(group->setterId, first, second);
         }
     }
@@ -1425,8 +1425,8 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         }
         to = future != NULL ? future->payload : NULL;
         if (from != NULL || to != NULL) {
-            evtBlendParamsC(enable, ratio, from, to, &D_00453990);
-            evtSetDrawVectorTarget(0, D_00453990.vec[1], D_00453990.vec[0], D_00453990.vec[2], D_00453990.vec[3]);
+            evtHokanSceneFog(enable, ratio, from, to, &D_00453990);
+            dds3SetFogPara(0, D_00453990.vec[1], D_00453990.vec[0], D_00453990.vec[2], D_00453990.vec[3]);
             kwlnDrawVector.fogColor = D_00453990.color;
         }
         break;
@@ -1441,7 +1441,7 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         }
         to = future != NULL ? future->payload : NULL;
         if (from != NULL || to != NULL) {
-            evtBlendParamsA(enable, ratio, from, to, &D_004539B0);
+            evtHokanBlur2(enable, ratio, from, to, &D_004539B0);
             effSetLoadDescA(&D_004539B0);
             if ((D_004539B0.color >> 24) == 0) {
                 viewer->blurRectangleEnabled = 0;
@@ -1461,8 +1461,8 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         }
         to = future != NULL ? future->payload : NULL;
         if (from != NULL || to != NULL) {
-            evtBlendParamsB(enable, ratio, from, to, &D_004539E0);
-            effCopyTexturedBlurParameters(&D_004539E0);
+            evtHokanMultBlur(enable, ratio, from, to, &D_004539E0);
+            Eve_PartialMultiBlurSetParam(&D_004539E0);
             if ((D_004539E0.source.color >> 24) == 0) {
                 viewer->texturedBlurEnabled = 0;
             } else {
@@ -1481,8 +1481,8 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         }
         to = future != NULL ? future->payload : NULL;
         if (from != NULL || to != NULL) {
-            evtBlendParamsE(enable, ratio, from, to, &D_00453A60);
-            effCopyFilterBlurParameters(&D_00453A60);
+            evtHokanDistBlur(enable, ratio, from, to, &D_00453A60);
+            Eve_DistortionBlurSetParam(&D_00453A60);
             if ((D_00453A60.color >> 24) == 0) {
                 viewer->filterBlurEnabled = 0;
             } else {
@@ -1501,8 +1501,8 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         }
         to = future != NULL ? future->payload : NULL;
         if (from != NULL || to != NULL) {
-            evtBlendParamsF(enable, ratio, from, to, &D_00453A90);
-            effCopyStaggeredBlurParameters(&D_00453A90);
+            evtHokanRipBlur(enable, ratio, from, to, &D_00453A90);
+            Eve_RippleBlurSetParam(&D_00453A90);
             if ((D_00453A90.color >> 24) == 0) {
                 viewer->staggeredBlurEnabled = 0;
             } else {
@@ -1541,8 +1541,8 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         }
         to = future != NULL ? future->payload : NULL;
         if (from != NULL || to != NULL) {
-            evtPolygonMovieBlendMatrixParam(enable, ratio, from, to, &D_00453A10);
-            effCopyColorRectangleParameters(&D_00453A10);
+            evtHokanFilter(enable, ratio, from, to, &D_00453A10);
+            Eve_FilterSetParam(&D_00453A10);
             if ((D_00453A10.color >> 24) == 0) {
                 viewer->colorRectangleEnabled = 0;
             } else {
@@ -1561,8 +1561,8 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         }
         to = future != NULL ? future->payload : NULL;
         if (from != NULL || to != NULL) {
-            evtBlendParamsD(enable, ratio, from, to, &D_00453A30);
-            effCopyTexturedSquareParameters(&D_00453A30);
+            evtHokanMultFilter(enable, ratio, from, to, &D_00453A30);
+            Eve_PartialMultiFilterSetParam(&D_00453A30);
             if (D_00453A30.draw.color[3] == 0) {
                 viewer->texturedSquareEnabled = 0;
             } else {
@@ -1613,8 +1613,8 @@ void evtEventViewerUpdateUnitTransitions(s32 timelineTime, EvtRuntime *viewer) {
     s32 transitionValue;
     s32 latestTransitionTime;
 
-    if (dds3GetWorldObject() != NULL) {
-        worldObject = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head;
+    if (dds3GetActiveScene() != NULL) {
+        worldObject = ((EvtWorldTable *)((EffWorldNode *)dds3GetActiveScene())->data)->slots[EVT_WORLD_SLOT_UNIT].head;
         while (worldObject != NULL) {
             if (((u8 *)worldObject->value) != NULL) {
                 selectedKey = NULL;
@@ -1626,7 +1626,7 @@ void evtEventViewerUpdateUnitTransitions(s32 timelineTime, EvtRuntime *viewer) {
                         transitionKey = track->children;
                         while (transitionKey != NULL) {
                             if (timelineTime >= transitionKey->frame + track->metadata.value && transitionKey->p08.sh[0] >= 0 &&
-                                worldObject == dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(),
+                                worldObject == dds3SceneBasicSearchNameAndType(dds3GetActiveScene(),
                                     EVT_WORLD_SLOT_UNIT, viewer->entryName[transitionKey->p08.sh[0]])) {
                                 if (latestTransitionTime < transitionKey->frame + track->metadata.value) {
                                     transitionValue = (s32)track->info;
@@ -1639,7 +1639,7 @@ void evtEventViewerUpdateUnitTransitions(s32 timelineTime, EvtRuntime *viewer) {
                     }
                     track = track->next;
                 }
-                eventUnit = evtUnitGetNestedValue(worldObject);
+                eventUnit = evtGetUnitHandle2(worldObject);
                 if (selectedKey != NULL) {
                     if (selectedKey->p08.sh[1] != 0) {
                         if (eventUnit->currentTransitionValue != transitionValue || !(eventUnit->flags & 0x40000)) {
@@ -1663,8 +1663,8 @@ void evtEventViewerUpdateUnitTransitions(s32 timelineTime, EvtRuntime *viewer) {
     }
 }
 
-extern f32 evtMovieInterpolateFloatIfEnabled(s32 enable, f32 t, f32 a, f32 b);
-extern s32 evtMovieInterpolateIntIfEnabled(s32 enable, f32 t, s32 a, s32 b);
+extern f32 evtHokanFloat(s32 enable, f32 t, f32 a, f32 b);
+extern s32 evtHokanInt(s32 enable, f32 t, s32 a, s32 b);
 
 /* At time, applies the track's latest enabled mode keys, then interpolates the
  * unit's byte and float parameters from the active kind-3/4 key to the next
@@ -1696,7 +1696,7 @@ void evtStepPolygonMovieConditionalKeys(EvtRuntimeGroup *track, s32 time) {
             case 4:
                 if (evtViewerTestIndexedCondition(key->p10.sh[0]) == 1) {
                     unitMode = key->p08.sb[0];
-                    unit = evtUnitGetNestedValue(track->info);
+                    unit = evtGetUnitHandle2(track->info);
                 }
                 break;
             }
@@ -1748,11 +1748,11 @@ void evtStepPolygonMovieConditionalKeys(EvtRuntimeGroup *track, s32 time) {
             if (next->p0C.sb[0] == 0 || next->p0C.sb[0] == 2) {
                 interpolationFactor = 0.0f;
             }
-            unit->shadowLevel = evtMovieInterpolateIntIfEnabled(0, interpolationFactor, current->p0C.b[1], next->p0C.b[1]);
+            unit->shadowLevel = evtHokanInt(0, interpolationFactor, current->p0C.b[1], next->p0C.b[1]);
             if (next->p0C.b[0] < 2) {
                 interpolationFactor = 0.0f;
             }
-            unit->shadowY = evtMovieInterpolateFloatIfEnabled(0, interpolationFactor, current->p14.f, next->p14.f);
+            unit->shadowY = evtHokanFloat(0, interpolationFactor, current->p14.f, next->p14.f);
         }
         if (current->p0C.sb[0] == 1 || current->p0C.sb[0] == 3) {
             setFlags |= 0x4000;
@@ -1937,7 +1937,7 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
     evtEventViewerUpdateUnitTransitions(time, viewer);
     if (viewer->flags & 1) {
         if (!(viewer->flags & 2)) {
-            kwlnCancelConfiguredFadeFrames();
+            dds3StopQuake();
         }
         if (!(viewer->flags & 4)) {
             kwlnDrawOverlayEnabled = 0;
@@ -1993,8 +1993,8 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
     s32 extra;
     EvtRuntimeChild *glyph;
 
-    if (dds3GetWorldObject() != 0) {
-        worldTable = (s32)((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data);
+    if (dds3GetActiveScene() != 0) {
+        worldTable = (s32)((EvtWorldTable *)((EffWorldNode *)dds3GetActiveScene())->data);
         if (worldTable != 0) {
             worldSlots = (s32)((EvtWorldTable *)worldTable)->slots;
             if (worldSlots != 0) {
@@ -2003,7 +2003,7 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
                     do {
                         trackEntry = viewer->groups;
                         while (trackEntry != NULL) {
-                            if (trackEntry->info != NULL && (void *)movieObject == dds3GetSlot(trackEntry->info, 1)) {
+                            if (trackEntry->info != NULL && (void *)movieObject == dds3ObjectBaseGetControlBasic(trackEntry->info, 1)) {
                                 if (trackEntry->type == 2) {
                                     startFrame = 0;
                                     if (trackEntry->childCount != 0) {
@@ -2031,7 +2031,7 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
     }
 }
 
-extern Motion *mdlFindNodeById(MdlCtx *ctx, s32 id);
+extern Motion *mdlGetMotionCtrlr(MdlCtx *ctx, s32 id);
 extern EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s32 frame, s32 channel);
 
 void evtViewerSyncModelMotionChannels(s32 frame, EffWorldNode *object, EvtRuntimeGroup *track,
@@ -2044,7 +2044,7 @@ void evtViewerSyncModelMotionChannels(s32 frame, EffWorldNode *object, EvtRuntim
         return;
     }
     for (channel = 0; channel < 4; channel++) {
-        Motion *motion = mdlFindNodeById(model, channel);
+        Motion *motion = mdlGetMotionCtrlr(model, channel);
         EvtRuntimeChild *key;
         s32 sampleFrame;
 
@@ -2056,11 +2056,11 @@ void evtViewerSyncModelMotionChannels(s32 frame, EffWorldNode *object, EvtRuntim
             if (mode == 0 && track->motionKeyCache[channel] == key) {
                 continue;
             }
-            motion = mdlFindNodeById(model, channel);
-            sdfMotionInitialize(motion, 0, 0, 0.0f, 0.0f);
-            if (mdlGetNodeFrameCount(model, channel) != 0) {
-                if ((s32)mdlGetNodeFrameCount(model, channel) - 1 < frame) {
-                    sampleFrame = (s32)mdlGetNodeFrameCount(model, channel) - 1;
+            motion = mdlGetMotionCtrlr(model, channel);
+            sdfMotionChangeBlend(motion, 0, 0, 0.0f, 0.0f);
+            if (mdlGetMotionLengthEx(model, channel) != 0) {
+                if ((s32)mdlGetMotionLengthEx(model, channel) - 1 < frame) {
+                    sampleFrame = (s32)mdlGetMotionLengthEx(model, channel) - 1;
                 } else {
                     sampleFrame = frame;
                 }
@@ -2068,23 +2068,23 @@ void evtViewerSyncModelMotionChannels(s32 frame, EffWorldNode *object, EvtRuntim
                 sampleFrame = 0;
             }
             if (channel == 0) {
-                motion = mdlFindNodeById(model, 0);
-                sdfMotionSampleAtFrame(motion, (f32)sampleFrame);
+                motion = mdlGetMotionCtrlr(model, 0);
+                sdfMotionSeek(motion, (f32)sampleFrame);
             } else {
-                motion = mdlFindNodeById(model, channel);
-                sdfMotionSampleAtFrame(motion, 0.0f);
+                motion = mdlGetMotionCtrlr(model, channel);
+                sdfMotionSeek(motion, 0.0f);
             }
             if ((viewer->flags & 1) != 0) {
-                motion = mdlFindNodeById(model, channel);
-                sdfMotionSuspend(motion);
+                motion = mdlGetMotionCtrlr(model, channel);
+                sdfMotionPause(motion);
             } else {
-                motion = mdlFindNodeById(model, channel);
-                sdfMotionResume(motion);
+                motion = mdlGetMotionCtrlr(model, channel);
+                sdfMotionPauseOff(motion);
             }
             track->motionKeyCache[channel] = NULL;
             if (channel != 0) {
-                motion = mdlFindNodeById(model, channel);
-                sdfMotionSuspend(motion);
+                motion = mdlGetMotionCtrlr(model, channel);
+                sdfMotionPause(motion);
             }
             continue;
         }
@@ -2098,7 +2098,7 @@ void evtViewerSyncModelMotionChannels(s32 frame, EffWorldNode *object, EvtRuntim
 
             if (loopEnabled == 0) {
                 s32 keyFrame = key->frame;
-                nodeFrameCount = (s32)mdlGetNodeFrameCount(model, channel);
+                nodeFrameCount = (s32)mdlGetMotionLengthEx(model, channel);
                 relativeFrame = frame - keyFrame + duration;
                 if (nodeFrameCount - 1 < relativeFrame) {
                     mode = 1;
@@ -2114,38 +2114,38 @@ void evtViewerSyncModelMotionChannels(s32 frame, EffWorldNode *object, EvtRuntim
             if (mode == 0 && track->motionKeyCache[channel] == key) {
                 continue;
             }
-            motion = mdlFindNodeById(model, channel);
-            sdfMotionInitialize(motion, key->p0C.sb[1], loopEnabled,
+            motion = mdlGetMotionCtrlr(model, channel);
+            sdfMotionChangeBlend(motion, key->p0C.sb[1], loopEnabled,
                                 (f32)blendLead, (f32)key->p0C.sb[3]);
             if (mode == 1) {
                 if (loopEnabled == mode) {
-                    nodeFrameCount = (s32)mdlGetNodeFrameCount(model, channel);
+                    nodeFrameCount = (s32)mdlGetMotionLengthEx(model, channel);
                     if (nodeFrameCount != 0) {
-                        nodeFrameCount = (s32)mdlGetNodeFrameCount(model, channel);
+                        nodeFrameCount = (s32)mdlGetMotionLengthEx(model, channel);
                         sampleFrame = ((s32)frame - key->frame + duration) % nodeFrameCount;
                     } else {
                         sampleFrame = 0;
                     }
                 } else {
                     s32 capturedFrame = key->frame;
-                    nodeFrameCount = (s32)mdlGetNodeFrameCount(model, channel);
+                    nodeFrameCount = (s32)mdlGetMotionLengthEx(model, channel);
                     relativeFrame = frame - capturedFrame + duration;
                     if (nodeFrameCount - 1 < relativeFrame) {
-                        nodeFrameCount = (s32)mdlGetNodeFrameCount(model, channel);
+                        nodeFrameCount = (s32)mdlGetMotionLengthEx(model, channel);
                         sampleFrame = nodeFrameCount - 1;
                     } else {
                         sampleFrame = (s32)frame - key->frame + duration;
                     }
                 }
-                motion = mdlFindNodeById(model, channel);
-                sdfMotionSampleAtFrame(motion, (f32)sampleFrame);
+                motion = mdlGetMotionCtrlr(model, channel);
+                sdfMotionSeek(motion, (f32)sampleFrame);
             }
             if ((viewer->flags & 1) != 0) {
-                motion = mdlFindNodeById(model, channel);
-                sdfMotionSuspend(motion);
+                motion = mdlGetMotionCtrlr(model, channel);
+                sdfMotionPause(motion);
             } else {
-                motion = mdlFindNodeById(model, channel);
-                sdfMotionResume(motion);
+                motion = mdlGetMotionCtrlr(model, channel);
+                sdfMotionPauseOff(motion);
             }
             track->motionKeyCache[channel] = key;
         }
@@ -2159,8 +2159,8 @@ void evtViewerSyncWorldGroups(u32 position, EvtRuntime *viewer) {
     EvtRuntimeGroup *node;
     EvtRuntimeGroup *found;
 
-    if (dds3GetWorldObject() != 0) {
-        unitObject = (u8 *)((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head;
+    if (dds3GetActiveScene() != 0) {
+        unitObject = (u8 *)((EvtWorldTable *)((EffWorldNode *)dds3GetActiveScene())->data)->slots[EVT_WORLD_SLOT_UNIT].head;
         while (unitObject != 0) {
             found = 0;
             for (node = viewer->groups; node != 0; node = node->next) {
@@ -2261,10 +2261,10 @@ void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer) {
                     VU0_STORE_VF(vf10, &node->info->inner->smoothedPosition);
                     node->objectAttached = 0;
                 } else {
-                    EffWorldNode *object = dds3FindObjectChainNodeByName(
-                        dds3GetWorldObject(), viewer->entryName[channel]);
+                    EffWorldNode *object = dds3SceneBasicSearchName(
+                        dds3GetActiveScene(), viewer->entryName[channel]);
 
-                    mdlAttachWorldObjectToSourceVector(
+                    evtSetUnitPos(
                         node->info->key, object->key);
                     node->objectAttached = 1;
                 }
@@ -2371,7 +2371,7 @@ s32 evtViewerHasUpdateFlag(EvtRuntime *viewer) {
 void evtEventViewerFadeBackground(EvtRuntime *viewer) {
     s32 fade = 0;
 
-    kwlnGetDrawBufferIndex();
+    dds3GetFrameID();
     if (viewer->updateCount != 0x19) {
         fade = (s32)(128.0f - ((f32)viewer->backgroundFadeStartAlpha +
                                ((128.0f - (f32)viewer->backgroundFadeStartAlpha) / 25.0f) * (f32)viewer->updateCount));
@@ -2392,7 +2392,7 @@ void evtEventViewerFadeBackground(EvtRuntime *viewer) {
         case 2:
             return;
         }
-        kwlnFadeSetColor(D_004372C0[0], D_004372C0[1], D_004372C0[2], 0x80 - fade);
+        dds3FadeSet(D_004372C0[0], D_004372C0[1], D_004372C0[2], 0x80 - fade);
     }
 }
 
@@ -2426,9 +2426,9 @@ void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer) {
                 if (viewer->ch71 != value) {
                     viewer->ch71 = value;
                     if (value == 0) {
-                        effInitCh71Id();
+                        Eve_PartialMultiBlurSetDefTex();
                     } else {
-                        effSetCh71Id(value);
+                        Eve_PartialMultiBlurSetTex(value);
                     }
                 }
                 break;
@@ -2436,9 +2436,9 @@ void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer) {
                 if (viewer->ch72 != value) {
                     viewer->ch72 = value;
                     if (value == 0) {
-                        effInitCh72Id();
+                        Eve_DistortionBlurSetDefTex();
                     } else {
-                        effSetCh72Id(value);
+                        Eve_DistortionBlurSetTex(value);
                     }
                 }
                 break;
@@ -2446,9 +2446,9 @@ void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer) {
                 if (viewer->ch76 != value) {
                     viewer->ch76 = value;
                     if (value == 0) {
-                        effInitCh76Id();
+                        Eve_RippleBlurSetDefTex();
                     } else {
-                        effSetCh76Id(value);
+                        Eve_RippleBlurSetTex(value);
                     }
                 }
                 break;
@@ -2456,9 +2456,9 @@ void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer) {
                 if (viewer->ch75 != value) {
                     viewer->ch75 = value;
                     if (value == 0) {
-                        effInitCh75Id();
+                        Eve_PartialMultiFilterSetDefTex();
                     } else {
-                        effSetCh75Id(value);
+                        Eve_PartialMultiFilterSetTex(value);
                     }
                 }
                 break;
@@ -2469,19 +2469,19 @@ void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer) {
 }
 
 extern void mnuCheckMovieDecoderStatus(void);
-extern void mnuStopMovieDrawTask(void);
+extern void movieStop(void);
 /* Advance or stop the timed viewer action according to the current position. */
 s32 evtViewerUpdateTimedAction(EvtRuntime *viewer) {
     if (viewer->timedActive == 1) {
         if (viewer->curFrame < viewer->timedStart) {
-            mnuStopMovieDrawTask();
+            movieStop();
             viewer->timedActive = 0;
             viewer->timedStart = 0;
             viewer->timedEnd = 0;
         } else if (viewer->timedEnd < 0) {
             mnuCheckMovieDecoderStatus();
         } else if (viewer->curFrame >= viewer->timedEnd) {
-            mnuStopMovieDrawTask();
+            movieStop();
             viewer->timedActive = 0;
             viewer->timedStart = 0;
             viewer->timedEnd = 0;
@@ -2544,10 +2544,10 @@ void evtEventViewerApplyPlaybackMode(s32 mode, u32 frame, EvtRuntime *viewer) {
     void *movie;
     s32 useTrackTime;
 
-    if (dds3GetWorldObject() == NULL) {
+    if (dds3GetActiveScene() == NULL) {
         return;
     }
-    table = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data);
+    table = ((EvtWorldTable *)((EffWorldNode *)dds3GetActiveScene())->data);
     object = table->slots[5].head;
     while (object != NULL) {
         track = viewer->groups;
@@ -2569,10 +2569,10 @@ void evtEventViewerApplyPlaybackMode(s32 mode, u32 frame, EvtRuntime *viewer) {
         motion = ((EffectTransformData *)object->data)->resourceState->motion;
         if (motion != NULL) {
             if (mode == 0) {
-                sdfMotionSampleAtFrame(motion, (f32)frame);
-                sdfMotionSuspend(motion);
+                sdfMotionSeek(motion, (f32)frame);
+                sdfMotionPause(motion);
             } else {
-                sdfMotionResume(motion);
+                sdfMotionPauseOff(motion);
             }
         }
         object = object->next;
@@ -2582,9 +2582,9 @@ void evtEventViewerApplyPlaybackMode(s32 mode, u32 frame, EvtRuntime *viewer) {
         path = ((Dds3SlotResource *)object->data)->path;
         if (path != NULL) {
             if (mode == 0) {
-                sdfFreezeFloatCounter(&path->counter);
+                dds3PathBasicPauseOn(&path->counter);
             } else {
-                sdfUnfreezeFloatCounter(&path->counter);
+                dds3PathBasicPauseOff(&path->counter);
             }
         }
         object = object->next;
@@ -2611,12 +2611,12 @@ void evtEventViewerApplyPlaybackMode(s32 mode, u32 frame, EvtRuntime *viewer) {
                     useTrackTime = track->metadata.option;
 updateMovie:
                     if (object != NULL) {
-                        movie = dds3GetObjectOwnedHandle(object)->slots[1];
+                        movie = dds3GetBaseControlWorkData(object)->slots[1];
                         if (movie != NULL) {
                             if (useTrackTime == 0) {
-                                evtPolygonMovieScaleByProgress(movie, mode, key->frame, frame);
+                                evtStopMover(movie, mode, key->frame, frame);
                             } else {
-                                evtPolygonMovieScaleByProgress(movie, mode, 0, frame);
+                                evtStopMover(movie, mode, 0, frame);
                             }
                         }
                     }
@@ -2739,10 +2739,10 @@ u16 evtViewerPopHistory(EvtRuntime *viewer) {
     return historyId;
 }
 
-extern s16 itfPanelGetPairFirst(s32 windowIndex);
-extern void itfPanelSetPairFirst(s32 windowIndex, s16 status);
-extern void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
-extern void itfMesResetWindow(s32 window);
+extern s16 itfMesMngGetSelPhase(s32 windowIndex);
+extern void itfMesMngSetSelPhase(s32 windowIndex, s16 status);
+extern void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock);
+extern void itfMesMngRequestSelectRelease(s32 window);
 void evtViewerMarkWindowInactive(EvtRuntime *);
 void evtViewerUpdateWindowShadeFade(EvtRuntime *);
 
@@ -2753,16 +2753,16 @@ void evtUpdateViewerMessageWindow(EvtRuntime *viewer) {
     if (viewer->windowContext->handle == -1) {
         return;
     }
-    if (itfMesGetWindowFlags(viewer->windowContext->handle) & 4) {
+    if (itfMesMngGetStat(viewer->windowContext->handle) & 4) {
         if ((viewer->flags & 1) == 0) {
-            itfMesCleanupWindow(viewer->windowContext->handle, 1);
-            itfMesFinishWindowAndClearStatus(viewer->windowContext->handle);
+            itfMesMngRequestMessageRelease(viewer->windowContext->handle, 1);
+            itfMesMngMsgWndCls(viewer->windowContext->handle);
         }
     }
-    if (itfPanelGetPairFirst(viewer->windowContext->handle) < 0) {
-        itfPanelSetPairFirst(viewer->windowContext->handle, 0);
-        datGameState->script.ints[viewer->windowResultVariableIndex] = itfMesGetWindowClearBitCount(viewer->windowContext->handle);
-        itfMesResetWindow(viewer->windowContext->handle);
+    if (itfMesMngGetSelPhase(viewer->windowContext->handle) < 0) {
+        itfMesMngSetSelPhase(viewer->windowContext->handle, 0);
+        datGameState->script.ints[viewer->windowResultVariableIndex] = itfMesMngGetSelect(viewer->windowContext->handle);
+        itfMesMngRequestSelectRelease(viewer->windowContext->handle);
         evtViewerMarkWindowInactive(viewer);
         viewer->flags ^= 1;
         evtViewerDispatchFlagMode(viewer);
@@ -2783,13 +2783,13 @@ void evtViewerCleanupMessageWindow(EvtRuntime *viewer) {
     if (v1 == -1) {
         return;
     }
-    itfMesCleanupWindow(v1, 1);
+    itfMesMngRequestMessageRelease(v1, 1);
     v0 = viewer->windowContext;
-    itfMesFinishWindowAndClearStatus(v0->handle);
+    itfMesMngMsgWndCls(v0->handle);
     v0 = viewer->windowContext;
-    itfPanelSetPairFirst(v0->handle, 0);
+    itfMesMngSetSelPhase(v0->handle, 0);
     v0 = viewer->windowContext;
-    itfMesResetWindow(v0->handle);
+    itfMesMngRequestSelectRelease(v0->handle);
     viewer->windowActive = 0;
     viewer->windowShadeFade = 0;
 }
@@ -2825,7 +2825,7 @@ void evtViewerUpdateWindowShadeFade(EvtRuntime *viewer) {
             viewer->windowShadeFade = 0x5E;
         }
     }
-    buffer = kwlnGetDrawBufferIndex();
+    buffer = dds3GetFrameID();
     alpha = 0x80 - viewer->windowShadeFade;
     if (alpha < 0x80) {
         u64 red;
@@ -2862,8 +2862,8 @@ void evtViewerUpdateWindowShadeFade(EvtRuntime *viewer) {
         evtWindowShadePackets[buffer].regs[8].value = color;
         evtWindowShadePackets[buffer].regs[9].registerId = 5;
         evtWindowShadePackets[buffer].regs[9].value = 0x00FEFFFF87009000ULL;
-        list = sdfCreateResetPacketList();
-        sdfAppendPacket(list, (u32)&evtWindowShadePackets[buffer]);
+        list = dds3FontReqAllocDrawTag();
+        sdfDrawTagLink(list, (u32)&evtWindowShadePackets[buffer]);
         D_00380448.append(&D_00380448, list);
     }
 }
@@ -3144,18 +3144,18 @@ extern const char D_004373A0[];
 extern const char D_004373A8[];
 extern const char D_004373B0[];
 extern u8 D_00438A34;
-extern void evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
+extern void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 extern void effSetLoadDescA(void *parameters);
 extern void effSetLoadDescD(void *parameters);
 extern void effEventSetBlurTemplateParameters(EffBlurTemplateBody *parameters);
 extern void effEventSetScatterBlurParameters(EffBlurScatterParams *parameters);
-extern void effEventSetScaleBlurParameters(EffBlurScaleParams *parameters);
-extern void effEventSetResourceTemplateParameters(EffResourceRectParams *parameters);
+extern void rblurSetParam(EffBlurScaleParams *parameters);
+extern void mfilterSetParam(EffResourceRectParams *parameters);
 extern void campResolvePendingValue(EvtRuntime *scene, EvtRuntimeChild *cue);
-extern s32 evtEventViewerEditDrawVectorTargetTask(KwlnTask *task);
+extern s32 mdlDebugPrintEffectScale2(KwlnTask *task);
 extern s32 evtPollRuntimeControlReady(KwlnTask *task);
 extern s32 evtSynchronizeSelectedEntry(KwlnTask *task);
-extern EvtRuntimeChild *evtEventViewerCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer);
+extern EvtRuntimeChild *AddFrameInfo2(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_004229A0);
 
@@ -3553,9 +3553,9 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                     }
                     case 11: {
                         EvtViewerDrawPayload *parameters = key->payload;
-                        evtSetDrawVectorTarget(0, parameters->parameters.vec[1], parameters->parameters.vec[0], parameters->parameters.vec[2], parameters->parameters.vec[3]);
+                        dds3SetFogPara(0, parameters->parameters.vec[1], parameters->parameters.vec[0], parameters->parameters.vec[2], parameters->parameters.vec[3]);
                         kwlnDrawVector.fogColor = parameters->parameters.color;
-                        viewer->controlState = dds3StartProcess(D_004373A0, 0x2AF9, 1, 1, evtEventViewerEditDrawVectorTargetTask, NULL, 1);
+                        viewer->controlState = dds3StartProcess(D_004373A0, 0x2AF9, 1, 1, mdlDebugPrintEffectScale2, NULL, 1);
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     }
@@ -3577,7 +3577,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     case 23:
-                        effEventSetScaleBlurParameters(key->payload);
+                        rblurSetParam(key->payload);
                         viewer->staggeredBlurEnabled = 0;
                         campResolvePendingValue(viewer, key);
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
@@ -3594,7 +3594,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     case 17:
-                        effEventSetResourceTemplateParameters(key->payload);
+                        mfilterSetParam(key->payload);
                         viewer->texturedSquareEnabled = 0;
                         campResolvePendingValue(viewer, key);
                         viewer->controlState = dds3StartProcess(D_004373B0, 0x2AF9, 1, 1, evtSynchronizeSelectedEntry, NULL, (u32)viewer);
@@ -3737,7 +3737,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                 }
             }
         } else if (command == 1) {
-            evtEventViewerCreateTrackKeyAtFrame(group, viewer->curFrame, viewer);
+            AddFrameInfo2(group, viewer->curFrame, viewer);
         }
     }
     return 0;
@@ -3757,7 +3757,7 @@ s32 evtViewerStoreKeyTimingOrSelector(s32 unused0, s32 unused1, EvtRuntime *view
         switch (category) {
         case 0:
             key->frame = viewer->value - track->metadata.value;
-            evtReorderListNodes(track);
+            SortFrameInfo(track);
             evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
             break;
         case 9:
@@ -4184,7 +4184,7 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, EvtRuntime *v
         memcpy(entry->payload, effEventGetScatterBlurSetupParams(), 0x2C);
         break;
     case 23:
-        memcpy(entry->payload, effEventGetScaleBlurSetupParams(), 0x2C);
+        memcpy(entry->payload, rblurGetParam(), 0x2C);
         break;
     case 27:
         memcpy(entry->payload, effGetLoadDescD(), 0x28);
@@ -4193,7 +4193,7 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, EvtRuntime *v
         memcpy(entry->payload, effEventGetSolidRectangleSetupParams(), 0x18);
         break;
     case 17:
-        memcpy(entry->payload, effEventGetResourceTemplateSetupParams(), 0x24);
+        memcpy(entry->payload, mfilterGetParam(), 0x24);
         break;
     }
     evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
@@ -4300,7 +4300,7 @@ s32 evtViewerScheduleFrameVariableTask(KwlnTask *task) {
 
     viewer = (void *)dds3GetProcessData(task);
     evtApplyViewerTimelineFrame(((EvtRuntime *)viewer)->curFrame, viewer);
-    dds3LinkProcess(task, (KwlnTask *)evtCreateFrameVariableTask());
+    dds3LinkProcess(task, (KwlnTask *)evtInitFrameVar());
     kwlnDrawControlFlags |= 0x2000000;
     return (s32)(u32)evtViewerUpdateFrame;
 }
@@ -4384,9 +4384,9 @@ u8 evtViewerSkipsCampSceneIdRelease(PolyMovieWork *task) {
 }
 
 extern f32 D_0037F590[];
-extern s32 sdfCheckPendingWorkWithInterrupts();
-extern void evtDestroySecondaryWorldNode();
-extern void kwlnTextureReleaseHeldReference();
+extern s32 sdfDelayedResrcCheck();
+extern void evtFreeStage();
+extern void dds3FreeRenderTexture();
 extern void fldReleaseCameraColorEffect();
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
 void evtViewerCleanupMessageWindow(EvtRuntime *viewer);
@@ -4401,36 +4401,36 @@ void evtViewerRelease(viewer)
     evtViewerCleanupMessageWindow(viewer);
     mnuCampLinkFontGlyph(viewer);
     fldSetTitleDrawMode(0);
-    kwlnCancelConfiguredFadeFrames();
+    dds3StopQuake();
     D_0037F590[0] = D_0037F590[1] = D_0037F590[2] = D_0037F590[3] = 0.0f;
     if (viewer->timedActive == 1) {
         if (viewer->timedEnd != -2 || evtViewerHasUpdateFlag(viewer) == 1) {
-            mnuStopMovieDrawTask();
+            movieStop();
         }
         viewer->timedActive = 0;
     }
-    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    while (sdfDelayedResrcCheck() != 0) {
     }
-    evtDestroySecondaryWorldNode();
-    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    evtFreeStage();
+    while (sdfDelayedResrcCheck() != 0) {
     }
     if (viewer->pendingResource != 0) {
         sdfMemFreeDelayedDirect((struct SdfMemBlock *)viewer->pendingResource);
         viewer->pendingResource = 0;
         viewer->pendingWork = 0;
     }
-    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    while (sdfDelayedResrcCheck() != 0) {
     }
-    kwlnTextureReleaseHeldReference();
-    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    dds3FreeRenderTexture();
+    while (sdfDelayedResrcCheck() != 0) {
     }
     evtEventViewerReleaseGroups(viewer);
     evtEventViewerShutdown(viewer);
     sdfMemFreeDirect(viewer->resourceHandle);
-    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    while (sdfDelayedResrcCheck() != 0) {
     }
     fldReleaseCameraColorEffect();
-    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    while (sdfDelayedResrcCheck() != 0) {
     }
     kwlnFadeSetMode(0);
     kwlnDrawControlFlags |= 0x2000000;
@@ -4468,7 +4468,7 @@ void evtViewerCreateTaskWithSky(void) {
     memset(viewer, 0, 0x24BC);
     viewer->resourceHandle = viewerHandle;
     viewerTask = dds3StartProcess(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, evtEventViewerDestroyActive, (u32)viewer);
-    dds3LinkProcess(viewerTask, (KwlnTask *)evtCreateSkyTask());
+    dds3LinkProcess(viewerTask, (KwlnTask *)evtInitSky());
     evtEventViewerInitCampFontResource(viewer);
 }
 
@@ -4486,36 +4486,36 @@ void evtEventViewerPollMovieResources(PolyMovieWork *assets) {
         if (assets->mainResource.request == 0) {
             return;
         }
-        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)assets->mainResource.request) == 0) {
+        if (pacFileCheckEnd((struct FileRequest *)assets->mainResource.request) == 0) {
             return;
         }
-        assets->mainResource.handle = fileGetResourceHandle((struct FileRequest *)assets->mainResource.request);
+        assets->mainResource.handle = fileGetMemHandle((struct FileRequest *)assets->mainResource.request);
         assets->mainResource.address = (PmdHeader *)sdfMemLock(assets->mainResource.handle);
-        filePollEntryCleanup(assets->mainResource.request);
+        fileHandleFree(assets->mainResource.request);
         assets->mainResource.request = 0;
         assets->flags &= ~2;
     } else if (assets->flags & 4) {
         if (assets->secondaryResource.request == 0) {
             return;
         }
-        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)assets->secondaryResource.request) == 0) {
+        if (pacFileCheckEnd((struct FileRequest *)assets->secondaryResource.request) == 0) {
             return;
         }
-        assets->secondaryResource.handle = fileGetResourceHandle((struct FileRequest *)assets->secondaryResource.request);
+        assets->secondaryResource.handle = fileGetMemHandle((struct FileRequest *)assets->secondaryResource.request);
         assets->secondaryResource.address = (PmdHeader *)sdfMemLock(assets->secondaryResource.handle);
-        filePollEntryCleanup(assets->secondaryResource.request);
+        fileHandleFree(assets->secondaryResource.request);
         assets->secondaryResource.request = 0;
         assets->flags &= ~4;
     } else if (assets->flags & 0x10) {
         if (assets->tertiaryResource.request == 0) {
             return;
         }
-        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)assets->tertiaryResource.request) == 0) {
+        if (pacFileCheckEnd((struct FileRequest *)assets->tertiaryResource.request) == 0) {
             return;
         }
-        assets->tertiaryResource.handle = fileGetResourceHandle((struct FileRequest *)assets->tertiaryResource.request);
+        assets->tertiaryResource.handle = fileGetMemHandle((struct FileRequest *)assets->tertiaryResource.request);
         assets->tertiaryResource.address = (PmdHeader *)sdfMemLock(assets->tertiaryResource.handle);
-        filePollEntryCleanup(assets->tertiaryResource.request);
+        fileHandleFree(assets->tertiaryResource.request);
         assets->tertiaryResource.request = 0;
         assets->flags &= ~0x10;
     } else if (assets->mainResource.address != NULL && assets->secondaryResource.address != NULL) {

@@ -81,9 +81,9 @@ extern SdfPendingRequest sdfResourceReleaseQueue;
 extern SdfPendingRequest sdfAssetReleaseQueue;
 
 
-void sdfResourceListReleaseAssets(DevRequest *);
+void sdfMatListFree(DevRequest *);
 
-extern SdfSubParam *sdfSubParamCreate(void);
+extern SdfSubParam *sdfMatAllocTexUvwParm(void);
 
 
 
@@ -91,30 +91,30 @@ extern SdfSubParam *sdfSubParamCreate(void);
 extern s32 sdfLiveAssetCount;
 
 
-void sdfAssetRelease(SdfAsset *);
+void sdfMatFree(SdfAsset *);
 
 
 void sdfAssetCopyTextureState(SdfAsset *, SdfAssetEntry *);
 
-void sdfApplyAssetSecondaryEntry(SdfAsset *, SdfAssetEntry *);
+void sdfMatUpdatePacketMultiTex(SdfAsset *, SdfAssetEntry *);
 
 void sdfTexBlendPaletteToTintedIntensityVU(SdfTex *texture, s32 tint, f32 amount);
 
 void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 extern vu8 sdfCurrentBufferIndex;
-extern void sdfCopyAssetListParameterState(DevRequest *, DevRequest *);
+extern void sdfMatListCopyStat(DevRequest *, DevRequest *);
 
 
-void sdfModelCopyRuntimeState(SdfModel *destination, SdfModel *source) {
+void sdfModelCopyStat(SdfModel *destination, SdfModel *source) {
     SdfDrawNode **destinationNodes;
     SdfDrawNode **sourceNodes;
     s32 count;
     s32 buffer;
     s32 i;
 
-    sdfCopyAssetListParameterState(destination->resources, source->resources);
-    sdfModelCopyData(destination->slotPairs, source->slotPairs);
+    sdfMatListCopyStat(destination->resources, source->resources);
+    sdfModelMorphListCopyStat(destination->slotPairs, source->slotPairs);
     destination->flags = source->flags;
     destination->drawFlags = source->drawFlags;
     destination->color = source->color;
@@ -156,29 +156,29 @@ void sdfModelCopyRuntimeState(SdfModel *destination, SdfModel *source) {
 }
 
 /* Initialize one draw-group record of a frame draw bank. */
-void sdfInitializeDrawPacketGroups(SdfDrawPacketGroups *ctx) {
+void sdfModelSetDrawEnv(SdfDrawPacketGroups *ctx) {
     SdfDrawPacketGroup *packet = ctx->groups;
     s32 i;
 
-    sdfBuildPrimaryAlphaBlendDmaPacket(&ctx->groups[0].packet.blend);
-    sdfBuildPrimaryTestBlendPacket(&ctx->groups[1].packet.blend);
-    sdfBuildPrimaryAlphaAdditiveDmaPacket(&ctx->groups[2].packet.blend);
-    sdfBuildPrimaryAlphaSubtractiveDmaPacket(&ctx->groups[3].packet.blend);
+    sdfPrimSetOpaquePacket(&ctx->groups[0].packet.blend);
+    sdfPrimSetSemiTransPacket(&ctx->groups[1].packet.blend);
+    sdfPrimSetAddTransPacket(&ctx->groups[2].packet.blend);
+    sdfPrimSetSubTransPacket(&ctx->groups[3].packet.blend);
     for (i = 0; i != 4; i++) {
         /* Replace only the first VIF word; preserve the builder's DIRECT word. */
         packet->packet.dma.firstVifCode = 0x11000000;
-        sdfInitPacketList(&packet->list);
-        sdfAppendPacket(&packet->list, (u32)&packet->packet.blend);
+        sdfDrawTagInit(&packet->list);
+        sdfDrawTagLink(&packet->list, (u32)&packet->packet.blend);
         packet++;
     }
-    sdfInitPacketList(&ctx->syncList);
+    sdfDrawTagInit(&ctx->syncList);
     ctx->syncPacketWords[0] = 0;
     ctx->syncPacketWords[1] = 0x13000000;
-    sdfAppendPacket(&ctx->syncList, (u32)&ctx->syncPacketWords[0]);
+    sdfDrawTagLink(&ctx->syncList, (u32)&ctx->syncPacketWords[0]);
 }
 
 /* Submit the four draw lists, then the trailing list to the fourth owner. */
-void sdfSubmitDrawPacketGroups(SdfPoolNode **owners, SdfDrawPacketGroups *packets) {
+void sdfModelDrawEnvLinkOt(SdfPoolNode **owners, SdfDrawPacketGroups *packets) {
     s32 i;
 
     for (i = 0; i != 4; i++) {
@@ -211,7 +211,7 @@ SdfChunkHeader *sdfChunkFindByTag(const SdfModel *model, s32 tag) {
 
 
 /* Names are followed by a four-byte-aligned ID word; missing chunks/names return -1. */
-s32 sdfNamedChunkFindId(SdfModel *model, const char *name) {
+s32 sdfModelGetNodeIndexByName(SdfModel *model, const char *name) {
     SdfChunkHeader *namesChunk = sdfChunkFindByTag(model, SDF_CHUNK_NAMED_IDS);
     u8 *entryName;
     u8 *chunkEnd;
@@ -235,7 +235,7 @@ s32 sdfNamedChunkFindId(SdfModel *model, const char *name) {
 
 extern const char D_0040B338[];
 
-const char *sdfNamedChunkGetNameById(SdfModel *model, s32 nameId) {
+const char *sdfModelGetNodeName(SdfModel *model, s32 nameId) {
     SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_NAMED_IDS);
     const u8 *name;
     const u8 *end;
@@ -260,7 +260,7 @@ const char *sdfNamedChunkGetNameById(SdfModel *model, s32 nameId) {
     } while (1);
 }
 
-u32 sdfCountMapPositionRecords(const SdfModel *model) {
+u32 sdfModelGetMarkPosCount(const SdfModel *model) {
     const SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);
     if (chunk != NULL) {
         return (chunk->size - 0x10) >> 6;
@@ -270,8 +270,8 @@ u32 sdfCountMapPositionRecords(const SdfModel *model) {
 
 /* vu0 routine: build basis rows in vf28-vf31 from the map record, then
  * postmultiply using its draw-node matrix. */
-void sdfSetLookAtBasisFromRecord(SdfModel *model, SdfMapPositionRecord *record) {
-    SdfDrawNode *drawNode = sdfModelFindDrawNode(model, record->nodeId);
+void sdfModelMakeMarkPosMatrix(SdfModel *model, SdfMapPositionRecord *record) {
+    SdfDrawNode *drawNode = sdfModelSearchNode(model, record->nodeId);
     u8 *vector;
 
     vector = (u8 *)&record->up;
@@ -292,8 +292,8 @@ void sdfSetLookAtBasisFromRecord(SdfModel *model, SdfMapPositionRecord *record) 
 
 /* vu0 routine: transform the map-record position by its draw-node matrix;
  * the transformed position is left in vf10. */
-void sdfVuTransformMapRecordPosition(SdfModel *model, SdfMapPositionRecord *record) {
-    SdfDrawNode *drawNode = sdfModelFindDrawNode(model, record->nodeId);
+void sdfModelMakeMarkPos(SdfModel *model, SdfMapPositionRecord *record) {
+    SdfDrawNode *drawNode = sdfModelSearchNode(model, record->nodeId);
 
     VU0_LOAD_MATRIX(drawNode->worldMatrix);
     VU0_LOAD_VF(vf10, &record->position);
@@ -301,7 +301,7 @@ void sdfVuTransformMapRecordPosition(SdfModel *model, SdfMapPositionRecord *reco
 }
 
 /* Search the fixed-size map-position records within the chunk's declared byte extent. */
-SdfMapPositionRecord *sdfChunkFindRecordById(SdfModel *model, s32 recordId) {
+SdfMapPositionRecord *sdfModelSearchMarkPosData(SdfModel *model, s32 recordId) {
     SdfChunkHeader *positionsChunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);
     SdfMapPositionChunkPrefix *positions;
     SdfMapPositionRecord *record;
@@ -321,19 +321,19 @@ SdfMapPositionRecord *sdfChunkFindRecordById(SdfModel *model, s32 recordId) {
     return NULL;
 }
 
-s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 mapRecordId) {
-    SdfMapPositionRecord *resource = sdfChunkFindRecordById(model, mapRecordId);
+s32 sdfModelGetMarkPosMatrix(SdfModel *model, s32 mapRecordId) {
+    SdfMapPositionRecord *resource = sdfModelSearchMarkPosData(model, mapRecordId);
     if (resource != NULL) {
-        sdfSetLookAtBasisFromRecord(model, resource);
+        sdfModelMakeMarkPosMatrix(model, resource);
         return 1;
     }
     return 0;
 }
 
-s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 mapRecordId) {
-    SdfMapPositionRecord *resource = sdfChunkFindRecordById(model, mapRecordId);
+s32 sdfModelGetMarkPos(SdfModel *model, s32 mapRecordId) {
+    SdfMapPositionRecord *resource = sdfModelSearchMarkPosData(model, mapRecordId);
     if (resource != NULL) {
-        sdfVuTransformMapRecordPosition(model, resource);
+        sdfModelMakeMarkPos(model, resource);
         return 1;
     }
     return 0;
@@ -356,19 +356,19 @@ u32 sdfGetLodChunkValue(SdfModel *model) {
 }
 
 /* Store the override pair and select it instead of the shared defaults. */
-void sdfSetModelScalarOverrides(SdfModel *model, f32 first, f32 second) {
+void sdfModelSetFaceDivParm(SdfModel *model, f32 first, f32 second) {
     model->scalarOverrideFirst = first;
     model->scalarOverrideSecond = second;
     model->flags = model->flags | SDF_MODEL_USE_SCALAR_OVERRIDES;
 }
 
 /* Clear only the pair-override selection bit. */
-void sdfClearModelScalarOverrides(SdfModel *model) {
+void sdfModelResetFaceDivParm(SdfModel *model) {
     model->flags = model->flags & SDF_TEXT_PAIR_OVERRIDE_CLEAR_MASK;
 }
 
 /* Return the first override value when selected, otherwise its shared default. */
-f32 sdfGetFirstModelScalar(SdfModel *model) {
+f32 sdfModelGetFaceDivSoften(SdfModel *model) {
     if ((model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) != 0) {
         return model->scalarOverrideFirst;
     }
@@ -376,7 +376,7 @@ f32 sdfGetFirstModelScalar(SdfModel *model) {
 }
 
 /* Return the second override value when selected, otherwise its shared default. */
-f32 sdfGetSecondModelScalar(SdfModel *model) {
+f32 sdfModelGetFaceDivBias(SdfModel *model) {
     if ((model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) != 0) {
         return model->scalarOverrideSecond;
     }
@@ -389,12 +389,12 @@ void sdfSetForcedAssetTextureMode(u32 mode) {
 }
 
 /* Create a four-byte-item buffer with growth in groups of four slots. */
-DevRequest *sdfCreateConfiguredBufferedResourceList(s32 capacity) {
+DevRequest *sdfTexListNew(s32 capacity) {
     return sdfDevCreateBufferedRequest(capacity, SDF_RESOURCE_LIST_ITEM_BYTES, SDF_RESOURCE_LIST_GROWTH);
 }
 
 /* Optionally release item references before destroying the buffered list; null lists are ignored. */
-void sdfResourceListRelease(DevRequest *list, s32 releaseItems) {
+void sdfTexListFree(DevRequest *list, s32 releaseItems) {
     s32 itemIndex;
     s32 itemCount;
     if (list == NULL) {
@@ -406,18 +406,18 @@ void sdfResourceListRelease(DevRequest *list, s32 releaseItems) {
             sdfTexReleaseReferenceViaHandler((SdfTex *)((u32 *)list->buffer)[itemIndex]);
         }
     }
-    sdfDestroyDevRequest(list);
+    sdfItemArrayFree(list);
 }
 
-void sdfAppendResourceListItem(DevRequest *list, SdfTex *texture) {
+void sdfTexListAdd(DevRequest *list, SdfTex *texture) {
     if (list->usedCount >= (s16)list->capacity) {
-        sdfDevBufferedRequestGrow(list);
+        sdfItemArrayGrow(list);
     }
     ((u32 *)list->buffer)[list->usedCount] = (u32)texture;
     list->usedCount++;
 }
 
-void sdfReduceResourceListCount(DevRequest *list, s32 newCount, s32 applyReduction) {
+void sdfTexListSetCapacity(DevRequest *list, s32 newCount, s32 applyReduction) {
     s32 countCursor;
 
     if ((newCount < list->usedCount) && (applyReduction != 0)) {
@@ -434,7 +434,7 @@ void sdfReduceResourceListCount(DevRequest *list, s32 newCount, s32 applyReducti
 extern SdfTex *sdfTexClone(SdfTex *);
 /* Clone every texture into a new buffered list; null sources return null.
  * Entries remain address words, so bridge them explicitly at the texture API. */
-DevRequest *sdfResourceListClone(DevRequest *source) {
+DevRequest *sdfTexListDup(DevRequest *source) {
     s32 itemCount;
     DevRequest *clone;
     s32 itemIndex;
@@ -443,7 +443,7 @@ DevRequest *sdfResourceListClone(DevRequest *source) {
         return NULL;
     }
     itemCount = source->usedCount;
-    clone = sdfCreateConfiguredBufferedResourceList(itemCount);
+    clone = sdfTexListNew(itemCount);
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
         ((u32 *)clone->buffer)[itemIndex] = (u32)sdfTexClone((SdfTex *)((u32 *)source->buffer)[itemIndex]);
     }
@@ -452,7 +452,7 @@ DevRequest *sdfResourceListClone(DevRequest *source) {
 }
 
 /* Apply the palette update only to textures with a nonempty color lookup table. */
-void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 tint, f32 amount) {
+void sdfTexListSetClutColor(DevRequest *list, s32 tint, f32 amount) {
     s32 itemIndex;
     s32 itemCount;
 
@@ -469,62 +469,62 @@ void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 tint, f32 amount) 
     }
 }
 
-void sdfRegisterResourceQueueCallbacks(void) {
-    sdfInitializeSynchronizedRequest(&sdfResourceReleaseQueue, sdfResourceListReleaseAssets);
-    sdfInitializeSynchronizedRequest(&sdfAssetReleaseQueue, sdfAssetRelease);
+void sdfMatInitSystem(void) {
+    sdfDelayedResrcInitCB(&sdfResourceReleaseQueue, sdfMatListFree);
+    sdfDelayedResrcInitCB(&sdfAssetReleaseQueue, sdfMatFree);
 }
 
-DevRequest *sdfCreateResourceList(s32 capacity) {
+DevRequest *sdfMatListNew(s32 capacity) {
     return sdfDevCreateBufferedRequest(capacity, 4, 8);
 }
 
 /* Release every asset, then destroy its buffered list. */
-void sdfResourceListReleaseAssets(DevRequest *list) {
+void sdfMatListFree(DevRequest *list) {
     s32 itemIndex;
 
     for (itemIndex = 0; itemIndex < list->usedCount; itemIndex++) {
-        sdfAssetRelease(((SdfAsset **)list->buffer)[itemIndex]);
+        sdfMatFree(((SdfAsset **)list->buffer)[itemIndex]);
     }
-    sdfDestroyDevRequest(list);
+    sdfItemArrayFree(list);
 }
 
-void sdfReleaseQueuedResource(void *resource, s32 retained) {
+void sdfMatListFreeResrc(void *resource, s32 retained) {
     if (resource == NULL) {
         return;
     }
     if (retained != 0) {
-        sdfPendingQueuePush(&sdfResourceReleaseQueue, resource);
+        sdfDelayedResrcEntry(&sdfResourceReleaseQueue, resource);
     } else {
-        sdfDestroyDevRequest(resource);
+        sdfItemArrayFree(resource);
     }
 }
 
-void sdfGrowResourceListStorage(DevRequest *list) {
-    sdfDevBufferedRequestGrow(list);
+void sdfMatListGrow(DevRequest *list) {
+    sdfItemArrayGrow(list);
 }
 
-void sdfAppendAssetToResourceList(DevRequest *list, SdfAsset *asset) {
+void sdfMatListAdd(DevRequest *list, SdfAsset *asset) {
     if (list->usedCount >= (s16)list->capacity) {
-        sdfGrowResourceListStorage(list);
+        sdfMatListGrow(list);
     }
     ((SdfAsset **)list->buffer)[list->usedCount] = asset;
     list->usedCount++;
 }
 
 /* Store the first primary-state word and dirty both draw entries. */
-void sdfSetPrimaryStateWordFirst(SdfAsset *asset, u32 stateWord) {
+void sdfMatSetAmbient(SdfAsset *asset, u32 stateWord) {
     asset->primaryStateWordFirst = stateWord;
     asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Store the second primary-state word and dirty both draw entries. */
-void sdfSetPrimaryStateWordSecond(SdfAsset *asset, u32 stateWord) {
+void sdfMatSetDiffuse(SdfAsset *asset, u32 stateWord) {
     asset->primaryStateWordSecond = stateWord;
     asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Store the third primary-state word and dirty both draw entries. */
-void sdfSetPrimaryStateWordThird(SdfAsset *asset, u32 stateWord) {
+void sdfMatSetSpecular(SdfAsset *asset, u32 stateWord) {
     asset->primaryStateWordThird = stateWord;
     asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
@@ -536,7 +536,7 @@ void sdfSetPrimaryStateWordFourth(SdfAsset *asset, u32 bits) {
 }
 
 /* Store the primary-state float and dirty both draw entries. */
-void sdfSetPrimaryStateFloat(SdfAsset *asset, f32 value) {
+void sdfMatSetConstant(SdfAsset *asset, f32 value) {
     asset->primaryStateFloat = value;
     asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
@@ -548,7 +548,7 @@ void sdfSetAssetPrimaryTextureAddress(SdfAsset *asset, SdfTex *texture) {
 }
 
 /* Initialize packed scalar values 0,0,1,1,0; the final opaque word is untouched. */
-SdfSubParam *sdfSubParamCreate(void) {
+SdfSubParam *sdfMatAllocTexUvwParm(void) {
     SdfSubParam *subParameter;
 
     subParameter = sdfChipAllocDirect(SDF_SUBPARAM_BYTES);
@@ -560,10 +560,10 @@ SdfSubParam *sdfSubParamCreate(void) {
 }
 
 /* Lazily create the primary scalar block; this does not itself dirty an entry. */
-SdfSubParam *sdfEnsurePrimaryTextSubParam(SdfAsset *asset) {
+SdfSubParam *sdfMatGetTexUvwParm(SdfAsset *asset) {
     SdfSubParam *subParameter = asset->primarySubParam;
     if (subParameter == NULL) {
-        subParameter = sdfSubParamCreate();
+        subParameter = sdfMatAllocTexUvwParm();
         asset->primarySubParam = subParameter;
     }
     return subParameter;
@@ -572,7 +572,7 @@ SdfSubParam *sdfEnsurePrimaryTextSubParam(SdfAsset *asset) {
 /* Store the five primary scalars in order and dirty both draw entries. */
 void sdfSetPrimaryTextScalars(SdfAsset *asset, f32 centerOffsetX, f32 centerOffsetY,
                               f32 basisScaleX, f32 basisScaleY, f32 rotationInput) {
-    f32 *scalarValues = sdfEnsurePrimaryTextSubParam(asset)->scalar.values;
+    f32 *scalarValues = sdfMatGetTexUvwParm(asset)->scalar.values;
     scalarValues[0] = centerOffsetX;
     scalarValues[1] = centerOffsetY;
     scalarValues[2] = basisScaleX;
@@ -582,8 +582,8 @@ void sdfSetPrimaryTextScalars(SdfAsset *asset, f32 centerOffsetX, f32 centerOffs
 }
 
 /* Copy five scalar values, leaving the block's opaque final word unchanged. */
-void sdfCopyPrimaryTextScalars(SdfAsset *asset, const f32 *sourceScalars) {
-    f32 *scalarValues = sdfEnsurePrimaryTextSubParam(asset)->scalar.values;
+void sdfMatSetTexUvwByPtr(SdfAsset *asset, const f32 *sourceScalars) {
+    f32 *scalarValues = sdfMatGetTexUvwParm(asset)->scalar.values;
     scalarValues[0] = sourceScalars[0];
     scalarValues[1] = sourceScalars[1];
     scalarValues[2] = sourceScalars[2];
@@ -593,37 +593,37 @@ void sdfCopyPrimaryTextScalars(SdfAsset *asset, const f32 *sourceScalars) {
 }
 
 /* Write the full packed secondary-color word and dirty both draw entries. */
-void sdfSetAssetSecondaryColor(SdfAsset *asset, u32 packedColor) {
+void sdfMatSetMultiDiffuse(SdfAsset *asset, u32 packedColor) {
     asset->secondaryColor = packedColor;
     asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
 /* Store the mode used by the secondary packet's mode and palette lookup. */
-void sdfSetAssetSecondaryMode(SdfAsset *asset, u32 packetMode) {
+void sdfMatSetMultiMethod(SdfAsset *asset, u32 packetMode) {
     asset->secondaryMode = packetMode;
     asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
 /* Store the secondary texture address and dirty both draw entries. */
-void sdfSetAssetSecondaryTextureAddress(SdfAsset *asset, SdfTex *texture) {
+void sdfMatSetMultiTex(SdfAsset *asset, SdfTex *texture) {
     asset->secondaryTexture = texture;
     asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
 /* Lazily create the secondary scalar block; this does not itself dirty an entry. */
-SdfSubParam *sdfEnsureSecondaryTextSubParam(SdfAsset *asset) {
+SdfSubParam *sdfMatGetMultiTexUvwParm(SdfAsset *asset) {
     SdfSubParam *subParameter = asset->secondarySubParam;
     if (subParameter == NULL) {
-        subParameter = sdfSubParamCreate();
+        subParameter = sdfMatAllocTexUvwParm();
         asset->secondarySubParam = subParameter;
     }
     return subParameter;
 }
 
 /* Store the five secondary scalars in order and dirty both draw entries. */
-void sdfSetSecondaryTextScalars(SdfAsset *asset, f32 centerOffsetX, f32 centerOffsetY,
+void sdfMatSetMultiTexUvw(SdfAsset *asset, f32 centerOffsetX, f32 centerOffsetY,
                                 f32 basisScaleX, f32 basisScaleY, f32 rotationInput) {
-    f32 *scalarValues = sdfEnsureSecondaryTextSubParam(asset)->scalar.values;
+    f32 *scalarValues = sdfMatGetMultiTexUvwParm(asset)->scalar.values;
     scalarValues[0] = centerOffsetX;
     scalarValues[1] = centerOffsetY;
     scalarValues[2] = basisScaleX;
@@ -633,8 +633,8 @@ void sdfSetSecondaryTextScalars(SdfAsset *asset, f32 centerOffsetX, f32 centerOf
 }
 
 /* Copy five scalar values, leaving the block's opaque final word unchanged. */
-void sdfCopySecondaryTextScalars(SdfAsset *asset, const f32 *sourceScalars) {
-    f32 *scalarValues = sdfEnsureSecondaryTextSubParam(asset)->scalar.values;
+void sdfMatSetMultiTexUvwByPtr(SdfAsset *asset, const f32 *sourceScalars) {
+    f32 *scalarValues = sdfMatGetMultiTexUvwParm(asset)->scalar.values;
     scalarValues[0] = sourceScalars[0];
     scalarValues[1] = sourceScalars[1];
     scalarValues[2] = sourceScalars[2];
@@ -644,14 +644,14 @@ void sdfCopySecondaryTextScalars(SdfAsset *asset, const f32 *sourceScalars) {
 }
 
 /* Store the scalar pair and mark its corresponding group dirty for both entries. */
-void sdfSetTextScalarPair(SdfAsset *asset, f32 first, f32 second) {
+void sdfMatSetFaceDivParm(SdfAsset *asset, f32 first, f32 second) {
     asset->scalarPairFirst = first;
     asset->scalarPairSecond = second;
     asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PAIR_STATE_DIRTY;
 }
 
 /* Allocate both native draw-entry command blocks and mark every change group dirty. */
-SdfAsset *sdfCreateAssetWithDrawEntries(void) {
+SdfAsset *sdfMatNew(void) {
     SdfAsset *asset;
     u32 *entryWords;
     s32 entryIndex;
@@ -679,7 +679,7 @@ SdfAsset *sdfCreateAssetWithDrawEntries(void) {
 
 /* Consume supported presence bits in their native order and return the next byte.
  * Texture indices and packet modes are unchecked; unknown bits consume no payload. */
-u8 *sdfParseAssetParameterFlags(SdfAsset *asset, DevRequest *resourceLookup, u8 *serializedData) {
+u8 *sdfMatSet(SdfAsset *asset, DevRequest *resourceLookup, u8 *serializedData) {
     u32 parameterFlags;
     u8 *parameterCursor;
     u32 packedTextureMode;
@@ -689,11 +689,11 @@ u8 *sdfParseAssetParameterFlags(SdfAsset *asset, DevRequest *resourceLookup, u8 
     parameterFlags = *(u16 *)(serializedData + 6);
     parameterCursor = serializedData + SDF_PARAM_HEADER_BYTES;
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_FIRST_PRESENT) {
-        sdfSetPrimaryStateWordFirst(asset, *(u32 *)parameterCursor);
+        sdfMatSetAmbient(asset, *(u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_SECOND_PRESENT) {
-        sdfSetPrimaryStateWordSecond(asset, *(u32 *)parameterCursor);
+        sdfMatSetDiffuse(asset, *(u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_TEXTURE_PRESENT) {
@@ -705,21 +705,21 @@ u8 *sdfParseAssetParameterFlags(SdfAsset *asset, DevRequest *resourceLookup, u8 
         parameterCursor += SDF_PARAM_SCALAR_BLOCK_BYTES;
     }
     if (parameterFlags & SDF_PARAM_SECONDARY_COLOR_PRESENT) {
-        sdfSetAssetSecondaryColor(asset, *(u32 *)parameterCursor);
+        sdfMatSetMultiDiffuse(asset, *(u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_SECONDARY_TEXTURE_STATE_PRESENT) {
         packedTextureMode = *(u32 *)parameterCursor;
         parameterCursor += SDF_PARAM_WORD_BYTES;
-        sdfSetAssetSecondaryTextureAddress(asset, (SdfTex *)((u32 *)resourceLookup->buffer)[packedTextureMode & SDF_PARAM_TEXTURE_INDEX_MASK]);
-        sdfSetAssetSecondaryMode(asset, packedTextureMode >> SDF_PARAM_PACKET_MODE_SHIFT);
+        sdfMatSetMultiTex(asset, (SdfTex *)((u32 *)resourceLookup->buffer)[packedTextureMode & SDF_PARAM_TEXTURE_INDEX_MASK]);
+        sdfMatSetMultiMethod(asset, packedTextureMode >> SDF_PARAM_PACKET_MODE_SHIFT);
     }
     if (parameterFlags & SDF_PARAM_SECONDARY_SCALARS_PRESENT) {
-        sdfSetSecondaryTextScalars(asset, ((f32 *)parameterCursor)[0], ((f32 *)parameterCursor)[1], ((f32 *)parameterCursor)[2], ((f32 *)parameterCursor)[3], ((f32 *)parameterCursor)[4]);
+        sdfMatSetMultiTexUvw(asset, ((f32 *)parameterCursor)[0], ((f32 *)parameterCursor)[1], ((f32 *)parameterCursor)[2], ((f32 *)parameterCursor)[3], ((f32 *)parameterCursor)[4]);
         parameterCursor += SDF_PARAM_SCALAR_BLOCK_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_THIRD_PRESENT) {
-        sdfSetPrimaryStateWordThird(asset, *(u32 *)parameterCursor);
+        sdfMatSetSpecular(asset, *(u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_FOURTH_PRESENT) {
@@ -727,18 +727,18 @@ u8 *sdfParseAssetParameterFlags(SdfAsset *asset, DevRequest *resourceLookup, u8 
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_FLOAT_PRESENT) {
-        sdfSetPrimaryStateFloat(asset, *(f32 *)parameterCursor);
+        sdfMatSetConstant(asset, *(f32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_SCALAR_PAIR_PRESENT) {
-        sdfSetTextScalarPair(asset, ((f32 *)parameterCursor)[0], ((f32 *)parameterCursor)[1]);
+        sdfMatSetFaceDivParm(asset, ((f32 *)parameterCursor)[0], ((f32 *)parameterCursor)[1]);
         parameterCursor += SDF_PARAM_SCALAR_PAIR_BYTES;
     }
     return parameterCursor;
 }
 
 /* Release both draw entries and the parameter blocks, then the asset; null is ignored. */
-void sdfAssetRelease(SdfAsset *asset) {
+void sdfMatFree(SdfAsset *asset) {
     if (asset == NULL) {
         return;
     }
@@ -751,14 +751,14 @@ void sdfAssetRelease(SdfAsset *asset) {
 }
 
 /* Queue the non-null asset address for deferred release. */
-void sdfQueueAssetRelease(SdfAsset *asset) {
+void sdfMatFreeDelayed(SdfAsset *asset) {
     if (asset != NULL) {
-        sdfPendingQueuePush(&sdfAssetReleaseQueue, asset);
+        sdfDelayedResrcEntry(&sdfAssetReleaseQueue, asset);
     }
 }
 
 /* Reference the selected buffered asset draw entry and return the packet payload. */
-SdfDmaTagHeader *sdfInitAssetDrawEntryReferenceNode(SdfAsset *asset, SdfDmaTagHeader *tag, s32 frame) {
+SdfDmaTagHeader *sdfMatMakePacket(SdfAsset *asset, SdfDmaTagHeader *tag, s32 frame) {
     tag->control = 0x30;
     tag->address = (u32)asset->drawEntries[frame] & SDF_NODE_SOURCE_WORD_MASK;
     tag->quadwordCount = 0xA;
@@ -781,9 +781,9 @@ void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
     entry->unk14 = asset->primaryStateWordFourth;
     texture = asset->texture;
     if (texture != NULL) {
-        entry->primaryTextureState.sampling = sdfTexGetPrimarySamplingState(texture);
-        entry->primaryTextureState.texture = sdfTexGetPrimaryTextureState(texture);
-        entry->primaryTextureState.clamp = sdfTexGetPrimaryClampState(texture);
+        entry->primaryTextureState.sampling = sdfTexGetTex1Reg(texture);
+        entry->primaryTextureState.texture = sdfTexGetTex0Reg(texture);
+        entry->primaryTextureState.clamp = sdfTexGetClampReg(texture);
     }
 }
 
@@ -791,7 +791,7 @@ void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
 
 /* Build the 3x2 scalar-block transform from the sub-parameter's five floats
  * and rotation, or the identity layout when the block is absent. */
-void sdfBuildSubParameterTransform(SdfDrawTransform *transform, const SdfSubParam *subParam) {
+void sdfMatSetUvwParm(SdfDrawTransform *transform, const SdfSubParam *subParam) {
     f32 v0;
     f32 v1;
     f32 v2;
@@ -814,7 +814,7 @@ void sdfBuildSubParameterTransform(SdfDrawTransform *transform, const SdfSubPara
     }
 
     angle = -subParam->transformInputs.rotationInput;
-    s = sdfSinPoly(angle);
+    s = sdfSin(angle);
     c = sdfCos(angle);
     v0 = subParam->transformInputs.centerOffsetX;
     v1 = subParam->transformInputs.centerOffsetY;
@@ -833,14 +833,14 @@ void sdfBuildSubParameterTransform(SdfDrawTransform *transform, const SdfSubPara
     transform->m[5] = 0.5f - m1 * (v0 + 0.5f) - m3 * (0.5f - v1);
 }
 
-void sdfCopyAssetPrimarySubParameter(SdfAsset *asset, SdfAssetEntry *entry) {
-    sdfBuildSubParameterTransform(&entry->transforms[0], asset->primarySubParam);
+void sdfMatUpdatePacketUvwParm(SdfAsset *asset, SdfAssetEntry *entry) {
+    sdfMatSetUvwParm(&entry->transforms[0], asset->primarySubParam);
 }
 
 extern u16 D_0040B348[];
 /* Copy color, unchecked mode/palette state and optional GS texture words,
  * then apply the secondary scalar block to the entry's native location. */
-void sdfApplyAssetSecondaryEntry(SdfAsset *asset, SdfAssetEntry *drawEntry) {
+void sdfMatUpdatePacketMultiTex(SdfAsset *asset, SdfAssetEntry *drawEntry) {
     SdfTex *texture = asset->secondaryTexture;
     u32 packetMode;
 
@@ -849,35 +849,35 @@ void sdfApplyAssetSecondaryEntry(SdfAsset *asset, SdfAssetEntry *drawEntry) {
     drawEntry->secondaryMode = packetMode;
     drawEntry->alphaState = D_0040B348[packetMode];
     if (texture != NULL) {
-        drawEntry->secondaryTextureState.sampling = sdfTexGetPrimarySamplingState(texture);
-        drawEntry->secondaryTextureState.texture = sdfTexGetPrimaryTextureState(texture);
-        drawEntry->secondaryTextureState.clamp = sdfTexGetPrimaryClampState(texture);
+        drawEntry->secondaryTextureState.sampling = sdfTexGetTex1Reg(texture);
+        drawEntry->secondaryTextureState.texture = sdfTexGetTex0Reg(texture);
+        drawEntry->secondaryTextureState.clamp = sdfTexGetClampReg(texture);
     }
-    sdfBuildSubParameterTransform(&drawEntry->transforms[1], asset->secondarySubParam);
+    sdfMatSetUvwParm(&drawEntry->transforms[1], asset->secondarySubParam);
 }
 
 /* Copy the source pair into the destination entry's two scalar slots. */
-void sdfCopyAssetScalarPairToDrawEntry(SdfAsset *source, SdfAssetEntry *destination) {
+void sdfMatUpdatePacketFaceDiv(SdfAsset *source, SdfAssetEntry *destination) {
     destination->y = source->scalarPairFirst;
     destination->x = source->scalarPairSecond;
 }
 
 /* Apply the selected entry's groups and retain the other entry's captured bits.
  * entryIndex is unchecked and expected to be zero or one. */
-void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 entryIndex) {
+void sdfMatUpdatePacket(SdfAsset *asset, s32 entryIndex) {
     u8 dirtyFlags = asset->dirtyFlags;
     SdfAssetEntry *drawEntry = asset->drawEntries[entryIndex];
     if ((dirtyFlags >> entryIndex) & SDF_ASSET_PRIMARY_STATE_BIT) {
         sdfAssetCopyTextureState(asset, drawEntry);
     }
     if (dirtyFlags & (SDF_ASSET_PRIMARY_SCALARS_BIT << entryIndex)) {
-        sdfCopyAssetPrimarySubParameter(asset, drawEntry);
+        sdfMatUpdatePacketUvwParm(asset, drawEntry);
     }
     if (dirtyFlags & (SDF_ASSET_SECONDARY_STATE_BIT << entryIndex)) {
-        sdfApplyAssetSecondaryEntry(asset, drawEntry);
+        sdfMatUpdatePacketMultiTex(asset, drawEntry);
     }
     if (dirtyFlags & (SDF_ASSET_PAIR_STATE_BIT << entryIndex)) {
-        sdfCopyAssetScalarPairToDrawEntry(asset, drawEntry);
+        sdfMatUpdatePacketFaceDiv(asset, drawEntry);
     }
     asset->dirtyFlags = dirtyFlags & (SDF_ASSET_ENTRY_CHANGE_BITS << (entryIndex ^ 1));
 }
@@ -893,28 +893,28 @@ void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *asset, s32 entryIndex)
         sdfAssetCopyTextureState(asset, drawEntry);
     }
     if (dirtyFlags & (SDF_ASSET_PRIMARY_SCALARS_BIT << entryIndex)) {
-        sdfCopyAssetPrimarySubParameter(asset, drawEntry);
+        sdfMatUpdatePacketUvwParm(asset, drawEntry);
     }
     if (dirtyFlags & (SDF_ASSET_SECONDARY_STATE_BIT << entryIndex)) {
-        sdfApplyAssetSecondaryEntry(asset, drawEntry);
+        sdfMatUpdatePacketMultiTex(asset, drawEntry);
     }
     if (dirtyFlags & (SDF_ASSET_PAIR_STATE_BIT << entryIndex)) {
-        sdfCopyAssetScalarPairToDrawEntry(asset, drawEntry);
+        sdfMatUpdatePacketFaceDiv(asset, drawEntry);
     }
     asset->dirtyFlags = dirtyFlags & (SDF_ASSET_ENTRY_CHANGE_BITS << (entryIndex ^ 1));
 }
 
 #include "sdf_asset_create.h"
-u8 *sdfParseAssetParameterFlags(SdfAsset *, DevRequest *, u8 *);
+u8 *sdfMatSet(SdfAsset *, DevRequest *, u8 *);
 /* Parse the declared number of variable-sized assets, reserving at least the minimum capacity. */
-DevRequest *sdfAssetListParse(DevRequest *lookup, u32 *data) {
+DevRequest *sdfMatListMake(DevRequest *lookup, u32 *data) {
     u32 remainingAssets = *data;
     u8 *parameterCursor = (u8 *)(data + 1);
-    DevRequest *list = sdfCreateResourceList(remainingAssets >= SDF_ASSET_LIST_MIN_CAPACITY ? remainingAssets : SDF_ASSET_LIST_MIN_CAPACITY);
+    DevRequest *list = sdfMatListNew(remainingAssets >= SDF_ASSET_LIST_MIN_CAPACITY ? remainingAssets : SDF_ASSET_LIST_MIN_CAPACITY);
     while (remainingAssets != 0) {
-        SdfAsset *asset = sdfCreateAssetWithDrawEntries();
-        parameterCursor = sdfParseAssetParameterFlags(asset, lookup, parameterCursor);
-        sdfAppendAssetToResourceList(list, asset);
+        SdfAsset *asset = sdfMatNew();
+        parameterCursor = sdfMatSet(asset, lookup, parameterCursor);
+        sdfMatListAdd(list, asset);
         remainingAssets--;
     }
     return list;
@@ -927,12 +927,12 @@ void sdfResourceListApplyEntryChanges(DevRequest *list, s32 entryIndex) {
     u32 *assetItems = list->buffer;
 
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-        sdfAssetApplyEntryChanges((SdfAsset *)assetItems[itemIndex], entryIndex);
+        sdfMatUpdatePacket((SdfAsset *)assetItems[itemIndex], entryIndex);
     }
 }
 
 /* Apply the selected entry to each asset using the forced-texture variant. */
-void sdfApplyResourceListEntriesWithForcedTexture(DevRequest *list, s32 entryIndex) {
+void sdfMatListUpdatePacket(DevRequest *list, s32 entryIndex) {
     s32 itemIndex;
     s32 itemCount = list->usedCount;
     u32 *assetItems = list->buffer;
@@ -945,7 +945,7 @@ void sdfApplyResourceListEntriesWithForcedTexture(DevRequest *list, s32 entryInd
 
 /* Copy base state; only present source subparameters overwrite destination
  * blocks. Each whole scalar aggregate includes its final opaque word. */
-void sdfCopyAssetParameterState(SdfAsset *destination, SdfAsset *source) {
+void sdfMatCopyStat(SdfAsset *destination, SdfAsset *source) {
     SdfSubParam *subParameters;
 
     destination->dirtyFlags = SDF_ASSET_ALL_STATE_DIRTY;
@@ -959,32 +959,32 @@ void sdfCopyAssetParameterState(SdfAsset *destination, SdfAsset *source) {
     destination->primaryStateWordFourth = source->primaryStateWordFourth;
     subParameters = source->primarySubParam;
     if (subParameters != NULL) {
-        sdfEnsurePrimaryTextSubParam(destination)->scalar = subParameters->scalar;
+        sdfMatGetTexUvwParm(destination)->scalar = subParameters->scalar;
     }
     subParameters = source->secondarySubParam;
     if (subParameters != NULL) {
-        sdfEnsureSecondaryTextSubParam(destination)->scalar = subParameters->scalar;
+        sdfMatGetMultiTexUvwParm(destination)->scalar = subParameters->scalar;
     }
     destination->scalarPairFirst = source->scalarPairFirst;
     destination->scalarPairSecond = source->scalarPairSecond;
 }
 
-void sdfCopyAssetParameterState(SdfAsset *, SdfAsset *);
+void sdfMatCopyStat(SdfAsset *, SdfAsset *);
 /* Copy paired items using the destination count; source must contain at least that many items. */
-void sdfCopyAssetListParameterState(DevRequest *destination, DevRequest *source) {
+void sdfMatListCopyStat(DevRequest *destination, DevRequest *source) {
     s32 itemCount = destination->usedCount;
     u32 *sourceItems = source->buffer;
     u32 *destinationItems = destination->buffer;
     s32 itemIndex;
 
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-        sdfCopyAssetParameterState((SdfAsset *)destinationItems[itemIndex], (SdfAsset *)sourceItems[itemIndex]);
+        sdfMatCopyStat((SdfAsset *)destinationItems[itemIndex], (SdfAsset *)sourceItems[itemIndex]);
     }
 }
 
 extern s32 (*D_0040B358[])(u32, u32);
 /* The high halfword selects the handler, which receives the complete command word unchanged. */
-void *sdfDispatchAssetCommandWord(Motion *motion, u32 commandWord, s32 targetIndex) {
+void *sdfMotionNodeNew(Motion *motion, u32 commandWord, s32 targetIndex) {
     return (void *)D_0040B358[commandWord >> 16]((u32)motion, commandWord);
 }
 

@@ -82,21 +82,21 @@ typedef char EffMagatuhiValueWork_historyScalars_offset[((u32)&((EffMagatuhiValu
 typedef char EffMagatuhiHistoryParams_size_must_be_0x1C[(sizeof(EffMagatuhiHistoryParams) == 0x1C) ? 1 : -1];
 typedef char EffMagatuhiOwner_size_must_be_0x20[(sizeof(EffMagatuhiOwner) == 0x20) ? 1 : -1];
 
-EffMagatuhiOwner *effCloneMagatuhiWithColorResource(const u32 *source);
-void effReleaseMagatuhiOwner(EffMagatuhiOwner *owner);
-void effMagatuhiReleaseResource(EffMagatuhiValueWork *work);
-void effMagatuhiSetValue(EffMagatuhiValueWork *work, s32 index, u32 color);
-void effMagatuhiFillColorTable(EffMagatuhiValueWork *work, u32 colorA, u32 colorB);
+EffMagatuhiOwner *effMagaCylinderAllocPart(const u32 *source);
+void effMagaCylinderFree(EffMagatuhiOwner *owner);
+void effMagaCylinderFreeParts(EffMagatuhiValueWork *work);
+void effMagaCylinderSetPart(EffMagatuhiValueWork *work, s32 index, u32 color);
+void effMagaCylinderBlendColor(EffMagatuhiValueWork *work, u32 colorA, u32 colorB);
 #ifdef VERSION_DDS2
-EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 historyCount, f32 historyDistanceScale, s32 param, f32 historyAngleStep);
-void effMagatuhiDrawOwnerHistoryTrails(EffMagatuhiOwner *owner);
-void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 index);
-void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, const f32 vector[4]);
+EffMagatuhiValueWork *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 historyDistanceScale, s32 param, f32 historyAngleStep);
+void effMagaCylinderDrawTrack(EffMagatuhiOwner *owner);
+void effMagaCylinderSetPartPtrs(EffMagatuhiValueWork *work, s32 index);
+void effMagaCylinderSetPartPos(EffMagatuhiValueWork *work, s32 index, const f32 vector[4]);
 #else
-EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 historyCount, f32 historyDistanceScale, s32 param, f32 historyAngleStep);
-void effMagatuhiDrawOwnerHistoryTrails(EffMagatuhiOwner *owner);
-void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 index);
-void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, const f32 vector[4]);
+EffMagatuhiValueWork *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 historyDistanceScale, s32 param, f32 historyAngleStep);
+void effMagaCylinderDrawTrack(EffMagatuhiOwner *owner);
+void effMagaCylinderSetPartPtrs(EffMagatuhiValueWork *work, s32 index);
+void effMagaCylinderSetPartPos(EffMagatuhiValueWork *work, s32 index, const f32 vector[4]);
 #endif
 
 struct MdlCtx;
@@ -148,7 +148,7 @@ typedef struct EffSegmentedBezierSlot {
     f32 parameterStep;
 } EffSegmentedBezierSlot;
 
-extern s32 effStepBezierSlotSegment(EffSegmentedBezierSlot *slot, f32 *out);
+extern s32 effPCPBezierEval(EffSegmentedBezierSlot *slot, f32 *out);
 
 /* Parameter head (0x54 bytes) of the fragment effect, copied verbatim into the work. */
 typedef struct {
@@ -194,15 +194,15 @@ typedef struct {
     EffResourceRectDrawParams draw;
 } EffResourceRectParams; /* 0x24 */
 
-void effCopyTexturedSquareParameters(EffResourceRectParams *parameters);
+void Eve_PartialMultiFilterSetParam(EffResourceRectParams *parameters);
 
 typedef struct {
     EffResourceRectParams params;
     SdfTex *texture;
 } EffResourceRectWork; /* 0x28 */
 
-EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
-void effReleaseResourceTemplate(EffResourceRectWork *work);
+EffResourceRectWork *dds3EffectPartialMultiFilterCreate(EffResourceRectParams *params);
+void dds3EffectPartialMultiFilterDelete(EffResourceRectWork *work);
 
 typedef char EffResourceRectDrawParams_size_must_be_0x18[(sizeof(EffResourceRectDrawParams) == 0x18) ? 1 : -1];
 typedef char EffResourceRectParams_size_must_be_0x24[(sizeof(EffResourceRectParams) == 0x24) ? 1 : -1];
@@ -215,7 +215,7 @@ typedef struct EffCntRec {
     u32 unk4;        /* +0x04: id released with its owner */
 } EffCntRec;
 
-/* Complete 0x2C-byte primitive-curve owner allocated by effCreatePrimitiveCurve.
+/* Complete 0x2C-byte primitive-curve owner allocated by dds3AllocSplineHandle.
  * Keys are borrowed XYZ samples; the three polynomial coefficient banks share
  * the optional backing allocation. */
 typedef struct EffPrimitiveCurve {
@@ -242,8 +242,8 @@ typedef struct EffWork {
 } EffWork;
 typedef char EffWork_size_must_be_8[sizeof(EffWork) == 8 ? 1 : -1];
 
-EffWork *effAllocDispatch(s32 type, void *params);
-void *effGetHandlerArg(EffWork *work);
+EffWork *dds3MagatuhiParCreate(s32 type, void *params);
+void *dds3MagatuhiGetHandle(EffWork *work);
 
 /* Effect callback dispatch entry (0x18); DDS1/2 game/code_0018CAC8/00194700.c. */
 typedef struct EffHandler {
@@ -297,14 +297,14 @@ struct BillOut;
 
 typedef struct BillObj {
     f32 position[4]; /* 0x00: copied as a four-component position by both render paths. */
-    f32 childScaleX;  /* 0x10: set by billSetChildScaleComponents */
+    f32 childScaleX;  /* 0x10: set by dds3BillboardSetScale */
     f32 childScaleY;  /* 0x14 */
     f32 unk18;
     f32 unk1C;
     f32 rotationAngle;  /* 0x20: radian angle used to rotate the quad corners. */
-    u32 childParam;   /* 0x24: set by billSetChildParameter */
-    void (*callback)(); /* 0x28: called by billInvokeCallback; set from the
-                          per-index table by billCreateIndexed */
+    u32 childParam;   /* 0x24: set by dds3BillboardSetRGBA */
+    void (*callback)(); /* 0x28: called by dds3BillboardDraw; set from the
+                          per-index table by dds3BillboardCreate */
     u16 kind;         /* 0x2C: kind 0/3 child, kind 1 animation list */
     u16 requestedPacketListIndex; /* 0x2E: selected child packet-list pool */
     union {
@@ -635,8 +635,8 @@ typedef char EffTemplatePacketList_listAllocation_offset[(u32)&((EffTemplatePack
 typedef char EffTemplatePacketList_auxiliaryAllocation_offset[(u32)&((EffTemplatePacketList *)0)->auxiliaryAllocation == 0x17C ? 1 : -1];
 
 
-EffectBufferTail *effAllocateBuffer(s32 recordCount);
-void effReleaseBufferAllocation(EffectBufferTail *buffer);
+EffectBufferTail *dds3Particle_PhysicsCreate(s32 recordCount);
+void dds3Particle_PhysicsDelete(EffectBufferTail *buffer);
 
 /* Resource-entry work shared by the needle constructor and its renderer. */
 typedef struct EffResourceEntry {
@@ -743,7 +743,7 @@ typedef struct PcpFlashPulseParticle {
     u8 pad0C[4];
 } PcpFlashPulseParticle;
 
-/* effFlashRecordCreate copies the 0x30-byte parameter prefix, then places
+/* effPCPFlashPolySphere2Create copies the 0x30-byte parameter prefix, then places
  * these 0x10-byte particles immediately after the 0x48-byte work. */
 typedef struct PcpFlashTrianglePulseWork {
     f32 origin[3];
@@ -822,7 +822,7 @@ typedef struct EffPCPNeedleParams {
     u32 outerColor;
     f32 width;
 #ifdef VERSION_DDS2
-    s32 perCellInput; /* 0x54: passed to parAllocateCellSystem's perCell sizing argument. */
+    s32 perCellInput; /* 0x54: passed to dds3TrackPolyCreate's perCell sizing argument. */
 #else
     s32 unk54;
 #endif
@@ -855,19 +855,19 @@ typedef char EffPCPNeedleSlotSizeCheck[sizeof(EffPCPNeedleSlot) == 0x2C ? 1 : -1
 typedef char EffPCPNeedleWorkSizeCheck[sizeof(EffPCPNeedleWork) == 0x74 ? 1 : -1];
 
 #ifdef VERSION_DDS2
-extern EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *);
-extern EffResourceWork *effCreateResourceEntryWork(u32);
+extern EffPCPNeedleWork *effPCPNeedleSpiralCreate(EffPCPNeedleParams *);
+extern EffResourceWork *dds3NeedleModelCreate(u32);
 #else
-extern EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *);
-extern EffResourceWork *effCreateResourceEntryWork(u32);
+extern EffPCPNeedleWork *effPCPNeedleSpiralCreate(EffPCPNeedleParams *);
+extern EffResourceWork *dds3NeedleModelCreate(u32);
 #endif
 
 extern void effReleaseOptionalResource(EffResourceWork *);
-extern void effReleaseAttachedResources(EffResourceWork *);
-extern void effSetResourceEntryPosition(EffResourceWork *, s32, f32 *);
-extern void effGetResourceEntryPosition(EffResourceWork *, s32, f32 *);
-extern void effSetResourceEntryValue(EffResourceWork *work, s32 index, u32 color);
-extern void effDrawInstancedResourceTrianglesVU(EffResourceWork *);
+extern void dds3NeedleModelDelete(EffResourceWork *);
+extern void dds3NeedleModelSetPosition(EffResourceWork *, s32, f32 *);
+extern void dds3NeedleModelGetPosition(EffResourceWork *, s32, f32 *);
+extern void dds3NeedleModelSetColor(EffResourceWork *work, s32 index, u32 color);
+extern void dds3NeedleModelDraw(EffResourceWork *);
 extern void effBuildRadialFanStreams(EffResourceWork *, u32, u32, u32, f32, f32);
 
 /* Native 0x14-byte timed state embedded in a slot's kind-specific payload. */
@@ -1023,8 +1023,8 @@ typedef struct EffThunderGroupParams {
 } EffThunderGroupParams;
 typedef struct EffThunderGroup EffThunderGroup;
 
-EffThunderGroupParams *effGetPairedBlurResourceVectorRecordAddress(EffThunderGroup *resource);
-void effSetResourceBlendColor(EffThunderGroup *resource, u32 color);
+EffThunderGroupParams *effPCP_ThunderPolyListGetParam(EffThunderGroup *resource);
+void effPCP_ThunderPolyListSetColor(EffThunderGroup *resource, u32 color);
 
 typedef struct PairedEffectParams {
     f32 startVec[4];

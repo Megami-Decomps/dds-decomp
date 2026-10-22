@@ -15,42 +15,42 @@
 #include "sdf_chunk.h"
 #include "sdf_projection.h"
 
-extern void effBossUpdateGeometry(void *work);
-extern void effBossSetPosition(void *dst, void *src);
-extern PairedEffectResources *effBossCreatePairedChainResources(PairedEffectParams *src);
-extern EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src);
+extern void effPCPCrackDraw(void *work);
+extern void effPCPCrackSetPosition(void *dst, void *src);
+extern PairedEffectResources *effPCPBossMETATOBeamCreate(PairedEffectParams *src);
+extern EffThunderGroup *effPCP_ThunderPolyListCreate(EffThunderGroupParams *src);
 
 extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern u8 effBossLookAtReferenceAxis[];
 
-extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
-extern void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
-extern void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
-extern void effSetVectorIncrementBits(EffRecordPool *pool, u32 bits);
+extern EffRecordPool *dds3FlashPolyListCreate(u32 cellCount);
+extern void *dds3FlashPolyListGetVertex(EffRecordPool *pool, s32 index);
+extern void *dds3FlashPolyListGetVC(EffRecordPool *pool, s32 index);
+extern void dds3FlashPolyListSetBlend(EffRecordPool *pool, u32 bits);
 extern EffRandState effDefaultRandomState[];
 extern f32 D_004334C4;
-extern void effBossInitializeModelGroups(EffBossWork *work);
-extern EffBossWork *effBossCloneWorkAndParameters(EffBossWork *src);
-extern void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool);
+extern void effPCPCrackInit(EffBossWork *work);
+extern EffBossWork *effPCPCrackCopy(EffBossWork *src);
+extern void dds3FlashPolyListDelete(EffRecordPool *pool);
 
 /* Randomize geometry and initial age; the two extents remain proportional. */
-void effBossCellRandomize(EffBossWork *work, EffBossCell *cell) {
+void effPCPCrackSizeInit(EffBossWork *work, EffBossCell *cell) {
     f32 blend = work->head.offsetRandomness;
     f32 scale = work->head.scale;
     f32 t;
 
-    cell->offsetDistance = work->head.offsetDistance * (sdfGetRandFloat(effDefaultRandomState) * blend + (1.0f - blend)) * scale;
+    cell->offsetDistance = work->head.offsetDistance * (dds3GetRandFloatA(effDefaultRandomState) * blend + (1.0f - blend)) * scale;
     blend = work->head.extentRandomness;
-    t = sdfGetRandFloat(effDefaultRandomState) * blend + (1.0f - blend);
+    t = dds3GetRandFloatA(effDefaultRandomState) * blend + (1.0f - blend);
     cell->baseExtent = work->head.baseExtent * t * scale;
     cell->tipExtent = work->head.tipExtent * t * scale;
-    cell->flip = sdfGetRand((EffRandState *)effDefaultRandomState) & 1;
-    cell->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % work->head.delaySpread);
+    cell->flip = dds3GetRandA((EffRandState *)effDefaultRandomState) & 1;
+    cell->age = -(dds3GetRandA((EffRandState *)effDefaultRandomState) % work->head.delaySpread);
 }
 
 /* Create a draw pool and delayed cells for each model map-position group. */
-void effBossInitializeModelGroups(EffBossWork *work)
+void effPCPCrackInit(EffBossWork *work)
 {
     MdlCtx *model = effParamWorkGetData(work->paramWork);
     EffBossGroup *group;
@@ -62,11 +62,11 @@ void effBossInitializeModelGroups(EffBossWork *work)
         work->head.delaySpread = 1;
     }
     model->first->frameStep = work->head.frameStep;
-    mdlAddEntryPlain(model, 0, 0);
+    mdlSingleMotion(model, 0, 0);
     work->cellCount = model->first->frameCount;
-    work->groupCount = sdfCountMapPositionRecords(model->inner);
-    work->system = parAllocateCellSystem(work->groupCount, work->cellCount, 1, PAR_CELL_TOPOLOGY_TRIANGLE);
-    parSetCellDrawBucket(work->system, work->head.drawBucket);
+    work->groupCount = sdfModelGetMarkPosCount(model->inner);
+    work->system = dds3TrackPolyCreate(work->groupCount, work->cellCount, 1, PAR_CELL_TOPOLOGY_TRIANGLE);
+    dds3TrackPolySetMode(work->system, work->head.drawBucket);
     work->groupsHandle = NULL;
     if (work->head.hasCells) {
         work->groupsHandle = sdfMemAllocDirect(work->groupCount * sizeof(EffBossGroup)
@@ -77,7 +77,7 @@ void effBossInitializeModelGroups(EffBossWork *work)
         for (groupIndex = 0, group = work->groups; groupIndex < work->groupCount; groupIndex++, group++) {
             EffBossCell *cell;
 
-            group->drawPool = effRecordPoolCreateFiveVertexGroups(work->cellCount);
+            group->drawPool = dds3FlashPolyListCreate(work->cellCount);
             if (work->head.directionMode == 0) {
                 group->direction[0] = 0.0f;
                 group->direction[1] = -1.0f;
@@ -90,8 +90,8 @@ void effBossInitializeModelGroups(EffBossWork *work)
             group->angularSpeed = (0.1f * (3.14159265f / 180.0f));
             group->rotationAngle = 0.0f;
             for (cellIndex = 0; cellIndex < work->cellCount; cellIndex++) {
-                f32 *vertices = (f32 *)effGetIndexedEffectGroupRecord(group->drawPool, cellIndex);
-                EffBossColorSlot *colors = effGetIndexedEffectGroupIndexEntry(group->drawPool, cellIndex);
+                f32 *vertices = (f32 *)dds3FlashPolyListGetVertex(group->drawPool, cellIndex);
+                EffBossColorSlot *colors = dds3FlashPolyListGetVC(group->drawPool, cellIndex);
 
                 colors->color[0] = 0;
                 colors->color[1] = 0;
@@ -105,78 +105,78 @@ void effBossInitializeModelGroups(EffBossWork *work)
                 VU0_STORE_VF(vf10, vertices + 12);
                 VU0_STORE_VF(vf10, vertices + 16);
             }
-            effSetVectorIncrementBits(group->drawPool, work->head.incrementBits);
+            dds3FlashPolyListSetBlend(group->drawPool, work->head.incrementBits);
             group->cells = nextCells;
             nextCells += work->cellCount;
             for (cellIndex = 0, cell = group->cells; cellIndex < work->cellCount; cellIndex++, cell++) {
-                effBossCellRandomize(work, cell);
+                effPCPCrackSizeInit(work, cell);
             }
         }
     }
 }
 
 /* Copy the trail head and create its model, cell system and per-map groups. */
-EffBossWork *effBossCreate(EffBossParams *bossParams, void *effectParams) {
+EffBossWork *effPCPCrackCreate(EffBossParams *bossParams, void *effectParams) {
     EffBossWork *work;
 
     work = sdfChipAllocDirect(sizeof(EffBossWork));
     work->head = bossParams->head;
     work->frame = 0;
     work->color = 0x80808080;
-    work->paramWork = effParamWorkCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, effectParams);
-    effBossInitializeModelGroups(work);
+    work->paramWork = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, effectParams);
+    effPCPCrackInit(work);
     return work;
 }
 
 /* Apply the first two packed parameter blocks to the boss effect. */
-EffBossWork *effPCPBossApplyTwoBlocks(void *parameterTable) {
+EffBossWork *effPCPCrackCreatePCF(void *parameterTable) {
     EffBossParams *bossParams;
     void *effectParams;
 
-    bossParams = effParamTableGetBlock(parameterTable, 0);
-    effectParams = effParamTableGetBlock(parameterTable, 1);
-    return effBossCreate(bossParams, effectParams);
+    bossParams = dds3EffectPCPDataGetData(parameterTable, 0);
+    effectParams = dds3EffectPCPDataGetData(parameterTable, 1);
+    return effPCPCrackCreate(bossParams, effectParams);
 }
 
 /* Duplicate model parameters and rebuild groups with a fresh frame counter. */
-EffBossWork *effBossCloneWorkAndParameters(EffBossWork *src) {
+EffBossWork *effPCPCrackCopy(EffBossWork *src) {
     EffBossWork *work;
 
     work = sdfChipAllocDirect(sizeof(EffBossWork));
     memcpy(&work->head, &src->head, sizeof(EffBossHead));
     work->frame = 0;
     work->color = 0x80808080;
-    work->paramWork = effParamWorkDuplicate(src->paramWork);
-    effBossInitializeModelGroups(work);
+    work->paramWork = dds3EffectPartCopy(src->paramWork);
+    effPCPCrackInit(work);
     return work;
 }
 
 /* Release group draw pools, the shared cell system, model resource and owner. */
-void effBossDestroy(EffBossWork *work) {
+void effPCPCrackDelete(EffBossWork *work) {
     u32 groupIndex;
 
     if (work->groupsHandle != 0) {
         for (groupIndex = 0; groupIndex < work->groupCount; groupIndex++) {
-            effReleaseRecordGroupAssetAndHandle(work->groups[groupIndex].drawPool);
+            dds3FlashPolyListDelete(work->groups[groupIndex].drawPool);
         }
         sdfMemFreeDirect(work->groupsHandle);
     }
-    parReleaseCellSystem(work->system);
-    effDispatchParameterDataAndFreeWork(work->paramWork);
+    dds3TrackPolyDelete(work->system);
+    dds3EffectPartDelete(work->paramWork);
     sdfChipFreeDirect(work);
 }
 
 #include "eff_math.h"
 #include "sdf_quaternion.h"
-extern u32 effMultiplyPackedColors(u32, u32);
+extern u32 effMagaCylinderCalcColor(u32, u32);
 extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern f32 D_003B1FE0[4];
-extern s32 sdfLoadMapRecordLookAtBasis(struct SdfModel *, s32);
-extern void effSetFanRecordPoolColor(EffRecordPool *, u32);
-extern void effDrawScaledRecordPool(EffRecordPool *);
+extern s32 sdfModelGetMarkPosMatrix(struct SdfModel *, s32);
+extern void dds3FlashPolyListSetABGR(EffRecordPool *, u32);
+extern void dds3FlashPolyListDraw(EffRecordPool *);
 
 /* Independent native reconstruction; prior KiB/Opal/Brass algorithms credited. */
-void effBossUpdateGeometry(void *opaque) {
+void effPCPCrackDraw(void *opaque) {
     EffBossWork *work = opaque;
     f32 perpendicular[4];
     f32 direction[4];
@@ -221,19 +221,19 @@ void effBossUpdateGeometry(void *opaque) {
     model = effParamWorkGetData(work->paramWork);
     map = model->inner;
     VU0_LOAD_VF(vf10, work->head.position);
-    mdlStorePrimaryVectorVU(model);
+    mdlSetPosition(model);
     VEC3_SPLAT(scaleVector, work->head.scale);
     scaleVector[3] = 0.0f;
     VU0_LOAD_VF(vf10, scaleVector);
-    mdlStoreTertiaryVectorVU(model);
-    mdlProcessContextNodesAndTransforms(model, kwlnSceneSurfaceSets[10]);
+    mdlSetScale(model);
+    mdlLink(model, kwlnSceneSurfaceSets[10]);
     if (work->head.drawTrail) {
         colorStart = work->head.trailColorStartFrame;
         if (frame > colorStart) {
             if (work->head.trailColorTransitionFrames > 0) {
                 blend = (f32)(frame - colorStart) / work->head.trailColorTransitionFrames;
-                center = effBlendColor(work->head.trailStartCenterColor, work->head.trailEndCenterColor, blend);
-                edge = effBlendColor(work->head.trailStartEdgeColor, work->head.trailEndEdgeColor, blend);
+                center = effColorBlend(work->head.trailStartCenterColor, work->head.trailEndCenterColor, blend);
+                edge = effColorBlend(work->head.trailStartEdgeColor, work->head.trailEndEdgeColor, blend);
             } else {
                 center = work->head.trailEndCenterColor;
                 edge = work->head.trailEndEdgeColor;
@@ -275,7 +275,7 @@ void effBossUpdateGeometry(void *opaque) {
                 direction[0] = 0.0f;
                 direction[1] = 0.0f;
                 direction[2] = 1.0f;
-                sdfLoadMapRecordLookAtBasis(map, i);
+                sdfModelGetMarkPosMatrix(map, i);
                 VU0_LOAD_VF(vf10, direction);
                 VU0_ROTATE_VEC(vf10, vf10);
                 VU0_STORE_VF(vf10, direction);
@@ -283,7 +283,7 @@ void effBossUpdateGeometry(void *opaque) {
                 work->groups[i].direction[1] = direction[1];
                 work->groups[i].direction[2] = direction[2];
             }
-            sdfLoadMapRecordPositionVector(map, i);
+            sdfModelGetMarkPos(map, i);
             if (frame < work->cellCount) {
                 historyCount = historyCell->vertexCount;
                 VU0_STORE_VF_UNCLOBBERED(vf10, positions + historyCount);
@@ -329,7 +329,7 @@ void effBossUpdateGeometry(void *opaque) {
         } while (i < groupCount);
     }
     if (work->head.drawTrail) {
-        parPrependCellNode(work->system);
+        dds3TrackPolyDraw(work->system);
     }
     if (work->groupsHandle != NULL) {
         duration = work->head.cellDuration;
@@ -348,16 +348,16 @@ void effBossUpdateGeometry(void *opaque) {
                 historyCell = &work->system->cells[i];
                 historyStart = historyCell->history;
                 cell = group->cells;
-                effSetFanRecordPoolColor(group->drawPool, tint);
+                dds3FlashPolyListSetABGR(group->drawPool, tint);
                 for (j = 0; j < count - 1; j++, cell++, historyStart += 3) {
-                    positions = effGetIndexedEffectGroupRecord(group->drawPool, j);
-                    colorWords = ((EffBossColorSlot *)effGetIndexedEffectGroupIndexEntry(group->drawPool, j))->color;
+                    positions = dds3FlashPolyListGetVertex(group->drawPool, j);
+                    colorWords = ((EffBossColorSlot *)dds3FlashPolyListGetVC(group->drawPool, j))->color;
                     age = cell->age;
                     if (age > colorStart) {
                         if (work->head.cellColorTransitionFrames > 0 && age < colorStart + colorFrames) {
                             blend = (f32)(age - colorStart) / colorFrames;
-                            center = effBlendColor(work->head.cellStartCenterColor, work->head.cellEndCenterColor, blend);
-                            edge = effBlendColor(work->head.cellStartEdgeColor, work->head.cellEndEdgeColor, blend);
+                            center = effColorBlend(work->head.cellStartCenterColor, work->head.cellEndCenterColor, blend);
+                            edge = effColorBlend(work->head.cellStartEdgeColor, work->head.cellEndEdgeColor, blend);
                         } else {
                             center = work->head.cellEndCenterColor;
                             edge = work->head.cellEndEdgeColor;
@@ -382,7 +382,7 @@ void effBossUpdateGeometry(void *opaque) {
                             VU0_SUB(vf10, vf10, vf11);
                             VU0_NORMALIZE_VF10();
                             VU0_STORE_VF_UNCLOBBERED(vf10, axis);
-                            sdfBuildVuRotationFromAxisAngle(group->rotationAngle, (const struct RwV3d *)axis);
+                            SetRotateMatrixAxis(group->rotationAngle, (const struct RwV3d *)axis);
                             VU0_LOAD_VF(vf10, displacement);
                             VU0_ROTATE_VEC(vf10, vf10);
                             VU0_STORE_VF(vf10, displacement);
@@ -436,27 +436,27 @@ void effBossUpdateGeometry(void *opaque) {
                         if (age <= duration) {
                             if (age < fadeIn && fadeIn != 0) {
                                 blend = (f32)age / fadeIn;
-                                alphaColor = effMultiplyPackedColors(((u32)(blend * 2147483648.0f) & 0xFF000000) | 0x808080, tint);
+                                alphaColor = effMagaCylinderCalcColor(((u32)(blend * 2147483648.0f) & 0xFF000000) | 0x808080, tint);
                             } else if (duration - age <= fadeOut && fadeOut != 0) {
                                 blend = (f32)(duration - age) / fadeOut;
-                                alphaColor = effMultiplyPackedColors(((u32)(blend * 2147483648.0f) & 0xFF000000) | 0x808080, tint);
+                                alphaColor = effMagaCylinderCalcColor(((u32)(blend * 2147483648.0f) & 0xFF000000) | 0x808080, tint);
                             } else alphaColor = tint;
                         }
-                        colorWords[0] = effMultiplyPackedColors(edge, alphaColor);
-                        colorWords[1] = effMultiplyPackedColors(edge, alphaColor);
+                        colorWords[0] = effMagaCylinderCalcColor(edge, alphaColor);
+                        colorWords[1] = effMagaCylinderCalcColor(edge, alphaColor);
                         if (cell->flip) {
-                            colorWords[2] = effMultiplyPackedColors(0x80000000, alphaColor);
-                            colorWords[3] = effMultiplyPackedColors(center | 0xFF000000, alphaColor);
+                            colorWords[2] = effMagaCylinderCalcColor(0x80000000, alphaColor);
+                            colorWords[3] = effMagaCylinderCalcColor(center | 0xFF000000, alphaColor);
                             colorWords[4] = colorWords[2];
                         } else {
-                            colorWords[2] = effMultiplyPackedColors(0xFF000000, alphaColor);
-                            colorWords[3] = effMultiplyPackedColors(center | 0x40000000, alphaColor);
+                            colorWords[2] = effMagaCylinderCalcColor(0xFF000000, alphaColor);
+                            colorWords[3] = effMagaCylinderCalcColor(center | 0x40000000, alphaColor);
                             colorWords[4] = colorWords[2];
                         }
                     }
                     cell->age++;
                 }
-                effDrawScaledRecordPool(group->drawPool);
+                dds3FlashPolyListDraw(group->drawPool);
             }
         }
     }
@@ -464,7 +464,7 @@ void effBossUpdateGeometry(void *opaque) {
 }
 
 
-void effBossSetPosition(void *dst, void *src)
+void effPCPCrackSetPosition(void *dst, void *src)
 {
     PCP_COPY_VECTOR(dst, src);
 }
@@ -474,47 +474,47 @@ void effBossTrailSetColor(EffBossWork *work, s32 value) {
 }
 
 /* Copy the beam vector and create its model and auxiliary parameter works. */
-EffPCPBossWork *effBossBeamCreate(void *vector, void *paramA, void *paramB) {
+EffPCPBossWork *effPCPBossBaelCreate(void *vector, void *paramA, void *paramB) {
     EffPCPBossWork *work;
 
     work = sdfChipAllocDirect(sizeof(EffPCPBossWork));
     memcpy(work->parameterVector, vector, 0x10);
     work->color = 0x80808080;
     work->frame = 0;
-    work->modelResource = effParamWorkCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, paramA);
-    work->auxiliaryResource = effParamWorkCreate(EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK, paramB);
+    work->modelResource = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, paramA);
+    work->auxiliaryResource = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK, paramB);
     return work;
 }
 
 /* Apply three packed parameter blocks to the boss effect. */
-EffPCPBossWork *effPCPBossApplyThreeBlocks(void *parameterTable) {
+EffPCPBossWork *effPCPBossBaelCreatePCF(void *parameterTable) {
     void *firstBlock;
     void *secondBlock;
     void *thirdBlock;
 
-    firstBlock = effParamTableGetBlock(parameterTable, 0);
-    secondBlock = effParamTableGetBlock(parameterTable, 1);
-    thirdBlock = effParamTableGetBlock(parameterTable, 2);
-    return effBossBeamCreate(firstBlock, secondBlock, thirdBlock);
+    firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
+    secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
+    thirdBlock = dds3EffectPCPDataGetData(parameterTable, 2);
+    return effPCPBossBaelCreate(firstBlock, secondBlock, thirdBlock);
 }
 
 /* Duplicate both parameter works; the clone begins at frame zero. */
-EffPCPBossWork *effBossBeamClone(EffPCPBossWork *src) {
+EffPCPBossWork *effPCPBossBaelCopy(EffPCPBossWork *src) {
     EffPCPBossWork *work;
 
     work = sdfChipAllocDirect(sizeof(EffPCPBossWork));
     memcpy(work->parameterVector, src->parameterVector, 0x10);
     work->color = 0x80808080;
     work->frame = 0;
-    work->modelResource = effParamWorkDuplicate(src->modelResource);
-    work->auxiliaryResource = effParamWorkDuplicate(src->auxiliaryResource);
+    work->modelResource = dds3EffectPartCopy(src->modelResource);
+    work->auxiliaryResource = dds3EffectPartCopy(src->auxiliaryResource);
     return work;
 }
 
 /* Release both beam parameter works before freeing the owner. */
-void effPCPBossFree(EffPCPBossWork *work) {
-    effDispatchParameterDataAndFreeWork(work->auxiliaryResource);
-    effDispatchParameterDataAndFreeWork(work->modelResource);
+void effPCPBossBaelDelete(EffPCPBossWork *work) {
+    dds3EffectPartDelete(work->auxiliaryResource);
+    dds3EffectPartDelete(work->modelResource);
     sdfChipFreeDirect(work);
 }
 
@@ -529,8 +529,8 @@ void effBossBeamUpdate(EffPCPBossWork *work) {
             VU0_STORE_VF(vf10, work->position);
         }
         direction = work->parameterVector;
-        sdfVuBuildLookAtBasis(work, direction, effBossLookAtReferenceAxis);
-        sdfInvertRigidVuTransform();
+        LookAtMatrix(work, direction, effBossLookAtReferenceAxis);
+        ReverseMatrix();
         VU0_MOVE_VF(vf31, vf0);
         VU0_STORE_MATRIX(matrix);
     } else {
@@ -542,22 +542,22 @@ void effBossBeamUpdate(EffPCPBossWork *work) {
         EE_MMI_UNIT_MATRIX(matrix);
         direction = work->parameterVector;
     }
-    effParamWorkCallback2(work->modelResource, matrix);
-    effParamWorkCallback2(work->auxiliaryResource, matrix);
-    effParamWorkCallback0(work->modelResource, direction);
-    effParamWorkCallback0(work->auxiliaryResource, direction);
-    effParamWorkCallback3(work->modelResource, work->color);
-    effParamWorkCallback3(work->auxiliaryResource, work->color);
-    effParamWorkInvokeCallback(work->modelResource);
-    effParamWorkInvokeCallback(work->auxiliaryResource);
+    dds3EffectPartSetRotateMatrix(work->modelResource, matrix);
+    dds3EffectPartSetRotateMatrix(work->auxiliaryResource, matrix);
+    dds3EffectPartSetPosition(work->modelResource, direction);
+    dds3EffectPartSetPosition(work->auxiliaryResource, direction);
+    dds3EffectPartSetColor(work->modelResource, work->color);
+    dds3EffectPartSetColor(work->auxiliaryResource, work->color);
+    dds3EffectPartDraw(work->modelResource);
+    dds3EffectPartDraw(work->auxiliaryResource);
     work->frame++;
 }
 
-void effPCPBossSetParameterVector(EffPCPBossWork *work, void *src) {
+void effPCPBossBaelSetPosition(EffPCPBossWork *work, void *src) {
     PCP_COPY_VECTOR(&work->parameterVector, src);
 }
 
-void effPCPBossSetParameter(EffPCPBossWork *work, u32 value) {
+void effPCPBossBaelSetColor(EffPCPBossWork *work, u32 value) {
     work->color = value;
 }
 
@@ -751,11 +751,11 @@ void func_0018D6A0(void) {
 }
 
 /* Apply per-cell rotation onset and speed after creating the trail groups. */
-EffBossWork *effBossCreateWithGroups(EffBossParams *bossParams, void *effectParams) {
+EffBossWork *effPCPCrack2Create(EffBossParams *bossParams, void *effectParams) {
     EffBossWork *work;
     u32 groupIndex;
 
-    work = effBossCreate(bossParams, effectParams);
+    work = effPCPCrackCreate(bossParams, effectParams);
     for (groupIndex = 0; groupIndex < work->groupCount; groupIndex++) {
         work->groups[groupIndex].rotationStartAge = bossParams->rotationStartAge;
         work->groups[groupIndex].rotationAngle = 0.0f;
@@ -764,21 +764,21 @@ EffBossWork *effBossCreateWithGroups(EffBossParams *bossParams, void *effectPara
     return work;
 }
 
-EffBossWork *effBossCreateGroupsFromPackedParams(void *data) {
+EffBossWork *effPCPCrack2CreatePCF(void *data) {
     EffBossParams *bossParams;
     void *effectParams;
 
-    bossParams = effParamTableGetBlock(data, 0);
-    effectParams = effParamTableGetBlock(data, 1);
-    return effBossCreateWithGroups(bossParams, effectParams);
+    bossParams = dds3EffectPCPDataGetData(data, 0);
+    effectParams = dds3EffectPCPDataGetData(data, 1);
+    return effPCPCrack2Create(bossParams, effectParams);
 }
 
 /* Preserve rotation settings, but restart every group's accumulated angle. */
-EffBossWork *effBossCloneWithGroups(EffBossWork *src) {
+EffBossWork *effPCPCrack2Copy(EffBossWork *src) {
     EffBossWork *work;
     u32 groupIndex;
 
-    work = effBossCloneWorkAndParameters(src);
+    work = effPCPCrackCopy(src);
     for (groupIndex = 0; groupIndex < work->groupCount; groupIndex++) {
         work->groups[groupIndex].rotationStartAge = src->groups[groupIndex].rotationStartAge;
         work->groups[groupIndex].rotationAngle = 0.0f;
@@ -787,16 +787,16 @@ EffBossWork *effBossCloneWithGroups(EffBossWork *src) {
     return work;
 }
 
-void effBossReleaseWorkCallback(void *work) {
-    effBossDestroy(work);
+void effPCPCrack2Delete(void *work) {
+    effPCPCrackDelete(work);
 }
 
-void effBossUpdateGeometryCallback(void *work) {
-    effBossUpdateGeometry(work);
+void effPCPCrack2Draw(void *work) {
+    effPCPCrackDraw(work);
 }
 
 void effBossSetPositionCallback(void *work, void *position) {
-    effBossSetPosition(work, position);
+    effPCPCrackSetPosition(work, position);
 }
 
 void effBossApplyGroupTint(EffBossWork *work, s32 value) {
@@ -804,7 +804,7 @@ void effBossApplyGroupTint(EffBossWork *work, s32 value) {
 }
 
 /* Create paired four-point chains; the update fills their point vectors. */
-PairedEffectResources *effBossCreatePairedChainResources(PairedEffectParams *src)
+PairedEffectResources *effPCPBossMETATOBeamCreate(PairedEffectParams *src)
 {
     PairedEffectResources *work = sdfChipAllocDirect(sizeof(PairedEffectResources));
     EffThunderGroupParams chain;
@@ -814,18 +814,18 @@ PairedEffectResources *effBossCreatePairedChainResources(PairedEffectParams *src
     work->frame = 0;
     chain.params = work->fragment;
     chain.count = 4;
-    work->resource[0] = effThunderChainGroupCreate(&chain);
-    work->resource[1] = effThunderChainGroupCreate(&chain);
+    work->resource[0] = effPCP_ThunderPolyListCreate(&chain);
+    work->resource[1] = effPCP_ThunderPolyListCreate(&chain);
     return work;
 }
 
-PairedEffectResources *effBossCreatePairedChainsFromTable(void *data) {
+PairedEffectResources *effPCPBossMETATOBeamCreatePCF(void *data) {
     void *work;
 
-    work = effParamTableGetBlock(data, 0);
-    return effBossCreatePairedChainResources(work);
+    work = dds3EffectPCPDataGetData(data, 0);
+    return effPCPBossMETATOBeamCreate(work);
 }
 
-PairedEffectResources *effBossCreatePairedChainsFromParams(void *work) {
-    return effBossCreatePairedChainResources(work);
+PairedEffectResources *effPCPBossMETATOBeamCopy(void *work) {
+    return effPCPBossMETATOBeamCreate(work);
 }

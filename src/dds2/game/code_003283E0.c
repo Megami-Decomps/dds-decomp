@@ -11,32 +11,32 @@ extern s32 DisableIntc(s32);
 extern void (*sdfTickCallback)(void);
 
 
-void *sdfAllocateBlockBySizeThreshold(s32 size) {
+void *sdfAllocAuto(s32 size) {
     if (size >= 0x401) {
         return (void *)sdfMemLock(sdfMemAllocDirect(size));
     }
     return sdfChipAllocDirect(size);
 }
 
-extern void sdfMemFreeHandleDirect(void *);
+extern void sdfMemFreePtrDirect(void *);
 
-void sdfFreeMemoryFromEitherHeap(void *allocation) {
+void sdfFreeAuto(void *allocation) {
     if (allocation != NULL) {
-        if (sdfChipIsInRange((s32)allocation)) {
+        if (sdfChipCheck((s32)allocation)) {
             sdfChipFreeDirect(allocation);
             return;
         }
-        sdfMemFreeHandleDirect(allocation);
+        sdfMemFreePtrDirect(allocation);
     }
 }
 
-void sdfReleaseChipOrRetainedResource(void *allocation) {
+void sdfFreeAutoDelayed(void *allocation) {
     if (allocation != NULL) {
-        if (sdfChipIsInRange((s32)allocation)) {
-            sdfQueuePendingChipRelease(allocation);
+        if (sdfChipCheck((s32)allocation)) {
+            sdfChipFreeDelayedDirect(allocation);
             return;
         }
-        sdfMemFreeDelayedDirect(sdfFindGeneralBlockByAddress(allocation));
+        sdfMemFreeDelayedDirect(sdfMemGetHandleByPtr(allocation));
     }
 }
 
@@ -44,20 +44,20 @@ void sdfFreeMemorySlotFromEitherHeap(void **slot) {
     void *allocation = *slot;
     if (allocation != NULL) {
         *slot = NULL;
-        if (sdfChipIsInRange((s32)allocation)) {
+        if (sdfChipCheck((s32)allocation)) {
             sdfChipFreeDirect(allocation);
             return;
         }
-        sdfMemFreeHandleDirect(allocation);
+        sdfMemFreePtrDirect(allocation);
     }
 }
 
-void sdfPanicHaltPrintf(const char *format, ...) {
+void FatalError(const char *format, ...) {
     for (;;) {
     }
 }
 
-extern void sdfPanicHaltPrintf(const char *format, ...) __attribute__((noreturn));
+extern void FatalError(const char *format, ...) __attribute__((noreturn));
 extern s32 AddIntcHandler2(s32, s32, s32, s32);
 extern s32 AddDmacHandler2(s32, s32, s32, s32);
 
@@ -76,10 +76,10 @@ SdfHandlerNode *sdfAddHandler(s32 kind, s32 channel, s32 handler, s32 arg, s32 n
         id = AddSbusIntcHandler(channel, handler);
         break;
     default:
-        sdfPanicHaltPrintf("sdfAddHandler : unknown type %d\n", kind);
+        FatalError("sdfAddHandler : unknown type %d\n", kind);
         break;
     }
-    node = sdfAllocateBlockBySizeThreshold(sizeof(*node));
+    node = sdfAllocAuto(sizeof(*node));
     node->handlerKind = kind;
     node->channel = channel;
     node->handlerId = id;
@@ -88,7 +88,7 @@ SdfHandlerNode *sdfAddHandler(s32 kind, s32 channel, s32 handler, s32 arg, s32 n
     return node;
 }
 
-void sdfRemoveHandler(SdfHandlerNode *target) {
+void sdfIpuRemoveHandler(SdfHandlerNode *target) {
     SdfHandlerNode **link = &sdfHandlerNodeListHead;
     SdfHandlerNode *node = *link;
 
@@ -107,7 +107,7 @@ void sdfRemoveHandler(SdfHandlerNode *target) {
                 RemoveSbusIntcHandler(node->channel);
                 break;
             }
-            sdfFreeMemoryFromEitherHeap(target);
+            sdfFreeAuto(target);
             return;
         }
         /* Non-head handles are followed through their own link. */
@@ -119,6 +119,6 @@ void sdfRemoveHandler(SdfHandlerNode *target) {
 void sdfDrainPendingHandlers(void) {
     SdfHandlerNode *current;
     while ((current = sdfHandlerNodeListHead) != 0) {
-        sdfRemoveHandler(current);
+        sdfIpuRemoveHandler(current);
     }
 }

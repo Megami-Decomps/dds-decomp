@@ -143,9 +143,9 @@ typedef char SdfTexResource_size_must_be_0x1C[
     (sizeof(SdfTexResource) == 0x1C) ? 1 : -1];
 /* Allocate a low-VRAM image block and record its logical dimensions and format.
  * The caller owns the returned block and releases it with the masked updater below. */
-SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
+SdfTexResource *sdfGsAllocFrameBuff(s32 width, s32 height, s32 format);
 /* Return a VRAM block to the free list and coalesce neighbors with interrupts masked; NULL is a no-op. */
-void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
+void sdfGsMemFree(SdfTexResource *textureBlock);
 /* IPU register state saved across stream callbacks (0x24 bytes). */
 typedef struct IpuDmaState {
     u32 inputAddress;
@@ -264,11 +264,11 @@ typedef char SdfStreamFrameNode_readContext_offset_must_be_0x60[
 
 typedef s32 (*SdfStreamRead)(SdfStreamFrameNode *, struct MovObj *, s32, void *, s32);
 
-void sdfBuildStreamInputDmaChain(SdfStreamFrameNode *, u8 *, s32);
-void sdfSoundInitFormattedNode(SdfStreamFrameNode *node, struct SoundFormat *format, SdfStreamRead read, struct MovObj *readContext);
+void sdfIpuMakeToIpuDmaTag(SdfStreamFrameNode *, u8 *, s32);
+void sdfIpuStrmDecodeInit(SdfStreamFrameNode *node, struct SoundFormat *format, SdfStreamRead read, struct MovObj *readContext);
 void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, struct SoundFormat *format, SdfStreamRead read, struct MovObj *readContext, s32 resource);
-s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *node, struct MovObj *movie, s32 operation, void *dataBuffer, s32 byteCount);
-s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *node, struct MovObj *movie, s32 operation, void *dataBuffer, s32 byteCount);
+s32 movieCopyChunk(SdfStreamFrameNode *node, struct MovObj *movie, s32 operation, void *dataBuffer, s32 byteCount);
+s32 movieParseHeader(SdfStreamFrameNode *node, struct MovObj *movie, s32 operation, void *dataBuffer, s32 byteCount);
 void sdfAdvanceStreamPlayback(s32 cadence);
 /* Store the stream-frame draw-path word unchanged; 1 selects the alternate path. */
 void sdfSetStreamFrameDrawMode(u32 mode);
@@ -332,8 +332,8 @@ typedef char MovObj_size_must_be_0xB0[
 typedef char MovObj_stream_offset_must_be_0x1C[
     ((u32)&((MovObj *)0)->stream == 0x1C) ? 1 : -1];
 
-void sdfMovieInitializeStreamWork(MovObj *, SdfMovieDescriptor *, const char *);
-void sdfCancelAndReleaseMovieStreamWork(MovObj *);
+void movieOpenStream(MovObj *, SdfMovieDescriptor *, const char *);
+void movieCloseStream(MovObj *);
 
 /* Graph target: two color buffers followed by the auxiliary/depth buffer (0x14). */
 typedef struct SdfGraphObj {
@@ -381,7 +381,7 @@ typedef struct SdfTex {
     SdfTexBuf *primaryBuffer;
     SdfTexBuf *secondaryBuffer;
     u8 *paletteData; /* 0x30: retained copy of the texture's palette colors. */
-    s32 paletteDataSize; /* 0x34: palette byte count from sdfTexGetPaletteByteSize. */
+    s32 paletteDataSize; /* 0x34: palette byte count from sdfTexGetClutDataSize. */
     s32 unk38;
     u8 *intensityMap; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
 } SdfTex;
@@ -399,16 +399,16 @@ void sdfTexReleaseReference(SdfTex *texture);
 void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 /* Texture resource accessors and palette helpers shared by both title providers. */
-u8 sdfTexGetPaletteCount(SdfTex *texture);
-u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
-u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
-s32 sdfTexFormatSizeHint(s32 format);
-void sdfTexAllocatePaletteData(SdfTex *texture);
+u8 sdfTexGetCLUTCount(SdfTex *texture);
+u32 sdfTexGetPixelAddr(SdfTex *texture);
+u32 sdfTexGetCLUTAddr(SdfTex *texture);
+s32 sdfTexGetTexelBitCount(s32 format);
+void sdfTexAllocClutBuff(SdfTex *texture);
 
 /* Return packed 64-bit TEX0, TEX1, and CLAMP states from the primary GS packet. */
-u64 sdfTexGetPrimaryTextureState(SdfTex *texture);
-u64 sdfTexGetPrimarySamplingState(SdfTex *texture);
-u64 sdfTexGetPrimaryClampState(SdfTex *texture);
+u64 sdfTexGetTex0Reg(SdfTex *texture);
+u64 sdfTexGetTex1Reg(SdfTex *texture);
+u64 sdfTexGetClampReg(SdfTex *texture);
 
 /* Semaphore ID and attached work pointers (0x14); DDS1/2 game/code_002D10B0/00329F60.c. */
 

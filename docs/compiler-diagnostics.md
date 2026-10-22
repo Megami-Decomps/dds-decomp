@@ -22,8 +22,8 @@ review while the tool still indexes real definitions across that title. Use
 
 ```sh
 python3 tools/ee_gcc_contracts.py src/dds1/script/scrScriptProcess.c \
-  --symbol sdfReadNamedResource
-python3 tools/ee_gcc_contracts.py --version dds1 --symbol sdfReadNamedResource
+  --symbol sdfDevLoadFileEx
+python3 tools/ee_gcc_contracts.py --version dds1 --symbol sdfDevLoadFileEx
 python3 tools/ee_gcc_contracts.py --json /tmp/contracts.json
 ```
 

@@ -57,9 +57,9 @@
 extern void effLoadFlashTextures(void);
 extern void effLoadScalyTexture(void);
 extern void effLoadWindTexture(void);
-extern s32 fileBeginRequest(char *fileName, void *dataAddressSlot, void *dataSizeSlot, void *continuation, void *pendingRequestStatus);
-extern void fileClearMemoryCardOperationActive(void);
-extern s32 fileCreateMainBegin(void);
+extern s32 slSaveWriteFile(char *fileName, void *dataAddressSlot, void *dataSizeSlot, void *continuation, void *pendingRequestStatus);
+extern void dds3SoftResetOn(void);
+extern s32 slSaveData_chdir(void);
 extern void frEnableMode(s32 mask);
 extern u8 frDisableMode(u8 mask);
 extern void frSetFontDrawOT(u32 renderFlags);
@@ -125,7 +125,7 @@ extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
 #include "fpu.h"
 struct MenuListNode;
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
-extern void kwlnFadeInStart(s32 red, s32 green, s32 blue, s32 duration);
+extern void dds3FadeOut(s32 red, s32 green, s32 blue, s32 duration);
 
 struct SdfMemBlock;
 
@@ -219,13 +219,13 @@ extern s32 fileSlotSelectPoll(void);
 
 extern s32 fileBeginSlotMetadataRefresh(void);
 
-extern s32 fileStartMemoryCardFormat(void);
+extern s32 slFormatStart(void);
 
 extern s32 mcResetSlotMetadata(void);
 
 extern s32 filePollSlotDetectionAndBranch(void);
 
-extern s32 fileIsCardSpaceAboveMinimum(void);
+extern s32 slSizeChk(void);
 
 extern u32 fileMenuContinuation;
 
@@ -239,18 +239,18 @@ extern s32 fileSlotScanIndex;
 
 extern void mcdFormatSaveSlotName(void *buffer, s32 slot);
 
-extern s32 fileScanSlotIconSysBegin(void);
+extern s32 slChooseData_getCardInfo2(void);
 
-extern s32 fileScanSlotIconSysAltBegin(void);
+extern s32 slChooseData_getCardInfo2_B(void);
 
 extern s32 filePrepareMainBlobWrite(void);
 
 extern s32 fileOnAllWritten(void);
 
-extern void fileSetMemoryCardOperationActive(void);
+extern void dds3SoftResetOff(void);
 extern s8 kwlnTaskPadButtonStates[];
-extern void sndReleaseTrackHandle(s32 command);
-extern s32 fileBeginWait(void *callback);
+extern void p2sdStopBGM(s32 command);
+extern s32 slExitWait(void *callback);
 
 extern s32 mcHandleDetectionResult(void);
 
@@ -306,7 +306,7 @@ extern s8 fileSavePreviewVersionByteView[];
 
 extern s32 (*fileMenuStateHandler)();
 
-extern void evtSetDrawSurfaceIndex(u32);
+extern void eglSetOt(u32);
 
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 
@@ -321,19 +321,19 @@ extern void fileDrawCursorPulse(s32, s32, s32);
 extern s32 D_00437D78;
 
 extern s32 fileReadSlotPreviewBegin(void);
-extern void mcReadOpenFile(s32, u32, s32);
-extern s32 mcHandleSetupResult(void);
+extern void sdfMcFuncRead(s32, u32, s32);
+extern s32 slLoadProc_readFile(void);
 extern s32 fileSaveFileDescriptor;
 extern struct SdfMemBlock *fileSaveReadBufferResource;
-extern s32 fileReadSlotPreviewWait(void);
+extern s32 slHeadLoadProc_readFile(void);
 
 extern s32 fileBeginReadRemainingSlotIcons(void);
 
-extern s32 fileBeginSlotOpen(void);
+extern s32 slHeadLoad(void);
 
 extern s32 fileSlotSelectPollClear(void);
 
-extern s32 fileRestartSlotSelection(void);
+extern s32 slBootRetry(void);
 
 extern s32 fileSlotStatusPoll(void);
 
@@ -344,24 +344,24 @@ extern u32 fileSlotDisplayStates[16];
 
 extern void *fileWaitContinuation;
 
-extern s32 fileUpdateWait(void);
+extern s32 slExitWaitProc(void);
 
-extern s32 mcHandleSlotWriteResult(void);
+extern s32 slChooseData_getCardInfo3(void);
 
 
-extern s32 fileBeginSlotPromptFive(void);
+extern s32 slBootError(void);
 
 extern s32 fileScanSlotStatesAdvance(void);
 
-extern s32 mcHandleDirectoryWriteResult(void);
+extern s32 slChooseData_getCardInfo3_B(void);
 
-extern s32 mcPrepareDirectory(void);
+extern s32 slSaveData(void);
 
-extern s32 mcHandleSearchResult(void);
+extern s32 slSaveProc_Write_mkdir(void);
 
 extern s32 fileScanSlotStates(void);
 
-extern s32 fileLoadMainBlobBegin(void);
+extern s32 slLoadProc_openFile(void);
 
 
 
@@ -413,19 +413,19 @@ extern void fileQueueInitTransform(void *queue);
 extern FileJob *fileJobCreate(void);
 
 
-extern s32 fileBeginSlotResetPrompt(void);
+extern s32 slEndingExit(void);
 
-extern s32 fileBeginSlotReset(void);
+extern s32 slEndingTop(void);
 
 extern s32 D_00437D30;
 
-extern s32 fileBeginPromptDialog(void *start, void *finish, s32 mode);
+extern s32 slQueryYesNo(void *start, void *finish, s32 mode);
 
-extern s32 fileBeginDirectoryScan(void);
+extern s32 slEndingUpd2(void);
 
 extern char D_0042B698[];
 
-extern s32 fileAbortSlotScanOnInput(void);
+extern s32 slErrorWait(void);
 
 
 extern char D_0042B6B8[];
@@ -434,7 +434,7 @@ extern sceMcTblGetDir fileDirectoryEntryScratch[];
 
 extern s32 mcClearSlotMetadata(void);
 
-extern s32 mcChooseLoadPath(void);
+extern s32 slSaveData_deleteIconSys(void);
 
 extern s32 fileSelectedSlotIndex;
 
@@ -442,7 +442,7 @@ extern s32 fileBuildMainBlobAfterDelete(void);
 
 extern s32 fileBuildMainBlobAndWrite(void);
 
-extern s32 mnuSelectFileBranch(void);
+extern s32 slFormatCancel(void);
 
 extern u32 D_00437D0C;
 
@@ -473,13 +473,13 @@ extern char D_00437E18[];
 
 extern char D_00437E20[];
 
-extern char *sdfDevGetPathBuffer(void);
+extern char *sdfFileGetHostRoot(void);
 
 
 
 
 
-void fileDestroyMenuTask(void) {
+void slKillLoadProcess(void) {
     if (D_00437CD8 != 0) {
         dds3KillProcess((KwlnTask *)D_00437CD8, 1);
         D_00437CD8 = 0;
@@ -549,9 +549,9 @@ void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {
     frEnableMode(1);
     fileMenuStringGlyph = frFontBuildGlyphChain((const char *)(u32)glyphSource, 0, 0, 0, 0);
     frDisableMode(1);
-    frFontSetSpacingAndMeasureGlyphs(fileMenuStringGlyph, 1);
-    frFontSetGlyphPosition(fileMenuStringGlyph, x << 4, y << 3);
-    frFontSetChildColors(fileMenuStringGlyph, colors);
+    frSetFontSpace(fileMenuStringGlyph, 1);
+    frSetDrawPosition(fileMenuStringGlyph, x << 4, y << 3);
+    frSetFontColor(fileMenuStringGlyph, colors);
     frFontDrawGlyphChain(fileMenuStringGlyph, 0, 0x56);
     frDestroyFontRequestAfter(fileMenuStringGlyph);
     frSetFontDrawOT(0x54);
@@ -570,13 +570,13 @@ void fileDrawPulsingSaveHighlight(void) {
     s32 angle;
     f32 wave;
 
-    evtSetDrawSurfaceIndex(0x56);
+    eglSetOt(0x56);
     evtSubmitPrimaryAlphaBlendMode(0);
     fileSaveHighlightPhase = fileSaveHighlightPhase + 0.39999998f;
-    sdfSinPoly(fileSaveHighlightPhase);
+    sdfSin(fileSaveHighlightPhase);
     angle = ((s32)D_003E8008[2] + 8) % 360;
     D_003E8008[2] = angle;
-    wave = sdfSinPoly((f32)((angle + 0x5A) % 360) / 180.0f * 3.1415899f);
+    wave = sdfSin((f32)((angle + 0x5A) % 360) / 180.0f * 3.1415899f);
     D_003E8008[3] = (s32)((wave + 1.0f) * 0.5f * 191.0f + 64.0f);
     evtSubmitTexturedGradientQuad(0x1BE, 0x12C, 0x13, 0x1F, 1, 1, 0x13, 0x1F, (D_003E8008[3] << 24) | 0xAEC014,
                   (D_003E8008[3] << 24) | 0xAEC014, (D_003E8008[3] << 24) | 0xAEC014,
@@ -584,7 +584,7 @@ void fileDrawPulsingSaveHighlight(void) {
 }
 
 void fileDrawSaveWindow(void) {
-    evtSetDrawSurfaceIndex(0x56);
+    eglSetOt(0x56);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitTexturedGradientQuad(0x112, 0x113, 0x98, 0x34, 0x14A, 0x1C5, 0x98, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00437D78));
     evtSubmitTexturedGradientQuad(0x56, 0x113, 0xBC, 0x34, 0x14A, 0x1C5, 1, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00437D78));
@@ -593,7 +593,7 @@ void fileDrawSaveWindow(void) {
     D_00437D44++;
 }
 
-s32 fileIsLoadStepComplete(void) {
+s32 slChkWindowOpenDone(void) {
     if (D_00437D48 < 7) {
         return 0;
     }
@@ -606,7 +606,7 @@ s32 fileDrawFileMenuPromptAndCheckDelay(void) {
     s32 height;
     s32 value;
 
-    evtSetDrawSurfaceIndex(0x56);
+    eglSetOt(0x56);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 128, 3, 0, 0, 1, 1);
     if (D_00437D48 < 32) {
@@ -630,7 +630,7 @@ s32 fileDrawFileMenuPromptAndCheckDelay(void) {
                  (((value << 7) / 100) << 24) | 0xA1000,
                  (((value << 7) / 100) << 24) | 0xA1000,
                  (((value << 7) / 100) << 24) | 0xA1000);
-    evtSetDrawSurfaceIndex(0x53);
+    eglSetOt(0x53);
     if (D_00437D48 < 7) {
         return 0;
     }
@@ -766,7 +766,7 @@ void fileDrawMemoryCardFlowPrompt(void) {
 }
 
 
-void fileSetMenuFlowState(u32 value) {
+void slSetInfo(u32 value) {
     s32 previous;
 
     previous = D_00437D38;
@@ -903,7 +903,7 @@ void fileClearAllSlotFlags(void) {
     fileReqClearSlotFlags(fileMemoryCardRequestIndex, 9);
 }
 
-s32 fileBeginSlotOpen(void) {
+s32 slHeadLoad(void) {
     char path[0x50];
     u32 ctx;
     s32 slot;
@@ -921,12 +921,12 @@ s32 fileBeginSlotOpen(void) {
     path[len + 1] = 0x2F;
     memcpy(&path[len + 2], &path[1], len);
     path[len * 2 + 2] = 0;
-    mcOpenFilePath(ctx, path, 1);
+    sdfMcFuncOpen(ctx, path, 1);
     return (s32)fileReadSlotPreviewBegin;
 }
 
 s32 fileReadSlotPreviewBegin(void) {
-    McPollResult status = mcPollCommandStatusWithResult(&fileSaveFileDescriptor);
+    McPollResult status = sdfMcFuncOpen1(&fileSaveFileDescriptor);
 
     if (status == MC_POLL_PENDING) {
         return 0;
@@ -934,23 +934,23 @@ s32 fileReadSlotPreviewBegin(void) {
     if (status == MC_POLL_SUCCESS) {
         fileSaveReadBufferResource = sdfMemAllocDirect(0x30);
         fileSaveReadBuffer = (void *)(u32)sdfMemLock(fileSaveReadBufferResource);
-        mcReadOpenFile(fileSaveFileDescriptor, (u32)fileSaveReadBuffer, 0x30);
-        return (s32)fileReadSlotPreviewWait;
+        sdfMcFuncRead(fileSaveFileDescriptor, (u32)fileSaveReadBuffer, 0x30);
+        return (s32)slHeadLoadProc_readFile;
     }
     return fileBeginSlotMetadataRefresh();
 }
 
-extern void mcCloseOpenFile(u32);
+extern void sdfMcFuncClose(u32);
 extern s32 fileStoreSlotHeader(void);
 
-s32 fileReadSlotPreviewWait(void) {
-    McPollResult r = mcPollCompletionStatus();
+s32 slHeadLoadProc_readFile(void) {
+    McPollResult r = sdfMcFuncRead1();
 
     if (r == MC_POLL_PENDING) {
         return 0;
     }
     if (r == MC_POLL_SUCCESS) {
-        mcCloseOpenFile(fileSaveFileDescriptor);
+        sdfMcFuncClose(fileSaveFileDescriptor);
         return (s32)fileStoreSlotHeader;
     }
     sdfMemFreeDirect(fileSaveReadBufferResource);
@@ -961,7 +961,7 @@ s32 fileReadSlotPreviewWait(void) {
 extern FileSavePreviewRecord fileSavePreviewRecords[10];
 
 s32 fileStoreSlotHeader(void) {
-    McPollResult status = mcPollZeroCommandResult();
+    McPollResult status = sdfMcFuncClose1();
 
     if (status == MC_POLL_PENDING) {
         return 0;
@@ -975,73 +975,73 @@ s32 fileStoreSlotHeader(void) {
     return fileBeginSlotMetadataRefresh();
 }
 
-s32 fileBeginWait(void *callback) {
-    kwlnFadeInStart(0, 0, 0, 15);
+s32 slExitWait(void *callback) {
+    dds3FadeOut(0, 0, 0, 15);
     fileWaitContinuation = callback;
     fileWaitTicksRemaining = 0x14;
-    return (s32)fileUpdateWait;
+    return (s32)slExitWaitProc;
 }
 
-s32 fileBeginSlotReset(void) {
+s32 slEndingTop(void) {
     D_00437D30 = 0;
-    fileSetMenuFlowState(0);
+    slSetInfo(0);
     D_00437D3C = 0;
     D_00437D1C = 4;
     D_00437CF8 = 0;
-    return fileBeginPromptDialog(&fileResetSelection, &fileBeginSlotResetPrompt, 0);
+    return slQueryYesNo(&fileResetSelection, &slEndingExit, 0);
 }
 
-s32 fileBeginDirectoryScan(void) {
-    fileSetMenuFlowState(0);
+s32 slEndingUpd2(void) {
+    slSetInfo(0);
     D_00437D3C = 0;
     D_00437D1C = 9;
-    return fileBeginPromptDialog(&mcPrepareDirectory, &fileScanSlotStates, 1);
+    return slQueryYesNo(&slSaveData, &fileScanSlotStates, 1);
 }
 
 extern s32 fileRequestDefaultMode(void);
 
-s32 fileBeginSlotResetPrompt(void) {
-    fileSetMenuFlowState(0);
+s32 slEndingExit(void) {
+    slSetInfo(0);
     D_00437D3C = 0;
     D_00437D1C = 8;
     D_00437CF8 = 0;
-    return fileBeginPromptDialog(&fileRequestDefaultMode, &fileBeginSlotReset, 1);
+    return slQueryYesNo(&fileRequestDefaultMode, &slEndingTop, 1);
 }
 
-s32 fileReturnToSlotSelection(void) {
-    fileSetMenuFlowState(0);
+s32 slBootTop(void) {
+    slSetInfo(0);
     D_00437CF8 = 0;
     return (s32)fileSlotSelectPoll;
 }
 
-s32 fileRestartSlotSelection(void) {
+s32 slBootRetry(void) {
     fileReqBegin(0);
     fileSlotSelectionPollCount = 30;
     D_00437CEC = 1;
-    fileSetMenuFlowState(1);
+    slSetInfo(1);
     D_00437CF8 = 1;
     return (s32)fileSlotSelectPollClear;
 }
 
-s32 fileBeginSlotPromptFive(void) {
+s32 slBootError(void) {
     D_00437CF4 = 1;
-    fileSetMenuFlowState(0);
+    slSetInfo(0);
     D_00437D1C = 5;
-    return fileBeginPromptDialog(&fileRequestDefaultMode, &fileRestartSlotSelection, 1);
+    return slQueryYesNo(&fileRequestDefaultMode, &slBootRetry, 1);
 }
 
 extern s32 fileRequestDefaultMode(void);
 
-s32 fileBeginSlotPromptSix(void) {
+s32 slBootError2(void) {
     D_00437CF4 = 1;
-    fileSetMenuFlowState(0);
+    slSetInfo(0);
     D_00437D1C = 6;
-    return fileBeginPromptDialog(&fileRequestDefaultMode, &fileRestartSlotSelection, 1);
+    return slQueryYesNo(&fileRequestDefaultMode, &slBootRetry, 1);
 }
 
 s32 fileBeginSlotMetadataRefresh(void) {
     fileClearAllSlotFlags();
-    fileSetMenuFlowState(0);
+    slSetInfo(0);
     D_00437D3C = 1;
     D_00437D40 = 0;
     fileReqBegin(fileMemoryCardRequestIndex);
@@ -1063,16 +1063,16 @@ s32 fileResetSelection(void) {
     fileReqBegin(0);
     fileSlotSelectionPollCount = 15;
     D_00437CEC = 1;
-    fileSetMenuFlowState(1);
+    slSetInfo(1);
     D_00437CF8 = 1;
     return (s32)fileSlotStatusPoll;
 }
-extern void dds3AdminSubmitModeRequest(s32, const s32 *, s32, s32);
+extern void dds3AdminiCallSequence(s32, const s32 *, s32, s32);
 extern s32 fileMenuWorkStart(void);
 
 
-s32 fileAbortSlotFlow(void) {
-    fileSetMenuFlowState(0);
+s32 slExit(void) {
+    slSetInfo(0);
     D_00437CF8 = 0;
     D_00437CF4 = 0;
     return 0xffffffff;
@@ -1083,7 +1083,7 @@ s32 mcdEnterDefaultFileFlow(void) {
     if (mcdOriginalTitleFileMode != 0) {
         return (s32)fileMenuWorkStart;
     }
-    dds3AdminSubmitModeRequest(2, &mode, 4, 0);
+    dds3AdminiCallSequence(2, &mode, 4, 0);
     return 0;
 }
 
@@ -1097,13 +1097,13 @@ s32 mcdEnterSelectedFileFlow(void) {
     if (mcdOriginalTitleFileMode != 0) {
         return (s32)fileMenuWorkStart;
     }
-    dds3AdminSubmitModeRequest(2, &mode, 4, 0);
+    dds3AdminiCallSequence(2, &mode, 4, 0);
     return 0;
 }
 
 s32 fileRestartSlotScan(void) {
     fileClearAllSlotFlags();
-    fileSetMenuFlowState(1);
+    slSetInfo(1);
     D_00437D3C = 0;
     D_00437CF8 = 0;
     return fileResetSelection();
@@ -1138,12 +1138,12 @@ s32 fileScanSlotStates(void) {
     return (s32)fileSlotBrowserUpdate;
 }
 
-s32 fileResolveAbortSlotFlow(void) {
+s32 slCancel(void) {
     if (D_00437D30 == 1 && dds3SearchProcessName(D_0042B698) == NULL) {
         return mcdEnterSelectedFileFlow();
     }
-    fileSetMenuFlowState(0);
-    return fileBeginWait(&fileAbortSlotFlow);
+    slSetInfo(0);
+    return slExitWait(&slExit);
 }
 
 extern struct SdfMemBlock *fileSaveIconResourceHandle;
@@ -1152,7 +1152,7 @@ extern char D_0042B6A8[];
 
 s32 fileLoadIconFileAndResetSelection(void) {
     fileSaveIconResourceHandle = 0;
-    fileSaveIconRequest = (u32)fileQueueDefaultCallbackRequest(D_0042B6A8);
+    fileSaveIconRequest = (u32)fileLoad(D_0042B6A8);
     return fileResetSelection();
 }
 
@@ -1162,17 +1162,17 @@ s32 fileResetSlotSelection(void) {
 
 s32 fileLoadIconFileAndBeginSlotReset(void) {
     fileSaveIconResourceHandle = 0;
-    fileSaveIconRequest = (u32)fileQueueDefaultCallbackRequest(D_0042B6A8);
-    return fileBeginSlotReset();
+    fileSaveIconRequest = (u32)fileLoad(D_0042B6A8);
+    return slEndingTop();
 }
 
-s32 fileResetSlotPollState(void) {
+s32 slBootProc1st(void) {
     fileReqBegin(0);
     D_00437CEC = 1;
     fileSlotSelectionPollCount = 0;
-    fileSetMenuFlowState(0);
+    slSetInfo(0);
     D_00437CF8 = 0;
-    return fileReturnToSlotSelection();
+    return slBootTop();
 }
 
 s32 fileSlotStatusPoll(void) {
@@ -1193,19 +1193,19 @@ s32 fileSlotStatusPoll(void) {
     case 2:
         if (D_00437D30 == 0) {
             fileClearAllSlotFlags();
-            fileSetMenuFlowState(0);
+            slSetInfo(0);
             D_00437D3C = 0;
             D_00437D1C = 2;
-            return fileBeginPromptDialog(fileStartMemoryCardFormat, mnuSelectFileBranch, 1);
+            return slQueryYesNo(slFormatStart, slFormatCancel, 1);
         }
-        fileSetMenuFlowState(0);
+        slSetInfo(0);
         D_00437D3C = 7;
         D_00437D40 = 0;
         fileReqBegin(fileMemoryCardRequestIndex);
         return (s32)filePollSlotDetectionAndBranch;
     case 3:
         fileClearAllSlotFlags();
-        fileSetMenuFlowState(0);
+        slSetInfo(0);
         D_00437D3C = 2;
         D_00437D40 = 0;
         fileReqBegin(fileMemoryCardRequestIndex);
@@ -1233,14 +1233,14 @@ s32 fileCountSelectableFiles(void) {
     return count;
 }
 
-s32 fileIsCardSpaceAboveMinimum(void) {
+s32 slSizeChk(void) {
     return fileReqGetSize(fileMemoryCardRequestIndex) > 0x2A7FF;
 }
 
-extern s32 fileBeginSlotPromptFive(void);
+extern s32 slBootError(void);
 extern s32 fileRequestDefaultMode(void);
-extern s32 fileIsCardSpaceAboveMinimum(void);
-extern s32 fileRestartSlotSelection(void);
+extern s32 slSizeChk(void);
+extern s32 slBootRetry(void);
 
 s32 fileSlotSelectPoll(void) {
     s32 result = fileReqPoll();
@@ -1256,22 +1256,22 @@ s32 fileSlotSelectPoll(void) {
     switch (fileReqGetStatus(fileMemoryCardRequestIndex)) {
     case 0:
     case 3:
-        return fileBeginSlotPromptFive();
+        return slBootError();
     case 2:
         return (s32)fileRequestDefaultMode();
     case 1:
-        if (fileIsCardSpaceAboveMinimum() != 0) {
+        if (slSizeChk() != 0) {
             return (s32)fileRequestDefaultMode();
         }
-        return (s32)fileRestartSlotSelection();
+        return (s32)slBootRetry();
     default:
         return 0;
     }
 }
 
-extern s32 fileBeginSlotPromptFive(void);
+extern s32 slBootError(void);
 extern s32 fileRequestDefaultMode(void);
-extern s32 fileIsCardSpaceAboveMinimum(void);
+extern s32 slSizeChk(void);
 
 s32 fileSlotSelectPollClear(void) {
     if (fileReqPoll() == 0) {
@@ -1285,11 +1285,11 @@ s32 fileSlotSelectPollClear(void) {
     switch (fileReqGetStatus(fileMemoryCardRequestIndex)) {
     case 0:
     case 3:
-        return fileBeginSlotPromptFive();
+        return slBootError();
     case 2:
         return fileRequestDefaultMode();
     case 1:
-        if (fileIsCardSpaceAboveMinimum() != 0) {
+        if (slSizeChk() != 0) {
             return fileRequestDefaultMode();
         }
         return mcClearSlotMetadata();
@@ -1305,7 +1305,7 @@ s32 filePollSlotDetectionAndBranch(void) {
     if (D_00437D40 == 0) {
         if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) ||
             fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0)) {
-            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+            p2sdPlaySE(0xA, 0x7F, 0x3F);
             D_00437D40 = 1;
         }
     }
@@ -1314,10 +1314,10 @@ s32 filePollSlotDetectionAndBranch(void) {
             D_00437D3C = 0;
             D_00437CF8 = 0;
             if (D_00437D0C != 0) {
-                return fileBeginSlotResetPrompt();
+                return slEndingExit();
             }
             if (D_00437D30 == 0) {
-                return fileBeginWait(&fileAbortSlotFlow);
+                return slExitWait(&slExit);
             }
             return mcdEnterSelectedFileFlow();
         }
@@ -1326,7 +1326,7 @@ s32 filePollSlotDetectionAndBranch(void) {
         case 1:
             if (D_00437D3C == 1) {
                 fileClearAllSlotFlags();
-                fileSetMenuFlowState(1);
+                slSetInfo(1);
                 D_00437D3C = 0;
                 D_00437CF8 = 0;
                 return fileResetSelection();
@@ -1346,7 +1346,7 @@ s32 filePollSlotDetectionAndBranch(void) {
                 fileClearAllSlotFlags();
                 D_00437D3C = 0;
                 D_00437D1C = 2;
-                return fileBeginPromptDialog(&fileStartMemoryCardFormat, &mnuSelectFileBranch, 1);
+                return slQueryYesNo(&slFormatStart, &slFormatCancel, 1);
             }
             if (D_00437D3C != 7) {
                 fileClearAllSlotFlags();
@@ -1368,11 +1368,11 @@ s32 filePollSlotDetectionAndBranch(void) {
     return 0;
 }
 
-s32 filePollSlotScanOrReset(void) {
+s32 slErrorWaitToFileMc(void) {
     if (D_00437D40 == 0) {
         if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) ||
             fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0)) {
-            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            p2sdPlaySE(8, 0x7F, 0x3F);
             D_00437D40 = 1;
         }
     }
@@ -1391,10 +1391,10 @@ s32 filePollSlotScanOrReset(void) {
     return 0;
 }
 
-s32 fileAbortSlotScanOnInput(void) {
+s32 slErrorWait(void) {
     if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) ||
         fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0)) {
-        sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+        p2sdPlaySE(8, 0x7F, 0x3F);
         D_00437D3C = 0;
         D_00437CF8 = 0;
         return fileResetSelection();
@@ -1402,7 +1402,7 @@ s32 fileAbortSlotScanOnInput(void) {
     return 0;
 }
 
-s32 fileUpdateWait(void) {
+s32 slExitWaitProc(void) {
     s32 remaining = fileWaitTicksRemaining - 1;
     fileWaitTicksRemaining = remaining;
     if (remaining <= 0) {
@@ -1422,14 +1422,14 @@ s32 fileSetMenuCallbackAndClearResult(u32 menuCallback) {
 s32 mcdFinishFileDetection(void) {
     if (fileIsLoadedAndConditionTrue((u32)kwlnTaskPadButtonStates[0x21] >> 31) ||
         fileIsLoadedAndConditionTrue((u32)kwlnTaskPadButtonStates[0x23] >> 31)) {
-        fileSetMenuFlowState(0);
+        slSetInfo(0);
         D_00437D3C = 0;
         D_00437CF8 = 0;
         if (mcdOriginalTitleFileMode == 0) {
-            sndReleaseTrackHandle(0x310000);
+            p2sdStopBGM(0x310000);
         }
         if (fileMenuContinuation == (u32)-1) {
-            return fileBeginWait((void *)-1);
+            return slExitWait((void *)-1);
         }
         return ((s32 (*)())fileMenuContinuation)();
     }
@@ -1449,17 +1449,17 @@ s32 filePollSlotRequestAndResumeFlow(void) {
     if (D_00437D40 == 0) {
         if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) ||
             fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0)) {
-            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            p2sdPlaySE(8, 0x7F, 0x3F);
             D_00437D40 = 1;
         }
     }
     if (fileReqPoll() != 0) {
         if (D_00437D40 == 1) {
-            fileSetMenuFlowState(0);
+            slSetInfo(0);
             D_00437D3C = 0;
             D_00437CF8 = 0;
             if (fileMenuContinuation == -1) {
-                return fileBeginWait((void *)-1);
+                return slExitWait((void *)-1);
             }
             return ((s32 (*)())fileMenuContinuation)();
         }
@@ -1468,7 +1468,7 @@ s32 filePollSlotRequestAndResumeFlow(void) {
         case 1:
             if (D_00437D3C == 1) {
                 fileClearAllSlotFlags();
-                fileSetMenuFlowState(1);
+                slSetInfo(1);
                 D_00437D3C = 0;
                 D_00437CF8 = 0;
                 return fileResetSelection();
@@ -1480,14 +1480,14 @@ s32 filePollSlotRequestAndResumeFlow(void) {
         case 2:
             if (D_00437D30 == 0) {
                 fileClearAllSlotFlags();
-                fileSetMenuFlowState(0);
+                slSetInfo(0);
                 D_00437D3C = 0;
                 D_00437D1C = 2;
-                return fileBeginPromptDialog(&fileStartMemoryCardFormat, &mnuSelectFileBranch, 1);
+                return slQueryYesNo(&slFormatStart, &slFormatCancel, 1);
             }
             if (D_00437D3C != 7) {
                 fileClearAllSlotFlags();
-                fileSetMenuFlowState(0);
+                slSetInfo(0);
                 D_00437D3C = 7;
                 D_00437D40 = 0;
             }
@@ -1496,7 +1496,7 @@ s32 filePollSlotRequestAndResumeFlow(void) {
         case 3:
             if (D_00437D3C != 2) {
                 fileClearAllSlotFlags();
-                fileSetMenuFlowState(0);
+                slSetInfo(0);
                 D_00437D3C = 2;
                 D_00437D40 = 0;
             }
@@ -1512,30 +1512,30 @@ s32 fileBeginReadSlotIcon(void) {
 
     buf[0] = 0x2F;
     mcdFormatSaveSlotName(&buf[1], fileSlotScanIndex);
-    mcChangeCurrentDirectory(fileMemoryCardRequestIndex, (const char *)buf);
-    return (s32)fileScanSlotIconSysBegin;
+    sdfMcFuncChdir(fileMemoryCardRequestIndex, (const char *)buf);
+    return (s32)slChooseData_getCardInfo2;
 }
 
-s32 fileScanSlotIconSysBegin(void) {
-    McPollResult t = mcPollSyncResult();
+s32 slChooseData_getCardInfo2(void) {
+    McPollResult t = sdfMcFuncChdir1();
 
     if (t == MC_POLL_PENDING) {
         return 0;
     }
     if (t == MC_POLL_SUCCESS) {
         fileReqSetSlotFlags(fileMemoryCardRequestIndex, fileSlotScanIndex, FILE_REQ_SLOT_DIRECTORY_READY);
-        mcReadDirectoryEntries(fileMemoryCardRequestIndex, D_0042B6B8, fileDirectoryEntryScratch, 1);
-        return (s32)mcHandleSlotWriteResult;
+        sdfMcFuncGetDir(fileMemoryCardRequestIndex, D_0042B6B8, fileDirectoryEntryScratch, 1);
+        return (s32)slChooseData_getCardInfo3;
     }
     if (t == MC_POLL_ERROR) {
         return fileBeginSlotMetadataRefresh();
     }
-    return fileBeginSlotOpen();
+    return slHeadLoad();
 }
 
-s32 mcHandleSlotWriteResult(void) {
+s32 slChooseData_getCardInfo3(void) {
     s32 value;
-    McPollResult status = mcPollNonnegativeResult(&value);
+    McPollResult status = sdfMcFuncGetDir1(&value);
     if (status == MC_POLL_PENDING) {
         return 0;
     }
@@ -1544,12 +1544,12 @@ s32 mcHandleSlotWriteResult(void) {
             fileReqSetSlotFlags(fileMemoryCardRequestIndex, fileSlotScanIndex,
                                 FILE_REQ_SLOT_CAN_READ_SAVE | FILE_REQ_SLOT_DELETE_BEFORE_WRITE);
         }
-        return fileBeginSlotOpen();
+        return slHeadLoad();
     }
     if (status == MC_POLL_ERROR) {
         return fileBeginSlotMetadataRefresh();
     }
-    return fileBeginSlotOpen();
+    return slHeadLoad();
 }
 
 s32 fileBeginReadRemainingSlotIcons(void) {
@@ -1565,7 +1565,7 @@ s32 fileBeginReadRemainingSlotIcons(void) {
         if (fileCountSelectableFiles() == 0) {
             if (D_00437D30 != 0) {
                 D_00437CF8 = 0;
-                fileSetMenuFlowState(0);
+                slSetInfo(0);
                 for (slot = 0; slot < 10; slot++) {
                     flags = fileReqGetSlotFlags(fileMemoryCardRequestIndex, slot);
                     if (flags & 2) {
@@ -1583,8 +1583,8 @@ s32 fileBeginReadRemainingSlotIcons(void) {
                 fileReqBegin(fileMemoryCardRequestIndex);
                 return (s32)filePollSlotDetectionAndBranch;
             }
-            if (fileIsCardSpaceAboveMinimum() == 0) {
-                fileSetMenuFlowState(0);
+            if (slSizeChk() == 0) {
+                slSetInfo(0);
                 D_00437CF8 = 0;
                 D_00437D3C = 5;
                 D_00437D40 = 0;
@@ -1592,7 +1592,7 @@ s32 fileBeginReadRemainingSlotIcons(void) {
                 return (s32)filePollSlotDetectionAndBranch;
             }
         }
-        fileSetMenuFlowState(0);
+        slSetInfo(0);
         return fileScanSlotStates();
     }
     return fileBeginReadSlotIcon();
@@ -1601,7 +1601,7 @@ s32 fileBeginReadRemainingSlotIcons(void) {
 s32 mcResetSlotMetadata(void) {
     s32 index;
     if (fileReqIsSlotMetadataDirty(fileMemoryCardRequestIndex) != 0) {
-        fileSetMenuFlowState(1);
+        slSetInfo(1);
         fileSlotScanIndex = 0;
         index = 0;
         do {
@@ -1612,7 +1612,7 @@ s32 mcResetSlotMetadata(void) {
         return fileBeginReadSlotIcon();
     } else {
         D_00437CEC = 0;
-        fileSetMenuFlowState(0);
+        slSetInfo(0);
         return fileScanSlotStates();
     }
 }
@@ -1622,33 +1622,33 @@ s32 fileBeginSaveSlotIconScan(void) {
 
     buf[0] = 0x2F;
     mcdFormatSaveSlotName(&buf[1], fileSlotScanIndex);
-    mcChangeCurrentDirectory(fileMemoryCardRequestIndex, (const char *)buf);
-    return (s32)fileScanSlotIconSysAltBegin;
+    sdfMcFuncChdir(fileMemoryCardRequestIndex, (const char *)buf);
+    return (s32)slChooseData_getCardInfo2_B;
 }
 
-s32 fileScanSlotIconSysAltBegin(void) {
-    McPollResult t = mcPollSyncResult();
+s32 slChooseData_getCardInfo2_B(void) {
+    McPollResult t = sdfMcFuncChdir1();
 
     if (t == MC_POLL_PENDING) {
         return 0;
     }
     if (t == MC_POLL_SUCCESS) {
         fileReqSetSlotFlags(fileMemoryCardRequestIndex, fileSlotScanIndex, FILE_REQ_SLOT_DIRECTORY_READY);
-        mcReadDirectoryEntries(fileMemoryCardRequestIndex, D_0042B6B8, fileDirectoryEntryScratch, 1);
-        return (s32)mcHandleDirectoryWriteResult;
+        sdfMcFuncGetDir(fileMemoryCardRequestIndex, D_0042B6B8, fileDirectoryEntryScratch, 1);
+        return (s32)slChooseData_getCardInfo3_B;
     }
     if (t == MC_POLL_ERROR) {
-        fileSetMenuFlowState(0);
+        slSetInfo(0);
         D_00437CF8 = 0;
         D_00437D3C = 0;
-        return fileBeginSlotPromptFive();
+        return slBootError();
     }
     return fileScanSlotStatesAdvance();
 }
 
-s32 mcHandleDirectoryWriteResult(void) {
+s32 slChooseData_getCardInfo3_B(void) {
     s32 value;
-    McPollResult status = mcPollNonnegativeResult(&value);
+    McPollResult status = sdfMcFuncGetDir1(&value);
     if (status == MC_POLL_PENDING) {
         return 0;
     }
@@ -1660,10 +1660,10 @@ s32 mcHandleDirectoryWriteResult(void) {
         return fileScanSlotStatesAdvance();
     }
     if (status == MC_POLL_ERROR) {
-        fileSetMenuFlowState(0);
+        slSetInfo(0);
         D_00437CF8 = 0;
         D_00437D3C = 0;
-        return fileBeginSlotPromptFive();
+        return slBootError();
     }
     return fileScanSlotStatesAdvance();
 }
@@ -1676,7 +1676,7 @@ s32 fileScanSlotStatesAdvance(void) {
     if (buttons & FILE_REQ_SLOT_CAN_READ_SAVE) {
         if (buttons & FILE_REQ_SLOT_DIRECTORY_READY) {
             if (buttons & FILE_REQ_SLOT_DELETE_BEFORE_WRITE) {
-                fileSetMenuFlowState(0);
+                slSetInfo(0);
                 D_00437CF8 = 0;
                 D_00437D3C = 0;
                 return fileRequestDefaultMode();
@@ -1685,10 +1685,10 @@ s32 fileScanSlotStatesAdvance(void) {
     }
     fileSlotScanIndex = slot;
     if (slot == 10) {
-        fileSetMenuFlowState(0);
+        slSetInfo(0);
         D_00437CF8 = 0;
         D_00437D3C = 0;
-        return fileBeginSlotPromptSix();
+        return slBootError2();
     }
     return fileBeginSaveSlotIconScan();
 }
@@ -1696,7 +1696,7 @@ s32 fileScanSlotStatesAdvance(void) {
 s32 mcClearSlotMetadata(void) {
     s32 index = 0;
     u32 *saved;
-    fileSetMenuFlowState(1);
+    slSetInfo(1);
     D_00437CF8 = 0;
     fileSlotScanIndex = 0;
     fileReqMarkSlotMetadataDirty(fileMemoryCardRequestIndex);
@@ -1709,66 +1709,66 @@ s32 mcClearSlotMetadata(void) {
     return fileBeginSaveSlotIconScan();
 }
 
-s32 mcPrepareDirectory(void) {
+s32 slSaveData(void) {
     u8 name[0x50];
     u32 entry = fileMemoryCardRequestIndex;
     s32 slot = fileReqGetSelectedSlot(entry);
     fileReqGetSlotFlags(entry, slot);
-    fileSetMenuFlowState(2);
+    slSetInfo(2);
     fileReqMarkSlotMetadataDirty(entry);
     if (fileReqGetSlotFlags(entry, slot) & FILE_REQ_SLOT_DIRECTORY_READY) {
-        return fileCreateMainBegin();
+        return slSaveData_chdir();
     }
     name[0] = '/';
     mcdFormatSaveSlotName(name + 1, slot);
-    mcMakeDirectory(entry, (const char *)name);
-    return (s32)mcHandleSearchResult;
+    sdfMcFuncMkdir(entry, (const char *)name);
+    return (s32)slSaveProc_Write_mkdir;
 }
 
-s32 fileCreateMainBegin(void) {
+s32 slSaveData_chdir(void) {
     u8 buf[0x50];
     u32 entry = fileMemoryCardRequestIndex;
     s32 v = fileReqGetSelectedSlot(entry);
 
     buf[0] = 0x2F;
     mcdFormatSaveSlotName(&buf[1], v);
-    mcChangeCurrentDirectory(entry, (const char *)buf);
+    sdfMcFuncChdir(entry, (const char *)buf);
     return (s32)filePrepareMainBlobWrite;
 }
 
-s32 mcHandleSearchResult(void) {
-    McPollResult status = mcPollWithExtendedErrors();
+s32 slSaveProc_Write_mkdir(void) {
+    McPollResult status = sdfMcFuncMkdir1();
     if (status == MC_POLL_PENDING) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
         fileReqSetSlotFlags(fileMemoryCardRequestIndex, fileSelectedSlotIndex, FILE_REQ_SLOT_DIRECTORY_READY);
-        return fileCreateMainBegin();
+        return slSaveData_chdir();
     }
-    fileSetMenuFlowState(0);
+    slSetInfo(0);
     D_00437D3C = 4;
-    return (s32)fileAbortSlotScanOnInput;
+    return (s32)slErrorWait;
 }
 
 s32 filePrepareMainBlobWrite(void) {
-    McPollResult t = mcPollSyncResult();
+    McPollResult t = sdfMcFuncChdir1();
 
     if (t == MC_POLL_PENDING) {
         return 0;
     }
     if (t == MC_POLL_SUCCESS) {
-        return mcChooseLoadPath();
+        return slSaveData_deleteIconSys();
     }
     if (t == MC_POLL_ERROR) {
-        fileSetMenuFlowState(0);
+        slSetInfo(0);
         D_00437D3C = 4;
-        return (s32)fileAbortSlotScanOnInput;
+        return (s32)slErrorWait;
     }
     return 0;
 }
 
 s32 fileBuildMainBlobAfterDelete(void) {
-    McPollResult t = mcPollNormalizedCommandStatus();
+    McPollResult t = sdfMcFuncDelete1();
 
     if (t == MC_POLL_PENDING) {
         return 0;
@@ -1777,9 +1777,9 @@ s32 fileBuildMainBlobAfterDelete(void) {
         return fileBuildMainBlobAndWrite();
     }
     if (t == MC_POLL_ERROR) {
-        fileSetMenuFlowState(0);
+        slSetInfo(0);
         D_00437D3C = 4;
-        return (s32)fileAbortSlotScanOnInput;
+        return (s32)slErrorWait;
     }
     return 0;
 }
@@ -1787,12 +1787,12 @@ s32 fileBuildMainBlobAfterDelete(void) {
 s32 fileOnAllWritten(void) {
     fileReqSetSlotFlags(fileMemoryCardRequestIndex, fileSelectedSlotIndex, FILE_REQ_SLOT_CAN_READ_SAVE);
     fileReqSetSlotFlags(fileMemoryCardRequestIndex, fileSelectedSlotIndex, FILE_REQ_SLOT_DELETE_BEFORE_WRITE);
-    fileSetMenuFlowState(4);
+    slSetInfo(4);
     return fileBeginDetectionRequest((u32)fileScanSlotStates);
 }
 
 s32 fileWriteIconSysComplete(void) {
-    fileDestroyMenuTask();
+    slKillLoadProcess();
     return (s32)fileOnAllWritten;
 }
 
@@ -1809,10 +1809,10 @@ s32 fileBeginLabeledSlotWrite(void) {
     fileSaveIconSysData[0xFA] = -0x7E;
     fileSaveIconSysData[0xF9] = q + 0x4F;
     fileSaveIconSysData[0xFB] = r + 0x4F;
-    return fileBeginRequest(D_0042B6B8, &D_00437D90, &D_00437D94, (void *)fileWriteIconSysComplete, 0);
+    return slSaveWriteFile(D_0042B6B8, &D_00437D90, &D_00437D94, (void *)fileWriteIconSysComplete, 0);
 }
 
-extern s32 fileBeginRequest(char *fileName, void *dataAddressSlot, void *dataSizeSlot, void *continuation, void *pendingRequestStatus);
+extern s32 slSaveWriteFile(char *fileName, void *dataAddressSlot, void *dataSizeSlot, void *continuation, void *pendingRequestStatus);
 extern s32 fileBeginLabeledSlotWrite(void);
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B698);
@@ -1821,8 +1821,8 @@ INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B6A8);
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B6B8);
 
-s32 fileRequestBaseIcon(void) {
-    return fileBeginRequest("base.ico", &fileSaveIconData, &fileSaveIconDataSize, fileBeginLabeledSlotWrite, &fileSaveIconRequest);
+s32 slSaveWriteEnd_saveData(void) {
+    return slSaveWriteFile("base.ico", &fileSaveIconData, &fileSaveIconDataSize, fileBeginLabeledSlotWrite, &fileSaveIconRequest);
 }
 
 extern DatGameState *fileMainSaveBlobAddress;
@@ -1877,14 +1877,14 @@ s32 fileBuildMainBlobAndWrite(void) {
     fileMainSaveBlobAddress = datGameState;
     fileMainSaveBlobSize = sizeof(DatGameState);
     if (D_00437D08 == 0 || D_00437D08 == 2) {
-        return fileBeginRequest(filename, &fileMainSaveBlobAddress, &fileMainSaveBlobSize,
-                                       fileRequestBaseIcon, NULL);
+        return slSaveWriteFile(filename, &fileMainSaveBlobAddress, &fileMainSaveBlobSize,
+                                       slSaveWriteEnd_saveData, NULL);
     }
-    return fileBeginRequest(filename, &fileMainSaveBlobAddress, &fileMainSaveBlobSize,
+    return slSaveWriteFile(filename, &fileMainSaveBlobAddress, &fileMainSaveBlobSize,
                                    fileBeginLabeledSlotWrite, NULL);
 }
 
-s32 mcChooseLoadPath(void) {
+s32 slSaveData_deleteIconSys(void) {
     u32 entry = fileMemoryCardRequestIndex;
     s32 slot = fileReqGetSelectedSlot(entry);
     u32 flags = fileReqGetSlotFlags(entry, slot);
@@ -1892,7 +1892,7 @@ s32 mcChooseLoadPath(void) {
         /* Build the main blob from the current global state. */
         return fileBuildMainBlobAndWrite();
     }
-    mcDeleteFilePath(entry, D_0042B6B8);
+    sdfMcFuncDelete(entry, D_0042B6B8);
     return (s32)fileBuildMainBlobAfterDelete;
 }
 
@@ -1900,66 +1900,66 @@ extern u32 *fileWriteDataAddressSlot;
 extern u32 *fileWriteDataSizeSlot;
 extern u32 fileWriteContinuation;
 extern u32 fileWritePendingRequestSlot;
-extern s32 fileWriteWaitOpen(void);
+extern s32 slSaveProc_openFile(void);
 
-s32 fileBeginRequest(char *fileName, void *dataAddressSlot, void *dataSizeSlot, void *continuation, void *pendingRequestStatus) {
+s32 slSaveWriteFile(char *fileName, void *dataAddressSlot, void *dataSizeSlot, void *continuation, void *pendingRequestStatus) {
     fileWriteDataAddressSlot = (u32 *)dataAddressSlot;
     fileWriteDataSizeSlot = (u32 *)dataSizeSlot;
     fileWriteContinuation = (u32)continuation;
     fileWritePendingRequestSlot = (u32)pendingRequestStatus;
-    mcOpenFilePath(fileMemoryCardRequestIndex, fileName, 0x203);
-    return (s32)fileWriteWaitOpen;
+    sdfMcFuncOpen(fileMemoryCardRequestIndex, fileName, 0x203);
+    return (s32)slSaveProc_openFile;
 }
 
-extern void mcBeginWrite(s32 request, u32 first, u32 second);
-extern s32 mcHandleLoadResult(void);
-extern s32 fileFinishRequest(void);
+extern void sdfMcFuncWrite(s32 request, u32 first, u32 second);
+extern s32 slSaveProc_writeFile(void);
+extern s32 slSaveProc_waitDataReady(void);
 
-s32 fileWriteWaitOpen(void) {
-    McPollResult status = mcPollCommandStatusWithResult(&fileSaveFileDescriptor);
+s32 slSaveProc_openFile(void) {
+    McPollResult status = sdfMcFuncOpen1(&fileSaveFileDescriptor);
 
     if (status == MC_POLL_PENDING) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
         if (fileWritePendingRequestSlot != 0 && *(u32 *)fileWritePendingRequestSlot != 0) {
-            return (s32)fileFinishRequest;
+            return (s32)slSaveProc_waitDataReady;
         }
-        mcBeginWrite(fileSaveFileDescriptor, *fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
-        return (s32)mcHandleLoadResult;
+        sdfMcFuncWrite(fileSaveFileDescriptor, *fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
+        return (s32)slSaveProc_writeFile;
     }
     if (status == MC_POLL_ERROR) {
-        fileSetMenuFlowState(0);
+        slSetInfo(0);
         D_00437D3C = 4;
-        return (s32)fileAbortSlotScanOnInput;
+        return (s32)slErrorWait;
     }
     return 0;
 }
 
 
-extern s32 mcDispatchReadCallback(void);
+extern s32 slSaveProc_closeFile(void);
 
-s32 mcHandleLoadResult(void) {
-    McPollResult status = mcPollWriteCompletion();
+s32 slSaveProc_writeFile(void) {
+    McPollResult status = sdfMcFuncWrite1();
 
     if (status == MC_POLL_PENDING) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
-        mcCloseOpenFile(fileSaveFileDescriptor);
-        return (s32)mcDispatchReadCallback;
+        sdfMcFuncClose(fileSaveFileDescriptor);
+        return (s32)slSaveProc_closeFile;
     }
     if (status == MC_POLL_ERROR) {
-        fileSetMenuFlowState(0);
+        slSetInfo(0);
         D_00437D3C = 4;
-        return (s32)fileAbortSlotScanOnInput;
+        return (s32)slErrorWait;
     }
     return 0;
 }
 
 extern u32 fileWriteContinuation;
-s32 mcDispatchReadCallback(void) {
-    McPollResult status = mcPollZeroCommandResult();
+s32 slSaveProc_closeFile(void) {
+    McPollResult status = sdfMcFuncClose1();
 
     if (status == MC_POLL_PENDING) {
         return 0;
@@ -1968,61 +1968,61 @@ s32 mcDispatchReadCallback(void) {
         return ((s32 (*)())fileWriteContinuation)();
     }
     if (status == MC_POLL_ERROR) {
-        fileSetMenuFlowState(0);
+        slSetInfo(0);
         D_00437D3C = 4;
-        return (s32)fileAbortSlotScanOnInput;
+        return (s32)slErrorWait;
     }
     return 0;
 }
 
-s32 fileFinishRequest(void) {
+s32 slSaveProc_waitDataReady(void) {
     if (fileSaveIconRequest != 0) {
         return 0;
     }
-    mcBeginWrite(fileSaveFileDescriptor, *fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
-    return (s32)mcHandleLoadResult;
+    sdfMcFuncWrite(fileSaveFileDescriptor, *fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
+    return (s32)slSaveProc_writeFile;
 }
 
 s32 mcHandleDetectionResult(void) {
-    McPollResult status = mcPollStrictSuccess();
+    McPollResult status = sdfMcFuncFormat1();
 
     if (status == MC_POLL_PENDING) {
         return 0;
     }
-    fileClearMemoryCardOperationActive();
+    dds3SoftResetOn();
     if (status < 0) {
-        fileSetMenuFlowState(0);
+        slSetInfo(0);
         D_00437D3C = 6;
-        return (s32)fileAbortSlotScanOnInput;
+        return (s32)slErrorWait;
     }
-    fileSetMenuFlowState(6);
+    slSetInfo(6);
     return fileBeginDetectionRequest((u32)fileRestartSlotScan);
 }
 
-s32 fileStartMemoryCardFormat(void) {
-    fileSetMenuFlowState(5);
-    fileSetMemoryCardOperationActive();
-    fileReqStartCardDetection(fileMemoryCardRequestIndex);
+s32 slFormatStart(void) {
+    slSetInfo(5);
+    dds3SoftResetOff();
+    sdfMcFuncFormat(fileMemoryCardRequestIndex);
     return (s32)mcHandleDetectionResult;
 }
 
-s32 mnuSelectFileBranch(void) {
+s32 slFormatCancel(void) {
     if (D_00437D0C != 0) {
         D_00437D1C = 7;
-        return fileBeginPromptDialog(fileBeginSlotResetPrompt, fileResetSelection, 1);
+        return slQueryYesNo(slEndingExit, fileResetSelection, 1);
     }
     D_00437D1C = 7;
-    return fileBeginPromptDialog(fileAbortSlotFlow, fileResetSelection, 1);
+    return slQueryYesNo(slExit, fileResetSelection, 1);
 }
 
-s32 fileBeginSlotCreate(void) {
+s32 slLoadData(void) {
     char path[0x50];
     u32 ctx = fileMemoryCardRequestIndex;
     s32 slot = fileReqGetSelectedSlot(ctx);
     u32 attr = fileReqGetSlotFlags(ctx, slot);
     u32 len;
 
-    fileSetMenuFlowState(3);
+    slSetInfo(3);
     if ((attr & FILE_REQ_SLOT_CAN_READ_SAVE) == 0) {
         return fileScanSlotStates();
     }
@@ -2033,12 +2033,12 @@ s32 fileBeginSlotCreate(void) {
     path[len + 1] = '/';
     memcpy(&path[len + 2], &path[1], len);
     path[len * 2 + 2] = 0;
-    mcOpenFilePath(ctx, path, 1);
-    return (s32)fileLoadMainBlobBegin;
+    sdfMcFuncOpen(ctx, path, 1);
+    return (s32)slLoadProc_openFile;
 }
 
-s32 fileLoadMainBlobBegin(void) {
-    McPollResult status = mcPollCommandStatusWithResult(&fileSaveFileDescriptor);
+s32 slLoadProc_openFile(void) {
+    McPollResult status = sdfMcFuncOpen1(&fileSaveFileDescriptor);
     u32 size;
 
     if (status == MC_POLL_PENDING) {
@@ -2048,29 +2048,29 @@ s32 fileLoadMainBlobBegin(void) {
     fileSaveReadBufferResource = sdfMemAllocDirect(size);
     fileSaveReadBuffer = (void *)(u32)sdfMemLock(fileSaveReadBufferResource);
     if (status == MC_POLL_SUCCESS) {
-        mcReadOpenFile(fileSaveFileDescriptor, (u32)fileSaveReadBuffer, size);
-        return (s32)mcHandleSetupResult;
+        sdfMcFuncRead(fileSaveFileDescriptor, (u32)fileSaveReadBuffer, size);
+        return (s32)slLoadProc_readFile;
     }
-    fileSetMenuFlowState(0);
+    slSetInfo(0);
     D_00437D3C = 3;
-    return (s32)fileAbortSlotScanOnInput;
+    return (s32)slErrorWait;
 }
 
 extern s32 mcdHandleSaveSetupDone(void);
-s32 mcHandleSetupResult(void) {
-    McPollResult status = mcPollCompletionStatus();
+s32 slLoadProc_readFile(void) {
+    McPollResult status = sdfMcFuncRead1();
 
     if (status == MC_POLL_PENDING) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
-        mcCloseOpenFile(fileSaveFileDescriptor);
+        sdfMcFuncClose(fileSaveFileDescriptor);
         return (s32)mcdHandleSaveSetupDone;
     }
     sdfMemFreeDirect(fileSaveReadBufferResource);
-    fileSetMenuFlowState(0);
+    slSetInfo(0);
     D_00437D3C = 3;
-    return (s32)fileAbortSlotScanOnInput;
+    return (s32)slErrorWait;
 }
 
 extern s8 D_00437CD5;
@@ -2078,7 +2078,7 @@ extern s8 D_00437CD5;
 void fileRestoreSlotFlagsToState(void);
 
 s32 mcdHandleSaveSetupDone(void) {
-    McPollResult status = mcPollZeroCommandResult();
+    McPollResult status = sdfMcFuncClose1();
 
     if (status == MC_POLL_PENDING) {
         return 0;
@@ -2087,19 +2087,19 @@ s32 mcdHandleSaveSetupDone(void) {
         fileReloadSaveBuffer();
         sdfMemFreeDirect(fileSaveReadBufferResource);
         D_00437CD5 = 1;
-        fileDestroyMenuTask();
+        slKillLoadProcess();
         if (fileLoadStateChanged() == 0) {
             fileCacheSlotFlagsFromState();
         } else {
             fileRestoreSlotFlagsToState();
         }
-        fileSetMenuFlowState(13);
+        slSetInfo(13);
         return fileSetMenuCallbackAndClearResult(-1);
     }
     sdfMemFreeDirect(fileSaveReadBufferResource);
-    fileSetMenuFlowState(0);
+    slSetInfo(0);
     D_00437D3C = 3;
-    return (s32)fileAbortSlotScanOnInput;
+    return (s32)slErrorWait;
 }
 
 
@@ -2107,7 +2107,7 @@ s32 mcdHandleSaveSetupDone(void) {
 extern s32 mcdContinueLoadSelection();
 
 s32 mcdAdvanceToLoadSelection(void) {
-    fileSetMenuFlowState(13);
+    slSetInfo(13);
     return fileSetMenuCallbackAndClearResult((u32)mcdContinueLoadSelection);
 }
 
@@ -2165,7 +2165,7 @@ s32 fileSlotBrowserUpdate(void) {
         }
         fileSelectedSlotIndex = D_00437D28 + offset;
         if (oldSelection != fileSelectedSlotIndex) {
-            sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+            p2sdPlaySE(0, 0x7F, 0x3F);
         }
         if (fileSelectedSlotIndex < oldSelection) {
             D_00437D00 = -8;
@@ -2190,69 +2190,69 @@ s32 fileSlotBrowserUpdate(void) {
             return 0;
         }
         if (action == 1) {
-            fileSetMenuFlowState(0);
+            slSetInfo(0);
             if (D_00437D30 == 0) {
                 fileReqSetSelectedSlot(fileMemoryCardRequestIndex, fileSelectedSlotIndex);
                 flags = fileReqGetSlotFlags(fileMemoryCardRequestIndex, fileSelectedSlotIndex);
                 if ((flags & FILE_REQ_SLOT_SELECTABLE_SAVE_MASK) ==
                     FILE_REQ_SLOT_SELECTABLE_SAVE_MASK) {
-                    sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+                    p2sdPlaySE(8, 0x7F, 0x3F);
                     if (D_00437D0C != 0) {
                         D_00437D08 = action;
                         D_00437D1C = action;
-                        return fileBeginPromptDialog(fileBeginDirectoryScan, fileScanSlotStates, 1);
+                        return slQueryYesNo(slEndingUpd2, fileScanSlotStates, 1);
                     }
                     D_00437D08 = action;
                     D_00437D1C = action;
-                    return fileBeginPromptDialog(mcPrepareDirectory, fileScanSlotStates, 1);
+                    return slQueryYesNo(slSaveData, fileScanSlotStates, 1);
                 }
                 slotState = flags & FILE_REQ_SLOT_DIRECTORY_DELETE_MASK;
                 if (slotState == FILE_REQ_SLOT_DIRECTORY_READY) {
-                    sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+                    p2sdPlaySE(8, 0x7F, 0x3F);
                     D_00437D08 = slotState;
-                    return mcPrepareDirectory();
+                    return slSaveData();
                 }
-                sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+                p2sdPlaySE(8, 0x7F, 0x3F);
                 D_00437D08 = 0;
-                if (fileIsCardSpaceAboveMinimum() != 0) {
-                    return mcPrepareDirectory();
+                if (slSizeChk() != 0) {
+                    return slSaveData();
                 }
-                fileSetMenuFlowState(0);
+                slSetInfo(0);
                 D_00437D3C = 5;
                 D_00437D40 = 0;
                 fileReqBegin(fileMemoryCardRequestIndex);
-                return (s32)filePollSlotScanOrReset;
+                return (s32)slErrorWaitToFileMc;
             }
             fileReqSetSelectedSlot(fileMemoryCardRequestIndex, fileSelectedSlotIndex);
             flags = fileReqGetSlotFlags(fileMemoryCardRequestIndex, fileSelectedSlotIndex);
             if ((flags & FILE_REQ_SLOT_CAN_READ_SAVE) != 0) {
-                sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+                p2sdPlaySE(8, 0x7F, 0x3F);
                 if (mcdOriginalTitleFileMode != 0 &&
                     fileSavePreviewRecords[fileSelectedSlotIndex].status == 0) {
-                    fileSetMenuFlowState(0);
+                    slSetInfo(0);
                     D_00437D3C = 8;
                     D_00437D40 = 0;
                     fileReqBegin(fileMemoryCardRequestIndex);
-                    return (s32)filePollSlotScanOrReset;
+                    return (s32)slErrorWaitToFileMc;
                 }
                 D_00437D1C = 3;
                 if (mcdOriginalTitleFileMode == 0) {
-                    return fileBeginPromptDialog(fileBeginSlotCreate, fileScanSlotStates, 1);
+                    return slQueryYesNo(slLoadData, fileScanSlotStates, 1);
                 }
                 fileCopyRecordHeader(&fileLoadSelectionWork->header,
                     &fileSavePreviewRecords[fileSelectedSlotIndex]);
-                return fileBeginPromptDialog(mcdAdvanceToLoadSelection, fileScanSlotStates, 1);
+                return slQueryYesNo(mcdAdvanceToLoadSelection, fileScanSlotStates, 1);
             }
-            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+            p2sdPlaySE(0xA, 0x7F, 0x3F);
             return fileScanSlotStates();
         }
         if (action == 2) {
-            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+            p2sdPlaySE(0xA, 0x7F, 0x3F);
             fileResetLoadContextSlide();
             if (D_00437D0C != 0) {
-                return fileBeginSlotResetPrompt();
+                return slEndingExit();
             }
-            return fileResolveAbortSlotFlow();
+            return slCancel();
         }
     }
     return 0;
@@ -2299,12 +2299,12 @@ s32 fileDrawSlotListAndPreview(s32 work) {
     } else {
         evtSubmitTexturedGradientQuad(0x56, 0x33, 0x137, 0x17, 5, 0x1DD, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00437D74));
     }
-    evtSetDrawSurfaceIndex(0x55);
+    eglSetOt(0x55);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 2, 0, 0, 1, 1);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitDefaultDepthGradientRect(0, 0, 0x200, 0x1C0, 0, 0, 0, 0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-    evtSetDrawSurfaceIndex(0x53);
+    eglSetOt(0x53);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     /* Retail computes the clamped slide delta but snaps to the target. */
@@ -2519,7 +2519,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
         u32 arrowColor;
 
         evtSubmitTexturedGradientQuad(0xF8, 0x50, 0xF, 0x22, 0x35, 2, 0xF, 0x22, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00437D70));
-        wave = sdfSinPoly((f32)((fileScrollArrowState.angle + 90) % 360) / 180.0f * 3.1415899f);
+        wave = sdfSin((f32)((fileScrollArrowState.angle + 90) % 360) / 180.0f * 3.1415899f);
         fileScrollArrowState.upAlpha = (s32)((wave + 1.0f) * 0.5f * 176.0f + 16.0f);
         arrowColor = (fileScrollArrowState.upAlpha << 24) | 0x808080;
         evtSubmitTexturedGradientQuad(0xF8, 0x50, 0xF, 0x22, 0x35, 2, 0xF, 0x22, arrowColor, arrowColor, arrowColor, arrowColor, (struct SdfTex *)(u32)(D_00437D70));
@@ -2528,21 +2528,21 @@ s32 fileDrawSlotListAndPreview(s32 work) {
         u32 arrowColor;
 
         evtSubmitTexturedGradientQuad(0xF8, 0x18B, 0xF, 0x22, 0x47, 2, 0xF, 0x22, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00437D70));
-        wave = sdfSinPoly((f32)((fileScrollArrowState.angle + 90) % 360) / 180.0f * 3.1415899f);
+        wave = sdfSin((f32)((fileScrollArrowState.angle + 90) % 360) / 180.0f * 3.1415899f);
         fileScrollArrowState.downAlpha = (s32)((wave + 1.0f) * 0.5f * 176.0f + 16.0f);
         arrowColor = (fileScrollArrowState.downAlpha << 24) | 0x808080;
         evtSubmitTexturedGradientQuad(0xF8, 0x18B, 0xF, 0x22, 0x47, 2, 0xF, 0x22, arrowColor, arrowColor, arrowColor, arrowColor, (struct SdfTex *)(u32)(D_00437D70));
     }
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 5, 0x80, 3, 0, 0, 1, 1);
-    evtSetDrawSurfaceIndex(0x53);
+    eglSetOt(0x53);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 5, 0x80, 3, 0, 0, 1, 2);
     return 0;
 }
 
 
-s32 fileRunMenuState(KwlnTask *task) {
+s32 slCalc(KwlnTask *task) {
     s32 next;
     u32 job;
     s32 (*cur)();
@@ -2558,12 +2558,12 @@ s32 fileRunMenuState(KwlnTask *task) {
         cur = (s32 (*)())next;
     }
     fileMenuStateHandler = cur;
-    if (job != 0 && fileIsRequestReadyInCurrentMode((struct FileRequest *)job) != 0) {
+    if (job != 0 && pacFileCheckEnd((struct FileRequest *)job) != 0) {
         fileSaveIconRequest = 0;
-        fileSaveIconResourceHandle = fileGetResourceHandle((struct FileRequest *)(u32)job);
-        fileSaveIconData = (u32)fileGetLoadedDataAddress((struct FileRequest *)(u32)job);
-        fileSaveIconDataSize = fileGetResourceSize((struct FileRequest *)(u32)job);
-        filePollEntryCleanup((struct FileRequest *)(u32)job);
+        fileSaveIconResourceHandle = fileGetMemHandle((struct FileRequest *)(u32)job);
+        fileSaveIconData = (u32)fileGetLoadPtr((struct FileRequest *)(u32)job);
+        fileSaveIconDataSize = fileGetLoadSize((struct FileRequest *)(u32)job);
+        fileHandleFree((struct FileRequest *)(u32)job);
     }
     return 0;
 }
@@ -2573,7 +2573,7 @@ s32 fileDrawMenuFrame(s32 task) {
     s32 fade;
     s32 alpha;
 
-    evtSetDrawSurfaceIndex(0x52);
+    eglSetOt(0x52);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     if (D_00437CF4 != 0) {
@@ -2605,7 +2605,7 @@ s32 fileDrawMenuFrame(s32 task) {
 }
 
 void fileResetMenuFlowState(void) {
-    fileSetMenuFlowState(0);
+    slSetInfo(0);
     D_00437D04 = 0;
     fileWaitTicksRemaining = 0;
     D_00437D18 = 0xffffffff;
@@ -2630,10 +2630,10 @@ void fileResetMenuFlowState(void) {
 extern void *memset(void *dst, s32 value, s32 size);
 
 struct SdfMemBlock;
-extern void fileSetMemoryCardOperationActive(void);
+extern void dds3SoftResetOff(void);
 extern s32 D_00437D80;
 extern void fileDestroyMemoryCardMenuTask(KwlnTask *task);
-extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
+extern void dds3FadeIn(s32 red, s32 green, s32 blue, s32 duration);
 
 void fileInitCursorPulse(void);
 
@@ -2645,66 +2645,66 @@ void fileStartMemoryCardMenuForMode(s32 mode) {
     u32 titleNamesAddress;
     void *world;
 
-    fileSetMemoryCardOperationActive();
-    request = (FilePacRequest *)fileQueuePlainDispatchRequest("/mc/mcpack.LB");
-    fileWaitForRequestReady((struct FileRequest *)request);
+    dds3SoftResetOff();
+    request = (FilePacRequest *)pacLoad("/mc/mcpack.LB");
+    pacSync((struct FileRequest *)request);
     node = request->packet.queueHead;
     while (node != NULL) {
         switch (index) {
         case 0:
-            D_00437D5C = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            D_00437D5C = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 1:
-            D_00437D60 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            D_00437D60 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 2:
-            D_00437D64 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            D_00437D64 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 3:
-            D_00437D68 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            D_00437D68 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 4:
-            D_00437D6C = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            D_00437D6C = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 5:
-            D_00437D70 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            D_00437D70 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 6:
-            D_00437D74 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            D_00437D74 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 7:
-            D_00437D78 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            D_00437D78 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 8:
-            fileSavePreviewPortraitTextures[0] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[0] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 9:
-            fileSavePreviewPortraitTextures[1] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[1] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 10:
-            fileSavePreviewPortraitTextures[2] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[2] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 11:
-            fileSavePreviewPortraitTextures[3] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[3] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 12:
-            fileSavePreviewPortraitTextures[4] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[4] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 13:
-            fileSavePreviewPortraitTextures[5] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[5] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 14:
-            fileSavePreviewPortraitTextures[6] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[6] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 15:
-            fileSavePreviewPortraitTextures[7] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[7] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct SdfMemBlock *)node->resourceHandle)));
             break;
         }
         sdfMemFreeDirect((struct SdfMemBlock *)node->resourceHandle);
         index++;
         node = node->next;
     }
-    btlStageTaskCleanupCallback(request);
+    pacFileHandleFree_(request);
     D_00437D80 = 1;
     if (mode == 0) {
         D_00437CF4 = 1;
@@ -2720,7 +2720,7 @@ void fileStartMemoryCardMenuForMode(s32 mode) {
         D_00437CF4 = 1;
         mcdOriginalTitleFileMode = 0;
         D_00437D0C = 1;
-        mdlFlagSet(0xBA0);
+        evtBitOn(0xBA0);
         datGameState->header.status =
             (u16)datGameState->header.status + 1;
         datGameState->header.transition = 1;
@@ -2735,26 +2735,26 @@ void fileStartMemoryCardMenuForMode(s32 mode) {
         } else {
             mcdOriginalTitleFileMode = 0;
             D_00437CF4 = 0;
-            fileMenuStateHandler = (s32 (*)())fileResetSlotPollState;
+            fileMenuStateHandler = (s32 (*)())slBootProc1st;
         }
     }
     if (mcdOriginalTitleFileMode != 0) {
-        titleNamesAllocation = sdfReadNamedResource("/mc/DDS1TN.DAT", &titleNamesAddress, NULL);
-        D_00437D54 = sdfAllocateBlockBySizeThreshold(0x3C0);
-        D_00437D58 = sdfAllocateBlockBySizeThreshold(0x780);
+        titleNamesAllocation = sdfDevLoadFileEx("/mc/DDS1TN.DAT", &titleNamesAddress, NULL);
+        D_00437D54 = sdfAllocAuto(0x3C0);
+        D_00437D58 = sdfAllocAuto(0x780);
         memcpy(D_00437D54, (void *)titleNamesAddress, 0x3C0);
         memcpy(D_00437D58, (void *)(titleNamesAddress + 0x3C0), 0x780);
         sdfMemFreeDirect(titleNamesAllocation);
     }
-    dds3StartProcess("FileMentCalc", 0x2B0A, 0, 0, fileRunMenuState, fileDestroyMemoryCardMenuTask, 0);
+    dds3StartProcess("FileMentCalc", 0x2B0A, 0, 0, slCalc, fileDestroyMemoryCardMenuTask, 0);
     D_00437CE4 = 1;
     fileInitCursorPulse();
-    kwlnFadeOutStart(0, 0, 0, 8);
+    dds3FadeIn(0, 0, 0, 8);
     D_00437D30 = mode;
     fileResetMenuFlowState();
-    world = dds3GetWorldObject();
+    world = dds3GetActiveScene();
     if (world != 0) {
-        dds3SetWorldObjectDrawEnabled((EffWorldNode *)world, 0);
+        dds3VisibleSceneBasic((EffWorldNode *)world, 0);
     }
 }
 
@@ -2819,26 +2819,26 @@ void fileReleaseMenuResources(void) {
             D_00437D5C = 0;
         }
         if (D_00437D54 != 0) {
-            sdfFreeMemoryFromEitherHeap(D_00437D54);
+            sdfFreeAuto(D_00437D54);
             D_00437D54 = 0;
         }
         if (D_00437D58 != 0) {
-            sdfFreeMemoryFromEitherHeap(D_00437D58);
+            sdfFreeAuto(D_00437D58);
             D_00437D58 = 0;
         }
-        world = dds3GetWorldObject();
+        world = dds3GetActiveScene();
         if (world != 0) {
-            dds3SetWorldObjectDrawEnabled((EffWorldNode *)world, 1);
+            dds3VisibleSceneBasic((EffWorldNode *)world, 1);
         }
         if (fileSaveIconRequest != 0) {
-            fileWaitReady((struct FileRequest *)fileSaveIconRequest);
-            fileSaveIconResourceHandle = fileGetResourceHandle((struct FileRequest *)(u32)fileSaveIconRequest);
-            filePollEntryCleanup((struct FileRequest *)(u32)fileSaveIconRequest);
+            fileSync((struct FileRequest *)fileSaveIconRequest);
+            fileSaveIconResourceHandle = fileGetMemHandle((struct FileRequest *)(u32)fileSaveIconRequest);
+            fileHandleFree((struct FileRequest *)(u32)fileSaveIconRequest);
             fileSaveIconRequest = 0;
         }
-        sdfReleaseMemorySlot((s32 *)&fileSaveIconResourceHandle);
+        sdfMemFreeHandleDirect((s32 *)&fileSaveIconResourceHandle);
         dds3KillProcessName("FileMentCalc", 1);
-        fileClearMemoryCardOperationActive();
+        dds3SoftResetOn();
     }
 }
 
@@ -2857,22 +2857,22 @@ u32 fileGetSelectionPendingFlag(void) {
 extern u32 D_00439024, D_00439028;
 /* Yes/no cursor input while the card request is idle. */
 static inline void filePollPromptChoice(void) {
-    if (D_00437D20 == 0 && fileIsLoadStepComplete() != 0) {
+    if (D_00437D20 == 0 && slChkWindowOpenDone() != 0) {
         if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x27] < 0) != 0) {
             if (D_00437D18 != 1) {
-                sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+                p2sdPlaySE(0, 0x7F, 0x3F);
             }
             D_00437D18 = 1;
         } else if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x26] < 0) != 0) {
             if (D_00437D18 != 0) {
-                sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+                p2sdPlaySE(0, 0x7F, 0x3F);
             }
             D_00437D18 = 0;
         } else if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) != 0) {
             if (D_00437D18 == 0 && (D_00437D1C == 1 || D_00437D1C == 3)) {
-                sndSetSequenceVolumePan(0x11, 0x7F, 0x3F);
+                p2sdPlaySE(0x11, 0x7F, 0x3F);
             } else {
-                sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+                p2sdPlaySE(8, 0x7F, 0x3F);
             }
             if (D_00437D18 != 0) {
                 D_00437D20 = 2;
@@ -2880,7 +2880,7 @@ static inline void filePollPromptChoice(void) {
                 D_00437D20 = 1;
             }
         } else if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0) != 0) {
-            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+            p2sdPlaySE(0xA, 0x7F, 0x3F);
             D_00437D20 = 2;
         }
     }
@@ -2914,7 +2914,7 @@ s32 fileUpdatePromptDialog(void) {
             if (D_00437D1C == 5) {
                 D_00437D1C = 0;
                 D_00437D18 = -1;
-                return fileRestartSlotSelection();
+                return slBootRetry();
             }
             /* Retail 0x002CEAEC bne: shared begin tail (.L002CEDD0). */
             goto begin;
@@ -2940,19 +2940,19 @@ s32 fileUpdatePromptDialog(void) {
     if (D_00437D1C == 4 || D_00437D1C == 8) {
         if (kwlnTaskPadButtonStates[0x27] < 0) {
             if (D_00437D18 != 1) {
-                sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+                p2sdPlaySE(0, 0x7F, 0x3F);
             }
             D_00437D18 = 1;
         } else if (kwlnTaskPadButtonStates[0x26] < 0) {
             if (D_00437D18 != 0) {
-                sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+                p2sdPlaySE(0, 0x7F, 0x3F);
             }
             D_00437D18 = 0;
         } else if (kwlnTaskPadButtonStates[0x21] < 0) {
             if (D_00437D18 == 0 && (D_00437D1C == 1 || D_00437D1C == 3 || D_00437D1C == 9)) {
-                sndSetSequenceVolumePan(0x11, 0x7F, 0x3F);
+                p2sdPlaySE(0x11, 0x7F, 0x3F);
             } else {
-                sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+                p2sdPlaySE(8, 0x7F, 0x3F);
             }
             if (D_00437D18 == 0) {
                 /* Retail 0x002CEC20 b: enters the shared yes tail mid-block at .L002CEDE8;
@@ -2963,7 +2963,7 @@ s32 fileUpdatePromptDialog(void) {
              * its delay slot (addiu $2,$0,-1) is the tail's first step. */
             goto no;
         } else if (kwlnTaskPadButtonStates[0x23] < 0) {
-            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+            p2sdPlaySE(0xA, 0x7F, 0x3F);
             D_00437D18 = -1;
             D_00437D1C = 0;
             return ((s32 (*)(void))D_00439028)();
@@ -3021,7 +3021,7 @@ restartRequest:
     D_00437D1C = 0;
     D_00437D18 = -1;
     fileClearAllSlotFlags();
-    fileSetMenuFlowState(0);
+    slSetInfo(0);
     D_00437D3C = 1;
     D_00437D40 = 0;
     fileReqBegin(fileMemoryCardRequestIndex);
@@ -3037,7 +3037,7 @@ extern u32 D_00439024;
 extern u32 D_00439028;
 extern s32 fileUpdatePromptDialog(void);
 
-s32 fileBeginPromptDialog(void *start, void *finish, s32 mode) {
+s32 slQueryYesNo(void *start, void *finish, s32 mode) {
     D_00439024 = (u32)start;
     D_00439028 = (u32)finish;
     D_00437D18 = (u32)mode;
@@ -3054,7 +3054,7 @@ u32 fileGetLoadSelectionState(void) {
     return D_00437D04;
 }
 
-void fileSetPreviewLocation(s32 x, s32 y) {
+void slSetTmnlID(s32 x, s32 y) {
     DatGameState *state = datGameState;
 
     state->vr.previewX = x;
@@ -3114,7 +3114,7 @@ void fileDrawSlotIcon(s32 index, s32 x, s32 y, s32 alpha) {
         {26, 74}, {26, 74}, {26, 74}, {26, 74}, {26, 74}, {26, 74}, {26, 74},
     };
 
-    evtSetDrawSurfaceIndex(0x53);
+    eglSetOt(0x53);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     evtSubmitTexturedGradientQuad(x, y, 0x16, 0x10, uv[index][0], uv[index][1], 0x16, 0x10, (alpha << 24) | 0x808080,
@@ -3197,7 +3197,7 @@ void fileDrawCursorPulse(s32 x, s32 y, s32 surface) {
     s32 i;
 
     memcpy(offsets, D_0042B8F8, sizeof(offsets));
-    evtSetDrawSurfaceIndex(surface);
+    eglSetOt(surface);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     for (i = 0; i < 3; i++) {
@@ -3270,8 +3270,8 @@ void fileLoadCtxSlideUpdate(void) {
 s32 mcdFinishFileDetectionWithAudio(void) {
     if (fileIsLoadedAndConditionTrue((u32)kwlnTaskPadButtonStates[0x21] >> 31) ||
         fileIsLoadedAndConditionTrue((u32)kwlnTaskPadButtonStates[0x23] >> 31)) {
-        fileSetMenuFlowState(0);
-        sndSetSequenceVolumePan(8, 0x7f, 0x3f);
+        slSetInfo(0);
+        p2sdPlaySE(8, 0x7f, 0x3f);
         return ((s32 (*)())fileMenuContinuation)();
     }
     return 0;
@@ -3286,28 +3286,28 @@ s32 fileCreateDetectionAudioCallback(u32 callback) {
 extern u32 fileFourWayDialogCancelCallback;
 
 s32 fileFourWayDialogPoll(void) {
-    if (fileIsLoadStepComplete() == 0) {
+    if (slChkWindowOpenDone() == 0) {
         return 0;
     }
     if (kwlnTaskPadButtonStates[0x27] < 0) {
         if (D_00437D18 != 1) {
-            sndSetSequenceVolumePan(0, 0x7f, 0x3f);
+            p2sdPlaySE(0, 0x7f, 0x3f);
         }
         D_00437D18 = 1;
     } else if (kwlnTaskPadButtonStates[0x26] < 0) {
         if (D_00437D18 != 0) {
-            sndSetSequenceVolumePan(0, 0x7f, 0x3f);
+            p2sdPlaySE(0, 0x7f, 0x3f);
         }
         D_00437D18 = 0;
     } else if (kwlnTaskPadButtonStates[0x21] < 0) {
-        sndSetSequenceVolumePan(8, 0x7f, 0x3f);
+        p2sdPlaySE(8, 0x7f, 0x3f);
         if (D_00437D18 == 0) {
             return ((s32 (*)())D_00439024)();
         }
         return ((s32 (*)())D_00439028)();
     } else if (kwlnTaskPadButtonStates[0x23] < 0) {
         if (fileFourWayDialogCancelCallback != 0) {
-            sndSetSequenceVolumePan(0xA, 0x7f, 0x3f);
+            p2sdPlaySE(0xA, 0x7f, 0x3f);
             return ((s32 (*)())fileFourWayDialogCancelCallback)();
         }
     }
@@ -3342,7 +3342,7 @@ s32 fileApplySelectedLoadResult(void) {
     if (kwlnDrawControlFlags & 2) {
         return 0;
     }
-    fileSetMenuFlowState(0);
+    slSetInfo(0);
     D_00437D18 = -1;
     D_00437D1C = 0;
     fldPrepareDeferredSceneTransition();
@@ -3350,7 +3350,7 @@ s32 fileApplySelectedLoadResult(void) {
         return (s32)fileWaitAfterLoadResult;
     }
     if (fileLoadSelectionWork->startBranchFlag == 0) {
-        mdlFlagSet(0xB8F);
+        evtBitOn(0xB8F);
         fileCopySaveHeaderNumbers(&fileLoadSelectionWork->header);
     } else {
         fileCopyRecordHeader(&fileLoadSelectionWork->header, &datGameState->header);
@@ -3375,7 +3375,7 @@ s32 fileApplySelectedLoadResult(void) {
     if (fileLoadSelectionWork->hardInitSelected != 0) {
         DatGameState *state;
         u16 startBranchFlag;
-        mdlFlagSet(0x80E);
+        evtBitOn(0x80E);
         state = datGameState;
         startBranchFlag = fileLoadSelectionWork->startBranchFlag;
         state->header.saveFlags2 |= 0x80000000;
@@ -3385,22 +3385,22 @@ s32 fileApplySelectedLoadResult(void) {
             printf("scd:hard init\n");
         }
     } else {
-        mdlFlagClear(0x80E);
+        evtBitOff(0x80E);
         datGameState->header.saveFlags2 &= 0x7FFFFFFF;
     }
-    if (mdlFlagTest(0xB8F)) {
-        mdlFlagClear(0x801);
-        mdlFlagSet(0x81D);
-        mdlFlagSet(0x805);
-        mdlFlagSet(0x806);
+    if (evtBitCheck(0xB8F)) {
+        evtBitOff(0x801);
+        evtBitOn(0x81D);
+        evtBitOn(0x805);
+        evtBitOn(0x806);
     }
     return (s32)fileWaitAfterLoadResult;
 }
 
 
 s32 fileBeginFadeAndConfirmSound(void) {
-    kwlnFadeInStart(0, 0, 0, 8);
-    sndReleaseTrackHandle(0x310000);
+    dds3FadeOut(0, 0, 0, 8);
+    p2sdStopBGM(0x310000);
     return (s32)fileApplySelectedLoadResult;
 }
 
@@ -3416,7 +3416,7 @@ s32 fileSelectLoadWithHardInit(void) {
 }
 
 s32 fileBeginLoadBranchDialog(void) {
-    fileSetMenuFlowState(0);
+    slSetInfo(0);
     D_00437D1C = 12;
     return fileBeginFourWayDialog((u32)fileSelectLoadWithoutHardInit, (u32)fileSelectLoadWithHardInit, 0, 0);
 }
@@ -3424,7 +3424,7 @@ s32 fileBeginLoadBranchDialog(void) {
 s32 fileStartLoadDetectionAfterBranchDialog(void) {
     D_00437D18 = -1;
     D_00437D1C = 0;
-    fileSetMenuFlowState(0x18);
+    slSetInfo(0x18);
     fileLoadSelectionWork->applyLoadResult = 1;
     return fileCreateDetectionAudioCallback((u32)fileBeginLoadBranchDialog);
 }
@@ -3435,7 +3435,7 @@ s32 fileRestartSelectionFlow(void) {
 }
 
 s32 fileBeginLoadConfirmationDialog(void) {
-    fileSetMenuFlowState(0);
+    slSetInfo(0);
     D_00437D1C = 11;
     return fileBeginFourWayDialog((u32)fileStartLoadDetectionAfterBranchDialog, (u32)fileRestartSelectionFlow, (u32)fileRestartSelectionFlow, 0);
 }
@@ -3443,7 +3443,7 @@ s32 fileBeginLoadConfirmationDialog(void) {
 extern s32 fileNextMenuFlowState(void);
 
 s32 fileWaitForLoadStepBeforeDetection(void) {
-    if (fileIsLoadStepComplete() != 0) {
+    if (slChkWindowOpenDone() != 0) {
         return fileCreateDetectionAudioCallback((u32)fileNextMenuFlowState);
     }
     return 0;
@@ -3463,7 +3463,7 @@ s32 fileNextMenuFlowState(void) {
 
         work->flowRowCursor = index + 1;
         if (fileMenuFlowStateEntries[index].mask & work->flowConditionMask) {
-            fileSetMenuFlowState(fileMenuFlowStateEntries[index].state);
+            slSetInfo(fileMenuFlowStateEntries[index].state);
             return (s32)fileWaitForLoadStepBeforeDetection;
         }
     }
@@ -3479,17 +3479,17 @@ s32 fileResetPendingRequest(void) {
     D_00437D18 = -1;
     mode = 3;
     D_00437D1C = 0;
-    dds3AdminSubmitModeRequest(2, &mode, 4, 0);
+    dds3AdminiCallSequence(2, &mode, 4, 0);
     return 0;
 }
 
 s32 fileFadeBeforeResettingRequest(void) {
-    kwlnFadeInStart(0, 0, 0, 8);
+    dds3FadeOut(0, 0, 0, 8);
     return (s32)fileResetPendingRequest;
 }
 
 s32 fileBeginLoadOrAbortDialog(void) {
-    fileSetMenuFlowState(0);
+    slSetInfo(0);
     D_00437D1C = 10;
     fileLoadSelectionWork->applyLoadResult = 0;
     return fileBeginFourWayDialog((u32)fileRestartSelectionFlow, (u32)fileBeginFadeAndConfirmSound, (u32)fileFadeBeforeResettingRequest, 0);
@@ -3504,7 +3504,7 @@ s32 mcdContinueLoadSelection(void) {
             block = fileLoadSelectionWork;
             block->flowRowCursor = 0;
             fileApplyMenuFlagsToModel(block);
-            sndSetSequenceVolumePan(8, 0x7f, 0x3f);
+            p2sdPlaySE(8, 0x7f, 0x3f);
             next = (s32)fileNextMenuFlowState;
         } else {
             next = 0;
@@ -3513,15 +3513,15 @@ s32 mcdContinueLoadSelection(void) {
     return next;
 }
 
-extern void kwlnFadeStartIn(s32);
+extern void dds3FadeIn2(s32);
 extern s32 fileBeginLoadOrAbortDialog(void);
 
 s32 fileMenuWorkStart(void) {
     fileSelectedSlotIndex = 0;
     D_00437D28 = 0;
     D_00437CF8 = 0;
-    if (kwlnFadeIsActive()) {
-        kwlnFadeStartIn(0x10);
+    if (dds3FadeCheck()) {
+        dds3FadeIn2(0x10);
     }
     if (fileLoadSelectionWork->startBranchFlag == 0) {
         return (s32)fileBeginLoadOrAbortDialog;
@@ -3602,7 +3602,7 @@ s32 ptyApplyUnlockedUnitStatBonusesOnce(s32 unitId) {
     if (unitId != 7) {
         for (row = 0; row < 24; row++) {
             if (ptyUnlockedUnitStatBonusRows[row].unitId == unitId) {
-                if (mdlFlagTest(ptyUnlockedUnitStatBonusRows[row].flag)) {
+                if (evtBitCheck(ptyUnlockedUnitStatBonusRows[row].flag)) {
                     bonus = D_00435E3C[58 + ptyUnlockedUnitStatBonusRows[row].bonusIndex];
                     for (index = 0; index < DAT_BASE_STAT_COUNT; index++) {
                         party->baseStats[index] += bonus[index];
@@ -3614,7 +3614,7 @@ s32 ptyApplyUnlockedUnitStatBonusesOnce(s32 unitId) {
     } else {
         for (row = 0; row < 6; row++) {
             for (index = 0; index < 4; index++) {
-                if (mdlFlagTest(ptyUnit7StatBonusFlagGroups[row].flags[index])) {
+                if (evtBitCheck(ptyUnit7StatBonusFlagGroups[row].flags[index])) {
                     bonus = D_00435E3C[58 + ptyUnit7StatBonusFlagGroups[row].bonusIndex];
                     for (stat = 0; stat < DAT_BASE_STAT_COUNT; stat++) {
                         party->baseStats[stat] += bonus[stat];
@@ -3647,19 +3647,19 @@ void fileApplyMenuFlagsToModel(MenuWork *work) {
 
     for (i = 0; i < 0x4F; i++) {
         if (((s32)work->header.saveWords.words[i >> 5] >> (i & 0x1F)) & 1) {
-            mdlFlagSet(0xB40 + i);
+            evtBitOn(0xB40 + i);
         } else {
-            mdlFlagClear(0xB40 + i);
+            evtBitOff(0xB40 + i);
         }
     }
     for (i = 0; i < 5; i++) {
-        if (mdlFlagTest(fileRareItemNoticeFlagRows[i].flag)) {
+        if (evtBitCheck(fileRareItemNoticeFlagRows[i].flag)) {
             work->flowConditionMask |= 2;
             break;
         }
     }
     for (i = 0; i < 0x18; i++) {
-        if (mdlFlagTest(ptyUnlockedUnitStatBonusRows[i].flag)) {
+        if (evtBitCheck(ptyUnlockedUnitStatBonusRows[i].flag)) {
             work->flowConditionMask |= 4;
             break;
         }
@@ -3680,7 +3680,7 @@ void fileRestoreSlotFlagsToState(void) {
     datGameState->world.slotFlags = fileSavedSlotFlags;
 }
 
-extern void kwlnPadStartMotor(s32, u8, s32);
+extern void dds3PadVibrationSet(s32, u8, s32);
 
 extern s32 fileTestSlotFlagsBit(s32 kind, s32 *flags);
 
@@ -3689,11 +3689,11 @@ s32 fileToggleSlotFlagsBit(u32 kind, s32 *flags) {
     case 0:
         *flags ^= 2;
         if (fileTestSlotFlagsBit(kind, flags) != 0) {
-            kwlnPadStartMotor(0, 1, 0xF);
-            kwlnPadStartMotor(1, 0x80, 0xF);
+            dds3PadVibrationSet(0, 1, 0xF);
+            dds3PadVibrationSet(1, 0x80, 0xF);
         } else {
-            kwlnPadStartMotor(0, 0, 0xF);
-            kwlnPadStartMotor(1, 0, 0xF);
+            dds3PadVibrationSet(0, 0, 0xF);
+            dds3PadVibrationSet(1, 0, 0xF);
         }
         return 1;
     case 1:
@@ -3836,7 +3836,7 @@ FileConfigTask *fileCreateConfigTask(s32 mode) {
         mnuResetTitleStreamLocked();
         mnuQueueTitleSoundStreamEntry(0x14);
         mnuResetTitleStreamAfterFileIdle();
-        kwlnFadeOutStart(0, 0, 0, 0xF);
+        dds3FadeIn(0, 0, 0, 0xF);
         break;
     default:
         for (i = 0; i < 4; i++) {
@@ -3858,7 +3858,7 @@ void fileConfigTaskDestroy(KwlnTask *task) {
     if (fileConfigTaskWork != 0) {
         fileSavedSlotFlags = datGameState->world.slotFlags;
         if (*(u32 *)((u32)fileConfigTaskWork + 4) == 1) {
-            dds3AdminSubmitModeRequest(2, &request, 4, 0);
+            dds3AdminiCallSequence(2, &request, 4, 0);
             mnuAdvanceTitleStateUnderSemaphore();
         }
         node = (FileConfigListNode *)((FileConfigTask *)fileConfigTaskWork)->frame->first;
@@ -3889,7 +3889,7 @@ extern s32 fileUpdateConfigOwnerTask(KwlnTask *task);
 
 extern s8 fileConfigTaskState;
 
-void mnuCreateConfigTasks(s32 mode) {
+void dds3ConfigProcessStart(s32 mode) {
     if (fileConfigTaskWork == 0) {
         fileConfigTaskWork = fileCreateConfigTask(mode);
         dds3StartProcess(fileConfigInputTaskName, 0x3F2, 1, 1, fileUpdateConfigurationMenu, NULL, (u32)fileConfigTaskWork);
@@ -3899,13 +3899,13 @@ void mnuCreateConfigTasks(s32 mode) {
     }
 }
 
-void mnuConfigTasksDestroy(void) {
+void dds3ConfigProcessEnd(void) {
     dds3KillProcessName(fileConfigInputTaskName, 1);
     dds3KillProcessName(fileConfigLoadTaskName, 1);
     dds3KillProcessName(fileConfigOwnerTaskName, 1);
 }
 
-s32 fileConsumeConfigTaskReady(void) {
+s32 checkConfigState(void) {
     s32 state = fileConfigTaskState;
     if (state == 1) {
         return 1;
@@ -3975,7 +3975,7 @@ s32 fileUpdateConfigurationMenu(KwlnTask *task) {
         break;
     case 3:
         if (fileConfigTaskWork->state == 1) {
-            kwlnFadeInStart(0, 0, 0, 15);
+            dds3FadeOut(0, 0, 0, 15);
         }
         fileConfigTaskWork->ticks = 0;
         fileConfigTaskWork->result = 4;
@@ -4004,14 +4004,14 @@ s32 fileUpdateConfigurationMenu(KwlnTask *task) {
     oldIndex = fileConfigTaskWork->frame->cursor->index;
     if ((u8)kwlnTaskPadButtonStates[0x26] & 2) {
         if (mnuRetreatListCursorDefault(fileConfigTaskWork->frame) != NULL) {
-            sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+            p2sdPlaySE(0, 0x7F, 0x3F);
             fileConfigTaskWork->transitionTicks = 8;
             fileConfigTaskWork->previousIndex = oldIndex;
         }
     }
     if ((u8)kwlnTaskPadButtonStates[0x27] & 2) {
         if (mnuAdvanceListCursorDefault(fileConfigTaskWork->frame) != NULL) {
-            sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+            p2sdPlaySE(0, 0x7F, 0x3F);
             fileConfigTaskWork->previousIndex = oldIndex;
             fileConfigTaskWork->transitionTicks = 8;
         }
@@ -4020,14 +4020,14 @@ s32 fileUpdateConfigurationMenu(KwlnTask *task) {
     if (index < 4) {
         if (kwlnTaskPadButtonStates[0x24] < 0 && fileTestSlotFlagsBit(index, (s32 *)&datGameState->world.slotFlags) == 0) {
             fileToggleSlotFlagsBit(fileConfigTaskWork->frame->cursor->index, (s32 *)&datGameState->world.slotFlags);
-            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            p2sdPlaySE(8, 0x7F, 0x3F);
             cursor = (FileConfigListNode *)fileConfigTaskWork->frame->cursor;
             cursor->resource->ticks = 8;
         }
         if (kwlnTaskPadButtonStates[0x25] < 0) {
             if (fileTestSlotFlagsBit(fileConfigTaskWork->frame->cursor->index, (s32 *)&datGameState->world.slotFlags) != 0) {
                 fileToggleSlotFlagsBit(fileConfigTaskWork->frame->cursor->index, (s32 *)&datGameState->world.slotFlags);
-                sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+                p2sdPlaySE(8, 0x7F, 0x3F);
                 cursor = (FileConfigListNode *)fileConfigTaskWork->frame->cursor;
                 cursor->resource->ticks = 8;
             }
@@ -4039,12 +4039,12 @@ s32 fileUpdateConfigurationMenu(KwlnTask *task) {
     if (kwlnTaskPadButtonStates[0x21] < 0) {
         if (fileConfigTaskWork->frame->cursor->index == 4) {
             fileConfigTaskWork->result = 3;
-            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            p2sdPlaySE(8, 0x7F, 0x3F);
         }
     } else if (kwlnTaskPadButtonStates[0x23] < 0) {
         fileConfigTaskWork->result = 3;
         fileRestoreSlotFlagsToState();
-        sndSetSequenceVolumePan(10, 0x7F, 0x3F);
+        p2sdPlaySE(10, 0x7F, 0x3F);
     }
     return 0;
 }
@@ -4464,7 +4464,7 @@ s32 sdfProjectPointInForwardConeVU(void) {
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_MATRIX(sdfViewMatrix);
     VU0_MOVE_MATRIX_TO_B();
-    sdfInvertRigidVuTransform();
+    ReverseMatrix();
     VU0_MOVE_VF(vf10, vf30);
     VU0_NORMALIZE_VF10();
     VU0_DOT_XYZ(facing, vf10, vf11);
@@ -4795,13 +4795,13 @@ void fileJobCopyCommandIntoPrimaryData(FileJobPayload *job, const char *commandP
     struct SdfMemBlock *allocation;
     void *buffer;
 
-    command = sdfDevCreateCommandState(commandPath);
+    command = sdfFileOpen(commandPath);
     if (command != 0) {
-        size = sdfDevQueueControlAndWait(command);
+        size = sdfFileLength(command);
         allocation = sdfMemAllocDirect(size);
         buffer = (void *)sdfMemLock(allocation);
-        sdfDevQueueReadAndWait(command, buffer, size);
-        sdfDevWaitThenReleaseCommandState(command);
+        sdfFileRead(command, buffer, size);
+        sdfFileClose(command);
         fileJobSetPrimaryData(job, buffer, size, option);
         sdfMemFreeDirect(allocation);
         return;
@@ -4825,13 +4825,13 @@ void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, const char *comman
     struct SdfMemBlock *allocation;
     void *buffer;
 
-    command = sdfDevCreateCommandState(commandPath);
+    command = sdfFileOpen(commandPath);
     if (command != 0) {
-        size = sdfDevQueueControlAndWait(command);
+        size = sdfFileLength(command);
         allocation = sdfMemAllocDirect(size);
         buffer = (void *)sdfMemLock(allocation);
-        sdfDevQueueReadAndWait(command, buffer, size);
-        sdfDevWaitThenReleaseCommandState(command);
+        sdfFileRead(command, buffer, size);
+        sdfFileClose(command);
         fileJobSetSecondaryData(job, buffer, size, selector);
         sdfMemFreeDirect(allocation);
         return;
@@ -4848,7 +4848,7 @@ void fileWriteToPfs(FileJobPayload *job, const char *filePath) {
         sprintf(path, D_00437E10, filePath);
         fd = sceOpen(path, 0x602, 0x1B6);
     } else {
-        sprintf(path, D_00437E18, sdfDevGetPathBuffer(), filePath);
+        sprintf(path, D_00437E18, sdfFileGetHostRoot(), filePath);
         fd = sceOpen(path, 0x602);
     }
     fileJobWriteSerializedPayload(fd, job);
@@ -4877,13 +4877,13 @@ FileJobPayload *fileJobCreateFromCommandState(const char *entry) {
     void *buffer;
     FileJobPayload *job;
 
-    command = sdfDevCreateCommandState(entry);
+    command = sdfFileOpen(entry);
     if (command != 0) {
-        size = sdfDevQueueControlAndWait(command);
+        size = sdfFileLength(command);
         allocation = sdfMemAllocDirect(size);
         buffer = (void *)sdfMemLock(allocation);
-        sdfDevQueueReadAndWait(command, buffer, size);
-        sdfDevWaitThenReleaseCommandState(command);
+        sdfFileRead(command, buffer, size);
+        sdfFileClose(command);
         job = fileDuplicateJob((FileJobPayload *)buffer);
         sdfMemFreeDirect(allocation);
         return job;
@@ -5066,7 +5066,7 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
 }
 
 /* Effect-node creation callback: ignore its option and clone the supplied queue. */
-FileQueue *effCloneQueueForNode(u32 unused, FileQueue *source) {
+FileQueue *CallShopTest(u32 unused, FileQueue *source) {
     return fileCloneQueueEntries(source);
 }
 
@@ -5466,7 +5466,7 @@ void fileQueueSaveImage(FileQueue *queue, const char *filePath) {
         sprintf(path, D_00437E10, filePath);
         fd = sceOpen(path, 0x602, 0x1B6);
     } else {
-        sprintf(path, D_00437E18, sdfDevGetPathBuffer(), filePath);
+        sprintf(path, D_00437E18, sdfFileGetHostRoot(), filePath);
         fd = sceOpen(path, 0x602);
     }
     header = *queue;
@@ -5566,7 +5566,7 @@ void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
         sprintf(path, D_00437E10, filePath);
         fd = sceOpen(path, 0x602, 0x1B6);
     } else {
-        sprintf(path, D_00437E18, sdfDevGetPathBuffer(), filePath);
+        sprintf(path, D_00437E18, sdfFileGetHostRoot(), filePath);
         fd = sceOpen(path, 0x602);
     }
     image.version = 5;
@@ -5644,7 +5644,7 @@ void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
 }
 
 FileQueue *fileQueueCreateFromCommandState(const char *entry) {
-    DevState *command = sdfDevCreateCommandState(entry);
+    DevState *command = sdfFileOpen(entry);
     s32 size;
     struct SdfMemBlock *allocation;
     FileQueue *image;
@@ -5656,11 +5656,11 @@ FileQueue *fileQueueCreateFromCommandState(const char *entry) {
     if (command == NULL) {
         return NULL;
     }
-    size = sdfDevQueueControlAndWait(command);
+    size = sdfFileLength(command);
     allocation = sdfMemAllocDirect(size);
     image = (FileQueue *)sdfMemLock(allocation);
-    sdfDevQueueReadAndWait(command, image, size);
-    sdfDevWaitThenReleaseCommandState(command);
+    sdfFileRead(command, image, size);
+    sdfFileClose(command);
     queue = fileQueueCreate();
     PCP_COPY_VECTOR(queue->offset, image->offset);
     PCP_COPY_VECTOR(queue->axis, image->offset);
@@ -5882,7 +5882,7 @@ void fileDestroyEffectSurfaceAndChildren(EffectSurfaceNode *node) {
     u32 i;
 
     if (node->resource != NULL) {
-        billDispatchByKind(node->resource);
+        dds3BillboardDelete(node->resource);
     }
     if (node->jobAllocation != 0) {
         count = node->record->count;
@@ -5902,7 +5902,7 @@ void fileDestroyEffectSurfaceAndChildren(EffectSurfaceNode *node) {
         effReleaseReferenceHolder(node->resourceHolder);
     }
     if (node->record != 0) {
-        fileReleaseGridRecordHandle(node->record);
+        effPCPHelperBEDGetModel(node->record);
     }
     sdfChipFreeDirect(node);
 }
@@ -5928,12 +5928,12 @@ void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *
     case 2:
     case 4:
         if (dst->resource != NULL) {
-            billDispatchByKind(dst->resource);
+            dds3BillboardDelete(dst->resource);
         }
-        dst->resource = billCloneObjectRetainingSharedData(src->resource);
-        billMarkKindOneFlag(dst->resource);
+        dst->resource = dds3BillboardCopy(src->resource);
+        dds3BillboardSetAnimColorAdvMode(dst->resource);
         if (dst->record != 0) {
-            billSetBillboardMode(dst->resource, (s16)((FileKeyBlock *)dst->record->data0)->alphaTrack.surfaceIndex);
+            dds3BillboardSetMode(dst->resource, (s16)((FileKeyBlock *)dst->record->data0)->alphaTrack.surfaceIndex);
         }
         break;
     case 5:
@@ -5994,7 +5994,7 @@ void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *
 
 void fileLoadObjectSetResource(EffectSurfaceNode *node, u32 entryId, void *resource) {
     if (node->record != 0) {
-        fileReleaseGridRecordHandle(node->record);
+        effPCPHelperBEDGetModel(node->record);
     }
     node->record = fileAllocateGridRecordSlots((u16)entryId, node->handleCount, resource);
 }
@@ -6002,37 +6002,37 @@ void fileLoadObjectSetResource(EffectSurfaceNode *node, u32 entryId, void *resou
 void fileLoadObjectOpenNamedDevice(EffectSurfaceNode *node, u32 resourceId) {
     struct BillObj *resource = node->resource;
     if (resource != 0) {
-        billDispatchByKind(resource);
+        dds3BillboardDelete(resource);
     }
     resource = effCreateBillboardSharingIndexedResource(resourceId);
     node->resource = resource;
     if (node->record != 0) {
-        billSetBillboardMode(resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
+        dds3BillboardSetMode(resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
     }
 }
 
 void fileLoadObjectOpenDevice(EffectSurfaceNode *node, u32 resourceId) {
     struct BillObj *resource = node->resource;
     if (resource != 0) {
-        billDispatchByKind(resource);
+        dds3BillboardDelete(resource);
     }
-    resource = billCreateIndexed(0, resourceId);
+    resource = dds3BillboardCreate(0, resourceId);
     node->resource = resource;
     if (node->record != 0) {
-        billSetBillboardMode(resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
+        dds3BillboardSetMode(resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
     }
 }
 
 void fileLoadObjectOpenAndStartDevice(EffectSurfaceNode *node, u32 resourceId) {
     struct BillObj *resource = node->resource;
     if (resource != 0) {
-        billDispatchByKind(resource);
+        dds3BillboardDelete(resource);
     }
-    resource = billCreateIndexed(1, resourceId);
+    resource = dds3BillboardCreate(1, resourceId);
     node->resource = resource;
-    billMarkKindOneFlag(resource);
+    dds3BillboardSetAnimColorAdvMode(resource);
     if (node->record != 0) {
-        billSetBillboardMode(node->resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
+        dds3BillboardSetMode(node->resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -6110,7 +6110,7 @@ fileAcquireLoadObjectRecord(EffectSurfaceNode *obj) {
 
 #include "eff_anim.h"
 
-extern void billInvokeCallback(struct BillObj *);
+extern void dds3BillboardDraw(struct BillObj *);
 extern void fileReadRecordSecondVector(u8 *, void *);
 extern void fileReadVectorPtr20(u8 *, void *);
 extern void effSubmitGeneratedTexturePacket(SdfPoolNode *, EffGeneratedTextureDescriptor *);
@@ -6166,12 +6166,12 @@ void fileDrawLoadObjectSlots(s32 object) {
                         VU0_MUL(vf10, vf10, vf11);
                         billDirectPacked = eePackRGBAWord(128.0f);
                         scale = slot->scale;
-                        billSetChildParameter(billboard, billDirectPacked);
-                        billSetChildScaleComponents(billboard, scale, scale);
-                        billSetRotationAngle(billboard, slot->angle);
+                        dds3BillboardSetRGBA(billboard, billDirectPacked);
+                        dds3BillboardSetScale(billboard, scale, scale);
+                        dds3BillboardSetRotate(billboard, slot->angle);
                         effCopyVector(billboard, slot->pos);
-                        billSetAnimationFrameForImmediateAdvance(billboard, slot->state);
-                        billInvokeCallback(billboard);
+                        dds3BillboardSetAnimKey(billboard, slot->state);
+                        dds3BillboardDraw(billboard);
                     }
                 }
             } else {
@@ -6193,12 +6193,12 @@ void fileDrawLoadObjectSlots(s32 object) {
                         VU0_MUL(vf10, vf10, vf11);
                         billTransformedPacked = eePackRGBAWord(128.0f);
                         scale = slot->scale;
-                        billSetChildParameter(billboard, billTransformedPacked);
-                        billSetChildScaleComponents(billboard, scale, scale);
-                        billSetRotationAngle(billboard, slot->angle);
+                        dds3BillboardSetRGBA(billboard, billTransformedPacked);
+                        dds3BillboardSetScale(billboard, scale, scale);
+                        dds3BillboardSetRotate(billboard, slot->angle);
                         effCopyVector(billboard, transformed);
-                        billSetAnimationFrameForImmediateAdvance(billboard, slot->state);
-                        billInvokeCallback(billboard);
+                        dds3BillboardSetAnimKey(billboard, slot->state);
+                        dds3BillboardDraw(billboard);
                     }
                 }
             }
@@ -6884,13 +6884,13 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                     toSpawn = record->instances;
                 } else {
                     toSpawn = (s32)((f32)record->instances *
-                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
                 }
             } else {
                 prewarm = 0;
                 if (keys->spawnVariance > 0.0f) {
                     record->spawnRemainder += (f32)keys->spawnRate *
-                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
                 } else {
                     record->spawnRemainder += (f32)keys->spawnRate;
                 }
@@ -6926,9 +6926,9 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                                 motion->axis[1] = direction[1];
                                 motion->axis[2] = direction[2];
                             }
-                            direction[0] = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f;
+                            direction[0] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f;
                             direction[1] = 0.0f;
-                            direction[2] = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f;
+                            direction[2] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f;
                             direction[3] = 0.0f;
                             VU0_LOAD_VF(vf10, direction);
                             VU0_NORMALIZE_VF10();
@@ -6940,23 +6940,23 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                             motion->swayDirection[1] = direction[1];
                             motion->swayDirection[2] = direction[2];
                             motion->speed = keys->emitter.wave.axialSpeed *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.wave.axialSpeedRandomness +
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.wave.axialSpeedRandomness +
                                  (1.0f - keys->emitter.wave.axialSpeedRandomness));
                             initialAmplitude = keys->emitter.wave.initialAmplitude *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.wave.initialAmplitudeRandomness +
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.wave.initialAmplitudeRandomness +
                                  (1.0f - keys->emitter.wave.initialAmplitudeRandomness));
                             finalAmplitude = keys->emitter.wave.finalAmplitude *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.wave.finalAmplitudeRandomness +
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.wave.finalAmplitudeRandomness +
                                  (1.0f - keys->emitter.wave.finalAmplitudeRandomness));
                             motion->amplitude = initialAmplitude;
                             motion->amplitudeStep = (finalAmplitude - initialAmplitude) / (f32)length;
                             motion->phaseStep = keys->emitter.wave.phaseStep *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.wave.phaseStepRandomness +
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.wave.phaseStepRandomness +
                                  (1.0f - keys->emitter.wave.phaseStepRandomness));
-                            motion->phase = sdfGetRandFloat(&effSharedRandomState) * 6.2831850051879883f;
-                            motion->previousSine = sdfSinPoly(motion->phase);
+                            motion->phase = dds3GetRandFloatA(&effSharedRandomState) * 6.2831850051879883f;
+                            motion->previousSine = sdfSin(motion->phase);
                             radius = keys->emitter.wave.initialRadius *
-                                ((sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f);
+                                ((dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f);
                             VEC3_SPLAT(radiusVector, radius);
                             if (localSpace != 0) {
                                 VU0_LOAD_VF(vf10, direction);
@@ -6970,14 +6970,14 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                                 VU0_ADD(vf10, vf10, vf11);
                             }
                             VU0_STORE_VF(vf10, slot->pos);
-                            motion->scaleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
+                            motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                motion->angleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->heading.emitter.randomness +
                                     (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
-                                    motion->angle = sdfGetRandFloat(&effSharedRandomState) * 6.2831850051879883f;
-                                    if (sdfGetRand(&effSharedRandomState) & 1) {
+                                    motion->angle = dds3GetRandFloatA(&effSharedRandomState) * 6.2831850051879883f;
+                                    if (dds3GetRandA(&effSharedRandomState) & 1) {
                                         motion->angleMultiplier = -motion->angleMultiplier;
                                     }
                                 } else {
@@ -6990,7 +6990,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                             slot->state = 0;
                             PCP_COPY_VECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
-                                f32 age = (f32)(sdfGetRand(&effSharedRandomState) % prewarmLength);
+                                f32 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
                                 distance = motion->speed * age;
                                 distance -= speedDecrease * age * age * 0.5f;
                                 slot->pos[0] += motion->axis[0] * distance;
@@ -6998,7 +6998,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                                 slot->pos[2] += motion->axis[2] * distance;
                                 motion->phase += motion->phaseStep * age;
                                 motion->amplitude += motion->amplitudeStep * age;
-                                sine = sdfSinPoly(motion->phase);
+                                sine = sdfSin(motion->phase);
                                 sway = motion->amplitude * sine;
                                 slot->state = (s32)age;
                                 slot->pos[0] += motion->swayDirection[0] * sway;
@@ -7020,7 +7020,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                         }
                     } else {
                         PCP_COPY_VECTOR(previousPosition, slot->pos);
-                        sine = sdfSinPoly(motion->phase);
+                        sine = sdfSin(motion->phase);
                         sway = motion->amplitude * (sine - motion->previousSine);
                         slot->pos[0] += motion->swayDirection[0] * sway;
                         slot->pos[1] += motion->swayDirection[1] * sway;
@@ -7120,13 +7120,13 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                 toSpawn = count;
                 if (keys->spawnVariance > 0.0f) {
                     toSpawn = (s32)((f32)record->instances *
-                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
                 }
             } else {
                 prewarm = 0;
                 if (keys->spawnVariance > 0.0f) {
                     record->spawnRemainder += (f32)keys->spawnRate *
-                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
                 } else {
                     record->spawnRemainder += (f32)keys->spawnRate;
                 }
@@ -7145,9 +7145,9 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                 if (frame != -2) {
                     if (frame == -1) {
                         if (toSpawn != 0) {
-                            delta[0] = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f;
-                            delta[1] = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f;
-                            delta[2] = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f;
+                            delta[0] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f;
+                            delta[1] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f;
+                            delta[2] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f;
                             VU0_LOAD_VF(vf10, delta);
                             VU0_NORMALIZE_VF10();
                             VU0_STORE_VF(vf10, delta);
@@ -7155,10 +7155,10 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                             motion->direction[1] = delta[1];
                             motion->direction[2] = delta[2];
                             motion->speed = fabsf(keys->emitter.radial.speed *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.radial.speedRandomness + (1.0f - keys->emitter.radial.speedRandomness)));
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.radial.speedRandomness + (1.0f - keys->emitter.radial.speedRandomness)));
                             {
                                 f32 radius = keys->emitter.radial.radius *
-                                    (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.radial.radiusRandomness + (1.0f - keys->emitter.radial.radiusRandomness));
+                                    (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.radial.radiusRandomness + (1.0f - keys->emitter.radial.radiusRandomness));
                                 VEC3_SPLAT(radiusVector, radius);
                             }
                             /* Retail initializes only XYZ of this radius vector; W is left untouched. */
@@ -7176,14 +7176,14 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                                 VU0_ADD(vf10, vf10, vf11);
                             }
                             VU0_STORE_VF(vf10, slot->pos);
-                            motion->scaleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
+                            motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                motion->angleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->heading.emitter.randomness +
                                     (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
-                                    motion->angle = sdfGetRandFloat(&effSharedRandomState) * 6.2831850051879883f;
-                                    if (sdfGetRand(&effSharedRandomState) & 1) {
+                                    motion->angle = dds3GetRandFloatA(&effSharedRandomState) * 6.2831850051879883f;
+                                    if (dds3GetRandA(&effSharedRandomState) & 1) {
                                         motion->angleMultiplier = -motion->angleMultiplier;
                                     }
                                 } else {
@@ -7196,7 +7196,7 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                             slot->state = 0;
                             PCP_COPY_VECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
-                                f32 age = (f32)(sdfGetRand(&effSharedRandomState) % prewarmLength);
+                                f32 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
                                 VU0_LOAD_VF(vf11, slot->pos);
                                 distance = motion->speed * age;
                                 distance += acceleration * age * age * 0.5f;
@@ -7339,13 +7339,13 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                 toSpawn = count;
                 if (keys->spawnVariance > 0.0f) {
                     toSpawn = (s32)((f32)record->instances *
-                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
                 }
             } else {
                 prewarm = 0;
                 if (keys->spawnVariance > 0.0f) {
                     record->spawnRemainder += (f32)keys->spawnRate *
-                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
                 } else {
                     record->spawnRemainder += (f32)keys->spawnRate;
                 }
@@ -7369,24 +7369,24 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                             s32 localSpace;
 
                             initialRadius = keys->emitter.circular.initialRadius *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.circular.initialRadiusRandomness +
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.circular.initialRadiusRandomness +
                                  (1.0f - keys->emitter.circular.initialRadiusRandomness));
                             finalRadius = keys->emitter.circular.finalRadius *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.circular.finalRadiusRandomness +
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.circular.finalRadiusRandomness +
                                  (1.0f - keys->emitter.circular.finalRadiusRandomness));
                             motion->radius = initialRadius;
                             motion->radiusStep = (finalRadius - initialRadius) / (f32)length;
-                            motion->initialPhase = sdfGetRandFloat(&effSharedRandomState) * 6.2831850051879883f;
+                            motion->initialPhase = dds3GetRandFloatA(&effSharedRandomState) * 6.2831850051879883f;
                             motion->angularSpeed = keys->emitter.circular.angularSpeed *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.circular.angularSpeedRandomness +
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.circular.angularSpeedRandomness +
                                  (1.0f - keys->emitter.circular.angularSpeedRandomness));
                             motion->axialSpeed = keys->emitter.circular.axialSpeed *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.circular.axialSpeedRandomness +
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.circular.axialSpeedRandomness +
                                  (1.0f - keys->emitter.circular.axialSpeedRandomness));
                             direction[0] = sdfCos(motion->initialPhase);
                             direction[1] = 0.0f;
-                            direction[2] = sdfSinPoly(motion->initialPhase);
-                            motion->height = -keys->emitter.circular.initialAxialExtent * sdfGetRandFloat(&effSharedRandomState);
+                            direction[2] = sdfSin(motion->initialPhase);
+                            motion->height = -keys->emitter.circular.initialAxialExtent * dds3GetRandFloatA(&effSharedRandomState);
                             VEC3_SPLAT(radiusVector, initialRadius);
                             VU0_LOAD_VF(vf10, direction);
                             VU0_LOAD_VF(vf11, radiusVector);
@@ -7405,14 +7405,14 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                                 VU0_ADD(vf10, vf10, vf11);
                             }
                             VU0_STORE_VF(vf10, slot->pos);
-                            motion->scaleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
+                            motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                motion->angleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->heading.emitter.randomness +
                                     (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
-                                    motion->angle = sdfGetRandFloat(&effSharedRandomState) * 6.2831850051879883f;
-                                    if (sdfGetRand(&effSharedRandomState) & 1) {
+                                    motion->angle = dds3GetRandFloatA(&effSharedRandomState) * 6.2831850051879883f;
+                                    if (dds3GetRandA(&effSharedRandomState) & 1) {
                                         motion->angleMultiplier = -motion->angleMultiplier;
                                     }
                                 } else {
@@ -7425,12 +7425,12 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                             slot->state = 0;
                             PCP_COPY_VECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
-                                age = (f32)(sdfGetRand(&effSharedRandomState) % prewarmLength);
+                                age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
                                 motion->height = motion->height - motion->axialSpeed * age + gravity * age * age * 0.5f;
                                 motion->radius += motion->radiusStep * age;
                                 position[0] = sdfCos(motion->initialPhase) * motion->radius;
                                 position[1] = motion->height;
-                                position[2] = sdfSinPoly(motion->initialPhase) * motion->radius;
+                                position[2] = sdfSin(motion->initialPhase) * motion->radius;
                                 if (localSpace == 0) {
                                     VU0_LOAD_VF(vf10, initialOrientation);
                                     effMiscQuaternionToMatrixVU();
@@ -7462,7 +7462,7 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                         phase = (motion->angularSpeed + angularAcceleration * age * 0.5f) * age + motion->initialPhase;
                         position[0] = sdfCos(phase) * motion->radius;
                         position[1] = motion->height;
-                        position[2] = sdfSinPoly(phase) * motion->radius;
+                        position[2] = sdfSin(phase) * motion->radius;
                         if (!(flags & 1)) {
                             orientation[0] = motion->orientation[0];
                             orientation[1] = motion->orientation[1];
@@ -7528,7 +7528,7 @@ typedef struct FileOrientedRingMotion {
     f32 angleMultiplier;
 } FileOrientedRingMotion;   /* 0x38, ordinary word alignment */
 
-extern void sdfVuLoadRotationMatrixX(f32 angle);
+extern void SetRotateMatrixX(f32 angle);
 extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 
 /* vu0 routine: advances a ring in its sampled orientation with vertical acceleration. */
@@ -7583,13 +7583,13 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                 toSpawn = count;
                 if (keys->spawnVariance > 0.0f) {
                     toSpawn = (s32)((f32)record->instances *
-                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
                 }
             } else {
                 prewarm = 0;
                 if (keys->spawnVariance > 0.0f) {
                     record->spawnRemainder += (f32)keys->spawnRate *
-                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
                 } else {
                     record->spawnRemainder += (f32)keys->spawnRate;
                 }
@@ -7613,26 +7613,26 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                             s32 localSpace;
 
                             initialRadius = keys->emitter.orientedRing.initialRadius *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.orientedRing.initialRadiusRandomness +
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.orientedRing.initialRadiusRandomness +
                                  (1.0f - keys->emitter.orientedRing.initialRadiusRandomness));
                             finalRadius = keys->emitter.orientedRing.finalRadius *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.orientedRing.finalRadiusRandomness +
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.orientedRing.finalRadiusRandomness +
                                  (1.0f - keys->emitter.orientedRing.finalRadiusRandomness));
                             motion->radius = initialRadius;
                             motion->radiusStep = (finalRadius - initialRadius) / (f32)length;
                             motion->angularSpeed = keys->emitter.orientedRing.angularSpeed *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.orientedRing.angularSpeedRandomness +
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.orientedRing.angularSpeedRandomness +
                                  (1.0f - keys->emitter.orientedRing.angularSpeedRandomness));
-                            motion->initialPhase = sdfGetRandFloat(&effSharedRandomState) * 1.5707962512969971f;
+                            motion->initialPhase = dds3GetRandFloatA(&effSharedRandomState) * 1.5707962512969971f;
                             motion->height = 0.0f;
-                            motion->orientationAngle = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
-                            motion->tiltAngle = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
-                            sdfVuLoadRotationMatrixX(motion->orientationAngle);
+                            motion->orientationAngle = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+                            motion->tiltAngle = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+                            SetRotateMatrixX(motion->orientationAngle);
                             sdfVuLoadSecondaryRotationMatrixY(motion->tiltAngle);
-                            sdfMultiplyVuMatrixInPlace();
+                            MultMatrixRevNoArg();
                             direction[0] = sdfCos(motion->initialPhase) * initialRadius;
                             direction[1] = 0.0f;
-                            direction[2] = sdfSinPoly(motion->initialPhase) * initialRadius;
+                            direction[2] = sdfSin(motion->initialPhase) * initialRadius;
                             VU0_LOAD_VF(vf10, direction);
                             VU0_ROTATE_VEC(vf10, vf10);
                             localSpace = flags & 1;
@@ -7644,14 +7644,14 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                                 VU0_ADD(vf10, vf10, vf11);
                             }
                             VU0_STORE_VF(vf10, slot->pos);
-                            motion->scaleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
+                            motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                motion->angleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->heading.emitter.randomness +
                                     (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
-                                    motion->angle = sdfGetRandFloat(&effSharedRandomState) * 6.2831850051879883f;
-                                    if (sdfGetRand(&effSharedRandomState) & 1) {
+                                    motion->angle = dds3GetRandFloatA(&effSharedRandomState) * 6.2831850051879883f;
+                                    if (dds3GetRandA(&effSharedRandomState) & 1) {
                                         motion->angleMultiplier = -motion->angleMultiplier;
                                     }
                                 } else {
@@ -7664,13 +7664,13 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                             slot->state = 0;
                             PCP_COPY_VECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
-                                age = (f32)(sdfGetRand(&effSharedRandomState) % prewarmLength);
+                                age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
                                 motion->height += gravity * age * age * 0.5f;
                                 motion->radius += motion->radiusStep * age;
                                 radius = motion->radius;
                                 direction[0] = sdfCos(motion->initialPhase) * radius;
                                 direction[1] = 0.0f;
-                                direction[2] = sdfSinPoly(motion->initialPhase) * radius;
+                                direction[2] = sdfSin(motion->initialPhase) * radius;
                                 VU0_LOAD_VF(vf10, direction);
                                 VU0_ROTATE_VEC(vf10, vf10);
                                 if (localSpace == 0) {
@@ -7698,13 +7698,13 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                         motion->height += gravity * age;
                         motion->radius += motion->radiusStep;
                         phase = (motion->angularSpeed + angularAcceleration * age * 0.5f) * age + motion->initialPhase;
-                        sdfVuLoadRotationMatrixX(motion->orientationAngle);
+                        SetRotateMatrixX(motion->orientationAngle);
                         sdfVuLoadSecondaryRotationMatrixY(motion->tiltAngle);
-                        sdfMultiplyVuMatrixInPlace();
+                        MultMatrixRevNoArg();
                         radius = motion->radius;
                         direction[0] = sdfCos(phase) * radius;
                         direction[1] = 0.0f;
-                        direction[2] = sdfSinPoly(phase) * radius;
+                        direction[2] = sdfSin(phase) * radius;
                         VU0_LOAD_VF(vf10, direction);
                         VU0_ROTATE_VEC(vf10, vf10);
                         VU0_STORE_VF(vf10, position);
@@ -7796,13 +7796,13 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                     toSpawn = record->instances;
                 } else {
                     toSpawn = (s32)((f32)record->instances *
-                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
                 }
             } else {
                 prewarm = 0;
                 if (keys->spawnVariance > 0.0f) {
                     record->spawnRemainder += (f32)keys->spawnRate *
-                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
                 } else {
                     record->spawnRemainder += (f32)keys->spawnRate;
                 }
@@ -7825,11 +7825,11 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                             s32 localSpace;
 
                             spread = keys->emitter.directed.spread *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.directed.spreadRandomness +
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.directed.spreadRandomness +
                                  (1.0f - keys->emitter.directed.spreadRandomness));
-                            delta[0] = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f * spread;
+                            delta[0] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f * spread;
                             delta[1] = -(1.0f - spread);
-                            delta[2] = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f * spread;
+                            delta[2] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f * spread;
                             VU0_LOAD_VF(vf10, delta);
                             VU0_NORMALIZE_VF10();
                             localSpace = flags & 1;
@@ -7841,10 +7841,10 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                             motion->direction[1] = delta[1];
                             motion->direction[2] = delta[2];
                             motion->speed = fabsf(keys->emitter.directed.speed *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.directed.speedRandomness + (1.0f - keys->emitter.directed.speedRandomness)));
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.directed.speedRandomness + (1.0f - keys->emitter.directed.speedRandomness)));
                             {
                                 f32 radius = keys->emitter.directed.radius *
-                                    (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.directed.radiusRandomness + (1.0f - keys->emitter.directed.radiusRandomness));
+                                    (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.directed.radiusRandomness + (1.0f - keys->emitter.directed.radiusRandomness));
                                 VEC3_SPLAT(radiusVector, radius);
                             }
                             /* Retail initializes only XYZ of this radius vector; W is left untouched. */
@@ -7862,14 +7862,14 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                                 VU0_ADD(vf10, vf10, vf11);
                             }
                             VU0_STORE_VF(vf10, slot->pos);
-                            motion->scaleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
+                            motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                motion->angleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->heading.emitter.randomness +
                                     (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
-                                    motion->angle = sdfGetRandFloat(&effSharedRandomState) * 6.2831850051879883f;
-                                    if (sdfGetRand(&effSharedRandomState) & 1) {
+                                    motion->angle = dds3GetRandFloatA(&effSharedRandomState) * 6.2831850051879883f;
+                                    if (dds3GetRandA(&effSharedRandomState) & 1) {
                                         motion->angleMultiplier = -motion->angleMultiplier;
                                     }
                                 } else {
@@ -7882,7 +7882,7 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                             slot->state = 0;
                             PCP_COPY_VECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
-                                f32 age = (f32)(sdfGetRand(&effSharedRandomState) % prewarmLength);
+                                f32 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
                                 VU0_LOAD_VF(vf11, slot->pos);
                                 distance = motion->speed * age;
                                 distance += acceleration * age * age * 0.5f;
@@ -8010,13 +8010,13 @@ void effUpdateSectorEmitterSlots(FileSlotTable *record) {
                     toSpawn = record->instances;
                 } else {
                     toSpawn = (s32)((f32)record->instances *
-                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
                 }
             } else {
                 prewarm = 0;
                 if (keys->spawnVariance > 0.0f) {
                     record->spawnRemainder += (f32)keys->spawnRate *
-                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
                 } else {
                     record->spawnRemainder += (f32)keys->spawnRate;
                 }
@@ -8040,14 +8040,14 @@ void effUpdateSectorEmitterSlots(FileSlotTable *record) {
                             s32 localSpace;
 
                             angle = (f32)keys->emitter.sector.azimuthDegrees *
-                                ((sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f) *
+                                ((dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f) *
                                 0.5f * 0.0174532925f - 1.5707962512969971f;
                             spread = keys->emitter.sector.spread *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.sector.spreadRandomness +
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.sector.spreadRandomness +
                                  (1.0f - keys->emitter.sector.spreadRandomness));
                             delta[0] = sdfCos(angle) * spread;
                             delta[1] = -(1.0f - spread);
-                            delta[2] = sdfSinPoly(angle) * spread;
+                            delta[2] = sdfSin(angle) * spread;
                             VU0_LOAD_VF(vf10, delta);
                             VU0_NORMALIZE_VF10();
                             localSpace = flags & 1;
@@ -8059,10 +8059,10 @@ void effUpdateSectorEmitterSlots(FileSlotTable *record) {
                             motion->direction[1] = delta[1];
                             motion->direction[2] = delta[2];
                             motion->speed = fabsf(keys->emitter.sector.speed *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.sector.speedRandomness + (1.0f - keys->emitter.sector.speedRandomness)));
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.sector.speedRandomness + (1.0f - keys->emitter.sector.speedRandomness)));
                             {
                                 f32 radius = keys->emitter.sector.radius *
-                                    (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.sector.radiusRandomness + (1.0f - keys->emitter.sector.radiusRandomness));
+                                    (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.sector.radiusRandomness + (1.0f - keys->emitter.sector.radiusRandomness));
                                 VEC3_SPLAT(radiusVector, radius);
                             }
                             /* Retail initializes only XYZ of this radius vector; W is left untouched. */
@@ -8080,14 +8080,14 @@ void effUpdateSectorEmitterSlots(FileSlotTable *record) {
                                 VU0_ADD(vf10, vf10, vf11);
                             }
                             VU0_STORE_VF(vf10, slot->pos);
-                            motion->scaleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
+                            motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                motion->angleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->heading.emitter.randomness +
                                     (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
-                                    motion->angle = sdfGetRandFloat(&effSharedRandomState) * 6.2831850051879883f;
-                                    if (sdfGetRand(&effSharedRandomState) & 1) {
+                                    motion->angle = dds3GetRandFloatA(&effSharedRandomState) * 6.2831850051879883f;
+                                    if (dds3GetRandA(&effSharedRandomState) & 1) {
                                         motion->angleMultiplier = -motion->angleMultiplier;
                                     }
                                 } else {
@@ -8100,7 +8100,7 @@ void effUpdateSectorEmitterSlots(FileSlotTable *record) {
                             slot->state = 0;
                             PCP_COPY_VECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
-                                f32 age = (f32)(sdfGetRand(&effSharedRandomState) % prewarmLength);
+                                f32 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
                                 VU0_LOAD_VF(vf11, slot->pos);
                                 distance = motion->speed * age;
                                 distance += acceleration * age * age * 0.5f;
@@ -8294,13 +8294,13 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                     toSpawn = record->instances;
                 } else {
                     toSpawn = (s32)((f32)record->instances *
-                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
                 }
             } else {
                 prewarm = 0;
                 if (keys->spawnVariance > 0.0f) {
                     record->spawnRemainder += (f32)keys->spawnRate *
-                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
                 } else {
                     record->spawnRemainder += (f32)keys->spawnRate;
                 }
@@ -8322,10 +8322,10 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                             f32 angle;
                             f32 offset;
 
-                            angle = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+                            angle = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
                             motion->endpointOffset[0] = sdfCos(angle) * keys->emitter.curve.endpointRadius;
                             motion->endpointOffset[1] = -keys->emitter.curve.endpointDrop;
-                            motion->endpointOffset[2] = sdfSinPoly(angle) * keys->emitter.curve.endpointRadius;
+                            motion->endpointOffset[2] = sdfSin(angle) * keys->emitter.curve.endpointRadius;
                             endpoint[0] = keys->emitter.curve.end[0] + motion->endpointOffset[0];
                             endpoint[1] = keys->emitter.curve.end[1] + motion->endpointOffset[1];
                             endpoint[2] = keys->emitter.curve.end[2] + motion->endpointOffset[2];
@@ -8349,11 +8349,11 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                             VU0_CROSS_XYZ(vf10, vf10, vf11);
                             VU0_STORE_VF(vf10, lateral);
                             angle = (f32)keys->emitter.curve.spreadDegrees *
-                                ((sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f) *
+                                ((dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f) *
                                 0.5f * 0.0174532925f;
-                            sdfBuildVuRotationFromAxisAngle(angle, (const struct RwV3d *)axis);
+                            SetRotateMatrixAxis(angle, (const struct RwV3d *)axis);
                             offset = keys->emitter.curve.firstOffset *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.curve.firstRandomness +
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.curve.firstRandomness +
                                  (1.0f - keys->emitter.curve.firstRandomness));
                             VU0_LOAD_VF(vf10, firstPoint);
                             VU0_LOAD_VF(vf12, lateral);
@@ -8366,7 +8366,7 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                             motion->firstControl[1] = point[1];
                             motion->firstControl[2] = point[2];
                             offset = keys->emitter.curve.secondOffset *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.curve.secondRandomness +
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.curve.secondRandomness +
                                  (1.0f - keys->emitter.curve.secondRandomness));
                             VU0_LOAD_VF(vf10, secondPoint);
                             VU0_MOVE_VF(vf11, vf12);
@@ -8378,21 +8378,21 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                             motion->secondControl[1] = point[1];
                             motion->secondControl[2] = point[2];
                             motion->travelSpeed = keys->emitter.curve.travelSpeed *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.curve.travelRandomness +
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.curve.travelRandomness +
                                  (1.0f - keys->emitter.curve.travelRandomness));
                             motion->angularSpeed = keys->emitter.curve.angularSpeed *
-                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.curve.angularRandomness +
+                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.curve.angularRandomness +
                                  (1.0f - keys->emitter.curve.angularRandomness));
                             motion->progress = 0.0f;
                             PCP_COPY_VECTOR(slot->pos, start);
-                            motion->scaleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
+                            motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                motion->angleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->heading.emitter.randomness +
                                     (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
-                                    motion->angle = sdfGetRandFloat(&effSharedRandomState) * 6.2831850051879883f;
-                                    if (sdfGetRand(&effSharedRandomState) & 1) {
+                                    motion->angle = dds3GetRandFloatA(&effSharedRandomState) * 6.2831850051879883f;
+                                    if (dds3GetRandA(&effSharedRandomState) & 1) {
                                         motion->angleMultiplier = -motion->angleMultiplier;
                                     }
                                 } else {
@@ -8405,7 +8405,7 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                             slot->state = 0;
                             PCP_COPY_VECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
-                                age = (f32)(sdfGetRand(&effSharedRandomState) % prewarmLength);
+                                age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
                                 travel = motion->travelSpeed * age;
                                 travel += travelAcceleration * age * age * 0.5f;
                                 if (travel < 0.0f) {
@@ -8432,7 +8432,7 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                                     motion->secondControl, sampledEndpoint, progress);
                                 if (rotation != 0.0f) {
                                     VU0_STORE_VF(vf10, point);
-                                    sdfBuildVuRotationFromAxisAngle(rotation, (const struct RwV3d *)axis);
+                                    SetRotateMatrixAxis(rotation, (const struct RwV3d *)axis);
                                     VU0_LOAD_VF(vf11, axis);
                                     VU0_SCALE_VF(vf11, motion->pathLength * progress);
                                     VU0_LOAD_VF(vf10, point);
@@ -8491,7 +8491,7 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                             VU0_SUB(vf10, vf10, vf11);
                             VU0_NORMALIZE_VF10();
                             VU0_STORE_VF(vf10, axis);
-                            sdfBuildVuRotationFromAxisAngle(rotation, (const struct RwV3d *)axis);
+                            SetRotateMatrixAxis(rotation, (const struct RwV3d *)axis);
                             VU0_LOAD_VF(vf11, axis);
                             VU0_SCALE_VF(vf11, motion->pathLength * progress);
                             VU0_LOAD_VF(vf10, point);
@@ -8574,7 +8574,7 @@ FileSlotTable *fileAllocateGridRecordSlots(u16 type, u32 count, const void *data
     return rec;
 }
 
-void fileReleaseGridRecordHandle(FileSlotTable *record) {
+void effPCPHelperBEDGetModel(FileSlotTable *record) {
     sdfMemFreeDirect(record->allocation);
 }
 

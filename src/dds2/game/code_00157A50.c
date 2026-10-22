@@ -12,7 +12,7 @@
 #include "eff_bill_resource_init.h"
 
 #include "sdf.h"
-EffNode *effCloneSourceWithTypeHandler(const EffNode *source) {
+EffNode *dds3EffectCopy(const EffNode *source) {
     EffNode *copy = (EffNode *)sdfChipAllocDirect(0x10);
     u32 argument = (u32)source->instance;
 
@@ -24,7 +24,7 @@ EffNode *effCloneSourceWithTypeHandler(const EffNode *source) {
 
 #include "sdf_debug_api.h"
 
-void effConvertLegacyNodeDescriptor(EffNodeDescriptor *descriptor) {
+void dds3EffectDataRevision(EffNodeDescriptor *descriptor) {
     u8 *payload = descriptor->payload;
 
     if (descriptor->version == 1.0f) {
@@ -83,8 +83,8 @@ void effInitializeBillResourceOwners(void) {
     u32 configOffset;
 
     billPendingChildList = 0;
-    archive = (FilePacRequest *)fileQueuePlainDispatchRequest(D_004142B0);
-    fileWaitForRequestReady((struct FileRequest *)archive);
+    archive = (FilePacRequest *)pacLoad(D_004142B0);
+    pacSync((struct FileRequest *)archive);
     node = archive->packet.queueHead;
     if (node != NULL) {
         configTable = (u8 *)D_003AA880;
@@ -92,8 +92,8 @@ void effInitializeBillResourceOwners(void) {
         scaleTable = (f32 *)((u8 *)D_003AA880 + 8);
         configOffset = 0;
         do {
-            billboard = billCreateIndexed(((EffBillResourceInit *)(configOffset + (u32)configTable))->billboardKind,
-                                          (u32)sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle));
+            billboard = dds3BillboardCreate(((EffBillResourceInit *)(configOffset + (u32)configTable))->billboardKind,
+                                          (u32)sdfMemGetPtr((struct SdfMemBlock *)node->resourceHandle));
             scale = (f32 *)(configOffset + (u32)scaleTable);
             configOffset += sizeof(EffBillResourceInit);
             payload = billboard->child;
@@ -104,7 +104,7 @@ void effInitializeBillResourceOwners(void) {
             node = node->next;
         } while (node != NULL);
     }
-    btlStageTaskCleanupCallback(archive);
+    pacFileHandleFree_(archive);
     printf(D_004142C0, D_004142B0);
 }
 
@@ -113,11 +113,11 @@ void effBillDispatchAll(void) {
 
     billPendingChildList = 0;
     for (i = 0; i < 15; i++) {
-        billDispatchByKind(effBillResourceOwners[i]);
+        dds3BillboardDelete(effBillResourceOwners[i]);
     }
 }
 
-BillChildPayload *billCreateChildPayloadFromTextureResource(SdfTextureFileHeader *resource) {
+BillChildPayload *BillboardLoadTex(SdfTextureFileHeader *resource) {
     struct SdfMemBlock *allocation;
     BillPacketWork *work;
     BillChildPayload *child;
@@ -141,7 +141,7 @@ BillChildPayload *billCreateChildPayloadFromTextureResource(SdfTextureFileHeader
     }
     child->packetListIndex = 0;
 
-    texture = sdfTexAcquireResourceTexture(resource);
+    texture = sdfTexSet(resource);
     heightUv = (s16)((u16)texture->height << 4);
     widthUv = (s16)((u16)texture->width << 4);
 

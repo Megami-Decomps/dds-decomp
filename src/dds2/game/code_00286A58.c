@@ -22,7 +22,7 @@ void mtrMantraSetBit(DatPartyRecord *record) {
     s32 i;
 
     evtPrintDeveloperConsoleMessage(D_00425F30, record->unitId);
-    if (mdlFlagTest(0xBA0) != 0 && mdlFlagTest(0x80E) == 0) {
+    if (evtBitCheck(0xBA0) != 0 && evtBitCheck(0x80E) == 0) {
         mtrRecomputeMantraFlagsForPartyUnit(record);
     } else {
         mtrMantraBitResetUnit(record);

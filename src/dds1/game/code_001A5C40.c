@@ -64,7 +64,7 @@ extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
 
 extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 
-extern void datClearUnitStatusBits(DatPartyRecord *record, s32 mask);
+extern void datResetBadStat(DatPartyRecord *record, s32 mask);
 
 extern s32 datGetClampedProfileAdjustedStat(DatPartyRecord *, s32);
 
@@ -197,10 +197,10 @@ s32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s
     }
     limit = datCommandRecords[command].stat36;
     if (result < -limit) {
-        s32 randomScale = sdfGetRandInt(0, 11) + 95;
+        s32 randomScale = dds3GetRandIntA(0, 11) + 95;
         result = -(limit * randomScale) / 100;
     } else if (result > limit) {
-        s32 randomScale = sdfGetRandInt(0, 11) + 95;
+        s32 randomScale = dds3GetRandIntA(0, 11) + 95;
         result = limit * randomScale / 100;
     }
     if (result == 0 && base != 0) {
@@ -296,10 +296,10 @@ s32 btlCalculateMpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s
     }
     limit = datCommandRecords[command].stat36;
     if (result < -limit) {
-        s32 randomScale = sdfGetRandInt(0, 11) + 95;
+        s32 randomScale = dds3GetRandIntA(0, 11) + 95;
         result = -(limit * randomScale) / 100;
     } else if (result > limit) {
-        s32 randomScale = sdfGetRandInt(0, 11) + 95;
+        s32 randomScale = dds3GetRandIntA(0, 11) + 95;
         result = limit * randomScale / 100;
     }
     if (result == 0 && base != 0) {
@@ -467,7 +467,7 @@ u8 btlSelectCommandHitCount(BtlUnit *unit, s32 command) {
         maximum = datCommandRecords[command].rangeMax;
     }
     if (minimum < maximum) {
-        result = minimum + sdfGetRandInt(0, maximum - minimum + 1);
+        result = minimum + dds3GetRandIntA(0, maximum - minimum + 1);
     } else {
         result = minimum;
     }
@@ -610,8 +610,8 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
         } while (sorted == 0);
     } else {
         for (i = 0; i < 13; i++) {
-            randomIndices[0] = sdfGetRandInt(0, count);
-            randomIndices[1] = sdfGetRandInt(0, count);
+            randomIndices[0] = dds3GetRandIntA(0, count);
+            randomIndices[1] = dds3GetRandIntA(0, count);
             if (randomIndices[0] != randomIndices[1]) {
                 btlSwapIndexListEntries(targets, randomIndices[0], randomIndices[1]);
             }
@@ -655,7 +655,7 @@ void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
 
     targetCount = btlGetIndexListCount(targets);
     allowConsecutiveHits = targetCount < 2;
-    maximumHits = targetCount + sdfGetRandInt(0, 2);
+    maximumHits = targetCount + dds3GetRandIntA(0, 2);
     if (allowConsecutiveHits) {
         results[0].count = maximumHits;
         return;
@@ -669,10 +669,10 @@ void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
     hitCount = btlSelectCommandHitCount(unit, command);
     memset(selected, 0, sizeof(selected));
     while (i < hitCount) {
-        index = sdfGetRandInt(0, targetCount);
+        index = dds3GetRandIntA(0, targetCount);
         entry = btlGetIndexListEntry(copy, index);
         if (!allowConsecutiveHits && entry == previous) {
-            index = (index + sdfGetRandInt(0, targetCount - 1) + 1) % targetCount;
+            index = (index + dds3GetRandIntA(0, targetCount - 1) + 1) % targetCount;
             entry = btlGetIndexListEntry(copy, index);
         }
         previous = entry;

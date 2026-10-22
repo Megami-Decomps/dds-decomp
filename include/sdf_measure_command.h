@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-/* Prefix consumed by sdfCommandListMeasure; the kind-specific payload is opaque. */
+/* Prefix consumed by sdfModelGetDrawPacketSize; the kind-specific payload is opaque. */
 typedef struct SdfMeasureCommandPrefix {
     u8 kind;
     u8 opaque01[0xB];

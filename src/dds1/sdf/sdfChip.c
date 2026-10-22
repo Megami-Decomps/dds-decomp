@@ -15,10 +15,10 @@ SdfPendingRequest sdfChipReleaseRequest __attribute__((section(".sbss"), aligned
 
 SdfChipClassTable sdfChipClassTable __attribute__((section(".bss"), aligned(8)));
 
-void sdfSelectNextChipPage(SdfChipClass *sizeClass);
+void sdfChipAllocNextPage(SdfChipClass *sizeClass);
 
 void *sdfAllocAndClearQuadwords(s32 size) {
-    return sdfClearQuadwords(sdfChipAllocDirect(size), (size + 15) >> 4);
+    return sdfZeroMemQuad(sdfChipAllocDirect(size), (size + 15) >> 4);
 }
 
 void sdfChipFreeDirect(void *memory) {
@@ -45,7 +45,7 @@ void sdfChipFreeDirect(void *memory) {
     if (page->usedCells == 0) {
         link = &sizeClass->availablePages;
         if (sizeClass->currentPage == page) {
-            sdfSelectNextChipPage(sizeClass);
+            sdfChipAllocNextPage(sizeClass);
         } else {
             while (*link != page) {
                 link = &(*link)->next;
@@ -68,11 +68,11 @@ void sdfChipFreeDirect(void *memory) {
     }
 }
 
-void sdfQueuePendingChipRelease(void *memory) {
-    sdfPendingQueuePush(&sdfChipReleaseRequest, memory);
+void sdfChipFreeDelayedDirect(void *memory) {
+    sdfDelayedResrcEntry(&sdfChipReleaseRequest, memory);
 }
 
-s32 sdfChipIsInRange(s32 address) {
+s32 sdfChipCheck(s32 address) {
     s32 inRange;
 
     inRange = 0;

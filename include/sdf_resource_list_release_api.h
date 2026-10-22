@@ -5,6 +5,6 @@
 
 struct DevRequest;
 
-void sdfResourceListRelease(struct DevRequest *list, s32 releaseItems);
+void sdfTexListFree(struct DevRequest *list, s32 releaseItems);
 
 #endif /* SDF_RESOURCE_LIST_RELEASE_API_H */

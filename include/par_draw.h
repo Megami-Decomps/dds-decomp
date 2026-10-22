@@ -4,23 +4,23 @@
 #include "eff_track_poly_list.h"
 #include "par_kind_api.h"
 
-void parDrawHistorySlots(struct ParTable *table);
-void parPrependCellNode(struct ParSystem *system);
+void dds3Particle_BlurDraw(struct ParTable *table);
+void dds3TrackPolyDraw(struct ParSystem *system);
 
 /* Both particle render paths submit the resource selected by this shared kind. */
 static __inline__ void parSubmitKindDrawing(ParKindState *kind) {
     switch (kind->kind) {
     case PAR_KIND_STATE_HISTORY:
-        parDrawHistorySlots(kind->payload.history.table);
+        dds3Particle_BlurDraw(kind->payload.history.table);
         break;
     case PAR_KIND_STATE_BILLBOARD_CROSS_STRIP:
-        parPrependCellNode(kind->payload.crossStrip.drawSystem);
+        dds3TrackPolyDraw(kind->payload.crossStrip.drawSystem);
         break;
     case PAR_KIND_STATE_BILLBOARD_CROSS_TRIANGLE:
-        parPrependCellNode(kind->payload.crossTriangle.drawSystem);
+        dds3TrackPolyDraw(kind->payload.crossTriangle.drawSystem);
         break;
     case PAR_KIND_STATE_TRACK_POLYGON_CROSS_AXES:
-        effTrackPolyDrawModelWorkList(kind->payload.trackPolygon.modelList);
+        Eff_ModelTrackPolyListDrawOnly(kind->payload.trackPolygon.modelList);
         break;
     }
 }

@@ -103,7 +103,7 @@ static inline void effSubmitSurfacePacket(SdfPoolNode *surface, void *list) {
 }
 
 #include "sdf_packet_alloc.h"
-extern void *effCreateVertexDrawPacket(EffPacketParams *);
+extern void *effPkt3DPrimMakePoly(EffPacketParams *);
 extern u32 D_0037ECB0[];
 extern SdfPoolNode *D_0037ECF0[];
 extern SdfPoolNode *D_0037EE68[];
@@ -124,11 +124,11 @@ extern char D_003B3BA0[]; /* "/tool/effect/hlp/" */
 
 extern f32 effComputeProjectedOffsetAngle(u8 *, void *);
 
-extern f32 effCalcViewAxisWidthFactor(u8 *, void *);
+extern f32 dds3BillboardGetDirectionScale(u8 *, void *);
 
 
 
-extern void billInvokeCallback(BillObj *);
+extern void dds3BillboardDraw(BillObj *);
 
 extern u8 D_003B2B10[];
 
@@ -162,7 +162,7 @@ extern FileJobPayload *effTemporaryFileJob;
 extern FileQueue *effAuxiliaryFileQueue;
 
 extern FileQueue *effFileQueue;
-extern void kwlnPadStartMotor(s32, u8, s32);
+extern void dds3PadVibrationSet(s32, u8, s32);
 
 extern u8 *effAllocateTexturedStripWork();
 
@@ -207,9 +207,9 @@ extern void effFillSurfaceGridColorGradient(EffSurfaceGridNode *, u32 *);
 
 extern void effReleaseSurfaceGridBuffers(EffSurfaceGridNode *);
 
-extern s32 effGetGeneralResourceCount(void);
+extern s32 dds3BillboardGeneralNumber(void);
 
-extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
+extern SdfAsset *sdfMatNew(void);
 
 
 extern EffPacketParams D_003DC9E0;
@@ -219,7 +219,7 @@ extern void effReleaseResourceRefs(EffTrackSet *);
 
 
 
-extern void effDrawSolidRectangle(void *);
+extern void dds3EffectFilter(void *);
 
 extern f32 mnuMeasureProjectedPerpendicularDistance(f32);
 
@@ -561,7 +561,7 @@ EffFadeHeaderWork *effCreateSmallHeaderFromFile(void *work) {
 }
 
 void effReleaseFadeHeaderAllocation(EffFadeHeaderWork *allocation) {
-    kwlnCancelConfiguredFadeFrames();
+    dds3StopQuake();
     sdfChipFreeDirect(allocation);
 }
 
@@ -578,7 +578,7 @@ void effFadeFrameAdvance(EffFadeHeaderWork *counter) {
 
     frame = counter->frame;
     if (frame == 0) {
-        kwlnFadeSetupFrames(counter->payload[0], counter->payload[1]);
+        dds3SetQuake(counter->payload[0], counter->payload[1]);
         frame = counter->frame;
     }
     counter->frame = frame + 1;
@@ -799,11 +799,11 @@ void effUpdateFadeBlendA(EffKindWork *work) {
 }
 
 u32 effCreateFadeBlendWorkFromOutput(void *work) {
-    return (u32)effCloneBlurTemplate((EffBlurTemplateBody *)((u8 *)work + 0xc0));
+    return (u32)dds3EffectPartialMultiBlurCreate((EffBlurTemplateBody *)((u8 *)work + 0xc0));
 }
 
 void effReleaseFadeBlendWork(u32 resourceHandle) {
-    effReleaseBlurTemplate((EffBlurTemplate *)resourceHandle);
+    dds3EffectPartialMultiBlurDelete((EffBlurTemplate *)resourceHandle);
 }
 
 /* Draw the fade in fixed subpixel units, either centered or at the projected position.
@@ -880,11 +880,11 @@ void effUpdateTarget(EffKindWork *work, SdfTex *target) {
 }
 
 u32 effCreateFixedSlotBlurWorkFromFadeOutput(void *source) {
-    return (u32)effBlurCreateScatterWork((EffBlurScatterParams *)((u8 *)source + 0xC0));
+    return (u32)dds3EffectDistortionBlurCreate((EffBlurScatterParams *)((u8 *)source + 0xC0));
 }
 
 void effReleaseFixedSlotBlurWork(EffBlurScatterWork *handle) {
-    effBlurReleaseFirstResource(handle);
+    dds3EffectDistortionBlurDelete(handle);
 }
 
 /* Draw the pixel-unit fade using the handle's output record and payload's curves.
@@ -957,11 +957,11 @@ void effTextureReferenceRelease(EffKindWork *work, SdfTex *target) {
 }
 
 u32 effCreateVariableSlotBlurWorkFromFadeOutput(void *source) {
-    return (u32)effCloneBlurWorkWithSlots((EffBlurScaleParams *)((u8 *)source + 0xc0));
+    return (u32)dds3EffectRippleBlurCreate((EffBlurScaleParams *)((u8 *)source + 0xc0));
 }
 
 void effReleaseVariableSlotBlurWork(EffBlurScaleWork *work) {
-    effBlurReleaseSecondResource(work);
+    dds3EffectRippleBlurDelete(work);
 }
 
 /* Draw the same pixel-unit fade into the wider renderer output record.
@@ -1110,15 +1110,15 @@ void effUpdateFadeBlendC(EffKindWork *work) {
     packed = eePackRGBAWord(128.0f);
     out->color = packed;
     out->blendControl = work->mode;
-    effDrawSolidRectangle(out);
+    dds3EffectFilter(out);
 }
 
 u32 effCreateFadeColorWorkFromOutput(void *work) {
-    return (u32)effCloneResourceTemplate((EffResourceRectParams *)((u8 *)work + 0xc0));
+    return (u32)dds3EffectPartialMultiFilterCreate((EffResourceRectParams *)((u8 *)work + 0xc0));
 }
 
 void effReleaseFadeColorWork(EffResourceRectWork *work) {
-    effReleaseResourceTemplate(work);
+    dds3EffectPartialMultiFilterDelete(work);
 }
 
 /* This projected fade also consumes EffKindWork: position, handle and payload. */
@@ -1237,10 +1237,10 @@ EffKindWork *effCreateKindWorkFromFile(FileJobPayload *work) {
             effect->sourceKind = kind;
             switch (kind) {
             case 1:
-                effect->target = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(secondary));
+                effect->target = sdfTexSet((SdfTextureFileHeader *)(secondary));
                 break;
             case 4:
-                effect->target = effGetBillResourceTexture(secondary[0]);
+                effect->target = dds3BillboardGetGeneralTex(secondary[0]);
                 break;
             }
             D_0037E770[effect->kind].initialize(effect, effect->target);
@@ -1331,10 +1331,10 @@ EffKindWork *effCreateKindWorkFromFileB(FileJobPayload *work) {
             effect->sourceKind = kind;
             switch (kind) {
             case 1:
-                effect->target = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(secondary));
+                effect->target = sdfTexSet((SdfTextureFileHeader *)(secondary));
                 break;
             case 4:
-                effect->target = effGetBillResourceTexture(secondary[0]);
+                effect->target = dds3BillboardGetGeneralTex(secondary[0]);
                 break;
             }
             D_0037E7E8[effect->kind].initialize(effect, effect->target);
@@ -1400,7 +1400,7 @@ u8 *effCreateBillboardWork(FileJobPayload *source) {
     memcpy(work + 0x2C, fileResolvePrimaryBuffer(source),
            source->primary.size);
     ((EffBillboardWork *)work)->billboard =
-        billCreateIndexed(1, (u32)fileResolveSecondaryBuffer(source));
+        dds3BillboardCreate(1, (u32)fileResolveSecondaryBuffer(source));
     return work;
 }
 
@@ -1409,7 +1409,7 @@ void effBillboardWorkRelease(u32 work) {
 
     billboard = ((EffBillboardWork *)work)->billboard;
     if (billboard != 0) {
-        billDispatchByKind(billboard);
+        dds3BillboardDelete(billboard);
     }
     sdfChipFreeDirect((void *)work);
 }
@@ -1427,14 +1427,14 @@ void effReplaceBillboardClone(s32 dst, s32 src) {
     BillObj *billboard;
 
     if (((EffBillboardWork *)dst)->billboard != 0) {
-        billDispatchByKind(((EffBillboardWork *)dst)->billboard);
+        dds3BillboardDelete(((EffBillboardWork *)dst)->billboard);
     }
-    billboard = billCloneObjectRetainingSharedData(((EffBillboardWork *)src)->billboard);
+    billboard = dds3BillboardCopy(((EffBillboardWork *)src)->billboard);
     ((EffBillboardWork *)dst)->billboard = billboard;
 }
 
 void effBillboardEntryFrameReset(s32 work) {
-    billSetAnimationFrameWithOneTickHold(((EffBillboardWork *)work)->billboard, 0);
+    dds3BillboardSetAnimKey2(((EffBillboardWork *)work)->billboard, 0);
     ((EffBillboardWork *)work)->frame = 0;
 }
 
@@ -1449,27 +1449,27 @@ void effUpdateScaledBillboardFrame(EffBillboardWork *work) {
     s32 frame;
     s32 limit;
 
-    limit = billGetFirstEntryFramePeriod(work->billboard);
+    limit = dds3BillboardGetAnimFrame(work->billboard);
     frame = work->frame;
     if (frame < limit) {
-        billSetAnimationFrameWithOneTickHold(work->billboard, frame);
+        dds3BillboardSetAnimKey2(work->billboard, frame);
         VU0_LOAD_VF(vf10, work->rotation);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, D_003B2B10);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, &vec);
         angle = effComputeProjectedOffsetAngle((u8 *)work, &vec);
-        scale = effCalcViewAxisWidthFactor((u8 *)work, &vec);
+        scale = dds3BillboardGetDirectionScale((u8 *)work, &vec);
         if (scale < 0.3f) {
             scale = 0.3f;
         }
         scale *= work->scale;
         width = scale * work->widthScale;
         height = work->heightScale * work->scale;
-        billSetChildScaleComponents(work->billboard, width, height);
-        billSetRotationAngle(work->billboard, angle);
+        dds3BillboardSetScale(work->billboard, width, height);
+        dds3BillboardSetRotate(work->billboard, angle);
         effCopyVector(work->billboard, work);
-        billInvokeCallback(work->billboard);
+        dds3BillboardDraw(work->billboard);
         work->frame++;
     }
 }
@@ -1620,17 +1620,17 @@ void billAdvanceFrameInstances(EffClassWork *work) {
             if (remainingSpawn != 0) {
                 f32 randomValue;
                 f32 factor;
-                entry->angle = sdfGetRandFloat(effSharedRandomState) * 6.28318500518798828125f;
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                entry->angle = dds3GetRandFloatA(effSharedRandomState) * 6.28318500518798828125f;
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 entry->spin = config->spin * (randomValue * config->spinJitter + (1.0f - config->spinJitter));
-                if (sdfGetRand((EffRandState *)effSharedRandomState) & 1) entry->spin = -entry->spin;
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) entry->spin = -entry->spin;
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 entry->radius = config->radius * (randomValue * config->radiusJitter + (1.0f - config->radiusJitter));
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 factor = randomValue * config->widthJitter + (1.0f - config->widthJitter);
                 entry->innerWidth = config->innerWidth * factor;
                 entry->outerWidth = config->outerWidth * factor;
-                if (randomAge != 0) entry->age = (s32)(sdfGetRand((EffRandState *)effSharedRandomState) % (u32)lifetime);
+                if (randomAge != 0) entry->age = (s32)(dds3GetRandA((EffRandState *)effSharedRandomState) % (u32)lifetime);
                 else entry->age = 0;
                 remainingSpawn = (s32)((u32)remainingSpawn - 1u);
             }
@@ -1667,7 +1667,7 @@ void billAdvanceFrameInstances(EffClassWork *work) {
             VU0_STORE_VF_UNCLOBBERED(vf10, innerWidth);
             VU0_STORE_VF_UNCLOBBERED(vf11, outerWidth);
             direction[0] = sdfCos(angle);
-            direction[2] = sdfSinPoly(angle);
+            direction[2] = sdfSin(angle);
             VU0_LOAD_VF(vf10, direction);
             VU0_MOVE_VF(vf12, vf10);
             VU0_GET_VF10_X(cosine);
@@ -1907,22 +1907,22 @@ void billAdvanceCellInstances(EffClassWork *work) {
                 f32 randomValue;
                 f32 jitter;
                 f32 base;
-                entry->angle = sdfGetRandFloat(effSharedRandomState) * 6.28318500518798828125f;
+                entry->angle = dds3GetRandFloatA(effSharedRandomState) * 6.28318500518798828125f;
                 jitter = config->radiusJitter;
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 base = 1.0f - jitter;
                 entry->radiusA = config->radius * (randomValue * jitter + base);
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 entry->radiusB = config->radius * (randomValue * jitter + base);
                 jitter = config->centerOffsetJitter;
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 entry->centerOffset = config->centerOffset * (randomValue * jitter + (1.0f - jitter));
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 entry->velocity = config->velocity * (randomValue * config->velocityJitter + (1.0f - config->velocityJitter));
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 jitter = randomValue * config->extentJitter + (1.0f - config->extentJitter);
                 entry->extent = config->extent * jitter;
-                if (randomAge != 0) entry->age = (s32)(sdfGetRand((EffRandState *)effSharedRandomState) % (u32)lifetime);
+                if (randomAge != 0) entry->age = (s32)(dds3GetRandA((EffRandState *)effSharedRandomState) % (u32)lifetime);
                 else entry->age = startAge;
                 remainingSpawn = (s32)((u32)remainingSpawn - 1u);
             }
@@ -1966,7 +1966,7 @@ void billAdvanceCellInstances(EffClassWork *work) {
             VU0_SCALE_VF(vf10, entry->extent);
             VU0_STORE_VF_UNCLOBBERED(vf10, width);
             direction[0] = sdfCos(angle);
-            direction[2] = sdfSinPoly(angle);
+            direction[2] = sdfSin(angle);
             VU0_LOAD_VF(vf10, direction);
             VU0_MOVE_VF(vf12, vf10);
             VU0_SCALE_VF(vf10, entry->radiusA);
@@ -2320,17 +2320,17 @@ void billAdvanceAnimatedFrameTransforms(EffClassWork *work) {
         if (age == waitingState) {
             if (remainingSpawn != 0) {
                 f32 randomValue;
-                entry->angle = sdfGetRandFloat(effSharedRandomState) * 6.28318500518798828125f;
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                entry->angle = dds3GetRandFloatA(effSharedRandomState) * 6.28318500518798828125f;
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 entry->spin = config->spin * (randomValue * config->spinJitter + (1.0f - config->spinJitter));
-                if (sdfGetRand((EffRandState *)effSharedRandomState) & 1) entry->spin = -entry->spin;
+                if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) entry->spin = -entry->spin;
                 entry->radius = 0.0f;
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 entry->radiusStep = config->radius * (randomValue * config->radiusJitter + (1.0f - config->radiusJitter)) / (f32)frames;
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 entry->width = config->width * (randomValue * config->widthJitter + (1.0f - config->widthJitter));
                 if (randomAge != 0) {
-                    entry->age = (s32)(sdfGetRand((EffRandState *)effSharedRandomState) % (u32)lifetime);
+                    entry->age = (s32)(dds3GetRandA((EffRandState *)effSharedRandomState) % (u32)lifetime);
                     entry->radius += entry->radiusStep * (f32)(entry->age % frames);
                 } else {
                     entry->age = 0;
@@ -2369,7 +2369,7 @@ void billAdvanceAnimatedFrameTransforms(EffClassWork *work) {
             VU0_SCALE_VF(vf10, entry->width);
             VU0_STORE_VF_UNCLOBBERED(vf10, width);
             direction[0] = sdfCos(angle);
-            direction[2] = sdfSinPoly(angle);
+            direction[2] = sdfSin(angle);
             VU0_LOAD_VF(vf10, direction);
             VU0_MOVE_VF(vf12, vf10);
             VU0_GET_VF10_X(cosine);
@@ -2620,19 +2620,19 @@ void billAdvanceEmitterInstances(EffClassWork *work) {
             if (remainingSpawn != 0) {
                 f32 randomValue;
                 f32 jitter;
-                entry->angle = sdfGetRandFloat(effSharedRandomState) * 6.28318500518798828125f;
+                entry->angle = dds3GetRandFloatA(effSharedRandomState) * 6.28318500518798828125f;
                 jitter = config->radiusJitter;
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 entry->radius = config->radius * (randomValue * jitter + (1.0f - jitter));
                 jitter = config->offsetJitter;
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 entry->offset = config->offset * (randomValue * jitter + (1.0f - jitter));
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 entry->speed = config->speed * (randomValue * config->speedJitter + (1.0f - config->speedJitter));
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 jitter = randomValue * config->widthJitter + (1.0f - config->widthJitter);
                 entry->width = config->width * jitter;
-                if (randomAge != 0) entry->age = (s32)(sdfGetRand((EffRandState *)effSharedRandomState) % (u32)lifetime);
+                if (randomAge != 0) entry->age = (s32)(dds3GetRandA((EffRandState *)effSharedRandomState) % (u32)lifetime);
                 else entry->age = startAge;
                 remainingSpawn = (s32)((u32)remainingSpawn - 1u);
             }
@@ -2669,7 +2669,7 @@ void billAdvanceEmitterInstances(EffClassWork *work) {
             distance = (speed + (acceleration * motionTime) * 0.5f) * motionTime;
             distance += entry->offset;
             direction[0] = sdfCos(angle);
-            direction[2] = sdfSinPoly(angle);
+            direction[2] = sdfSin(angle);
             VU0_LOAD_VF(vf10, direction);
             VU0_MOVE_VF(vf11, vf10);
             VU0_SCALE_VF(vf10, entry->radius);
@@ -2927,34 +2927,34 @@ void billAdvanceStripInstances(EffClassWork *work) {
                 f32 start;
                 f32 end;
 
-                entry->angle = sdfGetRandFloat(effSharedRandomState) * 6.28318500518798828125f;
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                entry->angle = dds3GetRandFloatA(effSharedRandomState) * 6.28318500518798828125f;
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 start = config->lengthStart * (randomValue * config->lengthStartJitter + (1.0f - config->lengthStartJitter));
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 end = config->lengthEnd * (randomValue * config->lengthEndJitter + (1.0f - config->lengthEndJitter));
                 entry->length = start;
                 entry->lengthStep = (end - start) / (f32)lifetime;
 
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 start = config->radiusStart * (randomValue * config->radiusStartJitter + (1.0f - config->radiusStartJitter));
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 end = config->radiusEnd * (randomValue * config->radiusEndJitter + (1.0f - config->radiusEndJitter));
                 entry->radius = start;
                 entry->radiusStep = (end - start) / (f32)lifetime;
 
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 start = config->tiltStart * (randomValue * config->tiltStartJitter + (1.0f - config->tiltStartJitter));
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 end = config->tiltEnd * (randomValue * config->tiltEndJitter + (1.0f - config->tiltEndJitter));
                 entry->tilt = start;
                 entry->tiltStep = (end - start) / (f32)lifetime;
 
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 entry->width = config->width * (randomValue * config->widthJitter + (1.0f - config->widthJitter));
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 entry->spin = config->spin * (randomValue * config->spinJitter + (1.0f - config->spinJitter));
                 if (randomAge != 0) {
-                    time = (f32)(sdfGetRand((struct EffRandState *)effSharedRandomState) % (u32)lifetime);
+                    time = (f32)(dds3GetRandA((struct EffRandState *)effSharedRandomState) % (u32)lifetime);
                     entry->age = (s32)time;
                     entry->length += entry->lengthStep * time;
                     entry->radius += entry->radiusStep * time;
@@ -2989,7 +2989,7 @@ void billAdvanceStripInstances(EffClassWork *work) {
             radius = entry->radius;
             tilt = entry->tilt;
             cosine = sdfCos(angle);
-            sine = sdfSinPoly(angle);
+            sine = sdfSin(angle);
 
             center[0] = cosine * radius;
             center[2] = sine * radius;
@@ -3359,30 +3359,30 @@ void billAdvanceQuadInstances(EffClassWork *work) {
                 f32 radialStart;
                 f32 radialEnd;
 
-                entry->angle = sdfGetRandFloat(effSharedRandomState) * 6.28318500518798828125f;
+                entry->angle = dds3GetRandFloatA(effSharedRandomState) * 6.28318500518798828125f;
                 randomFactor = config->radiusJitter;
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 entry->radius = config->radius * (randomValue * randomFactor + (1.0f - randomFactor));
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 heightStartJitter = config->heightStartJitter;
                 radialStart = config->heightStart * (randomValue * heightStartJitter + (1.0f - heightStartJitter));
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 heightEndJitter = config->heightEndJitter;
                 radialEnd = config->heightEnd * (randomValue * heightEndJitter + (1.0f - heightEndJitter));
                 entry->height = radialStart;
                 entry->heightStep = (radialEnd - radialStart) / (f32)lifetime;
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 velocityJitter = config->velocityJitter;
                 entry->velocity = config->velocity * (randomValue * velocityJitter + (1.0f - velocityJitter));
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 widthJitter = config->widthJitter;
                 randomFactor = randomValue * widthJitter + (1.0f - widthJitter);
                 entry->width = config->width * randomFactor;
-                randomValue = sdfGetRandFloat(effSharedRandomState);
+                randomValue = dds3GetRandFloatA(effSharedRandomState);
                 tiltJitter = config->tiltJitter;
                 entry->tilt = config->tilt * (randomValue * tiltJitter + (1.0f - tiltJitter));
                 if (randomAge != 0) {
-                    entry->timer = (s32)(sdfGetRand((struct EffRandState *)effSharedRandomState) % (u32)lifetime);
+                    entry->timer = (s32)(dds3GetRandA((struct EffRandState *)effSharedRandomState) % (u32)lifetime);
                 } else {
                     entry->timer = startFrame;
                 }
@@ -3428,7 +3428,7 @@ void billAdvanceQuadInstances(EffClassWork *work) {
             radialOffset = entry->height + entry->heightStep * time;
             shapeFactor = entry->tilt;
             cosine = sdfCos(angle);
-            sine = sdfSinPoly(angle);
+            sine = sdfSin(angle);
 
             center[0] = cosine * shapeFactor;
             center[1] = shapeFactor + -1.0f;
@@ -3722,8 +3722,8 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
     set->allocation = base;
     set->flag = 0;
     set->shared = 0;
-    set->handle = sdfCreateAssetWithDrawEntries();
-    sdfSetPrimaryStateFloat(set->handle, 1.0f);
+    set->handle = sdfMatNew();
+    sdfMatSetConstant(set->handle, 1.0f);
     memset(&D_003DC9E0, 0, 0x2C);
     D_003DC9E0.primitive = 0x4000;
     return set;
@@ -3790,7 +3790,7 @@ void effReleaseResourceRefs(EffTrackSet *refs) {
             effReleaseSharedReference(ref);
         }
     }
-    sdfQueueAssetRelease(refs->handle);
+    sdfMatFreeDelayed(refs->handle);
     sdfMemFreeDirect(refs->allocation);
 }
 
@@ -3840,14 +3840,14 @@ void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
     }
 
     surface = D_0037EAB0[track->type];
-    list = (void *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
+    list = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
     if (matrix == NULL) {
         VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
     } else {
         VU0_LOAD_MATRIX(matrix);
     }
-    sdfConsAppendVuPacket(list, 0);
+    sdf3DPrimLinkTm(list, 0);
 
     if (track->columns != NULL) {
         RefObj *reference = track->shared;
@@ -3872,17 +3872,17 @@ void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
         }
         sdfSetAssetPrimaryTextureAddress(track->handle, texture);
     }
-    sdfConsAppendAssetPacket(list, track->handle, 0);
+    sdf3DPrimLinkMat(list, track->handle, 0);
 
     if (track->flag == 0) {
-        packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+        packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
         packet->dmaTag = 2;
         packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
         packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
         packet->registerList = 0xE;
         packet->registerValue = 0x31801;
         packet->registerAddress = 0x47;
-        sdfAppendPacket(list, (u32)packet);
+        sdfDrawTagLink(list, (u32)packet);
     }
 
     kind = track->kind;
@@ -3903,14 +3903,14 @@ void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
         D_003DC9E0.parameters = D_0037E9A0;
         while (remaining >= 25) {
             remaining -= 25;
-            sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DC9E0));
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
             D_003DC9E0.positions += 25;
             D_003DC9E0.colors += 25;
         }
         if (remaining >= 5) {
             D_003DC9E0.parameterCount = (s16)((remaining / 5) * 3);
             D_003DC9E0.vertexCount = (s16)remaining;
-            sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DC9E0));
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
         }
         break;
     case 1:
@@ -3919,7 +3919,7 @@ void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
         D_003DC9E0.parameters = D_0037E9F0;
         while (remaining >= 13) {
             remaining -= 13;
-            sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DC9E0));
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
             D_003DC9E0.positions += 13;
             D_003DC9E0.colors += 13;
         }
@@ -3930,14 +3930,14 @@ void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
         D_003DC9E0.parameters = D_0037EA20;
         while (remaining >= 32) {
             remaining -= 32;
-            sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DC9E0));
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
             D_003DC9E0.positions += 32;
             D_003DC9E0.colors += 32;
         }
         if (remaining >= 4) {
             D_003DC9E0.parameterCount = (s16)((remaining / 4) * 2);
             D_003DC9E0.vertexCount = (s16)remaining;
-            sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DC9E0));
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
         }
         break;
     case 3:
@@ -3947,7 +3947,7 @@ void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
         D_003DC9E0.parameters = D_0037EA70;
         while (remaining >= 32) {
             remaining -= 32;
-            sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DC9E0));
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
             D_003DC9E0.positions += 32;
             D_003DC9E0.texcoords += 64;
             D_003DC9E0.colors += 32;
@@ -3955,7 +3955,7 @@ void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
         if (remaining >= 4) {
             D_003DC9E0.parameterCount = (s16)((remaining / 4) * 2);
             D_003DC9E0.vertexCount = (s16)remaining;
-            sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DC9E0));
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
         }
         break;
     default:
@@ -3963,14 +3963,14 @@ void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
     }
 
     if (track->flag == 0) {
-        packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+        packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
         packet->dmaTag = 2;
         packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
         packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
         packet->registerList = 0xE;
         packet->registerValue = 0x51801;
         packet->registerAddress = 0x47;
-        sdfAppendPacket(list, (u32)packet);
+        sdfDrawTagLink(list, (u32)packet);
     }
     effSubmitSurfacePacket(surface, list);
 }
@@ -3979,8 +3979,8 @@ void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
 extern u32 D_003BC960[2];
 
 void effLoadFlashTextures(void) {
-    D_003BC960[0] = (u32)sdfReadNamedResource("/effect/flash00.tmx", (u32 *)&effFlashTextureHandles, 0);
-    D_003BC960[1] = (u32)sdfReadNamedResource("/effect/flash01.tmx", (u32 *)(&effFlashTextureHandles + 1), 0);
+    D_003BC960[0] = (u32)sdfDevLoadFileEx("/effect/flash00.tmx", (u32 *)&effFlashTextureHandles, 0);
+    D_003BC960[1] = (u32)sdfDevLoadFileEx("/effect/flash01.tmx", (u32 *)(&effFlashTextureHandles + 1), 0);
 }
 
 u32 effGetFlashTextureHandle(s32 flashTextureIndex) {
@@ -4126,7 +4126,7 @@ void effUpdateExpandingRingPoints(EffClassWork *work) {
     VU0_STORE_VF(vf11, bands[2]);
     for (i = 0; i < groups; i++) {
         direction[0] = sdfCos(angle);
-        direction[2] = sdfSinPoly(angle);
+        direction[2] = sdfSin(angle);
         VU0_LOAD_VF(vf10, direction);
         VU0_MOVE_VF(vf11, vf10);
         VU0_SCALAR_OP_CLOBBER(radius, "vmulx.xyzw vf10, vf10, vf2x");
@@ -4240,7 +4240,7 @@ EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
         colors[2] = (first & second) + (((first ^ second) & 0xFEFEFEFE) >> 1);
         colors[3] = first;
         colors += 4;
-        *scales++ = source->scale * (sdfGetRandFloat(effSharedRandomState) * source->scaleRand + (1.0f - source->scaleRand));
+        *scales++ = source->scale * (dds3GetRandFloatA(effSharedRandomState) * source->scaleRand + (1.0f - source->scaleRand));
     }
     return state;
 }
@@ -4469,7 +4469,7 @@ void effUpdateCenteredRadialRingVertices(EffClassWork *work) {
     VU0_STORE_VF(vf11, bands[2]);
     for (i = 0; i < groups; i++) {
         direction[0] = sdfCos(angle);
-        direction[2] = sdfSinPoly(angle);
+        direction[2] = sdfSin(angle);
         VU0_STORE_VF(vf0, out[0]);
         VU0_LOAD_VF(vf11, direction);
         VU0_LOAD_VF(vf10, bands[0]);
@@ -4614,8 +4614,8 @@ EffPointSet *effCreatePointSet4(u32 count) {
     set->allocation = base;
     set->tail = data;
     set->flag = 0;
-    set->handle = sdfCreateAssetWithDrawEntries();
-    sdfSetPrimaryStateFloat(set->handle, 1.0f);
+    set->handle = sdfMatNew();
+    sdfMatSetConstant(set->handle, 1.0f);
     memset(D_003DCA10, 0, 0x2C);
     D_003DCA10[0].primitive = 0x4000;
     return set;
@@ -4623,7 +4623,7 @@ EffPointSet *effCreatePointSet4(u32 count) {
 
 /* Queue the draw asset for release and return the backing allocation. */
 void effAssetQueueRelease(EffPointSet *set) {
-    sdfQueueAssetRelease(set->handle);
+    sdfMatFreeDelayed(set->handle);
     sdfMemFreeDirect(set->allocation);
 }
 
@@ -4636,24 +4636,24 @@ void effDrawFourPointGroups(EffPointSet *set, Matrix4 *matrix) {
     s32 surfaceId;
 
     if (set->color & 0xFF000000) {
-        list = (void *)sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(list);
+        list = (void *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(list);
         if (matrix == NULL) {
             VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
         } else {
             VU0_LOAD_MATRIX(matrix);
         }
-        sdfConsAppendVuPacket(list, 0);
-        sdfConsAppendAssetPacket(list, set->handle, 0);
+        sdf3DPrimLinkTm(list, 0);
+        sdf3DPrimLinkMat(list, set->handle, 0);
         if (set->flag == 0) {
-            packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+            packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
             packet->dmaTag = 2;
             packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
             packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
             packet->registerList = 0xE;
             packet->registerValue = 0x31801;
             packet->registerAddress = 0x47;
-            sdfAppendPacket(list, (u32)packet);
+            sdfDrawTagLink(list, (u32)packet);
         }
         remaining = set->rows;
         D_003DCA10[0].colors = (u32 *)set->tail;
@@ -4664,24 +4664,24 @@ void effDrawFourPointGroups(EffPointSet *set, Matrix4 *matrix) {
         D_003DCA10[0].parameters = D_0037EB30;
         while (remaining >= 12) {
             remaining -= 8;
-            sdfAppendPacket(list, effCreateVertexDrawPacket(D_003DCA10));
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(D_003DCA10));
             D_003DCA10[0].positions += 8;
             D_003DCA10[0].colors += 8;
         }
         if (remaining >= 8) {
             D_003DCA10[0].parameterCount = 6;
             D_003DCA10[0].vertexCount = remaining;
-            sdfAppendPacket(list, effCreateVertexDrawPacket(D_003DCA10));
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(D_003DCA10));
         }
         if (set->flag == 0) {
-            packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+            packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
             packet->dmaTag = 2;
             packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
             packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
             packet->registerList = 0xE;
             packet->registerValue = 0x51801;
             packet->registerAddress = 0x47;
-            sdfAppendPacket(list, (u32)packet);
+            sdfDrawTagLink(list, (u32)packet);
         }
         if (set->type < 5) {
             effSubmitSurfacePacket(D_0037EB78[set->type], list);
@@ -4689,18 +4689,18 @@ void effDrawFourPointGroups(EffPointSet *set, Matrix4 *matrix) {
             EffGsPacket *blendPacket;
 
             surfaceId = set->type == 5 ? 51 : 56;
-            setup = (void *)sdfAllocPacketAligned(0x20);
-            sdfInitPacketList(setup);
-            blendPacket = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+            setup = (void *)sdfGrAllocPacketBuff(0x20);
+            sdfDrawTagInit(setup);
+            blendPacket = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
             blendPacket->registerValue = 6;
             blendPacket->dmaTag = 2;
             blendPacket->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
             blendPacket->gifTag = ((u64)0x10000000 << 32) | 0x8001;
             blendPacket->registerList = 0xE;
             blendPacket->registerAddress = 0x42;
-            sdfAppendPacket(setup, (u32)blendPacket);
+            sdfDrawTagLink(setup, (u32)blendPacket);
             effSubmitSurfacePacket(&kwlnDrawSurfaces[surfaceId], setup);
-            blendPacket = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+            blendPacket = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
             blendPacket->dmaTag = 2;
             blendPacket->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
             blendPacket->gifTag = ((u64)0x10000000 << 32) | 0x8001;
@@ -4714,7 +4714,7 @@ void effDrawFourPointGroups(EffPointSet *set, Matrix4 *matrix) {
                 break;
             }
             blendPacket->registerAddress = 0x42;
-            sdfAppendPacket(list, (u32)blendPacket);
+            sdfDrawTagLink(list, (u32)blendPacket);
             effSubmitSurfacePacket(&kwlnDrawSurfaces[surfaceId], list);
         }
     }
@@ -4799,7 +4799,7 @@ void effDestroySurfaceNode(EffectSurfaceNode *node) {
     u32 count;
 
     if (node->resource != NULL) {
-        billDispatchByKind(node->resource);
+        dds3BillboardDelete(node->resource);
     }
     if (node->jobAllocation != 0) {
         count = node->record->count;
@@ -4818,7 +4818,7 @@ void effDestroySurfaceNode(EffectSurfaceNode *node) {
         effReleaseReferenceHolder(node->resourceHolder);
     }
     if (node->record != 0) {
-        fileReleaseGridRecordHandle(node->record);
+        effPCPHelperBEDGetModel(node->record);
     }
     sdfChipFreeDirect(node);
 }
@@ -4852,13 +4852,13 @@ void effCloneSurfaceGridResources(EffectSurfaceNode *dst, u8 *work) {
     case 2:
     case 4:
         if (dst->resource != NULL) {
-            billDispatchByKind(dst->resource);
+            dds3BillboardDelete(dst->resource);
         }
-        dst->resource = billCloneObjectRetainingSharedData(src->resource);
-        billMarkKindOneFlag(dst->resource);
+        dst->resource = dds3BillboardCopy(src->resource);
+        dds3BillboardSetAnimColorAdvMode(dst->resource);
         if (dst->record != 0) {
             FileSlotTable *record = dst->record;
-            billSetBillboardMode(dst->resource, (s16)((FileKeyBlock *)record->data0)->alphaTrack.surfaceIndex);
+            dds3BillboardSetMode(dst->resource, (s16)((FileKeyBlock *)record->data0)->alphaTrack.surfaceIndex);
         }
         break;
     case 5: {
@@ -4926,7 +4926,7 @@ void effRebuildSurfaceHandles(EffectSurfaceNode *node, u16 kind, void *source) {
 
 void effReplaceResourceRef(EffectSurfaceNode *node, u32 entryId, void *resource) {
     if (node->record != NULL) {
-        fileReleaseGridRecordHandle(node->record);
+        effPCPHelperBEDGetModel(node->record);
     }
     node->record = fileAllocateGridRecordSlots((u16)entryId, node->handleCount, resource);
 }
@@ -4935,12 +4935,12 @@ void effReplaceResourceRef(EffectSurfaceNode *node, u32 entryId, void *resource)
 void effSetSurfaceRetainedResource(EffectSurfaceNode *node, u32 resourceId) {
     BillObj *resource = node->resource;
     if (resource != 0) {
-        billDispatchByKind(resource);
+        dds3BillboardDelete(resource);
     }
     resource = effCreateBillboardSharingIndexedResource(resourceId);
     node->resource = resource;
     if (node->record != 0) {
-        billSetBillboardMode(resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
+        dds3BillboardSetMode(resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -4948,25 +4948,25 @@ void effSetSurfaceRetainedResource(EffectSurfaceNode *node, u32 resourceId) {
 void effReplaceSurfacePrimaryBillboard(EffectSurfaceNode *node, u32 resourceId) {
     BillObj *resource = node->resource;
     if (resource != 0) {
-        billDispatchByKind(resource);
+        dds3BillboardDelete(resource);
     }
-    resource = billCreateIndexed(0, resourceId);
+    resource = dds3BillboardCreate(0, resourceId);
     node->resource = resource;
     if (node->record != 0) {
-        billSetBillboardMode(resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
+        dds3BillboardSetMode(resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
     }
 }
 
 void effReplaceSurfaceFlaggedBillboard(EffectSurfaceNode *node, u32 resourceId) {
     BillObj *resource = node->resource;
     if (resource != 0) {
-        billDispatchByKind(resource);
+        dds3BillboardDelete(resource);
     }
-    resource = billCreateIndexed(1, resourceId);
+    resource = dds3BillboardCreate(1, resourceId);
     node->resource = resource;
-    billMarkKindOneFlag(resource);
+    dds3BillboardSetAnimColorAdvMode(resource);
     if (node->record != 0) {
-        billSetBillboardMode(node->resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
+        dds3BillboardSetMode(node->resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -5076,8 +5076,8 @@ EffSurfaceGridNode *effCreateSurfaceGridNode(u32 count, u32 columns) {
     node->allocation = base;
     node->tail = (u32 *)data;
     node->field_14 = 0;
-    node->handle = sdfCreateAssetWithDrawEntries();
-    sdfSetPrimaryStateFloat(node->handle, 1.0f);
+    node->handle = sdfMatNew();
+    sdfMatSetConstant(node->handle, 1.0f);
     memset(&D_003DCA40, 0, sizeof(EffPacketParams));
     D_003DCA40.primitive = 0x4000;
     D_003DCA40.parameters = (u32 *)D_0037EB90;
@@ -5144,7 +5144,7 @@ void effFillSurfaceGridColorGradient(EffSurfaceGridNode *node, u32 *colors) {
 }
 
 void effReleaseSurfaceGridBuffers(EffSurfaceGridNode *node) {
-    sdfQueueAssetRelease(node->handle);
+    sdfMatFreeDelayed(node->handle);
     sdfMemFreeDirect(node->allocation);
 }
 
@@ -5253,11 +5253,11 @@ void effInterpolateSurfaceGridVectors(EffSurfaceGridNode *work, const f32 (*vect
 }
 
 void effBeginMatrixVuDrawPacket(const Matrix4 *matrix) {
-    struct SdfListHead *work = (struct SdfListHead *)sdfAllocPacketAligned(0x20);
+    struct SdfListHead *work = (struct SdfListHead *)sdfGrAllocPacketBuff(0x20);
     effCurrentRenderPacket = work;
-    sdfInitPacketList(work);
+    sdfDrawTagInit(work);
     VU0_LOAD_MATRIX(matrix);
-    sdfConsAppendVuPacket(effCurrentRenderPacket, 0);
+    sdf3DPrimLinkTm(effCurrentRenderPacket, 0);
 }
 
 /* Point history of a grid-surface trail: a ring of 16-byte points with packed colors,
@@ -5292,7 +5292,7 @@ void effDrawSurfaceTrailHistory(EffSurfaceTrailHistory *history, u32 color) {
     if (history->activePointCount < 6) {
         return;
     }
-    sdfConsAppendAssetPacket(effCurrentRenderPacket, history->resourceHandle, 0);
+    sdf3DPrimLinkMat(effCurrentRenderPacket, history->resourceHandle, 0);
     recent = history->activePointCount;
     start[0] = history->nextPointWriteIndex - recent;
     if (start[0] < 3) {
@@ -5316,7 +5316,7 @@ void effDrawSurfaceTrailHistory(EffSurfaceTrailHistory *history, u32 color) {
         while (remaining >= 15) {
             remaining -= 12;
             list = effCurrentRenderPacket;
-            sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DCA40));
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCA40));
             D_003DCA40.positions += 12;
             D_003DCA40.colors += 12;
         }
@@ -5324,7 +5324,7 @@ void effDrawSurfaceTrailHistory(EffSurfaceTrailHistory *history, u32 color) {
             draw->parameterCount = (remaining / 3) * 4 - 4;
             draw->vertexCount = remaining;
             list = effCurrentRenderPacket;
-            sdfAppendPacket(list, effCreateVertexDrawPacket(draw));
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(draw));
             draw->colors += remaining;
         }
     }
@@ -5336,7 +5336,7 @@ void effDrawSurfaceTrailHistory(EffSurfaceTrailHistory *history, u32 color) {
         colors[3] = colors[2] = colors[1] = D_003DCA40.colors[-3];
     D_003DCA70.color = color;
     list = effCurrentRenderPacket;
-    sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DCA70));
+    sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCA70));
 }
 
 typedef struct EffDrawEntry {
@@ -5370,8 +5370,8 @@ EffQuadWork *effCreateQuadWork(FileJobPayload *job) {
     work->color = 0x80808080;
     work->billHandle = NULL;
     work->reference = NULL;
-    work->assetHandle = sdfCreateAssetWithDrawEntries();
-    sdfSetPrimaryStateFloat(work->assetHandle, 1.0f);
+    work->assetHandle = sdfMatNew();
+    sdfMatSetConstant(work->assetHandle, 1.0f);
     memset(&effQuadPacketParams, 0, sizeof(EffPacketParams));
     effQuadPacketParams.primitive = 0x4000;
     effQuadPacketParams.parameters = D_0037EC10;
@@ -5388,10 +5388,10 @@ EffQuadWork *effCreateQuadWork(FileJobPayload *job) {
     if (buffer != NULL) {
         switch (job->primary.selector) {
         case 1:
-            work->billHandle = billCreateIndexed(0, (u32)buffer);
+            work->billHandle = dds3BillboardCreate(0, (u32)buffer);
             break;
         case 2:
-            work->billHandle = billCreateIndexed(1, (u32)buffer);
+            work->billHandle = dds3BillboardCreate(1, (u32)buffer);
             break;
         case 4:
             work->billHandle = effCreateBillboardSharingIndexedResource(*(s32 *)buffer);
@@ -5401,8 +5401,8 @@ EffQuadWork *effCreateQuadWork(FileJobPayload *job) {
             break;
         }
         if (work->billHandle != NULL) {
-            billMarkKindOneFlag(work->billHandle);
-            billSetBillboardMode(work->billHandle, (s16)work->source.alphaTrack.surfaceIndex);
+            dds3BillboardSetAnimColorAdvMode(work->billHandle);
+            dds3BillboardSetMode(work->billHandle, (s16)work->source.alphaTrack.surfaceIndex);
         }
     }
     return work;
@@ -5410,13 +5410,13 @@ EffQuadWork *effCreateQuadWork(FileJobPayload *job) {
 
 void effReleaseRenderResources(EffQuadWork *work) {
     if (work->billHandle != 0) {
-        billDispatchByKind(work->billHandle);
+        dds3BillboardDelete(work->billHandle);
     }
     if (work->reference != NULL) {
         effReleaseReferenceHolder(work->reference);
     }
     if (work->assetHandle != 0) {
-        sdfQueueAssetRelease(work->assetHandle);
+        sdfMatFreeDelayed(work->assetHandle);
     }
     sdfChipFreeDirect(work);
 }
@@ -5435,12 +5435,12 @@ void effDuplicateRenderResourceOwner(EffQuadWork *work, const EffQuadWork *sourc
 
     if (source->billHandle != 0) {
         if (work->billHandle != 0) {
-            billDispatchByKind(work->billHandle);
+            dds3BillboardDelete(work->billHandle);
         }
-        resource = billCloneObjectRetainingSharedData(source->billHandle);
+        resource = dds3BillboardCopy(source->billHandle);
         work->billHandle = resource;
-        billMarkKindOneFlag(resource);
-        billSetBillboardMode(work->billHandle, (s16)work->source.alphaTrack.surfaceIndex);
+        dds3BillboardSetAnimColorAdvMode(resource);
+        dds3BillboardSetMode(work->billHandle, (s16)work->source.alphaTrack.surfaceIndex);
         return;
     }
     if (work->reference != NULL) {
@@ -5482,7 +5482,7 @@ void effRandomizeParticleFields(EffClassWork *work) {
 
     if (count != 0) {
         do {
-            entry->key = -1 - (sdfGetRand((struct EffRandState *)effSharedRandomState) & 3);
+            entry->key = -1 - (dds3GetRandA((struct EffRandState *)effSharedRandomState) & 3);
             entry++;
             index++;
         } while (index < count);
@@ -5630,13 +5630,13 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
             if (entry->key == -1) {
                 entry->color = 0xA0808080;
             } else {
-                f32 r = sdfGetRandFloat(effSharedRandomState);
+                f32 r = dds3GetRandFloatA(effSharedRandomState);
                 f32 bendStep = speed * (r * speedJitter + (1.0f - speedJitter));
                 f32 bend;
 
                 phase = entry->angle;
                 bendStep /= layers;
-                if (sdfGetRand((struct EffRandState *)effSharedRandomState) & 1) {
+                if (dds3GetRandA((struct EffRandState *)effSharedRandomState) & 1) {
                     bendStep = -bendStep;
                 }
                 bend = bendStep;
@@ -5645,7 +5645,7 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
                 } else {
                     entry->key = -1;
                     if (respawnDelay > 0) {
-                        entry->key -= (u32)sdfGetRand((struct EffRandState *)effSharedRandomState) % (u32)respawnDelay;
+                        entry->key -= (u32)dds3GetRandA((struct EffRandState *)effSharedRandomState) % (u32)respawnDelay;
                     }
                     continue;
                 }
@@ -5666,15 +5666,15 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
                     s32 j;
                     s32 k;
 
-                    if (sdfGetRand((struct EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((struct EffRandState *)effSharedRandomState) & 1) {
                         amplitude = -amplitude;
                     }
                     stepSquared = step * step;
-                    waveAngle = sdfGetRandFloat(effSharedRandomState) * 3.14159265f;
-                    waveRadius = amplitude * (sdfGetRandFloat(effSharedRandomState) * 0.9f + (1.0f - 0.9f));
-                    waveHeight = sdfSinPoly(waveAngle) * waveRadius;
+                    waveAngle = dds3GetRandFloatA(effSharedRandomState) * 3.14159265f;
+                    waveRadius = amplitude * (dds3GetRandFloatA(effSharedRandomState) * 0.9f + (1.0f - 0.9f));
+                    waveHeight = sdfSin(waveAngle) * waveRadius;
                     waveAngle += waveStep;
-                    newHeight = sdfSinPoly(waveAngle) * waveRadius;
+                    newHeight = sdfSin(waveAngle) * waveRadius;
                     delta = newHeight - waveHeight;
                     waveHeight = newHeight;
                     segmentLength = fsqrtf(delta * delta + stepSquared);
@@ -5710,25 +5710,25 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
                     }
                     vertices += 20;
                     for (k = 1; k < rows; k++) {
-                        f32 tilt = bendScale * (sdfGetRandFloat(effSharedRandomState) * 0.75 + 0.25);
+                        f32 tilt = bendScale * (dds3GetRandFloatA(effSharedRandomState) * 0.75 + 0.25);
                         f32 slope;
                         f32 tangentScale;
                         f32 sine;
 
-                        if (sdfGetRand((struct EffRandState *)effSharedRandomState) & 1) {
+                        if (dds3GetRandA((struct EffRandState *)effSharedRandomState) & 1) {
                             bendScale = -bendScale;
                         }
                         waveAngle += waveStep;
                         if (waveAngle >= 3.14159265f) {
                             waveAngle -= 3.14159265f;
                             amplitude = -amplitude;
-                            waveRadius = amplitude * (sdfGetRandFloat(effSharedRandomState) * 0.9f + (1.0f - 0.9f));
+                            waveRadius = amplitude * (dds3GetRandFloatA(effSharedRandomState) * 0.9f + (1.0f - 0.9f));
                         }
-                        newHeight = sdfSinPoly(waveAngle) * waveRadius;
+                        newHeight = sdfSin(waveAngle) * waveRadius;
                         delta = newHeight - waveHeight;
                         segmentLength = fsqrtf(delta * delta + stepSquared);
                         slope = asinf(delta / segmentLength) + (tilt + bend);
-                        sdfBuildVuRotationFromAxisAngle(oldSlope, (const struct RwV3d *)axis);
+                        SetRotateMatrixAxis(oldSlope, (const struct RwV3d *)axis);
                         slope += phase;
                         VU0_LOAD_VF(vf10, direction);
                         VU0_ROTATE_VEC(vf10, vf10);
@@ -5736,7 +5736,7 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
                         oldSlope = slope;
                         waveHeight = newHeight;
                         bend += bendStep;
-                        sine = sdfSinPoly(delta);
+                        sine = sdfSin(delta);
                         tangentScale = sine / sdfCos(delta);
                         VU0_MOVE_VF(vf12, vf10);
                         for (j = 0; j < 5; j++) {
@@ -5861,14 +5861,14 @@ EffClassWorkList *effCreateRadialClassResourceEntries(EffBillPointConfig *config
     copy.timed.count = 1;
     copy.totalLength = config->totalLength;
     step = 6.2831852f / (f32)count;
-    position = step * ((sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f);
+    position = step * ((dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f);
     for (index = 0; index < count; index++) {
         EffClassWork *resourceWork = effCreateClassResourceWork(1, &copy);
         u8 **resourceSlot = (u8 **)resourceWork->resource;
 
         *entries++ = resourceWork;
         *(f32 *)(*resourceSlot + 0xC) = position;
-        offset = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f;
+        offset = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f;
         position += step + step * offset * 0.25f;
     }
     return allocation;
@@ -5950,7 +5950,7 @@ void effUpdateRadialClassInstances(EffClassWork *work) {
         EffPointSetTable *points = (EffPointSetTable *)entry->resource;
         f32 angle = points->rows->angle;
 
-        position[0] = work->vectors.position[0] - sdfSinPoly(angle) * radius;
+        position[0] = work->vectors.position[0] - sdfSin(angle) * radius;
         position[1] = work->vectors.position[1] - sdfCos(angle) * radius;
         effCopyClassResourcePosition(*entries, position);
         effCopyClassResourceOrientation(*entries, orientation);
@@ -5976,12 +5976,12 @@ void effSeedBillScaleRange(EffClassWork *work) {
     EffScaleRange *range = (EffScaleRange *)work->resource;
     s32 steps = config->point.timed.time.duration;
     EffScaleRangeEntry *entry = range->entries;
-    f32 start = config->startBase * (sdfGetRandFloat(effSharedRandomState) * config->startRand + (1.0f - config->startRand));
+    f32 start = config->startBase * (dds3GetRandFloatA(effSharedRandomState) * config->startRand + (1.0f - config->startRand));
     u32 index;
     u32 count;
 
     if (steps > 0) {
-        f32 end = config->endBase * (sdfGetRandFloat(effSharedRandomState) * config->endRand + (1.0f - config->endRand));
+        f32 end = config->endBase * (dds3GetRandFloatA(effSharedRandomState) * config->endRand + (1.0f - config->endRand));
         range->start = start;
         range->delta = (end - start) / (f32)steps;
     } else {
@@ -5993,7 +5993,7 @@ void effSeedBillScaleRange(EffClassWork *work) {
     if (count != 0) {
         do {
             index++;
-            entry->negativeSeed = -1 - (sdfGetRand((struct EffRandState *)effSharedRandomState) & 7);
+            entry->negativeSeed = -1 - (dds3GetRandA((struct EffRandState *)effSharedRandomState) & 7);
             entry++;
         } while (index < count);
     }
@@ -6141,26 +6141,26 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
     remaining = count;
     for (; remaining != 0; remaining--, entry++) {
         if (entry->negativeSeed == -1) {
-            f32 r = sdfGetRandFloat(effSharedRandomState);
+            f32 r = dds3GetRandFloatA(effSharedRandomState);
             f32 jitter = config->angularRand;
             f32 baseSpeed = config->angularBase;
             entry->phase = 0;
             entry->angularRate = baseSpeed * (r * jitter + (1.0f - jitter));
             if (!useHeight) {
-                entry->yaw = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+                entry->yaw = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
                 entry->height = 0;
             } else {
-                entry->yaw = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f * (45.0f * (3.14159265f / 180.0f));
-                entry->height = -config->heightScale * sdfGetRandFloat(effSharedRandomState);
+                entry->yaw = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f * (45.0f * (3.14159265f / 180.0f));
+                entry->height = -config->heightScale * dds3GetRandFloatA(effSharedRandomState);
             }
-            entry->pitch = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
-            sdfVuLoadRotationMatrixX(entry->yaw);
+            entry->pitch = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+            SetRotateMatrixX(entry->yaw);
             sdfVuLoadSecondaryRotationMatrixY(entry->pitch);
-            sdfMultiplyVuMatrixInPlace();
+            MultMatrixRevNoArg();
             phase = entry->phase;
             position[0] = sdfCos(phase) * radius;
             position[1] = 0;
-            position[2] = sdfSinPoly(phase) * radius;
+            position[2] = sdfSin(phase) * radius;
             VU0_LOAD_VF(vf10, position);
             VU0_ROTATE_VEC(vf10, vf10);
             VU0_STORE_VF(vf10, position);
@@ -6174,7 +6174,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
             } else {
                 entry->negativeSeed = -1;
                 if (respawnDelay > 0) {
-                    entry->negativeSeed -= (u32)sdfGetRand((struct EffRandState *)effSharedRandomState) % (u32)respawnDelay;
+                    entry->negativeSeed -= (u32)dds3GetRandA((struct EffRandState *)effSharedRandomState) % (u32)respawnDelay;
                 }
                 continue;
             }
@@ -6197,32 +6197,32 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                 f32 segmentLength;
                 s32 j;
                 s32 k;
-                if (sdfGetRand((struct EffRandState *)effSharedRandomState) & 1) {
+                if (dds3GetRandA((struct EffRandState *)effSharedRandomState) & 1) {
                     amplitude = -amplitude;
                 }
                 stepSquared = step * step;
-                waveAngle = sdfGetRandFloat(effSharedRandomState) * 3.14159265f;
-                waveRadius = amplitude * (sdfGetRandFloat(effSharedRandomState) * 0.95f + (1.0f - 0.95f));
-                waveHeight = sdfSinPoly(waveAngle) * waveRadius;
+                waveAngle = dds3GetRandFloatA(effSharedRandomState) * 3.14159265f;
+                waveRadius = amplitude * (dds3GetRandFloatA(effSharedRandomState) * 0.95f + (1.0f - 0.95f));
+                waveHeight = sdfSin(waveAngle) * waveRadius;
                 waveAngle += waveStep;
-                newHeight = sdfSinPoly(waveAngle) * waveRadius;
+                newHeight = sdfSin(waveAngle) * waveRadius;
                 delta = newHeight - waveHeight;
                 waveHeight = newHeight;
                 segmentLength = fsqrtf(delta * delta + stepSquared);
                 oldSlope = asinf(delta / segmentLength);
                 inner = config->point.halfWidth;
                 edgeWidth = config->point.edgeWidth;
-                curveSample = sdfGetRandFloat(effSharedRandomState);
+                curveSample = dds3GetRandFloatA(effSharedRandomState);
                 width = inner + edgeWidth;
                 phase = (entry->angularRate + acceleration * (f32)(entry->negativeSeed + 1) * 0.5f) * (f32)(entry->negativeSeed + 1);
                 phase = phase + entry->phase;
                 curve = bendStep * (curveSample * 0.7f + (1.0f - 0.7f));
-                sdfVuLoadRotationMatrixX(entry->yaw);
+                SetRotateMatrixX(entry->yaw);
                 sdfVuLoadSecondaryRotationMatrixY(entry->pitch);
-                sdfMultiplyVuMatrixInPlace();
+                MultMatrixRevNoArg();
                 position[0] = sdfCos(phase) * radius;
                 position[1] = 0;
-                position[2] = sdfSinPoly(phase) * radius;
+                position[2] = sdfSin(phase) * radius;
                 VU0_LOAD_VF(vf10, position);
                 VU0_ROTATE_VEC(vf10, vf10);
                 VU0_STORE_VF(vf10, position);
@@ -6267,29 +6267,29 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                 entry->position[2] = previous[2];
                 vertices += 20;
                 for (k = 1; k < rows; k++) {
-                    f32 tilt = bendScale * (sdfGetRandFloat(effSharedRandomState) * 0.75 + 0.25);
+                    f32 tilt = bendScale * (dds3GetRandFloatA(effSharedRandomState) * 0.75 + 0.25);
                     f32 slope;
                     f32 distance;
                     f32 tangentScale;
-                    if (sdfGetRand((struct EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((struct EffRandState *)effSharedRandomState) & 1) {
                         bendScale = -bendScale;
                     }
                     waveAngle += waveStep;
                     if (waveAngle >= 3.14159265f) {
                         waveAngle -= 3.14159265f;
                         amplitude = -amplitude;
-                        waveRadius = amplitude * (sdfGetRandFloat(effSharedRandomState) * 0.95f + (1.0f - 0.95f));
-                        curve = bendStep * (sdfGetRandFloat(effSharedRandomState) * 0.7f + (1.0f - 0.7f));
+                        waveRadius = amplitude * (dds3GetRandFloatA(effSharedRandomState) * 0.95f + (1.0f - 0.95f));
+                        curve = bendStep * (dds3GetRandFloatA(effSharedRandomState) * 0.7f + (1.0f - 0.7f));
                     }
-                    newHeight = sdfSinPoly(waveAngle) * waveRadius;
+                    newHeight = sdfSin(waveAngle) * waveRadius;
                     delta = newHeight - waveHeight;
                     segmentLength = fsqrtf(delta * delta + stepSquared);
                     slope = asinf(delta / segmentLength) + tilt;
-                    sdfBuildVuRotationFromAxisAngle(oldSlope, (const struct RwV3d *)radial);
+                    SetRotateMatrixAxis(oldSlope, (const struct RwV3d *)radial);
                     VU0_LOAD_VF(vf10, direction);
                     VU0_ROTATE_VEC(vf10, vf10);
                     VU0_STORE_VF(vf10, rotated);
-                    sdfBuildVuRotationFromAxisAngle(curve, (const struct RwV3d *)tangent);
+                    SetRotateMatrixAxis(curve, (const struct RwV3d *)tangent);
                     VU0_LOAD_VF(vf10, direction);
                     VU0_ROTATE_VEC(vf10, vf10);
                     VU0_STORE_VF(vf10, direction);
@@ -6476,8 +6476,8 @@ EffPointSet *effCreatePointSet5(s32 count) {
     set->allocation = base;
     set->tail = data;
     set->flag = 0;
-    set->handle = sdfCreateAssetWithDrawEntries();
-    sdfSetPrimaryStateFloat(set->handle, 1.0f);
+    set->handle = sdfMatNew();
+    sdfMatSetConstant(set->handle, 1.0f);
     memset(D_003DCAD0, 0, 0x2C);
     D_003DCAD0[0].primitive = 0x4000;
     return set;
@@ -6485,7 +6485,7 @@ EffPointSet *effCreatePointSet5(s32 count) {
 
 /* Queue the draw asset for release and return the backing allocation. */
 void effReleasePointSetAsset(EffPointSet *set) {
-    sdfQueueAssetRelease(set->handle);
+    sdfMatFreeDelayed(set->handle);
     sdfMemFreeDirect(set->allocation);
 }
 
@@ -6495,24 +6495,24 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
     s32 remaining;
 
     if (set->color & 0xFF000000) {
-        list = (void *)sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(list);
+        list = (void *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(list);
         if (matrix == NULL) {
             VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
         } else {
             VU0_LOAD_MATRIX(matrix);
         }
-        sdfConsAppendVuPacket(list, 0);
-        sdfConsAppendAssetPacket(list, set->handle, 0);
+        sdf3DPrimLinkTm(list, 0);
+        sdf3DPrimLinkMat(list, set->handle, 0);
         if (set->flag == 0) {
-            packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+            packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
             packet->dmaTag = 2;
             packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
             packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
             packet->registerList = 0xE;
             packet->registerValue = 0x31801;
             packet->registerAddress = 0x47;
-            sdfAppendPacket(list, (u32)packet);
+            sdfDrawTagLink(list, (u32)packet);
         }
         remaining = set->rows;
         D_003DCAD0[0].colors = (u32 *)set->tail;
@@ -6523,24 +6523,24 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
         D_003DCAD0[0].parameters = D_0037ECB0;
         while (remaining >= 0xF) {
             remaining -= 0xA;
-            sdfAppendPacket(list, effCreateVertexDrawPacket(D_003DCAD0));
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(D_003DCAD0));
             D_003DCAD0[0].positions += 0xA;
             D_003DCAD0[0].colors += 0xA;
         }
         if (remaining >= 0xA) {
             D_003DCAD0[0].parameterCount = 8;
             D_003DCAD0[0].vertexCount = remaining;
-            sdfAppendPacket(list, effCreateVertexDrawPacket(D_003DCAD0));
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(D_003DCAD0));
         }
         if (set->flag == 0) {
-            packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+            packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
             packet->dmaTag = 2;
             packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
             packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
             packet->registerList = 0xE;
             packet->registerValue = 0x51801;
             packet->registerAddress = 0x47;
-            sdfAppendPacket(list, (u32)packet);
+            sdfDrawTagLink(list, (u32)packet);
         }
         D_0037ECF0[set->type]->append(D_0037ECF0[set->type], list);
     }
@@ -6581,13 +6581,13 @@ EffectStripNode *effFileResourceReferenceReplace(FileJobPayload *work) {
 
 void effReleaseModelResources(EffectStripNode *work) {
     if (work->resource != NULL) {
-        billDispatchByKind(work->resource);
+        dds3BillboardDelete(work->resource);
     }
     if (work->trackSet != NULL) {
         effReleaseResourceRefs(work->trackSet);
     }
     if (work->active != 0) {
-        fileReleaseGridRecordHandle(work->active);
+        effPCPHelperBEDGetModel(work->active);
     }
     sdfChipFreeDirect(work);
 }
@@ -6603,7 +6603,7 @@ EffectStripNode *effCloneStripResourceFromOwner(EffectStripNode *work) {
 
 void effReplaceFileResourceRef(EffectStripNode *node, u32 entryId, void *resource) {
     if (node->active != 0) {
-        fileReleaseGridRecordHandle(node->active);
+        effPCPHelperBEDGetModel(node->active);
     }
     node->active = fileAllocateGridRecordSlots((u16)entryId, node->percent, resource);
 }
@@ -6686,7 +6686,7 @@ void effDrawEffectStrip(EffectStripNode *node) {
     billboard = node->resource;
     opacity = node->opacity;
     billSize = node->copiedHeader.billSize;
-    billSetBillboardMode(billboard, (s16)info->alphaTrack.surfaceIndex);
+    dds3BillboardSetMode(billboard, (s16)info->alphaTrack.surfaceIndex);
     VU0_LOAD_VF(vf10, sdfViewEyeVector);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
@@ -6738,14 +6738,14 @@ void effDrawEffectStrip(EffectStripNode *node) {
                 childColor = eePackRGBAWord(128.0f);
                 cross = crossSize * scale;
                 billExtent = billSize * scale;
-                billSetChildParameter(billboard, childColor);
-                billSetChildScaleComponents(billboard, billExtent, billExtent);
-                billSetRotationAngle(billboard, entry->angle);
+                dds3BillboardSetRGBA(billboard, childColor);
+                dds3BillboardSetScale(billboard, billExtent, billExtent);
+                dds3BillboardSetRotate(billboard, entry->angle);
                 effCopyVector(billboard, position);
-                billInvokeCallback(billboard);
+                dds3BillboardDraw(billboard);
                 along = longSize * scale * 1.5f;
                 side = sideSize * scale * 1.5f;
-                sdfBuildVuRotationFromAxisAngle(entry->angle, (const RwV3d *)view);
+                SetRotateMatrixAxis(entry->angle, (const RwV3d *)view);
                 VU0_LOAD_VF(vf10, right);
                 VU0_ROTATE_VEC(vf10, vf10);
                 VU0_STORE_VF_UNCLOBBERED(vf10, rightAxis);
@@ -7212,33 +7212,33 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
 
                 if (spawnRemaining != 0) {
                     radius = common->radiusStart *
-                        (sdfGetRandFloat(effSharedRandomState) * common->radiusStartJitter +
+                        (dds3GetRandFloatA(effSharedRandomState) * common->radiusStartJitter +
                          (1.0f - common->radiusStartJitter));
                     radiusStep =
-                        (common->radiusEnd * (sdfGetRandFloat(effSharedRandomState) * common->radiusEndJitter +
+                        (common->radiusEnd * (dds3GetRandFloatA(effSharedRandomState) * common->radiusEndJitter +
                                               (1.0f - common->radiusEndJitter)) - radius) /
                         (f32)life;
                     particle->radius = radius;
                     particle->radiusStep = radiusStep;
                     particle->drag = config->drag *
-                        (sdfGetRandFloat(effSharedRandomState) * config->dragJitter +
+                        (dds3GetRandFloatA(effSharedRandomState) * config->dragJitter +
                          (1.0f - config->dragJitter));
-                    particle->verticalOffset = -config->velocity * sdfGetRandFloat(effSharedRandomState);
+                    particle->verticalOffset = -config->velocity * dds3GetRandFloatA(effSharedRandomState);
                     particle->flare = config->flare *
-                        (sdfGetRandFloat(effSharedRandomState) * config->flareJitter +
+                        (dds3GetRandFloatA(effSharedRandomState) * config->flareJitter +
                          (1.0f - config->flareJitter));
-                    particle->spinPhase = sdfGetRandFloat(effSharedRandomState) * 6.2831853f;
+                    particle->spinPhase = dds3GetRandFloatA(effSharedRandomState) * 6.2831853f;
                     particle->spin = config->spin *
-                        (sdfGetRandFloat(effSharedRandomState) * config->spinJitter +
+                        (dds3GetRandFloatA(effSharedRandomState) * config->spinJitter +
                          (1.0f - config->spinJitter));
                     particle->width = common->width *
-                        (sdfGetRandFloat(effSharedRandomState) * common->widthJitter +
+                        (dds3GetRandFloatA(effSharedRandomState) * common->widthJitter +
                          (1.0f - common->widthJitter));
                     particle->extent = common->extent *
-                        (sdfGetRandFloat(effSharedRandomState) * common->extentJitter +
+                        (dds3GetRandFloatA(effSharedRandomState) * common->extentJitter +
                          (1.0f - common->extentJitter)) * 10.0f;
                     {
-                        f32 random = sdfGetRandFloat(effSharedRandomState);
+                        f32 random = dds3GetRandFloatA(effSharedRandomState);
                         f32 height = common->height *
                             (random * common->heightJitter + (1.0f - common->heightJitter));
                         colors[0] = 0;
@@ -7246,7 +7246,7 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
                     }
 
                     if (spawnAll) {
-                        s32 birthAge = sdfGetRand((EffRandState *)effSharedRandomState) % life;
+                        s32 birthAge = dds3GetRandA((EffRandState *)effSharedRandomState) % life;
                         f32 gravityDisplacement;
                         ageF = (f32)birthAge;
                         gravityDisplacement = gravity * ageF * ageF * 0.5f;
@@ -7288,7 +7288,7 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
                     phaseOffset = ageF / (f32)life - flareCenter;
                     radius += phaseOffset * phaseOffset * flare;
                     cosine = sdfCos(angle);
-                    sine = sdfSinPoly(angle);
+                    sine = sdfSin(angle);
                     center[0] = cosine * radius;
                     center[1] = currentY;
                     center[2] = sine * radius;
@@ -7611,20 +7611,20 @@ void effUpdateBillSpiral(EffClassWork *work) {
             if (timer == -1) {
                 if (spawn != 0) {
                     f32 radiusDelta;
-                    start = config->common.radiusStart * (sdfGetRandFloat(effSharedRandomState) * config->common.radiusStartJitter + (1.0f - config->common.radiusStartJitter));
-                    radiusDelta = (config->common.radiusEnd * (sdfGetRandFloat(effSharedRandomState) * config->common.radiusEndJitter + (1.0f - config->common.radiusEndJitter)) - start) / (f32)life;
+                    start = config->common.radiusStart * (dds3GetRandFloatA(effSharedRandomState) * config->common.radiusStartJitter + (1.0f - config->common.radiusStartJitter));
+                    radiusDelta = (config->common.radiusEnd * (dds3GetRandFloatA(effSharedRandomState) * config->common.radiusEndJitter + (1.0f - config->common.radiusEndJitter)) - start) / (f32)life;
                     particle->radius = start;
                     particle->radiusStep = radiusDelta;
-                    particle->tiltX = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
-                    particle->tiltY = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
-                    particle->phase = sdfGetRandFloat(effSharedRandomState) * 6.2831853f;
-                    particle->spin = config->spin * (sdfGetRandFloat(effSharedRandomState) * config->spinJitter + (1.0f - config->spinJitter));
-                    particle->width = config->common.width * (sdfGetRandFloat(effSharedRandomState) * config->common.widthJitter + (1.0f - config->common.widthJitter));
-                    particle->sweep = config->common.extent * (sdfGetRandFloat(effSharedRandomState) * config->common.extentJitter + (1.0f - config->common.extentJitter));
-                    particle->height = config->common.height * (sdfGetRandFloat(effSharedRandomState) * config->common.heightJitter + (1.0f - config->common.heightJitter));
+                    particle->tiltX = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+                    particle->tiltY = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+                    particle->phase = dds3GetRandFloatA(effSharedRandomState) * 6.2831853f;
+                    particle->spin = config->spin * (dds3GetRandFloatA(effSharedRandomState) * config->spinJitter + (1.0f - config->spinJitter));
+                    particle->width = config->common.width * (dds3GetRandFloatA(effSharedRandomState) * config->common.widthJitter + (1.0f - config->common.widthJitter));
+                    particle->sweep = config->common.extent * (dds3GetRandFloatA(effSharedRandomState) * config->common.extentJitter + (1.0f - config->common.extentJitter));
+                    particle->height = config->common.height * (dds3GetRandFloatA(effSharedRandomState) * config->common.heightJitter + (1.0f - config->common.heightJitter));
                     *colors = 0;
                     if (burst != 0) {
-                        particle->timer = sdfGetRand(effSharedRandomState) % life;
+                        particle->timer = dds3GetRandA(effSharedRandomState) % life;
                         time = (f32)particle->timer;
                         particle->radius += particle->radiusStep * time;
                     } else {
@@ -7648,12 +7648,12 @@ void effUpdateBillSpiral(EffClassWork *work) {
                     step = -particle->sweep / segmentCount;
                 }
                 height = particle->height;
-                sdfVuLoadRotationMatrixX(particle->tiltX);
+                SetRotateMatrixX(particle->tiltX);
                 sdfVuLoadSecondaryRotationMatrixY(particle->tiltY);
-                sdfMultiplyVuMatrixInPlace();
+                MultMatrixRevNoArg();
                 pos[0] = sdfCos(angle);
                 pos[1] = 0.0f;
-                pos[2] = sdfSinPoly(angle);
+                pos[2] = sdfSin(angle);
                 for (j = 0; j < segments; j++) {
                     f32 rowHeight;
                     VU0_LOAD_VF(vf10, pos);
@@ -7663,7 +7663,7 @@ void effUpdateBillSpiral(EffClassWork *work) {
                     angle += step;
                     pos[0] = sdfCos(angle);
                     pos[1] = 0.0f;
-                    pos[2] = sdfSinPoly(angle);
+                    pos[2] = sdfSin(angle);
                     VU0_LOAD_VF(vf10, pos);
                     VU0_ROTATE_VEC(vf10, vf10);
                     VU0_SCALE_VF(vf10, radius);
@@ -7856,8 +7856,8 @@ EffRibbonWork *effCreateRibbonWork(u32 count, u32 repeat) {
     for (i = 0; i < count; i++) {
         ((u32 *)p)[i] = 0x80808080;
     }
-    work->handle = sdfCreateAssetWithDrawEntries();
-    sdfSetPrimaryStateFloat(work->handle, 1.0f);
+    work->handle = sdfMatNew();
+    sdfMatSetConstant(work->handle, 1.0f);
     memset(&D_003DCB00, 0, sizeof(EffPacketParams));
     D_003DCB00.primitive = 0x4000;
     return work;
@@ -7892,7 +7892,7 @@ void effSharedAssetReferenceRelease(EffRibbonWork *work) {
     else {
         effReleaseSharedReference(work->resource);
     }
-    sdfQueueAssetRelease(work->handle);
+    sdfMatFreeDelayed(work->handle);
     sdfMemFreeDirect(work->allocation);
 }
 
@@ -7948,30 +7948,30 @@ void effDrawRibbon(EffRibbonWork *work, Matrix4 *matrix) {
     surface = D_0037ED78[work->surfaceIndex];
     eeUnpackRGBAWordFloat(color, 1.0f / 128.0f);
     VU0_STORE_VF(vf10, baseVector);
-    list = (void *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
+    list = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
     if (matrix == NULL) {
         VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
     } else {
         VU0_LOAD_MATRIX(matrix);
     }
-    sdfConsAppendVuPacket(list, 0);
+    sdf3DPrimLinkTm(list, 0);
     if (work->resource == NULL) {
         texture = sdfGetOrCreateTextureForReference(surface, (RefObj *)D_003BC990);
     } else {
         texture = sdfGetOrCreateTextureForReference(surface, work->resource);
     }
     sdfSetAssetPrimaryTextureAddress(work->handle, texture);
-    sdfConsAppendAssetPacket(list, work->handle, 0);
+    sdf3DPrimLinkMat(list, work->handle, 0);
     if (work->drawMode == 0) {
-        packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+        packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
         packet->dmaTag = 2;
         packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
         packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
         packet->registerList = 0xE;
         packet->registerValue = 0x31801;
         packet->registerAddress = 0x47;
-        sdfAppendPacket(list, (u32)packet);
+        sdfDrawTagLink(list, (u32)packet);
     }
     positions = work->positions;
     uvs = work->uvs;
@@ -8004,7 +8004,7 @@ void effDrawRibbon(EffRibbonWork *work, Matrix4 *matrix) {
                 D_003DCB00.parameters = D_0037EB30;
                 while (remaining >= 12) {
                     remaining -= 8;
-                    sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DCB00));
+                    sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCB00));
                     D_003DCB00.positions += 8;
                     D_003DCB00.colors += 8;
                     D_003DCB00.texcoords += 16;
@@ -8012,7 +8012,7 @@ void effDrawRibbon(EffRibbonWork *work, Matrix4 *matrix) {
                 if (remaining >= 8) {
                     D_003DCB00.parameterCount = 6;
                     D_003DCB00.vertexCount = remaining;
-                    sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DCB00));
+                    sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCB00));
                 }
             }
             positions += positionStep;
@@ -8023,20 +8023,20 @@ void effDrawRibbon(EffRibbonWork *work, Matrix4 *matrix) {
         } while (segment < count);
     }
     if (work->drawMode == 0) {
-        packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+        packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
         packet->dmaTag = 2;
         packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
         packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
         packet->registerList = 0xE;
         packet->registerValue = 0x51801;
         packet->registerAddress = 0x47;
-        sdfAppendPacket(list, (u32)packet);
+        sdfDrawTagLink(list, (u32)packet);
     }
     surface->append(surface, (SdfListHead *)list);
 }
 
 void effLoadWindTexture(void) {
-    D_003BC984 = (u32)sdfReadNamedResource("/effect/wind00.tmx", &effWindTextureHandle, 0);
+    D_003BC984 = (u32)sdfDevLoadFileEx("/effect/wind00.tmx", &effWindTextureHandle, 0);
 }
 
 u32 effGetWindTextureHandle(void) {
@@ -8197,8 +8197,8 @@ void effInitializeAnimationPositions(u8 *work) {
 
     fileClearRecordReferences(record);
     for (; i < count; i++) {
-        positions[0] = sdfGetRandFloat(effSharedRandomState);
-        positions[1] = sdfGetRandFloat(effSharedRandomState);
+        positions[0] = dds3GetRandFloatA(effSharedRandomState);
+        positions[1] = dds3GetRandFloatA(effSharedRandomState);
         positions += 2;
     }
 }
@@ -8242,7 +8242,7 @@ void effReleaseAnimationFrameResources(u8 *work) {
 
     effReleaseScalyTextureReference(state->textureHandle);
     if (state->record != 0) {
-        fileReleaseGridRecordHandle(state->record);
+        effPCPHelperBEDGetModel(state->record);
     }
     sdfMemFreeDirect(state->allocation);
 }
@@ -8363,20 +8363,20 @@ void effBuildQuantizedTexturedStrip(u32 *buffer, EffBillQuantizedConfig *config)
     for (segment = 0; segment < segmentCount; segment++) {
         angle = segmentAngle;
         for (sample = 0; sample < 4; sample++) {
-            radii[sample] = radius * sdfSinPoly(angle);
+            radii[sample] = radius * sdfSin(angle);
             heights[sample] = -radius * sdfCos(angle);
             angle += sampleStep;
         }
         segmentAngle += angleStep;
         rowAngle = 0.0f;
         /* Retail keeps this unused sample (DDS1 002B0008 / DDS2 002F33F8). */
-        sdfSinPoly(segmentAngle);
+        sdfSin(segmentAngle);
         for (row = 0; row < rowCount; row++) {
             f32 *position;
             f32 *texA;
             f32 *texB;
             cosine = sdfCos(rowAngle);
-            sine = sdfSinPoly(rowAngle);
+            sine = sdfSin(rowAngle);
             rowFraction = (f32)row / rowCount;
             fraction = (f32)segment / segmentCount;
             fractionStep = (1.0f / segmentCount) / 3.0f;
@@ -8646,8 +8646,8 @@ u32 repeat;
     for (i = 0; i < count; i++) {
         ((u32 *)p)[i] = 0x80808080;
     }
-    work->handle = sdfCreateAssetWithDrawEntries();
-    sdfSetPrimaryStateFloat(work->handle, 1.0f);
+    work->handle = sdfMatNew();
+    sdfMatSetConstant(work->handle, 1.0f);
     memset(&D_003DCB30, 0, sizeof(EffPacketParams));
     D_003DCB30.primitive = 0x4000;
     return (u8 *)work;
@@ -8662,7 +8662,7 @@ u32 effCreateTexturedStripWithSharedTexture(u32 count, u32 repeat) {
 
 void effReleaseScalyStripResources(s32 work) {
     effReleaseScalyTextureReference((s32)effSharedScalyStripResource);
-    sdfQueueAssetRelease(((EffStripWork *)work)->handle);
+    sdfMatFreeDelayed(((EffStripWork *)work)->handle);
     sdfMemFreeDirect(((EffStripWork *)work)->allocation);
 }
 
@@ -8751,34 +8751,34 @@ void func_002B0B70(u8 *owner, void *matrix) {
     baseColor[0] = work->color;
     EE_MMI_RGBA_UNPACK(baseColor, 1.0f / 128.0f);
     VU0_STORE_VF(vf10, normalizedColor);
-    list = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
+    list = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
     if (matrix == NULL) {
         VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
     } else {
         VU0_LOAD_MATRIX(matrix);
     }
-    sdfConsAppendVuPacket(list, 0);
+    sdf3DPrimLinkTm(list, 0);
     texture = sdfGetOrCreateTextureForReference(surface, (RefObj *)effSharedScalyStripResource);
     sdfSetAssetPrimaryTextureAddress((SdfAsset *)work->handle, texture);
-    sdfSetAssetSecondaryTextureAddress((SdfAsset *)work->handle, texture);
-    sdfSetAssetSecondaryMode((SdfAsset *)work->handle, mode);
+    sdfMatSetMultiTex((SdfAsset *)work->handle, texture);
+    sdfMatSetMultiMethod((SdfAsset *)work->handle, mode);
     row = 0;
-    sdfAssetApplyEntryChanges((SdfAsset *)work->handle, (s8)sdfCurrentBufferIndex);
+    sdfMatUpdatePacket((SdfAsset *)work->handle, (s8)sdfCurrentBufferIndex);
     entry = (SdfAssetEntry *)((SdfAsset *)work->handle)->drawEntries[(s8)sdfCurrentBufferIndex];
     entry->secondaryTextureState.clamp = 0x7F000FFF;
     entry->primaryTextureState.clamp = 0x02007F000FFFULL;
     entry->secondaryMode = mode;
     entry->alphaState = registerId;
-    referencePacket = sdfAllocPacketAligned(0x20);
-    sdfInitAssetDrawEntryReferenceNode((SdfAsset *)work->handle, (SdfDmaTagHeader *)referencePacket,
+    referencePacket = sdfGrAllocPacketBuff(0x20);
+    sdfMatMakePacket((SdfAsset *)work->handle, (SdfDmaTagHeader *)referencePacket,
                                        (s8)sdfCurrentBufferIndex);
     referencePacket[1] = 0;
     sdfAppendReferencePacket(list, (u32)referencePacket);
-    dmaPacket = sdfAllocPacketAligned(0x40);
-    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, dmaPacket, 0);
-    sdfAppendDmaTagToList(list, (u32)dmaPacket);
-    packet = sdfAllocPacketAligned(0x40);
+    dmaPacket = sdfGrAllocPacketBuff(0x40);
+    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, dmaPacket, 0);
+    sdfDrawTagLinkRefGif(list, (u32)dmaPacket);
+    packet = sdfGrAllocPacketBuff(0x40);
     packet->dmaTag = 3;
     packet->vifTag = (((u64)0x50000003 << 16) | 0x1000) << 16;
     packet->gifTag = ((u64)0x10000000 << 32) | 0x8002;
@@ -8787,8 +8787,8 @@ void func_002B0B70(u8 *owner, void *matrix) {
     packet->firstAddress = 0x47;
     packet->secondValue = 0x44;
     packet->secondAddress = 0x42;
-    sdfAppendPacket(list, packet);
-    packet = sdfAllocPacketAligned(0x40);
+    sdfDrawTagLink(list, packet);
+    packet = sdfGrAllocPacketBuff(0x40);
     packet->dmaTag = 3;
     packet->vifTag = (((u64)0x50000003 << 16) | 0x1000) << 16;
     packet->gifTag = ((u64)0x10000000 << 32) | 0x8002;
@@ -8797,7 +8797,7 @@ void func_002B0B70(u8 *owner, void *matrix) {
     packet->firstAddress = 0x48;
     packet->secondValue = registerId;
     packet->secondAddress = 0x43;
-    sdfAppendPacket(list, packet);
+    sdfDrawTagLink(list, packet);
     positions = (u128 *)work->positions;
     uvsA = (f32 (*)[2])work->uvsA;
     uvsB = (f32 (*)[2])work->uvsB;
@@ -8824,7 +8824,7 @@ void func_002B0B70(u8 *owner, void *matrix) {
             D_003DCB30.parameters = D_0037EB30;
             while (remaining >= 12) {
                 remaining -= 8;
-                sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DCB30));
+                sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCB30));
                 D_003DCB30.positions += 8;
                 D_003DCB30.colors += 8;
                 D_003DCB30.texcoords += 16;
@@ -8833,7 +8833,7 @@ void func_002B0B70(u8 *owner, void *matrix) {
             if (remaining >= 8) {
                 D_003DCB30.vertexCount = remaining;
                 D_003DCB30.parameterCount = 6;
-                sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DCB30));
+                sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCB30));
             }
         }
         positions += stride;
@@ -8842,10 +8842,10 @@ void func_002B0B70(u8 *owner, void *matrix) {
         uvsB += stride;
         colors++;
     }
-    dmaPacket = sdfAllocPacketAligned(0x40);
-    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, dmaPacket, 0);
-    sdfAppendDmaTagToList(list, (u32)dmaPacket);
-    packet = sdfAllocPacketAligned(0x40);
+    dmaPacket = sdfGrAllocPacketBuff(0x40);
+    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, dmaPacket, 0);
+    sdfDrawTagLinkRefGif(list, (u32)dmaPacket);
+    packet = sdfGrAllocPacketBuff(0x40);
     packet->dmaTag = 3;
     packet->vifTag = (((u64)0x50000003 << 16) | 0x1000) << 16;
     packet->gifTag = ((u64)0x10000000 << 32) | 0x8002;
@@ -8854,12 +8854,12 @@ void func_002B0B70(u8 *owner, void *matrix) {
     packet->firstAddress = 0x47;
     packet->secondValue = restoreValue;
     packet->secondAddress = 0x42;
-    sdfAppendPacket(list, packet);
+    sdfDrawTagLink(list, packet);
     surface->append((SdfListHead *)surface, list);
 }
 
 void effLoadScalyTexture(void) {
-    D_003BC994 = (u32)sdfReadNamedResource("/effect/scaly00.tmx", &effScalyTextureHandle, 0);
+    D_003BC994 = (u32)sdfDevLoadFileEx("/effect/scaly00.tmx", &effScalyTextureHandle, 0);
 }
 
 u32 effGetScalyTextureHandle(void) {
@@ -8891,8 +8891,8 @@ void effSeedParticleSpanParameters(EffModelResource *work) {
             if (spans != 0) {
                 do {
                     span++;
-                    entry->first = sdfGetRandFloat(effSharedRandomState) * config->firstRand + (1.0f - config->firstRand);
-                    entry->second = config->secondBase * (sdfGetRandFloat(effSharedRandomState) * config->rangeRand + (1.0f - config->rangeRand));
+                    entry->first = dds3GetRandFloatA(effSharedRandomState) * config->firstRand + (1.0f - config->firstRand);
+                    entry->second = config->secondBase * (dds3GetRandFloatA(effSharedRandomState) * config->rangeRand + (1.0f - config->rangeRand));
                     entry->referenceAge = 0;
                     entry++;
                 } while (span < spans);
@@ -8908,7 +8908,7 @@ extern EffPointSet *effCreatePointSet3(s32 count);
 /* Build the point and reference sets for each model map-position record. */
 EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
     u32 total = model->first->frameCount;
-    u32 count = sdfCountMapPositionRecords(model->inner);
+    u32 count = sdfModelGetMarkPosCount(model->inner);
     u32 spans;
     u32 partialSpan;
     struct SdfMemBlock *allocation;
@@ -8924,7 +8924,7 @@ EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
     EffTrackSet *tracks;
 
     model->first->frameStep = 1.0f;
-    mdlAddEntryPlain(model, 0, 0);
+    mdlSingleMotion(model, 0, 0);
     if (config->perSpan == 0) {
         config->perSpan = 1;
     }
@@ -9094,9 +9094,9 @@ void effDestroyModelResource(EffModelResource *effect) {
 
 EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
     EffModelResource *effect = effCreateModelResourceWithInlineData(work->kind, work->source, 0, 0);
-    s32 x = mdlGetContextResourceGroup(work->assetId);
-    s32 y = mdlGetContextResourceId(work->assetId);
-    MdlCtx *model = mdlCreateContextFromResourceKey(x, y);
+    s32 x = mdlGetMajorNum(work->assetId);
+    s32 y = mdlGetMinorNum(work->assetId);
+    MdlCtx *model = mdlLoad(x, y);
 
     effect->model = model;
     effInitModelVUState(model);
@@ -9162,8 +9162,8 @@ EffPointSet *effCreatePointSet3(s32 count) {
     set->allocation = base;
     set->tail = data;
     set->flag = 0;
-    set->handle = sdfCreateAssetWithDrawEntries();
-    sdfSetPrimaryStateFloat(set->handle, 1.0f);
+    set->handle = sdfMatNew();
+    sdfMatSetConstant(set->handle, 1.0f);
     memset(D_003DCB60, 0, 0x2C);
     D_003DCB60[0].primitive = 0x4000;
     return set;
@@ -9171,7 +9171,7 @@ EffPointSet *effCreatePointSet3(s32 count) {
 
 /* Queue the draw asset for release and return the backing allocation. */
 void effReleaseModelPointSetAsset(EffPointSet *set) {
-    sdfQueueAssetRelease(set->handle);
+    sdfMatFreeDelayed(set->handle);
     sdfMemFreeDirect(set->allocation);
 }
 
@@ -9181,24 +9181,24 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
     s32 remaining;
 
     if (set->color & 0xFF000000) {
-        list = (void *)sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(list);
+        list = (void *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(list);
         if (matrix == NULL) {
             VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
         } else {
             VU0_LOAD_MATRIX(matrix);
         }
-        sdfConsAppendVuPacket(list, 0);
-        sdfConsAppendAssetPacket(list, set->handle, 0);
+        sdf3DPrimLinkTm(list, 0);
+        sdf3DPrimLinkMat(list, set->handle, 0);
         if (set->flag == 0) {
-            packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+            packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
             packet->dmaTag = 2;
             packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
             packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
             packet->registerList = 0xE;
             packet->registerValue = 0x31801;
             packet->registerAddress = 0x47;
-            sdfAppendPacket(list, (u32)packet);
+            sdfDrawTagLink(list, (u32)packet);
         }
         remaining = set->rows;
         D_003DCB60[0].colors = (u32 *)set->tail;
@@ -9209,24 +9209,24 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
         D_003DCB60[0].parameters = (u32 *)D_0037EB90;
         while (remaining >= 0xF) {
             remaining -= 0xC;
-            sdfAppendPacket(list, effCreateVertexDrawPacket(D_003DCB60));
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(D_003DCB60));
             D_003DCB60[0].positions += 0xC;
             D_003DCB60[0].colors += 0xC;
         }
         if (remaining >= 6) {
             D_003DCB60[0].parameterCount = 4;
             D_003DCB60[0].vertexCount = remaining;
-            sdfAppendPacket(list, effCreateVertexDrawPacket(D_003DCB60));
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(D_003DCB60));
         }
         if (set->flag == 0) {
-            packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+            packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
             packet->dmaTag = 2;
             packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
             packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
             packet->registerList = 0xE;
             packet->registerValue = 0x51801;
             packet->registerAddress = 0x47;
-            sdfAppendPacket(list, (u32)packet);
+            sdfDrawTagLink(list, (u32)packet);
         }
         D_0037EE68[set->type]->append(D_0037EE68[set->type], list);
     }
@@ -9241,7 +9241,7 @@ extern u32 effBTLFieldColorGetOverrideSelector(void);
 
 extern u32 effBTLFieldColorGetFinalSelector(void);
 
-extern void effBattleMiscQueryPosition(void *owner, EffectVectorRequest *request, u128 *out);
+extern void effBTLPartGetPositionPtr(void *owner, EffectVectorRequest *request, u128 *out);
 
 void effGetWorldVector(u32 which) {
     EffectVectorRequest request;
@@ -9284,7 +9284,7 @@ void effGetWorldVector(u32 which) {
     if (request.kind != 0xB) {
         u128 *vec = &result;
 
-        effBattleMiscQueryPosition((void *)handle, &request, vec);
+        effBTLPartGetPositionPtr((void *)handle, &request, vec);
         VU0_LOAD_VF_MEMORY(vf10, vec);
     } else {
         VU0_MOVE_VF(vf10, vf0);
@@ -9356,7 +9356,7 @@ s32 effCollectModelEffectActors(BtlUnit **out, u32 kind) {
     return count;
 }
 
-extern void evtConfigureUnitTransition(EvtUnit *, s32);
+extern void evtUnitLightOff(EvtUnit *, s32);
 
 /* Restore actor light endpoints and directions when the field-light effect ends. */
 void effRestoreBattleActorLighting(u32 unusedResource) {
@@ -9389,7 +9389,7 @@ void effRestoreBattleActorLighting(u32 unusedResource) {
                 VU0_STORE_VF(vf10, unit->ext->vec10);
                 VU0_STORE_VF(vf10, unit->ext->vec20);
                 VU0_STORE_VF(vf10, unit->ext->vec40);
-                evtConfigureUnitTransition(unit->ext, 0);
+                evtUnitLightOff(unit->ext, 0);
             }
         }
         unit = unit->next;
@@ -9429,7 +9429,7 @@ void effUpdateBattleActorLighting(EffActiveResource *work) {
         {
             void *owner = (void *)effBTLFieldColorGetOriginalSelector();
             request.kind = 0;
-            effBattleMiscQueryPosition(owner, &request, (u128 *)origin);
+            effBTLPartGetPositionPtr(owner, &request, (u128 *)origin);
             request.kind = 0xB;
         }
         break;
@@ -9437,7 +9437,7 @@ void effUpdateBattleActorLighting(EffActiveResource *work) {
         {
             void *owner = (void *)effBTLFieldColorGetVariantSelector();
             request.kind = 0;
-            effBattleMiscQueryPosition(owner, &request, (u128 *)origin);
+            effBTLPartGetPositionPtr(owner, &request, (u128 *)origin);
             request.kind = 0xB;
         }
         break;
@@ -9454,7 +9454,7 @@ void effUpdateBattleActorLighting(EffActiveResource *work) {
         {
             void *owner = (void *)effBTLFieldColorGetOverrideSelector();
             request.kind = 6;
-            effBattleMiscQueryPosition(owner, &request, (u128 *)origin);
+            effBTLPartGetPositionPtr(owner, &request, (u128 *)origin);
             request.kind = 0xB;
         }
         break;
@@ -9462,7 +9462,7 @@ void effUpdateBattleActorLighting(EffActiveResource *work) {
         {
             void *owner = (void *)effBTLFieldColorGetFinalSelector();
             request.kind = 7;
-            effBattleMiscQueryPosition(owner, &request, (u128 *)origin);
+            effBTLPartGetPositionPtr(owner, &request, (u128 *)origin);
             request.kind = 0xB;
         }
         break;
@@ -9471,9 +9471,9 @@ void effUpdateBattleActorLighting(EffActiveResource *work) {
         for (index = 0; index < count; index++) {
             if (actors[index]->status.stateFlags & 0x10) {
                 effect = actors[index]->ext;
-                evtSetUnitStatusFlags(effect);
+                evtUnitLightOn(effect);
                 if (config->colorFadeIn != -1 && config->colorFadeOut != -1) {
-                    evtInitializeUnitColorTransition(effect, config->colorFadeIn, config->firstColor, config->secondColor);
+                    evtSetUnitLightAndAmbient(effect, config->colorFadeIn, config->firstColor, config->secondColor);
                 }
                 if (config->directionFadeIn != -1 && config->directionFadeOut != -1) {
                     if (request.kind == 3) {
@@ -9498,7 +9498,7 @@ void effUpdateBattleActorLighting(EffActiveResource *work) {
                         VU0_SUB(vf10, vf10, vf11);
                         VU0_NORMALIZE_VF10();
                     }
-                    evtSetUnitNormalizedDirection(effect, config->directionFadeIn);
+                    evtSetUnitLightDir(effect, config->directionFadeIn);
                 }
             }
         }
@@ -9520,7 +9520,7 @@ void effUpdateBattleActorLighting(EffActiveResource *work) {
                     EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
                     secondColor = packedEnd[0];
                 }
-                evtInitializeUnitColorTransition(effect, config->colorFadeOut, firstColor, secondColor);
+                evtSetUnitLightAndAmbient(effect, config->colorFadeOut, firstColor, secondColor);
             }
         }
     }
@@ -9529,7 +9529,7 @@ void effUpdateBattleActorLighting(EffActiveResource *work) {
             if (actors[index]->status.stateFlags & 0x10) {
                 effect = actors[index]->ext;
                 VU0_LOAD_VF(vf10, actors[index]->lightDirection);
-                evtSetUnitNormalizedDirection(effect, config->directionFadeOut);
+                evtSetUnitLightDir(effect, config->directionFadeOut);
             }
         }
     }
@@ -9548,7 +9548,7 @@ void effSyncLinkedActorChildParameter(void) {
             u8 *work = (u8 *)((BtlUnit *)effect)->ext;
             if (work != NULL) {
                 ((EvtUnit *)work)->color60 = ((BtlUnit *)effect)->baseColor;
-                evtSetUnitRgbTransition((EvtUnit *)work, 0, ((BtlUnit *)effect)->baseColor);
+                evtSetUnitColorRGB((EvtUnit *)work, 0, ((BtlUnit *)effect)->baseColor);
             }
         }
         effect = (u8 *)((BtlUnit *)effect)->next;
@@ -9580,7 +9580,7 @@ void effTransitionSelectedActorRgbColors(EffActiveResource *work) {
                     } else {
                         blended = color;
                     }
-                    evtSetUnitRgbTransition(effect, config->fadeIn, blended);
+                    evtSetUnitColorRGB(effect, config->fadeIn, blended);
                 }
             }
         }
@@ -9591,7 +9591,7 @@ void effTransitionSelectedActorRgbColors(EffActiveResource *work) {
 
             if (flags & 2) {
                 if ((flags & 0xE0) == 0) {
-                    evtSetUnitRgbTransition(actors[i]->ext, config->fadeOut, actors[i]->baseColor);
+                    evtSetUnitColorRGB(actors[i]->ext, config->fadeOut, actors[i]->baseColor);
                 }
             }
         }
@@ -9617,13 +9617,13 @@ s32 effComputeLightDirectionVU(MdlCtx *vector, SdfLightingPacketStorage *target)
         if (D_003BC9AC == 0) {
             return 0;
         }
-        mdlLoadPrimaryVectorVU(vector);
+        mdlGetPosition(vector);
         VU0_LOAD_VF($vf11, D_003DCBE0);
         VU0_SUB($vf10, $vf10, $vf11);
         VU0_CLEAR_W(vf10);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF($vf10, D_003DCBA0);
-        sdfBuildLightingPacket(target, D_0037EE80, D_003DCBD0);
+        sdf3DMakeLightParallelPacket(target, D_0037EE80, D_003DCBD0);
         return 1;
     }
     return result;
@@ -9696,7 +9696,7 @@ void effInitializeFieldLightColors(EffActiveResource *work) {
             break;
         }
         if (handle != 0) {
-            effBattleMiscQueryPosition((void *)handle, &request, D_003DCBE0);
+            effBTLPartGetPositionPtr((void *)handle, &request, D_003DCBE0);
         }
         eeUnpackRGBAWordFloat(config->firstColor, 1.0f / 128.0f);
         VU0_STORE_VF_UNCLOBBERED(vf10, D_003DCB90);
@@ -9743,7 +9743,7 @@ typedef struct EffCopiedSpawnList {
     u32 count;
     FldSpawnBatch *groups;
 } EffCopiedSpawnList;
-extern EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name);
+extern EffWorldNode *dds3AddPathBasic(s32 key, void *work, const char *name);
 
 /* Capture constructor arguments before consuming the entry; see
  * docs/idioms.md, "Trace-justified cursor consumption: copied payload slots". */
@@ -9766,8 +9766,8 @@ void effInitializeCopiedPayloadSlots(EffCopiedPayload *payload) {
                 const char *name = entry->name;
 
                 entry++;
-                payload->effects[count] = evtSpawnActionObj10(id, data, name);
-                payload->targets[count] = dds3CreatePathCurveWork(payload->effects[count]);
+                payload->effects[count] = dds3AddPathBasic(id, data, name);
+                payload->targets[count] = dds3AllocPathBasicWorkData(payload->effects[count]);
             }
         }
     }
@@ -9776,17 +9776,17 @@ void effInitializeCopiedPayloadSlots(EffCopiedPayload *payload) {
         payload->targets[i] = NULL;
     }
     payload->slotCount = count;
-    payload->selectedTargetIndex = sdfGetRandInt(0, count);
+    payload->selectedTargetIndex = dds3GetRandIntA(0, count);
 }
 
-extern void fldRelocatePackedTransferChunk(u32, FldTransferChunk *);
+extern void fldAddressResolver(u32, FldTransferChunk *);
 
 
 
 EffCopiedPayload *effCreateAndInitializeCopiedPayload(u32 type, const void *source, s32 size) {
     EffCopiedPayload *effect = effAllocateCopiedEffectPayload(type, source, size);
     u32 bodyAddress = (u32)effect->body;
-    fldRelocatePackedTransferChunk(bodyAddress,
+    fldAddressResolver(bodyAddress,
                                    (struct FldTransferChunk *)(bodyAddress + 8));
     effInitializeCopiedPayloadSlots(effect);
     return effect;
@@ -9808,11 +9808,11 @@ void effDestroyCopiedEffectPayload(EffCopiedPayload *payload) {
 
     for (i = 0; i < 5; i++) {
         if (*targets != 0) {
-            dds3FreePathObject(*targets);
+            dds3DeletePathControl(*targets);
         }
         targets++;
         if (*effects != 0) {
-            dds3RemoveWorldObjectNode(*effects);
+            dds3DeleteSceneBasicData(*effects);
         }
         effects++;
     }
@@ -9828,7 +9828,7 @@ extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 extern void btlFlagAllUnitsDefeatCandidate(void);
 extern void btlFlagUnitDefeatCandidate(BtlUnit *);
 extern void btlCopyUnitRotationQuaternion(BtlUnit *, void *);
-extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
+extern void dds3CameraObjectBasicSetFovy(EffWorldNode *, f32);
 extern f32 D_003BC9A8;
 extern u128 D_0037EE90, D_0037EEA0, D_0037EEB0, D_0037EEC0, D_0037EED0;
 extern u128 D_0037E110;
@@ -9851,7 +9851,7 @@ s32 func_002B3698(EffActiveResource *owner) {
     if (config->startFrame < owner->frame && config->startFrame != 0) {
         return;
     }
-    camera = dds3GetWorldCameraObject(dds3GetWorldObject());
+    camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
     if (camera == NULL || camera->value == NULL) {
         return;
     }
@@ -9928,9 +9928,9 @@ s32 func_002B3698(EffActiveResource *owner) {
         actor = NULL;
         break;
     }
-    effBattleMiscQueryPosition(actor, &request, (u128 *)actorPosition);
+    effBTLPartGetPositionPtr(actor, &request, (u128 *)actorPosition);
     path = slots->targets[slots->selectedTargetIndex];
-    dds3InterpolatePathVectorVU(path);
+    dds3PathBasicControlGetPos(path);
     if (config->actorSelection != 5) {
         VU0_STORE_VF(vf10, position);
         switch (config->actorSelection) {
@@ -9959,7 +9959,7 @@ s32 func_002B3698(EffActiveResource *owner) {
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, position);
     data = camera->data;
-    dds3InterpolatePathQuaternionVU(path);
+    dds3PathBasicControlGetRot(path);
     if (config->actorSelection != 5) {
         VU0_LOAD_VF_MEMORY(vf11, actorRotation);
         effMiscQuatMultiplyVU();
@@ -9976,10 +9976,10 @@ s32 func_002B3698(EffActiveResource *owner) {
     PCP_COPY_VECTOR(&data->localEyeOffset, eyeOffset);
     VU0_SCALAR_OP(1.0f, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_STORE_VF(vf10, &data->worldEye);
-    dds3SetCameraFieldOfView(camera, D_003BC9A8);
+    dds3CameraObjectBasicSetFovy(camera, D_003BC9A8);
     data->fovUpdatePending |= 1;
     dds3SetRotPoseSet(camera, &D_0037EEB0);
-    return sdfStepWrappingFloatCounter(&path->counter);
+    return dds3PathBasicControlIsFinished(&path->counter);
 }
 
 
@@ -10014,7 +10014,7 @@ void effApplyOverlaySpecs(u8 *work) {
         if (flags & 2) {
             if ((flags & 0x20) == 0) {
                 if ((((BtlUnit *)objects[i])->effectLink.flags & 0x10) == 0) {
-                    if (mdlGetNodeRefHalf(objects[i]->ext->owner, 0) > ((EffAnimInfo *)spec)->id) {
+                    if (mdlGetNumOfCut(objects[i]->ext->owner, 0) > ((EffAnimInfo *)spec)->id) {
                         btlApplyScaledUnitEffectParameter((u8 *)objects[i], ((EffAnimInfo *)spec)->id, ((EffAnimInfo *)spec)->flags | 0x100, 1.0f);
                         if (((EffAnimInfo *)spec)->loop == 0) {
                             btlStartMoveOtherUnitsTask(objects[i], ((EffAnimInfo *)spec)->id);
@@ -10100,12 +10100,12 @@ void effTickSlotVolumeFade(void) {
                 if (D_003BC9C8[i] != 0) {
                     ratio = 1.0f - ratio;
                 }
-                kwlnPadStartMotor(i, (u8)(D_003BC9C0[i] * ratio), 100);
+                dds3PadVibrationSet(i, (u8)(D_003BC9C0[i] * ratio), 100);
                 D_003BC9B8[i] -= 1;
             } else if (D_003BC9C8[i] == 1) {
-                kwlnPadStartMotor(i, D_003BC9C0[i], 100);
+                dds3PadVibrationSet(i, D_003BC9C0[i], 100);
             } else {
-                kwlnPadStartMotor(i, 0, 0);
+                dds3PadVibrationSet(i, 0, 0);
                 D_003BC9B0[i] = 0;
             }
         }
@@ -10361,10 +10361,10 @@ EffParticleSharedResource *effCreateParticleSharedResourceFromFile(FileJobPayloa
     if (buffer != NULL) {
         switch (source->primary.selector) {
         case 1:
-            work->billHandle = billCreateIndexed(0, (u32)buffer);
+            work->billHandle = dds3BillboardCreate(0, (u32)buffer);
             break;
         case 2:
-            work->billHandle = billCreateIndexed(1, (u32)buffer);
+            work->billHandle = dds3BillboardCreate(1, (u32)buffer);
             break;
         case 4:
             work->billHandle = effCreateBillboardSharingIndexedResource(*(s32 *)buffer);
@@ -10374,7 +10374,7 @@ EffParticleSharedResource *effCreateParticleSharedResourceFromFile(FileJobPayloa
             break;
         }
         if (work->billHandle != NULL) {
-            billMarkKindOneFlag(work->billHandle);
+            dds3BillboardSetAnimColorAdvMode(work->billHandle);
         }
     }
     return work;
@@ -10383,7 +10383,7 @@ EffParticleSharedResource *effCreateParticleSharedResourceFromFile(FileJobPayloa
 void effReleaseParticleResources(EffParticleSharedResource *work) {
     BillObj *particle = work->billHandle;
     if (particle != NULL) {
-        billDispatchByKind(particle);
+        dds3BillboardDelete(particle);
     }
     if (work->reference != NULL) {
         effReleaseReferenceHolder(work->reference);
@@ -10404,12 +10404,12 @@ void effReplaceSharedResource(EffParticleSharedResource *work, EffParticleShared
     BillObj *billboard;
     if (source->billHandle != 0) {
         if (work->billHandle != 0) {
-            billDispatchByKind(work->billHandle);
+            dds3BillboardDelete(work->billHandle);
         }
-        billboard = billCloneObjectRetainingSharedData(
+        billboard = dds3BillboardCopy(
             source->billHandle);
         work->billHandle = billboard;
-        billMarkKindOneFlag(billboard);
+        dds3BillboardSetAnimColorAdvMode(billboard);
         return;
     }
     if (work->reference != NULL) {
@@ -10424,7 +10424,7 @@ void effResetParticleStateWord(EffParticleSharedResource *work) {
 
 extern SdfPoolNode D_003255A8;
 
-extern void sdfQueueGouraudTexturedQuad(SdfListHead *list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2, s32 u2, s32 v2, s32 color2, s32 x3, s32 y3, s32 u3, s32 v3, s32 color3, s32 depth, s32 (*alloc)(s32));
+extern void sdfPrimLinkGt4(SdfListHead *list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2, s32 u2, s32 v2, s32 color2, s32 x3, s32 y3, s32 u3, s32 v3, s32 color3, s32 depth, s32 (*alloc)(s32));
 
 void func_002B4BA0(EffParticleSharedResource *work) {
     s32 limit = work->limit;
@@ -10451,7 +10451,7 @@ void func_002B4BA0(EffParticleSharedResource *work) {
     size = effSampleScalarCurve(&work->scaleTrack.curve, frame, limit);
     angle = effSampleScalarCurve(&work->rotationTrack.curve, frame, limit);
     if (work->billHandle != NULL) {
-        billSetAnimationFrameForImmediateAdvance(work->billHandle, frame);
+        dds3BillboardSetAnimKey(work->billHandle, frame);
         billCopyCurrentRecordToSnapshot(work->billHandle, &snapshot);
     } else {
         s32 width, height;
@@ -10481,7 +10481,7 @@ void func_002B4BA0(EffParticleSharedResource *work) {
     halfWidth = snapshot.halfWidth * 16.0f * size;
     halfHeight = snapshot.halfHeight * 16.0f * size;
     cosine = sdfCos(angle);
-    sine = sdfSinPoly(angle);
+    sine = sdfSin(angle);
     coordX = centerX + halfWidth;
     coordY = centerY + halfHeight;
     corners[0][0] = (s32)(coordX * cosine - coordY * sine);
@@ -10497,9 +10497,9 @@ void func_002B4BA0(EffParticleSharedResource *work) {
     corners[2][1] = (s32)(coordX * sine + coordY * cosine);
     coordX = (f32)(work->x << 4);
     coordY = (f32)(work->y << 3);
-    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
-    packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
     packet->dmaTag = 2;
     packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
     packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
@@ -10522,9 +10522,9 @@ void func_002B4BA0(EffParticleSharedResource *work) {
         break;
     }
     packet->registerAddress = 0x42;
-    sdfAppendPacket(list, (u32)packet);
-    sdfConsCreateDrawPacket(list, snapshot.texture, 0);
-    sdfQueueGouraudTexturedQuad(list, 0x40,
+    sdfDrawTagLink(list, (u32)packet);
+    sdf2DLinkTexPacket(list, snapshot.texture, 0);
+    sdfPrimLinkGt4(list, 0x40,
         (s32)((f32)(corners[3][0] + 0x7000) + coordX), (s32)((f32)((corners[3][1] >> 1) + 0x7900) + coordY),
         snapshot.uv.components[0], snapshot.uv.components[1], packed,
         (s32)((f32)(corners[2][0] + 0x7000) + coordX), (s32)((f32)((corners[2][1] >> 1) + 0x7900) + coordY),
@@ -11647,7 +11647,7 @@ u32 effPollNamedFileJob(void) {
 }
 
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
-extern void sdfVuLoadRotationMatrixZ(f32);
+extern void SetRotateMatrixY(f32);
 extern char D_003B3A90[], D_003B3AA8[];
 extern s8 sdfPadButtonStates[];
 extern f32 D_0038F530[4];
@@ -11701,7 +11701,7 @@ s32 effHandleDebugOrbitInput(void) {
             flags |= 2;
         }
         if (angle != 0.0f) {
-            sdfVuLoadRotationMatrixZ(angle);
+            SetRotateMatrixY(angle);
             VU0_LOAD_VF(vf10, vector);
             VU0_ROTATE_VEC(vf10, vf10);
             VU0_STORE_VF(vf10, vector);
@@ -11952,7 +11952,7 @@ decreaseRoll:
     for (i = -8; i < 9; i++) {
         f32 sampleRadius;
         angle = (f32)i * 0.19634954f;
-        point[1] = sdfSinPoly(angle) * -200.0f + center[1];
+        point[1] = sdfSin(angle) * -200.0f + center[1];
         sampleRadius = sdfCos(angle) * 200.0f;
         if ((s8)D_003BD108 == i) {
             radius = sampleRadius;
@@ -11966,7 +11966,7 @@ decreaseRoll:
     angle = (f32)(s8)D_003BD109 * 0.39269908f;
     point[0] = selected[0] + sdfCos(angle) * radius;
     point[1] = selected[1];
-    point[2] = selected[2] + sdfSinPoly(angle) * radius;
+    point[2] = selected[2] + sdfSin(angle) * radius;
     btlDebugDrawSegment(point, selected, 0x80006060);
     VU0_LOAD_VF(vf10, point);
     VU0_LOAD_VF(vf11, center);
@@ -12305,7 +12305,7 @@ void effPollResourceBank(s32 flags, void *out) {
         effResourceBankEntries = btlScanDirectory(0, flags);
         if (flags & BTL_RESOURCE_SCAN_GENERAL) {
             u32 i = 0;
-            u32 count = effGetGeneralResourceCount();
+            u32 count = dds3BillboardGeneralNumber();
             if (count != 0) {
                 do {
                     char name[0x70];
@@ -13308,14 +13308,14 @@ u32 fileLoadEffectSlotHelp(void) {
         struct SdfMemBlock *oldAllocation;
         u32 queuedFile;
         job = fileCreateJob(6);
-        command = sdfDevCreateCommandState(&fileInfo);
-        dataLength = sdfDevQueueControlAndWait(command);
+        command = sdfFileOpen(&fileInfo);
+        dataLength = sdfFileLength(command);
         totalLength = dataLength + headerBytes;
         allocation = sdfMemAllocDirect(totalLength);
         buffer = (u8 *)sdfMemLock(allocation);
         memset(buffer, 0, headerBytes);
-        sdfDevQueueReadAndWait(command, buffer + headerBytes, dataLength);
-        sdfDevWaitThenReleaseCommandState(command);
+        sdfFileRead(command, buffer + headerBytes, dataLength);
+        sdfFileClose(command);
         fileJobSetPrimaryData(job, buffer, totalLength, 0);
         entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = entry;
@@ -13586,14 +13586,14 @@ s32 effPollResourceList(EffectList *list) {
         case 2:
             if (node->state == 0 && node->length != 0) {
                 if (list->request != NULL) {
-                    btlStageTaskCleanupCallback(list->request);
+                    pacFileHandleFree_(list->request);
                 }
-                list->request = (FilePacRequest *)fileQueuePlainDispatchRequest((const char *)node->length);
+                list->request = (FilePacRequest *)pacLoad((const char *)node->length);
                 if (list->mode == 2) {
-                    fileWaitForRequestReady((struct FileRequest *)list->request);
+                    pacSync((struct FileRequest *)list->request);
                 }
                 node->state = 1;
-            } else if (fileRequestIsReady((struct FileRequest *)list->request) != 0) {
+            } else if (pacCheckEnd((struct FileRequest *)list->request) != 0) {
                 for (item = list->request->packet.queueHead; item != NULL; item = item->next) {
                     if (((SdfPacStreamPacketHeader *)item->packet)->command == 1) {
                         node = list->first;
@@ -13607,7 +13607,7 @@ s32 effPollResourceList(EffectList *list) {
                 }
             }
             if (list->count == 0) {
-                btlStageTaskCleanupCallback(list->request);
+                pacFileHandleFree_(list->request);
                 list->request = NULL;
             }
             break;

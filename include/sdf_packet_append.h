@@ -5,11 +5,11 @@
 
 /* Append standard packets to a DMA packet list. A null allocator selects the
    default packet allocator. Asset packets reference the selected draw entry. */
-void sdfConsAppendClearPacket(SdfListHead *packetList,
+void sdf3DPrimLinkResetTm(SdfListHead *packetList,
                               s32 (*allocatePacket)(s32));
-void sdfConsAppendVuPacket(SdfListHead *packetList,
+void sdf3DPrimLinkTm(SdfListHead *packetList,
                            s32 (*allocatePacket)(s32));
-void sdfConsAppendAssetPacket(SdfListHead *packetList, SdfAsset *asset,
+void sdf3DPrimLinkMat(SdfListHead *packetList, SdfAsset *asset,
                               s32 (*allocatePacket)(s32));
 
 #endif /* SDF_PACKET_APPEND_H */
