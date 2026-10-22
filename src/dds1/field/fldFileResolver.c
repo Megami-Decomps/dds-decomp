@@ -1678,7 +1678,7 @@ extern void fldInitializeActorMotionSlots(void);
 
 extern DevRequest *sndLoadNamedOffsetResourceList(const char *name);
 
-extern s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *worldNode, void *resourceHandle);
+extern s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *worldNode, struct sdfMemHandle_t *resourceHandle);
 
 extern char D_003BAC98[];
 

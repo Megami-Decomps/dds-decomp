@@ -48,7 +48,7 @@ s32 evtLoadSceneResourceFrom(dds3Basic_t *worldNode, const char *resourceName) {
  * attachment, 0 otherwise. NULL preserves the current resource. A non-NULL
  * handle releases the old resource first, so failure does not restore it;
  * a NULL resolved address fails attachment without undoing the retain. */
-s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *worldNode, void *resourceHandle) {
+s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *worldNode, struct sdfMemHandle_t *resourceHandle) {
     s32 notAttachedStatus = 0;
     u32 resourceAddress;
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
@@ -59,9 +59,9 @@ s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *worldNode, void *resourceH
     if (worldData->sceneResourceHandle != 0) {
         dds3SceneBasicReleaseScriptFile(worldNode);
     }
-    resourceAddress = sdfMemLock((struct sdfMemHandle_t *)resourceHandle);
+    resourceAddress = sdfMemLock(resourceHandle);
     if (resourceAddress != 0) {
-        worldData->sceneResourceHandle = (struct sdfMemHandle_t *)resourceHandle;
+        worldData->sceneResourceHandle = resourceHandle;
         worldData->sceneScript = (struct BfFlw0Header *)resourceAddress;
         return 1;
     }

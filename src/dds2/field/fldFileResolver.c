@@ -1503,7 +1503,7 @@ extern void fldUpdateSparkSlots(void);
 extern void fldMakeObjectBasic3(void);
 extern void fldInitializeActorMotionSlots(void);
 extern struct DevRequest *sndLoadNamedOffsetResourceList(const char *name);
-extern s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *worldNode, void *resourceHandle);
+extern s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *worldNode, struct sdfMemHandle_t *resourceHandle);
 extern char D_00436028[];
 extern char D_00436030[];
 extern char D_00436038[];
