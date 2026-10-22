@@ -234,7 +234,6 @@ extern void btlInitializeStaffActorPanels(void);
 extern void btlSetActorPanelYForMode(s32);
 
 extern void itfMesClearFlags();
-extern void brsTaskAllowUpdate();
 extern void btlClearPartyRecordStatusBits(DatPartyRecord *, s32);
 extern s32 mnuIsTitleEntryAvailable(DatPartyRecord *);
 extern void datAdjustCurrentHp();
