@@ -248,7 +248,7 @@ void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *requ
         VU0_MOVE_VF(vf11, vf10);
         dds3GetPosPoseSet(camera);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_LOAD_VF(vf11, dir);
         VU0_MUL(vf10, vf10, vf11);
         return;
@@ -331,7 +331,7 @@ void effBattleMiscDirectionTo(BtlUnit *unit, EffectVectorRequest *request, f32 *
     }
     VU0_LOAD_VF(vf11, origin);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, out);
 }
 

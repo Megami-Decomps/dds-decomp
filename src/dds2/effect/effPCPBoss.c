@@ -300,11 +300,11 @@ void effPCPCrackDraw(void *opaque) {
                         VU0_LOAD_VF(vf10, positions + 4);
                         VU0_LOAD_VF(vf11, positions + 1);
                         VU0_SUB(vf10, vf10, vf11);
-                        VU0_LENGTH_VF10(trailLength);
+                        SDF_VU0_GETLENGTH(trailLength);
                         if (trailLength > 1.0f) {
                             VU0_MOVE_VF(vf11, vf12);
                             VU0_CROSS_XYZ(vf10, vf10, vf11);
-                            VU0_NORMALIZE_VF10();
+                            SDF_VU0_NORMALIZE();
                             VU0_STORE_VF(vf10, perpendicular);
                         } else {
                             VU0_LOAD_VF(vf10, perpendicular);
@@ -380,7 +380,7 @@ void effPCPCrackDraw(void *opaque) {
                             VU0_LOAD_VF(vf10, historyStart + 4);
                             VU0_LOAD_VF(vf11, historyStart + 1);
                             VU0_SUB(vf10, vf10, vf11);
-                            VU0_NORMALIZE_VF10();
+                            SDF_VU0_NORMALIZE();
                             VU0_STORE_VF_UNCLOBBERED(vf10, axis);
                             SetRotateMatrixAxis(group->rotationAngle, (const struct RwV3d *)axis);
                             VU0_LOAD_VF(vf10, displacement);
@@ -397,9 +397,9 @@ void effPCPCrackDraw(void *opaque) {
                         VU0_LOAD_VF(vf10, historyStart + 4);
                         VU0_LOAD_VF(vf11, historyStart + 1);
                         VU0_SUB(vf10, vf10, vf11);
-                        VU0_LENGTH_VF10(cellLength);
+                        SDF_VU0_GETLENGTH(cellLength);
                         if (cellLength > 1.0f) {
-                            VU0_NORMALIZE_VF10();
+                            SDF_VU0_NORMALIZE();
                             VU0_MOVE_VF(vf11, vf10);
                             VU0_LOAD_VF(vf10, tipVector);
                             VU0_MUL(vf10, vf10, vf11);
@@ -466,7 +466,7 @@ void effPCPCrackDraw(void *opaque) {
 
 void effPCPCrackSetPosition(void *dst, void *src)
 {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effBossTrailSetColor(effPCPCrack_t *work, s32 value) {
@@ -554,7 +554,7 @@ void effBossBeamUpdate(EffPCPBossWork *work) {
 }
 
 void effPCPBossBaelSetPosition(EffPCPBossWork *work, void *src) {
-    PCP_COPY_VECTOR(&work->parameterVector, src);
+    SDF_VU0_COPYVECTOR(&work->parameterVector, src);
 }
 
 void effPCPBossBaelSetColor(EffPCPBossWork *work, u32 value) {

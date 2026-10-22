@@ -277,7 +277,7 @@ s32 kwlnBuildFrameScenePackets(dds3ProcessID_t *task) {
     VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_SCALAR_OP(600.0f, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_ADD(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, sdfViewShakeVector);

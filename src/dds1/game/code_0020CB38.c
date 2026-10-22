@@ -200,7 +200,7 @@ void btlUpdateBossUnitScaleTransition(void) {
                         switch (transition->active) {
                         case 0:
                             if (transition->unitId != 0) {
-                                PCP_COPY_VECTOR(unit->currentPosition, unit->position);
+                                SDF_VU0_COPYVECTOR(unit->currentPosition, unit->position);
                                 unit->scale = 1.0f;
                                 unit->overlayColor = (unit->baseColor & 0x00FFFFFF) | 0x80000000;
                                 transition->unitId = 0;
@@ -213,7 +213,7 @@ void btlUpdateBossUnitScaleTransition(void) {
                             } else {
                                 unit->overlayColor = 0;
                             }
-                            PCP_COPY_VECTOR(unit->currentPosition, effectPosition);
+                            SDF_VU0_COPYVECTOR(unit->currentPosition, effectPosition);
                             if (transition->modelValue >= 223) {
                                 transition->active = 2;
                             }
@@ -481,7 +481,7 @@ u8 btlOffsetSpecialTargetPositionForAction(BtlLinkedCommand *command, s8 unused1
         return 0;
     }
     if (command->actionCode == 0x175) {
-        PCP_COPY_VECTOR(pos, other->position);
+        SDF_VU0_COPYVECTOR(pos, other->position);
         pos[2] += 600.0f;
         btlSetUnitPosition(other, pos);
     }
@@ -574,7 +574,7 @@ void btlRecenterUnitsOnLead(void) {
         btlCopyUnitCurrentPosition(lead, pos);
         shift = -pos[0];
         pos[0] = 0;
-        PCP_COPY_VECTOR(lead->position, pos);
+        SDF_VU0_COPYVECTOR(lead->position, pos);
         btlSetUnitPosition(lead, pos);
         for (unit = work->units; unit != 0; unit = unit->next) {
             if (unit->status.flags & 1) {
@@ -582,7 +582,7 @@ void btlRecenterUnitsOnLead(void) {
                     if (unit != lead) {
                         btlCopyUnitCurrentPosition(unit, pos);
                         pos[0] = pos[0] + shift;
-                        PCP_COPY_VECTOR(unit->position, pos);
+                        SDF_VU0_COPYVECTOR(unit->position, pos);
                         btlSetUnitPosition(unit, pos);
                     }
                 }

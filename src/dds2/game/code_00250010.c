@@ -4939,8 +4939,8 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 mdlSmoothSingleMotion(evtGetUnitHandle(objectId)->owner, 0, 0, 0.0f, 0.0f);
             }
             transform = group->info->inner;
-            PCP_COPY_VECTOR(group->savedPosition, transform->position);
-            PCP_COPY_VECTOR(group->savedRotation, transform->rotation);
+            SDF_VU0_COPYVECTOR(group->savedPosition, transform->position);
+            SDF_VU0_COPYVECTOR(group->savedRotation, transform->rotation);
         }
     }
     for (row = 0; row < (s32)work->mainEntry7Count; row++) {

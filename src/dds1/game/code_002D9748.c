@@ -113,8 +113,8 @@ void sdfModelCopyStat(sdfModelRootNode_t *destination, sdfModelRootNode_t *sourc
     destination->color = source->color;
     VU0_LOAD_MATRIX(source->matrix);
     VU0_STORE_MATRIX(destination->matrix);
-    PCP_COPY_VECTOR(destination->rotationQuaternion, source->rotationQuaternion);
-    PCP_COPY_VECTOR(destination->scaleVector, source->scaleVector);
+    SDF_VU0_COPYVECTOR(destination->rotationQuaternion, source->rotationQuaternion);
+    SDF_VU0_COPYVECTOR(destination->scaleVector, source->scaleVector);
     buffer = (s8)sdfFrameId;
     destination->lighting = source->lighting;
     destination->scalarOverrideFirst = source->scalarOverrideFirst;
@@ -133,9 +133,9 @@ void sdfModelCopyStat(sdfModelRootNode_t *destination, sdfModelRootNode_t *sourc
             destinationNode->flags = sourceNode->flags;
             destinationNode->color = sourceNode->color;
             destinationNode->drawFlagMask = sourceNode->drawFlagMask;
-            PCP_COPY_VECTOR(destinationNode->quaternion, sourceNode->quaternion);
-            PCP_COPY_VECTOR(destinationNode->translation, sourceNode->translation);
-            PCP_COPY_VECTOR(destinationNode->scale, sourceNode->scale);
+            SDF_VU0_COPYVECTOR(destinationNode->quaternion, sourceNode->quaternion);
+            SDF_VU0_COPYVECTOR(destinationNode->translation, sourceNode->translation);
+            SDF_VU0_COPYVECTOR(destinationNode->scale, sourceNode->scale);
             VU0_LOAD_MATRIX(sourceNode->localMatrix);
             VU0_STORE_MATRIX(destinationNode->localMatrix);
             VU0_LOAD_MATRIX(sourceNode->worldMatrix);
@@ -276,7 +276,7 @@ void sdfModelMakeMarkPosMatrix(sdfModelRootNode_t *model, SdfMapPositionRecord *
     VU0_NEGATE_XYZ(vf10);
     VU0_MOVE_VF(vf29, vf10);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf28, vf10);
     VU0_LOAD_VF(vf31, &record->position);
     VU0_SET_W_ONE(vf31);

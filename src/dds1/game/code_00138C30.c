@@ -167,8 +167,8 @@ static inline s32 fldTestBits(u32 flags, u32 mask) {
 static inline f32 fldNormalizeProbeVector(void) {
     f32 length;
 
-    VU0_LENGTH_VF10(length);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_GETLENGTH(length);
+    SDF_VU0_NORMALIZE();
     return length;
 }
 
@@ -698,7 +698,7 @@ s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
                 VU0_STORE_VF(vf30, dir);
                 dir[1] = 0.0f;
                 VU0_LOAD_VF(vf10, dir);
-                VU0_NORMALIZE_VF10();
+                SDF_VU0_NORMALIZE();
                 VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
                 VU0_MOVE_VF(vf12, vf10);
                 VU0_LOAD_VF(vf10, position);
@@ -726,7 +726,7 @@ s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
                 VU0_STORE_VF(vf30, dir);
                 dir[1] = 0.0f;
                 VU0_LOAD_VF(vf10, dir);
-                VU0_NORMALIZE_VF10();
+                SDF_VU0_NORMALIZE();
                 VU0_STORE_VF(vf10, dir);
                 dot = fldVecDot(dir, fldEveHitTable[i].center);
                 if (dot < 0.5f) {
@@ -757,13 +757,13 @@ s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry) {
             switch (kind) {
             case 0:
                 source = entry->data;
-                PCP_COPY_VECTOR(position, &source->position);
+                SDF_VU0_COPYVECTOR(position, &source->position);
                 VU0_LOAD_VF(vf10, actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
                 VU0_STORE_VF(vf30, dir);
                 dir[1] = 0.0f;
                 VU0_LOAD_VF(vf10, dir);
-                VU0_NORMALIZE_VF10();
+                SDF_VU0_NORMALIZE();
                 VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
                 VU0_MOVE_VF(vf12, vf10);
                 VU0_LOAD_VF(vf10, position);
@@ -788,7 +788,7 @@ s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry) {
                 VU0_STORE_VF(vf30, dir);
                 dir[1] = 0.0f;
                 VU0_LOAD_VF(vf10, dir);
-                VU0_NORMALIZE_VF10();
+                SDF_VU0_NORMALIZE();
                 VU0_STORE_VF(vf10, dir);
                 dot = fldVecDot(dir, fldEveHitTable[i].center);
                 if (dot < 0.5f) {
@@ -816,7 +816,7 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *posit
         VU0_STORE_VF(vf30, dir);
         dir[1] = 0.0f;
         VU0_LOAD_VF(vf10, dir);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_MOVE_VF(vf12, vf10);
         VU0_LOAD_VF(vf10, position);
@@ -844,7 +844,7 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *posit
         VU0_STORE_VF(vf30, dir);
         dir[1] = 0.0f;
         VU0_LOAD_VF(vf10, dir);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF(vf10, dir);
         dot = fldVecDot(dir, fldEveHitTable[roomIndex].center);
         if (dot < 0.5f) {

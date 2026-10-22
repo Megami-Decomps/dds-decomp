@@ -73,7 +73,7 @@ void dds3BillboardTagLink(billHandle_t *obj, BillChildPayload *child) {
             VU0_LOAD_VF(vf10, aViewTarget);
             VU0_LOAD_VF(vf11, sdfViewTargetVector);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_LOAD_VF(vf11, billChildFacingReferenceAxis);
             VU0_DOT_XYZ(dot, vf10, vf11);
             dds3BillboardTagParam[1] = 1.0 - fabs(dot);
@@ -96,7 +96,7 @@ void dds3BillboardTagLink(billHandle_t *obj, BillChildPayload *child) {
     }
     work = child->work;
     index = work->count;
-    PCP_COPY_VECTOR(work->positions[index], obj->position);
+    SDF_VU0_COPYVECTOR(work->positions[index], obj->position);
     work->colors[index] = obj->childParam;
     memcpy(&work->uv[index], &child->uv, sizeof(child->uv));
     x = child->x * obj->childScaleX;
@@ -259,7 +259,7 @@ void billAppendPairedQuadEntry(billHandle_t *obj, BillRenderPair *node) {
             VU0_LOAD_VF(vf10, aViewTarget);
             VU0_LOAD_VF(vf11, sdfViewTargetVector);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_LOAD_VF(vf11, billPairFacingReferenceAxis);
             VU0_DOT_XYZ(dot, vf10, vf11);
             billPairFacingScale[1] = 1.0 - fabs(dot);
@@ -337,7 +337,7 @@ void billAppendPairedQuadEntry(billHandle_t *obj, BillRenderPair *node) {
         work->offsets[index][6] = cornerX * cosine - cornerY * sine;
         work->offsets[index][7] = cornerX * sine + cornerY * cosine;
     }
-    PCP_COPY_VECTOR(work->positions[index], obj->position);
+    SDF_VU0_COPYVECTOR(work->positions[index], obj->position);
     work->count++;
     if (work->count == 7) {
         dds3MultiBillboardPktLink(node);

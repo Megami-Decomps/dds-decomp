@@ -257,9 +257,9 @@ void dds3HermitianTrackPolyGetVertex(dds3HermitianTrackPoly_tag *data, u128 *dst
         pos = (pos + data->count) - 2;
     }
     p = &data->points[pos];
-    PCP_COPY_VECTOR(dst0, p);
+    SDF_VU0_COPYVECTOR(dst0, p);
     p++;
-    PCP_COPY_VECTOR(dst1, p);
+    SDF_VU0_COPYVECTOR(dst1, p);
 }
 
 /* Advance around the track's ring, wrapping below the reserved first pair. */
@@ -278,14 +278,14 @@ void dds3HermitianTrackPolySetVertexSub(dds3HermitianTrackPoly_tag *data, const 
     u128 *points = data->points;
     s32 count;
 
-    PCP_COPY_VECTOR(&points[position], src);
-    PCP_COPY_VECTOR(&points[position + 1], src + 1);
+    SDF_VU0_COPYVECTOR(&points[position], src);
+    SDF_VU0_COPYVECTOR(&points[position + 1], src + 1);
     position += 2;
     count = data->count;
     data->position = position;
     if (position == count) {
-        PCP_COPY_VECTOR(&points[0], src);
-        PCP_COPY_VECTOR(&points[1], src + 1);
+        SDF_VU0_COPYVECTOR(&points[0], src);
+        SDF_VU0_COPYVECTOR(&points[1], src + 1);
         data->position = 2;
     }
     if (data->activePointCount < count - 2) {
@@ -325,8 +325,8 @@ void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *data, const u12
         dds3HermitianTrackPolyGetVertex(data, (u128 *)firstHistory[0], (u128 *)secondHistory[0], 3);
         dds3HermitianTrackPolyGetVertex(data, (u128 *)firstHistory[1], (u128 *)secondHistory[1], 2);
         dds3HermitianTrackPolyGetVertex(data, (u128 *)firstHistory[2], (u128 *)secondHistory[2], 1);
-        PCP_COPY_VECTOR(firstHistory[3], src);
-        PCP_COPY_VECTOR(secondHistory[3], src + 1);
+        SDF_VU0_COPYVECTOR(firstHistory[3], src);
+        SDF_VU0_COPYVECTOR(secondHistory[3], src + 1);
         sampleWeight = 0.0f;
         sampleWeightStep = 1.0f / (f32)sampleCount;
         dds3HermitianTrackPolySetCurrent(data, 2);
@@ -356,10 +356,10 @@ void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *data, const u12
 
         dds3HermitianTrackPolyGetVertex(data, (u128 *)firstHistory[0], (u128 *)secondHistory[0], 2);
         dds3HermitianTrackPolyGetVertex(data, (u128 *)firstHistory[1], (u128 *)secondHistory[1], 1);
-        PCP_COPY_VECTOR(firstHistory[2], src);
-        PCP_COPY_VECTOR(secondHistory[2], src + 1);
-        PCP_COPY_VECTOR(firstHistory[3], src);
-        PCP_COPY_VECTOR(secondHistory[3], src + 1);
+        SDF_VU0_COPYVECTOR(firstHistory[2], src);
+        SDF_VU0_COPYVECTOR(secondHistory[2], src + 1);
+        SDF_VU0_COPYVECTOR(firstHistory[3], src);
+        SDF_VU0_COPYVECTOR(secondHistory[3], src + 1);
         sampleWeight = 0.0f;
         sampleWeightStep = 1.0f / (f32)sampleCount;
         sampleIndex = 0;

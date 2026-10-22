@@ -55,7 +55,7 @@ void effPCPFlashPolySphere2Delete(PcpFlashTrianglePulseWork *work) {
 }
 
 void effPCPFlashPolySphere2SetPosition(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effPCPFlashPolySphere2SetColor(PcpFlashTrianglePulseWork *work, u32 value) {
@@ -148,7 +148,7 @@ void effPCPFlashPolySphere2Draw(PcpFlashTrianglePulseWork *work) {
     VU0_LOAD_VF($vf10, aViewTarget);
     VU0_LOAD_VF($vf11, sdfViewTargetVector);
         VU0_SUB(vf10, vf10, vf11);;
-        VU0_NORMALIZE_VF10();;
+        SDF_VU0_NORMALIZE();;
     VU0_STORE_VF($vf10, axis);
     lifetime = work->lifetime;
     particleCount = work->particleCount;
@@ -258,7 +258,7 @@ void effPCPFlashPolySphereDelete(PcpFlashStreakWork *work) {
 }
 
 void effPCPFlashPolySphereSetPosition(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effPCPFlashPolySphereSetColor(PcpFlashStreakWork *work, u32 value) {
@@ -312,7 +312,7 @@ void effPCPFlashPolySpherePartInit(PcpFlashStreakWork *work, s32 index, void *or
     VU0_LOAD_VF(vf10, direction);
     VU0_LOAD_VF(vf11, orientation);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-        VU0_NORMALIZE_VF10();;
+        SDF_VU0_NORMALIZE();;
     VU0_STORE_VF(vf10, direction);
     part->position[0] = direction[0];
     part->position[1] = direction[1];
@@ -355,7 +355,7 @@ void effPCPFlashPolySpherePartSetVertex(PcpFlashStreakWork *work, s32 index, voi
     VU0_LOAD_VF(vf11, view);
     VU0_MOVE_VF(vf12, vf10);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, across);
     VU0_MUL(vf10, vf10, vf11);
@@ -539,7 +539,7 @@ void effPCPFlashPolyRingDelete(PcpFlashScalingOrbitWork *work) {
 }
 
 void effPCPFlashPolyRingSetPosition(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effPCPFlashPolyRingSetColor(PcpFlashScalingOrbitWork *work, u32 value) {
@@ -608,12 +608,12 @@ void effPCPFlashPolyRingPartSetVertex(PcpFlashScalingOrbitWork *work, s32 index)
     effPCPFlashPolyRingVertex[1] = height + -1.0f;
     effPCPFlashPolyRingVertex[2] = sinv * height;
     VU0_LOAD_VF(vf10, effPCPFlashPolyRingVertex);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf11, vf10);
     VU0_MOVE_VF(vf12, vf10);
     VU0_LOAD_VF(vf10, unit);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, scaleB);
     VU0_MUL(vf10, vf10, vf11);
@@ -781,7 +781,7 @@ void effPCPFlashPolyPipeDelete(PcpFlashAccumulatingWork *work) {
 }
 
 void effPCPFlashPolyPipeSetPosition(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effPCPFlashPolyPipeSetColor(PcpFlashAccumulatingWork *work, u32 value) {
@@ -856,12 +856,12 @@ void effPCPFlashPolyPipePartSetVertex(PcpFlashAccumulatingWork *work, s32 index)
     effPCPFlashPolyPipeVertex[1] = height + -1.0f;
     effPCPFlashPolyPipeVertex[2] = sinv * height;
     VU0_LOAD_VF(vf10, effPCPFlashPolyPipeVertex);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf11, vf10);
     VU0_MOVE_VF(vf12, vf10);
     VU0_LOAD_VF(vf10, unit);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, size);
     VU0_MUL(vf10, vf10, vf11);
@@ -892,9 +892,9 @@ void effPCPFlashPolyPipePartSetVertex(PcpFlashAccumulatingWork *work, s32 index)
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad);
     mirror = dds3FlashPolyList3GetVertex(work->resourceHandle, index * 2 + 1);
-    PCP_COPY_VECTOR(mirror + 8, quad + 8);
-    PCP_COPY_VECTOR(mirror + 4, quad + 4);
-    PCP_COPY_VECTOR(mirror + 12, quad + 12);
+    SDF_VU0_COPYVECTOR(mirror + 8, quad + 8);
+    SDF_VU0_COPYVECTOR(mirror + 4, quad + 4);
+    SDF_VU0_COPYVECTOR(mirror + 12, quad + 12);
     VU0_LOAD_VF(vf10, offset);
     VU0_LOAD_VF(vf11, inner);
     VU0_ADD(vf10, vf10, vf11);
@@ -1040,7 +1040,7 @@ void effPCPFlashPolyRingExpDelete(PcpFlashOrbitArcWork *work) {
 }
 
 void effPCPFlashPolyRingExpSetPosition(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effPCPFlashPolyRingExpSetColor(PcpFlashOrbitArcWork *work, u32 value) {
@@ -1101,12 +1101,12 @@ void effPCPFlashPolyRingExpPartSetVertex(PcpFlashOrbitArcWork *work, s32 index)
     effPCPFlashPolyRingExpVertex[1] = height + -1.0f;
     effPCPFlashPolyRingExpVertex[2] = sinv * height;
     VU0_LOAD_VF(vf10, effPCPFlashPolyRingExpVertex);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf11, vf10);
     VU0_MOVE_VF(vf12, vf10);
     VU0_LOAD_VF(vf10, unit);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, scaleB);
     VU0_MUL(vf10, vf10, vf11);
@@ -1292,7 +1292,7 @@ void effPCPFlashPolySphereExpDelete(PcpFlashRotatingQuadWork *work) {
 }
 
 void effPCPFlashPolySphereExpSetPosition(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effPCPFlashPolySphereExpSetColor(PcpFlashRotatingQuadWork *work, u32 value) {
@@ -1371,12 +1371,12 @@ void effPCPFlashPolySphereExpPartSetVertex(PcpFlashRotatingQuadWork *work, s32 i
     VU0_LOAD_VF(vf10, base);
     VU0_LOAD_VF(vf11, view);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_LOAD_VF(vf11, view);
     VU0_MOVE_VF(vf12, vf10);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, across);
     VU0_MUL(vf10, vf10, vf11);
@@ -1545,7 +1545,7 @@ void effPCPFlashPolySphere2ExpDelete(PcpFlashRadialTriangleWork *work) {
 }
 
 void effPCPFlashPolySphere2ExpSetPosition(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effPCPFlashPolySphere2ExpSetColor(PcpFlashRadialTriangleWork *work, u32 value) {
@@ -1593,7 +1593,7 @@ void effPCPFlashPolySphere2ExpPartSetVertex(PcpFlashRadialTriangleWork *work, s3
     VU0_LOAD_VF(vf10, base);
     VU0_LOAD_VF(vf11, view);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, base);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_LOAD_VF(vf11, size);
@@ -1632,7 +1632,7 @@ void effPCPFlashPolySphere2ExpDraw(PcpFlashRadialTriangleWork *work) {
     VU0_LOAD_VF($vf10, aViewTarget);
     VU0_LOAD_VF($vf11, sdfViewTargetVector);
         VU0_SUB(vf10, vf10, vf11);;
-        VU0_NORMALIZE_VF10();;
+        SDF_VU0_NORMALIZE();;
     VU0_STORE_VF($vf10, &axis);
     count = work->particleCount;
     part = work->parts;
@@ -1744,7 +1744,7 @@ void effPCPFlashPolySphere3Delete(PcpFlashRadialStripWork *work) {
 }
 
 void effPCPFlashPolySphere3SetPosition(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effPCPFlashPolySphere3SetColor(PcpFlashRadialStripWork *work, u32 value) {
@@ -1820,7 +1820,7 @@ void effPCPFlashPolySphere3PartSetVertex(PcpFlashRadialStripWork *work, s32 inde
     VU0_LOAD_VF(vf10, base);
     VU0_LOAD_VF(vf11, view);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_MOVE_VF(vf12, vf10);
     /* retail multiplies the (never written) `spare` slot here and stores it back */
@@ -1830,7 +1830,7 @@ void effPCPFlashPolySphere3PartSetVertex(PcpFlashRadialStripWork *work, s32 inde
     VU0_MOVE_VF(vf10, vf12);
     VU0_LOAD_VF(vf11, view);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, size);
     VU0_MUL(vf10, vf10, vf11);
@@ -1856,9 +1856,9 @@ void effPCPFlashPolySphere3PartSetVertex(PcpFlashRadialStripWork *work, s32 inde
     VU0_LOAD_VF(vf10, outer);
     VU0_STORE_VF(vf10, quad);
     mirror = (f32 *)dds3FlashPolyList3GetVertex(work->resourceHandle, index * 2 + 1);
-    PCP_COPY_VECTOR(mirror + 8, quad + 8);
-    PCP_COPY_VECTOR(mirror + 4, quad + 4);
-    PCP_COPY_VECTOR(mirror + 12, quad + 12);
+    SDF_VU0_COPYVECTOR(mirror + 8, quad + 8);
+    SDF_VU0_COPYVECTOR(mirror + 4, quad + 4);
+    SDF_VU0_COPYVECTOR(mirror + 12, quad + 12);
     VU0_LOAD_VF(vf10, inner);
     VU0_STORE_VF(vf10, mirror);
 }
@@ -2009,7 +2009,7 @@ void effPCPFlashPolyRingExp2Delete(PcpFlashFadingOrbitWork *work) {
 }
 
 void effPCPFlashPolyRingExp2SetPosition(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effPCPFlashPolyRingExp2SetColor(PcpFlashFadingOrbitWork *work, u32 value) {
@@ -2078,12 +2078,12 @@ void effPCPFlashPolyRingExp2PartSetVertex(PcpFlashFadingOrbitWork *work, s32 ind
     effPCPFlashPolyRingExp2Vertex[1] = height + -1.0f;
     effPCPFlashPolyRingExp2Vertex[2] = sinv * height;
     VU0_LOAD_VF(vf10, effPCPFlashPolyRingExp2Vertex);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf11, vf10);
     VU0_MOVE_VF(vf12, vf10);
     VU0_LOAD_VF(vf10, unit);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, scaleB);
     VU0_MUL(vf10, vf10, vf11);
@@ -2243,7 +2243,7 @@ void effPCPFlashPolyCircleDelete(PcpFlashOffsetRadialWork *work) {
 }
 
 void effPCPFlashPolyCircleSetPosition(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effPCPFlashPolyCircleSetColor(PcpFlashOffsetRadialWork *work, u32 value) {
@@ -2291,7 +2291,7 @@ void effPCPFlashPolyCirclePartSetVertex(PcpFlashOffsetRadialWork *work, s32 inde
     VU0_LOAD_VF(vf10, base);
     VU0_LOAD_VF(vf11, view);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, base);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_LOAD_VF(vf11, size);
@@ -2331,7 +2331,7 @@ void effPCPFlashPolyCircleDraw(PcpFlashOffsetRadialWork *work) {
     VU0_LOAD_VF($vf10, aViewTarget);
     VU0_LOAD_VF($vf11, sdfViewTargetVector);
         VU0_SUB(vf10, vf10, vf11);;
-        VU0_NORMALIZE_VF10();;
+        SDF_VU0_NORMALIZE();;
     VU0_STORE_VF($vf10, axis);
     count = work->particleCount;
     part = work->parts;

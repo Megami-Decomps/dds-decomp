@@ -541,9 +541,9 @@ void kwlnUpdatePadInputState(void) {
         v[2] = sticks[1][1] - 0x80;
         v[3] = 0;
         VU0_LOAD_VF(vf10, v);
-        VU0_LENGTH_VF10(length);
+        SDF_VU0_GETLENGTH(length);
         if (length >= 64.0f) {
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_LOAD_VF(vf11, forward);
             VU0_DOT_XYZ(dot, vf10, vf11);
             if (dot < -1.0f) {
@@ -614,7 +614,7 @@ void kwlnUpdatePadInputState(void) {
             v[2] = sticks[i][1] - 0x80;
             v[3] = 0;
             VU0_LOAD_VF(vf10, v);
-            VU0_LENGTH_VF10(stickLength);
+            SDF_VU0_GETLENGTH(stickLength);
             if (stickLength >= 64.0f) {
                 D_003BA868[pad][i] = 1;
                 if (++kwlnPadStickHoldCounters[pad][i] == 1) {

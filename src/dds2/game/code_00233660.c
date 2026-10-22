@@ -1123,7 +1123,7 @@ void mdlEffect_P2A_D3P_GetPos(sdfModelRootNode_t *model, dds3ModelEffectCtrlr_t 
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf12, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf12);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_SET_VF2X(scale);
     VU0_MUL_VF2X(vf10, vf10);
     VU0_ADD(vf10, vf10, vf11);
@@ -1325,9 +1325,9 @@ void mdlLoadViewerResourceAndResetCursors(void) {
 }
 
 void mdlResetViewerBasisVectors(void) {
-    PCP_COPY_VECTOR(&D_00453620, &D_003C87C0);
-    PCP_COPY_VECTOR(&D_00453630, &D_003C87D0);
-    PCP_COPY_VECTOR(&D_00453640, &D_003C87E0);
+    SDF_VU0_COPYVECTOR(&D_00453620, &D_003C87C0);
+    SDF_VU0_COPYVECTOR(&D_00453630, &D_003C87D0);
+    SDF_VU0_COPYVECTOR(&D_00453640, &D_003C87E0);
     D_00453584[0] = 0;
 }
 
@@ -2342,8 +2342,8 @@ void mdlUpdateViewerSettingsInput(void) {
             mdlViewerState.unk3E = mdlViewerState.settingsCursor - 4;
             break;
         case 9:
-            PCP_COPY_VECTOR(&D_003C87C0, &D_00453620);
-            PCP_COPY_VECTOR(&D_003C87D0, &D_00453630);
+            SDF_VU0_COPYVECTOR(&D_003C87C0, &D_00453620);
+            SDF_VU0_COPYVECTOR(&D_003C87D0, &D_00453630);
             mdlSaveViewerPresentationConfig();
             break;
         }
@@ -2837,9 +2837,9 @@ s32 mdlViewer(dds3ProcessID_t *task) {
         mdlViewerState.taskPhase = 0;
         mdlViewerState.selectedTaskIndex = mdlViewerState.unk0B - 1;
     }
-    PCP_COPY_VECTOR(sdfViewTargetVector, &D_00453620);
-    PCP_COPY_VECTOR(aViewTarget, &D_00453630);
-    PCP_COPY_VECTOR(aViewDown, &D_00453640);
+    SDF_VU0_COPYVECTOR(sdfViewTargetVector, &D_00453620);
+    SDF_VU0_COPYVECTOR(aViewTarget, &D_00453630);
+    SDF_VU0_COPYVECTOR(aViewDown, &D_00453640);
     mdlViewerState.packetList = dds3FontReqAllocDrawTag();
     packet = sdfGrAllocPacketBuff(0x40);
     sdfGrSetRegsPacketHeader(packet, 2);
@@ -3097,7 +3097,7 @@ void mdlInitializeViewerTasksAndResources(void) {
     mdlViewerState.workspaceSetupPhase = 0;
     mdlResetViewerBasisVectors();
     dds3ScreenParam.camera.fov = 0.4363323f;
-    PCP_COPY_VECTOR(&D_0037F6C0, &D_003C8A80);
+    SDF_VU0_COPYVECTOR(&D_0037F6C0, &D_003C8A80);
     for (i = 0; i != 12; i++) {
         mdlViewerState.resources[i] = NULL;
     }

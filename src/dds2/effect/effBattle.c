@@ -318,7 +318,7 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
                     break;
                 case 5:
                     effBTLModelGetMarkMatrix2(unit, entry->aimParams.count);
-                    VU0_LOAD_MATRIX_B(baseMatrix);
+                    SDF_VU0_LOADMATRIX_B(baseMatrix);
                     sdfComposeVuMatrixFromRegisters();
                     VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
                     dds3EffectPartSetRotateMatrix(work->parameterWorks[entryIndex], matrixOutput);
@@ -326,7 +326,7 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
                 case 8:
                     if ((unit->status.flags & 2) != 0) {
                         mdlGetScale(unit->ext->owner);
-                        VU0_GET_VF10_X(scalar);
+                        SDF_VU0_GETVECTOR_X(scalar);
                     } else {
                         scalar = 0.0f;
                     }
@@ -343,7 +343,7 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
                 case 9:
                     if ((overrideOwner->status.flags & 2) != 0) {
                         mdlGetScale(overrideOwner->ext->owner);
-                        VU0_GET_VF10_X(scalar);
+                        SDF_VU0_GETVECTOR_X(scalar);
                     } else {
                         scalar = 0.0f;
                     }
@@ -360,7 +360,7 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
                 case 10:
                     if ((finalOwner->status.flags & 2) != 0) {
                         mdlGetScale(finalOwner->ext->owner);
-                        VU0_GET_VF10_X(scalar);
+                        SDF_VU0_GETVECTOR_X(scalar);
                     } else {
                         scalar = 0.0f;
                     }

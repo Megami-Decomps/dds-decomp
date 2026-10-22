@@ -166,7 +166,7 @@ void LoadMatrix(void *matrix) {
 }
 
 void LoadMatrix_B(void *matrix) {
-    VU0_LOAD_MATRIX_B(matrix);
+    SDF_VU0_LOADMATRIX_B(matrix);
 }
 
 void StoreMatrix(void *dst) {
@@ -174,7 +174,7 @@ void StoreMatrix(void *dst) {
 }
 
 void StoreMatrix_B(void *dst) {
-    VU0_STORE_MATRIX_B(dst);
+    SDF_VU0_STOREMATRIX_B(dst);
 }
 
 /* vu0 routine: vf24-vf27 = vf28-vf31 */
@@ -241,7 +241,7 @@ void StoreIdentity(void *dst) {
 /* Transpose the four VU rows; EE MMI interleave is needed for packed vectors. */
 /* libvu0: sceVu0TransposeMatrix, register form (vf28-vf31 in and out) */
 void DiagMatrix(void) {
-    VU0_MATRIX4_TRANSPOSE();
+    SDF_VU0_TRANSMATRIX();
 }
 
 /* vu0 routine: rigid inverse of vf28-vf31 (transpose the 3x3, translation = -(R^T * t)) */
@@ -309,7 +309,7 @@ void StoreRotateMatrixAxis(f32 angle, const RwV3d *axis, RwMatrix *matrix) {
     f32 sine = sinf(angle);
 
     VU0_LOAD_VF(vf10, axis);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, normalizedAxis);
 
     x = normalizedAxis[0];

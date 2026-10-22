@@ -62,6 +62,38 @@ A few recovered names are terse where ours were descriptive, `_FRQ` for
 these passes is that the original name wins; a reader who wants the description
 has the struct's own comments.
 
+## The VU0 and MMI macros
+
+The same recovery reaches the engine's inline-asm macros, by a route worth
+stating: HD's transpiler could not inline them, so its metadata keeps each one
+as a real function, with a doubled underscore after the module tag
+(`SDF_VU0__NORMALIZE`). smt3-decomp's `include/ps2asm.h` adopted those names,
+which makes them recovered rather than chosen.
+
+`smt3-decomp/tools/dds_vu_macros.py` pairs a macro here with one there when the
+instruction template, the operand constraints and the clobber list all match
+after normalising whitespace and the macros' own parameter spellings. Same
+instructions, same operands, same operation. It then requires the recovered
+name to appear in the HD reconstruction under its doubled-underscore spelling,
+so a contributor's name cannot ride along.
+
+15 macros were renamed, among them `VU0_NORMALIZE_VF10` to
+`SDF_VU0_NORMALIZE`, `VU0_LENGTH_VF10` to `SDF_VU0_GETLENGTH`, and
+`PCP_COPY_VECTOR` to `SDF_VU0_COPYVECTOR`. Another 24 already agreed. Three
+matched by body but kept their names because the recovered spelling is not in
+HD: `MMI_PEXT5`, and the two `SDF_VU0_STOREMATRIX` variants whose
+`_MEMOPS` and `_NOMEM` suffixes distinguish clobber lists and are a
+contributor's distinction, not the engine's.
+
+A macro rename cannot change the build: the name is gone after preprocessing,
+and the instruction text it expands to is what the pairing proved identical.
+
+108 of this repo's macros matched no body there, and 195 bodies exist only in
+smt3-decomp. Those two numbers are the real backlog: each is either an idiom
+one repo has written and the other has not, or the same idiom recorded with a
+different clobber list. Reconciling them would give both repos one name per
+operation, and it is mechanical once someone decides which spellings win.
+
 ## What this does not cover
 
 - Member names. The recovery carries them too, and they are the larger prize,

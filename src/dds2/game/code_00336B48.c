@@ -80,13 +80,13 @@ void MultMatrixRevNoArg_C(void) {
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 void MultMatrix(void *matrix) {
-    VU0_LOAD_MATRIX_B(matrix);
+    SDF_VU0_LOADMATRIX_B(matrix);
     sdfComposeVuMatrixFromRegisters();
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 void sdfPostmultiplyVuMatrixFromMemory(const void *matrix) {
-    VU0_LOAD_MATRIX_B(matrix);
+    SDF_VU0_LOADMATRIX_B(matrix);
     MultMatrixRevNoArg();
 }
 
@@ -123,12 +123,12 @@ void LookAtMatrix(const void *directionPoint, const void *basisOrigin, const voi
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, directionPoint);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf30, vf10);
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF_MEMORY(vf10, up);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf28, vf10);
     VU0_MOVE_VF(vf11, vf10);
     VU0_MOVE_VF(vf10, vf30);

@@ -123,7 +123,7 @@ void effAPPoint4PartInit(EffChanWork *work, u32 recordIndex) {
     VU0_SUB(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, viewDirection);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_LOAD_VF(vf11, jitterScale);
     VU0_MUL(vf10, vf10, vf11);
     VU0_ADD(vf10, vf10, vf12);
@@ -142,7 +142,7 @@ void effAPPoint4PartInit(EffChanWork *work, u32 recordIndex) {
     VU0_SUB(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, viewDirection);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_LOAD_VF(vf11, jitterScale);
     VU0_MUL(vf10, vf10, vf11);
     VU0_ADD(vf10, vf10, vf12);
@@ -161,7 +161,7 @@ void effAPPoint4PartInit(EffChanWork *work, u32 recordIndex) {
     VU0_SUB(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, viewDirection);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, lastNormal);
     VU0_LOAD_VF(vf11, jitterScale);
     VU0_MUL(vf10, vf10, vf11);

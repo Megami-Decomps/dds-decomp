@@ -138,7 +138,7 @@ void effPCPFlashPolyRingExpHDelete(EffRingWork *ring) {
 
 /* Copy one quadword; the fourth component is copied along with XYZ. */
 void effPCPFlashPolyRingExpHSetPosition(void *destination, void *source) {
-    PCP_COPY_VECTOR(destination, source);
+    SDF_VU0_COPYVECTOR(destination, source);
 }
 
 /* Replace the ring's packed modulation color without touching vertex colors. */
@@ -207,12 +207,12 @@ void effPCPFlashPolyRingExpHPartSetVertex(EffRingWork *work, s32 index) {
     effPCPFlashPolyRingExpHVertex[1] = basisFactor + -1.0f;
     effPCPFlashPolyRingExpHVertex[2] = sine * basisFactor;
     VU0_LOAD_VF(vf10, effPCPFlashPolyRingExpHVertex);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf11, vf10);
     VU0_MOVE_VF(vf12, vf10);
     VU0_LOAD_VF(vf10, radialDirection);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, sideOffsetA);
     VU0_MUL(vf10, vf10, vf11);

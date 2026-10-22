@@ -136,7 +136,7 @@ void evtGetUnitDirVector(evtUnitHandle_t *unit) {
     v[1] = 0.0f;
     v[3] = 1.0f;
     VU0_LOAD_VF(vf10, v);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
 }
 
@@ -149,7 +149,7 @@ s32 evtCheckMoveEnd(evtUnitHandle_t *unit) {
     case 1:
     case 2:
         evtVu0SubVectorXZAxis(unit->targetVector, unit->effObj->inner->position);
-        VU0_LENGTH_VF10(value);
+        SDF_VU0_GETLENGTH(value);
         if (value <= 20.0f) {
             return 1;
         }

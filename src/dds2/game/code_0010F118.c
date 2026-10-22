@@ -280,9 +280,9 @@ void dds3BackupPoseSet(dds3PoseSet_t *node) {
 }
 
 void dds3SetRadiusPoseSet(dds3PoseSet_t *node) {
-    PCP_COPY_VECTOR(&node->savedScale, &node->scale);
-    PCP_COPY_VECTOR(&node->savedRotation, &node->rotation);
-    PCP_COPY_VECTOR(&node->savedPosition, &node->position);
+    SDF_VU0_COPYVECTOR(&node->savedScale, &node->scale);
+    SDF_VU0_COPYVECTOR(&node->savedRotation, &node->rotation);
+    SDF_VU0_COPYVECTOR(&node->savedPosition, &node->position);
 }
 
 void dds3GetRadiusPoseSet(dds3Basic_t *node, f32 value) {
@@ -298,7 +298,7 @@ void dds3SetPosPoseSet(dds3Basic_t *node, u128 *vector) {
 
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
-    PCP_COPY_VECTOR(&inner->position, vector);
+    SDF_VU0_COPYVECTOR(&inner->position, vector);
 }
 
 void dds3SetRotPoseSet(dds3Basic_t *node, u128 *vector) {
@@ -306,7 +306,7 @@ void dds3SetRotPoseSet(dds3Basic_t *node, u128 *vector) {
 
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
-    PCP_COPY_VECTOR(&inner->rotation, vector);
+    SDF_VU0_COPYVECTOR(&inner->rotation, vector);
 }
 
 void dds3SetSclPoseSet(dds3Basic_t *node, u128 *vector) {
@@ -314,7 +314,7 @@ void dds3SetSclPoseSet(dds3Basic_t *node, u128 *vector) {
 
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
-    PCP_COPY_VECTOR(&inner->scale, vector);
+    SDF_VU0_COPYVECTOR(&inner->scale, vector);
 }
 
 void dds3GetPosPoseSet(dds3Basic_t *node) {

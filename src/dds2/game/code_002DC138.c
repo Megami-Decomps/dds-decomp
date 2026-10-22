@@ -652,7 +652,7 @@ void func_002DD448(EffResourceOwner *owner) {
     u32 byteUnit;
 
     mdlGetScale(owner->model);
-    VU0_GET_VF10_X(scale);
+    SDF_VU0_GETVECTOR_X(scale);
     if (btlIsRuntimeAllocated() != 0) {
         haveTarget = 0;
         if (owner->extended.enableExplicitEndpoints != 0) {
@@ -687,7 +687,7 @@ void func_002DD448(EffResourceOwner *owner) {
             VU0_LOAD_VF(vf10, position);
             VU0_LOAD_VF(vf11, endpoint);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_LENGTH_VF10(distance);
+            SDF_VU0_GETLENGTH(distance);
             distanceScale = distance / 800.0f;
             distanceScale /= scale;
             VU0_SET_ONES_XYZ(vf10);

@@ -2702,7 +2702,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             battle->debug.phase = 2;
             break;
         }
-        PCP_COPY_VECTOR(btlDebugEditorPosition, unit->position);
+        SDF_VU0_COPYVECTOR(btlDebugEditorPosition, unit->position);
         btlReturnDebugMenuSetupWord((u32)&btlDebugPositionEditor);
         if (dds3PadBitTable[2] < 0) {
             btlDebugEditorPosition[0] = 0.0f;
@@ -2713,7 +2713,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         btlDebugMenuBeforeRecordNoOp();
         btlDebugMenuRecordNoOp((u32)&btlDebugPositionEditor);
         btlDebugMenuAfterRecordNoOp();
-        PCP_COPY_VECTOR(unit->position, btlDebugEditorPosition);
+        SDF_VU0_COPYVECTOR(unit->position, btlDebugEditorPosition);
         btlSetUnitPosition(unit, unit->position);
         break;
     case 8:

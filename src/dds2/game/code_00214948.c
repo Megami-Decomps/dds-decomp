@@ -1297,9 +1297,9 @@ void btlBuildAngledApproachCameraPose(BtlLinkedCommand *command, BtlCamState *ou
     VU0_LOAD_VF(vf10, targetPos);
     VU0_LOAD_VF(vf11, userPos);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_GETLENGTH(length);
     length *= 0.6f;
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, dir);
     VU0_SCALE_VF_MFC1(vf10, length);
     VU0_ADD(vf10, vf10, vf11);
@@ -1353,9 +1353,9 @@ void btlBuildTargetFocusedCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     VU0_STORE_VF(vf10, front->position);
     VU0_LOAD_VF(vf11, userPos);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_GETLENGTH(length);
     front->distance = length;
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, front->direction);
     angle = front->fov * 1.3333333f * 0.5f;
     front->distance += userExtent * 2.5f / tanf(angle);
@@ -1411,9 +1411,9 @@ void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     VU0_STORE_VF(vf10, front->position);
     VU0_LOAD_VF(vf11, targetPos);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_GETLENGTH(length);
     front->distance = length;
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, front->direction);
     angle = front->fov * 1.3333333f * 0.5f;
     front->distance = front->distance + targetExtent * 1.5f / tanf(angle);
@@ -1471,9 +1471,9 @@ void btlBuildInsetExchangeCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     VU0_STORE_VF(vf10, front->position);
     VU0_LOAD_VF(vf11, targetPos);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_GETLENGTH(length);
     front->distance = length;
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, front->direction);
     angle = front->fov * 1.3333333f * 0.5f;
     front->distance = front->distance + targetExtent * 1.5f / tanf(angle);
@@ -2719,7 +2719,7 @@ void btlRecenterActorsAroundLead(void) {
         btlCopyUnitCurrentPosition(lead, pos);
         shift = -pos[0];
         pos[0] = 0;
-        PCP_COPY_VECTOR(lead->position, pos);
+        SDF_VU0_COPYVECTOR(lead->position, pos);
         btlSetUnitPosition(lead, pos);
         for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
             if (unit->status.flags & 1) {
@@ -2727,7 +2727,7 @@ void btlRecenterActorsAroundLead(void) {
                     if (unit != lead) {
                         btlCopyUnitCurrentPosition(unit, pos);
                         pos[0] = pos[0] + shift;
-                        PCP_COPY_VECTOR(unit->position, pos);
+                        SDF_VU0_COPYVECTOR(unit->position, pos);
                         btlSetUnitPosition(unit, pos);
                     }
                 }
@@ -2864,7 +2864,7 @@ extern void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *, s32, s32);
 
 /* The three formation actors retain a complete vector and their current dimensions. */
 static inline void btlCopyFormationDimensions(BtlUnit *unit) {
-    PCP_COPY_VECTOR(unit->muzzleOffset, unit->bodyOffset);
+    SDF_VU0_COPYVECTOR(unit->muzzleOffset, unit->bodyOffset);
     unit->bodyRadius = unit->reach;
     unit->geometryHeight = unit->height;
 }
@@ -3140,7 +3140,7 @@ void btlResetSpecialActionActorPresentation(void) {
                         unit->status.flags &= ~0x80000;
                         /* Retail resets xyz; the copied fourth lane is unspecified. */
                         VEC3_SPLAT(position, 0.0f);
-                        PCP_COPY_VECTOR(unit->position, position);
+                        SDF_VU0_COPYVECTOR(unit->position, position);
                         btlSetUnitPosition(unit, position);
                     }
                 }
@@ -4799,7 +4799,7 @@ void btlCenterMarkedFormationAroundLead(void) {
         pos[2] = 200.0f;
         shift = -pos[0];
         pos[0] = 0;
-        PCP_COPY_VECTOR(lead->position, pos);
+        SDF_VU0_COPYVECTOR(lead->position, pos);
         btlSetUnitPosition(lead, pos);
         for (unit = scene->units; unit != 0; unit = unit->nextActor) {
             if (unit->status.flags & 1) {
@@ -4807,7 +4807,7 @@ void btlCenterMarkedFormationAroundLead(void) {
                     if (unit != lead) {
                         btlCopyUnitCurrentPosition(unit, pos);
                         pos[0] = pos[0] + shift;
-                        PCP_COPY_VECTOR(unit->position, pos);
+                        SDF_VU0_COPYVECTOR(unit->position, pos);
                         btlSetUnitPosition(unit, pos);
                     }
                 }
@@ -5948,8 +5948,8 @@ u64 btlCreateLinkedActorTransformTasks(u64 prerequisiteHandle) {
     task->ownerId = owner;
     btlStartTask(task);
     unit = effect->actor;
-    PCP_COPY_VECTOR(unit->position, D_003BF910);
-    PCP_COPY_VECTOR(unit->rotation, D_003BF920);
+    SDF_VU0_COPYVECTOR(unit->position, D_003BF910);
+    SDF_VU0_COPYVECTOR(unit->rotation, D_003BF920);
     unit->status.flags &= ~0x80000;
     unit->status.flags &= ~1;
     unit->status.stateFlags |= 0x20000;
@@ -7522,7 +7522,7 @@ u8 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camer
         unit = unit->nextActor;
     }
     if (unit != NULL) {
-        PCP_COPY_VECTOR(position, unit->position);
+        SDF_VU0_COPYVECTOR(position, unit->position);
         position[2] += 340.0f;
         btlSetUnitPosition(unit, position);
     }
@@ -8251,7 +8251,7 @@ void btlRestoreLinkedEffectUnitPose(BtlUnit *source) {
         f32 translatedZ;
         f32 height;
 
-        PCP_COPY_VECTOR(position, source->position);
+        SDF_VU0_COPYVECTOR(position, source->position);
         translatedX = position[0] + 420.0f;
         translatedZ = position[2] + -50.0f;
         position[0] = translatedX;
@@ -8437,10 +8437,10 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
     if (effect->linked.active == 1 || effect->linked.actor == 0) {
         mainUnit->position[0] = 0.0f;
         btlSetUnitPosition(mainUnit, mainUnit->position);
-        PCP_COPY_VECTOR(twin->position, mainUnit->position);
+        SDF_VU0_COPYVECTOR(twin->position, mainUnit->position);
         btlSetUnitPosition(twin, mainUnit->position);
         btlSetUnitRotation(mainUnit, (s128 *)mainUnit->rotation);
-        PCP_COPY_VECTOR(twin->rotation, mainUnit->rotation);
+        SDF_VU0_COPYVECTOR(twin->rotation, mainUnit->rotation);
         btlSetUnitRotation(twin, (s128 *)mainUnit->rotation);
         if (mainUnit->resourceIndex != twin->resourceIndex) {
             btlInitializeEffectVectorsFromSourceRecords(mainUnit,
@@ -8476,7 +8476,7 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
     } else {
         if (twin != NULL) {
             twin->status.stateFlags &= ~0x100;
-            PCP_COPY_VECTOR(position, twin->position);
+            SDF_VU0_COPYVECTOR(position, twin->position);
             position[0] += 420.0f;
             btlSetUnitPosition(twin, position);
             btlSetUnitRotation(twin, (s128 *)twin->rotation);
@@ -8493,7 +8493,7 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
         }
         if (mainUnit != NULL) {
             /* The snapshot is not used by the following main-unit refresh. */
-            PCP_COPY_VECTOR(position, twin->position);
+            SDF_VU0_COPYVECTOR(position, twin->position);
             btlSetUnitPosition(mainUnit, mainUnit->position);
             btlSetUnitRotation(mainUnit, (s128 *)mainUnit->rotation);
             btlInitializeEffectVectorsFromSourceRecords(mainUnit, 1, 0x12E);

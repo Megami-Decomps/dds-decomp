@@ -81,8 +81,8 @@ void CalcCamera(void) {
     camera = (dds3Basic_t *)D_00438944;
     camera->ops->update(camera);
     cameraData = (CameraData *)((dds3Basic_t *)D_00438944)->data;
-    PCP_COPY_VECTOR(&cameraData->localUp, D_0040ABB0);
-    PCP_COPY_VECTOR(&cameraData->worldUp, D_0040ABB0);
+    SDF_VU0_COPYVECTOR(&cameraData->localUp, D_0040ABB0);
+    SDF_VU0_COPYVECTOR(&cameraData->worldUp, D_0040ABB0);
 }
 
 void dds3InitSoundSlotPool(void) {

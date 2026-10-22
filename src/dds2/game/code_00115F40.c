@@ -110,7 +110,7 @@ void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *object) {
         direction[2] = -value;
         direction[3] = 1.0f;
         VU0_LOAD_VF(vf10, direction);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF(vf10, normalizedDirection);
         {
             dds3PoseSet_t *inner;

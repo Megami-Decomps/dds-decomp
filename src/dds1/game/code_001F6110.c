@@ -216,17 +216,17 @@ s32 btlProjectForwardPositionToScreen(s32 *out) {
     VU0_MOVE_VF(vf12, vf10);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(distance);
+    SDF_VU0_GETLENGTH(distance);
     if (!(distance > 16.0)) {
         return 0;
     }
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    VU0_MOVE_MATRIX_TO_B();
+    SDF_VU0_COPYMATRIX_A_TO_B();
     ReverseMatrix();
     VU0_MOVE_VF(vf10, vf30);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_DOT_XYZ(facing, vf10, vf11);
     if (facing <= 0.5f) {
         return 0;
@@ -239,7 +239,7 @@ s32 btlProjectForwardPositionToScreen(s32 *out) {
     projection = sdfProjectionMatrix;
     sdfPostmultiplyVuMatrixFromMemory(projection);
     VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
+    SDF_VU0_PERSVECTOR();
     projection += 16;
     VU0_LOAD_VF(vf11, projection);
     VU0_MUL(vf10, vf10, vf11);
@@ -260,17 +260,17 @@ s32 nbClipEffectNum(s32 screenPosition[4]) {
     VU0_MOVE_VF(vf12, vf10);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(viewDistance);
+    SDF_VU0_GETLENGTH(viewDistance);
     if (!(viewDistance > 16.0))
         return 0;
 
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    VU0_MOVE_MATRIX_TO_B();
+    SDF_VU0_COPYMATRIX_A_TO_B();
     ReverseMatrix();
     VU0_MOVE_VF(vf10, vf30);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_DOT_XYZ(forwardDot, vf10, vf11);
     if (forwardDot <= 0.5f)
         return 0;
@@ -283,7 +283,7 @@ s32 nbClipEffectNum(s32 screenPosition[4]) {
     projectionData = sdfProjectionMatrix;
     sdfPostmultiplyVuMatrixFromMemory(projectionData);
     VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
+    SDF_VU0_PERSVECTOR();
     projectionData += 16;
     VU0_LOAD_VF(vf11, projectionData);
     VU0_MUL(vf10, vf10, vf11);
@@ -870,7 +870,7 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
                         VU0_SCALAR_OP(targetPos.f[1], "vaddx.y vf10, vf0, vf2x");
                         VU0_LOAD_VF($vf11, &targetPos);
                         VU0_SUB(vf10, vf10, vf11);
-                        VU0_LENGTH_VF10(distance);
+                        SDF_VU0_GETLENGTH(distance);
                         if (needsFirstSample) {
                             nearestDistance = distance;
                             nearest = unit;
@@ -903,7 +903,7 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
                     VU0_SCALAR_OP(point[1], "vaddx.y vf10, vf0, vf2x");
                     VU0_LOAD_VF(vf11, point);
                     VU0_SUB(vf10, vf10, vf11);
-                    VU0_LENGTH_VF10(distance);
+                    SDF_VU0_GETLENGTH(distance);
                     if (farthestDistance < distance) {
                         farthestDistance = distance;
                         farthest = unit;
@@ -938,12 +938,12 @@ BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *reference, BtlIndexList *list) {
             if (reference->status.flags & 0x200) {
                 if (position.f[0] < selectedPosition.f[0]) {
                     selected = unit;
-                    PCP_COPY_VECTOR(&selectedPosition, &position);
+                    SDF_VU0_COPYVECTOR(&selectedPosition, &position);
                 }
             } else {
                 if (position.f[0] > selectedPosition.f[0]) {
                     selected = unit;
-                    PCP_COPY_VECTOR(&selectedPosition, &position);
+                    SDF_VU0_COPYVECTOR(&selectedPosition, &position);
                 }
             }
         }
@@ -1149,7 +1149,7 @@ void btlTriangleNormalVU(const f32 *vertexA, const f32 *vertexB, const f32 *vert
     VU0_MOVE_VF(vf11, vf10);
     VU0_MOVE_VF(vf10, vf12);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
 }
 
 
@@ -1175,7 +1175,7 @@ void btlPointOffPlaneVU(f32 *vertexA, f32 *vertexB, f32 *vertexC, f32 *point) {
     VU0_LOAD_VF(vf10, point);
     VU0_LOAD_VF(vf11, vertexC);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_SCALAR_OP(projection, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_LOAD_VF(vf11, vertexC);
     VU0_ADD(vf10, vf10, vf11);

@@ -35,7 +35,7 @@ s32 dds3ComparePosPoseSet(dds3PoseSet_t *left, dds3PoseSet_t *right) {
     VU0_LOAD_VF(vf10, left->position);
     VU0_LOAD_VF(vf11, right->position);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_GETLENGTH(length);
     leftLimit = left->radius;
     rightLimit = right->radius;
     if (fabsf(length) - (leftLimit + rightLimit) < 0.0f) {
@@ -51,7 +51,7 @@ s32 dds3ComparePosPoseSet2(dds3PoseSet_t *left, dds3PoseSet_t *right) {
     VU0_LOAD_VF(vf10, left->position);
     VU0_LOAD_VF(vf11, right->position);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_GETLENGTH(length);
     rightLimit = right->radius;
     return ffabsf(length) - rightLimit < 0.0f;
 }

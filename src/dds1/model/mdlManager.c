@@ -652,7 +652,7 @@ dds3ModelHandle_t *mdlLoad(u32 group, u32 id) {
     scale[1] = modelScale;
     scale[2] = modelScale;
     scale[3] = 1.0f;
-    PCP_COPY_VECTOR(inner->scaleVector, scale);
+    SDF_VU0_COPYVECTOR(inner->scaleVector, scale);
     ctx->objectRadius = node->objectRadius;
     ctx->current.h.id = -1;
     ctx->current.h.motionIndex = -1;
@@ -1056,7 +1056,7 @@ void mdlGetScreenOffset(dds3ModelHandle_t *ctx, void *point)
     MultMatrixRevNoArg();
     VU0_LOAD_VF(vf10, point);
     VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
+    SDF_VU0_PERSVECTOR();
     VU0_LOAD_VF(vf11, D_00324650);
     VU0_MUL(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, D_00324660);
@@ -1081,7 +1081,7 @@ void mdlProjectPoints(dds3ModelHandle_t *ctx, f32 (*inputPoints)[4], f32 (*outpu
     for (pointIndex = 0; pointIndex < pointCount; pointIndex++) {
         VU0_LOAD_VF(vf10, inputPoints[pointIndex]);
         VU0_TRANSFORM_POINT(vf10, vf10);
-        VU0_PERSPECTIVE_DIVIDE_VF10();
+        SDF_VU0_PERSVECTOR();
         VU0_LOAD_VF(vf11, sdfProjectionMatrix + MDL_PROJECTION_SCALE_OFFSET);
         VU0_MUL(vf10, vf10, vf11);
         VU0_LOAD_VF(vf11, sdfProjectionMatrix + MDL_PROJECTION_BIAS_OFFSET);

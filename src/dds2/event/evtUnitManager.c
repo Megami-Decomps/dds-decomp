@@ -60,7 +60,7 @@ f32 GetSplineLength(dds3PathBasicControl_t *path) {
         dds3PathBasicControlGetPos(path);
         VU0_MOVE_VF(vf12, vf10);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(segmentLength);
+        SDF_VU0_GETLENGTH(segmentLength);
         length += segmentLength;
         VU0_MOVE_VF(vf10, vf12);
         t += step;
@@ -192,7 +192,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
             VU0_LOAD_VF(vf11, ((dds3Basic_t *)unit->currentTransitionValue)->inner->position);
             VU0_SUB(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, targetDirection);
-            VU0_LENGTH_VF10(distance);
+            SDF_VU0_GETLENGTH(distance);
             if (distance <= target->nearDistance) {
                 currentWeight = 1.0f;
             } else if (distance >= target->farDistance) {
@@ -207,7 +207,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
                 VU0_LOAD_VF(vf11, ((dds3Basic_t *)unit->previousTransitionValue)->inner->position);
                 VU0_SUB(vf10, vf10, vf11);
                 VU0_STORE_VF_UNCLOBBERED(vf10, previousDirection);
-                VU0_LENGTH_VF10(previousDistance);
+                SDF_VU0_GETLENGTH(previousDistance);
                 if (previousDistance <= previous->nearDistance) {
                     previousWeight = 1.0f;
                 } else if (previousDistance >= previous->farDistance) {
@@ -328,7 +328,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         }
         VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec10);
     } else {
-        PCP_COPY_VECTOR(unit->vec10, unit->vec40);
+        SDF_VU0_COPYVECTOR(unit->vec10, unit->vec40);
     }
     /* Advance the two local colour tracks before applying target influence. */
     originalFlags = unit->flags;
@@ -685,7 +685,7 @@ void evtSetUnitLightAndAmbient(evtUnitHandle_t *unit, s32 duration, u32 firstCol
 void evtSetUnitLightDir(evtUnitHandle_t *unit, s32 directionMode) {
     unit->directionMode = directionMode;
     VU0_CLEAR_W(vf10);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec30);
     GetBaseLightDir(unit);
     VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec20);
@@ -943,11 +943,11 @@ s32 evtRotateUnitTowardTarget(evtUnitHandle_t *unit, f32 *dir, f32 scale) {
     VU0_STORE_VF(vf10, a);
     VU0_MOVE_VF(vf12, vf10);
     evtVu0SubVectorXZAxis(dir, unit->effObj->inner->position);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF_UNCLOBBERED(vf10, out);
     VU0_LOAD_VF(vf11, b);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf11, vf12);
     VU0_DOT_XYZ(dot1, vf10, vf11);
     VU0_LOAD_VF(vf10, out);
@@ -985,7 +985,7 @@ s32 evtUnitRotationQuat(evtUnitHandle_t *unit, f32 *quat, f32 angle) {
     effMiscQuaternionToMatrixVU();
     VU0_MOVE_VF(vf10, vf30);
     VU0_SET_AXIS_CLEAR_W(0.0f, y);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_LOAD_VF(vf11, unit->effObj->inner->position);
     VU0_ADD(vf10, vf10, vf11);
@@ -1007,7 +1007,7 @@ s32 evtUnitMoveType0(evtUnitHandle_t *unit) {
         obj = unit->effObj;
         VU0_LOAD_VF(vf11, obj->inner->position);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
     }
     scale = unit->motionParameter * 0.1f;
     VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
@@ -1082,7 +1082,7 @@ s32 evtUnitMoveTypePathTrace(evtUnitHandle_t *unit) {
 }
 
 void evtCopyUnitTargetVector(evtUnitHandle_t *work, void *src) {
-    PCP_COPY_VECTOR(work->targetVector, src);
+    SDF_VU0_COPYVECTOR(work->targetVector, src);
 }
 
 #include "sdf_trig.h"
@@ -1203,7 +1203,7 @@ void evtSetUnitRot1(evtUnitHandle_t *work, s128 *vector, s32 frames) {
     if ((u32)(frames - 1) < 100) {
         work->linkedUnit = NULL;
         work->motionState = EVT_UNIT_MOTION_STATE_VECTOR;
-        PCP_COPY_VECTOR(destination, vector);
+        SDF_VU0_COPYVECTOR(destination, vector);
         work->motionParameter = frames;
         work->directionOffset = 0;
         work->motionCallback = 0;
@@ -1232,7 +1232,7 @@ void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, s128 *vector, s32
     work->motionState = EVT_UNIT_MOTION_STATE_SOURCE;
     work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_COPIED_VECTOR;
     work->linkedUnit = NULL;
-    PCP_COPY_VECTOR(destination, vector);
+    SDF_VU0_COPYVECTOR(destination, vector);
     work->motionParameter = frames;
     work->directionOffset = valueB6;
     work->motionCallback = callback;
@@ -2307,7 +2307,7 @@ u32 evtOpTurnUnitRelativeToWorldNode(void) {
     sourceTransform = source->data;
     dds3GetPosPoseSet(actor);
     VU0_STORE_VF(vf10, actorPosition);
-    PCP_COPY_VECTOR(sourcePosition, &sourceTransform->position);
+    SDF_VU0_COPYVECTOR(sourcePosition, &sourceTransform->position);
 
     if ((unit->referenceAngleCacheFlags & EVT_UNIT_REFERENCE_ANGLE_CACHE_VALID) == 0) {
         dds3GetRotPoseSet(actor);

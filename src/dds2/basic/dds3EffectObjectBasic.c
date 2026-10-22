@@ -118,7 +118,7 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
                     break;
                 }
             }
-            VU0_MOVE_MATRIX_TO_B();
+            SDF_VU0_COPYMATRIX_A_TO_B();
             VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
             VU0_LOAD_VF(vf10, &data->word10);
             VU0_SET_W_ONE(vf10);
@@ -200,8 +200,8 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
                 u8 *record = data->vector;
 
                 if (record != NULL) {
-                    PCP_COPY_VECTOR(record, position);
-                    PCP_COPY_VECTOR(record + 0x10, rotation);
+                    SDF_VU0_COPYVECTOR(record, position);
+                    SDF_VU0_COPYVECTOR(record + 0x10, rotation);
                     effEveBEDCutSetParams((effEveBEDCutHandle_t *)eventNode, record);
                 }
             }
@@ -528,8 +528,8 @@ dds3Basic_t *AddBEDEffect(source, firstVector, secondVector)
     if (obj == NULL) {
         return NULL;
     }
-    PCP_COPY_VECTOR(parameters.firstVector, firstVector);
-    PCP_COPY_VECTOR(parameters.secondVector, secondVector);
+    SDF_VU0_COPYVECTOR(parameters.firstVector, firstVector);
+    SDF_VU0_COPYVECTOR(parameters.secondVector, secondVector);
     mixer = effEveBEDCreate(source);
     data = obj->data;
     data->state = EFF_OBJ_STATE_EVENT_NODE;

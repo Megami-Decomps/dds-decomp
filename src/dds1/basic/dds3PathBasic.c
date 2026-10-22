@@ -85,10 +85,10 @@ void dds3PathBasicControlNextStep(dds3PathBasicControl_t *path, WorldTransformPa
         VU0_SET_VF10_W(entries[segmentIndex].rotation[3]);
         VU0_SCALAR_OP(1.0f - interpolationWeight, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_ADD(vf10, vf10, vf11);
-        VU0_GET_VF10_X(transformParams->rotation[0]);
-        VU0_GET_VF10_Y(transformParams->rotation[1]);
-        VU0_GET_VF10_Z(transformParams->rotation[2]);
-        VU0_GET_VF10_W(transformParams->rotation[3]);
+        SDF_VU0_GETVECTOR_X(transformParams->rotation[0]);
+        SDF_VU0_GETVECTOR_Y(transformParams->rotation[1]);
+        SDF_VU0_GETVECTOR_Z(transformParams->rotation[2]);
+        SDF_VU0_GETVECTOR_W(transformParams->rotation[3]);
         VU0_SET_VF10_COMPONENT(x, entries[segmentIndex + 1].position[0]);
         VU0_SET_VF10_COMPONENT(y, entries[segmentIndex + 1].position[1]);
         VU0_SET_VF10_COMPONENT(z, entries[segmentIndex + 1].position[2]);
@@ -99,9 +99,9 @@ void dds3PathBasicControlNextStep(dds3PathBasicControl_t *path, WorldTransformPa
         VU0_SET_VF10_COMPONENT(z, entries[segmentIndex].position[2]);
         VU0_SCALAR_OP(1.0f - interpolationWeight, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_ADD(vf10, vf10, vf11);
-        VU0_GET_VF10_X(transformParams->position[0]);
-        VU0_GET_VF10_Y(transformParams->position[1]);
-        VU0_GET_VF10_Z(transformParams->position[2]);
+        SDF_VU0_GETVECTOR_X(transformParams->position[0]);
+        SDF_VU0_GETVECTOR_Y(transformParams->position[1]);
+        SDF_VU0_GETVECTOR_Z(transformParams->position[2]);
         VU0_SET_VF10_COMPONENT(x, entries[segmentIndex + 1].scale[0]);
         VU0_SET_VF10_COMPONENT(y, entries[segmentIndex + 1].scale[1]);
         VU0_SET_VF10_COMPONENT(z, entries[segmentIndex + 1].scale[2]);
@@ -112,9 +112,9 @@ void dds3PathBasicControlNextStep(dds3PathBasicControl_t *path, WorldTransformPa
         VU0_SET_VF10_COMPONENT(z, entries[segmentIndex].scale[2]);
         VU0_SCALAR_OP(1.0f - interpolationWeight, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_ADD(vf10, vf10, vf11);
-        VU0_GET_VF10_X(transformParams->scale[0]);
-        VU0_GET_VF10_Y(transformParams->scale[1]);
-        VU0_GET_VF10_Z(transformParams->scale[2]);
+        SDF_VU0_GETVECTOR_X(transformParams->scale[0]);
+        SDF_VU0_GETVECTOR_Y(transformParams->scale[1]);
+        SDF_VU0_GETVECTOR_Z(transformParams->scale[2]);
     } else {
         memset(transformParams, 0, 0x28);
     }

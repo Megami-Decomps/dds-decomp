@@ -959,9 +959,9 @@ void btlBuildProgressiveApproachCameraPose(BtlLinkedCommand *command, BtlCamStat
     VU0_LOAD_VF(vf10, targetPos);
     VU0_LOAD_VF(vf11, userPos);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_GETLENGTH(length);
     length *= ratio * (0.6f - 0.55f) + 0.55f;
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, dir);
     VU0_SCALE_VF_MFC1(vf10, length);
     VU0_ADD(vf10, vf10, vf11);
@@ -1024,9 +1024,9 @@ void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     VU0_STORE_VF(vf10, front->position);
     VU0_LOAD_VF(vf11, targetPos);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_GETLENGTH(length);
     front->distance = length;
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, front->direction);
     angle = front->fov * 1.3333333f * 0.5f;
     front->distance = front->distance + targetExtent * 1.5f / tanf(angle);
@@ -1289,7 +1289,7 @@ void btlCenterUsasEnemyFormation(void) {
         btlCopyUnitCurrentPosition(target, position);
         shift = -position[0];
         position[0] = 0.0f;
-        PCP_COPY_VECTOR(target->position, position);
+        SDF_VU0_COPYVECTOR(target->position, position);
         btlSetUnitPosition(target, position);
         for (unit = state->units; unit != NULL; unit = unit->next) {
             if (unit->status.flags & 1) {
@@ -1297,7 +1297,7 @@ void btlCenterUsasEnemyFormation(void) {
                     if (unit != target) {
                         btlCopyUnitCurrentPosition(unit, position);
                         position[0] += shift;
-                        PCP_COPY_VECTOR(unit->position, position);
+                        SDF_VU0_COPYVECTOR(unit->position, position);
                         btlSetUnitPosition(unit, position);
                     }
                 }
@@ -1521,7 +1521,7 @@ void btlRestoreLinkedEffectUnitPose(BtlUnit *source) {
         f32 translatedZ;
         f32 height;
 
-        PCP_COPY_VECTOR(position, source->position);
+        SDF_VU0_COPYVECTOR(position, source->position);
         translatedX = position[0] + 420.0f;
         translatedZ = position[2] + -50.0f;
         position[0] = translatedX;
@@ -1714,10 +1714,10 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
     if (effect->active == 1 || effect->header.owner == 0) {
         second->position[0] = 0.0f;
         btlSetUnitPosition(second, second->position);
-        PCP_COPY_VECTOR(first->position, second->position);
+        SDF_VU0_COPYVECTOR(first->position, second->position);
         btlSetUnitPosition(first, second->position);
         btlSetUnitRotation(second, second->rotation);
-        PCP_COPY_VECTOR(first->rotation, second->rotation);
+        SDF_VU0_COPYVECTOR(first->rotation, second->rotation);
         btlSetUnitRotation(first, second->rotation);
         if (second->species != first->species) {
             btlInitializeEffectVectorsFromSourceRecords(second, second->resourceKind, second->species);
@@ -1734,7 +1734,7 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
         first->status.stateFlags &= ~0x100;
         btlBeginEffectActorFadeOut();
         if ((second->status.flags & 0xE0) && !(first->status.flags & 0xE0) && second->species == 0x108) {
-            PCP_COPY_VECTOR(position, second->position);
+            SDF_VU0_COPYVECTOR(position, second->position);
             position[0] += 400.0f;
             position[2] += 400.0f;
             btlSetUnitPosition(second, position);
@@ -1745,7 +1745,7 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
     } else {
         if (first != NULL) {
             first->status.stateFlags &= ~0x100;
-            PCP_COPY_VECTOR(position, first->position);
+            SDF_VU0_COPYVECTOR(position, first->position);
             position[0] += 420.0f;
             btlSetUnitPosition(first, position);
             btlSetUnitRotation(first, first->rotation);
@@ -1761,7 +1761,7 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
             first->bodyOffsetWBits = 0;
         }
         if (second != NULL) {
-            PCP_COPY_VECTOR(position, first->position);
+            SDF_VU0_COPYVECTOR(position, first->position);
             btlSetUnitPosition(second, second->position);
             btlSetUnitRotation(second, second->rotation);
             btlInitializeEffectVectorsFromSourceRecords(second, 1, 0x108);
@@ -2820,9 +2820,9 @@ s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, command->backCamera.position);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(distance);
+    SDF_VU0_GETLENGTH(distance);
     command->backCamera.distance = distance;
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, command->backCamera.direction);
     command->backCamera.distance += 45.0f;
     btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
@@ -3506,7 +3506,7 @@ void btlUpdateNidhoggrScaleAndPosition(void) {
 
     model = selected->ext->owner;
     mdlGetScale(model);
-    VU0_GET_VF10_X(currentScale);
+    SDF_VU0_GETVECTOR_X(currentScale);
     if (currentScale == transition->targetScale) {
         return;
     }
@@ -3932,11 +3932,11 @@ void btlRefreshRavanaUnitModelsAndPose(void) {
                         if (unit->lookupId == effect->selectedId && (effect->options & 4)) {
                             vector = unit->position;
                             actor = effect->header.actor;
-                            PCP_COPY_VECTOR(actor->position, vector);
+                            SDF_VU0_COPYVECTOR(actor->position, vector);
                             btlSetUnitPosition(actor, unit->currentPosition);
                             actor = effect->header.actor;
                             vector = unit->rotation;
-                            PCP_COPY_VECTOR(actor->rotation, vector);
+                            SDF_VU0_COPYVECTOR(actor->rotation, vector);
                             btlSetUnitRotation(actor, unit->orientation);
                             btlFlagUnitDefeatCandidate(effect->header.actor);
                         }
@@ -4049,10 +4049,10 @@ void btlSyncEffectActorToUnit(BtlUnit *unit, u8 *task) {
                 if (unit->lookupId == effect->selectedId) {
                     if ((*(u16 *)(task + 0x26) & 0x800) == 0) {
                         effect->options |= 4;
-                        PCP_COPY_VECTOR(target->position, unit->position);
+                        SDF_VU0_COPYVECTOR(target->position, unit->position);
                         btlSetUnitPosition(target, unit->currentPosition);
                         actor = effect->header.actor;
-                        PCP_COPY_VECTOR(actor->rotation, unit->rotation);
+                        SDF_VU0_COPYVECTOR(actor->rotation, unit->rotation);
                         btlSetUnitRotation(actor, unit->orientation);
                         btlFlagUnitDefeatCandidate(effect->header.actor);
                     }

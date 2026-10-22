@@ -3815,8 +3815,8 @@ void btlCommandTaskReleaseActor(ActionStateLink *task) {
             }
             {
                 BtlUnit *model = task->unit;
-                PCP_COPY_VECTOR(model->currentPosition, model->position);
-                PCP_COPY_VECTOR(model->orientation, model->rotation);
+                SDF_VU0_COPYVECTOR(model->currentPosition, model->position);
+                SDF_VU0_COPYVECTOR(model->orientation, model->rotation);
                 model->selectedEntryIndex = -1;
             }
             task->unit = 0;

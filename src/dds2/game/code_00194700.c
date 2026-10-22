@@ -719,7 +719,7 @@ void effScreenOffset(void) {
     projectionData = sdfProjectionMatrix;
     sdfPostmultiplyVuMatrixFromMemory(projectionData);
     VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
+    SDF_VU0_PERSVECTOR();
     projectionData += EFF_MATRIX_BYTES;
     VU0_LOAD_VF_MEMORY(vf11, projectionData);
     VU0_MUL(vf10, vf10, vf11);
@@ -747,7 +747,7 @@ s32 effPCPBlurScreenOffset(f32 scale) {
     VU0_SUB(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, aViewDown);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_LOAD_VF_MEMORY(vf11, scaleVector);
     VU0_MUL(vf10, vf10, vf11);
     VU0_MOVE_VF(vf11, vf12);
@@ -827,7 +827,7 @@ f32 effLinePointLength(f32 *direction, f32 *origin, f32 *point) {
     VU0_LOAD_VF(vf10, pointOffset);
     VU0_LOAD_VF(vf11, projectedOffset);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(distance);
+    SDF_VU0_GETLENGTH(distance);
     return distance;
 }
 

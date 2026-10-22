@@ -224,7 +224,7 @@ void effSwordTrackDrawTex(EffMagatuhiValueWork *work) {
         index = *writeIndices++;
         historyOffset += historyCount;
         if (slotColor & 0xFF000000) {
-            PCP_COPY_VECTOR(point, historyPositions[index]);
+            SDF_VU0_COPYVECTOR(point, historyPositions[index]);
             historyIndex = 0;
             if (validCount != 0) {
                 widthScale = baseSize * 4.0f;
@@ -307,7 +307,7 @@ void effMagaCylinderSetPartPos(EffMagatuhiValueWork *work, s32 index, const f32 
     linearIndex = rowBase + writeIndex;
     newSlot = work->positions + linearIndex;
     scalarOutput = work->historyScalars + linearIndex;
-    PCP_COPY_VECTOR(newSlot, vector);
+    SDF_VU0_COPYVECTOR(newSlot, vector);
     angleRow = work->angleRows[index];
 
     angleRow[2] += 0.21816613f;
@@ -344,7 +344,7 @@ void effMagaCylinderSetPartPos(EffMagatuhiValueWork *work, s32 index, const f32 
         VU0_SUB(vf10, vf10, vf11);
         VU0_MOVE_VF(vf11, vf12);
         VU0_CROSS_XYZ(vf10, vf10, vf11);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF(vf10, viewDirection);
         radial = sdfSin(angleRow[0]) * angleRow[1];
         (*replayPosition)[0] += viewDirection[0] * radial;
@@ -355,11 +355,11 @@ void effMagaCylinderSetPartPos(EffMagatuhiValueWork *work, s32 index, const f32 
     VU0_LOAD_VF(vf11, vector);
     VU0_LOAD_VF(vf10, historyPosition);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(radial);
+    SDF_VU0_GETLENGTH(radial);
     limit = baseLimit * 3.0f;
     if (limit < radial) {
         VEC3_SPLAT(viewDirection, limit);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_LOAD_VF(vf11, viewDirection);
         VU0_MUL(vf10, vf10, vf11);
     }
@@ -454,7 +454,7 @@ void effMagaSmokeConvPartInit(EffMagatuhiWideFirst *work, s32 index) {
     random = dds3GetRandFloatA(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     direction[2] = random + random;
     VU0_LOAD_VF_FROM(vf10, *(u128 *)direction);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF_TO_MEMORY(vf10, *(u128 *)direction);
     particle->position[0] = radius * direction[0];
     particle->position[1] = 0.0f;
@@ -465,7 +465,7 @@ void effMagaSmokeConvPartInit(EffMagatuhiWideFirst *work, s32 index) {
     random = dds3GetRandFloatA(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     particle->driftState[2] = random + random;
     VU0_LOAD_VF(vf10, particle->driftState);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, particle->driftState);
     particle->scale = work->head.baseScale *
         (dds3GetRandFloatA(effDefaultRandomState) * work->head.scaleVariation +
@@ -522,12 +522,12 @@ void effMagaSmokeConvDraw(EffMagatuhiWideFirst *work) {
     fadeIn = work->head.fadeInFrames;
     fadeOut = work->head.fadeOutFrames;
     slot = dds3Bezier4PGetPart(mathResource, 0);
-    PCP_COPY_VECTOR(origin, &work->head.origin);
+    SDF_VU0_COPYVECTOR(origin, &work->head.origin);
     captureDistance = work->head.captureDistance;
     pathJitter = work->head.pathJitter;
     pathStep = work->head.pathStep;
     pathAcceleration = work->head.pathAcceleration;
-    PCP_COPY_VECTOR(target, &work->head.target);
+    SDF_VU0_COPYVECTOR(target, &work->head.target);
     for (i = 0; i < count; i++, particle++, slot++) {
         age = particle->age;
         if (age == 0) {
@@ -535,7 +535,7 @@ void effMagaSmokeConvDraw(EffMagatuhiWideFirst *work) {
         }
         if (age > 0 && age <= life) {
             if (slot->step == 0.0f) {
-                PCP_COPY_VECTOR(basePosition, particle->position);
+                SDF_VU0_COPYVECTOR(basePosition, particle->position);
                 radial = particle->scale * sdfSin(particle->angle);
                 particle->driftState[1] += particle->liftStep;
                 point[0] = origin[0] + particle->position[0] + particle->driftState[0] * radial;
@@ -546,18 +546,18 @@ void effMagaSmokeConvDraw(EffMagatuhiWideFirst *work) {
                 VU0_LOAD_VF(vf10, target);
                 VU0_LOAD_VF(vf11, point);
                 VU0_SUB(vf10, vf10, vf11);
-                VU0_LENGTH_VF10(distance);
+                SDF_VU0_GETLENGTH(distance);
                 if (distance <= captureDistance) {
-                    VU0_NORMALIZE_VF10();
+                    SDF_VU0_NORMALIZE();
                     VU0_STORE_VF(vf10, towardTarget);
                     VU0_LOAD_VF(vf11, viewDirection);
                     VU0_CROSS_XYZ(vf10, vf10, vf11);
-                    VU0_NORMALIZE_VF10();
+                    SDF_VU0_NORMALIZE();
                     VU0_STORE_VF(vf10, sideAxis);
                     VU0_LOAD_VF(vf10, point);
                     VU0_LOAD_VF(vf11, basePosition);
                     VU0_SUB(vf10, vf10, vf11);
-                    VU0_NORMALIZE_VF10();
+                    SDF_VU0_NORMALIZE();
                     VU0_STORE_VF(vf10, startTangent);
                     slot->controlPoints[0][0] = point[0];
                     slot->controlPoints[0][1] = point[1];
@@ -678,7 +678,7 @@ void effMagaPoint4PartInit(EffMagatuhiWideSecond *work, s32 index) {
     VU0_SUB(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, viewDirection);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_LOAD_VF(vf11, scale);
     VU0_MUL(vf10, vf10, vf11);
     VU0_ADD(vf10, vf10, vf12);
@@ -697,7 +697,7 @@ void effMagaPoint4PartInit(EffMagatuhiWideSecond *work, s32 index) {
     VU0_SUB(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, viewDirection);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_LOAD_VF(vf11, scale);
     VU0_MUL(vf10, vf10, vf11);
     VU0_ADD(vf10, vf10, vf12);
@@ -716,7 +716,7 @@ void effMagaPoint4PartInit(EffMagatuhiWideSecond *work, s32 index) {
     VU0_SUB(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, viewDirection);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, lastNormal);
     VU0_LOAD_VF(vf11, scale);
     VU0_MUL(vf10, vf10, vf11);
@@ -1024,7 +1024,7 @@ void effMagaCylinderDraw(EffMagatuhiRingWork *work) {
 
 /* Copy the ring origin as one quadword, including its fourth component. */
 void effMagaCylinderSetPosition(EffMagatuhiRingWork *work, void *origin) {
-    PCP_COPY_VECTOR(work->head.origin, origin);
+    SDF_VU0_COPYVECTOR(work->head.origin, origin);
 }
 
 /* The historical symbol names a resource, but this slot is packed color. */
@@ -1068,7 +1068,7 @@ void effMagaCylinderRandomize(EffMagatuhiCallback *callback) {
             maxSteps = work->head.maxSteps;
             frames = work->head.lifetimeFrames;
             particle = work->particles;
-            PCP_COPY_VECTOR(origin, work->head.origin);
+            SDF_VU0_COPYVECTOR(origin, work->head.origin);
             VU0_LOAD_MATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaCylinderPartInit(work, i);
@@ -1233,7 +1233,7 @@ void effMagaSpiralDraw(EffMagatuhiOrbitWork *work) {
 
 /* Copy the orbit origin as one quadword, preserving the source w. */
 void effMagaSpiralSetPosition(EffMagatuhiOrbitWork *work, void *origin) {
-    PCP_COPY_VECTOR(work->head.origin, origin);
+    SDF_VU0_COPYVECTOR(work->head.origin, origin);
 }
 
 /* This callback sets the packed orbit color, not an allocation handle. */
@@ -1278,7 +1278,7 @@ void effMagaSpiralRandomize(EffMagatuhiCallback *callback) {
             maxSteps = work->head.maxSteps;
             frames = work->head.lifetimeFrames;
             particle = work->particles;
-            PCP_COPY_VECTOR(origin, work->head.origin);
+            SDF_VU0_COPYVECTOR(origin, work->head.origin);
             VU0_LOAD_MATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaSpiralPartInit(work, i);
@@ -1380,7 +1380,7 @@ void effMagaSmokePartInit(EffMagatuhiDriftWork *work, s32 index) {
     random = dds3GetRandFloatA(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     direction[2] = random + random;
     VU0_LOAD_VF_FROM(vf10, *(u128 *)direction);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF_TO_MEMORY(vf10, *(u128 *)direction);
     particle->position[0] = radius * direction[0];
     particle->position[1] = 0.0f;
@@ -1391,7 +1391,7 @@ void effMagaSmokePartInit(EffMagatuhiDriftWork *work, s32 index) {
     random = dds3GetRandFloatA(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     particle->driftState[2] = random + random;
     VU0_LOAD_VF(vf10, particle->driftState);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, particle->driftState);
     particle->scale = work->head.initialScale *
         (dds3GetRandFloatA(effDefaultRandomState) * work->head.initialScaleRandomness +
@@ -1476,7 +1476,7 @@ void effMagaSmokeDraw(EffMagatuhiDriftWork *work) {
 
 /* Copy the drift origin as one quadword, preserving the source w. */
 void effMagaSmokeSetPosition(EffMagatuhiDriftWork *work, void *origin) {
-    PCP_COPY_VECTOR(work->head.origin, origin);
+    SDF_VU0_COPYVECTOR(work->head.origin, origin);
 }
 
 /* This callback sets packed drift color; +0x120 is not an owner pointer. */
@@ -1519,7 +1519,7 @@ void effMagaSmokeRandomize(EffMagatuhiCallback *callback) {
             maxSteps = work->head.maxSteps;
             frames = work->head.lifetimeFrames;
             particle = work->particles;
-            PCP_COPY_VECTOR(origin, work->head.origin);
+            SDF_VU0_COPYVECTOR(origin, work->head.origin);
             VU0_LOAD_MATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaSmokePartInit(work, i);

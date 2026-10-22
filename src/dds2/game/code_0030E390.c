@@ -440,10 +440,10 @@ void egl3Dto2D(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z) {
     point[3] = 1.0f;
     VU0_LOAD_MATRIX(sdfViewMatrix);
     sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
-    VU0_MOVE_MATRIX_TO_B();
+    SDF_VU0_COPYMATRIX_A_TO_B();
     VU0_LOAD_VF(vf10, point);
     VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
+    SDF_VU0_PERSVECTOR();
     VU0_LOAD_VF(vf11, D_0037F650);
     VU0_MUL(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, D_0037F660);

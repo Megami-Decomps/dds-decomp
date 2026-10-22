@@ -1358,7 +1358,7 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
             VU0_LOAD_VF(vf10, vertices[0]);
             VU0_LOAD_VF(vf11, vertices[1]);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_MOVE_VF(vf11, vf10);
             VU0_SET_ONES_XYZ(vf10);
             VU0_SCALAR_OP_R3(step, "vmulx.xyzw vf10, vf10, vf2x");
