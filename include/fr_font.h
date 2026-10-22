@@ -178,16 +178,9 @@ struct FrFontGlyph *itfCreateMeasuredTextGlyph(s32 x, s32 y, s32 depth, s32 colo
 void frFontBindResourceSections(u8 slotIndex, u8 *resourceBytes,
     struct SdfMemBlock *allocation);
 
-#ifdef VERSION_DDS1
-void func_00193D70(s32 x, s32 y, s32 width, s32 halfHeight, u8 style,
-    u32 color, u32 depth, s32 enabled, const FrFontUvRect *uv,
-    const FrFontAtlas *atlas, s32 drawFlags);
-#endif
-#ifdef VERSION_DDS2
-void func_0019BA00(s32 x, s32 y, s32 width, s32 halfHeight, u8 style,
-    u32 color, u32 depth, s32 enabled, const FrFontUvRect *uv,
-    const FrFontAtlas *atlas, s32 drawFlags);
-#endif
+void frFontDrawAtlasGlyph(s32 x, s32 y, s32 width, s32 height, u8 style,
+    u32 color, u32 depth, s32 filtered, const FrFontUvRect *uv,
+    const FrFontAtlas *atlas, s32 surface);
 
 typedef char FntNodeSizeCheck[sizeof(FntNode) == 0x20 ? 1 : -1];
 typedef char FntListSizeCheck[sizeof(FntList) == 0x20 ? 1 : -1];
