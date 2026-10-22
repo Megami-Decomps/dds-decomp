@@ -5,6 +5,7 @@
 
 struct sdfMemHandle_t;
 struct sdfTexHandle_t;
+struct FileRequest;
 
 /* BE resource files have a 0x20-byte header and fixed 0x20-byte records. */
 typedef struct EvtPackEntry {
@@ -30,7 +31,7 @@ typedef struct EvtPackHeader {
 typedef struct EvtPackLoadState {
     s32 eventId;                  /* 0x00 */
     s32 loaded;                   /* 0x04 */
-    void *pendingRequest;         /* 0x08: queued callback work, then cleanup */
+    struct FileRequest *pendingRequest; /* 0x08: queued event-script request, then cleanup */
     struct sdfMemHandle_t *resourceAllocation; /* 0x0C: retained descriptor */
     u8 *data;                     /* 0x10 */
     EvtPackHeader *header;        /* 0x14 */

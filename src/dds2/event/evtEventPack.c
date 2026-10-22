@@ -243,7 +243,7 @@ void evtCheckEventScriptLoaded(EvtPackLoadState *state) {
 
     if (state->pendingRequest != NULL) {
         if (pacFileCheckEnd(state->pendingRequest) != 0) {
-            state->resourceAllocation = fileGetMemHandle((struct FileRequest *)state->pendingRequest);
+            state->resourceAllocation = fileGetMemHandle(state->pendingRequest);
             fileHandleFree(state->pendingRequest);
             state->pendingRequest = NULL;
             header = (EvtPackHeader *)sdfMemLock(state->resourceAllocation);
