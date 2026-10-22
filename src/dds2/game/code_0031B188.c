@@ -66,7 +66,7 @@ void mnuDeactivateModelNode(MnuModelNode *node);
 extern u8 D_0040ABD0[];
 extern u8 D_0040ABC0[];
 extern u8 D_0040ABB0[];
-extern s32 D_00438944;
+extern dds3Basic_t *D_00438944;
 struct dds3Basic_t;
 extern void dds3CameraObjectBasicGetCameraTM(struct dds3Basic_t *camera, u128 *worldEye);
 
@@ -76,11 +76,11 @@ void CalcCamera(void) {
     CameraData *cameraData;
     dds3Basic_t *camera;
 
-    dds3CameraObjectBasicGetCameraTM((dds3Basic_t *)D_00438944, (u128 *)D_0040ABD0);
-    dds3SetPosPoseSet((dds3Basic_t *)D_00438944, (u128 *)D_0040ABC0);
-    camera = (dds3Basic_t *)D_00438944;
+    dds3CameraObjectBasicGetCameraTM(D_00438944, (u128 *)D_0040ABD0);
+    dds3SetPosPoseSet(D_00438944, (u128 *)D_0040ABC0);
+    camera = D_00438944;
     camera->ops->update(camera);
-    cameraData = (CameraData *)((dds3Basic_t *)D_00438944)->data;
+    cameraData = (CameraData *)D_00438944->data;
     PCP_COPY_VECTOR(&cameraData->localUp, D_0040ABB0);
     PCP_COPY_VECTOR(&cameraData->worldUp, D_0040ABB0);
 }
@@ -777,4 +777,3 @@ void mnuSetModelNodeBroadcastAlpha(void) {
 INCLUDE_RODATA(const s32, "game/code_0031B188", D_0042DAE8);
 
 INCLUDE_SDATA(const s32, "game/code_0031B188", D_00438950);
-
