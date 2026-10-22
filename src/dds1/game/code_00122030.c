@@ -2023,7 +2023,7 @@ extern s32 fldUpdateTravelAndEncounters(void);
 extern void fldUpdateSelectedValueTransition(void);
 
 
-extern void func_0013B1D8(EffWorldNode *);
+extern void fldUpdateRoomTriggers(EffWorldNode *);
 
 extern void func_001415F8(void);
 
@@ -2183,7 +2183,7 @@ s32 fldProcSequence(KwlnTask *task) {
         D_003BAD58 = 1;
         if (fldTestSceneControlFlags(0x40) != 0 && fldRestartSceneResourceTask() != 0) return 0;
         if (fldTestSceneControlFlags(0x40) != 0 && fldAreaState.titleFade != 0) {
-            func_0013B1D8((EffWorldNode *)fldPlayerObject);
+            fldUpdateRoomTriggers((EffWorldNode *)fldPlayerObject);
             break;
         }
         fldFinishDeferredExit();
@@ -2207,7 +2207,7 @@ s32 fldProcSequence(KwlnTask *task) {
             break;
         }
         fldUpdateCameraFrame();
-        if (fldTestSceneControlFlags(0x40) != 0) func_0013B1D8((EffWorldNode *)fldPlayerObject);
+        if (fldTestSceneControlFlags(0x40) != 0) fldUpdateRoomTriggers((EffWorldNode *)fldPlayerObject);
         break;
     case 5:
         dds3SetWorldObjectDrawEnabled(dds3GetWorldObject(), 0);

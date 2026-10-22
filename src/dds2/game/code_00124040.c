@@ -175,7 +175,7 @@ extern void fldUpdateSwayOffset(void);
 
 extern void fldUpdateSelectedValueTransition(void);
 
-extern void func_0013DDC0(EffWorldNode *);
+extern void fldUpdateRoomTriggers(EffWorldNode *);
 
 extern void fldUpdateObjectSlotActivation(void);
 
@@ -2311,7 +2311,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
         D_004360E8 = 1;
         if (fldTestSceneControlFlags(0x40) != 0 && fldRestartSceneResourceTask() != 0) return 0;
         if (fldTestSceneControlFlags(0x40) != 0 && fldAreaState.titleFade != 0) {
-            func_0013DDC0((EffWorldNode *)fldPlayerObject);
+            fldUpdateRoomTriggers((EffWorldNode *)fldPlayerObject);
             break;
         }
         fldFinishDeferredExit();
@@ -2338,7 +2338,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
             break;
         }
         fldUpdateCameraFrame();
-        if (fldTestSceneControlFlags(0x40) != 0) func_0013DDC0((EffWorldNode *)fldPlayerObject);
+        if (fldTestSceneControlFlags(0x40) != 0) fldUpdateRoomTriggers((EffWorldNode *)fldPlayerObject);
         break;
     case 5:
         dds3SetWorldObjectDrawEnabled(dds3GetWorldObject(), 0);

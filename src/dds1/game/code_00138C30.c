@@ -250,7 +250,7 @@ extern u32 D_003BADD8;
 
 extern u32 D_003BAE28;
 
-extern s32 D_003BAE3C;
+extern s32 fldCurrentEventRoom;
 
 extern u32 fldSelectedActorEntryIndex;
 
@@ -264,7 +264,7 @@ extern u32 D_003BACEC;
 
 extern SdfTex *fldMarkerTexture;
 
-extern u32 D_003C92E0[];
+extern u32 fldDisplayValues[];
 
 extern s16 D_003C9518[];
 
@@ -283,7 +283,7 @@ extern s32 fldEncounterRuntimeState;
 
 extern u32 D_003BACFC;
 
-extern u32 D_003308B0[];
+extern u32 fldRoomTaskHandles[];
 
 
 extern s32 fldUpdateTitleBannerTask(KwlnTask *task);
@@ -303,7 +303,7 @@ extern u8 D_003BAC90[];
 
 extern s32 D_003BAE30;
 
-extern s32 D_003BAE1C;
+extern s32 fldTriggeredNpcRoom;
 
 extern s32 fldTaskSlotCount;
 
@@ -317,7 +317,7 @@ extern void fldResetZoneRecordsAndActorSlots();
 
 extern FldWaypointBlock fldActorWaypointRows;
 
-extern FldFileResource *D_003307B0[];
+extern FldFileResource *fldRoomResources[];
 
 extern void fldDrawMarkerQuad(f32 *pos);
 
@@ -361,7 +361,7 @@ extern s32 fldRoomEventPlacementCount;
 
 extern u32 fldRelocateOnRelease;
 
-extern s32 D_003BAE40;
+extern s32 fldEventActorTaskStarted;
 
 extern FldTransferChunk *fldRoomF1Chunk;
 
@@ -555,23 +555,23 @@ extern FldRoomState fldRoomRecords[];
 
 extern void fldResetActorSlots(void);
 
-extern s32 D_003BAE04;
+extern s32 fldActorTaskRoom;
 
-extern s32 D_003BAE08;
+extern s32 fldEventSetRoom;
 
-extern s32 D_003BAE0C;
+extern s32 fldLabelTaskRoom;
 
-extern s32 D_003BAE10;
+extern s32 fldLabelTaskSlot;
 
-extern s32 D_003BAE18;
+extern s32 fldTriggeredRoom;
 
-extern s32 D_003BAE1C;
+extern s32 fldTriggeredNpcRoom;
 
-extern s32 D_003BAE20;
+extern s32 fldTriggeredItemBoxRoom;
 
-extern s32 D_003BAE2C;
+extern s32 fldRoomTriggersHalted;
 
-extern s32 D_003BAE34;
+extern s32 fldActionRowCount;
 
 /* Reset room records and selection sentinels, then apply actor-slot defaults. */
 void fldResetZoneRecordsAndActorSlots(void) {
@@ -580,7 +580,7 @@ void fldResetZoneRecordsAndActorSlots(void) {
 
     fldTaskSlotCount = 0;
     D_003BAE28 = 0;
-    D_003BAE2C = 0;
+    fldRoomTriggersHalted = 0;
     for (roomIndex = 0; roomIndex < FIELD_ROOM_RECORD_COUNT; roomIndex++) {
         for (vectorIndex = 0; vectorIndex < FIELD_ROOM_CORNER_COUNT; vectorIndex++) {
             fldRoomRecords[roomIndex].corner[vectorIndex][0] = 0.0f;
@@ -599,38 +599,38 @@ void fldResetZoneRecordsAndActorSlots(void) {
             fldRoomRecords[roomIndex].plane[vectorIndex][3] = 1.0f;
             fldRoomRecords[roomIndex].limit[vectorIndex] = 0.0f;
         }
-        D_003308B0[roomIndex] = 0;
+        fldRoomTaskHandles[roomIndex] = 0;
         fldRoomRecords[roomIndex].worldObjectKey = 0;
-        fldRoomRecords[roomIndex].unk10C = 0.0f;
-        fldRoomRecords[roomIndex].unk110 = 0.0f;
-        fldRoomRecords[roomIndex].unk114 = 0.0f;
+        fldRoomRecords[roomIndex].sizeX = 0.0f;
+        fldRoomRecords[roomIndex].sizeY = 0.0f;
+        fldRoomRecords[roomIndex].sizeZ = 0.0f;
         fldRoomRecords[roomIndex].unk118 = 0.0f;
         fldRoomRecords[roomIndex].unk11C = 0.0f;
         fldRoomRecords[roomIndex].unk130 = 0;
         fldRoomRecords[roomIndex].roomId = -1;
-        fldRoomRecords[roomIndex].unk134 = -1;
+        fldRoomRecords[roomIndex].mapSlot = -1;
         fldRoomRecords[roomIndex].mode = 0;
         fldRoomRecords[roomIndex].entryIndex = -1;
-        fldRoomRecords[roomIndex].unk120 = -1;
+        fldRoomRecords[roomIndex].savePointValue = -1;
         fldRoomRecords[roomIndex].axisMode = 0;
-        fldRoomRecords[roomIndex].shapeKind = 0;
+        fldRoomRecords[roomIndex].crossingDirection = 0;
     }
-    D_003BAE04 = -1;
-    D_003BAE08 = -1;
-    D_003BAE0C = -1;
-    D_003BAE10 = -1;
-    D_003BAE18 = -1;
-    D_003BAE1C = -1;
-    D_003BAE20 = -1;
-    D_003BAE34 = 0;
+    fldActorTaskRoom = -1;
+    fldEventSetRoom = -1;
+    fldLabelTaskRoom = -1;
+    fldLabelTaskSlot = -1;
+    fldTriggeredRoom = -1;
+    fldTriggeredNpcRoom = -1;
+    fldTriggeredItemBoxRoom = -1;
+    fldActionRowCount = 0;
     fldResetActorSlots();
 }
 
-extern s32 D_003BAE18;
+extern s32 fldTriggeredRoom;
 
-extern s32 D_003BAE20;
+extern s32 fldTriggeredItemBoxRoom;
 
-extern s32 D_003BAE2C;
+extern s32 fldRoomTriggersHalted;
 
 /* Clear slot handles and destroy named tasks reached through linked display values. */
 void fldResetTaskSlots(void) {
@@ -639,19 +639,19 @@ void fldResetTaskSlots(void) {
     void *task;
     FldTaskInfo *taskInfo;
 
-    D_003BAE2C = 1;
+    fldRoomTriggersHalted = 1;
     for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
-        D_003308B0[slotIndex] = 0;
+        fldRoomTaskHandles[slotIndex] = 0;
     }
-    D_003BAE18 = -1;
-    D_003BAE1C = -1;
-    D_003BAE20 = -1;
+    fldTriggeredRoom = -1;
+    fldTriggeredNpcRoom = -1;
+    fldTriggeredItemBoxRoom = -1;
     world = dds3GetWorldSecondaryObject();
     if (world != 0) {
         for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
-            taskInfo = (FldTaskInfo *)D_003307B0[slotIndex]->data;
+            taskInfo = (FldTaskInfo *)fldRoomResources[slotIndex]->data;
             if (taskInfo->slot >= 0) {
-                task = dds3GetWorldObjectPayload((EffWorldNode *)dds3FindWorldObjectNodeByKey(world, *(u32 *)D_003C92E0[taskInfo->slot], 0xD));
+                task = dds3GetWorldObjectPayload((EffWorldNode *)dds3FindWorldObjectNodeByKey(world, *(u32 *)fldDisplayValues[taskInfo->slot], 0xD));
                 if (scrFindNamedProcessNode(task) != 0) {
                     evtDestroyNamedTask(dds3GetWorldObject(), task);
                 }
@@ -664,7 +664,7 @@ void fldResetTaskSlots(void) {
 u32 fldPushDisplayValue(u32 value, EffWorldNode *object) {
     s32 index = D_003BAE28;
 
-    D_003C92E0[index] = value;
+    fldDisplayValues[index] = value;
     D_003BAE28 = index + 1;
     return index;
 }
@@ -686,7 +686,7 @@ s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
     position[3] = 1.0f;
     for (i = 0; i < fldTaskSlotCount; i++) {
         if (fldRoomRecords[i].worldObjectKey == entry->key) {
-            kind = ((FldTaskInfo *)D_003307B0[i]->data)->shape->kind;
+            kind = ((FldTaskInfo *)fldRoomResources[i]->data)->shape->kind;
             switch (kind) {
             case 0:
                 source = entry->data;
@@ -719,7 +719,7 @@ s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
                 }
                 return 1;
             case 1:
-                return fldRoomRecords[i].shapeKind == kind;
+                return fldRoomRecords[i].crossingDirection == kind;
             case 2:
                 VU0_LOAD_VF(vf10, actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
@@ -753,7 +753,7 @@ s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry) {
     position[3] = 1.0f;
     for (i = 0; i < fldTaskSlotCount; i++) {
         if (fldRoomRecords[i].worldObjectKey == entry->key) {
-            kind = ((FldTaskInfo *)D_003307B0[i]->data)->shape->kind;
+            kind = ((FldTaskInfo *)fldRoomResources[i]->data)->shape->kind;
             switch (kind) {
             case 0:
                 source = entry->data;
@@ -781,7 +781,7 @@ s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry) {
                 }
                 return 1;
             case 1:
-                return fldRoomRecords[i].shapeKind == kind;
+                return fldRoomRecords[i].crossingDirection == kind;
             case 2:
                 VU0_LOAD_VF(vf10, actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
@@ -808,7 +808,7 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, EffWorldNode *actor, f32 *posi
     f32 angle;
     u32 kind;
 
-    kind = ((FldTaskInfo *)D_003307B0[roomIndex]->data)->shape->kind;
+    kind = ((FldTaskInfo *)fldRoomResources[roomIndex]->data)->shape->kind;
     switch (kind) {
     case 0:
         VU0_LOAD_VF(vf10, actor->inner->rotation);
@@ -837,7 +837,7 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, EffWorldNode *actor, f32 *posi
         }
         return 1;
     case 1:
-        return fldRoomRecords[roomIndex].shapeKind == kind;
+        return fldRoomRecords[roomIndex].crossingDirection == kind;
     case 2:
         VU0_LOAD_VF(vf10, actor->inner->rotation);
         effMiscQuaternionToMatrixVU();
@@ -897,10 +897,10 @@ s32 fldRoomContainsPoint(f32 *point, s32 room) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00138C30", func_0013AFC8);
+INCLUDE_ASM(const s32, "game/code_00138C30", fldStartRoomEventTask);
 
 s32 fldDestroyFlaggedNamedTask(char *flag, u32 slot) {
-    D_003308B0[slot] = 0;
+    fldRoomTaskHandles[slot] = 0;
     if (scrFindNamedProcessNode(flag) != 0) {
         evtDestroyNamedTask(dds3GetWorldObject(), flag);
         return 0;
@@ -909,7 +909,7 @@ s32 fldDestroyFlaggedNamedTask(char *flag, u32 slot) {
 }
 
 u32 fldDestroyTaskSlot(u32 slot) {
-    u32 *task = &D_003308B0[slot];
+    u32 *task = &fldRoomTaskHandles[slot];
 
     if (dds3ExistProcess((KwlnTask *)*task) != 0) {
         dds3KillProcess((KwlnTask *)*task, 0);
@@ -936,13 +936,13 @@ s32 fldRestartSceneResourceTask(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00138C30", func_0013B1D8);
+INCLUDE_ASM(const s32, "game/code_00138C30", fldUpdateRoomTriggers);
 
 void fldDrawTaskMarkers(void) {
     s32 count = fldTaskSlotCount;
     s32 i = 0;
     if (count > 0) {
-        FldFileResource **entry = D_003307B0;
+        FldFileResource **entry = fldRoomResources;
         do {
             fldDrawMarkerQuad((*entry)->transform);
             i++;
@@ -956,7 +956,7 @@ void fldClearInactiveTaskSlots(void) {
     s32 count = fldTaskSlotCount;
     s32 slotIndex = 0;
     if (count > 0) {
-        u32 *taskSlot = D_003308B0;
+        u32 *taskSlot = fldRoomTaskHandles;
         do {
             if (dds3ExistProcess((KwlnTask *)*taskSlot) == 0) {
                 *taskSlot = 0;
@@ -971,8 +971,8 @@ void fldClearInactiveTaskSlots(void) {
 s32 fldFindTaskRecordId(u32 task) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
-        if (D_003308B0[slotIndex] == task) {
-            return D_003307B0[slotIndex]->id;
+        if (fldRoomTaskHandles[slotIndex] == task) {
+            return fldRoomResources[slotIndex]->id;
         }
     }
     return -1;
@@ -985,7 +985,7 @@ s32 fldFindRoomByTask(u32 task) {
     s32 slotIndex;
 
     for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
-        if (D_003308B0[slotIndex] == task) {
+        if (fldRoomTaskHandles[slotIndex] == task) {
             return fldRoomRecords[slotIndex].roomId;
         }
     }
@@ -996,42 +996,42 @@ s32 fldFindRoomByTask(u32 task) {
 const char *fldGetTaskRecordValue(u32 task) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
-        if (D_003308B0[slotIndex] == task) {
-            return D_003307B0[slotIndex]->name;
+        if (fldRoomTaskHandles[slotIndex] == task) {
+            return fldRoomResources[slotIndex]->name;
         }
     }
     return 0;
 }
 
-extern FldActionRow D_003309B0[];
+extern FldActionRow fldActionRows[];
 
 extern char D_00330760[];
 
-extern char D_00330770[];
+extern char fldHitProgramName[];
 
 extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
 
 extern char D_00330780[];
 
 void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 radius) {
-    s32 index = D_003BAE34;
+    s32 index = fldActionRowCount;
     FldActionTransform *transform;
     s32 worldKey = dds3AdvanceWorldCounter();
     EffWorldNode *object;
     s32 taskIndex;
 
     object = evtSpawnActionObjD(worldKey, D_00330780, (s32)D_00330760);
-    D_003309B0[index].displayResource.id = worldKey;
+    fldActionRows[index].displayResource.id = worldKey;
     taskIndex = fldPushDisplayValue(
-        (u32)&D_003309B0[index].displayResource, object);
-    D_003309B0[index].prefix.task.shape.radius = radius;
-    D_003309B0[index].prefix.task.shape.kind = 0;
-    D_003309B0[index].prefix.task.info.unk0 = 1;
-    D_003309B0[index].prefix.task.info.slot = taskIndex;
-    D_003309B0[index].prefix.task.info.unk08 = 1;
-    D_003309B0[index].prefix.task.info.shape = (FldTriggerShape *)&D_003309B0[index].prefix.task.shape;
-    D_003309B0[index].childResource.data = &D_003309B0[index].prefix.task.info;
-    transform = &D_003309B0[index].transform;
+        (u32)&fldActionRows[index].displayResource, object);
+    fldActionRows[index].prefix.task.shape.radius = radius;
+    fldActionRows[index].prefix.task.shape.kind = 0;
+    fldActionRows[index].prefix.task.info.unk0 = 1;
+    fldActionRows[index].prefix.task.info.slot = taskIndex;
+    fldActionRows[index].prefix.task.info.unk08 = 1;
+    fldActionRows[index].prefix.task.info.shape = (FldTriggerShape *)&fldActionRows[index].prefix.task.shape;
+    fldActionRows[index].childResource.data = &fldActionRows[index].prefix.task.info;
+    transform = &fldActionRows[index].transform;
     transform->position[3] = 1.0f;
     transform->scale[0] = 1.0f;
     transform->scale[1] = 1.0f;
@@ -1040,24 +1040,24 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 radius) {
     transform->position[0] = x;
     transform->position[1] = y;
     transform->position[2] = z;
-    D_003309B0[index].childResource.transform = transform->position;
+    fldActionRows[index].childResource.transform = transform->position;
     transform->rotation[1] = 0.0f;
     transform->rotation[2] = 0.0f;
     transform->rotation[3] = 0.0f;
     transform->rotation[0] = 0.0f;
-    D_003309B0[index].childResource.id = dds3AdvanceWorldCounter();
-    D_003309B0[index].childResource.name = (const char *)D_00330760;
-    object = evtSpawnActionObj11(D_003309B0[index].childResource.id,
-                                 (EvtWorldSourceTransformPrefix *)D_003309B0[index].childResource.transform,
-                                 D_00330770);
-    taskIndex = fldRegisterRoomObject(&D_003309B0[index].childResource, object);
+    fldActionRows[index].childResource.id = dds3AdvanceWorldCounter();
+    fldActionRows[index].childResource.name = (const char *)D_00330760;
+    object = evtSpawnActionObj11(fldActionRows[index].childResource.id,
+                                 (EvtWorldSourceTransformPrefix *)fldActionRows[index].childResource.transform,
+                                 fldHitProgramName);
+    taskIndex = fldRegisterRoomObject(&fldActionRows[index].childResource, object);
     fldRoomRecords[taskIndex].roomId = roomId;
     fldRoomRecords[taskIndex].mode = 2;
-    D_003BAE34++;
+    fldActionRowCount++;
     fldRoomRecords[taskIndex].entryIndex = -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00138C30", func_0013C138);
+INCLUDE_ASM(const s32, "game/code_00138C30", fldSpawnNpcTrigger);
 
 extern char D_00330790[];
 
@@ -1065,7 +1065,7 @@ extern char D_003307A0[];
 
 void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
                                 f32 x, f32 y, f32 z, f32 radius) {
-    s32 index = D_003BAE34;
+    s32 index = fldActionRowCount;
     FldActionTransform *transform;
     s32 worldKey = dds3AdvanceWorldCounter();
     EffWorldNode *object;
@@ -1076,17 +1076,17 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
     } else {
         object = evtSpawnActionObjD(worldKey, D_00330790, (s32)D_00330760);
     }
-    D_003309B0[index].displayResource.id = worldKey;
+    fldActionRows[index].displayResource.id = worldKey;
     taskIndex = fldPushDisplayValue(
-        (u32)&D_003309B0[index].displayResource, object);
-    D_003309B0[index].prefix.task.shape.radius = radius;
-    D_003309B0[index].prefix.task.shape.kind = 0;
-    D_003309B0[index].prefix.task.info.unk0 = 1;
-    D_003309B0[index].prefix.task.info.slot = taskIndex;
-    D_003309B0[index].prefix.task.info.unk08 = 1;
-    D_003309B0[index].prefix.task.info.shape = (FldTriggerShape *)&D_003309B0[index].prefix.task.shape;
-    D_003309B0[index].childResource.data = &D_003309B0[index].prefix.task.info;
-    transform = &D_003309B0[index].transform;
+        (u32)&fldActionRows[index].displayResource, object);
+    fldActionRows[index].prefix.task.shape.radius = radius;
+    fldActionRows[index].prefix.task.shape.kind = 0;
+    fldActionRows[index].prefix.task.info.unk0 = 1;
+    fldActionRows[index].prefix.task.info.slot = taskIndex;
+    fldActionRows[index].prefix.task.info.unk08 = 1;
+    fldActionRows[index].prefix.task.info.shape = (FldTriggerShape *)&fldActionRows[index].prefix.task.shape;
+    fldActionRows[index].childResource.data = &fldActionRows[index].prefix.task.info;
+    transform = &fldActionRows[index].transform;
     transform->position[3] = 1.0f;
     transform->scale[0] = 1.0f;
     transform->scale[1] = 1.0f;
@@ -1095,29 +1095,29 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
     transform->position[0] = x;
     transform->position[1] = y;
     transform->position[2] = z;
-    D_003309B0[index].childResource.transform = transform->position;
+    fldActionRows[index].childResource.transform = transform->position;
     transform->rotation[1] = 0.0f;
     transform->rotation[2] = 0.0f;
     transform->rotation[3] = 0.0f;
     transform->rotation[0] = 0.0f;
-    D_003309B0[index].childResource.id = dds3AdvanceWorldCounter();
-    D_003309B0[index].childResource.name = (const char *)D_00330760;
-    object = evtSpawnActionObj11(D_003309B0[index].childResource.id,
-                                 (EvtWorldSourceTransformPrefix *)D_003309B0[index].childResource.transform,
-                                 D_00330770);
-    taskIndex = fldRegisterRoomObject(&D_003309B0[index].childResource, object);
+    fldActionRows[index].childResource.id = dds3AdvanceWorldCounter();
+    fldActionRows[index].childResource.name = (const char *)D_00330760;
+    object = evtSpawnActionObj11(fldActionRows[index].childResource.id,
+                                 (EvtWorldSourceTransformPrefix *)fldActionRows[index].childResource.transform,
+                                 fldHitProgramName);
+    taskIndex = fldRegisterRoomObject(&fldActionRows[index].childResource, object);
     if (kind == 0) {
         fldRoomRecords[taskIndex].mode = 3;
-        fldRoomRecords[taskIndex].unk120 = roomValue;
+        fldRoomRecords[taskIndex].savePointValue = roomValue;
     } else {
         fldRoomRecords[taskIndex].mode = 4;
     }
-    D_003BAE34++;
+    fldActionRowCount++;
     fldRoomRecords[taskIndex].entryIndex = -1;
 }
 
 s32 fldCheckEntryActive(s32 entry) {
-    s32 entryIdx = D_003BAE1C;
+    s32 entryIdx = fldTriggeredNpcRoom;
     s16 *slot;
 
     if (D_003BAE30 != 0) {
@@ -1137,7 +1137,7 @@ s32 fldCheckEntryActive(s32 entry) {
 s32 fldHasActiveTasks(void) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
-        if (D_003308B0[slotIndex] != 0) {
+        if (fldRoomTaskHandles[slotIndex] != 0) {
             return 1;
         }
     }
@@ -1145,7 +1145,7 @@ s32 fldHasActiveTasks(void) {
 }
 
 s32 fldGetCurrentSceneSelectionId(void) {
-    s32 slot = D_003BAE3C;
+    s32 slot = fldCurrentEventRoom;
 
     if (slot < 0) {
         return -1;
@@ -1272,7 +1272,7 @@ s32 fldResolveEventSelectorTarget(s32 selector) {
     case 0:
         return 0;
     case 100:
-        fldResolveEventSetByNameEitherKindArea(D_003307B0[D_003BAE3C]->name);
+        fldResolveEventSetByNameEitherKindArea(fldRoomResources[fldCurrentEventRoom]->name);
         switch ((s8)D_00332E30.sets[D_003BAE38].eventHit) {
         case 0: return 199;
         case 4: return 104;
@@ -1280,7 +1280,7 @@ s32 fldResolveEventSelectorTarget(s32 selector) {
         case 6: return 106;
         case 7: return 107;
         }
-        fldFindActorEntryByName(D_003307B0[D_003BAE3C]->name);
+        fldFindActorEntryByName(fldRoomResources[fldCurrentEventRoom]->name);
         switch (D_003BAE68) {
         case 0:
         case 1:
@@ -1495,7 +1495,7 @@ void fldCopyInfoTable(const void *source) {
     memcpy(&D_00332E30, source, sizeof(D_00332E30));
 }
 
-extern s32 D_003BAE40;
+extern s32 fldEventActorTaskStarted;
 
 extern u8 *fldFindActorEntryByName(const char *);
 
@@ -1503,13 +1503,13 @@ void fldStartSelectedActorTask(void) {
     s32 slot;
     char *actor;
 
-    D_003BAE40 = 1;
-    slot = D_003BAE3C;
-    actor = (char *)fldFindActorEntryByName(D_003307B0[slot]->name);
+    fldEventActorTaskStarted = 1;
+    slot = fldCurrentEventRoom;
+    actor = (char *)fldFindActorEntryByName(fldRoomResources[slot]->name);
     if (scrFindNamedProcessNode(actor) != NULL) {
         return;
     }
-    D_003308B0[slot] = evtStartSceneResourceTask(dds3GetWorldObject(), actor);
+    fldRoomTaskHandles[slot] = evtStartSceneResourceTask(dds3GetWorldObject(), actor);
 }
 
 extern u8 D_003369B0[];
@@ -1530,7 +1530,7 @@ extern u8 D_00336A40[];
 
 extern u8 D_00336A50[];
 
-extern s32 D_003BAE6C;
+extern s32 fldPickedActorTemplateKind;
 
 static inline FldActorEntry *fldGetActorRows(void) {
     return fldActorWaypointRows.actors;
@@ -1566,39 +1566,39 @@ u8 *fldPickActorTemplateByName(const char *name) {
                     sub = entry->variant;
                     if (sub != 0) {
                         if (sub == 1) {
-                            D_003BAE6C = 6;
+                            fldPickedActorTemplateKind = 6;
                             return D_00336A10;
                         }
                     }
                 }
-                D_003BAE6C = 0;
+                fldPickedActorTemplateKind = 0;
                 return D_003369B0;
             case 2:
-                D_003BAE6C = 1;
+                fldPickedActorTemplateKind = 1;
                 return D_003369C0;
             case 3:
-                D_003BAE6C = 2;
+                fldPickedActorTemplateKind = 2;
                 return D_003369D0;
             case 4:
-                D_003BAE6C = 3;
+                fldPickedActorTemplateKind = 3;
                 return D_003369E0;
             case 5:
-                D_003BAE6C = 5;
+                fldPickedActorTemplateKind = 5;
                 return D_00336A00;
             case 10:
-                D_003BAE6C = 8;
+                fldPickedActorTemplateKind = 8;
                 return D_00336A30;
             case 11:
-                D_003BAE6C = 9;
+                fldPickedActorTemplateKind = 9;
                 return D_00336A40;
             case 12:
-                D_003BAE6C = 10;
+                fldPickedActorTemplateKind = 10;
                 return D_00336A50;
             }
         }
         i++;
     } while (i < 0x100);
-    D_003BAE6C = -1;
+    fldPickedActorTemplateKind = -1;
     return 0;
 }
 
@@ -2013,7 +2013,7 @@ void fldApplyCurrentTaskScene(const char *name) {
 }
 
 extern s32 D_003BAE58;
-extern s32 D_003BAE24;
+extern s32 fldTriggeredSavePointValue;
 extern char D_003A0270[], D_003A0280[];
 extern void dds3WorkClear(void);
 extern void fldReleaseCurrentBgm(void);
@@ -2058,10 +2058,10 @@ void fldDispatchSceneAction(u32 action) {
         fldSetDeferredFieldCommand(0, 0);
         D_003BAE54 = fldAreaState.area;
         preview[0] = 1;
-        preview[1] = D_003BAE24;
+        preview[1] = fldTriggeredSavePointValue;
         D_003BAE58 = fldAreaState.floor + 1;
         D_003BAE5C = 4;
-        D_003BAE60 = D_003BAE24;
+        D_003BAE60 = fldTriggeredSavePointValue;
         datGameState->vr.previewX = preview[0];
         datGameState->vr.previewY = preview[1];
         dds3AdminSubmitModeRequest(0x15, preview, 8, 0);
@@ -2752,9 +2752,9 @@ void fldInitializeActorMotionSlots(void) {
         if (actor->kind == 2) {
             if (actor->floor == D_0032E3C4[0] + 1) {
                 for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
-                    if (D_003307B0[slotIndex]->name != NULL &&
-                        strcmp(D_003307B0[slotIndex]->name, actor->name) == 0) {
-                        FldFileResource *resource = D_003307B0[slotIndex];
+                    if (fldRoomResources[slotIndex]->name != NULL &&
+                        strcmp(fldRoomResources[slotIndex]->name, actor->name) == 0) {
+                        FldFileResource *resource = fldRoomResources[slotIndex];
                         const f32 *transform = resource->transform;
                         row->actorId = resource->id;
                         rotation[0] = transform[4];
@@ -2791,9 +2791,9 @@ void fldInitializeActorMotionSlots(void) {
                 if (node != NULL) {
                     row->firstKey = node->key;
                     for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
-                        if (D_003307B0[slotIndex]->name != NULL &&
-                            strcmp(D_003307B0[slotIndex]->name, actor->name) == 0) {
-                            FldFileResource *resource = D_003307B0[slotIndex];
+                        if (fldRoomResources[slotIndex]->name != NULL &&
+                            strcmp(fldRoomResources[slotIndex]->name, actor->name) == 0) {
+                            FldFileResource *resource = fldRoomResources[slotIndex];
                             const f32 *transform = resource->transform;
                             row->actorId = resource->id;
                             rotation[0] = transform[4];
@@ -2827,9 +2827,9 @@ void fldInitializeActorMotionSlots(void) {
                 if (node != NULL) {
                     row->secondKey = node->key;
                     for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
-                        if (D_003307B0[slotIndex]->name != NULL &&
-                            strcmp(D_003307B0[slotIndex]->name, actor->name) == 0) {
-                            FldFileResource *resource = D_003307B0[slotIndex];
+                        if (fldRoomResources[slotIndex]->name != NULL &&
+                            strcmp(fldRoomResources[slotIndex]->name, actor->name) == 0) {
+                            FldFileResource *resource = fldRoomResources[slotIndex];
                             const f32 *transform = resource->transform;
                             row->actorId = resource->id;
                             rotation[0] = transform[4];
@@ -3328,37 +3328,37 @@ s32 fldInitializeTitleBannerTask(KwlnTask *task) {
     return (s32)fldUpdateTitleBannerTask;
 }
 
-INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE04);
+INCLUDE_SDATA(const s32, "game/code_00138C30", fldActorTaskRoom);
 
-INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE08);
+INCLUDE_SDATA(const s32, "game/code_00138C30", fldEventSetRoom);
 
-INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE0C);
+INCLUDE_SDATA(const s32, "game/code_00138C30", fldLabelTaskRoom);
 
-INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE10);
+INCLUDE_SDATA(const s32, "game/code_00138C30", fldLabelTaskSlot);
 
 INCLUDE_SDATA(const s32, "game/code_00138C30", fldTaskSlotCount);
 
-INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE18);
+INCLUDE_SDATA(const s32, "game/code_00138C30", fldTriggeredRoom);
 
-INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE1C);
+INCLUDE_SDATA(const s32, "game/code_00138C30", fldTriggeredNpcRoom);
 
-INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE20);
+INCLUDE_SDATA(const s32, "game/code_00138C30", fldTriggeredItemBoxRoom);
 
-INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE24);
+INCLUDE_SDATA(const s32, "game/code_00138C30", fldTriggeredSavePointValue);
 
 INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE28);
 
-INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE2C);
+INCLUDE_SDATA(const s32, "game/code_00138C30", fldRoomTriggersHalted);
 
 INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE30);
 
-INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE34);
+INCLUDE_SDATA(const s32, "game/code_00138C30", fldActionRowCount);
 
 INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE38);
 
-INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE3C);
+INCLUDE_SDATA(const s32, "game/code_00138C30", fldCurrentEventRoom);
 
-INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE40);
+INCLUDE_SDATA(const s32, "game/code_00138C30", fldEventActorTaskStarted);
 
 INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE44);
 
@@ -3380,7 +3380,7 @@ INCLUDE_SDATA(const s32, "game/code_00138C30", fldSelectedActorEntryIndex);
 
 INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE68);
 
-INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE6C);
+INCLUDE_SDATA(const s32, "game/code_00138C30", fldPickedActorTemplateKind);
 
 INCLUDE_SDATA(const s32, "game/code_00138C30", fldFieldTaskHandle);
 
