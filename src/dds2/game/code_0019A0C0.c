@@ -657,7 +657,7 @@ extern s32 fmGslReleaseActiveResourceBuffers(void);
 
 /* Build the glyph atlas once: COLUMNS x ROWS cells in a circular node list, each with its
  * UV rectangle in 1/16-texel units and an optional RECORDBYTES-sized per-cell record. */
-s32 frFontInitializeGlyphAtlas(s32 unused, s32 columns, s32 rows, s32 cellWidth, s32 cellHeight,
+s32 frFontInitializeGlyphAtlas(u32 unused, s32 columns, s32 rows, s32 cellWidth, s32 cellHeight,
                                s32 recordBytes) {
     u8 *records = NULL;
     FntNode *node;
