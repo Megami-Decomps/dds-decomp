@@ -3488,11 +3488,148 @@ void fldInitializeHuntSparkUnit(EvtUnit *unit) {
     evtInitializeUnitColorTransition(unit, 0, colorA, colorB);
 }
 
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413AE8);
+/* Area/floor/name rules select an NPC model, animation and LOD. */
+typedef struct FldNpcPlacementRule {
+    s16 area, floor;
+    char name[16];
+    s8 kind;
+    u8 resource;
+    s8 lod, motion;
+    s16 alternateFlag;
+    u8 alternateResource;
+    s8 alternateLod, alternateMotion, behavior;
+    s16 requiredFlagA, requiredFlagB, requiredFlagC;
+} FldNpcPlacementRule;
+typedef char FldNpcPlacementRule_size_check[
+    (sizeof(FldNpcPlacementRule) == 0x24) ? 1 : -1];
 
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413AF8);
+extern FldNpcPlacementRule D_003A55F0[400];
+extern u32 sdfGetLodChunkValue(SdfModel *model);
+extern void fldHitProgramAdd(s32 room, f32 x, f32 y, f32 z, f32 radius, f32 height);
+extern void func_0013ED20(f32 x, f32 y, f32 z, f32 height, char *name, s32 arg1, s32 room, s32 index);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014C2B8);
+void func_0014C2B8(s32 key, f32 *orientation, s32 room, char *name, s32 argument,
+                   f32 x, f32 y, f32 z) {
+    f32 position[4];
+    f32 rotation[4];
+    s32 outputIndex;
+    s32 kind, resource, motion, lod, visible;
+    s32 behavior = 0;
+    s32 i;
+    f32 radius, height, hitHeight, size;
+    EffWorldNode *object;
+    MdlCtx *model;
+    SdfModel *inner;
+
+    memset(position, 0, sizeof(position));
+    position[3] = 1.0f;
+    memset(rotation, 0, sizeof(rotation));
+    {
+        f32 scale[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+        f32 axis[4] = {0.0f, 1.0f, 0.0f, 1.0f};
+        kind = 3;
+        resource = 9;
+        motion = 0;
+        lod = 0;
+        visible = 0;
+        outputIndex = fldRoomEffectEntryCount;
+        fldRoomEffectEntries[outputIndex].x = x;
+        fldRoomEffectEntries[outputIndex].y = y;
+        fldRoomEffectEntries[outputIndex].z = z;
+        fldRoomEffectEntries[outputIndex].orientation[0] = orientation[0];
+        fldRoomEffectEntries[outputIndex].orientation[1] = orientation[1];
+        fldRoomEffectEntries[outputIndex].orientation[2] = orientation[2];
+        fldRoomEffectEntries[outputIndex].unk0 = key;
+        fldRoomEffectEntries[outputIndex].orientation[3] = orientation[3];
+        fldRoomEffectEntries[outputIndex].unk2C = 0;
+        fldRoomEffectEntries[outputIndex].unk30 = 0;
+        fldRoomEffectEntries[outputIndex].unk3C = 0;
+        fldRoomEffectEntries[outputIndex].object = NULL;
+        fldRoomEffectEntries[outputIndex].unk34 = 0;
+        fldRoomEffectEntries[outputIndex].room = room;
+        strcpy(fldRoomEffectEntries[outputIndex].name, name);
+        for (i = 0; i < 400; i++) {
+            if (D_003A55F0[i].area == fldAreaState.area &&
+                D_003A55F0[i].floor == fldAreaState.floor + 1 &&
+                strcmp(D_003A55F0[i].name, name) == 0) {
+                if (D_003A55F0[i].requiredFlagA != 0 && !mdlFlagTest(D_003A55F0[i].requiredFlagA)) return;
+                if (D_003A55F0[i].requiredFlagB != 0 && !mdlFlagTest(D_003A55F0[i].requiredFlagB)) return;
+                if (D_003A55F0[i].requiredFlagC != 0 && !mdlFlagTest(D_003A55F0[i].requiredFlagC)) return;
+                kind = D_003A55F0[i].kind;
+                resource = D_003A55F0[i].resource;
+                motion = D_003A55F0[i].motion;
+                lod = D_003A55F0[i].lod;
+                if (D_003A55F0[i].behavior >= 10) visible = 1;
+                else visible = 0;
+                behavior = D_003A55F0[i].behavior % 10;
+                if (D_003A55F0[i].alternateFlag != 0 && mdlFlagTest(D_003A55F0[i].alternateFlag)) {
+                    resource = D_003A55F0[i].alternateResource;
+                    motion = D_003A55F0[i].alternateMotion;
+                    lod = D_003A55F0[i].alternateLod;
+                }
+                break;
+            }
+        }
+        fldRoomEffectEntries[outputIndex].kind = kind;
+        fldRoomEffectEntries[outputIndex].kindId = resource;
+        fldRoomEffectEntries[outputIndex].unk3E = lod;
+        if (behavior == 1) {
+            radius = 50.0f; height = 180.0f; hitHeight = 100.0f;
+            size = 30.0f;
+        } else if (behavior == 2) {
+            radius = 100.0f; height = 230.0f; hitHeight = 100.0f;
+            size = 80.0f;
+        } else {
+            radius = 20.0f; height = 160.0f; hitHeight = 100.0f;
+            size = 0.0f;
+        }
+        fldRoomEffectEntries[outputIndex].size = size;
+        if (dds3FindObjectChainNodeByName(dds3GetWorldSecondaryObject(), "TEX_UNIT") == NULL) {
+            object = dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), position, rotation);
+            dds3SetWorldNodeValue(object, (u32)"TEX_UNIT");
+            dds3RebuildObjectModelContext(object, 3, 0x60);
+            dds3ObjectBaseOffFlag(object, 0x400);
+            model = dds3ObjectBaseGetModelHandle(object);
+            model->flags |= 1;
+        }
+        if (fldAreaState.area == 15 && dds3FindObjectChainNodeByName(dds3GetWorldSecondaryObject(), "TEX_UNIT015") == NULL) {
+            object = dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), position, rotation);
+            dds3SetWorldNodeValue(object, (u32)"TEX_UNIT015");
+            dds3RebuildObjectModelContext(object, 3, 0xBF);
+            dds3ObjectBaseOffFlag(object, 0x400);
+            model = dds3ObjectBaseGetModelHandle(object);
+            model->flags |= 1;
+        }
+        position[0] = x;
+        position[1] = y;
+        position[2] = z;
+        VU0_LOAD_VF(vf10, axis);
+        effMiscAxisAngleToQuaternionVU(3.14159265f);
+        VU0_LOAD_VF(vf11, orientation);
+        effMiscQuatMultiplyVU();
+        /* Original SDK store: the complete output goes directly to opaque
+         * constructor calls, with no scalar C readback or loop reuse. */
+        VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+        object = dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), position, rotation);
+        dds3SetWorldNodeValue(object, (u32)"NPC_MDL_UNIT");
+        fldRoomEffectEntries[outputIndex].object = (s32 *)object;
+        dds3RebuildObjectModelContext(object, kind, resource);
+        dds3SetSclPoseSet(object, scale);
+        if (kind == 3 && resource == 8) effObjSetInnerFloat(object, 50.0f);
+        model = dds3ObjectBaseGetModelHandle(object);
+        model->first->frameStep = 1.0f;
+        mdlAddEntryFlagged(model, 0, motion);
+        inner = model->inner;
+        sdfGetLodChunkValue(inner);
+        inner->lodIndex = lod;
+        if (!visible) dds3ObjectBaseOnFlag(object, 0x400);
+        else dds3ObjectBaseOffFlag(object, 0x400);
+        fldInitializeHuntSparkUnit(evtUnitGetNestedValue(object));
+        fldHitProgramAdd(room, x, y, z, radius, hitHeight);
+        func_0013ED20(x, y, z, height, name, argument, room, fldRoomEffectEntryCount);
+        fldRoomEffectEntryCount++;
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413B38);
 
