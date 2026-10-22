@@ -389,7 +389,7 @@ void sdfPacTmxDecoderEndFunc(PacState *state) {
 void sdfPacTmxDecoderInit(PacState *state, SdfPacStreamPacketHeader *packet) {
     sdfPacNewResrc(state, packet);
     {
-        void *allocation = sdfChipAllocDirect(0x10);
+        PacBuf *allocation = (PacBuf *)sdfChipAllocDirect(0x10);
         state->slot.resource = allocation;
         sdfPacTmxDecoderInitFunc(state, packet, allocation);
     }
