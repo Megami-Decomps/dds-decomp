@@ -1321,7 +1321,7 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
 
 extern void itfMesClearFlags(s32);
 
-extern void brsTaskAllowUpdate(void);
+extern u32 brsTaskAllowUpdate(void);
 
 
 extern void btlClearPartyRecordStatusBits(DatPartyRecord *, s32);
