@@ -11111,3 +11111,6 @@
 0x00109028	evtSubmitTexturedGradientQuadPoints	inferred	Submits a textured quad with four corner colours (sdfPrimLinkGt4) to the current draw surface, placed by four float screen points (top left, top right, bottom left, bottom right) where evtSubmitTexturedGradientQuad takes a rectangle. DDS2's own; no direct caller.
 0x003BD7D0	btlCameraCursor	inferred	DDS1's btlCameraCursor, the same view; btlBuildPresetCameraPose writes it alike
 0x003BF5F8	btlAiActionHandlers	inferred	DDS1's btlAiActionHandlers: the AI action handlers btlExecuteAiTableAction dispatches through
+0x0040B660	sdfCameraTm	inferred	The camera matrix sdf3DSetCamera is given, kept as it stores it first. Named the original name, from Nocturne HD's sdf3D.c, whose sdf3DSetCamera stores sdfCameraTm, sdf3DScreenTm, sdf3DEyeOffset and the screen parameters in this order
+0x0040B6A0	sdf3DEyeOffset	inferred	The eye offset sdf3DSetCamera stores after the screen matrix: the record's inverse origin transformed by it. Named the original name, from Nocturne HD's sdf3D.c (sdf3DSetCamera's stores in order)
+0x0040B580	sdf3DScreenParam	inferred	The screen parameters sdf3DSetCamera copies whole (an SdfProjectionRecord, 0xA0 bytes). Named the original name, from Nocturne HD's sdf3D.c (sdf3DSetCamera's stores in order)
