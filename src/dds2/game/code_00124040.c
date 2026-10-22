@@ -239,7 +239,7 @@ extern u8 D_00435F24;
 
 extern u8 D_00387D60[];
 
-extern u32 D_00435F38;
+extern struct sdfMemHandle_t *D_00435F38;
 
 extern u32 D_00435F44;
 
@@ -1258,13 +1258,13 @@ void fldTogglePlayerModel(void) {
     dds3SetActiveUnitSceneBasic(dds3GetControlScene(), (dds3Basic_t *)fldPlayerObject);
     fldLoadPlayerModel();
     D_00435F40 = D_00435F44;
-    D_00435F38 = (u32)sdfMemAllocDirect(D_00435F44);
+    D_00435F38 = sdfMemAllocDirect(D_00435F44);
     source = (void *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)fldPlayerModelResource);
-    buffer = (void *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)D_00435F38);
+    buffer = (void *)sdfMemGetPtr(D_00435F38);
     memcpy(buffer, source, D_00435F40);
     D_00435F3C = (u32)buffer;
     mdlPackDecode(2, 0, 0x101, (s32)buffer, D_00435F40);
-    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)D_00435F38);
+    sdfMemFreeDelayedDirect(D_00435F38);
     D_00435F38 = 0;
     dds3RebuildObjectModelContext((dds3Basic_t *)fldPlayerObject, 2, fldSceneParam.sequenceWord3C);
     fldPlayerModelContext = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle((dds3Basic_t *)fldPlayerObject);
@@ -1288,19 +1288,19 @@ void fldPrepareResourceBuffer(void) {
     void *buffer;
     fldLoadPlayerModel();
     D_00435F40 = D_00435F44;
-    D_00435F38 = (u32)sdfMemAllocDirect(D_00435F44);
+    D_00435F38 = sdfMemAllocDirect(D_00435F44);
     source = (void *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)fldPlayerModelResource);
-    buffer = (void *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)D_00435F38);
+    buffer = (void *)sdfMemGetPtr(D_00435F38);
     memcpy(buffer, source, D_00435F40);
     D_00435F3C = (u32)buffer;
     mdlPackDecode(2, 0, 0x101, (s32)buffer, D_00435F40);
-    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)D_00435F38);
+    sdfMemFreeDelayedDirect(D_00435F38);
     D_00435F38 = 0;
 }
 
 void fldReleaseResources(void) {
     if (D_00435F38 != 0) {
-        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)D_00435F38);
+        sdfMemFreeDelayedDirect(D_00435F38);
         D_00435F38 = 0;
     }
     if (D_00389790[0] == 0 && D_00435F78 == 0) {
