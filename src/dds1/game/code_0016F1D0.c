@@ -46,7 +46,7 @@
 extern void dds3FlashPolyListHDelete(dds3FlashPolyList_t *pool);
 
 extern u32 effMagaCylinderCalcColor(u32 colorA, u32 colorB);
-extern void *dds3FlashPolyListHGetVertex(dds3FlashPolyList_t *pool, s32 index);
+extern f32 *dds3FlashPolyListHGetVertex(dds3FlashPolyList_t *pool, s32 index);
 extern u32 *dds3FlashPolyListHGetVC(dds3FlashPolyList_t *pool, s32 index);
 extern f32 effPCPFlashPolyRingExpHVertex[];
 
@@ -177,7 +177,7 @@ void effPCPFlashPolyRingExpHPartSetVC(EffRingWork *work, s32 index, s32 modulati
  * No camera matrix is read. Quadword loads retain the native scratch W values. */
 void effPCPFlashPolyRingExpHPartSetVertex(EffRingWork *work, s32 index) {
     EffRingParticle *part = &work->vertices[index];
-    f32 *positions = (f32 *)dds3FlashPolyListHGetVertex(work->recordPool, index);
+    f32 *positions = dds3FlashPolyListHGetVertex(work->recordPool, index);
     f32 orbitOffset[4];
     f32 radialDirection[4];
     f32 axisOffset[4];
@@ -459,8 +459,8 @@ void dds3FlashPolyListDraw(dds3FlashPolyList_t *work)
 }
 
 /* Address the five-position record for a group; no index bounds check. */
-void *dds3FlashPolyListGetVertex(dds3FlashPolyList_t *group, s32 groupIndex) {
-    return group->recordBase + groupIndex * EFF_FAN_POSITION_BYTES;
+f32 *dds3FlashPolyListGetVertex(dds3FlashPolyList_t *group, s32 groupIndex) {
+    return (f32 *)(group->recordBase + groupIndex * EFF_FAN_POSITION_BYTES);
 }
 
 /* Address the group's five packed color words. */
@@ -566,8 +566,8 @@ void dds3FlashPolyList2Draw(dds3FlashPolyList_t *pool)
 }
 
 /* Address three quadword positions for one triangle. */
-void *dds3FlashPolyList2GetVertex(dds3FlashPolyList_t *group, s32 groupIndex) {
-    return group->recordBase + groupIndex * EFF_TRIANGLE_POSITION_BYTES;
+f32 *dds3FlashPolyList2GetVertex(dds3FlashPolyList_t *group, s32 groupIndex) {
+    return (f32 *)(group->recordBase + groupIndex * EFF_TRIANGLE_POSITION_BYTES);
 }
 
 /* Address three packed color words for one triangle. */
@@ -654,8 +654,8 @@ void dds3FlashPolyList3Draw(dds3FlashPolyList_t *pool)
 }
 
 /* Address four quadword positions for one quad. */
-void *dds3FlashPolyList3GetVertex(dds3FlashPolyList_t *group, s32 groupIndex) {
-    return group->recordBase + groupIndex * EFF_QUAD_POSITION_BYTES;
+f32 *dds3FlashPolyList3GetVertex(dds3FlashPolyList_t *group, s32 groupIndex) {
+    return (f32 *)(group->recordBase + groupIndex * EFF_QUAD_POSITION_BYTES);
 }
 
 /* Address four packed color words for one quad. */
@@ -741,8 +741,8 @@ void dds3FlashPolyListHDraw(dds3FlashPolyList_t *work)
 }
 
 /* Address the five-position record for one fan group. */
-void *dds3FlashPolyListHGetVertex(dds3FlashPolyList_t *group, s32 groupIndex) {
-    return group->recordBase + groupIndex * EFF_FAN_POSITION_BYTES;
+f32 *dds3FlashPolyListHGetVertex(dds3FlashPolyList_t *group, s32 groupIndex) {
+    return (f32 *)(group->recordBase + groupIndex * EFF_FAN_POSITION_BYTES);
 }
 
 /* Address the five color words for one fan group. */

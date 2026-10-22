@@ -21,7 +21,7 @@ extern void dds3FlashPolyList3Draw(dds3FlashPolyList_t *pool);
 
 
 extern void *dds3FlashPolyList2GetVC(dds3FlashPolyList_t *pool, s32 index);
-extern void *dds3FlashPolyListGetVertex(dds3FlashPolyList_t *pool, s32 index);
+extern f32 *dds3FlashPolyListGetVertex(dds3FlashPolyList_t *pool, s32 index);
 extern f32 effPCPFlashPolySphereVertex[];
 extern f32 effPCPFlashPolyRingExpVertex[];
 extern f32 effPCPFlashPolyRingVertex[];
@@ -31,8 +31,8 @@ extern f32 effPCPFlashPolySphereExpVertex[];
 extern f32 def_dir[];
 extern f32 effPCPFlashPolyCircleVertex[];
 extern f32 effPCPFlashPolySphere2Vertex[];
-extern void *dds3FlashPolyList2GetVertex(dds3FlashPolyList_t *pool, s32 index);
-extern void *dds3FlashPolyList3GetVertex(dds3FlashPolyList_t *pool, s32 index);
+extern f32 *dds3FlashPolyList2GetVertex(dds3FlashPolyList_t *pool, s32 index);
+extern f32 *dds3FlashPolyList3GetVertex(dds3FlashPolyList_t *pool, s32 index);
 
 extern u32 effMagaCylinderCalcColor(u32 color, u32 colorB);
 
@@ -86,7 +86,7 @@ void effPCPFlashPolySphere2PartSetVC(PcpFlashTrianglePulseWork *work, s32 index,
 void effPCPFlashPolySphere2PartSetVertex(PcpFlashTrianglePulseWork *work, s32 index, void *view)
 {
     PcpFlashPulseParticle *part = &work->parts[index];
-    f32 *quad = (f32 *)dds3FlashPolyList2GetVertex(work->resourceHandle, index);
+    f32 *quad = dds3FlashPolyList2GetVertex(work->resourceHandle, index);
     f32 base[4];
     f32 size[4];
     f32 step;
@@ -331,7 +331,7 @@ void effPCPFlashPolySpherePartInit(PcpFlashStreakWork *work, s32 index, void *or
 void effPCPFlashPolySpherePartSetVertex(PcpFlashStreakWork *work, s32 index, void *view)
 {
     PcpFlashRotatingParticle *part = &work->parts[index];
-    f32 *quad = (f32 *)dds3FlashPolyListGetVertex(work->resourceHandle, index);
+    f32 *quad = dds3FlashPolyListGetVertex(work->resourceHandle, index);
     f32 center[4];
     f32 scale[4];
     f32 across[4];
@@ -576,7 +576,7 @@ void effPCPFlashPolyRingPartSetVC(PcpFlashScalingOrbitWork *work, s32 index, s32
 void effPCPFlashPolyRingPartSetVertex(PcpFlashScalingOrbitWork *work, s32 index)
 {
     PcpFlashOrbitParticle *part = &work->parts[index];
-    f32 *quad = (f32 *)dds3FlashPolyListGetVertex(work->resourceHandle, index);
+    f32 *quad = dds3FlashPolyListGetVertex(work->resourceHandle, index);
     f32 offset[4];
     f32 unit[4];
     f32 scaleA[4];
@@ -1077,7 +1077,7 @@ void effPCPFlashPolyRingExpPartSetVC(PcpFlashOrbitArcWork *work, s32 index, s32 
 void effPCPFlashPolyRingExpPartSetVertex(PcpFlashOrbitArcWork *work, s32 index)
 {
     PcpFlashMotionParticle *part = &work->parts[index];
-    f32 *quad = (f32 *)dds3FlashPolyListGetVertex(work->resourceHandle, index);
+    f32 *quad = dds3FlashPolyListGetVertex(work->resourceHandle, index);
     f32 offset[4];
     f32 unit[4];
     f32 scaleA[4];
@@ -1347,7 +1347,7 @@ void effPCPFlashPolySphereExpPartInit(PcpFlashRotatingQuadWork *work, s32 index,
 void effPCPFlashPolySphereExpPartSetVertex(PcpFlashRotatingQuadWork *work, s32 index, void *view)
 {
     PcpFlashRotatingQuadParticle *part = &work->parts[index];
-    f32 *quad = (f32 *)dds3FlashPolyListGetVertex(work->resourceHandle, index);
+    f32 *quad = dds3FlashPolyListGetVertex(work->resourceHandle, index);
     f32 base[4];
     f32 scale[4];
     f32 across[4];
@@ -1575,7 +1575,7 @@ void effPCPFlashPolySphere2ExpPartSetVC(PcpFlashRadialTriangleWork *work, s32 in
 void effPCPFlashPolySphere2ExpPartSetVertex(PcpFlashRadialTriangleWork *work, s32 index, void *view)
 {
     PcpFlashMotionParticle *part = &work->parts[index];
-    f32 *quad = (f32 *)dds3FlashPolyList2GetVertex(work->resourceHandle, index);
+    f32 *quad = dds3FlashPolyList2GetVertex(work->resourceHandle, index);
     f32 base[4];
     f32 size[4];
     f32 step;
@@ -1792,7 +1792,7 @@ void effPCPFlashPolySphere3PartInit(PcpFlashRadialStripWork *work, s32 index, vo
 void effPCPFlashPolySphere3PartSetVertex(PcpFlashRadialStripWork *work, s32 index, void *view)
 {
     PcpFlashRadialStripParticle *part = &work->parts[index];
-    f32 *quad = (f32 *)dds3FlashPolyList3GetVertex(work->resourceHandle, index * 2);
+    f32 *quad = dds3FlashPolyList3GetVertex(work->resourceHandle, index * 2);
     f32 base[4];
     f32 size[4];
     f32 spare[4];
@@ -1855,7 +1855,7 @@ void effPCPFlashPolySphere3PartSetVertex(PcpFlashRadialStripWork *work, s32 inde
     VU0_STORE_VF(vf10, quad + 12);
     VU0_LOAD_VF(vf10, outer);
     VU0_STORE_VF(vf10, quad);
-    mirror = (f32 *)dds3FlashPolyList3GetVertex(work->resourceHandle, index * 2 + 1);
+    mirror = dds3FlashPolyList3GetVertex(work->resourceHandle, index * 2 + 1);
     PCP_COPY_VECTOR(mirror + 8, quad + 8);
     PCP_COPY_VECTOR(mirror + 4, quad + 4);
     PCP_COPY_VECTOR(mirror + 12, quad + 12);
@@ -2046,7 +2046,7 @@ void effPCPFlashPolyRingExp2PartSetVC(PcpFlashFadingOrbitWork *work, s32 index, 
 void effPCPFlashPolyRingExp2PartSetVertex(PcpFlashFadingOrbitWork *work, s32 index)
 {
     PcpFlashOrbitParticle *part = &work->parts[index];
-    f32 *quad = (f32 *)dds3FlashPolyListGetVertex(work->resourceHandle, index);
+    f32 *quad = dds3FlashPolyListGetVertex(work->resourceHandle, index);
     f32 offset[4];
     f32 unit[4];
     f32 scaleA[4];
@@ -2273,7 +2273,7 @@ void effPCPFlashPolyCirclePartSetVC(PcpFlashOffsetRadialWork *work, s32 index, s
 void effPCPFlashPolyCirclePartSetVertex(PcpFlashOffsetRadialWork *work, s32 index, void *view)
 {
     PcpFlashMotionParticle *part = &work->parts[index];
-    f32 *quad = (f32 *)dds3FlashPolyList2GetVertex(work->resourceHandle, index);
+    f32 *quad = dds3FlashPolyList2GetVertex(work->resourceHandle, index);
     f32 base[4];
     f32 size[4];
     f32 step;
