@@ -118,7 +118,7 @@ extern void mnuReleaseMantraFadeData(struct MantraDrawItem *);
 s32 mnuUpdateMantraLimitLineFade();
 s32 mnuDrawMantraLimitLine();
 u32 mnuCreateMantraLimitLineFadeData(u32 list);
-void mnuMantraSetupSlot(u32);
+void mnuMantraSetupSlot(MantraDrawItem *item);
 void mnuReleaseMantraFadeDrawData(struct MantraDrawItem *);
 typedef struct MantraIconEntry {
     /* 0x0 */ u32 active : 1;
@@ -974,14 +974,13 @@ void mnuDestroyMantraDrawPool(MantraDrawPool *pool) {
     s32 i;
     for (i = 0; i < count; i++, item++) {
         if (item->flags & 1) {
-            mnuMantraSetupSlot((u32)item);
+            mnuMantraSetupSlot(item);
         }
     }
     sdfMemFreeDirect(pool->allocation);
 }
 
-void mnuMantraSetupSlot(u32 item) {
-    MantraDrawItem *entry = (MantraDrawItem *)item;
+void mnuMantraSetupSlot(MantraDrawItem *entry) {
     if (!((entry->flags >> 11) & 1)) {
         if (entry->release != 0) {
             entry->release(entry);
@@ -7539,4 +7538,3 @@ u32 mnuAllocateMantraEffectSlotPool(u32 count) {
     ((MantraEffectPoolHeader *)block)->counterE = 0;
     return block;
 }
-
