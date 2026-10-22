@@ -12215,6 +12215,7 @@ func_00370AF0 = 0x00370AF0; // type:func
 func_00370B68 = 0x00370B68; // type:func
 // END romwright
 effMathStepBezierSlotDirect = 0x00195D00; // type:func
+btlUpdateBattleEnd = 0x001D22D8; // type:func
 sdfSoundShutdownIpuStreamHandlers = 0x003457A8; // type:func
 itfIndexedImageDescriptors = 0x0040AE28;
 itfIndexedImageResourceBanks = 0x0045C840;

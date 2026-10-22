@@ -10021,3 +10021,4 @@
 0x0043E1C0	kwlnBackgroundFadeOverlayPackets	inferred	The background fade's overlay packet, one per draw buffer. DDS1 twin 0x003C2A40.
 0x00345810	sdfMoviePacReserveRingBlock	inferred	The sound driver's block allocator for a PAC movie: reserves bytes of the stream's ring, wrapping at 64 KB, or none when it is full. DDS1 twin 0x002EC968.
 0x00345928	sdfMovieQueueFrameSprite	inferred	Queues the decoded movie frame as a sprite over the movie's draw bounds, starting the PAC stream's sound once the ring holds a page. DDS1 twin 0x002ECA80.
+0x001D22D8	btlUpdateBattleEnd	inferred	The battle's end: the end jingle by its outcome, then, once sound and the units are idle, the next mode (the field, or the event a loss starts). DDS1 twin 0x001C6888.
