@@ -1232,11 +1232,11 @@ void mnuReleaseStaffMenuTextureHandles(void *resourceBase) {
 
 u32 mnuCreateSelectState(dds3ProcessID_t *task, s32 staffView) {
     s32 context = dds3GetProcessData(task);
-    u32 handle = (u32)sdfMemAllocDirect(0x30);
-    StaffMenuRuntime *state = (StaffMenuRuntime *)sdfMemLock((struct sdfMemHandle_t *)handle);
+    struct sdfMemHandle_t *handle = sdfMemAllocDirect(0x30);
+    StaffMenuRuntime *state = (StaffMenuRuntime *)sdfMemLock(handle);
     *(StaffMenuRuntime **)(context + 0xaa48) = state;
     memset(state, 0, 0x30);
-    state->allocation = (sdfMemHandle_t *)handle;
+    state->allocation = handle;
     state->staffView = staffView;
     if (staffView == 0) {
         state->staffMode = 0;
@@ -1257,7 +1257,7 @@ s32 mnuStaffCloseSelectionState(dds3ProcessID_t *task) {
 
     mnuResetWorkFloats();
     mnuReleaseMenuWindowHandles(context);
-    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)((s32)menuWork->allocation));
+    sdfMemFreeDirect(menuWork->allocation);
     return 1;
 }
 
