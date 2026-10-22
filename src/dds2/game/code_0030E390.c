@@ -269,7 +269,7 @@ MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
     first = ring->first;
     node->next = first;
     first->prev = node;
-    ring->arg = limit;
+    ring->lifetimeTicks = limit;
     ring->count = count;
     ring->interval = 0;
     return ring;
@@ -286,12 +286,12 @@ void fldAdvanceMapRequest(MapRequestState *queue, s32 x, s32 y, s32 z) {
 
     entry = queue->next;
     if (queue->elapsed == queue->interval) {
-        if (entry->active == 0) {
+        if (entry->ageTicks == 0) {
             entry->x = x;
             entry->y = y;
             entry->z = z;
             queue->next = entry->next;
-            entry->active = 1;
+            entry->ageTicks = 1;
         }
         queue->elapsed = 0;
         return;
@@ -303,7 +303,7 @@ void fldSetMapRequestInterval(MapRequestState *queue, u16 interval) {
     queue->interval = interval;
 }
 
-/* Advance active ring nodes, retiring each node when it reaches the queue limit. */
+/* Advance active ring nodes, retiring each when its age reaches lifetimeTicks. */
 void fldAdvanceMapRequestAges(MapRequestState *ring) {
     s32 remaining;
     s32 pending;
@@ -316,15 +316,15 @@ void fldAdvanceMapRequestAges(MapRequestState *ring) {
     if (--remaining == -1) {
         goto done;
     }
-    if (first->active == 0) {
+    if (first->ageTicks == 0) {
         goto done;
     }
-    first->active++;
-    pending = first->active < ring->arg;
-    limit = ring->arg;
+    first->ageTicks++;
+    pending = first->ageTicks < ring->lifetimeTicks;
+    limit = ring->lifetimeTicks;
     if (!pending) {
         node = first->next;
-        first->active = 0;
+        first->ageTicks = 0;
         ring->third = node;
         goto loop;
     }
@@ -338,16 +338,16 @@ loop:
     if (--remaining == -1) {
         goto done;
     }
-    if (node->active == 0) {
+    if (node->ageTicks == 0) {
         goto done;
     }
-    node->active++;
-    if (node->active < (s16)limit) {
+    node->ageTicks++;
+    if (node->ageTicks < (s16)limit) {
         goto advance;
     }
     {
         MapRequestNode *nextHead = ring->third->next;
-        node->active = 0;
+        node->ageTicks = 0;
         node = node->next;
         ring->third = nextHead;
     }
@@ -379,14 +379,14 @@ loop:
     if (remaining == end) {
         goto done;
     }
-    if (node->active == 0) {
+    if (node->ageTicks == 0) {
         goto done;
     }
     {
         f32 progress;
         void (*callback)(s32, s32, s32, MapRequestState *, MapRequestNode *, f32) = ring->callback;
 
-        progress = (f32)node->active / (f32)ring->arg;
+        progress = (f32)node->ageTicks / (f32)ring->lifetimeTicks;
         progress = one - progress;
         if (callback == NULL) {
             goto advance;

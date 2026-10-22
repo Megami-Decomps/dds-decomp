@@ -8,7 +8,7 @@ typedef struct MapRequestNode {
     s32 x;                          /* 0x00: queued map-world X coordinate */
     s32 y;                          /* 0x04: queued map-world Y coordinate */
     s32 z;                          /* 0x08: queued map-world Z coordinate */
-    s32 active;
+    s32 ageTicks; /* 0x0C: zero is inactive; active nodes count age in update ticks. */
     struct MapRequestNode *next;
     struct MapRequestNode *prev;
     u8 pad18[8];
@@ -20,7 +20,7 @@ typedef struct MapRequestState {
     MapRequestNode *next;
     MapRequestNode *third;
     s16 count;
-    s16 arg;
+    s16 lifetimeTicks; /* 0x0E: age threshold and progress denominator for queued nodes. */
     s16 interval;
     s16 elapsed;
     void (*callback)(s32, s32, s32, struct MapRequestState *, MapRequestNode *, f32);
