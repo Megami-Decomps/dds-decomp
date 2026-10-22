@@ -30,12 +30,13 @@ typedef struct MtrSelectionFlags {
     u32 unk05 : 27;
 } MtrSelectionFlags;
 
+/* mtrAdvanceMantraResourceLoadState's progress through mtrMantraResourceFiles. */
 typedef struct MtrResourceLoadState {
     struct FileRequest *fileEntry;
-    u32 unk04;
+    struct FileRequest *archive; /* released through btlStageTaskCleanupCallback when set */
     s16 state;
     u16 entryIndex;
-    u32 partyMask;
+    s32 partyMask; /* bit unitId - 1 per active party member; tested with srav */
 } MtrResourceLoadState;
 
 typedef char MtrResourceLoadStateFileEntryOffsetCheck[((u32)&((MtrResourceLoadState *)0)->fileEntry == 0x00) ? 1 : -1];
@@ -75,7 +76,8 @@ typedef struct MenuMantraRecord {
             u16 kind : 4;
             u16 flag12 : 1;
             u16 queued : 1;
-            u16 unk14 : 2;
+            u16 announced : 1; /* 0x4000: shown; mnuScanMantraSourceCandidates skips it */
+            u16 unk15 : 1;
         } fields;
     };
     union {
@@ -142,7 +144,7 @@ typedef struct MantraMenuWork {
             u32 iconFade : 1;
             u32 hasSource : 1;
             u32 mode : 8;
-            u32 unk10 : 4;
+            u32 drawRank : 4; /* max(model flag state, last enabled mantra category) */
             u32 drawEnabled : 1;
             u32 sourceDialogVariant : 1; /* Selects one of the two source-dialog variants. */
             u32 hasQueuedMastery : 1;

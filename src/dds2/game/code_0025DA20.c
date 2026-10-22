@@ -2543,7 +2543,7 @@ extern s32 mnuCampAdvanceCounter(s32, MenuTerminalContext *);
 
 
 extern u8 mnuShopCommandPopupEntries[];
-extern u8 *D_00435E48;
+extern u8 *datUnitNames;
 extern char D_00437840[];
 extern s32 D_003C9A20[];
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
@@ -3235,7 +3235,7 @@ s32 evtGetRemainingSlotThreshold(u32 slotIndex) {
 
 s32 evtShowResultText(void) {
     char formattedText[0x40];
-    evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E48 + 0x11));
+    evtCopyEntryStringToActiveWindow(0, (const void *)(datUnitNames + 0x11));
     sprintf(formattedText, D_00437840, datGameState->progressTotal);
     evtCopyEntryStringToActiveWindow(1, formattedText);
     evtCopyEntryStringToActiveWindow(2, (const void *)(D_003C9A20[datGameState->progressSlot]));
@@ -4028,7 +4028,7 @@ s32 evtTriggerProgressFlagGate(s32 unusedContext) {
 s32 evtShowSlotText(KwlnTask *task) {
     char formattedText[0x40];
     if (((MenuTerminalContext *)dds3GetProcessData(task))->advancedSlots > 0) {
-        evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E48 + 0x11));
+        evtCopyEntryStringToActiveWindow(0, (const void *)(datUnitNames + 0x11));
         sprintf(formattedText, D_00437840, mnuShopProgressSlotRows[datGameState->progressSlot * EVT_PROGRESS_RECORD_WORDS]);
         evtCopyEntryStringToActiveWindow(1, formattedText);
         evtCopyEntryStringToActiveWindow(2, (const void *)(D_003C9A20[datGameState->progressSlot]));

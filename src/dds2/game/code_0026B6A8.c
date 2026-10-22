@@ -31,7 +31,7 @@ extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
 extern u8 *D_00435E5C;
 extern DspMantraName *D_00435E50;
 extern u8 *D_00435E4C;
-extern DspUnitName *D_00435E48;
+extern DspUnitName *datUnitNames;
 
 extern void evtCloseDisplayChannelAndEnsureMessageWindow(void *context);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
@@ -67,7 +67,7 @@ s32 dspStartFlagEvent(void *context) {
                     && mdlFlagTest(mnuPartyFlagEventEntries[slot->unitId].handledFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
-                    evtCopyEntryStringToActiveWindow(0, D_00435E48[slot->unitId].encodedText);
+                    evtCopyEntryStringToActiveWindow(0, datUnitNames[slot->unitId].encodedText);
                     dspStartEntry(4);
                     mdlFlagSet(mnuPartyFlagEventEntries[slot->unitId].handledFlag);
                     return 1;

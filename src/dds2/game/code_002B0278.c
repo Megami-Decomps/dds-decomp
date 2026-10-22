@@ -138,7 +138,7 @@ extern FrFontGlyph *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32)
 extern u8 *D_00435E54;
 
 
-extern u8 *D_00435E48;
+extern u8 *datUnitNames;
 
 
 
@@ -659,7 +659,7 @@ void mnuCreatePartySelectionWindow(MenuContext *context) {
         if ((datGameState->party[i].flags & 1) != 0) {
             s32 id = datGameState->party[i].unitId;
             MenuListNode *node = mnuAppendWindowListNode(window,
-                D_00435E48 + id * 17);
+                datUnitNames + id * 17);
 
             node->sortKeyPrimary = id - 1;
             node->sortKeySecondary = datGameState->party[i].level;
@@ -1595,7 +1595,7 @@ void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, MenuPageWindow *page
     mnuApplyPackedGroupValues(packedGroup, entry->itemId);
     mnuDrawAndAdvancePanelGroup(0xeb0, 0x518, 0, entry, packedGroup, 0, spriteFlags);
     mnuDrawPartySkillListPanel(0, 0, 0, entry, spriteState, spriteFlags);
-    mnuDrawTextSprite(0x2a0, 0xa50, 0, 0xa09dc380, D_00435E48 + entry->unitId * 0x11 + 0x110, spriteFlags);
+    mnuDrawTextSprite(0x2a0, 0xa50, 0, 0xa09dc380, datUnitNames + entry->unitId * 0x11 + 0x110, spriteFlags);
     mnuDrawSlotIcons(0x14a, page);
 }
 

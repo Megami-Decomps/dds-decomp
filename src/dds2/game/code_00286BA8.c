@@ -328,13 +328,13 @@ void mtrMantraSelectRelease(void) {
 
 extern SdfTaskItemDesc D_003CFCFC;
 extern void mnuTickPanelSoundEntries(void);
-extern s32 func_0028A1D0(MnuStatusResource *);
+extern s32 mnuUpdateMantraSelectionState(MnuStatusResource *);
 
 /* Tick panel sounds and process the selection result. Case 2 intentionally falls through to case 3;
  * case 4 queues item 1 for activation and returns -1, while other results return zero. */
 s32 mtrMantraSelectUpdate(s32 key) {
     mnuTickPanelSoundEntries();
-    switch (func_0028A1D0((MnuStatusResource *)sdfGetTaskValueByKey(mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY))) {
+    switch (mnuUpdateMantraSelectionState((MnuStatusResource *)sdfGetTaskValueByKey(mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY))) {
     case 1:
         break;
     case 2:
@@ -436,7 +436,7 @@ void mtrMantraEquipRelease(s32 key, s32 initResult) {
     evtPrintDeveloperConsoleMessage("mtrMantraEquipRelease\n");
 }
 
-extern DspUnitName *D_00435E48;
+extern DspUnitName *datUnitNames;
 extern DspMantraName *D_00435E50;
 extern s8 D_0037F510[];
 extern DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *);
@@ -516,7 +516,7 @@ s32 mtrMantraEquipUpdate(void) {
         break;
 
     case 2:
-        evtCopyEntryStringToActiveWindow(0, D_00435E48[selectedRecord->unitId].encodedText);
+        evtCopyEntryStringToActiveWindow(0, datUnitNames[selectedRecord->unitId].encodedText);
         evtCopyEntryStringToActiveWindow(
             1, D_00435E50[scrGetSelectedScriptEntryId(selectedRecord)].encodedText);
         evtCopyEntryStringToActiveWindow(
@@ -531,7 +531,7 @@ s32 mtrMantraEquipUpdate(void) {
         break;
 
     case 3:
-        evtCopyEntryStringToActiveWindow(0, D_00435E48[selectedRecord->unitId].encodedText);
+        evtCopyEntryStringToActiveWindow(0, datUnitNames[selectedRecord->unitId].encodedText);
         evtCopyEntryStringToActiveWindow(
             1, D_00435E50[scrGetSelectedScriptEntryId(selectedRecord)].encodedText);
         evtCopyEntryStringToActiveWindow(
@@ -561,7 +561,7 @@ s32 mtrMantraEquipUpdate(void) {
 
     case 6:
         sourceEntryId = (u16)selectedEntryId;
-        evtCopyEntryStringToActiveWindow(0, D_00435E48[selectedRecord->unitId].encodedText);
+        evtCopyEntryStringToActiveWindow(0, datUnitNames[selectedRecord->unitId].encodedText);
         evtCopyEntryStringToActiveWindow(
             1, D_00435E50[scrGetSelectedScriptEntryId(selectedRecord)].encodedText);
         evtCopyEntryStringToActiveWindow(

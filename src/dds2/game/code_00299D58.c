@@ -166,7 +166,7 @@ u32 mnuProcessItemSelection(BrsSkillPackageWork *scene) {
     return 1;
 }
 
-extern DspUnitName *D_00435E48;
+extern DspUnitName *datUnitNames;
 extern DspUnitName *datSkillNames;
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
@@ -180,7 +180,7 @@ void prfCapPresentMessages(BrsSkillPackageWork *scene) {
 
     if (scene->selectionApplied != 0) {
         evtCopyEntryStringToActiveWindow(
-            0, D_00435E48[item->unitId].encodedText);
+            0, datUnitNames[item->unitId].encodedText);
         scrGetIndexedRecordAddress(profileId & 0xFFFF, &message);
         evtCopyEntryStringToActiveWindow(1, (const void *)(message));
         dspSetActive(1);
@@ -189,7 +189,7 @@ void prfCapPresentMessages(BrsSkillPackageWork *scene) {
     } else if (scene->pendingSkillCount > 0) {
         skillId = scene->skillList.skills[scene->pendingSkillIndex];
         evtCopyEntryStringToActiveWindow(
-            0, D_00435E48[item->unitId].encodedText);
+            0, datUnitNames[item->unitId].encodedText);
         evtCopyEntryStringToActiveWindow(
             1, datSkillNames[skillId].encodedText);
         dspSetActive(1);
@@ -365,7 +365,7 @@ void brsShowStatSelectionStatus(BrsSkillPackageWork *scene) {
             active.count++;
         }
     }
-    evtCopyEntryStringToActiveWindow(0, D_00435E48[item->unitId].encodedText);
+    evtCopyEntryStringToActiveWindow(0, datUnitNames[item->unitId].encodedText);
     dspSetActive(1);
     if (scene->extentExhausted == 0) {
         dspStartEntry(0x15);
@@ -407,7 +407,7 @@ void brsUpdateStatSelectionExtent(BrsSkillPackageWork *scene) {
     }
     kind = item->unitId;
     if (mnuKindIsSelectable(kind) != 0) {
-        evtCopyEntryStringToActiveWindow(0, D_00435E48[kind].encodedText);
+        evtCopyEntryStringToActiveWindow(0, datUnitNames[kind].encodedText);
         sprintf(text, D_004379B0, available);
         evtCopyEntryStringToActiveWindow(1, text);
         dspSetActive(1);

@@ -176,7 +176,7 @@ typedef struct MantraAcquisitionDialogues {
     s32 entries[6][2];
 } MantraAcquisitionDialogues;
 
-extern DspUnitName *D_00435E48;
+extern DspUnitName *datUnitNames;
 extern DspMantraName *D_00435E50;
 extern const MantraAttributeNameTable mnuMantraAttributeNames;
 extern const MantraAcquisitionDialogues D_004275E8;
@@ -211,14 +211,14 @@ s32 mnuHandleMantraSourceDialogResult(MantraMenuSrc *source, MnuStatusResource *
     activeVariant = state->drawBits.sourceDialogVariant != 0;
     memset(attributeSummary, 0, sizeof(attributeSummary));
     if (*sourceBits & 0x8000) {
-        evtCopyEntryStringToActiveWindow(0, D_00435E48[party->unitId].encodedText);
+        evtCopyEntryStringToActiveWindow(0, datUnitNames[party->unitId].encodedText);
         evtCopyEntryStringToActiveWindow(1, D_00435E50[source->fields.unitIndex].encodedText);
         *sourceBits &= ~0x2000;
         dspStartEntry(messageEntries.entries[0][activeVariant]);
         return -1;
     }
 
-    evtCopyEntryStringToActiveWindow(0, D_00435E48[party->unitId].encodedText);
+    evtCopyEntryStringToActiveWindow(0, datUnitNames[party->unitId].encodedText);
     evtCopyEntryStringToActiveWindow(1, D_00435E50[source->fields.unitIndex].encodedText);
 
     currentFlags = *sourceBits;
@@ -1821,7 +1821,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00293DB0);
+INCLUDE_ASM(const s32, "game/code_0028FD30", mnuUpdateMantraTutorialPanelStatus);
 
 s32 mnuFindOtherPanelSelectorForScriptId(MnuStatusResource *object, u16 id) {
     MantraMenuWork *state = &object->menu;

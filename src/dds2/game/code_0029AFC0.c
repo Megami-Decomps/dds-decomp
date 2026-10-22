@@ -20,7 +20,7 @@ extern void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *);
 
 extern void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *, s32);
 extern void mnuRollExtraLevelReward(DatPartyRecord *, BrsSkillPackageWork *);
-extern u8 *D_00435E48;
+extern u8 *datUnitNames;
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 
 extern s32 evtStageTestUpdateCamera(void);
@@ -228,7 +228,7 @@ s32 mnuShowProgressLevelChangePopup(KwlnTask *task) {
     gain = context->selectedRewardRow->values.amount;
     context->crossedSteps = brsGetLevelStepCrossedBy(item->level - gain, gain);
     if (context->crossedSteps != 0) {
-        sprintf(text, D_004379B8, D_00435E48 + item->unitId * 17);
+        sprintf(text, D_004379B8, datUnitNames + item->unitId * 17);
         evtCopyEntryStringToActiveWindow(0, text);
         sprintf(text, D_004379B0, brsGetLevelStepForValue(item->level));
         evtCopyEntryStringToActiveWindow(1, text);
@@ -366,7 +366,7 @@ u32 brsPrepareRewardMessage(KwlnTask *task) {
     mnuRollExtraLevelReward(item, context);
     mode = context->rewardMode;
     if (mode != 0 && mode != 5) {
-        evtCopyEntryStringToActiveWindow(0, D_00435E48 + item->unitId * 17);
+        evtCopyEntryStringToActiveWindow(0, datUnitNames + item->unitId * 17);
         dspStartEntry(0x19);
     }
     memset(context->statGains, 0, sizeof(context->statGains));

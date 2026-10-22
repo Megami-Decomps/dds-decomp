@@ -47,7 +47,7 @@ typedef struct FrFontGlyph FrFontGlyph;
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern u8 *D_00435E5C;
-extern u8 *D_00435E48;
+extern u8 *datUnitNames;
 extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
@@ -474,7 +474,7 @@ void mnuPrepareStaffSelectionChangeDialog(MenuStaffContext *context,
 
     mnuSetStateValue(&context->unkAA50, 1);
     if (current != target) {
-        evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E48 + entry->unitId * 0x11));
+        evtCopyEntryStringToActiveWindow(0, (const void *)(datUnitNames + entry->unitId * 0x11));
         evtCopyEntryStringToActiveWindow(1, (const void *)(D_00435E5C + current * 0x19));
         evtCopyEntryStringToActiveWindow(2, (const void *)(D_00435E5C + target * 0x19));
         dspStartEntry(0);
@@ -740,19 +740,19 @@ void mnuStaffEntrySwapLabels(MenuStaffContext *context,
 
     mnuSetStateValue(&context->unkAA50, 1);
     if (target == 0) {
-        evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E48 + entry->unitId * 0x11));
+        evtCopyEntryStringToActiveWindow(0, (const void *)(datUnitNames + entry->unitId * 0x11));
         evtCopyEntryStringToActiveWindow(1, (const void *)(D_00435E5C + current * 0x19));
         dspStartEntry(6);
         menu->alternatePrevious = current;
         menu->alternateRequested = 0;
     } else if (current != target) {
         if (current != 0) {
-            evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E48 + entry->unitId * 0x11));
+            evtCopyEntryStringToActiveWindow(0, (const void *)(datUnitNames + entry->unitId * 0x11));
             evtCopyEntryStringToActiveWindow(1, (const void *)(D_00435E5C + current * 0x19));
             evtCopyEntryStringToActiveWindow(2, (const void *)(D_00435E5C + target * 0x19));
             dspStartEntry(3);
         } else {
-            evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E48 + entry->unitId * 0x11));
+            evtCopyEntryStringToActiveWindow(0, (const void *)(datUnitNames + entry->unitId * 0x11));
             evtCopyEntryStringToActiveWindow(1, (const void *)(D_00435E5C + target * 0x19));
             dspStartEntry(4);
         }

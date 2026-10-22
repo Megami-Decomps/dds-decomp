@@ -388,14 +388,11 @@ s32 evtTestMantraNodePartyRequirements(u16 entry, s32 mode) {
     return satisfiedNeighbors == 0x3F;
 }
 
-typedef struct MantraNodeStates {
-    u8 pad00[8];
-    u16 *cells; /* 0x08: per-node state halfwords, indexed by record id */
-} MantraNodeStates;
-
-void mnuUpdateMantraNeighborNodeStates(MantraNodeStates *states, s32 unused, s16 entry) {
+/* Mark a node acquired in one unit's flag slot and open its waiting neighbours.
+ * The party record argument (mnuUpdateMantraSelectionState passes the selected unit's) is unused. */
+void mnuUpdateMantraNeighborNodeStates(MantraFlagResource *resource, DatPartyRecord *unused, s16 entry) {
     MantraNodePos *record = (MantraNodePos *)mnuGetMantraNodePositionRecord(entry);
-    u16 *origin = &states->cells[record->id];
+    u16 *origin = &resource->flags[record->id];
     s32 slot;
 
     *origin |= 0x100;
@@ -403,7 +400,7 @@ void mnuUpdateMantraNeighborNodeStates(MantraNodeStates *states, s32 unused, s16
         MantraNodePos *neighbor = record->neighbors[slot];
 
         if (neighbor != NULL) {
-            u16 *cell = &states->cells[neighbor->id];
+            u16 *cell = &resource->flags[neighbor->id];
             s32 kind = neighbor->selector.packed & 0xF;
 
             if (kind == 1 || kind == 4 || ((neighbor->selector.packed & 0x10F) == 2 && ((*cell >> 8) & 8))) {

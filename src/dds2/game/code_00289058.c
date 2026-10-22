@@ -306,7 +306,7 @@ void mnuInitializeMantraSelectionWork(MnuStatusResource *object) {
     object->menu.selectionController = mnuCreateMantraDrawPool(0xB);
     object->currency = datGameState->header.currency;
     state->drawFlags = 4;
-    state->drawBits.unk10 = mnuGetActiveMantraModelFlagState();
+    state->drawBits.drawRank = mnuGetActiveMantraModelFlagState();
     i = 0;
     for (node = object->list->first; node != NULL; node = node->next, i++) {
         record = node->partyRecord;
@@ -343,7 +343,7 @@ void mnuInitializeMantraSelectionWork(MnuStatusResource *object) {
     state->resource = mnuCreateMantraPanelPool(0x3CE, object);
 }
 
-extern s32 func_0028E858(MnuStatusResource *object);
+extern s32 mnuInitMantraMapScroll(MnuStatusResource *object);
 
 /* Opens mantra selection, saving party record addresses and starting the AT3 load. */
 extern void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *);
@@ -362,7 +362,7 @@ void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *object) {
     work->drawBits.mode = 1;
     work->defaultSelector = mnuGetMantraNodePositionRecord(
         (s16)scrGetSelectedScriptEntryId(selectedValue));
-    func_0028E858(object);
+    mnuInitMantraMapScroll(object);
 
     node = object->list->first;
     count = 0;
@@ -465,11 +465,11 @@ s32 mnuFindFirstMatchingListItemIndex(MnuStatusResource *resource) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_0028A1D0);
+INCLUDE_ASM(const s32, "game/code_00289058", mnuUpdateMantraSelectionState);
 
 extern void dspRequestMessageWindowModeOne(MnuStatusResource *);
 extern s32 mnuUpdateMantraPanelVisualState(s32, s32, s32, s32, MnuStatusResource *, s32);
-extern s32 func_00293DB0(MnuStatusResource *);
+extern s32 mnuUpdateMantraTutorialPanelStatus(MnuStatusResource *);
 extern s32 mnuUpdateMantraPanelStatusFromFlags(s32, s32, s32, s32, MnuStatusResource *, s32);
 
 s32 mnuDrawMantraPhaseOpacity(MnuStatusResource *resource) {
@@ -494,7 +494,7 @@ s32 mnuDrawMantraPhaseOpacity(MnuStatusResource *resource) {
         mnuUpdateMantraPanelVisualState(0, 0, 0, 0x80, resource, 0x53);
         break;
     case 25:
-        func_00293DB0(resource);
+        mnuUpdateMantraTutorialPanelStatus(resource);
         break;
     case 19:
     case 20:
@@ -637,7 +637,7 @@ s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src)
     return 0;
 }
 
-extern DspUnitName *D_00435E48;
+extern DspUnitName *datUnitNames;
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void mnuActivateMantraNode(MnuStatusResource *, u16);
 extern s32 mnuFindMantraSourceCandidate(MnuStatusResource *, MantraMenuSrc *);
@@ -719,8 +719,8 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
             mnuSetSelectedMantraOptionFlag(party);
             dspCloseChannel();
             evtCreateMessageWindowIfMissing(object->messageDefinition);
-            evtCopyEntryStringToActiveWindow(0, D_00435E48[party->unitId].encodedText);
-            evtCopyEntryStringToActiveWindow(1, D_00435E48[party->unitId + 16].encodedText);
+            evtCopyEntryStringToActiveWindow(0, datUnitNames[party->unitId].encodedText);
+            evtCopyEntryStringToActiveWindow(1, datUnitNames[party->unitId + 16].encodedText);
             dspStartEntry(3);
             mnuSelectMantraUnitByIndex(object, (s8)index);
             work->sourceNextState = 3;
@@ -1323,7 +1323,7 @@ void mnuSpawnMantraPanelsFromSelectedUnitFlags(MnuStatusResource *object, s32 st
     } while (--recordIndex >= 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_0028D2F8);
+INCLUDE_ASM(const s32, "game/code_00289058", mnuDrawMantraMasteryPanels);
 
 struct MantraPanelAnimation;
 extern struct MantraPanelAnimation *mnuSpawnPanelSlotA(MantraPanelPool *, s32, s8, s16, s16, u32);

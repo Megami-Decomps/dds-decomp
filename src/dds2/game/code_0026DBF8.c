@@ -15,6 +15,7 @@
 #include "mnu_mantra_position_api.h"
 #include "mnu_panel_position_record.h"
 #include "mdl_flag_api.h"
+#include "mnu_mantra_draw.h"
 /* Declared before first use (were implicit int). */
 extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
 extern void prfCopyMantraNamePart(u16 scriptId, s32 namePartMode, char *destination);
@@ -204,40 +205,6 @@ typedef struct MantraRecordPanelState {
     s32 step;
 } MantraRecordPanelState;
 
-typedef struct MantraDisplayNode {
-    s32 frame;
-    u32 fromValue;
-    u32 toValue;
-    s16 transitionKind;
-    u8 pad0E[2];
-    struct MantraDisplayNode *next;
-} MantraDisplayNode;
-
-/* One draw process: construction supplies data, update requests completion,
- * draw runs each active frame, and release receives the item record. */
-typedef struct MantraDrawItem {
-    u32 kind;
-    union {
-        u32 flags;
-        struct {
-            u32 active : 1;
-            u32 unkBits : 2;
-            u32 state : 8;
-            u32 released : 1;
-            u32 category : 8;
-            u32 unkHigh : 12;
-        } bits;
-    };
-    u32 (*create)();
-    void (*release)(struct MantraDrawItem *);
-    s32 (*update)();
-    void (*draw)();
-    s16 startDelay;    /* 0x18: delay before construction */
-    s16 endDelay;      /* 0x1A: delay before release */
-    u32 createArg;     /* 0x1C: constructor argument */
-    void *data;       /* 0x20: constructor result */
-} MantraDrawItem;
-
 s32 mnuDrawMantraBackgroundPulse(s32 unused, MantraDrawItem *drawItem);
 s32 mnuUpdateMantraGaugeFade(s32 unused, MantraDrawItem *item);
 
@@ -328,15 +295,6 @@ typedef struct MantraBackgroundState {
     s32 selectedValue;    /* 0x14: one bit per node; mnuDrawMantraBackgroundSelectionIcons tests it with srav (signed) */
     MantraBurstPool *burstPool; /* 0x18 */
 } MantraBackgroundState;
-
-typedef struct MantraListState {
-    u32 unk0;
-    MantraDisplayNode *head;
-    u32 entries[8];
-    s16 count;
-    s16 index;
-    u32 unk2C;
-} MantraListState;
 
 MantraDisplayNode *mnuAppendDisplayListNode(MantraListState *state);
 
@@ -2622,16 +2580,6 @@ typedef struct MantraPanelListInput {
     u32 count;
 } MantraPanelListInput;
 
-typedef struct MantraLampState {
-    /* 0x00 */ u16 state;
-    /* 0x02 */ u16 unk2;
-    /* 0x04 */ u16 timer;
-    /* 0x06 */ u16 clock;
-    /* 0x08 */ f32 value;
-    /* 0x0C */ MantraListState list;
-    /* 0x3C */ u32 bits;
-} MantraLampState;
-
 MantraDrawItem *mnuRegisterMantraUnitPanelDraw(MantraDrawPool *pool, u32 resource) {
     return mnuRegisterMantraDrawItem(pool, 9, mnuUpdateMantraUnitPanelFade, mnuDrawMantraUnitPanel,
                          mnuInitMantraUnitPanelDraw, mnuReleaseMantraUnitPanelDraw, 10, 0, resource);
@@ -2645,7 +2593,7 @@ void mnuBeginMantraUnitPanelExit(MantraDrawPool *pool) {
 void mnuSetMantraUnitPanelValue(MantraDrawPool *pool, s16 value) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind(pool, 9);
     if (item != 0) {
-        ((MantraLampState *)item->data)->unk2 = value;
+        ((MantraLampState *)item->data)->status = value;
     }
 }
 

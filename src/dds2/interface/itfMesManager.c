@@ -726,7 +726,7 @@ u8 *itfMesGetWindowTableValue(s32 window, s32 slotIndex) {
     return (u8 *)itfWindowSlots[window].mes->textSlots.addresses[slotIndex];
 }
 
-extern u8 *D_00435E48;
+extern u8 *datUnitNames;
 extern u8 *D_00435E4C;
 extern u8 *D_00435E5C;
 extern u8 *D_00435E60;
@@ -766,11 +766,11 @@ void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 select
         itfMesCopyStringToWindowTableSlot(window, slotIndex, (const void *)(D_00435E60 + value * 7));
         break;
     case 2:
-        itfMesCopyStringToWindowTableSlot(window, slotIndex, (const void *)(D_00435E48 + value * 0x11));
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, (const void *)(datUnitNames + value * 0x11));
         break;
     case 15:
         memset(converted15, 0, sizeof(converted15));
-        itfConvertText(converted15, (char *)D_00435E48 + value * 0x11);
+        itfConvertText(converted15, (char *)datUnitNames + value * 0x11);
         itfMesCopyStringToWindowTableSlot(window, slotIndex, converted15);
         break;
     case 3:
