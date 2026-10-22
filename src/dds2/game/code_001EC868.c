@@ -7,6 +7,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_camera_snapshots.h"
 #include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_action_camera_preset.h"
@@ -4619,40 +4620,6 @@ INCLUDE_ASM(const s32, "game/code_001EC868", btlBuildPresetCameraPose);
 extern void btlApplyScriptCameraTrack(BtlLinkedCommand *, BtlCamState *, const BtlCameraTimedInstruction *, s32 *, const BtlCameraParameterRecord *);
 extern void btlApplyRadialLinkageFormation(BtlLinkedCommand *);
 
-typedef struct BtlCameraStoredPose {
-    BtlCamState pose;
-    u8 pad28[8];
-} BtlCameraStoredPose;
-
-typedef struct BtlCameraParameterSnapshot {
-    f32 pathEnd[4];
-    f32 pathStart[4];
-    f32 targetFrom[4];
-    f32 targetTo[4];
-    f32 cameraFrom[4];
-    f32 cameraTo[4];
-    f32 direction[4];
-    f32 distance;
-    u8 pad74[0xC];
-    f32 angleVector[4];
-    f32 startFrame;
-    u8 pad94[0xC];
-    f32 duration;
-    u8 padA4[0xC];
-    u8 parameterD0;
-    u8 padB1[0xF];
-    f32 parameterE0;
-    u8 padC4[0xC];
-    f32 blendRate;
-    u8 padD4[0xC];
-    f32 rangeStart;
-    u8 padE4[0xC];
-    f32 rangeEnd;
-    u8 padF4[0xC];
-} BtlCameraParameterSnapshot;
-
-typedef char CameraSnapshotExtent[(sizeof(BtlCameraParameterSnapshot) == 0x100) ? 1 : -1];
-typedef char CameraStoredPoseExtent[(sizeof(BtlCameraStoredPose) == 0x30) ? 1 : -1];
 extern BtlCameraParameterSnapshot D_003BD900;
 extern BtlCameraParameterSnapshot D_003BDA00;
 extern BtlCameraStoredPose D_003BDB00;

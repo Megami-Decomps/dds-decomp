@@ -2,6 +2,7 @@
 #include "btl_vec3.h"
 #include "btl_motion_transform.h"
 #include "btl_camera_pose_api.h"
+#include "btl_camera_snapshots.h"
 #include "btl_camera_cursor.h"
 #include "btl_camera_path_preset.h"
 #include "btl_pair_camera_preset.h"
@@ -5422,40 +5423,6 @@ extern void btlApplyScriptCameraTrack(BtlLinkedCommand *, BtlCamState *,
                          const BtlCameraParameterRecord *);
 extern void btlApplyRadialLinkageFormation(BtlLinkedCommand *);
 
-typedef struct BtlCameraStoredPose {
-    BtlCamState pose;
-    u8 pad28[8];
-} BtlCameraStoredPose;
-
-typedef struct BtlCameraParameterSnapshot {
-    f32 pathEnd[4];
-    f32 pathStart[4];
-    f32 targetFrom[4];
-    f32 targetTo[4];
-    f32 cameraFrom[4];
-    f32 cameraTo[4];
-    f32 direction[4];
-    f32 distance;
-    u8 pad74[0xC];
-    f32 angleVector[4];
-    f32 startFrame;
-    u8 pad94[0xC];
-    f32 duration;
-    u8 padA4[0xC];
-    u8 parameterD0;
-    u8 padB1[0xF];
-    f32 parameterE0;
-    u8 padC4[0xC];
-    f32 blendRate;
-    u8 padD4[0xC];
-    f32 rangeStart;
-    u8 padE4[0xC];
-    f32 rangeEnd;
-    u8 padF4[0xC];
-} BtlCameraParameterSnapshot;
-
-typedef char CameraSnapshotExtent[(sizeof(BtlCameraParameterSnapshot) == 0x100) ? 1 : -1];
-typedef char CameraStoredPoseExtent[(sizeof(BtlCameraStoredPose) == 0x30) ? 1 : -1];
 extern BtlCameraParameterSnapshot D_0035F230;
 extern BtlCameraParameterSnapshot D_0035F330;
 extern BtlCameraStoredPose D_0035F430;
