@@ -137,7 +137,7 @@ typedef struct PartyMenuData {
 
 
 typedef struct StaffMenuWork {
-    s32 handle;               /* 0x00 */
+    struct sdfMemHandle_t *handle; /* 0x00: owns this menu work block. */
     u8 pad04[0xC];
     s32 staffMode;            /* 0x10 */
     s32 staffImage;           /* 0x14 */
@@ -1724,13 +1724,13 @@ void mnuDestroySkillMenuWindows(s32 context) {
 
 s32 mnuCampMenuInit(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
-    s32 handle = (u32)sdfMemAllocDirect(0x38);
-    s32 *menu = (void *)sdfMemLock((struct sdfMemHandle_t *)(handle));
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(0x38);
+    s32 *menu = (void *)sdfMemLock(allocation);
     CampMenuContext *work = (CampMenuContext *)context;
 
     work->menu = menu;
     memset(menu, 0, 0x38);
-    *menu = handle;
+    ((StaffMenuWork *)menu)->handle = allocation;
     mnuSelectSkillSelectionVisuals(context);
     mnuForwardDupArg((MenuWindowContainer *)work->panelList,
                      (struct EffectSlotSet *)work->option, 0, 0, 0);
@@ -1763,7 +1763,7 @@ s32 mnuCloseItemSelectionState(dds3ProcessID_t *contextArg) {
         mnuDestroySelectedPartyWindow(contextArg);
     }
     mnuNoOpItemSelectionTeardown(context);
-    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(menu->handle));
+    sdfMemFreeDirect(menu->handle);
     return 1;
 }
 
