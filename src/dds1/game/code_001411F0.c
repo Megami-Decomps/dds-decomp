@@ -84,19 +84,19 @@ extern char fldTitleTaskName[]; /* "fldTitle" */
 
 extern char D_003A0828[]; /* "fldTitleMini" */
 
-extern u32 fldDamEffectResource;
+extern struct sdfMemHandle_t *fldDamEffectResource;
 
 extern u32 fldDamEffectData;
 
-extern u32 fldDamEffectNode;
+extern EffNode *fldDamEffectNode;
 
 extern u32 fldDamEffectPositioned;
 
-extern u32 fldYukEffectResource;
+extern struct sdfMemHandle_t *fldYukEffectResource;
 
 extern u32 fldYukEffectData;
 
-extern u32 fldYukEffectNode;
+extern EffNode *fldYukEffectNode;
 
 extern u32 fldYukEffectPositioned;
 
@@ -3936,11 +3936,11 @@ void fldLoadWeatherEffects(void) {
     handle = (s32)sdfDevLoadFileEx(s_fieldWeatherLimitPath, (u32 *)&resourceAddress, 0);
     fldWeatherLimitTexture = sdfTexSet((SdfTextureFileHeader *)(resourceAddress));
     sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)handle);
-    fldDamEffectResource = (u32)sdfDevLoadFileEx("/fld/f/bin/FH_DAM_2.EPL", &fldDamEffectData, 0);
-    fldDamEffectNode = (u32)effCreateNodeFromParameter(fldDamEffectData);
+    fldDamEffectResource = sdfDevLoadFileEx("/fld/f/bin/FH_DAM_2.EPL", &fldDamEffectData, 0);
+    fldDamEffectNode = effCreateNodeFromParameter(fldDamEffectData);
     fldDamEffectPositioned = 0;
-    fldYukEffectResource = (u32)sdfDevLoadFileEx("/fld/f/bin/YUK_2.EPL", &fldYukEffectData, 0);
-    fldYukEffectNode = (u32)effCreateNodeFromParameter(fldYukEffectData);
+    fldYukEffectResource = sdfDevLoadFileEx("/fld/f/bin/YUK_2.EPL", &fldYukEffectData, 0);
+    fldYukEffectNode = effCreateNodeFromParameter(fldYukEffectData);
     fldYukEffectPositioned = 0;
 }
 
@@ -3949,17 +3949,17 @@ void fldReleaseWeatherEffects(void) {
         sdfTexReleaseReferenceViaHandler(fldWeatherLimitTexture);
         fldWeatherLimitTexture = 0;
     }
-    dds3EffectDelete((EffNode *)(u32)fldDamEffectNode);
-    fldDamEffectNode = 0;
+    dds3EffectDelete(fldDamEffectNode);
+    fldDamEffectNode = NULL;
     fldDamEffectPositioned = 0;
-    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldDamEffectResource);
-    fldDamEffectResource = 0;
+    sdfMemFreeDelayedDirect(fldDamEffectResource);
+    fldDamEffectResource = NULL;
     fldDamEffectData = 0;
-    dds3EffectDelete((EffNode *)(u32)fldYukEffectNode);
-    fldYukEffectNode = 0;
+    dds3EffectDelete(fldYukEffectNode);
+    fldYukEffectNode = NULL;
     fldYukEffectPositioned = 0;
-    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldYukEffectResource);
-    fldYukEffectResource = 0;
+    sdfMemFreeDelayedDirect(fldYukEffectResource);
+    fldYukEffectResource = NULL;
     fldYukEffectData = 0;
 }
 
@@ -3968,30 +3968,30 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
 
     memset(pos, 0, sizeof(pos));
     pos[3] = 1.0f;
-    if (fldDamEffectNode != 0) {
+    if (fldDamEffectNode != NULL) {
         pos[0] = x;
         pos[1] = y;
         pos[2] = z;
-        dds3EffectReset((EffNode *)(u32)fldDamEffectNode);
-        effCopyVectorToNodeInstance((EffNode *)(u32)fldDamEffectNode, pos);
+        dds3EffectReset(fldDamEffectNode);
+        effCopyVectorToNodeInstance(fldDamEffectNode, pos);
         fldDamEffectPositioned = 1;
     }
-    if (fldYukEffectNode != 0) {
+    if (fldYukEffectNode != NULL) {
         pos[0] = x;
         pos[1] = y;
         pos[2] = z;
-        dds3EffectReset((EffNode *)(u32)fldYukEffectNode);
-        effCopyVectorToNodeInstance((EffNode *)(u32)fldYukEffectNode, pos);
+        dds3EffectReset(fldYukEffectNode);
+        effCopyVectorToNodeInstance(fldYukEffectNode, pos);
         fldYukEffectPositioned = 1;
     }
 }
 
 void fldUpdateWeatherEffectNodes(void) {
-    if (fldDamEffectNode != 0 && fldDamEffectPositioned != 0) {
-        dds3EffectDraw((EffNode *)(u32)fldDamEffectNode);
+    if (fldDamEffectNode != NULL && fldDamEffectPositioned != 0) {
+        dds3EffectDraw(fldDamEffectNode);
     }
-    if (fldYukEffectNode != 0 && fldYukEffectPositioned != 0) {
-        dds3EffectDraw((EffNode *)(u32)fldYukEffectNode);
+    if (fldYukEffectNode != NULL && fldYukEffectPositioned != 0) {
+        dds3EffectDraw(fldYukEffectNode);
     }
 }
 
