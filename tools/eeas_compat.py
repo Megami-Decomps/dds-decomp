@@ -29,9 +29,11 @@ cost is that those instructions carry no relocation, which is irrelevant for a
 matching (non-shiftable) build.
 
     python tools/eeas_compat.py IN.s OUT.s
+    python tools/eeas_compat.py --prefix DIR IN.s...   # each IN.s to DIR/IN.s
 """
 from __future__ import annotations
 
+import functools
 import json
 import re
 import struct
@@ -138,12 +140,9 @@ def realign_rodata(text: str, pool: Pool, unit_rodata_start: int | None) -> str:
     return "\n".join(lines)
 
 
-def unit_rodata_start(version: str, src: Path) -> int | None:
-    """Retail address of the .rodata subsegment of the unit an asm file belongs to."""
-    parts = src.resolve().parts
-    if "nonmatchings" not in parts:
-        return None
-    unit = "/".join(parts[parts.index("nonmatchings") + 1:-1])
+@functools.cache
+def rodata_start(version: str, unit: str) -> int | None:
+    """Retail address of a unit's .rodata subsegment, from the splat yaml."""
     root = Path(__file__).resolve().parent.parent
     info = json.loads((root / "config/versions.json").read_text())[version]
     yaml_text = (root / "config" / version / f"{info['serial']}.yaml").read_text()
@@ -151,21 +150,47 @@ def unit_rodata_start(version: str, src: Path) -> int | None:
     return int(m.group(1), 16) + 0xFF000 if m else None
 
 
+def unit_rodata_start(version: str, src: Path) -> int | None:
+    """Retail address of the .rodata subsegment of the unit an asm file belongs to."""
+    parts = src.resolve().parts
+    if "nonmatchings" not in parts:
+        return None
+    return rodata_start(version, "/".join(parts[parts.index("nonmatchings") + 1:-1]))
+
+
 def convert(text: str, pool: Pool | None = None) -> str:
     return "\n".join(convert_line(line, pool) for line in text.split("\n"))
 
 
-def main() -> None:
-    if len(sys.argv) != 3:
-        raise SystemExit(__doc__)
-    src, dst = Path(sys.argv[1]), Path(sys.argv[2])
+@functools.cache
+def version_pool(version: str | None) -> Pool | None:
+    return Pool(version) if version else None
+
+
+def convert_file(src: Path, dst: Path) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
     version = next((p for p in src.resolve().parts if p in ("dds1", "dds2")), None)
-    pool = Pool(version) if version else None
+    pool = version_pool(version)
     text = convert(src.read_text(), pool)
     if pool:
         text = realign_rodata(text, pool, unit_rodata_start(version, src))
     dst.write_text(text)
+
+
+def main() -> None:
+    args = sys.argv[1:]
+    # One process per translation unit: the retail ELF and the yaml are read
+    # once for all of a unit's asm files instead of once per file.
+    if args and args[0] == "--prefix":
+        if len(args) < 3:
+            raise SystemExit(__doc__)
+        prefix = Path(args[1])
+        for name in args[2:]:
+            convert_file(Path(name), prefix / name)
+        return
+    if len(args) != 2:
+        raise SystemExit(__doc__)
+    convert_file(Path(args[0]), Path(args[1]))
 
 
 if __name__ == "__main__":
