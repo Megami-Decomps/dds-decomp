@@ -237,7 +237,7 @@ void frFontEnsureSlotLoaded(s32 slotId, const char *path) {
     }
 }
 
-extern void frFontInitializeGlyphAtlas(u32 bufferBase, s32 columns, s32 rows, s32 cellWidth,
+extern s32 frFontInitializeGlyphAtlas(u32 bufferBase, s32 columns, s32 rows, s32 cellWidth,
                                        s32 cellHeight, s32 recordBytes);
 extern void frFontUploadImageBlocks(void);
 /* Native interior labels refer to fields of this single font-system owner. */
