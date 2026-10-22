@@ -654,7 +654,7 @@ extern void sdfCounterStepDownAnimationValue(void);
 extern void sdfLatchBaseVectorsForSelection(void);
 extern s32 sdfStepSelectedMapCameraTransition(void);
 extern s32 fldAdvanceLocalMapCameraTransition(void);
-extern s8 D_0037F510[];
+extern s8 kwlnTaskPadButtonStates[];
 extern s32 D_00439094;
 extern void sdfCounterAdvanceBoundedAnimationValue(void);
 extern s32 fldLmapToggleOverlay(void);
@@ -711,7 +711,7 @@ s32 fldUpdateLocalMapCounterSelection(void) {
     case 3:
         sdfCounterTickCountdownAndMapTimers();
         fldUpdateMapRequestQueues(0);
-        if (D_0037F510[0x21] < 0) {
+        if (kwlnTaskPadButtonStates[0x21] < 0) {
             D_00439094 = 55;
         }
         D_00439094++;

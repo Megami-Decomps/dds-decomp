@@ -3910,7 +3910,7 @@ s32 evtViewerPickNextHandler(KwlnTask *task) {
 }
 
 extern s16 D_003BBE7C;
-extern s8 D_00324510[];
+extern s8 kwlnTaskPadButtonStates[];
 extern void mnuAdvanceShopMenuState(struct EvtRuntime *);
 extern s32 mnuGetMoviePlaybackMode(void);
 extern s32 evtViewerPickNextHandler(KwlnTask *task);
@@ -3928,7 +3928,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
     evtEventViewerApplyEffectToggles(viewer);
     flags = viewer->flags;
     if (!(flags & 8)) {
-        if (D_00324510[0x22] < 0) {
+        if (kwlnTaskPadButtonStates[0x22] < 0) {
             viewer->flags = flags | 1;
             evtViewerDispatchFlagMode(viewer);
             viewer->actionMode = 0;
@@ -3943,7 +3943,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
             viewer->flags = flags & ~1;
             evtViewerDispatchFlagMode(viewer);
         }
-        if (D_00324510[0x22] >= 0 && D_00324510[0x2C] < 0 &&
+        if (kwlnTaskPadButtonStates[0x22] >= 0 && kwlnTaskPadButtonStates[0x2C] < 0 &&
             evtViewerHasUpdateFlag(viewer) == 0) {
             evtEventViewerStartEndCountdown(viewer);
         }

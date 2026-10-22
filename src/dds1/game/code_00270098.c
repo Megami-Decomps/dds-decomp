@@ -204,7 +204,7 @@ void mnuDrawMovieProgressCounter(void) {
     }
 }
 
-extern u8 D_00324510[2][2][16];
+extern u8 kwlnTaskPadButtonStates[2][2][16];
 extern SdfMovieDescriptor mnuMovieViewerDrawDescriptor;
 extern u16 D_003BD3A0[4];
 extern u16 D_003BD8E4;
@@ -215,19 +215,19 @@ s32 mnuMovieViewer(void) {
     MnuMovieListNode *node;
     s32 nextTop;
 
-    if ((s8)D_00324510[1][0][0x0D] != 0) {
+    if ((s8)kwlnTaskPadButtonStates[1][0][0x0D] != 0) {
         mnuMovieDrawContext.soundNode.playbackCadenceStep = 1;
     } else {
         mnuMovieDrawContext.soundNode.playbackCadenceStep = 0x1E;
     }
 
-    if ((s8)D_00324510[1][0][0x08] < 0) {
+    if ((s8)kwlnTaskPadButtonStates[1][0][0x08] < 0) {
         mnuMovieViewerDrawDescriptor.unk00 = 0x7000;
         mnuMovieViewerDrawDescriptor.unk02 = 0x7900;
         mnuMovieViewerDrawDescriptor.unk08 = 0x2000;
         mnuMovieViewerDrawDescriptor.unk0A = 0x0E00;
     }
-    if ((s8)D_00324510[1][0][0x0A] < 0) {
+    if ((s8)kwlnTaskPadButtonStates[1][0][0x0A] < 0) {
         mnuMovieViewerDrawDescriptor.unk00 = 0x7000;
         mnuMovieViewerDrawDescriptor.unk02 = 0x7B00;
         mnuMovieViewerDrawDescriptor.unk08 = 0x2000;
@@ -243,7 +243,7 @@ s32 mnuMovieViewer(void) {
                 mnuMovieList.playing = 0;
             }
         }
-    } else if ((s8)D_00324510[1][0][0x01] < 0 || (s8)D_00324510[1][0][0x08] < 0 || (s8)D_00324510[1][0][0x0A] < 0) {
+    } else if ((s8)kwlnTaskPadButtonStates[1][0][0x01] < 0 || (s8)kwlnTaskPadButtonStates[1][0][0x08] < 0 || (s8)kwlnTaskPadButtonStates[1][0][0x0A] < 0) {
         node = mnuGetMovieListNodeAtOffset();
         if (node != NULL) {
             mnuStopMovieDrawTask();
@@ -253,13 +253,13 @@ s32 mnuMovieViewer(void) {
             mnuStopMovieDrawTask();
             mnuRequestIndexedMovieResource(0);
         }
-    } else if (((u8)D_00324510[1][0][0x07] & 2) != 0 && mnuMovieList.cursor < mnuMovieList.total - 1) {
+    } else if (((u8)kwlnTaskPadButtonStates[1][0][0x07] & 2) != 0 && mnuMovieList.cursor < mnuMovieList.total - 1) {
         mnuMovieList.cursor++;
         nextTop = mnuMovieList.cursor - 7;
         if (mnuMovieList.top < nextTop) {
             mnuMovieList.top = nextTop;
         }
-    } else if (((u8)D_00324510[1][0][0x06] & 2) != 0 && mnuMovieList.cursor > 0) {
+    } else if (((u8)kwlnTaskPadButtonStates[1][0][0x06] & 2) != 0 && mnuMovieList.cursor > 0) {
         mnuMovieList.cursor--;
         if (mnuMovieList.cursor < mnuMovieList.top) {
             mnuMovieList.top = mnuMovieList.cursor;

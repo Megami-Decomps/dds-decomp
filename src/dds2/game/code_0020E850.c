@@ -84,7 +84,7 @@ extern void btlAppendSelectedOrCurrentActorTarget(s32, s32);
 extern void btlSelectTargetsByMode(s32, s32);
 
 
-extern s8 D_0037F510[];
+extern s8 kwlnTaskPadButtonStates[];
 
 extern u32 btlRequestAnalysisPanelClose(void);
 
@@ -1168,7 +1168,7 @@ s32 btlWaitEffectTask(void *arguments) {
     }
     if (task->elapsedTicks >= 0x11) {
         if (btlGetRegisteredTaskValueOrDefault() == 1) {
-            if (D_0037F510[0x21] < 0 || D_0037F510[0x23] < 0) {
+            if (kwlnTaskPadButtonStates[0x21] < 0 || kwlnTaskPadButtonStates[0x23] < 0) {
                 btlSetCommandPanelFadeMode(1, 8);
                 btlRequestAnalysisPanelClose();
                 return 1;

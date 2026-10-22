@@ -416,7 +416,7 @@ void sdfCounterTickCountdownAndMapTimers(void) {
     sdfCounterTickPositionTransition();
 }
 
-extern s8 D_00324510[];
+extern s8 kwlnTaskPadButtonStates[];
 extern s32 D_003BD240;
 extern s8 D_003BD280;
 extern void mnuClearListFlagsOneAndTwo(u32 *);
@@ -430,7 +430,7 @@ s32 sdfHandleMapCounterSelectionInput(void) {
     s32 channelIndex;
     s32 previousIndex;
 
-    if (D_00324510[0x26] < 0 || (D_00324510[0x26] & 2)) {
+    if (kwlnTaskPadButtonStates[0x26] < 0 || (kwlnTaskPadButtonStates[0x26] & 2)) {
         previousIndex = sdfActiveCounterRuntime->cursor->index;
         if (mnuRetreatListCursorDefault(sdfActiveCounterRuntime) != NULL) {
             channelIndex = sdfActiveCounterRuntime->cursor->index;
@@ -440,7 +440,7 @@ s32 sdfHandleMapCounterSelectionInput(void) {
             sndSetSequenceVolumePan(0, 127, 63);
         }
     }
-    if (D_00324510[0x27] < 0 || (D_00324510[0x27] & 2)) {
+    if (kwlnTaskPadButtonStates[0x27] < 0 || (kwlnTaskPadButtonStates[0x27] & 2)) {
         previousIndex = sdfActiveCounterRuntime->cursor->index;
         if (mnuAdvanceListCursorDefault(sdfActiveCounterRuntime) != NULL) {
             channelIndex = sdfActiveCounterRuntime->cursor->index;
@@ -450,7 +450,7 @@ s32 sdfHandleMapCounterSelectionInput(void) {
                 channelIndex * (sdfActiveCounterRuntime->rowStep >> 3));
         }
     }
-    if (D_00324510[0x23] < 0) {
+    if (kwlnTaskPadButtonStates[0x23] < 0) {
         sdfCounterSetMode(sdfActiveCounterRuntime->cursor->index);
         channelIndex = sdfActiveCounterRuntime->cursor->index;
         if (D_003BD240 != channelIndex) {
@@ -460,13 +460,13 @@ s32 sdfHandleMapCounterSelectionInput(void) {
         sdfSetSelectedIndex(D_003BD240);
         sndSetSequenceVolumePan(10, 127, 63);
     }
-    if (D_00324510[0x21] < 0) {
+    if (kwlnTaskPadButtonStates[0x21] < 0) {
         sndSetSequenceVolumePan(8, 127, 63);
         sdfSetSelectedIndex(sdfActiveCounterRuntime->cursor->index);
         return -2;
     }
     mnuSetMapTimerFlags(sdfCounterGetSelectionBoundaryFlags());
-    if (D_00324510[0x26] == 0 && D_00324510[0x27] == 0) {
+    if (kwlnTaskPadButtonStates[0x26] == 0 && kwlnTaskPadButtonStates[0x27] == 0) {
         mnuClearListFlagsOneAndTwo(&sdfActiveCounterRuntime->stateFlags);
     }
     if (D_003BD280 < 11) {
@@ -498,7 +498,7 @@ s32 sdfAdjustCounterValueAndRedraw(s32 decrease) {
     evtSetDrawSurfaceIndex(0x53);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     color = ((u32)((1.0f - progress) * 128.0f) << 24) | 0x808080U;
-    kwlnDrawTexturedColorQuad(x, 0x77, 0xAA, 0xA3, 9, 0x151, 0xAA, 0xA3,
+    evtSubmitTexturedGradientQuad(x, 0x77, 0xAA, 0xA3, 9, 0x151, 0xAA, 0xA3,
                   color, color, color, color, fldLocalMapTextureResource.texture);
     evtSetDrawSurfaceIndex(0x54);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
@@ -673,7 +673,7 @@ void mnuDrawMapCounterTimerHints(void) {
         value = 0.0f;
     }
     value *= fade;
-    kwlnDrawTexturedColorQuad(displacement + 11, 122, 17, 14, 204, 339, 17, 14,
+    evtSubmitTexturedGradientQuad(displacement + 11, 122, 17, 14, 204, 339, 17, 14,
                   ((u32)(value * 128.0f) << 24) | 0x808080,
                   ((u32)(value * 128.0f) << 24) | 0x808080,
                   ((u32)(value * 128.0f) << 24) | 0x808080,
@@ -691,7 +691,7 @@ void mnuDrawMapCounterTimerHints(void) {
         value = 0.0f;
     }
     value *= fade;
-    kwlnDrawTexturedColorQuad(displacement + 11, 257, 17, 14, 224, 339, 17, 14,
+    evtSubmitTexturedGradientQuad(displacement + 11, 257, 17, 14, 224, 339, 17, 14,
                   ((u32)(value * 128.0f) << 24) | 0x808080,
                   ((u32)(value * 128.0f) << 24) | 0x808080,
                   ((u32)(value * 128.0f) << 24) | 0x808080,
@@ -758,7 +758,7 @@ void sdfCounterDrawSelectedTimerFade(s32 unused, s32 x, f32 fade) {
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     evtSubmitPrimaryAlphaBlendMode(1);
     shrink = (1.0f - grow) * 8.5f;
-    kwlnDrawTexturedColorQuad((s32)(shrink + 13.0f), (s32)((f32)(x - offset + timer->y + 7) + shrink), (s32)(grow * 17.0f), (s32)(grow * 17.0f),
+    evtSubmitTexturedGradientQuad((s32)(shrink + 13.0f), (s32)((f32)(x - offset + timer->y + 7) + shrink), (s32)(grow * 17.0f), (s32)(grow * 17.0f),
                   0xB6, 0x151, 0x11, 0x11,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,

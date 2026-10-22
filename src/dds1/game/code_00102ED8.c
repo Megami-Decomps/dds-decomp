@@ -324,7 +324,7 @@ s32 kwlnConfigureNamedSlotMode2(const char *name, TaskUpdate update, TaskDestroy
 void kwlnRuntimeStartupHook(void) {
 }
 
-extern s8 D_00324510[64];
+extern s8 kwlnTaskPadButtonStates[64];
 
 /* Fresh presses wrap; repeat-bit input stops at the implemented end bounds.
  * Without scrolling, forward motion is bounded by visibleRows, not itemCount. */
@@ -338,7 +338,7 @@ void kwlnStepListCursor(s32 *scrollOffset, s32 *cursorRow, s32 itemCount, s32 vi
     if (itemCount < 2) {
         return;
     }
-    backwardState = D_00324510[backwardInput + padSet * KWLN_PAD_INPUTS_PER_SET];
+    backwardState = kwlnTaskPadButtonStates[backwardInput + padSet * KWLN_PAD_INPUTS_PER_SET];
     if (backwardState < 0) {
         if (scrollOffset == NULL) {
             if (*cursorRow > 0) {
@@ -358,7 +358,7 @@ void kwlnStepListCursor(s32 *scrollOffset, s32 *cursorRow, s32 itemCount, s32 vi
         } else {
             *cursorRow = itemCount - 1;
         }
-    } else if (D_00324510[backwardInput + padSet * KWLN_PAD_INPUTS_PER_SET] & KWLN_PAD_REPEAT_BIT) {
+    } else if (kwlnTaskPadButtonStates[backwardInput + padSet * KWLN_PAD_INPUTS_PER_SET] & KWLN_PAD_REPEAT_BIT) {
         if (scrollOffset == NULL) {
             if (*cursorRow > 0) {
                 (*cursorRow)--;
@@ -369,7 +369,7 @@ void kwlnStepListCursor(s32 *scrollOffset, s32 *cursorRow, s32 itemCount, s32 vi
             (*scrollOffset)--;
         }
     }
-    forwardState = D_00324510[forwardInput + padSet * KWLN_PAD_INPUTS_PER_SET];
+    forwardState = kwlnTaskPadButtonStates[forwardInput + padSet * KWLN_PAD_INPUTS_PER_SET];
     if (forwardState < 0) {
         if (scrollOffset == NULL) {
             if (*cursorRow < visibleRows - 1) {
@@ -385,7 +385,7 @@ void kwlnStepListCursor(s32 *scrollOffset, s32 *cursorRow, s32 itemCount, s32 vi
             *scrollOffset = 0;
             *cursorRow = 0;
         }
-    } else if (D_00324510[forwardInput + padSet * KWLN_PAD_INPUTS_PER_SET] & KWLN_PAD_REPEAT_BIT) {
+    } else if (kwlnTaskPadButtonStates[forwardInput + padSet * KWLN_PAD_INPUTS_PER_SET] & KWLN_PAD_REPEAT_BIT) {
         if (scrollOffset == NULL) {
             if (*cursorRow < visibleRows - 1) {
                 (*cursorRow)++;
@@ -404,17 +404,17 @@ s32 kwlnStepTwoListCursors(s32 padSet, s32 secondaryCount, s32 primaryCount, s32
     kwlnStepListCursor(primaryScroll, primaryCursor, primaryCount, primaryVisible, padSet, 7, 6);
     kwlnStepListCursor(secondaryScroll, secondaryCursor, secondaryCount, secondaryVisible, padSet, 5, 4);
     if (padSet == 0) {
-        if (D_00324510[1] < 0) {
+        if (kwlnTaskPadButtonStates[1] < 0) {
             return 1;
         }
-        if (D_00324510[3] < 0) {
+        if (kwlnTaskPadButtonStates[3] < 0) {
             return -1;
         }
     } else {
-        if (D_00324510[KWLN_ALT_CONFIRM_INPUT] < 0) {
+        if (kwlnTaskPadButtonStates[KWLN_ALT_CONFIRM_INPUT] < 0) {
             return 1;
         }
-        if (D_00324510[KWLN_ALT_CANCEL_INPUT] < 0) {
+        if (kwlnTaskPadButtonStates[KWLN_ALT_CANCEL_INPUT] < 0) {
             return -1;
         }
     }
@@ -465,7 +465,7 @@ void kwlnPadResetInputAndMotorState(void) {
         for (bank = 0; bank < 2; bank++) {
             for (i = 0; i < 16; i++) {
                 kwlnPadButtonStates[bank][port][i] = 0;
-                D_00324510[bank * 32 + port * 16 + i] = 0;
+                kwlnTaskPadButtonStates[bank * 32 + port * 16 + i] = 0;
                 inputTimers[bank * 2 + port][i] = 0;
             }
         }

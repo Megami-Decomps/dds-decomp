@@ -1538,7 +1538,7 @@ void mnuInitPartyPanelSlots(PartyPanel *panel) {
     }
 }
 
-extern s8 D_00324510[];
+extern s8 kwlnTaskPadButtonStates[];
 extern u8 D_00324530[];
 
 /* Translate requested inputs using native sign-bit/trigger-bit and nonzero tests.
@@ -1547,12 +1547,12 @@ s32 mnuMapPadMaskToFlags(s32 buttonMask) {
     s32 inputFlags = 0;
 
     if (buttonMask & MNU_INPUT_PRIORITY_BIT) {
-        if (D_00324510[0x21] < 0) {
+        if (kwlnTaskPadButtonStates[0x21] < 0) {
             inputFlags = MNU_INPUT_PRIORITY_BIT;
         }
     }
     if (buttonMask & 0x2) {
-        if (D_00324510[0x23] < 0) {
+        if (kwlnTaskPadButtonStates[0x23] < 0) {
             inputFlags |= 0x2;
         }
     }
@@ -1577,12 +1577,12 @@ s32 mnuMapPadMaskToFlags(s32 buttonMask) {
         }
     }
     if (buttonMask & 0x4) {
-        if (D_00324510[0x22] < 0) {
+        if (kwlnTaskPadButtonStates[0x22] < 0) {
             inputFlags |= 0x4;
         }
     }
     if (buttonMask & 0x8) {
-        if (D_00324510[0x20] < 0) {
+        if (kwlnTaskPadButtonStates[0x20] < 0) {
             inputFlags |= 0x8;
         }
     }
@@ -1607,70 +1607,70 @@ s32 mnuMapPadMaskToFlags(s32 buttonMask) {
         }
     }
     if (buttonMask & 0x1000) {
-        if (D_00324510[0x2C] < 0) {
+        if (kwlnTaskPadButtonStates[0x2C] < 0) {
             inputFlags |= 0x1000;
         }
     }
     if (buttonMask & 0x2000) {
-        if (D_00324510[0x2D] < 0) {
+        if (kwlnTaskPadButtonStates[0x2D] < 0) {
             inputFlags |= 0x2000;
         }
     }
     if (buttonMask & 0x20000) {
-        if (D_00324510[0x2A] < 0) {
+        if (kwlnTaskPadButtonStates[0x2A] < 0) {
             inputFlags |= 0x20000;
         }
     }
     if (buttonMask & 0x10000) {
-        if (D_00324510[0x28] < 0) {
+        if (kwlnTaskPadButtonStates[0x28] < 0) {
             inputFlags |= 0x10000;
         }
     }
     if (buttonMask & 0x80000) {
-        if (D_00324510[0x2B] < 0) {
+        if (kwlnTaskPadButtonStates[0x2B] < 0) {
             inputFlags |= 0x80000;
         }
     }
     if (buttonMask & 0x40000) {
-        if (D_00324510[0x29] < 0) {
+        if (kwlnTaskPadButtonStates[0x29] < 0) {
             inputFlags |= 0x40000;
         }
     }
     if (buttonMask & 0x10) {
-        if (D_00324510[0x26] != 0) {
+        if (kwlnTaskPadButtonStates[0x26] != 0) {
             inputFlags |= 0x100000;
         }
     }
     if (buttonMask & 0x20) {
-        if (D_00324510[0x27] != 0) {
+        if (kwlnTaskPadButtonStates[0x27] != 0) {
             inputFlags |= 0x200000;
         }
     }
     if (buttonMask & 0x40) {
-        if (D_00324510[0x24] != 0) {
+        if (kwlnTaskPadButtonStates[0x24] != 0) {
             inputFlags |= 0x400000;
         }
     }
     if (buttonMask & 0x80) {
-        if (D_00324510[0x25] != 0) {
+        if (kwlnTaskPadButtonStates[0x25] != 0) {
             inputFlags |= 0x800000;
         }
-        if (D_00324510[0x2A] != 0) {
+        if (kwlnTaskPadButtonStates[0x2A] != 0) {
             inputFlags |= 0x1000000;
         }
     }
     if (buttonMask & 0x40) {
-        if (D_00324510[0x28] != 0) {
+        if (kwlnTaskPadButtonStates[0x28] != 0) {
             inputFlags |= 0x2000000;
         }
     }
     if (buttonMask & 0x80) {
-        if (D_00324510[0x2B] != 0) {
+        if (kwlnTaskPadButtonStates[0x2B] != 0) {
             inputFlags |= 0x4000000;
         }
     }
     if (buttonMask & 0x40) {
-        if (D_00324510[0x29] != 0) {
+        if (kwlnTaskPadButtonStates[0x29] != 0) {
             inputFlags |= 0x8000000;
         }
     }
@@ -2935,7 +2935,7 @@ void evtStageTestDrawCameraTransformDebug(void) {
     if (world == NULL) {
         return;
     }
-    if (D_00324510[0x2D] < 0) {
+    if (kwlnTaskPadButtonStates[0x2D] < 0) {
         if (D_003BC7BC != 0) {
             D_003BC7BC = 0;
         } else {
@@ -2949,7 +2949,7 @@ void evtStageTestDrawCameraTransformDebug(void) {
     if (camera == NULL) {
         return;
     }
-    if (D_00324510[0x20] < 0) {
+    if (kwlnTaskPadButtonStates[0x20] < 0) {
         if (camera->next != NULL) {
             camera = camera->next;
         } else {
@@ -2957,7 +2957,7 @@ void evtStageTestDrawCameraTransformDebug(void) {
         }
         dds3SetWorldCameraObject((EffWorldNode *)dds3GetWorldObject(), camera);
         sdfSetViewFieldOfView(dds3GetCameraFieldOfView(camera));
-    } else if (D_00324510[0x22] < 0) {
+    } else if (kwlnTaskPadButtonStates[0x22] < 0) {
         if (camera->previous != NULL) {
             camera = camera->previous;
         } else {
@@ -3019,20 +3019,20 @@ s32 evtBattleStageTestScreen(KwlnTask *task) {
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
     D_00325708.append(&D_00325708, packetList);
-    if (D_00324510[0x21] < 0) {
+    if (kwlnTaskPadButtonStates[0x21] < 0) {
         evtCreateWorldObjectForKey(D_003BC7D0, D_003BC7D4);
         return (s32)evtCreateBattleStageTestCamera;
     }
-    if (D_00324510[0x25] & MNU_PAD_TRIGGER_BIT) {
+    if (kwlnTaskPadButtonStates[0x25] & MNU_PAD_TRIGGER_BIT) {
         D_003BC7D0++;
     }
-    if (D_00324510[0x24] & MNU_PAD_TRIGGER_BIT) {
+    if (kwlnTaskPadButtonStates[0x24] & MNU_PAD_TRIGGER_BIT) {
         D_003BC7D0--;
     }
-    if (D_00324510[0x2A] & MNU_PAD_TRIGGER_BIT) {
+    if (kwlnTaskPadButtonStates[0x2A] & MNU_PAD_TRIGGER_BIT) {
         D_003BC7D4++;
     }
-    if (D_00324510[0x28] & MNU_PAD_TRIGGER_BIT) {
+    if (kwlnTaskPadButtonStates[0x28] & MNU_PAD_TRIGGER_BIT) {
         D_003BC7D4--;
     }
     return 0;

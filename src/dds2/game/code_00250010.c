@@ -106,7 +106,7 @@ extern void *D_0043653C;
 extern void *D_00436520;
 
 
-extern EvtPad D_0037F510;
+extern EvtPad kwlnTaskPadButtonStates;
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern char D_004233F0[]; /* " RR  = ENTER" */
 extern char D_00423400[]; /* " RD  = CANCEL" */
@@ -344,21 +344,21 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->actionMode != 8) {
         return 0;
     }
-    if (D_0037F510.confirm < 0) {
+    if (kwlnTaskPadButtonStates.confirm < 0) {
         return 1;
     }
-    if (D_0037F510.cancel < 0) {
+    if (kwlnTaskPadButtonStates.cancel < 0) {
         return -1;
     }
     step = 0.0f;
-    if (D_0037F510.decOne & 2) {
+    if (kwlnTaskPadButtonStates.decOne & 2) {
         step = -0.1f;
-    } else if (D_0037F510.incOne & 2) {
+    } else if (kwlnTaskPadButtonStates.incOne & 2) {
         step = 0.1f;
     }
-    if (D_0037F510.decTen & 2) {
+    if (kwlnTaskPadButtonStates.decTen & 2) {
         step = -1.0f;
-    } else if (D_0037F510.incTen & 2) {
+    } else if (kwlnTaskPadButtonStates.incTen & 2) {
         step = 1.0f;
     }
     ctx->floatValue += step;
@@ -411,22 +411,22 @@ s32 evtUpdateValueChangeDialog(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->actionMode != 7) {
         return 0;
     }
-    if (D_0037F510.confirm < 0) {
+    if (kwlnTaskPadButtonStates.confirm < 0) {
         return 1;
     }
-    if (D_0037F510.cancel < 0) {
+    if (kwlnTaskPadButtonStates.cancel < 0) {
         return -1;
     }
-    if (D_0037F510.decOne & 2) {
+    if (kwlnTaskPadButtonStates.decOne & 2) {
         step = -1;
-    } else if (D_0037F510.incOne & 2) {
+    } else if (kwlnTaskPadButtonStates.incOne & 2) {
         step = 1;
     } else {
         step = 0;
     }
-    if (D_0037F510.decTen & 2) {
+    if (kwlnTaskPadButtonStates.decTen & 2) {
         step = -10;
-    } else if (D_0037F510.incTen & 2) {
+    } else if (kwlnTaskPadButtonStates.incTen & 2) {
         step = 10;
     }
     ctx->value += step;
@@ -488,30 +488,30 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->actionMode != 6) {
         return 0;
     }
-    if (D_0037F510.confirm < 0) {
+    if (kwlnTaskPadButtonStates.confirm < 0) {
         return 1;
     }
-    if (D_0037F510.cancel < 0) {
+    if (kwlnTaskPadButtonStates.cancel < 0) {
         return -1;
     }
-    if (D_0037F510.decOne & 2) {
+    if (kwlnTaskPadButtonStates.decOne & 2) {
         step = -1;
-    } else if (D_0037F510.incOne & 2) {
+    } else if (kwlnTaskPadButtonStates.incOne & 2) {
         step = 1;
     } else {
         step = 0;
     }
-    if (D_0037F510.decTen & 2) {
+    if (kwlnTaskPadButtonStates.decTen & 2) {
         step = -10;
-    } else if (D_0037F510.incTen & 2) {
+    } else if (kwlnTaskPadButtonStates.incTen & 2) {
         step = 10;
     }
-    if (D_0037F510.decHun & 2) {
+    if (kwlnTaskPadButtonStates.decHun & 2) {
         step = -100;
-    } else if (D_0037F510.incHun & 2) {
+    } else if (kwlnTaskPadButtonStates.incHun & 2) {
         step = 100;
     }
-    if (D_0037F510.syncKey < 0) {
+    if (kwlnTaskPadButtonStates.syncKey < 0) {
         step = ctx->curFrame - ctx->value;
     }
     ctx->value += step;
@@ -521,7 +521,7 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->value >= ctx->valueMax) {
         ctx->value = ctx->valueMax;
     }
-    if (D_0037F510.apply != 0) {
+    if (kwlnTaskPadButtonStates.apply != 0) {
         if (ctx->curFrame != ctx->value) {
             ctx->curFrame = ctx->value;
             evtViewerDispatchFlagMode(ctx);
@@ -793,13 +793,13 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->actionMode != 9) {
         return 0;
     }
-    if (D_0037F510.decTen < 0) {
+    if (kwlnTaskPadButtonStates.decTen < 0) {
         ctx->charRow ^= 1;
     }
-    if (D_0037F510.incTen < 0) {
+    if (kwlnTaskPadButtonStates.incTen < 0) {
         ctx->charRow ^= 1;
     }
-    if (D_0037F510.decOne & 2) {
+    if (kwlnTaskPadButtonStates.decOne & 2) {
         switch (ctx->charRow) {
         case 0:
             if (D_004372B0 >= 0x1F5) {
@@ -813,7 +813,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
             break;
         }
     }
-    if (D_0037F510.incOne & 2) {
+    if (kwlnTaskPadButtonStates.incOne & 2) {
         switch (ctx->charRow) {
         case 0:
             if (D_004372B0 < 0x3E7) {
@@ -827,7 +827,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
             break;
         }
     }
-    if (D_0037F510.decHun & 2) {
+    if (kwlnTaskPadButtonStates.decHun & 2) {
         switch (ctx->charRow) {
         case 0:
             if (D_004372B0 >= 0x1F5) {
@@ -851,7 +851,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
             break;
         }
     }
-    if (D_0037F510.incHun & 2) {
+    if (kwlnTaskPadButtonStates.incHun & 2) {
         switch (ctx->charRow) {
         case 0:
             D_004372B0 += 100;
@@ -861,13 +861,13 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
             break;
         }
     }
-    if (D_0037F510.confirm < 0) {
+    if (kwlnTaskPadButtonStates.confirm < 0) {
         return 1;
     }
-    if (D_0037F510.cancel < 0) {
+    if (kwlnTaskPadButtonStates.cancel < 0) {
         return -1;
     }
-    if (D_0037F510.syncKey < 0) {
+    if (kwlnTaskPadButtonStates.syncKey < 0) {
         D_004372B0 = 0x258;
     }
     return 0;
@@ -1482,11 +1482,11 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
         shown = group->childCount + 1;
     }
     if (evtIsMenuTableEntryEnabled(&group->type) == 1) {
-        if (D_0037F510.decTen < 0) {
+        if (kwlnTaskPadButtonStates.decTen < 0) {
             if (ctx->frameCursor + ctx->frameFirst == 0) {
                 return -4;
             }
-        } else if (D_0037F510.incTen < 0) {
+        } else if (kwlnTaskPadButtonStates.incTen < 0) {
             count = 0;
             for (node = group->children; node != NULL; node = node->next) {
                 count++;
@@ -1499,10 +1499,10 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     result = kwlnStepTwoListCursors(0, columns, group->childCount + 1,
                                   columns, shown, NULL, &ctx->frameCursor,
                                   &ctx->frameColumn, &ctx->frameFirst);
-    if (D_0037F510.syncKey < 0) {
+    if (kwlnTaskPadButtonStates.syncKey < 0) {
         result = -2;
     }
-    if (D_0037F510.select < 0) {
+    if (kwlnTaskPadButtonStates.select < 0) {
         result = -3;
     }
     return result;
@@ -1744,9 +1744,9 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
     field = ctx->messageField;
     if (field != 0) {
         if (field == 1) {
-            if (D_0037F510.decOne & 2) {
+            if (kwlnTaskPadButtonStates.decOne & 2) {
                 branch = branch == 0 ? 0xA : branch - 1;
-            } else if (D_0037F510.incOne & 2) {
+            } else if (kwlnTaskPadButtonStates.incOne & 2) {
                 branch = branch >= 0xA ? 0 : branch + 1;
             }
             ctx->value &= 0xFFF;
@@ -1754,9 +1754,9 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
         }
     } else {
         delta = 0;
-        if (D_0037F510.decOne & 2) {
+        if (kwlnTaskPadButtonStates.decOne & 2) {
             delta = -1;
-        } else if (D_0037F510.incOne & 2) {
+        } else if (kwlnTaskPadButtonStates.incOne & 2) {
             delta = 1;
         }
         number += delta;
@@ -1768,10 +1768,10 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
         }
         ctx->value = number | (branch << 12);
     }
-    if ((D_0037F510.decTen & 2) || (D_0037F510.incTen & 2)) {
+    if ((kwlnTaskPadButtonStates.decTen & 2) || (kwlnTaskPadButtonStates.incTen & 2)) {
         ctx->messageField = !field;
     }
-    if (D_0037F510.confirm < 0) {
+    if (kwlnTaskPadButtonStates.confirm < 0) {
         handle = ctx->windowContext->handle;
         if (handle != -1) {
             if (branch == 0) {
@@ -1783,7 +1783,7 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
             }
         }
     }
-    return D_0037F510.cancel >= 0 ? 0 : -1;
+    return kwlnTaskPadButtonStates.cancel >= 0 ? 0 : -1;
 }
 
 
@@ -1846,9 +1846,9 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
     field = ctx->compareField;
     switch (field) {
     case 0:
-        if (D_0037F510.decOne & 2) {
+        if (kwlnTaskPadButtonStates.decOne & 2) {
             branch = branch == 0 ? 0xA : branch - 1;
-        } else if (D_0037F510.incOne & 2) {
+        } else if (kwlnTaskPadButtonStates.incOne & 2) {
             branch = branch >= 0xA ? 0 : branch + 1;
         }
         ctx->value &= 0xFFF;
@@ -1856,9 +1856,9 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
         break;
     case 1:
         delta = 0;
-        if (D_0037F510.decOne & 2) {
+        if (kwlnTaskPadButtonStates.decOne & 2) {
             delta = -1;
-        } else if (D_0037F510.incOne & 2) {
+        } else if (kwlnTaskPadButtonStates.incOne & 2) {
             delta = 1;
         }
         number += delta;
@@ -1871,13 +1871,13 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
         ctx->value = number | (branch << 12);
         break;
     }
-    if ((D_0037F510.decTen & 2) || (D_0037F510.incTen & 2)) {
+    if ((kwlnTaskPadButtonStates.decTen & 2) || (kwlnTaskPadButtonStates.incTen & 2)) {
         ctx->compareField = !field;
     }
-    if (D_0037F510.confirm < 0) {
+    if (kwlnTaskPadButtonStates.confirm < 0) {
         return 1;
     }
-    return D_0037F510.cancel >= 0 ? 0 : -1;
+    return kwlnTaskPadButtonStates.cancel >= 0 ? 0 : -1;
 }
 
 s32 evtIsMenuTableEntryEnabled(s32 *index) {
@@ -1973,19 +1973,19 @@ s32 evtUpdateGroupPropertyDialog(s32 x, s32 y, EvtRuntime *runtime) {
         column = runtime->tableColumn = D_003C9730[group->type].columnCount - 1;
     }
     field = D_003C9730[group->type].columns[column];
-    if (D_0037F510.incOne < 0) {
+    if (kwlnTaskPadButtonStates.incOne < 0) {
         if (column < D_003C9730[group->type].columnCount - 1) {
             runtime->tableColumn = column + 1;
         } else {
             runtime->tableColumn = 0;
         }
-    } else if (D_0037F510.decOne < 0) {
+    } else if (kwlnTaskPadButtonStates.decOne < 0) {
         if (column > 0) {
             runtime->tableColumn = column - 1;
         } else {
             runtime->tableColumn = D_003C9730[group->type].columnCount == 0 ? 0 : D_003C9730[group->type].columnCount - 1;
         }
-    } else if (D_0037F510.confirm < 0) {
+    } else if (kwlnTaskPadButtonStates.confirm < 0) {
         switch (field) {
         case 0:
             runtime->value = runtime->frameGroup->metadata.value;
@@ -2009,7 +2009,7 @@ s32 evtUpdateGroupPropertyDialog(s32 x, s32 y, EvtRuntime *runtime) {
             break;
         }
         return 1;
-    } else if (D_0037F510.frameEnd < 0) {
+    } else if (kwlnTaskPadButtonStates.frameEnd < 0) {
         if (column == 0) {
             runtime->frameColumn = 0;
         } else {
@@ -2027,7 +2027,7 @@ s32 evtUpdateGroupPropertyDialog(s32 x, s32 y, EvtRuntime *runtime) {
             runtime->frameCursor = 0;
         }
         return -1;
-    } else if (D_0037F510.frameStart < 0) {
+    } else if (kwlnTaskPadButtonStates.frameStart < 0) {
         if (column == 0) {
             runtime->frameColumn = 0;
         } else {
@@ -2037,7 +2037,7 @@ s32 evtUpdateGroupPropertyDialog(s32 x, s32 y, EvtRuntime *runtime) {
         runtime->frameFirst = 0;
         return -1;
     }
-    return D_0037F510.cancel >= 0 ? 0 : -1;
+    return kwlnTaskPadButtonStates.cancel >= 0 ? 0 : -1;
 }
 
 s32 mnuDrawMotionChangeLabel(SdfListHead *target, s32 x, s32 y) {
@@ -2338,13 +2338,13 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->actionMode != 0x10) {
         return 0;
     }
-    if (D_0037F510.decTen & 2) {
+    if (kwlnTaskPadButtonStates.decTen & 2) {
         if (ctx->fieldIndex == 0) {
             ctx->fieldIndex = 3;
         } else {
             ctx->fieldIndex = ctx->fieldIndex - 1;
         }
-    } else if (D_0037F510.incTen & 2) {
+    } else if (kwlnTaskPadButtonStates.incTen & 2) {
         if (ctx->fieldIndex == 3) {
             ctx->fieldIndex = 0;
         } else {
@@ -2355,7 +2355,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
     count = mdlGetNodeRefHalf((MdlCtx *)model, packed.bits.group);
     switch (ctx->fieldIndex) {
     case 0:
-        if (D_0037F510.incOne & 2) {
+        if (kwlnTaskPadButtonStates.incOne & 2) {
             do {
                 if (packed.bits.group < 3) {
                     packed.bits.group = packed.bits.group + 1;
@@ -2363,7 +2363,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
                     packed.bits.group = 0;
                 }
             } while (mdlFindNodeById(model, packed.bits.group) == NULL);
-        } else if (D_0037F510.decOne & 2) {
+        } else if (kwlnTaskPadButtonStates.decOne & 2) {
             do {
                 if (packed.bits.group > 0) {
                     packed.bits.group = packed.bits.group - 1;
@@ -2377,13 +2377,13 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
         }
         break;
     case 1:
-        if (D_0037F510.incOne & 2) {
+        if (kwlnTaskPadButtonStates.incOne & 2) {
             if (packed.bits.motion >= count - 1) {
                 packed.bits.motion = 0;
             } else {
                 packed.bits.motion = packed.bits.motion + 1;
             }
-        } else if (D_0037F510.decOne & 2) {
+        } else if (kwlnTaskPadButtonStates.decOne & 2) {
             if (packed.bits.motion > 0) {
                 packed.bits.motion = packed.bits.motion - 1;
             } else {
@@ -2392,19 +2392,19 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
         }
         break;
     case 2:
-        if ((D_0037F510.incOne & 2) || (D_0037F510.decOne & 2)) {
+        if ((kwlnTaskPadButtonStates.incOne & 2) || (kwlnTaskPadButtonStates.decOne & 2)) {
             packed.bits.loop = packed.bits.loop == 0;
         }
         break;
     case 3:
-        if (D_0037F510.incOne & 2) {
+        if (kwlnTaskPadButtonStates.incOne & 2) {
             if (packed.bits.hokan < 0x64) {
                 packed.bits.hokan = packed.bits.hokan + 1;
             } else {
                 packed.bits.hokan = 0;
             }
         }
-        if (D_0037F510.decOne & 2) {
+        if (kwlnTaskPadButtonStates.decOne & 2) {
             if (packed.bits.hokan > 0) {
                 packed.bits.hokan = packed.bits.hokan - 1;
             } else {
@@ -2414,10 +2414,10 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
         break;
     }
     ctx->value = packed.word;
-    if (D_0037F510.confirm < 0 && mdlFindNodeById(model, packed.bits.group)->motionTable->entries[packed.bits.motion] != NULL) {
+    if (kwlnTaskPadButtonStates.confirm < 0 && mdlFindNodeById(model, packed.bits.group)->motionTable->entries[packed.bits.motion] != NULL) {
         return 1;
     }
-    return D_0037F510.cancel >= 0 ? 0 : -1;
+    return kwlnTaskPadButtonStates.cancel >= 0 ? 0 : -1;
 }
 
 extern char D_00424090[]; /* "UNIT ALL" */
@@ -2488,7 +2488,7 @@ extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 /* vu0 routine: rotate an event-viewer position about camera axes selected by the pad. */
 void evtRotateViewerPositionFromPad(f32 *position)
 {
-    if (D_0037F510.incOne != 0) {
+    if (kwlnTaskPadButtonStates.incOne != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
         effMiscAxisAngleToQuaternionVU(2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
@@ -2496,7 +2496,7 @@ void evtRotateViewerPositionFromPad(f32 *position)
         VU0_TRANSFORM_POINT(vf10, vf10);
         VU0_SET_W_ONE(vf10);
         VU0_STORE_VF(vf10, position);
-    } else if (D_0037F510.decOne != 0) {
+    } else if (kwlnTaskPadButtonStates.decOne != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
         effMiscAxisAngleToQuaternionVU(-2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
@@ -2505,7 +2505,7 @@ void evtRotateViewerPositionFromPad(f32 *position)
         VU0_SET_W_ONE(vf10);
         VU0_STORE_VF(vf10, position);
     }
-    if (D_0037F510.incTen != 0) {
+    if (kwlnTaskPadButtonStates.incTen != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix);
         effMiscAxisAngleToQuaternionVU(-2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
@@ -2513,7 +2513,7 @@ void evtRotateViewerPositionFromPad(f32 *position)
         VU0_TRANSFORM_POINT(vf10, vf10);
         VU0_SET_W_ONE(vf10);
         VU0_STORE_VF(vf10, position);
-    } else if (D_0037F510.decTen != 0) {
+    } else if (kwlnTaskPadButtonStates.decTen != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix);
         effMiscAxisAngleToQuaternionVU(2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
@@ -2613,11 +2613,11 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
         return 0;
     }
     changed = 0;
-    if (D_0037F510.apply < 0) {
+    if (kwlnTaskPadButtonStates.apply < 0) {
         return 1;
     }
 
-    if (D_0037F510.confirm < 0) {
+    if (kwlnTaskPadButtonStates.confirm < 0) {
         switch (runtime->unk2328) {
         case 7:
             mnuShopSavePrimaryTransform((u8 *)runtime);
@@ -2632,23 +2632,23 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
             changed = 1;
             break;
         }
-    } else if (D_0037F510.cancel < 0) {
+    } else if (kwlnTaskPadButtonStates.cancel < 0) {
         changed = -1;
-    } else if ((D_0037F510.incTen & 2) != 0 && runtime->unk232C == 0) {
+    } else if ((kwlnTaskPadButtonStates.incTen & 2) != 0 && runtime->unk232C == 0) {
         if (runtime->unk2328 < 9) {
             runtime->unk2328++;
         } else {
             runtime->unk2328 = 0;
         }
-    } else if ((D_0037F510.decTen & 2) != 0 && runtime->unk232C == 0) {
+    } else if ((kwlnTaskPadButtonStates.decTen & 2) != 0 && runtime->unk232C == 0) {
         if (runtime->unk2328 > 0) {
             runtime->unk2328--;
         } else {
             runtime->unk2328 = 9;
         }
-    } else if (D_0037F510.coarseIncrease != 0) {
+    } else if (kwlnTaskPadButtonStates.coarseIncrease != 0) {
         runtime->lightPanelOffset = (s32)((u32)runtime->lightPanelOffset + 8u);
-    } else if (D_0037F510.coarseDecrease != 0) {
+    } else if (kwlnTaskPadButtonStates.coarseDecrease != 0) {
         runtime->lightPanelOffset = (s32)((u32)runtime->lightPanelOffset - 8u);
     }
 
@@ -2668,16 +2668,16 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
     } else if (submode == 1) {
         mode = runtime->unk2328;
         if ((u32)mode < 3U) {
-            if ((D_0037F510.incOne & 2) != 0) {
+            if ((kwlnTaskPadButtonStates.incOne & 2) != 0) {
                 f32 candidate = runtime->commandMatrix[mode] + 0.01f;
                 runtime->commandMatrix[mode] = (candidate < 2.0f) ? candidate : 2.0f;
-            } else if ((D_0037F510.incTen & 2) != 0) {
+            } else if ((kwlnTaskPadButtonStates.incTen & 2) != 0) {
                 f32 candidate = runtime->commandMatrix[mode] + 0.09999999404f;
                 runtime->commandMatrix[mode] = (candidate < 2.0f) ? candidate : 2.0f;
-            } else if ((D_0037F510.decOne & 2) != 0) {
+            } else if ((kwlnTaskPadButtonStates.decOne & 2) != 0) {
                 f32 candidate = runtime->commandMatrix[mode] - 0.01f;
                 runtime->commandMatrix[mode] = (0.0f < candidate) ? candidate : 0.0f;
-            } else if ((D_0037F510.decTen & 2) != 0) {
+            } else if ((kwlnTaskPadButtonStates.decTen & 2) != 0) {
                 f32 candidate = runtime->commandMatrix[mode] - 0.09999999404f;
                 runtime->commandMatrix[mode] = (0.0f < candidate) ? candidate : 0.0f;
             }
@@ -2689,16 +2689,16 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
 
         mode = runtime->unk2328;
         if (((u32)mode - 4u) < 3U) {
-            if ((D_0037F510.incOne & 2) != 0) {
+            if ((kwlnTaskPadButtonStates.incOne & 2) != 0) {
                 f32 candidate = runtime->commandMatrix[8 + mode - 4] + 0.01f;
                 runtime->commandMatrix[8 + mode - 4] = (candidate < 2.0f) ? candidate : 2.0f;
-            } else if ((D_0037F510.incTen & 2) != 0) {
+            } else if ((kwlnTaskPadButtonStates.incTen & 2) != 0) {
                 f32 candidate = runtime->commandMatrix[8 + mode - 4] + 0.09999999404f;
                 runtime->commandMatrix[8 + mode - 4] = (candidate < 2.0f) ? candidate : 2.0f;
-            } else if ((D_0037F510.decOne & 2) != 0) {
+            } else if ((kwlnTaskPadButtonStates.decOne & 2) != 0) {
                 f32 candidate = runtime->commandMatrix[8 + mode - 4] - 0.01f;
                 runtime->commandMatrix[8 + mode - 4] = (0.0f < candidate) ? candidate : 0.0f;
-            } else if ((D_0037F510.decTen & 2) != 0) {
+            } else if ((kwlnTaskPadButtonStates.decTen & 2) != 0) {
                 f32 candidate = runtime->commandMatrix[8 + mode - 4] - 0.09999999404f;
                 runtime->commandMatrix[8 + mode - 4] = (0.0f < candidate) ? candidate : 0.0f;
             }
@@ -2851,23 +2851,23 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
         return status;
     }
     {
-        if (D_0037F510.apply < 0) {
+        if (kwlnTaskPadButtonStates.apply < 0) {
             if (runtime->floatEditMode == 0) {
                 return 1;
             }
-        } else if (D_0037F510.confirm < 0) {
+        } else if (kwlnTaskPadButtonStates.confirm < 0) {
             if (runtime->floatEditMode == 0) {
                 runtime->floatEditMode = 1;
             } else if (runtime->floatEditMode == 1) {
                 runtime->floatEditMode = 0;
             }
-        } else if (D_0037F510.cancel < 0) {
+        } else if (kwlnTaskPadButtonStates.cancel < 0) {
             if (runtime->floatEditMode == 1) {
                 runtime->floatEditMode = 0;
             } else {
                 status = -1;
             }
-        } else if (D_0037F510.incTen & 2) {
+        } else if (kwlnTaskPadButtonStates.incTen & 2) {
             if (runtime->floatEditMode == 0) {
                 if (runtime->floatSelection < 2) {
                     runtime->floatSelection++;
@@ -2884,7 +2884,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
                     break;
                 }
             }
-        } else if (D_0037F510.decTen & 2) {
+        } else if (kwlnTaskPadButtonStates.decTen & 2) {
             if (runtime->floatEditMode == 0) {
                 if (runtime->floatSelection > 0) {
                     runtime->floatSelection--;
@@ -2901,7 +2901,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
                     break;
                 }
             }
-        } else if (D_0037F510.incOne & 2) {
+        } else if (kwlnTaskPadButtonStates.incOne & 2) {
             if (runtime->floatEditMode == 1) {
                 if (runtime->floatSelection == 0) {
                     runtime->floatEditX += 0.01f;
@@ -2911,7 +2911,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
                     D_00438A34 ^= 1;
                 }
             }
-        } else if (D_0037F510.decOne & 2) {
+        } else if (kwlnTaskPadButtonStates.decOne & 2) {
             if (runtime->floatEditMode == 1) {
                 if (runtime->floatSelection == 0) {
                     runtime->floatEditX -= 0.01f;
@@ -2921,9 +2921,9 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
                     D_00438A34 ^= 1;
                 }
             }
-        } else if (D_0037F510.coarseIncrease != 0) {
+        } else if (kwlnTaskPadButtonStates.coarseIncrease != 0) {
             runtime->horizontalOffset += 8;
-        } else if (D_0037F510.coarseDecrease != 0) {
+        } else if (kwlnTaskPadButtonStates.coarseDecrease != 0) {
             runtime->horizontalOffset -= 8;
         }
 
@@ -3012,10 +3012,10 @@ s32 mnuDrawTimedPrompt(s32 x, s32 y, EvtRuntime *ctx) {
     } else if (ctx->commandFirst == 0) {
         return -1;
     }
-    if (D_0037F510.confirm < 0) {
+    if (kwlnTaskPadButtonStates.confirm < 0) {
         return 1;
     }
-    if (D_0037F510.cancel >= 0) {
+    if (kwlnTaskPadButtonStates.cancel >= 0) {
         return 0;
     }
     return -1;
@@ -3144,19 +3144,19 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
         lastMode = 1;
         break;
     }
-    if (D_0037F510.incTen & 2) {
+    if (kwlnTaskPadButtonStates.incTen & 2) {
         if (ctx->groupCursor < lastRow) {
             ctx->groupCursor++;
         } else {
             ctx->groupCursor = 0;
         }
-    } else if (D_0037F510.decTen & 2) {
+    } else if (kwlnTaskPadButtonStates.decTen & 2) {
         if (ctx->groupCursor == 0) {
             ctx->groupCursor = lastRow;
         } else {
             ctx->groupCursor--;
         }
-    } else if (D_0037F510.incOne & 2) {
+    } else if (kwlnTaskPadButtonStates.incOne & 2) {
         switch (ctx->groupCursor) {
         case 0:
             if (ctx->shadowMode < lastMode) {
@@ -3172,7 +3172,7 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
             ctx->shadowY += 0.1f;
             break;
         }
-    } else if (D_0037F510.coarseIncrease & 2) {
+    } else if (kwlnTaskPadButtonStates.coarseIncrease & 2) {
         switch (ctx->groupCursor) {
         case 0:
             if (ctx->shadowMode < lastMode) {
@@ -3188,7 +3188,7 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
             ctx->shadowY += 1.0f;
             break;
         }
-    } else if (D_0037F510.decOne & 2) {
+    } else if (kwlnTaskPadButtonStates.decOne & 2) {
         switch (ctx->groupCursor) {
         case 0:
             if (ctx->shadowMode == 0) {
@@ -3204,7 +3204,7 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
             ctx->shadowY -= 0.1f;
             break;
         }
-    } else if (D_0037F510.coarseDecrease & 2) {
+    } else if (kwlnTaskPadButtonStates.coarseDecrease & 2) {
         switch (ctx->groupCursor) {
         case 0:
             if (ctx->shadowMode == 0) {
@@ -3221,10 +3221,10 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
             break;
         }
     } else {
-        if (D_0037F510.confirm < 0) {
+        if (kwlnTaskPadButtonStates.confirm < 0) {
             return 1;
         }
-        if (D_0037F510.cancel < 0) {
+        if (kwlnTaskPadButtonStates.cancel < 0) {
             return -1;
         }
     }
@@ -3383,25 +3383,25 @@ s32 evtEditEffectSpriteFrame(EvtRuntime *runtime) {
                                      packetList);
 
     step = 0;
-    if ((D_0037F510.incTen & 2) != 0) {
+    if ((kwlnTaskPadButtonStates.incTen & 2) != 0) {
         if (runtime->editField >= 8) {
             runtime->editField = 0;
         } else {
             runtime->editField++;
         }
-    } else if ((D_0037F510.decTen & 2) != 0) {
+    } else if ((kwlnTaskPadButtonStates.decTen & 2) != 0) {
         if (runtime->editField <= 0) {
             runtime->editField = 8;
         } else {
             runtime->editField--;
         }
-    } else if ((D_0037F510.decOne & 2) != 0) {
+    } else if ((kwlnTaskPadButtonStates.decOne & 2) != 0) {
         step = -1;
-    } else if ((D_0037F510.incOne & 2) != 0) {
+    } else if ((kwlnTaskPadButtonStates.incOne & 2) != 0) {
         step = 1;
-    } else if ((D_0037F510.coarseDecrease & 2) != 0) {
+    } else if ((kwlnTaskPadButtonStates.coarseDecrease & 2) != 0) {
         step = -10;
-    } else if ((D_0037F510.coarseIncrease & 2) != 0) {
+    } else if ((kwlnTaskPadButtonStates.coarseIncrease & 2) != 0) {
         step = 10;
     }
 
@@ -3518,7 +3518,7 @@ s32 evtEditEffectSpriteFrame(EvtRuntime *runtime) {
     }
 
 
-    if (D_0037F510.cancel < 0) {
+    if (kwlnTaskPadButtonStates.cancel < 0) {
         runtime->frameGroup->usePendingKey = 0;
         return 0;
     }
@@ -3653,25 +3653,25 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
     fldApplyCameraColorKeyWords(runtime, &key->parameters);
 
     step = 0;
-    if ((D_0037F510.incTen & 2) != 0) {
+    if ((kwlnTaskPadButtonStates.incTen & 2) != 0) {
         if (runtime->colorSelection >= 11) {
             runtime->colorSelection = 0;
         } else {
             runtime->colorSelection++;
         }
-    } else if ((D_0037F510.decTen & 2) != 0) {
+    } else if ((kwlnTaskPadButtonStates.decTen & 2) != 0) {
         if (runtime->colorSelection <= 0) {
             runtime->colorSelection = 11;
         } else {
             runtime->colorSelection--;
         }
-    } else if ((D_0037F510.decOne & 2) != 0) {
+    } else if ((kwlnTaskPadButtonStates.decOne & 2) != 0) {
         step = -1;
-    } else if ((D_0037F510.incOne & 2) != 0) {
+    } else if ((kwlnTaskPadButtonStates.incOne & 2) != 0) {
         step = 1;
-    } else if ((D_0037F510.coarseDecrease & 2) != 0) {
+    } else if ((kwlnTaskPadButtonStates.coarseDecrease & 2) != 0) {
         step = -10;
-    } else if ((D_0037F510.coarseIncrease & 2) != 0) {
+    } else if ((kwlnTaskPadButtonStates.coarseIncrease & 2) != 0) {
         step = 10;
     }
 
@@ -3848,7 +3848,7 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
         }
     }
 
-    if (D_0037F510.cancel < 0) {
+    if (kwlnTaskPadButtonStates.cancel < 0) {
         runtime->colorEditorActive = 0;
         return 0;
     }
@@ -3951,20 +3951,20 @@ s32 func_002582D0(EvtRuntime *runtime) {
         }
         kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
 
-        if (D_0037F510.incTen & 2) {
+        if (kwlnTaskPadButtonStates.incTen & 2) {
             evtIncrementBezierParameter(bytes, component * 2 + 5);
-        } else if (D_0037F510.decTen & 2) {
+        } else if (kwlnTaskPadButtonStates.decTen & 2) {
             evtDecrementBezierParameter(bytes, component * 2 + 5);
-        } else if (D_0037F510.decOne & 2) {
+        } else if (kwlnTaskPadButtonStates.decOne & 2) {
             evtDecrementBezierParameter(bytes, component * 2 + 4);
-        } else if (D_0037F510.incOne & 2) {
+        } else if (kwlnTaskPadButtonStates.incOne & 2) {
             evtIncrementBezierParameter(bytes, component * 2 + 4);
-        } else if (D_0037F510.decHun & 2) {
+        } else if (kwlnTaskPadButtonStates.decHun & 2) {
             runtime->curveComponent ^= 1;
-        } else if (D_0037F510.incHun & 2) {
+        } else if (kwlnTaskPadButtonStates.incHun & 2) {
             runtime->curveComponent ^= 1;
         }
-        if (D_0037F510.cancel < 0) {
+        if (kwlnTaskPadButtonStates.cancel < 0) {
             runtime->frameGroup->usePendingKey = 0;
             return 0;
         }
@@ -4022,7 +4022,7 @@ s32 evtUpdateEffectViewerGroup(s32 arg0, s32 arg1, EvtRuntime *runtime) {
     case 0xB:
     case 0xC:
     default:
-        if (D_0037F510.apply < 0) {
+        if (kwlnTaskPadButtonStates.apply < 0) {
             status = 0;
         }
         break;

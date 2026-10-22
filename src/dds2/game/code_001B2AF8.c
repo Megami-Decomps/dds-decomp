@@ -139,7 +139,7 @@ extern char D_004159A0[];
 extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
-extern SndPad D_0037F510;
+extern SndPad kwlnTaskPadButtonStates;
 
 extern u8 D_00436630[5];
 
@@ -1868,10 +1868,10 @@ void func_001B5A20(BattleSceneObject *object) {
     switch (fldGetSceneObjectState()) {
     case 1:
     case 2: {
-        if (D_0037F510.confirm >= 0 && D_0037F510.primaryCancel >= 0) {
-            if ((D_0037F510.alternateNext & 2) != 0) {
+        if (kwlnTaskPadButtonStates.confirm >= 0 && kwlnTaskPadButtonStates.primaryCancel >= 0) {
+            if ((kwlnTaskPadButtonStates.alternateNext & 2) != 0) {
                 for (; changed == 0;) {
-                    if (btlCommandPanelWork->classIndex != 5 || D_0037F510.alternateNext < 0) {
+                    if (btlCommandPanelWork->classIndex != 5 || kwlnTaskPadButtonStates.alternateNext < 0) {
                         btlCommandPanelWork->classIndex++;
                         btlCommandPanelWork->labelFade = 0xF0;
                         btlLinkedSelectionTaskBuffer->backdropFade = 0;
@@ -1892,9 +1892,9 @@ void func_001B5A20(BattleSceneObject *object) {
                         changed = 1;
                     }
                 }
-            } else if ((D_0037F510.alternatePrev & 2) != 0) {
+            } else if ((kwlnTaskPadButtonStates.alternatePrev & 2) != 0) {
                 for (; changed == 0;) {
-                    if (btlCommandPanelWork->classIndex != 0 || D_0037F510.alternatePrev < 0) {
+                    if (btlCommandPanelWork->classIndex != 0 || kwlnTaskPadButtonStates.alternatePrev < 0) {
                         btlCommandPanelWork->classIndex--;
                         btlCommandPanelWork->labelFade = 0xF0;
                         btlLinkedSelectionTaskBuffer->backdropFade = 0;
@@ -5084,7 +5084,7 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
         row = entry - cursor;
         state = object->state;
         if (state == 2 && (optionCount = fldUpdateSceneKindCounter((s32)object, btlCommandPanelWork->classIndex, 1)) >= 2) {
-            if ((D_0037F510.prev & 2) || (D_0037F510.next & 2)) {
+            if ((kwlnTaskPadButtonStates.prev & 2) || (kwlnTaskPadButtonStates.next & 2)) {
                 /* Retail compares cached entry with the relative row at 001B2FE4. */
                 if (D_00438F4C->cursor != cursor || D_00438F4C->entry != row || D_00438F4C->row != row) {
                     D_00438F4C->alpha = 128;
@@ -5208,8 +5208,8 @@ s32 func_001BEBD0(KwlnTask *task) {
     s32 opacity;
     u32 shade;
 
-    if (work->fadeCountdowns[0] <= 0 || D_0037F510.confirm < 0 ||
-        D_0037F510.primaryCancel < 0) {
+    if (work->fadeCountdowns[0] <= 0 || kwlnTaskPadButtonStates.confirm < 0 ||
+        kwlnTaskPadButtonStates.primaryCancel < 0) {
         return -1;
     }
     for (i = 0; i < 4; i++) {
@@ -6737,19 +6737,19 @@ s32 btlUpdateReservePanelSelection(KwlnTask *task, BtlState *battle) {
     if (commandTask != NULL) {
         command = (BattleSceneObject *)dds3GetProcessData(commandTask);
         if (command->state == 6) {
-            if (D_0037F510.confirm < 0) {
+            if (kwlnTaskPadButtonStates.confirm < 0) {
                 work->partyRecordIndex = datGameState->partyOrder[work->selectedReserveIndex + work->activeCount];
                 sndSetStationedSeVolume(8);
                 command->state = 8;
                 command->commandData->phase = 9;
-            } else if (D_0037F510.primaryCancel < 0) {
+            } else if (kwlnTaskPadButtonStates.primaryCancel < 0) {
                 btlSlotBankPromoteStates(work);
                 command->state = 7;
                 sndSetStationedSeVolume(0xA);
                 btlSetActionActorPanelPresentation(command->owner, 0, 0);
             } else {
-                if (D_0037F510.alternateNext & 2) {
-                    if (work->selectedReserveIndex != count - 1 || D_0037F510.alternateNext < 0) {
+                if (kwlnTaskPadButtonStates.alternateNext & 2) {
+                    if (work->selectedReserveIndex != count - 1 || kwlnTaskPadButtonStates.alternateNext < 0) {
                         work->selectedReserveIndex++;
                         if (work->selectedReserveIndex >= count) {
                             work->selectedReserveIndex = 0;
@@ -6758,8 +6758,8 @@ s32 btlUpdateReservePanelSelection(KwlnTask *task, BtlState *battle) {
                         btlSlotBankPromoteStates(work);
                         work->reserveEntries[work->selectedReserveIndex].presentation.presentationState = 2;
                     }
-                } else if (D_0037F510.alternatePrev & 2) {
-                    if (work->selectedReserveIndex != 0 || D_0037F510.alternatePrev < 0) {
+                } else if (kwlnTaskPadButtonStates.alternatePrev & 2) {
+                    if (work->selectedReserveIndex != 0 || kwlnTaskPadButtonStates.alternatePrev < 0) {
                         work->selectedReserveIndex--;
                         if (work->selectedReserveIndex < 0) {
                             work->selectedReserveIndex = count - 1;
@@ -9143,7 +9143,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
     u16 *commands;
     u16 *picked;
 
-    if (D_0037F510.confirm < 0) {
+    if (kwlnTaskPadButtonStates.confirm < 0) {
         switch (kind) {
         case 0:
             if (entry == 0 && cursor == 0) {
@@ -9280,7 +9280,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
         default:
             return 0;
         }
-    } else if (D_0037F510.primaryCancel < 0) {
+    } else if (kwlnTaskPadButtonStates.primaryCancel < 0) {
         if ((u32)(object->state - 1) < 2) {
             if (kind == 4) {
                 btlSetActionActorPanelPresentation(object->owner, 1, 0);
@@ -9294,14 +9294,14 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
             object->selections[0].cursor = 0;
             sndSetStationedSeVolume(10);
         }
-    } else if ((D_0037F510.prev & 2) != 0) {
+    } else if ((kwlnTaskPadButtonStates.prev & 2) != 0) {
         if (entry > 0) {
             if (entry == cursor + 1 && cursor > 0) {
                 cursor--;
             }
             entry--;
             sndSetStationedSeVolume(0);
-        } else if (D_0037F510.prev < 0) {
+        } else if (kwlnTaskPadButtonStates.prev < 0) {
             entry = (s16)(count - 1);
             cursor = entry - 3;
             if (cursor < 0) {
@@ -9310,7 +9310,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
                 sndSetStationedSeVolume(0);
             }
         }
-    } else if ((D_0037F510.next & 2) != 0) {
+    } else if ((kwlnTaskPadButtonStates.next & 2) != 0) {
         if (entry < count - 1) {
             entry++;
             if (entry == cursor + 3 && cursor < count - 4) {
@@ -9319,14 +9319,14 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
             if (count >= 2) {
                 sndSetStationedSeVolume(0);
             }
-        } else if (D_0037F510.next < 0) {
+        } else if (kwlnTaskPadButtonStates.next < 0) {
             entry = 0;
             cursor = 0;
             if (count >= 2) {
                 sndSetStationedSeVolume(0);
             }
         }
-    } else if (D_0037F510.buttons[0] < 0) {
+    } else if (kwlnTaskPadButtonStates.buttons[0] < 0) {
         if (kind == 4) {
             btlSetActionActorPanelPresentation(object->owner, 1, 0);
         }
@@ -10519,7 +10519,7 @@ void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode
     BattleActorPanelWork *panel;
 
     (void)scene;
-    if (D_0037F510.confirm < 0) {
+    if (kwlnTaskPadButtonStates.confirm < 0) {
         task = (KwlnTask *)dds3SearchProcessName(btlCommandPanelTaskNameRef);
         object = (BattleSceneObject *)dds3GetProcessData((s32)task);
         if (object->state == 8) {
@@ -10540,7 +10540,7 @@ void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode
         return;
     }
 
-    if (D_0037F510.primaryCancel < 0) {
+    if (kwlnTaskPadButtonStates.primaryCancel < 0) {
         state->state = 4;
         sndSetStationedSeVolume(10);
         if (fldGetSceneObjectState() == 8) {
@@ -10570,44 +10570,44 @@ void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode
 
     switch (mode) {
     case 0:
-        if ((D_0037F510.alternateNext & 2) != 0) {
+        if ((kwlnTaskPadButtonStates.alternateNext & 2) != 0) {
             direction = 1;
-        } else if ((D_0037F510.alternatePrev & 2) != 0) {
+        } else if ((kwlnTaskPadButtonStates.alternatePrev & 2) != 0) {
             direction = 2;
         }
         break;
     case 1:
-        if ((D_0037F510.alternatePrev & 2) != 0) {
+        if ((kwlnTaskPadButtonStates.alternatePrev & 2) != 0) {
             direction = 1;
-        } else if ((D_0037F510.alternateNext & 2) != 0) {
+        } else if ((kwlnTaskPadButtonStates.alternateNext & 2) != 0) {
             direction = 2;
         }
         break;
     case 2:
-        if ((D_0037F510.prev & 2) != 0) {
+        if ((kwlnTaskPadButtonStates.prev & 2) != 0) {
             direction = 1;
-        } else if ((D_0037F510.next & 2) != 0) {
+        } else if ((kwlnTaskPadButtonStates.next & 2) != 0) {
             direction = 2;
         }
         break;
     case 3:
-        if ((D_0037F510.next & 2) != 0) {
+        if ((kwlnTaskPadButtonStates.next & 2) != 0) {
             direction = 1;
-        } else if ((D_0037F510.prev & 2) != 0) {
+        } else if ((kwlnTaskPadButtonStates.prev & 2) != 0) {
             direction = 2;
         }
         break;
     case 4:
-        if ((D_0037F510.prev & 2) != 0 || (D_0037F510.alternateNext & 2) != 0) {
+        if ((kwlnTaskPadButtonStates.prev & 2) != 0 || (kwlnTaskPadButtonStates.alternateNext & 2) != 0) {
             direction = 1;
-        } else if ((D_0037F510.next & 2) != 0 || (D_0037F510.alternatePrev & 2) != 0) {
+        } else if ((kwlnTaskPadButtonStates.next & 2) != 0 || (kwlnTaskPadButtonStates.alternatePrev & 2) != 0) {
             direction = 2;
         }
         break;
     case 5:
-        if ((D_0037F510.next & 2) != 0 || (D_0037F510.alternatePrev & 2) != 0) {
+        if ((kwlnTaskPadButtonStates.next & 2) != 0 || (kwlnTaskPadButtonStates.alternatePrev & 2) != 0) {
             direction = 1;
-        } else if ((D_0037F510.prev & 2) != 0 || (D_0037F510.alternateNext & 2) != 0) {
+        } else if ((kwlnTaskPadButtonStates.prev & 2) != 0 || (kwlnTaskPadButtonStates.alternateNext & 2) != 0) {
             direction = 2;
         }
         break;

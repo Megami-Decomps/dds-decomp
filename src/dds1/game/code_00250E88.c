@@ -350,7 +350,7 @@ void mnuReleaseResourceTaskData(s32 unused, MnuResourceTask *task) {
 /* Snapshot is one native DatPartyRecord: 0x1A4 bytes with word alignment. */
 typedef struct ResourcePartySnapshot { u32 words[0x1A4/4]; } ResourcePartySnapshot;
 
-extern s8 D_00324510[];
+extern s8 kwlnTaskPadButtonStates[];
 
 extern SdfTaskItemDesc D_0036C65C;
 
@@ -424,7 +424,7 @@ s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
         if (frame>=5) {mnuMarkTitleStreamResetPending();mnuResetTitleStreamLocked();return -1;}
         return 0;
     default:
-        if (D_00324510[0x26]&2) {
+        if (kwlnTaskPadButtonStates[0x26]&2) {
             if (mnuMoveResourceListCursor(list, mnuRetreatListCursorDefault)!=NULL) {
                 action=1;
                 ((s32 (*)())mnuReleaseMenuVisualWorkResources)(metadata->attachedEffect);
@@ -433,7 +433,7 @@ s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
                 *snapshot=**selectedParty;
                 mnuSetupStaffMenuProfilePage((struct DatPartyRecord *)snapshot,metadata->attachedEffect);
             }
-        } else if (D_00324510[0x27]&2) {
+        } else if (kwlnTaskPadButtonStates[0x27]&2) {
             if (mnuMoveResourceListCursor(list, mnuAdvanceListCursorDefault)!=NULL) {
                 action=1;
                 ((s32 (*)())mnuReleaseMenuVisualWorkResources)(metadata->attachedEffect);
@@ -442,14 +442,14 @@ s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
                 *snapshot=**selectedParty;
                 mnuSetupStaffMenuProfilePage((struct DatPartyRecord *)snapshot,metadata->attachedEffect);
             }
-        } else if (D_00324510[0x21]<0) {
+        } else if (kwlnTaskPadButtonStates[0x21]<0) {
             action=2; task->unk04[1]=0; task->unk04[0]=2;
-        } else if (D_00324510[0x23]<0) {
+        } else if (kwlnTaskPadButtonStates[0x23]<0) {
             mnuCommitTitleStreamReadyState();
             task->unk04[0]=3; task->unk04[1]=0;
             action=3;
         }
-        if ((D_00324510[0x26]==0) & (D_00324510[0x27]==0)) mnuClearListFlagsOneAndTwo(list);
+        if ((kwlnTaskPadButtonStates[0x26]==0) & (kwlnTaskPadButtonStates[0x27]==0)) mnuClearListFlagsOneAndTwo(list);
         if (action != 0) {
             switch (action) {
             case 1:
@@ -719,7 +719,7 @@ void mnuInitializeMantraSelectionGrid(MenuSceneWork *sceneWork) {
 }
 
 extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];
-extern s8 D_00324510[64];
+extern s8 kwlnTaskPadButtonStates[64];
 extern SdfGridCell *sdfGridCursorUpToFilledCell(SdfGrid *grid);
 extern SdfGridCell *sdfGridCursorDownToFilledCell(SdfGrid *grid);
 extern s32 mnuSelectMantraGridLeftNeighbor(SdfGrid *grid);
@@ -764,38 +764,38 @@ void mnuHandleMantraGridInput(MenuSceneWork *work) {
     s8 direction;
     MnuMantraGridEntry *entry;
 
-    if (D_00324510[0x26] != 0) {
+    if (kwlnTaskPadButtonStates[0x26] != 0) {
         work->cursorInputMask = 0x80;
-    } else if (D_00324510[0x27] != 0) {
+    } else if (kwlnTaskPadButtonStates[0x27] != 0) {
         work->cursorInputMask = 0x40;
-    } else if (D_00324510[0x24] != 0) {
+    } else if (kwlnTaskPadButtonStates[0x24] != 0) {
         work->cursorInputMask = 0x20;
-    } else if (D_00324510[0x25] != 0) {
+    } else if (kwlnTaskPadButtonStates[0x25] != 0) {
         work->cursorInputMask = 0x10;
     } else {
         work->cursorInputMask = 0;
     }
     direction = work->cursorInputMask;
     if (work->cursorMoving == 0) {
-        if ((D_00324510[0x26] & 2) && (direction & 0x80)) {
+        if ((kwlnTaskPadButtonStates[0x26] & 2) && (direction & 0x80)) {
             if (sdfGridCursorUpToFilledCell(work->gridHandle) != NULL) {
                 feedback = 1;
             }
-        } else if ((D_00324510[0x27] & 2) && (direction & 0x40)) {
+        } else if ((kwlnTaskPadButtonStates[0x27] & 2) && (direction & 0x40)) {
             if (sdfGridCursorDownToFilledCell(work->gridHandle) != NULL) {
                 feedback = 1;
             }
-        } else if ((D_00324510[0x24] & 2) && (direction & 0x20)) {
+        } else if ((kwlnTaskPadButtonStates[0x24] & 2) && (direction & 0x20)) {
             if (mnuSelectMantraGridLeftNeighbor(work->gridHandle) != 0) {
                 feedback = 1;
             }
-        } else if ((D_00324510[0x25] & 2) && (direction & 0x10)) {
+        } else if ((kwlnTaskPadButtonStates[0x25] & 2) && (direction & 0x10)) {
             if (mnuSelectMantraGridRightNeighbor(work->gridHandle) != 0) {
                 feedback = 1;
             }
         }
     }
-    if (D_00324510[0x21] < 0 && work->transitionBlendCounter == 0) {
+    if (kwlnTaskPadButtonStates[0x21] < 0 && work->transitionBlendCounter == 0) {
         entry = (MnuMantraGridEntry *)work->gridHandle->cursor->value;
         if (entry != NULL &&
             work->entryPosition.x == mnuMantraVariantSpritePlacements[entry->sceneId][2] &&
@@ -807,16 +807,16 @@ void mnuHandleMantraGridInput(MenuSceneWork *work) {
                 work->scenePhase = 4;
             }
         }
-    } else if (D_00324510[0x23] < 0 && work->transitionBlendCounter == 0) {
+    } else if (kwlnTaskPadButtonStates[0x23] < 0 && work->transitionBlendCounter == 0) {
         feedback = 3;
         work->scenePhase = 2;
-    } else if (D_00324510[0x28] < 0) {
+    } else if (kwlnTaskPadButtonStates[0x28] < 0) {
         feedback = 4;
         mnuBeginTransition(work, 1);
-    } else if (D_00324510[0x2A] < 0) {
+    } else if (kwlnTaskPadButtonStates[0x2A] < 0) {
         feedback = 4;
         mnuBeginTransition(work, 2);
-    } else if (D_00324510[0x20] < 0 && work->transitionBlendCounter == 0) {
+    } else if (kwlnTaskPadButtonStates[0x20] < 0 && work->transitionBlendCounter == 0) {
         feedback = 2;
         work->scenePhase = 5;
     }
@@ -1666,7 +1666,7 @@ void mnuFinishMantraProfileSelection(void) {
     mnuFinalizeProgressHostVia(scene->attachedEffect, mnuReleaseMenuVisualWorkResources);
 }
 
-extern s8 D_00324510[];
+extern s8 kwlnTaskPadButtonStates[];
 extern s32 mnuAreRequiredProfilesCapped(u16);
 extern s32 mnuGetMantraSourceValue(u16);
 extern void itfDspPopulatePrimaryLabels(void);
@@ -1685,7 +1685,7 @@ s32 mnuUpdateMantraSceneState(void) {
 
     switch (scene->state) {
     case MENU_SCENE_STATE_SELECTING:
-        if (D_00324510[0x21] < 0) {
+        if (kwlnTaskPadButtonStates[0x21] < 0) {
             if (selection->profileId == scene->pendingProfileId) {
                 if (prfGetCapValue(entry->sceneId) ==
                     ptyGetProfileRecordValue(selection->partyRecord, entry->sceneId)) {
@@ -1710,7 +1710,7 @@ s32 mnuUpdateMantraSceneState(void) {
             } else {
                 scene->state = entry->state;
             }
-        } else if (D_00324510[0x23] < 0 && scene->stageFinished != 0) {
+        } else if (kwlnTaskPadButtonStates[0x23] < 0 && scene->stageFinished != 0) {
             scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
             scene->pendingProfileId = 0;
         }
@@ -1915,7 +1915,7 @@ typedef struct {
     DspEffectRoot *effectRoot; /* 0x24 */
 } DspTableScene;
 
-extern s8 D_00324510[64];
+extern s8 kwlnTaskPadButtonStates[64];
 extern void mnuStopResourceAnimation(void);
 extern void mnuResetResourceAnimation(void);
 extern s32 mnuRestoreMantraGridSelection(MenuSceneWork *);
@@ -1993,45 +1993,45 @@ s32 mnuHandleMantraSceneInput(void) {
         break;
     }
     mnuUpdateMantraSelectionCursorPosition(work);
-    if (D_00324510[0x26] != 0) {
+    if (kwlnTaskPadButtonStates[0x26] != 0) {
         work->cursorInputMask = 0x80;
-    } else if (D_00324510[0x27] != 0) {
+    } else if (kwlnTaskPadButtonStates[0x27] != 0) {
         work->cursorInputMask = 0x40;
-    } else if (D_00324510[0x24] != 0) {
+    } else if (kwlnTaskPadButtonStates[0x24] != 0) {
         work->cursorInputMask = 0x20;
-    } else if (D_00324510[0x25] != 0) {
+    } else if (kwlnTaskPadButtonStates[0x25] != 0) {
         work->cursorInputMask = 0x10;
     } else {
         work->cursorInputMask = 0;
     }
     direction = work->cursorInputMask;
     if (work->cursorMoving == 0) {
-        if ((D_00324510[0x26] & 2) && (direction & 0x80)) {
+        if ((kwlnTaskPadButtonStates[0x26] & 2) && (direction & 0x80)) {
             if (sdfGridCursorUpToFilledCell(work->gridHandle) != NULL) {
                 feedback = 1;
             }
-        } else if ((D_00324510[0x27] & 2) && (direction & 0x40)) {
+        } else if ((kwlnTaskPadButtonStates[0x27] & 2) && (direction & 0x40)) {
             if (sdfGridCursorDownToFilledCell(work->gridHandle) != NULL) {
                 feedback = 1;
             }
-        } else if ((D_00324510[0x24] & 2) && (direction & 0x20)) {
+        } else if ((kwlnTaskPadButtonStates[0x24] & 2) && (direction & 0x20)) {
             if (mnuSelectMantraGridLeftNeighbor(work->gridHandle) != 0) {
                 feedback = 1;
             }
-        } else if ((D_00324510[0x25] & 2) && (direction & 0x10)) {
+        } else if ((kwlnTaskPadButtonStates[0x25] & 2) && (direction & 0x10)) {
             if (mnuSelectMantraGridRightNeighbor(work->gridHandle) != 0) {
                 feedback = 1;
             }
-        } else if (D_00324510[0x28] < 0) {
+        } else if (kwlnTaskPadButtonStates[0x28] < 0) {
             mnuBeginTransitionAlt(work, 1);
             feedback = 4;
-        } else if (D_00324510[0x2A] < 0) {
+        } else if (kwlnTaskPadButtonStates[0x2A] < 0) {
             mnuBeginTransitionAlt(work, 2);
             feedback = 4;
         }
     }
-    if ((D_00324510[0x23] < 0 || D_00324510[0x20] < 0 ||
-        D_00324510[0x21] < 0) && work->transitionBlendCounter == 0) {
+    if ((kwlnTaskPadButtonStates[0x23] < 0 || kwlnTaskPadButtonStates[0x20] < 0 ||
+        kwlnTaskPadButtonStates[0x21] < 0) && work->transitionBlendCounter == 0) {
         host->frame = 0;
         host->phase = 2;
         feedback = 3;

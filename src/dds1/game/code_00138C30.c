@@ -254,7 +254,7 @@ extern s32 D_003BAE3C;
 
 extern u32 fldSelectedActorEntryIndex;
 
-extern u32 D_0032E570[];
+extern u32 fldDisplayStateWords[];
 
 extern s32 D_003BAE38;
 
@@ -503,7 +503,7 @@ extern u32 D_003BADD4;
 
 extern u32 D_003BADDC;
 
-extern s32 D_003BADE0;
+extern s32 fldCameraColorFade;
 
 extern s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
 

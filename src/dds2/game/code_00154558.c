@@ -226,7 +226,7 @@ extern s32 D_003897C0[];
 
 extern s32 D_003897C8[];
 
-extern s32 D_00389988[];
+extern s32 fldDisplayStateWords[];
 
 
 extern s32 fldGetActorStat0(s32);
@@ -758,19 +758,19 @@ extern void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode);
 s32 fldCmdSetFieldParameterPair(void) {
     s32 value;
 
-    D_00389988[11] = scrReadIntParameter(0);
+    fldDisplayStateWords[11] = scrReadIntParameter(0);
     value = scrReadIntParameter(1);
-    fldApplySkyLightSet(D_00389988[11], value);
+    fldApplySkyLightSet(fldDisplayStateWords[11], value);
     return 1;
 }
 
 s32 fldCmdSetFadeAndSway(void) {
     s32 second;
     s32 third;
-    D_00389988[13] = scrReadIntParameter(0) & 0xFF;
+    fldDisplayStateWords[13] = scrReadIntParameter(0) & 0xFF;
     second = scrReadIntParameter(1);
     third = scrReadIntParameter(2);
-    fldSetFadeTarget(D_00389988[13], second, third);
+    fldSetFadeTarget(fldDisplayStateWords[13], second, third);
     fldSetSwayMode(scrReadIntParameter(3));
     return 1;
 }

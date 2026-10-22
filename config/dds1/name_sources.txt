@@ -1060,11 +1060,11 @@
 0x00133280	fldApplyPendingSceneValueWithSpeed	inferred	Applies a queued field value when different from current with gated update speed. [names_reviewed11.tsv]
 0x001332E8	fldTransitionSkyLightSet	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:4989; Applies the indexed sky light set using the requested transition mode.; twin=0x00135D80 (DDS2).
 0x00133600	fldSetCameraObjectActiveFlag	inferred	Sets or clears the camera object's 0x100 flag and activates its associated object on enable. [names_reviewed5.tsv]
-0x001338F0	fldSetDisplayState	inferred	stores arg to D_003BAD98 and D_0032E570[11], zeroes D_003BADC8/D_003BADD8/D_0032E570[12]; parked store-order diff
+0x001338F0	fldSetDisplayState	inferred	stores arg to D_003BAD98 and fldDisplayStateWords[11], zeroes D_003BADC8/D_003BADD8/fldDisplayStateWords[12]; parked store-order diff
 0x00133CA0	fldApplyLightSetCurrent	inferred	applies the current 0xE0 FldLightSet record
 0x00133EC0	fldApplyLightSetIndex	inferred	applies an indexed FldLightSet record
 0x001340E0	fldActivateCameraColorSetting	inferred	Installs the configured camera color effect when enabled and copies the active camera setting. [names_reviewed5.tsv]
-0x001342B0	fldComposeFadeColor	inferred	color | (alpha*D_003BADE0/100 scaled by the fade factor above 0xE0) << 24
+0x001342B0	fldComposeFadeColor	inferred	color | (alpha*fldCameraColorFade/100 scaled by the fade factor above 0xE0) << 24
 0x00134C68	fldInitializeCameraColorResource	inferred	Loads a field resource and initializes camera color effect state. [names_reviewed9.tsv]
 0x00134CF0	fldReleaseCameraColorEffect	inferred	Releases the retained camera color texture and effect and clears its enabled state. [names_reviewed5.tsv]
 0x00134D38	fldCopyCameraSetting	inferred	copies a 0x54 camera setting record
@@ -7799,7 +7799,7 @@
 0x001039E0	kwlnPadResetInputAndMotorState	inferred	Inferred from the current C implementation in game/code_00102ED8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00104168	kwlnUpdatePadMotorDurations	inferred	Inferred from the current C implementation in game/code_00102ED8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00105150	kwlnInitializeFrameDrawPackets	inferred	Inferred from the current C implementation in game/code_00102ED8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x00108FA0	kwlnDrawTexturedColorQuad	inferred	Inferred from the current C implementation in game/code_00107FD8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00108FA0	evtSubmitTexturedGradientQuad	inferred	Submits a textured quad with four corner colours to the current draw surface (sdfQueueGouraudTexturedQuad): named as in DDS2 and as its evtSubmit* neighbours. DDS2 twin 0x00108EC0.
 0x001093F8	evtSubmitGradientTriangle	inferred	Inferred from the current C implementation in game/code_00107FD8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00111BD8	dds3ResolveModelChunkBindings	inferred	Inferred from the current C implementation in basic/dds3ObjectBase.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00113F28	effUpdateTransformOpacityMode	inferred	Inferred from the current C implementation in game/code_001130E0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
@@ -10007,3 +10007,17 @@
 0x003DCAA0	effQuadPacketParams	inferred	The effect quads' shared vertex packet parameters (EffPacketParams): effDrawQuadWork points them at its frame's corner and texture arrays and colour, effCreateVertexDrawPacket copies them. DDS2 twin 0x00458370.
 0x0037EC30	effLayerSurfaces	inferred	The draw surface each effect layer's packets go to (eight SdfPoolNode pointers into kwlnDrawSurfaces, indexed by a track's surfaceIndex). DDS2 twin 0x003E9CE0.
 0x002A8020	effDrawQuadWork	inferred	Per-frame draw of a textured effect quad (effCreateQuadWork's): samples its tracks, builds the rotated corners, submits the packets to its layer's surface, advances the frame. DDS2 twin 0x002EA5D8.
+0x0011EA10	fldUpdateCameraMoveTracking	inferred	Each frame while camera move tracking is set: steps fldCameraMoveTrackingCurrent one toward fldCameraMoveTrackingTarget (passing over zero) once more frames have passed than a delay that is longest near either end (50, 45, 30, 20, 15, 15 by distance), latches a press of the first pad's cancel (fldCameraMoveTrackingCancelPressed), and draws the value at (380, 18) with fldDrawPercentValue, or the target's or start's full label above 1000 when the value equals its remainder. DDS2 twin 0x001208D0.
+0x003BAB08	fldCameraMoveTrackingCurrent	inferred	The camera move's tracked value: set from the start entry by fldConfigureCameraMoveTracking (its remainder by 1000), stepped toward the target by fldUpdateCameraMoveTracking; FIELD_CAMERA_TRACKING_UNSET (-999) while tracking is off. DDS2 twin 0x00435EE0.
+0x003BAB0C	fldCameraMoveTrackingStart	inferred	The camera move's start value (the start entry, its remainder by 1000 above 1000); with the target it sets the step delay's distance. DDS2 twin 0x00435EE4.
+0x003BAB10	fldCameraMoveTrackingStartLabel	inferred	The start entry in full when above 1000, else -999; drawn in place of the tracked value when that equals its remainder by 1000 (and the target has no such label). DDS2 twin 0x00435EE8.
+0x003BAB14	fldCameraMoveTrackingTarget	inferred	The camera move's target value (the end entry, its remainder by 1000 above 1000). DDS2 twin 0x00435EEC.
+0x003BAB18	fldCameraMoveTrackingTargetLabel	inferred	The end entry in full when above 1000, else -999; drawn in place of the tracked value when that equals its remainder by 1000. DDS2 twin 0x00435EF0.
+0x003BAB1C	fldCameraMoveTrackingStepFrames	inferred	Frames since the tracked value last stepped; -999 when start and end are the same entry (no stepping). DDS2 twin 0x00435EF4.
+0x003BAB20	fldCameraMoveTrackingCancelPressed	inferred	Set to 1 by fldUpdateCameraMoveTracking on a fresh press of the first pad's cancel (kwlnTaskPadButtonStates[1][0][3]); fldEvaluateCameraMoveTracking then reports 2; cleared by configure and reset. DDS2 twin 0x00435EF8.
+0x00324510	kwlnTaskPadButtonStates	inferred	kwlnPadButtonStates as the stepping task sees them, s8[2][2][16] (bank, port, button; 0x40 bytes): kwlnTaskStep copies them in before each task's update, or clears them for a task flagged 0x10. Negative is a fresh press, bit 1 a repeat. Extent unsized: later automatic labels lie inside. DDS2 twin 0x0037F510.
+0x003BADE0	fldCameraColorFade	inferred	The camera colour layers' fade in percent: fldDrawCameraColorScrollingGradient steps it toward 0 while fldAreaState.colorEffectSuppressed, else toward 100; fldComposeFadeColor scales each tile's alpha by it. DDS2 twin 0x00436170.
+0x003BADE4	fldCameraColorLayerScroll	inferred	The vertical scroll of the camera colour layer being drawn (its fldCameraColorLayerScrolls entry), read for each tile's position and fade. DDS2 twin 0x00436174.
+0x00330728	fldCameraColorLayerScrolls	inferred	Each camera colour layer's vertical scroll (s32[3]), advanced by the layer's speed each frame modulo its tile size. DDS2 twin 0x0038BBC8.
+0x00330750	fldResolvedPosition	inferred	The field position the collision last resolved (x, y, z, then 1): fldRefreshAreaStateFromPosition and fldHitChkUnitElv/ElvOnly/Damage start from it and store their result in it. DDS2 twin 0x0038BBF0.
+0x0032E570	fldDisplayStateWords	inferred	Field display-state words after fldAreaState, reset by fldInitializeAreaWork: [6] draws the collision faces (fldRefreshAreaStateFromPosition) and trigger debug shapes, [11] the light set, [13..16] fade area, slot 14, fade mode and sway mode, [19] with the first pad's button 11 held lets the position through solid faces. Extent unsized (later automatic labels lie inside). DDS2 twin 0x00389988.

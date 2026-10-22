@@ -53,7 +53,7 @@ extern u8 kwlnTaskTreePrefix[];
 
 extern s8 kwlnPadButtonStates[2][2][16];
 
-extern u8 D_00324510[2][2][16];
+extern u8 kwlnTaskPadButtonStates[2][2][16];
 
 extern u8 D_003BA860[2][2][2];
 extern s8 D_003BA868[2][2];
@@ -108,8 +108,8 @@ s32 kwlnTaskStep(KwlnTask *task) {
     if (task->flags & 0x10) {
         for (port = 0; port < 2; port++) {
             for (inputIndex = 0; inputIndex < 16; inputIndex++) {
-                D_00324510[0][port][inputIndex] = 0;
-                D_00324510[1][port][inputIndex] = 0;
+                kwlnTaskPadButtonStates[0][port][inputIndex] = 0;
+                kwlnTaskPadButtonStates[1][port][inputIndex] = 0;
             }
             for (inputIndex = 0; inputIndex < 2; inputIndex++) {
                 D_003BA870[port][inputIndex][0] = 0;
@@ -120,8 +120,8 @@ s32 kwlnTaskStep(KwlnTask *task) {
     } else {
         for (port = 0; port < 2; port++) {
             for (inputIndex = 0; inputIndex < 16; inputIndex++) {
-                D_00324510[0][port][inputIndex] = kwlnPadButtonStates[0][port][inputIndex];
-                D_00324510[1][port][inputIndex] = kwlnPadButtonStates[1][port][inputIndex];
+                kwlnTaskPadButtonStates[0][port][inputIndex] = kwlnPadButtonStates[0][port][inputIndex];
+                kwlnTaskPadButtonStates[1][port][inputIndex] = kwlnPadButtonStates[1][port][inputIndex];
             }
             for (inputIndex = 0; inputIndex < 2; inputIndex++) {
                 D_003BA870[port][inputIndex][0] = D_003BA860[port][inputIndex][0];

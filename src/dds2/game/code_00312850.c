@@ -15,7 +15,7 @@
 #include "sdf_grid_directions.h"
 #include "sdf_task_work.h"
 
-extern s8 D_0037F510[];
+extern s8 kwlnTaskPadButtonStates[];
 
 
 

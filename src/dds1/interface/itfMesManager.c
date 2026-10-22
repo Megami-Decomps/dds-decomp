@@ -981,7 +981,7 @@ u16 itfMesGetGlobalFlags(void) {
 
 
 
-extern s8 D_00324510[];
+extern s8 kwlnTaskPadButtonStates[];
 extern char *D_00357FA0[];
 extern char *D_003BB200[2];
 extern char D_003BB208[];
@@ -1028,16 +1028,16 @@ s32 itfMesRunPanelLayoutInspector(void) {
         panel = &debug->window->state->blkA4;
         switch (debug->mode) {
         case 0:
-            if (D_00324510[0x36] & 2) {
+            if (kwlnTaskPadButtonStates[0x36] & 2) {
                 if (--debug->selectedItem < 0) {
                     debug->selectedItem = 2;
                 }
-            } else if (D_00324510[0x37] & 2) {
+            } else if (kwlnTaskPadButtonStates[0x37] & 2) {
                 if (++debug->selectedItem >= 5) {
                     debug->selectedItem = 0;
                 }
             }
-            if (D_00324510[0x31] < 0) {
+            if (kwlnTaskPadButtonStates[0x31] < 0) {
                 ItfMesDebugState *confirmDebug = &D_00357D80;
 
                 switch (confirmDebug->selectedItem) {
@@ -1053,19 +1053,19 @@ s32 itfMesRunPanelLayoutInspector(void) {
                     confirmDebug->window = itfMesFindPreviousWindowWithPanelSprite(confirmDebug->window);
                     break;
                 }
-            } else if (D_00324510[0x33] < 0) {
+            } else if (kwlnTaskPadButtonStates[0x33] < 0) {
                 return -1;
             }
             break;
         case 1:
             itfAdjustPanelBoundsWithPad(panel, debug->selectedItem);
-            if (D_00324510[0x33] < 0) {
+            if (kwlnTaskPadButtonStates[0x33] < 0) {
                 debug->mode = 0;
             }
             break;
         case 2:
             sndStepIndexByPad(panel);
-            if (D_00324510[0x33] < 0) {
+            if (kwlnTaskPadButtonStates[0x33] < 0) {
                 D_00357D80.mode = 0;
             }
             break;

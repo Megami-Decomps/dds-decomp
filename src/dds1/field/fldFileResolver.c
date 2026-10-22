@@ -653,7 +653,7 @@ extern u32 D_0032E538[];
 
 extern u32 D_0032E544[];
 
-extern u32 D_0032E570[];
+extern u32 fldDisplayStateWords[];
 
 extern s32 D_003BAE38;
 
@@ -4579,7 +4579,7 @@ s32 fldUpdateAreaDamageReaction(void) {
     return 0;
 }
 
-extern s8 D_00324510[2][2][16];
+extern s8 kwlnTaskPadButtonStates[2][2][16];
 
 extern u8 D_003BA870[2][2][2];
 
@@ -4684,7 +4684,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
         if (fldAreaState.cameraTilt > 150.0f) {
             fldAreaState.cameraTilt = 150.0f;
         }
-        if (D_00324510[1][0][3] < 0) {
+        if (kwlnTaskPadButtonStates[1][0][3] < 0) {
             fldAreaState.cameraTiltActive = 0;
             fldAreaState.cameraTilt = 0.0f;
         }
@@ -4714,25 +4714,25 @@ s32 fldUpdateFieldPlayerMovement(void) {
         direction = (s32)(angle / 22.5f);
     }
     if (direction == -1) {
-        if (D_00324510[1][0][4] != 0 && D_00324510[1][0][6] != 0) {
+        if (kwlnTaskPadButtonStates[1][0][4] != 0 && kwlnTaskPadButtonStates[1][0][6] != 0) {
             direction = 14;
-        } else if (D_00324510[1][0][4] != 0 && D_00324510[1][0][7] != 0) {
+        } else if (kwlnTaskPadButtonStates[1][0][4] != 0 && kwlnTaskPadButtonStates[1][0][7] != 0) {
             direction = 10;
-        } else if (D_00324510[1][0][5] != 0 && D_00324510[1][0][6] != 0) {
+        } else if (kwlnTaskPadButtonStates[1][0][5] != 0 && kwlnTaskPadButtonStates[1][0][6] != 0) {
             direction = 2;
-        } else if (D_00324510[1][0][5] != 0 && D_00324510[1][0][7] != 0) {
+        } else if (kwlnTaskPadButtonStates[1][0][5] != 0 && kwlnTaskPadButtonStates[1][0][7] != 0) {
             direction = 6;
-        } else if (D_00324510[1][0][4] != 0) {
+        } else if (kwlnTaskPadButtonStates[1][0][4] != 0) {
             direction = 12;
-        } else if (D_00324510[1][0][5] != 0) {
+        } else if (kwlnTaskPadButtonStates[1][0][5] != 0) {
             direction = 4;
-        } else if (D_00324510[1][0][6] != 0) {
+        } else if (kwlnTaskPadButtonStates[1][0][6] != 0) {
             direction = 0;
-        } else if (D_00324510[1][0][7] != 0) {
+        } else if (kwlnTaskPadButtonStates[1][0][7] != 0) {
             direction = 8;
         }
     }
-    if (D_00324510[1][0][3] < 0) {
+    if (kwlnTaskPadButtonStates[1][0][3] < 0) {
         D_003BAD48 = 0;
         D_003BAD54 = 0;
     }
@@ -4744,7 +4744,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
             D_003BAD48 = 0;
         }
     }
-    if (D_00324510[1][0][3] != 0 || (D_00324510[1][0][8] != 0 && D_00324510[1][0][10] != 0)) {
+    if (kwlnTaskPadButtonStates[1][0][3] != 0 || (kwlnTaskPadButtonStates[1][0][8] != 0 && kwlnTaskPadButtonStates[1][0][10] != 0)) {
         if (fldAreaState.mode != 1 && fldAreaState.mode != 3) {
             snapInput = 1;
         }
@@ -4926,7 +4926,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
             fldAreaState.negatedAngle = difference;
         }
         if (D_003BAD2C == 0) {
-            if (D_00324510[1][0][3] < 0) {
+            if (kwlnTaskPadButtonStates[1][0][3] < 0) {
                 fldAreaState.cameraTargetAngle = -fldAreaState.targetAngle;
                 fldAreaState.cameraTargetAngle = fldSnapAngleToCardinalDirection(fldAreaState.cameraTargetAngle);
                 difference = fldAngleDifference(fldAreaState.cameraTargetAngle, fldAreaState.negatedAngle);
@@ -4958,12 +4958,12 @@ s32 fldUpdateFieldPlayerMovement(void) {
             fldAreaState.negatedAngle = difference;
         }
         if (snapInput != 0) {
-            if (D_00324510[1][0][8] < 0 && D_00324510[1][0][10] == 0) {
+            if (kwlnTaskPadButtonStates[1][0][8] < 0 && kwlnTaskPadButtonStates[1][0][10] == 0) {
                 fldAreaState.cameraTargetAngle -= 88.0f;
                 fldAreaState.cameraTargetAngle = fldSnapAngleToCardinalDirection(fldAreaState.cameraTargetAngle);
                 D_003BAD2C = 1;
                 fldAreaState.targetAngle = -fldAreaState.cameraTargetAngle;
-            } else if (D_00324510[1][0][10] < 0 && D_00324510[1][0][8] == 0) {
+            } else if (kwlnTaskPadButtonStates[1][0][10] < 0 && kwlnTaskPadButtonStates[1][0][8] == 0) {
                 fldAreaState.cameraTargetAngle += 88.0f;
                 fldAreaState.cameraTargetAngle = fldSnapAngleToCardinalDirection(fldAreaState.cameraTargetAngle);
                 D_003BAD2C = 1;
@@ -4971,9 +4971,9 @@ s32 fldUpdateFieldPlayerMovement(void) {
             }
         } else {
             s32 reversed = fileTestSavedSlotFlags(3) == 0;
-            if (D_00324510[1][0][8] != 0 && D_00324510[1][0][10] == 0) {
+            if (kwlnTaskPadButtonStates[1][0][8] != 0 && kwlnTaskPadButtonStates[1][0][10] == 0) {
                 fldAreaState.negatedAngle -= 4.5f;
-            } else if (D_00324510[1][0][8] == 0 && D_00324510[1][0][10] != 0) {
+            } else if (kwlnTaskPadButtonStates[1][0][8] == 0 && kwlnTaskPadButtonStates[1][0][10] != 0) {
                 fldAreaState.negatedAngle += 4.5f;
             } else if (D_003BA870[0][0][0] < 0x20) {
                 if (reversed) {
@@ -5044,7 +5044,7 @@ camera_input_done:
 s32 fldUpdateCameraFrame(void) {
     s16 node;
 
-    if (D_0032E570[0] != 0) {
+    if (fldDisplayStateWords[0] != 0) {
         return 0;
     }
     if (fldGetSceneReadyFlag() != 0) {
@@ -5565,10 +5565,10 @@ void fldDrawSkyGradient(void) {
             a1 += fldSwayOffset;
             a2 += fldSwayOffset;
             a3 += fldSwayOffset;
-            a0 += (s32)D_0032E570[14];
-            a1 += (s32)D_0032E570[14];
-            a2 += (s32)D_0032E570[14];
-            a3 += (s32)D_0032E570[14];
+            a0 += (s32)fldDisplayStateWords[14];
+            a1 += (s32)fldDisplayStateWords[14];
+            a2 += (s32)fldDisplayStateWords[14];
+            a3 += (s32)fldDisplayStateWords[14];
             if (a0 < 0) a0 = 0;
             if (a0 > 255) a0 = 255;
             if (a1 < 0) a1 = 0;
@@ -5603,10 +5603,10 @@ void fldDrawSkyGradient(void) {
                 oldA1 += fldSwayOffset;
                 oldA2 += fldSwayOffset;
                 oldA3 += fldSwayOffset;
-                oldA0 += (s32)D_0032E570[14];
-                oldA1 += (s32)D_0032E570[14];
-                oldA2 += (s32)D_0032E570[14];
-                oldA3 += (s32)D_0032E570[14];
+                oldA0 += (s32)fldDisplayStateWords[14];
+                oldA1 += (s32)fldDisplayStateWords[14];
+                oldA2 += (s32)fldDisplayStateWords[14];
+                oldA3 += (s32)fldDisplayStateWords[14];
                 if (oldA0 < 0) oldA0 = 0;
                 if (oldA0 > 255) oldA0 = 255;
                 if (oldA1 < 0) oldA1 = 0;
@@ -5857,13 +5857,13 @@ void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode) {
         if (state->sceneCommand == 0) {
             light = &((FldLightSet *)fldSkyLightSetBuffer)[skyLightSetIndex];
             area = light->fadeArea;
-            D_0032E570[13] = area;
-            D_0032E570[14] = light->displayStateSlot14;
+            fldDisplayStateWords[13] = area;
+            fldDisplayStateWords[14] = light->displayStateSlot14;
             value = light->fadeMode;
-            D_0032E570[15] = value;
-            D_0032E570[16] = light->swayMode;
+            fldDisplayStateWords[15] = value;
+            fldDisplayStateWords[16] = light->swayMode;
             fldSetFadeTarget(area, value, duration);
-            fldSetSwayMode(D_0032E570[16]);
+            fldSetSwayMode(fldDisplayStateWords[16]);
             vec[0] = light->drawColorFixedR * 0.00390625f;
             vec[1] = light->drawColorFixedG * 0.00390625f;
             vec[2] = light->drawColorFixedB * 0.00390625f;
@@ -6003,15 +6003,15 @@ void fldTransitionSkyLightSet(s32 lightSetIndex, s32 mode) {
             D_003BAD98 = lightSetIndex;
             if (fldAreaState.sceneCommand == 0) {
                 light = &((FldLightSet *)fldSkyLightSetBuffer)[lightSetIndex];
-                D_0032E570[11] = lightSetIndex;
+                fldDisplayStateWords[11] = lightSetIndex;
                 area = light->fadeArea;
-                D_0032E570[13] = area;
-                D_0032E570[14] = light->displayStateSlot14;
+                fldDisplayStateWords[13] = area;
+                fldDisplayStateWords[14] = light->displayStateSlot14;
                 value = light->fadeMode;
-                D_0032E570[15] = value;
-                D_0032E570[16] = light->swayMode;
+                fldDisplayStateWords[15] = value;
+                fldDisplayStateWords[16] = light->swayMode;
                 fldSetFadeTarget(area, value, duration);
-                fldSetSwayMode(D_0032E570[16]);
+                fldSetSwayMode(fldDisplayStateWords[16]);
                 vec[0] = light->drawColorFixedR * 0.00390625f;
                 vec[1] = light->drawColorFixedG * 0.00390625f;
                 vec[2] = light->drawColorFixedB * 0.00390625f;
@@ -6115,17 +6115,17 @@ void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode) {
                 lightSetIndex = D_003BAD98;
             }
             light = &((FldLightSet *)fldSkyLightSetBuffer)[lightSetIndex];
-            D_003BADDC = D_0032E570[11];
-            D_0032E570[11] = lightSetIndex;
+            D_003BADDC = fldDisplayStateWords[11];
+            fldDisplayStateWords[11] = lightSetIndex;
             D_003BADD8 = lightSetIndex;
             area = light->fadeArea;
-            D_0032E570[13] = area;
-            D_0032E570[14] = light->displayStateSlot14;
+            fldDisplayStateWords[13] = area;
+            fldDisplayStateWords[14] = light->displayStateSlot14;
             value = light->fadeMode;
-            D_0032E570[15] = value;
-            D_0032E570[16] = light->swayMode;
+            fldDisplayStateWords[15] = value;
+            fldDisplayStateWords[16] = light->swayMode;
             fldSetFadeTarget(area, value, duration);
-            fldSetSwayMode(D_0032E570[16]);
+            fldSetSwayMode(fldDisplayStateWords[16]);
             vec[0] = light->drawColorFixedR * 0.00390625f;
             vec[1] = light->drawColorFixedG * 0.00390625f;
             vec[2] = light->drawColorFixedB * 0.00390625f;
@@ -6180,8 +6180,8 @@ void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode) {
 void fldSetDisplayState(u32 state) {
     D_003BAD98 = state;
     D_003BADC8 = 0;
-    D_0032E570[12] = 0;
-    D_0032E570[11] = state;
+    fldDisplayStateWords[12] = 0;
+    fldDisplayStateWords[11] = state;
     D_003BADD8 = 0;
 }
 
@@ -6220,8 +6220,8 @@ void fldApplySkyLightSetToPlayerVU(void) {
         } else {
             light = &((FldLightSet *)fldSkyLightSetBuffer)[D_003BAD98];
         }
-        fldSetFadeTarget(D_0032E570[13], D_0032E570[15], 0);
-        fldSetSwayMode(D_0032E570[16]);
+        fldSetFadeTarget(fldDisplayStateWords[13], fldDisplayStateWords[15], 0);
+        fldSetSwayMode(fldDisplayStateWords[16]);
 
         vec[0] = light->drawColorFixedR * 0.00390625f;
         vec[1] = light->drawColorFixedG * 0.00390625f;
@@ -6297,13 +6297,13 @@ void fldApplyLightSetCurrent(void) {
     s32 value;
 
     area = light->fadeArea;
-    D_0032E570[13] = area;
-    D_0032E570[14] = light->displayStateSlot14;
+    fldDisplayStateWords[13] = area;
+    fldDisplayStateWords[14] = light->displayStateSlot14;
     value = light->fadeMode;
-    D_0032E570[15] = value;
-    D_0032E570[16] = light->swayMode;
+    fldDisplayStateWords[15] = value;
+    fldDisplayStateWords[16] = light->swayMode;
     fldSetFadeTarget(area, value, 0);
-    fldSetSwayMode(D_0032E570[16]);
+    fldSetSwayMode(fldDisplayStateWords[16]);
     vec[0] = light->drawColorFixedR * 0.00390625f;
     vec[1] = light->drawColorFixedG * 0.00390625f;
     vec[2] = light->drawColorFixedB * 0.00390625f;
@@ -6356,13 +6356,13 @@ void fldApplyLightSetIndex(s32 index) {
 
     D_003BAD98 = index;
     area = light->fadeArea;
-    D_0032E570[13] = area;
-    D_0032E570[14] = light->displayStateSlot14;
+    fldDisplayStateWords[13] = area;
+    fldDisplayStateWords[14] = light->displayStateSlot14;
     value = light->fadeMode;
-    D_0032E570[15] = value;
-    D_0032E570[16] = light->swayMode;
+    fldDisplayStateWords[15] = value;
+    fldDisplayStateWords[16] = light->swayMode;
     fldSetFadeTarget(area, value, 0);
-    fldSetSwayMode(D_0032E570[16]);
+    fldSetSwayMode(fldDisplayStateWords[16]);
     vec[0] = light->drawColorFixedR * 0.00390625f;
     vec[1] = light->drawColorFixedG * 0.00390625f;
     vec[2] = light->drawColorFixedB * 0.00390625f;
@@ -6445,7 +6445,7 @@ void fldActivateCameraColorSetting(s32 enable) {
     fldCameraColorEnabled = enable;
 }
 
-extern s32 D_003BADE0;
+extern s32 fldCameraColorFade;
 
 s32 fldComposeFadeColor(s32 fade, s32 color, s32 alpha) {
     s32 scaled;
@@ -6453,7 +6453,7 @@ s32 fldComposeFadeColor(s32 fade, s32 color, s32 alpha) {
     if (fade < 0) {
         fade = 0;
     }
-    scaled = alpha * D_003BADE0 / 100;
+    scaled = alpha * fldCameraColorFade / 100;
     if (fade < 0xE0) {
         return color | (scaled << 24);
     }
@@ -7303,7 +7303,7 @@ s32 fldClassifyPositionInZoneWithMargin(f32 *out, s32 mode, s32 count, f32 margi
     return inside;
 }
 
-extern f32 D_00330750[3];
+extern f32 fldResolvedPosition[3];
 
 extern s32 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit);
 
@@ -7325,14 +7325,14 @@ void fldHitChkUnitElvOnly(f32 *input) {
     s32 index;
     f32 margin;
 
-    previous[1] = D_00330750[1];
+    previous[1] = fldResolvedPosition[1];
     position[1] = input[1] - 35.0f;
     position[0] = input[0];
     position[2] = input[2];
-    previous[0] = D_00330750[0];
-    previous[2] = D_00330750[2];
-    absoluteDelta[0] = ffabsf(input[0] - D_00330750[0]);
-    absoluteDelta[2] = ffabsf(input[2] - D_00330750[2]);
+    previous[0] = fldResolvedPosition[0];
+    previous[2] = fldResolvedPosition[2];
+    absoluteDelta[0] = ffabsf(input[0] - fldResolvedPosition[0]);
+    absoluteDelta[2] = ffabsf(input[2] - fldResolvedPosition[2]);
     margin = 45.0f;
     for (index = 0; index < fldValueRecordCount; index++) {
         if (!(fldValueRecords[index].face->attributes & 0x80)) {
@@ -7448,9 +7448,9 @@ void fldHitChkUnitElv(f32 *position) {
             newPosition[0] = position[0] + movement[0];
             newPosition[1] = position[1] + movement[1];
             newPosition[2] = position[2] + movement[2];
-            previous[0] = D_00330750[0];
-            previous[1] = D_00330750[1];
-            previous[2] = D_00330750[2];
+            previous[0] = fldResolvedPosition[0];
+            previous[1] = fldResolvedPosition[1];
+            previous[2] = fldResolvedPosition[2];
             fldAreaState.positionPending = 1;
             fldAreaState.targetX = newPosition[0];
             fldAreaState.targetY = newPosition[1];
@@ -7458,9 +7458,9 @@ void fldHitChkUnitElv(f32 *position) {
             position[0] = newPosition[0];
             position[1] = newPosition[1];
             position[2] = newPosition[2];
-            D_00330750[0] = newPosition[0];
-            D_00330750[1] = newPosition[1];
-            D_00330750[2] = newPosition[2];
+            fldResolvedPosition[0] = newPosition[0];
+            fldResolvedPosition[1] = newPosition[1];
+            fldResolvedPosition[2] = newPosition[2];
         }
     }
 }
@@ -7490,9 +7490,9 @@ void fldHitChkUnitDamage(f32 *position) {
     point[0] = position[0];
     point[1] = position[1];
     point[2] = position[2];
-    reference[0] = D_00330750[0];
-    reference[1] = D_00330750[1];
-    reference[2] = D_00330750[2];
+    reference[0] = fldResolvedPosition[0];
+    reference[1] = fldResolvedPosition[1];
+    reference[2] = fldResolvedPosition[2];
     point[1] -= 35.0f;
     distanceVector[0] = point[0] - reference[0];
     distanceVector[1] = point[1] - reference[1];
@@ -8194,9 +8194,9 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BADD8);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BADDC);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BADE0);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCameraColorFade);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BADE4);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCameraColorLayerScroll);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldAuxRecordBuffer);
 

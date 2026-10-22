@@ -577,7 +577,7 @@ void fileDrawPulsingSaveHighlight(void) {
     D_0037D4D0[2] = angle;
     wave = sdfSinPoly((f32)((angle + 0x5A) % 360) / 180.0f * 3.1415899f);
     D_0037D4D0[3] = (s32)((wave + 1.0f) * 0.5f * 191.0f + 64.0f);
-    kwlnDrawTexturedColorQuad(0x1BE, 0x12C, 0x13, 0x1F, 1, 1, 0x13, 0x1F, (D_0037D4D0[3] << 24) | 0xAEC014,
+    evtSubmitTexturedGradientQuad(0x1BE, 0x12C, 0x13, 0x1F, 1, 1, 0x13, 0x1F, (D_0037D4D0[3] << 24) | 0xAEC014,
                   (D_0037D4D0[3] << 24) | 0xAEC014, (D_0037D4D0[3] << 24) | 0xAEC014,
                   (D_0037D4D0[3] << 24) | 0xAEC014, itfMesGetWindowTexture());
 }
@@ -591,8 +591,8 @@ extern s32 D_003BC884;
 void fileDrawSaveWindow(void) {
     evtSetDrawSurfaceIndex(0x56);
     evtSubmitPrimaryAlphaBlendMode(0);
-    kwlnDrawTexturedColorQuad(0x112, 0x113, 0x98, 0x34, 0x14A, 0x1C5, 0x98, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_003BC884));
-    kwlnDrawTexturedColorQuad(0x56, 0x113, 0xBC, 0x34, 0x14A, 0x1C5, 1, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_003BC884));
+    evtSubmitTexturedGradientQuad(0x112, 0x113, 0x98, 0x34, 0x14A, 0x1C5, 0x98, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_003BC884));
+    evtSubmitTexturedGradientQuad(0x56, 0x113, 0xBC, 0x34, 0x14A, 0x1C5, 1, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_003BC884));
     fileCursorPulseUpdate();
     fileDrawCursorPulse(0x17E, 0x118, 0x56);
     D_003BC85C++;
@@ -627,7 +627,7 @@ s32 fileDrawStatusDialogFrame(void) {
     } else {
         value = 80;
     }
-    kwlnDrawTexturedColorQuad(0, 0, 512, 448, 0, 0, 512, 448,
+    evtSubmitTexturedGradientQuad(0, 0, 512, 448, 0, 0, 512, 448,
                  (((value << 7) / 100) << 24) | 0x808080,
                  (((value << 7) / 100) << 24) | 0x808080,
                  (((value << 7) / 100) << 24) | 0x808080,
@@ -1211,15 +1211,15 @@ s32 fileSlotSelectPollClear(void) {
     }
 }
 
-extern s8 D_00324510[];
+extern s8 kwlnTaskPadButtonStates[];
 
 s32 filePollSlotDetectionAndBranch(void) {
     s32 reqStatus;
 
     D_003BC810 = 0;
     if (D_003BC858 == 0) {
-        if (fileIsLoadedAndConditionTrue(D_00324510[0x21] < 0) ||
-            fileIsLoadedAndConditionTrue(D_00324510[0x23] < 0)) {
+        if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) ||
+            fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0)) {
             sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
             D_003BC858 = 1;
         }
@@ -1285,8 +1285,8 @@ s32 filePollSlotDetectionAndBranch(void) {
 
 s32 filePollSlotScanOrReset(void) {
     if (D_003BC858 == 0) {
-        if (fileIsLoadedAndConditionTrue(D_00324510[0x21] < 0) ||
-            fileIsLoadedAndConditionTrue(D_00324510[0x23] < 0)) {
+        if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) ||
+            fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0)) {
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
             D_003BC858 = 1;
         }
@@ -1307,8 +1307,8 @@ s32 filePollSlotScanOrReset(void) {
 }
 
 s32 fileAbortSlotScanOnInput(void) {
-    if (fileIsLoadedAndConditionTrue(D_00324510[0x21] < 0) ||
-        fileIsLoadedAndConditionTrue(D_00324510[0x23] < 0)) {
+    if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) ||
+        fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0)) {
         sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         D_003BC854 = 0;
         D_003BC810 = 0;
@@ -1336,8 +1336,8 @@ s32 fileSetMenuCallbackAndClearResult(u32 callback) {
 }
 
 s32 mcdFinishFileDetection(void) {
-    if (fileIsLoadedAndConditionTrue(D_00324510[0x21] < 0) ||
-        fileIsLoadedAndConditionTrue(D_00324510[0x23] < 0)) {
+    if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) ||
+        fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0)) {
         fileSetMenuFlowState(0);
         D_003BC854 = 0;
         D_003BC810 = 0;
@@ -1361,8 +1361,8 @@ s32 filePollSlotRequestAndResumeFlow(void) {
     s32 fileStatus;
 
     if (D_003BC858 == 0) {
-        if (fileIsLoadedAndConditionTrue(D_00324510[0x21] < 0) ||
-            fileIsLoadedAndConditionTrue(D_00324510[0x23] < 0)) {
+        if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) ||
+            fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0)) {
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
             D_003BC858 = 1;
         }
@@ -2244,7 +2244,7 @@ s32 fileSlotBrowserUpdate(void) {
         fileLoadMenuState.inputRepeatTimer++;
         fileLoadMenuState.inputRepeatTimer = fileLoadMenuState.inputRepeatTimer <= 0 ? 0 : fileLoadMenuState.inputRepeatTimer > 3 ? 3 : fileLoadMenuState.inputRepeatTimer;
 
-        if (fileIsLoadedWithActiveFlow(((u8)D_00324510[0x26] >> 1) & 1) != 0 && fileLoadMenuState.inputRepeatTimer >= 3) {
+        if (fileIsLoadedWithActiveFlow(((u8)kwlnTaskPadButtonStates[0x26] >> 1) & 1) != 0 && fileLoadMenuState.inputRepeatTimer >= 3) {
             selection = D_003BC840;
             fileLoadMenuState.inputRepeatTimer = 0;
             if (selection > 0) {
@@ -2260,7 +2260,7 @@ s32 fileSlotBrowserUpdate(void) {
             }
         }
 
-        if (fileIsLoadedWithActiveFlow(((u8)D_00324510[0x27] >> 1) & 1) != 0 && fileLoadMenuState.inputRepeatTimer >= 3) {
+        if (fileIsLoadedWithActiveFlow(((u8)kwlnTaskPadButtonStates[0x27] >> 1) & 1) != 0 && fileLoadMenuState.inputRepeatTimer >= 3) {
             selection = D_003BC840;
             fileLoadMenuState.inputRepeatTimer = 0;
             if (selection < 7) {
@@ -2285,10 +2285,10 @@ s32 fileSlotBrowserUpdate(void) {
         } else if (oldSelection < fileSelectedSlotIndex) {
             D_003BC818 = 8;
         }
-        if (fileIsLoadedAndConditionTrue(D_00324510[0x21] < 0) != 0) {
+        if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) != 0) {
             D_003BC82C = 1;
         }
-        if (fileIsLoadedAndConditionTrue(D_00324510[0x23] < 0) != 0) {
+        if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0) != 0) {
             D_003BC82C = 2;
         }
     }
@@ -2410,9 +2410,9 @@ s32 fileDrawSlotListAndPreview(s32 work) {
         D_003BC818++;
     }
     if (D_003BC848 == 0) {
-        kwlnDrawTexturedColorQuad(0x56, 0x33, 0x137, 0x17, 5, 0x1C4, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_003BC880));
+        evtSubmitTexturedGradientQuad(0x56, 0x33, 0x137, 0x17, 5, 0x1C4, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_003BC880));
     } else {
-        kwlnDrawTexturedColorQuad(0x56, 0x33, 0x137, 0x17, 5, 0x1DD, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_003BC880));
+        evtSubmitTexturedGradientQuad(0x56, 0x33, 0x137, 0x17, 5, 0x1DD, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_003BC880));
     }
     evtSetDrawSurfaceIndex(0x55);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 2, 0, 0, 1, 1);
@@ -2486,13 +2486,13 @@ s32 fileDrawSlotListAndPreview(s32 work) {
             detailColor = fileClampPackedColorByte(detailColor, fileLoadMenuState.standardRowAlpha, 0);
         }
         baseColor = (alpha << 24) | 0x808080;
-        kwlnDrawTexturedColorQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_003BC868));
+        evtSubmitTexturedGradientQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_003BC868));
         if (fileSlotDisplayStates[slot] == FILE_SLOT_DISPLAY_NO_RECOGNIZED_SAVE) {
-            kwlnDrawTexturedColorQuad(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_003BC870));
+            evtSubmitTexturedGradientQuad(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_003BC870));
         } else if (fileSlotDisplayStates[slot] == FILE_SLOT_DISPLAY_DIRECTORY_WITHOUT_SAVE) {
-            kwlnDrawTexturedColorQuad(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_003BC878));
+            evtSubmitTexturedGradientQuad(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_003BC878));
         } else if (fileSavePreviewRecords[slot].status > 0) {
-            kwlnDrawTexturedColorQuad(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_003BC874));
+            evtSubmitTexturedGradientQuad(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_003BC874));
         }
         if (slot != 10) {
             fileDrawSlotIcon(slot + 1, 0x5A, y + 4, alpha);
@@ -2500,19 +2500,19 @@ s32 fileDrawSlotListAndPreview(s32 work) {
                 trailAlpha = 16;
                 if (D_003BC818 > 0) {
                     for (trail = 0; trail < D_003BC818; trail++, trailAlpha -= 2) {
-                        kwlnDrawTexturedColorQuad(0x1F, y - trail * 4, 0x1BB, trail * 4 + 16, 3, 3, 0x1BB, trail * 4 + 16, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (struct SdfTex *)(u32)(D_003BC86C));
+                        evtSubmitTexturedGradientQuad(0x1F, y - trail * 4, 0x1BB, trail * 4 + 16, 3, 3, 0x1BB, trail * 4 + 16, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (struct SdfTex *)(u32)(D_003BC86C));
                     }
                 } else if (D_003BC818 < 0) {
                     trailAlpha = 32;
                     for (trail = 0; trail < -D_003BC818; trail++, trailAlpha -= 4) {
-                        kwlnDrawTexturedColorQuad(0x1F, y + 0x58, 0x1BB, trail * 4 + 16, 3, 0x5B - trail * 4, 0x1BB, trail * 4 + 16, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (struct SdfTex *)(u32)(D_003BC86C));
+                        evtSubmitTexturedGradientQuad(0x1F, y + 0x58, 0x1BB, trail * 4 + 16, 3, 0x5B - trail * 4, 0x1BB, trail * 4 + 16, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (struct SdfTex *)(u32)(D_003BC86C));
                     }
                 }
             }
             if (fileSlotDisplayStates[slot] != FILE_SLOT_DISPLAY_SAVE_PRESENT) {
                 if (fileSelectedSlotIndex == slot) {
                     u32 highlightColor = ((D_0037D4D0[0] + 0x80) << 24) | 0x808080;
-                    kwlnDrawTexturedColorQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, (struct SdfTex *)(u32)(D_003BC86C));
+                    evtSubmitTexturedGradientQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, (struct SdfTex *)(u32)(D_003BC86C));
                 }
             } else {
                 u32 bannerColor;
@@ -2522,7 +2522,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
                     mnuDrawAndStoreTextGlyphHandle(0x40, y + 0x20, detailColor, fileNewCycleLabel);
                 }
                 bannerColor = (alpha << 24) | 0x808080;
-                kwlnDrawTexturedColorQuad(0x88, y + 4, 0x137, 0x1F, 4, 0x1C5, 0x137, 0x1F, bannerColor, bannerColor, bannerColor, bannerColor, (struct SdfTex *)(u32)(D_003BC884));
+                evtSubmitTexturedGradientQuad(0x88, y + 4, 0x137, 0x1F, 4, 0x1C5, 0x137, 0x1F, bannerColor, bannerColor, bannerColor, bannerColor, (struct SdfTex *)(u32)(D_003BC884));
                 if (preview->newCycle == 0) {
                     if (preview->mapGroup == 0) {
                         mnuDrawAndStoreTextGlyphHandle(0xF0, y, detailColor, D_00347C68[preview->mapIndex]);
@@ -2545,7 +2545,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
                 fileDrawMenuImageAtPoint(0x1BD, y + 0x15, titleColor, text);
                 if (fileSelectedSlotIndex == slot) {
                     u32 highlightColor = ((D_0037D4D0[0] + 0x80) << 24) | 0x808080;
-                    kwlnDrawTexturedColorQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, (struct SdfTex *)(u32)(D_003BC86C));
+                    evtSubmitTexturedGradientQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, (struct SdfTex *)(u32)(D_003BC86C));
                 }
                 if (fileSavePreviewRecords[slot].newCycle == 0) {
                     if (fileSelectedSlotIndex == slot) {
@@ -2563,7 +2563,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
                             case 5: portrait = 3; break;
                             case 6: portrait = 4; break;
                             }
-                            kwlnDrawTexturedColorQuad(partyIndex * 60 + 0x80, y + 0x23, 0x32, 0x3E, 1, 1, 0x32, 0x3E, partyColor, partyColor, partyColor, partyColor, (struct SdfTex *)(u32)(fileSavePreviewPortraitTextures[portrait]));
+                            evtSubmitTexturedGradientQuad(partyIndex * 60 + 0x80, y + 0x23, 0x32, 0x3E, 1, 1, 0x32, 0x3E, partyColor, partyColor, partyColor, partyColor, (struct SdfTex *)(u32)(fileSavePreviewPortraitTextures[portrait]));
                             sprintf(text, D_003BC8A8, fileSavePreviewRecords[slot].levels[partyIndex]);
                             fileDrawMenuImageAtPoint(partyIndex * 60 + 0x98, y + 0x51, titleColor, text);
                         }
@@ -2577,20 +2577,20 @@ s32 fileDrawSlotListAndPreview(s32 work) {
     if (D_003BC840 > 0) {
         u32 arrowColor;
 
-        kwlnDrawTexturedColorQuad(0xF8, 0x50, 0xF, 0x22, 0x35, 2, 0xF, 0x22, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_003BC87C));
+        evtSubmitTexturedGradientQuad(0xF8, 0x50, 0xF, 0x22, 0x35, 2, 0xF, 0x22, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_003BC87C));
         wave = sdfSinPoly((f32)((fileScrollArrowState.angle + 90) % 360) / 180.0f * 3.1415899f);
         fileScrollArrowState.upAlpha = (s32)((wave + 1.0f) * 0.5f * 176.0f + 16.0f);
         arrowColor = (fileScrollArrowState.upAlpha << 24) | 0x808080;
-        kwlnDrawTexturedColorQuad(0xF8, 0x50, 0xF, 0x22, 0x35, 2, 0xF, 0x22, arrowColor, arrowColor, arrowColor, arrowColor, (struct SdfTex *)(u32)(D_003BC87C));
+        evtSubmitTexturedGradientQuad(0xF8, 0x50, 0xF, 0x22, 0x35, 2, 0xF, 0x22, arrowColor, arrowColor, arrowColor, arrowColor, (struct SdfTex *)(u32)(D_003BC87C));
     }
     if (D_003BC840 < 7) {
         u32 arrowColor;
 
-        kwlnDrawTexturedColorQuad(0xF8, 0x18B, 0xF, 0x22, 0x47, 2, 0xF, 0x22, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_003BC87C));
+        evtSubmitTexturedGradientQuad(0xF8, 0x18B, 0xF, 0x22, 0x47, 2, 0xF, 0x22, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_003BC87C));
         wave = sdfSinPoly((f32)((fileScrollArrowState.angle + 90) % 360) / 180.0f * 3.1415899f);
         fileScrollArrowState.downAlpha = (s32)((wave + 1.0f) * 0.5f * 176.0f + 16.0f);
         arrowColor = (fileScrollArrowState.downAlpha << 24) | 0x808080;
-        kwlnDrawTexturedColorQuad(0xF8, 0x18B, 0xF, 0x22, 0x47, 2, 0xF, 0x22, arrowColor, arrowColor, arrowColor, arrowColor, (struct SdfTex *)(u32)(D_003BC87C));
+        evtSubmitTexturedGradientQuad(0xF8, 0x18B, 0xF, 0x22, 0x47, 2, 0xF, 0x22, arrowColor, arrowColor, arrowColor, arrowColor, (struct SdfTex *)(u32)(D_003BC87C));
     }
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 5, 0x80, 3, 0, 0, 1, 1);
@@ -2632,9 +2632,9 @@ s32 fileDrawMenuFrame(s32 work) {
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     if (D_003BC80C != 0) {
-        kwlnDrawTexturedColorQuad(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
+        evtSubmitTexturedGradientQuad(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
                       (struct SdfTex *)(u32)(D_003BC880));
-        kwlnDrawTexturedColorQuad(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
+        evtSubmitTexturedGradientQuad(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
                       (struct SdfTex *)(u32)(D_003BC884));
     }
     if (D_003BC810 != 0) {
@@ -2857,17 +2857,17 @@ extern void *D_003BD908, *D_003BD90C;
 /* Yes/no cursor input while the card request is idle. */
 static inline void filePollPromptChoice(void) {
     if (D_003BC838 == 0 && fileIsLoadStepComplete() != 0) {
-        if (fileIsLoadedAndConditionTrue(D_00324510[0x27] < 0) != 0) {
+        if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x27] < 0) != 0) {
             if (D_003BC830 != 1) {
                 sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             }
             D_003BC830 = 1;
-        } else if (fileIsLoadedAndConditionTrue(D_00324510[0x26] < 0) != 0) {
+        } else if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x26] < 0) != 0) {
             if (D_003BC830 != 0) {
                 sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             }
             D_003BC830 = 0;
-        } else if (fileIsLoadedAndConditionTrue(D_00324510[0x21] < 0) != 0) {
+        } else if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) != 0) {
             if (D_003BC830 == 0 && (D_003BC834 == 1 || D_003BC834 == 3)) {
                 sndSetSequenceVolumePan(0x11, 0x7F, 0x3F);
             } else {
@@ -2878,7 +2878,7 @@ static inline void filePollPromptChoice(void) {
             } else {
                 D_003BC838 = 1;
             }
-        } else if (fileIsLoadedAndConditionTrue(D_00324510[0x23] < 0) != 0) {
+        } else if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0) != 0) {
             sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
             D_003BC838 = 2;
         }
@@ -2937,17 +2937,17 @@ s32 fileUpdatePromptDialog(void) {
         return 0;
     }
     if (D_003BC834 == 4 || D_003BC834 == 8) {
-        if (D_00324510[0x27] < 0) {
+        if (kwlnTaskPadButtonStates[0x27] < 0) {
             if (D_003BC830 != 1) {
                 sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             }
             D_003BC830 = 1;
-        } else if (D_00324510[0x26] < 0) {
+        } else if (kwlnTaskPadButtonStates[0x26] < 0) {
             if (D_003BC830 != 0) {
                 sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             }
             D_003BC830 = 0;
-        } else if (D_00324510[0x21] < 0) {
+        } else if (kwlnTaskPadButtonStates[0x21] < 0) {
             if (D_003BC830 == 0 && (D_003BC834 == 1 || D_003BC834 == 3 || D_003BC834 == 9)) {
                 sndSetSequenceVolumePan(0x11, 0x7F, 0x3F);
             } else {
@@ -2961,7 +2961,7 @@ s32 fileUpdatePromptDialog(void) {
             /* Retail 0x0028F8F0 bnez: enters the shared no tail mid-block at .L0028FADC;
              * its delay slot (addiu $2,$0,-1) is the tail's first step. */
             goto no;
-        } else if (D_00324510[0x23] < 0) {
+        } else if (kwlnTaskPadButtonStates[0x23] < 0) {
             sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
             D_003BC830 = -1;
             D_003BC834 = 0;
@@ -3117,7 +3117,7 @@ void fileDrawSlotIcon(s32 index, s32 x, s32 y, s32 alpha) {
     evtSetDrawSurfaceIndex(0x53);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-    kwlnDrawTexturedColorQuad(x, y, 0x16, 0x10, uv[index][0], uv[index][1], 0x16, 0x10, (alpha << 24) | 0x808080,
+    evtSubmitTexturedGradientQuad(x, y, 0x16, 0x10, uv[index][0], uv[index][1], 0x16, 0x10, (alpha << 24) | 0x808080,
                   (alpha << 24) | 0x808080, (alpha << 24) | 0x808080, (alpha << 24) | 0x808080, (struct SdfTex *)(u32)(D_003BC87C));
 }
 
@@ -3192,7 +3192,7 @@ void fileDrawCursorPulse(s32 x, s32 y, s32 surface) {
 
         if (mode < 2) {
             if (mode >= 0) {
-                kwlnDrawTexturedColorQuad(x + fileCursorPulseState.pos[i][0] + offsets[i][0],
+                evtSubmitTexturedGradientQuad(x + fileCursorPulseState.pos[i][0] + offsets[i][0],
                              y + fileCursorPulseState.pos[i][1] + offsets[i][1],
                              27, 26,
                              texturePositions[mode][0], texturePositions[mode][1],
@@ -3576,14 +3576,14 @@ s32 fileUpdateConfigurationMenu(KwlnTask *task) {
     }
 
     oldIndex = fileConfigTaskWork->frame->cursor->index;
-    if ((u8)D_00324510[0x26] & 2) {
+    if ((u8)kwlnTaskPadButtonStates[0x26] & 2) {
         if (mnuRetreatListCursorDefault(fileConfigTaskWork->frame) != NULL) {
             sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             fileConfigTaskWork->transitionTicks = 8;
             fileConfigTaskWork->previousIndex = oldIndex;
         }
     }
-    if ((u8)D_00324510[0x27] & 2) {
+    if ((u8)kwlnTaskPadButtonStates[0x27] & 2) {
         if (mnuAdvanceListCursorDefault(fileConfigTaskWork->frame) != NULL) {
             sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             fileConfigTaskWork->previousIndex = oldIndex;
@@ -3592,13 +3592,13 @@ s32 fileUpdateConfigurationMenu(KwlnTask *task) {
     }
     index = fileConfigTaskWork->frame->cursor->index;
     if (index < 4) {
-        if (D_00324510[0x24] < 0 && fileTestSlotFlagsBit(index, (s32 *)&datGameState->world.slotFlags) == 0) {
+        if (kwlnTaskPadButtonStates[0x24] < 0 && fileTestSlotFlagsBit(index, (s32 *)&datGameState->world.slotFlags) == 0) {
             fileToggleSlotFlagsBit(fileConfigTaskWork->frame->cursor->index, (s32 *)&datGameState->world.slotFlags);
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
             cursor = (FileConfigListNode *)fileConfigTaskWork->frame->cursor;
             cursor->resource->ticks = 8;
         }
-        if (D_00324510[0x25] < 0) {
+        if (kwlnTaskPadButtonStates[0x25] < 0) {
             if (fileTestSlotFlagsBit(fileConfigTaskWork->frame->cursor->index, (s32 *)&datGameState->world.slotFlags) != 0) {
                 fileToggleSlotFlagsBit(fileConfigTaskWork->frame->cursor->index, (s32 *)&datGameState->world.slotFlags);
                 sndSetSequenceVolumePan(8, 0x7F, 0x3F);
@@ -3607,15 +3607,15 @@ s32 fileUpdateConfigurationMenu(KwlnTask *task) {
             }
         }
     }
-    if (D_00324510[0x26] == 0 && D_00324510[0x27] == 0) {
+    if (kwlnTaskPadButtonStates[0x26] == 0 && kwlnTaskPadButtonStates[0x27] == 0) {
         mnuClearListFlagsOneAndTwo((u32 *)fileConfigTaskWork->frame);
     }
-    if (D_00324510[0x21] < 0) {
+    if (kwlnTaskPadButtonStates[0x21] < 0) {
         if (fileConfigTaskWork->frame->cursor->index == 4) {
             fileConfigTaskWork->result = 3;
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         }
-    } else if (D_00324510[0x23] < 0) {
+    } else if (kwlnTaskPadButtonStates[0x23] < 0) {
         fileConfigTaskWork->result = 3;
         fileRestoreSlotFlagsToState();
         sndSetSequenceVolumePan(10, 0x7F, 0x3F);

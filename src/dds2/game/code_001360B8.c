@@ -14,10 +14,10 @@ extern u32 D_0038BB50[];
 extern u32 D_0038BB60[];
 
 
-extern s32 D_00436170;
+extern s32 fldCameraColorFade;
 
 extern u32 D_00436128;
-extern u32 D_00389988[];
+extern u32 fldDisplayStateWords[];
 
 
 extern void *D_004360F0;
@@ -88,17 +88,17 @@ void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode) {
                 lightSetIndex = D_00436128;
             }
             light = &((FldLightSet *)fldSkyLightSetBuffer)[lightSetIndex];
-            D_0043616C = D_00389988[11];
-            D_00389988[11] = lightSetIndex;
+            D_0043616C = fldDisplayStateWords[11];
+            fldDisplayStateWords[11] = lightSetIndex;
             D_00436168 = lightSetIndex;
             area = light->fadeArea;
-            D_00389988[13] = area;
-            D_00389988[14] = light->displayStateSlot14;
+            fldDisplayStateWords[13] = area;
+            fldDisplayStateWords[14] = light->displayStateSlot14;
             value = light->fadeMode;
-            D_00389988[15] = value;
-            D_00389988[16] = light->swayMode;
+            fldDisplayStateWords[15] = value;
+            fldDisplayStateWords[16] = light->swayMode;
             fldSetFadeTarget(area, value, duration);
-            fldSetSwayMode(D_00389988[16]);
+            fldSetSwayMode(fldDisplayStateWords[16]);
             vec[0] = light->drawColorFixedR * 0.00390625f;
             vec[1] = light->drawColorFixedG * 0.00390625f;
             vec[2] = light->drawColorFixedB * 0.00390625f;
@@ -154,8 +154,8 @@ extern s32 D_00436168;
 void fldSetDisplayState(u32 state) {
     D_00436128 = state;
     D_00436158 = 0;
-    D_00389988[12] = 0;
-    D_00389988[11] = state;
+    fldDisplayStateWords[12] = 0;
+    fldDisplayStateWords[11] = state;
     D_00436168 = 0;
 }
 
@@ -186,8 +186,8 @@ void fldApplySkyLightSetToPlayerVU(void) {
         } else {
             light = &((FldLightSet *)fldSkyLightSetBuffer)[D_00436128];
         }
-        fldSetFadeTarget(D_00389988[13], D_00389988[15], 0);
-        fldSetSwayMode(D_00389988[16]);
+        fldSetFadeTarget(fldDisplayStateWords[13], fldDisplayStateWords[15], 0);
+        fldSetSwayMode(fldDisplayStateWords[16]);
 
         vec[0] = light->drawColorFixedR * 0.00390625f;
         vec[1] = light->drawColorFixedG * 0.00390625f;
@@ -297,13 +297,13 @@ void fldApplyLightSetCurrent(void) {
     s32 value;
 
     area = light->fadeArea;
-    D_00389988[13] = area;
-    D_00389988[14] = light->displayStateSlot14;
+    fldDisplayStateWords[13] = area;
+    fldDisplayStateWords[14] = light->displayStateSlot14;
     value = light->fadeMode;
-    D_00389988[15] = value;
-    D_00389988[16] = light->swayMode;
+    fldDisplayStateWords[15] = value;
+    fldDisplayStateWords[16] = light->swayMode;
     fldSetFadeTarget(area, value, 0);
-    fldSetSwayMode(D_00389988[16]);
+    fldSetSwayMode(fldDisplayStateWords[16]);
     vec[0] = light->drawColorFixedR * 0.00390625f;
     vec[1] = light->drawColorFixedG * 0.00390625f;
     vec[2] = light->drawColorFixedB * 0.00390625f;
@@ -356,13 +356,13 @@ void fldApplyLightSetIndex(s32 index) {
 
     D_00436128 = index;
     area = light->fadeArea;
-    D_00389988[13] = area;
-    D_00389988[14] = light->displayStateSlot14;
+    fldDisplayStateWords[13] = area;
+    fldDisplayStateWords[14] = light->displayStateSlot14;
     value = light->fadeMode;
-    D_00389988[15] = value;
-    D_00389988[16] = light->swayMode;
+    fldDisplayStateWords[15] = value;
+    fldDisplayStateWords[16] = light->swayMode;
     fldSetFadeTarget(area, value, 0);
-    fldSetSwayMode(D_00389988[16]);
+    fldSetSwayMode(fldDisplayStateWords[16]);
     vec[0] = light->drawColorFixedR * 0.00390625f;
     vec[1] = light->drawColorFixedG * 0.00390625f;
     vec[2] = light->drawColorFixedB * 0.00390625f;
@@ -449,7 +449,7 @@ s32 fldComposeFadeColor(s32 fade, s32 color, s32 alpha) {
     if (fade < 0) {
         fade = 0;
     }
-    scaled = alpha * D_00436170 / 100;
+    scaled = alpha * fldCameraColorFade / 100;
     if (fade < 0xE0) {
         return color | (scaled << 24);
     }
@@ -467,5 +467,5 @@ INCLUDE_SDATA(const s32, "game/code_001360B8", D_00436168);
 
 INCLUDE_SDATA(const s32, "game/code_001360B8", D_0043616C);
 
-INCLUDE_SDATA(const s32, "game/code_001360B8", D_00436170);
+INCLUDE_SDATA(const s32, "game/code_001360B8", fldCameraColorFade);
 

@@ -171,7 +171,7 @@ void *evtGetTestTaskUpdateCallback(void) {
 extern s32 sdfPathExists(char *);
 extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
 extern SdfPoolNode D_00325708;
-extern u8 D_00324510[2][2][16];
+extern u8 kwlnTaskPadButtonStates[2][2][16];
 extern s32 D_003BBDEC;
 extern const char D_003ACC68[];
 extern const char D_003ACC78[];
@@ -194,7 +194,7 @@ s32 evtUpdateScriptTestSelection(KwlnTask *task) {
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7F00, 0xFEFFFF, 0, "L1R1 = +-100"));
     D_00325708.append(&D_00325708, list);
 
-    if ((s8)D_00324510[1][0][1] < 0) {
+    if ((s8)kwlnTaskPadButtonStates[1][0][1] < 0) {
         sprintf(path, "/event/e%03d/e%03d/scr/e%03d.bf",
                       D_003BBDEC - D_003BBDEC % 10, D_003BBDEC, D_003BBDEC);
         if (sdfPathExists(path) != 0) {
@@ -203,29 +203,29 @@ s32 evtUpdateScriptTestSelection(KwlnTask *task) {
             return (s32)evtUpdateIdleTestTask;
         }
     }
-    if ((s8)D_00324510[1][0][3] < 0) {
+    if ((s8)kwlnTaskPadButtonStates[1][0][3] < 0) {
         mdlFlagClearAll();
         return (s32)evtGetTestTaskUpdateCallback;
     }
-    if (D_00324510[1][0][5] & 2) {
+    if (kwlnTaskPadButtonStates[1][0][5] & 2) {
         D_003BBDEC++;
     }
-    if ((D_00324510[1][0][4] & 2) && D_003BBDEC > 500) {
+    if ((kwlnTaskPadButtonStates[1][0][4] & 2) && D_003BBDEC > 500) {
         D_003BBDEC--;
     }
-    if ((s8)D_00324510[1][0][2] < 0) {
+    if ((s8)kwlnTaskPadButtonStates[1][0][2] < 0) {
         D_003BBDEC = 500;
     }
-    if ((s8)D_00324510[1][0][0] < 0) {
+    if ((s8)kwlnTaskPadButtonStates[1][0][0] < 0) {
         D_003BBDEC = 600;
     }
-    if ((D_00324510[1][0][8] & 2) && D_003BBDEC > 500) {
+    if ((kwlnTaskPadButtonStates[1][0][8] & 2) && D_003BBDEC > 500) {
         D_003BBDEC -= 100;
         if (D_003BBDEC < 500) {
             D_003BBDEC = 500;
         }
     }
-    if (D_00324510[1][0][10] & 2) {
+    if (kwlnTaskPadButtonStates[1][0][10] & 2) {
         D_003BBDEC += 100;
     }
     return 0;

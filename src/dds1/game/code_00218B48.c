@@ -245,7 +245,7 @@ extern s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *pad);
 
 extern void fldAdjustIntegerUsingMainPad(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep);
 
-extern s8 D_00324510[64];
+extern s8 kwlnTaskPadButtonStates[64];
 
 extern void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, s8 *pad);
 
@@ -712,46 +712,46 @@ void mdlEditMarkParametersWithPad(EffMarkParams *params, s16 *fieldCursor) {
     s32 selectedField = *fieldCursor;
     u8 *colorChannel;
 
-    if (D_00324510[0x27] < 0) {
+    if (kwlnTaskPadButtonStates[0x27] < 0) {
         selectedField = selectedField != MDL_MARK_LAST_FIELD ? selectedField + 1 : 0;
-    } else if (((u8)D_00324510[0x27] & MDL_PAD_REPEAT_FLAG) != 0 && selectedField < MDL_MARK_LAST_FIELD) {
+    } else if (((u8)kwlnTaskPadButtonStates[0x27] & MDL_PAD_REPEAT_FLAG) != 0 && selectedField < MDL_MARK_LAST_FIELD) {
         selectedField++;
-    } else if (D_00324510[0x26] < 0) {
+    } else if (kwlnTaskPadButtonStates[0x26] < 0) {
         selectedField = selectedField != 0 ? selectedField - 1 : MDL_MARK_LAST_FIELD;
-    } else if (((u8)D_00324510[0x26] & MDL_PAD_REPEAT_FLAG) != 0 && selectedField > 0) {
+    } else if (((u8)kwlnTaskPadButtonStates[0x26] & MDL_PAD_REPEAT_FLAG) != 0 && selectedField > 0) {
         selectedField--;
     } else {
         switch (selectedField) {
         case 0:
-            fldStepIntByPad(&params->mark0, 4, 0, 99999, 0, 1, D_00324510);
+            fldStepIntByPad(&params->mark0, 4, 0, 99999, 0, 1, kwlnTaskPadButtonStates);
             break;
         case 1:
-            fldStepIntByPad(&params->mark1, 4, 0, 99999, 0, 1, D_00324510);
+            fldStepIntByPad(&params->mark1, 4, 0, 99999, 0, 1, kwlnTaskPadButtonStates);
             break;
         case 2:
-            fldStepIntByPad(&params->start, 2, 0, 9999, 0, 1, D_00324510);
+            fldStepIntByPad(&params->start, 2, 0, 9999, 0, 1, kwlnTaskPadButtonStates);
             break;
         case 3:
-            fldStepIntByPad(&params->end, 2, 0, 9999, 0, 1, D_00324510);
+            fldStepIntByPad(&params->end, 2, 0, 9999, 0, 1, kwlnTaskPadButtonStates);
             break;
         case 4:
-            fldStepIntByPad(&params->interval, 2, 1, 10, 0, 1, D_00324510);
+            fldStepIntByPad(&params->interval, 2, 1, 10, 0, 1, kwlnTaskPadButtonStates);
             break;
         case 5:
-            fldStepIntByPad(&params->face, 1, 1, 10, 0, 1, D_00324510);
+            fldStepIntByPad(&params->face, 1, 1, 10, 0, 1, kwlnTaskPadButtonStates);
             break;
         case 6:
-            fldStepIntByPad(&params->blend, 1, 0, 4, 0, 1, D_00324510);
+            fldStepIntByPad(&params->blend, 1, 0, 4, 0, 1, kwlnTaskPadButtonStates);
             break;
         default:
             colorChannel = (u8 *)params->colors + selectedField - MDL_MARK_COLOR_FIRST_FIELD;
-            if (D_00324510[0x25] < 0) {
+            if (kwlnTaskPadButtonStates[0x25] < 0) {
                 *colorChannel += 1;
-            } else if (((u8)D_00324510[0x25] & MDL_PAD_REPEAT_FLAG) != 0 && *colorChannel < MDL_COLOR_BYTE_MASK) {
+            } else if (((u8)kwlnTaskPadButtonStates[0x25] & MDL_PAD_REPEAT_FLAG) != 0 && *colorChannel < MDL_COLOR_BYTE_MASK) {
                 *colorChannel += 1;
-            } else if (D_00324510[0x24] < 0) {
+            } else if (kwlnTaskPadButtonStates[0x24] < 0) {
                 *colorChannel -= 1;
-            } else if (((u8)D_00324510[0x24] & MDL_PAD_REPEAT_FLAG) != 0 && *colorChannel != 0) {
+            } else if (((u8)kwlnTaskPadButtonStates[0x24] & MDL_PAD_REPEAT_FLAG) != 0 && *colorChannel != 0) {
                 *colorChannel -= 1;
             }
             break;
@@ -1965,7 +1965,7 @@ void mdlAdjustViewerScale(void) {
     s32 scaleHundredths = (s32)(mdlViewerState.viewerScale * 100.0f + 0.5f);
 
     /* Keep the distinct up/down thresholds and the native float expression order. */
-    if (D_00324510[0x27] & MDL_PAD_REPEAT_FLAG) {
+    if (kwlnTaskPadButtonStates[0x27] & MDL_PAD_REPEAT_FLAG) {
         if (scaleHundredths < 0x32) {
             scaleHundredths += 1;
         } else if (scaleHundredths < 0x1F4) {
@@ -1977,7 +1977,7 @@ void mdlAdjustViewerScale(void) {
             }
         }
         mdlViewerState.viewerScale = scaleHundredths * 0.01f;
-    } else if (D_00324510[0x26] & MDL_PAD_REPEAT_FLAG) {
+    } else if (kwlnTaskPadButtonStates[0x26] & MDL_PAD_REPEAT_FLAG) {
         if (scaleHundredths < 0x33) {
             scaleHundredths -= 1;
             if (scaleHundredths < 5) {
@@ -1990,14 +1990,14 @@ void mdlAdjustViewerScale(void) {
         }
         mdlViewerState.viewerScale = scaleHundredths * 0.01f;
     }
-    if (D_00324510[0x23] < 0) {
+    if (kwlnTaskPadButtonStates[0x23] < 0) {
         mdlViewerState.unitStepMode ^= 1;
     }
     mdlViewerState.unitStepSign = 0;
     if (mdlViewerState.unitStepMode != 0) {
-        if (D_00324510[0x25] != 0) {
+        if (kwlnTaskPadButtonStates[0x25] != 0) {
             mdlViewerState.unitStepSign = 1;
-        } else if (D_00324510[0x24] != 0) {
+        } else if (kwlnTaskPadButtonStates[0x24] != 0) {
             mdlViewerState.unitStepSign = -1;
         }
     }
@@ -2487,26 +2487,26 @@ void mdlUpdateViewerMarkEditorInput(void) {
     switch (state->editorMode) {
     case 0:
         count = mdlCountActiveRecords();
-        if (D_00324510[0x27] < 0) {
+        if (kwlnTaskPadButtonStates[0x27] < 0) {
             state->selectedRecordIndex++;
             if (state->selectedRecordIndex >= count) {
                 state->selectedRecordIndex = 0;
             }
-        } else if (((u8)D_00324510[0x27] & MDL_PAD_REPEAT_FLAG) != 0) {
+        } else if (((u8)kwlnTaskPadButtonStates[0x27] & MDL_PAD_REPEAT_FLAG) != 0) {
             if (state->selectedRecordIndex < count - 1) {
                 state->selectedRecordIndex++;
             }
-        } else if (D_00324510[0x26] < 0) {
+        } else if (kwlnTaskPadButtonStates[0x26] < 0) {
             if (state->selectedRecordIndex == 0) {
                 state->selectedRecordIndex = count - 1;
             } else {
                 state->selectedRecordIndex--;
             }
-        } else if (((u8)D_00324510[0x26] & MDL_PAD_REPEAT_FLAG) != 0) {
+        } else if (((u8)kwlnTaskPadButtonStates[0x26] & MDL_PAD_REPEAT_FLAG) != 0) {
             if (state->selectedRecordIndex > 0) {
                 state->selectedRecordIndex--;
             }
-        } else if (D_00324510[0x21] < 0) {
+        } else if (kwlnTaskPadButtonStates[0x21] < 0) {
             record = mdlGetSelectedRecord();
             if (record != NULL && mdlRecordHasKind(record, MDL_VIEWER_RECORD_KIND_TRACK_POLY)) {
                 state->editorMode = 1;
@@ -2515,8 +2515,8 @@ void mdlUpdateViewerMarkEditorInput(void) {
         break;
     case 1:
         record = mdlGetSelectedRecord();
-        if (D_00324510[0x23] >= 0 && record != NULL && mdlRecordHasKind(record, MDL_VIEWER_RECORD_KIND_TRACK_POLY)) {
-            if (D_00324510[0x21] < 0) {
+        if (kwlnTaskPadButtonStates[0x23] >= 0 && record != NULL && mdlRecordHasKind(record, MDL_VIEWER_RECORD_KIND_TRACK_POLY)) {
+            if (kwlnTaskPadButtonStates[0x21] < 0) {
                 mdlAddPlainViewerEntryForSelectedNode();
             } else {
                 mdlEditMarkParametersWithPad((EffMarkParams *)record, &state->markFieldCursor);
@@ -2771,17 +2771,17 @@ s32 mdlViewer(KwlnTask *task) {
     }
     if (mdlViewerState.taskPhase == 0) {
         selection = mdlViewerState.selectedTaskIndex;
-        if ((D_00324510[0x27] & 2) && (u32)selection < 12) {
+        if ((kwlnTaskPadButtonStates[0x27] & 2) && (u32)selection < 12) {
             mdlViewerState.selectedTaskIndex = selection + 1;
-        } else if (D_00324510[0x27] < 0) {
+        } else if (kwlnTaskPadButtonStates[0x27] < 0) {
             if (selection == 12) mdlViewerState.selectedTaskIndex = 0;
             else { mdlViewerState.selectedTaskIndex = selection + 1; }
-        } else if ((D_00324510[0x26] & 2) && selection > 0) {
+        } else if ((kwlnTaskPadButtonStates[0x26] & 2) && selection > 0) {
             mdlViewerState.selectedTaskIndex = selection - 1;
-        } else if (D_00324510[0x26] < 0) {
+        } else if (kwlnTaskPadButtonStates[0x26] < 0) {
             if (selection == 0) mdlViewerState.selectedTaskIndex = 12;
             else { mdlViewerState.selectedTaskIndex = selection - 1; }
-        } else if (D_00324510[0x25] < 0 || D_00324510[0x24] < 0) {
+        } else if (kwlnTaskPadButtonStates[0x25] < 0 || kwlnTaskPadButtonStates[0x24] < 0) {
             if ((u32)selection < 7) {
                 selection += 7;
                 if ((u32)selection < 13) mdlViewerState.selectedTaskIndex = selection;
@@ -2790,11 +2790,11 @@ s32 mdlViewer(KwlnTask *task) {
 
                 mdlViewerState.selectedTaskIndex = selection + pageStep;
             }
-        } else if (D_00324510[0x21] < 0) {
+        } else if (kwlnTaskPadButtonStates[0x21] < 0) {
             mdlViewerState.unk09 = 0;
             mdlViewerState.taskPhase = (u8)mdlViewerState.selectedTaskIndex + 1;
             mdlRestartViewerPhaseTask();
-        } else if (D_00324510[0x22] < 0) {
+        } else if (kwlnTaskPadButtonStates[0x22] < 0) {
             mdlViewerState.taskPhase = mdlViewerState.unk0B;
             mdlRestartViewerPhaseTask();
         }
@@ -3172,7 +3172,7 @@ s32 dds3LightEditorProcess(KwlnTask *task) {
         state->pad = (MdlPadState *)D_00324520;
     } else if ((u32)state == 1) {
         state = &D_00367D30;
-        state->pad = (MdlPadState *)D_00324510;
+        state->pad = (MdlPadState *)kwlnTaskPadButtonStates;
     }
     if (state->pad == NULL) {
         state->pad = (MdlPadState *)D_00324520;
@@ -3405,7 +3405,7 @@ s32 evtEventViewerEditDrawVectorTargetTask(KwlnTask *task) {
     if (dds3GetProcessData(task) == 0) {
         pad = D_00398638;
     } else {
-        pad = D_00324510;
+        pad = kwlnTaskPadButtonStates;
     }
     state->pad = (MdlPadState *)pad;
     mdlViewerControlState.packetList = sdfCreateResetPacketList();
@@ -3534,7 +3534,7 @@ s32 mdlUpdateFaceDivisionEditorTask(KwlnTask *task) {
     if (dds3GetProcessData(task) == 0) {
         pad = D_00398638;
     } else {
-        pad = D_00324510;
+        pad = kwlnTaskPadButtonStates;
     }
     value = D_003BD358;
     adjustment = D_003BD35C;

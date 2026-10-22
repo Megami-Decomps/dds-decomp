@@ -500,7 +500,7 @@ void brsBuildActiveUnitProgressRows(BrsActiveProgressList *output) {
     }
 }
 
-extern s8 D_0037F510[];
+extern s8 kwlnTaskPadButtonStates[];
 extern char D_00428550[];
 extern void brsUpdateResultBackgroundFade(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void brsDrawProgressRowEntries(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, BrsActiveProgressList *, s32, s32);
@@ -530,7 +530,7 @@ void mnuDrawUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressLi
     if (task != NULL) {
         work = (BrsSkillPackageWork *)dds3GetProcessData(task);
     }
-    if ((D_0037F510[0x21] < 0 || (D_0037F510[0x23] & 2)) && work->opacity >= 0x80) {
+    if ((kwlnTaskPadButtonStates[0x21] < 0 || (kwlnTaskPadButtonStates[0x23] & 2)) && work->opacity >= 0x80) {
         work->skipProgressAnimation = 1;
     }
     count = list->count;
