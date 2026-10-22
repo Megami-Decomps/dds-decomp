@@ -43,7 +43,7 @@ extern void sdfDisableFlagListViewTargetRelativeMode(void);
 extern void evtSetSolarOverlayFullyTransparent(void);
 extern void evtDestroySecondaryWorldNode(void);
 extern SdfMemBlock *D_003BD254;
-extern s32 fldLocalMapTrackSlotFromMode();
+extern s32 fldLocalMapTrackSlotFromMode(s32 mode);
 extern s32 fldLmapTaskUpdate(KwlnTask *task);
 extern s32 D_003BD23C;
 extern s32 D_003BD96C;
@@ -355,7 +355,7 @@ s32 fldLmapTaskUpdate(KwlnTask *task) {
 
 void fldStartLmapTask(s32 mode) {
     if (mode != 0) {
-        D_003BD23C = fldLocalMapTrackSlotFromMode();
+        D_003BD23C = fldLocalMapTrackSlotFromMode(mode);
     } else {
         D_003BD23C = 1;
     }
