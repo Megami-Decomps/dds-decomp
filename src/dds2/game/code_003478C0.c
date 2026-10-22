@@ -57,8 +57,6 @@ extern s32 sdfFileRpcReadCallback(sdfFileCmdHandle_t *, s32, s32, s32, s32);
 
 extern s32 D_00439224;
 
-extern void sdfGrSortOtSetup();
-
 extern DevRequest *sdfTexListNew(s32 count);
 
 /* Read the entry count word, size the list for it and arm the skip handler. */
