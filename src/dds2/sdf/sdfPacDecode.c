@@ -198,7 +198,7 @@ void sdfPacMemDecoderFunc(PacState *state) {
 void sdfPacMemDecompDecoderFunc(PacState *state) {
     s32 inputBytes = state->inputAvailable;
     s32 finished = sdfDecomp((SdfPacDecoder *)state->decoder, state->inputCursor, inputBytes);
-    sdfPacUseSrc(state, inputBytes - ((PacBuf *)state->decoder)->remainingBytes);
+    sdfPacUseSrc(state, inputBytes - ((SdfPacDecoder *)state->decoder)->remainingInputBytes);
     if (finished == 0) {
         return;
     }
@@ -337,7 +337,7 @@ void sdfPacTmxDecompDecoderFunc(PacState *state) {
     /* This handler offers pendingBytes, unlike the packet-level decoder. */
     s32 inputBytes = state->pendingBytes;
     s32 finished = sdfDecomp((SdfPacDecoder *)state->decoder, state->inputCursor, inputBytes);
-    sdfPacUseSrc(state, inputBytes - ((PacBuf *)state->decoder)->remainingBytes);
+    sdfPacUseSrc(state, inputBytes - ((SdfPacDecoder *)state->decoder)->remainingInputBytes);
     if (finished == 0) {
         return;
     }
