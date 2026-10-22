@@ -1658,8 +1658,8 @@ s32 evtFindUnitSlotAuxCoordinates(evtUnitHandle_t *unit, f32 *outX, f32 *outY) {
     return 0;
 }
 
-void *evtSearchBasic(s32 objectKind, s32 worldObjectKey) {
-    void *world;
+dds3Basic_t *evtSearchBasic(s32 objectKind, s32 worldObjectKey) {
+    dds3Basic_t *world;
 
     world = dds3GetActiveScene();
     return dds3SearchSceneBasic(world, worldObjectKey, objectKind);
@@ -2685,7 +2685,7 @@ u32 evtCommand_EFFBED_BE_EVO(void) {
 
 u32 evtCommand_EFFBED_START(void) {
     s32 worldObjectKey;
-    void *unit;
+    dds3Basic_t *unit;
     u32 entryId;
 
     worldObjectKey = scrGetIntPara(0);
@@ -2833,31 +2833,31 @@ u32 evtCommand_EFFMG2_BE(void) {
 
 u32 evtCommand_EFFMG2_PRESET(void) {
     s32 worldObjectKey;
-    void *obj;
+    dds3Basic_t *obj;
 
     worldObjectKey = scrGetIntPara(0);
     obj = evtSearchBasic(7, worldObjectKey);
     if (obj != NULL) {
-        dds3EffectObjectPresetMG12((dds3Basic_t *)obj);
+        dds3EffectObjectPresetMG12(obj);
     }
     return 1;
 }
 
 u32 evtCommand_EFFECT_PRESET(void) {
     s32 worldObjectKey;
-    void *obj;
+    dds3Basic_t *obj;
 
     worldObjectKey = scrGetIntPara(0);
     obj = evtSearchBasic(7, worldObjectKey);
     if (obj != NULL) {
-        dds3EffectObjectPresetMG12((dds3Basic_t *)obj);
+        dds3EffectObjectPresetMG12(obj);
     }
     return 1;
 }
 
 u32 evtCommand_EFFECT_CLS(void) {
     s32 worldObjectKey;
-    void *obj;
+    dds3Basic_t *obj;
 
     worldObjectKey = scrGetIntPara(0);
     obj = evtSearchBasic(7, worldObjectKey);
