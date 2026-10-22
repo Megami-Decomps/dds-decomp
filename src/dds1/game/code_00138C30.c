@@ -230,7 +230,7 @@ extern s32 fldBackgroundBuffer;
 
 extern u32 fldDisplayRow;
 
-extern u32 D_003BAC30;
+extern u32 fldRelocateOnRelease;
 
 extern u32 fldPendingArea;
 
@@ -333,7 +333,7 @@ extern s32 D_003BAE60;
 
 extern char D_003BAC40[];
 
-extern s32 D_003BAC10;
+extern s32 fldRoomEventPlacementCount;
 
 extern EffWorldNode *evtSpawnActionObjD(s32 key, void *work, s32 name);
 
@@ -341,7 +341,7 @@ extern u32 fldPushDisplayValue(u32, EffWorldNode *);
 
 extern s32 fldRegisterRoomObject(FldFileResource *, EffWorldNode *);
 
-extern struct DevRequest *D_003BAC14;
+extern struct DevRequest *fldRoomSoundResources;
 
 extern void dds3SetObjectPayloadWord8(EffWorldNode *, u32);
 
@@ -357,23 +357,23 @@ extern void fldCopyActorWaypointTable(const void *source);
 
 extern void fldCopyInfoTable(const void *);
 
-extern s32 D_003BAC10;
+extern s32 fldRoomEventPlacementCount;
 
-extern u32 D_003BAC30;
+extern u32 fldRelocateOnRelease;
 
 extern s32 D_003BAE40;
 
-extern FldTransferChunk *D_003BAC18;
+extern FldTransferChunk *fldRoomF1Chunk;
 
-extern u32 D_003BAC1C;
+extern u32 fldRoomF1Data;
 
-extern FldTransferChunk *D_003BAC20;
+extern FldTransferChunk *fldRoomF2Chunk;
 
-extern u32 D_003BAC24;
+extern u32 fldRoomF2Data;
 
-extern FldTransferChunk *D_003BAC28;
+extern FldTransferChunk *fldRoomKF2Chunk;
 
-extern u32 D_003BAC2C;
+extern u32 fldRoomKF2Data;
 
 extern struct FileRequest *D_003BAC38;
 
@@ -397,19 +397,19 @@ extern char D_003BACA0[];
 
 extern char D_003BACA8[];
 
-extern s32 D_003BAC10;
+extern s32 fldRoomEventPlacementCount;
 
-extern FldTransferChunk *D_003BAC18;
+extern FldTransferChunk *fldRoomF1Chunk;
 
-extern u32 D_003BAC1C;
+extern u32 fldRoomF1Data;
 
-extern FldTransferChunk *D_003BAC20;
+extern FldTransferChunk *fldRoomF2Chunk;
 
-extern u32 D_003BAC24;
+extern u32 fldRoomF2Data;
 
-extern FldTransferChunk *D_003BAC28;
+extern FldTransferChunk *fldRoomKF2Chunk;
 
-extern u32 D_003BAC2C;
+extern u32 fldRoomKF2Data;
 
 extern struct FileRequest *D_003BAC38;
 

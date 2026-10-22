@@ -623,7 +623,7 @@ extern s32 fldBackgroundBuffer;
 
 extern u32 fldDisplayRow;
 
-extern u32 D_003BAC30;
+extern u32 fldRelocateOnRelease;
 
 extern u32 fldPendingArea;
 
@@ -819,7 +819,7 @@ extern FldFileResource *D_003BD7B8;
 
 extern u32 D_003BD7BC;
 
-extern s32 D_003BAC10;
+extern s32 fldRoomEventPlacementCount;
 
 extern s16 D_0032E4B4[];
 
@@ -931,7 +931,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                 if (isAppended != 0) {
                     spawnResource->id |= 0x800000;
                 } else {
-                    D_003BAC10++;
+                    fldRoomEventPlacementCount++;
                 }
                 event = spawnResource->data;
                 spawnedObject = evtSpawnActionObjD(spawnResource->id, (void *)event->label, (s32)spawnResource->name);
@@ -960,13 +960,13 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                     case 1:
                         func_00148FF0(0, point->id, rotation, position[0], position[1], position[2]);
                         if (isAppended == 0) {
-                            D_003BAC10++;
+                            fldRoomEventPlacementCount++;
                         }
                         break;
                     case 2:
                         func_00148FF0(1, point->id, rotation, position[0], position[1], position[2]);
                         if (isAppended == 0) {
-                            D_003BAC10++;
+                            fldRoomEventPlacementCount++;
                         }
                         break;
                     case 3:
@@ -991,7 +991,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                     if (isAppended != 0) {
                         FldPlacementData *placement = spawnResource->data;
                         func_001480D0(id, rotation, position[0], position[1], position[2],
-                                      room, spawnResource->name, placement->event + D_003BAC10);
+                                      room, spawnResource->name, placement->event + fldRoomEventPlacementCount);
                     } else {
                         FldPlacementData *placement = spawnResource->data;
                         func_001480D0(id, rotation, position[0], position[1], position[2],
@@ -1002,7 +1002,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                     parameters = ((FldPlacementData *)spawnResource->data)->payload.words;
                     func_001486D0(parameters[0], rotation, position[0], position[1], position[2]);
                     if (isAppended == 0) {
-                        D_003BAC10++;
+                        fldRoomEventPlacementCount++;
                     }
                     break;
                 case 7:
@@ -1053,7 +1053,7 @@ extern FldFileResource *D_003BD7B8;
 
 extern u32 D_003BD7BC;
 
-extern struct DevRequest *D_003BAC14;
+extern struct DevRequest *fldRoomSoundResources;
 
 extern EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, f32 *rotation);
 
@@ -1089,7 +1089,7 @@ void fldCreateResourceScriptObjects(void) {
     for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
         scriptResource = resource->data;
         evtCreateScriptObjectWithResource(resource->id, &scriptResource->itemList,
-                                         scriptResource->motionTable, D_003BAC14, resource->name);
+                                         scriptResource->motionTable, fldRoomSoundResources, resource->name);
         /* Retail fills both 16-byte stack vectors before creating the object. */
         if (resource->transform != NULL) {
             position[0] = resource->transform[0];
@@ -1630,23 +1630,23 @@ void fldReleaseAreaResourceCache(void) {
     D_003C9200[0] = D_003BAC90[0];
 }
 
-extern s32 D_003BAC10;
+extern s32 fldRoomEventPlacementCount;
 
-extern u32 D_003BAC30;
+extern u32 fldRelocateOnRelease;
 
 extern s32 D_003BAE40;
 
-extern FldTransferChunk *D_003BAC18;
+extern FldTransferChunk *fldRoomF1Chunk;
 
-extern u32 D_003BAC1C;
+extern u32 fldRoomF1Data;
 
-extern FldTransferChunk *D_003BAC20;
+extern FldTransferChunk *fldRoomF2Chunk;
 
-extern u32 D_003BAC24;
+extern u32 fldRoomF2Data;
 
-extern FldTransferChunk *D_003BAC28;
+extern FldTransferChunk *fldRoomKF2Chunk;
 
-extern u32 D_003BAC2C;
+extern u32 fldRoomKF2Data;
 
 extern struct FileRequest *D_003BAC38;
 
@@ -1718,8 +1718,8 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
     PacWork *work;
     s32 index;
 
-    D_003BAC30 = 0;
-    D_003BAC10 = 0;
+    fldRelocateOnRelease = 0;
+    fldRoomEventPlacementCount = 0;
     fldCachedRoomF1ResourceAllocation = NULL;
     fldCachedRoomF2ResourceAllocation = NULL;
     fldCachedRoomKF2ResourceAllocation = NULL;
@@ -1768,13 +1768,13 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
             fileWaitForRequestReady(request);
         }
         index = 0;
-        D_003BAC14 = NULL;
+        fldRoomSoundResources = NULL;
         work = ((FilePacRequest *)D_003BAC38)->packet.queueHead;
         fldCachedRoomResourceAllocation = NULL;
         for (; work != NULL; work = work->next) {
             switch (index) {
             case 0:
-                D_003BAC14 = sndBuildResourceHandleListFromOffsets((const SdfTextureOffsetListHeader *)work->dataCursor);
+                fldRoomSoundResources = sndBuildResourceHandleListFromOffsets((const SdfTextureOffsetListHeader *)work->dataCursor);
                 sdfMemFreeDelayedDirect((struct SdfMemBlock *)work->resourceHandle);
                 fldCachedRoomResourceAllocation = NULL;
                 break;
@@ -1782,8 +1782,8 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
                 fldCachedRoomF2ResourceAllocation = NULL;
                 roomData = work->dataCursor;
                 chunk = (FldTransferChunk *)((u8 *)roomData + 8);
-                D_003BAC24 = (u32)roomData;
-                D_003BAC20 = chunk;
+                fldRoomF2Data = (u32)roomData;
+                fldRoomF2Chunk = chunk;
                 fldRelocatePackedTransferChunk((u32)roomData, chunk);
                 fldProcessFieldRequest((FldSceneRequest *)fldGetTransferChunkPayload(chunk));
                 break;
@@ -1791,8 +1791,8 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
                 fldCachedRoomF1ResourceAllocation = NULL;
                 roomData = work->dataCursor;
                 chunk = (FldTransferChunk *)((u8 *)roomData + 8);
-                D_003BAC1C = (u32)roomData;
-                D_003BAC18 = chunk;
+                fldRoomF1Data = (u32)roomData;
+                fldRoomF1Chunk = chunk;
                 fldRelocatePackedTransferChunk((u32)roomData, chunk);
                 fldLoadSceneRequestFiles((FldLoadRequest *)fldGetTransferChunkPayload(chunk));
                 break;
@@ -1804,9 +1804,9 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
         fldCachedRoomResourceAllocation = fldLoadCachedRoomResourceIfLocationMatches(&roomOffsets, area, room);
         if (fldCachedRoomResourceAllocation == NULL) {
             sprintf(path, D_003BAC98, resourceName);
-            D_003BAC14 = sndLoadNamedOffsetResourceList(path);
+            fldRoomSoundResources = sndLoadNamedOffsetResourceList(path);
         } else {
-            D_003BAC14 = sndBuildResourceHandleListFromOffsets(roomOffsets);
+            fldRoomSoundResources = sndBuildResourceHandleListFromOffsets(roomOffsets);
             sdfMemFreeDelayedDirect(fldCachedRoomResourceAllocation);
             fldCachedRoomResourceAllocation = NULL;
         }
@@ -1818,8 +1818,8 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
             fldCachedRoomF2ResourceAllocation = sdfReadNamedResource(path, &roomData, 0);
         }
         chunk = (FldTransferChunk *)((u8 *)roomData + 8);
-        D_003BAC24 = (u32)roomData;
-        D_003BAC20 = chunk;
+        fldRoomF2Data = (u32)roomData;
+        fldRoomF2Chunk = chunk;
         fldRelocatePackedTransferChunk((u32)roomData, chunk);
         fldProcessFieldRequest((FldSceneRequest *)fldGetTransferChunkPayload(chunk));
     }
@@ -1831,8 +1831,8 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
             fldCachedRoomKF2ResourceAllocation = sdfReadNamedResource(path, &roomData, 0);
         }
         chunk = (FldTransferChunk *)((u8 *)roomData + 8);
-        D_003BAC2C = (u32)roomData;
-        D_003BAC28 = chunk;
+        fldRoomKF2Data = (u32)roomData;
+        fldRoomKF2Chunk = chunk;
         fldRelocatePackedTransferChunk((u32)roomData, chunk);
         fldProcessFieldRequestAlternate((FldSceneRequest *)fldGetTransferChunkPayload(chunk));
     }
@@ -1843,8 +1843,8 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
             fldCachedRoomF1ResourceAllocation = sdfReadNamedResource(path, &roomData, 0);
         }
         chunk = (FldTransferChunk *)((u8 *)roomData + 8);
-        D_003BAC1C = (u32)roomData;
-        D_003BAC18 = chunk;
+        fldRoomF1Data = (u32)roomData;
+        fldRoomF1Chunk = chunk;
         fldRelocatePackedTransferChunk((u32)roomData, chunk);
         fldLoadSceneRequestFiles((FldLoadRequest *)fldGetTransferChunkPayload(chunk));
     }
@@ -1870,19 +1870,19 @@ extern u32 fldLoadAreaRoomResourcesFromRequest(u32, u32, u32, u32,
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", fldLoadAreaRoomResourcesFromRequest);
 
-extern s32 D_003BAC10;
+extern s32 fldRoomEventPlacementCount;
 
-extern FldTransferChunk *D_003BAC18;
+extern FldTransferChunk *fldRoomF1Chunk;
 
-extern u32 D_003BAC1C;
+extern u32 fldRoomF1Data;
 
-extern FldTransferChunk *D_003BAC20;
+extern FldTransferChunk *fldRoomF2Chunk;
 
-extern u32 D_003BAC24;
+extern u32 fldRoomF2Data;
 
-extern FldTransferChunk *D_003BAC28;
+extern FldTransferChunk *fldRoomKF2Chunk;
 
-extern u32 D_003BAC2C;
+extern u32 fldRoomKF2Data;
 
 extern struct FileRequest *D_003BAC38;
 
@@ -1931,8 +1931,8 @@ void fldReleaseFieldResources(void) {
         mnuReleaseResourceEntries();
         fldReleaseTextureSlots();
     }
-    sdfResourceListRelease(D_003BAC14, 1);
-    D_003BAC14 = 0;
+    sdfResourceListRelease(fldRoomSoundResources, 1);
+    fldRoomSoundResources = 0;
     for (i = 0; i < 4; i++) {
         if (D_003C91E0[i] != 0) {
             sdfMemFreeDelayedDirect((struct SdfMemBlock *)D_003C91E0[i]);
@@ -1940,24 +1940,24 @@ void fldReleaseFieldResources(void) {
             D_003C91F0[i] = 0;
         }
     }
-    if (D_003BAC30 != 0) {
-        if (D_003BAC18 != 0) {
-            fldRelocateTransferChunkWords(D_003BAC1C, D_003BAC18);
-            D_003BAC18 = 0;
-            D_003BAC1C = 0;
+    if (fldRelocateOnRelease != 0) {
+        if (fldRoomF1Chunk != 0) {
+            fldRelocateTransferChunkWords(fldRoomF1Data, fldRoomF1Chunk);
+            fldRoomF1Chunk = 0;
+            fldRoomF1Data = 0;
         }
-        if (D_003BAC20 != 0) {
-            fldRelocateTransferChunkWords(D_003BAC24, D_003BAC20);
-            D_003BAC20 = 0;
-            D_003BAC24 = 0;
+        if (fldRoomF2Chunk != 0) {
+            fldRelocateTransferChunkWords(fldRoomF2Data, fldRoomF2Chunk);
+            fldRoomF2Chunk = 0;
+            fldRoomF2Data = 0;
         }
-        if (D_003BAC28 != 0) {
-            fldRelocateTransferChunkWords(D_003BAC2C, D_003BAC28);
-            D_003BAC28 = 0;
-            D_003BAC2C = 0;
+        if (fldRoomKF2Chunk != 0) {
+            fldRelocateTransferChunkWords(fldRoomKF2Data, fldRoomKF2Chunk);
+            fldRoomKF2Chunk = 0;
+            fldRoomKF2Data = 0;
         }
     }
-    D_003BAC10 = 0;
+    fldRoomEventPlacementCount = 0;
     D_003BAC4C = NULL;
     if (fldCachedRoomResourceAllocation != NULL) {
         sdfMemFreeDelayedDirect(fldCachedRoomResourceAllocation);
@@ -2118,7 +2118,7 @@ void fldDrawRoomModeAndObjectModeFlagGrid(void) {
 
 /* Enable or skip relocation of remaining transfer chunks during field teardown. */
 void fldSetRelocateOnRelease(u32 relocateOnRelease) {
-    D_003BAC30 = relocateOnRelease;
+    fldRelocateOnRelease = relocateOnRelease;
 }
 
 void fldInitDisplayObjects(void) {
@@ -7994,23 +7994,23 @@ void evtMessageExtraActionNoOp(void) {
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_003A0138);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAC10);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomEventPlacementCount);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAC14);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomSoundResources);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAC18);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomF1Chunk);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAC1C);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomF1Data);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAC20);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomF2Chunk);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAC24);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomF2Data);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAC28);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomKF2Chunk);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAC2C);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomKF2Data);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAC30);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRelocateOnRelease);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldAreaPackedArchive);
 

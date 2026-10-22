@@ -10026,3 +10026,12 @@
 0x004523C0	frFontSetupPackets	inferred	Per draw buffer, the font's GS setup packet (FrFontGsPacket) that frFontSubmitAtlasSetupPackets builds with frFontBuildGsSetupPacket. DDS1 twin 0x003D6920.
 0x004524C0	frFontAtlasPacketLists	inferred	Per draw buffer, the packet list (SdfListHead) frFontSubmitAtlasSetupPackets puts the atlas strip's packet on and submits through kwlnDrawSurfaces[83]. DDS1 twin 0x003D6A20.
 0x00452500	frFontAtlasPackets	inferred	Per draw buffer, the packet (FrFontAtlasPacket) frFontSubmitAtlasSetupPackets draws the whole glyph atlas with, as a textured four-corner strip. DDS1 twin 0x003D6A60.
+0x00435FA0	fldRoomEventPlacementCount	inferred	The room's event placements spawned so far; an appended placement's event number is offset by it. DDS1 twin 0x003BAC10.
+0x00435FA4	fldRoomSoundResources	inferred	The room's sound resource handle list (DevRequest), from its packed archive's first entry or its named offsets file. DDS1 twin 0x003BAC14.
+0x00435FA8	fldRoomF1Chunk	inferred	The room's F1 transfer chunk, whose load request fldLoadSceneRequestFiles runs; relocated back on release. DDS1 twin 0x003BAC18.
+0x00435FAC	fldRoomF1Data	inferred	The F1 resource data fldRoomF1Chunk lies in, its relocation base. DDS1 twin 0x003BAC1C.
+0x00435FB0	fldRoomF2Chunk	inferred	The room's F2 transfer chunk, whose scene request fldProcessFieldRequest runs; relocated back on release. DDS1 twin 0x003BAC20.
+0x00435FB4	fldRoomF2Data	inferred	The F2 resource data fldRoomF2Chunk lies in, its relocation base. DDS1 twin 0x003BAC24.
+0x00435FB8	fldRoomKF2Chunk	inferred	The room's KF2 transfer chunk, whose scene request fldProcessFieldRequestAlternate runs; relocated back on release. DDS1 twin 0x003BAC28.
+0x00435FBC	fldRoomKF2Data	inferred	The KF2 resource data fldRoomKF2Chunk lies in, its relocation base. DDS1 twin 0x003BAC2C.
+0x00435FC0	fldRelocateOnRelease	inferred	Set by fldSetRelocateOnRelease: field teardown relocates the room's remaining transfer chunks back when it is set. DDS1 twin 0x003BAC30.
