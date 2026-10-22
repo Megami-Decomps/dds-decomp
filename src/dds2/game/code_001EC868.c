@@ -4627,10 +4627,10 @@ typedef struct BtlCameraStoredPose {
 typedef struct BtlCameraParameterSnapshot {
     f32 pathEnd[4];
     f32 pathStart[4];
-    f32 eyeFrom[4];
-    f32 eyeTo[4];
-    f32 focusFrom[4];
-    f32 focusTo[4];
+    f32 targetFrom[4];
+    f32 targetTo[4];
+    f32 cameraFrom[4];
+    f32 cameraTo[4];
     f32 direction[4];
     f32 distance;
     u8 pad74[0xC];
@@ -5109,14 +5109,14 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
                 VU0_STORE_VF_UNCLOBBERED(vf10, D_003BD900.pathEnd);
                 VU0_LOAD_VF(vf10, CURSOR->pathStart);
                 VU0_STORE_VF_UNCLOBBERED(vf10, D_003BD900.pathStart);
-                VU0_LOAD_VF(vf10, CURSOR->eyeFrom);
-                VU0_STORE_VF_UNCLOBBERED(vf10, D_003BD900.eyeFrom);
-                VU0_LOAD_VF(vf10, CURSOR->eyeTo);
-                VU0_STORE_VF_UNCLOBBERED(vf10, D_003BD900.eyeTo);
-                VU0_LOAD_VF(vf10, CURSOR->focusFrom);
-                VU0_STORE_VF_UNCLOBBERED(vf10, D_003BD900.focusFrom);
-                VU0_LOAD_VF(vf10, CURSOR->focusTo);
-                VU0_STORE_VF_UNCLOBBERED(vf10, D_003BD900.focusTo);
+                VU0_LOAD_VF(vf10, CURSOR->targetFrom);
+                VU0_STORE_VF_UNCLOBBERED(vf10, D_003BD900.targetFrom);
+                VU0_LOAD_VF(vf10, CURSOR->targetTo);
+                VU0_STORE_VF_UNCLOBBERED(vf10, D_003BD900.targetTo);
+                VU0_LOAD_VF(vf10, CURSOR->cameraFrom);
+                VU0_STORE_VF_UNCLOBBERED(vf10, D_003BD900.cameraFrom);
+                VU0_LOAD_VF(vf10, CURSOR->cameraTo);
+                VU0_STORE_VF_UNCLOBBERED(vf10, D_003BD900.cameraTo);
                 VU0_LOAD_VF(vf10, CURSOR->direction);
                 VU0_STORE_VF_UNCLOBBERED(vf10, D_003BD900.direction);
                 VU0_LOAD_VF(vf10, &CURSOR->fov);
@@ -5142,14 +5142,14 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
                 VU0_STORE_VF_UNCLOBBERED(vf10, savedParameters->pathEnd);
                 VU0_LOAD_VF(vf10, CURSOR->pathStart);
                 VU0_STORE_VF_UNCLOBBERED(vf10, savedParameters->pathStart);
-                VU0_LOAD_VF(vf10, CURSOR->eyeFrom);
-                VU0_STORE_VF_UNCLOBBERED(vf10, savedParameters->eyeFrom);
-                VU0_LOAD_VF(vf10, CURSOR->eyeTo);
-                VU0_STORE_VF_UNCLOBBERED(vf10, savedParameters->eyeTo);
-                VU0_LOAD_VF(vf10, CURSOR->focusFrom);
-                VU0_STORE_VF_UNCLOBBERED(vf10, savedParameters->focusFrom);
-                VU0_LOAD_VF(vf10, CURSOR->focusTo);
-                VU0_STORE_VF_UNCLOBBERED(vf10, savedParameters->focusTo);
+                VU0_LOAD_VF(vf10, CURSOR->targetFrom);
+                VU0_STORE_VF_UNCLOBBERED(vf10, savedParameters->targetFrom);
+                VU0_LOAD_VF(vf10, CURSOR->targetTo);
+                VU0_STORE_VF_UNCLOBBERED(vf10, savedParameters->targetTo);
+                VU0_LOAD_VF(vf10, CURSOR->cameraFrom);
+                VU0_STORE_VF_UNCLOBBERED(vf10, savedParameters->cameraFrom);
+                VU0_LOAD_VF(vf10, CURSOR->cameraTo);
+                VU0_STORE_VF_UNCLOBBERED(vf10, savedParameters->cameraTo);
                 VU0_LOAD_VF(vf10, CURSOR->direction);
                 VU0_STORE_VF_UNCLOBBERED(vf10, savedParameters->direction);
                 VU0_LOAD_VF(vf10, &CURSOR->fov);
@@ -5166,14 +5166,14 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
                 VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathEnd);
                 VU0_LOAD_VF(vf10, D_003BD900.pathStart);
                 VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathStart);
-                VU0_LOAD_VF(vf10, D_003BD900.eyeFrom);
-                VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->eyeFrom);
-                VU0_LOAD_VF(vf10, D_003BD900.eyeTo);
-                VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->eyeTo);
-                VU0_LOAD_VF(vf10, D_003BD900.focusFrom);
-                VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->focusFrom);
-                VU0_LOAD_VF(vf10, D_003BD900.focusTo);
-                VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->focusTo);
+                VU0_LOAD_VF(vf10, D_003BD900.targetFrom);
+                VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->targetFrom);
+                VU0_LOAD_VF(vf10, D_003BD900.targetTo);
+                VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->targetTo);
+                VU0_LOAD_VF(vf10, D_003BD900.cameraFrom);
+                VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraFrom);
+                VU0_LOAD_VF(vf10, D_003BD900.cameraTo);
+                VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraTo);
                 VU0_LOAD_VF(vf10, D_003BD900.direction);
                 VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->direction);
                 VU0_LOAD_VF(vf10, D_003BD900.angleVector);
@@ -5205,14 +5205,14 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
                 VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathEnd);
                 VU0_LOAD_VF(vf10, savedParameters->pathStart);
                 VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathStart);
-                VU0_LOAD_VF(vf10, savedParameters->eyeFrom);
-                VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->eyeFrom);
-                VU0_LOAD_VF(vf10, savedParameters->eyeTo);
-                VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->eyeTo);
-                VU0_LOAD_VF(vf10, savedParameters->focusFrom);
-                VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->focusFrom);
-                VU0_LOAD_VF(vf10, savedParameters->focusTo);
-                VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->focusTo);
+                VU0_LOAD_VF(vf10, savedParameters->targetFrom);
+                VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->targetFrom);
+                VU0_LOAD_VF(vf10, savedParameters->targetTo);
+                VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->targetTo);
+                VU0_LOAD_VF(vf10, savedParameters->cameraFrom);
+                VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraFrom);
+                VU0_LOAD_VF(vf10, savedParameters->cameraTo);
+                VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraTo);
                 VU0_LOAD_VF(vf10, savedParameters->direction);
                 VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->direction);
                 VU0_LOAD_VF(vf10, savedParameters->angleVector);
@@ -5353,8 +5353,8 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
 
         BtlUnit *targetUnit = btlGetIndexListEntry(action->targetList, 0);
         BtlUnit *sourceUnit = action->link->unit;
-        s8 mode40 = (s8)(s32)CURSOR->eyeFrom[0];
-        s8 mode50 = (s8)(s32)CURSOR->eyeTo[0];
+        s8 mode40 = (s8)(s32)CURSOR->targetFrom[0];
+        s8 mode50 = (s8)(s32)CURSOR->targetTo[0];
 
         distance = btlBuildProjectedActorPairBoundsVU(0x600, targetUnit, sourceUnit,
                                  mode40, mode50, NULL, NULL, NULL, NULL);
@@ -5445,13 +5445,13 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
             progress = 0.999999f;
         }
 
-        VU0_LOAD_VF(vf10, CURSOR->focusTo);
-        VU0_LOAD_VF(vf11, CURSOR->focusFrom);
+        VU0_LOAD_VF(vf10, CURSOR->cameraTo);
+        VU0_LOAD_VF(vf11, CURSOR->cameraFrom);
         VU0_SUB(vf10, vf10, vf11);
         VU0_LENGTH_VF10(distance);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF(vf10, axis);
-        VU0_LOAD_VF(vf10, CURSOR->focusFrom);
+        VU0_LOAD_VF(vf10, CURSOR->cameraFrom);
         VU0_STORE_VF(vf10, point);
         VU0_LOAD_VF(vf10, axis);
         VU0_SCALAR_OP(distance * CURSOR->rangeStart, "vmulx.xyzw vf10, vf10, vf2x");
@@ -5537,8 +5537,8 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
         VU0_LOAD_VF(vf11, pose->position);
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF(vf10, endpoint);
-        VU0_LOAD_VF(vf10, CURSOR->eyeTo);
-        VU0_LOAD_VF(vf11, CURSOR->eyeFrom);
+        VU0_LOAD_VF(vf10, CURSOR->targetTo);
+        VU0_LOAD_VF(vf11, CURSOR->targetFrom);
         VU0_SUB(vf10, vf10, vf11);
         VU0_LENGTH_VF10(pathLength);
         distance = pathLength;
@@ -5547,7 +5547,7 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
 
         progress = CURSOR->blendRate;
         action->motionParameter = progress;
-        VU0_LOAD_VF(vf10, CURSOR->eyeFrom);
+        VU0_LOAD_VF(vf10, CURSOR->targetFrom);
         VU0_STORE_VF(vf10, point);
         phaseMode = CURSOR->kind;
         if (phaseMode == 5) {
@@ -5584,13 +5584,13 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF(vf10, pose->position);
         if (CURSOR->kind == 5) {
-            VU0_LOAD_VF(vf10, CURSOR->focusTo);
-            VU0_LOAD_VF(vf11, CURSOR->focusFrom);
+            VU0_LOAD_VF(vf10, CURSOR->cameraTo);
+            VU0_LOAD_VF(vf11, CURSOR->cameraFrom);
             VU0_SUB(vf10, vf10, vf11);
             VU0_LENGTH_VF10(distance);
             VU0_NORMALIZE_VF10();
             VU0_STORE_VF(vf10, axis);
-            VU0_LOAD_VF(vf10, CURSOR->focusFrom);
+            VU0_LOAD_VF(vf10, CURSOR->cameraFrom);
             VU0_STORE_VF(vf10, point);
             VU0_LOAD_VF(vf10, axis);
             VU0_SCALAR_OP(distance * CURSOR->rangeStart, "vmulx.xyzw vf10, vf10, vf2x");
@@ -5628,15 +5628,15 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
             VU0_LOAD_VF(vf11, pose->position);
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF(vf10, endpoint);
-            VU0_LOAD_VF(vf10, CURSOR->eyeTo);
-            VU0_LOAD_VF(vf11, CURSOR->eyeFrom);
+            VU0_LOAD_VF(vf10, CURSOR->targetTo);
+            VU0_LOAD_VF(vf11, CURSOR->targetFrom);
             VU0_SUB(vf10, vf10, vf11);
             VU0_LENGTH_VF10(distance);
             VU0_NORMALIZE_VF10();
             VU0_STORE_VF(vf10, axis);
             progress = CURSOR->blendRate;
             action->motionParameter = progress;
-            VU0_LOAD_VF(vf10, CURSOR->eyeFrom);
+            VU0_LOAD_VF(vf10, CURSOR->targetFrom);
             VU0_STORE_VF(vf10, point);
             if (CURSOR->startFrame == (f32)CURSOR->frame) {
                 btlScalarRangeSetStartClearEnd(&action->exponentialRange,

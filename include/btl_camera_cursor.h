@@ -25,10 +25,14 @@ typedef struct BtlCameraCursorView {
     u8 pad16[0xA];
     f32 pathEnd[4];         /* 0x20 */
     f32 pathStart[4];       /* 0x30 */
-    f32 eyeFrom[4];         /* 0x40 */
-    f32 eyeTo[4];           /* 0x50 */
-    f32 focusFrom[4];       /* 0x60 */
-    f32 focusTo[4];         /* 0x70 */
+    /* Where the camera looks and where it stands, from and to, as retail's debug
+     * print labels them ("[Target]", "[Camera]"): the pose's target moves along
+     * targetFrom..targetTo, and the camera (the target less the pose's direction
+     * times its distance) along cameraFrom..cameraTo. */
+    f32 targetFrom[4];      /* 0x40 */
+    f32 targetTo[4];        /* 0x50 */
+    f32 cameraFrom[4];      /* 0x60 */
+    f32 cameraTo[4];        /* 0x70 */
     f32 direction[4];       /* 0x80 */
     f32 distance;           /* 0x90 */
     u8 pad94[0xC];
@@ -69,10 +73,10 @@ typedef char BtlCameraCursorViewDirectionOffsetCheck[
     ((u32)&((BtlCameraCursorView *)0)->direction == 0x80) ? 1 : -1];
 typedef char BtlCameraCursorViewKindOffsetCheck[
     ((u32)&((BtlCameraCursorView *)0)->kind == 0x10) ? 1 : -1];
-typedef char BtlCameraCursorViewEyeFromOffsetCheck[
-    ((u32)&((BtlCameraCursorView *)0)->eyeFrom == 0x40) ? 1 : -1];
-typedef char BtlCameraCursorViewFocusFromOffsetCheck[
-    ((u32)&((BtlCameraCursorView *)0)->focusFrom == 0x60) ? 1 : -1];
+typedef char BtlCameraCursorViewTargetFromOffsetCheck[
+    ((u32)&((BtlCameraCursorView *)0)->targetFrom == 0x40) ? 1 : -1];
+typedef char BtlCameraCursorViewCameraFromOffsetCheck[
+    ((u32)&((BtlCameraCursorView *)0)->cameraFrom == 0x60) ? 1 : -1];
 typedef char BtlCameraCursorViewDistanceOffsetCheck[
     ((u32)&((BtlCameraCursorView *)0)->distance == 0x90) ? 1 : -1];
 typedef char BtlCameraCursorViewFovOffsetCheck[
