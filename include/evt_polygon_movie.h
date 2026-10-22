@@ -50,9 +50,9 @@ typedef struct PolyMovieWork {
     PmdHeader *data;   /* 0x10 */
     PmdEntry *entries; /* 0x14 */
     u8 *mainEntry1Data;   /* 0x18 */
-    u32 unk_1C;        /* 0x1C */
+    u32 mainEntry1Value; /* 0x1C: value from the main type-1 entry. */
     u8 *mainEntry2Data;   /* 0x20 */
-    u32 unk_24;        /* 0x24 */
+    u32 mainEntry2Value; /* 0x24: value from the main type-2 entry. */
     u8 *mainEntry10Data;  /* 0x28 */
     u8 *mainEntry11Data;  /* 0x2C */
     u8 *mainEntry12Data;  /* 0x30 */
@@ -71,7 +71,7 @@ typedef struct PolyMovieWork {
     PmdHeader *sub;    /* 0x74 */
     PmdEntry *subEntries; /* 0x78 */
     u8 *subEntry1Data;    /* 0x7C */
-    u32 unk_80;        /* 0x80 */
+    u32 subEntry1Value; /* 0x80: value from the secondary type-1 entry. */
     u8 *subEntry0Data;    /* 0x84 */
     u8 *subEntry4Kind4Data; /* 0x88 */
     u8 *subEntry4OtherData; /* 0x8C */
@@ -81,25 +81,25 @@ typedef struct PolyMovieWork {
     u32 extendedEntry4Count; /* 0x9C: rows in the extended type-4 table */
     u32 subEntry4Count; /* 0xA0 */
     u8 *subEntry5Data;    /* 0xA4 */
-    u32 unk_A8;        /* 0xA8 */
+    u32 subEntry5Value; /* 0xA8: value from the secondary type-5 entry. */
     u8 *subEntry13Data;   /* 0xAC */
-    u32 unk_B0;        /* 0xB0 */
+    u32 subEntry13Value; /* 0xB0: value from the secondary type-13 entry. */
     u8 *subEntry14Data;   /* 0xB4 */
-    u32 unk_B8;        /* 0xB8 */
+    u32 subEntry14Value; /* 0xB8: value from the secondary type-14 entry. */
     u8 *subEntry15Data;   /* 0xBC */
-    u32 unk_C0;        /* 0xC0 */
+    u32 subEntry15Value; /* 0xC0: value from the secondary type-15 entry. */
     u8 *subEntry16Data;   /* 0xC4 */
-    u32 unk_C8;        /* 0xC8 */
+    u32 subEntry16Value; /* 0xC8: value from the secondary type-16 entry. */
     u8 *subEntry17Data;   /* 0xCC */
-    u32 unk_D0;        /* 0xD0 */
+    u32 subEntry17Value; /* 0xD0: value from the secondary type-17 entry. */
     u8 *subEntry18Data;   /* 0xD4 */
-    u32 unk_D8;        /* 0xD8 */
+    u32 subEntry18Value; /* 0xD8: value from the secondary type-18 entry. */
     u8 *subEntry19Data;   /* 0xDC */
-    u32 unk_E0;        /* 0xE0 */
+    u32 subEntry19Value; /* 0xE0: value from the secondary type-19 entry. */
     u8 *subEntry20Data;   /* 0xE4 */
-    u32 unk_E8;        /* 0xE8 */
+    u32 subEntry20Value; /* 0xE8: value from the secondary type-20 entry. */
     u8 *subEntry24Data;   /* 0xEC */
-    u32 unk_F0;        /* 0xF0 */
+    u32 subEntry24Value; /* 0xF0: value from the secondary type-24 entry. */
     u8 *subEntry21Data;   /* 0xF4 */
     u32 subEntry21Count; /* 0xF8: rows in the sub type-21 group metadata table */
     u8 *subEntry25Data;   /* 0xFC */
