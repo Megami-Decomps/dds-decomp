@@ -190,7 +190,7 @@ typedef struct MnuShootingWork {
     s16 phase;
     s16 result;
     s32 phaseTicks;
-    s32 targets; /* 0xA0: remaining shooting targets (func_00319388 decrements per hit); cleared by mnuInitializeShootingWorkResources. */
+    s32 targets; /* 0xA0: remaining shooting targets (mnuFinishOrDeactivateShootingEntry decrements per hit); cleared by mnuInitializeShootingWorkResources. */
     s32 unkA4; /* 0xA4: cleared by the section initializer (mnuInitializeShootingWorkResources). */
     s32 playerResetState; /* 0xA8: mnuAdvanceShootingPlayerEntryReset switch state. */
     s32 playerResetTicks; /* 0xAC: mnuAdvanceShootingPlayerEntryReset per-state tick. */

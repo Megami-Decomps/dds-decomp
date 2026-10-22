@@ -692,7 +692,7 @@ void mnuInitializeShootingScene(MnuShootingWork *handle) {
     mnuCopyResourceProgressParameters(&D_0040AC40);
     mnuResetProgressLimitAndStep(1, 1);
     mnuSetWorkEntryStartCallback(mnuCreateShootingEntryObject);
-    mnuSetWorkEntryFinishOrDeactivateCallback(func_00319388);
+    mnuSetWorkEntryFinishOrDeactivateCallback(mnuFinishOrDeactivateShootingEntry);
     mnuSetActiveWorkVisitor(mnuPlaceShootingEntryObject);
     mnuSetRuntimeRecordInitializationCallback(mnuApplyPlayerRuntimeRecordFeedback);
     mnuSetRuntimeWorkHitCallback(mnuApplyShootingRuntimeRecordEvent);
@@ -1355,7 +1355,7 @@ extern void itfSetModelInstanceSecondaryVector(ModelInstance *, f32, f32, f32);
 
 /* Finish/deactivate a shooting entry. Keep the timed coordinate distinct from
  * its two screen-space consumers, and retain fresh reads after callbacks. */
-void func_00319388(MenuWorkEntry *entry, MnuShootingWork *work) {
+void mnuFinishOrDeactivateShootingEntry(MenuWorkEntry *entry, MnuShootingWork *work) {
     f32 position[4] __attribute__((aligned(16)));
     MnuEffectPositionStep step __attribute__((aligned(16)));
     MenuRegistry *registry;
