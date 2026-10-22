@@ -458,10 +458,15 @@ void mdlMarkAndProcessObjectNodes(void) {
 
 #include "eff_resource_owner.h"
 
-typedef struct {
-    u8 bytes[0x38];
-    u32 last;
-} EffectModelHeaderCopy;
+typedef struct EffResourceModelConfig {
+    SdfColorTrack colorTrack;
+    SdfAlphaTrack alphaTrack;
+    u32 plainEntry;
+    f32 frameStep;
+} EffResourceModelConfig;
+
+typedef char EffResourceModelConfig_size_check[
+    sizeof(EffResourceModelConfig) == 0x3C ? 1 : -1];
 
 
 /* Create an empty owner, or load its model and per-record queues from a file job. */
@@ -474,7 +479,7 @@ u8 *effCreateResourceOwner(void *input) {
     memset(owner, 0, sizeof(EffResourceOwner));
     if (source != NULL) {
         data = fileResolvePrimaryBuffer(source);
-        memcpy((u8 *)owner + 8, data, sizeof(EffectModelHeaderCopy));
+        memcpy((u8 *)owner + 8, data, sizeof(EffResourceModelConfig));
         owner->model = effLoadViewerModelWithVUState(data + 0x40,
                                                    source->primary.size - 0x40);
         if (owner->model->first != NULL) {
@@ -526,7 +531,7 @@ extern void effCopyResourceOwner(EffResourceOwner *, EffResourceOwner *);
 u8 *effDuplicateModelOwner(u8 *source) {
     u8 *effect = effCreateResourceOwner(0);
 
-    *(EffectModelHeaderCopy *)(effect + 8) = *(EffectModelHeaderCopy *)(source + 8);
+    *(EffResourceModelConfig *)(effect + 8) = *(EffResourceModelConfig *)(source + 8);
     effCopyResourceOwner((EffResourceOwner *)effect, (EffResourceOwner *)source);
     return effect;
 }
