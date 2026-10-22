@@ -712,8 +712,6 @@ void sdfSortOtAvlRegist(sdfSortOtNode_tag **tree, SdfKeyPoolNode *item) {
     }
 }
 
-extern void sdfGrSortOtSetup();
-
 void sdfGrSortOtReg(SdfPool *pool, SdfKeyPoolNode *node) {
     if (node->packetHeadAddress != 0) {
         if (node->kind == SDF_POOL_FREE_KIND) {

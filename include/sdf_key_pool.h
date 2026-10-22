@@ -46,6 +46,7 @@ typedef char SdfKeyTreeNode_size_must_be_0x10[(sizeof(sdfSortOtNode_tag) == 0x10
 typedef char SdfPool_size_must_be_0x1C[(sizeof(SdfPool) == 0x1C) ? 1 : -1];
 
 void sdfGrSortOtReg(SdfPool *pool, SdfKeyPoolNode *node);
+void sdfGrSortOtSetup(SdfPool *pool);
 void sdfGrSortOtCallback(SdfPool *pool, s32 mode, SdfKeyPoolNode *node);
 void sdfModelSetOtCallbacks(SdfPool *pool);
 
