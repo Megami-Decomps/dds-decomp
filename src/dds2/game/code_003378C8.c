@@ -117,8 +117,8 @@ void corePktMakeEdgePoint(VuBlendNode *out, VuBlendNode *first, VuBlendNode *sec
 
 extern u8 corePktSoftenBias;
 extern u16 D_00474210[];
-extern u8 D_0040B580[];
-extern f32 D_0040B6A0[4];
+extern u8 sdf3DScreenParam[];
+extern f32 sdf3DEyeOffset[4];
 extern f32 D_00439190;
 static inline VuBlendNode *sdfVuAllocClipNode(corePktCb_t *work) {
     VuBlendNode *node = work->ringDst;
@@ -294,8 +294,8 @@ void corePktBuildFaceList(corePktCb_t *work) {
     VuGeomRef *out;
     f32 scale = work->depth;
     f32 clipBias = D_00439190;
-    const f32 *clipPlane = D_0040B6A0;
-    const u8 *projection = D_0040B580;
+    const f32 *clipPlane = sdf3DEyeOffset;
+    const u8 *projection = sdf3DScreenParam;
 
     VU0_SET_CLIP_PLANES(clipBias, clipPlane, projection);
     if (work->selectedFlags & 0x4000) {
@@ -449,8 +449,8 @@ void corePktBuildBackFaceList(corePktCb_t *work) {
     VuBlendNode *nodes;
     s32 acceptAll;
     VuGeomRef *out;
-    const f32 *clipPlane = D_0040B6A0;
-    const u8 *projection = D_0040B580;
+    const f32 *clipPlane = sdf3DEyeOffset;
+    const u8 *projection = sdf3DScreenParam;
 
     VU0_SET_CLIP_PLANES(scale, clipPlane, projection);
     acceptAll = corePktSoftenBias;

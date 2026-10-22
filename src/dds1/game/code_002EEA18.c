@@ -260,7 +260,7 @@ void sdfDecompInit(SdfPacDecoder *decoder, u8 *output) {
     decoder->state = 1;
 }
 
-extern f32 D_00398440[][4];
+extern u8 sdf3DScreenParam[];
 /* vu0 routine: clip homogeneous line pairs and build a coloured GS packet. */
 SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     SdfPacket *packet;
@@ -276,7 +276,7 @@ SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s3
 
     packet = (SdfPacket *)sdfGrOpenPacketBuff();
     cursor = (u128 *)(packet + 1);
-    viewport = D_00398440;
+    viewport = (f32 (*)[4])(sdf3DScreenParam + 0x70);  /* its camera's viewport */
     VU0_LOAD_VF_AT(vf14, 0x0, viewport);
     VU0_LOAD_VF_AT(vf15, 0x10, viewport);
     emitted = 0;

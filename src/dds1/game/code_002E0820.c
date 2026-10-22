@@ -304,24 +304,24 @@ void sdf3DMakeViewportPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node
     packet->unknownCC = 0;
 }
 
-extern u8 D_003983D0[];
+extern u8 sdf3DScreenParam[];
 
 extern u8 sdf3DScreenTm[];
 
-extern u8 D_003984B0[];
+extern u8 sdfCameraTm[];
 
-extern u8 D_003984F0[];
+extern u8 sdf3DEyeOffset[];
 
 /* Cache node data, its composed transform, and the transformed cached origin. */
 void sdf3DSetCamera(SdfProjectionRecord *node, void *transformMatrix) {
     VU0_LOAD_MATRIX(transformMatrix);
-    VU0_STORE_MATRIX(D_003984B0);
+    VU0_STORE_MATRIX(sdfCameraTm);
     sdfPostmultiplyVuMatrixFromMemory(node->camera.matrix);
     VU0_LOAD_VF_MEMORY(vf10, node->inverseOrigin);
     VU0_STORE_MATRIX(sdf3DScreenTm);
     VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_STORE_VF(vf10, D_003984F0);
-    memcpy(D_003983D0, node, sizeof(*node));
+    VU0_STORE_VF(vf10, sdf3DEyeOffset);
+    memcpy(sdf3DScreenParam, node, sizeof(*node));
 }
 
 /* Set the first DMA reference fallback used when a model has no override. */
@@ -473,7 +473,7 @@ void sdf3DMakeLightParallelPacket(SdfLightingPacketStorage *packet, SdfLightSour
     DiagMatrix();
     VU0_LOAD_VF(vf10, first[1]);
     VU0_NORMALIZE_VF10();
-    EE_MMI_LOAD_MATRIX_COLUMN(vf11, D_003984B0 + 8);
+    EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfCameraTm + 8);
     VU0_ADD(vf10, vf10, vf11);
     VU0_NEGATE_XYZ(vf10);
     VU0_NORMALIZE_VF10();
