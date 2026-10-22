@@ -20,7 +20,7 @@ typedef struct SoundSlot {
 } SoundSlot;
 
 typedef struct SoundSlotPool {
-    u32 handle;
+    struct sdfMemHandle_t *allocation;
     SoundSlot *slots;
     s32 count;
 } SoundSlotPool;
@@ -48,7 +48,7 @@ static inline void mnuSetBasisRow(f32 *row, f32 x, f32 y, f32 z, f32 w) {
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
 
-extern u32 *dds3SoundSlotPool;
+extern SoundSlotPool *dds3SoundSlotPool;
 extern void fileSetRenderFlag(u32 mask);
 extern u32 fileClearRenderFlag(u32 mask);
 
@@ -86,29 +86,27 @@ void CalcCamera(void) {
 }
 
 void dds3InitSoundSlotPool(void) {
-    u32 handle;
-    SoundSlotPool *pool;
-    if (dds3SoundSlotPool != 0) {
+    struct sdfMemHandle_t *allocation;
+    if (dds3SoundSlotPool != NULL) {
         dds3ReleaseSoundSlotPool();
     }
-    handle = (u32)sdfMemAllocDirect(0x32c);
-    dds3SoundSlotPool = (void *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)handle);
+    allocation = sdfMemAllocDirect(0x32c);
+    dds3SoundSlotPool = (SoundSlotPool *)sdfMemGetPtr(allocation);
     memset(dds3SoundSlotPool, 0, 0x32c);
-    pool = (SoundSlotPool *)dds3SoundSlotPool;
-    pool->handle = handle;
-    pool->slots = (SoundSlot *)(pool + 1);
-    pool->count = 100;
+    dds3SoundSlotPool->allocation = allocation;
+    dds3SoundSlotPool->slots = (SoundSlot *)(dds3SoundSlotPool + 1);
+    dds3SoundSlotPool->count = 100;
 }
 
 void dds3ReleaseSoundSlotPool(void) {
-    if (dds3SoundSlotPool != (u32 *)0x0) {
-        sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(*dds3SoundSlotPool));
-        dds3SoundSlotPool = (u32 *)0x0;
+    if (dds3SoundSlotPool != NULL) {
+        sdfMemFreeDirect(dds3SoundSlotPool->allocation);
+        dds3SoundSlotPool = NULL;
     }
 }
 
 SoundSlot *dds3FindFreeSoundSlot(void) {
-    SoundSlotPool *pool = (SoundSlotPool *)dds3SoundSlotPool;
+    SoundSlotPool *pool = dds3SoundSlotPool;
     SoundSlot *slot = pool->slots;
     s32 i;
 
@@ -132,7 +130,7 @@ SoundSlot *dds3ClaimSoundSlot(u32 sequence, u32 frames) {
 
 /* Returns occupied sound slots to their default volume and pan when they expire. */
 void dds3UpdateSoundSlots(void) {
-    SoundSlotPool *pool = (SoundSlotPool *)dds3SoundSlotPool;
+    SoundSlotPool *pool = dds3SoundSlotPool;
     if (pool != 0) {
         s32 index = 0;
         SoundSlot *slot = pool->slots;
@@ -146,7 +144,7 @@ void dds3UpdateSoundSlots(void) {
                 }
                 index++;
                 slot++;
-            } while (index < ((SoundSlotPool *)dds3SoundSlotPool)->count);
+            } while (index < dds3SoundSlotPool->count);
         }
     }
 }
