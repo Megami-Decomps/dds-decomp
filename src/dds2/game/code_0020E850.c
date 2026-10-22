@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "btl_indexed_ui_resource_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_actor_status_table_api.h"
@@ -207,11 +208,11 @@ void btlDrawActorGroundDisc(BtlUnit *unit) {
     }
 
     dds3GetPosPoseSet((dds3Basic_t *)unit->effectObject);
-    VU0_STORE_VF(vf10, actorPosition);
+    SDF_VU0_STOREVECTOR(actorPosition);
     if (sdfModelGetMarkPos(model->inner, 0) == 0) {
-        VU0_LOAD_VF(vf10, actorPosition);
+        SDF_VU0_LOADVECTOR(actorPosition);
     }
-    VU0_STORE_VF(vf10, position);
+    SDF_VU0_STOREVECTOR(position);
     fldDrawShadowDisc(position[0], actorPosition[1], position[2], radius, alpha);
 }
 
@@ -291,86 +292,86 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
         if (unit->status.stateFlags & 0x80) {
             return;
         }
-        VU0_STORE_VF_UNCLOBBERED(vf10, baseline);
+        SDF_VU0_STOREVECTOR_NOMEM(baseline);
     } else {
         btlUnitGetMuzzlePosVU(unit);
-        VU0_STORE_VF_UNCLOBBERED(vf10, baseline);
+        SDF_VU0_STOREVECTOR_NOMEM(baseline);
         baseline[1] = -btlUnitGetTopY(unit);
     }
     if (unit->status.stateFlags & 0x80) {
-        VU0_LOAD_VF(vf10, baseline);
+        SDF_VU0_LOADVECTOR(baseline);
         return;
     }
-    VU0_LOAD_VF(vf10, baseline);
+    SDF_VU0_LOADVECTOR(baseline);
     visible = nbClipEffectNum(screen);
     x = screen[0] >> 4;
     y = screen[1] >> 3;
     if (!visible || x < 12 || x >= 501 || y < 48 || y >= 324) {
         if (btlSetActorEffectParameter(unit, 1) != 0) {
-            VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
+            SDF_VU0_STOREVECTOR_NOMEM(candidate);
             visible = nbClipEffectNum(screen);
             x = screen[0] >> 4;
             y = screen[1] >> 3;
             if (visible == 1 && !(unit->status.stateFlags & 0x400000) &&
                 x >= 12 && x < 501 && y >= 48 && y < 324) {
                 btlBossDebugPrintf("btl:hpmp clip 1shot\n");
-                VU0_LOAD_VF(vf10, candidate);
+                SDF_VU0_LOADVECTOR(candidate);
                 return;
             }
         }
         btlUnitGetMuzzlePosVU(unit);
-        VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
-        VU0_LOAD_VF(vf11, baseline);
-        VU0_SUB(vf10, vf10, vf11);
+        SDF_VU0_STOREVECTOR_NOMEM(candidate);
+        SDF_VU0_LOADVECTOR_B(baseline);
+        SDF_VU0_SUBVECTOR();
         SDF_VU0_GETLENGTH(distance);
         if (distance < unit->reach * unit->scale * 4.0f) {
             candidate[0] = baseline[0];
             candidate[2] = baseline[2];
             candidate[1] -= unit->height * unit->scale * 0.25f;
-            VU0_LOAD_VF(vf10, candidate);
+            SDF_VU0_LOADVECTOR(candidate);
             visible = nbClipEffectNum(screen);
             x = screen[0] >> 4;
             y = screen[1] >> 3;
             if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
                 btlBossDebugPrintf("btl:hpmp clip height 3/4\n");
-                VU0_LOAD_VF(vf10, candidate);
+                SDF_VU0_LOADVECTOR(candidate);
                 return;
             }
         }
         btlUnitGetMuzzlePosVU(unit);
-        VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
+        SDF_VU0_STOREVECTOR_NOMEM(candidate);
         visible = nbClipEffectNum(screen);
         x = screen[0] >> 4;
         y = screen[1] >> 3;
         if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
             btlBossDebugPrintf("btl:hpmp clip cylinder center\n");
-            VU0_LOAD_VF(vf10, candidate);
+            SDF_VU0_LOADVECTOR(candidate);
             return;
         }
         candidate[1] += unit->height * unit->scale * 0.5f;
-        VU0_LOAD_VF(vf10, candidate);
+        SDF_VU0_LOADVECTOR(candidate);
         visible = nbClipEffectNum(screen);
         x = screen[0] >> 4;
         y = screen[1] >> 3;
         if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
             btlBossDebugPrintf("btl:hpmp clip cylinder bottom\n");
-            VU0_LOAD_VF(vf10, candidate);
+            SDF_VU0_LOADVECTOR(candidate);
             return;
         }
         btlUnitGetMuzzlePosVU(unit);
-        VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
+        SDF_VU0_STOREVECTOR_NOMEM(candidate);
         candidate[1] -= unit->height * unit->scale * 0.5f;
-        VU0_LOAD_VF(vf10, candidate);
+        SDF_VU0_LOADVECTOR(candidate);
         visible = nbClipEffectNum(screen);
         x = screen[0] >> 4;
         y = screen[1] >> 3;
         if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
             btlBossDebugPrintf("btl:hpmp clip cylinder top\n");
-            VU0_LOAD_VF(vf10, candidate);
+            SDF_VU0_LOADVECTOR(candidate);
             return;
         }
     }
-    VU0_LOAD_VF(vf10, baseline);
+    SDF_VU0_LOADVECTOR(baseline);
 }
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
@@ -569,13 +570,13 @@ s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args) {
         args->payload.linked.offsetIndex = unit->linkedNumberCount % 12;
         unit->linkedNumberCount++;
         btlSelectHpMpDisplayPositionVU(args->unit);
-        VU0_STORE_VF_UNCLOBBERED(vf10, args->anchorOffset);
+        SDF_VU0_STOREVECTOR_NOMEM(args->anchorOffset);
         btlUnitGetMuzzlePosVU(args->unit);
-        VU0_STORE_VF_UNCLOBBERED(vf10, args->referencePosition);
-        VU0_MOVE_VF(vf11, vf10);
-        VU0_LOAD_VF(vf10, args->anchorOffset);
-        VU0_SUB(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, args->anchorOffset);
+        SDF_VU0_STOREVECTOR_NOMEM(args->referencePosition);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(args->anchorOffset);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_STOREVECTOR_NOMEM(args->anchorOffset);
         switch (args->payload.linked.kind) {
         case 0:
             if (value <= 0) {
@@ -638,10 +639,10 @@ s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args) {
         if ((status & 0x21) == 1) {
             btlUnitGetMuzzlePosVU(args->unit);
         } else {
-            VU0_LOAD_VF(vf10, args->referencePosition);
+            SDF_VU0_LOADVECTOR(args->referencePosition);
         }
-        VU0_LOAD_VF(vf11, args->anchorOffset);
-        VU0_ADD(vf10, vf10, vf11);
+        SDF_VU0_LOADVECTOR_B(args->anchorOffset);
+        SDF_VU0_ADDVECTOR();
         if (nbClipEffectNum(screen) != 0) {
             screen[0] += (s32)(btlLinkedNumberScreenOffsets[args->payload.linked.offsetIndex][0] * 40.0f) << 4;
             screen[1] += ((s32)(btlLinkedNumberScreenOffsets[args->payload.linked.offsetIndex][1] * 40.0f) << 3) + 320;
@@ -744,13 +745,13 @@ s32 func_0020FA98(BtlLinkedEffectArgs *args) {
         args->unit->counterDisplayCount++;
 
         btlSelectHpMpDisplayPositionVU(args->unit);
-        VU0_STORE_VF_UNCLOBBERED(vf10, args->anchorOffset);
+        SDF_VU0_STOREVECTOR_NOMEM(args->anchorOffset);
         btlUnitGetMuzzlePosVU(args->unit);
-        VU0_STORE_VF_UNCLOBBERED(vf10, args->referencePosition);
-        VU0_MOVE_VF(vf11, vf10);
-        VU0_LOAD_VF(vf10, args->anchorOffset);
-        VU0_SUB(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, args->anchorOffset);
+        SDF_VU0_STOREVECTOR_NOMEM(args->referencePosition);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(args->anchorOffset);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_STOREVECTOR_NOMEM(args->anchorOffset);
     }
 
     ticks = (u32)args->payload.counter.elapsedTicks;
@@ -786,10 +787,10 @@ s32 func_0020FA98(BtlLinkedEffectArgs *args) {
         if ((status & 0x21) == 1) {
             btlUnitGetMuzzlePosVU(args->unit);
         } else {
-            VU0_LOAD_VF(vf10, args->referencePosition);
+            SDF_VU0_LOADVECTOR(args->referencePosition);
         }
-        VU0_LOAD_VF(vf11, args->anchorOffset);
-        VU0_ADD(vf10, vf10, vf11);
+        SDF_VU0_LOADVECTOR_B(args->anchorOffset);
+        SDF_VU0_ADDVECTOR();
 
         if (nbClipEffectNum(screen)) {
             screen[0] += (s32)(btlLinkedNumberScreenOffsets[args->payload.counter.offsetIndex][0] * 40.0f) << 4;

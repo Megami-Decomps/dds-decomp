@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "sdf_request.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "ee_mmi.h"
 #include "sdf_trig.h"
 #include "sdf_chip.h"
@@ -107,9 +108,9 @@ loop:
         count -= 4;
         done = count < 4;
         EE_STORE_ZERO_QUAD(p, 0x0);
-        EE_STORE_ZERO_QUAD(p, 0x10);
-        EE_STORE_ZERO_QUAD(p, 0x20);
-        EE_STORE_ZERO_QUAD(p, 0x30);
+        PS2_STORE_ZERO_QUAD_AT16(p);
+        PS2_STORE_ZERO_QUAD_AT32(p);
+        PS2_STORE_ZERO_QUAD_AT48(p);
         p += 4;
         if (!done) {
             goto loop;
@@ -117,9 +118,9 @@ loop:
     }
     switch (count) {
     case 3:
-        EE_STORE_ZERO_QUAD(p, 0x20);
+        PS2_STORE_ZERO_QUAD_AT32(p);
     case 2:
-        EE_STORE_ZERO_QUAD(p, 0x10);
+        PS2_STORE_ZERO_QUAD_AT16(p);
     case 1:
         EE_STORE_ZERO_QUAD(p, 0x0);
     }

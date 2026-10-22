@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "eff.h"
 #include "eff_event_draw.h"
 #include "sdf_chip.h"
@@ -98,11 +99,11 @@ u32 evtHokanColor(s32 enable, f32 t, u32 a, u32 b) {
         color1[0] = a;
         EE_MMI_RGBA_UNPACK(color1, 1.0f / 128.0f);
         VU0_SCALE_VF(vf10, 1.0f - t);
-        VU0_MOVE_VF(vf11, vf10);
+        SDF_VU0_COPYVECTOR_A_TO_B();
         color2[0] = b;
         EE_MMI_RGBA_UNPACK(color2, 1.0f / 128.0f);
         VU0_SCALE_VF(vf10, t);
-        VU0_ADD(vf10, vf10, vf11);
+        SDF_VU0_ADDVECTOR();
         EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
         blended[0] = packed;
         return blended[0];
@@ -116,48 +117,48 @@ void evtHokanSceneLight(s32 enable, f32 t, f32 *a, f32 *b, f32 *out) {
         t = 0.0f;
     }
     if (a != NULL) {
-        VU0_LOAD_VF(vf10, a);
+        SDF_VU0_LOADVECTOR(a);
     } else {
-        VU0_LOAD_VF(vf10, D_003C9310);
+        SDF_VU0_LOADVECTOR(D_003C9310);
     }
     VU0_SCALAR_OP(1.0f - t, "vmulx.xyzw vf10, vf10, vf2x");
     if (b != NULL) {
-        VU0_LOAD_VF(vf11, b);
+        SDF_VU0_LOADVECTOR_B(b);
     } else {
-        VU0_LOAD_VF(vf11, D_003C9310);
+        SDF_VU0_LOADVECTOR_B(D_003C9310);
     }
     VU0_SCALAR_OP(t, "vmulx.xyzw vf11, vf11, vf2x");
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, out);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(out);
     if (a != NULL) {
-        VU0_LOAD_VF(vf10, a + 4);
+        SDF_VU0_LOADVECTOR(a + 4);
     } else {
-        VU0_LOAD_VF(vf10, D_003C9320);
+        SDF_VU0_LOADVECTOR(D_003C9320);
     }
     VU0_SCALAR_OP(1.0f - t, "vmulx.xyzw vf10, vf10, vf2x");
     if (b != NULL) {
-        VU0_LOAD_VF(vf11, b + 4);
+        SDF_VU0_LOADVECTOR_B(b + 4);
     } else {
-        VU0_LOAD_VF(vf11, D_003C9320);
+        SDF_VU0_LOADVECTOR_B(D_003C9320);
     }
     VU0_SCALAR_OP(t, "vmulx.xyzw vf11, vf11, vf2x");
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, out + 4);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(out + 4);
     if (a != NULL) {
-        VU0_LOAD_VF(vf10, a + 8);
+        SDF_VU0_LOADVECTOR(a + 8);
     } else {
-        VU0_LOAD_VF(vf10, D_003C9330);
+        SDF_VU0_LOADVECTOR(D_003C9330);
     }
     VU0_SCALAR_OP(1.0f - t, "vmulx.xyzw vf10, vf10, vf2x");
     if (b != NULL) {
-        VU0_LOAD_VF(vf11, b + 8);
+        SDF_VU0_LOADVECTOR_B(b + 8);
     } else {
-        VU0_LOAD_VF(vf11, D_003C9330);
+        SDF_VU0_LOADVECTOR_B(D_003C9330);
     }
     VU0_SCALAR_OP(t, "vmulx.xyzw vf11, vf11, vf2x");
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_SET_W_ONE(vf10);
-    VU0_STORE_VF(vf10, out + 8);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_STOREVECTOR(out + 8);
 }
 
 extern f32 D_003C9340[4];
@@ -189,7 +190,7 @@ void evtHokanSceneFog(s32 enable, f32 t, EvtBlendVecColor *a, EvtBlendVecColor *
         evtSetBlendVecW(D_003C9340[3]);
     }
     VU0_SCALE_VF(vf10, 1.0f - t);
-    VU0_MOVE_VF(vf11, vf10);
+    SDF_VU0_COPYVECTOR_A_TO_B();
     if (b != NULL) {
         VU0_SET_VF10_COMPONENT(x, b->vec[0]);
         VU0_SET_VF10_COMPONENT(y, b->vec[1]);
@@ -202,7 +203,7 @@ void evtHokanSceneFog(s32 enable, f32 t, EvtBlendVecColor *a, EvtBlendVecColor *
         evtSetBlendVecW(D_003C9340[3]);
     }
     VU0_SCALE_VF(vf10, t);
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_ADDVECTOR();
     SDF_VU0_GETVECTOR_X(out->vec[0]);
     SDF_VU0_GETVECTOR_Y(out->vec[1]);
     SDF_VU0_GETVECTOR_Z(out->vec[2]);
@@ -213,14 +214,14 @@ void evtHokanSceneFog(s32 enable, f32 t, EvtBlendVecColor *a, EvtBlendVecColor *
         eeUnpackRGBAWordFloat(D_003C9350[0], 1.0f / 128.0f);
     }
     VU0_SCALE_VF(vf10, 1.0f - t);
-    VU0_MOVE_VF(vf11, vf10);
+    SDF_VU0_COPYVECTOR_A_TO_B();
     if (b != NULL) {
         eeUnpackRGBAWordFloat(b->color, 1.0f / 128.0f);
     } else {
         eeUnpackRGBAWordFloat(D_003C9350[0], 1.0f / 128.0f);
     }
     VU0_SCALE_VF(vf10, t);
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_ADDVECTOR();
     out->color = eePackRGBAWord(128.0f);
 }
 

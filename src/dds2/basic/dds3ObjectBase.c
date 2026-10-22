@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_model_packet_callback.h"
 #include "dds3_object_flags.h"
 #include "sdf_model.h"
@@ -280,13 +281,13 @@ void dds3RebuildObjectModelContext(dds3Basic_t *object, s32 resourceGroup, s32 r
     dds3LoadObjectResourceSlotIds(base, model);
     base->currentSlot = sdfModelGetNodeIndexByName(model->inner, "Bip01 Head");
     mdlGetScale(model);
-    VU0_STORE_VF(vf10, scale);
+    SDF_VU0_STOREVECTOR(scale);
     dds3SetSclPoseSet(object, (u128 *)scale);
-    VU0_LOAD_VF(vf10, object->inner->rotation);
+    SDF_VU0_LOADVECTOR(object->inner->rotation);
     Normalize();
     mdlSetRotate(model);
-    VU0_LOAD_VF(vf10, object->inner->position);
-    VU0_SET_W_ONE(vf10);
+    SDF_VU0_LOADVECTOR(object->inner->position);
+    SDF_VU0_VECTOR_W_SET_ONE();
     mdlSetPosition(model);
     base->resourceHandle = model;
     object->inner->radius = model->objectRadius;

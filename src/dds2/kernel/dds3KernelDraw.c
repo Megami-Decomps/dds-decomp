@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "kwln.h"
 #include "gs_packet.h"
 #include "pcp_vu0.h"
@@ -920,28 +921,28 @@ void dds3RotationArc(void) {
     memset(identity, 0, sizeof(identity));
     identity[3] = 1.0f;
 
-    VU0_CLEAR_W(vf10);
+    SDF_VU0_VECTOR_W_SET_ZERO();
     SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf2, vf10);
-    VU0_MOVE_VF(vf10, vf11);
+    SDF_VU0_COPYVECTOR_B_TO_A();
     VU0_MOVE_VF(vf11, vf2);
-    VU0_CLEAR_W(vf10);
+    SDF_VU0_VECTOR_W_SET_ZERO();
     SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf2, vf10);
-    VU0_MOVE_VF(vf10, vf11);
+    SDF_VU0_COPYVECTOR_B_TO_A();
     VU0_MOVE_VF(vf11, vf2);
 
-    VU0_DOT_XYZ(dot, vf10, vf11);
+    SDF_VU0_INNERPRODUCT(dot);
     if (dot >= 0.9999f) {
-        VU0_LOAD_VF_FROM(vf10, *(u128 *)identity);
+        SDF_VU0_LOADVECTOR_MEMOPS(*(u128 *)identity);
         return;
     }
 
     if (dot <= -0.9999f) {
         SDF_VU0_GETVECTOR_Y(component);
         if (0.9999f <= fabsf(component)) {
-            VU0_MOVE_VF(vf10, vf0);
-            VU0_CLEAR_W(vf10);
+            SDF_VU0_LOADIDENTITYVECTOR();
+            SDF_VU0_VECTOR_W_SET_ZERO();
             VU0_SET_VF10_COMPONENT(z, -1.0f);
         } else {
             SDF_VU0_GETVECTOR_Z(component);
@@ -949,23 +950,23 @@ void dds3RotationArc(void) {
             axis[1] = 0.0f;
             SDF_VU0_GETVECTOR_X(axis[2]);
             axis[3] = 0.0f;
-            VU0_LOAD_VF(vf10, axis);
+            SDF_VU0_LOADVECTOR(axis);
             SDF_VU0_NORMALIZE();
         }
 
-        VU0_DOT_XYZ(dot, vf10, vf11);
-        VU0_CROSS_XYZ(vf10, vf10, vf11);
+        SDF_VU0_INNERPRODUCT(dot);
+        SDF_VU0_OUTERPRODUCT();
         VU0_SET_VF10_W(dot);
         return;
     }
 
-    VU0_MOVE_VF(vf12, vf10);
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_ADDVECTOR();
     SDF_VU0_NORMALIZE();
-    VU0_MOVE_VF(vf11, vf12);
-    VU0_DOT_XYZ(dot, vf10, vf11);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, axis);
+    SDF_VU0_COPYVECTOR_C_TO_B();
+    SDF_VU0_INNERPRODUCT(dot);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_STOREVECTOR(axis);
     VU0_SET_VF10_W(dot);
     Normalize();
 }

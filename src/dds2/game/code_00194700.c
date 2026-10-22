@@ -2,6 +2,7 @@
 #include "eff_resource_browser.h"
 #include "sdf_sif_command.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_chip.h"
 #include "sdf_column_packet_api.h"
@@ -718,13 +719,13 @@ void effScreenOffset(void) {
     VU0_LOAD_MATRIX(sdfViewMatrix);
     projectionData = sdfProjectionMatrix;
     sdfPostmultiplyVuMatrixFromMemory(projectionData);
-    VU0_TRANSFORM_POINT(vf10, vf10);
+    SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
     projectionData += EFF_MATRIX_BYTES;
-    VU0_LOAD_VF_MEMORY(vf11, projectionData);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_LOAD_VF_MEMORY(vf11, D_0037F660);
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR_B_BARRIER(projectionData);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_LOADVECTOR_B_BARRIER(D_0037F660);
+    SDF_VU0_ADDVECTOR();
 }
 
 /* vu0 routine: project a point and its camera-right offset, returning their rounded screen distance. */
@@ -736,28 +737,28 @@ s32 effPCPBlurScreenOffset(f32 scale) {
     f32 dx;
     f32 dy;
 
-    VU0_STORE_VF_UNCLOBBERED(vf10, original);
+    SDF_VU0_STOREVECTOR_NOMEM(original);
     effScreenOffset();
-    VU0_STORE_VF(vf10, projectedStart);
+    SDF_VU0_STOREVECTOR(projectedStart);
 
     scaleVector[0] = scaleVector[1] = scaleVector[2] = scale;
-    VU0_LOAD_VF(vf10, original);
-    VU0_MOVE_VF(vf12, vf10);
-    VU0_LOAD_VF(vf11, sdfViewTargetVector);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, aViewDown);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR(original);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(aViewDown);
+    SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
-    VU0_LOAD_VF_MEMORY(vf11, scaleVector);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_MOVE_VF(vf11, vf12);
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR_B_BARRIER(scaleVector);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_COPYVECTOR_C_TO_B();
+    SDF_VU0_ADDVECTOR();
 
     effScreenOffset();
-    VU0_STORE_VF(vf10, projectedEnd);
+    SDF_VU0_STOREVECTOR(projectedEnd);
     dx = projectedEnd[0] - projectedStart[0];
     dy = projectedEnd[1] - projectedStart[1];
-    VU0_LOAD_VF(vf10, projectedStart);
+    SDF_VU0_LOADVECTOR(projectedStart);
     return (s32)fsqrtf(dx * dx + dy * dy);
 }
 
@@ -775,12 +776,12 @@ u32 effColorBlend(u32 colorA, u32 colorB, f32 t) {
     unit = 0x3C000000;
     color1[0] = colorB;
     EE_MMI_RGBA_UNPACK(color1, unit);
-    VU0_MOVE_VF(vf11, vf10);
+    SDF_VU0_COPYVECTOR_A_TO_B();
     color2[0] = colorA;
     EE_MMI_RGBA_UNPACK(color2, unit);
     VU0_SCALAR_OP_CLOBBER(1.0f - t, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALAR_OP_R3_CLOBBER(t, "vmulx.xyzw vf11, vf11, vf2x");
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_ADDVECTOR();
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
 
@@ -797,10 +798,10 @@ u32 effMagaCylinderCalcColor(u32 colorA, u32 colorB) {
     u32 unpackScaleBits = EFF_COLOR_UNPACK_SCALE_BITS;
     colorAWords[0] = colorA;
     EE_MMI_RGBA_UNPACK(colorAWords, unpackScaleBits);
-    VU0_MOVE_VF(vf11, vf10);
+    SDF_VU0_COPYVECTOR_A_TO_B();
     colorBWords[0] = colorB;
     EE_MMI_RGBA_UNPACK(colorBWords, unpackScaleBits);
-    VU0_MUL(vf10, vf10, vf11);
+    SDF_VU0_MULVECTOR();
     EE_MMI_RGBA_PACK(packed);
     packedWords[0] = packed;
     return packedWords[0];
@@ -814,19 +815,19 @@ f32 effLinePointLength(f32 *direction, f32 *origin, f32 *point) {
     f32 projectionAmount;
     f32 distance;
 
-    VU0_LOAD_VF(vf10, point);
-    VU0_LOAD_VF(vf11, origin);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, pointOffset);
-    VU0_LOAD_VF(vf11, direction);
-    VU0_DOT_XYZ(projectionAmount, vf10, vf11);
+    SDF_VU0_LOADVECTOR(point);
+    SDF_VU0_LOADVECTOR_B(origin);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_STOREVECTOR(pointOffset);
+    SDF_VU0_LOADVECTOR_B(direction);
+    SDF_VU0_INNERPRODUCT(projectionAmount);
     /* The fourth projection component remains unwritten: only xyz contributes to distance. */
     projectedOffset[0] = direction[0] * projectionAmount;
     projectedOffset[1] = direction[1] * projectionAmount;
     projectedOffset[2] = direction[2] * projectionAmount;
-    VU0_LOAD_VF(vf10, pointOffset);
-    VU0_LOAD_VF(vf11, projectedOffset);
-    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR(pointOffset);
+    SDF_VU0_LOADVECTOR_B(projectedOffset);
+    SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(distance);
     return distance;
 }

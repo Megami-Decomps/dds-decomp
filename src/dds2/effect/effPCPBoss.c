@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "btl_effect_position.h"
 #include "eff_random.h"
 #include "sdf_chip.h"
@@ -98,12 +99,12 @@ void effPCPCrackInit(effPCPCrack_t *work)
                 colors->color[2] = 0;
                 colors->color[3] = 0;
                 colors->color[4] = 0;
-                VU0_MOVE_VF(vf10, vf0);
-                VU0_STORE_VF(vf10, vertices);
-                VU0_STORE_VF(vf10, vertices + 4);
-                VU0_STORE_VF(vf10, vertices + 8);
-                VU0_STORE_VF(vf10, vertices + 12);
-                VU0_STORE_VF(vf10, vertices + 16);
+                SDF_VU0_LOADIDENTITYVECTOR();
+                SDF_VU0_STOREVECTOR(vertices);
+                SDF_VU0_STOREVECTOR(vertices + 4);
+                SDF_VU0_STOREVECTOR(vertices + 8);
+                SDF_VU0_STOREVECTOR(vertices + 12);
+                SDF_VU0_STOREVECTOR(vertices + 16);
             }
             dds3FlashPolyListSetBlend(group->drawPool, work->head.incrementBits);
             group->cells = nextCells;
@@ -220,11 +221,11 @@ void effPCPCrackDraw(void *opaque) {
     mode = work->head.directionMode;
     model = effParamWorkGetData(work->paramWork);
     map = model->inner;
-    VU0_LOAD_VF(vf10, work->head.position);
+    SDF_VU0_LOADVECTOR(work->head.position);
     mdlSetPosition(model);
     VEC3_SPLAT(scaleVector, work->head.scale);
     scaleVector[3] = 0.0f;
-    VU0_LOAD_VF(vf10, scaleVector);
+    SDF_VU0_LOADVECTOR(scaleVector);
     mdlSetScale(model);
     mdlLink(model, kwlnSceneSurfaceSets[10]);
     if (work->head.drawTrail) {
@@ -276,9 +277,9 @@ void effPCPCrackDraw(void *opaque) {
                 direction[1] = 0.0f;
                 direction[2] = 1.0f;
                 sdfModelGetMarkPosMatrix(map, i);
-                VU0_LOAD_VF(vf10, direction);
-                VU0_ROTATE_VEC(vf10, vf10);
-                VU0_STORE_VF(vf10, direction);
+                SDF_VU0_LOADVECTOR(direction);
+                SDF_VU0_APPLYMATRIX_XYZ();
+                SDF_VU0_STOREVECTOR(direction);
                 work->groups[i].direction[0] = direction[0];
                 work->groups[i].direction[1] = direction[1];
                 work->groups[i].direction[2] = direction[2];
@@ -286,39 +287,39 @@ void effPCPCrackDraw(void *opaque) {
             sdfModelGetMarkPos(map, i);
             if (frame < work->cellCount) {
                 historyCount = historyCell->vertexCount;
-                VU0_STORE_VF_UNCLOBBERED(vf10, positions + historyCount);
-                VU0_STORE_VF_UNCLOBBERED(vf10, positions + historyCount + 1);
-                VU0_STORE_VF_UNCLOBBERED(vf10, positions + historyCount + 2);
+                SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount);
+                SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount + 1);
+                SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount + 2);
                 historyCell->vertexCount += 3;
                 taperStep = taperRange / frame;
                 blend = 1.0f;
-                VU0_LOAD_VF(vf12, D_003B1FE0);
+                SDF_VU0_LOADVECTOR_C(D_003B1FE0);
                 if (frame > 0) {
                     const f32 *trailWidth = widthVector;
                     j = frame;
                     do {
-                        VU0_LOAD_VF(vf10, positions + 4);
-                        VU0_LOAD_VF(vf11, positions + 1);
-                        VU0_SUB(vf10, vf10, vf11);
+                        SDF_VU0_LOADVECTOR(positions + 4);
+                        SDF_VU0_LOADVECTOR_B(positions + 1);
+                        SDF_VU0_SUBVECTOR();
                         SDF_VU0_GETLENGTH(trailLength);
                         if (trailLength > 1.0f) {
-                            VU0_MOVE_VF(vf11, vf12);
-                            VU0_CROSS_XYZ(vf10, vf10, vf11);
+                            SDF_VU0_COPYVECTOR_C_TO_B();
+                            SDF_VU0_OUTERPRODUCT();
                             SDF_VU0_NORMALIZE();
-                            VU0_STORE_VF(vf10, perpendicular);
+                            SDF_VU0_STOREVECTOR(perpendicular);
                         } else {
-                            VU0_LOAD_VF(vf10, perpendicular);
+                            SDF_VU0_LOADVECTOR(perpendicular);
                         }
-                        VU0_LOAD_VF(vf11, trailWidth);
+                        SDF_VU0_LOADVECTOR_B(trailWidth);
                         VU0_SCALE_VF(vf11, blend);
-                        VU0_MUL(vf10, vf10, vf11);
-                        VU0_MOVE_VF(vf11, vf10);
-                        VU0_LOAD_VF(vf10, positions + 1);
-                        VU0_ADD(vf10, vf10, vf11);
-                        VU0_STORE_VF(vf10, positions);
-                        VU0_SUB(vf10, vf10, vf11);
-                        VU0_SUB(vf10, vf10, vf11);
-                        VU0_STORE_VF(vf10, positions + 2);
+                        SDF_VU0_MULVECTOR();
+                        SDF_VU0_COPYVECTOR_A_TO_B();
+                        SDF_VU0_LOADVECTOR(positions + 1);
+                        SDF_VU0_ADDVECTOR();
+                        SDF_VU0_STOREVECTOR(positions);
+                        SDF_VU0_SUBVECTOR();
+                        SDF_VU0_SUBVECTOR();
+                        SDF_VU0_STOREVECTOR(positions + 2);
                         --j;
                         blend += taperStep;
                         positions += 3;
@@ -377,15 +378,15 @@ void effPCPCrackDraw(void *opaque) {
                         displacement[2] = group->direction[2] * direction[1];
                         displacement[3] = 0.0f;
                         if (mode == 2 && currentAge >= group->rotationStartAge) {
-                            VU0_LOAD_VF(vf10, historyStart + 4);
-                            VU0_LOAD_VF(vf11, historyStart + 1);
-                            VU0_SUB(vf10, vf10, vf11);
+                            SDF_VU0_LOADVECTOR(historyStart + 4);
+                            SDF_VU0_LOADVECTOR_B(historyStart + 1);
+                            SDF_VU0_SUBVECTOR();
                             SDF_VU0_NORMALIZE();
-                            VU0_STORE_VF_UNCLOBBERED(vf10, axis);
+                            SDF_VU0_STOREVECTOR_NOMEM(axis);
                             SetRotateMatrixAxis(group->rotationAngle, (const struct RwV3d *)axis);
-                            VU0_LOAD_VF(vf10, displacement);
-                            VU0_ROTATE_VEC(vf10, vf10);
-                            VU0_STORE_VF(vf10, displacement);
+                            SDF_VU0_LOADVECTOR(displacement);
+                            SDF_VU0_APPLYMATRIX_XYZ();
+                            SDF_VU0_STOREVECTOR(displacement);
                             group->rotationAngle += group->angularSpeed;
                         }
                         baseExtent = cell->baseExtent;
@@ -394,43 +395,43 @@ void effPCPCrackDraw(void *opaque) {
                         tipExtent = cell->tipExtent;
                         VEC3_SPLAT(tipVector, tipExtent);
                         tipVector[3] = 0.0f;
-                        VU0_LOAD_VF(vf10, historyStart + 4);
-                        VU0_LOAD_VF(vf11, historyStart + 1);
-                        VU0_SUB(vf10, vf10, vf11);
+                        SDF_VU0_LOADVECTOR(historyStart + 4);
+                        SDF_VU0_LOADVECTOR_B(historyStart + 1);
+                        SDF_VU0_SUBVECTOR();
                         SDF_VU0_GETLENGTH(cellLength);
                         if (cellLength > 1.0f) {
                             SDF_VU0_NORMALIZE();
-                            VU0_MOVE_VF(vf11, vf10);
-                            VU0_LOAD_VF(vf10, tipVector);
-                            VU0_MUL(vf10, vf10, vf11);
-                            VU0_STORE_VF(vf10, tipVector);
-                            VU0_LOAD_VF(vf10, baseVector);
-                            VU0_MUL(vf10, vf10, vf11);
-                            VU0_STORE_VF(vf10, baseVector);
-                            VU0_LOAD_VF(vf12, displacement);
-                            VU0_LOAD_VF(vf10, historyStart + 4);
-                            VU0_LOAD_VF(vf11, baseVector);
-                            VU0_STORE_VF(vf10, positions + 3);
-                            VU0_ADD(vf10, vf10, vf11);
-                            VU0_STORE_VF(vf10, positions + 2);
-                            VU0_SUB(vf10, vf10, vf11);
-                            VU0_SUB(vf10, vf10, vf11);
-                            VU0_STORE_VF(vf10, positions + 4);
-                            VU0_LOAD_VF(vf10, historyStart + 4);
-                            VU0_LOAD_VF(vf11, tipVector);
-                            VU0_ADD(vf10, vf10, vf12);
-                            VU0_ADD(vf10, vf10, vf11);
-                            VU0_STORE_VF(vf10, positions);
-                            VU0_SUB(vf10, vf10, vf11);
-                            VU0_SUB(vf10, vf10, vf11);
-                            VU0_STORE_VF(vf10, positions + 1);
+                            SDF_VU0_COPYVECTOR_A_TO_B();
+                            SDF_VU0_LOADVECTOR(tipVector);
+                            SDF_VU0_MULVECTOR();
+                            SDF_VU0_STOREVECTOR(tipVector);
+                            SDF_VU0_LOADVECTOR(baseVector);
+                            SDF_VU0_MULVECTOR();
+                            SDF_VU0_STOREVECTOR(baseVector);
+                            SDF_VU0_LOADVECTOR_C(displacement);
+                            SDF_VU0_LOADVECTOR(historyStart + 4);
+                            SDF_VU0_LOADVECTOR_B(baseVector);
+                            SDF_VU0_STOREVECTOR(positions + 3);
+                            SDF_VU0_ADDVECTOR();
+                            SDF_VU0_STOREVECTOR(positions + 2);
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_STOREVECTOR(positions + 4);
+                            SDF_VU0_LOADVECTOR(historyStart + 4);
+                            SDF_VU0_LOADVECTOR_B(tipVector);
+                            SDF_VU0_ADDVECTOR_A_C();
+                            SDF_VU0_ADDVECTOR();
+                            SDF_VU0_STOREVECTOR(positions);
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_STOREVECTOR(positions + 1);
                         } else {
-                            VU0_MOVE_VF(vf10, vf0);
-                            VU0_STORE_VF(vf10, positions);
-                            VU0_STORE_VF(vf10, positions + 1);
-                            VU0_STORE_VF(vf10, positions + 2);
-                            VU0_STORE_VF(vf10, positions + 3);
-                            VU0_STORE_VF(vf10, positions + 4);
+                            SDF_VU0_LOADIDENTITYVECTOR();
+                            SDF_VU0_STOREVECTOR(positions);
+                            SDF_VU0_STOREVECTOR(positions + 1);
+                            SDF_VU0_STOREVECTOR(positions + 2);
+                            SDF_VU0_STOREVECTOR(positions + 3);
+                            SDF_VU0_STOREVECTOR(positions + 4);
                         }
                         alphaColor = 0;
                         if (age <= duration) {
@@ -526,12 +527,12 @@ void effBossBeamUpdate(EffPCPBossWork *work) {
     if (effBTLFieldColorUsesActorSelectors() != 0) {
         if (work->frame == 0) {
             btlUnitGetMuzzlePosVU((struct BtlUnit *)effBTLFieldColorGetVariantSelector());
-            VU0_STORE_VF(vf10, work->position);
+            SDF_VU0_STOREVECTOR(work->position);
         }
         direction = work->parameterVector;
         LookAtMatrix(work, direction, effBossLookAtReferenceAxis);
         ReverseMatrix();
-        VU0_MOVE_VF(vf31, vf0);
+        SDF_VU0_RESET_ROW3();
         VU0_STORE_MATRIX(matrix);
     } else {
         work->position[0] = 0;

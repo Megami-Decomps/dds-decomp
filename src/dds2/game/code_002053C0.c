@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "sdf_trig.h"
 #include "sdf_packet_list.h"
@@ -361,7 +362,7 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
         }
     }
     btlMeasureFilteredUnitGroupBounds(0x400, 0, 0);
-    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    SDF_VU0_STOREVECTOR_NOMEM(target);
     for (i = count - 1; i >= 0; i--) {
         unit = actors[i];
         if (!(unit->status.flags & 0x80000)) {
@@ -370,9 +371,9 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
             SDF_VU0_COPYVECTOR(unit->rotation, D_003BE070);
         } else {
             btlUnitGetMuzzlePosVU(unit);
-            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            SDF_VU0_STOREVECTOR_NOMEM(position);
             if (btlAimHorizontalDirectionVU(position, target) != 0) {
-                VU0_STORE_VF_UNCLOBBERED(vf10, direction);
+                SDF_VU0_STOREVECTOR_NOMEM(direction);
                 btlSetUnitRotation(unit, (s128 *)direction);
             }
         }
@@ -572,13 +573,13 @@ void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, 
     slot[first->lookupId] = first;
     slot[second->lookupId] = second;
     radius = btlMeasureFilteredUnitGroupBounds(0x400, 0, 0) + 200.0f;
-    VU0_STORE_VF_UNCLOBBERED(vf10, center);
+    SDF_VU0_STOREVECTOR_NOMEM(center);
     pos[0] = center[0];
     pos[1] = 0.0f;
     pos[2] = center[2] - radius;
     btlSetUnitPosition(slot[1], pos);
     if (btlAimHorizontalDirectionVU((f32 *)pos, (f32 *)center) != 0) {
-        VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+        SDF_VU0_STOREVECTOR_NOMEM(rotation);
         btlSetUnitRotation(slot[1], (s128 *)rotation);
     }
     angle = 30.0f * 0.017453293f;
@@ -587,7 +588,7 @@ void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, 
     pos[2] = center[2] - sdfSin(angle) * radius;
     btlSetUnitPosition(slot[0], pos);
     if (btlAimHorizontalDirectionVU((f32 *)pos, (f32 *)center) != 0) {
-        VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+        SDF_VU0_STOREVECTOR_NOMEM(rotation);
         btlSetUnitRotation(slot[0], (s128 *)rotation);
     }
     pos[0] = center[0] + sdfCos(angle) * radius;
@@ -595,7 +596,7 @@ void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, 
     pos[2] = center[2] - sdfSin(angle) * radius;
     btlSetUnitPosition(slot[2], pos);
     if (btlAimHorizontalDirectionVU((f32 *)pos, (f32 *)center) != 0) {
-        VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+        SDF_VU0_STOREVECTOR_NOMEM(rotation);
         btlSetUnitRotation(slot[2], (s128 *)rotation);
     }
 }
@@ -621,38 +622,38 @@ void btlPlaceTripleFormationAroundTarget(ActionStateLink *link, BtlUnit *first, 
         slot[first->lookupId] = first;
         slot[second->lookupId] = second;
         btlUnitGetMuzzlePosVU(target);
-        VU0_STORE_VF(vf10, center);
+        SDF_VU0_STOREVECTOR(center);
         center[1] = 0.0f;
         radius = target->bodyRadius * target->scale;
         radius += 100.0f;
         if (radius < 500.0f) {
             radius = 500.0f;
         }
-        VU0_LOAD_VF(vf10, target->orientation);
+        SDF_VU0_LOADVECTOR(target->orientation);
         effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, D_003E9130);
-        VU0_ROTATE_VEC(vf10, vf10);
+        SDF_VU0_LOADVECTOR(D_003E9130);
+        SDF_VU0_APPLYMATRIX_XYZ();
         VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
-        VU0_LOAD_VF(vf11, center);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+        SDF_VU0_LOADVECTOR_B(center);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR_NOMEM(pos);
         btlSetUnitPosition(slot[1], pos);
         btlUnitFaceTarget(slot[1], target);
-        VU0_LOAD_VF(vf10, D_003E9120);
-        VU0_ROTATE_VEC(vf10, vf10);
+        SDF_VU0_LOADVECTOR(D_003E9120);
+        SDF_VU0_APPLYMATRIX_XYZ();
         VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
-        VU0_LOAD_VF(vf11, center);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+        SDF_VU0_LOADVECTOR_B(center);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR_NOMEM(pos);
         btlSetUnitPosition(slot[0], pos);
         btlUnitFaceTarget(slot[0], target);
-        VU0_LOAD_VF(vf10, D_003E9120);
-        VU0_NEGATE_XYZ(vf10);
-        VU0_ROTATE_VEC(vf10, vf10);
+        SDF_VU0_LOADVECTOR(D_003E9120);
+        SDF_VU0_NEGVECTOR_XYZ();
+        SDF_VU0_APPLYMATRIX_XYZ();
         VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
-        VU0_LOAD_VF(vf11, center);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+        SDF_VU0_LOADVECTOR_B(center);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR_NOMEM(pos);
         btlSetUnitPosition(slot[2], pos);
         btlUnitFaceTarget(slot[2], target);
     }
@@ -689,21 +690,21 @@ void btlPlaceTripleFormationAroundMiddleActor(ActionStateLink *link, BtlUnit *fi
         }
     }
     if (slot[1] != 0) {
-        VU0_LOAD_VF(vf10, (u8 *)slot[1] + 0x70);
+        SDF_VU0_LOADVECTOR((u8 *)slot[1] + 0x70);
         effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, D_003E9130);
-        VU0_ROTATE_VEC(vf10, vf10);
-        VU0_MOVE_VF(vf11, vf10);
+        SDF_VU0_LOADVECTOR(D_003E9130);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        SDF_VU0_COPYVECTOR_A_TO_B();
         VU0_NEGATE_XYZ(vf11);
-        VU0_STORE_VF(vf11, dir);
+        SDF_VU0_STOREVECTOR_B(dir);
         radius = slot[1]->bodyRadius * slot[1]->scale;
         radius += 100.0f;
         VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
-        VU0_STORE_VF_UNCLOBBERED(vf10, center);
+        SDF_VU0_STOREVECTOR_NOMEM(center);
         btlUnitGetMuzzlePosVU(slot[1]);
-        VU0_LOAD_VF(vf11, center);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, center);
+        SDF_VU0_LOADVECTOR_B(center);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR_NOMEM(center);
         center[1] = 0.0f;
     } else {
         center[0] = 0.0f;
@@ -723,18 +724,18 @@ void btlPlaceTripleFormationAroundMiddleActor(ActionStateLink *link, BtlUnit *fi
                 } else if (i == 2) {
                     SetRotateMatrixY(-2.0943951f);
                 }
-                VU0_LOAD_VF(vf10, dir);
-                VU0_ROTATE_VEC(vf10, vf10);
+                SDF_VU0_LOADVECTOR(dir);
+                SDF_VU0_APPLYMATRIX_XYZ();
             } else {
-                VU0_LOAD_VF(vf10, dir);
+                SDF_VU0_LOADVECTOR(dir);
             }
             VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
-            VU0_LOAD_VF(vf11, center);
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+            SDF_VU0_LOADVECTOR_B(center);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR_NOMEM(pos);
             btlSetUnitPosition(slot[i], pos);
             if (btlAimHorizontalDirectionVU((f32 *)pos, (f32 *)center) != 0) {
-                VU0_STORE_VF_UNCLOBBERED(vf10, rot);
+                SDF_VU0_STOREVECTOR_NOMEM(rot);
                 btlSetUnitRotation(slot[i], (s128 *)rot);
             }
         }
@@ -773,11 +774,11 @@ void btlOrientFrontAndBackUnitsTowardTargets(ActionStateLink *link, BtlUnit *a, 
         btlUnitFaceTarget(front, target);
     } else {
         btlUnitGetMuzzlePosVU(front);
-        VU0_STORE_VF(vf10, vec[0]);
+        SDF_VU0_STOREVECTOR(vec[0]);
         btlMeasureFilteredUnitGroupBounds(target->status.flags & 0x600, 0, 0);
-        VU0_STORE_VF_UNCLOBBERED(vf10, vec[1]);
+        SDF_VU0_STOREVECTOR_NOMEM(vec[1]);
         if (btlAimHorizontalDirectionVU(vec[0], vec[1]) != 0) {
-            VU0_STORE_VF_UNCLOBBERED(vf10, &rot);
+            SDF_VU0_STOREVECTOR_NOMEM(&rot);
             btlSetUnitRotation(front, &rot);
         }
     }
@@ -851,11 +852,11 @@ void btlAlignTripleFormationWithTarget(ActionStateLink *link, BtlUnit *first, Bt
             }
         }
         btlUnitGetMuzzlePosVU(slot[1]);
-        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        SDF_VU0_STOREVECTOR_NOMEM(position);
         btlUnitGetMuzzlePosVU(target);
-        VU0_STORE_VF_UNCLOBBERED(vf10, targetPosition);
-        VU0_LOAD_VF(vf11, position);
-        VU0_SUB(vf10, vf10, vf11);
+        SDF_VU0_STOREVECTOR_NOMEM(targetPosition);
+        SDF_VU0_LOADVECTOR_B(position);
+        SDF_VU0_SUBVECTOR();
         SDF_VU0_GETVECTOR_X(offsetX);
         targetPosition[2] -= target->reach * target->scale;
         offset = -(500.0f - (targetPosition[2] - position[2]));
@@ -917,13 +918,13 @@ void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other)
     } else {
         btlMeasureUnitIndexListBounds(link->indexWork.indices, 0, 0);
     }
-    VU0_STORE_VF(vf10, muzzle);
+    SDF_VU0_STOREVECTOR(muzzle);
     VU0_SCALAR_OP_CLOBBER(0.0f, "vaddx.y vf10, vf0, vf2x");
-    VU0_LOAD_VF(vf11, &D_003BE0A0);
-    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR_B(&D_003BE0A0);
+    SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
-    VU0_NEGATE_XYZ(vf10);
-    VU0_STORE_VF(vf10, dir);
+    SDF_VU0_NEGVECTOR_XYZ();
+    SDF_VU0_STOREVECTOR(dir);
     for (i = 0; i < 2; i++) {
         radius = slot[i]->bodyRadius * slot[i]->scale;
         radius += 100.0f;
@@ -932,15 +933,15 @@ void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other)
         } else {
             SetRotateMatrixY(-1.0471975f);
         }
-        VU0_LOAD_VF(vf10, dir);
-        VU0_ROTATE_VEC(vf10, vf10);
+        SDF_VU0_LOADVECTOR(dir);
+        SDF_VU0_APPLYMATRIX_XYZ();
         VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
-        VU0_LOAD_VF(vf11, &D_003BE0A0);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+        SDF_VU0_LOADVECTOR_B(&D_003BE0A0);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR_NOMEM(pos);
         btlSetUnitPosition(slot[i], pos);
         if (btlAimHorizontalDirectionVU((f32 *)pos, (f32 *)muzzle) != 0) {
-            VU0_STORE_VF_UNCLOBBERED(vf10, rot);
+            SDF_VU0_STOREVECTOR_NOMEM(rot);
             btlSetUnitRotation(slot[i], (s128 *)rot);
         }
     }
@@ -1014,11 +1015,11 @@ void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
             btlMeasureUnitIndexListBounds(link->indexWork.indices, 0, 0);
             reach = 0.0f;
         }
-        VU0_STORE_VF(vf10, muzzle);
+        SDF_VU0_STOREVECTOR(muzzle);
         VU0_SCALAR_OP_CLOBBER(0.0f, "vaddx.y vf10, vf0, vf2x");
-        VU0_LOAD_VF(vf11, &D_003BE0B0);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, center);
+        SDF_VU0_LOADVECTOR_B(&D_003BE0B0);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(center);
         center[2] -= reach;
     }
     for (unit = state->units; unit != NULL; unit = unit->nextActor) {
@@ -1056,16 +1057,16 @@ void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
             } else {
                 SetRotateMatrixY(-1.0471975f);
             }
-            VU0_LOAD_VF(vf10, &D_003BE0C0);
-            VU0_ROTATE_VEC(vf10, vf10);
+            SDF_VU0_LOADVECTOR(&D_003BE0C0);
+            SDF_VU0_APPLYMATRIX_XYZ();
             VU0_SCALAR_OP_CLOBBER(radius, "vmulx.xyzw vf10, vf10, vf2x");
-            VU0_LOAD_VF(vf11, center);
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF(vf10, position);
+            SDF_VU0_LOADVECTOR_B(center);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(position);
         }
         btlSetUnitPosition(slots[i], position);
         if (btlAimHorizontalDirectionVU(position, muzzle) != 0) {
-            VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+            SDF_VU0_STOREVECTOR_NOMEM(rotation);
             btlSetUnitRotation(slots[i], (s128 *)rotation);
         }
     }
@@ -1106,7 +1107,7 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
     target = btlGetIndexListEntry(command->targetList, 0);
     btlUnitGetMuzzlePosVU(target);
     /* Audited SDK store: this vector is read only by the VU load below. */
-    VU0_STORE_VF_UNCLOBBERED(vf10, targetPosition);
+    SDF_VU0_STOREVECTOR_NOMEM(targetPosition);
     participants[0] = command->linkedA;
     participants[1] = command->linkedB;
     participants[2] = command->link->unit;
@@ -1129,15 +1130,15 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
         distance = spacing->spacing * participants[i]->scale + target->reach * target->scale;
         btlCopyUnitCurrentPosition((u8 *)participants[i], oldPosition);
         btlUnitGetMuzzlePosVU(participants[i]);
-        VU0_LOAD_VF(vf11, targetPosition);
-        VU0_SUB(vf10, vf10, vf11);
+        SDF_VU0_LOADVECTOR_B(targetPosition);
+        SDF_VU0_SUBVECTOR();
         VU0_SET_VF10_COMPONENT(y, flatY);
         SDF_VU0_NORMALIZE();
         VU0_SCALAR_OP_CLOBBER(distance, "vmulx.xyzw vf10, vf10, vf2x");
-        VU0_LOAD_VF(vf11, targetPosition);
-        VU0_ADD(vf10, vf10, vf11);
+        SDF_VU0_LOADVECTOR_B(targetPosition);
+        SDF_VU0_ADDVECTOR();
         /* The vector is complete here; Y is replaced, then the callee consumes it. */
-        VU0_STORE_VF_UNCLOBBERED(vf10, newPosition);
+        SDF_VU0_STOREVECTOR_NOMEM(newPosition);
         newPosition[1] = oldPosition[1];
         btlSetUnitPosition(participants[i], newPosition);
     }
@@ -1181,50 +1182,50 @@ void btlPlaceBothSidesInRadialFormation(ActionStateLink *link, BtlUnit *firstAct
     SDF_VU0_COPYVECTOR(firstDirection, D_003E9130);
     SDF_VU0_COPYVECTOR(secondDirection, D_003E9130);
     SetRotateMatrixY(1.0471975f);
-    VU0_LOAD_VF(vf10, firstDirection);
-    VU0_ROTATE_VEC(vf10, vf10);
-    VU0_STORE_VF_UNCLOBBERED(vf10, firstDirection);
+    SDF_VU0_LOADVECTOR(firstDirection);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_STOREVECTOR_NOMEM(firstDirection);
     SetRotateMatrixY(2.0943951f);
 
     for (slot = 0; slot < 3; slot++) {
         if (second[slot] != NULL) {
             radius = second[slot]->bodyRadius * second[slot]->scale;
             radius += 500.0f;
-            VU0_LOAD_VF(vf10, secondDirection);
+            SDF_VU0_LOADVECTOR(secondDirection);
             VU0_SCALE_VF(vf10, radius);
-            VU0_LOAD_VF(vf11, effZeroVector);
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            SDF_VU0_LOADVECTOR_B(effZeroVector);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR_NOMEM(position);
             btlSetUnitPosition(second[slot], position);
             if (btlAimHorizontalDirectionVU(position, effZeroVector)) {
-                VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+                SDF_VU0_STOREVECTOR_NOMEM(rotation);
                 btlSetUnitRotation(second[slot], (s128 *)rotation);
             }
         }
         if (first[slot] != NULL) {
             radius = first[slot]->bodyRadius * first[slot]->scale;
             radius += 100.0f;
-            VU0_LOAD_VF(vf10, firstDirection);
-            VU0_MOVE_VF(vf11, vf10);
+            SDF_VU0_LOADVECTOR(firstDirection);
+            SDF_VU0_COPYVECTOR_A_TO_B();
             VU0_SCALE_VF(vf10, radius);
             VU0_SCALE_VF(vf11, 200.0f);
             VU0_ADD(vf11, vf11, vf10);
-            VU0_STORE_VF_UNCLOBBERED(vf11, target);
-            VU0_LOAD_VF(vf11, effZeroVector);
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            SDF_VU0_STOREVECTOR_B_NOMEM(target);
+            SDF_VU0_LOADVECTOR_B(effZeroVector);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR_NOMEM(position);
             btlSetUnitPosition(first[slot], position);
             if (btlAimHorizontalDirectionVU(position, target)) {
-                VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+                SDF_VU0_STOREVECTOR_NOMEM(rotation);
                 btlSetUnitRotation(first[slot], (s128 *)rotation);
             }
         }
-        VU0_LOAD_VF(vf10, secondDirection);
-        VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, secondDirection);
-        VU0_LOAD_VF(vf10, firstDirection);
-        VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, firstDirection);
+        SDF_VU0_LOADVECTOR(secondDirection);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        SDF_VU0_STOREVECTOR_NOMEM(secondDirection);
+        SDF_VU0_LOADVECTOR(firstDirection);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        SDF_VU0_STOREVECTOR_NOMEM(firstDirection);
     }
 }
 

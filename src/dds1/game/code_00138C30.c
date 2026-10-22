@@ -9,6 +9,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "fld_stop_entry.h"
 #include "sdf_resource_list_release_api.h"
 #include "kwln_background_fade_api.h"
@@ -693,23 +694,23 @@ s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
                 position[0] = source->position.x;
                 position[1] = source->position.y;
                 position[2] = source->position.z;
-                VU0_LOAD_VF(vf10, actor->inner->rotation);
+                SDF_VU0_LOADVECTOR(actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
-                VU0_STORE_VF(vf30, dir);
+                SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
-                VU0_LOAD_VF(vf10, dir);
+                SDF_VU0_LOADVECTOR(dir);
                 SDF_VU0_NORMALIZE();
                 VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
-                VU0_MOVE_VF(vf12, vf10);
-                VU0_LOAD_VF(vf10, position);
-                VU0_LOAD_VF(vf11, actor->inner->position);
-                VU0_SUB(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, dir);
+                SDF_VU0_COPYVECTOR_A_TO_C();
+                SDF_VU0_LOADVECTOR(position);
+                SDF_VU0_LOADVECTOR_B(actor->inner->position);
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_STOREVECTOR(dir);
                 dir[1] = 0.0f;
-                VU0_LOAD_VF(vf10, dir);
+                SDF_VU0_LOADVECTOR(dir);
                 length = fldNormalizeProbeVector();
-                VU0_MOVE_VF(vf11, vf12);
-                VU0_DOT_XYZ(dot, vf10, vf11);
+                SDF_VU0_COPYVECTOR_C_TO_B();
+                SDF_VU0_INNERPRODUCT(dot);
                 angle = dot * 180.0f / 3.14f;
                 if (angle < 0.0f) {
                     return 0;
@@ -721,13 +722,13 @@ s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
             case 1:
                 return fldEveHitTable[i].crossingDirection == kind;
             case 2:
-                VU0_LOAD_VF(vf10, actor->inner->rotation);
+                SDF_VU0_LOADVECTOR(actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
-                VU0_STORE_VF(vf30, dir);
+                SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
-                VU0_LOAD_VF(vf10, dir);
+                SDF_VU0_LOADVECTOR(dir);
                 SDF_VU0_NORMALIZE();
-                VU0_STORE_VF(vf10, dir);
+                SDF_VU0_STOREVECTOR(dir);
                 dot = fldVecDot(dir, fldEveHitTable[i].center);
                 if (dot < 0.5f) {
                     return 0;
@@ -758,23 +759,23 @@ s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry) {
             case 0:
                 source = entry->data;
                 SDF_VU0_COPYVECTOR(position, &source->position);
-                VU0_LOAD_VF(vf10, actor->inner->rotation);
+                SDF_VU0_LOADVECTOR(actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
-                VU0_STORE_VF(vf30, dir);
+                SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
-                VU0_LOAD_VF(vf10, dir);
+                SDF_VU0_LOADVECTOR(dir);
                 SDF_VU0_NORMALIZE();
                 VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
-                VU0_MOVE_VF(vf12, vf10);
-                VU0_LOAD_VF(vf10, position);
-                VU0_LOAD_VF(vf11, actor->inner->position);
-                VU0_SUB(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, dir);
+                SDF_VU0_COPYVECTOR_A_TO_C();
+                SDF_VU0_LOADVECTOR(position);
+                SDF_VU0_LOADVECTOR_B(actor->inner->position);
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_STOREVECTOR(dir);
                 dir[1] = 0.0f;
-                VU0_LOAD_VF(vf10, dir);
+                SDF_VU0_LOADVECTOR(dir);
                 fldNormalizeProbeVector();
-                VU0_MOVE_VF(vf11, vf12);
-                VU0_DOT_XYZ(dot, vf10, vf11);
+                SDF_VU0_COPYVECTOR_C_TO_B();
+                SDF_VU0_INNERPRODUCT(dot);
                 angle = dot * 180.0f / 3.14f;
                 if (angle < 0.0f) {
                     return 0;
@@ -783,13 +784,13 @@ s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry) {
             case 1:
                 return fldEveHitTable[i].crossingDirection == kind;
             case 2:
-                VU0_LOAD_VF(vf10, actor->inner->rotation);
+                SDF_VU0_LOADVECTOR(actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
-                VU0_STORE_VF(vf30, dir);
+                SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
-                VU0_LOAD_VF(vf10, dir);
+                SDF_VU0_LOADVECTOR(dir);
                 SDF_VU0_NORMALIZE();
-                VU0_STORE_VF(vf10, dir);
+                SDF_VU0_STOREVECTOR(dir);
                 dot = fldVecDot(dir, fldEveHitTable[i].center);
                 if (dot < 0.5f) {
                     return 0;
@@ -811,23 +812,23 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *posit
     kind = ((FldTaskInfo *)fldRoomResources[roomIndex]->data)->shape->kind;
     switch (kind) {
     case 0:
-        VU0_LOAD_VF(vf10, actor->inner->rotation);
+        SDF_VU0_LOADVECTOR(actor->inner->rotation);
         effMiscQuaternionToMatrixVU();
-        VU0_STORE_VF(vf30, dir);
+        SDF_VU0_STORE_ROW2(dir);
         dir[1] = 0.0f;
-        VU0_LOAD_VF(vf10, dir);
+        SDF_VU0_LOADVECTOR(dir);
         SDF_VU0_NORMALIZE();
         VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
-        VU0_MOVE_VF(vf12, vf10);
-        VU0_LOAD_VF(vf10, position);
-        VU0_LOAD_VF(vf11, actor->inner->position);
-        VU0_SUB(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, dir);
+        SDF_VU0_COPYVECTOR_A_TO_C();
+        SDF_VU0_LOADVECTOR(position);
+        SDF_VU0_LOADVECTOR_B(actor->inner->position);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_STOREVECTOR(dir);
         dir[1] = 0.0f;
-        VU0_LOAD_VF(vf10, dir);
+        SDF_VU0_LOADVECTOR(dir);
         length = fldNormalizeProbeVector();
-        VU0_MOVE_VF(vf11, vf12);
-        VU0_DOT_XYZ(dot, vf10, vf11);
+        SDF_VU0_COPYVECTOR_C_TO_B();
+        SDF_VU0_INNERPRODUCT(dot);
         angle = dot * 180.0f / 3.14f;
         if (angle < 0.0f) {
             return 0;
@@ -839,13 +840,13 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *posit
     case 1:
         return fldEveHitTable[roomIndex].crossingDirection == kind;
     case 2:
-        VU0_LOAD_VF(vf10, actor->inner->rotation);
+        SDF_VU0_LOADVECTOR(actor->inner->rotation);
         effMiscQuaternionToMatrixVU();
-        VU0_STORE_VF(vf30, dir);
+        SDF_VU0_STORE_ROW2(dir);
         dir[1] = 0.0f;
-        VU0_LOAD_VF(vf10, dir);
+        SDF_VU0_LOADVECTOR(dir);
         SDF_VU0_NORMALIZE();
-        VU0_STORE_VF(vf10, dir);
+        SDF_VU0_STOREVECTOR(dir);
         dot = fldVecDot(dir, fldEveHitTable[roomIndex].center);
         if (dot < 0.5f) {
             return 0;
@@ -2761,7 +2762,7 @@ void fldInitializeActorMotionSlots(void) {
                         rotation[1] = transform[5];
                         rotation[2] = transform[6];
                         rotation[3] = transform[7];
-                        VU0_LOAD_VF(vf10, rotation);
+                        SDF_VU0_LOADVECTOR(rotation);
                         angle = EulerAngleAxisY() * 180.0f / 3.14f;
                         while (angle < 0.0f) {
                             angle += 360.0f;
@@ -2800,7 +2801,7 @@ void fldInitializeActorMotionSlots(void) {
                             rotation[1] = transform[5];
                             rotation[2] = transform[6];
                             rotation[3] = transform[7];
-                            VU0_LOAD_VF(vf10, rotation);
+                            SDF_VU0_LOADVECTOR(rotation);
                             angle = EulerAngleAxisY() * 180.0f / 3.14f;
                             while (angle < 0.0f) {
                                 angle += 360.0f;
@@ -2836,7 +2837,7 @@ void fldInitializeActorMotionSlots(void) {
                             rotation[1] = transform[5];
                             rotation[2] = transform[6];
                             rotation[3] = transform[7];
-                            VU0_LOAD_VF(vf10, rotation);
+                            SDF_VU0_LOADVECTOR(rotation);
                             angle = EulerAngleAxisY() * 180.0f / 3.14f;
                             while (angle < 0.0f) {
                                 angle += 360.0f;

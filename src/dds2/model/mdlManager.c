@@ -3,6 +3,7 @@
 #include "sdf_model_packet_callback.h"
 #include "ee_mmi.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "btl_group_id_api.h"
 #include "sdf_resource_list_release_api.h"
 #include "btl_stage_task_cleanup.h"
@@ -565,13 +566,13 @@ void mdlSetBlur(dds3ModelHandle_t *ctx, s32 stride, s32 capacity,
         inverseSpan = 1.0f / deviceList->byteCount;
         startCarrier[0] = startColor;
         EE_MMI_RGBA_UNPACK(startCarrier, 0.0078125f);
-        VU0_STORE_VF(vf10, deviceList->color);
-        VU0_MOVE_VF_EXTENDED(vf11, vf10);
+        SDF_VU0_STOREVECTOR(deviceList->color);
+        SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED();
         endCarrier[0] = endColor;
         EE_MMI_RGBA_UNPACK(endCarrier, 0.0078125f);
-        VU0_SUB_EXTENDED(vf10, vf10, vf11);
+        SDF_VU0_SUBVECTOR_EXTENDED();
         VU0_SCALAR_OP(inverseSpan, "vmulx.xyzw vf10, vf10, vf2x");
-        VU0_STORE_VF(vf10, deviceList->colorStep);
+        SDF_VU0_STOREVECTOR(deviceList->colorStep);
     }
 }
 
@@ -619,7 +620,7 @@ void mdlLinkBlur(dds3ModelHandle_t *ctx, struct SdfPoolNode **surfaces) {
         list->first = slot;
     }
     eeUnpackRGBAWordFloat(original->color, 1.0f / 128.0f);
-    VU0_STORE_VF(vf10, tint);
+    SDF_VU0_STOREVECTOR(tint);
     slot = list->first;
     while (slot != NULL) {
         remaining = slot->remaining;
@@ -633,9 +634,9 @@ void mdlLinkBlur(dds3ModelHandle_t *ctx, struct SdfPoolNode **surfaces) {
         }
         /* Both callbacks complete before the countdown is published. */
         slot->remaining = remaining;
-        VU0_LOAD_VF(vf10, list->color);
-        VU0_LOAD_VF(vf11, list->colorStep);
-        VU0_LOAD_VF(vf12, tint);
+        SDF_VU0_LOADVECTOR(list->color);
+        SDF_VU0_LOADVECTOR_B(list->colorStep);
+        SDF_VU0_LOADVECTOR_C(tint);
         color = mdlPackDevSlotColor(remaining - 1, 128.0f);
         model->color = color;
         sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, surfaces, model);
@@ -985,21 +986,21 @@ void mdlSetMotionSpeedEx(dds3ModelHandle_t *ctx, s32 searchId, f32 frameStep) {
 /* vu0 routine: load the primary vector into vf10, not a C return value. */
 void mdlGetPosition(dds3ModelHandle_t *ctx) {
     void *primaryVector = ctx->inner->matrix[3];
-    VU0_LOAD_VF_MEMORY(vf10, primaryVector);
+    SDF_VU0_LOADVECTOR_BARRIER(primaryVector);
 }
 
 /* vu0 routine: force vf10.w to one and store it as the primary vector. */
 void mdlSetPosition(dds3ModelHandle_t *ctx) {
     void *primaryVector;
-    VU0_SET_W_ONE(vf10);
+    SDF_VU0_VECTOR_W_SET_ONE();
     primaryVector = ctx->inner->matrix[3];
-    VU0_STORE_VF(vf10, primaryVector);
+    SDF_VU0_STOREVECTOR(primaryVector);
 }
 
 /* vu0 routine: load the stored rotation quaternion into vf10. */
 void mdlGetRotate(dds3ModelHandle_t *ctx) {
     void *rotationQuaternion = ctx->inner->rotationQuaternion;
-    VU0_LOAD_VF_MEMORY(vf10, rotationQuaternion);
+    SDF_VU0_LOADVECTOR_BARRIER(rotationQuaternion);
 }
 
 
@@ -1012,26 +1013,26 @@ void mdlSetRotate(dds3ModelHandle_t *ctx) {
     void *basisRow2;
 
     rotationQuaternion = ctx->inner->rotationQuaternion;
-    VU0_STORE_VF(vf10, rotationQuaternion);
+    SDF_VU0_STOREVECTOR(rotationQuaternion);
     effMiscQuaternionToMatrixVU();
     basisRow0 = ctx->inner->matrix[0];
-    VU0_STORE_VF(vf28, basisRow0);
+    SDF_VU0_STORE_ROW0(basisRow0);
     basisRow1 = ctx->inner->matrix[1];
-    VU0_STORE_VF(vf29, basisRow1);
+    SDF_VU0_STORE_ROW1(basisRow1);
     basisRow2 = ctx->inner->matrix[2];
-    VU0_STORE_VF(vf30, basisRow2);
+    SDF_VU0_STORE_ROW2(basisRow2);
 }
 
 /* vu0 routine: load the tertiary vector into vf10; projection uses its row scale. */
 void mdlGetScale(dds3ModelHandle_t *ctx) {
     void *tertiaryVector = ctx->inner->scaleVector;
-    VU0_LOAD_VF_MEMORY(vf10, tertiaryVector);
+    SDF_VU0_LOADVECTOR_BARRIER(tertiaryVector);
 }
 
 /* vu0 routine: store all vf10 components as the tertiary vector, without forcing w. */
 void mdlSetScale(dds3ModelHandle_t *ctx) {
     void *tertiaryVector = ctx->inner->scaleVector;
-    VU0_STORE_VF(vf10, tertiaryVector);
+    SDF_VU0_STOREVECTOR(tertiaryVector);
 }
 
 /* Return the last original value stored by either broadcast path. */
@@ -1080,15 +1081,15 @@ void mdlGetScreenOffset(dds3ModelHandle_t *ctx, void *point)
     VU0_MOVE_VF(vf26, vf30);
     VU0_MOVE_VF(vf27, vf31);
     VU0_LOAD_MATRIX(ctx->inner->matrix);
-    VU0_SCALE_MATRIX_ROWS(vf10);
+    SDF_VU0_SCALE_XYZ();
     MultMatrixRevNoArg();
-    VU0_LOAD_VF(vf10, point);
-    VU0_TRANSFORM_POINT(vf10, vf10);
+    SDF_VU0_LOADVECTOR(point);
+    SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
-    VU0_LOAD_VF(vf11, D_0037F650);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, D_0037F660);
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR_B(D_0037F650);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_LOADVECTOR_B(D_0037F660);
+    SDF_VU0_ADDVECTOR();
 }
 
 #define MDL_PROJECTION_SCALE_OFFSET 0x40
@@ -1102,19 +1103,19 @@ void mdlProjectPoints(dds3ModelHandle_t *ctx, f32 (*inputPoints)[4], f32 (*outpu
     s32 pointIndex;
 
     VU0_LOAD_MATRIX(ctx->inner->matrix);
-    VU0_LOAD_VF(vf10, ctx->inner->scaleVector);
-    VU0_SCALE_MATRIX_ROWS(vf10);
+    SDF_VU0_LOADVECTOR(ctx->inner->scaleVector);
+    SDF_VU0_SCALE_XYZ();
     sdfPostmultiplyVuMatrixFromMemory(sdfViewMatrix);
     sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
     for (pointIndex = 0; pointIndex < pointCount; pointIndex++) {
-        VU0_LOAD_VF(vf10, inputPoints[pointIndex]);
-        VU0_TRANSFORM_POINT(vf10, vf10);
+        SDF_VU0_LOADVECTOR(inputPoints[pointIndex]);
+        SDF_VU0_APPLYMATRIX_XYZ1();
         SDF_VU0_PERSVECTOR();
-        VU0_LOAD_VF(vf11, sdfProjectionMatrix + MDL_PROJECTION_SCALE_OFFSET);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_LOAD_VF(vf11, sdfProjectionMatrix + MDL_PROJECTION_BIAS_OFFSET);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, outputPoints[pointIndex]);
+        SDF_VU0_LOADVECTOR_B(sdfProjectionMatrix + MDL_PROJECTION_SCALE_OFFSET);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_LOADVECTOR_B(sdfProjectionMatrix + MDL_PROJECTION_BIAS_OFFSET);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(outputPoints[pointIndex]);
     }
 }
 

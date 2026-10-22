@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "sdf_line_pair_packet_api.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_thread_workspace_api.h"
 #include "sdf_timer.h"
@@ -281,14 +282,14 @@ SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s3
     VU0_LOAD_VF_AT(vf15, 0x10, viewport);
     emitted = 0;
     for (i = 0; i < vertexCount; i += 2) {
-        VU0_LOAD_VF(vf10, vertices[i]);
-        EE_MMI_RGBA_TO_VF(vf8, colors[i]);
-        VU0_TRANSFORM_POINT(vf10, vf10);
-        VU0_LOAD_VF(vf11, vertices[i + 1]);
-        EE_MMI_RGBA_TO_VF(vf9, colors[i + 1]);
-        VU0_TRANSFORM_POINT(vf11, vf11);
-        VU0_CLIPW_XYZ(vf10);
-        VU0_CLIPW_XYZ(vf11);
+        SDF_VU0_LOADVECTOR(vertices[i]);
+        EE_MMI_RGBA_TO_VF8(colors[i]);
+        SDF_VU0_APPLYMATRIX_XYZ1();
+        SDF_VU0_LOADVECTOR_B(vertices[i + 1]);
+        EE_MMI_RGBA_TO_VF9(colors[i + 1]);
+        VU0_TRANSFORM_POINT_VF11();
+        SDF_VU0_CLIPTEST();
+        SDF_VU0_CLIPTEST_B();
         SDF_VU0_CLIPTESTWAIT(clipFlags);
         firstClip = (clipFlags >> 6) & 0x3F;
         secondClip = clipFlags & 0x3F;
@@ -299,25 +300,25 @@ SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s3
             for (plane = 4; plane != -1; plane--) {
                 if (firstClip & (1 << plane)) {
                     if ((plane & 1) == 0) {
-                        VU0_POSITIVE_CLIP_PLANE(vf2);
+                        VU0_POSITIVE_CLIP_PLANE_VF2();
                     } else {
-                        VU0_NEGATIVE_CLIP_PLANE(vf2);
+                        VU0_NEGATIVE_CLIP_PLANE_VF2();
                     }
-                    VU0_CLIP_SEGMENT_PREP(vf10, vf11, vf8, vf9);
+                    VU0_CLIP_SEGMENT_PREP_FIRST();
                     switch (plane) {
                     case 0:
                     case 1:
-                        VU0_CLIP_RATIO(x);
+                        VU0_CLIP_RATIO_X();
                         break;
                     case 2:
                     case 3:
-                        VU0_CLIP_RATIO(y);
+                        VU0_CLIP_RATIO_Y();
                         break;
                     default:
-                        VU0_CLIP_RATIO(z);
+                        VU0_CLIP_RATIO_Z();
                         break;
                     }
-                    VU0_CLIP_SEGMENT_UPDATE(vf10, vf8);
+                    VU0_CLIP_SEGMENT_UPDATE_FIRST();
                     SDF_VU0_CLIPTESTWAIT(firstClip);
                     firstClip &= 0x3F;
                     if (firstClip & secondClip) {
@@ -326,25 +327,25 @@ SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s3
                 }
                 if (secondClip & (1 << plane)) {
                     if ((plane & 1) == 0) {
-                        VU0_POSITIVE_CLIP_PLANE(vf2);
+                        VU0_POSITIVE_CLIP_PLANE_VF2();
                     } else {
-                        VU0_NEGATIVE_CLIP_PLANE(vf2);
+                        VU0_NEGATIVE_CLIP_PLANE_VF2();
                     }
-                    VU0_CLIP_SEGMENT_PREP(vf11, vf10, vf9, vf8);
+                    VU0_CLIP_SEGMENT_PREP_SECOND();
                     switch (plane) {
                     case 0:
                     case 1:
-                        VU0_CLIP_RATIO(x);
+                        VU0_CLIP_RATIO_X();
                         break;
                     case 2:
                     case 3:
-                        VU0_CLIP_RATIO(y);
+                        VU0_CLIP_RATIO_Y();
                         break;
                     default:
-                        VU0_CLIP_RATIO(z);
+                        VU0_CLIP_RATIO_Z();
                         break;
                     }
-                    VU0_CLIP_SEGMENT_UPDATE(vf11, vf9);
+                    VU0_CLIP_SEGMENT_UPDATE_SECOND();
                     SDF_VU0_CLIPTESTWAIT(secondClip);
                     secondClip &= 0x3F;
                     if (firstClip & secondClip) {

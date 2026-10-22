@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_channel.h"
 #include "scr_work_task_api.h"
 #include "dat_save_words.h"
@@ -157,7 +158,7 @@ void *dds3GetWorldNodeData(dds3Basic_t *node) {
 void evtLoadValueVectorIntoVu(dds3Basic_t *node) {
     void *vec = dds3GetWorldNodeData(node);
 
-    VU0_LOAD_VF_MEMORY(vf10, vec);
+    SDF_VU0_LOADVECTOR_BARRIER(vec);
 
 }
 
@@ -165,7 +166,7 @@ void evtLoadValueVectorIntoVu(dds3Basic_t *node) {
 void evtLoadValueSecondaryVectorIntoVu(dds3Basic_t *node) {
     void *vec = (void *)((u8 *)dds3GetWorldNodeData(node) + 0x10);
 
-    VU0_LOAD_VF_MEMORY(vf10, vec);
+    SDF_VU0_LOADVECTOR_BARRIER(vec);
 
 }
 

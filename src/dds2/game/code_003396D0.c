@@ -2,6 +2,7 @@
 #include "sdf_gs_header.h"
 #include "eeregs.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_pad_entry.h"
 #include "sdf_pad_mode_api.h"
@@ -307,15 +308,15 @@ void sdf3DMakeViewportPacket(SdfVuBonePacket *packet, SdfProjectionRecord *node,
     VU0_STORE_MATRIX(packet->matrixA);
     sdfPostmultiplyVuMatrixFromMemory(node->camera.matrix);
     VU0_STORE_MATRIX(packet->matrixB);
-    VU0_LOAD_VF(vf10, &node->camera.halfWidth);
-        VU0_STORE_VF_UNCLOBBERED(vf10, packet->vecA);
-    VU0_LOAD_VF(vf10, &node->camera.originX);
-        VU0_STORE_VF_UNCLOBBERED(vf10, packet->vecB);
+    SDF_VU0_LOADVECTOR(&node->camera.halfWidth);
+        SDF_VU0_STOREVECTOR_NOMEM(packet->vecA);
+    SDF_VU0_LOADVECTOR(&node->camera.originX);
+        SDF_VU0_STOREVECTOR_NOMEM(packet->vecB);
     VU0_LOAD_MATRIX(transformMatrix);
     ReverseMatrix();
-    VU0_MOVE_VF(vf10, vf31);
-        VU0_STORE_VF_UNCLOBBERED(vf10, packet->vecC);
-        VU0_STORE_VF_UNCLOBBERED(vf10, node->inverseOrigin);
+    SDF_VU0_GET_ROW3();
+        SDF_VU0_STOREVECTOR_NOMEM(packet->vecC);
+        SDF_VU0_STOREVECTOR_NOMEM(node->inverseOrigin);
     packet->mscalCommand = SDF_VIF_MSCAL_COMMAND;
     packet->stmodCommand = SDF_VIF_ITOP_MATRIX;
     packet->unknownC8 = 0;
@@ -335,10 +336,10 @@ void sdf3DSetCamera(SdfProjectionRecord *node, void *transformMatrix) {
     VU0_LOAD_MATRIX(transformMatrix);
     VU0_STORE_MATRIX(sdfCameraTm);
     sdfPostmultiplyVuMatrixFromMemory(node->camera.matrix);
-        VU0_LOAD_VF(vf10, node->inverseOrigin);
+        SDF_VU0_LOADVECTOR(node->inverseOrigin);
     VU0_STORE_MATRIX(sdf3DScreenTm);
-    VU0_TRANSFORM_POINT(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, sdf3DEyeOffset);
+    SDF_VU0_APPLYMATRIX_XYZ1();
+        SDF_VU0_STOREVECTOR_NOMEM(sdf3DEyeOffset);
     *(SdfProjectionRecord *)sdf3DScreenParam = *node;
 }
 
@@ -428,8 +429,8 @@ void sdf3DMakeLightParallelPacket(SdfLightingPacketStorage *packet, SdfLightSour
     packet->quadwordCount = 13;
     packet->flushCode = 0x10000000;
     packet->unpackCode = 0x6C0D4398;
-    VU0_LOAD_VF(vf11, ambient);
-    VU0_STORE_VF(vf11, packet->ambient);
+    SDF_VU0_LOADVECTOR_B(ambient);
+    SDF_VU0_STOREVECTOR_B(packet->ambient);
     first = NULL;
     for (i = 0; i < 3; i++) {
         f32 (*light)[4] = sources[i];
@@ -446,56 +447,56 @@ void sdf3DMakeLightParallelPacket(SdfLightingPacketStorage *packet, SdfLightSour
             if (first == NULL) {
                 first = light;
             }
-            VU0_LOAD_VF(vf10, light[1]);
+            SDF_VU0_LOADVECTOR(light[1]);
             SDF_VU0_NORMALIZE();
             VU0_SCALE_VF(vf10, -1.0f);
-            VU0_STORE_VF(vf10, direction);
+            SDF_VU0_STOREVECTOR(direction);
             packet->normal[0][i] = direction[0];
             packet->normal[1][i] = direction[1];
             packet->normal[2][i] = direction[2];
-            VU0_LOAD_VF(vf10, light[0]);
+            SDF_VU0_LOADVECTOR(light[0]);
             VU0_ADD(vf11, vf11, vf10);
-            VU0_STORE_VF(vf10, packet->color[i]);
+            SDF_VU0_STOREVECTOR(packet->color[i]);
         }
     }
     SDF_VU0_COPYVECTOR(packet->normal[3], packet->color[0]);
-    VU0_STORE_VF(vf11, packet->combinedColor);
+    SDF_VU0_STOREVECTOR_B(packet->combinedColor);
     if (first == NULL) {
         EE_MMI_UNIT_MATRIX(packet->basis);
         return;
     }
-    VU0_LOAD_VF(vf10, first[1]);
+    SDF_VU0_LOADVECTOR(first[1]);
     SDF_VU0_NORMALIZE();
-    VU0_CLEAR_W(vf10);
-    VU0_MOVE_VF(vf30, vf10);
-    VU0_STORE_VF(vf10, axis);
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    SDF_VU0_SET_ROW2();
+    SDF_VU0_STOREVECTOR(axis);
     if (ffabsf(axis[0]) < 0.000001f && ffabsf(axis[2]) < 0.000001f) {
         axis[0] = -axis[1];
         axis[1] = 0.0f;
         axis[2] = 0.0f;
         axis[3] = 0.0f;
-        VU0_LOAD_VF(vf11, axis);
+        SDF_VU0_LOADVECTOR_B(axis);
     } else {
-        VU0_LOAD_VF(vf11, D_0040B540);
+        SDF_VU0_LOADVECTOR_B(D_0040B540);
     }
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
-    VU0_CLEAR_W(vf10);
-    VU0_MOVE_VF(vf28, vf10);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_MOVE_VF(vf10, vf30);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_CLEAR_W(vf10);
-    VU0_MOVE_VF(vf29, vf10);
-    VU0_MOVE_VF(vf31, vf0);
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    SDF_VU0_SET_ROW0();
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_GET_ROW2();
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    SDF_VU0_SET_ROW1();
+    SDF_VU0_RESET_ROW3();
     DiagMatrix();
-    VU0_LOAD_VF(vf10, first[1]);
+    SDF_VU0_LOADVECTOR(first[1]);
     SDF_VU0_NORMALIZE();
     EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfCameraTm + 8);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_NEGATE_XYZ(vf10);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_NEGVECTOR_XYZ();
     SDF_VU0_NORMALIZE();
-    VU0_MOVE_VF(vf31, vf10);
+    SDF_VU0_SET_ROW3();
     VU0_STORE_MATRIX(packet->basis);
 }
 

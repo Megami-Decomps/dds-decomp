@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_model_packet_callback.h"
 #include "sdf_vu_rotation_axes.h"
 #include "eff_pcp_paired_event_row.h"
@@ -262,7 +263,7 @@ void effPCPSparkleSphereDraw(EffPCPRingWork *work) {
 
     VU0_LOAD_VF($vf10, sdfViewTargetVector);
     VU0_LOAD_VF($vf11, aViewTarget);
-    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
     VU0_STORE_VF($vf10, dir);
     handle = work->handle;
@@ -271,9 +272,9 @@ void effPCPSparkleSphereDraw(EffPCPRingWork *work) {
     size[2] = work->scale;
     VU0_LOAD_VF($vf10, size);
     VU0_LOAD_VF($vf11, dir);
-    VU0_MUL(vf10, vf10, vf11);
+    SDF_VU0_MULVECTOR();
     VU0_LOAD_VF($vf11, work);
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_ADDVECTOR();
     VU0_STORE_VF($vf10, pos);
     effCopyVector(handle, pos);
     scale = work->scale;
@@ -398,7 +399,7 @@ void effPCPHama01Draw(EffPCPTwinWork *work) {
         }
         obj[0] = effParamWorkGetData(work->pair[slotIndex][0]);
         obj[1] = effParamWorkGetData(work->pair[slotIndex][1]);
-        VU0_LOAD_VF(vf10, work);
+        SDF_VU0_LOADVECTOR(work);
         mdlSetPosition(obj[0]);
         dds3EffectPartSetScale(work->pair[slotIndex][0], work->scale * 1.5f);
         dds3EffectPartSetScale(work->pair[slotIndex][1], 1.75f);
@@ -406,7 +407,7 @@ void effPCPHama01Draw(EffPCPTwinWork *work) {
         mdlLink(obj[0], kwlnSceneSurfaceSets[10]);
         sdfModelGetMarkPos(obj[0]->inner, 1);
         posp = &pos;
-        VU0_STORE_VF_UNCLOBBERED(vf10, posp);
+        SDF_VU0_STOREVECTOR_NOMEM(posp);
         mdlSetPosition(obj[1]);
         mdlLink(obj[1], kwlnSceneSurfaceSets[10]);
         if (work->frame > 0x18) {
@@ -517,7 +518,7 @@ void effPCPHama02Draw(EffPCPStaggered *work) {
             pos[0] = work->position[0];
             pos[2] = work->position[2];
             pos[1] = (work->position[1] - work->verticalOffset[i] + 100.0f) * work->scale;
-                        VU0_LOAD_VF(vf10, pos);
+                        SDF_VU0_LOADVECTOR(pos);
             mdlSetPosition(obj[0]);
             dds3EffectPartSetScale(work->handle[i * 2], work->scale * 1.5f);
             dds3EffectPartSetScale(work->handle[i * 2 + 1], 1.5f);
@@ -637,7 +638,7 @@ void effPCPHamaonDraw(EffPCPCrossWork *work) {
     s32 j;
 
     anchor = effParamWorkGetData(work->base);
-    VU0_LOAD_VF(vf10, work);
+    SDF_VU0_LOADVECTOR(work);
     mdlSetPosition(anchor);
     dds3EffectPartSetScale(work->base, work->scale);
     mdlLink(anchor, kwlnSceneSurfaceSets[10]);
@@ -747,12 +748,12 @@ void effPCPMHanma01Draw(EffPCPDelayedPairs *work) {
         } else {
             obj[0] = effParamWorkGetData(work->handle[i * 2]);
             obj[1] = effParamWorkGetData(work->handle[i * 2 + 1]);
-                        VU0_LOAD_VF_MEMORY(vf10, work);
+                        SDF_VU0_LOADVECTOR_BARRIER(work);
             mdlSetPosition(obj[0]);
             mdlSetColor(obj[1], work->color);
             mdlLink(obj[0], kwlnSceneSurfaceSets[10]);
             sdfModelGetMarkPos(obj[0]->inner, 1);
-                        VU0_STORE_VF_UNCLOBBERED(vf10, &vec);
+                        SDF_VU0_STOREVECTOR_NOMEM(&vec);
             mdlSetPosition(obj[1]);
             mdlLink(obj[1], kwlnSceneSurfaceSets[10]);
         }
@@ -849,7 +850,7 @@ void effPCPMudoDraw(EffPCPChargeWork *work) {
         for (point = 0; point < 7; point++) {
             if (captureRow % effChargeSamplePeriods[point] == 0) {
                 sdfModelGetMarkPos(model->inner, point + 1);
-                VU0_STORE_VF(vf10, position);
+                SDF_VU0_STOREVECTOR(position);
                 SDF_VU0_COPYVECTOR(work->samplePositions[captureRow][point], position);
                 work->animationFrames[captureRow][point] = dds3GetRandA((EffRandState *)effDefaultRandomState);
                 work->sampleScales[captureRow][point] = 0;
@@ -935,7 +936,7 @@ void effPCPHwave01Draw(EffPCPSpawnOnceWork *work) {
     u128 vec;
 
     obj = effParamWorkGetData(work->primaryHandle);
-        VU0_LOAD_VF_MEMORY(vf10, work->vector);
+        SDF_VU0_LOADVECTOR_BARRIER(work->vector);
     mdlSetPosition(obj);
     dds3EffectPartSetColor(work->secondaryHandle, work->color);
     mdlLink(obj, kwlnSceneSurfaceSets[10]);
@@ -1013,9 +1014,9 @@ void effPCPZiodin01Init(EffPCPThunderGroup *group) {
         scale[1] = -reach;
         VU0_LOAD_VF($vf10, dir);
         VU0_LOAD_VF($vf11, scale);
-        VU0_MUL(vf10, vf10, vf11);
+        SDF_VU0_MULVECTOR();
         VU0_LOAD_VF($vf11, D_003B1680);
-        VU0_ADD(vf10, vf10, vf11);
+        SDF_VU0_ADDVECTOR();
         VU0_STORE_VF($vf10, effSharedSpawnParams);
         if (scale[0] < 250.0f) {
             speed = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * 2.5f + 5.0f;
@@ -1074,11 +1075,11 @@ static inline void effPcpShiftThunderHandles(EffPCPThunderGroup *work, s32 count
         VU0_LOAD_VF($vf10, obj + 0x10);
         VU0_STORE_VF($vf10, &saved[1]);
         VU0_LOAD_VF($vf11, work);
-        VU0_ADD(vf10, vf10, vf11);
+        SDF_VU0_ADDVECTOR();
         VU0_STORE_VF($vf10, obj + 0x10);
         VU0_LOAD_VF($vf10, obj);
         VU0_STORE_VF($vf10, &saved[0]);
-        VU0_ADD(vf10, vf10, vf11);
+        SDF_VU0_ADDVECTOR();
         VU0_STORE_VF($vf10, obj);
         effPCP_ThunderPolyDraw(work->handles[i]);
         SDF_VU0_COPYVECTOR(obj, &saved[0]);
@@ -1141,7 +1142,7 @@ void effPCPZiodin02Init(EffPCPThunderGroup *group) {
         effPCPZiodin02Param->start[2] = 0;
         effPCPZiodin02Param->start[1] = -height;
         VU0_LOAD_VF($vf10, effPCPZiodin02Param->start);
-        VU0_ROTATE_VEC(vf10, vf10);
+        SDF_VU0_APPLYMATRIX_XYZ();
         VU0_STORE_VF($vf10, effPCPZiodin02Param->start);
         effPCPZiodin02Param->start[0] += effPCPZiodin02Param->end[0];
         effPCPZiodin02Param->start[2] += effPCPZiodin02Param->end[2];
@@ -1236,7 +1237,7 @@ void effPCPZiodin03Init(EffPCPThunderGroup *group) {
         effPCPZiodin03Param->start[2] = 0;
         effPCPZiodin03Param->start[1] = -height;
         VU0_LOAD_VF($vf10, effPCPZiodin03Param->start);
-        VU0_ROTATE_VEC(vf10, vf10);
+        SDF_VU0_APPLYMATRIX_XYZ();
         VU0_STORE_VF($vf10, effPCPZiodin03Param->start);
         effPCPZiodin03Param->start[0] += effPCPZiodin03Param->end[0];
         effPCPZiodin03Param->start[2] += effPCPZiodin03Param->end[2];
@@ -1332,7 +1333,7 @@ void effPCPZiodin04Init(EffPCPThunderGroup *group) {
         effPCPZiodin04Param->start[2] = 0;
         effPCPZiodin04Param->start[1] = -height;
         VU0_LOAD_VF($vf10, effPCPZiodin04Param->start);
-        VU0_ROTATE_VEC(vf10, vf10);
+        SDF_VU0_APPLYMATRIX_XYZ();
         VU0_STORE_VF($vf10, effPCPZiodin04Param->start);
         effPCPZiodin04Param->start[0] += effPCPZiodin04Param->end[0];
         effPCPZiodin04Param->start[2] += effPCPZiodin04Param->end[2];
@@ -1483,7 +1484,7 @@ void effPCPMZiodin02Init(EffPCPThunderGroup *group) {
         SetRotateMatrixZ_B((dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
         MultMatrixRevNoArg();
         VU0_LOAD_VF($vf10, params->start);
-        VU0_ROTATE_VEC(vf10, vf10);
+        SDF_VU0_APPLYMATRIX_XYZ();
         VU0_STORE_VF($vf10, params->start);
         params->start[0] += params->end[0];
         params->start[2] += params->end[2];
@@ -1648,7 +1649,7 @@ void effPCPShockWave02Init(EffPCPThunderGroup *group) {
         effPCPShockWave02Param->start[2] = 0;
         effPCPShockWave02Param->start[1] = -height;
         VU0_LOAD_VF($vf10, effPCPShockWave02Param->start);
-        VU0_ROTATE_VEC(vf10, vf10);
+        SDF_VU0_APPLYMATRIX_XYZ();
         VU0_STORE_VF($vf10, effPCPShockWave02Param->start);
         effPCPShockWave02Param->start[0] += effPCPShockWave02Param->end[0];
         effPCPShockWave02Param->start[2] += effPCPShockWave02Param->end[2];
@@ -2026,9 +2027,9 @@ void effPCPMultiFilterExpDraw(EffPCPCompactFadeWork *work) {
         fadeIn = work->fadeIn;
         fadeOut = work->fadeOut;
         if (work->flags == 0) {
-            VU0_LOAD_VF(vf10, work->position);
+            SDF_VU0_LOADVECTOR(work->position);
             effScreenOffset();
-            VU0_STORE_VF(vf10, projected);
+            SDF_VU0_STOREVECTOR(projected);
             rect->params.center[0] = (s32)projected[0] - 2048;
             rect->params.center[1] = ((s32)projected[1] - 2048) << 1;
         } else {
@@ -2122,9 +2123,9 @@ void effPCPMultiBlurExp2Draw(EffPCPCompactFadeWork *work) {
         fadeIn = work->fadeIn;
         fadeOut = work->fadeOut;
         if (work->flags == 0) {
-            VU0_LOAD_VF(vf10, work->position);
+            SDF_VU0_LOADVECTOR(work->position);
             effScreenOffset();
-            VU0_STORE_VF(vf10, projected);
+            SDF_VU0_STOREVECTOR(projected);
             rect->body.source.position[0] = (s32)projected[0] - 2048;
             rect->body.source.position[1] = ((s32)projected[1] - 2048) << 1;
         } else {
@@ -2357,9 +2358,9 @@ void effPCPDistortionBlurExpDraw(EffPCPCompactWork *work) {
     resource->params.positionSpread =
         (f32)work->startExtent + displacement;
     if (work->flags == 0) {
-        VU0_LOAD_VF(vf10, work->position);
+        SDF_VU0_LOADVECTOR(work->position);
         effScreenOffset();
-        VU0_STORE_VF(vf10, projected);
+        SDF_VU0_STOREVECTOR(projected);
         resource = work->resource.scatter;
         resource->params.position[0] = (s32)projected[0] - 2048;
         resource->params.position[1] = (u32)((s32)projected[1] - 2048) << 1;
@@ -2463,9 +2464,9 @@ void effPCPRippleBlurExpDraw(EffPCPCompactWork *work) {
     resource->params.size =
         (f32)work->startExtent + displacement;
     if (flags == 0 || flags == 2) {
-        VU0_LOAD_VF(vf10, work->position);
+        SDF_VU0_LOADVECTOR(work->position);
         effScreenOffset();
-        VU0_STORE_VF(vf10, projected);
+        SDF_VU0_STOREVECTOR(projected);
         resource = work->resource.scale;
         resource->params.position[0] = (s32)projected[0] - 2048;
         resource->params.position[1] = (u32)((s32)projected[1] - 2048) << 1;
@@ -2725,9 +2726,9 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
     }
     if (effBTLFieldColorUsesActorSelectors() && work->frame == 0) {
         btlMeasureFilteredUnitGroupBounds(((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x600, NULL, NULL);
-        VU0_STORE_VF(vf10, center);
+        SDF_VU0_STOREVECTOR(center);
         btlUnitGetMuzzlePosVU((BtlUnit *)effBTLFieldColorGetOriginalSelector());
-        VU0_STORE_VF(vf10, muzzle);
+        SDF_VU0_STOREVECTOR(muzzle);
         look[0] = center[0] - muzzle[0];
         look[2] = center[2] - muzzle[2];
         work->angle = sdfAtan2(look[0], look[2]) - params->sweepDegrees * EFF_DEG2RAD * 0.5f;
@@ -2738,14 +2739,14 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
         sdfComposeVuMatrixFromRegisters();
         aim[0] = aim[1] = 0.0f;
         aim[2] = 1.0f;
-        VU0_LOAD_VF(vf10, aim);
-        VU0_ROTATE_VEC(vf10, vf10);
+        SDF_VU0_LOADVECTOR(aim);
+        SDF_VU0_APPLYMATRIX_XYZ();
         VEC3_SPLAT(muzzle, params->radius);
-        VU0_LOAD_VF(vf11, muzzle);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_LOAD_VF(vf11, params->anchor);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, muzzle);
+        SDF_VU0_LOADVECTOR_B(muzzle);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_LOADVECTOR_B(params->anchor);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR_NOMEM(muzzle);
         effCopyVectorToNodeInstance(node, muzzle);
         if (work->frame > params->holdFrames) {
             work->angle += work->spin;
@@ -2868,16 +2869,16 @@ void effPCPAgiraoFireDraw(EffPCPTripleWork *work) {
     for (group = 0; group < 3; group++) {
         s32 start = work->head.groupStartFrame[group];
         if (frame >= start) {
-            VU0_LOAD_VF(vf11, work->head.origin);
+            SDF_VU0_LOADVECTOR_B(work->head.origin);
             VU0_LOAD_MATRIX(basis);
             position[0] = work->head.offset[group][0];
             position[1] = work->head.offset[group][1];
             position[2] = 0;
-            VU0_LOAD_VF_MEMORY(vf10, position);
-            VU0_CLEAR_W(vf10);
-            VU0_APPLY_MATRIX(vf10, vf10);
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF(vf10, position);
+            SDF_VU0_LOADVECTOR_BARRIER(position);
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(position);
             for (handleIndex = 0; handleIndex < 7; handleIndex++) {
                 if (frame >= (s32)((u32)work->head.handleDelay[handleIndex] + (u32)start)) {
                     effSetNodeParameterValue((struct EffNode *)work->handles[group * 7 + handleIndex], color);
@@ -3096,10 +3097,10 @@ void effPcpBlockSetUpdate(EffPCPBlockSetWork *work) {
         dds3EffectPartSetPosition(work->headHandle, work->params.position);
         if (effBTLFieldColorUsesActorSelectors()) {
             btlUnitGetMuzzlePosVU((void *)effBTLFieldColorGetOriginalSelector());
-            VU0_STORE_VF_UNCLOBBERED(vf10, muzzle);
+            SDF_VU0_STOREVECTOR_NOMEM(muzzle);
             LookAtMatrix(work->params.position, muzzle, D_003B1AE0);
             ReverseMatrix();
-            VU0_MOVE_VF(vf31, vf0);
+            SDF_VU0_RESET_ROW3();
             VU0_STORE_MATRIX(matrix);
         } else {
             /* Keep the VU source load and destination store as separate stages. */
@@ -3112,7 +3113,7 @@ void effPcpBlockSetUpdate(EffPCPBlockSetWork *work) {
     mdlLink(model, kwlnSceneSurfaceSets[10]);
     SDF_VU0_COPYVECTOR(work->previousPosition, work->currentPosition);
     sdfModelGetMarkPos(model->inner, 1);
-    VU0_STORE_VF(vf10, work->currentPosition);
+    SDF_VU0_STOREVECTOR(work->currentPosition);
     if (frame < count && frame > 0) {
         for (i = 0; i < 5; i++) {
             if (i == 4) {
@@ -3152,22 +3153,22 @@ void effPcpBlockSetUpdate(EffPCPBlockSetWork *work) {
             if (work->params.groupSize[j] > 0) {
                 if (frame < count) {
                     base = (work->frame - 1) * work->params.groupSize[j];
-                    VU0_LOAD_VF(vf10, work->currentPosition);
-                    VU0_LOAD_VF(vf11, work->previousPosition);
-                    VU0_SUB(vf10, vf10, vf11);
-                    VU0_MOVE_VF(vf12, vf10);
+                    SDF_VU0_LOADVECTOR(work->currentPosition);
+                    SDF_VU0_LOADVECTOR_B(work->previousPosition);
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_COPYVECTOR_A_TO_C();
                     VEC3_SPLAT(step, 1.0f / work->params.groupSize[j]);
-                    VU0_LOAD_VF(vf11, step);
-                    VU0_MUL(vf10, vf10, vf11);
-                    VU0_STORE_VF(vf10, step);
+                    SDF_VU0_LOADVECTOR_B(step);
+                    SDF_VU0_MULVECTOR();
+                    SDF_VU0_STOREVECTOR(step);
                     SDF_VU0_COPYVECTOR(position, work->previousPosition);
-                    VU0_LOAD_VF(vf10, sdfViewTargetVector);
-                    VU0_LOAD_VF(vf11, aViewTarget);
-                    VU0_SUB(vf10, vf10, vf11);
-                    VU0_MOVE_VF(vf11, vf12);
-                    VU0_CROSS_XYZ(vf10, vf10, vf11);
+                    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+                    SDF_VU0_LOADVECTOR_B(aViewTarget);
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_COPYVECTOR_C_TO_B();
+                    SDF_VU0_OUTERPRODUCT();
                     SDF_VU0_NORMALIZE();
-                    VU0_STORE_VF(vf10, side);
+                    SDF_VU0_STOREVECTOR(side);
                     for (i = 0; i < work->params.groupSize[j]; i++) {
                         if (work->list[j][base + i] == 0) {
                             work->list[j][base + i] = dds3EffectPartCopy(work->list[j][0]);
@@ -3176,19 +3177,19 @@ void effPcpBlockSetUpdate(EffPCPBlockSetWork *work) {
                             dds3EffectPartSetScale(work->list[j][base + i], scale *
                                 (dds3GetRandFloatA(effDefaultRandomState) * randomScale + (1.0f - randomScale)));
                         }
-                        VU0_LOAD_VF(vf10, position);
-                        VU0_LOAD_VF(vf11, step);
-                        VU0_ADD(vf10, vf10, vf11);
-                        VU0_MOVE_VF(vf12, vf10);
+                        SDF_VU0_LOADVECTOR(position);
+                        SDF_VU0_LOADVECTOR_B(step);
+                        SDF_VU0_ADDVECTOR();
+                        SDF_VU0_COPYVECTOR_A_TO_C();
                         randomOffset = dds3GetRandFloatA(effDefaultRandomState) - 0.5f;
                         randomOffset = randomOffset + randomOffset;
                         VEC3_SPLAT(scatter, work->params.groupScatter[j] * randomOffset);
-                        VU0_LOAD_VF(vf10, side);
-                        VU0_LOAD_VF(vf11, scatter);
-                        VU0_MUL(vf10, vf10, vf11);
-                        VU0_ADD(vf10, vf10, vf12);
+                        SDF_VU0_LOADVECTOR(side);
+                        SDF_VU0_LOADVECTOR_B(scatter);
+                        SDF_VU0_MULVECTOR();
+                        SDF_VU0_ADDVECTOR_A_C();
                         /* Fully written here, then consumed by VU loads and callbacks. */
-                        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+                        SDF_VU0_STOREVECTOR_NOMEM(position);
                         dds3EffectPartSetPosition(work->list[j][base + i], position);
                         dds3EffectPartSetColor(work->list[j][base + i], work->color);
                     }
@@ -3843,10 +3844,10 @@ void effPcpUpdateMuzzleThunderRay(EffPCPBurstWork *work) {
 
     if (effBTLFieldColorUsesActorSelectors() != 0) {
         btlUnitGetMuzzlePosVU((BtlUnit *)effBTLFieldColorGetVariantSelector());
-        VU0_LOAD_VF(vf11, work->position);
-        VU0_SUB(vf10, vf10, vf11);
+        SDF_VU0_LOADVECTOR_B(work->position);
+        SDF_VU0_SUBVECTOR();
         SDF_VU0_NORMALIZE();
-        VU0_STORE_VF(vf10, direction);
+        SDF_VU0_STOREVECTOR(direction);
         params = (u8 *)effPCP_ThunderPolyGetParam(work->fragmentWork);
         distance = work->startDistance;
         dirX = direction[0];
@@ -4058,8 +4059,8 @@ void dds3RingPolyExpListDraw(EffPCPBeamNode *node) {
     VU0_LOAD_MATRIX(node->localMatrix);
     SDF_VU0_LOADMATRIX_B(node->matrix);
     sdfComposeVuMatrixFromRegisters();
-    VU0_LOAD_VF(vf10, &node->position);
-    VU0_ADD_XYZ(vf31, vf31, vf10);
+    SDF_VU0_LOADVECTOR(&node->position);
+    VU0_ADD_VF31_VF10_XYZ();
     SDF_VU0_LOADMATRIX_B(scaleMatrix);
     sdfComposeVuMatrixFromRegisters();
     sdf3DPrimLinkTm(list, 0);
@@ -4108,19 +4109,19 @@ void effPCPRingPolyExpSetVertex(f32 radius, EffPCPBeamWork *work) {
     for (i = 0; i < count; i++, out += 16) {
         direction[0] = sdfCos(angle);
         direction[2] = sdfSin(angle);
-        VU0_LOAD_VF(vf11, direction);
-        VU0_LOAD_VF(vf10, inner);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, out);
-        VU0_LOAD_VF(vf10, first);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, out + 4);
-        VU0_LOAD_VF(vf10, middle);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, out + 8);
-        VU0_LOAD_VF(vf10, outer);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, out + 12);
+        SDF_VU0_LOADVECTOR_B(direction);
+        SDF_VU0_LOADVECTOR(inner);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_STOREVECTOR(out);
+        SDF_VU0_LOADVECTOR(first);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_STOREVECTOR(out + 4);
+        SDF_VU0_LOADVECTOR(middle);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_STOREVECTOR(out + 8);
+        SDF_VU0_LOADVECTOR(outer);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_STOREVECTOR(out + 12);
         angle += step;
     }
 }
@@ -4307,21 +4308,21 @@ void effPCPRingPolyExp2SetVertex(EffPCPBeamLargeWork *work, f32 radius) {
             dir[2] = sdfSin(angle);
         }
         dir[3] = 0;
-        VU0_LOAD_VF(vf10, dir);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_MOVE_VF(vf11, vf10);
-        VU0_LOAD_VF(vf10, rowA);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, points);
-        VU0_LOAD_VF(vf10, rowB);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, points + 4);
-        VU0_LOAD_VF(vf10, rowC);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, points + 8);
-        VU0_LOAD_VF(vf10, rowD);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, points + 12);
+        SDF_VU0_LOADVECTOR(dir);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(rowA);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_STOREVECTOR(points);
+        SDF_VU0_LOADVECTOR(rowB);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_STOREVECTOR(points + 4);
+        SDF_VU0_LOADVECTOR(rowC);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_STOREVECTOR(points + 8);
+        SDF_VU0_LOADVECTOR(rowD);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_STOREVECTOR(points + 12);
         angle += step;
         points += 16;
     }
@@ -4676,9 +4677,9 @@ void effPCPRadiateThunderDraw(EffPCPGroupSet *work) {
                 direction[0] = cosine * blend;
                 direction[1] = 1.0f - ffabsf(blend);
                 direction[2] = sine * blend;
-                VU0_LOAD_VF(vf10, direction);
+                SDF_VU0_LOADVECTOR(direction);
                 SDF_VU0_NORMALIZE();
-                VU0_STORE_VF(vf10, direction);
+                SDF_VU0_STOREVECTOR(direction);
                 fragment->start[0] = point[0] + direction[0] * length;
                 fragment->start[1] = point[1] + direction[1] * length;
                 fragment->start[2] = point[2] + direction[2] * length;
@@ -4780,7 +4781,7 @@ void effPCPMakkaDelete(EffPCPSprayWork *work) {
 void effPCPMakkaUpdateNode(sdfModelNode_t *node) {
     sdfModelNode_t *child;
 
-    VU0_STORE_VF(vf10, node->scale);
+    SDF_VU0_STOREVECTOR(node->scale);
     child = node->children;
     if (child != NULL) {
         do {
@@ -4817,16 +4818,16 @@ void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
         data = effParamWorkGetData(work->handle[i]);
         sdfConvertEulerAnglesToQuaternionVU(0.0f, work->rotationY[i], 0.0f);
         if (effBTLFieldColorUsesActorSelectors() && (((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x400)) {
-            VU0_LOAD_VF(vf11, D_00414610);
+            SDF_VU0_LOADVECTOR_B(D_00414610);
             effMiscQuatMultiplyVU();
         }
         mdlSetRotate(data);
         vec[3] = 0;
         VEC3_SPLAT(vec, work->scale * work->scale);
-        VU0_LOAD_VF(vf10, vec);
+        SDF_VU0_LOADVECTOR(vec);
         mdlSetScale(data);
         mdlSetColor(data, work->color);
-        VU0_LOAD_VF(vf10, work->pos);
+        SDF_VU0_LOADVECTOR(work->pos);
         mdlSetPosition(data);
         for (j = 0; j != 4; j++) {
             child = data->slots[j];
@@ -4838,7 +4839,7 @@ void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
             model = data->inner;
             root = ((sdfModelNode_t **)model->list->buffer)[0];
             VEC3_SPLAT(vec, 1.0f / work->scale);
-            VU0_LOAD_VF(vf10, vec);
+            SDF_VU0_LOADVECTOR(vec);
             effPCPMakkaUpdateNode(root);
             sdfModelEvalTm(model);
             sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, kwlnSceneSurfaceSets[10], model);
@@ -5294,11 +5295,11 @@ void effPCPRadiateTBDraw(EffPCPPairedEventWork *work) {
     place.payload[8] = 100.0f;
     place.payload[9] = 100.0f;
     place.payload[10] = 1.0f;
-    VU0_LOAD_VF(vf10, aViewTarget);
-    VU0_LOAD_VF(vf11, sdfViewTargetVector);
-    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR(aViewTarget);
+    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
-    VU0_STORE_VF(vf10, viewAxis);
+    SDF_VU0_STOREVECTOR(viewAxis);
     for (i = 0; i < count; i++, entry++) {
         frame = entry->frame;
         if (frame <= duration) {
@@ -5315,22 +5316,22 @@ void effPCPRadiateTBDraw(EffPCPPairedEventWork *work) {
 
                 fragment = effPCP_ThunderPolyGetParam(entry->fragment);
                 SetRotateMatrixAxis(entry->phase, (const struct RwV3d *)viewAxis);
-                VU0_LOAD_VF(vf10, effPCPRadiateTBParam);
-                VU0_LOAD_VF(vf11, viewAxis);
-                VU0_CROSS_XYZ(vf10, vf10, vf11);
+                SDF_VU0_LOADVECTOR(effPCPRadiateTBParam);
+                SDF_VU0_LOADVECTOR_B(viewAxis);
+                SDF_VU0_OUTERPRODUCT();
                 SDF_VU0_NORMALIZE();
-                VU0_ROTATE_VEC(vf10, vf10);
-                VU0_STORE_VF(vf10, direction);
-                VU0_LOAD_VF(vf11, effPCPRadiateTBParam);
-                VU0_CROSS_XYZ(vf10, vf10, vf11);
+                SDF_VU0_APPLYMATRIX_XYZ();
+                SDF_VU0_STOREVECTOR(direction);
+                SDF_VU0_LOADVECTOR_B(effPCPRadiateTBParam);
+                SDF_VU0_OUTERPRODUCT();
                 SDF_VU0_NORMALIZE();
                 /* This SDK-produced axis is consumed only by the external builder. */
-                VU0_STORE_VF_UNCLOBBERED(vf10, tiltAxis);
+                SDF_VU0_STOREVECTOR_NOMEM(tiltAxis);
                 radius = entry->radius;
                 SetRotateMatrixAxis(entry->tilt, (const struct RwV3d *)tiltAxis);
-                VU0_LOAD_VF(vf10, direction);
-                VU0_ROTATE_VEC(vf10, vf10);
-                VU0_STORE_VF(vf10, direction);
+                SDF_VU0_LOADVECTOR(direction);
+                SDF_VU0_APPLYMATRIX_XYZ();
+                SDF_VU0_STOREVECTOR(direction);
                 fragment->start[0] = origin[0] + direction[0] * radius;
                 fragment->start[1] = origin[1] + direction[1] * radius;
                 fragment->start[2] = origin[2] + direction[2] * radius;
@@ -5739,9 +5740,9 @@ void effPCPHelperBEDDraw(EffPCPMapEventWork *work) {
     if (frameLimit >= frame) {
         model = effParamWorkGetData(work->modelResource);
         mapModel = model->inner;
-        VU0_LOAD_VF(vf10, work->params.position);
+        SDF_VU0_LOADVECTOR(work->params.position);
         mdlSetPosition(model);
-        VU0_LOAD_VF(vf10, scale);
+        SDF_VU0_LOADVECTOR(scale);
         mdlSetScale(model);
         mdlLink(model, kwlnSceneSurfaceSets[10]);
         count = work->count;
@@ -5755,7 +5756,7 @@ void effPCPHelperBEDDraw(EffPCPMapEventWork *work) {
             }
             if (frame >= 0) {
                 sdfModelGetMarkPos(mapModel, i);
-                VU0_STORE_VF(vf10, position);
+                SDF_VU0_STOREVECTOR(position);
                 if (frame == 0) {
                     entry->initialPosition[0] = position[0];
                     entry->initialPosition[1] = position[1];
@@ -5770,9 +5771,9 @@ void effPCPHelperBEDDraw(EffPCPMapEventWork *work) {
                         initialPosition[1] = entry->initialPosition[1];
                         initialPosition[2] = entry->initialPosition[2];
                         initialPosition[3] = 0;
-                        VU0_LOAD_VF(vf10, position);
-                        VU0_LOAD_VF(vf11, initialPosition);
-                        VU0_SUB(vf10, vf10, vf11);
+                        SDF_VU0_LOADVECTOR(position);
+                        SDF_VU0_LOADVECTOR_B(initialPosition);
+                        SDF_VU0_SUBVECTOR();
                         SDF_VU0_GETLENGTH(distance);
                         if (distance > 1.0f) {
                             entry->frameLimit = frameLimit - frame;

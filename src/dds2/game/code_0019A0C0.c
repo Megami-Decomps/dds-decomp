@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu0.h"
 #include "eff_random.h"
 #include "eff_param.h"
 #include "sdf_resource.h"
@@ -104,10 +105,10 @@ void effAPPoint4PartInit(EffChanWork *work, u32 recordIndex) {
     f32 cursorStep;
     f32 centeredRandom;
 
-    VU0_LOAD_VF(vf10, sdfViewTargetVector);
-    VU0_LOAD_VF(vf11, aViewTarget);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, viewDirection);
+    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewTarget);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_STOREVECTOR(viewDirection);
     cursorStep = 1.0f / (f32)work->head.steps;
     bezierSlot = dds3Bezier4PGetPart(work->slots, recordIndex);
     bezierSlot->t = 0;
@@ -117,17 +118,17 @@ void effAPPoint4PartInit(EffChanWork *work, u32 recordIndex) {
     jitterScale[0] = work->head.jitter[0] * (centeredRandom + centeredRandom);
     jitterScale[1] = jitterScale[0];
     jitterScale[2] = jitterScale[0];
-    VU0_LOAD_VF(vf10, work->head.controlPoints[0]);
-    VU0_LOAD_VF(vf11, work->head.controlPoints[1]);
-    VU0_MOVE_VF(vf12, vf10);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, viewDirection);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR(work->head.controlPoints[0]);
+    SDF_VU0_LOADVECTOR_B(work->head.controlPoints[1]);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(viewDirection);
+    SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
-    VU0_LOAD_VF(vf11, jitterScale);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_ADD(vf10, vf10, vf12);
-    VU0_STORE_VF(vf10, jitteredPoint);
+    SDF_VU0_LOADVECTOR_B(jitterScale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_ADDVECTOR_A_C();
+    SDF_VU0_STOREVECTOR(jitteredPoint);
     bezierSlot->controlPoints[0][0] = jitteredPoint[0];
     bezierSlot->controlPoints[0][1] = jitteredPoint[1];
     bezierSlot->controlPoints[0][2] = jitteredPoint[2];
@@ -136,17 +137,17 @@ void effAPPoint4PartInit(EffChanWork *work, u32 recordIndex) {
     jitterScale[0] = work->head.jitter[1] * (centeredRandom + centeredRandom);
     jitterScale[1] = jitterScale[0];
     jitterScale[2] = jitterScale[0];
-    VU0_LOAD_VF(vf10, work->head.controlPoints[1]);
-    VU0_LOAD_VF(vf11, work->head.controlPoints[2]);
-    VU0_MOVE_VF(vf12, vf10);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, viewDirection);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR(work->head.controlPoints[1]);
+    SDF_VU0_LOADVECTOR_B(work->head.controlPoints[2]);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(viewDirection);
+    SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
-    VU0_LOAD_VF(vf11, jitterScale);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_ADD(vf10, vf10, vf12);
-    VU0_STORE_VF(vf10, jitteredPoint);
+    SDF_VU0_LOADVECTOR_B(jitterScale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_ADDVECTOR_A_C();
+    SDF_VU0_STOREVECTOR(jitteredPoint);
     bezierSlot->controlPoints[1][0] = jitteredPoint[0];
     bezierSlot->controlPoints[1][1] = jitteredPoint[1];
     bezierSlot->controlPoints[1][2] = jitteredPoint[2];
@@ -155,18 +156,18 @@ void effAPPoint4PartInit(EffChanWork *work, u32 recordIndex) {
     jitterScale[0] = work->head.jitter[2] * (centeredRandom + centeredRandom);
     jitterScale[1] = jitterScale[0];
     jitterScale[2] = jitterScale[0];
-    VU0_LOAD_VF(vf10, work->head.controlPoints[2]);
-    VU0_LOAD_VF(vf11, work->head.controlPoints[3]);
-    VU0_MOVE_VF(vf12, vf10);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, viewDirection);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR(work->head.controlPoints[2]);
+    SDF_VU0_LOADVECTOR_B(work->head.controlPoints[3]);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(viewDirection);
+    SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
-    VU0_STORE_VF(vf10, lastNormal);
-    VU0_LOAD_VF(vf11, jitterScale);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_ADD(vf10, vf10, vf12);
-    VU0_STORE_VF(vf10, jitteredPoint);
+    SDF_VU0_STOREVECTOR(lastNormal);
+    SDF_VU0_LOADVECTOR_B(jitterScale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_ADDVECTOR_A_C();
+    SDF_VU0_STOREVECTOR(jitteredPoint);
     bezierSlot->controlPoints[2][0] = jitteredPoint[0];
     bezierSlot->controlPoints[2][1] = jitteredPoint[1];
     bezierSlot->controlPoints[2][2] = jitteredPoint[2];
@@ -175,12 +176,12 @@ void effAPPoint4PartInit(EffChanWork *work, u32 recordIndex) {
     jitterScale[0] = work->head.jitter[3] * (centeredRandom + centeredRandom);
     jitterScale[1] = jitterScale[0];
     jitterScale[2] = jitterScale[0];
-    VU0_LOAD_VF(vf10, lastNormal);
-    VU0_LOAD_VF(vf11, jitterScale);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, work->head.controlPoints[3]);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, jitteredPoint);
+    SDF_VU0_LOADVECTOR(lastNormal);
+    SDF_VU0_LOADVECTOR_B(jitterScale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_LOADVECTOR_B(work->head.controlPoints[3]);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(jitteredPoint);
     bezierSlot->controlPoints[3][0] = jitteredPoint[0];
     bezierSlot->controlPoints[3][1] = jitteredPoint[1];
     bezierSlot->controlPoints[3][2] = jitteredPoint[2];
@@ -420,7 +421,7 @@ void effSplCalcRegist(EffPrimitiveCurve *primitive, s32 recordIndex, f32 t)
         vertex[1] = a[1] + (b[1] - a[1]) * t;
         vertex[2] = a[2] + (b[2] - a[2]) * t;
     }
-    VU0_LOAD_VF_FROM(vf10, *(u128 *)vertex);
+    SDF_VU0_LOADVECTOR_MEMOPS(*(u128 *)vertex);
 }
 
 /* Reset the primitive's record index and within-record position without changing its step. */

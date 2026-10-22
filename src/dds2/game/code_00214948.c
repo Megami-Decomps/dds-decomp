@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_skill_max_api.h"
@@ -1250,9 +1251,9 @@ void btlFaceLinkedTargetAndFlagDirection(BtlLinkedCommand *command, void *unused
         btlFlagUnitDefeatCandidate(target);
     }
     btlUnitGetMuzzlePosVU(user);
-    VU0_STORE_VF(vf10, userPos);
+    SDF_VU0_STOREVECTOR(userPos);
     btlUnitGetMuzzlePosVU(target);
-    VU0_STORE_VF(vf10, targetPos);
+    SDF_VU0_STOREVECTOR(targetPos);
     btlUnitFaceTarget(target, user);
     if (userPos[0] < targetPos[0]) {
         command->flags |= 0x200;
@@ -1289,21 +1290,21 @@ void btlBuildAngledApproachCameraPose(BtlLinkedCommand *command, BtlCamState *ou
     extent = user->reach * user->scale;
     out->fov = command->camera.fov;
     btlUnitGetMuzzlePosVU(user);
-    VU0_STORE_VF(vf10, userPos);
+    SDF_VU0_STOREVECTOR(userPos);
     userPos[1] += user->height * user->scale * frontLift;
     btlUnitGetMuzzlePosVU(target);
-    VU0_STORE_VF_UNCLOBBERED(vf10, targetPos);
+    SDF_VU0_STOREVECTOR_NOMEM(targetPos);
     targetPos[1] += target->height * target->scale * backLift;
-    VU0_LOAD_VF(vf10, targetPos);
-    VU0_LOAD_VF(vf11, userPos);
-    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR(targetPos);
+    SDF_VU0_LOADVECTOR_B(userPos);
+    SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(length);
     length *= 0.6f;
     SDF_VU0_NORMALIZE();
-    VU0_STORE_VF(vf10, dir);
+    SDF_VU0_STOREVECTOR(dir);
     VU0_SCALE_VF_MFC1(vf10, length);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, out->position);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(out->position);
     angle *= 0.017453293f;
     extent += length * sinf(angle);
     length *= cosf(angle);
@@ -1313,9 +1314,9 @@ void btlBuildAngledApproachCameraPose(BtlLinkedCommand *command, BtlCamState *ou
         angle = -angle;
     }
     SetRotateMatrixY(angle);
-    VU0_LOAD_VF(vf10, dir);
-    VU0_APPLY_MATRIX(vf10, vf10);
-    VU0_STORE_VF(vf10, out->direction);
+    SDF_VU0_LOADVECTOR(dir);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(out->direction);
 }
 
 /* Build reciprocal target-focused cameras with a side offset and optional plane adjustment. */
@@ -1337,10 +1338,10 @@ void btlBuildTargetFocusedCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     userExtent = user->reach * user->scale;
     targetExtent = target->reach * target->scale;
     btlUnitGetMuzzlePosVU(user);
-    VU0_STORE_VF(vf10, userPos);
+    SDF_VU0_STOREVECTOR(userPos);
     userPos[1] = -btlUnitGetTopY(user);
     btlUnitGetMuzzlePosVU(target);
-    VU0_STORE_VF(vf10, targetPos);
+    SDF_VU0_STOREVECTOR(targetPos);
     targetPos[1] += target->height * target->scale * backLift;
     if (targetPos[0] <= userPos[0]) {
         userPos[0] -= userExtent;
@@ -1349,14 +1350,14 @@ void btlBuildTargetFocusedCameraPair(BtlLinkedCommand *command, BtlCamState *fro
         userPos[0] += userExtent;
         targetPos[0] -= targetExtent * sideScale;
     }
-    VU0_LOAD_VF(vf10, targetPos);
-    VU0_STORE_VF(vf10, front->position);
-    VU0_LOAD_VF(vf11, userPos);
-    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR(targetPos);
+    SDF_VU0_STOREVECTOR(front->position);
+    SDF_VU0_LOADVECTOR_B(userPos);
+    SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(length);
     front->distance = length;
     SDF_VU0_NORMALIZE();
-    VU0_STORE_VF(vf10, front->direction);
+    SDF_VU0_STOREVECTOR(front->direction);
     angle = front->fov * 1.3333333f * 0.5f;
     front->distance += userExtent * 2.5f / tanf(angle);
     minDistance = targetExtent / tanf(angle);
@@ -1397,24 +1398,24 @@ void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     userExtent = user->reach * user->scale;
     targetExtent = target->reach * target->scale;
     btlUnitGetMuzzlePosVU(user);
-    VU0_STORE_VF(vf10, userPos);
+    SDF_VU0_STOREVECTOR(userPos);
     userPos[1] += user->height * user->scale * frontLift;
     btlUnitGetMuzzlePosVU(target);
-    VU0_STORE_VF(vf10, targetPos);
+    SDF_VU0_STOREVECTOR(targetPos);
     targetPos[1] += target->height * target->scale * backLift;
     if (targetPos[0] <= userPos[0]) {
         targetPos[0] = targetPos[0] + targetExtent * sideScale;
     } else {
         targetPos[0] = targetPos[0] - targetExtent * sideScale;
     }
-    VU0_LOAD_VF(vf10, userPos);
-    VU0_STORE_VF(vf10, front->position);
-    VU0_LOAD_VF(vf11, targetPos);
-    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR(userPos);
+    SDF_VU0_STOREVECTOR(front->position);
+    SDF_VU0_LOADVECTOR_B(targetPos);
+    SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(length);
     front->distance = length;
     SDF_VU0_NORMALIZE();
-    VU0_STORE_VF(vf10, front->direction);
+    SDF_VU0_STOREVECTOR(front->direction);
     angle = front->fov * 1.3333333f * 0.5f;
     front->distance = front->distance + targetExtent * 1.5f / tanf(angle);
     minDistance = userExtent / tanf(angle);
@@ -1455,10 +1456,10 @@ void btlBuildInsetExchangeCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     userExtent = user->reach * user->scale;
     targetExtent = target->reach * target->scale;
     btlUnitGetMuzzlePosVU(user);
-    VU0_STORE_VF(vf10, userPos);
+    SDF_VU0_STOREVECTOR(userPos);
     userPos[1] += user->height * user->scale * frontLift;
     btlUnitGetMuzzlePosVU(target);
-    VU0_STORE_VF(vf10, targetPos);
+    SDF_VU0_STOREVECTOR(targetPos);
     targetPos[1] += target->height * target->scale * backLift;
     if (targetPos[0] <= userPos[0]) {
         targetPos[0] = targetPos[0] + targetExtent * targetSideScale;
@@ -1467,14 +1468,14 @@ void btlBuildInsetExchangeCameraPair(BtlLinkedCommand *command, BtlCamState *fro
         targetPos[0] = targetPos[0] - targetExtent * targetSideScale;
         userPos[0] = userPos[0] + userExtent * userSideScale;
     }
-    VU0_LOAD_VF(vf10, userPos);
-    VU0_STORE_VF(vf10, front->position);
-    VU0_LOAD_VF(vf11, targetPos);
-    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR(userPos);
+    SDF_VU0_STOREVECTOR(front->position);
+    SDF_VU0_LOADVECTOR_B(targetPos);
+    SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(length);
     front->distance = length;
     SDF_VU0_NORMALIZE();
-    VU0_STORE_VF(vf10, front->direction);
+    SDF_VU0_STOREVECTOR(front->direction);
     angle = front->fov * 1.3333333f * 0.5f;
     front->distance = front->distance + targetExtent * 1.5f / tanf(angle);
     minDistance = userExtent / tanf(angle);
@@ -2789,10 +2790,10 @@ void btlFadeAndTintNamedChunkTree(sdfModelNode_t *node, s32 color) {
     }
     source[0] = color;
     EE_MMI_RGBA_UNPACK(source, 1.0f / 128.0f);
-    VU0_MOVE_VF(vf11, vf10);
+    SDF_VU0_COPYVECTOR_A_TO_B();
     tint[0] = node->color | 0x808080;
     EE_MMI_RGBA_UNPACK(tint, 1.0f / 128.0f);
-    VU0_MUL(vf10, vf10, vf11);
+    SDF_VU0_MULVECTOR();
     EE_MMI_RGBA_PACK(packed[0]);
     child = node->children;
     node->color = packed[0];
@@ -3675,9 +3676,9 @@ s32 btlInitializeEffectVectors(BtlLinkedCommand *command) {
     btlBuildBattleUnitFramingCameraPose(command, pose, 25.0f);
     btlCopyMotionTransform(&command->backCamera, pose);
     SetRotateMatrixY(-0.87266463f);
-        VU0_STORE_VF(vf10, pose->direction);
-        VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF(vf10, command->backCamera.direction);
+        SDF_VU0_STOREVECTOR(pose->direction);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        SDF_VU0_STOREVECTOR(command->backCamera.direction);
     command->motionParameter = 125.0f;
     command->flags |= 0x841;
     return 1;
@@ -3741,9 +3742,9 @@ s32 rotate;
             break;
         }
         /* vu0 routine: rotate the camera direction by the prepared matrix. */
-        VU0_LOAD_VF(vf10, camera->direction);
-        VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF(vf10, camera->direction);
+        SDF_VU0_LOADVECTOR(camera->direction);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        SDF_VU0_STOREVECTOR(camera->direction);
     }
     return 1;
 }
@@ -3780,9 +3781,9 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
         }
         SetRotateMatrixX_B(-0.34906585f);
         MultMatrixRevNoArg();
-        VU0_STORE_VF(vf10, command->frontCamera.direction);
-        VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF(vf10, command->backCamera.direction);
+        SDF_VU0_STOREVECTOR(command->frontCamera.direction);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        SDF_VU0_STOREVECTOR(command->backCamera.direction);
         command->motionParameter = 45.0f;
         command->flags |= 0x841;
         return 1;
@@ -5966,7 +5967,7 @@ void btlRestoreLinkedActorSceneColor(void) {
     if (effect != NULL) {
         actor = effect->action.actor;
         if (actor != NULL && (actor->status.flags & 2)) {
-            VU0_LOAD_VF(vf10, D_0037F770[0]);
+            SDF_VU0_LOADVECTOR(D_0037F770[0]);
             EE_MMI_RGBA_PACK(packed[0]);
             evtSetUnitColorRGB(actor->ext, 0, packed[0]);
         }
@@ -6483,9 +6484,9 @@ u8 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camera
                 break;
             }
             }
-            VU0_LOAD_VF(vf10, camera->direction);
-            VU0_ROTATE_VEC(vf10, vf10);
-            VU0_STORE_VF(vf10, camera->direction);
+            SDF_VU0_LOADVECTOR(camera->direction);
+            SDF_VU0_APPLYMATRIX_XYZ();
+            SDF_VU0_STOREVECTOR(camera->direction);
         }
     }
     return 1;
@@ -7144,9 +7145,9 @@ u8 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camer
             break;
         }
         /* vu0 routine: rotate the camera direction by the prepared matrix. */
-        VU0_LOAD_VF(vf10, camera->direction);
-        VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF(vf10, camera->direction);
+        SDF_VU0_LOADVECTOR(camera->direction);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        SDF_VU0_STOREVECTOR(camera->direction);
     }
     return 1;
 }
@@ -7558,9 +7559,9 @@ u8 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camer
             break;
         }
         /* vu0 routine: rotate the camera direction by the prepared matrix. */
-        VU0_LOAD_VF(vf10, camera->direction);
-        VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF(vf10, camera->direction);
+        SDF_VU0_LOADVECTOR(camera->direction);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        SDF_VU0_STOREVECTOR(camera->direction);
     }
     return 1;
 }
@@ -8260,10 +8261,10 @@ void btlRestoreLinkedEffectUnitPose(BtlUnit *source) {
         position[1] = height;
         dds3SetPosPoseSet(unit->effectObject, (u128 *)position);
 
-        VU0_LOAD_VF(vf10, source->rotation);
-        VU0_LOAD_VF(vf11, D_0041B4D0);
+        SDF_VU0_LOADVECTOR(source->rotation);
+        SDF_VU0_LOADVECTOR_B(D_0041B4D0);
         effMiscQuatMultiplyVU();
-        VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+        SDF_VU0_STOREVECTOR_NOMEM(rotation);
         dds3SetRotPoseSet(effect->linked.actor->effectObject, (u128 *)rotation);
     }
 

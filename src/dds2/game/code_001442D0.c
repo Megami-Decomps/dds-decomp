@@ -13,6 +13,7 @@
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "snd_track_playback_api.h"
 #include "sdf_vu_matrix.h"
 #include "fld_scene_ready_api.h"
@@ -1248,9 +1249,9 @@ void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z) {
     pos[1] = y;
     pos[2] = z;
     handle = *(sdfModelNode_t **)emitter->list->buffer;
-    VU0_LOAD_VF_MEMORY(vf10, pos);
-    VU0_SET_W_ONE(vf10);
-    VU0_STORE_VF(vf10, emitter->matrix[3]);
+    SDF_VU0_LOADVECTOR_BARRIER(pos);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_STOREVECTOR(emitter->matrix[3]);
     sdfModelMakeLocalTm(handle);
     sdfModelEvalTm(emitter);
     sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, kwlnSceneSurfaceSets[11], emitter);
@@ -2083,18 +2084,18 @@ void func_00148188(f32 centerX, f32 centerY, f32 angle) {
     corners[2][2] = 4080.0f;
 
     SetRotateMatrixY((angle + 180.0f) * 3.14f / 180.0f);
-    VU0_LOAD_VF(vf10, corners[0]);
-    VU0_ROTATE_VEC(vf10, vf10);
-    VU0_STORE_VF(vf10, corners[0]);
-    VU0_LOAD_VF(vf10, corners[1]);
-    VU0_ROTATE_VEC(vf10, vf10);
-    VU0_STORE_VF(vf10, corners[1]);
-    VU0_LOAD_VF(vf10, corners[2]);
-    VU0_ROTATE_VEC(vf10, vf10);
-    VU0_STORE_VF(vf10, corners[2]);
-    VU0_LOAD_VF(vf10, corners[3]);
-    VU0_ROTATE_VEC(vf10, vf10);
-    VU0_STORE_VF(vf10, corners[3]);
+    SDF_VU0_LOADVECTOR(corners[0]);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_STOREVECTOR(corners[0]);
+    SDF_VU0_LOADVECTOR(corners[1]);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_STOREVECTOR(corners[1]);
+    SDF_VU0_LOADVECTOR(corners[2]);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_STOREVECTOR(corners[2]);
+    SDF_VU0_LOADVECTOR(corners[3]);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_STOREVECTOR(corners[3]);
 
     corners[0][2] *= 0.5f;
     corners[0][0] += centerX * 16.0f;
@@ -3421,7 +3422,7 @@ void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
 
     object = unit->effObj;
     resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(object);
-    VU0_LOAD_VF(vf10, object->inner->rotation);
+    SDF_VU0_LOADVECTOR(object->inner->rotation);
     index = D_00389784[0] + 1;
     if (index >= 64) {
         index = 63;
@@ -3470,7 +3471,7 @@ void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
     direction[1] = height;
     direction[2] = sdfCos(radians);
     direction[3] = 0.0f;
-    VU0_LOAD_VF(vf10, direction);
+    SDF_VU0_LOADVECTOR(direction);
     SDF_VU0_NORMALIZE();
     evtSetUnitLightDir(unit, 0);
     red = row->colorA[0];
@@ -3482,7 +3483,7 @@ void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
     blue = row->colorB[2];
     colorB = red | (blue << 16) | (green << 8) | 0x80000000;
     evtSetUnitLightAndAmbient(unit, 0, colorA, colorB);
-    VU0_LOAD_VF(vf10, direction);
+    SDF_VU0_LOADVECTOR(direction);
     SDF_VU0_NORMALIZE();
     evtSetUnitLightDir(unit, 0);
     evtSetUnitLightAndAmbient(unit, 0, colorA, colorB);
@@ -3603,13 +3604,13 @@ void func_0014C2B8(s32 key, f32 *orientation, s32 room, char *name, s32 argument
         position[0] = x;
         position[1] = y;
         position[2] = z;
-        VU0_LOAD_VF(vf10, axis);
+        SDF_VU0_LOADVECTOR(axis);
         FromRotation(3.14159265f);
-        VU0_LOAD_VF(vf11, orientation);
+        SDF_VU0_LOADVECTOR_B(orientation);
         effMiscQuatMultiplyVU();
         /* Audited SDK-style store: the complete output goes directly to opaque
          * constructor calls, with no scalar C readback or loop reuse. */
-        VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+        SDF_VU0_STOREVECTOR_NOMEM(rotation);
         object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
         dds3SetUnitObjectId(object, (u32)"NPC_MDL_UNIT");
         fldModelSlotTable[outputIndex].object = (s32 *)object;
@@ -6128,11 +6129,11 @@ void fldUpdateTargetGuideEffects(void) {
     position[2] = fldTargetGuideState.position[2];
     dds3SetPosPoseSet(D_00435F1C, (u128 *)position);
 
-    VU0_LOAD_VF(vf10, axis);
+    SDF_VU0_LOADVECTOR(axis);
     angle = (D_00451D4C[0] * 3.14f) / 180.0f;
     FromRotation(angle);
     /* SDK store: the quaternion is consumed by the following vector setter. */
-    VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+    SDF_VU0_STOREVECTOR_NOMEM(rotation);
     dds3SetRotPoseSet(D_00435F1C, (u128 *)rotation);
 
     if (fldTargetGuideState.updateFlags & 0x40) {
@@ -6734,12 +6735,12 @@ void fldCreateChaseCameraObject(void) {
     dds3PoseSet_t *inner;
     dds3Basic_t *object;
 
-    VU0_LOAD_VF(vf10, axis);
+    SDF_VU0_LOADVECTOR(axis);
     FromRotation(3.14159265f);
-    VU0_LOAD_VF(vf11, rotation);
+    SDF_VU0_LOADVECTOR_B(rotation);
     effMiscQuatMultiplyVU();
     /* The SDK store is followed by opaque consumers, with no scalar readback. */
-    VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+    SDF_VU0_STOREVECTOR_NOMEM(rotation);
     D_00435F1C = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
     dds3SetUnitObjectId(D_00435F1C, (u32)"OIKAKE_UNIT");
     dds3SetActiveUnitSceneBasic(dds3GetControlScene(), D_00435F1C);

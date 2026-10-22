@@ -3,6 +3,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "kwln_draw_buffer.h"
 #include "sdf_trig.h"
 #include "kwln_frame_draw_buffer.h"
@@ -54,18 +55,18 @@ void effUpdatePairedResources(PairedEffectResources *work) {
             resourceIndex = 0;
             do {
                 effBTLModelGetMarkPosition2((struct BtlUnit *)actor, 0xB);
-                VU0_STORE_VF(vf10, actorPosition);
+                SDF_VU0_STOREVECTOR(actorPosition);
                 record = effPCP_ThunderPolyListGetParam(work->resource[resourceIndex]);
-                VU0_LOAD_VF(vf10, actorPosition);
-                VU0_MOVE_VF(vf12, vf10);
-                VU0_STORE_VF(vf10, record->points[0]);
-                VU0_LOAD_VF(vf11, work->startVec);
+                SDF_VU0_LOADVECTOR(actorPosition);
+                SDF_VU0_COPYVECTOR_A_TO_C();
+                SDF_VU0_STOREVECTOR(record->points[0]);
+                SDF_VU0_LOADVECTOR_B(work->startVec);
                 VU0_LERP_VF10(0.33f);
-                VU0_STORE_VF(vf10, record->points[1]);
-                VU0_MOVE_VF(vf10, vf12);
+                SDF_VU0_STOREVECTOR(record->points[1]);
+                SDF_VU0_COPYVECTOR_C_TO_A();
                 VU0_LERP_VF10(0.66f);
-                VU0_STORE_VF(vf10, record->points[2]);
-                VU0_STORE_VF(vf11, record->points[3]);
+                SDF_VU0_STOREVECTOR(record->points[2]);
+                SDF_VU0_STOREVECTOR_B(record->points[3]);
                 effPCP_ThunderPolyListSetColor(work->resource[resourceIndex], blendColor);
                 effPCP_ThunderPolyListDraw(work->resource[resourceIndex]);
                 resourceIndex++;

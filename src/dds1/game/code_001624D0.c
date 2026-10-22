@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_chip.h"
 #include "eff_param.h"
 #include "eff_param_operations.h"
@@ -113,7 +114,7 @@ void effBattleApplyUnitColorDirection(BtlUnit *unit, EffBattleUnitColorCommand *
             evtUnitLightOn(eventUnit);
             evtSetUnitLightAndAmbient(eventUnit, startDuration, command->firstColor, command->secondColor);
             effBattleMiscDirectionTo(selected[index], &command->request, direction);
-            VU0_LOAD_VF(vf10, direction);
+            SDF_VU0_LOADVECTOR(direction);
             evtSetUnitLightDir(eventUnit, startDuration);
         }
     }
@@ -129,15 +130,15 @@ void effBattleApplyUnitColorDirection(BtlUnit *unit, EffBattleUnitColorCommand *
                 firstColor = btlBlendColorVec(battle->lightColor, selected[index]->colorStart, 0.3f);
                 secondColor = btlBlendColorVec(battle->ambientColor, selected[index]->colorEnd, 0.3f);
             } else {
-                VU0_LOAD_VF(vf10, selected[index]->colorStart);
+                SDF_VU0_LOADVECTOR(selected[index]->colorStart);
                 EE_MMI_RGBA_PACK_UNIT(packedStart[0], 128.0f);
                 firstColor = packedStart[0];
-                VU0_LOAD_VF(vf10, selected[index]->colorEnd);
+                SDF_VU0_LOADVECTOR(selected[index]->colorEnd);
                 EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
                 secondColor = packedEnd[0];
             }
             evtSetUnitLightAndAmbient(eventUnit, endDuration, firstColor, secondColor);
-            VU0_LOAD_VF(vf10, selected[index]->lightDirection);
+            SDF_VU0_LOADVECTOR(selected[index]->lightDirection);
             evtSetUnitLightDir(eventUnit, endDuration);
         }
     }
@@ -296,11 +297,11 @@ void dds3EffectPartBillboardScale(void *payload, f32 scale) {
 /* Load the default primary/rotation/tertiary vectors and packed broadcast value.
  * Reset the first motion node's float to 1.0f, then clear flag bit zero. */
 void dds3EffectPartModelInit(dds3ModelHandle_t *work) {
-    VU0_LOAD_VF(vf10, &effModelDefaultPosition);
+    SDF_VU0_LOADVECTOR(&effModelDefaultPosition);
     mdlSetPosition(work);
-    VU0_LOAD_VF(vf10, &effModelDefaultQuaternion);
+    SDF_VU0_LOADVECTOR(&effModelDefaultQuaternion);
     mdlSetRotate(work);
-    VU0_LOAD_VF(vf10, &effModelDefaultScale);
+    SDF_VU0_LOADVECTOR(&effModelDefaultScale);
     mdlSetScale(work);
     mdlSetColor(work, 0x80808080);
     if (work->first != NULL) {
@@ -347,7 +348,7 @@ void *dds3EffectPartModelCopy(void *source) {
 
 /* Load a full source quadword into vf10 and store it as the primary vector. */
 void dds3EffectPartModelSetPosition(void *work, void *vector) {
-    VU0_LOAD_VF_MEMORY(vf10, vector);
+    SDF_VU0_LOADVECTOR_BARRIER(vector);
     mdlSetPosition(work);
 }
 
@@ -357,7 +358,7 @@ void dds3EffectPartModelSetScale(void *work, f32 scalar) {
     f32 components[4];
 
     components[0] = components[1] = components[2] = scalar;
-    VU0_LOAD_VF_MEMORY(vf10, components);
+    SDF_VU0_LOADVECTOR_BARRIER(components);
     mdlSetScale(work);
 }
 
@@ -369,11 +370,11 @@ void dds3EffectPartModelSetRotateMatrix(dds3ModelHandle_t *work, void *matrix) {
 
     VU0_LOAD_MATRIX(matrix);
     firstVector = work->inner->matrix[0];
-    VU0_STORE_VF(vf28, firstVector);
+    SDF_VU0_STORE_ROW0(firstVector);
     secondVector = work->inner->matrix[1];
-    VU0_STORE_VF(vf29, secondVector);
+    SDF_VU0_STORE_ROW1(secondVector);
     thirdVector = work->inner->matrix[2];
-    VU0_STORE_VF(vf30, thirdVector);
+    SDF_VU0_STORE_ROW2(thirdVector);
 }
 
 /* Set model color and broadcast its alpha with neutral RGB to the resources. */
