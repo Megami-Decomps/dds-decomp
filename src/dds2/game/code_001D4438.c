@@ -1384,7 +1384,7 @@ extern const char D_00417348[];
 extern const char D_00417360[];
 extern s32 btlActionEntryIsEmpty(s32 index, BtlOperandGroup *slot, BtlOperandEntry *entry);
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
-extern BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *unit, s32 index, f32 scale);
+extern BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *unit, BtlUnit *target, f32 scale);
 extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *unit, s32 index, s32 value, f32 scale);
 extern void btlBossDebugPrintf(const char *format, ...);
 extern s32 btlCanUseActorCommandForModelEntry(s32 object, s32 other, s32 offset, s32 index);
@@ -1516,7 +1516,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
             if ((action->unit->status.flags & indexedTarget->status.flags & 0x600) == 0 ||
                     (indexedTarget->status.flags & 0x200) != 0) {
                 task = btlAllocateApproachTargetTask(action->unit,
-                    (s32)indexedTarget, state->modelFrameScale);
+                    indexedTarget, state->modelFrameScale);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = moveHandle;
                 btlStartTask(task);
