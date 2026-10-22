@@ -32,7 +32,7 @@ typedef struct SndWork {
     SndChannel channels[SND_WORK_CHANNEL_COUNT];
     SndIopBuffer buffers[SND_WORK_IOP_BUFFER_COUNT];
     SndTrackSlot slots[SND_WORK_TRACK_SLOT_COUNT];
-    void *eeWorkAddress;
+    struct SndWork *eeWorkAddress;
     u32 eeWorkByteCount;
     u32 opaque200;
     u32 opaque204;
