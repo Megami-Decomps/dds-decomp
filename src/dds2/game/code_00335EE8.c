@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_vu_rotation_axes.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_quaternion.h"
@@ -226,11 +227,11 @@ void CopyMatrixCtoB(void) {
 }
 
 void LoadIdentity(void) {
-    VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+    SDF_VU0_LOADIDENTITY();
 }
 
 void LoadIdentity_B(void) {
-    VU0_SET_UNIT_MATRIX(vf24, vf25, vf26, vf27);
+    SDF_VU0_LOADIDENTITY_B();
 }
 
 /* libvu0: sceVu0UnitMatrix */
@@ -308,9 +309,9 @@ void StoreRotateMatrixAxis(f32 angle, const RwV3d *axis, RwMatrix *matrix) {
     f32 cosine = cosf(angle);
     f32 sine = sinf(angle);
 
-    VU0_LOAD_VF(vf10, axis);
+    SDF_VU0_LOADVECTOR(axis);
     SDF_VU0_NORMALIZE();
-    VU0_STORE_VF(vf10, normalizedAxis);
+    SDF_VU0_STOREVECTOR(normalizedAxis);
 
     x = normalizedAxis[0];
     y = normalizedAxis[1];

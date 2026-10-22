@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_dma_tag.h"
 #include "evt_window_shade_packet.h"
 #include "evt_camera_color_track_api.h"
@@ -2044,7 +2045,7 @@ void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer) {
                     dds3SetRotPoseSet(node->info,
                         (u128 *)node->savedRotation);
                     dds3GetPosPoseSet(node->info);
-                    VU0_STORE_VF(vf10, &node->info->inner->smoothedPosition);
+                    SDF_VU0_STOREVECTOR(&node->info->inner->smoothedPosition);
                     node->objectAttached = 0;
                 }
             } else if (best->frame == position) {
@@ -2056,7 +2057,7 @@ void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer) {
                     dds3SetRotPoseSet(node->info,
                         (u128 *)node->savedRotation);
                     dds3GetPosPoseSet(node->info);
-                    VU0_STORE_VF(vf10, &node->info->inner->smoothedPosition);
+                    SDF_VU0_STOREVECTOR(&node->info->inner->smoothedPosition);
                     node->objectAttached = 0;
                 } else {
                     dds3Basic_t *object = dds3SceneBasicSearchName(

@@ -2,6 +2,7 @@
 #include "fld_area_work.h"
 #include "dds3_admin_control_api.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "scr_integer_return_value_api.h"
 #include "kwln_task_add_child.h"
 #include "sdf_vu_matrix.h"
@@ -787,10 +788,10 @@ s32 evtCommand_CAM_ROT_XYZ(void) {
     degreesToRadians = 0.017453293f;
     pitch = scrGetFloatPara(1) * degreesToRadians;
     sdfConvertEulerAnglesToQuaternionVU(pitch, scrGetFloatPara(2) * degreesToRadians, 0.0f);
-    VU0_MOVE_VF(vf11, vf10);
+    SDF_VU0_COPYVECTOR_A_TO_B();
     sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, scrGetFloatPara(3) * degreesToRadians);
     effMiscQuatMultiplyVU();
-    VU0_STORE_VF(vf10, quaternion);
+    SDF_VU0_STOREVECTOR(quaternion);
     dds3SetRotPoseSet(effectUnit, (u128 *)quaternion);
     return 1;
 }

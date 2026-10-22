@@ -9,6 +9,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "fld_stop_entry.h"
 #include "sdf_resource_list_release_api.h"
 #include "kwln_background_fade_api.h"
@@ -2248,18 +2249,18 @@ void fldPoint3To2(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
 ;
     sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
     SDF_VU0_COPYMATRIX_A_TO_B();
-    VU0_LOAD_VF_MEMORY(vf10, vec);
-    VU0_TRANSFORM_POINT(vf10, vf10);
+    SDF_VU0_LOADVECTOR_BARRIER(vec);
+    SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
-    VU0_LOAD_VF_MEMORY(vf11, D_00324650);
+    SDF_VU0_LOADVECTOR_B_BARRIER(D_00324650);
 ;
-    VU0_MUL(vf10, vf10, vf11);
+    SDF_VU0_MULVECTOR();
 ;
-    VU0_LOAD_VF_MEMORY(vf11, D_00324660);
+    SDF_VU0_LOADVECTOR_B_BARRIER(D_00324660);
 ;
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_ADDVECTOR();
 ;
-    VU0_STORE_VF(vf10, result);
+    SDF_VU0_STOREVECTOR(result);
 ;
     *dstX = result[0];
     *dstY = result[1];
@@ -2281,18 +2282,18 @@ void fldPoint3To2H(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
 ;
     sdfPostmultiplyVuMatrixFromMemory(D_003249B0);
     SDF_VU0_COPYMATRIX_A_TO_B();
-    VU0_LOAD_VF_MEMORY(vf10, vec);
-    VU0_TRANSFORM_POINT(vf10, vf10);
+    SDF_VU0_LOADVECTOR_BARRIER(vec);
+    SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
-    VU0_LOAD_VF_MEMORY(vf11, D_003249F0);
+    SDF_VU0_LOADVECTOR_B_BARRIER(D_003249F0);
 ;
-    VU0_MUL(vf10, vf10, vf11);
+    SDF_VU0_MULVECTOR();
 ;
-    VU0_LOAD_VF_MEMORY(vf11, D_00324A00);
+    SDF_VU0_LOADVECTOR_B_BARRIER(D_00324A00);
 ;
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_ADDVECTOR();
 ;
-    VU0_STORE_VF(vf10, result);
+    SDF_VU0_STOREVECTOR(result);
 ;
     *dstX = result[0];
     *dstY = result[1];
@@ -2307,7 +2308,7 @@ void fldPrepareProjectionMatrix(void) {
     sdfPostmultiplyVuMatrixFromMemory(matrix);
     SDF_VU0_COPYMATRIX_A_TO_B();
     matrix += 0x40;
-    VU0_LOAD_VF_MEMORY(vf11, matrix);
+    SDF_VU0_LOADVECTOR_B_BARRIER(matrix);
 ;
     VU0_LOAD_VF_MEMORY(vf12, D_00324660);
 ;
@@ -2316,12 +2317,12 @@ void fldPrepareProjectionMatrix(void) {
 void fldProjectPointWithPreparedMatrix(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };
     f32 result[4];
-    VU0_LOAD_VF_MEMORY(vf10, vec);
-    VU0_TRANSFORM_POINT(vf10, vf10);
+    SDF_VU0_LOADVECTOR_BARRIER(vec);
+    SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_ADD(vf10, vf10, vf12);
-    VU0_STORE_VF(vf10, result);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_ADDVECTOR_A_C();
+    SDF_VU0_STOREVECTOR(result);
 ;
     *dstX = result[0];
     *dstY = result[1];
@@ -3686,7 +3687,7 @@ void fldUpdateFieldCameraViewState(void) {
     fldGlobalBase.angle = angle;
     fldGlobalBase.targetAngle = angle;
     dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
-    VU0_STORE_VF_UNCLOBBERED(vf10, &playerPosition);
+    SDF_VU0_STOREVECTOR_NOMEM(&playerPosition);
 
     radiansPerHalfTurn = 3.14f;
     area = &fldGlobalBase;
@@ -3941,9 +3942,9 @@ void fldUpdateCameraProximity(void) {
         matrices = ((FldModelMatrices *)model)->rows;
             VU0_LOAD_MATRIX(matrices[slot] + 0xC0);
 ;
-        VU0_LOAD_VF(vf10, vec);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, vec);
+        SDF_VU0_LOADVECTOR(vec);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR_NOMEM(vec);
         if (fldPointDistance(vec[0], vec[1], vec[2], fldCamTarget[0], fldCamTarget[1], fldCamTarget[2]) < 45.0f) {
             fldEncountTestFlag(0x40);
             fldClearCameraModelColor();
@@ -4217,7 +4218,7 @@ void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
             fldSetSequenceVolume(sequenceCategory, volume);
             D_003BAD44 += (dds3GetRandA(NULL) >> 4 & 1) + 1;
             if (sdfModelGetMarkPos(fldPlayerModelContext->inner, 0xCA) == 0) return;
-            VU0_STORE_VF(vf10, &position);
+            SDF_VU0_STOREVECTOR(&position);
             fldQueueSecondaryEffectPosition(position.f[0], fldGlobalBase.y - 5.0f, position.f[2]);
             return;
         }
@@ -4225,7 +4226,7 @@ void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
             fldSetSequenceVolume(sequenceCategory, volume);
             D_003BAD44 += (dds3GetRandA(NULL) >> 4 & 1) + 1;
             if (sdfModelGetMarkPos(fldPlayerModelContext->inner, 0xC9) == 0) return;
-            VU0_STORE_VF(vf10, &position);
+            SDF_VU0_STOREVECTOR(&position);
             fldQueuePrimaryEffectPosition(position.f[0], fldGlobalBase.y - 5.0f, position.f[2]);
             return;
         }
@@ -4234,7 +4235,7 @@ void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
             fldSetSequenceVolume(sequenceCategory, volume);
             D_003BAD44 += (dds3GetRandA(NULL) >> 4 & 1) + 1;
             if (sdfModelGetMarkPos(fldPlayerModelContext->inner, 0xCA) == 0) return;
-            VU0_STORE_VF(vf10, &position);
+            SDF_VU0_STOREVECTOR(&position);
             fldQueueSecondaryEffectPosition(position.f[0], fldGlobalBase.y - 5.0f, position.f[2]);
             return;
         }
@@ -4242,7 +4243,7 @@ void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
             fldSetSequenceVolume(sequenceCategory, volume);
             D_003BAD44 += (dds3GetRandA(NULL) >> 4 & 1) + 1;
             if (sdfModelGetMarkPos(fldPlayerModelContext->inner, 0xC9) == 0) return;
-            VU0_STORE_VF(vf10, &position);
+            SDF_VU0_STOREVECTOR(&position);
             fldQueuePrimaryEffectPosition(position.f[0], fldGlobalBase.y - 5.0f, position.f[2]);
             return;
         }
@@ -4250,7 +4251,7 @@ void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
             fldSetSequenceVolume(sequenceCategory, volume);
             D_003BAD44 += (dds3GetRandA(NULL) >> 4 & 1) + 1;
             if (sdfModelGetMarkPos(fldPlayerModelContext->inner, 0xCA) == 0) return;
-            VU0_STORE_VF(vf10, &position);
+            SDF_VU0_STOREVECTOR(&position);
             fldQueueSecondaryEffectPosition(position.f[0], fldGlobalBase.y - 5.0f, position.f[2]);
             return;
         }
@@ -4258,7 +4259,7 @@ void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
             fldSetSequenceVolume(sequenceCategory, volume);
             D_003BAD44 += (dds3GetRandA(NULL) >> 4 & 1) + 1;
             if (sdfModelGetMarkPos(fldPlayerModelContext->inner, 0xC9) == 0) return;
-            VU0_STORE_VF(vf10, &position);
+            SDF_VU0_STOREVECTOR(&position);
             fldQueuePrimaryEffectPosition(position.f[0], fldGlobalBase.y - 5.0f, position.f[2]);
         }
     }
@@ -4294,7 +4295,7 @@ void fldUpdateCameraTarget(void) {
             dds3SetPosPoseSet((dds3Basic_t *)fldPlayerObject, &vec.q);
             st->positionPending = 0;
             dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
-            VU0_STORE_VF(vf10, &vec);
+            SDF_VU0_STOREVECTOR(&vec);
 ;
             dst = (u128 *)(*(u32 *)(fldPlayerObject + 0x1C) + 0x70);
             SDF_VU0_COPYVECTOR(dst, &vec);
@@ -4329,7 +4330,7 @@ void fldUpdateModeOneCameraPose(void) {
         return;
     }
     dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
-    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    SDF_VU0_STOREVECTOR_NOMEM(position);
     fldGlobalBase.previousX = fldGlobalBase.x;
     fldGlobalBase.previousY = fldGlobalBase.y;
     fldGlobalBase.previousZ = fldGlobalBase.z;
@@ -4366,7 +4367,7 @@ void fldUpdateModeOneCameraPose(void) {
         fldGlobalBase.unk174 += 360.0f;
     }
     dds3GetRotPoseSet((dds3Basic_t *)fldPlayerObject);
-    VU0_STORE_VF_UNCLOBBERED(vf10, quaternion);
+    SDF_VU0_STOREVECTOR_NOMEM(quaternion);
     EulerAngleAxisY();
     VU0_LOAD_MATRIX(sdfViewMatrix);
     InversMatrix();
@@ -4400,7 +4401,7 @@ void fldUpdateModeOneCameraPose(void) {
             fldGlobalBase.positionPending = 0;
         }
         dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
-        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        SDF_VU0_STOREVECTOR_NOMEM(position);
         PCP_COPY_VECTOR_F32(smoothed, ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition);
         if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
             ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[0] = position[0];
@@ -4439,9 +4440,9 @@ void fldUpdateModeOneCameraPose(void) {
         difference = fldGlobalBase.angle + step;
     }
     fldGlobalBase.angle = difference;
-    VU0_LOAD_VF(vf10, axis.components);
+    SDF_VU0_LOADVECTOR(axis.components);
     FromRotation(fldGlobalBase.angle * 3.14f / 180.0f);
-    VU0_STORE_VF_UNCLOBBERED(vf10, quaternion);
+    SDF_VU0_STOREVECTOR_NOMEM(quaternion);
     dds3SetRotPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)quaternion);
     if (fldPlayerModelContext->current.h.motionIndex != motion) {
         fldPlayerModelContext->first->frameStep = 1.0f;
@@ -4461,7 +4462,7 @@ s32 fldApplyPlayerVerticalStep(void) {
     f32 position[4] __attribute__((aligned(16)));
     if (fldGlobalBase.verticalStepDirection > 0) {
         dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
-        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        SDF_VU0_STOREVECTOR_NOMEM(position);
         fldGlobalBase.previousX = fldGlobalBase.x;
         fldGlobalBase.previousY = fldGlobalBase.y;
         fldGlobalBase.previousZ = fldGlobalBase.z;
@@ -4476,7 +4477,7 @@ s32 fldApplyPlayerVerticalStep(void) {
         fldClearCameraObjectHighlightFlag();
     } else if (fldGlobalBase.verticalStepDirection < 0) {
         dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
-        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        SDF_VU0_STOREVECTOR_NOMEM(position);
         fldGlobalBase.previousX = fldGlobalBase.x;
         fldGlobalBase.previousY = fldGlobalBase.y;
         fldGlobalBase.previousZ = fldGlobalBase.z;
@@ -4755,7 +4756,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
     }
 
     dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
-    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    SDF_VU0_STOREVECTOR_NOMEM(position);
     fldGlobalBase.previousX = fldGlobalBase.x;
     fldGlobalBase.previousY = fldGlobalBase.y;
     fldGlobalBase.previousZ = fldGlobalBase.z;
@@ -4775,7 +4776,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
         fldGlobalBase.angle += 360.0f;
     }
     dds3GetRotPoseSet((dds3Basic_t *)fldPlayerObject);
-    VU0_STORE_VF_UNCLOBBERED(vf10, quaternion);
+    SDF_VU0_STOREVECTOR_NOMEM(quaternion);
     VU0_LOAD_MATRIX(sdfViewMatrix);
     InversMatrix();
     dds3OnPoseSetFlag(((dds3Basic_t *)fldPlayerObject)->inner,
@@ -4866,7 +4867,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
             }
         }
         dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
-        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        SDF_VU0_STOREVECTOR_NOMEM(position);
         PCP_COPY_VECTOR_F32(smoothed, ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition);
         if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
             ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[0] = position[0];
@@ -4906,9 +4907,9 @@ s32 fldUpdateFieldPlayerMovement(void) {
         difference = fldGlobalBase.angle + step;
     }
     fldGlobalBase.angle = difference;
-    VU0_LOAD_VF(vf10, axis.components);
+    SDF_VU0_LOADVECTOR(axis.components);
     FromRotation(fldGlobalBase.angle * 3.14f / 180.0f);
-    VU0_STORE_VF_UNCLOBBERED(vf10, quaternion);
+    SDF_VU0_STOREVECTOR_NOMEM(quaternion);
     dds3SetRotPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)quaternion);
     if (fldGlobalBase.mode != 3 && fldGlobalBase.mode != 1) {
         if (D_003BAD2C != 0) {
@@ -5133,7 +5134,7 @@ s32 fldUpdateCameraObjectPose(void) {
     fldGlobalBase.positionMode = 0;
     if (D_003BAB50 == 0) return 0;
     dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
-    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    SDF_VU0_STOREVECTOR_NOMEM(position);
     fldGlobalBase.previousX = fldGlobalBase.x;
     fldGlobalBase.previousY = fldGlobalBase.y;
     fldGlobalBase.previousZ = fldGlobalBase.z;
@@ -5155,7 +5156,7 @@ s32 fldUpdateCameraObjectPose(void) {
         fldGlobalBase.positionPending = 0;
     }
     dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
-    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    SDF_VU0_STOREVECTOR_NOMEM(position);
     inner = ((dds3Basic_t *)fldPlayerObject)->inner;
     SDF_VU0_COPYVECTOR(inner->smoothedPosition, position);
     dds3OffPoseSetFlag(inner, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
@@ -5293,11 +5294,11 @@ void fldUpdateSmoothedCameraPose(void) {
                     difference = fldGlobalBase.angle + step;
                 }
                 fldGlobalBase.angle = difference;
-                VU0_LOAD_VF(vf10, axis.components);
+                SDF_VU0_LOADVECTOR(axis.components);
                 FromRotation(fldGlobalBase.angle * 3.14f / 180.0f);
                 /* The following out-of-line setter consumes all four lanes;
                  * no C scalar read is moved across this legacy SDK store. */
-                VU0_STORE_VF_UNCLOBBERED(vf10, quaternion.f);
+                SDF_VU0_STOREVECTOR_NOMEM(quaternion.f);
                 dds3SetRotPoseSet((dds3Basic_t *)fldPlayerObject, &quaternion.q);
             } else {
                 f32 angle;
@@ -5308,7 +5309,7 @@ void fldUpdateSmoothedCameraPose(void) {
             }
 
             dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
-            VU0_STORE_VF(vf10, position);
+            SDF_VU0_STOREVECTOR(position);
             fldGlobalBase.previousX = fldGlobalBase.x;
             fldGlobalBase.previousY = fldGlobalBase.y;
             fldGlobalBase.previousZ = fldGlobalBase.z;
@@ -5765,7 +5766,7 @@ void fldUpdateSelectedValueTransition(void) {
         direction[1] = D_00330670[5];
         direction[2] = D_00330670[6];
         direction[3] = 0.0f;
-        VU0_LOAD_VF(vf10, direction);
+        SDF_VU0_LOADVECTOR(direction);
         evtSetUnitLightDir(player, 0);
     }
 }
@@ -5795,9 +5796,9 @@ void fldSetPlayerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
     direction[1] = y;
     direction[2] = z;
     direction[3] = 0.0f;
-    VU0_LOAD_VF(vf10, direction);
+    SDF_VU0_LOADVECTOR(direction);
     evtSetUnitLightDir(player, duration);
-    VU0_LOAD_VF(vf10, direction);
+    SDF_VU0_LOADVECTOR(direction);
     evtSetUnitLightDir(player, 0);
     D_00330670[0] = redA;
     D_00330670[1] = greenA;
@@ -6282,9 +6283,9 @@ void fldApplySkyLightSetToPlayerVU(void) {
         dir[1] = light->unitLightDirection[1];
         dir[2] = light->unitLightDirection[2];
         dir[3] = 0.0f;
-        VU0_LOAD_VF(vf10, dir);
+        SDF_VU0_LOADVECTOR(dir);
         evtSetUnitLightDir(unit, 0);
-        VU0_LOAD_VF(vf10, dir);
+        SDF_VU0_LOADVECTOR(dir);
         evtSetUnitLightDir(unit, 0);
     }
 }

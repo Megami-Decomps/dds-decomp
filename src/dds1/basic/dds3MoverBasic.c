@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu0.h"
 #include "dds3obj.h"
 #include "dds3_path.h"
 #include "eff_object.h"
@@ -31,7 +32,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
     if (slotResource->path != NULL) {
         if (slotResource->path->counter.flags & DDS3_PATH_POSITION_CHANNEL) {
             dds3PathBasicControlGetPos(slotResource->path);
-            VU0_STORE_VF(vf10, pathVector);
+            SDF_VU0_STOREVECTOR(pathVector);
             dds3SetPosPoseSet(targetObject, (u128 *)pathVector);
             if (((u8 *)&targetObject->kindTag)[3] == DDS3_MOVER_POSITION_COPY_KIND) {
                 SDF_VU0_COPYVECTOR(&((EffectTransformData *)targetObject->data)->position, pathVector);
@@ -39,7 +40,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
         }
         if (slotResource->path->counter.flags & DDS3_PATH_ROTATION_CHANNEL) {
             dds3PathBasicControlGetRot(slotResource->path);
-            VU0_STORE_VF(vf10, pathVector);
+            SDF_VU0_STOREVECTOR(pathVector);
             dds3SetRotPoseSet(targetObject, (u128 *)pathVector);
         }
         if (slotResource->path->counter.flags & DDS3_PATH_SCALAR_CHANNEL) {

@@ -1,5 +1,6 @@
 #include "sdf_projection.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
 #include "sdf_vu_matrix.h"
@@ -73,19 +74,19 @@ void MakeCamera(dds3Basic_t *camera) {
     CameraData *data = camera->data;
     dds3PoseSet_t *inner = camera->inner;
 
-    VU0_LOAD_VF(vf10, &inner->rotation);
+    SDF_VU0_LOADVECTOR(&inner->rotation);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, &data->localUp);
-    VU0_APPLY_MATRIX(vf10, vf10);
-    VU0_SET_W_ONE(vf10);
-    VU0_STORE_VF(vf10, &data->worldUp);
+    SDF_VU0_LOADVECTOR(&data->localUp);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_STOREVECTOR(&data->worldUp);
     if (data->eyeIsRelative == 1) {
-        VU0_LOAD_VF(vf10, &data->localEyeOffset);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_LOAD_VF(vf11, &inner->position);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_SET_W_ONE(vf10);
-        VU0_STORE_VF(vf10, &data->worldEye);
+        SDF_VU0_LOADVECTOR(&data->localEyeOffset);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_LOADVECTOR_B(&inner->position);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_STOREVECTOR(&data->worldEye);
     }
     LookAtMatrix(&data->worldEye, &inner->position, &data->worldUp);
     VU0_STORE_MATRIX(data->matrix);
@@ -180,7 +181,7 @@ void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *camera, u128 *worldEye) {
 void dds3CameraObjectBasicGetTargetPos(dds3Basic_t *camera) {
     u128 *eye = &((CameraData *)camera->data)->worldEye;
 
-    VU0_LOAD_VF_MEMORY(vf10, eye);
+    SDF_VU0_LOADVECTOR_BARRIER(eye);
 }
 
 /* Cache a field of view in radians and request its next active-camera update. */
@@ -202,19 +203,19 @@ void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *obj, f32 *worldEyeOut, f32 *tar
     CameraData *data = obj->data;
     dds3PoseSet_t *inner = obj->inner;
 
-    VU0_LOAD_VF(vf10, &inner->rotation);
+    SDF_VU0_LOADVECTOR(&inner->rotation);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, &data->localUp);
-    VU0_APPLY_MATRIX(vf10, vf10);
-    VU0_SET_W_ONE(vf10);
-    VU0_STORE_VF(vf10, &data->worldUp);
+    SDF_VU0_LOADVECTOR(&data->localUp);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_STOREVECTOR(&data->worldUp);
     if (data->eyeIsRelative == 1) {
-        VU0_LOAD_VF(vf10, &data->localEyeOffset);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_LOAD_VF(vf11, &inner->position);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_SET_W_ONE(vf10);
-        VU0_STORE_VF(vf10, &data->worldEye);
+        SDF_VU0_LOADVECTOR(&data->localEyeOffset);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_LOADVECTOR_B(&inner->position);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_STOREVECTOR(&data->worldEye);
     }
     worldEyeOut[0] = ((f32 *)&data->worldEye)[0];
     worldEyeOut[1] = ((f32 *)&data->worldEye)[1];

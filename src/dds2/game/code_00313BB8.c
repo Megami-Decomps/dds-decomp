@@ -7,6 +7,7 @@
 #include "sdf_packet_list.h"
 #include "dsp_name.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "eff_random.h"
 #include "sdf_resource.h"
 #include "sdf_vu_matrix.h"
@@ -1447,32 +1448,32 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
                     pos[0] = depth * spreadX * ((dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f);
                     pos[1] = depth * spreadY * lateral;
                     pos[2] = depth;
-                    VU0_LOAD_VF(vf10, pos);
-                    VU0_TRANSFORM_POINT(vf10, vf10);
-                    VU0_STORE_VF(vf10, vertices[0]);
+                    SDF_VU0_LOADVECTOR(pos);
+                    SDF_VU0_APPLYMATRIX_XYZ1();
+                    SDF_VU0_STOREVECTOR(vertices[0]);
                     vertices[0][1] -= depth * spreadY * 1.7f;
                     if (sdfViewTargetVector[1] + 500.0f < vertices[0][1]) {
                         vertices[0][1] -= vertices[0][1] - sdfViewTargetVector[1];
                     }
                     if (D_00438918 != 0) {
-                        VU0_LOAD_VF(vf10, vertices[0]);
-                        VU0_LOAD_VF(vf11, sdfViewTargetVector);
-                        VU0_SUB(vf10, vf10, vf11);
-                        VU0_STORE_VF(vf10, vertices[0]);
+                        SDF_VU0_LOADVECTOR(vertices[0]);
+                        SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+                        SDF_VU0_SUBVECTOR();
+                        SDF_VU0_STOREVECTOR(vertices[0]);
                     }
                 } else {
                     depth = 0.0f;
                     pos[0] = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f * 1000.0f;
                     pos[2] = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f * 1000.0f;
                     pos[1] = lateral * 100.0f + -200.0f;
-                    VU0_LOAD_VF(vf10, pos);
-                    VU0_LOAD_VF(vf11, sdfViewTargetVector);
-                    VU0_ADD(vf10, vf10, vf11);
+                    SDF_VU0_LOADVECTOR(pos);
+                    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+                    SDF_VU0_ADDVECTOR();
                     if (D_00438918 != 0) {
-                        VU0_LOAD_VF(vf11, sdfViewTargetVector);
-                        VU0_SUB(vf10, vf10, vf11);
+                        SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+                        SDF_VU0_SUBVECTOR();
                     }
-                    VU0_STORE_VF(vf10, vertices[0]);
+                    SDF_VU0_STOREVECTOR(vertices[0]);
                 }
                 vertices[1][0] = vertices[0][0];
                 vertices[1][2] = vertices[0][2];
@@ -1490,21 +1491,21 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
             }
         } else {
             step = speed + (speed * 0.2f + (f32)timer / 30.0f);
-            VU0_LOAD_VF(vf10, vertices[0]);
-            VU0_LOAD_VF(vf11, vertices[1]);
-            VU0_SUB(vf10, vf10, vf11);
+            SDF_VU0_LOADVECTOR(vertices[0]);
+            SDF_VU0_LOADVECTOR_B(vertices[1]);
+            SDF_VU0_SUBVECTOR();
             SDF_VU0_NORMALIZE();
-            VU0_MOVE_VF(vf11, vf10);
-            VU0_SET_ONES_XYZ(vf10);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_SETSCALE1VECTOR();
             VU0_SCALAR_OP_R3(step, "vmulx.xyzw vf10, vf10, vf2x");
-            VU0_MUL(vf10, vf10, vf11);
-            VU0_MOVE_VF(vf12, vf10);
-            VU0_LOAD_VF(vf10, vertices[0]);
-            VU0_ADD(vf10, vf10, vf12);
-            VU0_LOAD_VF(vf11, vertices[1]);
-            VU0_ADD(vf11, vf11, vf12);
-            VU0_STORE_VF(vf10, vertices[0]);
-            VU0_STORE_VF(vf11, vertices[1]);
+            SDF_VU0_MULVECTOR();
+            SDF_VU0_COPYVECTOR_A_TO_C();
+            SDF_VU0_LOADVECTOR(vertices[0]);
+            SDF_VU0_ADDVECTOR_A_C();
+            SDF_VU0_LOADVECTOR_B(vertices[1]);
+            SDF_VU0_ADDVECTOR_B_C();
+            SDF_VU0_STOREVECTOR(vertices[0]);
+            SDF_VU0_STOREVECTOR_B(vertices[1]);
             if (timer < 20) {
                 alpha = mark->alpha;
             } else {
@@ -1549,12 +1550,12 @@ void sdfDrawFlagListVertices(SdfFlagListWork *work) {
     count *= SDF_FLAG_LIST_VERTICES_PER_ENTRY;
     copiedVertices = (f32 (*)[4])sdfMemGetPtr(vertexAllocation);
     for (vertexIndex = 0; vertexIndex < count; vertexIndex++) {
-        VU0_LOAD_VF(vf10, &sourceVertices[vertexIndex]);
+        SDF_VU0_LOADVECTOR(&sourceVertices[vertexIndex]);
         if (D_00438918 != 0) {
-            VU0_LOAD_VF(vf11, sdfViewTargetVector);
-            VU0_ADD(vf10, vf10, vf11);
+            SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+            SDF_VU0_ADDVECTOR();
         }
-        VU0_STORE_VF_UNCLOBBERED(vf10, &copiedVertices[vertexIndex]);
+        SDF_VU0_STOREVECTOR_NOMEM(&copiedVertices[vertexIndex]);
     }
     packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(SDF_FLAG_LIST_PACKET_BYTES);
     sdfDrawTagInit(packetList);

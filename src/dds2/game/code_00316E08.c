@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "mnu_sprite_placement.h"
 #include "sdf_chip.h"
 #include "mnu_title_stream.h"
@@ -1417,15 +1418,15 @@ void func_00319388(MenuWorkEntry *entry, MnuShootingWork *work) {
             step.y = sdfCos(
                          entry->currentAngleRadians + 1.5707963f) -
                      sdfSin(entry->currentAngleRadians + 1.5707963f) * 0.0f;
-            VU0_LOAD_VF(vf10, &step);
+            SDF_VU0_LOADVECTOR(&step);
             VU0_SCALE_VF(vf10, (f32)entry->movementEffectScale / 3.5f);
-            VU0_STORE_VF(vf10, &step);
+            SDF_VU0_STOREVECTOR(&step);
         } else {
             step.x = 0.0f;
             step.y = 1.0f;
-            VU0_LOAD_VF(vf10, &step);
+            SDF_VU0_LOADVECTOR(&step);
             VU0_SCALE_VF(vf10, 4.0f);
-            VU0_STORE_VF(vf10, &step);
+            SDF_VU0_STOREVECTOR(&step);
         }
         if ((entry->tag & MNU_WORK_TAG_CLASS_MASK) == MNU_WORK_TAG_REGISTRY_TABLE) {
             mnuStartPositionedEffectBurst(effects, &step, 0,

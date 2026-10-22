@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "fld_map_selection.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_vector_latch.h"
@@ -139,13 +140,13 @@ s32 sdfLoadMapCounterCameraVectorsForMask(s32 mask) {
                 sprintf(name, "01cam_%02d", i + 1);
                 node = dds3SceneBasicSearchNameAndType(world, 4, (u8 *)name);
                 dds3GetPosPoseSet(node);
-                VU0_STORE_VF_UNCLOBBERED(vf10, position);
+                SDF_VU0_STOREVECTOR_NOMEM(position);
                 D_004009B0[count].v[0] = position[0];
                 D_004009B0[count].v[1] = position[1];
                 D_004009B0[count].v[2] = position[2];
                 D_004009B0[count].v[3] = position[3];
                 dds3GetRotPoseSet(node);
-                VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+                SDF_VU0_STOREVECTOR_NOMEM(rotation);
                 D_00400A50[count].v[0] = rotation[0];
                 D_00400A50[count].v[1] = rotation[1];
                 D_00400A50[count].v[2] = rotation[2];
@@ -156,13 +157,13 @@ s32 sdfLoadMapCounterCameraVectorsForMask(s32 mask) {
             sprintf(name, "01cam_%02d", i + 1);
             node = dds3SceneBasicSearchNameAndType(world, 4, (u8 *)name);
             dds3GetPosPoseSet(node);
-            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            SDF_VU0_STOREVECTOR_NOMEM(position);
             D_004008E0[i - 10][0] = position[0];
             D_004008E0[i - 10][1] = position[1];
             D_004008E0[i - 10][2] = position[2];
             D_004008E0[i - 10][3] = position[3];
             dds3GetRotPoseSet(node);
-            VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+            SDF_VU0_STOREVECTOR_NOMEM(rotation);
             D_00400920[i - 10][0] = rotation[0];
             D_00400920[i - 10][1] = rotation[1];
             D_00400920[i - 10][2] = rotation[2];

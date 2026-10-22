@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_pose_api.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
@@ -1010,7 +1011,7 @@ void btlUpdateActionCameraFromTargetPolicy(BtlLinkedCommand *action) {
 
             btlUnitGetMuzzlePosVU(link->unit);
             /* Retail 001DE74C keeps this SDK snapshot at SP+0x10. */
-            VU0_STORE_VF(vf10, positions[1]);
+            SDF_VU0_STOREVECTOR(positions[1]);
             for (unit = runtime->units; unit != 0; unit = unit->next) {
                 if (unit != link->unit) {
                     u32 flags = unit->status.flags;
@@ -1018,7 +1019,7 @@ void btlUpdateActionCameraFromTargetPolicy(BtlLinkedCommand *action) {
                         if ((flags & 0x200) != 0) {
                             btlUnitGetMuzzlePosVU(unit);
                             /* Retail 001DE794 keeps the ally snapshot at SP+0. */
-                            VU0_STORE_VF(vf10, positions[0]);
+                            SDF_VU0_STOREVECTOR(positions[0]);
                         }
                     }
                 }
@@ -1084,7 +1085,7 @@ void btlPrepareSingleTargetCameraBlend(BtlLinkedCommand *action) {
         return;
     }
     btlUnitGetBodyPosVU(target);
-    VU0_STORE_VF(vf10, targetPosition);
+    SDF_VU0_STOREVECTOR(targetPosition);
     if (targetPosition[0] > 0.0f) {
         poseKind = 2;
     } else {

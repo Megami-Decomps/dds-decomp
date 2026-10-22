@@ -85,6 +85,23 @@ HD: `MMI_PEXT5`, and the two `SDF_VU0_STOREMATRIX` variants whose
 `_MEMOPS` and `_NOMEM` suffixes distinguish clobber lists and are a
 contributor's distinction, not the engine's.
 
+A second pass went further, because many macros here take the register as a
+parameter where the engine had one macro per concrete operation. One such macro
+stands for several operations, so no single body can match it. Expanding each
+call site with its actual register argument and matching the result found 95
+such forms, and 11,500 call sites were rewritten to the concrete recovered
+macro: `VU0_ADD(vf10, vf10, vf11)` is `SDF_VU0_ADDVECTOR`, `VU0_LOAD_VF(vf11,
+p)` is `SDF_VU0_LOADVECTOR_B`. The definitions live in `include/sdf_vu0.h`,
+copied verbatim from smt3-decomp's `include/ps2asm.h`, and each rewritten unit
+includes it.
+
+Two things that pass had to respect. The operand constraints are part of the
+body: `"f"` and `"r"` bind the same expression to different register classes,
+so a normalisation that ignored them paired macros that emit different code.
+And four units whose matched functions turn on the text around them are left
+alone entirely, `game/code_002DE248` among them, because adding an include to
+them is enough to tip a function.
+
 A macro rename cannot change the build: the name is gone after preprocessing,
 and the instruction text it expands to is what the pairing proved identical.
 

@@ -9,6 +9,7 @@
 #include "btl_registered_panel_work.h"
 #include "btl_command_layout_work.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "dsp_message_window_api.h"
 #include "fr_font_context.h"
@@ -2886,12 +2887,12 @@ void btlUpdateAnalysisPanelWindowGeometry(BtlLinkedCommand *command, BtlAnalysis
     switch (work->page) {
     case 0:
         /* Audited original SDK pipeline: five stores precede all coordinate reads. */
-        VU0_LOAD_VF(vf10, center);
-        VU0_STORE_VF_UNCLOBBERED(vf10, panel->anchor);
-        VU0_STORE_VF_UNCLOBBERED(vf10, panel->corners[3]);
-        VU0_STORE_VF_UNCLOBBERED(vf10, panel->corners[0]);
-        VU0_STORE_VF_UNCLOBBERED(vf10, panel->corners[1]);
-        VU0_STORE_VF_UNCLOBBERED(vf10, panel->corners[2]);
+        SDF_VU0_LOADVECTOR(center);
+        SDF_VU0_STOREVECTOR_NOMEM(panel->anchor);
+        SDF_VU0_STOREVECTOR_NOMEM(panel->corners[3]);
+        SDF_VU0_STOREVECTOR_NOMEM(panel->corners[0]);
+        SDF_VU0_STOREVECTOR_NOMEM(panel->corners[1]);
+        SDF_VU0_STOREVECTOR_NOMEM(panel->corners[2]);
         {
             f32 centerZ = panel->anchor[2] + 200.0f;
             f32 lastZ = panel->corners[3][2] + 200.0f;
@@ -8905,9 +8906,9 @@ void func_001BFDE0(BtlUnit *unit, SceneAiWork *work, u32 index) {
         btlUnitGetMuzzlePosVU(unit);
     } else if ((unit->status.flags & 0x8000000) != 0) {
         btlUnitGetMuzzlePosVU(unit);
-        VU0_STORE_VF_UNCLOBBERED(vf10, muzzle);
+        SDF_VU0_STOREVECTOR_NOMEM(muzzle);
         muzzle[1] = -24.0f;
-        VU0_LOAD_VF(vf10, muzzle);
+        SDF_VU0_LOADVECTOR(muzzle);
     }
     if (btlProjectForwardPositionToScreen(position) == 0) {
         return;

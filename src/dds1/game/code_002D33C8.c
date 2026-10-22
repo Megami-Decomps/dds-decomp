@@ -13,6 +13,7 @@
 #include "sdf_tex_lifetime.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_timer.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_slot.h"
@@ -1748,8 +1749,8 @@ sdfModelRootNode_t *sdfModelRootNew(void) {
     slot->list = sdfDevCreateBufferedRequest(0, 4, 0x20);
     EE_MMI_UNIT_MATRIX(slot->matrix);
     VU0_STORE_VF(vf0, slot->rotationQuaternion);
-    VU0_SET_ONES_XYZ(vf10);
-    VU0_STORE_VF(vf10, slot->scaleVector);
+    SDF_VU0_SETSCALE1VECTOR();
+    SDF_VU0_STOREVECTOR(slot->scaleVector);
     slot->drawFlags = -1;
     slot->color = 0x80808080;
     return slot;

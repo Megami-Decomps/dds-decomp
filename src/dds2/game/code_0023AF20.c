@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_float_counter.h"
 #include "eff_node.h"
 #include "dds3obj.h"
@@ -120,9 +121,9 @@ s32 evtStageAnimeControl(s32 modeSelector, s32 modeValue) {
 
 /* vf10 = (a - b) with y replaced by 0 */
 void evtVu0SubVectorXZAxis(f32 *a, f32 *b) {
-    VU0_LOAD_VF(vf10, a);
-    VU0_LOAD_VF(vf11, b);
-    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR(a);
+    SDF_VU0_LOADVECTOR_B(b);
+    SDF_VU0_SUBVECTOR();
     VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
 }
 
@@ -130,12 +131,12 @@ void evtVu0SubVectorXZAxis(f32 *a, f32 *b) {
 void evtGetUnitDirVector(evtUnitHandle_t *unit) {
     f32 v[4];
 
-    VU0_LOAD_VF(vf10, unit->effObj->inner->rotation);
+    SDF_VU0_LOADVECTOR(unit->effObj->inner->rotation);
     effMiscQuaternionToMatrixVU();
-    VU0_STORE_VF(vf30, v);
+    SDF_VU0_STORE_ROW2(v);
     v[1] = 0.0f;
     v[3] = 1.0f;
-    VU0_LOAD_VF(vf10, v);
+    SDF_VU0_LOADVECTOR(v);
     SDF_VU0_NORMALIZE();
     VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
 }

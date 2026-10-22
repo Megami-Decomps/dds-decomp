@@ -4,6 +4,7 @@
 #include "fld_label_rows.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "fld_scene_ready_api.h"
 #include "fld_encounter_runtime_api.h"
 #include "fld_activation_entry.h"
@@ -212,42 +213,42 @@ void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted) {
     s32 shade;
 
     SDF_VU0_NORMALIZE();
-    VU0_CLEAR_W(vf10);
-    VU0_MOVE_VF(vf30, vf10);
-    VU0_STORE_VF(vf10, axis);
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    SDF_VU0_SET_ROW2();
+    SDF_VU0_STOREVECTOR(axis);
     if (ffabsf(axis[0]) < 0.000001f && ffabsf(axis[2]) < 0.000001f) {
         axis[2] = -axis[1];
         axis[0] = 0.0f;
         axis[1] = 0.0f;
-        VU0_LOAD_VF(vf11, axis);
+        SDF_VU0_LOADVECTOR_B(axis);
     } else {
-        VU0_LOAD_VF(vf11, D_0040B540);
+        SDF_VU0_LOADVECTOR_B(D_0040B540);
     }
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
-    VU0_CLEAR_W(vf10);
-    VU0_MOVE_VF(vf28, vf10);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_MOVE_VF(vf10, vf30);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_CLEAR_W(vf10);
-    VU0_MOVE_VF(vf29, vf10);
-    VU0_MOVE_VF(vf31, vf0);
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    SDF_VU0_SET_ROW0();
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_GET_ROW2();
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    SDF_VU0_SET_ROW1();
+    SDF_VU0_RESET_ROW3();
     sdfPostmultiplyVuMatrixFromMemory(sdfViewMatrix);
-    VU0_LOAD_VF(vf10, D_00386470);
+    SDF_VU0_LOADVECTOR(D_00386470);
     SDF_VU0_SCALE_XYZ_REV();
     axis[0] = (f32)x;
     axis[1] = (f32)y;
     axis[2] = 160.0f;
-    VU0_LOAD_VF(vf31, axis);
+    SDF_VU0_LOAD_ROW3(axis);
 
     shade = highlighted ? 0x101 : 0x10101;
     outline = D_00386370;
     for (i = 0; i != 13; i++) {
-        VU0_LOAD_VF(vf10, outline[i]);
-        VU0_TRANSFORM_POINT(vf10, vf10);
-        VU0_FTOI0(vf10, vf10);
-        VU0_STORE_VF(vf10, point);
+        SDF_VU0_LOADVECTOR(outline[i]);
+        SDF_VU0_APPLYMATRIX_XYZ1();
+        SDF_VU0_FTOI0();
+        SDF_VU0_STOREVECTOR(point);
         xyz[i] = (u32)((point[0] & 0xFFFF) | (point[1] << 16)) | ((u64)z << 32);
         color[i] = (u32)(shade * point[2] | 0x80000000) | ((u64)0x3F800000 << 32);
     }
@@ -1091,7 +1092,7 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
                 target = dds3SearchSceneBasic(dds3GetActiveScene(), data->activeId, 9);
                 transition = dds3GetUnitHandleObjectBasic(object);
                 if (sdfModelGetMarkPos(transition->owner->inner, 0)) {
-                    VU0_STORE_VF_UNCLOBBERED(vf10, anchorPosition);
+                    SDF_VU0_STOREVECTOR_NOMEM(anchorPosition);
                     D_0043E5E0[0] = anchorPosition[0] - target->inner->position[0];
                     D_0043E5E0[1] = anchorPosition[1] - target->inner->position[1];
                     D_0043E5E0[2] = anchorPosition[2] - target->inner->position[2];
@@ -1165,7 +1166,7 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
     D_0043E5E0[3] = 1.0f;
     VU0_LOAD_VF_PTR(vf10, D_0043E5E0);
     SDF_VU0_NORMALIZE();
-    VU0_STORE_VF_UNCLOBBERED(vf10, D_0043E5E0);
+    SDF_VU0_STOREVECTOR_NOMEM(D_0043E5E0);
     /* Retail still stores this full-length vector at11F43C..11F44C;
      * the later per-slot geometry uses slotExtrusion instead. */
     extrusion[0] = D_0043E5E0[0] * length;
@@ -1174,7 +1175,7 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
     extrusion[3] = 1.0f;
     VU0_LOAD_VF_PTR(vf10, D_0043E5E0);
     SDF_VU0_NORMALIZE();
-    VU0_STORE_VF_UNCLOBBERED(vf10, D_0043E5E0);
+    SDF_VU0_STOREVECTOR_NOMEM(D_0043E5E0);
     for (slot = 0; slot < base->resourceSlotCount; slot++) {
         length = extrusionLengths[slot];
         slotExtrusion[slot][0] = D_0043E5E0[0] * length;
@@ -1188,7 +1189,7 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
     viewDirection[3] = 1.0f;
     VU0_LOAD_VF_PTR(vf10, viewDirection);
     SDF_VU0_NORMALIZE();
-    VU0_STORE_VF_UNCLOBBERED(vf10, viewDirection);
+    SDF_VU0_STOREVECTOR_NOMEM(viewDirection);
     rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
     rsetAlpha(1);
     aDrawBoxF(0, 0, 512, 224, 0, 0, 0, 0);
@@ -1299,20 +1300,20 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
             firstVertex[1] = vertices[triangle[0]][1];
             firstVertex[2] = vertices[triangle[0]][2];
             VU0_LOAD_VF_PTR(vf10, firstVertex);
-            VU0_APPLY_MATRIX(vf10, vf10);
-            VU0_STORE_VF_UNCLOBBERED(vf10, firstVertex);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_STOREVECTOR_NOMEM(firstVertex);
             secondVertex[0] = vertices[triangle[1]][0];
             secondVertex[1] = vertices[triangle[1]][1];
             secondVertex[2] = vertices[triangle[1]][2];
             VU0_LOAD_VF_PTR(vf10, secondVertex);
-            VU0_APPLY_MATRIX(vf10, vf10);
-            VU0_STORE_VF_UNCLOBBERED(vf10, secondVertex);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_STOREVECTOR_NOMEM(secondVertex);
             thirdVertex[0] = vertices[triangle[2]][0];
             thirdVertex[1] = vertices[triangle[2]][1];
             thirdVertex[2] = vertices[triangle[2]][2];
             VU0_LOAD_VF_PTR(vf10, thirdVertex);
-            VU0_APPLY_MATRIX(vf10, vf10);
-            VU0_STORE_VF_UNCLOBBERED(vf10, thirdVertex);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_STOREVECTOR_NOMEM(thirdVertex);
             planeVertices[0][0] = firstVertex[0];
             planeVertices[0][1] = firstVertex[1];
             planeVertices[0][2] = firstVertex[2];
@@ -1329,7 +1330,7 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
             VU0_LOAD_VF_PTR(vf10, plane);
             SDF_VU0_NORMALIZE();
             VU0_LOAD_VF_PTR(vf11, D_0043E5E0);
-            VU0_DOT_XYZ(facing, vf10, vf11);
+            SDF_VU0_INNERPRODUCT(facing);
             if (facing < 0.0f) {
                 first = triangle[0]; second = triangle[1];
                 if (first < second) {
@@ -1479,37 +1480,37 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
                     extrudedStart[2] = firstVertex[2] + slotExtrusion[slot][2];
                     if (pass == 0) {
                         VU0_LOAD_VF_PTR(vf10, edgeStart);
-                        VU0_TRANSFORM_POINT(vf10, vf10);
+                        SDF_VU0_APPLYMATRIX_XYZ1();
                         SDF_VU0_PERSVECTOR();
                         VU0_APPLY_VIEWPORT(vf10, vf10, vf11, vf12);
-                        VU0_STORE_VF_UNCLOBBERED(vf10, projectedStart);
+                        SDF_VU0_STOREVECTOR_NOMEM(projectedStart);
                         if (projectedStart[0] < minimumX) minimumX = projectedStart[0];
                         else if (projectedStart[0] > maximumX) maximumX = projectedStart[0];
                         if (projectedStart[1] < minimumY) minimumY = projectedStart[1];
                         else if (projectedStart[1] > maximumY) maximumY = projectedStart[1];
                         VU0_LOAD_VF_PTR(vf10, edgeEnd);
-                        VU0_TRANSFORM_POINT(vf10, vf10);
+                        SDF_VU0_APPLYMATRIX_XYZ1();
                         SDF_VU0_PERSVECTOR();
                         VU0_APPLY_VIEWPORT(vf10, vf10, vf11, vf12);
-                        VU0_STORE_VF_UNCLOBBERED(vf10, projectedEnd);
+                        SDF_VU0_STOREVECTOR_NOMEM(projectedEnd);
                         if (projectedEnd[0] < minimumX) minimumX = projectedEnd[0];
                         else if (projectedEnd[0] > maximumX) maximumX = projectedEnd[0];
                         if (projectedEnd[1] < minimumY) minimumY = projectedEnd[1];
                         else if (projectedEnd[1] > maximumY) maximumY = projectedEnd[1];
                         VU0_LOAD_VF_PTR(vf10, extrudedEnd);
-                        VU0_TRANSFORM_POINT(vf10, vf10);
+                        SDF_VU0_APPLYMATRIX_XYZ1();
                         SDF_VU0_PERSVECTOR();
                         VU0_APPLY_VIEWPORT(vf10, vf10, vf11, vf12);
-                        VU0_STORE_VF_UNCLOBBERED(vf10, projectedExtrudedEnd);
+                        SDF_VU0_STOREVECTOR_NOMEM(projectedExtrudedEnd);
                         if (projectedExtrudedEnd[0] < minimumX) minimumX = projectedExtrudedEnd[0];
                         else if (projectedExtrudedEnd[0] > maximumX) maximumX = projectedExtrudedEnd[0];
                         if (projectedExtrudedEnd[1] < minimumY) minimumY = projectedExtrudedEnd[1];
                         else if (projectedExtrudedEnd[1] > maximumY) maximumY = projectedExtrudedEnd[1];
                         VU0_LOAD_VF_PTR(vf10, extrudedStart);
-                        VU0_TRANSFORM_POINT(vf10, vf10);
+                        SDF_VU0_APPLYMATRIX_XYZ1();
                         SDF_VU0_PERSVECTOR();
                         VU0_APPLY_VIEWPORT(vf10, vf10, vf11, vf12);
-                        VU0_STORE_VF_UNCLOBBERED(vf10, projectedExtrudedStart);
+                        SDF_VU0_STOREVECTOR_NOMEM(projectedExtrudedStart);
                         if (projectedExtrudedStart[0] < minimumX) minimumX = projectedExtrudedStart[0];
                         else if (projectedExtrudedStart[0] > maximumX) maximumX = projectedExtrudedStart[0];
                         if (projectedExtrudedStart[1] < minimumY) minimumY = projectedExtrudedStart[1];

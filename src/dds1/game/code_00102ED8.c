@@ -2,6 +2,7 @@
 #include "sdf_scene_packet.h"
 #include "sdf_gs_scene_state.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "kwln_background_fade_api.h"
 #include "dds3Admin.h"
 #include "kwln_draw_buffer.h"
@@ -540,12 +541,12 @@ void kwlnUpdatePadInputState(void) {
         v[1] = 0;
         v[2] = sticks[1][1] - 0x80;
         v[3] = 0;
-        VU0_LOAD_VF(vf10, v);
+        SDF_VU0_LOADVECTOR(v);
         SDF_VU0_GETLENGTH(length);
         if (length >= 64.0f) {
             SDF_VU0_NORMALIZE();
-            VU0_LOAD_VF(vf11, forward);
-            VU0_DOT_XYZ(dot, vf10, vf11);
+            SDF_VU0_LOADVECTOR_B(forward);
+            SDF_VU0_INNERPRODUCT(dot);
             if (dot < -1.0f) {
                 dot = -1.0f;
             }
@@ -613,7 +614,7 @@ void kwlnUpdatePadInputState(void) {
             v[1] = 0;
             v[2] = sticks[i][1] - 0x80;
             v[3] = 0;
-            VU0_LOAD_VF(vf10, v);
+            SDF_VU0_LOADVECTOR(v);
             SDF_VU0_GETLENGTH(stickLength);
             if (stickLength >= 64.0f) {
                 D_003BA868[pad][i] = 1;
@@ -1347,8 +1348,8 @@ void kwlnAdvanceShakeOffsets(void) {
 
     memcpy(weights, D_003BA940, sizeof(weights));
     if (D_003BA918 == 0) {
-        VU0_MOVE_VF(vf10, vf0);
-        VU0_CLEAR_W(vf10);
+        SDF_VU0_LOADIDENTITYVECTOR();
+        SDF_VU0_VECTOR_W_SET_ZERO();
         return;
     }
     if (D_003BA91A == 0) {

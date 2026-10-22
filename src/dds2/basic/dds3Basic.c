@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu0.h"
 #include "dds3_vu_transform.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
@@ -9,11 +10,11 @@
 void dds3MakeMatrix(const f32 scale[4],
                                        const f32 rotation[4],
                                        const f32 translation[4]) {
-    VU0_LOAD_VF(vf10, rotation);
+    SDF_VU0_LOADVECTOR(rotation);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, scale);
-    VU0_SCALE_MATRIX_ROWS(vf10);
-    VU0_LOAD_VF(vf10, translation);
-    VU0_SET_W_ONE(vf10);
-    VU0_MOVE_VF(vf31, vf10);
+    SDF_VU0_LOADVECTOR(scale);
+    SDF_VU0_SCALE_XYZ();
+    SDF_VU0_LOADVECTOR(translation);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
 }

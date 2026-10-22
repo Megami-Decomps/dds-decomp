@@ -4,6 +4,7 @@
 #include "eff_random.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_raise_party_record_status_value.h"
 #include "btl_actor_status_table_api.h"
@@ -3218,11 +3219,11 @@ void btlScheduleSummonActionTasks(ActionStateLink *action) {
             /* Audited SDK VU pipeline, as in btlUnitFaceTarget: only the
              * external aim routine consumes the two stored vectors. */
             btlMeasureFilteredUnitGroupBounds(0x400, 0, 0);
-            VU0_STORE_VF_UNCLOBBERED(vf10, center);
+            SDF_VU0_STOREVECTOR_NOMEM(center);
             btlUnitGetBodyPosVU(unit);
-            VU0_STORE_VF_UNCLOBBERED(vf10, bodyPosition);
+            SDF_VU0_STOREVECTOR_NOMEM(bodyPosition);
             if (btlAimHorizontalDirectionVU(bodyPosition, center) != 0) {
-                VU0_STORE_VF_UNCLOBBERED(vf10, unit->orientation);
+                SDF_VU0_STOREVECTOR_NOMEM(unit->orientation);
             }
         }
         rate = 1.0f;

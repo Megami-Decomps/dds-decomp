@@ -11,6 +11,7 @@
 #include "file_pac.h"
 #include "evt_world.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "snd_track_playback_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_clear_menu_entries_api.h"
@@ -1074,9 +1075,9 @@ void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z) {
     pos[1] = y;
     pos[2] = z;
     handle = *(sdfModelNode_t **)emitter->list->buffer;
-        VU0_LOAD_VF_MEMORY(vf10, pos);
-        VU0_SET_W_ONE(vf10);
-        VU0_STORE_VF(vf10, emitter->matrix[3]);
+        SDF_VU0_LOADVECTOR_BARRIER(pos);
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_STOREVECTOR(emitter->matrix[3]);
     sdfModelMakeLocalTm(handle);
     sdfModelEvalTm(emitter);
     sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, kwlnSceneSurfaceSets[11], emitter);
@@ -3086,7 +3087,7 @@ void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
 
     object = unit->effObj;
     resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(object);
-    VU0_LOAD_VF(vf10, object->inner->rotation);
+    SDF_VU0_LOADVECTOR(object->inner->rotation);
     index = D_0032E3C4[0] + 1;
     if (index >= 64) {
         index = 63;
@@ -3135,7 +3136,7 @@ void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
     direction[1] = height;
     direction[2] = sdfCos(radians);
     direction[3] = 0.0f;
-    VU0_LOAD_VF(vf10, direction);
+    SDF_VU0_LOADVECTOR(direction);
     SDF_VU0_NORMALIZE();
     evtSetUnitLightDir(unit, 0);
     red = row[0];
@@ -3147,7 +3148,7 @@ void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
     blue = row[5];
     colorB = red | (blue << 16) | (green << 8) | 0x80000000;
     evtSetUnitLightAndAmbient(unit, 0, colorA, colorB);
-    VU0_LOAD_VF(vf10, direction);
+    SDF_VU0_LOADVECTOR(direction);
     SDF_VU0_NORMALIZE();
     evtSetUnitLightDir(unit, 0);
     evtSetUnitLightAndAmbient(unit, 0, colorA, colorB);

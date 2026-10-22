@@ -2,6 +2,7 @@
 #include "btl_runtime_state.h"
 #include "eff_random.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "scr_integer_return_value_api.h"
 #include "btl_script_resource_api.h"
@@ -2773,7 +2774,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         }
         if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress == (u32)&btlDebugEditorActorStatus.positionGuideScale) {
             effBTLModelGetMarkPosition2(unit, 3);
-            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            SDF_VU0_STOREVECTOR_NOMEM(position);
             btlDebugDrawScaledPositionGuide(position, 0x10808080, 0, record->positionGuideScale * unit->scale);
         }
         selectedAddress = btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress;
@@ -2786,7 +2787,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         }
         if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress == (u32)&btlDebugEditorMotionSlot.muzzleGuideScale) {
             btlUnitGetMuzzlePosVU(unit);
-            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            SDF_VU0_STOREVECTOR_NOMEM(position);
             btlDebugDrawScaledPositionGuide(position, 0x10106020, 0, btlDebugEditorMotionSlot.muzzleGuideScale * btlDebugEditorActorStatus.scale);
         }
         if (btlDebugActorStatusEditor.flags & 8) {

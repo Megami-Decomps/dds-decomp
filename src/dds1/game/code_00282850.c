@@ -7,6 +7,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "evt_stage_test_api.h"
 #include "pty_bullet_item_count_api.h"
 #include "sdf_vu_matrix.h"
@@ -2663,7 +2664,7 @@ f32 mnuSetModelScaleVector(dds3ModelHandle_t *model, s32 useTable) {
     scaleVector[1] = scale;
     scaleVector[2] = scale;
     scaleVector[3] = 1.0f;
-    VU0_LOAD_VF(vf10, scaleVector);
+    SDF_VU0_LOADVECTOR(scaleVector);
     mdlSetScale(model);
     return scale;
 }
@@ -2703,7 +2704,7 @@ void mnuApplyModelCamera(dds3ModelHandle_t *model) {
         position[2] = 0.0f;
         *(f32 *)(evtStageTestViewTargetVector + 8) = (EVT_STAGE_DEFAULT_TARGET_Z - stageEntry->position[2]) * scale;
     }
-    VU0_LOAD_VF(vf10, position);
+    SDF_VU0_LOADVECTOR(position);
     mdlSetPosition((void *)model);
 }
 
@@ -2729,18 +2730,18 @@ void evtStageTestUpdateCamera(void)
     SDF_VU0_COPYVECTOR(aViewTarget, evtStageTestViewEyeVector);
     SDF_VU0_COPYVECTOR(aViewDown, evtStageTestViewUpVector);
     sdfCameraBuildProjection(&dds3ScreenParam.camera);
-    VU0_LOAD_VF(vf10, aViewTarget);
-    VU0_LOAD_VF(vf11, sdfViewTargetVector);
-    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR(aViewTarget);
+    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
     VU0_SCALAR_OP(600.0f, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, sdfViewShakeVector);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, &eye);
-    VU0_LOAD_VF(vf10, sdfViewTargetVector);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF_UNCLOBBERED(vf10, &target);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_LOADVECTOR_B(sdfViewShakeVector);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&eye);
+    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&target);
     LookAtMatrix(&eye, &target, aViewDown);
     VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
     sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(D_003270F0 + drawBufferIndex * 8000), &dds3ScreenParam, sdfViewMatrix);

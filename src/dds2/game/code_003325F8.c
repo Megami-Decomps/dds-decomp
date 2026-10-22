@@ -2,6 +2,7 @@
 #include "sdf_request.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_resource_list_release_api.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_trig.h"
@@ -275,18 +276,18 @@ void sdfModelMakeMarkPosMatrix(sdfModelRootNode_t *model, SdfMapPositionRecord *
     u8 *vector;
 
     vector = (u8 *)&record->up;
-    VU0_LOAD_VF(vf10, vector);
-    VU0_MOVE_VF(vf30, vf10);
-    VU0_MOVE_VF(vf11, vf10);
+    SDF_VU0_LOADVECTOR(vector);
+    SDF_VU0_SET_ROW2();
+    SDF_VU0_COPYVECTOR_A_TO_B();
     vector = (u8 *)&record->direction;
-    VU0_LOAD_VF(vf10, vector);
-    VU0_NEGATE_XYZ(vf10);
-    VU0_MOVE_VF(vf29, vf10);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR(vector);
+    SDF_VU0_NEGVECTOR_XYZ();
+    SDF_VU0_SET_ROW1();
+    SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
-    VU0_MOVE_VF(vf28, vf10);
-    VU0_LOAD_VF(vf31, &record->position);
-    VU0_SET_W_ONE(vf31);
+    SDF_VU0_SET_ROW0();
+    SDF_VU0_LOAD_ROW3(&record->position);
+    SDF_VU0_MATRIX_ROW3_W_SET_ONE();
     sdfPostmultiplyVuMatrixFromMemory(drawNode->worldMatrix);
 }
 
@@ -296,8 +297,8 @@ void sdfModelMakeMarkPos(sdfModelRootNode_t *model, SdfMapPositionRecord *record
     sdfModelNode_t *drawNode = sdfModelSearchNode(model, record->nodeId);
 
     VU0_LOAD_MATRIX(drawNode->worldMatrix);
-    VU0_LOAD_VF(vf10, &record->position);
-    VU0_TRANSFORM_POINT(vf10, vf10);
+    SDF_VU0_LOADVECTOR(&record->position);
+    SDF_VU0_APPLYMATRIX_XYZ1();
 }
 
 /* Search the fixed-size map-position records within the chunk's declared byte extent. */

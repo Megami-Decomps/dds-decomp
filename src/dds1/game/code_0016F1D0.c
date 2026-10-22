@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "eff_packet_params.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "eff_ring_color_slot.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
@@ -205,40 +206,40 @@ void effPCPFlashPolyRingExpHPartSetVertex(EffRingWork *work, s32 index) {
     effPCPFlashPolyRingExpHVertex[0] = radialDirection[0] * basisFactor;
     effPCPFlashPolyRingExpHVertex[1] = basisFactor + -1.0f;
     effPCPFlashPolyRingExpHVertex[2] = sine * basisFactor;
-    VU0_LOAD_VF(vf10, effPCPFlashPolyRingExpHVertex);
+    SDF_VU0_LOADVECTOR(effPCPFlashPolyRingExpHVertex);
     SDF_VU0_NORMALIZE();
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_MOVE_VF(vf12, vf10);
-    VU0_LOAD_VF(vf10, radialDirection);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR(radialDirection);
+    SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, sideOffsetA);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, sideOffsetA);
-    VU0_LOAD_VF(vf10, sideOffsetB);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, sideOffsetB);
-    VU0_MOVE_VF(vf10, vf12);
-    VU0_LOAD_VF(vf11, axisOffset);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_MOVE_VF(vf12, vf10);
-    VU0_LOAD_VF(vf10, orbitOffset);
-    VU0_LOAD_VF(vf11, sideOffsetB);
-    VU0_STORE_VF(vf10, positions + 12);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, positions + 8);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, positions + 16);
-    VU0_LOAD_VF(vf10, orbitOffset);
-    VU0_LOAD_VF(vf11, sideOffsetA);
-    VU0_ADD(vf10, vf10, vf12);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, positions);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, positions + 4);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(sideOffsetA);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_STOREVECTOR(sideOffsetA);
+    SDF_VU0_LOADVECTOR(sideOffsetB);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_STOREVECTOR(sideOffsetB);
+    SDF_VU0_COPYVECTOR_C_TO_A();
+    SDF_VU0_LOADVECTOR_B(axisOffset);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR(orbitOffset);
+    SDF_VU0_LOADVECTOR_B(sideOffsetB);
+    SDF_VU0_STOREVECTOR(positions + 12);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(positions + 8);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_STOREVECTOR(positions + 16);
+    SDF_VU0_LOADVECTOR(orbitOffset);
+    SDF_VU0_LOADVECTOR_B(sideOffsetA);
+    SDF_VU0_ADDVECTOR_A_C();
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(positions);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_STOREVECTOR(positions + 4);
 }
 
 /* Advance one ring particle's angle; index is unchecked. */

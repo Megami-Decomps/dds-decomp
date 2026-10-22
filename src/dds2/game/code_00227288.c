@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "btl_boss_data_api.h"
 #include "btl_effect_active_api.h"
 #include "eff_random_mod.h"
@@ -365,7 +366,7 @@ void btlUpdateLinkedActorGroundHeight(void) {
             return;
         }
         dds3GetPosPoseSet(selected->effectObject);
-        VU0_STORE_VF(vf10, (u128 *)vector);
+        SDF_VU0_STOREVECTOR((u128 *)vector);
         if (!(vector[1] > -125.0f)) {
             return;
         }
@@ -401,7 +402,7 @@ void btlUpdateLinkedActorGroundHeight(void) {
                     if (flags & 0x200) {
                         if (flags & 2) {
                             dds3GetPosPoseSet(unit->effectObject);
-                            VU0_STORE_VF(vf10, (u128 *)vector);
+                            SDF_VU0_STOREVECTOR((u128 *)vector);
                             if (!(vector[1] > ceiling)) {
                                 if (vector[1] < lowerLimit) {
                                     height = effect->linked.height + effect->linked.speed;
@@ -1103,16 +1104,16 @@ s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
     command->motionProgress = 1;
     command->state = 0;
     effBTLModelGetMarkPosition2((BtlUnit *)target, 0);
-    VU0_STORE_VF_UNCLOBBERED(vf10, command->backCamera.position);
+    SDF_VU0_STOREVECTOR_NOMEM(command->backCamera.position);
     command->backCamera.position[1] += 150.0f;
     btlInterpolateVectorStep(&command->frontCamera);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, command->backCamera.position);
-    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(command->backCamera.position);
+    SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(distance);
     command->backCamera.distance = distance;
     SDF_VU0_NORMALIZE();
-    VU0_STORE_VF(vf10, command->backCamera.direction);
+    SDF_VU0_STOREVECTOR(command->backCamera.direction);
     command->backCamera.distance += 45.0f;
     btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
     return 1;
