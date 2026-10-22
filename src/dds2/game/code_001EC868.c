@@ -137,7 +137,7 @@ extern void btlFrameEarliestAnimatedUnitCameraPair(BtlLinkedCommand *, BtlCamSta
 
 extern BattleSoundArchiveEntry D_003BDE18[BTL_SOUND_ENTRY_COUNT];
 
-extern BtlCameraCursorView D_003BD7D0;
+extern BtlCameraCursorView btlCameraCursor;
 
 /* Two camera vectors are written at work+0x50 and work+0x60 by btlInitializeSceneLightingAndTint. */
 typedef struct BtlCameraVectors {
@@ -244,7 +244,7 @@ extern f32 btlBuildProjectedActorPairBoundsVU(s32, BtlUnit *, BtlUnit *, s8, s8,
 
 extern s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *, BtlCamState *, s8, s8);
 
-#define CURSOR (&D_003BD7D0)
+#define CURSOR (&btlCameraCursor)
 
 extern char D_00418C58[];
 
@@ -266,7 +266,7 @@ struct FileQueue;
 extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
 
 
-extern void func_001F5868(BtlLinkedCommand *, BtlCamState *, s16, s16);
+extern void btlBuildPresetCameraPose(BtlLinkedCommand *, BtlCamState *, s16, s16);
 
 extern void btlInitializeCameraCursorFromPreset(BtlLinkedCommand *, BtlCamState *, s32, s32);
 
@@ -3969,7 +3969,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         } else {
             CURSOR->scriptIndex = 0x21;
         }
-        func_001F5868(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
+        btlBuildPresetCameraPose(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 4);
         btlClearAllUnitDefeatCandidatesTask();
         btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
@@ -3978,7 +3978,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         CURSOR->scriptSetIndex = 1;
         CURSOR->scriptIndex = 0x1A;
         CURSOR->unk_0E = 0;
-        func_001F5868(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
+        btlBuildPresetCameraPose(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 4);
         btlClearAllUnitDefeatCandidatesTask();
         btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
@@ -3986,7 +3986,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
     case 0x1DC:
         CURSOR->scriptSetIndex = 2;
         CURSOR->unk_0E = 0;
-        func_001F5868(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
+        btlBuildPresetCameraPose(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
         CURSOR->scriptIndex = 0x17;
         btlInitializeCameraCursorFromPreset(command, pose, 0, 4);
         btlClearAllUnitDefeatCandidatesTask();
@@ -3996,13 +3996,13 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         CURSOR->scriptSetIndex = 3;
         CURSOR->scriptIndex = 0x1B;
         CURSOR->unk_0E = 0;
-        func_001F5868(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         break;
     case 0x1BF:
         CURSOR->scriptSetIndex = 3;
         CURSOR->unk_0E = 0;
-        func_001F5868(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
         CURSOR->scriptIndex = 0x16;
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         btlClearAllUnitDefeatCandidatesTask();
@@ -4011,7 +4011,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
     case 0x1D2:
         CURSOR->scriptSetIndex = 2;
         CURSOR->unk_0E = 0;
-        func_001F5868(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
+        btlBuildPresetCameraPose(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
         CURSOR->scriptIndex = pathChoices[(s16)btlNextScaledRandom(4)];
         btlInitializeCameraCursorFromPreset(command, pose, 0, 4);
         btlClearAllUnitDefeatCandidatesTask();
@@ -4020,7 +4020,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
     case 0x1D7:
         CURSOR->scriptSetIndex = 2;
         CURSOR->unk_0E = 0;
-        func_001F5868(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
+        btlBuildPresetCameraPose(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
         if (btlCanUseLinkedActor(command) == 0) {
             CURSOR->scriptIndex = 0x1E;
         } else {
@@ -4034,35 +4034,35 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         CURSOR->scriptSetIndex = 3;
         CURSOR->scriptIndex = 0x1D;
         CURSOR->unk_0E = 0;
-        func_001F5868(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         break;
     case 0x1D1:
         CURSOR->scriptSetIndex = 3;
         CURSOR->scriptIndex = 0x1C;
         CURSOR->unk_0E = 0;
-        func_001F5868(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         break;
     case 0x1DD:
         CURSOR->scriptSetIndex = 3;
         CURSOR->scriptIndex = 0x15;
         CURSOR->unk_0E = 0;
-        func_001F5868(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         break;
     case 0x1DE:
         CURSOR->scriptSetIndex = 3;
         CURSOR->scriptIndex = 8;
         CURSOR->unk_0E = 0;
-        func_001F5868(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         break;
     case 0x1E0:
         CURSOR->scriptSetIndex = 3;
         CURSOR->scriptIndex = 2;
         CURSOR->unk_0E = 0;
-        func_001F5868(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         break;
     case 0x20D:
@@ -4086,7 +4086,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
             CURSOR->scriptIndex = 0x20;
             choice = 1;
         }
-        func_001F5868(command, pose, 1, sideChoices[choice]);
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[choice]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         btlClearAllUnitDefeatCandidatesTask();
         btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
@@ -4114,7 +4114,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
             CURSOR->scriptIndex = 0x14;
             choice = 1;
         }
-        func_001F5868(command, pose, 1, sideChoices[choice]);
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[choice]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         btlClearAllUnitDefeatCandidatesTask();
         btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
@@ -4125,7 +4125,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
     case 0x1B3:
         CURSOR->scriptSetIndex = 3;
         CURSOR->unk_0E = 0;
-        func_001F5868(command, pose, 1, sideChoices[1]);
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[1]);
         if (skillId == 0x5C) {
             CURSOR->scriptIndex = 0x2E;
         } else if (skillId == 0x5B) {
@@ -4140,14 +4140,14 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
     case 0x1B7:
         CURSOR->scriptSetIndex = 3;
         CURSOR->unk_0E = 0;
-        func_001F5868(command, pose, 1, sideChoices[1]);
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[1]);
         CURSOR->scriptIndex = 0x12;
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         break;
     case 0x1C3:
         CURSOR->scriptSetIndex = 3;
         CURSOR->unk_0E = 0;
-        func_001F5868(command, pose, 1, sideChoices[1]);
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[1]);
         CURSOR->scriptIndex = 0xE;
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         break;
@@ -4160,7 +4160,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         default: choice = (s16)btlNextScaledRandom(2); break;
         }
         CURSOR->scriptIndex = choice + 0xC;
-        func_001F5868(command, pose, 1, sideChoices[choice]);
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[choice]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         break;
     case 0x1D6:
@@ -4172,7 +4172,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         case 2: CURSOR->scriptIndex = 10; break;
         default: CURSOR->scriptIndex = choice + 9; break;
         }
-        func_001F5868(command, pose, 1, sideChoices[choice]);
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[choice]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         break;
     case 0x1DA:
@@ -4184,7 +4184,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         case 2: CURSOR->scriptIndex = 0x10; break;
         default: CURSOR->scriptIndex = choice + 0xF; break;
         }
-        func_001F5868(command, pose, 1, sideChoices[choice]);
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[choice]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         break;
     case 0x200:
@@ -4199,7 +4199,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         btlApplyTimedCameraInstruction(command, pose, D_003BBFC4);
         choice = (s16)btlNextScaledRandom(2);
         choice += 0x1F;
-        func_001F5868(command, pose, 1, choice);
+        btlBuildPresetCameraPose(command, pose, 1, choice);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 0x12);
         break;
     case 0x202:
@@ -4218,7 +4218,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         }
         btlApplyTimedCameraInstruction(command, pose, D_003BBFC4);
         choice += 0x1F;
-        func_001F5868(command, pose, 1, choice);
+        btlBuildPresetCameraPose(command, pose, 1, choice);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 0x12);
         break;
     case 0x20C:
@@ -4228,7 +4228,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         btlApplyTimedCameraInstruction(command, pose, D_003BBFC4);
         choice = (s16)btlNextScaledRandom(2);
         choice += 0x1F;
-        func_001F5868(command, pose, 1, choice);
+        btlBuildPresetCameraPose(command, pose, 1, choice);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 0x12);
         break;
     case 0x1D8:
@@ -4241,7 +4241,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         CURSOR->unk_0E = 0;
         choice = (s16)btlNextScaledRandom(2);
         choice += 8;
-        func_001F5868(command, pose, 1, choice);
+        btlBuildPresetCameraPose(command, pose, 1, choice);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 0xC);
         break;
     case 0x1D9:
@@ -4250,7 +4250,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         CURSOR->scriptSetIndex = 3;
         CURSOR->scriptIndex = 0x26;
         CURSOR->unk_0E = 0;
-        func_001F5868(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         break;
     default:
@@ -4258,7 +4258,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         CURSOR->unk_0E = 0;
         choice = (s16)btlNextScaledRandom(2);
         CURSOR->scriptIndex = 0x19 - choice;
-        func_001F5868(command, pose, 1, sideChoices[choice]);
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[choice]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         break;
     }
@@ -4378,7 +4378,7 @@ void btlInitializeRandomCameraCursor(BtlLinkedCommand *action, BtlCamState *stat
     CURSOR->category = action->link->unit->lookupId;
     random = btlNextScaledRandom(8);
     CURSOR->index = choices.values[markedCount][CURSOR->category - 3][random];
-    func_001F5868(action, state, 0, D_003BBD90[CURSOR->index]);
+    btlBuildPresetCameraPose(action, state, 0, D_003BBD90[CURSOR->index]);
     btlInitializeCameraCursorFromPreset(action, state, 0, D_003BBD70[CURSOR->index]);
 }
 
@@ -4613,7 +4613,7 @@ INCLUDE_RODATA(const s32, "game/code_001EC868", D_004184D8);
 
 INCLUDE_RODATA(const s32, "game/code_001EC868", D_00418568);
 
-INCLUDE_ASM(const s32, "game/code_001EC868", func_001F5868);
+INCLUDE_ASM(const s32, "game/code_001EC868", btlBuildPresetCameraPose);
 
 /* Public Brass preferred source, preserved by PiM; current-header admission by BigB. */
 extern void btlApplyScriptCameraTrack(BtlLinkedCommand *, BtlCamState *, const BtlCameraTimedInstruction *, s32 *, const BtlCameraParameterRecord *);
@@ -4913,7 +4913,7 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
         case 6:
             if (instruction->startFrame <= (f32)CURSOR->frame &&
                 (f32)CURSOR->frame < instruction->startFrame + instruction->duration) {
-                func_001F5868(action, pose, 0, instruction->parameterIndex);
+                btlBuildPresetCameraPose(action, pose, 0, instruction->parameterIndex);
             }
             ++instruction;
             break;
@@ -5088,7 +5088,7 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
         case 7:
             if (instruction->startFrame <= (f32)CURSOR->frame &&
                 (f32)CURSOR->frame < instruction->startFrame + instruction->duration) {
-                func_001F5868(action, pose, 1, instruction->parameterIndex);
+                btlBuildPresetCameraPose(action, pose, 1, instruction->parameterIndex);
             }
             ++instruction;
             break;
@@ -5137,7 +5137,7 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
                     savedPose = &D_003BDC30;
                 }
                 memcpy(savedPose, pose, sizeof(*savedPose));
-                func_001F5868(action, &savedPose->pose, 1, instruction->parameterIndex);
+                btlBuildPresetCameraPose(action, &savedPose->pose, 1, instruction->parameterIndex);
                 VU0_LOAD_VF(vf10, CURSOR->pathEnd);
                 VU0_STORE_VF_UNCLOBBERED(vf10, savedParameters->pathEnd);
                 VU0_LOAD_VF(vf10, CURSOR->pathStart);
@@ -5232,7 +5232,7 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
         case 33:
             if (instruction->startFrame <= (f32)CURSOR->frame &&
                 (f32)CURSOR->frame < instruction->startFrame + instruction->duration) {
-                func_001F5868(action, pose, 2, instruction->parameterIndex);
+                btlBuildPresetCameraPose(action, pose, 2, instruction->parameterIndex);
             }
             ++instruction;
             break;
@@ -6864,18 +6864,18 @@ s32 btlCountUnitsByFlags(u32 mask) {
 /* Reset the shared cursor and select camera setup by the linked actor's unit ID.
  * Preserve the legacy implicit return type and the callers' existing signatures. */
 btlInitializeCameraCursorForActorId(BtlLinkedCommand *action, BtlCamState *state) {
-    memset(&D_003BD7D0, 0, sizeof(D_003BD7D0));
+    memset(&btlCameraCursor, 0, sizeof(btlCameraCursor));
     switch (action->link->unit->partyRecord.unitId) {
     case 1:
         btlApplyTimedCameraInstruction(action, state, D_003BC0A0[4]);
-        func_001F5868(action, state, 2, 4);
+        btlBuildPresetCameraPose(action, state, 2, 4);
         CURSOR->scriptIndex = 2;
         btlInitializeCameraCursorFromPreset(action, state, 2, 1);
         CURSOR->useTimedScript = 1;
         break;
     case 4:
         btlApplyTimedCameraInstruction(action, state, D_003BC0A0[4]);
-        func_001F5868(action, state, 2, 0);
+        btlBuildPresetCameraPose(action, state, 2, 0);
         CURSOR->scriptIndex = 0;
         btlInitializeCameraCursorFromPreset(action, state, 2, 1);
         CURSOR->useTimedScript = 1;
@@ -6884,28 +6884,28 @@ btlInitializeCameraCursorForActorId(BtlLinkedCommand *action, BtlCamState *state
     case 5:
     case 6:
         btlApplyTimedCameraInstruction(action, state, D_003BC0A0[3]);
-        func_001F5868(action, state, 2, 2);
+        btlBuildPresetCameraPose(action, state, 2, 2);
         CURSOR->scriptIndex = 1;
         btlInitializeCameraCursorFromPreset(action, state, 2, 1);
         CURSOR->useTimedScript = 1;
         break;
     case 7:
         btlApplyTimedCameraInstruction(action, state, D_003BC0A0[3]);
-        func_001F5868(action, state, 2, 7);
+        btlBuildPresetCameraPose(action, state, 2, 7);
         CURSOR->scriptIndex = 5;
         btlInitializeCameraCursorFromPreset(action, state, 2, 2);
         CURSOR->useTimedScript = 1;
         break;
     case 2:
         btlApplyTimedCameraInstruction(action, state, D_003BC0A0[4]);
-        func_001F5868(action, state, 2, 8);
+        btlBuildPresetCameraPose(action, state, 2, 8);
         CURSOR->scriptIndex = 2;
         btlInitializeCameraCursorFromPreset(action, state, 2, 2);
         CURSOR->useTimedScript = 1;
         break;
     case 8:
         btlApplyTimedCameraInstruction(action, state, D_003BC0A0[4]);
-        func_001F5868(action, state, 2, 9);
+        btlBuildPresetCameraPose(action, state, 2, 9);
         CURSOR->scriptIndex = 6;
         btlInitializeCameraCursorFromPreset(action, state, 2, 2);
         CURSOR->useTimedScript = 1;
@@ -6931,7 +6931,7 @@ void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *action, BtlCamState *stat
 }
 
 void btlClearCommandCursorAndRunAction(BtlLinkedCommand *action) {
-    memset(&D_003BD7D0, 0, 0x130);
+    memset(&btlCameraCursor, 0, 0x130);
     btlFlagUserAndTargetDefeat(action, action);
 }
 
@@ -6951,10 +6951,10 @@ void btlAdvanceCommandCursorOrAction(BtlLinkedCommand *action, BtlCamState *stat
 }
 
 void btlInitCommandCursorForCategory(BtlLinkedCommand *action, BtlCamState *state) {
-    memset(&D_003BD7D0, 0, 0x130);
+    memset(&btlCameraCursor, 0, 0x130);
     switch (action->link->unit->partyRecord.unitId) {
     case 1:
-        func_001F5868(action, state, 4, 0);
+        btlBuildPresetCameraPose(action, state, 4, 0);
         CURSOR->scriptIndex = 0;
         btlInitializeCameraCursorFromPreset(action, state, 4, 1);
         CURSOR->useTimedScript = 1;
@@ -6962,19 +6962,19 @@ void btlInitCommandCursorForCategory(BtlLinkedCommand *action, BtlCamState *stat
     case 2:
         return;
     case 3:
-        func_001F5868(action, state, 4, 0);
+        btlBuildPresetCameraPose(action, state, 4, 0);
         CURSOR->scriptIndex = 0;
         btlInitializeCameraCursorFromPreset(action, state, 4, 1);
         CURSOR->useTimedScript = 1;
         break;
     case 4:
-        func_001F5868(action, state, 4, 0);
+        btlBuildPresetCameraPose(action, state, 4, 0);
         CURSOR->scriptIndex = 0;
         btlInitializeCameraCursorFromPreset(action, state, 4, 1);
         CURSOR->useTimedScript = 1;
         break;
     case 5:
-        func_001F5868(action, state, 4, 0);
+        btlBuildPresetCameraPose(action, state, 4, 0);
         CURSOR->scriptIndex = 0;
         btlInitializeCameraCursorFromPreset(action, state, 4, 1);
         CURSOR->useTimedScript = 1;
@@ -7008,9 +7008,9 @@ void btlInitCommandCursorForFirstActor(BtlLinkedCommand *action, BtlCamState *st
     memset(CURSOR, 0, 0x130);
     btlRefreshUnitEffectMotionAndEntry(first);
     if (btlHasFirstLinkedCategoryFlag1000(action) != 0) {
-        func_001F5868(action, state, 5, 1);
+        btlBuildPresetCameraPose(action, state, 5, 1);
     } else {
-        func_001F5868(action, state, 5, 0);
+        btlBuildPresetCameraPose(action, state, 5, 0);
     }
     CURSOR->scriptIndex = 0;
     btlInitializeCameraCursorFromPreset(action, state, 0, 0x11);
@@ -7030,11 +7030,11 @@ void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *action, BtlCamState *stat
 void btlInitLinkedUnitActionCursor(ActionStateLink *linkState) {
     BtlLinkedCommand *scene = &((BtlState *)btlGetRuntime())->cameraCommand;
     scene->link = linkState;
-    memset(&D_003BD7D0, 0, 0x130);
+    memset(&btlCameraCursor, 0, 0x130);
     CURSOR->scriptSetIndex = 0;
     CURSOR->unk_0E = 0;
     btlRefreshUnitEffectMotionAndEntry(linkState->unit);
-    func_001F5868(scene, &scene->camera, 6, 0);
+    btlBuildPresetCameraPose(scene, &scene->camera, 6, 0);
     btlClearAllUnitDefeatCandidatesTask();
     btlFlagUnitDefeatCandidate(linkState->unit);
     CURSOR->scriptIndex = 0;
@@ -7053,8 +7053,8 @@ void btlInitTargetCursorAndFacing(BtlLinkedCommand *action, BtlCamState *state) 
 
     memset(offset, 0, sizeof(offset));
     offset[2] = 1.0f;
-    memset(&D_003BD7D0, 0, 0x130);
-    func_001F5868(action, state, 2, 3);
+    memset(&btlCameraCursor, 0, 0x130);
+    btlBuildPresetCameraPose(action, state, 2, 3);
     btlInitializeCameraCursorFromPreset(action, state, 0, 0);
     btlConstrainCameraEndpointHeight(action, state, 0, 1);
     btlFlagMatchingUnitsDefeatCandidate(0x600);
@@ -7086,8 +7086,8 @@ void btlInitTargetCursorAndFacing(BtlLinkedCommand *action, BtlCamState *state) 
 
 s32 btlInitCursorAndApplyAction(BtlLinkedCommand *action, BtlCamState *state) {
     s32 result;
-    memset(&D_003BD7D0, 0, 0x130);
-    func_001F5868(action, state, 2, 6);
+    memset(&btlCameraCursor, 0, 0x130);
+    btlBuildPresetCameraPose(action, state, 2, 6);
     btlInitializeCameraCursorFromPreset(action, state, 0, 0);
     result = btlConstrainCameraEndpointHeight(action, state, 0, 1);
     CURSOR->scriptIndex = 2;
