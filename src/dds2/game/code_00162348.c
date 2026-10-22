@@ -454,7 +454,7 @@ u32 dds3Particle_TrackPolyGetRecTiming(u16 pointCapacity) {
     return 0;
 }
 
-extern u8 D_00451F50[];
+extern EffRandState D_00451F50;
 
 
 void dds3TrackPolyInit(void);
@@ -462,7 +462,7 @@ void dds3TrackPolyInit(void);
 void dds3PolygonManagerInit(void) {
     hDrawListTop = 0;
     dds3TrackPolyInit();
-    sdfRandomizeByTime((EffRandState *)D_00451F50);
+    sdfRandomizeByTime(&D_00451F50);
 }
 
 void dds3PolygonManagerExit(void) {
@@ -1795,4 +1795,3 @@ ParEmitDesc *dds3SpPoly_Ring_Old_Create(ParEmitDesc *src) {
 INCLUDE_SDATA(const s32, "game/code_00162348", hDrawListTop);
 
 INCLUDE_SDATA(const s32, "game/code_00162348", D_00436404);
-
