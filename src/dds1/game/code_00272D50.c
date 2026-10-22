@@ -16,7 +16,7 @@ extern void mnuCreateStaffItemWindow(StaffDisplayContext *);
 
 
 typedef struct {
-    u32 allocation; /* 0x00 */
+    struct sdfMemHandle_t *allocation; /* 0x00 */
     u32 pad04;       /* 0x04 */
     MenuWindowContainer *windows[3]; /* 0x08 */
     u8 pad14[0x14];
@@ -271,14 +271,14 @@ void mnuNoOpStaffDisplayTeardown(StaffDisplayContext *context) {
 s32 mnuInitializeStaffDisplayResources(dds3ProcessID_t *task) {
     StaffDisplayContext *context;
     StaffWindowResources *resources;
-    s32 handle;
+    struct sdfMemHandle_t *allocation;
 
     context = (StaffDisplayContext *)dds3GetProcessData(task);
-    handle = (u32)sdfMemAllocDirect(0x2C);
-    resources = (void *)sdfMemLock((struct sdfMemHandle_t *)(handle));
+    allocation = sdfMemAllocDirect(0x2C);
+    resources = (void *)sdfMemLock(allocation);
     context->resources = resources;
     memset(resources, 0, 0x2C);
-    resources->allocation = handle;
+    resources->allocation = allocation;
     mnuSelectStaffDisplayCategory((u32)context);
     mnuCreateStaffItemWindow(context);
     mnuForwardDupArg(context->activeWindow, (struct EffectSlotSet *)context->unk74, 0, 0, 0);
@@ -294,7 +294,7 @@ s32 mnuStaffFreeDisplayResources(dds3ProcessID_t *task) {
     StaffWindowResources *resources = context->resources;
     mnuReleaseStaffPrimaryWindows(context);
     mnuNoOpStaffDisplayTeardown(context);
-    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(resources->allocation));
+    sdfMemFreeDirect(resources->allocation);
     return 1;
 }
 
