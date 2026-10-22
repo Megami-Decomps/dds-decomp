@@ -3542,7 +3542,7 @@ void btlUpdateNidhoggrScaleAndPosition(void) {
     }
 }
 
-extern void btlArrangeOpponentFormationSlots(void);
+extern s64 btlArrangeOpponentFormationSlots(void);
 
 /* Nidhoggr's update hook reapplies the opponent formation slots. */
 void btlUpdateNidhoggrOpponentSlots(void) {
