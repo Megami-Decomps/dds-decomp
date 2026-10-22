@@ -56,11 +56,15 @@ typedef struct DdsNamedList {
 } DdsNamedList;
 
 typedef struct DdsPackedObject {
-    u32 maxPackedOffset; /* 0x00 */
-    u32 segments; /* 0x04 */
-    u32 namedReferences; /* 0x08 */
-    u32 pendingReferences; /* 0x0C */
+    u32 maxPackedOffset;                 /* 0x00 */
+    MnuCallbackList *segments;           /* 0x04: owns packed value buffers */
+    MnuCallbackList *namedReferences;    /* 0x08: owns named offset records */
+    MnuCallbackList *pendingReferences;  /* 0x0C: owns pending relocation records */
 } DdsPackedObject;
+typedef char DdsPackedObject_size_must_be_0x10[(sizeof(DdsPackedObject) == 0x10) ? 1 : -1];
+typedef char DdsPackedObject_segments_offset_must_be_4[((u32)&((DdsPackedObject *)0)->segments == 4) ? 1 : -1];
+typedef char DdsPackedObject_namedReferences_offset_must_be_8[((u32)&((DdsPackedObject *)0)->namedReferences == 8) ? 1 : -1];
+typedef char DdsPackedObject_pendingReferences_offset_must_be_C[((u32)&((DdsPackedObject *)0)->pendingReferences == 0xC) ? 1 : -1];
 
 extern DdsPackedObject *dds3CreatePackedObject(void);
 
@@ -84,23 +88,24 @@ typedef struct DdsCallbackCollection {
    (dds3ReleasePackedValueBuffer frees both). */
 typedef struct DdsAllocBlock {
     u32 used;   /* 0x00 */
-    u32 buffer; /* 0x04 */
+    u8 *buffer; /* 0x04 */
 } DdsAllocBlock;
+typedef char DdsAllocBlock_size_must_be_8[(sizeof(DdsAllocBlock) == 8) ? 1 : -1];
 
 
 DdsAllocBlock *dds3AllocateEmptyPackedValueBuffer(void) {
     DdsAllocBlock *block = (DdsAllocBlock *)malloc(8);
-    u32 buffer;
+    u8 *buffer;
 
     memset(block, 0, 8);
-    buffer = (u32)malloc(0x10000);
+    buffer = malloc(0x10000);
     block->used = 0;
     block->buffer = buffer;
     return block;
 }
 
 void dds3ReleasePackedValueBuffer(u32 node) {
-    free((void *)((DdsAllocBlock *)node)->buffer);
+    free(((DdsAllocBlock *)node)->buffer);
     free((void *)node);
 }
 
@@ -134,16 +139,16 @@ void dds3DestroyNamedReferenceCallback(u32 index, u32 referenceAddress) {
 }
 
 
-DdsAllocBlock *dds3AllocateAndAttachPackedValueBuffer(s32 object) {
+DdsAllocBlock *dds3AllocateAndAttachPackedValueBuffer(DdsPackedObject *object) {
     DdsAllocBlock *record;
 
     record = dds3AllocateEmptyPackedValueBuffer();
-    dds3AppendIndexedListNode((MnuCallbackList *)*(u32 *)(object + 4), 0, (u32)record);
+    dds3AppendIndexedListNode(object->segments, 0, (u32)record);
     return record;
 }
 
-u32 dds3GetCurrentPackedValueBuffer(s32 object) {
-    return *(u32 *)(*(s32 *)(*(s32 *)(object + 4) + 8) + 0x10);
+DdsAllocBlock *dds3GetCurrentPackedValueBuffer(DdsPackedObject *object) {
+    return (DdsAllocBlock *)object->segments->tail->value;
 }
 
 /* Allocate the packed owner, its three callback-owned lists and initial buffer. */
@@ -151,13 +156,13 @@ DdsPackedObject *dds3CreatePackedObject(void) {
     DdsPackedObject *object = (DdsPackedObject *)malloc(sizeof(DdsPackedObject));
 
     object->maxPackedOffset = 0;
-    object->segments = (u32)mnuCreateCallbackNode(0);
-    ((MnuCallbackList *)object->segments)->onRemove = dds3DestroyPackedSegmentCallback;
-    object->namedReferences = (u32)mnuCreateCallbackNode(0);
-    ((MnuCallbackList *)object->namedReferences)->onRemove = dds3DestroyNamedReferenceCallback;
-    object->pendingReferences = (u32)mnuCreateCallbackNode(0);
-    ((MnuCallbackList *)object->pendingReferences)->onRemove = dds3DestroyNamedReferenceCallback;
-    dds3AllocateAndAttachPackedValueBuffer((s32)object);
+    object->segments = mnuCreateCallbackNode(0);
+    object->segments->onRemove = dds3DestroyPackedSegmentCallback;
+    object->namedReferences = mnuCreateCallbackNode(0);
+    object->namedReferences->onRemove = dds3DestroyNamedReferenceCallback;
+    object->pendingReferences = mnuCreateCallbackNode(0);
+    object->pendingReferences->onRemove = dds3DestroyNamedReferenceCallback;
+    dds3AllocateAndAttachPackedValueBuffer(object);
     return object;
 }
 
@@ -173,19 +178,19 @@ void dds3ReleaseCallbackCollectionAndNodes(u32 node) {
 
 /* Append `bytes` copies of the source data into the object's 0x10000-byte allocation blocks, moving on to a fresh block when one fills up. */
 void dds3AppendPackedBytes(DdsPackedObject *object, const void *source, u32 bytes) {
-    DdsAllocBlock *block = (DdsAllocBlock *)dds3GetCurrentPackedValueBuffer((s32)object);
+    DdsAllocBlock *block = dds3GetCurrentPackedValueBuffer(object);
 
     if (bytes != 0) {
         do {
             u32 remaining = 0x10000 - block->used;
             u32 count = remaining < bytes ? remaining : bytes;
 
-            memcpy((void *)(block->buffer + block->used), source, count);
+            memcpy(block->buffer + block->used, source, count);
             bytes -= count;
             block->used += count;
             object->maxPackedOffset += count;
             if (block->used > 0xffff) {
-                block = dds3AllocateAndAttachPackedValueBuffer((s32)object);
+                block = dds3AllocateAndAttachPackedValueBuffer(object);
             }
         } while (bytes != 0);
     }
@@ -218,22 +223,22 @@ void dds3RegisterNamedPackedOffset(DdsPackedObject *object, const char *name) {
     }
     record = dds3AllocateNamedReference();
     sprintf(record->name, D_00438960, name);
-    dds3AppendIndexedListNode((MnuCallbackList *)object->namedReferences, 0, (u32)record);
+    dds3AppendIndexedListNode(object->namedReferences, 0, (u32)record);
     record->value = object->maxPackedOffset;
 }
 
 void dds3RecordNamedReference(u32 context, const char *name) {
     DdsNamedRecord *record = dds3AllocateNamedReference();
     strncpy(record->name, name, DDS_NAMED_RECORD_NAME_BYTES);
-    dds3AppendIndexedListNode((MnuCallbackList *)((DdsPackedObject *)context)->pendingReferences, 0, (u32)record);
+    dds3AppendIndexedListNode(((DdsPackedObject *)context)->pendingReferences, 0, (u32)record);
     record->value = ((DdsPackedObject *)context)->maxPackedOffset;
     dds3WritePackedValue(context, -1, 4);
 }
 
 
 /* Walk the named-record list; names occupy at most 0x40 bytes. */
-DdsNamedRecord *dds3FindNamedRecord(u32 context, const char *name) {
-    DdsNamedNode *node = ((DdsNamedList *)context)->first;
+DdsNamedRecord *dds3FindNamedRecord(MnuCallbackList *list, const char *name) {
+    DdsNamedNode *node = (DdsNamedNode *)list->head;
     while (node) {
         DdsNamedRecord *record = node->record;
         if (strncmp(record->name, name, DDS_NAMED_RECORD_NAME_BYTES) == 0) {
@@ -252,19 +257,18 @@ u32 dds3ResolvePackedOffset(u32 *object, u32 packedOffset) {
     if (packedOffset > ((DdsPackedObject *)object)->maxPackedOffset) {
         return 0;
     }
-    segment = mnuFindResourceNodeById(
-        (MnuCallbackList *)((DdsPackedObject *)object)->segments, segmentIndex);
+    segment = mnuFindResourceNodeById(((DdsPackedObject *)object)->segments, segmentIndex);
     return *(u32 *)((u32)segment->value + 4) + offset;
 }
 
 /* Replace recorded pointer slots with their matching named addresses. */
 s32 dds3ApplyNamedRelocations(u32 *object) {
-    DdsNamedNode *node = ((DdsNamedList *)((DdsPackedObject *)object)->pendingReferences)->first;
+    DdsPackedObject *packedObject = (DdsPackedObject *)object;
+    DdsNamedNode *node = (DdsNamedNode *)packedObject->pendingReferences->head;
     if (node != NULL) {
         do {
             DdsNamedRecord *record = node->record;
-            DdsNamedRecord *found = dds3FindNamedRecord(
-                ((DdsPackedObject *)object)->namedReferences, record->name);
+            DdsNamedRecord *found = dds3FindNamedRecord(packedObject->namedReferences, record->name);
             u32 address;
             u32 replacement;
             if (found == NULL) {
@@ -297,7 +301,7 @@ u32 dds3RegisterPendingNamedReferences(u32 *object, SdkFileStream *stream) {
     DdsNamedNode *node = ((DdsNamedList *)object[1])->first;
     while (node) {
         DdsAllocBlock *record = node->record;
-        fwrite((const void *)record->buffer, record->used, 1, stream);
+        fwrite(record->buffer, record->used, 1, stream);
         node = node->next;
     }
     return object[0];
