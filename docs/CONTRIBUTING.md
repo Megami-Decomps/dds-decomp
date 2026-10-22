@@ -177,7 +177,8 @@ Always check the whole unit after an edit. A changed declaration, or even a
 new name, can change how other functions compile. Then build:
 
 ```sh
-ninja            # both games; fails unless every ELF is byte-identical
+ninja                       # both games; fails unless every ELF is byte-identical
+python3 tools/run_tests.py  # the script and data tooling tests, across every core
 ```
 
 Other diff tools:
