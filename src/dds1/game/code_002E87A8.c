@@ -10,6 +10,7 @@
 #include "sdf_alarm.h"
 #include "mnu_sound_resource_path_api.h"
 #include "snd_midi_state_views.h"
+#include "snd_file_request_state.h"
 #define SND_COMMAND_RING_ENTRY_COUNT 32
 #define SND_COMMAND_RING_INDEX_MASK (SND_COMMAND_RING_ENTRY_COUNT - 1)
 #define SND_COMMAND_HEADER_BYTES 0x14
@@ -447,12 +448,6 @@ u32 sndSendFilenameCommand(char *filename) {
     return sndSendCommand(0xA0, filename, length);
 }
 
-typedef struct SndFileRequestState {
-    u8 path[0x100];
-    s32 size;
-    s32 pending;
-    u32 data;
-} SndFileRequestState;
 extern SndFileRequestState D_003FE990;
 extern u32 D_003BDA70;
 void p2sdSetPcmBuffer(u32 data, s32 size) {
