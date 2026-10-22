@@ -253,7 +253,7 @@ struct MdlCtx;
 struct SdfPoolNode;
 extern void btlDrawUnitTransparencyPasses(void *, void *, s32, u8 *, u32);
 extern void dds3ObjectBaseOffFlag(s32, s32);
-extern struct SdfPoolNode *D_00380788[13][4];
+extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern u8 btlUnitTransparencySurfaces[];
 
 

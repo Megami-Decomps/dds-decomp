@@ -70,7 +70,7 @@ extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
 extern void mnuDrawPanelItemValueMeter(s32, s32, s32, DatPartyRecord *, MenuSpriteState *, s32);
 struct SdfPoolNode;
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);
-extern struct SdfPoolNode *D_00380788[13][4];
+extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *context, s32 copyOptions) {
     DatPartyRecord *unit = context->selectedRewardRow->unit;
@@ -93,7 +93,7 @@ void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *context, s32 copyOptions) {
     mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, unit, context->panelHandle, 0, 0x53);
     mnuDrawPanelItemValueMeter(0, 0, 0, unit, context->spriteHandle, 0x53);
     mnuDrawRemainingSelectionExtent(context);
-    evtStageTestUpdate(D_00380788[0]);
+    evtStageTestUpdate(kwlnSceneSurfaceSets[0]);
 }
 
 s32 mnuAdvanceSkillPackageToItemPanel(KwlnTask *request) {

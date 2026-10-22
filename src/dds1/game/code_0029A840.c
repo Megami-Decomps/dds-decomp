@@ -159,12 +159,11 @@ void effModelAnimationStop(EffModelOwner *owner) {
     sdfMotionSampleAtFrame(owner->model->first, 0.0f);
 }
 
-extern struct SdfPoolNode *D_00325828[4];
 
 extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
 
 #include "sdf_packet_alloc.h"
-extern SdfPoolNode *D_00325788[13][4];
+extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern u64 D_0037E5B0[];
 
 /* Attach the owner's lighting buffer when the direction update succeeds. */
@@ -176,7 +175,7 @@ void effRefreshModelLighting(EffModelOwner *work) {
     } else {
         model = work->model;
     }
-    mdlProcessContextNodesAndTransforms(model, D_00325828);
+    mdlProcessContextNodesAndTransforms(model, kwlnSceneSurfaceSets[10]);
 }
 
 /* Pass a vector to the VU0 model helpers via vf10 (gcc cannot do this from plain C). */
@@ -302,7 +301,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
         }
         packet[5] = 0x47;
         sdfAppendPacket(list, (u32)packet);
-        surface = D_00325788[1][index];
+        surface = kwlnSceneSurfaceSets[1][index];
         surface->append(surface, list);
     }
 
@@ -310,7 +309,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
         owner->model->inner->lighting = &owner->ownedBuffer->dmaTag;
     }
 
-    mdlProcessContextNodesAndTransforms(owner->model, D_00325788[1]);
+    mdlProcessContextNodesAndTransforms(owner->model, kwlnSceneSurfaceSets[1]);
 
     for (index = 1; index != 4; index++) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
@@ -323,7 +322,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
         packet[4] = D_0037E5B0[index];
         packet[5] = 0x47;
         sdfAppendPacket(list, (u32)packet);
-        surface = D_00325788[1][index];
+        surface = kwlnSceneSurfaceSets[1][index];
         surface->append(surface, list);
     }
 }
@@ -631,7 +630,7 @@ void func_0029B818(EffResourceOwner *owner) {
         VU0_STORE_VF_UNCLOBBERED(vf30, owner->model->inner->matrix[2]);
     }
     owner->model->first->frameStep = frameStep;
-    mdlProcessContextNodesAndTransforms(owner->model, D_00325828);
+    mdlProcessContextNodesAndTransforms(owner->model, kwlnSceneSurfaceSets[10]);
     frame = owner->unk04;
     count = owner->count;
     limit = owner->plainEntry;

@@ -183,8 +183,7 @@ extern u8 evtStageTestViewTargetVector[];
 
 
 /* Battle stage test viewer state. Retail addresses it partly through
- * D_003DC600 (= &evtStageTestState.queue.slot[0], hence the negative offsets), so the
- * D_003DC5EC..D_003DC654 symbols are all interior fields of this one object. */
+ * &evtStageTestState.queue.slot[0], hence the negative offsets. */
 extern StageTestState evtStageTestState;
 
 extern void btlStopStage(void);

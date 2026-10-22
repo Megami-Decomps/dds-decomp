@@ -204,7 +204,7 @@ extern u8 D_00384790[];
 extern u8 sdfViewEyeVector[], sdfViewTargetVector[], sdfViewUpVector[];
 extern u8 D_0037F590[];
 extern u8 sdfViewMatrix[0x40];
-extern SdfPoolNode *D_00380788[13][4];
+extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern void kwlnAdvanceShakeOffsets(void);
 extern u32 evtCheckSelectionState(void);
 extern void kwlnUpdateDrawParameterTransitions(void);
@@ -306,30 +306,30 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
         sdfAppendPacketChainNode((SdfPacketChain *)D_00380860,
             (SdfLinkedPacketList *)(D_003820F0 - 0x230 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
         providerSurfaces = &kwlnDrawSurfaces[7];
-        sdfStoreMessageWordsAndNotifyConsumer(D_00380788[0], &providerSurfaces[32], &providerSurfaces[33],
+        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[0], &providerSurfaces[32], &providerSurfaces[33],
                                               &providerSurfaces[48], &providerSurfaces[49]);
         fldConfigureRenderCleanupMessage();
-        sdfStoreMessageWordsAndNotifyConsumer(D_00380788[8], &providerSurfaces[55], &providerSurfaces[56],
+        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[8], &providerSurfaces[55], &providerSurfaces[56],
                                               &providerSurfaces[57], &providerSurfaces[58]);
-        sdfStoreMessageWordsAndNotifyConsumer(D_00380788[9], &providerSurfaces[67], &providerSurfaces[68],
+        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[9], &providerSurfaces[67], &providerSurfaces[68],
                                               &providerSurfaces[69], &providerSurfaces[70]);
-        sdfStoreMessageWordsAndNotifyConsumer(D_00380788[1], &providerSurfaces[1], &providerSurfaces[2],
+        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[1], &providerSurfaces[1], &providerSurfaces[2],
                                               &providerSurfaces[3], &providerSurfaces[4]);
-        sdfStoreMessageWordsAndNotifyConsumer(D_00380788[2], &providerSurfaces[6], &providerSurfaces[7],
+        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[2], &providerSurfaces[6], &providerSurfaces[7],
                                               &providerSurfaces[8], &providerSurfaces[9]);
-        sdfStoreMessageWordsAndNotifyConsumer(D_00380788[3], &providerSurfaces[11], &providerSurfaces[12],
+        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[3], &providerSurfaces[11], &providerSurfaces[12],
                                               &providerSurfaces[13], &providerSurfaces[14]);
-        sdfStoreMessageWordsAndNotifyConsumer(D_00380788[4], &providerSurfaces[16], &providerSurfaces[17],
+        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[4], &providerSurfaces[16], &providerSurfaces[17],
                                               &providerSurfaces[18], &providerSurfaces[19]);
-        sdfStoreMessageWordsAndNotifyConsumer(D_00380788[5], &providerSurfaces[21], &providerSurfaces[22],
+        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[5], &providerSurfaces[21], &providerSurfaces[22],
                                               &providerSurfaces[23], &providerSurfaces[24]);
-        sdfStoreMessageWordsAndNotifyConsumer(D_00380788[6], &providerSurfaces[37], &providerSurfaces[38],
+        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[6], &providerSurfaces[37], &providerSurfaces[38],
                                               &providerSurfaces[39], &providerSurfaces[40]);
-        sdfStoreMessageWordsAndNotifyConsumer(D_00380788[10], &providerSurfaces[42], &providerSurfaces[43],
+        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[10], &providerSurfaces[42], &providerSurfaces[43],
                                               &providerSurfaces[46], &providerSurfaces[47]);
-        sdfStoreMessageWordsAndNotifyConsumer(D_00380788[11], &providerSurfaces[79], &providerSurfaces[80],
+        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[11], &providerSurfaces[79], &providerSurfaces[80],
                                               &providerSurfaces[81], &providerSurfaces[82]);
-        sdfStoreMessageWordsAndNotifyConsumer(D_00380788[12], &providerSurfaces[-5], &providerSurfaces[-4],
+        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[12], &providerSurfaces[-5], &providerSurfaces[-4],
                                               &providerSurfaces[-3], &providerSurfaces[-2]);
         sdfConsSetDefaultFirstReference((u32)(D_003820F0 + bufferIndex * 0x1F40 + 0xD0));
         sdfConsSetDefaultSecondReference((u32)viewFrustum);
@@ -376,7 +376,7 @@ extern void kwlnAdvanceDrawFadesAndTransitions(void);
 extern u32 fldIsUpdateInhibited(void);
 extern void sdfDumpDmaVifCommandStream(s32);
 extern void sdfGrReqDraw(SdfListHead *, SdfPacketChain *);
-extern SdfPoolNode *D_00380788[13][4];
+extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern SdfPoolNode D_00380708;
 extern u8 kwlnDrawOverlayEnabled;
@@ -410,7 +410,7 @@ s32 kwlnRenderFrame(KwlnTask *task) {
     kwlnFadeUpdate();
     kwlnQueueBackgroundFadeOverlayPacket();
     kwlnAdvanceDrawFadesAndTransitions();
-    groupHeads = D_00380788;
+    groupHeads = kwlnSceneSurfaceSets;
     packetGroups = D_00380870[bufferIndex].packetGroups;
     for (i = KWLN_FRAME_LAST_GROUP_INDEX; i >= 0; i--) {
         sdfSubmitDrawPacketGroups(*groupHeads, packetGroups);

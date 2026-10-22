@@ -169,7 +169,7 @@ void effBossDestroy(EffBossWork *work) {
 #include "eff_math.h"
 #include "sdf_quaternion.h"
 extern u32 effMultiplyPackedColors(u32, u32);
-extern struct SdfPoolNode *D_00325828[];
+extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern f32 D_003556B0[4];
 extern s32 sdfLoadMapRecordLookAtBasis(struct SdfModel *, s32);
 extern void effSetFanRecordPoolColor(EffRecordPool *, u32);
@@ -226,7 +226,7 @@ void effBossUpdateGeometry(void *opaque) {
     scaleVector[3] = 0.0f;
     VU0_LOAD_VF(vf10, scaleVector);
     mdlStoreTertiaryVectorVU(model);
-    mdlProcessContextNodesAndTransforms(model, D_00325828);
+    mdlProcessContextNodesAndTransforms(model, kwlnSceneSurfaceSets[10]);
     if (work->head.drawTrail) {
         colorStart = work->head.trailColorStartFrame;
         if (frame > colorStart) {

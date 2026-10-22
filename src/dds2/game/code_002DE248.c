@@ -408,7 +408,7 @@ extern MdlCtx *effLoadViewerModelWithVUState(void *, u32);
 
 
 
-extern struct SdfPoolNode *D_00380828[4];
+extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 
 typedef struct EffectObjectFlag {
@@ -10953,7 +10953,7 @@ void effUpdateActorPoseFromModelResource(EffActiveResource *resource)
 
     model = *modelHandle;
     model->first->frameStep = config->frameStep;
-    mdlProcessContextNodesAndTransforms(model, D_00380828);
+    mdlProcessContextNodesAndTransforms(model, kwlnSceneSurfaceSets[10]);
     elapsedFrame = (s32)resource->frame;
     duration = config->duration;
     inner = (*modelHandle)->inner;
@@ -11121,7 +11121,7 @@ void effApplyModelTransform(u8 *work) {
     mdlStoreTertiaryVectorVU(modelContext->model);
     modelContext->model->first->frameStep =
         ((EffAimConfig *)animation)->modelParameter;
-    mdlProcessContextNodesAndTransforms(modelContext->model, D_00380828);
+    mdlProcessContextNodesAndTransforms(modelContext->model, kwlnSceneSurfaceSets[10]);
     effDrawClassResourceWork(modelContext->material);
 }
 
@@ -12295,7 +12295,7 @@ void func_002FAD98(EffectSlotNode80 *node) {
                 VU0_STORE_VF(vf29, model->matrix[1]);
                 VU0_STORE_VF(vf30, model->matrix[2]);
                 sdfModelUpdateCurrentFrameTransforms(model);
-                sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, D_00380828, model);
+                sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, kwlnSceneSurfaceSets[10], model);
             }
         } else {
             fileReadRecordSecondVector((u8 *)record, rotation);
@@ -12337,7 +12337,7 @@ void func_002FAD98(EffectSlotNode80 *node) {
                 VU0_STORE_VF(vf29, model->matrix[1]);
                 VU0_STORE_VF(vf30, model->matrix[2]);
                 sdfModelUpdateCurrentFrameTransforms(model);
-                sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, D_00380828, model);
+                sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, kwlnSceneSurfaceSets[10], model);
             }
         }
         break;
@@ -12592,8 +12592,7 @@ void effSampleSharedEffectModelStartPose(EffSharedEffectWork *work) {
     }
 }
 
-extern SdfPoolNode *D_00380788[13][4];
-extern SdfPoolNode *D_00380808[4];
+extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern u64 D_003EA210[4];
 
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *owner, MdlResourceItem *anchorRecord);
@@ -12664,9 +12663,9 @@ void func_002FB998(EffSharedEffectWork *work) {
     }
     if (work->resource->deviceSlot == 0) {
         if (work->data.pad0B != 0) {
-            mdlProcessContextNodesAndTransforms(work->resource->model, D_00380808);
+            mdlProcessContextNodesAndTransforms(work->resource->model, kwlnSceneSurfaceSets[8]);
         } else {
-            mdlProcessContextNodesAndTransforms(work->resource->model, D_00380828);
+            mdlProcessContextNodesAndTransforms(work->resource->model, kwlnSceneSurfaceSets[10]);
         }
         return;
     }
@@ -12682,14 +12681,14 @@ void func_002FB998(EffSharedEffectWork *work) {
         packet->registerValue = 0x72801;
         packet->registerAddress = 0x47;
         sdfAppendPacket(list, (u32)packet);
-        surface = D_00380788[0][i];
+        surface = kwlnSceneSurfaceSets[0][i];
         surface->append(surface, list);
     }
     model = work->resource->model;
     model->flags |= MDL_SKIP_ANCHORS;
     savedFlags = model->inner->drawFlags;
     model->inner->drawFlags = 0x2000;
-    mdlProcessContextNodesAndTransforms(model, D_00380788[0]);
+    mdlProcessContextNodesAndTransforms(model, kwlnSceneSurfaceSets[0]);
     work->resource->model->flags &= ~MDL_SKIP_ANCHORS;
     work->resource->model->inner->drawFlags = savedFlags;
     for (i = 0; i != 4; i++) {
@@ -12703,7 +12702,7 @@ void func_002FB998(EffSharedEffectWork *work) {
         packet->registerValue = D_003EA210[i];
         packet->registerAddress = 0x47;
         sdfAppendPacket(list, (u32)packet);
-        surface = D_00380788[0][i];
+        surface = kwlnSceneSurfaceSets[0][i];
         surface->append(surface, list);
     }
     baseColor[0] = work->data.frame;
@@ -12730,7 +12729,7 @@ void func_002FB998(EffSharedEffectWork *work) {
         packet->registerValue = 0x51801;
         packet->registerAddress = 0x47;
         sdfAppendPacket(list, (u32)packet);
-        surface = D_00380788[8][i];
+        surface = kwlnSceneSurfaceSets[8][i];
         surface->append(surface, list);
     }
     sdfModelCopyRuntimeState((SdfModel *)work->resource->deviceSlot, work->resource->model->inner);
@@ -12739,7 +12738,7 @@ void func_002FB998(EffSharedEffectWork *work) {
     } else {
         ((SdfModel *)work->resource->deviceSlot)->lighting = NULL;
     }
-    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, D_00380788[8],
+    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, kwlnSceneSurfaceSets[8],
                            (SdfModel *)work->resource->deviceSlot);
     for (i = 0; i != 4; i++) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
@@ -12752,7 +12751,7 @@ void func_002FB998(EffSharedEffectWork *work) {
         packet->registerValue = D_003EA210[i];
         packet->registerAddress = 0x47;
         sdfAppendPacket(list, (u32)packet);
-        surface = D_00380788[8][i];
+        surface = kwlnSceneSurfaceSets[8][i];
         surface->append(surface, list);
     }
 }

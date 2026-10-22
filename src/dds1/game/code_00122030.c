@@ -96,7 +96,7 @@ extern s32 D_0032E4DC[];
 
 extern SdfPoolNode D_00324F88[];
 
-extern SdfPoolNode *D_00325788[13][4];
+extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 extern u8 D_00324530[];
 
@@ -1577,7 +1577,7 @@ u8 fldIsFlagActive(void) {
 }
 
 void fldConfigureRenderCleanupMessage(void) {
-    sdfStoreMessageWordsAndNotifyConsumer(D_00325788[7], &D_00324F88[0], &D_00324F88[6], &D_00324F88[8], &D_00324F88[7]);
+    sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[7], &D_00324F88[0], &D_00324F88[6], &D_00324F88[8], &D_00324F88[7]);
 }
 
 #include "fld_encounter_roll_entry.h"

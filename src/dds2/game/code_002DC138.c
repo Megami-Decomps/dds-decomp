@@ -41,7 +41,6 @@ extern void effRecreateModelFromSource(EffModelOwner *, EffModelOwner *);
 
 #include "sdf_debug_api.h"
 
-extern struct SdfPoolNode *D_00380828[4];
 
 
 
@@ -57,7 +56,7 @@ extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
 extern void effFloorModelListRemove(EffectObjectNode *);
 
 #include "sdf_packet_alloc.h"
-extern SdfPoolNode *D_00380788[13][4];
+extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern u64 D_003E9640[];
 
 extern u32 effSharedTextureReferenceCount;
@@ -183,7 +182,7 @@ void effRefreshModelLighting(EffModelOwner *work) {
     } else {
         model = work->model;
     }
-    mdlProcessContextNodesAndTransforms(model, D_00380828);
+    mdlProcessContextNodesAndTransforms(model, kwlnSceneSurfaceSets[10]);
 }
 
 void effApplyModelPrimaryVector(EffModelOwner *owner, u8 *vec) {
@@ -320,7 +319,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
         }
         packet[5] = 0x47;
         sdfAppendPacket(list, (u32)packet);
-        surface = D_00380788[1][index];
+        surface = kwlnSceneSurfaceSets[1][index];
         surface->append(surface, list);
     }
 
@@ -328,7 +327,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
         owner->model->inner->lighting = &owner->ownedBuffer->dmaTag;
     }
 
-    mdlProcessContextNodesAndTransforms(owner->model, D_00380788[1]);
+    mdlProcessContextNodesAndTransforms(owner->model, kwlnSceneSurfaceSets[1]);
 
     for (index = 1; index != 4; index++) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
@@ -341,7 +340,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
         packet[4] = D_003E9640[index];
         packet[5] = 0x47;
         sdfAppendPacket(list, (u32)packet);
-        surface = D_00380788[1][index];
+        surface = kwlnSceneSurfaceSets[1][index];
         surface->append(surface, list);
     }
 }
@@ -701,7 +700,7 @@ void func_002DD448(EffResourceOwner *owner) {
     }
     if (!(effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE)) {
         owner->model->first->frameStep = frameStep;
-        mdlProcessContextNodesAndTransforms(owner->model, D_00380828);
+        mdlProcessContextNodesAndTransforms(owner->model, kwlnSceneSurfaceSets[10]);
     }
     frame = owner->unk04;
     count = owner->count;
