@@ -10004,3 +10004,6 @@
 0x0037E508	fileJobZeroPadding	inferred	Sixteen zero bytes fileJobWriteSerializedPayload writes to pad a job file's primary buffer to sixteen bytes. DDS2 twin 0x003E9578.
 0x00357FE8	itfSoundSelectorBorderColor	inferred	The sound selector option panel's border colour (DrawColorRec 0x3D, 5, 0, 0x4D), for itfDrawThreePanelBorderBands. DDS2 twin 0x003B49D8.
 0x00325788	kwlnSceneSurfaceSets	inferred	Thirteen sets of four draw surfaces (SdfPoolNode *[13][4]) that kwlnBuildFrameScenePackets stores each frame; a model draws through the set of its pass. DDS2 twin 0x00380788.
+0x003DCAA0	effQuadPacketParams	inferred	The effect quads' shared vertex packet parameters (EffPacketParams): effDrawQuadWork points them at its frame's corner and texture arrays and colour, effCreateVertexDrawPacket copies them. DDS2 twin 0x00458370.
+0x0037EC30	effLayerSurfaces	inferred	The draw surface each effect layer's packets go to (eight SdfPoolNode pointers into kwlnDrawSurfaces, indexed by a track's surfaceIndex). DDS2 twin 0x003E9CE0.
+0x002A8020	effDrawQuadWork	inferred	Per-frame draw of a textured effect quad (effCreateQuadWork's): samples its tracks, builds the rotated corners, submits the packets to its layer's surface, advances the frame. DDS2 twin 0x002EA5D8.

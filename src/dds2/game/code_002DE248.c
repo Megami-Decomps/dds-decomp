@@ -5650,7 +5650,7 @@ void effSubmitIndexedRenderPacket(u32 index) {
 extern EffQuadWork *effCreateQuadWork(FileJobPayload *job);
 void effDuplicateRenderResourceOwner(EffQuadWork *work, const EffQuadWork *source);
 
-extern EffPacketParams D_00458370;
+extern EffPacketParams effQuadPacketParams;
 extern u32 D_003E9CC0[];
 extern u32 D_003E9CD0[];
 
@@ -5667,12 +5667,12 @@ EffQuadWork *effCreateQuadWork(FileJobPayload *job) {
     work->reference = NULL;
     work->assetHandle = sdfCreateAssetWithDrawEntries();
     sdfSetPrimaryStateFloat(work->assetHandle, 1.0f);
-    memset(&D_00458370, 0, sizeof(EffPacketParams));
-    D_00458370.primitive = 0x4000;
-    D_00458370.parameters = D_003E9CC0;
-    D_00458370.colors = D_003E9CD0;
-    D_00458370.parameterCount = 2;
-    D_00458370.vertexCount = 4;
+    memset(&effQuadPacketParams, 0, sizeof(EffPacketParams));
+    effQuadPacketParams.primitive = 0x4000;
+    effQuadPacketParams.parameters = D_003E9CC0;
+    effQuadPacketParams.colors = D_003E9CD0;
+    effQuadPacketParams.parameterCount = 2;
+    effQuadPacketParams.vertexCount = 4;
     if (job == NULL) {
         return work;
     }
@@ -5743,7 +5743,7 @@ void effResetRenderResourceKind(EffQuadWork *work) {
     work->frame = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002EA5D8);
+INCLUDE_ASM(const s32, "game/code_002DE248", effDrawQuadWork);
 
 void effCopyRenderResourcePosition(EffQuadWork *work, const f32 *source) {
     PCP_COPY_VECTOR(work->position, source);
