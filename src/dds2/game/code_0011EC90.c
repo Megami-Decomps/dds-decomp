@@ -7,7 +7,7 @@
 #include "dds3_owned_node.h"
 #include "pty_roster_api.h"
 
-extern u32 mtrHasEnoughOwnedMantras(void);
+extern s32 mtrHasEnoughOwnedMantras(void);
 
 extern s32 ptyAddUnitWithFlags(s32 rosterIndex, s32 initFlags);
 
