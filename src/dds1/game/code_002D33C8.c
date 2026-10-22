@@ -84,7 +84,7 @@ extern void sdfSleepThreadCount(s32 requestedSleepCount);
 
 extern u16 D_003BD334;
 extern s32 D_003BD340;
-extern s8 D_003BDA05;
+extern s8 sdfImageUploadPending;
 extern vu8 sdfCurrentBufferIndex;
 
 extern SdfPendingNode *sdfPendingQueueHead;
@@ -105,8 +105,8 @@ extern s32 sdfPendingQueueSemaphore;
 extern SdfPendingRequest sdfTextureReleaseQueue;
 extern SdfPendingRequest sdfObjectListReleaseQueue;
 extern volatile s8 sdfPacketSlotIndex;
-extern s32 D_003BD338;
-extern SdfPacketSlot D_00398158[];
+extern s32 sdfFramePacketSlotIndex;
+extern SdfPacketSlot sdfFramePacketSlots[];
 
 extern SdfGraphObj D_003980E0;
 
@@ -874,7 +874,7 @@ void sdfBuildSceneDrawHeader(SdfGsContextPacket *packet, s32 frameAddress, s32 w
 }
 
 
-extern u8 D_003BD332;
+extern u8 sdfGrBufferSlotIndex;
 
 /* Build both GS drawing contexts from the selected frame buffer and shared depth buffer. */
 void sdfGrSetDrawEnv(SdfSceneDrawPacket *packet, SdfGraphObj *view, s32 bufferIndex) {
@@ -892,8 +892,8 @@ void sdfGrSetDrawEnv(SdfSceneDrawPacket *packet, SdfGraphObj *view, s32 bufferIn
     frameFormat = view->bufferFormat;
     height = view->height;
     depthFormat = view->auxiliaryFormat;
-    sdfBuildFrameDepthScissorPacket(&packet->contextOne, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_003BD332, 0);
-    sdfBuildFrameDepthScissorPacket(&packet->contextTwo, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_003BD332, 1);
+    sdfBuildFrameDepthScissorPacket(&packet->contextOne, frameAddress, width, height, frameFormat, depthAddress, depthFormat, sdfGrBufferSlotIndex, 0);
+    sdfBuildFrameDepthScissorPacket(&packet->contextTwo, frameAddress, width, height, frameFormat, depthAddress, depthFormat, sdfGrBufferSlotIndex, 1);
     sdfBuildCenteredViewBoundsPacket(&packet->centeredBounds, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
     packet->blendState.contextOne.test.value = SDF_GS_SCENE_TEST;
     packet->blendState.contextOne.test.registerId = SDF_GS_TEST_1;
@@ -1007,11 +1007,11 @@ void sdfGrReqDraw(SdfListHead *list, SdfPacketChain *chain) {
     }
     D_003BD334 = sdfGetElapsedTimerTicks(start);
     interrupts = DIntr();
-    index = D_003BD338 + 1;
+    index = sdfFramePacketSlotIndex + 1;
     if (index == 3) {
         index = 0;
     }
-    slot = &D_00398158[index];
+    slot = &sdfFramePacketSlots[index];
     slot->packetList = NULL;
     slot->callbackHead = NULL;
     slot->slotUpdatePhase = 0;
@@ -1025,8 +1025,8 @@ void sdfGrReqDraw(SdfListHead *list, SdfPacketChain *chain) {
         }
         slot->queuedBufferIndex = sdfCurrentBufferIndex;
     }
-    D_003BD338 = index;
-    D_003BDA05 = 1;
+    sdfFramePacketSlotIndex = index;
+    sdfImageUploadPending = 1;
     D_003BD340++;
     if (interrupts != 0) {
         EIntr();
@@ -1039,8 +1039,8 @@ void sdfGrReqDrawDelay(s32 value) {
 
 void sdfGrInitDraw(void) {
     sdfPacketSlotIndex = 0;
-    D_00398158[0].packetList = NULL;
-    D_003BD338 = 0;
+    sdfFramePacketSlots[0].packetList = NULL;
+    sdfFramePacketSlotIndex = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", sdfGrDrawFrame);
@@ -1049,15 +1049,15 @@ extern vu8 D_003BD32D;
 
 /* Wait for the shared busy flag, then sleep until the active slot is empty or ready. */
 void sdfDrawSync(void) {
-    SdfPacketSlot *table = D_00398158;
+    SdfPacketSlot *table = sdfFramePacketSlots;
 
     for (;;) {
         while (D_003BD32D != 0) {
         }
-        if (table[D_003BD338].packetList == NULL) {
+        if (table[sdfFramePacketSlotIndex].packetList == NULL) {
             break;
         }
-        if (table[D_003BD338].slotUpdatePhase >= 2) {
+        if (table[sdfFramePacketSlotIndex].slotUpdatePhase >= 2) {
             break;
         }
         sdfSleepThreadCount(0);
@@ -1909,25 +1909,25 @@ INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfPacketCursor);
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfPacketBufferEnd);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD32C);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfGrDrawStopRequested);
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD32D);
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD32E);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD330);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfGrFrameComplete);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD331);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfGrDrawBufferIndex);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD332);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfGrBufferSlotIndex);
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfPacketSlotIndex);
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD334);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD338);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfFramePacketSlotIndex);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD33C);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfGrLastSentChain);
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD340);
 
