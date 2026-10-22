@@ -48,6 +48,7 @@ void btlInitFxLights(BtlUnit *unit);
 void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *unit, s32 kind, s32 index);
 
 struct evtUnitHandle_t;
+struct sdfMemHandle_t;
 struct SoundResourceLink;
 struct dds3Basic_t;
 
@@ -171,7 +172,7 @@ typedef struct BtlUnit {
     s32 transparencyBuffer; /* 0x32C: mirror pass's 512x224 transfer image. */
     s32 transparencyBufferAllocation; /* 0x330: general allocation released with the image. */
     u8 pad334[8];
-    u32 handle; /* 0x33C */
+    struct sdfMemHandle_t *handle; /* 0x33C: allocation that owns this unit. */
     struct BtlUnit *previousActor; /* 0x340 */
     struct BtlUnit *next; /* 0x344: actor-list link, not a task-chain link */
 } BtlUnit;
@@ -259,7 +260,7 @@ typedef struct BtlUnit {
     s32 transparencyBuffer; /* 0x34C: mirror pass's 512x224 transfer image. */
     s32 transparencyBufferAllocation; /* 0x350: general allocation released with the image. */
     u8 pad354[8];
-    u32 handle; /* 0x35C: allocation that owns this unit. */
+    struct sdfMemHandle_t *handle; /* 0x35C: allocation that owns this unit. */
     struct BtlUnit *previousActor; /* 0x360 */
     struct BtlUnit *nextActor; /* 0x364 */
 } BtlUnit;

@@ -4995,7 +4995,7 @@ BtlUnit *btlCreateUnit(void) {
     BtlUnit *unit = (BtlUnit *)sdfMemLock(allocation);
     BtlActorWork *work;
     memset(unit, 0, 0x348);
-    unit->handle = (u32)allocation;
+    unit->handle = allocation;
     unit->identity = btlAdvanceRuntimeSequenceCounter();
     unit->status.flags = 0;
     unit->status.stateFlags = 0;
@@ -5073,7 +5073,7 @@ void btlDestroyUnit(u8 *actor) {
     } else {
         *(u8 **)((u8 *)btlGetRuntime() + 0x228) = *(u8 **)(actor + 0x344);
     }
-    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(*(s32 *)(actor + 0x33C)));
+    sdfMemFreeDirect(((BtlUnit *)actor)->handle);
 }
 
 void btlDestroyAllUnits(void) {
