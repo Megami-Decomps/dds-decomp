@@ -1229,7 +1229,7 @@ GridTextListItem *itfAppendGridTextItem(GridTextWidget *owner, const char *text,
     item->next = 0;
     item->value = value;
     tail = owner->tail;
-    item->parameter = NULL;
+    item->numericDescriptor = NULL;
     item->previous = tail;
     if (tail != 0) {
         tail->next = item;
@@ -1311,8 +1311,8 @@ GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *widget) {
         widget->tail = previous;
     }
     sdfChipFreeDirect(node->text);
-    if (node->parameter != NULL) {
-        sdfChipFreeDirect(node->parameter);
+    if (node->numericDescriptor != NULL) {
+        sdfChipFreeDirect(node->numericDescriptor);
     }
     sdfChipFreeDirect(node);
     widget->itemCount--;
@@ -1345,11 +1345,11 @@ s32 itfSetGridNumericItemDescriptor(GridTextWidget *widget, GridTextListItem *it
     s32 length;
 
     copy = (GridNumericDescriptor *)sdfChipAllocDirect(sizeof(GridNumericDescriptor));
-    item->parameter = copy;
+    item->numericDescriptor = copy;
     memcpy(copy, descriptor, sizeof(GridNumericDescriptor));
     item->number = descriptor->value;
     length = strlen(item->text);
-    maximum = ((GridNumericDescriptor *)item->parameter)->maximum;
+    maximum = item->numericDescriptor->maximum;
 
     switch (descriptor->mode) {
         case GRID_NUMERIC_FORMAT_HEXADECIMAL:
@@ -1393,7 +1393,7 @@ void itfAdvanceGridScrollPosition(GridTextWidget *owner, u32 key, s32 steps) {
     float previous;
 
     entry = itfFindGridNodeByKey(key, owner);
-    range = entry->parameter;
+    range = entry->numericDescriptor;
     position = &entry->number;
     delta = range->step;
     if (1 < steps) {
@@ -1422,7 +1422,7 @@ void itfReverseGridScrollPosition(GridTextWidget *owner, u32 key, s32 steps) {
     float previous;
 
     entry = itfFindGridNodeByKey(key, owner);
-    range = entry->parameter;
+    range = entry->numericDescriptor;
     position = &entry->number;
     delta = range->step;
     if (1 < steps) {
@@ -1471,7 +1471,7 @@ void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry
 
     if (entry->format != NULL) {
         entry->format(widget, entry, text, 0x100);
-    } else if (entry->parameter == NULL) {
+    } else if (entry->numericDescriptor == NULL) {
         sprintf(text, "%s", entry->text);
     } else {
         if (strlen(entry->text) == 0) {
@@ -1479,7 +1479,7 @@ void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry
         } else {
             sprintf(prefix, "%s ", entry->text);
         }
-        switch (((GridNumericDescriptor *)entry->parameter)->mode) {
+        switch (entry->numericDescriptor->mode) {
         case GRID_NUMERIC_FORMAT_DECIMAL:
             sprintf(format, "%%s%%0%dd", entry->formatWidth);
             sprintf(text, format, prefix, (s32)entry->number);
