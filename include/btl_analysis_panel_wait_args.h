@@ -4,10 +4,10 @@
 #include "common.h"
 
 /* Eight-byte callback arguments allocated by btlAllocTask(8). The first word
- * is forwarded unchanged to btlCreateAnalysisPanelTask; its origin remains
- * opaque here. The second word counts callback updates before panel creation. */
+ * is forwarded as the analysis-panel entry to btlCreateAnalysisPanelTask. The
+ * second word counts callback updates before panel creation. */
 typedef struct BtlAnalysisPanelWaitArgs {
-    s32 value;
+    s32 panelEntry;
     u32 elapsedTicks;
 } BtlAnalysisPanelWaitArgs;
 
