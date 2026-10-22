@@ -2728,7 +2728,7 @@ u32 evtCommand_EFFBED_START_EVO(void) {
         modelRecordIndex = scrGetIntPara(2);
         if (modelRecordIndex >= 0) {
             f32 value = evtComputeClampedModelScale(modelRecordIndex);
-            void *target = ((EvtModelHeader *)unit->data)->target2C;
+            struct effEveBEDCutHandle_t *target = ((EvtModelHeader *)unit->data)->target2C;
             if (target != NULL) {
                 effEveBEDCutSetScale(target, value);
             }

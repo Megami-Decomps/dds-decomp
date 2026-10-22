@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+struct effEveBEDCutHandle_t;
+
 /* Shared event-model prefix; DDS2 also consumes the opaque +0x1C..+0x2B gap
  * and the target pointer at +0x2C in the model-cut opcode. */
 typedef struct EvtModelHeader {
@@ -14,7 +16,7 @@ typedef struct EvtModelHeader {
     f32 positionZ;      /* 0x18 */
 #ifdef VERSION_DDS2
     u8 pad1C[0x10];
-    void *target2C;     /* 0x2C: scaled by the model-cut opcode */
+    struct effEveBEDCutHandle_t *target2C; /* 0x2C: model-cut scale target */
 #endif
 } EvtModelHeader;
 
