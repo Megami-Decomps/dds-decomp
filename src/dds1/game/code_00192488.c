@@ -468,7 +468,7 @@ void dds3BuildSplinePoints(f32 *tangents, f32 *keys, u32 recordCount)
 /* Solve the cubic tangent system: endpoint diagonal 2, interior diagonal 4. */
 void SolveTridiagonal(f32 *solution, f32 *rhs, s32 count) {
     s32 byteCount = count * sizeof(f32);
-    void *allocation = sdfMemAllocDirect(byteCount);
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(byteCount);
     f32 *upper;
     s32 i;
     f32 denominator;
