@@ -7344,7 +7344,6 @@
 0x002A7568	effAppendSurfaceGridVectors	inferred	Appends three vectors to the surface-grid ring, mirrors the ring head at capacity, and advances retained-vector count.
 0x002A7610	effInterpolateSurfaceGridVectors	inferred	Interpolates three surface-grid vectors across each column using Catmull-Rom when history is full or linear interpolation otherwise, then appends each result.
 0x002A7890	effBeginMatrixVuDrawPacket	inferred	Allocates a render packet, loads matrix rows into VU registers and appends packet header. [names_reviewed5.tsv]
-0x002A78E0	effDrawSurfaceTrailHistory	inferred	Skips transparent/incomplete trails; draws wrapped point/color ring-buffer slices as triangle strips, appends the fixed end cap and submits it. Called by func_002A6440. Paired DDS2 implementation is 0x002E9E98.
 0x002A7B30	effSubmitIndexedRenderPacket	inferred	Invokes indexed render entry with current packet then clears packet handle. [names_reviewed5.tsv]
 0x002A7B68	effCreateQuadWork	inferred	allocates and initializes EffQuadWork, optionally loading a FileJobPayload; NULL path creates a blank owner for cloning
 0x002A7DF8	effReleaseRenderResources	inferred	eff effect resources and animation in game/code_0029A840.c
@@ -7544,7 +7543,6 @@
 0x002B5160	btlUpdateEffectWork	inferred	btl battle control and actor operations in game/code_0029A840.c
 0x002B51B0	effResetFileResourceStores	inferred	Resets both effect file resource stores. [names_reviewed9.tsv]
 0x002B51D0	effSetBattleOffset	inferred	Byte-identical dds2 twin 0x002FC180; DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described setBattleEffectOffset behavior. [names_conflicts.tsv]
-0x002B51E8	effComputeBattleCameraPositionVU	inferred	VU result in vf10: object position/offset (+D_003DF910, +D_003BD060 vector, y=-5 if flag 4)
 0x002B5290	effMultiplyQuatWithFlag	inferred	eff loads node+0x50 quaternion, optionally via func_00295E00 when flags&0x60, and calls effMiscQuatMultiplyVU
 0x002B5300	effApplyBattleCameraToObject	inferred	stores vf10 results through func_002936E0/func_00293720/func_00293760/func_002937A0
 0x002B5390	effCreateBattleCameraJob	inferred	optional memcpy of D_003DE148 into request output, func_002937E0 then func_00293450 + func_002B5300
@@ -7565,8 +7563,6 @@
 0x002B6C00	effCloneSelectedFileJob	inferred	confidence=high; matched-C; Duplicates the selected file job while retaining its sector leader, rebinds the asset payload and refreshes selected queue views. DDS2 twin 0x002FDDD8. Namer1 batch 5.
 0x002B6FD8	effFlagFileQueueActive	inferred	confidence=high; matched-C; src/dds1/game/code_0029C530.c:7494:func_002B6FD8; Sets file queue active flag, updates linked file state and returns zero.; source=revalidated-unapplied-names_R_Names16.tsv:38 [names_qp12_apply.tsv]
 0x002B7000	effSelectLinkedFileState	inferred	High: selects the queued file object's linked state when non-null and returns zero whether or not it switches. [names_qp9.tsv]
-0x002B7020	effLoadBattleCameraSnapshot	inferred	queue record -> D_003DF840, D_003DF9A0 -> D_003DF840, then play-state table select [names_M60_EffMid.tsv]
-0x002B71D0	effStoreBattleCameraSnapshot	inferred	D_003DF840 -> queue record and D_003DF9A0, then play-state table select [names_M60_EffMid.tsv]
 0x002B7388	effSelectCameraFileJobFromRows	inferred	confidence=high; matched-C; Builds the named request list, tracks preview selection, appends the selected positioned camera/file job on accept and returns selection status. DDS2 twin 0x002FE5B8. Namer1 batch 5.
 0x002B7718	effCreateParticleTask	inferred	Passes retail label "PARTICLE" and a task descriptor to the effect-task constructor. [names_reviewed21.tsv]
 0x002B7740	effCreatePolyTrackControlTask	inferred	confidence=medium; matched-C; src/dds1/game/code_0029C530.c:7340:func_002B7740; Creates task labelled POLY TRACK with its descriptor table and six entries, distinct from existing POLY TRACK S constructor.; twin=0x002FE970, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
@@ -7593,7 +7589,6 @@
 0x002B8618	effResetCameraSnapshotSelection	inferred	Resets three camera snapshot selection bytes and clears associated VU vector. [names_reviewed5.tsv]
 0x002B8648	effUpdateCameraSnapshotGuides	inferred	confidence=high; Paired debug snapshot updater copies quaternion state, chooses battle versus saved position, collects result bits and draws quaternion-oriented forward250/x100/z25 guide segments plus a point. Existing per-game snapshot/scratch types and VU macros unchanged. DDS2 twin002FF8A0; immutable queue-persist caller002B8BF0. [PurA readability b5; full paired bodies and camera guide construction]
 0x002B8948	effLoadFileSlotAndPoll	inferred	copies queue record into work buffer, polls effUpdateCameraDiagnostics, sets done flag (DDS2 func_002FFE48)
-0x002B8B48	effRunWithStateBackup	inferred	eff snapshots D_003DF920, backs up its first vector around effUpdateCameraDiagnostics and restores it
 0x002B8BF0	effProcessQueuedFileRecordAndPersistChanges	inferred	Copies a queued file record to scratch, transforms it and copies the result back. [names_reviewed14.tsv]
 0x002B8DF0	effResetFileResources	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B8E60	effBattleResourceDescriptorRelease	inferred	paired effect body: calls btlDestroyResourceDescriptor, btlDestroyEntryList [names_R_FuncNames7.tsv]
@@ -10469,3 +10464,44 @@
 0x003FE0C0	sdfSndMap	inferred	SMT3HD data name via SLUS_209.11 0x00593880, 3 agreeing references; was sdfSndMap
 0x003FE250	LastLoad	inferred	SMT3HD data name via SLUS_209.11 0x00593A10, 2 agreeing references; was LastLoad
 0x003FEB00	sdfIpuDecodeThStack	inferred	SMT3HD data name via SLUS_209.11 0x00593F80, 1 agreeing references; was sdfIpuDecodeThStack
+0x002A78E0	effDrawSurfaceTrailHistory	inferred	Skips transparent/incomplete trails; draws wrapped point/color ring-buffer slices as triangle strips, appends the fixed end cap and submits it. Called by effDrawSurfaceNode. Paired DDS2 implementation is 0x002E9E98.
+0x002B51E8	effComputeBattleCameraPositionVU	inferred	VU result in vf10: object position/offset (+effBattleOffset, +D_003BD060 vector, y=-5 if flag 4)
+0x002B7020	effLoadBattleCameraSnapshot	inferred	queue record -> D_003DF840, effSelectedJobHeader -> D_003DF840, then play-state table select [names_M60_EffMid.tsv]
+0x002B71D0	effStoreBattleCameraSnapshot	inferred	D_003DF840 -> queue record and effSelectedJobHeader, then play-state table select [names_M60_EffMid.tsv]
+0x002B8B48	effRunWithStateBackup	inferred	eff snapshots effEditedQueueHeader, backs up its first vector around effUpdateCameraDiagnostics and restores it
+0x0037E0E0	effOnesVector	inferred	A (1,1,1,1) vector the billboard updaters load into a VU0 register and scale, to spread one scalar (an extent, a radius, an alpha) over four lanes. DDS2 0x003E9100.
+0x0037E830	billRingCosines	inferred	Cosines of twelve 30-degree steps around a ring, two zero floats after; the cell and particle updaters scale each fan vertex's lateral width by them. DDS2 0x003E98E0.
+0x0037E868	billRingSines	inferred	Sines of the same twelve 30-degree steps, two zero floats after; the cell and particle updaters scale each fan vertex's radial offset by them. DDS2 0x003E9918.
+0x002AEC60	effUpdateBillFlame	inferred	Advances the flame billboard emitter (EffBillFlameConfig, the texture animation class) a frame: spawns, retires, rebuilds four strip vertices and two texture-coordinate sets per row spiralling by the spin, and samples the emitter color and alpha tracks. The same routine as DDS2 0x002F2050.
+0x003BD12C	effColorEditKeyColor	inferred	effEditColorTrack: the selected key's color with alpha 0x80; the RGB sub-menu's rows edit its bytes. DDS2 0x0043877C.
+0x003BD150	effColorEditFrameCountFormat	inferred	effEditColorTrack and the alpha range editor (func_002BB188): the format they print the track's frame count with. DDS2 0x004387A0.
+0x003BD958	effColorEditKeyFraction	inferred	effEditColorTrack: the selected color key's position in the track, 0 to 1. DDS2 0x00439078.
+0x003BD95C	effColorEditKeyFrame	inferred	effEditColorTrack: the selected key's position in frames, shown by the editor menu's rows. DDS2 0x0043907C.
+0x003BD960	effColorEditFadeInFrame	inferred	effEditColorTrack and the alpha range editor (func_002BB188): the fade-in boundary in frames, shown by the editor menu's rows. DDS2 0x00439080.
+0x003BD964	effColorEditFadeOutFrame	inferred	effEditColorTrack and the alpha range editor (func_002BB188): the fade-out boundary in frames, shown by the editor menu's rows. DDS2 0x00439084.
+0x003DFA40	effColorEditColorTrack	inferred	effEditColorTrack: its working copy of the edited SdfColorTrack, which the editor menu's rows also edit; written back each frame. DDS2 0x0045C310.
+0x003DFA68	effColorEditAlphaTrack	inferred	effEditColorTrack and the alpha range editor (func_002BB188): the working copy of the edited SdfAlphaTrack, which the editor menu's rows also edit; written back each frame. DDS2 0x0045C338.
+0x0038F620	effColorEditRgbMenu	inferred	effEditColorTrack's RGB sub-menu, an EffQueuedFileObject whose rows edit effColorEditKeyColor's red, green and blue bytes. DDS2 0x003FFDA0.
+0x0029C748	effDrawLensFlare	inferred	Lens-flare class draw: projects the light vector, fades by distance from the screen centre and draws each visible element of the selected effLensFlareSets set as four sprite quadrants on sdfGrOtTable[83]; DDS2's setup packet also writes TEST_1. DDS2 twin 0x002DE460.
+0x002A6440	effDrawSurfaceNode	inferred	Surface node draw: rebuilds each live row's trail ribbon and draws its history, then submits the rows by kind (billboards, file jobs, DDS2's file queues, sampled-atlas textures). DDS2 twin 0x002E8770.
+0x002B59A8	effUpdatePartsListEditor	inferred	Effect editor's PARTS LIST page: pad scrolling and start-frame edits, rebuilds the rows, runs the menu, previews the selection or the all-parts queue; returns the menu result (0x800001 while open). DDS2 twin 0x002FCA58.
+0x0037E5D0	effLensFlareSets	inferred	Lens-flare elements, EffLensFlareElement[2][13]: per element its position and size scales, general-billboard texture index and colour (alpha 0 skips it); effDrawLensFlare picks a set by EffLensFlareParams.flareSet. DDS2 twin 0x003E9670.
+0x0037E0F0	effZeroVector	inferred	{0, 0, 0, 0}: effDrawSurfaceNode starts a fresh row's trail side from it. DDS2 twin 0x003E9110.
+0x0038F2F0	effPartsListMenu	inferred	The effect editor's PARTS LIST menu (EffQueuedFileObject, 0x38 bytes): effUpdatePartsListEditor rebuilds its rows each frame; its cursor plus effPartsListScroll is the selected queue entry. Unsized: its cursor is still a separate automatic symbol C reads. DDS2 twin 0x003FFA78.
+0x0038EA60	effResetConfirmMenu	inferred	The parts list's "RESET OK?" menu (EffQueuedFileObject, 0x38 bytes), behind its NEW row. Unsized: its cursor is still a separate automatic symbol C reads. DDS2 twin 0x003FF1B8.
+0x0038EC00	effExitConfirmMenu	inferred	The parts list's "EXIT OK?" menu (EffQueuedFileObject), behind its EXIT row: NO, or YES (effFlagFileQueueActive). DDS2 twin 0x003FF358.
+0x0038EEC8	effPartEntryMenu	inferred	The menu behind a parts-list entry (EffQueuedFileObject): EDIT, POSETURE, INSTANCE, COPY, DELETE, POSITION, SIZE, OFFSET and NAME; opening and closing it load and store the battle camera snapshot. DDS2 twin 0x003FF620.
+0x0038EFF0	effAttachedPartEntryMenu	inferred	The menu behind an attached parts-list entry (FileJob.flags bit 0; EffQueuedFileObject): POSETURE, POSITION, SIZE, OFFSET, DELETE and NAME; opening and closing it load and store the battle camera snapshot. DDS2 twin 0x003FF748.
+0x0038F208	effNewPartsMenu	inferred	The parts list's NEW PARTS menu (EffQueuedFileObject): one row per part to add, from PARTICLE and the POLY tasks to MODEL, HELPER and BATTLE ONLY. DDS2 twin 0x003FF990.
+0x0038F3A0	effQueuePostureMenu	inferred	The parts list's POSETURE (posture) menu (EffQueuedFileObject): POSITION, CAMERA and CAMERA Y (transform flag bits 0x20 and 0x40) and SCALE (the scale multiplier) of effEditedQueueHeader; with its flag 8 set, effUpdatePartsListEditor rebuilds the all-parts view. DDS2 twin 0x003FFB28.
+0x003BD098	effEditorCurrentMenu	inferred	The effect editor's current menu (an EffQueuedFileObject address): handed to the debug menu each frame and replaced by effQueuedFileObject when that is set. DDS2 twin 0x004386F0.
+0x003BD058	effPartsListScroll	inferred	The first queue entry the parts list shows (at most 21 entries show); the pad's scroll buttons step it at the list's first and last rows. DDS2 twin 0x004386B0.
+0x003DF920	effEditedQueueHeader	inferred	The edited file queue's first 0x80 bytes (offset, transform, colour, scale): effUpdatePartsListEditor copies them in before the menu runs and back after, so the posture menu edits this copy; the all-parts view takes its rotation and colour. DDS2 twin 0x0045C1F0.
+0x003DF910	effBattleOffset	inferred	The effect editor's battle offset, set by effSetBattleOffset (zeroed with w 1 at init): added to each part's position and the all-parts view's position. DDS2 twin 0x0045C1E0.
+0x003DF9A0	effSelectedJobHeader	inferred	The selected queue entry's first 0x80 bytes (its FileJob transform, scale and colour), copied when the preview job is made and read by the battle camera placement. DDS2 twin 0x0045C270.
+0x003BD954	effPartsPreviewReload	inferred	Set when the battle camera snapshot is stored into the selected entry: effUpdatePartsListEditor then remakes the preview job and clears it. DDS2 twin 0x00439074.
+0x003BD955	effPartsListExitRequested	inferred	Set by effFlagFileQueueActive (the EXIT OK? confirmation): effUpdatePartsListEditor then closes the page (result 0) and clears it. DDS2 twin 0x00439075.
+0x003BD11C	effColorEditRgbMenuOpen	inferred	effEditColorTrack: 1 while its RGB sub-menu (effColorEditRgbMenu) is open over the color key page; the pad's button 1 opens it, button 3 closes it. DDS2 0x0043876C.
+0x003BD120	effColorEditSelectedKey	inferred	effEditColorTrack: the selected color key (0 the initial color, last the final one), clamped to the track's keys each frame. DDS2 0x00438770.
+0x003BD124	effColorEditSelectedAlphaKey	inferred	effEditColorTrack: the selected alpha key, 1 the fade-in boundary and 2 the fade-out boundary. DDS2 0x00438774.
+0x003BD128	effColorEditPage	inferred	effEditColorTrack: the page the pad edits, 0 the color keys, 1 the alpha fade boundaries, 2 the mapping menu. DDS2 0x00438778.

@@ -24,7 +24,8 @@ typedef struct EffSurfaceGridNode {
 typedef char EffSurfaceGridNodeSizeCheck[(sizeof(EffSurfaceGridNode) == 0x3C) ? 1 : -1];
 #else
 typedef struct EffSurfaceGridNode {
-    u8 pad_00[0x20];
+    f32 position[4];    // 0x00: the row position the trail last reached
+    f32 direction[4];   // 0x10: the trail's last side direction, kept facing one way
     s32 rows;           // 0x20
     s32 field_24;       // 0x24
     s32 field_28;       // 0x28

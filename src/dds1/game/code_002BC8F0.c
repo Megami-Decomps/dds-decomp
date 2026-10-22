@@ -24,11 +24,11 @@
 extern void * memset(void *, s32, u32);
 
 
-extern u32 D_003BD11C;
+extern u32 effColorEditRgbMenuOpen;
 
-extern u32 D_003BD120;
+extern u32 effColorEditSelectedKey;
 
-extern u32 D_003BD128;
+extern u32 effColorEditPage;
 
 extern u32 D_003BD158;
 
@@ -36,11 +36,11 @@ extern u32 D_003BD15C;
 
 extern u32 D_003BD160;
 
-extern u32 D_003BD124;
+extern u32 effColorEditSelectedAlphaKey;
 
 
 
-extern s32 D_003BD098;
+extern s32 effEditorCurrentMenu;
 
 
 
@@ -77,7 +77,7 @@ typedef struct EffectObjectFlag {
 
 extern EffectObjectNode *effFloorModelListHead;
 
-extern u32 D_003BD058;
+extern u32 effPartsListScroll;
 
 extern s32 D_003BC970[2];
 
