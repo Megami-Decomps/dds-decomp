@@ -115,7 +115,7 @@ extern void *memset(void *, s32, u32);
 
 extern s32 btlSelectHighestCurrentMpTarget(s32, s32);
 
-extern void *btlSelectRandomUnitFromMask(BtlIndexList *, u16 *, u16);
+extern BtlUnit *btlSelectRandomUnitFromMask(BtlIndexList *, u16 *, u16);
 
 extern char D_00436CC8[], D_00436CD0[], D_00436CD8[];
 
@@ -449,7 +449,7 @@ s32 btlCanStartCommandWithPartners(BtlUnit *unit, s32 command) {
 
 /* Pick a flagged entry starting from a random index and wrapping once. When
  * none is flagged, fall back to units whose status pair has 0x21 == 1. */
-void *btlSelectRandomUnitFromMask(BtlIndexList *list, u16 *flags, u16 count) {
+BtlUnit *btlSelectRandomUnitFromMask(BtlIndexList *list, u16 *flags, u16 count) {
     u16 fallback[12];
     u32 start;
     u32 i;
@@ -1062,7 +1062,7 @@ s32 btlSelectTargetsByMode(s32 task, s32 mode) {
                 picked[i] = 1;
             }
         }
-        unit = (BtlUnit *)btlSelectRandomUnitFromMask(list, picked, count);
+        unit = btlSelectRandomUnitFromMask(list, picked, count);
         btlAppendIndexListEntry(((ActionStateLink *)task)->indexWork.indices, unit);
         if (mode == 0) {
             ((ActionStateLink *)task)->lastMode = unit->partyRecord.unitId;
