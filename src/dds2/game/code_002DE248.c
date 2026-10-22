@@ -11177,7 +11177,7 @@ extern SdfPoolNode D_0037FF48;
 extern u32 kwlnGetFrameCounter(void);
 extern void evtSubmitPrimaryFramePacket(void);
 extern void evtSubmitAlternateFramePacket(void);
-extern void evtSetDrawSurfaceIndex(s32);
+extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitGradientRectAtDepth(s32, s32, s32, s32, u32,
                                          s32, s32, s32, s32);

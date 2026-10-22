@@ -25,6 +25,7 @@
 #include "mdl_flag_api.h"
 #include "script_flag_slot.h"
 #include "pty_preset_record.h"
+#include "prf_profile_parameters.h"
 /* Declared before first use (were implicit int). */
 extern u16 prfGetSkillAtIndex(u16 profileId, u32 skillIndex);
 extern s32 scrSetFlag(DatPartyRecord *work, u16 flagId);
@@ -44,7 +45,6 @@ extern s32 scrSetFlag(DatPartyRecord *work, u16 flagId);
 #define SCR_GLOBAL_FLAG_WORD_SHIFT 5
 #define SCR_GLOBAL_FLAG_BIT_MASK 31
 #define PTY_SKILL_SLOT_COUNT 24
-#define PRF_SKILL_LIST_ENTRY_COUNT 8
 #define PRF_SKILL_LIST_FLAGGED 4
 
 #define PTY_PRESET_SKILL_SLOT_COUNT 8
@@ -54,9 +54,6 @@ extern s32 scrSetFlag(DatPartyRecord *work, u16 flagId);
 #define PTY_PROFILE_UNIT_LAST_INDEX 4
 #define PTY_PROFILE_UNIT_ID_COUNT 0x10
 #define PTY_PROFILE_UNIT_OCCUPIED_BIT 1
-/* Native table stride in u16 entries; the eight skills begin at row+0xC. */
-#define PRF_SKILL_TABLE_STRIDE 14
-#define PRF_PROFILE_COUNT 0x60
 #define PRF_REQUIRED_PROFILE_COUNT 8
 #define PRF_FALLBACK_GROUP_COUNT 4
 #define PRF_FALLBACK_FLAG_COUNT 2
@@ -109,28 +106,6 @@ extern Entry24B D_00393220[];
 
 extern Entry24W D_00393234[];
 
-typedef struct Dds1ProfileParamRecord {
-    u32 flags;
-    u8 value04;
-    u8 value05;
-    u16 requiredLevel;
-    u32 capacity;
-    u16 skills[PRF_SKILL_LIST_ENTRY_COUNT];
-} Dds1ProfileParamRecord;
-
-typedef char Dds1ProfileParamRecordLayoutCheck[
-    (sizeof(Dds1ProfileParamRecord) == 0x1C &&
-     PRF_SKILL_TABLE_STRIDE * sizeof(u16) == sizeof(Dds1ProfileParamRecord) &&
-     (u32)&((Dds1ProfileParamRecord *)0)->flags == 0 &&
-     (u32)&((Dds1ProfileParamRecord *)0)->value04 == 4 &&
-     (u32)&((Dds1ProfileParamRecord *)0)->value05 == 5 &&
-     (u32)&((Dds1ProfileParamRecord *)0)->requiredLevel == 6 &&
-     (u32)&((Dds1ProfileParamRecord *)0)->capacity == 8 &&
-     (u32)&((Dds1ProfileParamRecord *)0)->skills == 0xC) ? 1 : -1];
-
-extern Dds1ProfileParamRecord D_003907B0[PRF_PROFILE_COUNT];
-typedef char Dds1ProfileParamTableExtentCheck[
-    (sizeof(D_003907B0) == 0xA80) ? 1 : -1];
 extern SdkFileStream *fopen(const char *, const char *);
 extern void fprintf(SdkFileStream *, const char *, s32, s32);
 extern void fclose(SdkFileStream *);

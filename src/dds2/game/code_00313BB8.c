@@ -30,6 +30,7 @@ extern void memset(void *dst, s32 value, s32 size);
 #include "prf_profile_cap.h"
 #include "script_flag_slot.h"
 #include "pty_preset_record.h"
+#include "prf_profile_parameters.h"
 
 
 #define SCR_FLAG_ID_MASK 0xFFFF
@@ -47,7 +48,6 @@ extern void memset(void *dst, s32 value, s32 size);
 #define SCR_GLOBAL_FLAG_WORD_SHIFT 5
 #define SCR_GLOBAL_FLAG_BIT_MASK 31
 #define PTY_SKILL_SLOT_COUNT 24
-#define PRF_SKILL_LIST_ENTRY_COUNT 8
 #define PRF_SKILL_LIST_FLAGGED 4
 
 #define PTY_PRESET_SKILL_SLOT_COUNT 8
@@ -58,9 +58,6 @@ extern void memset(void *dst, s32 value, s32 size);
 #define PTY_PROFILE_UNIT_ID_COUNT 0x10
 #define PTY_PROFILE_UNIT_OCCUPIED_BIT 1
 /* Stride in u16 entries, not bytes; only the first eight are skill IDs. */
-#define PRF_SKILL_TABLE_STRIDE 18
-#define PRF_PROFILE_PARAM_BYTES 36
-#define PRF_PROFILE_COUNT 0xB0
 #define PRF_REQUIRED_PROFILE_COUNT 8
 #define PRF_REQUIRED_PROFILE_IDS_OFFSET 0xC
 #define PRF_FALLBACK_GROUP_COUNT 4
@@ -119,32 +116,6 @@ extern u16 D_004052F8[][80];
 
 extern void ptyRefreshEntryFromSavedTemplate(DatPartyRecord *);
 
-/* Native profile parameter data: 176 complete 0x24-byte records. */
-typedef struct PrfProfileParameters {
-    u32 flags;
-    u8 value04;
-    u8 value05;
-    u16 requiredLevel;
-    u32 capacity;
-    u8 parameters[6];
-    u16 skills[8];
-    u16 reserved22;
-} PrfProfileParameters;
-
-typedef char PrfProfileParametersLayoutCheck[
-    (sizeof(PrfProfileParameters) == 0x24 &&
-     (u32)&((PrfProfileParameters *)0)->flags == 0 &&
-     (u32)&((PrfProfileParameters *)0)->value04 == 4 &&
-     (u32)&((PrfProfileParameters *)0)->value05 == 5 &&
-     (u32)&((PrfProfileParameters *)0)->requiredLevel == 6 &&
-     (u32)&((PrfProfileParameters *)0)->capacity == 8 &&
-     (u32)&((PrfProfileParameters *)0)->parameters == 0xC &&
-     (u32)&((PrfProfileParameters *)0)->skills == 0x12 &&
-     (u32)&((PrfProfileParameters *)0)->reserved22 == 0x22) ? 1 : -1];
-
-extern PrfProfileParameters D_00401320[PRF_PROFILE_COUNT];
-typedef char PrfProfileParametersTableExtentCheck[
-    (sizeof(D_00401320) == 0x18C0) ? 1 : -1];
 
 
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);

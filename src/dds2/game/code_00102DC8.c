@@ -50,15 +50,6 @@ extern u16 D_00435CE8;
 
 extern u32 kwlnDrawControlFlags;
 
-typedef struct {
-    s8 r;
-    s8 g;
-    s8 b;
-    s8 a;
-} KwlnFadeColor;
-
-extern KwlnFadeColor kwlnFadeColor;
-
 extern u16 kwlnFadeCounter;
 
 extern u16 kwlnFadeDuration;
@@ -74,6 +65,8 @@ extern u16 D_00435CEE;
 extern void kwlnPadStartMotor(u32, u8, s32);
 
 #include "sdf_packet_alloc.h"
+#include "kwln_fade_color.h"
+#include "evt_frame_state_packet.h"
 
 
 extern void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y);
@@ -141,7 +134,6 @@ extern u8 kwlnPadMotorLevels[2];
 extern s32 dds3AdminPollModeCompletion(KwlnTask *task);
 extern void dds3AdminReleaseTaskWork(KwlnTask *task);
 extern char dds3AdminTaskName[];
-extern u8 evtFrameStatePacketTemplates[];
 extern u16 kwlnBackgroundFadeCounter;
 extern u16 kwlnBackgroundFadeDuration;
 
@@ -1420,8 +1412,6 @@ void kwlnAdvanceShakeOffsets(void) {
 
 #define KWLN_FADE_TICKS_PER_FRAME 10
 #define KWLN_FADE_MARK_NUMERATOR 4
-#define KWLN_FRAME_STATE_BYTES 0x160
-#define KWLN_FRAME_BUFFER_BYTES 0xB0
 #define KWLN_FADE_COUNT_DOWN_BIT 1
 #define KWLN_FADE_COUNT_UP_BIT 2
 #define KWLN_FADE_DIRECTION_BITS 3
@@ -1467,7 +1457,7 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", evtInitializeFrameStatePacketTempla
 SdfListHead *evtBuildFrameStatePacketList(s32 stateIndex) {
     SdfListHead *packetList = sdfCreateResetPacketList();
 
-    sdfAppendPacket(packetList, (u32)(evtFrameStatePacketTemplates + stateIndex * KWLN_FRAME_STATE_BYTES + kwlnGetDrawBufferIndex() * KWLN_FRAME_BUFFER_BYTES));
+    sdfAppendPacket(packetList, (u32)&evtFrameStatePacketTemplates[stateIndex][kwlnGetDrawBufferIndex()]);
     return packetList;
 }
 

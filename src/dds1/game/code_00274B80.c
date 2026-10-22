@@ -1544,7 +1544,7 @@ void mnuNoOpItemSelectionTeardown(s32 context) {
 INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuDrawEntry);
 
 extern s32 ptyHasSkill(DatPartyRecord *unit, s32 skillId);
-extern s32 scrGetSecondaryScriptFlag(DatPartyRecord *unit, u16 code);
+extern u32 scrGetSecondaryScriptFlag(DatPartyRecord *unit, u16 code);
 
 /* Secondary script bits enable the category marker independently of learned skills. */
 void ptySkillMenuRefreshEntries(CampMenuContext *context) {

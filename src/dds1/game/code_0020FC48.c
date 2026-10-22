@@ -1990,7 +1990,7 @@ extern s32 btlGetUnitElementAffinity(BtlUnit *, s32);
 
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 
-extern void evtSetDrawSurfaceIndex(s32);
+extern void evtSetDrawSurfaceIndex(u32);
 
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 

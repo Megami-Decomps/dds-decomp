@@ -579,7 +579,7 @@ s32 fldUpdateLocalMapController(void) {
 }
 
 extern void fldDrawSkyGradient(void);
-extern void evtSetDrawSurfaceIndex(s32);
+extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, u32, s32, s32, s32);
 extern void sdfAdjustCounterValueAndRedraw(s32);
