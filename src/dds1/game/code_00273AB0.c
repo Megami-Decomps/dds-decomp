@@ -97,7 +97,7 @@ extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
-extern void mnuClearListFlagsOneAndTwo();
+extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 
 s32 mnuStaffImageEnterA(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
@@ -449,7 +449,7 @@ s32 mnuHandleStaffValuePageInput(dds3ProcessID_t *task) {
         mnuReleaseStaffValuePageResources(task);
         mnuAdvanceListCursorDefault(((StaffImageContext *)context)->pageWindow.lists[0]);
     }
-    mnuClearListFlagsOneAndTwo(((StaffImageContext *)context)->pageWindow.lists[0]);
+    mnuClearListFlagsOneAndTwo(&((StaffImageContext *)context)->pageWindow.lists[0]->stateFlags);
     if (pageChanged == 0) {
         return 0;
     }
