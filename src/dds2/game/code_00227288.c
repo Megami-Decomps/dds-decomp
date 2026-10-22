@@ -61,7 +61,7 @@ extern u64 btlStartTask(void *);
 
 extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 
-extern s32 btlCreateSecondaryCommandSoundTask();
+extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 
 extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
 

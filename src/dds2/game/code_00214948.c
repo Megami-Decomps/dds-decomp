@@ -2067,7 +2067,7 @@ s32 btlCheckActionRecordUnit(ActionStateLink *record) {
 
 extern u8 *btlCreateCommandSoundUpdateTask(void);
 
-extern u8 *btlCreateSecondaryCommandSoundTask(void);
+extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 
 extern u8 *btlCreateCommandSoundTask(u8 *, s32);
 
