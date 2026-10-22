@@ -126,9 +126,9 @@ extern s8 D_0037F53B[];
 
 extern void kwlnTextureAttachTask(SdfPoolNode *surface);
 
-extern s16 D_00435CFE;
+extern s16 kwlnBackgroundFadeFirstRamp;
 
-extern s16 D_00435D00;
+extern s16 kwlnBackgroundFadeSecondRamp;
 
 extern u8 kwlnBackgroundFadeColor[4];
 
@@ -141,7 +141,7 @@ extern u8 kwlnPadMotorLevels[2];
 extern s32 dds3AdminPollModeCompletion(KwlnTask *task);
 extern void dds3AdminReleaseTaskWork(KwlnTask *task);
 extern char dds3AdminTaskName[];
-extern u8 D_0043DDA0[];
+extern u8 evtFrameStatePacketTemplates[];
 extern u16 kwlnBackgroundFadeCounter;
 extern u16 kwlnBackgroundFadeDuration;
 
@@ -1467,7 +1467,7 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", evtInitializeFrameStatePacketTempla
 SdfListHead *evtBuildFrameStatePacketList(s32 stateIndex) {
     SdfListHead *packetList = sdfCreateResetPacketList();
 
-    sdfAppendPacket(packetList, (u32)(D_0043DDA0 + stateIndex * KWLN_FRAME_STATE_BYTES + kwlnGetDrawBufferIndex() * KWLN_FRAME_BUFFER_BYTES));
+    sdfAppendPacket(packetList, (u32)(evtFrameStatePacketTemplates + stateIndex * KWLN_FRAME_STATE_BYTES + kwlnGetDrawBufferIndex() * KWLN_FRAME_BUFFER_BYTES));
     return packetList;
 }
 
@@ -1621,8 +1621,8 @@ void kwlnFadeResetBackground(void) {
     kwlnBackgroundFadeColor[1] = 0;
     kwlnBackgroundFadeColor[2] = 0;
     kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = 0;
-    D_00435CFE = KWLN_BGFADE_FIRST_RAMP_MAX;
-    D_00435D00 = KWLN_BGFADE_SECOND_RAMP_MAX;
+    kwlnBackgroundFadeFirstRamp = KWLN_BGFADE_FIRST_RAMP_MAX;
+    kwlnBackgroundFadeSecondRamp = KWLN_BGFADE_SECOND_RAMP_MAX;
 }
 
 /* Start the background countdown; zero duration performs the full background reset. */
@@ -1635,8 +1635,8 @@ void kwlnFadeBackgroundStartOut(s32 duration) {
         kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = 0;
         kwlnBackgroundFadeCounter = 0;
         kwlnBackgroundFadeDuration = 0;
-        D_00435CFE = KWLN_BGFADE_FIRST_RAMP_MAX;
-        D_00435D00 = KWLN_BGFADE_SECOND_RAMP_MAX;
+        kwlnBackgroundFadeFirstRamp = KWLN_BGFADE_FIRST_RAMP_MAX;
+        kwlnBackgroundFadeSecondRamp = KWLN_BGFADE_SECOND_RAMP_MAX;
         kwlnFadeResetBackground();
     } else {
         kwlnBackgroundFadeDuration = duration;
@@ -1657,8 +1657,8 @@ void kwlnFadeBackgroundStartIn(s32 duration) {
         kwlnBackgroundFadeDuration = 0;
         kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
         kwlnDrawControlFlags &= KWLN_BGFADE_KEEP_OTHER_BITS;
-        D_00435CFE = 0;
-        D_00435D00 = 0;
+        kwlnBackgroundFadeFirstRamp = 0;
+        kwlnBackgroundFadeSecondRamp = 0;
     } else {
         kwlnBackgroundFadeDuration = duration;
         kwlnBackgroundFadeCounter = 0;
@@ -1677,7 +1677,7 @@ s32 kwlnFadeIsBackgroundOverlayActive(void) {
         if (KWLN_FADE_MAX_ALPHA - kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] >= KWLN_FADE_MAX_ALPHA) {
             return 0;
         }
-    } else if (D_00435CFE == KWLN_BGFADE_FIRST_RAMP_MAX) {
+    } else if (kwlnBackgroundFadeFirstRamp == KWLN_BGFADE_FIRST_RAMP_MAX) {
         return 0;
     }
     return 1;
@@ -1688,8 +1688,8 @@ s32 kwlnFadeIsBackgroundOverlayActive(void) {
 void kwlnFadeSetMode(s32 visibilityMode) {
     kwlnBackgroundFadeMode = visibilityMode;
     if (kwlnBackgroundFadeMode == 0) {
-        D_00435CFE = 0;
-        D_00435D00 = 0;
+        kwlnBackgroundFadeFirstRamp = 0;
+        kwlnBackgroundFadeSecondRamp = 0;
     } else {
         kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
     }
@@ -1708,8 +1708,8 @@ void kwlnStepBackgroundFade(void) {
         }
         fadeRatio = (f32)kwlnBackgroundFadeCounter / (f32)kwlnBackgroundFadeDuration;
         kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = (kwlnBackgroundFadeCounter << KWLN_FADE_ALPHA_SHIFT) / kwlnBackgroundFadeDuration;
-        D_00435CFE = KWLN_BGFADE_FIRST_RAMP_SCALE - fadeRatio * KWLN_BGFADE_FIRST_RAMP_SCALE;
-        D_00435D00 = KWLN_BGFADE_SECOND_RAMP_SCALE - fadeRatio * KWLN_BGFADE_SECOND_RAMP_SCALE;
+        kwlnBackgroundFadeFirstRamp = KWLN_BGFADE_FIRST_RAMP_SCALE - fadeRatio * KWLN_BGFADE_FIRST_RAMP_SCALE;
+        kwlnBackgroundFadeSecondRamp = KWLN_BGFADE_SECOND_RAMP_SCALE - fadeRatio * KWLN_BGFADE_SECOND_RAMP_SCALE;
         if (((kwlnDrawControlFlags & KWLN_BGFADE_COUNT_DOWN_BIT) && kwlnBackgroundFadeCounter == 0) ||
             ((kwlnDrawControlFlags & KWLN_BGFADE_COUNT_UP_BIT) && kwlnBackgroundFadeCounter == kwlnBackgroundFadeDuration)) {
             kwlnBackgroundFadeCounter = 0;
@@ -1728,9 +1728,9 @@ void kwlnDrawBackgroundFadeBands(void) {
     if (kwlnBackgroundFadeMode == 0) {
         fade = KWLN_FADE_MAX_ALPHA - kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL];
     } else {
-        firstRamp = D_00435CFE;
+        firstRamp = kwlnBackgroundFadeFirstRamp;
         fade = 0;
-        secondRamp = D_00435D00;
+        secondRamp = kwlnBackgroundFadeSecondRamp;
         if (firstRamp == KWLN_BGFADE_FIRST_RAMP_MAX) {
             return;
         }
@@ -1853,9 +1853,11 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CFB);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnBackgroundFadeMode);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CFE);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnBackgroundFadeFirstRamp);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D00);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnBackgroundFadeSecondRamp);
+
+INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D02);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnDistanceBlurErrorCount);
 

@@ -159,7 +159,7 @@ SdfMemBlock *sdfGetFirstGeneralHeapBlock(void) {
 
 INCLUDE_SDATA(const s32, "game/code_002D00F8", D_003BD2DC);
 
-INCLUDE_SDATA(const s32, "game/code_002D00F8", D_003BD2E0);
+INCLUDE_SDATA(const s32, "game/code_002D00F8", sdfGrFirstFrameDrawn);
 
-INCLUDE_SDATA(const s32, "game/code_002D00F8", D_003BD2E1);
+INCLUDE_SDATA(const s32, "game/code_002D00F8", sdfGrDisplayField);
 

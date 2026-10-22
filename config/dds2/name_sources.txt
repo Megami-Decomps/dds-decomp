@@ -9992,3 +9992,32 @@
 0x0040F5D0	sbrkBreak	inferred	The heap's current end that sbrk moves (Sony's sbrk: checked against EndOfHeap with interrupts off), initialized to the end of the loaded image; newlib's allocator grows and trims through it. DDS1 twin 0x0039C450.
 0x0040F5C8	fileioLibraryVersion	inferred	The EE FILEIO library's version ("2500" here): the library's open compares the IOP FILEIO's reply at 0x00486FA8 with it, or with "....", and refuses a mismatch. DDS1 twin 0x0039C448.
 0x00306030	sdfDrawTexturedQuad	inferred	DDS1's sdfDrawTexturedQuad (0x002BE8A8) with one parameter more, the aspect mode it passes to itfRotateScreenOffset; DDS1's C compiles to it.
+0x0040B260	sdfGraphModeDefaults	inferred	Each display mode's frame defaults (SdfGraphModeDefaults): sdfGrSetFrameSetMode copies one into a graph target. DDS1 twin 0x003980B0.
+0x0040B308	sdfFramePacketSlots	inferred	The frame packet slots (SdfPacketSlot) sdfGrDrawFrame sends from, indexed by sdfFramePacketSlotIndex. DDS1 twin 0x00398158.
+0x0040BBF8	sdfIpuAudioModeIdecBits	inferred	Per stream audio mode, IDEC's OFM bit then its DTE bit, which sdfStartStreamNodeIpuTransfer sets. DDS1 twin 0x00398A48.
+0x00435CFE	kwlnBackgroundFadeFirstRamp	inferred	The background fade's first band ramp, up to KWLN_BGFADE_FIRST_RAMP_MAX: the band's top moves up 8 units a step. DDS1 twin 0x003BA92E.
+0x00435D00	kwlnBackgroundFadeSecondRamp	inferred	The background fade's second band ramp, up to KWLN_BGFADE_SECOND_RAMP_MAX: the band's bottom moves down 8 units a step. DDS1 twin 0x003BA930.
+0x004389D0	sdfGrFirstFrameDrawn	inferred	Set once sdfGrDrawFrame has drawn a frame; the developer console draws only after. DDS1 twin 0x003BD2E0.
+0x004389D1	sdfGrDisplayField	inferred	The interlaced field shown (its low bit), whose opposite the next frame draws into. DDS1 twin 0x003BD2E1.
+0x004389E1	sdfGraphicsTransferState	inferred	The graphics transfer worker's state: 0 starting, 1 asleep, 3 sending a frame, 5 capturing GS memory. DDS1 twin 0x003BD2F1.
+0x004389EC	sdfGrDrawStartSemaphore	inferred	Signalled when sdfGrDrawFrame has started a frame (or has none), which the main loop waits on. DDS1 twin 0x003BD2FC.
+0x00438A1C	sdfGrDrawStopRequested	inferred	Set to stop the graphics transfer worker: its waits for the GS and DMA give up. DDS1 twin 0x003BD32C.
+0x00438A20	sdfGrFrameComplete	inferred	Set when sdfGrDrawFrame finishes a frame; the main loop clears it. DDS1 twin 0x003BD330.
+0x00438A21	sdfGrDrawBufferIndex	inferred	The draw buffer the next frame goes to, toggled after each frame. DDS1 twin 0x003BD331.
+0x00438A22	sdfGrBufferSlotIndex	inferred	The buffer slot the frame being drawn uses, the opposite of the shown field. DDS1 twin 0x003BD332.
+0x00438A28	sdfFramePacketSlotIndex	inferred	The slot of sdfFramePacketSlots the next frame is sent from. DDS1 twin 0x003BD338.
+0x00438A2C	sdfGrLastSentChain	inferred	The DMA chain sdfGrDrawFrame last sent to VIF1. DDS1 twin 0x003BD33C.
+0x00438D10	sdfMovieDrawLeft	inferred	The movie sprite's left edge (GS coordinates), set by sdfSetGridScaledDrawBounds. DDS1 twin 0x003BD620.
+0x00438D14	sdfMovieDrawTop	inferred	The movie sprite's top edge (GS coordinates), set by sdfSetGridScaledDrawBounds. DDS1 twin 0x003BD624.
+0x00438D18	sdfMovieDrawRight	inferred	The movie sprite's right edge (GS coordinates), set by sdfSetGridScaledDrawBounds. DDS1 twin 0x003BD628.
+0x00438D1C	sdfMovieDrawBottom	inferred	The movie sprite's bottom edge (GS coordinates), set by sdfSetGridScaledDrawBounds. DDS1 twin 0x003BD62C.
+0x00438D20	sdfMovieDrawColor	inferred	The movie sprite's color: alpha in the top byte, RGB below, set by sdfSetGridScaledDrawBounds. DDS1 twin 0x003BD630.
+0x00439165	sdfImageUploadPending	inferred	Set when images wait to upload; sdfGrDrawFrame clears it and flushes the queue. DDS1 twin 0x003BDA05.
+0x00439204	sdfIpuOutputStream	inferred	The stream frame node the IPU output DMA serves. DDS1 twin 0x003BDAA4.
+0x00439208	sdfIpuInputStream	inferred	The stream frame node the IPU input DMA serves. DDS1 twin 0x003BDAA8.
+0x00439218	sdfMoviePacSoundMovie	inferred	The movie whose PAC stream feeds the sound driver. DDS1 twin 0x003BDAB8.
+0x0043921C	sdfMoviePacRingFullFrame	inferred	The movie frame at which the PAC ring last ran out of room. DDS1 twin 0x003BDABC.
+0x0043DDA0	evtFrameStatePacketTemplates	inferred	The frame state packet templates evtInitializeFrameStatePacketTemplates fills. DDS1 twin 0x003C2620.
+0x0043E1C0	kwlnBackgroundFadeOverlayPackets	inferred	The background fade's overlay packet, one per draw buffer. DDS1 twin 0x003C2A40.
+0x00345810	sdfMoviePacReserveRingBlock	inferred	The sound driver's block allocator for a PAC movie: reserves bytes of the stream's ring, wrapping at 64 KB, or none when it is full. DDS1 twin 0x002EC968.
+0x00345928	sdfMovieQueueFrameSprite	inferred	Queues the decoded movie frame as a sprite over the movie's draw bounds, starting the PAC stream's sound once the ring holds a page. DDS1 twin 0x002ECA80.

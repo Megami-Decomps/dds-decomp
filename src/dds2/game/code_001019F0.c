@@ -386,7 +386,7 @@ extern s32 D_00435CE0[2];
 extern u8 D_00435BC8;
 extern SdfListHead *D_00435C14;
 extern u32 kwlnDrawControlFlags;
-extern s8 D_00438A20;
+extern s8 sdfGrFrameComplete;
 
 
 /* Update draw controls, submit thirteen packet groups, optionally draw the
@@ -482,7 +482,7 @@ s32 kwlnRenderFrame(KwlnTask *task) {
     } else {
         kwlnDrawControlFlags &= KWLN_FRAME_CLEAR_SKIP_POOL_QUEUE;
     }
-    D_00438A20 = 0;
+    sdfGrFrameComplete = 0;
     return 0;
 }
 

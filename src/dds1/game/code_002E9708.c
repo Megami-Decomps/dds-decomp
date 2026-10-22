@@ -54,15 +54,15 @@
 #define SDF_IPU_FDEC 0x40000000
 #define SDF_IPU_FDEC_BYTE 0x40000008
 
-extern s32 D_003BD620;
+extern s32 sdfMovieDrawLeft;
 
-extern s32 D_003BD624;
+extern s32 sdfMovieDrawTop;
 
-extern s32 D_003BD628;
+extern s32 sdfMovieDrawRight;
 
-extern s32 D_003BD62C;
+extern s32 sdfMovieDrawBottom;
 
-extern u32 D_003BD630;
+extern u32 sdfMovieDrawColor;
 
 extern u32 D_003BD61C;
 
@@ -95,7 +95,7 @@ extern SdfSoundCommand D_003BD494;
 
 
 extern SdfStreamFrameNode *sdfSoundNodeHead;
-extern SdfStreamFrameNode *D_003BDAA8;
+extern SdfStreamFrameNode *sdfIpuInputStream;
 extern s32 D_003BDA94;
 extern s32 D_003BDAB4;
 extern void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, u8 *sourceAddress, s32 sourceSize);
@@ -1464,7 +1464,7 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
     }
 }
 
-extern SdfStreamFrameNode *D_003BDAA4;
+extern SdfStreamFrameNode *sdfIpuOutputStream;
 extern void sdfTexQueueResourceRelease(s32);
 extern void sdfTexQueuePendingWork(SdfTexResource *texture);
 
@@ -1478,7 +1478,7 @@ void sdfDestroyStreamFrameNode(SdfStreamFrameNode *node) {
     node->drained = 1;
     sdfSoundRemoveNode(node);
     sdfStreamNodeUnlink(node, 1);
-    if (D_003BDAA4 == node) {
+    if (sdfIpuOutputStream == node) {
         HW_WRITE(IPU_CTRL, 0x40000000);
         sceIpuSync(0, 0);
         dmaEnable = HW_READ(D_ENABLER);
@@ -1486,7 +1486,7 @@ void sdfDestroyStreamFrameNode(SdfStreamFrameNode *node) {
         HW_WRITE(D4_CHCR, 1);
         HW_WRITE(D3_CHCR, 0);
         HW_WRITE(D_ENABLER, dmaEnable);
-        D_003BDAA4 = NULL;
+        sdfIpuOutputStream = NULL;
         wasActive = 1;
     }
     if (interruptsEnabled != 0) {
@@ -1565,7 +1565,7 @@ void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
 /* Start IPU input from the initial chain or a feed slot; defer an empty ring. */
 void sdfSoundStartIpuInputDma(SdfStreamFrameNode *stream) {
     if (stream->active == 0) {
-        D_003BDAA8 = stream;
+        sdfIpuInputStream = stream;
         HW_WRITE(D4_TADR, (u32)stream->inputDmaChain & SDF_EE_PHYSICAL_MASK);
         HW_WRITE(D4_QWC, 0);
         HW_WRITE(D4_CHCR, SDF_IPU_DMA_CHAIN_START);
@@ -1574,7 +1574,7 @@ void sdfSoundStartIpuInputDma(SdfStreamFrameNode *stream) {
             stream->inputDmaStartPending = 1;
             return;
         }
-        D_003BDAA8 = stream;
+        sdfIpuInputStream = stream;
         stream->inputFeedDmaInFlight = 1;
         HW_WRITE(D4_MADR, ((u32)stream->scratchBuffer + (stream->firstSlot << SDF_STREAM_SLOT_SHIFT)) &
                               SDF_EE_PHYSICAL_MASK);
@@ -1612,7 +1612,7 @@ void sdfDispatchNextStreamNode(s32 skipInterruptGuard) {
     SdfStreamFrameNode *node;
     s32 interruptsEnabled = 0;
 
-    if (D_003BDAA4 != NULL) {
+    if (sdfIpuOutputStream != NULL) {
         return;
     }
     if (skipInterruptGuard == 0) {
@@ -1645,7 +1645,7 @@ void sdfIpuDmaCompletionWorker(void) {
 
     for (;;) {
         SleepThread();
-        work = D_003BDAA4;
+        work = sdfIpuOutputStream;
         if (work == NULL) {
             continue;
         }
@@ -1657,7 +1657,7 @@ void sdfIpuDmaCompletionWorker(void) {
             work->playbackPhase = SDF_STREAM_PLAYBACK_FIRST_COMPLETION;
         }
         work->completedBufferCount++;
-        D_003BDAA4 = NULL;
+        sdfIpuOutputStream = NULL;
         work->tickCount++;
         if (work->tickCount == work->cycleLength) {
             if (work->loopMode != 0) {
@@ -1686,11 +1686,11 @@ s32 sdfWakeIpuCompletionWorker(void) {
 }
 
 s32 sdfCompleteIpuInputFeedDma(void) {
-    SdfStreamFrameNode *stream = D_003BDAA8;
+    SdfStreamFrameNode *stream = sdfIpuInputStream;
 
     if (stream != NULL) {
         D_003BDA94 = stream->playbackFrameIndex;
-        D_003BDAA8 = NULL;
+        sdfIpuInputStream = NULL;
         if (stream->inputFeedEnabled != 0 && stream->active == 1) {
             if (stream->inputFeedDmaInFlight != 0) {
                 stream->inputFeedDmaInFlight = 0;
@@ -1764,7 +1764,7 @@ extern u32 D_003BD614;
 
 /* Advance playback cadence, refill active feeds and retry a deferred IPU input. */
 void sdfAdvanceStreamPlayback(s32 cadence) {
-    SdfStreamFrameNode *node = D_003BDAA4;
+    SdfStreamFrameNode *node = sdfIpuOutputStream;
     s32 elapsed;
     s32 interruptsEnabled;
 
@@ -1849,7 +1849,7 @@ void sdfSoundInitIpuStream(void) {
     sceIpuInit();
     HW_WRITE(IPU_CMD, 0x90000000);
     sdfSoundNodeHead = 0;
-    D_003BDAA4 = NULL;
+    sdfIpuOutputStream = NULL;
     D_003BDA9C = sdfAddHandler(1, 3, sdfWakeIpuCompletionWorker, -1, 0);
     EnableDmac(3);
     D_003BDAA0 = sdfAddHandler(1, 4, sdfCompleteIpuInputFeedDma, -1, 0);
@@ -1879,7 +1879,7 @@ void sdfPrintTextLine(const char *text) {
     puts(text);
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC968);
+INCLUDE_ASM(const s32, "game/code_002E9708", sdfMoviePacReserveRingBlock);
 
 /* Store the stream-frame draw-path mode; movie viewport setup selects 1. */
 void sdfSetStreamFrameDrawMode(u32 value) {
@@ -1887,18 +1887,18 @@ void sdfSetStreamFrameDrawMode(u32 value) {
 }
 
 void sdfSetGridScaledDrawBounds(s32 column, s32 row, s32 width, s32 height, u32 mode) {
-    D_003BD620 = column * 0x10 + 0x7000;
-    D_003BD624 = row * 8 + 0x7900;
-    D_003BD628 = D_003BD620 + width * 0x10;
-    D_003BD62C = D_003BD624 + height * 8;
-    D_003BD630 = mode;
+    sdfMovieDrawLeft = column * 0x10 + 0x7000;
+    sdfMovieDrawTop = row * 8 + 0x7900;
+    sdfMovieDrawRight = sdfMovieDrawLeft + width * 0x10;
+    sdfMovieDrawBottom = sdfMovieDrawTop + height * 8;
+    sdfMovieDrawColor = mode;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002ECA80);
+INCLUDE_ASM(const s32, "game/code_002E9708", sdfMovieQueueFrameSprite);
 
-extern MovObj *D_003BDAB8;
-extern void *func_002EC968(s32);
-extern void func_002ECA80(MovObj *, SdfPoolNode *);
+extern MovObj *sdfMoviePacSoundMovie;
+extern void *sdfMoviePacReserveRingBlock(s32);
+extern void sdfMovieQueueFrameSprite(MovObj *, SdfPoolNode *);
 
 /* DMA/VIF/GIF header then nine A+D register writes for the sprite.
  * registerId 3 is UV; the texture value's 0x200000 is PSM PSMCT16. */
@@ -1929,14 +1929,14 @@ void sdfMovieDrawFrame(MovObj *movie, SdfPoolNode *pool) {
         return;
     }
     if (D_003BD61C == 1) {
-        func_002ECA80(movie, pool);
+        sdfMovieQueueFrameSprite(movie, pool);
         return;
     }
     if (movie->pacEnabled != 0 && movie->pad21 == 0 &&
         movie->stream.pac->ringLength >= 0x1000) {
         movie->pad21 = 1;
-        D_003BDAB8 = movie;
-        sdfSoundTryQueueCommand((u32)func_002EC968);
+        sdfMoviePacSoundMovie = movie;
+        sdfSoundTryQueueCommand((u32)sdfMoviePacReserveRingBlock);
         sndTrySendChannelGroupCommand120(movie->packetLimit);
     }
 
@@ -2092,15 +2092,15 @@ INCLUDE_SDATA(const s32, "game/code_002E9708", sdfMoviePacRingSemaphore);
 
 INCLUDE_SDATA(const s32, "game/code_002E9708", D_003BD61C);
 
-INCLUDE_SDATA(const s32, "game/code_002E9708", D_003BD620);
+INCLUDE_SDATA(const s32, "game/code_002E9708", sdfMovieDrawLeft);
 
-INCLUDE_SDATA(const s32, "game/code_002E9708", D_003BD624);
+INCLUDE_SDATA(const s32, "game/code_002E9708", sdfMovieDrawTop);
 
-INCLUDE_SDATA(const s32, "game/code_002E9708", D_003BD628);
+INCLUDE_SDATA(const s32, "game/code_002E9708", sdfMovieDrawRight);
 
-INCLUDE_SDATA(const s32, "game/code_002E9708", D_003BD62C);
+INCLUDE_SDATA(const s32, "game/code_002E9708", sdfMovieDrawBottom);
 
-INCLUDE_SDATA(const s32, "game/code_002E9708", D_003BD630);
+INCLUDE_SDATA(const s32, "game/code_002E9708", sdfMovieDrawColor);
 
-INCLUDE_SDATA(const s32, "game/code_002E9708", D_003BD633);
+INCLUDE_SDATA(const s32, "game/code_002E9708", D_003BD634);
 

@@ -33,7 +33,7 @@ typedef struct PacAlloc {
 
 extern DevState *sdfFileCmdReadOpen(const char *path, void *callback, s32 callbackContext);
 extern s32 sdfMoviePacRingSemaphore;
-extern s32 D_0043921C;
+extern s32 sdfMoviePacRingFullFrame;
 extern u8 D_00438D28[];
 
 
@@ -88,7 +88,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
     if (sdfMoviePacRingSemaphore < 0) {
         sdfMoviePacRingSemaphore = sdfCreateSemaphore(1, 1, 0);
     }
-    D_0043921C = -1;
+    sdfMoviePacRingFullFrame = -1;
     pacWork = sdfAllocAndClearQuadwords(sizeof(*pacWork));
     owner->stream.pac = pacWork;
     allocation = sdfMemAllocDirect(0x24000);

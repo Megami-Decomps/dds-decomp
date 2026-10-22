@@ -65,14 +65,14 @@ void sdfGraphSelectDisplayBuffer(s32 bufferIndex) {
     sceGsPutDispEnv(&sdfDisplayEnvironment);
 }
 
-extern SdfGraphModeDefaults D_0040B260[];
+extern SdfGraphModeDefaults sdfGraphModeDefaults[];
 extern u8 D_004389D9;
 
 /* Reset the GS with the interlace setting of the current display mode. */
 void sdfGraphResetDeviceForCurrentMode(void) {
     s32 inter;
     s32 ffmode;
-    u16 interlace = D_0040B260[sdfCurrentDisplayModeIndex].interlace;
+    u16 interlace = sdfGraphModeDefaults[sdfCurrentDisplayModeIndex].interlace;
 
     switch (interlace) {
     case 0:
