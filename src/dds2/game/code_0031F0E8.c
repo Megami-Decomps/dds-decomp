@@ -25,7 +25,7 @@ extern MnuCallbackListPair *sdfCloneExtendedSpriteRecords(const void *, u32);
 
 extern MnuCallbackListPair *sdfCloneSpriteRecords(const void *, u32);
 
-extern void *dds3ReadRelocatedSpriteFile(const char *, const char *, u32 *);
+extern u8 *dds3ReadRelocatedSpriteFile(const char *, const char *, u32 *);
 
 extern MnuCallbackListPair *sdfCloneOwnedSpriteRecordList(const void *, s32);
 
@@ -602,7 +602,7 @@ s32 dds3WriteArraySpriteFile(const char *directory, const char *name, u32 **sour
 
 /* Load relocated sprite records into an owned list, then release the file buffer. */
 MnuCallbackListPair *dds3LoadOwnedSpriteRecordList(const char *source, const char *request) {
-    void *buffer;
+    u8 *buffer;
     MnuCallbackListPair *result;
     u32 metadata[4];
 
@@ -650,7 +650,7 @@ s32 dds3WriteNestedSpriteFile(const char *directory, const char *name, u32 **sou
 
 /* Separate native copy of the same owned-list loader, using the shared decoder. */
 MnuCallbackListPair *dds3LoadOwnedSpriteRecordListDuplicate(const char *source, const char *request) {
-    void *buffer;
+    u8 *buffer;
     MnuCallbackListPair *result;
     u32 metadata[4];
 
@@ -699,7 +699,7 @@ s32 dds3WriteSpriteFile(const char *directory, const char *name, u32 **source) {
 /* Read directory + name and return an owning list of copied sprite records.
  * The source file allocation is released after the records are cloned. */
 MnuCallbackListPair *dds3LoadSpriteRecords(const char *directory, const char *name) {
-    void *buffer;
+    u8 *buffer;
     MnuCallbackListPair *result;
     u32 metadata[4];
 
@@ -748,7 +748,7 @@ s32 dds3WriteExtendedSpriteFile(const char *directory, const char *name, u32 **s
 /* Read directory + name and return an owning list of extended sprite copies.
  * Their pointed-to vectors outlive the released source file allocation. */
 MnuCallbackListPair *dds3LoadExtendedSpriteRecords(const char *directory, const char *name) {
-    void *buffer;
+    u8 *buffer;
     MnuCallbackListPair *result;
     u32 metadata[4];
 
@@ -774,7 +774,7 @@ INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438988);
 
 INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438990);
 
-void *dds3ReadRelocatedSpriteFile(const char *directory, const char *name, u32 *countOut) {
+u8 *dds3ReadRelocatedSpriteFile(const char *directory, const char *name, u32 *countOut) {
     DdsSpriteFileHeader header;
     u32 info[5];
     char path[128];
