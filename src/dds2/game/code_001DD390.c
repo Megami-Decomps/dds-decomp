@@ -4575,7 +4575,7 @@ u32 btlUnitBaseLightTask(BtlUnitBaseLightArgs *work) {
         if (work->delay >= 2) {
             ext = unit->ext;
             evtUnitLightOn(ext);
-            target = (dds3Basic_t *)ext->currentTransitionValue;
+            target = ext->currentTransitionTarget;
             if (target != NULL && (ext->flags & 0x40000)) {
                 info = target->data;
                 PCP_COPY_VECTOR(unit->colorStart, info->firstColor);

@@ -1610,7 +1610,7 @@ void evtEventViewerUpdateUnitTransitions(s32 timelineTime, EvtRuntime *viewer) {
     EvtRuntimeChild *transitionKey;
     EvtRuntimeChild *selectedKey;
     evtUnitHandle_t *eventUnit;
-    s32 transitionValue;
+    dds3Basic_t *transitionValue;
     s32 latestTransitionTime;
 
     if (dds3GetActiveScene() != NULL) {
@@ -1629,7 +1629,7 @@ void evtEventViewerUpdateUnitTransitions(s32 timelineTime, EvtRuntime *viewer) {
                                 worldObject == dds3SceneBasicSearchNameAndType(dds3GetActiveScene(),
                                     EVT_WORLD_SLOT_UNIT, viewer->entryName[transitionKey->p08.sh[0]])) {
                                 if (latestTransitionTime < transitionKey->frame + track->metadata.value) {
-                                    transitionValue = (s32)track->info;
+                                    transitionValue = track->info;
                                     latestTransitionTime = transitionKey->frame + track->metadata.value;
                                     selectedKey = transitionKey;
                                 }
@@ -1642,8 +1642,8 @@ void evtEventViewerUpdateUnitTransitions(s32 timelineTime, EvtRuntime *viewer) {
                 eventUnit = evtGetUnitHandle2(worldObject);
                 if (selectedKey != NULL) {
                     if (selectedKey->p08.sh[1] != 0) {
-                        if (eventUnit->currentTransitionValue != transitionValue || !(eventUnit->flags & 0x40000)) {
-                            evtSetUnitValueTransition(eventUnit, (dds3Basic_t *)transitionValue, selectedKey->duration);
+                        if (eventUnit->currentTransitionTarget != transitionValue || !(eventUnit->flags & 0x40000)) {
+                            evtSetUnitValueTransition(eventUnit, transitionValue, selectedKey->duration);
                         }
                     } else {
                         if (eventUnit->flags & 0x40000) {
@@ -1653,7 +1653,7 @@ void evtEventViewerUpdateUnitTransitions(s32 timelineTime, EvtRuntime *viewer) {
                         }
                     }
                 } else {
-                    if (eventUnit->currentTransitionValue != 0) {
+                    if (eventUnit->currentTransitionTarget != 0) {
                         evtEndUnitValueTransition(eventUnit, 0);
                     }
                 }
