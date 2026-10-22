@@ -35,7 +35,7 @@ typedef char EvtPictureWork_texture_at_0x04[
 
 /* Native resource handle and the loader's corresponding data address. */
 typedef struct EvtResourcePair {
-    u32 handle;
+    struct sdfMemHandle_t *handle;
     u32 dataAddress;
 } EvtResourcePair;
 
