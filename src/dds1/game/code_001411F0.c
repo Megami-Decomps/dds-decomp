@@ -20,6 +20,7 @@
 #include "fld_release_texture_slots_api.h"
 #include "fld_spark_object_entry.h"
 #include "fld_spark_slot.h"
+#include "fld_spark_controller_state.h"
 #include "sdf_math_vector4.h"
 #include "kwln_fade.h"
 #include "mnu_title_stream.h"
@@ -4014,21 +4015,13 @@ void *fldFindFieldEntryByKeyPair(s32 key0, s32 key1) {
 typedef struct FldSparkController {
     void *object;              /* 0x00 */
     FldEnt110 *entry;           /* 0x04 */
-    s32 phase;                 /* 0x08 */
-    s32 countdown;             /* 0x0C */
-    s32 terminated;            /* 0x10 */
-    s32 mode;                  /* 0x14 */
-    s32 modeCountdown;         /* 0x18 */
-    s32 pendingMode;           /* 0x1C */
-    s32 frame;                 /* 0x20 */
-    s32 pulse;                 /* 0x24 */
-    s32 dialogPhase;           /* 0x28 */
-    s32 dialogTimer;           /* 0x2C */
-    s32 entryCount;            /* 0x30 */
-    s32 sequenceIndex;         /* 0x34 */
-    s32 sequenceRemaining;     /* 0x38 */
+    FldSparkControllerState state; /* 0x08 */
     s32 cursor;                /* 0x3C */
 } FldSparkController;
+
+typedef char FldSparkControllerStateOffsetCheck[
+    ((u32)&((FldSparkController *)0)->state == 0x08) ? 1 : -1];
+typedef char FldSparkControllerSizeCheck[(sizeof(FldSparkController) == 0x40) ? 1 : -1];
 
 extern FldSparkController fldSparkControlState;
 
@@ -4218,7 +4211,7 @@ void fldUpdateSparkSlots(void) {
     s32 i;
 
     fldCreateSparkSlotObjects();
-    for (i = 0; i < 64 && i < fldSparkControlState.entryCount; i++) {
+    for (i = 0; i < 64 && i < fldSparkControlState.state.entryCount; i++) {
         if (fldSparkSlots[i].hasVectors != 0 && fldSparkSlots[i].active != 0) {
             fldBindSparkSlotObject(i, fldSparkSlots[i].reservedObjectSlot);
         }
@@ -4234,12 +4227,12 @@ void fldUpdateSparkSequence(void) {
     f32 dy;
     f32 dz;
 
-    if (fldSparkControlState.sequenceRemaining == 0) {
-        i = fldSparkControlState.sequenceIndex;
+    if (fldSparkControlState.state.sequenceRemaining == 0) {
+        i = fldSparkControlState.state.sequenceIndex;
         sequence = &fldSparkControlState.entry->sequences[i];
-        fldSparkControlState.sequenceRemaining = sequence->count;
+        fldSparkControlState.state.sequenceRemaining = sequence->count;
         if (sequence->count == -1) {
-            fldSparkControlState.terminated = 1;
+            fldSparkControlState.state.terminated = 1;
             return;
         }
         if (sequence->count == 0) {
@@ -4248,7 +4241,7 @@ void fldUpdateSparkSequence(void) {
             fldSparkSlots[slot].reservedObjectSlot = 1;
             fldSparkSlots[slot].active = 1;
             fldSparkSlots[slot].tickCounter = 0;
-            fldSparkControlState.sequenceRemaining = 1;
+            fldSparkControlState.state.sequenceRemaining = 1;
             p2sdPlaySE(0x670015, 0x7F, 0x3F);
         } else {
             for (i = 0; i < sequence->count; i++) {
@@ -4260,16 +4253,16 @@ void fldUpdateSparkSequence(void) {
             }
             p2sdPlaySE(0x670014, 0x7F, 0x3F);
         }
-        fldSparkControlState.sequenceIndex++;
+        fldSparkControlState.state.sequenceIndex++;
     }
-    for (i = 0; i < 64 && i < fldSparkControlState.entryCount; i++) {
+    for (i = 0; i < 64 && i < fldSparkControlState.state.entryCount; i++) {
         switch (fldSparkSlots[i].active) {
         case 0:
             break;
         case 1:
             fldSparkSlots[i].tickCounter++;
-            if (fldSparkSlots[i].objectSlot != -1 && fldSparkControlState.mode == 1 &&
-                fldSparkControlState.pulse != 0 && (u32)(fldSparkControlState.modeCountdown - 10) < 6) {
+            if (fldSparkSlots[i].objectSlot != -1 && fldSparkControlState.state.mode == 1 &&
+                fldSparkControlState.state.pulse != 0 && (u32)(fldSparkControlState.state.modeCountdown - 10) < 6) {
                 PCP_COPY_VECTOR(&position, fldSparkSlots[i].position);
                 dx = fldGlobalBase.x - position.x;
                 dy = fldGlobalBase.y - position.y;
@@ -4278,15 +4271,15 @@ void fldUpdateSparkSequence(void) {
                     fldSetWeatherEffectPos(position.x, position.y, position.z);
                     fldGlobalBase.collectedCount++;
                     fldGlobalBase.score += 0x32;
-                    fldSparkControlState.sequenceRemaining--;
+                    fldSparkControlState.state.sequenceRemaining--;
                     p2sdPlaySE(0x670013, 0x7F, 0x3F);
                     fldReleaseCameraModel(3);
-                    fldSparkControlState.modeCountdown += 3;
+                    fldSparkControlState.state.modeCountdown += 3;
                     fldFreeSparkSlot(i);
                     fldSparkSlots[i].reservedObjectSlot = 0;
                     fldSparkSlots[i].active = 0;
                     fldSparkSlots[i].tickCounter = dds3GetRandA(0) % 270 + 30;
-                    fldSparkControlState.pulse = 0;
+                    fldSparkControlState.state.pulse = 0;
                 }
             }
 
@@ -4300,7 +4293,7 @@ extern FldSparkController fldSparkControlState;
 s32 fldIsNearSpark(f32 x, f32 y, f32 z) {
     s32 i;
 
-    for (i = 0; i < 64 && i < fldSparkControlState.entryCount; i++) {
+    for (i = 0; i < 64 && i < fldSparkControlState.state.entryCount; i++) {
         if (fldSparkSlots[i].active == 1 && fldSparkSlots[i].objectSlot != -1) {
             f32 dx = x - fldSparkSlots[i].position[0];
             f32 dy = y - fldSparkSlots[i].position[1];
@@ -4328,7 +4321,7 @@ void fldDrawWeatherLimitTimer(void) {
     u32 vertexColor;
 
     memcpy(digitOrigins, D_003A0928, sizeof(digitOrigins));
-    remainingFrames = fldSparkControlState.countdown;
+    remainingFrames = fldSparkControlState.state.countdown;
     vertexColor = 0x80808080;
     eglSetOt(0x53);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 1);
@@ -4368,9 +4361,9 @@ void func_0014C468(void) {
         fclInitMessage((struct ItfMesSub *)D_0034D8F0);
         fclStartMessage(6);
         D_0032E4B4[0] = 1;
-        fldSparkControlState.dialogPhase = 12;
-        fldSparkControlState.phase = 0;
-        fldSparkControlState.dialogTimer = 0;
+        fldSparkControlState.state.dialogPhase = 12;
+        fldSparkControlState.state.phase = 0;
+        fldSparkControlState.state.dialogTimer = 0;
         fldResetPlayerSceneObjectState();
         return;
     }
@@ -4384,21 +4377,21 @@ void func_0014C468(void) {
     evtSetMessageWindowOptionWhenOpen(0);
     evtBitOn(0x81A);
     entry = (FldEnt110 *)fldFindFieldEntryByKeyPair(fldGlobalBase.area, fldGlobalBase.floor + 1);
-    fldSparkControlState.phase = 0;
+    fldSparkControlState.state.phase = 0;
     fldGlobalBase.score = 0;
-    fldSparkControlState.countdown = entry->duration;
+    fldSparkControlState.state.countdown = entry->duration;
     fldGlobalBase.transitionMode = 1;
-    fldSparkControlState.dialogPhase = 1;
-    fldSparkControlState.terminated = 0;
-    fldSparkControlState.mode = 0;
-    fldSparkControlState.modeCountdown = 0;
-    fldSparkControlState.pendingMode = 0;
-    fldSparkControlState.pulse = 0;
-    fldSparkControlState.dialogTimer = 0;
-    fldSparkControlState.sequenceIndex = 0;
-    fldSparkControlState.sequenceRemaining = 0;
+    fldSparkControlState.state.dialogPhase = 1;
+    fldSparkControlState.state.terminated = 0;
+    fldSparkControlState.state.mode = 0;
+    fldSparkControlState.state.modeCountdown = 0;
+    fldSparkControlState.state.pendingMode = 0;
+    fldSparkControlState.state.pulse = 0;
+    fldSparkControlState.state.dialogTimer = 0;
+    fldSparkControlState.state.sequenceIndex = 0;
+    fldSparkControlState.state.sequenceRemaining = 0;
     fldSparkControlState.entry = entry;
-    fldSparkControlState.entryCount = entry->entryCount;
+    fldSparkControlState.state.entryCount = entry->entryCount;
     fldSparkControlState.cursor = 0;
     fldGlobalBase.collectedCount = 0;
     fldGlobalBase.unk10C = 0.0f;
@@ -4435,8 +4428,8 @@ void fldFinishEventFieldState(void) {
         fldStartSceneBgmAlternate();
         fldPreparePlayerSceneCameraTarget();
         state->transitionMode = 0;
-        fldSparkControlState.phase = 0;
-        fldSparkControlState.countdown = 0;
+        fldSparkControlState.state.phase = 0;
+        fldSparkControlState.state.countdown = 0;
         evtSetSolarOverlayFullyVisible();
     }
 }
@@ -4460,13 +4453,13 @@ void fldUpdateSparkMessageSequence(void) {
     s32 choice;
     void *node;
 
-    switch (fldSparkControlState.dialogPhase) {
+    switch (fldSparkControlState.state.dialogPhase) {
     case 12:
         dspRequestMessageWindowModeOne();
         if (fclChkMessage() == 0) {
             evtFinishMessageWindowAndNotify();
             fclDestroyMessage();
-            fldSparkControlState.dialogPhase = 11;
+            fldSparkControlState.state.dialogPhase = 11;
             fldGlobalBase.transitionMode = 0;
             evtSetSolarOverlayFullyVisible();
         }
@@ -4478,19 +4471,19 @@ void fldUpdateSparkMessageSequence(void) {
             if (choice == 0) {
                 evtFinishMessageWindowAndNotify();
                 fclDestroyMessage();
-                fldSparkControlState.dialogPhase = 5;
-                fldSparkControlState.dialogTimer = 0;
+                fldSparkControlState.state.dialogPhase = 5;
+                fldSparkControlState.state.dialogTimer = 0;
             } else if (choice == 1) {
                 evtFinishMessageWindowAndNotify();
                 fclDestroyMessage();
-                fldSparkControlState.dialogPhase = 11;
+                fldSparkControlState.state.dialogPhase = 11;
                 fldGlobalBase.transitionMode = 0;
                 evtSetSolarOverlayFullyVisible();
             } else {
                 evtFinishMessageWindowAndNotify();
                 fclDestroyMessage();
-                fldSparkControlState.dialogPhase = 4;
-                fldSparkControlState.dialogTimer = 0;
+                fldSparkControlState.state.dialogPhase = 4;
+                fldSparkControlState.state.dialogTimer = 0;
                 fclInitMessage((struct ItfMesSub *)D_0034D8F0);
                 fclStartMessage(3);
                 evtStoreValueAndCaptureWindowPanelValue(2);
@@ -4503,16 +4496,16 @@ void fldUpdateSparkMessageSequence(void) {
         if (fclChkMessage() == 0) {
             evtFinishMessageWindowAndNotify();
             fclDestroyMessage();
-            fldSparkControlState.dialogPhase = 1;
-            fldSparkControlState.dialogTimer = 0;
+            fldSparkControlState.state.dialogPhase = 1;
+            fldSparkControlState.state.dialogTimer = 0;
         }
         break;
     case 5:
         dds3WorkClear();
         fldBgmFadeOut();
         D_003BAFE8 = fileLoad((const char *)D_003A0978);
-        fldSparkControlState.dialogPhase = 6;
-        fldSparkControlState.dialogTimer = 0;
+        fldSparkControlState.state.dialogPhase = 6;
+        fldSparkControlState.state.dialogTimer = 0;
         break;
     case 6:
         if (pacFileCheckEnd(D_003BAFE8) != 0) {
@@ -4528,43 +4521,43 @@ void fldUpdateSparkMessageSequence(void) {
             fldAddCameraModelEntry(0xD);
             D_0032E5C4[0] = 1;
             fldResetArchiveLoadPhase();
-            fldSparkControlState.dialogTimer = 0;
-            fldSparkControlState.dialogPhase = 2;
+            fldSparkControlState.state.dialogTimer = 0;
+            fldSparkControlState.state.dialogPhase = 2;
         }
         break;
     case 2:
-        if (fldSparkControlState.dialogTimer == 20) {
+        if (fldSparkControlState.state.dialogTimer == 20) {
             dds3EffectObjectBasicStatOn(fldSparkControlState.object, 1);
             dds3StartBEDEffectObjectBasic(fldSparkControlState.object, 0);
         }
-        fldSparkControlState.dialogTimer++;
+        fldSparkControlState.state.dialogTimer++;
         if (fldStepArchiveLoad() != 0) {
             mnuQueueTitleSoundStreamEntry(0x12);
-            fldSparkControlState.dialogPhase = 3;
+            fldSparkControlState.state.dialogPhase = 3;
         }
         break;
     case 3:
-        if (fldSparkControlState.dialogTimer == 20) {
+        if (fldSparkControlState.state.dialogTimer == 20) {
             dds3EffectObjectBasicStatOn(fldSparkControlState.object, 1);
             dds3StartBEDEffectObjectBasic(fldSparkControlState.object, 0);
         }
-        fldSparkControlState.dialogTimer++;
+        fldSparkControlState.state.dialogTimer++;
         if (mnuPollTitleStreamStateLocked() == 2) {
             p2sdPlaySE(0x670010, 0x7F, 0x3F);
-            fldSparkControlState.dialogPhase = 8;
+            fldSparkControlState.state.dialogPhase = 8;
         }
         break;
     case 8:
-        if (fldSparkControlState.dialogTimer == 46) {
+        if (fldSparkControlState.state.dialogTimer == 46) {
             dds3FadeOut(0xFF, 0xFF, 0xFF, 4);
         }
-        if (fldSparkControlState.dialogTimer == 20) {
+        if (fldSparkControlState.state.dialogTimer == 20) {
             dds3EffectObjectBasicStatOn(fldSparkControlState.object, 1);
             dds3StartBEDEffectObjectBasic(fldSparkControlState.object, 0);
         }
-        if (++fldSparkControlState.dialogTimer > 50) {
-            fldSparkControlState.dialogTimer = 0;
-            fldSparkControlState.dialogPhase = 9;
+        if (++fldSparkControlState.state.dialogTimer > 50) {
+            fldSparkControlState.state.dialogTimer = 0;
+            fldSparkControlState.state.dialogPhase = 9;
         }
         break;
     case 9:
@@ -4572,31 +4565,31 @@ void fldUpdateSparkMessageSequence(void) {
         fldLoadWeatherEffects();
         fldTogglePlayerModel();
         fldSetCameraModelMotionRequest(0x66, 0);
-        fldSparkControlState.dialogTimer = 0;
-        fldSparkControlState.dialogPhase = 10;
+        fldSparkControlState.state.dialogTimer = 0;
+        fldSparkControlState.state.dialogPhase = 10;
         evtDisableMoonDraw();
         dds3FadeIn(0xFF, 0xFF, 0xFF, 4);
         break;
     case 10:
         fldDrawWeatherLimitTimer();
-        if (++fldSparkControlState.dialogTimer > 10) {
+        if (++fldSparkControlState.state.dialogTimer > 10) {
             dds3EffectObjectBasicStatOff(fldSparkControlState.object, 1);
             dds3DeleteSceneBasicData(fldSparkControlState.object);
             sdfMemFreeDelayedDirect(D_003BAFEC);
-            fldSparkControlState.dialogTimer = 0;
-            fldSparkControlState.dialogPhase = 7;
+            fldSparkControlState.state.dialogTimer = 0;
+            fldSparkControlState.state.dialogPhase = 7;
             mnuTitleStreamUpdateAndLogBgm();
         }
         break;
     case 7:
         fldDrawWeatherLimitTimer();
-        fldSparkControlState.dialogPhase = 0;
-        fldSparkControlState.phase = 1;
+        fldSparkControlState.state.dialogPhase = 0;
+        fldSparkControlState.state.phase = 1;
         fldPreparePlayerSceneCameraTarget();
         break;
     case 11:
-        fldSparkControlState.phase = 1;
-        fldSparkControlState.dialogPhase = 0;
+        fldSparkControlState.state.phase = 1;
+        fldSparkControlState.state.dialogPhase = 0;
         fldPreparePlayerSceneCameraTarget();
         break;
     }
@@ -4619,56 +4612,56 @@ void fldUpdateSparkEncounterScene(void) {
     memset(secondVector, 0, sizeof(secondVector));
     secondVector[3] = 1.0f;
 
-    phase = fldSparkControlState.phase;
+    phase = fldSparkControlState.state.phase;
     if (phase == 1) {
-        if (fldSparkControlState.mode == 0) {
+        if (fldSparkControlState.state.mode == 0) {
             if (D_00324530[0] < 0) {
                 fldSetCameraModelMotionRequest(6, 20);
                 p2sdPlaySE(0x670012, 0x7F, 0x3F);
-                fldSparkControlState.mode = 1;
-                fldSparkControlState.pulse = 1;
-                fldSparkControlState.modeCountdown = 20;
-                fldSparkControlState.pendingMode = 0;
+                fldSparkControlState.state.mode = 1;
+                fldSparkControlState.state.pulse = 1;
+                fldSparkControlState.state.modeCountdown = 20;
+                fldSparkControlState.state.pendingMode = 0;
             }
-        } else if (fldSparkControlState.modeCountdown > 0) {
-            value = fldSparkControlState.modeCountdown - 1;
-            fldSparkControlState.modeCountdown = value;
+        } else if (fldSparkControlState.state.modeCountdown > 0) {
+            value = fldSparkControlState.state.modeCountdown - 1;
+            fldSparkControlState.state.modeCountdown = value;
             if (value == 0) {
-                if (fldSparkControlState.pendingMode == 0) {
+                if (fldSparkControlState.state.pendingMode == 0) {
                     s32 pendingMode;
                     fldSetCameraModelMotionRequest(1, 0);
-                    pendingMode = fldSparkControlState.pendingMode;
-                    fldSparkControlState.mode = pendingMode;
-                    fldSparkControlState.modeCountdown = 0;
-                    fldSparkControlState.pendingMode = 0;
+                    pendingMode = fldSparkControlState.state.pendingMode;
+                    fldSparkControlState.state.mode = pendingMode;
+                    fldSparkControlState.state.modeCountdown = 0;
+                    fldSparkControlState.state.pendingMode = 0;
                 }
-            } else if (fldSparkControlState.mode == 1 && fldSparkControlState.pendingMode == 0 && value < 14 && D_00324530[0] < 0) {
+            } else if (fldSparkControlState.state.mode == 1 && fldSparkControlState.state.pendingMode == 0 && value < 14 && D_00324530[0] < 0) {
                 fldSetCameraModelMotionRequest(6, 20);
                 p2sdPlaySE(0x670012, 0x7F, 0x3F);
-                fldSparkControlState.mode = 1;
-                fldSparkControlState.pulse = 1;
-                fldSparkControlState.modeCountdown = 20;
+                fldSparkControlState.state.mode = 1;
+                fldSparkControlState.state.pulse = 1;
+                fldSparkControlState.state.modeCountdown = 20;
             }
         }
 
         if (fldGetSparkDialogPhase() == 0 && fldEncountTestFlag(0x40) != 0) {
-            if (fldSparkControlState.countdown == 300) {
+            if (fldSparkControlState.state.countdown == 300) {
                 p2sdPlaySE(0x670017, 0x7F, 0x3F);
             }
-            if (fldSparkControlState.countdown > 0) {
-                fldSparkControlState.countdown--;
+            if (fldSparkControlState.state.countdown > 0) {
+                fldSparkControlState.state.countdown--;
             }
         }
 
         fldDrawWeatherLimitTimer();
-        if (fldSparkControlState.countdown < 31) {
-            fldSparkControlState.countdown = 0;
+        if (fldSparkControlState.state.countdown < 31) {
+            fldSparkControlState.state.countdown = 0;
             p2sdStopSe(0x670017);
             p2sdPlaySE(0x670016, 0x7F, 0x3F);
             fldReleaseCameraModel(0);
             fldSetCameraModelMotionRequest(2, 0);
             fldSetCameraNodeModeWithTen();
-            fldSparkControlState.phase = 3;
+            fldSparkControlState.state.phase = 3;
             fclInitMessage((struct ItfMesSub *)D_0034D8F0);
             fclStartMessage(4);
             fldResetPlayerSceneObjectState();
@@ -4678,12 +4671,12 @@ void fldUpdateSparkEncounterScene(void) {
             fldUpdateSparkSequence();
         }
 
-        if (fldSparkControlState.terminated != 0) {
+        if (fldSparkControlState.state.terminated != 0) {
             p2sdStopSe(0x670017);
             mnuMarkTitleStreamResetPending();
             D_0032E4C0[0] = 1;
             fldResetPlayerSceneObjectState();
-            fldSparkControlState.phase = 7;
+            fldSparkControlState.state.phase = 7;
             evtBitOn(0x819);
         }
         return;
@@ -4694,8 +4687,8 @@ void fldUpdateSparkEncounterScene(void) {
         }
         evtFinishMessageWindowAndNotify();
         fclDestroyMessage();
-        fldSparkControlState.frame = 0;
-        fldSparkControlState.phase = 6;
+        fldSparkControlState.state.frame = 0;
+        fldSparkControlState.state.phase = 6;
         mnuAdvanceTitleStateUnderSemaphore();
         D_003BAFE8 = fileLoad(D_003A0978);
     } else if (phase == 6) {
@@ -4715,39 +4708,39 @@ void fldUpdateSparkEncounterScene(void) {
         fldSetCameraModelMotionRequest(5, 0);
         dds3EffectObjectBasicStatOn(fldSparkControlState.object, 1);
         dds3StartBEDEffectObjectBasic(fldSparkControlState.object, 0);
-        fldSparkControlState.phase = 7;
+        fldSparkControlState.state.phase = 7;
     } else if (phase == 7) {
-        fldSparkControlState.frame++;
-        if (fldSparkControlState.frame == 40) {
+        fldSparkControlState.state.frame++;
+        if (fldSparkControlState.state.frame == 40) {
             dds3FadeOut(255, 255, 255, 4);
         }
-        if (fldSparkControlState.frame < 45) {
+        if (fldSparkControlState.state.frame < 45) {
             return;
         }
-        fldSparkControlState.phase = 8;
+        fldSparkControlState.state.phase = 8;
     } else if (phase == 8) {
         p2sdPlaySE(0x670011, 0x7F, 0x3F);
         fldTogglePlayerModel();
         fldStartSceneBgmAlternate();
         evtSetSolarOverlayFullyVisible();
         D_0032E4E8[0] = 1;
-        fldSparkControlState.phase = 9;
-        fldSparkControlState.frame = 0;
+        fldSparkControlState.state.phase = 9;
+        fldSparkControlState.state.frame = 0;
     } else if (phase == 9) {
-        fldSparkControlState.frame++;
-        if (fldSparkControlState.frame == 1) {
+        fldSparkControlState.state.frame++;
+        if (fldSparkControlState.state.frame == 1) {
             dds3FadeIn(255, 255, 255, 4);
         }
-        if (fldSparkControlState.frame == 6) {
+        if (fldSparkControlState.state.frame == 6) {
             node = fldSparkControlState.object;
             dds3EffectObjectBasicStatOff(node, 1);
             dds3DeleteSceneBasicData(fldSparkControlState.object);
             sdfMemFreeDelayedDirect(D_003BAFEC);
         }
-        if (fldSparkControlState.frame >= 11) {
+        if (fldSparkControlState.state.frame >= 11) {
             D_0032E5C4[0] = 0;
             fldPreparePlayerSceneCameraTarget();
-            fldSparkControlState.phase = 0;
+            fldSparkControlState.state.phase = 0;
             D_0032E4B4[0] = 0;
         }
     } else {
@@ -4994,4 +4987,3 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAFEC);
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAFF0);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldWeatherLimitTexture);
-
