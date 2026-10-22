@@ -3683,11 +3683,7 @@ s32 btlInitializeEffectVectors(BtlLinkedCommand *command) {
     return 1;
 }
 
-u8 btlSetLinkedDefeatCameraPresetA(command, camera, rotate)
-BtlLinkedCommand *command;
-BtlCamState *camera;
-s32 rotate;
-{
+u8 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     u16 *runtime = (u16 *)btlGetRuntime();
     BtlUnit *unit;
     u32 kind;
@@ -4461,7 +4457,7 @@ s32 btlSetupDefeatCameraFromAnimationFlags(BtlLinkedCommand *command) {
     }
     if (flags & 0x8000) {
         btlFlagAllUnitDefeatCandidatesTask();
-        btlSetLinkedDefeatCameraPresetA(command, command, 0);
+        btlSetLinkedDefeatCameraPresetA(command, &command->camera, 0);
         btlClearRuntimeFlag2000();
         return 1;
     }

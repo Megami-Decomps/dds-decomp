@@ -81,7 +81,7 @@ s32 btlSetupDefeatCameraFromAnimationFlags(BtlLinkedCommand *command) {
         command->state = 0;
     } else if (flags & 0x8000) {
         btlFlagAllUnitDefeatCandidatesTask();
-        btlSetLinkedDefeatCameraPresetA((void *)command, (void *)command, 0);
+        btlSetLinkedDefeatCameraPresetA(command, &command->camera, 0);
     } else if (flags & 8) {
         if (btlGetIndexListCount(command->task->indexWork.indices) == 1) {
             void *target = btlGetIndexListEntry(command->task->indexWork.indices, 0);
