@@ -43,7 +43,7 @@ extern u16 D_003BDA24;
 
 void corePktLerpUVChain(VuBlendNode *node);
 
-void corePktSetConstColor(VuWork *work, u32 color) {
+void corePktSetConstColor(corePktCb_t *work, u32 color) {
     f32 colorScale = 1.0f / 128.0f;
     VuBlendNode *node;
     s32 remaining;
@@ -77,7 +77,7 @@ void corePktMakeEdgePoint(VuBlendNode *out, VuBlendNode *first, VuBlendNode *sec
 
 extern u8 corePktSoftenBias;
 extern u16 D_003F7860[];
-static inline VuBlendNode *vuAllocNode(VuWork *work) {
+static inline VuBlendNode *vuAllocNode(corePktCb_t *work) {
     VuBlendNode *node = work->dmaAddrA;
 
     if (--work->dmaCountA == 0) {
@@ -91,7 +91,7 @@ static inline VuBlendNode *vuAllocNode(VuWork *work) {
     return node;
 }
 /* vu0 routine: native clip facing and ordinary triangle fans. */
-void corePktClipFace(VuWork *work) {
+void corePktClipFace(corePktCb_t *work) {
     s32 triangleCount;
     s32 i;
     u16 *triangles;
@@ -247,7 +247,7 @@ extern f32 D_003BDA30;
 extern f32 D_003984F0[4];
 extern u8 D_003983D0[];
 /* vu0 routine: native clip-plane setup and ordinary triangle fans. */
-void corePktBuildFaceList(VuWork *work) {
+void corePktBuildFaceList(corePktCb_t *work) {
     s32 triangleCount;
     u16 *triangles;
     VuBlendNode *nodes;
@@ -400,7 +400,7 @@ void corePktBuildFaceList(VuWork *work) {
     *work->dmaEnd = NULL;
 }
 
-void corePktBuildBackFaceList(VuWork *work) {
+void corePktBuildBackFaceList(corePktCb_t *work) {
     /* DDS1 node region uses the tail byte at +0x50. */
     f32 scale = D_003BDA30;
     s32 remaining;
@@ -532,7 +532,7 @@ void corePktBuildBackFaceList(VuWork *work) {
 }
 
 void corePktEmitTexTris(work)
-    VuWork *work;
+    corePktCb_t *work;
 {
     s32 remaining = work->nodeCount;
     if (remaining != 0) {
@@ -601,7 +601,7 @@ void corePktEmitTexTris(work)
 
 /* Emit up to 16 triangles per batch; TEX1/TEX0/CLAMP/ALPHA context 2 state
  * precedes the first batch only. clearPrimitiveFlags filters GIF PRIM bits. */
-void corePktEmitTexTrisCtx2(VuWork *work, u64 samplingState, u64 textureState, u64 clampState, u64 alphaState, s32 clearPrimitiveFlags) {
+void corePktEmitTexTrisCtx2(corePktCb_t *work, u64 samplingState, u64 textureState, u64 clampState, u64 alphaState, s32 clearPrimitiveFlags) {
     s32 remainingTriangles = work->nodeCount;
     if (remainingTriangles != 0) {
         u128 *(*triangleRefs)[3] = D_003EB860;
@@ -676,7 +676,7 @@ void corePktEmitTexTrisCtx2(VuWork *work, u64 samplingState, u64 textureState, u
 /* Emit up to 24 colored triangles per batch, copying vertex quadwords 0 and 2.
  * Keep the native K&R declaration and caller convention. */
 void corePktEmitTris(work)
-    VuWork *work;
+    corePktCb_t *work;
 {
     s32 remainingTriangles = work->nodeCount;
     if (remainingTriangles != 0) {
@@ -715,7 +715,7 @@ void corePktEmitTris(work)
 }
 
 /* Select textured or colored emission. */
-void corePktEmitBase(VuWork *work) {
+void corePktEmitBase(corePktCb_t *work) {
     if ((work->selectedFlags & SDF_VU_TEXTURED_FLAG) != 0) {
         corePktEmitTexTris(work);
         return;
@@ -724,9 +724,9 @@ void corePktEmitBase(VuWork *work) {
 }
 
 /* Finish the selected node's transformed rows and emit its textured geometry. */
-void corePktApplyFaceDivColor(VuWork *work, const u128 *parameters);
+void corePktApplyFaceDivColor(corePktCb_t *work, const u128 *parameters);
 
-void corePktEmitMultiTexPass(VuWork *work) {
+void corePktEmitMultiTexPass(corePktCb_t *work) {
     SdfAssetEntry *node;
     u32 mode;
     u32 secondaryColor;

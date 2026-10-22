@@ -3,10 +3,10 @@
 
 #include "common.h"
 
-struct DatPartyRecord;
+struct datUnitWork_t;
 
 typedef struct MnuProfileProgress {
-    struct DatPartyRecord *partyRecord;
+    struct datUnitWork_t *partyRecord;
     s32 profileId;
     u32 value;
     u32 cap;

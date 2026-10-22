@@ -24,18 +24,18 @@ extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern u8 effBossLookAtReferenceAxis[];
 
-extern EffRecordPool *dds3FlashPolyListCreate(u32 cellCount);
-extern void *dds3FlashPolyListGetVertex(EffRecordPool *pool, s32 index);
-extern void *dds3FlashPolyListGetVC(EffRecordPool *pool, s32 index);
-extern void dds3FlashPolyListSetBlend(EffRecordPool *pool, u32 bits);
+extern dds3FlashPolyList_t *dds3FlashPolyListCreate(u32 cellCount);
+extern void *dds3FlashPolyListGetVertex(dds3FlashPolyList_t *pool, s32 index);
+extern void *dds3FlashPolyListGetVC(dds3FlashPolyList_t *pool, s32 index);
+extern void dds3FlashPolyListSetBlend(dds3FlashPolyList_t *pool, u32 bits);
 extern EffRandState effDefaultRandomState[];
 extern f32 D_003B9308;
-extern void effPCPCrackInit(EffBossWork *work);
-extern EffBossWork *effPCPCrackCopy(EffBossWork *src);
-extern void dds3FlashPolyListDelete(EffRecordPool *pool);
+extern void effPCPCrackInit(effPCPCrack_t *work);
+extern effPCPCrack_t *effPCPCrackCopy(effPCPCrack_t *src);
+extern void dds3FlashPolyListDelete(dds3FlashPolyList_t *pool);
 
 /* Randomize geometry and initial age; the two extents remain proportional. */
-void effPCPCrackSizeInit(EffBossWork *work, EffBossCell *cell) {
+void effPCPCrackSizeInit(effPCPCrack_t *work, EffBossCell *cell) {
     f32 blend = work->head.offsetRandomness;
     f32 scale = work->head.scale;
     f32 t;
@@ -50,9 +50,9 @@ void effPCPCrackSizeInit(EffBossWork *work, EffBossCell *cell) {
 }
 
 /* Create a draw pool and delayed cells for each model map-position group. */
-void effPCPCrackInit(EffBossWork *work)
+void effPCPCrackInit(effPCPCrack_t *work)
 {
-    MdlCtx *model = effParamWorkGetData(work->paramWork);
+    dds3ModelHandle_t *model = effParamWorkGetData(work->paramWork);
     EffBossGroup *group;
     EffBossCell *nextCells;
     u32 groupIndex;
@@ -116,10 +116,10 @@ void effPCPCrackInit(EffBossWork *work)
 }
 
 /* Copy the trail head and create its model, cell system and per-map groups. */
-EffBossWork *effPCPCrackCreate(EffBossParams *bossParams, void *effectParams) {
-    EffBossWork *work;
+effPCPCrack_t *effPCPCrackCreate(EffBossParams *bossParams, void *effectParams) {
+    effPCPCrack_t *work;
 
-    work = sdfChipAllocDirect(sizeof(EffBossWork));
+    work = sdfChipAllocDirect(sizeof(effPCPCrack_t));
     work->head = bossParams->head;
     work->frame = 0;
     work->color = 0x80808080;
@@ -129,7 +129,7 @@ EffBossWork *effPCPCrackCreate(EffBossParams *bossParams, void *effectParams) {
 }
 
 /* Apply the first two packed parameter blocks to the boss effect. */
-EffBossWork *effPCPCrackCreatePCF(void *parameterTable) {
+effPCPCrack_t *effPCPCrackCreatePCF(void *parameterTable) {
     EffBossParams *bossParams;
     void *effectParams;
 
@@ -139,10 +139,10 @@ EffBossWork *effPCPCrackCreatePCF(void *parameterTable) {
 }
 
 /* Duplicate model parameters and rebuild groups with a fresh frame counter. */
-EffBossWork *effPCPCrackCopy(EffBossWork *src) {
-    EffBossWork *work;
+effPCPCrack_t *effPCPCrackCopy(effPCPCrack_t *src) {
+    effPCPCrack_t *work;
 
-    work = sdfChipAllocDirect(sizeof(EffBossWork));
+    work = sdfChipAllocDirect(sizeof(effPCPCrack_t));
     memcpy(&work->head, &src->head, sizeof(EffBossHead));
     work->frame = 0;
     work->color = 0x80808080;
@@ -152,7 +152,7 @@ EffBossWork *effPCPCrackCopy(EffBossWork *src) {
 }
 
 /* Release group draw pools, the shared cell system, model resource and owner. */
-void effPCPCrackDelete(EffBossWork *work) {
+void effPCPCrackDelete(effPCPCrack_t *work) {
     u32 groupIndex;
 
     if (work->groupsHandle != 0) {
@@ -171,13 +171,13 @@ void effPCPCrackDelete(EffBossWork *work) {
 extern u32 effMagaCylinderCalcColor(u32, u32);
 extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern f32 D_003556B0[4];
-extern s32 sdfModelGetMarkPosMatrix(struct SdfModel *, s32);
-extern void dds3FlashPolyListSetABGR(EffRecordPool *, u32);
-extern void dds3FlashPolyListDraw(EffRecordPool *);
+extern s32 sdfModelGetMarkPosMatrix(struct sdfModelRootNode_t *, s32);
+extern void dds3FlashPolyListSetABGR(dds3FlashPolyList_t *, u32);
+extern void dds3FlashPolyListDraw(dds3FlashPolyList_t *);
 
 /* Independent native reconstruction; prior KiB/Opal/Brass algorithms credited. */
 void effPCPCrackDraw(void *opaque) {
-    EffBossWork *work = opaque;
+    effPCPCrack_t *work = opaque;
     f32 perpendicular[4];
     f32 direction[4];
     f32 axis[4];
@@ -186,8 +186,8 @@ void effPCPCrackDraw(void *opaque) {
     f32 displacement[4];
     f32 baseVector[4];
     f32 tipVector[4];
-    MdlCtx *model;
-    struct SdfModel *map;
+    dds3ModelHandle_t *model;
+    struct sdfModelRootNode_t *map;
     s32 i;
     s32 colorStart;
     s32 mode;
@@ -469,7 +469,7 @@ void effPCPCrackSetPosition(void *dst, void *src)
     PCP_COPY_VECTOR(dst, src);
 }
 
-void effBossTrailSetColor(EffBossWork *work, s32 value) {
+void effBossTrailSetColor(effPCPCrack_t *work, s32 value) {
     work->color = value;
 }
 
@@ -746,8 +746,8 @@ void func_00185A48(void) {
 }
 
 /* Apply per-cell rotation onset and speed after creating the trail groups. */
-EffBossWork *effPCPCrack2Create(EffBossParams *bossParams, void *effectParams) {
-    EffBossWork *work;
+effPCPCrack_t *effPCPCrack2Create(EffBossParams *bossParams, void *effectParams) {
+    effPCPCrack_t *work;
     u32 groupIndex;
 
     work = effPCPCrackCreate(bossParams, effectParams);
@@ -759,7 +759,7 @@ EffBossWork *effPCPCrack2Create(EffBossParams *bossParams, void *effectParams) {
     return work;
 }
 
-EffBossWork *effPCPCrack2CreatePCF(void *data) {
+effPCPCrack_t *effPCPCrack2CreatePCF(void *data) {
     EffBossParams *bossParams;
     void *effectParams;
 
@@ -769,8 +769,8 @@ EffBossWork *effPCPCrack2CreatePCF(void *data) {
 }
 
 /* Preserve rotation settings, but restart every group's accumulated angle. */
-EffBossWork *effPCPCrack2Copy(EffBossWork *src) {
-    EffBossWork *work;
+effPCPCrack_t *effPCPCrack2Copy(effPCPCrack_t *src) {
+    effPCPCrack_t *work;
     u32 groupIndex;
 
     work = effPCPCrackCopy(src);
@@ -794,7 +794,7 @@ void effBossSetPositionCallback(void *work, void *position) {
     effPCPCrackSetPosition(work, position);
 }
 
-void effBossApplyGroupTint(EffBossWork *work, s32 value) {
+void effBossApplyGroupTint(effPCPCrack_t *work, s32 value) {
     effBossTrailSetColor(work, value);
 }
 

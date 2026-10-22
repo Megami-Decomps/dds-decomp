@@ -5,11 +5,11 @@
 #include "mnu_mantra.h"
 #include "mnu_mantra_position_api.h"
 
-extern DatProfileRecord *ptyGetProfileRecordPointer(DatPartyRecord *, u16);
+extern DatProfileRecord *ptyGetProfileRecordPointer(datUnitWork_t *, u16);
 struct MantraPanelAnimation;
 extern struct MantraPanelAnimation *mnuFindPanelSlotById(MantraPanelPool *, s32, s8);
 extern u32 mnuQueuePanelAnimationTransition(struct MantraPanelAnimation *, u32, s16);
-extern void ptyApplyProfile(DatPartyRecord *, u16);
+extern void ptyApplyProfile(datUnitWork_t *, u16);
 extern void mnuStorePanelEntry(s32 soundHandle, s32 framesRemaining);
 
 static inline u16 *mantraFlagEntry(MantraFlagResource *work, s32 id) {
@@ -25,7 +25,7 @@ void mnuApplyMantraUnlockToPartyList(MnuStatusResource *resource, u16 id) {
     if (node != 0) {
         row = 0;
         do {
-            DatPartyRecord *party = node->partyRecord;
+            datUnitWork_t *party = node->partyRecord;
             MantraFlagResource *work = resource->menu.slots[row];
             struct MantraPanelAnimation *panel;
             u16 *selected;

@@ -38,7 +38,7 @@ typedef struct EffThunderCellWork {
     EffThunderCell *cells; /* 0x48 */
     u32 unk4C; /* 0x4C: settable, otherwise unobserved */
     ParSystem *system; /* 0x50 */
-    SdfMemBlock *allocationHandle; /* 0x54 */
+    sdfMemHandle_t *allocationHandle; /* 0x54 */
 } EffThunderCellWork;
 
 typedef char EffThunderCell_size_must_be_0x14[

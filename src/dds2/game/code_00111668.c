@@ -3,9 +3,9 @@
 #include "dds3obj.h"
 #include "dds3_path.h"
 
-extern void dds3MoverBasicFreePath(EffWorldNode *slotObject);
+extern void dds3MoverBasicFreePath(dds3Basic_t *slotObject);
 
-void MoverBasicDestructor(EffWorldNode *slotObject) {
+void MoverBasicDestructor(dds3Basic_t *slotObject) {
     Dds3SlotResource *resource;
 
     resource = slotObject->data;

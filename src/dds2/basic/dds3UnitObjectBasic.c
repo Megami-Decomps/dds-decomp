@@ -3,6 +3,6 @@
 #include "eff_transform.h"
 
 
-void dds3DeleteUnitObjectBasic(EffWorldNode *unitObject) {
+void dds3DeleteUnitObjectBasic(dds3Basic_t *unitObject) {
     dds3DeleteSceneBasicData(unitObject);
 }

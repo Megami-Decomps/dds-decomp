@@ -24,11 +24,11 @@ extern void fldApplyCurrentTaskScene(const char *name);
 #include "scr_string_parameter_api.h"
 
 /* The setter returns the context it set the value in (scrTraceCode.c). */
-extern ScrData *scrSetIntReturnValue(s32 retVal);
+extern scrProcessWork_s *scrSetIntReturnValue(s32 retVal);
 
-struct EvtUnit;
+struct evtUnitHandle_t;
 
-struct SdfTex;
+struct sdfTexHandle_t;
 
 
 extern void fldSetRoomObjectModeFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
@@ -107,19 +107,19 @@ extern u32 fldYukEffectNode;
 
 extern u32 fldYukEffectPositioned;
 
-extern struct SdfTex *D_004363AC;
+extern struct sdfTexHandle_t *D_004363AC;
 
-extern struct SdfTex *D_004363B0;
+extern struct sdfTexHandle_t *D_004363B0;
 
-extern struct SdfTex *D_004363B4;
+extern struct sdfTexHandle_t *D_004363B4;
 
 extern s32 D_00436370;
 
 extern s32 D_00436374;
 
-extern struct SdfTex *D_00436368;
+extern struct sdfTexHandle_t *D_00436368;
 
-extern struct SdfTex *D_0043636C;
+extern struct sdfTexHandle_t *D_0043636C;
 
 extern u32 fldIndexedResourceHandle;
 
@@ -149,7 +149,7 @@ extern s32 D_00436358;
 
 extern s32 D_00436360;
 
-extern struct SdfTex *D_0043637C;
+extern struct sdfTexHandle_t *D_0043637C;
 
 extern s32 fldFindEveRngIndex(u32);
 
@@ -189,9 +189,9 @@ extern void fldDoor_ExitCamera(const char *entry);
 
 extern FldActivationEntry D_003A8EB0[];
 
-extern void fldInitializeHuntSparkUnit(struct EvtUnit *unit);
+extern void fldInitializeHuntSparkUnit(struct evtUnitHandle_t *unit);
 
-extern struct EvtUnit *evtGetUnitHandle(s32 param);
+extern struct evtUnitHandle_t *evtGetUnitHandle(s32 param);
 
 
 extern s32 fldFindEffectByName(char *str);
@@ -286,7 +286,7 @@ extern s32 D_0043630C;
 
 
 
-extern void dds3CameraObjectBasicGetTgtCam(EffWorldNode *camera, f32 *worldEyeOut,
+extern void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *camera, f32 *worldEyeOut,
                                                        f32 *targetPositionOut);
 
 extern void fldUpdateCameraProjectionEndpoints(void);
@@ -375,17 +375,17 @@ void fldStartSceneBgm(void);
 
 void fldStartSceneBgmAlternate(void);
 
-extern s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry);
+extern s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry);
 
-extern s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry);
+extern s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry);
 
 extern s32 fldEveHitResID_Find(u32 task);
 extern s32 fldResolvePendingTitleBanner(void);
 
 s32 fldCmdQueryActorEntrySceneStatus(void) {
-    EffWorldNode *world = dds3GetActiveScene();
-    EffWorldNode *unit = (EffWorldNode *)fldPlayerObject;
-    EffWorldNode *entry;
+    dds3Basic_t *world = dds3GetActiveScene();
+    dds3Basic_t *unit = (dds3Basic_t *)fldPlayerObject;
+    dds3Basic_t *entry;
     s32 result;
 
     if (unit == 0) {
@@ -417,9 +417,9 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
 }
 
 s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
-    EffWorldNode *world = dds3GetActiveScene();
-    EffWorldNode *unit = (EffWorldNode *)fldPlayerObject;
-    EffWorldNode *entry;
+    dds3Basic_t *world = dds3GetActiveScene();
+    dds3Basic_t *unit = (dds3Basic_t *)fldPlayerObject;
+    dds3Basic_t *entry;
     s32 result;
 
     if (unit == 0) {
@@ -469,9 +469,9 @@ s32 fldCommand_ACT_WIN_DSP3(void) {
 }
 
 s32 fldCmdTestActorEntryCondition(void) {
-    EffWorldNode *world = dds3GetActiveScene();
-    EffWorldNode *unit = (EffWorldNode *)fldPlayerObject;
-    EffWorldNode *entry;
+    dds3Basic_t *world = dds3GetActiveScene();
+    dds3Basic_t *unit = (dds3Basic_t *)fldPlayerObject;
+    dds3Basic_t *entry;
 
     if (unit == 0) {
         scrSetIntReturnValue(0);
@@ -507,7 +507,7 @@ s32 fldCommand_PAD_ENABLE(void) {
     if (fldPlayerObject == 0) {
         return 1;
     }
-    dds3ObjectBaseSetPrimaryControl((EffWorldNode *)fldPlayerObject, 0);
+    dds3ObjectBaseSetPrimaryControl((dds3Basic_t *)fldPlayerObject, 0);
     fldSetCameraNodeModeWithTen();
     fldPreparePlayerSceneCameraTarget();
     D_003898B0[0] = 0;
@@ -539,8 +539,8 @@ extern void fldUpdateCameraViewFromPlayer(void);
 /* The kind-4 lookup returns a camera with a separately owned world transform. */
 s32 fldCmdFocusCameraOnObject(void) {
     FldAreaWork *work;
-    EffWorldNode *obj;
-    EffWorldNode *world = dds3GetControlScene();
+    dds3Basic_t *obj;
+    dds3Basic_t *world = dds3GetControlScene();
 
     obj = dds3SearchSceneBasic(world, scrGetIntPara(0), 4);
     if (obj == NULL) {
@@ -625,9 +625,9 @@ s32 fldCmdSetLookAtHeading(void) {
 s32 fldCommand_CAM_SEL_PHOKAN(void) {
     f32 pos[4];
     f32 rot[4];
-    EffWorldNode *target;
-    EffWorldNode *object;
-    EffWorldNode *world;
+    dds3Basic_t *target;
+    dds3Basic_t *object;
+    dds3Basic_t *world;
 
     if (scrGetIntPara(0) == -1) {
         target = fldGetPlayerSceneState();
@@ -725,7 +725,7 @@ u32 fldCmdFreeDisplayObjects(void) {
 }
 
 s32 fldCommand_SEARCH_ID(const char *name) {
-    EffWorldNode *entry = dds3SceneBasicSearchName(dds3GetControlScene(), name);
+    dds3Basic_t *entry = dds3SceneBasicSearchName(dds3GetControlScene(), name);
     if (entry != 0) {
         return entry->key;
     }
@@ -788,7 +788,7 @@ s32 fldCommand_FLD_MODEL_ON(void) {
     char *name;
     s32 room;
     WorldIndexNode *list;
-    EffWorldNode *node;
+    dds3Basic_t *node;
 
     world = scrGetIntPara(0);
     if (world == 0) {
@@ -810,10 +810,10 @@ s32 fldCommand_FLD_MODEL_ON(void) {
     }
     if (world == fldGlobalBase.area && stage == fldGlobalBase.floor + 1) {
         list = dds3SceneBasicGetList(dds3GetControlScene(), 6);
-        if (dds3GetBasicArrayCount((WorldValueIndices *)list) != 0) {
-            dds3SetFirstBasicArray((WorldValueIndices *)list);
+        if (dds3GetBasicArrayCount((dds3BasicArrayHandle_t *)list) != 0) {
+            dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)list);
             do {
-                node = (EffWorldNode *)(u32)dds3GetBasicArray((WorldValueIndices *)list);
+                node = (dds3Basic_t *)(u32)dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
                 if (((EffectTransformData *)node->data)->roomNumber == (u32)room) {
                     switch (mode) {
                     case 0:
@@ -827,7 +827,7 @@ s32 fldCommand_FLD_MODEL_ON(void) {
                         break;
                     }
                 }
-            } while (dds3SetNextBasicArray((WorldValueIndices *)list) != 0);
+            } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != 0);
             dds3FreeBasicArrayHandle(list);
         }
     }
@@ -847,7 +847,7 @@ s32 fldCmdApplyNumericRoomModeGroupZero(void) {
     char *name;
     s32 room;
     WorldIndexNode *list;
-    EffWorldNode *node;
+    dds3Basic_t *node;
 
     world = scrGetIntPara(0);
     if (world == 0) {
@@ -870,10 +870,10 @@ s32 fldCmdApplyNumericRoomModeGroupZero(void) {
     }
     if (world == fldGlobalBase.area && stage == fldGlobalBase.floor + 1) {
         list = dds3SceneBasicGetList(dds3GetControlScene(), 6);
-        if (dds3GetBasicArrayCount((WorldValueIndices *)list) != 0) {
-            dds3SetFirstBasicArray((WorldValueIndices *)list);
+        if (dds3GetBasicArrayCount((dds3BasicArrayHandle_t *)list) != 0) {
+            dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)list);
             do {
-                node = (EffWorldNode *)(u32)dds3GetBasicArray((WorldValueIndices *)list);
+                node = (dds3Basic_t *)(u32)dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
                 if (((EffectTransformData *)node->data)->roomNumber == (u32)room) {
                     switch (mode) {
                     case 0:
@@ -887,7 +887,7 @@ s32 fldCmdApplyNumericRoomModeGroupZero(void) {
                         break;
                     }
                 }
-            } while (dds3SetNextBasicArray((WorldValueIndices *)list) != 0);
+            } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != 0);
             dds3FreeBasicArrayHandle(list);
         }
     }
@@ -903,7 +903,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
     char *name;
     s32 room;
     WorldIndexNode *list;
-    EffWorldNode *node;
+    dds3Basic_t *node;
 
     world = scrGetIntPara(0);
     if (world == 0) {
@@ -928,10 +928,10 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
     }
     if (world == fldGlobalBase.area && stage == fldGlobalBase.floor + 1) {
         list = dds3SceneBasicGetList(dds3GetControlScene(), 6);
-        if (dds3GetBasicArrayCount((WorldValueIndices *)list) != 0) {
-            dds3SetFirstBasicArray((WorldValueIndices *)list);
+        if (dds3GetBasicArrayCount((dds3BasicArrayHandle_t *)list) != 0) {
+            dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)list);
             do {
-                node = (EffWorldNode *)(u32)dds3GetBasicArray((WorldValueIndices *)list);
+                node = (dds3Basic_t *)(u32)dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
                 if (((EffectTransformData *)node->data)->roomNumber == (u32)room) {
                     switch (mode) {
                     case 0:
@@ -945,7 +945,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
                         break;
                     }
                 }
-            } while (dds3SetNextBasicArray((WorldValueIndices *)list) != 0);
+            } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != 0);
             dds3FreeBasicArrayHandle(list);
         }
     }
@@ -961,7 +961,7 @@ s32 fldCmdApplyNumericRoomModeGroupOne(void) {
     char *name;
     s32 room;
     WorldIndexNode *list;
-    EffWorldNode *node;
+    dds3Basic_t *node;
 
     world = scrGetIntPara(0);
     if (world == 0) {
@@ -984,10 +984,10 @@ s32 fldCmdApplyNumericRoomModeGroupOne(void) {
     }
     if (world == fldGlobalBase.area && stage == fldGlobalBase.floor + 1) {
         list = dds3SceneBasicGetList(dds3GetControlScene(), 6);
-        if (dds3GetBasicArrayCount((WorldValueIndices *)list) != 0) {
-            dds3SetFirstBasicArray((WorldValueIndices *)list);
+        if (dds3GetBasicArrayCount((dds3BasicArrayHandle_t *)list) != 0) {
+            dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)list);
             do {
-                node = (EffWorldNode *)(u32)dds3GetBasicArray((WorldValueIndices *)list);
+                node = (dds3Basic_t *)(u32)dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
                 if (((EffectTransformData *)node->data)->roomNumber == (u32)room) {
                     switch (mode) {
                     case 0:
@@ -1001,7 +1001,7 @@ s32 fldCmdApplyNumericRoomModeGroupOne(void) {
                         break;
                     }
                 }
-            } while (dds3SetNextBasicArray((WorldValueIndices *)list) != 0);
+            } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != 0);
             dds3FreeBasicArrayHandle(list);
         }
     }
@@ -1485,7 +1485,7 @@ s32 fldCmdPushSceneParam(void) {
 extern void fldActivateFlaggedObject(u32 flagIndex);
 
 u32 fldCommand_FLD_SET_TAKARA_OPEN(void) {
-    ScrData *script;
+    scrProcessWork_s *script;
     s32 room;
 
     script = scrGetScriptHandle();
@@ -1725,7 +1725,7 @@ s32 fldCommand_FLD_SET_ENCOUNT(void) {
 }
 
 s32 fldCommand_FLD_EXIT_CAMERA(void) {
-    ScrData *work = scrGetScriptHandle();
+    scrProcessWork_s *work = scrGetScriptHandle();
     const char *entry = fldEveHitResName_Find((u32)work->task);
 
     if (entry != NULL) {

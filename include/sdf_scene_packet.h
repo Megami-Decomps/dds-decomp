@@ -6,7 +6,7 @@
 #include "sdf_gs_context.h"
 #include "sdf_gs_scene_state.h"
 
-struct SdfGraphObj;
+struct sdfGrFrameSet_t;
 
 /* Complete DMA/GIF owner used by scene builders and held-texture draw banks. */
 typedef struct SdfSceneDrawPacket {
@@ -32,12 +32,12 @@ typedef char SdfSceneDrawPacket_blendState_at_0x130[
     ((u32)&((SdfSceneDrawPacket *)0)->blendState == 0x130) ? 1 : -1];
 
 void sdfGrSetDrawEnv(SdfSceneDrawPacket *packet,
-    struct SdfGraphObj *view, s32 bufferIndex);
+    struct sdfGrFrameSet_t *view, s32 bufferIndex);
 
 /* Linked metadata precedes the DMA drawing payload by one quadword. */
 typedef struct SdfSceneNode {
     SdfPacketPatchLink link;
-    SdfGraphObj *view;
+    sdfGrFrameSet_t *view;
     u8 padC[4];
     SdfGsPacketHeader header;
     SdfGsDrawDefaultsRegisters drawDefaults;
@@ -47,7 +47,7 @@ typedef struct SdfSceneNode {
     SdfGsSceneBlendRegisters blendState;
     SdfGsRegisterWrite frameContextOne; /* 0x180: FRAME_1 with FBMSK 0x00FFFFFF. */
     SdfGsRegisterWrite frameContextTwo; /* 0x190: FRAME_2 with FBMSK 0x00FFFFFF. */
-    SdfTexBuf texturePackets[2];
+    sdfTexPacket_t texturePackets[2];
 } SdfSceneNode;
 
 typedef char SdfSceneNode_size_must_be_0x220[
@@ -67,7 +67,7 @@ typedef char SdfSceneNode_frameContextTwo_registerId_at_0x198[
 typedef char SdfSceneNode_textures_at_0x1A0[
     ((u32)&((SdfSceneNode *)0)->texturePackets == 0x1A0) ? 1 : -1];
 
-void sdfGrSetStdDrawEnv(SdfSceneNode *node, SdfGraphObj *view);
+void sdfGrSetStdDrawEnv(SdfSceneNode *node, sdfGrFrameSet_t *view);
 void sdfGrStdDrawEnvPredraw(SdfSceneNode *node, s32 bufferIndex);
 
 #endif

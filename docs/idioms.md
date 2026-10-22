@@ -297,7 +297,7 @@ all twelve consumer declarations now agree. The two provider units each
 check at 56 match, 0 differ, and narrowing the sole wide consumer declaration
 in DDS2 `code_00265AD8` leaves that unit at 21 match, 0 differ.
 
-The kernel task interface also distinguishes real `KwlnTask *` values from
+The kernel task interface also distinguishes real `dds3ProcessID_t *` values from
 the native 32-bit words retained by game-side tracking slots. Task lookup
 takes `const char *`; the registration query returns `s32`, and user data
 is transported as `u32`. Decode tracked words at that SDK boundary and use
@@ -1338,7 +1338,7 @@ Scratch-only probes used the normal unit flags (`-quiet -O2`, default `-G8`,
 original assembler `-EL -G8 -g -Iinclude`) through `tools/ee_gcc_probe.py`.
 For DDS2 `func_0026DB28`, `func_0026DB70`, and `func_0026DBB8`, a synthetic
 three-site callback inline with the real
-`void (*)(DatPartyRecord *, u16, u32)` prototype reproduced all three 32-byte
+`void (*)(datUnitWork_t *, u16, u32)` prototype reproduced all three 32-byte
 retail bodies: `check_unit.py --source` reported **3 match, 0 differ** for this
 three-function diagnostic, **not** for the full unit. The direct-call and
 direct-inline controls emitted sibling jumps. `tools/ee_gcc_why.py` located
@@ -1383,7 +1383,7 @@ has no references and the tester has three direct jumps plus one direct call.
 No aligned literal pointer to any of these three operation addresses occurs
 in the ELF's loaded regions, so no operation-pointer table was identified.
 Searches of checked-in callback declarations and flag-dispatch strings did
-not establish the `void (*)(DatPartyRecord *, u16, u32)` abstraction.
+not establish the `void (*)(datUnitWork_t *, u16, u32)` abstraction.
 The clear operation's six-instruction core, also searched with register
 operands masked, had no counterpart in DDS1 or either Nocturne ELF. These are
 bounded negative findings, not proof that an original header-only helper
@@ -1842,7 +1842,7 @@ word input instead of erasing its alignment with a byte-blob pointer.
 ## Textured-square template ownership
 
 The event manager's former nine-word `EffTemplateBody` is the same
-0x24-byte `EffResourceRectParams` consumed by `dds3EffectPartialMultiFilterCreate`.
+0x24-byte `dds3Effect_PartialMultiFilterParam_t` consumed by `dds3EffectPartialMultiFilterCreate`.
 The live textured-square work is the canonical 0x28-byte `EffResourceRectWork`,
 not a second body-plus-word layout. Its selected source handle follows `params`.
 The event setup table, its whole-parameter setters and the viewer's 0x24-byte
@@ -1857,12 +1857,12 @@ step count, clears `updateCount` and creates independently owned history data.
 The renderer, constructors and model-viewer record conversion share these records.
 
 `sampleInterval` is unsigned: the active update uses unsigned remainder to
-gate endpoint sampling. Its borrowed `MdlCtx` supplies the SDK model through
+gate endpoint sampling. Its borrowed `dds3ModelHandle_t` supplies the SDK model through
 `inner` and the frame bounds through `first->currentFrame`; the former padded
 `EffTrackPolyModel` and `EffTrackPolyModelState` were prefixes of the existing
 context and motion owners, not separate model allocations.
 
-`MdlResourceItem.type` distinguishes the track pointer stored by
+`dds3ModelEffectCtrlr_t.type` distinguishes the track pointer stored by
 `mdlCreateEffect_TRACK` (type 2) from the handles installed by
 `mdlCreateEffect_P2A_D3P`. Keep those alternatives on the same tagged union
 in `mdl.h`, and use `part.track` for track creation, release and update.
@@ -1878,7 +1878,7 @@ callee register contents as integer handles.
 
 `dds3AddPointBasic` (DDS1 `0x001175F8`, DDS2 `0x00117860`) takes a
 `u32` serial ID and a borrowed `const char *` name. Its constructor stores
-that name directly in the existing `EffWorldNode.value` pointer. Callers
+that name directly in the existing `dds3Basic_t.value` pointer. Callers
 must pass their resource names or static text directly, not cast them to
 `s32` and have the callee cast the word back to a pointer.
 
@@ -1893,7 +1893,7 @@ code under their existing flags.
 
 ## Battle records and saved-party ownership
 
-The DDS1 battle getters return the canonical `DatPartyRecord` entries in
+The DDS1 battle getters return the canonical `datUnitWork_t` entries in
 `DDS3_GBWK->party`. The current-entry getter forwards its roster ID to
 `dds3FindEntryIndex`; it does not load that ID through a pointer argument.
 Use the shared record for party scans and command-power snapshots, and the
@@ -1918,7 +1918,7 @@ result in `s32`; the old `u64` declarations were not evidence of packed
 values or a wide return. The draw controller reads the canonical party
 record's `itemId` at +0x1B2, not an alternate record view.
 
-Both games now embed the complete canonical `DatPartyRecord` in `BtlUnit`
+Both games now embed the complete canonical `datUnitWork_t` in `BtlUnit`
 at `+0x120`. Actor stat getters, command-power snapshots and status checks
 use that record directly rather than a second actor-stat prefix. The earlier
 `+0x174`/`+0x178` actor-link interpretation was superseded by the shared
@@ -1935,7 +1935,7 @@ DDS2's command-block query at `0x001ABB10` reads the shared two-byte
 and the signed kind is byte 1. Kind 0 and kind 2 both reach the cost-mode
 restriction; treating kind 2 as an unconditional exemption changes behavior.
 The slot-cost query accepts `BtlUnit *`, and the enabled-current-ID check
-and `mnuGetPartyEntryCurrentId` accept `DatPartyRecord *`; the latter returns
+and `mnuGetPartyEntryCurrentId` accept `datUnitWork_t *`; the latter returns
 the record's `u16 itemId`, not a word-sized address or a second record view.
 
 DDS1's camera-selection command stores its selected actor in
@@ -1954,7 +1954,7 @@ through `BattleSceneObject.owner`; the reset callback at `0x001C9E20`
 passes that same task type and sets its existing `flags` member.
 
 DDS2's special-actor chunk update at `0x0021A778` walks
-`BtlState.units` and compares the signed `EvtUnit.slotC` frame threshold
+`BtlState.units` and compares the signed `evtUnitHandle_t.slotC` frame threshold
 against the model's current frame. The unsigned ID is
 `BtlUnit.partyRecord.unitId` at `+0x124`, not an independent mode field.
 Promote it to a meaningful `s32` local for the ID-range tests; the retail
@@ -1976,22 +1976,22 @@ native word-array argument slot; typed actor-effect callers store it without cas
 SDF's packet allocator and cursor helpers transport EE addresses as 32-bit
 words. The DDS1 `code_002D33C8` / DDS2 `code_0032C278` providers return
 `s32` from `sdfGrAllocPacketBuff`; `sdfDrawTagLink` takes
-`(SdfListHead *, u32)`. The corresponding `code_002DDC98` / `code_00336B48`
+`(sdfDrawTag_t *, u32)`. The corresponding `code_002DDC98` / `code_00336B48`
 constructors take a real `SdfDrawPacket *` in `sdf2DMakePrimPacketHeader`,
 return `u32` from `sdf2DMakeStdPacket`, and return `s32` from
 `sdf2DGetPrimPtr`. Decode a transported address at the
 SDK buffer boundary, rather than changing these providers to invented
 pointer or 64-bit signatures.
 
-Packet-list owners passed between draw helpers are `SdfListHead *`, and
-texture-bound helpers take `SdfTex *`. These are not GS register values.
+Packet-list owners passed between draw helpers are `sdfDrawTag_t *`, and
+texture-bound helpers take `sdfTexHandle_t *`. These are not GS register values.
 Keep the actual GIF register list and GS A+D payload entries as `s64` /
 `u64`: narrowing the address interface must not narrow those packed
 hardware words. Both games' eleven interface emitters, border wrapper,
 panel renderers, and picture submission wrappers remained byte-exact with
 these distinctions.
 
-Blur drawing shares the `0x28`-byte `EffBlurQuad` payload in `eff_blur.h`.
+Blur drawing shares the `0x28`-byte `dds3Effect_Blur_t` payload in `eff_blur.h`.
 Event callbacks and event-viewer serialized records embed that same payload;
 a four-byte color array does not establish a separate `BlurSource` owner.
 Keep the surrounding serialized records distinct from allocated blur work:
@@ -2000,16 +2000,16 @@ fields differ and neither includes the live owner's allocation or slot tail.
 
 The interface sprite constructor is a different boundary: its optional
 argument is a kind-selected `u32` payload word, not a universally typed
-texture parameter. Texture callers encode their `SdfTex *` once when
+texture parameter. Texture callers encode their `sdfTexHandle_t *` once when
 passing that word. The sprite's allocation descriptors remain genuine
-`SdfMemBlock *`, and its payload remains the generic `u32` buffer. Do not
+`sdfMemHandle_t *`, and its payload remains the generic `u32` buffer. Do not
 reinterpret an allocation descriptor as a texture or impose a second
 structure view merely because kinds 6--9 initialize the first payload word.
 
 The kernel's 98-entry draw pool uses complete `SdfPoolNode` owners of size
 `0x20` for its draw protocol, not module-specific callback prefixes.
 The SDF providers initialize the next link, transported first/last words, and
-native `void append(SdfListHead *, SdfListHead *)` / three-argument
+native `void append(sdfDrawTag_t *, sdfDrawTag_t *)` / three-argument
 `s32 prepend` callbacks. The SDK itself accepts the owner through its common
 packet-list prefix at the call boundary; keep the full owner for array
 indexing and callback access. `D_003255A8` / `D_003805A8` are surface 83,
@@ -2045,7 +2045,7 @@ do not make the renderer's return type ambiguous.
 
 `sdfPrimAllocDrawTag` and its optional allocation callback return native
 `s32` allocation words. Decode each newly allocated list once into
-`SdfListHead *`; keep the full `SdfPoolNode` owner and typed list thereafter.
+`sdfDrawTag_t *`; keep the full `SdfPoolNode` owner and typed list thereafter.
 The diagnostic draw leaves similarly decode each 20-byte
 `sdfAllocAligned` result once at the SDK boundary. These are allocation
 transport conversions, not permission to reinterpret a game-owned record.
@@ -2285,7 +2285,7 @@ static inline SdfPoolNode *fldGetDisplaySurfaceBase(void) {
     return sdfGrOtTable;
 }
 
-static inline void fldAppendToDisplaySurface(SdfListHead *list) {
+static inline void fldAppendToDisplaySurface(sdfDrawTag_t *list) {
     SdfPoolNode *surface = &fldGetDisplaySurfaceBase()[rsetFrameMaskOtOffset];
     surface->append(surface, list);
 }
@@ -2651,7 +2651,7 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     `node->next`, the pool fields `head/tail` become `SdfPoolNode *`) gave a
     full match, and the callees `func_002EFB88` / `func_00348A30` matched at
     the same time. Also unify duplicate views of one structure: the key-tree
-    walker used a private `SdfKeyTreeNode` while the unit already has
+    walker used a private `sdfSortOtNode_tag` while the unit already has
     `SdfTreeNode`; `pool->sub` became `SdfTreeNode *sub[1]`.
     A 1-3 word residual in a function whose locals or fields are typed
     `s32`/`void *` is a type problem before it is a scheduling problem.
@@ -2887,8 +2887,8 @@ loads or stores even when every instruction is right:
   lets the load move up.
 
 The object model-rebuild pair (DDS1 `func_00111E30`, DDS2 `func_00112058`)
-requires the real pointer type of `ObjBase.resourceHandle`. State 0 stores an
-allocated `MdlCtx *`; state 1 stores an allocated `SdfModel *`. The motion
+requires the real pointer type of `dds3ObjectBaseControlWorkData_t.resourceHandle`. State 0 stores an
+allocated `dds3ModelHandle_t *`; state 1 stores an allocated `sdfModelRootNode_t *`. The motion
 pointer is a separate field. A `void *` therefore describes the actual common
 owner without inventing an alternate view.
 
@@ -3413,7 +3413,7 @@ a distinct failed shape here: it produced `movn` and a shorter function.
 ## Nested rectangle draw records and void submission
 
 The resource-rectangle family has two real parameter records. The `0x24`
-`EffResourceRectParams` stores extent and center in its first three words,
+`dds3Effect_PartialMultiFilterParam_t` stores extent and center in its first three words,
 then embeds an `0x18` `EffResourceRectDrawParams` at `+0xC`. That inner
 record contains four color bytes, signed blend control, and four signed
 bounds. The `0x28` owner appends its source handle at `+0x24`.
@@ -3674,7 +3674,7 @@ padding. DDS2's producer at `0x002C4328` copies the party record's level,
 current HP/MP and maxima into `+0x0C` through `+0x1C`, then sign-extends
 the five base-stat bytes into the five words at `+0x20` through `+0x30`.
 The natural indexed five-stat `for` loop matches all 260 native bytes;
-the caller passes the actual `DatPartyRecord *` without a byte-view cast.
+the caller passes the actual `datUnitWork_t *` without a byte-view cast.
 The complete producer unit remains clean at 172 matching functions.
 
 The HP/MP subrecords in each DDS2 page bank are the same complete
@@ -3712,7 +3712,7 @@ free routine rather than the SDK size-class allocator. Its identical
 `0x14`-byte node geometry alone does not prove shared producer identity.
 
 The allocator's unlink helper instead borrows the existing `0x10`-byte
-`SdfMemBlock`. Its previous/next links are at `+0` and `+4`; an eight-byte
+`sdfMemHandle_t`. Its previous/next links are at `+0` and `+4`; an eight-byte
 `SdfListNode` projection or byte-offset view is not a second list owner.
 Both titles pass the actual allocation and its predecessor directly.
 
@@ -3720,14 +3720,14 @@ Both titles pass the actual allocation and its predecessor directly.
 ## World nodes own separate transforms and kind-specific work
 
 `dds3AllocBasic` (DDS1 `0x0010F418`, DDS2 `0x0010F640`)
-requests `0x44` bytes: **68 decimal**, not `0x68`. `EffWorldNode` is this
+requests `0x44` bytes: **68 decimal**, not `0x68`. `dds3Basic_t` is this
 primary owner. Camera, action, script and event-slot nodes share its
 metadata, callbacks, payload pointer and links; they are not independent
 short object headers. Its high tag byte selects the kind. The payload at
 `+0x18` remains opaque in the shared owner, with each kind using its own
 existing work type at the consumer boundary.
 
-The separate `ObjectTransform` allocation is `0xD0` bytes
+The separate `dds3PoseSet_t` allocation is `0xD0` bytes
 (`dds3InitPoseSet`, DDS1 `0x0010F570`, DDS2 `0x0010F798`). The world node's
 `inner` at `+0x1C` points to its matrix, position/rotation/scale, saved and
 smoothed vectors, and flags at `+0xC0`. Vector setters accept the world
@@ -3740,24 +3740,24 @@ also receives this complete world node. Reading `kindTag >> 24` keeps
 the native byte load at `+0x0F` without a second short owner view.
 `dds3CreateWorldInnerState` (`0x00112958` / `0x00112B80`) separately
 allocates `0x90` bytes of kind-specific work and stores that pointer at
-`+0x18`; its historical "inner" name does not mean `ObjectTransform`.
-That work owns an `ObjBase *` at `+0x80` and a state word at `+0x88`.
+`+0x18`; its historical "inner" name does not mean `dds3PoseSet_t`.
+That work owns an `dds3ObjectBaseControlWorkData_t *` at `+0x80` and a state word at `+0x88`.
 
 The model viewer's attachment routine (DDS1 `0x0021FD50`, DDS2
 `0x0023A8C0`) looks up two such nodes: kind 5 is the destination and
 kind `0x11` supplies two adjacent float vectors through `data`.
 The source payload is borrowed as float vectors, not another short
 world header. Its final VU0 store addresses the destination's separate
-transform vector at `+0x70` through `ObjectTransform`.
+transform vector at `+0x70` through `dds3PoseSet_t`.
 
 The kind directory `D_003299C0` points at complete six-word (`0x18`-byte)
 `EffWorldOps` tables. Their first four entries are create, destroy, update
 and draw callbacks; both remaining words are zero. Kind 1 selects
 `D_00329A20` and its initializer at DDS1 `0x00110578`, which allocates a
 `0x40`-byte `EvtWorldTable` and eighteen `0x0C`-byte slots. Each slot's
-endpoints are borrowed `EffWorldNode *` values.
+endpoints are borrowed `dds3Basic_t *` values.
 
-Kind 1 also uses the first eight metadata bytes as `WorldValueIndices`:
+Kind 1 also uses the first eight metadata bytes as `dds3BasicArrayHandle_t`:
 the head, tail and cursor indices followed by the entry count. The cursor
 helper at DDS1 `0x00110490` demonstrates this interpretation. The same
 index record occurs in a separate `0x10`-byte allocation at `0x0010FEC8`,
@@ -3794,9 +3794,9 @@ text-exact under `check_unit.py`; no scheduling-only temporary is needed.
 
 DDS2 `func_0028A018` (`0x0028A018`, 220 bytes plus four bytes of padding)
 prints `mtrChkMantraCompleteMaster!!` and checks the six mastery flags
-through a nine-entry unit-index map. Its owner is `DatPartyRecord`, not
+through a nine-entry unit-index map. Its owner is `datUnitWork_t`, not
 an integer with an ad hoc `+4` access. The actual providers are
-`s32 evtBitCheck(s32)`, `s32 prfAreAllRequiredProfileFlagsSet(DatPartyRecord *)`,
+`s32 evtBitCheck(s32)`, `s32 prfAreAllRequiredProfileFlagsSet(datUnitWork_t *)`,
 and the existing variadic `void evtPrintDeveloperConsoleMessage`.
 
 With these contracts, ordinary automatic array initializers and early
@@ -3837,8 +3837,8 @@ The resource-ID snapshot has the unsigned domain shown by all four
 native `sltiu` comparisons. Retain the shared actor record and its
 existing resource-index field rather than introducing an alternate view.
 
-The motion state belongs to `BtlUnit.ext`, its model to `EvtUnit.owner`,
-and its sampled speed to `Motion.frameStep`. The API accepts five integer
+The motion state belongs to `BtlUnit.ext`, its model to `evtUnitHandle_t.owner`,
+and its sampled speed to `sdfMotionCtrlr_t.frameStep`. The API accepts five integer
 arguments followed by a float; treating the fifth integer mode as absent
 loses the override carried in `$8`. Its actual callees are the void
 `evtSetUnitMotion`, `mdlLoopMotion`, and
@@ -3854,8 +3854,8 @@ increments its counter and returns zero. This ordinary ready-first
 control flow reproduces the native branch-likely increment-store delay
 slot. Early-return wait guards instead overrun the next function.
 
-Use `BtlUnit.ext` and the primary `EffWorldNode` payload. The existing
-`EvtUnit.currentTransitionValue` word carries a slot-9 node address when
+Use `BtlUnit.ext` and the primary `dds3Basic_t` payload. The existing
+`evtUnitHandle_t.currentTransitionValue` word carries a slot-9 node address when
 flag `0x40000` is set, as also shown by `evtUnitManager.c`. Its light
 payload uses the shared `EvtTargetInfo` in `evt_unit.h`: first colour at
 zero, direction at `0x10`, and second colour at `0x40`. The six copies use the
@@ -3964,11 +3964,11 @@ owners behind an opaque borrowed-work argument rather than introducing
 another layout or an incompatible cross-unit record-pointer prototype.
 
 
-## Motion-sound callbacks retain the pack's native format records
+## sdfMotionCtrlr_t-sound callbacks retain the pack's native format records
 
 The 448-byte DDS1/DDS2 `evtMotionSeProcess1` twins use the existing
-`EvtMotionSeTaskParams`, a kind-5 payload's `EvtUnit *` at `+0x08`,
-and `MdlCtx`'s first motion. Convert its floating current frame to a
+`EvtMotionSeTaskParams`, a kind-5 payload's `evtUnitHandle_t *` at `+0x08`,
+and `dds3ModelHandle_t`'s first motion. Convert its floating current frame to a
 signed word before comparing the type-6 pack's 16-byte cue records.
 The pack entry's cue count and motion ID are signed words at `+0x08`
 and `+0x1C`. A missing object, pack, or unit returns `-1`; the ordinary
@@ -4042,7 +4042,7 @@ The complete grid units check DDS1 `62 match, 0 differ` and DDS2 `70 match, 0 di
 ## Battle ability queries receive the party record
 
 `btlCheckSpecialAbility` forwards its first argument to `datUnitHasSkill`,
-so that argument is a `DatPartyRecord *`, not an integer actor address.
+so that argument is a `datUnitWork_t *`, not an integer actor address.
 Actor-facing slot and recovery helpers receive a `BtlUnit *` and pass
 `&unit->partyRecord`, the native subobject at `+0x120`.
 `btlApplyCommandAbilityMultiplier` also receives a party record: the
@@ -4104,7 +4104,7 @@ record and these pointer contracts live in `mnu_work.h`.
 
 ## DDS1 staff pages retain one embedded window owner
 
-DDS1 `func_00276898` receives a `KwlnTask *` and explicitly forwards it to
+DDS1 `func_00276898` receives a `dds3ProcessID_t *` and explicitly forwards it to
 `dds3GetProcessData`; the native accessor loads the task's `+0x38` word.
 `CampMenuContext.partyWindow` starts at `+0x15C`, with native slots at window
 `+0x78` and a `0x134` stride. Its `lists[0]` is at window `+0x67C`, hence
@@ -4179,7 +4179,7 @@ The group's dispatch kind retains its game-specific signedness: DDS1 uses
 with `sltiu`; restoring the unsigned owner member leaves `code_0020E850`
 at `60 match, 0 differ`.
 
-The HP/MP forwarding entry points take a `DatPartyRecord *` and a signed
+The HP/MP forwarding entry points take a `datUnitWork_t *` and a signed
 delta in both games, and return the signed clamped value. The primary
 `datAddHp` and `datAddMp` providers compute that value,
 store its low halfword and return it in `$v0`; `btlAdjustUnitHp` and
@@ -4247,7 +4247,7 @@ promote the incidental context-pointer register value into an API.
 DDS2 `func_00299988` receives the level in a 32-bit integer argument and
 stores its low halfword into both `BrsProgressAnimation.level` fields.
 Both retail callers in `func_00299018` deliberately load `$6` with
-`lhu` from `DatPartyRecord.level`; the callee does not normalize `$6`
+`lhu` from `datUnitWork_t.level`; the callee does not normalize `$6`
 to a 16-bit formal. Its declaration therefore uses `s32`, even though
 the destination members are 16-bit. The current caller unit checks
 `40 match, 0 differ`; the setter body remains `INCLUDE_ASM`.
@@ -4345,7 +4345,7 @@ Keep that cursor distinct from the party-record index at `+0x7BE`.
 DDS1 `00160958` and DDS2 `00168548` allocate and clear `0x128` bytes.
 Their object is the same owner that `effBTLCutListRelease` follows through
 `next` at `+0x124` and that the frame helpers update at `+0x10`:
-one `BattleEffect`, not a sound-list prefix cast to a separate effect.
+one `effBTLCutHandle_t`, not a sound-list prefix cast to a separate effect.
 The pointer at `+0x04` is its real `SoundMixer`; release decrements that
 mixer's active count at `+0xC3C`. The allocator narrows its second
 argument with `ANDI 0xFFFF` before bank selection and the `SH +0x1C`,
@@ -4365,7 +4365,7 @@ at these positions obscure the real API.
 
 ## Font glyphs, draw controllers, and message-window ownership
 
-The font parent pool allocates `0x44`-byte `FrFontGlyph` nodes. Their
+The font parent pool allocates `0x44`-byte `_FRQ` nodes. Their
 `previous` link is at `+0x24`, `next` at `+0x28`, and child chain at
 `+0x1C`. The packed word/halfword/byte members are the existing font
 owner's actual representations, not alternative controller views.
@@ -4374,9 +4374,9 @@ input bytes at `+0x10`, glyph chain at `+0x14`, and cursor at `+0x18`.
 Glyph-only setters must receive the glyph, not a cast to that controller.
 
 Message-window text status is the signed byte at state `+0x34`.
-The three resource fields at `+0xA4` are `UiSprite *` objects; their
+The three resource fields at `+0xA4` are `itfpanel_t *` objects; their
 release helper owns the sprite's payload and record allocations.
-Replacement-text slots pair relocated byte addresses with `SdfMemBlock *`
+Replacement-text slots pair relocated byte addresses with `sdfMemHandle_t *`
 allocation handles. Retain/release use the memory-block owner, not the
 unrelated linked named-resource `SdfResource`; the paired-slot release
 helper receives the same `ItfMesTextSlots` used by its allocation producer.
@@ -4385,7 +4385,7 @@ real measured-advance result, which the sound-selector UI tests before
 advancing its message and fade state. Both games' initial 16 `itf.h`
 includers gate with zero differences after this owner/type closure.
 
-`frGetStrWidth` receives the parent `FrFontGlyph *` and returns
+`frGetStrWidth` receives the parent `_FRQ *` and returns
 the existing unsigned sum of child advances and signed spacing. Utility
 draw helpers carry glyph pointers, not integer handles or controller views.
 The colored-text resource itself is one serialized `FrFontTextBank`; its
@@ -4420,7 +4420,7 @@ The work initializer only writes the two noise geometries, their
 intervals and `unk0E`, plus the cached phase; it does not reset all
 animation fields.
 
-Solar scheduler callbacks use `KwlnTask *` and the kernel's `s32`
+Solar scheduler callbacks use `dds3ProcessID_t *` and the kernel's `s32`
 update result. The work pointer crosses the genuine `u32` user-value
 API once on set/get, and a returned next-update address crosses the
 same encoded-word scheduler boundary.
@@ -4580,9 +4580,9 @@ eight bytes later than DDS1.
 The six image-buffer words are unsigned: the font sprite renderer loads its
 selected CLUT buffer with `lwu` before shifting it into the 64-bit TEX0 word.
 
-`FrFontGlyph` genuinely gives its `+0x1C` and `+0x20` pointer words two
+`_FRQ` genuinely gives its `+0x1C` and `+0x20` pointer words two
 roles. A parent stores its first/last child, while a drawable item stores
-a retained `FrFontRecord` or a borrowed source record. The retained
+a retained `GsFont_t` or a borrowed source record. The retained
 record's `FntNode` owns four UV words at `+4`. Native `00193D70` /
 `0019BA00` receive their address as the ninth argument, not a glyph Y
 coordinate; their width and half-height arguments are full signed words.
@@ -4679,7 +4679,7 @@ by `0x10` differently from retail, although the effective accesses agree.
 
 `SdfPacketBuilder.prepare` receives the builder and the selected buffer
 index: both games' indirect callers deliberately set `$a0/$a1`.
-Its `source` is the canonical `SdfGraphObj *`, and `frameMask` is the
+Its `source` is the canonical `sdfGrFrameSet_t *`, and `frameMask` is the
 upper FRAME register word at builder `+0x54`. The initializer's formals
 follow those real field types. The callback itself remains ASM: honest
 64-bit GS packing with the matched neighboring convention differs in the
@@ -4718,13 +4718,13 @@ their ID, name, transform and payload are at `+0`, `+8`, `+0x10` and
 attribute; actor lookup and script commands pass it to name-based consumers.
 Use the primary record's members rather than word indexing beside that owner.
 
-The enabled `scrScriptProcess.c` definitions return `ScrData *` from
+The enabled `scrScriptProcess.c` definitions return `scrProcessWork_s *` from
 `scrSearchScriptName(char *)`, while `dds3SceneBasic.c` defines
 `dds3SceneBasicEndScript(void *, const char *)`. Their field callers must keep
 these pointer contracts. Clients that only compare the lookup result with
-NULL can use the canonical incomplete `struct ScrData *` tag without adding
+NULL can use the canonical incomplete `struct scrProcessWork_s *` tag without adding
 a second script-data definition or importing the complete script header.
-`scrGetWorkTaskHandle` also returns the active work-task `ScrData *`, and
+`scrGetWorkTaskHandle` also returns the active work-task `scrProcessWork_s *`, and
 `scrIsCurrentWorkTask` compares that pointer with a named-process node; callers
 should keep this identity check pointer-typed rather than round-tripping through
 `u32`.
@@ -4733,7 +4733,7 @@ should keep this identity check pointer-typed rather than round-tripping through
 ## Reward-panel glyph pointer contracts
 
 DDS1 `code_002649B0`'s formatted reward text retains the actual
-`FrFontGlyph *` returned by `itfCreateFont3TextGlyph`. The font measurement provider
+`_FRQ *` returned by `itfCreateFont3TextGlyph`. The font measurement provider
 returns `u32`, and `frFontSetContextPair` receives that glyph pointer with
 two `u32` coordinates. Importing the canonical interface declaration removes
 the caller's old integer-handle prototypes and pointer casts without changing
@@ -4843,12 +4843,12 @@ PM3 still scans all 26 section numbers but writes only section 4.
 ## Actor effect world-node ownership
 
 DDS2 `BtlUnit.effectObject` at `+0x33C`, like DDS1's member at `+0x31C`,
-is an `EffWorldNode *`. The actor-model creator returns that node; effect
+is an `dds3Basic_t *`. The actor-model creator returns that node; effect
 origin consumers pass it to the SDK vector helpers, and the scale updater
 uses its `inner` transform. Keep it pointer-typed through construction,
 removal, flag operations and vector calls, without integer transports.
 DDS2's actual flag providers take `(void *, u32)`; the node-removal
-provider takes `EffWorldNode *`.
+provider takes `dds3Basic_t *`.
 
 ## Primary actor status is a complete two-word record
 
@@ -4929,9 +4929,9 @@ operands of the equivalent inclusive comparison does not change tie-breaking.
 ## Inner-transform SDK vector boundary
 
 The matched `effObjSetInnerFirstVec` and `effObjSetInnerSecondVec` providers
-take `(EffWorldNode *, u128 *)` (DDS1 `0010F6E0`/`0010F710`, DDS2
+take `(dds3Basic_t *, u128 *)` (DDS1 `0010F6E0`/`0010F710`, DDS2
 `0010F908`/`0010F938`). They copy the packed vector through `PCP_COPY_VECTOR`
-into the primary `ObjectTransform.position`/`rotation` float arrays.
+into the primary `dds3PoseSet_t.position`/`rotation` float arrays.
 The battle callers' float-vector scratch arrays remain float arrays; the
 `u128 *` conversion belongs at this SDK boundary, not in a second owner view.
 
@@ -4939,7 +4939,7 @@ The battle callers' float-vector scratch arrays remain float arrays; the
 
 The matched `sdfMemory.c` providers in both games distinguish the descriptor
 from its represented data address: `sdfMemAllocDirect(s32)` returns a
-`SdfMemBlock *`, while `sdfMemGetPtr(SdfMemBlock *)` returns a
+`sdfMemHandle_t *`, while `sdfMemGetPtr(sdfMemHandle_t *)` returns a
 `u32` address word. Task-resource and grid `allocation` fields retain the
 descriptor pointer for destruction; they are not integer allocation indices.
 Convert the returned address word once at the accessor boundary to the
@@ -5015,7 +5015,7 @@ as full words, pass them to `evtFormatPolygonMoviePaths`, and store them in
 the primary `PolyMovieWork.eventId`/`sceneId` signed-word fields. Their shared
 declarations therefore use `s32` arguments, not halfwords.
 
-The resource loader returns a `SdfMemBlock *` descriptor but writes a `u32`
+The resource loader returns a `sdfMemHandle_t *` descriptor but writes a `u32`
 represented address. The synthesized PMD2/PMD3 header providers instead
 write `void *`/`u8 *` outputs and return the descriptor as an `s32` address
 word. Preserve those actual boundaries rather than inventing narrower loader
@@ -5024,7 +5024,7 @@ candidate still swaps the two argument-setup instructions at `+0x80/+0x84`.
 
 ## Callback-list allocation descriptors
 
-`SdfList.allocation` is a `SdfMemBlock *`, not a numeric list index or the
+`SdfList.allocation` is a `sdfMemHandle_t *`, not a numeric list index or the
 represented data address. A forward declaration keeps that canonical pointer
 owner available without relocating the full general-heap descriptor definition.
 Its layout remains a `0x1C`-byte callback-list header.
@@ -5072,7 +5072,7 @@ no pointer-to-word bridge is needed.
 ## Canonical grid allocation descriptors
 
 `sdf_grid.h` owns `SdfGrid` and `SdfGridCell` for both games. The grid's
-`allocation` retains a general-heap `SdfMemBlock *`, distinct from the
+`allocation` retains a general-heap `sdfMemHandle_t *`, distinct from the
 represented data address returned by the memory getter. Destruction releases
 that descriptor directly. The canonical header remains `0x34` bytes and each
 cell remains eight bytes; the DDS2 units no longer declare separate grid views.
@@ -5080,7 +5080,7 @@ cell remains eight bytes; the DDS2 units no longer declare separate grid views.
 
 ## Event motion completion callbacks
 
-`EvtUnit.motionCallback` at `+0x94` is a function pointer, not a stored scalar.
+`evtUnitHandle_t.motionCallback` at `+0x94` is a function pointer, not a stored scalar.
 The DDS1/DDS2 motion drivers call it with the unit and zero in states 1 and 4;
 a return value of one completes the motion. The vector-transition providers
 retain that same callback, and normal motion setup clears it.
@@ -5093,7 +5093,7 @@ moving counter after six idle frames.
 
 ## Scoped kernel task flags
 
-DDS1 `00101060` and DDS2 `00100F48` operate on the canonical `KwlnTask *`
+DDS1 `00101060` and DDS2 `00100F48` operate on the canonical `dds3ProcessID_t *`
 and admit flag bits through `0x0FFFFFF0`. Scope zero updates the supplied
 task without a null guard; scope one updates other scheduler tasks, scope two
 recurses through its children, and scope three updates every scheduler task.
@@ -5131,7 +5131,7 @@ the following jump table are not record fields or artificial C padding.
 
 ## Texture-viewer switch-table alignment
 
-DDS1 `00104810` and DDS2 `00104700` display the canonical `SdfTex`
+DDS1 `00104810` and DDS2 `00104700` display the canonical `sdfTexHandle_t`
 dimensions, nine native pixel-format labels, `resourceKey`, and
 `battleTextureSlot`. The two format literals and 45-target switch table
 are owned solely by each function's assembly split; the label-pointer
@@ -5316,7 +5316,7 @@ assembly: the honest typed iterator still differs in six prefix instructions.
 
 DDS2's `fileLoadSelectionWork` owns the existing `0x40`-byte `MenuWork`.
 Retail `002D0498` reads both decision bytes at `+0x30/+0x31` with `lb`;
-the final word retains the `SdfMemBlock *` allocation descriptor, not the
+the final word retains the `sdfMemHandle_t *` allocation descriptor, not the
 buffer address. The resource getter's `u32` address is converted once at
 that API boundary. `fileCopyRecordHeader` copies the first `0x30` serialized
 bytes from either directory metadata or `DatStateHeader`, whose additional
@@ -5343,7 +5343,7 @@ an independently recovered Nocturne `__FILE__` boundary.
 ## Sound-selector manager update
 
 DDS2 `001A76C8` traverses the existing `ItfMesGlobals.pool.activeHead` list,
-passes each node's stored state address to the true `void (ItfMesState *)`
+passes each node's stored state address to the true `void (instanceMes_tag *)`
 panel updater, then increments the manager's `unk8` counter. A nonzero result
 from the zero-argument `001200E0` gate skips both operations. The natural
 early return matches all 112 native bytes; the older gated-block candidate
@@ -5352,7 +5352,7 @@ needed.
 
 ## Save confirmation restores maxima before currents
 
-DDS2 `002D0498` walks the five canonical `DatPartyRecord` entries in
+DDS2 `002D0498` walks the five canonical `datUnitWork_t` entries in
 forward order and re-reads `DDS3_GBWK` across the selector/stat calls.
 Its natural early guards and signed index let gcc derive the native
 countdown. After computing maximum MP, the source sets `maxMp` before
@@ -5364,9 +5364,9 @@ artificial counter, or register-control construct is needed.
 
 ## Callback returns and skill-runtime visibility
 
-DDS2 `0030A8A8` receives its `KwlnTask *` in `$4`, forwards it to the task
+DDS2 `0030A8A8` receives its `dds3ProcessID_t *` in `$4`, forwards it to the task
 user-value getter, and propagates the controller's `-1` result. Its real
-contract is `s32 (KwlnTask *)`, not a zero-argument void callback. DDS1
+contract is `s32 (dds3ProcessID_t *)`, not a zero-argument void callback. DDS1
 `0027B888` takes the primary `MenuList *` and returns its cursor pointer;
 the destructor's pending value is therefore `MenuListNode *`, not `s64`.
 The legacy terminal caller in `code_00248580` retains its old extern until
@@ -5441,7 +5441,7 @@ end-to-end debt, not a reason to add pointer/integer round trips elsewhere.
 command pointer for kinds 2/3. Its +C allocation descriptor is independent.
 Reference commands carry a kind byte, flags at +16, a count at +18 and
 halfword object indices at +1A. Their dispatcher receives the primary
-`SdfModel *` and indexes `model->list->buffer` as `SdfDrawNode **`; the old
+`sdfModelRootNode_t *` and indexes `model->list->buffer` as `sdfModelNode_t **`; the old
 pointer-to-padded-context view incorrectly described those two loads.
 Both existing dispatchers retain their native flag/count guards and real
 bottom-tested loop. The model builder and reset provider consume a
@@ -5937,9 +5937,9 @@ remains assembly. All 17 actual `mnu_result.h` clients gate 596 match,
 
 ## Effect owners retain their word storage and read its actual kind byte
 
-The constructor allocates the same 0x44-byte `EffWorldNode` described by
+The constructor allocates the same 0x44-byte `dds3Basic_t` described by
 the former `EffectObj` owner: identity at +04, kind-7 payload at +18 and
-`ObjectTransform` at +1C. Retail writes the kind word at +0C (DDS1
+`dds3PoseSet_t` at +1C. Retail writes the kind word at +0C (DDS1
 0010F418 / DDS2 0010F640), but effect providers read its high byte at +0F
 (001158B8 / 00115B20).
 
@@ -5947,13 +5947,13 @@ Keep `kindTag` as the original word and read the kind through
 `((u8 *)&node->kindTag)[3]`, as the DDS1 provider already did. A word/byte
 union changes the constructors' alias dependencies; a shift expression
 changes store scheduling in `dds3EffectObjectBasicLinkObject`. Neither is needed:
-all ten source users now share `EffWorldNode`, without the parallel owner,
+all ten source users now share `dds3Basic_t`, without the parallel owner,
 an extra union, a const operations table, or a store-order search.
 
 Kind-five entry forwarding also has real nested owners. Its data is
-`EffectObjectData`, whose `modelHolder` is `ObjBase *`. Resource state zero
-selects `MdlCtx` at `resourceHandle`, and that context's `inner` is the
-`SdfModel *` argument. The object-model constructor and release dispatcher
+`EffectObjectData`, whose `modelHolder` is `dds3ObjectBaseControlWorkData_t *`. Resource state zero
+selects `dds3ModelHandle_t` at `resourceHandle`, and that context's `inner` is the
+`sdfModelRootNode_t *` argument. The object-model constructor and release dispatcher
 establish this discrimination. Use those fields rather than
 `EffOwnerBillPayloadView` and `EffOwnerBillParamView`; both complete basic
 effect units retain `38 match, 0 differ` with these views removed.
@@ -5968,7 +5968,7 @@ of each changed shared header, not just the function that exposed the view.
 
 The counter providers read direction, flags, duration and current time at
 `+0/+4/+8/+C`. `SdfFloatCounter` owns those four words; the complete
-`Dds3PathCurveWork` embeds it before its five channel pointers, preserving
+`dds3PathBasicControl_t` embeds it before its five channel pointers, preserving
 the constructor's 0x24-byte allocation. Movie progress uses the same counter
 type directly. The former 0x1C-byte `EvtScaledValue` and partial
 `PolyMovieClip` are not additional objects and are removed.
@@ -6048,8 +6048,8 @@ rotation, which does not justify store-order search.
 
 ## Object-base render setup uses the complete model owner
 
-DDS1 `func_00112100` follows `ObjBase.resourceHandle` to `MdlCtx.inner`
-and temporarily changes `SdfModel.flags` at +19. The existing complete
+DDS1 `func_00112100` follows `dds3ObjectBaseControlWorkData_t.resourceHandle` to `dds3ModelHandle_t.inner`
+and temporarily changes `sdfModelRootNode_t.flags` at +19. The existing complete
 owners replace the two render-only prefix views without changing code.
 `mdlLink` receives the actual `s32` SDK
 update argument; the surface-table pointer crosses that address-word
@@ -6209,15 +6209,15 @@ DDS2 `0033251C..00332544` reloads the original renderer argument, indexes
 four `SdfPoolNode *` entries, and calls each selected pool's `append` at +10.
 `mdlLink`, `mdlBlendEntryPitchYawAndUpdate`, and
 `evtStageTestUpdate` therefore forward `SdfPoolNode **surfaces` unchanged.
-The stage viewer's +08 model is `MdlCtx *`; its motion-state check is
+The stage viewer's +08 model is `dds3ModelHandle_t *`; its motion-state check is
 `model->first->state`, not an address-word view. Existing encoded-word
 transport and the SDK pool-to-list-head callback boundary are unchanged.
 
 ## Basic object drawing uses the complete model owners
 
-DDS1 `00112100` and DDS2 `00112328` obtain `MdlCtx *` from the basic
+DDS1 `00112100` and DDS2 `00112328` obtain `dds3ModelHandle_t *` from the basic
 object's resource handle and operate on `context->inner->flags` in the
-complete `SdfModel`. Their old context/inner prefix typedefs are unnecessary.
+complete `sdfModelRootNode_t`. Their old context/inner prefix typedefs are unnecessary.
 The draw-surface pointer table is forwarded unchanged through the model
 update API; no auxiliary flags view or SDK address-word conversion is needed.
 
@@ -6300,7 +6300,7 @@ DDS1 `00138ED0` and DDS2 `0013BAB8` return the old `fldEveRngCount`
 before incrementing it (`0013A6A8` / `0013D290` move that value to `v0`).
 The paired action constructors immediately multiply the result by `0x140`
 to update the corresponding room record. Their `FldFileResource *`,
-`EffWorldNode *` interface therefore returns `s32`, even though the general
+`dds3Basic_t *` interface therefore returns `s32`, even though the general
 file-resource dispatchers ignore it. Correcting the caller declarations
 does not change either still-ASM provider's body.
 
@@ -6317,8 +6317,8 @@ The two dispatch bodies remain ASM.
 
 ## Terminal glyph constructors preserve chain pointers
 
-DDS2 `0019F5E8` and `0019F6C8` return `FrFontGlyph *` and take a previous
-`FrFontGlyph *` as their sixth argument. Both native-matching definitions
+DDS2 `0019F5E8` and `0019F6C8` return `_FRQ *` and take a previous
+`_FRQ *` as their sixth argument. Both native-matching definitions
 append text, update the resulting chain and return it. The terminal
 numeric/currency callers in `002665B0` now use that actual contract,
 with null previous chains and no integer-return reconstruction casts.
@@ -6376,7 +6376,7 @@ use the same payload, not separate resource/mover prefixes. The getter
 returns the retained path; the conditional attachment tests the source node.
 
 `dds3InvokeSlot1Handler` installs rather than invokes the callback. Mover
-update supplies `ObjectTransform *` and `EffWorldNode *`, and applies the
+update supplies `dds3PoseSet_t *` and `dds3Basic_t *`, and applies the
 relative transform only for result 1. The constant-zero callbacks
 `001243C0`/`001266D8` retain those unused family formals. Ring-entry addresses
 and room-name addresses still use the world node's existing encoded `value`
@@ -6384,7 +6384,7 @@ word; generic slot APIs and the float-counter SDK word boundary are unchanged.
 
 ## Packed command queries borrow the complete party record
 
-DDS1 `00117438` and DDS2 `001176A0` use `DatPartyRecord` for packed-status
+DDS1 `00117438` and DDS2 `001176A0` use `datUnitWork_t` for packed-status
 query/apply/raise helpers and DDS2's HP-bracket helper. HP/max-HP at `+6/+8`, MP/max-MP at `+A/+C`
 and status at `+E` belong to one record, not separate short party views.
 The affinity and skill providers already accept that same owner.
@@ -6522,12 +6522,12 @@ at their existing boundary rather than propagated through actor providers.
 ## Model afterimage slots own models and signed countdowns
 
 The paired afterimage updaters (`002174C0` / `00231FD8`) allocate `0xC`
-bytes per `MdlDevSlot`: next at `+0`, the actual `SdfModel *` at `+4`,
+bytes per `MdlDevSlot`: next at `+0`, the actual `sdfModelRootNode_t *` at `+4`,
 and a signed word countdown at `+8`. The destructor releases that model
 before the slot allocation. Keep the complete owner in `mdl.h`, not an
 eight-byte prefix or another private slot view.
 
-`SdfModel.unk94` is a binary32 model scale. DDS1 `0021755C` and DDS2
+`sdfModelRootNode_t.unk94` is a binary32 model scale. DDS1 `0021755C` and DDS2
 `00232074` store `1000.0f`; DDS1 `002D9454` loads it as a float for
 `sdfCoreDrawSetZBias`. The renderer copies its unchanged bits at `002D9530`
 into the first word of a three-scalar VIF payload at `+0x2C`, followed by
@@ -6632,7 +6632,7 @@ Completing this owner does not match its remaining assembly renderers.
 ## Blur controllers keep the actual packet-list pointer
 
 The matched `0019FF60` / `001A8BD0` controllers retain
-`dds3FontReqAllocDrawTag`'s `SdfListHead *` directly. No intermediate
+`dds3FontReqAllocDrawTag`'s `sdfDrawTag_t *` directly. No intermediate
 signed address word or repeated conversion is needed for its typed list
 consumers. Packet payloads still cross the real `u32 packetAddress` API
 explicitly. Their unchanged surface callback's legacy first-formal
@@ -6677,7 +6677,7 @@ selection controller or close the separate legacy scene-context API.
 
 ## Field vector fetches retain their real node contract
 
-`effObjFetchInnerFirstVec` takes an `EffWorldNode *` and leaves the
+`effObjFetchInnerFirstVec` takes an `dds3Basic_t *` and leaves the
 position in `vf10`; it has no C return value. The field controller
 converts its retained address word once at that provider boundary.
 The vertical-step callback at `001321F8` returns zero on both exits,
@@ -6874,7 +6874,7 @@ claim that the remaining banner controller has matched.
 
 DDS2's command-list text helpers receive a 32-bit handle from
 `itfCreateConvertedTextGlyph`, then pass its glyph pointer to
-`frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8)`. The provider in
+`frFontDrawGlyphWithSharedFlags(_FRQ *, s8)`. The provider in
 `interface/frFont.c` forwards that pointer and mode to the chain renderer.
 Use the same explicit word-to-pointer boundary as the adjacent
 `frDestroyFontRequestAfter` call, rather than relying on an
@@ -7026,7 +7026,7 @@ not an integer ID, so retaining that pointer formal avoids false scalar calls.
 
 ## Converted scene text retains its glyph pointer
 
-`itfCreateConvertedTextGlyph` returns `struct FrFontGlyph *` and accepts a
+`itfCreateConvertedTextGlyph` returns `struct _FRQ *` and accepts a
 glyph parent of that same type. DDS2's scene text helpers retain this pointer
 through draw and queue calls instead of transporting it through a scalar ID.
 The provider's existing definition and both whole-unit helper gates establish
@@ -7074,7 +7074,7 @@ return, a new object view, or a wrong-prototype target landing.
 ## Synthesized polygon-movie headers return allocation handles
 
 The paired PMD2 `evtAllocMovieWork` and PMD3
-`func_00234C18`/`func_0024F9B8` constructors return the `SdfMemBlock *`
+`func_00234C18`/`func_0024F9B8` constructors return the `sdfMemHandle_t *`
 obtained from `sdfMemAllocDirect`; their output arguments separately
 receive the retained data address. Returning the handle directly retires
 the pointer-to-integer adapters without changing any constructor text.
@@ -7120,7 +7120,7 @@ integer adapter, and this closure does not claim a parser-body match.
 ## Terminal text uses the existing glyph pointer contracts
 
 DDS1 `code_00248580`'s atlas-slot and number-sprite clients return and queue
-`struct FrFontGlyph *` from the existing text providers; their handles are
+`struct _FRQ *` from the existing text providers; their handles are
 not integer IDs. The local declarations now agree with the providers,
 including `frFontDrawGlyphChain`'s `s8` option and `u32` priority. No provider
 or shared header changes are needed. The selected-row candidate at
@@ -7158,7 +7158,7 @@ The title stream and secondary sound-buffer state are both `0x28`-byte
 prefix view. Their compressed-data, PCM, decoder and allocation pointers
 occupy `0x14`, `0x18`, `0x1C` and `0x20`; load state is at `0x24`.
 The decoder remains an opaque SDK word array, while the allocation is the
-real `SdfMemBlock` descriptor. Explicit address-word conversions remain only
+real `sdfMemHandle_t` descriptor. Explicit address-word conversions remain only
 at the SDK's word-valued address API and PCM-buffer representation boundary.
 
 Credit Basalt's released title-stream support for the complete owner evidence.
@@ -7276,7 +7276,7 @@ DDS1 `btlInitVisibilityGrid` allocates exactly `gridWidth * gridHeight`
 bytes; `00212998` reads each visibility value with `LBU`. Keep the
 source-local runtime owner as `u8 *`, including its initializer and
 release local, rather than an opaque allocation with a signed-byte view.
-The overlay providers and their fade caller carry actual `SdfListHead *`
+The overlay providers and their fade caller carry actual `sdfDrawTag_t *`
 values through to the existing SDK list APIs. The textured-cell provider
 forwards that same owner to `effAppendTexturedTrianglePacket`.
 
@@ -7325,7 +7325,7 @@ not a fabricated return or a fall-through register value.
 
 ## Movie packet builders borrow the complete stream owner
 
-DDS2 `func_002A7B28` takes `MovObj *`, as the existing
+DDS2 `func_002A7B28` takes `movieStream_t *`, as the existing
 `mnuMovieDrawNextProc` caller already supplies, plus `SdfPoolNode *`.
 Use the canonical nested stream-frame fields and pool append callback
 when reconstructing it; an integer-address or second movie-record view
@@ -7369,10 +7369,10 @@ unchanged.
 
 ## CPU list wrappers preserve the list owner, not its DMA address words
 
-`dds3LinkZClearDrawTag` returns the `SdfListHead *` created by
+`dds3LinkZClearDrawTag` returns the `sdfDrawTag_t *` created by
 `dds3FontReqAllocDrawTag`; its frame callers append that same owner to
 their `SdfPoolNode`. The background resource/descriptor builders retain
-the list returned by `sdfPrimAllocDrawTag` as `SdfListHead *` too.
+the list returned by `sdfPrimAllocDrawTag` as `sdfDrawTag_t *` too.
 `sdf3DLinkInitPacket` receives that CPU list owner as
 its first argument and a `DmaPacketHeader *` as its second argument.
 Only the second argument is converted to the genuine packet-address
@@ -7382,12 +7382,12 @@ Keep encoded program addresses, DMA tag words, and allocator/range
 address-word interfaces unchanged.
 
 The camera FOV editors and mirrored-unit resource/descriptor submissions
-also keep factory results as `SdfListHead *` through the matching pool
+also keep factory results as `sdfDrawTag_t *` through the matching pool
 callback. Their float calculations, input predicates and model-creation
 control flow are independent of that software-list owner.
 
 The image-outline and textured-quad/triangle appenders likewise receive a
-`SdfListHead *`; the packet allocated inside each appender still becomes
+`sdfDrawTag_t *`; the packet allocated inside each appender still becomes
 a hardware address word in the second `sdfDrawTagLink` argument. The
 two `pbDrawRotatedPrim` functions keep their reset-list result
 as that pointer through packet appends and the surface callback. These
@@ -7395,7 +7395,7 @@ closures change no allocator, GS/DMA word, statement order, or callback.
 
 The short field GS-command/frame/vector submissions, generated/composite
 texture submissions, and UI sprite-outline submissions keep their
-`0x20`-byte software list as `SdfListHead *` through initialization,
+`0x20`-byte software list as `sdfDrawTag_t *` through initialization,
 draw helpers and pool append. Decode the allocator's word only once;
 their separate GS packet locals and physical submission words retain
 their original address-word representation.
@@ -7423,14 +7423,14 @@ function's own `D_003A2608` and `D_003A27C8` data inclusions.
 symbols for `sdfGrOtTable[40]`: each is `0x500` bytes after the
 array base, whose canonical `SdfPoolNode` entries are `0x20` bytes.
 Their callback at `+0x10` is therefore `append(SdfPoolNode *,
-SdfListHead *)`, not a separate viewer-device callback taking an
+sdfDrawTag_t *)`, not a separate viewer-device callback taking an
 integer list. Keep the typed native interior externs: using the array
 origin instead changes the compiler's addressing in all three viewer
 submission functions. Both games' list locals and callbacks remain
 byte-exact with the canonical owner and native symbols.
 
 The shop builders also retain their `sdfPrimAllocDrawTag` result as
-`SdfListHead *`. Frame initialization passes `&scene.link` to the
+`sdfDrawTag_t *`. Frame initialization passes `&scene.link` to the
 linked-payload helper, rather than casting the complete `SdfSceneNode`.
 
 ## Viewer object creators consume the canonical timeline owners
@@ -7488,7 +7488,7 @@ loads and pending/frame/message stores without artificial temporaries.
 ## Blur and rectangle sources retain CPU texture pointers
 
 `EffBlurTemplate`, `EffBlurScatterWork` and `EffBlurScaleWork` store the
-selected `SdfTex *` at `+0x2C`; `EffResourceRectWork` stores it at `+0x24`.
+selected `sdfTexHandle_t *` at `+0x2C`; `EffResourceRectWork` stores it at `+0x24`.
 The four viewer channel caches carry the same pointers selected from
 `EvtRuntimeGroup.texture`, not resource indices or DMA address words.
 DDS1 kind work retains a direct texture. DDS2 retains the existing
@@ -7532,9 +7532,9 @@ declaration-order change, or compiler-flag override is involved.
 ## Frame-reference submission retains its list owner
 
 The paired frame-reference submissions (`00108E60`/`00108D80` and
-`00108F00`/`00108E20`) allocate a `0x20`-byte `SdfListHead`, initialize it,
+`00108F00`/`00108E20`) allocate a `0x20`-byte `sdfDrawTag_t`, initialize it,
 append a separate `SdfDmaReferenceChainPacket`, then pass that same list
-to the selected surface. Declare the local as `SdfListHead *` instead of
+to the selected surface. Declare the local as `sdfDrawTag_t *` instead of
 re-decoding `void *` at the tag append. The frame packet's `u32` conversion
 is still required by the physical DMA tag append interface.
 
@@ -7565,14 +7565,14 @@ packet in `s32` or inventing a second sprite/header view.
 The paired viewer option callbacks keep the reset-list factory result in
 `MdlOptionState.packetList` at `+0x30`, then pass that same list to packet
 and surface append routines. The separate `MdlCtrlState.packetList` at
-`+0x08` feeds the packed-color label renderer. Both are `SdfListHead *`;
+`+0x08` feeds the packed-color label renderer. Both are `sdfDrawTag_t *`;
 the two work structures remain distinct, with their original sizes
 (`0x38` and `0x0C`) and offsets. No integer encoding or alternate work
 view is needed at either CPU list boundary.
 
 
 The depth-selected cell helper `dds3ConsPanelTagLinkZ` likewise accepts a
-`SdfListHead *` in both games. It forwards that CPU list unchanged to
+`sdfDrawTag_t *` in both games. It forwards that CPU list unchanged to
 `sdfDrawTagLink`; only the generated rectangle packet is the physical
 second argument. The depth, cell-span arithmetic and packet constructor
 retain their existing contracts.
@@ -7592,7 +7592,7 @@ both games, even when an older wrong pointer return happened to match.
 ## Event viewer software lists and claim-held import debt
 
 The menu frame, available row/header callbacks and their reset-list
-locals use the existing `SdfListHead *` owner through formatting and
+locals use the existing `sdfDrawTag_t *` owner through formatting and
 surface append. The header and row callback typedefs stay unprototyped:
 their existing call convention genuinely supplies different arities.
 `dds3ConsPanelTagLink` now exposes the same CPU list owner in both provider
@@ -7645,7 +7645,7 @@ color unpacking, or store order.
 
 
 Field GS primitive writers also keep two distinct primary allocations:
-`SdfListHead *command` for the CPU list, and `SdfDrawPacket *packet` for
+`sdfDrawTag_t *command` for the CPU list, and `SdfDrawPacket *packet` for
 the initialized draw header. Their existing `u64 *` payload cursor and
 coordinate/color work arrays remain unchanged. Do not apply this header
 type to SDK routines that only transport address words through the
@@ -7669,7 +7669,7 @@ loop remain the original consumed work, independent of list encoding.
 marker producers fill. Its position, canonical `BillTextureQuad`, corner
 array, packed color and final float cover the real `0x48` input; a second
 `FldModelPacketInput` prefix is unnecessary. The separate command-list,
-DMA header and opaque geometry allocations retain `SdfListHead *`,
+DMA header and opaque geometry allocations retain `sdfDrawTag_t *`,
 `DmaPacketHeader *` and `u8 *` until their physical-address submission.
 The SDK model formatter agrees with the existing billboard callers.
 
@@ -8049,9 +8049,9 @@ claim of raw objdiff 100%); native-address word comparisons are exact.
 
 ## Movie parameter blends use the renderer's primary records
 
-Both polygon-movie units now use `EffBlurQuad`, `EffBlurTemplateBody`,
-`EffResourceRectParams`, `EffBlurScatterParams`, `EffBlurScaleParams` and
-`EffSolidRectParams` directly; the local `EvtBlendA..G` projections are gone.
+Both polygon-movie units now use `dds3Effect_Blur_t`, `dds3Effect_PartialMultiBlurParam_t`,
+`dds3Effect_PartialMultiFilterParam_t`, `dds3Effect_DistortionBlurParam_t`, `dds3Effect_RippleBlurParam_t` and
+`dds3Effect_Filter_t` directly; the local `EvtBlendA..G` projections are gone.
 The native two-coordinate loops establish `position[2]` / `center[2]`, and
 the nested two-by-two loops establish `corners[2][2]`. Named renderer accesses
 migrate to those same arrays, with sizes and offsets unchanged.
@@ -8071,7 +8071,7 @@ canonical Eff records privately regresses six already-matched functions
 per game. Five fade-setup helpers move the counter `SH` before the alpha
 `LBU` (four words each); the per-frame updater overruns its native boundary.
 The legacy `KwlnScaleBlurParams` also has `aligned(8)` and size 0x30,
-whereas `EffBlurScaleParams` is 0x2C. Do not force the primary record's
+whereas `dds3Effect_RippleBlurParam_t` is 0x2C. Do not force the primary record's
 size/alignment or change statement order to conceal those snapshot/alias
 differences. The kernel sources remain unchanged while the independent
 movie-blender owner fold lands.
@@ -8207,7 +8207,7 @@ is a supported reconstructed extent, not a recovered source-file endpoint.
 There is no corresponding evidence to absorb the subsequent test/battle code.
 
 Keep the actual providers in address order. Reconcile their declarations rather
-than retaining conflicting private views: the pool node is `ItfMesPoolNode`,
+than retaining conflicting private views: the pool node is `mesflow_tag`,
 the pad stepper has its existing concrete type, and `scrGetMessageHandle` returns
 `u32`. The manager owns `.rodata` through `0x00414E90`; the new residual owner
 `game/code_001A8748` starts its data there and retains the original `.lit4` run.
@@ -8604,7 +8604,7 @@ selection. Its existing ten-argument caller and the native `LHU` at
 selector formal. Screen X/width use a factor of 16, Y/height a factor of 8;
 the texture footprint remains 64 texels in each axis (`+0x400` in UV units),
 independent of the requested screen size. Keep the adjacent-word UV indexing,
-canonical `BtlState` texture handle, `SdfListHead` packet lifecycle and
+canonical `BtlState` texture handle, `sdfDrawTag_t` packet lifecycle and
 `SdfPoolNode.append` callback. No table-view cast, argument-position tuning,
 extra geometry buffers or assembly is needed.
 
@@ -8948,7 +8948,7 @@ stay exact with the explicit per-mode assignments.
 DDS1 `func_001515E8` (`0x001515E8`) and DDS2 `func_001591D8`
 (`0x001591D8`) are the same 696-byte animation-entry updater; Nocturne debug
 `0x0015E1E0` and US Nocturne `0x0015C650` corroborate the instruction sequence.
-Use the existing `BillObj`, `BillOut`, `BillPluralRecord` and child owners.
+Use the existing `billHandle_t`, `BillOut`, `BillPluralRecord` and child owners.
 
 The decisive expansion property is that the resolved-entry base is loaded into
 a register **before the index is scaled**, leaving an index-first `PLUS` before
@@ -9051,7 +9051,7 @@ is D_0032F1A0, with aligned position/rotation at +0/+16; its stack vectors
 likewise occupy aligned SP+0/SP+16 in the 64-byte frame.
 
 Keep provider declarations truthful when adding either body. Model-context
-rebuild consumes `EffWorldNode *`, node-frame step has a floating third
+rebuild consumes `dds3Basic_t *`, node-frame step has a floating third
 argument, and scene-light selection takes a signed 32-bit index. The scene
 command callers deliberately convert their stored command to signed 16 bits
 before passing that index; keep the explicit conversion there rather than
@@ -9796,7 +9796,7 @@ This is a type recovery, not a scheduling cast or a global aliasing relaxation.
 texture/list pointers; consumers choose the concrete pointer type from the
 packet tag, with no arithmetic on this field. `MdlLoadPayload.partInfo` merely
 transports borrowed record data; `mdlRegistModelSet` installs it in the existing
-typed `BattleGroupNode.partInfo` owner. `PacWork` remains 0x10 bytes and
+typed `dds3ModelResrc_t.partInfo` owner. `PacWork` remains 0x10 bytes and
 `MdlLoadPayload` remains 0x20 bytes. Casts to signed address words remain only at
 existing integer-address API/storage boundaries. The distinct later pointer
 fields retain their types and native load order.
@@ -10835,7 +10835,7 @@ The profile progress indicator writes four palette words in its frame and passes
 
 ### Indirect-call provenance is an independent first-stage explanation
 
-Matched `dds3BillboardDraw` invokes `obj->callback()` using the real `BillObj` field. Initial RTL loads +28 into pseudo85 and emits ordinary call_insn12 through that pseudo; no CALL_PLACEHOLDER exists. The sibling-decision hook therefore has no placeholder to select.
+Matched `dds3BillboardDraw` invokes `obj->callback()` using the real `billHandle_t` field. Initial RTL loads +28 into pseudo85 and emits ordinary call_insn12 through that pseudo; no CALL_PLACEHOLDER exists. The sibling-decision hook therefore has no placeholder to select.
 
 As the earlier synthetic callback controls demonstrate, an indirect call may later become a direct target without acquiring a sibling alternative. Those synthetic controls are not matched in-tree evidence. Recover an actual generic callback abstraction before transferring this mechanism; do not invent a one-off inline or pointer solely to manufacture a JAL.
 
@@ -11278,7 +11278,7 @@ the two-meter graph and separate peak-expiry/new-peak reset predicates.
 The renderer twins use two independent optional DMA prefixes.
 `sdf3DSetDefaultLight` and `sdf3DSetDefaultFog`
 store fallbacks that native `sdfModel` selects when the respective per-model
-reference is null, then copies to `SdfListHead.firstReferenceSource` and
+reference is null, then copies to `sdfDrawTag_t.firstReferenceSource` and
 `secondReferenceSource`. The frame caller supplies a frustum packet for the
 second source. Its first source points just after `ConsMatrixPacket`, so the
 name deliberately does not assert that it is the matrix payload itself.
@@ -11473,7 +11473,7 @@ and number-display animation remain game-specific.
 
 `sdfChipInit` initializes the page records, free pages, size classes and
 release callback. `sdfMemGetTop` returns the first general-heap
-allocation descriptor (`SdfMemBlock *`) from the shared resource API.
+allocation descriptor (`sdfMemHandle_t *`) from the shared resource API.
 `sdfMemReallocRecord` retains descriptor identity while resizing its
 backing storage. `sdfDeleteTrackedThread` unlinks the tracked node and selects
 self deletion versus terminating/deleting another thread; it does not imply
@@ -11709,7 +11709,7 @@ entry is ready and chooses fixed camera keys at step 25.
 The DDS2 frontline hooks use actor IDs, not enemy-name IDs. The decoded
 `data/battle/msg.tblasm` actor-name rows identify 1=Serph, 2=Sera, 4=Argilla,
 5=Gale, 7=Roland and 8=Seraph. `prfCapPresentMessages` indexes displayed
-names by `DatPartyRecord.unitId`; `ptyRebalanceFrontline` promotes that
+names by `datUnitWork_t.unitId`; `ptyRebalanceFrontline` promotes that
 selected roster entry. Thus the hooks name their actual promoted actors.
 The fixed return-6 callback remains unnamed: sharing a slot with a
 target-kind callback does not prove that 6 means actor Cielo.
@@ -12632,7 +12632,7 @@ compiler, source lifetime, control flow, or macro contract changes.
 ### Mode-1 field camera keeps the selected motion across pose work
 
 The 1,704-byte twins `func_0012F578` / `func_00131B50` use the existing
-`FldAreaWork`, `EffWorldNode` and `ObjectTransform` owners. Their mode-1
+`FldAreaWork`, `dds3Basic_t` and `dds3PoseSet_t` owners. Their mode-1
 heading is `unk174` / `unk180`, produced by the actor-entry trigger; it is
 separate from `targetAngle`. Preserve the six degree-wrap loops, callback-fresh
 runtime flag, pending X/Y+44/Z correction, three independent smoothed-position
@@ -12822,7 +12822,7 @@ Three source relationships explain otherwise small residuals:
 Keep text and palette colors distinct where their jobs diverge. The
 inactive-unit text tint, predicate/status-selected palette and text tints,
 and completed-bar palette follow their native clamp/publication sequence.
-`mnuIsTitleEntryAvailable` takes a `DatPartyRecord *` even though DDS2's provider
+`mnuIsTitleEntryAvailable` takes a `datUnitWork_t *` even though DDS2's provider
 is a zero-return stub; its DDS1 counterpart actually reads the unit.
 
 Both native phase checks reject `<0` and then `>=3` through one real fallback.
@@ -12903,7 +12903,7 @@ native MMI/VU sequences are at `002173A0..00217410` and
 `00231EB8..00231F28`; the two packed-color work homes are at SP+0 and SP+0x10
 in both games, supporting the four-word SDK carriers.
 
-The existing primary `MdlCtx` and `MdlDevList` owners remain unchanged.
+The existing primary `dds3ModelHandle_t` and `MdlDevList` owners remain unchanged.
 Both actual C callers receive only the truthful void, five-argument prototype;
 the DDS2 caller unit's Cedar narrow scope was disclosed and its body untouched.
 Fresh whole-unit gates are 73/0 for each provider and 109/0 / 110/0 for the
@@ -13056,7 +13056,7 @@ provider body or held caller body changes are required.
 ### Scatter drawable: contiguous streams and mirrored alpha ramp
 
 `dds3WhirlwindPolyListCreate` (DDS1 `00175B50`, DDS2 `0017D7A8`, 564 bytes
-each) uses the existing `PcpScatterDraw` owner without an allocator-contract
+each) uses the existing `dds3WhirlwindPolyList_tag` owner without an allocator-contract
 override. Its 0x80-byte object owns a separate zeroed geometry block:
 16-byte points, 8-byte UVs, one packed color per vector, then one per particle.
 The vector count is `2 * pairs + 2`; the ramp covers a quarter of that count,
@@ -13346,9 +13346,9 @@ in the agent ledger.
 
 `DispBaseData` (DDS1 `0010EF68`, DDS2 `0010F190`)
 prints a node's ID and name, then separate position, rotation and scale
-sections when its `ObjectTransform` exists. Each section uses one screen-row
-coordinate for both its label and its values. The existing `EffWorldNode`
-and `ObjectTransform` owners describe every field; varargs perform ordinary
+sections when its `dds3PoseSet_t` exists. Each section uses one screen-row
+coordinate for both its label and its values. The existing `dds3Basic_t`
+and `dds3PoseSet_t` owners describe every field; varargs perform ordinary
 float-to-double promotion.
 
 A shared returned line count, two without an inner transform and eight with
@@ -13378,7 +13378,7 @@ pass locations are recorded in the agent ledger.
 `effEventUpdateEffectParameters` (DDS1 `00190328`, DDS2 `00197F60`) has
 197 identical native instructions after relocation masking, a `0x110`
 frame, and five independently advanced parameter-array cursors. The current
-`BattleEffect`, battle-entry and `EvtUnit`/`MdlCtx` owners describe its accesses.
+`effBTLCutHandle_t`, battle-entry and `evtUnitHandle_t`/`dds3ModelHandle_t` owners describe its accesses.
 Its VU0 position and matrix outputs are passed directly to callbacks or loaded
 back into VU0, not read through cached C scalar values.
 
@@ -13432,7 +13432,7 @@ permission to invent a biased layout or an extra use.
 ## Detaching a world-value free-list prefix
 
 `dds3AddBasicArray` (DDS1 001102C8 / DDS2 001104F0, 312 bytes each)
-uses the existing `WorldInfo`, `WorldValueEntry` and `WorldValueIndices`
+uses the existing `WorldInfo`, `WorldValueEntry` and `dds3BasicArrayHandle_t`
 owners without alternate views. The entry links and retained first/last
 indices are signed halfwords; the available and attached counts are unsigned
 halfwords, while the requested count and traversal counter are signed words.
@@ -14158,8 +14158,8 @@ change; no types, bounds, casts, data bytes, layouts or control flow change.
 `evtMovieDefaultResourceRect`, `evtMovieDefaultBlurScatter` and
 `evtMovieDefaultBlurScale` are the existing renderer parameter records selected
 when either input to the corresponding polygon-movie blend is null. Their
-names follow the already shared `EffBlurTemplateBody`, `EffSolidRectParams`,
-`EffResourceRectParams`, `EffBlurScatterParams` and `EffBlurScaleParams`
+names follow the already shared `dds3Effect_PartialMultiBlurParam_t`, `dds3Effect_Filter_t`,
+`dds3Effect_PartialMultiFilterParam_t`, `dds3Effect_DistortionBlurParam_t` and `dds3Effect_RippleBlurParam_t`
 owners. The paired native records agree byte-for-byte over their observed
 spans; naming does not change the declarations, storage or interior labels.
 
@@ -14989,14 +14989,14 @@ promotions of their variadic arguments, together with the format strings.
 
 ### Keep concrete layout checks with their consumers
 
-The shadow-projection owners in both titles check `EvtUnit.shadowLevel` at
+The shadow-projection owners in both titles check `evtUnitHandle_t.shadowLevel` at
 offset `0xD3` after their function bodies. The field name, type and native
 layout remain shared. Adding the same offset-expression typedef to the common
 header changes unrelated switch-table address selection in this compiler's
 full-unit context. Keeping the unchanged check with the concrete operation
 preserves the contract and the already matching switch dispatches.
 
-The `FieldSequenceRecord` constructors similarly check their `0xA0` packet
+The `fldSceneParam_t` constructors similarly check their `0xA0` packet
 size and `enabled` offset `0x58` after code and data. Keeping those assertions
 in the shared header changes three load-scheduling instructions in an unrelated
 DDS1 actor-transition consumer. Both constructor owners retain the unchanged
@@ -15152,8 +15152,8 @@ jump tables. The complete adjacent owners instead retain these native spans:
 | `.sdata` | `0x003BBDAC`–`0x003BBDB8` | `0x004371EC`–`0x004371F8` |
 
 Both owners retain default `-O2 -G8`; neither `cflags.txt` needs an override.
-The window's retained unit is an `EvtUnit *`, matching
-`evtActivateStoredUnitMotionSlot(EvtUnit *)`; pass that pointer directly at
+The window's retained unit is an `evtUnitHandle_t *`, matching
+`evtActivateStoredUnitMotionSlot(evtUnitHandle_t *)`; pass that pointer directly at
 both activation sites and preserve the same four-byte native storage. No
 shared-header change or compatibility owner is needed.
 
@@ -15297,7 +15297,7 @@ No unit flags, expected assembly, data ownership or VU assembly are changed.
 ## Loaded-record descriptors retain their real runtime pointers
 
 `EvtLoadedRecord` is the runtime 0x0C-byte descriptor, not the packed resource
-information header. Its first two words are a `SdfMemBlock *` allocation handle
+information header. Its first two words are a `sdfMemHandle_t *` allocation handle
 and a byte pointer to the 32-byte-stride record array; the third is the unsigned
 record count. Release the typed handle directly and use `records` as the byte
 origin. `sdfMemGetPtr` truthfully returns `u8 *`, so casts at the two
@@ -15540,7 +15540,7 @@ special-list routes and caller-supplied cell emitter. There is no invented
 callback parameter or narrowed owner domain. A direct-call rewrite changes
 address commoning and is not equivalent compiler visibility for this toolchain.
 
-`ParReleaseRecord.texcoords` is a float UV-pair array, matching the request's
+`dds3Polygon_t.texcoords` is a float UV-pair array, matching the request's
 float texture-coordinate stream; the constructor's allocated-buffer cast has
 the same type. Both direct includers and both constructors remain exact.
 Both complete owners gate at 63 match/0 differ; the three required canaries
@@ -15602,7 +15602,7 @@ Several native accesses already have fields in the primary owner:
 - DDS1 `btlQueueSceneActorModelEntry` reads the scene kind at `+0x24A`
   (`lbu` at `001C55CC`), already `BtlState.unk24A`.
 - DDS1 `func_002DF710` reads the signed count at `+0x52`
-  (`lh` at `002DF77C`), already `VuWork.selectedTriangleCount`.
+  (`lh` at `002DF77C`), already `corePktCb_t.selectedTriangleCount`.
 - DDS2 movie selection lists use `MenuList.drawCallback` at `+0x2C`
   and `MenuList.cursor` at `+0x1C`; the selected node's index is its
   first word. A separate padded `SpriteMenuList` is unnecessary.
@@ -15653,8 +15653,8 @@ declaration or altered return/argument contract was needed.
 ## Kernel draw state shares the effect owner's parameter types
 
 Both `dds3KernelDraw.c` implementations and `evtPolygonMovie.c` exchange
-the same `EffSolidRectParams`, `EffResourceRectParams`, `EffBlurQuad`,
-`EffBlurTemplateBody`, and `EffBlurScaleParams` bodies. The effect work
+the same `dds3Effect_Filter_t`, `dds3Effect_PartialMultiFilterParam_t`, `dds3Effect_Blur_t`,
+`dds3Effect_PartialMultiBlurParam_t`, and `dds3Effect_RippleBlurParam_t` bodies. The effect work
 records already name these bodies as their leading members. A separate
 set of layout-identical `Kwln*Params` types is not an independent payload
 format. Use the owner's actual type in every staged, saved, and frame
@@ -15684,7 +15684,7 @@ units at 103/0, and both complete linked games pass their retail SHA-1.
 
 ## Serialized event prefixes do not need a nominal byte-array owner
 
-`EffEventWork` contains the real `EffEventInit` prefix followed by the actor
+`effEveBEDCutHandle_t` contains the real `EffEventInit` prefix followed by the actor
 and effect pointers. Copy the prefix with
 `memcpy(&destination->init, source, sizeof(destination->init))`. The paired
 serialized-record copier takes byte-buffer arguments and copies the existing
@@ -15697,7 +15697,7 @@ Keep pointer arguments faithful to existing declarations as well. The
 billboard packet's `texcoords` is `f32 *`, so its local `f32 uv[4][2]` supplies
 `&uv[0][0]`, not an intermediate `u32 *`. A draw surface's `append` callback
 takes the `SdfPoolNode *` owner itself, not that same address temporarily cast
-to `SdfListHead *`. These four one-line corrections keep the DDS1/DDS2
+to `sdfDrawTag_t *`. These four one-line corrections keep the DDS1/DDS2
 billboard units at 121/0 each and browser units at 60/0 each.
 
 ## A nested channel loader returns its captured aligned span
@@ -15727,7 +15727,7 @@ field unit at 184/0.
 ## A draw-surface append receives its actual pool owner
 
 `SdfPoolNode.append` takes `SdfPoolNode *` as its first argument and
-`SdfListHead *` as its second. The pool and the packet list are different
+`sdfDrawTag_t *` as its second. The pool and the packet list are different
 objects, despite their similarly positioned link fields. Pass the actual
 surface pointer directly:
 
@@ -15736,7 +15736,7 @@ surface->append(surface, packets);
 kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, packets);
 ```
 
-Do not cast the receiver to `SdfListHead *` before passing it back to the
+Do not cast the receiver to `sdfDrawTag_t *` before passing it back to the
 already correctly typed callback. The preview, overlay editor, light
 editor, group-property dialog, and DDS2 `func_002F3F70` sites keep their
 native bytes with the direct receiver. This removes an incompatible

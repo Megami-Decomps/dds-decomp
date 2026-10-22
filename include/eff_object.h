@@ -1,13 +1,13 @@
 #ifndef EFF_OBJECT_H
 #define EFF_OBJECT_H
 #include "dds3obj.h"
-struct EvtUnit;
+struct evtUnitHandle_t;
 /* Kind-5 constructors allocate and clear the complete 0x40-byte payload. */
 typedef struct EffectObjectData {
-    ObjBase *handle;
+    dds3ObjectBaseControlWorkData_t *handle;
     s32 word04; /* 0x04: room-mode flag selector; nonpositive bypasses room gating. */
-    struct EvtUnit *transitionWork; /* 0x08: object transition work */
-    ObjBase *modelHolder; /* 0x0C: owned base retains the model resource. */
+    struct evtUnitHandle_t *transitionWork; /* 0x08: object transition work */
+    dds3ObjectBaseControlWorkData_t *modelHolder; /* 0x0C: owned base retains the model resource. */
     s32 activeId;
     u32 followParameterIndex; /* 0x14: 16-byte follow-parameter row; all-ones selects the base record. */
     u32 word18;
@@ -27,7 +27,7 @@ typedef char EffectObjectData_tail_at_0x3C[((u32)&((EffectObjectData *)0)->limit
 
 /* Kind-6 world nodes allocate this complete transform payload at 0x30 bytes. */
 typedef struct EffectTransformData {
-    ObjBase *resourceState;
+    dds3ObjectBaseControlWorkData_t *resourceState;
     u32 roomNumber;
     u32 opacityMode;
     s32 activeId;
@@ -38,6 +38,6 @@ typedef char EffectTransformData_size_must_be_0x30[(sizeof(EffectTransformData) 
 typedef char EffectTransformData_roomNumber_at_0x04[((u32)&((EffectTransformData *)0)->roomNumber == 0x04) ? 1 : -1];
 typedef char EffectTransformData_position_at_0x20[((u32)&((EffectTransformData *)0)->position == 0x20) ? 1 : -1];
 
-ObjBase *dds3UnitObjectBasicGetControlWorkData(EffWorldNode *object);
-ObjBase *dds3MatterObjectBasicGetControlWorkData(const EffWorldNode *object);
+dds3ObjectBaseControlWorkData_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic_t *object);
+dds3ObjectBaseControlWorkData_t *dds3MatterObjectBasicGetControlWorkData(const dds3Basic_t *object);
 #endif

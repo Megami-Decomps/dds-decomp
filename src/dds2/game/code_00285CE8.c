@@ -16,7 +16,7 @@ extern void mnuClearCampResourceFlagEntries(void);
 
 extern void mnuSynchronizeMantraModelFlags(s32 mode);
 
-extern void mtrRecomputeMantraFlagsForPartyUnit(DatPartyRecord *record);
+extern void mtrRecomputeMantraFlagsForPartyUnit(datUnitWork_t *record);
 
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 
@@ -222,9 +222,9 @@ void mtrAdvanceGridCellPropagation(MtrGrid *grid) {
 
 INCLUDE_RODATA(const s32, "game/code_00285CE8", D_00425DD8);
 
-struct SdfMemBlock *mtrMantraEventBitPush(void) {
+struct sdfMemHandle_t *mtrMantraEventBitPush(void) {
     s8 *data;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     s32 i;
 
     allocation = sdfMemAllocDirect(0x76);
@@ -247,7 +247,7 @@ struct SdfMemBlock *mtrMantraEventBitPush(void) {
 }
 
 
-void mtrMantraEventBitPop(struct SdfMemBlock *allocation) {
+void mtrMantraEventBitPop(struct sdfMemHandle_t *allocation) {
     s32 i;
     s8 *data = (s8 *)sdfMemGetPtr(allocation);
 
@@ -271,8 +271,8 @@ void mtrMantraEventBitPop(struct SdfMemBlock *allocation) {
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraEventBitPop()]*****************\n");
 }
 
-extern void scrSetEntryLowFlags(DatPartyRecord *context, u16 entryId, u16 lowFlags);
-void mtrMantraBitResetUnit(DatPartyRecord *record) {
+extern void scrSetEntryLowFlags(datUnitWork_t *context, u16 entryId, u16 lowFlags);
+void mtrMantraBitResetUnit(datUnitWork_t *record) {
     s32 i;
 
     for (i = 0; i < 0xB0; i++) {
@@ -307,7 +307,7 @@ void mtrMantraEventBitReset(void) {
 }
 
 void mtrRefreshMantraStateForUnit2(void) {
-    DatPartyRecord record;
+    datUnitWork_t record;
 
     memset(&record, 0, sizeof(record));
     record.unitId = 2;
@@ -319,7 +319,7 @@ void mtrRefreshMantraStateForUnit2(void) {
 }
 
 void mtrRefreshMantraStateForUnit1(void) {
-    DatPartyRecord record;
+    datUnitWork_t record;
 
     memset(&record, 0, sizeof(record));
     record.unitId = 1;
@@ -331,7 +331,7 @@ void mtrRefreshMantraStateForUnit1(void) {
 }
 
 void mtrRefreshMantraStateForPartyUnit(void) {
-    DatPartyRecord record;
+    datUnitWork_t record;
 
     memset(&record, 0, sizeof(record));
     record.unitId = 3;
@@ -339,7 +339,7 @@ void mtrRefreshMantraStateForPartyUnit(void) {
 }
 
 void mtrRefreshMantraStateForUnit7(void) {
-    DatPartyRecord record;
+    datUnitWork_t record;
 
     memset(&record, 0, sizeof(record));
     record.unitId = 7;
@@ -348,16 +348,16 @@ void mtrRefreshMantraStateForUnit7(void) {
 
 #include "mnu_mantra.h"
 #include "mnu_mantra_position_api.h"
-extern u16 scrGetEntryLowFlags(DatPartyRecord *, u16);
-extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
+extern u16 scrGetEntryLowFlags(datUnitWork_t *, u16);
+extern u32 scrGetSelectedScriptEntryId(datUnitWork_t *);
 extern u32 ptyGetProfileRecordCap(u16);
 extern s32 mnuGetActiveMantraModelFlagState(void);
-extern u32 ptyGetProfileRecordValue(DatPartyRecord *work, u16 scriptId);
+extern u32 ptyGetProfileRecordValue(datUnitWork_t *work, u16 scriptId);
 
 void mtrSynchronizeMantraFlagsAcrossParty(void) {
-    DatPartyRecord first;
-    DatPartyRecord second;
-    DatPartyRecord merged;
+    datUnitWork_t first;
+    datUnitWork_t second;
+    datUnitWork_t merged;
     u16 firstId = 0;
     u16 secondId = 0;
     u32 i;

@@ -23,9 +23,9 @@ typedef char BtlFade_textAdvanceFrameCount_offset_must_be_0x08[
 
 /* Common draw record allocated by the interface object constructors (0x40). */
 /* Allocation fields own general-heap descriptors, not retained payload addresses. */
-typedef struct UiSprite {
-    SdfMemBlock *allocation;
-    SdfMemBlock *payloadAllocation;
+typedef struct itfpanel_t {
+    sdfMemHandle_t *allocation;
+    sdfMemHandle_t *payloadAllocation;
     u32 *payload;
     s32 renderValue;
     s32 left;
@@ -42,10 +42,10 @@ typedef struct UiSprite {
     s32 alpha;
     u8 kind; /* Unsigned index into the panel handler tables. */
     u8 pad3D[3];
-} UiSprite;
+} itfpanel_t;
 
 /* Font items use their own 0x2C-byte pool, separate from parent chains. */
-typedef struct FrFontChildGlyph {
+typedef struct _TEXT {
     union {
         u16 glyphCode;
         struct {
@@ -92,22 +92,22 @@ typedef struct FrFontChildGlyph {
         u8 cellHeight;
         u8 opaque[2];
     } cellDimensions;
-    FrFontRecord *cachedItem;
-    FrFontRecord *sourceItem;
-    struct FrFontChildGlyph *previous;
-    struct FrFontChildGlyph *next;
-} FrFontChildGlyph;
+    GsFont_t *cachedItem;
+    GsFont_t *sourceItem;
+    struct _TEXT *previous;
+    struct _TEXT *next;
+} _TEXT;
 
 typedef char FrFontChildGlyph_size_must_be_0x2C[
-    sizeof(FrFontChildGlyph) == 0x2C ? 1 : -1];
+    sizeof(_TEXT) == 0x2C ? 1 : -1];
 typedef char FrFontChildGlyph_owner_offsets[
-    ((u32)&((FrFontChildGlyph *)0)->cellDimensions == 0x18 &&
-     (u32)&((FrFontChildGlyph *)0)->cachedItem == 0x1C &&
-     (u32)&((FrFontChildGlyph *)0)->sourceItem == 0x20 &&
-     (u32)&((FrFontChildGlyph *)0)->next == 0x28) ? 1 : -1];
+    ((u32)&((_TEXT *)0)->cellDimensions == 0x18 &&
+     (u32)&((_TEXT *)0)->cachedItem == 0x1C &&
+     (u32)&((_TEXT *)0)->sourceItem == 0x20 &&
+     (u32)&((_TEXT *)0)->next == 0x28) ? 1 : -1];
 
 /* Parent chain heads use the 0x44-byte glyph pool and own child-item links. */
-typedef struct FrFontGlyph {
+typedef struct _FRQ {
     union {
         u16 glyphCode;
         struct {
@@ -149,25 +149,25 @@ typedef struct FrFontGlyph {
         } shadeColor;
     } renderValueOrSetupOrShade;
     u32 childCount;
-    FrFontChildGlyph *firstChild;
-    FrFontChildGlyph *lastChild;
-    struct FrFontGlyph *previous;
-    struct FrFontGlyph *next;
-    struct FrFontGlyph *chainHead;
+    _TEXT *firstChild;
+    _TEXT *lastChild;
+    struct _FRQ *previous;
+    struct _FRQ *next;
+    struct _FRQ *chainHead;
     u32 timedControlCode; /* F214/F215 terminal timing control. */
     u32 pendingLipsStopCode; /* F117 until evtLipsStopFunction runs. */
     u32 skipLipsStopWait; /* Set when a timing control follows F117. */
     s32 remainingWaitFrames; /* F215 uses 0xFFFF for title-sound completion. */
     s32 contextModeEnabled;
-} FrFontGlyph;
+} _FRQ;
 
 typedef char FrFontGlyph_size_must_be_0x44[
-    sizeof(FrFontGlyph) == 0x44 ? 1 : -1];
+    sizeof(_FRQ) == 0x44 ? 1 : -1];
 typedef char FrFontGlyph_owner_offsets[
-    ((u32)&((FrFontGlyph *)0)->childCount == 0x18 &&
-     (u32)&((FrFontGlyph *)0)->firstChild == 0x1C &&
-     (u32)&((FrFontGlyph *)0)->lastChild == 0x20 &&
-     (u32)&((FrFontGlyph *)0)->chainHead == 0x2C) ? 1 : -1];
+    ((u32)&((_FRQ *)0)->childCount == 0x18 &&
+     (u32)&((_FRQ *)0)->firstChild == 0x1C &&
+     (u32)&((_FRQ *)0)->lastChild == 0x20 &&
+     (u32)&((_FRQ *)0)->chainHead == 0x2C) ? 1 : -1];
 
 /* Encoded message controls consumed by the glyph timing/lipsync state. */
 typedef enum ItfGlyphControlCode {
@@ -188,7 +188,7 @@ typedef struct FrFontCtx {
     s8 secondOption;
     u8 contextEncodedByte;
     u8 *encodedText;
-    FrFontGlyph *glyphChain;
+    _FRQ *glyphChain;
     s32 encodedTextOffset;
     s8 pendingCreate;
     s8 pendingPosition;
@@ -208,19 +208,19 @@ typedef struct FrFontTextBank {
     FrFontTextIndex entries[1];
 } FrFontTextBank;
 
-void frSetDrawSpeed(FrFontGlyph *glyph, s32 inputValue);
-void frFontEnableContextMode(FrFontGlyph *glyph);
-void frSetFontSpace(FrFontGlyph *glyph, s32 spacing);
-void frSetDrawPosition(FrFontGlyph *glyph, u32 x, u32 y);
-void frSetPriority(FrFontGlyph *glyph, u32 unshiftedValue);
-void frSetFontColor(FrFontGlyph *parentGlyph, u32 colorWord);
-void frSetFontColorNo(FrFontGlyph *glyph, u8 firstOption);
-void frSetFontSize(FrFontGlyph *glyph, s32 cellAdvance, s32 cellHeight);
+void frSetDrawSpeed(_FRQ *glyph, s32 inputValue);
+void frFontEnableContextMode(_FRQ *glyph);
+void frSetFontSpace(_FRQ *glyph, s32 spacing);
+void frSetDrawPosition(_FRQ *glyph, u32 x, u32 y);
+void frSetPriority(_FRQ *glyph, u32 unshiftedValue);
+void frSetFontColor(_FRQ *parentGlyph, u32 colorWord);
+void frSetFontColorNo(_FRQ *glyph, u8 firstOption);
+void frSetFontSize(_FRQ *glyph, s32 cellAdvance, s32 cellHeight);
 
 typedef struct ItfMesBlk14 {
     u32 x;
     u32 y;
-    FrFontGlyph *glyphChain;
+    _FRQ *glyphChain;
     u16 selectedIndex;
     u8 pad0E[2];
 } ItfMesBlk14;
@@ -229,7 +229,7 @@ typedef struct ItfMesEntryBlock {
     u32 x;
     s32 y;
     ItfMesTable *table;
-    FrFontGlyph *glyphChain;
+    _FRQ *glyphChain;
     s8 textState;
     u8 textInterfaceMask; /* 0x11: result of frGetMessageResult(3). */
     u8 color[4];
@@ -251,7 +251,7 @@ typedef struct ItfMesOption {
 typedef struct ItfMesBlk40 {
     u32 x;
     u32 y;
-    FrFontGlyph *glyphChain;
+    _FRQ *glyphChain;
     u32 panelValue;
     s16 selectionState;
     s16 selectedIndex;
@@ -266,9 +266,9 @@ typedef struct ItfMesBlk40 {
 
 /* The three sprite records occupy +0xA4/+0xA8/+0xAC in the window state. */
 typedef struct ItfMesBlkA4 {
-    UiSprite *frame;
-    UiSprite *sprite;
-    UiSprite *overlay;
+    itfpanel_t *frame;
+    itfpanel_t *sprite;
+    itfpanel_t *overlay;
     s32 bounds[4];
     s32 red;
     s32 green;
@@ -278,10 +278,10 @@ typedef struct ItfMesBlkA4 {
 
 typedef struct ItfMesTextSlots {
     u32 addresses[0x20];
-    SdfMemBlock *handles[0x20];
+    sdfMemHandle_t *handles[0x20];
 } ItfMesTextSlots;
 
-typedef struct ItfMesState {
+typedef struct instanceMes_tag {
     u32 flags;
     ItfMesSub *sub;
     u8 *temporaryFontEntry; /* 0x08: relocated font resource bytes from the MSG1 trailing entry. */
@@ -296,79 +296,79 @@ typedef struct ItfMesState {
     ItfMesTextSlots textSlots;
     BtlFade fade;
     u32 callbackAddress;
-} ItfMesState;
+} instanceMes_tag;
 
 typedef char ItfMesState_temporaryFontEntry_offset_must_be_0x08[
-    ((u32)&((ItfMesState *)0)->temporaryFontEntry == 0x08) ? 1 : -1];
+    ((u32)&((instanceMes_tag *)0)->temporaryFontEntry == 0x08) ? 1 : -1];
 
 typedef struct ItfMesSlot {
-    ItfMesState *mes;
+    instanceMes_tag *mes;
     u8 unk4[0x10];
 } ItfMesSlot;
 
 void InitializeSpeaker(ItfMesBlk14 *cursor, s32 resetPosition);
 void InitializeMessage(ItfMesEntryBlock *cursor, s32 resetPosition);
 
-FrFontGlyph *itfMesBuildNodeRows(u32 *items, s32 itemCount, u32 mask,
+_FRQ *itfMesBuildNodeRows(u32 *items, s32 itemCount, u32 mask,
     s32 x, s32 y, s32 renderValue);
-FrFontGlyph *UnchainFontHandleUnit(FrFontGlyph *glyph, s32 from, s32 to);
-FrFontGlyph *GetLastLinkFontHandle(FrFontGlyph *glyph);
-void ChangeZBuffer(FrFontGlyph *glyph, s32 renderValue);
-void ChangeFontAlpha(FrFontGlyph *glyph, u32 color);
-s32 CountLineMessage(FrFontGlyph *last, FrFontGlyph *first);
-void GetLastMessagePara(FrFontGlyph *glyph, ItfMesEntryBlock *entryBlock);
-void itfMesEnableUnflaggedNodeContexts(FrFontGlyph *glyph);
+_FRQ *UnchainFontHandleUnit(_FRQ *glyph, s32 from, s32 to);
+_FRQ *GetLastLinkFontHandle(_FRQ *glyph);
+void ChangeZBuffer(_FRQ *glyph, s32 renderValue);
+void ChangeFontAlpha(_FRQ *glyph, u32 color);
+s32 CountLineMessage(_FRQ *last, _FRQ *first);
+void GetLastMessagePara(_FRQ *glyph, ItfMesEntryBlock *entryBlock);
+void itfMesEnableUnflaggedNodeContexts(_FRQ *glyph);
 
-void itfPnlRelease(UiSprite *sprite);
-FrFontGlyph *MessageRequest(s32 x, s32 y, u8 *encodedText, FrFontGlyph *sub);
-FrFontGlyph *MessageRequestEx(s32 x, s32 y, s32 channel0, s32 channel1,
-    s32 channel2, s32 channel3, u8 *encodedText, FrFontGlyph *sub);
-FrFontGlyph *MessageRequestEx2(s32 x, s32 y, s32 depth, s32 channel0,
-    s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, FrFontGlyph *sub);
-FrFontGlyph *itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
-    s32 channel2, s32 channel3, u8 *encodedText, FrFontGlyph *unusedSub);
-FrFontGlyph *itfDrawPlainEncodedTextWithByteColors(s32 x, s32 y, s32 depth,
+void itfPnlRelease(itfpanel_t *sprite);
+_FRQ *MessageRequest(s32 x, s32 y, u8 *encodedText, _FRQ *sub);
+_FRQ *MessageRequestEx(s32 x, s32 y, s32 channel0, s32 channel1,
+    s32 channel2, s32 channel3, u8 *encodedText, _FRQ *sub);
+_FRQ *MessageRequestEx2(s32 x, s32 y, s32 depth, s32 channel0,
+    s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, _FRQ *sub);
+_FRQ *itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
+    s32 channel2, s32 channel3, u8 *encodedText, _FRQ *unusedSub);
+_FRQ *itfDrawPlainEncodedTextWithByteColors(s32 x, s32 y, s32 depth,
     s32 channel0, s32 channel1, s32 channel2, s32 channel3,
-    u8 *encodedText, FrFontGlyph *unusedSub);
-s32 frFontDrawGlyphInDefaultMode(FrFontGlyph *glyph);
-s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *glyph, s8 mode);
+    u8 *encodedText, _FRQ *unusedSub);
+s32 frFontDrawGlyphInDefaultMode(_FRQ *glyph);
+s32 frFontDrawGlyphWithSharedFlags(_FRQ *glyph, s8 mode);
 
 /* The message manager owns a fixed pool of 64 windows in this 0x520-byte bank. */
-typedef struct ItfMesPoolNode {
-    struct ItfMesPoolNode *previous;
-    struct ItfMesPoolNode *next;
+typedef struct mesflow_tag {
+    struct mesflow_tag *previous;
+    struct mesflow_tag *next;
     s32 index;
-    ItfMesState *state;
-    SdfMemBlock *resourceHandle;
-} ItfMesPoolNode;
+    instanceMes_tag *state;
+    sdfMemHandle_t *resourceHandle;
+} mesflow_tag;
 
 /* State of the interactive message-layout inspector. */
 typedef struct ItfMesDebugState {
     s32 selectedItem;
     s32 mode;
-    ItfMesPoolNode *window;
+    mesflow_tag *window;
 } ItfMesDebugState;
 
 typedef struct ItfMesPool {
-    ItfMesPoolNode *activeHead;
-    ItfMesPoolNode *activeTail;
-    ItfMesPoolNode *firstFree;
-    ItfMesPoolNode *lastFree;
+    mesflow_tag *activeHead;
+    mesflow_tag *activeTail;
+    mesflow_tag *firstFree;
+    mesflow_tag *lastFree;
 } ItfMesPool;
 
 typedef struct ItfMesGlobals {
     u32 activeWindowCount;
-    SdfTex *windowTexture;
+    sdfTexHandle_t *windowTexture;
     u32 unk8;
     u16 flags;
     u16 unkE;
     ItfMesPool pool;
-    ItfMesPoolNode nodes[0x40];
+    mesflow_tag nodes[0x40];
 } ItfMesGlobals;
 
-typedef char ItfMesPoolNode_size_must_be_0x14[(sizeof(ItfMesPoolNode) == 0x14) ? 1 : -1];
+typedef char ItfMesPoolNode_size_must_be_0x14[(sizeof(mesflow_tag) == 0x14) ? 1 : -1];
 typedef char ItfMesPoolNode_resourceHandle_offset_must_be_0x10[
-    ((u32)&((ItfMesPoolNode *)0)->resourceHandle == 0x10) ? 1 : -1];
+    ((u32)&((mesflow_tag *)0)->resourceHandle == 0x10) ? 1 : -1];
 typedef char ItfMesPool_size_must_be_0x10[(sizeof(ItfMesPool) == 0x10) ? 1 : -1];
 typedef char ItfMesGlobals_size_must_be_0x520[(sizeof(ItfMesGlobals) == 0x520) ? 1 : -1];
 
@@ -388,12 +388,12 @@ typedef char ItfMesGlobals_firstStateAddress_offset_must_be_0x2C[
 /* Message-window pool operations move nodes between the free and active lists.
  * Acquire returns NULL when the free list is empty; release expects an active
  * node belonging to the supplied pool and appends it to the free-list tail. */
-void itfMiscLinkInitialize(ItfMesPool *pool, ItfMesPoolNode *nodes, s32 count, s32 stride);
-ItfMesPoolNode *itfMiscLinkTake(ItfMesPool *pool);
-void itfMiscLinkGive(ItfMesPoolNode *node, ItfMesPool *pool);
+void itfMiscLinkInitialize(ItfMesPool *pool, mesflow_tag *nodes, s32 count, s32 stride);
+mesflow_tag *itfMiscLinkTake(ItfMesPool *pool);
+void itfMiscLinkGive(mesflow_tag *node, ItfMesPool *pool);
 
 /* Return a retained texture handle after releasing the temporary asset allocation. */
-SdfTex *itfMiscLoadTexture(const char *path);
+sdfTexHandle_t *itfMiscLoadTexture(const char *path);
 
 
 

@@ -17,8 +17,8 @@
 #include "sdf.h"
 #include "sdf_texture_primary_buffer_api.h"
 
-extern void dds3BillboardTagLink(BillObj *, BillChildPayload *);
-extern void billAppendPairedQuadEntry(BillObj *, BillRenderPair *);
+extern void dds3BillboardTagLink(billHandle_t *, BillChildPayload *);
+extern void billAppendPairedQuadEntry(billHandle_t *, BillRenderPair *);
 
 
 
@@ -39,7 +39,7 @@ extern BillChildPayload *dds3BillboardTag;
 
 /* Keep each child's pending list synchronized with the instance's draw mode,
  * then append one quad to its fifteen-record streams. */
-void dds3BillboardTagLink(BillObj *obj, BillChildPayload *child) {
+void dds3BillboardTagLink(billHandle_t *obj, BillChildPayload *child) {
     f32 matrix[16];
     f32 direction[4];
     f32 dot;
@@ -66,7 +66,7 @@ void dds3BillboardTagLink(BillObj *obj, BillChildPayload *child) {
         child->packetListIndex = selected;
     }
     if (child->pendingLists[selected] == NULL) {
-        child->pendingLists[selected] = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        child->pendingLists[selected] = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(child->pendingLists[selected]);
         packet = sdfGrAllocPacketBuff(0x20);
         sdf3DMakeDirectRefPacket((DmaPacketHeader *)packet,
@@ -170,7 +170,7 @@ void billFlushPendingChildPackets(void) {
             }
 
             for (listIndex = 0; listIndex < 5; listIndex++) {
-                SdfListHead *value = node->pendingLists[listIndex];
+                sdfDrawTag_t *value = node->pendingLists[listIndex];
 
                 if (value != NULL) {
                     D_003AA960[listIndex]->append(D_003AA960[listIndex], value);
@@ -197,7 +197,7 @@ extern void dds3MultiBillboardPktLink(BillRenderPair *node);
 
 /* Initialize the paired texture/state list, then append one quad to each
  * child stream. The second child owns the geometry and common batch count. */
-void billAppendPairedQuadEntry(BillObj *obj, BillRenderPair *node) {
+void billAppendPairedQuadEntry(billHandle_t *obj, BillRenderPair *node) {
     f32 matrix[16];
     f32 direction[4];
     f32 dot;
@@ -214,7 +214,7 @@ void billAppendPairedQuadEntry(BillObj *obj, BillRenderPair *node) {
     f32 cornerX, cornerY;
 
     if (node->packetList == NULL) {
-        node->packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        node->packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(node->packetList);
         framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
         sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
@@ -394,7 +394,7 @@ extern void sdfBuildFrameRegisterReference(const u8 *source, SdfDmaReferenceChai
 
 void billFlushPendingRenderPairs(void) {
     BillRenderPair *node = billPendingRenderPairList;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     SdfDmaReferenceChainPacket *texture;
     BillStatePacket *packet;
 
@@ -409,7 +409,7 @@ void billFlushPendingRenderPairs(void) {
             node = node->next;
         } while (node != NULL);
     }
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
     sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
@@ -428,7 +428,7 @@ void billFlushPendingRenderPairs(void) {
     billPendingRenderPairList = NULL;
 }
 
-void dds3Billboard_BasicInit(BillObj *billboard) {
+void dds3Billboard_BasicInit(billHandle_t *billboard) {
     f32 zero = 0.0f;
     f32 one = 1.0f;
     billboard->requestedPacketListIndex = 0;
@@ -444,8 +444,8 @@ void dds3Billboard_BasicInit(BillObj *billboard) {
     billboard->rotationAngle = zero;
 }
 
-BillObj *billAllocChild(SdfTextureFileHeader *resourceData) {
-    BillObj *obj;
+billHandle_t *billAllocChild(SdfTextureFileHeader *resourceData) {
+    billHandle_t *obj;
 
     obj = sdfChipAllocDirect(0x34);
     obj->child = NULL;
@@ -455,7 +455,7 @@ BillObj *billAllocChild(SdfTextureFileHeader *resourceData) {
     return obj;
 }
 
-void billReleaseChild(BillObj *obj) {
+void billReleaseChild(billHandle_t *obj) {
     s32 child;
 
     child = (s32)obj->child;
@@ -465,13 +465,13 @@ void billReleaseChild(BillObj *obj) {
     sdfChipFreeDirect(obj);
 }
 
-void dds3Billboard_NormalDraw(BillObj *obj) {
+void dds3Billboard_NormalDraw(billHandle_t *obj) {
     dds3BillboardTagLink(obj, obj->child);
 }
 
-BillObj *dds3Billboard_P2ACreate(void *resourceData) {
+billHandle_t *dds3Billboard_P2ACreate(void *resourceData) {
     BillData *data;
-    BillObj *newobj;
+    billHandle_t *newobj;
     s32 n;
 
     data = NULL;
@@ -490,10 +490,10 @@ BillObj *dds3Billboard_P2ACreate(void *resourceData) {
     return newobj;
 }
 
-BillObj *dds3Billboard_P2ACopy(const BillObj *obj) {
+billHandle_t *dds3Billboard_P2ACopy(const billHandle_t *obj) {
     BillData *data;
     s32 n;
-    BillObj *newobj;
+    billHandle_t *newobj;
 
     data = obj->animationData;
     n = data->entryCount;
@@ -508,14 +508,14 @@ BillObj *dds3Billboard_P2ACopy(const BillObj *obj) {
     return newobj;
 }
 
-void dds3Billboard_P2ADelete(BillObj *obj) {
+void dds3Billboard_P2ADelete(billHandle_t *obj) {
     billReleaseSharedEntryBlock(obj->animationData);
     sdfChipFreeDirect(obj);
 }
 
 /* Advance an entry's frame timer and apply its current record to the shared
  * child payload. Plural descriptors are handled by the dispatcher instead. */
-BillChildPayload *dds3Billboard_P2AAnimDraw(BillObj *obj, BillOut *out) {
+BillChildPayload *dds3Billboard_P2AAnimDraw(billHandle_t *obj, BillOut *out) {
     BillAnimationEntry *entry = out->entry;
     BillData *data = obj->animationData;
     BillRecord *record;
@@ -600,7 +600,7 @@ u32 dds3Billboard_P2AColorMul(u32 colorA, u32 colorB) {
 
 /* Indexed entries and restore order preserve the native PLUS and lifetimes;
  * see docs/idioms.md, "Trace-justified indexing: billboard update". */
-void dds3Billboard_P2ADraw(BillObj *obj) {
+void dds3Billboard_P2ADraw(billHandle_t *obj) {
     BillChildPayload *child;
     u32 savedColor;
     f32 savedAngle;
@@ -709,7 +709,7 @@ void dds3Billboard_P2ASetAnim(BillData *animationData, s32 entryIndex, BillOut *
 #include "sdf_debug_api.h"
 
 /* Select an animation and initialize the plural records' signed start delays. */
-void dds3Billboard_P2ASetNumber(BillObj *obj, s32 animationEntryIndex) {
+void dds3Billboard_P2ASetNumber(billHandle_t *obj, s32 animationEntryIndex) {
     BillData *data = obj->animationData;
     BillAnimationEntry *entry = data->entries + animationEntryIndex;
 
@@ -755,7 +755,7 @@ BillData *billCreateAnimationDataFromResource(void *resourceData) {
     s32 *resourceHeader = resourceData;
     s32 *childOffsetCursor = (s32 *)(sourceBytes + resourceHeader[0]);
     s32 childCount = *childOffsetCursor++;
-    SdfMemBlock *allocation;
+    sdfMemHandle_t *allocation;
     BillData *data;
     u8 *copiedBase;
     s32 entryCount;
@@ -814,7 +814,7 @@ void billReleaseSharedEntryBlock(BillData *block) {
 
 
 /* Copy the billboard's current source record (by kind) into a snapshot. */
-void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
+void billCopyCurrentRecordToSnapshot(billHandle_t *obj, BillSnapshot *snapshot) {
     BillChildPayload *record;
 
     if (obj->kind == 1) {
@@ -834,8 +834,8 @@ void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
 
 extern BillDispatch D_003AA990[];
 
-BillObj *dds3BillboardCreate(s32 index, u32 data) {
-    BillObj *newobj;
+billHandle_t *dds3BillboardCreate(s32 index, u32 data) {
+    billHandle_t *newobj;
 
     newobj = D_003AA990[index].func(data);
     dds3Billboard_BasicInit(newobj);
@@ -844,9 +844,9 @@ BillObj *dds3BillboardCreate(s32 index, u32 data) {
     return newobj;
 }
 
-BillObj *billCreateFromResource(s32 kind, const char *path) {
-    struct SdfMemBlock *allocation;
-    BillObj *billboard;
+billHandle_t *billCreateFromResource(s32 kind, const char *path) {
+    struct sdfMemHandle_t *allocation;
+    billHandle_t *billboard;
     u32 header[4];
 
     allocation = sdfDevLoadFileEx(path, header, 0);
@@ -856,8 +856,8 @@ BillObj *billCreateFromResource(s32 kind, const char *path) {
 }
 
 /* Duplicate a billboard object: an entry list is cloned, a child shares (and refs) the source's data block. */
-BillObj *dds3BillboardCopy(const BillObj *source) {
-    BillObj *copy;
+billHandle_t *dds3BillboardCopy(const billHandle_t *source) {
+    billHandle_t *copy;
     BillChildPayload *data;
     u16 sourceKind;
     void (*sourceCallback)();
@@ -881,10 +881,10 @@ BillObj *dds3BillboardCopy(const BillObj *source) {
     return copy;
 }
 
-void dds3BillboardDelete(BillObj *obj) {
+void dds3BillboardDelete(billHandle_t *obj) {
     D_003AA990[obj->kind].destroy(obj);
 }
 
-void dds3BillboardDraw(BillObj *obj) {
+void dds3BillboardDraw(billHandle_t *obj) {
     obj->callback(obj);
 }

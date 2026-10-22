@@ -21,7 +21,7 @@
 #include "eff_packet_params.h"
 
 extern s32 sdf2DGetPrimPtr(s32 packetAddress);
-extern SdfTex *dds3GetRenderTexture(void);
+extern sdfTexHandle_t *dds3GetRenderTexture(void);
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern SdfPoolNode D_0037FB88;
 extern SdfPoolNode D_00380588;
@@ -206,7 +206,7 @@ void effWriteGouraudTexturedQuadPacket(u64 *packet, s32 primitive,
     packet[14] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
-void effAppendGouraudTexturedQuadPacket(SdfListHead *chain, s32 primitive,
+void effAppendGouraudTexturedQuadPacket(sdfDrawTag_t *chain, s32 primitive,
                  s32 x0, s32 y0, f32 s0, f32 t0, s32 color0,
                  s32 x1, s32 y1, f32 s1, f32 t1, s32 color1,
                  s32 x2, s32 y2, f32 s2, f32 t2, s32 color2,
@@ -242,7 +242,7 @@ void billWriteFloatTextureTrianglePacket(u64 *packet, s32 color, s32 primitive,
     packet[9] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
-void effAppendTexturedTrianglePacket(SdfListHead *chain, s32 color, s32 primitive,
+void effAppendTexturedTrianglePacket(sdfDrawTag_t *chain, s32 color, s32 primitive,
                  s32 x0, s32 y0, f32 u0, f32 v0,
                  s32 x1, s32 y1, f32 u1, f32 v1,
                  s32 x2, s32 y2, f32 u2, f32 v2, s32 depth) {
@@ -438,7 +438,7 @@ void dds3CrossfadeStart(s32 frames) {
 
 /* Capture the first frame, then draw the held texture with a decreasing alpha. */
 void dds3UpdateCrossfade(void) {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     SdfDmaNode *reference;
     u64 *texturePacket;
     u64 *blendPacket;
@@ -454,7 +454,7 @@ void dds3UpdateCrossfade(void) {
         return;
     }
     if (D_0043640C == 0) {
-        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         reference = (SdfDmaNode *)sdfGrAllocPacketBuff(0x20);
         sdfGrLinkDispFrameTex(list,
@@ -504,7 +504,7 @@ void dds3UpdateCrossfade(void) {
     D_0043640C = (u32)D_0043640C + 1;
     alpha = (128 - (u32)((f32)(u32)D_0043640C * 128.0f /
                        (f32)(u32)D_00436410)) & 0xFF;
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     sdf2DLinkTexPacket(list, dds3GetRenderTexture(), 0);
     sprite = sdf2DAllocSprite(1);
@@ -541,7 +541,7 @@ extern void effBTLPartCreate(SoundMixer *dst, SoundMixer *src);
 
 /* Clone a mixer: copy its banks, rebuild the voice state from the original and start with no voices. */
 SoundMixer *sndMixerClone(SoundMixer *src) {
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(sizeof(SoundMixer));
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(sizeof(SoundMixer));
     SoundMixer *mixer = (void *)sdfMemLock(allocation);
 
     mixer->resource = allocation;
@@ -553,8 +553,8 @@ SoundMixer *sndMixerClone(SoundMixer *src) {
 }
 
 void sndReleaseAllVoices(SoundMixer *mixer) {
-    BattleEffect *voice = mixer->voiceList;
-    BattleEffect *next;
+    effBTLCutHandle_t *voice = mixer->voiceList;
+    effBTLCutHandle_t *next;
 
     while (voice != NULL) {
         next = voice->next;
@@ -583,9 +583,9 @@ s32 effBTLGetDrawEndFrame(SoundMixer *mixer, u16 kind) {
     return mixer->banks[bank].list.colorRampEndFrame;
 }
 
-void effBTLCutListRelease(BattleEffect *voice) {
-    BattleEffect **link = &voice->state->voiceList;
-    BattleEffect *cur;
+void effBTLCutListRelease(effBTLCutHandle_t *voice) {
+    effBTLCutHandle_t **link = &voice->state->voiceList;
+    effBTLCutHandle_t *cur;
 
     while ((cur = *link) != NULL) {
         if (cur == voice) {
@@ -605,18 +605,18 @@ extern void * sdfChipAllocDirect(s32 size);
 
 INCLUDE_RODATA(const s32, "game/code_001670C0", D_00414430);
 
-BattleEffect *effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value) {
+effBTLCutHandle_t *effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value) {
     EffBattleEntryList *bank;
     EffBattleEntryList *parameters;
-    BattleEffect *effect;
+    effBTLCutHandle_t *effect;
     EffBattleEntry *entry;
-    struct EffParamWork **workSlot;
+    struct effPartHandle_t **workSlot;
     s32 remaining;
     u16 entryCount;
     u32 callbackEnabled;
 
-    effect = sdfChipAllocDirect(sizeof(BattleEffect));
-    memset(effect, 0, sizeof(BattleEffect));
+    effect = sdfChipAllocDirect(sizeof(effBTLCutHandle_t));
+    memset(effect, 0, sizeof(effBTLCutHandle_t));
     effect->color = 0x80808080;
 
     {

@@ -13,8 +13,8 @@
 SdfMemHeap sdfMemCB __attribute__((section(".bss"), aligned(8)));
 
 /* Return the next descriptor unless it is the end marker; used blocks are not filtered. */
-SdfMemBlock *sdfMemGetNext(SdfMemBlock *block) {
-    SdfMemBlock *nextBlock = block->next;
+sdfMemHandle_t *sdfMemGetNext(sdfMemHandle_t *block) {
+    sdfMemHandle_t *nextBlock = block->next;
     if (nextBlock->state == SDF_HEAP_BLOCK_END) {
         return NULL;
     }
@@ -24,8 +24,8 @@ SdfMemBlock *sdfMemGetNext(SdfMemBlock *block) {
 
 
 /* Derive the byte count from adjacent addresses while preserving the interrupt state. */
-s32 sdfMemGetSize(const SdfMemBlock *block) {
-    const SdfMemBlock *nextBlock;
+s32 sdfMemGetSize(const sdfMemHandle_t *block) {
+    const sdfMemHandle_t *nextBlock;
     s32 blockBytes;
     s32 interruptsWereEnabled;
 
@@ -39,7 +39,7 @@ s32 sdfMemGetSize(const SdfMemBlock *block) {
 }
 
 /* Return the represented address, not the allocation descriptor's address. */
-u8 *sdfMemGetPtr(const SdfMemBlock *block) {
+u8 *sdfMemGetPtr(const sdfMemHandle_t *block) {
     return (u8 *)(u32)block->address;
 }
 
@@ -47,11 +47,11 @@ extern void (*D_004389CC)(s32);
 
 /* Low-end first-fit with 128-byte rounding; returns an allocation handle.
  * At the end marker, call the optional out-of-memory hook and continue searching. */
-SdfMemBlock *sdfMemAllocDirect(s32 requestedBytes) {
+sdfMemHandle_t *sdfMemAllocDirect(s32 requestedBytes) {
     SdfMemHeap *heap = &sdfMemCB;
     s32 alignedBytes = (requestedBytes + SDF_HEAP_ALIGNMENT_MASK) & ~SDF_HEAP_ALIGNMENT_MASK;
     s32 interruptsWereEnabled;
-    SdfMemBlock *block;
+    sdfMemHandle_t *block;
 
     interruptsWereEnabled = DIntr();
     for (block = heap->head.next;; block = block->next) {
@@ -69,7 +69,7 @@ SdfMemBlock *sdfMemAllocDirect(s32 requestedBytes) {
 
             if (availableBytes >= alignedBytes) {
                 if (alignedBytes < availableBytes) {
-                    SdfMemBlock *splitBlock = sdfChipAllocDirect(SDF_HEAP_BLOCK_DESCRIPTOR_BYTES);
+                    sdfMemHandle_t *splitBlock = sdfChipAllocDirect(SDF_HEAP_BLOCK_DESCRIPTOR_BYTES);
 
                     splitBlock->prev = block;
                     splitBlock->address = block->address + alignedBytes;
@@ -91,11 +91,11 @@ SdfMemBlock *sdfMemAllocDirect(s32 requestedBytes) {
 
 /* Search backward and carve the upper end of a free span with 128-byte rounding.
  * End markers restore interrupts but do not terminate the search or invoke the hook. */
-SdfMemBlock *sdfMemAllocFromTailDirect(s32 requestedBytes) {
+sdfMemHandle_t *sdfMemAllocFromTailDirect(s32 requestedBytes) {
     SdfMemHeap *heap = &sdfMemCB;
     s32 alignedBytes = (requestedBytes + SDF_HEAP_ALIGNMENT_MASK) & ~SDF_HEAP_ALIGNMENT_MASK;
     s32 interruptsWereEnabled;
-    SdfMemBlock *block;
+    sdfMemHandle_t *block;
 
     interruptsWereEnabled = DIntr();
     for (block = heap->tail.prev;; block = block->prev) {
@@ -110,7 +110,7 @@ SdfMemBlock *sdfMemAllocFromTailDirect(s32 requestedBytes) {
 
             if (availableBytes >= alignedBytes) {
                 if (alignedBytes < availableBytes) {
-                    SdfMemBlock *splitBlock = sdfChipAllocDirect(SDF_HEAP_BLOCK_DESCRIPTOR_BYTES);
+                    sdfMemHandle_t *splitBlock = sdfChipAllocDirect(SDF_HEAP_BLOCK_DESCRIPTOR_BYTES);
 
                     splitBlock->prev = block;
                     splitBlock->address = block->address + (availableBytes - alignedBytes);
@@ -134,11 +134,11 @@ SdfMemBlock *sdfMemAllocFromTailDirect(s32 requestedBytes) {
 
 /* Low-end first-fit without the out-of-memory hook; return NULL at the end marker.
  * Rounding and split layout are the same as the normal low-end allocator. */
-SdfMemBlock *sdfMemAlloc2Direct(s32 requestedBytes) {
+sdfMemHandle_t *sdfMemAlloc2Direct(s32 requestedBytes) {
     SdfMemHeap *heap = &sdfMemCB;
     s32 alignedBytes = (requestedBytes + SDF_HEAP_ALIGNMENT_MASK) & ~SDF_HEAP_ALIGNMENT_MASK;
     s32 interruptsWereEnabled;
-    SdfMemBlock *block;
+    sdfMemHandle_t *block;
 
     interruptsWereEnabled = DIntr();
     for (block = heap->head.next;; block = block->next) {
@@ -154,7 +154,7 @@ SdfMemBlock *sdfMemAlloc2Direct(s32 requestedBytes) {
 
             if (availableBytes >= alignedBytes) {
                 if (alignedBytes < availableBytes) {
-                    SdfMemBlock *splitBlock = sdfChipAllocDirect(SDF_HEAP_BLOCK_DESCRIPTOR_BYTES);
+                    sdfMemHandle_t *splitBlock = sdfChipAllocDirect(SDF_HEAP_BLOCK_DESCRIPTOR_BYTES);
 
                     splitBlock->prev = block;
                     splitBlock->address = block->address + alignedBytes;

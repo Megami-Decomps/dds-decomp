@@ -10,7 +10,7 @@ void sdfModelMorphListCopyStat(struct DevRequest *destination, const struct DevR
 
 /* Copy runtime model and draw-node state into an existing model overlay.
  * Both models and their resource and draw-node lists must be initialized. */
-struct SdfModel;
-void sdfModelCopyStat(struct SdfModel *destination, struct SdfModel *source);
+struct sdfModelRootNode_t;
+void sdfModelCopyStat(struct sdfModelRootNode_t *destination, struct sdfModelRootNode_t *source);
 
 #endif /* SDF_MODEL_COPY_H */

@@ -5,7 +5,7 @@
 #include "dds3_path.h"
 #include "eff_transform.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Payload owner shared by the paired effect units. +0x3C remains opaque. */
 typedef struct EffCopiedPayload {
@@ -13,9 +13,9 @@ typedef struct EffCopiedPayload {
     s32 size;                       /* 0x04 */
     u32 slotCount;                  /* 0x08: populated effect/target pairs */
     u32 selectedTargetIndex;        /* 0x0C: chosen target path slot */
-    EffWorldNode *effects[5];      /* 0x10 */
-    Dds3PathCurveWork *targets[5]; /* 0x24 */
-    struct SdfMemBlock *allocation; /* 0x38 */
+    dds3Basic_t *effects[5];      /* 0x10 */
+    dds3PathBasicControl_t *targets[5]; /* 0x24 */
+    struct sdfMemHandle_t *allocation; /* 0x38 */
     u8 opaque3C[4];
 } EffCopiedPayload;
 

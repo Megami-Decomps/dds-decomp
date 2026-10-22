@@ -38,7 +38,7 @@ u32 scrGetMessageHandle(void) {
     return nowpwork->resourceIndex;
 }
 
-ScrData *scrGetScriptHandle(void) {
+scrProcessWork_s *scrGetScriptHandle(void) {
     return nowpwork;
 }
 

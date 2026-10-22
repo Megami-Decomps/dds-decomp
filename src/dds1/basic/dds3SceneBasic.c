@@ -7,7 +7,7 @@
 #include "kwln_task_lifecycle.h"
 #include "bf_flw0_header.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 extern s32 scrStartScript2(s32 priority, s32 processId, s32 option);
 
@@ -15,7 +15,7 @@ extern void fldReleaseFieldResources(void);
 
 /* Release field resources before clearing the scene object's state word.
  * The scene resource handle/address are released separately. */
-void dds3SceneBasicFreeScene(EffWorldNode *worldNode) {
+void dds3SceneBasicFreeScene(dds3Basic_t *worldNode) {
     EvtWorldTable *worldData;
 
     worldData = (EvtWorldTable *)worldNode->data;
@@ -23,9 +23,9 @@ void dds3SceneBasicFreeScene(EffWorldNode *worldNode) {
     worldData->indexedHandle = 0;
 }
 
-s32 evtLoadSceneResourceFrom(EffWorldNode *worldNode, const char *resourceName) {
+s32 evtLoadSceneResourceFrom(dds3Basic_t *worldNode, const char *resourceName) {
     EvtWorldTable *worldData;
-    struct SdfMemBlock *resourceHandle;
+    struct sdfMemHandle_t *resourceHandle;
     u32 resolvedAddress;
 
     worldData = (EvtWorldTable *)worldNode->data;
@@ -48,7 +48,7 @@ s32 evtLoadSceneResourceFrom(EffWorldNode *worldNode, const char *resourceName) 
  * attachment, 0 otherwise. NULL preserves the current resource. A non-NULL
  * handle releases the old resource first, so failure does not restore it;
  * a NULL resolved address fails attachment without undoing the retain. */
-s32 dds3SceneBasicLoadScriptFile_FromMem(EffWorldNode *worldNode, void *resourceHandle) {
+s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *worldNode, void *resourceHandle) {
     s32 notAttachedStatus = 0;
     u32 resourceAddress;
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
@@ -59,9 +59,9 @@ s32 dds3SceneBasicLoadScriptFile_FromMem(EffWorldNode *worldNode, void *resource
     if (worldData->sceneResourceHandle != 0) {
         dds3SceneBasicReleaseScriptFile(worldNode);
     }
-    resourceAddress = sdfMemLock((struct SdfMemBlock *)resourceHandle);
+    resourceAddress = sdfMemLock((struct sdfMemHandle_t *)resourceHandle);
     if (resourceAddress != 0) {
-        worldData->sceneResourceHandle = (struct SdfMemBlock *)resourceHandle;
+        worldData->sceneResourceHandle = (struct sdfMemHandle_t *)resourceHandle;
         worldData->sceneScript = (struct BfFlw0Header *)resourceAddress;
         return 1;
     }
@@ -70,7 +70,7 @@ s32 dds3SceneBasicLoadScriptFile_FromMem(EffWorldNode *worldNode, void *resource
 
 /* Release a stored allocation handle when present, then always clear both
  * handle and resolved address. Safe for an already-cleared resource state. */
-void dds3SceneBasicReleaseScriptFile(EffWorldNode *worldNode) {
+void dds3SceneBasicReleaseScriptFile(dds3Basic_t *worldNode) {
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
 
     if (worldData->sceneResourceHandle != 0) {
@@ -82,7 +82,7 @@ void dds3SceneBasicReleaseScriptFile(EffWorldNode *worldNode) {
 
 /* Starts the named script task on the scene object's resource; stays asm:
    retail's beqz/b merge of the two exit paths has no plain-C shape. */
-s32 evtStartSceneResourceTask(EffWorldNode *worldNode, const char *taskName) {
+s32 evtStartSceneResourceTask(dds3Basic_t *worldNode, const char *taskName) {
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
     struct BfFlw0Header *sceneScript = worldData->sceneScript;
     s32 scriptIndex;
@@ -107,7 +107,7 @@ s32 evtStartSceneResourceTask(EffWorldNode *worldNode, const char *taskName) {
  * unusedContext is not read. The nested early return retains the matched
  * jal/epilogue rather than turning the destruction into a sibling call. */
 void dds3SceneBasicEndScript(void *unusedContext, const char *taskName) {
-    KwlnTask *task;
+    dds3ProcessID_t *task;
 
     if (taskName != NULL) {
         task = dds3SearchProcessName(taskName);

@@ -5,7 +5,7 @@
 #include "eff_curve.h"
 #include "sdf.h"
 
-struct BillObj;
+struct billHandle_t;
 struct EffExpandedList;
 
 /* The +0x0C bytes (colorTrack through y) are copied from the file. */
@@ -25,7 +25,7 @@ typedef struct EffParticleSharedResource {
     s32 limit;                      /* 0x98: frame count, 0 = unlimited */
     s32 x;                          /* 0x9C */
     s32 y;                          /* 0xA0 */
-    struct BillObj *billHandle;     /* 0xA4 */
+    struct billHandle_t *billHandle;     /* 0xA4 */
     struct EffExpandedList *reference; /* 0xA8 */
 } EffParticleSharedResource;
 

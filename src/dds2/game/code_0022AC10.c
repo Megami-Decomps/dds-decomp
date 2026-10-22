@@ -180,7 +180,7 @@ extern u8 D_00380860[];
 
 extern u8 D_00380870[];
 
-extern SdfTex *dds3RenderTexture;
+extern sdfTexHandle_t *dds3RenderTexture;
 
 extern s32 dds3AllocRenderTexture(u16 width, u16 height, f32 value);
 
@@ -281,9 +281,9 @@ extern void btlRefreshUnitEffects(void);
 extern struct BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32);
 
 
-extern void effBattleUpdate(BattleEffect *);
+extern void effBattleUpdate(effBTLCutHandle_t *);
 
-extern BattleEffect * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
+extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
 extern void effBTLFieldColorSetSelectors(s32 baseId, u32 variant, s32 overrideId, s32 finalId);
 
 /* Advance the current event through release, preparation, playback and completion. */
@@ -298,7 +298,7 @@ void btlUpdateEventPlayback(void) {
     switch (phase) {
     case 0:
         if (battle->eventData != NULL) {
-            effBTLCutDelete((BattleEffect *)battle->eventData);
+            effBTLCutDelete((effBTLCutHandle_t *)battle->eventData);
             battle->eventData = NULL;
         }
         if (battle->eventRequest != NULL) {
@@ -316,7 +316,7 @@ void btlUpdateEventPlayback(void) {
             return;
         }
         if (battle->eventData != NULL) {
-            effBTLCutDelete((BattleEffect *)battle->eventData);
+            effBTLCutDelete((effBTLCutHandle_t *)battle->eventData);
             battle->eventData = NULL;
         }
         if (battle->eventRequest != NULL) {
@@ -328,7 +328,7 @@ void btlUpdateEventPlayback(void) {
 
     case 2:
         if (battle->eventData != NULL) {
-            effBTLCutDelete((BattleEffect *)battle->eventData);
+            effBTLCutDelete((effBTLCutHandle_t *)battle->eventData);
         }
         battle->eventData = effCreateBattleVoiceOwner((SoundMixer *)battle->eventRequest, 1,
                                           battle->eventUnit, 0);
@@ -349,8 +349,8 @@ void btlUpdateEventPlayback(void) {
                 frame = (s32)btlGetUnitModelCurrentFrame(unit);
                 frame = abs(frame - 0x1A);
                 if (frame >= 6) {
-                    EvtUnit *ext = unit->ext;
-                    MdlCtx *model = ext->owner;
+                    evtUnitHandle_t *ext = unit->ext;
+                    dds3ModelHandle_t *model = ext->owner;
                     ext->flags &= ~0xA0;
                     ext->motionState = 0;
                     mdlSingleMotion(model, 0, unit->motionId);
@@ -367,7 +367,7 @@ void btlUpdateEventPlayback(void) {
             s32 selectedFrame = effBTLGetDrawEndFrame(
                 (SoundMixer *)battle->eventRequest, 1);
             frame = (s32)effBTLCutGetFrame(
-                (BattleEffect *)battle->eventData);
+                (effBTLCutHandle_t *)battle->eventData);
             if (frame == 1) {
                 battle->battleFlags &= ~0x40000;
                 if ((battle->commandRestrictFlags & 0x40000) == 0) {
@@ -386,7 +386,7 @@ void btlUpdateEventPlayback(void) {
             } else {
                 s32 selector = (s32)battle->eventUnit;
                 effBTLFieldColorSetSelectors(selector, (u32)selector, 0, 0);
-                effBattleUpdate((BattleEffect *)battle->eventData);
+                effBattleUpdate((effBTLCutHandle_t *)battle->eventData);
                 return;
             }
         }
@@ -423,7 +423,7 @@ void btlRequestSceneEventResources(void) {
     u32 battleMode = battleState->battleMode;
     u16 rawEventId;
     s16 eventId;
-    KwlnTask *eventTask;
+    dds3ProcessID_t *eventTask;
     char scriptPath[0x80];
 
     battleState->eventTaskId = BTL_EVENT_TASK_NONE;
@@ -554,7 +554,7 @@ void btlReleaseEventAssets(void) {
     btlReleaseEventData();
     eventAssets = battleState->eventAssets;
     if (eventAssets != 0) {
-        sdfMemFreeDirect((struct SdfMemBlock *)eventAssets);
+        sdfMemFreeDirect((struct sdfMemHandle_t *)eventAssets);
         battleState->eventAssets = 0;
     }
     btlBossDebugPrintf(D_0041B7D0);
@@ -848,7 +848,7 @@ s32 btlUpdateScriptResourceTask(BattleScriptTaskData *record) {
         btlStartSkillEventTask(record->group);
         object = battle->scriptTask;
         if (object != 0) {
-            scrSetUserData((KwlnTask *)object, (void *)record->object);
+            scrSetUserData((dds3ProcessID_t *)object, (void *)record->object);
         }
     }
     if (btlReleaseScriptResource()) {
@@ -1097,7 +1097,7 @@ s32 btlGetCommandBlockReason(ActionStateLink *actionTask, s32 commandId) {
     return BTL_BLOCK_EMPTY_OR_ALL_FLAGGED;
 }
 
-extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
+extern s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *);
 
 extern s32 btlLowestSetPairIndex(u32);
 
@@ -1387,7 +1387,7 @@ void btlFinalizeModelPackEntry(s32 kind, s32 id) {
                      * "Trace-justified pointer staging: sound-table row". */
                     SoundSlotTableEntry *part = parts + i;
                     if (part->resourceOffset >= 0) {
-                        entry->soundOwner->work.resourceHandles[i] = (struct SdfMemBlock *)node->resourceHandle;
+                        entry->soundOwner->work.resourceHandles[i] = (struct sdfMemHandle_t *)node->resourceHandle;
                         entry->soundOwner->work.fileRequests[i] = 0;
                         btlBossDebugPrintf("btl:pack motSE load[%02d][%02d]\n", i, part->resourceOffset);
                         node = node->next;
@@ -1398,7 +1398,7 @@ void btlFinalizeModelPackEntry(s32 kind, s32 id) {
                 }
             } else {
                 for (node = entry->packRequest->packet.queueHead; node != NULL; node = node->next) {
-                    sdfMemFreeDirect((struct SdfMemBlock *)node->resourceHandle);
+                    sdfMemFreeDirect((struct sdfMemHandle_t *)node->resourceHandle);
                 }
             }
             pacFileHandleFree_(entry->packRequest);
@@ -1451,7 +1451,7 @@ s32 btlEnsureModelAndSoundReady(s32 kind, s32 id, s32 unused) {
 }
 
 /* Queue the held texture as a centered scaled quad with caller primitive/color/depth. */
-void btlDrawScaledHeldTextureQuad(SdfListHead *list, s32 primitive, s32 color, s32 depth, f32 scale) {
+void btlDrawScaledHeldTextureQuad(sdfDrawTag_t *list, s32 primitive, s32 color, s32 depth, f32 scale) {
     s32 halfWidth;
     s32 halfHeight;
     s32 xOffset;
@@ -1484,7 +1484,7 @@ void btlDrawScaledHeldTextureQuad(SdfListHead *list, s32 primitive, s32 color, s
                          depth, 0);
 }
 
-void btlBuildOverlayQuadPacket(SdfListHead *list, s32 primitive, s32 color, s32 depth) {
+void btlBuildOverlayQuadPacket(sdfDrawTag_t *list, s32 primitive, s32 color, s32 depth) {
     sdfPrimLinkF4(list, color, primitive, 0x7000, 0x7900, 0x9000, 0x7900, 0x7000,
                      0x8700, 0x9000, 0x8700, depth, 0);
 }
@@ -1561,11 +1561,11 @@ void btlReleaseOwnedData(void) {
     }
 }
 
-extern SdfAsset *sdfMatNew(void);
+extern sdfMat_t *sdfMatNew(void);
 extern void LoadIdentity(void);
 extern void SetRotateMatrixAxis_B(const RwV3d *, f32);
 extern void *effPkt3DPrimMakePoly(EffPacketParams *);
-extern SdfAsset *D_00436D10;
+extern sdfMat_t *D_00436D10;
 extern EffPacketParams btlCapturedScreenTileDrawParams;
 extern u32 btlCapturedScreenTilePacketParameters[];
 extern f32 btlCapturedScreenTileVertexOffsets[6][2];
@@ -1587,8 +1587,8 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
     f32 axis[4] __attribute__((aligned(16)));
     f32 center[4] __attribute__((aligned(16)));
     s32 complete = 1;
-    SdfListHead *list;
-    SdfListHead *tiles;
+    sdfDrawTag_t *list;
+    sdfDrawTag_t *tiles;
     u64 *packet;
     u32 row;
     u32 column;
@@ -1622,7 +1622,7 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
     f32 planarY;
 
     if (color & 0xFF000000) {
-        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         packet = (u64 *)sdfGrAllocPacketBuff(0x40);
         packet[0] = 3;
@@ -1638,7 +1638,7 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
         D_00380708.append(&D_00380708, list);
     }
     if (btlRuntimeState.options & 1) {
-        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         packet = (u64 *)sdfGrAllocPacketBuff(0x40);
         packet[0] = 3;
@@ -1661,7 +1661,7 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
             btlCapturedScreenTileDrawParams.parameterCount = 4;
             btlCapturedScreenTileDrawParams.vertexCount = 6;
         }
-        tiles = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        tiles = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(tiles);
         VU0_LOAD_MATRIX(D_00384790);
         ReverseMatrix();
@@ -1881,12 +1881,12 @@ void btlResetHeldTextureState(void) {
 
 void btlInitializeGraphicsRuntime(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
-    SdfListHead *packetList;
-    SdfLinkedPacketList *context;
+    sdfDrawTag_t *packetList;
+    sdfPreDrawTag_t *context;
     runtime->handle = sdfMemAllocFromTailDirect(0x70000);
     runtime->resource = (void *)sdfMemLock(runtime->handle);
-    packetList = (SdfListHead *)sdfPrimAllocDrawTag(0);
-    context = (SdfLinkedPacketList *)sdfGrAllocPacketBuff(16);
+    packetList = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
+    context = (sdfPreDrawTag_t *)sdfGrAllocPacketBuff(16);
     sdfPreDrawTagInit(context);
     sdfLinkStoreFrameImage(packetList, context, 0, 0, 0x200, 0xe0, (s32)runtime->resource, 0, 0, 0);
     sdfPreDrawChainLink((SdfPacketChain *)D_00380860, context);
@@ -1895,19 +1895,19 @@ void btlInitializeGraphicsRuntime(void) {
 
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
-    SdfListHead *packetList = (SdfListHead *)sdfPrimAllocDrawTag(0);
+    sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
     sdfLinkLoadImage(packetList, dds3RenderTexture->primaryResource,
                               0, 0, 0x200, 0xe0, (s32)runtime->resource, 0);
     D_00380608.append(&D_00380608, packetList);
-    sdfMemFreeDelayedDirect((struct SdfMemBlock *)runtime->handle);
+    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)runtime->handle);
     runtime->handle = 0;
     runtime->resource = 0;
     runtime->options |= 1;
 }
 
 void btlInitializeOverlayGraphics(void) {
-    SdfListHead *packetList = (SdfListHead *)sdfPrimAllocDrawTag(0);
-    SdfLinkedPacketList *context = (SdfLinkedPacketList *)sdfGrAllocPacketBuff(16);
+    sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
+    sdfPreDrawTag_t *context = (sdfPreDrawTag_t *)sdfGrAllocPacketBuff(16);
     sdfPreDrawTagInit(context);
     sdfPrimLinkFrameMovePacket(packetList, context, dds3RenderTexture->primaryResource, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
     sdfPreDrawChainLink((SdfPacketChain *)D_00380860, context);
@@ -2016,7 +2016,7 @@ void btlClearRuntimeState(void) {
 void btlResetAsyncState(void) {
     void *handle = btlRuntimeState.handle;
     if (handle != 0) {
-        sdfMemFreeDelayedDirect((struct SdfMemBlock *)handle);
+        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)handle);
         btlRuntimeState.handle = 0;
         btlRuntimeState.resource = 0;
     }
@@ -2281,7 +2281,7 @@ s32 mnuListMoveCursor(MenuList *menuList) {
 
 /* Queue text at pixel coordinates, using the font's native X/Y scaling. */
 s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
-    struct FrFontGlyph *textGlyph = itfCreateMeasuredTextGlyph(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
+    struct _FRQ *textGlyph = itfCreateMeasuredTextGlyph(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
         MNU_LIST_NORMAL_COLOR, (const char *)(u32)text, NULL);
     frFontDrawGlyphChain(textGlyph, 0, 0x60);
     return frDestroyFontRequestAfter(textGlyph);
@@ -2303,7 +2303,7 @@ s32 btlDrawSelectableListRows(u8 *x, u8 *y, s32 unusedMode, u8 *selectionState, 
     selectedIndex = ((MenuList *)selectionState)->cursor;
     rowY = (s32)y;
     for (; itemIndex < endIndex; itemIndex++) {
-        struct FrFontGlyph *textGlyph = itfCreateMeasuredTextGlyph((s32)x << 4, rowY << 3,
+        struct _FRQ *textGlyph = itfCreateMeasuredTextGlyph((s32)x << 4, rowY << 3,
             MNU_LIST_TEXT_DEPTH,
             itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR,
             (const char *)(u32)rowTexts[itemIndex], NULL);
@@ -2349,7 +2349,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 frameWidth, u8 *selectionState, 
             rowY += MNU_LIST_FIXED_ROW_HEIGHT;
         }
     }
-    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)indexPackets);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (sdfDrawTag_t *)indexPackets);
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, frameWidth, selectionState, rowTexts);
 }
 
@@ -2418,7 +2418,7 @@ extern void btlRequestTargetSelectionClose(void);
 extern void btlCopyUnitCurrentPosition(BtlUnit *, f32 *);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateControlObject(void);
-extern void btlCopyUnitStats(BtlUnit *, DatPartyRecord *);
+extern void btlCopyUnitStats(BtlUnit *, datUnitWork_t *);
 extern BtlRuntimeTask *btlCreateHookedUnitSoundTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
 extern BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *);
@@ -2429,7 +2429,7 @@ extern void btlSetUnitPosition(BtlUnit *, f32 *);
 extern void btlApplyUnitEffectScale(BtlUnit *);
 extern void btlApplyUnitModelScaledValue(BtlUnit *);
 extern void btlSeekUnitModelFrameZero(BtlUnit *);
-extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *, u32);
+extern void btlInitializePartyRecordFromEnemy(datUnitWork_t *, u32);
 extern void btlDebugDrawScaledPositionGuide(f32 *, u32, s32, f32);
 extern void btlDebugDrawText(s32, s32, s32, const char *);
 extern void btlDebugMenuBeforeRecordNoOp(void);
@@ -2439,7 +2439,7 @@ extern void btlDebugMenuRecordNoOp(u32);
 extern s32 btlDebugModelEditorActionNames[], btlDebugModelMotionNames[];
 extern BtlDebugValueMenu btlDebugPartyRecordEditor, btlDebugPositionEditor, btlDebugTransformEditor, btlDebugActorStatusEditor;
 extern BtlDebugValueEntry btlDebugActorStatusEditorRows[];
-extern DatPartyRecord *D_00435DD4;
+extern datUnitWork_t *D_00435DD4;
 extern s16 D_00436D8E;
 extern BtlUnit *D_00436D90;
 extern u16 D_00436E58;
@@ -2447,7 +2447,7 @@ extern char D_00436F00[];
 extern u8 btlDebugEditorStatusSelection;
 extern s32 btlDebugEditorSelectedEntryIndex;
 extern u16 btlDebugEditorEntryCodes[7];
-extern DatPartyRecord btlDebugEditorPartyRecord;
+extern datUnitWork_t btlDebugEditorPartyRecord;
 extern f32 btlDebugEditorPosition[4];
 extern BtlActorTransformParameters btlDebugEditorTransformParameters;
 extern BtlActorStatusRecord btlDebugEditorActorStatus;
@@ -2604,7 +2604,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         break;
     case 4:
         unit = battle->debug.selectedUnit;
-        memcpy(&btlDebugEditorPartyRecord, &unit->partyRecord, sizeof(DatPartyRecord));
+        memcpy(&btlDebugEditorPartyRecord, &unit->partyRecord, sizeof(datUnitWork_t));
         btlDebugEditorEntryCodes[0] = unit->entrySlots[0].code;
         btlDebugEditorEntryCodes[1] = unit->entrySlots[1].code;
         btlDebugEditorEntryCodes[2] = unit->entrySlots[2].code;
@@ -2635,10 +2635,10 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         } else {
             btlDebugEditorPartyRecord.status = 0;
         }
-        memcpy(&unit->partyRecord, &btlDebugEditorPartyRecord, sizeof(DatPartyRecord));
+        memcpy(&unit->partyRecord, &btlDebugEditorPartyRecord, sizeof(datUnitWork_t));
         btlRefreshUnitMotionSelection(unit);
         if (unit->status.flags & 0x200) {
-            memcpy(&DDS3_GBWK->party[unit->partyIndex], &btlDebugEditorPartyRecord, sizeof(DatPartyRecord));
+            memcpy(&DDS3_GBWK->party[unit->partyIndex], &btlDebugEditorPartyRecord, sizeof(datUnitWork_t));
         }
         if (dds3PadBitTable[3] < 0) {
             battle->debug.phase = 2;
@@ -2965,7 +2965,7 @@ extern u16 D_00436F6C, D_00436F6E, D_00436F70;
 extern u32 D_00436F74, D_00436F78;
 extern const char *D_00436F80, *D_00436F84;
 extern char D_00436F98[];
-extern DatPartyRecord btlDebugPartyPresets[][5];
+extern datUnitWork_t btlDebugPartyPresets[][5];
 extern u32 btlReturnDebugMenuSetupWord(u32);
 extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuRecordNoOp(u32);
@@ -3038,7 +3038,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     u32 i;
     u16 unitId;
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
     s32 encounter;
 
     if (dds3PadBitTable[3] < 0) {
@@ -3144,7 +3144,7 @@ void btlApplyDebugEncounterPartySelection(void) {
         if (btlDebugPartyPresets[D_00436F61][0].unitId != 0) {
             do {
                 if (D_00436F62 != D_00436F61) {
-                    memcpy(&DDS3_GBWK->party[i], &btlDebugPartyPresets[D_00436F61][i], sizeof(DatPartyRecord));
+                    memcpy(&DDS3_GBWK->party[i], &btlDebugPartyPresets[D_00436F61][i], sizeof(datUnitWork_t));
                 }
                 if (D_00436F96 != 0) {
                     for (n = 0; btlDebugPartyEffectDataOverrides[i][n] >= 0; n++) {
@@ -3175,7 +3175,7 @@ void btlApplyDebugEncounterPartySelection(void) {
             } while (i < 5 && btlDebugPartyPresets[D_00436F61][i].unitId != 0);
         }
         for (; i < 5; i++) {
-            memset(&DDS3_GBWK->party[i], 0, sizeof(DatPartyRecord));
+            memset(&DDS3_GBWK->party[i], 0, sizeof(datUnitWork_t));
         }
         DDS3_GBWK->inventory.counts[0] = 0;
         for (i = 1; i < 0x100; i++) {

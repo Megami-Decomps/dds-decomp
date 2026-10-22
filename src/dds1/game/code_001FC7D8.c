@@ -77,7 +77,7 @@ void btlDrawUnitStatusShadowDisc(BtlUnit *unit) {
     f32 ownPosition[4] __attribute__((aligned(16)));
     f32 radius;
     f32 x, y, z;
-    MdlCtx *model;
+    dds3ModelHandle_t *model;
     BtlActorStatusRecord *status;
     s32 alpha;
 

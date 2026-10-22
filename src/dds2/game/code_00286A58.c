@@ -6,17 +6,17 @@
 #include "mdl_flag_api.h"
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
-extern void mtrRecomputeMantraFlagsForPartyUnit(DatPartyRecord *);
-extern void mtrMantraBitResetUnit(DatPartyRecord *);
-extern MantraFlagResource *evtAllocateMantraSelectionWork(DatPartyRecord *, s32);
+extern void mtrRecomputeMantraFlagsForPartyUnit(datUnitWork_t *);
+extern void mtrMantraBitResetUnit(datUnitWork_t *);
+extern MantraFlagResource *evtAllocateMantraSelectionWork(datUnitWork_t *, s32);
 extern void evtReleaseMantraSelectionWork(MantraFlagResource *);
-extern s32 *ptyGetProfileRecordPointer(DatPartyRecord *, u16);
-extern void ptyApplyProfile(DatPartyRecord *, u16);
-extern void scrSetEntryLowFlags(DatPartyRecord *, u16, u16);
+extern s32 *ptyGetProfileRecordPointer(datUnitWork_t *, u16);
+extern void ptyApplyProfile(datUnitWork_t *, u16);
+extern void scrSetEntryLowFlags(datUnitWork_t *, u16, u16);
 
 const char D_00425F30[] = "*****************[mtrMantraSetBit():[0x%x]]*****************\n";
 
-void mtrMantraSetBit(DatPartyRecord *record) {
+void mtrMantraSetBit(datUnitWork_t *record) {
     MantraFlagResource *work;
     MantraNodePos *node;
     s32 i;

@@ -10,7 +10,7 @@
 #include "mnu_scene_work.h"
 #include "sdf_grid.h"
 
-extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
+extern u32 ptyGetProfileRecordValue(struct datUnitWork_t *, u16);
 
 
 extern u32 D_003E274C[];

@@ -3,14 +3,14 @@
 
 #include "common.h"
 
-struct BillObj;
+struct billHandle_t;
 struct EffNode;
 struct MdlObj;
 
 /* The slot kind selects the concrete object retained at offset 0x08. */
 typedef union MdlPartObject {
     void *raw; /* Stored by constructors before readers dispatch on kind. */
-    struct BillObj *billboard;
+    struct billHandle_t *billboard;
     struct EffNode *effect;
     struct MdlObj *model;
 } MdlPartObject;

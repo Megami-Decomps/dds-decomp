@@ -11,14 +11,14 @@
 #include "sdf.h"
 #include "kwln_task_lifecycle.h"
 
-ScrData *fldFlowParse(void *header, s32 procedureIndex);
+scrProcessWork_s *fldFlowParse(void *header, s32 procedureIndex);
 /* Load a script resource, create its VM process and retain its resource handle. */
-ScrData *scrLoadScriptFile(const char *path, s32 option)
+scrProcessWork_s *scrLoadScriptFile(const char *path, s32 option)
 {
     u32 resourceInfo[4];
-    SdfMemBlock *handle;
+    sdfMemHandle_t *handle;
     u32 resourceAddress;
-    ScrData *process;
+    scrProcessWork_s *process;
     handle = sdfDevLoadFileEx(path, resourceInfo, 0);
     resourceAddress = resourceInfo[0];
     if (resourceAddress == 0)
@@ -33,9 +33,9 @@ ScrData *scrLoadScriptFile(const char *path, s32 option)
     return process;
 }
 
-KwlnTask *scrStartScriptProcess(u32 priority, ScrData *process)
+dds3ProcessID_t *scrStartScriptProcess(u32 priority, scrProcessWork_s *process)
 {
-    KwlnTask *task;
+    dds3ProcessID_t *task;
     task = dds3StartProcess(process->procedures[process->procedureIndex].name,
                           priority, 1, 1, scrScriptProcess, scrScriptShutdown,
                           (u32)process);
@@ -59,7 +59,7 @@ s32 scrStartScriptByName(s32 priority, const char *path, s32 option)
     return (s32)scrStartScriptProcess(priority, scrLoadScriptFile(path, option));
 }
 
-ScrData *scrCreateProcessWithDefaultOption(const char *path)
+scrProcessWork_s *scrCreateProcessWithDefaultOption(const char *path)
 {
     return scrLoadScriptFile(path, 0);
 }
@@ -69,19 +69,19 @@ s32 scrStartScript2(s32 priority, s32 processId, s32 option)
     return (s32)scrStartScriptProcess(priority, fldFlowParse((void *)processId, option));
 }
 
-ScrData *scrCreateTaskWithDefaultOption(void *header)
+scrProcessWork_s *scrCreateTaskWithDefaultOption(void *header)
 {
     return fldFlowParse(header, 0);
 }
 
-KwlnTask *scrRunScriptEx(u32 priority, void *header,
+dds3ProcessID_t *scrRunScriptEx(u32 priority, void *header,
     ScrSection *procedureSection, ScrLabel *procedures, ScrLabel *labels,
     ScrInstr *instructions, void *auxiliaryData, char *strings, s32 procedureIndex)
 {
     return scrStartScriptProcess(priority, bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, procedureIndex));
 }
 
-ScrData *scrCreateProcessAtFirstProcedure(void *header, ScrSection *procedureSection,
+scrProcessWork_s *scrCreateProcessAtFirstProcedure(void *header, ScrSection *procedureSection,
     ScrLabel *procedures, ScrLabel *labels, ScrInstr *instructions,
     void *auxiliaryData, char *strings)
 {
@@ -90,10 +90,10 @@ ScrData *scrCreateProcessAtFirstProcedure(void *header, ScrSection *procedureSec
 
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern void itfMesMngRelease(s32);
-extern void scrUnlinkHandle(ScrData *process);
+extern void scrUnlinkHandle(scrProcessWork_s *process);
 
 /* Log the process name, release its VM buffers and resource, then unlink and free it. */
-void scrProcDestroyTask(ScrData *process) {
+void scrProcDestroyTask(scrProcessWork_s *process) {
     evtPrintDeveloperConsoleMessage("end <%s>\n", process->procedures[process->procedureIndex].name);
     if (process->localInt != NULL) {
         sdfChipFreeDirect(process->localInt);
@@ -115,8 +115,8 @@ void scrProcDestroyTask(ScrData *process) {
 /* Walk the script-name table, releasing each node's task or process. */
 void scrDestroyAllNamedProcesses(void)
 {
-    ScrData *processNode;
-    ScrData *nextProcessNode;
+    scrProcessWork_s *processNode;
+    scrProcessWork_s *nextProcessNode;
 
     processNode = scrHandleFirst;
     if (processNode == NULL) {
@@ -139,7 +139,7 @@ void scrDestroyAllNamedProcesses(void)
 }
 
 /* Start a procedure on a script process: copy its name, set pc, clear the stack and timers. */
-s32 scrStartProcessProcedure(ScrData *process, s32 procedureIndex)
+s32 scrStartProcessProcedure(scrProcessWork_s *process, s32 procedureIndex)
 {
     s32 cursor;
 
@@ -166,8 +166,8 @@ s32 scrStartProcessProcedure(ScrData *process, s32 procedureIndex)
 }
 
 /* Find the node whose name matches, or NULL when the table is exhausted. */
-ScrData *scrSearchScriptName(const char *name) {
-    ScrData *processNode = scrHandleFirst;
+scrProcessWork_s *scrSearchScriptName(const char *name) {
+    scrProcessWork_s *processNode = scrHandleFirst;
 
     while (processNode != NULL) {
         if (strcmp(name, processNode->name) == 0) {

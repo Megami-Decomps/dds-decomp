@@ -3,12 +3,12 @@
 
 #include "common.h"
 
-struct SdfAsset;
+struct sdfMat_t;
 struct SdfDmaTagHeader;
 
 /* Write the reference header for one buffered asset draw entry and return
  * the packet payload immediately after the header. */
-struct SdfDmaTagHeader *sdfMatMakePacket(struct SdfAsset *asset,
+struct SdfDmaTagHeader *sdfMatMakePacket(struct sdfMat_t *asset,
                                                            struct SdfDmaTagHeader *tag,
                                                            s32 frame);
 

@@ -42,9 +42,9 @@ extern void fldReleaseCameraColorEffect(void);
 extern void sdfDisableFlagListViewTargetRelativeMode(void);
 extern void evtDisableMoonDraw(void);
 extern void evtFreeStage(void);
-extern SdfMemBlock *D_003BD254;
+extern sdfMemHandle_t *D_003BD254;
 extern s32 fldLocalMapTrackSlotFromMode(s32 mode);
-extern s32 fldLmapTaskUpdate(KwlnTask *task);
+extern s32 fldLmapTaskUpdate(dds3ProcessID_t *task);
 extern s32 D_003BD23C;
 extern s32 D_003BD96C;
 extern void fldInitializeLmapState(void);
@@ -303,7 +303,7 @@ extern SdfPoolNode sdfGrOtTable[];
 
 /* Build one positioned SIF command and submit it on the requested draw surface. */
 void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z, s32 drawMode, const char *command, s32 surfaceIndex) {
-    SdfListHead *packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     SdfPoolNode *drawSurface;
     SifCommand packetHeader;
 
@@ -316,7 +316,7 @@ void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z, s32 drawMode, con
 
 /* Build an untextured rectangle with a separate outline color. */
 void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height, s32 fillColor, s32 borderColor, s32 surfaceIndex) {
-    SdfListHead *packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     SdfPoolNode *drawSurface;
 
     sdfDrawTagInit(packetList);
@@ -325,7 +325,7 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height,
     drawSurface->append(drawSurface, packetList);
 }
 
-s32 fldLmapTaskUpdate(KwlnTask *task) {
+s32 fldLmapTaskUpdate(dds3ProcessID_t *task) {
     s32 state = D_003BD96C;
     s32 result;
 

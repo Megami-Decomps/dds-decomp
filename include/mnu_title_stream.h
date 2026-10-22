@@ -13,7 +13,7 @@ typedef struct TitleAudioStreamState {
     u8 *compressedData;
     s16 *samples;
     u32 *decoder;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     s32 loadState;
 } TitleAudioStreamState;
 typedef char TitleAudioStreamState_size[(sizeof(TitleAudioStreamState) == 0x28) ? 1 : -1];

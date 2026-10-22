@@ -3,13 +3,13 @@
 
 #include "common.h"
 
-struct SdfTex;
-struct SdfMemBlock;
+struct sdfTexHandle_t;
+struct sdfMemHandle_t;
 struct SdfTextureFileHeader;
 
 typedef struct MapResource {
-    struct SdfTex *texture;            /* 0x00: retained texture returned by sdfTexSet */
-    struct SdfMemBlock *allocation;    /* 0x04: named-resource allocation queued for release */
+    struct sdfTexHandle_t *texture;            /* 0x00: retained texture returned by sdfTexSet */
+    struct sdfMemHandle_t *allocation;    /* 0x04: named-resource allocation queued for release */
     struct SdfTextureFileHeader *resourceData; /* 0x08: loaded texture-file data consumed by the texture loader */
     u32 unknown0C;                     /* 0x0C: untouched by the paired loader/release providers */
 } MapResource;
@@ -29,6 +29,6 @@ extern MapResource fldLocalMapAuxTextureResource;
 extern MapResource fldLocalMapTextureResource;
 
 s32 texLoad(const char *name, MapResource *record);
-u32 texRelease(struct SdfTex **texture);
+u32 texRelease(struct sdfTexHandle_t **texture);
 
 #endif /* DDS_FLD_MAP_RESOURCE_H */

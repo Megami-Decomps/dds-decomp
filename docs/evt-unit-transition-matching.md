@@ -12,18 +12,18 @@ a default. The final source uses ordinary C around the shared VU/MMI primitives.
 
 ## Storage and the unpack read contract
 
-`EvtUnit` keeps its physical offsets and complete allocation extent: 0x170
+`evtUnitHandle_t` keeps its physical offsets and complete allocation extent: 0x170
 bytes in DDS1 and 0x1D0 bytes in DDS2, with four-byte alignment. Union views
 expose the decoded colour words, direction vector and unsigned frame counters.
 The extra DDS2 slot storage moves the trailing counters by 0x60; it does not
 change the common colour/vector prefix.
 
-Battle units hold this same complete `EvtUnit` through `BtlUnit.ext` (+0x320
+Battle units hold this same complete `evtUnitHandle_t` through `BtlUnit.ext` (+0x320
 in DDS1, +0x340 in DDS2), not a separate battle extension prefix. Its +0x8C
-`owner` is the SDK's 0x38-byte `MdlCtx`: model data is `owner->inner`
-(`SdfModel`, +0x18), and the active motion is `owner->first` (`Motion`, +0x1C).
-Motion sampling uses `currentFrame`, `frameStep`, `frameCount` and `state`;
-lighting belongs to `SdfModel.lighting`. Shared SDK structs replace the old
+`owner` is the SDK's 0x38-byte `dds3ModelHandle_t`: model data is `owner->inner`
+(`sdfModelRootNode_t`, +0x18), and the active motion is `owner->first` (`sdfMotionCtrlr_t`, +0x1C).
+sdfMotionCtrlr_t sampling uses `currentFrame`, `frameStep`, `frameCount` and `state`;
+lighting belongs to `sdfModelRootNode_t.lighting`. Shared SDK structs replace the old
 owner/data prefix overlays without changing either event-unit allocation.
 
 The SDK motion sampler returns `void`, and the random modulo helper returns

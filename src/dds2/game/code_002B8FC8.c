@@ -170,7 +170,7 @@ extern s32 evtGetCapturedWindowPanelValue();
 
 extern s32 mnuApplyRandomStatItemEffect();
 
-extern void mnuPrepareStaffValueChangeDialog(MenuStaffContext *, DatPartyRecord *, s32, s32);
+extern void mnuPrepareStaffValueChangeDialog(MenuStaffContext *, datUnitWork_t *, s32, s32);
 
 extern char mnuCampRingCustomizationPopupEntry[];
 
@@ -180,7 +180,7 @@ extern u8 *D_00435E6C;
 
 extern void mnuDrawCampIconBackdropByKind();
 
-extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
+extern s32 mnuGetSelectionFromFlags(datUnitWork_t *);
 
 
 extern void mnuDrawCampGridAndLabelDefault();
@@ -273,9 +273,9 @@ typedef struct MenuVoiceState {
 } MenuVoiceState;
 
 
-extern void ptyRecomputeMaxHpMp(DatPartyRecord *unit);
+extern void ptyRecomputeMaxHpMp(datUnitWork_t *unit);
 
-extern void scrClearSecondaryScriptFlag(DatPartyRecord *unit, u16 flagId);
+extern void scrClearSecondaryScriptFlag(datUnitWork_t *unit, u16 flagId);
 
 #include "fr_font_draw_glyph.h"
 
@@ -301,7 +301,7 @@ s32 mnuAdvanceStaffValuePopup(s32 callback);
 s32 mnuFinishStaffValuePopup(s32 callback);
 
 /* Initialize the menu display using a value from the resource chain. */
-u32 mnuEnterSelectedResourceLabel(KwlnTask *task);
+u32 mnuEnterSelectedResourceLabel(dds3ProcessID_t *task);
 
 u32 mnuPartySlotAssignmentLeaveNoOp(void);
 
@@ -315,9 +315,9 @@ s32 mnuStartPanelExit(s32 callback);
 
 /* Clear the selected item's five stat bonuses and its requirement count,
  * then recalculate the party record's maximum HP and MP. */
-void mnuClearPartySelectionValues(DatPartyRecord *entry, s32 selection);
+void mnuClearPartySelectionValues(datUnitWork_t *entry, s32 selection);
 
-u32 mnuEnterSlotLabel(KwlnTask *task);
+u32 mnuEnterSlotLabel(dds3ProcessID_t *task);
 
 u32 mnuPartySlotClearLeaveNoOp(void);
 
@@ -365,7 +365,7 @@ void mnuRefreshPartyPanelSlots(s32 context);
 
 
 
-u32 mnuReleasePartySelectionResources(KwlnTask *task);
+u32 mnuReleasePartySelectionResources(dds3ProcessID_t *task);
 
 void mnuPreparePartyPanelTransition(s32 menu);
 
@@ -393,15 +393,15 @@ void mnuReleaseMenuWindowHandles(s32 context);
 
 u32 mnuCreateSelectState(u32 unused, s32 staffView);
 
-s32 mnuStaffCloseSelectionState(KwlnTask *task);
+s32 mnuStaffCloseSelectionState(dds3ProcessID_t *task);
 
 u32 mnuOpenStaffSelectionEntry(u32 context);
 
-s32 mnuFinishStaffSelectionEntry(KwlnTask *task);
+s32 mnuFinishStaffSelectionEntry(dds3ProcessID_t *task);
 
 u32 mnuOpenPartySelectionEntry(u32 context);
 
-s32 mnuFinishPartySelectionEntry(KwlnTask *task);
+s32 mnuFinishPartySelectionEntry(dds3ProcessID_t *task);
 
 /* Update the popup first; accept confirm/cancel only while its state is zero.
  * Return a nonzero popup-update word unchanged, or zero after handling input. */
@@ -413,7 +413,7 @@ s32 mnuStepStaffCampPageControl(s32 callback);
 
 
 
-extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
+extern MenuProfilePanel *mnuCreateProfilePanel(datUnitWork_t *selectionState);
 extern void evtStageTestSelectEntry(s32, s32, s32);
 extern void mnuConfigurePartyPanelPage(s32, s32, s32, s32);
 
@@ -437,9 +437,9 @@ void mnuDrawSelectedPartySlotMarkers(s32 context, StaffSlots *resources);
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags);
 
-void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, MenuPageWindow *page, MenuPanelGroup *packedGroup, MenuSpriteState *spriteState, s32 unused, s32 spriteFlags);
+void mnuDrawPartySkillAndStatusPanel(datUnitWork_t *entry, MenuPageWindow *page, MenuPanelGroup *packedGroup, MenuSpriteState *spriteState, s32 unused, s32 spriteFlags);
 
-void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSpriteState *spriteState,
+void mnuDrawProfilePanelAndSprite(datUnitWork_t *entry, u32 unused1, MenuSpriteState *spriteState,
                                     MenuProfilePanel *resource,
                                     u32 unused4, u32 spriteFlags);
 
@@ -461,7 +461,7 @@ u32 mnuDestroySelectedPartyWindow(u32 callback);
 
 /* Seek the first node with a nonzero sort key and no unavailable flag.
  * Leave the cursor unchanged if no such node exists. */
-void mnuSeekFirstAvailableStaffListNode(KwlnTask *task);
+void mnuSeekFirstAvailableStaffListNode(dds3ProcessID_t *task);
 
 MenuWindowContainer *mnuSeekSelectedWindowCursor(s32 selectionMode, s32 callback);
 
@@ -501,14 +501,14 @@ void mnuHighlightSelectedListNode();
 
 
 
-u32 mnuClearSkillSelectionImageState(KwlnTask *task);
+u32 mnuClearSkillSelectionImageState(dds3ProcessID_t *task);
 
 /* Narrow the ID to its native 16-bit skill code before duplicate detection.
  * Insert only missing skills, then recompute maxima and clear the script flag. */
-void mnuAddPartySkillIfMissing(DatPartyRecord *partyEntry, s32 skillId, s32 skillSlot);
+void mnuAddPartySkillIfMissing(datUnitWork_t *partyEntry, s32 skillId, s32 skillSlot);
 
 /* Clear one skill slot, retaining the native short-arity maxima recomputation. */
-void mnuClearPartySkillSlot(DatPartyRecord *partyEntry, s32 skillSlot);
+void mnuClearPartySkillSlot(datUnitWork_t *partyEntry, s32 skillSlot);
 
 /* Open the selected skill's popup or cancel, then process list navigation.
  * Native list reads precede the late window guard; preserve that ordering. */
@@ -516,7 +516,7 @@ void mnuCampMenuHandleInput(s32 callback);
 
 
 
-void mnuSwapPartySkillSlots(DatPartyRecord *party, s32 firstSlot, s32 secondSlot);
+void mnuSwapPartySkillSlots(datUnitWork_t *party, s32 firstSlot, s32 secondSlot);
 
 /* First confirm stores a slot; a different second slot swaps and rebuilds.
  * Cancel clears the saved slot, opening the exit popup only if none was saved. */
@@ -575,7 +575,7 @@ void mnuDrawSelectionLabel(u16 id);
 
 
 /* Collect up to max pointers to occupied, frontline party slots. */
-void mnuCollectFrontlinePartySlots(DatPartyRecord **out, s32 max);
+void mnuCollectFrontlinePartySlots(datUnitWork_t **out, s32 max);
 
 s32 mnuHasAvailableSlotResource(s32 id);
 
@@ -790,7 +790,7 @@ void mnuDispatchEntryWords(EffectSlotSet *menu, s32 entryIndex, MenuListNode *en
     }
 }
 
-extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
+extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
 extern const char D_00437C28[];
 
 /* Draw visible rows, preserving each row's glyph chain and callback state. */
@@ -804,7 +804,7 @@ void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
     mnuDecreaseListNodeFadeCounters(list);
     while (node != NULL && row < list->visibleCount) {
         u32 color;
-        struct FrFontGlyph *glyph = NULL;
+        struct _FRQ *glyph = NULL;
         s32 chainFlag;
 
         if (node->flags48 & 1) {
@@ -1001,7 +1001,7 @@ void mnuInitIconSprites(MenuIconSprites *obj, s32 w, s32 h, u32 value,
 /* Create an owned three-sprite bundle using the caller's slot-index array. */
 MenuIconSprites *mnuCreateWindowSpriteResources(u32 width, u32 height, u32 value,
                     EffectSlotSet *resourceHandle, s32 *indices, u32 unused) {
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(0x18);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(0x18);
     MenuIconSprites *bundle = (void *)sdfMemLock(allocation);
     memset(bundle, 0, 0x18);
     bundle->allocation = allocation;
@@ -1537,7 +1537,7 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
         mnuComparePrimaryKeyAscending, mnuCompareSecondaryKeyAscending, mnuCompareTertiaryKeyAscending
     };
     s32 nodeCount = 0;
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(menu->count * MNU_LIST_POINTER_BYTES);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(menu->count * MNU_LIST_POINTER_BYTES);
     MenuListNode **items = (MenuListNode **)sdfMemLock(allocation);
     MenuListNode **writeCursor = items;
     MenuListNode *node;
@@ -2170,7 +2170,7 @@ void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSe
 
 void mnuRebuildPartySlotResources(MenuPageWindow *menu, s32 partySlotIndex, s32 kind) {
     MenuPageSlot *slot = &menu->slots[partySlotIndex];
-    DatPartyRecord *actor = &DDS3_GBWK->party[menu->records->slots[partySlotIndex].index];
+    datUnitWork_t *actor = &DDS3_GBWK->party[menu->records->slots[partySlotIndex].index];
     s32 resourceIndex;
     s32 statusIndex;
 

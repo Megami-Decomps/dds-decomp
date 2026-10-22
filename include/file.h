@@ -13,7 +13,7 @@ struct FilePacRequest;
 struct FileQueue;
 struct FileRequest;
 struct FileTransferJob;
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Selects the operation and callback rows used by a file job. */
 typedef u16 FileJobType;
@@ -32,7 +32,7 @@ typedef struct FileJobBufferSlot {
 typedef struct FileJobPayloadBufferSlot {
     u32 offset;
     u32 size;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u16 selector;
     u16 unkE;
 } FileJobPayloadBufferSlot;
@@ -50,7 +50,7 @@ typedef struct FileJobPayload {
     struct {
         u32 offset;
         u32 size;
-        struct SdfMemBlock *allocation;
+        struct sdfMemHandle_t *allocation;
     } secondary;            /* 0x20; no selector follows this descriptor */
 } FileJobPayload;
 

@@ -10,13 +10,13 @@
 #include "sdf_packet_alloc.h"
 extern SdfPoolNode D_003803C8;
 
-void effResourceQuadDraw(EffResourceRectDrawParams *params, SdfTex *resource, u8 gsCoordinates) {
-    SdfListHead *list;
+void effResourceQuadDraw(EffResourceRectDrawParams *params, sdfTexHandle_t *resource, u8 gsCoordinates) {
+    sdfDrawTag_t *list;
     u64 *packet;
     SdfDrawPacket *drawPacket;
     BlurPacketQuad *quad;
 
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     packet = (u64 *)sdfGrAllocPacketBuff(0x40);
     packet[0] = 3;
@@ -77,7 +77,7 @@ void effResourceQuadDraw(EffResourceRectDrawParams *params, SdfTex *resource, u8
 
 
 /* Clone rectangle parameters and select a fresh source handle. */
-EffResourceRectWork *dds3EffectPartialMultiFilterCreate(EffResourceRectParams *src) {
+EffResourceRectWork *dds3EffectPartialMultiFilterCreate(dds3Effect_PartialMultiFilterParam_t *src) {
     EffResourceRectWork *dst = sdfChipAllocDirect(sizeof(EffResourceRectWork));
 
     dst->texture = dds3BillboardGetGeneralTex(0);
@@ -123,12 +123,12 @@ void effResourceRectDrawGsCoords(EffResourceRectWork *work) {
     effResourceQuadDraw(&work->params.draw, work->texture, 1);
 }
 
-typedef struct EffTrackPolyData EffTrackPolyData;
+typedef struct dds3HermitianTrackPoly_tag dds3HermitianTrackPoly_tag;
 
 
-extern EffTrackPolyData *dds3HermitianTrackPolyCreate(s32 historyLength, s32 steps);
-extern void dds3HermitianTrackPolySetVC(EffTrackPolyData *data, u32 *gradientColors);
-extern void dds3HermitianTrackPolySetBlend(EffTrackPolyData *data, u32 kind);
+extern dds3HermitianTrackPoly_tag *dds3HermitianTrackPolyCreate(s32 historyLength, s32 steps);
+extern void dds3HermitianTrackPolySetVC(dds3HermitianTrackPoly_tag *data, u32 *gradientColors);
+extern void dds3HermitianTrackPolySetBlend(dds3HermitianTrackPoly_tag *data, u32 kind);
 
 /* Clone a model track with independent history and gradient storage. */
 EffTrackPolyWork *effTrackPolyCreateWork(EffTrackPolyParams *src) {

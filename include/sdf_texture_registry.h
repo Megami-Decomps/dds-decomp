@@ -3,11 +3,11 @@
 
 #include "common.h"
 
-struct SdfTex;
+struct sdfTexHandle_t;
 
-/* The active resource registry contains SdfTex nodes; lookup compares the
+/* The active resource registry contains sdfTexHandle_t nodes; lookup compares the
  * texture's resource key and follows its previous-node link. */
-extern struct SdfTex *sdfTexHandleLink;
-struct SdfTex *sdfTexSearch(s32 resourceKey);
+extern struct sdfTexHandle_t *sdfTexHandleLink;
+struct sdfTexHandle_t *sdfTexSearch(s32 resourceKey);
 
 #endif /* SDF_TEXTURE_REGISTRY_H */

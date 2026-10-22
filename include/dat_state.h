@@ -5,7 +5,7 @@
 #include "dat_affinity.h"
 #include "dat_stat.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* The first 0x30 bytes also form compact save metadata; GBWK retains the
  * backing allocation descriptor at +0x30. */
@@ -24,7 +24,7 @@ typedef struct DatStateHeader {
     u32 saveFlags; /* 0x24: packed evtBitCheck bits persisted in save word 0. */
     u32 saveFlags1; /* 0x28: packed evtBitCheck bits persisted in save word 1. */
     u32 saveFlags2; /* 0x2C: packed evtBitCheck bits persisted in save word 2. */
-    struct SdfMemBlock *backingAllocation;
+    struct sdfMemHandle_t *backingAllocation;
     u32 firstTick;
     u32 secondTick;
     s32 currency;
@@ -99,7 +99,7 @@ typedef struct EventRosterStat {
 typedef char EventRosterStatSizeCheck[sizeof(EventRosterStat) == 0x14 ? 1 : -1];
 
 /* The active roster and saved template bank share this complete record type. */
-typedef struct DatPartyRecord {
+typedef struct datUnitWork_t {
     u16 flags;
     u16 affinityTableIndex;
     u16 unitId;
@@ -149,18 +149,18 @@ typedef struct DatPartyRecord {
     s32 huntExp; /* 0x1B8: hunt EP accumulated this battle */
     u8 pad1BC[8];
 #endif
-} DatPartyRecord;
+} datUnitWork_t;
 
 #ifdef VERSION_DDS1
 typedef char DatPartyRecord_savedCommandPhase_offset[
-    ((u32)&((DatPartyRecord *)0)->savedCommandPhase == 0x18C) ? 1 : -1];
+    ((u32)&((datUnitWork_t *)0)->savedCommandPhase == 0x18C) ? 1 : -1];
 #else
 typedef char DatPartyRecord_savedCommandPhase_offset[
-    ((u32)&((DatPartyRecord *)0)->savedCommandPhase == 0x1AC) ? 1 : -1];
+    ((u32)&((datUnitWork_t *)0)->savedCommandPhase == 0x1AC) ? 1 : -1];
 #endif
 
 typedef char DatPartyRecord_effectDataCount_offset[
-    ((unsigned long)&((DatPartyRecord *)0)->effectDataCount == 0x20) ? 1 : -1];
+    ((unsigned long)&((datUnitWork_t *)0)->effectDataCount == 0x20) ? 1 : -1];
 
 typedef struct DatInventory {
 #ifdef VERSION_DDS1
@@ -240,7 +240,7 @@ typedef struct DatGameState {
     DatScriptGlobals script;               /* 0x00040 */
     DatModelFlags modelFlags;              /* 0x00840 */
     DatWorldState world;                   /* 0x00A40 */
-    DatPartyRecord party[5];               /* 0x00A60 */
+    datUnitWork_t party[5];               /* 0x00A60 */
 #ifdef VERSION_DDS1
     u8 partyOrder[5];                      /* 0x01294: ordered indices into party[]. */
     u8 pad1299[3];
@@ -259,7 +259,7 @@ typedef struct DatGameState {
     u8 pad2E9E8[8];
     DatMantraBitmap mantraBits[16];        /* 0x2E9F0 */
     DatProfileRecord profileRecords[16][96]; /* 0x2EBB0 */
-    DatPartyRecord templates[16];          /* 0x31BB0: the snapshot copies sixteen records. */
+    datUnitWork_t templates[16];          /* 0x31BB0: the snapshot copies sixteen records. */
     u8 pad335F0[0x10];
 #endif
 #ifdef VERSION_DDS2
@@ -279,7 +279,7 @@ typedef struct DatGameState {
     u32 battleFlags[4];                    /* 0x16F00 */
     DatMantraBitmap mantraBits[16];        /* 0x16F10 */
     DatProfileBank profileBanks[16]; /* 0x17210 */
-    DatPartyRecord templates[16];          /* 0x1CA10: the initializer clears sixteen records. */
+    datUnitWork_t templates[16];          /* 0x1CA10: the initializer clears sixteen records. */
     u32 savedCurrency;                    /* 0x1E650 */
     s32 progressTotal;                    /* 0x1E654 */
     s32 progressSlot;                     /* 0x1E658 */
@@ -296,13 +296,13 @@ typedef struct DatGameState {
 typedef char DatStateHeaderSizeCheck[sizeof(DatStateHeader) == 0x40 ? 1 : -1];
 typedef char DatFieldMapBankSizeCheck[sizeof(DatFieldMapBank) == 0x780 ? 1 : -1];
 #ifdef VERSION_DDS1
-typedef char DatPartyRecordSizeCheck[sizeof(DatPartyRecord) == 0x1A4 ? 1 : -1];
+typedef char DatPartyRecordSizeCheck[sizeof(datUnitWork_t) == 0x1A4 ? 1 : -1];
 typedef char DatGameStateSizeCheck[sizeof(DatGameState) == 0x33600 ? 1 : -1];
 #endif
 #ifdef VERSION_DDS2
-typedef char DatPartyRecordSizeCheck[sizeof(DatPartyRecord) == 0x1C4 ? 1 : -1];
-typedef char DatPartyRecordActionSlotOffsetCheck[((u32)&((DatPartyRecord *)0)->actionSlot == 0x1B0) ? 1 : -1];
-typedef char DatPartyRecordItemIdOffsetCheck[((u32)&((DatPartyRecord *)0)->itemId == 0x1B2) ? 1 : -1];
+typedef char DatPartyRecordSizeCheck[sizeof(datUnitWork_t) == 0x1C4 ? 1 : -1];
+typedef char DatPartyRecordActionSlotOffsetCheck[((u32)&((datUnitWork_t *)0)->actionSlot == 0x1B0) ? 1 : -1];
+typedef char DatPartyRecordItemIdOffsetCheck[((u32)&((datUnitWork_t *)0)->itemId == 0x1B2) ? 1 : -1];
 typedef char DatGameStateSizeCheck[sizeof(DatGameState) == 0x1E840 ? 1 : -1];
 #endif
 

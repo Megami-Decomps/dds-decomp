@@ -12,16 +12,16 @@
 
 /* Two frame banks for the main scene and overlay packet chains. */
 typedef struct KwlnFrameDrawBank {
-    SdfListHead initialList;             /* 0x0000 */
+    sdfDrawTag_t initialList;             /* 0x0000 */
     DmaPacketHeader programReference;    /* 0x0020 */
     SdfDrawPacketGroups packetGroups[13]; /* 0x0040 */
-    SdfListHead sceneList;               /* 0x1630 */
-    SdfLinkedPacketList linkedList;       /* 0x1650 */
+    sdfDrawTag_t sceneList;               /* 0x1630 */
+    sdfPreDrawTag_t linkedList;       /* 0x1650 */
     SdfSceneNode scene;                  /* 0x1660 */
     ConsMatrixPacket sceneMatrix;         /* 0x1880 */
     u8 scenePacketStorage[0xE0];          /* 0x1950: opaque packet storage */
     KwlnTextureBank heldTexture;          /* 0x1A30: the held texture's packets */
-    SdfListHead thirdList;               /* 0x1D70 */
+    sdfDrawTag_t thirdList;               /* 0x1D70 */
     ConsMatrixPacket thirdMatrix;        /* 0x1D90 */
     SdfLightingPacketStorage overlayLightPacket; /* 0x1E60 */
 } KwlnFrameDrawBank;

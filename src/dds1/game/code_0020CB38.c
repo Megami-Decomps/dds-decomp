@@ -107,7 +107,7 @@ void btlHaritiUpdateCallback(void) {
 }
 #include "mdl.h"
 #include "eff_transform.h"
-extern void mdlSetEffectScale(MdlCtx *, f32);
+extern void mdlSetEffectScale(dds3ModelHandle_t *, f32);
 void btlUpdateBossUnitScaleTransition(void) {
     /* Same 0x24-byte transition layout declared by the following initializer. */
     typedef struct {
@@ -178,7 +178,7 @@ void btlUpdateBossUnitScaleTransition(void) {
                         f32 *position;
                         f32 progress;
                         f32 nextScale;
-                        ObjectTransform *inner;
+                        dds3PoseSet_t *inner;
 
                         while (effectActor != 0) {
                             u32 effectFlags = effectActor->status.flags;

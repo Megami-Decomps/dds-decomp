@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Each mapped record owns status storage expanded while its resource is loaded. */
 typedef struct EffMappedRecord {
@@ -16,7 +16,7 @@ typedef struct EffMappedRecord {
 
 typedef struct EffMappedResource {
     s32 count;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     EffMappedRecord *records;
 } EffMappedResource;
 
@@ -25,7 +25,7 @@ typedef char EffMappedResource_size_must_be_0x0C[(sizeof(EffMappedResource) == 0
 
 /* Header for count 0x6C-byte records; allocation is retained as a resource handle. */
 typedef struct EffPayload {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u32 count;
     u8 *records;
 } EffPayload;

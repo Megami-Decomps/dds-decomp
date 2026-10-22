@@ -44,9 +44,9 @@
 
 extern void btlBossDebugPrintf(const char *format, ...);
 /* Functions defined earlier in the previous translation unit. */
-DatPartyRecord *btlGetIndexedPartyEntryRecord(s32 index);
+datUnitWork_t *btlGetIndexedPartyEntryRecord(s32 index);
 s8 btlGetActorIndexedSignedValue(BtlUnit *unit, s32 index);
-s32 btlCheckSpecialAbility(DatPartyRecord *object, s32 flag);
+s32 btlCheckSpecialAbility(datUnitWork_t *object, s32 flag);
 f32 btlGetElementAbilityMultiplier(BtlUnit *actor, s32 attr);
 s32 btlGetAbilityAttributeMultiplierPercent(BtlUnit *actor, s32 attr);
 f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge);
@@ -60,15 +60,15 @@ typedef struct EntryPair {
 
 extern EntryPair btlActorEntryCodeDefaults[];
 
-extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
+extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
 
-extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
+extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *);
 
-extern void datResetBadStat(DatPartyRecord *record, s32 mask);
+extern void datResetBadStat(datUnitWork_t *record, s32 mask);
 
-extern s32 datGetClampedProfileAdjustedStat(DatPartyRecord *, s32);
+extern s32 datGetClampedProfileAdjustedStat(datUnitWork_t *, s32);
 
-extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32);
+extern s32 datGetStatWithStatusOverride(datUnitWork_t *, s32);
 
 extern u8 btlSharedActorTransformParameters[];
 
@@ -80,7 +80,7 @@ extern const u8 *btlPartyUnitGunTypeNames[];
 extern DatEnemyRecord *datEnemyRecords;
 
 
-extern s32 datCalculateCommandBaseValue(DatPartyRecord *, s32);
+extern s32 datCalculateCommandBaseValue(datUnitWork_t *, s32);
 extern u8 *D_003BAA14;
 
 extern u8 *D_003BAA28;
@@ -100,11 +100,11 @@ extern char D_003A1A40[];
 
 extern s32 dds3FindEntryIndex(s32);
 
-extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
+extern datUnitWork_t *btlGetIndexedPartyEntryRecord(s32);
 
 extern EffRandState effSharedRandomState[];
 
-extern s32 sdfCalculateCommandVitalDelta(s32, s32, DatPartyRecord *, u32, u8);
+extern s32 sdfCalculateCommandVitalDelta(s32, s32, datUnitWork_t *, u32, u8);
 
 extern s32 evtRunContext(s32 script, s32 firstArgument, s32 secondArgument, s32 commandIndex, u16 options);
 

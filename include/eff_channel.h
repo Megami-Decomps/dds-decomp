@@ -21,11 +21,11 @@ typedef struct EffChanHead {
 } EffChanHead;
 
 /* One randomized channel record. */
-struct EffParamWork;
+struct effPartHandle_t;
 
 typedef struct EffChanRecord {
     s32 delay;
-    struct EffParamWork *param; /* Retained compact effect owner, cloned per record. */
+    struct effPartHandle_t *param; /* Retained compact effect owner, cloned per record. */
 } EffChanRecord;
 
 /* Allocated channel owner shared by the event factory and channel consumers. */
@@ -33,7 +33,7 @@ typedef struct EffChanWork {
     EffChanHead head;
     EffChanRecord *records;
     struct EffArrHdr *slots; /* Trailing allocation header, not the slot base. */
-    SdfMemBlock *buffer;
+    sdfMemHandle_t *buffer;
 } EffChanWork;
 
 typedef char EffChanHead_size_must_be_0x168[(sizeof(EffChanHead) == 0x168) ? 1 : -1];

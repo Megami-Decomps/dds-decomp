@@ -46,15 +46,15 @@ typedef struct EntryPair {
 
 extern EntryPair btlActorEntryCodeDefaults[];
 
-extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
+extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
 
-extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
+extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *);
 
-extern void datResetBadStat(DatPartyRecord *record, s32 mask);
+extern void datResetBadStat(datUnitWork_t *record, s32 mask);
 
-extern s32 datGetClampedProfileAdjustedStat(DatPartyRecord *, s32);
+extern s32 datGetClampedProfileAdjustedStat(datUnitWork_t *, s32);
 
-extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32);
+extern s32 datGetStatWithStatusOverride(datUnitWork_t *, s32);
 
 extern u8 btlSharedActorTransformParameters[];
 
@@ -66,7 +66,7 @@ extern const u8 *btlPartyUnitGunTypeNames[];
 extern DatEnemyRecord *datEnemyRecords;
 
 
-extern s32 datCalculateCommandBaseValue(DatPartyRecord *, s32);
+extern s32 datCalculateCommandBaseValue(datUnitWork_t *, s32);
 extern u8 *D_003BAA14;
 
 extern u8 *D_003BAA28;
@@ -86,12 +86,12 @@ extern char D_003A1A40[];
 
 extern s32 dds3FindEntryIndex(s32);
 
-extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
+extern datUnitWork_t *btlGetIndexedPartyEntryRecord(s32);
 
 extern EffRandState effSharedRandomState[];
 
 /* Clear the supplied party-record status mask. */
-void btlClearPartyRecordStatusBits(DatPartyRecord *record, s32 mask) {
+void btlClearPartyRecordStatusBits(datUnitWork_t *record, s32 mask) {
     datResetBadStat(record, mask);
 }
 
@@ -107,7 +107,7 @@ void btlClearActorSelectedEntryIndex(BtlUnit *actor) {
 
 
 /* Initialize enemy vitals/stats and pack its nonzero skill IDs into the party record. */
-void btlInitializePartyRecordFromEnemy(DatPartyRecord *entry, s32 index) {
+void btlInitializePartyRecordFromEnemy(datUnitWork_t *entry, s32 index) {
     u32 count;
     u32 i;
 
@@ -136,8 +136,8 @@ void btlInitializePartyRecordFromEnemy(DatPartyRecord *entry, s32 index) {
     entry->mp = datEnemyRecords[index].mp;
 }
 
-DatPartyRecord *btlGetActorEntryData(BtlUnit *actor) {
-    DatPartyRecord *entry;
+datUnitWork_t *btlGetActorEntryData(BtlUnit *actor) {
+    datUnitWork_t *entry;
 
     if ((actor->status.flags & 0x400) == 0) {
         entry = btlGetIndexedPartyEntryRecord(actor->partyIndex);
@@ -146,20 +146,20 @@ DatPartyRecord *btlGetActorEntryData(BtlUnit *actor) {
     return &actor->partyRecord;
 }
 
-DatPartyRecord *btlGetCurrentPartyEntryRecord(s32 rosterIndex) {
+datUnitWork_t *btlGetCurrentPartyEntryRecord(s32 rosterIndex) {
     s32 index;
 
     index = dds3FindEntryIndex(rosterIndex);
     return &DDS3_GBWK->party[index];
 }
 
-DatPartyRecord *btlGetIndexedPartyEntryRecord(s32 index) {
+datUnitWork_t *btlGetIndexedPartyEntryRecord(s32 index) {
     return &DDS3_GBWK->party[index];
 }
 
 void btlSyncPlayerWork(BtlUnit *actor) {
-    DatPartyRecord *src = &actor->partyRecord;
-    DatPartyRecord *dst = btlGetIndexedPartyEntryRecord(actor->partyIndex);
+    datUnitWork_t *src = &actor->partyRecord;
+    datUnitWork_t *dst = btlGetIndexedPartyEntryRecord(actor->partyIndex);
     s32 maxHp;
     s32 maxMp;
 
@@ -210,11 +210,11 @@ BtlUnit *btlFindActiveActorByKind(s32 index) {
     return 0;
 }
 
-extern void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source);
+extern void btlCopyUnitStats(BtlUnit *unit, datUnitWork_t *source);
 
 /* Insert a complete party record before actors with a larger priority. */
 void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
-    DatPartyRecord saved;
+    datUnitWork_t saved;
     s32 insertion = 0;
     s32 i;
 
@@ -256,7 +256,7 @@ void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
 
 /* Move a departing actor behind the remaining occupied party records. */
 void btlRemovePartyActorAndShiftEntries(BtlUnit *unit) {
-    DatPartyRecord saved;
+    datUnitWork_t saved;
     DatGameState *scanState = DDS3_GBWK;
     s32 originalIndex;
     s32 index;
@@ -288,7 +288,7 @@ void btlRemovePartyActorAndShiftEntries(BtlUnit *unit) {
 
 /* Swap complete records while keeping the actor in its original party slot. */
 void btlSynchronizePartyActorRecords(BtlUnit *actor, u8 targetIndex) {
-    DatPartyRecord previous;
+    datUnitWork_t previous;
 
     if (actor->partyIndex != targetIndex) {
         memcpy(&previous, &DDS3_GBWK->party[actor->partyIndex], sizeof(previous));
@@ -304,7 +304,7 @@ void btlSynchronizePartyActorRecords(BtlUnit *actor, u8 targetIndex) {
     }
 }
 
-s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record) {
+s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record) {
     if ((record->flags & 4) != 0) {
         return 0;
     }
@@ -313,16 +313,16 @@ s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record) {
 
 /* Native tail jump forwards the clamped profile-adjusted stat in v0;
  * retain the existing void C surface for matching. */
-void btlQueryClampedProfileAdjustedStat(DatPartyRecord *unit, s32 statIndex) {
+void btlQueryClampedProfileAdjustedStat(datUnitWork_t *unit, s32 statIndex) {
     datGetClampedProfileAdjustedStat(unit, statIndex);
 }
 
 /* Return the requested party-record stat with its native status override. */
-s32 btlGetStatWithStatusOverride(DatPartyRecord *unit, s32 statIndex) {
+s32 btlGetStatWithStatusOverride(datUnitWork_t *unit, s32 statIndex) {
     return datGetStatWithStatusOverride(unit, statIndex);
 }
 
-s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *battler, s32 command) {
+s32 btlApplyCommandAbilityMultiplier(datUnitWork_t *battler, s32 command) {
     u32 value = datCalculateCommandBaseValue(battler, command);
     f32 scale;
 
@@ -398,9 +398,9 @@ s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
     return result;
 }
 
-s32 btlGetCombinedPartyCommandPower(DatPartyRecord *base, BtlUnit *first, BtlUnit *second,
+s32 btlGetCombinedPartyCommandPower(datUnitWork_t *base, BtlUnit *first, BtlUnit *second,
                   BtlUnit *third, s32 command) {
-    DatPartyRecord snapshot = *base;
+    datUnitWork_t snapshot = *base;
     s32 totalMaxHp = 0;
     s32 count = 0;
     s32 average;
@@ -474,9 +474,9 @@ s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element) {
     return btlResolveUnitValueWithOverride(&battler->partyRecord, element);
 }
 
-extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
+extern s32 datGetEffectiveAffinity(datUnitWork_t *, s32);
 
-s32 btlResolveUnitValueWithOverride(DatPartyRecord *record, s32 value) {
+s32 btlResolveUnitValueWithOverride(datUnitWork_t *record, s32 value) {
     s32 (*handler)(s32, s32) = *(s32 (**)(s32, s32))((u8 *)btlGetRuntime() + 0x670);
     if (handler != 0) {
         s32 result = handler((s32)record, value);
@@ -1107,7 +1107,7 @@ s32 btlFlagToElementIndex(s32 flag) {
 
 extern s32 evtGetMirroredSolarPhase(void);
 
-s32 btlCheckSpecialAbility(DatPartyRecord *object, s32 flag) {
+s32 btlCheckSpecialAbility(datUnitWork_t *object, s32 flag) {
     if (datUnitHasSkill(object, flag) == 0) {
         return 0;
     }
@@ -1340,7 +1340,7 @@ s32 btlCountAvailableParticipants(void) {
         }
     }
     {
-        DatPartyRecord *entry = DDS3_GBWK->party;
+        datUnitWork_t *entry = DDS3_GBWK->party;
         s32 i;
         for (i = 4; i >= 0; i--, entry++) {
             u16 flags = entry->flags;
@@ -1907,7 +1907,7 @@ s32 btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *target, u32 comman
     s32 fixedChance;
     f32 multiplier;
     s32 autoChance;
-    DatPartyRecord *record;
+    datUnitWork_t *record;
 
     attribute = btlGetActorIndexedSignedValue(attacker, command);
     mask = btlEncodeActorIndexAsSelectionMask(attribute);

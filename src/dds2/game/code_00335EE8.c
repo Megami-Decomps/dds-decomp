@@ -29,13 +29,13 @@ s32 sdfMotGenMorphNode(void *object, s32 command) {
 
 /* Bind the selected pair of model slot indices and weights. */
 void sdfMotGenMorphInit(SdfMotionSlotPairBinding *destination,
-                                 Motion *motion, SdfMotionBindingDispatch *dispatch, s32 entryIndex) {
+                                 sdfMotionCtrlr_t *motion, SdfMotionBindingDispatch *dispatch, s32 entryIndex) {
     sdfMotionNodeBaseInit((SdfMotionBindingHead *)&destination->keys,
                             motion, dispatch);
     destination->current = &((SdfSlotEntry *)motion->owner->slotPairs->buffer)[entryIndex];
 }
 
-SdfMotionSlotPairBinding *sdfMotGenMorph(Motion *motion,
+SdfMotionSlotPairBinding *sdfMotGenMorph(sdfMotionCtrlr_t *motion,
                                                            s32 unused, s32 entryIndex) {
     SdfMotionSlotPairBinding *entry = sdfChipAllocDirect(sizeof(SdfMotionSlotPairBinding));
 

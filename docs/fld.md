@@ -520,7 +520,7 @@ the terminal or marker id. Both PS2 runtimes create `SAVE_UNIT` and
 of transform vectors, and its retail resources are consistently named as hunt
 markers across both games.
 
-## Motion and path curves
+## sdfMotionCtrlr_t and path curves
 
 Type-9 resources contain one or more independently keyed curves. The track
 table names each value kind and points to its curve:

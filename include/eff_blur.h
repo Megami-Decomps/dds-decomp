@@ -4,10 +4,10 @@
 #include "common.h"
 #include "sdf_texture_draw_packet.h"
 
-struct SdfTex;
+struct sdfTexHandle_t;
 
 /* Shared rectangle and sampling payload; color is packed or read by channel. */
-typedef struct EffBlurQuad {
+typedef struct dds3Effect_Blur_t {
     u32 color; /* Byte consumers read the packed word through u8 object access. */
     s32 blendControl;
     f32 angle;
@@ -16,25 +16,25 @@ typedef struct EffBlurQuad {
     s32 position[2];
     /* Native movie blends interpolate these four corners with a 2x2 loop. */
     s32 corners[2][2];
-} EffBlurQuad;
+} dds3Effect_Blur_t;
 
 /* The textured blur allocation stores this copied body followed by a
  * separately acquired source texture. */
-typedef struct EffBlurTemplateBody {
+typedef struct dds3Effect_PartialMultiBlurParam_t {
     s32 extent;
-    EffBlurQuad source;
-} EffBlurTemplateBody;
+    dds3Effect_Blur_t source;
+} dds3Effect_PartialMultiBlurParam_t;
 
 typedef struct EffBlurTemplate {
-    EffBlurTemplateBody body;
-    struct SdfTex *texture;
+    dds3Effect_PartialMultiBlurParam_t body;
+    struct sdfTexHandle_t *texture;
 } EffBlurTemplate;
 
-typedef char EffBlurQuadSizeCheck[sizeof(EffBlurQuad) == 0x28 ? 1 : -1];
-typedef char EffBlurQuadCenterOffsetCheck[((u32)&((EffBlurQuad *)0)->position == 0x10) ? 1 : -1];
-typedef char EffBlurQuadEdgesOffsetCheck[((u32)&((EffBlurQuad *)0)->corners == 0x18) ? 1 : -1];
-typedef char EffBlurTemplateBodySizeCheck[sizeof(EffBlurTemplateBody) == 0x2C ? 1 : -1];
-typedef char EffBlurTemplateSourceOffsetCheck[((u32)&((EffBlurTemplateBody *)0)->source == 0x04) ? 1 : -1];
+typedef char EffBlurQuadSizeCheck[sizeof(dds3Effect_Blur_t) == 0x28 ? 1 : -1];
+typedef char EffBlurQuadCenterOffsetCheck[((u32)&((dds3Effect_Blur_t *)0)->position == 0x10) ? 1 : -1];
+typedef char EffBlurQuadEdgesOffsetCheck[((u32)&((dds3Effect_Blur_t *)0)->corners == 0x18) ? 1 : -1];
+typedef char EffBlurTemplateBodySizeCheck[sizeof(dds3Effect_PartialMultiBlurParam_t) == 0x2C ? 1 : -1];
+typedef char EffBlurTemplateSourceOffsetCheck[((u32)&((dds3Effect_PartialMultiBlurParam_t *)0)->source == 0x04) ? 1 : -1];
 typedef char EffBlurTemplateSizeCheck[sizeof(EffBlurTemplate) == 0x30 ? 1 : -1];
 typedef char EffBlurTemplateResourceOffsetCheck[((u32)&((EffBlurTemplate *)0)->texture == 0x2C) ? 1 : -1];
 
@@ -54,7 +54,7 @@ typedef struct BlurPacketQuad {
 } BlurPacketQuad;
 
 /* Random-position blur parameters and their allocated slot owner. */
-typedef struct EffBlurScatterParams {
+typedef struct dds3Effect_DistortionBlurParam_t {
     s32 count;
     s32 delaySpread;
     f32 angleStep;
@@ -66,30 +66,30 @@ typedef struct EffBlurScatterParams {
     s32 position[2];
     s32 positionSpread;
     s32 size;
-} EffBlurScatterParams;
+} dds3Effect_DistortionBlurParam_t;
 
 typedef struct EffBlurScatterSlot {
     s32 delay;
     f32 angle;
-    EffBlurQuad quad;
+    dds3Effect_Blur_t quad;
 } EffBlurScatterSlot;
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 typedef struct EffBlurScatterWork {
-    EffBlurScatterParams params;
-    struct SdfTex *texture;
-    struct SdfMemBlock *allocation;
+    dds3Effect_DistortionBlurParam_t params;
+    struct sdfTexHandle_t *texture;
+    struct sdfMemHandle_t *allocation;
     EffBlurScatterSlot *slots;
 } EffBlurScatterWork;
 
-typedef char EffBlurScatterParamsSizeCheck[sizeof(EffBlurScatterParams) == 0x2C ? 1 : -1];
+typedef char EffBlurScatterParamsSizeCheck[sizeof(dds3Effect_DistortionBlurParam_t) == 0x2C ? 1 : -1];
 typedef char EffBlurScatterSlotSizeCheck[sizeof(EffBlurScatterSlot) == 0x30 ? 1 : -1];
 typedef char EffBlurScatterWorkSizeCheck[sizeof(EffBlurScatterWork) == 0x38 ? 1 : -1];
 typedef char EffBlurScatterAllocationOffsetCheck[((u32)&((EffBlurScatterWork *)0)->allocation == 0x30) ? 1 : -1];
 typedef char EffBlurScatterSlotsOffsetCheck[((u32)&((EffBlurScatterWork *)0)->slots == 0x34) ? 1 : -1];
 
 /* Phase-driven blur parameters and the scale-slot allocation they own. */
-typedef struct EffBlurScaleParams {
+typedef struct dds3Effect_RippleBlurParam_t {
     s32 count;
     f32 phaseStep;
     f32 spacing;
@@ -101,22 +101,22 @@ typedef struct EffBlurScaleParams {
     /* Native movie blends index the renderer position as a two-element vector. */
     s32 position[2];
     s32 size;
-} EffBlurScaleParams;
+} dds3Effect_RippleBlurParam_t;
 
 typedef struct EffBlurScaleSlot {
     f32 phase;
     f32 angle;
-    EffBlurQuad quad;
+    dds3Effect_Blur_t quad;
 } EffBlurScaleSlot;
 
 typedef struct EffBlurScaleWork {
-    EffBlurScaleParams params;
-    struct SdfTex *texture;
-    struct SdfMemBlock *allocation;
+    dds3Effect_RippleBlurParam_t params;
+    struct sdfTexHandle_t *texture;
+    struct sdfMemHandle_t *allocation;
     EffBlurScaleSlot *slots;
 } EffBlurScaleWork;
 
-typedef char EffBlurScaleParamsSizeCheck[sizeof(EffBlurScaleParams) == 0x2C ? 1 : -1];
+typedef char EffBlurScaleParamsSizeCheck[sizeof(dds3Effect_RippleBlurParam_t) == 0x2C ? 1 : -1];
 typedef char EffBlurScaleSlotSizeCheck[sizeof(EffBlurScaleSlot) == 0x30 ? 1 : -1];
 typedef char EffBlurScaleWorkSizeCheck[sizeof(EffBlurScaleWork) == 0x38 ? 1 : -1];
 typedef char EffBlurScaleAllocationOffsetCheck[((u32)&((EffBlurScaleWork *)0)->allocation == 0x30) ? 1 : -1];
@@ -129,25 +129,25 @@ void dds3EffectRipBlurPartInit(EffBlurScaleWork *work, EffBlurScaleSlot *slot);
 SdfDrawPacket *effPkt2DAllocTriStrip(s32 height, s32 flags);
 
 /* Factories accept the serialized parameter prefix used by effect callbacks. */
-EffBlurScatterWork *dds3EffectDistortionBlurCreate(EffBlurScatterParams *params);
+EffBlurScatterWork *dds3EffectDistortionBlurCreate(dds3Effect_DistortionBlurParam_t *params);
 void dds3EffectDistortionBlurDelete(EffBlurScatterWork *work);
 void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work);
-EffBlurScaleWork *dds3EffectRippleBlurCreate(EffBlurScaleParams *params);
+EffBlurScaleWork *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *params);
 void dds3EffectRippleBlurDelete(EffBlurScaleWork *work);
 
-void effAppendBlurRectanglePackets(void *list, const EffBlurQuad *source, u8 fixedPointCoordinates);
-void effDrawBlurSource(const EffBlurQuad *source, struct SdfTex *resource, u8 fixedPointCoordinates);
-void effDrawBlurRectangle(const EffBlurQuad *source);
-void effBlurDrawFramebufferQuad(const EffBlurQuad *source);
+void effAppendBlurRectanglePackets(void *list, const dds3Effect_Blur_t *source, u8 fixedPointCoordinates);
+void effDrawBlurSource(const dds3Effect_Blur_t *source, struct sdfTexHandle_t *resource, u8 fixedPointCoordinates);
+void effDrawBlurRectangle(const dds3Effect_Blur_t *source);
+void effBlurDrawFramebufferQuad(const dds3Effect_Blur_t *source);
 void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner);
 /* Borrow the live textured-blur owner; callers do not acquire or release it. */
 EffBlurTemplate *Eve_PartialMultiBlurGetParams(void);
 /* Borrow the live scatter-blur owner; callers do not acquire or release it. */
 EffBlurScatterWork *Eve_DistortionBlurGetParams(void);
-EffBlurTemplate *dds3EffectPartialMultiBlurCreate(const EffBlurTemplateBody *body);
-void Eve_PartialMultiBlurSetParam(EffBlurTemplateBody *parameters);
-void Eve_DistortionBlurSetParam(EffBlurScatterParams *parameters);
-void Eve_RippleBlurSetParam(EffBlurScaleParams *parameters);
+EffBlurTemplate *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMultiBlurParam_t *body);
+void Eve_PartialMultiBlurSetParam(dds3Effect_PartialMultiBlurParam_t *parameters);
+void Eve_DistortionBlurSetParam(dds3Effect_DistortionBlurParam_t *parameters);
+void Eve_RippleBlurSetParam(dds3Effect_RippleBlurParam_t *parameters);
 void dds3EffectPartialMultiBlurDelete(EffBlurTemplate *owner);
 void effDrawBlurPixelRectWithResource(EffBlurTemplate *owner);
 

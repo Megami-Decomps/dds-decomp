@@ -6,17 +6,17 @@
 
 s32 dds3AreaBasicTypeHasItems(u32 kind);
 
-extern s32 dds3SearchDeleteBasicArray(WorldValueIndices *indexNode, EffWorldNode *targetNode, s32 processAllMatches);
+extern s32 dds3SearchDeleteBasicArray(dds3BasicArrayHandle_t *indexNode, dds3Basic_t *targetNode, s32 processAllMatches);
 
 /* Remove every entry for the node from the owner's world slot selected by the node's kind. */
-void dds3AreaBasicGetItemArray(EffWorldNode *worldIndexOwner, EffWorldNode *node) {
+void dds3AreaBasicGetItemArray(dds3Basic_t *worldIndexOwner, dds3Basic_t *node) {
     WorldIndexNode *slot = dds3AreaBasicReleaseItem(worldIndexOwner, dds3AreaBasicTypeHasItems(((u8 *)node)[0xF]));
 
-    dds3SearchDeleteBasicArray((WorldValueIndices *)slot, node, 0);
+    dds3SearchDeleteBasicArray((dds3BasicArrayHandle_t *)slot, node, 0);
 }
 
 /* Select one of the kind-2 owner's two world index nodes. */
-WorldIndexNode *dds3AreaBasicReleaseItem(EffWorldNode *worldIndexOwner, s32 slotIndex) {
+WorldIndexNode *dds3AreaBasicReleaseItem(dds3Basic_t *worldIndexOwner, s32 slotIndex) {
     WorldIndexNode **slot = worldIndexOwner->data;
 
     slot += slotIndex;
@@ -24,49 +24,49 @@ WorldIndexNode *dds3AreaBasicReleaseItem(EffWorldNode *worldIndexOwner, s32 slot
 }
 #include "dds3_world_secondary.h"
 /* Copy the slot's world-object words (optionally filtered) into a fresh index node. */
-WorldIndexNode *dds3AreaBasicArrangeGetItemArray(EffWorldNode *worldIndexOwner, s32 slotIndex, s32 (*filter)(u32)) {
+WorldIndexNode *dds3AreaBasicArrangeGetItemArray(dds3Basic_t *worldIndexOwner, s32 slotIndex, s32 (*filter)(u32)) {
     WorldIndexNode *slot = dds3AreaBasicReleaseItem(worldIndexOwner, slotIndex);
     WorldIndexNode *result;
     u32 word;
 
-    if (dds3GetBasicArrayCount((WorldValueIndices *)slot) == 0) {
+    if (dds3GetBasicArrayCount((dds3BasicArrayHandle_t *)slot) == 0) {
         return NULL;
     }
     result = dds3GetBasicArrayHandle(0);
-    dds3SetFirstBasicArray((WorldValueIndices *)slot);
+    dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)slot);
     do {
-        word = dds3GetBasicArray((WorldValueIndices *)slot);
+        word = dds3GetBasicArray((dds3BasicArrayHandle_t *)slot);
         if (filter == NULL || filter(word) != 0) {
-            dds3AddBasicArray((WorldValueIndices *)result, 1);
-            dds3SetBasicArray((WorldValueIndices *)result, word);
+            dds3AddBasicArray((dds3BasicArrayHandle_t *)result, 1);
+            dds3SetBasicArray((dds3BasicArrayHandle_t *)result, word);
         }
-    } while (dds3SetNextBasicArray((WorldValueIndices *)slot) != 0);
-    if (dds3GetBasicArrayCount((WorldValueIndices *)result) == 0) {
+    } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)slot) != 0);
+    if (dds3GetBasicArrayCount((dds3BasicArrayHandle_t *)result) == 0) {
         dds3FreeBasicArrayHandle(result);
         return NULL;
     }
     return result;
 }
 
-EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void) {
+dds3Basic_t *dds3GetFirstWorldObjectNodeOfKind2(void) {
     WorldIndexNode *indexObject;
-    EffWorldNode *node;
+    dds3Basic_t *node;
 
     indexObject = dds3SceneBasicGetList(dds3GetControlScene(), 2);
     if (indexObject == NULL) {
         return NULL;
     }
-    if (dds3GetBasicArrayCount((WorldValueIndices *)indexObject) == 0) {
+    if (dds3GetBasicArrayCount((dds3BasicArrayHandle_t *)indexObject) == 0) {
         return NULL;
     }
-    dds3SetFirstBasicArray((WorldValueIndices *)indexObject);
-    node = (EffWorldNode *)(u32)dds3GetBasicArray((WorldValueIndices *)indexObject);
+    dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)indexObject);
+    node = (dds3Basic_t *)(u32)dds3GetBasicArray((dds3BasicArrayHandle_t *)indexObject);
     dds3FreeBasicArrayHandle(indexObject);
     return node;
 }
 
 
-s32 MoverBasicConstructor(EffWorldNode *obj) {
+s32 MoverBasicConstructor(dds3Basic_t *obj) {
     obj->data = sdfChipAllocDirect(0x10);
     memset(obj->data, 0, 0x10);
     return 1;

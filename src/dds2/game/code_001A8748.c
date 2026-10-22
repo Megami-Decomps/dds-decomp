@@ -70,14 +70,14 @@ typedef union UiQuadColor {
 
 extern s32 dds3FindEntryIndex();
 
-extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
+extern datUnitWork_t *btlGetIndexedPartyEntryRecord(s32);
 
 
 extern const char *D_003B4CF8[];
 
 extern u32 sndTestMessageResourceIndex;
 
-extern SdfTex *sndTestMessageTexture;
+extern sdfTexHandle_t *sndTestMessageTexture;
 
 
 extern u64 D_004366E8;
@@ -120,7 +120,7 @@ typedef struct BattleController {
     s32 adjustmentGroupIndex;  /* 0x298 */
     s32 adjustmentEntryIndex;  /* 0x29C */
     u8 pad_2A0[0x24];
-    KwlnTask *drawTask;
+    dds3ProcessID_t *drawTask;
     u8 pad2C8[0x14];
     BattleItemDrop itemDrops[3];
     s32 moneyEarned; /* 0x2E8 */
@@ -137,7 +137,7 @@ typedef char BattleControllerTotalApOffsetCheck[
 typedef char BattleControllerDrawTaskOffsetCheck[
     ((u32)&((BattleController *)0)->drawTask == 0x2C4) ? 1 : -1];
 
-extern s32 datCalculateCommandBaseValue(DatPartyRecord *, s32);
+extern s32 datCalculateCommandBaseValue(datUnitWork_t *, s32);
 
 extern DatEnemyRecord *datEnemyRecords;
 
@@ -155,14 +155,14 @@ extern f32 btlActiveGroupCountMultipliers[];
 
 
 
-extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
+extern u16 mnuGetPartyEntryCurrentId(datUnitWork_t *);
 
-extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
+extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 
 extern s32 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity);
 
 
-extern s32 TestMsgMngD_Process(KwlnTask *task);
+extern s32 TestMsgMngD_Process(dds3ProcessID_t *task);
 
 extern SdfPoolNode D_003805A8;
 
@@ -174,9 +174,9 @@ extern u8 D_003B4D28[];
 
 #include "sdf_packet_alloc.h"
 
-extern void itfMiscDrawAlphaPrim(SdfListHead *list, s32 context, s32 mode);
+extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *list, s32 context, s32 mode);
 
-extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
+extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
 extern SndPad dds3PadButtonState;
@@ -185,9 +185,9 @@ extern SdfPoolNode sdfGrOtTable[];
 
 #define BTL_ENTRY_STATUS_MASK 0x7FFF
 
-extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
+extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
 
-extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
+extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *);
 
 extern SdfPoolNode D_00380708;
 
@@ -197,7 +197,7 @@ extern s32 D_00435CBC;
 
 extern void itfDebugPrintMark();
 
-extern s32 TestMsgMngC_Process(KwlnTask *task);
+extern s32 TestMsgMngC_Process(dds3ProcessID_t *task);
 
 extern u8 D_003B4A28[];
 
@@ -208,7 +208,7 @@ void TestMsgReloadTexture(void);
 void itfDebugMesMngInitialize(void) {
     D_00435CBC = 0x80FFFFFF;
     TestMsgReloadTexture();
-    itfMesMngSetKutiCallback(((ScrData *)dds3GetProcessData((KwlnTask *)scrStartScript2(0x3E8, (s32)D_003B4A28, 0)))->resourceIndex, itfDebugPrintMark);
+    itfMesMngSetKutiCallback(((scrProcessWork_s *)dds3GetProcessData((dds3ProcessID_t *)scrStartScript2(0x3E8, (s32)D_003B4A28, 0)))->resourceIndex, itfDebugPrintMark);
     dds3StartProcess("TestMsgMngC", 0x3EF, 0, 0, TestMsgMngC_Process, 0, 0);
     dds3StartProcess("TestMsgMngD", 0x2AFE, 0, 0, TestMsgMngD_Process, 0, 0);
 }
@@ -224,17 +224,17 @@ void TestMsgReloadTexture(void) {
     }
 }
 
-s32 TestMsgMngC_Process(KwlnTask *task) {
+s32 TestMsgMngC_Process(dds3ProcessID_t *task) {
     if (D_0037F530[0] < 0) {
         TestMsgReloadTexture();
     }
     return 0;
 }
 
-s32 TestMsgMngD_Process(KwlnTask *task) {
-    SdfListHead *mem;
+s32 TestMsgMngD_Process(dds3ProcessID_t *task) {
+    sdfDrawTag_t *mem;
     if ((sndTestMessageTexture != 0) && (sndTestMessageResourceIndex != 3)) {
-        mem = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        mem = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(mem);
         itfMiscDrawAlphaPrim(mem, 0, 0);
         itfMiscDrawSpritePrim(D_003B4D08, D_003B4D18, D_003B4D28, 0xFFF, sndTestMessageTexture, 0, mem);
@@ -274,7 +274,7 @@ extern s32 pbCalcFovDegrees(f32 *, f32, f32, f32, f32);
 
 s32 pbDebugPrintPanel(void) {
     SifCommand packet;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     f32 radiansToDegrees = 57.2957795f;
 
     list = dds3FontReqAllocDrawTag();
@@ -399,7 +399,7 @@ extern SdfPoolNode kwlnPositionedTextSurface;
 /* Draw the blur settings and handle selection, editing and cancellation. */
 s32 pbDebugPrintPanel2(void) {
     SifCommand packet;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     s32 row;
     s32 y;
     s16 previous;
@@ -567,7 +567,7 @@ void pbDrawRotatedPrim(s32 surfaceIndex);
 /* Retail 0x001A92F0 keeps the row < 4 select inside the four-row loop. */
 s32 pbDebugPrintPanel3(void) {
     SifCommand packet;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     s32 row;
     s32 y = 0x7A20;
     s16 previousSelection;
@@ -718,7 +718,7 @@ void pbDrawRotatedPrim(s32 surfaceIndex) {
     s32 alpha;
     s32 i;
     u8 *component;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     SdfPoolNode *surface;
     f32 phase;
 
@@ -787,7 +787,7 @@ extern void btlUpdateBattleCameraFrame(void);
 
 extern s32 btlExitWhenAudioAndTasksIdle(void);
 
-s32 btlUpdateActiveBattleFrame(KwlnTask *task) {
+s32 btlUpdateActiveBattleFrame(dds3ProcessID_t *task) {
     if (btlRuntime == NULL) {
         return 0;
     }
@@ -826,7 +826,7 @@ extern s32 btlUpdateSceneFlow(void);
 
 extern s32 btlClearDeferredTasks(void);
 
-s32 btlUpdateBattleFieldPresentation(KwlnTask *task) {
+s32 btlUpdateBattleFieldPresentation(dds3ProcessID_t *task) {
     BattleController *battle = (BattleController *)btlRuntime;
     if (battle == 0) {
         return 0;
@@ -845,27 +845,27 @@ s32 btlUpdateBattleFieldPresentation(KwlnTask *task) {
 }
 
 /* Empty destructor callback for the active battle-frame task. */
-void btlReleaseActiveBattleFrameTask(KwlnTask *task) {
+void btlReleaseActiveBattleFrameTask(dds3ProcessID_t *task) {
 }
 
 extern char D_004366F0[];
 
-extern void btlReleaseActiveBattleFrameTask(KwlnTask *task);
+extern void btlReleaseActiveBattleFrameTask(dds3ProcessID_t *task);
 
-extern s32 btlUpdateBattleFieldPresentation(KwlnTask *task);
+extern s32 btlUpdateBattleFieldPresentation(dds3ProcessID_t *task);
 
-extern s32 btlUpdateActiveBattleFrame(KwlnTask *task);
+extern s32 btlUpdateActiveBattleFrame(dds3ProcessID_t *task);
 
 void btlCreateDrawTasks(void) {
     BattleController *battle = (BattleController *)btlRuntime;
-    KwlnTask *draw;
+    dds3ProcessID_t *draw;
     draw = dds3StartProcess(D_004366F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, btlReleaseActiveBattleFrameTask, 0);
     battle->drawTask = draw;
     dds3LinkProcess(draw, dds3StartProcess("battle_draw", 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0));
 }
 
 void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
-    KwlnTask *task;
+    dds3ProcessID_t *task;
 
     task = dds3SearchProcessPriority(0x3f9);
     if (task != 0) {
@@ -902,7 +902,7 @@ typedef struct BattleInitState {
     u32 unk5BC;
 } BattleInitState;
 
-extern SdfMemBlock *D_004366E0;
+extern sdfMemHandle_t *D_004366E0;
 
 extern ItfMesSub *D_00435E78;
 
@@ -941,7 +941,7 @@ extern void sndResetTransition(void);
 
 /* Allocate/reset battle work, initialize windows and queue shared resources. */
 void btlInitializeBattleRuntime(void) {
-    SdfMemBlock *allocation;
+    sdfMemHandle_t *allocation;
     u32 seed;
     u8 *runtime;
 
@@ -1240,7 +1240,7 @@ s32 btlHasPendingRuntimeActivity(void) {
 
 void btlResetActorEntryState(void) {
     s32 context = (s32)btlRuntime;
-    DatPartyRecord *party = DDS3_GBWK->party;
+    datUnitWork_t *party = DDS3_GBWK->party;
     u32 i;
     *(s32 *)(context + 0x2E8) = 0;
     *(s32 *)(context + 0x2EC) = 0;
@@ -1314,51 +1314,51 @@ void *btlGetRuntime(void) {
 }
 
 /* Read current HP from a unit-entry address. */
-s32 btlReadCurrentUnitHp(DatPartyRecord *entry) {
+s32 btlReadCurrentUnitHp(datUnitWork_t *entry) {
     return entry->hp;
 }
 
 /* Word-return getter; native callers choose whether to truncate MP to 16 bits. */
-s32 btlReadCurrentUnitMp(DatPartyRecord *entry) {
+s32 btlReadCurrentUnitMp(datUnitWork_t *entry) {
     return entry->mp;
 }
 
-extern s32 ptyComputeMaxHp(DatPartyRecord *);
+extern s32 ptyComputeMaxHp(datUnitWork_t *);
 
-extern s32 ptyComputeMaxMp(DatPartyRecord *);
+extern s32 ptyComputeMaxMp(datUnitWork_t *);
 
-void btlComputeProfileMaxHp(DatPartyRecord *unit) {
+void btlComputeProfileMaxHp(datUnitWork_t *unit) {
     ptyComputeMaxHp(unit);
 }
 
-void btlComputeProfileMaxMp(DatPartyRecord *unit) {
+void btlComputeProfileMaxMp(datUnitWork_t *unit) {
     ptyComputeMaxMp(unit);
 }
 
-u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *stats) {
+u32 btlComputeSkillAdjustedMaxHp(datUnitWork_t *stats) {
     return datComputeSkillBoostedMaxHp(stats);
 }
 
-u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *stats) {
+u32 btlComputeSkillAdjustedMaxMp(datUnitWork_t *stats) {
     return datComputeSkillBoostedMaxMp(stats);
 }
 
-extern s32 datAddHp(DatPartyRecord *, s32);
+extern s32 datAddHp(datUnitWork_t *, s32);
 
-extern s32 datAddMp(DatPartyRecord *, s32);
+extern s32 datAddMp(datUnitWork_t *, s32);
 
-s32 btlAdjustUnitHp(DatPartyRecord *object, s32 delta) {
+s32 btlAdjustUnitHp(datUnitWork_t *object, s32 delta) {
     return datAddHp(object, delta);
 }
 
-s32 btlAdjustUnitMp(DatPartyRecord *object, s32 delta) {
+s32 btlAdjustUnitMp(datUnitWork_t *object, s32 delta) {
     return datAddMp(object, delta);
 }
 
 /* Cache the skill-adjusted maximum and return current HP clamped to it.
  * The comparison uses the full-width result, not the u16 cache. */
-u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *entryAddress) {
-    DatPartyRecord *entry = entryAddress;
+u16 btlRefreshUnitMaximumHpAndClampCurrentHp(datUnitWork_t *entryAddress) {
+    datUnitWork_t *entry = entryAddress;
     u32 currentHp = btlReadCurrentUnitHp(entry);
     u32 maxHp = btlComputeSkillAdjustedMaxHp(entryAddress);
     entry->maxHp = maxHp;
@@ -1370,7 +1370,7 @@ u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *entryAddress) {
 
 /* Cache the skill-adjusted maximum and return current MP clamped to it.
  * The comparison uses the full-width result, not the u16 cache. */
-u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *entryAddress) {
+u16 btlRefreshUnitMaximumMpAndClampCurrentMp(datUnitWork_t *entryAddress) {
     u32 currentMp = btlReadCurrentUnitMp(entryAddress);
     u32 maxMp = btlComputeSkillAdjustedMaxMp(entryAddress);
     entryAddress->maxMp = maxMp;
@@ -1381,21 +1381,21 @@ u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *entryAddress) {
 }
 
 /* Return the low 15 status bits; do not expose the stored high bit. */
-u16 btlReadUnitStatusMask(DatPartyRecord *entry) {
+u16 btlReadUnitStatusMask(datUnitWork_t *entry) {
     return entry->status & BTL_ENTRY_STATUS_MASK;
 }
 
-extern void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 minimumValue);
+extern void sdfRaisePackedChannelValue(datUnitWork_t *item, u32 minimumValue);
 
 /* Forward the record and value to the packed low-15-bit status update. */
-void btlRaisePartyRecordStatusValue(DatPartyRecord *item, u32 minimumValue) {
+void btlRaisePartyRecordStatusValue(datUnitWork_t *item, u32 minimumValue) {
     sdfRaisePackedChannelValue(item, minimumValue);
 }
 
-extern void datResetBadStat(DatPartyRecord *unit, s32 mask);
+extern void datResetBadStat(datUnitWork_t *unit, s32 mask);
 
 /* Forward the legacy record/mask arguments to the party-record status clear. */
-void btlClearPartyRecordStatusBits(DatPartyRecord *record, s32 mask) {
+void btlClearPartyRecordStatusBits(datUnitWork_t *record, s32 mask) {
     datResetBadStat(record, mask);
 }
 
@@ -1410,7 +1410,7 @@ void btlClearActorSelectedEntryIndex(BtlUnit *actor) {
 }
 
 /* Initialize enemy vitals/stats and pack its nonzero skill IDs into the party record. */
-void btlInitializePartyRecordFromEnemy(DatPartyRecord *entry, s32 index) {
+void btlInitializePartyRecordFromEnemy(datUnitWork_t *entry, s32 index) {
     u32 count;
     u32 i;
 
@@ -1439,8 +1439,8 @@ void btlInitializePartyRecordFromEnemy(DatPartyRecord *entry, s32 index) {
     entry->mp = datEnemyRecords[index].mp;
 }
 
-DatPartyRecord *btlGetActorEntryData(BtlUnit *actor) {
-    DatPartyRecord *entry;
+datUnitWork_t *btlGetActorEntryData(BtlUnit *actor) {
+    datUnitWork_t *entry;
 
     if ((actor->status.flags & 0x400) == 0) {
         entry = btlGetIndexedPartyEntryRecord(actor->partyIndex);
@@ -1449,22 +1449,22 @@ DatPartyRecord *btlGetActorEntryData(BtlUnit *actor) {
     return &actor->partyRecord;
 }
 
-DatPartyRecord *btlGetCurrentPartyEntryRecord(s32 rosterIndex) {
+datUnitWork_t *btlGetCurrentPartyEntryRecord(s32 rosterIndex) {
     s32 index;
 
     index = dds3FindEntryIndex(rosterIndex);
     return &DDS3_GBWK->party[index];
 }
 
-DatPartyRecord *btlGetIndexedPartyEntryRecord(s32 index) {
+datUnitWork_t *btlGetIndexedPartyEntryRecord(s32 index) {
     return &DDS3_GBWK->party[index];
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_004150B0);
 
 void btlSyncPlayerWork(BtlUnit *actor) {
-    DatPartyRecord *src = &actor->partyRecord;
-    DatPartyRecord *dst = btlGetIndexedPartyEntryRecord(actor->partyIndex);
+    datUnitWork_t *src = &actor->partyRecord;
+    datUnitWork_t *dst = btlGetIndexedPartyEntryRecord(actor->partyIndex);
     s32 maxHp;
     s32 maxMp;
     if (src->flags & 0x1000) {
@@ -1515,11 +1515,11 @@ BtlUnit *btlFindActiveActorByKind(s32 kind) {
     return 0;
 }
 
-extern void btlCopyUnitStats(BtlUnit *, DatPartyRecord *);
+extern void btlCopyUnitStats(BtlUnit *, datUnitWork_t *);
 
 /* Insert a complete party record before actors with a larger priority. */
 void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
-    DatPartyRecord saved;
+    datUnitWork_t saved;
     s32 insertion = 0;
     s32 i;
 
@@ -1563,7 +1563,7 @@ void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
 }
 
 void btlMoveActorOutOfActiveParty(BtlUnit *unit) {
-    DatPartyRecord saved;
+    datUnitWork_t saved;
     DatGameState *scanState = DDS3_GBWK;
     s32 originalIndex;
     s32 index;
@@ -1597,7 +1597,7 @@ extern const char D_00415130[];
 
 /* Swap the actor's roster entry, refresh its stats, and mark the active entry. */
 void btlSynchronizePartyActorRecords(BtlUnit *actor, u8 targetIndex) {
-    DatPartyRecord previous;
+    datUnitWork_t previous;
 
     if (actor->partyIndex != targetIndex) {
         memcpy(&previous, &DDS3_GBWK->party[actor->partyIndex], sizeof(previous));
@@ -1615,29 +1615,29 @@ void btlSynchronizePartyActorRecords(BtlUnit *actor, u8 targetIndex) {
     }
 }
 
-s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record) {
+s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record) {
     if ((record->flags & 4) != 0) {
         return 0;
     }
     return datEnemyRecords[record->unitId].flags;
 }
 
-extern s32 datGetClampedProfileAdjustedStat(DatPartyRecord *, s32);
+extern s32 datGetClampedProfileAdjustedStat(datUnitWork_t *, s32);
 
-extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32);
+extern s32 datGetStatWithStatusOverride(datUnitWork_t *, s32);
 
 /* Native tail jump forwards the clamped profile-adjusted stat in v0;
  * retain the existing void C surface for matching. */
-void btlQueryClampedProfileAdjustedStat(DatPartyRecord *unit, s32 statIndex) {
+void btlQueryClampedProfileAdjustedStat(datUnitWork_t *unit, s32 statIndex) {
     datGetClampedProfileAdjustedStat(unit, statIndex);
 }
 
 /* Return the requested party-record stat with its native status override. */
-s32 btlGetStatWithStatusOverride(DatPartyRecord *unit, s32 statIndex) {
+s32 btlGetStatWithStatusOverride(datUnitWork_t *unit, s32 statIndex) {
     return datGetStatWithStatusOverride(unit, statIndex);
 }
 
-s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *battler, s32 command) {
+s32 btlApplyCommandAbilityMultiplier(datUnitWork_t *battler, s32 command) {
     u32 value = datCalculateCommandBaseValue(battler, command);
     f32 scale;
 
@@ -1731,9 +1731,9 @@ s32 btlGetCommandUseError(BtlUnit *unit, s32 command) {
     return btlCheckCommandVitalCost(unit, command);
 }
 
-s32 btlGetCombinedPartyCommandPower(DatPartyRecord *base, BtlUnit *first, BtlUnit *second,
+s32 btlGetCombinedPartyCommandPower(datUnitWork_t *base, BtlUnit *first, BtlUnit *second,
                   BtlUnit *third, s32 command) {
-    DatPartyRecord snapshot = *base;
+    datUnitWork_t snapshot = *base;
     s32 totalMaxHp = 0;
     s32 count = 0;
     s32 average;
@@ -1807,9 +1807,9 @@ s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element) {
     return btlResolveUnitValueWithOverride(&battler->partyRecord, element);
 }
 
-extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
+extern s32 datGetEffectiveAffinity(datUnitWork_t *, s32);
 
-s32 btlResolveUnitValueWithOverride(DatPartyRecord *record, s32 element) {
+s32 btlResolveUnitValueWithOverride(datUnitWork_t *record, s32 element) {
     s32 (*hook)(s32, s32) = *(s32 (**)(s32, s32))((u8 *)btlGetRuntime() + 0x6B8);
     if (hook != 0) {
         s32 value = hook((s32)record, element);
@@ -2447,7 +2447,7 @@ s32 btlFlagToElementIndex(s32 flag) {
     return datFlagToElementIndex(flag);
 }
 
-s32 btlCheckSpecialAbility(DatPartyRecord *record, s32 ability) {
+s32 btlCheckSpecialAbility(datUnitWork_t *record, s32 ability) {
     if (datUnitHasSkill(record, ability) == 0) {
         return 0;
     }
@@ -2489,7 +2489,7 @@ s32 btlHasSkillInFirstEightSlots(DatSkillOwner *unit, s32 skill) {
     return 0;
 }
 
-s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *partyRecord, u32 entryId) {
+s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *partyRecord, u32 entryId) {
     if (partyRecord->flags & 0x20) {
         return 0;
     }
@@ -2799,7 +2799,7 @@ s32 btlCountAvailableUnits(void) {
 /* Count ready scene actors plus eligible party entries stored in script state. */
 s32 btlCountAvailableParticipants(void) {
     BtlUnit *unit;
-    DatPartyRecord *entry;
+    datUnitWork_t *entry;
     s32 count = 0;
     s32 i;
     u32 flags;
@@ -3335,7 +3335,7 @@ s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *unit, u32 slot) {
 
 /* Return the enabled low-HP ability's multiplier from the native HP-percent thresholds. */
 f32 btlGetLowHpAbilityMultiplier(BtlUnit *unit) {
-    DatPartyRecord *entry = &unit->partyRecord;
+    datUnitWork_t *entry = &unit->partyRecord;
     s32 maximum;
     s32 percentage;
 

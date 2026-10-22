@@ -125,7 +125,7 @@ typedef struct BtlOperandGroup {
 /* Embedded command work at actor +0x20. DDS1 btlInitBattleIndexWork owns
  * thirteen retained groups at +0x60/+0x64 (0x68 bytes); DDS2 uses
  * +0x68/+0x6C (0x70 bytes). Neither record is the whole owning actor. */
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 typedef struct BattleIndexWork {
     s32 phase;
@@ -171,7 +171,7 @@ typedef struct BattleIndexWork {
     u8 pad65[3];
 #endif
     BtlOperandGroup *groups;
-    struct SdfMemBlock *allocationHandle;
+    struct sdfMemHandle_t *allocationHandle;
 } BattleIndexWork;
 typedef char BattleIndexWork_costValidationFailed_offset_must_be_0x2D[
     ((u32)&((BattleIndexWork *)0)->costValidationFailed == 0x2D) ? 1 : -1];

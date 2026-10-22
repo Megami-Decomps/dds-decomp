@@ -13,7 +13,7 @@ extern void mnuClearTitleState(BrsSkillPackageWork *);
 extern u8 D_00324530[];
 extern u8 D_0036D3EC[];
 
-s32 brsMessageInputStep(KwlnTask *input) {
+s32 brsMessageInputStep(dds3ProcessID_t *input) {
     BrsSkillPackageWork *context;
     s32 *transitionState;
     s32 buttons;
@@ -41,7 +41,7 @@ s32 brsMessageInputStep(KwlnTask *input) {
 }
 
 
-s32 mnuStaffRunPanel1(KwlnTask *task) {
+s32 mnuStaffRunPanel1(dds3ProcessID_t *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
 
     if (brsTaskIsUiUpdateAllowed(context) != 0) {
@@ -52,7 +52,7 @@ s32 mnuStaffRunPanel1(KwlnTask *task) {
 
 extern void brsDecaySharedAnimCounter(BrsSkillPackageWork *);
 
-s32 mnuStaffRunPanel2(KwlnTask *task) {
+s32 mnuStaffRunPanel2(dds3ProcessID_t *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
 
     if (brsTaskIsUiUpdateAllowed(context) != 0) {
@@ -71,19 +71,19 @@ u32 mnuResultMessageLeaveNoOp(void) {
     return 1;
 }
 
-s32 mnuStaffRunPanel0(KwlnTask *task) {
+s32 mnuStaffRunPanel0(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
     mnuMapPadMaskToFlags(0x33);
     return menuRunPanel((void *)context, 0, (void *)task);
 }
 
-s32 mnuRefreshAndDispatchCurrentPanel(KwlnTask *task) {
+s32 mnuRefreshAndDispatchCurrentPanel(dds3ProcessID_t *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
     mnuRefreshPanelLayer(context);
     return menuRunPanel(context, 1, (void *)task);
 }
 
-s32 mnuRunResultPanelMode2(KwlnTask *input) {
+s32 mnuRunResultPanelMode2(dds3ProcessID_t *input) {
     s32 context = dds3GetProcessData(input);
     return menuRunPanel((void *)context, 2, (void *)input);
 }

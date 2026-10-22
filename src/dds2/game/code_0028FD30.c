@@ -21,7 +21,7 @@ extern void mnuEnableMantraBackground(struct MantraDrawPool *pool);
 extern void mnuToggleMantraTitleVariant(struct MantraDrawPool *pool);
 extern void mnuBeginMantraUnitPanelExit(struct MantraDrawPool *pool);
 extern struct MantraDrawItem *mnuRegisterMantraUnitPanelDraw(struct MantraDrawPool *pool, u32);
-extern DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *);
+extern datUnitWork_t *mnuGetSelectedNodeValue(MnuStatusResource *);
 extern s32 mnuMoveNodeCursorToTargetIndex(MnuStatusResource *, s8);
 extern void mnuSpawnMantraPanelsFromSelectedUnitFlags(MnuStatusResource *, s32, s32);
 extern void mnuUpdateMantraSelectionPanelSlots(MnuStatusResource *, s16, s32, s8, s8, s32);
@@ -98,7 +98,7 @@ typedef struct MenuPanelEntry {
 } MenuPanelEntry;
 
 typedef struct MenuPanelEntryPool {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     MenuPanelEntry *entries;
     s32 count;
 } MenuPanelEntryPool;
@@ -197,7 +197,7 @@ s32 mnuHandleMantraSourceDialogResult(MantraMenuSrc *source, MnuStatusResource *
     s32 messageEntry;
     u32 currentFlags;
     u32 publishedFlags;
-    DatPartyRecord *party;
+    datUnitWork_t *party;
     MantraMenuWork *state;
 
     if (source == NULL) {
@@ -658,8 +658,8 @@ void mnuSynchronizeMantraModelFlags(s32 mode) {
     }
 }
 
-extern void ptyRecomputeMaxVitals(DatPartyRecord *, const s32 *);
-extern s32 ptyAddClampedEntryValue(DatPartyRecord *entry, s32 statIndex, s32 amount);
+extern void ptyRecomputeMaxVitals(datUnitWork_t *, const s32 *);
+extern s32 ptyAddClampedEntryValue(datUnitWork_t *entry, s32 statIndex, s32 amount);
 
 /* Apply one stat, or all five base stats, to each occupied party slot. */
 void ptyAdjustAllActiveRosterStats(s32 statIndex, s32 amount) {
@@ -667,7 +667,7 @@ void ptyAdjustAllActiveRosterStats(s32 statIndex, s32 amount) {
 
     for (index = 0; index < 5; index++) {
         if ((u16)(DDS3_GBWK->party[index].flags & 1) != 0) {
-            DatPartyRecord *entry = &DDS3_GBWK->party[index];
+            datUnitWork_t *entry = &DDS3_GBWK->party[index];
 
             if (statIndex == DAT_BASE_STAT_COUNT) {
                 s32 stat;
@@ -683,7 +683,7 @@ void ptyAdjustAllActiveRosterStats(s32 statIndex, s32 amount) {
     }
 }
 
-extern void scrSetEntryLowFlags(DatPartyRecord *context, u16 entryId, u16 lowFlags);
+extern void scrSetEntryLowFlags(datUnitWork_t *context, u16 entryId, u16 lowFlags);
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
 const s16 mnuMantraBridgeDestinationIds[4][3] __attribute__((section(".rodata"), aligned(8))) = {
@@ -713,7 +713,7 @@ void mnuStoreMantraPanelFlagsToScript(MnuStatusResource *object) {
     s32 slotIndex = 0;
 
     for (; node != NULL; node = node->next) {
-        DatPartyRecord *context = node->partyRecord;
+        datUnitWork_t *context = node->partyRecord;
         u16 *values = object->menu.slots[slotIndex]->flags;
         s32 i;
 
@@ -724,7 +724,7 @@ void mnuStoreMantraPanelFlagsToScript(MnuStatusResource *object) {
     }
 }
 
-extern u16 scrGetEntryLowFlags(DatPartyRecord *context, u16 entryId);
+extern u16 scrGetEntryLowFlags(datUnitWork_t *context, u16 entryId);
 
 /* Read each list node's 0xB0 script entry flags into its panel slot and log the slot number. */
 void mnuLoadMantraPanelFlagsFromScript(MnuStatusResource *object) {
@@ -732,7 +732,7 @@ void mnuLoadMantraPanelFlagsFromScript(MnuStatusResource *object) {
     s32 slotIndex = 0;
 
     for (; node != NULL; node = node->next) {
-        DatPartyRecord *context = node->partyRecord;
+        datUnitWork_t *context = node->partyRecord;
         u16 *values = object->menu.slots[slotIndex]->flags;
         s32 i;
 
@@ -743,11 +743,11 @@ void mnuLoadMantraPanelFlagsFromScript(MnuStatusResource *object) {
     }
 }
 
-extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
+extern u32 scrGetSelectedScriptEntryId(datUnitWork_t *);
 extern u32 ptyGetProfileRecordCap(u16 scriptId);
-extern u32 ptyGetProfileRecordValue(DatPartyRecord *work, u16 scriptId);
+extern u32 ptyGetProfileRecordValue(datUnitWork_t *work, u16 scriptId);
 
-s32 mnuValidateProfileEntry(MantraFlagResource *slot, DatPartyRecord *partyRecord) {
+s32 mnuValidateProfileEntry(MantraFlagResource *slot, datUnitWork_t *partyRecord) {
     u16 target = scrGetSelectedScriptEntryId(partyRecord) & 0xFFFF;
     u16 *dst = slot->flags;
     s32 i;
@@ -1952,7 +1952,7 @@ void mnuUpdateMantraTutorialPanelSprites(MnuStatusResource *object) {
 
 /* Allocate twenty countdown entries for sounds attached to this panel. */
 void mnuInitPanelSoundEntries(void) {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     MenuPanelEntryPool *pool;
 
     if (mnuPanelSoundEntryPool == 0) {

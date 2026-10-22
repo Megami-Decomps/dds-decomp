@@ -108,7 +108,7 @@ void sdfVu1Init(void) {
 }
 
 /* Split ring addressing at position 128; retain the native 96-byte stride. */
-void corePktSetupPointBuff(VuWork *work, s32 ringPosition) {
+void corePktSetupPointBuff(corePktCb_t *work, s32 ringPosition) {
     void *ringEnd = (u8 *)work + 0x78;
     if (ringPosition < 0x80) {
         work->dmaCountA = 0x80 - ringPosition;
@@ -133,7 +133,7 @@ void corePktSetupPointBuff(VuWork *work, s32 ringPosition) {
 }
 
 /* Decode four leading halfwords; selectionMask filters flags, not the payload. */
-void corePktInitCb(VuWork *work, u16 *parameterWords, u32 selectionMask) {
+void corePktInitCb(corePktCb_t *work, u16 *parameterWords, u32 selectionMask) {
     u8 *payload = (u8 *)(parameterWords + 4);
     u16 ringPosition;
     u16 parameterFlags;

@@ -14,7 +14,7 @@
 s32 evtCheckPathStat(void *obj) {
     f32 target = 1.0f;
     void *slot;
-    Dds3PathCurveWork *handle;
+    dds3PathBasicControl_t *handle;
     s32 kind;
 
     if (obj == NULL) {
@@ -42,7 +42,7 @@ s32 evtCheckPathStat(void *obj) {
 }
 
 void evtPathLoop(void *worldObject, s32 enabled) {
-    Dds3PathCurveWork *data = dds3ObjectBaseGetPathControl(worldObject);
+    dds3PathBasicControl_t *data = dds3ObjectBaseGetPathControl(worldObject);
 
     if (data == NULL) {
         return;
@@ -102,8 +102,8 @@ void evtEffectLoopControl(EvtNodeOwner *owner, s32 nodeFlag) {
 #include "dds3_world_primary.h"
 
 s32 evtStageAnimeControl(s32 modeSelector, s32 modeValue) {
-    EffWorldNode *world = dds3GetActiveScene();
-    EffWorldNode *node;
+    dds3Basic_t *world = dds3GetActiveScene();
+    dds3Basic_t *node;
     s32 combinedMode;
 
     if (world == NULL) {
@@ -127,7 +127,7 @@ void evtVu0SubVectorXZAxis(f32 *a, f32 *b) {
 }
 
 /* vf10 = the unit's rotated y axis flattened to the ground plane, negated */
-void evtGetUnitDirVector(EvtUnit *unit) {
+void evtGetUnitDirVector(evtUnitHandle_t *unit) {
     f32 v[4];
 
     VU0_LOAD_VF(vf10, unit->effObj->inner->rotation);
@@ -141,7 +141,7 @@ void evtGetUnitDirVector(EvtUnit *unit) {
 }
 
 /* vu0 routine: test target range or the selected path endpoint. */
-s32 evtCheckMoveEnd(EvtUnit *unit) {
+s32 evtCheckMoveEnd(evtUnitHandle_t *unit) {
     f32 value;
 
     switch (unit->motionSubmode) {
@@ -155,7 +155,7 @@ s32 evtCheckMoveEnd(EvtUnit *unit) {
         }
         break;
     case 3:
-        value = dds3PathBasicControlGetRatio(&((Dds3PathCurveWork *)unit->pathHandle)->counter);
+        value = dds3PathBasicControlGetRatio(&((dds3PathBasicControl_t *)unit->pathHandle)->counter);
         if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (value == 0.0f) {
                 return 1;
@@ -169,7 +169,7 @@ s32 evtCheckMoveEnd(EvtUnit *unit) {
 }
 
 
-s32 evtGetNextMovePos(EvtUnit *unit) {
+s32 evtGetNextMovePos(evtUnitHandle_t *unit) {
     f32 t;
 
     if (unit->motionState != EVT_UNIT_MOTION_STATE_SOURCE) {
@@ -180,7 +180,7 @@ s32 evtGetNextMovePos(EvtUnit *unit) {
     case EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE:
         break;
     case EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE:
-        t = dds3PathBasicControlGetRatio(&((Dds3PathCurveWork *)unit->pathHandle)->counter);
+        t = dds3PathBasicControlGetRatio(&((dds3PathBasicControl_t *)unit->pathHandle)->counter);
         if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (t == 0.0f) {
                 return 0;
@@ -197,8 +197,8 @@ s32 evtGetNextMovePos(EvtUnit *unit) {
         if (1.0f < t) {
             t = 1.0f;
         }
-        dds3PathBasicControlSetRatio(&((Dds3PathCurveWork *)unit->pathHandle)->counter, t);
-        dds3PathBasicControlGetPos((Dds3PathCurveWork *)unit->pathHandle);
+        dds3PathBasicControlSetRatio(&((dds3PathBasicControl_t *)unit->pathHandle)->counter, t);
+        dds3PathBasicControlGetPos((dds3PathBasicControl_t *)unit->pathHandle);
         VU0_STORE_VF($vf10, unit->targetVector);
         return 1;
     }

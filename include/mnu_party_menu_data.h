@@ -7,13 +7,13 @@
 /* DDS2's party-selection allocation is initialized and read by the party
  * menu owner. Its saved panel records are two complete MenuPageBar views. */
 typedef struct PartyMenuData {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u8 pad04[4];
     MenuWindowContainer *primaryWindow; /* 0x08 */
-    DatPartyRecord original[5];         /* 0x0C */
-    DatPartyRecord current[5];          /* 0x8E0 */
+    datUnitWork_t original[5];         /* 0x0C */
+    datUnitWork_t current[5];          /* 0x8E0 */
     s32 activeCount;                    /* 0x11B4 */
-    DatPartyRecord backup[5];           /* 0x11B8 */
+    datUnitWork_t backup[5];           /* 0x11B8 */
     s32 selection;                      /* 0x1A8C */
     MenuPageBar panelSnapshots[5][2];   /* 0x1A90 */
     s32 fadeA;                          /* 0x1DB0 */

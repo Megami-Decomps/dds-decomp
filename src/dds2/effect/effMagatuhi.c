@@ -106,7 +106,7 @@ typedef struct {
     EffArrHdr *mathResource;    /* 0x180 */
     u8 pad184[8];
     EffMagatuhiOwner *managedResource; /* 0x18C */
-    SdfMemBlock *allocationHandle; /* 0x190 backing allocation, not the particle address */
+    sdfMemHandle_t *allocationHandle; /* 0x190 backing allocation, not the particle address */
 } EffMagatuhiWideFirst;
 
 /* Bezier parameter head: particle count and delay spread at their native offsets. */
@@ -129,7 +129,7 @@ typedef struct {
     s32 *delays;           /* 0x180 */
     EffArrHdr *mathResource;    /* 0x184 */
     EffMagatuhiOwner *managedResource; /* 0x188 */
-    SdfMemBlock *allocationHandle; /* 0x18C backing allocation, not the work address */
+    sdfMemHandle_t *allocationHandle; /* 0x18C backing allocation, not the work address */
 } EffMagatuhiWideSecond;
 
 /* Float source block read by effMagaSCSetArea. */
@@ -162,12 +162,12 @@ static inline u32 packMagatuhiTrailColor(void) {
     EE_MMI_RGBA_PACK_UNIT(rgba[0], 128.0f);
     return rgba[0];
 }
-extern SdfTexBuf * sdfTexGetPacket(SdfTex *texture);
+extern sdfTexPacket_t * sdfTexGetPacket(sdfTexHandle_t *texture);
 extern s32 sdfGrAllocPacketBuff(s32 size);
-extern s32 sdfTexGetPacketLength(const SdfTex *texture);
-extern void sdfDrawTagLink(SdfListHead *list, u32 packet);
-extern void sdfAppendReferencePacket(SdfListHead *list, u32 packetAddress);
-extern void sdfDrawTagInit(SdfListHead *list);
+extern s32 sdfTexGetPacketLength(const sdfTexHandle_t *texture);
+extern void sdfDrawTagLink(sdfDrawTag_t *list, u32 packet);
+extern void sdfAppendReferencePacket(sdfDrawTag_t *list, u32 packetAddress);
+extern void sdfDrawTagInit(sdfDrawTag_t *list);
 
 void effSwordTrackDrawTex(EffMagatuhiValueWork *work) {
     f32 positions[15][4];
@@ -175,7 +175,7 @@ void effSwordTrackDrawTex(EffMagatuhiValueWork *work) {
     f32 offsets[15][8];
     f32 matrix[16];
     f32 point[4];
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     u32 packet;
     u32 *vertexPacket;
     f32 (*historyPositions)[4];
@@ -196,12 +196,12 @@ void effSwordTrackDrawTex(EffMagatuhiValueWork *work) {
     f32 size, widthScale;
     u32 packed;
 
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     packet = sdfGrAllocPacketBuff(0x20);
     sdf3DMakeDirectRefPacket((DmaPacketHeader *)packet,
         (u32)sdfTexGetPacket(work->texture),
-        sdfTexGetPacketLength((SdfTex *)work->texture));
+        sdfTexGetPacketLength((sdfTexHandle_t *)work->texture));
     sdfAppendReferencePacket(list, packet);
     EE_MMI_UNIT_MATRIX(matrix);
     historyOffset = 0;
@@ -408,7 +408,7 @@ extern EffRandState effDefaultRandomState[];
 EffMagatuhiWideFirst *effMagaSmokeConvCreate(EffMagatuhiHeadFirst *src) {
     u32 count = src->particleCount;
     u32 size = count * sizeof(EffMagatuhiDriftParticle);
-    SdfMemBlock *allocation = sdfMemAllocDirect(size + sizeof(EffMagatuhiWideFirst));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(size + sizeof(EffMagatuhiWideFirst));
     EffMagatuhiDriftParticle *particle = (EffMagatuhiDriftParticle *)sdfMemLock(allocation);
     EffMagatuhiWideFirst *work = (EffMagatuhiWideFirst *)((u8 *)particle + size);
     s32 spread;
@@ -618,7 +618,7 @@ void effMagaSCSetArea(EffMagatuhiCallback *work, EffMagatuhiFloatParams *src) {
 /* Clone history parameters; signed delays follow the returned work block. */
 EffMagatuhiWideSecond *effMagaPoint4Create(EffMagatuhiHeadSecond *src) {
     u32 count = src->particleCount;
-    SdfMemBlock *allocation = sdfMemAllocDirect(count * EFF_MAGATUHI_DELAY_WORD_BYTES + sizeof(EffMagatuhiWideSecond));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(count * EFF_MAGATUHI_DELAY_WORD_BYTES + sizeof(EffMagatuhiWideSecond));
     EffMagatuhiWideSecond *work = (EffMagatuhiWideSecond *)sdfMemLock(allocation);
     s32 *delays = (s32 *)(work + 1);
     s32 spread;
@@ -900,13 +900,13 @@ typedef struct {
     EffMagatuhiRingParticle *particles;
     EffMagatuhiOwner *managedResource;
     u32 tintColor;
-    SdfMemBlock *allocationHandle;
+    sdfMemHandle_t *allocationHandle;
 } EffMagatuhiRingWork;
 
 /* Clone ring parameters; the returned work precedes its individual slots. */
 EffMagatuhiRingWork *effMagaCylinderCreate(EffMagatuhiRingParams *src) {
     u32 count = src->particleCount;
-    SdfMemBlock *allocation = sdfMemAllocDirect(count * sizeof(EffMagatuhiRingParticle) + sizeof(EffMagatuhiRingWork));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(EffMagatuhiRingParticle) + sizeof(EffMagatuhiRingWork));
     EffMagatuhiRingWork *work = (EffMagatuhiRingWork *)sdfMemLock(allocation);
     EffMagatuhiRingParticle *particle = (EffMagatuhiRingParticle *)(work + 1);
     s32 spread;
@@ -1112,7 +1112,7 @@ void effMagaCylinderRandomize(EffMagatuhiCallback *callback) {
 /* Clone orbit parameters; the returned work precedes its individual slots. */
 EffMagatuhiOrbitWork *effMagaSpiralCreate(EffMagatuhiOrbitParams *src) {
     u32 count = src->particleCount;
-    SdfMemBlock *allocation = sdfMemAllocDirect(count * sizeof(EffMagatuhiOrbitParticle) + sizeof(EffMagatuhiOrbitWork));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(EffMagatuhiOrbitParticle) + sizeof(EffMagatuhiOrbitWork));
     EffMagatuhiOrbitWork *work = (EffMagatuhiOrbitWork *)sdfMemLock(allocation);
     EffMagatuhiOrbitParticle *particle = (EffMagatuhiOrbitParticle *)(work + 1);
     s32 spread;
@@ -1329,14 +1329,14 @@ typedef struct {
     EffMagatuhiDriftParticle *particles;
     u32 tintColor;
     EffMagatuhiOwner *managedResource;
-    SdfMemBlock *allocationHandle;
+    sdfMemHandle_t *allocationHandle;
 } EffMagatuhiDriftWork;
 
 /* Clone drift parameters; return the work after its 0x30-byte state array. */
 EffMagatuhiDriftWork *effMagaSmokeCreate(EffMagatuhiDriftParams *src) {
     u32 count = src->particleCount;
     u32 size = count * sizeof(EffMagatuhiDriftParticle);
-    SdfMemBlock *allocation = sdfMemAllocDirect(size + sizeof(EffMagatuhiDriftWork));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(size + sizeof(EffMagatuhiDriftWork));
     EffMagatuhiDriftParticle *particle = (EffMagatuhiDriftParticle *)sdfMemLock(allocation);
     EffMagatuhiDriftWork *work = (EffMagatuhiDriftWork *)((u8 *)particle + size);
     s32 spread;

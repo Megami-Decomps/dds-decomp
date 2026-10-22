@@ -4,14 +4,14 @@
 #include "common.h"
 #include "kwln.h"
 
-/* One 4-byte script operand slot; DDS1/2 script/scrTraceCode.c via ScrData. */
+/* One 4-byte script operand slot; DDS1/2 script/scrTraceCode.c via scrProcessWork_s. */
 typedef union ScrStackValue {
     s32 i;
     f32 f;
     char *s;
 } ScrStackValue;
 
-/* Four-byte decoded VM instruction; DDS1/2 script/scrTraceCode.c via ScrData. */
+/* Four-byte decoded VM instruction; DDS1/2 script/scrTraceCode.c via scrProcessWork_s. */
 typedef union ScrInstr {
     struct {
         s16 opCode;
@@ -41,7 +41,7 @@ typedef char ScrSection_size_must_be_0x10[
 
 /* Native 0xF4-byte process allocated by bfContextCreate in both games.
  * The interpreter, scheduler attachment and named-process list share this owner. */
-typedef struct ScrData {
+typedef struct scrProcessWork_s {
     char name[24];
     s32 pc;
     s32 sp;
@@ -61,40 +61,40 @@ typedef struct ScrData {
     void *scriptHandle;
     s32 *localInt;
     f32 *localFloat;
-    KwlnTask *task;       /* 0xE4: scheduler object returned by dds3StartProcess */
-    struct ScrData *previous; /* 0xE8: named-process list links */
-    struct ScrData *next;     /* 0xEC */
+    dds3ProcessID_t *task;       /* 0xE4: scheduler object returned by dds3StartProcess */
+    struct scrProcessWork_s *previous; /* 0xE8: named-process list links */
+    struct scrProcessWork_s *next;     /* 0xEC */
     void *actor;          /* 0xF0: caller-owned command work */
-} ScrData;
+} scrProcessWork_s;
 
 typedef char ScrData_size_must_be_0xF4[
-    (sizeof(ScrData) == 0xF4) ? 1 : -1];
+    (sizeof(scrProcessWork_s) == 0xF4) ? 1 : -1];
 
-extern ScrData *nowpwork;
-extern ScrData *scrHandleFirst;
-extern ScrData *scrHandleLast;
+extern scrProcessWork_s *nowpwork;
+extern scrProcessWork_s *scrHandleFirst;
+extern scrProcessWork_s *scrHandleLast;
 
-ScrData *scrGetScriptHandle(void);
-ScrData *scrSearchScriptName(const char *name);
+scrProcessWork_s *scrGetScriptHandle(void);
+scrProcessWork_s *scrSearchScriptName(const char *name);
 void *scrGetData(void);
-void *scrGetUserData(KwlnTask *task);
-void scrSetUserData(KwlnTask *task, void *actor);
-void scrScriptShutdown(KwlnTask *task);
-void scrRunScript(ScrData *context);
-s32 scrScriptProcess(KwlnTask *task);
-s32 scrTraceCode(ScrData *context);
-void scrProcDestroyTask(ScrData *process);
-ScrData *bfContextCreate(void *header, ScrSection *sections, ScrLabel *procedures,
+void *scrGetUserData(dds3ProcessID_t *task);
+void scrSetUserData(dds3ProcessID_t *task, void *actor);
+void scrScriptShutdown(dds3ProcessID_t *task);
+void scrRunScript(scrProcessWork_s *context);
+s32 scrScriptProcess(dds3ProcessID_t *task);
+s32 scrTraceCode(scrProcessWork_s *context);
+void scrProcDestroyTask(scrProcessWork_s *process);
+scrProcessWork_s *bfContextCreate(void *header, ScrSection *sections, ScrLabel *procedures,
                         ScrLabel *labels, ScrInstr *instructions, void *auxiliaryData,
                         char *strings, s32 procedureIndex);
-ScrData *scrCreateTaskWithDefaultOption(void *header);
-void PushInt(ScrData *script, s32 value);
-void PushFloat(ScrData *script, f32 value);
-void PushStr(ScrData *script, char *value);
-void PushRet(ScrData *script, s32 value);
-s32 PopInt(ScrData *script);
-f32 PopFloat(ScrData *script);
-KwlnTask *scrRunScriptEx(u32 priority, void *header,
+scrProcessWork_s *scrCreateTaskWithDefaultOption(void *header);
+void PushInt(scrProcessWork_s *script, s32 value);
+void PushFloat(scrProcessWork_s *script, f32 value);
+void PushStr(scrProcessWork_s *script, char *value);
+void PushRet(scrProcessWork_s *script, s32 value);
+s32 PopInt(scrProcessWork_s *script);
+f32 PopFloat(scrProcessWork_s *script);
+dds3ProcessID_t *scrRunScriptEx(u32 priority, void *header,
     ScrSection *sections, ScrLabel *procedures, ScrLabel *labels,
     ScrInstr *instructions, void *auxiliaryData, char *strings, s32 procedureIndex);
 

@@ -36,9 +36,9 @@ extern u8 D_003BD3F0;
 
 extern s16 D_003BD420;
 
-extern DevState *D_003BD424;
+extern sdfFileCmdHandle_t *D_003BD424;
 
-extern DevState *D_003BD428;
+extern sdfFileCmdHandle_t *D_003BD428;
 
 extern s32 sdfFileCmdThreadPrio;
 
@@ -50,7 +50,7 @@ extern u8 sdfPfsPathPrefix[];
 
 extern f32 sdfNormalizedAsinSamples[];
 
-extern void sdfMemReallocRecord(struct SdfMemBlock *allocation, s32 size);
+extern void sdfMemReallocRecord(struct sdfMemHandle_t *allocation, s32 size);
 
 
 extern u32 sdfDiscType;
@@ -77,9 +77,9 @@ extern Bytes7 D_003BD400[];
 
 extern char D_003BD410[]; /* cdrom */
 
-extern DevState *D_003BD418;
+extern sdfFileCmdHandle_t *D_003BD418;
 
-extern DevState *D_003BD41C;
+extern sdfFileCmdHandle_t *D_003BD41C;
 
 extern s16 D_003BD42C;
 

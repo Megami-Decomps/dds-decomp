@@ -4,7 +4,7 @@
 #include "mdl.h"
 
 static inline void mdlApplyBroadcastVia(
-        void (*apply)(MdlCtx *, u32), MdlCtx *model, u32 value) {
+        void (*apply)(dds3ModelHandle_t *, u32), dds3ModelHandle_t *model, u32 value) {
     apply(model, value);
 }
 

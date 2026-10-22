@@ -36,20 +36,20 @@ u32 evtHokanColor(s32 enable, f32 t, u32 a, u32 b);
 /* "PMD2" resource: a 0x20-byte header followed by 16-byte entries whose
  * offsets are relative to the start of the block. */
 
-extern EvtUnit *dds3GetUnitHandleObjectBasic(EffWorldNode *object);
-extern void dds3ObjectBaseOnFlag(EffWorldNode *obj, s32 flags);
-extern void dds3ObjectBaseOffFlag(EffWorldNode *obj, s32 flags);
+extern evtUnitHandle_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *object);
+extern void dds3ObjectBaseOnFlag(dds3Basic_t *obj, s32 flags);
+extern void dds3ObjectBaseOffFlag(dds3Basic_t *obj, s32 flags);
 
 extern f32 D_00368540[4];
 extern f32 D_00368550[4];
 extern f32 D_00368560[4];
-extern EffBlurQuad D_00368590;
-extern EffBlurTemplateBody evtMovieDefaultBlurTemplate;
-extern EffSolidRectParams evtMovieDefaultSolidRect;
-extern EffResourceRectParams evtMovieDefaultResourceRect;
-extern EffBlurScatterParams evtMovieDefaultBlurScatter;
-extern EffBlurScaleParams evtMovieDefaultBlurScale;
-extern EffBlurQuad D_003686A0;
+extern dds3Effect_Blur_t D_00368590;
+extern dds3Effect_PartialMultiBlurParam_t evtMovieDefaultBlurTemplate;
+extern dds3Effect_Filter_t evtMovieDefaultSolidRect;
+extern dds3Effect_PartialMultiFilterParam_t evtMovieDefaultResourceRect;
+extern dds3Effect_DistortionBlurParam_t evtMovieDefaultBlurScatter;
+extern dds3Effect_RippleBlurParam_t evtMovieDefaultBlurScale;
+extern dds3Effect_Blur_t D_003686A0;
 extern s32 itfMesMngInitialize(u8 *messageSubData);
 extern void itfMesMngRelease(s32 handle);
 extern void fileSyncAll(void);
@@ -57,7 +57,7 @@ extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);
 #include "sdf_debug_api.h"
 
-s32 evtCheckPolygonMovieRun(KwlnTask *task)
+s32 evtCheckPolygonMovieRun(dds3ProcessID_t *task)
 {
     EvtPolygonMovieTaskState *state;
     s32 set;
@@ -235,7 +235,7 @@ void evtHokanSceneFog(s32 enable, f32 t, EvtBlendVecColor *a, EvtBlendVecColor *
     out->color = eePackRGBAWord(128.0f);
 }
 
-void evtHokanBlur2(s32 enable, f32 t, EffBlurQuad *a, EffBlurQuad *b, EffBlurQuad *out)
+void evtHokanBlur2(s32 enable, f32 t, dds3Effect_Blur_t *a, dds3Effect_Blur_t *b, dds3Effect_Blur_t *out)
 {
     s32 positionOrCornerIndex;
     s32 coordinateIndex;
@@ -263,7 +263,7 @@ void evtHokanBlur2(s32 enable, f32 t, EffBlurQuad *a, EffBlurQuad *b, EffBlurQua
     }
 }
 
-void evtHokanMultBlur(s32 enable, f32 t, EffBlurTemplateBody *a, EffBlurTemplateBody *b, EffBlurTemplateBody *out)
+void evtHokanMultBlur(s32 enable, f32 t, dds3Effect_PartialMultiBlurParam_t *a, dds3Effect_PartialMultiBlurParam_t *b, dds3Effect_PartialMultiBlurParam_t *out)
 {
     s32 positionOrCornerIndex;
     s32 coordinateIndex;
@@ -292,7 +292,7 @@ void evtHokanMultBlur(s32 enable, f32 t, EffBlurTemplateBody *a, EffBlurTemplate
     }
 }
 
-void evtHokanFilter(s32 enable, f32 t, EffSolidRectParams *a, EffSolidRectParams *b, EffSolidRectParams *out)
+void evtHokanFilter(s32 enable, f32 t, dds3Effect_Filter_t *a, dds3Effect_Filter_t *b, dds3Effect_Filter_t *out)
 {
     s32 cornerIndex;
     s32 coordinateIndex;
@@ -315,7 +315,7 @@ void evtHokanFilter(s32 enable, f32 t, EffSolidRectParams *a, EffSolidRectParams
     out->blendControl = a->blendControl;
 }
 
-void evtHokanMultFilter(s32 enable, f32 t, EffResourceRectParams *a, EffResourceRectParams *b, EffResourceRectParams *out)
+void evtHokanMultFilter(s32 enable, f32 t, dds3Effect_PartialMultiFilterParam_t *a, dds3Effect_PartialMultiFilterParam_t *b, dds3Effect_PartialMultiFilterParam_t *out)
 {
     s32 centerCoordinateIndex;
 
@@ -337,7 +337,7 @@ void evtHokanMultFilter(s32 enable, f32 t, EffResourceRectParams *a, EffResource
     out->draw.blendControl = a->draw.blendControl;
 }
 
-void evtHokanDistBlur(s32 enable, f32 t, EffBlurScatterParams *a, EffBlurScatterParams *b, EffBlurScatterParams *out)
+void evtHokanDistBlur(s32 enable, f32 t, dds3Effect_DistortionBlurParam_t *a, dds3Effect_DistortionBlurParam_t *b, dds3Effect_DistortionBlurParam_t *out)
 {
     s32 positionAxisIndex;
 
@@ -364,7 +364,7 @@ void evtHokanDistBlur(s32 enable, f32 t, EffBlurScatterParams *a, EffBlurScatter
     out->size = evtHokanUInt(enable, t, a->size, b->size);
 }
 
-void evtHokanRipBlur(s32 enable, f32 t, EffBlurScaleParams *a, EffBlurScaleParams *b, EffBlurScaleParams *out)
+void evtHokanRipBlur(s32 enable, f32 t, dds3Effect_RippleBlurParam_t *a, dds3Effect_RippleBlurParam_t *b, dds3Effect_RippleBlurParam_t *out)
 {
     s32 positionAxisIndex;
 
@@ -391,7 +391,7 @@ void evtHokanRipBlur(s32 enable, f32 t, EffBlurScaleParams *a, EffBlurScaleParam
     out->size = evtHokanUInt(enable, t, a->size, b->size);
 }
 
-void evtBlendParamsG(s32 enable, f32 t, EffBlurQuad *a, EffBlurQuad *b, EffBlurQuad *out)
+void evtBlendParamsG(s32 enable, f32 t, dds3Effect_Blur_t *a, dds3Effect_Blur_t *b, dds3Effect_Blur_t *out)
 {
     s32 positionOrCornerIndex;
     s32 coordinateIndex;
@@ -438,7 +438,7 @@ void evtBlendParamsH(s32 enable, f32 t, const EvtBlendKey *a, const EvtBlendKey 
     }
 }
 
-void evtPolygonMovieSetObjectMode(EffWorldNode *obj, u32 mode, s32 setFlags, s32 clearFlags)
+void evtPolygonMovieSetObjectMode(dds3Basic_t *obj, u32 mode, s32 setFlags, s32 clearFlags)
 {
     switch (mode) {
     case 0:
@@ -477,7 +477,7 @@ void evtPolygonMovieSetObjectMode(EffWorldNode *obj, u32 mode, s32 setFlags, s32
 }
 
 /* Apply a caller-provided mask to the event state's flag word. */
-void evtPolygonMovieSetFlagBits(KwlnTask *task, u32 bits)
+void evtPolygonMovieSetFlagBits(dds3ProcessID_t *task, u32 bits)
 {
     EvtPolygonMovieTaskState *state;
 
@@ -485,7 +485,7 @@ void evtPolygonMovieSetFlagBits(KwlnTask *task, u32 bits)
     *state->flags = *state->flags | bits;
 }
 
-void evtPolygonMovieClearFlagBits(KwlnTask *task, u32 bits)
+void evtPolygonMovieClearFlagBits(dds3ProcessID_t *task, u32 bits)
 {
     EvtPolygonMovieTaskState *state;
 
@@ -494,7 +494,7 @@ void evtPolygonMovieClearFlagBits(KwlnTask *task, u32 bits)
 }
 
 /* Scale the clip to the elapsed fraction of its duration, then apply or undo it. */
-s32 evtStopMover(EffWorldNode *movie, s32 undo, s32 startFrame, s32 endFrame)
+s32 evtStopMover(dds3Basic_t *movie, s32 undo, s32 startFrame, s32 endFrame)
 {
     SdfFloatCounter *clip;
     s32 elapsedFrames;
@@ -520,7 +520,7 @@ s32 evtStopMover(EffWorldNode *movie, s32 undo, s32 startFrame, s32 endFrame)
 }
 
 /* Store elapsed frames, bounded below by zero and above by clip duration. */
-void evtPolygonMovieClampTime(EffWorldNode *movie, s32 unused, s32 start, s32 end)
+void evtPolygonMovieClampTime(dds3Basic_t *movie, s32 unused, s32 start, s32 end)
 {
     SdfFloatCounter *clip;
     s32 elapsedFrames;
@@ -795,11 +795,11 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work)
 }
 
 /* Allocate a resource block holding a fresh "PMD2" header; returns the handle. */
-SdfMemBlock *evtAllocMovieWork(PmdHeader **out)
+sdfMemHandle_t *evtAllocMovieWork(PmdHeader **out)
 {
     s32 header[16] = {0, 0, 0x32444D50, 0, 1, 9, 0, 0, 0, 0x10, 1, 0x30, 0, 999, 1000, 0};
     s32 headerBytes;
-    SdfMemBlock *handle;
+    sdfMemHandle_t *handle;
     void *block;
 
     headerBytes = 0x40;
@@ -830,10 +830,10 @@ extern char D_003BBF78[];
 
 /* Build the 0x20-byte PMD3 resource header, copy it into a fresh allocation and
  * hand the retained address back through `out`. */
-SdfMemBlock *evtPolygonMovieSynthesizePmd3Header(PmdHeader **out) {
+sdfMemHandle_t *evtPolygonMovieSynthesizePmd3Header(PmdHeader **out) {
     u8 buffer[0x20];
     s32 headerBytes = 0x20;
-    SdfMemBlock *handle;
+    sdfMemHandle_t *handle;
     u8 *address;
 
     memset(buffer, 0, headerBytes);
@@ -871,9 +871,9 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
     PmdHeader *address1;
     PmdHeader *address2;
     PmdHeader *address3;
-    SdfMemBlock *handle1;
-    SdfMemBlock *handle2;
-    SdfMemBlock *handle3;
+    sdfMemHandle_t *handle1;
+    sdfMemHandle_t *handle2;
+    sdfMemHandle_t *handle3;
     PolyMovieWork *work;
 
     evtFormatPolygonMoviePaths(eventId, sceneId, path1, path2, path3);
@@ -912,19 +912,19 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
 
 extern u32 D_003BA8EC;
 extern s32 sdfFileCheckExist(char *path);
-extern void evtEventViewerDestroyActiveAlternate(KwlnTask *task);
+extern void evtEventViewerDestroyActiveAlternate(dds3ProcessID_t *task);
 extern void evtEventViewerInitCampFontResource(EvtRuntime *viewer);
 extern char D_003ADDB0[]; /* "(ZikkiPlayMode)EventViewer" */
 
 /* Create the event viewer task `taskId` for event `event`/scene `id` and request its movie files. */
-KwlnTask *evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
+dds3ProcessID_t *evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
     char path0[0x40];
     char path1[0x40];
     char path2[0x40];
-    SdfMemBlock *viewerHandle;
+    sdfMemHandle_t *viewerHandle;
     EvtRuntime *viewer;
     PolyMovieWork *work;
-    KwlnTask *task;
+    dds3ProcessID_t *task;
 
     D_003BA8EC = 0x80000000;
     viewerHandle = sdfMemAllocDirect(0x2490);
@@ -955,14 +955,14 @@ KwlnTask *evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
 
 
 /* Flag operations act on the scheduler task's user-value context. */
-void evtPictureDrawOn(KwlnTask *task) {
+void evtPictureDrawOn(dds3ProcessID_t *task) {
     EvtPictureWork *context;
 
     context = (EvtPictureWork *)dds3GetProcessData(task);
     context->drawEnabled = context->drawEnabled | EVT_PICTURE_FLAG_DRAW_ENABLED;
 }
 
-void evtPictureDrawOff(KwlnTask *task) {
+void evtPictureDrawOff(dds3ProcessID_t *task) {
     EvtPictureWork *context;
 
     context = (EvtPictureWork *)dds3GetProcessData(task);
@@ -970,7 +970,7 @@ void evtPictureDrawOff(KwlnTask *task) {
 }
 
 void evtKillPictureProcess(u32 taskHandle) {
-    dds3KillProcess((KwlnTask *)taskHandle, 1);
+    dds3KillProcess((dds3ProcessID_t *)taskHandle, 1);
 }
 
 /* Allocate the picture task's flag and texture state. */

@@ -3,9 +3,9 @@
 
 #include "common.h"
 
-struct ScrData;
+struct scrProcessWork_s;
 
-struct ScrData *scrGetWorkTaskHandle(void);
-u8 scrIsCurrentWorkTask(struct ScrData *expected);
+struct scrProcessWork_s *scrGetWorkTaskHandle(void);
+u8 scrIsCurrentWorkTask(struct scrProcessWork_s *expected);
 
 #endif /* SCR_WORK_TASK_API_H */

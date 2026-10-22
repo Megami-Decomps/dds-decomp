@@ -37,7 +37,7 @@ typedef struct EffResourceDescriptor {
     EffResourceListNode *firstVisibleEntry;
     EffResourceListNode *selectedEntry;
     EffResourceListNode *cachedEntry;
-    SdfTex *textureHandle;
+    sdfTexHandle_t *textureHandle;
     EffResourceList *resourceList;
 } EffResourceDescriptor;
 typedef char EffResourceDescriptor_size_must_be_0x44[

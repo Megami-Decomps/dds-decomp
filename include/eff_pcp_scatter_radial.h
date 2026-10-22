@@ -65,10 +65,10 @@ typedef struct PcpScatterRadialWork {
     f32 scale;
     u32 color;
     PcpScatterPool *childWork;
-    SdfMemBlock *allocation;
+    sdfMemHandle_t *allocation;
     u32 duplicateGroupCount;
-    EffParamWork **duplicatedHandles;
-    SdfMemBlock *duplicateAllocation;
+    effPartHandle_t **duplicatedHandles;
+    sdfMemHandle_t *duplicateAllocation;
 } PcpScatterRadialWork;
 
 typedef char PcpScatterRadialWork_size_must_be_0x94[

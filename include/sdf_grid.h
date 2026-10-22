@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 typedef struct SdfGridCell {
     u32 index;
@@ -12,7 +12,7 @@ typedef struct SdfGridCell {
 
 /* Grid header allocated immediately before its variable-size cell array. */
 typedef struct SdfGrid {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     SdfGridCell *cells;
     SdfGridCell *cursor;
     SdfGridCell *viewportOrigin;

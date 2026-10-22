@@ -3,8 +3,8 @@
 
 #include "common.h"
 
-struct DatPartyRecord;
+struct datUnitWork_t;
 
-s32 btlResolveUnitValueWithOverride(struct DatPartyRecord *record, s32 element);
+s32 btlResolveUnitValueWithOverride(struct datUnitWork_t *record, s32 element);
 
 #endif

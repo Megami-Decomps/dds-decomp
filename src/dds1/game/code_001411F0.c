@@ -100,17 +100,17 @@ extern u32 fldYukEffectNode;
 
 extern u32 fldYukEffectPositioned;
 
-extern SdfTex *fldWeatherLimitTexture;
+extern sdfTexHandle_t *fldWeatherLimitTexture;
 
 extern s32 D_003BAFBC;
 
-extern SdfTex *D_003BAFC4;
+extern sdfTexHandle_t *D_003BAFC4;
 
 extern s32 D_003BAFB8;
 
 extern s32 D_003BAFC0;
 
-extern SdfTex *D_003BAFB4;
+extern sdfTexHandle_t *D_003BAFB4;
 
 extern s32 D_003BAFA0;
 
@@ -162,12 +162,12 @@ extern void evtSetSolarOverlayFullyVisible(void);
 
 struct FileRequest;
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 extern s8 D_00324530[];
 extern s32 D_0032E4C0[];
 extern s32 D_0032E4E8[];
 extern struct FileRequest *D_003BAFE8;
-extern struct SdfMemBlock *D_003BAFEC;
+extern struct sdfMemHandle_t *D_003BAFEC;
 extern u32 D_003BAFF0;
 extern void fldSetCameraModelMotionRequest(u32, u32);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
@@ -177,7 +177,7 @@ extern void dds3EffectObjectBasicStatOn(void *, s32);
 extern void dds3StartBEDEffectObjectBasic(void *, u32);
 extern void fldSetCameraNodeModeWithTen(void);
 extern u8 D_003A0978[];
-extern void sdfMemFreeDelayedDirect(struct SdfMemBlock *);
+extern void sdfMemFreeDelayedDirect(struct sdfMemHandle_t *);
 
 extern s32 D_0032E5C4[];
 
@@ -212,7 +212,7 @@ extern s32 D_0032E3C0[];
 
 extern s32 fldSceneSoundBase;
 
-extern void dds3DeleteUnitObjectBasic(EffWorldNode *node);
+extern void dds3DeleteUnitObjectBasic(dds3Basic_t *node);
 
 extern FldSparkObjectEntry fldSparkObjectEntries[];
 
@@ -272,11 +272,11 @@ extern void rsetAlpha(s32);
 
 extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern void DrwSprite2D(s32, s32, s32, s32, s32, s32, s32, s32, s32, SdfTex *);
+extern void DrwSprite2D(s32, s32, s32, s32, s32, s32, s32, s32, s32, sdfTexHandle_t *);
 
 #include "fld_title_banner_menu.h"
 
-extern KwlnTask *inputpanel_id;
+extern dds3ProcessID_t *inputpanel_id;
 extern u32 fldRunDanteGunFlag[];
 extern s32 gFldInf_WpExit;
 extern u8 fldProcCampChk(void);
@@ -366,7 +366,7 @@ s32 fldFieldTaskUpdate(void) {
     return 0;
 }
 
-void *fldAddressProcess1(KwlnTask *task) {
+void *fldAddressProcess1(dds3ProcessID_t *task) {
     s32 *work;
 
     work = sdfChipAllocDirect(0x10);
@@ -378,7 +378,7 @@ void *fldAddressProcess1(KwlnTask *task) {
     return fldFieldTaskUpdate;
 }
 
-void fldAddressShutdown(KwlnTask *task) {
+void fldAddressShutdown(dds3ProcessID_t *task) {
     void *work;
 
     work = (void *)dds3GetProcessData(task);
@@ -394,7 +394,7 @@ void fldInitAddressProcess(void) {
 
 void fldFreeAddressProcess(void) {
     if (addressprocess_id != 0) {
-        dds3KillProcess((KwlnTask *)addressprocess_id, 1);
+        dds3KillProcess((dds3ProcessID_t *)addressprocess_id, 1);
     }
 }
 
@@ -1002,7 +1002,7 @@ void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
     if (D_0032E3C0[0] < 0xC8) {
         u8 *transferStart = chunk + 8;
 
-        fldAutoMapBuf = (struct SdfMemBlock *)(u32)resourceHandle;
+        fldAutoMapBuf = (struct sdfMemHandle_t *)(u32)resourceHandle;
         fldAddressResolver((u32)chunk, (FldTransferChunk *)transferStart);
         {
             FldSceneRecordTableHeader *header =
@@ -1035,8 +1035,8 @@ void fldReleaseSceneRecordChunk(void) {
 }
 
 
-extern SdfTex *D_003D40A0[4];
-extern SdfModel *D_00348F30[];
+extern sdfTexHandle_t *D_003D40A0[4];
+extern sdfModelRootNode_t *D_00348F30[];
 /* Native scene rows copy XYZ floats into this twelve-byte position cache. */
 extern FldPoint D_003D40B0[];
 
@@ -1064,16 +1064,16 @@ void fldResetSceneResourceTables(void) {
 extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 
-void fldAutoMapDrawMdl1(SdfModel *emitter, f32 x, f32 y, f32 z) {
+void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z) {
     f32 pos[4];
-    SdfDrawNode *handle;
+    sdfModelNode_t *handle;
 
     memset(pos, 0, sizeof(pos));
     pos[3] = 1.0f;
     pos[0] = x;
     pos[1] = y;
     pos[2] = z;
-    handle = *(SdfDrawNode **)emitter->list->buffer;
+    handle = *(sdfModelNode_t **)emitter->list->buffer;
         VU0_LOAD_VF_MEMORY(vf10, pos);
         VU0_SET_W_ONE(vf10);
         VU0_STORE_VF(vf10, emitter->matrix[3]);
@@ -1083,7 +1083,7 @@ void fldAutoMapDrawMdl1(SdfModel *emitter, f32 x, f32 y, f32 z) {
 }
 
 extern FldProjectedSprite D_0033EBA0[];
-extern SdfTex *D_003D40A0[4];
+extern sdfTexHandle_t *D_003D40A0[4];
 
 void fldDrawProjectedMapIcon(f32 x, f32 y, s32 index, u32 color) {
     FldProjectedSprite *sprite = &D_0033EBA0[index];
@@ -1124,12 +1124,12 @@ s32 fldAutoMap_GetFloor(s32 scene, u32 index) {
 
 
 /* Model request buffers contain the root followed by indexed draw nodes. */
-void fldAutoMapNodeSet(SdfModel *model, s32 index, s32 clearFlag) {
-    SdfDrawNode *parent = ((SdfDrawNode **)model->list->buffer)[index + 1];
-    SdfDrawNode *first;
-    SdfDrawNode *node;
-    SdfDrawNode *next;
-    SdfDrawNode *headNext;
+void fldAutoMapNodeSet(sdfModelRootNode_t *model, s32 index, s32 clearFlag) {
+    sdfModelNode_t *parent = ((sdfModelNode_t **)model->list->buffer)[index + 1];
+    sdfModelNode_t *first;
+    sdfModelNode_t *node;
+    sdfModelNode_t *next;
+    sdfModelNode_t *headNext;
     u16 flags;
 
     if (parent->children == NULL) {
@@ -1189,15 +1189,15 @@ s32 fldAutoMapGetFloorMax(void) {
 }
 
 #include "field_stage.h"
-typedef struct FrFontGlyph FrFontGlyph;
-extern FrFontGlyph *D_003BD7CC;
+typedef struct _FRQ _FRQ;
+extern _FRQ *D_003BD7CC;
 extern s32 D_003BAEAC, D_003BAEB8, D_003BAEBC, D_003BAEC0;
 extern s32 D_003BAEF0, D_003BAEF4, D_003BAF00, D_003BAF04, D_003BAF08;
 extern f32 D_003BAEF8, D_003BAEFC, D_003BAF0C, D_003BAF10, D_003BAF14;
 extern u8 dds3PadButtonState[2][2][16];
 extern f32 D_00329790[4][4], sdfViewMatrix[4][4];
 extern f32 D_00324A20[4] __attribute__((aligned(16)));
-extern SdfModel *D_00348F30[];
+extern sdfModelRootNode_t *D_00348F30[];
 extern void frSetFontDrawOT(u32);
 extern void InversMatrix(void);
 extern s32 fldAutoMapGetFloorNext(s32), fldAutoMapGetFloorPrev(s32);
@@ -1214,9 +1214,9 @@ extern void fldPoint3To2H(f32 *, f32 *, f32, f32, f32);
 extern void fldAutoMapDrawIconOfsRF(s32, f32, f32, f32);
 extern void fldAutoMapGetBBox(f32 *, f32 *, f32 *, f32 *);
 extern s32 fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex);
-extern void frSetPriority(FrFontGlyph *, u32);
-extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
-extern s32 frDestroyFontRequestAfter(FrFontGlyph *);
+extern void frSetPriority(_FRQ *, u32);
+extern s32 frFontDrawGlyphWithSharedFlags(_FRQ *, s8);
+extern s32 frDestroyFontRequestAfter(_FRQ *);
 
 
 void fldDrawAutomapScene(void) {
@@ -1922,7 +1922,7 @@ void func_00145B18(void) {
     if (fldAutoMapSeqTestFlag(1) == 1) {
         return;
     }
-    dds3VisibleSceneBasic((EffWorldNode *)(u32)dds3GetActiveScene(), 0);
+    dds3VisibleSceneBasic((dds3Basic_t *)(u32)dds3GetActiveScene(), 0);
     p2sdPlaySE(0xE, 0x7F, 0x3F);
     cam = &fldGlobalBase;
     D_003D40A0[2] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[2].resourceAddress));
@@ -1988,11 +1988,11 @@ void fldReleaseTitleSlots(void) {
     frSetFontDrawOT(0x54);
 }
 
-extern SdfModel *D_00348F30[];
+extern sdfModelRootNode_t *D_00348F30[];
 
 extern FldPoint D_003D40B0[];
 
-extern void sdfModelRootFree(SdfModel *slot, s32 recycle, s32 release);
+extern void sdfModelRootFree(sdfModelRootNode_t *slot, s32 recycle, s32 release);
 
 void fldReleaseMenuSlots(void) {
     s32 i;
@@ -2053,7 +2053,7 @@ void fldEnterSceneCamera(void) {
     fldApplySkyLightSetToPlayerVU();
     cam->sceneMode = 4;
     frSetFontDrawOT(0x54);
-    dds3VisibleSceneBasic((EffWorldNode *)(u32)dds3GetActiveScene(), 1);
+    dds3VisibleSceneBasic((dds3Basic_t *)(u32)dds3GetActiveScene(), 1);
     D_003BAED4 = 0;
     D_003BAEB4 = cam->floor;
     D_003BAEB8 = cam->flagStage;
@@ -2752,7 +2752,7 @@ void fldReleaseTextureSlots(void) {
         if (fldEffectTextureNodes[i] != 0) {
             dds3EffectDelete((EffNode *)(u32)fldEffectTextureNodes[i]);
             fldEffectTextureNodes[i] = 0;
-            sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldEffectTextureLoadHandles[i]);
+            sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldEffectTextureLoadHandles[i]);
             fldEffectTextureLoadHandles[i] = 0;
             fldEffectTextureData[i] = 0;
         }
@@ -2773,7 +2773,7 @@ void fldUpdateEffectTextureTransforms(void) {
 
     memset(vec, 0, sizeof(vec));
     vec[3] = 1.0f;
-    dds3GetRotPoseSet((EffWorldNode *)fldPlayerObject);
+    dds3GetRotPoseSet((dds3Basic_t *)fldPlayerObject);
     angle = EulerAngleAxisY();
     for (i = 0; i < 4; i++) {
         if (fldEffectTextureNodes[i] != 0) {
@@ -2888,7 +2888,7 @@ void fldParseMixLb(void) {
     FilePacRequest *lb;
     PacWork *node;
     u32 index;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
 
     index = 0;
     lb = (FilePacRequest *)pacLoad("/fld/f/bin/fldmix.LB");
@@ -2972,7 +2972,7 @@ void fldParseMixLb(void) {
 
 extern s32 D_003BAF48, D_003BAF4C, D_003BAF40, D_003BAF3C;
 
-extern SdfTex *D_003BAF30, *D_003BAF34, *D_003BAF38;
+extern sdfTexHandle_t *D_003BAF30, *D_003BAF34, *D_003BAF38;
 
 extern s32 D_003BD7F0, D_003BD7D8, D_003BD7E0, D_003BD7E8;
 
@@ -3069,14 +3069,14 @@ void fldResetObjectSlots(void) {
 }
 
 extern void dds3ObjectBaseOnFlag(void *object, s32 mask);
-extern void sdfModelSetFaceDivParm(struct SdfModel *model, f32 first, f32 second);
+extern void sdfModelSetFaceDivParm(struct sdfModelRootNode_t *model, f32 first, f32 second);
 extern s32 D_0032E3C4[];
 extern u8 D_003D44A0[0x200];
 extern f32 sdfCos(f32);
 
-void fldInitializeHuntSparkUnit(EvtUnit *unit) {
-    EffWorldNode *object;
-    MdlCtx *resource;
+void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
+    dds3Basic_t *object;
+    dds3ModelHandle_t *resource;
     u8 *row;
     s32 index;
     f32 angle, height, radians;
@@ -3085,7 +3085,7 @@ void fldInitializeHuntSparkUnit(EvtUnit *unit) {
     s32 red, green, blue;
 
     object = unit->effObj;
-    resource = (MdlCtx *)dds3ObjectBaseGetModelHandle(object);
+    resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(object);
     VU0_LOAD_VF(vf10, object->inner->rotation);
     index = D_0032E3C4[0] + 1;
     if (index >= 64) {
@@ -3197,13 +3197,13 @@ extern u8 fldEncountTestFlag(u32 mask);
 
 void fldUpdateObjectSlotActivation(void) {
     s32 i;
-    MdlCtx *resource;
+    dds3ModelHandle_t *resource;
 
     for (i = 0; i < fldTakaraCount; i++) {
         switch (fldTakaraSlotTable[i].activationState) {
         case 0:
             if (fldTakaraSlotTable[i].activationRequested == 1) {
-                resource = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)(u32)fldTakaraSlotTable[i].unk0);
+                resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle((dds3Basic_t *)(u32)fldTakaraSlotTable[i].unk0);
                 mdlSingleMotion(resource, 0, 1);
                 fldTakaraSlotTable[i].activationState = fldTakaraSlotTable[i].activationRequested;
                 switch (fldTakaraSlotTable[i].effectVariant) {
@@ -3226,14 +3226,14 @@ void fldUpdateObjectSlotActivation(void) {
                     break;
                 }
             } else {
-                resource = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)(u32)fldTakaraSlotTable[i].unk0);
+                resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle((dds3Basic_t *)(u32)fldTakaraSlotTable[i].unk0);
                 if (resource->first->state == SDF_MOTION_STATE_TERMINAL) {
                     mdlSingleMotion(resource, 0, 0);
                 }
             }
             break;
         case 1:
-            resource = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)(u32)fldTakaraSlotTable[i].unk0);
+            resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle((dds3Basic_t *)(u32)fldTakaraSlotTable[i].unk0);
             if (resource->first->state == SDF_MOTION_STATE_TERMINAL) {
                 mdlLoopMotion(resource, 0, 2);
                 fldTakaraSlotTable[i].activationRequested = 2;
@@ -3242,7 +3242,7 @@ void fldUpdateObjectSlotActivation(void) {
             break;
         case 2:
             if (fldEncountTestFlag(0x40)) {
-                resource = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)(u32)fldTakaraSlotTable[i].unk0);
+                resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle((dds3Basic_t *)(u32)fldTakaraSlotTable[i].unk0);
                 mdlLoopMotion(resource, 0, 3);
                 fldTakaraSlotTable[i].activationRequested = 3;
                 fldTakaraSlotTable[i].activationState = 3;
@@ -3273,7 +3273,7 @@ extern f32 fldBannerColorPhase;
 extern s32 ptyAnyUnitFlagMatch(s32 statusMask, s32 flagMode);
 
 
-extern void DrwSprite2DC(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, SdfTex *);
+extern void DrwSprite2DC(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, sdfTexHandle_t *);
 
 void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
     u32 color;
@@ -3440,7 +3440,7 @@ extern u8 D_003D44A0[0x200];
 void fldLoadNpcPalette(s32 field) {
     char path[64];
     char directory[32];
-    DevState *command;
+    sdfFileCmdHandle_t *command;
 
     if (field < 100) {
         fldMakeFilePath(directory, field, 1);
@@ -3628,7 +3628,7 @@ void fldStartTitle(s32 field, s32 mode, s32 option) {
     sprintf(path, D_003A0810, field);
     handle = (s32)sdfDevLoadFileEx(path, (u32 *)&resourceAddress, 0);
     D_003BAFB4 = sdfTexSet((SdfTextureFileHeader *)(resourceAddress));
-    sdfMemFreeDirect((struct SdfMemBlock *)(u32)(handle));
+    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(handle));
     if (fldTitleIsActive() == 0) {
         dds3StartProcess(fldTitleTaskName, 0x2B0A, 0, 1, fldTitle, fldReleaseTitleTextureReference, 0);
     }
@@ -3914,7 +3914,7 @@ void fldStartMiniTitleForUnlock(s32 id) {
     sprintf(path, "/fld/f/pnl/ds%03d.tmx", id);
     handle = (s32)sdfDevLoadFileEx(path, (u32 *)&data, 0);
     D_003BAFC4 = sdfTexSet((SdfTextureFileHeader *)(data));
-    sdfMemFreeDirect((struct SdfMemBlock *)(u32)(handle));
+    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(handle));
     if (fldTitleIsActive() == 0) {
         dds3StartProcess(D_003A0828, 0x2B0A, 0, 1, fldTitleMini, fldReleaseTitleMiniTexture, 0);
     }
@@ -3935,7 +3935,7 @@ void fldLoadWeatherEffects(void) {
 
     handle = (s32)sdfDevLoadFileEx(s_fieldWeatherLimitPath, (u32 *)&resourceAddress, 0);
     fldWeatherLimitTexture = sdfTexSet((SdfTextureFileHeader *)(resourceAddress));
-    sdfMemFreeDelayedDirect((struct SdfMemBlock *)handle);
+    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)handle);
     fldDamEffectResource = (u32)sdfDevLoadFileEx("/fld/f/bin/FH_DAM_2.EPL", &fldDamEffectData, 0);
     fldDamEffectNode = (u32)effCreateNodeFromParameter(fldDamEffectData);
     fldDamEffectPositioned = 0;
@@ -3952,13 +3952,13 @@ void fldReleaseWeatherEffects(void) {
     dds3EffectDelete((EffNode *)(u32)fldDamEffectNode);
     fldDamEffectNode = 0;
     fldDamEffectPositioned = 0;
-    sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldDamEffectResource);
+    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldDamEffectResource);
     fldDamEffectResource = 0;
     fldDamEffectData = 0;
     dds3EffectDelete((EffNode *)(u32)fldYukEffectNode);
     fldYukEffectNode = 0;
     fldYukEffectPositioned = 0;
-    sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldYukEffectResource);
+    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldYukEffectResource);
     fldYukEffectResource = 0;
     fldYukEffectData = 0;
 }
@@ -4037,9 +4037,9 @@ typedef struct FldSparkEntryInfo {
     s16 modelId;
 } FldSparkEntryInfo;
 
-extern EffWorldNode *dds3AddUnitObjectBasic(s32 value, void *position, void *rotation);
-extern void dds3RebuildObjectModelContext(EffWorldNode *node, s32 kind, s32 resource);
-extern void dds3SetSclPoseSet(EffWorldNode *node, u128 *vector);
+extern dds3Basic_t *dds3AddUnitObjectBasic(s32 value, void *position, void *rotation);
+extern void dds3RebuildObjectModelContext(dds3Basic_t *node, s32 kind, s32 resource);
+extern void dds3SetSclPoseSet(dds3Basic_t *node, u128 *vector);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A08E8);
 
@@ -4053,7 +4053,7 @@ extern SdfMathVector4 D_003A08F8;
 void fldCreateSparkSlotObjects(void) {
     SdfMathVector4 position = D_003A08E8;
     SdfMathVector4 rotation;
-    MdlCtx *resource;
+    dds3ModelHandle_t *resource;
     s32 i;
 
     memset(&rotation, 0, sizeof(rotation));
@@ -4074,7 +4074,7 @@ void fldCreateSparkSlotObjects(void) {
                 dds3RebuildObjectModelContext(fldSparkObjectEntries[i].objectHandle, 1, 0x146);
             }
             dds3SetSclPoseSet(fldSparkObjectEntries[i].objectHandle, (u128 *)&scale);
-            resource = (MdlCtx *)dds3ObjectBaseGetModelHandle(fldSparkObjectEntries[i].objectHandle);
+            resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(fldSparkObjectEntries[i].objectHandle);
             resource->first->frameStep = 1.0f;
             mdlLoopMotion(resource, 0, 0);
             resource->flags |= 1;
@@ -4089,7 +4089,7 @@ void fldClearObjectEntryHandles(void) {
     s32 i = 0x10;
 
     do {
-        EffWorldNode *objectHandle = entry->objectHandle;
+        dds3Basic_t *objectHandle = entry->objectHandle;
 
         i--;
         if (objectHandle != NULL) {
@@ -4144,7 +4144,7 @@ s32 fldSetSparkVectors(s32 index, const u128 *position, const u128 *rotation) {
 
 /* Complete 0x40-byte field spark controller, including the weather timer. */
 extern s32 D_003D62DC[];
-struct EffWorldNode;
+struct dds3Basic_t;
 
 
 s32 fldBindSparkSlotObject(s32 index, s32 reserved) {
@@ -4189,7 +4189,7 @@ extern SdfMathVector4 D_003A0918;
 
 void fldFreeSparkSlot(s32 index) {
     SdfMathVector4 vec;
-    EffWorldNode *obj;
+    dds3Basic_t *obj;
     s32 *flags;
     s16 slot;
 

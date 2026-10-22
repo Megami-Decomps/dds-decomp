@@ -22,7 +22,7 @@
 extern void dds3Particle_BasicDelete(EffEmitterHead *owner);
 
 struct ParSystem;
-struct EffTrackPolyList;
+struct effMTPolyListHandle_t;
 
 enum {
     PAR_BURST_RANDOM_AXIS = 1
@@ -40,7 +40,7 @@ typedef struct {
     f32 initialRadiusJitter;
     f32 targetRadiusJitter;
     ParHistoryTable history;
-    SdfMemBlock *childHandle;     /* 0x174: additional owned allocation */
+    sdfMemHandle_t *childHandle;     /* 0x174: additional owned allocation */
     f32 previousOrigin[3];       /* 0x178: native updater caches origin here */
 } ParBurstEmitter; /* 0x184 */
 
@@ -151,7 +151,7 @@ void dds3Particle_SphereSpiral2BuffInit(ParBurstEmitter *effect, u32 particleInd
 #define PAR_PACKET_INITIAL_TAG 0xF0000001
 
 extern u32 dds3ParticleColorBlend(u32 colorA, u32 colorB);
-extern void dds3Particle_BlurSetExp(ParTable *table, s32 slotIndex, const f32 *origin, u32 color,
+extern void dds3Particle_BlurSetExp(dds3Particle_BlurBuff_t *table, s32 slotIndex, const f32 *origin, u32 color,
                                        ParHistoryTable *source, f32 scale);
 extern void dds3Particle_TrackSetExp(struct ParSystem *system, s32 index, const f32 *origin, u32 color,
                                        ParHistoryTable *source);
@@ -384,13 +384,13 @@ u32 dds3ParticleColorAnim(ParColorRamp *p, u32 color, s32 age) {
 }
 
 /* Allocate contiguous point slabs, slot records and the trailing table header. */
-ParTable *dds3Particle_BlurCreate(u32 slotCount, u16 pointCapacity, BillObj **billboardRef) {
+dds3Particle_BlurBuff_t *dds3Particle_BlurCreate(u32 slotCount, u16 pointCapacity, billHandle_t **billboardRef) {
     u32 pointBytes = pointCapacity * sizeof(u128);
     u32 slabBytes = pointBytes + sizeof(ParSlot);
     u32 totalBytes = slabBytes * slotCount;
-    SdfMemBlock *allocation = sdfMemAllocDirect(totalBytes + sizeof(ParTable));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(totalBytes + sizeof(dds3Particle_BlurBuff_t));
     u8 *base = (u8 *)sdfMemLock(allocation);
-    ParTable *table = (ParTable *)(base + totalBytes);
+    dds3Particle_BlurBuff_t *table = (dds3Particle_BlurBuff_t *)(base + totalBytes);
     u128 *points = (u128 *)base;
     ParSlot *slotBase = (ParSlot *)(points + pointCapacity * slotCount);
     ParSlot *slots;
@@ -415,11 +415,11 @@ ParTable *dds3Particle_BlurCreate(u32 slotCount, u16 pointCapacity, BillObj **bi
 }
 
 /* Release the slot table's allocation handle, not a separate node object. */
-void dds3Particle_BlurDelete(ParTable *table) {
+void dds3Particle_BlurDelete(dds3Particle_BlurBuff_t *table) {
     sdfMemFreeDirect(table->allocation);
 }
 
-void dds3Particle_BlurSet(ParTable *table, s32 slotIndex, u32 color, f32 billboardScale) {
+void dds3Particle_BlurSet(dds3Particle_BlurBuff_t *table, s32 slotIndex, u32 color, f32 billboardScale) {
     ParSlot *slot = &table->slots[slotIndex];
     s32 last = table->pointCapacity - 1;
     u128 *point = slot->points + last;
@@ -437,9 +437,9 @@ void dds3Particle_BlurSet(ParTable *table, s32 slotIndex, u32 color, f32 billboa
     slot->billboardScale = billboardScale;
 }
 
-extern void dds3BillboardDraw(BillObj *billboard);
+extern void dds3BillboardDraw(billHandle_t *billboard);
 
-void dds3Particle_BlurSetExp(ParTable *table, s32 slotIndex, const f32 *origin, u32 color,
+void dds3Particle_BlurSetExp(dds3Particle_BlurBuff_t *table, s32 slotIndex, const f32 *origin, u32 color,
                    ParHistoryTable *source, f32 scale) {
     f32 localOrigin[4];
     ParHistory *history;
@@ -475,8 +475,8 @@ void dds3Particle_BlurSetExp(ParTable *table, s32 slotIndex, const f32 *origin, 
     slot->billboardScale = scale;
 }
 
-void dds3Particle_BlurDraw(ParTable *table) {
-    BillObj *billboard;
+void dds3Particle_BlurDraw(dds3Particle_BlurBuff_t *table) {
+    billHandle_t *billboard;
     ParSlot *slot;
     s32 remainingSlots;
     s32 pointCount;
@@ -519,7 +519,7 @@ void dds3Particle_BlurDraw(ParTable *table) {
 }
 
 /* Disable this slot's billboard points by clearing its count, not a bit flag. */
-void dds3Particle_BlurClearItem(ParTable *table, s32 slotIndex) {
+void dds3Particle_BlurClearItem(dds3Particle_BlurBuff_t *table, s32 slotIndex) {
     table->slots[slotIndex].pointCount = 0;
 }
 
@@ -676,7 +676,7 @@ void dds3ParticleDelete(ParObj *obj) {
 /* Draw live particles after applying the requested number of emitter updates. */
 void dds3ParticleDraw(ParObj *effect) {
     EffectBufferRecord *record;
-    BillObj *billboard;
+    billHandle_t *billboard;
     u32 step;
     s32 particleCount;
     s32 lifetime;

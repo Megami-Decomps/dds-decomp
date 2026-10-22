@@ -3,8 +3,8 @@
 
 #include "common.h"
 
-struct EffWorldNode;
+struct dds3Basic_t;
 
-s32 dds3EffectObjectPresetMG12(struct EffWorldNode *obj);
+s32 dds3EffectObjectPresetMG12(struct dds3Basic_t *obj);
 
 #endif /* EFF_OBJECT_DISPATCH_API_H */

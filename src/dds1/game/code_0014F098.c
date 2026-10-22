@@ -3,9 +3,9 @@
 #include "scr_string_parameter_api.h"
 
 /* The setter returns the context it set the value in (scrTraceCode.c). */
-extern ScrData *scrSetIntReturnValue(s32 retVal);
+extern scrProcessWork_s *scrSetIntReturnValue(s32 retVal);
 
-struct EvtUnit;
+struct evtUnitHandle_t;
 
 
 
@@ -41,13 +41,13 @@ extern void fldSetArchiveSoundVolumePan(s32 archiveId, s32 soundId);
 
 extern void fldPlayArchiveSound(s32 archiveId, s32 soundId);
 
-extern void fldInitializeHuntSparkUnit(struct EvtUnit *unit);
+extern void fldInitializeHuntSparkUnit(struct evtUnitHandle_t *unit);
 
 extern s32 fldFindEffectByName(char *str);
 
 extern void fldStartTitle(s32 field, s32 mode, s32 option);
 
-extern struct EvtUnit *evtGetUnitHandle(s32 param);
+extern struct evtUnitHandle_t *evtGetUnitHandle(s32 param);
 
 
 /* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
@@ -187,7 +187,7 @@ s32 fldCommand_FLD_SET_ENCOUNT(void) {
 
 /* Look up the command's task record before applying its associated entry. */
 s32 fldCommand_FLD_EXIT_CAMERA(void) {
-    ScrData *command = scrGetScriptHandle();
+    scrProcessWork_s *command = scrGetScriptHandle();
     const char *record = fldEveHitResName_Find((u32)command->task);
 
     if (record != NULL) {

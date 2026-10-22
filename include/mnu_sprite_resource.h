@@ -3,12 +3,12 @@
 
 #include "common.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 struct SdfList;
 
 /* Shared owner for the mantra and title-movie sprite schedulers. */
 typedef struct MnuSpriteResourceGroup {
-    struct SdfMemBlock *allocation; /* 0x00 */
+    struct sdfMemHandle_t *allocation; /* 0x00 */
     struct SdfList *tasks[10];      /* 0x04 */
     s32 activeCount;                /* 0x2C */
     s32 spawnCountdown;             /* 0x30 */

@@ -15,7 +15,7 @@ typedef struct MapRequestNode {
 } MapRequestNode;
 
 typedef struct MapRequestState {
-    struct SdfMemBlock *allocation; /* 0x00: descriptor for the ring and nodes. */
+    struct sdfMemHandle_t *allocation; /* 0x00: descriptor for the ring and nodes. */
     MapRequestNode *first;
     MapRequestNode *next;
     MapRequestNode *third;
@@ -63,7 +63,7 @@ typedef struct LmapTaskState {
     s32 phase;                    /* 0x04: task lifecycle phase */
     s32 variant;                  /* 0x08: selected local-map variant */
     u32 spriteSlots[25];          /* 0x0C: SdfSlotSet-compatible slot array */
-    SdfMemBlock *allocation;      /* 0x70: loaded resource allocation */
+    sdfMemHandle_t *allocation;      /* 0x70: loaded resource allocation */
     u32 resourceAddress;          /* 0x74: loaded resource address */
     LmapLoadState load;           /* 0x78 */
 } LmapTaskState;

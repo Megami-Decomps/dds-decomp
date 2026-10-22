@@ -23,10 +23,10 @@ typedef struct EffectSurfaceNode {
     u32 kind;
     EffSurfaceParams params; /* 0x10: copied source header */
     u32 index;
-    struct SdfMemBlock *handleBuffer; // 0x30
-    BillObj *resource;
+    struct sdfMemHandle_t *handleBuffer; // 0x30
+    billHandle_t *resource;
     FileJobPayload **jobs;          // 0x38
-    struct SdfMemBlock *jobAllocation;      // 0x3C
+    struct sdfMemHandle_t *jobAllocation;      // 0x3C
     struct EffExpandedList *resourceHolder; // 0x40, released separately from the grid record
     FileSlotTable *record; // 0x44: retained grid record table
     u16 count;          // 0x48: initialized to 1; remaining role unknown
@@ -41,12 +41,12 @@ typedef struct EffectSurfaceNode {
     u32 kind;
     EffSurfaceParams params; /* 0x10: copied source header */
     u32 index;
-    struct SdfMemBlock *handleBuffer; // 0x30
-    BillObj *resource;
+    struct sdfMemHandle_t *handleBuffer; // 0x30
+    billHandle_t *resource;
     FileJobPayload **jobs;          // 0x38
-    struct SdfMemBlock *jobAllocation;      // 0x3C
+    struct sdfMemHandle_t *jobAllocation;      // 0x3C
     struct FileQueue **queues;      // 0x40: cloned queues, one per active record
-    struct SdfMemBlock *queueAllocation;    // 0x44: backing allocation descriptor
+    struct sdfMemHandle_t *queueAllocation;    // 0x44: backing allocation descriptor
     struct EffExpandedList *resourceHolder; // 0x48
     FileSlotTable *record; // 0x4C: retained grid record table
     u16 active;         // 0x50: initialized to 1

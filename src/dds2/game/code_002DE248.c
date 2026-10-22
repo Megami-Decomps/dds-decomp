@@ -111,7 +111,7 @@ extern void fileSetRecordSecondVector(void *record, const void *src);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex);
 extern void kwlnPadResetMotorLevelsAndOutput(void);
 extern void mnuRecordSetVector(void *record, const void *src);
-extern s32 sdfModelGetMarkPosMatrix(SdfModel *model, s32 mapRecordId);
+extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *model, s32 mapRecordId);
 extern u8 *effAllocateStripFromWorkAndRetainTexture(u8 *work);
 extern u8 *effCreateTexturedStripWithSharedTexture(u32 count, u32 repeat);
 
@@ -188,7 +188,7 @@ typedef struct EffSurfaceEndpoints {
 
 typedef struct EffModelBindings {
     EffClassWork *material;
-    MdlCtx *model;
+    dds3ModelHandle_t *model;
 } EffModelBindings;
 
 typedef struct EffAimConfig {
@@ -207,7 +207,7 @@ typedef struct EffAimState {
 
 typedef struct EffDrawableAssetWork {
     u32 unk00;
-    SdfAsset *asset;
+    sdfMat_t *asset;
     u32 state;
 } EffDrawableAssetWork;
 
@@ -270,7 +270,7 @@ typedef struct EffModelCreateRequest {
     u8 pad0[0x2C];
     u16 kind;
     u8 pad2E[2];
-    MdlCtx *assetId;
+    dds3ModelHandle_t *assetId;
     u32 attributes;
     u8 pad38[4];
     void *source;
@@ -281,7 +281,7 @@ extern s32 effUpdateCameraDiagnostics(EffectStateSnapshot *, s8);
 typedef struct EffKindAssetHolder {
     s32 kind;
     s32 references;
-    SdfTex *resource;
+    sdfTexHandle_t *resource;
 } EffKindAssetHolder;
 
 struct EffKindWork;
@@ -294,7 +294,7 @@ typedef struct EffKindDesc {
     u32 (*create)(void *);        // 0x00
     void (*destroy)();       // 0x04: release the created handle
     void (*update)();        // 0x08: advance work through its kind callback
-    void (*initialize)(struct EffKindWork *, SdfTex *); // 0x0C
+    void (*initialize)(struct EffKindWork *, sdfTexHandle_t *); // 0x0C
     u32 payloadSize;         // 0x10: bytes copied after the work header
 } EffKindDesc; // 0x14
 
@@ -347,7 +347,7 @@ extern f32 dds3BillboardGetDirectionScale(void *, void *);
 
 
 
-extern void dds3BillboardDraw(BillObj *);
+extern void dds3BillboardDraw(billHandle_t *);
 
 extern f32 D_0042BC10[4];
 
@@ -402,7 +402,7 @@ extern u128 D_00458470[];
 extern SdfLightSources D_003E9F50;
 extern u8 btlIsRuntimeAllocated(void);
 
-extern MdlCtx *effLoadViewerModelWithVUState(void *, u32);
+extern dds3ModelHandle_t *effLoadViewerModelWithVUState(void *, u32);
 
 #include "eff_emitter_type.h"
 
@@ -532,7 +532,7 @@ struct EffSpanTable;
 /* This table has a single populated kind with span-resource callbacks. */
 typedef struct EffModelResourceOps {
     void (*initialize)(struct EffModelResource *); /* 0x00 */
-    struct EffSpanTable *(*createResource)(struct EffSpanConfig *, MdlCtx *); /* 0x04 */
+    struct EffSpanTable *(*createResource)(struct EffSpanConfig *, dds3ModelHandle_t *); /* 0x04 */
     void (*destroyResource)(struct EffSpanTable *); /* 0x08 */
     void (*update)(struct EffModelResource *); /* 0x0C */
     void (*draw)(struct EffModelResource *); /* 0x10 */
@@ -545,7 +545,7 @@ typedef char EffModelResourceOps_size_must_be_0x18[
 
 extern u8 *D_003E9CA8[];
 
-extern struct SdfListHead *effCurrentRenderPacket;
+extern struct sdfDrawTag_t *effCurrentRenderPacket;
 
 
 
@@ -605,7 +605,7 @@ extern u8 D_00400250[];
 extern EffClassResourceOps effClassResourceWorkOperations[];
 
 /* VU0 model helpers consume vf10 directly, as in the DDS1 counterpart. */
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 
 
@@ -646,11 +646,11 @@ extern struct EffModelResource *effCreateModelResourceWithInlineData(u16, void *
 
 
 
-MdlCtx *effCloneModelWithVUState(MdlCtx *sourceModel);
+dds3ModelHandle_t *effCloneModelWithVUState(dds3ModelHandle_t *sourceModel);
 
-void effDestroyModelContext(MdlCtx *owner);
+void effDestroyModelContext(dds3ModelHandle_t *owner);
 
-void effInitModelVUState(MdlCtx *model);
+void effInitModelVUState(dds3ModelHandle_t *model);
 
 typedef struct EffFadeHeaderWork {
     s32 frame;
@@ -863,7 +863,7 @@ typedef struct EffFadeConfig {
     EffScalarTrack rateB;   /* 0x8C */
     s32 duration;         /* 0xB8 */
     u8 padBC[4];
-    EffSolidRectParams out; /* 0xC0 */
+    dds3Effect_Filter_t out; /* 0xC0 */
 } EffFadeConfig;
 
 typedef struct EffRateConfig {
@@ -878,7 +878,7 @@ typedef struct EffRateConfig {
     s32 duration;         /* 0xB8 */
     u8 fixedMode;         /* 0xBC */
     u8 padBD[3];
-    EffBlurQuad out;       /* 0xC0 */
+    dds3Effect_Blur_t out;       /* 0xC0 */
 } EffRateConfig;
 
 /* Draw through the configured duration; zero duration uses frame zero.
@@ -887,7 +887,7 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
     s32 duration = config->duration;
     s32 frame = 0;
-    EffBlurQuad *out = &config->out;
+    dds3Effect_Blur_t *out = &config->out;
     s32 color1[4];
     s32 color2[4];
     s32 blended[4];
@@ -925,7 +925,7 @@ void effUpdateFadeBlendA(EffKindWork *work) {
 }
 
 u32 effCreateFadeBlendWorkFromOutput(void *work) {
-    return (u32)dds3EffectPartialMultiBlurCreate((EffBlurTemplateBody *)((u8 *)work + 0xc0));
+    return (u32)dds3EffectPartialMultiBlurCreate((dds3Effect_PartialMultiBlurParam_t *)((u8 *)work + 0xc0));
 }
 
 void effReleaseFadeBlendWork(u32 resourceHandle) {
@@ -994,12 +994,12 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     effDrawBlurFixedPointRectangle(out);
 }
 
-void effSetFadeMapParameter(EffKindWork *work, SdfTex *value) {
+void effSetFadeMapParameter(EffKindWork *work, sdfTexHandle_t *value) {
     ((EffBlurTemplate *)work->handle)->texture = value;
 }
 
 u32 effCreateFixedSlotBlurWorkFromFadeOutput(void *source) {
-    return (u32)dds3EffectDistortionBlurCreate((EffBlurScatterParams *)((u8 *)source + 0xC0));
+    return (u32)dds3EffectDistortionBlurCreate((dds3Effect_DistortionBlurParam_t *)((u8 *)source + 0xC0));
 }
 
 void effReleaseFixedSlotBlurWork(EffBlurScatterWork *handle) {
@@ -1064,12 +1064,12 @@ void effUpdateFadeMapA(EffKindWork *work) {
     effBlurStepScatterSlotsAndDraw(out);
 }
 
-void effSetWideFadeMapParameter(EffKindWork *work, SdfTex *value) {
+void effSetWideFadeMapParameter(EffKindWork *work, sdfTexHandle_t *value) {
     ((EffBlurScatterWork *)work->handle)->texture = value;
 }
 
 u32 effCreateVariableSlotBlurWorkFromFadeOutput(void *source) {
-    return (u32)dds3EffectRippleBlurCreate((EffBlurScaleParams *)((u8 *)source + 0xc0));
+    return (u32)dds3EffectRippleBlurCreate((dds3Effect_RippleBlurParam_t *)((u8 *)source + 0xc0));
 }
 
 void effReleaseVariableSlotBlurWork(EffBlurScaleWork *work) {
@@ -1134,7 +1134,7 @@ void effUpdateFadeMapB(EffKindWork *work) {
     effBlurStepScaleSlotsAndDraw(out);
 }
 
-void effSetFadeBlendParameter(EffKindWork *work, SdfTex *value) {
+void effSetFadeBlendParameter(EffKindWork *work, sdfTexHandle_t *value) {
     ((EffBlurScaleWork *)work->handle)->texture = value;
 }
 
@@ -1144,7 +1144,7 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
     s32 duration = config->duration;
     s32 frame = 0;
-    EffBlurQuad *out = &config->out;
+    dds3Effect_Blur_t *out = &config->out;
     s32 color1[4];
     s32 color2[4];
     s32 blended[4];
@@ -1190,7 +1190,7 @@ void func_002DF6C8(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
     s32 duration = config->duration;
     s32 frame = 0;
-    EffBlurQuad *out = &config->out;
+    dds3Effect_Blur_t *out = &config->out;
     f32 delta[4];
     f32 ahead[4];
     s32 color1[4];
@@ -1268,7 +1268,7 @@ void effUpdateFadeBlendC(EffKindWork *work) {
     EffFadeConfig *config = work->payload;
     s32 duration = config->duration;
     s32 frame = 0;
-    EffSolidRectParams *out = &config->out;
+    dds3Effect_Filter_t *out = &config->out;
     u32 packed;
     u32 unit;
     u32 second;
@@ -1300,7 +1300,7 @@ void effUpdateFadeBlendC(EffKindWork *work) {
 }
 
 u32 effCreateFadeColorWorkFromOutput(void *work) {
-    return (u32)dds3EffectPartialMultiFilterCreate((EffResourceRectParams *)((u8 *)work + 0xc0));
+    return (u32)dds3EffectPartialMultiFilterCreate((dds3Effect_PartialMultiFilterParam_t *)((u8 *)work + 0xc0));
 }
 
 void effReleaseFadeColorWork(EffResourceRectWork *work) {
@@ -1368,7 +1368,7 @@ void effUpdateProjectedFadeColor(EffKindWork *work) {
 }
 
 /* Replace the rectangle handle's texture without changing the kind-work asset reference. */
-void effSetKindRectangleTexture(EffKindWork *work, SdfTex *value) {
+void effSetKindRectangleTexture(EffKindWork *work, sdfTexHandle_t *value) {
     ((EffResourceRectWork *)work->handle)->texture = value;
 }
 
@@ -1441,7 +1441,7 @@ EffKindWork *effCloneKindWork(EffKindWork *source) {
     EffKindWork *copy = effAllocateKindWork((u16)source->kind, source->payload);
     if (source->target != NULL && D_003E9810[copy->kind].initialize != NULL) {
         EffKindAssetHolder *child = effRetainKindSecondaryAsset(source->target);
-        SdfTex *parameter = child->resource;
+        sdfTexHandle_t *parameter = child->resource;
         copy->target = child;
         D_003E9810[copy->kind].initialize(copy, parameter);
     }
@@ -1540,7 +1540,7 @@ EffKindWork *effCloneAlternateKindWork(EffKindWork *source) {
     EffKindWork *copy = effAllocateAlternateKindWork((u16)source->kind, source->payload);
     if (source->target != NULL && D_003E98A0[copy->kind].initialize != NULL) {
         EffKindAssetHolder *child = effRetainKindSecondaryAsset(source->target);
-        SdfTex *parameter = child->resource;
+        sdfTexHandle_t *parameter = child->resource;
         copy->target = child;
         D_003E98A0[copy->kind].initialize(copy, parameter);
     }
@@ -1623,7 +1623,7 @@ u8 *effCreateBillboardWork(FileJobPayload *source) {
 }
 
 void effBillboardWorkRelease(u32 work) {
-    BillObj *billboard;
+    billHandle_t *billboard;
 
     billboard = ((EffBillboardWork *)work)->billboard;
     if (billboard != 0) {
@@ -1642,7 +1642,7 @@ u8 *effDuplicateBillState(const u8 *source) {
 }
 
 void effReplaceBillboardClone(s32 dst, s32 src) {
-    BillObj *billboard;
+    billHandle_t *billboard;
 
     if (((EffBillboardWork *)dst)->billboard != 0) {
         dds3BillboardDelete(((EffBillboardWork *)dst)->billboard);
@@ -1723,8 +1723,8 @@ void effClearBillFrames(u8 *owner) {
 u8 *effCreateBillFrameNode(EffBillFrameConfig *config, u32 handle) {
     u32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
-    struct SdfMemBlock *base = sdfMemAllocDirect(count * 0x18 + headerSize);
-    u8 *body = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(count * 0x18 + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -1993,8 +1993,8 @@ void billResetCellIndices(u8 *owner) {
 u8 *billCreateCellNode(EffBillCellConfig *config, u32 handle) {
     u32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
-    struct SdfMemBlock *base = sdfMemAllocDirect(count * 0x1C + headerSize);
-    u8 *body = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(count * 0x1C + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -2282,8 +2282,8 @@ void billResetParticleIndices(u8 *owner) {
 u8 *billCreateParticleNode(EffBillParticleConfig *config, u32 handle) {
     u32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
-    struct SdfMemBlock *base = sdfMemAllocDirect(count * 0x2C + headerSize);
-    u8 *body = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(count * 0x2C + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -2355,8 +2355,8 @@ void effClearAnimatedFrames(u8 *owner) {
 
 u8 *billAllocateAnimatedTransformEntries(EffBillAnimatedFrameConfig *config) {
     u32 headerSize = 0x10;
-    struct SdfMemBlock *base = sdfMemAllocDirect(config->frame.output.timed.count * 0x18 + headerSize);
-    u8 *node = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(config->frame.output.timed.count * 0x18 + headerSize);
+    u8 *node = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
     u8 *entries = node + headerSize;
 
     ((EffBillFrameState *)node)->allocation = base;
@@ -2659,8 +2659,8 @@ void billResetEmitterIndices(u8 *owner) {
 
 u8 *billAllocEmitterNode(u8 *config) {
     u32 headerSize = 0x10;
-    struct SdfMemBlock *base = sdfMemAllocDirect(((EffBillTimedHeader *)config)->count * 0x18 + headerSize);
-    u8 *body = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(((EffBillTimedHeader *)config)->count * 0x18 + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -2965,8 +2965,8 @@ void effClearStripFrames(u8 *owner) {
 
 u8 *billAllocStripNode(u8 *config) {
     u32 headerSize = 0x10;
-    struct SdfMemBlock *base = sdfMemAllocDirect(((EffBillTimedHeader *)config)->count * 0x28 + headerSize);
-    u8 *body = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(((EffBillTimedHeader *)config)->count * 0x28 + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -3301,8 +3301,8 @@ void billResetTrailIndices(u8 *owner) {
 
 u8 *billCreateTrailNode(EffBillTrailFrameConfig *config, u32 handle) {
     u32 headerSize = 0x10;
-    struct SdfMemBlock *base = sdfMemAllocDirect(config->frame.output.timed.count * 0x2C + headerSize);
-    u8 *body = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(config->frame.output.timed.count * 0x2C + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -3374,8 +3374,8 @@ void billResetQuadIndices(u8 *owner) {
 
 u8 *billAllocQuadNode(u8 *config) {
     u32 headerSize = 0x10;
-    struct SdfMemBlock *base = sdfMemAllocDirect(((EffBillTimedHeader *)config)->count * sizeof(EffBillQuadEntry) + headerSize);
-    u8 *body = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(((EffBillTimedHeader *)config)->count * sizeof(EffBillQuadEntry) + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -3822,7 +3822,7 @@ void effSetActiveInstanceMatrixComponent(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
-extern SdfAsset *sdfMatNew(void);
+extern sdfMat_t *sdfMatNew(void);
 
 
 extern EffPacketParams D_004582B0;
@@ -3837,7 +3837,7 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
     s32 rows;
     s32 cols;
     s32 size;
-    struct SdfMemBlock *base;
+    struct sdfMemHandle_t *base;
     u8 *trackStorage;
     EffTrackSet *set;
 
@@ -4030,8 +4030,8 @@ extern u32 D_003E9A50[20];
 extern u32 D_003E9AA0[12];
 extern u32 D_003E9AD0[20];
 extern u32 D_003E9B20[16];
-extern SdfTex *sdfGetOrCreateTextureForReference(void *, RefObj *);
-struct SdfAsset;
+extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(void *, RefObj *);
+struct sdfMat_t;
 
 /* Draw track-set positions/colors/UVs; a null matrix selects the identity transform. */
 void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
@@ -4061,7 +4061,7 @@ void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
 
     if (track->columns != NULL) {
         RefObj *reference = track->shared;
-        SdfTex *texture;
+        sdfTexHandle_t *texture;
 
         if (reference == NULL) {
             switch (track->kind) {
@@ -4210,7 +4210,7 @@ typedef struct EffClassDrawState {
     };
     EffClassWork *effect;
     EffTrackSet *trackSet;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
 } EffClassDrawState;
 
 void effResetRingResourceFrame(s32 work) {
@@ -4414,7 +4414,7 @@ typedef struct EffRingClassConfig {
 EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
     u32 count = source->ring.segments;
     u32 size;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     f32 *scales;
     EffClassDrawState *state;
     EffTrackSet *tracks;
@@ -4826,7 +4826,7 @@ extern EffPacketParams D_004582E0[];
 EffPointSet *effCreatePointSet4(u32 count) {
     s32 rows = count * 4 + 4;
     s32 size = rows * 20;
-    struct SdfMemBlock *base;
+    struct sdfMemHandle_t *base;
     u8 *data;
     EffPointSet *set;
 
@@ -5348,13 +5348,13 @@ extern u8 D_003E9C90[];
 EffSurfaceGridNode *effCreateSurfaceGridNode(u32 count, u32 columns) {
     s32 rows = count * columns * 3 + 6;
     s32 size = rows * 20 + 0xA0;
-    struct SdfMemBlock *base;
+    struct sdfMemHandle_t *base;
     u8 *data;
     EffSurfaceGridNode *node;
 
     size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
     base = sdfMemAllocDirect(size + 0x4C);
-    data = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
+    data = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
     node = (EffSurfaceGridNode *)(data + size);
     node->type = 2;
     node->buffer = (u128 *)data;
@@ -5545,7 +5545,7 @@ void effInterpolateSurfaceGridVectors(EffSurfaceGridNode *work, const f32 (*vect
 }
 
 void effBeginMatrixVuDrawPacket(const Matrix4 *matrix) {
-    struct SdfListHead *work = (struct SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    struct sdfDrawTag_t *work = (struct sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     effCurrentRenderPacket = work;
     sdfDrawTagInit(work);
     VU0_LOAD_MATRIX(matrix);
@@ -5579,7 +5579,7 @@ void effDrawSurfaceTrailHistory(EffSurfaceTrailHistory *history, u32 color) {
     s32 remaining;
     EffPacketParams *draw;
     u32 *colors;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
 
     if ((color & 0xFF000000) == 0) {
         return;
@@ -5638,7 +5638,7 @@ typedef struct EffDrawEntry {
     u32 handle;
     s32 frame;
     u8 pad08[8];
-    void (*draw)(u8 *, struct SdfListHead *);
+    void (*draw)(u8 *, struct sdfDrawTag_t *);
 } EffDrawEntry;
 
 void effSubmitIndexedRenderPacket(u32 index) {
@@ -6239,7 +6239,7 @@ typedef struct EffScaleRange {
     EffScaleRangeEntry *entries;
     f32 start;
     f32 delta;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
 } EffScaleRange;
 
 
@@ -6275,7 +6275,7 @@ void effSeedBillScaleRange(EffClassWork *work) {
 
 EffScaleRange *effCreateRetainedPointSetColorRows(EffBillPointConfig *src) {
     u32 count = src->timed.count;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     EffScaleRange *table;
     EffScaleRangeEntry *row;
     u32 i;
@@ -6289,7 +6289,7 @@ EffScaleRange *effCreateRetainedPointSetColorRows(EffBillPointConfig *src) {
     s32 rampOut;
 
     allocation = sdfMemAllocDirect(count * sizeof(EffScaleRangeEntry) + sizeof(EffScaleRange));
-    table = (EffScaleRange *)sdfMemLock((struct SdfMemBlock *)((u32)allocation));
+    table = (EffScaleRange *)sdfMemLock((struct sdfMemHandle_t *)((u32)allocation));
     table->allocation = allocation;
     table->entries = (EffScaleRangeEntry *)(table + 1);
     if ((u32)src->layers < 3) {
@@ -6909,7 +6909,7 @@ extern EffPacketParams D_00458430[];
 EffPointSet *effCreatePointSet5(s32 count) {
     s32 rows = count * 5 + 5;
     s32 size = rows * 20;
-    struct SdfMemBlock *base;
+    struct sdfMemHandle_t *base;
     u8 *data;
     EffPointSet *set;
 
@@ -7093,7 +7093,7 @@ void effDrawEffectStrip(EffectStripNode *node) {
     f32 (*quad)[4];
     u32 *colors;
     u32 *quadColors;
-    struct BillObj *billboard;
+    struct billHandle_t *billboard;
     s32 count;
     s32 remaining;
     u32 hasTransform;
@@ -7309,7 +7309,7 @@ void effResetBillTable(u8 *p) {
 }
 
 u8 *effAllocateRingFadeEntries(EffBillVortexConfig *config) {
-    struct SdfMemBlock *base = sdfMemAllocDirect(config->common.header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(config->common.header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
     EffFrameState *node = (EffFrameState *)sdfMemLock(base);
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
@@ -7471,7 +7471,7 @@ void effResetBillboardFrameInstanceCounters(u8 *p) {
 }
 
 u8 *effAllocateBillFadeFrameEntries(EffBillColumnConfig *config) {
-    struct SdfMemBlock *base = sdfMemAllocDirect(config->common.header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(config->common.header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
     EffFrameState *node = (EffFrameState *)sdfMemLock(base);
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
@@ -7854,7 +7854,7 @@ void effResetParticleBillFrameCounters(u8 *p) {
 }
 
 u8 *effAllocateCompactRingFadeEntries(EffBillSpiralConfig *config) {
-    struct SdfMemBlock *base = sdfMemAllocDirect(config->common.header.timed.count * 0x2C + 0xC);
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(config->common.header.timed.count * 0x2C + 0xC);
     EffFrameState *node = (EffFrameState *)sdfMemLock(base);
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
@@ -8275,8 +8275,8 @@ EffRibbonWork *effCreateRibbonWork(u32 count, u32 repeat) {
     u32 rowStride = repeat * 4 + 4;
     u32 size = (rowStride * 0x1C + 4) * count;
     u32 cells = rowStride * count;
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(size + 0x34);
-    u8 *p = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)allocation));
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(size + 0x34);
+    u8 *p = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)allocation));
     EffRibbonWork *work = (EffRibbonWork *)(p + size);
     u32 i;
 
@@ -8375,7 +8375,7 @@ void effDrawRibbon(EffRibbonWork *work, Matrix4 *matrix) {
     u32 color;
     u32 segmentColor;
     f32 baseVector[4];
-    SdfTex *texture;
+    sdfTexHandle_t *texture;
 
     count = work->count;
     if (count == 0) {
@@ -8472,7 +8472,7 @@ void effDrawRibbon(EffRibbonWork *work, Matrix4 *matrix) {
         packet->registerAddress = 0x47;
         sdfDrawTagLink(list, (u32)packet);
     }
-    surface->append(surface, (SdfListHead *)list);
+    surface->append(surface, (sdfDrawTag_t *)list);
 }
 
 void effLoadWindTexture(void) {
@@ -8498,7 +8498,7 @@ void effResetAnimationFrameEntries(u8 *p) {
 }
 
 u8 *effAllocateAnimationBuffer(EffBillFlameConfig *config) {
-    struct SdfMemBlock *base = sdfMemAllocDirect(config->header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(config->header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
     EffFrameState *node = (EffFrameState *)sdfMemLock(base);
     u32 count = config->header.segments;
     u8 *entries = (u8 *)(node + 1);
@@ -8647,7 +8647,7 @@ u32 effClampSlotCount(u8 *p) {
 u32 effRetainScalyTextureReference(void);
 
 EffAnimationState *effCreateAnimationState(u32 unused, u32 count) {
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(count * 8 + 0x10);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(count * 8 + 0x10);
     EffAnimationState *state = (EffAnimationState *)sdfMemLock(allocation);
 
     state->allocation = allocation;
@@ -8718,7 +8718,7 @@ void effResetSlotAnimationRecord(s32 work) {
 
 
 u32 *effAllocateQuantizedBuffer(EffBillQuantizedConfig *work) {
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(0xC);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(0xC);
     u32 *buffer = (u32 *)sdfMemLock(allocation);
     u32 count = work->samples.quantizedSamples;
 
@@ -9051,8 +9051,8 @@ u32 repeat;
     u32 rowStride = repeat * 4 + 4;
     u32 size = (rowStride * 0x24 + 4) * count;
     u32 cells = rowStride * count;
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(size + 0x34);
-    u8 *p = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)allocation));
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(size + 0x34);
+    u8 *p = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)allocation));
     EffStripWork *work = (EffStripWork *)(p + size);
     u32 i;
 
@@ -9120,9 +9120,9 @@ extern SdfPoolNode *D_003E9EF0[];
 extern vu8 sdfFrameId;
 extern u8 kwlnFrameDrawPacketRecords[];
 extern s32 dds3GetFrameID(void);
-extern void sdfMatUpdatePacket(SdfAsset *, s32);
-extern void sdfAppendReferencePacket(SdfListHead *, u32);
-extern void sdfDrawTagLinkRefGif(SdfListHead *, u32);
+extern void sdfMatUpdatePacket(sdfMat_t *, s32);
+extern void sdfAppendReferencePacket(sdfDrawTag_t *, u32);
+extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *, u32);
 extern void sdfBuildMaskedFrameRegisterReference(s32, u32, s32);
 extern void sdfBuildFrameRegisterReference(s32, u32, s32);
 
@@ -9133,7 +9133,7 @@ void func_002F3F70(u8 *owner, void *matrix) {
     EffStripWork *work = (EffStripWork *)owner;
     SdfPoolNode *surface;
     void *list;
-    SdfTex *texture;
+    sdfTexHandle_t *texture;
     SdfAssetEntry *entry;
     u128 *referencePacket;
     void *dmaPacket;
@@ -9189,18 +9189,18 @@ void func_002F3F70(u8 *owner, void *matrix) {
     }
     sdf3DPrimLinkTm(list, 0);
     texture = sdfGetOrCreateTextureForReference(surface, (RefObj *)effSharedScalyStripResource);
-    sdfSetAssetPrimaryTextureAddress((SdfAsset *)work->handle, texture);
-    sdfMatSetMultiTex((SdfAsset *)work->handle, texture);
-    sdfMatSetMultiMethod((SdfAsset *)work->handle, mode);
+    sdfSetAssetPrimaryTextureAddress((sdfMat_t *)work->handle, texture);
+    sdfMatSetMultiTex((sdfMat_t *)work->handle, texture);
+    sdfMatSetMultiMethod((sdfMat_t *)work->handle, mode);
     row = 0;
-    sdfMatUpdatePacket((SdfAsset *)work->handle, (s8)sdfFrameId);
-    entry = (SdfAssetEntry *)((SdfAsset *)work->handle)->drawEntries[(s8)sdfFrameId];
+    sdfMatUpdatePacket((sdfMat_t *)work->handle, (s8)sdfFrameId);
+    entry = (SdfAssetEntry *)((sdfMat_t *)work->handle)->drawEntries[(s8)sdfFrameId];
     entry->secondaryTextureState.clamp = 0x7F000FFF;
     entry->primaryTextureState.clamp = 0x02007F000FFFULL;
     entry->secondaryMode = mode;
     entry->alphaState = registerId;
     referencePacket = sdfGrAllocPacketBuff(0x20);
-    sdfMatMakePacket((SdfAsset *)work->handle, (SdfDmaTagHeader *)referencePacket,
+    sdfMatMakePacket((sdfMat_t *)work->handle, (SdfDmaTagHeader *)referencePacket,
                                        (s8)sdfFrameId);
     referencePacket[1] = 0;
     sdfAppendReferencePacket(list, (u32)referencePacket);
@@ -9332,12 +9332,12 @@ void effSeedParticleSpanParameters(EffModelResource *work) {
 extern EffPointSet *effCreatePointSet3(s32 count);
 
 /* Build the point and reference sets for each model map-position record. */
-EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
+EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, dds3ModelHandle_t *model) {
     u32 total = model->first->frameCount;
     u32 count = sdfModelGetMarkPosCount(model->inner);
     u32 spans;
     u32 partialSpan;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     EffSpanTable *table;
     EffSpanRecord *record;
     EffSpanEntry *entries;
@@ -9513,7 +9513,7 @@ EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
     EffModelResource *effect = effCreateModelResourceWithInlineData(work->kind, work->source, 0, 0);
     s32 x = mdlGetMajorNum(work->assetId);
     s32 y = mdlGetMinorNum(work->assetId);
-    MdlCtx *model = mdlLoad(x, y);
+    dds3ModelHandle_t *model = mdlLoad(x, y);
 
     effect->model = model;
     effInitModelVUState(model);
@@ -9563,7 +9563,7 @@ void effSetModelResourceScale(EffModelResource *effect, f32 scale) {
 EffPointSet *effCreatePointSet3(s32 count) {
     s32 rows = count * 3 + 3;
     s32 size = rows * 20;
-    struct SdfMemBlock *base;
+    struct sdfMemHandle_t *base;
     u8 *data;
     EffPointSet *set;
 
@@ -9840,7 +9840,7 @@ s32 effCollectModelEffectActors(BtlUnit **out, u32 kind) {
     return count;
 }
 
-extern void evtUnitLightOff(EvtUnit *, s32);
+extern void evtUnitLightOff(evtUnitHandle_t *, s32);
 
 /* Restore actor light endpoints and directions when the field-light effect ends. */
 void effRestoreBattleActorLighting(u32 unusedResource) {
@@ -9855,7 +9855,7 @@ void effRestoreBattleActorLighting(u32 unusedResource) {
     unit = state->units;
     while (unit != NULL) {
         if (unit->status.flags & 2) {
-            EvtUnit *effect = unit->ext;
+            evtUnitHandle_t *effect = unit->ext;
 
             if (effect != NULL) {
                 u32 firstColor;
@@ -9898,7 +9898,7 @@ void effUpdateBattleActorLighting(EffActiveResource *work) {
     u32 frame = work->frame;
     u32 count = effCollectModelEffectActors(actors, config->actorSelection);
     u32 index;
-    EvtUnit *effect;
+    evtUnitHandle_t *effect;
 
     request.count = config->direction.count;
     request.directionMode = config->direction.directionMode;
@@ -10027,7 +10027,7 @@ void effSyncLinkedActorChildParameter(void) {
     entry = ((BtlState *)owner)->units;
     while (entry != NULL) {
         if (entry->status.flags & 2) {
-            EvtUnit *child = entry->ext;
+            evtUnitHandle_t *child = entry->ext;
             if (child != 0) {
                 child->color60 = entry->baseColor;
                 evtSetUnitColorRGB(child, 0, entry->baseColor);
@@ -10038,7 +10038,7 @@ void effSyncLinkedActorChildParameter(void) {
 }
 
 
-extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
+extern s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *);
 
 /* Tint selected eligible actors, then restore their original RGB at fade-out. */
 void effTransitionSelectedActorRgbColors(EffActiveResource *work) {
@@ -10069,7 +10069,7 @@ void effTransitionSelectedActorRgbColors(EffActiveResource *work) {
                 }
                 {
                     u32 baseColor = actors[i]->baseColor;
-                    EvtUnit *effect = actors[i]->ext;
+                    evtUnitHandle_t *effect = actors[i]->ext;
                     u32 blended;
 
                     if ((baseColor & 0xFFFFFF) != 0x808080) {
@@ -10105,7 +10105,7 @@ void effTransitionSelectedActorRgbColors(EffActiveResource *work) {
     }
 }
 
-s32 effComputeLightDirectionVU(MdlCtx *model, SdfLightingPacketStorage *target) {
+s32 effComputeLightDirectionVU(dds3ModelHandle_t *model, SdfLightingPacketStorage *target) {
     if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
@@ -10197,10 +10197,10 @@ void effInitializeFieldLightColors(EffActiveResource *work) {
 }
 
 void effResetCopiedPayloadTargets(EffCopiedPayloadWork *work) {
-    Dds3PathCurveWork **objects = work->payload->targets;
+    dds3PathBasicControl_t **objects = work->payload->targets;
     u32 i;
     for (i = 0; i < 5; i++) {
-        Dds3PathCurveWork *object = objects[i];
+        dds3PathBasicControl_t *object = objects[i];
         if (object != 0) {
             object->counter.direction = 0;
             object->counter.time = 0.0f;
@@ -10210,8 +10210,8 @@ void effResetCopiedPayloadTargets(EffCopiedPayloadWork *work) {
 
 EffCopiedPayload *effAllocateCopiedEffectPayload(u32 owner, const void *source, s32 size) {
     u32 headerSize = 0x40;
-    SdfMemBlock *base = sdfMemAllocDirect(size + headerSize);
-    u8 *body = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
+    sdfMemHandle_t *base = sdfMemAllocDirect(size + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
     EffCopiedPayload *node = (EffCopiedPayload *)body;
 
     body += headerSize;
@@ -10230,7 +10230,7 @@ typedef struct EffCopiedSpawnList {
     u32 count;
     FldSpawnBatch *groups;
 } EffCopiedSpawnList;
-extern EffWorldNode *dds3AddPathBasic(s32 key, void *work, const char *name);
+extern dds3Basic_t *dds3AddPathBasic(s32 key, void *work, const char *name);
 
 /* Capture constructor arguments before consuming the entry; see
  * docs/idioms.md, "Trace-justified cursor consumption: copied payload slots". */
@@ -10290,8 +10290,8 @@ EffCopiedPayload *effCloneEffectPayloadFromOwner(EffCopiedPayloadWork *owner) {
 
 
 void effDestroyCopiedEffectPayload(EffCopiedPayload *payload) {
-    EffWorldNode **tails = payload->effects;
-    Dds3PathCurveWork **heads = payload->targets;
+    dds3Basic_t **tails = payload->effects;
+    dds3PathBasicControl_t **heads = payload->targets;
     u32 i;
     for (i = 0; i < 5; i++) {
         if (*heads != 0) {
@@ -10315,7 +10315,7 @@ extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 extern void btlFlagAllUnitsDefeatCandidate(void);
 extern void btlFlagUnitDefeatCandidate(BtlUnit *);
 extern void btlCopyUnitRotationQuaternion(BtlUnit *, void *);
-extern void dds3CameraObjectBasicSetFovy(EffWorldNode *, f32);
+extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *, f32);
 extern f32 D_00437E90;
 extern u128 D_003E9F60, D_003E9F70, D_003E9F80, D_003E9F90, D_003E9FA0;
 extern u128 D_003E9130;
@@ -10330,10 +10330,10 @@ s32 func_002F6D00(EffActiveResource *owner) {
     EffectVectorRequest request;
     EffCameraPathParameters *config = owner->payload;
     EffCopiedPayload *slots = owner->resource;
-    EffWorldNode *camera;
+    dds3Basic_t *camera;
     CameraData *data;
     BtlUnit *actor;
-    Dds3PathCurveWork *path;
+    dds3PathBasicControl_t *path;
 
     if (config->startFrame < owner->frame && config->startFrame != 0) {
         return;
@@ -10871,18 +10871,18 @@ void effDrawActiveSurfaceNode(s32 owner) {
     func_002E8770(*(u32 *)((EffActiveResource *)owner)->resource);
 }
 
-MdlCtx **effAllocateModelObjectSlot(u32 owner) {
-    MdlCtx **work = sdfChipAllocDirect(sizeof(*work));
+dds3ModelHandle_t **effAllocateModelObjectSlot(u32 owner) {
+    dds3ModelHandle_t **work = sdfChipAllocDirect(sizeof(*work));
     *work = NULL;
     return work;
 }
 
 
 
-MdlCtx **effCreateAndAttachModelEffectObject(u32 *owner, u32 kind, void *source, u32 settings) {
-    MdlCtx **work = effAllocateModelObjectSlot((u32)owner);
-    MdlCtx *object = effLoadViewerModelWithVUState(source, settings);
-    Motion *active = object->first;
+dds3ModelHandle_t **effCreateAndAttachModelEffectObject(u32 *owner, u32 kind, void *source, u32 settings) {
+    dds3ModelHandle_t **work = effAllocateModelObjectSlot((u32)owner);
+    dds3ModelHandle_t *object = effLoadViewerModelWithVUState(source, settings);
+    sdfMotionCtrlr_t *active = object->first;
     *work = object;
     if (active != 0) {
         if (*owner != 0) {
@@ -10894,13 +10894,13 @@ MdlCtx **effCreateAndAttachModelEffectObject(u32 *owner, u32 kind, void *source,
     return work;
 }
 
-MdlCtx **effCreateAndAttachModelFromResourceDescriptor(u8 *request) {
+dds3ModelHandle_t **effCreateAndAttachModelFromResourceDescriptor(u8 *request) {
     u32 *owner = ((EffActiveResource *)request)->payload;
-    MdlCtx **source = (MdlCtx **)((EffActiveResource *)request)->resource;
-    MdlCtx **work = effAllocateModelObjectSlot((u32)owner);
+    dds3ModelHandle_t **source = (dds3ModelHandle_t **)((EffActiveResource *)request)->resource;
+    dds3ModelHandle_t **work = effAllocateModelObjectSlot((u32)owner);
     s32 a = mdlGetMajorNum(*source);
     s32 b = mdlGetMinorNum(*source);
-    MdlCtx *object = mdlLoad(a, b);
+    dds3ModelHandle_t *object = mdlLoad(a, b);
     *work = object;
     effInitModelVUState(object);
     if ((*work)->first != NULL) {
@@ -10913,7 +10913,7 @@ MdlCtx **effCreateAndAttachModelFromResourceDescriptor(u8 *request) {
     return work;
 }
 
-void effReleaseOwnedModelContextWork(MdlCtx **handle) {
+void effReleaseOwnedModelContextWork(dds3ModelHandle_t **handle) {
     if (*handle != NULL) {
         effDestroyModelContext(*handle);
     }
@@ -10933,10 +10933,10 @@ typedef char EffModelCallbackConfigSizeCheck[sizeof(EffModelCallbackConfig) == 0
 
 void effUpdateActorPoseFromModelResource(EffActiveResource *resource)
 {
-    MdlCtx **modelHandle = (MdlCtx **)resource->resource;
+    dds3ModelHandle_t **modelHandle = (dds3ModelHandle_t **)resource->resource;
     EffModelCallbackConfig *config = (EffModelCallbackConfig *)resource->payload;
-    MdlCtx *model;
-    SdfModel *inner;
+    dds3ModelHandle_t *model;
+    sdfModelRootNode_t *inner;
     BtlUnit *unit;
     s32 elapsedFrame;
     s32 duration;
@@ -10999,8 +10999,8 @@ EffModelBindings *effAllocateModelBindings(s32 *owner) {
 
 EffModelBindings *effCreateMaterialAndModelEffectWork(s32 *owner, u32 kind, void *source, u32 settings) {
     EffModelBindings *work = effAllocateModelBindings(owner);
-    MdlCtx *object;
-    Motion *active;
+    dds3ModelHandle_t *object;
+    sdfMotionCtrlr_t *active;
 
     work->material = effCreateClassResourceWork(4, owner);
     object = effLoadViewerModelWithVUState(source, settings);
@@ -11022,9 +11022,9 @@ EffModelBindings *effCreateModelEffectWorkFromPayload(u8 *request) {
     EffModelBindings *work = effAllocateModelBindings(owner);
     s32 a;
     s32 b;
-    MdlCtx *object;
+    dds3ModelHandle_t *object;
     EffClassWork *material;
-    MdlCtx *modelSource;
+    dds3ModelHandle_t *modelSource;
 
     material = effCloneClassResourceWork(source->material);
     modelSource = source->model;
@@ -11056,7 +11056,7 @@ void effDestroyMaterialAndModelEffectWork(EffModelBindings *work) {
     sdfChipFreeDirect(work);
 }
 
-extern s32 sdfModelGetMarkPosMatrix(SdfModel *model, s32 id);
+extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *model, s32 id);
 
 /* vu0 routine: orient along target minus model origin, save distance, and advance the resource. */
 void effOrientClassResourceAlongTargetOffset(u8 *work) {
@@ -11125,11 +11125,11 @@ void effApplyModelTransform(u8 *work) {
     effDrawClassResourceWork(modelContext->material);
 }
 
-extern SdfAsset *sdfMatNew(void);
+extern sdfMat_t *sdfMatNew(void);
 
 EffDrawableAssetWork *effCreateDrawableAssetWithDefaultOpacity() {
     EffDrawableAssetWork *work = (EffDrawableAssetWork *)sdfAllocAndClearQuadwords(sizeof(*work));
-    SdfAsset *asset;
+    sdfMat_t *asset;
     work->state = 0;
     asset = sdfMatNew();
     work->asset = asset;
@@ -11146,7 +11146,7 @@ EffDrawableAssetWork *effCloneDrawableAssetWork(EffActiveResource *owner) {
 }
 
 void effReleaseQueuedDrawableAssetWork(EffDrawableAssetWork *work) {
-    SdfAsset *resource;
+    sdfMat_t *resource;
 
     resource = work->asset;
     if (resource != NULL) {
@@ -11193,7 +11193,7 @@ void effDrawMovingRadialCylinder(EffActiveResource *work) {
     f32 side[18][4] __attribute__((aligned(16)));
     f32 cap[48][4] __attribute__((aligned(16)));
     SdfPoolNode *drawNode;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     EffGsPacket *gs;
     u32 surface;
     u32 vertexCount;
@@ -11216,7 +11216,7 @@ void effDrawMovingRadialCylinder(EffActiveResource *work) {
         evtSubmitAlternateFramePacket();
     }
 
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     gs = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
     gs->dmaTag = 2;
@@ -11243,7 +11243,7 @@ void effDrawMovingRadialCylinder(EffActiveResource *work) {
         state->unk00++;
     }
     sdf3DPrimLinkTm(list, 0);
-    sdf3DPrimLinkMat(list, (SdfAsset *)state->asset, 0);
+    sdf3DPrimLinkMat(list, (sdfMat_t *)state->asset, 0);
 
     description = &request;
     memset(description, 0, sizeof(request));
@@ -11354,7 +11354,7 @@ void effSyncFadeColorToTargets(void) {
 
         while (node != 0) {
             if (node->status.flags & 2) {
-                EvtUnit *target = node->ext;
+                evtUnitHandle_t *target = node->ext;
 
                 if (target != 0) {
                     node->overlayColor = (node->overlayColor & 0xFFFFFF) | (node->baseColor & 0xFF000000);
@@ -11435,8 +11435,8 @@ extern u8 D_003E9FF0[];
 
 
 typedef struct EffMotionResource {
-    BillObj *billboard; /* 0x00 */
-    SdfAsset *asset;    /* 0x04 */
+    billHandle_t *billboard; /* 0x00 */
+    sdfMat_t *asset;    /* 0x04 */
 } EffMotionResource;
 typedef char EffMotionResourceSizeCheck[(sizeof(EffMotionResource) == 8) ? 1 : -1];
 typedef char EffMotionResourceAssetOffsetCheck[
@@ -11509,7 +11509,7 @@ void effDrawGrowingTexturedStrip(EffActiveResource *work) {
     f32 positions[6][4];
     f32 texcoords[3][4];
     u32 baseColor[4], trackColor[4], blendedColor[4];
-    SdfListHead *packet;
+    sdfDrawTag_t *packet;
     SdfPoolNode *surface;
     f32 distance, length, pivotLength, width, ratio, initial;
     f32 left, nearZ, farZ, texSplit;
@@ -11518,7 +11518,7 @@ void effDrawGrowingTexturedStrip(EffActiveResource *work) {
     if (duration < frame || duration == 0) {
         return;
     }
-    packet = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packet);
     effResolveRequestPositionIntoVu(&config->start, config->startIndex);
     VU0_STORE_VF_UNCLOBBERED(vf10, first);
@@ -11762,7 +11762,7 @@ EffParticleSharedResource *effCreateParticleSharedResourceFromFile(FileJobPayloa
 }
 
 void effReleaseParticleResources(EffParticleSharedResource *p) {
-    BillObj *billboard = p->billHandle;
+    billHandle_t *billboard = p->billHandle;
     if (billboard != NULL) {
         dds3BillboardDelete(billboard);
     }
@@ -11782,7 +11782,7 @@ EffParticleSharedResource *effCloneParticleSharedResource(EffParticleSharedResou
 }
 
 void effReplaceSharedResource(EffParticleSharedResource *dst, EffParticleSharedResource *src) {
-    BillObj *billboard;
+    billHandle_t *billboard;
 
     if (src->billHandle != 0) {
         if (dst->billHandle != 0) {
@@ -11806,7 +11806,7 @@ void effResetParticleStateWord(EffParticleSharedResource *work) {
 
 extern SdfPoolNode D_003805A8;
 
-extern void sdfPrimLinkGt4(SdfListHead *list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2, s32 u2, s32 v2, s32 color2, s32 x3, s32 y3, s32 u3, s32 v3, s32 color3, s32 depth, s32 (*alloc)(s32));
+extern void sdfPrimLinkGt4(sdfDrawTag_t *list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2, s32 u2, s32 v2, s32 color2, s32 x3, s32 y3, s32 u3, s32 v3, s32 color3, s32 depth, s32 (*alloc)(s32));
 
 void func_002F9DF0(EffParticleSharedResource *work) {
     s32 limit = work->limit;
@@ -11814,7 +11814,7 @@ void func_002F9DF0(EffParticleSharedResource *work) {
     BillSnapshot snapshot;
     s32 corners[4][2];
     EffAnimSample sample;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     EffGsPairPacket *packet;
     SdfPoolNode *surface;
     f32 size, angle, halfWidth, halfHeight, centerX, centerY, cosine, sine, coordX, coordY;
@@ -11879,7 +11879,7 @@ void func_002F9DF0(EffParticleSharedResource *work) {
     corners[2][1] = (s32)(coordX * sine + coordY * cosine);
     coordX = (f32)(work->x << 4);
     coordY = (f32)(work->y << 3);
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     packet = (EffGsPairPacket *)sdfGrAllocPacketBuff(0x40);
     packet->dmaTag = 3;
@@ -11941,13 +11941,13 @@ typedef struct EffectSlotNode80 {
     f32 angularAcceleration; // 0x2C
     u16 scaleByOpacity;    // 0x30: native LHU in the slot renderer
     u8 pad32[0x2E];
-    MdlCtx *model;           // 0x60
+    dds3ModelHandle_t *model;           // 0x60
     void *deviceSlot;       // 0x64
     FileQueue **resourceEntries; // 0x68: per-record cloned queues
-    struct SdfMemBlock *entryAllocation;    // 0x6C: queue-clone array descriptor
+    struct sdfMemHandle_t *entryAllocation;    // 0x6C: queue-clone array descriptor
     FileSlotTable *record;  // 0x70: primary slot-table owner
     u8 *positions;          // 0x74
-    struct SdfMemBlock *positionAllocation; // 0x78: particle-position array descriptor
+    struct sdfMemHandle_t *positionAllocation; // 0x78: particle-position array descriptor
     u16 active;
 } EffectSlotNode80;
 
@@ -12086,8 +12086,8 @@ void *effCloneOwnedState(void *owner, u16 type) {
 /* Replace secondary ownership with cloned model/device resources or cloned queues. */
 void effCloneSlotNodeSecondaryResources(EffectSlotNode80 *dst, EffectSlotNode80 *src) {
     s32 kind = src->resourceKind;
-    MdlCtx *model;
-    BattleGroupNode *modelData;
+    dds3ModelHandle_t *model;
+    dds3ModelResrc_t *modelData;
     u32 count;
     u32 i;
 
@@ -12135,7 +12135,7 @@ void effCloneSlotNodeSecondaryResources(EffectSlotNode80 *dst, EffectSlotNode80 
 
 void effRebuildResourceEntries(u8 *work, u32 kind, s32 *config) {
     FileSlotTable *previous = ((EffectSlotNode80 *)work)->record;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u32 count;
     u32 i;
     u8 *entries;
@@ -12157,8 +12157,8 @@ void effRebuildResourceEntries(u8 *work, u32 kind, s32 *config) {
 }
 
 void effReplaceEffectSlotModelAndDeviceResources(EffectSlotNode80 *work, void *source, u32 config) {
-    BattleGroupNode *modelData;
-    MdlCtx *model;
+    dds3ModelResrc_t *modelData;
+    dds3ModelHandle_t *model;
     void *deviceSlot;
 
     if (work->model != 0) {
@@ -12237,7 +12237,7 @@ void func_002FAD98(EffectSlotNode80 *node) {
     FileSlotTable *record;
     FileSlot *slot;
     f32 *direction;
-    SdfModel *model;
+    sdfModelRootNode_t *model;
     FileQueue **queues;
     u32 color;
     s32 count;
@@ -12450,7 +12450,7 @@ typedef struct EffectBlob {
 } EffectBlob;
 
 typedef struct EffSharedEffectResource {
-    MdlCtx *model;
+    dds3ModelHandle_t *model;
     u32 deviceSlot;
     SdfLightingPacketStorage *data;
     u32 unk0C;
@@ -12458,7 +12458,7 @@ typedef struct EffSharedEffectResource {
     u8 pad12[2];
     void *entries;
     u32 entriesSize;
-    SdfMemBlock *allocation;
+    sdfMemHandle_t *allocation;
 } EffSharedEffectResource;
 typedef struct EffSharedEffectWork {
     f32 position[4];
@@ -12468,7 +12468,7 @@ typedef struct EffSharedEffectWork {
     u32 unk28;
     EffectBlob data;       // 0x2C through 0x477
     EffSharedEffectResource *resource; // 0x478, shared resource whose reference count is at +0x10
-    SdfMemBlock *allocation; /* 0x47C: general-heap descriptor, not the retained address */
+    sdfMemHandle_t *allocation; /* 0x47C: general-heap descriptor, not the retained address */
 } EffSharedEffectWork;
 
 void effApplySharedModelParameters(EffSharedEffectWork *work) {
@@ -12476,7 +12476,7 @@ void effApplySharedModelParameters(EffSharedEffectWork *work) {
     f32 scale;
     u32 i;
     SdfMapPositionRecord *record;
-    MdlResourceItem *item;
+    dds3ModelEffectCtrlr_t *item;
 
     work->unk28 = 0;
     if (work->resource->model == NULL) {
@@ -12508,7 +12508,7 @@ void effApplySharedModelParameters(EffSharedEffectWork *work) {
 
 /* General-heap descriptors and retained buffer addresses are distinct owners. */
 u8 *effCreateSharedEffectResourceWork(FileJobPayload *source) {
-    SdfMemBlock *allocation = sdfMemAllocDirect(sizeof(EffSharedEffectWork));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(sizeof(EffSharedEffectWork));
     EffSharedEffectWork *work = (EffSharedEffectWork *)sdfMemLock(allocation);
     void *secondary;
 
@@ -12586,7 +12586,7 @@ void effShareReferenceCountedEffectObject(s32 target, s32 source) {
 
 /* Sample the retained model's first motion at frame zero when a model is present. */
 void effSampleSharedEffectModelStartPose(EffSharedEffectWork *work) {
-    MdlCtx *context = work->resource->model;
+    dds3ModelHandle_t *context = work->resource->model;
     if (context != NULL) {
         sdfMotionSeek(context->first, 0.0f);
     }
@@ -12595,14 +12595,14 @@ void effSampleSharedEffectModelStartPose(EffSharedEffectWork *work) {
 extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern u64 D_003EA210[4];
 
-extern void mdlLinkEffect(MdlCtx *owner, MdlResourceItem *anchorRecord);
+extern void mdlLinkEffect(dds3ModelHandle_t *owner, dds3ModelEffectCtrlr_t *anchorRecord);
 
 void func_002FB998(EffSharedEffectWork *work) {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     EffGsPacket *packet;
     SdfPoolNode *surface;
-    MdlCtx *model;
-    MdlResourceItem *item;
+    dds3ModelHandle_t *model;
+    dds3ModelEffectCtrlr_t *item;
     u32 tint, baseColor[4], trackColor[4], blendedColor[4];
     u32 frame, alpha, packed, unit, bits;
     u16 savedFlags;
@@ -12671,7 +12671,7 @@ void func_002FB998(EffSharedEffectWork *work) {
     }
     mdlSetColor(work->resource->model, tint);
     for (i = 0; i != 4; i++) {
-        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
         packet->dmaTag = 2;
@@ -12692,7 +12692,7 @@ void func_002FB998(EffSharedEffectWork *work) {
     work->resource->model->flags &= ~MDL_SKIP_ANCHORS;
     work->resource->model->inner->drawFlags = savedFlags;
     for (i = 0; i != 4; i++) {
-        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
         packet->dmaTag = 2;
@@ -12719,7 +12719,7 @@ void func_002FB998(EffSharedEffectWork *work) {
         mdlLinkEffect(work->resource->model, item);
     }
     for (i = 0; i != 4; i++) {
-        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
         packet->dmaTag = 2;
@@ -12732,16 +12732,16 @@ void func_002FB998(EffSharedEffectWork *work) {
         surface = kwlnSceneSurfaceSets[8][i];
         surface->append(surface, list);
     }
-    sdfModelCopyStat((SdfModel *)work->resource->deviceSlot, work->resource->model->inner);
+    sdfModelCopyStat((sdfModelRootNode_t *)work->resource->deviceSlot, work->resource->model->inner);
     if (effComputeLightDirectionVU(work->resource->model, work->resource->data)) {
-        ((SdfModel *)work->resource->deviceSlot)->lighting = (struct SdfDmaTagHeader *)work->resource->data;
+        ((sdfModelRootNode_t *)work->resource->deviceSlot)->lighting = (struct SdfDmaTagHeader *)work->resource->data;
     } else {
-        ((SdfModel *)work->resource->deviceSlot)->lighting = NULL;
+        ((sdfModelRootNode_t *)work->resource->deviceSlot)->lighting = NULL;
     }
     sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, kwlnSceneSurfaceSets[8],
-                           (SdfModel *)work->resource->deviceSlot);
+                           (sdfModelRootNode_t *)work->resource->deviceSlot);
     for (i = 0; i != 4; i++) {
-        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
         packet->dmaTag = 2;
@@ -13760,7 +13760,7 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const void *sourceRows, 
     EffQueuedFileObject *state;
     EffEditorRow *entries;
     char *nameBuffer;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u32 capacity = sourceCount;
     u32 i;
     u32 count = 0;
@@ -15723,10 +15723,10 @@ u32 effQueueGeneratedFileJob(void) {
     FileJob *entry;
     EffFileJobRequest *resource;
     u8 *buffer;
-    DevState *command;
+    sdfFileCmdHandle_t *command;
     u32 totalLength;
     u32 dataLength;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
 
     effPollResourceBankSlot(D_0042D140, BTL_RESOURCE_SCAN_PB, &fileInfo);
     status = fileInfo.state;
@@ -15735,7 +15735,7 @@ u32 effQueueGeneratedFileJob(void) {
         result = 0x400000;
     } else if (status == BTL_RESOURCE_SELECTION_ACCEPTED) {
         u32 headerBytes = 0x80;
-        struct SdfMemBlock *oldAllocation;
+        struct sdfMemHandle_t *oldAllocation;
         u32 queuedFile;
         job = fileCreateJob(6);
         command = sdfFileOpen(&fileInfo);
@@ -16054,7 +16054,7 @@ u32 effRemoveListEntry(EffectList *list) {
 s32 effPollResourceList(EffectList *list) {
     EffectListNode *node = list->first;
     PacWork *item;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
 
     if (node != NULL) {
         switch (list->mode) {
@@ -16084,7 +16084,7 @@ s32 effPollResourceList(EffectList *list) {
                 for (item = list->request->packet.queueHead; item != NULL; item = item->next) {
                     if (((SdfPacStreamPacketHeader *)item->packet)->command == 1) {
                         node = list->first;
-                        allocation = (struct SdfMemBlock *)item->resourceHandle;
+                        allocation = (struct sdfMemHandle_t *)item->resourceHandle;
                         *node->reference = effCreateResourceSlotSetFromAllocation(allocation, node->kind);
                         if (node->kind == 0) {
                             sdfMemFreeDirect(allocation);
@@ -16138,7 +16138,7 @@ EffectSlotSet *effLoadIndexedResource(const char *base, const char *name, s32 ke
 
 /* Publish the instance, release its source allocation, then clean up the completed file job. */
 void effCompleteTransientResourceJob(struct FileRequest *job, u32 *outInstance) {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     EffectSlotSet *instance;
 
     allocation = fileGetMemHandle(job);
@@ -16150,7 +16150,7 @@ void effCompleteTransientResourceJob(struct FileRequest *job, u32 *outInstance) 
 
 /* Publish the instance without releasing its source allocation, then clean up the file job. */
 void effCompleteRetainedResourceJob(struct FileRequest *job, u32 *outInstance) {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     EffectSlotSet *instance;
 
     allocation = fileGetMemHandle(job);
@@ -16187,7 +16187,7 @@ EffMappedResource *effLoadMappedResource(const char *base, const char *name) {
 /* Publish mapped records before releasing their source allocation and completing the file job. */
 void effCompleteMappedResourceJob(struct FileRequest *job,
                                   EffMappedResource **outMappedResource) {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u32 sourceAddress;
     EffMappedResource *mappedResource;
 
@@ -16377,9 +16377,9 @@ typedef struct EffMappedHeader {
  * The required-size calculation uses the first record, not the current row.
  * Returns the record-allocation handle, not its retained address.
  */
-struct SdfMemBlock *effLoadMappedStatusRecords(const u8 *source, EffMappedHeader *headerOut) {
+struct sdfMemHandle_t *effLoadMappedStatusRecords(const u8 *source, EffMappedHeader *headerOut) {
     EffMappedHeader header;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     EffMappedRecord *records;
     u32 recordIndex = 0;
     u32 statusBytes;
@@ -16426,7 +16426,7 @@ EffMappedResource *effCreateMappedResource(const u8 *source) {
 /* Build one zeroed status record and allocate the category's required status storage. */
 EffMappedResource *effCreateStatusBatch(u32 category) {
     EffMappedResource *batch = (EffMappedResource *)sdfChipAllocDirect(EFF_BATCH_HEADER_BYTES);
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u32 statusBytes;
     u8 *statuses;
 
@@ -16616,7 +16616,7 @@ u8 *effResolveResourceSlots(EffectSlotSet *set, u8 *resourceBytes, s32 clearAllS
 
 void effResolveAndReleaseResource(EffectSlotSet *owner) {
     if (owner->sourceAllocation != 0) {
-        struct SdfMemBlock *resource = owner->sourceAllocation;
+        struct sdfMemHandle_t *resource = owner->sourceAllocation;
         u8 *mapped = (u8 *)sdfMemLock(resource);
         effResolveResourceSlots(owner, mapped, 0, -1);
         sdfMemUnlock(owner->sourceAllocation);
@@ -16625,7 +16625,7 @@ void effResolveAndReleaseResource(EffectSlotSet *owner) {
 
 void effResolveAndReleaseSelectedResource(EffectSlotSet *owner, s32 mapping) {
     if (owner->sourceAllocation != 0) {
-        struct SdfMemBlock *resource = owner->sourceAllocation;
+        struct sdfMemHandle_t *resource = owner->sourceAllocation;
         u8 *mapped = (u8 *)sdfMemLock(resource);
         effResolveResourceSlots(owner, mapped, 0, mapping);
         sdfMemUnlock(owner->sourceAllocation);
@@ -16641,7 +16641,7 @@ void effReleaseSlotTextureReferencesAndResetWork(EffectSlotSet *owner, s32 prese
         do {
             if (resources[i] != 0) {
                 u32 *current;
-                sdfTexReleaseReference((SdfTex *)resources[i]);
+                sdfTexReleaseReference((sdfTexHandle_t *)resources[i]);
                 current = (u32 *)owner->textureReferences;
                 count = owner->textureCount;
                 resources = current;
@@ -16667,7 +16667,7 @@ u8 effHasFirstTextureHandle(const EffectSlotSet *owner) {
 EffPayload *effCreatePayload(u32 recordCount) {
     u32 recordBytes = recordCount * EFF_PAYLOAD_RECORD_BYTES;
     EffPayload *payload = (EffPayload *)sdfChipAllocDirect(EFF_BATCH_HEADER_BYTES);
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(recordBytes);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(recordBytes);
     payload->count = recordCount;
     payload->allocation = allocation;
     payload->records = (u8 *)sdfMemLock(allocation);
@@ -16682,7 +16682,7 @@ u32 effDestroyPayload(EffPayload *payload) {
     return 1;
 }
 
-EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct SdfMemBlock *resourceAllocation, u32 keepAllocation) {
+EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct sdfMemHandle_t *resourceAllocation, u32 keepAllocation) {
     EffectSlotSet *set;
     u8 *resource;
     u8 *entries;
@@ -16697,7 +16697,7 @@ EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct SdfMemBlock *resour
     set->textureCount = *(u16 *)(resource + 0x14);
     set->textureAllocation = sdfMemAllocDirect(
         set->textureCount * 4);
-    set->textureReferences = (SdfTex **)sdfMemLock(set->textureAllocation);
+    set->textureReferences = (sdfTexHandle_t **)sdfMemLock(set->textureAllocation);
     memset(set->textureReferences, 0, set->textureCount * 4);
     entries = effResolveResourceSlots(set, resource,
         keepAllocation, -1);
@@ -16724,7 +16724,7 @@ EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 cou
     effect->sharesTextureReferences = 1;
     {
         u32 mode = source->textureCount;
-        SdfTex **textureReferences = source->textureReferences;
+        sdfTexHandle_t **textureReferences = source->textureReferences;
         effect->textureCount = mode;
         effect->textureReferences = textureReferences;
     }
@@ -16954,7 +16954,7 @@ void effSelectPresetByKind(u32 mode, u32 value) {
     }
 }
 
-typedef struct SdfTex SdfTex;
+typedef struct sdfTexHandle_t sdfTexHandle_t;
 typedef struct SdfDrawPacket SdfDrawPacket;
 
 typedef struct EffSpriteUV {
@@ -16974,16 +16974,16 @@ typedef union EffSpriteColor {
     } channels;
 } EffSpriteColor;
 
-extern void sdfTexSetFilter(SdfTex *, s32, s32);
+extern void sdfTexSetFilter(sdfTexHandle_t *, s32, s32);
 extern s32 sdf2DGetPrimPacketSize(s32, s32);
 extern s32 sdf2DGetPrimPtr(s32);
 extern void effSelectPresetByKind(u32, u32);
 void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
                    const EffSpriteUV *uvRect, const EffSpriteColor *color, u32 flipFlags,
-                   u32 blendKind, s32 mode, SdfTex *texture, s32 surfaceId) {
+                   u32 blendKind, s32 mode, sdfTexHandle_t *texture, s32 surfaceId) {
     u32 textureCoordinates[4];
     void *packet;
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
     u64 *packetWords;
     s32 left;
     s32 top;
@@ -17034,7 +17034,7 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     packetWords[5] = depth;
     packetWords[9] = depth;
     effSelectPresetByKind(blendKind, surfaceId);
-    packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
     sdf2DLinkTexPacket(packetList, texture, 0);
     sdfDrawTagLink(packetList, (u32)packet);
@@ -17076,7 +17076,7 @@ void itfRotateScreenOffset(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 
 void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
                    const EffSpriteUV *uvRect, const EffSpriteColor *cornerColors,
                    u32 flipFlags, f32 angle, u32 blendKind, s32 mode, s32 aspectMode,
-                   SdfTex *texture, s32 surfaceId) {
+                   sdfTexHandle_t *texture, s32 surfaceId) {
     u32 textureCoordinates[4];
     /* The four corners stay separate locals: itfRotateScreenOffset writes each
      * coordinate through its own pointer. */
@@ -17089,7 +17089,7 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     s32 x3;
     s32 y3;
     s32 packet;
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
     u64 *packetWords;
     s32 left;
     s32 top;
@@ -17190,7 +17190,7 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     packetWords[22] = (u64)(u32)x3 | ((u64)(u32)y3 << 32);
     packetWords[23] = depth >> 4;
     effSelectPresetByKind(blendKind, surfaceId);
-    packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
     sdf2DLinkTexPacket(packetList, texture, 0);
     sdfDrawTagLink(packetList, packet);
@@ -17202,7 +17202,7 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
 void itfDrawRotatedTexturedRect(s32 x, s32 y, s32 depth, s32 width, s32 height,
                                const u32 *textureCoordinates, const u32 *cornerColors,
                                u32 flipFlags, f32 rotation, u32 blendKind, u32 textureMode,
-                               SdfTex *texture, u32 surfaceId) {
+                               sdfTexHandle_t *texture, u32 surfaceId) {
     sdfDrawTexturedQuad(x, y, depth, width, height, (const EffSpriteUV *)textureCoordinates,
                   (const EffSpriteColor *)cornerColors, flipFlags, rotation, blendKind, textureMode, 1,
                   texture, surfaceId);

@@ -77,14 +77,14 @@ typedef union UiQuadColor {
 
 extern s32 dds3FindEntryIndex();
 
-extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
+extern datUnitWork_t *btlGetIndexedPartyEntryRecord(s32);
 
 
 extern const char *D_003B4CF8[];
 
 extern u32 sndTestMessageResourceIndex;
 
-extern SdfTex *sndTestMessageTexture;
+extern sdfTexHandle_t *sndTestMessageTexture;
 
 
 extern u64 D_004366E8;
@@ -115,7 +115,7 @@ typedef char BtlStateTotalApDds2OffsetCheck[
 typedef char BtlStateCommandRangeOverrideDds2OffsetCheck[
     ((u32)&((BtlState *)0)->commandRangeOverride == 0x6DC) ? 1 : -1];
 
-extern s32 datCalculateCommandBaseValue(DatPartyRecord *, s32);
+extern s32 datCalculateCommandBaseValue(datUnitWork_t *, s32);
 
 extern DatEnemyRecord *datEnemyRecords;
 
@@ -133,14 +133,14 @@ extern f32 btlActiveGroupCountMultipliers[];
 
 
 
-extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
+extern u16 mnuGetPartyEntryCurrentId(datUnitWork_t *);
 
-extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
+extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 
 extern s32 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity);
 
 
-extern s32 TestMsgMngD_Process(KwlnTask *task);
+extern s32 TestMsgMngD_Process(dds3ProcessID_t *task);
 
 extern SdfPoolNode D_003805A8;
 
@@ -152,9 +152,9 @@ extern u8 D_003B4D28[];
 
 #include "sdf_packet_alloc.h"
 
-extern void itfMiscDrawAlphaPrim(SdfListHead *list, s32 context, s32 mode);
+extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *list, s32 context, s32 mode);
 
-extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
+extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
 extern SndPad dds3PadButtonState;
@@ -163,9 +163,9 @@ extern SdfPoolNode sdfGrOtTable[];
 
 #define BTL_ENTRY_STATUS_MASK 0x7FFF
 
-extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
+extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
 
-extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
+extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *);
 
 extern SdfPoolNode D_00380708;
 
@@ -175,7 +175,7 @@ extern s32 D_00435CBC;
 
 extern void itfDebugPrintMark();
 
-extern s32 TestMsgMngC_Process(KwlnTask *task);
+extern s32 TestMsgMngC_Process(dds3ProcessID_t *task);
 
 extern u8 D_003B4A28[];
 
@@ -186,8 +186,8 @@ void TestMsgReloadTexture(void);
 /* Functions defined earlier in the previous translation unit. */
 void *btlGetRuntime(void);
 s8 btlGetActorIndexedSignedValue(BtlUnit *object, s32 index);
-s32 btlCheckSpecialAbility(DatPartyRecord *record, s32 ability);
-s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *partyRecord, u32 entryId);
+s32 btlCheckSpecialAbility(datUnitWork_t *record, s32 ability);
+s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *partyRecord, u32 entryId);
 f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge);
 f32 btlGetElementAbilityMultiplier(BtlUnit *unit, s32 attr);
 f32 btlGetLowHpAbilityMultiplier(BtlUnit *unit);
@@ -196,9 +196,9 @@ extern u8 *datRosterDetails;
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 
-s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record);
+s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record);
 s32 btlGetAbilityAttributeMultiplierPercent(BtlUnit *actor, s32 attr);
-extern s32 sdfCalculateCommandVitalDelta(s32, s32, DatPartyRecord *, u32, u8);
+extern s32 sdfCalculateCommandVitalDelta(s32, s32, datUnitWork_t *, u32, u8);
 s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
                                u32 maxHits, s32 actionKind, s32 side,
                                u32 calculationFlags) {

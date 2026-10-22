@@ -3,19 +3,19 @@
 
 #include "common.h"
 
-struct EvtUnit;
-struct MdlCtx;
+struct evtUnitHandle_t;
+struct dds3ModelHandle_t;
 
 /* Consumer view of the model owner reached from an event lip-sync link. */
 typedef struct EvtLipsMh {
     u8 opaque00[0x0C];
-    struct MdlCtx *model; /* 0x0C */
+    struct dds3ModelHandle_t *model; /* 0x0C */
 } EvtLipsMh;
 
 /* Consumer view of a lip-sync entry in the world's unit list. */
 typedef struct EvtLipsLink {
     u8 opaque00[0x08];
-    struct EvtUnit *unit; /* 0x08 */
+    struct evtUnitHandle_t *unit; /* 0x08 */
     EvtLipsMh *mh; /* 0x0C */
 } EvtLipsLink;
 

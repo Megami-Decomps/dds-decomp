@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 struct SdfTextureFileHeader;
 
 /* Reference-counted texture payload placed at the end of its allocation. */
@@ -15,7 +15,7 @@ typedef struct RefObj {
     s32 paletteHeight;                /* 0x10 */
     s32 refCount;                     /* 0x14 retained references to this texture */
     s32 index;                        /* 0x18 caller-selected texture index */
-    struct SdfMemBlock *allocationHandle; /* 0x1C final-release descriptor */
+    struct sdfMemHandle_t *allocationHandle; /* 0x1C final-release descriptor */
 } RefObj;
 
 typedef char RefObjSizeCheck[sizeof(RefObj) == 0x20 ? 1 : -1];

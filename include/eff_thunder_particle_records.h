@@ -60,7 +60,7 @@ typedef struct EffThunderSparkWork {
     EffThunderSparkParams head;      /* 0x00 */
     EffThunderSpark *sparks;         /* 0xA4 */
     u32 tintColor;                   /* 0xA8 */
-    SdfMemBlock *allocationHandle;   /* 0xAC */
+    sdfMemHandle_t *allocationHandle;   /* 0xAC */
 } EffThunderSparkWork;
 
 typedef char EffThunderFragSizeCheck[

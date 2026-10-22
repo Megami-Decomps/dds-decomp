@@ -96,16 +96,16 @@ extern char D_00419A88[];
 
 extern void btlDebugPrintf(const char *, ...);
 
-extern u16 btlReadUnitStatusMask(DatPartyRecord *);
+extern u16 btlReadUnitStatusMask(datUnitWork_t *);
 
 
 
 extern s32 btlMatchesActorEntryCodeCondition(BtlUnit *, s32);
 
 
-extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
+extern s32 btlReadCurrentUnitHp(datUnitWork_t *);
 
-extern s32 btlReadCurrentUnitMp(DatPartyRecord *);
+extern s32 btlReadCurrentUnitMp(datUnitWork_t *);
 
 extern s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *);
 
@@ -484,7 +484,7 @@ INCLUDE_ASM(const s32, "game/code_00211360", func_00211F38);
 
 /* Compare HP against a signed percentage using the native products and unsigned comparison. */
 s32 btlIsUnitAtOrBelowHealthRate(BtlUnit *unit, s32 healthPercent) {
-    DatPartyRecord *statAddress = &unit->partyRecord;
+    datUnitWork_t *statAddress = &unit->partyRecord;
     s32 currentHp = btlReadCurrentUnitHp(statAddress);
     s32 maximumHp = btlComputeSkillAdjustedMaxHp(statAddress);
     if ((u32)(maximumHp * healthPercent) < (u32)(currentHp * BTL_HEALTH_RATE_SCALE)) {
@@ -509,7 +509,7 @@ s32 btlHasUnitAtOrBelowHealthRate(s32 unused, s32 multiplier) {
     BtlUnit *unit = ((BattleWork *)btlGetRuntime())->actorList;
     for (; unit != 0; unit = unit->nextActor) {
         if ((btlUnitStatusPair(unit) & 0x221) == 0x201) {
-            DatPartyRecord *stats = &unit->partyRecord;
+            datUnitWork_t *stats = &unit->partyRecord;
             s32 current = btlReadCurrentUnitHp(stats);
             s32 maximum = btlComputeSkillAdjustedMaxHp(stats);
             if ((u32)(maximum * multiplier) >= (u32)(current * 100)) {
@@ -524,7 +524,7 @@ s32 btlHasUnitAtOrAboveHealthRate(s32 unused, s32 multiplier) {
     BtlUnit *unit = ((BattleWork *)btlGetRuntime())->actorList;
     for (; unit != 0; unit = unit->nextActor) {
         if ((btlUnitStatusPair(unit) & 0x221) == 0x201) {
-            DatPartyRecord *stats = &unit->partyRecord;
+            datUnitWork_t *stats = &unit->partyRecord;
             s32 current = btlReadCurrentUnitHp(stats);
             s32 maximum = btlComputeSkillAdjustedMaxHp(stats);
             if ((u32)(current * 100) >= (u32)(maximum * multiplier)) {
@@ -647,7 +647,7 @@ s32 btlAnyGroup400HasActionMask(s32 unused, s32 actionMask) {
 
 s32 btlHasActorOrSlotMatchingActionQuery(s32 unused, u32 query) {
     BtlUnit *unit;
-    DatPartyRecord *record;
+    datUnitWork_t *record;
     s32 i;
 
     for (unit = ((BattleWork *)btlGetRuntime())->actorList; unit != 0; unit = unit->nextActor) {
@@ -1032,7 +1032,7 @@ s32 btlIsReadyWithoutTurns(void) {
 /* Compare a unit stat with a percentage of its maximum.
  * The stat's identity is not established by these two accessors. */
 s32 btlIsUnitStatAtOrBelowRate(BtlUnit *unit, s32 percentage) {
-    DatPartyRecord *statAddress = &unit->partyRecord;
+    datUnitWork_t *statAddress = &unit->partyRecord;
     u32 currentValue = btlReadCurrentUnitMp(statAddress);
     u32 scaledMaximum = btlComputeSkillAdjustedMaxMp(statAddress) * percentage;
     if (scaledMaximum < currentValue * BTL_HEALTH_RATE_SCALE) {
@@ -1042,7 +1042,7 @@ s32 btlIsUnitStatAtOrBelowRate(BtlUnit *unit, s32 percentage) {
 }
 
 s32 btlUnitStatAtOrAboveRate(BtlUnit *unit, u32 percentage) {
-    DatPartyRecord *stats = &unit->partyRecord;
+    datUnitWork_t *stats = &unit->partyRecord;
     u32 current = btlReadCurrentUnitMp(stats);
     u32 maximum = btlComputeSkillAdjustedMaxMp(stats);
     if (current * 100 < maximum * percentage) {
@@ -1052,7 +1052,7 @@ s32 btlUnitStatAtOrAboveRate(BtlUnit *unit, u32 percentage) {
 }
 
 s32 btlUnitStatAtMost(BtlUnit *unit, u32 limit) {
-    DatPartyRecord *stats = &unit->partyRecord;
+    datUnitWork_t *stats = &unit->partyRecord;
     u32 current = btlReadCurrentUnitMp(stats);
     btlComputeSkillAdjustedMaxMp(stats);
     if (limit < current) {
@@ -1062,7 +1062,7 @@ s32 btlUnitStatAtMost(BtlUnit *unit, u32 limit) {
 }
 
 s32 btlUnitStatAtLeast(BtlUnit *unit, u32 limit) {
-    DatPartyRecord *stats = &unit->partyRecord;
+    datUnitWork_t *stats = &unit->partyRecord;
     u32 current = btlReadCurrentUnitMp(stats);
     btlComputeSkillAdjustedMaxMp(stats);
     if (current < limit) {

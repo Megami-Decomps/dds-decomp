@@ -4,13 +4,13 @@
 #include "common.h"
 
 struct BtlFade;
-struct ItfMesState;
+struct instanceMes_tag;
 struct ItfMesTextSlots;
 
 /* Reset fade timing and alpha, optionally preserving its kind byte. */
 void InitializeCurCtr(struct BtlFade *fade, s32 preserveKind);
 /* Release an interface state's effect resources and clear its effect flags. */
-void btlReleaseEffectResourceHandles(struct ItfMesState *effect);
+void btlReleaseEffectResourceHandles(struct instanceMes_tag *effect);
 /* Release texture handles owned by its message text slots. */
 void ReleaseAllVariable(struct ItfMesTextSlots *slots);
 

@@ -6,7 +6,7 @@
 #include "evt_polygon_movie.h"
 #include "fld.h"
 
-struct KwlnTask;
+struct dds3ProcessID_t;
 
 /* A timeline key's scalar formats are selected by its track kind. */
 typedef union EvtViewParam {
@@ -72,14 +72,14 @@ typedef struct EvtRuntimeGroup {
     };
     s32 entryHeader; /* Signed runtime name-table index. */
     s32 argument0C;
-    EffWorldNode *info;
+    dds3Basic_t *info;
     union {
         void *resourceData;
         struct { u16 resourceGroup, resourceId; } resourceIds;
     };
     EvtGroupMetadata metadata;
     u8 pad20[4];
-    SdfTex *texture; /* Retained kind-0x18 texture; released with the group. */
+    sdfTexHandle_t *texture; /* Retained kind-0x18 texture; released with the group. */
     s32 usePendingKey; /* 0x28: type-24 tracks apply the queued key when set. */
     f32 savedPosition[4];
     f32 savedRotation[4];
@@ -102,7 +102,7 @@ typedef union EvtFrameRange {
 /* One allocation retained by the EventViewer task. Camp-named timeline
  * helpers receive this same pointer; their old types omitted the voice tail. */
 typedef struct EvtRuntime {
-    SdfMemBlock *resourceHandle;
+    sdfMemHandle_t *resourceHandle;
     u32 flags;
     PolyMovieWork *windowContext;
     s32 headerThird;
@@ -112,20 +112,20 @@ typedef struct EvtRuntime {
     s32 previousGlyphPosition;
     s32 entryTotal;
     char entryName[256][32];
-    EffWorldNode *activeEntryIndex;
+    dds3Basic_t *activeEntryIndex;
     u8 pad2028[4];
     s32 fallbackEntry;
     s32 entryCount;
     EvtRuntimeGroup *groups;
     EvtRuntimeGroup *lastGroup;
-    EffWorldNode *objects[127];
+    dds3Basic_t *objects[127];
     s32 unk2238;
     struct { u16 id, a, b, pad6; } history[8];
     s32 historyCount;
     s32 actionMode;
     s32 commandResetId;
     s32 unk2288; /* Cleared when committing a type-12 key option. */
-    struct KwlnTask *controlState;
+    struct dds3ProcessID_t *controlState;
     s32 blurRectangleEnabled;
     s32 texturedBlurEnabled;
     s32 filterBlurEnabled;
@@ -181,10 +181,10 @@ typedef struct EvtRuntime {
     s16 windowResultVariableIndex; /* VM integer destination for the completed message-window result. */
     s32 tableColumn;
     s32 cameraColorActive;
-    SdfTex *ch71;
-    SdfTex *ch72;
-    SdfTex *ch76;
-    SdfTex *ch75;
+    sdfTexHandle_t *ch71;
+    sdfTexHandle_t *ch72;
+    sdfTexHandle_t *ch76;
+    sdfTexHandle_t *ch75;
     s32 selectedEntry;
     s32 commandFirst;
     EvtCommandArgument commandSecond;
@@ -241,8 +241,8 @@ typedef struct EvtRuntime {
 EvtRuntimeGroup *mnuCampFindEntryByName(EvtRuntime *scene, const char *name);
 
 /* Returns the next update function as the scheduler's signed callback word. */
-s32 evtViewerStartUpdate(struct KwlnTask *task);
-struct KwlnTask *evtViewerCreateTask(s32 taskId, s32 event, s32 id);
+s32 evtViewerStartUpdate(struct dds3ProcessID_t *task);
+struct dds3ProcessID_t *evtViewerCreateTask(s32 taskId, s32 event, s32 id);
 
 typedef char EvtRuntimeChild_size[(sizeof(EvtRuntimeChild) == 0x38) ? 1 : -1];
 typedef char EvtGroupMetadata_size[(sizeof(EvtGroupMetadata) == 8) ? 1 : -1];

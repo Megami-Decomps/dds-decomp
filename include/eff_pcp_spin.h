@@ -13,8 +13,8 @@ typedef struct EffPCPSpinWork {
     f32 angle;
     f32 scale;
     u32 color;
-    EffParamWork *handle0;
-    EffParamWork *handle1;
+    effPartHandle_t *handle0;
+    effPartHandle_t *handle1;
 } EffPCPSpinWork;
 
 typedef char EffPCPSpinWork_size_must_be_0x70[

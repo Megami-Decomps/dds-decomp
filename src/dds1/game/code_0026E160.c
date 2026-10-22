@@ -131,7 +131,7 @@ void mnuDrawMovieSpriteGroup(s32 x, s32 y, s32 z, s32 alpha, MnuSpriteResourceGr
 MnuSpriteResourceGroup *mnuCreateMovieSpriteResource(s32 cueDuration,
                                                      u8 initialGenerations,
                                                      u8 variant) {
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(0x48);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(0x48);
     MnuSpriteResourceGroup *resource = (MnuSpriteResourceGroup *)sdfMemGetPtr(allocation);
     memset(resource, 0, 0x48);
     resource->allocation = allocation;

@@ -271,7 +271,7 @@ void func_00206608(void);
 void btlQueueLinkedPairModelSwapTasks(BtlTask *, s32, u64, u64, u64);
 void func_00209EB8(BtlTask *);
 s32 func_0020A860(void);
-s32 func_0020AB08(DatPartyRecord *, s32);
+s32 func_0020AB08(datUnitWork_t *, s32);
 s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
 void btlUpdateBossUnitScaleTransition(void);
 s32 btlOffsetSpecialTargetPositionForActionHook(BtlLinkedCommand *, s32, s32);

@@ -187,7 +187,7 @@ EffectSlotSet *effLoadIndexedResource(const char *base, const char *name, u32 ke
 
 /* Publish the instance, release its source allocation, then clean up the completed file job. */
 void effCompleteTransientResourceJob(struct FileRequest *job, u32 *outInstance) {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     EffectSlotSet *instance;
 
     allocation = fileGetMemHandle(job);
@@ -199,7 +199,7 @@ void effCompleteTransientResourceJob(struct FileRequest *job, u32 *outInstance) 
 
 /* Publish the instance without releasing its source allocation, then clean up the file job. */
 void effCompleteRetainedResourceJob(struct FileRequest *job, u32 *outInstance) {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     EffectSlotSet *instance;
 
     allocation = fileGetMemHandle(job);
@@ -240,7 +240,7 @@ EffMappedResource *effLoadMappedResource(const char *base, const char *name) {
 /* Publish mapped records before releasing their source allocation and completing the file job. */
 void effCompleteMappedResourceJob(struct FileRequest *job,
                                   EffMappedResource **outMappedResource) {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u32 sourceAddress;
     EffMappedResource *mappedResource;
 
@@ -441,9 +441,9 @@ typedef struct EffMappedHeader {
  * The required-size calculation uses the first record, not the current row.
  * Returns the record-allocation handle, not its retained address.
  */
-struct SdfMemBlock *effLoadMappedStatusRecords(const u8 *source, EffMappedHeader *headerOut) {
+struct sdfMemHandle_t *effLoadMappedStatusRecords(const u8 *source, EffMappedHeader *headerOut) {
     EffMappedHeader header;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     EffMappedRecord *records;
     u32 recordIndex = 0;
     u32 statusBytes;
@@ -490,7 +490,7 @@ EffMappedResource *effCreateMappedResource(const u8 *source) {
 /* Build one zeroed status record and allocate the category's required status storage. */
 EffMappedResource *effCreateStatusBatch(u32 category) {
     EffMappedResource *batch = sdfChipAllocDirect(sizeof(EffMappedResource));
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u32 recordAddress;
     u32 statusBytes;
     void *statuses;
@@ -700,7 +700,7 @@ u8 effHasFirstTextureHandle(const EffectSlotSet *set) {
 EffPayload *effCreatePayload(u32 recordCount) {
     u32 recordBytes = recordCount * EFF_PAYLOAD_RECORD_BYTES;
     EffPayload *header = sdfChipAllocDirect(sizeof(EffPayload));
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(recordBytes);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(recordBytes);
     u8 *records;
 
     header->count = recordCount;
@@ -718,7 +718,7 @@ u32 effDestroyPayload(EffPayload *payload) {
     return 1;
 }
 
-EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct SdfMemBlock *resourceAllocation, u32 keepAllocation) {
+EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct sdfMemHandle_t *resourceAllocation, u32 keepAllocation) {
     EffectSlotSet *set;
     u8 *resource;
     u32 *entries;
@@ -733,7 +733,7 @@ EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct SdfMemBlock *resour
     set->textureCount = *(u16 *)(resource + 0x14);
     set->textureAllocation =
         sdfMemAllocDirect(set->textureCount * 4);
-    set->textureReferences = (SdfTex **)sdfMemLock(set->textureAllocation);
+    set->textureReferences = (sdfTexHandle_t **)sdfMemLock(set->textureAllocation);
     memset(set->textureReferences, 0, set->textureCount * 4);
     entries = (u32 *)effResolveResourceSlots(set, resource,
         keepAllocation, -1);
@@ -760,7 +760,7 @@ EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 cou
     effect->sharesTextureReferences = 1;
     {
         u32 mode = source->textureCount;
-        SdfTex **textureReferences = source->textureReferences;
+        sdfTexHandle_t **textureReferences = source->textureReferences;
         effect->textureCount = mode;
         effect->textureReferences = textureReferences;
     }
@@ -994,7 +994,7 @@ void effSelectPresetByKind(u32 mode, u32 value) {
 
 
 extern SdfPoolNode sdfGrOtTable[];
-typedef struct SdfTex SdfTex;
+typedef struct sdfTexHandle_t sdfTexHandle_t;
 typedef struct SdfDrawPacket SdfDrawPacket;
 
 typedef struct EffSpriteUV {
@@ -1015,16 +1015,16 @@ typedef union EffSpriteColor {
 } EffSpriteColor;
 
 #include "sdf_packet_alloc.h"
-extern void sdfTexSetFilter(SdfTex *, s32, s32);
+extern void sdfTexSetFilter(sdfTexHandle_t *, s32, s32);
 extern s32 sdf2DGetPrimPacketSize(s32, s32);
 extern s32 sdf2DGetPrimPtr(s32);
 extern void effSelectPresetByKind(u32, u32);
 void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
                    const EffSpriteUV *uvRect, const EffSpriteColor *color, u32 flipFlags,
-                   u32 blendKind, s32 mode, SdfTex *texture, s32 surfaceId) {
+                   u32 blendKind, s32 mode, sdfTexHandle_t *texture, s32 surfaceId) {
     u32 textureCoordinates[4];
     s32 packet;
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
     u64 *packetWords;
     s32 left;
     s32 top;
@@ -1076,7 +1076,7 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     packetWords[5] = depth;
     packetWords[9] = depth;
     effSelectPresetByKind(blendKind, surfaceId);
-    packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
     sdf2DLinkTexPacket(packetList, texture, 0);
     sdfDrawTagLink(packetList, packet);
@@ -1116,7 +1116,7 @@ void itfRotateScreenOffset(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 
 void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
                    const EffSpriteUV *uvRect, const EffSpriteColor *cornerColors,
                    u32 flipFlags, f32 angle, u32 blendKind, s32 mode,
-                   SdfTex *texture, s32 surfaceId) {
+                   sdfTexHandle_t *texture, s32 surfaceId) {
     u32 textureCoordinates[4];
     /* The four corners stay separate locals: itfRotateScreenOffset writes each
      * coordinate through its own pointer. */
@@ -1129,7 +1129,7 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     s32 x3;
     s32 y3;
     s32 packet;
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
     u64 *packetWords;
     s32 left;
     s32 top;
@@ -1231,7 +1231,7 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     packetWords[22] = (u64)(u32)x3 | ((u64)(u32)y3 << 32);
     packetWords[23] = depth >> 4;
     effSelectPresetByKind(blendKind, surfaceId);
-    packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
     sdf2DLinkTexPacket(packetList, texture, 0);
     sdfDrawTagLink(packetList, packet);

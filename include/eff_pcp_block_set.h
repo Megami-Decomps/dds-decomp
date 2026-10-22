@@ -3,7 +3,7 @@
 
 #include "eff_param.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* The serialized parameter block copied into each block-set work record. */
 typedef struct EffPCPBlockSetParams {
@@ -44,12 +44,12 @@ typedef struct EffPCPBlockSetWork {
     u32 count;
     u32 color;
     u32 mode;
-    EffParamWork *headHandle;
-    EffParamWork *handleA[5];
-    EffParamWork **list[3];
-    EffParamWork *handleB[5];
-    EffParamWork *tailHandle;
-    struct SdfMemBlock *alloc[3];
+    effPartHandle_t *headHandle;
+    effPartHandle_t *handleA[5];
+    effPartHandle_t **list[3];
+    effPartHandle_t *handleB[5];
+    effPartHandle_t *tailHandle;
+    struct sdfMemHandle_t *alloc[3];
     struct EffPCPBlockSetWork *source;
 } EffPCPBlockSetWork;
 

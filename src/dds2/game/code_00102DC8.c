@@ -42,9 +42,9 @@ extern u32 kwlnTextureViewerPageIndex;
 
 extern u32 dds3RenderTex;
 
-extern SdfTexResource *D_00435CC4;
+extern sdfGsMemSlice_t *D_00435CC4;
 
-extern SdfTex *dds3RenderTexture;
+extern sdfTexHandle_t *dds3RenderTexture;
 
 extern u16 D_00435CE8;
 
@@ -81,9 +81,9 @@ extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 
 extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 
-extern s32 kwlnDebugGraphUpdate(KwlnTask *task);
+extern s32 kwlnDebugGraphUpdate(dds3ProcessID_t *task);
 
-extern void kwlnDebugGraphTaskDestroy(KwlnTask *task);
+extern void kwlnDebugGraphTaskDestroy(dds3ProcessID_t *task);
 
 typedef s32 (*KwlnTaskUpdateCallback)();
 typedef void (*KwlnTaskDestroyCallback)();
@@ -98,7 +98,7 @@ extern s32 ripblurovercnt;
 
 extern SdfPoolNode D_00380708;
 
-extern KwlnTask *kwlnDebugGraphTask;
+extern dds3ProcessID_t *kwlnDebugGraphTask;
 
 extern f32 D_0037F5EC[];
 
@@ -131,8 +131,8 @@ extern u8 kwlnLargeMotorTarget;
 
 extern u8 dds3PadVibrationState[2];
 
-extern s32 dds3AdminPollModeCompletion(KwlnTask *task);
-extern void dds3AdminiNeoShutdown(KwlnTask *task);
+extern s32 dds3AdminPollModeCompletion(dds3ProcessID_t *task);
+extern void dds3AdminiNeoShutdown(dds3ProcessID_t *task);
 extern char dds3AdminTaskName[];
 extern u16 kwlnBackgroundFadeCounter;
 extern u16 kwlnBackgroundFadeDuration;
@@ -441,19 +441,19 @@ s32 dds3SelectMenu(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 seconda
 }
 
 /* Append a cell rectangle; rowSpan also supplies the horizontal padding. */
-void dds3ConsPanelTagLink(SdfListHead *packetList, s32 column, s32 row, s32 columnCount, s32 rowCount) {
+void dds3ConsPanelTagLink(sdfDrawTag_t *packetList, s32 column, s32 row, s32 columnCount, s32 rowCount) {
     s32 columnSpan = KWLN_CELL_COLUMN_SPAN, rowSpan = KWLN_CELL_ROW_SPAN;
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, 0xFEFFFF, columnCount * columnSpan + rowSpan, rowCount * rowSpan + 0x30, 0x60000000, 0x40806020));
 }
 
 /* Append the same cell rectangle with caller-selected depth. */
-void dds3ConsPanelTagLinkZ(SdfListHead *packetList, s32 column, s32 row, s32 columnCount, s32 rowCount, s32 depth) {
+void dds3ConsPanelTagLinkZ(sdfDrawTag_t *packetList, s32 column, s32 row, s32 columnCount, s32 rowCount, s32 depth) {
     s32 columnSpan = KWLN_CELL_COLUMN_SPAN, rowSpan = KWLN_CELL_ROW_SPAN;
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, depth, columnCount * columnSpan + rowSpan, rowCount * rowSpan + 0x30, 0x60000000, 0x40806020));
 }
 
 /* Periodically pulses both pad motors, varying the large-motor level. */
-s32 dds3PadVibrationTest(KwlnTask *task) {
+s32 dds3PadVibrationTest(dds3ProcessID_t *task) {
     if (dds3GetProcessRunTime(task) % KWLN_DEBUG_RUMBLE_PERIOD == 0) {
         dds3PadVibrationSet(KWLN_PAD_SMALL_MOTOR, 1, KWLN_DEBUG_SMALL_PULSE_FRAMES);
         dds3PadVibrationSet(KWLN_PAD_LARGE_MOTOR, (u8)(dds3GetRandIntA(0, KWLN_DEBUG_RUMBLE_VARIATION) + KWLN_DEBUG_RUMBLE_BASE), KWLN_DEBUG_LARGE_PULSE_FRAMES);
@@ -740,7 +740,7 @@ void dds3UpdateVibrationSlots(void) {
     }
 }
 
-s32 kwlnTaskNoopCallback(KwlnTask *task) {
+s32 kwlnTaskNoopCallback(dds3ProcessID_t *task) {
     return 0;
 }
 
@@ -757,16 +757,16 @@ extern u16 D_00435C54;
 extern u16 D_00435C56;
 extern char D_00435C58[];
 
-s32 kwlnDebugGraphUpdate(KwlnTask *task) {
-    SdfListHead *packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
-    SdfGsBlendPacket *blendPacket;
+s32 kwlnDebugGraphUpdate(dds3ProcessID_t *task) {
+    sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfPrimTransPacket_t *blendPacket;
     s32 originX = 0x7100;
     /* Keep the four real conversion epochs in one local; see docs/idioms.md,
      * "Trace-justified pixel conversion reuse: kwlnDebugGraphUpdate". */
     s32 pixels;
 
     sdfDrawTagInit(packetList);
-    blendPacket = (SdfGsBlendPacket *)sdfGrAllocPacketBuff(0x40);
+    blendPacket = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
     sdfPrimSetOpaquePacket(blendPacket);
     sdfDrawTagLink(packetList, (u32)blendPacket);
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(0x70D0, 0x85A8,
@@ -815,7 +815,7 @@ s32 kwlnDebugGraphUpdate(KwlnTask *task) {
     return 0;
 }
 
-void kwlnDebugGraphTaskDestroy(KwlnTask *task) {
+void kwlnDebugGraphTaskDestroy(dds3ProcessID_t *task) {
 }
 
 /* Only mode 1 creates and mode 0 destroys the timing graph; other modes do nothing. */
@@ -829,7 +829,7 @@ void kwlnDebugGraphSetEnabled(s8 enabled) {
 
 /* Scale the longer preview side to at most 256 texels, preserving division
  * before coordinate scaling; UV endpoints at 1024 texels are reduced by one. */
-void kwlnDrawImageOutline(SdfListHead *packetList, SdfTex *image) {
+void kwlnDrawImageOutline(sdfDrawTag_t *packetList, sdfTexHandle_t *image) {
     s32 width = image->width;
     s32 height = image->height;
     s32 drawWidth;
@@ -858,7 +858,7 @@ void kwlnDrawImageOutline(SdfListHead *packetList, SdfTex *image) {
 }
 
 /* Append the zero-based viewer page and final page index; an empty list prints -1. */
-void kwlnTextureDrawPageCounter(SdfListHead *packetList) {
+void kwlnTextureDrawPageCounter(sdfDrawTag_t *packetList) {
     char pageText[0x70];
     s32 pageIndex = kwlnTextureGetPageIndex();
     s32 resourceCount = kwlnTextureCountIncompleteResources();
@@ -872,7 +872,7 @@ extern char D_00411308[];
 
 INCLUDE_RODATA(const s32, "game/code_00102DC8", D_004111F8);
 
-void kwlnDrawTextureResourceDetails(SdfListHead *packetList, SdfTex *texture) {
+void kwlnDrawTextureResourceDetails(sdfDrawTag_t *packetList, sdfTexHandle_t *texture) {
     char text[0x70];
     s32 formatIndex = 0;
     s32 formatMode = 0;
@@ -919,8 +919,8 @@ void kwlnDrawTextureResourceDetails(SdfListHead *packetList, SdfTex *texture) {
 
 /* Count texture entries without a reference clone source. */
 s32 kwlnTextureCountIncompleteResources(void) {
-    SdfTex *texture = sdfTexHandleLink;
-    SdfTex *previousTexture;
+    sdfTexHandle_t *texture = sdfTexHandleLink;
+    sdfTexHandle_t *previousTexture;
     s32 incompleteCount = 0;
     while (texture != NULL) {
         while (texture->reference != NULL && texture->reference->cloneSource != NULL) {
@@ -943,8 +943,8 @@ u32 kwlnTextureGetPageIndex(void) {
 /* DDS2 first skips clone-source entries at the head, even for requested index zero.
  * This assumes a nonempty list; initial exhaustion returns 0 before selection writes. */
 s32 kwlnSelectIncompleteResourceAtPageIndex(s32 requestedIndex) {
-    SdfTex *texture = sdfTexHandleLink;
-    SdfTex *previousTexture;
+    sdfTexHandle_t *texture = sdfTexHandleLink;
+    sdfTexHandle_t *previousTexture;
     s32 visitedIndex = 0;
 
     while (texture->reference != NULL && texture->reference->cloneSource != NULL) {
@@ -1001,21 +1001,21 @@ s32 kwlnTextureViewerHandlePad(void) {
 
 extern s32 D_00435CB0;
 
-void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, SdfTexResource *block, u8 mode);
+void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, sdfGsMemSlice_t *block, u8 mode);
 
 void kwlnDrawTextureViewerFrame(void *surfaceContext, s32 handle) {
     SdfPoolNode *surface;
-    SdfTex *image;
-    SdfListHead *packetList;
+    sdfTexHandle_t *image;
+    sdfDrawTag_t *packetList;
     s32 counter;
     s32 mode;
 
     surface = (SdfPoolNode *)surfaceContext;
-    image = (SdfTex *)handle;
+    image = (sdfTexHandle_t *)handle;
     if (handle == 0) {
         return;
     }
-    packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(0x7160, 0x79B0, 0x0FFFFF7F, 0x1040, 0x80, 0x80000000, 0x80806020));
     kwlnTextureDrawPageCounter(packetList);
@@ -1070,7 +1070,7 @@ s32 kwlnLoadDefaultResource(void) {
 /* Initialize viewer state and return its default renderer for the first eligible
  * node. Exhausting a nonempty list returns NULL after the initial state writes. */
 s32 (*kwlnTextureFindIncompleteResource(void))(void) {
-    SdfTex *texture = sdfTexHandleLink;
+    sdfTexHandle_t *texture = sdfTexHandleLink;
     if (texture == NULL) {
         return NULL;
     }
@@ -1078,7 +1078,7 @@ s32 (*kwlnTextureFindIncompleteResource(void))(void) {
     D_00435C60 = 1;
     kwlnTextureViewerPageIndex = 0;
     while (texture->reference != NULL && texture->reference->cloneSource != NULL) {
-        texture = ((SdfTex *)(u32)kwlnCurrentIncompleteResource)->prev;
+        texture = ((sdfTexHandle_t *)(u32)kwlnCurrentIncompleteResource)->prev;
         if (texture == NULL) {
             return NULL;
         }
@@ -1090,7 +1090,7 @@ s32 (*kwlnTextureFindIncompleteResource(void))(void) {
 /* Draw one allocation-map block in address units, choosing color by mode.
  * Only the initial partial row forces a nonzero remainder to occupy one cell;
  * the final partial row retains its truncated cell count. */
-void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, SdfTexResource *block, u8 mode) {
+void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, sdfGsMemSlice_t *block, u8 mode) {
     s32 color;
     u32 remainingUnits;
     s32 columnIndex;
@@ -1156,7 +1156,7 @@ void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, SdfTexRes
 
 /* Draw the allocation-map border, then walk blocks through their prev links. */
 void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y) {
-    SdfTexResource *block = sdfGsMemGetLinkHead();
+    sdfGsMemSlice_t *block = sdfGsMemGetLinkHead();
 
     if (block != NULL) {
         sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x - 0x20, y - 0x10,
@@ -1171,7 +1171,7 @@ void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y) {
 
 /* Build an allocation-map packet list and submit it through the surface callback. */
 void kwlnTextureAttachTask(SdfPoolNode *surface) {
-    SdfListHead *packetList = (SdfListHead *)sdfGrAllocPacketBuff(KWLN_DIAG_PACKET_LIST_BYTES);
+    sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(KWLN_DIAG_PACKET_LIST_BYTES);
     sdfDrawTagInit(packetList);
     kwlnDrawTextureListDiagnostic(packetList, 0x7180, 0x79C0);
     surface->append(surface, packetList);
@@ -1192,14 +1192,14 @@ typedef char KwlnFrameDrawBank_size_check[sizeof(KwlnFrameDrawBank) == 0x1F40 ? 
 
 extern KwlnFrameDrawBank D_00380870[2];
 extern u32 D_00435CBC;
-extern SdfGraphObj D_0040B290;
+extern sdfGrFrameSet_t D_0040B290;
 extern SdfLightSources D_0037F770;
 extern f32 kwlnDefaultColorVector[4];
 extern u8 sdfViewMatrix[];
 extern u8 D_00384790[];
 extern SdfLightSources kwlnOverlayLightSources;
 extern f32 kwlnOverlayAmbientColor[4];
-extern void sdf3DLinkInitPacket(SdfListHead *, DmaPacketHeader *);
+extern void sdf3DLinkInitPacket(sdfDrawTag_t *, DmaPacketHeader *);
 
 /* Initialize the selected frame bank's program, scene and overlay packet chains. */
 void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
@@ -1255,7 +1255,7 @@ void dds3InitDrawEnv(void) {
 /* One 0x1F40-byte draw bank of the held-texture render target. */
 #include "kwln_texture_bank.h"
 
-extern SdfGraphObj dds3RenderTexId;
+extern sdfGrFrameSet_t dds3RenderTexId;
 extern u16 D_00435CCC;
 extern u16 D_00435CCE;
 extern u32 D_00435CD0;
@@ -1292,12 +1292,12 @@ extern u16 D_00435CCC;
 extern u16 D_00435CCE;
 extern void dds3FreeRenderTexture(void);
 extern void dds3InitRenderDrawEnv(void);
-extern SdfTexResource *sdfGsAllocFrameBuff(s32 width, s32 height, s32 format);
-extern SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 paletteCount, SdfTexResource *secondary);
+extern sdfGsMemSlice_t *sdfGsAllocFrameBuff(s32 width, s32 height, s32 format);
+extern sdfTexHandle_t *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, sdfGsMemSlice_t *primary, s32 paletteFormat, s32 paletteCount, sdfGsMemSlice_t *secondary);
 /* Replace the held texture with a width x height image buffer; return 1 on success.
  * A texture-creation failure does not roll back the already allocated image buffer. */
 s32 dds3AllocRenderTexture(u16 width, u16 height, f32 aspect) {
-    SdfTex *texture;
+    sdfTexHandle_t *texture;
 
     if (dds3RenderTexture != 0) {
         dds3FreeRenderTexture();
@@ -1354,7 +1354,7 @@ u32 dds3CheckRenderTexture(void) {
     return dds3RenderTex;
 }
 
-SdfTex *dds3GetRenderTexture(void) {
+sdfTexHandle_t *dds3GetRenderTexture(void) {
     return dds3RenderTexture;
 }
 
@@ -1454,8 +1454,8 @@ void dds3StopQuake(void) {
 INCLUDE_ASM(const s32, "game/code_00102DC8", dds3InitZClearDrawTag);
 
 /* Append the selected state's packet for the current draw buffer to a new list. */
-SdfListHead *dds3LinkZClearDrawTag(s32 stateIndex) {
-    SdfListHead *packetList = dds3FontReqAllocDrawTag();
+sdfDrawTag_t *dds3LinkZClearDrawTag(s32 stateIndex) {
+    sdfDrawTag_t *packetList = dds3FontReqAllocDrawTag();
 
     sdfDrawTagLink(packetList, (u32)&dds3ZClearDrawTag[stateIndex][dds3GetFrameID()]);
     return packetList;
@@ -1584,11 +1584,11 @@ void dds3FadeUpdate(void) {
 /* Submit diagnostics when enabled and either counter is nonzero; only positive
  * counters produce text, so negative-only errors still submit an empty list. */
 void dds3DrawDistRipOverError(void) {
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
 
     if (D_00435BA4 != 0) {
         if (distblurovercnt != 0 || ripblurovercnt != 0) {
-            packetList = (SdfListHead *)sdfGrAllocPacketBuff(KWLN_DIAG_PACKET_LIST_BYTES);
+            packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(KWLN_DIAG_PACKET_LIST_BYTES);
             sdfDrawTagInit(packetList);
             if (distblurovercnt > 0) {
                 sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, D_004112F0, distblurovercnt));

@@ -16,12 +16,12 @@ typedef struct SdfKeyPoolNode {
 } SdfKeyPoolNode;
 
 
-typedef struct SdfKeyTreeNode {
-    struct SdfKeyTreeNode *right; /* 0x00 */
-    struct SdfKeyTreeNode *left;  /* 0x04 */
+typedef struct sdfSortOtNode_tag {
+    struct sdfSortOtNode_tag *right; /* 0x00 */
+    struct sdfSortOtNode_tag *left;  /* 0x04 */
     SdfKeyPoolNode *item;         /* 0x08 */
     s32 balance;                  /* 0x0C */
-} SdfKeyTreeNode;
+} sdfSortOtNode_tag;
 
 /* A key-sorted draw-surface pool: an SdfPoolNode whose append and prepend
  * callbacks release a node into the pool and update its free list. */
@@ -32,17 +32,17 @@ typedef struct SdfPool {
     SdfKeyPoolNode *freeHead;                                  /* 0x0C */
     void (*release)(struct SdfPool *, SdfKeyPoolNode *);       /* 0x10: the entry's append */
     void (*update)(struct SdfPool *, s32, SdfKeyPoolNode *);   /* 0x14: the entry's prepend */
-    SdfKeyTreeNode *keyTree[1];                                /* 0x18: first root; allocation continues */
+    sdfSortOtNode_tag *keyTree[1];                                /* 0x18: first root; allocation continues */
 } SdfPool;
 
-void sdfSortOtAvlRegist(SdfKeyTreeNode **tree, SdfKeyPoolNode *item);
+void sdfSortOtAvlRegist(sdfSortOtNode_tag **tree, SdfKeyPoolNode *item);
 
 typedef char SdfKeyPoolNode_size_must_be_0x10[(sizeof(SdfKeyPoolNode) == 0x10) ? 1 : -1];
 typedef char SdfKeyPoolNode_kind_must_be_at_C[
     ((u32)&((SdfKeyPoolNode *)0)->kind == 0x0C) ? 1 : -1];
 typedef char SdfKeyPoolNode_key_must_be_at_C[
     ((u32)&((SdfKeyPoolNode *)0)->key == 0x0C) ? 1 : -1];
-typedef char SdfKeyTreeNode_size_must_be_0x10[(sizeof(SdfKeyTreeNode) == 0x10) ? 1 : -1];
+typedef char SdfKeyTreeNode_size_must_be_0x10[(sizeof(sdfSortOtNode_tag) == 0x10) ? 1 : -1];
 typedef char SdfPool_size_must_be_0x1C[(sizeof(SdfPool) == 0x1C) ? 1 : -1];
 
 void sdfGrSortOtReg(SdfPool *pool, SdfKeyPoolNode *node);

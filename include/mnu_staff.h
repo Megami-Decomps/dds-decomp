@@ -34,21 +34,21 @@ void mnuDrawStaffGridLabelsForKind(s32 kind, struct EffectSlotSet *resources);
 /* Create, draw, and queue the unchecked image-table entry for this staff slot. */
 void mnuCreateStaffImageSprite(s32 imageIndex);
 
-struct DatPartyRecord;
+struct datUnitWork_t;
 /* Field-use skills operate on the selected party records and their page. */
 s32 ptySkillApplyFieldUseEffect(MenuPageWindow *page, u16 ability,
-                               struct DatPartyRecord *target,
-                               struct DatPartyRecord *selected);
+                               struct datUnitWork_t *target,
+                               struct datUnitWork_t *selected);
 
 /* Rebuild the five party-panel rows from occupied party records. */
 void mnuInitPartyPanelSlots(PartyPanel *party);
 
 void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *page);
-struct KwlnTask;
+struct dds3ProcessID_t;
 /* Draw the default camp screen for its scheduler task. */
-void mnuDrawCampScreenDefault(struct KwlnTask *task);
+void mnuDrawCampScreenDefault(struct dds3ProcessID_t *task);
 /* Test whether the skill menu retains a selected list-node ID. */
-u32 mnuHasSelectedListNodeId(struct KwlnTask *callback);
+u32 mnuHasSelectedListNodeId(struct dds3ProcessID_t *callback);
 #ifdef VERSION_DDS1
 void mnuClearListFlags(s32 which, MenuPageWindow *page);
 struct StaffDisplayContext;
@@ -60,7 +60,7 @@ s32 mnuIsStaffWindowReadyForItem(s32 itemId,
 #ifdef VERSION_DDS2
 struct MenuPanelState;
 /* Initialize the camp menu after its task-owned effect handles are ready. */
-s32 mnuInitializeCampMenuWhenResourcesReady(struct KwlnTask *task);
+s32 mnuInitializeCampMenuWhenResourcesReady(struct dds3ProcessID_t *task);
 void mnuRefreshWindowSlots(MenuPageWindow *page, s32 preserveResourceHandles);
 
 /* Native staff components: page 0x284, party 0xA928 and fade 0xB10C. */
@@ -74,25 +74,25 @@ s32 mnuUseStaffItem(s32 itemId, MenuStaffContext *context);
 void mnuApplyResourceSelection(s32 itemId, MenuStaffContext *context);
 s32 mnuIsStaffWindowReadyForItem(s32 itemId, MenuStaffContext *context);
 s32 mnuGetAbilityTargetCategory(u16 commandId);
-s32 mnuGetMatchingPartyEntryMask(struct DatPartyRecord *entry);
-s32 mnuFindMatchingPartyEntryIndex(struct DatPartyRecord *entry);
+s32 mnuGetMatchingPartyEntryMask(struct datUnitWork_t *entry);
+s32 mnuFindMatchingPartyEntryIndex(struct datUnitWork_t *entry);
 s32 func_002C5A28(MenuPageWindow *page, u16 ability,
-                  struct DatPartyRecord *target, struct DatPartyRecord *selected);
+                  struct datUnitWork_t *target, struct datUnitWork_t *selected);
 s32 mnuTryUseFieldSkill(PartyPanel *party, MenuPageWindow *page,
-                       struct DatPartyRecord *entry, s32 commit);
+                       struct datUnitWork_t *entry, s32 commit);
 s32 mnuUseFieldSkillOnParty(PartyPanel *party, MenuPageWindow *page, s32 commit);
-s32 mnuIsEntryCostUnaffordable(u16 commandId, struct DatPartyRecord *entry);
+s32 mnuIsEntryCostUnaffordable(u16 commandId, struct datUnitWork_t *entry);
 void mnuReleaseAndRefreshWindowSlots(MenuPageWindow *page);
 void mnuRefreshPartyPanelBars(MenuPageWindow *page);
 s32 func_002C6008(PartyPanel *party, MenuPageWindow *page,
-                 struct DatPartyRecord *entry, s32 commit);
+                 struct datUnitWork_t *entry, s32 commit);
 /* Append entry pointers whose optional model-flag requirements are met. */
 MenuWindowContainer *mnuCreateStaffResourceListWindow(
     void *const *entries, s32 entryCount, s32 width, s32 rowHeight,
     u8 *work, const s32 *requiredFlags);
 void mnuDestroyWindowContainer(MenuWindowContainer *window);
 void mnuDestroyPanelState(struct MenuPanelState *panel);
-s32 mnuConsumeEntryCost(s32 commandId, struct DatPartyRecord *entry);
+s32 mnuConsumeEntryCost(s32 commandId, struct datUnitWork_t *entry);
 #endif
 
 #endif

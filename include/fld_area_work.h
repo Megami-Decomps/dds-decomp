@@ -3,19 +3,19 @@
 
 #include "common.h"
 
-struct SdfTex;
-struct SdfMemBlock;
+struct sdfTexHandle_t;
+struct sdfMemHandle_t;
 
 /* Field loaders retain the allocation owner and its resource address. */
 typedef struct FldResourceBlock {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u32 resourceAddress;
 } FldResourceBlock;
 
 typedef struct FldTextureResource {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u32 resourceAddress;
-    struct SdfTex *texture;
+    struct sdfTexHandle_t *texture;
 } FldTextureResource;
 
 /* Shared field controller, camera/motion state and retained map resources.

@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 typedef struct EffFileJobRequest {
     char *name;                       /* 0x00 */
@@ -13,7 +13,7 @@ typedef struct EffFileJobRequest {
     u8 pad0A[2];
     void *output;                     /* 0x0C */
     u32 size;                         /* 0x10 */
-    struct SdfMemBlock *allocation;   /* 0x14 */
+    struct sdfMemHandle_t *allocation;   /* 0x14 */
     u16 resourceMode;                 /* 0x18 */
     u8 pad1A[2];
     const char *secondaryCommandPath; /* 0x1C */

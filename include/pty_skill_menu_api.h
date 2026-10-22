@@ -3,10 +3,10 @@
 
 #include "kwln.h"
 
-s32 ptySkillMenuUpdate(KwlnTask *callback);
-s32 ptySkillMenuOpenPartyPage(KwlnTask *callback);
-s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, KwlnTask *callback);
-void ptySkillMenuHandleSelection(KwlnTask *callback);
-void ptySkillMenuHandleSlotReorder(KwlnTask *callback);
+s32 ptySkillMenuUpdate(dds3ProcessID_t *callback);
+s32 ptySkillMenuOpenPartyPage(dds3ProcessID_t *callback);
+s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, dds3ProcessID_t *callback);
+void ptySkillMenuHandleSelection(dds3ProcessID_t *callback);
+void ptySkillMenuHandleSlotReorder(dds3ProcessID_t *callback);
 
 #endif

@@ -143,8 +143,8 @@ typedef struct MdlViewState {
     f32 viewerScale; /* 0x54: viewer zoom, in hundredths */
     u8 pad58[8];
     u128 unk60[3]; /* 0x60: quadword slots; their alignment makes the state quadword aligned */
-    MdlCtx *resources[MDL_VIEWER_RESOURCE_SLOTS]; /* 0x90 */
-    SdfListHead *packetList; /* 0xC0: drawing packet destination */
+    dds3ModelHandle_t *resources[MDL_VIEWER_RESOURCE_SLOTS]; /* 0x90 */
+    sdfDrawTag_t *packetList; /* 0xC0: drawing packet destination */
 } MdlViewState;
 typedef char MdlViewState_selectedTaskIndex_offset_check[
     ((u32)&((MdlViewState *)0)->selectedTaskIndex == 0x14) ? 1 : -1];
@@ -189,7 +189,7 @@ typedef struct MdlCountNode {
     u8 pad00[4];
     s16 count; /* 0x04 */
     u8 pad06[6];
-    SdfTex **textures;
+    sdfTexHandle_t **textures;
 } MdlCountNode;
 
 
@@ -197,12 +197,12 @@ typedef struct MdlCountNode {
 
 
 
-extern EffWorldNode *dds3AddUnitObjectBasic(s32 world, void *pos, void *rot);
+extern dds3Basic_t *dds3AddUnitObjectBasic(s32 world, void *pos, void *rot);
 
 extern void dds3ObjectBaseOnFlag(s32 obj, u32 flags);
 
 
-extern void dds3RebuildObjectModelContext(EffWorldNode *obj, s32 a, s32 b);
+extern void dds3RebuildObjectModelContext(dds3Basic_t *obj, s32 a, s32 b);
 #include "dds3_world_secondary.h"
 extern s8 D_00453560[];
 
@@ -228,8 +228,8 @@ extern s8 dds3PadButtonState[64];
 extern void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, s8 *pad);
 
 
-void sdfIpuSetOutputTex(SdfStreamFrameNode *, SdfStreamParams *, u8 *, s32, SdfTex *);
-void sdfIpuFree(SdfStreamFrameNode *);
+void sdfIpuSetOutputTex(sdfIpuDecodeCb_t *, SdfStreamParams *, u8 *, s32, sdfTexHandle_t *);
+void sdfIpuFree(sdfIpuDecodeCb_t *);
 
 extern f32 D_00453620[4] __attribute__((aligned(16)));
 
@@ -265,7 +265,7 @@ typedef struct MdlCtrlState {
     u8 editing;
     u8 blinkTick;
     s16 selection;
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
 } MdlCtrlState;
 
 extern MdlCtrlState mdlDebugScaleWork;
@@ -291,7 +291,7 @@ extern char D_004370C0[]; /* "%5.2f" */
 extern u8 sdfViewTargetVector[];
 
 
-extern void dds3BillboardDraw(BillObj *billboard);
+extern void dds3BillboardDraw(billHandle_t *billboard);
 
 
 
@@ -362,13 +362,13 @@ void mdlMakeHddFileListDummy(void) {
 
     mdlReleaseHddFileList();
     D_00436FAC = (u32)sdfMemAllocDirect(MDL_VIEWER_HEADER_BYTES);
-    D_00438F98 = (MdlResourceSelection *)sdfMemLock((struct SdfMemBlock *)(D_00436FAC));
+    D_00438F98 = (MdlResourceSelection *)sdfMemLock((struct sdfMemHandle_t *)(D_00436FAC));
     D_00438F98->pathTable = 5;
     D_00438F98->pathIndex = 0;
     D_00438F98->unk4 = 0x1000;
     D_00438F98->unk6 = 0x3E8;
     D_00436FB0 = (u32)sdfMemAllocDirect(MDL_VIEWER_NAME_TABLE_BYTES);
-    D_00438F9C = (MdlResourcePath *)sdfMemLock((struct SdfMemBlock *)(D_00436FB0));
+    D_00438F9C = (MdlResourcePath *)sdfMemLock((struct sdfMemHandle_t *)(D_00436FB0));
     for (sourceIndex = 0; sourceIndex != MDL_VIEWER_LABEL_COUNT; sourceIndex++) {
         switch (sourceIndex) {
         case 0:
@@ -517,9 +517,9 @@ void mdlMakeHddFileList(void) {
         if (count != 0) {
             index = 0;
             D_00436FAC = (u32)sdfMemAllocDirect(count * sizeof(MdlResourceSelection));
-            D_00438F98 = sdfMemLock((SdfMemBlock *)D_00436FAC);
+            D_00438F98 = sdfMemLock((sdfMemHandle_t *)D_00436FAC);
             D_00436FB0 = (u32)sdfMemAllocDirect(count * sizeof(MdlResourcePath));
-            D_00438F9C = sdfMemLock((SdfMemBlock *)D_00436FB0);
+            D_00438F9C = sdfMemLock((sdfMemHandle_t *)D_00436FB0);
             memset(D_00438F9C, 0, count * sizeof(MdlResourcePath));
             file = D_00438F94;
             while (file != NULL) {
@@ -612,7 +612,7 @@ u16 mdlPibGetChunkCount(MdlRecord *record) {
 }
 
 /* Follow relative links in the resource's record table to find an ID. */
-MdlRecord *mdlPibGetChunk(MdlCtx *resource, s32 recordId) {
+MdlRecord *mdlPibGetChunk(dds3ModelHandle_t *resource, s32 recordId) {
     MdlRecord *recordTable = resource->sub->partInfo;
     MdlRecord *recordCursor;
     s32 remainingRecords;
@@ -703,7 +703,7 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_00421030);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421040);
 
-void mdlPibDrawEffectInfo(SdfListHead *packetList, s32 x, s32 y, s32 depth, s32 textStyle, MdlRecord *record) {
+void mdlPibDrawEffectInfo(sdfDrawTag_t *packetList, s32 x, s32 y, s32 depth, s32 textStyle, MdlRecord *record) {
     if (record->kind >= MDL_VIEWER_RECORD_KIND_BILLBOARD_PART &&
         record->kind <= MDL_VIEWER_RECORD_KIND_OBJECT_PART) {
         switch (record->kind) {
@@ -745,7 +745,7 @@ void mdlPibDrawEffectInfo(SdfListHead *packetList, s32 x, s32 y, s32 depth, s32 
 }
 
 /* Draw the scalar marker fields, then four colors with four byte channels each; negative selection hides the cursor. */
-void mdlPibDrawTrackInfo(SdfListHead *packetList, s32 x, s32 y, s32 depth, EffMarkParams *params, s32 selectedField) {
+void mdlPibDrawTrackInfo(sdfDrawTag_t *packetList, s32 x, s32 y, s32 depth, EffMarkParams *params, s32 selectedField) {
     s32 colorY = y + 0x300;
     s32 labelX = x + 0xC0;
     u32 packedColor;
@@ -848,7 +848,7 @@ void mdlCreateEffectResrc_D3P(DevRequest *partList, EffNodeDescriptor *descripto
     partList->usedCount += 1;
 }
 
-void mdlCreateEffectResrc_IPU(DevRequest *list, u8 *sourceAddress, SdfMemBlock *backingAllocation, s32 sourceSize) {
+void mdlCreateEffectResrc_IPU(DevRequest *list, u8 *sourceAddress, sdfMemHandle_t *backingAllocation, s32 sourceSize) {
     MdlObj *node = sdfAllocAndClearQuadwords(sizeof(*node));
     MdlPartEntry *entry = &((MdlPartEntry *)list->buffer)[list->usedCount];
 
@@ -870,7 +870,7 @@ void mdlDeleteEffectResrc_IPU(MdlObj *obj) {
     sdfChipFreeDirect(obj);
 }
 
-void mdlStartEffectResrc_IPU(MdlObj *obj, SdfTex *resource, SdfStreamParams *params) {
+void mdlStartEffectResrc_IPU(MdlObj *obj, sdfTexHandle_t *resource, SdfStreamParams *params) {
     if (obj->initialized == 0) {
         obj->initialized = 1;
         sdfIpuSetOutputTex(&obj->soundNode, params, obj->sourceAddress, obj->sourceSize, resource);
@@ -907,9 +907,9 @@ void mdlEffectResrcListFree(DevRequest *partList) {
 }
 
 /* Prepend a cleared, typed resource item to the owner's list. */
-MdlResourceItem *mdlCreateEffectCtrlr(MdlCtx *owner, s32 type, s32 motionSlotIndex) {
-    MdlResourceItem *item = sdfAllocAndClearQuadwords(sizeof(MdlResourceItem));
-    MdlResourceItem *previousHead = owner->resourceItems;
+dds3ModelEffectCtrlr_t *mdlCreateEffectCtrlr(dds3ModelHandle_t *owner, s32 type, s32 motionSlotIndex) {
+    dds3ModelEffectCtrlr_t *item = sdfAllocAndClearQuadwords(sizeof(dds3ModelEffectCtrlr_t));
+    dds3ModelEffectCtrlr_t *previousHead = owner->resourceItems;
     item->type = type;
     item->next = previousHead;
     item->motionSlotIndex = motionSlotIndex;
@@ -918,7 +918,7 @@ MdlResourceItem *mdlCreateEffectCtrlr(MdlCtx *owner, s32 type, s32 motionSlotInd
 }
 
 void *mdlEffectDup_P2A(MdlPartEntry *entry) {
-    struct BillObj *clone = dds3BillboardCopy(mdlPartObjectFromStorage(entry->object).billboard);
+    struct billHandle_t *clone = dds3BillboardCopy(mdlPartObjectFromStorage(entry->object).billboard);
     entry->state = entry->state + 1;
     return clone;
 }
@@ -930,7 +930,7 @@ void *mdlEffectDup_D3P(MdlPartEntry *entry) {
 }
 
 /* Resolve a native fixed-size slot when its table exists and index is below the upper bound; no lower-bound check. */
-MdlPartEntry *mdlGetEffectResrc(MdlCtx *resource, s32 slotIndex) {
+MdlPartEntry *mdlGetEffectResrc(dds3ModelHandle_t *resource, s32 slotIndex) {
     DevRequest *slotTable;
 
     slotTable = resource->sub->partList;
@@ -944,11 +944,11 @@ MdlPartEntry *mdlGetEffectResrc(MdlCtx *resource, s32 slotIndex) {
 }
 
 /* Bind each consecutive record ID to a newly created part when the chunk contains it. */
-void mdlCreateEffect_P2A_D3P(MdlCtx *owner, MdlRecord *partRecord, s32 motionSlotIndex, s32 resourceType, void *(*createPart)(MdlPartEntry *)) {
+void mdlCreateEffect_P2A_D3P(dds3ModelHandle_t *owner, MdlRecord *partRecord, s32 motionSlotIndex, s32 resourceType, void *(*createPart)(MdlPartEntry *)) {
     MdlPartEntry *partSlot = mdlGetEffectResrc(owner, partRecord->parameter.part.partIndex);
 
     if (partSlot != NULL) {
-        SdfModel *model = owner->inner;
+        sdfModelRootNode_t *model = owner->inner;
         s32 recordId = partRecord->payload.id;
         s32 remainingRecords = partRecord->parameter.part.count;
         f32 optionalAnchorScale = 0.0f;
@@ -961,7 +961,7 @@ void mdlCreateEffect_P2A_D3P(MdlCtx *owner, MdlRecord *partRecord, s32 motionSlo
             SdfMapPositionRecord *chunkRecord = sdfModelSearchMarkPosData(model, recordId++);
 
             if (chunkRecord != NULL) {
-                MdlResourceItem *resourceItem = mdlCreateEffectCtrlr(owner, resourceType, motionSlotIndex);
+                dds3ModelEffectCtrlr_t *resourceItem = mdlCreateEffectCtrlr(owner, resourceType, motionSlotIndex);
 
                 resourceItem->payload.part.instance = createPart(partSlot);
                 resourceItem->payload.part.slot = partSlot;
@@ -973,8 +973,8 @@ void mdlCreateEffect_P2A_D3P(MdlCtx *owner, MdlRecord *partRecord, s32 motionSlo
 }
 
 /* Convert the effect record to native track parameters and retain its work pointer. */
-void mdlCreateEffect_TRACK(MdlCtx *owner, MdlTrackPolyRecordView *record, s32 motionSlotIndex) {
-    MdlResourceItem *resourceItem;
+void mdlCreateEffect_TRACK(dds3ModelHandle_t *owner, MdlTrackPolyRecordView *record, s32 motionSlotIndex) {
+    dds3ModelEffectCtrlr_t *resourceItem;
     EffTrackPolyParams effectParams;
 
     effectParams.model = owner;
@@ -994,9 +994,9 @@ void mdlCreateEffect_TRACK(MdlCtx *owner, MdlTrackPolyRecordView *record, s32 mo
     resourceItem->payload.part.track = effTrackPolyCreateWork(&effectParams);
 }
 
-extern void mdlSetBlur(MdlCtx *, s32, s32, u32, u32);
+extern void mdlSetBlur(dds3ModelHandle_t *, s32, s32, u32, u32);
 
-void mdlCreateEffect_BLUR(MdlCtx *owner, MdlRecord *record) {
+void mdlCreateEffect_BLUR(dds3ModelHandle_t *owner, MdlRecord *record) {
     mdlSetBlur(owner, record->payload.stream.selectorA,
                   record->payload.stream.selectorB,
                   record->parameter.word, record->tail.word10);
@@ -1004,15 +1004,15 @@ void mdlCreateEffect_BLUR(MdlCtx *owner, MdlRecord *record) {
 
 
 /* Claim an unused object only after its data resource resolves, retaining record flags and deferred-init parameters. */
-void mdlCreateEffect_IPU(MdlCtx *owner, MdlRecord *entryRecord, s32 motionSlotIndex) {
+void mdlCreateEffect_IPU(dds3ModelHandle_t *owner, MdlRecord *entryRecord, s32 motionSlotIndex) {
     MdlPartEntry *partSlot = mdlGetEffectResrc(owner, entryRecord->tail.object.partIndex);
 
     if (partSlot != 0) {
         MdlObj *object = mdlPartObjectFromStorage(partSlot->object).model;
         if (object->inUse == 0) {
-            SdfTex *texture = sdfTexSearch(entryRecord->payload.id);
+            sdfTexHandle_t *texture = sdfTexSearch(entryRecord->payload.id);
             if (texture != 0) {
-                MdlResourceItem *resourceItem;
+                dds3ModelEffectCtrlr_t *resourceItem;
                 u8 *attributes;
                 object->inUse = 1;
                 resourceItem = mdlCreateEffectCtrlr(owner, MDL_RESOURCE_OBJECT, motionSlotIndex);
@@ -1031,7 +1031,7 @@ void mdlCreateEffect_IPU(MdlCtx *owner, MdlRecord *entryRecord, s32 motionSlotIn
 }
 
 /* Initialize once the owner's motion reaches the stored threshold; retain native float-to-signed-to-unsigned conversion. */
-void mdlDrawEffect_IPU(MdlResourceItem *item) {
+void mdlDrawEffect_IPU(dds3ModelEffectCtrlr_t *item) {
     MdlObj *object = item->payload.object.object;
     if (object->initialized == 0) {
         s32 minimumTime = item->payload.object.minimumTime;
@@ -1046,7 +1046,7 @@ void mdlDrawEffect_IPU(MdlResourceItem *item) {
 
 
 /* Dispatch the five record kinds; resource application ignores any callee return value. */
-void mdlCreateEffect(MdlCtx *owner, MdlRecord *record, s32 motionSlotIndex) {
+void mdlCreateEffect(dds3ModelHandle_t *owner, MdlRecord *record, s32 motionSlotIndex) {
     switch (record->kind) {
     case MDL_VIEWER_RECORD_KIND_BILLBOARD_PART:
         mdlCreateEffect_P2A_D3P(owner, record, motionSlotIndex, MDL_RESOURCE_BILLBOARD, mdlEffectDup_P2A);
@@ -1067,7 +1067,7 @@ void mdlCreateEffect(MdlCtx *owner, MdlRecord *record, s32 motionSlotIndex) {
 }
 
 /* Find the requested record list and associate each entry with this motion slot. */
-void mdlGenEffect(MdlCtx *owner, s32 recordId, s32 motionSlotIndex) {
+void mdlGenEffect(dds3ModelHandle_t *owner, s32 recordId, s32 motionSlotIndex) {
     MdlRecord *recordList = mdlPibGetChunk(owner, recordId);
     if (recordList != NULL) {
         MdlRecord *recordCursor = mdlPibGetFirstChunkItem(recordList);
@@ -1079,10 +1079,10 @@ void mdlGenEffect(MdlCtx *owner, s32 recordId, s32 motionSlotIndex) {
 }
 
 /* Release billboard, effect, or tracked-poly handles when applicable, then always free the list item. */
-void mdlFreeEffect(MdlResourceItem *item) {
+void mdlFreeEffect(dds3ModelEffectCtrlr_t *item) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
-        dds3BillboardDelete((BillObj *)item->payload.part.instance);
+        dds3BillboardDelete((billHandle_t *)item->payload.part.instance);
         break;
     case MDL_RESOURCE_EFFECT:
         dds3EffectDelete((EffNode *)item->payload.part.instance);
@@ -1095,12 +1095,12 @@ void mdlFreeEffect(MdlResourceItem *item) {
 }
 
 /* Release all items for this slot without losing the link across consecutive matches. */
-void mdlStopEffect(MdlCtx *owner, s32 motionSlotIndex) {
-    MdlResourceItem **itemLink = &owner->resourceItems;
-    MdlResourceItem *item = *itemLink;
+void mdlStopEffect(dds3ModelHandle_t *owner, s32 motionSlotIndex) {
+    dds3ModelEffectCtrlr_t **itemLink = &owner->resourceItems;
+    dds3ModelEffectCtrlr_t *item = *itemLink;
     while (item != 0) {
         if (item->motionSlotIndex == motionSlotIndex) {
-            MdlResourceItem *nextItem = item->next;
+            dds3ModelEffectCtrlr_t *nextItem = item->next;
             mdlFreeEffect(item);
             *itemLink = nextItem;
             item = nextItem;
@@ -1112,9 +1112,9 @@ void mdlStopEffect(MdlCtx *owner, s32 motionSlotIndex) {
 }
 
 /* vu0 routine: positionOut = p + normalize(p - sdfViewTargetVector) * scale, p = transformed node position. */
-void mdlEffect_P2A_D3P_GetPos(SdfModel *model, MdlResourceItem *anchorRecord, f32 *positionOut) {
+void mdlEffect_P2A_D3P_GetPos(sdfModelRootNode_t *model, dds3ModelEffectCtrlr_t *anchorRecord, f32 *positionOut) {
     SdfMapPositionRecord *mapPosition = anchorRecord->payload.part.mapPositionRecord;
-    SdfDrawNode *drawNode = sdfModelSearchNode(model, mapPosition->nodeId);
+    sdfModelNode_t *drawNode = sdfModelSearchNode(model, mapPosition->nodeId);
     f32 scale = anchorRecord->payload.part.anchorScale;
 
     VU0_LOAD_MATRIX(drawNode->worldMatrix);
@@ -1131,8 +1131,8 @@ void mdlEffect_P2A_D3P_GetPos(SdfModel *model, MdlResourceItem *anchorRecord, f3
 }
 
 /* Update anchored billboard/effect positions, tracked polygons, or deferred object initialization by type. */
-void mdlLinkEffect(MdlCtx *owner, MdlResourceItem *anchorRecord) {
-    SdfModel *model = owner->inner;
+void mdlLinkEffect(dds3ModelHandle_t *owner, dds3ModelEffectCtrlr_t *anchorRecord) {
+    sdfModelRootNode_t *model = owner->inner;
     f32 position[4];
     void *resourceInstance;
 
@@ -1141,7 +1141,7 @@ void mdlLinkEffect(MdlCtx *owner, MdlResourceItem *anchorRecord) {
         mdlEffect_P2A_D3P_GetPos(model, anchorRecord, position);
         resourceInstance = anchorRecord->payload.part.instance;
         effCopyVector(resourceInstance, position);
-        dds3BillboardDraw((BillObj *)resourceInstance);
+        dds3BillboardDraw((billHandle_t *)resourceInstance);
         break;
     case MDL_RESOURCE_EFFECT:
         mdlEffect_P2A_D3P_GetPos(model, anchorRecord, position);
@@ -1159,10 +1159,10 @@ void mdlLinkEffect(MdlCtx *owner, MdlResourceItem *anchorRecord) {
 }
 
 /* Set a billboard/effect frame; other resource-item kinds have no frame dispatch. */
-void mdlSetEffectColorSub(MdlCtx *owner, MdlResourceItem *item, s32 frame) {
+void mdlSetEffectColorSub(dds3ModelHandle_t *owner, dds3ModelEffectCtrlr_t *item, s32 frame) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
-        dds3BillboardSetRGBA((BillObj *)item->payload.part.instance, frame);
+        dds3BillboardSetRGBA((billHandle_t *)item->payload.part.instance, frame);
         return;
     case MDL_RESOURCE_EFFECT:
         effSetNodeParameterValue((EffNode *)item->payload.part.instance, frame);
@@ -1171,10 +1171,10 @@ void mdlSetEffectColorSub(MdlCtx *owner, MdlResourceItem *item, s32 frame) {
 }
 
 /* Apply amount to billboard/effect scale; other resource-item kinds are ignored. */
-void mdlSetEffectScaleSub(MdlCtx *owner, MdlResourceItem *item, float amount) {
+void mdlSetEffectScaleSub(dds3ModelHandle_t *owner, dds3ModelEffectCtrlr_t *item, float amount) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
-        dds3BillboardSetScale((struct BillObj *)item->payload.part.instance, amount, amount);
+        dds3BillboardSetScale((struct billHandle_t *)item->payload.part.instance, amount, amount);
         return;
     case MDL_RESOURCE_EFFECT:
         dds3EffectSetScale((EffNode *)item->payload.part.instance, amount);
@@ -1187,7 +1187,7 @@ u64 *mdlBuildViewerRectanglePacket(s32 x, s32 y, s32 depth, s32 width, s32 heigh
 }
 
 void mdlAppendViewerRectToDrawList(s32 x, s32 y, s32 depth, s32 width, s32 height, s32 unused) {
-    SdfListHead *packet;
+    sdfDrawTag_t *packet;
 
     packet = mdlViewerState.packetList;
     sdfDrawTagLink(packet, (u32)mdlBuildViewerRectanglePacket(x, y, depth, width, height));
@@ -1308,7 +1308,7 @@ s32 mdlUpdateViewerCursorWithPageStep(s16 *cursor, s32 entryCount, s32 pageStep)
 }
 
 void mdlLoadViewerResourceAndResetCursors(void) {
-    MdlCtx *loaded;
+    dds3ModelHandle_t *loaded;
 
     loaded = mdlLoad(mdlViewerState.resourceGroup, mdlViewerState.resourceId);
     mdlViewerState.resources[0] = loaded;
@@ -1334,7 +1334,7 @@ void mdlResetViewerBasisVectors(void) {
 /* Rotate the viewer resource list in place without moving its allocation. */
 void mdlRotateViewResourcesRight(void) {
     s32 resourceIndex = mdlViewerState.resourceCount - 1;
-    MdlCtx *lastResource = mdlViewerState.resources[resourceIndex];
+    dds3ModelHandle_t *lastResource = mdlViewerState.resources[resourceIndex];
 
     if (resourceIndex > 0) {
         do {
@@ -1349,7 +1349,7 @@ void mdlRotateViewResourcesRight(void) {
 void mdlRotateViewList(void) {
     s32 resourceIndex;
     s32 resourceCount = mdlViewerState.resourceCount;
-    MdlCtx *firstResource = mdlViewerState.resources[0];
+    dds3ModelHandle_t *firstResource = mdlViewerState.resources[0];
 
     for (resourceIndex = 0; resourceIndex < resourceCount - 1; resourceIndex++) {
         mdlViewerState.resources[resourceIndex] = mdlViewerState.resources[resourceIndex + 1];
@@ -1853,7 +1853,7 @@ void mdlUpdateViewerCameraFromPad(void) {
 }
 
 void mdlDrawViewerIndexedLabelOverlay(void) {
-    SdfListHead *packets;
+    sdfDrawTag_t *packets;
 
     mdlAppendViewerRectToDrawList(0x8A10L, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
     packets = mdlViewerState.packetList;
@@ -1974,7 +1974,7 @@ void mdlUpdateViewerSelectedModelFromPad(void) {
 }
 
 void mdlDrawViewerSelectionLabel(void) {
-    SdfListHead *packets;
+    sdfDrawTag_t *packets;
 
     mdlAppendViewerRectToDrawList(0x8A10L, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
     packets = mdlViewerState.packetList;
@@ -2036,9 +2036,9 @@ void mdlAdjustViewerScale(void) {
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421278);
 
 void mdlDrawViewerMotionTimeline(void) {
-    SdfListHead *packetList;
-    MdlCtx *resource;
-    Motion *motion;
+    sdfDrawTag_t *packetList;
+    dds3ModelHandle_t *resource;
+    sdfMotionCtrlr_t *motion;
     s32 playheadX;
     s32 textStyle;
 
@@ -2124,9 +2124,9 @@ u32 mdlUpdateViewerWorkspaceSetupTask(void) {
 
 void mdlApplyViewerResourceMenuAction(void) {
     s32 i;
-    MdlCtx *resource;
+    dds3ModelHandle_t *resource;
     s32 entryId;
-    Motion *motion;
+    sdfMotionCtrlr_t *motion;
 
     if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.scrollPage, 5, 1) != 0) {
         return;
@@ -2248,7 +2248,7 @@ void mdlDrawViewerTexturePreview(void) {
     s32 count = 0;
     s32 width, height;
     MdlCountNode *node;
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
     s32 displayWidth, displayHeight;
     s32 selectedNumber = 0;
 
@@ -2403,7 +2403,7 @@ void mdlDrawViewerSettings(void) {
     /* Retail00237754..74 fills and then indexes these three status bytes
      * at sp+0..2; this is a real temporary stack table, not a source view. */
     s8 enabled[3];
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
     s32 i;
     s32 y;
     s32 style;
@@ -2454,7 +2454,7 @@ u32 mdlRunViewerSettingsTask(void) {
 
 /* Sum list -1 and active-entry counts, retaining both independent lookups. */
 s32 mdlCountActiveRecords(void) {
-    MdlCtx *resource = mdlViewerState.resources[0];
+    dds3ModelHandle_t *resource = mdlViewerState.resources[0];
     s32 firstListCount = mdlPibGetChunkItemCount(mdlPibGetChunk(resource, -1));
     s32 activeListCount = mdlPibGetChunkItemCount(mdlPibGetChunk(resource, mdlViewerState.activeEntryId));
 
@@ -2463,7 +2463,7 @@ s32 mdlCountActiveRecords(void) {
 
 /* Record at the cursor index, counting list -1 first and then the active entry's list. */
 MdlRecord *mdlGetSelectedRecord(void) {
-    MdlCtx *resource = mdlViewerState.resources[0];
+    dds3ModelHandle_t *resource = mdlViewerState.resources[0];
     MdlRecord *firstList = mdlPibGetChunk(resource, -1);
     MdlRecord *secondList = mdlPibGetChunk(resource, mdlViewerState.activeEntryId);
     s32 index = mdlViewerState.selectedRecordIndex;
@@ -2548,7 +2548,7 @@ extern const char D_00421420[];
 extern const char D_004370F0[];
 void mdlDrawViewerEffectRecordList(void) {
     MdlViewState *state = &mdlViewerState;
-    MdlCtx *resource;
+    dds3ModelHandle_t *resource;
     MdlRecord *firstList;
     MdlRecord *secondList;
     MdlRecord *record;
@@ -2562,7 +2562,7 @@ void mdlDrawViewerEffectRecordList(void) {
     s32 rowCount;
     s32 markerY;
     s32 descriptionY;
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
 
     mdlAppendViewerRectToDrawList(0x7150, 0x7A08, 0xFF007F, 0xF60, 0x270, 0);
     resource = state->resources[0];
@@ -2712,7 +2712,7 @@ extern u32 D_003C8990[];
 
 /* Submit the intermediate packet with an identity basis in phases 2 and 3. */
 void mdlSubmitViewerIntermediateDrawPacket(void) {
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
 
     if (mdlViewerState.taskPhase < 4) {
         if (mdlViewerState.taskPhase >= 2) {
@@ -2734,9 +2734,9 @@ extern s32 sdfDumpHexLine(s32, s32);
 
 /* Submit the selected resource in phase 3; keep the native bitwise input/once-flag test. */
 void mdlSubmitViewerResourceDrawPacket(void) {
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
     s32 drawPacket;
-    MdlCtx *resource;
+    dds3ModelHandle_t *resource;
 
     if (mdlViewerState.taskPhase == 3) {
         packetList = dds3FontReqAllocDrawTag();
@@ -2754,7 +2754,7 @@ void mdlSubmitViewerResourceDrawPacket(void) {
 
 void mdlViewerTaskDestroy(void) {
     if (mdlViewerState.viewerTask != 0) {
-        dds3KillProcess((KwlnTask *)mdlViewerState.viewerTask, 0);
+        dds3KillProcess((dds3ProcessID_t *)mdlViewerState.viewerTask, 0);
         mdlViewerState.viewerTask = 0;
     }
 }
@@ -2775,7 +2775,7 @@ void mdlRestartViewerPhaseTask(void) {
         (s32)dds3StartProcess(D_003C87F0[mdlViewerState.taskPhase - 1].name, 0x2B00, 1, 0,
                        D_003C87F0[mdlViewerState.taskPhase - 1].update, 0,
                        D_003C87F0[mdlViewerState.taskPhase - 1].data);
-    dds3LinkProcess((KwlnTask *)mdlViewerState.unk00, (KwlnTask *)mdlViewerState.viewerTask);
+    dds3LinkProcess((dds3ProcessID_t *)mdlViewerState.unk00, (dds3ProcessID_t *)mdlViewerState.viewerTask);
 }
 
 #include "sdf_gs_header.h"
@@ -2783,11 +2783,11 @@ extern s8 D_0040B7E6[];
 extern s8 D_0037F532[];
 extern u8 aViewTarget[];
 extern u8 aViewDown[];
-extern u32 sdfGetLodChunkValue(SdfModel *);
+extern u32 sdfGetLodChunkValue(sdfModelRootNode_t *);
 extern s32 sdfGrAllocPacketBuff(s32 size);
 
-s32 mdlViewer(KwlnTask *task) {
-    SdfModel *model;
+s32 mdlViewer(dds3ProcessID_t *task) {
+    sdfModelRootNode_t *model;
     SdfGsPacketHeader *packet;
     s32 lodCount;
     s32 selection;
@@ -2859,12 +2859,12 @@ s32 mdlViewer(KwlnTask *task) {
 }
 
 /* Walk native 64-byte map-position records and submit their visualization in one packet list. */
-void mdlDrawMapPositionRecords(MdlCtx *resource) {
+void mdlDrawMapPositionRecords(dds3ModelHandle_t *resource) {
     s32 recordCount = sdfModelGetMarkPosCount(resource->inner);
 
     if (recordCount > 0) {
         s32 recordIndex = 0;
-        SdfListHead *packetList = dds3FontReqAllocDrawTag();
+        sdfDrawTag_t *packetList = dds3FontReqAllocDrawTag();
         SdfMapPositionRecord *recordCursor = (SdfMapPositionRecord *)(
             (SdfMapPositionChunkPrefix *)sdfChunkFindByTag(resource->inner, MDL_MAP_POSITION_TAG) + 1);
 
@@ -2882,7 +2882,7 @@ void mdlDrawMapPositionRecords(MdlCtx *resource) {
 
 extern SdfPoolNode D_003805A8;
 extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
-s32 mdlViewerEnd(KwlnTask *task)
+s32 mdlViewerEnd(dds3ProcessID_t *task)
 {
   f32 step = mdlViewerState.viewerScale;
   s32 i;
@@ -2891,7 +2891,7 @@ s32 mdlViewerEnd(KwlnTask *task)
     i = 0;
     do
     {
-      Motion *motion;
+      sdfMotionCtrlr_t *motion;
       if (mdlViewerState.resources[i] != 0)
       {
         motion = mdlViewerState.resources[i]->first;
@@ -2970,7 +2970,7 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_00421420);
 
 void mdlLoadViewerPresentationConfig(void) {
     s32 fileRequest;
-    struct SdfMemBlock *resourceHandle;
+    struct sdfMemHandle_t *resourceHandle;
     char *fileData;
     s32 fileSize;
     s32 lineOffset;
@@ -3067,8 +3067,8 @@ extern char D_004214E8[];
 
 extern char D_004214F8[];
 
-extern s32 mdlViewer(KwlnTask *);
-extern s32 mdlViewerEnd(KwlnTask *);
+extern s32 mdlViewer(dds3ProcessID_t *);
+extern s32 mdlViewerEnd(dds3ProcessID_t *);
 extern void mdlMakeHddFileList(void);
 extern s32 fclEncycFreeEntries(const char *);
 extern MdlEyeVec D_003C8A80;
@@ -3117,11 +3117,11 @@ void mdlInitializeViewerTasksAndResources(void) {
 /* Clear each occupied resource slot before destroying its context; retain the native scan form. */
 void mdlFreeViewResources(void) {
     MdlViewState *viewerState = &mdlViewerState;
-    MdlCtx **resourceSlot = viewerState->resources;
+    dds3ModelHandle_t **resourceSlot = viewerState->resources;
     s32 resourceIndex;
 
     for (resourceIndex = 0; resourceIndex != MDL_VIEWER_RESOURCE_SLOTS; resourceIndex++) {
-        MdlCtx *resource = *resourceSlot;
+        dds3ModelHandle_t *resource = *resourceSlot;
 
         if (resource != 0) {
             *resourceSlot = 0;
@@ -3204,7 +3204,7 @@ void mdlSetDebugMatrix(MdlLightEditorState *context, f32 *position)
 }
 
 /* Update/draw the task-selected light and ambient editor; return zero. */
-s32 mdlDebugPrintEffectScale(KwlnTask *task) {
+s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
     MdlLightEditorState *state = (MdlLightEditorState *)dds3GetProcessData(task);
     f32 (*light)[4];
     MdlOptionLabel *label;
@@ -3443,14 +3443,14 @@ void mdlGetDebugEntry(s32 valueEditIndex) {
     *target = value;
 }
 
-struct KwlnTask;
-extern s32 mdlDebugPrintEffectScale2(struct KwlnTask *);
+struct dds3ProcessID_t;
+extern s32 mdlDebugPrintEffectScale2(struct dds3ProcessID_t *);
 extern MdlOptionLabel D_003C8AF8;
 extern char D_00437178[];
 extern s8 D_0040B7E8[16];
 
 /* Edit the draw-vector target: four numeric rows and three packed-colour channels. */
-s32 mdlDebugPrintEffectScale2(KwlnTask *task) {
+s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
     MdlCtrlState *state = &mdlDebugScaleWork;
     s8 *pad;
     s32 changed;
@@ -3553,7 +3553,7 @@ typedef struct MdlOptionState {
     u8 pad08[0x20];
     f32 value;
     f32 adjustment;
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
     u8 pad34[4];
 } MdlOptionState;
 
@@ -3575,7 +3575,7 @@ extern const char D_004371B0[];
 extern const char D_004371B8[];
 
 /* Update/draw the FACE-DIV soften, bias and divide controls; return zero. */
-s32 soften_bias_Process(KwlnTask *task) {
+s32 soften_bias_Process(dds3ProcessID_t *task) {
     MdlOptionState *state = &D_00453660;
     MdlOptionLabel *label;
     s8 *pad;
@@ -3764,14 +3764,14 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_00421518);
 
 s32 dds3BitEditorProcess(void) {
     char glyph[2];
-    SdfListHead *packets;
+    sdfDrawTag_t *packets;
     s32 column, row, style, result;
     s32 cellWidth = 0xC0, cellHeight = 0x60;
 
     /* Native 0023A1D4..E4 copies this space/NUL template as one block;
      * see docs/idioms.md, "Bit-editor glyph template block copy". */
     memcpy(glyph, D_004371D0, sizeof(glyph));
-    packets = (SdfListHead *)sdfGrAllocPacketBuff(sizeof(*packets));
+    packets = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(*packets));
     sdfDrawTagInit(packets);
     dds3ConsPanelTagLink(packets, 50, 50, 23, 20);
     sdfDrawTagLink(packets, (u32)sdfDevPrintf(
@@ -3836,12 +3836,12 @@ s32 dds3BitEditorProcess(void) {
     return 0;
 }
 
-extern EffWorldNode *dds3AddCameraObjectBasicTypeFree(s32 world, void *pos, void *rot);
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 world, void *pos, void *rot);
 
 s32 evtSetTestCamera(void) {
     f32 pos[4] = {0.0f, -100.0f, -600.0f, 0.0f};
     f32 rot[4];
-    EffWorldNode *obj;
+    dds3Basic_t *obj;
 
     memset(rot, 0, 0x10);
     rot[3] = 1.0f;
@@ -3856,7 +3856,7 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     f32 pos[4];
     f32 rot[4];
     s32 world;
-    EffWorldNode *obj;
+    dds3Basic_t *obj;
 
     memset(pos, 0, 0x10);
     pos[3] = 1.0f;
@@ -3867,8 +3867,8 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     dds3ObjectBaseOnFlag((u32)obj, 0x20);
     dds3GetRadiusPoseSet(obj, 10.0f);
     dds3RebuildObjectModelContext(obj, slotKind, resource);
-    if (((MdlCtx *)dds3ObjectBaseGetModelHandle(obj))->first != NULL) {
-        mdlLoopMotion((MdlCtx *)dds3ObjectBaseGetModelHandle(obj), 0, 0);
+    if (((dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(obj))->first != NULL) {
+        mdlLoopMotion((dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(obj), 0, 0);
     }
     dds3ObjectBaseSetPadControl(obj, 0);
     return world;
@@ -3881,7 +3881,7 @@ s32 evtLoadUnit(s32 slotKind, s32 resource) {
     f32 pos[4];
     f32 rot[4];
     s32 world;
-    EffWorldNode *obj;
+    dds3Basic_t *obj;
 
     memset(pos, 0, 0x10);
     pos[3] = 1.0f;
@@ -3892,7 +3892,7 @@ s32 evtLoadUnit(s32 slotKind, s32 resource) {
     dds3ObjectBaseOnFlag((u32)obj, 0x20);
     dds3GetRadiusPoseSet(obj, 10.0f);
     dds3RebuildObjectModelContext(obj, slotKind, resource);
-    mdlLoopMotion((MdlCtx *)dds3ObjectBaseGetModelHandle(obj), 0, 0);
+    mdlLoopMotion((dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(obj), 0, 0);
     dds3ObjectBaseSetControlBasic(obj, dds3SearchSceneBasic(dds3GetControlScene(), 0x10000, 2));
     dds3ObjectBaseRegistArea(obj);
     dds3ObjectBaseSetPadControl(obj, 0);
@@ -3902,8 +3902,8 @@ s32 evtLoadUnit(s32 slotKind, s32 resource) {
 
 void evtSetUnitPos(u32 targetKey, u32 sourceKey) {
     f32 axis[4] = {0.0f, 1.0f, 0.0f, 1.0f};
-    EffWorldNode *obj;
-    EffWorldNode *src;
+    dds3Basic_t *obj;
+    dds3Basic_t *src;
     EvtWorldSourceTransformPrefix *sourceTransform;
 
     obj = dds3SearchSceneBasic(dds3GetControlScene(), targetKey, 5);

@@ -70,7 +70,7 @@ typedef char MenuSceneCoordinateRingLayoutAssert[
         ? 1 : -1];
 
 typedef struct MenuSceneWork {
-    struct SdfMemBlock *allocation; /* 0x000: retained general-heap owner */
+    struct sdfMemHandle_t *allocation; /* 0x000: retained general-heap owner */
     MnuMantraNodeState nodes[96]; /* 0x004: grid userData; 0x480 bytes */
     SdfGrid *gridHandle; /* 0x484 */
     MnuGridFeedbackState gridFeedback; /* 0x488 */

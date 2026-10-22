@@ -47,12 +47,12 @@ void effPCPWwSpherePolySetRotateMatrix(PcpScatterPlainInstance *work, void *src)
 extern EffPacketParams effScatterDrawParams;
 
 /* Allocate the drawable's four streams and initialize its mirrored alpha ramp. */
-PcpScatterDraw *dds3WhirlwindPolyListCreate(u32 count, u32 pairs) {
+dds3WhirlwindPolyList_tag *dds3WhirlwindPolyListCreate(u32 count, u32 pairs) {
     s32 vectors = pairs * 2 + 2;
     s32 totalVectors = vectors * count;
     s32 bytes = (totalVectors * 6 + vectors + count) * 4;
-    PcpScatterDraw *object;
-    struct SdfMemBlock *allocation;
+    dds3WhirlwindPolyList_tag *object;
+    struct sdfMemHandle_t *allocation;
     u8 *cursor;
     u32 quarter;
     u32 rampIndex;
@@ -62,7 +62,7 @@ PcpScatterDraw *dds3WhirlwindPolyListCreate(u32 count, u32 pairs) {
     f32 step;
     u32 color;
 
-    object = sdfChipAllocDirect(sizeof(PcpScatterDraw));
+    object = sdfChipAllocDirect(sizeof(dds3WhirlwindPolyList_tag));
     allocation = sdfMemAllocDirect(bytes);
     cursor = (u8 *)sdfMemLock(allocation);
     memset(cursor, 0, bytes);
@@ -106,8 +106,8 @@ PcpScatterDraw *dds3WhirlwindPolyListCreate(u32 count, u32 pairs) {
 }
 
 /* Release the shared scatter resource before the object's private assets. */
-void dds3WhirlwindPolyListDelete(PcpScatterDraw *object) {
-    PcpScatterDraw *current;
+void dds3WhirlwindPolyListDelete(dds3WhirlwindPolyList_tag *object) {
+    dds3WhirlwindPolyList_tag *current;
 
     current = object;
     if (current->sharedResource != 0) {
@@ -122,23 +122,23 @@ extern u8 effScatterTriangleIndices[];
 extern SdfPoolNode *effScatterDrawSurfaces[];
 #include "sdf_packet_alloc.h"
 extern void *effPkt3DPrimMakePoly(EffPacketParams *);
-extern f32 *dds3WhirlwindPolyListGetVertex(PcpScatterDraw *object, s32 particleIndex);
-extern f32 *dds3WhirlwindPolyListGetUV(PcpScatterDraw *object, s32 particleIndex);
-struct SdfAsset;
+extern f32 *dds3WhirlwindPolyListGetVertex(dds3WhirlwindPolyList_tag *object, s32 particleIndex);
+extern f32 *dds3WhirlwindPolyListGetUV(dds3WhirlwindPolyList_tag *object, s32 particleIndex);
+struct sdfMat_t;
 
-extern u32 dds3WhirlwindPolyListGetABGR(PcpScatterDraw *object, s32 particleIndex);
+extern u32 dds3WhirlwindPolyListGetABGR(dds3WhirlwindPolyList_tag *object, s32 particleIndex);
 
 /* Render scatter strips in batches of sixteen vertices, then submit the tail. */
-void dds3WhirlwindPolyListDraw(PcpScatterDraw *object) {
+void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object) {
     f32 matrix[16] __attribute__((aligned(16)));
-    SdfListHead *packet;
+    sdfDrawTag_t *packet;
     EffPacketParams *draw;
     s32 count;
     s32 remaining;
     s32 particleIndex;
     SdfPoolNode *surface;
 
-    packet = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packet);
     EE_MMI_UNIT_MATRIX(matrix);
     matrix[10] = matrix[5] = matrix[0] = object->scale;
@@ -150,10 +150,10 @@ void dds3WhirlwindPolyListDraw(PcpScatterDraw *object) {
     sdfComposeVuMatrixFromRegisters();
     sdf3DPrimLinkTm(packet, 0);
     if (object->sharedResource != NULL) {
-        sdfSetAssetPrimaryTextureAddress((struct SdfAsset *)object->asset,
+        sdfSetAssetPrimaryTextureAddress((struct sdfMat_t *)object->asset,
                       object->sharedResource->textureHandle);
     }
-    sdf3DPrimLinkMat(packet, (SdfAsset *)object->asset, 0);
+    sdf3DPrimLinkMat(packet, (sdfMat_t *)object->asset, 0);
     count = (s32)object->particleCount;
     effScatterDrawParams.parameters = (const u32 *)effScatterTriangleIndices;
     for (particleIndex = 0; particleIndex < count; particleIndex++) {
@@ -185,7 +185,7 @@ void dds3WhirlwindPolyListDraw(PcpScatterDraw *object) {
 }
 
 /* Give this object its own reference to a newly created scatter resource. */
-void dds3WhirlwindPolyListSetTex(PcpScatterDraw *object, u32 resource) {
+void dds3WhirlwindPolyListSetTex(dds3WhirlwindPolyList_tag *object, u32 resource) {
     PcpScatterRes *shared;
 
     shared = dds3ScatterPolyListTexResourceCreate(resource);
@@ -193,7 +193,7 @@ void dds3WhirlwindPolyListSetTex(PcpScatterDraw *object, u32 resource) {
 }
 
 /* Share another object's scatter resource while retaining a separate reference. */
-void dds3WhirlwindPolyListCopyTex(PcpScatterDraw *object, PcpScatterDraw *source) {
+void dds3WhirlwindPolyListCopyTex(dds3WhirlwindPolyList_tag *object, dds3WhirlwindPolyList_tag *source) {
     PcpScatterRes *shared;
 
     shared = dds3ScatterPolyListTexResourceCopy(source->sharedResource);
@@ -201,21 +201,21 @@ void dds3WhirlwindPolyListCopyTex(PcpScatterDraw *object, PcpScatterDraw *source
 }
 
 /* Compute the address of a 16-byte-wide block within the stride. */
-f32 *dds3WhirlwindPolyListGetVertex(PcpScatterDraw *object, s32 particleIndex) {
+f32 *dds3WhirlwindPolyListGetVertex(dds3WhirlwindPolyList_tag *object, s32 particleIndex) {
     return object->points + particleIndex * object->vectorsPerParticle * 4;
 }
 
 /* Compute the address of an 8-byte-wide block within the stride. */
-f32 *dds3WhirlwindPolyListGetUV(PcpScatterDraw *object, s32 particleIndex) {
+f32 *dds3WhirlwindPolyListGetUV(dds3WhirlwindPolyList_tag *object, s32 particleIndex) {
     return object->uv + particleIndex * object->vectorsPerParticle * 2;
 }
 
-u32 dds3WhirlwindPolyListGetABGR(PcpScatterDraw *object, s32 particleIndex) {
+u32 dds3WhirlwindPolyListGetABGR(dds3WhirlwindPolyList_tag *object, s32 particleIndex) {
     return object->colors[particleIndex];
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void dds3WhirlwindPolyListSetRotateMatrix(PcpScatterDraw *object, const void *src) {
+void dds3WhirlwindPolyListSetRotateMatrix(dds3WhirlwindPolyList_tag *object, const void *src) {
     VU0_LOAD_MATRIX(src);
     VU0_STORE_MATRIX(object->matrix);
 }
@@ -225,7 +225,7 @@ extern EffRandState effDefaultRandomState[];
 
 /* effPCPNeedleSpiralCreate */
 EffPCPNeedleWork *effPCPNeedleSpiralCreate(EffPCPNeedleParams *params) {
-    SdfMemBlock *allocation = sdfMemAllocDirect(params->count * sizeof(EffPCPNeedleSlot) + sizeof(EffPCPNeedleWork));
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(params->count * sizeof(EffPCPNeedleSlot) + sizeof(EffPCPNeedleWork));
     EffPCPNeedleWork *work = (EffPCPNeedleWork *)sdfMemLock(allocation);
     u32 slotIndex;
     EffResourceWork *resource;

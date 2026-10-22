@@ -4,9 +4,9 @@
 #include "common.h"
 #include "mnu_fade.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 struct MnuSectionObjectList;
-struct MdlCtx;
+struct dds3ModelHandle_t;
 struct FileQueue;
 struct FileRequest;
 struct WideSlotPool;
@@ -34,7 +34,7 @@ typedef struct ModelInstanceList {
 } ModelInstanceList;
 
 typedef struct ModelInstanceWork {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     s32 count;
     ModelInstanceList *lists;
     u32 unkC;
@@ -58,7 +58,7 @@ typedef struct MnuModelNode {
     f32 y;
     f32 z;
     u32 positionFlag;
-    struct MdlCtx *model;
+    struct dds3ModelHandle_t *model;
     u32 flags;
     u16 value48;
     u16 value4A;
@@ -78,7 +78,7 @@ typedef struct MnuNodeList {
 } MnuNodeList;
 
 typedef struct MnuSectionModelWork {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     s32 count;
     MnuNodeList *groups;
     u32 unkC;
@@ -111,7 +111,7 @@ typedef struct MnuEffectList {
 } MnuEffectList;
 
 typedef struct MnuEffectWork {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     s32 count;
     MnuEffectList *lists;
     u32 unkC;
@@ -140,7 +140,7 @@ struct WideSlot *itfClaimWideSlotWithTaggedPayload(u32 x, u32 y, u32 value, s8 t
 
 /* DDS2 shooting task allocation, cleared as 0x1E0 bytes by its constructor. */
 typedef struct MnuShootingWork {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     struct MnuSectionObjectList *objects;
     struct MnuSectionObjectList *playerObjects;
     struct MnuSectionObjectList *mapObjects;

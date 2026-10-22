@@ -44,8 +44,8 @@ void sdfGrSetDrawDefParmPacket(SdfGsDrawDefaultsRegisters *packet);
 
 /* TEST/ALPHA A+D state for the two independent GS drawing contexts. */
 typedef struct SdfGsSceneBlendRegisters {
-    SdfGsBlendRegisters contextOne;
-    SdfGsBlendRegisters contextTwo;
+    sdfPrimTransElem_t contextOne;
+    sdfPrimTransElem_t contextTwo;
 } SdfGsSceneBlendRegisters;
 
 typedef char SdfGsSceneBlendRegisters_size_must_be_0x40[

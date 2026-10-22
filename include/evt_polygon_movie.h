@@ -5,9 +5,9 @@
 #include "sdf.h"
 #include "sdf_float_counter.h"
 
-struct KwlnTask;
+struct dds3ProcessID_t;
 struct EvtRuntime;
-struct EffWorldNode;
+struct dds3Basic_t;
 
 /* User-value state shared by the DDS1 and DDS2 polygon-movie providers. */
 typedef struct EvtPolygonMovieTaskState {
@@ -40,7 +40,7 @@ typedef struct PmdHeader {
 /* Three retained resources share request/handle/address slots. */
 typedef struct PolyMovieResourceSlot {
     void *request;
-    SdfMemBlock *handle;
+    sdfMemHandle_t *handle;
     PmdHeader *address;
 } PolyMovieResourceSlot;
 
@@ -105,7 +105,7 @@ typedef struct PolyMovieWork {
     u8 *subEntry25Data;   /* 0xFC */
     u32 subEntry25Count;       /* 0x100 */
     s32 handle;        /* 0x104 */
-    struct KwlnTask *task; /* 0x108: scheduler task created for this viewer */
+    struct dds3ProcessID_t *task; /* 0x108: scheduler task created for this viewer */
     s32 eventId;       /* 0x10C */
     s32 sceneId;       /* 0x110 */
     u32 unk_114;       /* 0x114 */
@@ -125,15 +125,15 @@ typedef char PolyMovieState_clip_at_0x4[((u32)&((PolyMovieState *)0)->clip == 0x
 
 PolyMovieWork *InitPolygonMovieWorkData(void);
 PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *, PmdHeader *, PmdHeader *, PmdHeader *);
-SdfMemBlock *evtAllocMovieWork(PmdHeader **out);
-SdfMemBlock *evtPolygonMovieSynthesizePmd3Header(PmdHeader **out);
-void evtPolygonMovieSetFlagBits(struct KwlnTask *task, u32 bits);
-void evtPolygonMovieClearFlagBits(struct KwlnTask *task, u32 bits);
-void evtPolygonMovieSetObjectMode(struct EffWorldNode *obj, u32 mode, s32 setFlags, s32 clearFlags);
-s32 evtStopMover(struct EffWorldNode *movie, s32 undo, s32 start, s32 end);
+sdfMemHandle_t *evtAllocMovieWork(PmdHeader **out);
+sdfMemHandle_t *evtPolygonMovieSynthesizePmd3Header(PmdHeader **out);
+void evtPolygonMovieSetFlagBits(struct dds3ProcessID_t *task, u32 bits);
+void evtPolygonMovieClearFlagBits(struct dds3ProcessID_t *task, u32 bits);
+void evtPolygonMovieSetObjectMode(struct dds3Basic_t *obj, u32 mode, s32 setFlags, s32 clearFlags);
+s32 evtStopMover(struct dds3Basic_t *movie, s32 undo, s32 start, s32 end);
 
 #ifdef VERSION_DDS1
-void evtPolygonMovieClampTime(struct EffWorldNode *movie, s32 unused, s32 start, s32 end);
+void evtPolygonMovieClampTime(struct dds3Basic_t *movie, s32 unused, s32 start, s32 end);
 PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode);
 s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, struct EvtRuntime *viewer);
 #elif VERSION_DDS2

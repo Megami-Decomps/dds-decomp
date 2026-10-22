@@ -18,11 +18,11 @@ extern f32 vecLength(f32 *);
 
 
 
-struct FrFontGlyph;
-extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *glyph, s8 mode);
+struct _FRQ;
+extern s32 frFontDrawGlyphWithSharedFlags(struct _FRQ *glyph, s8 mode);
 
 void sdfCounterDrawGlyphAtGridCell(s32 x, s32 y, u32 colors, const u8 *text) {
-    struct FrFontGlyph *handle;
+    struct _FRQ *handle;
 
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
@@ -292,9 +292,9 @@ f32 *sdfTransformDirectionByMatrix(f32 *direction, f32 *matrix) {
 extern float sdfPowFloatByTruncatedExponent(float base, float exponent);
 
 /* Sample the Bernstein-weighted control points after building binomial coefficients. */
-struct SdfMemBlock *sdfSampleBernsteinCurve(SdfMathVector4 *controlPoints, s32 degree, s32 sampleCount) {
-    struct SdfMemBlock *outputBlock;
-    struct SdfMemBlock *coefficientBlock;
+struct sdfMemHandle_t *sdfSampleBernsteinCurve(SdfMathVector4 *controlPoints, s32 degree, s32 sampleCount) {
+    struct sdfMemHandle_t *outputBlock;
+    struct sdfMemHandle_t *coefficientBlock;
     f32 *coefficients;
     SdfMathVector4 *output;
     SdfMathVector4 *sample;

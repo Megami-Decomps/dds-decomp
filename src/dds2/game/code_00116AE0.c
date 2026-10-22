@@ -13,8 +13,8 @@
 
 
 /* Instantiate a script object of kind 10 and fill in its parameters. */
-EffWorldNode *dds3AddModelBasic(s32 key, SdfItemListRef *itemList, MotionTable *motionTable, EffWorldNode *fallbackModelObject, const char *name) {
-    EffWorldNode *object = dds3AddSceneBasicData(EFF_WORLD_KIND_SCRIPT_OBJECT);
+dds3Basic_t *dds3AddModelBasic(s32 key, sdfModelDef_t *itemList, MotionTable *motionTable, dds3Basic_t *fallbackModelObject, const char *name) {
+    dds3Basic_t *object = dds3AddSceneBasicData(EFF_WORLD_KIND_SCRIPT_OBJECT);
     EvtScriptModelWork *work = object->data;
 
     work->motionTable = motionTable;
@@ -27,8 +27,8 @@ EffWorldNode *dds3AddModelBasic(s32 key, SdfItemListRef *itemList, MotionTable *
 }
 
 /* Create a script object with its loaded resource already supplied. */
-EffWorldNode *dds3AddModelBasic2(s32 key, SdfItemListRef *itemList, MotionTable *motionTable, void *loadedModelResource, const char *name) {
-    EffWorldNode *object = dds3AddSceneBasicData(EFF_WORLD_KIND_SCRIPT_OBJECT);
+dds3Basic_t *dds3AddModelBasic2(s32 key, sdfModelDef_t *itemList, MotionTable *motionTable, void *loadedModelResource, const char *name) {
+    dds3Basic_t *object = dds3AddSceneBasicData(EFF_WORLD_KIND_SCRIPT_OBJECT);
     EvtScriptModelWork *work = object->data;
 
     object->key = key;
@@ -40,9 +40,9 @@ EffWorldNode *dds3AddModelBasic2(s32 key, SdfItemListRef *itemList, MotionTable 
 }
 
 /* Create the model from the loaded resource, or from the fallback. */
-SdfModel *dds3ModelBasicMakeModel(EffWorldNode *object) {
+sdfModelRootNode_t *dds3ModelBasicMakeModel(dds3Basic_t *object) {
     EvtScriptModelWork *work = (EvtScriptModelWork *)object->data;
-    SdfModel *model;
+    sdfModelRootNode_t *model;
 
     if (work->loadedModelResource != NULL) {
         model = sdfModelMake(work->loadedModelResource, work->itemList);
@@ -52,8 +52,8 @@ SdfModel *dds3ModelBasicMakeModel(EffWorldNode *object) {
     return model;
 }
 
-Motion *dds3ModelBasicSetMotion(EffWorldNode *object, SdfModel *owner) {
-    Motion *motion = NULL;
+sdfMotionCtrlr_t *dds3ModelBasicSetMotion(dds3Basic_t *object, sdfModelRootNode_t *owner) {
+    sdfMotionCtrlr_t *motion = NULL;
     EvtScriptModelWork *work;
 
     if (owner == NULL) {
@@ -68,7 +68,7 @@ Motion *dds3ModelBasicSetMotion(EffWorldNode *object, SdfModel *owner) {
 }
 
 
-s32 dds3AllocModelBasicWorkData(EffWorldNode *obj) {
+s32 dds3AllocModelBasicWorkData(dds3Basic_t *obj) {
     obj->data = sdfChipAllocDirect(0x18);
     memset(obj->data, 0, 0x18);
     return 1;

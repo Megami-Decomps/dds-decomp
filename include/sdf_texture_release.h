@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 enum {
     SDF_TEX_RELEASE_GENERAL_ALLOCATION = 1,
@@ -14,7 +14,7 @@ enum {
 typedef struct SdfTextureReleaseHead {
     struct SdfTextureReleaseHead *next; /* 0x00 */
     void *chipMemory;                   /* 0x04 */
-    struct SdfMemBlock *allocation;     /* 0x08 */
+    struct sdfMemHandle_t *allocation;     /* 0x08 */
     u8 releaseMode;                     /* 0x0C */
     u8 reserved0D[3];
 } SdfTextureReleaseHead;

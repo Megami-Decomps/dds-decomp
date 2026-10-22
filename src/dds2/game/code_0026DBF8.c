@@ -108,8 +108,8 @@ typedef struct MantraMenu {
     u8 pad00[0x240];
     MantraMenuWork work;
 } MantraMenu;
-extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
-extern DatPartyRecord *mnuGetSelectedNodeValue(u8 *);
+extern u32 scrGetSelectedScriptEntryId(datUnitWork_t *);
+extern datUnitWork_t *mnuGetSelectedNodeValue(u8 *);
 extern struct MantraIconPool *mnuAllocateMantraIconPool(u32);
 extern u32 mnuCreateMantraIconListA();
 extern u32 mnuCreateMantraIconListB();
@@ -134,7 +134,7 @@ typedef struct MantraIconEntry {
 } MantraIconEntry;
 
 typedef struct MantraIconPool {
-    /* 0x00 */ struct SdfMemBlock *allocation;
+    /* 0x00 */ struct sdfMemHandle_t *allocation;
     /* 0x04 */ MantraIconEntry *entries;
     /* 0x08 */ MantraIconEntry *chainTail;
     /* 0x0C */ MantraIconEntry *current;
@@ -209,7 +209,7 @@ s32 mnuDrawMantraBackgroundPulse(s32 unused, MantraDrawItem *drawItem);
 s32 mnuUpdateMantraGaugeFade(s32 unused, MantraDrawItem *item);
 
 typedef struct MantraDrawPool {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     MantraDrawItem *items;
     s32 count;
 } MantraDrawPool;
@@ -299,7 +299,7 @@ typedef struct MantraBackgroundState {
 MantraDisplayNode *mnuAppendDisplayListNode(MantraListState *state);
 
 
-s32 mnuLoadMantraSpriteTask(KwlnTask *task);
+s32 mnuLoadMantraSpriteTask(dds3ProcessID_t *task);
 extern char D_004250B0[];
 extern void mnuDrawMantraSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                                 s32 flags, s32 context);
@@ -310,7 +310,7 @@ extern s32 mnuDrawMantraUnitPanel();
 extern u32 mnuInitMantraUnitPanelDraw();
 extern void mnuReleaseMantraUnitPanelDraw(struct MantraDrawItem *);
 void mnuStorePanelEntry(u32, u32);
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 s32 mnuGetActiveMantraModelFlagState(void) {
     s32 result = 0;
@@ -328,12 +328,12 @@ s32 mnuGetActiveMantraModelFlagState(void) {
 }
 
 extern EvtLoadedRecord *mnuMantraNodePositionTable;
-extern s32 scrTestEntryFlagBit15(DatPartyRecord *, u8);
-extern s32 scrTestEntryFlag(DatPartyRecord *, u16, u32);
-extern void scrSetEntryLowFlags(DatPartyRecord *, u16, u16);
+extern s32 scrTestEntryFlagBit15(datUnitWork_t *, u8);
+extern s32 scrTestEntryFlag(datUnitWork_t *, u16, u32);
+extern void scrSetEntryLowFlags(datUnitWork_t *, u16, u16);
 extern s32 mnuCheckMantraNeighborRequirements(u16);
 
-void func_0026DC48(DatPartyRecord *party) {
+void func_0026DC48(datUnitWork_t *party) {
     s32 modelFlagState;
     u32 selected;
     MantraNodePos *node;
@@ -568,7 +568,7 @@ void mnuReleaseMantraSpriteSlots(void) {
     }
 }
 
-s32 mnuLoadMantraSpriteTask(KwlnTask *task) {
+s32 mnuLoadMantraSpriteTask(dds3ProcessID_t *task) {
     FilePacRequest *request = (FilePacRequest *)dds3GetProcessData(task);
     s32 result = pacCheckEnd((struct FileRequest *)request);
     if (result != 0) {
@@ -576,8 +576,8 @@ s32 mnuLoadMantraSpriteTask(KwlnTask *task) {
         s32 i;
         for (i = 4; entry != 0; entry = entry->next, i++) {
             if (((SdfPacStreamPacketHeader *)entry->packet)->command == 1) {
-                mnuMantraSpriteSlots[i] = (u32)effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)entry->resourceHandle, 0);
-                sdfMemFreeDirect((struct SdfMemBlock *)(u32)((u32)entry->resourceHandle));
+                mnuMantraSpriteSlots[i] = (u32)effCreateResourceSlotSetFromAllocation((struct sdfMemHandle_t *)entry->resourceHandle, 0);
+                sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)((u32)entry->resourceHandle));
             }
         }
         pacFileHandleFree_(request);
@@ -957,7 +957,7 @@ void func_0026FAC8(void) {
 /* Allocate one header followed by fixed-size draw items; return the pool base. */
 MantraDrawPool *mnuCreateMantraDrawPool(u32 itemCount) {
     u32 poolBytes = itemCount * MNU_MANTRA_DRAW_ITEM_BYTES + MNU_MANTRA_DRAW_POOL_HEADER_BYTES;
-    struct SdfMemBlock *allocation = sdfMemAllocDirect((s32)poolBytes);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect((s32)poolBytes);
     MantraDrawPool *pool = (MantraDrawPool *)sdfMemGetPtr(
         allocation);
     memset(pool, 0, poolBytes);
@@ -2914,7 +2914,7 @@ MantraIconEntry *mnuSpawnMantraIcon(s32 x, s32 y, MantraIconPool *pool, u32 mode
 
 MantraIconPool *mnuAllocateMantraIconPool(u32 count) {
     u32 size = count * sizeof(MantraIconEntry) + sizeof(MantraIconPool);
-    struct SdfMemBlock *handle = sdfMemAllocDirect((s32)size);
+    struct sdfMemHandle_t *handle = sdfMemAllocDirect((s32)size);
     MantraIconPool *pool = (MantraIconPool *)sdfMemGetPtr(handle);
 
     memset(pool, 0, size);
@@ -3984,7 +3984,7 @@ MantraPanelPool *mnuCreateMantraPanelPool(s32 count, s32 userValue) {
         mnuDrawFadedMantraDualCyclePanel,
         (MantraPanelDraw)mnuDrawMantraNodeMasteryFlash,
     };
-    struct SdfMemBlock *handle;
+    struct sdfMemHandle_t *handle;
     MantraPanelPool *pool;
     s32 allocationSize;
     s32 i;
@@ -4009,7 +4009,7 @@ MantraPanelPool *mnuCreateMantraPanelPool(s32 count, s32 userValue) {
 
 void mnuReleaseMantraIconSpriteHandle(u32 *sprite) {
     if (sprite != 0) {
-        sdfMemFreeDirect((struct SdfMemBlock *)(u32)(*sprite));
+        sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(*sprite));
     }
 }
 
@@ -7102,14 +7102,14 @@ typedef struct MantraBurstSlot {
 } MantraBurstSlot;
 
 struct MantraBurstPool {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     MantraBurstSlot *slots;
     s32 count;
     u16 tick;
 };
 
 MantraBurstPool *mnuAllocateMantraPanelBurstPool(void) {
-    struct SdfMemBlock *handle = sdfMemAllocDirect(0x650);
+    struct sdfMemHandle_t *handle = sdfMemAllocDirect(0x650);
     u32 block = sdfMemGetPtr(handle);
     memset((void *)block, 0, 0x650);
     ((MantraBurstPool *)block)->allocation = handle;
@@ -7241,7 +7241,7 @@ MantraBurstSlot *mnuSpawnBurstSlotSmall(MantraBurstPool *pool, s8 wide, s8 side)
 }
 
 MantraBurstPool *mnuAllocateMantraBackgroundBurstPool(void) {
-    struct SdfMemBlock *handle = sdfMemAllocDirect(0x650);
+    struct sdfMemHandle_t *handle = sdfMemAllocDirect(0x650);
     u32 block = sdfMemGetPtr(handle);
     memset((void *)block, 0, 0x650);
     ((MantraBurstPool *)block)->allocation = handle;
@@ -7518,7 +7518,7 @@ typedef struct MantraEffectPoolHeader {
 u32 mnuAllocateMantraEffectSlotPool(u32 count) {
     u32 size = count * 12 + 0x28;
     u32 handle = (u32)sdfMemAllocDirect((s32)size);
-    u32 block = sdfMemGetPtr((struct SdfMemBlock *)handle);
+    u32 block = sdfMemGetPtr((struct sdfMemHandle_t *)handle);
     memset((void *)block, 0, size);
     ((MantraEffectPoolHeader *)block)->allocation = handle;
     ((MantraEffectPoolHeader *)block)->slots = block + 0x28;

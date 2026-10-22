@@ -451,13 +451,13 @@ INCLUDE_RODATA(const s32, "game/code_001FF0C8", D_003A5988);
 
 INCLUDE_ASM(const s32, "game/code_001FF0C8", func_001FFE30);
 
-extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
+extern s32 btlReadCurrentUnitHp(datUnitWork_t *);
 
-extern u16 btlReadUnitStatusMask(DatPartyRecord *);
+extern u16 btlReadUnitStatusMask(datUnitWork_t *);
 
 /* Compare HP against a signed percentage using the native products and unsigned comparison. */
 s32 btlIsUnitAtOrBelowHealthRate(BtlUnit *unit, s32 healthPercent) {
-    DatPartyRecord *statAddress = &unit->partyRecord;
+    datUnitWork_t *statAddress = &unit->partyRecord;
     s32 currentHp = btlReadCurrentUnitHp(statAddress);
     s32 maximumHp = btlComputeSkillAdjustedMaxHp(statAddress);
     if ((u32)(maximumHp * healthPercent) < (u32)(currentHp * BTL_HEALTH_RATE_SCALE)) {
@@ -953,12 +953,12 @@ s32 btlIsReadyWithoutTurns(void) {
     return 0;
 }
 
-extern s32 btlReadCurrentUnitMp(DatPartyRecord *);
+extern s32 btlReadCurrentUnitMp(datUnitWork_t *);
 
 /* Compare a unit stat with a percentage of its maximum.
  * The stat's identity is not established by these two accessors. */
 s32 btlIsUnitStatAtOrBelowRate(BtlUnit *unit, s32 percentage) {
-    DatPartyRecord *statAddress = &unit->partyRecord;
+    datUnitWork_t *statAddress = &unit->partyRecord;
     u32 currentValue = btlReadCurrentUnitMp(statAddress);
     u32 scaledMaximum = btlComputeSkillAdjustedMaxMp(statAddress) * percentage;
     if (scaledMaximum < currentValue * BTL_HEALTH_RATE_SCALE) {

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Rename identifiers in the files tools/names.py leaves alone: headers, docs, config.
 
-    python3 tools/rename_refs.py renames.tsv [more.tsv ...]
+    python3 tools/rename_refs.py [--src] renames.tsv [more.tsv ...]
 
 Rows are <old>\t<new>. Whole-word replacement over include/**/*.h, docs/**/*.md,
 README.md and the config text that mentions functions; symbol_addrs.txt and the
@@ -75,12 +75,19 @@ def rewrite(path, pattern, renames, notes_only):
 
 def main():
     args = sys.argv[1:]
+    also_src = "--src" in args
+    args = [a for a in args if a != "--src"]
     if not args:
         sys.exit(__doc__)
     renames = read_map(args)
     pattern = re.compile(r"\b(" + "|".join(map(re.escape, sorted(renames, key=len, reverse=True))) + r")\b")
     touched = 0
-    for base, glob in TARGETS:
+    targets = list(TARGETS)
+    if also_src:
+        # Type names live in the C as well, which names.py only rewrites for
+        # symbols it renames.
+        targets += [(ROOT / "src", "*.c")]
+    for base, glob in targets:
         for path in (base.rglob(glob) if glob else ([base] if base.exists() else [])):
             touched += rewrite(path, pattern, renames, False)
     for base, glob in NOTES:

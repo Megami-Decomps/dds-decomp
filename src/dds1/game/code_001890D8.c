@@ -47,7 +47,7 @@ EffMagatuhiValueWork *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 h
     s32 frameTerm;
     s32 countTerm;
     s32 allocationSize;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     s32 positions;
     s32 colorTable;
     s32 historyScalars;

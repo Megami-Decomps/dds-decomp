@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Shared billboard-emitter parameters copied into each live set. Creation and
  * parameter copies clamp startDelaySpread, fadeIn, and fadeOut to at least
@@ -70,7 +70,7 @@ typedef struct EffEventBillSet {
     EffEventBillParticle *particles;
     u8 flag;
     u8 pad81[3];
-    struct SdfMemBlock *allocationHandle;
+    struct sdfMemHandle_t *allocationHandle;
 } EffEventBillSet;
 
 typedef char EffEventBillParams_size[(sizeof(EffEventBillParams) == 0x7C) ? 1 : -1];

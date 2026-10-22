@@ -13,7 +13,7 @@ typedef struct EffPCPDelayedPairs {
     u8 unk0C[4];
     u32 color;
     f32 scale;
-    EffParamWork *handle[12];
+    effPartHandle_t *handle[12];
     u32 remainingDelay[6];
 } EffPCPDelayedPairs;
 

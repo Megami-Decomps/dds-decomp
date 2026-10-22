@@ -5,7 +5,7 @@
 #include "poly_ring_records.h"
 
 struct ParSystem;
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Band owner and parameter tail copied from the serialized ring template. */
 typedef struct PolyBand {
@@ -24,7 +24,7 @@ typedef struct PolyBand {
     void *dispatchArgA;             /* +0xEC */
     struct ParSystem *strip;         /* +0xF0 */
     PolyBandRecord *records;         /* +0xF4 */
-    struct SdfMemBlock *allocation;  /* +0xF8 */
+    struct sdfMemHandle_t *allocation;  /* +0xF8 */
     u8 padFC[4];
 } PolyBand;
 

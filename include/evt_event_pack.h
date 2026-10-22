@@ -3,8 +3,8 @@
 
 #include "common.h"
 
-struct SdfMemBlock;
-struct SdfTex;
+struct sdfMemHandle_t;
+struct sdfTexHandle_t;
 
 /* BE resource files have a 0x20-byte header and fixed 0x20-byte records. */
 typedef struct EvtPackEntry {
@@ -31,20 +31,20 @@ typedef struct EvtPackLoadState {
     s32 eventId;                  /* 0x00 */
     s32 loaded;                   /* 0x04 */
     void *pendingRequest;         /* 0x08: queued callback work, then cleanup */
-    struct SdfMemBlock *resourceAllocation; /* 0x0C: retained descriptor */
+    struct sdfMemHandle_t *resourceAllocation; /* 0x0C: retained descriptor */
     u8 *data;                     /* 0x10 */
     EvtPackHeader *header;        /* 0x14 */
     EvtPackEntry *entries;        /* 0x18 */
     u8 *entryPoint;               /* 0x1C */
     u8 pad20[4];
-    struct SdfMemBlock *sceneAllocation1; /* 0x24: descriptor released at teardown. */
+    struct sdfMemHandle_t *sceneAllocation1; /* 0x24: descriptor released at teardown. */
     u8 pad28[8];
-    struct SdfMemBlock *sceneAllocation2; /* 0x30: descriptor released at teardown. */
+    struct sdfMemHandle_t *sceneAllocation2; /* 0x30: descriptor released at teardown. */
     u8 pad34[4];
-    struct SdfTex *effect72;      /* 0x38 */
-    struct SdfTex *effect71;      /* 0x3C: retained channel texture. */
-    struct SdfTex *effect76;      /* 0x40: retained channel texture. */
-    struct SdfTex *effect75;      /* 0x44: retained channel texture. */
+    struct sdfTexHandle_t *effect72;      /* 0x38 */
+    struct sdfTexHandle_t *effect71;      /* 0x3C: retained channel texture. */
+    struct sdfTexHandle_t *effect76;      /* 0x40: retained channel texture. */
+    struct sdfTexHandle_t *effect75;      /* 0x44: retained channel texture. */
 } EvtPackLoadState;
 
 typedef char EvtPackEntry_size_must_be_0x20[(sizeof(EvtPackEntry) == 0x20) ? 1 : -1];

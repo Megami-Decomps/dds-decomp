@@ -61,7 +61,7 @@ extern u32 itfGetGridListLinkFlags(LmapList *);
 extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
 extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
 extern s32 fldLocalMapTrackSlotFromMode(s32);
-extern s32 fldLmapTaskUpdate(KwlnTask *);
+extern s32 fldLmapTaskUpdate(dds3ProcessID_t *);
 extern s32 D_00438890;
 extern void p2sdStopBGM(u32);
 extern void sdfReleaseAllSpriteSlots(void);
@@ -71,7 +71,7 @@ extern void fldReleaseCameraColorEffect(void);
 extern void sdfDisableFlagListViewTargetRelativeMode(void);
 extern void evtDisableMoonDraw(void);
 extern void evtFreeStage(void);
-extern SdfMemBlock *D_004388A4;
+extern sdfMemHandle_t *D_004388A4;
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern char D_004388A0[];
 extern void dspRequestMessageWindowModeOne(void);
@@ -294,7 +294,7 @@ extern SdfPoolNode sdfGrOtTable[];
 
 /* Build one positioned SIF command and submit it on the requested draw surface. */
 void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z, s32 drawMode, const char *command, s32 surfaceIndex) {
-    SdfListHead *packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     SdfPoolNode *drawSurface;
     SifCommand packetHeader;
 
@@ -307,7 +307,7 @@ void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z, s32 drawMode, con
 
 /* Build an untextured rectangle with a separate outline color. */
 void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height, s32 fillColor, s32 borderColor, s32 surfaceIndex) {
-    SdfListHead *packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     SdfPoolNode *drawSurface;
 
     sdfDrawTagInit(packetList);
@@ -321,7 +321,7 @@ extern void fldInitializeLocalMapScene(void);
 extern s32 fldUpdateLocalMapCounterSelection(void);
 extern void fldDrawLocalMapOverlay(void);
 
-s32 fldLmapTaskUpdate(KwlnTask *task) {
+s32 fldLmapTaskUpdate(dds3ProcessID_t *task) {
     LmapTaskState *state = (LmapTaskState *)dds3GetProcessData(task);
     s32 phase = state->phase;
     s32 result;
@@ -353,7 +353,7 @@ s32 fldLmapTaskUpdate(KwlnTask *task) {
 
 
 void fldStartLmapTask(s32 mode) {
-    SdfMemBlock *allocation = sdfMemAllocDirect(0x88);
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(0x88);
     LmapTaskState *taskData = (LmapTaskState *)sdfMemGetPtr(allocation);
 
     memset(taskData, 0, 0x88);

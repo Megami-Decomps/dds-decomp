@@ -10,7 +10,7 @@ typedef struct EffPCPStaggered {
     u32 color;
     f32 scale;
     f32 verticalOffset[8];
-    EffParamWork *handle[16];
+    effPartHandle_t *handle[16];
     u32 remainingDelay[8];
 } EffPCPStaggered;
 

@@ -14,7 +14,7 @@
 #include "kwln_task_create.h"
 
 
-typedef ItfMesPoolNode ItfMesWindowRec;
+typedef mesflow_tag ItfMesWindowRec;
 
 
 
@@ -42,12 +42,12 @@ void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock);
 
 void itfMesMngRequestSelectRelease(s32 window);
 
-ItfMesEntry *GetTypeHeader(ItfMesState *mes, s32 entryIndex);
+ItfMesEntry *GetTypeHeader(instanceMes_tag *mes, s32 entryIndex);
 
 ItfMesEntry *GetTypeHeader2(ItfMesSub *sub);
 
 u8 *GetMessagePagePtr(ItfMesTable *table, s32 itemIndex);
-u8 *GetSpeakerName(ItfMesState *mes);
+u8 *GetSpeakerName(instanceMes_tag *mes);
 
 void ResolveResourceAddress(ItfMesSub *resource);
 
@@ -60,7 +60,7 @@ s32 itfMesMngSetSelectDefKey(s32 window, s32 id, s32 value);
 
 
 
-void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
+void frFontCenterGlyphChainAt(s32 x, s32 y, _FRQ *glyphChain);
 
 
 
@@ -68,30 +68,30 @@ s32 itfGetTextLipsUnitId();
 
 s32 itfGetTextLipsMotionId();
 
-void ChangeZBuffer(FrFontGlyph *glyph, s32 renderValue);
+void ChangeZBuffer(_FRQ *glyph, s32 renderValue);
 
-FrFontGlyph *GetLastLinkFontHandle(FrFontGlyph *glyph);
+_FRQ *GetLastLinkFontHandle(_FRQ *glyph);
 
 
 void CommitVarTable(s32 *table);
 
-s32 GetMessageWidth(FrFontGlyph *glyph);
+s32 GetMessageWidth(_FRQ *glyph);
 
 extern s32 CalcMsgMng_Process(void);
 
 extern void DrawMsgMng_Shutdown(void);
 
-extern s32 DrawMsgMng_Process(KwlnTask *task);
+extern s32 DrawMsgMng_Process(dds3ProcessID_t *task);
 
 void SetVar();
 
-extern s32 frFontMeasureGlyphStripWidth(s32 line, FrFontGlyph *glyph);
+extern s32 frFontMeasureGlyphStripWidth(s32 line, _FRQ *glyph);
 
-void itfMesInitializePanelPlacementSprite(ItfMesState *panel);
+void itfMesInitializePanelPlacementSprite(instanceMes_tag *panel);
 
-void OpenCheckSpeakerWindow(ItfMesState *panel);
+void OpenCheckSpeakerWindow(instanceMes_tag *panel);
 
-extern UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 payload);
+extern itfpanel_t *itfCreateUiSpriteByKind(s32 kind, u32 payload);
 
 #define ITF_MES_MAGIC_MSG0 0x3047534d
 #define ITF_MES_MAGIC_MSG1 0x3147534d
@@ -163,7 +163,7 @@ s32 itfMesMngOpenWindow(void) {
  * value was zero. Finishing a nonzero state therefore still returns 0. */
 s32 itfMesMngCloseWindow(void) {
     s32 window = scrGetMessageHandle();
-    ItfMesState *mes;
+    instanceMes_tag *mes;
     u32 scriptStatus;
 
     if (window < 0) {
@@ -181,7 +181,7 @@ s32 itfMesMngCloseWindow(void) {
 /* Mark each originally nonzero status pair with both bits, then clean/reset
  * content and clear the script panel bit. The status pairs are set, not cleared. */
 void itfMesMngMsgWndCls(s32 window) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
     u32 previousFlags = mes->flags;
 
     if (previousFlags & ITF_MES_LOWER_STATUS_PAIR_MASK) {
@@ -321,7 +321,7 @@ s32 itfMesMngSelectDefKey(void) {
 }
 
 /* Return the loaded message-window texture resource, not a window index. */
-SdfTex *itfMesGetWindowTexture(void) {
+sdfTexHandle_t *itfMesGetWindowTexture(void) {
     return itfMesMngManager.windowTexture;
 }
 
@@ -338,14 +338,14 @@ void itfMesClearFlags(u32 mask) {
 extern ItfMesSub *itfMesMngSetResourcePtr(s32 window, ItfMesSub *sub);
 
 s32 itfMesMngInitialize(ItfMesSub *sub) {
-    ItfMesPoolNode *node = itfMiscLinkTake(&itfMesMngManager.pool);
+    mesflow_tag *node = itfMiscLinkTake(&itfMesMngManager.pool);
     s32 window = node->index;
-    ItfMesState *mes;
-    struct SdfMemBlock *handle;
+    instanceMes_tag *mes;
+    struct sdfMemHandle_t *handle;
 
     handle = sdfMemAllocDirect(0x1E0);
     node->resourceHandle = handle;
-    mes = (ItfMesState *)sdfMemLock(handle);
+    mes = (instanceMes_tag *)sdfMemLock(handle);
     node->state = mes;
     mes->sub = NULL;
     itfMesMngSetResourcePtr(window, sub);
@@ -371,12 +371,12 @@ void itfMesMngRelease(s32 window) {
     }
 }
 
-void itfMesBuildEntryGlyph(ItfMesState *mes);
+void itfMesBuildEntryGlyph(instanceMes_tag *mes);
 
 /* Install an entry's table into the window, rebuild its text glyphs and the
  * selected-item caption, then mark the entry block active. */
 s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
     ItfMesEntryBlock *entryBlock = &mes->entryBlock;
     ItfMesTable *table = GetTypeHeader(mes, entryIndex)->table;
     ItfMesBlk14 *captionBlock;
@@ -436,12 +436,12 @@ s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex) {
     return 1;
 }
 
-extern s32 itfInitTextDrawArgs(u8 *encodedText, FrFontGlyph *sub);
+extern s32 itfInitTextDrawArgs(u8 *encodedText, _FRQ *sub);
 
 /* Cache the selected table and narrowed item index, then initialize its text.
  * Empty tables return 0; nonempty tables return the text initializer's result. */
 s32 itfMesSelectTableItemText(s32 window, s32 entryIndex, s32 itemIndex) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
     ItfMesTable *table = GetTypeHeader(mes, entryIndex)->table;
     ItfMesEntryBlock *entryBlock = &mes->entryBlock;
 
@@ -457,7 +457,7 @@ s32 itfMesSelectTableItemText(s32 window, s32 entryIndex, s32 itemIndex) {
 /* Release/reset selected-entry glyphs and their status; optionally do the same
  * for primary text. Negative window is a no-op; no other slot validation. */
 void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock) {
-    ItfMesState *mes;
+    instanceMes_tag *mes;
     ItfMesEntryBlock *entryBlock;
     ItfMesBlk14 *primaryTextBlock;
 
@@ -486,7 +486,7 @@ void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock) {
 
 /* Build the option panel around the widest measured row, using this game's
  * fixed row spacing. Preserve the existing panel creation/layout order. */
-void itfMesBuildOptionFrame(ItfMesState *mes) {
+void itfMesBuildOptionFrame(instanceMes_tag *mes) {
     ItfMesBlk40 *optionBlock = &mes->blk40;
     ItfMesBlkA4 *panelBlock = &mes->blkA4;
     s32 bounds[4];
@@ -520,7 +520,7 @@ extern s32 GetNumSelectItem(s32 bitCount, u32 remainingMask);
 /* Replace the option glyph chain with rows selected by clear panel-mask bits.
  * Item zero is skipped; mode 3 additionally builds the surrounding frame. */
 void itfMesBuildOptionList(s32 window, s32 entryIndex) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
     ItfMesBlk40 *optionBlock = &mes->blk40;
     ItfMesEntry *entry = GetTypeHeader(mes, entryIndex);
     ItfMesTable *table;
@@ -550,7 +550,7 @@ void itfMesBuildOptionList(s32 window, s32 entryIndex) {
 /* Release option glyphs, clear option selection/state and invalidate its rank.
  * Other content and the window allocation remain installed. */
 void itfMesMngRequestSelectRelease(s32 window) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
     ItfMesBlk40 *optionBlock = &mes->blk40;
 
     if (optionBlock->glyphChain != NULL) {
@@ -595,7 +595,7 @@ void itfMesMngSetSelect(s32 window, s32 selectedBitIndex) {
     optionBlock->savedIndex = clearBitCount;
 }
 
-extern void ChangeFontPosition(FrFontGlyph *, s32, s32);
+extern void ChangeFontPosition(_FRQ *, s32, s32);
 
 /* Move primary text to an absolute position; an unchanged position is a no-op. */
 void itfMesMngSetSpeakerPosition(s32 window, s32 x, s32 y) {
@@ -671,7 +671,7 @@ void itfMesMngSetSelPositionOffset(s32 window, s32 dx, s32 dy) {
 
 /* Propagate a changed render value to all three glyph chains before caching it. */
 void itfMesMngSetPriority(s32 window, s32 renderValue) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
 
     if (mes->renderValue == renderValue) {
         return;
@@ -689,21 +689,21 @@ u32 itfMesMngGetStat(s32 window) {
 
 /* Replace only the high half, preserving the existing low-half cast. */
 void itfMesMngSetStat(s32 window, u32 highFlags) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
 
     mes->flags = (u32)(u16)mes->flags | (highFlags & ITF_MES_HIGH_FLAGS_MASK);
 }
 
 /* Set only high-half mask bits; low-half status is unchanged. */
 void itfMesMngMarkBitStat(s32 window, u32 mask) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
 
     mes->flags |= mask & ITF_MES_HIGH_FLAGS_MASK;
 }
 
 /* Clear only high-half mask bits; low-half status is unchanged. */
 void itfMesMngClearBitStat(s32 window, u32 mask) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
 
     mes->flags &= ~mask | ITF_MES_LOW_FLAGS_MASK;
 }
@@ -839,7 +839,7 @@ void itfMesMngSetVarImmediate2(s32 window, s32 slotIndex, const char *source, s3
 /* Install/relocate a message resource and cache MSG1's trailing-entry word as
  * the temporary font entry. Return the previous resource without releasing it. */
 ItfMesSub *itfMesMngSetResourcePtr(s32 window, ItfMesSub *sub) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
     ItfMesSub *previous = mes->sub;
     ItfMesEntry *entry;
     u8 *temporaryFontEntry;
@@ -865,7 +865,7 @@ extern void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *blk, s32 panelMo
 /* Refresh changed panel values only when both content-status pairs are clear.
  * Release the old primitive after applying the panel mode and fade limit. */
 void itfMesMngChangeWindowType(s32 window, s32 panelMode, s32 fadeLimit) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
     ItfMesBlkA4 *panelBlock = &mes->blkA4;
 
     if ((mes->flags & ITF_MES_CONTENT_STATUS_MASK) == 0) {
@@ -913,10 +913,10 @@ s32 itfMesMngSetSelectDefKey(s32 window, s32 id, s32 value) {
 /* Build and release a temporary glyph chain to measure the widest grouped row.
  * Empty tables and zero/missing encoded items return zero. */
 s32 itfMesMngGetWidth(s32 window, s32 entryIndex, s32 itemIndex) {
-    ItfMesState *mes = pinst[window].mes;
+    instanceMes_tag *mes = pinst[window].mes;
     ItfMesTable *table;
     u8 *encodedText;
-    FrFontGlyph *glyphChain;
+    _FRQ *glyphChain;
     s32 textExtent;
 
     table = GetTypeHeader(mes, entryIndex)->table;
@@ -950,7 +950,7 @@ void itfMesMngSetKutiCallback(s32 window, void (*callback)(void)) {
 /* Initialize the fixed window pool, load its texture and register the named
  * calculation/drawing tasks. Keep the existing task flags and callback casts. */
 void itfMesMngInitializeManager(void) {
-    ItfMesPoolNode *poolNode;
+    mesflow_tag *poolNode;
 
     itfMesMngManager.activeWindowCount = 0;
     itfMesMngManager.unk8 = 0;
@@ -1005,9 +1005,9 @@ INCLUDE_RODATA(const s32, "interface/itfMesManager", D_003A14B0);
 
 s32 itfMesMngDebugProc(void) {
     ItfMesBlkA4 *panel;
-    UiSprite *panelSprite;
+    itfpanel_t *panelSprite;
     s32 *bounds;
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
     s32 menuItemIndex;
     s32 menuItemY;
     const char *menuItemFormat;
@@ -1127,7 +1127,7 @@ extern ItfMesWindowRec D_003D6EC0[];
  * the pool-array-relative counter. An empty record is a no-op. */
 void DestructFlow(s32 window) {
     ItfMesWindowRec *windowRecord = &D_003D6EC0[window];
-    ItfMesState *mes = windowRecord->state;
+    instanceMes_tag *mes = windowRecord->state;
 
     if (mes != NULL) {
         itfMesMngRequestMessageRelease(window, 1);
@@ -1164,7 +1164,7 @@ u32 CheckMessageBinary(ItfMesSub *resource) {
 }
 
 /* Address an installed resource entry; caller supplies an in-range index. */
-ItfMesEntry *GetTypeHeader(ItfMesState *mes, s32 entryIndex) {
+ItfMesEntry *GetTypeHeader(instanceMes_tag *mes, s32 entryIndex) {
     ItfMesEntry *entries = mes->sub->entries;
 
     return &entries[entryIndex];
@@ -1199,10 +1199,10 @@ u8 *GetMessagePagePtr(ItfMesTable *table, s32 itemIndex) {
 
 /* Rebuild colored entry glyphs, synchronize interface flags/hooks and cache
  * the span count. Existing span helpers require a valid created chain. */
-void itfMesBuildEntryGlyph(ItfMesState *mes) {
+void itfMesBuildEntryGlyph(instanceMes_tag *mes) {
     ItfMesEntryBlock *entryBlock = &mes->entryBlock;
-    FrFontGlyph *glyph;
-    FrFontGlyph *previousGlyph;
+    _FRQ *glyph;
+    _FRQ *previousGlyph;
     s32 lipsValue;
     u32 interfaceMask;
     void (*callback)();
@@ -1252,7 +1252,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
  * padded string span; positive counts copy that many bytes into a zeroed block.
  * DDS1 string mode intentionally has no memset. Keep the K&R declaration form. */
 void SetVar(mes, slotIndex, source, byteCount)
-    ItfMesState *mes;
+    instanceMes_tag *mes;
     s32 slotIndex;
     const char *source;
     s32 byteCount;
@@ -1289,7 +1289,7 @@ void CommitVarTable(s32 *table) {
 }
 
 /* Read the selected item from the window's trailing entry, without validation. */
-u8 *GetSpeakerName(ItfMesState *mes) {
+u8 *GetSpeakerName(instanceMes_tag *mes) {
     u32 *items;
 
     items = GetTypeHeader2(mes->sub)->itemList;
@@ -1316,8 +1316,8 @@ s32 GetNumSelectItem(s32 bitCount, u32 remainingMask) {
 
 /* Append text for each clear mask bit. Masked items are still consumed, while
  * y advances only for built text. Return NULL if nothing was built. */
-FrFontGlyph *itfMesBuildNodeRows(u32 *items, s32 itemCount, u32 mask, s32 x, s32 y, s32 renderValue) {
-    FrFontGlyph *glyphChain = NULL;
+_FRQ *itfMesBuildNodeRows(u32 *items, s32 itemCount, u32 mask, s32 x, s32 y, s32 renderValue) {
+    _FRQ *glyphChain = NULL;
     s32 itemIndex;
 
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++, items++) {
@@ -1342,12 +1342,12 @@ FrFontGlyph *itfMesBuildNodeRows(u32 *items, s32 itemCount, u32 mask, s32 x, s32
 /* Discard (to - from - 1) preceding rows when positive, retain the next
  * complete y-group and queue everything after it. Requires non-NULL input;
  * return NULL if discarding preceding rows exhausts the chain. */
-FrFontGlyph *UnchainFontHandleUnit(FrFontGlyph *glyph, s32 from, s32 to) {
+_FRQ *UnchainFontHandleUnit(_FRQ *glyph, s32 from, s32 to) {
     s32 rowsToDiscard = to - from - 1;
     s32 rowY = glyph->y;
-    FrFontGlyph *nextNode;
-    FrFontGlyph *rowHead;
-    FrFontGlyph *rowTail;
+    _FRQ *nextNode;
+    _FRQ *rowHead;
+    _FRQ *rowTail;
 
     while (rowsToDiscard > 0) {
         while (rowY == glyph->y) {
@@ -1387,7 +1387,7 @@ FrFontGlyph *UnchainFontHandleUnit(FrFontGlyph *glyph, s32 from, s32 to) {
 }
 
 /* Return the final previous-linked glyph; input must be non-NULL. */
-FrFontGlyph *GetLastLinkFontHandle(FrFontGlyph *glyph) {
+_FRQ *GetLastLinkFontHandle(_FRQ *glyph) {
     while (glyph->previous != NULL) {
         glyph = glyph->previous;
     }
@@ -1395,8 +1395,8 @@ FrFontGlyph *GetLastLinkFontHandle(FrFontGlyph *glyph) {
 }
 
 /* Copy the auxiliary glyph's shade bytes; its encoded intensity is unsigned. */
-void GetLastMessagePara(FrFontGlyph *glyph, ItfMesEntryBlock *entryBlock) {
-    FrFontChildGlyph *shade = glyph->lastChild;
+void GetLastMessagePara(_FRQ *glyph, ItfMesEntryBlock *entryBlock) {
+    _TEXT *shade = glyph->lastChild;
     u8 encodedIntensity = glyph->glyphCodeOrContext.byteRoles.encodedContextByte;
 
     entryBlock->color[3] = encodedIntensity >> 1;
@@ -1407,14 +1407,14 @@ void GetLastMessagePara(FrFontGlyph *glyph, ItfMesEntryBlock *entryBlock) {
 
 /* Inclusive step count from the y delta in eighths and the first row's height.
  * Both pointers and a nonzero first-row height are required. */
-s32 CountLineMessage(FrFontGlyph *last, FrFontGlyph *first) {
+s32 CountLineMessage(_FRQ *last, _FRQ *first) {
     s16 rowHeightUnits = first->parentDimensionsOrRenderWord.parentDimensions.cellHeight;
 
     return ((first->y - last->y) >> ITF_MES_TEXT_Y_SHIFT) / rowHeightUnits + 1;
 }
 
 /* Translate every linked node in text units; a NULL chain is a no-op. */
-void ChangeFontPosition(FrFontGlyph *glyph, s32 dx, s32 dy) {
+void ChangeFontPosition(_FRQ *glyph, s32 dx, s32 dy) {
     if (glyph == NULL) {
         return;
     }
@@ -1426,7 +1426,7 @@ void ChangeFontPosition(FrFontGlyph *glyph, s32 dx, s32 dy) {
 }
 
 /* Assign the render value across the complete chain; a NULL chain is a no-op. */
-void ChangeZBuffer(FrFontGlyph *glyph, s32 renderValue) {
+void ChangeZBuffer(_FRQ *glyph, s32 renderValue) {
     while (glyph != NULL) {
         glyph->renderValueOrSetupOrShade.renderValue = renderValue;
         glyph = glyph->previous;
@@ -1435,11 +1435,11 @@ void ChangeZBuffer(FrFontGlyph *glyph, s32 renderValue) {
 
 /* Skip (rowCount - rowIndex - 1) preceding y-groups when positive, then set each
  * child's flag byte in the next row. Requires non-NULL input; past-end is a no-op. */
-void ChangeFontColor(FrFontGlyph *glyph, s32 rowIndex, s32 rowCount, s32 requestedFlagValue) {
+void ChangeFontColor(_FRQ *glyph, s32 rowIndex, s32 rowCount, s32 requestedFlagValue) {
     s32 rowsToSkip = rowCount - rowIndex - 1;
     s32 rowY = glyph->y;
     s32 currentY = rowY;
-    FrFontChildGlyph *child;
+    _TEXT *child;
     u8 flagValue;
 
     while (rowsToSkip > 0) {
@@ -1463,8 +1463,8 @@ void ChangeFontColor(FrFontGlyph *glyph, s32 rowIndex, s32 rowCount, s32 request
 }
 
 /* Set every child's flag byte across the parent chain; NULL is a no-op. */
-void ChangeFontColorAll(FrFontGlyph *glyph, u8 flagValue) {
-    FrFontChildGlyph *child;
+void ChangeFontColorAll(_FRQ *glyph, u8 flagValue) {
+    _TEXT *child;
 
     for (; glyph != NULL; glyph = glyph->previous) {
         for (child = glyph->firstChild; child != NULL; child = child->next) {
@@ -1475,8 +1475,8 @@ void ChangeFontColorAll(FrFontGlyph *glyph, u8 flagValue) {
 
 /* Clear each child's low color byte, then OR the unmasked input word.
  * High input bits can therefore also change the upper bytes. */
-void ChangeFontAlpha(FrFontGlyph *glyph, u32 color) {
-    FrFontChildGlyph *child;
+void ChangeFontAlpha(_FRQ *glyph, u32 color) {
+    _TEXT *child;
 
     for (; glyph != NULL; glyph = glyph->previous) {
         for (child = glyph->firstChild; child != NULL; child = child->next) {
@@ -1487,7 +1487,7 @@ void ChangeFontAlpha(FrFontGlyph *glyph, u32 color) {
 
 /* Find the maximum summed advance of contiguous equal-y groups, scaled by 16.
  * NULL returns zero; the initial zero also excludes negative group totals. */
-s32 GetMessageWidth(FrFontGlyph *glyph) {
+s32 GetMessageWidth(_FRQ *glyph) {
     s32 maxAdvance = 0;
 
     while (glyph != NULL) {
@@ -1523,7 +1523,7 @@ s32 GetMaskedIndex(s32 clearBitsToSkip, u32 mask) {
 
 /* Enable parent contexts whose first child's tested flag is zero.
  * NULL chain is allowed, but every visited node must have a first child. */
-void itfMesEnableUnflaggedNodeContexts(FrFontGlyph *glyph) {
+void itfMesEnableUnflaggedNodeContexts(_FRQ *glyph) {
     for (; glyph != NULL; glyph = glyph->previous) {
         if (glyph->firstChild->renderValueOrSetupOrShade.setupBytes.secondOption == 0) {
             frFontEnableContextMode(glyph);

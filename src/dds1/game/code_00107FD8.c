@@ -101,7 +101,7 @@ enum {
     BF_FLW0_SECTION_STRINGS = 4
 };
 
-extern DevConsState *evtConsoleFontResourceChain;
+extern sdfDevConsCB_tag *evtConsoleFontResourceChain;
 
 extern s32 fldLmapTaskExists(void);
 
@@ -129,7 +129,7 @@ extern u32 dds3DrawFlag;
 
 
 
-extern s32 kwlnTaskNoopCallback(KwlnTask *task);
+extern s32 kwlnTaskNoopCallback(dds3ProcessID_t *task);
 
 extern void fldMainLoadStart(void);
 extern void btlStart(s32 mode, s32 pack, s32 encounter);
@@ -219,7 +219,7 @@ extern s8 D_0032453B[];
 extern void evtDrawHeapUsageOverlay(SdfPoolNode *);
 
 
-extern s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *);
+extern s32 evtDrawGeneralHeapUsageGraph(struct dds3ProcessID_t *);
 
 extern void *D_003BD764;
 
@@ -233,7 +233,7 @@ typedef struct KwlnResourceNode {
 extern s32 D_003BD3C8;
 
 
-extern s32 evtDrawResourceCountDebugTask(KwlnTask *task);
+extern s32 evtDrawResourceCountDebugTask(dds3ProcessID_t *task);
 
 extern void *D_003BD768;
 
@@ -667,7 +667,7 @@ extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChai
 
 
 void evtSubmitPrimaryFramePacket(void) {
-    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
     SdfDmaReferenceChainPacket *framePacket;
     sdfDrawTagInit(list);
     framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(EVT_FRAME_REFERENCE_PACKET_BYTES);
@@ -682,7 +682,7 @@ void evtSubmitPrimaryFramePacket(void) {
 extern void sdfBuildFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
 void evtSubmitAlternateFramePacket(void) {
-    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
     SdfDmaReferenceChainPacket *framePacket;
     sdfDrawTagInit(list);
     framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(EVT_FRAME_REFERENCE_PACKET_BYTES);
@@ -696,8 +696,8 @@ void evtSubmitAlternateFramePacket(void) {
 
 void evtSubmitTexturedGradientQuad(s32 x, s32 y, s32 width, s32 height,
                    s32 u, s32 v, s32 textureWidth, s32 textureHeight,
-                   u32 color0, u32 color1, u32 color2, u32 color3, SdfTex *texture) {
-    SdfListHead *list;
+                   u32 color0, u32 color1, u32 color2, u32 color3, sdfTexHandle_t *texture) {
+    sdfDrawTag_t *list;
     SdfPoolNode *surface;
     s32 left, top, right, bottom;
     s32 uLeft, vTop, uRight, vBottom;
@@ -726,7 +726,7 @@ void evtSubmitTexturedGradientQuad(s32 x, s32 y, s32 width, s32 height,
 /* Native rectangle emitter: x/y/width/height, explicit depth, then TL/TR/BR/BL colors. */
 void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 color0, s32 color1, s32 color2, s32 color3) {
     s32 coords[8];
-    SdfListHead *command;
+    sdfDrawTag_t *command;
     SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
@@ -758,7 +758,7 @@ void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 col
     coords[5] = (y + h) * 8;
     coords[6] = x * 16;
     coords[7] = (y + h) * 8;
-    command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
@@ -799,7 +799,7 @@ void evtSubmitDefaultDepthGradientRect(s32 x, s32 y, s32 width, s32 height, s32 
 /* Submit three packed vertex colors and XY pairs at the default depth. */
 void eglLinkTri(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 color1, s32 color2) {
     s32 coords[3][2];
-    SdfListHead *command;
+    sdfDrawTag_t *command;
     SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
@@ -823,7 +823,7 @@ void eglLinkTri(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 
     coords[1][1] = y1 * 8;
     coords[2][0] = x2 * 16;
     coords[2][1] = y2 * 8;
-    command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 3));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 3);
@@ -909,7 +909,7 @@ void eglLinkTexPoly4(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f32 x1, f32 y1, f32
     SdfPoolNode *surface;
 
     asset = sdfMatNew();
-    sdfSetAssetPrimaryTextureAddress(asset, (SdfTex *)bits);
+    sdfSetAssetPrimaryTextureAddress(asset, (sdfTexHandle_t *)bits);
     list = (void *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
     sdfDrawTagInit(list);
     sdf3DPrimLinkResetTm(list, 0);
@@ -950,7 +950,7 @@ void eglLinkTexPoly4(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f32 x1, f32 y1, f32
     sdfDrawTagLink(list, (u32)(sdf3DPrimMakePoly(&desc)));
     surface = &sdfGrOtTable[egl_OT_Offset];
     surface->append(surface, list);
-    sdfMatFreeDelayed((SdfAsset *)asset);
+    sdfMatFreeDelayed((sdfMat_t *)asset);
 }
 
 extern f32 D_003245B0[][4];
@@ -993,7 +993,7 @@ void eglLinkPrint(s32 x, s32 y, s32 packetArg, s32 drawArg) {
 }
 
 void eglLinkKanji(s32 width, s32 height, s32 colors, const char *text) {
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
 
     glyph = itfCreateMeasuredTextGlyph(width << 4, height << 3, 0, colors, text, NULL);
     frFontDrawGlyphInDefaultMode(glyph);
@@ -1173,8 +1173,8 @@ u8 CheckEndSave(void) {
     return operationResult == 0;
 }
 
-struct FieldSequenceRecord;
-extern void fldProcTrigSequence(struct FieldSequenceRecord *record, u32 mode);
+struct fldSceneParam_t;
+extern void fldProcTrigSequence(struct fldSceneParam_t *record, u32 mode);
 
 void evtStartAreaFromSelection(u32 selection, u32 area) {
     kwlnFadeBackgroundStartOut(0);
@@ -1627,9 +1627,9 @@ extern char evtGeneralHeapPercentFormat[];
 
 extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 
-s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *task) {
+s32 evtDrawGeneralHeapUsageGraph(struct dds3ProcessID_t *task) {
     SdfGeneralHeapStats heapStats;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     void *packet;
     s32 freePercent;
     s32 originX = 0x7100;
@@ -1638,7 +1638,7 @@ s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *task) {
 
     sdfMemGetInfo(&heapStats);
     freePercent = heapStats.freeBytes * 100 / heapStats.totalBytes;
-    list = (SdfListHead *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
     sdfDrawTagInit(list);
     packet = (void *)sdfGrAllocPacketBuff(0x40);
     sdfPrimSetOpaquePacket(packet);
@@ -1660,7 +1660,7 @@ s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *task) {
     return 0;
 }
 
-void evtGeneralHeapGraphTaskDestroy(KwlnTask *task) {
+void evtGeneralHeapGraphTaskDestroy(dds3ProcessID_t *task) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E1F0);
@@ -1677,7 +1677,7 @@ void evtToggleDebugTimeGraphTask(s8 mode) {
 
 extern u32 D_003BA97C;
 /* Render an allocation span as partial rows and complete heap-map rows. */
-void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
+void sdfDrawHeapSpanOverlay(sdfDrawTag_t *packetList, s32 x, s32 y,
                    u32 heapBase, u32 blockAddress, s32 blockSize, u8 state) {
     s32 color;
     u32 byteOffset;
@@ -1747,12 +1747,12 @@ void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
     }
 }
 
-extern u16 sdfMemGetType(SdfMemBlock *);
+extern u16 sdfMemGetType(sdfMemHandle_t *);
 
 void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
     SdfHeapOverlayBlock *snapshot;
     SdfHeapOverlayBlock *entry;
-    SdfMemBlock *block;
+    sdfMemHandle_t *block;
     u32 count;
     u32 i;
     u32 heapBase;
@@ -1848,10 +1848,10 @@ extern s32 frGetTextHandleNum(void);
 extern s32 effGetFontListCount(void);
 extern const char D_0039E220[];
 
-s32 evtDrawResourceCountDebugTask(KwlnTask *task) {
+s32 evtDrawResourceCountDebugTask(dds3ProcessID_t *task) {
     SdfGeneralHeapStats heapStats;
     s32 heapRatio;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     void *packet;
     s32 fontCount;
     s32 textCount;
@@ -1860,7 +1860,7 @@ s32 evtDrawResourceCountDebugTask(KwlnTask *task) {
     sdfMemGetInfo(&heapStats);
     /* The unused heap ratio retains the native zero-divisor check. */
     heapRatio = heapStats.freeBytes / heapStats.totalBytes;
-    list = (SdfListHead *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
     sdfDrawTagInit(list);
     packet = (void *)sdfGrAllocPacketBuff(0x40);
     sdfPrimSetOpaquePacket(packet);
@@ -1876,7 +1876,7 @@ s32 evtDrawResourceCountDebugTask(KwlnTask *task) {
     return 0;
 }
 
-void evtResourceCountDebugTaskDestroy(KwlnTask *task) {
+void evtResourceCountDebugTaskDestroy(dds3ProcessID_t *task) {
 }
 
 void evtToggleAlternateDebugTimeGraphTask(s8 mode) {
@@ -1888,8 +1888,8 @@ void evtToggleAlternateDebugTimeGraphTask(s8 mode) {
 }
 
 /* Append to the event-work doubly linked list, maintaining both endpoints. */
-void scrLinkHandle(ScrData *node) {
-    ScrData *tail = scrHandleLast;
+void scrLinkHandle(scrProcessWork_s *node) {
+    scrProcessWork_s *tail = scrHandleLast;
 
     if (tail == NULL) {
         scrHandleFirst = node;
@@ -1907,7 +1907,7 @@ void scrLinkHandle(ScrData *node) {
 }
 
 /* Detach from either end or the middle, and clear the old links. */
-void scrUnlinkHandle(ScrData *node) {
+void scrUnlinkHandle(scrProcessWork_s *node) {
     if (scrHandleFirst == node) {
         scrHandleFirst = node->next;
     }
@@ -1932,11 +1932,11 @@ INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E220);
 
 INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E238);
 
-ScrData *bfContextCreate(void *rawHeader, ScrSection *sections, ScrLabel *procedures,
+scrProcessWork_s *bfContextCreate(void *rawHeader, ScrSection *sections, ScrLabel *procedures,
                         ScrLabel *labels, ScrInstr *instructions, void *auxiliaryData,
                         char *strings, s32 procedureIndex) {
     BfFlw0Header *header = rawHeader;
-    ScrData *process;
+    scrProcessWork_s *process;
     s32 i;
     s8 *types;
     ScrStackValue *values;
@@ -1946,7 +1946,7 @@ ScrData *bfContextCreate(void *rawHeader, ScrSection *sections, ScrLabel *proced
         procedureIndex >= sections->count) {
         return NULL;
     }
-    process = sdfChipAllocDirect(sizeof(ScrData));
+    process = sdfChipAllocDirect(sizeof(scrProcessWork_s));
     if (process == NULL) {
         return NULL;
     }
@@ -2006,7 +2006,7 @@ ScrData *bfContextCreate(void *rawHeader, ScrSection *sections, ScrLabel *proced
 
 /* Resolve supported FLW0 sections relative to the header; reject bad magic/unknown kinds.
    Zero-count auxiliary sections are ignored, and absent sections remain null. */
-ScrData *fldFlowParse(BfFlw0Header *header, s32 procedureIndex) {
+scrProcessWork_s *fldFlowParse(BfFlw0Header *header, s32 procedureIndex) {
     ScrSection *sections;
     ScrLabel *procedures = NULL;
     ScrLabel *labels = NULL;

@@ -4,7 +4,7 @@
 #include "common.h"
 
 struct BtlTask;
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 struct ActionStateLink;
 struct BattleIndexWork;
 
@@ -245,14 +245,14 @@ typedef struct BattleActorPanelEntry {
 } BattleActorPanelEntry;
 
 typedef struct BattleActorPanelWork {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     s32 activeCount;
     s32 reserveCount;
     BattleActorPanelEntry activeEntries[3];
     s16 selectedReserveIndex;
     s16 partyRecordIndex;
     BattleActorPanelEntry reserveEntries[4];
-    struct SdfMemBlock *reserveUnitAllocation;
+    struct sdfMemHandle_t *reserveUnitAllocation;
 } BattleActorPanelWork;
 
 typedef char BattleActorPanelPresentationSizeCheck[sizeof(BattleActorPanelPresentation) == 0x280 ? 1 : -1];

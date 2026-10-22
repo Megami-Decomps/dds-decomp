@@ -91,7 +91,7 @@ void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 taskItemMode) {
 }
 
 TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, void *userData) {
-    SdfMemBlock *allocation = sdfMemAllocDirect(0x14);
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(0x14);
     TaskWork *work = (TaskWork *)sdfMemGetPtr(allocation);
 
     memset(work, 0, 0x14);
@@ -227,7 +227,7 @@ s32 sdfTaskWorkStep(TaskWork *work) {
     return 1;
 }
 
-s32 sdfTaskWorkRunAllEntries(KwlnTask *task) {
+s32 sdfTaskWorkRunAllEntries(dds3ProcessID_t *task) {
     TaskWork *work = (TaskWork *)dds3GetProcessData(task);
 
     if (work->currentNode == NULL) {
@@ -238,7 +238,7 @@ s32 sdfTaskWorkRunAllEntries(KwlnTask *task) {
     return 0;
 }
 
-s32 sdfTaskWorkRunAll(KwlnTask *task) {
+s32 sdfTaskWorkRunAll(dds3ProcessID_t *task) {
     TaskWork *work = (TaskWork *)dds3GetProcessData(task);
 
     if (work->currentNode == NULL) {
@@ -249,7 +249,7 @@ s32 sdfTaskWorkRunAll(KwlnTask *task) {
     return 0;
 }
 
-void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task) {
+void sdfReleaseCurrentTaskOwnedResources(dds3ProcessID_t *task) {
     sdfDestroyTaskResourceWork((TaskWork *)dds3GetProcessData(task));
 }
 
@@ -263,7 +263,7 @@ SdfGrid *sdfGridCreate(s32 width, s32 height, u16 cellWidth, u16 cellHeight, u16
                        u16 visibleRows, u32 userData, void (*onDestroy)(s32, u32)) {
     u32 cellCount = width * height;
     s32 size = sizeof(SdfGrid) + cellCount * sizeof(SdfGridCell);
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
     SdfGrid *grid = (SdfGrid *)sdfMemGetPtr(allocation);
 
     memset(grid, 0, size);

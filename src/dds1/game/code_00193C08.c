@@ -10,7 +10,7 @@
 #include "kwln.h"
 /* Declared before first use (were implicit int). */
 extern void frLoadStyleAll(void);
-extern SdfTexResource * sdfGsMemAllocFromTail(s32 size, s32 allocationMode);
+extern sdfGsMemSlice_t * sdfGsMemAllocFromTail(s32 size, s32 allocationMode);
 
 #define FR_FONT_BYTE_MASK 0xFF
 #define FR_FONT_ENTRY_ENABLED 1
@@ -28,7 +28,7 @@ extern SdfTexResource * sdfGsMemAllocFromTail(s32 size, s32 allocationMode);
 
 extern u32 frFontLoaded[];
 extern void frDelStyleAll(void);
-extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
+extern _FRQ *frFontReleaseGlyphChain(_FRQ *glyph);
 extern s32 fmDestroyFontMemControl(void);
 
 /* Insert after the list's fixed anchor and update the entry count. */
@@ -125,7 +125,7 @@ void frFontDrawAtlasGlyph(s32 x, s32 y, s32 width, s32 height, u8 style,
     u32 color, u32 depth, s32 filtered, const FrFontUvRect *uv,
     const FrFontAtlas *atlas, s32 surface) {
     FrFontSpritePacketView *packet;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     SdfPoolNode *drawSurface;
     u32 reversedColor;
     s32 right, bottom;
@@ -169,7 +169,7 @@ void frFontDrawAtlasGlyph(s32 x, s32 y, s32 width, s32 height, u8 style,
     packet->sprite.corners[1].uv = (uv->v0 << 16) | uv->u0;
     packet->sprite.corners[1].rgbaq = rgbaq;
     packet->sprite.corners[1].xyz = (u32)((x & 0xFFFF) | (y << 16)) | z;
-    list = (SdfListHead *)sdfGrAllocPacketBuff(sizeof(SdfListHead));
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)packet);
     drawSurface = &sdfGrOtTable[surface];
@@ -178,7 +178,7 @@ void frFontDrawAtlasGlyph(s32 x, s32 y, s32 width, s32 height, u8 style,
 
 
 /* Submit glyph-relative coordinates and the cache node's owned UV rectangle. */
-void frCreateUserFontPacket(s32 x, s32 y, s32 depth, FrFontChildGlyph *glyph,
+void frCreateUserFontPacket(s32 x, s32 y, s32 depth, _TEXT *glyph,
                   s32 drawFlags) {
     frFontDrawAtlasGlyph(x + glyph->x, y + glyph->y,
                  glyph->cellDimensions.cellWidth,
@@ -204,7 +204,7 @@ void frCopyFontClutToVram(s32 buffer, s32 image) {
 void frFontUploadClearedTexture(void) {
     u8 loadImage[FR_FONT_IMAGE_DESCRIPTOR_BYTES];
     s32 imageSize;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     void *pixels;
 
     imageSize = frFontWork.atlas.height * frFontWork.atlas.width;
@@ -258,7 +258,7 @@ void frInitFontTable(s32 rowBudget, s32 poolCount) {
     s32 glyphsPerRow;
     s32 rowTotal;
     s32 glyphRingCount;
-    SdfTexResource *atlasHead;
+    sdfGsMemSlice_t *atlasHead;
 
     frFontWork.cachedItemCount = 0;
     frFontWork.itemCount = 0;
@@ -299,7 +299,7 @@ void frInitFontTable(s32 rowBudget, s32 poolCount) {
 }
 
 /* Release slot allocations, both glyph chains/rings, and the shared GS resource buffers. */
-void frDestroyFontTable(KwlnTask *task) {
+void frDestroyFontTable(dds3ProcessID_t *task) {
     frDelStyleAll();
     frFontReleaseGlyphChain(frFontWork.glyphSlots[0]);
     frFontReleaseGlyphChain(frFontWork.glyphSlots[1]);
@@ -315,7 +315,7 @@ void frDestroyFontTable(KwlnTask *task) {
  * precedes the word table and remaining resource data. Offsets are unchecked.
  */
 void frAddFontStyle(
-    u8 slotIndex, u8 *resourceBytes, struct SdfMemBlock *allocation
+    u8 slotIndex, u8 *resourceBytes, struct sdfMemHandle_t *allocation
 ) {
     FrFontEntry *entry;
     s32 sectionOffset;
@@ -354,7 +354,7 @@ void frAddFontStyle(
         entry->metricByteCount = 0;
         entry->valueByteCount = 0;
     }
-    entry->slots = (FrFontRecord **)(resourceBytes + sectionOffset);
+    entry->slots = (GsFont_t **)(resourceBytes + sectionOffset);
     sectionOffset += entry->resourceHeader->widthCount * FR_FONT_WORD_BYTES;
     entry->resource = (struct ItfRelativeSegmentResourceView *)(resourceBytes + sectionOffset);
     lookupOffset = entry->resourceHeader->lookupOffset;

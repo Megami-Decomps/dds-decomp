@@ -9,7 +9,7 @@ struct BillConfig;
  * The dependency at 0x0C has a state-dependent owner: node, billboard or sound.
  * Bytes 0x30..0x3B remain opaque. */
 typedef struct EffectDependencyState {
-    ObjBase *objectHandle;
+    dds3ObjectBaseControlWorkData_t *objectHandle;
     u32 flags;
     s32 state;
     void *handle;
@@ -35,11 +35,11 @@ typedef char EffectDependencyState_node_at_0x2C[((u32)&((EffectDependencyState *
 typedef char EffectDependencyState_config_at_0x3C[((u32)&((EffectDependencyState *)0)->config == 0x3C) ? 1 : -1];
 typedef char EffectDependencyState_position_at_0x40[((u32)&((EffectDependencyState *)0)->sourcePosition == 0x40) ? 1 : -1];
 
-void dds3EffectObjectBasicUnlinkObject(EffWorldNode *object);
-void dds3EffectObjectBasicCalcFldEx(EffWorldNode *object);
+void dds3EffectObjectBasicUnlinkObject(dds3Basic_t *object);
+void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *object);
 
 void FreeEffectData(EffectDependencyState *state);
 
-ObjBase *dds3EffectObjectBasicGetControlWorkData(EffWorldNode *object);
+dds3ObjectBaseControlWorkData_t *dds3EffectObjectBasicGetControlWorkData(dds3Basic_t *object);
 
 #endif

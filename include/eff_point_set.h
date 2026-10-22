@@ -3,8 +3,8 @@
 
 #include "common.h"
 
-struct SdfMemBlock;
-struct SdfAsset;
+struct sdfMemHandle_t;
+struct sdfMat_t;
 
 /* Point-set node: `rows` 16-byte entries in `buffer`, then `tail`. */
 typedef struct EffPointSet {
@@ -15,8 +15,8 @@ typedef struct EffPointSet {
     u8 pad_0D[3];
     u8 *buffer;     // 0x10
     u8 *tail;       // 0x14
-    struct SdfAsset *handle; // 0x18
-    struct SdfMemBlock *allocation; // 0x1C
+    struct sdfMat_t *handle; // 0x18
+    struct sdfMemHandle_t *allocation; // 0x1C
 } EffPointSet;
 
 typedef struct EffRingResource {

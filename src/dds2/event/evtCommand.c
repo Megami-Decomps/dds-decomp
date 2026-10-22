@@ -41,11 +41,11 @@ s32 scrGetIntPara(s32 idx);
 
 void *evtSearchBasic(s32 objectKind, s32 worldObjectKey);
 
-s32 dds3EffectObjectBasicLinkObject(EffWorldNode *obj, EffWorldNode *owner);
-s32 dds3EffectObjectSetMG12Pos(EffWorldNode *obj, EffWorldNode *first,
-                                     EffWorldNode *second, EffWorldNode *third,
-                                     EffWorldNode *fourth);
-s32 dds3EffectObjectBasicLinkObjectIndex(EffWorldNode *obj, EffWorldNode *owner, s32 entryId);
+s32 dds3EffectObjectBasicLinkObject(dds3Basic_t *obj, dds3Basic_t *owner);
+s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first,
+                                     dds3Basic_t *second, dds3Basic_t *third,
+                                     dds3Basic_t *fourth);
+s32 dds3EffectObjectBasicLinkObjectIndex(dds3Basic_t *obj, dds3Basic_t *owner, s32 entryId);
 
 
 
@@ -91,7 +91,7 @@ void evtFreeStage(void);
 extern u32 dds3DrawFlag;
 
 
-void dds3RefreshStoredVec3(EffWorldNode *object);
+void dds3RefreshStoredVec3(dds3Basic_t *object);
 
 
 void evtPathLoop(void *unit, s32 enabled);
@@ -134,9 +134,9 @@ extern char D_00421FC8[]; /* "error: LIGHT_PATH_MOVE.\n" */
 
 /* Copy two source points into the primary effect object. */
 s32 evtCommand_EFFMG1_POS(void) {
-    EffWorldNode *primaryEffect;
-    EffWorldNode *sourcePoint0;
-    EffWorldNode *sourcePoint1;
+    dds3Basic_t *primaryEffect;
+    dds3Basic_t *sourcePoint0;
+    dds3Basic_t *sourcePoint1;
 
     primaryEffect = evtSearchBasic(7, scrGetIntPara(0));
     if (primaryEffect == NULL) {
@@ -159,11 +159,11 @@ s32 evtCommand_EFFMG1_POS(void) {
 
 /* Apply four effect parameters after resolving every input object. */
 s32 evtCommand_EFFMG2_POS(void) {
-    EffWorldNode *primaryEffect;
-    EffWorldNode *sourcePoint0;
-    EffWorldNode *sourcePoint1;
-    EffWorldNode *sourcePoint2;
-    EffWorldNode *sourcePoint3;
+    dds3Basic_t *primaryEffect;
+    dds3Basic_t *sourcePoint0;
+    dds3Basic_t *sourcePoint1;
+    dds3Basic_t *sourcePoint2;
+    dds3Basic_t *sourcePoint3;
 
     primaryEffect = evtSearchBasic(7, scrGetIntPara(0));
     if (primaryEffect == NULL) {
@@ -204,7 +204,7 @@ s32 evtCommand_EFFECT_ON(void)
 /* Bind the selected effect path to the first owner found in kinds 4..9.
  * Missing paths or owners complete the command without binding anything. */
 s32 evtCommand_EFFECT_LINK(void) {
-    EffWorldNode *effectPath = evtSearchBasic(7, scrGetIntPara(0));
+    dds3Basic_t *effectPath = evtSearchBasic(7, scrGetIntPara(0));
     void *owner;
     s32 objectKind;
 
@@ -225,7 +225,7 @@ s32 evtCommand_EFFECT_LINK(void) {
 
 /* Search the same owner kinds, then bind with the VM's third entry argument. */
 s32 evtCommand_EFFECT_LINK2(void) {
-    EffWorldNode *effectPath = evtSearchBasic(7, scrGetIntPara(0));
+    dds3Basic_t *effectPath = evtSearchBasic(7, scrGetIntPara(0));
     void *owner;
     s32 objectKind;
 
@@ -317,9 +317,9 @@ s32 evtCommand_EFFECT_PATH_WAIT(void) {
 
 /* Return the named world-chain node's key to the script VM. */
 s32 evtCommand_SEARCH_ID(void) {
-    EffWorldNode *worldNode;
+    dds3Basic_t *worldNode;
 
-    worldNode = dds3SceneBasicSearchName((EffWorldNode *)dds3GetControlScene(),
+    worldNode = dds3SceneBasicSearchName((dds3Basic_t *)dds3GetControlScene(),
                                               (const u8 *)scrGetStrPara(0));
     if (worldNode == NULL) {
         printf("ID : id not found!! <%s>\n", scrGetStrPara(0));
@@ -606,7 +606,7 @@ s32 evtCommand_UNIT_CLS_STOP(void)
 }
 
 s32 evtCommandAddEffectUnitToWorld(void) {
-    EffWorldNode *cameraOwner;
+    dds3Basic_t *cameraOwner;
 
     if (scrGetIntPara(0) < 0) {
         cameraOwner = fldGetPlayerSceneState();
@@ -621,7 +621,7 @@ s32 evtCommandAddEffectUnitToWorld(void) {
 }
 
 s32 evtCommand_CAM_SEL_FOVY(void) {
-    EffWorldNode *cameraOwner;
+    dds3Basic_t *cameraOwner;
     CameraData *cameraData;
 
     if (scrGetIntPara(0) < 0) {
@@ -690,7 +690,7 @@ s32 evtCommand_CAM_PATH_WAIT(void) {
     }
 }
 
-extern EffWorldNode *dds3AddCameraObjectBasicTypeFree(s32 world, void *pos, void *rot);
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 world, void *pos, void *rot);
 
 /* Create with a zero position and identity rotation; return the world value to the VM. */
 s32 evtCommand_CAM_CREATE(void) {
@@ -788,15 +788,15 @@ s32 evtCommand_CAM_ROT_Q(void) {
 }
 
 
-extern void dds3MoverBasicMakePath(EffWorldNode *object);
+extern void dds3MoverBasicMakePath(dds3Basic_t *object);
 extern char D_00421E58[], D_00421E68[], D_00421E78[];
 
 s32 evtCommand_OBJ_PATH_MOVE(void) {
     void *unit;
-    EffWorldNode *target;
-    ObjBase *objectData;
-    EffWorldNode *slotNode;
-    Dds3PathCurveWork *path;
+    dds3Basic_t *target;
+    dds3ObjectBaseControlWorkData_t *objectData;
+    dds3Basic_t *slotNode;
+    dds3PathBasicControl_t *path;
     Dds3SlotResource *resource;
     s32 roomNumber;
 
@@ -852,10 +852,10 @@ extern char D_00421E98[]; /* "re attach...!\n" */
 
 s32 evtCommandReattachObjectPath(void) {
     void *unit;
-    EffWorldNode *target;
-    ObjBase *objectData;
-    EffWorldNode *slotNode;
-    Dds3PathCurveWork *path;
+    dds3Basic_t *target;
+    dds3ObjectBaseControlWorkData_t *objectData;
+    dds3Basic_t *slotNode;
+    dds3PathBasicControl_t *path;
     Dds3SlotResource *resource;
     s32 targetId;
     s32 mode;
@@ -983,7 +983,7 @@ u32 evtCommand_CHG_MOON(void) {
  * No VM context completes immediately; a pending task returns zero. */
 s32 evtCommand_LOAD_BE(void) {
     s32 taskId = scrGetIntPara(0);
-    ScrData *commandWork = scrGetScriptHandle();
+    scrProcessWork_s *commandWork = scrGetScriptHandle();
     char *message;
 
     if (commandWork == NULL) {
@@ -1011,7 +1011,7 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_00421ED8);
 
 s32 evtCommand_READ_BE(void) {
     s32 taskId = scrGetIntPara(0);
-    ScrData *commandWork = scrGetScriptHandle();
+    scrProcessWork_s *commandWork = scrGetScriptHandle();
 
     if (commandWork == NULL) {
         return 1;
@@ -1056,16 +1056,16 @@ s32 evtCommand_DEL_BE(void) {
 
 /* Create an event/scene movie task using the active camp resource, set bit 0,
  * and return its handle through the VM result. Missing work skips creation. */
-extern KwlnTask * evtViewerCreateTask(s32 taskId, s32 event, s32 id);
-extern void evtPolygonMovieSetFlagBits(KwlnTask *task, u32 bits);
+extern dds3ProcessID_t * evtViewerCreateTask(s32 taskId, s32 event, s32 id);
+extern void evtPolygonMovieSetFlagBits(dds3ProcessID_t *task, u32 bits);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421F08);
 
 s32 evtCommandStartPolygonMovie(void) {
-    ScrData *commandWork = scrGetScriptHandle();
+    scrProcessWork_s *commandWork = scrGetScriptHandle();
     s32 eventId;
     s32 sceneId;
-    KwlnTask *movieTask;
+    dds3ProcessID_t *movieTask;
 
     if (commandWork == NULL) {
         return 1;
@@ -1084,7 +1084,7 @@ s32 evtCommandStartPolygonMovie(void) {
     return 1;
 }
 
-extern void evtPolygonMovieClearFlagBits(KwlnTask *task, u32 bits);
+extern void evtPolygonMovieClearFlagBits(dds3ProcessID_t *task, u32 bits);
 
 /* Clear bit 0 and echo the movie ID through the VM result. */
 s32 evtCommandClearPolygonMovieFlag(void)
@@ -1092,7 +1092,7 @@ s32 evtCommandClearPolygonMovieFlag(void)
     s32 movieId;
 
     movieId = scrGetIntPara(0);
-    evtPolygonMovieClearFlagBits((KwlnTask *)(u32)movieId, 1);
+    evtPolygonMovieClearFlagBits((dds3ProcessID_t *)(u32)movieId, 1);
     scrSetIntReturnValue(movieId);
     return 1;
 }
@@ -1100,10 +1100,10 @@ s32 evtCommandClearPolygonMovieFlag(void)
 /* Create and return an event/scene movie task without setting bit 0.
  * The owning scheduler task supplies the viewer task's priority. */
 s32 evtCommand_PMV_RUN(void) {
-    ScrData *commandWork = scrGetScriptHandle();
+    scrProcessWork_s *commandWork = scrGetScriptHandle();
     s32 eventId;
     s32 sceneId;
-    KwlnTask *movieTask;
+    dds3ProcessID_t *movieTask;
 
     if (commandWork == NULL) {
         return 1;
@@ -1161,7 +1161,7 @@ s32 evtCommand_PATH_START(void) {
 /* Apply the float state, then update a room flag when its parsed number is positive.
  * Values above 0.5 set that flag; the VM float parameter is deliberately re-read. */
 s32 evtCommand_PATH_RATE(void) {
-    EffWorldNode *worldNode;
+    dds3Basic_t *worldNode;
     s32 roomNumber;
     char *roomName;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
@@ -1195,7 +1195,7 @@ s32 evtCommand_PATH_RATE(void) {
 /* Apply the integer state and update a positive parsed room number's flag.
  * Unlike the float command, an integer value of zero sets the room flag. */
 s32 evtCommand_PATH_DIR(void) {
-    EffWorldNode *worldNode;
+    dds3Basic_t *worldNode;
     s32 roomNumber;
     char *roomName;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;

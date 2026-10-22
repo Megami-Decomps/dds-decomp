@@ -29,7 +29,7 @@ extern s8 evtSolarOverlayFadeFlags;
 extern s32 dpy;
 
 
-s32 EventDebugProcess1(KwlnTask *task);
+s32 EventDebugProcess1(dds3ProcessID_t *task);
 
 extern s32 evtSolarOverlayFadeCounter;
 
@@ -157,7 +157,7 @@ void func_0022AB58(void) {
 }
 
 /* After launching a test script, keep the test task idle and return 0. */
-s32 evtDebugCameraStep(KwlnTask *task) {
+s32 evtDebugCameraStep(dds3ProcessID_t *task) {
     func_0022AB58();
     return 0;
 }
@@ -177,11 +177,11 @@ extern const char D_003ACC68[];
 extern const char D_003ACC78[];
 extern const char D_003ACC88[];
 
-s32 EventDebugProcess1(KwlnTask *task) {
+s32 EventDebugProcess1(dds3ProcessID_t *task) {
     char path[0x40];
-    SdfListHead *list;
+    sdfDrawTag_t *list;
 
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     dds3ConsPanelTagLink(list, 0x84, 0x54, 0x15, 10);
     sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7840, 0x7BA0, 0xFEFFFF, 0, D_003ACC68));
@@ -233,7 +233,7 @@ s32 EventDebugProcess1(KwlnTask *task) {
 
 
 /* Test-task teardown destroys the named script processes. */
-void EventDebugShutdown(KwlnTask *task) {
+void EventDebugShutdown(dds3ProcessID_t *task) {
     scrDestroyAllNamedProcesses();
 }
 
@@ -462,7 +462,7 @@ EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, Evt
     case 14: {
         void *payload = sdfChipAllocDirect(0x2C);
         key->payload = payload;
-        memcpy(payload, &Eve_PartialMultiBlurGetParams()->body, sizeof(EffBlurTemplateBody));
+        memcpy(payload, &Eve_PartialMultiBlurGetParams()->body, sizeof(dds3Effect_PartialMultiBlurParam_t));
         key->p08.h[0] = 1;
         key->p10.h[0] = 0;
         break;
@@ -470,7 +470,7 @@ EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, Evt
     case 15: {
         void *payload = sdfChipAllocDirect(0x2C);
         key->payload = payload;
-        memcpy(payload, &Eve_DistortionBlurGetParams()->params, sizeof(EffBlurScatterParams));
+        memcpy(payload, &Eve_DistortionBlurGetParams()->params, sizeof(dds3Effect_DistortionBlurParam_t));
         key->p08.h[0] = 1;
         break;
     }

@@ -3,11 +3,11 @@
 
 #include "common.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Chip-heap work record for the linear movie stream (0x14 bytes). */
 typedef struct MovLinearStream {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u8 *bufferStart;
     u8 *readCursor;
     u8 *writeCursor;
@@ -24,10 +24,10 @@ typedef struct MovPacStream {
     s32 packetBytes;
     s32 blockBytes;
     u8 scratchBuffer[0x20];
-    struct SdfMemBlock *payloadAllocation;
+    struct sdfMemHandle_t *payloadAllocation;
     u8 *blockMask;
     s32 blockIndex;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u8 *pacInputBuffer;
     u8 *pacBuffer;
     s32 pacReadOffset;

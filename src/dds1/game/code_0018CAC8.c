@@ -432,7 +432,7 @@ EffResourceDescriptor *dds3EffectFileListWindowCreate(EffResourceList *list) {
 /* Retail 0x0018D774 reloads selectedEntry after the case-1 texture update. */
 s32 dds3EffectFileListWindowDraw(EffResourceDescriptor *descriptor) {
     EffResourceListNode *visibleEntry;
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
     SdfPoolNode *surface;
     s32 drawnRows;
     s32 contentRow;
@@ -546,7 +546,7 @@ s32 dds3EffectFileListWindowDraw(EffResourceDescriptor *descriptor) {
         }
     }
 
-    packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(
         0x8000 - (descriptor->x << 4), 0x8000 - (descriptor->y << 3),
@@ -586,7 +586,7 @@ s32 dds3EffectFileListWindowDraw(EffResourceDescriptor *descriptor) {
 
 /* Release any retained texture reference, clear its handle, and free the work block. */
 void dds3EffectFileListWindowDelete(EffResourceDescriptor *work) {
-    SdfTex *texture = work->textureHandle;
+    sdfTexHandle_t *texture = work->textureHandle;
 
     if (texture != NULL) {
         sdfTexReleaseReferenceViaHandler(texture);
@@ -638,8 +638,8 @@ void dds3EffectFileListWindowSetWindowColor(EffResourceDescriptor *message, u32 
 /* Release the previous texture reference before loading/acquiring its replacement.
    Release the temporary loaded resource afterward; native failure results are unchecked. */
 void dds3EffectListSetTexture(EffResourceDescriptor *work, const char *textureResource) {
-    SdfTex *texture;
-    SdfMemBlock *loadedResource;
+    sdfTexHandle_t *texture;
+    sdfMemHandle_t *loadedResource;
     u32 resourceWords[4];
 
     if (work->textureHandle != NULL) {
@@ -657,13 +657,13 @@ extern SdfPoolNode D_003255A8;
 
 /* Queue the overlay's texture as a quad at its screen position. */
 void dds3EffectFileListWindowDrawSprite(EffResourceDescriptor *overlay) {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     void *sprite;
     KwlnSpriteVertex *vertex;
-    SdfTex *texture;
+    sdfTexHandle_t *texture;
 
     if (overlay->textureHandle != 0) {
-        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         sprite = sdf2DAllocSprite(1);
         vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr((s32)sprite);
@@ -821,7 +821,7 @@ f32 effLinePointLength(f32 *direction, f32 *origin, f32 *point) {
 /* Allocate/retain slot storage and return its header after the slots, not the slot base.
    Only the two native slot defaults are initialized; count/allocation validity is unchecked. */
 EffArrHdr *dds3Bezier4PCreate(s32 count) {
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(count * EFF_SLOT_BYTES + EFF_SLOT_HEADER_BYTES);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(count * EFF_SLOT_BYTES + EFF_SLOT_HEADER_BYTES);
     void *retainedAddress = (void *)sdfMemLock(allocation);
     u32 slotIndex = 0;
     EffCubicBezierSlot *slot = retainedAddress;

@@ -3,10 +3,10 @@
 
 #include "common.h"
 
-struct DevState;
-struct MovObj;
+struct sdfFileCmdHandle_t;
+struct movieStream_t;
 
-/* Values stored in MovObj.state. State 6 is entered by the device-release
+/* Values stored in movieStream_t.state. State 6 is entered by the device-release
  * callback and observed by the owner while it waits for shutdown. */
 enum {
     SDF_MOVIE_STATE_INITIAL = 0,
@@ -19,9 +19,9 @@ enum {
     SDF_MOVIE_STATE_STOP_REQUESTED = 7
 };
 
-s32 movieGetStreamSize(struct DevState *deviceState, s32 operation,
-                                    void *data, s32 bytesRead, struct MovObj *movie);
-s32 movieReadChunk(struct DevState *deviceState, s32 operation,
-                                 void *readBuffer, s32 bytesRead, struct MovObj *movie);
+s32 movieGetStreamSize(struct sdfFileCmdHandle_t *deviceState, s32 operation,
+                                    void *data, s32 bytesRead, struct movieStream_t *movie);
+s32 movieReadChunk(struct sdfFileCmdHandle_t *deviceState, s32 operation,
+                                 void *readBuffer, s32 bytesRead, struct movieStream_t *movie);
 
 #endif /* SDF_MOVIE_STATE_H */

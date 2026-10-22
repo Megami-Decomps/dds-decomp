@@ -22,7 +22,7 @@
 #include "mnu_event_flag_entries.h"
 #include "eff_event_draw.h"
 
-struct SdfTex;
+struct sdfTexHandle_t;
 struct MenuTerminalWork;
 extern void mnuTerminalSelectResourceBank(struct MenuTerminalWork *);
 extern void mnuApplyFadeTrackMode(s32, struct MenuTerminalWork *);
@@ -114,7 +114,7 @@ void evtCloseDisplayChannelAndEnsureMessageWindow(void *context) {
 s32 dspStartFlagEvent(s32 context) {
     s32 panelKind = *(s32 *)(context + 0x7C);
     s32 index;
-    DatPartyRecord *slot;
+    datUnitWork_t *slot;
 
     if (panelKind < 2) {
         if (panelKind >= 0) {
@@ -154,7 +154,7 @@ s32 dspStartFlagEvent(s32 context) {
 }
 
 /* Initialize the current terminal task's resource bank and mode-zero fade track. */
-s32 mnuPrepareTerminalPanelState(KwlnTask *task) {
+s32 mnuPrepareTerminalPanelState(dds3ProcessID_t *task) {
     struct MenuTerminalWork *work = (struct MenuTerminalWork *)dds3GetProcessData(task);
 
     mnuTerminalSelectResourceBank(work);
@@ -169,7 +169,7 @@ u32 mnuTerminalPanelLeaveNoOp(void) {
 
 /* Propagate the panel worker's nonzero result before considering a flag-event popup.
  * When its popup slot and message control are idle, fall back if no event starts. */
-s32 dspUpdateFlagEvent(KwlnTask *request) {
+s32 dspUpdateFlagEvent(dds3ProcessID_t *request) {
     s32 workAddress = dds3GetProcessData(request);
     s32 *popupSlot = (s32 *)(workAddress + 0x54);
     s32 result = menuRunPanel((void *)workAddress, 0, (void *)request);
@@ -187,14 +187,14 @@ s32 dspUpdateFlagEvent(KwlnTask *request) {
 }
 
 /* Prepare the current terminal work and dispatch panel mode one. */
-s32 mnuDispatchTerminalPanel(KwlnTask *request) {
+s32 mnuDispatchTerminalPanel(dds3ProcessID_t *request) {
     s32 workAddress = dds3GetProcessData(request);
     mnuDrawTerminalEffectIfAvailable(workAddress);
     return menuRunPanel((void *)workAddress, 1, (void *)request);
 }
 
 /* Request the message-window transition before dispatching terminal panel mode two. */
-s32 mnuDispatchTerminalPanelExit(KwlnTask *request) {
+s32 mnuDispatchTerminalPanelExit(dds3ProcessID_t *request) {
     s32 workAddress = dds3GetProcessData(request);
     dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)workAddress, 2, (void *)request);
@@ -204,7 +204,7 @@ void evtClearActiveFlag(s32 flagIndex);
 
 /* Reset display slots for a zero exit marker, otherwise start the existing fade-in.
  * The active-flag call's index is the zero the fade's arguments leave in a0. */
-u32 mnuApplyTerminalExitFadeOrReset(KwlnTask *task) {
+u32 mnuApplyTerminalExitFadeOrReset(dds3ProcessID_t *task) {
     s32 workAddress;
 
     workAddress = dds3GetProcessData(task);
@@ -220,7 +220,7 @@ u32 mnuApplyTerminalExitFadeOrReset(KwlnTask *task) {
 }
 
 /* Select the terminal's mode-one fade track before starting the black fade-out. */
-s32 mnuStartTerminalPanelFadeOut(KwlnTask *task) {
+s32 mnuStartTerminalPanelFadeOut(dds3ProcessID_t *task) {
     struct MenuTerminalWork *work = (struct MenuTerminalWork *)dds3GetProcessData(task);
 
     mnuApplyFadeTrackMode(1, work);
@@ -235,7 +235,7 @@ extern char D_0036AE48[];
 /* Propagate the panel worker result; create a ready popup only for an empty slot.
  * Kind zero waits for the named task unless active flag zero overrides the wait;
  * other kinds wait for the fade to finish. */
-s32 mnuUpdateTerminalReadyPopup(KwlnTask *request) {
+s32 mnuUpdateTerminalReadyPopup(dds3ProcessID_t *request) {
     s32 workAddress = dds3GetProcessData(request);
     s32 *popupSlot = (s32 *)(workAddress + 0x54);
     s32 result = menuRunPanel((void *)workAddress, 0, (void *)request);
@@ -261,21 +261,21 @@ s32 mnuUpdateTerminalReadyPopup(KwlnTask *request) {
 }
 
 /* Draw the available terminal effect, then dispatch panel mode one. */
-s32 mnuDispatchTerminalPanelModeOne(KwlnTask *request) {
+s32 mnuDispatchTerminalPanelModeOne(dds3ProcessID_t *request) {
     s32 workAddress = dds3GetProcessData(request);
     mnuDrawTerminalEffectIfAvailable(workAddress);
     return menuRunPanel((void *)workAddress, 1, (void *)request);
 }
 
 /* Dispatch the current work in terminal panel mode two. */
-s32 mnuDispatchTerminalPanelModeTwo(KwlnTask *request) {
+s32 mnuDispatchTerminalPanelModeTwo(dds3ProcessID_t *request) {
     s32 workAddress = dds3GetProcessData(request);
 
     return menuRunPanel((void *)workAddress, 2, (void *)request);
 }
 
 /* Clear the terminal task's stored selection word and report completion. */
-u32 mnuClearTerminalPanelSelection(KwlnTask *task) {
+u32 mnuClearTerminalPanelSelection(dds3ProcessID_t *task) {
     s32 workAddress;
 
     workAddress = dds3GetProcessData(task);
@@ -288,7 +288,7 @@ extern void mnuReleaseWorkResources(u8 *work);
 extern void mnuTerminalBuildMenus(struct MenuTerminalWork *host);
 
 /* Release the current task's menu resources before rebuilding its terminal menus. */
-s32 mnuRebuildTerminalMenuResources(KwlnTask *task) {
+s32 mnuRebuildTerminalMenuResources(dds3ProcessID_t *task) {
     s32 *work = (s32 *)dds3GetProcessData(task);
 
     mnuReleaseWorkResources(work);
@@ -318,13 +318,13 @@ u32 func_0024D608(void) {
 /* Copy the source node's nested value only on a successful lookup.
  * The destination and both nested data pointers are caller-owned. */
 s32 evtCopyWorldObjectEntryValue(s32 objectId, s32 destination) {
-    EffWorldNode *source;
-    EffWorldNode *destinationNode;
+    dds3Basic_t *source;
+    dds3Basic_t *destinationNode;
 
-    source = dds3SceneBasicSearchNameAndType((EffWorldNode *)dds3GetControlScene(), 9,
+    source = dds3SceneBasicSearchNameAndType((dds3Basic_t *)dds3GetControlScene(), 9,
                                                   (const u8 *)objectId);
     if (source != NULL) {
-        destinationNode = (EffWorldNode *)destination;
+        destinationNode = (dds3Basic_t *)destination;
         *(s32 *)((u8 *)destinationNode->data + 0x80) = *(s32 *)((u8 *)source->data + 0x78);
         return 1;
     }
@@ -388,8 +388,8 @@ void fclInitPanelPos(s32 firstWord, s32 secondWord, s32 thirdWord, s32 firstHalf
 /* Destroy a nonzero, registered task. The declared return value is not set. */
 s32 fclScriptForcedEnd(s32 task) {
     if (task != 0) {
-        if (dds3GetProcessStat((KwlnTask *)task)) {
-            dds3KillProcess((KwlnTask *)task, 0);
+        if (dds3GetProcessStat((dds3ProcessID_t *)task)) {
+            dds3KillProcess((dds3ProcessID_t *)task, 0);
         }
     }
 }
@@ -474,7 +474,7 @@ void evtLoadResourcePair(u32 resourceId, EvtResourcePair *record) {
 
 /* Release the handle without clearing either word of the caller's record. */
 void evtReleaseResourcePairHandle(EvtResourcePair *record) {
-    sdfMemFreeDirect((struct SdfMemBlock *)(u32)record->handle);
+    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)record->handle);
 }
 
 struct ItfMesSub;
@@ -705,13 +705,13 @@ void evtMoveMessageWindowWithPanelOffset(s32 x, s32 y) {
 
 /* Recognize all three scheduler queues. Preserve the repeated queries. */
 s32 fclChkMessageDraw(s32 task) {
-    if (dds3GetProcessStat((KwlnTask *)task) == KWLN_TASK_DELAYED_START) {
+    if (dds3GetProcessStat((dds3ProcessID_t *)task) == KWLN_TASK_DELAYED_START) {
         return 1;
     }
-    if (dds3GetProcessStat((KwlnTask *)task) == KWLN_TASK_ACTIVE) {
+    if (dds3GetProcessStat((dds3ProcessID_t *)task) == KWLN_TASK_ACTIVE) {
         return 1;
     }
-    return dds3GetProcessStat((KwlnTask *)task) == KWLN_TASK_DESTROY_PENDING;
+    return dds3GetProcessStat((dds3ProcessID_t *)task) == KWLN_TASK_DESTROY_PENDING;
 }
 
 /* Clear one active-entry flag; the caller supplies a valid index. */
@@ -767,7 +767,7 @@ u32 fclLoadTexture(u32 path) {
     u32 allocation = (u32)sdfDevLoadFileEx((const char *)(u32)path, info, &info[1]);
     u32 texture = (u32)sdfTexSet((SdfTextureFileHeader *)(info[0]));
 
-    sdfMemFreeDirect((struct SdfMemBlock *)(u32)(allocation));
+    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(allocation));
     return texture;
 }
 

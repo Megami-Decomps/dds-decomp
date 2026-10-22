@@ -108,10 +108,10 @@ extern s32 mnuShopPrimarySpriteNames[];
 
 
 /* Schedule the camp task only if no task currently owns this event ID. */
-KwlnTask *evtLoadEventPack(s32 taskId) {
+dds3ProcessID_t *evtLoadEventPack(s32 taskId) {
     char taskName[CAMP_TASK_NAME_BYTES];
     EvtPackLoadState *taskData;
-    KwlnTask *task;
+    dds3ProcessID_t *task;
 
     task = evtSearchEventPack(taskId);
     if (task == 0) {
@@ -126,7 +126,7 @@ KwlnTask *evtLoadEventPack(s32 taskId) {
 }
 
 void evtKillEventPack(s32 taskId) {
-    KwlnTask *taskHandle;
+    dds3ProcessID_t *taskHandle;
 
     taskHandle = evtSearchEventPack(taskId);
     if (taskHandle != 0) {
@@ -137,7 +137,7 @@ void evtKillEventPack(s32 taskId) {
 
 /* Drain every camp task at the scheduler priority used during creation. */
 void mnuCampDestroyAllTasks(void) {
-    KwlnTask *task;
+    dds3ProcessID_t *task;
 
     while (task = dds3SearchProcessPriority(CAMP_TASK_PRIORITY), task != NULL) {
         dds3KillProcess(task, 0);
@@ -454,8 +454,8 @@ void mnuSampleCampPanelVisualTrack(EvtRuntime *runtime, EvtRuntimeGroup *group, 
 
 
 #include "sdf_packet_alloc.h"
-extern void itfMiscDrawAlphaPrim(SdfListHead *packet, s32 table, s32 mode);
-extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
+extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *packet, s32 table, s32 mode);
+extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 extern s32 mnuCampQuadBounds[4];
 extern s32 mnuCampQuadTexcoords[4];
 extern s32 mnuCampQuadColor[4];
@@ -714,11 +714,11 @@ void campResolvePendingValue(EvtRuntime *scene, EvtRuntimeChild *cue) {
     }
 }
 
-void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display) {
+void mnuDrawCampScaledTexture(sdfTexHandle_t *texture, CampDisplayDefaults *display) {
     s32 halfWidth;
     s32 halfHeight;
     s32 variant;
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
 
     mnuCampQuadTexcoords[2] = texture->width << 4;
     mnuCampQuadTexcoords[3] = texture->height << 4;
@@ -734,7 +734,7 @@ void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display) {
     mnuCampQuadColor[3] = display->color[3];
     variant = display->variant;
     if (display->color[3] != 0) {
-        packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(packetList);
         if (variant == 0) {
             itfMiscDrawAlphaPrim(packetList, 0, 0);
@@ -858,20 +858,20 @@ void evtUpdateCameraColorTrackEffect(EvtRuntime *scene) {
 }
 
 extern s32 D_00368BD8[];
-struct FrFontGlyph;
-extern struct FrFontGlyph * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, struct FrFontGlyph *existingGlyph);
+struct _FRQ;
+extern struct _FRQ * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, struct _FRQ *existingGlyph);
 
 void mnuCampInitFontResource(EvtRuntime *scene) {
     s32 fontHandle;
     scene->glyph = 0;
     fontHandle = (s32)(u32)frFontBuildGlyphChain((const char *)D_00368BD8, 0, 0, 0, 0);
     scene->glyph = fontHandle;
-    frSetDrawPosition((struct FrFontGlyph *)(u32)fontHandle,
+    frSetDrawPosition((struct _FRQ *)(u32)fontHandle,
         CAMP_FONT_CONTEXT_WIDTH, CAMP_FONT_CONTEXT_HEIGHT);
 }
 
 void mnuCampLinkFontGlyph(EvtRuntime *scene) {
-    frDestroyFontRequestAfter((struct FrFontGlyph *)(u32)scene->glyph);
+    frDestroyFontRequestAfter((struct _FRQ *)(u32)scene->glyph);
     scene->glyph = 0;
 }
 
@@ -890,7 +890,7 @@ void mnuEnterCampSceneMenuState(EvtRuntime *scene) {
     }
 }
 
-extern SdfTex *dds3RenderTexture;
+extern sdfTexHandle_t *dds3RenderTexture;
 extern s32 dds3AllocRenderTexture(u16 width, u16 height, f32 value);
 extern void mnuShopCreateDescriptorSurface(EvtRuntime *scene);
 extern void mnuShopSubmitDescriptor(EvtRuntime *scene);
@@ -928,18 +928,18 @@ extern SdfPoolNode D_00325708;
 extern u8 D_00325860[];
 
 void mnuShopCreateDescriptorSurface(EvtRuntime *scene) {
-    SdfListHead *surface;
-    SdfLinkedPacketList *context;
+    sdfDrawTag_t *surface;
+    sdfPreDrawTag_t *context;
     s32 handle;
 
     if (scene->pendingResource == 0) {
         handle = (s32)sdfMemAllocFromTailDirect(0x70000);
         scene->pendingResource = handle;
-        scene->pendingWork = (s32)sdfMemLock((struct SdfMemBlock *)(handle));
+        scene->pendingWork = (s32)sdfMemLock((struct sdfMemHandle_t *)(handle));
     }
     memset((void *)scene->pendingWork, 0x40, 0x70000);
     surface = sdfPrimAllocDrawTag(0);
-    context = (SdfLinkedPacketList *)sdfGrAllocPacketBuff(0x10);
+    context = (sdfPreDrawTag_t *)sdfGrAllocPacketBuff(0x10);
     sdfPreDrawTagInit(context);
     sdfLinkStoreFrameImage(surface, context, 0, 0, 0x200, 0xE0,
                                     scene->pendingWork, 0, 0, 0);
@@ -948,7 +948,7 @@ void mnuShopCreateDescriptorSurface(EvtRuntime *scene) {
 }
 
 void mnuShopSubmitDescriptor(EvtRuntime *scene) {
-    SdfListHead *drawPacket;
+    sdfDrawTag_t *drawPacket;
 
     if (scene->pendingWork != 0) {
         drawPacket = sdfPrimAllocDrawTag(0);
@@ -965,7 +965,7 @@ extern s32 D_00368C20[4];
 extern s32 D_00368C30[4];
 
 void mnuShopQueueAuxiliaryTexturePacket(s32 alpha) {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     SdfPacket *packet;
     u32 color;
 
@@ -991,7 +991,7 @@ void mnuShopQueueAuxiliaryTexturePacket(s32 alpha) {
     D_00368C20[1] = 0x180;
     D_00368C20[2] = 0x2000;
     D_00368C20[3] = 0xB90;
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     packet = (SdfPacket *)sdfGrAllocPacketBuff(0x40);
     packet[0].unk0 = 3;
@@ -1392,7 +1392,7 @@ s32 mnuCampGetShopPriceStage(void) {
 /* Sum the active low bit across the five party entries. */
 s32 mnuCountActivePartyEntries(void) {
     u16 entryFlags;
-    DatPartyRecord *entryCursor;
+    datUnitWork_t *entryCursor;
     s32 entryCountdown;
     s32 enabledCount;
 
@@ -1409,7 +1409,7 @@ s32 mnuCountActivePartyEntries(void) {
 }
 
 ShopScene *mnuShopCreateScene(void) {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     ShopScene *obj;
 
     allocation = sdfMemAllocDirect(0xB4);
@@ -1429,7 +1429,7 @@ ShopScene *mnuShopCreateScene(void) {
 
 extern void evtReleaseResourcePairHandle(EvtResourcePair *);
 
-void mnuShopDestroyScene(KwlnTask *task) {
+void mnuShopDestroyScene(dds3ProcessID_t *task) {
     ShopScene *scene = (ShopScene *)dds3GetProcessData(task);
 
     if (scene != NULL) {
@@ -1444,9 +1444,9 @@ void mnuShopDestroyScene(KwlnTask *task) {
     }
 }
 
-extern s32 mnuCampRunPanel0(KwlnTask *request);
-extern s32 mnuCampRunPanel1(KwlnTask *request);
-extern s32 mnuCampRunPanel2(KwlnTask *request);
+extern s32 mnuCampRunPanel0(dds3ProcessID_t *request);
+extern s32 mnuCampRunPanel1(dds3ProcessID_t *request);
+extern s32 mnuCampRunPanel2(dds3ProcessID_t *request);
 
 /* Create the camp context and its three scheduler tasks (main, draw, update).
  * Optionally seed the initial selection from the caller. */
@@ -1487,7 +1487,7 @@ s32 mnuPollTaskState(void) {
 
 extern u8 mnuShopMessageSequencePopupEntry[];
 
-s32 mnuCampRunPanel0(KwlnTask *request) {
+s32 mnuCampRunPanel0(dds3ProcessID_t *request) {
     s32 state = dds3GetProcessData(request);
     s32 *panel = (s32 *)(state + 0x54);
     mnuSetPopupEntry(panel, mnuShopMessageSequencePopupEntry);
@@ -1495,12 +1495,12 @@ s32 mnuCampRunPanel0(KwlnTask *request) {
 }
 
 
-s32 mnuCampRunPanel1(KwlnTask *request) {
+s32 mnuCampRunPanel1(dds3ProcessID_t *request) {
     s32 state = dds3GetProcessData(request);
     return menuRunPanel((void *)state, 1, request);
 }
 
-s32 mnuCampRunPanel2(KwlnTask *request) {
+s32 mnuCampRunPanel2(dds3ProcessID_t *request) {
     s32 state = dds3GetProcessData(request);
     return menuRunPanel((void *)state, 2, request);
 }
@@ -2022,12 +2022,12 @@ s32 mnuBuildCampItemList(ShopScene *scene) {
     return scene->window->list->count;
 }
 
-extern struct FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, s32, s32, s32);
+extern struct _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, s32, s32, s32);
 
 
-extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
 void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2, s32 unused3, s32 fontArg, s32 flags) {
-    struct FrFontGlyph *handle;
+    struct _FRQ *handle;
 
     if (enabled != 0) {
         handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)fontValue, enabled, fontArg);
@@ -2136,7 +2136,7 @@ void evtInstallStateTable(ShopScene *state) {
 extern s32 mnuShopHasExtraOption(ShopScene *scene);
 extern void mnuShopInitializeOptionList(ShopScene *);
 /* Prepare the active menu state and copy the selection into its window. */
-s32 evtInitializeActiveMenuState(KwlnTask *task) {
+s32 evtInitializeActiveMenuState(dds3ProcessID_t *task) {
     s32 stateAddress = dds3GetProcessData(task);
     MnuShopListContext *windowData;
     s32 pendingSelection;
@@ -2156,7 +2156,7 @@ s32 evtInitializeActiveMenuState(KwlnTask *task) {
 }
 
 /* Advance command phase when the current menu state is phase one. */
-s32 evtAdvancePhaseOne(KwlnTask *task) {
+s32 evtAdvancePhaseOne(dds3ProcessID_t *task) {
     ShopScene *state = (ShopScene *)dds3GetProcessData(task);
 
     if (state->action == 1) {
@@ -2173,7 +2173,7 @@ INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF418);
 
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF428);
 
-s32 mnuShopPollCommandSelection(KwlnTask *task) {
+s32 mnuShopPollCommandSelection(dds3ProcessID_t *task) {
     s32 allowed = 1;
     ShopScene *state = (ShopScene *)dds3GetProcessData(task);
     s32 input = mnuMapPadMaskToFlags(0x33);
@@ -2243,14 +2243,14 @@ s32 mnuShopPollCommandSelection(KwlnTask *task) {
     }
 }
 
-s32 evtPrimeDispatchStart(KwlnTask *callbackContext) {
+s32 evtPrimeDispatchStart(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
 
     mnuDrawShopCommandPanel((ShopScene *)stateAddress);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 evtSetupDispatchSync(KwlnTask *callbackContext) {
+s32 evtSetupDispatchSync(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
 
     dspRequestMessageWindowModeOne();
@@ -2263,7 +2263,7 @@ void evtInstallStateTableB(ShopScene *state) {
     }
 }
 
-s32 evtBuildShopCatalogIfActive(KwlnTask *task) {
+s32 evtBuildShopCatalogIfActive(dds3ProcessID_t *task) {
     ShopScene *state = (ShopScene *)dds3GetProcessData(task);
 
     if (state->action == 1) {
@@ -2273,7 +2273,7 @@ s32 evtBuildShopCatalogIfActive(KwlnTask *task) {
 }
 
 /* Map actions five and seven to their menu phases, then reset substate. */
-s32 evtSelectStateAction(KwlnTask *task) {
+s32 evtSelectStateAction(dds3ProcessID_t *task) {
     s32 stateAddress = dds3GetProcessData(task);
     s32 action = ((ShopScene *)stateAddress)->action;
 
@@ -2292,7 +2292,7 @@ s32 evtSelectStateAction(KwlnTask *task) {
 }
 
 /* Poll the dispatch slot, then process command phases and mapped input flags. */
-s32 mnuShopPollBuyCommandSelection(KwlnTask *task) {
+s32 mnuShopPollBuyCommandSelection(dds3ProcessID_t *task) {
     s32 dispatchResult;
     s32 inputFlags;
     s32 stateAddress;
@@ -2364,14 +2364,14 @@ s32 mnuShopPollBuyCommandSelection(KwlnTask *task) {
     return dispatchResult;
 }
 
-s32 evtStageDispatchStart(KwlnTask *callbackContext) {
+s32 evtStageDispatchStart(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
 
     mnuDrawShopPanelTransition((ShopScene *)stateAddress);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 evtSetupDispatchSyncB(KwlnTask *callbackContext) {
+s32 evtSetupDispatchSyncB(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
 
     dspRequestMessageWindowModeOne();
@@ -2384,7 +2384,7 @@ void evtInstallStateTableC(ShopScene *state) {
     }
 }
 
-s32 evtBuildFilteredShopCatalogIfActive(KwlnTask *task) {
+s32 evtBuildFilteredShopCatalogIfActive(dds3ProcessID_t *task) {
     ShopScene *state = (ShopScene *)dds3GetProcessData(task);
 
     if (state->action == 1) {
@@ -2393,7 +2393,7 @@ s32 evtBuildFilteredShopCatalogIfActive(KwlnTask *task) {
     return 1;
 }
 
-s32 evtSelectStateActionB(KwlnTask *task) {
+s32 evtSelectStateActionB(dds3ProcessID_t *task) {
     s32 stateAddress = dds3GetProcessData(task);
     s32 action = ((ShopScene *)stateAddress)->action;
 
@@ -2413,7 +2413,7 @@ s32 evtSelectStateActionB(KwlnTask *task) {
 
 
 /* Poll the dispatch slot, then process command phases and mapped input flags. */
-s32 mnuShopPollFilteredCommandSelection(KwlnTask *task) {
+s32 mnuShopPollFilteredCommandSelection(dds3ProcessID_t *task) {
     s32 dispatchResult;
     s32 inputFlags;
     s32 stateAddress;
@@ -2484,14 +2484,14 @@ s32 mnuShopPollFilteredCommandSelection(KwlnTask *task) {
     return dispatchResult;
 }
 
-s32 evtStageDispatchStartB(KwlnTask *callbackContext) {
+s32 evtStageDispatchStartB(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
 
     mnuDrawShopPanelTransition((ShopScene *)stateAddress);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 evtSetupDispatchSyncC(KwlnTask *callbackContext) {
+s32 evtSetupDispatchSyncC(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
 
     dspRequestMessageWindowModeOne();
@@ -2504,7 +2504,7 @@ void evtInstallStateTableD(ShopScene *state) {
     }
 }
 
-s32 evtEnableStateFlag(KwlnTask *task) {
+s32 evtEnableStateFlag(dds3ProcessID_t *task) {
     s32 stateAddress = dds3GetProcessData(task);
 
     if ((((ShopScene *)stateAddress)->action == 1) && (mnuBuildCampItemList((ShopScene *)stateAddress) == 0)) {
@@ -2513,7 +2513,7 @@ s32 evtEnableStateFlag(KwlnTask *task) {
     return 1;
 }
 
-s32 evtSelectStateActionC(KwlnTask *task) {
+s32 evtSelectStateActionC(dds3ProcessID_t *task) {
     s32 stateAddress = dds3GetProcessData(task);
     s32 action = ((ShopScene *)stateAddress)->action;
 
@@ -2532,7 +2532,7 @@ s32 evtSelectStateActionC(KwlnTask *task) {
 }
 
 /* Poll the dispatch slot, then process command phases and mapped input flags. */
-s32 mnuShopPollSaleCommandSelection(KwlnTask *task) {
+s32 mnuShopPollSaleCommandSelection(dds3ProcessID_t *task) {
     s32 dispatchResult;
     s32 inputFlags;
     s32 stateAddress;
@@ -2593,21 +2593,21 @@ s32 mnuShopPollSaleCommandSelection(KwlnTask *task) {
     return dispatchResult;
 }
 
-s32 evtStageDispatchStartC(KwlnTask *callbackContext) {
+s32 evtStageDispatchStartC(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
 
     mnuDrawShopPanelTransition((ShopScene *)stateAddress);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 evtSetupDispatchSyncD(KwlnTask *callbackContext) {
+s32 evtSetupDispatchSyncD(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
 
     dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-u32 evtResetStateProgressTimer(KwlnTask *task) {
+u32 evtResetStateProgressTimer(dds3ProcessID_t *task) {
     s32 stateAddress;
 
     stateAddress = dds3GetProcessData(task);
@@ -2617,7 +2617,7 @@ u32 evtResetStateProgressTimer(KwlnTask *task) {
 }
 
 /* Keep the dispatch query alive for 20 idle ticks before restarting its table. */
-s32 evtQueryStateProgress(KwlnTask *callbackContext) {
+s32 evtQueryStateProgress(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
     s32 dispatchResult = menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_POLL, callbackContext);
 
@@ -2636,21 +2636,21 @@ s32 evtQueryStateProgress(KwlnTask *callbackContext) {
     return dispatchResult;
 }
 
-s32 evtFetchDispatchStart(KwlnTask *callbackContext) {
+s32 evtFetchDispatchStart(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
 
     mnuStepShopWindowTransition((ShopScene *)stateAddress, ((ShopScene *)stateAddress)->progressTicks);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 evtSetupDispatchSyncE(KwlnTask *callbackContext) {
+s32 evtSetupDispatchSyncE(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
 
     dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-s32 evtApplyBaseRateProgressStep(KwlnTask *task) {
+s32 evtApplyBaseRateProgressStep(dds3ProcessID_t *task) {
     ShopScene *state = (ShopScene *)dds3GetProcessData(task);
 
     state->counter = 1;
@@ -2658,7 +2658,7 @@ s32 evtApplyBaseRateProgressStep(KwlnTask *task) {
     return 1;
 }
 
-s32 evtAdvanceStateStage(KwlnTask *task) {
+s32 evtAdvanceStateStage(dds3ProcessID_t *task) {
     s32 stateAddress = dds3GetProcessData(task);
 
     if (((ShopScene *)stateAddress)->action == 0xA) {
@@ -2677,7 +2677,7 @@ extern s32 mnuTickCommandWaitPhase(ShopScene *);
 extern void mnuSetQuantityListTransition(struct MenuList *, u32);
 extern u8 mnuShopTransactionPopupEntry[];
 
-s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
+s32 evtPollQuantitySelection(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
     s32 *dispatchSlot = &((ShopScene *)stateAddress)->dispatchState;
     s32 previousQuantity = ((ShopScene *)stateAddress)->counter;
@@ -2744,14 +2744,14 @@ s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
     return 0;
 }
 
-s32 evtAlignDispatchStart(KwlnTask *callbackContext) {
+s32 evtAlignDispatchStart(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
 
     mnuDrawCommandClosePhase((ShopScene *)stateAddress);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 evtSetupDispatchSyncF(KwlnTask *callbackContext) {
+s32 evtSetupDispatchSyncF(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
 
     dspRequestMessageWindowModeOne();
@@ -2776,7 +2776,7 @@ INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A0);
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A8);
 
-s32 mnuShopBeginTransactionMessage(KwlnTask *task) {
+s32 mnuShopBeginTransactionMessage(dds3ProcessID_t *task) {
     ShopScene *scene = (ShopScene *)dds3GetProcessData(task);
     char text[16];
     s32 options[2] = {1, 3};
@@ -2808,7 +2808,7 @@ s32 mnuShopBeginTransactionMessage(KwlnTask *task) {
 extern MenuSelectionPair D_003BC3C0[];
 
 /* Remove a sold-out sell row, handle an empty list, and resume the shop command. */
-s32 mnuPruneSoldOutShopSelection(KwlnTask *task) {
+s32 mnuPruneSoldOutShopSelection(dds3ProcessID_t *task) {
     ShopScene *scene = (ShopScene *)dds3GetProcessData(task);
     MenuSelectionPair options = D_003BC3C0[0];
     MenuWindowContainer *window = scene->window;
@@ -2852,7 +2852,7 @@ INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3B8);
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3C0);
 
-s32 mnuApplyShopSelectionTransaction(KwlnTask *task) {
+s32 mnuApplyShopSelectionTransaction(dds3ProcessID_t *task) {
     ShopScene *scene;
     CampWindowParams *values;
     s32 itemId;
@@ -2895,7 +2895,7 @@ s32 mnuApplyShopSelectionTransaction(KwlnTask *task) {
 extern s32 D_003BC3D0[];
 extern s8 evtGetCapturedWindowPanelValue(void);
 
-s32 evtDispatchShopSelectionAction(KwlnTask *task) {
+s32 evtDispatchShopSelectionAction(dds3ProcessID_t *task) {
     ShopScene *state = (ShopScene *)dds3GetProcessData(task);
     MenuSelectionPair options;
     s32 *dispatchSlot = &state->dispatchState;
@@ -2943,7 +2943,7 @@ s32 evtDispatchShopSelectionAction(KwlnTask *task) {
 }
 
 
-s32 evtRedrawShopSceneSelection(KwlnTask *task) {
+s32 evtRedrawShopSceneSelection(dds3ProcessID_t *task) {
     ShopScene *state = (ShopScene *)dds3GetProcessData(task);
     s32 selectedIndex;
     MenuSelectionPair options = D_003BC3D8[0];
@@ -2973,14 +2973,14 @@ s32 evtRedrawShopSceneSelection(KwlnTask *task) {
     return mnuDispatchPopupTransition(&state->transitionWork, &state->dispatchState, 1, task);
 }
 
-s32 evtSetupDispatchSyncG(KwlnTask *callbackContext) {
+s32 evtSetupDispatchSyncG(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
 
     dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-s32 evtPlayDispatchModeCue(KwlnTask *task) {
+s32 evtPlayDispatchModeCue(dds3ProcessID_t *task) {
     ShopScene *state = (ShopScene *)dds3GetProcessData(task);
     dspSetActive(1);
     switch (state->menuMode) {
@@ -2999,7 +2999,7 @@ extern MenuPopupEntry mnuShopCommandPopupEntries[];
 
 extern void mnuSetCommandPhase(ShopScene *, u32);
 
-s32 evtApplyDispatchModeState(KwlnTask *task) {
+s32 evtApplyDispatchModeState(dds3ProcessID_t *task) {
     ShopScene *state = (ShopScene *)dds3GetProcessData(task);
     switch (state->menuMode) {
     case 1:
@@ -3016,7 +3016,7 @@ s32 evtApplyDispatchModeState(KwlnTask *task) {
 }
 
 /* After idle dispatch, resume the state table at its saved position. */
-s32 evtSetPopupEntryWhenMessageWindowIdle(KwlnTask *callbackContext) {
+s32 evtSetPopupEntryWhenMessageWindowIdle(dds3ProcessID_t *callbackContext) {
     s32 stateAddress;
     s32 result;
     s32 *dispatchSlot;
@@ -3039,7 +3039,7 @@ extern void mnuDrawShopPricePlaceholder(s32, s32, s32, ShopScene *, s32);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, struct MenuList *, s32);
 extern void mnuDrawIconFixedEntryWithBadge(s32, s32, s32, s32, s32, s32);
 
-s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
+s32 mnuShopDrawMenuState(dds3ProcessID_t *callbackContext) {
     ShopScene *state = (ShopScene *)dds3GetProcessData(callbackContext);
 
     switch (state->menuMode) {
@@ -3073,7 +3073,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
     return menuRunPanel(state, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
 }
 
-s32 evtSetupDispatchSyncH(KwlnTask *callbackContext) {
+s32 evtSetupDispatchSyncH(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
 
     dspRequestMessageWindowModeOne();
@@ -3101,7 +3101,7 @@ extern void p2sdPlayBGMFade(s32);
 
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF528);
 
-s32 mnuTickShopMessageSequence(KwlnTask *task) {
+s32 mnuTickShopMessageSequence(dds3ProcessID_t *task) {
     ShopScene *state = (ShopScene *)dds3GetProcessData(task);
     s32 *dispatchSlot = &state->dispatchState;
     s32 allowed;
@@ -3230,7 +3230,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
 }
 
 
-s32 evtRefreshDispatchStart(KwlnTask *callbackContext) {
+s32 evtRefreshDispatchStart(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
     s32 progressTicks = ((ShopScene *)stateAddress)->progressTicks;
 
@@ -3240,7 +3240,7 @@ s32 evtRefreshDispatchStart(KwlnTask *callbackContext) {
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 evtSetupDispatchSyncI(KwlnTask *callbackContext) {
+s32 evtSetupDispatchSyncI(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
 
     dspRequestMessageWindowModeOne();
@@ -3264,7 +3264,7 @@ extern const char D_003AF528[];
 extern s32 mnuShopFadeCompletePopupEntry[];
 extern s32 evtIsActiveFlagSet(s32 flagIndex);
 
-s32 evtUpdateMainTaskPopupEntry(KwlnTask *task) {
+s32 evtUpdateMainTaskPopupEntry(dds3ProcessID_t *task) {
     ShopScene *scene = (ShopScene *)dds3GetProcessData(task);
     s32 result = menuRunPanel(scene, 0, task);
     if (result != 0) {
@@ -3289,14 +3289,14 @@ s32 evtUpdateMainTaskPopupEntry(KwlnTask *task) {
 
 
 /* Select the primary entry action with opaque callback data, not a callback address. */
-s32 evtDispatchStart(KwlnTask *callbackContext) {
+s32 evtDispatchStart(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
 
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 /* Select the secondary entry action with the same opaque callback context. */
-s32 evtDispatchSync(KwlnTask *callbackContext) {
+s32 evtDispatchSync(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
 
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -3331,8 +3331,8 @@ extern MnuSceneFlagEntry mnuSceneFlagEventEntries[MNU_SCENE_FLAG_ENTRY_COUNT];
 extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
 
 /* Snapshot four primary flag pairs and sixteen extra pairs for restoration. */
-struct SdfMemBlock *mnuCreateFlagEntries(void) {
-    struct SdfMemBlock *snapshotHandle = sdfMemAllocDirect(MNU_FLAG_SNAPSHOT_BYTES);
+struct sdfMemHandle_t *mnuCreateFlagEntries(void) {
+    struct sdfMemHandle_t *snapshotHandle = sdfMemAllocDirect(MNU_FLAG_SNAPSHOT_BYTES);
     MnuFlagSnapshotEntry *snapshot = (MnuFlagSnapshotEntry *)sdfMemLock(snapshotHandle);
     u32 pairIndex;
 
@@ -3352,7 +3352,7 @@ struct SdfMemBlock *mnuCreateFlagEntries(void) {
 }
 
 /* Restore only those flags that were enabled in the saved snapshot. */
-void mnuApplyFlagEntries(struct SdfMemBlock *snapshotHandle) {
+void mnuApplyFlagEntries(struct sdfMemHandle_t *snapshotHandle) {
     MnuFlagSnapshotEntry *snapshot = (MnuFlagSnapshotEntry *)sdfMemLock(snapshotHandle);
     u32 pairIndex;
 

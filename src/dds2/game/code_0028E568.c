@@ -34,11 +34,11 @@ extern const char mnuMantraMemberEventDebugFormat[];
 extern const char mnuMantraNoNeighborCandidateDebugText[];
 extern const char mnuMantraProfileCandidateDebugFormat[];
 
-extern DatPartyRecord *mnuGetNodeValueByIndex(MnuStatusResource *, s32);
+extern datUnitWork_t *mnuGetNodeValueByIndex(MnuStatusResource *, s32);
 
 extern s32 ptyAnyActivePartyMemberAtProfileCap(u16, u16);
 
-extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
+extern u32 ptyGetProfileRecordValue(datUnitWork_t *, u16);
 
 
 struct MantraPanelPool;
@@ -381,7 +381,7 @@ s32 mnuFindMantraSourceCandidate(MnuStatusResource *object, MantraMenuSrc *state
     MantraNodePos *entry;
     MtrUnitMenuEntry *slot;
     struct MenuListNode *node;
-    DatPartyRecord *party;
+    datUnitWork_t *party;
     const MantraProfileRequirement *requirements;
     u32 value;
     u32 cap;
@@ -453,7 +453,7 @@ s32 mnuSelectPreferredMantraNode(MnuStatusResource *object, MantraMenuSrc *state
     MantraNodePos *entry;
     MantraNodePos **entries;
     struct MenuListNode *node;
-    DatPartyRecord *value;
+    datUnitWork_t *value;
     s32 i, j;
     s32 cap;
 

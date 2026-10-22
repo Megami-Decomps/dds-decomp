@@ -4,6 +4,6 @@
 #include "sdf.h"
 
 /* Copy the texture's palette-sized byte range into its owned palette buffer. */
-void sdfTexCopyClutData(SdfTex *texture, const u8 *source);
+void sdfTexCopyClutData(sdfTexHandle_t *texture, const u8 *source);
 
 #endif /* SDF_TEX_COPY_IMAGE_DATA_API_H */

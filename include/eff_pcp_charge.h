@@ -3,7 +3,7 @@
 
 #include "eff_param.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Captured model-point history and its two parameter resources share this
  * general-heap allocation. Creation and cloning initialize the live tail and
@@ -19,9 +19,9 @@ typedef struct EffPCPChargeWork {
     u32 historyCount;
     u32 updateCount;
     u32 baseColor;
-    EffParamWork *secondaryHandle;
-    EffParamWork *primaryHandle;
-    struct SdfMemBlock *allocationHandle;
+    effPartHandle_t *secondaryHandle;
+    effPartHandle_t *primaryHandle;
+    struct sdfMemHandle_t *allocationHandle;
 } EffPCPChargeWork;
 
 typedef char EffPCPChargeWork_size_must_be_0x1354[

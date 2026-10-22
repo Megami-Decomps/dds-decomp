@@ -21,8 +21,8 @@ typedef struct EffRibbonWork {
     u8 *positions;             /* 0x20 */
     u8 *uvs;                    /* 0x24 */
     u8 *extra;                  /* 0x28 */
-    SdfAsset *handle;           /* 0x2C */
-    struct SdfMemBlock *allocation; /* 0x30 */
+    sdfMat_t *handle;           /* 0x2C */
+    struct sdfMemHandle_t *allocation; /* 0x30 */
 } EffRibbonWork;
 
 EffRibbonWork *effCreateRibbonWork(u32 count, u32 repeat);

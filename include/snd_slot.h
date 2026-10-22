@@ -4,7 +4,7 @@
 #include "common.h"
 
 struct FileRequest;
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 typedef struct SoundSlotTableEntry {
     s16 resourceOffset;
@@ -19,7 +19,7 @@ typedef struct SoundSlotWork {
     s32 pendingSoundId;
     s32 pendingSlot;
     struct FileRequest *fileRequests[0x1D];
-    struct SdfMemBlock *resourceHandles[0x1D];
+    struct sdfMemHandle_t *resourceHandles[0x1D];
 } SoundSlotWork;
 
 /* SoundSlotOwner flag bits observed across file and packed-track loading. */

@@ -16,7 +16,7 @@ typedef struct FldQuadState {
     s32 rowX;
     s32 rowY;
     s32 drawDepth;
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
 } FldQuadState;
 
 typedef char FldQuadState_size_must_be_0x2C[

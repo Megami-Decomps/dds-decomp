@@ -14,8 +14,8 @@ typedef struct ActionSub {
 } ActionSub;
 
 
-EffWorldNode *dds3AddModelRangeBasicNew(s32 objectKey, s32 b, s32 c, s32 objectName) {
-    EffWorldNode *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_ACTION_B);
+dds3Basic_t *dds3AddModelRangeBasicNew(s32 objectKey, s32 b, s32 c, s32 objectName) {
+    dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_ACTION_B);
 
     obj->value = (const char *)objectName;
     ((ActionSub *)obj->data)->unk10 = 0;
@@ -23,21 +23,21 @@ EffWorldNode *dds3AddModelRangeBasicNew(s32 objectKey, s32 b, s32 c, s32 objectN
     return obj;
 }
 
-void dds3SetPathBasicSpline(EffWorldNode *path, u32 value) {
+void dds3SetPathBasicSpline(dds3Basic_t *path, u32 value) {
     ((Dds3PathStatePayload *)path->data)->value = value;
 }
 
 u32 dds3SearchSceneBasicWorkData(u32 id) {
-    EffWorldNode *path;
-    EffWorldNode *world;
+    dds3Basic_t *path;
+    dds3Basic_t *world;
 
     world = dds3GetControlScene();
     path = dds3SearchSceneBasic(world, id, 6);
     return ((Dds3PathStatePayload *)path->data)->value;
 }
 
-EffWorldNode *dds3AddEventBasic(s32 key, void *work, s32 name) {
-    EffWorldNode *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_ACTION_D);
+dds3Basic_t *dds3AddEventBasic(s32 key, void *work, s32 name) {
+    dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_ACTION_D);
 
     obj->data = work;
     obj->key = key;
@@ -45,7 +45,7 @@ EffWorldNode *dds3AddEventBasic(s32 key, void *work, s32 name) {
     return obj;
 }
 
-void *dds3EventBasicGetResource(EffWorldNode *object) {
+void *dds3EventBasicGetResource(dds3Basic_t *object) {
     return object->data;
 }
 
@@ -66,8 +66,8 @@ void dds3PathEvalSpline(u32 *segment, f32 *weight, const Dds3PathKeyframes *keys
     *weight = 1.0f;
 }
 
-EffWorldNode *dds3AddPathBasic(s32 key, void *work, const char *name) {
-    EffWorldNode *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_ACTION_10);
+dds3Basic_t *dds3AddPathBasic(s32 key, void *work, const char *name) {
+    dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_ACTION_10);
 
     obj->key = key;
     obj->value = name;
@@ -77,11 +77,11 @@ EffWorldNode *dds3AddPathBasic(s32 key, void *work, const char *name) {
 
 extern EffPrimitiveCurve *dds3AllocSplineHandle(f32 *data, u32 count, s32 mode);
 
-Dds3PathCurveWork *dds3AllocPathBasicWorkData(EffWorldNode *object) {
+dds3PathBasicControl_t *dds3AllocPathBasicWorkData(dds3Basic_t *object) {
     Dds3PathCurveTable *table = object->data;
     Dds3PathCurveEntry *entry;
     Dds3PathKeyframes *keys;
-    Dds3PathCurveWork *work;
+    dds3PathBasicControl_t *work;
     Dds3PathPositionSample *positionSamples;
     u32 i;
 

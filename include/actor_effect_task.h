@@ -6,7 +6,7 @@
 
 typedef struct ActorEffectTaskArgs {
     SoundResourceNode *source;
-    BattleEffect *effect;
+    effBTLCutHandle_t *effect;
     ActorEffectOwner owner;
     u32 duration;
     s32 counter;

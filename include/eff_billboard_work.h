@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-struct BillObj;
+struct billHandle_t;
 
 /* Shared DDS1/DDS2 animated billboard effect state. */
 typedef struct EffBillboardWork {
@@ -15,7 +15,7 @@ typedef struct EffBillboardWork {
     f32 heightScale;
     f32 widthScale;
     u8 opaque34[0x30];
-    struct BillObj *billboard;
+    struct billHandle_t *billboard;
 } EffBillboardWork;
 
 typedef char EffBillboardWork_size_must_be_0x68[

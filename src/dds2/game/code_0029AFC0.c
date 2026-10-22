@@ -19,7 +19,7 @@ extern void dspRequestMessageWindowModeOne(void);
 extern void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *);
 
 extern void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *, s32);
-extern void mnuRollExtraLevelReward(DatPartyRecord *, BrsSkillPackageWork *);
+extern void mnuRollExtraLevelReward(datUnitWork_t *, BrsSkillPackageWork *);
 extern u8 *datUnitNames;
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 
@@ -29,14 +29,14 @@ extern s32 evtStageTestUpdateCamera(void);
 
 extern char brsRewardMessagePopupEntry[];
 extern void mnuClearItemSelectionSlots(BrsSkillPackageWork *);
-extern void mnuRefreshPartyUnitVitalsPanels(DatPartyRecord *, BrsSkillPackageWork *);
+extern void mnuRefreshPartyUnitVitalsPanels(datUnitWork_t *, BrsSkillPackageWork *);
 
 
 extern char D_004379B0[];
 extern char D_004379B8[];
 
 /* All five signed-byte plus table-word totals must meet the minimum. */
-s32 mnuCheckTableSums(DatPartyRecord *bytes, BrsSkillPackageWork *table) {
+s32 mnuCheckTableSums(datUnitWork_t *bytes, BrsSkillPackageWork *table) {
     s32 *tableValues = table->statGains;
     s8 *byteValues = bytes->baseStats;
     s32 statIndex = 0;
@@ -58,9 +58,9 @@ extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char brsStatConfirmationPopupEntry[];
 
 
-s32 mnuHandleStatPointAssignment(KwlnTask *task) {
+s32 mnuHandleStatPointAssignment(dds3ProcessID_t *task) {
     BrsSkillPackageWork *work;
-    DatPartyRecord *entry;
+    datUnitWork_t *entry;
     s32 inputFlags;
     s32 selection;
     s32 changed = 0;
@@ -134,7 +134,7 @@ s32 mnuHandleStatPointAssignment(KwlnTask *task) {
     return 0;
 }
 
-s32 mnuDrawItemPanelDuringRequest(KwlnTask *task) {
+s32 mnuDrawItemPanelDuringRequest(dds3ProcessID_t *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
 
     mnuDrawItemPanelBackdrop(context);
@@ -142,14 +142,14 @@ s32 mnuDrawItemPanelDuringRequest(KwlnTask *task) {
     return menuSetHandler(context, 1, (void *)task);
 }
 
-s32 mnuAdvanceItemPanelAfterRequest(KwlnTask *request) {
+s32 mnuAdvanceItemPanelAfterRequest(dds3ProcessID_t *request) {
     s32 context = dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)context, 2, (void *)request);
 }
 
-u32 mnuResetGroupSelectionAndStartMessage(KwlnTask *task) {
+u32 mnuResetGroupSelectionAndStartMessage(dds3ProcessID_t *task) {
     BrsSkillPackageWork *context;
 
     context = (BrsSkillPackageWork *)dds3GetProcessData(task);
@@ -166,12 +166,12 @@ u32 mnuStatAssignmentMessageLeaveNoOp(void) {
 }
 
 extern s8 evtGetCapturedWindowPanelValue(void);
-extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
+extern s32 btlAddBaseStats(s32 *, datUnitWork_t *);
 extern char brsLevelChangePopupEntry[];
 
-s32 mnuCommitAssignedStatPoints(KwlnTask *task) {
+s32 mnuCommitAssignedStatPoints(dds3ProcessID_t *task) {
     BrsSkillPackageWork *work;
-    DatPartyRecord *entry;
+    datUnitWork_t *entry;
     s32 result;
 
     work = (BrsSkillPackageWork *)dds3GetProcessData(task);
@@ -202,7 +202,7 @@ s32 mnuCommitAssignedStatPoints(KwlnTask *task) {
     return 0;
 }
 
-s32 mnuDrawItemPanelAfterStatAssignment(KwlnTask *request) {
+s32 mnuDrawItemPanelAfterStatAssignment(dds3ProcessID_t *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
 
     mnuDrawItemPanelBackdrop(context);
@@ -210,17 +210,17 @@ s32 mnuDrawItemPanelAfterStatAssignment(KwlnTask *request) {
     return menuSetHandler(context, 1, (void *)request);
 }
 
-s32 mnuAdvanceStatAssignmentPanel(KwlnTask *request) {
+s32 mnuAdvanceStatAssignmentPanel(dds3ProcessID_t *request) {
     s32 context = dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)context, 2, (void *)request);
 }
 
-s32 mnuShowProgressLevelChangePopup(KwlnTask *task) {
+s32 mnuShowProgressLevelChangePopup(dds3ProcessID_t *task) {
     char text[0x20];
     BrsSkillPackageWork *context;
-    DatPartyRecord *item;
+    datUnitWork_t *item;
     s32 gain;
 
     context = (BrsSkillPackageWork *)dds3GetProcessData(task);
@@ -245,7 +245,7 @@ u32 mnuLevelChangeMessageLeaveNoOp(void) {
 }
 
 /* On an idle panel, apply the extra fallback only when the auxiliary check also fails. */
-s32 mnuRunPanelWithIdleFallback(KwlnTask *request) {
+s32 mnuRunPanelWithIdleFallback(dds3ProcessID_t *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
     s32 *panelState = &context->transition.state;
     s32 result;
@@ -261,7 +261,7 @@ s32 mnuRunPanelWithIdleFallback(KwlnTask *request) {
     return result;
 }
 
-s32 mnuRunItemPanelWithInactiveBackdrop(KwlnTask *request) {
+s32 mnuRunItemPanelWithInactiveBackdrop(dds3ProcessID_t *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
 
     mnuDrawItemPanelBackdrop(context);
@@ -269,7 +269,7 @@ s32 mnuRunItemPanelWithInactiveBackdrop(KwlnTask *request) {
     return menuSetHandler(context, 1, (void *)request);
 }
 
-s32 mnuAdvanceInactiveItemPanel(KwlnTask *request) {
+s32 mnuAdvanceInactiveItemPanel(dds3ProcessID_t *request) {
     s32 context = dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
@@ -296,7 +296,7 @@ s32 mnuChooseWeightedItem(s32 rewardRowIndex) {
     return 0;
 }
 
-extern s32 scrFindSlot(DatPartyRecord *, u16);
+extern s32 scrFindSlot(datUnitWork_t *, u16);
 extern s32 mnuStaffPickRollByMode(u32);
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
@@ -310,7 +310,7 @@ typedef struct StaffItemRow {
 extern StaffItemRow mnuExtraLevelItemRewardRows[7];
 
 /* Roll a staff reward: a chance-gated stat raise (mode 4) or an item grant (mode 5). */
-void mnuRollExtraLevelReward(DatPartyRecord *unit, BrsSkillPackageWork *work) {
+void mnuRollExtraLevelReward(datUnitWork_t *unit, BrsSkillPackageWork *work) {
     u32 modulus;
     s32 threshold;
     s32 rollMode;
@@ -358,9 +358,9 @@ void mnuRollExtraLevelReward(DatPartyRecord *unit, BrsSkillPackageWork *work) {
     }
 }
 
-u32 brsPrepareRewardMessage(KwlnTask *task) {
+u32 brsPrepareRewardMessage(dds3ProcessID_t *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
-    DatPartyRecord *item = context->selectedRewardRow->unit;
+    datUnitWork_t *item = context->selectedRewardRow->unit;
     s32 mode;
 
     mnuRollExtraLevelReward(item, context);

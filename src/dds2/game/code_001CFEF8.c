@@ -64,7 +64,7 @@ typedef char BtlStateTotalApOffsetCheck[
 #define FLD_SCENE_COUNTER_ACTION_ID 0x61
 #define FLD_SCENE_INSERT_ACTION_ID 0x62
 #define FLD_SCENE_SWAP_ACTION_ID 0x63
-extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
+extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 
 extern void btlDispatchStateHandler(void *, s32);
 extern u64 btlStartTask(void *);
@@ -265,13 +265,13 @@ s32 fldSceneStateStartTileEffect(BtlState *scene) {
 
 extern void btlReleaseUnitResources(BtlUnit *);
 extern BtlUnit *btlCreateUnit(void);
-extern s32 btlHasSpecialAbilityOrModelFlag(DatPartyRecord *record);
+extern s32 btlHasSpecialAbilityOrModelFlag(datUnitWork_t *record);
 extern s32 btlSelectPreemptiveOutcome(void);
 extern s8 btlChooseStartVoice(void);
 extern void btlApplyMaskedActorEntryAdjustments(BtlUnit *unit, u32 flags, s16 delta);
 extern void btlClearUnitStatusMask(void);
-extern void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source);
-extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *entry, s32 index);
+extern void btlCopyUnitStats(BtlUnit *unit, datUnitWork_t *source);
+extern void btlInitializePartyRecordFromEnemy(datUnitWork_t *entry, s32 index);
 extern void btlSetActorSelectedEntryIndex(BtlUnit *actor, u32 index);
 
 void btlInitializeBattleUnits(BtlState *scene) {
@@ -1369,9 +1369,9 @@ extern void itfMesClearFlags();
 
 extern u32 brsTaskAllowUpdate(void);
 
-extern void btlClearPartyRecordStatusBits(DatPartyRecord *, s32);
+extern void btlClearPartyRecordStatusBits(datUnitWork_t *, s32);
 
-extern s32 mnuIsTitleEntryAvailable(DatPartyRecord *);
+extern s32 mnuIsTitleEntryAvailable(datUnitWork_t *);
 
 extern void datAddHp();
 
@@ -1480,7 +1480,7 @@ void fldMarkLinkedSceneActors(u8 *scene) {
     btlFlagTasksForUpdate();
 }
 
-extern void ptyApplySkillRecovery(DatPartyRecord *entry, u32 skillId);
+extern void ptyApplySkillRecovery(datUnitWork_t *entry, u32 skillId);
 extern void dds3WorkClear(void);
 
 /* Restore the party after all scene tasks finish, then clear battle activity. */
@@ -1645,7 +1645,7 @@ s32 fldClassifyActorSceneGroup(ActionStateLink *task) {
     }
 }
 
-extern s32 btlGetStatWithStatusOverride(DatPartyRecord *unit, s32 statIndex);
+extern s32 btlGetStatWithStatusOverride(datUnitWork_t *unit, s32 statIndex);
 
 /* Sort adjacent occupied tasks by descending accessor value; null slots stay put. */
 void btlSortSceneGroupByPriorityDesc(ActionStateLink **group, s32 entryCount) {

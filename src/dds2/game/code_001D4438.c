@@ -133,7 +133,7 @@ extern s32 D_004367C0;
 
 extern char D_003B5B10[];
 
-extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
+extern s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *);
 extern void btlSyncPlayerWork(BtlUnit *);
 
 extern void fldInitializeSceneGroups(void);
@@ -234,8 +234,8 @@ extern void btlInitializeStaffActorPanels(void);
 extern void btlSetActorPanelYForMode(s32);
 
 extern void itfMesClearFlags();
-extern void btlClearPartyRecordStatusBits(DatPartyRecord *, s32);
-extern s32 mnuIsTitleEntryAvailable(DatPartyRecord *);
+extern void btlClearPartyRecordStatusBits(datUnitWork_t *, s32);
+extern s32 mnuIsTitleEntryAvailable(datUnitWork_t *);
 extern void datAddHp();
 
 #include "brs_task_poll_done_api.h"
@@ -249,7 +249,7 @@ extern f32 dds3GetRandFloatA(EffRandState *state);
 extern EffRandState effSharedRandomState[];
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 extern void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState *);
-struct MdlCtx;
+struct dds3ModelHandle_t;
 struct SdfPoolNode;
 extern void btlDrawUnitTransparencyPasses(void *, void *, s32, u8 *, u32);
 extern void dds3ObjectBaseOffFlag(s32, s32);
@@ -366,7 +366,7 @@ extern BtlRuntimeTask *btlCreateHookedUnitSoundTask(BtlUnit *, s32);
 extern u32 D_00436AD4;
 
 
-extern struct EffWorldNode *dds3AddLightObjectBasic(s32);
+extern struct dds3Basic_t *dds3AddLightObjectBasic(s32);
 
 
 extern s32 btlUpdateBattleModelDebugEditor(void);
@@ -511,7 +511,7 @@ extern s32 sndGetEffectNodeParameter(SoundResourceNode *, u16);
 
 
 
-extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
+extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 extern void btlClearAllActorEntrySlots(BtlUnit *);
 extern void btlReleaseUnitResources(BtlUnit *);
 extern void btlInitUnitFxDefaults(BtlUnit *);
@@ -1216,7 +1216,7 @@ s32 btlAiTaskUpdate(ActionStateLink *task) {
                     } else {
                         btlDispatchStateHandler(task, 0xC);
                     }
-                } else if (dds3ExistProcess((KwlnTask *)scene->boundTask) == 0) {
+                } else if (dds3ExistProcess((dds3ProcessID_t *)scene->boundTask) == 0) {
                     if (task->indexWork.phase == -1) {
                         btlBossDebugPrintf("btl:AI script return NULL[%p]\n", task);
                         btlDebugPrintf("AI script return NULL\n");
@@ -2810,13 +2810,13 @@ void btlEnterTuningActionState(ActionStateLink *task) {
 }
 
 extern BtlRuntimeTask *btlCreateControlObject(void);
-extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *record, s32 index);
+extern void btlInitializePartyRecordFromEnemy(datUnitWork_t *record, s32 index);
 extern DatEnemyRecord *datEnemyRecords;
 
 void btlStartAlternateModelChange(ActionStateLink *action) {
     BtlState *state;
     BtlUnit *unit;
-    DatPartyRecord *party;
+    datUnitWork_t *party;
     BtlRuntimeTask *sound;
     BtlRuntimeTask *change;
     BtlRuntimeTask *spawned;
@@ -3073,7 +3073,7 @@ void btlScheduleSummonActionTasks(ActionStateLink *action) {
     BtlRuntimeTask *fadeTask;
     BtlRuntimeTask *completionTask;
     ActionStateLink *summonedAction;
-    DatPartyRecord *record;
+    datUnitWork_t *record;
     s32 modelId;
     s32 resourceKind;
     s32 duration;
@@ -3337,7 +3337,7 @@ extern void btlApplyMaskedActorEntryAdjustments(BtlUnit *unit, u32 flags, s16 de
 /* Reload the linked party unit and queue load-dependent motion, lighting and effects. */
 void btlReloadLinkedUnitAndQueueEffects(ActionStateLink *task) {
     BtlUnit *unit = task->indexWork.linkedUnit;
-    DatPartyRecord *record;
+    datUnitWork_t *record;
     BtlRuntimeTask *load;
     BtlRuntimeTask *spawned;
     BtlRuntimeTask *delayed;
@@ -3683,7 +3683,7 @@ extern BtlRuntimeTask *btlCreateSelectedEffectUpdateTask(BtlUnit *);
 void btlStartActorDefeatTransition(ActionStateLink *command) {
     BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *actor = command->unit;
-    DatPartyRecord *profile = &actor->partyRecord;
+    datUnitWork_t *profile = &actor->partyRecord;
     BtlRuntimeTask *soundTask;
     BtlRuntimeTask *object;
     s64 sequence;

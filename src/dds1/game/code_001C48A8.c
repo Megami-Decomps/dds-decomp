@@ -160,7 +160,7 @@ extern void fldClearSceneSlotsAndGroups(void);
 
 u32 btlHasRegisteredGuidePanelTask(void);
 
-s32 btlGetStatWithStatusOverride(DatPartyRecord *unit, s32 statIndex);
+s32 btlGetStatWithStatusOverride(datUnitWork_t *unit, s32 statIndex);
 
 void btlRequestGuidePanelClose(void);
 
@@ -243,8 +243,8 @@ static inline void initializeBattleUnitHook(BtlState *scene, BtlUnit *unit) {
 }
 extern s32 btlSelectPreemptiveOutcome(void);
 extern void btlClearUnitStatusMask(void);
-extern void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source);
-extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *entry, s32 index);
+extern void btlCopyUnitStats(BtlUnit *unit, datUnitWork_t *source);
+extern void btlInitializePartyRecordFromEnemy(datUnitWork_t *entry, s32 index);
 
 void btlInitializeBattleUnits(BtlState *scene) {
     u32 index;
@@ -1324,7 +1324,7 @@ extern void itfMesClearFlags(s32);
 extern u32 brsTaskAllowUpdate(void);
 
 
-extern void btlClearPartyRecordStatusBits(DatPartyRecord *, s32);
+extern void btlClearPartyRecordStatusBits(datUnitWork_t *, s32);
 
 extern s32 mnuIsTitleEntryAvailable();
 
@@ -1435,7 +1435,7 @@ void fldMarkLinkedSceneActors(s32 context) {
     btlFlagTasksForUpdate();
 }
 
-extern void ptyApplySkillRecovery(DatPartyRecord *entry, u32 skillId);
+extern void ptyApplySkillRecovery(datUnitWork_t *entry, u32 skillId);
 extern void dds3WorkClear(void);
 
 s32 btlFinishScenePartyRecovery(s32 sceneAddress) {

@@ -3,10 +3,10 @@
 
 #include "common.h"
 
-struct KwlnTask;
+struct dds3ProcessID_t;
 
 /* Task initializer used by the field title-banner panel in both games. */
-s32 fldInputPanelProcess1(struct KwlnTask *task);
+s32 fldInputPanelProcess1(struct dds3ProcessID_t *task);
 
 /* Title-banner consumer confirms these four halfwords and their offsets. */
 typedef struct FldTitleBannerMenu {

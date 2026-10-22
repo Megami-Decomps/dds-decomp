@@ -56,7 +56,7 @@ extern s32 D_00439214;
 #define SDF_IPU_FDEC 0x40000000
 #define SDF_IPU_FDEC_BYTE 0x40000008
 
-extern SdfStreamFrameNode *sdfCurrIpuDecodeCb;
+extern sdfIpuDecodeCb_t *sdfCurrIpuDecodeCb;
 
 extern u32 p2sdPcmState;
 
@@ -97,17 +97,17 @@ extern s32 sifRpcServerSema;
 extern u32 D_0047B440[16];
 
 
-extern SdfStreamFrameNode *sdfIpuTaskLink;
-extern SdfStreamFrameNode *sdfIpuInputStream;
+extern sdfIpuDecodeCb_t *sdfIpuTaskLink;
+extern sdfIpuDecodeCb_t *sdfIpuInputStream;
 extern s32 D_004391F4;
 
-extern SdfStreamFrameNode *sdfIpuQueueHead;
-extern SdfStreamFrameNode *sdfIpuQueueTail;
+extern sdfIpuDecodeCb_t *sdfIpuQueueHead;
+extern sdfIpuDecodeCb_t *sdfIpuQueueTail;
 
 
 
 extern void sdfIpuExecQueue(s32 skipInterruptGuard);
-extern s32 sdfIpuDecode(SdfStreamFrameNode *);
+extern s32 sdfIpuDecode(sdfIpuDecodeCb_t *);
 
 
 extern char sdfGsMemoryDumpHeader[]; /* " <<< GS memory information >>>..." */
@@ -218,9 +218,9 @@ s32 sdfFileRpcCallback(s32 unused, u32 event) {
 
 extern SdfSoundRpcRequest *D_004391D4;
 extern s32 D_004391D8;
-extern DevState *D_004391DC;
+extern sdfFileCmdHandle_t *D_004391DC;
 extern SdfSoundResidentBuffer D_0047B418;
-extern DevState *sdfFileCmdReadOpen(const char *path, void *callback, s32 callbackContext);
+extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void *callback, s32 callbackContext);
 extern void sdfSndTransToIOP(s32, void *, s32);
 
 /* Handle sound-file/buffer RPC commands and return the shared reply words. */
@@ -229,7 +229,7 @@ u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
 
     switch (command) {
     case 0: {
-        DevState *state;
+        sdfFileCmdHandle_t *state;
         if (D_0040BAF8[0] == 0) {
             D_0047B440[0] = 0;
             break;
@@ -252,7 +252,7 @@ u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
         break;
     }
     case 1: {
-        SdfMemBlock *allocation;
+        sdfMemHandle_t *allocation;
         void *buffer;
         D_004391D4 = request;
         allocation = sdfMemAllocDirect(request->byteCount);
@@ -947,9 +947,9 @@ void sdfGrFlushOtChain(u32 *source) {
 
 void sdfDumpGsMemory(void) {
     char buf[8];
-    SdfTexResource *head;
-    SdfTexResource *node;
-    SdfTexResource *walk;
+    sdfGsMemSlice_t *head;
+    sdfGsMemSlice_t *node;
+    sdfGsMemSlice_t *walk;
     char *name;
 
     sdfPrintf(sdfGsMemoryDumpHeader);
@@ -973,9 +973,9 @@ void sdfDumpGsMemory(void) {
 
 void sdfDumpGsMemory2(void) {
     char buf[8];
-    SdfTexResource *head;
-    SdfTexResource *node;
-    SdfTexResource *walk;
+    sdfGsMemSlice_t *head;
+    sdfGsMemSlice_t *node;
+    sdfGsMemSlice_t *walk;
     char *name;
 
     sdfPrintf(sdfGsMemoryDumpHeader);
@@ -1036,10 +1036,10 @@ void sdfDumpChipMemory(void) {
 
 /* Read a named file through the dev RPC into a freshly allocated block; returns the block's handle.
  * outData receives the block address, outSize the file size; without outData the block is released. */
-SdfMemBlock *sdfDevLoadFile(const char *name, u32 *outData, u32 *outSize, s32 extra) {
-    DevState *state = sdfFileOpen(name);
+sdfMemHandle_t *sdfDevLoadFile(const char *name, u32 *outData, u32 *outSize, s32 extra) {
+    sdfFileCmdHandle_t *state = sdfFileOpen(name);
     s32 size = sdfFileLength(state);
-    SdfMemBlock *handle = sdfMemAllocDirect(size + extra);
+    sdfMemHandle_t *handle = sdfMemAllocDirect(size + extra);
     u32 address = sdfMemLock(handle);
 
     sdfFileRead(state, (void *)address, size);
@@ -1055,13 +1055,13 @@ SdfMemBlock *sdfDevLoadFile(const char *name, u32 *outData, u32 *outSize, s32 ex
     return handle;
 }
 
-SdfMemBlock *sdfDevLoadFileEx(const char *name, u32 *outAddress, u32 *outSize) {
+sdfMemHandle_t *sdfDevLoadFileEx(const char *name, u32 *outAddress, u32 *outSize) {
     return sdfDevLoadFile(name, outAddress, outSize, 0);
 }
 
-SdfTex *sdfLoadNamedResourceAndReleaseLookupHandle(const char *name) {
-    SdfMemBlock *buffer;
-    SdfTex *result;
+sdfTexHandle_t *sdfLoadNamedResourceAndReleaseLookupHandle(const char *name) {
+    sdfMemHandle_t *buffer;
+    sdfTexHandle_t *result;
     u32 info[4];
 
     buffer = sdfDevLoadFileEx(name, info, 0);
@@ -1090,7 +1090,7 @@ DevRequest *sdfTexSetTB(const SdfTextureOffsetListHeader *resource) {
 }
 
 DevRequest *sndLoadNamedOffsetResourceList(const char *name) {
-    SdfMemBlock *buffer;
+    sdfMemHandle_t *buffer;
     DevRequest *result;
     u32 info[4];
 
@@ -1110,9 +1110,9 @@ u8 *sdfRelocatePackedResourcePayload(SdfPackedRelocationHeader *resource) {
 }
 
 /* Return the retained allocation handle and publish the relocated payload address. */
-SdfMemBlock *sdfLoadPackedResourceWithRelocatedPayload(const char *name, u8 **outPayload) {
+sdfMemHandle_t *sdfLoadPackedResourceWithRelocatedPayload(const char *name, u8 **outPayload) {
     u32 info[4];
-    SdfMemBlock *buffer = sdfDevLoadFileEx(name, info, 0);
+    sdfMemHandle_t *buffer = sdfDevLoadFileEx(name, info, 0);
     *outPayload = sdfRelocatePackedResourcePayload((SdfPackedRelocationHeader *)(u32)info[0]);
     return buffer;
 }
@@ -1127,9 +1127,9 @@ u8 *sdfRelocatePackedResourceWordsFromHeader(SdfPackedRelocationHeader *resource
 }
 
 /* Return the retained allocation handle and publish the relocated payload address. */
-SdfMemBlock *sdfReadPackedResourceAndRelocateHeader(const char *name, u8 **outPayload) {
+sdfMemHandle_t *sdfReadPackedResourceAndRelocateHeader(const char *name, u8 **outPayload) {
     u32 info[4];
-    SdfMemBlock *buffer = sdfDevLoadFileEx(name, info, 0);
+    sdfMemHandle_t *buffer = sdfDevLoadFileEx(name, info, 0);
     *outPayload = sdfRelocatePackedResourceWordsFromHeader((SdfPackedRelocationHeader *)(u32)info[0]);
     return buffer;
 }
@@ -1166,10 +1166,10 @@ void sdfAddressResolver(s32 *words, s32 relocationBase, const u8 *table, s32 tab
 }
 
 /* Remove a queued node without clearing its old links; the caller may own the interrupt guard. */
-void sdfIpuDetachQueue(SdfStreamFrameNode *node, s32 skipInterruptGuard) {
+void sdfIpuDetachQueue(sdfIpuDecodeCb_t *node, s32 skipInterruptGuard) {
     s32 interruptsEnabled = 0;
-    SdfStreamFrameNode *previousNode;
-    SdfStreamFrameNode *nextNode;
+    sdfIpuDecodeCb_t *previousNode;
+    sdfIpuDecodeCb_t *nextNode;
     if (skipInterruptGuard == 0) {
         interruptsEnabled = DIntr();
     }
@@ -1194,7 +1194,7 @@ void sdfIpuDetachQueue(SdfStreamFrameNode *node, s32 skipInterruptGuard) {
 }
 
 /* Move a node to the queue tail, using one interrupt guard for unlink plus append. */
-void sdfIpuAttachQueue(SdfStreamFrameNode *node, s32 skipInterruptGuard) {
+void sdfIpuAttachQueue(sdfIpuDecodeCb_t *node, s32 skipInterruptGuard) {
     s32 interruptsEnabled = 0;
     if (skipInterruptGuard == 0) {
         interruptsEnabled = DIntr();
@@ -1217,9 +1217,9 @@ void sdfIpuAttachQueue(SdfStreamFrameNode *node, s32 skipInterruptGuard) {
 }
 
 /* Walk link addresses to append to the independent singly-linked sound list. */
-void sdfIpuAttachTask(SdfStreamFrameNode *node) {
-    SdfStreamFrameNode **tailLink = &sdfIpuTaskLink;
-    SdfStreamFrameNode *currentNode = *tailLink;
+void sdfIpuAttachTask(sdfIpuDecodeCb_t *node) {
+    sdfIpuDecodeCb_t **tailLink = &sdfIpuTaskLink;
+    sdfIpuDecodeCb_t *currentNode = *tailLink;
     if (currentNode != NULL) {
         tailLink = &currentNode->next;
         while ((currentNode = *tailLink) != NULL) {
@@ -1231,9 +1231,9 @@ void sdfIpuAttachTask(SdfStreamFrameNode *node) {
 }
 
 /* Unlink the first matching sound node; absence leaves the list unchanged. */
-void sdfIpuDetachTask(SdfStreamFrameNode *node) {
-    SdfStreamFrameNode **nodeLink = &sdfIpuTaskLink;
-    SdfStreamFrameNode *currentNode = *nodeLink;
+void sdfIpuDetachTask(sdfIpuDecodeCb_t *node) {
+    sdfIpuDecodeCb_t **nodeLink = &sdfIpuTaskLink;
+    sdfIpuDecodeCb_t *currentNode = *nodeLink;
     while (currentNode != NULL) {
         if (currentNode == node) {
             *nodeLink = currentNode->next;
@@ -1247,7 +1247,7 @@ void sdfIpuDetachTask(SdfStreamFrameNode *node) {
 
 
 /* Allocate two width-by-height frames, using four bytes per pixel for mode zero, two otherwise. */
-void sdfIpuAllocBuff(SdfStreamFrameNode *node) {
+void sdfIpuAllocBuff(sdfIpuDecodeCb_t *node) {
     s32 bytesPerPixel = SDF_STREAM_PIXEL_BYTES_WIDE;
     s32 size;
 
@@ -1262,7 +1262,7 @@ void sdfIpuAllocBuff(SdfStreamFrameNode *node) {
 }
 
 /* Each 16-byte DMA tag holds control/address bits and a zero reserved half. */
-void sdfIpuMakeToIpuDmaTag(SdfStreamFrameNode *node, u8 *source, s32 bytes) {
+void sdfIpuMakeToIpuDmaTag(sdfIpuDecodeCb_t *node, u8 *source, s32 bytes) {
     s32 remaining = (bytes + 15) & ~15;
     SdfStreamInputDmaTag *tag;
     u32 address;
@@ -1284,7 +1284,7 @@ void sdfIpuMakeToIpuDmaTag(SdfStreamFrameNode *node, u8 *source, s32 bytes) {
 }
 
 /* Build the two GIF upload buffers for the node's tiled frame images. */
-void sdfIpuMakeBltPacket(SdfStreamFrameNode *node) {
+void sdfIpuMakeBltPacket(sdfIpuDecodeCb_t *node) {
     s32 pixelMode;
     u32 tileQwords;
     s32 width;
@@ -1374,7 +1374,7 @@ void sdfIpuMakeBltPacket(SdfStreamFrameNode *node) {
 
 
 /* Clear the node, map the format's two selector bytes to mode 0/1/2, and copy loop/playback modes. */
-void sdfIpuInitCb(SdfStreamFrameNode *node, SoundFormat *format) {
+void sdfIpuInitCb(sdfIpuDecodeCb_t *node, SoundFormat *format) {
     memset(node, 0, SDF_STREAM_NODE_BYTES);
     if (format->hasAudio == 0) {
         node->audioMode = SDF_STREAM_AUDIO_DISABLED;
@@ -1391,7 +1391,7 @@ void sdfIpuInitCb(SdfStreamFrameNode *node, SoundFormat *format) {
 
 
 /* Decode the frame header, allocate its buffers, then queue the bytes after that header. */
-void sdfIpuSetDecodeParams(SdfStreamFrameNode *node, SoundFormat *format, u8 *sourceAddress, s32 sourceSize) {
+void sdfIpuSetDecodeParams(sdfIpuDecodeCb_t *node, SoundFormat *format, u8 *sourceAddress, s32 sourceSize) {
     s32 interruptsEnabled;
     u8 *frameBytes = sourceAddress;
     sdfIpuInitCb(node, format);
@@ -1409,7 +1409,7 @@ void sdfIpuSetDecodeParams(SdfStreamFrameNode *node, SoundFormat *format, u8 *so
 }
 
 /* Store the callback and movie context, then allocate the feed ring and leading mirror bytes. */
-void sdfIpuStrmDecodeInit(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead readSource, MovObj *readContext) {
+void sdfIpuStrmDecodeInit(sdfIpuDecodeCb_t *node, SoundFormat *format, SdfStreamRead readSource, movieStream_t *readContext) {
     sdfIpuInitCb(node, format);
     node->read = readSource;
     node->readContext = readContext;
@@ -1417,12 +1417,12 @@ void sdfIpuStrmDecodeInit(SdfStreamFrameNode *node, SoundFormat *format, SdfStre
     node->scratchBuffer = (u8 *)sdfAllocAuto(SDF_STREAM_SCRATCH_BYTES) + SDF_STREAM_PREFIX_BYTES;
 }
 
-extern SdfTexResource *sdfGsMemAllocRect(s32, s32, s32, s32, s32);
+extern sdfGsMemSlice_t *sdfGsMemAllocRect(s32, s32, s32, s32, s32);
 
 /* Query for a complete header before reading it. Texture dimensions are rounded
  * only when larger than one GS page; smaller dimensions remain unchanged.
  */
-void sdfIpuAllocGsRect(SdfStreamFrameNode *node) {
+void sdfIpuAllocGsRect(sdfIpuDecodeCb_t *node) {
     SdfStreamFrameHeader header;
     s32 readStatus;
     s32 interruptsEnabled;
@@ -1442,7 +1442,7 @@ void sdfIpuAllocGsRect(SdfStreamFrameNode *node) {
         s32 textureWidth = node->width;
         s32 textureHeight = node->height;
         s32 pixelFormat;
-        SdfTexResource *texture;
+        sdfGsMemSlice_t *texture;
 
         if (textureWidth > SDF_STREAM_PAGE_WIDTH) {
             textureWidth = (textureWidth + SDF_STREAM_PAGE_WIDTH_MASK) & ~SDF_STREAM_PAGE_WIDTH_MASK;
@@ -1471,9 +1471,9 @@ void sdfIpuAllocGsRect(SdfStreamFrameNode *node) {
 }
 
 extern void sdfImageSetChainReleaseMem(s32);
-extern void sdfGsMemFreeDelayed(SdfTexResource *texture);
+extern void sdfGsMemFreeDelayed(sdfGsMemSlice_t *texture);
 
-void sdfIpuFree(SdfStreamFrameNode *node) {
+void sdfIpuFree(sdfIpuDecodeCb_t *node) {
     s32 interruptsEnabled;
     s32 wasActive;
     u32 dmaEnable;
@@ -1518,7 +1518,7 @@ void sdfIpuFree(SdfStreamFrameNode *node) {
  * data; EOF permits a partial final read. Copy the final slot's trailing bytes
  * into the prefix mirror, retaining the original copy even for a partial read.
  */
-void sdfIpuHandleDmaEnd(SdfStreamFrameNode *feed) {
+void sdfIpuHandleDmaEnd(sdfIpuDecodeCb_t *feed) {
     s32 writeSlot;
     s32 filledSlots;
     s32 availableBytes;
@@ -1568,7 +1568,7 @@ void sdfIpuHandleDmaEnd(SdfStreamFrameNode *feed) {
 }
 
 /* Start IPU input from the initial chain or a feed slot; defer an empty ring. */
-void sdfIpuSetToIpuDma(SdfStreamFrameNode *stream) {
+void sdfIpuSetToIpuDma(sdfIpuDecodeCb_t *stream) {
     if (stream->active == 0) {
         sdfIpuInputStream = stream;
         HW_WRITE(D4_TADR, (u32)stream->inputDmaChain & SDF_EE_PHYSICAL_MASK);
@@ -1590,7 +1590,7 @@ void sdfIpuSetToIpuDma(SdfStreamFrameNode *stream) {
 }
 
 /* Start DMA from the IPU into the selected buffer, then toggle the byte index. */
-void sdfIpuSetFromIpuDma(SdfStreamFrameNode *stream) {
+void sdfIpuSetFromIpuDma(sdfIpuDecodeCb_t *stream) {
     u8 bufferIndex = stream->bufferIndex;
     HW_WRITE(D3_MADR, (u32)stream->frameBuffers[bufferIndex] & SDF_EE_PHYSICAL_MASK);
     HW_WRITE(D3_QWC, stream->bufferSize / SDF_STREAM_QWORD_BYTES);
@@ -1614,7 +1614,7 @@ INCLUDE_ASM(const s32, "game/code_003425B0", sdfIpuDecode);
 
 /* Remove and advance the first list item matching the IPU cleanup test. */
 void sdfIpuExecQueue(s32 skipInterruptGuard) {
-    SdfStreamFrameNode *node;
+    sdfIpuDecodeCb_t *node;
     s32 interruptsEnabled = 0;
 
     if (sdfCurrIpuDecodeCb != NULL) {
@@ -1645,7 +1645,7 @@ void sdfIpuExecQueue(s32 skipInterruptGuard) {
 /* Sleep for IPU completion, advance cycle state and requeue non-drained nodes;
  * the DMA worker runs indefinitely and retains the native completion-byte gates. */
 void sdfIpuDecodeThread(void) {
-    SdfStreamFrameNode *work;
+    sdfIpuDecodeCb_t *work;
     s32 interruptsEnabled;
 
     for (;;) {
@@ -1691,7 +1691,7 @@ s32 sdfIpuFromDmacHandler(void) {
 }
 
 s32 sdfIpuToDmacHandler(void) {
-    SdfStreamFrameNode *stream = sdfIpuInputStream;
+    sdfIpuDecodeCb_t *stream = sdfIpuInputStream;
 
     if (stream != NULL) {
         D_004391F4 = stream->playbackFrameIndex;
@@ -1732,7 +1732,7 @@ u32 sdfIpuGetActiveFrame(SndMidiChannel *channel) {
 }
 
 /* Consume a pending buffer when present, but always advance processed; loop only on exact equality. */
-void sdfIpuFinishActiveFrame(SdfStreamFrameNode *node) {
+void sdfIpuFinishActiveFrame(sdfIpuDecodeCb_t *node) {
     s32 interruptsEnabled = DIntr();
     s32 pendingBuffers = node->completedBufferCount;
     s32 remainingBuffers = pendingBuffers - 1;
@@ -1751,10 +1751,10 @@ void sdfIpuFinishActiveFrame(SdfStreamFrameNode *node) {
     sdfIpuExecQueue(0);
 }
 
-extern void sdfIpuMakeBltPacket(SdfStreamFrameNode *node);
+extern void sdfIpuMakeBltPacket(sdfIpuDecodeCb_t *node);
 
 /* Return zero only when nothing is pending; otherwise call the zero-buffer handler if needed, queue and advance. */
-s32 sdfIpuSetChainTag(SdfStreamFrameNode *node) {
+s32 sdfIpuSetChainTag(sdfIpuDecodeCb_t *node) {
     u32 *selectedBuffer;
     if (node->completedBufferCount == 0) {
         return 0;
@@ -1772,7 +1772,7 @@ extern u32 D_00438D04;
 
 /* Advance playback cadence, refill active feeds and retry a deferred IPU input. */
 void sdfAdvanceStreamPlayback(s32 cadence) {
-    SdfStreamFrameNode *node = sdfCurrIpuDecodeCb;
+    sdfIpuDecodeCb_t *node = sdfCurrIpuDecodeCb;
     s32 elapsed;
     s32 interruptsEnabled;
 
@@ -1822,13 +1822,13 @@ void sdfAdvanceStreamPlayback(s32 cadence) {
     sdfIpuExecQueue(0);
 }
 
-void sdfSoundInitAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, u8 *source, s32 size, s32 resourceWord) {
+void sdfSoundInitAndAppendNode(sdfIpuDecodeCb_t *node, SoundFormat *format, u8 *source, s32 size, s32 resourceWord) {
     sdfIpuSetDecodeParams(node, format, source, size);
     node->resourceWord = resourceWord;
     sdfIpuAttachTask(node);
 }
 
-void sdfIpuSetOutputTex(SdfStreamFrameNode *node, SdfStreamParams *params, u8 *source, s32 size, SdfTex *resource) {
+void sdfIpuSetOutputTex(sdfIpuDecodeCb_t *node, SdfStreamParams *params, u8 *source, s32 size, sdfTexHandle_t *resource) {
     SdfStreamParams streamParams = *params;
     switch (resource->pixelFormat) {
     case 0:
@@ -1841,7 +1841,7 @@ void sdfIpuSetOutputTex(SdfStreamFrameNode *node, SdfStreamParams *params, u8 *s
     sdfSoundInitAndAppendNode(node, &streamParams, source, size, sdfTexGetPixelAddr(resource));
 }
 
-void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead read, MovObj *readContext, s32 resourceWord) {
+void sdfSoundInitFormattedAndAppendNode(sdfIpuDecodeCb_t *node, SoundFormat *format, SdfStreamRead read, movieStream_t *readContext, s32 resourceWord) {
     sdfIpuStrmDecodeInit(node, format, read, readContext);
     node->resourceWord = resourceWord;
     sdfIpuAttachTask(node);
@@ -1908,9 +1908,9 @@ void sdfSetGridScaledDrawBounds(s32 firstStart, s32 secondStart, s32 firstLength
 
 INCLUDE_ASM(const s32, "game/code_003425B0", sdfMovieQueueFrameSprite);
 
-extern MovObj *movieSemaId;
+extern movieStream_t *movieSemaId;
 extern void *movieWaitSema(s32);
-extern void sdfMovieQueueFrameSprite(MovObj *, SdfPoolNode *);
+extern void sdfMovieQueueFrameSprite(movieStream_t *, SdfPoolNode *);
 
 /* DMA/VIF/GIF header then nine A+D register writes for the sprite.
  * registerId 3 is UV; the texture value's 0x200000 is PSM PSMCT16. */
@@ -1927,9 +1927,9 @@ typedef struct SdfMovieDrawPacket {
     SdfGsRegisterWrite vertexExtent;
 } SdfMovieDrawPacket;
 
-void sdfMovieDrawFrame(MovObj *movie, SdfPoolNode *pool) {
+void sdfMovieDrawFrame(movieStream_t *movie, SdfPoolNode *pool) {
     SdfMovieDrawPacket *packet;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     u16 width;
     u16 height;
     s32 widthLog2;

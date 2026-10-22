@@ -156,12 +156,12 @@ void func_00245810(void) {
 }
 
 /* Retail test-task update is idle from creation; return 0 each tick. */
-s32 evtDebugCameraStep(KwlnTask *task) {
+s32 evtDebugCameraStep(dds3ProcessID_t *task) {
     return 0;
 }
 
 /* Test-task teardown destroys the named script processes. */
-void EventDebugShutdown(KwlnTask *task) {
+void EventDebugShutdown(dds3ProcessID_t *task) {
     scrDestroyAllNamedProcesses();
 }
 
@@ -384,7 +384,7 @@ EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *group, s32 frame, E
     case 14: {
         void *payload = sdfChipAllocDirect(0x2C);
         key->payload = payload;
-        memcpy(payload, &Eve_PartialMultiBlurGetParams()->body, sizeof(EffBlurTemplateBody));
+        memcpy(payload, &Eve_PartialMultiBlurGetParams()->body, sizeof(dds3Effect_PartialMultiBlurParam_t));
         key->p08.h[0] = 1;
         key->p10.h[0] = 0;
         break;
@@ -392,7 +392,7 @@ EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *group, s32 frame, E
     case 15: {
         void *payload = sdfChipAllocDirect(0x2C);
         key->payload = payload;
-        memcpy(payload, &Eve_DistortionBlurGetParams()->params, sizeof(EffBlurScatterParams));
+        memcpy(payload, &Eve_DistortionBlurGetParams()->params, sizeof(dds3Effect_DistortionBlurParam_t));
         key->p08.h[0] = 1;
         break;
     }

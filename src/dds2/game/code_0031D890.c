@@ -23,13 +23,13 @@ typedef struct CompactSlot {
 } CompactSlot;
 
 typedef struct WideSlotPool {
-    SdfMemBlock *allocation;
+    sdfMemHandle_t *allocation;
     WideSlot *slots;
     s32 count;
 } WideSlotPool;
 
 typedef struct CompactSlotPool {
-    SdfMemBlock *allocation;
+    sdfMemHandle_t *allocation;
     CompactSlot *slots;
     s32 count;
 } CompactSlotPool;
@@ -57,7 +57,7 @@ typedef char PoolLayoutAssert[
 /* Sprite-number work pool: count 0x14-byte items plus a 0xC-byte header. */
 WideSlotPool *itfCreateSpriteWorkPool(u32 count) {
     u32 size = count * 0x14 + 0xC;
-    SdfMemBlock *allocation = sdfMemAllocDirect(size);
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
     WideSlotPool *pool = (WideSlotPool *)sdfMemGetPtr(allocation);
     memset(pool, 0, size);
     pool->allocation = allocation;
@@ -202,7 +202,7 @@ void itfUpdateAndDrawSpriteNumbers(WideSlotPool *pool, u32 flags) {
 /* Sprite-hit-effect work pool: count 0x10-byte items plus a 0xC-byte header. */
 CompactSlotPool *itfCreateSpriteHitEffectWorkPool(u32 count) {
     u32 size = count * 0x10 + 0xC;
-    SdfMemBlock *allocation = sdfMemAllocDirect(size);
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
     CompactSlotPool *pool = (CompactSlotPool *)sdfMemGetPtr(allocation);
 
     memset(pool, 0, size);

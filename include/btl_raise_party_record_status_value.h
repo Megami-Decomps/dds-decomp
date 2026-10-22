@@ -3,8 +3,8 @@
 
 #include "common.h"
 
-struct DatPartyRecord;
+struct datUnitWork_t;
 
-void btlRaisePartyRecordStatusValue(struct DatPartyRecord *item, u32 minimumValue);
+void btlRaisePartyRecordStatusValue(struct datUnitWork_t *item, u32 minimumValue);
 
 #endif

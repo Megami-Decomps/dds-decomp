@@ -3,14 +3,14 @@
 
 #include "common.h"
 
-struct DevState;
+struct sdfFileCmdHandle_t;
 
 /* Shared queue/thread slot from the device-worker table. */
 typedef struct DevWorkerEntry {
     s32 threadId;
     s32 semaphore;
-    struct DevState *first;
-    struct DevState *last;
+    struct sdfFileCmdHandle_t *first;
+    struct sdfFileCmdHandle_t *last;
     u8 opaque10[8];
 } DevWorkerEntry;
 

@@ -4,7 +4,7 @@
 #include "dds3_path.h"
 
 /* Set the callback on an object's slot-1 handler; returns whether it exists. */
-u8 dds3ObjectBaseSetPrimaryControl(struct EffWorldNode *object,
+u8 dds3ObjectBaseSetPrimaryControl(struct dds3Basic_t *object,
                                Dds3MoverUpdate update);
 
 #endif

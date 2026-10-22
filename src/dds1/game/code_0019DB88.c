@@ -21,22 +21,22 @@
 
 #include "sdf.h"
 /* Declared before first use (were implicit int). */
-extern void itfMesBuildEntryGlyph(ItfMesState *mes);
+extern void itfMesBuildEntryGlyph(instanceMes_tag *mes);
 extern void CommitVarTable(s32 *table);
 #include "sdf_debug_api.h"
 extern ItfMesGlobals itfMesMngManager;
 
 
 
-extern void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy);
-extern void ChangeFontColorAll(FrFontGlyph *node, u8 flagValue);
+extern void itfMesShiftPanelVertically(instanceMes_tag *panel, s32 dy);
+extern void ChangeFontColorAll(_FRQ *node, u8 flagValue);
 extern s32 GetMaskedIndex(s32 clearBitsToSkip, u32 mask);
-extern s32 SelectItem(ItfMesState *);
-extern void itfUpdateSoundSelectionTransition(ItfMesState *);
+extern s32 SelectItem(instanceMes_tag *);
+extern void itfUpdateSoundSelectionTransition(instanceMes_tag *);
 
-extern s32 frFontMeasureGlyphStripWidth(s32 line, FrFontGlyph *glyph);
+extern s32 frFontMeasureGlyphStripWidth(s32 line, _FRQ *glyph);
 
-extern UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 payload);
+extern itfpanel_t *itfCreateUiSpriteByKind(s32 kind, u32 payload);
 
 extern SndPad dds3PadButtonState;
 
@@ -45,15 +45,15 @@ extern SdfPoolNode sdfGrOtTable[];
 extern ItfMesDebugState D_00357D80;
 
 
-extern void itfPnlDraw(UiSprite *sprite, SdfPoolNode *surface);
+extern void itfPnlDraw(itfpanel_t *sprite, SdfPoolNode *surface);
 
-extern void ChangeFontPosition(FrFontGlyph *node, s32 dx, s32 dy);
+extern void ChangeFontPosition(_FRQ *node, s32 dx, s32 dy);
 
-extern void DebugDrawWindowLine(UiSprite *sprite);
+extern void DebugDrawWindowLine(itfpanel_t *sprite);
 
 extern s32 SelectItemDefKey(ItfMesBlk40 *seq);
 
-extern void ChangeFontColor(FrFontGlyph *glyphChain, s32 rowIndex, s32 rowCount, s32 requestedFlagValue);
+extern void ChangeFontColor(_FRQ *glyphChain, s32 rowIndex, s32 rowCount, s32 requestedFlagValue);
 extern s8 D_00324530[];
 
 
@@ -61,18 +61,18 @@ extern const char *D_00358308[];
 
 extern u32 sndTestMessageResourceIndex;
 
-extern SdfTex *sndTestMessageTexture;
+extern sdfTexHandle_t *sndTestMessageTexture;
 
 
 
-void frFontEnableNodeContextModes(FrFontGlyph *node) {
+void frFontEnableNodeContextModes(_FRQ *node) {
     for (; node != NULL; node = node->previous) {
         frFontEnableContextMode(node);
     }
 }
 
 /* Initialize panel placement and retain its screen-space Y coordinate. */
-void itfMesInitializePanelPlacementSprite(ItfMesState *panel) {
+void itfMesInitializePanelPlacementSprite(instanceMes_tag *panel) {
     ItfMesEntryBlock *pos = &panel->entryBlock;
     ItfMesBlkA4 *place = &panel->blkA4;
     s32 spriteTop;
@@ -89,7 +89,7 @@ void itfMesInitializePanelPlacementSprite(ItfMesState *panel) {
     panel->flags = (panel->flags & ~0x300) | 0x100;
 }
 
-void OpenCheckSpeakerWindow(ItfMesState *panel) {
+void OpenCheckSpeakerWindow(instanceMes_tag *panel) {
     ItfMesBlk14 *origin = &panel->blk14;
     ItfMesBlkA4 *place = &panel->blkA4;
     if (origin->glyphChain != NULL && !(panel->flags & 0x10000)) {
@@ -186,7 +186,7 @@ void ForceSetCurCtr(BtlFade *fade, s16 phase, s16 alpha, s16 timer) {
     fade->timer = timer;
 }
 
-void btlReleaseEffectResourceHandles(ItfMesState *effect) {
+void btlReleaseEffectResourceHandles(instanceMes_tag *effect) {
     ItfMesBlkA4 *place = &effect->blkA4;
     if (place->frame != NULL) {
         itfPnlRelease(place->frame);
@@ -272,21 +272,21 @@ void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 panelMode, s
     }
 }
 
-void itfMesUpdatePanelFades(ItfMesState *panel);
-void CalcCurCtr(ItfMesState *panel);
+void itfMesUpdatePanelFades(instanceMes_tag *panel);
+void CalcCurCtr(instanceMes_tag *panel);
 
-void itfMesAdvanceEntryText(ItfMesState *mes);
+void itfMesAdvanceEntryText(instanceMes_tag *mes);
 
-void itfUpdateBattleDisplayAndFadeIndicator(ItfMesState *object) {
+void itfUpdateBattleDisplayAndFadeIndicator(instanceMes_tag *object) {
     itfMesUpdatePanelFades(object);
     itfMesAdvanceEntryText(object);
     itfUpdateSoundSelectionTransition(object);
     CalcCurCtr(object);
 }
 
-void itfMesUpdatePanelFades(ItfMesState *panel) {
+void itfMesUpdatePanelFades(instanceMes_tag *panel) {
     ItfMesBlkA4 *place = &panel->blkA4;
-    UiSprite *sprite;
+    itfpanel_t *sprite;
     s32 transition;
 
     sprite = place->sprite;
@@ -352,7 +352,7 @@ void itfMesUpdatePanelFades(ItfMesState *panel) {
 }
 
 extern u32 itfMessageFlags;
-void itfMesAdvanceEntryText(ItfMesState *mes) {
+void itfMesAdvanceEntryText(instanceMes_tag *mes) {
     ItfMesEntryBlock *entryBlock = &mes->entryBlock;
     u32 flags;
 
@@ -403,7 +403,7 @@ void itfMesAdvanceEntryText(ItfMesState *mes) {
     mes->flags = flags & ~0x1000000;
 }
 
-void itfUpdateSoundSelectionTransition(ItfMesState *panel) {
+void itfUpdateSoundSelectionTransition(instanceMes_tag *panel) {
     ItfMesBlk40 *selection = &panel->blk40;
     ItfMesEntryBlock *entry = &panel->entryBlock;
     u32 flags = panel->flags;
@@ -470,7 +470,7 @@ void itfUpdateSoundSelectionTransition(ItfMesState *panel) {
     }
 }
 
-void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy) {
+void itfMesShiftPanelVertically(instanceMes_tag *panel, s32 dy) {
     ItfMesBlk14 *origin = &panel->blk14;
     ItfMesEntryBlock *pos = &panel->entryBlock;
     ItfMesBlkA4 *place = &panel->blkA4;
@@ -490,7 +490,7 @@ void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy) {
 
 void SelectItemMove(ItfMesBlk40 *obj, s32 dir);
 
-s32 SelectItem(ItfMesState *panel) {
+s32 SelectItem(instanceMes_tag *panel) {
     ItfMesBlk40 *sel = &panel->blk40;
     s32 dir = 0;
     s32 index;
@@ -578,7 +578,7 @@ s32 SelectItemDefKey(ItfMesBlk40 *selection) {
 }
 
 
-void CalcCurCtr(ItfMesState *panel) {
+void CalcCurCtr(instanceMes_tag *panel) {
     BtlFade *fade = &panel->fade;
     s32 minimumAlpha;
     if (fade->kind != 0) {
@@ -606,16 +606,16 @@ void CalcCurCtr(ItfMesState *panel) {
     }
 }
 
-extern void itfMesRenderActivePanelSprites(ItfMesState *);
-extern void itfDrawSoundSelectorFadeLayers(ItfMesState *);
-extern void itfDrawSelectedSoundRow(ItfMesState *);
-extern void itfDrawSoundSelectorOptionPanel(ItfMesState *);
+extern void itfMesRenderActivePanelSprites(instanceMes_tag *);
+extern void itfDrawSoundSelectorFadeLayers(instanceMes_tag *);
+extern void itfDrawSelectedSoundRow(instanceMes_tag *);
+extern void itfDrawSoundSelectorOptionPanel(instanceMes_tag *);
 
 /* Draw the panel's glyph layers, advance its selection state and fade. */
-void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
+void itfUpdateSoundSelectorPanel(instanceMes_tag *panel) {
     u32 flags = panel->flags;
     ItfMesBlk40 *selection;
-    FrFontGlyph *glyph;
+    _FRQ *glyph;
 
     itfMesMngManager.flags &= ~2;
     itfMesRenderActivePanelSprites(panel);
@@ -660,7 +660,7 @@ void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
     }
 }
 
-void itfMesRenderActivePanelSprites(ItfMesState *panel) {
+void itfMesRenderActivePanelSprites(instanceMes_tag *panel) {
     ItfMesBlkA4 *place;
     if (panel->flags & 0x80000) {
         return;
@@ -682,19 +682,19 @@ void itfMesRenderActivePanelSprites(ItfMesState *panel) {
 
 extern DrawColorRec D_00357FC8[];
 #include "sdf_packet_alloc.h"
-extern void itfDrawThreePanelBorderBands(DrawVertex *bounds, DrawColorRec *color, u32 tail, s32 borderWidth, SdfListHead *command);
-extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
-extern void itfMiscDrawSpritePrim2(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
-extern void itfMiscDrawAlphaPrim(SdfListHead *, s32, s32);
+extern void itfDrawThreePanelBorderBands(DrawVertex *bounds, DrawColorRec *color, u32 tail, s32 borderWidth, sdfDrawTag_t *command);
+extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
+extern void itfMiscDrawSpritePrim2(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, sdfDrawTag_t *);
+extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *, s32, s32);
 
-void itfDrawSelectedSoundRow(ItfMesState *panel) {
+void itfDrawSelectedSoundRow(instanceMes_tag *panel) {
     DrawColorRec uv;
     DrawColorRec color;
     DrawVertex bounds[2];
     ItfMesBlk40 *selection = &panel->blk40;
     BtlFade *fade = &panel->fade;
     s32 selected = selection->savedIndex;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     s32 x;
     s32 y;
     s32 expansion;
@@ -705,7 +705,7 @@ void itfDrawSelectedSoundRow(ItfMesState *panel) {
     if (selected == -1) {
         return;
     }
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     x = selection->x;
     y = (s32)selection->y - ((selection->rowCount * 21 - 21) << 3) + selected * 0xA0;
@@ -762,14 +762,14 @@ INCLUDE_ASM(const s32, "game/code_0019DB88", itfDrawSoundSelectorOptionPanel);
 extern u8 D_00358008[];
 extern u8 D_00357FF8[];
 extern s32 D_00358018[];
-extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
-extern void itfMiscDrawAlphaPrim(SdfListHead *, s32, s32);
+extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
+extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *, s32, s32);
 
 /* Draw the sound selector frame, its fade layer and the expanding timer outline. */
-void itfDrawSoundSelectorFadeLayers(ItfMesState *panel) {
+void itfDrawSoundSelectorFadeLayers(instanceMes_tag *panel) {
     s32 bounds[4];
     BtlFade *fade = &panel->fade;
-    SdfListHead *packet;
+    sdfDrawTag_t *packet;
     s32 expansion;
     SdfPoolNode *surface;
 
@@ -777,7 +777,7 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *panel) {
     bounds[1] = 0xC60;
     bounds[2] = 0x1BD0;
     bounds[3] = 0xD58;
-    packet = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packet);
     D_00358018[3] = 0xFF;
     itfMiscDrawSpritePrim(bounds, D_00358008, D_00358018, panel->renderValue,
@@ -803,7 +803,7 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *panel) {
 
 
 s32 CalcMsgMng_Process(void) {
-    ItfMesPoolNode *node = itfMesMngManager.pool.activeHead;
+    mesflow_tag *node = itfMesMngManager.pool.activeHead;
     while (node != 0) {
         itfUpdateBattleDisplayAndFadeIndicator(node->state);
         node = node->next;
@@ -814,8 +814,8 @@ s32 CalcMsgMng_Process(void) {
 extern void DestructFlow(s32 window);
 extern u32 dds3NullDrawProc(void);
 
-s32 DrawMsgMng_Process(KwlnTask *task) {
-    ItfMesPoolNode *node;
+s32 DrawMsgMng_Process(dds3ProcessID_t *task) {
+    mesflow_tag *node;
 
     if (dds3NullDrawProc() != 0) {
         return 0;
@@ -828,7 +828,7 @@ s32 DrawMsgMng_Process(KwlnTask *task) {
 }
 
 void DrawMsgMng_Shutdown(void) {
-    ItfMesPoolNode *node = itfMesMngManager.pool.activeHead;
+    mesflow_tag *node = itfMesMngManager.pool.activeHead;
     s32 window;
     while (node != 0) {
         window = node->index;
@@ -844,25 +844,25 @@ extern SdfPoolNode D_00325708;
 extern s32 D_00358028[];
 extern u8 D_003BB230[5];
 extern u8 D_003BB238[5];
-extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, SdfListHead *);
+extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, sdfDrawTag_t *);
 
-void DebugDrawWindowLine(UiSprite *sprite) {
+void DebugDrawWindowLine(itfpanel_t *sprite) {
     s32 vertices[4][2] = {
         {sprite->left, sprite->top},
         {sprite->right, sprite->top},
         {sprite->right, sprite->bottom},
         {sprite->left, sprite->bottom}
     };
-    SdfListHead *list;
+    sdfDrawTag_t *list;
 
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     itfMiscDrawLineStripPrim(vertices, D_00358028, D_003BB230, D_003BB238, 5, 0xFFFFFF, list);
     D_00325708.append(&D_00325708, list);
 }
 
 void DebugMoveWinVert(ItfMesBlkA4 *panel, s32 boundsMode) {
-    UiSprite *sprite = panel->sprite;
+    itfpanel_t *sprite = panel->sprite;
     s32 *bounds;
     s32 dx;
     s32 dy;
@@ -934,7 +934,7 @@ void DebugMoveWinAlpha(ItfMesBlkA4 *panel) {
     }
 }
 
-ItfMesPoolNode *DebugChangeInstance(ItfMesPoolNode *node) {
+mesflow_tag *DebugChangeInstance(mesflow_tag *node) {
     s32 index = 0;
     s32 count = itfMesMngManager.activeWindowCount;
 
@@ -974,17 +974,17 @@ extern s32 scrStartScript2(s32, u8 *, s32);
 
 extern void TestMsgReloadTexture(void);
 
-extern s32 TestMsgMngC_Process(KwlnTask *task);
+extern s32 TestMsgMngC_Process(dds3ProcessID_t *task);
 
 extern void itfDebugPrintMark(void);
 
-extern s32 TestMsgMngD_Process(KwlnTask *task);
+extern s32 TestMsgMngD_Process(dds3ProcessID_t *task);
 
 
 void itfDebugMesMngInitialize(void) {
     D_003BA8EC = 0x80FFFFFF;
     TestMsgReloadTexture();
-    itfMesMngSetKutiCallback(((ScrData *)dds3GetProcessData(scrStartScript2(0x3E8, D_00358038, 0)))->resourceIndex, itfDebugPrintMark);
+    itfMesMngSetKutiCallback(((scrProcessWork_s *)dds3GetProcessData(scrStartScript2(0x3E8, D_00358038, 0)))->resourceIndex, itfDebugPrintMark);
     dds3StartProcess(D_003A14F0, 0x3EF, 0, 0, TestMsgMngC_Process, 0, 0);
     dds3StartProcess(D_003A1500, 0x2AFE, 0, 0, TestMsgMngD_Process, 0, 0);
 }
@@ -1000,7 +1000,7 @@ void TestMsgReloadTexture(void) {
     }
 }
 
-s32 TestMsgMngC_Process(KwlnTask *task) {
+s32 TestMsgMngC_Process(dds3ProcessID_t *task) {
     if (D_00324530[0] < 0) {
         TestMsgReloadTexture();
     }
@@ -1017,10 +1017,10 @@ extern u8 D_00358328[];
 extern u8 D_00358338[];
 
 
-s32 TestMsgMngD_Process(KwlnTask *task) {
-    SdfListHead *mem;
+s32 TestMsgMngD_Process(dds3ProcessID_t *task) {
+    sdfDrawTag_t *mem;
     if ((sndTestMessageTexture != 0) && (sndTestMessageResourceIndex != 3)) {
-        mem = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        mem = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(mem);
         itfMiscDrawAlphaPrim(mem, 0, 0);
         itfMiscDrawSpritePrim(D_00358318, D_00358328, D_00358338, 0xFFF, sndTestMessageTexture, 0, mem);
@@ -1056,7 +1056,7 @@ extern s32 pbCalcFovDegrees(f32 *, f32, f32, f32, f32);
 
 s32 pbDebugPrintPanel(void) {
     SifCommand packet;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     f32 radiansToDegrees = 57.2957795f;
 
     list = dds3FontReqAllocDrawTag();
@@ -1169,7 +1169,7 @@ extern char D_003BB288[];
 /* Draw the blur settings and handle selection, editing and cancellation. */
 s32 pbDebugPrintPanel2(void) {
     SifCommand packet;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     s32 row;
     s32 y;
     s16 previous;

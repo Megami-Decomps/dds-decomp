@@ -31,7 +31,7 @@ extern void mnuDrawStaffCampScreen(s32, s32);
 extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
 extern u8 *D_003BAA9C;
 extern void mnuSetStateValue(u32 *out, u32 value);
-extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *entry, u32 menuValue);
+extern u32 mnuSetPartyEntryMenuValue(datUnitWork_t *entry, u32 menuValue);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern u8 mnuCampItemCommandHelpTextBank[];
 extern char mnuCampAmmoEquipmentPopupEntry[];
@@ -99,7 +99,7 @@ extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 extern void mnuClearListFlagsOneAndTwo();
 
-s32 mnuStaffImageEnterA(KwlnTask *task) {
+s32 mnuStaffImageEnterA(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
 
@@ -116,7 +116,7 @@ s32 mnuStaffImageEnterA(KwlnTask *task) {
     return menuRunPanel((void *)context, 1, (void *)task);
 }
 
-s32 mnuStaffImageExitA(KwlnTask *task) {
+s32 mnuStaffImageExitA(dds3ProcessID_t *task) {
     StaffImageContext *context = (StaffImageContext *)dds3GetProcessData(task);
     StaffImageChoices *menu = context->menu;
     s32 item;
@@ -147,7 +147,7 @@ u32 mnuStaffValueSelectionLeaveNoOp(void) {
 }
 
 /* Once the popup is idle, confirmation captures the page-selection cursor index. */
-s32 mnuPollStaffValueSelectionConfirmation(KwlnTask *task) {
+s32 mnuPollStaffValueSelectionConfirmation(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
@@ -173,7 +173,7 @@ s32 mnuPollStaffValueSelectionConfirmation(KwlnTask *task) {
     return 0;
 }
 
-s32 mnuPrepareStaffImageAndSelectionLabel(KwlnTask *task) {
+s32 mnuPrepareStaffImageAndSelectionLabel(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
     mnuDrawCampScreenDefault(task);
     mnuCreateStaffImageSprite(7);
@@ -184,13 +184,13 @@ s32 mnuPrepareStaffImageAndSelectionLabel(KwlnTask *task) {
 }
 
 /* Run the label-image state's teardown phase and return its scheduler word. */
-s32 mnuExitStaffImageAndSelectionLabel(KwlnTask *task) {
+s32 mnuExitStaffImageAndSelectionLabel(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
     return menuRunPanel((void *)context, 2, (void *)task);
 }
 
 s32 mnuHandleSecondaryStaffObjectInput(s32 task) {
-    StaffImageContext *context = (StaffImageContext *)dds3GetProcessData((KwlnTask *)task);
+    StaffImageContext *context = (StaffImageContext *)dds3GetProcessData((dds3ProcessID_t *)task);
     s32 *popup = &context->popupState;
     StaffImageChoices *menu = context->menu;
     s32 buttons = mnuMapPadMaskToFlags(0x33);
@@ -224,7 +224,7 @@ s32 mnuHandleSecondaryStaffObjectInput(s32 task) {
     return 0;
 }
 
-s32 mnuStaffImageEnterD(KwlnTask *task) {
+s32 mnuStaffImageEnterD(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
 
@@ -242,7 +242,7 @@ s32 mnuStaffImageEnterD(KwlnTask *task) {
 }
 
 /* Run the secondary-image state's teardown phase and return its scheduler word. */
-s32 mnuStaffImageExitD(KwlnTask *task) {
+s32 mnuStaffImageExitD(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
     return menuRunPanel((void *)context, 2, (void *)task);
 }
@@ -261,7 +261,7 @@ extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 mnuGetAbilityTargetCategory(u16);
 extern char mnuCampItemUseListPopupEntry[];
 
-s32 mnuHandleStaffItemUseInput(KwlnTask *task) {
+s32 mnuHandleStaffItemUseInput(dds3ProcessID_t *task) {
     u32 userValue = dds3GetProcessData(task);
     StaffImageContext *staff = (StaffImageContext *)userValue;
     StaffImageChoices *menu = staff->menu;
@@ -303,7 +303,7 @@ s32 mnuHandleStaffItemUseInput(KwlnTask *task) {
     return 0;
 }
 
-s32 mnuStaffImageEnterB(KwlnTask *task) {
+s32 mnuStaffImageEnterB(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
 
@@ -321,13 +321,13 @@ s32 mnuStaffImageEnterB(KwlnTask *task) {
 }
 
 /* Run the alternate primary-image state's teardown phase and return its scheduler word. */
-s32 mnuStaffImageExitB(KwlnTask *task) {
+s32 mnuStaffImageExitB(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
     return menuRunPanel((void *)context, 2, (void *)task);
 }
 
 /* Build the staff value page for the current page-selection cursor. */
-s32 mnuInitializeStaffValuePage(KwlnTask *task) {
+s32 mnuInitializeStaffValuePage(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
     s32 index = ((StaffImageContext *)context)->pageWindow.lists[0]->cursor->index;
@@ -353,7 +353,7 @@ s32 mnuInitializeStaffValuePage(KwlnTask *task) {
     return 1;
 }
 
-s32 mnuReleaseStaffValuePageResources(KwlnTask *task) {
+s32 mnuReleaseStaffValuePageResources(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
 
     mnuReleaseStaffExtraWindow(context);
@@ -374,7 +374,7 @@ s32 mnuReleaseStaffValuePageResources(KwlnTask *task) {
     return 1;
 }
 
-extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
+extern u16 mnuGetPartyEntryMenuValue(datUnitWork_t *);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern u8 *D_003BAA70;
@@ -394,7 +394,7 @@ typedef struct MnuEquipScene {
 
 /* Swap the equipped bullet item: update the actor/old/new message tokens,
  * adjust inventory counts, and latch the old/new IDs in the menu context. */
-void mnuSwapEquippedBullet(s32 scene, DatPartyRecord *unit, s32 itemId) {
+void mnuSwapEquippedBullet(s32 scene, datUnitWork_t *unit, s32 itemId) {
     MnuEquipContext *equipContext = ((MnuEquipScene *)scene)->context;
     s32 equipped = mnuGetPartyEntryMenuValue(unit);
 
@@ -421,7 +421,7 @@ void mnuSwapEquippedBullet(s32 scene, DatPartyRecord *unit, s32 itemId) {
 
 /* Change pages only once per input sample, then restore the saved node and
  * row count on the new page. Returns one when the page changed, zero otherwise. */
-s32 mnuHandleStaffValuePageInput(KwlnTask *task) {
+s32 mnuHandleStaffValuePageInput(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
     s32 pageChanged = 0;
@@ -467,11 +467,11 @@ s32 mnuHandleStaffValuePageInput(KwlnTask *task) {
     return 1;
 }
 
-s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
+s32 mnuUpdateStaffPartySelectionState(dds3ProcessID_t *task) {
     StaffImageContext *context = (StaffImageContext *)dds3GetProcessData(task);
     StaffImageChoices *menu = context->menu;
     u32 buttons = mnuMapPadMaskToFlags(0x33);
-    DatPartyRecord *party = &DDS3_GBWK->party[context->pageWindow.lists[0]->cursor->index];
+    datUnitWork_t *party = &DDS3_GBWK->party[context->pageWindow.lists[0]->cursor->index];
     s32 state;
     MenuWindowContainer *list;
 
@@ -536,11 +536,11 @@ s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
 }
 
 /* Draw the selected party member's value page and advance its primary dispatch. */
-s32 mnuDrawStaffPartyValuePage(KwlnTask *task) {
+s32 mnuDrawStaffPartyValuePage(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
     s32 index = ((StaffImageContext *)context)->pageWindow.lists[0]->cursor->index;
-    DatPartyRecord *partyEntry = &DDS3_GBWK->party[index];
+    datUnitWork_t *partyEntry = &DDS3_GBWK->party[index];
     MenuWindowContainer *list;
     struct MenuList *window;
 
@@ -575,7 +575,7 @@ s32 mnuDrawStaffPartyValuePage(KwlnTask *task) {
 }
 
 /* Request message-window mode one before the value-page teardown phase. */
-s32 mnuExitStaffValuePage(KwlnTask *task) {
+s32 mnuExitStaffValuePage(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
 
     dspRequestMessageWindowModeOne();

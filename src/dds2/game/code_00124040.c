@@ -52,7 +52,7 @@ extern void fldResetTargetViewAndSound(void);
 extern void fldPauseBgm(void);
 extern void fldSubmitSelectedActorWaypointTransition(void);
 
-extern EffWorldNode *dds3AddCameraObjectBasicTypeLookAt(s32 key, void *targetPosition, u128 *worldEye, u128 *localUp);
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeLookAt(s32 key, void *targetPosition, u128 *worldEye, u128 *localUp);
 
 /* Field travel and encounter providers. Integer/FPU argument classes have
  * independent register sequences; the field-controller call establishes
@@ -80,7 +80,7 @@ extern s32 fldNext_fld;
 
 #include "dds3_object_payload.h"
 
-extern EffWorldNode *D_00435F60;
+extern dds3Basic_t *D_00435F60;
 
 extern FldSequenceController fldAutoMapSeqFlags;
 
@@ -175,7 +175,7 @@ extern void fldSkyCalcFilter(void);
 
 extern void fldUpdateSelectedValueTransition(void);
 
-extern void fldUpdateRoomTriggers(EffWorldNode *);
+extern void fldUpdateRoomTriggers(dds3Basic_t *);
 
 extern void fldUpdateObjectSlotActivation(void);
 
@@ -260,7 +260,7 @@ extern void fldFreeNextFile(void);
 
 extern s32 sdfDelayedResrcCheck(void);
 
-struct EffWorldNode;
+struct dds3Basic_t;
 
 
 extern f32 fldCalcAngleBetween(f32 fromX, f32 fromZ, f32 toX, f32 toZ);
@@ -317,9 +317,9 @@ void fldUnloadPlayerModel(void);
 extern void dds3ObjectBaseOffFlag(u32, s32);
 
 
-extern void dds3RebuildObjectModelContext(EffWorldNode *object, s32 resourceGroup, s32 resourceId);
+extern void dds3RebuildObjectModelContext(dds3Basic_t *object, s32 resourceGroup, s32 resourceId);
 
-extern EffWorldNode *dds3AddUnitObjectBasic(s32, void *, void *);
+extern dds3Basic_t *dds3AddUnitObjectBasic(s32, void *, void *);
 
 extern s32 D_0038A67C[];
 
@@ -370,7 +370,7 @@ extern void fldReleaseMenuSlotsAfterWait(void);
 
 void fldEncountSetFlag(u32 mask);
 
-s32 fldPlayerCameraTargetNoPathUpdate(ObjectTransform *relativeTransform, EffWorldNode *target);
+s32 fldPlayerCameraTargetNoPathUpdate(dds3PoseSet_t *relativeTransform, dds3Basic_t *target);
 
 extern void fldUpdateCameraTarget(void);
 
@@ -688,17 +688,17 @@ f32 fldPointDistance(f32 ax, f32 ay, f32 az, f32 bx, f32 by, f32 bz) {
 void fldToggleWorldNodeState(s64 clearMode) {
     WorldIndexNode *valueChain;
     s32 status;
-    EffWorldNode *worldObject;
+    dds3Basic_t *worldObject;
 
     valueChain = dds3GetControlScene();
     valueChain = dds3SceneBasicGetList(valueChain, 6);
-    status = dds3GetBasicArrayCount((WorldValueIndices *)valueChain);
+    status = dds3GetBasicArrayCount((dds3BasicArrayHandle_t *)valueChain);
     if (status == 0) {
         return;
     }
-    dds3SetFirstBasicArray((WorldValueIndices *)valueChain);
+    dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)valueChain);
     do {
-        worldObject = (EffWorldNode *)dds3GetBasicArray((WorldValueIndices *)valueChain);
+        worldObject = (dds3Basic_t *)dds3GetBasicArray((dds3BasicArrayHandle_t *)valueChain);
         status = dds3MatterObjectBasicGetAlpMode(worldObject);
         if (status == 4) {
             if (clearMode == 0) {
@@ -708,7 +708,7 @@ void fldToggleWorldNodeState(s64 clearMode) {
                 dds3MatterObjectBasicSetAlpMode(worldObject, 0);
             }
         }
-        status = dds3SetNextBasicArray((WorldValueIndices *)valueChain);
+        status = dds3SetNextBasicArray((dds3BasicArrayHandle_t *)valueChain);
     } while (status != 0);
     dds3FreeBasicArrayHandle(valueChain);
 }
@@ -739,10 +739,10 @@ extern void fldResetFieldRuntimeState();
 
 extern char D_00435F48[];
 
-void fldSetSceneParam2(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name);
+void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char *name);
 
 void fldMainLoadStart(void) {
-    FieldSequenceRecord record;
+    fldSceneParam_t record;
     u32 mode;
 
     if (fileGetSelectionPendingFlag() == 1) {
@@ -800,7 +800,7 @@ void fldResetPlayerSceneTransformState(void) {
 
 /* Fill a sequence packet for stage/kind/name, then clear the temporary override.
  * Unspecified packet bytes deliberately retain their previous contents. */
-void fldSetSceneParam2(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name) {
+void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char *name) {
     if (dds3SearchProcessName(D_00412D50) != NULL) {
         if (fldGlobalBase.area == stage) {
             fldGlobalBase.reuseAreaResources = 1;
@@ -828,7 +828,7 @@ void fldSetSceneParam2(FieldSequenceRecord *record, s32 stage, s32 kind, const c
 
 /* Fill the alternate-mode sequence packet for stage/kind/name.
  * Reuse a running sequence in the same area; otherwise request a work clear. */
-void fldSetSceneParam3(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name) {
+void fldSetSceneParam3(fldSceneParam_t *record, s32 stage, s32 kind, const char *name) {
     if (dds3SearchProcessName(D_00412D50) != NULL) {
         if (fldGlobalBase.area == stage) {
             fldGlobalBase.reuseAreaResources = 1;
@@ -854,7 +854,7 @@ void fldSetSceneParam3(FieldSequenceRecord *record, s32 stage, s32 kind, const c
 
 /* Fill a field sequence packet, including its narrowed code, link and detail name.
  * A running sequence in the same area requests reuse rather than a work clear. */
-void fldSetSceneParam4(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
+void fldSetSceneParam4(fldSceneParam_t *record, s32 stage, s32 kind, const char *name,
                    s32 code, s32 link, const char *subname) {
     if (dds3SearchProcessName(D_00412D50) != NULL) {
         if (fldGlobalBase.area == stage) {
@@ -881,7 +881,7 @@ void fldSetSceneParam4(FieldSequenceRecord *record, s32 stage, s32 kind, const c
 
 /* Fill a sequence packet with a narrowed code and note instead of a detail/link.
  * A running sequence in the same area requests reuse rather than a work clear. */
-void fldSetSceneParam5(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
+void fldSetSceneParam5(fldSceneParam_t *record, s32 stage, s32 kind, const char *name,
                     s32 code, const char *subname) {
     if (dds3SearchProcessName(D_00412D50) != NULL) {
         if (fldGlobalBase.area == stage) {
@@ -906,7 +906,7 @@ void fldSetSceneParam5(FieldSequenceRecord *record, s32 stage, s32 kind, const c
     record->options = 0;
 }
 
-void fldSetSceneParamLoad(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
+void fldSetSceneParamLoad(fldSceneParam_t *record, s32 stage, s32 kind, const char *name,
                     s32 code, s32 link, const char *subname) {
     record->unk_30 = 0;
     record->sequenceWord3C = 0;
@@ -946,9 +946,9 @@ u32 fldGetRestoreMode(void) {
 }
 
 extern FieldAreaEncounterTable *D_00435E08;
-extern void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *sequence);
+extern void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequence);
 
-extern f32 *dds3GetTransformSourceData(EffWorldNode *node);
+extern f32 *dds3GetTransformSourceData(dds3Basic_t *node);
 extern void fldStartMiniTitleForUnlock(s32 area);
 extern void FromRotation(f32 angle);
 extern void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode);
@@ -970,7 +970,7 @@ void fldRebuildFieldScene(void) {
     f32 fallback[12];
     f32 *transform = NULL;
     FieldPlayerSceneWork *sceneWork;
-    EffWorldNode *node;
+    dds3Basic_t *node;
     FieldAreaEncounterTable *encounters;
     FieldAreaEncounterRow *room;
     s32 reuseAreaResources;
@@ -980,7 +980,7 @@ void fldRebuildFieldScene(void) {
     s32 flag;
     s32 encounter;
     s32 cameraLinkMode;
-    ObjectTransform *camera;
+    dds3PoseSet_t *camera;
 
     memset(fallback, 0, sizeof(fallback));
     fallback[3] = 1.0f;
@@ -992,7 +992,7 @@ void fldRebuildFieldScene(void) {
         if (sceneWork->sequenceOption == 1) {
             /* This provider initializes the real sequence-packet layout in scene storage. */
             fldInitializeActorLinkedSequence(DDS3_GBWK->vr.previewX,
-                DDS3_GBWK->vr.previewY, (FieldSequenceRecord *)sceneWork);
+                DDS3_GBWK->vr.previewY, (fldSceneParam_t *)sceneWork);
         }
         reuseAreaResources = fldGlobalBase.reuseAreaResources;
         evtLoadArea(sceneWork->area, sceneWork->room);
@@ -1076,7 +1076,7 @@ void fldRebuildFieldScene(void) {
             fldCreateChaseCameraObject();
             fldGlobalBase.targetGuideEnabled = 1;
         }
-        dds3SetActiveUnitSceneBasic(dds3GetControlScene(), (EffWorldNode *)fldPlayerObject);
+        dds3SetActiveUnitSceneBasic(dds3GetControlScene(), (dds3Basic_t *)fldPlayerObject);
         fldPreparePlayerSceneCameraTarget();
         fldCreateSecondaryWorldCamera();
         if (sceneWork->primaryState == 0) {
@@ -1130,7 +1130,7 @@ void fldRebuildFieldScene(void) {
 }
 
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 
 /* Reload only when the field-selected variant changes or its handle is absent. */
@@ -1189,7 +1189,7 @@ void fldLoadPlayerModel(void) {
 
 void fldUnloadPlayerModel(void) {
     if (fldPlayerModelResource != 0) {
-        sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldPlayerModelResource);
+        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldPlayerModelResource);
         fldPlayerModelResource = 0;
         D_003898B8[0] = 0;
     }
@@ -1205,20 +1205,20 @@ typedef struct FieldVec4 {
 extern FieldVec4 D_00412EB0;
 extern void FromRotation(f32);
 extern s32 D_00389888[];
-extern MdlCtx *fldPlayerModelContext;
+extern dds3ModelHandle_t *fldPlayerModelContext;
 
 /* Toggle the selected player model, preserving and rebuilding its scene pose.
  * Sable/Garnet/Tidal reconstruction; KiB compiler/ABI qualification.
  * The four legacy SDK stores are audited against this exact VU/callee-read
  * pipeline; they are not general-purpose memory barriers. */
 
-extern void dds3DeleteUnitObjectBasic(EffWorldNode *);
+extern void dds3DeleteUnitObjectBasic(dds3Basic_t *);
 extern s32 fldSynchronizePlayerPositionAndAreaState(void);
 
 void fldTogglePlayerModel(void) {
     f32 work[4];
     FieldPlayerSceneWork *sceneWork;
-    EffWorldNode *player;
+    dds3Basic_t *player;
     void *source;
     void *buffer;
 
@@ -1227,7 +1227,7 @@ void fldTogglePlayerModel(void) {
     {
         FieldVec4 axis = D_00412EB0;
 
-        player = (EffWorldNode *)fldPlayerObject;
+        player = (dds3Basic_t *)fldPlayerObject;
         {
             sceneWork = &fldSceneParam;
             dds3GetPosPoseSet(player);
@@ -1235,7 +1235,7 @@ void fldTogglePlayerModel(void) {
             dds3GetRotPoseSet(player);
             VU0_STORE_VF_UNCLOBBERED(vf10, &sceneWork->rotation);
         }
-        dds3DeleteUnitObjectBasic((EffWorldNode *)fldPlayerObject);
+        dds3DeleteUnitObjectBasic((dds3Basic_t *)fldPlayerObject);
         fldUnloadPlayerModel();
         /* Rebind the same local for the rebuild phase. Both definitions feed
          * real phase uses; the resulting two-definition pseudo stays global,
@@ -1254,26 +1254,26 @@ void fldTogglePlayerModel(void) {
         VU0_STORE_VF_UNCLOBBERED(vf10, work);
     }
     fldPlayerObject = (u32)dds3AddUnitObjectBasic(dds3AllocObjectId(), sceneWork, work);
-    dds3SetUnitObjectId((struct EffWorldNode *)fldPlayerObject, (u32)D_00412EC0);
-    dds3SetActiveUnitSceneBasic(dds3GetControlScene(), (EffWorldNode *)fldPlayerObject);
+    dds3SetUnitObjectId((struct dds3Basic_t *)fldPlayerObject, (u32)D_00412EC0);
+    dds3SetActiveUnitSceneBasic(dds3GetControlScene(), (dds3Basic_t *)fldPlayerObject);
     fldLoadPlayerModel();
     D_00435F40 = D_00435F44;
     D_00435F38 = (u32)sdfMemAllocDirect(D_00435F44);
-    source = (void *)sdfMemGetPtr((struct SdfMemBlock *)(u32)fldPlayerModelResource);
-    buffer = (void *)sdfMemGetPtr((struct SdfMemBlock *)(u32)D_00435F38);
+    source = (void *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)fldPlayerModelResource);
+    buffer = (void *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)D_00435F38);
     memcpy(buffer, source, D_00435F40);
     D_00435F3C = (u32)buffer;
     mdlPackDecode(2, 0, 0x101, (s32)buffer, D_00435F40);
-    sdfMemFreeDelayedDirect((struct SdfMemBlock *)D_00435F38);
+    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)D_00435F38);
     D_00435F38 = 0;
-    dds3RebuildObjectModelContext((EffWorldNode *)fldPlayerObject, 2, fldSceneParam.sequenceWord3C);
-    fldPlayerModelContext = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)fldPlayerObject);
+    dds3RebuildObjectModelContext((dds3Basic_t *)fldPlayerObject, 2, fldSceneParam.sequenceWord3C);
+    fldPlayerModelContext = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle((dds3Basic_t *)fldPlayerObject);
     if (D_00389888[0] != 0) {
-        mdlLoopMotion((MdlCtx *)fldPlayerModelContext, 0, 2);
-        mdlSetMotionSpeedEx((MdlCtx *)fldPlayerModelContext, 1, 1.0f);
-        mdlLoopMotion((MdlCtx *)fldPlayerModelContext, 1, 2);
+        mdlLoopMotion((dds3ModelHandle_t *)fldPlayerModelContext, 0, 2);
+        mdlSetMotionSpeedEx((dds3ModelHandle_t *)fldPlayerModelContext, 1, 1.0f);
+        mdlLoopMotion((dds3ModelHandle_t *)fldPlayerModelContext, 1, 2);
     } else {
-        mdlLoopMotion((MdlCtx *)fldPlayerModelContext, 0, 3);
+        mdlLoopMotion((dds3ModelHandle_t *)fldPlayerModelContext, 0, 3);
         fldUnloadPlayerModel();
     }
     fldApplySceneLightSet(0, 0);
@@ -1289,18 +1289,18 @@ void fldPrepareResourceBuffer(void) {
     fldLoadPlayerModel();
     D_00435F40 = D_00435F44;
     D_00435F38 = (u32)sdfMemAllocDirect(D_00435F44);
-    source = (void *)sdfMemGetPtr((struct SdfMemBlock *)(u32)fldPlayerModelResource);
-    buffer = (void *)sdfMemGetPtr((struct SdfMemBlock *)(u32)D_00435F38);
+    source = (void *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)fldPlayerModelResource);
+    buffer = (void *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)D_00435F38);
     memcpy(buffer, source, D_00435F40);
     D_00435F3C = (u32)buffer;
     mdlPackDecode(2, 0, 0x101, (s32)buffer, D_00435F40);
-    sdfMemFreeDelayedDirect((struct SdfMemBlock *)D_00435F38);
+    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)D_00435F38);
     D_00435F38 = 0;
 }
 
 void fldReleaseResources(void) {
     if (D_00435F38 != 0) {
-        sdfMemFreeDelayedDirect((struct SdfMemBlock *)D_00435F38);
+        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)D_00435F38);
         D_00435F38 = 0;
     }
     if (D_00389790[0] == 0 && D_00435F78 == 0) {
@@ -1311,18 +1311,18 @@ void fldReleaseResources(void) {
 
 extern u32 fldSecondarySceneObject;
 
-extern MdlCtx *fldPlayerModelContext;
+extern dds3ModelHandle_t *fldPlayerModelContext;
 
-extern MdlCtx *fldSecondarySceneModelContext;
+extern dds3ModelHandle_t *fldSecondarySceneModelContext;
 
 void fldSnapshotAndReleasePlayerSceneObject(void) {
     FieldPlayerSceneWork *sceneWork;
     if (fldPlayerObject != 0) {
         if (dds3GetControlScene() != 0) {
             sceneWork = &fldSceneParam;
-            dds3GetPosPoseSet((EffWorldNode *)fldPlayerObject);
+            dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
             VU0_STORE_VF(vf10, &sceneWork->position);
-            dds3GetRotPoseSet((EffWorldNode *)fldPlayerObject);
+            dds3GetRotPoseSet((dds3Basic_t *)fldPlayerObject);
             VU0_STORE_VF(vf10, &sceneWork->rotation);
         }
         fldPlayerObject = 0;
@@ -1345,11 +1345,11 @@ void fldShutdownSceneTasksAndWorld(void) {
     fldResetTargetViewAndSound();
 }
 
-EffWorldNode **fldGetPlayerSceneStateAddress(void) {
+dds3Basic_t **fldGetPlayerSceneStateAddress(void) {
     return &D_00435F60;
 }
 
-EffWorldNode *fldGetPlayerSceneState(void) {
+dds3Basic_t *fldGetPlayerSceneState(void) {
     return *fldGetPlayerSceneStateAddress();
 }
 
@@ -1360,7 +1360,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
 
     if (fldPlayerObject != 0) {
         fldEncountSetFlag(0x40);
-        dds3ObjectBaseSetPrimaryControl((EffWorldNode *)fldPlayerObject, fldPlayerCameraTargetNoPathUpdate);
+        dds3ObjectBaseSetPrimaryControl((dds3Basic_t *)fldPlayerObject, fldPlayerCameraTargetNoPathUpdate);
     }
     fldGlobalBase.cameraTargetGraceTicks = 4;
     if (fldGlobalBase.sceneMode < 4) {
@@ -1372,7 +1372,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
     fldGlobalBase.unk90 = -1;
     fldGlobalBase.unk94 = -1;
     fldUpdateCameraTarget();
-    dds3GetPosPoseSet((EffWorldNode *)fldPlayerObject);
+    dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
     VU0_STORE_VF(vf10, position);
     position[1] += 10.0f;
     fldRefreshAreaStateFromPosition(position);
@@ -1381,7 +1381,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
 void fldResetPlayerSceneObjectState(void) {
     if (fldPlayerObject != 0) {
         fldEncountClearFlag(0x40);
-        dds3ObjectBaseSetPrimaryControl((EffWorldNode *)fldPlayerObject, 0);
+        dds3ObjectBaseSetPrimaryControl((dds3Basic_t *)fldPlayerObject, 0);
     }
     D_00389858[0] = 4;
 }
@@ -1397,13 +1397,13 @@ void fldCreatePlayerObject(void) {
     rotation[3] = 1.0f;
     if (fldPlayerObject == 0) {
         fldPlayerObject = (u32)dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
-        dds3SetUnitObjectId((struct EffWorldNode *)fldPlayerObject, (u32)D_00412EC0);
-        dds3SetActiveUnitSceneBasic(dds3GetControlScene(), (EffWorldNode *)fldPlayerObject);
+        dds3SetUnitObjectId((struct dds3Basic_t *)fldPlayerObject, (u32)D_00412EC0);
+        dds3SetActiveUnitSceneBasic(dds3GetControlScene(), (dds3Basic_t *)fldPlayerObject);
         if (D_00435F30 != 0) {
             dds3ObjectBaseOffFlag(fldPlayerObject, 0x20);
         }
         fldPrepareResourceBuffer();
-        dds3RebuildObjectModelContext((EffWorldNode *)fldPlayerObject, 2, D_0038A67C[0]);
+        dds3RebuildObjectModelContext((dds3Basic_t *)fldPlayerObject, 2, D_0038A67C[0]);
     }
 }
 
@@ -1438,7 +1438,7 @@ INCLUDE_RODATA(const s32, "game/code_00124040", D_00412EC0);
 
 void fldSpawnPlayerUnits(f32 *input) {
     f32 work[4];
-    EffWorldNode *player;
+    dds3Basic_t *player;
     s32 locationFlags;
 
     memset(work, 0, sizeof(work));
@@ -1454,30 +1454,30 @@ void fldSpawnPlayerUnits(f32 *input) {
         effMiscQuatMultiplyVU();
         VU0_STORE_VF(vf10, work);
 
-        player = (EffWorldNode *)fldPlayerObject;
+        player = (dds3Basic_t *)fldPlayerObject;
         if (player == NULL) {
             player = dds3AddUnitObjectBasic(dds3AllocObjectId(), input, work);
             fldPlayerObject = (u32)player;
             dds3SetUnitObjectId(player, (u32)D_00412EC0);
-            dds3SetActiveUnitSceneBasic(dds3GetControlScene(), (EffWorldNode *)fldPlayerObject);
+            dds3SetActiveUnitSceneBasic(dds3GetControlScene(), (dds3Basic_t *)fldPlayerObject);
             if (D_00435F30 != 0) {
                 dds3ObjectBaseOffFlag(fldPlayerObject, 0x20);
             }
             fldPrepareResourceBuffer();
-            dds3RebuildObjectModelContext((EffWorldNode *)fldPlayerObject, 2, D_0038A67C[0]);
-            player = (EffWorldNode *)fldPlayerObject;
+            dds3RebuildObjectModelContext((dds3Basic_t *)fldPlayerObject, 2, D_0038A67C[0]);
+            player = (dds3Basic_t *)fldPlayerObject;
         } else {
-            ObjectTransform *inner = player->inner;
+            dds3PoseSet_t *inner = player->inner;
             PCP_COPY_VECTOR_F32(inner->position, input);
             PCP_COPY_VECTOR_F32(inner->smoothedPosition, input);
             PCP_COPY_VECTOR_F32(inner->rotation, input + 4);
         }
 
         dds3SetPosPoseSet(player, (u128 *)input);
-        dds3SetRotPoseSet((EffWorldNode *)fldPlayerObject, (u128 *)work);
-        dds3SetSclPoseSet((EffWorldNode *)fldPlayerObject, (u128 *)unitScale);
-        fldPlayerModelContext = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)(u32)fldPlayerObject);
-        dds3GetRadiusPoseSet((EffWorldNode *)fldPlayerObject, 90.0f);
+        dds3SetRotPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)work);
+        dds3SetSclPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)unitScale);
+        fldPlayerModelContext = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle((dds3Basic_t *)(u32)fldPlayerObject);
+        dds3GetRadiusPoseSet((dds3Basic_t *)fldPlayerObject, 90.0f);
 
         if (fldGlobalBase.playerModelAlternate == 0) {
             mdlLoopMotion(fldPlayerModelContext, 0, 2);
@@ -1497,13 +1497,13 @@ void fldSpawnPlayerUnits(f32 *input) {
             effMiscQuatMultiplyVU();
             VU0_STORE_VF(vf10, work);
             fldSecondarySceneObject = (u32)dds3AddUnitObjectBasic(dds3AllocObjectId(), input, work);
-            dds3SetUnitObjectId((EffWorldNode *)fldSecondarySceneObject, (u32)D_00412F00);
-            dds3RebuildObjectModelContext((EffWorldNode *)fldSecondarySceneObject, 2, D_0038A67C[0]);
-            dds3SetPosPoseSet((EffWorldNode *)fldSecondarySceneObject, (u128 *)input);
-            dds3SetRotPoseSet((EffWorldNode *)fldSecondarySceneObject, (u128 *)work);
-            dds3SetSclPoseSet((EffWorldNode *)fldSecondarySceneObject, (u128 *)secondaryScale);
-            fldSecondarySceneModelContext = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)(u32)fldSecondarySceneObject);
-            dds3GetRadiusPoseSet((EffWorldNode *)fldSecondarySceneObject, 90.0f);
+            dds3SetUnitObjectId((dds3Basic_t *)fldSecondarySceneObject, (u32)D_00412F00);
+            dds3RebuildObjectModelContext((dds3Basic_t *)fldSecondarySceneObject, 2, D_0038A67C[0]);
+            dds3SetPosPoseSet((dds3Basic_t *)fldSecondarySceneObject, (u128 *)input);
+            dds3SetRotPoseSet((dds3Basic_t *)fldSecondarySceneObject, (u128 *)work);
+            dds3SetSclPoseSet((dds3Basic_t *)fldSecondarySceneObject, (u128 *)secondaryScale);
+            fldSecondarySceneModelContext = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle((dds3Basic_t *)(u32)fldSecondarySceneObject);
+            dds3GetRadiusPoseSet((dds3Basic_t *)fldSecondarySceneObject, 90.0f);
             mdlLoopMotion(fldSecondarySceneModelContext, 0, 0);
             sdfModelSetFaceDivParm(fldSecondarySceneModelContext->inner, 15.0f, 0.0f);
             fldSecondarySceneModelContext->inner->flags |= 8;
@@ -1558,7 +1558,7 @@ extern FieldVec4 D_00412F20;
 
 extern char D_00435F58[];
 
-extern void dds3CameraObjectBasicGetCameraTM(struct EffWorldNode *camera, u128 *worldEye);
+extern void dds3CameraObjectBasicGetCameraTM(struct dds3Basic_t *camera, u128 *worldEye);
 
 
 /* Create the secondary camera at target origin with the stored eye/up vectors. */
@@ -1566,8 +1566,8 @@ void fldCreateSecondaryWorldCamera(void) {
     FieldVec4 localUp = D_00412F10;
     FieldVec4 targetPosition;
     FieldVec4 worldEye;
-    EffWorldNode **cameraObjectSlot = &D_00435F60;
-    EffWorldNode *cameraObject;
+    dds3Basic_t **cameraObjectSlot = &D_00435F60;
+    dds3Basic_t *cameraObject;
     memset(&targetPosition, 0, sizeof(targetPosition));
     targetPosition.w = 1.0f;
     worldEye = D_00412F20;
@@ -1579,7 +1579,7 @@ void fldCreateSecondaryWorldCamera(void) {
     dds3SetActiveCameraSceneBasic(dds3GetControlScene(), *cameraObjectSlot);
 }
 
-s32 fldPlayerCameraTargetNoPathUpdate(ObjectTransform *relativeTransform, EffWorldNode *target) {
+s32 fldPlayerCameraTargetNoPathUpdate(dds3PoseSet_t *relativeTransform, dds3Basic_t *target) {
     return 0;
 }
 
@@ -1787,7 +1787,7 @@ s16 fldRollEncounter(void) {
 /* Advance movement-driven solar/attrition state and queue field encounters. */
 s32 fldUpdateTravelAndEncounters(void) {
     f32 *previousPosition = D_0038A6F0;
-    EffWorldNode *player;
+    dds3Basic_t *player;
     f32 distance;
     f32 interval;
     s32 previousPhase;
@@ -1803,7 +1803,7 @@ s32 fldUpdateTravelAndEncounters(void) {
         !fldEncountTestFlag(0x40)) return 0;
     if (fldAutoMapSeqTestFlag(1) == 1) return 0;
     if (!dds3GetActiveScene()) return 0;
-    player = (EffWorldNode *)fldPlayerObject;
+    player = (dds3Basic_t *)fldPlayerObject;
     if (!player) return 0;
 
     dds3GetPosPoseSet(player);
@@ -2176,8 +2176,8 @@ INCLUDE_RODATA(const s32, "game/code_00124040", D_00412F40);
 
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412F58);
 
-s32 fldUpdateFieldSceneTask(KwlnTask *task) {
-    EffBlurScatterParams blur;
+s32 fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
+    dds3Effect_DistortionBlurParam_t blur;
     FieldPlayerSceneWork *playerWork = &fldSceneParam;
     FldSequenceController *controller = &fldAutoMapSeqFlags;
     s32 mode;
@@ -2311,7 +2311,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
         D_004360E8 = 1;
         if (fldEncountTestFlag(0x40) != 0 && fldEveHit_ChkEveHitAfter() != 0) return 0;
         if (fldEncountTestFlag(0x40) != 0 && fldGlobalBase.titleFade != 0) {
-            fldUpdateRoomTriggers((EffWorldNode *)fldPlayerObject);
+            fldUpdateRoomTriggers((dds3Basic_t *)fldPlayerObject);
             break;
         }
         fldFinishDeferredExit();
@@ -2338,7 +2338,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
             break;
         }
         fldUpdateCameraFrame();
-        if (fldEncountTestFlag(0x40) != 0) fldUpdateRoomTriggers((EffWorldNode *)fldPlayerObject);
+        if (fldEncountTestFlag(0x40) != 0) fldUpdateRoomTriggers((dds3Basic_t *)fldPlayerObject);
         break;
     case 5:
         dds3VisibleSceneBasic(dds3GetActiveScene(), 0);
@@ -2411,7 +2411,7 @@ extern void fldTickWeatherEffectNodes(void);
 extern s32 D_003899A8[];
 extern s32 D_003899B0[];
 extern s32 D_00435F8C;
-s32 fldProcDraw(KwlnTask *task) {
+s32 fldProcDraw(dds3ProcessID_t *task) {
     s32 flags;
     FldSequenceController *lifecycle = &fldAutoMapSeqFlags;
 
@@ -2488,14 +2488,14 @@ u8 fldEncountTestFlag(u32 mask) {
     return (fldEncountFlags & mask) != 0;
 }
 
-extern s32 fldProcDraw(KwlnTask *task);
+extern s32 fldProcDraw(dds3ProcessID_t *task);
 
 extern s32 D_00435F84;
 extern char D_00412FD0[], D_00412FE0[];
-extern s32 fldProcDraw(KwlnTask *task);
+extern s32 fldProcDraw(dds3ProcessID_t *task);
 
 /* Start the field scene tasks; a zero mode copies the caller's sequence record into the scene work. */
-void fldProcTrigSequence(FieldSequenceRecord *record, u32 mode) {
+void fldProcTrigSequence(fldSceneParam_t *record, u32 mode) {
     FieldPlayerSceneWork *scene = &fldSceneParam;
     FldSequenceController *controller = &fldAutoMapSeqFlags;
 
@@ -2628,9 +2628,9 @@ s32 fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter) {
 
 /* Validate the packet where its native initialization is reconstructed. */
 typedef char FieldSequenceRecord_size_check[
-    (sizeof(FieldSequenceRecord) == 0xA0) ? 1 : -1];
+    (sizeof(fldSceneParam_t) == 0xA0) ? 1 : -1];
 typedef char FieldSequenceRecord_enabled_offset_check[
-    ((u32)&((FieldSequenceRecord *)0)->enabled == 0x58) ? 1 : -1];
+    ((u32)&((fldSceneParam_t *)0)->enabled == 0x58) ? 1 : -1];
 
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412FD0);
 

@@ -8,7 +8,7 @@ struct ItfMesSub;
 struct FileRequest;
 struct MenuList;
 struct MenuListNode;
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 typedef struct MantraPanelPool MantraPanelPool;
 struct MantraDrawPool;
 
@@ -92,7 +92,7 @@ typedef struct MenuMantraRecord {
 typedef MenuMantraRecord MantraMenuSrc;
 
 typedef struct MantraFlagResource {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u32 capacity;
     u16 *flags;
     u16 data[176];
@@ -137,7 +137,7 @@ typedef struct MantraMenuWork {
     u8 sourceNextState;
     s8 tutorialWaitFrames;
     u8 tutorialNextState;
-    DatPartyRecord tutorialParty[3];
+    datUnitWork_t tutorialParty[3];
     union {
         u32 drawFlags;
         struct {
@@ -194,17 +194,17 @@ typedef struct MantraMenuWork {
 /* mnuAllocateMantraResourceWork allocates and clears exactly 0xC08 bytes. The task keeps
  * this whole pointer while menu consumers address its work subobject. */
 typedef struct MnuStatusResource {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     struct MenuList *list;
     u32 resourceSlots[12];
-    struct SdfMemBlock *resourceAllocationA;
-    struct SdfMemBlock *resourceAllocationB;
+    struct sdfMemHandle_t *resourceAllocationA;
+    struct sdfMemHandle_t *resourceAllocationB;
     struct ItfMesSub *messageWindow;
     struct ItfMesSub *messageDefinition;
     MenuProgressHost *progressHost;
     s32 currency; /* 0x4C: copy of the saved currency taken when the menu opens */
     u8 pad50[4];
-    DatPartyRecord snapshot;
+    datUnitWork_t snapshot;
     MtrSelectionFlags flags;
     MtrResourceLoadState resourceLoad;
     MtrSelectionState selection;

@@ -3,12 +3,12 @@
 
 #include "common.h"
 
-struct EffEventWork;
+struct effEveBEDCutHandle_t;
 
 /* Both PCP drift owners allocate count * 0x18 bytes after their 0x11C-byte
  * work header, initialize these rows, and release each retained event. */
 typedef struct EffPCPDriftEventRow {
-    struct EffEventWork *event;
+    struct effEveBEDCutHandle_t *event;
     s32 frame;
     f32 position;
     f32 positionStep;

@@ -78,7 +78,7 @@ ModelInstanceWork *itfCreateModelInstanceWork(s32 listCount, s32 *instanceCounts
     s32 listBytes = listCount * 8;
     s32 allocationSize = listBytes + 16;
     s32 i;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     ModelInstanceWork *work;
     ModelInstanceList *list;
     u8 *records;

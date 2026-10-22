@@ -22,21 +22,21 @@
 extern void Normalize(void);
 
 
-void dds3MoverBasicSetCallBackPrimaryControl(EffWorldNode *object, Dds3MoverUpdate update);
+void dds3MoverBasicSetCallBackPrimaryControl(dds3Basic_t *object, Dds3MoverUpdate update);
 
 s32 BasicTypeToItemType(u32 kind);
 
 
 
-extern EffWorldNode *dds3AddMoverBasic(EffWorldNode *object);
+extern dds3Basic_t *dds3AddMoverBasic(dds3Basic_t *object);
 
 
-void dds3MoverBasicMakePath(EffWorldNode *object);
-void dds3MoverBasicFreePath(EffWorldNode *object);
+void dds3MoverBasicMakePath(dds3Basic_t *object);
+void dds3MoverBasicFreePath(dds3Basic_t *object);
 
 
-void dds3AreaBasicGetItemArray(EffWorldNode *slot, EffWorldNode *owner);
-void dds3ObjectBaseFreeModelHandle(EffWorldNode *object);
+void dds3AreaBasicGetItemArray(dds3Basic_t *slot, dds3Basic_t *owner);
+void dds3ObjectBaseFreeModelHandle(dds3Basic_t *object);
 
 
 #define DDS3_OBJECT_SLOT_COUNT 8
@@ -50,9 +50,9 @@ void dds3ObjectBaseFreeModelHandle(EffWorldNode *object);
 
 /* Process the owner's entry in the auxiliary handler index, destroy world nodes
  * in slots 1/2, release owned resources/devices, then free the index and base. */
-void dds3ObjectBaseFreeControlWorkData(ObjBase *base) {
-    EffWorldNode *owner;
-    EffWorldNode *handler;
+void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *base) {
+    dds3Basic_t *owner;
+    dds3Basic_t *handler;
     s32 slotIndex;
 
     owner = base->slots[DDS3_OBJECT_OWNER_SLOT];
@@ -71,7 +71,7 @@ void dds3ObjectBaseFreeControlWorkData(ObjBase *base) {
     }
     dds3ObjectBaseFreeModelHandle(owner);
     if (base->devSlot != 0) {
-        sdfModelRootFree((SdfModel *)base->devSlot, 1, 1);
+        sdfModelRootFree((sdfModelRootNode_t *)base->devSlot, 1, 1);
     }
     dds3FreeBasicArrayHandle(base->worldIndexNode);
     sdfChipFreeDirect(base);
@@ -79,7 +79,7 @@ void dds3ObjectBaseFreeControlWorkData(ObjBase *base) {
 
 /* Set mask bits in the object's resolved base. */
 void dds3ObjectBaseOnFlag(void *object, u32 mask) {
-    ObjBase *base;
+    dds3ObjectBaseControlWorkData_t *base;
 
     base = dds3GetBaseControlWorkData(object);
     base->flags = base->flags | mask;
@@ -87,15 +87,15 @@ void dds3ObjectBaseOnFlag(void *object, u32 mask) {
 
 /* Clear mask bits in the object's resolved base. */
 void dds3ObjectBaseOffFlag(void *object, u32 mask) {
-    ObjBase *base;
+    dds3ObjectBaseControlWorkData_t *base;
 
     base = dds3GetBaseControlWorkData(object);
     base->flags = base->flags & ~mask;
 }
 
 /* Return whether any requested mask bit is set, not whether all bits are set. */
-u8 dds3ObjectBaseCheckFlag(EffWorldNode *object, u32 mask) {
-    ObjBase *base;
+u8 dds3ObjectBaseCheckFlag(dds3Basic_t *object, u32 mask) {
+    dds3ObjectBaseControlWorkData_t *base;
 
     base = dds3GetBaseControlWorkData(object);
     return (base->flags & mask) != 0;
@@ -106,7 +106,7 @@ void *dds3ObjectBaseGetUserValue(void *object);
 /* Replace the extension pointer without releasing its previous value.
  * Keep the existing extension getter call before the store. */
 void dds3ObjectBaseSetUserValue(void *object, void *extensionData) {
-    ObjBase *base;
+    dds3ObjectBaseControlWorkData_t *base;
 
     base = dds3GetBaseControlWorkData(object);
     dds3ObjectBaseGetUserValue(object);
@@ -119,7 +119,7 @@ void *dds3ObjectBaseGetUserValue(void *object) {
 }
 
 /* Exchange the slot selected by the data kind; NULL data leaves every slot alone. */
-void *dds3ObjectBaseSetControlBasic(EffWorldNode *object, EffWorldNode *slotData) {
+void *dds3ObjectBaseSetControlBasic(dds3Basic_t *object, dds3Basic_t *slotData) {
     if (slotData == NULL) {
         return NULL;
     }
@@ -127,7 +127,7 @@ void *dds3ObjectBaseSetControlBasic(EffWorldNode *object, EffWorldNode *slotData
 }
 
 /* Replace one caller-selected slot and return its previous pointer; no release. */
-void *dds3ObjectBaseSetControlBasicType(EffWorldNode *object, void *slotData, s32 slotIndex) {
+void *dds3ObjectBaseSetControlBasicType(dds3Basic_t *object, void *slotData, s32 slotIndex) {
     void *previousData;
 
     previousData = dds3ObjectBaseGetControlBasic(object, slotIndex);
@@ -136,35 +136,35 @@ void *dds3ObjectBaseSetControlBasicType(EffWorldNode *object, void *slotData, s3
 }
 
 /* Read an indexed slot; the caller supplies a valid index. */
-void *dds3ObjectBaseGetControlBasic(EffWorldNode *object, s32 slotIndex) {
+void *dds3ObjectBaseGetControlBasic(dds3Basic_t *object, s32 slotIndex) {
     return dds3GetBaseControlWorkData(object)->slots[slotIndex];
 }
 
 /* Return the object's world-index node. */
-WorldIndexNode *dds3ObjectBaseGetEventArray(EffWorldNode *object) {
-    ObjBase *base;
+WorldIndexNode *dds3ObjectBaseGetEventArray(dds3Basic_t *object) {
+    dds3ObjectBaseControlWorkData_t *base;
 
     base = dds3GetBaseControlWorkData(object);
     return base->worldIndexNode;
 }
 
 /* Return the stored resource pointer; its type depends on resourceState. */
-void *dds3ObjectBaseGetModelHandle(EffWorldNode *object) {
+void *dds3ObjectBaseGetModelHandle(dds3Basic_t *object) {
     return dds3GetBaseControlWorkData(object)->resourceHandle;
 }
 
 /* A nonzero handle releases model/context state (0) or device/motion state (1),
  * then clears the handle and marks state 3. Other states skip backend release;
  * an absent handle leaves state untouched, and the stored motion pointer remains. */
-void dds3ObjectBaseFreeModelHandle(EffWorldNode *object) {
-    ObjBase *base;
+void dds3ObjectBaseFreeModelHandle(dds3Basic_t *object) {
+    dds3ObjectBaseControlWorkData_t *base;
     EffectObjectData *data;
 
     base = dds3GetBaseControlWorkData(object);
     if (base->resourceHandle != 0) {
         if (base->resourceState != DDS3_OBJECT_RESOURCE_DEV_MOTION) {
             if (base->resourceState == DDS3_OBJECT_RESOURCE_MODEL_CONTEXT) {
-                mdlFree((MdlCtx *)base->resourceHandle);
+                mdlFree((dds3ModelHandle_t *)base->resourceHandle);
                 data = object->data;
                 if (data->transitionWork != NULL) {
                     evtDeleteUnitHandle(data->transitionWork);
@@ -172,7 +172,7 @@ void dds3ObjectBaseFreeModelHandle(EffWorldNode *object) {
                 }
             }
         } else {
-            sdfModelRootFree((SdfModel *)base->resourceHandle, 1, 1);
+            sdfModelRootFree((sdfModelRootNode_t *)base->resourceHandle, 1, 1);
             sdfMotionCtrlrFree(base->motion);
         }
         base->resourceHandle = 0;
@@ -187,15 +187,15 @@ extern const char dds3ExtendedBipedChunkNames[18][20];
 extern const char dds3PlayerChunkNames[17][20];
 extern const char dds3Pc013ChunkNames[17][20];
 extern const char D_00435D98[];
-extern const char *sdfModelGetNodeName(SdfModel *model, s32 nameId);
-extern s32 sdfModelGetNodeIndexByName(SdfModel *model, const char *name);
+extern const char *sdfModelGetNodeName(sdfModelRootNode_t *model, s32 nameId);
+extern s32 sdfModelGetNodeIndexByName(sdfModelRootNode_t *model, const char *name);
 
 const char dds3PlayerModelName[16] = "player_a";
 
 /* Resolve positive named-chunk IDs into the model family's resource slots. */
-void dds3LoadObjectResourceSlotIds(ObjBase *base, MdlCtx *model) {
+void dds3LoadObjectResourceSlotIds(dds3ObjectBaseControlWorkData_t *base, dds3ModelHandle_t *model) {
     const char *modelName;
-    SdfModel *inner;
+    sdfModelRootNode_t *inner;
     s32 family;
     s32 chunkIndex;
     s32 chunkId;
@@ -267,14 +267,14 @@ void dds3LoadObjectResourceSlotIds(ObjBase *base, MdlCtx *model) {
 
 /* Rebuild the model resource, synchronize object vectors and initialize
  * transition work only when no transition is already associated with it. */
-void dds3RebuildObjectModelContext(EffWorldNode *object, s32 resourceGroup, s32 resourceId) {
+void dds3RebuildObjectModelContext(dds3Basic_t *object, s32 resourceGroup, s32 resourceId) {
     f32 scale[4];
-    ObjBase *base;
-    MdlCtx *model;
+    dds3ObjectBaseControlWorkData_t *base;
+    dds3ModelHandle_t *model;
 
     base = dds3GetBaseControlWorkData(object);
     if (base->resourceHandle != 0) {
-        mdlFree((MdlCtx *)base->resourceHandle);
+        mdlFree((dds3ModelHandle_t *)base->resourceHandle);
     }
     model = mdlLoad(resourceGroup, resourceId);
     dds3LoadObjectResourceSlotIds(base, model);
@@ -301,19 +301,19 @@ void dds3RebuildObjectModelContext(EffWorldNode *object, s32 resourceGroup, s32 
     }
 }
 
-extern void dds3GetTMPoseSet(EffWorldNode *object);
+extern void dds3GetTMPoseSet(dds3Basic_t *object);
 
 void dds3ObjectBaseMakeMatter(void *object) {
-    ObjBase *base;
-    EffWorldNode *scriptModelObject;
-    Motion *motion;
-    SdfModel *model;
+    dds3ObjectBaseControlWorkData_t *base;
+    dds3Basic_t *scriptModelObject;
+    sdfMotionCtrlr_t *motion;
+    sdfModelRootNode_t *model;
 
     base = dds3GetBaseControlWorkData(object);
     scriptModelObject = dds3ObjectBaseGetControlBasic(object, 3);
     model = dds3ModelBasicMakeModel(scriptModelObject);
     motion = dds3ModelBasicSetMotion(scriptModelObject, model);
-    dds3GetTMPoseSet((EffWorldNode *)object);
+    dds3GetTMPoseSet((dds3Basic_t *)object);
     VU0_STORE_MATRIX(model->matrix);
     sdfModelEvalTm2(model, 0);
     sdfModelEvalTm2(model, 1);
@@ -328,8 +328,8 @@ void dds3ObjectBaseMakeMatter(void *object) {
 
 /* Modes 0, 4 and 5 use weight 1; the other valid modes use 0.
  * Values outside 0..6 leave both the current mode and weight unchanged. */
-void dds3ObjectBaseMatterAnimeSpeed(EffWorldNode *object, u32 requestedMode) {
-    ObjBase *base = dds3GetBaseControlWorkData(object);
+void dds3ObjectBaseMatterAnimeSpeed(dds3Basic_t *object, u32 requestedMode) {
+    dds3ObjectBaseControlWorkData_t *base = dds3GetBaseControlWorkData(object);
 
     switch (requestedMode) {
     case 0:
@@ -366,7 +366,7 @@ void dds3ObjectBaseMatterAnimeSpeed(EffWorldNode *object, u32 requestedMode) {
 /* Ensure the owner appears in its auxiliary handler's world index.
  * Return 0 for an absent handler, otherwise 1 after updating the index. */
 s32 dds3ObjectBaseRegistArea(void *object) {
-    EffWorldNode *handler;
+    dds3Basic_t *handler;
 
     handler = dds3ObjectBaseGetControlBasic(object, DDS3_OBJECT_HANDLER_SLOT);
     if (handler == NULL) {
@@ -385,9 +385,9 @@ struct SdfPoolNode;
 extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 void dds3DrawObjectWithGradientOverlay(void *object) {
-    ObjBase *base;
-    MdlCtx *context;
-    SdfModel *inner;
+    dds3ObjectBaseControlWorkData_t *base;
+    dds3ModelHandle_t *context;
+    sdfModelRootNode_t *inner;
 
     base = dds3GetBaseControlWorkData(object);
     eglSetOt(0x4A);
@@ -403,7 +403,7 @@ void dds3DrawObjectWithGradientOverlay(void *object) {
     evtSubmitPrimaryGsTest(1, 1, 0x80, 2, 0, 0, 1, 1);
     evtSubmitPrimaryFramePacket();
 
-    context = (MdlCtx *)base->resourceHandle;
+    context = (dds3ModelHandle_t *)base->resourceHandle;
     inner = context->inner;
     inner->flags |= 0x20;
     mdlLink(context, kwlnSceneSurfaceSets[9]);
@@ -420,13 +420,13 @@ void dds3DrawObjectWithGradientOverlay(void *object) {
 
 #include "fld_area_work.h"
 extern s32 fldTestRoomObjectModeFlag(s32, u32, s32);
-extern void mdlBlendEntryPitchYawAndUpdate(MdlCtx *, struct SdfPoolNode **, s32, f32, f32);
-extern void sdfModelEvalTm(SdfModel *);
+extern void mdlBlendEntryPitchYawAndUpdate(dds3ModelHandle_t *, struct SdfPoolNode **, s32, f32, f32);
+extern void sdfModelEvalTm(sdfModelRootNode_t *);
 
-void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, EffWorldNode *object) {
-    ObjBase *base;
+void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, dds3Basic_t *object) {
+    dds3ObjectBaseControlWorkData_t *base;
     struct SdfDmaTagHeader *lighting;
-    SdfModel *model;
+    sdfModelRootNode_t *model;
     s32 roomObjectIndex;
 
     base = dds3GetBaseControlWorkData(object);
@@ -447,25 +447,25 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, EffWorldNode 
         }
         lighting = (struct SdfDmaTagHeader *)((EffectObjectData *)object->data)->transitionWork->value;
         if (lighting != NULL) {
-            ((MdlCtx *)base->resourceHandle)->inner->lighting = lighting;
+            ((dds3ModelHandle_t *)base->resourceHandle)->inner->lighting = lighting;
         } else {
-            ((MdlCtx *)base->resourceHandle)->inner->lighting = NULL;
+            ((dds3ModelHandle_t *)base->resourceHandle)->inner->lighting = NULL;
         }
         if (dds3ObjectBaseCheckFlag(object, 0x2000)) {
-            mdlBlendEntryPitchYawAndUpdate((MdlCtx *)base->resourceHandle, surfaces, base->currentSlot,
+            mdlBlendEntryPitchYawAndUpdate((dds3ModelHandle_t *)base->resourceHandle, surfaces, base->currentSlot,
                                            ((EffectObjectData *)object->data)->angle,
                                            ((EffectObjectData *)object->data)->word34);
             return;
         }
         if (dds3ObjectBaseCheckFlag(object, 0x10000)) {
-            model = ((MdlCtx *)base->resourceHandle)->inner;
+            model = ((dds3ModelHandle_t *)base->resourceHandle)->inner;
             model->flags |= 0x40;
-            mdlLink((MdlCtx *)base->resourceHandle, kwlnSceneSurfaceSets[9]);
+            mdlLink((dds3ModelHandle_t *)base->resourceHandle, kwlnSceneSurfaceSets[9]);
             model->flags &= ~0x40;
             dds3ObjectBaseOffFlag(object, 0x10000);
             return;
         }
-        mdlLink((MdlCtx *)base->resourceHandle, surfaces);
+        mdlLink((dds3ModelHandle_t *)base->resourceHandle, surfaces);
         return;
     }
 
@@ -507,7 +507,7 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, EffWorldNode 
                     base->motion->frameStep = base->weight;
                     sdfMotionNext(base->motion);
                 }
-                sdfModelEvalTm((SdfModel *)base->resourceHandle);
+                sdfModelEvalTm((sdfModelRootNode_t *)base->resourceHandle);
             } else {
                 switch (base->mode) {
                 case 0:
@@ -540,7 +540,7 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, EffWorldNode 
                     base->motion->frameStep = base->weight;
                     sdfMotionNext(base->motion);
                 }
-                sdfModelEvalTm((SdfModel *)base->resourceHandle);
+                sdfModelEvalTm((sdfModelRootNode_t *)base->resourceHandle);
             }
         } else {
             switch (base->mode) {
@@ -579,19 +579,19 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, EffWorldNode 
                 base->motion->frameStep = base->weight;
                 sdfMotionNext(base->motion);
             }
-            sdfModelEvalTm((SdfModel *)base->resourceHandle);
+            sdfModelEvalTm((sdfModelRootNode_t *)base->resourceHandle);
         }
     }
-    ((SdfModel *)base->resourceHandle)->color = object->color;
+    ((sdfModelRootNode_t *)base->resourceHandle)->color = object->color;
     sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, surfaces,
-                           (SdfModel *)base->resourceHandle);
+                           (sdfModelRootNode_t *)base->resourceHandle);
 }
 
 /* Create and attach kind-3 slot data only when the data slot is empty.
  * Existing data is retained; attachment still uses the new object's kind. */
 void dds3ObjectBaseCreateMover(void *object) {
     void *existingData;
-    EffWorldNode *newData;
+    dds3Basic_t *newData;
 
     existingData = dds3ObjectBaseGetControlBasic(object, DDS3_OBJECT_DATA_SLOT);
     if (existingData == NULL) {
@@ -601,13 +601,13 @@ void dds3ObjectBaseCreateMover(void *object) {
     }
 }
 
-u8 dds3ObjectBaseSetPadControl(EffWorldNode *object, Dds3MoverUpdate update) {
+u8 dds3ObjectBaseSetPadControl(dds3Basic_t *object, Dds3MoverUpdate update) {
     return dds3ObjectBaseSetPrimaryControl(object, update);
 }
 
 /* Returns whether a slot-1 handler took the callback (0/1). The bool-width result is why
  * the wrapper above stays jal + epilogue in retail (001129D0, not a sibling j). */
-u8 dds3ObjectBaseSetPrimaryControl(EffWorldNode *object, Dds3MoverUpdate update) {
+u8 dds3ObjectBaseSetPrimaryControl(dds3Basic_t *object, Dds3MoverUpdate update) {
     void *handler;
 
     handler = dds3ObjectBaseGetControlBasic(object, 1);
@@ -621,7 +621,7 @@ u8 dds3ObjectBaseSetPrimaryControl(EffWorldNode *object, Dds3MoverUpdate update)
 /* Store the source object on the data-slot handler, then replace the supplied
  * object's curve work. The replacement call uses object, not handler;
  * unlike the conditional dispatcher, this path does not check for NULL. */
-void dds3ObjectBaseMakePath(void *object, EffWorldNode *sourceObject) {
+void dds3ObjectBaseMakePath(void *object, dds3Basic_t *sourceObject) {
     void *handler;
 
     handler = dds3ObjectBaseGetControlBasic(object, DDS3_OBJECT_DATA_SLOT);
@@ -636,7 +636,7 @@ void dds3ObjectBaseFreePath(void *object) {
 }
 
 /* Return the data slot's retained curve work; the data slot must exist. */
-Dds3PathCurveWork *dds3ObjectBaseGetPathControl(EffWorldNode *object) {
+dds3PathBasicControl_t *dds3ObjectBaseGetPathControl(dds3Basic_t *object) {
     return dds3MoverBasicGetPathControl(dds3ObjectBaseGetControlBasic(object, DDS3_OBJECT_DATA_SLOT));
 }
 

@@ -25,29 +25,29 @@ extern u32 D_00435B98;
 
 extern u8 D_00435B89;
 
-extern KwlnTask *startinglistf;
-extern KwlnTask *D_00435BD4;
+extern dds3ProcessID_t *startinglistf;
+extern dds3ProcessID_t *D_00435BD4;
 extern s32 startinglistcnt;
-extern KwlnTask *endinglistf;
-extern KwlnTask *D_00435BE0;
+extern dds3ProcessID_t *endinglistf;
+extern dds3ProcessID_t *D_00435BE0;
 extern s32 endinglistcnt;
-extern KwlnTask *runninglistf;
-extern KwlnTask *D_00435BEC;
+extern dds3ProcessID_t *runninglistf;
+extern dds3ProcessID_t *D_00435BEC;
 extern s32 runninglistcnt;
 
 extern u8 D_00435BB8[];
 extern u8 D_00435BC0[];
-extern s32 kwlnPrepareFrameDrawPackets(KwlnTask *task);
-extern s32 kwlnBuildFrameScenePackets(KwlnTask *task);
-extern s32 kwlnRenderFrame(KwlnTask *task);
-extern s32 dds3BasicMainProcess(KwlnTask *task);
-extern s32 dds3BasicDrawProcess(KwlnTask *task);
-extern s32 frFlipPacketBuf(KwlnTask *task);
-extern void frDestroyFontTable(KwlnTask *task);
-extern s32 dds3DebugDevDumpProcess(KwlnTask *task);
+extern s32 kwlnPrepareFrameDrawPackets(dds3ProcessID_t *task);
+extern s32 kwlnBuildFrameScenePackets(dds3ProcessID_t *task);
+extern s32 kwlnRenderFrame(dds3ProcessID_t *task);
+extern s32 dds3BasicMainProcess(dds3ProcessID_t *task);
+extern s32 dds3BasicDrawProcess(dds3ProcessID_t *task);
+extern s32 frFlipPacketBuf(dds3ProcessID_t *task);
+extern void frDestroyFontTable(dds3ProcessID_t *task);
+extern s32 dds3DebugDevDumpProcess(dds3ProcessID_t *task);
 
-struct EffWorldNode;
-extern struct EffWorldNode * dds3AddWorld(s32 capacity);
+struct dds3Basic_t;
+extern struct dds3Basic_t * dds3AddWorld(s32 capacity);
 extern void mdlInitManager(void);
 extern void btlLoadInputIconsAndSystemSounds(void);
 extern void evtEnsureSolarOverlayTaskAndResetPhase(void);
@@ -220,7 +220,7 @@ void kwlnRunMainLoop(void) {
 }
 
 /* Remove a task from the doubly linked queue of its state (1 delayed start, 2 active, 3 delayed destroy). */
-void DeleteProcessList(KwlnTask *task) {
+void DeleteProcessList(dds3ProcessID_t *task) {
     switch (task->flags & 0xF) {
     case 0:
         return;
@@ -276,9 +276,9 @@ void DeleteProcessList(KwlnTask *task) {
     }
 }
 
-void AddProcessList(KwlnTask *task) {
-    KwlnTask *cur;
-    KwlnTask *prev;
+void AddProcessList(dds3ProcessID_t *task) {
+    dds3ProcessID_t *cur;
+    dds3ProcessID_t *prev;
 
     switch (task->flags & 0xF) {
     case 1:

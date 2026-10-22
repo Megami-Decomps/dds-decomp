@@ -12,7 +12,7 @@
 typedef struct EffUnitObject {
     f32 localMatrix[4][4]; /* 0x00: VU0 matrix initialized on clone. */
     f32 transform[4][4]; /* 0x40: VU0 matrix copied by dds3P2APolygonSetRotateMatrix. */
-    BillObj *billboard; /* 0x80: scene-owned billboard */
+    billHandle_t *billboard; /* 0x80: scene-owned billboard */
     void *resource; /* 0x84 */
 } EffUnitObject;
 typedef char EffUnitObject_size_check[(sizeof(EffUnitObject) == EFF_INSTANCE_BYTES) ? 1 : -1];

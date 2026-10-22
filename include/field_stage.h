@@ -36,7 +36,7 @@ typedef struct FieldPlayerSceneWork {
     s32 room; /* 0x54: one-based destination room */
     u32 retainCachedAreaResource; /* 0x58: preserves the cached room resource for this transition. */
     u32 secondaryState;
-    u16 sequenceCode; /* 0x60: copied from FieldSequenceRecord.code */
+    u16 sequenceCode; /* 0x60: copied from fldSceneParam_t.code */
     s16 sequenceMode; /* 0x62: copied by the sequence initializer */
     s32 cameraLinkMode; /* 0x64: sequence packet link mode */
     u8 pad68[8];

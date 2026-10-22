@@ -31,7 +31,7 @@
 #define ITF_PANEL_TINT_BORDER_WIDTH 0x240
 
 
-extern void (*DrawTable[])(UiSprite *, SdfListHead *);
+extern void (*DrawTable[])(itfpanel_t *, sdfDrawTag_t *);
 
 extern PanelHold itfHeldPanelCursor;
 
@@ -46,14 +46,14 @@ extern TextVector itfPanelColorTemplates[];
 extern TextVector D_003B4548[];
 extern TextVector itfPanelGradientColorTemplate[];
 extern TextVector itfPanelGradientColorPair[];
-extern void itfMiscDrawRectanglePrim(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, SdfListHead *command);
+extern void itfMiscDrawRectanglePrim(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, sdfDrawTag_t *command);
 extern u8 D_004365C8[8];
 extern u8 D_004365D0[8];
-extern void itfMiscDrawAlphaPrim(SdfListHead *command, s32 index, s32 flag);
-extern void itfMiscDrawTriangleStripPrim(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, SdfListHead *command);
+extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *command, s32 index, s32 flag);
+extern void itfMiscDrawTriangleStripPrim(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, sdfDrawTag_t *command);
 extern u8 D_004365D8[8];
 extern u8 D_004365E0[8];
-extern void itfDrawThreePanelBorderBands(PanelRect *bounds, u32 *color, u32 tail, s32 borderWidth, SdfListHead *command);
+extern void itfDrawThreePanelBorderBands(PanelRect *bounds, u32 *color, u32 tail, s32 borderWidth, sdfDrawTag_t *command);
 extern u32 D_003B4760[];
 #include "sdf_packet_alloc.h"
 extern u32 sdf2DMakeStdPacket(u32 packetAddress, s32 packetBytes);
@@ -62,7 +62,7 @@ extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern u8 D_003B45E8[], D_003B4600[], D_003B4618[];
 extern u8 D_003B4630[], D_003B4648[], D_003B4660[];
 extern u8 D_004365A8[8], D_004365B0[8];
-extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, SdfListHead *);
+extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, sdfDrawTag_t *);
 extern u8 D_003B4670[];
 extern u8 D_003B4680[];
 extern u8 D_004365B8[8];
@@ -70,7 +70,7 @@ extern u8 D_004365C0[8];
 
 
 /* Invoke the indexed panel handler; panel and kind are trusted. */
-void itfPnlDrawTag(UiSprite *panel, SdfListHead *list) {
+void itfPnlDrawTag(itfpanel_t *panel, sdfDrawTag_t *list) {
     DrawTable[panel->kind](panel, list);
 }
 
@@ -337,7 +337,7 @@ extern u8 D_003B45C8[];
 extern u8 D_003B45D8[];
 
 /* Draw the panel's three flat quads from one vertex/color buffer; each quad uses its own 4-byte index rows. */
-void DrawNormal(UiSprite *panel, SdfListHead *command) {
+void DrawNormal(itfpanel_t *panel, sdfDrawTag_t *command) {
     PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 4;
     s32 quadIndex;
@@ -350,7 +350,7 @@ void DrawNormal(UiSprite *panel, SdfListHead *command) {
 
 /* Update seven alpha words, then emit three wide and six side strips.
    The first color row is deliberately excluded from the alpha update. */
-void DrawMesWin(UiSprite *panel, SdfListHead *command) {
+void DrawMesWin(itfpanel_t *panel, sdfDrawTag_t *command) {
     PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 21;
     s32 alpha = panel->alpha;
@@ -370,7 +370,7 @@ void DrawMesWin(UiSprite *panel, SdfListHead *command) {
 
 /* Update five alpha words, then emit three wide and two side strips.
    The first color row is deliberately excluded from the alpha update. */
-void DrawSelWin(UiSprite *panel, SdfListHead *command) {
+void DrawSelWin(itfpanel_t *panel, sdfDrawTag_t *command) {
     PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 17;
     s32 alpha = panel->alpha;
@@ -388,7 +388,7 @@ void DrawSelWin(UiSprite *panel, SdfListHead *command) {
     }
 }
 
-void DrawPlain(UiSprite *panel, SdfListHead *command) {
+void DrawPlain(itfpanel_t *panel, sdfDrawTag_t *command) {
     DrawVertex vertices[12];
     PktRec *buf = (PktRec *)panel->payload;
     PktRec *colors = buf + 2;
@@ -417,7 +417,7 @@ void DrawPlain(UiSprite *panel, SdfListHead *command) {
 }
 
 /* Update the first color row's alpha and emit one indexed quad. */
-void DrawPera1(UiSprite *panel, SdfListHead *command) {
+void DrawPera1(itfpanel_t *panel, sdfDrawTag_t *command) {
     PktRec *colors = (PktRec *)panel->payload + 2;
 
     colors->alpha = panel->alpha;
@@ -425,7 +425,7 @@ void DrawPera1(UiSprite *panel, SdfListHead *command) {
 }
 
 /* Bracket the six-index panel draw with table-state two and its native reset to zero. */
-void DrawLeftFade(UiSprite *panel, SdfListHead *command) {
+void DrawLeftFade(itfpanel_t *panel, sdfDrawTag_t *command) {
     PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 3;
 
@@ -439,11 +439,11 @@ void DrawLeftFade(UiSprite *panel, SdfListHead *command) {
 extern u32 D_003B4690[];
 extern DrawColorRec D_003B4700;
 extern DrawColorRec D_003B4710;
-extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
+extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 
 /* Draw the framed panel: two bordered bands, then six texture-bound strips whose
  * rectangles are rebuilt from the live panel bounds. */
-void itfDrawFramedPanelWithTextureStrips(UiSprite *panel, SdfListHead *command) {
+void itfDrawFramedPanelWithTextureStrips(itfpanel_t *panel, sdfDrawTag_t *command) {
     PanelRect rect;
     UiSpriteTexturePayload *payload = (UiSpriteTexturePayload *)panel->payload;
     s32 *color = &panel->red;
@@ -509,12 +509,12 @@ void itfDrawFramedPanelWithTextureStrips(UiSprite *panel, SdfListHead *command) 
 
 extern DrawColorRec D_003B4720;
 extern DrawColorRec D_003B4730;
-extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
-extern void itfMiscDrawSpritePrim2(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
+extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
+extern void itfMiscDrawSpritePrim2(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, sdfDrawTag_t *);
 
 /* Bind the texture for the left cap, then draw the center and reversed right
  * cap. Insets are captured before the first submission; Y bounds are live. */
-void DrawSpkWin2(UiSprite *panel, SdfListHead *command) {
+void DrawSpkWin2(itfpanel_t *panel, sdfDrawTag_t *command) {
     DrawVertex rect[2];
     DrawColorRec *color = (DrawColorRec *)&panel->red;
     UiSpriteTexturePayload *payload = (UiSpriteTexturePayload *)panel->payload;
@@ -551,7 +551,7 @@ extern DrawColorRec D_003B44A0;
 
 /* Draw the three inset flat quads, then split a tall texture into top, stretch
  * and bottom bands. The short path uses the live rectangle in the panel. */
-void DrawFacility(UiSprite *panel, SdfListHead *command) {
+void DrawFacility(itfpanel_t *panel, sdfDrawTag_t *command) {
     DrawVertex rect[2];
     UiSpriteBandPayload *payload = (UiSpriteBandPayload *)panel->payload;
     DrawVertex *vertices = payload->vertices;
@@ -595,7 +595,7 @@ void DrawFacility(UiSprite *panel, SdfListHead *command) {
 
 
 /* Copy bounds and draw the tinted border; alpha uses the native signed 103/128 scale. */
-void itfDrawTintedPanelRect(UiSprite *panel, SdfListHead *command) {
+void itfDrawTintedPanelRect(itfpanel_t *panel, sdfDrawTag_t *command) {
     PanelRect rect;
 
     D_003B4760[3] = panel->alpha * ITF_PANEL_TINT_ALPHA_NUMERATOR / ITF_PANEL_TINT_ALPHA_DENOMINATOR;
@@ -607,7 +607,7 @@ void itfDrawTintedPanelRect(UiSprite *panel, SdfListHead *command) {
 }
 
 /* Append two GS A+D state writes: TEST_1 (0x47), then ALPHA_1 (0x42). */
-void DrawTestAlphaPrim(SdfListHead *list) {
+void DrawTestAlphaPrim(sdfDrawTag_t *list) {
     s32 packet = sdfGrAllocPacketBuff(ITF_PANEL_STATE_PACKET_BYTES);
     u64 *stateWords = (u64 *)sdf2DMakeStdPacket(packet, ITF_PANEL_STATE_PACKET_BYTES);
 

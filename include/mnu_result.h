@@ -33,7 +33,7 @@ typedef struct BrsRewardValues {
 } BrsRewardValues;
 
 typedef struct BrsRewardRow {
-    DatPartyRecord *unit;
+    datUnitWork_t *unit;
     BrsRewardValues values;
 } BrsRewardRow;
 
@@ -144,7 +144,7 @@ typedef struct BrsSkillIconRow {
 
 /* Allocation/zeroing: DDS1 00262684/0026269C; DDS2 0029959C/002995B4. */
 typedef struct BrsSkillPackageWork {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u32 overlayFlags;
     BrsResultTransition transition;
     struct EffectList *resourceList;
@@ -160,7 +160,7 @@ typedef struct BrsSkillPackageWork {
     u8 pad98[4];
     BrsRewardRow *selectedRewardRow;
 #endif
-    DatPartyRecord previewUnit;
+    datUnitWork_t previewUnit;
     s32 selectedRow;
     s32 pendingSkillCount;
     s32 pendingSkillIndex;

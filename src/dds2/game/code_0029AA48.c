@@ -22,20 +22,20 @@ void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *context) {
     mnuDrawCampIconBackdrop(&context->campEffect, 0x20);
 }
 
-struct FrFontGlyph;
+struct _FRQ;
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, s32, s32, s32);
-extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
 extern u32 mnuKindIsSelectable(u32);
 extern char D_004379B0[];
 
 void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
     char text[16];
     s32 iconFade = context->iconFade;
-    DatPartyRecord *item = context->selectedRewardRow->unit;
+    datUnitWork_t *item = context->selectedRewardRow->unit;
     s32 delta;
     s32 x;
-    struct FrFontGlyph *glyph;
+    struct _FRQ *glyph;
     u32 color;
 
     effDrawTextureSlotWithBlendedCornerColors(0x1710, 0x8C0, 0, iconFade, 1,
@@ -73,7 +73,7 @@ extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *context, s32 copyOptions) {
-    DatPartyRecord *unit = context->selectedRewardRow->unit;
+    datUnitWork_t *unit = context->selectedRewardRow->unit;
     s32 i;
 
     uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x19, 0x53);
@@ -96,7 +96,7 @@ void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *context, s32 copyOptions) {
     evtStageTestUpdate(kwlnSceneSurfaceSets[0]);
 }
 
-s32 mnuAdvanceSkillPackageToItemPanel(KwlnTask *request) {
+s32 mnuAdvanceSkillPackageToItemPanel(dds3ProcessID_t *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {
@@ -107,7 +107,7 @@ s32 mnuAdvanceSkillPackageToItemPanel(KwlnTask *request) {
     return menuSetHandler(context, 1, (void *)request);
 }
 
-s32 mnuAdvanceSkillPanelToNextMenu(KwlnTask *request) {
+s32 mnuAdvanceSkillPanelToNextMenu(dds3ProcessID_t *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {
@@ -118,7 +118,7 @@ s32 mnuAdvanceSkillPanelToNextMenu(KwlnTask *request) {
 }
 
 /* The five signed config bytes reserve space before the selected entry width. */
-u32 mnuResetSelectionWidthsFromConfig(KwlnTask *task) {
+u32 mnuResetSelectionWidthsFromConfig(dds3ProcessID_t *task) {
     s8 widthByte;
     BrsSkillPackageWork *context;
     s32 *widthSlot;
@@ -175,10 +175,10 @@ void mnuClearItemSelectionSlots(BrsSkillPackageWork *context) {
     } while (-1 < remaining);
 }
 
-extern void ptyRecomputeMaxVitals(DatPartyRecord *, const s32 *);
-extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
+extern void ptyRecomputeMaxVitals(datUnitWork_t *, const s32 *);
+extern void mnuRefreshSelectedUnitPanels(datUnitWork_t *, BrsSkillPackageWork *);
 
-void mnuRefreshPartyUnitVitalsPanels(DatPartyRecord *unit, BrsSkillPackageWork *menu) {
+void mnuRefreshPartyUnitVitalsPanels(datUnitWork_t *unit, BrsSkillPackageWork *menu) {
     ptyRecomputeMaxVitals(unit, menu->statGains);
     mnuRefreshSelectedUnitPanels(unit, menu);
 }

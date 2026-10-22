@@ -75,7 +75,7 @@ compiler flag or artificial producer is added to make either body match.
 matches 560 bytes per title. The existing 0x194-byte instance owns a contiguous
 array of 0x28-byte particles. Its 0x13C-byte serialized parameter copy starts at
 0x40 and ends exactly at the particles pointer at 0x17C. The allocation size
-uses these existing owner types, and allocationHandle stays SdfMemBlock*.
+uses these existing owner types, and allocationHandle stays sdfMemHandle_t*.
 The retain API returns the payload address; the destructor releases the draw
 resource and then the allocation descriptor.
 
@@ -100,7 +100,7 @@ retain their existing native preconditions.
 matches 536 bytes per title. The 0x138-byte parameter block occupies
 [0x40, 0x178) inside the existing 0x18C-byte owner, followed by the runtime
 fields and its contiguous 0x28-byte particles. The constructor uses the same
-complete serialized-parameter memcpy and current SdfMemBlock pointer owner.
+complete serialized-parameter memcpy and current sdfMemHandle_t pointer owner.
 The existing memcpy declaration now precedes this earlier consumer.
 
 The constructor interprets the delay modulus with a signed nonpositive test,
@@ -131,7 +131,7 @@ matches 496 bytes per title. The existing 0x13C-byte owner contains its
 0xE8-byte parameter block at [0x40, 0x128), then runtime fields, followed
 by 0x28-byte plain particles. Their age is at offset 0x0C; the other ring
 constructors use the separate particle owner whose age is at offset 0x08.
-This restores the prior C body with the canonical SdfMemBlock pointer owner
+This restores the prior C body with the canonical sdfMemHandle_t pointer owner
 and the same complete serialized byte-copy contract as the other restored
 constructors.
 

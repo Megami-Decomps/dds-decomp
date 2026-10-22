@@ -87,7 +87,7 @@ s32 sdfSetMainThreadPriority(void) {
 }
 
 /* Promote the next list node to current; an empty list clears current. */
-void sdfChipAllocNextPage(SdfChipClass *sizeClass) {
+void sdfChipAllocNextPage(sdfChipCB_tag *sizeClass) {
     SdfChipPage *nextPage;
 
     nextPage = sizeClass->availablePages;
@@ -98,7 +98,7 @@ void sdfChipAllocNextPage(SdfChipClass *sizeClass) {
 }
 
 /* Pop a recycled cell, count it live, and advance when its page becomes full. */
-SdfChipCell *sdfChipAllocGetFree(SdfChipClass *sizeClass, SdfChipPage *page) {
+SdfChipCell *sdfChipAllocGetFree(sdfChipCB_tag *sizeClass, SdfChipPage *page) {
     SdfChipCell *freeCell = page->freeCells;
     page->usedCells++;
     page->freeCells = freeCell->nextFree;
@@ -108,7 +108,7 @@ SdfChipCell *sdfChipAllocGetFree(SdfChipClass *sizeClass, SdfChipPage *page) {
     return freeCell;
 }
 
-SdfChipCell *sdfChipAllocPageGrow(SdfChipClass *sizeClass, SdfChipPage *page) {
+SdfChipCell *sdfChipAllocPageGrow(sdfChipCB_tag *sizeClass, SdfChipPage *page) {
     s16 cellCount = sizeClass->cellCount;
     s32 usedCells = (u16)page->usedCells + 1;
     s32 remaining = page->bumpCellsRemaining;
@@ -126,7 +126,7 @@ SdfChipCell *sdfChipAllocPageGrow(SdfChipClass *sizeClass, SdfChipPage *page) {
     return cell;
 }
 
-SdfChipCell *sdfChipAllocNewPage(SdfChipClass *sizeClass) {
+SdfChipCell *sdfChipAllocNewPage(sdfChipCB_tag *sizeClass) {
     SdfChipPage *page = sdfChipPageFreeLink;
 
     sdfChipPageFreeLink = page->next;
@@ -142,7 +142,7 @@ SdfChipCell *sdfChipAllocNewPage(SdfChipClass *sizeClass) {
 /* Allocate a block of `size` bytes from the size class that covers it (classes are powers of two from 16 bytes up); each class hands out from its own slot list. */
 void *sdfChipAllocDirect(s32 size) {
     s32 sizeClassIndex = 0;
-    SdfChipClass *sizeClass;
+    sdfChipCB_tag *sizeClass;
     SdfChipCell *result;
     s32 interruptsDisabled;
 

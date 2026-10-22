@@ -6,7 +6,7 @@
 
 /* Shared skill-name panel task state in both battle titles. */
 typedef struct BtlPanelTransitionWork {
-    KwlnTask *task;
+    dds3ProcessID_t *task;
     const u8 *text;
     s32 elapsed;
     s32 frames;

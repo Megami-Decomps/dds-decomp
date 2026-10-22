@@ -52,10 +52,10 @@ typedef struct PcpScatterSpinWork {
     f32 scale;
     u32 color;
     PcpScatterPool *childWork;
-    SdfMemBlock *allocation;
+    sdfMemHandle_t *allocation;
     u32 duplicateGroupCount;
-    EffParamWork **duplicatedHandles;
-    SdfMemBlock *duplicateAllocation;
+    effPartHandle_t **duplicatedHandles;
+    sdfMemHandle_t *duplicateAllocation;
 } PcpScatterSpinWork;
 
 /* Serialized parameters copied into each ribbon-scatter work owner. */
@@ -100,10 +100,10 @@ typedef struct PcpScatterRibbonWork {
     f32 scale;
     u32 color;
     PcpScatterPool *childWork;
-    SdfMemBlock *allocation;
+    sdfMemHandle_t *allocation;
     u32 duplicateGroupCount;
-    EffParamWork **duplicatedHandles;
-    SdfMemBlock *duplicateAllocation;
+    effPartHandle_t **duplicatedHandles;
+    sdfMemHandle_t *duplicateAllocation;
 } PcpScatterRibbonWork;
 
 typedef char PcpScatterSpinParams_size_must_be_0x64[

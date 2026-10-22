@@ -144,7 +144,7 @@ typedef struct BtlCmdCtx {
 
 extern f32 btlUnitGetTopY(BtlUnit *);
 
-extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
+extern s32 btlReadCurrentUnitHp(datUnitWork_t *);
 extern void btlGetUnitWorldPos(BtlUnit *, f32 *);
 
 extern f32 btlTriangleNormalDotEdge(const f32 *, const f32 *, const f32 *);
@@ -1063,9 +1063,9 @@ void btlRefreshUnitEffects(void) {
         if (unit->status.flags & 2) {
             if (unit->status.stateFlags & 0x10) {
                 handle = (u32)unit->ext;
-                evtUnitLightOn((EvtUnit *)handle);
+                evtUnitLightOn((evtUnitHandle_t *)handle);
                 VU0_LOAD_VF(vf10, unit);
-                evtSetUnitLightDir((EvtUnit *)handle, 0);
+                evtSetUnitLightDir((evtUnitHandle_t *)handle, 0);
             }
         }
         unit = unit->next;
@@ -1328,7 +1328,7 @@ f32 btlScalarRangeStepQuadratic(BtlScalarRange *state, f32 timeStep) {
 
 extern s32 btlIndexedIconUvOrigins[16];
 struct RefObj;
-extern SdfTex *sdfGetOrCreateTextureForReference(void *, struct RefObj *);
+extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(void *, struct RefObj *);
 #include "sdf_packet_alloc.h"
 
 /* Draw an indexed 64-pixel glyph with independent corner colors. */
@@ -1337,8 +1337,8 @@ void btlDrawButtonIconFixed64(SdfPoolNode *surface, s32 x, s32 y,
                    s32 bottomLeftColor, s32 bottomRightColor,
                    s32 buttonIndex) {
     BtlState *battle;
-    SdfTex *texture;
-    SdfListHead *packet;
+    sdfTexHandle_t *texture;
+    sdfDrawTag_t *packet;
     s32 uvIndex;
     s32 xFixed;
     s32 yFixed;
@@ -1346,7 +1346,7 @@ void btlDrawButtonIconFixed64(SdfPoolNode *surface, s32 x, s32 y,
     buttonIndex &= 0xFFFF;
     battle = (BtlState *)btlGetRuntime();
     texture = sdfGetOrCreateTextureForReference(surface, battle->buttonTextureHandle);
-    packet = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packet);
     sdf2DLinkTexPacket(packet, texture, 0);
 
@@ -1392,8 +1392,8 @@ extern BtnUv D_0035FAA0[];
 /* Draw a button glyph using its UV pair; screen coordinates are GS fixed-point. */
 void btlDrawButtonIcon(SdfPoolNode *surface, s32 x, s32 y, s32 topLeftColor, s32 topRightColor, s32 bottomLeftColor, s32 bottomRightColor, s32 button) {
     BtnUv *uv;
-    SdfTex *texture;
-    SdfListHead *packet;
+    sdfTexHandle_t *texture;
+    sdfDrawTag_t *packet;
     s32 xFixed;
     s32 yFixed;
 
@@ -1418,7 +1418,7 @@ void btlDrawButtonIcon(SdfPoolNode *surface, s32 x, s32 y, s32 topLeftColor, s32
         default: uv = 0; break;
         }
         texture = sdfGetOrCreateTextureForReference(surface, ((BtlState *)btlGetRuntime())->buttonTextureHandle);
-        packet = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(packet);
         sdf2DLinkTexPacket(packet, texture, 0);
         xFixed = x * 0x10;
@@ -2304,7 +2304,7 @@ u32 btlCmdCheckHpPercent(void) {
     }
     while (unit != NULL) {
         if ((unit->status.flags & 1) && (unit->status.flags & sideMask) && !(unit->status.flags & 0x20) && unit->identity == lookupId) {
-            DatPartyRecord *unitStats = &unit->partyRecord;
+            datUnitWork_t *unitStats = &unit->partyRecord;
             s32 currentHp = btlReadCurrentUnitHp(unitStats);
             s32 maximumHp = btlComputeSkillAdjustedMaxHp(unitStats);
             if (!((u32)(maximumHp * hpPercentThreshold) < (u32)(currentHp * BTL_HP_PERCENT_SCALE))) {
@@ -2686,13 +2686,13 @@ void btlBindActorSlot(BtlActor *actor, s32 taskArg) {
     BtlState *state = (BtlState *)btlGetRuntime();
     s32 slot = scrStartScript2((s32)state->scriptOwner->priority - 1, D_003BAAA8, taskArg);
     s32 handle;
-    scrSetUserData((KwlnTask *)slot, actor);
-    handle = ((ScrData *)dds3GetProcessData((KwlnTask *)slot))->resourceIndex;
+    scrSetUserData((dds3ProcessID_t *)slot, actor);
+    handle = ((scrProcessWork_s *)dds3GetProcessData((dds3ProcessID_t *)slot))->resourceIndex;
     if (handle >= 0) {
         BtlUnit *unit = actor->unit;
         itfMesSetTextSlotFromValue(handle, 0, unit->partyRecord.unitId, (unit->partyRecord.flags & 0x20) ? 1 : 2);
     }
-    dds3LinkProcess(state->scriptOwner, (KwlnTask *)slot);
+    dds3LinkProcess(state->scriptOwner, (dds3ProcessID_t *)slot);
     state->boundTask = slot;
 }
 
@@ -2758,7 +2758,7 @@ extern f32 btlDebugCameraRotations[2][4];
  * debug-menu descriptors mirror the command's active bit. */
 void btlUpdateDebugCameraFromPad(void) {
     BtlState *state = btlGetRuntime();
-    EffWorldNode *camera;
+    dds3Basic_t *camera;
 
     if (!(state->battleFlags & 2)) {
         return;
@@ -3287,7 +3287,7 @@ extern void * sdfDevPrintf(s32 source, s32 end, s32 argument, s32 index, const c
 /* Update list selection and submit the visible browser rows to its surface. */
 s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
     BtlResourceEntry *visibleEntry;
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
     SdfPoolNode *surface;
     s32 drawnRows;
     s32 topRow;
@@ -3389,7 +3389,7 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
                     descriptor->previewActive = descriptor->textureCategory = 1;
                     break;
                 case BTL_RESOURCE_ENTRY_CATEGORY_GENERAL: {
-                    SdfTex *texture = dds3BillboardGetGeneralTex(selectedEntry->value);
+                    sdfTexHandle_t *texture = dds3BillboardGetGeneralTex(selectedEntry->value);
                     descriptor->textureCategory = category;
                     descriptor->texture = texture;
                     descriptor->previewActive = 1;
@@ -3409,7 +3409,7 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
         }
     }
 
-    packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(
         (descriptor->originX << 4) + 0x7000,
@@ -3455,7 +3455,7 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
 
 /* Release an owned texture handle and the descriptor, but not its entry list. */
 void btlDestroyResourceDescriptor(BtlResourceDescriptor *descriptor) {
-    SdfTex *texture = descriptor->texture;
+    sdfTexHandle_t *texture = descriptor->texture;
     if (texture != NULL && descriptor->textureCategory == BTL_RESOURCE_ENTRY_CATEGORY_TMX) {
         sdfTexReleaseReferenceViaHandler(texture);
     }
@@ -3515,8 +3515,8 @@ void btlReplaceResourceHandle(BtlResourceDescriptor *, void *);
  * then release the temporary allocation returned by the resource reader. */
 void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *descriptor, const char *resourceName) {
     u32 loadedResource;
-    SdfTex *texture = descriptor->texture;
-    struct SdfMemBlock *allocation;
+    sdfTexHandle_t *texture = descriptor->texture;
+    struct sdfMemHandle_t *allocation;
     if (texture != NULL && descriptor->textureCategory == BTL_RESOURCE_ENTRY_CATEGORY_TMX) {
         sdfTexReleaseReferenceViaHandler(texture);
         descriptor->texture = 0;
@@ -3528,7 +3528,7 @@ void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *descriptor, const ch
 
 /* Acquire a texture from the supplied resource, releasing an owned old handle. */
 void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, void *textureResource) {
-    SdfTex *texture = descriptor->texture;
+    sdfTexHandle_t *texture = descriptor->texture;
     if (texture != NULL && descriptor->textureCategory == BTL_RESOURCE_ENTRY_CATEGORY_TMX) {
         sdfTexReleaseReferenceViaHandler(texture);
         descriptor->texture = 0;
@@ -3540,14 +3540,14 @@ extern s32 sdf2DGetPrimPtr(s32 packetAddress);
 
 /* Queue the descriptor's preview texture as a quad at its screen position. */
 void btlDrawResourcePreview(BtlResourceDescriptor *descriptor) {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     void *sprite;
     KwlnSpriteVertex *vertex;
-    SdfTex *texture;
+    sdfTexHandle_t *texture;
     SdfPoolNode *surface;
 
     if (descriptor->texture != 0) {
-        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         sprite = sdf2DAllocSprite(1);
         vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr((s32)sprite);

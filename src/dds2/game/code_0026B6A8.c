@@ -39,7 +39,7 @@ extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 s32 dspStartFlagEvent(void *context) {
     s32 kind = *(s32 *)((u8 *)context + 0x84);
     s32 i;
-    DatPartyRecord *slot;
+    datUnitWork_t *slot;
 
     if (kind < 2) {
         if (kind >= 0) {
@@ -79,7 +79,7 @@ s32 dspStartFlagEvent(void *context) {
 }
 
 
-s32 mnuPrepareTerminalPanelState(KwlnTask *task) {
+s32 mnuPrepareTerminalPanelState(dds3ProcessID_t *task) {
     struct MenuSlotState *state = (struct MenuSlotState *)dds3GetProcessData(task);
 
     mnuTerminalSelectResourceBank(state);
@@ -92,7 +92,7 @@ u32 mnuTerminalPanelLeaveNoOp(void) {
     return 1;
 }
 
-s32 dspUpdateFlagEvent(KwlnTask *request) {
+s32 dspUpdateFlagEvent(dds3ProcessID_t *request) {
     s32 state = dds3GetProcessData(request);
     s32 *panel = (s32 *)(state + 0x54);
     s32 result = mnuDispatchPopupTransition((u8 *)state + 8, panel, 0, (void *)request);
@@ -109,21 +109,21 @@ s32 dspUpdateFlagEvent(KwlnTask *request) {
     return 0;
 }
 
-s32 mnuDispatchTerminalPanel(KwlnTask *request) {
+s32 mnuDispatchTerminalPanel(dds3ProcessID_t *request) {
     s32 state = dds3GetProcessData(request);
 
     mnuDrawTerminalBackdrop(state);
     return menuSetHandler((void *)state, 1, (void *)request);
 }
 
-s32 mnuDispatchTerminalPanelExit(KwlnTask *request) {
+s32 mnuDispatchTerminalPanelExit(dds3ProcessID_t *request) {
     s32 state = dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)state, 2, (void *)request);
 }
 
-u32 mnuStartTaskFadeIn(KwlnTask *task) {
+u32 mnuStartTaskFadeIn(dds3ProcessID_t *task) {
     s32 state;
 
     state = dds3GetProcessData(task);
@@ -137,7 +137,7 @@ u32 mnuStartTaskFadeIn(KwlnTask *task) {
     return 1;
 }
 
-s32 mnuStartTerminalPanelFadeOut(KwlnTask *task) {
+s32 mnuStartTerminalPanelFadeOut(dds3ProcessID_t *task) {
     struct MenuSlotState *state = (struct MenuSlotState *)dds3GetProcessData(task);
 
     mnuApplyFadeTrackMode(1, state);
@@ -149,7 +149,7 @@ s32 mnuStartTerminalPanelFadeOut(KwlnTask *task) {
 extern char D_003CE998[];
 
 /* When the current panel is idle and no fade is running, start its queued step. */
-s32 mnuUpdateTerminalPanelPopupWhenIdle(KwlnTask *request) {
+s32 mnuUpdateTerminalPanelPopupWhenIdle(dds3ProcessID_t *request) {
     s32 state = dds3GetProcessData(request);
     s32 *panelState = (s32 *)(state + 0x54);
     s32 result = mnuDispatchPopupTransition((u8 *)state + 8, panelState, 0, request);
@@ -163,7 +163,7 @@ s32 mnuUpdateTerminalPanelPopupWhenIdle(KwlnTask *request) {
 }
 
 /* Draw the backdrop and dispatch phase one of the terminal fade popup. */
-s32 mnuDispatchTerminalFadePanel(KwlnTask *request) {
+s32 mnuDispatchTerminalFadePanel(dds3ProcessID_t *request) {
     s32 state = dds3GetProcessData(request);
 
     mnuDrawTerminalBackdrop(state);
@@ -171,13 +171,13 @@ s32 mnuDispatchTerminalFadePanel(KwlnTask *request) {
 }
 
 /* Dispatch phase two of the fade popup without changing message-window mode. */
-s32 mnuDispatchTerminalFadePanelExit(KwlnTask *request) {
+s32 mnuDispatchTerminalFadePanelExit(dds3ProcessID_t *request) {
     s32 state = dds3GetProcessData(request);
 
     return menuSetHandler((void *)state, 2, (void *)request);
 }
 
-u32 mnuClearTerminalPanelSelection(KwlnTask *task) {
+u32 mnuClearTerminalPanelSelection(dds3ProcessID_t *task) {
     s32 state;
 
     state = dds3GetProcessData(task);
@@ -189,7 +189,7 @@ struct MenuSlotState;
 extern void mnuReleaseWorkResources(u8 *work);
 extern void mnuTerminalBuildMenus(struct MenuSlotState *host);
 
-s32 mnuRebuildTerminalMenuResources(KwlnTask *task) {
+s32 mnuRebuildTerminalMenuResources(dds3ProcessID_t *task) {
     s32 *state = (s32 *)dds3GetProcessData(task);
 
     mnuReleaseWorkResources(state);
@@ -214,7 +214,7 @@ u32 mnuTerminalRebuildFinishNoOp(void) {
 
 /* Index (0-3) of the lowest main character present in the party, as a bit mask over unit ids 1, 2, 5 and 8; 0 when none. */
 s32 mnuFirstPresentMainCharacterIndex(void) {
-    DatPartyRecord *slot;
+    datUnitWork_t *slot;
     u32 present = 0;
     s32 i;
 
@@ -360,13 +360,13 @@ u32 func_0026C168(void) {
 }
 
 s32 evtCopyWorldObjectEntryValue(s32 id, s32 dst) {
-    EffWorldNode *src;
-    EffWorldNode *destinationNode;
+    dds3Basic_t *src;
+    dds3Basic_t *destinationNode;
 
-    src = dds3SceneBasicSearchNameAndType((EffWorldNode *)dds3GetControlScene(), 9,
+    src = dds3SceneBasicSearchNameAndType((dds3Basic_t *)dds3GetControlScene(), 9,
                                                (const u8 *)id);
     if (src != NULL) {
-        destinationNode = (EffWorldNode *)dst;
+        destinationNode = (dds3Basic_t *)dst;
         *(s32 *)((u8 *)destinationNode->data + 0x80) = *(s32 *)((u8 *)src->data + 0x78);
         return 1;
     }

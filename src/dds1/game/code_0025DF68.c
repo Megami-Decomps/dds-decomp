@@ -167,7 +167,7 @@ void mnuDrawIconTriple(s32 x, s32 y, s32 z, s32 a, s32 b, s32 c) {
 }
 
 #include "pty_bullet_item_count_api.h"
-extern FrFontGlyph *itfCreateTightFont3TextGlyph(s32, s32, s32, s32, char *, FrFontGlyph *);
+extern _FRQ *itfCreateTightFont3TextGlyph(s32, s32, s32, s32, char *, _FRQ *);
 extern char D_003BC4F0[];
 
 /* Draw the selected item quantity; bullets include matching party slot values. */
@@ -187,7 +187,7 @@ void mnuDrawShopItemQuantity(s32 x, s32 y, s32 depth, ShopScene *scene, s32 alph
         CampWindowParams *item = &list->cursor->camp;
         s32 quantity = DDS3_GBWK->inventory.counts[item->id];
         u32 style = (s32)((f32)(alpha << 7) * 0.00390625f) | 0xA09DC300;
-        FrFontGlyph *glyph;
+        _FRQ *glyph;
 
         if (item->mode == 2) {
             quantity = ptyCountBulletItem(item->id);
@@ -201,7 +201,7 @@ void mnuDrawShopItemQuantity(s32 x, s32 y, s32 depth, ShopScene *scene, s32 alph
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", mnuDrawMenuItemListRow);
 
-extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
 extern char D_003BC500[];
 void mnuDrawCampItemListRow(s32 x, s32 y, s32 z, struct MenuList *list, struct MenuListNode *node, s32 mode) {
     char text[16];
@@ -214,7 +214,7 @@ void mnuDrawCampItemListRow(s32 x, s32 y, s32 z, struct MenuList *list, struct M
     f32 pulse;
     s32 selected = 0;
     u32 color;
-    FrFontGlyph *glyph;
+    _FRQ *glyph;
 
     switch (context->mode) {
     case 1: {
@@ -282,7 +282,7 @@ void mnuDrawShopRowTextAndValue(s32 x, s32 y, s32 z, struct MenuList *list,
     u32 style = 0xA09DC300;
     s32 selected = 0;
     s32 value;
-    FrFontGlyph *glyph;
+    _FRQ *glyph;
     char text[16];
 
     switch (mode) {
@@ -410,7 +410,7 @@ void mnuDrawShopSelectedRowDetails(s32 x, s32 y, s32 depth, ShopScene *scene, s3
     struct MenuList *list = scene->window->list;
     s32 row;
     s32 firstIndex;
-    FrFontGlyph *glyph;
+    _FRQ *glyph;
 
     if (list->count != 0) {
         firstIndex = list->head->index;
@@ -438,7 +438,7 @@ void mnuDrawShopSelectedRowDetailsWithAlpha(s32 x, s32 y, s32 depth, ShopScene *
     s32 row;
     s32 firstIndex;
     u32 color;
-    FrFontGlyph *glyph;
+    _FRQ *glyph;
 
     if (list->count != 0) {
         firstIndex = list->head->index;
@@ -505,7 +505,7 @@ void mnuDrawShopPricePlaceholder(s32 x, s32 y, s32 depth, ShopScene *panel, s32 
     struct EffectSlotSet *texture = D_003BC520;
     MenuWindowContainer *object = panel->window;
     struct MenuList *inner;
-    FrFontGlyph *glyph;
+    _FRQ *glyph;
 
     effDrawSpriteWithCornerFade(mnuCommonIconPlacements[25][BRS_ICON_X] << 4, mnuCommonIconPlacements[25][BRS_ICON_Y] << 3,
                   0, 0x100, 0, texture, mnuCommonIconPlacements[25][BRS_ICON_ID], option);
@@ -527,7 +527,7 @@ void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 a, s32 b, s32 c) {
 void mnuDrawIconFixedEntryWithBadge(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     char text[16];
     s32 value;
-    FrFontGlyph *glyph;
+    _FRQ *glyph;
 
     effDrawSpriteWithCornerFade(x + (mnuCommonIconPlacements[25][BRS_ICON_X] << 4), y + (mnuCommonIconPlacements[25][BRS_ICON_Y] << 3), z, scale, 0, D_003BC520, mnuCommonIconPlacements[25][BRS_ICON_ID], option);
     value = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
@@ -543,7 +543,7 @@ void mnuDrawShopSelectedRowTotal(s32 x, s32 y, s32 depth, ShopScene *panel, s32 
     struct EffectSlotSet *texture = D_003BC520;
     MenuWindowContainer *object = panel->window;
     struct MenuList *inner;
-    FrFontGlyph *glyph;
+    _FRQ *glyph;
 
     effDrawSpriteWithCornerFade(mnuCommonIconPlacements[25][BRS_ICON_X] << 4, mnuCommonIconPlacements[25][BRS_ICON_Y] << 3,
                   0, 0x100, 0, texture, mnuCommonIconPlacements[25][BRS_ICON_ID], option);
@@ -582,7 +582,7 @@ void mnuDrawShopCurrencyBalance(ShopScene *state, s32 style) {
     }
 
     {
-        FrFontGlyph *glyph = itfCreateTightFont3TextGlyph(0x17C0, 0x2B8, 0, style, text, 0);
+        _FRQ *glyph = itfCreateTightFont3TextGlyph(0x17C0, 0x2B8, 0, style, text, 0);
 
         frFontDrawGlyphChain(glyph, 1, 0x53);
         frDestroyFontRequestAfter(glyph);

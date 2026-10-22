@@ -11,7 +11,7 @@
 void dds3ModelBasicFreeModel(Dds3ModelRangeObjectView *modelRangeObject) {
     Dds3ModelRangeDataView *rangeData;
     void *resourceData;
-    SdfMemBlock *allocation;
+    sdfMemHandle_t *allocation;
 
     rangeData = modelRangeObject->rangeData;
     resourceData = rangeData->resourceData;

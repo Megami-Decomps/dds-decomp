@@ -5,57 +5,57 @@
 #include "sdf_linked_packet.h"
 
 void sdfLinkStoreImage(
-    SdfListHead *list, SdfTexResource *source, s32 sourceX, s32 sourceY,
+    sdfDrawTag_t *list, sdfGsMemSlice_t *source, s32 sourceX, s32 sourceY,
     s32 width, s32 height, s32 resourceAddress, s32 arg7, s32 arg8,
     s32 (*allocatePacket)(s32));
 
 void sdfLinkLoadImage(
-    SdfListHead *list, SdfTexResource *source, s32 destinationX,
+    sdfDrawTag_t *list, sdfGsMemSlice_t *source, s32 destinationX,
     s32 destinationY, s32 width, s32 height, s32 sourceAddress,
     s32 (*allocatePacket)(s32));
 
 /* resourceAddress is copied as a packet metadata word, not dereferenced. */
 void sdfLinkStoreFrameImage(
-    SdfListHead *list, SdfLinkedPacketList *linkedList, s32 sourceX, s32 sourceY,
+    sdfDrawTag_t *list, sdfPreDrawTag_t *linkedList, s32 sourceX, s32 sourceY,
     s32 width, s32 height, s32 resourceAddress, s32 arg7, s32 arg8,
     s32 (*allocatePacket)(s32));
 
 /* destination is the texture's native VRAM resource descriptor. */
 void sdfPrimLinkFrameMovePacket(
-    SdfListHead *drawList, SdfLinkedPacketList *linkedList,
-    SdfTexResource *destination, s32 destinationX, s32 destinationY,
+    sdfDrawTag_t *drawList, sdfPreDrawTag_t *linkedList,
+    sdfGsMemSlice_t *destination, s32 destinationX, s32 destinationY,
     s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight,
     s32 resourceIndexXor, s32 (*allocatePacket)(s32));
 
 void sdfPrimLinkSprite(
-    SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
+    sdfDrawTag_t *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
     s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 depth,
     s32 (*allocatePacket)(s32));
 void sdfPrimLinkLine(
-    SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right,
+    sdfDrawTag_t *list, s32 color, s32 primitive, s32 left, s32 top, s32 right,
     s32 bottom, s32 depth, s32 (*allocatePacket)(s32));
 void sdfPrimLinkRect(
-    SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right,
+    sdfDrawTag_t *list, s32 color, s32 primitive, s32 left, s32 top, s32 right,
     s32 bottom, s32 depth, s32 (*allocatePacket)(s32));
 
 void sdfPrimLinkBoxLine(
-    SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right,
+    sdfDrawTag_t *list, s32 color, s32 primitive, s32 left, s32 top, s32 right,
     s32 bottom, s32 depth, s32 (*allocatePacket)(s32));
 
 void sdfPrimLinkF3(
-    SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
+    sdfDrawTag_t *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
     s32 y1, s32 x2, s32 y2, s32 depth, s32 (*allocatePacket)(s32));
 void sdfPrimLinkF4(
-    SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
+    sdfDrawTag_t *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
     s32 y1, s32 x2, s32 y2, s32 x3, s32 y3, s32 depth,
     s32 (*allocatePacket)(s32));
 void sdfPrimLinkFt4(
-    SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
+    sdfDrawTag_t *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
     s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2, s32 u2,
     s32 v2, s32 x3, s32 y3, s32 u3, s32 v3, s32 depth,
     s32 (*allocatePacket)(s32));
 void sdfPrimLinkGt4(
-    SdfListHead *list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
+    sdfDrawTag_t *list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
     s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2,
     s32 u2, s32 v2, s32 color2, s32 x3, s32 y3, s32 u3, s32 v3, s32 color3,
     s32 depth, s32 (*allocatePacket)(s32));

@@ -3,10 +3,10 @@
 
 #include "common.h"
 
-struct FrFontGlyph;
+struct _FRQ;
 struct MemNode;
-struct FrFontRecord;
-struct SdfMemBlock;
+struct GsFont_t;
+struct sdfMemHandle_t;
 struct ItfRelativeSegmentResourceView;
 
 /* Atlas-list nodes use a flattened index; index zero is the sentinel. */
@@ -20,22 +20,22 @@ typedef struct FrFontUvRect {
 typedef struct FntNode {
     u32 nodeIndex;
     FrFontUvRect uv;
-    struct FrFontRecord *item;
+    struct GsFont_t *item;
     struct FntNode *prev;
     struct FntNode *next;
 } FntNode;
 
-typedef struct FrFontRecord {
+typedef struct GsFont_t {
     u16 id;
     u8 pad02[2];
     u16 refs;
     u8 pad06[2];
     FntNode *list;
-} FrFontRecord;
+} GsFont_t;
 
 typedef struct FntList {
-    struct SdfMemBlock *nodeAllocation;
-    struct SdfMemBlock *recordStorageAllocation;
+    struct sdfMemHandle_t *nodeAllocation;
+    struct sdfMemHandle_t *recordStorageAllocation;
     s32 cellWidth;       /* 0x08 */
     s32 cellHeight;      /* 0x0C */
     s32 pixelByteCount;  /* 0x10 */
@@ -63,13 +63,13 @@ typedef struct FrFontHeader {
 } FrFontHeader;
 
 typedef struct FrFontEntry {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     FrFontHeader *resourceHeader;
     s32 metricByteCount;
     s32 valueByteCount;
     s8 *flagBytes;
     void *unk14;
-    FrFontRecord **slots;
+    GsFont_t **slots;
     struct ItfRelativeSegmentResourceView *resource;
     u32 unk20;
 } FrFontEntry;
@@ -91,12 +91,12 @@ typedef struct FrFontSystem {
     s32 glyphCount;
     struct MemNode *itemPool;
     struct MemNode *glyphPool;
-    struct SdfTexResource *textureHead0;
-    struct SdfTexResource *textureHead1;
+    struct sdfGsMemSlice_t *textureHead0;
+    struct sdfGsMemSlice_t *textureHead1;
     FrFontAtlas atlas;
     u32 imageBuffers[6];
     u8 pad190[4];
-    struct FrFontGlyph *glyphSlots[2];
+    struct _FRQ *glyphSlots[2];
 } FrFontSystem;
 
 /* The SDK DMA tag is accessed as a quadword and as its four command words. */
@@ -143,40 +143,40 @@ extern FntList gFGC;
 /* DDS1 keeps the legacy placeholder spelling here: declaring the real name in
  * this header perturbs vendor-cc1 symbol-name CSE hashing in
  * field/fldFileResolver.c (fldQuerySelectedActorMotionState grows 8 bytes). */
-struct FrFontGlyph *func_001951C8(const char *text, s8 fontIndex,
-    s8 firstOption, s8 secondOption, struct FrFontGlyph *existingGlyph);
+struct _FRQ *func_001951C8(const char *text, s8 fontIndex,
+    s8 firstOption, s8 secondOption, struct _FRQ *existingGlyph);
 #endif
 #ifdef VERSION_DDS2
-struct FrFontGlyph *frFontBuildGlyphChain(const char *text, s8 fontIndex,
-    s8 firstOption, s8 secondOption, struct FrFontGlyph *existingGlyph);
+struct _FRQ *frFontBuildGlyphChain(const char *text, s8 fontIndex,
+    s8 firstOption, s8 secondOption, struct _FRQ *existingGlyph);
 #endif
-struct FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex,
-    s8 firstOption, s8 secondOption, struct FrFontGlyph *previousGlyph);
+struct _FRQ *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex,
+    s8 firstOption, s8 secondOption, struct _FRQ *previousGlyph);
 /* Update the first-option byte of every child on this glyph chain. */
-void frSetFontColorNo(struct FrFontGlyph *glyph, u8 firstOption);
+void frSetFontColorNo(struct _FRQ *glyph, u8 firstOption);
 /* Replace each child render word along the borrowed glyph chain. */
-void frSetFontColor(struct FrFontGlyph *parentNode, u32 colorWord);
+void frSetFontColor(struct _FRQ *parentNode, u32 colorWord);
 
 /* Decode encoded text and append the resulting glyph to an optional parent. */
-struct FrFontGlyph *itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth,
-    u32 colors, const u8 *text, struct FrFontGlyph *parent);
-struct FrFontGlyph *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth,
-    u32 colors, char *text, struct FrFontGlyph *parent);
+struct _FRQ *itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth,
+    u32 colors, const u8 *text, struct _FRQ *parent);
+struct _FRQ *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth,
+    u32 colors, char *text, struct _FRQ *parent);
 
 /* Link a glyph chain into the current draw-buffer slot. */
-s32 frDestroyFontRequestAfter(struct FrFontGlyph *glyph);
+s32 frDestroyFontRequestAfter(struct _FRQ *glyph);
 
 #ifdef VERSION_DDS1
-struct FrFontGlyph *itfCreateMeasuredTextGlyph(s32 x, s32 y, s32 depth, s32 colors,
-    const char *text, struct FrFontGlyph *parent);
+struct _FRQ *itfCreateMeasuredTextGlyph(s32 x, s32 y, s32 depth, s32 colors,
+    const char *text, struct _FRQ *parent);
 #endif
 #ifdef VERSION_DDS2
-struct FrFontGlyph *itfCreateMeasuredTextGlyph(s32 x, s32 y, s32 depth, s32 colors,
-    const char *text, struct FrFontGlyph *parent);
+struct _FRQ *itfCreateMeasuredTextGlyph(s32 x, s32 y, s32 depth, s32 colors,
+    const char *text, struct _FRQ *parent);
 #endif
 
 void frAddFontStyle(u8 slotIndex, u8 *resourceBytes,
-    struct SdfMemBlock *allocation);
+    struct sdfMemHandle_t *allocation);
 
 void frFontDrawAtlasGlyph(s32 x, s32 y, s32 width, s32 height, u8 style,
     u32 color, u32 depth, s32 filtered, const FrFontUvRect *uv,
@@ -192,7 +192,7 @@ typedef char FntListPixelByteCountOffsetCheck[((u32)&((FntList *)0)->pixelByteCo
 typedef char FntListCapacityOffsetCheck[((u32)&((FntList *)0)->capacity == 0x14) ? 1 : -1];
 typedef char FntListCountOffsetCheck[((u32)&((FntList *)0)->count == 0x18) ? 1 : -1];
 typedef char FntListHeadOffsetCheck[((u32)&((FntList *)0)->head == 0x1C) ? 1 : -1];
-typedef char FrFontRecordSizeCheck[sizeof(FrFontRecord) == 0x0C ? 1 : -1];
+typedef char FrFontRecordSizeCheck[sizeof(GsFont_t) == 0x0C ? 1 : -1];
 typedef char FrFontEntrySizeCheck[sizeof(FrFontEntry) == 0x24 ? 1 : -1];
 typedef char FrFontEntryAllocationOffsetCheck[((u32)&((FrFontEntry *)0)->allocation == 0x00) ? 1 : -1];
 typedef char FrFontAtlasSizeCheck[sizeof(FrFontAtlas) == 0x18 ? 1 : -1];

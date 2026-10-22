@@ -16,7 +16,7 @@ typedef char EvtMotionSeTaskParamsSizeCheck[sizeof(EvtMotionSeTaskParams) == 0xC
  * DDS1 002420B8 / DDS2 0025D4D0: +0x08 retains the event motion object. */
 typedef struct EvtMotionSeUnitLink {
     u8 unk00[8];
-    struct EvtUnit *unit;
+    struct evtUnitHandle_t *unit;
 } EvtMotionSeUnitLink;
 
 /* Type-6 BE entries contain 0x10-byte cues compared with the current frame. */

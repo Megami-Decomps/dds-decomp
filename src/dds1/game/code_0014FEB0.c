@@ -10,8 +10,8 @@
 
 #include "sdf.h"
 extern s32 dds3BillboardTag;
-extern BillObj *hGeneralBillboard[];
-extern BillObj *billCreateFromResource(s32 kind, const char *path);
+extern billHandle_t *hGeneralBillboard[];
+extern billHandle_t *billCreateFromResource(s32 kind, const char *path);
 
 extern EffBillResourceInit effBillResourceInitTable[];
 
@@ -68,7 +68,7 @@ void dds3EffectDataRevision(EffNodeDescriptor *descriptor) {
 
 void effInitializeBillResourceOwners(void) {
     u32 billboardIndex;
-    BillObj *billboard;
+    billHandle_t *billboard;
     BillChildPayload *payload;
 
     dds3BillboardTag = 0;
@@ -94,10 +94,10 @@ void effBillDispatchAll(void) {
 }
 
 BillChildPayload *BillboardLoadTex(SdfTextureFileHeader *resource) {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     BillPacketWork *work;
     BillChildPayload *child;
-    SdfTex *texture;
+    sdfTexHandle_t *texture;
     s16 widthUv;
     s16 heightUv;
     s32 pendingIndex;

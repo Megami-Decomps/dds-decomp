@@ -32,8 +32,8 @@
 #include "btl_target_result.h"
 /* Declared before first use (were implicit int). */
 extern s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex);
-extern u32 sdfQueryChannelBits(s32 channel, s32 queryArg, DatPartyRecord *item);
-extern u32 sdfQueryChannelValue(s32 channel, s32 queryArg, DatPartyRecord *item);
+extern u32 sdfQueryChannelBits(s32 channel, s32 queryArg, datUnitWork_t *item);
+extern u32 sdfQueryChannelValue(s32 channel, s32 queryArg, datUnitWork_t *item);
 
 extern s32 D_003B4F70[];
 
@@ -46,7 +46,7 @@ extern s32 D_003B4F78[];
 extern s32 D_003B4F74[];
 
 
-extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
+extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 
 
 #include "sdf_debug_api.h"
@@ -72,7 +72,7 @@ f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge);
 
 s8 btlGetActorIndexedSignedValue(BtlUnit *object, s32 index);
 
-s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record);
+s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record);
 
 s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *unit, u32 slot);
 
@@ -217,7 +217,7 @@ s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *);
 
 s32 btlResolveCommandHitResult(BtlUnit *source, BtlUnit *target, s32 command) {
     BtlState *runtime;
-    DatPartyRecord *targetRecord;
+    datUnitWork_t *targetRecord;
     s32 entryFlags;
     u32 targetFlags;
     s32 runtimeFlags;

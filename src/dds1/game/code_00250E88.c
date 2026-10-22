@@ -55,9 +55,9 @@
 #define MNU_REQUIREMENT_MIN_COUNT 2
 
 
-extern s8 scrGetSelectedOperandIndex(struct DatPartyRecord *);
+extern s8 scrGetSelectedOperandIndex(struct datUnitWork_t *);
 
-extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
+extern u32 ptyGetProfileRecordValue(struct datUnitWork_t *, u16);
 
 extern u32 prfGetCapValue(u16);
 
@@ -89,11 +89,11 @@ extern MnuSpriteResourceGroup *mnuCreateSpriteResource(s32, u8, u8);
 extern MenuProgressHost *mnuCreateWorkBlock(void);
 
 typedef struct MnuResourceTaskWork {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u8 pad04[4];
-    struct SdfMemBlock *messageResource1;
+    struct sdfMemHandle_t *messageResource1;
     u32 messageResourceInfo1;
-    struct SdfMemBlock *messageResource2;
+    struct sdfMemHandle_t *messageResource2;
     u32 messageResourceInfo2;
     u8 pad18[0xC];
     MenuProgressHost *staffMenuContext;
@@ -143,7 +143,7 @@ void mnuReleaseResourceSlots(MnuResourceTaskWork *unusedWork) {
 
 /* Allocate and clear resource-task work, load both message resources and prepare the mantra visuals. */
 MnuResourceTaskWork *mnuAllocateMantraResourceWork(void) {
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(sizeof(MnuResourceTaskWork));
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(sizeof(MnuResourceTaskWork));
     MnuResourceTaskWork *resourceWork = (MnuResourceTaskWork *)sdfMemGetPtr(allocation);
 
     memset(resourceWork, 0, sizeof(MnuResourceTaskWork));
@@ -222,7 +222,7 @@ s32 mnuGetMantraSourceValue(u16 profileId) {
 
 /* Populate a progress record from a party row's selected profile and its current/cap values. */
 void mnuInitializeProfileProgress(u16 partyIndex, MnuProfileProgress *progress) {
-    struct DatPartyRecord *partyRecord = &DDS3_GBWK->party[partyIndex];
+    struct datUnitWork_t *partyRecord = &DDS3_GBWK->party[partyIndex];
 
     progress->partyRecord = partyRecord;
     progress->profileId = scrGetSelectedOperandIndex(partyRecord);
@@ -234,7 +234,7 @@ void mnuInitializeProfileProgress(u16 partyIndex, MnuProfileProgress *progress) 
 
 /* Resource-task -> list -> selection chain used by the mantra display. */
 typedef struct MnuResourceTask {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u32 unk04[2];
     struct MenuList *menuList;
 } MnuResourceTask;
@@ -264,8 +264,8 @@ void mnuBuildMantraPartyList(MnuResourceTask *task) {
     memset(list->context, 0, MNU_LIST_DRAW_VALUE_BYTES);
     memset(partyOrder, 0, sizeof(partyOrder));
     do {
-        s32 recordOffset = i * sizeof(DatPartyRecord) + MNU_GAME_PARTY_RECORD_OFFSET;
-        DatPartyRecord *partyRecord = (DatPartyRecord *)((u8 *)DDS3_GBWK + recordOffset);
+        s32 recordOffset = i * sizeof(datUnitWork_t) + MNU_GAME_PARTY_RECORD_OFFSET;
+        datUnitWork_t *partyRecord = (datUnitWork_t *)((u8 *)DDS3_GBWK + recordOffset);
         u16 active = partyRecord->flags & 1;
         if (active != 0) {
             partyOrder[partyRecord->unitId] = i + 1;
@@ -319,7 +319,7 @@ void mnuResetResourceAnimation(void) {
 
 /* Allocate the four-word list task work, construct its party list and clear both remaining words. */
 MnuResourceTask *mnuAllocateEmptyResourceListState(void) {
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(MNU_RESOURCE_LIST_WORK_BYTES);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(MNU_RESOURCE_LIST_WORK_BYTES);
     MnuResourceTask *task = (MnuResourceTask *)sdfMemGetPtr(allocation);
 
     memset(task, 0, MNU_RESOURCE_LIST_WORK_BYTES);
@@ -347,7 +347,7 @@ void mnuReleaseResourceTaskData(s32 unused, MnuResourceTask *task) {
     task = NULL;
 }
 
-/* Snapshot is one native DatPartyRecord: 0x1A4 bytes with word alignment. */
+/* Snapshot is one native datUnitWork_t: 0x1A4 bytes with word alignment. */
 typedef struct ResourcePartySnapshot { u32 words[0x1A4/4]; } ResourcePartySnapshot;
 
 extern s8 dds3PadButtonState[];
@@ -387,14 +387,14 @@ s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
         task->unk04[0]=1;
         snapshot=resourceTaskPartySnapshot(metadata);
         *snapshot=**selectedParty;
-        mnuSetupStaffMenuProfilePage((struct DatPartyRecord *)snapshot,metadata->attachedEffect);
+        mnuSetupStaffMenuProfilePage((struct datUnitWork_t *)snapshot,metadata->attachedEffect);
         return 0;
     case 7:
         selectedParty=(ResourcePartySnapshot **)(u32)list->cursor->userValue;
         task->unk04[0]=5;
         snapshot=resourceTaskPartySnapshot(metadata);
         *snapshot=**selectedParty;
-        mnuSetupStaffMenuProfilePage((struct DatPartyRecord *)snapshot,metadata->attachedEffect);
+        mnuSetupStaffMenuProfilePage((struct datUnitWork_t *)snapshot,metadata->attachedEffect);
         return 0;
     case 1:
     case 5:
@@ -431,7 +431,7 @@ s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
                 selectedParty=(ResourcePartySnapshot **)(u32)list->cursor->userValue;
                 snapshot=resourceTaskPartySnapshot(metadata);
                 *snapshot=**selectedParty;
-                mnuSetupStaffMenuProfilePage((struct DatPartyRecord *)snapshot,metadata->attachedEffect);
+                mnuSetupStaffMenuProfilePage((struct datUnitWork_t *)snapshot,metadata->attachedEffect);
             }
         } else if (dds3PadButtonState[0x27]&2) {
             if (mnuMoveResourceListCursor(list, mnuAdvanceListCursorDefault)!=NULL) {
@@ -440,7 +440,7 @@ s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
                 selectedParty=(ResourcePartySnapshot **)(u32)list->cursor->userValue;
                 snapshot=resourceTaskPartySnapshot(metadata);
                 *snapshot=**selectedParty;
-                mnuSetupStaffMenuProfilePage((struct DatPartyRecord *)snapshot,metadata->attachedEffect);
+                mnuSetupStaffMenuProfilePage((struct datUnitWork_t *)snapshot,metadata->attachedEffect);
             }
         } else if (dds3PadButtonState[0x21]<0) {
             action=2; task->unk04[1]=0; task->unk04[0]=2;
@@ -1026,7 +1026,7 @@ s32 mnuFreeTaskData(u32 unused, u32 taskData) {
 
 extern s32 prfCheckRequirementRules(s32, ScrVmOperand *, u16);
 extern void sdfGridGetCursorCoordinates(SdfGrid *, u32 *, u32 *);
-extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
+extern u32 ptyGetProfileRecordValue(datUnitWork_t *, u16);
 extern const s32 D_003AF810[8];
 extern const u16 D_003AF830[8];
 
@@ -1122,7 +1122,7 @@ s32 mnuDisplayNextPendingMantra(s32 context) {
 
 /* Allocate and clear scene work before registering its grid and coordinates. */
 MenuSceneWork *mnuCreateSceneWork(void) {
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(MNU_SCENE_WORK_SIZE);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(MNU_SCENE_WORK_SIZE);
     u8 *sceneWork = (u8 *)sdfMemGetPtr(allocation);
 
     memset(sceneWork, 0, MNU_SCENE_WORK_SIZE);
@@ -1449,9 +1449,9 @@ s32 mnuSelectMantraGridRightNeighbor(SdfGrid *grid) {
 extern u16 prfGetRequiredProfileLevel(u16);
 extern u8 prfGetProfileParameterByte5(u16);
 extern s32 prfBuildRawSkillList(u16, PrfSkillList *);
-extern s32 ptyTestSecondaryProfileFlag(DatPartyRecord *, u16);
+extern s32 ptyTestSecondaryProfileFlag(datUnitWork_t *, u16);
 extern s32 prfCheckRequirementRules(s32, ScrVmOperand *, u16);
-extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
+extern u32 ptyGetProfileRecordValue(datUnitWork_t *, u16);
 
 /* Build the 0x58-byte list entry for one profile, or NULL when it is not available (profile 0x4E is still
  * listed once flag 0x908 is set). The entry's state is 1 when requirement 1 passes or the profile flag is set,
@@ -1635,14 +1635,14 @@ s32 mnuBeginMantraProfileSelection(void) {
     fclInitMessage((struct ItfMesSub *)scene->messageWindowResource);
     memcpy((u32 *)((u8 *)scene + 0x28), ((MnuProfileProgress *)mnuGetSelectedNodeValue())->partyRecord, 0x1A4);
     ((u8 *)scene)[0x7D] = (u8)scene->pendingProfileId;
-    mnuSetupStaffMenuProfilePage((DatPartyRecord *)((u8 *)scene + 0x28), scene->attachedEffect);
+    mnuSetupStaffMenuProfilePage((datUnitWork_t *)((u8 *)scene + 0x28), scene->attachedEffect);
     scene->stageFinished = 0;
     scene->stageStarted = 0;
     return 0;
 }
 
-extern s8 scrSelectOperandIndex(DatPartyRecord *, s32);
-extern s8 scrGetSelectedOperandIndex(DatPartyRecord *);
+extern s8 scrSelectOperandIndex(datUnitWork_t *, s32);
+extern s8 scrGetSelectedOperandIndex(datUnitWork_t *);
 extern void mnuSetMantraGridFeedbackMode(MnuGridFeedbackState *, u32);
 void mnuFinishMantraProfileSelection(void) {
     MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);

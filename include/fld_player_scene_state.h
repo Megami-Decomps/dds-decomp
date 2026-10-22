@@ -1,10 +1,10 @@
 #ifndef FLD_PLAYER_SCENE_STATE_H
 #define FLD_PLAYER_SCENE_STATE_H
 
-struct EffWorldNode;
+struct dds3Basic_t;
 
 /* The scene-state word contains the selected camera/world-node pointer. */
-struct EffWorldNode *fldGetPlayerSceneState(void);
-struct EffWorldNode **fldGetPlayerSceneStateAddress(void);
+struct dds3Basic_t *fldGetPlayerSceneState(void);
+struct dds3Basic_t **fldGetPlayerSceneStateAddress(void);
 
 #endif /* FLD_PLAYER_SCENE_STATE_H */

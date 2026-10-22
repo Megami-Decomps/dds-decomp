@@ -29,7 +29,7 @@ extern u8 btlIsRuntimeAllocated(void);
 
 extern s32 btlIsCurrentActorFullyMarked(void);
 
-extern MdlCtx *effLoadViewerModelWithVUState(void *, u32);
+extern dds3ModelHandle_t *effLoadViewerModelWithVUState(void *, u32);
 
 extern void mdlPackDecode(s32, u16, s32, void *, u32);
 
@@ -51,7 +51,7 @@ extern u32 D_00437E38;
 extern u32 D_00437E3C;
 
 extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
-extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
+extern s32 effComputeLightDirectionVU(dds3ModelHandle_t *, SdfLightingPacketStorage *);
 
 extern void effFloorModelListRemove(EffectObjectNode *);
 
@@ -60,13 +60,13 @@ extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern u64 D_003E9640[];
 
 extern u32 effSharedTextureReferenceCount;
-extern SdfTex *D_00437E40;
+extern sdfTexHandle_t *D_00437E40;
 
 /* VU0 model helpers consume vf10 directly, as in the DDS1 counterpart. */
 
 
 /* Initialize the VU transforms and the first node's float slot, if present. */
-void effInitModelVUState(MdlCtx *model) {
+void effInitModelVUState(dds3ModelHandle_t *model) {
     VU0_MOVE_VF(vf10, vf0);
     mdlSetPosition(model);
     VU0_MOVE_VF(vf10, vf0);
@@ -82,8 +82,8 @@ void effInitModelVUState(MdlCtx *model) {
 }
 
 /* Load under an unused group-6 viewer ID and initialize the model's VU state. */
-MdlCtx *effLoadViewerModelWithVUState(void *modelData, u32 parameter) {
-    MdlCtx *result;
+dds3ModelHandle_t *effLoadViewerModelWithVUState(void *modelData, u32 parameter) {
+    dds3ModelHandle_t *result;
     while (mdlSearchResrc(6, D_00437E2C) != 0) {
         D_00437E2C++;
     }
@@ -95,15 +95,15 @@ MdlCtx *effLoadViewerModelWithVUState(void *modelData, u32 parameter) {
 }
 
 /* Clear the lighting attachment before destroying its model context. */
-void effDestroyModelContext(MdlCtx *owner) {
+void effDestroyModelContext(dds3ModelHandle_t *owner) {
     owner->inner->lighting = NULL;
     mdlFree(owner);
 }
 
-MdlCtx *effCloneModelWithVUState(MdlCtx *sourceModel) {
+dds3ModelHandle_t *effCloneModelWithVUState(dds3ModelHandle_t *sourceModel) {
     s32 group;
     s32 id;
-    MdlCtx *model;
+    dds3ModelHandle_t *model;
 
     group = mdlGetMajorNum(sourceModel);
     id = mdlGetMinorNum(sourceModel);
@@ -154,7 +154,7 @@ EffModelOwner *effDuplicateEffectHeader(EffModelOwner *source) {
 void effRecreateModelFromSource(EffModelOwner *owner, EffModelOwner *source) {
     s32 group;
     s32 id;
-    MdlCtx *model;
+    dds3ModelHandle_t *model;
 
     if (owner->model != 0) {
         effDestroyModelContext(owner->model);
@@ -175,7 +175,7 @@ void effModelAnimationStop(EffModelOwner *owner) {
 
 /* Attach the owner's lighting buffer when the direction update succeeds. */
 void effRefreshModelLighting(EffModelOwner *work) {
-    MdlCtx *model;
+    dds3ModelHandle_t *model;
     if (effComputeLightDirectionVU(work->model, work->ownedBuffer)) {
         model = work->model;
         model->inner->lighting = &work->ownedBuffer->dmaTag;
@@ -212,7 +212,7 @@ void effApplyScaledModelTertiaryVector(EffModelOwner *owner, float scale) {
 
 typedef struct EffTexTable {
     u8 pad_00[0xC];
-    SdfTex **entries; // 0x0C
+    sdfTexHandle_t **entries; // 0x0C
 } EffTexTable;
 
 /* Battle state: resource headers for texture slots 1 and 2. */
@@ -228,7 +228,7 @@ void effUploadModelTextures(EffModelOwner *owner) {
     EffTexTable *table = owner->model->inner->assetData;
 
     do {
-        SdfTex *tex = table->entries[i++];
+        sdfTexHandle_t *tex = table->entries[i++];
         u8 *header;
         u8 *pixels;
         s16 width;
@@ -296,7 +296,7 @@ EffModelOwner *effDuplicateFloorModelOwner(EffModelOwner *source) {
 
 /* Render the model owner with staged GS TEST_2 packets, then restore the tests. */
 void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     u64 *packet;
     SdfPoolNode *surface;
     s32 index;
@@ -305,7 +305,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
                        (mdlGetColor(owner->model) & 0xFFFFFF) | 0x80000000);
 
     for (index = 0; index != 4; index++) {
-        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         packet = (u64 *)sdfGrAllocPacketBuff(0x30);
         packet[0] = 2;
@@ -330,7 +330,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
     mdlLink(owner->model, kwlnSceneSurfaceSets[1]);
 
     for (index = 1; index != 4; index++) {
-        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         packet = (u64 *)sdfGrAllocPacketBuff(0x30);
         packet[0] = 2;
@@ -617,7 +617,7 @@ void effResetModelMotionAndOwnerFlag(void *work) {
 #include "sdf_vu_matrix.h"
 extern void effGetWorldVector(u32);
 extern s32 effResolveRequestPositionIntoVu(EffectVectorRequest *, s16);
-extern s32 sdfModelGetMarkPosMatrix(SdfModel *, s32);
+extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *, s32);
 extern void sdfVuMatrixToQuaternion(f32 [4][4]);
 extern void Normalize(void);
 extern void btlDebugDrawSegment(f32 *, f32 *, u32);
@@ -641,7 +641,7 @@ void func_002DD448(EffResourceOwner *owner) {
     s32 haveTarget;
     s16 targetKind;
     u32 count;
-    SdfModel *model;
+    sdfModelRootNode_t *model;
     FileQueue **queue;
     u32 index;
     u32 sampledColor;
@@ -816,7 +816,7 @@ RefObj *effCreateSharedTextureReference(SdfTextureFileHeader *source) {
     s32 imageBytes;
     s32 payloadBytes;
     s32 textureOffset;
-    struct SdfMemBlock *allocationHandle;
+    struct sdfMemHandle_t *allocationHandle;
     u8 *cursor;
     RefObj *texture;
 
@@ -871,12 +871,12 @@ RefObj *effCloneSharedReferenceWithValue(SdfTextureFileHeader *source, u32 textu
 
 void effReleaseSharedReference(RefObj *obj) {
     if (--effSharedTextureReferenceCount == 0) {
-        SdfTex *texture = D_00437E40;
+        sdfTexHandle_t *texture = D_00437E40;
 
         texture->width = 0x100;
         texture->height = 0x100;
         D_00437E38 = 0xffffffff;
-        sdfTexReleaseReference((struct SdfTex *)texture);
+        sdfTexReleaseReference((struct sdfTexHandle_t *)texture);
     }
     if (--obj->refCount == 0) {
         sdfMemFreeDirect(obj->allocationHandle);
@@ -889,17 +889,17 @@ RefObj *effRetainSharedReference(RefObj *obj) {
     return obj;
 }
 
-extern SdfTex *sdfGetOrCreateTextureForReference(void *, RefObj *);
+extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(void *, RefObj *);
 #include "sdf_packet_builders.h"
 
-SdfTex *sdfGetOrCreateTextureForReference(void *target, RefObj *source) {
+sdfTexHandle_t *sdfGetOrCreateTextureForReference(void *target, RefObj *source) {
     SdfPoolNode *surface = target;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     u16 width;
     u16 height;
     s32 widthLog2;
     s32 heightLog2;
-    SdfTex *texture;
+    sdfTexHandle_t *texture;
     u32 primary;
     u32 secondary;
     u8 clutFormat;
@@ -911,7 +911,7 @@ SdfTex *sdfGetOrCreateTextureForReference(void *target, RefObj *source) {
     }
     D_00437E38 = source->index;
     D_00437E3C = (u32)surface;
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     sdfLinkLoadImage(list, D_00437E40->secondaryResource, 0, 0,
         source->paletteWidth, source->paletteHeight, (s32)source->palette, 0);
@@ -971,7 +971,7 @@ struct EffExpandedList *effCreateTextureAnimationSet(u32 sourceAddress) {
     u32 count = source->count;
     EffExpandedEntry *sourceEntry = source->entries;
     u32 i = 0;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     EffExpandedList *list;
     u8 *payload;
 
@@ -1061,7 +1061,7 @@ void effSampleAnimSet(const EffExpandedList *set, u32 frame, EffAnimSample *out)
     out->angle = 0.0f;
 }
 
-SdfTex *effAssignSampledSegmentReference(EffExpandedList *set, void *target, const EffAnimSample *sample) {
+sdfTexHandle_t *effAssignSampledSegmentReference(EffExpandedList *set, void *target, const EffAnimSample *sample) {
     return sdfGetOrCreateTextureForReference(target, set->handles[sample->segment]);
 }
 

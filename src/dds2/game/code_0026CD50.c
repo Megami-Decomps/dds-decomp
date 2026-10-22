@@ -47,10 +47,10 @@ EvtLoadedRecord *evtCreateLoadedRecord(u32 sourceAddress) {
     EvtLoadedRecordHeader header;
     u32 offset;
     u8 *source;
-    struct SdfMemBlock *handle;
+    struct sdfMemHandle_t *handle;
     EvtLoadedRecord *record;
     u8 *records;
-    struct SdfMemBlock *relocationHandle;
+    struct sdfMemHandle_t *relocationHandle;
     u32 *relocations;
 
     memcpy(fileHeader, (void *)sourceAddress, sizeof(fileHeader));
@@ -160,7 +160,7 @@ void mnuLoadMantraPanelPositionTable(u32 resourceId) {
 
 /* Release the retained panel-position handle and clear the global table address. */
 void mnuReleaseMantraPanelPositionTable(void) {
-    sdfMemFreeDirect((struct SdfMemBlock *)(u32)mnuMantraPanelPositionTable->handle);
+    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)mnuMantraPanelPositionTable->handle);
     mnuMantraPanelPositionTable = 0;
 }
 
@@ -172,7 +172,7 @@ struct MantraNodePos *mnuGetMantraPanelPositionRecord(s16 index) {
 extern void mnuUpdateMantraRecordFlags(void *, s32, s32);
 
 typedef struct EvtMantraWork {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u32 capacity;
     void *entries;
     u8 data[0x160];
@@ -181,7 +181,7 @@ typedef struct EvtMantraWork {
 /* Allocate/zero the selection work and point its entries at its inline storage.
  * The existing initializer is called only for nonzero initialValue. */
 EvtMantraWork *evtAllocateMantraSelectionWork(s32 initialValue, s32 mode) {
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(MNU_MANTRA_SELECTION_WORK_BYTES);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(MNU_MANTRA_SELECTION_WORK_BYTES);
     EvtMantraWork *work = (EvtMantraWork *)sdfMemGetPtr(allocation);
 
     memset(work, 0, MNU_MANTRA_SELECTION_WORK_BYTES);
@@ -202,16 +202,16 @@ void evtReleaseMantraSelectionWork(EvtMantraWork *work) {
 
 extern s32 mnuGetActiveMantraModelFlagState(void);
 
-extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
+extern u32 scrGetSelectedScriptEntryId(datUnitWork_t *);
 
-extern s32 ptyTestSecondaryProfileFlag(DatPartyRecord *, u16);
+extern s32 ptyTestSecondaryProfileFlag(datUnitWork_t *, u16);
 
 
-extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
+extern u32 ptyGetProfileRecordValue(datUnitWork_t *, u16);
 
-extern s32 prfReqEvaluateRules(u32, u32, DatPartyRecord *, u16, u32 *);
+extern s32 prfReqEvaluateRules(u32, u32, datUnitWork_t *, u16, u32 *);
 
-extern s32 prfCheckRequirementRules(u32, DatPartyRecord *, u16);
+extern s32 prfCheckRequirementRules(u32, datUnitWork_t *, u16);
 
 extern s32 mnuIsMantraNodeModelFlagSetForMember(u16, s8);
 
@@ -222,7 +222,7 @@ extern const char D_00425098[];
 /* Populate mantra selection flags from rank, profile state and node rules. */
 void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
     EvtMantraWork *work = selection;
-    DatPartyRecord *unit = (DatPartyRecord *)unitAddress;
+    datUnitWork_t *unit = (datUnitWork_t *)unitAddress;
     s32 rank;
     u32 selected;
     u16 *entry;
@@ -317,15 +317,15 @@ void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
 }
 
 
-/* The shared value provider owns a DatPartyRecord, not an integer address. */
-extern u32 ptyGetProfileRecordValue(DatPartyRecord *work, u16 scriptId);
+/* The shared value provider owns a datUnitWork_t, not an integer address. */
+extern u32 ptyGetProfileRecordValue(datUnitWork_t *work, u16 scriptId);
 
 /* 1 when some active party member other than unit `skipId` has `scriptId` at its profile record cap. */
 s32 ptyAnyActivePartyMemberAtProfileCap(u16 scriptId, u16 skipId) {
     s32 i;
 
     for (i = 0; i < EVT_PARTY_SLOT_COUNT; i++) {
-        DatPartyRecord *slot;
+        datUnitWork_t *slot;
 
         if (DDS3_GBWK->party[i].flags & 1) {
             slot = &DDS3_GBWK->party[i];
@@ -361,7 +361,7 @@ s32 evtTestMantraNodePartyRequirements(u16 entry, s32 mode) {
         s32 slot;
 
         if ((u16)(DDS3_GBWK->party[partyIndex].flags & 1) != 0) {
-            DatPartyRecord *party = &DDS3_GBWK->party[partyIndex];
+            datUnitWork_t *party = &DDS3_GBWK->party[partyIndex];
             for (slot = 0; slot < 6; slot++) {
                 MantraNodePos **neighborSlot = &record->neighbors[slot];
                 MantraNodePos *neighbor = *neighborSlot;
@@ -390,7 +390,7 @@ s32 evtTestMantraNodePartyRequirements(u16 entry, s32 mode) {
 
 /* Mark a node acquired in one unit's flag slot and open its waiting neighbours.
  * The party record argument (mnuUpdateMantraSelectionState passes the selected unit's) is unused. */
-void mnuUpdateMantraNeighborNodeStates(MantraFlagResource *resource, DatPartyRecord *unused, s16 entry) {
+void mnuUpdateMantraNeighborNodeStates(MantraFlagResource *resource, datUnitWork_t *unused, s16 entry) {
     MantraNodePos *record = (MantraNodePos *)mnuGetMantraNodePositionRecord(entry);
     u16 *origin = &resource->flags[record->id];
     s32 slot;
@@ -412,9 +412,9 @@ void mnuUpdateMantraNeighborNodeStates(MantraFlagResource *resource, DatPartyRec
     }
 }
 
-extern s32 scrTestEntryFlagBit15(DatPartyRecord *context, u8 entry);
+extern s32 scrTestEntryFlagBit15(datUnitWork_t *context, u8 entry);
 
-extern s32 scrTestEntryFlagAtZeroBit0(DatPartyRecord *context);
+extern s32 scrTestEntryFlagAtZeroBit0(datUnitWork_t *context);
 
 /* Return true when all six neighbor conditions are satisfied across active party members. */
 s32 mnuCheckMantraNeighborRequirements(u16 entry) {
@@ -435,7 +435,7 @@ s32 mnuCheckMantraNeighborRequirements(u16 entry) {
         s32 slot;
 
         if ((u16)(DDS3_GBWK->party[partyIndex].flags & 1) != 0) {
-            DatPartyRecord *party = &DDS3_GBWK->party[partyIndex];
+            datUnitWork_t *party = &DDS3_GBWK->party[partyIndex];
             for (slot = 0; slot < 6; slot++) {
                 MantraNodePos **neighborSlot = &record->neighbors[slot];
                 MantraNodePos *neighbor = *neighborSlot;
@@ -531,9 +531,9 @@ void prfSummarizeNonzeroEntryAttributes(s32 entryId, s32 *summary) {
 void func_0026DB20(void) {
 }
 
-extern void scrClearEntryFlag(DatPartyRecord *context, u16 entryId, u32 bit);
+extern void scrClearEntryFlag(datUnitWork_t *context, u16 entryId, u32 bit);
 
-void scrClearPartyProfileEntryBit15(DatPartyRecord *context, u8 entry) {
+void scrClearPartyProfileEntryBit15(datUnitWork_t *context, u8 entry) {
     scrClearEntryFlag(context, entry, 0xf);
 }
 

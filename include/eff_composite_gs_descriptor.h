@@ -16,9 +16,9 @@ typedef struct EffCompositeGsDescriptor {
     u32 blendMode;
     BillTextureQuad primaryUv;
     BillTextureQuad secondaryUv;
-    SdfTex *primaryTexture;
+    sdfTexHandle_t *primaryTexture;
     u64 primaryClamp;
-    SdfTex *secondaryTexture;
+    sdfTexHandle_t *secondaryTexture;
     u8 unk5C[4];
     u64 secondaryClamp;
 } EffCompositeGsDescriptor;

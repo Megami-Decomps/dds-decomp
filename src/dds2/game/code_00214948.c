@@ -151,7 +151,7 @@ extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
-extern void evtSetWaitMotionSpeed(EvtUnit *, f32);
+extern void evtSetWaitMotionSpeed(evtUnitHandle_t *, f32);
 
 extern void evtSetWaitHokanFrame(void *, s32, s32);
 
@@ -160,9 +160,9 @@ extern u32 btlGetSubtaskTargetMode(void);
 extern u32 btlAppendEffectActorToCommandIndices(s32);
 
 
-extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
+extern s32 btlReadCurrentUnitHp(datUnitWork_t *);
 
-extern s32 btlReadCurrentUnitMp(DatPartyRecord *);
+extern s32 btlReadCurrentUnitMp(datUnitWork_t *);
 
 extern s32 btlBuildUnitIndexList(void *, BtlIndexList *, s32, s32, s32);
 
@@ -184,9 +184,9 @@ extern s32 btlGroup400UnitHasAction(BtlUnit *, s32);
 
 extern s8 D_00438F84;
 
-extern s32 sdfModelGetNodeIndexByName(SdfModel *, const char *);
+extern s32 sdfModelGetNodeIndexByName(sdfModelRootNode_t *, const char *);
 
-extern void btlFadeAndTintNamedChunkTree(SdfDrawNode *, s32);
+extern void btlFadeAndTintNamedChunkTree(sdfModelNode_t *, s32);
 
 
 extern BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *);
@@ -627,7 +627,7 @@ s32 btlSelectLowestHealthRateTarget(s32 task) {
         memset(picked, 0, sizeof(picked));
         lowestIndex = 0x20;
         for (i = 0; i < count; i++) {
-            DatPartyRecord *stats = &((BtlUnit *)btlGetIndexListEntry(list, i))->partyRecord;
+            datUnitWork_t *stats = &((BtlUnit *)btlGetIndexListEntry(list, i))->partyRecord;
             s32 current = btlReadCurrentUnitHp(stats);
             s32 percent = current * 100 / (s32)btlComputeSkillAdjustedMaxHp(stats);
 
@@ -1779,7 +1779,7 @@ void btlStartPrevUnitScriptAction(ActionStateLink *handle) {
     handle->flags = flags & ~8;
 }
 
-extern void evtSetUnitMotion(EvtUnit *, s32, s32, s32, s32);
+extern void evtSetUnitMotion(evtUnitHandle_t *, s32, s32, s32, s32);
 
 
 
@@ -2486,7 +2486,7 @@ extern char D_0041A378[]; /* "md_01all_02" */
 
 /* Before marking a gate enemy, notify md_01all_02 with payload word 1; always allow. */
 s32 btlPrepareGateDefeatCandidateSet(u8 *unit) {
-    EffWorldNode *object;
+    dds3Basic_t *object;
     if (!(((BtlUnit *)unit)->status.flags & 0x400)) {
         return 1;
     }
@@ -2503,7 +2503,7 @@ s32 btlPrepareGateDefeatCandidateSet(u8 *unit) {
 
 /* Before clearing that mark, notify the same model with word 2; always allow. */
 s32 btlPrepareGateDefeatCandidateClear(u8 *unit) {
-    EffWorldNode *object;
+    dds3Basic_t *object;
     if (!(((BtlUnit *)unit)->status.flags & 0x400)) {
         return 1;
     }
@@ -2773,8 +2773,8 @@ s32 btlDisableUnitsIfSpeciesFlagged(void) {
 }
 
 /* vu0 routine: normalize packed RGBA and fade the named chunk tree. */
-void btlFadeAndTintNamedChunkTree(SdfDrawNode *node, s32 color) {
-    SdfDrawNode *child;
+void btlFadeAndTintNamedChunkTree(sdfModelNode_t *node, s32 color) {
+    sdfModelNode_t *child;
     u32 source[4];
     u32 tint[4];
     u32 packed[4];
@@ -2806,12 +2806,12 @@ void btlFadeAndTintNamedChunkTree(SdfDrawNode *node, s32 color) {
 
 s8 btlDispatchNamedChunkNode(const char *name) {
     BtlUnit *battler = ((BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub)->unit;
-    EvtUnit *resource;
-    SdfModel *chunk;
+    evtUnitHandle_t *resource;
+    sdfModelRootNode_t *chunk;
     s32 index;
     DevRequest *data;
-    SdfDrawNode **entries;
-    SdfDrawNode *node;
+    sdfModelNode_t **entries;
+    sdfModelNode_t *node;
     if (battler == 0) {
         return 1;
     }
@@ -2832,8 +2832,8 @@ s8 btlDispatchNamedChunkNode(const char *name) {
     return D_00438F84;
 }
 
-void btlResetNamedChunkNodeTree(SdfDrawNode *node) {
-    SdfDrawNode *child;
+void btlResetNamedChunkNodeTree(sdfModelNode_t *node) {
+    sdfModelNode_t *child;
 
     node->color = 0x80808080;
     child = node->children;
@@ -2849,12 +2849,12 @@ void btlResetNamedChunkNodeTree(SdfDrawNode *node) {
 void btlClearNamedChunkFlags(const char *name) {
     BtlUnit *battler = ((BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub)->unit;
     if (battler != 0 && (battler->status.flags & 2) != 0) {
-        EvtUnit *resource = battler->ext;
-        SdfModel *chunk = resource->owner->inner;
+        evtUnitHandle_t *resource = battler->ext;
+        sdfModelRootNode_t *chunk = resource->owner->inner;
         s32 index = sdfModelGetNodeIndexByName(chunk, name);
         if (index != -1) {
             DevRequest *data = chunk->list;
-            SdfDrawNode **entries = data->buffer;
+            sdfModelNode_t **entries = data->buffer;
             btlResetNamedChunkNodeTree(entries[index]);
         }
     }
@@ -3199,7 +3199,7 @@ BtlUnit *btlGetReadyUnitForSpecies(s32 mode, u32 species) {
 
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
-extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *, s32);
+extern void btlInitializePartyRecordFromEnemy(datUnitWork_t *, s32);
 
 /* Create/load the unit only for an empty slot. A populated slot returns a fresh
  * sequence ID without launching a task; a nonzero prerequisite waits until
@@ -4889,7 +4889,7 @@ INCLUDE_RODATA(const s32, "game/code_00214948", D_0041AAC8);
 void btlChoosePartyDerivedShadowSkill(ActionStateLink *actor) {
     s32 choices[24];
     s32 partyId;
-    DatPartyRecord *entry;
+    datUnitWork_t *entry;
     s32 i;
     s32 count;
 
@@ -7951,7 +7951,7 @@ u32 btlFlagBattleForSpecialAction(u32 unit, u32 actor, u32 action) {
     return 0;
 }
 
-extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32);
+extern s32 datGetStatWithStatusOverride(datUnitWork_t *, s32);
 
 s32 btlSelectLowestStatTarget(ActionStateLink *actor) {
     BtlState *battle;

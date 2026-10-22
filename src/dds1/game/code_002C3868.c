@@ -37,7 +37,7 @@ extern s32 sdfCounterSelectionCount;
 
 extern void sdfLatchBaseVectorsForSelection(void);
 
-extern EffWorldNode *fldLocalMapCameraObject;
+extern dds3Basic_t *fldLocalMapCameraObject;
 
 typedef struct {
     f32 v[4];
@@ -81,8 +81,8 @@ s32 sdfLoadMapCounterCameraVectorsForMask(s32 mask) {
     f32 position[4];
     f32 rotation[4];
     char name[16];
-    EffWorldNode *world;
-    EffWorldNode *node;
+    dds3Basic_t *world;
+    dds3Basic_t *node;
     s8 count;
     s8 i;
 

@@ -17,9 +17,9 @@ extern char fileManagerTaskName[];
 extern s32 D_003BC7D8;
 
 extern s32 (*p2sdSmgBuf)(void);
-s32 fileManagerProc(KwlnTask *task);
+s32 fileManagerProc(dds3ProcessID_t *task);
 
-extern s32 sdfFileCmdFileSize(DevState *);
+extern s32 sdfFileCmdFileSize(sdfFileCmdHandle_t *);
 
 extern void pacRead(FileTransferJob *);
 
@@ -27,10 +27,10 @@ extern void fileLinkCloseWait(FileManWork *work, FileRequest *job);
 
 extern void fileUnlinkCloseWait(FileManWork *work, FileRequest *job);
 
-extern DevState *sdfFileCmdReadOpen(const char *path,
+extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path,
                         s32 (*callback)(void *, s32, s32, s32, FileTransferJob *), FileTransferJob *job);
 
-extern DevState *sdfFileCmdWriteOpen(const char *path,
+extern sdfFileCmdHandle_t *sdfFileCmdWriteOpen(const char *path,
                         s32 (*callback)(void *, s32, s32, s32, FileTransferJob *), FileTransferJob *job,
                         s32 options);
 
@@ -118,7 +118,7 @@ s32 fileLoadCallback(void *deviceRequest, s32 event, s32 unused, s32 byteCount, 
         sdfFileCmdFileSize(deviceRequest);
         break;
     case SDF_DEV_EVENT_SIZE_REPLY: {
-        struct SdfMemBlock *allocationHandle;
+        struct sdfMemHandle_t *allocationHandle;
 
         job->transferBytes = byteCount;
         job->totalBytes = byteCount;
@@ -290,7 +290,7 @@ void fileExecQueue(void) {
             job->allocationHandle = sdfMemAlloc2Direct(job->totalBytes);
             if (job->allocationHandle == NULL) {
                 sdfPrintf("alloc retry for %s\n",
-                                            ((DevState *)job->deviceRequest)->resolvedPath);
+                                            ((sdfFileCmdHandle_t *)job->deviceRequest)->resolvedPath);
                 job->retryCount--;
             } else {
                 u32 address = sdfMemLock(job->allocationHandle);
@@ -405,7 +405,7 @@ s32 fileManager(void) {
 }
 
 /* Task callback driving asynchronous file work. */
-s32 fileManagerProc(KwlnTask *task) {
+s32 fileManagerProc(dds3ProcessID_t *task) {
     fileManager();
     return 0;
 }

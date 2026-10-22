@@ -45,9 +45,9 @@ extern u64 *pbAllocPrimPacket(u32, u32, u32, u32, u32, u32, u32);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
-extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
+extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
 
-extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
+extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *);
 
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
@@ -87,7 +87,7 @@ void pbDrawRotatedPrim(s32 surfaceIndex);
 /* Retail 0x001A0680 keeps the row < 4 select inside the four-row loop. */
 s32 pbDebugPrintPanel3(void) {
     SifCommand packet;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     s32 row;
     s32 y = 0x7A20;
     s16 previousSelection;
@@ -236,7 +236,7 @@ void pbDrawRotatedPrim(s32 surfaceIndex) {
     s32 alpha;
     s32 i;
     u8 *component;
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     SdfPoolNode *surface;
     f32 phase;
 
@@ -296,7 +296,7 @@ extern void btlUpdateFadeColor(void);
 extern void btlUpdateTintAndWorldLight(void);
 extern void fldAdvanceSceneGroupScheduler(void);
 
-s32 btlUpdateActiveBattleFrame(KwlnTask *task) {
+s32 btlUpdateActiveBattleFrame(dds3ProcessID_t *task) {
     BtlState *battle = btlRuntime;
     if (battle == NULL) {
         return 0;
@@ -330,7 +330,7 @@ extern void btlUpdateEventPlayback(void);
 extern void btlUpdateFieldPresentationNoOp(void);
 extern void btlUpdateSceneFlow(void);
 
-s32 btlUpdateBattleFieldPresentation(KwlnTask *task) {
+s32 btlUpdateBattleFieldPresentation(dds3ProcessID_t *task) {
     BtlState *battle = btlRuntime;
     if (battle == NULL) {
         return 0;
@@ -349,7 +349,7 @@ s32 btlUpdateBattleFieldPresentation(KwlnTask *task) {
 }
 
 /* Empty destructor callback for the active battle-frame task. */
-void btlReleaseActiveBattleFrameTask(KwlnTask *task) {
+void btlReleaseActiveBattleFrameTask(dds3ProcessID_t *task) {
 }
 
 extern char D_003BB2F0[];
@@ -359,8 +359,8 @@ extern char D_003A1598[]; /* "battle_draw" */
 
 void btlCreateDrawTasks(void) {
     BtlState *battle = btlRuntime;
-    KwlnTask *mainTask;
-    KwlnTask *drawTask;
+    dds3ProcessID_t *mainTask;
+    dds3ProcessID_t *drawTask;
     mainTask = dds3StartProcess(D_003BB2F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, btlReleaseActiveBattleFrameTask, 0);
     battle->scriptOwner = mainTask;
     drawTask = dds3StartProcess(D_003A1598, 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0);
@@ -368,7 +368,7 @@ void btlCreateDrawTasks(void) {
 }
 
 void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
-    KwlnTask *task;
+    dds3ProcessID_t *task;
 
     task = dds3SearchProcessPriority(0x3f9);
     if (task != NULL) {
@@ -448,7 +448,7 @@ extern void btlInitializeRuntimeNoOp(void);
 void btlInitializeBattleRuntime(void) {
     btlResetRuntimeSequenceCounter();
     D_003BB2E0 = (u32)sdfMemAllocDirect(0xE10);
-    btlRuntime = (BtlState *)sdfMemLock((struct SdfMemBlock *)(D_003BB2E0));
+    btlRuntime = (BtlState *)sdfMemLock((struct sdfMemHandle_t *)(D_003BB2E0));
     memset(btlRuntime, 0, 0xE10);
 
     ((BattleInitState *)btlRuntime)->tick = 0;
@@ -567,7 +567,7 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     effResetSlots();
     evtDisableMoonDraw();
     itfMesClearFlags(1);
-    sdfMemFreeDirect((struct SdfMemBlock *)(u32)(D_003BB2E0));
+    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(D_003BB2E0));
     D_003BB2E0 = 0;
     btlRuntime = NULL;
     btlBossDebugPrintf("** btlExit ***************\n");
@@ -678,7 +678,7 @@ s32 btlHasPendingRuntimeActivity(void) {
 
 void btlResetActorEntryState(void) {
     BtlState *context = btlRuntime;
-    DatPartyRecord *entries = DDS3_GBWK->party;
+    datUnitWork_t *entries = DDS3_GBWK->party;
     u32 i;
     context->moneyEarned = 0;
     context->moneyTotal = 0;
@@ -767,49 +767,49 @@ void *btlGetRuntime(void) {
 #define BTL_ENTRY_STATUS_MASK 0x7FFF
 
 /* Read current HP from a unit-entry address. */
-s32 btlReadCurrentUnitHp(DatPartyRecord *entryAddress) {
+s32 btlReadCurrentUnitHp(datUnitWork_t *entryAddress) {
     return entryAddress->hp;
 }
 
 /* Word-return getter; native callers choose whether to truncate MP to 16 bits. */
-s32 btlReadCurrentUnitMp(DatPartyRecord *entryAddress) {
+s32 btlReadCurrentUnitMp(datUnitWork_t *entryAddress) {
     return entryAddress->mp;
 }
 
-extern s32 ptyComputeMaxHp(DatPartyRecord *);
-extern s32 ptyComputeMaxMp(DatPartyRecord *);
+extern s32 ptyComputeMaxHp(datUnitWork_t *);
+extern s32 ptyComputeMaxMp(datUnitWork_t *);
 
-void btlComputeProfileMaxHp(DatPartyRecord *unit) {
+void btlComputeProfileMaxHp(datUnitWork_t *unit) {
     ptyComputeMaxHp(unit);
 }
 
-void btlComputeProfileMaxMp(DatPartyRecord *unit) {
+void btlComputeProfileMaxMp(datUnitWork_t *unit) {
     ptyComputeMaxMp(unit);
 }
 
-u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *object) {
+u32 btlComputeSkillAdjustedMaxHp(datUnitWork_t *object) {
     return datComputeSkillBoostedMaxHp(object);
 }
 
-u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *object) {
+u32 btlComputeSkillAdjustedMaxMp(datUnitWork_t *object) {
     return datComputeSkillBoostedMaxMp(object);
 }
 
-extern s32 datAddHp(DatPartyRecord *, s32);
-extern s32 datAddMp(DatPartyRecord *, s32);
+extern s32 datAddHp(datUnitWork_t *, s32);
+extern s32 datAddMp(datUnitWork_t *, s32);
 
-s32 btlAdjustUnitHp(DatPartyRecord *object, s32 delta) {
+s32 btlAdjustUnitHp(datUnitWork_t *object, s32 delta) {
     return datAddHp(object, delta);
 }
 
-s32 btlAdjustUnitMp(DatPartyRecord *object, s32 delta) {
+s32 btlAdjustUnitMp(datUnitWork_t *object, s32 delta) {
     return datAddMp(object, delta);
 }
 
 /* Cache the skill-adjusted maximum and return current HP clamped to it.
  * The comparison uses the full-width result, not the u16 cache. */
-u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *entryAddress) {
-    DatPartyRecord *entry = entryAddress;
+u16 btlRefreshUnitMaximumHpAndClampCurrentHp(datUnitWork_t *entryAddress) {
+    datUnitWork_t *entry = entryAddress;
     u32 currentHp = btlReadCurrentUnitHp(entry);
     u32 maxHp = btlComputeSkillAdjustedMaxHp(entryAddress);
     entry->maxHp = maxHp;
@@ -821,7 +821,7 @@ u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *entryAddress) {
 
 /* Cache the skill-adjusted maximum and return current MP clamped to it.
  * The comparison uses the full-width result, not the u16 cache. */
-u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *entryAddress) {
+u16 btlRefreshUnitMaximumMpAndClampCurrentMp(datUnitWork_t *entryAddress) {
     u32 currentMp = btlReadCurrentUnitMp(entryAddress);
     u32 maxMp = btlComputeSkillAdjustedMaxMp(entryAddress);
     entryAddress->maxMp = maxMp;
@@ -832,14 +832,14 @@ u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *entryAddress) {
 }
 
 /* Return the low 15 status bits; do not expose the stored high bit. */
-u16 btlReadUnitStatusMask(DatPartyRecord *entry) {
+u16 btlReadUnitStatusMask(datUnitWork_t *entry) {
     return entry->status & BTL_ENTRY_STATUS_MASK;
 }
 
-extern void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 minimumValue);
+extern void sdfRaisePackedChannelValue(datUnitWork_t *item, u32 minimumValue);
 
 /* Forward the record and value to the packed low-15-bit status update. */
-void btlRaisePartyRecordStatusValue(DatPartyRecord *item, u32 minimumValue) {
+void btlRaisePartyRecordStatusValue(datUnitWork_t *item, u32 minimumValue) {
     sdfRaisePackedChannelValue(item, minimumValue);
 }
 

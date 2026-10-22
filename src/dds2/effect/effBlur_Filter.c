@@ -52,12 +52,12 @@ void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner) {
 }
 
 /* Copy only the serialized parameters, leaving the owned work tail intact. */
-void dds3EffectPartialMultiBlurSetParam(EffBlurScatterWork *dst, EffBlurScatterParams *src) {
+void dds3EffectPartialMultiBlurSetParam(EffBlurScatterWork *dst, dds3Effect_DistortionBlurParam_t *src) {
     dst->params = *src;
 }
 
 /* Select the source handle used by the first blur variant. */
-void dds3EffectPartialMultiBlurSetTex(EffBlurScatterWork *work, struct SdfTex *sourceHandle) {
+void dds3EffectPartialMultiBlurSetTex(EffBlurScatterWork *work, struct sdfTexHandle_t *sourceHandle) {
     work->texture = sourceHandle;
 }
 
@@ -67,7 +67,7 @@ void dds3EffectPartialMultiBlurSetTexDef(EffBlurScatterWork *work) {
 }
 
 void dds3EffectDistBlurPartInit(EffBlurScatterWork *work, EffBlurScatterSlot *slot) {
-    EffBlurQuad *quad = &slot->quad;
+    dds3Effect_Blur_t *quad = &slot->quad;
     f32 spread;
     s32 halfSize;
     s32 centerX;
@@ -92,9 +92,9 @@ void dds3EffectDistBlurPartInit(EffBlurScatterWork *work, EffBlurScatterSlot *sl
     quad->corners[1][1] = centerY + halfSize;
 }
 
-EffBlurScatterWork *dds3EffectDistortionBlurCreate(EffBlurScatterParams *params)
+EffBlurScatterWork *dds3EffectDistortionBlurCreate(dds3Effect_DistortionBlurParam_t *params)
 {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     EffBlurScatterWork *work;
     EffBlurScatterSlot *slot;
     s32 slotIndex;
@@ -120,9 +120,9 @@ void dds3EffectDistortionBlurDelete(EffBlurScatterWork *work) {
 
 
 #include "sdf_packet_alloc.h"
-struct SdfListHead;
-extern void effAppendBlurRenderState(void *list, s32 blendControl, struct SdfTex *resource);
-extern void effAppendBlurRectanglePackets(void *list, const EffBlurQuad *quad, u8 fixedPoint);
+struct sdfDrawTag_t;
+extern void effAppendBlurRenderState(void *list, s32 blendControl, struct sdfTexHandle_t *resource);
+extern void effAppendBlurRectanglePackets(void *list, const dds3Effect_Blur_t *quad, u8 fixedPoint);
 extern void effDrawBlurListWithFramePacket(void *list);
 extern f64 fabs(f64 value);
 
@@ -164,7 +164,7 @@ void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work)
 
 
 /* Update scale parameters but preserve the allocated destination slot count. */
-void dds3EffectDistortionBlurSetParam(EffBlurScaleWork *dst, EffBlurScaleParams *src) {
+void dds3EffectDistortionBlurSetParam(EffBlurScaleWork *dst, dds3Effect_RippleBlurParam_t *src) {
     s32 count = dst->params.count;
 
     dst->params = *src;
@@ -172,7 +172,7 @@ void dds3EffectDistortionBlurSetParam(EffBlurScaleWork *dst, EffBlurScaleParams 
 }
 
 /* The scale variant has its own source-handle setter. */
-void effBlurSetSecondSetting(EffBlurScaleWork *work, struct SdfTex *sourceHandle) {
+void effBlurSetSecondSetting(EffBlurScaleWork *work, struct sdfTexHandle_t *sourceHandle) {
     work->texture = sourceHandle;
 }
 
@@ -198,7 +198,7 @@ void effBlurSecondUpdateSlotRect(EffBlurScaleWork *work, EffBlurScaleSlot *slot)
 
 /* Reset a slot for a new burst: zero phase and angle, then copy the colour, the two spare fields and the centre from the work parameters. */
 void dds3EffectRipBlurPartInit(EffBlurScaleWork *work, EffBlurScaleSlot *slot) {
-    EffBlurQuad *quad = &slot->quad;
+    dds3Effect_Blur_t *quad = &slot->quad;
 
     slot->phase = 0.0f;
     slot->angle = 0.0f;

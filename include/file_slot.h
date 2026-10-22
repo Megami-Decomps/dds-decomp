@@ -26,7 +26,7 @@ typedef struct FileSlotTable {
     u8 *instanceWork;             /* 0x1C: per-type instance work */
     u8 *data0;             /* 0x20 */
     u8 *data1;             /* 0x24 */
-    struct SdfMemBlock *allocation; /* 0x28: owns the retained table storage */
+    struct sdfMemHandle_t *allocation; /* 0x28: owns the retained table storage */
 } FileSlotTable;
 
 FileSlotTable *fileAllocateGridRecordSlots(u16 type, u32 count, const void *configuration);

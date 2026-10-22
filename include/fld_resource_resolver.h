@@ -3,16 +3,16 @@
 
 #include "common.h"
 
-struct EffWorldNode;
+struct dds3Basic_t;
 
 /* Read or update the cached world object associated with a resource record ID. */
-struct EffWorldNode *fldFindMatterIndex(s32 id);
-void fldFindMatterIndexFrom(s32 id, struct EffWorldNode *worldNode);
+struct dds3Basic_t *fldFindMatterIndex(s32 id);
+void fldFindMatterIndexFrom(s32 id, struct dds3Basic_t *worldNode);
 
 /* Resolves a named world object or lazily creates/caches a dummy matter object. */
-struct EffWorldNode *fldGetMatter_From_ModelRangeID(u32 resourceId);
+struct dds3Basic_t *fldGetMatter_From_ModelRangeID(u32 resourceId);
 
 /* Matches a resource name entry, then resolves its owner by the resource name. */
-struct EffWorldNode *fldGetModelRange_From_MatterName(const char *entryName);
+struct dds3Basic_t *fldGetModelRange_From_MatterName(const char *entryName);
 
 #endif

@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* The deferred worker releases pixels only for the selected owned heap. */
 enum {
@@ -15,7 +15,7 @@ enum {
 /* Pixel upload inputs shared by texture and font-atlas producers. */
 typedef struct SdfImageUploadRequest {
     void *pixels;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u8 allocationMode;
     u8 format;
     u16 bufferWidth;

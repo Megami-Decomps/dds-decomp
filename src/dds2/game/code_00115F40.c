@@ -14,7 +14,7 @@
 
 /* Clear the kind-7 owner link and entry, preserving every flag except 4 and 8.
  * The caller supplies an existing effect resource; this does not free its owner. */
-void dds3EffectObjectBasicUnlinkObject(EffWorldNode *owner) {
+void dds3EffectObjectBasicUnlinkObject(dds3Basic_t *owner) {
     EffectDependencyState *resource = owner->data;
 
     resource->entryId = 0;
@@ -24,18 +24,18 @@ void dds3EffectObjectBasicUnlinkObject(EffWorldNode *owner) {
     resource->flags &= ~8;
 }
 
-struct BillObj;
-extern void dds3EffectObjectBasicStatOn(EffWorldNode *object, u32 flags);
-extern void dds3BillboardSetAnimNumber(struct BillObj *billboard, u32 entry);
+struct billHandle_t;
+extern void dds3EffectObjectBasicStatOn(dds3Basic_t *object, u32 flags);
+extern void dds3BillboardSetAnimNumber(struct billHandle_t *billboard, u32 entry);
 
 /* Complete 0x30-byte FLD1 type-11 effect descriptor. The field resolver
  * passes its resource data pointer directly to the billboard binder. */
 
 
 /* Bind a billboard config to the owner's resource, copy the source vector and set up the billboard by config kind. */
-void dds3EffectObjectBasicSetFldEx(EffWorldNode *owner, BillConfig *config) {
+void dds3EffectObjectBasicSetFldEx(dds3Basic_t *owner, BillConfig *config) {
     EffectDependencyState *resource = owner->data;
-    ObjectTransform *source = owner->inner;
+    dds3PoseSet_t *source = owner->inner;
 
     resource->config = config;
     resource->sourcePosition[0] = source->position[0];
@@ -46,7 +46,7 @@ void dds3EffectObjectBasicSetFldEx(EffWorldNode *owner, BillConfig *config) {
     switch (resource->config->kind) {
     case 0:
     case 3:
-        dds3BillboardSetXYOffset((struct BillObj *)resource->handle, resource->config->width, resource->config->height);
+        dds3BillboardSetXYOffset((struct billHandle_t *)resource->handle, resource->config->width, resource->config->height);
         if (resource->config->kind == 3) {
             dds3BillboardSetDrawType(resource->handle, 1);
         }
@@ -71,7 +71,7 @@ extern s32 fldTestMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueIndex);
 extern f32 sdfViewTargetVector[4];
 
-void dds3EffectObjectBasicCalcFldEx(EffWorldNode *object) {
+void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *object) {
     EffectDependencyState *resource = object->data;
     BillConfig *config;
     f32 direction[4] __attribute__((aligned(16)));
@@ -113,7 +113,7 @@ void dds3EffectObjectBasicCalcFldEx(EffWorldNode *object) {
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF(vf10, normalizedDirection);
         {
-            ObjectTransform *inner;
+            dds3PoseSet_t *inner;
 
             value = (f32)projectionDistanceWord;
             inner = object->inner;
@@ -150,7 +150,7 @@ void dds3EffectObjectBasicCalcFldEx(EffWorldNode *object) {
                 }
                 parameter = ((u32)alpha << 24) | 0x00808080;
             }
-            dds3BillboardSetRGBA((struct BillObj *)resource->handle, parameter);
+            dds3BillboardSetRGBA((struct billHandle_t *)resource->handle, parameter);
         }
         break;
     case 2:
@@ -162,7 +162,7 @@ void dds3EffectObjectBasicCalcFldEx(EffWorldNode *object) {
                                          config->mapSelector);
 
             if (entry != -1) {
-                dds3BillboardSetAnimNumber((struct BillObj *)resource->handle, (u32)entry);
+                dds3BillboardSetAnimNumber((struct billHandle_t *)resource->handle, (u32)entry);
             }
         }
         break;
@@ -174,9 +174,9 @@ void dds3EffectObjectBasicCalcFldEx(EffWorldNode *object) {
 
 /* Attach a 16-byte slot block, then publish its newly created state handle.
  * The block is attached before the state constructor sees the object. Returns 1. */
-u32 EventObjectBasicConstructor(EffWorldNode *object) {
+u32 EventObjectBasicConstructor(dds3Basic_t *object) {
     DdsSlotResourceBlock *resource;
-    ObjBase *handle;
+    dds3ObjectBaseControlWorkData_t *handle;
 
     dds3InitPoseSet(object);
     resource = (DdsSlotResourceBlock *)sdfChipAllocDirect(0x10);

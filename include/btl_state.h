@@ -8,10 +8,10 @@
 /* Broadens command targeting and suppresses command-block reasons when set. */
 #define BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS 0x800
 
-struct KwlnTask;
+struct dds3ProcessID_t;
 struct BtlRuntimeTask;
 struct SdfFlagListWork;
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 struct RefObj;
 
 /* Three-byte scene scheduling slot; IDs move with their group/countdown. */
@@ -207,8 +207,8 @@ typedef struct BtlState {
     u32 battleFlags; /* 0x1F4 */
     u32 commandRestrictFlags; /* 0x1F8: bit 0x10 blocks commands with the +0x30 restriction */
     u32 unk_1FC; /* BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS bypasses block reasons. */
-    struct EffWorldNode *cameraObject; /* 0x200: world camera stored at 001DC1EC. */
-    struct EffWorldNode *sceneLightNode; /* 0x204: action node used for scene-light transitions. */
+    struct dds3Basic_t *cameraObject; /* 0x200: world camera stored at 001DC1EC. */
+    struct dds3Basic_t *sceneLightNode; /* 0x204: action node used for scene-light transitions. */
     s32 currentScene; /* 0x208 */
     s32 queuedScene; /* 0x20C */
     s32 scenePhaseFrame; /* 0x210: scene-phase counter, distinct from the +0x1F0 model-update clock. */
@@ -256,10 +256,10 @@ typedef struct BtlState {
     u16 encounterParamA; /* 0x288: scene record +0x1C, else the test-menu default */
     u16 encounterParamB; /* 0x28A: scene record +0x1E, else the test-menu default */
     u8 pad28C[4];
-    struct SdfMemBlock *fieldF1ResourceId; /* 0x290: retained field archive allocation. */
-    struct SdfMemBlock *fieldF2ResourceId; /* 0x294 */
-    struct SdfMemBlock *fieldTBResourceId; /* 0x298 */
-    struct KwlnTask *scriptOwner; /* 0x29C: parent task; script tasks use its priority minus one */
+    struct sdfMemHandle_t *fieldF1ResourceId; /* 0x290: retained field archive allocation. */
+    struct sdfMemHandle_t *fieldF2ResourceId; /* 0x294 */
+    struct sdfMemHandle_t *fieldTBResourceId; /* 0x298 */
+    struct dds3ProcessID_t *scriptOwner; /* 0x29C: parent task; script tasks use its priority minus one */
     s32 scriptTask; /* 0x2A0: scheduler task handle, not another list pointer */
     s32 boundTask; /* 0x2A4: actor-slot binding task */
     s32 sceneObject; /* 0x2A8: fldDestroySceneTasksAndBuffers destroys this task handle. */
@@ -448,8 +448,8 @@ typedef struct BtlState {
     u32 battleFlags; /* 0x218 */
     u32 commandRestrictFlags; /* 0x21C: bit 0x10 blocks commands with the +0x30 restriction */
     u32 unk220; /* BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS bypasses block reasons. */
-    struct EffWorldNode *cameraObject; /* 0x224: world camera stored at 001E9514. */
-    struct EffWorldNode *sceneLightNode; /* 0x228: action node used for scene-light transitions. */
+    struct dds3Basic_t *cameraObject; /* 0x224: world camera stored at 001E9514. */
+    struct dds3Basic_t *sceneLightNode; /* 0x228: action node used for scene-light transitions. */
     s32 currentScene; /* 0x22C */
     s32 queuedScene;
     s32 frame;
@@ -502,15 +502,15 @@ typedef struct BtlState {
     s32 loadStep;
     u8 specialEncounterBlocked; /* 0x2B4: scene setup latch blocks special encounter rolls. */
     u8 pad2B5[3];
-    struct SdfMemBlock *fieldF1ResourceId; /* 0x2B8: retained field archive allocation. */
-    struct SdfMemBlock *fieldF2ResourceId; /* 0x2BC */
-    struct SdfMemBlock *fieldTBResourceId; /* 0x2C0 */
-    struct KwlnTask *scriptOwner; /* 0x2C4: parent task; script tasks use its priority minus one */
+    struct sdfMemHandle_t *fieldF1ResourceId; /* 0x2B8: retained field archive allocation. */
+    struct sdfMemHandle_t *fieldF2ResourceId; /* 0x2BC */
+    struct sdfMemHandle_t *fieldTBResourceId; /* 0x2C0 */
+    struct dds3ProcessID_t *scriptOwner; /* 0x2C4: parent task; script tasks use its priority minus one */
     s32 scriptTask; /* 0x2C8: also supplies the task passed to scrSetUserData */
     s32 boundTask; /* 0x2CC */
-    struct KwlnTask *sceneObject; /* 0x2D0: command-panel task created at 001CAB60. */
-    struct KwlnTask *spriteObject; /* 0x2D4: scene sprite task; destroyed with its hierarchy. */
-    struct KwlnTask *sceneStatus; /* 0x2D8: cleanup task created by fldCreateSceneCleanupTask. */
+    struct dds3ProcessID_t *sceneObject; /* 0x2D0: command-panel task created at 001CAB60. */
+    struct dds3ProcessID_t *spriteObject; /* 0x2D4: scene sprite task; destroyed with its hierarchy. */
+    struct dds3ProcessID_t *sceneStatus; /* 0x2D8: cleanup task created by fldCreateSceneCleanupTask. */
     BtlItemDrop itemDrops[3]; /* 0x2DC */
     s32 moneyEarned;
     s32 moneyTotal;

@@ -9,7 +9,7 @@ typedef struct EffBillboardSetWork {
     u32 mode;
     u32 color;
     f32 scale;
-    struct BillObj *handle;
+    struct billHandle_t *handle;
 } EffBillboardSetWork;
 
 /* Creation reads the requested mode from this parameter record. */

@@ -12,8 +12,8 @@
 extern u32 dds3ObjectIdCounter;
 
 /* Load the cached VU matrix, or rebuild and cache it when flags bit 1 is clear. */
-void dds3GetTMPoseSet(EffWorldNode *object) {
-    ObjectTransform *transform = object->inner;
+void dds3GetTMPoseSet(dds3Basic_t *object) {
+    dds3PoseSet_t *transform = object->inner;
     u32 flags = transform->flags;
 
     if (flags & OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID) {
@@ -27,7 +27,7 @@ void dds3GetTMPoseSet(EffWorldNode *object) {
 
 extern float fabsf(float);
 
-s32 dds3ComparePosPoseSet(ObjectTransform *left, ObjectTransform *right) {
+s32 dds3ComparePosPoseSet(dds3PoseSet_t *left, dds3PoseSet_t *right) {
     f32 length;
     f32 leftLimit;
     f32 rightLimit;
@@ -45,7 +45,7 @@ s32 dds3ComparePosPoseSet(ObjectTransform *left, ObjectTransform *right) {
 }
 
 /* vu0 routine: whether the distance between the position vectors is inside the second object's radius */
-s32 dds3ComparePosPoseSet2(ObjectTransform *left, ObjectTransform *right) {
+s32 dds3ComparePosPoseSet2(dds3PoseSet_t *left, dds3PoseSet_t *right) {
     f32 length;
     f32 rightLimit;
     VU0_LOAD_VF(vf10, left->position);
@@ -59,7 +59,7 @@ s32 dds3ComparePosPoseSet2(ObjectTransform *left, ObjectTransform *right) {
 
 
 /* Invoke the holder's first / second lifecycle callback when present; the result is 1 when there is nothing to call. */
-s32 dds3CallBasicMainProc(EffWorldNode *holder) {
+s32 dds3CallBasicMainProc(dds3Basic_t *holder) {
     s32 result = 1;
 
     if (holder != NULL) {
@@ -72,7 +72,7 @@ s32 dds3CallBasicMainProc(EffWorldNode *holder) {
     return result;
 }
 
-s32 dds3CallBasicDrawProc(EffWorldNode *holder) {
+s32 dds3CallBasicDrawProc(dds3Basic_t *holder) {
     s32 result = 1;
 
     if (holder != NULL) {
@@ -91,13 +91,13 @@ u32 dds3AllocObjectId(void) {
     return dds3ObjectIdCounter;
 }
 
-void dds3SetUnitObjectId(EffWorldNode *node, u32 worldNodeValue) {
+void dds3SetUnitObjectId(dds3Basic_t *node, u32 worldNodeValue) {
     if (node != NULL) {
         node->value = (const char *)worldNodeValue;
     }
 }
 
-u32 dds3GetWorldNodeValue(EffWorldNode *node) {
+u32 dds3GetWorldNodeValue(dds3Basic_t *node) {
     u32 worldNodeValue;
 
     worldNodeValue = 0;
@@ -109,7 +109,7 @@ u32 dds3GetWorldNodeValue(EffWorldNode *node) {
 
 /* Allocate and clear the world node's 0x28-byte WorldInfo payload. The native
    callback stores the payload on the node before initializing its fields. */
-s32 worldconstructor(EffWorldNode *object) {
+s32 worldconstructor(dds3Basic_t *object) {
     WorldInfo *entry;
 
     entry = (WorldInfo *)sdfChipAllocDirect(sizeof(WorldInfo));
@@ -132,7 +132,7 @@ s32 worldconstructor(EffWorldNode *object) {
     return 1;
 }
 
-void worlddestructor(EffWorldNode *object) {
+void worlddestructor(dds3Basic_t *object) {
     WorldInfo *entry = object->data;
 
     if (entry == NULL) {
@@ -150,35 +150,35 @@ void worlddestructor(EffWorldNode *object) {
     sdfChipFreeDirect(entry);
 }
 
-u32 worldmainprocuder(EffWorldNode *obj) {
+u32 worldmainprocuder(dds3Basic_t *obj) {
     WorldInfo *entry = obj->data;
-    EffWorldNode *callbackTarget;
+    dds3Basic_t *callbackTarget;
 
-    callbackTarget = (EffWorldNode *)entry->primaryObject;
+    callbackTarget = (dds3Basic_t *)entry->primaryObject;
     if (callbackTarget != NULL) {
         dds3CallBasicMainProc(callbackTarget);
     }
     return 1;
 }
 
-u32 worlddrawprocuder(EffWorldNode *obj) {
+u32 worlddrawprocuder(dds3Basic_t *obj) {
     WorldInfo *entry = obj->data;
-    EffWorldNode *callbackTarget;
+    dds3Basic_t *callbackTarget;
 
-    callbackTarget = (EffWorldNode *)entry->primaryObject;
+    callbackTarget = (dds3Basic_t *)entry->primaryObject;
     if (callbackTarget != NULL) {
         dds3CallBasicDrawProc(callbackTarget);
     }
     return 1;
 }
 
-extern EffWorldNode *dds3AllocBasic(u32 kind);
-extern EffWorldNode *dds3TheWorld;
+extern dds3Basic_t *dds3AllocBasic(u32 kind);
+extern dds3Basic_t *dds3TheWorld;
 
-EffWorldNode *dds3AddWorld(s32 capacity) {
-    EffWorldNode *world;
+dds3Basic_t *dds3AddWorld(s32 capacity) {
+    dds3Basic_t *world;
     WorldInfo *info;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     s32 index;
 
     if (dds3TheWorld != NULL) {

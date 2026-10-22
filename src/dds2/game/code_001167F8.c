@@ -12,32 +12,32 @@
 extern f32 *D_0037F770[];
 extern u8 kwlnDefaultColorVector[];
 
-struct EvtUnit;
+struct evtUnitHandle_t;
 
-extern void evtEndUnitValueTransition(struct EvtUnit *unit, s32 duration);
+extern void evtEndUnitValueTransition(struct evtUnitHandle_t *unit, s32 duration);
 
 
 u32 lightdrawprocedure(void) {
     return 1;
 }
 
-ObjBase *dds3LightObjectBasicGetControlWorkData(EffWorldNode *object) {
+dds3ObjectBaseControlWorkData_t *dds3LightObjectBasicGetControlWorkData(dds3Basic_t *object) {
     return ((EffLightData *)object->data)->resourceState;
 }
 
-EffWorldNode *dds3AddLightObjectBasic(s32 key) {
-    EffWorldNode *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_LIGHT);
+dds3Basic_t *dds3AddLightObjectBasic(s32 key) {
+    dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_LIGHT);
 
     obj->key = key;
     dds3ObjectBaseCreateMover(obj);
     return obj;
 }
 
-void dds3DeleteLightObjectBasic(EffWorldNode *object) {
+void dds3DeleteLightObjectBasic(dds3Basic_t *object) {
     dds3DeleteSceneBasicData(object);
 }
 
-void dds3LinkSceneLight(EffWorldNode *lightNode, s32 blendFrames) {
+void dds3LinkSceneLight(dds3Basic_t *lightNode, s32 blendFrames) {
     EffLightData *lightData = lightNode->data;
     s32 color1[4];
     s32 color2[4];
@@ -61,26 +61,26 @@ void dds3LinkSceneLight(EffWorldNode *lightNode, s32 blendFrames) {
     }
 }
 
-void dds3UnlinkSceneLight(EffWorldNode *object) {
+void dds3UnlinkSceneLight(dds3Basic_t *object) {
     EffLightData *data = object->data;
 
     data->flags &= ~(EFF_LIGHT_FLAG_UPDATE_COLOR_VECTORS | EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS);
 }
 
 /* Kind-5 effect payloads retain transition work separately from light data. */
-void dds3LinkLightObjectToUnitObject(EffectValueObject *value, EffWorldNode *effectNode, s32 duration) {
+void dds3LinkLightObjectToUnitObject(EffectValueObject *value, dds3Basic_t *effectNode, s32 duration) {
     EffectObjectData *effectData = effectNode->data;
 
     evtSetUnitValueTransition(effectData->transitionWork, value, duration);
 }
 
-void dds3UnlinkLightObjectFromUnitObject(EffWorldNode *effectNode, s32 duration) {
+void dds3UnlinkLightObjectFromUnitObject(dds3Basic_t *effectNode, s32 duration) {
     EffectObjectData *effectData = effectNode->data;
 
-    evtEndUnitValueTransition((struct EvtUnit *)effectData->transitionWork, duration);
+    evtEndUnitValueTransition((struct evtUnitHandle_t *)effectData->transitionWork, duration);
 }
 /* Load flags, mode and the transform block from a setup record. */
-void dds3SetLightObjectResoruce(EffWorldNode *worldNode, WorldTransformSetup *setup) {
+void dds3SetLightObjectResoruce(dds3Basic_t *worldNode, WorldTransformSetup *setup) {
     WorldTransformData *transformData = worldNode->data;
 
     transformData->flags = 0;
@@ -106,7 +106,7 @@ void dds3SetLightObjectResoruce(EffWorldNode *worldNode, WorldTransformSetup *se
 }
 
 /* Load rotation, position and scale from a parameter block. */
-void dds3SetLightObjectPathResoruce(EffWorldNode *worldNode, const WorldTransformParams *params) {
+void dds3SetLightObjectPathResoruce(dds3Basic_t *worldNode, const WorldTransformParams *params) {
     WorldTransformData *transformData = worldNode->data;
 
     transformData->rotation[0] = params->rotation[0];
@@ -125,7 +125,7 @@ void dds3SetLightObjectPathResoruce(EffWorldNode *worldNode, const WorldTransfor
 
 
 
-s32 dds3AllocEventBasicWorkData(EffWorldNode *obj) {
+s32 dds3AllocEventBasicWorkData(dds3Basic_t *obj) {
     obj->data = sdfChipAllocDirect(0x1C);
     memset(obj->data, 0, 0x1C);
     return 1;

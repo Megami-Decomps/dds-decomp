@@ -5,8 +5,8 @@
 #include "sdf.h"
 #include "dds3_world_counter.h"
 
-extern EffWorldNode *fldLocalMapCameraObject;
-struct EffWorldNode;
+extern dds3Basic_t *fldLocalMapCameraObject;
+struct dds3Basic_t;
 
 extern SdfQuad fldLocalMapFirstCameraVector;
 
@@ -15,10 +15,10 @@ extern SdfQuad fldLocalMapSecondCameraVector;
 
 
 
-extern void dds3GetRadiusPoseSet(EffWorldNode *object, f32 value);
+extern void dds3GetRadiusPoseSet(dds3Basic_t *object, f32 value);
 
 
-extern EffWorldNode *dds3AddCameraObjectBasicTypeFree(s32, SdfQuad *, SdfQuad *);
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32, SdfQuad *, SdfQuad *);
 
 void fldCreateLocalMapCamera(void) {
     fldLocalMapCameraObject = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), &fldLocalMapFirstCameraVector, &fldLocalMapSecondCameraVector);
