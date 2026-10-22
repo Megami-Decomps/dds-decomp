@@ -228,7 +228,7 @@ EffMappedResource *effLoadMappedResource(const char *base, const char *name) {
     char path[EFF_RESOURCE_PATH_BYTES];
     u32 sourceAddress;
     EffMappedResource *mappedResource;
-    u32 allocation;
+    struct sdfMemHandle_t *allocation;
 
     sprintf(path, D_003BD198, base, name);
     allocation = sdfDevLoadFileEx(path, &sourceAddress, 0);
