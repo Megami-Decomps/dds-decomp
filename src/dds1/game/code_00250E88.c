@@ -348,7 +348,7 @@ void mnuReleaseResourceTaskData(s32 unused, MnuResourceTask *task) {
 }
 
 /* Snapshot is one native datUnitWork_t: 0x1A4 bytes with word alignment. */
-typedef struct ResourcePartySnapshot { u32 words[0x1A4/4]; } ResourcePartySnapshot;
+typedef datUnitWork_t ResourcePartySnapshot;
 
 extern s8 dds3PadButtonState[];
 
@@ -387,14 +387,14 @@ s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
         task->unk04[0]=1;
         snapshot=resourceTaskPartySnapshot(metadata);
         *snapshot=**selectedParty;
-        mnuSetupStaffMenuProfilePage((struct datUnitWork_t *)snapshot,metadata->attachedEffect);
+        mnuSetupStaffMenuProfilePage(snapshot,metadata->attachedEffect);
         return 0;
     case 7:
         selectedParty=(ResourcePartySnapshot **)(u32)list->cursor->userValue;
         task->unk04[0]=5;
         snapshot=resourceTaskPartySnapshot(metadata);
         *snapshot=**selectedParty;
-        mnuSetupStaffMenuProfilePage((struct datUnitWork_t *)snapshot,metadata->attachedEffect);
+        mnuSetupStaffMenuProfilePage(snapshot,metadata->attachedEffect);
         return 0;
     case 1:
     case 5:
@@ -431,7 +431,7 @@ s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
                 selectedParty=(ResourcePartySnapshot **)(u32)list->cursor->userValue;
                 snapshot=resourceTaskPartySnapshot(metadata);
                 *snapshot=**selectedParty;
-                mnuSetupStaffMenuProfilePage((struct datUnitWork_t *)snapshot,metadata->attachedEffect);
+                mnuSetupStaffMenuProfilePage(snapshot,metadata->attachedEffect);
             }
         } else if (dds3PadButtonState[0x27]&2) {
             if (mnuMoveResourceListCursor(list, mnuAdvanceListCursorDefault)!=NULL) {
@@ -440,7 +440,7 @@ s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
                 selectedParty=(ResourcePartySnapshot **)(u32)list->cursor->userValue;
                 snapshot=resourceTaskPartySnapshot(metadata);
                 *snapshot=**selectedParty;
-                mnuSetupStaffMenuProfilePage((struct datUnitWork_t *)snapshot,metadata->attachedEffect);
+                mnuSetupStaffMenuProfilePage(snapshot,metadata->attachedEffect);
             }
         } else if (dds3PadButtonState[0x21]<0) {
             action=2; task->unk04[1]=0; task->unk04[0]=2;
