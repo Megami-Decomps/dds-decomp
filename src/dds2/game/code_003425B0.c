@@ -1912,20 +1912,7 @@ extern movieStream_t *movieSemaId;
 extern void *movieWaitSema(s32);
 extern void sdfMovieQueueFrameSprite(movieStream_t *, SdfPoolNode *);
 
-/* DMA/VIF/GIF header then nine A+D register writes for the sprite.
- * registerId 3 is UV; the texture value's 0x200000 is PSM PSMCT16. */
-typedef struct SdfMovieDrawPacket {
-    SdfGsPacketHeader header;
-    SdfGsRegisterWrite sampling;
-    SdfGsRegisterWrite texture;
-    SdfGsRegisterWrite clamp;
-    SdfGsRegisterWrite textureAlpha;
-    SdfGsRegisterWrite color;
-    SdfGsRegisterWrite sourceOrigin;
-    SdfGsRegisterWrite vertexOrigin;
-    SdfGsRegisterWrite sourceExtent;
-    SdfGsRegisterWrite vertexExtent;
-} SdfMovieDrawPacket;
+#include "sdf_movie_draw_packet.h"
 
 void sdfMovieDrawFrame(movieStream_t *movie, SdfPoolNode *pool) {
     SdfMovieDrawPacket *packet;
@@ -2115,4 +2102,3 @@ INCLUDE_SDATA(const s32, "game/code_003425B0", sdfMovieDrawBottom);
 INCLUDE_SDATA(const s32, "game/code_003425B0", sdfMovieDrawColor);
 
 INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438D24);
-
