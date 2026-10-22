@@ -10647,7 +10647,7 @@ void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode
     }
 }
 
-extern const u8 *D_00435E48;
+extern const u8 *datUnitNames;
 extern const u8 *D_00435E4C;
 extern const u8 *D_00435E60;
 extern void btlAdvanceTargetPanelAnimation(SceneAiWork *work, s32 mode);
@@ -10677,7 +10677,7 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x200) {
                 glyph = itfCreateConvertedTextGlyph(0x640, 0x200, 0, 0xA09DC380,
-                    D_00435E48 + unit->partyRecord.unitId * 17, 0);
+                    datUnitNames + unit->partyRecord.unitId * 17, 0);
                 width = frFontMeasureLines((struct FrFontGlyph *)glyph);
                 btlDrawCenteredPanelSegments(width);
                 frFontSetGlyphPosition((struct FrFontGlyph *)glyph, (0xFA - (width >> 1)) << 4, 0x220);

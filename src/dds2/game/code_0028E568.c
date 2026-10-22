@@ -123,7 +123,7 @@ void mnuUpdateMantraNodeState(MnuStatusResource *menu, u16 nodeId) {
 extern const u16 D_00427218[4][8];
 extern const u16 D_00427258[4][2];
 extern const char D_00427268[];
-s32 func_0028E858(MnuStatusResource *object) {
+s32 mnuInitMantraMapScroll(MnuStatusResource *object) {
     u16 layouts[4][8];
     u16 requirements[4][2];
     s32 enabled = 0;
@@ -140,9 +140,9 @@ s32 func_0028E858(MnuStatusResource *object) {
         }
     }
     work = &object->menu;
-    evtPrintDeveloperConsoleMessage(D_00427268, work->drawBits.unk10);
-    rankIndex = work->drawBits.unk10 == 0 ? 0 : work->drawBits.unk10 - 1;
-    rank = work->drawBits.unk10;
+    evtPrintDeveloperConsoleMessage(D_00427268, work->drawBits.drawRank);
+    rankIndex = work->drawBits.drawRank == 0 ? 0 : work->drawBits.drawRank - 1;
+    rank = work->drawBits.drawRank;
     switch (rank) {
     case 0:
     case 1:
@@ -172,7 +172,9 @@ s32 func_0028E858(MnuStatusResource *object) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427218);
+
 INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427258);
+
 INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427268);
 
 s32 mnuAdvanceMantraSelectionCursor(MnuStatusResource *object, s32 centerOnNode) {
@@ -200,8 +202,8 @@ s32 mnuAdvanceMantraSelectionCursor(MnuStatusResource *object, s32 centerOnNode)
         mdlFlagTest(requirements[i][1]);
     }
     layout = 3;
-    if (work->drawBits.unk10 >= 2) {
-        layout = work->drawBits.unk10 - 1;
+    if (work->drawBits.drawRank >= 2) {
+        layout = work->drawBits.drawRank - 1;
     }
     node = work->defaultSelector;
     target[0] = work->scrollX;

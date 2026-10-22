@@ -117,7 +117,7 @@ extern void mnuClearEntries(MenuPageWindow *);
 extern u8 *D_00435E54;
 
 
-extern u8 *D_00435E48;
+extern u8 *datUnitNames;
 
 
 

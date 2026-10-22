@@ -2353,7 +2353,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 frameWidth, u8 *selectionState, 
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, frameWidth, selectionState, rowTexts);
 }
 
-extern u8 *D_00435E48;
+extern u8 *datUnitNames;
 extern u8 *D_00435E4C;
 extern u8 *D_00435E5C;
 /* Reset the selected actor, debug-menu rows/label tables, phase and delay before TEST polling. */
@@ -2376,9 +2376,9 @@ void btlInitializeBattleDebugMenu(void) {
     }
     for (i = 0; i < 0x30; i++) {
         if (i < 0x20) {
-            state->debug.partyModelNames[i] = D_00435E48 + i * 0x11;
+            state->debug.partyModelNames[i] = datUnitNames + i * 0x11;
         } else {
-            state->debug.partyModelNames[i] = D_00435E48 + (i - 0x20) * 0x11;
+            state->debug.partyModelNames[i] = datUnitNames + (i - 0x20) * 0x11;
         }
     }
     for (i = 0; i < 0x180; i++) {
@@ -3077,7 +3077,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
             if (unitId - 1u < 15) {
                 glyph = itfCreateConvertedTextGlyph((btlDebugEncounterWindowView.x - 72) << 4,
                     (btlDebugEncounterWindowView.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
-                    (const u8 *)D_00435E48 + unitId * 17, NULL);
+                    (const u8 *)datUnitNames + unitId * 17, NULL);
                 frFontDrawGlyphChain(glyph, 1, 0x53);
                 frDestroyFontRequestAfter(glyph);
             }

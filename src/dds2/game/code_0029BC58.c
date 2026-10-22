@@ -16,7 +16,7 @@ extern void dspAdvanceMessageWindowControlWithRefresh(u32 value);
 extern void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *context);
 extern void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *context, s32 copyOptions);
 extern const char *D_003D62F0[6];
-extern char (*D_00435E48)[17];
+extern char (*datUnitNames)[17];
 extern char (*D_00435E5C)[25];
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 mnuSelectEventFlagCode(void);
@@ -37,7 +37,7 @@ void mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
     case 1:
     case 2:
     case 3:
-        evtCopyEntryStringToActiveWindow(0, D_00435E48[unit->unitId]);
+        evtCopyEntryStringToActiveWindow(0, datUnitNames[unit->unitId]);
         dspStartEntry(work->rewardMode + 25);
         break;
     case 5: {
@@ -45,7 +45,7 @@ void mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
         rewardIndex = unit->unitId * 4 - 4;
         roll = sdfGetRand(NULL) & 3;
 
-        evtCopyEntryStringToActiveWindow(0, D_00435E48[unit->unitId]);
+        evtCopyEntryStringToActiveWindow(0, datUnitNames[unit->unitId]);
         evtCopyEntryStringToActiveWindow(1, D_00435E5C[work->earnedItem]);
         switch (mnuSelectEventFlagCode()) {
         case 1:

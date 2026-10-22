@@ -2850,7 +2850,7 @@ extern s32 fldTestSecondarySceneFlag(void);
 extern void fldSetSecondarySceneFlag(void);
 extern s32 fldTestFieldTransitionFlag(void);
 extern void fldSetFieldTransitionFlag(void);
-extern u8 *D_00435E48;
+extern u8 *datUnitNames;
 s32 func_002C5A28(MenuPageWindow *page, u16 ability, struct DatPartyRecord *target,
                   struct DatPartyRecord *selected) {
     s32 result = btlItemApplyPermanentBonus(ability, selected);
@@ -2885,7 +2885,7 @@ s32 func_002C5A28(MenuPageWindow *page, u16 ability, struct DatPartyRecord *targ
             sndPlayPartyItemSe(ability, 1);
             return 2;
         }
-        evtCopyEntryStringToActiveWindow(0, D_00435E48 + ptyChooseFirstAvailableRosterId() * 17);
+        evtCopyEntryStringToActiveWindow(0, datUnitNames + ptyChooseFirstAvailableRosterId() * 17);
         sndPlayPartyItemSe(ability, 0);
         fldSetFieldTransitionFlag();
         goto accepted;
