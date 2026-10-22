@@ -657,7 +657,7 @@ s32 mnuFinishStaffReturnPopup(dds3ProcessID_t *callback) {
     return menuSetHandler((void *)dds3GetProcessData(callback), 2, (void *)callback);
 }
 
-extern s32 evtGetIndexedEventRecordId(s32);
+extern u32 evtGetIndexedEventRecordId(s32);
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 

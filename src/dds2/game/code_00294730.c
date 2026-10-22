@@ -185,7 +185,7 @@ void mnuDrawWindowBorderAndScrollBar(s32 x, s32 y, s32 unused, MenuTerminalConte
 }
 
 
-extern s32 evtGetIndexedEventRecordId(s32);
+extern u32 evtGetIndexedEventRecordId(s32);
 extern s32 ptyCountBulletItem(s32);
 extern s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot);
 extern u32 itfCreateTightFont3TextGlyph(s32, s32, s32, u32, char *, s32);
@@ -730,4 +730,3 @@ INCLUDE_SDATA(const s32, "game/code_00294730", D_00437970);
 INCLUDE_SDATA(const s32, "game/code_00294730", D_00437978);
 
 INCLUDE_SDATA(const s32, "game/code_00294730", D_00437980);
-

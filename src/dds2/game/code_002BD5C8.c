@@ -114,7 +114,7 @@ extern char D_00437C38[];
 extern char D_00437C40[];
 extern u16 mnuGetPartyEntryMenuValue(datUnitWork_t *);
 extern u16 mnuGetPartyEntryCurrentId(datUnitWork_t *);
-extern s32 evtGetIndexedEventRecordId(s32);
+extern u32 evtGetIndexedEventRecordId(s32);
 extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern char D_00437C38[];
@@ -371,4 +371,3 @@ INCLUDE_SDATA(const s32, "game/code_002BD5C8", D_00437C40);
 INCLUDE_SDATA(const s32, "game/code_002BD5C8", D_00437C48);
 
 INCLUDE_SDATA(const s32, "game/code_002BD5C8", D_00437C50);
-

@@ -2279,7 +2279,7 @@ s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unused
 }
 
 extern u16 mnuGetPartyEntryMenuValue(datUnitWork_t *);
-extern u16 evtGetIndexedEventRecordId(s32);
+extern u32 evtGetIndexedEventRecordId(s32);
 extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
 extern u8 *D_003BAA84;
 extern char D_003BC720[];

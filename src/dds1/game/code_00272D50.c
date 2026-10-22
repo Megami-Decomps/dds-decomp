@@ -388,7 +388,7 @@ s32 mnuStaffRunPanel2b(dds3ProcessID_t *request) {
 }
 
 extern s32 btlItemApplyDirectEffect(MenuPageWindow *, u16, s32, datUnitWork_t *);
-extern s32 evtGetIndexedEventRecordId(s32);
+extern u32 evtGetIndexedEventRecordId(s32);
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void mnuUpdatePartyPanelPercentDisplays(s32);
 
