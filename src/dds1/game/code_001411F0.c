@@ -278,7 +278,7 @@ extern void fldSubmitSpriteRect(s32, s32, s32, s32, s32, s32, s32, s32, s32, Sdf
 
 extern KwlnTask *fldInputPanelTaskHandle;
 extern u32 fldDisplayStateWords[];
-extern s32 D_003BAE40;
+extern s32 fldEventActorTaskStarted;
 extern u8 fldGetCampSceneControlMode(void);
 extern u8 fldGetSceneReadyOrPendingState(void);
 extern s32 fileMenuTaskExists(void);
@@ -322,7 +322,7 @@ s32 fldResolvePendingTitleBanner(void) {
         return -1;
     }
 
-    if (fldAreaState.titleFade != 0 || D_003BAE40 == 1 || (s8)kwlnTaskPadButtonStates[1][0][1] < 0) {
+    if (fldAreaState.titleFade != 0 || fldEventActorTaskStarted == 1 || (s8)kwlnTaskPadButtonStates[1][0][1] < 0) {
         if ((s8)kwlnTaskPadButtonStates[1][0][1] < 0) {
             fldApplyCameraFacingPoint();
         }

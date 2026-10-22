@@ -499,7 +499,7 @@ extern KwlnTask *fldInputPanelTaskHandle;
 extern void fldUpdateCameraHeadingFromXY(void);
 extern u32 fldDisplayStateWords[];
 extern u8 kwlnTaskPadButtonStates[2][2][16];
-extern s32 D_004361D0;
+extern s32 fldEventActorTaskStarted;
 
 #include "fld_title_banner_menu.h"
 
@@ -540,7 +540,7 @@ s32 fldResolvePendingTitleBanner(void) {
         return -1;
     }
     if (fldAreaState.titleFade != 0 ||
-        D_004361D0 == 1 || (s8)kwlnTaskPadButtonStates[1][0][1] < 0) {
+        fldEventActorTaskStarted == 1 || (s8)kwlnTaskPadButtonStates[1][0][1] < 0) {
         if ((s8)kwlnTaskPadButtonStates[1][0][1] < 0) {
             fldUpdateCameraHeadingFromXY();
         }
@@ -3506,7 +3506,7 @@ typedef char FldNpcPlacementRule_size_check[
 extern FldNpcPlacementRule D_003A55F0[400];
 extern u32 sdfGetLodChunkValue(SdfModel *model);
 extern void fldHitProgramAdd(s32 room, f32 x, f32 y, f32 z, f32 radius, f32 height);
-extern void func_0013ED20(f32 x, f32 y, f32 z, f32 height, char *name, s32 arg1, s32 room, s32 index);
+extern void fldSpawnNpcTrigger(f32 x, f32 y, f32 z, f32 height, char *name, s32 arg1, s32 room, s32 index);
 
 void func_0014C2B8(s32 key, f32 *orientation, s32 room, char *name, s32 argument,
                    f32 x, f32 y, f32 z) {
@@ -3626,7 +3626,7 @@ void func_0014C2B8(s32 key, f32 *orientation, s32 room, char *name, s32 argument
         else dds3ObjectBaseOffFlag(object, 0x400);
         fldInitializeHuntSparkUnit(evtUnitGetNestedValue(object));
         fldHitProgramAdd(room, x, y, z, radius, hitHeight);
-        func_0013ED20(x, y, z, height, name, argument, room, fldRoomEffectEntryCount);
+        fldSpawnNpcTrigger(x, y, z, height, name, argument, room, fldRoomEffectEntryCount);
         fldRoomEffectEntryCount++;
     }
 }

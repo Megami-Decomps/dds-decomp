@@ -643,7 +643,7 @@ extern u32 D_003BADD8;
 
 extern u32 D_003BAE28;
 
-extern s32 D_003BAE3C;
+extern s32 fldCurrentEventRoom;
 
 extern u32 fldSelectedActorEntryIndex;
 
@@ -685,7 +685,7 @@ extern u8 D_00324660[];
 
 extern char D_003C9200[];
 
-extern u32 D_003C92E0[];
+extern u32 fldDisplayValues[];
 
 extern s16 D_003C9518[];
 
@@ -733,7 +733,7 @@ extern f32 D_003306C0[];
 
 extern f32 D_00330670[];
 
-extern u32 D_003308B0[];
+extern u32 fldRoomTaskHandles[];
 
 
 extern s32 fldUpdateTitleBannerTask(KwlnTask *task);
@@ -759,7 +759,7 @@ extern s32 D_0032E4C8[];
 
 extern s32 D_003BAE30;
 
-extern s32 D_003BAE1C;
+extern s32 fldTriggeredNpcRoom;
 
 extern s32 fldTaskSlotCount;
 
@@ -791,7 +791,7 @@ extern void fldReleaseBackgroundBuffer(void);
 
 extern FldWaypointBlock fldActorWaypointRows;
 
-extern FldFileResource *D_003307B0[];
+extern FldFileResource *fldRoomResources[];
 
 extern void fldDrawMarkerQuad(f32 *pos);
 
@@ -1634,7 +1634,7 @@ extern s32 fldRoomEventPlacementCount;
 
 extern u32 fldRelocateOnRelease;
 
-extern s32 D_003BAE40;
+extern s32 fldEventActorTaskStarted;
 
 extern FldTransferChunk *fldRoomF1Chunk;
 
@@ -1723,7 +1723,7 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
     fldCachedRoomF1ResourceAllocation = NULL;
     fldCachedRoomF2ResourceAllocation = NULL;
     fldCachedRoomKF2ResourceAllocation = NULL;
-    D_003BAE40 = 0;
+    fldEventActorTaskStarted = 0;
     area = dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) >> 16;
     room = dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) & 0xFFFF;
     fldSetSceneLocation(area, room - 1, 0);

@@ -1481,7 +1481,7 @@ void fldReleaseAreaResourceCache(void) {
 }
 
 extern u32 fldRelocateOnRelease;
-extern s32 D_004361D0;
+extern s32 fldEventActorTaskStarted;
 extern FldTransferChunk *fldRoomF1Chunk;
 extern u32 fldRoomF1Data;
 extern FldTransferChunk *fldRoomF2Chunk;
@@ -1542,7 +1542,7 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
     fldCachedRoomF1ResourceAllocation = NULL;
     fldCachedRoomF2ResourceAllocation = NULL;
     fldCachedRoomKF2ResourceAllocation = NULL;
-    D_004361D0 = 0;
+    fldEventActorTaskStarted = 0;
     area = dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) >> 16;
     room = dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) & 0xFFFF;
     fldSetSceneLocation(area, room - 1, 0);

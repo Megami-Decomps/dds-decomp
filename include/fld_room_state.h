@@ -22,20 +22,21 @@ typedef struct FldRoomState {
     f32 plane[FIELD_ROOM_PLANE_COUNT][4];  /* 0x90 */
     f32 limit[FIELD_ROOM_PLANE_COUNT];     /* 0xF0 */
     s32 worldObjectKey; /* 0x108: compared with an EffWorldNode key */
-    f32 unk10C;
-    f32 unk110;
-    f32 unk114;
+    f32 sizeX;        /* 0x10C: the trigger shape's extents on its own axes */
+    f32 sizeY;
+    f32 sizeZ;
     f32 unk118;
     f32 unk11C;
-    s32 unk120;
+    s32 savePointValue; /* 0x120: a save point's (mode 3) spawn value, else -1 */
     u8 pad124[0xC];
     s16 unk130;
     s16 roomId;       /* 0x132: returned by fldFindRoomByTask */
-    s16 unk134;
-    s16 mode;
+    s16 mapSlot;      /* 0x134: above 0, the map slot whose flag hides the trigger */
+    s16 mode;         /* 0x136: 1 NPC, 2 item box, 3 save point, 4 heal point; 0 otherwise */
     s16 entryIndex; /* 0x138: active entry index when mode is 1. */
     s16 axisMode;
-    s32 shapeKind;    /* 0x13C: compared with FldTaskInfo.shape->kind */
+    s32 crossingDirection; /* 0x13C: a plane trigger's last crossing inside the room (1, -1; 0 none);
+                            * its probe tests it against the plane kind, 1 */
 } FldRoomState;
 
 typedef char FldRoomStateSizeCheck[(sizeof(FldRoomState) == 0x140) ? 1 : -1];
@@ -43,7 +44,7 @@ typedef char FldRoomStateWorldObjectKeyOffsetCheck[
     ((u32)&((FldRoomState *)0)->worldObjectKey == 0x108) ? 1 : -1];
 typedef char FldRoomStateRoomIdOffsetCheck[
     ((u32)&((FldRoomState *)0)->roomId == 0x132) ? 1 : -1];
-typedef char FldRoomStateShapeKindOffsetCheck[
-    ((u32)&((FldRoomState *)0)->shapeKind == 0x13C) ? 1 : -1];
+typedef char FldRoomStateCrossingDirectionOffsetCheck[
+    ((u32)&((FldRoomState *)0)->crossingDirection == 0x13C) ? 1 : -1];
 
 #endif /* FLD_ROOM_STATE_H */
