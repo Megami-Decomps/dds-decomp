@@ -7896,44 +7896,44 @@ u32 btlCameraVectorHasNaN(void) {
     return 0;
 }
 
-typedef struct SoundCommand {
-    u32 handle;
-    u32 resource;
-    u16 currentId;
-    u16 nextId;
-} SoundCommand;
+typedef struct TintTransitionState {
+    u32 sourceAlpha;
+    u32 targetAlpha;
+    u16 framesRemaining;
+    u16 totalFrames;
+} TintTransitionState;
 
-extern SoundCommand D_0035F5C0;
+extern TintTransitionState D_0035F5C0;
 
 void btlInitTintTransitionResource(u32 resource, u16 soundId) {
     u32 handle;
-    D_0035F5C0.currentId = soundId;
-    D_0035F5C0.nextId = soundId;
+    D_0035F5C0.framesRemaining = soundId;
+    D_0035F5C0.totalFrames = soundId;
     handle = fldSkyGetAlpha();
-    D_0035F5C0.resource = resource;
-    D_0035F5C0.handle = handle;
+    D_0035F5C0.targetAlpha = resource;
+    D_0035F5C0.sourceAlpha = handle;
 }
 
 void btlInitTintTransitionDefault(u16 soundId) {
     u32 handle;
-    D_0035F5C0.currentId = soundId;
-    D_0035F5C0.nextId = soundId;
+    D_0035F5C0.framesRemaining = soundId;
+    D_0035F5C0.totalFrames = soundId;
     handle = fldSkyGetAlpha();
-    D_0035F5C0.handle = handle;
-    D_0035F5C0.resource = 0x80;
+    D_0035F5C0.sourceAlpha = handle;
+    D_0035F5C0.targetAlpha = 0x80;
 }
 
 void btlStepTintTransition(void) {
-    SoundCommand *cmd = &D_0035F5C0;
+    TintTransitionState *cmd = &D_0035F5C0;
     u32 value;
     u32 start;
-    if (cmd->currentId != 0) {
-        cmd->currentId += 0xFFFF;
-        start = cmd->resource;
-        value = (f32)(s32)(cmd->handle - start) * ((f32)cmd->currentId / (f32)cmd->nextId);
-        fldSkySetAlpha(value + D_0035F5C0.resource);
+    if (cmd->framesRemaining != 0) {
+        cmd->framesRemaining += 0xFFFF;
+        start = cmd->targetAlpha;
+        value = (f32)(s32)(cmd->sourceAlpha - start) * ((f32)cmd->framesRemaining / (f32)cmd->totalFrames);
+        fldSkySetAlpha(value + D_0035F5C0.targetAlpha);
     } else {
-        fldSkySetAlpha(cmd->resource);
+        fldSkySetAlpha(cmd->targetAlpha);
     }
 }
 
