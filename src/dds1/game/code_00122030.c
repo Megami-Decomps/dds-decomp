@@ -118,7 +118,7 @@ extern u32 fldPlayerModelResource;
 
 extern u32 D_0032E498[];
 
-extern u32 D_003BAB58;
+extern struct sdfMemHandle_t *D_003BAB58;
 
 extern u32 D_0032E3D0[];
 
@@ -1098,14 +1098,14 @@ void fldTogglePlayerModel(void) {
     dds3SetActiveUnitSceneBasic(dds3GetControlScene(), (dds3Basic_t *)fldPlayerObject);
     fldLoadPlayerModel();
     D_003BAB60 = D_003BAB64;
-    D_003BAB58 = (u32)sdfMemAllocDirect(D_003BAB64);
+    D_003BAB58 = sdfMemAllocDirect(D_003BAB64);
     source = (void *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)fldPlayerModelResource);
-    buffer = (void *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)D_003BAB58);
+    buffer = (void *)sdfMemGetPtr(D_003BAB58);
     memcpy(buffer, source, D_003BAB60);
     D_003BAB5C = (u32)buffer;
     mdlPackDecode(2, 0, 0x101, buffer, D_003BAB60);
-    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)D_003BAB58);
-    D_003BAB58 = 0;
+    sdfMemFreeDelayedDirect(D_003BAB58);
+    D_003BAB58 = NULL;
     dds3RebuildObjectModelContext((dds3Basic_t *)fldPlayerObject, 2, fldSceneParam.sequenceWord3C);
     fldPlayerModelContext = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle((dds3Basic_t *)fldPlayerObject);
     if (D_0032E4C8[0] != 0) {
@@ -1127,20 +1127,20 @@ void fldPrepareResourceBuffer(void) {
     void *buffer;
     fldLoadPlayerModel();
     D_003BAB60 = D_003BAB64;
-    D_003BAB58 = (u32)sdfMemAllocDirect(D_003BAB64);
+    D_003BAB58 = sdfMemAllocDirect(D_003BAB64);
     source = (void *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)fldPlayerModelResource);
-    buffer = (void *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)D_003BAB58);
+    buffer = (void *)sdfMemGetPtr(D_003BAB58);
     memcpy(buffer, source, D_003BAB60);
     D_003BAB5C = (u32)buffer;
     mdlPackDecode(2, 0, 0x101, buffer, D_003BAB60);
-    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)D_003BAB58);
-    D_003BAB58 = 0;
+    sdfMemFreeDelayedDirect(D_003BAB58);
+    D_003BAB58 = NULL;
 }
 
 void fldReleaseResources(void) {
-    if (D_003BAB58 != 0) {
-        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)D_003BAB58);
-        D_003BAB58 = 0;
+    if (D_003BAB58 != NULL) {
+        sdfMemFreeDelayedDirect(D_003BAB58);
+        D_003BAB58 = NULL;
     }
     if (D_0032E3D0[0] == 0 && D_003BABE8 == 0) {
         fldUnloadPlayerModel();
