@@ -204,7 +204,7 @@
 0x00109CC0	evtCheckSelectionState	inferred	address-based Unk placeholder; inferred action from provenance [names_audit.tsv]
 0x00109D20	evtUpdateSelectionStateInterpolation	inferred	Updates the three timed values for an active selection state, handles its mode transitions and leaves completion to evtCheckSelectionState. DDS2 twin at 0x00109E60.
 0x0010A158	evtDestroySelectionState	inferred	DDS2 0010A298 twin; calls evtSelStateDestroy [names_R_FuncNames2.tsv]
-0x0010A170	evtSelStateDestroy	inferred	evt frees D_003BD760 and clears the vector at D_00324590
+0x0010A170	evtSelStateDestroy	inferred	evt frees D_003BD760 and clears the vector at sdfViewShakeVector
 0x0010A1B0	CallDebug	inferred	SMT3HD name via SLUS_209.11 0x00108AC8, reloc-identical; was evtStartSelCreate
 0x0010A1E8	ExitDebug	inferred	SMT3HD name via SLUS_209.11 0x00108B00, reloc-identical; was evtStartSelDestroy
 0x0010A210	CheckDebug	inferred	SMT3HD name via SLUS_209.11 0x00108B28, shared-hash-in-run; was evtKeepSelectionModePending
@@ -10437,3 +10437,6 @@
 0x003FE0C0	sndMidiTrackState	inferred	confidence=high; matched_users=src/dds1/game/code_002E87A8.c:func_002E8AB0, src/dds1/game/code_002E9140.c:func_002E92C0; Shared MIDI state contains initialized channels and track slots consulted during track-id queries. [names_qp9.tsv]
 0x003FE250	sndTrackBalanceEntries	inferred	confidence=high; src/dds1/game/code_002E9140.c:D_003FE250; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,sndGetTrackBalanceFirstComponent,sndGetTrackBalanceSecondComponent; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
 0x003FEB00	sdfIpuStreamThreadStack	inferred	confidence=high; src/dds1/game/code_002E9708.c:sdfIpuInit; Stack buffer passed to the IPU stream thread constructor with size 0x800. [names_qp9.tsv]
+0x0037E120	effDownVector	inferred	{0, -1, 0, 1}: the reference axis effUpdateParticleSpanGeometry crosses each span with and rotates per element; DDS2's routine reads its own copy alike
+0x00324590	sdfViewShakeVector	inferred	the camera shake offset: added to the view's eye and target before the look-at basis is built, random-walked by evtUpdateSelectionStateInterpolation, zeroed by the event viewer
+0x0036876A	evtViewerFrameColumnCategories	inferred	the event viewer's command category for each frame group type (33) and column (10): read as table[column + type * 10] by the key editor and the column headings

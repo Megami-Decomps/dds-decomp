@@ -5569,7 +5569,7 @@ void effFreeIndexedEntries(EffClassWork *work) {
     sdfChipFreeDirect(table);
 }
 
-extern f32 D_0037E120[4];
+extern f32 effDownVector[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
 
@@ -5615,7 +5615,7 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
     VU0_STORE_VF(vf10, view);
     VU0_LOAD_VF(vf10, work->vectors.orientation);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, D_0037E120);
+    VU0_LOAD_VF(vf10, effDownVector);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, direction);
     bendScale = 0.26179933547973633f;
@@ -12023,7 +12023,7 @@ typedef struct EffectCameraDebugState {
 } EffectCameraDebugState;
 extern EffectCameraDebugState D_0038F588;
 extern s8 D_0039862B[];
-extern f32 D_0037E120[4];
+extern f32 effDownVector[4];
 extern void btlDebugDrawOrientedExtentGuide(f32 *, f32, f32, u32, f32 (*)[4]);
 extern void btlDebugDrawPoint(f32 *);
 
@@ -12070,7 +12070,7 @@ u32 effUpdateCameraSnapshotGuides(EffectCameraSnapshotView *state, s8 useBattleP
     effMiscQuaternionToMatrixVU();
     VU0_STORE_MATRIX_UNCLOBBERED(scratch.rotationMatrix);
 
-    VU0_LOAD_VF(vf10, D_0037E120);
+    VU0_LOAD_VF(vf10, effDownVector);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_SCALE_VF(vf10, 250.0f);
     VU0_LOAD_VF(vf11, &scratch.segmentStart);

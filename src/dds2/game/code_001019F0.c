@@ -202,7 +202,7 @@ extern KwlnDrawVectorParams kwlnHeldTextureFrustumParameters, kwlnOverlayFrustum
 extern u8 kwlnHeldTextureViewMatrix[0x40];
 extern u8 D_00384790[];
 extern u8 sdfViewEyeVector[], sdfViewTargetVector[], sdfViewUpVector[];
-extern u8 D_0037F590[];
+extern u8 sdfViewShakeVector[];
 extern u8 sdfViewMatrix[0x40];
 extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern void kwlnAdvanceShakeOffsets(void);
@@ -280,7 +280,7 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
     VU0_NORMALIZE_VF10();
     VU0_SCALAR_OP(600.0f, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_ADD(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, D_0037F590);
+    VU0_LOAD_VF(vf11, sdfViewShakeVector);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, &eye);
     VU0_LOAD_VF(vf10, sdfViewTargetVector);

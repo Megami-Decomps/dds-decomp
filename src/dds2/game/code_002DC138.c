@@ -624,7 +624,7 @@ extern void btlDebugDrawSegment(f32 *, f32 *, u32);
 extern void btlDebugDrawPoint(f32 *);
 extern f32 D_003E9660[4];
 extern f32 D_003E9130[4];
-extern f32 D_003E9140[4];
+extern f32 effDownVector[4];
 extern f32 D_003E9120[4];
 
 /* Resolve attachment endpoints, advance the model, and update retained effect queues. */
@@ -755,7 +755,7 @@ void func_002DD448(EffResourceOwner *owner) {
                 VU0_STORE_VF_UNCLOBBERED(vf10, endpoint);
                 btlDebugDrawSegment(position, endpoint, 0x80006000);
                 VU0_LOAD_MATRIX_MEMORY(matrix);
-                VU0_LOAD_VF(vf10, D_003E9140);
+                VU0_LOAD_VF(vf10, effDownVector);
                 VU0_SCALE_VF(vf10, 5000.0f);
                 VU0_TRANSFORM_POINT(vf10, vf10);
                 VU0_STORE_VF_UNCLOBBERED(vf10, endpoint);

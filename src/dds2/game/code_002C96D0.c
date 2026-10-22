@@ -8235,7 +8235,7 @@ typedef struct FileCurveMotion {
     f32 angleMultiplier;
 } FileCurveMotion; /* 0x4C, naturally four-byte aligned */
 
-extern f32 D_003E9140[4];
+extern f32 effDownVector[4];
 
 /* vu0 routine: advances randomized cubic-curve slots and their axial rotation. */
 void effUpdateCurveEmitterSlots(FileSlotTable *record) {
@@ -8343,7 +8343,7 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                             VU0_NORMALIZE_VF10();
                             VU0_STORE_VF(vf10, axis);
                             VU0_MOVE_VF(vf12, vf10);
-                            VU0_LOAD_VF(vf11, D_003E9140);
+                            VU0_LOAD_VF(vf11, effDownVector);
                             VU0_CROSS_XYZ(vf10, vf10, vf11);
                             VU0_MOVE_VF(vf11, vf12);
                             VU0_CROSS_XYZ(vf10, vf10, vf11);

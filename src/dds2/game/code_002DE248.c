@@ -335,7 +335,7 @@ extern void effSetCurveEmitterStartPosition(s32, void *);
 
 extern void sdfVuMatrixToQuaternion(f32 matrix[4][4]);
 
-extern u8 D_003E9140[];
+extern u8 effDownVector[];
 
 extern u8 D_003E9110[];
 
@@ -5903,7 +5903,7 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
     VU0_STORE_VF(vf10, view);
     VU0_LOAD_VF(vf10, work->vectors.orientation);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, D_003E9140);
+    VU0_LOAD_VF(vf10, effDownVector);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, direction);
     bendScale = 0.26179933547973633f;
@@ -10770,7 +10770,7 @@ void effUpdateAimedClassResource(u8 *work) {
     ((EffAimState *)state)->length = length;
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf12, vf10);
-    VU0_LOAD_VF(vf11, D_003E9140);
+    VU0_LOAD_VF(vf11, effDownVector);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_MOVE_VF(vf30, vf10);
     VU0_MOVE_VF(vf11, vf10);
@@ -11084,7 +11084,7 @@ void effOrientClassResourceAlongTargetOffset(u8 *work) {
     ((EffAimState *)state)->length = length;
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf12, vf10);
-    VU0_LOAD_VF(vf11, D_003E9140);
+    VU0_LOAD_VF(vf11, effDownVector);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf30, vf10);
@@ -11229,7 +11229,7 @@ void effDrawMovingRadialCylinder(EffActiveResource *work) {
 
     VU0_LOAD_VF(vf10, work->orientation);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf11, D_003E9140);
+    VU0_LOAD_VF(vf11, effDownVector);
     VU0_ROTATE_VEC(vf11, vf11);
     travel = config->travelPerFrame * (f32)(s32)state->unk00;
     VU0_SCALE_VF(vf11, travel);
@@ -14422,7 +14422,7 @@ u32 effUpdateCameraSnapshotGuides(EffectStateSnapshot *state, s8 useBattlePositi
     effMiscQuaternionToMatrixVU();
     VU0_STORE_MATRIX_UNCLOBBERED(scratch.rotationMatrix);
 
-    VU0_LOAD_VF(vf10, &D_003E9140);
+    VU0_LOAD_VF(vf10, &effDownVector);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_SCALE_VF(vf10, 250.0f);
     VU0_LOAD_VF(vf11, &scratch.segmentStart);
