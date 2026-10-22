@@ -187,7 +187,7 @@ extern void fldUpdateObjectSlotActivation(void);
 
 extern u32 fldEncountFlags;
 
-extern u32 D_00435F70;
+extern s32 D_00435F70;
 
 extern FieldPlayerSceneWork fldSceneParam;
 
@@ -229,7 +229,7 @@ extern s32 D_00435F80;
 
 extern u32 fldDeferredCommandParameter;
 
-extern void func_001411F8(u32 sceneAction);
+extern void func_001411F8(s32 sceneAction);
 
 extern void dds3WorkClear(void);
 
@@ -2599,12 +2599,12 @@ void fldProcNextJump(void) {
     }
 }
 
-void fldSetPendingSceneAction(u32 sceneAction) {
+void fldSetPendingSceneAction(s32 sceneAction) {
     D_00435F70 = sceneAction;
 }
 
 void fldRunPendingSceneAction(void) {
-    u32 sceneAction;
+    s32 sceneAction;
 
     sceneAction = D_00435F70;
     if (sceneAction != 0) {
