@@ -10494,13 +10494,13 @@ void effApplySelectedActorEffects(EffActiveResource *owner) {
     }
 }
 
-void effReportResourceStatus(u8 *work) {
+void effReportResourceStatus(EffActiveResource *work) {
     u32 status;
 
-    if ((s32)((EffActiveResource *)work)->frame > 0) {
+    if ((s32)work->frame > 0) {
         return;
     }
-    status = *(u32 *)((EffActiveResource *)work)->payload;
+    status = *(u32 *)work->payload;
     switch (status) {
     case 0:
         sndLoadAndPlayStationedSe(0x1000A);
@@ -10523,15 +10523,15 @@ void effApplyBattleStateTint(void) {
 }
 
 /* Start the payload's packed-color tint transition on frame zero. */
-void effStartTintTransitionFromColors(u8 *work) {
+void effStartTintTransitionFromColors(EffActiveResource *work) {
     f32 from[3];
     f32 to[3];
     u32 *colors;
     u32 c;
 
     btlGetRuntime();
-    colors = ((EffActiveResource *)work)->payload;
-    if ((s32)((EffActiveResource *)work)->frame == 0) {
+    colors = work->payload;
+    if ((s32)work->frame == 0) {
         c = colors[0];
         from[0] = (c & 0xFF) / 255.0f;
         from[1] = ((c >> 8) & 0xFF) / 255.0f;
@@ -10607,7 +10607,7 @@ void effResetActiveEffectSlots(void) {
     }
 }
 
-void effUpdateEffectSlotTransitions(s32 work) {
+void effUpdateEffectSlotTransitions(EffActiveResource *work) {
     s32 elapsed;
     u32 duration;
     u32 *slotData;
@@ -10616,9 +10616,9 @@ void effUpdateEffectSlotTransitions(s32 work) {
 
     index = 0;
     btlGetRuntime();
-    elapsed = (s32)((EffActiveResource *)work)->frame;
-    slotColor = (u8 *)((EffActiveResource *)work)->payload + 0x18;
-    slotData = (u32 *)((u8 *)((EffActiveResource *)work)->payload + 0x10);
+    elapsed = (s32)work->frame;
+    slotColor = (u8 *)work->payload + 0x18;
+    slotData = (u32 *)((u8 *)work->payload + 0x10);
     do {
         duration = slotData[-4];
         if (duration < *slotData) {
@@ -10649,15 +10649,15 @@ typedef struct EffTintTransitionIds {
     u16 defaultKind;
 } EffTintTransitionIds;
 
-void effUpdateSlotTimerPair(u8 *work) {
+void effUpdateSlotTimerPair(EffActiveResource *work) {
     u32 *slot;
     u32 first;
     s32 phase;
 
     btlGetRuntime();
-    slot = ((EffActiveResource *)work)->payload;
+    slot = work->payload;
     first = slot[0];
-    phase = (s32)((EffActiveResource *)work)->frame;
+    phase = (s32)work->frame;
     if (first < slot[3]) {
         return;
     }
@@ -10673,16 +10673,16 @@ void effUpdateSlotTimerPair(u8 *work) {
 extern f32 D_00437E90;
 
 
-void effApplyKeyframeAngle(u8 *work) {
+void effApplyKeyframeAngle(EffActiveResource *work) {
     s32 owner = (s32)(u32)btlGetRuntime();
-    f32 *keys = ((EffActiveResource *)work)->payload;
+    f32 *keys = work->payload;
     u32 total = *(u32 *)keys;
     s32 frame;
     f32 ratio;
     f32 value;
 
     if (total != 0) {
-        frame = ((EffActiveResource *)work)->frame;
+        frame = work->frame;
         if (total < frame) {
             return;
         }
