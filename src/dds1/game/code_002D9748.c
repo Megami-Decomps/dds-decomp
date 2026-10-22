@@ -69,8 +69,8 @@
 extern SdfSubParam *sdfMatAllocTexUvwParm(void);
 
 extern u32 sdfForcedAssetTextureMode;
-extern f32 D_003BD358;
-extern f32 D_003BD35C;
+extern f32 sdf3DSoften;
+extern f32 sdf3DBias;
 extern SdfPendingRequest sdfResourceReleaseQueue;
 extern SdfPendingRequest sdfAssetReleaseQueue;
 extern s32 sdfLiveAssetCount;
@@ -366,7 +366,7 @@ f32 sdfModelGetFaceDivSoften(SdfModel *model) {
     if ((model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) != 0) {
         return model->scalarOverrideFirst;
     }
-    return D_003BD358;
+    return sdf3DSoften;
 }
 
 /* Return the second override value when selected, otherwise its shared default. */
@@ -374,7 +374,7 @@ f32 sdfModelGetFaceDivBias(SdfModel *model) {
     if ((model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) != 0) {
         return model->scalarOverrideSecond;
     }
-    return D_003BD35C;
+    return sdf3DBias;
 }
 
 /* Set the native mode word; its consumers distinguish mode one from other values. */

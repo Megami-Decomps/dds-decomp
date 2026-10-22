@@ -1941,5 +1941,5 @@ INCLUDE_SDATA(const s32, "game/code_0032C278", sdfGrLastSentChain);
 
 INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A30);
 
-INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A34);
+INCLUDE_SDATA(const s32, "game/code_0032C278", sdf3DSoftenOff);
 

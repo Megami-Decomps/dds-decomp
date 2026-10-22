@@ -152,9 +152,9 @@ extern char D_003BA950[];
 
 extern void *D_003BD6B0;
 
-extern f32 D_003BD358;
+extern f32 sdf3DSoften;
 
-extern f32 D_003BD35C;
+extern f32 sdf3DBias;
 
 extern u16 D_003BD706;
 
@@ -502,8 +502,8 @@ void dds3SceneLightUpdateFirst(void) {
     if (kwlnDrawControlFlags & EVT_SAVED_VECTOR_BLEND_FLAG) {
         ++D_003BD704;
         ratio = (f32)D_003BD704 / D_003BD706;
-        D_003BD358 = D_003BD708 * (1.0f - ratio) + D_003BD70C * ratio;
-        D_003BD35C = D_003BD710 * (1.0f - ratio) + D_003BD714 * ratio;
+        sdf3DSoften = D_003BD708 * (1.0f - ratio) + D_003BD70C * ratio;
+        sdf3DBias = D_003BD710 * (1.0f - ratio) + D_003BD714 * ratio;
         if (D_003BD704 >= D_003BD706) {
             kwlnDrawControlFlags &= ~EVT_SAVED_VECTOR_BLEND_FLAG;
         }
@@ -514,12 +514,12 @@ void dds3SceneLightUpdateFirst(void) {
 void dds3SetSoftenBias(s32 frames, f32 firstTarget, f32 secondTarget) {
     if (frames == 0) {
         kwlnDrawControlFlags &= ~EVT_SAVED_VECTOR_BLEND_FLAG;
-        D_003BD358 = firstTarget;
-        D_003BD35C = secondTarget;
+        sdf3DSoften = firstTarget;
+        sdf3DBias = secondTarget;
     }
     else {
-        f32 previousFirst = D_003BD358;
-        f32 previousSecond = D_003BD35C;
+        f32 previousFirst = sdf3DSoften;
+        f32 previousSecond = sdf3DBias;
         kwlnDrawControlFlags |= EVT_SAVED_VECTOR_BLEND_FLAG;
         D_003BD706 = frames;
         D_003BD708 = previousFirst;

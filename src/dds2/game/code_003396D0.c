@@ -121,9 +121,9 @@ extern u32 sdfVuSelectedTransformMatrix;
 
 extern u32 D_0043918C;
 
-extern u32 D_00438A64;
+extern u32 sdf3DDefaultLight;
 
-extern u32 D_00438A68;
+extern u32 sdf3DDefaultFog;
 
 extern u32 sdfConsoleFontTexture;
 
@@ -322,7 +322,7 @@ void sdf3DMakeViewportPacket(SdfVuBonePacket *packet, SdfProjectionRecord *node,
     packet->unknownCC = 0;
 }
 
-extern u8 sdfConsComposedMatrix[];
+extern u8 sdf3DCameraMatrix[];
 
 extern u8 D_0040B660[];
 
@@ -336,7 +336,7 @@ void sdf3DSetCamera(SdfProjectionRecord *node, void *transformMatrix) {
     VU0_STORE_MATRIX(D_0040B660);
     sdfPostmultiplyVuMatrixFromMemory(node->camera.matrix);
         VU0_LOAD_VF(vf10, node->inverseOrigin);
-    VU0_STORE_MATRIX(sdfConsComposedMatrix);
+    VU0_STORE_MATRIX(sdf3DCameraMatrix);
     VU0_TRANSFORM_POINT(vf10, vf10);
         VU0_STORE_VF_UNCLOBBERED(vf10, D_0040B6A0);
     *(SdfProjectionRecord *)D_0040B580 = *node;
@@ -344,12 +344,12 @@ void sdf3DSetCamera(SdfProjectionRecord *node, void *transformMatrix) {
 
 /* Set the first DMA reference fallback used when a model has no override. */
 void sdf3DSetDefaultLight(u32 referenceSource) {
-    D_00438A64 = referenceSource;
+    sdf3DDefaultLight = referenceSource;
 }
 
 /* Set the second DMA reference fallback used when a model has no override. */
 void sdf3DSetDefaultFog(u32 referenceSource) {
-    D_00438A68 = referenceSource;
+    sdf3DDefaultFog = referenceSource;
 }
 
 extern s8 D_00438A50;
@@ -669,9 +669,9 @@ void sdf3DPrimLinkMat(SdfListHead *packetList, SdfAsset *asset,
     sdfAppendReferencePacket(packetList, (u32)referencePacket);
 }
 
-extern f32 D_00438A48;
+extern f32 sdf3DSoften;
 
-extern f32 D_00438A4C;
+extern f32 sdf3DBias;
 
 extern u32 D_0040B6B0[];
 
@@ -727,8 +727,8 @@ u32 *sdf3DPrimMakePoly(SdfPrimitiveRequest *request) {
     packet[6] = 0x6003C003;
     cursor = packet + 7;
     *cursor++ = (u32)request->depth;
-    *cursor++ = (u32)D_00438A48;
-    *cursor++ = (u32)D_00438A4C;
+    *cursor++ = (u32)sdf3DSoften;
+    *cursor++ = (u32)sdf3DBias;
     *cursor++ = 0x04000004;
     *cursor++ = 0x14000000;
     *cursor++ = 0x6D01C000;
@@ -1659,9 +1659,9 @@ INCLUDE_RODATA(const s32, "game/code_003396D0", D_0042E258);
 
 INCLUDE_SDATA(const s32, "game/code_003396D0", D_00438A40);
 
-INCLUDE_SDATA(const s32, "game/code_003396D0", D_00438A48);
+INCLUDE_SDATA(const s32, "game/code_003396D0", sdf3DSoften);
 
-INCLUDE_SDATA(const s32, "game/code_003396D0", D_00438A4C);
+INCLUDE_SDATA(const s32, "game/code_003396D0", sdf3DBias);
 
 INCLUDE_SDATA(const s32, "game/code_003396D0", D_00438A50);
 
@@ -1673,9 +1673,9 @@ INCLUDE_SDATA(const s32, "game/code_003396D0", D_00438A5C);
 
 INCLUDE_SDATA(const s32, "game/code_003396D0", D_00438A60);
 
-INCLUDE_SDATA(const s32, "game/code_003396D0", D_00438A64);
+INCLUDE_SDATA(const s32, "game/code_003396D0", sdf3DDefaultLight);
 
-INCLUDE_SDATA(const s32, "game/code_003396D0", D_00438A68);
+INCLUDE_SDATA(const s32, "game/code_003396D0", sdf3DDefaultFog);
 
 INCLUDE_SDATA(const s32, "game/code_003396D0", D_00438A6C);
 

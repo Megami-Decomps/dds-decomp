@@ -11087,4 +11087,9 @@
 0x0047AA40	sndMidiTrackState	inferred	confidence=high; matched_users=src/dds2/game/code_00341650.c:func_00341958, src/dds2/game/code_00341FE8.c:func_00342168; Shared MIDI state contains initialized channels and track slots consulted during track-id queries. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x0047ABD0	sndTrackBalanceEntries	inferred	confidence=high; src/dds2/game/code_00341FE8.c:D_0047ABD0; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,sndGetTrackBalanceFirstComponent,sndGetTrackBalanceSecondComponent,sndGetTrackSlotTable; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
 0x003BDD08	btlStatusEffectStyles	inferred	DDS1's btlStatusEffectStyles, the same rows; func_002034A8 reads them alike
-0x0040B620	sdfConsComposedMatrix	inferred	the composed matrix sdfConsCacheTransformedNode stores (the transform it is given, postmultiplied by the node's camera matrix), which sdfCorePacketGen, the visible-node packets and the cached line pairs read
+0x0040B620	sdf3DCameraMatrix	inferred	the camera matrix sdf3DSetCamera keeps: the transform it is given, postmultiplied by the node's camera matrix; read by sdfCorePacketGen, sdfModelTempPacketLinkOt and the cached line pairs
+0x00438A48	sdf3DSoften	inferred	the models' soften, 7.0 at start: set with the bias by dds3SetSoftenBias (eased over frames by dds3SceneLightUpdateFirst), edited by soften_bias_Process, each model's default unless it overrides it
+0x00438A4C	sdf3DBias	inferred	the models' bias, 0.0 at start: set with the soften by dds3SetSoftenBias, edited by soften_bias_Process, each model's default unless it overrides it
+0x00438A34	sdf3DSoftenOff	inferred	soften switched off (soften_bias_Process shows ON at 0): corePktClipFace then keeps faces whole across soften regions, and the models pass it to their microprogram
+0x00438A64	sdf3DDefaultLight	inferred	the light a model without its own uses: set by sdf3DSetDefaultLight
+0x00438A68	sdf3DDefaultFog	inferred	the fog a model without its own uses: set by sdf3DSetDefaultFog

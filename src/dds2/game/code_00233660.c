@@ -3564,10 +3564,10 @@ extern MdlOptionState D_00453660;
 extern s8 D_0040B7E8[16];
 extern MdlOptionLabel D_003C8B68[4] __attribute__((section(".data")));
 extern u16 D_003C8B98[4] __attribute__((section(".data")));
-extern f32 D_00438A48 __attribute__((section(".sdata")));
-extern f32 D_00438A4C __attribute__((section(".sdata")));
+extern f32 sdf3DSoften __attribute__((section(".sdata")));
+extern f32 sdf3DBias __attribute__((section(".sdata")));
 /* The selector occupies byte zero of its aligned small-data allocation. */
-extern u8 D_00438A34 __attribute__((section(".sdata")));
+extern u8 sdf3DSoftenOff __attribute__((section(".sdata")));
 extern const char D_00437198[];
 extern const char D_004371A0[];
 extern const char D_004371A8[];
@@ -3592,8 +3592,8 @@ s32 soften_bias_Process(KwlnTask *task) {
     } else {
         pad = kwlnTaskPadButtonStates;
     }
-    value = D_00438A48;
-    adjustment = D_00438A4C;
+    value = sdf3DSoften;
+    adjustment = sdf3DBias;
     state->pad = pad;
     D_00453660.value = value;
     D_00453660.adjustment = adjustment;
@@ -3627,7 +3627,7 @@ s32 soften_bias_Process(KwlnTask *task) {
             }
         } else if (D_00453660.pad[1] & 0x80) {
             if (D_00453660.control.fields.cursor == 2) {
-                D_00438A34 ^= 1;
+                sdf3DSoftenOff ^= 1;
             } else {
                 D_00453660.control.fields.active = 1;
             }
@@ -3682,14 +3682,14 @@ s32 soften_bias_Process(KwlnTask *task) {
     sdfDrawTagLink(D_00453660.packetList,
                     (u32)sdfDevPrintf(0x8B00, 0x7AE0, 0xFF0080,
                                                      adjustmentStyle, D_004371A8, D_00453660.adjustment));
-    format = D_00438A34 == 0 ? D_004371B0 : D_004371B8;
+    format = sdf3DSoftenOff == 0 ? D_004371B0 : D_004371B8;
     sdfDrawTagLink(D_00453660.packetList,
                     (u32)sdfDevPrintf(0x8B00, 0x7BA0, 0xFF0080,
                                                      0, format));
     D_00380708.append(&D_00380708,
                       D_00453660.packetList);
-    D_00438A48 = D_00453660.value;
-    D_00438A4C = D_00453660.adjustment;
+    sdf3DSoften = D_00453660.value;
+    sdf3DBias = D_00453660.adjustment;
     return 0;
 }
 

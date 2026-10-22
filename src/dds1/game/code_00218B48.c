@@ -3508,10 +3508,10 @@ extern MdlOptionState D_003D7B60;
 extern s8 D_00398638[16];
 extern MdlOptionLabel D_00367DB8[4];
 extern u16 D_00367DE8[4] __attribute__((section(".data")));
-extern f32 D_003BD358;
-extern f32 D_003BD35C;
+extern f32 sdf3DSoften;
+extern f32 sdf3DBias;
 /* The selector occupies byte zero of its aligned small-data allocation. */
-extern u8 D_003BD344 __attribute__((section(".sdata")));
+extern u8 sdf3DSoftenOff __attribute__((section(".sdata")));
 extern const char D_003BBD58[];
 extern const char D_003BBD60[];
 extern const char D_003BBD68[];
@@ -3536,8 +3536,8 @@ s32 soften_bias_Process(KwlnTask *task) {
     } else {
         pad = kwlnTaskPadButtonStates;
     }
-    value = D_003BD358;
-    adjustment = D_003BD35C;
+    value = sdf3DSoften;
+    adjustment = sdf3DBias;
     state->pad = pad;
     D_003D7B60.value = value;
     D_003D7B60.adjustment = adjustment;
@@ -3571,7 +3571,7 @@ s32 soften_bias_Process(KwlnTask *task) {
             }
         } else if (D_003D7B60.pad[1] & 0x80) {
             if (D_003D7B60.control.fields.cursor == 2) {
-                D_003BD344 ^= 1;
+                sdf3DSoftenOff ^= 1;
             } else {
                 D_003D7B60.control.fields.active = 1;
             }
@@ -3626,14 +3626,14 @@ s32 soften_bias_Process(KwlnTask *task) {
     sdfDrawTagLink(D_003D7B60.packetList,
                     (u32)sdfDevPrintf(0x8B00, 0x7AE0, 0xFF0080,
                                                      adjustmentStyle, D_003BBD68, D_003D7B60.adjustment));
-    format = D_003BD344 == 0 ? D_003BBD70 : D_003BBD78;
+    format = sdf3DSoftenOff == 0 ? D_003BBD70 : D_003BBD78;
     sdfDrawTagLink(D_003D7B60.packetList,
                     (u32)sdfDevPrintf(0x8B00, 0x7BA0, 0xFF0080,
                                                      0, format));
     D_00325708.append(&D_00325708,
                       D_003D7B60.packetList);
-    D_003BD358 = D_003D7B60.value;
-    D_003BD35C = D_003D7B60.adjustment;
+    sdf3DSoften = D_003D7B60.value;
+    sdf3DBias = D_003D7B60.adjustment;
     return 0;
 }
 
