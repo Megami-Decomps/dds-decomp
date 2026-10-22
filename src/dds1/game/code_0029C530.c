@@ -486,8 +486,8 @@ struct EffKindWork;
 /* Native kind operations include handle destruction and per-frame update;
  * zero-argument notifications retain the original unprototyped callback ABI. */
 typedef struct EffKindDesc {
-    u32 (*create)(void *);   // 0x00
-    void (*destroy)();       // 0x04: release the created handle
+    void *(*create)(void *); // 0x00
+    void (*destroy)(void *); // 0x04: release the created handle
     void (*update)();        // 0x08: advance work through its kind callback
     void (*initialize)(struct EffKindWork *, sdfTexHandle_t *); // 0x0C
     u32 payloadSize;         // 0x10: bytes copied after the work header
@@ -503,7 +503,7 @@ typedef struct EffKindWork {
     f32 scale;      // 0x18
     s32 kind;       // 0x1C
     u32 frame;        // 0x20, incremented by the kind callback dispatcher
-    u32 handle;     // 0x24
+    void *handle;   // 0x24
     void *payload;  // 0x28
     u32 sourceKind; // 0x2C
     sdfTexHandle_t *target;     // 0x30
@@ -798,11 +798,11 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     effDrawBlurRectangle(out);
 }
 
-u32 effCreateFadeBlendWorkFromOutput(void *work) {
-    return (u32)dds3EffectPartialMultiBlurCreate((dds3Effect_PartialMultiBlurParam_t *)((u8 *)work + 0xc0));
+void *effCreateFadeBlendWorkFromOutput(void *work) {
+    return dds3EffectPartialMultiBlurCreate((dds3Effect_PartialMultiBlurParam_t *)((u8 *)work + 0xc0));
 }
 
-void effReleaseFadeBlendWork(u32 resourceHandle) {
+void effReleaseFadeBlendWork(void *resourceHandle) {
     dds3EffectPartialMultiBlurDelete((EffBlurTemplate *)resourceHandle);
 }
 
@@ -879,8 +879,8 @@ void effUpdateTarget(EffKindWork *work, sdfTexHandle_t *target) {
     ((EffBlurTemplate *)work->handle)->texture = target;
 }
 
-u32 effCreateFixedSlotBlurWorkFromFadeOutput(void *source) {
-    return (u32)dds3EffectDistortionBlurCreate((dds3Effect_DistortionBlurParam_t *)((u8 *)source + 0xC0));
+void *effCreateFixedSlotBlurWorkFromFadeOutput(void *source) {
+    return dds3EffectDistortionBlurCreate((dds3Effect_DistortionBlurParam_t *)((u8 *)source + 0xC0));
 }
 
 void effReleaseFixedSlotBlurWork(EffBlurScatterWork *handle) {
@@ -956,8 +956,8 @@ void effTextureReferenceRelease(EffKindWork *work, sdfTexHandle_t *target) {
     ((EffBlurScatterWork *)work->handle)->texture = target;
 }
 
-u32 effCreateVariableSlotBlurWorkFromFadeOutput(void *source) {
-    return (u32)dds3EffectRippleBlurCreate((dds3Effect_RippleBlurParam_t *)((u8 *)source + 0xc0));
+void *effCreateVariableSlotBlurWorkFromFadeOutput(void *source) {
+    return dds3EffectRippleBlurCreate((dds3Effect_RippleBlurParam_t *)((u8 *)source + 0xc0));
 }
 
 void effReleaseVariableSlotBlurWork(EffBlurScaleWork *work) {
@@ -1113,8 +1113,8 @@ void effUpdateFadeBlendC(EffKindWork *work) {
     dds3EffectFilter(out);
 }
 
-u32 effCreateFadeColorWorkFromOutput(void *work) {
-    return (u32)dds3EffectPartialMultiFilterCreate((dds3Effect_PartialMultiFilterParam_t *)((u8 *)work + 0xc0));
+void *effCreateFadeColorWorkFromOutput(void *work) {
+    return dds3EffectPartialMultiFilterCreate((dds3Effect_PartialMultiFilterParam_t *)((u8 *)work + 0xc0));
 }
 
 void effReleaseFadeColorWork(EffResourceRectWork *work) {
@@ -1250,7 +1250,7 @@ EffKindWork *effCreateKindWorkFromFile(FileJobPayload *work) {
 }
 
 void effReleaseLinkedTarget(EffKindWork *work) {
-    void *handle = (void *)work->handle;
+    void *handle = work->handle;
     if (handle != NULL) {
         D_0037E770[work->kind].destroy(handle);
     }
@@ -1345,7 +1345,7 @@ EffKindWork *effCreateKindWorkFromFileB(FileJobPayload *work) {
 
 /* Release the alternate-kind handle, owned secondary reference, and work allocation. */
 void effReleaseAlternateKindWork(EffKindWork *work) {
-    void *handle = (void *)work->handle;
+    void *handle = work->handle;
     if (handle != NULL) {
         D_0037E7E8[work->kind].destroy(handle);
     }
