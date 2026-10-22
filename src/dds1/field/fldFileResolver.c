@@ -597,7 +597,7 @@ extern u32 fldCameraColorEnabled;
 
 extern sdfTexHandle_t *fldRainTextureReference;
 
-extern s32 fldRainTextureResource;
+extern struct sdfMemHandle_t *fldRainTextureResource;
 
 extern dds3ModelHandle_t *fldPlayerModelContext;
 
@@ -5427,7 +5427,7 @@ void fldLoadSkyResource(s32 area) {
         sdfFileRead(command, fldSkyLightSetBuffer, 0xE000);
         sdfFileClose(command);
         if (area >= 2 && area < 100 && fldRainTextureResource == 0) {
-            fldRainTextureResource = (s32)(u32)sdfDevLoadFileEx(D_003A0100, &fldRainTextureData, 0);
+            fldRainTextureResource = sdfDevLoadFileEx(D_003A0100, &fldRainTextureData, 0);
             fldRainTextureReference = sdfTexSet((SdfTextureFileHeader *)(fldRainTextureData));
         }
     }
@@ -5439,8 +5439,8 @@ void fldReleaseSkyResources(void) {
         fldRainTextureReference = 0;
     }
     if (fldRainTextureResource != 0) {
-        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldRainTextureResource);
-        fldRainTextureResource = 0;
+        sdfMemFreeDelayedDirect(fldRainTextureResource);
+        fldRainTextureResource = NULL;
     }
     if (fldCameraColorEffect != 0) {
         effReleaseSelectionFlagList(fldCameraColorEffect);
@@ -5454,7 +5454,7 @@ void fldUploadSkyBuffer(FldSkyBuffer *src) {
     memcpy(fldSkyLightSetBuffer, src, 0xE000);
     fldReleaseSkyResources();
     if (D_0032E3C0[0] >= 2 && D_0032E3C0[0] < 100 && fldRainTextureResource == 0) {
-        fldRainTextureResource = (s32)(u32)sdfDevLoadFileEx(D_003A0100, &fldRainTextureData, 0);
+        fldRainTextureResource = sdfDevLoadFileEx(D_003A0100, &fldRainTextureData, 0);
         fldRainTextureReference = sdfTexSet((SdfTextureFileHeader *)(fldRainTextureData));
     }
 }
@@ -6474,12 +6474,12 @@ extern char D_003A0100[];
 extern u32 fldRainTextureData;
 
 void fldInitializeCameraColorResource(void) {
-    fldRainTextureResource = (s32)(u32)sdfDevLoadFileEx(D_003A0100, &fldRainTextureData, 0);
+    fldRainTextureResource = sdfDevLoadFileEx(D_003A0100, &fldRainTextureData, 0);
     fldRainTextureReference = sdfTexSet((SdfTextureFileHeader *)(fldRainTextureData));
     fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
     if (fldRainTextureResource != 0) {
-        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldRainTextureResource);
-        fldRainTextureResource = 0;
+        sdfMemFreeDelayedDirect(fldRainTextureResource);
+        fldRainTextureResource = NULL;
     }
     fldUpdateCameraColorEffect(fldCameraSettings);
     fldCameraColorEnabled = 1;
