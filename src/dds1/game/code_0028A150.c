@@ -284,7 +284,7 @@ extern struct sdfMemHandle_t *fileSaveIconResourceHandle;
 
 extern u32 fileSaveIconRequest;
 
-extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
+extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
 
 extern struct _FRQ *fileMenuStringGlyph;
 
@@ -553,11 +553,11 @@ void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, u32 font) {
 }
 
 void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
-    u32 imageHandle;
+    struct _FRQ *imageHandle;
 
     imageHandle = itfCreateFont2TextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(imageHandle, 1);
-    frDestroyFontRequestAfter((struct _FRQ *)(u32)imageHandle);
+    frDestroyFontRequestAfter(imageHandle);
 }
 
 extern f32 fileSaveHighlightPhase;
