@@ -58,7 +58,7 @@ struct GridTextListItem {
     char *text;                     /* 0x00 */
     u16 textLength;                 /* 0x04 */
     u16 index;                      /* 0x06 */
-    void *parameter;                /* 0x08 */
+    GridNumericDescriptor *numericDescriptor; /* 0x08; NULL for nonnumeric rows. */
     f32 number;                     /* 0x0C */
     s32 formatWidth;                /* 0x10 */
     u32 value;                      /* 0x14 */
