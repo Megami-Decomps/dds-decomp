@@ -31,6 +31,7 @@
 #include "fld_trigger_shape.h"
 #include "fld_room_state.h"
 #include "fld_action_row.h"
+#include "fld_actor_row.h"
 #include "eff_object.h"
 #include "evt_unit.h"
 #include "mdl.h"
@@ -245,26 +246,7 @@ extern FldWaypointBlock fldActorWaypointRows;
 
 extern FldActorEntry fldDoorTable[256];
 
-/* Actor slots use three transition keys, signed frame counters and two float
-   triples with per-frame increments; fldInitializeActorMotionSlots initializes the motion data. */
-typedef struct {
-    s32 kind;
-    u32 actorId;
-    u32 unk08;
-    u32 firstKey;
-    u32 secondaryMotion;
-    u32 secondKey;
-    u32 transitionKey;
-    s32 firstFrame;
-    s32 secondFrame;
-    s32 transitionFrame;
-    s32 frameCount;
-    f32 firstValues[3];
-    f32 firstStep[3];
-    f32 secondValues[3];
-    f32 secondStep[3];
-} FldActorRow; /* 0x5C bytes */
-
+/* Initialized by fldInitializeActorMotionSlots. */
 extern FldActorRow fldActorSlots[];
 
 extern s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);

@@ -99,6 +99,7 @@
 #include "fld_room_state.h"
 #include "fld_trigger_shape.h"
 #include "fld_action_row.h"
+#include "fld_actor_row.h"
 #include "mdl_world_object_source_vector_api.h"
 #include "btl.h"
 #include "fld_index_pair.h"
@@ -128,27 +129,7 @@ extern void kwlnFadeSetRGB(s32 red, s32 green, s32 blue);
 
 extern void fldReleaseActorTasksById(s32);
 
-/* Per-actor slot in the field's actor table; reset by fldResetActorSlots and
-   scanned by fldReleaseActorTasksById. 0x5C is the stride retail uses. Three transition keys, signed frame
-   counters and two float triples with per-frame increments (same layout as DDS2). */
-typedef struct {
-    s32 kind;
-    u32 actorId;
-    u32 unk08;
-    u32 firstKey;
-    u32 secondaryMotion;
-    u32 secondKey;
-    u32 transitionKey;
-    s32 firstFrame;
-    s32 secondFrame;
-    s32 transitionFrame;
-    s32 frameCount;
-    f32 firstValues[3];
-    f32 firstStep[3];
-    f32 secondValues[3];
-    f32 secondStep[3];
-} FldActorRow; /* 0x5C bytes */
-
+/* Reset by fldResetActorSlots and scanned by fldReleaseActorTasksById. */
 extern FldActorRow fldActorSlots[];
 
 extern s32 D_0032E530[];
