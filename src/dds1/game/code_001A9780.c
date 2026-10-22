@@ -3744,11 +3744,11 @@ void btlUpdatePhasePanelAnimation(BattlePhasePanelWork *work) {
 
 extern void btlScaleEffectSlotSourceBounds(EffectSlotSet *, s32);
 
-extern void func_001B19F8(BattlePhasePanelWork *);
+extern void btlDrawPhaseChangePanelStrips(BattlePhasePanelWork *);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A28F8);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B19F8);
+INCLUDE_ASM(const s32, "game/code_001A9780", btlDrawPhaseChangePanelStrips);
 
 extern const s32 D_003BB418[];
 extern const s32 D_003BB420[];
@@ -4011,7 +4011,7 @@ s32 btlUpdatePhaseGatedTaskUntilTimeout(KwlnTask *task) {
     }
     btlUpdatePhasePanelAnimation(state);
     if (btlTrackedTaskHandles->phaseGate == 0) {
-        func_001B19F8(state);
+        btlDrawPhaseChangePanelStrips(state);
     }
     btlUpdatePhasePanelSecondaryAnimation(state);
     if (btlTrackedTaskHandles->phaseGate == 0) {
