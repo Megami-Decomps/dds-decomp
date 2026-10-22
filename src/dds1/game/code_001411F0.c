@@ -172,7 +172,7 @@ extern struct sdfMemHandle_t *D_003BAFEC;
 extern u32 D_003BAFF0;
 extern void fldSetCameraModelMotionRequest(u32, u32);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
-extern void *dds3AddBEDEffectObjectBasic2(void *, f32 *, f32 *);
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *, f32 *, f32 *);
 extern void dds3EffectObjectBasicStatOff(void *, s32);
 extern void dds3EffectObjectBasicStatOn(void *, s32);
 extern void dds3StartBEDEffectObjectBasic(void *, u32);

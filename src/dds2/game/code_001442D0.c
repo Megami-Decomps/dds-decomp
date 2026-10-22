@@ -4943,7 +4943,7 @@ extern struct sdfMemHandle_t *D_004363A4;
 extern u32 D_004363A8;
 extern void dspRequestMessageWindowModeOne(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
-extern void *dds3AddBEDEffectObjectBasic2(void *, void *, void *);
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *, void *, void *);
 extern void dds3EffectObjectBasicStatOff(dds3Basic_t *, u32);
 extern void dds3EffectObjectBasicStatOn(dds3Basic_t *, u32);
 extern void dds3StartBEDEffectObjectBasic(dds3Basic_t *, u32);

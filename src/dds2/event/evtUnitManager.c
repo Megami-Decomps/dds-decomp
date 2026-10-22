@@ -1156,7 +1156,7 @@ extern u8 D_00421AC0[];
 extern void dds3EffectObjectBasicStatOn(void *object, s32 flags);
 
 extern dds3Basic_t *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
-extern void *dds3AddBEDEffectObjectBasic2(void *resource, void *position, void *scale);
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *resource, void *position, void *scale);
 extern dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 kind, struct EffNodeDescriptor *descriptor);
 extern char D_00421A78[];
 
