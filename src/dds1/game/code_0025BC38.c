@@ -158,22 +158,22 @@ void mnuDrawMantraSpriteCueGroups(s32 x, s32 y, s32 depth, s32 alpha,
 
 typedef struct MenuResourceWork {
     u8 pad00[0x6C];
-    u32 resourceHandle; /* 0x6C */
+    struct EffectSlotSet *resourceHandle; /* 0x6C */
 } MenuResourceWork;
 
 MenuResourceWork *mnuRequestEffectResource(const char *ctx, const char *config) {
     MenuResourceWork *work = (MenuResourceWork *)sdfChipAllocDirect(0x70);
     memset(work, 0, 0x70);
-    effRequestResourceByMode(ctx, config, 0, (u32)&work->resourceHandle);
+    effRequestResourceByMode(ctx, config, 0, (u32 *)&work->resourceHandle);
     return work;
 }
 
 u8 mnuHasEffectResourceHandle(MenuResourceWork *work) {
-    return work->resourceHandle != 0;
+    return work->resourceHandle != NULL;
 }
 
 void mnuReleaseEffectResource(MenuResourceWork *work) {
-    effDestroyResourceSlotSet((struct EffectSlotSet *)work->resourceHandle);
+    effDestroyResourceSlotSet(work->resourceHandle);
     sdfChipFreeDirect(work);
 }
 extern void mnuDrawSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 sprite,
