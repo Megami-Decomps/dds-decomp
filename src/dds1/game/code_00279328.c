@@ -27,7 +27,8 @@ extern void mnuPlayInputSound(s32, s32, u32 *);
 /* These context pointers lack a proven allocator path; retain only their
  * observed cursor/list views until their owners are established. */
 typedef struct SkillListView {
-    u8 pad00[0x1C];
+    u32 stateFlags;
+    u8 pad04[0x18];
     struct MenuListNode *cursor;
 } SkillListView;
 
@@ -281,7 +282,7 @@ s32 mnuCloseSelectionAndReleasePartyPanel(dds3ProcessID_t *selection) {
     return 1;
 }
 
-extern void mnuClearListFlagsOneAndTwo();
+extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 s32 ptySkillMenuHandlePageSwitch(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
     s32 changed = 0;
@@ -297,7 +298,7 @@ s32 ptySkillMenuHandlePageSwitch(dds3ProcessID_t *callback) {
         mnuAdvanceListCursorDefault(((SkillMenuContext *)context)->selection);
         changed = 1;
     }
-    mnuClearListFlagsOneAndTwo(((SkillMenuContext *)context)->selection);
+    mnuClearListFlagsOneAndTwo(&((SkillMenuContext *)context)->selection->stateFlags);
     if (changed != 0) {
         ptySkillMenuOpenPartyPage(callback);
         p2sdPlaySE(4, 0x7F, 0x3F);
