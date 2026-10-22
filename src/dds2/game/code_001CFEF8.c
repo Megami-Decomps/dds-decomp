@@ -115,7 +115,7 @@ extern void fldInitializeSceneGroups(void);
 
 
 
-extern s32 btlArrangeOpponentFormationSlots();
+extern s32 btlArrangeOpponentFormationSlots(void);
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 
