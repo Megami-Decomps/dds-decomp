@@ -5531,7 +5531,7 @@ u32 btlExecuteCommandSoundTask(BtlCommandSoundTaskArgs *arguments) {
     return 1;
 }
 
-void *btlCreateCommandSoundTask(s32 owner, s32 variant) {
+BtlRuntimeTask *btlCreateCommandSoundTask(s32 owner, s32 variant) {
     BtlRuntimeTask *task = (BtlRuntimeTask *)btlAllocTask(20);
     BtlCommandSoundTaskArgs *arguments;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;

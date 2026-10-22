@@ -156,7 +156,8 @@ typedef union BtlVec4 {
 
 extern u8 *btlCreateSecondaryCommandSoundTask(void);
 
-extern void *btlCreateCommandSoundTask(s32 owner, s32 variant);
+struct BtlRuntimeTask;
+extern struct BtlRuntimeTask *btlCreateCommandSoundTask(s32 owner, s32 variant);
 
 extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 
@@ -3855,4 +3856,3 @@ INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB828);
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB830);
 
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB838);
-

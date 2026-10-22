@@ -156,7 +156,7 @@ extern s32 sndPlaySkillSeTask(u32 *);
 
 extern u32 sndFinishEarringPlayback(void);
 
-extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
+extern BtlRuntimeTask *btlCreateMoveOtherUnitsTask(u8 *, u32);
 
 
 extern SoundResourceNode *sndAllocResourceNode(void);
@@ -10379,7 +10379,7 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
     return 0;
 }
 
-void *btlCreateMoveOtherUnitsTask(u8 *owner, u32 soundId) {
+BtlRuntimeTask *btlCreateMoveOtherUnitsTask(u8 *owner, u32 soundId) {
     u8 *task = btlAllocTask(16);
     SoundTaskArgs *arguments;
 
@@ -10394,7 +10394,7 @@ void *btlCreateMoveOtherUnitsTask(u8 *owner, u32 soundId) {
     arguments->slot = soundId;
     arguments->option = 0;
     arguments->waitFrames = 0;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 /* Disable the motion- and skill-SE load-frame counters with their -1 sentinel. */

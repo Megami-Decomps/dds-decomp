@@ -429,7 +429,7 @@ s32 fldSceneStateRestoreDisplay(u8 *scene) {
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern struct BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 extern u8 *btlCreateSecondaryCommandSoundTask(void);
-extern void *btlCreateCommandSoundTask(s32, s32);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
 extern u8 *btlCreateModelLoadPollTask(u8 *, u32, u32, s8);
 extern void *btlCreateActorTransparencyTask(BtlUnit *);
 extern u8 *btlCreateUnitFadeInTask(u8 *, u32, u32);
@@ -944,7 +944,7 @@ extern s32 btlSetEligibleActorPanelTransitionState(void);
 extern s32 btlDestroyTaskC(void);
 extern s32 btlDestroyTaskD(void);
 extern s32 btlChooseAvailableUnit(void);
-extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
+extern BtlRuntimeTask *btlCreateMoveOtherUnitsTask(u8 *, u32);
 extern struct BtlRuntimeTask *sndCreateClearBattleFlagTask(void);
 extern s32 btlGetSlotRateKind(u8 *, s32);
 extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
