@@ -5665,9 +5665,9 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001EC868", func_001FC5E0);
+INCLUDE_ASM(const s32, "game/code_001EC868", btlScaleCameraTrackValues);
 
-extern void func_001FC5E0(BtlLinkedCommand *, BtlCamState *,
+extern void btlScaleCameraTrackValues(BtlLinkedCommand *, BtlCamState *,
                          const BtlCameraTimedInstruction *, const s32 *,
                          const BtlCameraParameterRecord *, f32 *);
 
@@ -5701,7 +5701,7 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                 value[1] = records[*currentIndex].value[1];
                 value[2] = records[*currentIndex].value[2];
                 value[3] = records[*currentIndex].value[3];
-                func_001FC5E0(command, pose, instruction, currentIndex, records, value);
+                btlScaleCameraTrackValues(command, pose, instruction, currentIndex, records, value);
                 switch (instruction->kind) {
                 case 1:
                     VU0_LOAD_VF(vf10, pose->direction);
