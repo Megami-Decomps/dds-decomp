@@ -32,22 +32,15 @@
 #include "sdf_dma_tag.h"
 #include "sdf_gs_packet.h"
 #include "btl.h"
+#include "kwln_fade_color.h"
+#include "evt_frame_state_packet.h"
 /* Declared before first use (were implicit int). */
 extern void evtSetDrawSurfaceIndex(u32 surfaceIndex);
 extern void evtSubmitDefaultDepthGradientRect(s32 x, s32 y, s32 width, s32 height, s32 topLeftColor, s32 topRightColor, s32 bottomRightColor, s32 bottomLeftColor);
 extern void evtSubmitPrimaryAlphaBlendMode(s32 blendMode);
 extern void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst);
 
-typedef struct {
-    s8 r;
-    s8 g;
-    s8 b;
-    s8 a;
-} KwlnFadeColor;
-
 extern u32 kwlnDrawControlFlags;
-
-extern KwlnFadeColor kwlnFadeColor;
 
 extern u16 D_003BA918;
 extern s16 D_003BA91A;
@@ -116,24 +109,6 @@ extern s32 kwlnDebugGraphUpdate(KwlnTask *task);
 extern KwlnTask *kwlnDebugGraphTask;
 extern s32 kwlnTextureCountIncompleteResources(void);
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
-typedef struct EvtFrameStatePacket {
-    SdfDmaTagHeader dma;
-    u64 testGifTag;
-    u64 testGifRegisters;
-    SdfGsRegisterWrite clearTest;
-    u64 clearGifTag;
-    u64 clearGifRegisters;
-    SdfGsRegisterWrite topLeftColor;
-    SdfGsRegisterWrite topLeftPosition;
-    SdfGsRegisterWrite bottomRightColor;
-    SdfGsRegisterWrite bottomRightPosition;
-    u64 blendGifTag;
-    u64 blendGifRegisters;
-    SdfGsBlendRegisters blend;
-} EvtFrameStatePacket;
-
-typedef char EvtFrameStatePacketSizeCheck[sizeof(EvtFrameStatePacket) == 0xB0 ? 1 : -1];
-extern EvtFrameStatePacket evtFrameStatePacketTemplates[3][2];
 extern s32 D_003BA724;
 extern s32 kwlnDistanceBlurErrorCount;
 extern s32 kwlnRippleBlurErrorCount;

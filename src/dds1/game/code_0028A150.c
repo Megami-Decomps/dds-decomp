@@ -561,7 +561,7 @@ void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
 
 extern f32 fileSaveHighlightPhase;
 
-extern void evtSetDrawSurfaceIndex(s32);
+extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 
 /* Animate the save-window highlight's alpha with a sinusoidal phase. */
