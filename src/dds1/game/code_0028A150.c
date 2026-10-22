@@ -278,7 +278,8 @@ extern s32 D_003BC864;
 
 extern s8 fileSavePreviewVersionByteView[];
 
-extern u32 fileMenuContinuation;
+typedef s32 (*FileMenuContinuationCallback)(void);
+extern FileMenuContinuationCallback fileMenuContinuation;
 
 extern struct sdfMemHandle_t *fileSaveIconResourceHandle;
 
@@ -339,7 +340,7 @@ extern s32 slSizeChk(void);
 extern s32 fileSelectedSlotIndex;
 
 
-extern s32 fileBeginDetectionRequest(u32 callback);
+extern s32 fileBeginDetectionRequest(FileMenuContinuationCallback callback);
 
 extern s32 fileScanSlotStates(void);
 
@@ -1322,7 +1323,7 @@ s32 slExitWaitProc(void) {
     s32 remaining = fileWaitTicksRemaining - 1;
     fileWaitTicksRemaining = remaining;
     if (remaining <= 0) {
-        if (fileMenuContinuation == -1) {
+        if (fileMenuContinuation == (FileMenuContinuationCallback)-1) {
             return -1;
         }
         return ((s32 (*)())fileWaitContinuation)();
@@ -1330,7 +1331,7 @@ s32 slExitWaitProc(void) {
     return 0;
 }
 
-s32 fileSetMenuCallbackAndClearResult(u32 callback) {
+s32 fileSetMenuCallbackAndClearResult(FileMenuContinuationCallback callback) {
     fileMenuContinuation = callback;
     D_003BC858 = 0;
     return (s32)mcdFinishFileDetection;
@@ -1343,15 +1344,15 @@ s32 mcdFinishFileDetection(void) {
         D_003BC854 = 0;
         D_003BC810 = 0;
         p2sdStopBGM(0x310000);
-        if (fileMenuContinuation == -1) {
+        if (fileMenuContinuation == (FileMenuContinuationCallback)-1) {
             return slExitWait((void *)-1);
         }
-        return ((s32 (*)())fileMenuContinuation)();
+        return fileMenuContinuation();
     }
     return 0;
 }
 
-s32 fileBeginDetectionRequest(u32 callback) {
+s32 fileBeginDetectionRequest(FileMenuContinuationCallback callback) {
     fileMenuContinuation = callback;
     D_003BC858 = 0;
     fileReqBegin(fileMemoryCardRequestIndex);
@@ -1373,10 +1374,10 @@ s32 filePollSlotRequestAndResumeFlow(void) {
             slSetInfo(0);
             D_003BC854 = 0;
             D_003BC810 = 0;
-            if (fileMenuContinuation == -1) {
+            if (fileMenuContinuation == (FileMenuContinuationCallback)-1) {
                 return slExitWait((void *)-1);
             }
-            return ((s32 (*)())fileMenuContinuation)();
+            return fileMenuContinuation();
         }
         fileStatus = fileReqGetStatus(fileMemoryCardRequestIndex);
         switch (fileStatus) {
@@ -1687,7 +1688,7 @@ s32 fileOnAllWritten(void) {
     fileReqSetSlotFlags(fileMemoryCardRequestIndex, fileSelectedSlotIndex, FILE_REQ_SLOT_CAN_READ_SAVE);
     fileReqSetSlotFlags(fileMemoryCardRequestIndex, fileSelectedSlotIndex, FILE_REQ_SLOT_DELETE_BEFORE_WRITE);
     slSetInfo(4);
-    return fileBeginDetectionRequest((u32)fileScanSlotStates);
+    return fileBeginDetectionRequest(fileScanSlotStates);
 }
 
 s32 fileWriteIconSysComplete(void) {
@@ -2129,7 +2130,7 @@ s32 mcHandleDetectionResult(void) {
         return (s32)slErrorWait;
     }
     slSetInfo(6);
-    return fileBeginDetectionRequest((u32)fileRestartSlotScan);
+    return fileBeginDetectionRequest(fileRestartSlotScan);
 }
 
 s32 slFormatStart(void) {
@@ -2225,7 +2226,7 @@ s32 mcdHandleSaveSetupDone(void) {
             fileRestoreSlotFlagsToState();
         }
         slSetInfo(13);
-        return fileSetMenuCallbackAndClearResult(-1);
+        return fileSetMenuCallbackAndClearResult((FileMenuContinuationCallback)-1);
     }
     sdfMemFreeDirect(fileSaveReadBufferResource);
     slSetInfo(0);
