@@ -335,10 +335,6 @@ void evtAdvanceLongSolarNoiseLayers(SolarNoiseState *state) {
     }
 }
 
-const char D_004221C8[16] = "FREE CAMERA";
-static SolarNoiseDebugData evtSolarNoiseDebugData
-    __attribute__((section(".sdata"))) = {(const char *)0x004221C8, 0, "%s"};
-
 void evtDrawShortSolarNoiseLayers(s32 x, s32 y, s32 z, s32 width, SolarNoiseState *state, s32 context, s32 color) {
     SolarNoiseLayer *layer = state->layers;
     s32 i;
@@ -512,12 +508,3 @@ void evtDrawSolarPointTransitionShapes(s32 unused0, s32 unused1, s32 alpha, s32 
     }
     sdfSubmitGsAlphaOneRegisterPacket(0x44, object);
 }
-
-INCLUDE_RODATA(const s32, "game/code_002437F0", D_004221D8);
-
-INCLUDE_RODATA(const s32, "game/code_002437F0", D_004221E8);
-
-INCLUDE_RODATA(const s32, "game/code_002437F0", D_00422238);
-
-INCLUDE_RODATA(const s32, "game/code_002437F0", D_00422308);
-
