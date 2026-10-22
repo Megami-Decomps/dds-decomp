@@ -10001,4 +10001,6 @@
 0x003BAC28	fldRoomKF2Chunk	inferred	The room's KF2 transfer chunk, whose scene request fldProcessFieldRequestAlternate runs; relocated back on release. DDS2 twin 0x00435FB8.
 0x003BAC2C	fldRoomKF2Data	inferred	The KF2 resource data fldRoomKF2Chunk lies in, its relocation base. DDS2 twin 0x00435FBC.
 0x003BAC30	fldRelocateOnRelease	inferred	Set by fldSetRelocateOnRelease: field teardown relocates the room's remaining transfer chunks back when it is set. DDS2 twin 0x00435FC0.
+0x0037E508	fileJobZeroPadding	inferred	Sixteen zero bytes fileJobWriteSerializedPayload writes to pad a job file's primary buffer to sixteen bytes. DDS2 twin 0x003E9578.
+0x00357FE8	itfSoundSelectorBorderColor	inferred	The sound selector option panel's border colour (DrawColorRec 0x3D, 5, 0, 0x4D), for itfDrawThreePanelBorderBands. DDS2 twin 0x003B49D8.
 0x00325788	kwlnSceneSurfaceSets	inferred	Thirteen sets of four draw surfaces (SdfPoolNode *[13][4]) that kwlnBuildFrameScenePackets stores each frame; a model draws through the set of its pass. DDS2 twin 0x00380788.

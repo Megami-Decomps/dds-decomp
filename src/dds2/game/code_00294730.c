@@ -61,7 +61,7 @@ void mnuDrawTerminalPanelTransition(MenuTerminalContext *object, s32 elapsedFram
 
     effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[32][BRS_ICON_X] * 16,
                   mnuCommonIconPlacements[32][BRS_ICON_Y] * 8, 0, scale, 0,
-                  D_00438FC8->effectSlots[mnuCommonIconPlacements[32][BRS_ICON_TEXTURE]],
+                  mnuCurrentTerminalContext->effectSlots[mnuCommonIconPlacements[32][BRS_ICON_TEXTURE]],
                   mnuCommonIconPlacements[32][BRS_ICON_ID], 0x53);
     mnuDrawAndAdvanceScrollingStrips(0, 0, 0, scale, &object->panelWork[0], 0x53);
     mnuDrawAndAdvanceScrollingStrips(0, 0xCF8, 0, scale, &object->panelWork[1], 0x53);
@@ -76,7 +76,7 @@ void mnuDrawTerminalPanelTransition(MenuTerminalContext *object, s32 elapsedFram
         alpha = 1.0f;
     }
     index = evtSelectGraphicSlotBySpriteType(object);
-    resources = D_00438FC8;
+    resources = mnuCurrentTerminalContext;
     scale = (s32)(alpha * 256.0f);
     effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[index][BRS_ICON_X] * 16,
                   mnuCommonIconPlacements[index][BRS_ICON_Y] * 8, 0, scale, 0,
@@ -107,7 +107,7 @@ void mnuDrawSpriteMenuFadeOut(MenuTerminalContext *object, s32 elapsedFrames) {
 
     effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[32][BRS_ICON_X] * 16,
                   mnuCommonIconPlacements[32][BRS_ICON_Y] * 8, 0, scale, 0,
-                  D_00438FC8->effectSlots[mnuCommonIconPlacements[32][BRS_ICON_TEXTURE]],
+                  mnuCurrentTerminalContext->effectSlots[mnuCommonIconPlacements[32][BRS_ICON_TEXTURE]],
                   mnuCommonIconPlacements[32][BRS_ICON_ID], 0x53);
     mnuDrawAndAdvanceScrollingStrips(0, 0, 0, scale, &object->panelWork[0], 0x53);
     mnuDrawAndAdvanceScrollingStrips(0, 0xCF8, 0, scale, &object->panelWork[1], 0x53);
@@ -122,7 +122,7 @@ void mnuDrawSpriteMenuFadeOut(MenuTerminalContext *object, s32 elapsedFrames) {
     mnuDrawShopCurrencyBalance(object, 0xA09DC300 | (s32)(alpha * 128.0f));
 
     index = evtSelectGraphicSlotBySpriteType(object);
-    resources = D_00438FC8;
+    resources = mnuCurrentTerminalContext;
     scale = (s32)(alpha * 256.0f);
     effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[index][BRS_ICON_X] * 16,
                   mnuCommonIconPlacements[index][BRS_ICON_Y] * 8, 0, scale, 0,
@@ -139,20 +139,20 @@ void mnuDrawShopPanelWithTypeGraphic(s32 x, s32 y, s32 depth, MenuTerminalContex
     u32 index;
 
     effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[32][BRS_ICON_X] * 16, mnuCommonIconPlacements[32][BRS_ICON_Y] * 8,
-                  0, scale, 0, D_00438FC8->effectSlots[mnuCommonIconPlacements[32][BRS_ICON_TEXTURE]],
+                  0, scale, 0, mnuCurrentTerminalContext->effectSlots[mnuCommonIconPlacements[32][BRS_ICON_TEXTURE]],
                   mnuCommonIconPlacements[32][BRS_ICON_ID], option);
     mnuDrawAndAdvanceScrollingStrips(0, 0, 0, scale, &object->panelWork[0], option);
     mnuDrawAndAdvanceScrollingStrips(0, 0xCF8, 0, scale, &object->panelWork[1], option);
     mnuDrawType2PanelEffects(object, scale, option);
     index = evtSelectGraphicSlotBySpriteType(object);
     effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[index][BRS_ICON_X] * 16, mnuCommonIconPlacements[index][BRS_ICON_Y] * 8,
-                  0, scale, 0, D_00438FC8->effectSlots[mnuCommonIconPlacements[index][BRS_ICON_TEXTURE]],
+                  0, scale, 0, mnuCurrentTerminalContext->effectSlots[mnuCommonIconPlacements[index][BRS_ICON_TEXTURE]],
                   mnuCommonIconPlacements[index][BRS_ICON_ID], option);
 }
 
 
 void mnuDrawPulsingMenuIcon(MenuTerminalContext *object, s32 amplitude, s32 drawArg) {
-    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
     s32 alpha;
 
     alpha = (s32)((f32)amplitude * sdfSinPoly((object->pulseFrame / 120.0f) * 6.2831853f));
@@ -167,7 +167,7 @@ void mnuDrawPulsingMenuIcon(MenuTerminalContext *object, s32 amplitude, s32 draw
 INCLUDE_ASM(const s32, "game/code_00294730", mnuDrawTerminalPanelListRows);
 
 void mnuDrawWindowBorderAndScrollBar(s32 x, s32 y, s32 unused, MenuTerminalContext *object, s32 scale, s32 option) {
-    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
     s32 i;
 
     effDrawTextureSlotWithBlendedCornerColors(x + (mnuCommonIconPlacements[57][BRS_ICON_X] << 4),
@@ -198,7 +198,7 @@ extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
  * item kind its power (kind 1) or per-stat bonuses (kind 3), and the count. */
 void mnuDrawTerminalPanelValues(s32 x, s32 y, s32 z, MenuTerminalContext *object, s32 scale,
                                 s32 showFrame, s32 option) {
-    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
     char text[16];
     s32 count;
     u32 color;
@@ -280,7 +280,7 @@ extern char D_00437970[];
 void mnuDrawCampItemListRow(s32 x, s32 y, s32 z, struct MenuList *list,
                             struct MenuListNode *node, s32 mode) {
     MenuTerminalWindowState *context = list->context;
-    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
     s32 headIndex = list->head->index;
     s32 value = node->index;
     s32 row = value - headIndex;
@@ -476,7 +476,7 @@ void mnuDrawListChildrenWithCountdown(s32 x, s32 y, s32 z, u8 *object, s32 drawA
 void mnuDrawListFlagIndicatorsWithFade(s32 x, s32 y, s32 z, s32 unused, u8 *objectData, s32 option) {
     MenuWindowContainer *object = (MenuWindowContainer *)objectData;
     struct MenuList *inner = object->list;
-    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
     MenuTerminalWindowState *state = inner->context;
     s32 fadeMode = state->command.mode;
     s32 flags = inner->flags;
@@ -513,7 +513,7 @@ extern char D_00437978[]; /* "%d" */
 void mnuDrawShopSelectedRowDetails(s32 x, s32 y, s32 depth, MenuTerminalContext *scene, s32 option) {
     char text[16];
     struct MenuList *list = scene->window->list;
-    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
     s32 row;
     s32 firstIndex;
     s32 textOffset;
@@ -547,7 +547,7 @@ void mnuDrawShopSelectedRowDetailsWithAlpha(s32 x, s32 y, s32 depth, MenuTermina
                    u32 alpha, s32 option) {
     char text[16];
     struct MenuList *list = scene->window->list;
-    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
     f32 opacity;
     s32 row;
     s32 firstIndex;
@@ -589,7 +589,7 @@ void mnuDrawShopSelectedRowDetailsWithAlpha(s32 x, s32 y, s32 depth, MenuTermina
 
 
 void mnuDrawShopLimitArrows(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 option) {
-    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
     s32 firstIndex = panel->window->list->head->index;
     s32 row = panel->window->list->cursor->index - firstIndex;
 
@@ -606,7 +606,7 @@ void mnuDrawShopLimitArrows(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32
 }
 
 void mnuDrawShopLimitArrowsScaled(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 scale, s32 option) {
-    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
     s32 firstIndex = panel->window->list->head->index;
     s32 row = panel->window->list->cursor->index - firstIndex;
 
@@ -626,7 +626,7 @@ extern char D_00437980[];
 
 void mnuDrawShopPricePlaceholder(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 option) {
     char text[16];
-    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
     MenuWindowContainer *object = panel->window;
     struct MenuList *inner;
     struct FrFontGlyph *glyph;
@@ -649,7 +649,7 @@ void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 optio
     effDrawTextureSlotWithBlendedCornerColors(
         x + mnuCommonIconPlacements[26][BRS_ICON_X] * 16,
         y + mnuCommonIconPlacements[26][BRS_ICON_Y] * 8,
-        z, scale, 0, D_00438FC8->effectSlots[0],
+        z, scale, 0, mnuCurrentTerminalContext->effectSlots[0],
         mnuCommonIconPlacements[26][BRS_ICON_ID], option
     );
 }
@@ -661,7 +661,7 @@ void mnuDrawShopZeroValueIconAndText(s32 x, s32 y, s32 z, s32 unused, s32 scale,
     effDrawTextureSlotWithBlendedCornerColors(
         x + mnuCommonIconPlacements[25][BRS_ICON_X] * 16,
         y + mnuCommonIconPlacements[25][BRS_ICON_Y] * 8,
-        z, scale, 0, D_00438FC8->effectSlots[0],
+        z, scale, 0, mnuCurrentTerminalContext->effectSlots[0],
         mnuCommonIconPlacements[25][BRS_ICON_ID], option
     );
     value = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
@@ -674,7 +674,7 @@ void mnuDrawShopZeroValueIconAndText(s32 x, s32 y, s32 z, s32 unused, s32 scale,
 
 void mnuDrawShopSelectedRowTotal(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 option) {
     char text[16];
-    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
+    struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
     MenuWindowContainer *object = panel->window;
     struct MenuList *inner;
     struct FrFontGlyph *glyph;

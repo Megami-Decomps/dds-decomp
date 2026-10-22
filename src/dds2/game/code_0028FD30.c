@@ -2012,7 +2012,7 @@ void mnuStorePanelEntry(s32 soundHandle, s32 framesRemaining) {
 }
 
 void mnuSetCurrentTerminalContext(MenuTerminalContext *value) {
-    D_00438FC8 = value;
+    mnuCurrentTerminalContext = value;
 }
 INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437950);
 

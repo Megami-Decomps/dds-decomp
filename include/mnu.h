@@ -788,7 +788,7 @@ typedef char MenuTerminalContext_campEffect_offset[((u32)&((MenuTerminalContext 
 typedef char MenuTerminalContext_windowResource_offset[
     ((u32)&((MenuTerminalContext *)0)->windowResource == 0x378) ? 1 : -1];
 
-extern MenuTerminalContext *D_00438FC8;
+extern MenuTerminalContext *mnuCurrentTerminalContext;
 void func_0025FD78(MenuTerminalContext *scene);
 
 
@@ -905,7 +905,7 @@ typedef struct MenuStaffContext {
     u8 pad04[4];
     MenuPopupState transitionWork; /* +0x08: native saved-entry transition state */
     s32 popupState;       /* 0x54 */
-    u8 pad58[4];
+    s32 panelsBuilt;      /* 0x58: set once its resources have loaded and its panels are built */
     struct EffectList *menuResource; /* 0x5C: request list for all title resources. */
     StaffSlots resources; /* 0x60..0xC3: two base resources and the staff sprite banks. */
     struct EffectSlotSet *titleFrames[2]; /* 0xC4 and 0xC8 */

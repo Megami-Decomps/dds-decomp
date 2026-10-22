@@ -257,8 +257,8 @@ typedef struct ItfMesBlk40 {
     s16 selectedIndex;
     s16 savedIndex;
     s16 rowCount;
-    s32 unk18;
-    s32 unk1C;
+    s32 widestRowX;     /* the widest row's x, which the option panel's highlight spans from */
+    s32 widestRowWidth; /* the widest row's width */
     s16 glyphColorIntensity;
     s16 optionCount;
     ItfMesOption options[15];

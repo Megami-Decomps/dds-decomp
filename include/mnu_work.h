@@ -453,7 +453,7 @@ void mnuSetRuntimeRecordPairCallback(MenuRuntimePairCallback callback);
 
 void mnuCreateShootingEntryObject(MenuWorkEntry *, struct MnuShootingWork *);
 void func_00319388(MenuWorkEntry *, struct MnuShootingWork *);
-void func_00319A58(MenuWorkEntry *, struct MnuShootingWork *);
+void mnuPlaceShootingEntryObject(MenuWorkEntry *, struct MnuShootingWork *);
 void mnuApplyPlayerRuntimeRecordFeedback(MenuRuntimeRecord *);
 void mnuApplyShootingRuntimeRecordEvent(MenuRuntimeRecord *, MenuWorkEntry *, struct MnuShootingWork *);
 void mnuAdvanceShootingProgressFromRecord(MenuRuntimeRecord *, MenuRuntimeRecord *, struct MnuShootingWork *);

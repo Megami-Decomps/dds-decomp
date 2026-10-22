@@ -17,7 +17,7 @@ typedef struct StaffMenuWork {
     u8 pad04[4];
     MenuPopupState panel;
     s32 pendingPopupEntry;
-    u8 pad58[4];
+    s32 panelsBuilt; /* set once its resources have loaded and its panels are built */
     struct EffectList *resourceQueue;
     StaffSlots staffSlots;
     struct EffectSlotSet *categoryPair[2];
