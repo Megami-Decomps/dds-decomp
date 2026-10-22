@@ -614,16 +614,16 @@ s32 btlPollBattleResourceCleanup(BtlUnit *self) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     BtlUnit *actor;
     for (actor = scene->units; actor != 0; actor = actor->nextActor) {
-        if (actor->node318 != 0) {
-            if (sndIsResourceNodeReferencedOrActive(actor->node318) != 0) {
+        if (actor->resourceNode != 0) {
+            if (sndIsResourceNodeReferencedOrActive(actor->resourceNode) != 0) {
                 if (actor == self) {
                     return 0;
                 }
-                sndGetResourceStatus(actor->node318);
+                sndGetResourceStatus(actor->resourceNode);
                 return 0;
             }
-            sndFreeResourceNode(actor->node318);
-            actor->node318 = 0;
+            sndFreeResourceNode(actor->resourceNode);
+            actor->resourceNode = 0;
         }
     }
     if (self->listNode != 0) {
@@ -653,12 +653,12 @@ s32 btlPollBattleResourceCleanup(BtlUnit *self) {
 }
 
 s32 btlPollActorResourceCleanup(BtlUnit *actor) {
-    if (actor->node318 != 0) {
-        if (sndIsResourceNodeReferencedOrActive(actor->node318) != 0) {
+    if (actor->resourceNode != 0) {
+        if (sndIsResourceNodeReferencedOrActive(actor->resourceNode) != 0) {
             return 0;
         }
-        sndFreeResourceNode(actor->node318);
-        actor->node318 = 0;
+        sndFreeResourceNode(actor->resourceNode);
+        actor->resourceNode = 0;
     }
     if (actor->listNode != 0) {
         if (sndHasResourceFlagsOneOrEight(actor->listNode) != 0) {
@@ -709,12 +709,12 @@ void btlReleaseIdleUnitSoundAndAdvanceTask(ActionStateLink *task) {
 
     runtime = (BtlState *)btlGetRuntime();
     unit = task->unit;
-    resource = unit->node318;
+    resource = unit->resourceNode;
     task->pendingFlags &= ~0x100;
     if (resource != 0) {
         if (sndIsResourceNodeReferencedOrActive(resource) == 0) {
-            sndFreeResourceNode(unit->node318);
-            unit->node318 = 0;
+            sndFreeResourceNode(unit->resourceNode);
+            unit->resourceNode = 0;
         }
     }
     flags = unit->status.flags;
@@ -753,9 +753,9 @@ void btlUnitStateSelectAfterAction(u8 *task) {
     if (!(((BtlUnit *)unit)->status.flags & 0x20)) {
         ((ActionStateLink *)task)->pendingFlags &= ~0x100;
     }
-    if (((BtlUnit *)unit)->node318 != 0 && sndIsResourceNodeReferencedOrActive((s32)((BtlUnit *)unit)->node318) == 0) {
-        sndFreeResourceNode(((BtlUnit *)unit)->node318);
-        ((BtlUnit *)unit)->node318 = 0;
+    if (((BtlUnit *)unit)->resourceNode != 0 && sndIsResourceNodeReferencedOrActive((s32)((BtlUnit *)unit)->resourceNode) == 0) {
+        sndFreeResourceNode(((BtlUnit *)unit)->resourceNode);
+        ((BtlUnit *)unit)->resourceNode = 0;
     }
     flags = ((BtlUnit *)unit)->status.flags;
     if (flags & 0x20000000) {
@@ -1534,7 +1534,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
     btlBossDebugPrintf(D_00417348, groupDelay);
     if ((action->unit->status.flags & 0x200) != 0 &&
             (((action->unit->status.flags & 0x1000) == 0 && (action->unit->partyRecord.flags & 0x10) == 0) || action->indexWork.slot == 0x17)) {
-        resource = action->unit->node318 = sndCreateResourceNode((struct SoundMixer *)action->unit->gunResource);
+        resource = action->unit->resourceNode = sndCreateResourceNode((struct SoundMixer *)action->unit->gunResource);
         if ((action->unit->status.flags & 0x1000) == 0 && (action->unit->partyRecord.flags & 0x10) == 0) resourceNormal = 1;
         else resourceTimed = 1;
     }
@@ -2125,8 +2125,8 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
         }
     }
     btlFormatActionEventFilename(skill, resourceName);
-    unit->node318 = sndAllocResourceNode();
-    task = sndCreateEffectLoadTask(unit->node318, resourceName);
+    unit->resourceNode = sndAllocResourceNode();
+    task = sndCreateEffectLoadTask(unit->resourceNode, resourceName);
     task->startCondition.kind = 4;
     task->startDelay = maxFrames > 0 ? maxFrames - 1 : 0;
     task->startCondition.value.handle = soundHandle;
@@ -2188,7 +2188,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
                 btlStartTask(task);
             }
             if ((group->reflected == 0 || reflectedStarted == 0) && mode != 1) {
-                groupTask = sndCreateEffectWithTargets(unit->node318, actors[0], (s32)actors[1], (s32)actors[2], effectTarget, 2);
+                groupTask = sndCreateEffectWithTargets(unit->resourceNode, actors[0], (s32)actors[1], (s32)actors[2], effectTarget, 2);
                 groupTask->startCondition.kind = 7;
                 groupTask->startCondition.value.handle = masterOwner;
                 groupTask->startDelay = groupDelay;
@@ -2222,7 +2222,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
                     categoryKind = group->kind;
                     extraKind = group->parameter;
                 }
-                operandTask = sndCreateTimedUnitEffectTask(unit->node318, currentTarget, 2, (u32)(mode - 3) < 2 ? -1 : selection, 0);
+                operandTask = sndCreateTimedUnitEffectTask(unit->resourceNode, currentTarget, 2, (u32)(mode - 3) < 2 ? -1 : selection, 0);
                 operandTask->startCondition.kind = 5;
                 operandTask->startDelay = operandDelay;
                 operandTask->startCondition.value.handle = groupTask->handle;
@@ -2426,7 +2426,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
             groupDelay += actionFrames;
         }
         if (mode != 1) {
-            groupTask = sndCreateEffectWithTargets(unit->node318, actors[0], (s32)actors[1], (s32)actors[2], effectTarget, 1);
+            groupTask = sndCreateEffectWithTargets(unit->resourceNode, actors[0], (s32)actors[1], (s32)actors[2], effectTarget, 1);
             groupTask->startCondition.kind = 7;
             groupTask->startCondition.value.handle = masterOwner;
             groupTask->endCondition.kind = 7;

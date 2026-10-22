@@ -8585,7 +8585,7 @@ s32 sndIsResourceNodeReferencedOrActive(SoundResourceNode *effect) {
 s32 sndHasActiveActor(void) {
     BtlUnit *unit;
     for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
-        if (unit->node318 != 0 && sndIsResourceNodeReferencedOrActive(unit->node318) != 0) {
+        if (unit->resourceNode != 0 && sndIsResourceNodeReferencedOrActive(unit->resourceNode) != 0) {
             return 1;
         }
     }
