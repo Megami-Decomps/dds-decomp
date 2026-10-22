@@ -158,11 +158,7 @@ extern EffEditorRow D_003FFF58[];
 
 extern EffEditorRow D_003FFE98[];
 
-typedef struct EffectAssetLink {
-    u8 *asset;
-    void *object;
-    u8 pad_08[0x14];
-} EffectAssetLink;
+#include "effect_asset_link.h"
 
 extern void camFollowOffsetVec(u8 *, void *);
 
@@ -17902,4 +17898,3 @@ INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438850);
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438858);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438860);
-

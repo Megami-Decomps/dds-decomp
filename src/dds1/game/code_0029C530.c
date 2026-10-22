@@ -10770,11 +10770,7 @@ u32 effPollAttachedFile(void) {
     return result;
 }
 
-typedef struct EffectAssetLink {
-    u8 *asset;
-    void *object;
-    u8 pad_08[0x14];
-} EffectAssetLink;
+#include "effect_asset_link.h"
 
 extern EffectAssetLink *D_0038E9D8[22];
 
@@ -14217,4 +14213,3 @@ INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BD200);
 INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BD208);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BD210);
-
