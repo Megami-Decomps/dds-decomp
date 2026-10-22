@@ -6,14 +6,14 @@
 struct dds3Basic_t;
 extern struct dds3Basic_t *dds3AddCameraObjectBasicTypeLookAt(s32 value, void *targetPosition, u128 *worldEye, u128 *localUp);
 extern void dds3CameraObjectBasicGetCameraTM(struct dds3Basic_t *camera, u128 *worldEye);
-extern void dds3GetRadiusPoseSet(s32 object, f32 value);
+extern void dds3GetRadiusPoseSet(struct dds3Basic_t *object, f32 value);
 #include "dds3_world_secondary.h"
 extern void dds3SetScreenFovy(f32 fieldOfView);
 extern u8 D_0040ABC0[];
 extern u8 D_0040ABB0[];
 extern u8 D_0040ABD0[];
 extern u8 D_00438938[];
-extern s32 D_00438944;
+extern struct dds3Basic_t *D_00438944;
 extern f32 D_00435A7C;
 
 
@@ -163,11 +163,11 @@ void AddCamera(void) {
     u128 *worldEye = (u128 *)D_0040ABD0;
 
     camera = dds3AddCameraObjectBasicTypeLookAt(dds3AllocObjectId(), D_0040ABC0, worldEye, (u128 *)D_0040ABB0);
-    D_00438944 = (s32)camera;
+    D_00438944 = camera;
     dds3SetUnitObjectId(camera, (u32)D_00438938);
-    dds3CameraObjectBasicGetCameraTM((struct dds3Basic_t *)D_00438944, worldEye);
+    dds3CameraObjectBasicGetCameraTM(D_00438944, worldEye);
     dds3GetRadiusPoseSet(D_00438944, 2.0f);
     world = dds3GetControlScene();
-    dds3SetActiveCameraSceneBasic((struct dds3Basic_t *)world, (struct dds3Basic_t *)D_00438944);
+    dds3SetActiveCameraSceneBasic((struct dds3Basic_t *)world, D_00438944);
     dds3SetScreenFovy(0.6283184886f);
 }

@@ -26,6 +26,7 @@
 #include "btl.h"
 #include "dds3_world_selection.h"
 #include "evt_action_object.h"
+struct dds3Basic_t;
 /* Declared before first use (were implicit int). */
 extern void fldProcNextJump(void);
 extern void mnuClearInactiveSoundBufferState(void);
@@ -1640,9 +1641,8 @@ INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438938);
 
 INCLUDE_SDATA(const s32, "game/code_00316E08", dds3SoundSlotPool);
 
-INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438944);
+INCLUDE_SDATA(struct dds3Basic_t * const, "game/code_00316E08", D_00438944);
 
 INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438948);
 
 INCLUDE_SDATA(const s32, "game/code_00316E08", D_0043894C);
-
