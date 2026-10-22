@@ -436,7 +436,7 @@ extern u32 gFldFileResetMode;
 
 extern u32 rsetFrameMaskOtOffset;
 
-extern s32 fldDrwZBuf;
+extern void *fldDrwZBuf;
 
 extern u32 D_00436088;
 
@@ -2980,13 +2980,13 @@ void fldDraw2DBar(s32 x, s32 y, s32 width, s32 height) {
 
 void fldDrwZAlloc(void) {
     if (fldDrwZBuf == 0) {
-        fldDrwZBuf = (s32)(u32)sdfAllocAuto(0x70000);
+        fldDrwZBuf = sdfAllocAuto(0x70000);
     }
 }
 
 void fldDrwZFree(void) {
     if (fldDrwZBuf != 0) {
-        sdfFreeAutoDelayed((void *)(u32)fldDrwZBuf);
+        sdfFreeAutoDelayed(fldDrwZBuf);
         fldDrwZBuf = 0;
     }
 }
@@ -2996,7 +2996,7 @@ void fldDrwZSave(void) {
         sdfDrawTag_t *packet = sdfPrimAllocDrawTag(0);
         SdfPoolNode *descriptor;
         sdfLinkStoreImage(packet, D_0040B290.buffers[2],
-                                0, 0, 0x200, 0xE0, fldDrwZBuf, 0, 0, 0);
+                                0, 0, 0x200, 0xE0, (s32)(u32)fldDrwZBuf, 0, 0, 0);
         descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
         descriptor->append(descriptor, packet);
     }
@@ -3007,7 +3007,7 @@ void fldDrwZLoad(void) {
         sdfDrawTag_t *packet = sdfPrimAllocDrawTag(0);
         SdfPoolNode *descriptor;
         sdfLinkLoadImage(packet, D_0040B290.buffers[2],
-                                  0, 0, 0x200, 0xE0, fldDrwZBuf, 0);
+                                  0, 0, 0x200, 0xE0, (s32)(u32)fldDrwZBuf, 0);
         descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
         descriptor->append(descriptor, packet);
     }
@@ -5926,7 +5926,7 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", rsetFrameMaskOtOffset);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00436064);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldDrwZBuf);
+INCLUDE_SDATA(void * const, "field/fldFileResolver", fldDrwZBuf);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00436070);
 
