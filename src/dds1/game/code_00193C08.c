@@ -2,6 +2,8 @@
 #include "common.h"
 #include "fr_font_text_slots.h"
 #include "sdf.h"
+#include "sdf_packet_alloc.h"
+#include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "itf.h"
 #include "itf_mem_node.h"
@@ -99,7 +101,80 @@ void frFontBuildGsSetupPacket(FrFontGsPacket *packet) {
     packet->writes[5].reg = 0x47;
 }
 
-INCLUDE_ASM(const s32, "game/code_00193C08", frFontDrawAtlasGlyph);
+/* This allocation owns one 0x90-byte DMA/GIF sprite packet. The command
+ * header is emitted as 32-bit words and the GS payload as 64-bit fields;
+ * both are direct views of the same newly reserved packet storage.
+ */
+typedef union FrFontSpritePacketView {
+    FrFontSpritePacket sprite;
+    u32 words[36];
+} FrFontSpritePacketView;
+
+typedef char FrFontSpritePacketViewSizeCheck[
+    sizeof(FrFontSpritePacketView) == 0x90 ? 1 : -1];
+typedef char FrFontSpritePacketViewLayoutCheck[
+    ((u32)&((FrFontSpritePacketView *)0)->sprite.setupTag == 0x10 &&
+     (u32)&((FrFontSpritePacketView *)0)->sprite.tex0 == 0x20 &&
+     (u32)&((FrFontSpritePacketView *)0)->sprite.corners == 0x60) ? 1 : -1];
+
+extern u32 D_003D6DF8[];
+extern SdfPoolNode kwlnDrawSurfaces[];
+
+/* Build and submit an atlas glyph sprite, preserving the two-corner UV order. */
+void frFontDrawAtlasGlyph(s32 x, s32 y, s32 width, s32 height, u8 style,
+    u32 color, u32 depth, s32 filtered, const FrFontUvRect *uv,
+    const FrFontAtlas *atlas, s32 surface) {
+    FrFontSpritePacketView *packet;
+    SdfListHead *list;
+    SdfPoolNode *drawSurface;
+    u32 reversedColor;
+    s32 right, bottom;
+    u64 rgbaq;
+    u64 z;
+    u64 texBase, texWidth, texBuffer, texHeight;
+
+    reversedColor = frFontReverseWordBytes(color);
+    packet = (FrFontSpritePacketView *)sdfAllocPacketAligned(sizeof(FrFontSpritePacketView));
+    packet->words[0] = 0x70000008;
+    packet->words[3] = 0x50000008;
+    packet->sprite.tex1.value = ((u64)filtered << 5) | ((u64)filtered << 6);
+    packet->sprite.setupTag = 0x10AF400000000003ULL;
+    packet->sprite.setupRegisters = 0xE;
+    packet->sprite.tex1.reg = 0x14;
+    packet->words[1] = 0;
+    packet->words[2] = 0;
+    x += 0x7000;
+    width <<= 4;
+    y += 0x7900;
+    height <<= 4;
+    right = x + width;
+    bottom = y + height;
+    texBase = atlas->bufferBase | 0x8000000000000000ULL;
+    texWidth = ((u64)atlas->widthExponent << 26) | 0x400000000ULL;
+    texBuffer = ((u64)atlas->bufferWidth << 14) | 0x1400000;
+    texHeight = ((u64)atlas->heightExponent << 30) | ((u64)D_003D6DF8[style] << 37);
+    texBase |= texWidth;
+    texBuffer |= texHeight;
+    packet->sprite.tex0.reg = 6;
+    packet->sprite.clamp.reg = 8;
+    packet->sprite.spriteTag = 0x3400000000008002ULL;
+    packet->sprite.spriteRegisters = 0x413;
+    packet->sprite.tex0.value = texBase | texBuffer;
+    packet->sprite.clamp.value = 0;
+    rgbaq = reversedColor | 0x3F80000000000000ULL;
+    z = (u64)depth << 32;
+    packet->sprite.corners[0].uv = (uv->v1 << 16) | uv->u1;
+    packet->sprite.corners[0].rgbaq = rgbaq;
+    packet->sprite.corners[0].xyz = (u32)((right & 0xFFFF) | (bottom << 16)) | z;
+    packet->sprite.corners[1].uv = (uv->v0 << 16) | uv->u0;
+    packet->sprite.corners[1].rgbaq = rgbaq;
+    packet->sprite.corners[1].xyz = (u32)((x & 0xFFFF) | (y << 16)) | z;
+    list = (SdfListHead *)sdfAllocPacketAligned(sizeof(SdfListHead));
+    sdfInitPacketList(list);
+    sdfAppendPacket(list, (u32)packet);
+    drawSurface = &kwlnDrawSurfaces[surface];
+    drawSurface->append(drawSurface, list);
+}
 
 
 /* Submit glyph-relative coordinates and the cache node's owned UV rectangle. */
@@ -306,3 +381,4 @@ void frFontFreeEntry(s32 slotId) {
     }
     entry->slots = NULL;
 }
+
