@@ -377,7 +377,7 @@ void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
     }
 }
 
-extern s32 D_003BB2E0;
+extern struct sdfMemHandle_t *D_003BB2E0;
 
 extern u16 dds3VblanksPerFrame;
 
@@ -447,8 +447,8 @@ extern void btlInitializeRuntimeNoOp(void);
 /* Allocate/reset battle work, initialize windows and queue shared resources. */
 void btlInitializeBattleRuntime(void) {
     btlResetRuntimeSequenceCounter();
-    D_003BB2E0 = (u32)sdfMemAllocDirect(0xE10);
-    btlRuntime = (BtlState *)sdfMemLock((struct sdfMemHandle_t *)(D_003BB2E0));
+    D_003BB2E0 = sdfMemAllocDirect(0xE10);
+    btlRuntime = (BtlState *)sdfMemLock(D_003BB2E0);
     memset(btlRuntime, 0, 0xE10);
 
     ((BattleInitState *)btlRuntime)->tick = 0;
@@ -567,8 +567,8 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     effResetSlots();
     evtDisableMoonDraw();
     itfMesClearFlags(1);
-    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(D_003BB2E0));
-    D_003BB2E0 = 0;
+    sdfMemFreeDirect(D_003BB2E0);
+    D_003BB2E0 = NULL;
     btlRuntime = NULL;
     btlBossDebugPrintf("** btlExit ***************\n");
     return 0;
