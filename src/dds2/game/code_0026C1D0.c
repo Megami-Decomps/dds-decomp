@@ -206,15 +206,12 @@ void shuffleIndices(u8 *buffer, u32 length, s32 swapCount) {
 
 /* Store the resource handle in word zero and the loader's data address in word one. */
 void evtLoadResourcePair(u32 resourceId, EvtResourcePair *record) {
-    u32 handle;
-
-    handle = (u32)sdfDevLoadFileEx((const char *)(u32)resourceId, &record->dataAddress, 0);
-    record->handle = handle;
+    record->handle = sdfDevLoadFileEx((const char *)(u32)resourceId, &record->dataAddress, 0);
 }
 
 /* Release the handle without clearing either word of the caller's record. */
 void evtReleaseResourcePairHandle(EvtResourcePair *record) {
-    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(record->handle));
+    sdfMemFreeDirect(record->handle);
 }
 
 struct ItfMesSub;
