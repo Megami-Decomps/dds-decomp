@@ -31,6 +31,7 @@
 #include "pcp_vu0.h"
 #include "mnu.h"
 #include "mnu_panel_state.h"
+#include "mnu_panel_state_prefix.h"
 #include "mnu_staff.h"
 #include "eff.h"
 #include "mnu_shop.h"
@@ -321,12 +322,7 @@ void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth, MenuPageWindow *menu, s32 
 
 
 typedef struct MenuPanelState {
-    u8 pad00[0xC];
-    s32 width;
-    s32 height;
-    u32 state; /* 0x14 */
-    u32 firstValueA; /* 0x18 */
-    u32 firstValueB; /* 0x1C */
+    MenuPanelStatePrefix common;
     MenuGridSlot firstSlot; /* 0x20 */
     u32 secondValueA; /* 0x28 */
     u32 secondValueB; /* 0x2C */
@@ -349,8 +345,8 @@ typedef char MenuPanelStateResourceHandleOffsetCheck[((u32)&((MenuPanelState *)0
 MenuPanelState *mnuCreatePanelState(s32 width, s32 height) {
     MenuPanelState *panel = sdfChipAllocDirect(sizeof(MenuPanelState));
     memset(panel, 0, MNU_PANEL_STATE_BYTES);
-    panel->width = width;
-    panel->height = height;
+    panel->common.width = width;
+    panel->common.height = height;
     return panel;
 }
 
@@ -366,8 +362,8 @@ void mnuDestroyPanelState(MenuPanelState *panel) {
 
 void mnuSetPanelFirstGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB,
                                EffectSlotSet *resource, u32 index) {
-    panel->firstValueA = valueA;
-    panel->firstValueB = valueB;
+    panel->common.firstValueA = valueA;
+    panel->common.firstValueB = valueB;
     itfGridStorePosition(&panel->firstSlot, resource, index);
 }
 
@@ -399,7 +395,7 @@ void mnuSetPanelFourthGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB,
 }
 
 void mnuSetPanelState(MenuPanelState *panel, u32 state) {
-    panel->state = state;
+    panel->common.state = state;
 }
 
 /* Paired sprites derive from their row; see docs/idioms.md,
@@ -421,9 +417,9 @@ void mnuDrawPanelState(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawA
     offsetY = panel->fourthValueB;
     rowSet = panel->fourthSlot.set;
     if (panel->fourthValueC == 0) {
-        slot = panel->fourthSlot.index + panel->state * 2;
+        slot = panel->fourthSlot.index + panel->common.state * 2;
     } else {
-        slot = ((s32 *)panel->fourthValueC)[panel->state];
+        slot = ((s32 *)panel->fourthValueC)[panel->common.state];
     }
     i = 0;
     itfDrawGridWithResolvedSlot(x + rowX, y + offsetY, depth, 1,
@@ -432,9 +428,9 @@ void mnuDrawPanelState(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawA
     offsetY = panel->thirdValueB;
     rowSet = panel->thirdSlot.set;
     slot = panel->thirdSlot.index;
-    if (panel->width > 0) {
+    if (panel->common.width > 0) {
         do {
-            if (panel->state != i) {
+            if (panel->common.state != i) {
                 itfDrawGridWithResolvedSlot(x + rowX, y + offsetY, depth, 1,
                                            rowSet, slot + i * 2, drawArg);
             } else {
@@ -447,8 +443,8 @@ void mnuDrawPanelState(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawA
                                            rowSet, slot + i * 2 + 1, drawArg);
             }
             i++;
-            rowX += panel->height;
-        } while (i < panel->width);
+            rowX += panel->common.height;
+        } while (i < panel->common.width);
     }
     mnuDrawIconPanelDefaultFlag(x, y, depth, 0x100, panel->resourceHandle, drawArg);
     mnuUpdateWindowPanelHandleStates(panel->resourceHandle);

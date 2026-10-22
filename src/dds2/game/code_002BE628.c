@@ -36,6 +36,7 @@
 #include "mnu_shop.h"
 #include "mnu_list.h"
 #include "mnu_panel_state.h"
+#include "mnu_panel_state_prefix.h"
 #include "mnu_staff.h"
 #include "mdl.h"
 #include "mdl_asset_request.h"
@@ -991,12 +992,7 @@ void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth, MenuPageWindow *window, s3
 
 
 typedef struct MenuPanelState {
-    u8 pad00[0xC];
-    s32 width;
-    s32 height;
-    u32 state; /* 0x14 */
-    u32 firstValueA; /* 0x18 */
-    u32 firstValueB; /* 0x1C */
+    MenuPanelStatePrefix common;
     MenuGridSlot backgroundSlot; /* 0x20 */
     s32 corners[5][2]; /* 0x28 */
     MenuGridSlot selectedCenterSlot; /* 0x50 */
@@ -1020,8 +1016,8 @@ MenuPanelState *mnuCreatePanelState(s32 width, s32 height) {
     MenuPanelState *panel = (MenuPanelState *)sdfChipAllocDirect(MNU_PANEL_STATE_BYTES);
 
     memset(panel, 0, MNU_PANEL_STATE_BYTES);
-    panel->width = width;
-    panel->height = height;
+    panel->common.width = width;
+    panel->common.height = height;
     return panel;
 }
 
@@ -1037,8 +1033,8 @@ void mnuDestroyPanelState(MenuPanelState *panel) {
 
 void mnuSetPanelFirstGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,
                                     s32 resourceIndex) {
-    panel->firstValueA = valueA;
-    panel->firstValueB = valueB;
+    panel->common.firstValueA = valueA;
+    panel->common.firstValueB = valueB;
     itfGridStorePosition(&panel->backgroundSlot, resource, resourceIndex);
 }
 
@@ -1077,7 +1073,7 @@ void mnuSetPanelThirdGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB, Eff
 }
 
 void mnuSetPanelState(MenuPanelState *panel, u32 state) {
-    panel->state = state;
+    panel->common.state = state;
 }
 
 extern void mnuDrawIconState(u32, u32, u32, u32, struct MenuIconState *, u32, u32);
@@ -1099,15 +1095,15 @@ void mnuDrawPanelState(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawA
     rowY = panel->thirdValueB;
     itfDrawGridWithResolvedSlot(x + rowX, y + rowY,
                                 depth, 1, panel->headingSlot.set,
-                                panel->headingIndices[panel->state], drawArg);
+                                panel->headingIndices[panel->common.state], drawArg);
     rowX = panel->secondValueA;
     rowY = panel->secondValueB;
     rowSet = panel->rowSlot.set;
     rowIndex = panel->rowSlot.index;
     {
         s32 index;
-        for (index = 0; index < panel->width; index++) {
-            if (panel->state == index) {
+        for (index = 0; index < panel->common.width; index++) {
+            if (panel->common.state == index) {
                 for (corner = 1; corner < 5; corner++) {
                     itfDrawGridWithResolvedSlot(x + panel->corners[corner][0] + index * 0x2C0,
                                                 y + panel->corners[corner][1], depth, 1,
@@ -1121,7 +1117,7 @@ void mnuDrawPanelState(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawA
                 itfDrawGridWithResolvedSlot(x + rowX, y + rowY, depth, 1,
                                             rowSet, rowIndex + index, drawArg);
             }
-            rowX += panel->height;
+            rowX += panel->common.height;
         }
     }
     mnuDrawIconState(x, y, depth, 0x100, panel->resourceHandle, 0, drawArg);
