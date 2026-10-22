@@ -8059,6 +8059,7 @@ ptyPresetSkillSlots = 0x00393AE0;
 ptyPresetPoolSkills = 0x00393AF0;
 frFontColoredGlyphResource = 0x00394680;
 sdfPacketResourceEntries = 0x003980E8;
+sdfConsComposedMatrix = 0x00398470; // type:f32 size:0x40
 sdfPadButtonMasks = 0x00398600;
 sdfPadActuatorAlignment = 0x00398620;
 sdfPadButtonStates = 0x00398628;

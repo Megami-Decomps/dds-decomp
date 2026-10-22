@@ -35,7 +35,7 @@ enum {
     SDF_POOL_PUSH_FREE = 1
 };
 
-extern u8 D_0040B620[];
+extern u8 sdfConsComposedMatrix[];
 
 
 
@@ -399,13 +399,13 @@ SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s3
 
 /* vu0 routine: render line pairs using the cached composed matrix. */
 SdfPacket *effDebugDrawWireModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
-    VU0_LOAD_MATRIX(D_0040B620);
+    VU0_LOAD_MATRIX(sdfConsComposedMatrix);
     return sdfDrawModelWithMatrix(vertices, colors, vertexCount, primitiveFlags);
 }
 
 /* vu0 routine: compose the current matrix with the cached transform, then render line pairs. */
 SdfPacket *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
-    sdfPostmultiplyVuMatrixFromMemory(D_0040B620);
+    sdfPostmultiplyVuMatrixFromMemory(sdfConsComposedMatrix);
     return sdfDrawModelWithMatrix(vertices, colors, vertexCount, primitiveFlags);
 }
 
