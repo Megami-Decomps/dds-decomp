@@ -8090,25 +8090,25 @@ s32 btlSelectDisabledCommand(BtlUnit *battler) {
 
 void btlTrackSpecialEnemyCommandRestrictionByTurn(BtlUnit *unit, BtlOperandEntry *command) {
     BtlState *battle;
-    s32 *effect;
+    s32 *turnCount;
 
     if ((unit->status.flags & 0x400) == 0) {
         return;
     }
     battle = btlGetRuntime();
-    effect = (s32 *)battle->effect;
+    turnCount = &battle->effect->turnCount;
     if (unit->partyRecord.unitId != 0x118) {
         return;
     }
     if (command->flags & 0x10) {
         unit->partyRecord.flags |= 0x2000;
-        *effect = battle->turnCount;
+        *turnCount = battle->turnCount;
     }
     /* Retail reloads the flag word here on both paths. A second load with a
      * different alias set keeps GCSE from merging it with the 0x10 test. */
     if ((u32)*(void **)&command->flags & 0x100) {
         if (command->hpDelta < 0 || command->mpDelta < 0 || command->addedStatus != 0) {
-            if (*effect != battle->turnCount) {
+            if (*turnCount != battle->turnCount) {
                 unit->partyRecord.flags &= ~0x2000;
             }
         }
