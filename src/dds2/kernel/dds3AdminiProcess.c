@@ -40,7 +40,7 @@ void dds3AdminiCallSequence(s32 requestedMode, void *requestData, u32 dataBytes,
 
     if (requestData == NULL || dataBytes <= DDS3_ADMIN_REQUEST_DATA_MAX_BYTES) {
         work = GetAdminiProcessData();
-        previousRequestData = work->requestData;
+        previousRequestData = work->ownedRequestData;
         work->requestedMode = requestedMode;
         flags = work->flags;
         flags |= DDS3_ADMIN_REQUEST_PENDING_BIT;
@@ -50,15 +50,15 @@ void dds3AdminiCallSequence(s32 requestedMode, void *requestData, u32 dataBytes,
         work->modeTransitionDelay = DDS3_ADMIN_REQUEST_DELAY;
         if (previousRequestData != NULL) {
             sdfChipFreeDirect(previousRequestData);
-            work->requestData = NULL;
+            work->ownedRequestData = NULL;
             work->requestSizeLowByte = 0;
         }
         if (requestData != NULL) {
-            work->requestData = sdfChipAllocDirect(dataBytes);
-            memcpy(work->requestData, requestData, dataBytes);
+            work->ownedRequestData = sdfChipAllocDirect(dataBytes);
+            memcpy(work->ownedRequestData, requestData, dataBytes);
             work->requestSizeLowByte = dataBytes;
         } else {
-            work->requestData = NULL;
+            work->ownedRequestData = NULL;
             work->requestSizeLowByte = 0;
         }
         if (markHistory != 0) {
@@ -156,7 +156,7 @@ s32 dds3AdminActivateRequestedMode(dds3ProcessID_t *task) {
         work->unsignedHistory[work->historyIndex] = 0;
         modeEntryCallback = ddsAdminModeCallbacks[work->activeMode].entry;
         if (modeEntryCallback != NULL) {
-            modeEntryCallback(isRestoringHistory, work->requestData);
+            modeEntryCallback(isRestoringHistory, work->ownedRequestData);
         }
     }
     return (s32)dds3AdminPollModeCompletion;
@@ -204,7 +204,7 @@ s32 dds3AdminPollModeCompletion(dds3ProcessID_t *task) {
     if ((flags & 2) && work->activeMode >= 0) {
         previousHistoryIndex = (work->historyIndex + 7) & 7;
         if (work->signedHistory[previousHistoryIndex] >= 0 && (work->unsignedHistory[previousHistoryIndex] & 1)) {
-            void *requestData = work->requestData;
+            void *requestData = work->ownedRequestData;
 
             work->flags |= 0x10001;
             work->requestedMode = work->signedHistory[previousHistoryIndex];
@@ -212,7 +212,7 @@ s32 dds3AdminPollModeCompletion(dds3ProcessID_t *task) {
             work->flags &= ~4;
             if (requestData != NULL) {
                 sdfChipFreeDirect(requestData);
-                work->requestData = NULL;
+                work->ownedRequestData = NULL;
                 work->requestSizeLowByte = 0;
             }
         }
@@ -240,8 +240,8 @@ void dds3AdminiNeoShutdown(dds3ProcessID_t *task) {
             destroy();
         }
     }
-    if (work->requestData != NULL) {
-        sdfChipFreeDirect(work->requestData);
+    if (work->ownedRequestData != NULL) {
+        sdfChipFreeDirect(work->ownedRequestData);
     }
     sdfChipFreeDirect((void *)dds3GetProcessData(task));
 }
