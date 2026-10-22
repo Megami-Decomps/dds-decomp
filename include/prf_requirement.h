@@ -38,8 +38,17 @@ typedef char PrfDds1RequirementRecord_slots[((u32)&((PrfDds1RequirementRecord *)
 
 #ifdef VERSION_DDS2
 /* Serialized rule: operation-specific byte thresholds, word minimum and ID list. */
+typedef enum PrfRequirementOperationFlags {
+    PRF_REQUIREMENT_OP_ALL_PROFILES = 0x01,
+    PRF_REQUIREMENT_OP_PROFILE_COUNT = 0x02,
+    PRF_REQUIREMENT_OP_PROFILE_VALUE_COUNT = 0x04,
+    PRF_REQUIREMENT_OP_PROFILES_IN_PARTY = 0x08,
+    PRF_REQUIREMENT_OP_UNIT_LEVEL = 0x10,
+    PRF_REQUIREMENT_OP_GLOBAL_MINIMUM = 0x20
+} PrfRequirementOperationFlags;
+
 typedef struct PrfRequirementOperand {
-    u32 operation;
+    PrfRequirementOperationFlags operation;
     u8 levelThreshold;
     u8 profileThreshold;
     u8 reserved06[2];
@@ -58,6 +67,7 @@ typedef char PrfRequirementRecord_size[(sizeof(PrfRequirementRecord)==0x2C)?1:-1
 typedef char PrfRequirementRecord_rules[((u32)&((PrfRequirementRecord*)0)->rules==4)?1:-1];
 typedef char PrfRequirementTable_extent[(sizeof(D_00402BE0)==0x1E40)?1:-1];
 typedef char PrfRequirementOperand_size[(sizeof(PrfRequirementOperand)==0x14)?1:-1];
+typedef char PrfRequirementOperationFlags_size[(sizeof(PrfRequirementOperationFlags)==4)?1:-1];
 typedef char PrfRequirementOperand_operation[((u32)&((PrfRequirementOperand*)0)->operation==0)?1:-1];
 typedef char PrfRequirementOperand_level[((u32)&((PrfRequirementOperand*)0)->levelThreshold==4)?1:-1];
 typedef char PrfRequirementOperand_profile[((u32)&((PrfRequirementOperand*)0)->profileThreshold==5)?1:-1];

@@ -494,9 +494,9 @@ s32 mnuGetMantraSourceValue(u16 index) {
     PrfRequirementRecord *entry = scrGetEntryDescriptor(index);
     s32 slot = 0;
 
-    if (entry->rules[0].operation & 0x20) {
+    if (entry->rules[0].operation & PRF_REQUIREMENT_OP_GLOBAL_MINIMUM) {
         slot = 0;
-    } else if (entry->rules[1].operation & 0x20) {
+    } else if (entry->rules[1].operation & PRF_REQUIREMENT_OP_GLOBAL_MINIMUM) {
         slot = 1;
     } else {
         return result;

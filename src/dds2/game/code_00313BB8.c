@@ -1085,7 +1085,7 @@ s32 prfReqEvaluateRules(u32 state, u32 flags, datUnitWork_t *unit, u32 requireme
     }
     for (i = 0; i < 2; i++) {
         switch (rules[i].operation) {
-        case 1:
+        case PRF_REQUIREMENT_OP_ALL_PROFILES:
             if (flags == 0 || (flags & 4)) {
                 if (ptyHasAllReqProfiles(unit, &rules[i]) == expected) {
                     result = expected;
@@ -1094,7 +1094,7 @@ s32 prfReqEvaluateRules(u32 state, u32 flags, datUnitWork_t *unit, u32 requireme
                 }
             }
             break;
-        case 2:
+        case PRF_REQUIREMENT_OP_PROFILE_COUNT:
             if (flags == 0 || (flags & 4)) {
                 if (ptyReqProfileCountAtLeast(unit, &rules[i]) == expected) {
                     result = expected;
@@ -1103,7 +1103,7 @@ s32 prfReqEvaluateRules(u32 state, u32 flags, datUnitWork_t *unit, u32 requireme
                 }
             }
             break;
-        case 4:
+        case PRF_REQUIREMENT_OP_PROFILE_VALUE_COUNT:
             if (flags == 0 || (flags & 4)) {
                 if (ptyProfileCountAtLeast(unit, &rules[i]) == expected) {
                     result = expected;
@@ -1112,7 +1112,7 @@ s32 prfReqEvaluateRules(u32 state, u32 flags, datUnitWork_t *unit, u32 requireme
                 }
             }
             break;
-        case 8:
+        case PRF_REQUIREMENT_OP_PROFILES_IN_PARTY:
             if (flags == 0 || (flags & 4)) {
                 if (ptyAreReqProfilesInParty(&rules[i]) == expected) {
                     result = expected;
@@ -1121,7 +1121,7 @@ s32 prfReqEvaluateRules(u32 state, u32 flags, datUnitWork_t *unit, u32 requireme
                 }
             }
             break;
-        case 16:
+        case PRF_REQUIREMENT_OP_UNIT_LEVEL:
             if (flags == 0) {
                 if (prfReqCheckUnitLevel(unit, &rules[i]) == expected) {
                     result = expected;
@@ -1130,7 +1130,7 @@ s32 prfReqEvaluateRules(u32 state, u32 flags, datUnitWork_t *unit, u32 requireme
                 }
             }
             break;
-        case 32:
+        case PRF_REQUIREMENT_OP_GLOBAL_MINIMUM:
             if (flags == 0 || (flags & 1)) {
                 if (prfReqCheckGlobalCounter(&rules[i]) == expected) {
                     result = expected;
