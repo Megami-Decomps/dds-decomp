@@ -213,8 +213,8 @@ void evtDestroySkyTask(void) {
     }
 }
 
-extern void fldSetSwayMode();
-extern void fldSetSkyDrawState();
+extern void fldSetSwayMode(u32 mode);
+extern void fldSetSkyDrawState(u32 drawState);
 extern void fldSetSkyAlpha();
 extern void fldSetFadeTarget();
 
