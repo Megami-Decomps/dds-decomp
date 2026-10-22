@@ -1922,14 +1922,14 @@ void evtResourceCountDebugTaskDestroy(dds3ProcessID_t *task) {
 
 extern s32 evtDrawResourceCountDebugTask(dds3ProcessID_t *task);
 extern void evtResourceCountDebugTaskDestroy(dds3ProcessID_t *task);
-extern s32 D_00438E68;
+extern dds3ProcessID_t *D_00438E68;
 extern char D_004113B8[]; /* "DebugTimeGrph" */
 
 void evtToggleAlternateDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
-        D_00438E68 = (s32)dds3StartProcess(D_004113B8, 0x2710, 1, 1, evtDrawResourceCountDebugTask, evtResourceCountDebugTaskDestroy, 0);
+        D_00438E68 = dds3StartProcess(D_004113B8, 0x2710, 1, 1, evtDrawResourceCountDebugTask, evtResourceCountDebugTaskDestroy, 0);
     } else if (mode == 0) {
-        dds3KillProcess((void *)D_00438E68, 0);
+        dds3KillProcess(D_00438E68, 0);
     }
 }
 
@@ -2107,4 +2107,3 @@ INCLUDE_SDATA(const s32, "game/code_00107EF8", scrHandleCount);
 INCLUDE_SDATA(const s32, "game/code_00107EF8", scrHandleFirst);
 
 INCLUDE_SDATA(const s32, "game/code_00107EF8", scrHandleLast);
-
