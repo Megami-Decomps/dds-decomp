@@ -31,6 +31,7 @@
 #include "evt_unit.h"
 #include "evt_event_pack.h"
 #include "evt_polygon_movie.h"
+#include "evt_effect_scale_object.h"
 #include "fld.h"
 #include "kwln_task_lifecycle.h"
 #include "sdf_texture_file.h"
@@ -5786,23 +5787,6 @@ void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
     }
 }
 
-/* Party/enemy model table entry (0x270 bytes); only the scale-source field is known here. */
-typedef struct EvtModelScaleEntry {
-    u8 pad00[0x18];
-    f32 modelScale;
-    u8 pad1C[0x254];
-} EvtModelScaleEntry;
-
-typedef struct EvtEffectInner {
-    u8 pad00[0x2C];
-    void *scaledObject; /* 0x2C: object passed to the scale setter */
-} EvtEffectInner;
-
-typedef struct EvtEffectObject {
-    u8 pad00[0x18];
-    EvtEffectInner *inner;
-} EvtEffectObject;
-
 extern EvtModelScaleEntry *D_00435DE0;
 extern EvtModelScaleEntry *D_00435DF0;
 extern void dds3EffectObjectBasicStatOn(void *object, s32 flags);
@@ -5842,4 +5826,3 @@ INCLUDE_SDATA(const s32, "game/code_00250010", D_004377C0);
 INCLUDE_SDATA(const s32, "game/code_00250010", D_004377C8);
 
 INCLUDE_SDATA(const s32, "game/code_00250010", D_004377D0);
-
