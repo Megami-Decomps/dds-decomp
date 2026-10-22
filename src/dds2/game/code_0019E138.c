@@ -1015,8 +1015,8 @@ void frGetFontImagePtrs(ItfRelativeSegmentResourceView *block, ItfPackedResource
     s32 thirdOffset = secondOffset + block->thirdDelta;
 
     segments->treeNodes = (u8 *)block + firstOffset;
-    segments->entryBitOffsets = (u8 *)block + secondOffset;
-    segments->packedBitstream = (u8 *)block + thirdOffset;
+    segments->entryBitRanges = (ItfBitRange *)((u8 *)block + secondOffset);
+    segments->packedBitstream = (u16 *)((u8 *)block + thirdOffset);
 }
 
 /* Read the opaque header word at 0x10; its role is not established. */
@@ -1039,8 +1039,8 @@ s32 frDecodeFontRow(u8 *decodedBytes, s32 entryIndex, void *resourceBase, ItfPac
     u16 *root;
     u16 *node;
 
-    memcpy(&range.start, (u8 *)segments->entryBitOffsets + entryIndex * 4, 4);
-    memcpy(&range.end, (u8 *)segments->entryBitOffsets + entryIndex * 4 + 4, 4);
+    memcpy(&range.start, (u8 *)segments->entryBitRanges + entryIndex * 4, 4);
+    memcpy(&range.end, (u8 *)segments->entryBitRanges + entryIndex * 4 + 4, 4);
     produced = 0;
     frGetFontHeader((u32)resourceBase);
     start = range.start;
