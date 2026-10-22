@@ -926,7 +926,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             target->status.flags |= 0x4000000;
         }
         if (datCommandRecords[command].unk30 == 21) {
-            work->unk60 = btlCalculateMoneyDropAmount(target);
+            work->moneyDrop = btlCalculateMoneyDropAmount(target);
             target->status.stateFlags |= 0x10000;
         }
         switch (datCommandRecords[command].unk30) {
@@ -1270,7 +1270,7 @@ void btlResetIndexWork(BattleIndexWork *work) {
     work->moneyReward = 0;
     work->flags = 0;
     work->refreshEligibleActors = 0;
-    work->unk60 = 0;
+    work->moneyDrop = 0;
     for (i = 0; i < 13; i++) {
         work->groups[i].count = 0;
         work->groups[i].kind = 0;
@@ -5188,7 +5188,7 @@ BtlUnit *btlCreateUnit(void) {
     unit->partyIndex = 6;
     unit->gunResourceFlags = 0;
     unit->effectLink.referenceCount = 0;
-    unit->node318 = 0;
+    unit->resourceNode = 0;
     unit->gunResource = 0;
     unit->effectObject = 0;
     unit->ext = 0;
@@ -5212,9 +5212,9 @@ extern void btlReleaseActorModelResources(BtlUnit *);
 
 void btlReleaseUnitResources(BtlUnit *unit) {
     btlBossDebugPrintf("btl:unit data free[%p]\n", unit);
-    if (unit->node318 != 0) {
-        sndFreeResourceNode(unit->node318);
-        unit->node318 = 0;
+    if (unit->resourceNode != 0) {
+        sndFreeResourceNode(unit->resourceNode);
+        unit->resourceNode = 0;
     }
     if (unit->resourceLink != 0) {
         sndFreeResourceLink(unit->resourceLink);

@@ -242,7 +242,7 @@ typedef struct BtlUnit {
     BtlUnitEntrySlot entrySlots[7]; /* 0x2E6: btlClearActorEntrySlot clears each signed record. */
     s32 selectedEntryIndex; /* 0x310: -1 denotes no selected entry. */
     s32 pendingAbilityId; /* 0x314: queued ability effect; -1 means none. */
-    struct SoundResourceNode *node318;
+    struct SoundResourceNode *resourceNode; /* 0x318: owned system-effect resource, as DDS1's +0x2F8. */
     struct SoundResourceLink *resourceLink; /* 0x31C: linked model-resource task. */
     struct SoundLink *link; /* 0x320: per-unit command effect. */
     struct ActiveSoundNode *listNode; /* 0x324: independently loaded sound node. */

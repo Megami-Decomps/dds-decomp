@@ -166,7 +166,7 @@ typedef struct BattleIndexWork {
     u8 pad5F;
 #else
     u8 pad5E[2];
-    s32 unk60;
+    s32 moneyDrop; /* 0x60: currency a kind-21 command makes its target drop (btlCalculateMoneyDropAmount), handed to the currency reward task. */
     u8 refreshEligibleActors;
     u8 pad65[3];
 #endif
