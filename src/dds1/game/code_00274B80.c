@@ -872,7 +872,8 @@ s32 mnuStaffPopupUpdate(dds3ProcessID_t *callback) {
 
 extern u8 mnuCampCommandHelpTextBank[];
 extern void mnuDrawStaffCampScreen(s32 kind, dds3ProcessID_t *task);
-extern void mnuDrawCampGridAndLabelDefault();
+extern void mnuDrawCampGridAndLabelDefault(s32 kind, s32 labelIndex, s32 textTable, s32 context,
+                                           s32 drawOption, s32 layer);
 
 s32 mnuDrawStaffCampPageWithImage(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
@@ -894,7 +895,7 @@ s32 mnuDrawStaffCampPageWithImage(dds3ProcessID_t *callback) {
     if (menu->active != 0) {
         s32 *slot = &((MenuWindowContainer *)work->panel)->list->cursor->index;
 
-        mnuDrawCampGridAndLabelDefault(1, *slot, (s32)mnuCampCommandHelpTextBank, context, 1, 0x53, slot);
+        mnuDrawCampGridAndLabelDefault(1, *slot, (s32)mnuCampCommandHelpTextBank, context, 1, 0x53);
     }
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
@@ -2133,4 +2134,3 @@ INCLUDE_SDATA(const s32, "game/code_00274B80", D_003BC700);
 INCLUDE_SDATA(const s32, "game/code_00274B80", D_003BC708);
 
 INCLUDE_SDATA(const s32, "game/code_00274B80", D_003BC710);
-
