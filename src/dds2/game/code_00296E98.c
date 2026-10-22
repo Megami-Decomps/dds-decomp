@@ -95,13 +95,7 @@ extern u32 ptyAddProfileRecordValueClamped(DatPartyRecord *unit, u32 amount);
 extern void brsSetSkillProgressAnimations(BrsSkillPackageWork *, s32, s32, u32, s32, s32, s32);
 
 
-enum {
-    BRS_ICON_ID = 1,
-    BRS_ICON_X = 2,
-    BRS_ICON_Y = 3,
-};
 
-extern BrsIconRecord mnuCommonIconPlacements[];
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
 /* Draw the selected result icon, then the fixed companion at the same alpha. */
