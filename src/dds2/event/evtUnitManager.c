@@ -69,7 +69,7 @@ f32 GetSplineLength(Dds3PathCurveWork *path) {
     return length;
 }
 
-extern f32 D_00438A48, D_00438A4C;
+extern f32 sdf3DSoften, sdf3DBias;
 #include "dds3_world_primary.h"
 extern s32 dds3SceneBasicExistBasicFromType(EffWorldNode *object, s32 slotIndex, EffWorldNode *value);
 extern s32 sdfModelGetMarkPos(SdfModel *model, s32 mapRecordId);
@@ -107,8 +107,8 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
 
     memset(identity, 0, sizeof(identity));
     identity[3] = 1.0f;
-    auxFirst = D_00438A48;
-    auxSecond = D_00438A4C;
+    auxFirst = sdf3DSoften;
+    auxSecond = sdf3DBias;
     previousWeight = 0.0f;
     /* The model RGB and alpha tracks preserve the other packed channel. */
     flags = unit->flags;
@@ -475,16 +475,16 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
         auxSecond = target->auxSecond;
         if (auxFirst >= 1.0f) {
             factor = currentWeight * transition;
-            auxFirst = D_00438A48 * (1.0f - factor) + auxFirst * factor;
-            auxSecond = D_00438A4C * (1.0f - factor) + auxSecond * factor;
+            auxFirst = sdf3DSoften * (1.0f - factor) + auxFirst * factor;
+            auxSecond = sdf3DBias * (1.0f - factor) + auxSecond * factor;
         }
         if (previous) {
             f32 oldFirst = previous->auxFirst;
             f32 oldSecond = previous->auxSecond;
             if (oldFirst >= 1.0f) {
                 factor = previousWeight;
-                oldFirst = D_00438A48 * (1.0f - factor) + oldFirst * factor;
-                oldSecond = D_00438A4C * (1.0f - factor) + oldSecond * factor;
+                oldFirst = sdf3DSoften * (1.0f - factor) + oldFirst * factor;
+                oldSecond = sdf3DBias * (1.0f - factor) + oldSecond * factor;
                 auxFirst = auxFirst * transition + oldFirst * (1.0f - transition);
                 auxSecond = auxSecond * transition + oldSecond * (1.0f - transition);
             }

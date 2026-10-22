@@ -10442,4 +10442,9 @@
 0x003FE250	sndTrackBalanceEntries	inferred	confidence=high; src/dds1/game/code_002E9140.c:D_003FE250; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,sndGetTrackBalanceFirstComponent,sndGetTrackBalanceSecondComponent; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
 0x003FEB00	sdfIpuStreamThreadStack	inferred	confidence=high; src/dds1/game/code_002E9708.c:sdfIpuInit; Stack buffer passed to the IPU stream thread constructor with size 0x800. [names_qp9.tsv]
 0x0035F638	btlStatusEffectStyles	inferred	the status-effect style rows (BtlStatusStyleEntry, 17 of 16 bytes): an effect id, a colour, a release colour and a model flag per status; func_001F2818 tints a unit from its status row
-0x00398470	sdfConsComposedMatrix	inferred	the composed matrix sdfConsCacheTransformedNode stores (the transform it is given, postmultiplied by the node's camera matrix), which sdfCorePacketGen, the visible-node packets and the cached line pairs read
+0x00398470	sdf3DCameraMatrix	inferred	the camera matrix sdf3DSetCamera keeps: the transform it is given, postmultiplied by the node's camera matrix; read by sdfCorePacketGen, sdfModelTempPacketLinkOt and the cached line pairs
+0x003BD358	sdf3DSoften	inferred	the models' soften, 7.0 at start: set with the bias by dds3SetSoftenBias (eased over frames by dds3SceneLightUpdateFirst), edited by soften_bias_Process, each model's default unless it overrides it
+0x003BD35C	sdf3DBias	inferred	the models' bias, 0.0 at start: set with the soften by dds3SetSoftenBias, edited by soften_bias_Process, each model's default unless it overrides it
+0x003BD344	sdf3DSoftenOff	inferred	soften switched off (soften_bias_Process shows ON at 0): corePktClipFace then keeps faces whole across soften regions, and the models pass it to their microprogram
+0x003BD374	sdf3DDefaultLight	inferred	the light a model without its own uses: set by sdf3DSetDefaultLight
+0x003BD378	sdf3DDefaultFog	inferred	the fog a model without its own uses: set by sdf3DSetDefaultFog

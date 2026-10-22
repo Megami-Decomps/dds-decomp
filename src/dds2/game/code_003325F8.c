@@ -72,9 +72,9 @@ extern u32 sdfForcedAssetTextureMode;
 #define SDF_PARAM_PACKET_MODE_SHIFT 16
 
 
-extern f32 D_00438A48;
+extern f32 sdf3DSoften;
 
-extern f32 D_00438A4C;
+extern f32 sdf3DBias;
 
 extern SdfPendingRequest sdfResourceReleaseQueue;
 
@@ -372,7 +372,7 @@ f32 sdfModelGetFaceDivSoften(SdfModel *model) {
     if ((model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) != 0) {
         return model->scalarOverrideFirst;
     }
-    return D_00438A48;
+    return sdf3DSoften;
 }
 
 /* Return the second override value when selected, otherwise its shared default. */
@@ -380,7 +380,7 @@ f32 sdfModelGetFaceDivBias(SdfModel *model) {
     if ((model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) != 0) {
         return model->scalarOverrideSecond;
     }
-    return D_00438A4C;
+    return sdf3DBias;
 }
 
 /* Set the native mode word; its consumers distinguish mode one from other values. */

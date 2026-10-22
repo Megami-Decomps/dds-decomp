@@ -2784,9 +2784,9 @@ extern char D_00437750[];
 extern char D_00437758[];
 extern char D_00437760[];
 extern char D_004375D0[];
-extern u8 D_00438A34;
-extern f32 D_00438A48;
-extern f32 D_00438A4C;
+extern u8 sdf3DSoftenOff;
+extern f32 sdf3DSoften;
+extern f32 sdf3DBias;
 extern void evtSetSlotVector(s32 vectorSlot, f32 x, f32 y);
 
 /* Draw the XY/overlay editor; cancel restores the captured values and flag. */
@@ -2837,7 +2837,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
         s32 valueX = 0x8B00 + (runtime->horizontalOffset << 4);
         s32 style = runtime->floatEditMode == 1 && runtime->floatSelection == 2 ? 6 : 0;
         const char *toggleText;
-        if (D_00438A34 == 0) {
+        if (sdf3DSoftenOff == 0) {
             toggleText = D_00437760;
         } else {
             toggleText = D_004375D0;
@@ -2908,7 +2908,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
                 } else if (runtime->floatSelection == 1) {
                     runtime->floatEditY += 0.01f;
                 } else if (runtime->floatSelection == 2) {
-                    D_00438A34 ^= 1;
+                    sdf3DSoftenOff ^= 1;
                 }
             }
         } else if (kwlnTaskPadButtonStates.decOne & 2) {
@@ -2918,7 +2918,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
                 } else if (runtime->floatSelection == 1) {
                     runtime->floatEditY -= 0.01f;
                 } else if (runtime->floatSelection == 2) {
-                    D_00438A34 ^= 1;
+                    sdf3DSoftenOff ^= 1;
                 }
             }
         } else if (kwlnTaskPadButtonStates.coarseIncrease != 0) {
@@ -2934,8 +2934,8 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
             f32 currentX = runtime->floatEditX;
             f32 currentY = runtime->floatEditY;
 
-            D_00438A48 = currentX;
-            D_00438A4C = currentY;
+            sdf3DSoften = currentX;
+            sdf3DBias = currentY;
             evtSetSlotVector(group->setterId, currentX, currentY);
             break;
         }
@@ -2957,8 +2957,8 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
                 f32 savedX = runtime->savedFloatEditX;
                 f32 savedY = runtime->savedFloatEditY;
 
-                D_00438A48 = savedX;
-                D_00438A4C = savedY;
+                sdf3DSoften = savedX;
+                sdf3DBias = savedY;
                 evtSetSlotVector(group->setterId, savedX, savedY);
                 break;
             }
@@ -2971,7 +2971,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
                               runtime->savedFloatEditY);
                 break;
             }
-            D_00438A34 = runtime->savedOverlayFlag;
+            sdf3DSoftenOff = runtime->savedOverlayFlag;
         }
     }
     return status;

@@ -115,7 +115,7 @@ void corePktMakeEdgePoint(VuBlendNode *out, VuBlendNode *first, VuBlendNode *sec
     VU0_INTERPOLATE_CLIP_VERTEX(out, first, second);
 }
 
-extern u8 D_00438A34;
+extern u8 sdf3DSoftenOff;
 extern u16 D_00474210[];
 extern u8 D_0040B580[];
 extern f32 D_0040B6A0[4];
@@ -147,7 +147,7 @@ void corePktClipFace(VuWork *work) {
     triangleCount = (s16)work->param0;
     rejected = 0;
     scale = work->depth;
-    acceptAll = D_00438A34;
+    acceptAll = sdf3DSoftenOff;
     triangles = (u16 *)work->strip;
     nodes = (VuBlendNode *)work->ringSrc;
     for (i = 0; i != triangleCount; i++) {
@@ -302,7 +302,7 @@ void corePktBuildFaceList(VuWork *work) {
         corePktClipFace(work);
     }
     triangleCount = (s16)work->param0;
-    acceptAll = D_00438A34;
+    acceptAll = sdf3DSoftenOff;
     out = D_00468210;
     triangles = (u16 *)work->strip;
     nodes = (VuBlendNode *)work->ringSrc;
@@ -453,7 +453,7 @@ void corePktBuildBackFaceList(VuWork *work) {
     const u8 *projection = D_0040B580;
 
     VU0_SET_CLIP_PLANES(scale, clipPlane, projection);
-    acceptAll = D_00438A34;
+    acceptAll = sdf3DSoftenOff;
     remaining = work->selectedTriangleCount;
     indices = D_00474210;
     triangles = (u16 *)work->strip;

@@ -373,17 +373,17 @@ SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s3
     return packet;
 }
 
-extern u8 sdfConsComposedMatrix[];
+extern u8 sdf3DCameraMatrix[];
 
 /* vu0 routine: render line pairs using the cached composed matrix. */
 SdfPacket *effDebugDrawWireModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
-    VU0_LOAD_MATRIX(sdfConsComposedMatrix);
+    VU0_LOAD_MATRIX(sdf3DCameraMatrix);
     return sdfDrawModelWithMatrix(vertices, colors, vertexCount, primitiveFlags);
 }
 
 /* vu0 routine: compose the current matrix with the cached transform, then render line pairs. */
 SdfPacket *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
-    sdfPostmultiplyVuMatrixFromMemory(sdfConsComposedMatrix);
+    sdfPostmultiplyVuMatrixFromMemory(sdf3DCameraMatrix);
     return sdfDrawModelWithMatrix(vertices, colors, vertexCount, primitiveFlags);
 }
 

@@ -748,8 +748,8 @@ void evtViewerApplyParameterKeyTracks(EvtRuntime *viewer) {
 extern KwlnDrawVectorParams kwlnDrawVector;
 extern u128 *D_00324770[];
 extern u128 kwlnDefaultColorVector[];
-extern f32 D_003BD358;
-extern f32 D_003BD35C;
+extern f32 sdf3DSoften;
+extern f32 sdf3DBias;
 extern EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void);
 extern EffBlurScatterParams *effEventGetScatterBlurSetupParams(void);
 extern EffBlurScaleParams *rblurGetParam(void);
@@ -1229,8 +1229,8 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
             dds3SetLightColor(0, 0, D_003D7DA0[0]);
             dds3SetLightDir(0, 0, D_003D7DA0[1]);
             dds3SetAmbientColor(0, D_003D7DA0[2]);
-            D_003BD358 = evtHokanFloat(enable, ratio, firstFrom, firstTo);
-            D_003BD35C = evtHokanFloat(enable, ratio, secondFrom, secondTo);
+            sdf3DSoften = evtHokanFloat(enable, ratio, firstFrom, firstTo);
+            sdf3DBias = evtHokanFloat(enable, ratio, secondFrom, secondTo);
             break;
         }
         unit = NULL;
@@ -2922,7 +2922,7 @@ extern char *D_003684D0[];
 extern char D_003BBF60[];
 extern char D_003BBF68[];
 extern char D_003BBF70[];
-extern u8 D_003BD344;
+extern u8 sdf3DSoftenOff;
 extern s32 mdlDebugPrintEffectScale2(KwlnTask *task);
 extern s32 evtPollRuntimeControlReady(KwlnTask *task);
 extern s32 evtSynchronizeSelectedEntry(KwlnTask *task);
@@ -3342,7 +3342,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                     viewer->floatEditY = key->p0C.f;
                     viewer->savedFloatEditX = key->p08.f;
                     viewer->savedFloatEditY = key->p0C.f;
-                    viewer->savedOverlayFlag = D_003BD344;
+                    viewer->savedOverlayFlag = sdf3DSoftenOff;
                     evtViewerPushCommandHistory(19, 336, -12, viewer);
                     break;
                 case 17: {
@@ -3860,8 +3860,8 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, EvtRuntime *v
             PCP_COPY_VECTOR(destination + 2, kwlnDefaultColorVector);
             break;
         case 14:
-            entry->p08.f = D_003BD358;
-            entry->p0C.f = D_003BD35C;
+            entry->p08.f = sdf3DSoften;
+            entry->p0C.f = sdf3DBias;
             break;
         }
         break;

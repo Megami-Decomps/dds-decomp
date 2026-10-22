@@ -508,11 +508,11 @@ s32 sdfModelCheckBounds(const f32 *bounds) {
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelTempPacketLinkOt);
 
 #include "sdf.h"
-extern u8 D_00438A34;
-extern void *D_00438A64;
-extern void *D_00438A68;
-extern f32 D_00438A48, D_00438A4C;
-extern f32 sdfConsComposedMatrix[16];
+extern u8 sdf3DSoftenOff;
+extern void *sdf3DDefaultLight;
+extern void *sdf3DDefaultFog;
+extern f32 sdf3DSoften, sdf3DBias;
+extern f32 sdf3DCameraMatrix[16];
 extern void sdfCoreDrawSetZBias(f32);
 /* Build one per-frame packet list for each visible node resource variant. */
 void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
@@ -552,21 +552,21 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
 
     lighting = model->lighting;
     if (lighting == NULL) {
-        lighting = D_00438A64;
+        lighting = sdf3DDefaultLight;
     }
     secondaryLighting = model->secondaryLighting;
     if (secondaryLighting == NULL) {
-        secondaryLighting = D_00438A68;
+        secondaryLighting = sdf3DDefaultFog;
     }
-    globalByte = D_00438A34;
+    globalByte = sdf3DSoftenOff;
     modelColor = model->color;
     modelDrawFlags = model->drawFlags;
     if (model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) {
         firstScalar = model->scalarOverrideFirst;
         secondScalar = model->scalarOverrideSecond;
     } else {
-        firstScalar = D_00438A48;
-        secondScalar = D_00438A4C;
+        firstScalar = sdf3DSoften;
+        secondScalar = sdf3DBias;
     }
     skipCommands = 0;
     if (model->flags & 0x08) {
@@ -592,7 +592,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
         }
 
         VU0_LOAD_MATRIX(node->worldMatrix);
-        sdfPostmultiplyVuMatrixFromMemory(sdfConsComposedMatrix);
+        sdfPostmultiplyVuMatrixFromMemory(sdf3DCameraMatrix);
         if (node->boundsCorners != NULL &&
             sdfModelCheckBounds(node->boundsCorners) != 0) {
             continue;

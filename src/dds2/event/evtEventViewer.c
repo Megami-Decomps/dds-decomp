@@ -655,8 +655,8 @@ void evtViewerApplyParameterKeyTracks(EvtRuntime *viewer) {
 extern KwlnDrawVectorParams kwlnDrawVector;
 extern u128 *D_0037F770[];
 extern u128 kwlnDefaultColorVector[];
-extern f32 D_00438A48;
-extern f32 D_00438A4C;
+extern f32 sdf3DSoften;
+extern f32 sdf3DBias;
 extern EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void);
 extern EffBlurScatterParams *effEventGetScatterBlurSetupParams(void);
 extern EffBlurScaleParams *rblurGetParam(void);
@@ -1042,8 +1042,8 @@ extern void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *displ
 extern KwlnDrawVectorParams kwlnDrawVector;
 extern u128 *D_0037F770[];
 extern u128 kwlnDefaultColorVector[];
-extern f32 D_00438A48;
-extern f32 D_00438A4C;
+extern f32 sdf3DSoften;
+extern f32 sdf3DBias;
 extern EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void);
 extern EffBlurScatterParams *effEventGetScatterBlurSetupParams(void);
 extern EffBlurScaleParams *rblurGetParam(void);
@@ -1375,8 +1375,8 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
             dds3SetLightColor(0, 0, D_00453960[0]);
             dds3SetLightDir(0, 0, D_00453960[1]);
             dds3SetAmbientColor(0, D_00453960[2]);
-            D_00438A48 = evtHokanFloat(enable, ratio, firstFrom, firstTo);
-            D_00438A4C = evtHokanFloat(enable, ratio, secondFrom, secondTo);
+            sdf3DSoften = evtHokanFloat(enable, ratio, firstFrom, firstTo);
+            sdf3DBias = evtHokanFloat(enable, ratio, secondFrom, secondTo);
             break;
         }
         unit = NULL;
@@ -3143,7 +3143,7 @@ extern char *D_003C92A8[];
 extern const char D_004373A0[];
 extern const char D_004373A8[];
 extern const char D_004373B0[];
-extern u8 D_00438A34;
+extern u8 sdf3DSoftenOff;
 extern void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 extern void effSetLoadDescA(void *parameters);
 extern void effSetLoadDescD(void *parameters);
@@ -3631,7 +3631,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                     viewer->floatEditY = key->p0C.f;
                     viewer->savedFloatEditX = key->p08.f;
                     viewer->savedFloatEditY = key->p0C.f;
-                    viewer->savedOverlayFlag = D_00438A34;
+                    viewer->savedOverlayFlag = sdf3DSoftenOff;
                     evtViewerPushCommandHistory(19, 336, -12, viewer);
                     break;
                 case 17: {
@@ -4161,8 +4161,8 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, EvtRuntime *v
             PCP_COPY_VECTOR(destination + 2, kwlnDefaultColorVector);
             break;
         case 14:
-            entry->p08.f = D_00438A48;
-            entry->p0C.f = D_00438A4C;
+            entry->p08.f = sdf3DSoften;
+            entry->p0C.f = sdf3DBias;
             break;
         }
         break;
