@@ -1808,11 +1808,7 @@ INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA91E);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", fadergba);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA921);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA922);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA923);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA924);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnBackgroundFadeColor);
 
