@@ -146,7 +146,7 @@ extern s8 evtSelectionStateActive;
 
 extern void *evtSelectionState;
 
-extern u8 D_00324590[];
+extern u8 sdfViewShakeVector[];
 
 extern char D_003BA950[];
 
@@ -1053,7 +1053,7 @@ void evtSelStateDestroy(void) {
         evtSelectionStateActive = 0;
         VU0_MOVE_VF(vf10, vf0);
         VU0_CLEAR_W(vf10);
-        VU0_STORE_VF(vf10, D_00324590);
+        VU0_STORE_VF(vf10, sdfViewShakeVector);
     }
 }
 

@@ -3271,7 +3271,7 @@ extern u8 evtStageTestViewUpVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];
-extern u8 D_0037F590[];
+extern u8 sdfViewShakeVector[];
 extern u8 sdfViewMatrix[];
 extern u8 D_003820F0[];
 extern u8 D_0042B528[];
@@ -3561,7 +3561,7 @@ void evtStageTestUpdateCamera(void)
     VU0_NORMALIZE_VF10();
     VU0_SCALAR_OP(600.0f, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_ADD(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, D_0037F590);
+    VU0_LOAD_VF(vf11, sdfViewShakeVector);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, &eye);
     VU0_LOAD_VF(vf10, sdfViewTargetVector);

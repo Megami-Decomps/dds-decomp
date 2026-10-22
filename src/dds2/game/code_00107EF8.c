@@ -243,7 +243,7 @@ extern void evtSelStateDestroy(void);
 
 extern void evtUpdateSelectionStateInterpolation(void);
 
-extern u8 D_0037F590[];
+extern u8 sdfViewShakeVector[];
 
 
 extern s32 kwlnTaskNoopCallback(KwlnTask *task);
@@ -1047,7 +1047,7 @@ void evtSelStateDestroy(void) {
         evtSelectionStateActive = 0;
         VU0_MOVE_VF(vf10, vf0);
         VU0_CLEAR_W(vf10);
-        VU0_STORE_VF(vf10, D_0037F590);
+        VU0_STORE_VF(vf10, sdfViewShakeVector);
     }
 }
 

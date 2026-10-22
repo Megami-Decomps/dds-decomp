@@ -576,7 +576,7 @@ extern s32 sdfModelGetMarkPosMatrix(SdfModel *, s32);
 extern void sdfVuMatrixToQuaternion(f32 [4][4]);
 extern void btlDebugDrawSegment(f32 *, f32 *, u32);
 extern void btlDebugDrawPoint(f32 *);
-extern f32 D_0037E120[4];
+extern f32 effDownVector[4];
 extern f32 D_0037E110[4];
 extern f32 D_0037E100[4];
 extern f32 D_003B2AC0[4];
@@ -614,7 +614,7 @@ void func_0029B818(EffResourceOwner *owner) {
         }
         mdlGetPosition(owner->model);
         VU0_STORE_VF_UNCLOBBERED(vf10, endpoint);
-        LookAtMatrix(position, endpoint, D_0037E120);
+        LookAtMatrix(position, endpoint, effDownVector);
         ReverseMatrix();
         VU0_LOAD_VF(vf10, position);
         VU0_LOAD_VF(vf11, endpoint);
@@ -677,7 +677,7 @@ void func_0029B818(EffResourceOwner *owner) {
                 VU0_STORE_VF_UNCLOBBERED(vf10, endpoint);
                 btlDebugDrawSegment(position, endpoint, 0x80006000);
                 VU0_LOAD_MATRIX_MEMORY(matrix);
-                VU0_LOAD_VF(vf10, D_0037E120);
+                VU0_LOAD_VF(vf10, effDownVector);
                 VU0_SCALE_VF(vf10, 50.0f);
                 VU0_TRANSFORM_POINT(vf10, vf10);
                 VU0_STORE_VF_UNCLOBBERED(vf10, endpoint);

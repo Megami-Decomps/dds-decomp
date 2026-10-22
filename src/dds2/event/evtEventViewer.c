@@ -1030,7 +1030,7 @@ extern char evtViewerTaskName[]; /* "EventViewer" */
 /* Linked timeline track. Saved vectors and the attachment latch are used by
  * kind-1 world-object tracks; the vectors keep their original embedded layout. */
 
-extern s8 D_003C953A[];
+extern s8 evtViewerFrameColumnCategories[];
 extern void SortFrameInfo(EvtRuntimeGroup *track);
 
 typedef struct CampDisplayDefaults CampDisplayDefaults;
@@ -3220,7 +3220,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                 return 0;
             }
             if (command != -3) {
-                viewer->commandCategory = D_003C953A[viewer->frameColumn + group->type * 10];
+                viewer->commandCategory = evtViewerFrameColumnCategories[viewer->frameColumn + group->type * 10];
                 key = evtEventViewerGetPendingNode(viewer);
                 switch ((u32)viewer->commandCategory) {
                 case 0:
@@ -3753,7 +3753,7 @@ s32 evtViewerStoreKeyTimingOrSelector(s32 unused0, s32 unused1, EvtRuntime *view
     if (key != NULL) {
         track = viewer->frameGroup;
         kind = track->type;
-        category = D_003C953A[viewer->frameColumn + kind * 10];
+        category = evtViewerFrameColumnCategories[viewer->frameColumn + kind * 10];
         switch (category) {
         case 0:
             key->frame = viewer->value - track->metadata.value;
@@ -3824,7 +3824,7 @@ s32 evtViewerStoreMenuValueInPendingKey(s32 unused, s32 command, EvtRuntime *vie
     if (key == NULL) {
         return 0;
     }
-    switch (D_003C953A[viewer->frameColumn + viewer->frameGroup->type * 10]) {
+    switch (evtViewerFrameColumnCategories[viewer->frameColumn + viewer->frameGroup->type * 10]) {
     case 1:
         key->duration = value;
         break;
@@ -4383,7 +4383,7 @@ u8 evtViewerSkipsCampSceneIdRelease(PolyMovieWork *task) {
     return task->eventId == 0x263;
 }
 
-extern f32 D_0037F590[];
+extern f32 sdfViewShakeVector[];
 extern s32 sdfDelayedResrcCheck();
 extern void evtFreeStage();
 extern void dds3FreeRenderTexture();
@@ -4402,7 +4402,7 @@ void evtViewerRelease(viewer)
     mnuCampLinkFontGlyph(viewer);
     fldSetTitleDrawMode(0);
     dds3StopQuake();
-    D_0037F590[0] = D_0037F590[1] = D_0037F590[2] = D_0037F590[3] = 0.0f;
+    sdfViewShakeVector[0] = sdfViewShakeVector[1] = sdfViewShakeVector[2] = sdfViewShakeVector[3] = 0.0f;
     if (viewer->timedActive == 1) {
         if (viewer->timedEnd != -2 || evtViewerHasUpdateFlag(viewer) == 1) {
             movieStop();

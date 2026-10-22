@@ -1358,7 +1358,7 @@ SdfTex *dds3GetRenderTexture(void) {
     return kwlnHeldTextureReference;
 }
 
-extern f32 D_0037F590[];
+extern f32 sdfViewShakeVector[];
 extern f32 D_00435D10[];
 extern f32 fabsf(f32 value);
 
@@ -1384,20 +1384,20 @@ void kwlnAdvanceShakeOffsets(void) {
         if (limits[axis] != 0.0f) {
             f32 step = dds3GetRandFloatA(0) * limits[axis] * 0.5f + limits[axis] * 0.5f;
 
-            if (limits[axis] * weights[axis] <= fabsf(D_0037F590[axis])) {
-                if (D_0037F590[axis] <= 0.0f) {
-                    D_0037F590[axis] += step;
+            if (limits[axis] * weights[axis] <= fabsf(sdfViewShakeVector[axis])) {
+                if (sdfViewShakeVector[axis] <= 0.0f) {
+                    sdfViewShakeVector[axis] += step;
                 } else {
-                    D_0037F590[axis] -= step;
+                    sdfViewShakeVector[axis] -= step;
                 }
             } else {
-                D_0037F590[axis] += 2.0f * (step * (dds3GetRandFloatA(0) - 0.5f));
+                sdfViewShakeVector[axis] += 2.0f * (step * (dds3GetRandFloatA(0) - 0.5f));
             }
-            if (D_0037F590[axis] < -limits[axis]) {
-                D_0037F590[axis] = -limits[axis];
+            if (sdfViewShakeVector[axis] < -limits[axis]) {
+                sdfViewShakeVector[axis] = -limits[axis];
             }
-            if (limits[axis] < D_0037F590[axis]) {
-                D_0037F590[axis] = limits[axis];
+            if (limits[axis] < sdfViewShakeVector[axis]) {
+                sdfViewShakeVector[axis] = limits[axis];
             }
         }
     }
