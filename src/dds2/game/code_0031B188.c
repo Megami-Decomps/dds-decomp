@@ -605,22 +605,22 @@ MnuModelNode *mnuAcquireUnusedModelNode(MnuNodeList *group) {
     return 0;
 }
 
-void mnuSetModelNodeVisibility(u8 *node, s8 selector);
+void mnuSetModelNodeVisibility(MnuModelNode *node, s8 selector);
 
-void mnuSetActiveNodeModelVisibility(s32 *list, s8 value) {
-    u8 *node = (u8 *)list[0];
+void mnuSetActiveNodeModelVisibility(MnuNodeList *list, s8 value) {
+    MnuModelNode *node = list->nodes;
     s32 index = 0;
 
-    if (list[1] > 0) {
+    if (list->count > 0) {
         do {
-            u32 active = ((MnuModelNode *)node)->flags & 1;
+            u32 active = node->flags & 1;
 
             if (active == 1) {
                 mnuSetModelNodeVisibility(node, value);
             }
             index++;
-            node += 0x50;
-        } while (index < list[1]);
+            node++;
+        } while (index < list->count);
     }
 }
 
