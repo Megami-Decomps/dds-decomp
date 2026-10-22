@@ -2624,7 +2624,7 @@ INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435E5C);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435E60);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435E64);
+INCLUDE_SDATA(const s32, "newdata/datCalc", datSkillNames);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435E68);
 

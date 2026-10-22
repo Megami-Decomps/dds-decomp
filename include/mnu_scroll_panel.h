@@ -9,7 +9,7 @@ struct EffMappedResource;
 typedef struct MenuScrollPanel {
     u8 pad00[4];
 #ifdef VERSION_DDS2
-    u32 color; /* 0x04 */
+    u32 retract; /* 0x04: nonzero slides the tab back to frame 0, zero out to 181 */
     u32 firstSprite; /* 0x08 */
     u32 secondSprite; /* 0x0C */
     s32 animationFrame; /* 0x10: signed opening/closing progress, clamped to 0..181. */
@@ -31,7 +31,8 @@ void mnuDestroyScrollPanel(MenuScrollPanel *menu);
 void mnuReleaseScrollPanelAnimations(MenuScrollPanel *menu);
 void mnuConfigurePanelResource(MenuScrollPanel *menu,
                                struct EffectSlotSet *model, u32 value,
-                               u32 color);
+                               u32 retract);
+void mnuDrawStaffScrollPanel(s32 x, s32 y, s32 depth, MenuScrollPanel *panel, s32 surface);
 #else
     u32 selection; /* 0x04 */
     u32 firstSprite; /* 0x08 */

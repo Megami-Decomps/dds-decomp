@@ -29,6 +29,11 @@ typedef struct StageTestSlot {
     s32 blendDurationFrames; /* 0x24 */
 } StageTestSlot;
 
+/* StageTestQueue.flags bits. */
+#define EVT_STAGE_QUEUE_PENDING 1        /* a second selection waits in slot[1] */
+#define EVT_STAGE_QUEUE_REQUESTING 2     /* slot[0]'s model request is in progress */
+#define EVT_STAGE_QUEUE_SETUP_COMPLETE 4 /* slot[0]'s model is set up */
+
 typedef struct StageTestQueue {
     u32 flags; /* pending, request-in-progress, and setup-complete bits */
     StageTestSlot slot[2]; /* 0x04 and 0x2C */

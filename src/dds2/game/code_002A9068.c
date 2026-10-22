@@ -96,7 +96,6 @@ extern void mnuDrawCampIconBackdrop(u8 *, s32);
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
-extern void mnuDrawStaffScrollPanel(s32, s32, s32, s32, s32);
 
 
 extern void mnuDrawCampTitleCurrencyAndFade(s32, s32, s32, struct EffectSlotSet *, u8 *, s32);

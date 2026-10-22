@@ -15,7 +15,6 @@
 /* Declared before first use (were implicit int). */
 extern void mnuCreateConfigTasks(s32 mode);
 extern void mnuDrawCampIconBackdrop(MenuCampEffect *set, s32 surface);
-extern void mnuDrawStaffScrollPanel(s32, s32, s32, s32, s32);
 extern void mnuSwitchCampVisualCategory(s32 nextCategory, u8 *menuBytes);
 
 

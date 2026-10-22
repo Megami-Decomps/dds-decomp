@@ -13,6 +13,7 @@
 #include "kwln.h"
 #include "pty_skill_menu_api.h"
 #include "mnu.h"
+#include "mnu_party_panel_api.h"
 #include "mnu_party_menu_data.h"
 #include "brs_level_progress_api.h"
 #include "mnu_panel_state.h"
@@ -140,7 +141,6 @@ extern u8 *D_00435E54;
 extern u8 *D_00435E48;
 
 
-extern void mnuDrawPanelItemValueMeter();
 
 extern void mnuDrawSlotIcons(s32 x, MenuPageWindow *page);
 
@@ -343,7 +343,7 @@ typedef struct MenuListDefaults {
 
 extern MenuListDefaults D_0042AF00;
 extern const MenuListDefaults D_0042AE18;
-extern u8 (*D_00435E64)[17];
+extern u8 (*datSkillNames)[17];
 extern char D_00437C00[];
 extern s32 mnuGetEntryUseStatus(DatPartyRecord *, u16);
 extern void ptySkillMenuDrawEquippedSkillEntry(s32, s32, s32, MenuList *, MenuListNode *, s32);
@@ -1095,7 +1095,6 @@ extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern void mnuSetGroupProperties(MenuProfilePanel *, EffectSlotSet *, EffectSlotSet *, s32, s32);
 extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
-extern void mnuDrawPartyProfilePanelContents(s32, s32, s32, DatPartyRecord *, s32, s32, s32);
 
 extern void mnuDrawPartySelectionPreview(MenuContext *);
 extern void mnuDrawPartySelectionPreviewPanel(MenuContext *, MenuPageBar *, MenuPageBar *, DatPartyRecord *, EffectSlotSet *, u32, u32, s32);
@@ -1592,10 +1591,10 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags)
     frDestroyFontRequestAfter(handle);
 }
 
-void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, MenuPageWindow *page, MenuPanelGroup *packedGroup, s32 group, s32 unused, s32 spriteFlags) {
+void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, MenuPageWindow *page, MenuPanelGroup *packedGroup, MenuSpriteState *spriteState, s32 unused, s32 spriteFlags) {
     mnuApplyPackedGroupValues(packedGroup, entry->itemId);
     mnuDrawAndAdvancePanelGroup(0xeb0, 0x518, 0, entry, packedGroup, 0, spriteFlags);
-    mnuDrawPanelItemValueMeter(0, 0, 0, entry, group, spriteFlags);
+    mnuDrawPartySkillListPanel(0, 0, 0, entry, spriteState, spriteFlags);
     mnuDrawTextSprite(0x2a0, 0xa50, 0, 0xa09dc380, D_00435E48 + entry->unitId * 0x11 + 0x110, spriteFlags);
     mnuDrawSlotIcons(0x14a, page);
 }
@@ -1603,7 +1602,7 @@ void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, MenuPageWindow *page
 void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSpriteState *spriteState,
                                     MenuProfilePanel *resource,
                                     u32 unused4, u32 spriteFlags) {
-    mnuDrawPartyProfilePanelContents(0, 0, 0, entry, entry->profileId, (s32)spriteState, spriteFlags);
+    mnuDrawPartyProfilePanelContents(0, 0, 0, entry, entry->profileId, spriteState, spriteFlags);
     mnuDrawAndAdvanceProfilePanel(0xe80, 0x5b8, 0, resource, spriteFlags);
 }
 
@@ -1630,7 +1629,7 @@ s32 mnuDrawSelectedStaffPartyView(KwlnTask *callback) {
 
     if (menuWork->staffMode == 0) {
         mnuDrawPartySkillAndStatusPanel(partyEntry, &context->partyWindow,
-                                        context->panelGroup, (s32)context->panelRequest,
+                                        context->panelGroup, context->panelRequest,
                                         (s32)&context->displayHandle, 0x53);
         mnuDrawStaffGridLabelsForKind(5, (struct EffectSlotSet *)(u32)(context->displayHandle));
     } else {
@@ -1834,7 +1833,7 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, KwlnTask *callback) {
         MenuListNode *node;
 
         if (skill != 0) {
-            node = mnuAppendWindowListNode(window, D_00435E64[skill]);
+            node = mnuAppendWindowListNode(window, datSkillNames[skill]);
             node->sortKeySecondary = i;
             node->sortKeyPrimary = skill;
             if (selectionMode != 0 && mnuGetEntryUseStatus(entry, skill) != 0) {
@@ -2131,7 +2130,7 @@ void ptySkillMenuInitPages(MenuContext *context) {
                     do {
                         if (ptyGetSkillNibbleState(owner, (u16)skill) != 0) {
                             hasEntries = 1;
-                            node = mnuAppendWindowListNode(window, D_00435E64[skill]);
+                            node = mnuAppendWindowListNode(window, datSkillNames[skill]);
                             {
                                 u32 sortRank = context->slotOfA[skill];
                                 node->sortKeyPrimary = skill;
@@ -2942,7 +2941,7 @@ void mnuDrawAffinityParticipantLabels(u16 affinity, s32 resource, s32 labels) {
                                                0, 1, (EffectSlotSet *)(u32)labels, range + 1, 0x53);
                     glyph = itfCreateConvertedTextGlyph(x + textOffset.x, y + textOffset.y,
                                                        0, 0xA09DC380,
-                                                       D_00435E64[requirement], 0);
+                                                       datSkillNames[requirement], 0);
                 }
             } else {
                 s32 requirement = ptyGetAffinityFlagsWithoutOverride(affinity, i);
@@ -3070,7 +3069,7 @@ void ptySkillMenuBuildLinkageSkills(KwlnTask *task) {
         do {
             if (btlAccessRecordedLinkageSkillFlag((u16)skill, 2) != 0 &&
                 mnuHasAvailableSlotResource(skill) != 0) {
-                node = mnuAppendWindowListNode(windows[0], D_00435E64[skill]);
+                node = mnuAppendWindowListNode(windows[0], datSkillNames[skill]);
                 {
                     u32 sortRank = *ordinal;
                     node->sortKeyPrimary = skill;

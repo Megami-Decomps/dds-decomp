@@ -15,6 +15,7 @@
 #include "eff_resource_records.h"
 #include "eff_resource_list.h"
 #include "mnu.h"
+#include "mnu_party_panel_api.h"
 #include "sdf_resource.h"
 #include "mnu_staff.h"
 #include "kwln.h"
@@ -172,7 +173,6 @@ extern void mnuSetGroupProperties(MenuProfilePanel *, EffectSlotSet *, EffectSlo
 
 extern void mnuDrawListPanels(s32, s32, s32, s32, s32, s32);
 
-extern void mnuDrawPartyProfilePanelContents(s32, s32, s32, DatPartyRecord *, s32, s32, s32);
 
 extern void mnuTerminalSetTrack(s8, s8);
 
@@ -901,7 +901,7 @@ s32 mnuDrawLoadedProgressPanels(DatPartyRecord *resource, MenuProgressHost *host
     host->partyWindow.flags |= 0x280;
     mnuDrawListPanels(0, 0, 0, resource->profileId, (s32)&host->partyWindow, mode);
     mnuDrawPartyProfilePanelContents(0, 0, 0, resource, resource->profileId,
-                   (s32)host->effectResource, mode);
+                   host->effectResource, mode);
     return 1;
 }
 
