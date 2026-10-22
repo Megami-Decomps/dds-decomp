@@ -55,6 +55,7 @@
 #include "eff_pcp_compact_fade.h"
 #include "eff_pcp_compact_work.h"
 #include "eff_pcp_event_emitter_state.h"
+#include "eff_pcp_staggered_pulse_work.h"
 #include "eff_pcp_twin.h"
 #include "eff_pcp_spin.h"
 #include "eff_pcp_span.h"
@@ -4684,20 +4685,6 @@ void effPCPRadiateThunderSetColor(EffPCPGroupSet *work, u32 val) {
     work->color = val;
 }
 
-typedef struct EffPCPSprayWork {
-    f32 pos[4];       /* 0x00 vector loaded by the pulse updater */
-    f32 scale;        /* 0x10 */
-    u32 color;        /* 0x14 */
-    u32 count;        /* 0x18 particle count */
-    s32 frame;        /* 0x1C current update frame */
-    s32 startFrame[10]; /* 0x20 */
-    f32 rotationY[10];  /* 0x48 random start angles */
-    effPartHandle_t *handle[10];   /* 0x70 */
-} EffPCPSprayWork; /* 0x98 */
-
-typedef char EffPCPSprayWork_size_must_be_0x98[
-    (sizeof(EffPCPSprayWork) == 0x98) ? 1 : -1];
-
 EffPCPSprayWork *effPCPMakkaCreat(void *src) {
     EffPCPSprayWork *work = sdfChipAllocDirect(sizeof(EffPCPSprayWork));
     u32 i;
@@ -5727,4 +5714,3 @@ INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_003BB048);
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_003BB04C);
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_003BB04D);
-
