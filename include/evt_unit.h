@@ -124,8 +124,8 @@ typedef struct evtUnitHandle_t {
     u32 value;                     /* 0x6C */
     f32 targetVector[4];           /* 0x70 */
     dds3Basic_t *effObj;          /* 0x80: kind-5 world node owning this motion work. */
-    s32 currentTransitionValue;    /* 0x84 */
-    s32 previousTransitionValue;   /* 0x88 */
+    dds3Basic_t *currentTransitionTarget;  /* 0x84: active target world node */
+    dds3Basic_t *previousTransitionTarget; /* 0x88: prior target during blend-in */
     struct dds3ModelHandle_t *owner;          /* 0x8C: model context and its SDK motion slots */
     void *linkedUnit;              /* 0x90: retained source of a transition */
     s32 (*motionCallback)(struct evtUnitHandle_t *, s32); /* 0x94: returns 1 when motion completes. */

@@ -71,7 +71,7 @@ void dds3UnlinkSceneLight(dds3Basic_t *object) {
 void dds3LinkLightObjectToUnitObject(EffectValueObject *value, dds3Basic_t *effectNode, s32 duration) {
     EffectObjectData *effectData = effectNode->data;
 
-    evtSetUnitValueTransition(effectData->transitionWork, value, duration);
+    evtSetUnitValueTransition(effectData->transitionWork, (dds3Basic_t *)value, duration);
 }
 
 void dds3UnlinkLightObjectFromUnitObject(dds3Basic_t *effectNode, s32 duration) {

@@ -146,38 +146,38 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
     }
     /* Stale world-node references must not reach the target-vector reads. */
     if (flags & EVT_UNIT_FLAG_TARGET_TRANSITION) {
-        if (unit->currentTransitionValue == 0) {
+        if (unit->currentTransitionTarget == 0) {
             unit->flags = flags & ~EVT_UNIT_FLAG_TARGET_TRANSITION;
         } else if (!dds3SceneBasicExistBasicFromType(dds3GetActiveScene(), 9,
-                                                 (dds3Basic_t *)unit->currentTransitionValue)) {
-            unit->currentTransitionValue = 0;
-            unit->previousTransitionValue = 0;
+                                                 unit->currentTransitionTarget)) {
+            unit->currentTransitionTarget = 0;
+            unit->previousTransitionTarget = 0;
             unit->flags &= ~EVT_UNIT_FLAG_TARGET_TRANSITION;
         }
     }
-    if (unit->previousTransitionValue &&
+    if (unit->previousTransitionTarget &&
         !dds3SceneBasicExistBasicFromType(dds3GetActiveScene(), 9,
-                                       (dds3Basic_t *)unit->previousTransitionValue)) {
-        unit->previousTransitionValue = 0;
+                                       unit->previousTransitionTarget)) {
+        unit->previousTransitionTarget = 0;
     }
     transition = 0.0f;
     target = 0;
     previous = 0;
     ownVector = 0;
     currentWeight = 0.0f;
-    if (unit->currentTransitionValue) {
+    if (unit->currentTransitionTarget) {
         flags = unit->flags;
         if (flags & EVT_UNIT_FLAG_TARGET_TRANSITION) {
             f32 distance;
-            target = ((dds3Basic_t *)unit->currentTransitionValue)->data;
-            if (unit->previousTransitionValue) {
-                previous = ((dds3Basic_t *)unit->previousTransitionValue)->data;
+            target = unit->currentTransitionTarget->data;
+            if (unit->previousTransitionTarget) {
+                previous = unit->previousTransitionTarget->data;
             }
             if (!sdfModelGetMarkPos(unit->owner->inner, 0)) {
                 mdlGetPosition(unit->owner);
             }
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
-            VU0_LOAD_VF(vf11, ((dds3Basic_t *)unit->currentTransitionValue)->inner->position);
+            VU0_LOAD_VF(vf11, unit->currentTransitionTarget->inner->position);
             VU0_SUB(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, targetDirection);
             VU0_LENGTH_VF10(distance);
@@ -192,7 +192,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
             if (previous) {
                 f32 previousDistance;
                 VU0_LOAD_VF(vf10, position);
-                VU0_LOAD_VF(vf11, ((dds3Basic_t *)unit->previousTransitionValue)->inner->position);
+                VU0_LOAD_VF(vf11, unit->previousTransitionTarget->inner->position);
                 VU0_SUB(vf10, vf10, vf11);
                 VU0_STORE_VF_UNCLOBBERED(vf10, previousDirection);
                 VU0_LENGTH_VF10(previousDistance);
@@ -223,10 +223,10 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
                     if ((u16)unit->transitionFrameCount) {
                         if ((u16)unit->transitionFrameCount <= (u16)++unit->transitionElapsed) {
                             if (unit->flags & EVT_UNIT_FLAG_TARGET_BLEND_OUT) {
-                                unit->currentTransitionValue = 0;
+                                unit->currentTransitionTarget = 0;
                                 unit->flags &= ~EVT_UNIT_FLAG_TARGET_TRANSITION;
                             }
-                            unit->previousTransitionValue = 0;
+                            unit->previousTransitionTarget = 0;
                             unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_PHASES;
                         }
                     }
@@ -497,8 +497,8 @@ void GetBaseLightRGB(evtUnitHandle_t *unit) {
     s32 color;
     f32 scale;
 
-    if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        info = ((dds3Basic_t *)unit->currentTransitionValue)->data;
+    if (unit->currentTransitionTarget != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
+        info = unit->currentTransitionTarget->data;
         if (info->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
@@ -521,8 +521,8 @@ void GetBaseAmbientRGB(evtUnitHandle_t *unit) {
     s32 color;
     f32 scale;
 
-    if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        info = ((dds3Basic_t *)unit->currentTransitionValue)->data;
+    if (unit->currentTransitionTarget != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
+        info = unit->currentTransitionTarget->data;
         if (info->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
@@ -542,8 +542,8 @@ void GetBaseAmbientRGB(evtUnitHandle_t *unit) {
 void GetBaseLightDir(evtUnitHandle_t *unit) {
     s32 ownVector = 0;
 
-    if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        if (((EvtTargetInfo *)((dds3Basic_t *)unit->currentTransitionValue)->data)->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
+    if (unit->currentTransitionTarget != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
+        if (((EvtTargetInfo *)unit->currentTransitionTarget->data)->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
     }
@@ -605,10 +605,10 @@ void evtRefreshUnitEndpointWork(evtUnitHandle_t *unit) {
 
 void evtSetUnitValueTransition(evtUnitHandle_t *unit, dds3Basic_t *target, s32 duration) {
     unit->flags |= EVT_UNIT_FLAG_TARGET_TRANSITION;
-    unit->previousTransitionValue = unit->currentTransitionValue;
-    unit->currentTransitionValue = (s32)target;
+    unit->previousTransitionTarget = unit->currentTransitionTarget;
+    unit->currentTransitionTarget = target;
     if (duration == 0) {
-        unit->previousTransitionValue = 0;
+        unit->previousTransitionTarget = 0;
         unit->transitionElapsed = 0;
         unit->transitionDuration = 0;
         unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_PHASES;
@@ -621,11 +621,11 @@ void evtSetUnitValueTransition(evtUnitHandle_t *unit, dds3Basic_t *target, s32 d
 }
 
 void evtEndUnitValueTransition(evtUnitHandle_t *unit, s32 duration) {
-    if (unit->currentTransitionValue != 0) {
+    if (unit->currentTransitionTarget != 0) {
         if (duration == 0) {
             unit->flags &= ~EVT_UNIT_FLAG_TARGET_TRANSITION;
             unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_PHASES;
-            unit->currentTransitionValue = 0;
+            unit->currentTransitionTarget = 0;
         } else {
             unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_IN;
             unit->transitionDuration = duration;
