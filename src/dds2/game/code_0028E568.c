@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "pcp_vu0.h"
 #include "mnu_mantra.h"
 #include "mnu_mantra_position_api.h"
 #include "mdl_flag_api.h"
@@ -170,7 +171,96 @@ s32 func_0028E858(MnuStatusResource *object) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028E568", mnuAdvanceMantraSelectionCursor);
+INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427218);
+INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427258);
+INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427268);
+
+s32 mnuAdvanceMantraSelectionCursor(MnuStatusResource *object, s32 centerOnNode) {
+    s32 target[2];
+    f32 movement[4] __attribute__((aligned(16)));
+    s16 projected[2];
+    u16 layouts[4][10] = {
+        {145, 170, 118, 118, 142, 128, 240, 128, 20, 19},
+        {106, 212, 98, 136, 142, 128, 240, 128, 20, 19},
+        {-42, 360, -50, 368, 142, 128, 240, 128, 20, 19},
+        {63, 180, 75, 160, 52, 72, 420, 300, 20, 19}
+    };
+    u16 requirements[4][2] = {
+        {97, 0x977}, {98, 0x978}, {99, 0x979}, {100, 0x97A}
+    };
+    MantraMenuWork *work;
+    MantraNodePos *node;
+    s16 layout;
+    s32 i;
+    f32 distance;
+    f32 step;
+
+    work = &object->menu;
+    for (i = 0; i < 4; i++) {
+        mdlFlagTest(requirements[i][1]);
+    }
+    layout = 3;
+    if (work->drawBits.unk10 >= 2) {
+        layout = work->drawBits.unk10 - 1;
+    }
+    node = work->defaultSelector;
+    target[0] = work->scrollX;
+    target[1] = work->scrollY;
+    projected[0] = (s32)((f32)node->x / 10.0f * 40.0f);
+    projected[1] = (s32)((f32)node->y / 10.0f * 39.0f);
+    if (centerOnNode == 0) {
+        switch (layout) {
+        case 0:
+        case 1:
+        case 2:
+            target[0] = projected[0] - 256;
+            target[1] = projected[1] - 191;
+            break;
+        case 3:
+            {
+                const s16 *idField = &node->id;
+                s32 nodeId;
+
+                target[0] = 124;
+                target[1] = 160;
+                nodeId = *idField;
+                for (i = 0; i < 4; i++) {
+                    if (requirements[i][0] == nodeId) {
+                        target[0] = projected[0] - 256;
+                        target[1] = projected[1] - 191;
+                    }
+                }
+            }
+            break;
+        }
+    } else {
+        target[0] = projected[0] - 256;
+        target[1] = projected[1] - 191;
+    }
+    memset(movement, 0, sizeof(movement));
+    movement[0] = target[0] - work->scrollX;
+    movement[1] = target[1] - work->scrollY;
+    VU0_LOAD_VF_PTR(vf10, movement);
+    VU0_LENGTH_VF10(distance);
+    VU0_NORMALIZE_VF10();
+    step = distance - distance * 0.9f;
+    if (step < 12.0f) {
+        step = 12.0f;
+    }
+    if (distance < step) {
+        step = distance;
+    }
+    VU0_SCALAR_OP_CLOBBER(step, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_STORE_VF_PTR(vf10, movement);
+    work->scrollX += movement[0];
+    work->scrollY += movement[1];
+    work->scrollEndX = work->scrollX + layouts[layout][4];
+    work->scrollEndY = work->scrollY + layouts[layout][5];
+    if (step < distance) {
+        return 1;
+    }
+    return 0;
+}
 
 extern MenuMantraRecord *mnuMantraPublishedSourceRecords;
 
@@ -178,15 +268,10 @@ extern MenuMantraRecord *mnuMantraPublishedSourceRecords;
  * level comes from event flags 0x920-0x922, then one record per kind-2/4 node
  * and six per kind-3 node, each claiming the next event flag from 0x923. The
  * final store recomputes the list address so `record` stays the live cursor. */
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427218);
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427258);
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427268);
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427278);
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_004272C8);
 
 void mnuBuildMantraSourceList(MnuStatusResource *status) {
     MenuMantraRecord *list = (MenuMantraRecord *)((u8 *)status + 0x824);
