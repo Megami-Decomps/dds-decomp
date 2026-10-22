@@ -54,6 +54,7 @@
 #include "eff_pcp_charge.h"
 #include "eff_pcp_compact_fade.h"
 #include "eff_pcp_compact_work.h"
+#include "eff_pcp_event_emitter_state.h"
 #include "eff_pcp_twin.h"
 #include "eff_pcp_spin.h"
 #include "eff_pcp_span.h"
@@ -4828,34 +4829,6 @@ void effPCPMakkaSetScale(EffPCPSprayWork *work, f32 val) {
     work->scale = val;
 }
 
-/* Placement block handed to every spawned event entry. */
-/* Serialized drift ranges followed by the retained event array. */
-typedef struct EffPCPDriftEventParams {
-    f32 position[4];
-    u8 pad10[0x44];
-    s32 duration;
-    u32 count;
-    s32 delaySpread;
-    s32 fadeIn;
-    s32 fadeOut;
-    f32 startPosition, endPosition, startJitter, endJitter;
-    f32 angleStep;
-    f32 angleDecay;
-    f32 angleJitter;
-    u8 pad84[0x80];
-} EffPCPDriftEventParams;
-
-typedef struct EffPCPDriftEventWork {
-    EffPCPDriftEventParams params;
-    EffPCPDriftEventRow *entries;
-    SoundMixer *owner;
-    u8 unk10C;
-    u8 pad10D[3];
-    f32 scale;
-    u32 color;
-    struct sdfMemHandle_t *handle;
-} EffPCPDriftEventWork;
-
 /* Clone the source header (a longer one with 0x18-byte entries), then give every entry one event and a random negative start delay. */
 EffPCPDriftEventWork *effPCPRadiateBEDCreate(EffPCPDriftEventParams *src, void *params) {
     u32 count = src->count;
@@ -5064,29 +5037,6 @@ void effPCPRadiateBEDSetScale(EffPCPDriftEventWork *work, f32 val) {
 void effPCPRadiateBEDSetColor(EffPCPDriftEventWork *work, u32 val) {
     work->color = val;
 }
-
-typedef struct EffPCPPairedEventParams {
-    f32 origin[4];
-    u8 repeat;
-    u8 pad11[3];
-    s32 duration;
-    u32 count;
-    s32 delaySpread;
-    s32 fadeIn;
-    s32 fadeOut;
-    f32 baseRadius, radiusJitter, baseTiltStep, tiltJitter;
-    EffThunderFragmentParams fragmentParams;
-} EffPCPPairedEventParams;
-
-typedef struct EffPCPPairedEventWork {
-    EffPCPPairedEventParams params;
-    EffPCPPairedEventRow *entries;
-    SoundMixer *ownerA, *ownerB;
-    u8 unk98;
-    u8 pad99[3];
-    u32 color;
-    struct sdfMemHandle_t *handle;
-} EffPCPPairedEventWork;
 
 /* Clone the source effect header, then give every entry two events (placed at the unit scale) and a random negative start frame. */
 EffPCPPairedEventWork *effPCPRadiateTBCreate(EffPCPPairedEventParams *src, void *paramsA, void *paramsB) {
