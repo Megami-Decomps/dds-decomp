@@ -270,7 +270,8 @@ typedef struct MdlCtrlState {
 
 extern MdlCtrlState mdlViewerControlState;
 
-void fldDrawPackedRgbEditor();
+void fldDrawPackedRgbEditor(void *packetList, s32 x, s32 y, s32 selectedChannel,
+                            u32 packedColor, s32 showNormalizedValues);
 
 
 extern char *D_003C8768[];
@@ -3341,7 +3342,7 @@ void mdlDrawViewerLabelWithPackedColor(s32 first, s32 second, s32 color, s32 var
     s32 packedColor = color & 0xffffff;
 
     fldDrawPackedRgbEditor(mdlViewerControlState.packetList, first, second,
-                  (mdlViewerControlState.editing == 0) ? -1 : variant, packedColor | 0x80000000, 1, packedColor);
+                  (mdlViewerControlState.editing == 0) ? -1 : variant, packedColor | 0x80000000, 1);
 }
 
 typedef struct MdlValueEdit {
