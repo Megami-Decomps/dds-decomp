@@ -69,6 +69,7 @@
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
 #include "kwln_fade_timing.h"
+#include "btl_camera_setup_policy.h"
 /* Declared before first use (were implicit int). */
 extern s32 btlBuildEligibleTargetIndexList(void *actionArg, BtlIndexList *targets, s32 area, s32 rule, s32 excludedStatus);
 extern s32 btlGetSelectedUnitProperty(s32 unitAddress);
@@ -4002,29 +4003,6 @@ void btlUnitGetPosVU(BtlUnit *unit, u8 mode) {
     }
     VU0_LOAD_VF(vf10, pos);
 }
-
-/* Complete 0x60-byte camera-setup records. The seven bank boundaries and
- * their native 0x60 indexing establish the record and array extents. */
-typedef struct BtlCameraSetupPointPolicy {
-    u8 kind;
-    u8 mode;
-    u8 reserved02[2];
-    f32 side;
-    f32 distance;
-    f32 height;
-} BtlCameraSetupPointPolicy;
-
-typedef struct BtlCameraSetupPolicy {
-    f32 singleFov;
-    f32 multipleFov;
-    u8 reserved08[8];
-    f32 boundsSeed[4];
-    f32 boundsRadius;
-    BtlCameraSetupPointPolicy focusPolicy;
-    BtlCameraSetupPointPolicy eyePolicy;
-    BtlCameraSetupPointPolicy terminalPolicy;
-    u8 reserved54[12];
-} BtlCameraSetupPolicy;
 
 extern BtlCameraSetupPolicy D_0035A730[8];
 
