@@ -81,7 +81,7 @@ extern const s32 D_003A5D50[];
 
 extern AiSpecies *datEnemyAiRecords;
 
-extern u8 btlSetLinkedDefeatCameraPresetA();
+extern u8 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *, BtlCamState *, s32);
 
 extern u8 D_00360EE0[];
 

@@ -31,7 +31,7 @@ extern void btlSetUnitPosition(BtlUnit *, void *);
 
 
 
-extern u8 btlSetLinkedDefeatCameraPresetA();
+extern u8 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *, BtlCamState *, s32);
 
 
 extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
