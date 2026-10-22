@@ -237,7 +237,7 @@ extern u32 D_0037F5D0[];
 
 extern s8 evtSelectionStateActive;
 
-extern void *evtSelectionState;
+extern EvtSelState *evtSelectionState;
 
 extern void evtSelStateDestroy(void);
 
@@ -1010,11 +1010,11 @@ s32 evtSelStateCreate(s32 countLimit, s16 frames, s32 firstValue, s32 secondValu
     } else {
         selectionState->limit = countLimit;
     }
-    ((EvtSelState *)evtSelectionState)->unk_08 = firstValue;
-    ((EvtSelState *)evtSelectionState)->unk_0C = secondValue;
-    ((EvtSelState *)evtSelectionState)->amplitude[0] = frames;
-    ((EvtSelState *)evtSelectionState)->amplitude[1] = frames;
-    ((EvtSelState *)evtSelectionState)->amplitude[2] = frames;
+    evtSelectionState->unk_08 = firstValue;
+    evtSelectionState->unk_0C = secondValue;
+    evtSelectionState->amplitude[0] = frames;
+    evtSelectionState->amplitude[1] = frames;
+    evtSelectionState->amplitude[2] = frames;
     evtSelectionStateActive = 1;
     return 1;
 }
