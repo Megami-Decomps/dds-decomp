@@ -3388,7 +3388,7 @@ void fldResetObjectSlots(void) {
         fldTakaraSlotTable[i].activationState = 0;
         fldTakaraSlotTable[i].activationRequested = 0;
         if (fldTakaraSlotTable[i].effectNode != 0) {
-            dds3EffectDelete((EffNode *)(u32)fldTakaraSlotTable[i].effectNode);
+            dds3EffectDelete(fldTakaraSlotTable[i].effectNode);
         }
         fldTakaraSlotTable[i].effectNode = 0;
     }
@@ -3643,7 +3643,7 @@ void fldReleaseObjectSlots(void) {
 
     for (i = 0; i < 32; i++) {
         if (fldTakaraSlotTable[i].effectNode != 0) {
-            dds3EffectDelete((EffNode *)(u32)fldTakaraSlotTable[i].effectNode);
+            dds3EffectDelete(fldTakaraSlotTable[i].effectNode);
             fldTakaraSlotTable[i].effectNode = 0;
         }
     }
@@ -7064,4 +7064,3 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363DC);
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363E0);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363E4);
-
