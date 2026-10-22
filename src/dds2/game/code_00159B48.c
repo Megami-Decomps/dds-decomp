@@ -1014,15 +1014,15 @@ void dds3Particle_SpiralSetScale(float scale, EffTemplatePacketList *effect) {
 
 /* Clone the template prefix and appended tail, then allocate its packet records. */
 s32 dds3Particle_SpiralCreate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfChipAllocDirect(0x180);
+    EffEmitterHead *clone = sdfChipAllocDirect(0x180);
     s32 tailBytes = 0x30;
 
-    memset((void *)clone, 0, 0x180);
-    memcpy((void *)clone, source, source->head.templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    memset(clone, 0, 0x180);
+    memcpy(clone, source, source->head.templateSize);
+    memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->head.templateSize, tailBytes);
     dds3Particle_BasicCreate((EffEmitterHead *)clone);
-    dds3Particle_SpiralAllBuffInit(clone);
-    return clone;
+    dds3Particle_SpiralAllBuffInit((EffTemplatePacketList *)clone);
+    return (s32)clone;
 }
 
 void dds3Particle_SpiralDelete(u32 effect) {
@@ -1213,15 +1213,15 @@ void dds3Particle_SmokeSetScale(float scale, EffTemplatePacketList *effect) {
 
 /* Clone the disc prefix/tail, allocate packet records, and initialize their native age tags. */
 s32 dds3Particle_SmokeCreate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfChipAllocDirect(0x180);
+    EffEmitterHead *clone = sdfChipAllocDirect(0x180);
     s32 tailBytes = 0x30;
 
-    memset((void *)clone, 0, 0x180);
-    memcpy((void *)clone, source, source->head.templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    memset(clone, 0, 0x180);
+    memcpy(clone, source, source->head.templateSize);
+    memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->head.templateSize, tailBytes);
     dds3Particle_BasicCreate((EffEmitterHead *)clone);
-    dds3Particle_SmokeAllBuffInit(clone);
-    return clone;
+    dds3Particle_SmokeAllBuffInit((EffTemplatePacketList *)clone);
+    return (s32)clone;
 }
 
 void dds3Particle_SmokeDelete(u32 effect) {
@@ -1397,15 +1397,15 @@ void dds3Particle_SparkSetScale(float scale, EffTemplatePacketList *effect) {
 
 /* Clone the ballistic prefix/tail, allocate packet records, and initialize their native age tags. */
 s32 dds3Particle_SparkCreate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfChipAllocDirect(0x180);
+    EffEmitterHead *clone = sdfChipAllocDirect(0x180);
     s32 tailBytes = 0x30;
 
-    memset((void *)clone, 0, 0x180);
-    memcpy((void *)clone, source, source->head.templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    memset(clone, 0, 0x180);
+    memcpy(clone, source, source->head.templateSize);
+    memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->head.templateSize, tailBytes);
     dds3Particle_BasicCreate((EffEmitterHead *)clone);
-    dds3Particle_SparkAllBuffInit(clone);
-    return clone;
+    dds3Particle_SparkAllBuffInit((EffTemplatePacketList *)clone);
+    return (s32)clone;
 }
 
 void dds3Particle_SparkDelete(u32 effect) {
@@ -1851,15 +1851,15 @@ void dds3Particle_SphereSpiralSetScale(float scale, EffTemplatePacketList *effec
 
 /* Clone the burst prefix/tail, allocate packet records, and initialize their native age tags. */
 s32 dds3Particle_SphereSpiralCreate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfChipAllocDirect(0x170);
+    EffEmitterHead *clone = sdfChipAllocDirect(0x170);
     s32 tailBytes = 0x20;
 
-    memset((void *)clone, 0, 0x170);
-    memcpy((void *)clone, source, source->head.templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    memset(clone, 0, 0x170);
+    memcpy(clone, source, source->head.templateSize);
+    memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->head.templateSize, tailBytes);
     dds3Particle_BasicCreate((EffEmitterHead *)clone);
-    dds3Particle_SphereSpiralAllBuffInit(clone);
-    return clone;
+    dds3Particle_SphereSpiralAllBuffInit((EffTemplatePacketList *)clone);
+    return (s32)clone;
 }
 
 void dds3Particle_SphereSpiralDelete(u32 effect) {
@@ -2052,15 +2052,15 @@ void dds3Particle_SphereSmokeSetScale(float scale, EffTemplatePacketList *effect
 
 /* Clone the sphere prefix/tail, allocate packet records, and initialize their native age tags. */
 s32 dds3Particle_SphereSmokeCreate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfChipAllocDirect(0x180);
+    EffEmitterHead *clone = sdfChipAllocDirect(0x180);
     s32 tailBytes = 0x30;
 
-    memset((void *)clone, 0, 0x180);
-    memcpy((void *)clone, source, source->head.templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    memset(clone, 0, 0x180);
+    memcpy(clone, source, source->head.templateSize);
+    memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->head.templateSize, tailBytes);
     dds3Particle_BasicCreate((EffEmitterHead *)clone);
-    dds3Particle_SphereSmokeAllBuffInit(clone);
-    return clone;
+    dds3Particle_SphereSmokeAllBuffInit((EffTemplatePacketList *)clone);
+    return (s32)clone;
 }
 
 void dds3Particle_SphereSmokeDelete(u32 effect) {
@@ -2244,15 +2244,15 @@ void dds3Particle_SphereRingSetScale(float scale, EffTemplatePacketList *effect)
 
 /* Clone the expanding-ring prefix/tail and initialize its period-grouped packet tags. */
 s32 dds3Particle_SphereRingCreate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfChipAllocDirect(0x170);
+    EffEmitterHead *clone = sdfChipAllocDirect(0x170);
     s32 tailBytes = 0x20;
 
-    memset((void *)clone, 0, 0x170);
-    memcpy((void *)clone, source, source->head.templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    memset(clone, 0, 0x170);
+    memcpy(clone, source, source->head.templateSize);
+    memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->head.templateSize, tailBytes);
     dds3Particle_BasicCreate((EffEmitterHead *)clone);
-    dds3Particle_SphereRingAllBuffInit(clone);
-    return clone;
+    dds3Particle_SphereRingAllBuffInit((EffTemplatePacketList *)clone);
+    return (s32)clone;
 }
 
 void dds3Particle_SphereRingDelete(u32 effect) {
@@ -2417,15 +2417,15 @@ void dds3Particle_Spark2SetScale(float scale, EffTemplatePacketList *effect) {
 
 /* Clone the cone prefix/tail, allocate packet records, and initialize their native age tags. */
 s32 dds3Particle_Spark2Create(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfChipAllocDirect(0x180);
+    EffEmitterHead *clone = sdfChipAllocDirect(0x180);
     s32 tailBytes = 0x30;
 
-    memset((void *)clone, 0, 0x180);
-    memcpy((void *)clone, source, source->head.templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    memset(clone, 0, 0x180);
+    memcpy(clone, source, source->head.templateSize);
+    memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->head.templateSize, tailBytes);
     dds3Particle_BasicCreate((EffEmitterHead *)clone);
-    dds3Particle_Spark2AllBuffInit(clone);
-    return clone;
+    dds3Particle_Spark2AllBuffInit((EffTemplatePacketList *)clone);
+    return (s32)clone;
 }
 
 void dds3Particle_Spark2Delete(u32 effect) {
@@ -2587,15 +2587,15 @@ void dds3Particle_SphereAtomSetScale(float scale, EffTemplatePacketList *effect)
 
 /* Clone the prefix/tail and initialize each packet record with the template's uniform scale. */
 s32 dds3Particle_SphereAtomCreate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfChipAllocDirect(0x170);
+    EffEmitterHead *clone = sdfChipAllocDirect(0x170);
     s32 tailBytes = 0x20;
 
-    memset((void *)clone, 0, 0x170);
-    memcpy((void *)clone, source, source->head.templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    memset(clone, 0, 0x170);
+    memcpy(clone, source, source->head.templateSize);
+    memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->head.templateSize, tailBytes);
     dds3Particle_BasicCreate((EffEmitterHead *)clone);
-    dds3Particle_SphereAtomAllBuffInit(clone);
-    return clone;
+    dds3Particle_SphereAtomAllBuffInit((EffTemplatePacketList *)clone);
+    return (s32)clone;
 }
 
 void dds3Particle_SphereAtomDelete(u32 effect) {
@@ -2901,15 +2901,15 @@ void dds3Particle_SparkOffsetSetScale(float scale, EffTemplatePacketList *effect
 
 /* Clone the offset-gravity prefix/tail, allocate records, and initialize their native age tags. */
 s32 dds3Particle_SparkOffsetCreate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfChipAllocDirect(0x190);
+    EffEmitterHead *clone = sdfChipAllocDirect(0x190);
     s32 tailBytes = 0x40;
 
-    memset((void *)clone, 0, 0x190);
-    memcpy((void *)clone, source, source->head.templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    memset(clone, 0, 0x190);
+    memcpy(clone, source, source->head.templateSize);
+    memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->head.templateSize, tailBytes);
     dds3Particle_BasicCreate((EffEmitterHead *)clone);
-    dds3Particle_SparkOffsetAllBuffInit(clone);
-    return clone;
+    dds3Particle_SparkOffsetAllBuffInit((EffTemplatePacketList *)clone);
+    return (s32)clone;
 }
 
 void dds3Particle_SparkOffsetDelete(u32 effect) {
