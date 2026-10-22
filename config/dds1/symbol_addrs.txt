@@ -10891,6 +10891,7 @@ func_00323130 = 0x00323130; // type:func
 // END romwright
 effMathStepBezierSlotDirect = 0x0018E0C8; // type:func
 effReturnCallbackValue = 0x0018CE30; // type:func
+btlUpdateBattleEnd = 0x001C6888; // type:func
 mnuTitleStreamDecoderState = 0x003D9168;
 mnuTitleSoundBufferDecoderState = 0x003DA1A8;
 mnuTitleStreamDecodedSamples = 0x003D8140;

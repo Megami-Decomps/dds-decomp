@@ -1239,7 +1239,7 @@ extern void mnuResetTitleStreamLocked(void);
 extern void sndQueueNoPayloadCommand1A0(void);
 extern void sndQueueNoPayloadCommand210(void);
 
-s32 func_001D22D8(BtlState *scene) {
+s32 btlUpdateBattleEnd(BtlState *scene) {
     s32 state;
     s32 request;
     s32 nextMode, nextEntry;
