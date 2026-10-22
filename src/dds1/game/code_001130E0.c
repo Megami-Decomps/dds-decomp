@@ -767,25 +767,25 @@ void FreeEffectData(EffectDependencyState *state) {
     EffectDependencyState *data = state;
 
     switch (data->state) {
-    case 1:
+    case EFF_DEPENDENCY_STATE_BOUND_EFFECT_NODE:
         if (data->handle != NULL) {
             dds3EffectDelete(data->handle);
             data->handle = NULL;
         }
         break;
-    case 2:
-    case 3:
+    case EFF_DEPENDENCY_STATE_BILLBOARD_ANIMATION:
+    case EFF_DEPENDENCY_STATE_BILLBOARD_NODE:
         if (data->handle != NULL) {
             dds3BillboardDelete(data->handle);
             data->handle = NULL;
         }
         break;
-    case 4:
+    case EFF_DEPENDENCY_STATE_BORROWED_HANDLE:
         if (data->handle != NULL) {
             data->handle = NULL;
         }
         break;
-    case 5:
+    case EFF_DEPENDENCY_STATE_EVENT_CUT:
         if (data->node != NULL) {
             effEveBEDCutDelete(data->node);
             data->node = NULL;
@@ -799,8 +799,8 @@ void FreeEffectData(EffectDependencyState *state) {
             data->vector = NULL;
         }
         break;
-    case 7:
-    case 8:
+    case EFF_DEPENDENCY_STATE_MAGATUHI_TWO_ROWS:
+    case EFF_DEPENDENCY_STATE_MAGATUHI_FOUR_ROWS:
         if (data->handle != NULL) {
             dds3EffectDelete(data->handle);
             data->handle = NULL;
@@ -815,7 +815,7 @@ void FreeEffectData(EffectDependencyState *state) {
         }
         break;
     }
-    data->state = 0;
+    data->state = EFF_DEPENDENCY_STATE_EMPTY;
     data->handle = NULL;
 }
 
@@ -837,4 +837,3 @@ typedef char EvtUnitShadowLevelOffsetCheck[
     ((u32)&((evtUnitHandle_t *)0)->shadowLevel == 0xD3) ? 1 : -1];
 
 INCLUDE_SDATA(const s32, "game/code_001130E0", effObjOpacityPassEnabled);
-

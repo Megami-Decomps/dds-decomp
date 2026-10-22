@@ -5,13 +5,26 @@
 
 struct BillConfig;
 
+/* Effect-object dependency states drive handle update and release policy. */
+typedef enum EffectDependencyStateKind {
+    EFF_DEPENDENCY_STATE_EMPTY = 0,
+    EFF_DEPENDENCY_STATE_BOUND_EFFECT_NODE = 1,
+    EFF_DEPENDENCY_STATE_BILLBOARD_ANIMATION = 2,
+    EFF_DEPENDENCY_STATE_BILLBOARD_NODE = 3,
+    EFF_DEPENDENCY_STATE_BORROWED_HANDLE = 4,
+    EFF_DEPENDENCY_STATE_EVENT_CUT = 5,
+    EFF_DEPENDENCY_STATE_PARAMETERS_READY = 6,
+    EFF_DEPENDENCY_STATE_MAGATUHI_TWO_ROWS = 7,
+    EFF_DEPENDENCY_STATE_MAGATUHI_FOUR_ROWS = 8
+} EffectDependencyStateKind;
+
 /* Complete 0x50-byte kind-7 payload, allocated and cleared by its constructor.
  * The dependency at 0x0C has a state-dependent owner: node, billboard or sound.
  * Bytes 0x30..0x3B remain opaque. */
 typedef struct EffectDependencyState {
     dds3ObjectBaseControlWorkData_t *objectHandle;
     u32 flags;
-    s32 state;
+    EffectDependencyStateKind state;
     void *handle;
     u32 word10;
     u32 word14;
