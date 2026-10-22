@@ -1022,7 +1022,7 @@ void mnuApplyFadeTrackMode(s32 mode, MenuSlotState *host) {
 
 /* Allocate the terminal scene and its lists/effects/message resource.
  * Both cursor slots start at -1; DDS2 also initializes its gradient indicator. */
-u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
+MenuSlotState *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     struct sdfMemHandle_t *allocation;
     MenuSlotState *obj;
     u32 i;
@@ -1047,7 +1047,7 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     mnuTerminalSelectResourceBank(obj);
     mnuApplyFadeTrackMode(0, obj);
     mnuResetGradientFadeColor(&obj->gradientFade, 0x60);
-    return (u8 *)obj;
+    return obj;
 }
 
 extern void evtReleaseResourcePairHandle(EvtResourcePair *record);
@@ -1098,7 +1098,7 @@ INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F10);
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F20);
 
 void mnuCreateTerminalSceneTasks(s32 reduced, s32 slot) {
-    u8 *scene = mnuTerminalCreateScene(reduced, slot);
+    MenuSlotState *scene = mnuTerminalCreateScene(reduced, slot);
     dds3ProcessID_t *drawTask;
     dds3ProcessID_t *fadeTask;
 

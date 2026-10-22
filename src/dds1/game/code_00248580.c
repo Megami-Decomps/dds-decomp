@@ -891,7 +891,7 @@ INCLUDE_RODATA(const s32, "game/code_00248580", mnuTerminalMenuTemplate);
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF620);
 
-u8 *mnuTerminalCreateScene(reduced, slot)
+MenuTerminalWork *mnuTerminalCreateScene(reduced, slot)
     s32 reduced;
     s32 slot;
 {
@@ -917,7 +917,7 @@ u8 *mnuTerminalCreateScene(reduced, slot)
         obj->cursor[i] = -1;
     }
     mnuTerminalSelectResourceBank(obj);
-    return (u8 *)obj;
+    return obj;
 }
 
 extern void evtReleaseResourcePairHandle(EvtResourcePair *record);
@@ -973,7 +973,7 @@ extern void mnuReleaseTerminalWorkAndResumeField(dds3ProcessID_t *task);
 /* Create the terminal update/draw/exit tasks sharing one scene. */
 s32 mnuTerminalCreateTasks(s32 reduced, s32 slot) {
     s32 result;
-    void *work = mnuTerminalCreateScene(reduced, slot);
+    MenuTerminalWork *work = mnuTerminalCreateScene(reduced, slot);
 
     D_003BC3E4 = (s32)dds3StartProcess(D_003AF658, 0x404, 1, 1, mnuPrepareTerminalPopupAndDispatch, 0, (u32)work);
     dds3StartProcess(D_003AF668, 0x2B14, 1, 1, evtRunTerminalPanel, 0, (u32)work);
