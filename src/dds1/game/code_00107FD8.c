@@ -1016,8 +1016,8 @@ s32 evtSelStateCreate(s32 countLimit, s16 frames, s32 firstValue, s32 secondValu
     } else {
         selectionState->limit = countLimit;
     }
-    ((EvtSelState *)evtSelectionState)->unk_08 = firstValue;
-    ((EvtSelState *)evtSelectionState)->unk_0C = secondValue;
+    ((EvtSelState *)evtSelectionState)->rampUpFrames = firstValue;
+    ((EvtSelState *)evtSelectionState)->rampDownFrames = secondValue;
     ((EvtSelState *)evtSelectionState)->amplitude[0] = frames;
     ((EvtSelState *)evtSelectionState)->amplitude[1] = frames;
     ((EvtSelState *)evtSelectionState)->amplitude[2] = frames;
