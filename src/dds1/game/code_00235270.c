@@ -49,7 +49,7 @@ extern void effObjSetFlags(void *object, s32 flags);
 extern void *effObjCreateEventNode(void *obj, void *vecA, void *vecB);
 extern void fldSetSwayMode(u32 mode);
 extern void fldSetSkyDrawState(u32 drawState);
-extern void fldSetSkyAlpha(s32 value);
+extern void fldSetSkyAlpha(u32 alpha);
 extern s16 fldGetSkyAlpha(void);
 extern void fldSetFadeTarget(s32 area, s32 value, s32 duration);
 extern void fldDrawSkyGradient(void);

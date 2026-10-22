@@ -43,7 +43,7 @@ extern u32 evtSkyOverlayEnabled;
 
 extern u16 evtSkyTransitionActive;
 
-extern void fldSetSkyAlpha(s32 value);
+extern void fldSetSkyAlpha(u32 alpha);
 
 extern s16 fldGetSkyAlpha(void);
 
@@ -215,7 +215,7 @@ void evtDestroySkyTask(void) {
 
 extern void fldSetSwayMode(u32 mode);
 extern void fldSetSkyDrawState(u32 drawState);
-extern void fldSetSkyAlpha();
+extern void fldSetSkyAlpha(u32 alpha);
 extern void fldSetFadeTarget();
 
 s32 evtCreateSkyTask(void) {
