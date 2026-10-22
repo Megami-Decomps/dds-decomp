@@ -3537,29 +3537,8 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
     return 0;
 }
 
-typedef union MdlOptionControl {
-    u32 packed;
-    struct {
-        u8 active;
-        u8 blink;
-        s16 cursor;
-    } fields;
-} MdlOptionControl;
+#include "mdl_option_state.h"
 
-/* Complete 0x38-byte option-panel state; the task updates both float values. */
-typedef struct MdlOptionState {
-    s8 *pad;
-    MdlOptionControl control;
-    u8 pad08[0x20];
-    f32 value;
-    f32 adjustment;
-    sdfDrawTag_t *packetList;
-    u8 pad34[4];
-} MdlOptionState;
-
-
-
-typedef char MdlOptionStateSize[sizeof(MdlOptionState) == 0x38 ? 1 : -1];
 extern MdlOptionState D_00453660;
 extern s8 D_0040B7E8[16];
 extern MdlOptionLabel D_003C8B68[4] __attribute__((section(".data")));
@@ -4071,4 +4050,3 @@ INCLUDE_SDATA(const s32, "game/code_00233660", D_004371D8);
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004371E0);
 
 INCLUDE_SDATA(const s32, "game/code_00233660", evtPendingEventSelection);
-
