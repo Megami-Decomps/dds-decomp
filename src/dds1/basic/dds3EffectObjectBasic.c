@@ -24,12 +24,6 @@
 #include "sdf_vu_matrix_multiply_api.h"
 
 #define EFF_OBJ_KIND EFF_WORLD_KIND_EFFECT_OBJECT
-#define EFF_OBJ_STATE_BOUND_BILL 1
-#define EFF_OBJ_STATE_BILL_NODE 3
-#define EFF_OBJ_STATE_EVENT_NODE 5
-#define EFF_OBJ_STATE_PARAMETERS_READY 6
-#define EFF_OBJ_STATE_MAGATUHI_TWO_ROWS 7
-#define EFF_OBJ_STATE_MAGATUHI_FOUR_ROWS 8
 #define EFF_OBJ_VECTOR_BYTES 0x10
 #define EFF_OBJ_ENTRY_ID_MASK 0xFFFF
 #define EFF_OBJ_FLAG_OWNER_LINK 4
@@ -169,7 +163,7 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
         moved = 1;
     }
     switch (data->state) {
-    case EFF_OBJ_STATE_BOUND_BILL:
+    case EFF_DEPENDENCY_STATE_BOUND_EFFECT_NODE:
         node = data->handle;
         if (node != NULL && moved) {
             effCopyVectorToNodeInstance(node, position);
@@ -189,21 +183,21 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
             }
         }
         return 1;
-    case 2:
+    case EFF_DEPENDENCY_STATE_BILLBOARD_ANIMATION:
         bill = data->handle;
         if (bill != NULL && moved) {
             effCopyVector(bill, position);
         }
         result = dds3BillboardGetAnimState(bill);
         goto expired;
-    case EFF_OBJ_STATE_BILL_NODE:
+    case EFF_DEPENDENCY_STATE_BILLBOARD_NODE:
         if (data->handle != NULL && moved) {
             effCopyVector(data->handle, position);
         }
         return 1;
-    case 4:
+    case EFF_DEPENDENCY_STATE_BORROWED_HANDLE:
         return 1;
-    case EFF_OBJ_STATE_EVENT_NODE: {
+    case EFF_DEPENDENCY_STATE_EVENT_CUT: {
         void *eventNode = data->node;
 
         if (eventNode != NULL) {
@@ -283,7 +277,7 @@ dds3Basic_t *dds3AddEffectObjectBasic(u32 worldCounter, void *firstVec, void *se
     dds3SetRadiusPoseSet(obj->inner);
     data = obj->data;
     data->flags = 0;
-    data->state = 0;
+    data->state = EFF_DEPENDENCY_STATE_EMPTY;
     data->handle = NULL;
     data->owner = NULL;
     data->entryId = 0;
@@ -311,7 +305,7 @@ dds3Basic_t *AddP2AEffect(void *bill, void *vec, s32 extra) {
     data = obj->data;
     data->handle = bill;
     data->flags = 0;
-    data->state = 2;
+    data->state = EFF_DEPENDENCY_STATE_BILLBOARD_ANIMATION;
     data->owner = NULL;
     data->entryId = 0;
     data->ownerKind = 0;
@@ -372,7 +366,7 @@ dds3Basic_t *AddTMXEffect(void *bill, void *firstVector, s32 secondVectorAddress
     VU0_STORE_VF(vf10, copiedVector);
     effCopyVector(bill, copiedVector);
     data = obj->data;
-    data->state = EFF_OBJ_STATE_BILL_NODE;
+    data->state = EFF_DEPENDENCY_STATE_BILLBOARD_NODE;
     data->handle = bill;
     data->flags = 0;
     data->owner = NULL;
@@ -430,7 +424,7 @@ dds3Basic_t *effObjCreateWithBoundBill(void *bill, void *firstVector, void *seco
     VU0_STORE_VF(vf10, copiedVector);
     effCopyVectorToNodeInstance(bill, copiedVector);
     data = obj->data;
-    data->state = EFF_OBJ_STATE_BOUND_BILL;
+    data->state = EFF_DEPENDENCY_STATE_BOUND_EFFECT_NODE;
     data->handle = bill;
     data->flags = 0;
     data->owner = NULL;
@@ -479,7 +473,7 @@ dds3Basic_t *effObjCreateBillboardInWorld(void *bill, void *firstVector, s32 sec
     VU0_STORE_VF(vf10, copiedVector);
     effCopyVectorToNodeInstance(bill, copiedVector);
     data = obj->data;
-    data->state = EFF_OBJ_STATE_BOUND_BILL;
+    data->state = EFF_DEPENDENCY_STATE_BOUND_EFFECT_NODE;
     data->handle = bill;
     data->flags = 0;
     data->owner = NULL;
@@ -526,7 +520,7 @@ dds3Basic_t *AddBEDEffect(source, firstVector, secondVector)
     PCP_COPY_VECTOR(parameters.secondVector, secondVector);
     mixer = effEveBEDCreate(source);
     data = obj->data;
-    data->state = EFF_OBJ_STATE_EVENT_NODE;
+    data->state = EFF_DEPENDENCY_STATE_EVENT_CUT;
     data->handle = mixer;
     data->flags = 0;
     data->node = NULL;
@@ -569,7 +563,7 @@ void dds3StartBEDEffectObjectBasic(dds3Basic_t *obj, u32 entryId) {
     EffectDependencyState *data;
 
     data = obj->data;
-    if (data->state != EFF_OBJ_STATE_EVENT_NODE) {
+    if (data->state != EFF_DEPENDENCY_STATE_EVENT_CUT) {
         return;
     }
     if (data->vector == NULL) {
@@ -596,7 +590,7 @@ dds3Basic_t *AddESPEffect(const char *name, void *firstVector, void *secondVecto
         return NULL;
     }
     data = obj->data;
-    data->state = EFF_OBJ_STATE_PARAMETERS_READY;
+    data->state = EFF_DEPENDENCY_STATE_PARAMETERS_READY;
     obj->inner->scale[0] = scale;
     obj->inner->scale[1] = scale;
     obj->inner->scale[2] = scale;
@@ -648,9 +642,9 @@ dds3Basic_t *AddMG12Effect(kind, descriptor)
     data = obj->data;
     data->flags = 0;
     if (kind == 1) {
-        data->state = EFF_OBJ_STATE_MAGATUHI_TWO_ROWS;
+        data->state = EFF_DEPENDENCY_STATE_MAGATUHI_TWO_ROWS;
     } else {
-        data->state = EFF_OBJ_STATE_MAGATUHI_FOUR_ROWS;
+        data->state = EFF_DEPENDENCY_STATE_MAGATUHI_FOUR_ROWS;
     }
     data->handle = bill;
     data->owner = NULL;
@@ -710,7 +704,7 @@ EffectDependencyState *CheckESP(dds3Basic_t *obj) {
         return data;
     }
     data = obj->data;
-    if (data->state != EFF_OBJ_STATE_PARAMETERS_READY) {
+    if (data->state != EFF_DEPENDENCY_STATE_PARAMETERS_READY) {
         data = NULL;
     }
     return data;
@@ -745,13 +739,13 @@ s32 dds3EffectObjectPresetMG12(dds3Basic_t *obj) {
     if (((u8 *)&obj->kindTag)[3] == EFF_OBJ_KIND) {
         EffectDependencyState *data = obj->data;
 
-        switch (data->state) {
-        case EFF_OBJ_STATE_MAGATUHI_TWO_ROWS:
+        switch ((s32)data->state) {
+        case EFF_DEPENDENCY_STATE_MAGATUHI_TWO_ROWS:
             break;
-        case EFF_OBJ_STATE_MAGATUHI_FOUR_ROWS:
+        case EFF_DEPENDENCY_STATE_MAGATUHI_FOUR_ROWS:
             effMagaP4Randomize(data->handle);
             break;
-        case EFF_OBJ_STATE_BOUND_BILL:
+        case EFF_DEPENDENCY_STATE_BOUND_EFFECT_NODE:
             effMagaRandomize(data->handle);
             break;
         }
@@ -769,7 +763,7 @@ s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first, dds3Basic_t
     }
     data = obj->data;
     switch (data->state) {
-    case EFF_OBJ_STATE_MAGATUHI_TWO_ROWS:
+    case EFF_DEPENDENCY_STATE_MAGATUHI_TWO_ROWS:
         parameterRows = data->vector;
         if (GetESPPos(first)) {
             VU0_STORE_VF(vf10, parameterRows);
@@ -781,7 +775,7 @@ s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first, dds3Basic_t
         }
         effMagaSCSetArea(data->handle, parameterRows);
         return 1;
-    case EFF_OBJ_STATE_MAGATUHI_FOUR_ROWS:
+    case EFF_DEPENDENCY_STATE_MAGATUHI_FOUR_ROWS:
         parameterRows = data->vector;
         if (GetESPPos(first)) {
             VU0_STORE_VF(vf10, parameterRows);
@@ -894,4 +888,3 @@ INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_0039F8E8);
 INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_0039F900);
 
 INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_0039F918);
-
