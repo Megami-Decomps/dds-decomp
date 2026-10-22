@@ -40,7 +40,7 @@ extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
 extern void evtSetSkyAlpha(s32 duration, s32 target);
 
 s32 scrGetIntPara(s32 idx);
-extern void *evtSearchBasic(s32 objectKind, s32 worldObjectKey);
+extern struct dds3Basic_t *evtSearchBasic(s32 objectKind, s32 worldObjectKey);
 extern s32 evtCheckPathStat(void *object);
 
 s32 evtCommand_LIGHT_PATH_WAIT(void) {

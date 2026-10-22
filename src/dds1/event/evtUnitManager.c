@@ -1595,7 +1595,7 @@ s32 evtFindUnitSlotAuxCoordinates(evtUnitHandle_t *unit, f32 *outX, f32 *outY) {
     return 0;
 }
 
-void *evtSearchBasic(s32 objectKind, s32 worldObjectKey) {
+dds3Basic_t *evtSearchBasic(s32 objectKind, s32 worldObjectKey) {
     void *world;
 
     world = dds3GetActiveScene();
