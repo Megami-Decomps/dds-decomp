@@ -108,7 +108,7 @@ void btlFreeIndexList(BtlIndexList *list);
 
 /* Return the number of live entries, not the allocated capacity. */ u32 btlGetIndexListCount(BtlIndexList *list);
 
-/* The caller supplies an in-range index. */ void *btlGetIndexListEntry(BtlIndexList *list, s32 index);
+/* The caller supplies an in-range index. */ BtlUnit *btlGetIndexListEntry(BtlIndexList *list, s32 index);
 
 s32 btlPositionActorIndexUnits(BtlLinkedCommand *action);
 

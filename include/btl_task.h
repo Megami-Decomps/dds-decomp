@@ -4,6 +4,7 @@
 #include "common.h"
 
 struct BtlUnit;
+typedef struct BtlUnit BtlUnit;
 
 typedef struct BtlIndexList {
     s32 capacity;       /* 0x00: allocated entry count */
@@ -13,13 +14,13 @@ typedef struct BtlIndexList {
 
 BtlIndexList *btlAllocateIndexList(s32 capacity);
 void btlFreeIndexList(BtlIndexList *list);
-void btlAppendIndexListEntry(BtlIndexList *list, void *entry);
+void btlAppendIndexListEntry(BtlIndexList *list, BtlUnit *entry);
 void btlClearIndexList(BtlIndexList *list);
 u32 btlGetIndexListCount(BtlIndexList *list);
-void *btlGetIndexListEntry(BtlIndexList *list, s32 index);
+BtlUnit *btlGetIndexListEntry(BtlIndexList *list, s32 index);
 void btlCopyIndexList(BtlIndexList *destination, BtlIndexList *source);
 void btlSwapIndexListEntries(BtlIndexList *list, s32 first, s32 second);
-s32 btlFindListIndex(BtlIndexList *list, void *entry);
+s32 btlFindListIndex(BtlIndexList *list, BtlUnit *entry);
 
 /* The battle AI task's 0xA4-byte user-data allocation in both games. */
 typedef struct SceneAiWork {
@@ -58,8 +59,6 @@ typedef struct SceneAiWork {
 } SceneAiWork;
 typedef char SceneAiWork_size[(sizeof(SceneAiWork) == 0xA4) ? 1 : -1];
 typedef char SceneAiWork_cursor_offset[((unsigned long)&((SceneAiWork *)0)->cursor == 0x18) ? 1 : -1];
-
-typedef struct BtlUnit BtlUnit;
 
 /* Retained command operands: 0x28 bytes in DDS1, 0x2C in DDS2.
  * The task constructors copy the complete operand after the actor pointer. */

@@ -5414,9 +5414,9 @@ s32 btlChooseDefeatCameraByActionAndTargets(u8 *unit) {
         return 1;
     } else if (flags & BTL_ANIMATION_TARGET_DEFEAT_CAMERA) {
         if (btlGetIndexListCount(((BtlEventEntry *)unit)->task->indexWork.indices) == 1) {
-            void *other = btlGetIndexListEntry(((BtlEventEntry *)unit)->task->indexWork.indices, 0);
+            BtlUnit *other = btlGetIndexListEntry(((BtlEventEntry *)unit)->task->indexWork.indices, 0);
             btlFlagAllUnitDefeatCandidatesTask();
-            btlSetLinkedCameraForCommandMode((BtlLinkedCommand *)unit, (BtlUnit *)other);
+            btlSetLinkedCameraForCommandMode((BtlLinkedCommand *)unit, other);
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
             btlChooseRandomPresetCameraKeys(unit);
@@ -5446,4 +5446,3 @@ INCLUDE_SDATA(const s32, "game/code_00202178", D_003BB890);
 INCLUDE_SDATA(const s32, "game/code_00202178", D_003BB898);
 
 INCLUDE_SDATA(const s32, "game/code_00202178", D_003BB8A0);
-

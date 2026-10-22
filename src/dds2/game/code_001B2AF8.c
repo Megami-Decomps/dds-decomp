@@ -10642,7 +10642,7 @@ void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode
     }
     btlClearIndexList(state->listB);
     {
-        void *entry = btlGetIndexListEntry(state->listA, state->entry);
+        BtlUnit *entry = btlGetIndexListEntry(state->listA, state->entry);
         btlAppendIndexListEntry(state->listB, entry);
     }
 }
@@ -11954,4 +11954,3 @@ INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004368BC);
 INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004368BE);
 
 INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004368C0);
-

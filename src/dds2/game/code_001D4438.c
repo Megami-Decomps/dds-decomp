@@ -1410,7 +1410,7 @@ extern BtlRuntimeTask *btlCreateUpdateUnitEffectsTask(void);
 extern BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32 value);
 extern f32 btlGetActorStateScale(ActionStateLink *task);
 extern u32 btlGetIndexListCount(BtlIndexList *list);
-extern void *btlGetIndexListEntry(BtlIndexList *list, s32 index);
+extern BtlUnit *btlGetIndexListEntry(BtlIndexList *list, s32 index);
 extern s32 btlGetSlotRateKind(u8 *unit, s32 index);
 extern s32 btlMapActionCode(s32 unused, u32 id);
 extern BtlRuntimeTask *btlScheduleActorUpdate(BtlUnit *unit);
@@ -4068,4 +4068,3 @@ INCLUDE_SDATA(const s32, "game/code_001D4438", D_00436A10);
 INCLUDE_SDATA(const s32, "game/code_001D4438", D_00436A18);
 
 INCLUDE_SDATA(const s32, "game/code_001D4438", btlDeferredTaskTail);
-
