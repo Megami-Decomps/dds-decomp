@@ -45,7 +45,7 @@ extern s32 mnuRingCustomizationStatLabels[];
 extern s32 itfCreateFont2TextGlyph(s32, s32, s32, s32, s32, s32);
 typedef struct _FRQ _FRQ;
 extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
-extern s32 evtGetIndexedEventRecordId(s32);
+extern u32 evtGetIndexedEventRecordId(s32);
 extern u8 *D_00435E5C;
 extern u8 *datUnitNames;
 extern u16 mnuGetPartyEntryMenuValue(datUnitWork_t *);
@@ -1299,4 +1299,3 @@ INCLUDE_RODATA(const s32, "game/code_002AD3B8", D_0042AD08);
 INCLUDE_SDATA(const s32, "game/code_002AD3B8", D_00437BD0);
 
 INCLUDE_SDATA(const s32, "game/code_002AD3B8", D_00437BD8);
-

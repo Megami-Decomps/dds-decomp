@@ -257,7 +257,7 @@ u32 mnuStaffItemUseLeaveNoOp(void) {
     return 1;
 }
 
-extern s32 evtGetIndexedEventRecordId(s32);
+extern u32 evtGetIndexedEventRecordId(s32);
 extern s32 mnuGetAbilityTargetCategory(u16);
 extern char mnuCampItemUseListPopupEntry[];
 
