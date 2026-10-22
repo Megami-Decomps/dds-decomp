@@ -7110,12 +7110,13 @@ struct MantraBurstPool {
 
 MantraBurstPool *mnuAllocateMantraPanelBurstPool(void) {
     struct sdfMemHandle_t *handle = sdfMemAllocDirect(0x650);
-    u32 block = sdfMemGetPtr(handle);
-    memset((void *)block, 0, 0x650);
-    ((MantraBurstPool *)block)->allocation = handle;
-    ((MantraBurstPool *)block)->slots = (MantraBurstSlot *)(block + 0x10);
-    ((MantraBurstPool *)block)->count = 0x64;
-    return (MantraBurstPool *)block;
+    MantraBurstPool *pool = (MantraBurstPool *)sdfMemGetPtr(handle);
+
+    memset(pool, 0, 0x650);
+    pool->allocation = handle;
+    pool->slots = (MantraBurstSlot *)((u8 *)pool + 0x10);
+    pool->count = 0x64;
+    return pool;
 }
 
 void mnuReleaseMantraPanelBurstPool(MantraBurstPool *obj) {
@@ -7242,12 +7243,13 @@ MantraBurstSlot *mnuSpawnBurstSlotSmall(MantraBurstPool *pool, s8 wide, s8 side)
 
 MantraBurstPool *mnuAllocateMantraBackgroundBurstPool(void) {
     struct sdfMemHandle_t *handle = sdfMemAllocDirect(0x650);
-    u32 block = sdfMemGetPtr(handle);
-    memset((void *)block, 0, 0x650);
-    ((MantraBurstPool *)block)->allocation = handle;
-    ((MantraBurstPool *)block)->slots = (MantraBurstSlot *)(block + 0x10);
-    ((MantraBurstPool *)block)->count = 0x64;
-    return (MantraBurstPool *)block;
+    MantraBurstPool *pool = (MantraBurstPool *)sdfMemGetPtr(handle);
+
+    memset(pool, 0, 0x650);
+    pool->allocation = handle;
+    pool->slots = (MantraBurstSlot *)((u8 *)pool + 0x10);
+    pool->count = 0x64;
+    return pool;
 }
 
 void mnuReleaseMantraBackgroundBurstPool(MantraBurstPool *obj) {
