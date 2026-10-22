@@ -2157,16 +2157,16 @@ void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window) {
     window->flags = state;
     if (!(state & 0x30)) {
         if (!(input & 0x300000)) {
-            mnuClearListFlagsOneAndTwo((u32 *)list);
+            mnuClearListFlagsOneAndTwo(&list->stateFlags);
         }
         if (input & 0x10) {
-            if (mnuTestListFlagTwo((u32 *)list) == 0) {
+            if (mnuTestListFlagTwo(&list->stateFlags) == 0) {
                 window->fade = 0x100;
             }
             mnuRetreatListCursorDefault(list);
         }
         if (input & 0x20) {
-            if (mnuTestListFlagTwo((u32 *)list) == 0) {
+            if (mnuTestListFlagTwo(&list->stateFlags) == 0) {
                 window->fade = 0x100;
             }
             mnuAdvanceListCursorDefault(list);
@@ -2548,4 +2548,3 @@ void mnuQueuePartyPanelSlotBlend(MenuPageWindow *menu, s32 window, u32 kind, s32
 void mnuClearPanelWorkState(u32 panel) {
     memset(panel, 0, 0x20);
 }
-
