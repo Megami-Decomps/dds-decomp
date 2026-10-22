@@ -4,6 +4,7 @@
 #include "eff_surface_node.h"
 #include "common.h"
 #include "file_job_type.h"
+#include "file_config_task.h"
 #include "eff_emitter_type.h"
 #include "file_load_menu_state.h"
 #include "eff.h"
@@ -3777,23 +3778,6 @@ typedef struct FileConfigListNode {
     FileConfigCountdown *resource;   /* 0x70: separately allocated countdown */
 } FileConfigListNode;
 
-/* Save/config task context: DDS2 places the status four bytes later. */
-typedef struct FileConfigTask {
-    struct sdfMemHandle_t *backingAllocation; /* 0x00: descriptor owning this task */
-    u32 state;      /* 0x04 */
-    s32 ticks;
-    struct MenuList *frame; /* 0x0C: owned save/config list */
-    struct EffectSlotSet *slots[5]; /* 0x10 */
-    u8 pad24[4];
-    s32 result;     /* 0x28: negative when the queued load failed */
-    s16 previousIndex;
-    s16 transitionTicks;
-    f32 choiceFade;
-    f32 labelFade;
-    u32 pending;    /* 0x38: zero when no load can start */
-} FileConfigTask;
-typedef char FileConfigTask_size_check[(sizeof(FileConfigTask) == 0x3C) ? 1 : -1];
-typedef char FileConfigTask_state_offset_check[((u32)&((FileConfigTask *)0)->state == 0x04) ? 1 : -1];
 extern FileConfigTask *GBWK;
 
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
