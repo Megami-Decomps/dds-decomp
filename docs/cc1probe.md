@@ -58,6 +58,7 @@ tools/cc1probe.sh /tmp/candidate.c --as-unit src/dds1/game/code_001411F0.c \
 | `--maxlines N` | stop logging after N lines |
 | `--nohook` | only the unhooked compile (assembly and `-da` dumps), no gdb |
 | `--no-verify` | skip the byte comparison (the exit status then ignores it) |
+| `--no-dumps` | compile without `-da` (no `rtl.NN.*`), for a unit whose code the dumps change (below) |
 
 Output in `OUT`: `decisions.log` (a header plus the decisions, one section per
 pass such as `=== sched1 (pre-reload) function fldTitle ===`), `candidate.s`,
@@ -136,7 +137,20 @@ state the result:
 ```
 
 The exit status is 0 only for `verify: OK`. A log whose header says anything
-else must not be cited. The baseline assembly is also what `tools/cc.sh` gives
+else must not be cited.
+
+The `-da` dumps are not free: dumping allocates in cc1's heap, and CSE hashes
+heap addresses, so in a heap-sensitive unit the dumps can change the code
+itself. Two `-da` runs then agree with each other while neither is the build's
+compile. Each run therefore also compiles the unit once with plain
+`tools/cc.sh` (no dumps) and compares that assembly with the unhooked `-da`
+one (`dumps-vs-plain` in the header). When they differ, the status says so and
+the run is not OK; rerun with `--no-dumps`, which traces the build's compile
+(the uids in the log then have no dumps to look up). DDS2's
+`game/code_001B2AF8` with DDS2's battle adjustment records renamed is such a
+case: with dumps, `btlInitializeActorSlotOrder` loads `D_00438F58[selector]`
+as retail does, while the build, and `--no-dumps`, form the array's address
+first. The baseline assembly is also what `tools/cc.sh` gives
 for the unit (checked for `fldTitle`'s unit `src/dds1/game/code_001411F0.c`).
 
 The GDB launch keeps `startup-with-shell on` so the quoted arguments supplied

@@ -2,7 +2,7 @@
 # cc1probe.sh <file.c> [--sched] [--alloc] [--cse] [--reorg] [--jump] [--gcse] [--rcse] [--reload]
 #             [--ifcvt] [--loops] [--expand] [--all] [--func NAME] [--as-unit src/<v>/<dir>/<unit>.c]
 #             [--version dds1|dds2] [--out DIR] [--dumpbase PATH] [--cflag FLAG]... [--maxlines N]
-#             [--no-verify] [--nohook] [--quiet]
+#             [--no-verify] [--no-dumps] [--nohook] [--quiet]
 #
 # Read-only diagnostic. Runs the REAL, unmodified vendor cc1 on a C file under gdb, by way of
 # tools/cc.sh (so the compiler, pinned i386 loader, ASLR handling, canonical scratch names,
@@ -31,7 +31,10 @@
 # Output: $OUT/decisions.log (header + decisions), $OUT/candidate.s, $OUT/rtl.NN.* (-da dumps);
 # $OUT/baseline/ holds the unhooked run it is compared with. Default OUT is
 # ${TMPDIR:-/tmp}/cc1probe/<file>. Exit status is 0 only if the hooked run's assembly and every
-# -da dump are byte-identical to the unhooked run (the header and stderr line say `verify: OK`).
+# -da dump are byte-identical to the unhooked run, and the unhooked run's assembly is plain
+# tools/cc.sh's (the header and stderr line say `verify: OK`). Dumping allocates in cc1's heap,
+# which CSE hashes, so in a heap-sensitive unit `-da` can change the code itself; then the
+# trace is not of the build's compile, and --no-dumps traces it without dumps.
 # Nothing in the repo, the vendor binary or the build is modified, and the build does not use this
 # tool. Scratch trees live under $TMPDIR (see docs/cc1probe.md). Requires gdb with Python.
 #
@@ -44,7 +47,7 @@ REPO=$(cd "$tools/.." && pwd)
 export TMPDIR=${TMPDIR:-/tmp}
 mkdir -p "$TMPDIR"
 
-in= out= modes= func= as_unit= version=dds1 dumpbase= verify=1 maxlines=0 quiet=0 nohook=0
+in= out= modes= func= as_unit= version=dds1 dumpbase= verify=1 maxlines=0 quiet=0 nohook=0 dumps=1
 cflags=()
 while [ $# -gt 0 ]; do
     case $1 in
@@ -68,6 +71,7 @@ while [ $# -gt 0 ]; do
         --cflag) cflags+=("$2"); shift ;;
         --maxlines) maxlines=$2; shift ;;
         --no-verify) verify=0 ;;
+        --no-dumps) dumps=0 ;;
         --nohook) nohook=1 ;;
         --quiet) quiet=1 ;;
         -h|--help) sed -n 2,40p "$0"; exit 0 ;;
@@ -131,10 +135,13 @@ canon=${as_unit:-}
 case $in in "$REPO"/src/*/*.c) [ -z "$canon" ] && canon=${in#"$REPO"/} ;; esac
 [ -n "$canon" ] || canon=src/$version/game/$(basename "$in")
 
-# One compile of $in through tools/cc.sh (inside the mirror). $1 = where to keep the assembly.
+# One compile of $in through tools/cc.sh (inside the mirror). $1 = where to keep the assembly;
+# $3 = plain compiles without the -da dumps, as the build does.
 run_cc() {
+    local dumpflags=()
+    [ "$dumps" = 1 ] && [ "${3:-}" != plain ] && dumpflags=(-da -dumpbase "$dumpbase")
     ( cd "$mir" && DDS_VERSION=$version DDS_AS_UNIT=$canon DDS_KEEP_S=$1 \
-        tools/cc.sh -da -dumpbase "$dumpbase" "${cflags[@]}" "$in" -o "$2" )
+        tools/cc.sh "${dumpflags[@]}" "${cflags[@]}" "$in" -o "$2" )
 }
 same() {  # byte compare, ignoring the random scratch-dir names tools/cc.sh puts in `.file` and dump headers
     cmp -s <(sed -E 's#\.[0-9a-f]{2,4}/#./#g' "$1") <(sed -E 's#\.[0-9a-f]{2,4}/#./#g' "$2")
@@ -151,6 +158,13 @@ run_cc "$out/baseline/candidate.s" "$out/baseline/cc.o" >"$out/baseline/cc.stdou
 base_rc=$?
 collect "$out/baseline"
 [ $base_rc -eq 0 ] || { echo "baseline tools/cc.sh failed rc=$base_rc"; sed -n 1,20p "$out/baseline/cc.stderr"; exit 4; }
+# The dumps allocate in cc1's heap, which CSE hashes: compare the -da baseline with a plain
+# compile, so a trace whose compile the dumps changed is never taken for the build's.
+plain=same
+if [ "$dumps" = 1 ]; then
+    run_cc "$out/baseline/plain.s" "$out/baseline/plain.o" plain >/dev/null 2>&1 </dev/null
+    same "$out/baseline/plain.s" "$out/baseline/candidate.s" || plain=differs
+fi
 
 if [ "$nohook" = 1 ]; then   # plain compile only: assembly + dumps copied to $out, no gdb
     cp "$out"/baseline/candidate.s "$out"/baseline/rtl.[0-9][0-9].* "$out"/ 2>/dev/null
@@ -216,11 +230,13 @@ if [ "$verify" = 1 ]; then
         same "$f" "$out/$b" || { status="OUTPUT DIFFERS from unhooked run: $b"; break; }
     done
     [ "$rc" = none ] && status="gdb did not report exit (see $out/gdb.stderr)"
+    [ "$plain" = same ] || status="THE -da DUMPS CHANGE THE CODE: the unhooked -da compile differs from plain tools/cc.sh (cc1's heap); rerun with --no-dumps"
 fi
 {
     echo "# cc1probe  file=$in  unit=$canon  modes=$modes${func:+  func=$func}"
-    echo "# cc1 sha256=$want  gdb-run exit=$rc  hooked-vs-unhooked outputs: $status"
-    echo "# dumps: $dumpbase.NN.*   assembly: $out/candidate.s"
+    echo "# cc1 sha256=$want  gdb-run exit=$rc  dumps-vs-plain: $plain  hooked-vs-unhooked outputs: $status"
+    if [ "$dumps" = 1 ]; then echo "# dumps: $dumpbase.NN.*   assembly: $out/candidate.s"
+    else echo "# dumps: none (--no-dumps)   assembly: $out/candidate.s"; fi
 } >"$out/decisions.hdr"
 cat "$out/decisions.hdr" "$out/decisions.raw" >"$out/decisions.log"
 [ "$quiet" = 1 ] || cat "$out/decisions.log"
