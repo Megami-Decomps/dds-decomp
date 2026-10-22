@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+struct effEveBEDCutHandle_t;
+
 /* Party/enemy model-table entry; only the scale field is established. */
 typedef struct EvtModelScaleEntry {
     u8 pad00[0x18];
@@ -13,7 +15,7 @@ typedef struct EvtModelScaleEntry {
 /* Consumer view of the effect object passed to the event scale setter. */
 typedef struct EvtEffectInner {
     u8 pad00[0x2C];
-    void *scaledObject; /* 0x2C */
+    struct effEveBEDCutHandle_t *scaledObject; /* 0x2C: passed to effEveBEDCutSetScale. */
 } EvtEffectInner;
 
 typedef struct EvtEffectObject {
