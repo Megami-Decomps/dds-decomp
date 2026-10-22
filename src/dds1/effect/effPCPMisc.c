@@ -56,6 +56,7 @@
 #include "eff_pcp_compact_work.h"
 #include "eff_pcp_event_emitter_state.h"
 #include "eff_pcp_staggered_pulse_work.h"
+#include "eff_pcp_triple_emitter_work.h"
 #include "eff_pcp_twin.h"
 #include "eff_pcp_spin.h"
 #include "eff_pcp_span.h"
@@ -2701,24 +2702,6 @@ void effPCPBreathSetRotateMatrix(void *dst, void *src) {
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(dst);
 }
-
-/* Three view-relative offsets and stagger thresholds for seven handles per group. */
-typedef struct {
-    f32 origin[4];
-    f32 offset[3][2];
-    s32 groupStartFrame[3];
-    s32 handleDelay[7];
-} EffPCPTripleParams;
-
-typedef struct EffPCPTripleWork {
-    EffPCPTripleParams head;
-    s32 frame;
-    u32 color;
-    struct EffNode *handles[21];
-} EffPCPTripleWork;
-
-typedef char EffPCPTripleParamsSizeCheck[sizeof(EffPCPTripleParams) == 0x50 ? 1 : -1];
-typedef char EffPCPTripleWorkSizeCheck[sizeof(EffPCPTripleWork) == 0xAC ? 1 : -1];
 
 EffPCPTripleWork *effPCPAgiraoFireCreate(EffPCPTripleParams *params, EffNodeDescriptor **descriptors) {
     EffPCPTripleWork *work;
