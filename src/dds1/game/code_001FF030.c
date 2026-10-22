@@ -26,7 +26,7 @@ extern AiSpecies *datEnemyAiRecords;
 
 
 
-extern s32 btlRunAiAction();
+extern s32 btlRunAiAction(BtlTask *, s32, u32);
 
 
 extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
