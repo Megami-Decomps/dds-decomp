@@ -996,12 +996,12 @@ extern u8 D_00380860[];
 void mnuShopCreateDescriptorSurface(EvtRuntime *scene) {
     sdfDrawTag_t *surface;
     sdfPreDrawTag_t *context;
-    s32 handle;
+    sdfMemHandle_t *allocation;
 
     if (scene->pendingResource == 0) {
-        handle = (s32)sdfMemAllocFromTailDirect(0x70000);
-        scene->pendingResource = handle;
-        scene->pendingWork = (s32)sdfMemLock((struct sdfMemHandle_t *)(handle));
+        allocation = sdfMemAllocFromTailDirect(0x70000);
+        scene->pendingResource = allocation;
+        scene->pendingWork = (s32)sdfMemLock(allocation);
     }
     memset((void *)scene->pendingWork, 0x40, 0x70000);
     surface = sdfPrimAllocDrawTag(0);

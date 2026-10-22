@@ -206,7 +206,7 @@ typedef struct EvtRuntime {
     u8 pad2422[2];
     f32 shadowY;
     s32 pendingWork;
-    s32 pendingResource;
+    sdfMemHandle_t *pendingResource;
     s32 menuState;
     s32 shopFlag;
     u32 auxResource;
