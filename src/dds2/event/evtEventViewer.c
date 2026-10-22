@@ -568,19 +568,19 @@ void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer) {
 }
 
 /* Create an event-viewer effect at the origin and attach its active event node. */
-void *evtEventViewerCreateOriginEffect(void *resource, u32 entryId, s32 ownerNameIndex, s32 billboardEntry, u32 startFrame,
+dds3Basic_t *evtEventViewerCreateOriginEffect(void *resource, u32 entryId, s32 ownerNameIndex, s32 billboardEntry, u32 startFrame,
                     EvtRuntime *viewer) {
     f32 position[4];
     f32 scale[4];
-    void *effect;
+    dds3Basic_t *effect;
 
     memset(position, 0, 0x10);
     memset(scale, 0, 0x10);
     scale[3] = 1.0f;
     effect = dds3AddBEDEffectObjectBasic2(resource, position, scale);
-    dds3EffectObjectBasicStatOn((struct EffectObj *)effect, 1);
+    dds3EffectObjectBasicStatOn(effect, 1);
     dds3StartBEDEffectObjectBasic(effect, entryId);
-    evtViewerBindNamedOwner((dds3Basic_t *)effect, ownerNameIndex, billboardEntry, startFrame, viewer);
+    evtViewerBindNamedOwner(effect, ownerNameIndex, billboardEntry, startFrame, viewer);
     return effect;
 }
 
