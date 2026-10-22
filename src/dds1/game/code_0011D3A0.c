@@ -6,6 +6,7 @@
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "common.h"
 #include "fld_scene_ready_api.h"
 #include "fld_encounter_runtime_api.h"
@@ -160,7 +161,90 @@ u64 *fldCreateColoredLinePacket(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 
     return packet;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011D6B0);
+extern f32 D_00398390[4];
+extern u8 sdfViewMatrix[0x40];
+extern const f32 D_0032AF90[13][4];
+extern const f32 D_0032B090[4];
+extern const u8 D_0032B060[20][2];
+
+/* Build the light-direction gizmo packet: 20 GS lines over 13 transformed outline points. */
+void *func_0011D6B0(s32 x, s32 y, s32 z, s32 highlighted) {
+    u64 xyz[13];
+    u64 color[13];
+    volatile f32 axis[4] __attribute__((aligned(16)));
+    volatile s32 point[4] __attribute__((aligned(16)));
+    u64 *packet;
+    u64 *endColor;
+    u64 *endXyz;
+    const f32 (*outline)[4];
+    const u8 (*pair)[2];
+    s32 i;
+    s32 shade;
+
+    VU0_NORMALIZE_VF10();
+    VU0_CLEAR_W(vf10);
+    VU0_MOVE_VF(vf30, vf10);
+    VU0_STORE_VF(vf10, axis);
+    if (ffabsf(axis[0]) < 0.000001f && ffabsf(axis[2]) < 0.000001f) {
+        axis[2] = -axis[1];
+        axis[0] = 0.0f;
+        axis[1] = 0.0f;
+        VU0_LOAD_VF(vf11, axis);
+    } else {
+        VU0_LOAD_VF(vf11, D_00398390);
+    }
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_CLEAR_W(vf10);
+    VU0_MOVE_VF(vf28, vf10);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_MOVE_VF(vf10, vf30);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_CLEAR_W(vf10);
+    VU0_MOVE_VF(vf29, vf10);
+    VU0_MOVE_VF(vf31, vf0);
+    sdfPostmultiplyVuMatrixFromMemory(sdfViewMatrix);
+    VU0_LOAD_VF(vf10, D_0032B090);
+    VU0_MUL_MATRIX_ROWS_VF10();
+    axis[0] = (f32)x;
+    axis[1] = (f32)y;
+    axis[2] = 160.0f;
+    VU0_LOAD_VF(vf31, axis);
+
+    shade = highlighted ? 0x101 : 0x10101;
+    outline = D_0032AF90;
+    for (i = 0; i != 13; i++) {
+        VU0_LOAD_VF(vf10, outline[i]);
+        VU0_TRANSFORM_POINT(vf10, vf10);
+        VU0_FTOI0(vf10, vf10);
+        VU0_STORE_VF(vf10, point);
+        xyz[i] = (u32)((point[0] & 0xFFFF) | (point[1] << 16)) | ((u64)z << 32);
+        color[i] = (u32)(shade * point[2] | 0x80000000) | ((u64)0x3F800000 << 32);
+    }
+
+    packet = (u64 *)sdfAllocPacketAligned(0x2C0);
+    packet[0] = 0x2B;
+    packet[1] = 0x5000002B00000000ULL;
+    packet[2] = 0x1400000000000001ULL;
+    packet[3] = 0;
+    packet[4] = 0x189;
+    packet[5] = 0;
+    packet[6] = 0x4400000000008014ULL;
+    packet[7] = 0x5151;
+    endColor = packet + 10;
+    endXyz = packet + 11;
+    pair = D_0032B060;
+    for (i = 0; i != 20; i++) {
+        s32 index = pair[i][0];
+
+        endColor[i * 4 - 2] = color[index];
+        endXyz[i * 4 - 2] = xyz[index];
+        index = pair[i][1];
+        endColor[i * 4] = color[index];
+        endXyz[i * 4] = xyz[index];
+    }
+    return packet;
+}
 
 /* Wrap input cycles past the bounds; clamp input saturates there.
  * Coarse controls take priority over fine controls. */
