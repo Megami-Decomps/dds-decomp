@@ -3078,7 +3078,7 @@ extern f32 sdfCos(f32);
 void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
     dds3Basic_t *object;
     dds3ModelHandle_t *resource;
-    u8 *row;
+    FldNpcPaletteEntry *row;
     s32 index;
     f32 angle, height, radians;
     f32 direction[4];
@@ -3092,32 +3092,32 @@ void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
     if (index >= 64) {
         index = 63;
     }
-    row = D_003D44A0 + index * 8;
+    row = (FldNpcPaletteEntry *)(D_003D44A0 + index * 8);
     height = 0.0f;
     angle = -EulerAngleAxisY();
-    if (row[7] >= 20) {
-        angle = (f32)((row[7] - 20) % 20);
+    if (row->phase >= 20) {
+        angle = (f32)((row->phase - 20) % 20);
         angle = angle * 360.0f * 0.0625f;
         angle += 180.0f;
-        if (row[7] >= 60) {
+        if (row->phase >= 60) {
             height = -0.6f;
-        } else if (row[7] >= 40) {
+        } else if (row->phase >= 40) {
             height = 0.6f;
         }
     } else {
-        if (row[7] == 0) {
+        if (row->phase == 0) {
             angle = angle * 180.0f / 3.14f;
             angle += 70.0f;
             height = 0.6f;
-        } else if (row[7] == 1) {
+        } else if (row->phase == 1) {
             angle = angle * 180.0f / 3.14f;
             angle -= 70.0f;
             height = 0.6f;
-        } else if (row[7] == 2) {
+        } else if (row->phase == 2) {
             angle = angle * 180.0f / 3.14f;
             angle -= 70.0f;
             height = -0.6f;
-        } else if (row[7] == 3) {
+        } else if (row->phase == 3) {
             angle = angle * 180.0f / 3.14f;
             angle += 70.0f;
             height = -0.6f;
@@ -3130,7 +3130,7 @@ void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
     evtUnitLightOn(unit);
     radians = angle * 3.14f;
     dds3ObjectBaseOnFlag(object, 0x100);
-    sdfModelSetFaceDivParm(resource->inner, (f32)(row[6] >> 4), (f32)(row[6] & 15));
+    sdfModelSetFaceDivParm(resource->inner, (f32)(row->textPair >> 4), (f32)(row->textPair & 15));
     radians /= 180.0f;
     direction[0] = sdfSin(radians);
     direction[1] = height;
@@ -3139,13 +3139,13 @@ void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
     VU0_LOAD_VF(vf10, direction);
     VU0_NORMALIZE_VF10();
     evtSetUnitLightDir(unit, 0);
-    red = row[0];
-    green = row[1];
-    blue = row[2];
+    red = row->colorA[0];
+    green = row->colorA[1];
+    blue = row->colorA[2];
     colorA = red | (blue << 16) | (green << 8) | 0x80000000;
-    red = row[3];
-    green = row[4];
-    blue = row[5];
+    red = row->colorB[0];
+    green = row->colorB[1];
+    blue = row->colorB[2];
     colorB = red | (blue << 16) | (green << 8) | 0x80000000;
     evtSetUnitLightAndAmbient(unit, 0, colorA, colorB);
     VU0_LOAD_VF(vf10, direction);
