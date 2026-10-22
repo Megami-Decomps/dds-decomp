@@ -25,7 +25,7 @@ extern u32 effBTLFieldColorGetVariantSelector(void);
 extern u8 effBossLookAtReferenceAxis[];
 
 extern dds3FlashPolyList_t *dds3FlashPolyListCreate(u32 cellCount);
-extern void *dds3FlashPolyListGetVertex(dds3FlashPolyList_t *pool, s32 index);
+extern f32 *dds3FlashPolyListGetVertex(dds3FlashPolyList_t *pool, s32 index);
 extern void *dds3FlashPolyListGetVC(dds3FlashPolyList_t *pool, s32 index);
 extern void dds3FlashPolyListSetBlend(dds3FlashPolyList_t *pool, u32 bits);
 extern EffRandState effDefaultRandomState[];
@@ -90,7 +90,7 @@ void effPCPCrackInit(effPCPCrack_t *work)
             group->angularSpeed = (0.1f * (3.14159265f / 180.0f));
             group->rotationAngle = 0.0f;
             for (cellIndex = 0; cellIndex < work->cellCount; cellIndex++) {
-                f32 *vertices = (f32 *)dds3FlashPolyListGetVertex(group->drawPool, cellIndex);
+                f32 *vertices = dds3FlashPolyListGetVertex(group->drawPool, cellIndex);
                 EffBossColorSlot *colors = dds3FlashPolyListGetVC(group->drawPool, cellIndex);
 
                 colors->color[0] = 0;
