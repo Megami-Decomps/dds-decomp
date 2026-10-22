@@ -306,7 +306,7 @@ void sdf3DMakeViewportPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node
 
 extern u8 D_003983D0[];
 
-extern u8 D_00398470[];
+extern u8 sdfConsComposedMatrix[];
 
 extern u8 D_003984B0[];
 
@@ -318,7 +318,7 @@ void sdf3DSetCamera(SdfProjectionRecord *node, void *transformMatrix) {
     VU0_STORE_MATRIX(D_003984B0);
     sdfPostmultiplyVuMatrixFromMemory(node->camera.matrix);
     VU0_LOAD_VF_MEMORY(vf10, node->inverseOrigin);
-    VU0_STORE_MATRIX(D_00398470);
+    VU0_STORE_MATRIX(sdfConsComposedMatrix);
     VU0_TRANSFORM_POINT(vf10, vf10);
     VU0_STORE_VF(vf10, D_003984F0);
     memcpy(D_003983D0, node, sizeof(*node));

@@ -512,7 +512,7 @@ extern u8 D_003BD344;
 extern void *D_003BD374;
 extern void *D_003BD378;
 extern f32 D_003BD358, D_003BD35C;
-extern f32 D_00398470[16];
+extern f32 sdfConsComposedMatrix[16];
 extern void sdfCoreDrawSetZBias(f32);
 /* Build one per-frame packet list for each visible node resource variant. */
 void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
@@ -592,7 +592,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
         }
 
         VU0_LOAD_MATRIX(node->worldMatrix);
-        sdfPostmultiplyVuMatrixFromMemory(D_00398470);
+        sdfPostmultiplyVuMatrixFromMemory(sdfConsComposedMatrix);
         if (node->boundsCorners != NULL &&
             sdfModelCheckBounds(node->boundsCorners) != 0) {
             continue;
