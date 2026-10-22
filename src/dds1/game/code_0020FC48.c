@@ -2345,7 +2345,7 @@ extern u8 *btlCreateControlObject(void);
 extern void btlCopyUnitStats(BtlUnit *unit, datUnitWork_t *source);
 extern void btlInitializePartyRecordFromEnemy(datUnitWork_t *, s32);
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
-extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
+extern BtlRuntimeTask *btlCreateMoveOtherUnitsTask(u8 *, u32);
 extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 extern u8 *btlCreateGunLoadPollTask(u8 *);
 extern s32 btlGetUnitModelFrameCount(BtlUnit *);

@@ -50,7 +50,7 @@
 /* Declared before first use (were implicit int). */
 extern s32 btlCanSpawnAnotherEnemy(BtlUnit *requester);
 extern s32 btlCheckStatusActionEligibility(BtlTask *task);
-extern void * btlCreateCommandSoundTask(s32 owner, s32 variant);
+extern BtlRuntimeTask * btlCreateCommandSoundTask(s32 owner, s32 variant);
 extern u8 * btlCreateSecondaryCommandSoundTask(void);
 extern u8 * btlCreateUnitFadeInTask(u8 *owner, u32 value, u32 variant);
 extern void btlDispatchCommandViaHookOrDefault(u8 *command, u8 *argument);
@@ -105,7 +105,7 @@ extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
 
 
-extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
+extern BtlRuntimeTask *btlCreateMoveOtherUnitsTask(u8 *, u32);
 
 extern s32 btlUpdateBattleModelDebugEditor(void);
 
