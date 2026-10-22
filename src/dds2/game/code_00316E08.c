@@ -85,8 +85,6 @@ extern u32 mnuResumeEffectQueueFrameAdvance(void);
 extern void mnuInitializeShootingScene(MnuShootingWork *handle);
 
 
-extern void itfReleaseSpriteWorkPool(struct WideSlotPool *);
-extern void itfReleaseSpriteHitEffectWorkPool(struct CompactSlotPool *);
 extern void dds3ReleaseSoundSlotPool(void);
 extern sdfMemHandle_t *D_00438948;
 extern void mnuDestroyNodeJobQueues(s32 *);
@@ -598,8 +596,6 @@ extern void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
 extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
 extern s32 dds3SetAmbientColor(s32, void *);
 extern s32 dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
-extern struct WideSlotPool *itfCreateSpriteWorkPool(u32 count);
-extern struct CompactSlotPool *itfCreateSpriteHitEffectWorkPool(u32 count);
 extern void dds3InitSoundSlotPool(void);
 extern void mnuRegisterWorkEntryPool(u32 entries, u32 count);
 extern void mnuInitializeRuntimeHitTargetList(MenuRuntimeRecord *records, s32 capacity);
@@ -661,8 +657,8 @@ void mnuInitializeShootingScene(MnuShootingWork *handle) {
     color.v[2] = 0.4f;
     dds3SetAmbientColor(0, color.v);
     dds3SetFogPara(0, 255.0f, 255.0f, 3000.0f, 20000.0f);
-    handle->spriteWork = itfCreateSpriteWorkPool(100);
-    handle->tintWork = itfCreateSpriteHitEffectWorkPool(100);
+    handle->spriteNumberPool = itfCreateSpriteWorkPool(100);
+    handle->hitEffectPool = itfCreateSpriteHitEffectWorkPool(100);
     dds3InitSoundSlotPool();
     D_00438948 = sdfMemAllocDirect(0x1C20);
     D_0043894C = sdfMemGetPtr(D_00438948);
@@ -710,8 +706,8 @@ void mnuDestroyShootingWork(MnuShootingWork *work) {
     s32 i;
     u32 *slot;
 
-    itfReleaseSpriteWorkPool(work->spriteWork);
-    itfReleaseSpriteHitEffectWorkPool(work->tintWork);
+    itfReleaseSpriteWorkPool(work->spriteNumberPool);
+    itfReleaseSpriteHitEffectWorkPool(work->hitEffectPool);
     dds3ReleaseSoundSlotPool();
     if (D_00438948 != NULL) {
         sdfMemFreeDirect(D_00438948);
@@ -1136,8 +1132,6 @@ extern void itfDrawScaledIndexedImage(s32 x, s32 y, s32 z, s32 alpha, f32 xScale
 extern void itfDrawRotatedIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 angle);
 extern void mnuUpdateEffectQueues(MnuEffectWork *work, s32 paused);
 extern void mnuUpdateSectionModelWork(MnuSectionModelWork *work, s32 paused);
-extern void itfUpdateAndDrawSpriteNumbers(struct WideSlotPool *work, u32 flags);
-extern void itfUpdateAndDrawSpriteHitEffects(struct CompactSlotPool *work, u32 flags);
 extern void mnuSetNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z);
 extern void mnuSetNodeScaleVector(u8 *node, f32 value);
 extern void mnuBroadcastNodeModelState(u8 *node, u32 state);
@@ -1251,13 +1245,13 @@ s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
     if ((work->paused & 1) == 0) {
         mnuUpdateEffectQueues(work->effectWork, 0);
         mnuUpdateSectionModelWork(work->modelWork, 0);
-        itfUpdateAndDrawSpriteNumbers(work->spriteWork, 0);
-        itfUpdateAndDrawSpriteHitEffects(work->tintWork, 0);
+        itfUpdateAndDrawSpriteNumbers(work->spriteNumberPool, 0);
+        itfUpdateAndDrawSpriteHitEffects(work->hitEffectPool, 0);
     } else {
         mnuUpdateEffectQueues(work->effectWork, 1);
         mnuUpdateSectionModelWork(work->modelWork, 1);
-        itfUpdateAndDrawSpriteNumbers(work->spriteWork, 1);
-        itfUpdateAndDrawSpriteHitEffects(work->tintWork, 1);
+        itfUpdateAndDrawSpriteNumbers(work->spriteNumberPool, 1);
+        itfUpdateAndDrawSpriteHitEffects(work->hitEffectPool, 1);
     }
 
     if (D_00438928 != NULL) {
@@ -1405,7 +1399,7 @@ void mnuFinishOrDeactivateShootingEntry(MenuWorkEntry *entry, MnuShootingWork *w
             (entry->flagsBits.unk20 & 1) == 0) {
             itfClaimWideSlotWithTaggedPayload((s32)(entry->currentX + (f32)originX),
                                               timedY + originY, registry->score,
-                                              (s8)work->step, work->spriteWork);
+                                              (s8)work->step, work->spriteNumberPool);
         }
         itfProjectScreenPointToViewPlane(position,
                                          (s32)entry->currentX + originX, timedY + originY);

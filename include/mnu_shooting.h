@@ -9,9 +9,6 @@ struct MnuSectionObjectList;
 struct dds3ModelHandle_t;
 struct FileQueue;
 struct FileRequest;
-struct WideSlotPool;
-struct WideSlot;
-struct CompactSlotPool;
 
 /* Records are 0x34 bytes; bit 0 of flags marks a claimed slot. */
 typedef struct ModelInstance {
@@ -48,6 +45,52 @@ typedef char ModelInstanceLayoutsAssert[
      (unsigned long)&((ModelInstance *)0)->flags == 0x20 &&
      (unsigned long)&((ModelInstance *)0)->scale == 0x30 &&
      (unsigned long)&((ModelInstanceWork *)0)->lists == 0x08) ? 1 : -1];
+
+/* Number popups retain screen position, display value, tag bits and frame age. */
+typedef struct MnuSpriteNumberSlot {
+    u32 flags; /* bit 0 claims the slot; bits 1..8 retain the opaque tag */
+    s32 screenX;
+    s32 screenY;
+    s32 value;
+    s32 ageFrames;
+} MnuSpriteNumberSlot;
+
+typedef struct MnuSpriteNumberPool {
+    struct sdfMemHandle_t *allocation;
+    MnuSpriteNumberSlot *slots;
+    s32 count;
+} MnuSpriteNumberPool;
+
+/* Hit effects retain a screen point and animate it for eleven update frames. */
+typedef struct MnuHitEffectSlot {
+    u32 flags; /* bit 0 claims the slot */
+    s32 screenX;
+    s32 screenY;
+    s32 ageFrames;
+} MnuHitEffectSlot;
+
+typedef struct MnuHitEffectPool {
+    struct sdfMemHandle_t *allocation;
+    MnuHitEffectSlot *slots;
+    s32 count;
+} MnuHitEffectPool;
+
+typedef char MnuShootingSpritePoolLayoutsAssert[
+    (sizeof(MnuSpriteNumberSlot) == 0x14 &&
+     (unsigned long)&((MnuSpriteNumberSlot *)0)->screenX == 4 &&
+     (unsigned long)&((MnuSpriteNumberSlot *)0)->screenY == 8 &&
+     (unsigned long)&((MnuSpriteNumberSlot *)0)->value == 0xC &&
+     (unsigned long)&((MnuSpriteNumberSlot *)0)->ageFrames == 0x10 &&
+     sizeof(MnuHitEffectSlot) == 0x10 &&
+     (unsigned long)&((MnuHitEffectSlot *)0)->screenX == 4 &&
+     (unsigned long)&((MnuHitEffectSlot *)0)->screenY == 8 &&
+     (unsigned long)&((MnuHitEffectSlot *)0)->ageFrames == 0xC &&
+     sizeof(MnuSpriteNumberPool) == 0xC &&
+     sizeof(MnuHitEffectPool) == 0xC &&
+     (unsigned long)&((MnuSpriteNumberPool *)0)->slots == 4 &&
+     (unsigned long)&((MnuSpriteNumberPool *)0)->count == 8 &&
+     (unsigned long)&((MnuHitEffectPool *)0)->slots == 4 &&
+     (unsigned long)&((MnuHitEffectPool *)0)->count == 8) ? 1 : -1];
 
 /* Nodes passed to the menu model helpers are complete 0x50-byte records. */
 typedef struct MnuModelNode {
@@ -135,8 +178,17 @@ MnuEffectRecord *mnuStartPositionedEffectRecord(MnuEffectList *, s32, f32, f32, 
  * selector follows the position, as recovered from the shooting callback. */
 s32 mnuStartPositionedEffectBurst(MnuEffectList *list, MnuEffectPositionStep *step,
                                    s32 baseDelay, f32 x, f32 y, f32 z, s32 id);
-struct WideSlot *itfClaimWideSlotWithTaggedPayload(u32 x, u32 y, u32 value, s8 tag,
-    struct WideSlotPool *pool);
+MnuSpriteNumberPool *itfCreateSpriteWorkPool(u32 count);
+void itfReleaseSpriteWorkPool(MnuSpriteNumberPool *pool);
+void itfUpdateAndDrawSpriteNumbers(MnuSpriteNumberPool *pool, u32 flags);
+MnuSpriteNumberSlot *itfClaimWideSlotWithTaggedPayload(s32 screenX, s32 screenY,
+    s32 value, s8 tag, MnuSpriteNumberPool *pool);
+
+MnuHitEffectPool *itfCreateSpriteHitEffectWorkPool(u32 count);
+void itfReleaseSpriteHitEffectWorkPool(MnuHitEffectPool *pool);
+void itfUpdateAndDrawSpriteHitEffects(MnuHitEffectPool *pool, u32 flags);
+MnuHitEffectSlot *itfClaimCompactSlotWithPayload(s32 screenX, s32 screenY,
+    MnuHitEffectPool *pool);
 
 /* DDS2 shooting task allocation, cleared as 0x1E0 bytes by its constructor. */
 typedef struct MnuShootingWork {
@@ -150,8 +202,8 @@ typedef struct MnuShootingWork {
     struct MnuSectionModelWork *modelWork;
     struct MnuEffectWork *effectWork;
     struct ModelInstanceWork *work24;
-    struct WideSlotPool *spriteWork;
-    struct CompactSlotPool *tintWork;
+    MnuSpriteNumberPool *spriteNumberPool;
+    MnuHitEffectPool *hitEffectPool;
     union {
         u32 resourceSlots[7];
         struct {
@@ -230,8 +282,8 @@ typedef char ShootingCallbackOffsetsAssert[
      (unsigned long)&((MnuShootingWork *)0)->playerResetTicks == 0xAC) ? 1 : -1];
 
 typedef char ShootingPoolOffsetsAssert[
-    ((unsigned long)&((MnuShootingWork *)0)->spriteWork == 0x28 &&
-     (unsigned long)&((MnuShootingWork *)0)->tintWork == 0x2C) ? 1 : -1];
+    ((unsigned long)&((MnuShootingWork *)0)->spriteNumberPool == 0x28 &&
+     (unsigned long)&((MnuShootingWork *)0)->hitEffectPool == 0x2C) ? 1 : -1];
 typedef char ShootingPauseFadeOffsetsAssert[
     ((unsigned long)&((MnuShootingWork *)0)->pauseFade == 0x14C &&
      (unsigned long)&((MnuShootingWork *)0)->pauseFade.displayValue == 0x164) ? 1 : -1];

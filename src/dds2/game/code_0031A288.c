@@ -3,8 +3,6 @@
 #include "mnu_shooting.h"
 #include "mdl.h"
 
-struct CompactSlot;
-extern struct CompactSlot *itfClaimCompactSlotWithPayload(u32, u32, struct CompactSlotPool *);
 extern s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *, s32);
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
 extern u32 mnuAdvanceWorkEntry(MenuWorkEntry *, s32);
@@ -31,7 +29,7 @@ void mnuApplyShootingRuntimeRecordEvent(MenuRuntimeRecord *record, MenuWorkEntry
                 work->currentScore += 10000;
                 y = mnuEvaluateTimedValue(entry);
                 itfClaimWideSlotWithTaggedPayload((s32)(entry->currentX + (f32)originX),
-                    (s32)y + originY, 10000, 0, work->spriteWork);
+                    (s32)y + originY, 10000, 0, work->spriteNumberPool);
             }
             evtPrintDeveloperConsoleMessage("ITEM GET !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! %d\n", (D_0040ABF8.flags >> 15) & 0xF);
         } else if (D_0040ABF8.remaining != 0) {
@@ -67,7 +65,7 @@ void mnuApplyShootingRuntimeRecordEvent(MenuRuntimeRecord *record, MenuWorkEntry
         y = mnuEvaluateTimedValue(entry);
         y += parameters->hitOffsetY;
         y += parameters->hitHeight;
-        itfClaimCompactSlotWithPayload(x + originX, (s32)y + originY, work->tintWork);
+        itfClaimCompactSlotWithPayload(x + originX, (s32)y + originY, work->hitEffectPool);
         if (entry->flagsBits.finished) {
             if (work->completed == 0) {
                 work->progress++;
