@@ -131,7 +131,7 @@ void evtSetSolarOverlayFullyVisible(void);
 void evtLoadSolarNoiseSprite(struct EffectSlotSet **sprite);
 void evtReleaseSolarNoiseSprite(struct EffectSlotSet **sprite);
 
-extern KwlnTask *evtSolarOverlayTask;
+extern KwlnTask *moonprocess_id;
 s32 evtCreateSolarOverlayWork(KwlnTask *task);
 s32 evtUpdateSolarOverlayFade(KwlnTask *task);
 void evtFreeSolarOverlayWork(KwlnTask *task);

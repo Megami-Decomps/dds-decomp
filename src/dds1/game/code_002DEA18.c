@@ -32,7 +32,7 @@
 
 #define SDF_VU_COLORED_BATCH_LIMIT 0x18
 
-extern u32 sdfVuSelectedTransformMatrix;
+extern u32 corePktCurrLight;
 
 extern u128 *D_003EB860[][3];
 
@@ -75,7 +75,7 @@ void corePktMakeEdgePoint(VuBlendNode *out, VuBlendNode *first, VuBlendNode *sec
     VU0_INTERPOLATE_CLIP_VERTEX(out, first, second);
 }
 
-extern u8 sdf3DSoftenOff;
+extern u8 corePktSoftenBias;
 extern u16 D_003F7860[];
 static inline VuBlendNode *vuAllocNode(VuWork *work) {
     VuBlendNode *node = work->dmaAddrA;
@@ -105,7 +105,7 @@ void corePktClipFace(VuWork *work) {
     triangleCount = (s16)work->param0;
     rejected = 0;
     scale = work->depth;
-    acceptAll = sdf3DSoftenOff;
+    acceptAll = corePktSoftenBias;
     triangles = (u16 *)work->strip;
     nodes = (VuBlendNode *)work->dmaBase;
     for (i = 0; i != triangleCount; i++) {
@@ -263,7 +263,7 @@ void corePktBuildFaceList(VuWork *work) {
         corePktClipFace(work);
     }
     triangleCount = (s16)work->param0;
-    acceptAll = sdf3DSoftenOff;
+    acceptAll = corePktSoftenBias;
     out = D_003EB860;
     triangles = (u16 *)work->strip;
     nodes = (VuBlendNode *)work->dmaBase;
@@ -413,7 +413,7 @@ void corePktBuildBackFaceList(VuWork *work) {
     const u8 *projection = D_003983D0;
 
     VU0_SET_CLIP_PLANES(scale, clipPlane, projection);
-    acceptAll = sdf3DSoftenOff;
+    acceptAll = corePktSoftenBias;
     remaining = work->selectedTriangleCount;
     indices = D_003F7860;
     triangles = (u16 *)work->strip;
@@ -746,7 +746,7 @@ void corePktEmitMultiTexPass(VuWork *work) {
             if (primaryStateWordSecond != secondaryColor) {
                 u128 parameters[3];
 
-                corePktMakeFaceDivParm((SdfVuColorTransform *)parameters, sdfVuSelectedTransformMatrix, work->packedColor,
+                corePktMakeFaceDivParm((SdfVuColorTransform *)parameters, corePktCurrLight, work->packedColor,
                               secondaryColor, node->unk04, node->unk1C,
                               node->x + work->offsetX, node->y + work->offsetY);
                 corePktApplyFaceDivColor(work, parameters);

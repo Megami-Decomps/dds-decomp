@@ -66,7 +66,7 @@ extern u8 D_003BB188[];
 extern void frFontCheckPendingGlyphState(FrFontCtx *);
 extern void frMessageReturnCode(FrFontCtx *);
 extern void frFontAppendIndexedTextToGlyphChain(u8, FrFontCtx *);
-extern u8 frFontSharedGlyphFlags;
+extern u8 gModeFlag;
 extern void mnuSetTitleVoicePrefixIndex(s32);
 extern void mnuPlayTitleVoiceFile(char *);
 extern s32 mnuGetTitleEffectFrameCounter(void);
@@ -83,7 +83,7 @@ extern u8 frDisableMode(u8 value);
 extern u8 D_00357980[];
 extern u8 D_00357988[];
 
-extern s32 frFontDefaultGlyphCellSize;
+extern s32 frDefaultFontHandle;
 
 extern u32 itfTextLipsMotionId;
 
@@ -163,7 +163,7 @@ s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
         *position = payloadPosition + 1;
         break;
     case 0xF10F:
-        if (!(frFontSharedGlyphFlags & 4)) {
+        if (!(gModeFlag & 4)) {
             /* Retail 0x00196730 b .L00196774: advanceLine is also entered by
              * fall-through from the beql at 0x0019676C. */
             goto advanceLine;
@@ -173,7 +173,7 @@ s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
         D_003BB15C |= 2;
         return 1;
     case 0xF111:
-        if (!(frFontSharedGlyphFlags & 8)) {
+        if (!(gModeFlag & 8)) {
             /* Retail 0x00196750 beqz .L00196768: checkAutomaticLine has one entry
              * and falls into the shared advanceLine call at 0x00196774. */
             goto checkAutomaticLine;
@@ -184,7 +184,7 @@ s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
         return 1;
 
 checkAutomaticLine:
-        if (!(frFontSharedGlyphFlags & 0x20)) {
+        if (!(gModeFlag & 0x20)) {
             break;
         }
 advanceLine:
@@ -270,7 +270,7 @@ FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
                 break;
             }
         } else if (value == 10) {
-            if (!(frFontSharedGlyphFlags & 4)) {
+            if (!(gModeFlag & 4)) {
                 continue;
             }
             frMessageReturnCode(stream);
@@ -503,7 +503,7 @@ void itfSetTextDrawLimit(s32 limit) {
     if (limit < 1) {
         limit = 0x14;
     }
-    frFontDefaultGlyphCellSize = limit;
+    frDefaultFontHandle = limit;
 }
 
 FrFontGlyph *frwGetStaffFontFRQ(u32 x, u32 y, s32 depth, s32 alt, s32 measureFlag, u64 entryFlag, u32 colors, void *source) {

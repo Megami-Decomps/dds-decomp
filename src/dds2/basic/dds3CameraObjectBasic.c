@@ -27,9 +27,9 @@ u8 dds3CheckPoseSetFlag(ObjectTransform *node, u32 flags);
 void dds3OffPoseSetFlag(ObjectTransform *node, u32 flags);
 extern void dds3SetRadiusPoseSet(ObjectTransform *inner);
 extern void MakeCamera(EffWorldNode *camera);
-extern f32 sdfViewEyeVector[4];
+extern f32 aViewTarget[4];
 extern f32 sdfViewTargetVector[4];
-extern f32 sdfViewUpVector[4];
+extern f32 aViewDown[4];
 
 /* Rebuild dirty vectors and publish only the active world's camera; return 1.
  * A pending field-of-view update is consumed only while this camera is active. */
@@ -46,8 +46,8 @@ s32 dds3UpdateCameraObject(EffWorldNode *camera) {
     }
     if (dds3GetActiveCameraSceneBasic(dds3GetControlScene()) == camera) {
         PCP_COPY_VECTOR(sdfViewTargetVector, &inner->position);
-        PCP_COPY_VECTOR(sdfViewEyeVector, &data->worldEye);
-        PCP_COPY_VECTOR(sdfViewUpVector, &data->worldUp);
+        PCP_COPY_VECTOR(aViewTarget, &data->worldEye);
+        PCP_COPY_VECTOR(aViewDown, &data->worldUp);
         if (data->fovUpdatePending & 1) {
             dds3SetScreenFovy(data->fieldOfView);
             data->fovUpdatePending &= ~1;

@@ -63,7 +63,7 @@ extern s32 btlHasRegisteredAphNamePanelTask();
 extern void btlReplaceDialogTasksAndQueueMessage(s32, s32);
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 #include "sdf_debug_api.h"
-extern s8 kwlnTaskPadButtonStates[];
+extern s8 dds3PadButtonState[];
 /* Name-record overwrite prompt: uses coordinates, selection, state and both text slices. */
 INCLUDE_ASM(const s32, "game/code_001FC7D8", btlPollResourceNameOverwrite);
 
@@ -1127,7 +1127,7 @@ s32 btlWaitEffectTask(BtlAnalysisPanelWaitArgs *task) {
     }
     if (task->elapsedTicks >= 0x11) {
         if (btlGetRegisteredTaskValueOrDefault() == 1) {
-            if (kwlnTaskPadButtonStates[0x21] < 0 || kwlnTaskPadButtonStates[0x23] < 0) {
+            if (dds3PadButtonState[0x21] < 0 || dds3PadButtonState[0x23] < 0) {
                 btlSetCommandPanelFadeMode(1, 8);
                 btlRequestAnalysisPanelClose();
                 return 1;

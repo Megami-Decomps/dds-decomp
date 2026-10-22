@@ -1348,7 +1348,7 @@ void btlSelectSlotEntries(void) {
     DatPartyRecord *readyEntry = NULL;
     DatPartyRecord *activeEntry = NULL;
     u32 i;
-    slotEntry = datGameState->party;
+    slotEntry = DDS3_GBWK->party;
     for (i = 0; i < 5; i++) {
         u16 flags = slotEntry->flags;
         effectState[i] = flags;
@@ -1384,12 +1384,12 @@ void btlRestoreSlotEntriesFromEffect(void) {
     for (i = 0; i < 5; i++) {
         if (effectState[i] & 1) {
             if (effectState[i] & 2) {
-                datGameState->party[i].flags |= 2;
+                DDS3_GBWK->party[i].flags |= 2;
             } else {
-                datGameState->party[i].flags &= ~2;
+                DDS3_GBWK->party[i].flags &= ~2;
             }
-            if (datGameState->party[i].unitId == 1) {
-                activeEntry = &datGameState->party[i];
+            if (DDS3_GBWK->party[i].unitId == 1) {
+                activeEntry = &DDS3_GBWK->party[i];
             }
         }
     }

@@ -43,7 +43,7 @@ extern char mnuCampDrawTaskName[]; /* "camp_draw" */
 
 extern char mnuCampOwnerTaskName[]; /* "camp_update" */
 
-extern s8 mnuCampTaskState;
+extern s8 campExitState;
 
 
 
@@ -118,7 +118,7 @@ void ptyResetPartyRecordsAndProfiles(void) {
     s32 i = 4;
 
     do {
-        DatPartyRecord *rec = &datGameState->party[partyIndex];
+        DatPartyRecord *rec = &DDS3_GBWK->party[partyIndex];
         partyIndex++;
         if (rec->flags & 1) {
             scrClearPackedScriptFlags(rec);
@@ -127,7 +127,7 @@ void ptyResetPartyRecordsAndProfiles(void) {
         i--;
     } while (i >= 0);
     for (i = 0xC0; i < 0x100; i++) {
-        datGameState->inventory.counts[i] = 0;
+        DDS3_GBWK->inventory.counts[i] = 0;
         mnuClearEntryBlocked(i);
     }
     evtBitOff(0x901);
@@ -364,7 +364,7 @@ void movReleaseActivePartyCategoryModels(struct EffectSlotSet **modelHandles, s3
 
     effResolveAndReleaseResource(modelHandles[0]);
     for (partyIndex = 0; partyIndex < MNU_STAFF_PARTY_COUNT; partyIndex++) {
-        DatPartyRecord *partyRecord = &datGameState->party[partyIndex];
+        DatPartyRecord *partyRecord = &DDS3_GBWK->party[partyIndex];
 
         if ((partyRecord->flags & MNU_STAFF_PARTY_PRESENT_BIT) != 0) {
             s32 modelIndex = partyRecord->unitId + D_00437B73;
@@ -867,7 +867,7 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     movReleaseTitleEffects(menuBytes);
     effDestroyEffectList(((MenuStaffContext *)menuBytes)->menuResource);
     sdfMemFreeDirect(((MenuStaffContext *)menuBytes)->allocation);
-    mnuCampTaskState = MNU_CAMP_STATE_CLEANED_UP;
+    campExitState = MNU_CAMP_STATE_CLEANED_UP;
     p2sdBgmVolUp();
 }
 
@@ -930,7 +930,7 @@ void mnuCreateCampTasks(void) {
     dds3LinkProcess(drawTask, dds3StartProcess("camp_fade", 0x2B08, 1, 0, mnuDrawAndStepStaffGradientFade, 0, (u32)menu));
     dds3LinkProcess(drawTask, dds3StartProcess("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, (u32)menu));
     dds3FadeIn(0, 0, 0, MNU_CAMP_OPEN_FADE_FRAMES);
-    mnuCampTaskState = MNU_CAMP_STATE_ACTIVE;
+    campExitState = MNU_CAMP_STATE_ACTIVE;
 }
 
 /* Destroy the three named camp task hierarchies; owner teardown frees userdata. */
@@ -943,7 +943,7 @@ void mnuDestroyCampTasks(void) {
 /* Report active camp; acknowledge cleanup only for the exact cleaned-up state.
  * Other non-active states return 0 without being rewritten. */
 s32 mnuAcknowledgeCampState(void) {
-    s8 campState = mnuCampTaskState;
+    s8 campState = campExitState;
     if (campState == MNU_CAMP_STATE_ACTIVE) {
         return 1;
     }
@@ -951,7 +951,7 @@ s32 mnuAcknowledgeCampState(void) {
         return 0;
     }
     if (campState == MNU_CAMP_STATE_CLEANED_UP) {
-        mnuCampTaskState = MNU_CAMP_STATE_IDLE;
+        campExitState = MNU_CAMP_STATE_IDLE;
     }
     return 0;
 }
@@ -977,7 +977,7 @@ void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, st
         return;
     }
     effDrawTextureSlotWithBlendedCornerColors((visual->titleSlide + 0x1A) << 4, 0xCB8, 0, visual->titleOpacity, 1, drawResource, 0x3F, layer);
-    sprintf(buffer, D_00437B80, datGameState->header.currency);
+    sprintf(buffer, D_00437B80, DDS3_GBWK->header.currency);
     /* Keep the RGB channels fixed while the opacity byte fades from 0x80 to zero. */
     object = itfCreateTightFont3TextGlyph((visual->titleSlide + 0x33) << 4, 0xCD8, textParam,
                            fclBlendColor(0xA09DC380, 0xA09DC300, visual->titleOpacity), buffer, 0);

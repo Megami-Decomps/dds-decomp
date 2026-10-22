@@ -1142,9 +1142,9 @@ s32 btlSelectPreemptiveOutcome(void) {
     ratio = 1.0f;
     chance = evtRunContext(0x16, 0, 0, 0, 0);
     for (i = 0; i < 5; i++) {
-        if (datGameState->party[i].flags & 1) {
-            if (datGameState->party[i].flags & 2) {
-                if (btlCheckSpecialAbility(&datGameState->party[i], 0x22E)) {
+        if (DDS3_GBWK->party[i].flags & 1) {
+            if (DDS3_GBWK->party[i].flags & 2) {
+                if (btlCheckSpecialAbility(&DDS3_GBWK->party[i], 0x22E)) {
                     ratio *= datAbilityParameters[0x22E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
                 }
             }

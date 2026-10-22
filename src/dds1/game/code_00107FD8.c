@@ -122,9 +122,9 @@ extern void fileEnterMcPackScene(s32 mode);
 
 extern s32 fileMenuOperationSucceeded(void);
 
-extern u32 kwlnDrawSurfaceIndex;
+extern u32 egl_OT_Offset;
 
-extern u32 kwlnDrawControlFlags;
+extern u32 dds3DrawFlag;
 
 
 
@@ -152,9 +152,9 @@ extern char D_003BA950[];
 
 extern void *D_003BD6B0;
 
-extern f32 sdf3DSoften;
+extern f32 sdfFaceDivSoften;
 
-extern f32 sdf3DBias;
+extern f32 sdfFaceDivBias;
 
 extern u16 D_003BD706;
 
@@ -209,7 +209,7 @@ extern s32 D_0032E3C0[];
 
 extern void fldStartLmapTask(s32 mode);
 
-extern u32 scrNamedProcessCount;
+extern u32 scrHandleCount;
 
 
 extern SdfPoolNode kwlnPositionedTextSurface;
@@ -257,14 +257,14 @@ void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color) {
     if (light != NULL) {
         blendFlag = 4 << (lightIndex * 2);
         if (blendFrames == 0) {
-            kwlnDrawControlFlags &= ~blendFlag;
+            dds3DrawFlag &= ~blendFlag;
             VU0_LOAD_VF(vf10, color);
             VU0_CLEAR_W(vf10);
             VU0_STORE_VF(vf10, D_00324770[lightIndex]);
         } else {
             D_003BD6D0[lightIndex] = blendFrames;
             D_003BD6C8[lightIndex] = 0;
-            kwlnDrawControlFlags |= blendFlag;
+            dds3DrawFlag |= blendFlag;
             VU0_LOAD_VF(vf10, light);
             EE_MMI_RGBA_PACK(packedStartColor);
             startColorWords[0] = packedStartColor;
@@ -291,7 +291,7 @@ void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction) {
     if (D_00324770[lightIndex] != NULL) {
         blendFlag = 8 << (lightIndex * 2);
         if (blendFrames == 0) {
-            kwlnDrawControlFlags &= ~blendFlag;
+            dds3DrawFlag &= ~blendFlag;
             VU0_LOAD_VF(vf10, direction);
             VU0_NORMALIZE_VF10();
             VU0_CLEAR_W(vf10);
@@ -299,7 +299,7 @@ void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction) {
         } else {
             D_003BD6E0[lightIndex] = blendFrames;
             D_003BD6D8[lightIndex] = 0;
-            kwlnDrawControlFlags |= blendFlag;
+            dds3DrawFlag |= blendFlag;
             VU0_LOAD_VF(vf10, direction);
             VU0_CLEAR_W(vf10);
             VU0_NORMALIZE_VF10();
@@ -329,12 +329,12 @@ void dds3SetAmbientColor(s32 blendFrames, f32 *color) {
     u32 packedTargetColor;
 
     if (blendFrames == 0) {
-        kwlnDrawControlFlags &= ~EVT_BACKGROUND_BLEND_FLAG;
+        dds3DrawFlag &= ~EVT_BACKGROUND_BLEND_FLAG;
         VU0_LOAD_VF(vf10, color);
         VU0_SET_W_ONE(vf10);
         VU0_STORE_VF(vf10, kwlnDefaultColorVector);
     } else {
-        kwlnDrawControlFlags |= EVT_BACKGROUND_BLEND_FLAG;
+        dds3DrawFlag |= EVT_BACKGROUND_BLEND_FLAG;
         D_003BD6E8 = blendFrames;
         D_003BD6E6 = 0;
         VU0_LOAD_VF(vf10, kwlnDefaultColorVector);
@@ -365,10 +365,10 @@ void dds3SetFogColor(s32 blendFrames, f32 *color) {
     EE_MMI_RGBA_PACK_F255(packedTargetColor);
     targetColorWords[0] = packedTargetColor;
     if (blendFrames == 0) {
-        kwlnDrawControlFlags &= ~EVT_DRAW_COLOR_BLEND_FLAG;
+        dds3DrawFlag &= ~EVT_DRAW_COLOR_BLEND_FLAG;
         D_003247A0[0] = targetColorWords[0];
     } else {
-        kwlnDrawControlFlags |= EVT_DRAW_COLOR_BLEND_FLAG;
+        dds3DrawFlag |= EVT_DRAW_COLOR_BLEND_FLAG;
         D_003BD6F6 = blendFrames;
         D_003BD700 = targetColorWords[0];
         D_003BD6FC = D_003247A0[0];
@@ -380,7 +380,7 @@ void dds3SetFogColor(s32 blendFrames, f32 *color) {
 /* Either replace the draw vector immediately or interpolate from its prior value. */
 void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w) {
     if (blendFrames == 0) {
-        kwlnDrawControlFlags &= ~EVT_DRAW_VECTOR_BLEND_FLAG;
+        dds3DrawFlag &= ~EVT_DRAW_VECTOR_BLEND_FLAG;
         kwlnDrawVector.fogNear = x;
         kwlnDrawVector.fogFar = y;
         kwlnDrawVector.depthNear = z;
@@ -390,7 +390,7 @@ void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w) {
         f32 previousY = kwlnDrawVector.fogFar;
         f32 previousZ = kwlnDrawVector.depthNear;
         f32 previousW = kwlnDrawVector.depthFar;
-        kwlnDrawControlFlags |= EVT_DRAW_VECTOR_BLEND_FLAG;
+        dds3DrawFlag |= EVT_DRAW_VECTOR_BLEND_FLAG;
         D_003BD6FA = blendFrames;
         D_003C2C20.x = previousX;
         D_003C2C20.y = previousY;
@@ -421,9 +421,9 @@ void dds3SceneLightUpdateFirst(void) {
 
     for (i = 0, mask = 4; i < 3; i++, mask <<= 2) {
         if (D_00324770[i] == NULL) {
-            kwlnDrawControlFlags &= ~(mask | (mask << 1));
+            dds3DrawFlag &= ~(mask | (mask << 1));
         } else {
-            if (kwlnDrawControlFlags & mask) {
+            if (dds3DrawFlag & mask) {
                 ++D_003BD6C8[i];
                 ratio = (f32)D_003BD6C8[i] / D_003BD6D0[i];
                 eeUnpackRGBAWordFloatReadOnly(D_003C2BA0[i], 0.0078125f);
@@ -434,10 +434,10 @@ void dds3SceneLightUpdateFirst(void) {
                 VU0_ADD(vf10, vf10, vf11);
                 VU0_STORE_VF_UNCLOBBERED(vf10, D_00324770[i]);
                 if (D_003BD6C8[i] >= D_003BD6D0[i]) {
-                    kwlnDrawControlFlags &= ~mask;
+                    dds3DrawFlag &= ~mask;
                 }
             }
-            if (kwlnDrawControlFlags & (mask << 1)) {
+            if (dds3DrawFlag & (mask << 1)) {
                 ++D_003BD6D8[i];
                 ratio = (f32)D_003BD6D8[i] / D_003BD6E0[i];
                 VU0_MOVE_VF(vf10, vf0);
@@ -449,12 +449,12 @@ void dds3SceneLightUpdateFirst(void) {
                 VU0_APPLY_MATRIX(vf10, vf10);
                 VU0_STORE_VF_UNCLOBBERED(vf10, D_00324770[i] + 4);
                 if (D_003BD6D8[i] >= D_003BD6E0[i]) {
-                    kwlnDrawControlFlags &= ~(mask << 1);
+                    dds3DrawFlag &= ~(mask << 1);
                 }
             }
         }
     }
-    if (kwlnDrawControlFlags & EVT_BACKGROUND_BLEND_FLAG) {
+    if (dds3DrawFlag & EVT_BACKGROUND_BLEND_FLAG) {
         ++D_003BD6E6;
         ratio = (f32)D_003BD6E6 / D_003BD6E8;
         eeUnpackRGBAWordFloatReadOnly(D_003BD6EC, 0.0078125f);
@@ -466,10 +466,10 @@ void dds3SceneLightUpdateFirst(void) {
         VU0_SET_W_ONE(vf10);
         VU0_STORE_VF_UNCLOBBERED(vf10, kwlnDefaultColorVector);
         if (D_003BD6E6 >= D_003BD6E8) {
-            kwlnDrawControlFlags &= ~EVT_BACKGROUND_BLEND_FLAG;
+            dds3DrawFlag &= ~EVT_BACKGROUND_BLEND_FLAG;
         }
     }
-    if (kwlnDrawControlFlags & EVT_DRAW_COLOR_BLEND_FLAG) {
+    if (dds3DrawFlag & EVT_DRAW_COLOR_BLEND_FLAG) {
         ++D_003BD6F4;
         ratio = (f32)D_003BD6F4 / D_003BD6F6;
         eeUnpackRGBAWordFloatReadOnly(D_003BD6FC, 0.0078125f);
@@ -480,10 +480,10 @@ void dds3SceneLightUpdateFirst(void) {
         VU0_ADD(vf10, vf10, vf11);
         D_003247A0[0] = eePackRGBAWord(128.0f);
         if (D_003BD6F4 >= D_003BD6F6) {
-            kwlnDrawControlFlags &= ~EVT_DRAW_COLOR_BLEND_FLAG;
+            dds3DrawFlag &= ~EVT_DRAW_COLOR_BLEND_FLAG;
         }
     }
-    if (kwlnDrawControlFlags & EVT_DRAW_VECTOR_BLEND_FLAG) {
+    if (dds3DrawFlag & EVT_DRAW_VECTOR_BLEND_FLAG) {
         ++D_003BD6F8;
         ratio = (f32)D_003BD6F8 / D_003BD6FA;
         VU0_LOAD_VF(vf10, &D_003C2C20);
@@ -496,16 +496,16 @@ void dds3SceneLightUpdateFirst(void) {
         VU0_GET_VF10_Z(kwlnDrawVector.depthNear);
         VU0_GET_VF10_W(kwlnDrawVector.depthFar);
         if (D_003BD6F8 >= D_003BD6FA) {
-            kwlnDrawControlFlags &= ~EVT_DRAW_VECTOR_BLEND_FLAG;
+            dds3DrawFlag &= ~EVT_DRAW_VECTOR_BLEND_FLAG;
         }
     }
-    if (kwlnDrawControlFlags & EVT_SAVED_VECTOR_BLEND_FLAG) {
+    if (dds3DrawFlag & EVT_SAVED_VECTOR_BLEND_FLAG) {
         ++D_003BD704;
         ratio = (f32)D_003BD704 / D_003BD706;
-        sdf3DSoften = D_003BD708 * (1.0f - ratio) + D_003BD70C * ratio;
-        sdf3DBias = D_003BD710 * (1.0f - ratio) + D_003BD714 * ratio;
+        sdfFaceDivSoften = D_003BD708 * (1.0f - ratio) + D_003BD70C * ratio;
+        sdfFaceDivBias = D_003BD710 * (1.0f - ratio) + D_003BD714 * ratio;
         if (D_003BD704 >= D_003BD706) {
-            kwlnDrawControlFlags &= ~EVT_SAVED_VECTOR_BLEND_FLAG;
+            dds3DrawFlag &= ~EVT_SAVED_VECTOR_BLEND_FLAG;
         }
     }
 }
@@ -513,14 +513,14 @@ void dds3SceneLightUpdateFirst(void) {
 /* Replace the two scalar targets immediately, or retain start/end values for their blend. */
 void dds3SetSoftenBias(s32 frames, f32 firstTarget, f32 secondTarget) {
     if (frames == 0) {
-        kwlnDrawControlFlags &= ~EVT_SAVED_VECTOR_BLEND_FLAG;
-        sdf3DSoften = firstTarget;
-        sdf3DBias = secondTarget;
+        dds3DrawFlag &= ~EVT_SAVED_VECTOR_BLEND_FLAG;
+        sdfFaceDivSoften = firstTarget;
+        sdfFaceDivBias = secondTarget;
     }
     else {
-        f32 previousFirst = sdf3DSoften;
-        f32 previousSecond = sdf3DBias;
-        kwlnDrawControlFlags |= EVT_SAVED_VECTOR_BLEND_FLAG;
+        f32 previousFirst = sdfFaceDivSoften;
+        f32 previousSecond = sdfFaceDivBias;
+        dds3DrawFlag |= EVT_SAVED_VECTOR_BLEND_FLAG;
         D_003BD706 = frames;
         D_003BD708 = previousFirst;
         D_003BD70C = firstTarget;
@@ -538,7 +538,7 @@ void eglInit(void) {
 }
 
 void eglSetOt(u32 surfaceIndex) {
-    kwlnDrawSurfaceIndex = surfaceIndex;
+    egl_OT_Offset = surfaceIndex;
 }
 
 
@@ -549,7 +549,7 @@ typedef struct EvtGsCommand {
     u64 registerId;
 } EvtGsCommand;
 
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 
 #include "sdf_packet_alloc.h"
 
@@ -576,7 +576,7 @@ void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s3
     command->registerId = EVT_GS_TEST_PRIMARY;
     sdfDrawTagLink(list, (u32)(packet));
     {
-        SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+        SdfPoolNode *surface = &sdfGrOtTable[egl_OT_Offset];
         surface->append(surface, list);
     }
 }
@@ -593,7 +593,7 @@ void evtSubmitSecondaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, 
     command->registerId = EVT_GS_TEST_SECONDARY;
     sdfDrawTagLink(list, (u32)(packet));
     {
-        SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+        SdfPoolNode *surface = &sdfGrOtTable[egl_OT_Offset];
         surface->append(surface, list);
     }
 }
@@ -639,7 +639,7 @@ void evtSubmitPrimaryAlphaBlendMode(s32 blendMode) {
     command->registerId = EVT_GS_ALPHA_PRIMARY;
     sdfDrawTagLink(list, (u32)(packet));
     {
-        SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+        SdfPoolNode *surface = &sdfGrOtTable[egl_OT_Offset];
         surface->append(surface, list);
     }
 }
@@ -656,7 +656,7 @@ void evtSubmitFixedAlphaBlend(s32 fixedAlpha) {
     command->registerId = EVT_GS_ALPHA_PRIMARY;
     sdfDrawTagLink(list, (u32)(packet));
     {
-        SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+        SdfPoolNode *surface = &sdfGrOtTable[egl_OT_Offset];
         surface->append(surface, list);
     }
 }
@@ -674,7 +674,7 @@ void evtSubmitPrimaryFramePacket(void) {
     sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
     sdfDrawTagLinkRefGif(list, (u32)framePacket);
     {
-        SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+        SdfPoolNode *surface = &sdfGrOtTable[egl_OT_Offset];
         surface->append(surface, list);
     }
 }
@@ -689,7 +689,7 @@ void evtSubmitAlternateFramePacket(void) {
     sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
     sdfDrawTagLinkRefGif(list, (u32)framePacket);
     {
-        SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+        SdfPoolNode *surface = &sdfGrOtTable[egl_OT_Offset];
         surface->append(surface, list);
     }
 }
@@ -719,7 +719,7 @@ void evtSubmitTexturedGradientQuad(s32 x, s32 y, s32 width, s32 height,
         left, bottom, uLeft, vBottom, color3,
         right, bottom, uRight, vBottom, color2,
         -1, NULL);
-    surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+    surface = &sdfGrOtTable[egl_OT_Offset];
     surface->append(surface, list);
 }
 
@@ -785,7 +785,7 @@ void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 col
         pos += 2;
     }
     sdfDrawTagLink(command, (u32)packet);
-    descriptor = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+    descriptor = &sdfGrOtTable[egl_OT_Offset];
     descriptor->append(descriptor, command);
 }
 
@@ -846,7 +846,7 @@ void eglLinkTri(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 
         dst += 2;
     }
     sdfDrawTagLink(command, (u32)packet);
-    descriptor = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+    descriptor = &sdfGrOtTable[egl_OT_Offset];
     descriptor->append(descriptor, command);
 }
 
@@ -893,7 +893,7 @@ void eglLinkPoly4(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2
     indices[3] = i1;
     strip[0] = D_003245A0[0];
     sdfDrawTagLink(list, (u32)(sdf3DPrimMakePoly(&desc)));
-    surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+    surface = &sdfGrOtTable[egl_OT_Offset];
     surface->append(surface, list);
 }
 
@@ -948,7 +948,7 @@ void eglLinkTexPoly4(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f32 x1, f32 y1, f32
     uvs[6] = u1;
     uvs[7] = v0;
     sdfDrawTagLink(list, (u32)(sdf3DPrimMakePoly(&desc)));
-    surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+    surface = &sdfGrOtTable[egl_OT_Offset];
     surface->append(surface, list);
     sdfMatFreeDelayed((SdfAsset *)asset);
 }
@@ -972,7 +972,7 @@ void eglLinkLine(f32 x, f32 y, f32 z, f32 u, f32 v, f32 w, u32 first, u32 second
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)(effDebugDrawWireModel(D_003245B0, D_003245D0, 2, 0x80)));
     {
-        SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+        SdfPoolNode *surface = &sdfGrOtTable[egl_OT_Offset];
         surface->append(surface, list);
     }
 }
@@ -1889,11 +1889,11 @@ void evtToggleAlternateDebugTimeGraphTask(s8 mode) {
 
 /* Append to the event-work doubly linked list, maintaining both endpoints. */
 void scrLinkHandle(ScrData *node) {
-    ScrData *tail = scrNamedProcessTail;
+    ScrData *tail = scrHandleLast;
 
     if (tail == NULL) {
-        scrNamedProcessHead = node;
-        scrNamedProcessTail = node;
+        scrHandleFirst = node;
+        scrHandleLast = node;
         node->previous = NULL;
         node->next = NULL;
     }
@@ -1901,28 +1901,28 @@ void scrLinkHandle(ScrData *node) {
         node->previous = tail;
         tail->next = node;
         node->next = NULL;
-        scrNamedProcessTail = node;
+        scrHandleLast = node;
     }
-    scrNamedProcessCount++;
+    scrHandleCount++;
 }
 
 /* Detach from either end or the middle, and clear the old links. */
 void scrUnlinkHandle(ScrData *node) {
-    if (scrNamedProcessHead == node) {
-        scrNamedProcessHead = node->next;
+    if (scrHandleFirst == node) {
+        scrHandleFirst = node->next;
     }
     else {
         node->previous->next = node->next;
     }
-    if (scrNamedProcessTail == node) {
-        scrNamedProcessTail = node->previous;
+    if (scrHandleLast == node) {
+        scrHandleLast = node->previous;
     }
     else {
         node->next->previous = node->previous;
     }
     node->previous = NULL;
     node->next = NULL;
-    scrNamedProcessCount--;
+    scrHandleCount--;
 }
 
 
@@ -2058,9 +2058,9 @@ INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA980);
 
 INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA988);
 
-INCLUDE_SDATA(const s32, "game/code_00107FD8", scrNamedProcessCount);
+INCLUDE_SDATA(const s32, "game/code_00107FD8", scrHandleCount);
 
-INCLUDE_SDATA(const s32, "game/code_00107FD8", scrNamedProcessHead);
+INCLUDE_SDATA(const s32, "game/code_00107FD8", scrHandleFirst);
 
-INCLUDE_SDATA(const s32, "game/code_00107FD8", scrNamedProcessTail);
+INCLUDE_SDATA(const s32, "game/code_00107FD8", scrHandleLast);
 

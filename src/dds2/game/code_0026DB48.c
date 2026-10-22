@@ -13,17 +13,17 @@ extern EvtLoadedRecord *mnuMantraPanelPositionTable;
 
 extern EvtLoadedRecord *mnuMantraNodePositionTable;
 
-extern s32 dspWindowHandle;
+extern s32 gMsgID;
 
-extern s8 dspWindowControlState;
+extern s8 gMsgFlag;
 
 extern s32 D_00437888;
 
 extern s8 dspCapturedSoundMode;
 
-extern s8 evtMessageWindowOption;
+extern s8 gSelMsgPos;
 
-extern s8 dspWindowStateGate;
+extern s8 gMsgInvFlag;
 
 extern u32 D_00437890[];
 

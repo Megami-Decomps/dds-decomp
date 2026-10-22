@@ -26,6 +26,6 @@ typedef struct EvtFrameStatePacket {
 typedef char EvtFrameStatePacketSizeCheck[sizeof(EvtFrameStatePacket) == 0xB0 ? 1 : -1];
 
 /* The three frame states' packets, one per draw buffer. */
-extern EvtFrameStatePacket evtFrameStatePacketTemplates[3][2];
+extern EvtFrameStatePacket dds3ZClearDrawTag[3][2];
 
 #endif /* EVT_FRAME_STATE_PACKET_H */

@@ -327,8 +327,8 @@ s32 ptyAnyActivePartyMemberAtProfileCap(u16 scriptId, u16 skipId) {
     for (i = 0; i < EVT_PARTY_SLOT_COUNT; i++) {
         DatPartyRecord *slot;
 
-        if (datGameState->party[i].flags & 1) {
-            slot = &datGameState->party[i];
+        if (DDS3_GBWK->party[i].flags & 1) {
+            slot = &DDS3_GBWK->party[i];
             if (slot->unitId != skipId) {
                 if (ptyGetProfileRecordCap(scriptId) == ptyGetProfileRecordValue(slot, scriptId)) {
                     return 1;
@@ -360,8 +360,8 @@ s32 evtTestMantraNodePartyRequirements(u16 entry, s32 mode) {
     for (partyIndex = 0; partyIndex < EVT_PARTY_SLOT_COUNT; partyIndex++) {
         s32 slot;
 
-        if ((u16)(datGameState->party[partyIndex].flags & 1) != 0) {
-            DatPartyRecord *party = &datGameState->party[partyIndex];
+        if ((u16)(DDS3_GBWK->party[partyIndex].flags & 1) != 0) {
+            DatPartyRecord *party = &DDS3_GBWK->party[partyIndex];
             for (slot = 0; slot < 6; slot++) {
                 MantraNodePos **neighborSlot = &record->neighbors[slot];
                 MantraNodePos *neighbor = *neighborSlot;
@@ -434,8 +434,8 @@ s32 mnuCheckMantraNeighborRequirements(u16 entry) {
     for (partyIndex = 0; partyIndex < EVT_PARTY_SLOT_COUNT; partyIndex++) {
         s32 slot;
 
-        if ((u16)(datGameState->party[partyIndex].flags & 1) != 0) {
-            DatPartyRecord *party = &datGameState->party[partyIndex];
+        if ((u16)(DDS3_GBWK->party[partyIndex].flags & 1) != 0) {
+            DatPartyRecord *party = &DDS3_GBWK->party[partyIndex];
             for (slot = 0; slot < 6; slot++) {
                 MantraNodePos **neighborSlot = &record->neighbors[slot];
                 MantraNodePos *neighbor = *neighborSlot;

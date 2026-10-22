@@ -32,7 +32,7 @@ s32 dds3SetMFilterPara(s32 blendControl);
 void dds3SetScreenFovy(f32 fieldOfView);
 s32 dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 s32 fptodp(void);
-extern s8 sdfPadButtonStates[];
+extern s8 dds3PadBitTable[];
 extern char D_0039F4D8[];
 extern char D_0039F4E8[];
 extern const char scrSceneLightDirectionZeroWarning[];
@@ -171,13 +171,13 @@ s32 scrCommand_SEL_JMP(void)
 
 s32 scrCommand_PAD_TRIG(void)
 {
-    scrSetIntReturnValue(sdfPadButtonStates[scrGetIntPara(0)] < 0);
+    scrSetIntReturnValue(dds3PadBitTable[scrGetIntPara(0)] < 0);
     return 1;
 }
 
 s32 scrCommand_PAD_PRESS(void)
 {
-    scrSetIntReturnValue(sdfPadButtonStates[scrGetIntPara(0)] & 1);
+    scrSetIntReturnValue(dds3PadBitTable[scrGetIntPara(0)] & 1);
     return 1;
 }
 
@@ -924,19 +924,19 @@ s32 scrCommandResetFieldEffects(void)
 
 s32 scrCommandClearProcessControlFlag(void)
 {
-    datGameState->script.ints[SCR_PROCESS_CONTROL_FLAG_REGISTER] = 0;
+    DDS3_GBWK->script.ints[SCR_PROCESS_CONTROL_FLAG_REGISTER] = 0;
     return 1;
 }
 
 s32 scrCommandSetProcessControlFlag(void)
 {
-    datGameState->script.ints[SCR_PROCESS_CONTROL_FLAG_REGISTER] = 1;
+    DDS3_GBWK->script.ints[SCR_PROCESS_CONTROL_FLAG_REGISTER] = 1;
     return 1;
 }
 
 s32 scrCommandIsProcessControlFlagClear(void)
 {
-    return datGameState->script.ints[SCR_PROCESS_CONTROL_FLAG_REGISTER] == 0;
+    return DDS3_GBWK->script.ints[SCR_PROCESS_CONTROL_FLAG_REGISTER] == 0;
 }
 
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);

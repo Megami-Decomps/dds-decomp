@@ -173,7 +173,7 @@ extern s32 D_003BEA48[];
 
 extern s32 D_003BE6E0[];
 
-extern u8 sdfPfsDebugMode;
+extern u8 sdfHddValid;
 
 
 extern s32 btlBuiltinResourceNameIndex;
@@ -1121,7 +1121,7 @@ void btlUpdateUnitActors(void) {
 
 
 extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
-extern u32 kwlnDrawControlFlags;
+extern u32 dds3DrawFlag;
 
 /* Refresh active actor lighting and restore eligible enemy colors. */
 void btlRefreshUnitEffects(void) {
@@ -1146,7 +1146,7 @@ void btlRefreshUnitEffects(void) {
         unit = unit->nextActor;
     }
     if (state->commandRestrictFlags & 0x800000) {
-        kwlnDrawControlFlags |= 0x2000000;
+        dds3DrawFlag |= 0x2000000;
     }
 }
 
@@ -3056,7 +3056,7 @@ void btlReleaseActiveUnitEffectsUnlessPaused(void) {
     }
 }
 
-extern s8 sdfPadButtonStates[32];
+extern s8 dds3PadBitTable[32];
 extern f32 D_00436BA0;
 extern f32 D_00436BA4;
 extern u8 D_00436BA8;
@@ -3081,7 +3081,7 @@ void btlUpdateDebugCameraFromPad(void) {
     if (camera == NULL) {
         return;
     }
-    if (sdfPadButtonStates[0] < 0) {
+    if (dds3PadBitTable[0] < 0) {
         if ((u8)(D_00436BA8 & 1) == 0) {
             PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraPositions[0], camera->inner->position);
             PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraRotations[0], camera->inner->rotation);
@@ -3090,7 +3090,7 @@ void btlUpdateDebugCameraFromPad(void) {
             PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraRotations[1], camera->inner->rotation);
         }
         D_00436BA8 ^= 1;
-    } else if (sdfPadButtonStates[1] < 0) {
+    } else if (dds3PadBitTable[1] < 0) {
         if (state->cameraCommand.flags & 1) {
             state->cameraCommand.flags &= ~1;
         } else {
@@ -3365,7 +3365,7 @@ s32 btlOpenPfsDebugDirectory(const char *directoryName) {
 
     /* Debug mode opens a formatted pfs0 path; built-in mode resets name iteration. */
 
-    if (sdfPfsDebugMode != 0) {
+    if (sdfHddValid != 0) {
         sprintf(pathBuffer, "pfs0:/%s", directoryName);
         return sceDopen(pathBuffer);
     }
@@ -3375,7 +3375,7 @@ s32 btlOpenPfsDebugDirectory(const char *directoryName) {
 
 /* Close the scanned directory only in debug filesystem mode; ignore the native result. */
 void btlClosePfsDebugDirectory(s32 directoryHandle) {
-    if (sdfPfsDebugMode == 0) {
+    if (sdfHddValid == 0) {
         return;
     }
     sceDclose(directoryHandle);
@@ -3385,7 +3385,7 @@ void btlClosePfsDebugDirectory(s32 directoryHandle) {
 /* Debug mode delegates to the native reader. Built-in mode returns each name's length,
    clears the directory-type bit, and returns zero when the eight-name table is exhausted. */
 s32 btlReadBattleResourceDirectoryEntry(s32 directoryHandle, SceDirent *reader) {
-    if (sdfPfsDebugMode != 0) {
+    if (sdfHddValid != 0) {
         return sceDread(directoryHandle, reader);
     }
     if ((u32)btlBuiltinResourceNameIndex >= BTL_BUILTIN_NAME_COUNT) {
@@ -3576,9 +3576,9 @@ BtlResourceDescriptor *btlCreateResourceDescriptor(BtlResourceEntryList *list) {
     return descriptor;
 }
 
-extern s8 sdfPadButtonStates[0x20];
+extern s8 dds3PadBitTable[0x20];
 extern s8 D_0040B7DB[];
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *, char *);
 void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *, const char *);
@@ -3605,7 +3605,7 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
         BtlResourceEntry *navigationEntry;
         BtlResourceEntry *selectedEntry;
         s32 navigationStep;
-        if ((sdfPadButtonStates[6] & 2) != 0) {
+        if ((dds3PadBitTable[6] & 2) != 0) {
             if (descriptor->selectedEntry->prev != NULL) {
                 descriptor->selectedEntry = descriptor->selectedEntry->prev;
                 descriptor->selectedIndex--;
@@ -3619,7 +3619,7 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
                     }
                 }
             }
-        } else if ((sdfPadButtonStates[7] & 2) != 0) {
+        } else if ((dds3PadBitTable[7] & 2) != 0) {
             if (descriptor->selectedEntry->next != NULL) {
                 descriptor->selectedEntry = descriptor->selectedEntry->next;
                 descriptor->selectedIndex++;
@@ -3631,7 +3631,7 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
                     }
                 }
             }
-        } else if ((sdfPadButtonStates[9] & 2) != 0) {
+        } else if ((dds3PadBitTable[9] & 2) != 0) {
             selectedEntry = descriptor->selectedEntry;
             for (navigationStep = 0; navigationStep < 0x12; navigationStep++) {
                 navigationEntry = selectedEntry->prev;
@@ -3651,7 +3651,7 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
                     }
                 }
             }
-        } else if ((sdfPadButtonStates[11] & 2) != 0) {
+        } else if ((dds3PadBitTable[11] & 2) != 0) {
             for (navigationStep = 0; navigationStep < 0x12; navigationStep++) {
                 navigationEntry = descriptor->selectedEntry->next;
                 if (navigationEntry != NULL) {
@@ -3667,9 +3667,9 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
                     }
                 }
             }
-        } else if (sdfPadButtonStates[3] < 0) {
+        } else if (dds3PadBitTable[3] < 0) {
             descriptor->selectionStatus = BTL_RESOURCE_SELECTION_CANCELED;
-        } else if (sdfPadButtonStates[1] < 0) {
+        } else if (dds3PadBitTable[1] < 0) {
             descriptor->selectionStatus = BTL_RESOURCE_SELECTION_ACCEPTED;
         } else {
             BtlResourceEntry *cachedEntry = descriptor->cachedEntry;
@@ -3749,7 +3749,7 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
         visibleEntry = visibleEntry->next;
     }
 
-    surface = &kwlnDrawSurfaces[descriptor->drawSurfaceIndex];
+    surface = &sdfGrOtTable[descriptor->drawSurfaceIndex];
     surface->append(surface, packetList);
     return descriptor->selectionStatus;
 }
@@ -3869,7 +3869,7 @@ void btlDrawResourcePreview(BtlResourceDescriptor *descriptor) {
         vertex->corner[1].mask = 0xFF0000;
         sdf2DLinkTexPacket(list, texture, 0);
         sdfDrawTagLink(list, (u32)sprite);
-        surface = &kwlnDrawSurfaces[descriptor->drawSurfaceIndex];
+        surface = &sdfGrOtTable[descriptor->drawSurfaceIndex];
         surface->append(surface, list);
     }
 }
@@ -3923,7 +3923,7 @@ void btlUpdateResourceNameEditor(struct BtlResourceNameRecord *record) {
     s32 column;
 
     if (record->selectionStatus != BTL_RESOURCE_SELECTION_ACCEPTED) {
-        if ((sdfPadButtonStates[6] & 2) != 0) {
+        if ((dds3PadBitTable[6] & 2) != 0) {
             if (record->selection == EDITOR_BACKSPACE_CELL) {
                 record->selection = EDITOR_KEY_CELLS - 2;
             } else if (record->selection == EDITOR_CONFIRM_CELL) {
@@ -3934,7 +3934,7 @@ void btlUpdateResourceNameEditor(struct BtlResourceNameRecord *record) {
                     record->selection = EDITOR_CONFIRM_CELL;
                 }
             }
-        } else if ((sdfPadButtonStates[7] & 2) != 0) {
+        } else if ((dds3PadBitTable[7] & 2) != 0) {
             if (record->selection == EDITOR_BACKSPACE_CELL) {
                 record->selection = EDITOR_CONFIRM_CELL;
             } else if (record->selection == EDITOR_CONFIRM_CELL) {
@@ -3945,7 +3945,7 @@ void btlUpdateResourceNameEditor(struct BtlResourceNameRecord *record) {
                     record->selection = EDITOR_BACKSPACE_CELL;
                 }
             }
-        } else if ((sdfPadButtonStates[4] & 2) != 0) {
+        } else if ((dds3PadBitTable[4] & 2) != 0) {
             selection = record->selection;
             if ((u32)(selection - EDITOR_BACKSPACE_CELL) >= 2) {
                 if (selection % EDITOR_KEY_COLS == 0) {
@@ -3954,7 +3954,7 @@ void btlUpdateResourceNameEditor(struct BtlResourceNameRecord *record) {
                     record->selection = selection - 1;
                 }
             }
-        } else if ((sdfPadButtonStates[5] & 2) != 0) {
+        } else if ((dds3PadBitTable[5] & 2) != 0) {
             selection = record->selection;
             if ((u32)(selection - EDITOR_BACKSPACE_CELL) >= 2) {
                 if (selection % EDITOR_KEY_COLS == EDITOR_KEY_COLS - 1) {
@@ -3963,7 +3963,7 @@ void btlUpdateResourceNameEditor(struct BtlResourceNameRecord *record) {
                     record->selection = selection + 1;
                 }
             }
-        } else if (sdfPadButtonStates[1] < 0) {
+        } else if (dds3PadBitTable[1] < 0) {
             selection = record->selection;
             if (selection == EDITOR_CONFIRM_CELL) {
                 if (record->nameLength > 0) {
@@ -3977,7 +3977,7 @@ void btlUpdateResourceNameEditor(struct BtlResourceNameRecord *record) {
             } else {
                 editCode = selection;
             }
-        } else if (sdfPadButtonStates[3] < 0) {
+        } else if (dds3PadBitTable[3] < 0) {
             record->selectionStatus = BTL_RESOURCE_SELECTION_CANCELED;
         }
         if (record->selection == EDITOR_BLANK_CELL) {

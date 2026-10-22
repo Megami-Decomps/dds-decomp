@@ -256,26 +256,26 @@ void btlInitializeBattleUnits(BtlState *scene) {
         
         slot=0;
         for (index=0;index<5;index++) {
-            if (datGameState->party[index].flags & 1) {
+            if (DDS3_GBWK->party[index].flags & 1) {
                 if (!(scene->commandRestrictFlags & 0x80)) {
-                    if (btlCheckSpecialAbility(&datGameState->party[index],0x259) != 0) {
-                        datGameState->party[index].flags &= 0xEFFF;
+                    if (btlCheckSpecialAbility(&DDS3_GBWK->party[index],0x259) != 0) {
+                        DDS3_GBWK->party[index].flags &= 0xEFFF;
                     } else {
-                        datGameState->party[index].flags |= 0x1000;
+                        DDS3_GBWK->party[index].flags |= 0x1000;
                     }
-                    datGameState->party[index].flags &= 0xBFFF;
+                    DDS3_GBWK->party[index].flags &= 0xBFFF;
                 }
                 slot++;
             }
         }
-        datGameState->partyCount=slot;
+        DDS3_GBWK->partyCount=slot;
         slot=0;
         for (index=0;index<5 && slot<3;index++) {
-            u8 partyIndex=datGameState->partyOrder[index];
-            u16 flags=datGameState->party[partyIndex].flags;
+            u8 partyIndex=DDS3_GBWK->partyOrder[index];
+            u16 flags=DDS3_GBWK->party[partyIndex].flags;
             if ((flags & 1) && (flags & 2)) {
                 unit=btlCreateUnit();
-                btlCopyUnitStats(unit,&datGameState->party[partyIndex]);
+                btlCopyUnitStats(unit,&DDS3_GBWK->party[partyIndex]);
                 unit->partyIndex=partyIndex;
                 unit->lookupId=slot;
                 unit->status.flags |= 0x301;
@@ -817,7 +817,7 @@ extern void btlStartPrimaryScriptTask(void);
 extern void btlStartSecondaryScriptTask(void);
 extern void btlStartSkillEventTask(s32);
 extern s32 fldGetActiveSceneGroupValue(void);
-extern u32 kwlnDrawControlFlags;
+extern u32 dds3DrawFlag;
 
 /* Select a hook/fallback scene script and start its script/audio transition tasks. */
 void btlChooseAndStartSceneScript(BattleSceneWork *scene) {
@@ -849,7 +849,7 @@ void btlChooseAndStartSceneScript(BattleSceneWork *scene) {
     case 0xF000003:
         evtBeginSolarOverlayFadeOut(8);
         btlStartSecondaryScriptTask();
-        kwlnDrawControlFlags &= 0xDFFFFFFF;
+        dds3DrawFlag &= 0xDFFFFFFF;
         return;
     case 0xF000000: {
         BtlTask *task = (BtlTask *)fldGetActiveSceneGroupValue();
@@ -1132,13 +1132,13 @@ void btlFinalizeBattleRewards(BtlState *scene) {
         scene->epEarned = (s32)((f32)(u32)scene->epEarned / participants);
     }
     for (i = 0; i < 5; i++) {
-        if ((u16)(datGameState->party[i].flags & 1) && (datGameState->party[i].flags & 2)) {
+        if ((u16)(DDS3_GBWK->party[i].flags & 1) && (DDS3_GBWK->party[i].flags & 2)) {
             epRatio = 1.0f;
-            if ((datGameState->party[i].status & 0x7FFF) != 0x4000 && datGameState->party[i].hp != 0) {
+            if ((DDS3_GBWK->party[i].status & 0x7FFF) != 0x4000 && DDS3_GBWK->party[i].hp != 0) {
                 moneyRatio = 1.0f;
-                if (btlCheckSpecialAbility(&datGameState->party[i], 0x222) != 0) {
+                if (btlCheckSpecialAbility(&DDS3_GBWK->party[i], 0x222) != 0) {
                     moneyRatio = datAbilityParameters[0x222 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
-                } else if (btlCheckSpecialAbility(&datGameState->party[i], 0x221) != 0) {
+                } else if (btlCheckSpecialAbility(&DDS3_GBWK->party[i], 0x221) != 0) {
                     moneyRatio = datAbilityParameters[0x221 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
                 }
                 if (epRatio < moneyRatio) {
@@ -1146,9 +1146,9 @@ void btlFinalizeBattleRewards(BtlState *scene) {
                 }
             }
             if (epRatio != 1.0f) {
-                datGameState->party[i].huntExp = (s32)((f32)(u32)datGameState->party[i].huntExp * epRatio);
-                datGameState->party[i].huntExp = (u32)((f32)(u32)datGameState->party[i].huntExp + (f32)(u32)scene->epEarned * (epRatio - 1.0f));
-                btlBossDebugPrintf("btl:auto ep=%d[ratio=%.2f][%X]\n", datGameState->party[i].huntExp, epRatio, datGameState->party[i].unitId);
+                DDS3_GBWK->party[i].huntExp = (s32)((f32)(u32)DDS3_GBWK->party[i].huntExp * epRatio);
+                DDS3_GBWK->party[i].huntExp = (u32)((f32)(u32)DDS3_GBWK->party[i].huntExp + (f32)(u32)scene->epEarned * (epRatio - 1.0f));
+                btlBossDebugPrintf("btl:auto ep=%d[ratio=%.2f][%X]\n", DDS3_GBWK->party[i].huntExp, epRatio, DDS3_GBWK->party[i].unitId);
             }
         }
     }
@@ -1174,7 +1174,7 @@ const char D_003A34E8[] __attribute__((aligned(8))) = "btl:end [BTL_END_LOSE or 
 const char D_003A3510[] __attribute__((aligned(8))) = "btl:end [BTL_END_ESCAPE]\n";
 const char D_003A3530[] __attribute__((aligned(8))) = "btl:end [BTL_END_SERIAL]\n";
 const char D_003A3550[] __attribute__((aligned(8))) = "btl:end [BTL_END_COMPULSORY]\n";
-extern s8 kwlnTaskPadButtonStates[];
+extern s8 dds3PadButtonState[];
 extern s32 btlAllActiveUnitsReady(void);
 extern s32 btlCountRegisteredTasks(void);
 extern s32 btlReleaseScriptResourceB(void);
@@ -1235,7 +1235,7 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
     if (!((scene->scriptState != 0xF000003 || scene->scriptState != state) &&
           scene->scenePhaseFrame < scene->sceneState &&
           (scene->eventReady != 1 || scene->scenePhaseFrame < 37 ||
-           ((s8)kwlnTaskPadButtonStates[0x21] >= 0 && (s8)kwlnTaskPadButtonStates[0x23] >= 0))) &&
+           ((s8)dds3PadButtonState[0x21] >= 0 && (s8)dds3PadButtonState[0x23] >= 0))) &&
         scene->endDelay == 0) {
         switch (scene->eventReady) {
         case 0:
@@ -1341,15 +1341,15 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
     brsTaskAllowUpdate();
     evtBeginSolarOverlayFadeOut(8);
     do {
-        btlClearPartyRecordStatusBits(&datGameState->party[i], -0x45D1);
+        btlClearPartyRecordStatusBits(&DDS3_GBWK->party[i], -0x45D1);
         if (!(scene->subFlags & 0x40)) {
-            if (datGameState->party[i].flags & 2) {
+            if (DDS3_GBWK->party[i].flags & 2) {
                 if (scene->unk258 == 1) {
-                    if (datGameState->party[i].huntExp != 0 || scene->totalAp != 0) {
-                        if (!(datGameState->party[i].status & 0x40)) {
-                            if (mnuIsTitleEntryAvailable(&datGameState->party[i]) == 0) {
-                                datAddHp(&datGameState->party[i],
-                                               (s32)((f32)datGameState->party[i].maxHp * scale));
+                    if (DDS3_GBWK->party[i].huntExp != 0 || scene->totalAp != 0) {
+                        if (!(DDS3_GBWK->party[i].status & 0x40)) {
+                            if (mnuIsTitleEntryAvailable(&DDS3_GBWK->party[i]) == 0) {
+                                datAddHp(&DDS3_GBWK->party[i],
+                                               (s32)((f32)DDS3_GBWK->party[i].maxHp * scale));
                             }
                         }
                     }
@@ -1446,18 +1446,18 @@ s32 btlFinishScenePartyRecovery(s32 sceneAddress) {
         return 0;
     }
     for (i = 0; i < 5; i++) {
-        if (datGameState->party[i].flags & 1) {
+        if (DDS3_GBWK->party[i].flags & 1) {
             if (!(scene->commandRestrictFlags & 0x40)) {
-                if ((datGameState->party[i].flags & 2) &&
-                    (datGameState->party[i].status & 0x7FFF) != 0x4000 &&
-                    datGameState->party[i].hp != 0) {
-                    ptyApplySkillRecovery(&datGameState->party[i], 0x22A);
-                    ptyApplySkillRecovery(&datGameState->party[i], 0x22B);
+                if ((DDS3_GBWK->party[i].flags & 2) &&
+                    (DDS3_GBWK->party[i].status & 0x7FFF) != 0x4000 &&
+                    DDS3_GBWK->party[i].hp != 0) {
+                    ptyApplySkillRecovery(&DDS3_GBWK->party[i], 0x22A);
+                    ptyApplySkillRecovery(&DDS3_GBWK->party[i], 0x22B);
                 }
-                if ((datGameState->party[i].status & 0x4000) ||
-                    datGameState->party[i].hp == 0) {
-                    datGameState->party[i].status &= ~0x4000;
-                    datGameState->party[i].hp = 1;
+                if ((DDS3_GBWK->party[i].status & 0x4000) ||
+                    DDS3_GBWK->party[i].hp == 0) {
+                    DDS3_GBWK->party[i].status &= ~0x4000;
+                    DDS3_GBWK->party[i].hp = 1;
                 }
             }
         }
@@ -1465,7 +1465,7 @@ s32 btlFinishScenePartyRecovery(s32 sceneAddress) {
     dds3WorkClear();
     if (!(scene->commandRestrictFlags & 0x40)) {
         for (i = 0; i < 5; i++) {
-            btlClearPartyRecordStatusBits(&datGameState->party[i], -0x5D1);
+            btlClearPartyRecordStatusBits(&DDS3_GBWK->party[i], -0x5D1);
         }
     }
     if (btlCountRegisteredTasks() == 0) {

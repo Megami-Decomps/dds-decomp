@@ -24,14 +24,14 @@ void mnuAdvanceShootingProgressFromRecord(MenuRuntimeRecord *record, MenuRuntime
 /* Seed the saved-score floor and score snapshots, then clear the current score. */
 void mnuInitializeHighScoreState(MnuShootingWork *work) {
     u32 minimum = evtBitCheck(0x80E) == 0 ? 300000U : 600000U;
-    if (datGameState->highScore < minimum) {
-        datGameState->highScore = minimum;
+    if (DDS3_GBWK->highScore < minimum) {
+        DDS3_GBWK->highScore = minimum;
     }
-    work->peakScore = datGameState->highScore;
-    work->pendingScore = datGameState->highScore;
+    work->peakScore = DDS3_GBWK->highScore;
+    work->pendingScore = DDS3_GBWK->highScore;
     work->currentScore = 0;
     printf("************************Score Init!![%d]\n",
-                  datGameState->highScore);
+                  DDS3_GBWK->highScore);
 }
 
 
@@ -52,14 +52,14 @@ void mnuClampPendingScoreToPeak(MnuShootingWork *work) {
 void mnuUpdateHighScoreFlag(MnuShootingWork *work) {
     u32 pendingScore = work->pendingScore;
 
-    if (datGameState->highScore < pendingScore) {
-        datGameState->highScore = pendingScore;
+    if (DDS3_GBWK->highScore < pendingScore) {
+        DDS3_GBWK->highScore = pendingScore;
         evtBitOn(0x815);
     } else {
         evtBitOff(0x815);
     }
     printf("************************Score Update!![%d / %d]\n",
-                  datGameState->highScore, work->pendingScore);
+                  DDS3_GBWK->highScore, work->pendingScore);
 }
 
 
@@ -142,7 +142,7 @@ void mnuTickScoreProgressState(MnuShootingWork *work) {
 
 
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
-extern s8 kwlnTaskPadButtonStates[];
+extern s8 dds3PadButtonState[];
 
 s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
     switch (work->phase) {
@@ -201,10 +201,10 @@ s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
         }
         break;
     case 10:
-        if (kwlnTaskPadButtonStates[0x26] < 0) {
+        if (dds3PadButtonState[0x26] < 0) {
             work->choiceIndex--;
         }
-        if (kwlnTaskPadButtonStates[0x27] < 0) {
+        if (dds3PadButtonState[0x27] < 0) {
             work->choiceIndex++;
         }
         if (work->choiceIndex < 0) {
@@ -214,7 +214,7 @@ s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
             work->choiceIndex = 1;
         }
         itfSetTwoChoiceFadeSelection(&work->choiceFade, work->choiceIndex);
-        if (kwlnTaskPadButtonStates[0x21] < 0) {
+        if (dds3PadButtonState[0x21] < 0) {
             work->phase = 11;
             work->result = work->choiceIndex;
         }

@@ -31,26 +31,26 @@ s32 fldCommand_FLD_GET_KIRETA(void) {
     s32 changed = 0;
     switch (scrGetIntPara(0)) {
     case 0:
-        if (fldAreaState.consumedFlags & 1) {
-            fldAreaState.consumedFlags &= ~1;
+        if (fldGlobalBase.consumedFlags & 1) {
+            fldGlobalBase.consumedFlags &= ~1;
             changed = 1;
         }
         break;
     case 1:
-        if (fldAreaState.consumedFlags & 2) {
-            fldAreaState.consumedFlags &= ~2;
+        if (fldGlobalBase.consumedFlags & 2) {
+            fldGlobalBase.consumedFlags &= ~2;
             changed = 1;
         }
         break;
     case 2:
-        if (fldAreaState.consumedFlags & 4) {
-            fldAreaState.consumedFlags &= ~4;
+        if (fldGlobalBase.consumedFlags & 4) {
+            fldGlobalBase.consumedFlags &= ~4;
             changed = 1;
         }
         break;
     case 3:
-        if (fldAreaState.consumedFlags & 8) {
-            fldAreaState.consumedFlags &= ~8;
+        if (fldGlobalBase.consumedFlags & 8) {
+            fldGlobalBase.consumedFlags &= ~8;
             changed = 1;
         }
         break;

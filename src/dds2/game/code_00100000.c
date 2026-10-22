@@ -25,15 +25,15 @@ extern u32 D_00435B98;
 
 extern u8 D_00435B89;
 
-extern KwlnTask *kwlnDelayedStartTaskHead;
+extern KwlnTask *startinglistf;
 extern KwlnTask *D_00435BD4;
-extern s32 kwlnDelayedStartTaskCount;
-extern KwlnTask *kwlnDelayedDestroyTaskHead;
+extern s32 startinglistcnt;
+extern KwlnTask *endinglistf;
 extern KwlnTask *D_00435BE0;
-extern s32 kwlnDelayedDestroyTaskCount;
-extern KwlnTask *kwlnActiveTaskHead;
+extern s32 endinglistcnt;
+extern KwlnTask *runninglistf;
 extern KwlnTask *D_00435BEC;
-extern s32 kwlnActiveTaskCount;
+extern s32 runninglistcnt;
 
 extern u8 D_00435BB8[];
 extern u8 D_00435BC0[];
@@ -174,7 +174,7 @@ extern u16 D_00435BAA;
 extern s8 D_00435BB4;
 extern u16 D_00438A1E;
 extern u16 D_00438A24;
-extern u16 mnuMovieTaskState;
+extern u16 dds3VblanksPerFrame;
 extern void sdfWaitVblank(s32 count);
 extern void sdfGrReqDrawDelay(s32);
 extern void sdfPadBuildButtonStates(void);
@@ -189,8 +189,8 @@ void kwlnRunMainLoop(void) {
     kwlnInitializeRuntime();
     D_00438D80 = 0;
     while (D_00435B88 == 0) {
-        sdfWaitVblank(mnuMovieTaskState);
-        sdfGrReqDrawDelay(mnuMovieTaskState - 1);
+        sdfWaitVblank(dds3VblanksPerFrame);
+        sdfGrReqDrawDelay(dds3VblanksPerFrame - 1);
         sdfPadBuildButtonStates();
         if (D_00435BB4 != 0) {
             sdfFileCmdThreadSetLoPrio();
@@ -236,13 +236,13 @@ void DeleteProcessList(KwlnTask *task) {
     } else {
         switch (task->flags & 0xF) {
         case 1:
-            kwlnDelayedStartTaskHead = task->listNext;
+            startinglistf = task->listNext;
             break;
         case 2:
-            kwlnActiveTaskHead = task->listNext;
+            runninglistf = task->listNext;
             break;
         case 3:
-            kwlnDelayedDestroyTaskHead = task->listNext;
+            endinglistf = task->listNext;
             break;
         }
     }
@@ -265,13 +265,13 @@ void DeleteProcessList(KwlnTask *task) {
     task->listPrev = NULL;
     switch (task->flags & 0xF) {
     case 1:
-        kwlnDelayedStartTaskCount--;
+        startinglistcnt--;
         break;
     case 2:
-        kwlnActiveTaskCount--;
+        runninglistcnt--;
         break;
     case 3:
-        kwlnDelayedDestroyTaskCount--;
+        endinglistcnt--;
         break;
     }
 }
@@ -282,15 +282,15 @@ void AddProcessList(KwlnTask *task) {
 
     switch (task->flags & 0xF) {
     case 1:
-        cur = kwlnDelayedStartTaskHead;
+        cur = startinglistf;
         break;
     case 0:
         return;
     case 2:
-        cur = kwlnActiveTaskHead;
+        cur = runninglistf;
         break;
     case 3:
-        cur = kwlnDelayedDestroyTaskHead;
+        cur = endinglistf;
         break;
     default:
         return;
@@ -298,15 +298,15 @@ void AddProcessList(KwlnTask *task) {
     if (cur == NULL) {
         switch (task->flags & 0xF) {
         case 1:
-            kwlnDelayedStartTaskHead = task;
+            startinglistf = task;
             D_00435BD4 = task;
             break;
         case 2:
-            kwlnActiveTaskHead = task;
+            runninglistf = task;
             D_00435BEC = task;
             break;
         case 3:
-            kwlnDelayedDestroyTaskHead = task;
+            endinglistf = task;
             D_00435BE0 = task;
             break;
         }
@@ -323,13 +323,13 @@ void AddProcessList(KwlnTask *task) {
                 } else {
                     switch (task->flags & 0xF) {
                     case 1:
-                        kwlnDelayedStartTaskHead = task;
+                        startinglistf = task;
                         break;
                     case 2:
-                        kwlnActiveTaskHead = task;
+                        runninglistf = task;
                         break;
                     case 3:
-                        kwlnDelayedDestroyTaskHead = task;
+                        endinglistf = task;
                         break;
                     }
                     task->listPrev = NULL;
@@ -366,13 +366,13 @@ void AddProcessList(KwlnTask *task) {
     }
     switch (task->flags & 0xF) {
     case 1:
-        kwlnDelayedStartTaskCount++;
+        startinglistcnt++;
         break;
     case 2:
-        kwlnActiveTaskCount++;
+        runninglistcnt++;
         break;
     case 3:
-        kwlnDelayedDestroyTaskCount++;
+        endinglistcnt++;
         break;
     }
 }
@@ -403,7 +403,7 @@ INCLUDE_SDATA(const s32, "game/code_00100000", D_00435BA8);
 
 INCLUDE_SDATA(const s32, "game/code_00100000", D_00435BAA);
 
-INCLUDE_SDATA(const s32, "game/code_00100000", mnuMovieTaskState);
+INCLUDE_SDATA(const s32, "game/code_00100000", dds3VblanksPerFrame);
 
 INCLUDE_SDATA(const s32, "game/code_00100000", D_00435BB0);
 
@@ -415,21 +415,21 @@ INCLUDE_SDATA(const s32, "game/code_00100000", D_00435BC0);
 
 INCLUDE_SDATA(const s32, "game/code_00100000", D_00435BC8);
 
-INCLUDE_SDATA(const s32, "game/code_00100000", kwlnDelayedStartTaskHead);
+INCLUDE_SDATA(const s32, "game/code_00100000", startinglistf);
 
 INCLUDE_SDATA(const s32, "game/code_00100000", D_00435BD4);
 
-INCLUDE_SDATA(const s32, "game/code_00100000", kwlnDelayedStartTaskCount);
+INCLUDE_SDATA(const s32, "game/code_00100000", startinglistcnt);
 
-INCLUDE_SDATA(const s32, "game/code_00100000", kwlnDelayedDestroyTaskHead);
+INCLUDE_SDATA(const s32, "game/code_00100000", endinglistf);
 
 INCLUDE_SDATA(const s32, "game/code_00100000", D_00435BE0);
 
-INCLUDE_SDATA(const s32, "game/code_00100000", kwlnDelayedDestroyTaskCount);
+INCLUDE_SDATA(const s32, "game/code_00100000", endinglistcnt);
 
-INCLUDE_SDATA(const s32, "game/code_00100000", kwlnActiveTaskHead);
+INCLUDE_SDATA(const s32, "game/code_00100000", runninglistf);
 
 INCLUDE_SDATA(const s32, "game/code_00100000", D_00435BEC);
 
-INCLUDE_SDATA(const s32, "game/code_00100000", kwlnActiveTaskCount);
+INCLUDE_SDATA(const s32, "game/code_00100000", runninglistcnt);
 

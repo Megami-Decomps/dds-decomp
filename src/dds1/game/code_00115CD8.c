@@ -87,8 +87,8 @@ void dds3EffectObjectBasicCalcFldEx(EffWorldNode *object) {
 
     config = resource->config;
     if (config->mapSelector != 0) {
-        s32 mapId = fldAreaState.area;
-        u32 slotIndex = fldAreaState.floor + 1;
+        s32 mapId = fldGlobalBase.area;
+        u32 slotIndex = fldGlobalBase.floor + 1;
 
         if (fldTestMapTargetFlag(mapId, slotIndex, config->mapSelector)) {
             resource->flags &= ~1;
@@ -156,8 +156,8 @@ void dds3EffectObjectBasicCalcFldEx(EffWorldNode *object) {
         break;
     case 1:
         if (config->mapSelector != 0) {
-            s32 entry = fldGetMapSlotByte(fldAreaState.area,
-                                         (u32)fldAreaState.floor + 1,
+            s32 entry = fldGetMapSlotByte(fldGlobalBase.area,
+                                         (u32)fldGlobalBase.floor + 1,
                                          config->mapSelector);
 
             if (entry != -1) {

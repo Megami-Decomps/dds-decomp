@@ -192,7 +192,7 @@ void sdfCreateRuntimeTask(void) {
     state->header.firstTick = 0;
     state->header.secondTick = 0;
     dds3StartProcess(sdfRuntimeTaskName, 1, 0, 0, sdfBumpTickCounters, 0, (u32)state);
-    datGameState = state;
+    DDS3_GBWK = state;
     evtResetWorldAndProfileRuntime();
 }
 
@@ -201,16 +201,16 @@ void sdfDestroyRuntimeTask(void) {
 
     dds3KillProcessName(sdfRuntimeTaskName, 0);
     sdfRuntimeTaskTeardownHook();
-    allocation = datGameState->header.backingAllocation;
+    allocation = DDS3_GBWK->header.backingAllocation;
     sdfMemUnlock(allocation);
     sdfMemFreeDirect(allocation);
-    datGameState = 0;
+    DDS3_GBWK = 0;
 }
 
 s32 sdfBumpTickCounters(KwlnTask *task) {
     DatGameState *runtime;
 
-    runtime = datGameState;
+    runtime = DDS3_GBWK;
     runtime->header.firstTick += 1;
     runtime->header.secondTick += 1;
     return 0;
@@ -224,7 +224,7 @@ extern void ptyInitRuntime(void);
 void evtResetWorldAndProfileRuntime(void) {
     dds3GlobalWorkClearFlags();
     evtInitGlobalWork();
-    datGameState->world.updateMode = 8;
+    DDS3_GBWK->world.updateMode = 8;
     ptyInitRuntime();
     fldResetFieldRuntimeState(0);
     ptyClearProfileRecords();
@@ -282,32 +282,32 @@ void sdfSaveResetSnapshot(void) {
     if (evtBitCheck(0xC0E)) {
         D_00435DC4 = 1;
     }
-    memcpy(D_0043E5B0, datGameState->battleFlags, sizeof(datGameState->battleFlags));
-    D_00435DB8 = datGameState->header.status;
-    D_00435DBC = datGameState->header.secondTick;
-    D_00435DC0 = datGameState->header.savedMoney;
-    D_00385218.words[0] = datGameState->header.saveFlags;
-    D_00385218.words[1] = datGameState->header.saveFlags1;
-    D_00385218.words[2] = datGameState->header.saveFlags2;
+    memcpy(D_0043E5B0, DDS3_GBWK->battleFlags, sizeof(DDS3_GBWK->battleFlags));
+    D_00435DB8 = DDS3_GBWK->header.status;
+    D_00435DBC = DDS3_GBWK->header.secondTick;
+    D_00435DC0 = DDS3_GBWK->header.savedMoney;
+    D_00385218.words[0] = DDS3_GBWK->header.saveFlags;
+    D_00385218.words[1] = DDS3_GBWK->header.saveFlags1;
+    D_00385218.words[2] = DDS3_GBWK->header.saveFlags2;
     D_00438E90 = mnuCreateFlagEntries();
-    D_00438E94 = sdfMemAllocDirect(sizeof(datGameState->mantraBits));
+    D_00438E94 = sdfMemAllocDirect(sizeof(DDS3_GBWK->mantraBits));
     copy = (void *)sdfMemGetPtr(D_00438E94);
-    memcpy(copy, datGameState->mantraBits, sizeof(datGameState->mantraBits));
-    D_00438E98 = sdfMemAllocDirect(sizeof(datGameState->profileBanks));
+    memcpy(copy, DDS3_GBWK->mantraBits, sizeof(DDS3_GBWK->mantraBits));
+    D_00438E98 = sdfMemAllocDirect(sizeof(DDS3_GBWK->profileBanks));
     copy = (void *)sdfMemGetPtr(D_00438E98);
-    memcpy(copy, datGameState->profileBanks, sizeof(datGameState->profileBanks));
+    memcpy(copy, DDS3_GBWK->profileBanks, sizeof(DDS3_GBWK->profileBanks));
     ptySaveActivePartyTemplates();
-    D_00438E9C = sdfMemAllocDirect(sizeof(datGameState->templates));
+    D_00438E9C = sdfMemAllocDirect(sizeof(DDS3_GBWK->templates));
     copy = (void *)sdfMemGetPtr(D_00438E9C);
-    memcpy(copy, datGameState->templates, sizeof(datGameState->templates));
+    memcpy(copy, DDS3_GBWK->templates, sizeof(DDS3_GBWK->templates));
     D_00438EA0 = sdfMemAllocDirect(0x40);
     copy = (void *)sdfMemGetPtr(D_00438EA0);
-    memcpy(copy, &datGameState->inventory.counts[0xC0], 0x40);
-    D_00438EA4 = sdfMemAllocDirect(sizeof(datGameState->itemBlockedFlags));
+    memcpy(copy, &DDS3_GBWK->inventory.counts[0xC0], 0x40);
+    D_00438EA4 = sdfMemAllocDirect(sizeof(DDS3_GBWK->itemBlockedFlags));
     copy = (void *)sdfMemGetPtr(D_00438EA4);
-    memcpy(copy, datGameState->itemBlockedFlags, sizeof(datGameState->itemBlockedFlags));
+    memcpy(copy, DDS3_GBWK->itemBlockedFlags, sizeof(DDS3_GBWK->itemBlockedFlags));
     D_00438EA8 = mtrMantraEventBitPush();
-    D_00438EAC = datGameState->world.slotFlags;
+    D_00438EAC = DDS3_GBWK->world.slotFlags;
 }
 
 extern void mnuMarkEntryBlocked(s32);
@@ -327,44 +327,44 @@ void sdfRestoreResetSnapshot(void) {
     if (D_00435DB6) evtBitOn(0xBA0);
     if (D_00435DB5) evtBitOn(0xB8F);
     if (D_00435DC4) evtBitOn(0xC0E);
-    datGameState->header.status = D_00435DB8;
-    memcpy(datGameState->battleFlags, D_0043E5B0, sizeof(datGameState->battleFlags));
-    datGameState->header.secondTick = D_00435DBC;
-    datGameState->header.savedMoney = D_00435DC0;
-    datGameState->header.playTicks = datGameState->header.secondTick;
-    datGameState->header.saveFlags = D_00385218.words[0];
-    datGameState->header.saveFlags1 = D_00385218.words[1];
-    datGameState->header.saveFlags2 = D_00385218.words[2];
+    DDS3_GBWK->header.status = D_00435DB8;
+    memcpy(DDS3_GBWK->battleFlags, D_0043E5B0, sizeof(DDS3_GBWK->battleFlags));
+    DDS3_GBWK->header.secondTick = D_00435DBC;
+    DDS3_GBWK->header.savedMoney = D_00435DC0;
+    DDS3_GBWK->header.playTicks = DDS3_GBWK->header.secondTick;
+    DDS3_GBWK->header.saveFlags = D_00385218.words[0];
+    DDS3_GBWK->header.saveFlags1 = D_00385218.words[1];
+    DDS3_GBWK->header.saveFlags2 = D_00385218.words[2];
     mnuApplyCampResourceFlagEntries(D_00438E90);
     sdfMemFreeDirect(D_00438E90);
 
-    mantra = datGameState->mantraBits;
-    memcpy(mantra, (void *)sdfMemGetPtr(D_00438E94), sizeof(datGameState->mantraBits));
+    mantra = DDS3_GBWK->mantraBits;
+    memcpy(mantra, (void *)sdfMemGetPtr(D_00438E94), sizeof(DDS3_GBWK->mantraBits));
     sdfMemFreeDirect(D_00438E94);
-    profiles = datGameState->profileBanks;
-    memcpy(profiles, (void *)sdfMemGetPtr(D_00438E98), sizeof(datGameState->profileBanks));
+    profiles = DDS3_GBWK->profileBanks;
+    memcpy(profiles, (void *)sdfMemGetPtr(D_00438E98), sizeof(DDS3_GBWK->profileBanks));
     sdfMemFreeDirect(D_00438E98);
-    templates = datGameState->templates;
-    memcpy(templates, (void *)sdfMemGetPtr(D_00438E9C), sizeof(datGameState->templates));
+    templates = DDS3_GBWK->templates;
+    memcpy(templates, (void *)sdfMemGetPtr(D_00438E9C), sizeof(DDS3_GBWK->templates));
     sdfMemFreeDirect(D_00438E9C);
-    for (i = 0; i < 16; i++) datGameState->templates[i].level = 0;
-    state = datGameState;
+    for (i = 0; i < 16; i++) DDS3_GBWK->templates[i].level = 0;
+    state = DDS3_GBWK;
     bytes = (void *)sdfMemGetPtr(D_00438EA0);
     memcpy(&state->inventory.counts[0xC0], bytes, 0x40);
     sdfMemFreeDirect(D_00438EA0);
-    state = datGameState;
+    state = DDS3_GBWK;
     bytes = (void *)sdfMemGetPtr(D_00438EA4);
     memcpy(state->itemBlockedFlags, bytes, sizeof(state->itemBlockedFlags));
     sdfMemFreeDirect(D_00438EA4);
     for (i = 0xC0; (s32)i < 0x100; i++) {
-        if (datGameState->inventory.counts[i] != 0) mnuMarkEntryBlocked(i);
+        if (DDS3_GBWK->inventory.counts[i] != 0) mnuMarkEntryBlocked(i);
     }
     evtBitOn(0x901);
     mtrMantraEventBitPop(D_00438EA8);
     dds3ForEachFlagged();
     ptyClearSelectedSkillFlagsFromActiveEntries();
     ptyClearItemF8FromPartyAndInventory();
-    datGameState->world.slotFlags = D_00438EAC;
+    DDS3_GBWK->world.slotFlags = D_00438EAC;
 }
 
 /* A full reset preserves the scene allocation and restores the saved runtime data. */
@@ -373,15 +373,15 @@ void sdfResetGameRuntime(s32 fullReset) {
 
     if (fullReset == 1) {
         sdfSaveResetSnapshot();
-        backingAllocation = datGameState->header.backingAllocation;
-        memset(datGameState, 0, 0x1E840);
-        datGameState->header.backingAllocation = backingAllocation;
+        backingAllocation = DDS3_GBWK->header.backingAllocation;
+        memset(DDS3_GBWK, 0, 0x1E840);
+        DDS3_GBWK->header.backingAllocation = backingAllocation;
     }
-    datGameState->header.firstTick = 0;
-    datGameState->header.secondTick = 0;
+    DDS3_GBWK->header.firstTick = 0;
+    DDS3_GBWK->header.secondTick = 0;
     dds3GlobalWorkClearFlags();
     evtInitGlobalWork();
-    datGameState->world.updateMode = 8;
+    DDS3_GBWK->world.updateMode = 8;
     ptyInitRuntime();
     evtBitOff(0xC0E);
     evtBitOn(0x801);
@@ -882,16 +882,16 @@ s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
     }
     switch (datCommandRecords[channel].unk30) {
     case 5:
-        datGameState->world.fieldFlags |= 1;
+        DDS3_GBWK->world.fieldFlags |= 1;
         break;
     case 6:
-        datGameState->world.fieldFlags |= 2;
+        DDS3_GBWK->world.fieldFlags |= 2;
         break;
     case 7:
-        datGameState->world.fieldFlags |= 4;
+        DDS3_GBWK->world.fieldFlags |= 4;
         break;
     case 8:
-        datGameState->world.fieldFlags |= 8;
+        DDS3_GBWK->world.fieldFlags |= 8;
         break;
     }
     return 1;
@@ -932,7 +932,7 @@ INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DC4);
 
 INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DC5);
 
-INCLUDE_SDATA(const s32, "game/code_001176A0", datGameState);
+INCLUDE_SDATA(const s32, "game/code_001176A0", DDS3_GBWK);
 
 INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DD4);
 

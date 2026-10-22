@@ -70,9 +70,9 @@ typedef struct ScrData {
 typedef char ScrData_size_must_be_0xF4[
     (sizeof(ScrData) == 0xF4) ? 1 : -1];
 
-extern ScrData *scrCurrentContext;
-extern ScrData *scrNamedProcessHead;
-extern ScrData *scrNamedProcessTail;
+extern ScrData *nowpwork;
+extern ScrData *scrHandleFirst;
+extern ScrData *scrHandleLast;
 
 ScrData *scrGetScriptHandle(void);
 ScrData *scrSearchScriptName(const char *name);

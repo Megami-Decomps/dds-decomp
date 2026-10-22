@@ -8,7 +8,7 @@
 #include "file_manager_api.h"
 #include "file_request.h"
 
-FileManWork fileManagerWork __attribute__((section(".bss")));
+FileManWork fileQueueHead __attribute__((section(".bss")));
 
 extern s32 pacFileHandleFree(void *);
 #include "sdf_debug_api.h"
@@ -50,7 +50,7 @@ void fileLinkQueue(FileRequest *request, s32 kind, const char *requestName,
     char *duplicatedName;
     s32 startsQueue;
 
-    work = &fileManagerWork;
+    work = &fileQueueHead;
     request->kind = kind;
     duplicatedName = sdfStrdupChip(requestName);
     request->completionCallback = callback;
@@ -76,7 +76,7 @@ void fileLinkQueue(FileRequest *request, s32 kind, const char *requestName,
 /* Clear every matching read slot and unlink the first queued occurrence under
  * the semaphore. No request/name memory is freed; absence from the queue is OK. */
 void fileUnlinkQueue(FileRequest *node) {
-    FileManWork *work = &fileManagerWork;
+    FileManWork *work = &fileQueueHead;
     FileRequest *previousNode;
     FileRequest *currentNode;
     s32 slotIndex;
@@ -242,7 +242,7 @@ void pacSync(FileRequest *request) {
 /* Pump updates while the queued head or unknown manager word is nonzero.
  * This function does not directly test the callback list or individual slots. */
 void fileSyncAll(void) {
-    FileManWork *work = &fileManagerWork;
+    FileManWork *work = &fileQueueHead;
 
     while (work->head != 0 || work->closingJobs != 0) {
         fileManager();
@@ -274,7 +274,7 @@ struct FileRequest *fileSave(const char *requestName, const void *sourceData, s3
  * under the semaphore, then start the read after unlocking. Cap at 64 KiB but
  * preserve the absence of a lower size bound and the original request size. */
 void pacRead(FileRequest *request) {
-    FileManWork *work = &fileManagerWork;
+    FileManWork *work = &fileQueueHead;
     u8 slotIndex;
     s32 chunkBytes;
 

@@ -160,7 +160,7 @@ extern f32 btlCombineCameraSpheresVU(f32 *, f32, f32, f32 *);
 
 extern s32 sdfDelayedResrcCheck(void);
 
-extern u32 kwlnDrawControlFlags;
+extern u32 dds3DrawFlag;
 
 
 
@@ -4368,7 +4368,7 @@ void btlInitializeRandomCameraCursor(BtlLinkedCommand *action, BtlCamState *stat
 
     memset(CURSOR, 0, 0x130);
     CURSOR->mode = 0;
-    game = datGameState;
+    game = DDS3_GBWK;
     for (i = 0; i < game->partyCount; i++) {
         if (game->party[i].flags & 2) {
             markedCount++;
@@ -8685,7 +8685,7 @@ void btlSweepFloorModelLists(void) {
 void btlResetFieldColorAndSweepFlags(void) {
     effBTLFieldColorResetFlags();
     fileResetRenderFlags();
-    kwlnDrawControlFlags = kwlnDrawControlFlags & 0xdfffffff;
+    dds3DrawFlag = dds3DrawFlag & 0xdfffffff;
 }
 
 void sndClearResourceNodes(void);

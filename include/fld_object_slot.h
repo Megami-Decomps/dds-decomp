@@ -24,8 +24,8 @@ typedef char FldObjectSlot_activationState_offset_must_be_0x08[
     ((u32)&((FldObjectSlot *)0)->activationState == 0x08) ? 1 : -1];
 typedef char FldObjectSlot_size_must_be_0x30[sizeof(FldObjectSlot) == 0x30 ? 1 : -1];
 
-extern FldObjectSlot fldObjectSlots[32];
-extern s32 fldObjectSlotCount;
+extern FldObjectSlot fldTakaraSlotTable[32];
+extern s32 fldTakaraCount;
 
 /* A field object's effect kind (0x10), by FldObjectSlot.effectKindIndex. */
 typedef struct FldEffectKind {

@@ -430,7 +430,7 @@ void sdfCounterTickCountdownAndMapTimers(void) {
     sdfCounterTickPositionTransition();
 }
 
-extern u8 kwlnTaskPadButtonStates[2][2][16];
+extern u8 dds3PadButtonState[2][2][16];
 extern s32 D_00438894;
 extern s8 D_004388D0;
 struct MenuListNode;
@@ -445,7 +445,7 @@ s32 sdfPollCounterSelectionInput(void) {
     s32 channelIndex;
     s32 previousIndex;
 
-    if ((s8)kwlnTaskPadButtonStates[1][0][6] < 0 || (kwlnTaskPadButtonStates[1][0][6] & 2)) {
+    if ((s8)dds3PadButtonState[1][0][6] < 0 || (dds3PadButtonState[1][0][6] & 2)) {
         previousIndex = sdfActiveCounterRuntime->cursor->index;
         if (mnuRetreatListCursorDefault(sdfActiveCounterRuntime) != NULL) {
             channelIndex = sdfActiveCounterRuntime->cursor->index;
@@ -457,7 +457,7 @@ s32 sdfPollCounterSelectionInput(void) {
             p2sdPlaySE(0, 127, 63);
         }
     }
-    if ((s8)kwlnTaskPadButtonStates[1][0][7] < 0 || (kwlnTaskPadButtonStates[1][0][7] & 2)) {
+    if ((s8)dds3PadButtonState[1][0][7] < 0 || (dds3PadButtonState[1][0][7] & 2)) {
         previousIndex = sdfActiveCounterRuntime->cursor->index;
         if (mnuAdvanceListCursorDefault(sdfActiveCounterRuntime) != NULL) {
             channelIndex = sdfActiveCounterRuntime->cursor->index;
@@ -469,7 +469,7 @@ s32 sdfPollCounterSelectionInput(void) {
             p2sdPlaySE(0, 127, 63);
         }
     }
-    if ((s8)kwlnTaskPadButtonStates[1][0][3] < 0) {
+    if ((s8)dds3PadButtonState[1][0][3] < 0) {
         sdfCounterSetMode(sdfActiveCounterRuntime->cursor->index);
         channelIndex = sdfActiveCounterRuntime->cursor->index;
         if (D_00438894 != channelIndex) {
@@ -481,13 +481,13 @@ s32 sdfPollCounterSelectionInput(void) {
         sdfSetSelectedIndex(D_00438894);
         p2sdPlaySE(10, 127, 63);
     }
-    if ((s8)kwlnTaskPadButtonStates[1][0][1] < 0) {
+    if ((s8)dds3PadButtonState[1][0][1] < 0) {
         p2sdPlaySE(8, 127, 63);
         sdfSetSelectedIndex(sdfActiveCounterRuntime->cursor->index);
         return -2;
     }
     mnuSetMapTimerFlags(sdfCounterGetSelectionBoundaryFlags());
-    if ((s8)kwlnTaskPadButtonStates[1][0][6] == 0 && (s8)kwlnTaskPadButtonStates[1][0][7] == 0) {
+    if ((s8)dds3PadButtonState[1][0][6] == 0 && (s8)dds3PadButtonState[1][0][7] == 0) {
         mnuClearListFlagsOneAndTwo(&sdfActiveCounterRuntime->stateFlags);
     }
     if (D_004388D0 < 11) {

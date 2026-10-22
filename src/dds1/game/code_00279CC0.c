@@ -323,7 +323,7 @@ void mnuCollectFrontlinePartySlots(DatPartyRecord **out, s32 max) {
     s32 i = 0;
 
     while (count < max) {
-        DatPartyRecord *entry = &datGameState->party[i];
+        DatPartyRecord *entry = &DDS3_GBWK->party[i];
 
         *out = 0;
         if ((entry->flags & 1) != 0 &&

@@ -145,7 +145,7 @@ from `0x3D4` to `0x40C` and DDS2 text from `0x464` to `0x49C`. The table's two
 function pointers are relocated to the shifted callbacks in the same object;
 the old code and small-data slots are zero-filled.
 
-The FileManager NOBITS move recovers `fileManagerWork`, a `0x40`-byte asynchronous
+The FileManager NOBITS move recovers `fileQueueHead`, a `0x40`-byte asynchronous
 file-manager state object, as an explicit source definition in each title. Its
 four slots begin at `+0x20` and consist of a value followed by a request
 pointer; this corrects the previous nominal C layout, which was `0x44` bytes
@@ -156,7 +156,7 @@ unchanged while increasing the appended segment's memory size by exactly
 `0x40`.
 
 The complete FileManager subsystem is the first stateful replacement. Its
-manager and callback-driver text, read-only strings, and `fileManagerWork`
+manager and callback-driver text, read-only strings, and `fileQueueHead`
 state move together. The callback driver is three retail objects per title: the
 head unit (`game/code_00288E70` in DDS1, `game/code_002C83F0` in DDS2), the
 thirteen-function `fileReq*` middle unit (`game/code_00289A08`,

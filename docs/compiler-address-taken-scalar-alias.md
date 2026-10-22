@@ -230,7 +230,7 @@ if (entry->variant != 0) {
     stage = entry->variant;
 }
 room = entry->warpEntry;
-if (fldAreaState.area != stage) {
+if (fldGlobalBase.area != stage) {
     fldBgmFadeOut();
 }
 ```

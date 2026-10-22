@@ -174,7 +174,7 @@ s32 brsBuildRewardRows(BrsRewardBatch *batch, BrsRewardSummary *summary) {
 
     memset(batch, 0, sizeof(*batch));
     for (i = 0; i < 5; i++) {
-        DatPartyRecord *unit = &datGameState->party[i];
+        DatPartyRecord *unit = &DDS3_GBWK->party[i];
         u16 occupied = unit->flags & 1;
         if (occupied != 0 && (unit->status & 0x4000) == 0) {
             DatProfileRecord *profile;
@@ -245,7 +245,7 @@ s32 mnuCountAdvancingTitleAnimations(void) {
     s32 i;
     s32 count = 0;
     for (i = 0; i < 5; i++) {
-        s32 step = ptyCalcLevelUps(&datGameState->party[i]);
+        s32 step = ptyCalcLevelUps(&DDS3_GBWK->party[i]);
         count += step > 0;
     }
     return count;
@@ -259,7 +259,7 @@ s32 brsBuildLevelUpList(BrsRewardBatch *batch) {
     memset(batch, 0, sizeof(*batch));
     batch->count = 0;
     for (i = 0; i < 5; i++) {
-        DatPartyRecord *unit = &datGameState->party[i];
+        DatPartyRecord *unit = &DDS3_GBWK->party[i];
         u16 occupied = unit->flags & 1;
 
         if (occupied != 0) {
@@ -295,7 +295,7 @@ s32 brsBuildProfileCapList(BrsRewardBatch *batch) {
     memset(batch, 0, sizeof(*batch));
     batch->count = 0;
     for (i = 4; i >= 0; i--) {
-        DatPartyRecord *unit = (DatPartyRecord *)((u8 *)&datGameState->party + partyOffset);
+        DatPartyRecord *unit = (DatPartyRecord *)((u8 *)&DDS3_GBWK->party + partyOffset);
         u16 occupied = unit->flags & 1;
 
         partyOffset += sizeof(DatPartyRecord);
@@ -495,7 +495,7 @@ void brsBuildActiveUnitProgressRows(BrsActiveProgressList *output) {
 
     memset(output, 0, sizeof(*output));
     for (i = 0; i < 5; i++) {
-        DatPartyRecord *unit = &datGameState->party[i];
+        DatPartyRecord *unit = &DDS3_GBWK->party[i];
         if ((unit->flags & 1) != 0) {
             brsBuildUnitProgressRow(&output->rows[output->count++], unit);
         }
@@ -503,7 +503,7 @@ void brsBuildActiveUnitProgressRows(BrsActiveProgressList *output) {
 }
 
 extern char D_003AFBA0[];
-extern u8 kwlnTaskPadButtonStates[2][2][16];
+extern u8 dds3PadButtonState[2][2][16];
 extern void brsUpdateResultBackgroundFade(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void brsDrawProgressRowEntries(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void brsUpdateResultPortraitFade(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
@@ -531,7 +531,7 @@ void brsDrawActiveUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProg
     if (task != NULL) {
         work = (BrsSkillPackageWork *)dds3GetProcessData(task);
     }
-    if (((s8)kwlnTaskPadButtonStates[1][0][1] < 0 || (kwlnTaskPadButtonStates[1][0][3] & 2)) && work->opacity >= 0x80) {
+    if (((s8)dds3PadButtonState[1][0][1] < 0 || (dds3PadButtonState[1][0][3] & 2)) && work->opacity >= 0x80) {
         work->skipProgressAnimation = 1;
     }
     count = list->count;

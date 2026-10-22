@@ -32,18 +32,18 @@ void sdfChipInit(u32 heapSize) {
     s32 cellCount;
 
     allocation = malloc(heapSize);
-    sdfChipPages = allocation;
+    sdfChipPageInfo = allocation;
     recordBytes = (heapSize / 0x1018U) * sizeof(SdfChipPage);
     recordEnd = (u8 *)allocation + recordBytes;
     record = allocation;
-    sdfFreeChipPages = record;
+    sdfChipPageFreeLink = record;
     alignment = -(s32)recordEnd & 0x3F;
     remaining = (heapSize - recordBytes) - alignment;
     heapStart = recordEnd + alignment;
-    sdfChipHeapStart = heapStart;
+    sdfChipPageTop = heapStart;
     pageCount = remaining / SDF_CHIP_BLOCK_BYTES;
     sdfChipPageCount[0] = pageCount;
-    sdfChipHeapEnd = heapStart + pageCount * SDF_CHIP_BLOCK_BYTES;
+    sdfChipPageEnd = heapStart + pageCount * SDF_CHIP_BLOCK_BYTES;
     page = heapStart;
     do {
         next = record + 1;
@@ -56,7 +56,7 @@ void sdfChipInit(u32 heapSize) {
     } while (pageCount != 0);
     next[-1].next = NULL;
 
-    sizeClass = sdfChipClassTable.classes;
+    sizeClass = sdfChipCB.classes;
     unitSize = 0x10;
     cellCount = 0x100;
     pageCount = SDF_CHIP_CLASS_COUNT;
@@ -70,7 +70,7 @@ void sdfChipInit(u32 heapSize) {
         sizeClass->availablePages = NULL;
         sizeClass++;
     } while (pageCount != 0);
-    sdfDelayedResrcInitCB(&sdfChipReleaseRequest, sdfChipFreeDirect);
+    sdfDelayedResrcInitCB(&dds3CleanupList, sdfChipFreeDirect);
 }
 
 /* Fill `stats` with the chip heap's block totals and per-size-class usage. */
@@ -89,7 +89,7 @@ void sdfChipGetInfo(SdfChipHeapStats *stats) {
     for (classIndex = 0; classIndex != SDF_CHIP_CLASS_COUNT; classIndex++) {
         stats->usedCells[classIndex] = 0;
     }
-    block = sdfChipPages;
+    block = sdfChipPageInfo;
     emptyBlocks = 0;
     partialBlocks = 0;
     freeBytes = 0;
@@ -104,7 +104,7 @@ void sdfChipGetInfo(SdfChipHeapStats *stats) {
                 partialBlocks++;
                 freeBytes += freeCells * block->sizeClass->cellSize;
             }
-            stats->usedCells[block->sizeClass - sdfChipClassTable.classes] += block->usedCells;
+            stats->usedCells[block->sizeClass - sdfChipCB.classes] += block->usedCells;
         }
         block++;
     } while (--blocksRemaining != 0);
@@ -115,11 +115,11 @@ void sdfChipGetInfo(SdfChipHeapStats *stats) {
 
 extern void *malloc(u32 size);
 extern s32 D_003BD2DC;
-extern SdfPendingRequest sdfGeneralReleaseRequest;
+extern SdfPendingRequest sdfMemDelayedResrcCB;
 
 /* Align the usable span to 128 bytes and link one free block between sentinels. */
 void sdfMemInit(u32 heapSize) {
-    SdfMemHeap *heap = &sdfGeneralHeap;
+    SdfMemHeap *heap = &sdfMemCB;
     SdfMemBlock *freeBlock;
     u32 alignedStart;
     u32 alignedEnd;
@@ -145,7 +145,7 @@ void sdfMemInit(u32 heapSize) {
     freeBlock->address = alignedStart;
     freeBlock->referenceCount = 0;
     D_003BD2DC = 0;
-    sdfDelayedResrcInitCB(&sdfGeneralReleaseRequest, sdfMemFreeDirect);
+    sdfDelayedResrcInitCB(&sdfMemDelayedResrcCB, sdfMemFreeDirect);
 }
 
 u16 sdfMemGetType(SdfMemBlock *block) {
@@ -154,12 +154,12 @@ u16 sdfMemGetType(SdfMemBlock *block) {
 
 /* Return the first general-heap allocation descriptor. */
 SdfMemBlock *sdfMemGetTop(void) {
-    return sdfGeneralHeap.head.next;
+    return sdfMemCB.head.next;
 }
 
 INCLUDE_SDATA(const s32, "game/code_002D00F8", D_003BD2DC);
 
-INCLUDE_SDATA(const s32, "game/code_002D00F8", sdfGrFirstFrameDrawn);
+INCLUDE_SDATA(const s32, "game/code_002D00F8", sdfGrDrawFirstFlag);
 
-INCLUDE_SDATA(const s32, "game/code_002D00F8", sdfGrDisplayField);
+INCLUDE_SDATA(const s32, "game/code_002D00F8", sdfFrameEvenOdd);
 

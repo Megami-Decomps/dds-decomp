@@ -94,32 +94,32 @@ extern void fldSkyDrawFilter(void);
 
 extern void fldSubmitTexturedOverlaySprite(void);
 
-extern u32 fldDisplayStateWords[];
+extern u32 fldRunDanteGunFlag[];
 
 extern void rsetOtOfs(u32);
 
 extern void rsetOtOfs(u32);
 
-extern u32 fldDisplayStateWords[];
+extern u32 fldRunDanteGunFlag[];
 
-extern u32 fldDisplayStateWords[];
+extern u32 fldRunDanteGunFlag[];
 
 extern char D_00412B90[];
 
 
-extern s32 fldCameraMoveTrackingCurrent;
+extern s32 gFldElvFloorNow;
 
-extern s32 fldCameraMoveTrackingStart;
+extern s32 fldElvFloorFrom;
 
-extern s32 fldCameraMoveTrackingStartLabel;
+extern s32 fldElvFloorNum;
 
-extern s32 fldCameraMoveTrackingTarget;
+extern s32 fldElvFloorTo;
 
-extern s32 fldCameraMoveTrackingTargetLabel;
+extern s32 fldElvFloorDisp;
 
-extern s32 fldCameraMoveTrackingStepFrames;
+extern s32 fldElvFloorTarget;
 
-extern s32 fldCameraMoveTrackingCancelPressed;
+extern s32 fldElvState;
 
 extern void fldSetElvCameraScene(s32 mode);
 
@@ -642,7 +642,7 @@ void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade) {
     f32 sinB;
     f32 cosB;
 
-    if ((u32)(fldAreaState.area - 0xC9) < 0x12B) {
+    if ((u32)(fldGlobalBase.area - 0xC9) < 0x12B) {
         y = 0.0f;
     } else {
         radius *= 0.7f;
@@ -650,7 +650,7 @@ void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade) {
     if (fade == 0) {
         return;
     }
-    if ((u32)(fldAreaState.area - 0xC9) < 0x12B) {
+    if ((u32)(fldGlobalBase.area - 0xC9) < 0x12B) {
         rsetOtOfs(0x20);
     } else {
         rsetOtOfs(0x39);
@@ -698,7 +698,7 @@ s32 fldTestDrawUpdate(KwlnTask *task) {
     rsetAlpha(0);
     fldDrawCameraColorScrollingGradient();
     fldSkyDrawFilter();
-    if (fldDisplayStateWords[9] != 0) {
+    if (fldRunDanteGunFlag[9] != 0) {
         if (fldGetSceneReadyFlag() == 0) {
             rsetOtOfs(0x53);
         } else {
@@ -772,36 +772,36 @@ void fldElvSetFloor(s32 start, s32 end) {
     s32 endEntry;
 
     first = fldDoor_ElvTakasaToFloor(start);
-    fldCameraMoveTrackingCancelPressed = 0;
-    fldCameraMoveTrackingStart = first;
+    fldElvState = 0;
+    fldElvFloorFrom = first;
     if (first > 1000) {
-        fldCameraMoveTrackingCurrent = first % 1000;
+        gFldElvFloorNow = first % 1000;
     } else {
-        fldCameraMoveTrackingCurrent = first;
+        gFldElvFloorNow = first;
     }
     if (first > 1000) {
-        fldCameraMoveTrackingStartLabel = first;
-        fldCameraMoveTrackingStart = first % 1000;
+        fldElvFloorNum = first;
+        fldElvFloorFrom = first % 1000;
     } else {
-        fldCameraMoveTrackingStartLabel = -999;
+        fldElvFloorNum = -999;
     }
 
     endEntry = fldDoor_ElvTakasaToFloor(end);
-    fldCameraMoveTrackingTarget = endEntry;
+    fldElvFloorTo = endEntry;
     if (endEntry > 1000) {
-        fldCameraMoveTrackingTargetLabel = endEntry;
-        fldCameraMoveTrackingTarget = endEntry % 1000;
+        fldElvFloorDisp = endEntry;
+        fldElvFloorTo = endEntry % 1000;
     } else {
-        fldCameraMoveTrackingTargetLabel = -999;
+        fldElvFloorDisp = -999;
     }
     if (start == end) {
-        fldCameraMoveTrackingStepFrames = -999;
+        fldElvFloorTarget = -999;
     } else {
-        fldCameraMoveTrackingStepFrames = 0;
+        fldElvFloorTarget = 0;
     }
-    if (fldCameraMoveTrackingCurrent != -999 && fldCameraMoveTrackingStepFrames != -999) {
-        fldCameraMoveTrackingStepFrames++;
-        if (fldCameraMoveTrackingStart < fldCameraMoveTrackingTarget) {
+    if (gFldElvFloorNow != -999 && fldElvFloorTarget != -999) {
+        fldElvFloorTarget++;
+        if (fldElvFloorFrom < fldElvFloorTo) {
             fldSetElvCameraScene(1);
         } else {
             fldSetElvCameraScene(-1);
@@ -811,24 +811,24 @@ void fldElvSetFloor(s32 start, s32 end) {
 
 /* Clear the move mode and invalidate all six stored tracking values. */
 void fldResetCameraMoveTracking(void) {
-    fldCameraMoveTrackingCancelPressed = 0;
-    fldCameraMoveTrackingCurrent = FIELD_CAMERA_TRACKING_UNSET;
-    fldCameraMoveTrackingStart = FIELD_CAMERA_TRACKING_UNSET;
-    fldCameraMoveTrackingStartLabel = FIELD_CAMERA_TRACKING_UNSET;
-    fldCameraMoveTrackingTarget = FIELD_CAMERA_TRACKING_UNSET;
-    fldCameraMoveTrackingTargetLabel = FIELD_CAMERA_TRACKING_UNSET;
-    fldCameraMoveTrackingStepFrames = FIELD_CAMERA_TRACKING_UNSET;
+    fldElvState = 0;
+    gFldElvFloorNow = FIELD_CAMERA_TRACKING_UNSET;
+    fldElvFloorFrom = FIELD_CAMERA_TRACKING_UNSET;
+    fldElvFloorNum = FIELD_CAMERA_TRACKING_UNSET;
+    fldElvFloorTo = FIELD_CAMERA_TRACKING_UNSET;
+    fldElvFloorDisp = FIELD_CAMERA_TRACKING_UNSET;
+    fldElvFloorTarget = FIELD_CAMERA_TRACKING_UNSET;
     fldClearCameraMoveMode();
 }
 
 /* Report the pending camera move mode, kicking the field camera when the
  * stored start and end indices agree. */
 s32 fldElvCheckEnd(void) {
-    if (fldCameraMoveTrackingCancelPressed == 1) {
+    if (fldElvState == 1) {
         return 2;
     }
-    if (fldCameraMoveTrackingStepFrames != FIELD_CAMERA_TRACKING_UNSET && fldCameraMoveTrackingCurrent == fldCameraMoveTrackingTarget) {
-        if (fldCameraMoveTrackingStart < fldCameraMoveTrackingCurrent) {
+    if (fldElvFloorTarget != FIELD_CAMERA_TRACKING_UNSET && gFldElvFloorNow == fldElvFloorTo) {
+        if (fldElvFloorFrom < gFldElvFloorNow) {
             fldSetElvCameraScene(2);
         } else {
             fldSetElvCameraScene(-2);
@@ -902,8 +902,8 @@ extern void fldSubmitPrimaryFramePacket(void);
 extern void fldSubmitAlternateFramePacket(void);
 extern void fldPrepareProjectionMatrix(void);
 extern void *sdf3DPrimMakePoly(SdfPrimitiveRequest *);
-extern SdfPoolNode kwlnDrawSurfaces[];
-extern u32 fldDisplayRow;
+extern SdfPoolNode sdfGrOtTable[];
+extern u32 rsetFrameMaskOtOffset;
 extern u32 D_0043607C;
 extern s32 D_00435EFC, D_00435F00, D_00435F04, D_00435F08;
 extern f32 D_0043E5E0[4];
@@ -911,7 +911,7 @@ extern f32 D_0043E5F0[50][3][4];
 extern s8 D_0043EF50[26][26][2];
 extern f32 D_0043F4A0[26][26][4];
 extern f32 D_00441EE0[26][26][4];
-extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
+extern f32 aViewTarget[4], sdfViewTargetVector[4];
 extern SdfLightSources D_0037F770;
 
 extern f32 D_0038BB10[16];
@@ -946,12 +946,12 @@ static inline void fldFlushShadowStrip(SdfListHead *list, SdfPrimitiveRequest *r
 }
 
 static inline SdfPoolNode *fldGetDisplaySurfaceBase(void) {
-    return kwlnDrawSurfaces;
+    return sdfGrOtTable;
 }
 
 /* Appends a finished packet list to the active display surface. */
 static inline void fldAppendToDisplaySurface(SdfListHead *list) {
-    SdfPoolNode *surface = &fldGetDisplaySurfaceBase()[fldDisplayRow];
+    SdfPoolNode *surface = &fldGetDisplaySurfaceBase()[rsetFrameMaskOtOffset];
 
     surface->append(surface, list);
 }
@@ -1062,7 +1062,7 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
     secondVertex[2] = 0.0f;
     secondVertex[3] = 1.0f;
     rsetOtOfs(0x25);
-    if (fldAreaState.area >= 500) {
+    if (fldGlobalBase.area >= 500) {
         transition = dds3GetUnitHandleObjectBasic(object);
         if (transition != NULL) {
             if (transition->flags & 0x40000) {
@@ -1096,10 +1096,10 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
                     D_0043E5E0[1] = anchorPosition[1] - target->inner->position[1];
                     D_0043E5E0[2] = anchorPosition[2] - target->inner->position[2];
                 } else {
-                    D_0043E5E0[0] = fldAreaState.x - target->inner->position[0];
+                    D_0043E5E0[0] = fldGlobalBase.x - target->inner->position[0];
                     /* Retail 0x0011F134..0x0011F15C uses field Z for both Y and Z. */
-                    D_0043E5E0[1] = fldAreaState.z - target->inner->position[1];
-                    D_0043E5E0[2] = fldAreaState.z - target->inner->position[2];
+                    D_0043E5E0[1] = fldGlobalBase.z - target->inner->position[1];
+                    D_0043E5E0[2] = fldGlobalBase.z - target->inner->position[2];
                 }
                 horizontalDistance = fsqrtf(D_0043E5E0[0] * D_0043E5E0[0] + D_0043E5E0[2] * D_0043E5E0[2]);
                 if (D_0043E5E0[1] < 0.0f) {
@@ -1129,7 +1129,7 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
                 length = 200.0f;
             }
         } else if (D_00435F08 == 0) {
-            if (fldAreaState.area < 200) {
+            if (fldGlobalBase.area < 200) {
                 D_0043E5E0[0] = D_0038BB10[4];
                 D_0043E5E0[1] = D_0038BB10[5];
                 D_0043E5E0[2] = D_0038BB10[6];
@@ -1182,9 +1182,9 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
         slotExtrusion[slot][2] = D_0043E5E0[2] * length;
         slotExtrusion[slot][3] = 1.0f;
     }
-    viewDirection[0] = sdfViewEyeVector[0] - sdfViewTargetVector[0];
-    viewDirection[1] = sdfViewEyeVector[1] - sdfViewTargetVector[1];
-    viewDirection[2] = sdfViewEyeVector[2] - sdfViewTargetVector[2];
+    viewDirection[0] = aViewTarget[0] - sdfViewTargetVector[0];
+    viewDirection[1] = aViewTarget[1] - sdfViewTargetVector[1];
+    viewDirection[2] = aViewTarget[2] - sdfViewTargetVector[2];
     viewDirection[3] = 1.0f;
     VU0_LOAD_VF_PTR(vf10, viewDirection);
     VU0_NORMALIZE_VF10();
@@ -1227,7 +1227,7 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
             }
             break;
         case 3:
-            if (fldAreaState.area >= 500) continue;
+            if (fldGlobalBase.area >= 500) continue;
             vertices = D_00386818; triangles = D_00386878;
             triangleCount = 12; vertexCount = 8;
             break;
@@ -1381,7 +1381,7 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
                 PCP_COPY_VECTOR_UNCLOBBERED(D_0043E5F0[D_00435EFC][2], thirdVertex);
                 D_00435EFC++;
             } else {
-                if (fldAreaState.area >= 500) {
+                if (fldGlobalBase.area >= 500) {
                     switch (slot) {
                     case 2: case 3: case 4: case 7:
                     case 10: case 11: case 12: case 13:
@@ -1641,33 +1641,33 @@ void fldResetFieldMapState(void) {
     s32 valueIndex;
 
     for (bankIndex = 0; bankIndex < 32; bankIndex++) {
-        datGameState->activationFlags[bankIndex] = 0;
+        DDS3_GBWK->activationFlags[bankIndex] = 0;
     }
 
     for (bankIndex = 0; bankIndex < 31; bankIndex++) {
         for (slotIndex = 0; slotIndex < 64; slotIndex++) {
-            datGameState->maps[bankIndex].slots[slotIndex].roomModeFlags = 0;
-            datGameState->maps[bankIndex].slots[slotIndex].roomObjectModeFlags = 0;
-            datGameState->maps[bankIndex].slots[slotIndex].roomSceneFlags = 0;
-            datGameState->maps[bankIndex].slots[slotIndex].mapTargetFlags = 0;
-            datGameState->maps[bankIndex].slots[slotIndex].alternateMapTargetFlags = 0;
+            DDS3_GBWK->maps[bankIndex].slots[slotIndex].roomModeFlags = 0;
+            DDS3_GBWK->maps[bankIndex].slots[slotIndex].roomObjectModeFlags = 0;
+            DDS3_GBWK->maps[bankIndex].slots[slotIndex].roomSceneFlags = 0;
+            DDS3_GBWK->maps[bankIndex].slots[slotIndex].mapTargetFlags = 0;
+            DDS3_GBWK->maps[bankIndex].slots[slotIndex].alternateMapTargetFlags = 0;
             for (valueIndex = 0; valueIndex < 16; valueIndex++) {
-                datGameState->maps[bankIndex].slots[slotIndex].values[valueIndex] = 0xFF;
+                DDS3_GBWK->maps[bankIndex].slots[slotIndex].values[valueIndex] = 0xFF;
             }
-            datGameState->maps[bankIndex].slots[slotIndex].auxiliaryFlags = 0;
-            datGameState->maps[bankIndex].slots[slotIndex].valueFlags = 0;
+            DDS3_GBWK->maps[bankIndex].slots[slotIndex].auxiliaryFlags = 0;
+            DDS3_GBWK->maps[bankIndex].slots[slotIndex].valueFlags = 0;
         }
     }
 
     fldClearAllAreaFloorFlags();
-    memset(datGameState->stageCellBits, 0, sizeof(datGameState->stageCellBits));
+    memset(DDS3_GBWK->stageCellBits, 0, sizeof(DDS3_GBWK->stageCellBits));
 }
 
 #include "fld_vr_reset_view.h"
 
-extern u32 fldDisplayStateWords[];
+extern u32 fldRunDanteGunFlag[];
 void fldResetFieldRuntimeState(s32 mode) {
-    FldAreaWork *area = &fldAreaState;
+    FldAreaWork *area = &fldGlobalBase;
     s32 i;
 
     area->unk2C = 0x10;
@@ -1755,59 +1755,59 @@ void fldResetFieldRuntimeState(s32 mode) {
     area->fieldTextures[1].texture = NULL;
     area->fieldTextures[2].texture = NULL;
     area->fieldTextures[3].texture = NULL;
-    fldDisplayStateWords[0] = 0;
-    fldDisplayStateWords[1] = 0;
-    fldDisplayStateWords[2] = 0;
-    fldDisplayStateWords[3] = 0;
-    fldDisplayStateWords[4] = 0;
-    fldDisplayStateWords[5] = 0;
-    fldDisplayStateWords[6] = 0;
-    fldDisplayStateWords[7] = 0;
-    fldDisplayStateWords[8] = 0;
-    fldDisplayStateWords[9] = 1;
-    fldDisplayStateWords[10] = 1;
-    fldDisplayStateWords[11] = 0;
-    fldDisplayStateWords[12] = 0;
-    fldDisplayStateWords[13] = 0;
-    fldDisplayStateWords[14] = 0;
-    fldDisplayStateWords[15] = 0;
-    fldDisplayStateWords[16] = 0;
-    fldDisplayStateWords[19] = 1;
-    fldDisplayStateWords[18] = 0;
-    fldDisplayStateWords[21] = 0;
-    fldDisplayStateWords[22] = 0;
-    fldDisplayStateWords[23] = 1;
-    fldDisplayStateWords[24] = 1;
-    fldDisplayStateWords[20] = 1;
+    fldRunDanteGunFlag[0] = 0;
+    fldRunDanteGunFlag[1] = 0;
+    fldRunDanteGunFlag[2] = 0;
+    fldRunDanteGunFlag[3] = 0;
+    fldRunDanteGunFlag[4] = 0;
+    fldRunDanteGunFlag[5] = 0;
+    fldRunDanteGunFlag[6] = 0;
+    fldRunDanteGunFlag[7] = 0;
+    fldRunDanteGunFlag[8] = 0;
+    fldRunDanteGunFlag[9] = 1;
+    fldRunDanteGunFlag[10] = 1;
+    fldRunDanteGunFlag[11] = 0;
+    fldRunDanteGunFlag[12] = 0;
+    fldRunDanteGunFlag[13] = 0;
+    fldRunDanteGunFlag[14] = 0;
+    fldRunDanteGunFlag[15] = 0;
+    fldRunDanteGunFlag[16] = 0;
+    fldRunDanteGunFlag[19] = 1;
+    fldRunDanteGunFlag[18] = 0;
+    fldRunDanteGunFlag[21] = 0;
+    fldRunDanteGunFlag[22] = 0;
+    fldRunDanteGunFlag[23] = 1;
+    fldRunDanteGunFlag[24] = 1;
+    fldRunDanteGunFlag[20] = 1;
     if (mode == 0) {
         fldResetFieldMapState();
-        datGameState->vr.previewX = 0;
-        datGameState->vr.previewY = 0;
+        DDS3_GBWK->vr.previewX = 0;
+        DDS3_GBWK->vr.previewY = 0;
         {
-            u32 *word = ((FldVrResetView *)&datGameState->vr)->words;
+            u32 *word = ((FldVrResetView *)&DDS3_GBWK->vr)->words;
             for (i = 14; i >= 0; i--) {
                 *word++ = 0;
             }
         }
-        datGameState->header.magic[0] = 'V';
-        datGameState->header.magic[1] = 'E';
-        datGameState->header.magic[2] = 'R';
-        datGameState->header.version = 1;
-        datGameState->header.mapGroup = 0;
-        datGameState->header.mapIndex = 0;
-        datGameState->header.pad06[0] = 0;
-        datGameState->header.pad06[1] = 0;
-        datGameState->header.playTicks = 0;
+        DDS3_GBWK->header.magic[0] = 'V';
+        DDS3_GBWK->header.magic[1] = 'E';
+        DDS3_GBWK->header.magic[2] = 'R';
+        DDS3_GBWK->header.version = 1;
+        DDS3_GBWK->header.mapGroup = 0;
+        DDS3_GBWK->header.mapIndex = 0;
+        DDS3_GBWK->header.pad06[0] = 0;
+        DDS3_GBWK->header.pad06[1] = 0;
+        DDS3_GBWK->header.playTicks = 0;
         for (i = 0; i < 8; i++) {
-            datGameState->header.partyIds[i] = 0;
-            datGameState->header.partyLevels[i] = 0;
+            DDS3_GBWK->header.partyIds[i] = 0;
+            DDS3_GBWK->header.partyLevels[i] = 0;
         }
-        datGameState->header.savedMoney = 0;
-        datGameState->header.saveFlags = 0;
-        datGameState->header.saveFlags1 = 0;
-        datGameState->header.saveFlags2 = 0;
-        datGameState->header.status = 0;
-        datGameState->header.transition = 0;
+        DDS3_GBWK->header.savedMoney = 0;
+        DDS3_GBWK->header.saveFlags = 0;
+        DDS3_GBWK->header.saveFlags1 = 0;
+        DDS3_GBWK->header.saveFlags2 = 0;
+        DDS3_GBWK->header.status = 0;
+        DDS3_GBWK->header.transition = 0;
     }
     fldResetViewState();
     fldRunDanteClear();
@@ -1819,7 +1819,7 @@ extern void fldClearCameraHeadingRequest(void);
 /* Reset the per-area controller work: -1 selections, the attrition step and the
  * adjacent request words, then clear the camera facing/heading requests. */
 void fldInitializeAreaWork(void) {
-    FldAreaWork *area = &fldAreaState;
+    FldAreaWork *area = &fldGlobalBase;
 
     area->unk2C = 0x10;
     area->unk138 = 0;
@@ -1852,17 +1852,17 @@ void fldInitializeAreaWork(void) {
     area->frameTravelDistance = 0.0f;
     area->nextFloor = -1;
     area->unkD4 = 1;
-    fldDisplayStateWords[0] = 0;
-    fldDisplayStateWords[1] = 0;
-    fldDisplayStateWords[2] = 0;
-    fldDisplayStateWords[3] = 0;
-    fldDisplayStateWords[4] = 0;
-    fldDisplayStateWords[5] = 0;
-    fldDisplayStateWords[11] = 0;
-    fldDisplayStateWords[12] = 0;
-    fldDisplayStateWords[13] = 0;
-    fldDisplayStateWords[14] = 0;
-    fldDisplayStateWords[16] = 0;
+    fldRunDanteGunFlag[0] = 0;
+    fldRunDanteGunFlag[1] = 0;
+    fldRunDanteGunFlag[2] = 0;
+    fldRunDanteGunFlag[3] = 0;
+    fldRunDanteGunFlag[4] = 0;
+    fldRunDanteGunFlag[5] = 0;
+    fldRunDanteGunFlag[11] = 0;
+    fldRunDanteGunFlag[12] = 0;
+    fldRunDanteGunFlag[13] = 0;
+    fldRunDanteGunFlag[14] = 0;
+    fldRunDanteGunFlag[16] = 0;
     fldClearCameraFacingPointRequest();
     fldClearCameraHeadingRequest();
 }
@@ -1880,9 +1880,9 @@ void fldSetRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         if (enabled) {
-            datGameState->maps[mapIndex].slots[slotIndex].flagBanks[0] |= 1 << bit;
+            DDS3_GBWK->maps[mapIndex].slots[slotIndex].flagBanks[0] |= 1 << bit;
         } else {
-            datGameState->maps[mapIndex].slots[slotIndex].flagBanks[0] &= ~(1 << bit);
+            DDS3_GBWK->maps[mapIndex].slots[slotIndex].flagBanks[0] &= ~(1 << bit);
         }
     }
 }
@@ -1890,7 +1890,7 @@ void fldSetRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
 s32 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = datGameState->maps[mapIndex].slots[slotIndex].flagBanks[0];
+        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].flagBanks[0];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -1900,9 +1900,9 @@ void fldSetRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         if (enabled) {
-            datGameState->maps[mapIndex].slots[slotIndex].roomObjectModeFlags |= 1 << bit;
+            DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomObjectModeFlags |= 1 << bit;
         } else {
-            datGameState->maps[mapIndex].slots[slotIndex].roomObjectModeFlags &= ~(1 << bit);
+            DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomObjectModeFlags &= ~(1 << bit);
         }
     }
 }
@@ -1910,7 +1910,7 @@ void fldSetRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
 s32 fldTestRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = datGameState->maps[mapIndex].slots[slotIndex].flagBanks[1];
+        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].flagBanks[1];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -1920,9 +1920,9 @@ void fldSetRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         if (enabled) {
-            datGameState->maps[mapIndex].slots[slotIndex].roomSceneFlags |= 1 << bit;
+            DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomSceneFlags |= 1 << bit;
         } else {
-            datGameState->maps[mapIndex].slots[slotIndex].roomSceneFlags &= ~(1 << bit);
+            DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomSceneFlags &= ~(1 << bit);
         }
     }
 }
@@ -1930,7 +1930,7 @@ void fldSetRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
 s32 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = datGameState->maps[mapIndex].slots[slotIndex].flagBanks[2];
+        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].flagBanks[2];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -1940,9 +1940,9 @@ void fldSetMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         if (enabled) {
-            datGameState->maps[mapIndex].slots[slotIndex].mapTargetFlags |= 1 << bit;
+            DDS3_GBWK->maps[mapIndex].slots[slotIndex].mapTargetFlags |= 1 << bit;
         } else {
-            datGameState->maps[mapIndex].slots[slotIndex].mapTargetFlags &= ~(1 << bit);
+            DDS3_GBWK->maps[mapIndex].slots[slotIndex].mapTargetFlags &= ~(1 << bit);
         }
     }
 }
@@ -1950,7 +1950,7 @@ void fldSetMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
 s32 fldTestMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = datGameState->maps[mapIndex].slots[slotIndex].flagBanks[3];
+        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].flagBanks[3];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -1960,9 +1960,9 @@ void fldSetAlternateMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         if (enabled) {
-            datGameState->maps[mapIndex].slots[slotIndex].alternateMapTargetFlags |= 1 << bit;
+            DDS3_GBWK->maps[mapIndex].slots[slotIndex].alternateMapTargetFlags |= 1 << bit;
         } else {
-            datGameState->maps[mapIndex].slots[slotIndex].alternateMapTargetFlags &= ~(1 << bit);
+            DDS3_GBWK->maps[mapIndex].slots[slotIndex].alternateMapTargetFlags &= ~(1 << bit);
         }
     }
 }
@@ -1970,7 +1970,7 @@ void fldSetAlternateMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled
 s32 fldTestAlternateMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = datGameState->maps[mapIndex].slots[slotIndex].flagBanks[4];
+        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].flagBanks[4];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -1980,7 +1980,7 @@ s32 fldTestAlternateMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit) {
 void fldSetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueIndex, s32 byteValue) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        datGameState->maps[mapIndex].slots[slotIndex].values[valueIndex] = byteValue;
+        DDS3_GBWK->maps[mapIndex].slots[slotIndex].values[valueIndex] = byteValue;
     }
 }
 
@@ -1989,7 +1989,7 @@ s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueIndex) {
     u8 value = 0;
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        value = datGameState->maps[mapIndex].slots[slotIndex].values[valueIndex];
+        value = DDS3_GBWK->maps[mapIndex].slots[slotIndex].values[valueIndex];
     }
     return value == FIELD_MAP_EMPTY_VALUE ? -1 : value;
 }
@@ -1998,9 +1998,9 @@ void fldSetMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) 
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         if (enabled) {
-            datGameState->maps[mapIndex].slots[slotIndex].trailingFlagBanks[0] |= 1 << bit;
+            DDS3_GBWK->maps[mapIndex].slots[slotIndex].trailingFlagBanks[0] |= 1 << bit;
         } else {
-            datGameState->maps[mapIndex].slots[slotIndex].trailingFlagBanks[0] &= ~(1 << bit);
+            DDS3_GBWK->maps[mapIndex].slots[slotIndex].trailingFlagBanks[0] &= ~(1 << bit);
         }
     }
 }
@@ -2008,7 +2008,7 @@ void fldSetMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) 
 s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = datGameState->maps[mapIndex].slots[slotIndex].trailingFlagBanks[0];
+        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].trailingFlagBanks[0];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -2018,9 +2018,9 @@ void fldSetMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         if (enabled) {
-            datGameState->maps[mapIndex].slots[slotIndex].trailingFlagBanks[1] |= 1 << bit;
+            DDS3_GBWK->maps[mapIndex].slots[slotIndex].trailingFlagBanks[1] |= 1 << bit;
         } else {
-            datGameState->maps[mapIndex].slots[slotIndex].trailingFlagBanks[1] &= ~(1 << bit);
+            DDS3_GBWK->maps[mapIndex].slots[slotIndex].trailingFlagBanks[1] &= ~(1 << bit);
         }
     }
 }
@@ -2028,7 +2028,7 @@ void fldSetMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
 s32 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = datGameState->maps[mapIndex].slots[slotIndex].trailingFlagBanks[1];
+        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].trailingFlagBanks[1];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -2039,7 +2039,7 @@ extern void fldFindTakaraSlot(s32);
 extern void ptyReturnOne(s32);
 
 void fldActivateFlaggedObject(u32 flagIndex) {
-    datGameState->activationFlags[(s32)flagIndex >> 3] |= 1 << (flagIndex & 7);
+    DDS3_GBWK->activationFlags[(s32)flagIndex >> 3] |= 1 << (flagIndex & 7);
     fldFindTakaraSlot(flagIndex);
     if (flagIndex >= 0xF0 && flagIndex < 0x100) {
         evtBitOn(flagIndex + 0x610);
@@ -2050,7 +2050,7 @@ void fldActivateFlaggedObject(u32 flagIndex) {
 }
 
 u8 fldTestObjectActivationFlag(u32 flagIndex) {
-    return (datGameState->activationFlags[(s32)flagIndex >> 3] >> (flagIndex & 7)) & 1;
+    return (DDS3_GBWK->activationFlags[(s32)flagIndex >> 3] >> (flagIndex & 7)) & 1;
 }
 
 /* Search records 1..511 of the 30-byte coordinate table; return zero on miss. */
@@ -2227,7 +2227,7 @@ void fldMarkStageExplorationCellsAroundPosition(s32 room, s32 stage, f32 x, f32 
     s32 bit;
 
     fldAllIconDel(room, &originX, &originZ);
-    area = &fldAreaState;
+    area = &fldGlobalBase;
     record = fldFindStageCoordinateRecord(area->area, stage);
     if (record == NULL) {
         return;
@@ -2242,7 +2242,7 @@ void fldMarkStageExplorationCellsAroundPosition(s32 room, s32 stage, f32 x, f32 
         bit = neighborX % 8;
         column = neighborX / 8;
         if (column >= 0 && neighborZ >= 0 && column < record->cols && neighborZ < record->rows) {
-            datGameState->stageCellBits[(neighborZ + rowOffset) * 10 + column] |= 1 << bit;
+            DDS3_GBWK->stageCellBits[(neighborZ + rowOffset) * 10 + column] |= 1 << bit;
         }
     }
 }
@@ -2250,7 +2250,7 @@ void fldMarkStageExplorationCellsAroundPosition(s32 room, s32 stage, f32 x, f32 
 INCLUDE_ASM(const s32, "game/code_0011F208", fldMarkStageExplorationBitmapRegion);
 
 s32 fldIsStageExplorationCellMarked(s32 floor, f32 x, f32 z) {
-    FieldStageCoordinate *record = fldFindStageCoordinateRecord(fldAreaState.area, floor);
+    FieldStageCoordinate *record = fldFindStageCoordinateRecord(fldGlobalBase.area, floor);
     s32 cellX;
     s32 row;
     s32 byte;
@@ -2264,10 +2264,10 @@ s32 fldIsStageExplorationCellMarked(s32 floor, f32 x, f32 z) {
     row = -((s32)(z - record->originZ) / record->cellSize);
     bit = cellX % 8;
     byte = cellX / 8;
-    fldFindStageCoordinateIndex(fldAreaState.area, floor);
-    rowOffset = fldFindStageCoordinateRowOffset(fldAreaState.area, floor);
+    fldFindStageCoordinateIndex(fldGlobalBase.area, floor);
+    rowOffset = fldFindStageCoordinateRowOffset(fldGlobalBase.area, floor);
     if (byte >= 0 && row >= 0 && byte < record->cols && row < record->rows) {
-        if ((datGameState->stageCellBits[(row + rowOffset) * 10 + byte] >> bit) & 1) {
+        if ((DDS3_GBWK->stageCellBits[(row + rowOffset) * 10 + byte] >> bit) & 1) {
             return 1;
         }
     }
@@ -2284,19 +2284,19 @@ INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435ED0);
 
 INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435ED8);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", fldCameraMoveTrackingCurrent);
+INCLUDE_SDATA(const s32, "game/code_0011F208", gFldElvFloorNow);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", fldCameraMoveTrackingStart);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldElvFloorFrom);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", fldCameraMoveTrackingStartLabel);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldElvFloorNum);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", fldCameraMoveTrackingTarget);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldElvFloorTo);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", fldCameraMoveTrackingTargetLabel);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldElvFloorDisp);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", fldCameraMoveTrackingStepFrames);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldElvFloorTarget);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", fldCameraMoveTrackingCancelPressed);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldElvState);
 
 INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435EFC);
 
@@ -2342,7 +2342,7 @@ INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F58);
 
 INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F60);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", fldDeferredCommand);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldNext_fld);
 
 INCLUDE_SDATA(const s32, "game/code_0011F208", fldDeferredCommandParameter);
 
@@ -2358,11 +2358,11 @@ INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F80);
 
 INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F84);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", fldSceneLifecycleFlags);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldAutoMapSeqFlags);
 
 INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F8C);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", fldSceneControlFlags);
+INCLUDE_SDATA(const s32, "game/code_0011F208", fldEncountFlags);
 
 INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F98);
 

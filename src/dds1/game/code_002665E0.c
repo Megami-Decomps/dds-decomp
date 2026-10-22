@@ -58,7 +58,7 @@ void brsUpdateResultPortraitFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
     }
 }
 #include "sdf.h"
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
 extern void eglSetOt(u32 surfaceIndex);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
@@ -103,7 +103,7 @@ void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
         color.rgba[3] = packed;
     }
 
-    btlDrawButtonIconFixed64(&kwlnDrawSurfaces[surfaceIndex], iconX + (x >> 4),
+    btlDrawButtonIconFixed64(&sdfGrOtTable[surfaceIndex], iconX + (x >> 4),
                              iconY + (y >> 3), color.rgba[0], color.rgba[1], color.rgba[2],
                              color.rgba[3], unit->unitId);
 

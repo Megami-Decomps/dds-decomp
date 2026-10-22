@@ -177,7 +177,7 @@ static inline s8 mdlGetViewerDisplayMode(MdlViewState *state) {
     return state->assetDisplayMode;
 }
 
-extern MdlCtrlState mdlViewerControlState;
+extern MdlCtrlState mdlDebugScaleWork;
 
 
 extern s8 D_003D7A60[];
@@ -245,7 +245,7 @@ extern s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *pad);
 
 extern void dds3DebugIntEdit(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep);
 
-extern s8 kwlnTaskPadButtonStates[64];
+extern s8 dds3PadButtonState[64];
 
 extern void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, s8 *pad);
 
@@ -385,7 +385,7 @@ extern const char _ctype_[];
 extern DebugModelFile *D_003BD87C;
 extern const char D_003ABA68[];
 extern DebugWorkPrefix D_003BBB78[];
-extern u8 sdfPfsDebugMode;
+extern u8 sdfHddValid;
 
 static inline s32 debugFileUpper(s32 c) {
     return islower(c) ? c - 'a' + 'A' : c;
@@ -403,7 +403,7 @@ void mdlMakeHddFileList(void) {
     DebugModelFile *file;
     DebugModelFile **link;
 
-    if (sdfPfsDebugMode && (handle = sceDopen(D_003ABA68)) >= 0) {
+    if (sdfHddValid && (handle = sceDopen(D_003ABA68)) >= 0) {
         mdlReleaseHddFileList();
         while ((length = sceDread(handle, &directory)) > 0) {
             if ((directory.mode & 0xF000) != 0x1000 && length >= 4 && length < 49) {
@@ -712,46 +712,46 @@ void mdlPibEditTrackInfo(EffMarkParams *params, s16 *fieldCursor) {
     s32 selectedField = *fieldCursor;
     u8 *colorChannel;
 
-    if (kwlnTaskPadButtonStates[0x27] < 0) {
+    if (dds3PadButtonState[0x27] < 0) {
         selectedField = selectedField != MDL_MARK_LAST_FIELD ? selectedField + 1 : 0;
-    } else if (((u8)kwlnTaskPadButtonStates[0x27] & MDL_PAD_REPEAT_FLAG) != 0 && selectedField < MDL_MARK_LAST_FIELD) {
+    } else if (((u8)dds3PadButtonState[0x27] & MDL_PAD_REPEAT_FLAG) != 0 && selectedField < MDL_MARK_LAST_FIELD) {
         selectedField++;
-    } else if (kwlnTaskPadButtonStates[0x26] < 0) {
+    } else if (dds3PadButtonState[0x26] < 0) {
         selectedField = selectedField != 0 ? selectedField - 1 : MDL_MARK_LAST_FIELD;
-    } else if (((u8)kwlnTaskPadButtonStates[0x26] & MDL_PAD_REPEAT_FLAG) != 0 && selectedField > 0) {
+    } else if (((u8)dds3PadButtonState[0x26] & MDL_PAD_REPEAT_FLAG) != 0 && selectedField > 0) {
         selectedField--;
     } else {
         switch (selectedField) {
         case 0:
-            fldStepIntByPad(&params->mark0, 4, 0, 99999, 0, 1, kwlnTaskPadButtonStates);
+            fldStepIntByPad(&params->mark0, 4, 0, 99999, 0, 1, dds3PadButtonState);
             break;
         case 1:
-            fldStepIntByPad(&params->mark1, 4, 0, 99999, 0, 1, kwlnTaskPadButtonStates);
+            fldStepIntByPad(&params->mark1, 4, 0, 99999, 0, 1, dds3PadButtonState);
             break;
         case 2:
-            fldStepIntByPad(&params->start, 2, 0, 9999, 0, 1, kwlnTaskPadButtonStates);
+            fldStepIntByPad(&params->start, 2, 0, 9999, 0, 1, dds3PadButtonState);
             break;
         case 3:
-            fldStepIntByPad(&params->end, 2, 0, 9999, 0, 1, kwlnTaskPadButtonStates);
+            fldStepIntByPad(&params->end, 2, 0, 9999, 0, 1, dds3PadButtonState);
             break;
         case 4:
-            fldStepIntByPad(&params->interval, 2, 1, 10, 0, 1, kwlnTaskPadButtonStates);
+            fldStepIntByPad(&params->interval, 2, 1, 10, 0, 1, dds3PadButtonState);
             break;
         case 5:
-            fldStepIntByPad(&params->face, 1, 1, 10, 0, 1, kwlnTaskPadButtonStates);
+            fldStepIntByPad(&params->face, 1, 1, 10, 0, 1, dds3PadButtonState);
             break;
         case 6:
-            fldStepIntByPad(&params->blend, 1, 0, 4, 0, 1, kwlnTaskPadButtonStates);
+            fldStepIntByPad(&params->blend, 1, 0, 4, 0, 1, dds3PadButtonState);
             break;
         default:
             colorChannel = (u8 *)params->colors + selectedField - MDL_MARK_COLOR_FIRST_FIELD;
-            if (kwlnTaskPadButtonStates[0x25] < 0) {
+            if (dds3PadButtonState[0x25] < 0) {
                 *colorChannel += 1;
-            } else if (((u8)kwlnTaskPadButtonStates[0x25] & MDL_PAD_REPEAT_FLAG) != 0 && *colorChannel < MDL_COLOR_BYTE_MASK) {
+            } else if (((u8)dds3PadButtonState[0x25] & MDL_PAD_REPEAT_FLAG) != 0 && *colorChannel < MDL_COLOR_BYTE_MASK) {
                 *colorChannel += 1;
-            } else if (kwlnTaskPadButtonStates[0x24] < 0) {
+            } else if (dds3PadButtonState[0x24] < 0) {
                 *colorChannel -= 1;
-            } else if (((u8)kwlnTaskPadButtonStates[0x24] & MDL_PAD_REPEAT_FLAG) != 0 && *colorChannel != 0) {
+            } else if (((u8)dds3PadButtonState[0x24] & MDL_PAD_REPEAT_FLAG) != 0 && *colorChannel != 0) {
                 *colorChannel -= 1;
             }
             break;
@@ -1141,14 +1141,14 @@ void mdlAppendViewerRectToDrawList(s32 x, s32 y, s32 depth, s32 width, s32 heigh
     sdfDrawTagLink(packet, (u32)(mdlBuildViewerRectanglePacket(x, y, depth, width, height)));
 }
 
-extern s8 sdfPadButtonStates[];
+extern s8 dds3PadBitTable[];
 
 /* Return 1 after a cursor update: fresh presses wrap, while repeated presses stop at the ends. */
 s32 mdlUpdateViewerCursor(s16 *cursor, s32 entryCount) {
     s32 lastIndex = entryCount - 1;
     s32 selectedIndex = *cursor;
     s32 changed = 0;
-    if (sdfPadButtonStates[5] < 0) {
+    if (dds3PadBitTable[5] < 0) {
         if (selectedIndex < lastIndex) {
             selectedIndex += 1;
             changed = 1;
@@ -1156,12 +1156,12 @@ s32 mdlUpdateViewerCursor(s16 *cursor, s32 entryCount) {
             selectedIndex = 0;
             changed = 1;
         }
-    } else if (((u8)sdfPadButtonStates[5] & MDL_PAD_REPEAT_FLAG) != 0) {
+    } else if (((u8)dds3PadBitTable[5] & MDL_PAD_REPEAT_FLAG) != 0) {
         if (selectedIndex < lastIndex) {
             selectedIndex += 1;
             changed = 1;
         }
-    } else if (sdfPadButtonStates[4] < 0) {
+    } else if (dds3PadBitTable[4] < 0) {
         if (selectedIndex > 0) {
             selectedIndex -= 1;
             changed = 1;
@@ -1169,7 +1169,7 @@ s32 mdlUpdateViewerCursor(s16 *cursor, s32 entryCount) {
             selectedIndex = lastIndex;
             changed = 1;
         }
-    } else if ((((u8)sdfPadButtonStates[4] & MDL_PAD_REPEAT_FLAG) != 0) && (selectedIndex > 0)) {
+    } else if ((((u8)dds3PadBitTable[4] & MDL_PAD_REPEAT_FLAG) != 0) && (selectedIndex > 0)) {
         selectedIndex -= 1;
         changed = 1;
     }
@@ -1186,32 +1186,32 @@ s32 mdlUpdateViewerCursorWithPageStep(s16 *cursor, s32 entryCount, s32 pageStep)
     s32 lastIndex = entryCount - 1;
     s32 selectedIndex = *cursor;
     s32 changed = 0;
-    if (sdfPadButtonStates[7] < 0) {
+    if (dds3PadBitTable[7] < 0) {
         if (selectedIndex < lastIndex) {
             selectedIndex += 1;
         } else {
             selectedIndex = 0;
         }
         changed = 1;
-    } else if (((u8)sdfPadButtonStates[7] & MDL_PAD_REPEAT_FLAG) != 0) {
+    } else if (((u8)dds3PadBitTable[7] & MDL_PAD_REPEAT_FLAG) != 0) {
         if (selectedIndex < lastIndex) {
             selectedIndex += 1;
             changed = 1;
         }
-    } else if (sdfPadButtonStates[6] < 0) {
+    } else if (dds3PadBitTable[6] < 0) {
         if (selectedIndex > 0) {
             selectedIndex -= 1;
         } else {
             selectedIndex = lastIndex;
         }
         changed = 1;
-    } else if (((u8)sdfPadButtonStates[6] & MDL_PAD_REPEAT_FLAG) != 0) {
+    } else if (((u8)dds3PadBitTable[6] & MDL_PAD_REPEAT_FLAG) != 0) {
         if (selectedIndex > 0) {
             selectedIndex -= 1;
             changed = 1;
         }
     } else if (pageStep != 0) {
-        if (sdfPadButtonStates[11] < 0) {
+        if (dds3PadBitTable[11] < 0) {
             if (selectedIndex < lastIndex) {
                 selectedIndex += pageStep;
                 if (selectedIndex > lastIndex) {
@@ -1221,7 +1221,7 @@ s32 mdlUpdateViewerCursorWithPageStep(s16 *cursor, s32 entryCount, s32 pageStep)
                 selectedIndex = 0;
             }
             changed = 1;
-        } else if (((u8)sdfPadButtonStates[11] & MDL_PAD_REPEAT_FLAG) != 0) {
+        } else if (((u8)dds3PadBitTable[11] & MDL_PAD_REPEAT_FLAG) != 0) {
             if (selectedIndex < lastIndex) {
                 selectedIndex += pageStep;
                 if (selectedIndex > lastIndex) {
@@ -1229,7 +1229,7 @@ s32 mdlUpdateViewerCursorWithPageStep(s16 *cursor, s32 entryCount, s32 pageStep)
                 }
                 changed = 1;
             }
-        } else if (sdfPadButtonStates[10] < 0) {
+        } else if (dds3PadBitTable[10] < 0) {
             if (selectedIndex > 0) {
                 selectedIndex -= pageStep;
                 if (selectedIndex < 0) {
@@ -1239,7 +1239,7 @@ s32 mdlUpdateViewerCursorWithPageStep(s16 *cursor, s32 entryCount, s32 pageStep)
                 selectedIndex = lastIndex;
             }
             changed = 1;
-        } else if ((((u8)sdfPadButtonStates[10] & MDL_PAD_REPEAT_FLAG) != 0) && (selectedIndex > 0)) {
+        } else if ((((u8)dds3PadBitTable[10] & MDL_PAD_REPEAT_FLAG) != 0) && (selectedIndex > 0)) {
             selectedIndex -= pageStep;
             if (selectedIndex < 0) {
                 selectedIndex = 0;
@@ -1452,7 +1452,7 @@ extern u32 mdlGetNumOfMajor(void);
 extern u32 mdlGetNumOfMinor(s32 tableIndex);
 extern void mdlMakeHddFileList(void);
 extern void mdlFreeViewResources(void);
-extern u8 sdfPfsDebugMode;
+extern u8 sdfHddValid;
 
 /* Step the viewer's selected row, then apply that row's pending resource or
  * entry selection when the confirm buttons are pressed. */
@@ -1503,7 +1503,7 @@ void mdlHandleViewerAssetSelection(void) {
         return;
     }
     pageStep = mdlViewerState.assetDisplayMode == 0 ? 10 : 16;
-    if (sdfPadButtonStates[0] < 0) {
+    if (dds3PadBitTable[0] < 0) {
         mdlViewerState.selectedNodeId++;
         if (mdlViewerState.selectedNodeId == 4) {
             mdlViewerState.selectedNodeId = 0;
@@ -1550,8 +1550,8 @@ void mdlHandleViewerAssetSelection(void) {
         }
         break;
     }
-    if (sdfPadButtonStates[12] < 0) {
-        if (sdfPfsDebugMode == 0) {
+    if (dds3PadBitTable[12] < 0) {
+        if (sdfHddValid == 0) {
             return;
         }
         mdlFreeViewResources();
@@ -1565,7 +1565,7 @@ void mdlHandleViewerAssetSelection(void) {
         return;
     }
     if (mdlViewerState.selectionCursor < 2) {
-        if (sdfPadButtonStates[1] >= 0) {
+        if (dds3PadBitTable[1] >= 0) {
             return;
         }
         if (mdlViewerState.resourceGroup == mdlViewerState.selectedResourceGroup && mdlViewerState.resourceId == mdlViewerState.selectedResourceId) {
@@ -1577,9 +1577,9 @@ void mdlHandleViewerAssetSelection(void) {
         mdlViewerState.resourceId = mdlViewerState.selectedResourceId;
         mdlLoadViewerResourceAndResetCursors();
         return;
-    } else if (sdfPadButtonStates[1] < 0) {
+    } else if (dds3PadBitTable[1] < 0) {
         mdlAddViewEntryFlagged();
-    } else if (sdfPadButtonStates[3] < 0) {
+    } else if (dds3PadBitTable[3] < 0) {
         mdlAddPlainViewerEntryForSelectedNode();
     }
 }
@@ -1719,43 +1719,43 @@ void mdlUpdateViewerCameraFromPad(void) {
     f32 speed;
     s32 rotated;
 
-    if (sdfPadButtonStates[0xC] < 0) {
+    if (dds3PadBitTable[0xC] < 0) {
         mdlResetViewerBasisVectors();
         return;
     }
-    if (sdfPadButtonStates[0] < 0) {
+    if (dds3PadBitTable[0] < 0) {
         if (++mdlViewerState.labelIndexA == 2) {
             mdlViewerState.labelIndexA = 0;
         }
     }
     if (mdlViewerState.labelIndexA == 0) {
         speed = 1.25f;
-        if (sdfPadButtonStates[1] == 0) {
+        if (dds3PadBitTable[1] == 0) {
             speed = 20.0f;
-            if (sdfPadButtonStates[3] == 0) {
+            if (dds3PadBitTable[3] == 0) {
                 speed = 5.0f;
             }
         }
         VU0_MOVE_VF(vf10, vf0);
         EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix);
         VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
-        if (sdfPadButtonStates[5] != 0) {
+        if (dds3PadBitTable[5] != 0) {
             VU0_ADD(vf10, vf10, vf11);
-        } else if (sdfPadButtonStates[4] != 0) {
+        } else if (dds3PadBitTable[4] != 0) {
             VU0_SUB(vf10, vf10, vf11);
         }
         EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 2);
         VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
-        if (sdfPadButtonStates[6] != 0) {
+        if (dds3PadBitTable[6] != 0) {
             VU0_ADD(vf10, vf10, vf11);
-        } else if (sdfPadButtonStates[7] != 0) {
+        } else if (dds3PadBitTable[7] != 0) {
             VU0_SUB(vf10, vf10, vf11);
         }
         EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 1);
         VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
-        if (sdfPadButtonStates[9] != 0) {
+        if (dds3PadBitTable[9] != 0) {
             VU0_ADD(vf10, vf10, vf11);
-        } else if (sdfPadButtonStates[8] != 0) {
+        } else if (dds3PadBitTable[8] != 0) {
             VU0_SUB(vf10, vf10, vf11);
         }
         VU0_MOVE_VF(vf11, vf10);
@@ -1767,42 +1767,42 @@ void mdlUpdateViewerCameraFromPad(void) {
         VU0_STORE_VF(vf10, &D_003D7B30);
     } else {
         speed = 0.25f * 3.14159265f / 180.0f;
-        if (sdfPadButtonStates[1] == 0) {
+        if (dds3PadBitTable[1] == 0) {
             speed = 4.0f * 3.14159265f / 180.0f;
-            if (sdfPadButtonStates[3] == 0) {
+            if (dds3PadBitTable[3] == 0) {
                 speed = 1.0f * 3.14159265f / 180.0f;
             }
         }
         rotated = 0;
         VU0_MOVE_VF(vf10, vf0);
-        if (sdfPadButtonStates[5] != 0) {
+        if (dds3PadBitTable[5] != 0) {
             EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 1);
             FromRotation_B(speed);
             effMiscQuatMultiplyVU();
             rotated = 1;
-        } else if (sdfPadButtonStates[4] != 0) {
+        } else if (dds3PadBitTable[4] != 0) {
             EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 1);
             FromRotation_B(-speed);
             effMiscQuatMultiplyVU();
             rotated = 1;
         }
-        if (sdfPadButtonStates[6] != 0) {
+        if (dds3PadBitTable[6] != 0) {
             EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix);
             FromRotation_B(speed);
             effMiscQuatMultiplyVU();
             rotated = 1;
-        } else if (sdfPadButtonStates[7] != 0) {
+        } else if (dds3PadBitTable[7] != 0) {
             EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix);
             FromRotation_B(-speed);
             effMiscQuatMultiplyVU();
             rotated = 1;
         }
-        if (sdfPadButtonStates[8] != 0) {
+        if (dds3PadBitTable[8] != 0) {
             EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 2);
             FromRotation_B(speed);
             effMiscQuatMultiplyVU();
             rotated = 1;
-        } else if (sdfPadButtonStates[9] != 0) {
+        } else if (dds3PadBitTable[9] != 0) {
             EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 2);
             FromRotation_B(-speed);
             effMiscQuatMultiplyVU();
@@ -1847,14 +1847,14 @@ void mdlUpdateViewerSelectedModelFromPad(void) {
     f32 speed;
     f32 angle;
 
-    if (sdfPadButtonStates[0x11] < 0) {
+    if (dds3PadBitTable[0x11] < 0) {
         mdlViewerState.yawStepMode ^= 1;
     }
-    if (sdfPadButtonStates[0] < 0) {
+    if (dds3PadBitTable[0] < 0) {
         mdlViewerState.labelIndexB ^= 1;
         return;
     }
-    if (sdfPadButtonStates[0xC] < 0) {
+    if (dds3PadBitTable[0xC] < 0) {
         VU0_MOVE_VF(vf10, vf0);
         mdlSetPosition(mdlViewerState.resources[0]);
         mdlSetRotate(mdlViewerState.resources[0]);
@@ -1862,10 +1862,10 @@ void mdlUpdateViewerSelectedModelFromPad(void) {
     }
     if (mdlViewerState.yawStepMode != 0) {
         mdlGetRotate(mdlViewerState.resources[0]);
-        if (sdfPadButtonStates[5] < 0) {
+        if (dds3PadBitTable[5] < 0) {
             VU0_LOAD_VF(vf11, D_00398390);
             angle = 5.0f * 3.14159265f / 180.0f;
-        } else if (sdfPadButtonStates[4] < 0) {
+        } else if (dds3PadBitTable[4] < 0) {
             VU0_LOAD_VF(vf11, D_00398390);
             angle = -5.0f * 3.14159265f / 180.0f;
         } else {
@@ -1876,67 +1876,67 @@ void mdlUpdateViewerSelectedModelFromPad(void) {
         mdlSetRotate(mdlViewerState.resources[0]);
     } else if (mdlViewerState.labelIndexB == 0) {
         speed = 1.25f;
-        if (sdfPadButtonStates[1] == 0) {
+        if (dds3PadBitTable[1] == 0) {
             speed = 20.0f;
-            if (sdfPadButtonStates[3] == 0) {
+            if (dds3PadBitTable[3] == 0) {
                 speed = 5.0f;
             }
         }
         mdlGetPosition(mdlViewerState.resources[0]);
         EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix);
         VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
-        if (sdfPadButtonStates[5] != 0) {
+        if (dds3PadBitTable[5] != 0) {
             VU0_ADD(vf10, vf10, vf11);
-        } else if (sdfPadButtonStates[4] != 0) {
+        } else if (dds3PadBitTable[4] != 0) {
             VU0_SUB(vf10, vf10, vf11);
         }
         EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 2);
         VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
-        if (sdfPadButtonStates[6] != 0) {
+        if (dds3PadBitTable[6] != 0) {
             VU0_ADD(vf10, vf10, vf11);
-        } else if (sdfPadButtonStates[7] != 0) {
+        } else if (dds3PadBitTable[7] != 0) {
             VU0_SUB(vf10, vf10, vf11);
         }
         EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 1);
         VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
-        if (sdfPadButtonStates[9] != 0) {
+        if (dds3PadBitTable[9] != 0) {
             VU0_ADD(vf10, vf10, vf11);
-        } else if (sdfPadButtonStates[8] != 0) {
+        } else if (dds3PadBitTable[8] != 0) {
             VU0_SUB(vf10, vf10, vf11);
         }
         mdlSetPosition(mdlViewerState.resources[0]);
     } else {
         speed = 0.5f * 3.14159265f / 180.0f;
-        if (sdfPadButtonStates[1] == 0) {
+        if (dds3PadBitTable[1] == 0) {
             speed = 8.0f * 3.14159265f / 180.0f;
-            if (sdfPadButtonStates[3] == 0) {
+            if (dds3PadBitTable[3] == 0) {
                 speed = 2.0f * 3.14159265f / 180.0f;
             }
         }
         mdlGetRotate(mdlViewerState.resources[0]);
-        if (sdfPadButtonStates[5] != 0) {
+        if (dds3PadBitTable[5] != 0) {
             VU0_LOAD_VF(vf11, D_00398390);
             FromRotation_B(speed);
             effMiscQuatMultiplyVU();
-        } else if (sdfPadButtonStates[4] != 0) {
+        } else if (dds3PadBitTable[4] != 0) {
             VU0_LOAD_VF(vf11, D_00398390);
             FromRotation_B(-speed);
             effMiscQuatMultiplyVU();
         }
-        if (sdfPadButtonStates[6] != 0) {
+        if (dds3PadBitTable[6] != 0) {
             VU0_LOAD_VF(vf11, D_00398380);
             FromRotation_B(speed);
             effMiscQuatMultiplyVU();
-        } else if (sdfPadButtonStates[7] != 0) {
+        } else if (dds3PadBitTable[7] != 0) {
             VU0_LOAD_VF(vf11, D_00398380);
             FromRotation_B(-speed);
             effMiscQuatMultiplyVU();
         }
-        if (sdfPadButtonStates[9] != 0) {
+        if (dds3PadBitTable[9] != 0) {
             VU0_LOAD_VF(vf11, D_003983A0);
             FromRotation_B(speed);
             effMiscQuatMultiplyVU();
-        } else if (sdfPadButtonStates[8] != 0) {
+        } else if (dds3PadBitTable[8] != 0) {
             VU0_LOAD_VF(vf11, D_003983A0);
             FromRotation_B(-speed);
             effMiscQuatMultiplyVU();
@@ -1965,7 +1965,7 @@ void mdlAdjustViewerScale(void) {
     s32 scaleHundredths = (s32)(mdlViewerState.viewerScale * 100.0f + 0.5f);
 
     /* Keep the distinct up/down thresholds and the native float expression order. */
-    if (kwlnTaskPadButtonStates[0x27] & MDL_PAD_REPEAT_FLAG) {
+    if (dds3PadButtonState[0x27] & MDL_PAD_REPEAT_FLAG) {
         if (scaleHundredths < 0x32) {
             scaleHundredths += 1;
         } else if (scaleHundredths < 0x1F4) {
@@ -1977,7 +1977,7 @@ void mdlAdjustViewerScale(void) {
             }
         }
         mdlViewerState.viewerScale = scaleHundredths * 0.01f;
-    } else if (kwlnTaskPadButtonStates[0x26] & MDL_PAD_REPEAT_FLAG) {
+    } else if (dds3PadButtonState[0x26] & MDL_PAD_REPEAT_FLAG) {
         if (scaleHundredths < 0x33) {
             scaleHundredths -= 1;
             if (scaleHundredths < 5) {
@@ -1990,14 +1990,14 @@ void mdlAdjustViewerScale(void) {
         }
         mdlViewerState.viewerScale = scaleHundredths * 0.01f;
     }
-    if (kwlnTaskPadButtonStates[0x23] < 0) {
+    if (dds3PadButtonState[0x23] < 0) {
         mdlViewerState.unitStepMode ^= 1;
     }
     mdlViewerState.unitStepSign = 0;
     if (mdlViewerState.unitStepMode != 0) {
-        if (kwlnTaskPadButtonStates[0x25] != 0) {
+        if (dds3PadButtonState[0x25] != 0) {
             mdlViewerState.unitStepSign = 1;
-        } else if (kwlnTaskPadButtonStates[0x24] != 0) {
+        } else if (dds3PadButtonState[0x24] != 0) {
             mdlViewerState.unitStepSign = -1;
         }
     }
@@ -2100,7 +2100,7 @@ void mdlApplyViewerResourceMenuAction(void) {
     if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.scrollPage, 5, 1) != 0) {
         return;
     }
-    if (sdfPadButtonStates[1] >= 0) {
+    if (dds3PadBitTable[1] >= 0) {
         return;
     }
     switch (mdlViewerState.scrollPage) {
@@ -2302,7 +2302,7 @@ void mdlUpdateViewerSettingsInput(void) {
         if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.settingsCursor, 10, 1) != 0) {
             return;
         }
-        if (sdfPadButtonStates[1] >= 0) {
+        if (dds3PadBitTable[1] >= 0) {
             return;
         }
         switch (mdlViewerState.settingsCursor) {
@@ -2333,27 +2333,27 @@ void mdlUpdateViewerSettingsInput(void) {
         }
         break;
     case 1:
-        fldStepColorChannelByPad(&D_003BA8EC, mdlViewerState.settingsCursor - 3, sdfPadButtonStates);
-        if (sdfPadButtonStates[1] < 0 || sdfPadButtonStates[3] < 0) {
+        fldStepColorChannelByPad(&D_003BA8EC, mdlViewerState.settingsCursor - 3, dds3PadBitTable);
+        if (dds3PadBitTable[1] < 0 || dds3PadBitTable[3] < 0) {
             mdlViewerState.unk3E = 0;
         }
         break;
     case 2:
-        if (sdfPadButtonStates[1] < 0 || sdfPadButtonStates[3] < 0) {
+        if (dds3PadBitTable[1] < 0 || dds3PadBitTable[3] < 0) {
             mdlViewerState.unk3E = 0;
         } else {
             dds3DebugIntEdit(&mdlViewerState.captureScale, 2, 1, 8, 1, 1);
         }
         break;
     case 3:
-        if (sdfPadButtonStates[1] < 0 || sdfPadButtonStates[3] < 0) {
+        if (dds3PadBitTable[1] < 0 || dds3PadBitTable[3] < 0) {
             mdlViewerState.unk3E = 0;
         } else {
             dds3DebugIntEdit(&mdlViewerState.captureDivX, 2, 1, 8, 1, 1);
         }
         break;
     case 4:
-        if (sdfPadButtonStates[1] < 0 || sdfPadButtonStates[3] < 0) {
+        if (dds3PadBitTable[1] < 0 || dds3PadBitTable[3] < 0) {
             mdlViewerState.unk3E = 0;
         } else {
             dds3DebugIntEdit(&mdlViewerState.captureDivY, 2, 1, 8, 1, 1);
@@ -2487,26 +2487,26 @@ void mdlUpdateViewerMarkEditorInput(void) {
     switch (state->editorMode) {
     case 0:
         count = mdlCountActiveRecords();
-        if (kwlnTaskPadButtonStates[0x27] < 0) {
+        if (dds3PadButtonState[0x27] < 0) {
             state->selectedRecordIndex++;
             if (state->selectedRecordIndex >= count) {
                 state->selectedRecordIndex = 0;
             }
-        } else if (((u8)kwlnTaskPadButtonStates[0x27] & MDL_PAD_REPEAT_FLAG) != 0) {
+        } else if (((u8)dds3PadButtonState[0x27] & MDL_PAD_REPEAT_FLAG) != 0) {
             if (state->selectedRecordIndex < count - 1) {
                 state->selectedRecordIndex++;
             }
-        } else if (kwlnTaskPadButtonStates[0x26] < 0) {
+        } else if (dds3PadButtonState[0x26] < 0) {
             if (state->selectedRecordIndex == 0) {
                 state->selectedRecordIndex = count - 1;
             } else {
                 state->selectedRecordIndex--;
             }
-        } else if (((u8)kwlnTaskPadButtonStates[0x26] & MDL_PAD_REPEAT_FLAG) != 0) {
+        } else if (((u8)dds3PadButtonState[0x26] & MDL_PAD_REPEAT_FLAG) != 0) {
             if (state->selectedRecordIndex > 0) {
                 state->selectedRecordIndex--;
             }
-        } else if (kwlnTaskPadButtonStates[0x21] < 0) {
+        } else if (dds3PadButtonState[0x21] < 0) {
             record = mdlGetSelectedRecord();
             if (record != NULL && mdlPibCheckItemType(record, MDL_VIEWER_RECORD_KIND_TRACK_POLY)) {
                 state->editorMode = 1;
@@ -2515,8 +2515,8 @@ void mdlUpdateViewerMarkEditorInput(void) {
         break;
     case 1:
         record = mdlGetSelectedRecord();
-        if (kwlnTaskPadButtonStates[0x23] >= 0 && record != NULL && mdlPibCheckItemType(record, MDL_VIEWER_RECORD_KIND_TRACK_POLY)) {
-            if (kwlnTaskPadButtonStates[0x21] < 0) {
+        if (dds3PadButtonState[0x23] >= 0 && record != NULL && mdlPibCheckItemType(record, MDL_VIEWER_RECORD_KIND_TRACK_POLY)) {
+            if (dds3PadButtonState[0x21] < 0) {
                 mdlAddPlainViewerEntryForSelectedNode();
             } else {
                 mdlPibEditTrackInfo((EffMarkParams *)record, &state->markFieldCursor);
@@ -2682,7 +2682,7 @@ s32 mdlRequestViewerExitOnce(void) {
     return 0;
 }
 
-extern SdfPoolNode D_00325048; /* kwlnDrawSurfaces[40], a native interior symbol. */
+extern SdfPoolNode D_00325048; /* sdfGrOtTable[40], a native interior symbol. */
 
 extern f32 D_00367B80[][4];
 
@@ -2723,7 +2723,7 @@ void mdlSubmitViewerResourceDrawPacket(void) {
         resource = mdlViewerState.resources[0];
     VU0_LOAD_MATRIX(resource->inner->matrix);
         drawPacket = (s32)sdfDrawRotatedModel(D_00367C00, D_00367C40, 4, 0x80);
-        if ((sdfPadButtonStates[13] < 0) & (D_003BBCB8 == 0)) {
+        if ((dds3PadBitTable[13] < 0) & (D_003BBCB8 == 0)) {
             D_003BBCB8 = 1;
             sdfDumpHexLine(drawPacket, 0x100);
         }
@@ -2748,8 +2748,8 @@ void mdlRestartViewerPhaseTask(void) {
 #include "sdf_gs_header.h"
 extern s8 D_00398636[];
 extern s8 D_00324532[];
-extern u8 sdfViewEyeVector[];
-extern u8 sdfViewUpVector[];
+extern u8 aViewTarget[];
+extern u8 aViewDown[];
 extern u32 sdfGetLodChunkValue(SdfModel *);
 extern s32 sdfGrAllocPacketBuff(s32 size);
 
@@ -2771,17 +2771,17 @@ s32 mdlViewer(KwlnTask *task) {
     }
     if (mdlViewerState.taskPhase == 0) {
         selection = mdlViewerState.selectedTaskIndex;
-        if ((kwlnTaskPadButtonStates[0x27] & 2) && (u32)selection < 12) {
+        if ((dds3PadButtonState[0x27] & 2) && (u32)selection < 12) {
             mdlViewerState.selectedTaskIndex = selection + 1;
-        } else if (kwlnTaskPadButtonStates[0x27] < 0) {
+        } else if (dds3PadButtonState[0x27] < 0) {
             if (selection == 12) mdlViewerState.selectedTaskIndex = 0;
             else { mdlViewerState.selectedTaskIndex = selection + 1; }
-        } else if ((kwlnTaskPadButtonStates[0x26] & 2) && selection > 0) {
+        } else if ((dds3PadButtonState[0x26] & 2) && selection > 0) {
             mdlViewerState.selectedTaskIndex = selection - 1;
-        } else if (kwlnTaskPadButtonStates[0x26] < 0) {
+        } else if (dds3PadButtonState[0x26] < 0) {
             if (selection == 0) mdlViewerState.selectedTaskIndex = 12;
             else { mdlViewerState.selectedTaskIndex = selection - 1; }
-        } else if (kwlnTaskPadButtonStates[0x25] < 0 || kwlnTaskPadButtonStates[0x24] < 0) {
+        } else if (dds3PadButtonState[0x25] < 0 || dds3PadButtonState[0x24] < 0) {
             if ((u32)selection < 7) {
                 selection += 7;
                 if ((u32)selection < 13) mdlViewerState.selectedTaskIndex = selection;
@@ -2790,11 +2790,11 @@ s32 mdlViewer(KwlnTask *task) {
 
                 mdlViewerState.selectedTaskIndex = selection + pageStep;
             }
-        } else if (kwlnTaskPadButtonStates[0x21] < 0) {
+        } else if (dds3PadButtonState[0x21] < 0) {
             mdlViewerState.unk09 = 0;
             mdlViewerState.taskPhase = (u8)mdlViewerState.selectedTaskIndex + 1;
             mdlRestartViewerPhaseTask();
-        } else if (kwlnTaskPadButtonStates[0x22] < 0) {
+        } else if (dds3PadButtonState[0x22] < 0) {
             mdlViewerState.taskPhase = mdlViewerState.unk0B;
             mdlRestartViewerPhaseTask();
         }
@@ -2805,8 +2805,8 @@ s32 mdlViewer(KwlnTask *task) {
         mdlViewerState.selectedTaskIndex = mdlViewerState.unk0B - 1;
     }
     PCP_COPY_VECTOR(sdfViewTargetVector, &D_003D7B20);
-    PCP_COPY_VECTOR(sdfViewEyeVector, &D_003D7B30);
-    PCP_COPY_VECTOR(sdfViewUpVector, &D_003D7B40);
+    PCP_COPY_VECTOR(aViewTarget, &D_003D7B30);
+    PCP_COPY_VECTOR(aViewDown, &D_003D7B40);
     mdlViewerState.packetList = dds3FontReqAllocDrawTag();
     packet = sdfGrAllocPacketBuff(0x40);
     sdfGrSetRegsPacketHeader(packet, 2);
@@ -2991,7 +2991,7 @@ void mdlLoadViewerPresentationConfig(void) {
             }
         } else if (memcmp(lineStart, D_003BBCC8, 5) == 0) {
             if (sscanf(lineStart + 5, D_003BBCD0, &verticalFov) == 1) {
-                sdfSceneProjectionParameters.camera.fov = verticalFov;
+                dds3ScreenParam.camera.fov = verticalFov;
             }
         } else if (memcmp(lineStart, D_003BBCD8, 4) == 0) {
             if (sscanf(lineStart + 4, "%d,%f,%d,%f,%x", &fogNear, &fogValue, &fogFar, &fogFarB, &color) == 5) {
@@ -3016,7 +3016,7 @@ void mdlSaveViewerPresentationConfig(void) {
     size = sprintf(buffer, D_003ABF18, D_003BA8EC,
                         D_003D7B20.x, D_003D7B20.y, D_003D7B20.z,
                         D_003D7B30.x, D_003D7B30.y, D_003D7B30.z,
-                        sdfSceneProjectionParameters.camera.fov, (s32)kwlnDrawVector.fogNear,
+                        dds3ScreenParam.camera.fov, (s32)kwlnDrawVector.fogNear,
                         kwlnDrawVector.depthNear, (s32)kwlnDrawVector.fogFar,
                         kwlnDrawVector.depthFar, kwlnDrawVector.fogColor);
     request = fileSave(D_00367AF8, buffer, size);
@@ -3051,7 +3051,7 @@ void mdlInitializeViewerTasksAndResources(void) {
     mdlViewerState.unk0E = 0;
     mdlViewerState.workspaceSetupPhase = 0;
     mdlResetViewerBasisVectors();
-    sdfSceneProjectionParameters.camera.fov = 0.4363323f;
+    dds3ScreenParam.camera.fov = 0.4363323f;
     PCP_COPY_VECTOR(&D_003246C0, &D_00367CD0);
     for (i = 0; i != 12; i++) {
         mdlViewerState.resources[i] = NULL;
@@ -3172,7 +3172,7 @@ s32 mdlDebugPrintEffectScale(KwlnTask *task) {
         state->pad = (MdlPadState *)D_00324520;
     } else if ((u32)state == 1) {
         state = &D_00367D30;
-        state->pad = (MdlPadState *)kwlnTaskPadButtonStates;
+        state->pad = (MdlPadState *)dds3PadButtonState;
     }
     if (state->pad == NULL) {
         state->pad = (MdlPadState *)D_00324520;
@@ -3288,8 +3288,8 @@ s32 mdlDebugPrintEffectScale(KwlnTask *task) {
 void mdlDebugTextBox(s32 first, s32 second, s32 color, s32 variant) {
     s32 packedColor = color & 0xffffff;
 
-    dds3PrimDebugTextBoxRGB(mdlViewerControlState.packetList, first, second,
-                  (mdlViewerControlState.unk04 == 0) ? -1 : variant, packedColor | 0x80000000, 1);
+    dds3PrimDebugTextBoxRGB(mdlDebugScaleWork.packetList, first, second,
+                  (mdlDebugScaleWork.unk04 == 0) ? -1 : variant, packedColor | 0x80000000, 1);
 }
 
 typedef struct MdlValueEdit {
@@ -3326,7 +3326,7 @@ void mdlGetDebugEntry(s32 valueEditIndex) {
         stepB = 100;
     }
     min = edit->min;
-    pad = mdlViewerControlState.pad;
+    pad = mdlDebugScaleWork.pad;
     max = edit->max;
     if (pad->stepUpA & 0x80) {
         if (value < max) {
@@ -3396,7 +3396,7 @@ extern s8 D_00398638[16];
 
 /* Edit the draw-vector target: four numeric rows and three packed-colour channels. */
 s32 mdlDebugPrintEffectScale2(KwlnTask *task) {
-    MdlCtrlState *state = &mdlViewerControlState;
+    MdlCtrlState *state = &mdlDebugScaleWork;
     s8 *pad;
     s32 changed;
     s32 value;
@@ -3405,80 +3405,80 @@ s32 mdlDebugPrintEffectScale2(KwlnTask *task) {
     if (dds3GetProcessData(task) == 0) {
         pad = D_00398638;
     } else {
-        pad = kwlnTaskPadButtonStates;
+        pad = dds3PadButtonState;
     }
     state->pad = (MdlPadState *)pad;
-    mdlViewerControlState.packetList = dds3FontReqAllocDrawTag();
-    if (++mdlViewerControlState.blinkTick == 30) {
-        mdlViewerControlState.blinkTick = 0;
+    mdlDebugScaleWork.packetList = dds3FontReqAllocDrawTag();
+    if (++mdlDebugScaleWork.blinkTick == 30) {
+        mdlDebugScaleWork.blinkTick = 0;
     }
-    if (mdlViewerControlState.unk04 == 0) {
+    if (mdlDebugScaleWork.unk04 == 0) {
         changed = 1;
-        if (mdlViewerControlState.pad->stepUpB & 0x80) {
-            if (mdlViewerControlState.selection >= 6) {
-                mdlViewerControlState.selection = 0;
+        if (mdlDebugScaleWork.pad->stepUpB & 0x80) {
+            if (mdlDebugScaleWork.selection >= 6) {
+                mdlDebugScaleWork.selection = 0;
             } else {
-                mdlViewerControlState.selection++;
+                mdlDebugScaleWork.selection++;
             }
-        } else if (mdlViewerControlState.pad->stepUpB & 2) {
-            if (mdlViewerControlState.selection < 6) {
-                mdlViewerControlState.selection++;
+        } else if (mdlDebugScaleWork.pad->stepUpB & 2) {
+            if (mdlDebugScaleWork.selection < 6) {
+                mdlDebugScaleWork.selection++;
             }
-        } else if (mdlViewerControlState.pad->stepDownB & 0x80) {
-            if (mdlViewerControlState.selection > 0) {
-                mdlViewerControlState.selection--;
+        } else if (mdlDebugScaleWork.pad->stepDownB & 0x80) {
+            if (mdlDebugScaleWork.selection > 0) {
+                mdlDebugScaleWork.selection--;
             } else {
-                mdlViewerControlState.selection = 6;
+                mdlDebugScaleWork.selection = 6;
             }
-        } else if (mdlViewerControlState.pad->stepDownB & 2) {
-            if (mdlViewerControlState.selection > 0) {
-                mdlViewerControlState.selection--;
+        } else if (mdlDebugScaleWork.pad->stepDownB & 2) {
+            if (mdlDebugScaleWork.selection > 0) {
+                mdlDebugScaleWork.selection--;
             }
-        } else if (mdlViewerControlState.pad->confirm & 0x80) {
-            mdlViewerControlState.unk04 = 1;
+        } else if (mdlDebugScaleWork.pad->confirm & 0x80) {
+            mdlDebugScaleWork.unk04 = 1;
         } else {
             changed = 0;
         }
         if (changed != 0) {
-            mdlViewerControlState.blinkTick = 0;
+            mdlDebugScaleWork.blinkTick = 0;
         }
     } else {
-        if (mdlViewerControlState.pad->confirm & 0x80) {
-            mdlViewerControlState.unk04 = 0;
-        } else if (mdlViewerControlState.pad->cancel & 0x80) {
-            mdlViewerControlState.unk04 = 0;
-        } else if (mdlViewerControlState.selection < 4) {
-            mdlGetDebugEntry(mdlViewerControlState.selection);
+        if (mdlDebugScaleWork.pad->confirm & 0x80) {
+            mdlDebugScaleWork.unk04 = 0;
+        } else if (mdlDebugScaleWork.pad->cancel & 0x80) {
+            mdlDebugScaleWork.unk04 = 0;
+        } else if (mdlDebugScaleWork.selection < 4) {
+            mdlGetDebugEntry(mdlDebugScaleWork.selection);
         } else {
-            fldStepColorChannelByPad(&kwlnDrawVector.fogColor, mdlViewerControlState.selection - 4, (s8 *)mdlViewerControlState.pad);
+            fldStepColorChannelByPad(&kwlnDrawVector.fogColor, mdlDebugScaleWork.selection - 4, (s8 *)mdlDebugScaleWork.pad);
         }
     }
-    sdfDrawTagLink(mdlViewerControlState.packetList,
+    sdfDrawTagLink(mdlDebugScaleWork.packetList,
                     (u32)dds3PrimFrameRect(0x8590, 0x79A8, 0xFF007F, 0x960, 0x570, 0x60000000, 0x40806020));
-    sdfDrawTagLink(mdlViewerControlState.packetList,
+    sdfDrawTagLink(mdlDebugScaleWork.packetList,
                     (u32)sdfDevPrintf(D_00367D48.x, D_00367D48.y, 0xFF0080, D_00367D48.style, D_00367D48.format));
-    if (mdlViewerControlState.unk04 == 0 && mdlViewerControlState.blinkTick < 0x14) {
+    if (mdlDebugScaleWork.unk04 == 0 && mdlDebugScaleWork.blinkTick < 0x14) {
         s32 y;
 
-        if (mdlViewerControlState.selection < 4) {
-            y = D_00367D58[mdlViewerControlState.selection].y;
+        if (mdlDebugScaleWork.selection < 4) {
+            y = D_00367D58[mdlDebugScaleWork.selection].y;
         } else {
-            y = mdlViewerControlState.selection * 0x60 + 0x7AE0;
+            y = mdlDebugScaleWork.selection * 0x60 + 0x7AE0;
         }
-        sdfDrawTagLink(mdlViewerControlState.packetList, (u32)sdfDevPrintf(0x85C0, y, 0xFF0080, 0, D_003BBD38));
+        sdfDrawTagLink(mdlDebugScaleWork.packetList, (u32)sdfDevPrintf(0x85C0, y, 0xFF0080, 0, D_003BBD38));
     }
     for (i = 0; i != 4; i++) {
         s32 y = D_00367D58[i].y;
 
-        sdfDrawTagLink(mdlViewerControlState.packetList, (u32)sdfDevPrintf(0x8680, y, 0xFF0080, 0, D_00367D58[i].label));
+        sdfDrawTagLink(mdlDebugScaleWork.packetList, (u32)sdfDevPrintf(0x8680, y, 0xFF0080, 0, D_00367D58[i].label));
         value = *D_00367D58[i].target + 0.5f;
-        sdfDrawTagLink(mdlViewerControlState.packetList,
+        sdfDrawTagLink(mdlDebugScaleWork.packetList,
                         (u32)sdfDevPrintf(0x8A40, y, 0xFF0080,
-                                                          (mdlViewerControlState.unk04 == 1 && mdlViewerControlState.selection == i) ? 6 : 0,
+                                                          (mdlDebugScaleWork.unk04 == 1 && mdlDebugScaleWork.selection == i) ? 6 : 0,
                                                           D_00367D58[i].format, value));
     }
-    mdlDebugTextBox(0x8680, 0x7C60, kwlnDrawVector.fogColor, mdlViewerControlState.selection - 4);
-    D_00325708.append(&D_00325708, mdlViewerControlState.packetList);
+    mdlDebugTextBox(0x8680, 0x7C60, kwlnDrawVector.fogColor, mdlDebugScaleWork.selection - 4);
+    D_00325708.append(&D_00325708, mdlDebugScaleWork.packetList);
     return 0;
 }
 
@@ -3508,10 +3508,10 @@ extern MdlOptionState D_003D7B60;
 extern s8 D_00398638[16];
 extern MdlOptionLabel D_00367DB8[4];
 extern u16 D_00367DE8[4] __attribute__((section(".data")));
-extern f32 sdf3DSoften;
-extern f32 sdf3DBias;
+extern f32 sdfFaceDivSoften;
+extern f32 sdfFaceDivBias;
 /* The selector occupies byte zero of its aligned small-data allocation. */
-extern u8 sdf3DSoftenOff __attribute__((section(".sdata")));
+extern u8 corePktSoftenBias __attribute__((section(".sdata")));
 extern const char D_003BBD58[];
 extern const char D_003BBD60[];
 extern const char D_003BBD68[];
@@ -3534,10 +3534,10 @@ s32 soften_bias_Process(KwlnTask *task) {
     if (dds3GetProcessData(task) == 0) {
         pad = D_00398638;
     } else {
-        pad = kwlnTaskPadButtonStates;
+        pad = dds3PadButtonState;
     }
-    value = sdf3DSoften;
-    adjustment = sdf3DBias;
+    value = sdfFaceDivSoften;
+    adjustment = sdfFaceDivBias;
     state->pad = pad;
     D_003D7B60.value = value;
     D_003D7B60.adjustment = adjustment;
@@ -3571,7 +3571,7 @@ s32 soften_bias_Process(KwlnTask *task) {
             }
         } else if (D_003D7B60.pad[1] & 0x80) {
             if (D_003D7B60.control.fields.cursor == 2) {
-                sdf3DSoftenOff ^= 1;
+                corePktSoftenBias ^= 1;
             } else {
                 D_003D7B60.control.fields.active = 1;
             }
@@ -3626,14 +3626,14 @@ s32 soften_bias_Process(KwlnTask *task) {
     sdfDrawTagLink(D_003D7B60.packetList,
                     (u32)sdfDevPrintf(0x8B00, 0x7AE0, 0xFF0080,
                                                      adjustmentStyle, D_003BBD68, D_003D7B60.adjustment));
-    format = sdf3DSoftenOff == 0 ? D_003BBD70 : D_003BBD78;
+    format = corePktSoftenBias == 0 ? D_003BBD70 : D_003BBD78;
     sdfDrawTagLink(D_003D7B60.packetList,
                     (u32)sdfDevPrintf(0x8B00, 0x7BA0, 0xFF0080,
                                                      0, format));
     D_00325708.append(&D_00325708,
                       D_003D7B60.packetList);
-    sdf3DSoften = D_003D7B60.value;
-    sdf3DBias = D_003D7B60.adjustment;
+    sdfFaceDivSoften = D_003D7B60.value;
+    sdfFaceDivBias = D_003D7B60.adjustment;
     return 0;
 }
 
@@ -3654,7 +3654,7 @@ void evtInitGlobalWork(void) {
 
 void evtBitAllOff(void) {
     s32 i = 0x7f;
-    u32 *word = datGameState->modelFlags.words;
+    u32 *word = DDS3_GBWK->modelFlags.words;
 
     do {
         i -= 1;
@@ -3678,17 +3678,17 @@ void evtBitAllOff_FieldDebug(void) {
 /* Signed flag indices need a bias before arithmetic right shift divides by 32. */
 void evtBitOn(s32 flag) {
     s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
-    datGameState->modelFlags.words[adjustedFlag >> 5] |= 1 << flag;
+    DDS3_GBWK->modelFlags.words[adjustedFlag >> 5] |= 1 << flag;
 }
 
 void evtBitOff(s32 flag) {
     s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
-    datGameState->modelFlags.words[adjustedFlag >> 5] &= ~(1 << flag);
+    DDS3_GBWK->modelFlags.words[adjustedFlag >> 5] &= ~(1 << flag);
 }
 
 s32 evtBitCheck(s32 flag) {
     s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
-    return (((s32)datGameState->modelFlags.words[adjustedFlag >> 5] >> flag) & 1);
+    return (((s32)DDS3_GBWK->modelFlags.words[adjustedFlag >> 5] >> flag) & 1);
 }
 
 extern s32 D_003BBD80, D_003BBD84, D_003BBD88;
@@ -3756,11 +3756,11 @@ s32 dds3BitEditorProcess(void) {
         }
     }
     D_00325708.append(&D_00325708, packets);
-    if ((sdfPadButtonStates[24] & 2) && D_003BBD80 > 0) {
+    if ((dds3PadBitTable[24] & 2) && D_003BBD80 > 0) {
         D_003BBD80 -= 16;
         if (D_003BBD80 < 0) D_003BBD80 = 0;
     }
-    if (sdfPadButtonStates[26] & 2) {
+    if (dds3PadBitTable[26] & 2) {
         if (D_003BBD80 + 16 < 256) {
             if (D_003BBD80 + 32 > 256) D_003BBD80 = 240;
             else D_003BBD80 += 16;

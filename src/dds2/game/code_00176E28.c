@@ -70,7 +70,7 @@ extern EffRecordPool *dds3FlashPolyListHCreate(u32 count);
 
 extern EffRandState effDefaultRandomState[];
 extern void *dds3FlashPolyListHGetVertex(EffRecordPool *pool, s32 index);
-extern f32 effRingBasisScratchVector[];
+extern f32 effPCPFlashPolyRingExpHVertex[];
 
 /* Allocate a circular fan group. Zero spread becomes one; count is not guarded. */
 extern u32 effMagaCylinderCalcColor(u32 colorA, u32 colorB);
@@ -203,10 +203,10 @@ void effPCPFlashPolyRingExpHPartSetVertex(EffRingWork *work, s32 index) {
     orbitOffset[1] = 0;
     orbitOffset[2] = sine * work->currentRadius;
     basisFactor = part->basisFactor;
-    effRingBasisScratchVector[0] = radialDirection[0] * basisFactor;
-    effRingBasisScratchVector[1] = basisFactor + -1.0f;
-    effRingBasisScratchVector[2] = sine * basisFactor;
-    VU0_LOAD_VF(vf10, effRingBasisScratchVector);
+    effPCPFlashPolyRingExpHVertex[0] = radialDirection[0] * basisFactor;
+    effPCPFlashPolyRingExpHVertex[1] = basisFactor + -1.0f;
+    effPCPFlashPolyRingExpHVertex[2] = sine * basisFactor;
+    VU0_LOAD_VF(vf10, effPCPFlashPolyRingExpHVertex);
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf11, vf10);
     VU0_MOVE_VF(vf12, vf10);

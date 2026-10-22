@@ -382,7 +382,7 @@ extern BtlRuntimeTask *btlDeferredTaskHead;
 
 extern s32 sdfDelayedResrcCheck(void);
 
-extern u32 kwlnDrawControlFlags;
+extern u32 dds3DrawFlag;
 
 
 
@@ -432,7 +432,7 @@ extern SoundCommand D_003BDC90;
 extern u32 btlTintTransitionHoldCount;
 
 extern BtlRuntimeTask *btlAllocTask(s32);
-extern u8 kwlnTaskPadButtonStates[];
+extern u8 dds3PadButtonState[];
 
 extern char D_004178A8[];
 

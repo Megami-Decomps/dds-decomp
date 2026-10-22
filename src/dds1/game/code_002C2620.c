@@ -297,7 +297,7 @@ void fldLmapDrawListTree(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
 
 
 
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 #include "sdf_packet_alloc.h"
 #include "sdf_bordered_rectangle_packet.h"
 
@@ -310,7 +310,7 @@ void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z, s32 drawMode, con
     sdfDrawTagInit(packetList);
     sdfPktInit(&packetHeader, x + 0x7000, y + 0x7900, z, drawMode);
     sdfDrawTagLink(packetList, (u32)sdfDevPrintfEx(&packetHeader, command));
-    drawSurface = &kwlnDrawSurfaces[surfaceIndex];
+    drawSurface = &sdfGrOtTable[surfaceIndex];
     drawSurface->append(drawSurface, packetList);
 }
 
@@ -321,7 +321,7 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height,
 
     sdfDrawTagInit(packetList);
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x + 0x7000, y + 0x7900, z, width * 16, height * 8, fillColor, borderColor));
-    drawSurface = &kwlnDrawSurfaces[surfaceIndex];
+    drawSurface = &sdfGrOtTable[surfaceIndex];
     drawSurface->append(drawSurface, packetList);
 }
 

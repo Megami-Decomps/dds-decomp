@@ -178,7 +178,8 @@ corrupted debug text throughout.
 
 - Unpaired DDS-only code (no SMT3 counterpart; most of the field, battle AI
   and camp-grid systems written for DDS).
-- Data symbols. The same pairing reaches about 625 named SMT3 globals per game
+- Data symbols: carried in a second pass, see [SMT3 data names](smt3-data-names.md).
+  The same pairing reaches about 625 named SMT3 globals per game
   through functions that paired identically, but applying them needs the same
   provenance treatment as the functions plus a check that the DDS object has
   the same extent as its SMT3 counterpart. Not applied here (see

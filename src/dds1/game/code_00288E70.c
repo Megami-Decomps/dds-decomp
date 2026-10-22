@@ -16,7 +16,7 @@ extern char fileManagerTaskName[];
 
 extern s32 D_003BC7D8;
 
-extern s32 (*fileIdleUpdateCallback)(void);
+extern s32 (*p2sdSmgBuf)(void);
 s32 fileManagerProc(KwlnTask *task);
 
 extern s32 sdfFileCmdFileSize(DevState *);
@@ -37,7 +37,7 @@ extern DevState *sdfFileCmdWriteOpen(const char *path,
 extern s32 sdfPrintf(const char *fmt, ...);
 
 s32 pacLoadCallback(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
-    FileManWork *work = &fileManagerWork;
+    FileManWork *work = &fileQueueHead;
     s32 saved;
 
     switch (event) {
@@ -95,20 +95,20 @@ s32 pacLoadCallback(void *deviceRequest, s32 event, s32 unused, s32 byteCount, F
 }
 
 void fileRead(FileTransferJob *job) {
-    WaitSema(fileManagerWork.sema);
+    WaitSema(fileQueueHead.sema);
     if (job->state != FILE_JOB_READY) {
-        SignalSema(fileManagerWork.sema);
+        SignalSema(fileQueueHead.sema);
         return;
     }
     job->state = FILE_JOB_TRANSFERRING;
-    SignalSema(fileManagerWork.sema);
+    SignalSema(fileQueueHead.sema);
     sdfFileCmdRead(job->deviceRequest, (void *)job->transferAddress,
                     job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
 }
 
 /* Drive allocation, chunked reads, close, and completion-list handoff. */
 s32 fileLoadCallback(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
-    FileManWork *work = &fileManagerWork;
+    FileManWork *work = &fileQueueHead;
     s32 saved;
 
     switch (event) {
@@ -194,20 +194,20 @@ s32 fileLoadCallback(void *deviceRequest, s32 event, s32 unused, s32 byteCount, 
 }
 
 void fileWrite(FileTransferJob *job) {
-    WaitSema(fileManagerWork.sema);
+    WaitSema(fileQueueHead.sema);
     if (job->state != FILE_JOB_READY) {
-        SignalSema(fileManagerWork.sema);
+        SignalSema(fileQueueHead.sema);
         return;
     }
     job->state = FILE_JOB_TRANSFERRING;
-    SignalSema(fileManagerWork.sema);
+    SignalSema(fileQueueHead.sema);
     sdfFileCmdWrite(job->deviceRequest, (void *)job->transferAddress,
                      job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
 }
 
 /* Advance a chunked write, then close and queue its completion callback. */
 s32 fileSaveCallback(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
-    FileManWork *work = &fileManagerWork;
+    FileManWork *work = &fileQueueHead;
     s32 saved;
 
     switch (event) {
@@ -266,7 +266,7 @@ s32 fileSaveCallback(void *deviceRequest, s32 event, s32 unused, s32 byteCount, 
 
 /* Start or resume the read, PAC, or write job at the head of the queue. */
 void fileExecQueue(void) {
-    FileManWork *work = &fileManagerWork;
+    FileManWork *work = &fileQueueHead;
     FileTransferJob *job;
     s32 locked;
 
@@ -333,7 +333,7 @@ void fileExecQueue(void) {
 }
 
 void fileExecCallback(void) {
-    FileManWork *work = &fileManagerWork;
+    FileManWork *work = &fileQueueHead;
     FileTransferJob *node;
 
     WaitSema(work->sema);
@@ -350,7 +350,7 @@ extern void fileUnlinkQueue(FileRequest *request);
 
 /* Deliver callbacks queued after PAC input completes. */
 s32 fileManager(void) {
-    FileManWork *work = &fileManagerWork;
+    FileManWork *work = &fileQueueHead;
     u32 activeSlots;
     FilePacRequest **link;
     FilePacRequest *request;
@@ -411,12 +411,12 @@ s32 fileManagerProc(KwlnTask *task) {
 }
 
 void fileSysInit(void) {
-    memset(&fileManagerWork, 0, 0x40);
-    fileManagerWork.freeSlots = 4;
-    fileManagerWork.sema = sdfCreateSema(1, 0x7F, 0);
-    fileManagerWork.buffer = (u8 *)sdfMemLock(sdfMemAllocDirect(0x40000));
+    memset(&fileQueueHead, 0, 0x40);
+    fileQueueHead.freeSlots = 4;
+    fileQueueHead.sema = sdfCreateSema(1, 0x7F, 0);
+    fileQueueHead.buffer = (u8 *)sdfMemLock(sdfMemAllocDirect(0x40000));
     dds3StartProcess(fileManagerTaskName, 0x384, 1, 0, fileManagerProc, 0, 0);
-    fileIdleUpdateCallback = fileManager;
+    p2sdSmgBuf = fileManager;
 }
 
 s32 D_003BC7D8 __attribute__((section(".sdata"))) = 0;

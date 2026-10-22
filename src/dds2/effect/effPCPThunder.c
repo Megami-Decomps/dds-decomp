@@ -132,7 +132,7 @@ void effPCPThunderSphereInit(EffThunderVectorWork *work, s32 index) {
     cell->color = EFF_THUNDER_NEUTRAL_COLOR;
 }
 
-extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
+extern f32 aViewTarget[4], sdfViewTargetVector[4];
 extern void SetRotateMatrixXYZ(const struct RwV3d *);
 
 /* Sample a width multiplier, then bend the cell's placement vector around
@@ -172,7 +172,7 @@ void effPCPThunderSphereRotate(EffThunderVectorWork *work, s32 index) {
     originalAxis[3] = 0.0f;
     rotationScale = -source->rotationScale;
     radius = source->radius;
-    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB_EXTENDED(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, cameraDirection);
@@ -463,7 +463,7 @@ void effPCPThunderSphereLowRotate(EffThunderVectorWork *work, s32 index) {
     originalAxis[2] = source->rotationAxis[2];
     originalAxis[3] = 0.0f;
     radius = source->radius;
-    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB_EXTENDED(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, cameraDirection);
@@ -713,7 +713,7 @@ void effThunderBuildSparkStripCell(EffThunderSparkWork *work, s32 index) {
     VU0_STORE_VF_UNCLOBBERED(vf10, direction);
     distance /= work->head.halfLife;
     amplitude = work->head.waveAmplitude;
-    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB_EXTENDED(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, cameraDirection);
@@ -1051,7 +1051,7 @@ void effPCP_ThunderPolyPartRefresh(EffThunderFragmentWork *work, s32 index) {
     VU0_STORE_VF_UNCLOBBERED(vf10, direction);
     distance /= work->head.halfLife;
     amplitude = work->head.waveAmplitude;
-    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB_EXTENDED(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, cameraDirection);
@@ -1358,7 +1358,7 @@ void effPCP_ThunderPolyLowPartRefresh(EffThunderFragmentWork *work, s32 index) {
     VU0_STORE_VF_UNCLOBBERED(vf10, direction);
     distance /= work->head.halfLife;
     amplitude = work->head.waveAmplitude;
-    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB_EXTENDED(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, cameraDirection);
@@ -1637,7 +1637,7 @@ void effPCP_ThunderRadiatePolyPartRefresh(EffThunderCellWork *work, s32 index) {
     cell->vertexCount = system->vertexWordCount;
     vertices = cell->history;
     segments = work->head.halfLife;
-    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB_EXTENDED(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, cameraDirection);
@@ -1893,7 +1893,7 @@ void effPCP_ThunderPolyListPartRefresh(EffThunderFragmentWork *work, s32 index, 
     VU0_STORE_VF_UNCLOBBERED(vf10, direction);
     distance /= work->head.halfLife;
     amplitude = work->head.waveAmplitude;
-    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB_EXTENDED(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, cameraDirection);
@@ -2320,7 +2320,7 @@ void effThunderUpdateCurveGroup(EffPcpThunderGroup *group) {
         start[1] = -80.0f;
         start[2] = -400.0f;
     }
-    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB_EXTENDED(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, cameraDirection);
@@ -2695,8 +2695,8 @@ void effThunderSetCurveGroupTint(s32 work, u32 value) {
     *(u32 *)(work + 0x54) = value;
 }
 
-extern EffThunderDrawParams effThunderHistoryDrawParams;
-extern EffThunderDrawParams effThunderEndCapDrawParams;
+extern EffThunderDrawParams dds3BezierVertexCount;
+extern EffThunderDrawParams dds3BezierTrackPolyVertex;
 
 extern const f32 effThunderEndCapPoints[8][4];
 extern const u32 effThunderHistoryIndices[28];
@@ -2732,14 +2732,14 @@ EffPcpThunderFragmentResources *dds3BezierTrackPolySetVertex(s32 historyLength, 
     asset = sdfMatNew();
     history->resourceHandle = asset;
     sdfMatSetConstant(asset, 1.0f);
-    memset(&effThunderHistoryDrawParams, 0, 0x2C);
-    effThunderHistoryDrawParams.flags = 0x4000;
-    effThunderHistoryDrawParams.primitiveIndices = effThunderHistoryIndices;
-    memset(&effThunderEndCapDrawParams, 0, 0x2C);
-    effThunderEndCapDrawParams.flags = 0x4000;
-    effThunderEndCapDrawParams.primitiveIndices = effThunderEndCapIndices;
-    effThunderEndCapDrawParams.primitiveCount = 6;
-    effThunderEndCapDrawParams.pointCount = 8;
+    memset(&dds3BezierVertexCount, 0, 0x2C);
+    dds3BezierVertexCount.flags = 0x4000;
+    dds3BezierVertexCount.primitiveIndices = effThunderHistoryIndices;
+    memset(&dds3BezierTrackPolyVertex, 0, 0x2C);
+    dds3BezierTrackPolyVertex.flags = 0x4000;
+    dds3BezierTrackPolyVertex.primitiveIndices = effThunderEndCapIndices;
+    dds3BezierTrackPolyVertex.primitiveCount = 6;
+    dds3BezierTrackPolyVertex.pointCount = 8;
     return history;
 }
 
@@ -2810,7 +2810,7 @@ void dds3BezierTrackPolySetVC(EffPcpThunderFragmentResources *history, u128 *sou
 
 
 
-extern SdfPoolNode *effThunderHistorySurfaces[];
+extern SdfPoolNode *dds3BezierTrackPolyParam[];
 #include "sdf_packet_alloc.h"
 extern void *effPkt3DPrimMakePoly(EffThunderDrawParams *);
 
@@ -2848,19 +2848,19 @@ void dds3BezierTrackPolyDraw(EffPcpThunderFragmentResources *history) {
         length[0] = recent;
         length[1] = 0;
     }
-    effThunderHistoryDrawParams.colors = history->colors;
-    effThunderHistoryDrawParams.color = history->color;
+    dds3BezierVertexCount.colors = history->colors;
+    dds3BezierVertexCount.color = history->color;
     for (i = 0; i < 2; i++) {
-        draw = &effThunderHistoryDrawParams;
+        draw = &dds3BezierVertexCount;
         remaining = length[i];
         draw->primitiveCount = 16;
         draw->points = history->points + start[i];
         draw->pointCount = 15;
         while (remaining >= 15) {
             remaining -= 12;
-            sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&effThunderHistoryDrawParams));
-            effThunderHistoryDrawParams.points += 12;
-            effThunderHistoryDrawParams.colors += 12;
+            sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&dds3BezierVertexCount));
+            dds3BezierVertexCount.points += 12;
+            dds3BezierVertexCount.colors += 12;
         }
         if (remaining >= 6) {
             draw->primitiveCount = (remaining / 3) * 4 - 4;
@@ -2870,16 +2870,16 @@ void dds3BezierTrackPolyDraw(EffPcpThunderFragmentResources *history) {
         }
     }
     colors = history->endColors;
-    edgeColor = effThunderHistoryDrawParams.colors[-3];
-    centerColor = effThunderHistoryDrawParams.colors[-2];
+    edgeColor = dds3BezierVertexCount.colors[-3];
+    centerColor = dds3BezierVertexCount.colors[-2];
     colors[0] = centerColor;
     colors[7] = colors[6] = colors[5] = colors[4] =
         colors[3] = colors[2] = colors[1] = edgeColor;
-    effThunderEndCapDrawParams.colors = colors;
-    effThunderEndCapDrawParams.points = history->endPoints;
-    effThunderEndCapDrawParams.color = history->color;
-    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&effThunderEndCapDrawParams));
-    surface = effThunderHistorySurfaces[history->surfaceIndex];
+    dds3BezierTrackPolyVertex.colors = colors;
+    dds3BezierTrackPolyVertex.points = history->endPoints;
+    dds3BezierTrackPolyVertex.color = history->color;
+    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&dds3BezierTrackPolyVertex));
+    surface = dds3BezierTrackPolyParam[history->surfaceIndex];
     surface->append(surface, list);
 }
 

@@ -12,7 +12,7 @@
 #include "eff_manager_task.h"
 #include "eff_legacy_node_instance.h"
 
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 #include "sdf_packet_alloc.h"
 extern void effObjectListCountersReset(void);
 
@@ -47,7 +47,7 @@ s32 effSubmitFieldBlendStateTask(KwlnTask *task) {
     state->registers.alpha.value = 0x44;
     state->registers.alpha.registerId = 0x42;
     sdfDrawTagLink(list, (u32)state);
-    surface = &kwlnDrawSurfaces[51];
+    surface = &sdfGrOtTable[51];
     surface->append(surface, list);
 
     list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
@@ -109,57 +109,57 @@ EffNode *dds3EffectCreate(u16 type, u16 arg, s32 param) {
     node->type = type;
     node->unkC = 1.03f;
     node->arg = arg;
-    node->instance = effNodeTypeOperations[type].create(arg, param);
+    node->instance = EffMajorTable[type].create(arg, param);
     return node;
 }
 
 void dds3EffectDelete(EffNode *node) {
-    effNodeTypeOperations[node->type].destroy(node->instance);
+    EffMajorTable[node->type].destroy(node->instance);
     sdfChipFreeDirect(node);
 }
 
 void dds3EffectDraw(EffNode *node) {
-    effNodeTypeOperations[node->type].update(node->instance);
+    EffMajorTable[node->type].update(node->instance);
 }
 
 void dds3EffectReset(EffNode *node) {
-    effNodeTypeOperations[node->type].restart(node->instance);
+    EffMajorTable[node->type].restart(node->instance);
 }
 
 void dds3EffectSetScale(EffNode *node, f32 factor) {
-    effNodeTypeOperations[node->type].applyScale(node->instance, factor);
+    EffMajorTable[node->type].applyScale(node->instance, factor);
 }
 
 s32 effInvokeNodeConditionOrAcceptDefault(EffNode *node) {
-    if (effNodeTypeOperations[node->type].queryCondition == NULL) {
+    if (EffMajorTable[node->type].queryCondition == NULL) {
         return 1;
     }
-    return effNodeTypeOperations[node->type].queryCondition(node->instance);
+    return EffMajorTable[node->type].queryCondition(node->instance);
 }
 
 void effCopyVectorToNodeInstance(EffNode *node, const void *vector) {
-    effNodeTypeOperations[node->type].setVector(node->instance, vector);
+    EffMajorTable[node->type].setVector(node->instance, vector);
 }
 
 void effApplyNodeTransformMatrix(EffNode *node, const void *matrix) {
-    effNodeTypeOperations[node->type].setMatrix(node->instance, matrix);
+    EffMajorTable[node->type].setMatrix(node->instance, matrix);
 }
 
 void effSetNodeParameterValue(EffNode *node, u32 parameterWord) {
-    effNodeTypeOperations[node->type].setParameterWord(node->instance, parameterWord);
+    EffMajorTable[node->type].setParameterWord(node->instance, parameterWord);
 }
 
 void effDispatchOptionalNodeFlag(EffNode *node, u8 flag) {
-    if (effNodeTypeOperations[node->type].dispatchOptionalFlag != NULL) {
-        effNodeTypeOperations[node->type].dispatchOptionalFlag(node->instance, flag);
+    if (EffMajorTable[node->type].dispatchOptionalFlag != NULL) {
+        EffMajorTable[node->type].dispatchOptionalFlag(node->instance, flag);
     }
 }
 
 s32 effInvokeOptionalNodeInstanceCallback(EffNode *node) {
-    if (effNodeTypeOperations[node->type].queryOptional == NULL) {
+    if (EffMajorTable[node->type].queryOptional == NULL) {
         return 1;
     }
-    return effNodeTypeOperations[node->type].queryOptional(node->instance);
+    return EffMajorTable[node->type].queryOptional(node->instance);
 }
 #include "sdf_debug_api.h"
 

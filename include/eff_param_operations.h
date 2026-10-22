@@ -34,7 +34,7 @@ typedef char EffDispatchEntry_layout_must_match_native_row[
      (u32)&((EffDispatchEntry *)0)->callback5 == 0x24)
         ? 1 : -1];
 
-extern EffDispatchEntry effParamWorkFactories[];
-extern EffDispatchEntry effParameterWorkOperations[];
+extern EffDispatchEntry dds3EffectFuncTable[];
+extern EffDispatchEntry EffectPCPFuncTable[];
 
 #endif

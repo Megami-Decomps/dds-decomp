@@ -172,9 +172,9 @@ s32 ptySkillMenuUseSelectedInField(id, context)
 {
     s32 window = context + 0x15C;
     DatPartyRecord *selectedEntry =
-        &datGameState->party[((SkillMenuContext *)context)->selection->cursor->index];
+        &DDS3_GBWK->party[((SkillMenuContext *)context)->selection->cursor->index];
     DatPartyRecord *targetEntry =
-        &datGameState->party[((SkillMenuContext *)context)->target->cursor->index];
+        &DDS3_GBWK->party[((SkillMenuContext *)context)->target->cursor->index];
     if (mnuIsEntryCostUnaffordable(id, selectedEntry) != 0) {
         return 0;
     }
@@ -191,7 +191,7 @@ s32 ptySkillMenuUseSelectedInField(id, context)
 
 void mnuFlagMatchingEntries(s32 context) {
     DatPartyRecord *selectedEntry =
-        &datGameState->party[((SkillMenuContext *)context)->selection->cursor->index];
+        &DDS3_GBWK->party[((SkillMenuContext *)context)->selection->cursor->index];
     struct MenuListNode *node = ((SkillMenuContext *)context)->menu->selected->list->first;
     if (node != NULL) {
         do {

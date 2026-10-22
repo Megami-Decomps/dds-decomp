@@ -21,9 +21,9 @@ extern CameraVector D_0039F708;
 #include "dds3_world_secondary.h"
 extern u8 dds3CheckPoseSetFlag(ObjectTransform *node, u32 flags);
 extern void dds3OffPoseSetFlag(ObjectTransform *node, u32 flags);
-extern f32 sdfViewEyeVector[4];
+extern f32 aViewTarget[4];
 extern f32 sdfViewTargetVector[4];
-extern f32 sdfViewUpVector[4];
+extern f32 aViewDown[4];
 
 
 /* Release the camera's inner node, base handle, and owned data block. */
@@ -51,8 +51,8 @@ s32 dds3UpdateCameraObject(EffWorldNode *camera) {
     }
     if (dds3GetActiveCameraSceneBasic(dds3GetControlScene()) == camera) {
         PCP_COPY_VECTOR(sdfViewTargetVector, &inner->position);
-        PCP_COPY_VECTOR(sdfViewEyeVector, &data->worldEye);
-        PCP_COPY_VECTOR(sdfViewUpVector, &data->worldUp);
+        PCP_COPY_VECTOR(aViewTarget, &data->worldEye);
+        PCP_COPY_VECTOR(aViewDown, &data->worldUp);
         if (data->fovUpdatePending & 1) {
             dds3SetScreenFovy(data->fieldOfView);
             data->fovUpdatePending &= ~1;

@@ -768,7 +768,7 @@ void brsApplyPartyRewards(BrsSkillPackageWork *partyWork, BrsRewardBatch *batch)
     for (partyOffset = 0, partyIndex = 0; partyIndex < 5;
          partyIndex++, partyOffset += sizeof(DatPartyRecord)) {
         currentPartyUnit =
-            (DatPartyRecord *)((u8 *)datGameState->party + partyOffset);
+            (DatPartyRecord *)((u8 *)DDS3_GBWK->party + partyOffset);
 
         if ((currentPartyUnit->flags & 1) != 0 &&
             (currentPartyUnit->status & 0x4000) != 0) {
@@ -907,7 +907,7 @@ void brsMarkPartyRows(BrsProgressRow *dst, BrsRewardBatch *state, s32 flags) {
 
     for (i = 0; i < state->count; i++) {
         BrsProgressRow *d = dst;
-        DatPartyRecord *unit = datGameState->party;
+        DatPartyRecord *unit = DDS3_GBWK->party;
         s32 j;
 
         for (j = 4; j >= 0; j--) {

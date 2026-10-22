@@ -22,7 +22,7 @@ void itfPnlRelease(UiSprite *sprite) {
 
 /* The layout table accepts context alone or context plus four corners. */
 extern void (*itfPanelLayoutCallbacks[])();
-extern void (*itfPanelColorCallbacks[])();
+extern void (*CreateColorTable[])();
 
 /* Store rectangle corners and the caller's render value before notifying the
  * kind-specific handler with context only. No kind-range or context checks. */
@@ -59,8 +59,8 @@ void itfPnlSetColor(UiSprite *panel, s32 redValue, s32 greenValue, s32 blueValue
     panel->green = greenValue;
     panel->blue = blueValue;
     panel->alpha = alphaValue;
-    if (itfPanelColorCallbacks[panel->kind] != 0) {
-        itfPanelColorCallbacks[panel->kind](panel->payload);
+    if (CreateColorTable[panel->kind] != 0) {
+        CreateColorTable[panel->kind](panel->payload);
     }
 }
 

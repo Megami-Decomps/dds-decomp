@@ -88,7 +88,7 @@ extern void fldApplyLightSetIndex(s32);
 extern void fldInitializeCameraColorResource(void);
 extern void sdfEnableFlagListViewTargetRelativeMode(void);
 extern void sdfCounterInitializeDisplayAnimation(void);
-extern u32 kwlnDrawControlFlags;
+extern u32 dds3DrawFlag;
 extern u32 D_00435CBC;
 extern s32 D_00438894;
 extern u32 D_004388A8;
@@ -288,7 +288,7 @@ void fldLmapDrawListTree(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
 
 
 
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 #include "sdf_packet_alloc.h"
 #include "sdf_bordered_rectangle_packet.h"
 
@@ -301,7 +301,7 @@ void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z, s32 drawMode, con
     sdfDrawTagInit(packetList);
     sdfPktInit(&packetHeader, x + 0x7000, y + 0x7900, z, drawMode);
     sdfDrawTagLink(packetList, (u32)sdfDevPrintfEx(&packetHeader, command));
-    drawSurface = &kwlnDrawSurfaces[surfaceIndex];
+    drawSurface = &sdfGrOtTable[surfaceIndex];
     drawSurface->append(drawSurface, packetList);
 }
 
@@ -312,7 +312,7 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height,
 
     sdfDrawTagInit(packetList);
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x + 0x7000, y + 0x7900, z, width * 16, height * 8, fillColor, borderColor));
-    drawSurface = &kwlnDrawSurfaces[surfaceIndex];
+    drawSurface = &sdfGrOtTable[surfaceIndex];
     drawSurface->append(drawSurface, packetList);
 }
 
@@ -615,7 +615,7 @@ void fldInitializeLocalMapScene(void) {
             mode = 1;
         }
     }
-    kwlnDrawControlFlags |= 0x2000000;
+    dds3DrawFlag |= 0x2000000;
     mask = 0x3FF;
     evtLoadArea(1, mode);
     dds3SetActiveScene(NULL);
@@ -654,7 +654,7 @@ extern void sdfCounterStepDownAnimationValue(void);
 extern void sdfLatchBaseVectorsForSelection(void);
 extern s32 sdfStepSelectedMapCameraTransition(void);
 extern s32 fldAdvanceLocalMapCameraTransition(void);
-extern s8 kwlnTaskPadButtonStates[];
+extern s8 dds3PadButtonState[];
 extern s32 D_00439094;
 extern void sdfCounterAdvanceBoundedAnimationValue(void);
 extern s32 pipeMessDraw(void);
@@ -711,7 +711,7 @@ s32 fldUpdateLocalMapCounterSelection(void) {
     case 3:
         sdfCounterTickCountdownAndMapTimers();
         fldUpdateMapRequestQueues(0);
-        if (kwlnTaskPadButtonStates[0x21] < 0) {
+        if (dds3PadButtonState[0x21] < 0) {
             D_00439094 = 55;
         }
         D_00439094++;

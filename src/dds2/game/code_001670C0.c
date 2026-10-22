@@ -34,7 +34,7 @@ extern void (*D_003AAFB0[])(EffectDispatchState *);
 
 extern void (*D_003AAFC0[])(f32, EffectDispatchState *);
 
-extern BillDispatch effBillConstructorEntries[];
+extern BillDispatch dds3SpPolyTable[];
 
 #include "sdf_packet_alloc.h"
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
@@ -61,7 +61,7 @@ extern u32 D_00436410;
 
 
 void *dds3SpPolyCreate(s32 index, void *arg) {
-    EffectDispatchState *effect = effBillConstructorEntries[index].func(arg);
+    EffectDispatchState *effect = dds3SpPolyTable[index].func(arg);
 
     effect->handler = index;
     effect->valueB2 = 1;
@@ -69,7 +69,7 @@ void *dds3SpPolyCreate(s32 index, void *arg) {
 }
 
 void *dds3SpPolyCopy(EffectDispatchState *effect) {
-    EffectDispatchState *result = effBillConstructorEntries[effect->handler].func(effect);
+    EffectDispatchState *result = dds3SpPolyTable[effect->handler].func(effect);
 
     result->handler = effect->handler;
     result->valueB2 = 1;
@@ -78,12 +78,12 @@ void *dds3SpPolyCopy(EffectDispatchState *effect) {
 
 /* Invoke the selected dispatch record's destructor; the handler index is unchecked. */
 void dds3SpPolyDelete(EffectDispatchState *effect) {
-    effBillConstructorEntries[effect->handler].destroy(effect);
+    dds3SpPolyTable[effect->handler].destroy(effect);
 }
 
 /* Invoke the update column of the selected constructor/update/destructor record. */
 void dds3SpPolyDraw(EffectDispatchState *effect) {
-    effBillConstructorEntries[effect->handler].callback(effect);
+    dds3SpPolyTable[effect->handler].callback(effect);
 }
 
 void dds3SpPolyReset(EffectDispatchState *effect) {

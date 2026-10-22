@@ -80,9 +80,9 @@ s32 PopInt(ScrData *script) {
     case 1:
         return script->stackValues[script->sp].f;
     case 2:
-        return datGameState->script.ints[script->stackValues[script->sp].i];
+        return DDS3_GBWK->script.ints[script->stackValues[script->sp].i];
     case 3:
-        return datGameState->script.floats[script->stackValues[script->sp].i];
+        return DDS3_GBWK->script.floats[script->stackValues[script->sp].i];
     }
     return 0;
 }
@@ -99,9 +99,9 @@ f32 PopFloat(ScrData *script) {
     case 1:
         return script->stackValues[script->sp].f;
     case 2:
-        return (f32)datGameState->script.ints[script->stackValues[script->sp].i];
+        return (f32)DDS3_GBWK->script.ints[script->stackValues[script->sp].i];
     case 3:
-        return datGameState->script.floats[script->stackValues[script->sp].i];
+        return DDS3_GBWK->script.floats[script->stackValues[script->sp].i];
     }
     return 0.0f;
 }

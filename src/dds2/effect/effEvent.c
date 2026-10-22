@@ -74,23 +74,23 @@
 /* Packet-source layouts and concrete blur owners mirror their constructors.
  * Equal-sized parameter prefixes do not make the blur variants interchangeable. */
 
-extern EffScreenDrawParams effBlurRectangleParameters;
+extern EffScreenDrawParams Eve_Blur;
 
 
-extern EffBlurTemplate *effBlurPixelWork;
+extern EffBlurTemplate *hEve_PartialMultiBlur;
 
 
-extern EffBlurScatterWork *effFilterBlurWork;
+extern EffBlurScatterWork *hEve_DistortionBlur;
 
-extern EffBlurScaleWork *effStaggeredBlurWork;
+extern EffBlurScaleWork *hEve_RippleBlur;
 
 extern EffScreenDrawParams D_003B2238;
 
 
-extern EffSolidRectParams effColorRectangleParameters;
+extern EffSolidRectParams Eve_Filter;
 
 
-extern EffResourceRectWork *effTexturedSquareWork;
+extern EffResourceRectWork *hEve_PartialMultiFilter;
 
 extern u8 D_003B2208[];
 
@@ -117,19 +117,19 @@ extern EffResourceRectParams effResourceRectangleSetupParameters;
 
 extern EffBlurScaleParams effStaggeredBlurSetupParameters;
 
-extern s8 effTexturedSquareEnabled;
+extern s8 Eve_PartialMultiFilterShow;
 
-extern s8 effColorRectangleEnabled;
+extern s8 Eve_FilterShow;
 
 extern s8 D_00436463;
 
-extern s8 effStaggeredBlurEnabled;
+extern s8 Eve_RippleBlurShow;
 
-extern s8 effFilterBlurEnabled;
+extern s8 Eve_DistortionBlurShow;
 
-extern s8 effTexturedBlurEnabled;
+extern s8 Eve_PartialMultiBlurShow;
 
-extern s8 effRectangleBlurEnabled;
+extern s8 Eve_BlurShow;
 
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
 
@@ -374,7 +374,7 @@ void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, s32 format) {
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 
 void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
     f32 point[4] __attribute__((aligned(16)));
@@ -438,7 +438,7 @@ void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
         sdfComposeVuMatrixFromRegisters();
         VU0_STORE_MATRIX_UNCLOBBERED(matrix);
     }
-    surface = &kwlnDrawSurfaces[55];
+    surface = &sdfGrOtTable[55];
     surface->append(surface, list);
 }
 
@@ -498,7 +498,7 @@ void effDebugSelectCursorDraw(f32 *position) {
     D_00380028.append(&D_00380028, list);
 }
 
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 
 /* Draw horizontal rings, vertical sides, and the two sets of cap diameters. */
 void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32 height) {
@@ -616,7 +616,7 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
         angle += angleStep;
     }
     sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 20, 0x80));
-    surface = &kwlnDrawSurfaces[55];
+    surface = &sdfGrOtTable[55];
     surface->append(surface, list);
 }
 
@@ -633,102 +633,102 @@ void effDebugWindowDraw(s32 x, s32 y, s32 width, s32 height, s32 fillColor, s32 
 }
 
 void Eve_BlurON(void) {
-    effRectangleBlurEnabled = 1;
+    Eve_BlurShow = 1;
 }
 
 void Eve_BlurOFF(void) {
-    effRectangleBlurEnabled = 0;
+    Eve_BlurShow = 0;
 }
 
 /* Copy only the 0x28-byte source prefix; retain the screen record's trailing bytes. */
 void Eve_BlurSetParam(const EffBlurQuad *parameters) {
-    memcpy(&effBlurRectangleParameters, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
+    memcpy(&Eve_Blur, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
 /* Expose the rectangle-blur parameter block by address. */
 EffScreenDrawParams *Eve_BlurGetParam(void) {
-    return &effBlurRectangleParameters;
+    return &Eve_Blur;
 }
 
 void Eve_PartialMultiBlurON(void) {
-    effTexturedBlurEnabled = 1;
+    Eve_PartialMultiBlurShow = 1;
 }
 
 void Eve_PartialMultiBlurOFF(void) {
-    effTexturedBlurEnabled = 0;
+    Eve_PartialMultiBlurShow = 0;
 }
 
 /* Copy the pixel rectangle only; retain its selected source resource. */
 void Eve_PartialMultiBlurSetParam(EffBlurTemplateBody *parameters) {
-    effBlurPixelWork->body = *parameters;
+    hEve_PartialMultiBlur->body = *parameters;
 }
 
 /* Return the current textured-blur work without retaining it. */
 EffBlurTemplate *Eve_PartialMultiBlurGetParams(void) {
-    return effBlurPixelWork;
+    return hEve_PartialMultiBlur;
 }
 
 void Eve_PartialMultiBlurSetTex(SdfTex *texture) {
-    effBlurPixelWork->texture = texture;
+    hEve_PartialMultiBlur->texture = texture;
 }
 
 /* Select the same resource-table entry used by the filter-blur initializer. */
 void Eve_PartialMultiBlurSetDefTex(void) {
-    effBlurPixelWork->texture = dds3BillboardGetGeneralTex(EFF_EVENT_BLUR_RESOURCE_INDEX);
+    hEve_PartialMultiBlur->texture = dds3BillboardGetGeneralTex(EFF_EVENT_BLUR_RESOURCE_INDEX);
 }
 
 void Eve_DistortionBlurON(void) {
-    effFilterBlurEnabled = 1;
+    Eve_DistortionBlurShow = 1;
 }
 
 void Eve_DistortionBlurOFF(void) {
-    effFilterBlurEnabled = 0;
+    Eve_DistortionBlurShow = 0;
 }
 
 /* Update scatter parameters without replacing the owned allocation or slots. */
 void Eve_DistortionBlurSetParam(EffBlurScatterParams *parameters) {
-    effFilterBlurWork->params = *parameters;
+    hEve_DistortionBlur->params = *parameters;
 }
 
 /* Return the current filter-blur work without retaining it. */
 EffBlurScatterWork *Eve_DistortionBlurGetParams(void) {
-    return effFilterBlurWork;
+    return hEve_DistortionBlur;
 }
 
 void Eve_DistortionBlurSetTex(SdfTex *sourceHandle) {
-    effFilterBlurWork->texture = sourceHandle;
+    hEve_DistortionBlur->texture = sourceHandle;
 }
 
 /* Install the filter-blur resource-table texture without changing its slots. */
 void Eve_DistortionBlurSetDefTex(void) {
-    effFilterBlurWork->texture = dds3BillboardGetGeneralTex(EFF_EVENT_BLUR_RESOURCE_INDEX);
+    hEve_DistortionBlur->texture = dds3BillboardGetGeneralTex(EFF_EVENT_BLUR_RESOURCE_INDEX);
 }
 
 void Eve_RippleBlurON(void) {
-    effStaggeredBlurEnabled = 1;
+    Eve_RippleBlurShow = 1;
 }
 
 void Eve_RippleBlurOFF(void) {
-    effStaggeredBlurEnabled = 0;
+    Eve_RippleBlurShow = 0;
 }
 
 /* Update scale parameters without replacing the owned allocation or slots. */
 void Eve_RippleBlurSetParam(EffBlurScaleParams *parameters) {
-    effStaggeredBlurWork->params = *parameters;
+    hEve_RippleBlur->params = *parameters;
 }
 
 /* Return the current staggered-blur work without retaining it. */
 EffBlurScaleWork *Eve_RippleBlurGetParams(void) {
-    return effStaggeredBlurWork;
+    return hEve_RippleBlur;
 }
 
 void Eve_RippleBlurSetTex(SdfTex *sourceHandle) {
-    effStaggeredBlurWork->texture = sourceHandle;
+    hEve_RippleBlur->texture = sourceHandle;
 }
 
 /* Install the staggered-blur resource-table texture without changing its slots. */
 void Eve_RippleBlurSetDefTex(void) {
-    effStaggeredBlurWork->texture = dds3BillboardGetGeneralTex(EFF_EVENT_STAGGERED_RESOURCE_INDEX);
+    hEve_RippleBlur->texture = dds3BillboardGetGeneralTex(EFF_EVENT_STAGGERED_RESOURCE_INDEX);
 }
 
 void effEnableFramebufferQuad(void) {
@@ -750,81 +750,81 @@ EffScreenDrawParams *effGetCh73Params(void) {
 }
 
 void Eve_FilterON(void) {
-    effColorRectangleEnabled = 1;
+    Eve_FilterShow = 1;
 }
 
 void Eve_FilterOFF(void) {
-    effColorRectangleEnabled = 0;
+    Eve_FilterShow = 0;
 }
 
 /* Replace the complete solid-rectangle parameter block. */
 void Eve_FilterSetParam(EffSolidRectParams *parameters) {
-    effColorRectangleParameters = *parameters;
+    Eve_Filter = *parameters;
 }
 
 /* Expose the solid-rectangle parameter block by address. */
 EffSolidRectParams *Eve_FilterGetParams(void) {
-    return &effColorRectangleParameters;
+    return &Eve_Filter;
 }
 
 void Eve_PartialMultiFilterON(void) {
-    effTexturedSquareEnabled = 1;
+    Eve_PartialMultiFilterShow = 1;
 }
 
 void Eve_PartialMultiFilterOFF(void) {
-    effTexturedSquareEnabled = 0;
+    Eve_PartialMultiFilterShow = 0;
 }
 
 /* Copy the resource template body while preserving its selected resource. */
 void Eve_PartialMultiFilterSetParam(EffResourceRectParams *parameters) {
-    effTexturedSquareWork->params = *parameters;
+    hEve_PartialMultiFilter->params = *parameters;
 }
 
 /* Return the current textured-square work without retaining it. */
 EffResourceRectWork *Eve_PartialMultiFilterGetParams(void) {
-    return effTexturedSquareWork;
+    return hEve_PartialMultiFilter;
 }
 
 void Eve_PartialMultiFilterSetTex(SdfTex *texture) {
-    effTexturedSquareWork->texture = texture;
+    hEve_PartialMultiFilter->texture = texture;
 }
 
 /* Install the textured-square resource-table texture while retaining its body. */
 void Eve_PartialMultiFilterSetDefTex(void) {
-    effTexturedSquareWork->texture = dds3BillboardGetGeneralTex(EFF_EVENT_SQUARE_RESOURCE_INDEX);
+    hEve_PartialMultiFilter->texture = dds3BillboardGetGeneralTex(EFF_EVENT_SQUARE_RESOURCE_INDEX);
 }
 
 /* Clone the four default work templates; only the staggered slot count is overridden. */
 void Eve_EffectInit(void) {
-    effBlurPixelWork = dds3EffectPartialMultiBlurCreate((EffBlurTemplateBody *)D_003B2208);
-    effFilterBlurWork = dds3EffectDistortionBlurCreate((EffBlurScatterParams *)D_003B21D8);
-    effTexturedSquareWork = dds3EffectPartialMultiFilterCreate((EffResourceRectParams *)D_003B2278);
-    effStaggeredBlurWork = dds3EffectRippleBlurCreate((EffBlurScaleParams *)D_003B22A0);
+    hEve_PartialMultiBlur = dds3EffectPartialMultiBlurCreate((EffBlurTemplateBody *)D_003B2208);
+    hEve_DistortionBlur = dds3EffectDistortionBlurCreate((EffBlurScatterParams *)D_003B21D8);
+    hEve_PartialMultiFilter = dds3EffectPartialMultiFilterCreate((EffResourceRectParams *)D_003B2278);
+    hEve_RippleBlur = dds3EffectRippleBlurCreate((EffBlurScaleParams *)D_003B22A0);
     Eve_RippleBlurGetParams()->params.count = EFF_EVENT_STAGGERED_SLOT_COUNT;
 }
 
 /* Dispatch enabled draw families independently, in their native order. */
 void effDispatchActive(void) {
-    if (effRectangleBlurEnabled) {
-        effDrawBlurRectangle(&effBlurRectangleParameters.source);
+    if (Eve_BlurShow) {
+        effDrawBlurRectangle(&Eve_Blur.source);
     }
-    if (effTexturedBlurEnabled) {
-        effDrawBlurPixelRectWithResource(effBlurPixelWork);
+    if (Eve_PartialMultiBlurShow) {
+        effDrawBlurPixelRectWithResource(hEve_PartialMultiBlur);
     }
-    if (effFilterBlurEnabled) {
-        effBlurStepScatterSlotsAndDraw(effFilterBlurWork);
+    if (Eve_DistortionBlurShow) {
+        effBlurStepScatterSlotsAndDraw(hEve_DistortionBlur);
     }
-    if (effStaggeredBlurEnabled) {
-        effBlurStepScaleSlotsAndDraw(effStaggeredBlurWork);
+    if (Eve_RippleBlurShow) {
+        effBlurStepScaleSlotsAndDraw(hEve_RippleBlur);
     }
     if (D_00436463) {
         effBlurDrawFramebufferQuad(&D_003B2238.source);
     }
-    if (effColorRectangleEnabled) {
-        dds3EffectFilter(&effColorRectangleParameters);
+    if (Eve_FilterShow) {
+        dds3EffectFilter(&Eve_Filter);
     }
-    if (effTexturedSquareEnabled) {
-        effResourceRectDrawPixels(effTexturedSquareWork);
+    if (Eve_PartialMultiFilterShow) {
+        effResourceRectDrawPixels(hEve_PartialMultiFilter);
     }
 }
 
@@ -870,31 +870,31 @@ void effSetLoadDescA(void *parameters) {
     memcpy(&D_003B22D0, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
-extern EffEventSetupRecord effTexturedBlurSetupRecord;
-extern s8 effTexturedBlurSetupReady;
+extern EffEventSetupRecord mblurDebugMenu;
+extern s8 mblurDone;
 
 /* Prepare the blur-template callback from its explicit parameter block,
  * then process the channel; its optional copy still uses source/destination. */
 s8 effEventAdvanceBlurTemplateSetup(void) {
-    if (effTexturedBlurSetupReady == 0) {
-        if (effTexturedBlurSetupRecord.callback != 0) {
-            *effTexturedBlurSetupRecord.callbackResult = effTexturedBlurSetupRecord.callback(&effTexturedBlurSetupParameters);
+    if (mblurDone == 0) {
+        if (mblurDebugMenu.callback != 0) {
+            *mblurDebugMenu.callbackResult = mblurDebugMenu.callback(&effTexturedBlurSetupParameters);
         }
-        if (effTexturedBlurSetupRecord.destination != 0 && effTexturedBlurSetupRecord.source != 0) {
-            memcpy(effTexturedBlurSetupRecord.destination, effTexturedBlurSetupRecord.source, effTexturedBlurSetupRecord.copyBytes);
+        if (mblurDebugMenu.destination != 0 && mblurDebugMenu.source != 0) {
+            memcpy(mblurDebugMenu.destination, mblurDebugMenu.source, mblurDebugMenu.copyBytes);
         }
-        effTexturedBlurSetupReady = 1;
+        mblurDone = 1;
     }
-    if ((u8)effTexturedBlurSetupReady != 0) {
-        effReturnEventSetupWord((u32)&effTexturedBlurSetupRecord);
+    if ((u8)mblurDone != 0) {
+        effReturnEventSetupWord((u32)&mblurDebugMenu);
         effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&effTexturedBlurSetupRecord);
+        effEventSetupRecordNoOp(&mblurDebugMenu);
         effEventSetupAfterRecordNoOp();
     }
     if (D_0040B7DB[0] < 0) {
-        effTexturedBlurSetupReady = 0;
+        mblurDone = 0;
     }
-    return effTexturedBlurSetupReady;
+    return mblurDone;
 }
 
 /* Expose the blur-template setup parameters by address. */
@@ -907,30 +907,30 @@ void effEventSetBlurTemplateParameters(EffBlurTemplateBody *parameters) {
     effTexturedBlurSetupParameters = *parameters;
 }
 
-extern EffEventSetupRecord effScatterBlurSetupRecord;
-extern s8 effScatterBlurSetupReady;
+extern EffEventSetupRecord dblurDebugMenu;
+extern s8 dblurDone;
 
 /* Prepare scatter setup from its explicit parameters, then process the channel. */
 s8 effEventAdvanceScatterBlurSetup(void) {
-    if (effScatterBlurSetupReady == 0) {
-        if (effScatterBlurSetupRecord.callback != 0) {
-            *effScatterBlurSetupRecord.callbackResult = effScatterBlurSetupRecord.callback(&effScatterBlurSetupParameters);
+    if (dblurDone == 0) {
+        if (dblurDebugMenu.callback != 0) {
+            *dblurDebugMenu.callbackResult = dblurDebugMenu.callback(&effScatterBlurSetupParameters);
         }
-        if (effScatterBlurSetupRecord.destination != 0 && effScatterBlurSetupRecord.source != 0) {
-            memcpy(effScatterBlurSetupRecord.destination, effScatterBlurSetupRecord.source, effScatterBlurSetupRecord.copyBytes);
+        if (dblurDebugMenu.destination != 0 && dblurDebugMenu.source != 0) {
+            memcpy(dblurDebugMenu.destination, dblurDebugMenu.source, dblurDebugMenu.copyBytes);
         }
-        effScatterBlurSetupReady = 1;
+        dblurDone = 1;
     }
-    if ((u8)effScatterBlurSetupReady != 0) {
-        effReturnEventSetupWord((u32)&effScatterBlurSetupRecord);
+    if ((u8)dblurDone != 0) {
+        effReturnEventSetupWord((u32)&dblurDebugMenu);
         effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&effScatterBlurSetupRecord);
+        effEventSetupRecordNoOp(&dblurDebugMenu);
         effEventSetupAfterRecordNoOp();
     }
     if (D_0040B7DB[0] < 0) {
-        effScatterBlurSetupReady = 0;
+        dblurDone = 0;
     }
-    return effScatterBlurSetupReady;
+    return dblurDone;
 }
 
 /* Expose the scatter-blur setup parameters by address. */
@@ -979,30 +979,30 @@ void effSetLoadDescD(void *parameters) {
     memcpy(&D_003B2778, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
-extern EffEventSetupRecord effSolidRectangleSetupRecord;
-extern s8 effSolidRectangleSetupReady;
+extern EffEventSetupRecord filterDebugMenu;
+extern s8 evtViewerDirty;
 
 /* Prepare solid-rectangle setup from the channel source, then process it. */
 s8 evtViewerCheckDirty(void) {
-    if (effSolidRectangleSetupReady == 0) {
-        if (effSolidRectangleSetupRecord.callback != 0) {
-            *effSolidRectangleSetupRecord.callbackResult = effSolidRectangleSetupRecord.callback(effSolidRectangleSetupRecord.source);
+    if (evtViewerDirty == 0) {
+        if (filterDebugMenu.callback != 0) {
+            *filterDebugMenu.callbackResult = filterDebugMenu.callback(filterDebugMenu.source);
         }
-        if (effSolidRectangleSetupRecord.destination != 0 && effSolidRectangleSetupRecord.source != 0) {
-            memcpy(effSolidRectangleSetupRecord.destination, effSolidRectangleSetupRecord.source, effSolidRectangleSetupRecord.copyBytes);
+        if (filterDebugMenu.destination != 0 && filterDebugMenu.source != 0) {
+            memcpy(filterDebugMenu.destination, filterDebugMenu.source, filterDebugMenu.copyBytes);
         }
-        effSolidRectangleSetupReady = 1;
+        evtViewerDirty = 1;
     }
-    if ((u8)effSolidRectangleSetupReady != 0) {
-        effReturnEventSetupWord((u32)&effSolidRectangleSetupRecord);
+    if ((u8)evtViewerDirty != 0) {
+        effReturnEventSetupWord((u32)&filterDebugMenu);
         effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&effSolidRectangleSetupRecord);
+        effEventSetupRecordNoOp(&filterDebugMenu);
         effEventSetupAfterRecordNoOp();
     }
     if (D_0040B7DB[0] < 0) {
-        effSolidRectangleSetupReady = 0;
+        evtViewerDirty = 0;
     }
-    return effSolidRectangleSetupReady;
+    return evtViewerDirty;
 }
 
 /* Expose the solid-rectangle setup parameters by address. */
@@ -1015,24 +1015,24 @@ void effEventSetSolidRectangleParameters(EffSolidRectParams *parameters) {
     D_003B28B8 = *parameters;
 }
 
-extern EffEventSetupRecord effResourceRectangleSetupRecord;
+extern EffEventSetupRecord mfilterDebugMenu;
 extern s8 D_0043651C;
 
 /* Prepare resource-template setup from its explicit body, then process the channel. */
 s8 mfilterRun(void) {
     if (D_0043651C == 0) {
-        if (effResourceRectangleSetupRecord.callback != 0) {
-            *effResourceRectangleSetupRecord.callbackResult = effResourceRectangleSetupRecord.callback(&effResourceRectangleSetupParameters);
+        if (mfilterDebugMenu.callback != 0) {
+            *mfilterDebugMenu.callbackResult = mfilterDebugMenu.callback(&effResourceRectangleSetupParameters);
         }
-        if (effResourceRectangleSetupRecord.destination != 0 && effResourceRectangleSetupRecord.source != 0) {
-            memcpy(effResourceRectangleSetupRecord.destination, effResourceRectangleSetupRecord.source, effResourceRectangleSetupRecord.copyBytes);
+        if (mfilterDebugMenu.destination != 0 && mfilterDebugMenu.source != 0) {
+            memcpy(mfilterDebugMenu.destination, mfilterDebugMenu.source, mfilterDebugMenu.copyBytes);
         }
         D_0043651C = 1;
     }
     if ((u8)D_0043651C != 0) {
-        effReturnEventSetupWord((u32)&effResourceRectangleSetupRecord);
+        effReturnEventSetupWord((u32)&mfilterDebugMenu);
         effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&effResourceRectangleSetupRecord);
+        effEventSetupRecordNoOp(&mfilterDebugMenu);
         effEventSetupAfterRecordNoOp();
     }
     if (D_0040B7DB[0] < 0) {
@@ -1051,30 +1051,30 @@ void mfilterSetParam(EffResourceRectParams *parameters) {
     effResourceRectangleSetupParameters = *parameters;
 }
 
-extern EffEventSetupRecord effStaggeredBlurSetupRecord;
-extern s8 effStaggeredBlurSetupReady;
+extern EffEventSetupRecord rblurDebugMenu;
+extern s8 rblurDone;
 
 /* Prepare scale-blur setup from its explicit parameters, then process the channel. */
 s8 rblurProcess(void) {
-    if (effStaggeredBlurSetupReady == 0) {
-        if (effStaggeredBlurSetupRecord.callback != 0) {
-            *effStaggeredBlurSetupRecord.callbackResult = effStaggeredBlurSetupRecord.callback(&effStaggeredBlurSetupParameters);
+    if (rblurDone == 0) {
+        if (rblurDebugMenu.callback != 0) {
+            *rblurDebugMenu.callbackResult = rblurDebugMenu.callback(&effStaggeredBlurSetupParameters);
         }
-        if (effStaggeredBlurSetupRecord.destination != 0 && effStaggeredBlurSetupRecord.source != 0) {
-            memcpy(effStaggeredBlurSetupRecord.destination, effStaggeredBlurSetupRecord.source, effStaggeredBlurSetupRecord.copyBytes);
+        if (rblurDebugMenu.destination != 0 && rblurDebugMenu.source != 0) {
+            memcpy(rblurDebugMenu.destination, rblurDebugMenu.source, rblurDebugMenu.copyBytes);
         }
-        effStaggeredBlurSetupReady = 1;
+        rblurDone = 1;
     }
-    if ((u8)effStaggeredBlurSetupReady != 0) {
-        effReturnEventSetupWord((u32)&effStaggeredBlurSetupRecord);
+    if ((u8)rblurDone != 0) {
+        effReturnEventSetupWord((u32)&rblurDebugMenu);
         effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&effStaggeredBlurSetupRecord);
+        effEventSetupRecordNoOp(&rblurDebugMenu);
         effEventSetupAfterRecordNoOp();
     }
     if (D_0040B7DB[0] < 0) {
-        effStaggeredBlurSetupReady = 0;
+        rblurDone = 0;
     }
-    return effStaggeredBlurSetupReady;
+    return rblurDone;
 }
 
 /* Expose the scale-blur setup parameters by address. */
@@ -1300,7 +1300,7 @@ void effSimpleBEDSetRGBA(EffEventLight *work, u32 color) {
 extern f32 D_003B2CD0[];
 extern f32 D_003B2CE8[];
 extern u8 sdfViewTargetVector[];
-extern u8 sdfViewUpVector[];
+extern u8 aViewDown[];
 
 /* vu0 routine: leave the selected aim point in vf10, not a C return value.
  * Preserve the non-camera output scratch w, which is not initialized here. */
@@ -1343,7 +1343,7 @@ void effEveBEDPartGetPositionPtr(EffEventInit *source, EffectVectorRequest *para
         dir[2] = half < radius ? -radius : -half;
         dir[0] = dir[1] = 0.0f;
         pos[1] = y;
-        LookAtMatrix(pos, sdfViewTargetVector, sdfViewUpVector);
+        LookAtMatrix(pos, sdfViewTargetVector, aViewDown);
         ReverseMatrix();
         VU0_LOAD_VF(vf10, dir);
         VU0_CLEAR_W(vf10);
@@ -1476,7 +1476,7 @@ void effEVECombParSmokePartInit(EffEventBillSet *work, s32 index) {
     particle->lateralSpeed = work->head.lateralSpeed * (dds3GetRandFloatA(effDefaultRandomState) * work->head.lateralSpeedRandomness + (1.0f - work->head.lateralSpeedRandomness));
 }
 
-extern f32 sdfViewEyeVector[4];
+extern f32 aViewTarget[4];
 extern void dds3BillboardDraw(BillObj *obj);
 
 /* vu0 routine: camera-right normalization and position addition use the
@@ -1490,10 +1490,10 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
     u32 color;
     f32 acceleration, swayPhaseStep, swayAmplitudeStep;
 
-    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, sdfViewUpVector);
+    VU0_LOAD_VF(vf11, aViewDown);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, lateral);
@@ -1635,10 +1635,10 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     geometryPacket = (u8 *)sdfGrAllocPacketBuff(0x38);
     sdfBillBoardMakeTMPacket(geometryPacket, matrix[0]);
     sdfDrawTagLink(secondaryList, (u32)geometryPacket);
-    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, sdfViewUpVector);
+    VU0_LOAD_VF(vf11, aViewDown);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, lateral);
@@ -1848,7 +1848,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     statePacket[6] = 0x42;
     statePacket[7] = 0x42;
     sdfDrawTagLink(stateList, (u32)statePacket);
-    surface = &kwlnDrawSurfaces[60];
+    surface = &sdfGrOtTable[60];
     surface->append(surface, stateList);
     (surface - 1)->append(surface - 1, primaryList);
     surface->append(surface, secondaryList);
@@ -1935,19 +1935,19 @@ INCLUDE_SDATA(const s32, "effect/effEvent", D_00436458);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_0043645C);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", effRectangleBlurEnabled);
+INCLUDE_SDATA(const s32, "effect/effEvent", Eve_BlurShow);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", effTexturedBlurEnabled);
+INCLUDE_SDATA(const s32, "effect/effEvent", Eve_PartialMultiBlurShow);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", effFilterBlurEnabled);
+INCLUDE_SDATA(const s32, "effect/effEvent", Eve_DistortionBlurShow);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_00436463);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", effColorRectangleEnabled);
+INCLUDE_SDATA(const s32, "effect/effEvent", Eve_FilterShow);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", effTexturedSquareEnabled);
+INCLUDE_SDATA(const s32, "effect/effEvent", Eve_PartialMultiFilterShow);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", effStaggeredBlurEnabled);
+INCLUDE_SDATA(const s32, "effect/effEvent", Eve_RippleBlurShow);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_00436468);
 

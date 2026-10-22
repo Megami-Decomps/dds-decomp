@@ -70,7 +70,7 @@ typedef char EffInstance_billboard_offset_check[
 typedef char EffInstance_renderState_offset_check[
     ((u32)&((EffInstance *)0)->renderState == 0x84) ? 1 : -1];
 
-extern BillObj *effBillResourceOwners[];
+extern BillObj *hGeneralBillboard[];
 
 #include "sdf_packet_alloc.h"
 
@@ -97,7 +97,7 @@ void dds3Particle_SphereRingAllBuffInit(EffTemplatePacketList *effect);
  * resource stores the reference count; the BillObj payload is not an emitter. */
 BillObj *effCreateBillboardSharingIndexedResource(s32 index) {
     BillObj *effect = dds3BillboardCreate(D_003AA884[index].billboardKind, 0);
-    BillChildPayload *resource = effBillResourceOwners[index]->child;
+    BillChildPayload *resource = hGeneralBillboard[index]->child;
     s32 references = resource->refCount;
 
     effect->child = resource;
@@ -110,7 +110,7 @@ u32 dds3BillboardGeneralNumber(void) {
 }
 
 SdfTex *dds3BillboardGetGeneralTex(s32 index) {
-    return effBillResourceOwners[index]->child->texture;
+    return hGeneralBillboard[index]->child->texture;
 }
 
 void effCopyVector(void *dst, const void *src) {
@@ -379,7 +379,7 @@ f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
     return sdfAtan2(projectedDelta[1], projectedDelta[0]);
 }
 
-extern u8 sdfViewEyeVector[];
+extern u8 aViewTarget[];
 extern u8 sdfViewTargetVector[];
 
 /* vu0 routine: 1 - |dot(normalised eye - target, direction)|, how far the direction is from the view axis */
@@ -387,7 +387,7 @@ f32 dds3BillboardGetDirectionScale(void *unused, f32 *direction) {
     f32 dot;
     f32 alignment;
 
-    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
@@ -1705,9 +1705,9 @@ void dds3Particle_RadiateDelete(EffLookAtRingEmitter *effect) {
     sdfChipFreeDirect(effect);
 }
 
-extern u8 sdfViewEyeVector[];
+extern u8 aViewTarget[];
 extern u8 sdfViewTargetVector[];
-extern u8 sdfViewUpVector[];
+extern u8 aViewDown[];
 
 /* Seed a view-oriented ring packet and initialize its subeffect. */
 void dds3Particle_RadiateBuffInit(EffLookAtRingEmitter *effect, u32 packetIndex) {
@@ -1718,7 +1718,7 @@ void dds3Particle_RadiateBuffInit(EffLookAtRingEmitter *effect, u32 packetIndex)
     f32 jitter;
 
     packet += packetIndex;
-    LookAtMatrix(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
+    LookAtMatrix(aViewTarget, sdfViewTargetVector, aViewDown);
     ReverseMatrix();
     if (effect->mode == 0) {
         PCP_COPY_VECTOR(packet, effect->head.origin);
@@ -1775,7 +1775,7 @@ void dds3Particle_RadiateDraw(EffLookAtRingEmitter *effect) {
     s32 packetIndex;
 
     dds3Particle_EffectInit(&effect->head.sub);
-    LookAtMatrix(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
+    LookAtMatrix(aViewTarget, sdfViewTargetVector, aViewDown);
     ReverseMatrix();
     lifetimeFrames = effect->head.lifetimeFrames;
     phaseStep = effect->f160 * (3.14159265f / 180.0f);

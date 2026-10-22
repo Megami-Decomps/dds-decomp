@@ -119,7 +119,7 @@ extern s8 D_00419C58[];
 
 extern s32 btlWouldUiValueFallBelowQuarter(BtlUnit *, s32);
 
-extern u8 sdfPfsDebugMode;
+extern u8 sdfHddValid;
 
 extern s32 btlAnyUnitHasActionInSlots(s32 mask, s32 action);
 
@@ -457,7 +457,7 @@ u32 btlPickWeightedAiSlot(s32 unusedUnit, s32 speciesId, s32 rowIndex) {
         }
     }
     btlDebugPrintf("AI_BUGBUGBUGBUGBUG           \n");
-    if (sdfPfsDebugMode == 0) {
+    if (sdfHddValid == 0) {
         btlBossDebugPrintf(D_00419A88);
     }
     return 0;
@@ -606,7 +606,7 @@ s32 btlIsModelGateActiveForEligibleUnit(BtlUnit *unit) {
         return 0;
     }
     if (unit->status.flags & 0x200) {
-        if (datGameState->header.currency < 2) {
+        if (DDS3_GBWK->header.currency < 2) {
             return 0;
         }
     }
@@ -659,7 +659,7 @@ s32 btlHasActorOrSlotMatchingActionQuery(s32 unused, u32 query) {
             }
         }
     }
-    record = datGameState->party;
+    record = DDS3_GBWK->party;
     for (i = 0; i < 5; i++, record++) {
         if (record->flags & 1) {
             if (!(record->flags & 2)) {
@@ -1279,12 +1279,12 @@ s32 btlCanQueryElementAgainstEnemies(s32 unused, s32 action) {
 
 s32 btlCheckActorEligibilityWithDebug(s32 actor) {
     if (btlWouldUiValueFallBelowQuarter((BtlUnit *)actor, 0) != 0) {
-        if (sdfPfsDebugMode == 0) {
+        if (sdfHddValid == 0) {
             btlBossDebugPrintf(D_00419C30);
         }
         return 1;
     }
-    if (sdfPfsDebugMode == 0) {
+    if (sdfHddValid == 0) {
         btlBossDebugPrintf(D_00419C58);
     }
     return 0;

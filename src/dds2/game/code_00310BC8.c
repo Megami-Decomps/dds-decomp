@@ -17,7 +17,7 @@
 #include "kwln_task_lifecycle.h"
 #include "fr_font.h"
 
-extern s8 kwlnTaskPadButtonStates[];
+extern s8 dds3PadButtonState[];
 
 
 
@@ -430,7 +430,7 @@ u32 frFontQueueTintedGlyphChainAndMeasure(s32 x, s32 y, s32 depth, u32 colors, u
 #include "sdf_packet_alloc.h"
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 extern s32 sdf2DGetPrimPtr(s32);
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 
 /* Submit count XY pairs as a colored GS triangle fan to surfaceIndex.
  * useFirstColor bit 0 selects colors[0] instead of a color per vertex. */
@@ -470,7 +470,7 @@ void sdfDrawColoredTriangleFan(s32 *points, u32 tail, u32 *colors, s32 count,
         vertex += 2;
     }
     sdfDrawTagLink(list, (u32)packet);
-    surface = &kwlnDrawSurfaces[surfaceIndex];
+    surface = &sdfGrOtTable[surfaceIndex];
     surface->append(surface, list);
 }
 
@@ -669,40 +669,40 @@ SdfListNode *sdfFindTaskListNodeByKey(SdfList *list, s32 key) {
 u32 sdfReadPadDirectionMask(void) {
     u32 flags = 0;
 
-    if (kwlnTaskPadButtonStates[0x26] < 0) {
+    if (dds3PadButtonState[0x26] < 0) {
         flags |= 1;
     }
-    if (kwlnTaskPadButtonStates[0x26] & 2) {
+    if (dds3PadButtonState[0x26] & 2) {
         flags |= 1;
     }
-    if (kwlnTaskPadButtonStates[0x26]) {
+    if (dds3PadButtonState[0x26]) {
         flags |= 2;
     }
-    if (kwlnTaskPadButtonStates[0x27] < 0) {
+    if (dds3PadButtonState[0x27] < 0) {
         flags |= 4;
     }
-    if (kwlnTaskPadButtonStates[0x27] & 2) {
+    if (dds3PadButtonState[0x27] & 2) {
         flags |= 4;
     }
-    if (kwlnTaskPadButtonStates[0x27]) {
+    if (dds3PadButtonState[0x27]) {
         flags |= 8;
     }
-    if (kwlnTaskPadButtonStates[0x24] < 0) {
+    if (dds3PadButtonState[0x24] < 0) {
         flags |= 0x10;
     }
-    if (kwlnTaskPadButtonStates[0x24] & 2) {
+    if (dds3PadButtonState[0x24] & 2) {
         flags |= 0x10;
     }
-    if (kwlnTaskPadButtonStates[0x24]) {
+    if (dds3PadButtonState[0x24]) {
         flags |= 0x20;
     }
-    if (kwlnTaskPadButtonStates[0x25] < 0) {
+    if (dds3PadButtonState[0x25] < 0) {
         flags |= 0x40;
     }
-    if (kwlnTaskPadButtonStates[0x25] & 2) {
+    if (dds3PadButtonState[0x25] & 2) {
         flags |= 0x40;
     }
-    if (kwlnTaskPadButtonStates[0x25]) {
+    if (dds3PadButtonState[0x25]) {
         flags |= 0x80;
     }
     return flags;

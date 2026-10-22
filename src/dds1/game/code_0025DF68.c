@@ -185,7 +185,7 @@ void mnuDrawShopItemQuantity(s32 x, s32 y, s32 depth, ShopScene *scene, s32 alph
     list = scene->window->list;
     if (list->count != 0) {
         CampWindowParams *item = &list->cursor->camp;
-        s32 quantity = datGameState->inventory.counts[item->id];
+        s32 quantity = DDS3_GBWK->inventory.counts[item->id];
         u32 style = (s32)((f32)(alpha << 7) * 0.00390625f) | 0xA09DC300;
         FrFontGlyph *glyph;
 
@@ -563,22 +563,22 @@ void mnuDrawShopSelectedRowTotal(s32 x, s32 y, s32 depth, ShopScene *panel, s32 
 void mnuDrawShopCurrencyBalance(ShopScene *state, s32 style) {
     char text[16];
 
-    if (datGameState->header.currency != state->previousValue) {
+    if (DDS3_GBWK->header.currency != state->previousValue) {
         s32 transitionFrames = 20;
         s32 displayedValue;
 
         p2sdPlaySE(19, 127, 63);
         state->elapsedFrames++;
         displayedValue = state->previousValue +
-                         ((datGameState->header.currency - state->previousValue) * state->elapsedFrames) /
+                         ((DDS3_GBWK->header.currency - state->previousValue) * state->elapsedFrames) /
                              transitionFrames;
         sprintf(text, D_003BC508, displayedValue);
         if (state->elapsedFrames == transitionFrames) {
-            state->previousValue = datGameState->header.currency;
+            state->previousValue = DDS3_GBWK->header.currency;
             state->elapsedFrames = 0;
         }
     } else {
-        sprintf(text, D_003BC508, datGameState->header.currency);
+        sprintf(text, D_003BC508, DDS3_GBWK->header.currency);
     }
 
     {

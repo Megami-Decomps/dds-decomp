@@ -61,7 +61,7 @@ s32 scrCmdSetEntryFlagsInBothStores(void) {
     s32 result = 0;
 
     if (index >= 0) {
-        DatPartyRecord *entry = &datGameState->party[index];
+        DatPartyRecord *entry = &DDS3_GBWK->party[index];
 
         scrSetFlag(entry, flagId);
         scrClearAllSecondaryScriptFlags(entry);

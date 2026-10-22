@@ -890,7 +890,7 @@ void mnuEnterCampSceneMenuState(EvtRuntime *scene) {
     }
 }
 
-extern SdfTex *kwlnHeldTextureReference;
+extern SdfTex *dds3RenderTexture;
 extern s32 dds3AllocRenderTexture(u16 width, u16 height, f32 value);
 extern void mnuShopCreateDescriptorSurface(EvtRuntime *scene);
 extern void mnuShopSubmitDescriptor(EvtRuntime *scene);
@@ -901,7 +901,7 @@ extern void mnuShopQueueAuxiliaryTexture(EvtRuntime *scene);
 void mnuAdvanceShopMenuState(EvtRuntime *scene) {
     switch (scene->menuState) {
     case 1:
-        if (kwlnHeldTextureReference == 0) {
+        if (dds3RenderTexture == 0) {
             dds3AllocRenderTexture(CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT, 100.75f);
         }
         scene->menuState = scene->menuState + 1;
@@ -953,7 +953,7 @@ void mnuShopSubmitDescriptor(EvtRuntime *scene) {
     if (scene->pendingWork != 0) {
         drawPacket = sdfPrimAllocDrawTag(0);
         sdfLinkLoadImage(drawPacket,
-                                  kwlnHeldTextureReference->primaryResource, 0, 0,
+                                  dds3RenderTexture->primaryResource, 0, 0,
                                   CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT,
                                   scene->pendingWork, 0);
         D_00325708.append(&D_00325708, drawPacket);
@@ -969,7 +969,7 @@ void mnuShopQueueAuxiliaryTexturePacket(s32 alpha) {
     SdfPacket *packet;
     u32 color;
 
-    if (kwlnHeldTextureReference == NULL) {
+    if (dds3RenderTexture == NULL) {
         return;
     }
     if (alpha == 0) {
@@ -1004,7 +1004,7 @@ void mnuShopQueueAuxiliaryTexturePacket(s32 alpha) {
     packet[1].unk18 = 0x42;
     sdfDrawTagLink(list, (u32)packet);
     itfMiscDrawSpritePrim(D_00368C10, D_00368C20, D_00368C30,
-                                  0xFEFF9B, kwlnHeldTextureReference, 0, list);
+                                  0xFEFF9B, dds3RenderTexture, 0, list);
     D_003255A8.append(&D_003255A8, list);
 }
 
@@ -1060,8 +1060,8 @@ void mnuValidateCampTimelineScriptRegisters(EvtRuntime *scene) {
                 key = key->next;
             }
             if (!found) {
-                if (datGameState->script.ints[CAMP_TIMELINE_SCRIPT_REGISTER_BASE + slotIndex] != -1) {
-                    datGameState->script.ints[CAMP_TIMELINE_SCRIPT_REGISTER_BASE + slotIndex] = -1;
+                if (DDS3_GBWK->script.ints[CAMP_TIMELINE_SCRIPT_REGISTER_BASE + slotIndex] != -1) {
+                    DDS3_GBWK->script.ints[CAMP_TIMELINE_SCRIPT_REGISTER_BASE + slotIndex] = -1;
                 }
             }
         }
@@ -1194,7 +1194,7 @@ void mnuReleaseShopSceneSpriteResources(ShopScene *scene) {
 
 
 s32 mnuShopHasPendingFlag(ShopScene *unused) {
-    u8 *flags = datGameState->inventory.counts;
+    u8 *flags = DDS3_GBWK->inventory.counts;
     DatItemSkillRecord *entry = datItemSkillRecords;
     s32 found = 0;
     s32 i;
@@ -1378,7 +1378,7 @@ s32 mnuCampGetShopPriceStage(void) {
     u32 stage = mnuCampGetProgressStage();
 
     if (stage < 5) {
-        if (datGameState->world.score >= mnuShopProgressPriceScales[stage].threshold) {
+        if (DDS3_GBWK->world.score >= mnuShopProgressPriceScales[stage].threshold) {
             stage++;
         } else {
             stage = 0;
@@ -1398,7 +1398,7 @@ s32 mnuCountActivePartyEntries(void) {
 
     enabledCount = 0;
     entryCountdown = CAMP_PARTY_SCAN_LAST;
-    entryCursor = datGameState->party;
+    entryCursor = DDS3_GBWK->party;
     do {
         entryFlags = entryCursor->flags;
         entryCursor++;
@@ -1594,7 +1594,7 @@ s32 mnuShopGetTransactionLimit(ShopScene *scene) {
     switch (operation) {
     case 1:
     case 2: {
-        DatGameState *globalState = datGameState;
+        DatGameState *globalState = DDS3_GBWK;
 
         affordable = globalState->header.currency / price;
         limit = affordable;
@@ -1614,7 +1614,7 @@ s32 mnuShopGetTransactionLimit(ShopScene *scene) {
         break;
     }
     case 3: {
-        s32 quantity = datGameState->inventory.counts[itemId];
+        s32 quantity = DDS3_GBWK->inventory.counts[itemId];
 
         if (quantity * price > 9999999) {
             limit = (s32)(9999999.0f / (f32)price);
@@ -1628,7 +1628,7 @@ s32 mnuShopGetTransactionLimit(ShopScene *scene) {
 }
 
 s32 mnuCampGetAffordablePurchaseCount(ShopScene *context) {
-    DatGameState *globalState = datGameState;
+    DatGameState *globalState = DDS3_GBWK;
     MenuWindowContainer *itemObject = context->window;
     struct MenuList *record = itemObject->list;
     CampWindowParams *parameters = &record->cursor->camp;
@@ -1667,7 +1667,7 @@ void mnuCampDisableUnavailableItemEntries(ShopScene *scene) {
     struct MenuListNode *node = scene->window->list->first;
     for (; index < scene->window->list->count; index++) {
         CampWindowParams *parameters = &node->camp;
-        DatGameState *globalState = datGameState;
+        DatGameState *globalState = DDS3_GBWK;
         s32 itemId = parameters->id;
         s32 divisor = parameters->price;
         s32 kind = parameters->mode;
@@ -1998,7 +1998,7 @@ s32 mnuBuildCampItemList(ShopScene *scene) {
     scene->window = mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x15);
     for (i = 0; i < 0xC0; i++) {
         scene->atLimit = 1;
-        if ((u32)(i - 0xA0) >= 0x20 && datGameState->inventory.counts[i] != 0) {
+        if ((u32)(i - 0xA0) >= 0x20 && DDS3_GBWK->inventory.counts[i] != 0) {
             if ((datItemSkillRecords[i].flags & 3) != 0) {
                 parameters = &mnuAppendWindowListNode(scene->window, D_003BAA84[i])->camp;
                 value = (u32)datItemSkillRecords[i].price >> 1;
@@ -2149,7 +2149,7 @@ s32 evtInitializeActiveMenuState(KwlnTask *task) {
     }
     windowData = ((ShopScene *)stateAddress)->ownedWindows[0]->list->context;
     pendingSelection = mnuShopHasPendingFlag((ShopScene *)stateAddress);
-    ((ShopScene *)stateAddress)->previousValue = datGameState->header.currency;
+    ((ShopScene *)stateAddress)->previousValue = DDS3_GBWK->header.currency;
     windowData->pendingSelection = pendingSelection;
     ((ShopScene *)stateAddress)->pendingSelection = pendingSelection;
     return 1;
@@ -2790,10 +2790,10 @@ s32 mnuShopBeginTransactionMessage(KwlnTask *task) {
         operation = options[scene->ownedWindows[0]->list->cursor->index];
     }
     message = 7;
-    scene->previousValue = datGameState->header.currency;
+    scene->previousValue = DDS3_GBWK->header.currency;
     scene->elapsedFrames = 0;
     if (operation == 3) {
-        message = (u32)(values->value * scene->counter + datGameState->header.currency) > 9999999 ? 0xC : 7;
+        message = (u32)(values->value * scene->counter + DDS3_GBWK->header.currency) > 9999999 ? 0xC : 7;
     }
     sprintf(text, D_003BC3B8, values->value * scene->counter);
     evtCopyEntryStringToActiveWindow(3, text);
@@ -2823,7 +2823,7 @@ s32 mnuPruneSoldOutShopSelection(KwlnTask *task) {
     }
     itemId = values->id;
     if (operation == 3) {
-        if (datGameState->inventory.counts[itemId] == 0) {
+        if (DDS3_GBWK->inventory.counts[itemId] == 0) {
             mnuRemoveListCursorNode(scene->window->list);
         }
         if (scene->window->list->count == 0) {
@@ -2840,7 +2840,7 @@ void evtAccumulateStateScore(s32 stateAddress) {
     CampWindowParams *values = &((ShopScene *)stateAddress)->window->list->cursor->camp;
 
     if ((u32)(values->id - 0x60) < 0x20) {
-        datGameState->world.score += values->value * ((ShopScene *)stateAddress)->counter;
+        DDS3_GBWK->world.score += values->value * ((ShopScene *)stateAddress)->counter;
     }
 }
 
@@ -2875,12 +2875,12 @@ s32 mnuApplyShopSelectionTransaction(KwlnTask *task) {
             if (values->mode == 1) {
                 mnuShopCommitMode1PurchaseNoOp((u32)itemId & 0xFFFF);
             } else {
-                datGameState->inventory.counts[itemId] += scene->counter;
+                DDS3_GBWK->inventory.counts[itemId] += scene->counter;
             }
             break;
         case 3:
             datAddCurrencyClamped(values->value * scene->counter);
-            datGameState->inventory.counts[itemId] -= scene->counter;
+            DDS3_GBWK->inventory.counts[itemId] -= scene->counter;
             if (itemId == 0x6C) {
                 evtBitOn(0x97F);
             }

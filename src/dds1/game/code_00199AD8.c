@@ -31,8 +31,8 @@
 #define ITF_PANEL_TINT_BORDER_WIDTH 0x240
 
 
-extern PanelEntry itfWindowSlots[];
-extern void (*itfPanelHandlers[])(UiSprite *, SdfListHead *);
+extern PanelEntry pinst[];
+extern void (*DrawTable[])(UiSprite *, SdfListHead *);
 extern u32 scrGetMessageHandle(void);
 extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
 extern void itfMesMngRequestSelectRelease(s32 window);
@@ -69,7 +69,7 @@ extern PanelHold itfHeldPanelCursor;
 
 /* Invoke the indexed panel handler; panel and kind are trusted. */
 void itfPnlDrawTag(UiSprite *panel, SdfListHead *list) {
-    itfPanelHandlers[panel->kind](panel, list);
+    DrawTable[panel->kind](panel, list);
 }
 
 /* Emit top/bottom vertices for four columns; collapse overlapping inner columns to the midpoint.
@@ -608,7 +608,7 @@ s32 itfMesMngMessage(void) {
     if (window < 0) {
         return 1;
     }
-    record = itfWindowSlots[window].ptr;
+    record = pinst[window].ptr;
     entryIndex = scrGetIntPara(0);
     entryState = &record->sub24;
     status = entryState->status;
@@ -625,17 +625,17 @@ s32 itfMesMngMessage(void) {
 
 /* Forward this record's layout sprite address and the supplied value; index is unchecked. */
 void itfMesMngSetOffsetY1(s32 windowIndex, s32 topDelta) {
-    itfPnlSetPositionOffset(itfWindowSlots[windowIndex].ptr->layoutSprite, 0, topDelta, 0, 0, 0);
+    itfPnlSetPositionOffset(pinst[windowIndex].ptr->layoutSprite, 0, topDelta, 0, 0, 0);
 }
 
 /* Return the signed byte entry status; this is separate from the option-block s16 status. */
 s8 itfMesMngGetPhase(s32 windowIndex) {
-    return itfWindowSlots[windowIndex].ptr->sub24.status;
+    return pinst[windowIndex].ptr->sub24.status;
 }
 
 /* Store the signed byte entry status; index and payload pointer are trusted. */
 void itfMesMngSetPhase(s32 windowIndex, s8 status) {
-    itfWindowSlots[windowIndex].ptr->sub24.status = status;
+    pinst[windowIndex].ptr->sub24.status = status;
 }
 
 /* Capture the script window, reset its held queue, and switch to page three.
@@ -744,7 +744,7 @@ s32 itfMesMngSelect(void) {
     if (window < 0) {
         return 1;
     }
-    record = itfWindowSlots[window].ptr;
+    record = pinst[window].ptr;
     entry = scrGetIntPara(0);
     options = &record->options;
     if (options->status == 0) {
@@ -791,7 +791,7 @@ s32 itfCommandSelectOptionWithFade(void) {
     if (elapsedTicks == ITF_PANEL_MESSAGE_FADE_TICKS) {
         itfMesMngChangeWindowType(window, 3, 0);
     } else if (D_003BD820 == -1) {
-        record = itfWindowSlots[window].ptr;
+        record = pinst[window].ptr;
         entryIndex = scrGetIntPara(0);
         options = &record->options;
         if (options->status == 0) {
@@ -811,18 +811,18 @@ s32 itfCommandSelectOptionWithFade(void) {
 /* Return the option-block signed status word, not the separate entry status byte;
  * its callers read the sign-extended halfword as a word. */
 s32 itfMesMngGetSelPhase(s32 windowIndex) {
-    return itfWindowSlots[windowIndex].ptr->options.status;
+    return pinst[windowIndex].ptr->options.status;
 }
 
 /* Store the option-block signed status word without validating the slot. */
 void itfMesMngSetSelPhase(s32 windowIndex, s16 status) {
-    itfWindowSlots[windowIndex].ptr->options.status = status;
+    pinst[windowIndex].ptr->options.status = status;
 }
 
 /* Return the same signed word forwarded as the script result when an option completes;
  * its callers read the sign-extended halfword as a word. */
 s32 itfMesMngGetSelectNo(s32 windowIndex) {
-    return itfWindowSlots[windowIndex].ptr->options.clearBitCount;
+    return pinst[windowIndex].ptr->options.clearBitCount;
 }
 
 INCLUDE_SDATA(const s32, "game/code_00199AD8", D_003BB1A8);

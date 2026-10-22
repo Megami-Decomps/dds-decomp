@@ -1281,7 +1281,7 @@ void btlPromoteSeraForSmallParty(void) {
     hasKindTwo = 0;
     markedCount = 0;
     activeCount = 0;
-    entry = datGameState->party;
+    entry = DDS3_GBWK->party;
     index = 0;
     do {
         flags = entry->flags;
@@ -1929,7 +1929,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         commandFlags = battle->commandRestrictFlags;
         commandFlags = commandFlags | 0x18200;
         battle->commandRestrictFlags = commandFlags | 0x800000;
-        sdfSceneProjectionParameters.camera.farZ = 200000.0f;
+        dds3ScreenParam.camera.farZ = 200000.0f;
         effBTLFieldColorSetFlags(2);
         BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlResetActionScale);
         BTL_INSTALL_CALLBACK(battle->pad610, 0x0, btlRestoreLinkedActorSceneColor);

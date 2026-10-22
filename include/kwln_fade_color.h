@@ -13,6 +13,6 @@ typedef struct {
     u8 a;
 } KwlnFadeColor;
 
-extern KwlnFadeColor kwlnFadeColor;
+extern KwlnFadeColor fadergba;
 
 #endif /* KWLN_FADE_COLOR_H */

@@ -375,13 +375,13 @@ s32 mnuStaffUseSelectedItemTask(KwlnTask *task) {
     }
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {
         buttons = mnuUseStaffItem(item, context) ? 0 : 0x8000;
-        menu->windows[0]->list->cursor->sortKeyPrimary = datGameState->inventory.counts[item];
+        menu->windows[0]->list->cursor->sortKeyPrimary = DDS3_GBWK->inventory.counts[item];
         if (mnuIsStaffWindowReadyForItem(item & 0xFFFF, context) == 0) {
             mnuSetPopupEntryFlagged(popup, mnuCampItemCategoryPopupEntry);
             mnuClearActionFlags(0, party);
             mnuBeginWindowFadeTransition(0, &context->fade);
         } else {
-            itemExhausted = datGameState->inventory.counts[item] == 0;
+            itemExhausted = DDS3_GBWK->inventory.counts[item] == 0;
         }
     }
     if ((buttons & MNU_STAFF_INPUT_CANCEL) || itemExhausted) {
@@ -555,7 +555,7 @@ s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
     s32 state;
     s32 input;
     DatPartyRecord *party =
-        &datGameState->party[context->partyWindow.lists[0]->cursor->index];
+        &DDS3_GBWK->party[context->partyWindow.lists[0]->cursor->index];
     MenuWindowContainer *countWindow;
 
     state = mnuDispatchPopupTransition(&context->transitionWork, popup, 0, task);
@@ -594,7 +594,7 @@ s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
                     /* Snapshot input before publishing the remaining item count. */
                     input = buttons;
                     countWindow->list->cursor->sortKeyPrimary =
-                        datGameState->inventory.counts[itemId];
+                        DDS3_GBWK->inventory.counts[itemId];
                     menu->firstListState = 1;
                 } else {
                     buttons = 0;
@@ -639,7 +639,7 @@ s32 mnuDrawStaffPartyValuePage(KwlnTask *task) {
     s32 context = dds3GetProcessData(task);
     MenuStaffChoices *menu = ((MenuStaffContext *)context)->menu;
     s32 index = ((MenuStaffContext *)context)->partyWindow.lists[0]->cursor->index;
-    DatPartyRecord *partyEntry = &datGameState->party[index];
+    DatPartyRecord *partyEntry = &DDS3_GBWK->party[index];
     MenuWindowContainer *window;
     MenuList *list;
 
@@ -825,7 +825,7 @@ s32 mnuHandleStaffSelectionPageInput(KwlnTask *task) {
     s32 eligible;
     s32 selectionId;
 
-    party = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
+    party = &DDS3_GBWK->party[context->partyWindow.lists[0]->cursor->index];
     result = menuSetHandler(context, 0, task);
     if (result != 0) {
         return result;
@@ -872,7 +872,7 @@ s32 mnuHandleStaffSelectionPageInput(KwlnTask *task) {
                     if (eligible != 0) {
                         mnuStaffEntrySwapLabels(context, party, selectionId);
                         mnuSetPartyEntryCurrentId(party, (u32)selectionId);
-                        menu->windows[3]->list->cursor->sortKeyPrimary = datGameState->inventory.counts[selectionId];
+                        menu->windows[3]->list->cursor->sortKeyPrimary = DDS3_GBWK->inventory.counts[selectionId];
                         mnuInitPartyPanelSlots(&context->partyPanel);
                         mnuRefreshPartyPanelBars(&context->partyWindow);
                         menu->secondListReset = 1;
@@ -932,7 +932,7 @@ void mnuDrawStaffValueGrid(s32 x, s32 y, s32 itemId, MenuStaffContext *context) 
 
         if (itemId != 0) {
             value = ptyGetCombinedRecordAndSlotValue(itemId, i);
-            bonus = datGameState->itemStatBonuses[itemId - 0xC0][i] != 0;
+            bonus = DDS3_GBWK->itemStatBonuses[itemId - 0xC0][i] != 0;
         }
         filled = value != 0;
         kind = frames[filled].index;
@@ -968,7 +968,7 @@ s32 mnuDrawStaffValuePage(KwlnTask *task) {
     MenuStaffContext *context = (MenuStaffContext *)dds3GetProcessData(task);
     const u8 *slotsCaption = (const u8 *)D_0042AD08;
     MenuStaffChoices *menu = context->menu;
-    DatPartyRecord *party = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
+    DatPartyRecord *party = &DDS3_GBWK->party[context->partyWindow.lists[0]->cursor->index];
     MenuList *list;
     s32 selectionId;
     s32 owned;
@@ -1168,7 +1168,7 @@ s32 mnuIsStaffRequirementUnmet(s32 entryId) {
     if (entryId == 0) {
         return 0;
     }
-    availableCount = datGameState->itemRequirementCounts[requirementIndex];
+    availableCount = DDS3_GBWK->itemRequirementCounts[requirementIndex];
     return availableCount < ((MenuRequirementRecord *)D_00435E3C)[requirementIndex].requiredCount;
 }
 
@@ -1186,7 +1186,7 @@ s32 mnuHandleStaffOwnedCatalogInput(KwlnTask *task) {
     s32 result;
     s32 current;
 
-    party = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
+    party = &DDS3_GBWK->party[context->partyWindow.lists[0]->cursor->index];
     result = menuSetHandler(context, 0, (void *)task);
     if (result != 0) {
         return result;

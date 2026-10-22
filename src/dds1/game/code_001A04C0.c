@@ -38,8 +38,8 @@ typedef union UiQuadColor {
 typedef char UiQuadColorSizeCheck[sizeof(UiQuadColor) == 0x10 ? 1 : -1];
 
 
-extern SdfPoolNode kwlnDrawSurfaces[];
-extern s32 itfTestOverlayPhase;
+extern SdfPoolNode sdfGrOtTable[];
+extern s32 pbDebugPanel3State;
 extern UiQuadColor itfTestOverlayColor;
 extern u64 *pbAllocPrimPacket(u32, u32, u32, u32, u32, u32, u32);
 
@@ -69,9 +69,9 @@ typedef struct ItfColorPanelWork {
 
 typedef char ItfColorPanelWorkSizeCheck[sizeof(ItfColorPanelWork) == 0x10 ? 1 : -1];
 
-extern ItfColorPanelWork itfOverlayColorEditorWork;
+extern ItfColorPanelWork pbDebugPanel3X;
 extern ItfColorPanelRow itfOverlayColorEditorRows[6];
-extern SndPad kwlnTaskPadButtonStates;
+extern SndPad dds3PadButtonState;
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 itfTestOverlayPhaseStep;
 extern u8 D_003BB2B4;
@@ -99,10 +99,10 @@ s32 pbDebugPrintPanel3(void) {
         (u32)dds3PrimFrameRect(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x8980, 0x79C0, 0xFF0000, 0);
     sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_003BB2B8));
-    if (itfOverlayColorEditorWork.editing == 0) {
-        sdfPktInit(&packet, 0x8980, itfOverlayColorEditorWork.selection * 0x60 + 0x7A20, 0xFF0000, 0);
-        itfOverlayColorEditorWork.blink++;
-        if (itfOverlayColorEditorWork.blink < 32 || (itfOverlayColorEditorWork.blink & 31) < 18) {
+    if (pbDebugPanel3X.editing == 0) {
+        sdfPktInit(&packet, 0x8980, pbDebugPanel3X.selection * 0x60 + 0x7A20, 0xFF0000, 0);
+        pbDebugPanel3X.blink++;
+        if (pbDebugPanel3X.blink < 32 || (pbDebugPanel3X.blink & 31) < 18) {
             sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_003BB2C0));
         }
     }
@@ -111,7 +111,7 @@ s32 pbDebugPrintPanel3(void) {
         sdfDrawTagLink(list,
             (u32)sdfDevPrintfEx(&packet, D_003BB2C8, itfOverlayColorEditorRows[row].title));
         highlight = 0;
-        if (itfOverlayColorEditorWork.editing != 0 && row == itfOverlayColorEditorWork.selection) {
+        if (pbDebugPanel3X.editing != 0 && row == pbDebugPanel3X.selection) {
             highlight = 6;
         }
         sdfPktInit(&packet, 0x8C80, y, 0xFF0000, highlight);
@@ -125,70 +125,70 @@ s32 pbDebugPrintPanel3(void) {
         y += 0x60;
     }
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
-    itfTestOverlayPhase += itfTestOverlayPhaseStep;
+    pbDebugPanel3State += itfTestOverlayPhaseStep;
     pbDrawRotatedPrim(0x52);
-    if ((s8)kwlnTaskPadButtonStates.secondaryTriangle < 0) {
+    if ((s8)dds3PadButtonState.secondaryTriangle < 0) {
         D_003BB2B4 ^= 1;
     }
-    if (itfOverlayColorEditorWork.editing == 0) {
-        previousSelection = itfOverlayColorEditorWork.selection;
-        if ((u8)kwlnTaskPadButtonStates.secondaryUp & 2) {
-            itfOverlayColorEditorWork.selection--;
-            if (itfOverlayColorEditorWork.selection < 0) {
-                itfOverlayColorEditorWork.selection = 3;
+    if (pbDebugPanel3X.editing == 0) {
+        previousSelection = pbDebugPanel3X.selection;
+        if ((u8)dds3PadButtonState.secondaryUp & 2) {
+            pbDebugPanel3X.selection--;
+            if (pbDebugPanel3X.selection < 0) {
+                pbDebugPanel3X.selection = 3;
             }
         }
-        if ((u8)kwlnTaskPadButtonStates.secondaryDown & 2) {
-            itfOverlayColorEditorWork.selection++;
-            if (itfOverlayColorEditorWork.selection >= 4) {
-                itfOverlayColorEditorWork.selection = 0;
+        if ((u8)dds3PadButtonState.secondaryDown & 2) {
+            pbDebugPanel3X.selection++;
+            if (pbDebugPanel3X.selection >= 4) {
+                pbDebugPanel3X.selection = 0;
             }
         }
-        if (previousSelection != itfOverlayColorEditorWork.selection) {
-            itfOverlayColorEditorWork.blink = 0;
+        if (previousSelection != pbDebugPanel3X.selection) {
+            pbDebugPanel3X.blink = 0;
         }
-        if (kwlnTaskPadButtonStates.secondaryCross < 0) {
-            itfOverlayColorEditorWork.editing ^= 1;
-            itfOverlayColorEditorWork.blink = 0;
+        if (dds3PadButtonState.secondaryCross < 0) {
+            pbDebugPanel3X.editing ^= 1;
+            pbDebugPanel3X.blink = 0;
         }
-        if ((u8)kwlnTaskPadButtonStates.secondaryCancel & 2) {
+        if ((u8)dds3PadButtonState.secondaryCancel & 2) {
             return -1;
         }
     } else {
-        if (itfOverlayColorEditorWork.selection < 4) {
-            if ((u8)kwlnTaskPadButtonStates.coarseDown & 2) {
-                itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] -= 10;
-                if (itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] < 0) {
-                    itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] = 0;
+        if (pbDebugPanel3X.selection < 4) {
+            if ((u8)dds3PadButtonState.coarseDown & 2) {
+                itfTestOverlayColor.channels[pbDebugPanel3X.selection] -= 10;
+                if (itfTestOverlayColor.channels[pbDebugPanel3X.selection] < 0) {
+                    itfTestOverlayColor.channels[pbDebugPanel3X.selection] = 0;
                 }
             }
-            if ((u8)kwlnTaskPadButtonStates.coarseUp & 2) {
-                itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] += 10;
-                if (itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] > 255) {
-                    itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] = 255;
+            if ((u8)dds3PadButtonState.coarseUp & 2) {
+                itfTestOverlayColor.channels[pbDebugPanel3X.selection] += 10;
+                if (itfTestOverlayColor.channels[pbDebugPanel3X.selection] > 255) {
+                    itfTestOverlayColor.channels[pbDebugPanel3X.selection] = 255;
                 }
             }
         } else {
             previousRate = itfTestOverlayPhaseStep;
-            if ((u8)kwlnTaskPadButtonStates.coarseDown & 2) {
+            if ((u8)dds3PadButtonState.coarseDown & 2) {
                 itfTestOverlayPhaseStep -= 0x100;
                 if (itfTestOverlayPhaseStep < 0) {
                     itfTestOverlayPhaseStep = 0;
                 }
             }
-            if ((u8)kwlnTaskPadButtonStates.coarseUp & 2) {
+            if ((u8)dds3PadButtonState.coarseUp & 2) {
                 itfTestOverlayPhaseStep += 0x100;
                 if (itfTestOverlayPhaseStep > 0x800) {
                     itfTestOverlayPhaseStep = 0x800;
                 }
             }
             if (previousRate != itfTestOverlayPhaseStep) {
-                itfTestOverlayPhase = 0;
+                pbDebugPanel3State = 0;
             }
         }
-        if (kwlnTaskPadButtonStates.secondaryCancel < 0) {
-            itfOverlayColorEditorWork.editing ^= 1;
-            itfOverlayColorEditorWork.blink = 0;
+        if (dds3PadButtonState.secondaryCancel < 0) {
+            pbDebugPanel3X.editing ^= 1;
+            pbDebugPanel3X.blink = 0;
         }
     }
     return 0;
@@ -240,7 +240,7 @@ void pbDrawRotatedPrim(s32 surfaceIndex) {
     SdfPoolNode *surface;
     f32 phase;
 
-    phase = (f32)(itfTestOverlayPhase % 4096) * (1.0f / 4096.0f);
+    phase = (f32)(pbDebugPanel3State % 4096) * (1.0f / 4096.0f);
     phase = phase * 6.2831852f + 1.5707963f + 0.78539815f;
     alpha = (s32)((sdfSin(phase) + 1.0f) * 0.5f * itfTestOverlayColor.alpha);
     component = (u8 *)&itfTestOverlayColor;
@@ -252,7 +252,7 @@ void pbDrawRotatedPrim(s32 surfaceIndex) {
     sdfDrawTagLink(list, (u32)pbMakeSpritePacket(0x33001, 0));
     sdfDrawTagLink(list, (u32)pbMakePrimPacket(6, 0));
     sdfDrawTagLink(list, (u32)pbAllocPrimPacket(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
-    surface = &kwlnDrawSurfaces[surfaceIndex];
+    surface = &sdfGrOtTable[surfaceIndex];
     surface->append(surface, list);
 }
 
@@ -379,7 +379,7 @@ void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
 
 extern s32 D_003BB2E0;
 
-extern u16 mnuMovieTaskState;
+extern u16 dds3VblanksPerFrame;
 
 typedef struct BattleInitState {
     u8 pad000[0x1F0];
@@ -459,7 +459,7 @@ void btlInitializeBattleRuntime(void) {
     ((BattleInitState *)btlRuntime)->listHeads[3] = 0;
     ((BattleInitState *)btlRuntime)->listHeads[4] = 0;
     ((BattleInitState *)btlRuntime)->listHeads[5] = 0;
-    mnuMovieTaskState = 2;
+    dds3VblanksPerFrame = 2;
     btlRuntime->timingRate = 0x1E;
     {
         BattleInitState *state = (BattleInitState *)btlRuntime;
@@ -678,7 +678,7 @@ s32 btlHasPendingRuntimeActivity(void) {
 
 void btlResetActorEntryState(void) {
     BtlState *context = btlRuntime;
-    DatPartyRecord *entries = datGameState->party;
+    DatPartyRecord *entries = DDS3_GBWK->party;
     u32 i;
     context->moneyEarned = 0;
     context->moneyTotal = 0;
@@ -715,8 +715,8 @@ u32 btlSnapshotResultRewards(BrsRewardSummary *rewards) {
     btlBossDebugPrintf(D_003A16C8, rewards->totalExp);
     btlBossDebugPrintf(D_003A16D8, rewards->totalAp);
     for (i = 0; i < 5; i++) {
-        rewards->unitApBonus[i] = datGameState->party[i].huntExp;
-        btlBossDebugPrintf(D_003A16E8, rewards->unitApBonus[i], datGameState->party[i].unitId);
+        rewards->unitApBonus[i] = DDS3_GBWK->party[i].huntExp;
+        btlBossDebugPrintf(D_003A16E8, rewards->unitApBonus[i], DDS3_GBWK->party[i].unitId);
     }
     btlBossDebugPrintf(D_003A1698);
     for (i = 0; i < 3; i++) {

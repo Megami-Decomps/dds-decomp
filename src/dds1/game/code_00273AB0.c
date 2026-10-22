@@ -286,13 +286,13 @@ s32 mnuHandleStaffItemUseInput(KwlnTask *task) {
     }
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {
         buttons = mnuUseStaffItem(itemId, (struct StaffDisplayContext *)staff) == 0 ? 0x8000 : 0;
-        menu->primaryObject->list->cursor->sortKeyPrimary = datGameState->inventory.counts[itemId];
+        menu->primaryObject->list->cursor->sortKeyPrimary = DDS3_GBWK->inventory.counts[itemId];
         if (mnuIsStaffWindowReadyForItem((u16)itemId,
                                          (struct StaffDisplayContext *)staff) == 0) {
             mnuSetPopupEntryFlagged(&staff->popupState, mnuCampItemCategoryPopupEntry);
             mnuClearListFlags(0, &staff->pageWindow);
         } else {
-            itemCountIsZero = datGameState->inventory.counts[itemId] == 0;
+            itemCountIsZero = DDS3_GBWK->inventory.counts[itemId] == 0;
         }
     }
     if ((buttons & MNU_STAFF_INPUT_CANCEL) != 0 || itemCountIsZero != 0) {
@@ -471,7 +471,7 @@ s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
     StaffImageContext *context = (StaffImageContext *)dds3GetProcessData(task);
     StaffImageChoices *menu = context->menu;
     u32 buttons = mnuMapPadMaskToFlags(0x33);
-    DatPartyRecord *party = &datGameState->party[context->pageWindow.lists[0]->cursor->index];
+    DatPartyRecord *party = &DDS3_GBWK->party[context->pageWindow.lists[0]->cursor->index];
     s32 state;
     MenuWindowContainer *list;
 
@@ -512,7 +512,7 @@ s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
                 mnuSwapEquippedBullet((s32)context, party, bulletId);
                 mnuSetPartyEntryMenuValue(party, bulletId);
                 selectedList = menu->list->list;
-                inventoryCount = datGameState->inventory.counts[bulletId];
+                inventoryCount = DDS3_GBWK->inventory.counts[bulletId];
                 selectedList->cursor->sortKeyPrimary = inventoryCount;
                 menu->listState = 1;
             } else {
@@ -540,7 +540,7 @@ s32 mnuDrawStaffPartyValuePage(KwlnTask *task) {
     s32 context = dds3GetProcessData(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
     s32 index = ((StaffImageContext *)context)->pageWindow.lists[0]->cursor->index;
-    DatPartyRecord *partyEntry = &datGameState->party[index];
+    DatPartyRecord *partyEntry = &DDS3_GBWK->party[index];
     MenuWindowContainer *list;
     struct MenuList *window;
 

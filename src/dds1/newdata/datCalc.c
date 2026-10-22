@@ -339,20 +339,20 @@ s32 datCheckDying(DatPartyRecord *unit) {
 /* Add delta using the existing s32 addition, then clamp the currency balance
  * to 0..9,999,999. No overflow validation is performed before the clamp. */
 void datAddCurrencyClamped(s32 delta) {
-    s32 balance = datGameState->header.currency + delta;
+    s32 balance = DDS3_GBWK->header.currency + delta;
     if (balance < 0) {
         balance = 0;
     }
     if (balance > DAT_CURRENCY_MAX) {
         balance = DAT_CURRENCY_MAX;
     }
-    datGameState->header.currency = balance;
+    DDS3_GBWK->header.currency = balance;
 }
 
 /* Compare the signed balance against the requested amount; no debit or
  * validation is performed, so negative requests keep their original semantics. */
 s32 datHasEnoughCurrency(s32 requiredAmount) {
-    if (datGameState->header.currency < requiredAmount) {
+    if (DDS3_GBWK->header.currency < requiredAmount) {
         return 0;
     }
     return 1;
@@ -441,7 +441,7 @@ void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta) {
         evtBitOn(itemId + PTY_ITEM_MODEL_FLAG_BASE);
         return;
     }
-    quantity = datGameState->inventory.counts[itemId];
+    quantity = DDS3_GBWK->inventory.counts[itemId];
     quantity += quantityDelta;
     if (quantity < 0) {
         quantity = 0;
@@ -462,7 +462,7 @@ void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta) {
     } else {
         quantity = quantity < PTY_ITEM_QUANTITY_LIMIT ? quantity : PTY_ITEM_MAX_QUANTITY;
     }
-    datGameState->inventory.counts[itemId] = quantity;
+    DDS3_GBWK->inventory.counts[itemId] = quantity;
 }
 
 /* Flag-range items test their model flag and ignore minimumQuantity.
@@ -471,7 +471,7 @@ s32 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity) {
     if ((u32)(itemId - PTY_ITEM_FLAG_FIRST) < PTY_ITEM_FLAG_COUNT) {
         return evtBitCheck(itemId + PTY_ITEM_MODEL_FLAG_BASE) != 0;
     }
-    if (datGameState->inventory.counts[itemId] < minimumQuantity) {
+    if (DDS3_GBWK->inventory.counts[itemId] < minimumQuantity) {
         return 0;
     }
     return 1;
@@ -479,7 +479,7 @@ s32 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity) {
 
 /* Flag-range items have one slot; every quantity range caps at 99. */
 s32 ptyIsInventoryItemAtCapacity(s32 itemId) {
-    s32 quantity = datGameState->inventory.counts[itemId];
+    s32 quantity = DDS3_GBWK->inventory.counts[itemId];
 
     if (itemId >= 0xA0) {
         if (quantity >= PTY_ITEM_MAX_QUANTITY) {
@@ -507,7 +507,7 @@ u8 evtGetFlaggedRosterValue(DatPartyRecord *entry) {
 }
 
 s32 dds3FindEntryIndex(s32 rosterIndex) {
-    DatPartyRecord *entry = datGameState->party;
+    DatPartyRecord *entry = DDS3_GBWK->party;
     s32 slotIndex = 0;
 
     do {
@@ -525,7 +525,7 @@ s32 dds3FindEntryIndex(s32 rosterIndex) {
 /* Read a signed byte relative to the first roster entry's stat-byte base;
  * the caller supplies a byte offset, not a whole-entry index. */
 s8 ptyReadSignedRosterStatByte(s32 byteOffset) {
-    return datGameState->party[0].baseStats[byteOffset];
+    return DDS3_GBWK->party[0].baseStats[byteOffset];
 }
 
 extern void sdfRaisePackedChannelValue(DatPartyRecord *, u32 minimumValue);
@@ -534,7 +534,7 @@ extern void sdfRaisePackedChannelValue(DatPartyRecord *, u32 minimumValue);
 void ptyApplyEventPenalty(s32 penaltyMode) {
     s32 nextHp, loss, slotIndex;
     if (penaltyMode == 1 || penaltyMode == 4 || penaltyMode == 5 || penaltyMode == 6) {
-        DatPartyRecord *entry = datGameState->party;
+        DatPartyRecord *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
             if (entry->hp != 0) {
@@ -550,7 +550,7 @@ void ptyApplyEventPenalty(s32 penaltyMode) {
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
     if (penaltyMode == 2) {
-        DatPartyRecord *entry = datGameState->party;
+        DatPartyRecord *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
             if (entry->hp != 0) {
@@ -566,7 +566,7 @@ void ptyApplyEventPenalty(s32 penaltyMode) {
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
     if (penaltyMode == 3) {
-        DatPartyRecord *entry = datGameState->party;
+        DatPartyRecord *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
             if (entry->hp != 0) entry->hp = 1;
@@ -577,10 +577,10 @@ void ptyApplyEventPenalty(s32 penaltyMode) {
     if (penaltyMode >= 4 && penaltyMode <= 6) {
         slotIndex = 0;
         do {
-            if (datGameState->party[slotIndex].hp != 0) {
-                if (penaltyMode == 4) sdfRaisePackedChannelValue(&datGameState->party[slotIndex], 0x80);
-                if (penaltyMode == 5) sdfRaisePackedChannelValue(&datGameState->party[slotIndex], 0x40);
-                if (penaltyMode == 6) sdfRaisePackedChannelValue(&datGameState->party[slotIndex], 0x10);
+            if (DDS3_GBWK->party[slotIndex].hp != 0) {
+                if (penaltyMode == 4) sdfRaisePackedChannelValue(&DDS3_GBWK->party[slotIndex], 0x80);
+                if (penaltyMode == 5) sdfRaisePackedChannelValue(&DDS3_GBWK->party[slotIndex], 0x40);
+                if (penaltyMode == 6) sdfRaisePackedChannelValue(&DDS3_GBWK->party[slotIndex], 0x10);
             }
             slotIndex++;
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
@@ -592,7 +592,7 @@ void ptyApplyEventPenalty(s32 penaltyMode) {
 void ptyApplyFieldHpAttrition(s32 attritionMode) {
     s32 nextHp, loss, slotIndex;
     if (attritionMode == 1) {
-        DatPartyRecord *entry = datGameState->party;
+        DatPartyRecord *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
             if ((entry->flags & DAT_PARTY_FLAG_FRONTLINE) && (entry->status & 0x80)) {
@@ -610,7 +610,7 @@ void ptyApplyFieldHpAttrition(s32 attritionMode) {
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
     if (attritionMode == 2) {
-        DatPartyRecord *entry = datGameState->party;
+        DatPartyRecord *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
             if (entry->flags & DAT_PARTY_FLAG_FRONTLINE) {
@@ -635,7 +635,7 @@ void ptyRecoverAllUnits(void) {
     s32 slotIndex = 0;
 
     do {
-        DatPartyRecord *entry = &datGameState->party[slotIndex];
+        DatPartyRecord *entry = &DDS3_GBWK->party[slotIndex];
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             datAddHp(entry, PTY_RECOVERY_DELTA);
             datAddMp(entry, PTY_RECOVERY_DELTA);
@@ -647,7 +647,7 @@ void ptyRecoverAllUnits(void) {
 
 /* Test occupied entries with nonzero HP; mode 1 additionally requires a frontline member. */
 s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode) {
-    DatPartyRecord *entry = datGameState->party;
+    DatPartyRecord *entry = DDS3_GBWK->party;
     s32 slotIndex = 0;
 
     do {
@@ -710,7 +710,7 @@ void evtUpdateFlaggedStats(void) {
     s32 slotIndex = 0;
 
     do {
-        DatPartyRecord *entry = &datGameState->party[slotIndex];
+        DatPartyRecord *entry = &DDS3_GBWK->party[slotIndex];
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             if (entry->flags & DAT_PARTY_FLAG_FRONTLINE) {
                 ptyApplySkillRecovery(entry, 0x22C);
@@ -725,7 +725,7 @@ void evtUpdateFlaggedStats(void) {
 s32 evtHasMatchingFlaggedEntry(s32 skillId) {
     s32 slotIndex = 0;
     do {
-        DatPartyRecord *entry = &datGameState->party[slotIndex];
+        DatPartyRecord *entry = &DDS3_GBWK->party[slotIndex];
         if ((entry->flags & DAT_PARTY_FLAG_OCCUPIED) && (entry->flags & DAT_PARTY_FLAG_FRONTLINE)) {
             if (datUnitHasSkill(entry, skillId)) {
                 return 1;
@@ -770,23 +770,23 @@ void ptyInitRuntime(void) {
     s32 i;
 
     for (i = 0; i < 5; i++) {
-        memset(&datGameState->party[i], 0, sizeof(DatPartyRecord));
-        datGameState->partyOrder[i] = i;
+        memset(&DDS3_GBWK->party[i], 0, sizeof(DatPartyRecord));
+        DDS3_GBWK->partyOrder[i] = i;
     }
-    datGameState->partyCount = 0;
-    datGameState->party[0] = D_003BAA04[1];
-    datGameState->party[1] = D_003BAA04[3];
-    datGameState->party[2] = D_003BAA04[4];
-    datGameState->partyCount = 3;
+    DDS3_GBWK->partyCount = 0;
+    DDS3_GBWK->party[0] = D_003BAA04[1];
+    DDS3_GBWK->party[1] = D_003BAA04[3];
+    DDS3_GBWK->party[2] = D_003BAA04[4];
+    DDS3_GBWK->partyCount = 3;
     for (i = 0; i < 5; i++) {
-        datGameState->party[i].menuValue = 0;
+        DDS3_GBWK->party[i].menuValue = 0;
     }
-    datGameState->header.currency = 0x7D0;
+    DDS3_GBWK->header.currency = 0x7D0;
     for (i = 0; i < 192; i++) {
-        datGameState->inventory.counts[i] = 0;
+        DDS3_GBWK->inventory.counts[i] = 0;
     }
     for (i = 0; i < 16; i++) {
-        memset(&datGameState->templates[i], 0, sizeof(DatPartyRecord));
+        memset(&DDS3_GBWK->templates[i], 0, sizeof(DatPartyRecord));
     }
 }
 
@@ -804,7 +804,7 @@ u16 datGetLevelForDraw(s32 entryAddress) {
 
 /* Find the first occupied slot with this roster identifier, or return NULL. */
 DatPartyRecord *dds3FindEntry(s32 rosterIndex) {
-    DatPartyRecord *entry = datGameState->party;
+    DatPartyRecord *entry = DDS3_GBWK->party;
     s32 slotIndex = 0;
 
     do {
@@ -835,13 +835,13 @@ s32 ptyRebalanceFrontline(s32 rosterIndex) {
     }
 
     {
-        DatPartyRecord *const selectedEntry = &datGameState->party[selectedIndex];
+        DatPartyRecord *const selectedEntry = &DDS3_GBWK->party[selectedIndex];
         if ((selectedEntry->flags & DAT_PARTY_FLAG_FRONTLINE) != 0) {
             return 0;
         }
     }
 
-    scanState = datGameState;
+    scanState = DDS3_GBWK;
     scanIndex = 0;
     frontlineCount = 0;
     for (; scanIndex < PTY_ACTIVE_ROSTER_COUNT; scanIndex++) {
@@ -861,11 +861,11 @@ s32 ptyRebalanceFrontline(s32 rosterIndex) {
         scanState->party[frontlineCount].flags &= (u16)~DAT_PARTY_FLAG_FRONTLINE;
     }
 
-    datGameState->party[selectedIndex].flags |= DAT_PARTY_FLAG_FRONTLINE;
-    memcpy(&savedEntry, &datGameState->party[selectedIndex], sizeof(savedEntry));
-    memcpy(&datGameState->party[selectedIndex],
-           &datGameState->party[frontlineCount], sizeof(savedEntry));
-    memcpy(&datGameState->party[frontlineCount], &savedEntry,
+    DDS3_GBWK->party[selectedIndex].flags |= DAT_PARTY_FLAG_FRONTLINE;
+    memcpy(&savedEntry, &DDS3_GBWK->party[selectedIndex], sizeof(savedEntry));
+    memcpy(&DDS3_GBWK->party[selectedIndex],
+           &DDS3_GBWK->party[frontlineCount], sizeof(savedEntry));
+    memcpy(&DDS3_GBWK->party[frontlineCount], &savedEntry,
            sizeof(savedEntry));
     return 1;
 }
@@ -876,7 +876,7 @@ u8 ptyIsRosterEntryPresent(s32 rosterIndex) {
 
 /* Return the highest occupied-slot level, or zero when no slot is occupied. */
 s32 dds3EntryMax(void) {
-    DatPartyRecord *entry = datGameState->party;
+    DatPartyRecord *entry = DDS3_GBWK->party;
     s32 maximumLevel = 0;
     s32 remaining = 4;
 
@@ -894,7 +894,7 @@ s32 dds3EntryMax(void) {
 
 /* Ceiling average of occupied-slot levels; native code assumes a nonempty roster. */
 s32 ptyGetAverageLevel(void) {
-    DatPartyRecord *entry = datGameState->party;
+    DatPartyRecord *entry = DDS3_GBWK->party;
     s32 levelSum = 0;
     s32 activeCount = 0;
     s32 remaining = 4;
@@ -931,7 +931,7 @@ s32 ptyAddUnit(s32 rosterIndex) {
         return -1;
     }
     for (slotIndex = 0; slotIndex < 5; slotIndex++) {
-        entry = &datGameState->party[slotIndex];
+        entry = &DDS3_GBWK->party[slotIndex];
         if ((entry->flags & DAT_PARTY_FLAG_OCCUPIED) == 0) {
             break;
         }
@@ -941,11 +941,11 @@ s32 ptyAddUnit(s32 rosterIndex) {
     }
 
     memset(entry, 0, sizeof(*entry));
-    if ((datGameState->templates[rosterIndex].flags & DAT_PARTY_FLAG_OCCUPIED) != 0 &&
-        datGameState->templates[rosterIndex].level != 0) {
+    if ((DDS3_GBWK->templates[rosterIndex].flags & DAT_PARTY_FLAG_OCCUPIED) != 0 &&
+        DDS3_GBWK->templates[rosterIndex].level != 0) {
         s32 averageLevel = ptyGetAverageLevel();
-        memcpy(entry, &datGameState->templates[rosterIndex], sizeof(*entry));
-        memset(&datGameState->templates[rosterIndex], 0, sizeof(*entry));
+        memcpy(entry, &DDS3_GBWK->templates[rosterIndex], sizeof(*entry));
+        memset(&DDS3_GBWK->templates[rosterIndex], 0, sizeof(*entry));
         if (entry->level < averageLevel) {
             ptyAccumulateStatGains(gains, averageLevel - entry->level, entry);
             remaining = DAT_BASE_STAT_COUNT - 1;
@@ -1013,11 +1013,11 @@ s32 ptyRemoveUnit(s32 unitId) {
         return 0;
     }
 
-    memcpy(&datGameState->templates[unitId], &datGameState->party[partyIndex], sizeof(DatPartyRecord));
+    memcpy(&DDS3_GBWK->templates[unitId], &DDS3_GBWK->party[partyIndex], sizeof(DatPartyRecord));
     for (i = partyIndex; i < 4; i++) {
-        memcpy(&datGameState->party[i], &datGameState->party[i + 1], sizeof(DatPartyRecord));
+        memcpy(&DDS3_GBWK->party[i], &DDS3_GBWK->party[i + 1], sizeof(DatPartyRecord));
     }
-    memset(&datGameState->party[i], 0, sizeof(DatPartyRecord));
+    memset(&DDS3_GBWK->party[i], 0, sizeof(DatPartyRecord));
 
     modelFlag = &D_0032ACA8[unitId * 4];
     for (i = 0; i < 4U; i++) {
@@ -1028,7 +1028,7 @@ s32 ptyRemoveUnit(s32 unitId) {
     }
 
     completeSlotCount = 0;
-    entry = datGameState->party;
+    entry = DDS3_GBWK->party;
     for (i = 0; i < PTY_ACTIVE_ROSTER_COUNT; i++) {
         if ((entry->flags & 3) == 3) {
             completeSlotCount++;
@@ -1148,7 +1148,7 @@ void evtUpdateFlaggedEntries(void) {
     s32 slotIndex = 0;
 
     do {
-        DatPartyRecord *entry = &datGameState->party[slotIndex];
+        DatPartyRecord *entry = &DDS3_GBWK->party[slotIndex];
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             s32 rosterIndex = 0;
             do {
@@ -1186,7 +1186,7 @@ extern void scrSetSecondaryScriptFlag(DatPartyRecord *unit, u16 skill);
 
 void ptyMergeStockSkills(DatPartyRecord *unit) {
     u16 unitId = unit->unitId;
-    DatPartyRecord *stock = &datGameState->templates[unitId];
+    DatPartyRecord *stock = &DDS3_GBWK->templates[unitId];
     u16 occupied = stock->flags & DAT_PARTY_FLAG_OCCUPIED;
     u32 i;
     u16 skill;
@@ -1213,7 +1213,7 @@ void dds3ForEachFlagged(void) {
     s32 slotIndex = 0;
 
     do {
-        DatPartyRecord *entry = &datGameState->party[slotIndex];
+        DatPartyRecord *entry = &DDS3_GBWK->party[slotIndex];
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             ptyMergeStockSkills(entry);
         }
@@ -1226,11 +1226,11 @@ void ptySaveActiveUnitsToStock(void) {
     s32 slotIndex = 0;
 
     do {
-        DatPartyRecord *entry = &datGameState->party[slotIndex];
+        DatPartyRecord *entry = &DDS3_GBWK->party[slotIndex];
         u16 occupied = entry->flags & DAT_PARTY_FLAG_OCCUPIED;
 
         if (occupied != 0) {
-            memcpy(&datGameState->templates[entry->unitId], entry, sizeof(DatPartyRecord));
+            memcpy(&DDS3_GBWK->templates[entry->unitId], entry, sizeof(DatPartyRecord));
         }
         slotIndex++;
     } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
@@ -1258,7 +1258,7 @@ s32 evtClearRandomStatusFlags(void) {
         return 0;
     }
     remaining = 4;
-    entry = datGameState->party;
+    entry = DDS3_GBWK->party;
     do {
         if ((entry->flags & DAT_PARTY_FLAG_OCCUPIED) != 0 && entry->hp != 0) {
             u16 statusFlags = entry->status;
@@ -1880,8 +1880,8 @@ s32 btlCheckScenePartyLevelThreshold(u32 sceneIndex) {
             partyTotal = 0;
             count = 0;
             remaining = 4;
-            levelCursor = &datGameState->party[0].level;
-            entry = datGameState->party;
+            levelCursor = &DDS3_GBWK->party[0].level;
+            entry = DDS3_GBWK->party;
             do {
                 value = entry->flags;
                 entry++;
@@ -1959,24 +1959,24 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
     if (interval == 0) {
         return interval;
     }
-    counter = datGameState->conditionalEncounterStepRemainder + step;
-    datGameState->conditionalEncounterStepRemainder = counter;
+    counter = DDS3_GBWK->conditionalEncounterStepRemainder + step;
+    DDS3_GBWK->conditionalEncounterStepRemainder = counter;
     if (counter < 100.0f) {
         return 0;
     }
     count = (s32)(counter / 100.0f);
-    datGameState->conditionalEncounterStepRemainder = counter - (f32)count * 100.0f;
+    DDS3_GBWK->conditionalEncounterStepRemainder = counter - (f32)count * 100.0f;
     for (i = 0; i < count; i++) {
-        if (datGameState->world.fieldFlags & 2) {
-            datGameState->conditionalEncounterGauge = datGameState->conditionalEncounterGauge + dds3GetRandIntA(0, 7) + 6;
+        if (DDS3_GBWK->world.fieldFlags & 2) {
+            DDS3_GBWK->conditionalEncounterGauge = DDS3_GBWK->conditionalEncounterGauge + dds3GetRandIntA(0, 7) + 6;
         } else {
-            datGameState->conditionalEncounterGauge = datGameState->conditionalEncounterGauge + dds3GetRandIntA(0, 3) + 2;
+            DDS3_GBWK->conditionalEncounterGauge = DDS3_GBWK->conditionalEncounterGauge + dds3GetRandIntA(0, 3) + 2;
         }
     }
-    if (datGameState->conditionalEncounterGauge > 0xFDE8) {
-        datGameState->conditionalEncounterGauge = -0x218;
+    if (DDS3_GBWK->conditionalEncounterGauge > 0xFDE8) {
+        DDS3_GBWK->conditionalEncounterGauge = -0x218;
     }
-    if (datGameState->conditionalEncounterGauge < interval) {
+    if (DDS3_GBWK->conditionalEncounterGauge < interval) {
         return 0;
     }
     total = 0;
@@ -1991,7 +1991,7 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
         if (datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].sceneIndex != 0) {
             if (roll < count + datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].weight) {
                 scene = datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].sceneIndex;
-                if ((datGameState->world.fieldFlags & 1) == 0 || btlCheckScenePartyLevelThreshold(scene) != 0) {
+                if ((DDS3_GBWK->world.fieldFlags & 1) == 0 || btlCheckScenePartyLevelThreshold(scene) != 0) {
                     packed = (group << 24) | (i << 16) | scene;
                     btlSelectedConditionalEncounterIndex = encounterIndex;
                     btlConditionalEncounterCachedInterval = 0;
@@ -2008,8 +2008,8 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
 }
 
 void dds3WorkClear(void) {
-    datGameState->conditionalEncounterStepRemainder = 0;
-    datGameState->conditionalEncounterGauge = 0;
+    DDS3_GBWK->conditionalEncounterStepRemainder = 0;
+    DDS3_GBWK->conditionalEncounterGauge = 0;
     btlConditionalEncounterCachedInterval = 0;
 }
 

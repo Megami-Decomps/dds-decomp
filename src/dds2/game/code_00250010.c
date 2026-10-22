@@ -39,21 +39,21 @@
 extern void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer);
 /* Original-style implicit int, kept: matched code depends on it: sceWrite. */
 
-extern u32 evtSkyOverlayEnabled;
+extern u32 fldbokasi;
 
-extern u16 evtSkyTransitionActive;
+extern u16 skyanime;
 
 extern void fldSkySetAlphaOfs(u32 alpha);
 
 extern s16 fldSkyGetAlphaOfs(void);
 
-extern u16 evtSkyTransitionFrame;
+extern u16 skyanow;
 
-extern u16 evtSkyTransitionDuration;
+extern u16 skyamax;
 
-extern s16 evtSkyTransitionStartValue;
+extern s16 skyatarget;
 
-extern s16 evtSkyTransitionTargetValue;
+extern s16 skyabase_par;
 
 extern void fldSkyDrawFilter(void);
 
@@ -106,7 +106,7 @@ extern void *D_0043653C;
 extern void *D_00436520;
 
 
-extern EvtPad kwlnTaskPadButtonStates;
+extern EvtPad dds3PadButtonState;
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern char D_004233F0[]; /* " RR  = ENTER" */
 extern char D_00423400[]; /* " RD  = CANCEL" */
@@ -153,7 +153,7 @@ KwlnTask *evtStartPictureProcess(s32 taskId, SdfTex *texture) {
 }
 
 void evtSetBokasi(u32 enabled) {
-    evtSkyOverlayEnabled = enabled;
+    fldbokasi = enabled;
 }
 
 /* Either set the sky alpha immediately or interpolate from its current value. */
@@ -164,27 +164,27 @@ void evtSetSkyAlpha(s32 duration, s32 target) {
     if (current != target) {
         if (duration == 0) {
             fldSkySetAlphaOfs(target);
-            evtSkyTransitionActive = 0;
+            skyanime = 0;
         } else {
-            evtSkyTransitionDuration = duration;
-            evtSkyTransitionStartValue = current;
-            evtSkyTransitionTargetValue = target;
-            evtSkyTransitionActive = 1;
-            evtSkyTransitionFrame = 0;
+            skyamax = duration;
+            skyatarget = current;
+            skyabase_par = target;
+            skyanime = 1;
+            skyanow = 0;
         }
     }
 }
 
 u16 evtCheckSkyAlphaAnime(void) {
-    return evtSkyTransitionActive;
+    return skyanime;
 }
 
 void evtUpdateSkyAlpha(void) {
-    if (evtSkyTransitionActive != 0) {
-        evtSkyTransitionFrame += 1;
-        fldSkySetAlphaOfs(evtSkyTransitionStartValue + (s32)((f32)(evtSkyTransitionTargetValue - evtSkyTransitionStartValue) * ((f32)evtSkyTransitionFrame / (f32)evtSkyTransitionDuration)));
-        if (evtSkyTransitionFrame >= evtSkyTransitionDuration) {
-            evtSkyTransitionActive = 0;
+    if (skyanime != 0) {
+        skyanow += 1;
+        fldSkySetAlphaOfs(skyatarget + (s32)((f32)(skyabase_par - skyatarget) * ((f32)skyanow / (f32)skyamax)));
+        if (skyanow >= skyamax) {
+            skyanime = 0;
         }
     }
 }
@@ -192,7 +192,7 @@ void evtUpdateSkyAlpha(void) {
 s32 evtSkyProcess1(KwlnTask *task) {
     evtUpdateSkyAlpha();
     fldSkyDrawFilter();
-    if (evtSkyOverlayEnabled != 0) {
+    if (fldbokasi != 0) {
         rsetOtOfs(0x53);
         fldSubmitTexturedOverlaySprite();
     }
@@ -200,8 +200,8 @@ s32 evtSkyProcess1(KwlnTask *task) {
 }
 
 void evtSkyShutdown(KwlnTask *task) {
-    evtSkyTransitionActive = 0;
-    evtSkyOverlayEnabled = 0;
+    skyanime = 0;
+    fldbokasi = 0;
 }
 
 extern char evtSkyTaskName[];
@@ -344,21 +344,21 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->actionMode != 8) {
         return 0;
     }
-    if (kwlnTaskPadButtonStates.confirm < 0) {
+    if (dds3PadButtonState.confirm < 0) {
         return 1;
     }
-    if (kwlnTaskPadButtonStates.cancel < 0) {
+    if (dds3PadButtonState.cancel < 0) {
         return -1;
     }
     step = 0.0f;
-    if (kwlnTaskPadButtonStates.decOne & 2) {
+    if (dds3PadButtonState.decOne & 2) {
         step = -0.1f;
-    } else if (kwlnTaskPadButtonStates.incOne & 2) {
+    } else if (dds3PadButtonState.incOne & 2) {
         step = 0.1f;
     }
-    if (kwlnTaskPadButtonStates.decTen & 2) {
+    if (dds3PadButtonState.decTen & 2) {
         step = -1.0f;
-    } else if (kwlnTaskPadButtonStates.incTen & 2) {
+    } else if (dds3PadButtonState.incTen & 2) {
         step = 1.0f;
     }
     ctx->floatValue += step;
@@ -411,22 +411,22 @@ s32 evtUpdateValueChangeDialog(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->actionMode != 7) {
         return 0;
     }
-    if (kwlnTaskPadButtonStates.confirm < 0) {
+    if (dds3PadButtonState.confirm < 0) {
         return 1;
     }
-    if (kwlnTaskPadButtonStates.cancel < 0) {
+    if (dds3PadButtonState.cancel < 0) {
         return -1;
     }
-    if (kwlnTaskPadButtonStates.decOne & 2) {
+    if (dds3PadButtonState.decOne & 2) {
         step = -1;
-    } else if (kwlnTaskPadButtonStates.incOne & 2) {
+    } else if (dds3PadButtonState.incOne & 2) {
         step = 1;
     } else {
         step = 0;
     }
-    if (kwlnTaskPadButtonStates.decTen & 2) {
+    if (dds3PadButtonState.decTen & 2) {
         step = -10;
-    } else if (kwlnTaskPadButtonStates.incTen & 2) {
+    } else if (dds3PadButtonState.incTen & 2) {
         step = 10;
     }
     ctx->value += step;
@@ -488,30 +488,30 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->actionMode != 6) {
         return 0;
     }
-    if (kwlnTaskPadButtonStates.confirm < 0) {
+    if (dds3PadButtonState.confirm < 0) {
         return 1;
     }
-    if (kwlnTaskPadButtonStates.cancel < 0) {
+    if (dds3PadButtonState.cancel < 0) {
         return -1;
     }
-    if (kwlnTaskPadButtonStates.decOne & 2) {
+    if (dds3PadButtonState.decOne & 2) {
         step = -1;
-    } else if (kwlnTaskPadButtonStates.incOne & 2) {
+    } else if (dds3PadButtonState.incOne & 2) {
         step = 1;
     } else {
         step = 0;
     }
-    if (kwlnTaskPadButtonStates.decTen & 2) {
+    if (dds3PadButtonState.decTen & 2) {
         step = -10;
-    } else if (kwlnTaskPadButtonStates.incTen & 2) {
+    } else if (dds3PadButtonState.incTen & 2) {
         step = 10;
     }
-    if (kwlnTaskPadButtonStates.decHun & 2) {
+    if (dds3PadButtonState.decHun & 2) {
         step = -100;
-    } else if (kwlnTaskPadButtonStates.incHun & 2) {
+    } else if (dds3PadButtonState.incHun & 2) {
         step = 100;
     }
-    if (kwlnTaskPadButtonStates.syncKey < 0) {
+    if (dds3PadButtonState.syncKey < 0) {
         step = ctx->curFrame - ctx->value;
     }
     ctx->value += step;
@@ -521,7 +521,7 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->value >= ctx->valueMax) {
         ctx->value = ctx->valueMax;
     }
-    if (kwlnTaskPadButtonStates.apply != 0) {
+    if (dds3PadButtonState.apply != 0) {
         if (ctx->curFrame != ctx->value) {
             ctx->curFrame = ctx->value;
             evtViewerDispatchFlagMode(ctx);
@@ -793,13 +793,13 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->actionMode != 9) {
         return 0;
     }
-    if (kwlnTaskPadButtonStates.decTen < 0) {
+    if (dds3PadButtonState.decTen < 0) {
         ctx->charRow ^= 1;
     }
-    if (kwlnTaskPadButtonStates.incTen < 0) {
+    if (dds3PadButtonState.incTen < 0) {
         ctx->charRow ^= 1;
     }
-    if (kwlnTaskPadButtonStates.decOne & 2) {
+    if (dds3PadButtonState.decOne & 2) {
         switch (ctx->charRow) {
         case 0:
             if (D_004372B0 >= 0x1F5) {
@@ -813,7 +813,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
             break;
         }
     }
-    if (kwlnTaskPadButtonStates.incOne & 2) {
+    if (dds3PadButtonState.incOne & 2) {
         switch (ctx->charRow) {
         case 0:
             if (D_004372B0 < 0x3E7) {
@@ -827,7 +827,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
             break;
         }
     }
-    if (kwlnTaskPadButtonStates.decHun & 2) {
+    if (dds3PadButtonState.decHun & 2) {
         switch (ctx->charRow) {
         case 0:
             if (D_004372B0 >= 0x1F5) {
@@ -851,7 +851,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
             break;
         }
     }
-    if (kwlnTaskPadButtonStates.incHun & 2) {
+    if (dds3PadButtonState.incHun & 2) {
         switch (ctx->charRow) {
         case 0:
             D_004372B0 += 100;
@@ -861,13 +861,13 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
             break;
         }
     }
-    if (kwlnTaskPadButtonStates.confirm < 0) {
+    if (dds3PadButtonState.confirm < 0) {
         return 1;
     }
-    if (kwlnTaskPadButtonStates.cancel < 0) {
+    if (dds3PadButtonState.cancel < 0) {
         return -1;
     }
-    if (kwlnTaskPadButtonStates.syncKey < 0) {
+    if (dds3PadButtonState.syncKey < 0) {
         D_004372B0 = 0x258;
     }
     return 0;
@@ -1482,11 +1482,11 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
         shown = group->childCount + 1;
     }
     if (evtIsMenuTableEntryEnabled(&group->type) == 1) {
-        if (kwlnTaskPadButtonStates.decTen < 0) {
+        if (dds3PadButtonState.decTen < 0) {
             if (ctx->frameCursor + ctx->frameFirst == 0) {
                 return -4;
             }
-        } else if (kwlnTaskPadButtonStates.incTen < 0) {
+        } else if (dds3PadButtonState.incTen < 0) {
             count = 0;
             for (node = group->children; node != NULL; node = node->next) {
                 count++;
@@ -1499,10 +1499,10 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     result = dds3SelectMenu(0, columns, group->childCount + 1,
                                   columns, shown, NULL, &ctx->frameCursor,
                                   &ctx->frameColumn, &ctx->frameFirst);
-    if (kwlnTaskPadButtonStates.syncKey < 0) {
+    if (dds3PadButtonState.syncKey < 0) {
         result = -2;
     }
-    if (kwlnTaskPadButtonStates.select < 0) {
+    if (dds3PadButtonState.select < 0) {
         result = -3;
     }
     return result;
@@ -1744,9 +1744,9 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
     field = ctx->messageField;
     if (field != 0) {
         if (field == 1) {
-            if (kwlnTaskPadButtonStates.decOne & 2) {
+            if (dds3PadButtonState.decOne & 2) {
                 branch = branch == 0 ? 0xA : branch - 1;
-            } else if (kwlnTaskPadButtonStates.incOne & 2) {
+            } else if (dds3PadButtonState.incOne & 2) {
                 branch = branch >= 0xA ? 0 : branch + 1;
             }
             ctx->value &= 0xFFF;
@@ -1754,9 +1754,9 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
         }
     } else {
         delta = 0;
-        if (kwlnTaskPadButtonStates.decOne & 2) {
+        if (dds3PadButtonState.decOne & 2) {
             delta = -1;
-        } else if (kwlnTaskPadButtonStates.incOne & 2) {
+        } else if (dds3PadButtonState.incOne & 2) {
             delta = 1;
         }
         number += delta;
@@ -1768,10 +1768,10 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
         }
         ctx->value = number | (branch << 12);
     }
-    if ((kwlnTaskPadButtonStates.decTen & 2) || (kwlnTaskPadButtonStates.incTen & 2)) {
+    if ((dds3PadButtonState.decTen & 2) || (dds3PadButtonState.incTen & 2)) {
         ctx->messageField = !field;
     }
-    if (kwlnTaskPadButtonStates.confirm < 0) {
+    if (dds3PadButtonState.confirm < 0) {
         handle = ctx->windowContext->handle;
         if (handle != -1) {
             if (branch == 0) {
@@ -1783,7 +1783,7 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
             }
         }
     }
-    return kwlnTaskPadButtonStates.cancel >= 0 ? 0 : -1;
+    return dds3PadButtonState.cancel >= 0 ? 0 : -1;
 }
 
 
@@ -1846,9 +1846,9 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
     field = ctx->compareField;
     switch (field) {
     case 0:
-        if (kwlnTaskPadButtonStates.decOne & 2) {
+        if (dds3PadButtonState.decOne & 2) {
             branch = branch == 0 ? 0xA : branch - 1;
-        } else if (kwlnTaskPadButtonStates.incOne & 2) {
+        } else if (dds3PadButtonState.incOne & 2) {
             branch = branch >= 0xA ? 0 : branch + 1;
         }
         ctx->value &= 0xFFF;
@@ -1856,9 +1856,9 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
         break;
     case 1:
         delta = 0;
-        if (kwlnTaskPadButtonStates.decOne & 2) {
+        if (dds3PadButtonState.decOne & 2) {
             delta = -1;
-        } else if (kwlnTaskPadButtonStates.incOne & 2) {
+        } else if (dds3PadButtonState.incOne & 2) {
             delta = 1;
         }
         number += delta;
@@ -1871,13 +1871,13 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
         ctx->value = number | (branch << 12);
         break;
     }
-    if ((kwlnTaskPadButtonStates.decTen & 2) || (kwlnTaskPadButtonStates.incTen & 2)) {
+    if ((dds3PadButtonState.decTen & 2) || (dds3PadButtonState.incTen & 2)) {
         ctx->compareField = !field;
     }
-    if (kwlnTaskPadButtonStates.confirm < 0) {
+    if (dds3PadButtonState.confirm < 0) {
         return 1;
     }
-    return kwlnTaskPadButtonStates.cancel >= 0 ? 0 : -1;
+    return dds3PadButtonState.cancel >= 0 ? 0 : -1;
 }
 
 s32 evtIsMenuTableEntryEnabled(s32 *index) {
@@ -1973,19 +1973,19 @@ s32 evtUpdateGroupPropertyDialog(s32 x, s32 y, EvtRuntime *runtime) {
         column = runtime->tableColumn = D_003C9730[group->type].columnCount - 1;
     }
     field = D_003C9730[group->type].columns[column];
-    if (kwlnTaskPadButtonStates.incOne < 0) {
+    if (dds3PadButtonState.incOne < 0) {
         if (column < D_003C9730[group->type].columnCount - 1) {
             runtime->tableColumn = column + 1;
         } else {
             runtime->tableColumn = 0;
         }
-    } else if (kwlnTaskPadButtonStates.decOne < 0) {
+    } else if (dds3PadButtonState.decOne < 0) {
         if (column > 0) {
             runtime->tableColumn = column - 1;
         } else {
             runtime->tableColumn = D_003C9730[group->type].columnCount == 0 ? 0 : D_003C9730[group->type].columnCount - 1;
         }
-    } else if (kwlnTaskPadButtonStates.confirm < 0) {
+    } else if (dds3PadButtonState.confirm < 0) {
         switch (field) {
         case 0:
             runtime->value = runtime->frameGroup->metadata.value;
@@ -2009,7 +2009,7 @@ s32 evtUpdateGroupPropertyDialog(s32 x, s32 y, EvtRuntime *runtime) {
             break;
         }
         return 1;
-    } else if (kwlnTaskPadButtonStates.frameEnd < 0) {
+    } else if (dds3PadButtonState.frameEnd < 0) {
         if (column == 0) {
             runtime->frameColumn = 0;
         } else {
@@ -2027,7 +2027,7 @@ s32 evtUpdateGroupPropertyDialog(s32 x, s32 y, EvtRuntime *runtime) {
             runtime->frameCursor = 0;
         }
         return -1;
-    } else if (kwlnTaskPadButtonStates.frameStart < 0) {
+    } else if (dds3PadButtonState.frameStart < 0) {
         if (column == 0) {
             runtime->frameColumn = 0;
         } else {
@@ -2037,7 +2037,7 @@ s32 evtUpdateGroupPropertyDialog(s32 x, s32 y, EvtRuntime *runtime) {
         runtime->frameFirst = 0;
         return -1;
     }
-    return kwlnTaskPadButtonStates.cancel >= 0 ? 0 : -1;
+    return dds3PadButtonState.cancel >= 0 ? 0 : -1;
 }
 
 s32 mnuDrawMotionChangeLabel(SdfListHead *target, s32 x, s32 y) {
@@ -2064,9 +2064,9 @@ extern char D_00437438[];
 
 INCLUDE_SDATA(const s32, "game/code_00250010", evtPictureTaskName);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", evtSkyTransitionActive);
+INCLUDE_SDATA(const s32, "game/code_00250010", skyanime);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", evtSkyOverlayEnabled);
+INCLUDE_SDATA(const s32, "game/code_00250010", fldbokasi);
 
 INCLUDE_SDATA(const s32, "game/code_00250010", evtSkyTaskName);
 
@@ -2338,13 +2338,13 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->actionMode != 0x10) {
         return 0;
     }
-    if (kwlnTaskPadButtonStates.decTen & 2) {
+    if (dds3PadButtonState.decTen & 2) {
         if (ctx->fieldIndex == 0) {
             ctx->fieldIndex = 3;
         } else {
             ctx->fieldIndex = ctx->fieldIndex - 1;
         }
-    } else if (kwlnTaskPadButtonStates.incTen & 2) {
+    } else if (dds3PadButtonState.incTen & 2) {
         if (ctx->fieldIndex == 3) {
             ctx->fieldIndex = 0;
         } else {
@@ -2355,7 +2355,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
     count = mdlGetNumOfCut((MdlCtx *)model, packed.bits.group);
     switch (ctx->fieldIndex) {
     case 0:
-        if (kwlnTaskPadButtonStates.incOne & 2) {
+        if (dds3PadButtonState.incOne & 2) {
             do {
                 if (packed.bits.group < 3) {
                     packed.bits.group = packed.bits.group + 1;
@@ -2363,7 +2363,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
                     packed.bits.group = 0;
                 }
             } while (mdlGetMotionCtrlr(model, packed.bits.group) == NULL);
-        } else if (kwlnTaskPadButtonStates.decOne & 2) {
+        } else if (dds3PadButtonState.decOne & 2) {
             do {
                 if (packed.bits.group > 0) {
                     packed.bits.group = packed.bits.group - 1;
@@ -2377,13 +2377,13 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
         }
         break;
     case 1:
-        if (kwlnTaskPadButtonStates.incOne & 2) {
+        if (dds3PadButtonState.incOne & 2) {
             if (packed.bits.motion >= count - 1) {
                 packed.bits.motion = 0;
             } else {
                 packed.bits.motion = packed.bits.motion + 1;
             }
-        } else if (kwlnTaskPadButtonStates.decOne & 2) {
+        } else if (dds3PadButtonState.decOne & 2) {
             if (packed.bits.motion > 0) {
                 packed.bits.motion = packed.bits.motion - 1;
             } else {
@@ -2392,19 +2392,19 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
         }
         break;
     case 2:
-        if ((kwlnTaskPadButtonStates.incOne & 2) || (kwlnTaskPadButtonStates.decOne & 2)) {
+        if ((dds3PadButtonState.incOne & 2) || (dds3PadButtonState.decOne & 2)) {
             packed.bits.loop = packed.bits.loop == 0;
         }
         break;
     case 3:
-        if (kwlnTaskPadButtonStates.incOne & 2) {
+        if (dds3PadButtonState.incOne & 2) {
             if (packed.bits.hokan < 0x64) {
                 packed.bits.hokan = packed.bits.hokan + 1;
             } else {
                 packed.bits.hokan = 0;
             }
         }
-        if (kwlnTaskPadButtonStates.decOne & 2) {
+        if (dds3PadButtonState.decOne & 2) {
             if (packed.bits.hokan > 0) {
                 packed.bits.hokan = packed.bits.hokan - 1;
             } else {
@@ -2414,10 +2414,10 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
         break;
     }
     ctx->value = packed.word;
-    if (kwlnTaskPadButtonStates.confirm < 0 && mdlGetMotionCtrlr(model, packed.bits.group)->motionTable->entries[packed.bits.motion] != NULL) {
+    if (dds3PadButtonState.confirm < 0 && mdlGetMotionCtrlr(model, packed.bits.group)->motionTable->entries[packed.bits.motion] != NULL) {
         return 1;
     }
-    return kwlnTaskPadButtonStates.cancel >= 0 ? 0 : -1;
+    return dds3PadButtonState.cancel >= 0 ? 0 : -1;
 }
 
 extern char D_00424090[]; /* "UNIT ALL" */
@@ -2488,7 +2488,7 @@ extern void FromRotation(f32 angle);
 /* vu0 routine: rotate an event-viewer position about camera axes selected by the pad. */
 void evtRotateViewerPositionFromPad(f32 *position)
 {
-    if (kwlnTaskPadButtonStates.incOne != 0) {
+    if (dds3PadButtonState.incOne != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
         FromRotation(2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
@@ -2496,7 +2496,7 @@ void evtRotateViewerPositionFromPad(f32 *position)
         VU0_TRANSFORM_POINT(vf10, vf10);
         VU0_SET_W_ONE(vf10);
         VU0_STORE_VF(vf10, position);
-    } else if (kwlnTaskPadButtonStates.decOne != 0) {
+    } else if (dds3PadButtonState.decOne != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
         FromRotation(-2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
@@ -2505,7 +2505,7 @@ void evtRotateViewerPositionFromPad(f32 *position)
         VU0_SET_W_ONE(vf10);
         VU0_STORE_VF(vf10, position);
     }
-    if (kwlnTaskPadButtonStates.incTen != 0) {
+    if (dds3PadButtonState.incTen != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix);
         FromRotation(-2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
@@ -2513,7 +2513,7 @@ void evtRotateViewerPositionFromPad(f32 *position)
         VU0_TRANSFORM_POINT(vf10, vf10);
         VU0_SET_W_ONE(vf10);
         VU0_STORE_VF(vf10, position);
-    } else if (kwlnTaskPadButtonStates.decTen != 0) {
+    } else if (dds3PadButtonState.decTen != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix);
         FromRotation(2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
@@ -2613,11 +2613,11 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
         return 0;
     }
     changed = 0;
-    if (kwlnTaskPadButtonStates.apply < 0) {
+    if (dds3PadButtonState.apply < 0) {
         return 1;
     }
 
-    if (kwlnTaskPadButtonStates.confirm < 0) {
+    if (dds3PadButtonState.confirm < 0) {
         switch (runtime->unk2328) {
         case 7:
             mnuShopSavePrimaryTransform((u8 *)runtime);
@@ -2632,23 +2632,23 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
             changed = 1;
             break;
         }
-    } else if (kwlnTaskPadButtonStates.cancel < 0) {
+    } else if (dds3PadButtonState.cancel < 0) {
         changed = -1;
-    } else if ((kwlnTaskPadButtonStates.incTen & 2) != 0 && runtime->unk232C == 0) {
+    } else if ((dds3PadButtonState.incTen & 2) != 0 && runtime->unk232C == 0) {
         if (runtime->unk2328 < 9) {
             runtime->unk2328++;
         } else {
             runtime->unk2328 = 0;
         }
-    } else if ((kwlnTaskPadButtonStates.decTen & 2) != 0 && runtime->unk232C == 0) {
+    } else if ((dds3PadButtonState.decTen & 2) != 0 && runtime->unk232C == 0) {
         if (runtime->unk2328 > 0) {
             runtime->unk2328--;
         } else {
             runtime->unk2328 = 9;
         }
-    } else if (kwlnTaskPadButtonStates.coarseIncrease != 0) {
+    } else if (dds3PadButtonState.coarseIncrease != 0) {
         runtime->lightPanelOffset = (s32)((u32)runtime->lightPanelOffset + 8u);
-    } else if (kwlnTaskPadButtonStates.coarseDecrease != 0) {
+    } else if (dds3PadButtonState.coarseDecrease != 0) {
         runtime->lightPanelOffset = (s32)((u32)runtime->lightPanelOffset - 8u);
     }
 
@@ -2668,16 +2668,16 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
     } else if (submode == 1) {
         mode = runtime->unk2328;
         if ((u32)mode < 3U) {
-            if ((kwlnTaskPadButtonStates.incOne & 2) != 0) {
+            if ((dds3PadButtonState.incOne & 2) != 0) {
                 f32 candidate = runtime->commandMatrix[mode] + 0.01f;
                 runtime->commandMatrix[mode] = (candidate < 2.0f) ? candidate : 2.0f;
-            } else if ((kwlnTaskPadButtonStates.incTen & 2) != 0) {
+            } else if ((dds3PadButtonState.incTen & 2) != 0) {
                 f32 candidate = runtime->commandMatrix[mode] + 0.09999999404f;
                 runtime->commandMatrix[mode] = (candidate < 2.0f) ? candidate : 2.0f;
-            } else if ((kwlnTaskPadButtonStates.decOne & 2) != 0) {
+            } else if ((dds3PadButtonState.decOne & 2) != 0) {
                 f32 candidate = runtime->commandMatrix[mode] - 0.01f;
                 runtime->commandMatrix[mode] = (0.0f < candidate) ? candidate : 0.0f;
-            } else if ((kwlnTaskPadButtonStates.decTen & 2) != 0) {
+            } else if ((dds3PadButtonState.decTen & 2) != 0) {
                 f32 candidate = runtime->commandMatrix[mode] - 0.09999999404f;
                 runtime->commandMatrix[mode] = (0.0f < candidate) ? candidate : 0.0f;
             }
@@ -2689,16 +2689,16 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
 
         mode = runtime->unk2328;
         if (((u32)mode - 4u) < 3U) {
-            if ((kwlnTaskPadButtonStates.incOne & 2) != 0) {
+            if ((dds3PadButtonState.incOne & 2) != 0) {
                 f32 candidate = runtime->commandMatrix[8 + mode - 4] + 0.01f;
                 runtime->commandMatrix[8 + mode - 4] = (candidate < 2.0f) ? candidate : 2.0f;
-            } else if ((kwlnTaskPadButtonStates.incTen & 2) != 0) {
+            } else if ((dds3PadButtonState.incTen & 2) != 0) {
                 f32 candidate = runtime->commandMatrix[8 + mode - 4] + 0.09999999404f;
                 runtime->commandMatrix[8 + mode - 4] = (candidate < 2.0f) ? candidate : 2.0f;
-            } else if ((kwlnTaskPadButtonStates.decOne & 2) != 0) {
+            } else if ((dds3PadButtonState.decOne & 2) != 0) {
                 f32 candidate = runtime->commandMatrix[8 + mode - 4] - 0.01f;
                 runtime->commandMatrix[8 + mode - 4] = (0.0f < candidate) ? candidate : 0.0f;
-            } else if ((kwlnTaskPadButtonStates.decTen & 2) != 0) {
+            } else if ((dds3PadButtonState.decTen & 2) != 0) {
                 f32 candidate = runtime->commandMatrix[8 + mode - 4] - 0.09999999404f;
                 runtime->commandMatrix[8 + mode - 4] = (0.0f < candidate) ? candidate : 0.0f;
             }
@@ -2784,9 +2784,9 @@ extern char D_00437750[];
 extern char D_00437758[];
 extern char D_00437760[];
 extern char D_004375D0[];
-extern u8 sdf3DSoftenOff;
-extern f32 sdf3DSoften;
-extern f32 sdf3DBias;
+extern u8 corePktSoftenBias;
+extern f32 sdfFaceDivSoften;
+extern f32 sdfFaceDivBias;
 extern void evtSetSlotVector(s32 vectorSlot, f32 x, f32 y);
 
 /* Draw the XY/overlay editor; cancel restores the captured values and flag. */
@@ -2837,7 +2837,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
         s32 valueX = 0x8B00 + (runtime->horizontalOffset << 4);
         s32 style = runtime->floatEditMode == 1 && runtime->floatSelection == 2 ? 6 : 0;
         const char *toggleText;
-        if (sdf3DSoftenOff == 0) {
+        if (corePktSoftenBias == 0) {
             toggleText = D_00437760;
         } else {
             toggleText = D_004375D0;
@@ -2851,23 +2851,23 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
         return status;
     }
     {
-        if (kwlnTaskPadButtonStates.apply < 0) {
+        if (dds3PadButtonState.apply < 0) {
             if (runtime->floatEditMode == 0) {
                 return 1;
             }
-        } else if (kwlnTaskPadButtonStates.confirm < 0) {
+        } else if (dds3PadButtonState.confirm < 0) {
             if (runtime->floatEditMode == 0) {
                 runtime->floatEditMode = 1;
             } else if (runtime->floatEditMode == 1) {
                 runtime->floatEditMode = 0;
             }
-        } else if (kwlnTaskPadButtonStates.cancel < 0) {
+        } else if (dds3PadButtonState.cancel < 0) {
             if (runtime->floatEditMode == 1) {
                 runtime->floatEditMode = 0;
             } else {
                 status = -1;
             }
-        } else if (kwlnTaskPadButtonStates.incTen & 2) {
+        } else if (dds3PadButtonState.incTen & 2) {
             if (runtime->floatEditMode == 0) {
                 if (runtime->floatSelection < 2) {
                     runtime->floatSelection++;
@@ -2884,7 +2884,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
                     break;
                 }
             }
-        } else if (kwlnTaskPadButtonStates.decTen & 2) {
+        } else if (dds3PadButtonState.decTen & 2) {
             if (runtime->floatEditMode == 0) {
                 if (runtime->floatSelection > 0) {
                     runtime->floatSelection--;
@@ -2901,29 +2901,29 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
                     break;
                 }
             }
-        } else if (kwlnTaskPadButtonStates.incOne & 2) {
+        } else if (dds3PadButtonState.incOne & 2) {
             if (runtime->floatEditMode == 1) {
                 if (runtime->floatSelection == 0) {
                     runtime->floatEditX += 0.01f;
                 } else if (runtime->floatSelection == 1) {
                     runtime->floatEditY += 0.01f;
                 } else if (runtime->floatSelection == 2) {
-                    sdf3DSoftenOff ^= 1;
+                    corePktSoftenBias ^= 1;
                 }
             }
-        } else if (kwlnTaskPadButtonStates.decOne & 2) {
+        } else if (dds3PadButtonState.decOne & 2) {
             if (runtime->floatEditMode == 1) {
                 if (runtime->floatSelection == 0) {
                     runtime->floatEditX -= 0.01f;
                 } else if (runtime->floatSelection == 1) {
                     runtime->floatEditY -= 0.01f;
                 } else if (runtime->floatSelection == 2) {
-                    sdf3DSoftenOff ^= 1;
+                    corePktSoftenBias ^= 1;
                 }
             }
-        } else if (kwlnTaskPadButtonStates.coarseIncrease != 0) {
+        } else if (dds3PadButtonState.coarseIncrease != 0) {
             runtime->horizontalOffset += 8;
-        } else if (kwlnTaskPadButtonStates.coarseDecrease != 0) {
+        } else if (dds3PadButtonState.coarseDecrease != 0) {
             runtime->horizontalOffset -= 8;
         }
 
@@ -2934,8 +2934,8 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
             f32 currentX = runtime->floatEditX;
             f32 currentY = runtime->floatEditY;
 
-            sdf3DSoften = currentX;
-            sdf3DBias = currentY;
+            sdfFaceDivSoften = currentX;
+            sdfFaceDivBias = currentY;
             evtSetSlotVector(group->setterId, currentX, currentY);
             break;
         }
@@ -2957,8 +2957,8 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
                 f32 savedX = runtime->savedFloatEditX;
                 f32 savedY = runtime->savedFloatEditY;
 
-                sdf3DSoften = savedX;
-                sdf3DBias = savedY;
+                sdfFaceDivSoften = savedX;
+                sdfFaceDivBias = savedY;
                 evtSetSlotVector(group->setterId, savedX, savedY);
                 break;
             }
@@ -2971,7 +2971,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
                               runtime->savedFloatEditY);
                 break;
             }
-            sdf3DSoftenOff = runtime->savedOverlayFlag;
+            corePktSoftenBias = runtime->savedOverlayFlag;
         }
     }
     return status;
@@ -3012,10 +3012,10 @@ s32 mnuDrawTimedPrompt(s32 x, s32 y, EvtRuntime *ctx) {
     } else if (ctx->commandFirst == 0) {
         return -1;
     }
-    if (kwlnTaskPadButtonStates.confirm < 0) {
+    if (dds3PadButtonState.confirm < 0) {
         return 1;
     }
-    if (kwlnTaskPadButtonStates.cancel >= 0) {
+    if (dds3PadButtonState.cancel >= 0) {
         return 0;
     }
     return -1;
@@ -3144,19 +3144,19 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
         lastMode = 1;
         break;
     }
-    if (kwlnTaskPadButtonStates.incTen & 2) {
+    if (dds3PadButtonState.incTen & 2) {
         if (ctx->groupCursor < lastRow) {
             ctx->groupCursor++;
         } else {
             ctx->groupCursor = 0;
         }
-    } else if (kwlnTaskPadButtonStates.decTen & 2) {
+    } else if (dds3PadButtonState.decTen & 2) {
         if (ctx->groupCursor == 0) {
             ctx->groupCursor = lastRow;
         } else {
             ctx->groupCursor--;
         }
-    } else if (kwlnTaskPadButtonStates.incOne & 2) {
+    } else if (dds3PadButtonState.incOne & 2) {
         switch (ctx->groupCursor) {
         case 0:
             if (ctx->shadowMode < lastMode) {
@@ -3172,7 +3172,7 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
             ctx->shadowY += 0.1f;
             break;
         }
-    } else if (kwlnTaskPadButtonStates.coarseIncrease & 2) {
+    } else if (dds3PadButtonState.coarseIncrease & 2) {
         switch (ctx->groupCursor) {
         case 0:
             if (ctx->shadowMode < lastMode) {
@@ -3188,7 +3188,7 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
             ctx->shadowY += 1.0f;
             break;
         }
-    } else if (kwlnTaskPadButtonStates.decOne & 2) {
+    } else if (dds3PadButtonState.decOne & 2) {
         switch (ctx->groupCursor) {
         case 0:
             if (ctx->shadowMode == 0) {
@@ -3204,7 +3204,7 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
             ctx->shadowY -= 0.1f;
             break;
         }
-    } else if (kwlnTaskPadButtonStates.coarseDecrease & 2) {
+    } else if (dds3PadButtonState.coarseDecrease & 2) {
         switch (ctx->groupCursor) {
         case 0:
             if (ctx->shadowMode == 0) {
@@ -3221,10 +3221,10 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
             break;
         }
     } else {
-        if (kwlnTaskPadButtonStates.confirm < 0) {
+        if (dds3PadButtonState.confirm < 0) {
             return 1;
         }
-        if (kwlnTaskPadButtonStates.cancel < 0) {
+        if (dds3PadButtonState.cancel < 0) {
             return -1;
         }
     }
@@ -3383,25 +3383,25 @@ s32 evtEditEffectSpriteFrame(EvtRuntime *runtime) {
                                      packetList);
 
     step = 0;
-    if ((kwlnTaskPadButtonStates.incTen & 2) != 0) {
+    if ((dds3PadButtonState.incTen & 2) != 0) {
         if (runtime->editField >= 8) {
             runtime->editField = 0;
         } else {
             runtime->editField++;
         }
-    } else if ((kwlnTaskPadButtonStates.decTen & 2) != 0) {
+    } else if ((dds3PadButtonState.decTen & 2) != 0) {
         if (runtime->editField <= 0) {
             runtime->editField = 8;
         } else {
             runtime->editField--;
         }
-    } else if ((kwlnTaskPadButtonStates.decOne & 2) != 0) {
+    } else if ((dds3PadButtonState.decOne & 2) != 0) {
         step = -1;
-    } else if ((kwlnTaskPadButtonStates.incOne & 2) != 0) {
+    } else if ((dds3PadButtonState.incOne & 2) != 0) {
         step = 1;
-    } else if ((kwlnTaskPadButtonStates.coarseDecrease & 2) != 0) {
+    } else if ((dds3PadButtonState.coarseDecrease & 2) != 0) {
         step = -10;
-    } else if ((kwlnTaskPadButtonStates.coarseIncrease & 2) != 0) {
+    } else if ((dds3PadButtonState.coarseIncrease & 2) != 0) {
         step = 10;
     }
 
@@ -3518,7 +3518,7 @@ s32 evtEditEffectSpriteFrame(EvtRuntime *runtime) {
     }
 
 
-    if (kwlnTaskPadButtonStates.cancel < 0) {
+    if (dds3PadButtonState.cancel < 0) {
         runtime->frameGroup->usePendingKey = 0;
         return 0;
     }
@@ -3653,25 +3653,25 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
     fldApplyCameraColorKeyWords(runtime, &key->parameters);
 
     step = 0;
-    if ((kwlnTaskPadButtonStates.incTen & 2) != 0) {
+    if ((dds3PadButtonState.incTen & 2) != 0) {
         if (runtime->colorSelection >= 11) {
             runtime->colorSelection = 0;
         } else {
             runtime->colorSelection++;
         }
-    } else if ((kwlnTaskPadButtonStates.decTen & 2) != 0) {
+    } else if ((dds3PadButtonState.decTen & 2) != 0) {
         if (runtime->colorSelection <= 0) {
             runtime->colorSelection = 11;
         } else {
             runtime->colorSelection--;
         }
-    } else if ((kwlnTaskPadButtonStates.decOne & 2) != 0) {
+    } else if ((dds3PadButtonState.decOne & 2) != 0) {
         step = -1;
-    } else if ((kwlnTaskPadButtonStates.incOne & 2) != 0) {
+    } else if ((dds3PadButtonState.incOne & 2) != 0) {
         step = 1;
-    } else if ((kwlnTaskPadButtonStates.coarseDecrease & 2) != 0) {
+    } else if ((dds3PadButtonState.coarseDecrease & 2) != 0) {
         step = -10;
-    } else if ((kwlnTaskPadButtonStates.coarseIncrease & 2) != 0) {
+    } else if ((dds3PadButtonState.coarseIncrease & 2) != 0) {
         step = 10;
     }
 
@@ -3848,7 +3848,7 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
         }
     }
 
-    if (kwlnTaskPadButtonStates.cancel < 0) {
+    if (dds3PadButtonState.cancel < 0) {
         runtime->colorEditorActive = 0;
         return 0;
     }
@@ -3951,20 +3951,20 @@ s32 func_002582D0(EvtRuntime *runtime) {
         }
         kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
 
-        if (kwlnTaskPadButtonStates.incTen & 2) {
+        if (dds3PadButtonState.incTen & 2) {
             evtIncrementBezierParameter(bytes, component * 2 + 5);
-        } else if (kwlnTaskPadButtonStates.decTen & 2) {
+        } else if (dds3PadButtonState.decTen & 2) {
             evtDecrementBezierParameter(bytes, component * 2 + 5);
-        } else if (kwlnTaskPadButtonStates.decOne & 2) {
+        } else if (dds3PadButtonState.decOne & 2) {
             evtDecrementBezierParameter(bytes, component * 2 + 4);
-        } else if (kwlnTaskPadButtonStates.incOne & 2) {
+        } else if (dds3PadButtonState.incOne & 2) {
             evtIncrementBezierParameter(bytes, component * 2 + 4);
-        } else if (kwlnTaskPadButtonStates.decHun & 2) {
+        } else if (dds3PadButtonState.decHun & 2) {
             runtime->curveComponent ^= 1;
-        } else if (kwlnTaskPadButtonStates.incHun & 2) {
+        } else if (dds3PadButtonState.incHun & 2) {
             runtime->curveComponent ^= 1;
         }
-        if (kwlnTaskPadButtonStates.cancel < 0) {
+        if (dds3PadButtonState.cancel < 0) {
             runtime->frameGroup->usePendingKey = 0;
             return 0;
         }
@@ -4022,7 +4022,7 @@ s32 evtUpdateEffectViewerGroup(s32 arg0, s32 arg1, EvtRuntime *runtime) {
     case 0xB:
     case 0xC:
     default:
-        if (kwlnTaskPadButtonStates.apply < 0) {
+        if (dds3PadButtonState.apply < 0) {
             status = 0;
         }
         break;
@@ -4665,7 +4665,7 @@ void evtEmitGroupTypeTwentyFivePayloads(s32 output, EvtRuntime *runtime) {
     }
 }
 
-extern u8 sdfPfsDebugMode;
+extern u8 sdfHddValid;
 extern char *sdfFileGetHostRoot(void);
 extern void evtViewerWriteTrackDirectory(s32 output, s32 format, EvtRuntime *runtime);
 extern char D_004377C0[];
@@ -4685,14 +4685,14 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
     }
 
     if (mode == 0) {
-        if (sdfPfsDebugMode) {
+        if (sdfHddValid) {
             sprintf(pm2Path, "pfs0:/event/pmvtool/%s.PM2", (char *)&runtime->nameStorage[0x14]);
             sprintf(pm3Path, "pfs0:/event/pmvtool/%s.PM3", (char *)&runtime->nameStorage[0x14]);
         } else {
             sprintf(pm2Path, "%sevent/pmvtool/%s.PM2", sdfFileGetHostRoot(), (char *)&runtime->nameStorage[0x14]);
             sprintf(pm3Path, "%sevent/pmvtool/%s.PM3", sdfFileGetHostRoot(), (char *)&runtime->nameStorage[0x14]);
         }
-    } else if (sdfPfsDebugMode) {
+    } else if (sdfHddValid) {
         sprintf(pm2Path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
             ((u32)D_004372B0 / 10U) * 10, D_004372B0, D_004372B0,
             D_004372B2, D_004372B0, D_004372B2);
@@ -4708,7 +4708,7 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
             D_004372B0, D_004372B0, D_004372B2, D_004372B0, D_004372B2);
     }
 
-    if (sdfPfsDebugMode) {
+    if (sdfHddValid) {
         printf("hdd -> %s\n", pm2Path);
         pm2 = sceOpen(pm2Path, 0x602, 0666);
         pm3 = sceOpen(pm3Path, 0x602, 0666);
@@ -5529,7 +5529,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         }
     }
     for (row = 0; row < 10; row++) {
-        datGameState->script.ints[200 + row] = -1;
+        DDS3_GBWK->script.ints[200 + row] = -1;
     }
     if (needsBgm == 1) {
         evtLoadEventBgm(((EvtPmdWorldResource *)work->mainEntry2Data)->area);
@@ -5563,7 +5563,7 @@ extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *runtime);
 extern void movieStop(void);
 extern s32 sdfDelayedResrcCheck(void);
 extern void dds3FreeRenderTexture(void);
-extern u32 kwlnDrawControlFlags;
+extern u32 dds3DrawFlag;
 extern void evtFormatPolygonMoviePaths(u16 eventId, u16 sceneId, char *path0, char *path1, char *path2);
 extern s32 sdfFileCheckExist(char *path);
 extern void evtFreeStage(void);
@@ -5591,7 +5591,7 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     dds3FreeRenderTexture();
     while (sdfDelayedResrcCheck() != 0) {
     }
-    kwlnDrawControlFlags |= 0x2000000;
+    dds3DrawFlag |= 0x2000000;
     evtFormatPolygonMoviePaths(D_004372B0, D_004372B2, path0, path1, path2);
     if (mode == 1) {
         if (sdfFileCheckExist(path0) != 1) {

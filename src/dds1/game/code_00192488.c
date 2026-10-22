@@ -82,7 +82,7 @@ void effAPPoint4Delete(EffChanWork *work) {
 }
 
 extern f32 sdfViewTargetVector[4];
-extern f32 sdfViewEyeVector[4];
+extern f32 aViewTarget[4];
 
 /* vu0 routine: Jitter four control points normal to the path and viewing direction.
  * Reuse the final edge normal for the endpoint; retain XYZ-only scale initialization. */
@@ -97,7 +97,7 @@ void effAPPoint4PartInit(EffChanWork *work, u32 recordIndex) {
     f32 centeredRandom;
 
     VU0_LOAD_VF(vf10, sdfViewTargetVector);
-    VU0_LOAD_VF(vf11, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, aViewTarget);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, viewDirection);
     cursorStep = 1.0f / (f32)work->head.steps;
@@ -637,11 +637,11 @@ void effSetChanStep(EffChan *channel, f32 step) {
 }
 
 FntList *effGetFontListHead(void) {
-    return &frFontResourceList;
+    return &gFGC;
 }
 
 s32 effGetFontListCount(void) {
-    return frFontResourceList.count;
+    return gFGC.count;
 }
 
 extern s8 D_003BB150;
@@ -658,33 +658,33 @@ s32 fmInitFontMemControl(u32 unused, s32 columns, s32 rows, s32 cellWidth, s32 c
     s32 row;
     s32 column;
 
-    if (frFontResourceList.head != NULL && D_003BB150 != 0) {
+    if (gFGC.head != NULL && D_003BB150 != 0) {
         return 0;
     }
     count = columns * rows;
-    frFontResourceList.cellWidth = cellWidth;
-    frFontResourceList.cellHeight = cellHeight;
-    frFontResourceList.count = count;
-    frFontResourceList.capacity = count;
-    frFontResourceList.pixelByteCount = cellWidth * cellHeight / 2;
-    frFontResourceList.nodeAllocation = sdfMemAllocDirect(count * sizeof(FntNode));
-    frFontResourceList.head = (FntNode *)sdfMemLock(frFontResourceList.nodeAllocation);
+    gFGC.cellWidth = cellWidth;
+    gFGC.cellHeight = cellHeight;
+    gFGC.count = count;
+    gFGC.capacity = count;
+    gFGC.pixelByteCount = cellWidth * cellHeight / 2;
+    gFGC.nodeAllocation = sdfMemAllocDirect(count * sizeof(FntNode));
+    gFGC.head = (FntNode *)sdfMemLock(gFGC.nodeAllocation);
     if (recordBytes != 0) {
-        frFontResourceList.recordStorageAllocation = sdfMemAllocDirect(recordBytes * frFontResourceList.count);
-        records = (u8 *)sdfMemLock(frFontResourceList.recordStorageAllocation);
+        gFGC.recordStorageAllocation = sdfMemAllocDirect(recordBytes * gFGC.count);
+        records = (u8 *)sdfMemLock(gFGC.recordStorageAllocation);
     }
-    for (i = 0; i < frFontResourceList.count - 1; i++) {
-        frFontResourceList.head[i].next = &frFontResourceList.head[i + 1];
+    for (i = 0; i < gFGC.count - 1; i++) {
+        gFGC.head[i].next = &gFGC.head[i + 1];
     }
-    frFontResourceList.head[i].next = frFontResourceList.head;
-    for (i = frFontResourceList.count - 1; i > 0; i--) {
-        frFontResourceList.head[i].prev = &frFontResourceList.head[i - 1];
+    gFGC.head[i].next = gFGC.head;
+    for (i = gFGC.count - 1; i > 0; i--) {
+        gFGC.head[i].prev = &gFGC.head[i - 1];
     }
-    frFontResourceList.head[0].prev = &frFontResourceList.head[frFontResourceList.count - 1];
+    gFGC.head[0].prev = &gFGC.head[gFGC.count - 1];
     i = 0;
     for (row = 0; row < rows; row++) {
         for (column = 0; column < columns; column++) {
-            node = &frFontResourceList.head[i];
+            node = &gFGC.head[i];
             if (node == NULL) {
                 fmDestroyFontMemControl();
                 return 0;

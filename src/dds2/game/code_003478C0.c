@@ -35,7 +35,7 @@ enum {
     SDF_POOL_PUSH_FREE = 1
 };
 
-extern u8 sdf3DCameraMatrix[];
+extern u8 sdf3DScreenTm[];
 
 
 
@@ -399,13 +399,13 @@ SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s3
 
 /* vu0 routine: render line pairs using the cached composed matrix. */
 SdfPacket *effDebugDrawWireModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
-    VU0_LOAD_MATRIX(sdf3DCameraMatrix);
+    VU0_LOAD_MATRIX(sdf3DScreenTm);
     return sdfDrawModelWithMatrix(vertices, colors, vertexCount, primitiveFlags);
 }
 
 /* vu0 routine: compose the current matrix with the cached transform, then render line pairs. */
 SdfPacket *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
-    sdfPostmultiplyVuMatrixFromMemory(sdf3DCameraMatrix);
+    sdfPostmultiplyVuMatrixFromMemory(sdf3DScreenTm);
     return sdfDrawModelWithMatrix(vertices, colors, vertexCount, primitiveFlags);
 }
 
@@ -534,7 +534,7 @@ s32 *sdfFileRpcHandler(u32 command, s32 request) {
     }
     return D_0047BE00;
 }
-extern u8 sdfPfsDebugMode;
+extern u8 sdfHddValid;
 extern u8 D_0047BD00[];
 /* Load SDFIOPFL, wake the creator, and serve the registered stream RPC commands. */
 void SdfFileRpcServerThreadProc(void) {
@@ -549,7 +549,7 @@ void SdfFileRpcServerThreadProc(void) {
     sceSifRegisterRpc(server, 0x66504F49, sdfFileRpcHandler,
                       D_0047BD00, 0, 0, queue);
     module = "cdrom0:\\USERIRX\\SDFIOPFL.IRX;1";
-    if (sdfPfsDebugMode != 0 &&
+    if (sdfHddValid != 0 &&
         sceGetstat("pfs0:/userirx/sdfiopfl.irx", &info) == 0 &&
         (info.mode & 0xF000) == 0x2000) {
         module = "pfs0:/userirx/sdfiopfl.irx";

@@ -95,12 +95,12 @@ void mnuCreateStaffItemWindow(StaffDisplayContext *context) {
         u8 itemFlags;
         u32 quantity;
 
-        if (datGameState->inventory.counts[itemId] != 0) {
+        if (DDS3_GBWK->inventory.counts[itemId] != 0) {
             itemFlags = datItemSkillRecords[itemId].flags;
             if (((itemFlags & 3) != 0 || mnuIsSolarPricedItemId(itemId) != 0) &&
                 mnuIsBulletItemId(itemId) == 0) {
                 node = mnuAppendWindowListNode(window, D_003BAA84 + textOffset);
-                quantity = datGameState->inventory.counts[itemId];
+                quantity = DDS3_GBWK->inventory.counts[itemId];
                 node->sortKeySecondary = itemId;
                 node->sortKeyPrimary = quantity;
                 if ((datItemSkillRecords[itemId].flags & 1) == 0 || mnuIsSolarPricedItemId(itemId) != 0) {
@@ -163,7 +163,7 @@ extern void mnuRemoveWindowListCursorNode(MenuWindowContainer *);
 s32 mnuIsStaffWindowReadyForItem(s32 itemId, StaffDisplayContext *context) {
     StaffWindowResources *resources = context->resources;
 
-    if (((SaveItemCounts *)datGameState)->counts[itemId & 0xFFFF] == 0) {
+    if (((SaveItemCounts *)DDS3_GBWK)->counts[itemId & 0xFFFF] == 0) {
         mnuRemoveWindowListCursorNode(resources->windows[0]);
     }
     return resources->windows[0]->list->count != 0;
@@ -186,9 +186,9 @@ void mnuCreateStaffBulletItemWindow(StaffDisplayContext *context) {
     window->list->context = context;
     window->list->drawCallback = mnuDrawStaffItemListEntry;
     do {
-        if (((SaveItemCounts *)datGameState)->counts[itemId] != 0 && mnuIsBulletItemId(itemId)) {
+        if (((SaveItemCounts *)DDS3_GBWK)->counts[itemId] != 0 && mnuIsBulletItemId(itemId)) {
             node = mnuAppendWindowListNode(window, D_003BAA84 + textOffset);
-            quantity = ((SaveItemCounts *)datGameState)->counts[itemId];
+            quantity = ((SaveItemCounts *)DDS3_GBWK)->counts[itemId];
             node->sortKeySecondary = itemId;
             node->sortKeyPrimary = quantity;
         }
@@ -220,7 +220,7 @@ s32 mnuRefreshStaffBulletItemList(s32 itemId, s32 previousItemId, void *owner) {
     if (itemId == 0 && previousItemId == 0) {
         return 1;
     }
-    if (datGameState->inventory.counts[previousItemId] == 0) {
+    if (DDS3_GBWK->inventory.counts[previousItemId] == 0) {
         window = resources->windows[2];
         previousCursorId = window->list->cursor->index;
         if (window->list->cursor == window->list->last) {
@@ -231,7 +231,7 @@ s32 mnuRefreshStaffBulletItemList(s32 itemId, s32 previousItemId, void *owner) {
     } else {
         window = resources->windows[2];
         node = window->list->cursor;
-        quantity = datGameState->inventory.counts[previousItemId];
+        quantity = DDS3_GBWK->inventory.counts[previousItemId];
         node->sortKeyPrimary = quantity;
     }
 
@@ -249,10 +249,10 @@ s32 mnuRefreshStaffBulletItemList(s32 itemId, s32 previousItemId, void *owner) {
         node = mnuInsertWindowListNodeRelativeToAnchor(
             window, node, D_003BAA84 + itemId * 25, previousCursorId, insertBefore);
         window = resources->windows[2];
-        quantity = datGameState->inventory.counts[itemId];
+        quantity = DDS3_GBWK->inventory.counts[itemId];
         node->sortKeySecondary = itemId;
     } else {
-        quantity = datGameState->inventory.counts[itemId];
+        quantity = DDS3_GBWK->inventory.counts[itemId];
     }
     node->sortKeyPrimary = quantity;
     return window->list->count != 0;
@@ -397,7 +397,7 @@ extern void mnuUpdatePartyPanelPercentDisplays(s32);
  * party panels. Returns 1 when the item was consumed. */
 s32 mnuUseStaffItem(s32 itemId, StaffDisplayContext *context) {
     s32 partyPanel = (s32)context + 0x15C;
-    s32 targetUnit = (s32)&datGameState->party[context->selectionList->cursor->index];
+    s32 targetUnit = (s32)&DDS3_GBWK->party[context->selectionList->cursor->index];
     s32 result = btlItemApplyDirectEffect((MenuPageWindow *)partyPanel, itemId & 0xFFFF,
                                          targetUnit, (DatPartyRecord *)targetUnit);
 
@@ -427,7 +427,7 @@ void mnuRefreshStaffItemSelection(s32 selection, StaffDisplayContext *context) {
     consumed = mnuUseStaffItem(selection, context);
     if (consumed != 0) {
         resources->windows[0]->list->cursor->sortKeyPrimary =
-                  ((SaveItemCounts *)datGameState)->counts[selection];
+                  ((SaveItemCounts *)DDS3_GBWK)->counts[selection];
         resources->selection = selection;
     }
     mnuSetStateValue(&((StaffDisplayContext *)context)->gradient.active, 1);

@@ -96,7 +96,7 @@ typedef struct {
 extern s8 D_003BB04C;
 extern s32 D_003BB048;
 
-extern EffPCPSharedTrail *effPcpSharedTrailWork;
+extern EffPCPSharedTrail *pBlinkMultiBlurBase;
 
 
 /* The update uses unsigned frame bounds; the initial sweep interval is
@@ -115,10 +115,10 @@ extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 
 
-extern u8 effExpandingThunderFadeParams[];
-extern u8 effGrowingThunderFadeParams[];
-extern u8 effShortThunderFadeParams[];
-extern u8 effScalingThunderFadeParams[];
+extern u8 effPCP_ShockWave01_ThunderSpherePoly_Param[];
+extern u8 effPCP_Houden01_ThunderSpherePoly_Param[];
+extern u8 effPCP_Megidora01_ThunderSpherePoly_Param[];
+extern u8 effPCP_Megidoraon01_ThunderSpherePoly_Param[];
 extern u8 effMuzzleThunderRayParams[];
 extern u8 effCyanBlueRayPairParams[];
 extern u8 effWhiteYellowRayPairParams[];
@@ -144,7 +144,7 @@ void effPCPSparkleSphereDelete(EffPCPRingWork *work) {
     sdfChipFreeDirect(work);
 }
 
-extern u8 sdfViewEyeVector[];
+extern u8 aViewTarget[];
 extern u8 sdfViewTargetVector[];
 extern void dds3BillboardDraw(BillObj *effect);
 extern u32 effMagaCylinderCalcColor(u32 flags, u32 color);
@@ -162,7 +162,7 @@ void effPCPSparkleSphereDraw(EffPCPRingWork *work) {
     s32 i;
 
     VU0_LOAD_VF($vf10, sdfViewTargetVector);
-    VU0_LOAD_VF($vf11, sdfViewEyeVector);
+    VU0_LOAD_VF($vf11, aViewTarget);
     VU0_SUB(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF($vf10, dir);
@@ -1006,7 +1006,7 @@ void effPCPZiodin01SetColor(EffPCPThunderGroup *work, u32 val) {
     work->unk18 = val;
 }
 
-extern EffThunderFragmentParams effNarrowConeSpawnParams[];
+extern EffThunderFragmentParams effPCPZiodin02Param[];
 
 /* 12-piece spread on a cone around a random axis (rotation matrix built by
  * SetRotateMatrixAxis into the VU0 matrix registers). */
@@ -1030,25 +1030,25 @@ void effPCPZiodin02Init(EffPCPThunderGroup *group) {
             angle += 60.0f * EFF_DEG2RAD;
         }
         spread = dds3GetRandFloatA(effDefaultRandomState) * 0.5f + 0.5f;
-        effNarrowConeSpawnParams->bandWidth = spread * 1.25f;
-        effNarrowConeSpawnParams->edgeWidth = spread * 12.5f;
+        effPCPZiodin02Param->bandWidth = spread * 1.25f;
+        effPCPZiodin02Param->edgeWidth = spread * 12.5f;
         radius = (dds3GetRandFloatA(effDefaultRandomState) * 0.25f + 0.75f) * 100.0f;
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
-        effNarrowConeSpawnParams->end[1] = 0;
-        effNarrowConeSpawnParams->end[0] = sinv * radius;
-        effNarrowConeSpawnParams->end[2] = cosv * radius;
+        effPCPZiodin02Param->end[1] = 0;
+        effPCPZiodin02Param->end[0] = sinv * radius;
+        effPCPZiodin02Param->end[2] = cosv * radius;
         SetRotateMatrixAxis(-(dds3GetRandFloatA(effDefaultRandomState) * (50.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
         height = (dds3GetRandFloatA(effDefaultRandomState) * 0.65f + (1.0f - 0.65f)) * 500.0f;
-        effNarrowConeSpawnParams->start[0] = 0;
-        effNarrowConeSpawnParams->start[2] = 0;
-        effNarrowConeSpawnParams->start[1] = -height;
-        VU0_LOAD_VF($vf10, effNarrowConeSpawnParams->start);
+        effPCPZiodin02Param->start[0] = 0;
+        effPCPZiodin02Param->start[2] = 0;
+        effPCPZiodin02Param->start[1] = -height;
+        VU0_LOAD_VF($vf10, effPCPZiodin02Param->start);
                 VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF($vf10, effNarrowConeSpawnParams->start);
-        effNarrowConeSpawnParams->start[0] += effNarrowConeSpawnParams->end[0];
-        effNarrowConeSpawnParams->start[2] += effNarrowConeSpawnParams->end[2];
+        VU0_STORE_VF($vf10, effPCPZiodin02Param->start);
+        effPCPZiodin02Param->start[0] += effPCPZiodin02Param->end[0];
+        effPCPZiodin02Param->start[2] += effPCPZiodin02Param->end[2];
         if (height < 300.0f) {
             speed = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * 2.5f + 5.0f;
             life = dds3GetRandA((EffRandState *)effDefaultRandomState) % 5 + 5;
@@ -1056,9 +1056,9 @@ void effPCPZiodin02Init(EffPCPThunderGroup *group) {
             speed = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = dds3GetRandA((EffRandState *)effDefaultRandomState) % 6 + 15;
         }
-        effNarrowConeSpawnParams->halfLife = life;
-        effNarrowConeSpawnParams->waveAmplitude = speed;
-        group->handles[i] = effPCP_ThunderPolyCreate(effNarrowConeSpawnParams);
+        effPCPZiodin02Param->halfLife = life;
+        effPCPZiodin02Param->waveAmplitude = speed;
+        group->handles[i] = effPCP_ThunderPolyCreate(effPCPZiodin02Param);
         i++;
     } while (i < 12);
 }
@@ -1106,7 +1106,7 @@ void effPCPZiodin02SetColor(EffPCPThunderGroup *work, u32 val) {
     work->unk18 = val;
 }
 
-extern EffThunderFragmentParams effVariableHeightSpawnParams[];
+extern EffThunderFragmentParams effPCPZiodin03Param[];
 
 /* 30-piece spread: pieces are placed on a cone around a random axis (rotation
  * matrix built by SetRotateMatrixAxis into the VU0 matrix registers). */
@@ -1129,24 +1129,24 @@ void effPCPZiodin03Init(EffPCPThunderGroup *group) {
             angle += 24.0f * EFF_DEG2RAD;
         }
         spread = dds3GetRandFloatA(effDefaultRandomState) * 0.5f + 0.5f;
-        effVariableHeightSpawnParams->bandWidth = spread * 1.25f;
-        effVariableHeightSpawnParams->edgeWidth = spread * 12.5f;
-        effVariableHeightSpawnParams->end[1] = 0;
-        effVariableHeightSpawnParams->end[0] = sinv * ((dds3GetRandFloatA(effDefaultRandomState) * 0.25f + 0.75f) * 500.0f);
-        effVariableHeightSpawnParams->end[2] = cosv * ((dds3GetRandFloatA(effDefaultRandomState) * 0.25f + 0.75f) * 250.0f);
+        effPCPZiodin03Param->bandWidth = spread * 1.25f;
+        effPCPZiodin03Param->edgeWidth = spread * 12.5f;
+        effPCPZiodin03Param->end[1] = 0;
+        effPCPZiodin03Param->end[0] = sinv * ((dds3GetRandFloatA(effDefaultRandomState) * 0.25f + 0.75f) * 500.0f);
+        effPCPZiodin03Param->end[2] = cosv * ((dds3GetRandFloatA(effDefaultRandomState) * 0.25f + 0.75f) * 250.0f);
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
         SetRotateMatrixAxis(-(dds3GetRandFloatA(effDefaultRandomState) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
         height = (dds3GetRandFloatA(effDefaultRandomState) * 0.65f + (1.0f - 0.65f)) * 500.0f;
-        effVariableHeightSpawnParams->start[0] = 0;
-        effVariableHeightSpawnParams->start[2] = 0;
-        effVariableHeightSpawnParams->start[1] = -height;
-        VU0_LOAD_VF($vf10, effVariableHeightSpawnParams->start);
+        effPCPZiodin03Param->start[0] = 0;
+        effPCPZiodin03Param->start[2] = 0;
+        effPCPZiodin03Param->start[1] = -height;
+        VU0_LOAD_VF($vf10, effPCPZiodin03Param->start);
                 VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF($vf10, effVariableHeightSpawnParams->start);
-        effVariableHeightSpawnParams->start[0] += effVariableHeightSpawnParams->end[0];
-        effVariableHeightSpawnParams->start[2] += effVariableHeightSpawnParams->end[2];
+        VU0_STORE_VF($vf10, effPCPZiodin03Param->start);
+        effPCPZiodin03Param->start[0] += effPCPZiodin03Param->end[0];
+        effPCPZiodin03Param->start[2] += effPCPZiodin03Param->end[2];
         if (height < 300.0f) {
             speed = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * 2.5f + 5.0f;
             life = dds3GetRandA((EffRandState *)effDefaultRandomState) % 5 + 5;
@@ -1154,9 +1154,9 @@ void effPCPZiodin03Init(EffPCPThunderGroup *group) {
             speed = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = dds3GetRandA((EffRandState *)effDefaultRandomState) % 6 + 15;
         }
-        effVariableHeightSpawnParams->halfLife = life;
-        effVariableHeightSpawnParams->waveAmplitude = speed;
-        group->handles[i] = effPCP_ThunderPolyCreate(effVariableHeightSpawnParams);
+        effPCPZiodin03Param->halfLife = life;
+        effPCPZiodin03Param->waveAmplitude = speed;
+        group->handles[i] = effPCP_ThunderPolyCreate(effPCPZiodin03Param);
         i++;
     } while (i < 30);
 }
@@ -1204,7 +1204,7 @@ void effPCPZiodin03SetColor(EffPCPThunderGroup *work, u32 val) {
     work->unk18 = val;
 }
 
-extern EffThunderFragmentParams effWideConeSpawnParams[];
+extern EffThunderFragmentParams effPCPZiodin04Param[];
 
 /* Same spread as effPCPZiodin02Init with a wider cone and its own parameter block. */
 void effPCPZiodin04Init(EffPCPThunderGroup *group) {
@@ -1227,25 +1227,25 @@ void effPCPZiodin04Init(EffPCPThunderGroup *group) {
             angle += 60.0f * EFF_DEG2RAD;
         }
         spread = dds3GetRandFloatA(effDefaultRandomState) * 0.5f + 0.5f;
-        effWideConeSpawnParams->bandWidth = spread * 1.25f;
-        effWideConeSpawnParams->edgeWidth = spread * 12.5f;
+        effPCPZiodin04Param->bandWidth = spread * 1.25f;
+        effPCPZiodin04Param->edgeWidth = spread * 12.5f;
         radius = (dds3GetRandFloatA(effDefaultRandomState) * 0.25f + 0.75f) * 100.0f;
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
-        effWideConeSpawnParams->end[1] = 0;
-        effWideConeSpawnParams->end[0] = sinv * radius;
-        effWideConeSpawnParams->end[2] = cosv * radius;
+        effPCPZiodin04Param->end[1] = 0;
+        effPCPZiodin04Param->end[0] = sinv * radius;
+        effPCPZiodin04Param->end[2] = cosv * radius;
         SetRotateMatrixAxis(-(dds3GetRandFloatA(effDefaultRandomState) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
         height = (dds3GetRandFloatA(effDefaultRandomState) * 0.65f + (1.0f - 0.65f)) * 500.0f;
-        effWideConeSpawnParams->start[0] = 0;
-        effWideConeSpawnParams->start[2] = 0;
-        effWideConeSpawnParams->start[1] = -height;
-        VU0_LOAD_VF($vf10, effWideConeSpawnParams->start);
+        effPCPZiodin04Param->start[0] = 0;
+        effPCPZiodin04Param->start[2] = 0;
+        effPCPZiodin04Param->start[1] = -height;
+        VU0_LOAD_VF($vf10, effPCPZiodin04Param->start);
                 VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF($vf10, effWideConeSpawnParams->start);
-        effWideConeSpawnParams->start[0] += effWideConeSpawnParams->end[0];
-        effWideConeSpawnParams->start[2] += effWideConeSpawnParams->end[2];
+        VU0_STORE_VF($vf10, effPCPZiodin04Param->start);
+        effPCPZiodin04Param->start[0] += effPCPZiodin04Param->end[0];
+        effPCPZiodin04Param->start[2] += effPCPZiodin04Param->end[2];
         if (height < 300.0f) {
             speed = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * 2.5f + 5.0f;
             life = dds3GetRandA((EffRandState *)effDefaultRandomState) % 5 + 5;
@@ -1253,9 +1253,9 @@ void effPCPZiodin04Init(EffPCPThunderGroup *group) {
             speed = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = dds3GetRandA((EffRandState *)effDefaultRandomState) % 6 + 15;
         }
-        effWideConeSpawnParams->halfLife = life;
-        effWideConeSpawnParams->waveAmplitude = speed;
-        group->handles[i] = effPCP_ThunderPolyCreate(effWideConeSpawnParams);
+        effPCPZiodin04Param->halfLife = life;
+        effPCPZiodin04Param->waveAmplitude = speed;
+        group->handles[i] = effPCP_ThunderPolyCreate(effPCPZiodin04Param);
         i++;
     } while (i < 12);
 }
@@ -1463,7 +1463,7 @@ typedef struct EffPCPFadeWork {
 void effPCPShockWave01Init(EffPCPFadeWork *work) {
     EffThunderVectorWork *handle;
 
-    handle = effPCPThunderSpherePolyCreate((EffThunderAlphaParams *)effExpandingThunderFadeParams);
+    handle = effPCPThunderSpherePolyCreate((EffThunderAlphaParams *)effPCP_ShockWave01_ThunderSpherePoly_Param);
     work->frame = 0;
     work->handle = handle;
 }
@@ -1531,7 +1531,7 @@ void effPCPShockWave01SetColor(EffPCPFadeWork *work, u32 val) {
     work->color = val;
 }
 
-extern EffThunderFragmentParams effConeBurstSpawnParams[];
+extern EffThunderFragmentParams effPCPShockWave02Param[];
 
 /* Same spread as effPCPZiodin03Init with its own parameter block. */
 void effPCPShockWave02Init(EffPCPThunderGroup *group) {
@@ -1553,24 +1553,24 @@ void effPCPShockWave02Init(EffPCPThunderGroup *group) {
             angle += 24.0f * EFF_DEG2RAD;
         }
         spread = dds3GetRandFloatA(effDefaultRandomState) * 0.5f + 0.5f;
-        effConeBurstSpawnParams->bandWidth = spread * 1.25f;
-        effConeBurstSpawnParams->edgeWidth = spread * 12.5f;
-        effConeBurstSpawnParams->end[1] = 0;
-        effConeBurstSpawnParams->end[0] = sinv * ((dds3GetRandFloatA(effDefaultRandomState) * 0.25f + 0.75f) * 500.0f);
-        effConeBurstSpawnParams->end[2] = cosv * ((dds3GetRandFloatA(effDefaultRandomState) * 0.25f + 0.75f) * 250.0f);
+        effPCPShockWave02Param->bandWidth = spread * 1.25f;
+        effPCPShockWave02Param->edgeWidth = spread * 12.5f;
+        effPCPShockWave02Param->end[1] = 0;
+        effPCPShockWave02Param->end[0] = sinv * ((dds3GetRandFloatA(effDefaultRandomState) * 0.25f + 0.75f) * 500.0f);
+        effPCPShockWave02Param->end[2] = cosv * ((dds3GetRandFloatA(effDefaultRandomState) * 0.25f + 0.75f) * 250.0f);
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
         SetRotateMatrixAxis(-(dds3GetRandFloatA(effDefaultRandomState) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
         height = (dds3GetRandFloatA(effDefaultRandomState) * 0.65f + (1.0f - 0.65f)) * 500.0f;
-        effConeBurstSpawnParams->start[0] = 0;
-        effConeBurstSpawnParams->start[2] = 0;
-        effConeBurstSpawnParams->start[1] = -height;
-        VU0_LOAD_VF($vf10, effConeBurstSpawnParams->start);
+        effPCPShockWave02Param->start[0] = 0;
+        effPCPShockWave02Param->start[2] = 0;
+        effPCPShockWave02Param->start[1] = -height;
+        VU0_LOAD_VF($vf10, effPCPShockWave02Param->start);
                 VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF($vf10, effConeBurstSpawnParams->start);
-        effConeBurstSpawnParams->start[0] += effConeBurstSpawnParams->end[0];
-        effConeBurstSpawnParams->start[2] += effConeBurstSpawnParams->end[2];
+        VU0_STORE_VF($vf10, effPCPShockWave02Param->start);
+        effPCPShockWave02Param->start[0] += effPCPShockWave02Param->end[0];
+        effPCPShockWave02Param->start[2] += effPCPShockWave02Param->end[2];
         if (height < 300.0f) {
             speed = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * 2.5f + 5.0f;
             life = dds3GetRandA((EffRandState *)effDefaultRandomState) % 5 + 5;
@@ -1578,9 +1578,9 @@ void effPCPShockWave02Init(EffPCPThunderGroup *group) {
             speed = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = dds3GetRandA((EffRandState *)effDefaultRandomState) % 6 + 15;
         }
-        effConeBurstSpawnParams->halfLife = life;
-        effConeBurstSpawnParams->waveAmplitude = speed;
-        group->handles[i] = effPCP_ThunderPolyCreate(effConeBurstSpawnParams);
+        effPCPShockWave02Param->halfLife = life;
+        effPCPShockWave02Param->waveAmplitude = speed;
+        group->handles[i] = effPCP_ThunderPolyCreate(effPCPShockWave02Param);
         i++;
     } while (i < 30);
 }
@@ -1631,7 +1631,7 @@ void effPCPShockWave02SetColor(EffPCPThunderGroup *work, u32 val) {
 void effPCPHouden01Init(EffPCPFadeWork *work) {
     EffThunderVectorWork *handle;
 
-    handle = effPCPThunderSpherePolyCreate((EffThunderAlphaParams *)effGrowingThunderFadeParams);
+    handle = effPCPThunderSpherePolyCreate((EffThunderAlphaParams *)effPCP_Houden01_ThunderSpherePoly_Param);
     work->frame = 0;
     work->handle = handle;
 }
@@ -1718,21 +1718,21 @@ EffPCPSharedTrailRef *effPCPBlinkMultiBlurCreate(EffPCPTrailParams *params) {
 
     ref->frame = 0;
     if (D_003BB048 == 0) {
-        effPcpSharedTrailWork = sdfChipAllocDirect(sizeof(EffPCPSharedTrail));
-        effPcpSharedTrailWork->obj = dds3EffectPartialMultiBlurCreate(&params->res);
-        effPcpSharedTrailWork->color = params->res.source.color;
-        effPcpSharedTrailWork->frame = 0;
-        effPcpSharedTrailWork->flags = 0x80808080;
-        effPcpSharedTrailWork->pos[0] = 0;
-        effPcpSharedTrailWork->pos[1] = 0;
-        effPcpSharedTrailWork->pos[2] = 0;
-        effPcpSharedTrailWork->sizeInput = 0;
-        effPcpSharedTrailWork->limit = params->count;
-        effPcpSharedTrailWork->baseLimit = params->count;
-        effPcpSharedTrailWork->colors[0] = params->colors[0];
-        effPcpSharedTrailWork->colors[1] = params->colors[1];
-        effPcpSharedTrailWork->scale = params->scale;
-        effPcpSharedTrailWork->minSize = params->minSize;
+        pBlinkMultiBlurBase = sdfChipAllocDirect(sizeof(EffPCPSharedTrail));
+        pBlinkMultiBlurBase->obj = dds3EffectPartialMultiBlurCreate(&params->res);
+        pBlinkMultiBlurBase->color = params->res.source.color;
+        pBlinkMultiBlurBase->frame = 0;
+        pBlinkMultiBlurBase->flags = 0x80808080;
+        pBlinkMultiBlurBase->pos[0] = 0;
+        pBlinkMultiBlurBase->pos[1] = 0;
+        pBlinkMultiBlurBase->pos[2] = 0;
+        pBlinkMultiBlurBase->sizeInput = 0;
+        pBlinkMultiBlurBase->limit = params->count;
+        pBlinkMultiBlurBase->baseLimit = params->count;
+        pBlinkMultiBlurBase->colors[0] = params->colors[0];
+        pBlinkMultiBlurBase->colors[1] = params->colors[1];
+        pBlinkMultiBlurBase->scale = params->scale;
+        pBlinkMultiBlurBase->minSize = params->minSize;
     }
     D_003BB048++;
     return ref;
@@ -1744,8 +1744,8 @@ void effPCPBlinkMultiBlurDelete(EffPCPSharedTrailRef *work)
     if (--D_003BB048 != 0) {
         return;
     }
-    dds3EffectPartialMultiBlurDelete(effPcpSharedTrailWork->obj);
-    sdfChipFreeDirect(effPcpSharedTrailWork);
+    dds3EffectPartialMultiBlurDelete(pBlinkMultiBlurBase->obj);
+    sdfChipFreeDirect(pBlinkMultiBlurBase);
 }
 
 typedef struct EffPCPTrailWork {
@@ -1768,7 +1768,7 @@ typedef char EffPCPTrailWork_sizeInput_offset_must_be_0x1C[
 
 extern s32 effPCPBlurScreenOffset(f32 value);
 extern u32 effMagaCylinderCalcColor(u32 flags, u32 color);
-#define EFF_SHARED_TRAIL ((EffPCPSharedTrail *)effPcpSharedTrailWork)
+#define EFF_SHARED_TRAIL ((EffPCPSharedTrail *)pBlinkMultiBlurBase)
 
 void effPCPBlinkMultiBlurDraw(ref)
     EffPCPSharedTrailRef *ref;
@@ -1808,15 +1808,15 @@ void effPCPBlinkMultiBlurDraw(ref)
 }
 
 void effPCPBlinkMultiBlurSetPosition(void *work, void *src) {
-    PCP_COPY_VECTOR(effPcpSharedTrailWork, src);
+    PCP_COPY_VECTOR(pBlinkMultiBlurBase, src);
 }
 
 void effPCPBlinkMultiBlurSetColor(u32 unused, u32 val) {
-    effPcpSharedTrailWork->flags = val;
+    pBlinkMultiBlurBase->flags = val;
 }
 
 void effPCPBlinkMultiBlurSetArea(u32 unused, f32 value) {
-    effPcpSharedTrailWork->sizeInput = value;
+    pBlinkMultiBlurBase->sizeInput = value;
 }
 
 
@@ -2426,7 +2426,7 @@ void effPCPRippleBlurExpSetColor(EffPCPCompactWork *work, u32 val) {
 void effPCPMegidora01Init(EffPCPFadeWork *work) {
     EffThunderVectorWork *handle;
 
-    handle = effPCPThunderSpherePolyCreate((EffThunderAlphaParams *)effShortThunderFadeParams);
+    handle = effPCPThunderSpherePolyCreate((EffThunderAlphaParams *)effPCP_Megidora01_ThunderSpherePoly_Param);
     work->frame = 0;
     work->handle = handle;
 }
@@ -2503,7 +2503,7 @@ void effPCPMegidora01SetColor(EffPCPFadeWork *work, u32 val) {
 void effPCPMegidoraon01Init(EffPCPFadeWork *work) {
     EffThunderVectorWork *handle;
 
-    handle = effPCPThunderSpherePolyCreate((EffThunderAlphaParams *)effScalingThunderFadeParams);
+    handle = effPCPThunderSpherePolyCreate((EffThunderAlphaParams *)effPCP_Megidoraon01_ThunderSpherePoly_Param);
     work->frame = 0;
     work->handle = handle;
 }
@@ -2790,7 +2790,7 @@ void effPCPAgiraoFireDelete(EffPCPTripleWork *work) {
     sdfChipFreeDirect(work);
 }
 
-extern u8 sdfViewUpVector[];
+extern u8 aViewDown[];
 
 /* vu0 routine: place three staggered groups in the camera-relative basis. */
 void effPCPAgiraoFireDraw(EffPCPTripleWork *work) {
@@ -2801,7 +2801,7 @@ void effPCPAgiraoFireDraw(EffPCPTripleWork *work) {
     u32 group;
     u32 handleIndex;
 
-    LookAtMatrix(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
+    LookAtMatrix(aViewTarget, sdfViewTargetVector, aViewDown);
     VU0_STORE_MATRIX(basis);
     for (group = 0; group < 3; group++) {
         s32 start = work->head.groupStartFrame[group];
@@ -3102,7 +3102,7 @@ void effPcpBlockSetUpdate(EffPCPBlockSetWork *work) {
                     VU0_STORE_VF(vf10, step);
                     PCP_COPY_VECTOR(position, work->previousPosition);
                     VU0_LOAD_VF(vf10, sdfViewTargetVector);
-                    VU0_LOAD_VF(vf11, sdfViewEyeVector);
+                    VU0_LOAD_VF(vf11, aViewTarget);
                     VU0_SUB(vf10, vf10, vf11);
                     VU0_MOVE_VF(vf11, vf12);
                     VU0_CROSS_XYZ(vf10, vf10, vf11);
@@ -4236,7 +4236,7 @@ void effPCPRingPolyExp2SetVertex(EffPCPBeamLargeWork *work, f32 radius) {
     points = work->node->points;
     step = 6.2831851f / (f32)work->head.segments;
     if (work->head.mode == 0) {
-        LookAtMatrix(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
+        LookAtMatrix(aViewTarget, sdfViewTargetVector, aViewDown);
         ReverseMatrix();
     } else {
         SetRotateMatrixZ(work->rotationA);
@@ -5227,7 +5227,7 @@ void effPCPRadiateTBPartInit(EffPCPPairedEventWork *work, s32 index) {
     }
 }
 
-extern const f32 effPairedDriftReferenceAxis[4] __attribute__((aligned(16)));
+extern const f32 effPCPRadiateTBParam[4] __attribute__((aligned(16)));
 
 /* vu0 routine: rotate a fragment around the view and place events at both ends. */
 void effPCPRadiateTBDraw(EffPCPPairedEventWork *work) {
@@ -5266,7 +5266,7 @@ void effPCPRadiateTBDraw(EffPCPPairedEventWork *work) {
     place.payload[8] = 100.0f;
     place.payload[9] = 100.0f;
     place.payload[10] = 1.0f;
-    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
@@ -5287,13 +5287,13 @@ void effPCPRadiateTBDraw(EffPCPPairedEventWork *work) {
 
                 fragment = effPCP_ThunderPolyGetParam(entry->fragment);
                 SetRotateMatrixAxis(entry->phase, (const struct RwV3d *)viewAxis);
-                VU0_LOAD_VF(vf10, effPairedDriftReferenceAxis);
+                VU0_LOAD_VF(vf10, effPCPRadiateTBParam);
                 VU0_LOAD_VF(vf11, viewAxis);
                 VU0_CROSS_XYZ(vf10, vf10, vf11);
                 VU0_NORMALIZE_VF10();
                 VU0_ROTATE_VEC(vf10, vf10);
                 VU0_STORE_VF(vf10, direction);
-                VU0_LOAD_VF(vf11, effPairedDriftReferenceAxis);
+                VU0_LOAD_VF(vf11, effPCPRadiateTBParam);
                 VU0_CROSS_XYZ(vf10, vf10, vf11);
                 VU0_NORMALIZE_VF10();
                 /* This SDK-produced axis is consumed only by the external builder. */

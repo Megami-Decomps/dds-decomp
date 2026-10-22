@@ -87,7 +87,7 @@ extern const char *D_00368420[];
 extern const char *D_00368430[];
 extern s32 D_003BBE94;
 
-extern u32 kwlnDrawControlFlags;
+extern u32 dds3DrawFlag;
 extern s8 evtViewerFrameColumnCategories[];
 extern u8 D_003BBE88[3];
 extern void dds3FadeSet(s32 red, s32 green, s32 blue, s32 alpha);
@@ -748,8 +748,8 @@ void evtViewerApplyParameterKeyTracks(EvtRuntime *viewer) {
 extern KwlnDrawVectorParams kwlnDrawVector;
 extern u128 *D_00324770[];
 extern u128 kwlnDefaultColorVector[];
-extern f32 sdf3DSoften;
-extern f32 sdf3DBias;
+extern f32 sdfFaceDivSoften;
+extern f32 sdfFaceDivBias;
 extern EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void);
 extern EffBlurScatterParams *effEventGetScatterBlurSetupParams(void);
 extern EffBlurScaleParams *rblurGetParam(void);
@@ -1057,9 +1057,9 @@ extern EffResourceRectParams D_003D7E70;
 extern EffBlurScatterParams D_003D7EA0;
 extern EffBlurScaleParams D_003D7ED0;
 extern EffBlurQuad D_003D7F00;
-extern u8 kwlnDrawOverlayEnabled;
-extern s16 kwlnDrawOverlayAlpha;
-extern s16 kwlnDrawOverlayScale;
+extern u8 dds3ScreenBlurFlag;
+extern s16 dds3ScreenBlurAlpha;
+extern s16 dds3ScreenBlurScale;
 extern void evtSetBokasi(u32 enabled);
 extern void evtSetSkyAlpha(s32 duration, s32 state);
 extern u16 evtCheckSkyAlphaAnime(void);
@@ -1229,8 +1229,8 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
             dds3SetLightColor(0, 0, D_003D7DA0[0]);
             dds3SetLightDir(0, 0, D_003D7DA0[1]);
             dds3SetAmbientColor(0, D_003D7DA0[2]);
-            sdf3DSoften = evtHokanFloat(enable, ratio, firstFrom, firstTo);
-            sdf3DBias = evtHokanFloat(enable, ratio, secondFrom, secondTo);
+            sdfFaceDivSoften = evtHokanFloat(enable, ratio, firstFrom, firstTo);
+            sdfFaceDivBias = evtHokanFloat(enable, ratio, secondFrom, secondTo);
             break;
         }
         unit = NULL;
@@ -1252,12 +1252,12 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
                 break;
             }
             if (previous->frame == time && previous->p14.sh[0] == 1 && !(viewer->flags & 1)) {
-                kwlnDrawControlFlags |= 0x02000000;
+                dds3DrawFlag |= 0x02000000;
                 break;
             }
         } else if (kind == 2) {
             if (previous != NULL && previous->frame == time && previous->p14.sh[0] == 1 && !(viewer->flags & 1)) {
-                kwlnDrawControlFlags |= 0x02000000;
+                dds3DrawFlag |= 0x02000000;
                 break;
             }
         }
@@ -1442,14 +1442,14 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
             }
             if (opacity != 0 || scale != 0) {
                 viewer->flags |= 4;
-                kwlnDrawOverlayEnabled = 1;
-                kwlnDrawOverlayAlpha = opacity;
-                kwlnDrawOverlayScale = scale;
+                dds3ScreenBlurFlag = 1;
+                dds3ScreenBlurAlpha = opacity;
+                dds3ScreenBlurScale = scale;
                 break;
             }
         }
         viewer->flags &= ~4;
-        kwlnDrawOverlayEnabled = 0;
+        dds3ScreenBlurFlag = 0;
         break;
     }
 }
@@ -1791,7 +1791,7 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
             dds3StopQuake();
         }
         if (!(viewer->flags & 4)) {
-            kwlnDrawOverlayEnabled = 0;
+            dds3ScreenBlurFlag = 0;
         }
     }
 }
@@ -2555,7 +2555,7 @@ void evtUpdateViewerMessageWindow(EvtRuntime *viewer) {
     }
     if (itfMesMngGetSelPhase(viewer->windowContext->handle) < 0) {
         itfMesMngSetSelPhase(viewer->windowContext->handle, 0);
-        datGameState->script.ints[viewer->windowResultVariableIndex] = itfMesMngGetSelect(viewer->windowContext->handle);
+        DDS3_GBWK->script.ints[viewer->windowResultVariableIndex] = itfMesMngGetSelect(viewer->windowContext->handle);
         itfMesMngRequestSelectRelease(viewer->windowContext->handle);
         evtViewerMarkWindowInactive(viewer);
         viewer->flags ^= 1;
@@ -2671,7 +2671,7 @@ s32 evtViewerTestIndexedCondition(u32 encodedCondition) {
     if (conditionIndex == 0) {
         return 1;
     }
-    return (datGameState->script.ints[199 + conditionIndex] ^ expectedValue) == 0;
+    return (DDS3_GBWK->script.ints[199 + conditionIndex] ^ expectedValue) == 0;
 }
 
 u32 evtViewerReturnZero(void) {
@@ -2922,7 +2922,7 @@ extern char *D_003684D0[];
 extern char D_003BBF60[];
 extern char D_003BBF68[];
 extern char D_003BBF70[];
-extern u8 sdf3DSoftenOff;
+extern u8 corePktSoftenBias;
 extern s32 mdlDebugPrintEffectScale2(KwlnTask *task);
 extern s32 evtPollRuntimeControlReady(KwlnTask *task);
 extern s32 evtSynchronizeSelectedEntry(KwlnTask *task);
@@ -3342,7 +3342,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                     viewer->floatEditY = key->p0C.f;
                     viewer->savedFloatEditX = key->p08.f;
                     viewer->savedFloatEditY = key->p0C.f;
-                    viewer->savedOverlayFlag = sdf3DSoftenOff;
+                    viewer->savedOverlayFlag = corePktSoftenBias;
                     evtViewerPushCommandHistory(19, 336, -12, viewer);
                     break;
                 case 17: {
@@ -3860,8 +3860,8 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, EvtRuntime *v
             PCP_COPY_VECTOR(destination + 2, kwlnDefaultColorVector);
             break;
         case 14:
-            entry->p08.f = sdf3DSoften;
-            entry->p0C.f = sdf3DBias;
+            entry->p08.f = sdfFaceDivSoften;
+            entry->p0C.f = sdfFaceDivBias;
             break;
         }
         break;
@@ -3910,7 +3910,7 @@ s32 evtViewerPickNextHandler(KwlnTask *task) {
 }
 
 extern s16 D_003BBE7C;
-extern s8 kwlnTaskPadButtonStates[];
+extern s8 dds3PadButtonState[];
 extern void mnuAdvanceShopMenuState(struct EvtRuntime *);
 extern s32 mnuGetMoviePlaybackMode(void);
 extern s32 evtViewerPickNextHandler(KwlnTask *task);
@@ -3928,7 +3928,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
     evtEventViewerApplyEffectToggles(viewer);
     flags = viewer->flags;
     if (!(flags & 8)) {
-        if (kwlnTaskPadButtonStates[0x22] < 0) {
+        if (dds3PadButtonState[0x22] < 0) {
             viewer->flags = flags | 1;
             evtViewerDispatchFlagMode(viewer);
             viewer->actionMode = 0;
@@ -3943,7 +3943,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
             viewer->flags = flags & ~1;
             evtViewerDispatchFlagMode(viewer);
         }
-        if (kwlnTaskPadButtonStates[0x22] >= 0 && kwlnTaskPadButtonStates[0x2C] < 0 &&
+        if (dds3PadButtonState[0x22] >= 0 && dds3PadButtonState[0x2C] < 0 &&
             evtViewerHasUpdateFlag(viewer) == 0) {
             evtEventViewerStartEndCountdown(viewer);
         }
@@ -3998,7 +3998,7 @@ s32 evtViewerScheduleFrameVariableTask(KwlnTask *task) {
     viewer = (void *)dds3GetProcessData(task);
     evtApplyViewerTimelineFrame(((EvtRuntime *)viewer)->curFrame, viewer);
     dds3LinkProcess(task, (KwlnTask *)evtInitFrameVar());
-    kwlnDrawControlFlags |= 0x2000000;
+    dds3DrawFlag |= 0x2000000;
     return (s32)(u32)evtViewerUpdateFrame;
 }
 
@@ -4009,7 +4009,7 @@ s32 evtViewerInitializeUpdateSequence(KwlnTask *task) {
     viewer = (struct EvtRuntime *)dds3GetProcessData(task);
     fldInitializeCameraColorResource();
     evtEventViewerReset(viewer);
-    kwlnDrawControlFlags |= 0x2000000;
+    dds3DrawFlag |= 0x2000000;
     return (s32)(u32)evtViewerScheduleFrameVariableTask;
 }
 
@@ -4023,11 +4023,11 @@ s32 evtViewerAdvanceUpdate(KwlnTask *task) {
     window = viewer->windowContext;
     windowFlags = window->flags;
     if ((windowFlags & 8) == 0) {
-        kwlnDrawControlFlags |= 0x2000000;
+        dds3DrawFlag |= 0x2000000;
         return 0;
     } else {
         if ((windowFlags & 1) != 0) {
-            kwlnDrawControlFlags |= 0x2000000;
+            dds3DrawFlag |= 0x2000000;
             return 0;
         }
         if ((u32)(mnuPollTitleStreamStateLocked() - 3) < 2) {
@@ -4035,11 +4035,11 @@ s32 evtViewerAdvanceUpdate(KwlnTask *task) {
                 mnuMarkTitleStreamResetPending();
             }
             viewer->titleStreamWaitFrames++;
-            kwlnDrawControlFlags |= 0x2000000;
+            dds3DrawFlag |= 0x2000000;
             return 0;
         }
         evtPopulateViewerTimelineFromMovie(viewer->windowContext, viewer);
-        kwlnDrawControlFlags |= 0x2000000;
+        dds3DrawFlag |= 0x2000000;
         return (s32)(u32)evtViewerScheduleFrameVariableTask;
     }
 }
@@ -4061,7 +4061,7 @@ s32 evtViewerStartUpdate(KwlnTask *task) {
     evtViewerDispatchFlagMode(viewer);
     viewer->unk2238 = 0;
     viewer->flags |= 8;
-    kwlnDrawControlFlags |= 0x2000000;
+    dds3DrawFlag |= 0x2000000;
     return (s32)(u32)evtViewerAdvanceUpdate;
 }
 
@@ -4108,7 +4108,7 @@ void evtViewerReleaseResources(EvtRuntime *viewer) {
     while (sdfDelayedResrcCheck() != 0) {
     }
     kwlnFadeSetMode(0);
-    kwlnDrawControlFlags |= 0x2000000;
+    dds3DrawFlag |= 0x2000000;
 }
 
 /* Destroy the currently active event viewer. */

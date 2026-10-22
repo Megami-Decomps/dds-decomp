@@ -116,15 +116,15 @@ extern void DiagMatrix(void);
 
 #define SDF_CAMERA_HALF_HEIGHT_FLAG 1
 
-extern void *sdfConsoleFontTexture;
+extern void *sdfDebugFontHandle;
 
-extern u32 sdf3DDefaultFog;
+extern u32 sdf3DFogDefault;
 
-extern u32 sdf3DDefaultLight;
+extern u32 sdf3DLightDefault;
 
 extern u32 D_003BDA2C;
 
-extern u32 sdfVuSelectedTransformMatrix;
+extern u32 corePktCurrLight;
 
 extern DevConsState *D_003BD3C0;
 
@@ -132,9 +132,9 @@ extern u32 D_003BD3C4;
 
 extern u8 D_00315BA0[];
 
-extern SdfPadEntry sdfPadPorts[];
+extern SdfPadEntry sdfPadCb[];
 
-extern u32 sdfConsoleGlyphTexcoords[];
+extern u32 sdfDevConsFontUvTable[];
 
 extern u128 D_003F9890;
 
@@ -170,7 +170,7 @@ void sdfCoreDrawScanOneSkinNodes(SdfModel *model, SdfObjectRefCommand *source) {
 }
 
 void sdfCoreDrawSetLight(u32 matrixAddress) {
-    sdfVuSelectedTransformMatrix = matrixAddress;
+    corePktCurrLight = matrixAddress;
 }
 
 /* Cache the object's vector only when its address changes, not its contents. */
@@ -186,7 +186,7 @@ void sdfCoreDrawSetZBias(f32 scale) {
 }
 
 void sdfVuClearTransformCache(void) {
-    sdfVuSelectedTransformMatrix = 0;
+    corePktCurrLight = 0;
     D_003BDA2C = 0;
 }
 
@@ -306,7 +306,7 @@ void sdf3DMakeViewportPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node
 
 extern u8 D_003983D0[];
 
-extern u8 sdf3DCameraMatrix[];
+extern u8 sdf3DScreenTm[];
 
 extern u8 D_003984B0[];
 
@@ -318,7 +318,7 @@ void sdf3DSetCamera(SdfProjectionRecord *node, void *transformMatrix) {
     VU0_STORE_MATRIX(D_003984B0);
     sdfPostmultiplyVuMatrixFromMemory(node->camera.matrix);
     VU0_LOAD_VF_MEMORY(vf10, node->inverseOrigin);
-    VU0_STORE_MATRIX(sdf3DCameraMatrix);
+    VU0_STORE_MATRIX(sdf3DScreenTm);
     VU0_TRANSFORM_POINT(vf10, vf10);
     VU0_STORE_VF(vf10, D_003984F0);
     memcpy(D_003983D0, node, sizeof(*node));
@@ -326,12 +326,12 @@ void sdf3DSetCamera(SdfProjectionRecord *node, void *transformMatrix) {
 
 /* Set the first DMA reference fallback used when a model has no override. */
 void sdf3DSetDefaultLight(u32 referenceSource) {
-    sdf3DDefaultLight = referenceSource;
+    sdf3DLightDefault = referenceSource;
 }
 
 /* Set the second DMA reference fallback used when a model has no override. */
 void sdf3DSetDefaultFog(u32 referenceSource) {
-    sdf3DDefaultFog = referenceSource;
+    sdf3DFogDefault = referenceSource;
 }
 
 extern s8 D_003BD360;
@@ -581,7 +581,7 @@ void sdf3DInitSpecularTex2(void) {
     sdfMemFreeDirect(allocation);
 }
 
-extern u64 sdfPowerLookupTextureState;
+extern u64 sdf3DRefMapParam;
 
 extern s32 D_003241D8[];
 
@@ -595,7 +595,7 @@ extern u8 D_0031BC60[];
 
 extern void sdf3DInitSpecularTex2(void);
 
-extern u64 sdfPowerLookupTextureState;
+extern u64 sdf3DRefMapParam;
 
 extern s32 D_003241D8[];
 
@@ -612,7 +612,7 @@ void sdf3DInit(void) {
     s64 textureWord;
     sdf3DInitSpecularTex2();
     textureWord = sdfTexGetTex0Reg(D_003BD380);
-    sdfPowerLookupTextureState = textureWord;
+    sdf3DRefMapParam = textureWord;
     D_003241D8[0] = textureWord;
     D_003241D8[1] = textureWord >> 32;
     D_003BD37C = sdfTexSetDirect((SdfTextureFileHeader *)D_00317C20);
@@ -666,7 +666,7 @@ void sdf3DPrimLinkTm(SdfListHead *packetList,
     sdfDrawTagLink(packetList, (u32)dmaPacket);
 }
 
-extern vu8 sdfCurrentBufferIndex;
+extern vu8 sdfFrameId;
 
 /* Apply current-buffer changes and append the asset reference; keep both index reads. */
 void sdf3DPrimLinkMat(SdfListHead *packetList, SdfAsset *asset,
@@ -675,16 +675,16 @@ void sdf3DPrimLinkMat(SdfListHead *packetList, SdfAsset *asset,
     if (allocatePacket == NULL) {
         allocatePacket = sdfGrAllocPacketBuff;
     }
-    sdfMatUpdatePacket(asset, (s8)sdfCurrentBufferIndex);
+    sdfMatUpdatePacket(asset, (s8)sdfFrameId);
     referencePacket = (u64 *)allocatePacket(0x20);
-    sdfMatMakePacket(asset, (struct SdfDmaTagHeader *)referencePacket, (s8)sdfCurrentBufferIndex);
+    sdfMatMakePacket(asset, (struct SdfDmaTagHeader *)referencePacket, (s8)sdfFrameId);
     *(u128 *)&referencePacket[2] = 0;
     sdfAppendReferencePacket(packetList, (u32)referencePacket);
 }
 
-extern f32 sdf3DSoften;
+extern f32 sdfFaceDivSoften;
 
-extern f32 sdf3DBias;
+extern f32 sdfFaceDivBias;
 
 extern u32 D_00398500[];
 
@@ -740,8 +740,8 @@ u32 *sdf3DPrimMakePoly(SdfPrimitiveRequest *request) {
     packet[6] = 0x6003C003;
     cursor = packet + 7;
     *cursor++ = (u32)request->depth;
-    *cursor++ = (u32)sdf3DSoften;
-    *cursor++ = (u32)sdf3DBias;
+    *cursor++ = (u32)sdfFaceDivSoften;
+    *cursor++ = (u32)sdfFaceDivBias;
     *cursor++ = 0x04000004;
     *cursor++ = 0x14000000;
     *cursor++ = 0x6D01C000;
@@ -1243,7 +1243,7 @@ u32 sdfMultiBillBoardVcMakeN(u128 *positions, void *byteAttributes, void *halfAt
     return (u32)packet;
 }
 
-extern u8 sdfPadActuatorAlignment[];
+extern u8 sdfPadCb_0[];
 
 extern s32 scePadGetState(s32 port, s32 slot);
 
@@ -1325,7 +1325,7 @@ void sdfPadControl(SdfPadEntry *entry) {
         break;
     case 3:
         if (scePadInfoAct(port, slot, -1, 0) != 0) {
-            if (scePadSetActAlign(port, slot, sdfPadActuatorAlignment) != 0) {
+            if (scePadSetActAlign(port, slot, sdfPadCb_0) != 0) {
                 entry->state = 4;
             }
         } else {
@@ -1412,11 +1412,11 @@ extern void sdfPadControl(SdfPadEntry *entry);
 void sdfPadManager(void) {
     s32 padIndex;
     for (padIndex = 0; padIndex != SDF_PAD_ENTRY_COUNT; padIndex++) {
-        sdfPadControl(&sdfPadPorts[padIndex]);
+        sdfPadControl(&sdfPadCb[padIndex]);
     }
 }
 
-extern s32 sdfThreadWakeTick;
+extern s32 sdfVblankFlag;
 
 extern u16 D_003BD3A0[4];
 
@@ -1424,7 +1424,7 @@ extern u8 sdfPadAnalogSticks[8];
 
 extern u16 sdfPadButtonMasks[16];
 
-extern s8 sdfPadButtonStates[0x20];
+extern s8 dds3PadBitTable[0x20];
 
 extern u8 sdfPadButtonPressure[0x18];
 
@@ -1432,11 +1432,11 @@ extern u8 sdfPadButtonPressure[0x18];
  * Changes arm a 15-tick deadline; repeats set it to current tick + lateness + 4,
  * retaining the original extra delay when a deadline is missed. */
 void sdfPadBuildButtonStates(void) {
-    s32 currentTick = sdfThreadWakeTick;
+    s32 currentTick = sdfVblankFlag;
     s32 padIndex;
     s32 buttonIndex;
     for (padIndex = 0; padIndex != SDF_PAD_ENTRY_COUNT; padIndex++) {
-        SdfPadEntry *entry = &sdfPadPorts[padIndex];
+        SdfPadEntry *entry = &sdfPadCb[padIndex];
         s32 heldButtons = entry->buttons;
         s32 previousButtons = entry->prevButtons;
         s32 newPressMask;
@@ -1466,7 +1466,7 @@ void sdfPadBuildButtonStates(void) {
             if (newPressMask & buttonMask) {
                 buttonState |= SDF_PAD_BUTTON_NEW_PRESS_BIT;
             }
-            sdfPadButtonStates[padIndex * SDF_PAD_BUTTON_COUNT + buttonIndex] = buttonState;
+            dds3PadBitTable[padIndex * SDF_PAD_BUTTON_COUNT + buttonIndex] = buttonState;
         }
         memcpy(&sdfPadAnalogSticks[padIndex * SDF_PAD_STICK_COUNT], entry->stick, SDF_PAD_STICK_COUNT);
         memcpy(&sdfPadButtonPressure[padIndex * SDF_PAD_PRESSURE_COUNT], entry->pressure, SDF_PAD_PRESSURE_COUNT);
@@ -1475,24 +1475,24 @@ void sdfPadBuildButtonStates(void) {
 
 /* Store a mode request for the indexed logical pad; setup applies it later. */
 void sdfPadChangeMode(s32 padIndex, u8 requestedMode) {
-    sdfPadPorts[padIndex].requestedMode = requestedMode;
+    sdfPadCb[padIndex].requestedMode = requestedMode;
 }
 
 /* Store the small-motor request without validating the logical pad index. */
 void sdfPadSetAct0(s32 padIndex, u16 strength) {
-    sdfPadPorts[padIndex].smallMotor = strength;
+    sdfPadCb[padIndex].smallMotor = strength;
 }
 
 /* Store the large-motor request without validating the logical pad index. */
 void sdfPadSetAct1(s32 padIndex, u8 strength) {
-    sdfPadPorts[padIndex].largeMotor = strength;
+    sdfPadCb[padIndex].largeMotor = strength;
 }
 
 /* Despite the legacy console-prefixed name, set both pad motor low bytes. */
 void sdfPadSetAct(s32 padIndex, s32 smallMotor, s32 largeMotor) {
-    SdfPadEntry *entry = &sdfPadPorts[padIndex];
+    SdfPadEntry *entry = &sdfPadCb[padIndex];
     entry->smallMotor = smallMotor & SDF_PAD_MOTOR_VALUE_MASK;
-    sdfPadPorts[padIndex].largeMotor = largeMotor & SDF_PAD_MOTOR_VALUE_MASK;
+    sdfPadCb[padIndex].largeMotor = largeMotor & SDF_PAD_MOTOR_VALUE_MASK;
 }
 
 extern u8 sdfPadPortSlotPairs[4];
@@ -1515,7 +1515,7 @@ void sdfPadInitManager(void) {
         SdfPadEntry *entry;
 
         scePadPortOpen(port, slot, &sdfPadPortBuffers[padIndex * SDF_PAD_PORT_BUFFER_BYTES]);
-        entry = &sdfPadPorts[padIndex];
+        entry = &sdfPadCb[padIndex];
         entry->port = port;
         entry->slot = slot;
         entry->state = 0;
@@ -1526,7 +1526,7 @@ void sdfPadInitManager(void) {
         entry->smallMotor = 0;
         entry->largeMotor = 0;
     }
-    memset(sdfPadButtonStates, 0, SDF_PAD_BUTTON_STATE_BYTES);
+    memset(dds3PadBitTable, 0, SDF_PAD_BUTTON_STATE_BYTES);
     memset(sdfPadAnalogSticks, SDF_PAD_STICK_CENTER, SDF_PAD_STICK_STATE_BYTES);
     memset(sdfPadButtonPressure, 0, SDF_PAD_PRESSURE_STATE_BYTES);
     D_003BD39C = 0;
@@ -1536,19 +1536,19 @@ void sdfPadInitManager(void) {
 void sdfDevConsInit(void) {
     if (D_003BD3C4 == 0) {
         D_003BD3C4 = 1;
-        sdfConsoleFontTexture = sdfTexSet((SdfTextureFileHeader *)(D_00315BA0));
+        sdfDebugFontHandle = sdfTexSet((SdfTextureFileHeader *)(D_00315BA0));
     }
 }
 
 /* Ensure initialization and return the cached console texture. */
 void *sdfDevConsGetFontHandle(void) {
     sdfDevConsInit();
-    return sdfConsoleFontTexture;
+    return sdfDebugFontHandle;
 }
 
 /* Return the packed glyph-UV table indexed by character minus 0x20. */
 u32 *sdfDevConsGetFontUvTable(void) {
-    return sdfConsoleGlyphTexcoords;
+    return sdfDevConsFontUvTable;
 }
 
 /* Append to the next-linked list and move its stored tail to this node. */
@@ -1622,7 +1622,7 @@ DevConsState *sdfDevConsOpen(u32 screenOriginX, u32 screenOriginY, s32 columns, 
 }
 
 /* Packed console glyph UVs for characters 0x20 through 0x7F. */
-u32 sdfConsoleGlyphTexcoords[96] __attribute__((aligned(8))) = {
+u32 sdfDevConsFontUvTable[96] __attribute__((aligned(8))) = {
     0x00000000, 0x000000C0, 0x00000180, 0x00000240, 0x00000300, 0x000003C0, 0x00000480, 0x00000540,
     0x00000600, 0x000006C0, 0x00C00000, 0x00C000C0, 0x00C00180, 0x00C00240, 0x00C00300, 0x00C003C0,
     0x00C00480, 0x00C00540, 0x00C00600, 0x00C006C0, 0x01800000, 0x018000C0, 0x01800180, 0x01800240,
@@ -1638,7 +1638,7 @@ u32 sdfConsoleGlyphTexcoords[96] __attribute__((aligned(8))) = {
 };
 
 /* Mutable colors used by the device console and packet command setter. */
-u32 sdfConsoleColorPalette[16] = {
+u32 sdfDevConsColorTable[16] = {
     0x80808080, 0x80800000, 0x80000080, 0x80800080,
     0x80008000, 0x80808000, 0x80008080, 0x80606060,
     0x80202020, 0x80400000, 0x80000040, 0x80400040,
@@ -1649,9 +1649,9 @@ INCLUDE_RODATA(const s32, "game/code_002E0820", D_003B4548);
 
 INCLUDE_SDATA(const s32, "game/code_002E0820", D_003BD350);
 
-INCLUDE_SDATA(const s32, "game/code_002E0820", sdf3DSoften);
+INCLUDE_SDATA(const s32, "game/code_002E0820", sdfFaceDivSoften);
 
-INCLUDE_SDATA(const s32, "game/code_002E0820", sdf3DBias);
+INCLUDE_SDATA(const s32, "game/code_002E0820", sdfFaceDivBias);
 
 INCLUDE_SDATA(const s32, "game/code_002E0820", D_003BD360);
 
@@ -1663,15 +1663,15 @@ INCLUDE_SDATA(const s32, "game/code_002E0820", D_003BD36C);
 
 INCLUDE_SDATA(const s32, "game/code_002E0820", D_003BD370);
 
-INCLUDE_SDATA(const s32, "game/code_002E0820", sdf3DDefaultLight);
+INCLUDE_SDATA(const s32, "game/code_002E0820", sdf3DLightDefault);
 
-INCLUDE_SDATA(const s32, "game/code_002E0820", sdf3DDefaultFog);
+INCLUDE_SDATA(const s32, "game/code_002E0820", sdf3DFogDefault);
 
 INCLUDE_SDATA(const s32, "game/code_002E0820", D_003BD37C);
 
 INCLUDE_SDATA(const s32, "game/code_002E0820", D_003BD380);
 
-INCLUDE_SDATA(const s32, "game/code_002E0820", sdfPowerLookupTextureState);
+INCLUDE_SDATA(const s32, "game/code_002E0820", sdf3DRefMapParam);
 
 INCLUDE_SDATA(const s32, "game/code_002E0820", D_003BD390);
 

@@ -223,7 +223,7 @@ void mnuDrawTerminalPanelValues(s32 x, s32 y, s32 z, MenuTerminalContext *object
     }
     item = &object->window->list->cursor->camp;
     id = item->id;
-    count = datGameState->inventory.counts[id];
+    count = DDS3_GBWK->inventory.counts[id];
     color = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
     switch (item->mode) {
     case 1: {
@@ -697,22 +697,22 @@ void mnuDrawShopSelectedRowTotal(s32 x, s32 y, s32 depth, MenuTerminalContext *p
 void mnuDrawShopCurrencyBalance(MenuTerminalContext *state, s32 style) {
     char text[16];
 
-    if (datGameState->header.currency != state->previousValue) {
+    if (DDS3_GBWK->header.currency != state->previousValue) {
         s32 transitionFrames = 20;
         s32 displayedValue;
 
         p2sdPlaySE(19, 127, 63);
         state->elapsedFrames++;
         displayedValue = state->previousValue +
-                         ((datGameState->header.currency - state->previousValue) * state->elapsedFrames) /
+                         ((DDS3_GBWK->header.currency - state->previousValue) * state->elapsedFrames) /
                              transitionFrames;
         sprintf(text, D_00437980, displayedValue);
         if (state->elapsedFrames == transitionFrames) {
-            state->previousValue = datGameState->header.currency;
+            state->previousValue = DDS3_GBWK->header.currency;
             state->elapsedFrames = 0;
         }
     } else {
-        sprintf(text, D_00437980, datGameState->header.currency);
+        sprintf(text, D_00437980, DDS3_GBWK->header.currency);
     }
 
     {

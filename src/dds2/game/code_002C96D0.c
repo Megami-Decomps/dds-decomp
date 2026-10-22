@@ -144,7 +144,7 @@ extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
 extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 extern void mtrMantraEventBitReset(void);
 extern void ptyResetPartyRecordsAndProfiles(void);
-extern u32 kwlnDrawControlFlags;
+extern u32 dds3DrawFlag;
 
 extern u32 fileWaitTicksRemaining;
 
@@ -211,7 +211,7 @@ extern u32 effModelUpdateControlFlags;
 
 extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
 
-extern s8 fileMenuTaskAlive;
+extern s8 slLoadKillFlag;
 extern s32 mcdOriginalTitleFileMode;
 extern s32 D_00437D88;
 
@@ -248,7 +248,7 @@ extern s32 filePrepareMainBlobWrite(void);
 extern s32 fileOnAllWritten(void);
 
 extern void dds3SoftResetOff(void);
-extern s8 kwlnTaskPadButtonStates[];
+extern s8 dds3PadButtonState[];
 extern void p2sdStopBGM(s32 command);
 extern s32 slExitWait(void *callback);
 
@@ -294,7 +294,7 @@ typedef struct EffDispatchColor {
 
 
 
-extern s8 fileConfigTaskState;
+extern s8 dds3ConfigState;
 
 extern s32 mcdFinishFileDetectionWithAudio(void);
 
@@ -465,7 +465,7 @@ extern f32 fileSaveHighlightPhase;
 
 
 
-extern u8 sdfPfsDebugMode;
+extern u8 sdfHddValid;
 
 extern char D_00437E10[];
 
@@ -483,12 +483,12 @@ void slKillLoadProcess(void) {
     if (D_00437CD8 != 0) {
         dds3KillProcess((KwlnTask *)D_00437CD8, 1);
         D_00437CD8 = 0;
-        fileMenuTaskAlive = 0;
+        slLoadKillFlag = 0;
     }
 }
 
 s8 fileMenuTaskIsAlive(void) {
-    return fileMenuTaskAlive;
+    return slLoadKillFlag;
 }
 
 void mnuFormatSaveSlotHeaderName(void) {
@@ -516,10 +516,10 @@ u32 fileMainBlobSize(void) {
 }
 
 void fileReloadSaveBuffer(void) {
-    struct SdfMemBlock *saved = datGameState->header.backingAllocation;
+    struct SdfMemBlock *saved = DDS3_GBWK->header.backingAllocation;
     s32 size = FILE_MAIN_BLOB_SIZE;
-    memcpy(datGameState, fileSaveReadBuffer, size);
-    datGameState->header.backingAllocation = saved;
+    memcpy(DDS3_GBWK, fileSaveReadBuffer, size);
+    DDS3_GBWK->header.backingAllocation = saved;
 }
 
 u8 fileIsLoadedAndConditionTrue(s32 condition) {
@@ -1303,8 +1303,8 @@ s32 filePollSlotDetectionAndBranch(void) {
 
     D_00437CF8 = 0;
     if (D_00437D40 == 0) {
-        if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) ||
-            fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0)) {
+        if (fileIsLoadedAndConditionTrue(dds3PadButtonState[0x21] < 0) ||
+            fileIsLoadedAndConditionTrue(dds3PadButtonState[0x23] < 0)) {
             p2sdPlaySE(0xA, 0x7F, 0x3F);
             D_00437D40 = 1;
         }
@@ -1370,8 +1370,8 @@ s32 filePollSlotDetectionAndBranch(void) {
 
 s32 slErrorWaitToFileMc(void) {
     if (D_00437D40 == 0) {
-        if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) ||
-            fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0)) {
+        if (fileIsLoadedAndConditionTrue(dds3PadButtonState[0x21] < 0) ||
+            fileIsLoadedAndConditionTrue(dds3PadButtonState[0x23] < 0)) {
             p2sdPlaySE(8, 0x7F, 0x3F);
             D_00437D40 = 1;
         }
@@ -1392,8 +1392,8 @@ s32 slErrorWaitToFileMc(void) {
 }
 
 s32 slErrorWait(void) {
-    if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) ||
-        fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0)) {
+    if (fileIsLoadedAndConditionTrue(dds3PadButtonState[0x21] < 0) ||
+        fileIsLoadedAndConditionTrue(dds3PadButtonState[0x23] < 0)) {
         p2sdPlaySE(8, 0x7F, 0x3F);
         D_00437D3C = 0;
         D_00437CF8 = 0;
@@ -1420,8 +1420,8 @@ s32 fileSetMenuCallbackAndClearResult(u32 menuCallback) {
 }
 
 s32 mcdFinishFileDetection(void) {
-    if (fileIsLoadedAndConditionTrue((u32)kwlnTaskPadButtonStates[0x21] >> 31) ||
-        fileIsLoadedAndConditionTrue((u32)kwlnTaskPadButtonStates[0x23] >> 31)) {
+    if (fileIsLoadedAndConditionTrue((u32)dds3PadButtonState[0x21] >> 31) ||
+        fileIsLoadedAndConditionTrue((u32)dds3PadButtonState[0x23] >> 31)) {
         slSetInfo(0);
         D_00437D3C = 0;
         D_00437CF8 = 0;
@@ -1447,8 +1447,8 @@ s32 filePollSlotRequestAndResumeFlow(void) {
     s32 reqStatus;
 
     if (D_00437D40 == 0) {
-        if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) ||
-            fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0)) {
+        if (fileIsLoadedAndConditionTrue(dds3PadButtonState[0x21] < 0) ||
+            fileIsLoadedAndConditionTrue(dds3PadButtonState[0x23] < 0)) {
             p2sdPlaySE(8, 0x7F, 0x3F);
             D_00437D40 = 1;
         }
@@ -1834,31 +1834,31 @@ s32 fileBuildMainBlobAndWrite(void) {
     s32 slot = fileReqGetSelectedSlot(fileMemoryCardRequestIndex);
 
     mcdFormatSaveSlotName(filename, slot);
-    datGameState->header.magic[0] = 'V';
-    datGameState->header.magic[1] = 'E';
-    datGameState->header.magic[2] = 'R';
-    datGameState->header.version = 3;
-    datGameState->header.mapGroup = datGameState->vr.previewX;
-    datGameState->header.mapIndex = datGameState->vr.previewY;
-    datGameState->header.playTicks = datGameState->header.secondTick;
-    datGameState->header.partyIds[0] = datGameState->party[0].unitId;
-    datGameState->header.partyIds[1] = datGameState->party[1].unitId;
-    datGameState->header.partyIds[2] = datGameState->party[2].unitId;
-    datGameState->header.partyIds[3] = datGameState->party[3].unitId;
-    datGameState->header.partyIds[4] = datGameState->party[4].unitId;
-    datGameState->header.partyIds[5] = 0;
-    datGameState->header.partyIds[6] = 0;
-    datGameState->header.partyIds[7] = 0;
-    datGameState->header.partyLevels[0] = datGameState->party[0].level;
-    datGameState->header.partyLevels[1] = datGameState->party[1].level;
-    datGameState->header.partyLevels[2] = datGameState->party[2].level;
-    datGameState->header.partyLevels[3] = datGameState->party[3].level;
-    datGameState->header.partyLevels[4] = datGameState->party[4].level;
-    datGameState->header.partyLevels[5] = 0;
-    datGameState->header.partyLevels[6] = 0;
-    datGameState->header.partyLevels[7] = 0;
+    DDS3_GBWK->header.magic[0] = 'V';
+    DDS3_GBWK->header.magic[1] = 'E';
+    DDS3_GBWK->header.magic[2] = 'R';
+    DDS3_GBWK->header.version = 3;
+    DDS3_GBWK->header.mapGroup = DDS3_GBWK->vr.previewX;
+    DDS3_GBWK->header.mapIndex = DDS3_GBWK->vr.previewY;
+    DDS3_GBWK->header.playTicks = DDS3_GBWK->header.secondTick;
+    DDS3_GBWK->header.partyIds[0] = DDS3_GBWK->party[0].unitId;
+    DDS3_GBWK->header.partyIds[1] = DDS3_GBWK->party[1].unitId;
+    DDS3_GBWK->header.partyIds[2] = DDS3_GBWK->party[2].unitId;
+    DDS3_GBWK->header.partyIds[3] = DDS3_GBWK->party[3].unitId;
+    DDS3_GBWK->header.partyIds[4] = DDS3_GBWK->party[4].unitId;
+    DDS3_GBWK->header.partyIds[5] = 0;
+    DDS3_GBWK->header.partyIds[6] = 0;
+    DDS3_GBWK->header.partyIds[7] = 0;
+    DDS3_GBWK->header.partyLevels[0] = DDS3_GBWK->party[0].level;
+    DDS3_GBWK->header.partyLevels[1] = DDS3_GBWK->party[1].level;
+    DDS3_GBWK->header.partyLevels[2] = DDS3_GBWK->party[2].level;
+    DDS3_GBWK->header.partyLevels[3] = DDS3_GBWK->party[3].level;
+    DDS3_GBWK->header.partyLevels[4] = DDS3_GBWK->party[4].level;
+    DDS3_GBWK->header.partyLevels[5] = 0;
+    DDS3_GBWK->header.partyLevels[6] = 0;
+    DDS3_GBWK->header.partyLevels[7] = 0;
 
-    header = (FileSavePreviewRecord *)datGameState;
+    header = (FileSavePreviewRecord *)DDS3_GBWK;
     fileSavePreviewRecords[slot].signature[0] = header->signature[0];
     fileSavePreviewRecords[slot].signature[1] = header->signature[1];
     fileSavePreviewRecords[slot].signature[2] = header->signature[2];
@@ -1874,7 +1874,7 @@ s32 fileBuildMainBlobAndWrite(void) {
     fileSavePreviewRecords[slot].saveWords.words[0] = header->saveWords.words[0];
     fileSavePreviewRecords[slot].saveWords.words[1] = header->saveWords.words[1];
     fileSavePreviewRecords[slot].saveWords.words[2] = header->saveWords.words[2];
-    fileMainSaveBlobAddress = datGameState;
+    fileMainSaveBlobAddress = DDS3_GBWK;
     fileMainSaveBlobSize = sizeof(DatGameState);
     if (D_00437D08 == 0 || D_00437D08 == 2) {
         return slSaveWriteFile(filename, &fileMainSaveBlobAddress, &fileMainSaveBlobSize,
@@ -2131,7 +2131,7 @@ s32 fileSlotBrowserUpdate(void) {
         fileLoadMenuState.inputRepeatTimer =
             fileLoadMenuState.inputRepeatTimer <= 0 ? 0 :
             fileLoadMenuState.inputRepeatTimer > 3 ? 3 : fileLoadMenuState.inputRepeatTimer;
-        if (fileIsLoadedWithActiveFlow(((u8)kwlnTaskPadButtonStates[0x26] >> 1) & 1) != 0 &&
+        if (fileIsLoadedWithActiveFlow(((u8)dds3PadButtonState[0x26] >> 1) & 1) != 0 &&
             fileLoadMenuState.inputRepeatTimer >= 3) {
             selection = D_00437D28;
             fileLoadMenuState.inputRepeatTimer = 0;
@@ -2147,7 +2147,7 @@ s32 fileSlotBrowserUpdate(void) {
                 offset -= offset > 0;
             }
         }
-        if (fileIsLoadedWithActiveFlow(((u8)kwlnTaskPadButtonStates[0x27] >> 1) & 1) != 0 &&
+        if (fileIsLoadedWithActiveFlow(((u8)dds3PadButtonState[0x27] >> 1) & 1) != 0 &&
             fileLoadMenuState.inputRepeatTimer >= 3) {
             selection = D_00437D28;
             fileLoadMenuState.inputRepeatTimer = 0;
@@ -2172,10 +2172,10 @@ s32 fileSlotBrowserUpdate(void) {
         } else if (oldSelection < fileSelectedSlotIndex) {
             D_00437D00 = 8;
         }
-        if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) != 0) {
+        if (fileIsLoadedAndConditionTrue(dds3PadButtonState[0x21] < 0) != 0) {
             D_00437D14 = 1;
         }
-        if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0) != 0) {
+        if (fileIsLoadedAndConditionTrue(dds3PadButtonState[0x23] < 0) != 0) {
             D_00437D14 = 2;
         }
     }
@@ -2721,9 +2721,9 @@ void fileStartMemoryCardMenuForMode(s32 mode) {
         mcdOriginalTitleFileMode = 0;
         D_00437D0C = 1;
         evtBitOn(0xBA0);
-        datGameState->header.status =
-            (u16)datGameState->header.status + 1;
-        datGameState->header.transition = 1;
+        DDS3_GBWK->header.status =
+            (u16)DDS3_GBWK->header.status + 1;
+        DDS3_GBWK->header.transition = 1;
         fileMenuStateHandler = (s32 (*)())fileLoadIconFileAndBeginSlotReset;
     } else {
         D_00437D0C = 0;
@@ -2858,17 +2858,17 @@ extern u32 D_00439024, D_00439028;
 /* Yes/no cursor input while the card request is idle. */
 static inline void filePollPromptChoice(void) {
     if (D_00437D20 == 0 && slChkWindowOpenDone() != 0) {
-        if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x27] < 0) != 0) {
+        if (fileIsLoadedAndConditionTrue(dds3PadButtonState[0x27] < 0) != 0) {
             if (D_00437D18 != 1) {
                 p2sdPlaySE(0, 0x7F, 0x3F);
             }
             D_00437D18 = 1;
-        } else if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x26] < 0) != 0) {
+        } else if (fileIsLoadedAndConditionTrue(dds3PadButtonState[0x26] < 0) != 0) {
             if (D_00437D18 != 0) {
                 p2sdPlaySE(0, 0x7F, 0x3F);
             }
             D_00437D18 = 0;
-        } else if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x21] < 0) != 0) {
+        } else if (fileIsLoadedAndConditionTrue(dds3PadButtonState[0x21] < 0) != 0) {
             if (D_00437D18 == 0 && (D_00437D1C == 1 || D_00437D1C == 3)) {
                 p2sdPlaySE(0x11, 0x7F, 0x3F);
             } else {
@@ -2879,7 +2879,7 @@ static inline void filePollPromptChoice(void) {
             } else {
                 D_00437D20 = 1;
             }
-        } else if (fileIsLoadedAndConditionTrue(kwlnTaskPadButtonStates[0x23] < 0) != 0) {
+        } else if (fileIsLoadedAndConditionTrue(dds3PadButtonState[0x23] < 0) != 0) {
             p2sdPlaySE(0xA, 0x7F, 0x3F);
             D_00437D20 = 2;
         }
@@ -2938,17 +2938,17 @@ s32 fileUpdatePromptDialog(void) {
         return 0;
     }
     if (D_00437D1C == 4 || D_00437D1C == 8) {
-        if (kwlnTaskPadButtonStates[0x27] < 0) {
+        if (dds3PadButtonState[0x27] < 0) {
             if (D_00437D18 != 1) {
                 p2sdPlaySE(0, 0x7F, 0x3F);
             }
             D_00437D18 = 1;
-        } else if (kwlnTaskPadButtonStates[0x26] < 0) {
+        } else if (dds3PadButtonState[0x26] < 0) {
             if (D_00437D18 != 0) {
                 p2sdPlaySE(0, 0x7F, 0x3F);
             }
             D_00437D18 = 0;
-        } else if (kwlnTaskPadButtonStates[0x21] < 0) {
+        } else if (dds3PadButtonState[0x21] < 0) {
             if (D_00437D18 == 0 && (D_00437D1C == 1 || D_00437D1C == 3 || D_00437D1C == 9)) {
                 p2sdPlaySE(0x11, 0x7F, 0x3F);
             } else {
@@ -2962,7 +2962,7 @@ s32 fileUpdatePromptDialog(void) {
             /* Retail 0x002CEC18 bnez: enters the shared no tail mid-block at .L002CEE04;
              * its delay slot (addiu $2,$0,-1) is the tail's first step. */
             goto no;
-        } else if (kwlnTaskPadButtonStates[0x23] < 0) {
+        } else if (dds3PadButtonState[0x23] < 0) {
             p2sdPlaySE(0xA, 0x7F, 0x3F);
             D_00437D18 = -1;
             D_00437D1C = 0;
@@ -3055,7 +3055,7 @@ u32 fileGetLoadSelectionState(void) {
 }
 
 void slSetTmnlID(s32 x, s32 y) {
-    DatGameState *state = datGameState;
+    DatGameState *state = DDS3_GBWK;
 
     state->vr.previewX = x;
     state->vr.previewY = y;
@@ -3268,8 +3268,8 @@ void fileLoadCtxSlideUpdate(void) {
 }
 
 s32 mcdFinishFileDetectionWithAudio(void) {
-    if (fileIsLoadedAndConditionTrue((u32)kwlnTaskPadButtonStates[0x21] >> 31) ||
-        fileIsLoadedAndConditionTrue((u32)kwlnTaskPadButtonStates[0x23] >> 31)) {
+    if (fileIsLoadedAndConditionTrue((u32)dds3PadButtonState[0x21] >> 31) ||
+        fileIsLoadedAndConditionTrue((u32)dds3PadButtonState[0x23] >> 31)) {
         slSetInfo(0);
         p2sdPlaySE(8, 0x7f, 0x3f);
         return ((s32 (*)())fileMenuContinuation)();
@@ -3289,23 +3289,23 @@ s32 fileFourWayDialogPoll(void) {
     if (slChkWindowOpenDone() == 0) {
         return 0;
     }
-    if (kwlnTaskPadButtonStates[0x27] < 0) {
+    if (dds3PadButtonState[0x27] < 0) {
         if (D_00437D18 != 1) {
             p2sdPlaySE(0, 0x7f, 0x3f);
         }
         D_00437D18 = 1;
-    } else if (kwlnTaskPadButtonStates[0x26] < 0) {
+    } else if (dds3PadButtonState[0x26] < 0) {
         if (D_00437D18 != 0) {
             p2sdPlaySE(0, 0x7f, 0x3f);
         }
         D_00437D18 = 0;
-    } else if (kwlnTaskPadButtonStates[0x21] < 0) {
+    } else if (dds3PadButtonState[0x21] < 0) {
         p2sdPlaySE(8, 0x7f, 0x3f);
         if (D_00437D18 == 0) {
             return ((s32 (*)())D_00439024)();
         }
         return ((s32 (*)())D_00439028)();
-    } else if (kwlnTaskPadButtonStates[0x23] < 0) {
+    } else if (dds3PadButtonState[0x23] < 0) {
         if (fileFourWayDialogCancelCallback != 0) {
             p2sdPlaySE(0xA, 0x7f, 0x3f);
             return ((s32 (*)())fileFourWayDialogCancelCallback)();
@@ -3339,7 +3339,7 @@ INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B8F8);
 s32 fileApplySelectedLoadResult(void) {
     s32 i;
 
-    if (kwlnDrawControlFlags & 2) {
+    if (dds3DrawFlag & 2) {
         return 0;
     }
     slSetInfo(0);
@@ -3353,30 +3353,30 @@ s32 fileApplySelectedLoadResult(void) {
         evtBitOn(0xB8F);
         fileCopySaveHeaderNumbers(&fileLoadSelectionWork->header);
     } else {
-        fileCopyRecordHeader(&fileLoadSelectionWork->header, &datGameState->header);
+        fileCopyRecordHeader(&fileLoadSelectionWork->header, &DDS3_GBWK->header);
     }
     fileApplyMenuFlagsToModel(fileLoadSelectionWork);
     filePrintAccessoryLoadNotice();
     fileSaveAndDisplayCurrentMoney();
     for (i = 0; i < 5; i++) {
-        u16 activeFlag = datGameState->party[i].flags & DAT_PARTY_FLAG_OCCUPIED;
-        if (activeFlag && ptyApplyUnlockedUnitStatBonusesOnce(datGameState->party[i].unitId)) {
+        u16 activeFlag = DDS3_GBWK->party[i].flags & DAT_PARTY_FLAG_OCCUPIED;
+        if (activeFlag && ptyApplyUnlockedUnitStatBonusesOnce(DDS3_GBWK->party[i].unitId)) {
             u32 maximumMp;
             u16 restoredHp;
-            datGameState->party[i].maxHp =
-                datComputeSkillBoostedMaxHp(&datGameState->party[i]);
-            maximumMp = datComputeSkillBoostedMaxMp(&datGameState->party[i]);
-            restoredHp = datGameState->party[i].maxHp;
-            datGameState->party[i].maxMp = maximumMp;
-            datGameState->party[i].hp = restoredHp;
-            datGameState->party[i].mp = maximumMp;
+            DDS3_GBWK->party[i].maxHp =
+                datComputeSkillBoostedMaxHp(&DDS3_GBWK->party[i]);
+            maximumMp = datComputeSkillBoostedMaxMp(&DDS3_GBWK->party[i]);
+            restoredHp = DDS3_GBWK->party[i].maxHp;
+            DDS3_GBWK->party[i].maxMp = maximumMp;
+            DDS3_GBWK->party[i].hp = restoredHp;
+            DDS3_GBWK->party[i].mp = maximumMp;
         }
     }
     if (fileLoadSelectionWork->hardInitSelected != 0) {
         DatGameState *state;
         u16 startBranchFlag;
         evtBitOn(0x80E);
-        state = datGameState;
+        state = DDS3_GBWK;
         startBranchFlag = fileLoadSelectionWork->startBranchFlag;
         state->header.saveFlags2 |= 0x80000000;
         if (startBranchFlag) {
@@ -3386,7 +3386,7 @@ s32 fileApplySelectedLoadResult(void) {
         }
     } else {
         evtBitOff(0x80E);
-        datGameState->header.saveFlags2 &= 0x7FFFFFFF;
+        DDS3_GBWK->header.saveFlags2 &= 0x7FFFFFFF;
     }
     if (evtBitCheck(0xB8F)) {
         evtBitOff(0x801);
@@ -3473,7 +3473,7 @@ s32 fileNextMenuFlowState(void) {
 
 s32 fileResetPendingRequest(void) {
     s32 mode;
-    if (kwlnDrawControlFlags & 2) {
+    if (dds3DrawFlag & 2) {
         return 0;
     }
     D_00437D18 = -1;
@@ -3561,7 +3561,7 @@ void filePrintAccessoryLoadNotice(void) {
 extern char D_0042B938[];
 
 void fileSaveAndDisplayCurrentMoney(void) {
-    DatGameState *state = datGameState;
+    DatGameState *state = DDS3_GBWK;
     u32 money = state->header.savedMoney;
     state->savedCurrency = money;
     printf(D_0042B938, money);
@@ -3592,7 +3592,7 @@ s32 ptyApplyUnlockedUnitStatBonusesOnce(s32 unitId) {
     if (partyIndex < 0) {
         return 0;
     }
-    party = &datGameState->party[partyIndex];
+    party = &DDS3_GBWK->party[partyIndex];
     if (party->flags & 0x8000) {
         return 0;
     }
@@ -3630,7 +3630,7 @@ s32 ptyApplyUnlockedUnitStatBonusesOnce(s32 unitId) {
 
 
 void fileCopySaveHeaderNumbers(FileSavePreviewRecord *source) {
-    DatGameState *state = datGameState;
+    DatGameState *state = DDS3_GBWK;
 
     state->header.savedMoney = source->money;
     state->header.saveFlags = source->saveWords.words[0];
@@ -3673,11 +3673,11 @@ s32 fileLoadStateChanged(void) {
 
 void fileCacheSlotFlagsFromState(void) {
     fileSlotFlagMirror.current = fileSlotFlagMirror.previous =
-        datGameState->world.slotFlags;
+        DDS3_GBWK->world.slotFlags;
 }
 
 void fileRestoreSlotFlagsToState(void) {
-    datGameState->world.slotFlags = fileSavedSlotFlags;
+    DDS3_GBWK->world.slotFlags = fileSavedSlotFlags;
 }
 
 extern void dds3PadVibrationSet(s32, u8, s32);
@@ -3761,7 +3761,7 @@ s32 fileTestSlotFlagsBit(kind, flags)
 }
 
 s32 fileTestSavedSlotFlags(u32 kind) {
-    return fileTestSlotFlagsBit(kind, (s32 *)&datGameState->world.slotFlags);
+    return fileTestSlotFlagsBit(kind, (s32 *)&DDS3_GBWK->world.slotFlags);
 }
 
 
@@ -3794,7 +3794,7 @@ typedef struct FileConfigTask {
 } FileConfigTask;
 typedef char FileConfigTask_size_check[(sizeof(FileConfigTask) == 0x3C) ? 1 : -1];
 typedef char FileConfigTask_state_offset_check[((u32)&((FileConfigTask *)0)->state == 0x04) ? 1 : -1];
-extern FileConfigTask *fileConfigTaskWork;
+extern FileConfigTask *GBWK;
 
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
 extern void fileDrawConfigurationMenuEntry(s32 x, s32 y, s32 depth, struct MenuList *list, FileConfigListNode *node, s32 drawArg);
@@ -3855,28 +3855,28 @@ void fileConfigTaskDestroy(KwlnTask *task) {
     FileConfigListNode *node;
     s32 i;
 
-    if (fileConfigTaskWork != 0) {
-        fileSavedSlotFlags = datGameState->world.slotFlags;
-        if (*(u32 *)((u32)fileConfigTaskWork + 4) == 1) {
+    if (GBWK != 0) {
+        fileSavedSlotFlags = DDS3_GBWK->world.slotFlags;
+        if (*(u32 *)((u32)GBWK + 4) == 1) {
             dds3AdminiCallSequence(2, &request, 4, 0);
             mnuAdvanceTitleStateUnderSemaphore();
         }
-        node = (FileConfigListNode *)((FileConfigTask *)fileConfigTaskWork)->frame->first;
-        for (i = 0; i < ((FileConfigTask *)fileConfigTaskWork)->frame->count; i++) {
+        node = (FileConfigListNode *)((FileConfigTask *)GBWK)->frame->first;
+        for (i = 0; i < ((FileConfigTask *)GBWK)->frame->count; i++) {
             sdfChipFreeDirect(node->resource);
             node = node->next;
         }
-        mnuDestroyListState(((FileConfigTask *)fileConfigTaskWork)->frame);
-        ((FileConfigTask *)fileConfigTaskWork)->frame = 0;
+        mnuDestroyListState(((FileConfigTask *)GBWK)->frame);
+        ((FileConfigTask *)GBWK)->frame = 0;
         for (i = 0; i < 5; i++) {
-            if (((FileConfigTask *)fileConfigTaskWork)->slots[i] != 0) {
-                effDestroyResourceSlotSet(((FileConfigTask *)fileConfigTaskWork)->slots[i]);
-                ((FileConfigTask *)fileConfigTaskWork)->slots[i] = 0;
+            if (((FileConfigTask *)GBWK)->slots[i] != 0) {
+                effDestroyResourceSlotSet(((FileConfigTask *)GBWK)->slots[i]);
+                ((FileConfigTask *)GBWK)->slots[i] = 0;
             }
         }
-        sdfMemFreeDirect(((FileConfigTask *)fileConfigTaskWork)->backingAllocation);
-        fileConfigTaskWork = 0;
-        fileConfigTaskState = 0;
+        sdfMemFreeDirect(((FileConfigTask *)GBWK)->backingAllocation);
+        GBWK = 0;
+        dds3ConfigState = 0;
     }
 }
 
@@ -3887,15 +3887,15 @@ extern void fileConfigTaskDestroy(KwlnTask *task);
 extern s32 fileUpdateConfigurationMenu(KwlnTask *task);
 extern s32 fileUpdateConfigOwnerTask(KwlnTask *task);
 
-extern s8 fileConfigTaskState;
+extern s8 dds3ConfigState;
 
 void dds3ConfigProcessStart(s32 mode) {
-    if (fileConfigTaskWork == 0) {
-        fileConfigTaskWork = fileCreateConfigTask(mode);
-        dds3StartProcess(fileConfigInputTaskName, 0x3F2, 1, 1, fileUpdateConfigurationMenu, NULL, (u32)fileConfigTaskWork);
-        dds3StartProcess(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, (u32)fileConfigTaskWork);
-        dds3StartProcess(fileConfigOwnerTaskName, 0x520B, 1, 1, fileUpdateConfigOwnerTask, fileConfigTaskDestroy, (u32)fileConfigTaskWork);
-        fileConfigTaskState = 1;
+    if (GBWK == 0) {
+        GBWK = fileCreateConfigTask(mode);
+        dds3StartProcess(fileConfigInputTaskName, 0x3F2, 1, 1, fileUpdateConfigurationMenu, NULL, (u32)GBWK);
+        dds3StartProcess(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, (u32)GBWK);
+        dds3StartProcess(fileConfigOwnerTaskName, 0x520B, 1, 1, fileUpdateConfigOwnerTask, fileConfigTaskDestroy, (u32)GBWK);
+        dds3ConfigState = 1;
     }
 }
 
@@ -3906,7 +3906,7 @@ void dds3ConfigProcessEnd(void) {
 }
 
 s32 checkConfigState(void) {
-    s32 state = fileConfigTaskState;
+    s32 state = dds3ConfigState;
     if (state == 1) {
         return 1;
     }
@@ -3914,14 +3914,14 @@ s32 checkConfigState(void) {
         return 0;
     }
     if (state == 2) {
-        fileConfigTaskState = 0;
+        dds3ConfigState = 0;
     }
     return 0;
 }
 
 u32 fileGetConfigTaskSlot(s32 slot) {
     if (slot < 4) {
-        return (u32)fileConfigTaskWork->slots[slot];
+        return (u32)GBWK->slots[slot];
     }
     return 0;
 }
@@ -3939,110 +3939,110 @@ s32 fileUpdateConfigurationMenu(KwlnTask *task) {
     FileConfigListNode *cursor;
     FileConfigTask *loadingWork;
 
-    if (fileConfigTaskWork->transitionTicks != 0) {
-        fileConfigTaskWork->transitionTicks--;
+    if (GBWK->transitionTicks != 0) {
+        GBWK->transitionTicks--;
     }
-    switch (fileConfigTaskWork->result) {
+    switch (GBWK->result) {
     case 0:
-        if (fileConfigTaskWork->pending == 0) {
-            fileConfigTaskWork->pending = 1;
+        if (GBWK->pending == 0) {
+            GBWK->pending = 1;
             for (i = 0; i < 4; i++) {
-                loadingWork = fileConfigTaskWork;
+                loadingWork = GBWK;
                 if (loadingWork->slots[i] == 0) {
                     loadingWork->pending = 0;
                     return 0;
                 }
             }
         }
-        fileConfigTaskWork->result = 1;
+        GBWK->result = 1;
         /* fallthrough */
     case 1:
-        ticks = fileConfigTaskWork->ticks;
-        fileConfigTaskWork->ticks = ticks + 1;
+        ticks = GBWK->ticks;
+        GBWK->ticks = ticks + 1;
         fade = (f32)ticks / 15.0f;
-        fileConfigTaskWork->choiceFade = fileConfigTaskWork->labelFade = fade;
-        if (fileConfigTaskWork->ticks >= 16) {
-            fileConfigTaskWork->result = 2;
-            fileConfigTaskWork->ticks = 0;
-            fileConfigTaskWork->choiceFade = fileConfigTaskWork->labelFade = 1.0f;
+        GBWK->choiceFade = GBWK->labelFade = fade;
+        if (GBWK->ticks >= 16) {
+            GBWK->result = 2;
+            GBWK->ticks = 0;
+            GBWK->choiceFade = GBWK->labelFade = 1.0f;
         }
         break;
     case 2:
-        fileConfigTaskWork->ticks++;
-        if (fileConfigTaskWork->ticks >= 121) {
-            fileConfigTaskWork->ticks = 0;
+        GBWK->ticks++;
+        if (GBWK->ticks >= 121) {
+            GBWK->ticks = 0;
         }
         break;
     case 3:
-        if (fileConfigTaskWork->state == 1) {
+        if (GBWK->state == 1) {
             dds3FadeOut(0, 0, 0, 15);
         }
-        fileConfigTaskWork->ticks = 0;
-        fileConfigTaskWork->result = 4;
+        GBWK->ticks = 0;
+        GBWK->result = 4;
         /* fallthrough */
     case 4:
-        if (fileConfigTaskWork->ticks >= 6) {
-            fileConfigTaskWork->labelFade = 0.0f;
+        if (GBWK->ticks >= 6) {
+            GBWK->labelFade = 0.0f;
         } else {
-            fileConfigTaskWork->labelFade = 1.0f - (f32)fileConfigTaskWork->ticks / 5.0f;
+            GBWK->labelFade = 1.0f - (f32)GBWK->ticks / 5.0f;
         }
-        ticks = fileConfigTaskWork->ticks;
-        fileConfigTaskWork->ticks = ticks + 1;
-        fileConfigTaskWork->choiceFade = 1.0f - (f32)ticks / 15.0f;
-        if (fileConfigTaskWork->ticks >= 16) {
-            fileConfigTaskWork->result = 5;
-            fileConfigTaskWork->ticks = 0;
-            fileConfigTaskWork->labelFade = 0.0f;
-            fileConfigTaskWork->choiceFade = 0.0f;
+        ticks = GBWK->ticks;
+        GBWK->ticks = ticks + 1;
+        GBWK->choiceFade = 1.0f - (f32)ticks / 15.0f;
+        if (GBWK->ticks >= 16) {
+            GBWK->result = 5;
+            GBWK->ticks = 0;
+            GBWK->labelFade = 0.0f;
+            GBWK->choiceFade = 0.0f;
         }
         return 0;
     case 5:
-        fileConfigTaskWork->result |= 0x80000000;
+        GBWK->result |= 0x80000000;
         return -1;
     }
 
-    oldIndex = fileConfigTaskWork->frame->cursor->index;
-    if ((u8)kwlnTaskPadButtonStates[0x26] & 2) {
-        if (mnuRetreatListCursorDefault(fileConfigTaskWork->frame) != NULL) {
+    oldIndex = GBWK->frame->cursor->index;
+    if ((u8)dds3PadButtonState[0x26] & 2) {
+        if (mnuRetreatListCursorDefault(GBWK->frame) != NULL) {
             p2sdPlaySE(0, 0x7F, 0x3F);
-            fileConfigTaskWork->transitionTicks = 8;
-            fileConfigTaskWork->previousIndex = oldIndex;
+            GBWK->transitionTicks = 8;
+            GBWK->previousIndex = oldIndex;
         }
     }
-    if ((u8)kwlnTaskPadButtonStates[0x27] & 2) {
-        if (mnuAdvanceListCursorDefault(fileConfigTaskWork->frame) != NULL) {
+    if ((u8)dds3PadButtonState[0x27] & 2) {
+        if (mnuAdvanceListCursorDefault(GBWK->frame) != NULL) {
             p2sdPlaySE(0, 0x7F, 0x3F);
-            fileConfigTaskWork->previousIndex = oldIndex;
-            fileConfigTaskWork->transitionTicks = 8;
+            GBWK->previousIndex = oldIndex;
+            GBWK->transitionTicks = 8;
         }
     }
-    index = fileConfigTaskWork->frame->cursor->index;
+    index = GBWK->frame->cursor->index;
     if (index < 4) {
-        if (kwlnTaskPadButtonStates[0x24] < 0 && fileTestSlotFlagsBit(index, (s32 *)&datGameState->world.slotFlags) == 0) {
-            fileToggleSlotFlagsBit(fileConfigTaskWork->frame->cursor->index, (s32 *)&datGameState->world.slotFlags);
+        if (dds3PadButtonState[0x24] < 0 && fileTestSlotFlagsBit(index, (s32 *)&DDS3_GBWK->world.slotFlags) == 0) {
+            fileToggleSlotFlagsBit(GBWK->frame->cursor->index, (s32 *)&DDS3_GBWK->world.slotFlags);
             p2sdPlaySE(8, 0x7F, 0x3F);
-            cursor = (FileConfigListNode *)fileConfigTaskWork->frame->cursor;
+            cursor = (FileConfigListNode *)GBWK->frame->cursor;
             cursor->resource->ticks = 8;
         }
-        if (kwlnTaskPadButtonStates[0x25] < 0) {
-            if (fileTestSlotFlagsBit(fileConfigTaskWork->frame->cursor->index, (s32 *)&datGameState->world.slotFlags) != 0) {
-                fileToggleSlotFlagsBit(fileConfigTaskWork->frame->cursor->index, (s32 *)&datGameState->world.slotFlags);
+        if (dds3PadButtonState[0x25] < 0) {
+            if (fileTestSlotFlagsBit(GBWK->frame->cursor->index, (s32 *)&DDS3_GBWK->world.slotFlags) != 0) {
+                fileToggleSlotFlagsBit(GBWK->frame->cursor->index, (s32 *)&DDS3_GBWK->world.slotFlags);
                 p2sdPlaySE(8, 0x7F, 0x3F);
-                cursor = (FileConfigListNode *)fileConfigTaskWork->frame->cursor;
+                cursor = (FileConfigListNode *)GBWK->frame->cursor;
                 cursor->resource->ticks = 8;
             }
         }
     }
-    if (kwlnTaskPadButtonStates[0x26] == 0 && kwlnTaskPadButtonStates[0x27] == 0) {
-        mnuClearListFlagsOneAndTwo((u32 *)fileConfigTaskWork->frame);
+    if (dds3PadButtonState[0x26] == 0 && dds3PadButtonState[0x27] == 0) {
+        mnuClearListFlagsOneAndTwo((u32 *)GBWK->frame);
     }
-    if (kwlnTaskPadButtonStates[0x21] < 0) {
-        if (fileConfigTaskWork->frame->cursor->index == 4) {
-            fileConfigTaskWork->result = 3;
+    if (dds3PadButtonState[0x21] < 0) {
+        if (GBWK->frame->cursor->index == 4) {
+            GBWK->result = 3;
             p2sdPlaySE(8, 0x7F, 0x3F);
         }
-    } else if (kwlnTaskPadButtonStates[0x23] < 0) {
-        fileConfigTaskWork->result = 3;
+    } else if (dds3PadButtonState[0x23] < 0) {
+        GBWK->result = 3;
         fileRestoreSlotFlagsToState();
         p2sdPlaySE(10, 0x7F, 0x3F);
     }
@@ -4052,14 +4052,14 @@ s32 fileUpdateConfigurationMenu(KwlnTask *task) {
 extern void fileDrawConfigurationMenuBackground(void *);
 
 s32 fileStartQueuedLoad(KwlnTask *task) {
-    if (fileConfigTaskWork->pending == 0) {
+    if (GBWK->pending == 0) {
         return 0;
     }
-    if (fileConfigTaskWork->result < 0) {
+    if (GBWK->result < 0) {
         return -1;
     }
-    fileDrawConfigurationMenuBackground((void *)fileConfigTaskWork);
-    mnuCallInitWide(0x400, 0x400, 0, (u32)fileConfigTaskWork->frame, 0x53);
+    fileDrawConfigurationMenuBackground((void *)GBWK);
+    mnuCallInitWide(0x400, 0x400, 0, (u32)GBWK->frame, 0x53);
     return 0;
 }
 
@@ -4067,7 +4067,7 @@ s32 fileUpdateConfigOwnerTask(KwlnTask *task) {
     s32 result;
 
     result = -1;
-    if ((fileConfigTaskWork->result & 0x80000000) == 0) {
+    if ((GBWK->result & 0x80000000) == 0) {
         result = 0;
     }
     return result;
@@ -4075,7 +4075,7 @@ s32 fileUpdateConfigOwnerTask(KwlnTask *task) {
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", fileMemoryCardRequestIndex);
 
-INCLUDE_SDATA(const s32, "game/code_002C96D0", fileMenuTaskAlive);
+INCLUDE_SDATA(const s32, "game/code_002C96D0", slLoadKillFlag);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437CD5);
 
@@ -4191,7 +4191,7 @@ INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437DD8);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437DE0);
 
-INCLUDE_SDATA(const s32, "game/code_002C96D0", fileConfigTaskState);
+INCLUDE_SDATA(const s32, "game/code_002C96D0", dds3ConfigState);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", fileSlotFlagMirror);
 
@@ -4212,138 +4212,138 @@ void fileDrawConfigurationMenuEntry(s32 x, s32 y, s32 depth, struct MenuList *li
     f32 labelFade;
 
     pulse = 0.0f;
-    if (fileConfigTaskWork->result != 1) {
-        pulse = (f32)(fileConfigTaskWork->ticks % 120) / 60.0f;
+    if (GBWK->result != 1) {
+        pulse = (f32)(GBWK->ticks % 120) / 60.0f;
         if (pulse > choiceFade) {
             pulse = 2.0f - pulse;
         }
     }
     countdown = node->resource;
-    choiceFade = fileConfigTaskWork->choiceFade;
-    labelFade = fileConfigTaskWork->labelFade;
+    choiceFade = GBWK->choiceFade;
+    labelFade = GBWK->labelFade;
     if (countdown->ticks != 0) {
         --countdown->ticks;
     }
     if (list->cursor->index == node->index) {
         effDrawTextureSlotWithBlendedCornerColors(0x80, (index * 35 + 99) << 3, 0,
                      (u32)((pulse * 204.79998779296875f + 102.399993896484375f) * labelFade),
-                     0, fileConfigTaskWork->slots[1], 18, 0x53);
+                     0, GBWK->slots[1], 18, 0x53);
         effDrawTextureSlotWithBlendedCornerColors(0x1830, (index * 35 + 99) << 3, 0,
                      (u32)((pulse * 204.79998779296875f + 102.399993896484375f) * labelFade),
-                     0, fileConfigTaskWork->slots[1], 19, 0x53);
+                     0, GBWK->slots[1], 19, 0x53);
         effDrawTextureSlotWithBlendedCornerColors(0x8B0, 0x8C0, 0, (u32)(labelFade * 256.0f),
-                     0, fileConfigTaskWork->slots[3], labelFrames[index], 0x53);
+                     0, GBWK->slots[3], labelFrames[index], 0x53);
         entryIndex = index * 2;
         effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[entryIndex][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[entryIndex][FILE_CONFIG_Y] - 30) << 3, 0,
                      (u32)(choiceFade * 256.0f), 0,
-                     fileConfigTaskWork->slots[fileConfigSpritePlacements[entryIndex][FILE_CONFIG_SET]],
+                     GBWK->slots[fileConfigSpritePlacements[entryIndex][FILE_CONFIG_SET]],
                      fileConfigSpritePlacements[entryIndex][FILE_CONFIG_FRAME], 0x53);
-        if (fileConfigTaskWork->transitionTicks != 0) {
+        if (GBWK->transitionTicks != 0) {
             ++entryIndex;
             effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[entryIndex][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[entryIndex][FILE_CONFIG_Y] - 30) << 3, 0,
-                         (u32)((f32)fileConfigTaskWork->transitionTicks * 0.125f * 256.0f), 0,
-                         fileConfigTaskWork->slots[fileConfigSpritePlacements[entryIndex][FILE_CONFIG_SET]],
+                         (u32)((f32)GBWK->transitionTicks * 0.125f * 256.0f), 0,
+                         GBWK->slots[fileConfigSpritePlacements[entryIndex][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[entryIndex][FILE_CONFIG_FRAME], 0x53);
         }
     } else {
         entryIndex = index + 18;
         effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[entryIndex][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[entryIndex][FILE_CONFIG_Y] - 30) << 3, 0,
                      (u32)(labelFade * 256.0f), 0,
-                     fileConfigTaskWork->slots[fileConfigSpritePlacements[entryIndex][FILE_CONFIG_SET]],
+                     GBWK->slots[fileConfigSpritePlacements[entryIndex][FILE_CONFIG_SET]],
                      fileConfigSpritePlacements[entryIndex][FILE_CONFIG_FRAME], 0x53);
         entryIndex = index * 2;
-        if (fileConfigTaskWork->previousIndex == node->index) {
+        if (GBWK->previousIndex == node->index) {
             effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[entryIndex][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[entryIndex][FILE_CONFIG_Y] - 30) << 3, 0,
-                         (u32)((f32)fileConfigTaskWork->transitionTicks * 0.125f * 128.0f), 0,
-                         fileConfigTaskWork->slots[fileConfigSpritePlacements[entryIndex][FILE_CONFIG_SET]],
+                         (u32)((f32)GBWK->transitionTicks * 0.125f * 128.0f), 0,
+                         GBWK->slots[fileConfigSpritePlacements[entryIndex][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[entryIndex][FILE_CONFIG_FRAME], 0x53);
         }
     }
     if (index < 3) {
-        if (fileTestSlotFlagsBit(index, (s32 *)&datGameState->world.slotFlags) != 0) {
+        if (fileTestSlotFlagsBit(index, (s32 *)&DDS3_GBWK->world.slotFlags) != 0) {
             effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[10][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[10][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
-                         fileConfigTaskWork->slots[fileConfigSpritePlacements[10][FILE_CONFIG_SET]],
+                         GBWK->slots[fileConfigSpritePlacements[10][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[10][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[11][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[11][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 256.0f), 0,
-                             fileConfigTaskWork->slots[fileConfigSpritePlacements[11][FILE_CONFIG_SET]],
+                             GBWK->slots[fileConfigSpritePlacements[11][FILE_CONFIG_SET]],
                              fileConfigSpritePlacements[11][FILE_CONFIG_FRAME], 0x53);
             }
             effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[25][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[25][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
                          (u32)(labelFade * 256.0f), 0,
-                         fileConfigTaskWork->slots[fileConfigSpritePlacements[25][FILE_CONFIG_SET]],
+                         GBWK->slots[fileConfigSpritePlacements[25][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[25][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[14][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[14][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 128.0f), 0,
-                             fileConfigTaskWork->slots[fileConfigSpritePlacements[14][FILE_CONFIG_SET]],
+                             GBWK->slots[fileConfigSpritePlacements[14][FILE_CONFIG_SET]],
                              fileConfigSpritePlacements[14][FILE_CONFIG_FRAME], 0x53);
             }
         } else {
             effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[23][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[23][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
                          (u32)(labelFade * 256.0f), 0,
-                         fileConfigTaskWork->slots[fileConfigSpritePlacements[23][FILE_CONFIG_SET]],
+                         GBWK->slots[fileConfigSpritePlacements[23][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[23][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[10][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[10][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 128.0f), 0,
-                             fileConfigTaskWork->slots[fileConfigSpritePlacements[10][FILE_CONFIG_SET]],
+                             GBWK->slots[fileConfigSpritePlacements[10][FILE_CONFIG_SET]],
                              fileConfigSpritePlacements[10][FILE_CONFIG_FRAME], 0x53);
             }
             effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[14][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[14][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
-                         fileConfigTaskWork->slots[fileConfigSpritePlacements[14][FILE_CONFIG_SET]],
+                         GBWK->slots[fileConfigSpritePlacements[14][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[14][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[15][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[15][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 256.0f), 0,
-                             fileConfigTaskWork->slots[fileConfigSpritePlacements[15][FILE_CONFIG_SET]],
+                             GBWK->slots[fileConfigSpritePlacements[15][FILE_CONFIG_SET]],
                              fileConfigSpritePlacements[15][FILE_CONFIG_FRAME], 0x53);
             }
         }
     } else if (index == 3) {
-        if (fileTestSlotFlagsBit(3, (s32 *)&datGameState->world.slotFlags) != 0) {
+        if (fileTestSlotFlagsBit(3, (s32 *)&DDS3_GBWK->world.slotFlags) != 0) {
             effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[12][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[12][FILE_CONFIG_Y] - 30) << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
-                         fileConfigTaskWork->slots[fileConfigSpritePlacements[12][FILE_CONFIG_SET]],
+                         GBWK->slots[fileConfigSpritePlacements[12][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[12][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[13][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[13][FILE_CONFIG_Y] - 30) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 256.0f), 0,
-                             fileConfigTaskWork->slots[fileConfigSpritePlacements[13][FILE_CONFIG_SET]],
+                             GBWK->slots[fileConfigSpritePlacements[13][FILE_CONFIG_SET]],
                              fileConfigSpritePlacements[13][FILE_CONFIG_FRAME], 0x53);
             }
             effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[26][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[26][FILE_CONFIG_Y] - 30) << 3, 0,
                          (u32)(labelFade * 256.0f), 0,
-                         fileConfigTaskWork->slots[fileConfigSpritePlacements[26][FILE_CONFIG_SET]],
+                         GBWK->slots[fileConfigSpritePlacements[26][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[26][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[16][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[16][FILE_CONFIG_Y] - 30) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 128.0f), 0,
-                             fileConfigTaskWork->slots[fileConfigSpritePlacements[16][FILE_CONFIG_SET]],
+                             GBWK->slots[fileConfigSpritePlacements[16][FILE_CONFIG_SET]],
                              fileConfigSpritePlacements[16][FILE_CONFIG_FRAME], 0x53);
             }
         } else {
             effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[24][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[24][FILE_CONFIG_Y] - 30) << 3, 0,
                          (u32)(labelFade * 256.0f), 0,
-                         fileConfigTaskWork->slots[fileConfigSpritePlacements[24][FILE_CONFIG_SET]],
+                         GBWK->slots[fileConfigSpritePlacements[24][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[24][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[12][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[12][FILE_CONFIG_Y] - 30) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 128.0f), 0,
-                             fileConfigTaskWork->slots[fileConfigSpritePlacements[12][FILE_CONFIG_SET]],
+                             GBWK->slots[fileConfigSpritePlacements[12][FILE_CONFIG_SET]],
                              fileConfigSpritePlacements[12][FILE_CONFIG_FRAME], 0x53);
             }
             effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[16][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[16][FILE_CONFIG_Y] - 30) << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
-                         fileConfigTaskWork->slots[fileConfigSpritePlacements[16][FILE_CONFIG_SET]],
+                         GBWK->slots[fileConfigSpritePlacements[16][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[16][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 effDrawTextureSlotWithBlendedCornerColors(fileConfigSpritePlacements[17][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[17][FILE_CONFIG_Y] - 30) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 256.0f), 0,
-                             fileConfigTaskWork->slots[fileConfigSpritePlacements[17][FILE_CONFIG_SET]],
+                             GBWK->slots[fileConfigSpritePlacements[17][FILE_CONFIG_SET]],
                              fileConfigSpritePlacements[17][FILE_CONFIG_FRAME], 0x53);
             }
         }
@@ -4359,48 +4359,48 @@ void fileDrawConfigurationMenuBackground(void *unusedTask) {
         {0, 4, 0, 120},
         {0, 6, -20, -20}
     };
-    f32 labelFade = fileConfigTaskWork->labelFade;
-    f32 choiceFade = fileConfigTaskWork->choiceFade;
+    f32 labelFade = GBWK->labelFade;
+    f32 choiceFade = GBWK->choiceFade;
     s32 spriteIndex;
     s32 row;
 
     spriteIndex = 0;
     effDrawTextureSlotWithBlendedCornerColors(sprites[spriteIndex][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[spriteIndex][FILE_CONFIG_Y] - 30) << 3), 0,
                  (u32)(labelFade * 256.0f), 0,
-                 fileConfigTaskWork->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
+                 GBWK->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
                  sprites[spriteIndex][FILE_CONFIG_FRAME], 0x53);
     spriteIndex++;
     effDrawTextureSlotWithBlendedCornerColors(sprites[spriteIndex][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[spriteIndex][FILE_CONFIG_Y] - 30) << 3), 0,
                  (u32)(labelFade * 256.0f), 0,
-                 fileConfigTaskWork->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
+                 GBWK->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
                  sprites[spriteIndex][FILE_CONFIG_FRAME], 0x53);
-    if (fileConfigTaskWork->state == 1) {
+    if (GBWK->state == 1) {
         effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, 256, 0,
-                     fileConfigTaskWork->slots[4], 0, 0x53);
+                     GBWK->slots[4], 0, 0x53);
     }
     spriteIndex++;
     effDrawTextureSlotWithBlendedCornerColors(sprites[spriteIndex][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[spriteIndex][FILE_CONFIG_Y] - 30) << 3), 0,
                  (u32)(labelFade * 256.0f), 0,
-                 fileConfigTaskWork->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
+                 GBWK->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
                  sprites[spriteIndex][FILE_CONFIG_FRAME], 0x53);
     spriteIndex++;
     effDrawTextureSlotWithBlendedCornerColors(sprites[spriteIndex][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[spriteIndex][FILE_CONFIG_Y] - 30) << 3), 0,
                  (u32)(choiceFade * 256.0f), 0,
-                 fileConfigTaskWork->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
+                 GBWK->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
                  sprites[spriteIndex][FILE_CONFIG_FRAME], 0x53);
     spriteIndex++;
     effDrawTextureSlotWithBlendedCornerColors(sprites[spriteIndex][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[spriteIndex][FILE_CONFIG_Y] - 30) << 3), 0,
                  (u32)(labelFade * 256.0f), 0,
-                 fileConfigTaskWork->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
+                 GBWK->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
                  sprites[spriteIndex][FILE_CONFIG_FRAME], 0x53);
     for (row = 0; row < 5; row++) {
         effDrawTextureSlotWithBlendedCornerColors(0, (131 + row * 35 - 30) * 8, 0, (u32)(labelFade * 256.0f), 0,
-                     fileConfigTaskWork->slots[2], 9, 0x53);
+                     GBWK->slots[2], 9, 0x53);
         effDrawTextureSlotWithBlendedCornerColors(461 * 16, (131 + row * 35 - 30) * 8, 0, (u32)(labelFade * 256.0f), 0,
-                     fileConfigTaskWork->slots[2], 10, 0x53);
+                     GBWK->slots[2], 10, 0x53);
     }
     effDrawTextureSlotWithBlendedCornerColors(73 * 16, (326 - 30) * 8, 0, (u32)(labelFade * 256.0f), 0,
-                 fileConfigTaskWork->slots[2], 11, 0x53);
+                 GBWK->slots[2], 11, 0x53);
 }
 
 
@@ -4488,7 +4488,7 @@ s32 sdfProjectPointInForwardConeVU(void) {
     return 1;
 }
 
-extern u8 sdfViewUpVector[];
+extern u8 aViewDown[];
 
 /* vu0 routine: distance between the projected view point and a second point offset perpendicular to
    the camera axis by rate; 0 when either projection (sdfProjectPointInForwardConeVU) fails. Point comes in vf10. */
@@ -4510,7 +4510,7 @@ f32 mnuMeasureProjectedPerpendicularDistance(f32 rate) {
     VU0_MOVE_VF(vf12, vf10);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, sdfViewUpVector);
+    VU0_LOAD_VF(vf11, aViewDown);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_LOAD_VF(vf11, scale);
@@ -4583,21 +4583,21 @@ void vuCatmullRomPoint(f32 (*p)[4], f32 t)
 }
 
 extern u8 sdfViewTargetVector[];
-extern u8 sdfViewEyeVector[];
-extern u8 sdfViewUpVector[];
+extern u8 aViewTarget[];
+extern u8 aViewDown[];
 
-/* vu0 routine: camera basis rows vf28-vf31 from eye sdfViewTargetVector, target sdfViewEyeVector and up sdfViewUpVector */
+/* vu0 routine: camera basis rows vf28-vf31 from eye sdfViewTargetVector, target aViewTarget and up aViewDown */
 void vuBuildLookAtBasis(void)
 {
     VU0_LOAD_VF(vf10, sdfViewTargetVector);
     VU0_MOVE_VF(vf31, vf10);
     VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf10, aViewTarget);
     VU0_SUB(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf30, vf10);
     VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, sdfViewUpVector);
+    VU0_LOAD_VF(vf10, aViewDown);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf28, vf10);
@@ -4844,7 +4844,7 @@ void fileWriteToPfs(FileJobPayload *job, const char *filePath) {
     char path[0xD0];
     s32 fd;
 
-    if (sdfPfsDebugMode != 0) {
+    if (sdfHddValid != 0) {
         sprintf(path, D_00437E10, filePath);
         fd = sceOpen(path, 0x602, 0x1B6);
     } else {
@@ -5462,7 +5462,7 @@ void fileQueueSaveImage(FileQueue *queue, const char *filePath) {
     s32 size;
     FileJob *job;
 
-    if (sdfPfsDebugMode != 0) {
+    if (sdfHddValid != 0) {
         sprintf(path, D_00437E10, filePath);
         fd = sceOpen(path, 0x602, 0x1B6);
     } else {
@@ -5562,7 +5562,7 @@ void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
     s32 size;
     FileJob *job;
 
-    if (sdfPfsDebugMode != 0) {
+    if (sdfHddValid != 0) {
         sprintf(path, D_00437E10, filePath);
         fd = sceOpen(path, 0x602, 0x1B6);
     } else {
@@ -5754,7 +5754,7 @@ s32 fileQueueCountLinkedJobs(FileQueue *queue) {
 }
 
 
-/* vu0 routine: dst = |pos| * unit(sdfViewTargetVector - sdfViewEyeVector); flag 0x10 flattens y, then puts pos.y back */
+/* vu0 routine: dst = |pos| * unit(sdfViewTargetVector - aViewTarget); flag 0x10 flattens y, then puts pos.y back */
 void camFollowOffsetVec(FileJob *obj, void *dst)
 {
     f32 len[4];
@@ -5772,7 +5772,7 @@ void camFollowOffsetVec(FileJob *obj, void *dst)
     VU0_LENGTH_VF10(length);
     VEC3_SPLAT(len, length);
     VU0_LOAD_VF(vf10, sdfViewTargetVector);
-    VU0_LOAD_VF(vf11, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, aViewTarget);
     VU0_SUB(vf10, vf10, vf11);
     if (obj->xformFlags & 0x10) {
         VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
@@ -5786,7 +5786,7 @@ void camFollowOffsetVec(FileJob *obj, void *dst)
     VU0_STORE_VF(vf10, dst);
 }
 
-/* dst = rotation facing unit(sdfViewTargetVector - sdfViewEyeVector) (pitch and yaw); flag 0x40 composes it onto obj->quat, no flag 0x60 copies obj->quat */
+/* dst = rotation facing unit(sdfViewTargetVector - aViewTarget) (pitch and yaw); flag 0x40 composes it onto obj->quat, no flag 0x60 copies obj->quat */
 void camAimRotation(CamAim *obj, void *dst)
 {
     f32 v[4];
@@ -5798,7 +5798,7 @@ void camAimRotation(CamAim *obj, void *dst)
         return;
     }
     VU0_LOAD_VF(vf10, sdfViewTargetVector);
-    VU0_LOAD_VF(vf11, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, aViewTarget);
     VU0_SUB(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, v);

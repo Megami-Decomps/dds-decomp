@@ -118,7 +118,7 @@ void brsUpdateResultPortraitFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
     }
 }
 
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 extern void eglSetOt(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void btlDrawIconAtSize(SdfPoolNode *, s32, s32, s32, s32, s32, s32, s32, s32, u16);
@@ -172,7 +172,7 @@ void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
         color[3] = packed;
     }
 
-    btlDrawIconAtSize(&kwlnDrawSurfaces[surfaceIndex], iconX + (x >> 4),
+    btlDrawIconAtSize(&sdfGrOtTable[surfaceIndex], iconX + (x >> 4),
                       iconY + (y >> 3), iconWidth, iconHeight, color[0],
                       color[1], color[2], color[3], unit->unitId);
 

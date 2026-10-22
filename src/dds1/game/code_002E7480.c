@@ -28,7 +28,7 @@
 
 #define SDF_ASIN_SAMPLE_COUNT 128
 
-extern u8 sdfDevicePriorityOverrideTicks;
+extern u8 sdfFileCmdThreadPrioCheckCounter;
 
 extern u8 D_003BD42E;
 
@@ -40,9 +40,9 @@ extern DevState *D_003BD424;
 
 extern DevState *D_003BD428;
 
-extern s32 sdfDeviceWorkerPriority;
+extern s32 sdfFileCmdThreadPrio;
 
-extern s32 sdfDevReplySemaphore;
+extern s32 sdfFileSemaId;
 
 extern s32 sdfDiscRequestPending;
 
@@ -59,7 +59,7 @@ extern u8 D_003BD460[];
 
 extern u8 D_003BD468[];
 
-extern u16 sdfDefaultDevRequestOptions;
+extern u16 sdfFileCmdDefaultCreateMode;
 
 extern u8 D_003BD478;
 

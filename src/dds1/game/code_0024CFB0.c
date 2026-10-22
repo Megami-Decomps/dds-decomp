@@ -53,13 +53,13 @@ extern void mnuApplyFadeTrackMode(s32, struct MenuTerminalWork *);
 
 extern s32 D_003BC410;
 
-extern s32 dspWindowHandle;
+extern s32 gMsgID;
 
-extern u8 dspWindowControlState;
+extern u8 gMsgFlag;
 
-extern s8 dspWindowStateGate;
+extern s8 gMsgInvFlag;
 
-extern s8 evtMessageWindowOption;
+extern s8 gSelMsgPos;
 
 extern s8 dspCapturedSoundMode;
 
@@ -80,7 +80,7 @@ extern EvtActiveFlagTable evtActiveEntryFlags;
 
 
 
-extern u32 evtDisplayValues[];
+extern u32 fclWorkValue[];
 
 extern void mnuDrawTerminalEffectIfAvailable(s32 state);
 
@@ -137,7 +137,7 @@ s32 dspStartFlagEvent(s32 context) {
                 }
             }
             for (index = 0; index < EVT_PARTY_SLOT_COUNT; index++) {
-                slot = &datGameState->party[index];
+                slot = &DDS3_GBWK->party[index];
                 if ((slot->flags & 1) != 0 && evtBitCheck(mnuPartyFlagEventEntries[slot->unitId].requiredFlag) != 0
                     && evtBitCheck(mnuPartyFlagEventEntries[slot->unitId].handledFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
@@ -418,7 +418,7 @@ void evtCollectActiveGameIndices(ActiveList *list) {
     s32 index;
     list->entryCount = 0;
     for (index = 1; index < EVT_ACTIVE_ENTRY_LIMIT; index++) {
-        if (datGameState->inventory.counts[index] != 0) {
+        if (DDS3_GBWK->inventory.counts[index] != 0) {
             s32 outputIndex = list->entryCount++;
             list->entryIndices[outputIndex] = index;
         }
@@ -482,9 +482,9 @@ extern s32 itfMesMngInitialize(struct ItfMesSub *sub);
 
 /* Create the singleton message window only when its handle is negative. */
 s32 fclInitMessage(struct ItfMesSub *sub) {
-    if (dspWindowHandle < 0) {
-        dspWindowHandle = itfMesMngInitialize(sub);
-        itfMesMngChangeWindowType(dspWindowHandle, 2, 0);
+    if (gMsgID < 0) {
+        gMsgID = itfMesMngInitialize(sub);
+        itfMesMngChangeWindowType(gMsgID, 2, 0);
         return 1;
     }
     return 0;
@@ -492,22 +492,22 @@ s32 fclInitMessage(struct ItfMesSub *sub) {
 
 /* Apply page mode zero and the caller's opaque page value to an open window. */
 s32 evtSetMessageWindowPageValue(s32 pageValue) {
-    if (dspWindowHandle < 0) {
+    if (gMsgID < 0) {
         return 0;
     }
-    itfMesMngChangeWindowType(dspWindowHandle, 0, pageValue);
+    itfMesMngChangeWindowType(gMsgID, 0, pageValue);
     return 1;
 }
 
 /* Start an entry, mark the first panel value pending, and enable control state one. */
 s32 fclStartMessage(s32 entry) {
-    if (dspWindowHandle < 0) {
+    if (gMsgID < 0) {
         return 0;
     }
-    itfMesMngMarkBitStat(dspWindowHandle, DSP_WINDOW_ENTRY_FLAG);
-    itfMesStartEntry(dspWindowHandle, entry, 0);
-    itfMesMngSetSelPhase(dspWindowHandle, -1);
-    dspWindowControlState = DSP_WINDOW_CONTROL_ACTIVE;
+    itfMesMngMarkBitStat(gMsgID, DSP_WINDOW_ENTRY_FLAG);
+    itfMesStartEntry(gMsgID, entry, 0);
+    itfMesMngSetSelPhase(gMsgID, -1);
+    gMsgFlag = DSP_WINDOW_CONTROL_ACTIVE;
     return 1;
 }
 
@@ -516,7 +516,7 @@ extern s32 dspReadWindowSecondPanelValue(void);
 /* Store the caller's opaque value and snapshot the panel's second halfword.
  * This routine itself performs no sound-driver operation. */
 s32 evtStoreValueAndCaptureWindowPanelValue(s32 requestedValue) {
-    if (dspWindowHandle < 0) {
+    if (gMsgID < 0) {
         return 0;
     }
     D_003BC410 = requestedValue;
@@ -526,14 +526,14 @@ s32 evtStoreValueAndCaptureWindowPanelValue(s32 requestedValue) {
 
 /* Update the byte-sized option only while the singleton window is open. */
 void evtSetMessageWindowOptionWhenOpen(s32 option) {
-    if (dspWindowHandle >= 0) {
-        evtMessageWindowOption = option;
+    if (gMsgID >= 0) {
+        gSelMsgPos = option;
     }
 }
 
 /* Return the retained option byte, even when the window is closed. */
 s8 fclGetCurrentSelMessagePos(void) {
-    return evtMessageWindowOption;
+    return gSelMsgPos;
 }
 
 extern s32 itfMesMngGetSelectNo(s32 windowIndex);
@@ -541,10 +541,10 @@ extern s32 itfMesMngGetSelectNo(s32 windowIndex);
 /* Read the second panel halfword, or -1 when no message window exists.
  * Despite the inherited name, this is not a sound-driver query. */
 s32 dspReadWindowSecondPanelValue(void) {
-    if (dspWindowHandle < 0) {
+    if (gMsgID < 0) {
         return -1;
     }
-    return itfMesMngGetSelectNo(dspWindowHandle);
+    return itfMesMngGetSelectNo(gMsgID);
 }
 
 /* Return the captured signed-byte panel value without querying the live window. */
@@ -560,14 +560,14 @@ u32 evtCleanupMessageWindow(s32 notify) {
     u32 cleaned;
 
     cleaned = 0;
-    if (-1 < dspWindowHandle) {
-        itfMesMngSetPhase(dspWindowHandle, 0);
+    if (-1 < gMsgID) {
+        itfMesMngSetPhase(gMsgID, 0);
         if (notify != 0) {
-            itfMesMngMsgWndCls(dspWindowHandle);
+            itfMesMngMsgWndCls(gMsgID);
         }
-        itfMesMngRequestMessageRelease(dspWindowHandle, 0);
+        itfMesMngRequestMessageRelease(gMsgID, 0);
         dspSetActive(1);
-        dspWindowControlState = 0;
+        gMsgFlag = 0;
         cleaned = 1;
     }
     return cleaned;
@@ -580,38 +580,38 @@ u32 evtFinishMessageWindowAndNotify(void) {
 
 /* Destroy an existing singleton window and invalidate its handle and control gates. */
 s32 fclDestroyMessage(void) {
-    s32 window = dspWindowHandle;
+    s32 window = gMsgID;
     if (window < 0) {
         return 0;
     }
     itfMesMngRelease(window);
-    dspWindowHandle = -1;
-    dspWindowControlState = 0;
-    dspWindowStateGate = 0;
+    gMsgID = -1;
+    gMsgFlag = 0;
+    gMsgInvFlag = 0;
     return 1;
 }
 
 /* A closed window reports zero; the state gate hides only control state two. */
 s32 fclChkMessage(void) {
-    if (dspWindowHandle < 0) {
+    if (gMsgID < 0) {
         return 0;
     }
-    if (dspWindowStateGate != 0) {
-        if ((s8)dspWindowControlState == DSP_WINDOW_CONTROL_GATED) {
+    if (gMsgInvFlag != 0) {
+        if ((s8)gMsgFlag == DSP_WINDOW_CONTROL_GATED) {
             return 0;
         }
     }
-    return (s8)dspWindowControlState;
+    return (s8)gMsgFlag;
 }
 
 extern s32 itfMesMngGetSelPhase(s32 windowIndex);
 
 /* Snapshot the second panel halfword only after the first halfword is nonnegative. */
 s32 dspCaptureWindowSecondPanelValue(void) {
-    if (dspWindowHandle < 0) {
+    if (gMsgID < 0) {
         return 0;
     }
-    if (itfMesMngGetSelPhase(dspWindowHandle) < 0) {
+    if (itfMesMngGetSelPhase(gMsgID) < 0) {
         return 0;
     }
     dspCapturedSoundMode = dspReadWindowSecondPanelValue();
@@ -624,32 +624,32 @@ extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
 
 /* Advance the singleton window through its active, gated and cleanup phases. */
 void dspAdvanceMessageWindowControl(s32 notify) {
-    s32 handle = dspWindowHandle;
+    s32 handle = gMsgID;
     if (handle < 0) {
         return;
     }
-    switch ((s8)dspWindowControlState) {
+    switch ((s8)gMsgFlag) {
     case 0:
         return;
     case DSP_WINDOW_CONTROL_ACTIVE:
         if (itfMesMngGetPhase(handle) < 0) {
-            dspWindowControlState = DSP_WINDOW_CONTROL_GATED;
+            gMsgFlag = DSP_WINDOW_CONTROL_GATED;
         }
         return;
     case DSP_WINDOW_CONTROL_GATED:
         if (D_003BC410 >= 0) {
             itfMesMngSetSelectDefKey(handle, 3, 1);
-            itfMesMngSetSelect(dspWindowHandle, evtMessageWindowOption);
-            itfMesBuildOptionList(dspWindowHandle, D_003BC410);
+            itfMesMngSetSelect(gMsgID, gSelMsgPos);
+            itfMesBuildOptionList(gMsgID, D_003BC410);
             D_003BC410 = -1;
         }
-        if (dspWindowStateGate != 0) {
+        if (gMsgInvFlag != 0) {
             return;
         }
         if (dspCaptureWindowSecondPanelValue() != 0) {
             return;
         }
-        dspWindowControlState = 3;
+        gMsgFlag = 3;
         return;
     case 3:
         evtCleanupMessageWindow(notify);
@@ -668,12 +668,12 @@ void dspRequestMessageWindowModeOne(void) {
 extern void itfMesMngSetVarImmediate(s32 window, u32 slotIndex, const void *sourceText);
 
 void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText) {
-    itfMesMngSetVarImmediate(dspWindowHandle, slotIndex, sourceText);
+    itfMesMngSetVarImmediate(gMsgID, slotIndex, sourceText);
 }
 
 /* Return the gate byte independently of the singleton window's existence. */
 s8 dspGetWindowStateGate(void) {
-    return dspWindowStateGate;
+    return gMsgInvFlag;
 }
 
 /* Enable clears both disable flags and restores panel/control state one.
@@ -681,15 +681,15 @@ s8 dspGetWindowStateGate(void) {
  * Callers must already have a valid window. */
 void dspSetActive(s32 enabled) {
     if (enabled) {
-        itfMesMngClearBitStat(dspWindowHandle, DSP_WINDOW_DISABLE_FLAG_MAIN);
-        itfMesMngClearBitStat(dspWindowHandle, DSP_WINDOW_DISABLE_FLAG_SECONDARY);
-        dspWindowStateGate = 0;
-        itfMesMngSetPhase(dspWindowHandle, 1);
-        dspWindowControlState = DSP_WINDOW_CONTROL_ACTIVE;
+        itfMesMngClearBitStat(gMsgID, DSP_WINDOW_DISABLE_FLAG_MAIN);
+        itfMesMngClearBitStat(gMsgID, DSP_WINDOW_DISABLE_FLAG_SECONDARY);
+        gMsgInvFlag = 0;
+        itfMesMngSetPhase(gMsgID, 1);
+        gMsgFlag = DSP_WINDOW_CONTROL_ACTIVE;
     } else {
-        itfMesMngMarkBitStat(dspWindowHandle, DSP_WINDOW_DISABLE_FLAG_MAIN);
-        itfMesMngMarkBitStat(dspWindowHandle, DSP_WINDOW_DISABLE_FLAG_SECONDARY);
-        dspWindowStateGate = 1;
+        itfMesMngMarkBitStat(gMsgID, DSP_WINDOW_DISABLE_FLAG_MAIN);
+        itfMesMngMarkBitStat(gMsgID, DSP_WINDOW_DISABLE_FLAG_SECONDARY);
+        gMsgInvFlag = 1;
     }
 }
 
@@ -699,8 +699,8 @@ extern void itfMesMngSetOffsetY1(s32 windowIndex, s32 topDelta);
 /* Convert x/y to the window's 16-by-8 coordinate units and set its panel offset.
  * The original signed shifts are retained, including their input assumptions. */
 void evtMoveMessageWindowWithPanelOffset(s32 x, s32 y) {
-    itfMesMngSetMesPosition(dspWindowHandle, x << 4, y << 3);
-    itfMesMngSetOffsetY1(dspWindowHandle, -((DSP_WINDOW_PANEL_BASE_Y - y) << 3));
+    itfMesMngSetMesPosition(gMsgID, x << 4, y << 3);
+    itfMesMngSetOffsetY1(gMsgID, -((DSP_WINDOW_PANEL_BASE_Y - y) << 3));
 }
 
 /* Recognize all three scheduler queues. Preserve the repeated queries. */
@@ -729,14 +729,14 @@ s32 evtSetBoundedDisplayValue(s32 displayValueIndex, s32 displayValue) {
     if (displayValueIndex >= EVT_DISPLAY_VALUE_COUNT) {
         return 0;
     }
-    evtDisplayValues[displayValueIndex] = displayValue;
+    fclWorkValue[displayValueIndex] = displayValue;
     return 1;
 }
 
 /* Clamp only the upper side to the last display slot; negative indices pass through. */
 u32 evtGetBoundedDisplayValue(s32 displayValueIndex) {
     displayValueIndex = (displayValueIndex < EVT_DISPLAY_VALUE_COUNT) ? displayValueIndex : EVT_LAST_DISPLAY_VALUE;
-    return evtDisplayValues[displayValueIndex];
+    return fclWorkValue[displayValueIndex];
 }
 
 extern s32 scrGetIntPara(s32 parameterIndex);
@@ -756,7 +756,7 @@ s32 evtOpReadDisplayValue(void) {
     if (displayValueIndex >= EVT_DISPLAY_VALUE_COUNT) {
         displayValueIndex = EVT_LAST_DISPLAY_VALUE;
     }
-    scrSetIntReturnValue(evtDisplayValues[displayValueIndex]);
+    scrSetIntReturnValue(fclWorkValue[displayValueIndex]);
     return 1;
 }
 
@@ -782,15 +782,15 @@ extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
 
 /* Draw top/bottom viewport indicators; each flag selects its brighter color.
  * The two triangles retain their signed x-radius and y-offset calculations. */
-INCLUDE_SDATA(const s32, "game/code_0024CFB0", dspWindowHandle);
+INCLUDE_SDATA(const s32, "game/code_0024CFB0", gMsgID);
 
-INCLUDE_SDATA(const s32, "game/code_0024CFB0", dspWindowControlState);
+INCLUDE_SDATA(const s32, "game/code_0024CFB0", gMsgFlag);
 
-INCLUDE_SDATA(const s32, "game/code_0024CFB0", dspWindowStateGate);
+INCLUDE_SDATA(const s32, "game/code_0024CFB0", gMsgInvFlag);
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC410);
 
-INCLUDE_SDATA(const s32, "game/code_0024CFB0", evtMessageWindowOption);
+INCLUDE_SDATA(const s32, "game/code_0024CFB0", gSelMsgPos);
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", dspCapturedSoundMode);
 

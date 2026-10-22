@@ -18,7 +18,7 @@
 #include "sdf_thread_sleep.h"
 
 struct EffWorldNode;
-extern struct EffWorldNode *dds3ActiveWorld;
+extern struct EffWorldNode *dds3TheWorld;
 
 /* Detach a task from its parent's child list. Detached tasks are left untouched;
  * an attached task must already occur in that parent's sibling chain.
@@ -123,7 +123,7 @@ s32 sdfInitializeRuntimeAndStartMainLoop(void) {
 
 #define KWLN_FRAME_POOL_NODE_COUNT 0x62
 
-extern SdfPoolNode kwlnDrawSurfaces[KWLN_FRAME_POOL_NODE_COUNT];
+extern SdfPoolNode sdfGrOtTable[KWLN_FRAME_POOL_NODE_COUNT];
 extern u8 D_00325860[];
 extern KwlnFrameDrawBank D_00325870[2];
 extern void sdfWaitAndSelectBuffer(void);
@@ -165,7 +165,7 @@ s32 kwlnPrepareFrameDrawPackets(KwlnTask *task) {
     SdfPoolNode *drawSink;
 
     sdfWaitAndSelectBuffer();
-    sdfGrOtInit(kwlnDrawSurfaces, KWLN_FRAME_POOL_NODE_COUNT);
+    sdfGrOtInit(sdfGrOtTable, KWLN_FRAME_POOL_NODE_COUNT);
     sdfPreDrawChainInit((SdfPacketChain *)D_00325860);
     kwlnInitializeFrameDrawPackets(bufferIndex);
     packetGroups = D_00325870[bufferIndex].packetGroups;
@@ -173,7 +173,7 @@ s32 kwlnPrepareFrameDrawPackets(KwlnTask *task) {
         sdfModelSetDrawEnv(packetGroups);
         packetGroups++;
     }
-    drawSink = kwlnDrawSurfaces;
+    drawSink = sdfGrOtTable;
     drawSink->append(drawSink, &D_00325870[bufferIndex].initialList);
     return 0;
 }
@@ -183,7 +183,7 @@ s32 kwlnPrepareFrameDrawPackets(KwlnTask *task) {
 #include "pcp_vu0.h"
 
 struct ConsFrustumPacket;
-extern u32 kwlnTextureReferenceFlag;
+extern u32 dds3RenderTex;
 extern u32 D_003BA900;
 extern u32 D_003BA8EC;
 extern u8 kwlnHeldTextureLightingPackets[];
@@ -202,7 +202,7 @@ extern f32 D_00324A20[4], kwlnOverlayEyeVector[4], kwlnOverlayUpVector[4];
 extern KwlnDrawVectorParams kwlnHeldTextureFrustumParameters, kwlnOverlayFrustumParameters, kwlnDrawVector;
 extern u8 kwlnHeldTextureViewMatrix[0x40];
 extern u8 D_00329790[];
-extern u8 sdfViewEyeVector[], sdfViewTargetVector[], sdfViewUpVector[];
+extern u8 aViewTarget[], sdfViewTargetVector[], aViewDown[];
 extern u8 sdfViewShakeVector[];
 extern u8 sdfViewMatrix[0x40];
 extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
@@ -230,11 +230,11 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
     kwlnAdvanceShakeOffsets();
     evtCheckSelectionState();
     dds3SceneLightUpdateFirst();
-    if (kwlnTextureReferenceFlag != 0) {
+    if (dds3RenderTex != 0) {
         sdf3DMakeLightParallelPacket((SdfLightingPacketStorage *)(kwlnHeldTextureLightingPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
             kwlnHeldTextureLightSources, kwlnHeldTextureAmbientColor);
         *(u32 *)(kwlnHeldTextureLightingPackets - 0x140 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = D_003BA900;
-        if (kwlnTextureReferenceFlag != 0) {
+        if (dds3RenderTex != 0) {
             SdfPoolNode *sceneNode;
             SdfListHead *sceneList;
             u64 *sceneFrustum;
@@ -243,7 +243,7 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
             VU0_STORE_MATRIX_UNCLOBBERED(kwlnHeldTextureViewMatrix);
             sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(kwlnHeldTextureMatrixPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
                 &D_003247B0, kwlnHeldTextureViewMatrix);
-            sceneNode = &kwlnDrawSurfaces[1];
+            sceneNode = &sdfGrOtTable[1];
             sceneNode->append(sceneNode,
                 (SdfListHead *)(kwlnHeldTextureMatrixPackets - 0x190 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
             sceneList = dds3FontReqAllocDrawTag();
@@ -263,7 +263,7 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
         LookAtMatrix(D_00324A20, kwlnOverlayEyeVector, kwlnOverlayUpVector);
         VU0_STORE_MATRIX_UNCLOBBERED(D_00329790);
         sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(kwlnOverlayMatrixPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES), &D_00324980, D_00329790);
-        overlayNode = &kwlnDrawSurfaces[85];
+        overlayNode = &sdfGrOtTable[85];
         overlayNode->append(overlayNode, (SdfListHead *)(kwlnOverlayMatrixPackets - 0x20 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
         overlayList = dds3FontReqAllocDrawTag();
         overlayFrustum = (u64 *)sdfGrAllocPacketBuff(0x50);
@@ -274,8 +274,8 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
         sdf3DMakeLightParallelPacket((SdfLightingPacketStorage *)(kwlnOverlayMatrixPackets - 0x440 + bufferIndex * KWLN_FRAME_BUFFER_BYTES), D_00324770, kwlnDefaultColorVector);
         *(u32 *)(kwlnOverlayMatrixPackets - 0x620 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = D_003BA8EC;
     }
-    sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);
-    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    sdfCameraBuildProjection(&dds3ScreenParam.camera);
+    VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
@@ -287,16 +287,16 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
     VU0_LOAD_VF(vf10, sdfViewTargetVector);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, &target);
-    LookAtMatrix(&eye, &target, sdfViewUpVector);
+    LookAtMatrix(&eye, &target, aViewDown);
     VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
     {
         SdfPoolNode *viewNode;
         SdfListHead *viewList;
         u64 *viewFrustum;
         sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(D_003270F0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
-            &sdfSceneProjectionParameters, sdfViewMatrix);
-        sdf3DSetCamera(&sdfSceneProjectionParameters, sdfViewMatrix);
-        viewNode = &kwlnDrawSurfaces[7];
+            &dds3ScreenParam, sdfViewMatrix);
+        sdf3DSetCamera(&dds3ScreenParam, sdfViewMatrix);
+        viewNode = &sdfGrOtTable[7];
         viewNode->append(viewNode, (SdfListHead *)(D_003270F0 - 0x250 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
         viewList = dds3FontReqAllocDrawTag();
         viewFrustum = (u64 *)sdfGrAllocPacketBuff(0x50);
@@ -306,7 +306,7 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
 
         sdfPreDrawChainLink((SdfPacketChain *)D_00325860,
             (SdfLinkedPacketList *)(D_003270F0 - 0x230 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
-        providerSurfaces = &kwlnDrawSurfaces[7];
+        providerSurfaces = &sdfGrOtTable[7];
         sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[0], &providerSurfaces[32], &providerSurfaces[33],
                                               &providerSurfaces[48], &providerSurfaces[49]);
         fldConfigureRenderCleanupMessage();
@@ -338,17 +338,17 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
     }
     {
         SdfListHead *stateList = dds3LinkZClearDrawTag(0);
-        SdfPoolNode *const state0 = &kwlnDrawSurfaces[81];
+        SdfPoolNode *const state0 = &sdfGrOtTable[81];
         state0->append(state0, stateList);
     }
     {
         SdfListHead *stateList = dds3LinkZClearDrawTag(1);
-        SdfPoolNode *const state1 = &kwlnDrawSurfaces[93];
+        SdfPoolNode *const state1 = &sdfGrOtTable[93];
         state1->append(state1, stateList);
     }
     {
         SdfListHead *stateList = dds3LinkZClearDrawTag(2);
-        SdfPoolNode *const state2 = &kwlnDrawSurfaces[95];
+        SdfPoolNode *const state2 = &sdfGrOtTable[95];
         state2->append(state2, stateList);
     }
 
@@ -381,13 +381,13 @@ extern void sdfGrReqDraw(SdfListHead *, SdfPacketChain *);
 extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern SdfPoolNode D_00325708;
-extern u8 kwlnDrawOverlayEnabled;
-extern s16 kwlnDrawOverlayAlpha;
-extern s16 kwlnDrawOverlayScale;
+extern u8 dds3ScreenBlurFlag;
+extern s16 dds3ScreenBlurAlpha;
+extern s16 dds3ScreenBlurScale;
 extern s32 D_003BA910[2];
 extern u8 D_003BA7FC;
 extern SdfListHead *D_003BA844;
-extern u32 kwlnDrawControlFlags;
+extern u32 dds3DrawFlag;
 extern s8 sdfGrFrameComplete;
 
 
@@ -419,7 +419,7 @@ s32 kwlnRenderFrame(KwlnTask *task) {
         groupHeads++;
         packetGroups++;
     }
-    if (kwlnDrawOverlayEnabled != 0 && dds3NullDrawProc() == 0) {
+    if (dds3ScreenBlurFlag != 0 && dds3NullDrawProc() == 0) {
         packetList = (SdfListHead *)sdfGrAllocPacketBuff(KWLN_FRAME_PACKET_LIST_BYTES);
         sdfDrawTagInit(packetList);
         sdfGrLinkDispFrameTex(packetList, (u32)(kwlnFrameDrawPacketRecords[bufferIndex].baseBytes), (SdfDmaNode *)sdfGrAllocPacketBuff(KWLN_FRAME_PACKET_LIST_BYTES));
@@ -450,14 +450,14 @@ s32 kwlnRenderFrame(KwlnTask *task) {
         edgeDistances[3] = KWLN_FRAME_HALF_HEIGHT - D_003BA910[1];
         /* Signed Q12 scale; X and Y use distinct GS coordinate units below. */
         for (i = 0; i != 4; i++) {
-            edgeDistances[i] = edgeDistances[i] * kwlnDrawOverlayScale >> KWLN_FRAME_SCALE_FRACTION_BITS;
+            edgeDistances[i] = edgeDistances[i] * dds3ScreenBlurScale >> KWLN_FRAME_SCALE_FRACTION_BITS;
         }
         spritePacket = sdf2DAllocSprite(1);
         vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr((s32)spritePacket);
         vertex->r = KWLN_FRAME_NEUTRAL_COLOR;
         vertex->g = KWLN_FRAME_NEUTRAL_COLOR;
         vertex->b = KWLN_FRAME_NEUTRAL_COLOR;
-        vertex->a = kwlnDrawOverlayAlpha;
+        vertex->a = dds3ScreenBlurAlpha;
         vertex->corner[0].u = 0;
         vertex->corner[0].v = 0;
         vertex->corner[0].x = KWLN_FRAME_LEFT_BASE - edgeDistances[0] * KWLN_FRAME_X_UNITS_PER_PIXEL;
@@ -473,16 +473,16 @@ s32 kwlnRenderFrame(KwlnTask *task) {
         sdfDrawTagLink(packetList, (u32)spritePacket);
         D_00325708.append(&D_00325708, packetList);
     }
-    poolHead = sdfFlushPoolNodes(kwlnDrawSurfaces);
+    poolHead = sdfFlushPoolNodes(sdfGrOtTable);
     D_003BA844 = poolHead;
     if (D_003BA7FC != 0) {
         sdfGrFlushOtChain(poolHead->first);
         D_003BA7FC = 0;
     }
-    if (!(kwlnDrawControlFlags & KWLN_FRAME_SKIP_POOL_QUEUE_BIT)) {
+    if (!(dds3DrawFlag & KWLN_FRAME_SKIP_POOL_QUEUE_BIT)) {
         sdfGrReqDraw(poolHead, (SdfPacketChain *)D_00325860);
     } else {
-        kwlnDrawControlFlags &= KWLN_FRAME_CLEAR_SKIP_POOL_QUEUE;
+        dds3DrawFlag &= KWLN_FRAME_CLEAR_SKIP_POOL_QUEUE;
     }
     sdfGrFrameComplete = 0;
     return 0;
@@ -493,7 +493,7 @@ extern s32 dds3CallBasicMainProc(struct EffWorldNode *holder);
 
 /* Invoke the active world's first callback column; this task step returns zero. */
 s32 dds3BasicMainProcess(KwlnTask *task) {
-    dds3CallBasicMainProc(dds3ActiveWorld);
+    dds3CallBasicMainProc(dds3TheWorld);
     return 0;
 }
 
@@ -502,7 +502,7 @@ extern s32 dds3CallBasicDrawProc(struct EffWorldNode *holder);
 
 /* Invoke the active world's second callback column; this task step returns zero. */
 s32 dds3BasicDrawProcess(KwlnTask *task) {
-    dds3CallBasicDrawProc(dds3ActiveWorld);
+    dds3CallBasicDrawProc(dds3TheWorld);
     return 0;
 }
 

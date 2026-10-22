@@ -459,7 +459,7 @@ INCLUDE_SDATA(const s32, "game/code_0029BC58", D_00437A38);
 
 INCLUDE_SDATA(const s32, "game/code_0029BC58", D_00437A3C);
 
-INCLUDE_SDATA(const s32, "game/code_0029BC58", mnuMovieMenuState);
+INCLUDE_SDATA(const s32, "game/code_0029BC58", titleWork);
 
 INCLUDE_SDATA(const s32, "game/code_0029BC58", D_00437A48);
 
@@ -497,7 +497,7 @@ INCLUDE_SDATA(const s32, "game/code_0029BC58", D_00437AC0);
 
 INCLUDE_SDATA(const s32, "game/code_0029BC58", D_00437AC8);
 
-INCLUDE_SDATA(const s32, "game/code_0029BC58", mnuMovieDrawTask);
+INCLUDE_SDATA(const s32, "game/code_0029BC58", PlayingNo);
 
 INCLUDE_SDATA(const s32, "game/code_0029BC58", D_00437AD0);
 

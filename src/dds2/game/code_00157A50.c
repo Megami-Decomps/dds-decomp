@@ -18,7 +18,7 @@ EffNode *dds3EffectCopy(const EffNode *source) {
 
     copy->type = source->type;
     copy->arg = source->arg;
-    copy->instance = effNodeTypeOperations[source->type].cloneInstanceWord(argument);
+    copy->instance = EffMajorTable[source->type].cloneInstanceWord(argument);
     return copy;
 }
 
@@ -65,8 +65,8 @@ void dds3EffectDataRevision(EffNodeDescriptor *descriptor) {
 typedef struct MemBlock MemBlock;
 
 
-extern s32 billPendingChildList;
-extern BillObj *effBillResourceOwners[];
+extern s32 dds3BillboardTag;
+extern BillObj *hGeneralBillboard[];
 extern EffBillResourceInit D_003AA880[];
 extern char D_004142B0[];
 extern char D_004142C0[];
@@ -82,13 +82,13 @@ void effInitializeBillResourceOwners(void) {
     BillChildPayload *payload;
     u32 configOffset;
 
-    billPendingChildList = 0;
+    dds3BillboardTag = 0;
     archive = (FilePacRequest *)pacLoad(D_004142B0);
     pacSync((struct FileRequest *)archive);
     node = archive->packet.queueHead;
     if (node != NULL) {
         configTable = (u8 *)D_003AA880;
-        owner = effBillResourceOwners;
+        owner = hGeneralBillboard;
         scaleTable = (f32 *)((u8 *)D_003AA880 + 8);
         configOffset = 0;
         do {
@@ -111,9 +111,9 @@ void effInitializeBillResourceOwners(void) {
 void effBillDispatchAll(void) {
     u32 i;
 
-    billPendingChildList = 0;
+    dds3BillboardTag = 0;
     for (i = 0; i < 15; i++) {
-        dds3BillboardDelete(effBillResourceOwners[i]);
+        dds3BillboardDelete(hGeneralBillboard[i]);
     }
 }
 

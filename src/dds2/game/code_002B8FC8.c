@@ -2170,7 +2170,7 @@ void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSe
 
 void mnuRebuildPartySlotResources(MenuPageWindow *menu, s32 partySlotIndex, s32 kind) {
     MenuPageSlot *slot = &menu->slots[partySlotIndex];
-    DatPartyRecord *actor = &datGameState->party[menu->records->slots[partySlotIndex].index];
+    DatPartyRecord *actor = &DDS3_GBWK->party[menu->records->slots[partySlotIndex].index];
     s32 resourceIndex;
     s32 statusIndex;
 
@@ -2453,7 +2453,7 @@ void mnuSelectPage(MenuPageWindow *window, s32 selected) {
         effReleaseTextureHandlesAndResetSlots(window->handlesC[i]);
     }
 
-    selection = mnuGetSelectionFromFlags(&datGameState->party[
+    selection = mnuGetSelectionFromFlags(&DDS3_GBWK->party[
         window->records->slots[selected].index]);
     for (i = 0; i < 5; i++) {
         if (i == selection) {

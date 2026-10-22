@@ -4,7 +4,7 @@
 #include "ee_mmi.h"
 #include "sdf_graph_display.h"
 
-extern s32 sdfGraphicsTransferThreadId;
+extern s32 sdfDrawThreadId;
 
 #define SDF_GRAPH_AUXILIARY_BUFFER 2
 #define SDF_GRAPH_CPU_ADDRESS_MASK 0x0FFFFFFF
@@ -12,18 +12,18 @@ extern s32 sdfGraphicsTransferThreadId;
 #define SDF_GS_FRAMEBUFFER_PAGE_SHIFT 11
 
 
-extern u8 sdfCurrentDisplayModeIndex;
+extern u8 sdfGrScreenMode;
 
-extern u8 sdfGraphBufferRecreationPending;
+extern u8 reqMakeFrameBuff;
 
 extern SdfGraphObj D_0040B290;
 
 
 
 void sdfGrSetScreen(s32 displayModeIndex) {
-    sdfCurrentDisplayModeIndex = (u8)displayModeIndex;
+    sdfGrScreenMode = (u8)displayModeIndex;
     sdfGrSetFrameSetMode(&D_0040B290, displayModeIndex, 0);
-    sdfGraphBufferRecreationPending = 1;
+    reqMakeFrameBuff = 1;
 }
 
 /* Release buffers in slot order, clearing each slot immediately afterward. */
@@ -65,14 +65,14 @@ void sdfGrSetDisp(s32 bufferIndex) {
     sceGsPutDispEnv(&sdfDisplayEnvironment);
 }
 
-extern SdfGraphModeDefaults sdfGraphModeDefaults[];
+extern SdfGraphModeDefaults sdfGrFrameModes[];
 extern u8 D_004389D9;
 
 /* Reset the GS with the interlace setting of the current display mode. */
 void sdfGrGsReset(void) {
     s32 inter;
     s32 ffmode;
-    u16 interlace = sdfGraphModeDefaults[sdfCurrentDisplayModeIndex].interlace;
+    u16 interlace = sdfGrFrameModes[sdfGrScreenMode].interlace;
 
     switch (interlace) {
     case 0:
@@ -94,17 +94,17 @@ void sdfGrGsReset(void) {
 
 s32 sdfDrawThIntHandler(s32 channel) {
     if (channel == 1) {
-        iWakeupThread(sdfGraphicsTransferThreadId);
+        iWakeupThread(sdfDrawThreadId);
     }
     EE_ENABLE_INTERRUPTS_SYNC();
     return 0;
 }
 
-u8 sdfCurrentDisplayModeIndex __attribute__((section(".sdata"))) = 0;
+u8 sdfGrScreenMode __attribute__((section(".sdata"))) = 0;
 
 u8 D_004389D9 __attribute__((section(".sdata"))) = 0;
 
-vu8 sdfCurrentBufferIndex __attribute__((section(".sdata"))) = 0;
+vu8 sdfFrameId __attribute__((section(".sdata"))) = 0;
 
-volatile s32 sdfGsImageUploadSemaphore __attribute__((section(".sdata"))) = 0;
+volatile s32 dds3GsSema __attribute__((section(".sdata"))) = 0;
 

@@ -149,7 +149,7 @@ extern s32 fldGetModeFrameRecordIndex(s32);
 
 extern void mnuDrawTerminalBackdrop(s32);
 
-extern s8 mnuTerminalTaskState;
+extern s8 gProcessStat_2;
 
 
 extern void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 option);
@@ -374,7 +374,7 @@ s32 mnuTerminalScoreBox(DatPartyRecord *unit) {
 void mnuRefreshThresholdNodeFlags(MenuList *list) {
     MenuListNode *node = list->first;
     if (node != 0) {
-        DatGameState *base = datGameState;
+        DatGameState *base = DDS3_GBWK;
         do {
             u32 currency = (u32)base->header.currency;
             if (currency < (u32)node->terminal.requiredAmount) {
@@ -410,7 +410,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, MenuList 
     MenuSlotState *host = list->context;
     s32 scale = list->scale;
     MenuThresholdEntry *entry = &node->terminal;
-    DatPartyRecord *record = &datGameState->party[entry->entryId];
+    DatPartyRecord *record = &DDS3_GBWK->party[entry->entryId];
     s32 selected = 0;
     FrFontGlyph *glyph;
     MenuPageBar *panels;
@@ -480,7 +480,7 @@ void mnuCreateThresholdNodePanels(MenuSlotState *host) {
     while (node != 0) {
         s32 partyIndex = node->terminal.entryId;
         node->childPanel =
-            mnuCreateDualPercentPanel(&datGameState->party[partyIndex], host);
+            mnuCreateDualPercentPanel(&DDS3_GBWK->party[partyIndex], host);
         node = node->next;
     }
 }
@@ -510,7 +510,7 @@ void mnuBuildTerminalNodeList(MenuSlotState *host) {
     list->scale = 0;
     list->drawCallback = mnuDrawTerminalRecoveryListEntry;
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
-        DatPartyRecord *unit = &datGameState->party[partyIndex];
+        DatPartyRecord *unit = &DDS3_GBWK->party[partyIndex];
 
         if ((u16)(unit->flags & 1)) {
             s32 recoveryCost = mnuTerminalScoreBox(unit);
@@ -1069,7 +1069,7 @@ void mnuReleaseTerminalWorkAndResumeField(KwlnTask *task) {
         fclDestroyMessage();
         evtReleaseResourcePairHandle(&work->messageResources);
         sdfMemFreeDirect(work->heapHandle);
-        mnuTerminalTaskState = 2;
+        gProcessStat_2 = 2;
     }
     if (mnuCheckResourceTask() != 0) {
         mnuStopResourceTask();
@@ -1111,7 +1111,7 @@ void mnuCreateTerminalSceneTasks(s32 reduced, s32 slot) {
     fadeTask = dds3StartProcess("term_fade", 0x2B15, 1, 0,
         mnuUpdateTerminalMessageWindowIndicator, NULL, (u32)scene);
     dds3LinkProcess(drawTask, fadeTask);
-    mnuTerminalTaskState = 1;
+    gProcessStat_2 = 1;
 }
 
 
@@ -1125,7 +1125,7 @@ void fldStopSceneTasks(void) {
 
 /* Report one only for active state one; consume completed state two by clearing it. */
 s32 fldPollSceneState(void) {
-    s32 state = mnuTerminalTaskState;
+    s32 state = gProcessStat_2;
     if (state == 1) {
         return 1;
     }
@@ -1133,7 +1133,7 @@ s32 fldPollSceneState(void) {
         return 0;
     }
     if (state == 2) {
-        mnuTerminalTaskState = 0;
+        gProcessStat_2 = 0;
     }
     return 0;
 }
@@ -2167,7 +2167,7 @@ s32 mnuHandleTerminalRecoverySelection(KwlnTask *task) {
             if (!(node->flags48 & 1)) {
                 entry = &node->terminal;
                 buttons = 0;
-                fldSaveSceneOptionsAndClearFlags(&datGameState->party[entry->entryId]);
+                fldSaveSceneOptionsAndClearFlags(&DDS3_GBWK->party[entry->entryId]);
                 p2sdPlaySE(0x10, 0x7F, 0x3F);
                 mnuReleaseSelectedProgressPanel(host);
                 datAddCurrencyClamped(-entry->requiredAmount);
@@ -2207,7 +2207,7 @@ void mnuQueueTerminalCurrencyLabel(s32 fading, s32 state) {
     char text[16];
 
     index = fldGetModeFrameRecordIndex(state);
-    sprintf(text, D_00437868, datGameState->header.currency);
+    sprintf(text, D_00437868, DDS3_GBWK->header.currency);
     if (fading == 0) {
         /* The scene record supplies the steady label's low packed-color byte. */
         color = *(u8 *)&work->resourceBank[0]->workEntries[index].geometry.cornerColors[0] | 0xA09DC300;
@@ -2680,7 +2680,7 @@ INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424FF8);
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00425008);
 
-INCLUDE_SDATA(const s32, "game/code_002665B0", mnuTerminalTaskState);
+INCLUDE_SDATA(const s32, "game/code_002665B0", gProcessStat_2);
 
 INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437859);
 

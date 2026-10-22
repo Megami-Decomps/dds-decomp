@@ -11,97 +11,97 @@
 
 extern f32 *D_0037F770[4]; /* three light sources and a null */
 
-extern u32 kwlnDrawControlFlags;
+extern u32 dds3DrawFlag;
 
-extern u8 kwlnDrawOverlayEnabled;
+extern u8 dds3ScreenBlurFlag;
 
-extern s16 kwlnDrawOverlayAlpha;
+extern s16 dds3ScreenBlurAlpha;
 
-extern s16 kwlnDrawOverlayScale;
+extern s16 dds3ScreenBlurScale;
 
-extern u16 kwlnDrawOverlayTransitionCounter;
+extern u16 blurnow;
 
-extern u16 kwlnDrawOverlayTransitionDuration;
+extern u16 blurmax;
 
-extern s16 kwlnDrawOverlayTransitionStartAlpha;
+extern s16 bluralphabase;
 
-extern s16 kwlnDrawOverlayTransitionStartScale;
+extern s16 blurscalebase;
 
-extern s16 kwlnDrawOverlayTransitionTargetAlpha;
+extern s16 bluralphatarget;
 
-extern s16 kwlnDrawOverlayTransitionTargetScale;
+extern s16 blurscaletarget;
 
 
-extern EffResourceRectParams kwlnTexturedSquareParameters;
+extern EffResourceRectParams mfiltertarget;
 
-extern EffBlurTemplateBody kwlnTexturedBlurParameters;
+extern EffBlurTemplateBody mulblurtarget;
 
-extern EffBlurScatterParams kwlnFilterBlurParameters;
+extern EffBlurScatterParams distblurtarget;
 
-extern u32 kwlnDistanceBlurErrorCount;
+extern u32 distblurovercnt;
 
 /* These snapshot buffers are eight-byte aligned; the parameter body is 0x2C bytes. */
-extern EffBlurScaleParams kwlnStaggeredBlurParameters __attribute__((aligned(8)));
+extern EffBlurScaleParams ripblurtarget __attribute__((aligned(8)));
 
-extern u32 kwlnRippleBlurErrorCount;
+extern u32 ripblurovercnt;
 
-extern u16 kwlnTexturedSquareTargetAlpha;
+extern u16 mfilteratarget;
 
-extern u16 kwlnTexturedSquareStartAlpha;
+extern u16 mfilterabase;
 
-extern u16 kwlnTexturedSquareFadeCounter;
+extern u16 mfilternow;
 
-extern u16 kwlnTexturedSquareFadeDuration;
-
-
-extern u16 kwlnTexturedBlurStartAlpha;
-
-extern u16 kwlnTexturedBlurFadeCounter;
-
-extern u16 kwlnTexturedBlurTargetAlpha;
-
-extern u16 kwlnTexturedBlurFadeDuration;
+extern u16 mfiltermax;
 
 
-extern u16 kwlnFilterBlurStartAlpha;
+extern u16 mulblurabase;
 
-extern u16 kwlnFilterBlurFadeCounter;
+extern u16 mulblurnow;
 
-extern u16 kwlnFilterBlurTargetAlpha;
+extern u16 mulbluratarget;
 
-extern u16 kwlnFilterBlurFadeDuration;
+extern u16 mulblurmax;
 
 
-extern u16 kwlnStaggeredBlurTargetAlpha;
+extern u16 distblurabase;
 
-extern u16 kwlnStaggeredBlurStartAlpha;
+extern u16 distblurnow;
 
-extern u16 kwlnStaggeredBlurFadeCounter;
+extern u16 distbluratarget;
 
-extern u16 kwlnStaggeredBlurFadeDuration;
+extern u16 distblurmax;
+
+
+extern u16 ripbluratarget;
+
+extern u16 ripblurabase;
+
+extern u16 ripblurnow;
+
+extern u16 ripblurmax;
 
 extern void Normalize(void);
 
-extern EffSolidRectParams kwlnColorRectangleParameters;
+extern EffSolidRectParams filter2target;
 
-extern u16 kwlnColorRectangleStartAlpha;
+extern u16 filter2abase;
 
-extern u16 kwlnColorRectangleFadeCounter;
+extern u16 filter2now;
 
-extern u16 kwlnColorRectangleTargetAlpha;
+extern u16 filter2atarget;
 
-extern u16 kwlnColorRectangleFadeDuration;
+extern u16 filter2max;
 
 
-extern EffBlurQuad kwlnRectangleBlurParameters;
+extern EffBlurQuad blur2target;
 
-extern u16 kwlnRectangleBlurStartAlpha;
+extern u16 blur2abase;
 
-extern u16 kwlnRectangleBlurFadeCounter;
+extern u16 blur2now;
 
-extern u16 kwlnRectangleBlurTargetAlpha;
+extern u16 blur2atarget;
 
-extern u16 kwlnRectangleBlurFadeDuration;
+extern u16 blur2max;
 
 
 extern u128 kwlnDefaultColorVector;
@@ -144,136 +144,136 @@ void setdraw_xy(s32 corners[2][2]) {
 
 /* Stage the solid rectangle's blend control word. */
 void dds3SetFilter2Para(u32 blendControl) {
-    kwlnColorRectangleParameters.blendControl = blendControl;
+    filter2target.blendControl = blendControl;
 }
 
 /* Stage the solid rectangle's packed RGBA color. */
 void dds3SetFilter2RGBA(u32 rgba) {
-    kwlnColorRectangleParameters.color = rgba;
+    filter2target.color = rgba;
 }
 
-extern u16 kwlnColorRectangleTransitionCounter;
-extern u16 kwlnColorRectangleTransitionDuration;
+extern u16 filter2swapnow;
+extern u16 filter2swapmax;
 
-extern EffSolidRectParams kwlnColorRectangleTransitionStartParameters;
+extern EffSolidRectParams dds3Filter2Buf;
 
 /* Capture the live solid rectangle before applying or interpolating staged params.
  * Duration storage is 16-bit; the immediate test uses the full argument. */
 void dds3Filter2Swap(s32 duration) {
-    kwlnColorRectangleTransitionStartParameters = *Eve_FilterGetParams();
-    kwlnColorRectangleTransitionCounter = 0;
-    kwlnColorRectangleTransitionDuration = duration;
+    dds3Filter2Buf = *Eve_FilterGetParams();
+    filter2swapnow = 0;
+    filter2swapmax = duration;
     if (duration == 0) {
-        kwlnDrawControlFlags &= ~KWLN_DRAW_COLOR_TRANSITION_BIT;
-        setdraw_xy(kwlnColorRectangleParameters.corners);
-        Eve_FilterSetParam(&kwlnColorRectangleParameters);
+        dds3DrawFlag &= ~KWLN_DRAW_COLOR_TRANSITION_BIT;
+        setdraw_xy(filter2target.corners);
+        Eve_FilterSetParam(&filter2target);
     } else {
-        kwlnDrawControlFlags |= KWLN_DRAW_COLOR_TRANSITION_BIT;
+        dds3DrawFlag |= KWLN_DRAW_COLOR_TRANSITION_BIT;
     }
 }
 
 /* Fade solid-rectangle alpha from zero to the staged color; zero applies now. */
 void dds3Filter2On(s32 duration) {
-    EffSolidRectParams *params = &kwlnColorRectangleParameters;
+    EffSolidRectParams *params = &filter2target;
     s32 requestedDuration = duration;
 
-    kwlnColorRectangleStartAlpha = 0;
-    kwlnColorRectangleFadeCounter = 0;
-    kwlnColorRectangleTargetAlpha = (params->color >> 24);
-    kwlnColorRectangleFadeDuration = requestedDuration;
+    filter2abase = 0;
+    filter2now = 0;
+    filter2atarget = (params->color >> 24);
+    filter2max = requestedDuration;
     if (requestedDuration == 0) {
-        kwlnDrawControlFlags &= ~KWLN_DRAW_COLOR_FADE_BIT;
+        dds3DrawFlag &= ~KWLN_DRAW_COLOR_FADE_BIT;
         setdraw_xy(params->corners);
         Eve_FilterSetParam(params);
         Eve_FilterON();
     }
     else {
-        kwlnDrawControlFlags |= KWLN_DRAW_COLOR_FADE_BIT;
+        dds3DrawFlag |= KWLN_DRAW_COLOR_FADE_BIT;
     }
 }
 
 /* Fade staged solid-rectangle alpha toward zero; zero disables it immediately. */
 void dds3Filter2Off(s32 duration) {
-    kwlnColorRectangleTargetAlpha = 0;
-    kwlnColorRectangleStartAlpha = (kwlnColorRectangleParameters.color >> 24);
-    kwlnColorRectangleFadeCounter = 0;
-    kwlnColorRectangleFadeDuration = duration;
+    filter2atarget = 0;
+    filter2abase = (filter2target.color >> 24);
+    filter2now = 0;
+    filter2max = duration;
     if (duration == 0) {
-        kwlnDrawControlFlags &= ~KWLN_DRAW_COLOR_FADE_BIT;
-        kwlnDrawControlFlags &= ~KWLN_DRAW_COLOR_TRANSITION_BIT;
+        dds3DrawFlag &= ~KWLN_DRAW_COLOR_FADE_BIT;
+        dds3DrawFlag &= ~KWLN_DRAW_COLOR_TRANSITION_BIT;
         Eve_FilterOFF();
     }
     else {
-        kwlnDrawControlFlags |= KWLN_DRAW_COLOR_FADE_BIT;
+        dds3DrawFlag |= KWLN_DRAW_COLOR_FADE_BIT;
     }
 }
 
 /* Stage the textured square's blend control word. */
 void dds3SetMFilterPara(u32 blendControl) {
-    kwlnTexturedSquareParameters.draw.blendControl = blendControl;
+    mfiltertarget.draw.blendControl = blendControl;
 }
 
 /* Stage the textured square's packed RGBA color. */
 void dds3SetMFilterRGBA(u32 rgba) {
-    kwlnTexturedSquareParameters.draw.rgba = rgba;
+    mfiltertarget.draw.rgba = rgba;
 }
 
 /* Stage textured-square extent and center coordinates. */
 void dds3SetMFilterArea(u32 extent, u32 centerX, u32 centerY) {
-    kwlnTexturedSquareParameters.extent = extent;
-    kwlnTexturedSquareParameters.center[0] = centerX;
-    kwlnTexturedSquareParameters.center[1] = centerY;
+    mfiltertarget.extent = extent;
+    mfiltertarget.center[0] = centerX;
+    mfiltertarget.center[1] = centerY;
 }
 
-extern EffResourceRectParams kwlnTexturedSquareTransitionStartParameters;
-extern u16 kwlnTexturedSquareTransitionCounter;
-extern u16 kwlnTexturedSquareTransitionDuration;
+extern EffResourceRectParams dds3MFilterBuf;
+extern u16 mfilterswapnow;
+extern u16 mfilterswapmax;
 
 /* Save the live textured-square params; zero copies the staged body immediately. */
 void dds3MFilterSwap(s32 duration) {
-    kwlnTexturedSquareTransitionStartParameters = Eve_PartialMultiFilterGetParams()->params;
-    kwlnTexturedSquareTransitionCounter = 0;
-    kwlnTexturedSquareTransitionDuration = duration;
+    dds3MFilterBuf = Eve_PartialMultiFilterGetParams()->params;
+    mfilterswapnow = 0;
+    mfilterswapmax = duration;
     if (duration == 0) {
-        kwlnDrawControlFlags &= KWLN_DRAW_CLEAR_SQUARE_TRANSITION;
-        Eve_PartialMultiFilterSetParam(&kwlnTexturedSquareParameters);
+        dds3DrawFlag &= KWLN_DRAW_CLEAR_SQUARE_TRANSITION;
+        Eve_PartialMultiFilterSetParam(&mfiltertarget);
     } else {
-        kwlnDrawControlFlags |= KWLN_DRAW_SQUARE_TRANSITION_BIT;
+        dds3DrawFlag |= KWLN_DRAW_SQUARE_TRANSITION_BIT;
     }
 }
 
 /* Fade square alpha from zero to its staged color, or apply/enable it now. */
 void dds3MFilterOn(s32 duration) {
-    EffResourceRectParams *params = &kwlnTexturedSquareParameters;
+    EffResourceRectParams *params = &mfiltertarget;
     s32 requestedDuration = duration;
 
-    kwlnTexturedSquareStartAlpha = 0;
-    kwlnTexturedSquareFadeCounter = 0;
-    kwlnTexturedSquareTargetAlpha = params->draw.color[KWLN_DRAW_ALPHA_CHANNEL];
-    kwlnTexturedSquareFadeDuration = requestedDuration;
+    mfilterabase = 0;
+    mfilternow = 0;
+    mfilteratarget = params->draw.color[KWLN_DRAW_ALPHA_CHANNEL];
+    mfiltermax = requestedDuration;
     if (requestedDuration == 0) {
-        kwlnDrawControlFlags &= ~KWLN_DRAW_SQUARE_FADE_BIT;
+        dds3DrawFlag &= ~KWLN_DRAW_SQUARE_FADE_BIT;
         Eve_PartialMultiFilterSetParam(params);
         Eve_PartialMultiFilterON();
     }
     else {
-        kwlnDrawControlFlags |= KWLN_DRAW_SQUARE_FADE_BIT;
+        dds3DrawFlag |= KWLN_DRAW_SQUARE_FADE_BIT;
     }
 }
 
 /* Fade staged square alpha toward zero, or disable it now when duration is zero. */
 void dds3MFilterOff(s32 duration) {
-    kwlnTexturedSquareTargetAlpha = 0;
-    kwlnTexturedSquareStartAlpha = kwlnTexturedSquareParameters.draw.color[KWLN_DRAW_ALPHA_CHANNEL];
-    kwlnTexturedSquareFadeCounter = 0;
-    kwlnTexturedSquareFadeDuration = duration;
+    mfilteratarget = 0;
+    mfilterabase = mfiltertarget.draw.color[KWLN_DRAW_ALPHA_CHANNEL];
+    mfilternow = 0;
+    mfiltermax = duration;
     if (duration == 0) {
-        kwlnDrawControlFlags &= ~KWLN_DRAW_SQUARE_FADE_BIT;
-        kwlnDrawControlFlags &= ~KWLN_DRAW_SQUARE_TRANSITION_BIT;
+        dds3DrawFlag &= ~KWLN_DRAW_SQUARE_FADE_BIT;
+        dds3DrawFlag &= ~KWLN_DRAW_SQUARE_TRANSITION_BIT;
         Eve_PartialMultiFilterOFF();
     }
     else {
-        kwlnDrawControlFlags |= KWLN_DRAW_SQUARE_FADE_BIT;
+        dds3DrawFlag |= KWLN_DRAW_SQUARE_FADE_BIT;
     }
 }
 
@@ -281,24 +281,24 @@ void dds3MFilterOff(s32 duration) {
  * Despite the legacy function name, these values do not specify position offsets. */
 void dds3SetBlur(s32 duration, s32 alpha, s32 scale) {
     if (duration == 0) {
-        kwlnDrawOverlayAlpha = (s16)alpha;
-        kwlnDrawOverlayScale = (s16)scale;
+        dds3ScreenBlurAlpha = (s16)alpha;
+        dds3ScreenBlurScale = (s16)scale;
         if ((alpha == 0) && (scale == 0)) {
-            kwlnDrawOverlayEnabled = 0;
+            dds3ScreenBlurFlag = 0;
         }
         else {
-            kwlnDrawOverlayEnabled = 1;
+            dds3ScreenBlurFlag = 1;
         }
-        kwlnDrawControlFlags = kwlnDrawControlFlags & KWLN_DRAW_CLEAR_OVERLAY_TRANSITION;
+        dds3DrawFlag = dds3DrawFlag & KWLN_DRAW_CLEAR_OVERLAY_TRANSITION;
         return;
     }
-    kwlnDrawOverlayTransitionStartAlpha = kwlnDrawOverlayAlpha;
-    kwlnDrawOverlayTransitionStartScale = kwlnDrawOverlayScale;
-    kwlnDrawOverlayTransitionTargetAlpha = (s16)alpha;
-    kwlnDrawOverlayTransitionTargetScale = (s16)scale;
-    kwlnDrawOverlayTransitionDuration = (s16)duration;
-    kwlnDrawControlFlags = kwlnDrawControlFlags | KWLN_DRAW_OVERLAY_TRANSITION_BIT;
-    kwlnDrawOverlayTransitionCounter = 0;
+    bluralphabase = dds3ScreenBlurAlpha;
+    blurscalebase = dds3ScreenBlurScale;
+    bluralphatarget = (s16)alpha;
+    blurscaletarget = (s16)scale;
+    blurmax = (s16)duration;
+    dds3DrawFlag = dds3DrawFlag | KWLN_DRAW_OVERLAY_TRANSITION_BIT;
+    blurnow = 0;
 }
 
 #define KWLN_DRAW_RECT_FADE_BIT 0x20000
@@ -310,148 +310,148 @@ void dds3SetBlur(s32 duration, s32 alpha, s32 scale) {
 
 /* Stage rectangle-blur rotation, scale and blend control, in the original order. */
 void dds3SetBlur2Para(f32 rotation, f32 scale, u32 blendControl) {
-    kwlnRectangleBlurParameters.angle = rotation;
-    kwlnRectangleBlurParameters.displacement = scale;
-    kwlnRectangleBlurParameters.blendControl = blendControl;
+    blur2target.angle = rotation;
+    blur2target.displacement = scale;
+    blur2target.blendControl = blendControl;
 }
 
 /* Stage the rectangle blur's packed RGBA color. */
 void dds3SetBlur2RGBA(u32 rgba) {
-    kwlnRectangleBlurParameters.color = rgba;
+    blur2target.color = rgba;
 }
 
 /* Stage the rectangle blur's center coordinates. */
 void dds3SetBlur2Area(u32 centerX, u32 centerY) {
-    kwlnRectangleBlurParameters.position[0] = centerX;
-    kwlnRectangleBlurParameters.position[1] = centerY;
+    blur2target.position[0] = centerX;
+    blur2target.position[1] = centerY;
 }
 
 extern EffBlurQuad kwlnRectangleBlurTransitionStartParameters;
-extern u16 kwlnRectangleBlurTransitionCounter;
-extern u16 kwlnRectangleBlurTransitionDuration;
+extern u16 blur2swapnow;
+extern u16 blur2swapmax;
 
 /* Save live rectangle-blur params, then apply now or request interpolation. */
 void dds3Blur2Swap(s32 duration) {
     kwlnRectangleBlurTransitionStartParameters = Eve_BlurGetParam()->source;
-    kwlnRectangleBlurTransitionCounter = 0;
-    kwlnRectangleBlurTransitionDuration = duration;
+    blur2swapnow = 0;
+    blur2swapmax = duration;
     if (duration == 0) {
-        kwlnDrawControlFlags &= KWLN_DRAW_CLEAR_RECT_TRANSITION;
-        setdraw_xy(kwlnRectangleBlurParameters.corners);
-        Eve_BlurSetParam(&kwlnRectangleBlurParameters);
+        dds3DrawFlag &= KWLN_DRAW_CLEAR_RECT_TRANSITION;
+        setdraw_xy(blur2target.corners);
+        Eve_BlurSetParam(&blur2target);
     } else {
-        kwlnDrawControlFlags |= KWLN_DRAW_RECT_TRANSITION_BIT;
+        dds3DrawFlag |= KWLN_DRAW_RECT_TRANSITION_BIT;
     }
 }
 
 /* Fade rectangle-blur alpha from zero to the staged color; zero applies/enables now. */
 void dds3Blur2On(s32 duration) {
-    EffBlurQuad *params = &kwlnRectangleBlurParameters;
+    EffBlurQuad *params = &blur2target;
     s32 requestedDuration = duration;
 
-    kwlnRectangleBlurStartAlpha = 0;
-    kwlnRectangleBlurFadeCounter = 0;
-    kwlnRectangleBlurTargetAlpha = (params->color >> 24);
-    kwlnRectangleBlurFadeDuration = requestedDuration;
+    blur2abase = 0;
+    blur2now = 0;
+    blur2atarget = (params->color >> 24);
+    blur2max = requestedDuration;
     if (requestedDuration == 0) {
-        kwlnDrawControlFlags &= ~KWLN_DRAW_RECT_FADE_BIT;
+        dds3DrawFlag &= ~KWLN_DRAW_RECT_FADE_BIT;
         setdraw_xy(params->corners);
         Eve_BlurSetParam(params);
         Eve_BlurON();
     }
     else {
-        kwlnDrawControlFlags |= KWLN_DRAW_RECT_FADE_BIT;
+        dds3DrawFlag |= KWLN_DRAW_RECT_FADE_BIT;
     }
 }
 
 /* Fade staged rectangle-blur alpha toward zero; zero disables it immediately. */
 void dds3Blur2Off(s32 duration) {
-    kwlnRectangleBlurTargetAlpha = 0;
-    kwlnRectangleBlurStartAlpha = (kwlnRectangleBlurParameters.color >> 24);
-    kwlnRectangleBlurFadeCounter = 0;
-    kwlnRectangleBlurFadeDuration = duration;
+    blur2atarget = 0;
+    blur2abase = (blur2target.color >> 24);
+    blur2now = 0;
+    blur2max = duration;
     if (duration == 0) {
-        kwlnDrawControlFlags &= ~KWLN_DRAW_RECT_FADE_BIT;
-        kwlnDrawControlFlags &= ~KWLN_DRAW_RECT_TRANSITION_BIT;
+        dds3DrawFlag &= ~KWLN_DRAW_RECT_FADE_BIT;
+        dds3DrawFlag &= ~KWLN_DRAW_RECT_TRANSITION_BIT;
         Eve_BlurOFF();
     }
     else {
-        kwlnDrawControlFlags |= KWLN_DRAW_RECT_FADE_BIT;
+        dds3DrawFlag |= KWLN_DRAW_RECT_FADE_BIT;
     }
 }
 
 /* Stage textured-blur source rotation, scale and blend control. */
 void dds3SetMultiBlurPara(f32 rotation, f32 scale, u32 blendControl) {
-    kwlnTexturedBlurParameters.source.angle = rotation;
-    kwlnTexturedBlurParameters.source.displacement = scale;
-    kwlnTexturedBlurParameters.source.blendControl = blendControl;
+    mulblurtarget.source.angle = rotation;
+    mulblurtarget.source.displacement = scale;
+    mulblurtarget.source.blendControl = blendControl;
 }
 
 /* Stage the textured blur's packed source RGBA color. */
 void dds3SetMultiBlurRGBA(u32 rgba) {
-    kwlnTexturedBlurParameters.source.color = rgba;
+    mulblurtarget.source.color = rgba;
 }
 
 /* Stage textured-blur extent and source center coordinates. */
 void dds3SetMultiBlurArea(u32 extent, u32 centerX, u32 centerY) {
-    kwlnTexturedBlurParameters.extent = extent;
-    kwlnTexturedBlurParameters.source.position[0] = centerX;
-    kwlnTexturedBlurParameters.source.position[1] = centerY;
+    mulblurtarget.extent = extent;
+    mulblurtarget.source.position[0] = centerX;
+    mulblurtarget.source.position[1] = centerY;
 }
 
-extern EffBlurTemplateBody kwlnTexturedBlurTransitionStartParameters;
-extern u16 kwlnTexturedBlurTransitionCounter;
-extern u16 kwlnTexturedBlurTransitionDuration;
+extern EffBlurTemplateBody dds3MultiBlurBuf;
+extern u16 mulblurswapnow;
+extern u16 mulblurswapmax;
 
 /* Save live textured-blur params; zero copies the staged body immediately. */
 void dds3MultiBlurSwap(s32 duration) {
-    kwlnTexturedBlurTransitionStartParameters = Eve_PartialMultiBlurGetParams()->body;
-    kwlnTexturedBlurTransitionCounter = 0;
-    kwlnTexturedBlurTransitionDuration = duration;
+    dds3MultiBlurBuf = Eve_PartialMultiBlurGetParams()->body;
+    mulblurswapnow = 0;
+    mulblurswapmax = duration;
     if (duration == 0) {
-        kwlnDrawControlFlags &= KWLN_DRAW_CLEAR_TEXTURE_TRANSITION;
-        Eve_PartialMultiBlurSetParam(&kwlnTexturedBlurParameters);
+        dds3DrawFlag &= KWLN_DRAW_CLEAR_TEXTURE_TRANSITION;
+        Eve_PartialMultiBlurSetParam(&mulblurtarget);
     } else {
-        kwlnDrawControlFlags |= KWLN_DRAW_TEXTURE_TRANSITION_BIT;
+        dds3DrawFlag |= KWLN_DRAW_TEXTURE_TRANSITION_BIT;
     }
 }
 
 /* Fade textured-blur alpha from zero to staged alpha, or apply/enable it now. */
 void dds3MultiBlurOn(s32 duration) {
-    EffBlurTemplateBody *params = &kwlnTexturedBlurParameters;
+    EffBlurTemplateBody *params = &mulblurtarget;
     s32 requestedDuration = duration;
 
-    kwlnTexturedBlurStartAlpha = 0;
-    kwlnTexturedBlurFadeCounter = 0;
-    kwlnTexturedBlurTargetAlpha = (params->source.color >> 24);
-    kwlnTexturedBlurFadeDuration = requestedDuration;
+    mulblurabase = 0;
+    mulblurnow = 0;
+    mulbluratarget = (params->source.color >> 24);
+    mulblurmax = requestedDuration;
     if (requestedDuration == 0) {
-        kwlnDrawControlFlags &= ~KWLN_DRAW_TEXTURE_FADE_BIT;
+        dds3DrawFlag &= ~KWLN_DRAW_TEXTURE_FADE_BIT;
         Eve_PartialMultiBlurSetParam(params);
         Eve_PartialMultiBlurON();
     }
     else {
-        kwlnDrawControlFlags |= KWLN_DRAW_TEXTURE_FADE_BIT;
+        dds3DrawFlag |= KWLN_DRAW_TEXTURE_FADE_BIT;
     }
 }
 
 /* Fade staged textured-blur alpha toward zero. Immediate disable also copies params. */
 void dds3MultiBlurOff(s32 duration) {
-    EffBlurTemplateBody *params = &kwlnTexturedBlurParameters;
+    EffBlurTemplateBody *params = &mulblurtarget;
     s32 requestedDuration = duration;
 
-    kwlnTexturedBlurTargetAlpha = 0;
-    kwlnTexturedBlurFadeCounter = 0;
-    kwlnTexturedBlurStartAlpha = (params->source.color >> 24);
-    kwlnTexturedBlurFadeDuration = requestedDuration;
+    mulbluratarget = 0;
+    mulblurnow = 0;
+    mulblurabase = (params->source.color >> 24);
+    mulblurmax = requestedDuration;
     if (requestedDuration == 0) {
-        kwlnDrawControlFlags &= ~KWLN_DRAW_TEXTURE_FADE_BIT;
-        kwlnDrawControlFlags &= ~KWLN_DRAW_TEXTURE_TRANSITION_BIT;
+        dds3DrawFlag &= ~KWLN_DRAW_TEXTURE_FADE_BIT;
+        dds3DrawFlag &= ~KWLN_DRAW_TEXTURE_TRANSITION_BIT;
         Eve_PartialMultiBlurSetParam(params);
         Eve_PartialMultiBlurOFF();
     }
     else {
-        kwlnDrawControlFlags |= KWLN_DRAW_TEXTURE_FADE_BIT;
+        dds3DrawFlag |= KWLN_DRAW_TEXTURE_FADE_BIT;
     }
 }
 
@@ -472,64 +472,64 @@ void dds3SetDistBlurPara(s32 filterCount, s32 size, s32 delaySpread, s32 blendCo
                            f32 angleStep, f32 uvDisplacementAngleDegrees,
                            f32 uvDisplacementAmplitude) {
     if (filterCount >= KWLN_DRAW_FILTER_COUNT_LIMIT) {
-        kwlnDistanceBlurErrorCount++;
+        distblurovercnt++;
         filterCount = KWLN_DRAW_FILTER_MAX_COUNT;
     }
-    kwlnFilterBlurParameters.count = filterCount;
-    kwlnFilterBlurParameters.size = size;
-    kwlnFilterBlurParameters.delaySpread = delaySpread;
-    kwlnFilterBlurParameters.angleStep = angleStep;
-    kwlnFilterBlurParameters.uvDisplacementAngleDegrees = uvDisplacementAngleDegrees;
-    kwlnFilterBlurParameters.uvDisplacementAmplitude = uvDisplacementAmplitude;
-    kwlnFilterBlurParameters.blendControl = blendControl;
+    distblurtarget.count = filterCount;
+    distblurtarget.size = size;
+    distblurtarget.delaySpread = delaySpread;
+    distblurtarget.angleStep = angleStep;
+    distblurtarget.uvDisplacementAngleDegrees = uvDisplacementAngleDegrees;
+    distblurtarget.uvDisplacementAmplitude = uvDisplacementAmplitude;
+    distblurtarget.blendControl = blendControl;
 }
 
 /* Stage the filter blur's packed RGBA color. */
 void dds3SetDistBlurRGBA(u32 rgba) {
-    kwlnFilterBlurParameters.color = rgba;
+    distblurtarget.color = rgba;
 }
 
 /* Stage filter-blur position spread and coordinates. */
 void dds3SetDistBlurArea(u32 positionSpread, u32 x, u32 y) {
-    kwlnFilterBlurParameters.positionSpread = positionSpread;
-    kwlnFilterBlurParameters.position[0] = x;
-    kwlnFilterBlurParameters.position[1] = y;
+    distblurtarget.positionSpread = positionSpread;
+    distblurtarget.position[0] = x;
+    distblurtarget.position[1] = y;
 }
 
 extern EffBlurScatterParams kwlnFilterBlurTransitionStartParameters;
-extern u16 kwlnFilterBlurTransitionCounter;
-extern u16 kwlnFilterBlurTransitionDuration;
+extern u16 distblurswapnow;
+extern u16 distblurswapmax;
 
 /* Save live filter-blur params; zero copies the staged body immediately. */
 void dds3DistBlurSwap(s32 duration) {
     kwlnFilterBlurTransitionStartParameters = Eve_DistortionBlurGetParams()->params;
-    kwlnFilterBlurTransitionCounter = 0;
-    kwlnFilterBlurTransitionDuration = duration;
+    distblurswapnow = 0;
+    distblurswapmax = duration;
     if (duration == 0) {
-        kwlnDrawControlFlags &= KWLN_DRAW_CLEAR_FILTER_TRANSITION;
-        Eve_DistortionBlurSetParam(&kwlnFilterBlurParameters);
+        dds3DrawFlag &= KWLN_DRAW_CLEAR_FILTER_TRANSITION;
+        Eve_DistortionBlurSetParam(&distblurtarget);
     } else {
-        kwlnDrawControlFlags |= KWLN_DRAW_FILTER_TRANSITION_BIT;
+        dds3DrawFlag |= KWLN_DRAW_FILTER_TRANSITION_BIT;
     }
 }
 
 /* Fade filter alpha from zero to staged alpha. Both paths copy params;
  * a timed fade disables the effect before subsequent updates sample alpha. */
 void dds3DistBlurOn(s32 duration) {
-    EffBlurScatterParams *params = &kwlnFilterBlurParameters;
+    EffBlurScatterParams *params = &distblurtarget;
     s32 requestedDuration = duration;
 
-    kwlnFilterBlurStartAlpha = 0;
-    kwlnFilterBlurFadeCounter = 0;
-    kwlnFilterBlurTargetAlpha = (params->color >> 24);
-    kwlnFilterBlurFadeDuration = requestedDuration;
+    distblurabase = 0;
+    distblurnow = 0;
+    distbluratarget = (params->color >> 24);
+    distblurmax = requestedDuration;
     if (requestedDuration == 0) {
-        kwlnDrawControlFlags &= ~KWLN_DRAW_FILTER_FADE_BIT;
+        dds3DrawFlag &= ~KWLN_DRAW_FILTER_FADE_BIT;
         Eve_DistortionBlurSetParam(params);
         Eve_DistortionBlurON();
     }
     else {
-        kwlnDrawControlFlags |= KWLN_DRAW_FILTER_FADE_BIT;
+        dds3DrawFlag |= KWLN_DRAW_FILTER_FADE_BIT;
         Eve_DistortionBlurSetParam(params);
         Eve_DistortionBlurOFF();
     }
@@ -537,17 +537,17 @@ void dds3DistBlurOn(s32 duration) {
 
 /* Fade staged filter alpha toward zero; zero disables it immediately. */
 void dds3DistBlurOff(s32 duration) {
-    kwlnFilterBlurTargetAlpha = 0;
-    kwlnFilterBlurStartAlpha = (kwlnFilterBlurParameters.color >> 24);
-    kwlnFilterBlurFadeCounter = 0;
-    kwlnFilterBlurFadeDuration = duration;
+    distbluratarget = 0;
+    distblurabase = (distblurtarget.color >> 24);
+    distblurnow = 0;
+    distblurmax = duration;
     if (duration == 0) {
-        kwlnDrawControlFlags &= ~KWLN_DRAW_FILTER_FADE_BIT;
-        kwlnDrawControlFlags &= ~KWLN_DRAW_FILTER_TRANSITION_BIT;
+        dds3DrawFlag &= ~KWLN_DRAW_FILTER_FADE_BIT;
+        dds3DrawFlag &= ~KWLN_DRAW_FILTER_TRANSITION_BIT;
         Eve_DistortionBlurOFF();
     }
     else {
-        kwlnDrawControlFlags |= KWLN_DRAW_FILTER_FADE_BIT;
+        dds3DrawFlag |= KWLN_DRAW_FILTER_FADE_BIT;
     }
 }
 
@@ -557,64 +557,64 @@ void dds3SetRipBlurPara(s32 count, s32 blendControl, f32 phaseStep, f32 spacing,
                            f32 uvDisplacementAngleDegrees,
                            f32 uvDisplacementAmplitude, f32 angleStep) {
     if (count >= KWLN_DRAW_STAGGERED_COUNT_LIMIT) {
-        kwlnRippleBlurErrorCount++;
+        ripblurovercnt++;
         count = KWLN_DRAW_STAGGERED_MAX_COUNT;
     }
-    kwlnStaggeredBlurParameters.count = count;
-    kwlnStaggeredBlurParameters.phaseStep = phaseStep;
-    kwlnStaggeredBlurParameters.spacing = spacing;
-    kwlnStaggeredBlurParameters.uvDisplacementAngleDegrees = uvDisplacementAngleDegrees;
-    kwlnStaggeredBlurParameters.uvDisplacementAmplitude = uvDisplacementAmplitude;
-    kwlnStaggeredBlurParameters.angleStep = angleStep;
-    kwlnStaggeredBlurParameters.blendControl = blendControl;
+    ripblurtarget.count = count;
+    ripblurtarget.phaseStep = phaseStep;
+    ripblurtarget.spacing = spacing;
+    ripblurtarget.uvDisplacementAngleDegrees = uvDisplacementAngleDegrees;
+    ripblurtarget.uvDisplacementAmplitude = uvDisplacementAmplitude;
+    ripblurtarget.angleStep = angleStep;
+    ripblurtarget.blendControl = blendControl;
 }
 
 /* Stage the staggered blur's packed RGBA color. */
 void dds3SetRipBlurRGBA(u32 rgba) {
-    kwlnStaggeredBlurParameters.color = rgba;
+    ripblurtarget.color = rgba;
 }
 
 /* Stage staggered-blur size and coordinates. */
 void dds3SetRipBlurArea(u32 size, u32 x, u32 y) {
-    kwlnStaggeredBlurParameters.size = size;
-    kwlnStaggeredBlurParameters.position[0] = x;
-    kwlnStaggeredBlurParameters.position[1] = y;
+    ripblurtarget.size = size;
+    ripblurtarget.position[0] = x;
+    ripblurtarget.position[1] = y;
 }
 
-extern EffBlurScaleParams kwlnStaggeredBlurTransitionStartParameters __attribute__((aligned(8)));
-extern u16 kwlnStaggeredBlurTransitionCounter;
-extern u16 kwlnStaggeredBlurTransitionDuration;
+extern EffBlurScaleParams dds3RipBlurBuf __attribute__((aligned(8)));
+extern u16 ripblurswapnow;
+extern u16 ripblurswapmax;
 
 /* Save live staggered-blur params; zero copies the staged body immediately. */
 void dds3RipBlurSwap(s32 duration) {
-    kwlnStaggeredBlurTransitionStartParameters = Eve_RippleBlurGetParams()->params;
-    kwlnStaggeredBlurTransitionCounter = 0;
-    kwlnStaggeredBlurTransitionDuration = duration;
+    dds3RipBlurBuf = Eve_RippleBlurGetParams()->params;
+    ripblurswapnow = 0;
+    ripblurswapmax = duration;
     if (duration == 0) {
-        kwlnDrawControlFlags &= KWLN_DRAW_CLEAR_STAGGERED_TRANSITION;
-        Eve_RippleBlurSetParam(&kwlnStaggeredBlurParameters);
+        dds3DrawFlag &= KWLN_DRAW_CLEAR_STAGGERED_TRANSITION;
+        Eve_RippleBlurSetParam(&ripblurtarget);
     } else {
-        kwlnDrawControlFlags |= KWLN_DRAW_STAGGERED_TRANSITION_BIT;
+        dds3DrawFlag |= KWLN_DRAW_STAGGERED_TRANSITION_BIT;
     }
 }
 
 /* Fade staggered alpha from zero to staged alpha. Both paths copy params;
  * a timed fade disables the effect before subsequent updates sample alpha. */
 void dds3RipBlurOn(s32 duration) {
-    EffBlurScaleParams *params = &kwlnStaggeredBlurParameters;
+    EffBlurScaleParams *params = &ripblurtarget;
     s32 requestedDuration = duration;
 
-    kwlnStaggeredBlurStartAlpha = 0;
-    kwlnStaggeredBlurFadeCounter = 0;
-    kwlnStaggeredBlurTargetAlpha = (params->color >> 24);
-    kwlnStaggeredBlurFadeDuration = requestedDuration;
+    ripblurabase = 0;
+    ripblurnow = 0;
+    ripbluratarget = (params->color >> 24);
+    ripblurmax = requestedDuration;
     if (requestedDuration == 0) {
-        kwlnDrawControlFlags &= ~KWLN_DRAW_STAGGERED_FADE_BIT;
+        dds3DrawFlag &= ~KWLN_DRAW_STAGGERED_FADE_BIT;
         Eve_RippleBlurSetParam(params);
         Eve_RippleBlurON();
     }
     else {
-        kwlnDrawControlFlags |= KWLN_DRAW_STAGGERED_FADE_BIT;
+        dds3DrawFlag |= KWLN_DRAW_STAGGERED_FADE_BIT;
         Eve_RippleBlurSetParam(params);
         Eve_RippleBlurOFF();
     }
@@ -622,17 +622,17 @@ void dds3RipBlurOn(s32 duration) {
 
 /* Fade staged staggered alpha toward zero; zero disables it immediately. */
 void dds3RipBlurOff(s32 duration) {
-    kwlnStaggeredBlurTargetAlpha = 0;
-    kwlnStaggeredBlurStartAlpha = (kwlnStaggeredBlurParameters.color >> 24);
-    kwlnStaggeredBlurFadeCounter = 0;
-    kwlnStaggeredBlurFadeDuration = duration;
+    ripbluratarget = 0;
+    ripblurabase = (ripblurtarget.color >> 24);
+    ripblurnow = 0;
+    ripblurmax = duration;
     if (duration == 0) {
-        kwlnDrawControlFlags &= ~KWLN_DRAW_STAGGERED_FADE_BIT;
-        kwlnDrawControlFlags &= ~KWLN_DRAW_STAGGERED_TRANSITION_BIT;
+        dds3DrawFlag &= ~KWLN_DRAW_STAGGERED_FADE_BIT;
+        dds3DrawFlag &= ~KWLN_DRAW_STAGGERED_TRANSITION_BIT;
         Eve_RippleBlurOFF();
     }
     else {
-        kwlnDrawControlFlags |= KWLN_DRAW_STAGGERED_FADE_BIT;
+        dds3DrawFlag |= KWLN_DRAW_STAGGERED_FADE_BIT;
     }
 }
 
@@ -640,11 +640,11 @@ void dds3RipBlurOff(s32 duration) {
  * polygon-movie blend helpers combine the block saved when the transition
  * started with the staged block into one of these, and the effCopy* call then
  * hands the result to the effect. */
-extern EffBlurTemplateBody kwlnTexturedBlurFrameParameters;
+extern EffBlurTemplateBody key2;
 extern EffBlurScatterParams kwlnFilterBlurFrameParameters;
-extern EffBlurScaleParams kwlnStaggeredBlurFrameParameters __attribute__((aligned(8)));
+extern EffBlurScaleParams dds3BlurState __attribute__((aligned(8)));
 extern EffBlurQuad kwlnRectangleBlurFrameParameters;
-extern EffSolidRectParams kwlnColorRectangleFrameParameters;
+extern EffSolidRectParams dds3BlurParam;
 extern EffResourceRectParams kwlnTexturedSquareFrameParameters;
 
 /* The blend helpers replace the parameters, which are the leading fields the
@@ -664,26 +664,26 @@ extern void evtHokanFilter(s32 enable, f32 t, EffSolidRectParams *from, EffSolid
 void dds3BlurUpdate(void) {
     s32 alpha;
 
-    if (kwlnDrawControlFlags & KWLN_DRAW_OVERLAY_TRANSITION_BIT) {
-        kwlnDrawOverlayTransitionCounter++;
-        kwlnDrawOverlayAlpha = kwlnDrawOverlayTransitionStartAlpha + kwlnDrawOverlayTransitionCounter * (kwlnDrawOverlayTransitionTargetAlpha - kwlnDrawOverlayTransitionStartAlpha) / kwlnDrawOverlayTransitionDuration;
-        kwlnDrawOverlayScale = kwlnDrawOverlayTransitionStartScale + kwlnDrawOverlayTransitionCounter * (kwlnDrawOverlayTransitionTargetScale - kwlnDrawOverlayTransitionStartScale) / kwlnDrawOverlayTransitionDuration;
-        if (kwlnDrawOverlayAlpha == 0 && kwlnDrawOverlayScale == 0) {
-            kwlnDrawOverlayEnabled = 0;
+    if (dds3DrawFlag & KWLN_DRAW_OVERLAY_TRANSITION_BIT) {
+        blurnow++;
+        dds3ScreenBlurAlpha = bluralphabase + blurnow * (bluralphatarget - bluralphabase) / blurmax;
+        dds3ScreenBlurScale = blurscalebase + blurnow * (blurscaletarget - blurscalebase) / blurmax;
+        if (dds3ScreenBlurAlpha == 0 && dds3ScreenBlurScale == 0) {
+            dds3ScreenBlurFlag = 0;
         }
         else {
-            kwlnDrawOverlayEnabled = 1;
+            dds3ScreenBlurFlag = 1;
         }
-        if (kwlnDrawOverlayTransitionCounter >= kwlnDrawOverlayTransitionDuration) {
-            kwlnDrawControlFlags &= KWLN_DRAW_CLEAR_OVERLAY_TRANSITION;
+        if (blurnow >= blurmax) {
+            dds3DrawFlag &= KWLN_DRAW_CLEAR_OVERLAY_TRANSITION;
         }
     }
-    if (kwlnDrawControlFlags & KWLN_DRAW_RECT_TRANSITION_BIT) {
-        if (kwlnRectangleBlurTransitionCounter < kwlnRectangleBlurTransitionDuration) {
-            kwlnRectangleBlurTransitionCounter++;
+    if (dds3DrawFlag & KWLN_DRAW_RECT_TRANSITION_BIT) {
+        if (blur2swapnow < blur2swapmax) {
+            blur2swapnow++;
         }
-        evtHokanBlur2(1, (f32)kwlnRectangleBlurTransitionCounter / (f32)kwlnRectangleBlurTransitionDuration, &kwlnRectangleBlurTransitionStartParameters,
-                        &kwlnRectangleBlurParameters, &kwlnRectangleBlurFrameParameters);
+        evtHokanBlur2(1, (f32)blur2swapnow / (f32)blur2swapmax, &kwlnRectangleBlurTransitionStartParameters,
+                        &blur2target, &kwlnRectangleBlurFrameParameters);
         setdraw_xy(kwlnRectangleBlurFrameParameters.corners);
         Eve_BlurSetParam(&kwlnRectangleBlurFrameParameters);
         if ((kwlnRectangleBlurFrameParameters.color >> 24) != 0) {
@@ -692,18 +692,18 @@ void dds3BlurUpdate(void) {
         else {
             Eve_BlurOFF();
         }
-        if (kwlnRectangleBlurTransitionCounter >= kwlnRectangleBlurTransitionDuration) {
-            kwlnDrawControlFlags &= ~KWLN_DRAW_RECT_TRANSITION_BIT;
+        if (blur2swapnow >= blur2swapmax) {
+            dds3DrawFlag &= ~KWLN_DRAW_RECT_TRANSITION_BIT;
         }
     }
-    if (kwlnDrawControlFlags & KWLN_DRAW_RECT_FADE_BIT) {
-        if (kwlnRectangleBlurFadeCounter < kwlnRectangleBlurFadeDuration) {
-            kwlnRectangleBlurFadeCounter++;
+    if (dds3DrawFlag & KWLN_DRAW_RECT_FADE_BIT) {
+        if (blur2now < blur2max) {
+            blur2now++;
         }
-        kwlnRectangleBlurFrameParameters = kwlnRectangleBlurParameters;
-        alpha = kwlnRectangleBlurStartAlpha + kwlnRectangleBlurFadeCounter *
-                (kwlnRectangleBlurTargetAlpha - kwlnRectangleBlurStartAlpha) /
-                kwlnRectangleBlurFadeDuration;
+        kwlnRectangleBlurFrameParameters = blur2target;
+        alpha = blur2abase + blur2now *
+                (blur2atarget - blur2abase) /
+                blur2max;
         kwlnRectangleBlurFrameParameters.color = (kwlnRectangleBlurFrameParameters.color & 0xFFFFFF) | (alpha << 24);
         setdraw_xy(kwlnRectangleBlurFrameParameters.corners);
         Eve_BlurSetParam(&kwlnRectangleBlurFrameParameters);
@@ -713,53 +713,53 @@ void dds3BlurUpdate(void) {
         else {
             Eve_BlurON();
         }
-        if (kwlnRectangleBlurFadeCounter >= kwlnRectangleBlurFadeDuration) {
-            kwlnDrawControlFlags &= ~KWLN_DRAW_RECT_FADE_BIT;
+        if (blur2now >= blur2max) {
+            dds3DrawFlag &= ~KWLN_DRAW_RECT_FADE_BIT;
         }
     }
-    if (kwlnDrawControlFlags & KWLN_DRAW_TEXTURE_TRANSITION_BIT) {
-        if (kwlnTexturedBlurTransitionCounter < kwlnTexturedBlurTransitionDuration) {
-            kwlnTexturedBlurTransitionCounter++;
+    if (dds3DrawFlag & KWLN_DRAW_TEXTURE_TRANSITION_BIT) {
+        if (mulblurswapnow < mulblurswapmax) {
+            mulblurswapnow++;
         }
-        evtHokanMultBlur(1, (f32)kwlnTexturedBlurTransitionCounter / (f32)kwlnTexturedBlurTransitionDuration, &kwlnTexturedBlurTransitionStartParameters,
-                        &kwlnTexturedBlurParameters, &kwlnTexturedBlurFrameParameters);
-        Eve_PartialMultiBlurSetParam(&kwlnTexturedBlurFrameParameters);
-        if ((kwlnTexturedBlurFrameParameters.source.color >> 24) != 0) {
+        evtHokanMultBlur(1, (f32)mulblurswapnow / (f32)mulblurswapmax, &dds3MultiBlurBuf,
+                        &mulblurtarget, &key2);
+        Eve_PartialMultiBlurSetParam(&key2);
+        if ((key2.source.color >> 24) != 0) {
             Eve_PartialMultiBlurON();
         }
         else {
             Eve_PartialMultiBlurOFF();
         }
-        if (kwlnTexturedBlurTransitionCounter >= kwlnTexturedBlurTransitionDuration) {
-            kwlnDrawControlFlags &= ~KWLN_DRAW_TEXTURE_TRANSITION_BIT;
+        if (mulblurswapnow >= mulblurswapmax) {
+            dds3DrawFlag &= ~KWLN_DRAW_TEXTURE_TRANSITION_BIT;
         }
     }
-    if (kwlnDrawControlFlags & KWLN_DRAW_TEXTURE_FADE_BIT) {
-        if (kwlnTexturedBlurFadeCounter < kwlnTexturedBlurFadeDuration) {
-            kwlnTexturedBlurFadeCounter++;
+    if (dds3DrawFlag & KWLN_DRAW_TEXTURE_FADE_BIT) {
+        if (mulblurnow < mulblurmax) {
+            mulblurnow++;
         }
-        kwlnTexturedBlurFrameParameters = kwlnTexturedBlurParameters;
-        alpha = kwlnTexturedBlurStartAlpha + kwlnTexturedBlurFadeCounter *
-                (kwlnTexturedBlurTargetAlpha - kwlnTexturedBlurStartAlpha) /
-                kwlnTexturedBlurFadeDuration;
-        kwlnTexturedBlurFrameParameters.source.color = (kwlnTexturedBlurFrameParameters.source.color & 0xFFFFFF) | (alpha << 24);
-        Eve_PartialMultiBlurSetParam(&kwlnTexturedBlurFrameParameters);
+        key2 = mulblurtarget;
+        alpha = mulblurabase + mulblurnow *
+                (mulbluratarget - mulblurabase) /
+                mulblurmax;
+        key2.source.color = (key2.source.color & 0xFFFFFF) | (alpha << 24);
+        Eve_PartialMultiBlurSetParam(&key2);
         if (alpha == 0) {
             Eve_PartialMultiBlurOFF();
         }
         else {
             Eve_PartialMultiBlurON();
         }
-        if (kwlnTexturedBlurFadeCounter >= kwlnTexturedBlurFadeDuration) {
-            kwlnDrawControlFlags &= ~KWLN_DRAW_TEXTURE_FADE_BIT;
+        if (mulblurnow >= mulblurmax) {
+            dds3DrawFlag &= ~KWLN_DRAW_TEXTURE_FADE_BIT;
         }
     }
-    if (kwlnDrawControlFlags & KWLN_DRAW_FILTER_TRANSITION_BIT) {
-        if (kwlnFilterBlurTransitionCounter < kwlnFilterBlurTransitionDuration) {
-            kwlnFilterBlurTransitionCounter++;
+    if (dds3DrawFlag & KWLN_DRAW_FILTER_TRANSITION_BIT) {
+        if (distblurswapnow < distblurswapmax) {
+            distblurswapnow++;
         }
-        evtHokanDistBlur(1, (f32)kwlnFilterBlurTransitionCounter / (f32)kwlnFilterBlurTransitionDuration, &kwlnFilterBlurTransitionStartParameters,
-                        &kwlnFilterBlurParameters, &kwlnFilterBlurFrameParameters);
+        evtHokanDistBlur(1, (f32)distblurswapnow / (f32)distblurswapmax, &kwlnFilterBlurTransitionStartParameters,
+                        &distblurtarget, &kwlnFilterBlurFrameParameters);
         Eve_DistortionBlurSetParam(&kwlnFilterBlurFrameParameters);
         if ((kwlnFilterBlurFrameParameters.color >> 24) != 0) {
             Eve_DistortionBlurON();
@@ -767,18 +767,18 @@ void dds3BlurUpdate(void) {
         else {
             Eve_DistortionBlurOFF();
         }
-        if (kwlnFilterBlurTransitionCounter >= kwlnFilterBlurTransitionDuration) {
-            kwlnDrawControlFlags &= ~KWLN_DRAW_FILTER_TRANSITION_BIT;
+        if (distblurswapnow >= distblurswapmax) {
+            dds3DrawFlag &= ~KWLN_DRAW_FILTER_TRANSITION_BIT;
         }
     }
-    if (kwlnDrawControlFlags & KWLN_DRAW_FILTER_FADE_BIT) {
-        if (kwlnFilterBlurFadeCounter < kwlnFilterBlurFadeDuration) {
-            kwlnFilterBlurFadeCounter++;
+    if (dds3DrawFlag & KWLN_DRAW_FILTER_FADE_BIT) {
+        if (distblurnow < distblurmax) {
+            distblurnow++;
         }
-        kwlnFilterBlurFrameParameters = kwlnFilterBlurParameters;
-        alpha = kwlnFilterBlurStartAlpha + kwlnFilterBlurFadeCounter *
-                (kwlnFilterBlurTargetAlpha - kwlnFilterBlurStartAlpha) /
-                kwlnFilterBlurFadeDuration;
+        kwlnFilterBlurFrameParameters = distblurtarget;
+        alpha = distblurabase + distblurnow *
+                (distbluratarget - distblurabase) /
+                distblurmax;
         kwlnFilterBlurFrameParameters.color = (kwlnFilterBlurFrameParameters.color & 0xFFFFFF) | (alpha << 24);
         Eve_DistortionBlurSetParam(&kwlnFilterBlurFrameParameters);
         if (alpha == 0) {
@@ -787,93 +787,93 @@ void dds3BlurUpdate(void) {
         else {
             Eve_DistortionBlurON();
         }
-        if (kwlnFilterBlurFadeCounter >= kwlnFilterBlurFadeDuration) {
-            kwlnDrawControlFlags &= ~KWLN_DRAW_FILTER_FADE_BIT;
+        if (distblurnow >= distblurmax) {
+            dds3DrawFlag &= ~KWLN_DRAW_FILTER_FADE_BIT;
         }
     }
-    if (kwlnDrawControlFlags & KWLN_DRAW_STAGGERED_TRANSITION_BIT) {
-        if (kwlnStaggeredBlurTransitionCounter < kwlnStaggeredBlurTransitionDuration) {
-            kwlnStaggeredBlurTransitionCounter++;
+    if (dds3DrawFlag & KWLN_DRAW_STAGGERED_TRANSITION_BIT) {
+        if (ripblurswapnow < ripblurswapmax) {
+            ripblurswapnow++;
         }
-        evtHokanRipBlur(1, (f32)kwlnStaggeredBlurTransitionCounter / (f32)kwlnStaggeredBlurTransitionDuration, &kwlnStaggeredBlurTransitionStartParameters,
-                        &kwlnStaggeredBlurParameters, &kwlnStaggeredBlurFrameParameters);
-        Eve_RippleBlurSetParam(&kwlnStaggeredBlurFrameParameters);
-        if ((kwlnStaggeredBlurFrameParameters.color >> 24) != 0) {
+        evtHokanRipBlur(1, (f32)ripblurswapnow / (f32)ripblurswapmax, &dds3RipBlurBuf,
+                        &ripblurtarget, &dds3BlurState);
+        Eve_RippleBlurSetParam(&dds3BlurState);
+        if ((dds3BlurState.color >> 24) != 0) {
             Eve_RippleBlurON();
         }
         else {
             Eve_RippleBlurOFF();
         }
-        if (kwlnStaggeredBlurTransitionCounter >= kwlnStaggeredBlurTransitionDuration) {
-            kwlnDrawControlFlags &= ~KWLN_DRAW_STAGGERED_TRANSITION_BIT;
+        if (ripblurswapnow >= ripblurswapmax) {
+            dds3DrawFlag &= ~KWLN_DRAW_STAGGERED_TRANSITION_BIT;
         }
     }
-    if (kwlnDrawControlFlags & KWLN_DRAW_STAGGERED_FADE_BIT) {
-        if (kwlnStaggeredBlurFadeCounter < kwlnStaggeredBlurFadeDuration) {
-            kwlnStaggeredBlurFadeCounter++;
+    if (dds3DrawFlag & KWLN_DRAW_STAGGERED_FADE_BIT) {
+        if (ripblurnow < ripblurmax) {
+            ripblurnow++;
         }
-        memcpy(&kwlnStaggeredBlurFrameParameters, &kwlnStaggeredBlurParameters,
-               sizeof(kwlnStaggeredBlurFrameParameters));
-        alpha = kwlnStaggeredBlurStartAlpha + kwlnStaggeredBlurFadeCounter *
-                (kwlnStaggeredBlurTargetAlpha - kwlnStaggeredBlurStartAlpha) /
-                kwlnStaggeredBlurFadeDuration;
-        kwlnStaggeredBlurFrameParameters.color = (kwlnStaggeredBlurFrameParameters.color & 0xFFFFFF) | (alpha << 24);
-        Eve_RippleBlurSetParam(&kwlnStaggeredBlurFrameParameters);
+        memcpy(&dds3BlurState, &ripblurtarget,
+               sizeof(dds3BlurState));
+        alpha = ripblurabase + ripblurnow *
+                (ripbluratarget - ripblurabase) /
+                ripblurmax;
+        dds3BlurState.color = (dds3BlurState.color & 0xFFFFFF) | (alpha << 24);
+        Eve_RippleBlurSetParam(&dds3BlurState);
         if (alpha == 0) {
             Eve_RippleBlurOFF();
         }
         else {
             Eve_RippleBlurON();
         }
-        if (kwlnStaggeredBlurFadeCounter >= kwlnStaggeredBlurFadeDuration) {
-            kwlnDrawControlFlags &= ~KWLN_DRAW_STAGGERED_FADE_BIT;
+        if (ripblurnow >= ripblurmax) {
+            dds3DrawFlag &= ~KWLN_DRAW_STAGGERED_FADE_BIT;
         }
     }
-    if (kwlnDrawControlFlags & KWLN_DRAW_COLOR_TRANSITION_BIT) {
-        if (kwlnColorRectangleTransitionCounter < kwlnColorRectangleTransitionDuration) {
-            kwlnColorRectangleTransitionCounter++;
+    if (dds3DrawFlag & KWLN_DRAW_COLOR_TRANSITION_BIT) {
+        if (filter2swapnow < filter2swapmax) {
+            filter2swapnow++;
         }
-        evtHokanFilter(1, (f32)kwlnColorRectangleTransitionCounter / (f32)kwlnColorRectangleTransitionDuration, &kwlnColorRectangleTransitionStartParameters,
-                                        &kwlnColorRectangleParameters, &kwlnColorRectangleFrameParameters);
-        setdraw_xy(kwlnColorRectangleFrameParameters.corners);
-        Eve_FilterSetParam(&kwlnColorRectangleFrameParameters);
-        if ((kwlnColorRectangleFrameParameters.color >> 24) != 0) {
+        evtHokanFilter(1, (f32)filter2swapnow / (f32)filter2swapmax, &dds3Filter2Buf,
+                                        &filter2target, &dds3BlurParam);
+        setdraw_xy(dds3BlurParam.corners);
+        Eve_FilterSetParam(&dds3BlurParam);
+        if ((dds3BlurParam.color >> 24) != 0) {
             Eve_FilterON();
         }
         else {
             Eve_FilterOFF();
         }
-        if (kwlnColorRectangleTransitionCounter >= kwlnColorRectangleTransitionDuration) {
-            kwlnDrawControlFlags &= ~KWLN_DRAW_COLOR_TRANSITION_BIT;
+        if (filter2swapnow >= filter2swapmax) {
+            dds3DrawFlag &= ~KWLN_DRAW_COLOR_TRANSITION_BIT;
         }
     }
-    if (kwlnDrawControlFlags & KWLN_DRAW_COLOR_FADE_BIT) {
-        if (kwlnColorRectangleFadeCounter < kwlnColorRectangleFadeDuration) {
-            kwlnColorRectangleFadeCounter++;
+    if (dds3DrawFlag & KWLN_DRAW_COLOR_FADE_BIT) {
+        if (filter2now < filter2max) {
+            filter2now++;
         }
-        kwlnColorRectangleFrameParameters = kwlnColorRectangleParameters;
-        alpha = kwlnColorRectangleStartAlpha + kwlnColorRectangleFadeCounter *
-                (kwlnColorRectangleTargetAlpha - kwlnColorRectangleStartAlpha) /
-                kwlnColorRectangleFadeDuration;
-        kwlnColorRectangleFrameParameters.color = (kwlnColorRectangleFrameParameters.color & 0xFFFFFF) | (alpha << 24);
-        setdraw_xy(kwlnColorRectangleFrameParameters.corners);
-        Eve_FilterSetParam(&kwlnColorRectangleFrameParameters);
+        dds3BlurParam = filter2target;
+        alpha = filter2abase + filter2now *
+                (filter2atarget - filter2abase) /
+                filter2max;
+        dds3BlurParam.color = (dds3BlurParam.color & 0xFFFFFF) | (alpha << 24);
+        setdraw_xy(dds3BlurParam.corners);
+        Eve_FilterSetParam(&dds3BlurParam);
         if (alpha == 0) {
             Eve_FilterOFF();
         }
         else {
             Eve_FilterON();
         }
-        if (kwlnColorRectangleFadeCounter >= kwlnColorRectangleFadeDuration) {
-            kwlnDrawControlFlags &= ~KWLN_DRAW_COLOR_FADE_BIT;
+        if (filter2now >= filter2max) {
+            dds3DrawFlag &= ~KWLN_DRAW_COLOR_FADE_BIT;
         }
     }
-    if (kwlnDrawControlFlags & KWLN_DRAW_SQUARE_TRANSITION_BIT) {
-        if (kwlnTexturedSquareTransitionCounter < kwlnTexturedSquareTransitionDuration) {
-            kwlnTexturedSquareTransitionCounter++;
+    if (dds3DrawFlag & KWLN_DRAW_SQUARE_TRANSITION_BIT) {
+        if (mfilterswapnow < mfilterswapmax) {
+            mfilterswapnow++;
         }
-        evtHokanMultFilter(1, (f32)kwlnTexturedSquareTransitionCounter / (f32)kwlnTexturedSquareTransitionDuration, &kwlnTexturedSquareTransitionStartParameters,
-                        &kwlnTexturedSquareParameters, &kwlnTexturedSquareFrameParameters);
+        evtHokanMultFilter(1, (f32)mfilterswapnow / (f32)mfilterswapmax, &dds3MFilterBuf,
+                        &mfiltertarget, &kwlnTexturedSquareFrameParameters);
         Eve_PartialMultiFilterSetParam(&kwlnTexturedSquareFrameParameters);
         if (kwlnTexturedSquareFrameParameters.draw.color[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
             Eve_PartialMultiFilterON();
@@ -881,18 +881,18 @@ void dds3BlurUpdate(void) {
         else {
             Eve_PartialMultiFilterOFF();
         }
-        if (kwlnTexturedSquareTransitionCounter >= kwlnTexturedSquareTransitionDuration) {
-            kwlnDrawControlFlags &= ~KWLN_DRAW_SQUARE_TRANSITION_BIT;
+        if (mfilterswapnow >= mfilterswapmax) {
+            dds3DrawFlag &= ~KWLN_DRAW_SQUARE_TRANSITION_BIT;
         }
     }
-    if (kwlnDrawControlFlags & KWLN_DRAW_SQUARE_FADE_BIT) {
-        if (kwlnTexturedSquareFadeCounter < kwlnTexturedSquareFadeDuration) {
-            kwlnTexturedSquareFadeCounter++;
+    if (dds3DrawFlag & KWLN_DRAW_SQUARE_FADE_BIT) {
+        if (mfilternow < mfiltermax) {
+            mfilternow++;
         }
-        kwlnTexturedSquareFrameParameters = kwlnTexturedSquareParameters;
-        alpha = kwlnTexturedSquareStartAlpha + kwlnTexturedSquareFadeCounter *
-                (kwlnTexturedSquareTargetAlpha - kwlnTexturedSquareStartAlpha) /
-                kwlnTexturedSquareFadeDuration;
+        kwlnTexturedSquareFrameParameters = mfiltertarget;
+        alpha = mfilterabase + mfilternow *
+                (mfilteratarget - mfilterabase) /
+                mfiltermax;
         kwlnTexturedSquareFrameParameters.draw.rgba = (kwlnTexturedSquareFrameParameters.draw.rgba & 0xFFFFFF) | (alpha << 24);
         Eve_PartialMultiFilterSetParam(&kwlnTexturedSquareFrameParameters);
         if (alpha == 0) {
@@ -901,8 +901,8 @@ void dds3BlurUpdate(void) {
         else {
             Eve_PartialMultiFilterON();
         }
-        if (kwlnTexturedSquareFadeCounter >= kwlnTexturedSquareFadeDuration) {
-            kwlnDrawControlFlags &= ~KWLN_DRAW_SQUARE_FADE_BIT;
+        if (mfilternow >= mfiltermax) {
+            dds3DrawFlag &= ~KWLN_DRAW_SQUARE_FADE_BIT;
         }
     }
 }

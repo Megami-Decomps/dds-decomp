@@ -6,14 +6,14 @@
 #include "sdf_pending.h"
 #include "sdf_memory_api.h"
 
-SdfChipPage *sdfChipPages __attribute__((section(".sbss"), aligned(8)));
-SdfChipPage *sdfFreeChipPages __attribute__((section(".sbss")));
-u8 *sdfChipHeapStart __attribute__((section(".sbss")));
-u8 *sdfChipHeapEnd __attribute__((section(".sbss")));
+SdfChipPage *sdfChipPageInfo __attribute__((section(".sbss"), aligned(8)));
+SdfChipPage *sdfChipPageFreeLink __attribute__((section(".sbss")));
+u8 *sdfChipPageTop __attribute__((section(".sbss")));
+u8 *sdfChipPageEnd __attribute__((section(".sbss")));
 s32 sdfChipPageCount[2] __attribute__((section(".sbss")));
-SdfPendingRequest sdfChipReleaseRequest __attribute__((section(".sbss"), aligned(8)));
+SdfPendingRequest dds3CleanupList __attribute__((section(".sbss"), aligned(8)));
 
-SdfChipClassTable sdfChipClassTable __attribute__((section(".bss"), aligned(8)));
+SdfChipClassTable sdfChipCB __attribute__((section(".bss"), aligned(8)));
 
 void sdfChipAllocNextPage(SdfChipClass *sizeClass);
 
@@ -33,11 +33,11 @@ void sdfChipFreeDirect(void *memory) {
     if (memory == NULL) {
         return;
     }
-    heapByteOffset = (s32)memory - (s32)sdfChipHeapStart;
+    heapByteOffset = (s32)memory - (s32)sdfChipPageTop;
     if (heapByteOffset < 0) {
         heapByteOffset += 0xFFF;
     }
-    page = (SdfChipPage *)((u8 *)sdfChipPages + (heapByteOffset >> 12) * sizeof(SdfChipPage));
+    page = (SdfChipPage *)((u8 *)sdfChipPageInfo + (heapByteOffset >> 12) * sizeof(SdfChipPage));
     sizeClass = page->sizeClass;
     interrupts = DIntr();
     count = page->usedCells;
@@ -53,8 +53,8 @@ void sdfChipFreeDirect(void *memory) {
             *link = page->next;
         }
         page->sizeClass = NULL;
-        page->next = sdfFreeChipPages;
-        sdfFreeChipPages = page;
+        page->next = sdfChipPageFreeLink;
+        sdfChipPageFreeLink = page;
     } else {
         if (count == sizeClass->cellCount) {
             page->next = sizeClass->availablePages;
@@ -69,15 +69,15 @@ void sdfChipFreeDirect(void *memory) {
 }
 
 void sdfChipFreeDelayedDirect(void *memory) {
-    sdfDelayedResrcEntry(&sdfChipReleaseRequest, memory);
+    sdfDelayedResrcEntry(&dds3CleanupList, memory);
 }
 
 s32 sdfChipCheck(s32 address) {
     s32 inRange;
 
     inRange = 0;
-    if (address >= (s32)sdfChipHeapStart) {
-        inRange = address < (s32)sdfChipHeapEnd;
+    if (address >= (s32)sdfChipPageTop) {
+        inRange = address < (s32)sdfChipPageEnd;
     }
     return inRange;
 }

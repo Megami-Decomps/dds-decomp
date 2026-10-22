@@ -33,7 +33,7 @@ void sdfModelNodeBaseSet(SdfDrawNode *node, SdfItem *item);
 
 
 
-extern vu8 sdfCurrentBufferIndex;
+extern vu8 sdfFrameId;
 
 /* Retail selects by nodeId when SDF_MODEL_FIND_DRAW_NODE_BY_ID is set,
  * otherwise by array index. */
@@ -478,7 +478,7 @@ void sdfModelEvalTm2(SdfModel *model, s32 frame) {
 
 /* Update the model with the engine's current signed frame index. */
 void sdfModelEvalTm(SdfModel *model) {
-    sdfModelEvalTm2(model, (s8)sdfCurrentBufferIndex);
+    sdfModelEvalTm2(model, (s8)sdfFrameId);
 }
 
 /* Store a provider's four draw surfaces and make the second a key-sorted pool. */
@@ -508,11 +508,11 @@ s32 sdfModelCheckBounds(const f32 *bounds) {
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelTempPacketLinkOt);
 
 #include "sdf.h"
-extern u8 sdf3DSoftenOff;
-extern void *sdf3DDefaultLight;
-extern void *sdf3DDefaultFog;
-extern f32 sdf3DSoften, sdf3DBias;
-extern f32 sdf3DCameraMatrix[16];
+extern u8 corePktSoftenBias;
+extern void *sdf3DLightDefault;
+extern void *sdf3DFogDefault;
+extern f32 sdfFaceDivSoften, sdfFaceDivBias;
+extern f32 sdf3DScreenTm[16];
 extern void sdfCoreDrawSetZBias(f32);
 /* Build one per-frame packet list for each visible node resource variant. */
 void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
@@ -537,7 +537,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
         sdfBuildModelPacketsVia(sdfModelTempPacketLinkOt, surfaces, model);
     }
 
-    frame = (s8)sdfCurrentBufferIndex;
+    frame = (s8)sdfFrameId;
     if (model->flags & 0x20) {
         sdfSetForcedAssetTextureMode(1);
         sdfMatListUpdatePacket(model->resources, frame);
@@ -552,21 +552,21 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
 
     lighting = model->lighting;
     if (lighting == NULL) {
-        lighting = sdf3DDefaultLight;
+        lighting = sdf3DLightDefault;
     }
     secondaryLighting = model->secondaryLighting;
     if (secondaryLighting == NULL) {
-        secondaryLighting = sdf3DDefaultFog;
+        secondaryLighting = sdf3DFogDefault;
     }
-    globalByte = sdf3DSoftenOff;
+    globalByte = corePktSoftenBias;
     modelColor = model->color;
     nodeMask = model->drawFlags;
     if (model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) {
         firstScalar = model->scalarOverrideFirst;
         secondScalar = model->scalarOverrideSecond;
     } else {
-        firstScalar = sdf3DSoften;
-        secondScalar = sdf3DBias;
+        firstScalar = sdfFaceDivSoften;
+        secondScalar = sdfFaceDivBias;
     }
     skipCommands = 0;
     if (model->flags & 0x08) {
@@ -592,7 +592,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
         }
 
         VU0_LOAD_MATRIX(node->worldMatrix);
-        sdfPostmultiplyVuMatrixFromMemory(sdf3DCameraMatrix);
+        sdfPostmultiplyVuMatrixFromMemory(sdf3DScreenTm);
         if (node->boundsCorners != NULL &&
             sdfModelCheckBounds(node->boundsCorners) != 0) {
             continue;
