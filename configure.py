@@ -39,6 +39,7 @@ import shutil
 import stat
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import ninja_syntax
@@ -191,27 +192,53 @@ def generated_footprint(version: str) -> list[Path]:
     ]
 
 
-def run_splat(version: str, yaml: Path, force: bool) -> None:
+def run_splat(version: str, yaml: Path, force: bool, capture: bool = False) -> str:
     """Split when the config inputs changed since the last successful split."""
     inputs = [yaml, ROOT / "config" / version / "symbol_addrs.txt", ROOT / "config" / version / "reloc_addrs.txt"]
     digest = hashlib.sha1(b"".join(p.read_bytes() for p in inputs if p.exists())).hexdigest()
     stamp = ROOT / "build" / version / ".splat_stamp"
     if not force and stamp.exists() and stamp.read_text() == digest and (ROOT / "asm" / version).exists():
-        return
-    print(f"splat: {version}")
+        return ""
+    # Captured, the split's output is held back and printed as one block, so
+    # two versions running at once do not interleave their progress.
+    header = f"splat: {version}\n"
+    log = [header]
+
+    def run(command: list[str]) -> None:
+        result = subprocess.run(command, cwd=ROOT, check=True, capture_output=capture, text=capture)
+        if capture:
+            log.append((result.stdout or "") + (result.stderr or ""))
+
+    if not capture:
+        sys.stdout.write(header)
     snapshot = snapshot_generated_files(generated_footprint(version))
     # splat never deletes files: a unit or rodata split that moved leaves stale
     # asm behind (and include_rodata.py would include it twice).
     shutil.rmtree(ROOT / "asm" / version, ignore_errors=True)
-    subprocess.run([sys.executable, "-m", "splat", "split", str(yaml)], cwd=ROOT, check=True)
-    subprocess.run([sys.executable, "tools/resolve_jtbl_targets.py", f"asm/{version}"], cwd=ROOT, check=True)
-    subprocess.run([sys.executable, "tools/include_rodata.py", version], cwd=ROOT, check=True)
-    subprocess.run([sys.executable, "tools/include_sdata.py", version], cwd=ROOT, check=True)
+    run([sys.executable, "-m", "splat", "split", str(yaml)])
+    run([sys.executable, "tools/resolve_jtbl_targets.py", f"asm/{version}"])
+    run([sys.executable, "tools/include_rodata.py", version])
+    run([sys.executable, "tools/include_sdata.py", version])
     align_bss(ROOT / "build" / version / f"{VERSIONS[version]['serial']}.ld")
     provide_data_symbols(version)
     restore_unchanged_timestamps(snapshot)
     stamp.parent.mkdir(parents=True, exist_ok=True)
     stamp.write_text(digest)
+    return "".join(log) if capture else ""
+
+
+def split_versions(versions: list[str], force: bool) -> None:
+    """Split the versions at once: each only reads its own config and ELF."""
+    def yaml_of(version: str) -> Path:
+        return ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml"
+
+    if len(versions) == 1:
+        run_splat(versions[0], yaml_of(versions[0]), force)
+        return
+    with ThreadPoolExecutor(len(versions)) as pool:
+        logs = [pool.submit(run_splat, v, yaml_of(v), force, True) for v in versions]
+        for log in logs:
+            sys.stdout.write(log.result())
 
 
 def write_configure_build(n, configure_inputs: list[str], argv: list[str]) -> None:
@@ -469,7 +496,8 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
 
     n.rule("as", f"{AS} {AS_FLAGS} -o $out $in", description="as $in")
     n.rule("bin", f"{OBJCOPY} -I binary -O elf32-littlemips -B mips:5900 $in $out", description="bin $in")
-    n.rule("eeasm", f"{sys.executable} tools/eeas_compat.py $in $out", description="ee-as compat $in")
+    n.rule("eeasm", f"{sys.executable} tools/eeas_compat.py --prefix build/eeasm $in",
+           description="ee-as compat $unit")
     n.rule(
         "cc",
         f"cpp -MM -MG -MF $out.d -MT $out -nostdinc {INCLUDES} $cdefs $in && "
@@ -581,11 +609,11 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
     units: dict[str, list[dict]] = {}
     defaults = []
     dev_configure_inputs: set[str] = set()
+    if not args.no_split:
+        split_versions(versions, args.force_split)
     for version in versions:
         serial = VERSIONS[version]["serial"]
         yaml = Path("config") / version / f"{serial}.yaml"
-        if not args.no_split:
-            run_splat(version, ROOT / yaml, args.force_split)
         provide_symbol_aliases(version)
         ld_script = Path("build") / version / f"{serial}.ld"
         objects = linker_objects(ROOT / ld_script)
@@ -600,13 +628,15 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 n.build(str(obj), "bin", str(src))
             else:
                 text = (ROOT / src).read_text(errors="replace")
-                eeasm = []
                 nonmatchings = Path("asm") / version / "nonmatchings"
-                for _, folder, name in include_directives(text):
-                    asm = nonmatchings / folder / f"{name}.s"
-                    out = Path("build") / "eeasm" / asm
-                    n.build(str(out), "eeasm", str(asm), implicit=["tools/eeas_compat.py"])
-                    eeasm.append(str(out))
+                asm_files = list(dict.fromkeys(
+                    str(nonmatchings / folder / f"{name}.s")
+                    for _, folder, name in include_directives(text)
+                ))
+                eeasm = [f"build/eeasm/{asm}" for asm in asm_files]
+                if asm_files:
+                    n.build(eeasm, "eeasm", asm_files, implicit=["tools/eeas_compat.py"],
+                            variables={"unit": str(src)})
                 cdefs = f"'-DASM_ROOT=\"build/eeasm/{nonmatchings}/\"' -DVERSION_{version.upper()}"
                 flags = unit_cflags(version).get(src.relative_to(Path("src") / version).with_suffix("").as_posix(), "")
                 n.build(str(obj), "cc", str(src), implicit=eeasm + ["include/macro.inc", f"config/{version}/cflags.txt", "tools/production_report.py"],
