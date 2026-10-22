@@ -69,9 +69,9 @@ typedef char FldSceneRecordTableHeader_rows_at_4[
 typedef char FldSceneRecordTableHeader_count_at_8[
     ((u32)&((FldSceneRecordTableHeader *)0)->count == 8) ? 1 : -1];
 
-extern FldSceneRecord *fldSceneRecords;
-extern s32 fldSceneRecordCount;
+extern FldSceneRecord *fldAutoMapHeader;
+extern s32 fldAutoMapData;
 struct SdfMemBlock;
-extern struct SdfMemBlock *fldSceneRecordResource;
+extern struct SdfMemBlock *fldAutoMapBuf;
 
 #endif /* FLD_SCENE_RECORD_H */

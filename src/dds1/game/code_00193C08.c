@@ -26,19 +26,19 @@ extern SdfTexResource * sdfGsMemAllocFromTail(s32 size, s32 allocationMode);
 #define FR_FONT_GS_PSMT4 0x14
 #define FR_FONT_GLYPH_HEIGHT_SHIFT 1
 
-extern u32 frFontSlotLoadedFlags[];
+extern u32 frFontLoaded[];
 extern void frDelStyleAll(void);
 extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
 extern s32 fmDestroyFontMemControl(void);
 
 /* Insert after the list's fixed anchor and update the entry count. */
 void fmRetFontMem(FntNode *node) {
-    FntNode *anchor = frFontResourceList.head;
+    FntNode *anchor = gFGC.head;
     FntNode *nextNode = anchor->next;
 
     node->prev = anchor;
     node->next = nextNode;
-    frFontResourceList.count += 1;
+    gFGC.count += 1;
     anchor->next = node;
     nextNode->prev = node;
 }
@@ -118,7 +118,7 @@ typedef char FrFontSpritePacketViewLayoutCheck[
      (u32)&((FrFontSpritePacketView *)0)->sprite.corners == 0x60) ? 1 : -1];
 
 extern u32 D_003D6DF8[];
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 
 /* Build and submit an atlas glyph sprite, preserving the two-corner UV order. */
 void frFontDrawAtlasGlyph(s32 x, s32 y, s32 width, s32 height, u8 style,
@@ -172,7 +172,7 @@ void frFontDrawAtlasGlyph(s32 x, s32 y, s32 width, s32 height, u8 style,
     list = (SdfListHead *)sdfGrAllocPacketBuff(sizeof(SdfListHead));
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)packet);
-    drawSurface = &kwlnDrawSurfaces[surface];
+    drawSurface = &sdfGrOtTable[surface];
     drawSurface->append(drawSurface, list);
 }
 
@@ -187,17 +187,17 @@ void frCreateUserFontPacket(s32 x, s32 y, s32 depth, FrFontChildGlyph *glyph,
                  &glyph->cachedItem->list->uv, &frFontWork.atlas, drawFlags);
 }
 
-extern volatile s32 sdfGsImageUploadSemaphore; 
+extern volatile s32 dds3GsSema; 
 /* Upload an image to GS memory at the given buffer, serialized by the GS semaphore. */
 void frCopyFontClutToVram(s32 buffer, s32 image) {
     u8 loadImage[0x60];
 
     sceGsSetDefLoadImage(loadImage, (s16)buffer, 1, 0, 0, 0, 8, 2);
-    WaitSema(sdfGsImageUploadSemaphore);
+    WaitSema(dds3GsSema);
     FlushCache(0);
     sceGsExecLoadImage(loadImage, image);
     sceGsSyncPath(0, 0);
-    SignalSema(sdfGsImageUploadSemaphore);
+    SignalSema(dds3GsSema);
 }
 
 /* Clear and upload a PSMT4 font bitmap under the GS semaphore, then free the staging allocation. */
@@ -214,11 +214,11 @@ void frFontUploadClearedTexture(void) {
     memset(pixels, 0, imageSize);
     sceGsSetDefLoadImage(loadImage, (s16)frFontWork.atlas.bufferBase, (s16)frFontWork.atlas.bufferWidth, FR_FONT_GS_PSMT4, 0, 0,
                          (s16)frFontWork.atlas.width, (s16)frFontWork.atlas.height);
-    WaitSema(sdfGsImageUploadSemaphore);
+    WaitSema(dds3GsSema);
     FlushCache(0);
     sceGsExecLoadImage(loadImage, (s32)pixels);
     sceGsSyncPath(0, 0);
-    SignalSema(sdfGsImageUploadSemaphore);
+    SignalSema(dds3GsSema);
     sdfMemFreeDirect(allocation);
 }
 
@@ -227,13 +227,13 @@ void frFontEnsureSlotLoaded(s32 slotId, const char *path) {
     s32 slotIndex = slotId & FR_FONT_BYTE_MASK;
     FrFontSystem *fontSystem = &frFontWork;
 
-    if (frFontSlotLoadedFlags[slotIndex] != FR_FONT_LOADED_STATE) {
+    if (frFontLoaded[slotIndex] != FR_FONT_LOADED_STATE) {
         if (slotIndex == FR_FONT_SYSTEM_SLOT) {
             frAddFontStyle(FR_FONT_SYSTEM_SLOT, 0, fontSystem->entries[0].allocation);
         } else {
             frAddFontStyle(slotIndex, 0, sdfDevLoadFileEx(path, 0, 0));
         }
-        frFontSlotLoadedFlags[slotIndex] = FR_FONT_LOADED_STATE;
+        frFontLoaded[slotIndex] = FR_FONT_LOADED_STATE;
     }
 }
 
@@ -373,7 +373,7 @@ void frDelFontStyle(s32 slotId) {
     if (slotIndex < FR_FONT_FIRST_RELEASABLE_SLOT) {
         return;
     }
-    frFontSlotLoadedFlags[slotIndex] = 0;
+    frFontLoaded[slotIndex] = 0;
     entry = &frFontWork.entries[slotIndex];
     if (entry->allocation != NULL) {
         sdfMemFreeDirect(entry->allocation);

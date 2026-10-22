@@ -68,7 +68,7 @@ extern u32 D_004285D0[4];
 extern u32 mnuTitleStreamSemaphore;
 
 
-extern MovieMenuState *mnuMovieMenuState;
+extern MovieMenuState *titleWork;
 
 
 extern TitleAudioStreamState mnuTitleStreamStatus;
@@ -723,12 +723,12 @@ KwlnTask *mnuCreateTitleMenuTask(s32 mode) {
     kwlnFadeBackgroundStartOut(0);
     mnuStopTitleMovieDraw();
     allocation = sdfMemAllocDirect(sizeof(MovieMenuState));
-    mnuMovieMenuState = (void *)sdfMemLock((struct SdfMemBlock *)(allocation));
-    memset(mnuMovieMenuState, 0, sizeof(MovieMenuState));
-    mnuMovieMenuState->allocation = allocation;
+    titleWork = (void *)sdfMemLock((struct SdfMemBlock *)(allocation));
+    memset(titleWork, 0, sizeof(MovieMenuState));
+    titleWork->allocation = allocation;
     mnuRecreateMenuSelectionList();
-    mnuMovieMenuState->state = 0;
-    mnuMovieMenuState->cursor = 0;
+    titleWork->state = 0;
+    titleWork->cursor = 0;
     if (mode == 0) {
         mnuSelectMenuListCursorByAdvance(0);
     } else if (mode == 1) {
@@ -738,7 +738,7 @@ KwlnTask *mnuCreateTitleMenuTask(s32 mode) {
     } else if (mode == 3) {
         mnuSelectMenuListCursorByAdvance(1);
     }
-    mnuMovieMenuState->mode = mode;
+    titleWork->mode = mode;
     mnuLoadTitleMenuAssets();
     D_00435CBC = 0x80000000;
     return dds3StartProcess(D_00428680, 0x2B19, 1, 0, mnuUpdateTitleMenuTask, 0, 0);
@@ -761,8 +761,8 @@ void mnuReleaseTitleMenuAssetsAndMarkClosed(void) {
     mnuReleaseMenuResourceSlots();
     mnuReleaseSpriteHandle();
     mnuDestroyMovieMenuSelectionList();
-    sdfMemFreeDirect((struct SdfMemBlock *)(u32)((u32)mnuMovieMenuState->allocation));
-    mnuMovieMenuState = 0;
+    sdfMemFreeDirect((struct SdfMemBlock *)(u32)((u32)titleWork->allocation));
+    titleWork = 0;
     D_00435BB0 = 1;
 }
 
@@ -785,99 +785,99 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
 
     switch (event) {
     case 2:
-        mnuSlideBarSetStateSmall(mnuMovieMenuState->barSmall, 2);
-        mnuPairedSlideBarSetState(&mnuMovieMenuState->paired, 2);
-        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedA, 2, 0);
-        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedB, 2, 0);
-        mnuSlideBarSetState(mnuMovieMenuState->bar, 2);
-        mnuSlideBarSetStateB(mnuMovieMenuState->barB, 2);
+        mnuSlideBarSetStateSmall(titleWork->barSmall, 2);
+        mnuPairedSlideBarSetState(&titleWork->paired, 2);
+        mnuTimedSlideBarSetState(&titleWork->timedA, 2, 0);
+        mnuTimedSlideBarSetState(&titleWork->timedB, 2, 0);
+        mnuSlideBarSetState(titleWork->bar, 2);
+        mnuSlideBarSetStateB(titleWork->barB, 2);
         break;
     case 3:
         dds3FadeOut(0, 0, 0, 0);
-        mnuSlideBarSetStateSmall(mnuMovieMenuState->barSmall, 3);
-        mnuPairedSlideBarSetState(&mnuMovieMenuState->paired, 3);
-        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedA, 2, 0);
-        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedB, 3, 0);
-        mnuSlideBarSetState(mnuMovieMenuState->bar, 3);
-        mnuSlideBarSetStateB(mnuMovieMenuState->barB, 2);
+        mnuSlideBarSetStateSmall(titleWork->barSmall, 3);
+        mnuPairedSlideBarSetState(&titleWork->paired, 3);
+        mnuTimedSlideBarSetState(&titleWork->timedA, 2, 0);
+        mnuTimedSlideBarSetState(&titleWork->timedB, 3, 0);
+        mnuSlideBarSetState(titleWork->bar, 3);
+        mnuSlideBarSetStateB(titleWork->barB, 2);
         sdfSetStreamFrameDrawMode(1);
         sdfSetGridScaledDrawBounds(-0xA7, 0x5A, 0x200, 0x1C0, 0x80808080);
         mnuArmTitleMovieDrawAndResetFrame(0x5B, 0);
         break;
     case 5:
-        mnuSlideBarSetStateSmall(mnuMovieMenuState->barSmall, 2);
-        mnuPairedSlideBarSetState(&mnuMovieMenuState->paired, 2);
-        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedA, 2, 0);
-        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedB, 2, 0);
-        mnuSlideBarSetState(mnuMovieMenuState->bar, 2);
-        mnuSlideBarSetStateB(mnuMovieMenuState->barB, 2);
-        mnuResetMovieWorkState(mnuMovieMenuState->movie);
+        mnuSlideBarSetStateSmall(titleWork->barSmall, 2);
+        mnuPairedSlideBarSetState(&titleWork->paired, 2);
+        mnuTimedSlideBarSetState(&titleWork->timedA, 2, 0);
+        mnuTimedSlideBarSetState(&titleWork->timedB, 2, 0);
+        mnuSlideBarSetState(titleWork->bar, 2);
+        mnuSlideBarSetStateB(titleWork->barB, 2);
+        mnuResetMovieWorkState(titleWork->movie);
         sdfSetStreamFrameDrawMode(0);
         mnuStopTitleMovieDraw();
         break;
     case 19:
-        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedA, 3, 0);
+        mnuTimedSlideBarSetState(&titleWork->timedA, 3, 0);
         break;
     case 20:
-        mnuPairedSlideBarSetState(&mnuMovieMenuState->paired, 1);
+        mnuPairedSlideBarSetState(&titleWork->paired, 1);
         break;
     case 21:
-        if (++mnuMovieMenuState->cursor < 0x14B) {
+        if (++titleWork->cursor < 0x14B) {
             break;
         }
-        mnuSlideBarSetState(mnuMovieMenuState->bar, 1);
-        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedB, 1, 0);
+        mnuSlideBarSetState(titleWork->bar, 1);
+        mnuTimedSlideBarSetState(&titleWork->timedB, 1, 0);
         break;
     case 23:
-        mnuSlideBarSetStateSmall(mnuMovieMenuState->barSmall, 1);
-        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedA, 3, 0);
-        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedA, 0, 0x14);
-        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedB, 3, 0);
-        mnuSlideBarSetState(mnuMovieMenuState->bar, 3);
-        mnuSlideBarSetStateB(mnuMovieMenuState->barB, 1);
+        mnuSlideBarSetStateSmall(titleWork->barSmall, 1);
+        mnuTimedSlideBarSetState(&titleWork->timedA, 3, 0);
+        mnuTimedSlideBarSetState(&titleWork->timedA, 0, 0x14);
+        mnuTimedSlideBarSetState(&titleWork->timedB, 3, 0);
+        mnuSlideBarSetState(titleWork->bar, 3);
+        mnuSlideBarSetStateB(titleWork->barB, 1);
         sdfSetStreamFrameDrawMode(1);
         sdfSetGridScaledDrawBounds(-0xA7, 0x5A, 0x200, 0x1C0, 0x808080);
         mnuArmTitleMovieDrawAndResetFrame(0x5B, 1);
         break;
     case 25:
-        mnuPairedSlideBarSetState(&mnuMovieMenuState->paired, 3);
+        mnuPairedSlideBarSetState(&titleWork->paired, 3);
         /* fallthrough */
     case 26:
     case 31:
-        if (mnuMovieMenuState->timedA.control.pos < 0x200) {
-            if (mnuMovieMenuState->movieDrawn == 0) {
+        if (titleWork->timedA.control.pos < 0x200) {
+            if (titleWork->movieDrawn == 0) {
                 mnuArmTitleMovieDrawAndResetFrame(0x5B, 1);
             }
-            if (mnuMovieMenuState->movieFrame < 0x32A) {
-                mnuMovieMenuState->movieAlpha += 4;
-                if (mnuMovieMenuState->movieAlpha > 0x80) {
-                    mnuMovieMenuState->movieAlpha = 0x80;
+            if (titleWork->movieFrame < 0x32A) {
+                titleWork->movieAlpha += 4;
+                if (titleWork->movieAlpha > 0x80) {
+                    titleWork->movieAlpha = 0x80;
                 }
-            } else if (mnuMovieMenuState->movieDrawn != 0) {
-                mnuMovieMenuState->movieAlpha -= 4;
-                if (mnuMovieMenuState->movieAlpha < 0) {
-                    mnuMovieMenuState->movieAlpha = 0;
+            } else if (titleWork->movieDrawn != 0) {
+                titleWork->movieAlpha -= 4;
+                if (titleWork->movieAlpha < 0) {
+                    titleWork->movieAlpha = 0;
                 }
-                if (mnuMovieMenuState->movieAlpha == 0) {
+                if (titleWork->movieAlpha == 0) {
                     mnuStopTitleMovieDraw();
                 }
             }
         }
-        sdfSetGridScaledDrawBounds(-0xA7, 0x5A, 0x200, 0x1C0, (mnuMovieMenuState->movieAlpha << 24) | 0x808080);
-        mnuMovieMenuState->movieFrame++;
+        sdfSetGridScaledDrawBounds(-0xA7, 0x5A, 0x200, 0x1C0, (titleWork->movieAlpha << 24) | 0x808080);
+        titleWork->movieFrame++;
         break;
     case 32:
         if (!mnuIsTitleMovieDrawActive()) {
             break;
         }
         done = 1;
-        mnuSlideBarSetStateSmall(mnuMovieMenuState->barSmall, 2);
-        mnuPairedSlideBarSetState(&mnuMovieMenuState->paired, 2);
-        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedA, 2, 0);
-        mnuTimedSlideBarSetState(&mnuMovieMenuState->timedB, 2, 0);
-        mnuSlideBarSetState(mnuMovieMenuState->bar, 2);
-        mnuSlideBarSetStateB(mnuMovieMenuState->barB, 2);
-        mnuResetMovieWorkState(mnuMovieMenuState->movie);
+        mnuSlideBarSetStateSmall(titleWork->barSmall, 2);
+        mnuPairedSlideBarSetState(&titleWork->paired, 2);
+        mnuTimedSlideBarSetState(&titleWork->timedA, 2, 0);
+        mnuTimedSlideBarSetState(&titleWork->timedB, 2, 0);
+        mnuSlideBarSetState(titleWork->bar, 2);
+        mnuSlideBarSetStateB(titleWork->barB, 2);
+        mnuResetMovieWorkState(titleWork->movie);
         mnuStopTitleMovieDraw();
         sdfSetStreamFrameDrawMode(0);
         break;
@@ -938,10 +938,10 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
     s32 menuAction;
     s32 selectedItem;
 
-    switch (mnuMovieMenuState->state) {
+    switch (titleWork->state) {
     case 0:
-        mnuMovieMenuState->cursor = 0;
-        mnuMovieMenuState->state = 2;
+        titleWork->cursor = 0;
+        titleWork->state = 2;
         sndApplyTrackOperation(p2sdLoadSMGFile, 0x310000);
         break;
     case 1:
@@ -951,12 +951,12 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
     case 35:
         break;
     case 2:
-        mnuMovieMenuState->cursor = 0;
+        titleWork->cursor = 0;
         D_00435BB0 = 0;
-        if (mnuMovieMenuState->mode != 0) {
-            mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
-            mnuMovieMenuState->state = 3;
-            if (mnuMovieMenuState->mode == 3) {
+        if (titleWork->mode != 0) {
+            mnuHandleTitleMenuEvent(titleWork->state);
+            titleWork->state = 3;
+            if (titleWork->mode == 3) {
                 if (fileLoadStateChanged() == 0) {
                     fileCacheSlotFlagsFromState();
                 } else {
@@ -965,24 +965,24 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
             }
         } else {
             dds3FadeIn(0, 0, 0, 0x14);
-            mnuMovieMenuState->state = 5;
+            titleWork->state = 5;
         }
-        mnuMovieMenuState->mode = 0;
+        titleWork->mode = 0;
         break;
     case 3:
         if (mnuIsTitleMovieDrawActive() == 0) {
-            mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
+            mnuHandleTitleMenuEvent(titleWork->state);
         } else if (mnuGetMoviePlaybackMode() != 0) {
-            mnuMovieMenuState->state = 4;
-            mnuMovieMenuState->cursor = 0;
+            titleWork->state = 4;
+            titleWork->cursor = 0;
         }
         break;
     case 4:
         if (mnuHasSpriteHandle() != 0) {
-            mnuMovieMenuState->state = 31;
+            titleWork->state = 31;
             dds3FadeIn(0, 0, 0, 0x14);
-            if (mnuMovieMenuState->mode >= 0) {
-                if (mnuMovieMenuState->mode < 2) {
+            if (titleWork->mode >= 0) {
+                if (titleWork->mode < 2) {
                     sndApplyTrackOperation(p2sdPlayBGMFade, 0x310000);
                 }
             }
@@ -990,200 +990,200 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
         break;
     case 5:
         dds3FadeIn(0, 0, 0, 0x14);
-        mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
-        mnuMovieMenuState->state++;
+        mnuHandleTitleMenuEvent(titleWork->state);
+        titleWork->state++;
         break;
     case 6:
         mnuDrawMovieMenuSpriteSlot1F(0x80);
         if (dds3FadeCheck() == 0) {
-            mnuMovieMenuState->cursor = 0;
-            mnuMovieMenuState->state++;
+            titleWork->cursor = 0;
+            titleWork->state++;
         }
         break;
     case 7:
         mnuDrawMovieMenuSpriteSlot1F(0x80);
         if (mnuIsAnyMenuInputPressed() != 0) {
-            mnuMovieMenuState->cursor = 0x4B;
+            titleWork->cursor = 0x4B;
         }
-        if (mnuMovieMenuState->cursor < 0x4B) {
-            mnuMovieMenuState->cursor++;
+        if (titleWork->cursor < 0x4B) {
+            titleWork->cursor++;
         } else {
-            mnuMovieMenuState->cursor = 0;
-            mnuMovieMenuState->state++;
+            titleWork->cursor = 0;
+            titleWork->state++;
         }
         break;
     case 8:
-        volume = 0x80 - mnuMovieMenuState->cursor * 8;
+        volume = 0x80 - titleWork->cursor * 8;
         if (volume > 0) {
             mnuDrawMovieMenuSpriteSlot1F(volume);
         }
-        if (mnuMovieMenuState->cursor < 0x16) {
-            mnuMovieMenuState->cursor++;
+        if (titleWork->cursor < 0x16) {
+            titleWork->cursor++;
         } else {
-            mnuMovieMenuState->cursor = 0;
-            mnuMovieMenuState->state++;
+            titleWork->cursor = 0;
+            titleWork->state++;
         }
         break;
     case 9:
-        volume = mnuMovieMenuState->cursor * 6;
+        volume = titleWork->cursor * 6;
         if (volume >= 0x81) {
             volume = 0x80;
         }
         if (volume > 0) {
             mnuDrawMovieMenuSpriteSlot20(volume);
         }
-        if (mnuMovieMenuState->cursor < 0x14) {
-            mnuMovieMenuState->cursor++;
+        if (titleWork->cursor < 0x14) {
+            titleWork->cursor++;
         } else {
-            mnuMovieMenuState->cursor = 0;
-            mnuMovieMenuState->state++;
+            titleWork->cursor = 0;
+            titleWork->state++;
         }
         break;
     case 10:
         mnuDrawMovieMenuSpriteSlot20(0x80);
         if (mnuIsAnyMenuInputPressed() != 0) {
-            mnuMovieMenuState->cursor = 0x4B;
+            titleWork->cursor = 0x4B;
         }
-        if (mnuMovieMenuState->cursor < 0x4B) {
-            mnuMovieMenuState->cursor++;
+        if (titleWork->cursor < 0x4B) {
+            titleWork->cursor++;
         } else {
-            mnuMovieMenuState->cursor = 0;
-            mnuMovieMenuState->state++;
+            titleWork->cursor = 0;
+            titleWork->state++;
         }
         break;
     case 11:
-        volume = 0x80 - mnuMovieMenuState->cursor * 8;
+        volume = 0x80 - titleWork->cursor * 8;
         if (volume > 0) {
             mnuDrawMovieMenuSpriteSlot20(volume);
         }
-        if (mnuMovieMenuState->cursor < 0x16) {
-            mnuMovieMenuState->cursor++;
+        if (titleWork->cursor < 0x16) {
+            titleWork->cursor++;
         } else {
-            mnuMovieMenuState->cursor = 0;
-            mnuMovieMenuState->state++;
+            titleWork->cursor = 0;
+            titleWork->state++;
         }
         break;
     case 12:
-        volume = mnuMovieMenuState->cursor * 6;
+        volume = titleWork->cursor * 6;
         if (volume >= 0x81) {
             volume = 0x80;
         }
         if (volume > 0) {
             mnuDrawMovieMenuSpriteSlot21(volume);
         }
-        if (mnuMovieMenuState->cursor < 0x14) {
-            mnuMovieMenuState->cursor++;
+        if (titleWork->cursor < 0x14) {
+            titleWork->cursor++;
         } else {
-            mnuMovieMenuState->cursor = 0;
-            mnuMovieMenuState->state++;
+            titleWork->cursor = 0;
+            titleWork->state++;
         }
         break;
     case 13:
         mnuDrawMovieMenuSpriteSlot21(0x80);
         if (mnuIsAnyMenuInputPressed() != 0) {
-            mnuMovieMenuState->cursor = 0x4B;
+            titleWork->cursor = 0x4B;
         }
-        if (mnuMovieMenuState->cursor < 0x4B) {
-            mnuMovieMenuState->cursor++;
+        if (titleWork->cursor < 0x4B) {
+            titleWork->cursor++;
         } else {
             dds3FadeOut(0, 0, 0, 0x16);
-            mnuMovieMenuState->cursor = 0;
-            mnuMovieMenuState->state++;
+            titleWork->cursor = 0;
+            titleWork->state++;
         }
         break;
     case 14:
-        if (mnuMovieMenuState->cursor < 0x16) {
+        if (titleWork->cursor < 0x16) {
             mnuDrawMovieMenuSpriteSlot21(0x80);
-            mnuMovieMenuState->cursor++;
+            titleWork->cursor++;
         } else {
             dds3FadeIn(0, 0, 0, 0x1E);
-            mnuMovieMenuState->state = 15;
-            mnuMovieMenuState->cursor = 0;
+            titleWork->state = 15;
+            titleWork->cursor = 0;
         }
         break;
     case 15: {
         MovieMenuState *menu;
         mnuArmTitleMovieDrawAndResetFrame(0x5C, 0);
-        menu = mnuMovieMenuState;
+        menu = titleWork;
         menu->movieOpened = 0;
         menu->state = 16;
         break;
     }
     case 16:
         if (mnuGetMoviePlaybackMode() != 0) {
-            mnuMovieMenuState->state = 17;
+            titleWork->state = 17;
         }
         break;
     case 17:
         if (mnuIsAnyMenuInputPressed() != 0) {
-            mnuMovieMenuState->state = 18;
-            mnuMovieMenuState->cursor = 0;
+            titleWork->state = 18;
+            titleWork->cursor = 0;
             dds3FadeOut(0, 0, 0, 0x16);
             sdfSoundSetChannelCount(0x2D);
-            mnuMovieMenuState->movieOpened = 1;
+            titleWork->movieOpened = 1;
         }
         if (mnuCheckMovieDecoderStatus() != 0) {
-            mnuMovieMenuState->state = 18;
-            mnuMovieMenuState->cursor = 0x2D;
+            titleWork->state = 18;
+            titleWork->cursor = 0x2D;
         }
         break;
     case 18:
-        if (mnuMovieMenuState->cursor >= 0x2D) {
+        if (titleWork->cursor >= 0x2D) {
             mnuStopTitleMovieDraw();
-            mnuMovieMenuState->state = 19;
-            mnuMovieMenuState->cursor = 0;
+            titleWork->state = 19;
+            titleWork->cursor = 0;
         } else {
-            mnuMovieMenuState->cursor++;
+            titleWork->cursor++;
         }
         break;
     case 19:
         dds3FadeIn(0, 0, 0, 0x1E);
-        if (mnuMovieMenuState->movieOpened != 0) {
-            mnuMovieMenuState->state = 23;
+        if (titleWork->movieOpened != 0) {
+            titleWork->state = 23;
         } else {
-            mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
+            mnuHandleTitleMenuEvent(titleWork->state);
             mnuStartTitleMovieDraw();
-            mnuMovieMenuState->state = 20;
+            titleWork->state = 20;
         }
         break;
     case 20:
         if (mnuGetMoviePlaybackMode() != 0) {
-            mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
-            mnuMovieMenuState->state = 21;
-            mnuMovieMenuState->cursor = 0;
+            mnuHandleTitleMenuEvent(titleWork->state);
+            titleWork->state = 21;
+            titleWork->cursor = 0;
         }
         break;
     case 21:
-        mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
+        mnuHandleTitleMenuEvent(titleWork->state);
         if (mnuIsAnyMenuInputPressed() != 0) {
-            mnuMovieMenuState->state = 23;
-            mnuMovieMenuState->cursor = 0;
+            titleWork->state = 23;
+            titleWork->cursor = 0;
             mnuStopTitleMovieDraw();
         }
         if (mnuCheckMovieDecoderStatus() != 0) {
-            mnuMovieMenuState->state = 23;
-            mnuMovieMenuState->cursor = 0;
+            titleWork->state = 23;
+            titleWork->cursor = 0;
             mnuStopTitleMovieDraw();
         }
         break;
     case 23:
-        mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
-        mnuMovieMenuState->state = 24;
+        mnuHandleTitleMenuEvent(titleWork->state);
+        titleWork->state = 24;
         break;
     case 24:
         if (mnuHasSpriteHandle() != 0) {
-            mnuMovieMenuState->cursor = 0;
-            mnuMovieMenuState->state++;
+            titleWork->cursor = 0;
+            titleWork->state++;
         }
         break;
     case 25:
-        mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
-        mnuMovieMenuState->cursor = 0;
-        mnuMovieMenuState->state++;
+        mnuHandleTitleMenuEvent(titleWork->state);
+        titleWork->cursor = 0;
+        titleWork->state++;
         mnuResetTitleMovieMenuStateAndStartTrack();
         break;
     case 26:
-        mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
+        mnuHandleTitleMenuEvent(titleWork->state);
         menuAction = mnuPollMovieMenuInputAndTimeout();
         if (menuAction != -1) {
             if (menuAction != 1) {
@@ -1191,53 +1191,53 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
             } else {
                 mnuSelectMenuListCursorByAdvance(0);
                 mnuUpdateTitlePageByMode();
-                mnuMovieMenuState->state = 31;
-                mnuMovieMenuState->cursor = 0;
+                titleWork->state = 31;
+                titleWork->cursor = 0;
                 mnuTitleResetSequenceTimers();
             }
         } else {
             mnuUpdateTitlePageByMode();
-            mnuMovieMenuState->state = 28;
-            mnuMovieMenuState->cursor = 0;
+            titleWork->state = 28;
+            titleWork->cursor = 0;
             dds3FadeOut(0, 0, 0, 0xF);
             p2sdStopBGM(0x310000);
         }
         break;
     case 28:
-        if (mnuMovieMenuState->cursor < 0x78) {
+        if (titleWork->cursor < 0x78) {
             mnuUpdateTitlePageByMode();
-            mnuMovieMenuState->cursor++;
+            titleWork->cursor++;
         } else {
-            mnuMovieMenuState->cursor = 0;
-            mnuMovieMenuState->state = 5;
+            titleWork->cursor = 0;
+            titleWork->state = 5;
             mnuStopTitleMovieDraw();
             sdfSetStreamFrameDrawMode(0);
         }
         break;
     case 30:
         if (dds3FadeCheck() == 0) {
-            mnuMovieMenuState->state = 31;
-            mnuMovieMenuState->cursor = 0;
+            titleWork->state = 31;
+            titleWork->cursor = 0;
             mnuTitleResetSequenceTimers();
         }
         break;
     case 31:
-        mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
+        mnuHandleTitleMenuEvent(titleWork->state);
         menuAction = mnuUpdateMovieMenuInputState();
         switch (menuAction) {
         case 1:
             mnuDrawTitleSceneForPhase();
-            mnuMovieMenuState->state = 32;
-            mnuMovieMenuState->cursor = 0;
+            titleWork->state = 32;
+            titleWork->cursor = 0;
             dds3FadeOut(0, 0, 0, 0xF);
             break;
         case 2:
             mnuDrawTitleSceneForPhase();
-            mnuMovieMenuState->state = 33;
-            mnuMovieMenuState->cursor = 0;
+            titleWork->state = 33;
+            titleWork->cursor = 0;
             mnuClearGlobalMenuStateFields();
-            mnuMovieMenuState->state = 26;
-            mnuMovieMenuState->cursor = 0;
+            titleWork->state = 26;
+            titleWork->cursor = 0;
             break;
         default:
             mnuDrawTitleSceneForPhase();
@@ -1245,55 +1245,55 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
         }
         break;
     case 32:
-        if (mnuMovieMenuState->cursor < 0xF) {
-            mnuMovieMenuState->cursor++;
-        } else if (mnuHandleTitleMenuEvent(mnuMovieMenuState->state) == 0) {
+        if (titleWork->cursor < 0xF) {
+            titleWork->cursor++;
+        } else if (mnuHandleTitleMenuEvent(titleWork->state) == 0) {
             selectedItem = mnuGetMovieMenuSelectionIndex();
             switch (selectedItem) {
             case 1:
                 dds3FadeIn(0, 0, 0, 0x14);
-                mnuMovieMenuState->state = 34;
-                mnuMovieMenuState->cursor = 0;
+                titleWork->state = 34;
+                titleWork->cursor = 0;
                 break;
             case 0:
-                mnuMovieMenuState->mode = 1;
+                titleWork->mode = 1;
                 dds3AdminiCallSequence(3, 0, 0, 0);
-                mnuMovieMenuState->state = 35;
+                titleWork->state = 35;
                 break;
             case 2:
                 p2sdStopBGM(0x310000);
-                mnuMovieMenuState->mode = selectedItem;
-                mnuMovieMenuState->cursor = 0;
+                titleWork->mode = selectedItem;
+                titleWork->cursor = 0;
                 dds3FadeIn(0, 0, 0, 0xA);
                 dds3AdminiCallSequence(0xD, 0, 0, 0);
-                mnuMovieMenuState->state = 35;
+                titleWork->state = 35;
                 break;
             }
         }
         break;
     case 33:
         mnuClearGlobalMenuStateFields();
-        mnuMovieMenuState->state = 26;
-        mnuMovieMenuState->cursor = 0;
+        titleWork->state = 26;
+        titleWork->cursor = 0;
         break;
     case 34:
         dds3FadeClear();
         mnuRestartRuntimeAfterViewer(0);
         dds3AdminiCallSequence(0x1E, 0, 0, 0);
-        mnuMovieMenuState->state = 35;
-        mnuMovieMenuState->mode = 3;
-        mnuMovieMenuState->cursor = 0;
+        titleWork->state = 35;
+        titleWork->mode = 3;
+        titleWork->cursor = 0;
         break;
     }
 
-    mnuAdvanceTimedSlideBar(&mnuMovieMenuState->timedA, 0x52);
-    mnuAdvanceMultiSpriteSlideBar(&mnuMovieMenuState->timedB.control, 0x52);
-    mnuDrawMovieMenuSlideBar(&mnuMovieMenuState->timedA, &mnuMovieMenuState->timedB.control, 0x52);
-    mnuDrawExpandingMovieMenuPulseBar((MovieMenuPulse *)mnuMovieMenuState->barSmall, 0x52);
-    mnuAdvancePairedSlideBars((SlideBarPair *)mnuMovieMenuState->movie, 0x52);
-    mnuAdvanceSlideBarValue((SlideBar *)mnuMovieMenuState->barB, 0x52);
-    mnuAdvanceSlideBar(&mnuMovieMenuState->paired, 0x53);
-    mnuDrawAndAdvanceMovieMenuBar((SlideBar *)mnuMovieMenuState->bar, 0x53);
+    mnuAdvanceTimedSlideBar(&titleWork->timedA, 0x52);
+    mnuAdvanceMultiSpriteSlideBar(&titleWork->timedB.control, 0x52);
+    mnuDrawMovieMenuSlideBar(&titleWork->timedA, &titleWork->timedB.control, 0x52);
+    mnuDrawExpandingMovieMenuPulseBar((MovieMenuPulse *)titleWork->barSmall, 0x52);
+    mnuAdvancePairedSlideBars((SlideBarPair *)titleWork->movie, 0x52);
+    mnuAdvanceSlideBarValue((SlideBar *)titleWork->barB, 0x52);
+    mnuAdvanceSlideBar(&titleWork->paired, 0x53);
+    mnuDrawAndAdvanceMovieMenuBar((SlideBar *)titleWork->bar, 0x53);
     return 0;
 }
 

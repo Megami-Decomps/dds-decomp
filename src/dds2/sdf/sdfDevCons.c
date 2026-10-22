@@ -130,7 +130,7 @@ void sdfDevConsSetMode(DevConsState *console, u8 controlByte) {
 }
 
 struct SdfTex;
-extern u32 sdfConsoleFontTexture;
+extern u32 sdfDebugFontHandle;
 
 /* Close the ordered register-list tag in the console's uncached DMA buffer.
  * Five eight-byte register values form one sprite; pad an odd value count. */
@@ -208,8 +208,8 @@ void sdfDevConsDrawBG(DevConsState *console, ConsBuf *packetBuffers) {
     packetBuffers->writeCursor = packetBuffers->currentTag + SDF_DEVCONS_GIF_TAG_BYTES;
 }
 
-extern u32 sdfConsoleGlyphTexcoords[];
-extern u32 sdfConsoleColorPalette[];
+extern u32 sdfDevConsFontUvTable[];
+extern u32 sdfDevConsColorTable[];
 
 /* Emit five ordered register values per glyph into the console DMA buffer.
  * The native do-loops have no zero-dimension guard. */
@@ -254,8 +254,8 @@ void sdfDevConsDraw(DevConsState *console, ConsBuf *buffers) {
                     writeCursor = (vu64 *)buffers->writeCursor;
                     packetStart = buffers->packetStart;
                 }
-                glyph = sdfConsoleGlyphTexcoords[character - 0x20];
-                color = sdfConsoleColorPalette[attribute];
+                glyph = sdfDevConsFontUvTable[character - 0x20];
+                color = sdfDevConsColorTable[attribute];
                 writeCursor[0] = color;
                 writeCursor[1] = glyph;
                 writeCursor[2] = top;
@@ -288,7 +288,7 @@ void sdfDevConsDrawInit(ConsBuf *packetBuffers, u8 *storageBase, s32 storageCapa
     packetBuffers->bufferAddresses[1] = ring + halfBufferBytes;
     packetBuffers->packetStart = ring;
     packetBuffers->activeBufferIndex = 0;
-    textureState = sdfTexGetTex0Reg((struct SdfTex *)sdfConsoleFontTexture);
+    textureState = sdfTexGetTex0Reg((struct SdfTex *)sdfDebugFontHandle);
     packet = (vu64 *)ring;
     packet[0] = 0x10AB400000008005ULL;
     packet[1] = 0xE;

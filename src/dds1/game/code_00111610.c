@@ -14,7 +14,7 @@ typedef struct {
 
 
 extern SlotEntry dds3SlotRingEntries[];
-extern s32 dds3SlotRingCursor;
+extern s32 dds3MoverCount;
 
 extern s32 MoverBasicMainprocuder(EffWorldNode *object);
 
@@ -27,11 +27,11 @@ EffWorldNode *dds3AddMoverBasic(EffWorldNode *owner) {
     s32 slotIndex;
 
     resource->target = owner;
-    slotIndex = dds3SlotRingCursor;
+    slotIndex = dds3MoverCount;
     object->key = sequence;
     object->value = (const char *)&dds3SlotRingEntries[slotIndex];
-    dds3SlotRingCursor = slotIndex + 1;
-    dds3SlotRingCursor = dds3SlotRingCursor % DDS3_SLOT_RING_ENTRY_COUNT;
+    dds3MoverCount = slotIndex + 1;
+    dds3MoverCount = dds3MoverCount % DDS3_SLOT_RING_ENTRY_COUNT;
     return object;
 }
 
@@ -142,5 +142,5 @@ ObjBase *dds3CreateSlotResourceState(void *owner) {
     return state;
 }
 
-INCLUDE_SDATA(const s32, "game/code_00111610", dds3SlotRingCursor);
+INCLUDE_SDATA(const s32, "game/code_00111610", dds3MoverCount);
 

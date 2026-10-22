@@ -24,7 +24,7 @@
 extern void itfMesBuildEntryGlyph(ItfMesState *mes);
 extern void CommitVarTable(s32 *table);
 #include "sdf_debug_api.h"
-extern ItfMesGlobals itfMesWork;
+extern ItfMesGlobals itfMesMngManager;
 
 
 
@@ -38,9 +38,9 @@ extern s32 frFontMeasureGlyphStripWidth(s32 line, FrFontGlyph *glyph);
 
 extern UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 payload);
 
-extern SndPad kwlnTaskPadButtonStates;
+extern SndPad dds3PadButtonState;
 
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 
 extern ItfMesDebugState D_00357D80;
 
@@ -77,7 +77,7 @@ void itfMesInitializePanelPlacementSprite(ItfMesState *panel) {
     ItfMesBlkA4 *place = &panel->blkA4;
     s32 spriteTop;
     if (place->sprite == 0) {
-        place->sprite = itfCreateUiSpriteByKind(6, (u32)itfMesWork.windowTexture);
+        place->sprite = itfCreateUiSpriteByKind(6, (u32)itfMesMngManager.windowTexture);
         if (place->frame != 0) {
             place->sprite->unk20 = panel->blk14.glyphChain->x + frFontMeasureGlyphStripWidth(0, panel->blk14.glyphChain);
         }
@@ -95,7 +95,7 @@ void OpenCheckSpeakerWindow(ItfMesState *panel) {
     if (origin->glyphChain != NULL && !(panel->flags & 0x10000)) {
         if (place->frame == NULL) {
             s32 width = origin->glyphChain->advance * 16;
-            place->frame = itfCreateUiSpriteByKind(7, (u32)itfMesWork.windowTexture);
+            place->frame = itfCreateUiSpriteByKind(7, (u32)itfMesMngManager.windowTexture);
             itfPnlSetPosition(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0xF0, panel->renderValue);
             itfPnlSetColor(place->frame, 0x7F, 0x7F, 0x7F, 0);
         }
@@ -369,8 +369,8 @@ void itfMesAdvanceEntryText(ItfMesState *mes) {
         if (!(mes->flags & 0x100000)) {
             mes->fade.kind = 1;
         }
-        if (!(kwlnTaskPadButtonStates.confirm < 0 || kwlnTaskPadButtonStates.primaryCancel < 0 ||
-              (kwlnTaskPadButtonStates.primaryTriangle != 0 && mes->fade.textAdvanceFrameCount >= 5 && !(itfMessageFlags & 1))) &&
+        if (!(dds3PadButtonState.confirm < 0 || dds3PadButtonState.primaryCancel < 0 ||
+              (dds3PadButtonState.primaryTriangle != 0 && mes->fade.textAdvanceFrameCount >= 5 && !(itfMessageFlags & 1))) &&
               entryBlock->textInterfaceMask != 0) {
             return;
         }
@@ -392,7 +392,7 @@ void itfMesAdvanceEntryText(ItfMesState *mes) {
         mes->flags = (mes->flags & ~7) | 3;
         return;
     }
-    if ((kwlnTaskPadButtonStates.confirm < 0 || kwlnTaskPadButtonStates.primaryCancel < 0 || (kwlnTaskPadButtonStates.primaryTriangle != 0 && !(itfMessageFlags & 1))) &&
+    if ((dds3PadButtonState.confirm < 0 || dds3PadButtonState.primaryCancel < 0 || (dds3PadButtonState.primaryTriangle != 0 && !(itfMessageFlags & 1))) &&
         !(mes->flags & 0x1000000) && !(mes->flags & 0x400000)) {
         frFontEnableNodeContextModes(entryBlock->glyphChain);
         if (mes->blk14.glyphChain != NULL) {
@@ -494,14 +494,14 @@ s32 SelectItem(ItfMesState *panel) {
     ItfMesBlk40 *sel = &panel->blk40;
     s32 dir = 0;
     s32 index;
-    if (kwlnTaskPadButtonStates.prev & 2) {
+    if (dds3PadButtonState.prev & 2) {
         if (sel->selectedIndex != 0) {
             dir = -1;
-        } else if (kwlnTaskPadButtonStates.prev < 0) {
+        } else if (dds3PadButtonState.prev < 0) {
             dir = -1;
         }
-    } else if (kwlnTaskPadButtonStates.next & 2) {
-        if (sel->selectedIndex != sel->rowCount - 1 || kwlnTaskPadButtonStates.next < 0) {
+    } else if (dds3PadButtonState.next & 2) {
+        if (sel->selectedIndex != sel->rowCount - 1 || dds3PadButtonState.next < 0) {
             dir = 1;
         }
     }
@@ -509,7 +509,7 @@ s32 SelectItem(ItfMesState *panel) {
         SelectItemMove(sel, dir);
         InitializeCurCtr(&panel->fade, 1);
     }
-    if (kwlnTaskPadButtonStates.confirm < 0) {
+    if (dds3PadButtonState.confirm < 0) {
         p2sdPlaySE(8, 0x7F, 0x3F);
         return 1;
     }
@@ -555,7 +555,7 @@ s32 SelectItemDefKey(ItfMesBlk40 *selection) {
     for (i = 0; i < selection->optionCount; i++) {
         ItfMesOption *option = &selection->options[i];
 
-        if (kwlnTaskPadButtonStates.buttons[option->id] < 0) {
+        if (dds3PadButtonState.buttons[option->id] < 0) {
             s32 prefixLength = option->value;
             s32 rank = 0;
             u32 mask = selection->panelValue;
@@ -617,7 +617,7 @@ void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
     ItfMesBlk40 *selection;
     FrFontGlyph *glyph;
 
-    itfMesWork.flags &= ~2;
+    itfMesMngManager.flags &= ~2;
     itfMesRenderActivePanelSprites(panel);
     glyph = panel->blk14.glyphChain;
     if (!(flags & 0x10000) && glyph != 0) {
@@ -668,11 +668,11 @@ void itfMesRenderActivePanelSprites(ItfMesState *panel) {
     place = &panel->blkA4;
     if ((panel->flags & 0x300) >= 0x100) {
         if (panel->panelMode != 3) {
-            itfPnlDraw(place->sprite, &kwlnDrawSurfaces[panel->drawSurfaceIndex]);
+            itfPnlDraw(place->sprite, &sdfGrOtTable[panel->drawSurfaceIndex]);
         }
-        itfMesWork.flags |= 2;
+        itfMesMngManager.flags |= 2;
         if (place->overlay != 0) {
-            itfPnlDraw(place->overlay, &kwlnDrawSurfaces[panel->drawSurfaceIndex]);
+            itfPnlDraw(place->overlay, &sdfGrOtTable[panel->drawSurfaceIndex]);
         }
     }
     if (D_00357D80.window != NULL && D_00357D80.window->state == panel && place != 0) {
@@ -728,7 +728,7 @@ void itfDrawSelectedSoundRow(ItfMesState *panel) {
     color.components[2] = 0x80;
     color.components[3] = 0x26;
     itfMiscDrawSpritePrim(bounds, &uv, &color, panel->renderValue,
-                                  itfMesWork.windowTexture, 0, list);
+                                  itfMesMngManager.windowTexture, 0, list);
 
     bounds[0].x = x - 0xF0;
     bounds[0].y = y + 0x28;
@@ -753,7 +753,7 @@ void itfDrawSelectedSoundRow(ItfMesState *panel) {
         itfMiscDrawSpritePrim2(bounds, &uv, &color, panel->renderValue, 0, list);
         itfMiscDrawAlphaPrim(list, 0, 0);
     }
-    surface = &kwlnDrawSurfaces[panel->drawSurfaceIndex];
+    surface = &sdfGrOtTable[panel->drawSurfaceIndex];
     surface->append(surface, list);
 }
 
@@ -781,10 +781,10 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *panel) {
     sdfDrawTagInit(packet);
     D_00358018[3] = 0xFF;
     itfMiscDrawSpritePrim(bounds, D_00358008, D_00358018, panel->renderValue,
-                                  itfMesWork.windowTexture, 0, packet);
+                                  itfMesMngManager.windowTexture, 0, packet);
     D_00358018[3] = fade->alpha;
     itfMiscDrawSpritePrim(bounds, D_00357FF8, D_00358018, panel->renderValue,
-                                  itfMesWork.windowTexture, 0, packet);
+                                  itfMesMngManager.windowTexture, 0, packet);
     if (fade->timer > 0) {
         expansion = 0x80 - fade->timer;
         bounds[0] -= expansion * 2;
@@ -794,16 +794,16 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *panel) {
         D_00358018[3] = fade->timer;
         itfMiscDrawAlphaPrim(packet, 1, 0);
         itfMiscDrawSpritePrim(bounds, D_00357FF8, D_00358018, panel->renderValue,
-                                      itfMesWork.windowTexture, 0, packet);
+                                      itfMesMngManager.windowTexture, 0, packet);
         itfMiscDrawAlphaPrim(packet, 0, 0);
     }
-    surface = &kwlnDrawSurfaces[panel->drawSurfaceIndex];
+    surface = &sdfGrOtTable[panel->drawSurfaceIndex];
     surface->append(surface, packet);
 }
 
 
 s32 CalcMsgMng_Process(void) {
-    ItfMesPoolNode *node = itfMesWork.pool.activeHead;
+    ItfMesPoolNode *node = itfMesMngManager.pool.activeHead;
     while (node != 0) {
         itfUpdateBattleDisplayAndFadeIndicator(node->state);
         node = node->next;
@@ -820,23 +820,23 @@ s32 DrawMsgMng_Process(KwlnTask *task) {
     if (dds3NullDrawProc() != 0) {
         return 0;
     }
-    for (node = itfMesWork.pool.activeHead; node != NULL; node = node->next) {
+    for (node = itfMesMngManager.pool.activeHead; node != NULL; node = node->next) {
         itfUpdateSoundSelectorPanel(node->state);
     }
-    itfMesWork.unk8++;
+    itfMesMngManager.unk8++;
     return 0;
 }
 
 void DrawMsgMng_Shutdown(void) {
-    ItfMesPoolNode *node = itfMesWork.pool.activeHead;
+    ItfMesPoolNode *node = itfMesMngManager.pool.activeHead;
     s32 window;
     while (node != 0) {
         window = node->index;
         node = node->next;
         DestructFlow(window);
     }
-    sdfTexReleaseReferenceViaHandler(itfMesWork.windowTexture);
-    itfMesWork.windowTexture = NULL;
+    sdfTexReleaseReferenceViaHandler(itfMesMngManager.windowTexture);
+    itfMesMngManager.windowTexture = NULL;
 }
 
 
@@ -869,17 +869,17 @@ void DebugMoveWinVert(ItfMesBlkA4 *panel, s32 boundsMode) {
 
     if (sprite != NULL) {
         bounds = panel->bounds;
-        if (kwlnTaskPadButtonStates.coarseDown & 2) {
+        if (dds3PadButtonState.coarseDown & 2) {
             dx = -16;
         } else {
-            dx = ((u8)kwlnTaskPadButtonStates.coarseUp << 3) & 0x10;
+            dx = ((u8)dds3PadButtonState.coarseUp << 3) & 0x10;
         }
-        if (kwlnTaskPadButtonStates.secondaryUp & 2) {
+        if (dds3PadButtonState.secondaryUp & 2) {
             dy = -8;
         } else {
-            dy = ((u8)kwlnTaskPadButtonStates.secondaryDown << 2) & 8;
+            dy = ((u8)dds3PadButtonState.secondaryDown << 2) & 8;
         }
-        if (kwlnTaskPadButtonStates.secondaryCross != 0) {
+        if (dds3PadButtonState.secondaryCross != 0) {
             dx *= 8;
             dy *= 8;
         }
@@ -911,17 +911,17 @@ void DebugMoveWinVert(ItfMesBlkA4 *panel, s32 boundsMode) {
 void DebugMoveWinAlpha(ItfMesBlkA4 *panel) {
     s32 step;
 
-    if (kwlnTaskPadButtonStates.coarseDown & 2) {
+    if (dds3PadButtonState.coarseDown & 2) {
         step = -1;
     } else {
-        step = (kwlnTaskPadButtonStates.coarseUp & 2) > 0;
+        step = (dds3PadButtonState.coarseUp & 2) > 0;
     }
-    if (kwlnTaskPadButtonStates.secondaryUp & 2) {
+    if (dds3PadButtonState.secondaryUp & 2) {
         step = -1;
-    } else if (kwlnTaskPadButtonStates.secondaryDown & 2) {
+    } else if (dds3PadButtonState.secondaryDown & 2) {
         step = 1;
     }
-    if (kwlnTaskPadButtonStates.secondaryCross != 0) {
+    if (dds3PadButtonState.secondaryCross != 0) {
         step *= 10;
     }
     if (step != 0) {
@@ -936,7 +936,7 @@ void DebugMoveWinAlpha(ItfMesBlkA4 *panel) {
 
 ItfMesPoolNode *DebugChangeInstance(ItfMesPoolNode *node) {
     s32 index = 0;
-    s32 count = itfMesWork.activeWindowCount;
+    s32 count = itfMesMngManager.activeWindowCount;
 
     if (count <= 0) {
         return NULL;
@@ -946,7 +946,7 @@ ItfMesPoolNode *DebugChangeInstance(ItfMesPoolNode *node) {
             node = node->previous;
         }
         if (node == NULL) {
-            node = itfMesWork.pool.activeTail;
+            node = itfMesMngManager.pool.activeTail;
         }
         if ((node->state)->blkA4.sprite != NULL) {
             break;
@@ -1066,14 +1066,14 @@ s32 pbDebugPrintPanel(void) {
     sdfPktInit(&packet, 0x85C0, 0x7A20, 0xFF0000, 0);
     sdfDrawTagLink(list,
                     (u32)sdfDevPrintfEx(&packet, "FOVY: %6.2f",
-                        sdfSceneProjectionParameters.camera.fov * radiansToDegrees));
+                        dds3ScreenParam.camera.fov * radiansToDegrees));
     D_00325708.append(&D_00325708, list);
-    if (kwlnTaskPadButtonStates.secondaryCancel < 0) {
+    if (dds3PadButtonState.secondaryCancel < 0) {
         return -1;
     }
-    D_003D73C0.degrees = sdfSceneProjectionParameters.camera.fov * radiansToDegrees;
+    D_003D73C0.degrees = dds3ScreenParam.camera.fov * radiansToDegrees;
     if (pbCalcFovDegrees(&D_003D73C0.degrees, 1.0f, 89.0f, 0.1f, 1.0f) != 0) {
-        sdfSceneProjectionParameters.camera.fov = D_003D73C0.degrees * 0.0174532925f;
+        dds3ScreenParam.camera.fov = D_003D73C0.degrees * 0.0174532925f;
     }
     return 0;
 }
@@ -1082,32 +1082,32 @@ s32 pbCalcFovDegrees(f32 *angleDegrees, f32 minimum, f32 maximum, f32 coarseStep
     f32 current = *angleDegrees;
     s32 changed = 0;
 
-    if (kwlnTaskPadButtonStates.coarseUp < 0) {
+    if (dds3PadButtonState.coarseUp < 0) {
         if (current < maximum) {
             current += coarseStep;
         } else {
             current = minimum;
         }
         changed = 1;
-    } else if (kwlnTaskPadButtonStates.coarseUp & 2) {
+    } else if (dds3PadButtonState.coarseUp & 2) {
         if (current < maximum) {
             current += coarseStep;
             changed = 1;
         }
-    } else if (kwlnTaskPadButtonStates.coarseDown < 0) {
+    } else if (dds3PadButtonState.coarseDown < 0) {
         if (minimum < current) {
             current -= coarseStep;
         } else {
             current = maximum;
         }
         changed = 1;
-    } else if (kwlnTaskPadButtonStates.coarseDown & 2) {
+    } else if (dds3PadButtonState.coarseDown & 2) {
         if (minimum < current) {
             current -= coarseStep;
             changed = 1;
         }
     } else if (fineStep != 0.0f) {
-        if (kwlnTaskPadButtonStates.fineUp < 0) {
+        if (dds3PadButtonState.fineUp < 0) {
             if (current < maximum) {
                 current += fineStep;
                 if (maximum < current) {
@@ -1117,7 +1117,7 @@ s32 pbCalcFovDegrees(f32 *angleDegrees, f32 minimum, f32 maximum, f32 coarseStep
                 current = minimum;
             }
             changed = 1;
-        } else if (kwlnTaskPadButtonStates.fineUp & 2) {
+        } else if (dds3PadButtonState.fineUp & 2) {
             if (current < maximum) {
                 current += fineStep;
                 if (maximum < current) {
@@ -1125,7 +1125,7 @@ s32 pbCalcFovDegrees(f32 *angleDegrees, f32 minimum, f32 maximum, f32 coarseStep
                 }
                 changed = 1;
             }
-        } else if (kwlnTaskPadButtonStates.fineDown < 0) {
+        } else if (dds3PadButtonState.fineDown < 0) {
             if (minimum < current) {
                 current -= fineStep;
                 if (current < minimum) {
@@ -1135,7 +1135,7 @@ s32 pbCalcFovDegrees(f32 *angleDegrees, f32 minimum, f32 maximum, f32 coarseStep
                 current = maximum;
             }
             changed = 1;
-        } else if (kwlnTaskPadButtonStates.fineDown & 2) {
+        } else if (dds3PadButtonState.fineDown & 2) {
             if (minimum < current) {
                 current -= fineStep;
                 if (current < minimum) {
@@ -1155,9 +1155,9 @@ s32 pbCalcFovDegrees(f32 *angleDegrees, f32 minimum, f32 maximum, f32 coarseStep
 extern ItfDebugPanelWork D_003D73D0;
 extern const char *D_00358348[6];
 extern s32 D_003BA910[2];
-extern u8 kwlnDrawOverlayEnabled;
-extern s16 kwlnDrawOverlayAlpha;
-extern s16 kwlnDrawOverlayScale;
+extern u8 dds3ScreenBlurFlag;
+extern s16 dds3ScreenBlurAlpha;
+extern s16 dds3ScreenBlurScale;
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern char D_003BB260[];
 extern char D_003BB268[];
@@ -1180,7 +1180,7 @@ s32 pbDebugPrintPanel2(void) {
         (u32)dds3PrimFrameRect(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x82C0, 0x79C0, 0xFF0000, 0);
     sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet,
-        "BLUR:        %s", kwlnDrawOverlayEnabled ? D_003BB260 : D_003BB268));
+        "BLUR:        %s", dds3ScreenBlurFlag ? D_003BB260 : D_003BB268));
 
     y = 0x7A20;
     if (D_003D73D0.editing == 0) {
@@ -1203,11 +1203,11 @@ s32 pbDebugPrintPanel2(void) {
         switch (row) {
         case 0:
             sdfDrawTagLink(list,
-                (u32)sdfDevPrintfEx(&packet, D_003BB280, kwlnDrawOverlayAlpha));
+                (u32)sdfDevPrintfEx(&packet, D_003BB280, dds3ScreenBlurAlpha));
             break;
         case 1:
             sdfDrawTagLink(list,
-                (u32)sdfDevPrintfEx(&packet, D_003BB280, kwlnDrawOverlayScale));
+                (u32)sdfDevPrintfEx(&packet, D_003BB280, dds3ScreenBlurScale));
             break;
         case 2:
             sdfDrawTagLink(list,
@@ -1221,18 +1221,18 @@ s32 pbDebugPrintPanel2(void) {
             0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
 
-    if ((s8)kwlnTaskPadButtonStates.secondaryTriangle < 0) {
-        kwlnDrawOverlayEnabled ^= 1;
+    if ((s8)dds3PadButtonState.secondaryTriangle < 0) {
+        dds3ScreenBlurFlag ^= 1;
     }
     if (D_003D73D0.editing == 0) {
         previous = D_003D73D0.selection;
-        if ((u8)kwlnTaskPadButtonStates.secondaryUp & 2) {
+        if ((u8)dds3PadButtonState.secondaryUp & 2) {
             D_003D73D0.selection--;
             if (D_003D73D0.selection < 0) {
                 D_003D73D0.selection = 2;
             }
         }
-        if ((u8)kwlnTaskPadButtonStates.secondaryDown & 2) {
+        if ((u8)dds3PadButtonState.secondaryDown & 2) {
             D_003D73D0.selection++;
             if (D_003D73D0.selection >= 3) {
                 D_003D73D0.selection = 0;
@@ -1241,67 +1241,67 @@ s32 pbDebugPrintPanel2(void) {
         if (previous != D_003D73D0.selection) {
             D_003D73D0.blink = 0;
         }
-        if (kwlnTaskPadButtonStates.secondaryCross < 0) {
+        if (dds3PadButtonState.secondaryCross < 0) {
             D_003D73D0.editing ^= 1;
             D_003D73D0.blink = 0;
         }
-        if ((u8)kwlnTaskPadButtonStates.secondaryCancel & 2) {
+        if ((u8)dds3PadButtonState.secondaryCancel & 2) {
             return -1;
         }
     } else {
         if (D_003D73D0.selection == 2) {
-            if (kwlnTaskPadButtonStates.secondaryUp != 0) {
+            if (dds3PadButtonState.secondaryUp != 0) {
                 D_003BA910[1] -= 16;
                 if (D_003BA910[1] < -224) {
                     D_003BA910[1] = -224;
                 }
             }
-            if (kwlnTaskPadButtonStates.secondaryDown != 0) {
+            if (dds3PadButtonState.secondaryDown != 0) {
                 D_003BA910[1] += 16;
                 if (D_003BA910[1] > 224) {
                     D_003BA910[1] = 224;
                 }
             }
-            if (kwlnTaskPadButtonStates.coarseDown != 0) {
+            if (dds3PadButtonState.coarseDown != 0) {
                 D_003BA910[0] -= 16;
                 if (D_003BA910[0] < -256) {
                     D_003BA910[0] = -256;
                 }
             }
-            if (kwlnTaskPadButtonStates.coarseUp != 0) {
+            if (dds3PadButtonState.coarseUp != 0) {
                 D_003BA910[0] += 16;
                 if (D_003BA910[0] > 256) {
                     D_003BA910[0] = 256;
                 }
             }
         } else if (D_003D73D0.selection == 0) {
-            if ((u8)kwlnTaskPadButtonStates.coarseDown & 2) {
-                kwlnDrawOverlayAlpha -= 10;
-                if (kwlnDrawOverlayAlpha < 0) {
-                    kwlnDrawOverlayAlpha = 0;
+            if ((u8)dds3PadButtonState.coarseDown & 2) {
+                dds3ScreenBlurAlpha -= 10;
+                if (dds3ScreenBlurAlpha < 0) {
+                    dds3ScreenBlurAlpha = 0;
                 }
             }
-            if ((u8)kwlnTaskPadButtonStates.coarseUp & 2) {
-                kwlnDrawOverlayAlpha += 10;
-                if (kwlnDrawOverlayAlpha > 255) {
-                    kwlnDrawOverlayAlpha = 255;
+            if ((u8)dds3PadButtonState.coarseUp & 2) {
+                dds3ScreenBlurAlpha += 10;
+                if (dds3ScreenBlurAlpha > 255) {
+                    dds3ScreenBlurAlpha = 255;
                 }
             }
         } else {
-            if ((u8)kwlnTaskPadButtonStates.coarseDown & 2) {
-                kwlnDrawOverlayScale -= 10;
-                if (kwlnDrawOverlayScale < -255) {
-                    kwlnDrawOverlayScale = -255;
+            if ((u8)dds3PadButtonState.coarseDown & 2) {
+                dds3ScreenBlurScale -= 10;
+                if (dds3ScreenBlurScale < -255) {
+                    dds3ScreenBlurScale = -255;
                 }
             }
-            if ((u8)kwlnTaskPadButtonStates.coarseUp & 2) {
-                kwlnDrawOverlayScale += 10;
-                if (kwlnDrawOverlayScale > 255) {
-                    kwlnDrawOverlayScale = 255;
+            if ((u8)dds3PadButtonState.coarseUp & 2) {
+                dds3ScreenBlurScale += 10;
+                if (dds3ScreenBlurScale > 255) {
+                    dds3ScreenBlurScale = 255;
                 }
             }
         }
-        if (kwlnTaskPadButtonStates.secondaryCancel < 0) {
+        if (dds3PadButtonState.secondaryCancel < 0) {
             D_003D73D0.editing ^= 1;
             D_003D73D0.blink = 0;
         }

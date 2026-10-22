@@ -88,9 +88,9 @@ extern void evtSubmitPrimaryGsTest();
 
 extern void evtSubmitPrimaryAlphaBlendMode();
 
-extern u32 fldAuxRecordBuffer;
+extern u32 fldItemBoxObjBuf;
 
-extern FldValueRecord *fldValueRecords;
+extern FldValueRecord *fldMatterTable;
 
 extern u32 fldAuxRecordResource;
 
@@ -102,15 +102,15 @@ extern s32 D_004361F8;
 extern u32 fldRoomTaskHandles[];
 
 
-extern s32 fldTaskSlotCount;
+extern s32 fldEveRngCount;
 
 extern FldFileResource *fldRoomResources[];
 
 extern void fldDrawPos(f32 *pos);
 
-extern s32 fldCurrentEventRoom;
+extern s32 gFldInf_HitIdx;
 
-extern s32 fldEventActorTaskStarted;
+extern s32 gFldInf_WpExit;
 
 extern s32 D_004361B8;
 
@@ -213,21 +213,21 @@ extern s32 D_0043617C;
 
 extern u32 fldDisplayValues[];
 
-extern s32 fldTriggeredNpcRoom;
+extern s32 gFldEveRngIdx_N;
 
 extern f32 EulerAngleAxisY(void);
 
-extern s32 fldTriggeredRoom;
+extern s32 gFldEveRngIdx;
 
-extern s32 fldTriggeredItemBoxRoom;
+extern s32 gFldEveRngIdx_T;
 
 extern s32 fldTriggeredSavePointValue;
 
-extern s32 fldRoomTriggersHalted;
+extern s32 fldEveHitState;
 
 extern f32 fldVecDot(f32 *, f32 *);
 
-extern FldRoomState fldRoomRecords[];
+extern FldRoomState fldEveHitTable[];
 
 extern char D_00413448[]; /* "%sF%03d.INF": one string split at +8 from the separately included D_003A0200 */
 
@@ -243,7 +243,7 @@ extern s32 D_004361E0;
 
 extern FldWaypointBlock fldActorWaypointRows;
 
-extern FldActorEntry fldActorEntries[256];
+extern FldActorEntry fldDoorTable[256];
 
 /* Actor slots use three transition keys, signed frame counters and two float
    triples with per-frame increments; fldInitializeActorMotionSlots initializes the motion data. */
@@ -280,50 +280,50 @@ void fldResetZoneRecordsAndActorSlots(void) {
     s32 roomIndex;
     s32 vectorIndex;
 
-    fldTaskSlotCount = 0;
+    fldEveRngCount = 0;
     D_004361B8 = 0;
-    fldRoomTriggersHalted = 0;
+    fldEveHitState = 0;
     for (roomIndex = 0; roomIndex < FIELD_ROOM_RECORD_COUNT; roomIndex++) {
         for (vectorIndex = 0; vectorIndex < FIELD_ROOM_CORNER_COUNT; vectorIndex++) {
-            fldRoomRecords[roomIndex].corner[vectorIndex][0] = 0.0f;
-            fldRoomRecords[roomIndex].corner[vectorIndex][1] = 0.0f;
-            fldRoomRecords[roomIndex].corner[vectorIndex][2] = 0.0f;
-            fldRoomRecords[roomIndex].corner[vectorIndex][3] = 1.0f;
+            fldEveHitTable[roomIndex].corner[vectorIndex][0] = 0.0f;
+            fldEveHitTable[roomIndex].corner[vectorIndex][1] = 0.0f;
+            fldEveHitTable[roomIndex].corner[vectorIndex][2] = 0.0f;
+            fldEveHitTable[roomIndex].corner[vectorIndex][3] = 1.0f;
         }
-        fldRoomRecords[roomIndex].center[0] = 0.0f;
-        fldRoomRecords[roomIndex].center[1] = 0.0f;
-        fldRoomRecords[roomIndex].center[2] = 0.0f;
-        fldRoomRecords[roomIndex].center[3] = 1.0f;
+        fldEveHitTable[roomIndex].center[0] = 0.0f;
+        fldEveHitTable[roomIndex].center[1] = 0.0f;
+        fldEveHitTable[roomIndex].center[2] = 0.0f;
+        fldEveHitTable[roomIndex].center[3] = 1.0f;
         for (vectorIndex = 0; vectorIndex < FIELD_ROOM_PLANE_COUNT; vectorIndex++) {
-            fldRoomRecords[roomIndex].plane[vectorIndex][0] = 0.0f;
-            fldRoomRecords[roomIndex].plane[vectorIndex][1] = 0.0f;
-            fldRoomRecords[roomIndex].plane[vectorIndex][2] = 0.0f;
-            fldRoomRecords[roomIndex].plane[vectorIndex][3] = 1.0f;
-            fldRoomRecords[roomIndex].limit[vectorIndex] = 0.0f;
+            fldEveHitTable[roomIndex].plane[vectorIndex][0] = 0.0f;
+            fldEveHitTable[roomIndex].plane[vectorIndex][1] = 0.0f;
+            fldEveHitTable[roomIndex].plane[vectorIndex][2] = 0.0f;
+            fldEveHitTable[roomIndex].plane[vectorIndex][3] = 1.0f;
+            fldEveHitTable[roomIndex].limit[vectorIndex] = 0.0f;
         }
         fldRoomTaskHandles[roomIndex] = 0;
-        fldRoomRecords[roomIndex].worldObjectKey = 0;
-        fldRoomRecords[roomIndex].sizeX = 0.0f;
-        fldRoomRecords[roomIndex].sizeY = 0.0f;
-        fldRoomRecords[roomIndex].sizeZ = 0.0f;
-        fldRoomRecords[roomIndex].unk118 = 0.0f;
-        fldRoomRecords[roomIndex].unk11C = 0.0f;
-        fldRoomRecords[roomIndex].unk130 = 0;
-        fldRoomRecords[roomIndex].roomId = -1;
-        fldRoomRecords[roomIndex].mapSlot = -1;
-        fldRoomRecords[roomIndex].mode = 0;
-        fldRoomRecords[roomIndex].entryIndex = -1;
-        fldRoomRecords[roomIndex].savePointValue = -1;
-        fldRoomRecords[roomIndex].axisMode = 0;
-        fldRoomRecords[roomIndex].crossingDirection = 0;
+        fldEveHitTable[roomIndex].worldObjectKey = 0;
+        fldEveHitTable[roomIndex].sizeX = 0.0f;
+        fldEveHitTable[roomIndex].sizeY = 0.0f;
+        fldEveHitTable[roomIndex].sizeZ = 0.0f;
+        fldEveHitTable[roomIndex].unk118 = 0.0f;
+        fldEveHitTable[roomIndex].unk11C = 0.0f;
+        fldEveHitTable[roomIndex].unk130 = 0;
+        fldEveHitTable[roomIndex].roomId = -1;
+        fldEveHitTable[roomIndex].mapSlot = -1;
+        fldEveHitTable[roomIndex].mode = 0;
+        fldEveHitTable[roomIndex].entryIndex = -1;
+        fldEveHitTable[roomIndex].savePointValue = -1;
+        fldEveHitTable[roomIndex].axisMode = 0;
+        fldEveHitTable[roomIndex].crossingDirection = 0;
     }
     fldActorTaskRoom = -1;
     fldEventSetRoom = -1;
     fldLabelTaskRoom = -1;
     fldLabelTaskSlot = -1;
-    fldTriggeredRoom = -1;
-    fldTriggeredNpcRoom = -1;
-    fldTriggeredItemBoxRoom = -1;
+    gFldEveRngIdx = -1;
+    gFldEveRngIdx_N = -1;
+    gFldEveRngIdx_T = -1;
     fldActionRowCount = 0;
     fldResetActorSlots();
 }
@@ -335,16 +335,16 @@ void fldEveHit_End(void) {
     void *task;
     FldTaskInfo *taskInfo;
 
-    fldRoomTriggersHalted = 1;
-    for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+    fldEveHitState = 1;
+    for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
         fldRoomTaskHandles[slotIndex] = 0;
     }
-    fldTriggeredRoom = -1;
-    fldTriggeredNpcRoom = -1;
-    fldTriggeredItemBoxRoom = -1;
+    gFldEveRngIdx = -1;
+    gFldEveRngIdx_N = -1;
+    gFldEveRngIdx_T = -1;
     world = dds3GetControlScene();
     if (world != 0) {
-        for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+        for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
             taskInfo = (FldTaskInfo *)fldRoomResources[slotIndex]->data;
             if (taskInfo->slot >= 0) {
                 task = dds3EventBasicGetResource(dds3SearchSceneBasic(world, *(u32 *)fldDisplayValues[taskInfo->slot], 0xD));
@@ -379,8 +379,8 @@ s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
 
     memset(position, 0, sizeof(position));
     position[3] = 1.0f;
-    for (i = 0; i < fldTaskSlotCount; i++) {
-        if (fldRoomRecords[i].worldObjectKey == entry->key) {
+    for (i = 0; i < fldEveRngCount; i++) {
+        if (fldEveHitTable[i].worldObjectKey == entry->key) {
             kind = ((FldTaskInfo *)fldRoomResources[i]->data)->shape->kind;
             switch (kind) {
             case 0:
@@ -414,7 +414,7 @@ s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
                 }
                 return 1;
             case 1:
-                return fldRoomRecords[i].crossingDirection == kind;
+                return fldEveHitTable[i].crossingDirection == kind;
             case 2:
                 VU0_LOAD_VF(vf10, actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
@@ -423,7 +423,7 @@ s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
                 VU0_LOAD_VF(vf10, dir);
                 VU0_NORMALIZE_VF10();
                 VU0_STORE_VF(vf10, dir);
-                dot = fldVecDot(dir, fldRoomRecords[i].center);
+                dot = fldVecDot(dir, fldEveHitTable[i].center);
                 if (dot < 0.5f) {
                     return 0;
                 }
@@ -446,8 +446,8 @@ s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry) {
 
     memset(position, 0, sizeof(position));
     position[3] = 1.0f;
-    for (i = 0; i < fldTaskSlotCount; i++) {
-        if (fldRoomRecords[i].worldObjectKey == entry->key) {
+    for (i = 0; i < fldEveRngCount; i++) {
+        if (fldEveHitTable[i].worldObjectKey == entry->key) {
             kind = ((FldTaskInfo *)fldRoomResources[i]->data)->shape->kind;
             switch (kind) {
             case 0:
@@ -476,7 +476,7 @@ s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry) {
                 }
                 return 1;
             case 1:
-                return fldRoomRecords[i].crossingDirection == kind;
+                return fldEveHitTable[i].crossingDirection == kind;
             case 2:
                 VU0_LOAD_VF(vf10, actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
@@ -485,7 +485,7 @@ s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry) {
                 VU0_LOAD_VF(vf10, dir);
                 VU0_NORMALIZE_VF10();
                 VU0_STORE_VF(vf10, dir);
-                dot = fldVecDot(dir, fldRoomRecords[i].center);
+                dot = fldVecDot(dir, fldEveHitTable[i].center);
                 if (dot < 0.5f) {
                     return 0;
                 }
@@ -532,7 +532,7 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, EffWorldNode *actor, f32 *posi
         }
         return 1;
     case 1:
-        return fldRoomRecords[roomIndex].crossingDirection == kind;
+        return fldEveHitTable[roomIndex].crossingDirection == kind;
     case 2:
         VU0_LOAD_VF(vf10, actor->inner->rotation);
         effMiscQuaternionToMatrixVU();
@@ -541,7 +541,7 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, EffWorldNode *actor, f32 *posi
         VU0_LOAD_VF(vf10, dir);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF(vf10, dir);
-        dot = fldVecDot(dir, fldRoomRecords[roomIndex].center);
+        dot = fldVecDot(dir, fldEveHitTable[roomIndex].center);
         if (dot < 0.5f) {
             return 0;
         }
@@ -555,7 +555,7 @@ s32 fldProbeRoomPlanes(f32 *direction, s32 roomIndex) {
     f32 planar[2];
     s32 i;
 
-    if (fldRoomRecords[roomIndex].axisMode == 0) {
+    if (fldEveHitTable[roomIndex].axisMode == 0) {
         probe[0] = 0.0f;
         probe[1] = direction[1];
         probe[2] = direction[2];
@@ -569,7 +569,7 @@ s32 fldProbeRoomPlanes(f32 *direction, s32 roomIndex) {
         planar[1] = direction[1];
     }
     for (i = 0; i < 4; i++) {
-        if (fldVecDot(probe, fldRoomRecords[roomIndex].plane[i + 1]) - fldRoomRecords[roomIndex].limit[i + 1] < 0.0f) {
+        if (fldVecDot(probe, fldEveHitTable[roomIndex].plane[i + 1]) - fldEveHitTable[roomIndex].limit[i + 1] < 0.0f) {
             return -1;
         }
     }
@@ -580,7 +580,7 @@ s32 fldRoomContainsPoint(f32 *direction, s32 index) {
     s32 i;
 
     for (i = 0; i < 6; i++) {
-        if (fldVecDot(direction, fldRoomRecords[index].plane[i]) - fldRoomRecords[index].limit[i] > 0.0f) {
+        if (fldVecDot(direction, fldEveHitTable[index].plane[i]) - fldEveHitTable[index].limit[i] > 0.0f) {
             return 0;
         }
     }
@@ -635,7 +635,7 @@ s32 fldEveHit_ChkEveHitAfter(void) {
 INCLUDE_ASM(const s32, "game/code_0013B818", fldUpdateRoomTriggers);
 
 void fldDrawTaskMarkers(void) {
-    s32 count = fldTaskSlotCount;
+    s32 count = fldEveRngCount;
     s32 i = 0;
     if (count > 0) {
         FldFileResource **entry = fldRoomResources;
@@ -643,13 +643,13 @@ void fldDrawTaskMarkers(void) {
             fldDrawPos((*entry)->transform);
             i++;
             entry++;
-        } while (i < fldTaskSlotCount);
+        } while (i < fldEveRngCount);
     }
 }
 
 /* Clear unregistered task handles; retain the native global-count loop bound. */
 void fldPurgeEveRngProcesses(void) {
-    s32 count = fldTaskSlotCount;
+    s32 count = fldEveRngCount;
     s32 slotIndex = 0;
     if (count > 0) {
         u32 *taskSlot = fldRoomTaskHandles;
@@ -659,14 +659,14 @@ void fldPurgeEveRngProcesses(void) {
             }
             slotIndex++;
             taskSlot++;
-        } while (slotIndex < fldTaskSlotCount);
+        } while (slotIndex < fldEveRngCount);
     }
 }
 
 /* Return the first matching task slot's record ID; -1 denotes a miss. */
 s32 fldEveHitResID_Find(u32 task) {
     s32 slotIndex;
-    for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+    for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
         if (fldRoomTaskHandles[slotIndex] == task) {
             return fldRoomResources[slotIndex]->id;
         }
@@ -678,9 +678,9 @@ s32 fldEveHitResID_Find(u32 task) {
 s32 fldFindEveRngIndex(u32 task) {
     s32 slotIndex;
 
-    for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+    for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
         if (fldRoomTaskHandles[slotIndex] == task) {
-            return fldRoomRecords[slotIndex].roomId;
+            return fldEveHitTable[slotIndex].roomId;
         }
     }
     return -1;
@@ -689,7 +689,7 @@ s32 fldFindEveRngIndex(u32 task) {
 /* Return the first matching task slot's record name; NULL on miss. */
 const char *fldEveHitResName_Find(u32 task) {
     s32 slotIndex;
-    for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+    for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
         if (fldRoomTaskHandles[slotIndex] == task) {
             return fldRoomResources[slotIndex]->name;
         }
@@ -751,9 +751,9 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
     fldActionRows[index].childResource.name = (const char *)D_0038BC00;
     child = dds3AddPointBasic(fldActionRows[index].childResource.id, (EvtWorldSourceTransformPrefix *)fldActionRows[index].childResource.transform, fldHitProgramName);
     roomIndex = fldRegisterRoomObject(&fldActionRows[index].childResource, child);
-    fldRoomRecords[roomIndex].roomId = roomId;
-    fldRoomRecords[roomIndex].mode = 2;
-    fldRoomRecords[roomIndex].entryIndex = -1;
+    fldEveHitTable[roomIndex].roomId = roomId;
+    fldEveHitTable[roomIndex].mode = 2;
+    fldEveHitTable[roomIndex].entryIndex = -1;
     fldActionRowCount++;
 }
 
@@ -807,20 +807,20 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
                                  fldHitProgramName);
     taskIndex = fldRegisterRoomObject(&fldActionRows[index].childResource, object);
     if (kind == 0) {
-        fldRoomRecords[taskIndex].mode = 3;
-        fldRoomRecords[taskIndex].savePointValue = roomValue;
+        fldEveHitTable[taskIndex].mode = 3;
+        fldEveHitTable[taskIndex].savePointValue = roomValue;
     } else {
-        fldRoomRecords[taskIndex].mode = 4;
+        fldEveHitTable[taskIndex].mode = 4;
     }
     fldActionRowCount++;
-    fldRoomRecords[taskIndex].entryIndex = -1;
+    fldEveHitTable[taskIndex].entryIndex = -1;
 }
 
 extern s32 D_004361C0;
 
 s32 fldCheckEntryActive(s32 entry) {
     s32 blocked = D_004361C0;
-    s32 index = fldTriggeredNpcRoom;
+    s32 index = gFldEveRngIdx_N;
 
     if (blocked != 0) {
         return 1;
@@ -828,7 +828,7 @@ s32 fldCheckEntryActive(s32 entry) {
     if (index == -1) {
         return 0;
     }
-    if (fldRoomRecords[index].mode == 1 && fldRoomRecords[index].entryIndex == entry) {
+    if (fldEveHitTable[index].mode == 1 && fldEveHitTable[index].entryIndex == entry) {
         return 1;
     }
     return 0;
@@ -837,7 +837,7 @@ s32 fldCheckEntryActive(s32 entry) {
 /* Test for any nonzero slot handle, without consulting task registration. */
 s32 fldCheckEveRngEncount(void) {
     s32 slotIndex;
-    for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+    for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
         if (fldRoomTaskHandles[slotIndex] != 0) {
             return 1;
         }
@@ -846,7 +846,7 @@ s32 fldCheckEveRngEncount(void) {
 }
 
 s32 fldGetCurrentSceneSelectionId(void) {
-    s32 index = fldCurrentEventRoom;
+    s32 index = gFldInf_HitIdx;
 
     if (index < 0) {
         return -1;
@@ -866,7 +866,7 @@ const char *fldCheckNpcTalk(const char *eventName) {
     for (packOrSetIndex = 0; packOrSetIndex < 8; packOrSetIndex++) {
         if (D_0038E2D0.packs[packOrSetIndex].setIndex != 0) {
             for (eventHitIndex = 0; eventHitIndex < 5; eventHitIndex++) {
-                if (D_0038E2D0.packs[packOrSetIndex].hits[eventHitIndex].area == fldAreaState.floor + 1 &&
+                if (D_0038E2D0.packs[packOrSetIndex].hits[eventHitIndex].area == fldGlobalBase.floor + 1 &&
                     strcmp(eventName, D_0038E2D0.packs[packOrSetIndex].hits[eventHitIndex].eventName) == 0) {
                     s32 candidateSet = D_0038E2D0.packs[packOrSetIndex].setIndex;
                     if (D_0038E2D0.sets[D_004361C8].kindArea.packed == 1) {
@@ -879,7 +879,7 @@ const char *fldCheckNpcTalk(const char *eventName) {
     }
     for (packOrSetIndex = 0; packOrSetIndex < 40; packOrSetIndex++) {
         if (D_0038E2D0.sets[packOrSetIndex].kindArea.packed == 1 &&
-            D_0038E2D0.sets[packOrSetIndex].action == fldAreaState.floor + 1 &&
+            D_0038E2D0.sets[packOrSetIndex].action == fldGlobalBase.floor + 1 &&
             strcmp(eventName, D_0038E2D0.sets[packOrSetIndex].eventName) == 0) {
             D_004361C8 = packOrSetIndex;
             return D_0038E290;
@@ -895,7 +895,7 @@ const char *fldCheckNpcTalk2(const char *eventName) {
     for (packOrSetIndex = 0; packOrSetIndex < 8; packOrSetIndex++) {
         if (D_0038E2D0.packs[packOrSetIndex].setIndex != 0) {
             for (eventHitIndex = 0; eventHitIndex < 5; eventHitIndex++) {
-                if (D_0038E2D0.packs[packOrSetIndex].hits[eventHitIndex].area == fldAreaState.floor + 1 &&
+                if (D_0038E2D0.packs[packOrSetIndex].hits[eventHitIndex].area == fldGlobalBase.floor + 1 &&
                     strcmp(eventName, D_0038E2D0.packs[packOrSetIndex].hits[eventHitIndex].eventName) == 0) {
                     s32 candidateSet = D_0038E2D0.packs[packOrSetIndex].setIndex;
                     if (D_0038E2D0.sets[D_004361C8].kindArea.packed == 0) {
@@ -908,7 +908,7 @@ const char *fldCheckNpcTalk2(const char *eventName) {
     }
     for (packOrSetIndex = 0; packOrSetIndex < 40; packOrSetIndex++) {
         if (D_0038E2D0.sets[packOrSetIndex].kindArea.packed == 0 &&
-            D_0038E2D0.sets[packOrSetIndex].action == fldAreaState.floor + 1 &&
+            D_0038E2D0.sets[packOrSetIndex].action == fldGlobalBase.floor + 1 &&
             strcmp(eventName, D_0038E2D0.sets[packOrSetIndex].eventName) == 0) {
             D_004361C8 = packOrSetIndex;
             return D_0038E290;
@@ -924,7 +924,7 @@ const char *fldInf_FindTypeEveNpc(const char *eventName) {
     for (packOrSetIndex = 0; packOrSetIndex < 8; packOrSetIndex++) {
         if (D_0038E2D0.packs[packOrSetIndex].setIndex != 0) {
             for (eventHitIndex = 0; eventHitIndex < 5; eventHitIndex++) {
-                if (D_0038E2D0.packs[packOrSetIndex].hits[eventHitIndex].area == fldAreaState.floor + 1 &&
+                if (D_0038E2D0.packs[packOrSetIndex].hits[eventHitIndex].area == fldGlobalBase.floor + 1 &&
                     strcmp(eventName, D_0038E2D0.packs[packOrSetIndex].hits[eventHitIndex].eventName) == 0) {
                     D_004361C8 = D_0038E2D0.packs[packOrSetIndex].setIndex;
                     return D_0038E290;
@@ -934,7 +934,7 @@ const char *fldInf_FindTypeEveNpc(const char *eventName) {
     }
     for (packOrSetIndex = 0; packOrSetIndex < 40; packOrSetIndex++) {
         if ((u16)D_0038E2D0.sets[packOrSetIndex].kindArea.packed < 2 &&
-            D_0038E2D0.sets[packOrSetIndex].action == fldAreaState.floor + 1 &&
+            D_0038E2D0.sets[packOrSetIndex].action == fldGlobalBase.floor + 1 &&
             strcmp(eventName, D_0038E2D0.sets[packOrSetIndex].eventName) == 0) {
             D_004361C8 = packOrSetIndex;
             return D_0038E290;
@@ -971,7 +971,7 @@ s32 fldResolveEventSelectorTarget(s32 selector) {
     case 0:
         return 0;
     case 100:
-        fldInf_FindTypeEveNpc(fldRoomResources[fldCurrentEventRoom]->name);
+        fldInf_FindTypeEveNpc(fldRoomResources[gFldInf_HitIdx]->name);
         switch ((s8)D_0038E2D0.sets[D_004361C8].eventHit) {
         case 0: return 199;
         case 4: return 104;
@@ -979,7 +979,7 @@ s32 fldResolveEventSelectorTarget(s32 selector) {
         case 6: return 106;
         case 7: return 107;
         }
-        fldFindActorEntryByName(fldRoomResources[fldCurrentEventRoom]->name);
+        fldFindActorEntryByName(fldRoomResources[gFldInf_HitIdx]->name);
         switch (D_004361F8) {
         case 0:
         case 1:
@@ -1122,10 +1122,10 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
                 scrDestroyAllNamedProcesses();
                 command = D_0038E2D0.extraActions[(s8)D_0038E2D0.sets[D_004361C8].messages[row].extraAction].parameter0;
                 flag = D_0038E2D0.extraActions[(s8)D_0038E2D0.sets[D_004361C8].messages[row].extraAction].parameter1;
-                fldSetDeferredFieldCommand(fldAreaState.area, command);
+                fldSetDeferredFieldCommand(fldGlobalBase.area, command);
                 evtSubmitEventRequestImmediate(command);
                 if (flag == 1) {
-                    fldAreaState.titleFade = flag;
+                    fldGlobalBase.titleFade = flag;
                 }
                 return command + 200;
             }
@@ -1194,10 +1194,10 @@ void fldInfLoadFromMem(FldInfTable *src) {
 }
 
 void fldInfToWAP(void) {
-    s32 slot = fldCurrentEventRoom;
+    s32 slot = gFldInf_HitIdx;
     char *actor;
 
-    fldEventActorTaskStarted = 1;
+    gFldInf_WpExit = 1;
     actor = (char *)fldFindActorEntryByName(fldRoomResources[slot]->name);
     if (scrSearchScriptName(actor) == NULL) {
         fldRoomTaskHandles[slot] = evtStartSceneResourceTask(dds3GetActiveScene(), actor);
@@ -1218,14 +1218,14 @@ u8 *fldPickActorTemplateByName(const char *name) {
         return 0;
     }
     do {
-        entry = &fldActorEntries[i];
+        entry = &fldDoorTable[i];
         flag = entry->requiredFlag;
         if ((flag == 0 || evtBitCheck(flag) != 0)
-            && entry->floor == fldAreaState.floor + 1
+            && entry->floor == fldGlobalBase.floor + 1
             && strcmp(name, entry->name) == 0) {
             switch (entry->kind) {
             case 1:
-                if (fldAreaState.transitionMode != 0 && (entry->flags31 & 4)) {
+                if (fldGlobalBase.transitionMode != 0 && (entry->flags31 & 4)) {
                     fldPickedActorTemplateKind = 0xB;
                     return D_00391F84;
                 }
@@ -1281,15 +1281,15 @@ u8 *fldFindActorEntryByName(const char *name) {
         return 0;
     }
     do {
-        entry = &fldActorEntries[i];
+        entry = &fldDoorTable[i];
         flag = entry->requiredFlag;
         if ((flag == 0 || evtBitCheck(flag) != 0)
-            && entry->floor == fldAreaState.floor + 1
+            && entry->floor == fldGlobalBase.floor + 1
             && strcmp(name, entry->name) == 0) {
             fldSelectedActorEntryIndex = i;
             switch (entry->kind) {
             case 1:
-                if (fldAreaState.transitionMode != 0 && (entry->flags31 & 4)) {
+                if (fldGlobalBase.transitionMode != 0 && (entry->flags31 & 4)) {
                     fldPickedActorTemplateKind = 0xB;
                     return D_00391F84;
                 }
@@ -1335,7 +1335,7 @@ u8 *fldFindActorEntryByName(const char *name) {
 /* Use the selected actor slot only when it belongs to this area and kind 10. */
 u8 *fldSelectCurrentActorOnNextFloor(void) {
     s32 index = D_00435F28;
-    FldActorEntry *entry = &fldActorEntries[index];
+    FldActorEntry *entry = &fldDoorTable[index];
     if (entry->floor == D_00389784[0] + 1 && entry->kind == 10) {
         fldSelectedActorEntryIndex = index;
         D_004361F8 = 8;
@@ -1345,13 +1345,13 @@ u8 *fldSelectCurrentActorOnNextFloor(void) {
 }
 
 s32 fldGetSelectedActorMotionId(void) {
-    return fldActorEntries[fldSelectedActorEntryIndex].motion;
+    return fldDoorTable[fldSelectedActorEntryIndex].motion;
 }
 
 /* Inspect two independent properties of the selected actor, depending on mode:
  * mode 0 derives a size from the first two states; mode 1 tests a flag. */
 s32 fldQuerySelectedActorMotionState(s32 mode) {
-    FldActorEntry *entry = &fldActorEntries[fldSelectedActorEntryIndex];
+    FldActorEntry *entry = &fldDoorTable[fldSelectedActorEntryIndex];
     s16 a;
     u32 result;
     if (mode == 0 && entry->kind == 1) {
@@ -1385,7 +1385,7 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
         }
     }
     index = fldSelectedActorEntryIndex;
-    entry = &fldActorEntries[index];
+    entry = &fldDoorTable[index];
     kind = entry->kind;
     if (kind == 1) {
         if (entry->floor == D_00389784[0] + 1) {
@@ -1394,9 +1394,9 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
             return;
         }
     } else if (kind == 2) {
-        if (entry->floor == fldAreaState.floor + 1) {
-            fldAreaState.positionMode = 1;
-            fldAreaState.unk180 = fldActorSlots[index].firstValues[0];
+        if (entry->floor == fldGlobalBase.floor + 1) {
+            fldGlobalBase.positionMode = 1;
+            fldGlobalBase.unk180 = fldActorSlots[index].firstValues[0];
             if (entry->motion == 1) {
                 dds3FadeOut(0xC0, 0xC0, 0xC0, 0xF);
                 return;
@@ -1437,7 +1437,7 @@ void fldDoor_ExitCamera(const char *name) {
         return;
     }
     for (i = 0; i < 0x100; i++) {
-        entry = &fldActorEntries[i];
+        entry = &fldDoorTable[i];
         if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) {
             continue;
         }
@@ -1445,7 +1445,7 @@ void fldDoor_ExitCamera(const char *name) {
             continue;
         }
         entryName = entry->name;
-        if (entry->floor == fldAreaState.floor + 1) {
+        if (entry->floor == fldGlobalBase.floor + 1) {
             if (strcmp(name, entryName) == 0) {
                 if (entry->variantMode == 2) {
                     return;
@@ -1467,9 +1467,9 @@ u8 fldDoor_ChkWarp(void) {
 
 void fldApplySceneRoomSelection(FldActorEntry *actorEntry) {
     if (actorEntry->selectedRoom != 0) {
-        fldAreaState.unk88 = actorEntry->selectedRoom - 1;
+        fldGlobalBase.unk88 = actorEntry->selectedRoom - 1;
     }
-    fldAreaState.rowIdx = actorEntry->rowIndex;
+    fldGlobalBase.rowIdx = actorEntry->rowIndex;
 }
 
 #include "dat_state.h"
@@ -1512,7 +1512,7 @@ void fldApplyCurrentTaskScene(const char *name) {
             continue;
         }
         entryName = entry->name;
-        if (entry->floor != fldAreaState.floor + 1) {
+        if (entry->floor != fldGlobalBase.floor + 1) {
             continue;
         }
         match = 0;
@@ -1527,17 +1527,17 @@ void fldApplyCurrentTaskScene(const char *name) {
         }
         if (entry->kind == 3) {
             if (entry->motion != 0) {
-                fldSetFloorFlag(fldAreaState.area, fldAreaState.floor + 1,
+                fldSetFloorFlag(fldGlobalBase.area, fldGlobalBase.floor + 1,
                                 entry->motion);
             }
         } else if (entry->kind == 10) {
             if (entry->secondaryMotion != 0) {
-                fldSetFloorFlag(fldAreaState.area, fldAreaState.floor + 1,
+                fldSetFloorFlag(fldGlobalBase.area, fldGlobalBase.floor + 1,
                                 entry->secondaryMotion);
             }
         } else if (entry->kind == 11) {
             if (entry->secondaryMotion != 0) {
-                fldSetFloorFlag(fldAreaState.area, fldAreaState.floor + 1,
+                fldSetFloorFlag(fldGlobalBase.area, fldGlobalBase.floor + 1,
                                 entry->secondaryMotion);
             }
         }
@@ -1546,11 +1546,11 @@ void fldApplyCurrentTaskScene(const char *name) {
             if (entry->explorationArea != 0) {
                 area[0] = entry->explorationArea;
             } else {
-                area[0] = fldAreaState.area;
+                area[0] = fldGlobalBase.area;
             }
             floor = floorFlags >> 2;
             if (floor == 0) {
-                floor = fldAreaState.floor + 1;
+                floor = fldGlobalBase.floor + 1;
             }
             fldSetFloorFlag(area[0], floor, entry->floorFlagBit);
         }
@@ -1562,10 +1562,10 @@ void fldApplyCurrentTaskScene(const char *name) {
         }
         if (entry->variantMode == 2) {
             fldSetDeferredFieldCommand(0, 0);
-            fldSetFloorFlag(fldAreaState.area, fldAreaState.floor + 1,
+            fldSetFloorFlag(fldGlobalBase.area, fldGlobalBase.floor + 1,
                             entry->warpEntry2);
-            D_004361E4 = fldAreaState.area;
-            D_004361E8 = fldAreaState.floor + 1;
+            D_004361E4 = fldGlobalBase.area;
+            D_004361E8 = fldGlobalBase.floor + 1;
             D_004361EC = entry->variant;
             D_004361F0 = entry->warpEntry;
             dds3WorkClear();
@@ -1582,15 +1582,15 @@ void fldApplyCurrentTaskScene(const char *name) {
                 if (D_0038A3B8[vr[1]].requiredModelFlag != 0) {
                     evtBitOn(D_0038A3B8[vr[1]].requiredModelFlag);
                 }
-                datGameState->vr.previewX = vr[0];
-                datGameState->vr.previewY = vr[1];
+                DDS3_GBWK->vr.previewX = vr[0];
+                DDS3_GBWK->vr.previewY = vr[1];
                 dds3AdminiCallSequence(0x15, vr, sizeof(vr), 0);
                 return;
             case 4:
                 vr[0] = 1;
                 vr[1] = entry->warpEntry;
-                datGameState->vr.previewX = vr[0];
-                datGameState->vr.previewY = vr[1];
+                DDS3_GBWK->vr.previewX = vr[0];
+                DDS3_GBWK->vr.previewY = vr[1];
                 dds3AdminiCallSequence(0x15, vr, sizeof(vr), 0);
                 return;
             }
@@ -1600,21 +1600,21 @@ void fldApplyCurrentTaskScene(const char *name) {
             if (entry->variant == 1) {
                 dds3WorkClear();
                 fldBgmFadeOut();
-                area[0] = fldAreaState.area;
+                area[0] = fldGlobalBase.area;
                 dds3AdminiCallSequence(0x1C, &area[0], sizeof(area[0]), 0);
                 return;
             }
             if (entry->variant == 0) {
-                area[0] = fldAreaState.area;
+                area[0] = fldGlobalBase.area;
             } else {
                 area[0] = entry->variant;
             }
             if (entry->warpEntry == 0) {
-                floor = fldAreaState.floor + 1;
+                floor = fldGlobalBase.floor + 1;
             } else {
                 floor = entry->warpEntry;
             }
-            if (fldAreaState.area != area[0]) {
+            if (fldGlobalBase.area != area[0]) {
                 fldBgmFadeOut();
             }
             fldApplySceneRoomSelection(entry);
@@ -1624,14 +1624,14 @@ void fldApplyCurrentTaskScene(const char *name) {
                 D_00435F28 = i + 1;
             }
             if (entry->flags31 & 2) {
-                fldAreaState.unk100 = 1;
+                fldGlobalBase.unk100 = 1;
             } else if (entry->flags31 & 4) {
-                fldAreaState.unk100 = -1;
+                fldGlobalBase.unk100 = -1;
             } else {
-                fldAreaState.unk100 = 0;
+                fldGlobalBase.unk100 = 0;
             }
             if (entry->kind == 3 || entry->kind == 4) {
-                fldAreaState.unk188 = 15;
+                fldGlobalBase.unk188 = 15;
                 dds3FadeOut(0, 0, 0, 0);
                 if (entry->linkKind == 1 || entry->linkKind == 2) {
                     fldSetSceneParam4(&sequence, area[0], floor, entry->warpName, entry->sequenceCode,
@@ -1649,12 +1649,12 @@ void fldApplyCurrentTaskScene(const char *name) {
         if (entry->variantMode == 1) {
             row = entry->variant - 1;
             headerFloor = entry->warpEntry;
-            currentArea = fldAreaState.area;
+            currentArea = fldGlobalBase.area;
             floor = fldActorWaypointRows.headers[row].area;
             area[0] = currentArea;
             D_004361DC = row;
             D_004361E0 = headerFloor;
-            fldSetFloorFlag(area[0], fldAreaState.floor + 1,
+            fldSetFloorFlag(area[0], fldGlobalBase.floor + 1,
                             fldActorWaypointRows.headers[row].payload[headerFloor + 8]);
             entryName = D_004134C0;
             name = D_004134D0;
@@ -1664,7 +1664,7 @@ void fldApplyCurrentTaskScene(const char *name) {
         }
         if (entry->variantMode == 3) {
             command = entry->variant;
-            fldSetDeferredFieldCommand(fldAreaState.area, command);
+            fldSetDeferredFieldCommand(fldGlobalBase.area, command);
             fldBgmFadeOut();
             if (entry->warpEntry == 0 && entry->warpEntry2 != 0) {
                 fldSetDeferredFieldCommand(entry->warpEntry2, command);
@@ -1697,41 +1697,41 @@ void func_001411F8(s32 action) {
     if (action == 0x384) {
         dds3WorkClear();
         fldSetDeferredFieldCommand(0, 0);
-        D_004361E4 = fldAreaState.area;
+        D_004361E4 = fldGlobalBase.area;
         preview[0] = 2;
         preview[1] = 0;
-        D_004361E8 = fldAreaState.floor + 1;
+        D_004361E8 = fldGlobalBase.floor + 1;
         D_004361EC = 5;
         D_004361F0 = 0;
-        datGameState->vr.previewX = preview[0];
-        datGameState->vr.previewY = preview[1];
+        DDS3_GBWK->vr.previewX = preview[0];
+        DDS3_GBWK->vr.previewY = preview[1];
         dds3AdminiCallSequence(0x15, preview, 8, 0);
         return;
     }
     if (action == 0x385) {
         dds3WorkClear();
         fldSetDeferredFieldCommand(0, 0);
-        D_004361E4 = fldAreaState.area;
+        D_004361E4 = fldGlobalBase.area;
         preview[0] = 1;
         preview[1] = fldTriggeredSavePointValue;
-        D_004361E8 = fldAreaState.floor + 1;
+        D_004361E8 = fldGlobalBase.floor + 1;
         D_004361EC = 4;
         D_004361F0 = fldTriggeredSavePointValue;
-        datGameState->vr.previewX = preview[0];
-        datGameState->vr.previewY = preview[1];
+        DDS3_GBWK->vr.previewX = preview[0];
+        DDS3_GBWK->vr.previewY = preview[1];
         dds3AdminiCallSequence(0x15, preview, 8, 0);
         return;
     }
     for (index = 0; index < 256; index++) {
-        entry = &fldActorEntries[index];
+        entry = &fldDoorTable[index];
         if (entry->requiredFlag != 0 && !evtBitCheck(entry->requiredFlag)) continue;
         if (entry->kind != 9 || entry->motion != action) continue;
         floorFlags = entry->flags64;
         if (floorFlags & 1) {
-            if (entry->explorationArea == 0) area[0] = fldAreaState.area;
+            if (entry->explorationArea == 0) area[0] = fldGlobalBase.area;
             else area[0] = entry->explorationArea;
             room = entry->flags64 >> 2;
-            if (room == 0) room = fldAreaState.floor + 1;
+            if (room == 0) room = fldGlobalBase.floor + 1;
             fldSetFloorFlag(area[0], room, entry->floorFlagBit);
         }
         flags = entry->flags64;
@@ -1741,9 +1741,9 @@ void func_001411F8(s32 action) {
                 entry->explorationColumnCount, entry->explorationRowCount);
         }
         if (entry->variantMode == 2) {
-            fldSetFloorFlag(fldAreaState.area, fldAreaState.floor + 1, entry->warpEntry2);
-            D_004361E4 = fldAreaState.area;
-            D_004361E8 = fldAreaState.floor + 1;
+            fldSetFloorFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, entry->warpEntry2);
+            D_004361E4 = fldGlobalBase.area;
+            D_004361E8 = fldGlobalBase.floor + 1;
             D_004361EC = entry->variant;
             D_004361F0 = entry->warpEntry;
             dds3WorkClear();
@@ -1760,15 +1760,15 @@ void func_001411F8(s32 action) {
                 if (D_0038A3B8[preview[1]].requiredModelFlag != 0) {
                     evtBitOn(D_0038A3B8[preview[1]].requiredModelFlag);
                 }
-                datGameState->vr.previewX = preview[0];
-                datGameState->vr.previewY = preview[1];
+                DDS3_GBWK->vr.previewX = preview[0];
+                DDS3_GBWK->vr.previewY = preview[1];
                 dds3AdminiCallSequence(0x15, preview, 8, 0);
                 return;
             case 4:
                 preview[0] = 1;
                 preview[1] = entry->warpEntry;
-                datGameState->vr.previewX = preview[0];
-                datGameState->vr.previewY = preview[1];
+                DDS3_GBWK->vr.previewX = preview[0];
+                DDS3_GBWK->vr.previewY = preview[1];
                 dds3AdminiCallSequence(0x15, preview, 8, 0);
                 return;
             }
@@ -1776,26 +1776,26 @@ void func_001411F8(s32 action) {
         } else if (entry->variantMode == 0) {
             if (entry->variant == 1) {
                 fldBgmFadeOut();
-                area[0] = fldAreaState.area;
+                area[0] = fldGlobalBase.area;
                 dds3AdminiCallSequence(0x1C, &area[0], 4, 0);
                 return;
             }
-            if (entry->variant == 0) area[0] = fldAreaState.area;
+            if (entry->variant == 0) area[0] = fldGlobalBase.area;
             else area[0] = entry->variant;
-            if (entry->warpEntry == 0) room = fldAreaState.floor + 1;
+            if (entry->warpEntry == 0) room = fldGlobalBase.floor + 1;
             else room = entry->warpEntry;
-            if (fldAreaState.area != area[0]) fldBgmFadeOut();
+            if (fldGlobalBase.area != area[0]) fldBgmFadeOut();
             fldApplySceneRoomSelection(entry);
             if (entry->flags54 != 0) {
                 D_00435F24 = entry->flags54;
                 strcpy((char *)D_00387D60, entry->taskName);
                 D_00435F28 = index + 1;
             }
-            if (entry->flags31 & 2) fldAreaState.unk100 = 1;
-            else if (entry->flags31 & 4) fldAreaState.unk100 = -1;
-            else fldAreaState.unk100 = 0;
+            if (entry->flags31 & 2) fldGlobalBase.unk100 = 1;
+            else if (entry->flags31 & 4) fldGlobalBase.unk100 = -1;
+            else fldGlobalBase.unk100 = 0;
             if ((u32)((u8)entry->kind - 3) < 2U) {
-                fldAreaState.unk188 = 15;
+                fldGlobalBase.unk188 = 15;
                 if (entry->linkKind == 1) {
                     fldSetSceneParam4(&sequence, area[0], room, entry->warpName,
                         entry->sequenceCode, 1, entry->linkName);
@@ -1811,19 +1811,19 @@ void func_001411F8(s32 action) {
         } else if (entry->variantMode == 1) {
             headerIndex = entry->variant - 1;
             headerFloor = entry->warpEntry;
-            currentArea = fldAreaState.area;
+            currentArea = fldGlobalBase.area;
             room = fldActorWaypointRows.headers[headerIndex].area;
             area[0] = currentArea;
             D_004361DC = headerIndex;
             D_004361E0 = headerFloor;
-            fldSetFloorFlag(area[0], fldAreaState.floor + 1,
+            fldSetFloorFlag(area[0], fldGlobalBase.floor + 1,
                 fldActorWaypointRows.headers[headerIndex].body.data[headerFloor + 6]);
             fldSetSceneParam5(&sequence, area[0], room, D_004134C0, 0, D_004134D0);
             dds3AdminiCallSequence(5, &sequence, 0xA0, 0);
             return;
         } else if (entry->variantMode == 3) {
             warp = entry->variant;
-            fldSetDeferredFieldCommand(fldAreaState.area, warp);
+            fldSetDeferredFieldCommand(fldGlobalBase.area, warp);
             fldBgmFadeOut();
             if (entry->warpEntry == 0 && entry->warpEntry2 != 0) {
                 fldSetDeferredFieldCommand(entry->warpEntry2, warp);
@@ -1873,7 +1873,7 @@ void fldSubmitSelectedActorWaypointTransition(void) {
     index = D_004361F0;
     fldDoorLoad(D_004361E4);
     for (i = 0; i < 0x100; i++) {
-        entry = &fldActorEntries[i];
+        entry = &fldDoorTable[i];
         if (entry->requiredFlag != 0 && !evtBitCheck(entry->requiredFlag)) {
             continue;
         }
@@ -1891,10 +1891,10 @@ void fldSubmitSelectedActorWaypointTransition(void) {
         }
         floorFlags = entry->flags64;
         if (floorFlags & 1) {
-            stage = entry->explorationArea != 0 ? entry->explorationArea : fldAreaState.area;
+            stage = entry->explorationArea != 0 ? entry->explorationArea : fldGlobalBase.area;
             room = floorFlags >> 2;
             if (room == 0) {
-                room = fldAreaState.floor + 1;
+                room = fldGlobalBase.floor + 1;
             }
             fldSetFloorFlag(stage, room, entry->floorFlagBit);
         }
@@ -1905,7 +1905,7 @@ void fldSubmitSelectedActorWaypointTransition(void) {
         }
         if (entry->variant == 1) {
             fldBgmFadeOut();
-            stage = fldAreaState.area;
+            stage = fldGlobalBase.area;
             dds3AdminiCallSequence(0x1C, &stage, 4, 0);
             return;
         }
@@ -1918,7 +1918,7 @@ void fldSubmitSelectedActorWaypointTransition(void) {
         if (room == 0) {
             room = D_004361E8;
         }
-        if (fldAreaState.area != stage) {
+        if (fldGlobalBase.area != stage) {
             fldBgmFadeOut();
         }
         fldApplySceneRoomSelection(entry);
@@ -1964,7 +1964,7 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *
     }
     fldDoorLoad(field);
     for (i = 0; i < 0x100; i++) {
-        entry = &fldActorEntries[i];
+        entry = &fldDoorTable[i];
         if (entry->requiredFlag != 0 && !evtBitCheck(entry->requiredFlag)) {
             continue;
         }
@@ -1972,7 +1972,7 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *
             index != entry->secondaryMotion || entry->variantMode != 0) {
             continue;
         }
-        fldAreaState.rowIdx = entry->rowIndex;
+        fldGlobalBase.rowIdx = entry->rowIndex;
         if (entry->flags54 != 0) {
             D_00435F24 = entry->flags54;
             strcpy((char *)D_00387D60, entry->taskName);
@@ -1990,11 +1990,11 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *
             fldSetSceneParamLoad(sequence, field, kind, entry->warpName,
                                         entry->sequenceCode, entry->linkKind, entry->linkName);
             sequence->mode = 5;
-            if (fldAreaState.sequenceCode != entry->sequenceCode && entry->sequenceCode != 0) {
-                fldAreaState.sequenceCode = entry->sequenceCode;
+            if (fldGlobalBase.sequenceCode != entry->sequenceCode && entry->sequenceCode != 0) {
+                fldGlobalBase.sequenceCode = entry->sequenceCode;
             }
             if (entry->selectedRoom != 0) {
-                fldAreaState.unk88 = entry->selectedRoom - 1;
+                fldGlobalBase.unk88 = entry->selectedRoom - 1;
             }
         }
         return;
@@ -2017,7 +2017,7 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
 
     fldDoorLoad(command);
     for (i = 0; i < 0x100; i++) {
-        entry = &fldActorEntries[i];
+        entry = &fldDoorTable[i];
         if (entry->requiredFlag != 0 && !evtBitCheck(entry->requiredFlag)) {
             continue;
         }
@@ -2040,13 +2040,13 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
         floorFlags = entry->flags64;
         if (floorFlags & 1) {
             if (entry->explorationArea == 0) {
-                stagePayload.value = fldAreaState.area;
+                stagePayload.value = fldGlobalBase.area;
             } else {
                 stagePayload.value = entry->explorationArea;
             }
             room = floorFlags >> 2;
             if (room == 0) {
-                room = fldAreaState.floor + 1;
+                room = fldGlobalBase.floor + 1;
             }
             fldSetFloorFlag(stagePayload.value, room, entry->floorFlagBit);
         }
@@ -2057,7 +2057,7 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
         }
         if (entry->variant == 1) {
             fldBgmFadeOut();
-            stagePayload.value = fldAreaState.area;
+            stagePayload.value = fldGlobalBase.area;
             dds3AdminiCallSequence(0x1C, stagePayload.bytes, sizeof(stagePayload.bytes), 0);
             return 0;
         }
@@ -2067,7 +2067,7 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
             stagePayload.value = entry->variant;
         }
         room = entry->warpEntry;
-        if (fldAreaState.area != stagePayload.value) {
+        if (fldGlobalBase.area != stagePayload.value) {
             fldBgmFadeOut();
         }
         fldApplySceneRoomSelection(entry);
@@ -2098,56 +2098,56 @@ void fldDoor_WarpCash(const char *name) {
         return;
     }
     for (i = 0; i < 0x100; i++) {
-        entry = &fldActorEntries[i];
+        entry = &fldDoorTable[i];
         if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) {
             continue;
         }
         if (entry->kind == 1 && entry->variantMode == 0) {
-            if (entry->floor == fldAreaState.floor + 1 && strcmp(name, entry->name) == 0) {
-                area = entry->variant ? entry->variant : fldAreaState.area;
+            if (entry->floor == fldGlobalBase.floor + 1 && strcmp(name, entry->name) == 0) {
+                area = entry->variant ? entry->variant : fldGlobalBase.area;
                 room = entry->warpEntry;
                 if (room == 0) {
-                    room = fldAreaState.floor + 1;
+                    room = fldGlobalBase.floor + 1;
                 }
                 fldRequestAreaResource(area, room);
                 return;
             }
         } else if (entry->kind == 2 && entry->variantMode == 0) {
-            if (entry->floor == fldAreaState.floor + 1 && strcmp(name, entry->name) == 0) {
-                area = entry->variant ? entry->variant : fldAreaState.area;
+            if (entry->floor == fldGlobalBase.floor + 1 && strcmp(name, entry->name) == 0) {
+                area = entry->variant ? entry->variant : fldGlobalBase.area;
                 room = entry->warpEntry;
                 if (room == 0) {
-                    room = fldAreaState.floor + 1;
+                    room = fldGlobalBase.floor + 1;
                 }
                 fldRequestAreaResource(area, room);
                 return;
             }
         } else if (entry->kind == 3 && entry->variantMode == 0) {
-            if (entry->floor == fldAreaState.floor + 1 && strcmp(name, entry->name) == 0) {
-                area = entry->variant ? entry->variant : fldAreaState.area;
+            if (entry->floor == fldGlobalBase.floor + 1 && strcmp(name, entry->name) == 0) {
+                area = entry->variant ? entry->variant : fldGlobalBase.area;
                 room = entry->warpEntry;
                 if (room == 0) {
-                    room = fldAreaState.floor + 1;
+                    room = fldGlobalBase.floor + 1;
                 }
                 fldRequestAreaResource(area, room);
                 return;
             }
         } else if (entry->kind == 4 && entry->variantMode == 0) {
-            if (entry->floor == fldAreaState.floor + 1 && strcmp(name, entry->name) == 0) {
-                area = entry->variant ? entry->variant : fldAreaState.area;
+            if (entry->floor == fldGlobalBase.floor + 1 && strcmp(name, entry->name) == 0) {
+                area = entry->variant ? entry->variant : fldGlobalBase.area;
                 room = entry->warpEntry;
                 if (room == 0) {
-                    room = fldAreaState.floor + 1;
+                    room = fldGlobalBase.floor + 1;
                 }
                 fldRequestAreaResource(area, room);
                 return;
             }
         } else if (entry->kind == 5 && entry->variantMode == 0) {
-            if (entry->floor == fldAreaState.floor + 1 && strcmp(name, entry->name) == 0) {
-                area = entry->variant ? entry->variant : fldAreaState.area;
+            if (entry->floor == fldGlobalBase.floor + 1 && strcmp(name, entry->name) == 0) {
+                area = entry->variant ? entry->variant : fldGlobalBase.area;
                 room = entry->warpEntry;
                 if (room == 0) {
-                    room = fldAreaState.floor + 1;
+                    room = fldGlobalBase.floor + 1;
                 }
                 fldRequestAreaResource(area, room);
                 return;
@@ -2159,7 +2159,7 @@ void fldDoor_WarpCash(const char *name) {
 /* Read a selected actor state or a named world-object value; cases 1 and 2
  * deliberately fall through when no named object is found. */
 s32 fldGetActorStat0(s32 attribute) {
-    FldActorEntry *actor = &fldActorEntries[fldSelectedActorEntryIndex];
+    FldActorEntry *actor = &fldDoorTable[fldSelectedActorEntryIndex];
     EffWorldNode *objectNode;
     s32 secondaryMotion;
 
@@ -2194,7 +2194,7 @@ INCLUDE_RODATA(const s32, "game/code_0013B818", D_004134C0);
 INCLUDE_RODATA(const s32, "game/code_0013B818", D_004134D0);
 
 s32 fldGetMappedActorStateAttribute(u32 attribute) {
-    FldActorEntry *actor = &fldActorEntries[fldSelectedActorEntryIndex];
+    FldActorEntry *actor = &fldDoorTable[fldSelectedActorEntryIndex];
     EffWorldNode *objectNode;
 
     switch (attribute) {
@@ -2236,7 +2236,7 @@ s32 fldGetMappedActorStateAttribute(u32 attribute) {
 /* Look up a motion-table attribute indexed by this actor's state; named
  * object lookups fall through to the next attribute if absent. */
 s32 fldGetActorMotionEntry(u32 attribute) {
-    FldActorEntry *actor = &fldActorEntries[fldSelectedActorEntryIndex];
+    FldActorEntry *actor = &fldDoorTable[fldSelectedActorEntryIndex];
     s16 motionIndex = actor->motion;
     EffWorldNode *objectNode;
     s32 flags;
@@ -2349,23 +2349,23 @@ void fldDispatchSceneRoomSelection(s32 index) {
         sourceRoom--;
     }
     for (i = 0; i < FIELD_ACTOR_SLOT_COUNT; i++) {
-        entry = &fldActorEntries[i];
+        entry = &fldDoorTable[i];
         if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) {
             continue;
         }
         if (entry->kind == 6 && entry->motion - 1 == D_004361DC &&
             entry->secondaryMotion == sourceRoom && entry->variantMode == 0) {
             if (entry->variant == 0) {
-                area = fldAreaState.area;
+                area = fldGlobalBase.area;
             } else {
                 area = entry->variant;
             }
             if (entry->warpEntry == 0) {
-                floor = fldAreaState.floor + 1;
+                floor = fldGlobalBase.floor + 1;
             } else {
                 floor = entry->warpEntry;
             }
-            if (fldAreaState.area != area) {
+            if (fldGlobalBase.area != area) {
                 fldBgmFadeOut();
             }
             fldApplySceneRoomSelection(entry);
@@ -2374,11 +2374,11 @@ void fldDispatchSceneRoomSelection(s32 index) {
                 if (entry->explorationArea != 0) {
                     area = entry->explorationArea;
                 } else {
-                    area = fldAreaState.area;
+                    area = fldGlobalBase.area;
                 }
                 floor = floorFlags >> 2;
                 if (floor == 0) {
-                    floor = fldAreaState.floor + 1;
+                    floor = fldGlobalBase.floor + 1;
                 }
                 fldSetFloorFlag(area, floor, entry->floorFlagBit);
             }
@@ -2393,11 +2393,11 @@ void fldDispatchSceneRoomSelection(s32 index) {
                 D_00435F28 = i + 1;
             }
             if (entry->flags31 & 2U) {
-                fldAreaState.unk100 = 1;
+                fldGlobalBase.unk100 = 1;
             } else if (entry->flags31 & 4U) {
-                fldAreaState.unk100 = -1;
+                fldGlobalBase.unk100 = -1;
             } else {
-                fldAreaState.unk100 = 0;
+                fldGlobalBase.unk100 = 0;
             }
             fldSetFloorFlag(area, floor, D_003931A4[D_004361DC * 16 + sourceRoom + 8]);
             fldSetSceneParam4(&sequence, area, floor, entry->warpName, entry->sequenceCode, entry->linkKind, entry->linkName);
@@ -2406,7 +2406,7 @@ void fldDispatchSceneRoomSelection(s32 index) {
         } else if (entry->kind == 6 && entry->motion - 1 == D_004361DC &&
                    entry->secondaryMotion == sourceRoom && entry->variantMode == 3) {
             command = entry->variant;
-            fldSetDeferredFieldCommand(fldAreaState.area, command);
+            fldSetDeferredFieldCommand(fldGlobalBase.area, command);
             fldBgmFadeOut();
             if (entry->warpEntry == 0 && entry->warpEntry2 != 0) {
                 fldSetDeferredFieldCommand(entry->warpEntry2, command);
@@ -2484,11 +2484,11 @@ void fldInitializeActorMotionSlots(void) {
     rotation[3] = 1.0f;
     world = (EffWorldNode *)dds3GetControlScene();
     for (actorIndex = 0; actorIndex < FIELD_ACTOR_SLOT_COUNT; actorIndex++) {
-        actor = &fldActorEntries[actorIndex];
+        actor = &fldDoorTable[actorIndex];
         row = &fldActorSlots[actorIndex];
         if (actor->kind == 2) {
             if (actor->floor == D_00389784[0] + 1) {
-                for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+                for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
                     if (fldRoomResources[slotIndex]->name != NULL &&
                         strcmp(fldRoomResources[slotIndex]->name, actor->name) == 0) {
                         FldFileResource *resource = fldRoomResources[slotIndex];
@@ -2527,7 +2527,7 @@ void fldInitializeActorMotionSlots(void) {
                 node = dds3SceneBasicSearchNameAndType(world, 6, (const u8 *)actor->motionName);
                 if (node != NULL) {
                     row->firstKey = node->key;
-                    for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+                    for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
                         if (fldRoomResources[slotIndex]->name != NULL &&
                             strcmp(fldRoomResources[slotIndex]->name, actor->name) == 0) {
                             FldFileResource *resource = fldRoomResources[slotIndex];
@@ -2563,7 +2563,7 @@ void fldInitializeActorMotionSlots(void) {
                 node = dds3SceneBasicSearchNameAndType(world, 6, (const u8 *)actor->otherName);
                 if (node != NULL) {
                     row->secondKey = node->key;
-                    for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+                    for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
                         if (fldRoomResources[slotIndex]->name != NULL &&
                             strcmp(fldRoomResources[slotIndex]->name, actor->name) == 0) {
                             FldFileResource *resource = fldRoomResources[slotIndex];
@@ -2889,7 +2889,7 @@ void fldBeginNpcInteractionById(s32 id) {
     }
     if (D_00389780[0] == 0x1D || D_00389780[0] == 0x1E) {
         for (i = 0; i < 0x100; i++) {
-            actor = &fldActorEntries[i];
+            actor = &fldDoorTable[i];
             npc = &fldActorSlots[i];
             if (npc->kind == 1 && npc->actorId == id) {
                 fldApplyRoomObjectModeZero(0, 0, (char *)actor->motionName, 0);
@@ -2898,7 +2898,7 @@ void fldBeginNpcInteractionById(s32 id) {
         }
     } else {
         for (i = 0; i < 256; i++) {
-            actor = &fldActorEntries[i];
+            actor = &fldDoorTable[i];
             npc = &fldActorSlots[i];
             if (npc->kind == 1 && npc->actorId == id) {
                 npc->kind = 2;
@@ -3015,11 +3015,11 @@ void fldApplyCurrentAreaActorEntries(void) {
     s32 i;
 
     for (i = 0; i < 256; i++) {
-        entry = &fldActorEntries[i];
-        if (entry->kind == 1 && entry->floor == fldAreaState.floor + 1 && entry->motion != 0) {
+        entry = &fldDoorTable[i];
+        if (entry->kind == 1 && entry->floor == fldGlobalBase.floor + 1 && entry->motion != 0) {
             fldApplyRoomObjectModeOne(0, 0, (char *)entry->motionName, 0);
         }
-        if (entry->kind == 11 && entry->floor == fldAreaState.floor + 1 && entry->motion == 3) {
+        if (entry->kind == 11 && entry->floor == fldGlobalBase.floor + 1 && entry->motion == 3) {
             fldApplyRoomObjectModeOne(0, 0, (char *)entry->otherName, 0);
         }
     }
@@ -3032,17 +3032,17 @@ void fldDrawTitleBannerFrame(s32 mode) {
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     evtSubmitTexturedGradientQuad(0x97, 0x128, 0x3A, 0x24, 1, 2, 0x3A, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
-                  fldAreaState.fieldTextures[1].texture);
+                  fldGlobalBase.fieldTextures[1].texture);
     evtSubmitTexturedGradientQuad(0xD1, 0x128, 0x5E, 0x24, 0x3A, 2, 1, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
-                  fldAreaState.fieldTextures[1].texture);
+                  fldGlobalBase.fieldTextures[1].texture);
     evtSubmitTexturedGradientQuad(0x12F, 0x128, 0x3A, 0x24, 0x3B, 2, -0x3A, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
-                  fldAreaState.fieldTextures[1].texture);
+                  fldGlobalBase.fieldTextures[1].texture);
     if (mode < 0x18) {
         evtSubmitPrimaryAlphaBlendMode(1);
         evtSubmitTexturedGradientQuad(0xA0, 0x12B, 0x22, 0x24, 1, 0x21, 0x22, 0x1D, D_00399F90[mode], D_00399F90[mode],
-                      D_00399F90[mode], D_00399F90[mode], fldAreaState.fieldTextures[1].texture);
+                      D_00399F90[mode], D_00399F90[mode], fldGlobalBase.fieldTextures[1].texture);
         evtSubmitTexturedGradientQuad(0x13E, 0x12B, 0x22, 0x24, 0x23, 0x21, -0x22, 0x1D, D_00399F90[mode], D_00399F90[mode],
-                      D_00399F90[mode], D_00399F90[mode], fldAreaState.fieldTextures[1].texture);
+                      D_00399F90[mode], D_00399F90[mode], fldGlobalBase.fieldTextures[1].texture);
         evtSubmitPrimaryAlphaBlendMode(0);
     }
 }
@@ -3123,19 +3123,19 @@ INCLUDE_SDATA(const s32, "game/code_0013B818", fldLabelTaskRoom);
 
 INCLUDE_SDATA(const s32, "game/code_0013B818", fldLabelTaskSlot);
 
-INCLUDE_SDATA(const s32, "game/code_0013B818", fldTaskSlotCount);
+INCLUDE_SDATA(const s32, "game/code_0013B818", fldEveRngCount);
 
-INCLUDE_SDATA(const s32, "game/code_0013B818", fldTriggeredRoom);
+INCLUDE_SDATA(const s32, "game/code_0013B818", gFldEveRngIdx);
 
-INCLUDE_SDATA(const s32, "game/code_0013B818", fldTriggeredNpcRoom);
+INCLUDE_SDATA(const s32, "game/code_0013B818", gFldEveRngIdx_N);
 
-INCLUDE_SDATA(const s32, "game/code_0013B818", fldTriggeredItemBoxRoom);
+INCLUDE_SDATA(const s32, "game/code_0013B818", gFldEveRngIdx_T);
 
 INCLUDE_SDATA(const s32, "game/code_0013B818", fldTriggeredSavePointValue);
 
 INCLUDE_SDATA(const s32, "game/code_0013B818", D_004361B8);
 
-INCLUDE_SDATA(const s32, "game/code_0013B818", fldRoomTriggersHalted);
+INCLUDE_SDATA(const s32, "game/code_0013B818", fldEveHitState);
 
 INCLUDE_SDATA(const s32, "game/code_0013B818", D_004361C0);
 
@@ -3143,9 +3143,9 @@ INCLUDE_SDATA(const s32, "game/code_0013B818", fldActionRowCount);
 
 INCLUDE_SDATA(const s32, "game/code_0013B818", D_004361C8);
 
-INCLUDE_SDATA(const s32, "game/code_0013B818", fldCurrentEventRoom);
+INCLUDE_SDATA(const s32, "game/code_0013B818", gFldInf_HitIdx);
 
-INCLUDE_SDATA(const s32, "game/code_0013B818", fldEventActorTaskStarted);
+INCLUDE_SDATA(const s32, "game/code_0013B818", gFldInf_WpExit);
 
 INCLUDE_SDATA(const s32, "game/code_0013B818", D_004361D4);
 
@@ -3169,5 +3169,5 @@ INCLUDE_SDATA(const s32, "game/code_0013B818", D_004361F8);
 
 INCLUDE_SDATA(const s32, "game/code_0013B818", fldPickedActorTemplateKind);
 
-INCLUDE_SDATA(const s32, "game/code_0013B818", fldFieldTaskHandle);
+INCLUDE_SDATA(const s32, "game/code_0013B818", addressprocess_id);
 

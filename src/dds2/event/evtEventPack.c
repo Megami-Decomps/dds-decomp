@@ -29,9 +29,9 @@ enum {
 extern s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
                                             const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
 extern void fldFileAddrResetMode(u32 relocateOnRelease);
-extern u32 kwlnDrawControlFlags;
+extern u32 dds3DrawFlag;
 
-extern s32 evtNextCameraSlotViewerKey;
+extern s32 evtMotionSeWork;
 #include "sdf_debug_api.h"
 extern void mdlPackDecode(s32, s32, s32, s32, s32);
 extern s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource);
@@ -65,18 +65,18 @@ s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
                     case 0x2AC:
                     case 0x2AE:
                     case 0x2B0:
-                        mdlPackDecode(3, evtNextCameraSlotViewerKey, 0x101, (s32)modelPayload, entrySize);
+                        mdlPackDecode(3, evtMotionSeWork, 0x101, (s32)modelPayload, entrySize);
                         break;
                     default:
-                        mdlPackDecode(3, evtNextCameraSlotViewerKey, 0x103, (s32)modelPayload, entrySize);
+                        mdlPackDecode(3, evtMotionSeWork, 0x103, (s32)modelPayload, entrySize);
                         break;
                     }
-                    viewerObjectKey = mdlSpawnCameraSlotViewerObject(3, evtNextCameraSlotViewerKey);
-                    evtNextCameraSlotViewerKey++;
-                    if (evtNextCameraSlotViewerKey >= 0x7D0) {
-                        evtNextCameraSlotViewerKey = 0x3E8;
+                    viewerObjectKey = mdlSpawnCameraSlotViewerObject(3, evtMotionSeWork);
+                    evtMotionSeWork++;
+                    if (evtMotionSeWork >= 0x7D0) {
+                        evtMotionSeWork = 0x3E8;
                     }
-                    printf(D_00424850, evtNextCameraSlotViewerKey, entrySize);
+                    printf(D_00424850, evtMotionSeWork, entrySize);
                     return viewerObjectKey;
                 }
             }
@@ -130,7 +130,7 @@ s32 evtRegistBEField(s32 eventId, s32 resourceId) {
     if (areaRoomIds != NULL && resource0Data != NULL && resource1Data != NULL && textureOffsets != NULL) {
         evtLoadArea_FromMemory(areaRoomIds[0], areaRoomIds[1], (s32)resource0Data, (s32)resource1Data, textureOffsets, 0);
         fldFileAddrResetMode(1);
-        kwlnDrawControlFlags |= 0x02000000;
+        dds3DrawFlag |= 0x02000000;
         return 1;
     }
     return 0;
@@ -326,7 +326,7 @@ void evtWaitEventPackLoad(KwlnTask *task) {
     sdfChipFreeDirect(stateHandle);
 }
 
-INCLUDE_SDATA(const s32, "event/evtEventPack", evtNextCameraSlotViewerKey);
+INCLUDE_SDATA(const s32, "event/evtEventPack", evtMotionSeWork);
 
 INCLUDE_SDATA(const s32, "event/evtEventPack", D_004377E0);
 

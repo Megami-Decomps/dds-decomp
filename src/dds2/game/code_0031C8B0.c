@@ -11,7 +11,7 @@
 
 extern f32 D_0037F5EC[];
 
-extern f32 sdfViewEyeVector[4];
+extern f32 aViewTarget[4];
 
 extern f32 sdfViewTargetVector[4];
 
@@ -59,7 +59,7 @@ void itfProjectScreenPointToViewPlane(f32 *position, s32 screenX, s32 screenY) {
     f32 eyeTargetDepth;
 
     halfViewAngle = D_0037F5EC[0] * 0.5f;
-    eyeTargetDepth = sdfViewEyeVector[2] - sdfViewTargetVector[2];
+    eyeTargetDepth = aViewTarget[2] - sdfViewTargetVector[2];
     position[0] = eyeTargetDepth * tanf(halfViewAngle * 1.3f) *
         ((f32)(screenX - 256) * 0.00390625f);
     position[1] = eyeTargetDepth * tanf(halfViewAngle) *

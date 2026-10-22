@@ -179,9 +179,9 @@ extern void itfMiscDrawAlphaPrim(SdfListHead *list, s32 context, s32 mode);
 extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
-extern SndPad kwlnTaskPadButtonStates;
+extern SndPad dds3PadButtonState;
 
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 
 #define BTL_ENTRY_STATUS_MASK 0x7FFF
 
@@ -284,14 +284,14 @@ s32 pbDebugPrintPanel(void) {
     sdfPktInit(&packet, 0x85C0, 0x7A20, 0xFF0000, 0);
     sdfDrawTagLink(list,
                     (u32)sdfDevPrintfEx(&packet, "FOVY: %6.2f",
-                        sdfSceneProjectionParameters.camera.fov * radiansToDegrees));
+                        dds3ScreenParam.camera.fov * radiansToDegrees));
     D_00380708.append(&D_00380708, list);
     if (D_0037F543[0] < 0) {
         return -1;
     }
-    D_00452E70.degrees = sdfSceneProjectionParameters.camera.fov * radiansToDegrees;
+    D_00452E70.degrees = dds3ScreenParam.camera.fov * radiansToDegrees;
     if (pbCalcFovDegrees(&D_00452E70.degrees, 1.0f, 89.0f, 0.1f, 1.0f) != 0) {
-        sdfSceneProjectionParameters.camera.fov = D_00452E70.degrees * 0.0174532925f;
+        dds3ScreenParam.camera.fov = D_00452E70.degrees * 0.0174532925f;
     }
     return 0;
 }
@@ -300,32 +300,32 @@ s32 pbCalcFovDegrees(f32 *angleDegrees, f32 minimum, f32 maximum, f32 coarseStep
     f32 current = *angleDegrees;
     s32 changed = 0;
 
-    if (kwlnTaskPadButtonStates.coarseUp < 0) {
+    if (dds3PadButtonState.coarseUp < 0) {
         if (current < maximum) {
             current += coarseStep;
         } else {
             current = minimum;
         }
         changed = 1;
-    } else if (kwlnTaskPadButtonStates.coarseUp & 2) {
+    } else if (dds3PadButtonState.coarseUp & 2) {
         if (current < maximum) {
             current += coarseStep;
             changed = 1;
         }
-    } else if (kwlnTaskPadButtonStates.coarseDown < 0) {
+    } else if (dds3PadButtonState.coarseDown < 0) {
         if (minimum < current) {
             current -= coarseStep;
         } else {
             current = maximum;
         }
         changed = 1;
-    } else if (kwlnTaskPadButtonStates.coarseDown & 2) {
+    } else if (dds3PadButtonState.coarseDown & 2) {
         if (minimum < current) {
             current -= coarseStep;
             changed = 1;
         }
     } else if (fineStep != 0.0f) {
-        if (kwlnTaskPadButtonStates.fineUp < 0) {
+        if (dds3PadButtonState.fineUp < 0) {
             if (current < maximum) {
                 current += fineStep;
                 if (maximum < current) {
@@ -335,7 +335,7 @@ s32 pbCalcFovDegrees(f32 *angleDegrees, f32 minimum, f32 maximum, f32 coarseStep
                 current = minimum;
             }
             changed = 1;
-        } else if (kwlnTaskPadButtonStates.fineUp & 2) {
+        } else if (dds3PadButtonState.fineUp & 2) {
             if (current < maximum) {
                 current += fineStep;
                 if (maximum < current) {
@@ -343,7 +343,7 @@ s32 pbCalcFovDegrees(f32 *angleDegrees, f32 minimum, f32 maximum, f32 coarseStep
                 }
                 changed = 1;
             }
-        } else if (kwlnTaskPadButtonStates.fineDown < 0) {
+        } else if (dds3PadButtonState.fineDown < 0) {
             if (minimum < current) {
                 current -= fineStep;
                 if (current < minimum) {
@@ -353,7 +353,7 @@ s32 pbCalcFovDegrees(f32 *angleDegrees, f32 minimum, f32 maximum, f32 coarseStep
                 current = maximum;
             }
             changed = 1;
-        } else if (kwlnTaskPadButtonStates.fineDown & 2) {
+        } else if (dds3PadButtonState.fineDown & 2) {
             if (minimum < current) {
                 current -= fineStep;
                 if (current < minimum) {
@@ -374,11 +374,11 @@ extern ItfDebugPanelWork D_00452E80;
 
 extern const char *D_003B4D38[6];
 
-extern u8 kwlnDrawOverlayEnabled;
+extern u8 dds3ScreenBlurFlag;
 
-extern s16 kwlnDrawOverlayAlpha;
+extern s16 dds3ScreenBlurAlpha;
 
-extern s16 kwlnDrawOverlayScale;
+extern s16 dds3ScreenBlurScale;
 
 extern s32 D_00435CE0[2];
 
@@ -410,7 +410,7 @@ s32 pbDebugPrintPanel2(void) {
         (u32)dds3PrimFrameRect(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x82C0, 0x79C0, 0xFF0000, 0);
     sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet,
-        "BLUR:        %s", kwlnDrawOverlayEnabled ? D_00436660 : D_00436668));
+        "BLUR:        %s", dds3ScreenBlurFlag ? D_00436660 : D_00436668));
 
     y = 0x7A20;
     if (D_00452E80.editing == 0) {
@@ -433,11 +433,11 @@ s32 pbDebugPrintPanel2(void) {
         switch (row) {
         case 0:
             sdfDrawTagLink(list,
-                (u32)sdfDevPrintfEx(&packet, D_00436680, kwlnDrawOverlayAlpha));
+                (u32)sdfDevPrintfEx(&packet, D_00436680, dds3ScreenBlurAlpha));
             break;
         case 1:
             sdfDrawTagLink(list,
-                (u32)sdfDevPrintfEx(&packet, D_00436680, kwlnDrawOverlayScale));
+                (u32)sdfDevPrintfEx(&packet, D_00436680, dds3ScreenBlurScale));
             break;
         case 2:
             sdfDrawTagLink(list,
@@ -451,18 +451,18 @@ s32 pbDebugPrintPanel2(void) {
             0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
 
-    if ((s8)kwlnTaskPadButtonStates.secondaryTriangle < 0) {
-        kwlnDrawOverlayEnabled ^= 1;
+    if ((s8)dds3PadButtonState.secondaryTriangle < 0) {
+        dds3ScreenBlurFlag ^= 1;
     }
     if (D_00452E80.editing == 0) {
         previous = D_00452E80.selection;
-        if ((u8)kwlnTaskPadButtonStates.secondaryUp & 2) {
+        if ((u8)dds3PadButtonState.secondaryUp & 2) {
             D_00452E80.selection--;
             if (D_00452E80.selection < 0) {
                 D_00452E80.selection = 2;
             }
         }
-        if ((u8)kwlnTaskPadButtonStates.secondaryDown & 2) {
+        if ((u8)dds3PadButtonState.secondaryDown & 2) {
             D_00452E80.selection++;
             if (D_00452E80.selection >= 3) {
                 D_00452E80.selection = 0;
@@ -471,67 +471,67 @@ s32 pbDebugPrintPanel2(void) {
         if (previous != D_00452E80.selection) {
             D_00452E80.blink = 0;
         }
-        if (kwlnTaskPadButtonStates.secondaryCross < 0) {
+        if (dds3PadButtonState.secondaryCross < 0) {
             D_00452E80.editing ^= 1;
             D_00452E80.blink = 0;
         }
-        if ((u8)kwlnTaskPadButtonStates.secondaryCancel & 2) {
+        if ((u8)dds3PadButtonState.secondaryCancel & 2) {
             return -1;
         }
     } else {
         if (D_00452E80.selection == 2) {
-            if (kwlnTaskPadButtonStates.secondaryUp != 0) {
+            if (dds3PadButtonState.secondaryUp != 0) {
                 D_00435CE0[1] -= 16;
                 if (D_00435CE0[1] < -224) {
                     D_00435CE0[1] = -224;
                 }
             }
-            if (kwlnTaskPadButtonStates.secondaryDown != 0) {
+            if (dds3PadButtonState.secondaryDown != 0) {
                 D_00435CE0[1] += 16;
                 if (D_00435CE0[1] > 224) {
                     D_00435CE0[1] = 224;
                 }
             }
-            if (kwlnTaskPadButtonStates.coarseDown != 0) {
+            if (dds3PadButtonState.coarseDown != 0) {
                 D_00435CE0[0] -= 16;
                 if (D_00435CE0[0] < -256) {
                     D_00435CE0[0] = -256;
                 }
             }
-            if (kwlnTaskPadButtonStates.coarseUp != 0) {
+            if (dds3PadButtonState.coarseUp != 0) {
                 D_00435CE0[0] += 16;
                 if (D_00435CE0[0] > 256) {
                     D_00435CE0[0] = 256;
                 }
             }
         } else if (D_00452E80.selection == 0) {
-            if ((u8)kwlnTaskPadButtonStates.coarseDown & 2) {
-                kwlnDrawOverlayAlpha -= 10;
-                if (kwlnDrawOverlayAlpha < 0) {
-                    kwlnDrawOverlayAlpha = 0;
+            if ((u8)dds3PadButtonState.coarseDown & 2) {
+                dds3ScreenBlurAlpha -= 10;
+                if (dds3ScreenBlurAlpha < 0) {
+                    dds3ScreenBlurAlpha = 0;
                 }
             }
-            if ((u8)kwlnTaskPadButtonStates.coarseUp & 2) {
-                kwlnDrawOverlayAlpha += 10;
-                if (kwlnDrawOverlayAlpha > 255) {
-                    kwlnDrawOverlayAlpha = 255;
+            if ((u8)dds3PadButtonState.coarseUp & 2) {
+                dds3ScreenBlurAlpha += 10;
+                if (dds3ScreenBlurAlpha > 255) {
+                    dds3ScreenBlurAlpha = 255;
                 }
             }
         } else {
-            if ((u8)kwlnTaskPadButtonStates.coarseDown & 2) {
-                kwlnDrawOverlayScale -= 10;
-                if (kwlnDrawOverlayScale < -255) {
-                    kwlnDrawOverlayScale = -255;
+            if ((u8)dds3PadButtonState.coarseDown & 2) {
+                dds3ScreenBlurScale -= 10;
+                if (dds3ScreenBlurScale < -255) {
+                    dds3ScreenBlurScale = -255;
                 }
             }
-            if ((u8)kwlnTaskPadButtonStates.coarseUp & 2) {
-                kwlnDrawOverlayScale += 10;
-                if (kwlnDrawOverlayScale > 255) {
-                    kwlnDrawOverlayScale = 255;
+            if ((u8)dds3PadButtonState.coarseUp & 2) {
+                dds3ScreenBlurScale += 10;
+                if (dds3ScreenBlurScale > 255) {
+                    dds3ScreenBlurScale = 255;
                 }
             }
         }
-        if (kwlnTaskPadButtonStates.secondaryCancel < 0) {
+        if (dds3PadButtonState.secondaryCancel < 0) {
             D_00452E80.editing ^= 1;
             D_00452E80.blink = 0;
         }
@@ -539,11 +539,11 @@ s32 pbDebugPrintPanel2(void) {
     return 0;
 }
 
-extern ItfDebugPanelWork itfOverlayColorEditorWork;
+extern ItfDebugPanelWork pbDebugPanel3X;
 
 extern ItfColorPanelRow itfOverlayColorEditorRows[6];
 
-extern s32 itfTestOverlayPhase;
+extern s32 pbDebugPanel3State;
 
 extern UiQuadColor itfTestOverlayColor;
 
@@ -579,10 +579,10 @@ s32 pbDebugPrintPanel3(void) {
         (u32)dds3PrimFrameRect(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x8980, 0x79C0, 0xFF0000, 0);
     sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_004366B8));
-    if (itfOverlayColorEditorWork.editing == 0) {
-        sdfPktInit(&packet, 0x8980, itfOverlayColorEditorWork.selection * 0x60 + 0x7A20, 0xFF0000, 0);
-        itfOverlayColorEditorWork.blink++;
-        if (itfOverlayColorEditorWork.blink < 32 || (itfOverlayColorEditorWork.blink & 31) < 18) {
+    if (pbDebugPanel3X.editing == 0) {
+        sdfPktInit(&packet, 0x8980, pbDebugPanel3X.selection * 0x60 + 0x7A20, 0xFF0000, 0);
+        pbDebugPanel3X.blink++;
+        if (pbDebugPanel3X.blink < 32 || (pbDebugPanel3X.blink & 31) < 18) {
             sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_004366C0));
         }
     }
@@ -591,7 +591,7 @@ s32 pbDebugPrintPanel3(void) {
         sdfDrawTagLink(list,
             (u32)sdfDevPrintfEx(&packet, D_004366C8, itfOverlayColorEditorRows[row].title));
         highlight = 0;
-        if (itfOverlayColorEditorWork.editing != 0 && row == itfOverlayColorEditorWork.selection) {
+        if (pbDebugPanel3X.editing != 0 && row == pbDebugPanel3X.selection) {
             highlight = 6;
         }
         sdfPktInit(&packet, 0x8C80, y, 0xFF0000, highlight);
@@ -605,70 +605,70 @@ s32 pbDebugPrintPanel3(void) {
         y += 0x60;
     }
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
-    itfTestOverlayPhase += itfTestOverlayPhaseStep;
+    pbDebugPanel3State += itfTestOverlayPhaseStep;
     pbDrawRotatedPrim(0x52);
-    if ((s8)kwlnTaskPadButtonStates.secondaryTriangle < 0) {
+    if ((s8)dds3PadButtonState.secondaryTriangle < 0) {
         D_004366B4 ^= 1;
     }
-    if (itfOverlayColorEditorWork.editing == 0) {
-        previousSelection = itfOverlayColorEditorWork.selection;
-        if ((u8)kwlnTaskPadButtonStates.secondaryUp & 2) {
-            itfOverlayColorEditorWork.selection--;
-            if (itfOverlayColorEditorWork.selection < 0) {
-                itfOverlayColorEditorWork.selection = 3;
+    if (pbDebugPanel3X.editing == 0) {
+        previousSelection = pbDebugPanel3X.selection;
+        if ((u8)dds3PadButtonState.secondaryUp & 2) {
+            pbDebugPanel3X.selection--;
+            if (pbDebugPanel3X.selection < 0) {
+                pbDebugPanel3X.selection = 3;
             }
         }
-        if ((u8)kwlnTaskPadButtonStates.secondaryDown & 2) {
-            itfOverlayColorEditorWork.selection++;
-            if (itfOverlayColorEditorWork.selection >= 4) {
-                itfOverlayColorEditorWork.selection = 0;
+        if ((u8)dds3PadButtonState.secondaryDown & 2) {
+            pbDebugPanel3X.selection++;
+            if (pbDebugPanel3X.selection >= 4) {
+                pbDebugPanel3X.selection = 0;
             }
         }
-        if (previousSelection != itfOverlayColorEditorWork.selection) {
-            itfOverlayColorEditorWork.blink = 0;
+        if (previousSelection != pbDebugPanel3X.selection) {
+            pbDebugPanel3X.blink = 0;
         }
-        if (kwlnTaskPadButtonStates.secondaryCross < 0) {
-            itfOverlayColorEditorWork.editing ^= 1;
-            itfOverlayColorEditorWork.blink = 0;
+        if (dds3PadButtonState.secondaryCross < 0) {
+            pbDebugPanel3X.editing ^= 1;
+            pbDebugPanel3X.blink = 0;
         }
-        if ((u8)kwlnTaskPadButtonStates.secondaryCancel & 2) {
+        if ((u8)dds3PadButtonState.secondaryCancel & 2) {
             return -1;
         }
     } else {
-        if (itfOverlayColorEditorWork.selection < 4) {
-            if ((u8)kwlnTaskPadButtonStates.coarseDown & 2) {
-                itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] -= 10;
-                if (itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] < 0) {
-                    itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] = 0;
+        if (pbDebugPanel3X.selection < 4) {
+            if ((u8)dds3PadButtonState.coarseDown & 2) {
+                itfTestOverlayColor.channels[pbDebugPanel3X.selection] -= 10;
+                if (itfTestOverlayColor.channels[pbDebugPanel3X.selection] < 0) {
+                    itfTestOverlayColor.channels[pbDebugPanel3X.selection] = 0;
                 }
             }
-            if ((u8)kwlnTaskPadButtonStates.coarseUp & 2) {
-                itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] += 10;
-                if (itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] > 255) {
-                    itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] = 255;
+            if ((u8)dds3PadButtonState.coarseUp & 2) {
+                itfTestOverlayColor.channels[pbDebugPanel3X.selection] += 10;
+                if (itfTestOverlayColor.channels[pbDebugPanel3X.selection] > 255) {
+                    itfTestOverlayColor.channels[pbDebugPanel3X.selection] = 255;
                 }
             }
         } else {
             previousRate = itfTestOverlayPhaseStep;
-            if ((u8)kwlnTaskPadButtonStates.coarseDown & 2) {
+            if ((u8)dds3PadButtonState.coarseDown & 2) {
                 itfTestOverlayPhaseStep -= 0x100;
                 if (itfTestOverlayPhaseStep < 0) {
                     itfTestOverlayPhaseStep = 0;
                 }
             }
-            if ((u8)kwlnTaskPadButtonStates.coarseUp & 2) {
+            if ((u8)dds3PadButtonState.coarseUp & 2) {
                 itfTestOverlayPhaseStep += 0x100;
                 if (itfTestOverlayPhaseStep > 0x800) {
                     itfTestOverlayPhaseStep = 0x800;
                 }
             }
             if (previousRate != itfTestOverlayPhaseStep) {
-                itfTestOverlayPhase = 0;
+                pbDebugPanel3State = 0;
             }
         }
-        if (kwlnTaskPadButtonStates.secondaryCancel < 0) {
-            itfOverlayColorEditorWork.editing ^= 1;
-            itfOverlayColorEditorWork.blink = 0;
+        if (dds3PadButtonState.secondaryCancel < 0) {
+            pbDebugPanel3X.editing ^= 1;
+            pbDebugPanel3X.blink = 0;
         }
     }
     return 0;
@@ -722,7 +722,7 @@ void pbDrawRotatedPrim(s32 surfaceIndex) {
     SdfPoolNode *surface;
     f32 phase;
 
-    phase = (f32)(itfTestOverlayPhase % 4096) * (1.0f / 4096.0f);
+    phase = (f32)(pbDebugPanel3State % 4096) * (1.0f / 4096.0f);
     phase = phase * 6.2831852f + 1.5707963f + 0.78539815f;
     alpha = (s32)((sdfSin(phase) + 1.0f) * 0.5f * itfTestOverlayColor.alpha);
     component = (u8 *)&itfTestOverlayColor;
@@ -734,7 +734,7 @@ void pbDrawRotatedPrim(s32 surfaceIndex) {
     sdfDrawTagLink(list, (u32)pbMakeSpritePacket(0x33001, 0));
     sdfDrawTagLink(list, (u32)pbMakePrimPacket(6, 0));
     sdfDrawTagLink(list, (u32)pbAllocPrimPacket(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
-    surface = &kwlnDrawSurfaces[surfaceIndex];
+    surface = &sdfGrOtTable[surfaceIndex];
     surface->append(surface, list);
 }
 
@@ -910,7 +910,7 @@ extern ItfMesSub D_003858D8;
 
 extern ItfMesSub D_00385228;
 
-extern u16 mnuMovieTaskState;
+extern u16 dds3VblanksPerFrame;
 
 extern u32 dds3GetKernelCount(void);
 
@@ -960,7 +960,7 @@ void btlInitializeBattleRuntime(void) {
     ((BattleInitState *)btlRuntime)->listHeads[3] = 0;
     ((BattleInitState *)btlRuntime)->listHeads[4] = 0;
     ((BattleInitState *)btlRuntime)->listHeads[5] = 0;
-    mnuMovieTaskState = 2;
+    dds3VblanksPerFrame = 2;
     ((BattleInitState *)btlRuntime)->timingRate = 0x1E;
     {
         BattleInitState *state = (BattleInitState *)btlRuntime;
@@ -1089,7 +1089,7 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     state = (BattleInitState *)btlRuntime;
     if (state->commandRestrictFlags & 0x8000) {
         state->commandRestrictFlags &= ~0x8000;
-        sdfSceneProjectionParameters.camera.farZ = 65536.0f;
+        dds3ScreenParam.camera.farZ = 65536.0f;
         btlBossDebugPrintf(D_00414F98);
     }
 
@@ -1240,7 +1240,7 @@ s32 btlHasPendingRuntimeActivity(void) {
 
 void btlResetActorEntryState(void) {
     s32 context = (s32)btlRuntime;
-    DatPartyRecord *party = datGameState->party;
+    DatPartyRecord *party = DDS3_GBWK->party;
     u32 i;
     *(s32 *)(context + 0x2E8) = 0;
     *(s32 *)(context + 0x2EC) = 0;
@@ -1270,8 +1270,8 @@ s32 btlCaptureRewardSummary(BrsRewardSummary *rewards) {
     btlBossDebugPrintf("btl:ep    =%d\n", rewards->totalAp);
     btlBossDebugPrintf("btl:mitama=%d\n", rewards->mitama);
     for (i = 0; i < 5; i++) {
-        rewards->unitApBonus[i] = datGameState->party[i].huntExp;
-        btlBossDebugPrintf(D_004150B0, rewards->unitApBonus[i], datGameState->party[i].unitId);
+        rewards->unitApBonus[i] = DDS3_GBWK->party[i].huntExp;
+        btlBossDebugPrintf(D_004150B0, rewards->unitApBonus[i], DDS3_GBWK->party[i].unitId);
     }
     btlBossDebugPrintf("btl:----------------------\n");
     for (i = 0; i < 3; i++) {
@@ -1453,11 +1453,11 @@ DatPartyRecord *btlGetCurrentPartyEntryRecord(s32 rosterIndex) {
     s32 index;
 
     index = dds3FindEntryIndex(rosterIndex);
-    return &datGameState->party[index];
+    return &DDS3_GBWK->party[index];
 }
 
 DatPartyRecord *btlGetIndexedPartyEntryRecord(s32 index) {
-    return &datGameState->party[index];
+    return &DDS3_GBWK->party[index];
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_004150B0);
@@ -1523,9 +1523,9 @@ void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
     s32 insertion = 0;
     s32 i;
 
-    if (datGameState->party[0].flags & 2) {
+    if (DDS3_GBWK->party[0].flags & 2) {
         do {
-            if ((u16)(datGameState->party[insertion].flags & 1) == 0) {
+            if ((u16)(DDS3_GBWK->party[insertion].flags & 1) == 0) {
                 break;
             }
             if (priority < btlFindActiveActorByKind(insertion)->lookupId) {
@@ -1535,28 +1535,28 @@ void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
             if (insertion >= 5) {
                 break;
             }
-        } while (datGameState->party[insertion].flags & 2);
+        } while (DDS3_GBWK->party[insertion].flags & 2);
     }
 
-    memcpy(&saved, &datGameState->party[sourceIndex], sizeof(saved));
+    memcpy(&saved, &DDS3_GBWK->party[sourceIndex], sizeof(saved));
     for (i = sourceIndex; i < 4; i++) {
-        memcpy(&datGameState->party[i], &datGameState->party[i + 1], sizeof(saved));
-        if (datGameState->party[i + 1].flags & 2) {
+        memcpy(&DDS3_GBWK->party[i], &DDS3_GBWK->party[i + 1], sizeof(saved));
+        if (DDS3_GBWK->party[i + 1].flags & 2) {
             btlFindActiveActorByKind(i + 1)->partyIndex = i;
         }
     }
 
     for (i = 4; i > insertion; i--) {
-        memcpy(&datGameState->party[i], &datGameState->party[i - 1], sizeof(saved));
-        if (datGameState->party[i - 1].flags & 2) {
+        memcpy(&DDS3_GBWK->party[i], &DDS3_GBWK->party[i - 1], sizeof(saved));
+        if (DDS3_GBWK->party[i - 1].flags & 2) {
             btlFindActiveActorByKind(i - 1)->partyIndex = i;
         }
     }
 
-    memcpy(&datGameState->party[i], &saved, sizeof(saved));
+    memcpy(&DDS3_GBWK->party[i], &saved, sizeof(saved));
     btlCopyUnitStats(unit, &saved);
     unit->partyRecord.flags |= 2;
-    datGameState->party[i].flags |= 2;
+    DDS3_GBWK->party[i].flags |= 2;
     unit->partyIndex = i;
     btlOnPartyRosterChange();
     btlBossDebugPrintf("btl:party in %d->%d[%d]\n", sourceIndex, i, saved.unitId);
@@ -1564,30 +1564,30 @@ void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
 
 void btlMoveActorOutOfActiveParty(BtlUnit *unit) {
     DatPartyRecord saved;
-    DatGameState *scanState = datGameState;
+    DatGameState *scanState = DDS3_GBWK;
     s32 originalIndex;
     s32 index;
 
     originalIndex = unit->partyIndex;
-    memcpy(&saved, &datGameState->party[originalIndex], sizeof(saved));
+    memcpy(&saved, &DDS3_GBWK->party[originalIndex], sizeof(saved));
     index = originalIndex;
     if (index < 4 && (u16)(scanState->party[index + 1].flags & 1)) {
         do {
-            memcpy(&datGameState->party[index], &datGameState->party[index + 1], sizeof(saved));
-            if (datGameState->party[index + 1].flags & 2) {
+            memcpy(&DDS3_GBWK->party[index], &DDS3_GBWK->party[index + 1], sizeof(saved));
+            if (DDS3_GBWK->party[index + 1].flags & 2) {
                 btlFindActiveActorByKind(index + 1)->partyIndex = index;
             }
             index++;
             if (index >= 4) {
                 break;
             }
-            scanState = datGameState;
+            scanState = DDS3_GBWK;
         } while ((u16)(scanState->party[index + 1].flags & 1));
     }
 
-    memcpy(&datGameState->party[index], &saved, sizeof(saved));
+    memcpy(&DDS3_GBWK->party[index], &saved, sizeof(saved));
     unit->partyRecord.flags &= ~2;
-    datGameState->party[index].flags &= ~2;
+    DDS3_GBWK->party[index].flags &= ~2;
     unit->partyIndex = 6;
     btlOnPartyRosterChange();
     btlBossDebugPrintf("btl:party out %d->%d[%d]\n", originalIndex, index, saved.unitId);
@@ -1600,14 +1600,14 @@ void btlSynchronizePartyActorRecords(BtlUnit *actor, u8 targetIndex) {
     DatPartyRecord previous;
 
     if (actor->partyIndex != targetIndex) {
-        memcpy(&previous, &datGameState->party[actor->partyIndex], sizeof(previous));
-        memcpy(&datGameState->party[actor->partyIndex], &datGameState->party[targetIndex], sizeof(previous));
-        memcpy(&datGameState->party[targetIndex], &previous, sizeof(previous));
+        memcpy(&previous, &DDS3_GBWK->party[actor->partyIndex], sizeof(previous));
+        memcpy(&DDS3_GBWK->party[actor->partyIndex], &DDS3_GBWK->party[targetIndex], sizeof(previous));
+        memcpy(&DDS3_GBWK->party[targetIndex], &previous, sizeof(previous));
 
-        btlCopyUnitStats(actor, &datGameState->party[actor->partyIndex]);
+        btlCopyUnitStats(actor, &DDS3_GBWK->party[actor->partyIndex]);
         actor->partyRecord.flags |= 2;
-        datGameState->party[actor->partyIndex].flags |= 2;
-        datGameState->party[targetIndex].flags &= ~2;
+        DDS3_GBWK->party[actor->partyIndex].flags |= 2;
+        DDS3_GBWK->party[targetIndex].flags &= ~2;
         btlOnPartyRosterChange();
         btlBossDebugPrintf(D_00415130,
                            actor->partyIndex, targetIndex, previous.unitId,
@@ -2813,7 +2813,7 @@ s32 btlCountAvailableParticipants(void) {
             }
         }
     }
-    entry = datGameState->party;
+    entry = DDS3_GBWK->party;
     for (i = 4; i >= 0; i--) {
         if (entry->flags & 1) {
             if (!(entry->flags & 2)) {

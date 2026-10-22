@@ -68,11 +68,11 @@ extern void sdfDrawSync(void);
 extern void p2sdSendStopCmd(u32 controlWord);
 
 extern void p2sdStopAllBgm(void);
-extern u8 kwlnTaskPadButtonStates[2][2][16];
+extern u8 dds3PadButtonState[2][2][16];
 extern u8 D_003BA878[2][2];
-extern f32 sdfViewEyeVector[4];
+extern f32 aViewTarget[4];
 extern f32 sdfViewTargetVector[4];
-extern f32 sdfViewUpVector[4];
+extern f32 aViewDown[4];
 extern void fldAutoMapGetBBox(f32 *, f32 *, f32 *, f32 *);
 
 
@@ -121,19 +121,19 @@ extern s32 D_003BAFAC;
 extern u32 D_003BAFB0;
 
 
-extern u32 fldSceneReady;
+extern u32 AutoMapSeq;
 
 extern u32 fldFixedArchiveLoadPhase;
 
 extern u32 fldArchiveLoadPending;
 
-extern u32 fldCurrentBgmHandle;
+extern u32 fldSeLastBgm;
 
-extern u32 fldFieldTaskHandle;
+extern u32 addressprocess_id;
 
-extern s32 fldPendingSoundCount;
+extern s32 gFldSe3DNum;
 
-extern s32 fldAreaFlagIndex;
+extern s32 fldAutoMapField;
 
 extern s32 D_003BAEB4;
 
@@ -263,7 +263,7 @@ typedef struct {
     f32 w;
 } FldClear18; /* 0x18 bytes */
 
-extern FldClear18 fldPendingSounds[];
+extern FldClear18 fldSe3DTable[];
 
 
 extern void rsetOtOfs(u32);
@@ -276,9 +276,9 @@ extern void DrwSprite2D(s32, s32, s32, s32, s32, s32, s32, s32, s32, SdfTex *);
 
 #include "fld_title_banner_menu.h"
 
-extern KwlnTask *fldInputPanelTaskHandle;
-extern u32 fldDisplayStateWords[];
-extern s32 fldEventActorTaskStarted;
+extern KwlnTask *inputpanel_id;
+extern u32 fldRunDanteGunFlag[];
+extern s32 gFldInf_WpExit;
 extern u8 fldProcCampChk(void);
 extern u8 fldProcAmChk(void);
 extern s32 fileMenuTaskExists(void);
@@ -298,7 +298,7 @@ s32 fldResolvePendingTitleBanner(void) {
     if (fldProcAmChk() != 0) {
         return 0;
     }
-    if (fldDisplayStateWords[0] != 0) {
+    if (fldRunDanteGunFlag[0] != 0) {
         return 0;
     }
     if (fileMenuTaskExists() != 0) {
@@ -317,17 +317,17 @@ s32 fldResolvePendingTitleBanner(void) {
         return 0;
     }
 
-    menu = (FldTitleBannerMenu *)dds3GetProcessData(fldInputPanelTaskHandle);
+    menu = (FldTitleBannerMenu *)dds3GetProcessData(inputpanel_id);
     if (menu->pending == 0) {
         return -1;
     }
 
-    if (fldAreaState.titleFade != 0 || fldEventActorTaskStarted == 1 || (s8)kwlnTaskPadButtonStates[1][0][1] < 0) {
-        if ((s8)kwlnTaskPadButtonStates[1][0][1] < 0) {
+    if (fldGlobalBase.titleFade != 0 || gFldInf_WpExit == 1 || (s8)dds3PadButtonState[1][0][1] < 0) {
+        if ((s8)dds3PadButtonState[1][0][1] < 0) {
             fldApplyCameraFacingPoint();
         }
         menu->pending = 0;
-        area = &fldAreaState;
+        area = &fldGlobalBase;
         if (area->titleFade != 0) {
             dds3FadeIn2(8);
             area->titleFade = 0;
@@ -343,7 +343,7 @@ extern void fldDrawAnimatedFieldBanner(s32, s32, s32);
 
 extern void func_00147188(s32);
 
-extern s32 fldCameraMoveTrackingCurrent;
+extern s32 gFldElvFloorNow;
 
 s32 fldFieldTaskUpdate(void) {
     if (fldProcCampChk() != 0) {
@@ -358,7 +358,7 @@ s32 fldFieldTaskUpdate(void) {
     if (fldTitleIsActive() != 0) {
         return 0;
     }
-    if (fldCameraMoveTrackingCurrent != -999) {
+    if (gFldElvFloorNow != -999) {
         fldDrawAnimatedFieldBanner(0x80, 0, 0);
     } else {
         func_00147188(0);
@@ -383,23 +383,23 @@ void fldAddressShutdown(KwlnTask *task) {
 
     work = (void *)dds3GetProcessData(task);
     sdfChipFreeDirect(work);
-    fldFieldTaskHandle = 0;
+    addressprocess_id = 0;
 }
 
 void fldInitAddressProcess(void) {
-    if (fldFieldTaskHandle == 0) {
-        fldFieldTaskHandle = dds3StartProcess(D_003BAE78, 0x2B0B, 1, 1, fldAddressProcess1, fldAddressShutdown, 0);
+    if (addressprocess_id == 0) {
+        addressprocess_id = dds3StartProcess(D_003BAE78, 0x2B0B, 1, 1, fldAddressProcess1, fldAddressShutdown, 0);
     }
 }
 
 void fldFreeAddressProcess(void) {
-    if (fldFieldTaskHandle != 0) {
-        dds3KillProcess((KwlnTask *)fldFieldTaskHandle, 1);
+    if (addressprocess_id != 0) {
+        dds3KillProcess((KwlnTask *)addressprocess_id, 1);
     }
 }
 
 void fldSe_Init(void) {
-    FldClear18 *entry = fldPendingSounds;
+    FldClear18 *entry = fldSe3DTable;
     s32 remaining = 7;
 
     do {
@@ -409,19 +409,19 @@ void fldSe_Init(void) {
         entry->soundId = 0;
         entry += 1;
     } while (remaining >= 0);
-    fldPendingSoundCount = 0;
+    gFldSe3DNum = 0;
 }
 
 void fldAddSe3D(s32 soundId, f32 radius, f32 sourceX, f32 sourceY, f32 sourceZ) {
-    s32 i = fldPendingSoundCount;
+    s32 i = gFldSe3DNum;
 
-    fldPendingSounds[i].flags = 0;
-    fldPendingSounds[i].soundId = soundId;
-    fldPendingSounds[i].x = radius;
-    fldPendingSounds[i].y = sourceX;
-    fldPendingSounds[i].z = sourceY;
-    fldPendingSounds[i].w = sourceZ;
-    fldPendingSoundCount = i + 1;
+    fldSe3DTable[i].flags = 0;
+    fldSe3DTable[i].soundId = soundId;
+    fldSe3DTable[i].x = radius;
+    fldSe3DTable[i].y = sourceX;
+    fldSe3DTable[i].z = sourceY;
+    fldSe3DTable[i].w = sourceZ;
+    gFldSe3DNum = i + 1;
 }
 
 extern s32 fldStageSoundBaseTable[];
@@ -435,15 +435,15 @@ void fldPlayPendingSounds(void) {
     if (stage == 11) {
         stage = evtBitCheck(0x28) != 0 ? 2 : stage;
     }
-    for (i = 0; i < fldPendingSoundCount; i++) {
-        if (fldPendingSounds[i].flags & 1) {
-            fldPendingSounds[i].flags &= ~1;
-            p2sdStopSe(fldStageSoundBaseTable[stage] + fldPendingSounds[i].soundId);
+    for (i = 0; i < gFldSe3DNum; i++) {
+        if (fldSe3DTable[i].flags & 1) {
+            fldSe3DTable[i].flags &= ~1;
+            p2sdStopSe(fldStageSoundBaseTable[stage] + fldSe3DTable[i].soundId);
         }
     }
 }
 
-extern f32 fldLookAtFarPoint[];
+extern f32 fldCamTarget[];
 extern void p2sdStopSe(u32);
 extern s32 D_003BAE90;
 extern s32 D_003BAE94;
@@ -470,31 +470,31 @@ void func_001415F8(void) {
     tick = D_003BAE94 + 1;
     nearby = 0;
     D_003BAE94 = tick;
-    if (fldAreaState.mode == 0) {
-        listenerX = fldLookAtFarPoint[0] - fldLookAtNearPoint[0];
+    if (fldGlobalBase.mode == 0) {
+        listenerX = fldCamTarget[0] - fldLookAtNearPoint[0];
         extraRadius = 500.0f;
         listenerY = fldLookAtNearPoint[1];
-        listenerZ = fldLookAtFarPoint[2] - fldLookAtNearPoint[2];
+        listenerZ = fldCamTarget[2] - fldLookAtNearPoint[2];
         distance = fsqrtf(listenerX * listenerX + listenerZ * listenerZ);
         if (distance > 200.0f) {
             listenerX = fldLookAtNearPoint[0] + (listenerX / distance) * 200.0f;
             listenerZ = fldLookAtNearPoint[2] + (listenerZ / distance) * 200.0f;
         } else {
-            listenerX = fldLookAtFarPoint[0];
-            listenerZ = fldLookAtFarPoint[2];
+            listenerX = fldCamTarget[0];
+            listenerZ = fldCamTarget[2];
         }
     } else {
         extraRadius = 0.0f;
-        listenerX = fldAreaState.x;
-        listenerY = fldAreaState.y;
-        listenerZ = fldAreaState.z;
+        listenerX = fldGlobalBase.x;
+        listenerY = fldGlobalBase.y;
+        listenerZ = fldGlobalBase.z;
     }
-    for (i = 0; i < fldPendingSoundCount; i++) {
-        dx = listenerX - fldPendingSounds[i].y;
-        dy = listenerY - fldPendingSounds[i].z;
-        dz = listenerZ - fldPendingSounds[i].w;
+    for (i = 0; i < gFldSe3DNum; i++) {
+        dx = listenerX - fldSe3DTable[i].y;
+        dy = listenerY - fldSe3DTable[i].z;
+        dz = listenerZ - fldSe3DTable[i].w;
         distance = fsqrtf(dx * dx + dy * dy + dz * dz);
-        if (distance < fldPendingSounds[i].x + extraRadius) {
+        if (distance < fldSe3DTable[i].x + extraRadius) {
             distance = fsqrtf(dy * dy);
             if (distance < 500.0f) {
                 nearby = 1;
@@ -502,23 +502,23 @@ void func_001415F8(void) {
         }
     }
     if (nearby != 0 && (tick & 1)) {
-        if (fldAreaState.mode == 0) {
+        if (fldGlobalBase.mode == 0) {
             p2sdSetStandPos(listenerX, listenerY, listenerZ,
                 fldLookAtNearPoint[0], fldLookAtNearPoint[1], fldLookAtNearPoint[2]);
         } else {
-            p2sdSetStandPos(fldLookAtFarPoint[0], fldLookAtFarPoint[1], fldLookAtFarPoint[2],
+            p2sdSetStandPos(fldCamTarget[0], fldCamTarget[1], fldCamTarget[2],
                 fldLookAtNearPoint[0], fldLookAtNearPoint[1], fldLookAtNearPoint[2]);
         }
     }
-    stage = fldAreaState.area;
+    stage = fldGlobalBase.area;
     if (stage == 11) {
         stage = evtBitCheck(0x28) != 0 ? 2 : stage;
     }
-    for (i = 0; i < fldPendingSoundCount; i++) {
-        entry = &fldPendingSounds[i];
-        sourceX = fldPendingSounds[i].y;
-        sourceY = fldPendingSounds[i].z;
-        sourceZ = fldPendingSounds[i].w;
+    for (i = 0; i < gFldSe3DNum; i++) {
+        entry = &fldSe3DTable[i];
+        sourceX = fldSe3DTable[i].y;
+        sourceY = fldSe3DTable[i].z;
+        sourceZ = fldSe3DTable[i].w;
         dx = listenerX - sourceX;
         dy = listenerY - sourceY;
         dz = listenerZ - sourceZ;
@@ -622,26 +622,26 @@ s8 fldFindSceneEntryData(s32 id, s32 idx) {
 }
 
 void fldStartSceneBgm(void) {
-    s32 handle = fldResolveSpecialBgmTrack(fldAreaState.sequenceCode);
+    s32 handle = fldResolveSpecialBgmTrack(fldGlobalBase.sequenceCode);
     s32 stage;
     s32 idx;
 
-    if (handle != -1 || fldAreaState.area < 0x32) {
+    if (handle != -1 || fldGlobalBase.area < 0x32) {
         if (handle == -1) {
-            stage = fldAreaState.area;
+            stage = fldGlobalBase.area;
             if (stage == 11) {
                 stage = evtBitCheck(0x28) != 0 ? 2 : stage;
             }
-            idx = fldFindSceneEntryData(stage, fldAreaState.floor + 1);
+            idx = fldFindSceneEntryData(stage, fldGlobalBase.floor + 1);
             fldSceneSoundBase = fldStageSoundBaseTable[stage];
-            fldAreaState.sequenceCode = idx;
+            fldGlobalBase.sequenceCode = idx;
             handle = fldSceneSoundBase + idx;
         }
-        if (fldAreaState.sceneBgmSuppressed != 1) {
-            if (fldCurrentBgmHandle != handle) {
-                p2sdStopBGM(fldCurrentBgmHandle);
+        if (fldGlobalBase.sceneBgmSuppressed != 1) {
+            if (fldSeLastBgm != handle) {
+                p2sdStopBGM(fldSeLastBgm);
             }
-            fldCurrentBgmHandle = handle;
+            fldSeLastBgm = handle;
             p2sdPlayBGM(handle);
         }
     }
@@ -658,39 +658,39 @@ extern s32 fldResolveSpecialBgmTrack(s32);
 extern u64 p2sdResumeBgm(s32);
 
 void fldStartSceneBgmAlternate(void) {
-    s32 handle = fldResolveSpecialBgmTrack(fldAreaState.sequenceCode);
+    s32 handle = fldResolveSpecialBgmTrack(fldGlobalBase.sequenceCode);
     s32 stage;
     s32 idx;
 
-    if (handle != -1 || fldAreaState.area < 0x32) {
+    if (handle != -1 || fldGlobalBase.area < 0x32) {
         if (handle == -1) {
-            stage = fldAreaState.area;
+            stage = fldGlobalBase.area;
             if (stage == 11) {
                 stage = evtBitCheck(0x28) != 0 ? 2 : stage;
             }
-            idx = fldFindSceneEntryData(stage, fldAreaState.floor + 1);
+            idx = fldFindSceneEntryData(stage, fldGlobalBase.floor + 1);
             fldSceneSoundBase = fldStageSoundBaseTable[stage];
-            fldAreaState.sequenceCode = idx;
+            fldGlobalBase.sequenceCode = idx;
             handle = fldSceneSoundBase + idx;
         }
-        if (fldAreaState.sceneBgmSuppressed != 1) {
-            fldCurrentBgmHandle = handle;
+        if (fldGlobalBase.sceneBgmSuppressed != 1) {
+            fldSeLastBgm = handle;
             p2sdResumeBgm(handle);
         }
     }
 }
 
 void fldPauseBgm(void) {
-    p2sdSendStopCmd(fldCurrentBgmHandle);
-    fldCurrentBgmHandle = 0;
+    p2sdSendStopCmd(fldSeLastBgm);
+    fldSeLastBgm = 0;
 }
 
 void fldBgmFadeOut(void) {
-    p2sdStopBGM(fldCurrentBgmHandle);
-    if (fldAreaState.sequenceCode >= 0x80) {
-        fldAreaState.sequenceCode = 1;
+    p2sdStopBGM(fldSeLastBgm);
+    if (fldGlobalBase.sequenceCode >= 0x80) {
+        fldGlobalBase.sequenceCode = 1;
     }
-    fldCurrentBgmHandle = 0;
+    fldSeLastBgm = 0;
 }
 
 void fldBgmStopAll(void) {
@@ -698,7 +698,7 @@ void fldBgmStopAll(void) {
 }
 
 void fldBgmStop(void) {
-    p2sdStopSe(fldCurrentBgmHandle);
+    p2sdStopSe(fldSeLastBgm);
     fldCurrentBgmId[0] = 0;
 }
 
@@ -772,30 +772,30 @@ void fldSetBgmMode(s32 mode) {
 
 extern s32 fldResolveSpecialBgmTrack(s32);
 
-extern s32 fldSceneBgmArchiveTrack;
+extern s32 MidiNo;
 
-extern s32 fldSceneBgmArchivePhase;
+extern s32 fldBgmReloadStep;
 
 void fldPrepareSceneBgmArchive(void) {
-    s32 handle = fldResolveSpecialBgmTrack(fldAreaState.sequenceCode);
+    s32 handle = fldResolveSpecialBgmTrack(fldGlobalBase.sequenceCode);
     s32 stage;
     s32 idx;
 
     if (handle == -1) {
-        if (fldAreaState.area >= 0x32) {
+        if (fldGlobalBase.area >= 0x32) {
             return;
         }
-        stage = fldAreaState.area;
+        stage = fldGlobalBase.area;
         if (stage == 11) {
             stage = evtBitCheck(0x28) != 0 ? 2 : stage;
         }
-        idx = fldFindSceneEntryData(stage, fldAreaState.floor + 1);
+        idx = fldFindSceneEntryData(stage, fldGlobalBase.floor + 1);
         fldSceneSoundBase = fldStageSoundBaseTable[stage];
-        fldAreaState.sequenceCode = idx;
+        fldGlobalBase.sequenceCode = idx;
         handle = fldSceneSoundBase + idx;
     }
-    fldSceneBgmArchiveTrack = handle;
-    fldSceneBgmArchivePhase = 0;
+    MidiNo = handle;
+    fldBgmReloadStep = 0;
 }
 
 extern s32 sndFindPackedTrackLoadStatus(s32);
@@ -803,22 +803,22 @@ extern s32 sndFindPackedTrackLoadStatus(s32);
 extern void p2sdLoadSMGFile(s32);
 
 s32 fldStepSceneBgmArchive(void) {
-    switch (fldSceneBgmArchivePhase) {
+    switch (fldBgmReloadStep) {
     case 0:
-        if (sndFindPackedTrackLoadStatus(fldSceneBgmArchiveTrack) == 0) {
-            p2sdLoadSMGFile(fldSceneBgmArchiveTrack);
-            fldSceneBgmArchivePhase = fldSceneBgmArchivePhase + 1;
+        if (sndFindPackedTrackLoadStatus(MidiNo) == 0) {
+            p2sdLoadSMGFile(MidiNo);
+            fldBgmReloadStep = fldBgmReloadStep + 1;
         } else {
-            fldSceneBgmArchivePhase = fldSceneBgmArchivePhase + 2;
+            fldBgmReloadStep = fldBgmReloadStep + 2;
         }
         break;
     case 1:
-        if (sndFindPackedTrackLoadStatus(fldSceneBgmArchiveTrack) == 1) {
-            fldSceneBgmArchivePhase = fldSceneBgmArchivePhase + 1;
+        if (sndFindPackedTrackLoadStatus(MidiNo) == 1) {
+            fldBgmReloadStep = fldBgmReloadStep + 1;
         }
         break;
     default:
-        fldSceneBgmArchivePhase = -1;
+        fldBgmReloadStep = -1;
         return 1;
     }
     return 0;
@@ -878,7 +878,7 @@ s32 fldStepArchiveLoad(void) {
 }
 
 u32 fldGetCurrentBgmHandle(void) {
-    return fldCurrentBgmHandle;
+    return fldSeLastBgm;
 }
 
 extern s32 fldFindMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex);
@@ -932,22 +932,22 @@ void fldLoadSceneRecordTable(void) {
     FldSceneRecord *rows;
     s32 count;
 
-    fldMakeFilePath(directory, fldAreaState.area, 1);
-    area = fldAreaState.area;
+    fldMakeFilePath(directory, fldGlobalBase.area, 1);
+    area = fldGlobalBase.area;
     if (area == 0x1C) {
         if (evtBitCheck(0x5E1)) {
-            sprintf(path, D_003A04B0, directory, fldAreaState.area);
+            sprintf(path, D_003A04B0, directory, fldGlobalBase.area);
         } else if (evtBitCheck(0x5E2)) {
-            sprintf(path, "%sf%03da.amb", directory, fldAreaState.area);
+            sprintf(path, "%sf%03da.amb", directory, fldGlobalBase.area);
         } else if (evtBitCheck(0x5E3)) {
-            sprintf(path, "%sf%03db.amb", directory, fldAreaState.area);
+            sprintf(path, "%sf%03db.amb", directory, fldGlobalBase.area);
         } else if (evtBitCheck(0x5E4)) {
-            sprintf(path, "%sf%03dc.amb", directory, fldAreaState.area);
+            sprintf(path, "%sf%03dc.amb", directory, fldGlobalBase.area);
         } else {
-            sprintf(path, "%sf%03dd.amb", directory, fldAreaState.area);
+            sprintf(path, "%sf%03dd.amb", directory, fldGlobalBase.area);
         }
     } else if (area == 0x1B) {
-        room = fldAreaState.floor;
+        room = fldGlobalBase.floor;
         switch (room) {
         case 8:
         case 9:
@@ -963,46 +963,46 @@ void fldLoadSceneRecordTable(void) {
         case 19:
         case 20:
         case 21:
-            sprintf(path, "%sf%03da.amb", directory, fldAreaState.area);
+            sprintf(path, "%sf%03da.amb", directory, fldGlobalBase.area);
             break;
         case 7:
-            sprintf(path, "%sf%03db.amb", directory, fldAreaState.area);
+            sprintf(path, "%sf%03db.amb", directory, fldGlobalBase.area);
             break;
         case 22:
         case 23:
         case 27:
             if (evtBitCheck(0x58D)) {
-                sprintf(path, "%sf%03dd.amb", directory, fldAreaState.area);
+                sprintf(path, "%sf%03dd.amb", directory, fldGlobalBase.area);
             } else {
-                sprintf(path, "%sf%03dc.amb", directory, fldAreaState.area);
+                sprintf(path, "%sf%03dc.amb", directory, fldGlobalBase.area);
             }
             break;
         case 24:
         case 25:
         case 26:
         default:
-            sprintf(path, D_003A04B0, directory, fldAreaState.area);
+            sprintf(path, D_003A04B0, directory, fldGlobalBase.area);
             break;
         }
     } else {
-        sprintf(path, D_003A04B0, directory, fldAreaState.area);
+        sprintf(path, D_003A04B0, directory, fldGlobalBase.area);
     }
 
-    fldSceneRecordResource = sdfDevLoadFileEx(path, &resourceAddress, 0);
+    fldAutoMapBuf = sdfDevLoadFileEx(path, &resourceAddress, 0);
     transferStart = resourceAddress + 8;
     fldAddressResolver(resourceAddress, (FldTransferChunk *)transferStart);
     header = (FldSceneRecordTableHeader *)fldGetInfoHeader((FldTransferChunk *)transferStart);
     rows = header->rows;
     count = header->count;
-    fldSceneRecordCount = count;
-    fldSceneRecords = rows;
+    fldAutoMapData = count;
+    fldAutoMapHeader = rows;
 }
 
 void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
     if (D_0032E3C0[0] < 0xC8) {
         u8 *transferStart = chunk + 8;
 
-        fldSceneRecordResource = (struct SdfMemBlock *)(u32)resourceHandle;
+        fldAutoMapBuf = (struct SdfMemBlock *)(u32)resourceHandle;
         fldAddressResolver((u32)chunk, (FldTransferChunk *)transferStart);
         {
             FldSceneRecordTableHeader *header =
@@ -1010,8 +1010,8 @@ void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
             FldSceneRecord *rows = header->rows;
             s32 count = header->count;
 
-            fldSceneRecordCount = count;
-            fldSceneRecords = rows;
+            fldAutoMapData = count;
+            fldAutoMapHeader = rows;
         }
     }
 }
@@ -1026,12 +1026,12 @@ void fldInitSceneMapLabels(void) {
 }
 
 void fldReleaseSceneRecordChunk(void) {
-    if (fldSceneRecordResource != 0) {
-        sdfMemFreeDelayedDirect(fldSceneRecordResource);
+    if (fldAutoMapBuf != 0) {
+        sdfMemFreeDelayedDirect(fldAutoMapBuf);
     }
-    fldSceneRecordResource = 0;
-    fldSceneRecords = 0;
-    fldSceneRecordCount = 0;
+    fldAutoMapBuf = 0;
+    fldAutoMapHeader = 0;
+    fldAutoMapData = 0;
 }
 
 
@@ -1043,11 +1043,11 @@ extern FldPoint D_003D40B0[];
 void fldResetSceneResourceTables(void) {
     s32 i;
 
-    fldAreaState.unkC4 = -1;
-    fldAreaState.unkC8 = -1;
-    fldSceneRecordResource = 0;
-    fldSceneRecords = 0;
-    fldSceneRecordCount = 0;
+    fldGlobalBase.unkC4 = -1;
+    fldGlobalBase.unkC8 = -1;
+    fldAutoMapBuf = 0;
+    fldAutoMapHeader = 0;
+    fldAutoMapData = 0;
     D_003D40A0[0] = 0;
     D_003D40A0[1] = 0;
     D_003D40A0[2] = 0;
@@ -1106,12 +1106,12 @@ INCLUDE_ASM(const s32, "game/code_001411F0", fldAutoMapDrawIconOfsRF);
 
 s32 fldAutoMap_GetFloor(s32 scene, u32 index) {
     s32 result = 1;
-    FldSceneRecord *rec = fldSceneRecords;
+    FldSceneRecord *rec = fldAutoMapHeader;
     s32 i;
     u32 j;
     FldItem *item;
 
-    for (i = 0; i < (s32)fldSceneRecordCount; i++, rec++) {
+    for (i = 0; i < (s32)fldAutoMapData; i++, rec++) {
         item = rec->items;
         for (j = 0; j < rec->count; j++, item++) {
             if (i == scene && j == index) {
@@ -1172,12 +1172,12 @@ void fldAutoMapNodeSet(SdfModel *model, s32 index, s32 clearFlag) {
 
 s32 fldAutoMapGetFloorMax(void) {
     s32 max = 0;
-    FldSceneRecord *rec = fldSceneRecords;
+    FldSceneRecord *rec = fldAutoMapHeader;
     s32 i;
     u32 j;
     FldItem *item;
 
-    for (i = 0; i < (s32)fldSceneRecordCount; i++, rec++) {
+    for (i = 0; i < (s32)fldAutoMapData; i++, rec++) {
         item = rec->items;
         for (j = 0; j < rec->count; j++, item++) {
             if (max < item->floor) {
@@ -1194,7 +1194,7 @@ extern FrFontGlyph *D_003BD7CC;
 extern s32 D_003BAEAC, D_003BAEB8, D_003BAEBC, D_003BAEC0;
 extern s32 D_003BAEF0, D_003BAEF4, D_003BAF00, D_003BAF04, D_003BAF08;
 extern f32 D_003BAEF8, D_003BAEFC, D_003BAF0C, D_003BAF10, D_003BAF14;
-extern u8 kwlnTaskPadButtonStates[2][2][16];
+extern u8 dds3PadButtonState[2][2][16];
 extern f32 D_00329790[4][4], sdfViewMatrix[4][4];
 extern f32 D_00324A20[4] __attribute__((aligned(16)));
 extern SdfModel *D_00348F30[];
@@ -1240,7 +1240,7 @@ void fldDrawAutomapScene(void) {
     VU0_LOAD_MATRIX(D_00329790);
     InversMatrix();
     D_003BAEF0 = D_003BAEB8;
-    if ((s8)kwlnTaskPadButtonStates[1][0][8] < 0 && D_003BAEF0 < proposed) {
+    if ((s8)dds3PadButtonState[1][0][8] < 0 && D_003BAEF0 < proposed) {
         proposed = D_003BAEF0 + 1;
         if (!D_003BAEAC) proposed = fldAutoMapGetFloorNext(D_003BAEF0);
         if (D_003BAEF0 != proposed) {
@@ -1254,7 +1254,7 @@ void fldDrawAutomapScene(void) {
             D_003BAF08 = 0;
         }
     }
-    if ((s8)kwlnTaskPadButtonStates[1][0][10] < 0 && D_003BAEF0 >= 2) {
+    if ((s8)dds3PadButtonState[1][0][10] < 0 && D_003BAEF0 >= 2) {
         proposed = D_003BAEF0 - 1;
         if (!D_003BAEAC) proposed = fldAutoMapGetFloorPrev(D_003BAEF0);
         if (D_003BAEF0 != proposed) {
@@ -1279,7 +1279,7 @@ void fldDrawAutomapScene(void) {
         D_003BAEF8 += 500.0f; D_003BAEFC += 500.0f;
     } else { D_003BAEF8 = 0.0f; }
     D_003BAEB8 = D_003BAEF0;
-    sdf3DSetCamera(&sdfSceneProjectionParameters, D_00329790);
+    sdf3DSetCamera(&dds3ScreenParam, D_00329790);
     rsetOtOfs(0x56);
     rsetAlpha(0);
     rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
@@ -1288,7 +1288,7 @@ void fldDrawAutomapScene(void) {
     rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
     rsetOtOfs(0x56);
     rsetTest(1, 1, 128, 1, 0, 0, 1, 1);
-    stage = fldFindStageCoordinateRecord(fldAreaState.area, D_003BAEF0);
+    stage = fldFindStageCoordinateRecord(fldGlobalBase.area, D_003BAEF0);
     if (stage != NULL) {
         s32 run;
         f32 step = (f32)stage->cellSize;
@@ -1335,13 +1335,13 @@ void fldDrawAutomapScene(void) {
     }
 
     selectedFloor = D_003BAEF0 - 1;
-    record = fldSceneRecords;
-    for (i = 0; i < fldSceneRecordCount; i++, record++) {
+    record = fldAutoMapHeader;
+    for (i = 0; i < fldAutoMapData; i++, record++) {
         item = record->items;
         for (j = 0; j < record->count; j++, item++) {
             itemVisible = 0;
             if (selectedFloor == item->floor) {
-                if (fldGetFloorFlag(fldAreaFlagIndex, i, j) != 0) {
+                if (fldGetFloorFlag(fldAutoMapField, i, j) != 0) {
                     itemVisible = 1;
                 }
                 if (D_003BAEAC != 0) {
@@ -1351,7 +1351,7 @@ void fldDrawAutomapScene(void) {
             fldAutoMapNodeSet(D_00348F30[i], item->nodeIndex, itemVisible);
         }
     }
-    for (i = 0; i < fldSceneRecordCount; i++) {
+    for (i = 0; i < fldAutoMapData; i++) {
         D_00348F30[i]->color = 0x80808080;
         fldAutoMapDrawMdl1(D_00348F30[i], 0.0f, D_003BAEF8, 0.0f);
     }
@@ -1362,14 +1362,14 @@ void fldDrawAutomapScene(void) {
     rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
     aDrawBoxF(0, 0, 512, 224, 0, 0, 0, 0);
 
-    record = fldSceneRecords;
+    record = fldAutoMapHeader;
     selectedFloor = D_003BAEF0 - 1;
-    for (i = 0; i < fldSceneRecordCount; i++, record++) {
+    for (i = 0; i < fldAutoMapData; i++, record++) {
         item = record->items;
         for (j = 0; j < record->count; j++, item++) {
             itemVisible = 0;
             if (selectedFloor == item->floor) {
-                if (fldGetFloorFlag(fldAreaFlagIndex, i, j) != 0) {
+                if (fldGetFloorFlag(fldAutoMapField, i, j) != 0) {
                     itemVisible = 1;
                 }
                 if (D_003BAEAC != 0) {
@@ -1456,22 +1456,22 @@ void fldDrawAutomapScene(void) {
 
     rsetAlpha(0);
     rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
-    sdf3DSetCamera(&sdfSceneProjectionParameters, sdfViewMatrix);
+    sdf3DSetCamera(&dds3ScreenParam, sdfViewMatrix);
     D_003BAF10 += 0.4f;
     D_003BAF14 += 0.2f;
     PCP_COPY_VECTOR_F32(focus, D_00324A20);
 
     if (D_003BAF00 >= 128) {
         selectedFloor = D_003BAEF0 - 1;
-        record = fldSceneRecords;
-        for (i = 0; i < fldSceneRecordCount; i++, record++) {
+        record = fldAutoMapHeader;
+        for (i = 0; i < fldAutoMapData; i++, record++) {
             sceneX = 0.0f;
             sceneZ = 0.0f;
             item = record->items;
             for (j = 0; j < record->count; j++, item++) {
                 itemVisible = 0;
                 if (selectedFloor == item->floor) {
-                    if (fldGetFloorFlag(fldAreaFlagIndex, i, j) != 0) {
+                    if (fldGetFloorFlag(fldAutoMapField, i, j) != 0) {
                     itemVisible = 1;
                 }
                     if (D_003BAEAC != 0) {
@@ -1636,7 +1636,7 @@ void fldDrawAutomapScene(void) {
  * Continues inside the D_003BAF00 >= 128 block after the icon loops.
  * Function-scope locals and declarations are supplied by the prefix. */
 
-        if (D_003BAEF0 == fldAreaState.flagStage) {
+        if (D_003BAEF0 == fldGlobalBase.flagStage) {
             f32 worldX;
             f32 worldZ;
             f32 distanceX;
@@ -1645,12 +1645,12 @@ void fldDrawAutomapScene(void) {
             fldAllIconDel(D_003BAEB4, &sceneX, &sceneZ);
             rsetTest(1, 0, 128, 3, 0, 0, 1, 1);
             rsetAlpha(1);
-            worldX = fldAreaState.x + sceneX;
+            worldX = fldGlobalBase.x + sceneX;
             distanceX = focus[0] - worldX;
             if (distanceX < 0.0f) {
                 distanceX = -distanceX;
             }
-            worldZ = fldAreaState.z + sceneZ;
+            worldZ = fldGlobalBase.z + sceneZ;
             distanceZ = focus[2] - worldZ;
             if (distanceZ < 0.0f) {
                 distanceZ = -distanceZ;
@@ -1659,9 +1659,9 @@ void fldDrawAutomapScene(void) {
                                     worldX, D_003BAEF8, worldZ);
             if (distanceX < 80000.0f && distanceZ < 80000.0f) {
                 rsetAlpha(1);
-                fldAutoMapDrawIconOfsRF(1, playerX, playerY, -fldAreaState.negatedAngle);
+                fldAutoMapDrawIconOfsRF(1, playerX, playerY, -fldGlobalBase.negatedAngle);
                 rsetAlpha(0);
-                fldAutoMapDrawIconOfsRF(0, playerX, playerY, fldAreaState.angle);
+                fldAutoMapDrawIconOfsRF(0, playerX, playerY, fldGlobalBase.angle);
             }
         }
     }
@@ -1721,7 +1721,7 @@ void fldDrawAutomapScene(void) {
                         0x80808080, D_003D40A0[0]);
 
     {
-        const u8 *title = (const u8 *)D_0033EC90[fldAreaState.area % 100];
+        const u8 *title = (const u8 *)D_0033EC90[fldGlobalBase.area % 100];
 
         D_003BD7CC = itfCreateConvertedTextGlyph(
             (450 - D_003BD7D0 * 6) << 4, 112, 0, 0xA09DC380,
@@ -1749,7 +1749,7 @@ void fldDrawAutomapScene(void) {
             labelAlpha = 0;
         }
         labelColor = labelAlpha | 0x78759B00;
-        labelIndex = fldFindMapCoordinateIndex(fldAreaState.area % 100, D_003BAEF4);
+        labelIndex = fldFindMapCoordinateIndex(fldGlobalBase.area % 100, D_003BAEF4);
         D_003BD7CC = itfCreateConvertedTextGlyph(
             (450 - (D_003D4408[D_003BAEF4] / 2) * 12) << 4,
             (D_003BAF08 + 42) << 3, 0, labelColor,
@@ -1771,7 +1771,7 @@ void fldDrawAutomapScene(void) {
             labelAlpha = 0;
         }
         labelColor = labelAlpha | 0x78759B00;
-        labelIndex = fldFindMapCoordinateIndex(fldAreaState.area % 100, D_003BAEF0);
+        labelIndex = fldFindMapCoordinateIndex(fldGlobalBase.area % 100, D_003BAEF0);
         D_003BD7CC = itfCreateConvertedTextGlyph(
             (450 - (D_003D4408[D_003BAEF0] / 2) * 12) << 4,
             (D_003BAF04 << 3) + 332, 0, labelColor,
@@ -1801,7 +1801,7 @@ void fldDrawFieldBackdropFrame(void) {
     D_003BAF18 += 0x1.999998p-4f;
     VU0_LOAD_MATRIX(D_00329790);
     InversMatrix();
-    sdf3DSetCamera(&sdfSceneProjectionParameters, D_00329790);
+    sdf3DSetCamera(&dds3ScreenParam, D_00329790);
 
     rsetOtOfs(0x56);
     rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
@@ -1863,7 +1863,7 @@ void fldDrawFieldBackdropFrame(void) {
     }
 
     rsetAlpha(0);
-    sdf3DSetCamera(&sdfSceneProjectionParameters, sdfViewMatrix);
+    sdf3DSetCamera(&dds3ScreenParam, sdfViewMatrix);
     VU0_LOAD_MATRIX(sdfViewMatrix);
     rsetOtOfs(0x5E);
     rsetTest(1, 5, 0x81, 1, 0, 0, 1, 2);
@@ -1924,12 +1924,12 @@ void func_00145B18(void) {
     }
     dds3VisibleSceneBasic((EffWorldNode *)(u32)dds3GetActiveScene(), 0);
     p2sdPlaySE(0xE, 0x7F, 0x3F);
-    cam = &fldAreaState;
+    cam = &fldGlobalBase;
     D_003D40A0[2] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[2].resourceAddress));
     D_003D40A0[3] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[3].resourceAddress));
     D_003BAED4 = 0;
     D_003BAEB4 = cam->floor;
-    fldSceneReady = 1;
+    AutoMapSeq = 1;
     D_003BAEB8 = cam->flagStage;
     D_003BAED0 = cam->flagStage;
     fldAllIconDel(cam->floor, &entry[0], &entry[1]);
@@ -1984,7 +1984,7 @@ void fldReleaseTitleSlots(void) {
     while (sdfDelayedResrcCheck() != 0) {
         sdfDrawSync();
     }
-    fldSceneReady = 0;
+    AutoMapSeq = 0;
     frSetFontDrawOT(0x54);
 }
 
@@ -1997,7 +1997,7 @@ extern void sdfModelRootFree(SdfModel *slot, s32 recycle, s32 release);
 void fldReleaseMenuSlots(void) {
     s32 i;
 
-    for (i = 0; i < fldSceneRecordCount; i++) {
+    for (i = 0; i < fldAutoMapData; i++) {
         if (D_00348F30[i] != 0) {
             sdfModelRootFree(D_00348F30[i], 1, 1);
         }
@@ -2019,7 +2019,7 @@ void fldReleaseMenuSlots(void) {
     while (sdfDelayedResrcCheck() != 0) {
         sdfDrawSync();
     }
-    fldSceneReady = 0;
+    AutoMapSeq = 0;
 }
 
 extern void fldAutoMapSeqClearFlag(s32);
@@ -2033,7 +2033,7 @@ extern void fldApplySkyLightSetToPlayerVU(void);
 /* Enters the field camera state for a fresh scene: releases the title slots and
  * centers the camera on the scene's entry point. */
 void fldEnterSceneCamera(void) {
-    FldAreaWork *cam = &fldAreaState;
+    FldAreaWork *cam = &fldGlobalBase;
     f32 focus[4];
     f32 eye[4];
     SdfMathVector4 up;
@@ -2046,7 +2046,7 @@ void fldEnterSceneCamera(void) {
     sdfDrawSync();
     sdfDrawSync();
     fldReleaseTitleSlots();
-    fldSceneReady = 0;
+    AutoMapSeq = 0;
     fldAutoMapSeqClearFlag(1);
     fldPreparePlayerSceneCameraTarget();
     evtSetSolarOverlayFullyVisible();
@@ -2102,14 +2102,14 @@ void fldLoadSceneModelsAndCamera(void) {
     s32 cz;
     s32 i;
 
-    rec = fldSceneRecords;
-    for (i = 0; i < fldSceneRecordCount; i++, rec++) {
+    rec = fldAutoMapHeader;
+    for (i = 0; i < fldAutoMapData; i++, rec++) {
         D_00348F30[i] = sdfModelMakeEarly(0, rec->model);
         D_003D40B0[i].x = rec->pos->x;
         D_003D40B0[i].y = rec->pos->y;
         D_003D40B0[i].z = rec->pos->z;
     }
-    cam = &fldAreaState;
+    cam = &fldGlobalBase;
     D_003D40A0[0] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[0].resourceAddress));
     D_003D40A0[1] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[1].resourceAddress));
     D_003BAED4 = 0;
@@ -2152,7 +2152,7 @@ void fldReleaseMenuSlotsAfterWait(void) {
 }
 
 u32 fldGetSceneReadyFlag(void) {
-    return fldSceneReady;
+    return AutoMapSeq;
 }
 
 /* Handle automap input, clamp the grid position, and refresh its camera. */
@@ -2169,10 +2169,10 @@ void fldUpdateAutomapInput(void) {
         return;
     }
     if (D_0032E5C4[0] != 0) {
-        if ((s8)kwlnTaskPadButtonStates[1][0][2] != 0) {
+        if ((s8)dds3PadButtonState[1][0][2] != 0) {
             closeRequested = 1;
         }
-    } else if ((s8)kwlnTaskPadButtonStates[1][0][2] < 0) {
+    } else if ((s8)dds3PadButtonState[1][0][2] < 0) {
         closeRequested = 1;
     }
 
@@ -2181,13 +2181,13 @@ void fldUpdateAutomapInput(void) {
         D_003BAECC++;
     }
     if (closeRequested != 0 ||
-        ((s8)kwlnTaskPadButtonStates[1][0][3] < 0 && D_003BAED4 == 0)) {
+        ((s8)dds3PadButtonState[1][0][3] < 0 && D_003BAED4 == 0)) {
         fldEnterSceneCamera();
         dds3FadeOut2(0);
         dds3FadeIn2(8);
         return;
     }
-    if ((s8)kwlnTaskPadButtonStates[1][0][3] < 0) {
+    if ((s8)dds3PadButtonState[1][0][3] < 0) {
         p2sdPlaySE(10, 127, 63);
         D_003BAEBC = D_003BAEC4;
         D_003BAEC0 = D_003BAEC8;
@@ -2198,36 +2198,36 @@ void fldUpdateAutomapInput(void) {
     if (D_003BAECC >= 11) {
         if ((s8)D_003BA878[0][1] != 0) {
             if (D_003BA878[0][1] & 2) {
-                if ((s8)kwlnTaskPadButtonStates[1][0][5] != 0 &&
-                    (s8)kwlnTaskPadButtonStates[1][0][7] != 0) {
+                if ((s8)dds3PadButtonState[1][0][5] != 0 &&
+                    (s8)dds3PadButtonState[1][0][7] != 0) {
                     D_003BAED4 = 1;
                     D_003BAEBC += 600;
                     D_003BAEC0 -= 600;
-                } else if ((s8)kwlnTaskPadButtonStates[1][0][5] != 0 &&
-                           (s8)kwlnTaskPadButtonStates[1][0][6] != 0) {
+                } else if ((s8)dds3PadButtonState[1][0][5] != 0 &&
+                           (s8)dds3PadButtonState[1][0][6] != 0) {
                     D_003BAED4 = 1;
                     D_003BAEBC += 600;
                     D_003BAEC0 += 600;
-                } else if ((s8)kwlnTaskPadButtonStates[1][0][4] != 0 &&
-                           (s8)kwlnTaskPadButtonStates[1][0][7] != 0) {
+                } else if ((s8)dds3PadButtonState[1][0][4] != 0 &&
+                           (s8)dds3PadButtonState[1][0][7] != 0) {
                     D_003BAED4 = 1;
                     D_003BAEBC -= 600;
                     D_003BAEC0 -= 600;
-                } else if ((s8)kwlnTaskPadButtonStates[1][0][4] != 0 &&
-                           (s8)kwlnTaskPadButtonStates[1][0][6] != 0) {
+                } else if ((s8)dds3PadButtonState[1][0][4] != 0 &&
+                           (s8)dds3PadButtonState[1][0][6] != 0) {
                     D_003BAED4 = 1;
                     D_003BAEBC -= 600;
                     D_003BAEC0 += 600;
-                } else if ((s8)kwlnTaskPadButtonStates[1][0][5] != 0) {
+                } else if ((s8)dds3PadButtonState[1][0][5] != 0) {
                     D_003BAED4 = 1;
                     D_003BAEBC += 600;
-                } else if ((s8)kwlnTaskPadButtonStates[1][0][4] != 0) {
+                } else if ((s8)dds3PadButtonState[1][0][4] != 0) {
                     D_003BAED4 = 1;
                     D_003BAEBC -= 600;
-                } else if ((s8)kwlnTaskPadButtonStates[1][0][7] != 0) {
+                } else if ((s8)dds3PadButtonState[1][0][7] != 0) {
                     D_003BAED4 = 1;
                     D_003BAEC0 -= 600;
-                } else if ((s8)kwlnTaskPadButtonStates[1][0][6] != 0) {
+                } else if ((s8)dds3PadButtonState[1][0][6] != 0) {
                     D_003BAED4 = 1;
                     D_003BAEC0 += 600;
                 }
@@ -2235,44 +2235,44 @@ void fldUpdateAutomapInput(void) {
         } else {
             /* A held diagonal consumes the direction choice even when its
              * Z-repeat bit is absent; do not fall back to a cardinal step. */
-            if ((s8)kwlnTaskPadButtonStates[1][0][5] != 0 &&
-                (s8)kwlnTaskPadButtonStates[1][0][7] != 0) {
-                if (kwlnTaskPadButtonStates[1][0][7] & 2) {
+            if ((s8)dds3PadButtonState[1][0][5] != 0 &&
+                (s8)dds3PadButtonState[1][0][7] != 0) {
+                if (dds3PadButtonState[1][0][7] & 2) {
                     D_003BAED4 = 1;
                     D_003BAEBC += 600;
                     D_003BAEC0 -= 600;
                 }
-            } else if ((s8)kwlnTaskPadButtonStates[1][0][5] != 0 &&
-                       (s8)kwlnTaskPadButtonStates[1][0][6] != 0) {
-                if (kwlnTaskPadButtonStates[1][0][6] & 2) {
+            } else if ((s8)dds3PadButtonState[1][0][5] != 0 &&
+                       (s8)dds3PadButtonState[1][0][6] != 0) {
+                if (dds3PadButtonState[1][0][6] & 2) {
                     D_003BAED4 = 1;
                     D_003BAEBC += 600;
                     D_003BAEC0 += 600;
                 }
-            } else if ((s8)kwlnTaskPadButtonStates[1][0][4] != 0 &&
-                       (s8)kwlnTaskPadButtonStates[1][0][7] != 0) {
-                if (kwlnTaskPadButtonStates[1][0][7] & 2) {
+            } else if ((s8)dds3PadButtonState[1][0][4] != 0 &&
+                       (s8)dds3PadButtonState[1][0][7] != 0) {
+                if (dds3PadButtonState[1][0][7] & 2) {
                     D_003BAED4 = 1;
                     D_003BAEBC -= 600;
                     D_003BAEC0 -= 600;
                 }
-            } else if ((s8)kwlnTaskPadButtonStates[1][0][4] != 0 &&
-                       (s8)kwlnTaskPadButtonStates[1][0][6] != 0) {
-                if (kwlnTaskPadButtonStates[1][0][6] & 2) {
+            } else if ((s8)dds3PadButtonState[1][0][4] != 0 &&
+                       (s8)dds3PadButtonState[1][0][6] != 0) {
+                if (dds3PadButtonState[1][0][6] & 2) {
                     D_003BAED4 = 1;
                     D_003BAEBC -= 600;
                     D_003BAEC0 += 600;
                 }
-            } else if (kwlnTaskPadButtonStates[1][0][5] & 2) {
+            } else if (dds3PadButtonState[1][0][5] & 2) {
                 D_003BAED4 = 1;
                 D_003BAEBC += 600;
-            } else if (kwlnTaskPadButtonStates[1][0][4] & 2) {
+            } else if (dds3PadButtonState[1][0][4] & 2) {
                 D_003BAED4 = 1;
                 D_003BAEBC -= 600;
-            } else if (kwlnTaskPadButtonStates[1][0][7] & 2) {
+            } else if (dds3PadButtonState[1][0][7] & 2) {
                 D_003BAED4 = 1;
                 D_003BAEC0 -= 600;
-            } else if (kwlnTaskPadButtonStates[1][0][6] & 2) {
+            } else if (dds3PadButtonState[1][0][6] & 2) {
                 D_003BAED4 = 1;
                 D_003BAEC0 += 600;
             }
@@ -2314,13 +2314,13 @@ void fldUpdateAutomapInput(void) {
     kwlnOverlayFrustumParameters.depthFar = 20000.0f;
     kwlnOverlayFrustumParameters.fogColor = 0x808080;
     PCP_COPY_VECTOR(sdfViewTargetVector, eye);
-    PCP_COPY_VECTOR(sdfViewEyeVector, focus);
-    PCP_COPY_VECTOR(sdfViewUpVector, up);
+    PCP_COPY_VECTOR(aViewTarget, focus);
+    PCP_COPY_VECTOR(aViewDown, up);
 }
 
 /* Re-centers the scene camera on the current scene's entry point. */
 void fldCenterCameraOnEntry(void) {
-    FldAreaWork *cam = &fldAreaState;
+    FldAreaWork *cam = &fldGlobalBase;
     f32 focus[4];
     f32 eye[4];
     f32 up[4] = {0.0f, 0.0f, -1.0f, 1.0f};
@@ -2357,10 +2357,10 @@ void fldCenterCameraOnEntry(void) {
 /* Stores the area, floor/room and third location selection, and selects the
  * area's flag table. The third selection's interpretation is left unknown. */
 void fldSetSceneLocation(s32 area, s32 floor, s32 stage) {
-    fldAreaState.area = area;
-    fldAreaState.unk18 = stage;
-    D_003BAEB4 = fldAreaState.floor = floor;
-    fldAreaFlagIndex = area % 100;
+    fldGlobalBase.area = area;
+    fldGlobalBase.unk18 = stage;
+    D_003BAEB4 = fldGlobalBase.floor = floor;
+    fldAutoMapField = area % 100;
 }
 
 
@@ -2370,7 +2370,7 @@ extern s32 D_0032C900[];
 s32 fldGetFloorFlag(s32 area, s32 floor, s32 bit) {
     s32 areaIndex = D_0032C900[area % 100];
     if (areaIndex == -1) return 0;
-    return (datGameState->areaFlags[areaIndex][floor] >> bit) & 1;
+    return (DDS3_GBWK->areaFlags[areaIndex][floor] >> bit) & 1;
 }
 
 /* Set a one-based flag on the current floor, and retain the associated record. */
@@ -2379,13 +2379,13 @@ void fldSetFlagAndFindRecord(s32 flagNumber) {
     s32 bit;
 
     if (flagNumber > 0) {
-        areaIndex = D_0032C900[fldAreaFlagIndex % 100];
+        areaIndex = D_0032C900[fldAutoMapField % 100];
         if (areaIndex != -1) {
             bit = flagNumber - 1;
-            fldAreaState.unk18 = bit;
-            fldAreaState.flagNumber = flagNumber;
-            datGameState->areaFlags[areaIndex][fldAreaState.floor] |= 1ULL << bit;
-            fldAreaState.flagStage = fldAutoMap_GetFloor(fldAreaState.floor, bit);
+            fldGlobalBase.unk18 = bit;
+            fldGlobalBase.flagNumber = flagNumber;
+            DDS3_GBWK->areaFlags[areaIndex][fldGlobalBase.floor] |= 1ULL << bit;
+            fldGlobalBase.flagStage = fldAutoMap_GetFloor(fldGlobalBase.floor, bit);
         }
     }
 }
@@ -2398,7 +2398,7 @@ void fldSetFlagBit(s32 area, s32 floor, s32 bit) {
     bit--;
     areaIndex = D_0032C900[area % 100];
     if (areaIndex != -1) {
-        datGameState->areaFlags[areaIndex][floor] |= 1ULL << bit;
+        DDS3_GBWK->areaFlags[areaIndex][floor] |= 1ULL << bit;
     }
 }
 
@@ -2409,7 +2409,7 @@ void fldClearFloorFlag(s32 area, s32 floor, s32 bit) {
     bit--;
     areaIndex = D_0032C900[area % 100];
     if (areaIndex != -1) {
-        datGameState->areaFlags[areaIndex][floor] &= ~(1ULL << bit);
+        DDS3_GBWK->areaFlags[areaIndex][floor] &= ~(1ULL << bit);
     }
 }
 
@@ -2437,11 +2437,11 @@ s32 fldAutoMapGetFloorPrev(s32 limit) {
     u32 j;
     s32 item;
     s32 best = -1;
-    FldSceneRecord *entry = fldSceneRecords;
+    FldSceneRecord *entry = fldAutoMapHeader;
 
-    for (i = 0; i < (s32)fldSceneRecordCount; i++, entry++) {
+    for (i = 0; i < (s32)fldAutoMapData; i++, entry++) {
         for (j = 0; j < entry->count; j++) {
-            if (fldGetFloorFlag(fldAreaFlagIndex, i, j) != 0) {
+            if (fldGetFloorFlag(fldAutoMapField, i, j) != 0) {
                 item = fldAutoMap_GetFloor(i, j);
                 if (item < limit && best < item) {
                     best = item;
@@ -2460,11 +2460,11 @@ s32 fldAutoMapGetFloorNext(s32 limit) {
     u32 j;
     s32 item;
     s32 best = 999;
-    FldSceneRecord *entry = fldSceneRecords;
+    FldSceneRecord *entry = fldAutoMapHeader;
 
-    for (i = 0; i < (s32)fldSceneRecordCount; i++, entry++) {
+    for (i = 0; i < (s32)fldAutoMapData; i++, entry++) {
         for (j = 0; j < entry->count; j++) {
-            if (fldGetFloorFlag(fldAreaFlagIndex, i, j) != 0) {
+            if (fldGetFloorFlag(fldAutoMapField, i, j) != 0) {
                 item = fldAutoMap_GetFloor(i, j);
                 if (limit < item && item < best) {
                     best = item;
@@ -2480,8 +2480,8 @@ s32 fldAutoMapGetFloorNext(s32 limit) {
 
 void fldAllIconDel(s32 index, f32 *x, f32 *z) {
     s32 i;
-    FldSceneRecord *entry = fldSceneRecords;
-    for (i = 0; i < (s32)fldSceneRecordCount; i++, entry++) {
+    FldSceneRecord *entry = fldAutoMapHeader;
+    for (i = 0; i < (s32)fldAutoMapData; i++, entry++) {
         if (i == index) {
             FldPoint *position = entry->pos;
             *x = position->x;
@@ -2509,12 +2509,12 @@ void fldAutoMapGetBBox(f32 *minX, f32 *maxZ, f32 *maxX, f32 *minZ) {
     *maxZ = 0.0f;
     *maxX = 0.0f;
     *minZ = 0.0f;
-    rec = fldSceneRecords;
-    for (; room < fldSceneRecordCount; room++, rec++) {
+    rec = fldAutoMapHeader;
+    for (; room < fldAutoMapData; room++, rec++) {
         item = rec->items;
         for (i = 0; i < rec->count; i++, item++) {
             visible = 0;
-            if (fldGetFloorFlag(fldAreaFlagIndex, room, i) != 0) {
+            if (fldGetFloorFlag(fldAutoMapField, room, i) != 0) {
                 visible = 1;
             }
             if (D_003BAEAC != 0) {
@@ -2558,13 +2558,13 @@ void fldCheckSceneReady(void) {
     if (D_0032E3C0[0] >= 200) {
         return;
     }
-    if (fldSceneReady == 1) {
+    if (AutoMapSeq == 1) {
         fldUpdateAutomapInput();
     }
 }
 
 void fldDrawAutomapWhenReady(void) {
-    if (fldSceneReady == 1) {
+    if (AutoMapSeq == 1) {
         fldDrawFieldBackdropFrame();
         fldDrawAutomapScene();
     }
@@ -2582,7 +2582,7 @@ void fldClearAllAreaFloorFlags(void) {
     s32 index;
 
     index = 0;
-    block = datGameState;
+    block = DDS3_GBWK;
     do {
         words = block->areaFlags[index];
         remaining = 0x3f;
@@ -2613,14 +2613,14 @@ void func_00147188(s32 unused) {
     s32 xOffset;
     s32 yOffset;
 
-    if (fldAreaState.playerModelAlternate == 1) {
+    if (fldGlobalBase.playerModelAlternate == 1) {
         return;
     }
-    if (fldAreaState.area >= 200) {
+    if (fldGlobalBase.area >= 200) {
         return;
     }
 
-    mode = fldAreaState.unkD4;
+    mode = fldGlobalBase.unkD4;
     switch (mode) {
     case 0:
         alpha = 0.0f;
@@ -2674,7 +2674,7 @@ interpolate:
     xOffset = (s32)positionX;
     yOffset = (s32)positionY;
 
-    work = &fldAreaState;
+    work = &fldGlobalBase;
     map = work->unkC8;
     if (map != -1) {
         if (D_003D4460[map] < 2) {
@@ -2777,11 +2777,11 @@ void fldUpdateEffectTextureTransforms(void) {
     angle = EulerAngleAxisY();
     for (i = 0; i < 4; i++) {
         if (fldEffectTextureNodes[i] != 0) {
-            vec[0] = fldAreaState.x;
-            vec[2] = fldAreaState.z;
-            vec[1] = fldAreaState.y;
+            vec[0] = fldGlobalBase.x;
+            vec[2] = fldGlobalBase.z;
+            vec[1] = fldGlobalBase.y;
             if (i == 3) {
-                vec[1] = fldAreaState.y - 100.0f;
+                vec[1] = fldGlobalBase.y - 100.0f;
             }
             effCopyVectorToNodeInstance((EffNode *)(u32)fldEffectTextureNodes[i], vec);
             SetRotateMatrixY(-angle);
@@ -2947,23 +2947,23 @@ void fldParseMixLb(void) {
             break;
         case 10:
             allocation = node->resourceHandle;
-            fldAreaState.mapResources[0].allocation = allocation;
-            fldAreaState.mapResources[0].resourceAddress = sdfMemGetPtr(allocation);
+            fldGlobalBase.mapResources[0].allocation = allocation;
+            fldGlobalBase.mapResources[0].resourceAddress = sdfMemGetPtr(allocation);
             break;
         case 11:
             allocation = node->resourceHandle;
-            fldAreaState.mapResources[1].allocation = allocation;
-            fldAreaState.mapResources[1].resourceAddress = sdfMemGetPtr(allocation);
+            fldGlobalBase.mapResources[1].allocation = allocation;
+            fldGlobalBase.mapResources[1].resourceAddress = sdfMemGetPtr(allocation);
             break;
         case 12:
             allocation = node->resourceHandle;
-            fldAreaState.mapResources[2].allocation = allocation;
-            fldAreaState.mapResources[2].resourceAddress = sdfMemGetPtr(allocation);
+            fldGlobalBase.mapResources[2].allocation = allocation;
+            fldGlobalBase.mapResources[2].resourceAddress = sdfMemGetPtr(allocation);
             break;
         case 13:
             allocation = node->resourceHandle;
-            fldAreaState.mapResources[3].allocation = allocation;
-            fldAreaState.mapResources[3].resourceAddress = sdfMemGetPtr(allocation);
+            fldGlobalBase.mapResources[3].allocation = allocation;
+            fldGlobalBase.mapResources[3].resourceAddress = sdfMemGetPtr(allocation);
             break;
         }
     }
@@ -3030,19 +3030,19 @@ void fldClearMenuEntries(void) {
     s32 i;
 
     for (i = 0; i < 32; i++) {
-        fldRoomEffectEntries[i].unk0 = 0;
-        fldRoomEffectEntries[i].x = 0.0f;
-        fldRoomEffectEntries[i].y = 0.0f;
-        fldRoomEffectEntries[i].z = 0.0f;
-        fldRoomEffectEntries[i].object = 0;
-        fldRoomEffectEntries[i].unk2C = 0;
-        fldRoomEffectEntries[i].unk30 = 0;
-        fldRoomEffectEntries[i].unk34 = 0;
-        fldRoomEffectEntries[i].room = 0;
-        fldRoomEffectEntries[i].unk3C = 0;
-        fldRoomEffectEntries[i].unk3E = 0;
+        fldModelSlotTable[i].unk0 = 0;
+        fldModelSlotTable[i].x = 0.0f;
+        fldModelSlotTable[i].y = 0.0f;
+        fldModelSlotTable[i].z = 0.0f;
+        fldModelSlotTable[i].object = 0;
+        fldModelSlotTable[i].unk2C = 0;
+        fldModelSlotTable[i].unk30 = 0;
+        fldModelSlotTable[i].unk34 = 0;
+        fldModelSlotTable[i].room = 0;
+        fldModelSlotTable[i].unk3C = 0;
+        fldModelSlotTable[i].unk3E = 0;
     }
-    fldRoomEffectEntryCount = 0;
+    fldNpcModelTable = 0;
 }
 
 extern s32 D_003BAF70;
@@ -3053,16 +3053,16 @@ extern s32 D_003BAF7C;
 void fldResetObjectSlots(void) {
     s32 i;
 
-    fldObjectSlotCount = 0;
+    fldTakaraCount = 0;
     for (i = 0; i < 32; i++) {
-        fldObjectSlots[i].id = -1;
-        fldObjectSlots[i].unk0 = 0;
-        fldObjectSlots[i].activationState = 0;
-        fldObjectSlots[i].activationRequested = 0;
-        if (fldObjectSlots[i].effectNode != 0) {
-            dds3EffectDelete((EffNode *)(u32)fldObjectSlots[i].effectNode);
+        fldTakaraSlotTable[i].id = -1;
+        fldTakaraSlotTable[i].unk0 = 0;
+        fldTakaraSlotTable[i].activationState = 0;
+        fldTakaraSlotTable[i].activationRequested = 0;
+        if (fldTakaraSlotTable[i].effectNode != 0) {
+            dds3EffectDelete((EffNode *)(u32)fldTakaraSlotTable[i].effectNode);
         }
-        fldObjectSlots[i].effectNode = 0;
+        fldTakaraSlotTable[i].effectNode = 0;
     }
     D_003BAF70 = 0;
     D_003BAF7C = 0;
@@ -3168,9 +3168,9 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_001486D0);
 void fldFindTakaraSlot(s32 id) {
     s32 i;
 
-    for (i = 0; i < fldObjectSlotCount; i++) {
-        if (fldObjectSlots[i].id == id && fldObjectSlots[i].activationState == 0) {
-            fldObjectSlots[i].activationRequested = 1;
+    for (i = 0; i < fldTakaraCount; i++) {
+        if (fldTakaraSlotTable[i].id == id && fldTakaraSlotTable[i].activationState == 0) {
+            fldTakaraSlotTable[i].activationRequested = 1;
         }
     }
 }
@@ -3179,17 +3179,17 @@ void fldReleaseObjectSlots(void) {
     s32 i;
 
     for (i = 0; i < 32; i++) {
-        if (fldObjectSlots[i].effectNode != 0) {
-            dds3EffectDelete((EffNode *)(u32)fldObjectSlots[i].effectNode);
-            fldObjectSlots[i].effectNode = 0;
+        if (fldTakaraSlotTable[i].effectNode != 0) {
+            dds3EffectDelete((EffNode *)(u32)fldTakaraSlotTable[i].effectNode);
+            fldTakaraSlotTable[i].effectNode = 0;
         }
     }
-    fldObjectSlotCount = 0;
+    fldTakaraCount = 0;
     for (i = 0; i < 32; i++) {
-        fldObjectSlots[i].id = -1;
-        fldObjectSlots[i].unk0 = 0;
-        fldObjectSlots[i].activationState = 0;
-        fldObjectSlots[i].activationRequested = 0;
+        fldTakaraSlotTable[i].id = -1;
+        fldTakaraSlotTable[i].unk0 = 0;
+        fldTakaraSlotTable[i].activationState = 0;
+        fldTakaraSlotTable[i].activationRequested = 0;
     }
 }
 
@@ -3199,14 +3199,14 @@ void fldUpdateObjectSlotActivation(void) {
     s32 i;
     MdlCtx *resource;
 
-    for (i = 0; i < fldObjectSlotCount; i++) {
-        switch (fldObjectSlots[i].activationState) {
+    for (i = 0; i < fldTakaraCount; i++) {
+        switch (fldTakaraSlotTable[i].activationState) {
         case 0:
-            if (fldObjectSlots[i].activationRequested == 1) {
-                resource = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
+            if (fldTakaraSlotTable[i].activationRequested == 1) {
+                resource = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)(u32)fldTakaraSlotTable[i].unk0);
                 mdlSingleMotion(resource, 0, 1);
-                fldObjectSlots[i].activationState = fldObjectSlots[i].activationRequested;
-                switch (fldObjectSlots[i].effectVariant) {
+                fldTakaraSlotTable[i].activationState = fldTakaraSlotTable[i].activationRequested;
+                switch (fldTakaraSlotTable[i].effectVariant) {
                 case 0:
                 case 3:
                     if (D_003BAF58 != 0) {
@@ -3226,26 +3226,26 @@ void fldUpdateObjectSlotActivation(void) {
                     break;
                 }
             } else {
-                resource = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
+                resource = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)(u32)fldTakaraSlotTable[i].unk0);
                 if (resource->first->state == SDF_MOTION_STATE_TERMINAL) {
                     mdlSingleMotion(resource, 0, 0);
                 }
             }
             break;
         case 1:
-            resource = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
+            resource = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)(u32)fldTakaraSlotTable[i].unk0);
             if (resource->first->state == SDF_MOTION_STATE_TERMINAL) {
                 mdlLoopMotion(resource, 0, 2);
-                fldObjectSlots[i].activationRequested = 2;
-                fldObjectSlots[i].activationState = 2;
+                fldTakaraSlotTable[i].activationRequested = 2;
+                fldTakaraSlotTable[i].activationState = 2;
             }
             break;
         case 2:
             if (fldEncountTestFlag(0x40)) {
-                resource = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
+                resource = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)(u32)fldTakaraSlotTable[i].unk0);
                 mdlLoopMotion(resource, 0, 3);
-                fldObjectSlots[i].activationRequested = 3;
-                fldObjectSlots[i].activationState = 3;
+                fldTakaraSlotTable[i].activationRequested = 3;
+                fldTakaraSlotTable[i].activationState = 3;
                 if (D_003BAF58 != 0) {
                     dds3EffectDelete((EffNode *)(u32)D_003BAF58);
                     D_003BAF58 = 0;
@@ -3346,7 +3346,7 @@ void fldDrawLocationPanel(void) {
     if (fldGetSparkDialogPhase() != 0) {
         return;
     }
-    work = &fldAreaState;
+    work = &fldGlobalBase;
     if (work->playerModelAlternate == 1 || work->deferredExit != 0) {
         return;
     }
@@ -3386,7 +3386,7 @@ void fldDrawLocationPanel(void) {
 extern u8 fldAutoMapSeqTestFlag(u32 mask);
 
 void fldFlushQueuedEffectPositions(void) {
-    if (fldAreaState.area < 0xC8) {
+    if (fldGlobalBase.area < 0xC8) {
         if (fldAutoMapSeqTestFlag(1) != 0) {
             return;
         }
@@ -3397,13 +3397,13 @@ void fldFlushQueuedEffectPositions(void) {
             return;
         }
         if (fldSecondaryEffectPositionPending != 0) {
-            if (fldAreaState.colorEffectSuppressed == 0) {
+            if (fldGlobalBase.colorEffectSuppressed == 0) {
                 mnuSpawnResourceAtPosition(fldSecondaryQueuedEffectPosition[0], fldSecondaryQueuedEffectPosition[1], fldSecondaryQueuedEffectPosition[2]);
             }
             fldSecondaryEffectPositionPending = 0;
         }
         if (fldPrimaryEffectPositionPending != 0) {
-            if (fldAreaState.colorEffectSuppressed == 0) {
+            if (fldGlobalBase.colorEffectSuppressed == 0) {
                 mnuSpawnResourceAtPosition(fldPrimaryQueuedEffectPosition[0], fldPrimaryQueuedEffectPosition[1], fldPrimaryQueuedEffectPosition[2]);
             }
             fldPrimaryEffectPositionPending = 0;
@@ -3420,11 +3420,11 @@ extern void dds3ObjectBaseOnFlag();
 void fldNpcHojiRefresh(void) {
     s32 i;
 
-    for (i = 0; i < fldRoomEffectEntryCount; i++) {
-        s32 room = fldRoomEffectEntries[i].room;
-        if (room != 0 && fldTestMapSlotAuxiliaryFlag(fldAreaState.area, fldAreaState.floor + 1, room) != 0) {
-            if (fldRoomEffectEntries[i].object != 0) {
-                dds3ObjectBaseOnFlag(fldRoomEffectEntries[i].object, 1);
+    for (i = 0; i < fldNpcModelTable; i++) {
+        s32 room = fldModelSlotTable[i].room;
+        if (room != 0 && fldTestMapSlotAuxiliaryFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, room) != 0) {
+            if (fldModelSlotTable[i].object != 0) {
+                dds3ObjectBaseOnFlag(fldModelSlotTable[i].object, 1);
             }
         }
     }
@@ -3459,9 +3459,9 @@ void fldSetNpcPalette(const FldNpcPalette *src) {
 s32 fldFindEffectByName(const char *name) {
     s32 i;
 
-    for (i = 0; i < fldRoomEffectEntryCount; i++) {
-        if (fldRoomEffectEntries[i].unk0 != 999 && strcmp(fldRoomEffectEntries[i].name, name) == 0) {
-            return fldRoomEffectEntries[i].object[1];
+    for (i = 0; i < fldNpcModelTable; i++) {
+        if (fldModelSlotTable[i].unk0 != 999 && strcmp(fldModelSlotTable[i].name, name) == 0) {
+            return fldModelSlotTable[i].object[1];
         }
     }
     return 0;
@@ -4271,13 +4271,13 @@ void fldUpdateSparkSequence(void) {
             if (fldSparkSlots[i].objectSlot != -1 && fldSparkControlState.mode == 1 &&
                 fldSparkControlState.pulse != 0 && (u32)(fldSparkControlState.modeCountdown - 10) < 6) {
                 PCP_COPY_VECTOR(&position, fldSparkSlots[i].position);
-                dx = fldAreaState.x - position.x;
-                dy = fldAreaState.y - position.y;
-                dz = fldAreaState.z - position.z;
+                dx = fldGlobalBase.x - position.x;
+                dy = fldGlobalBase.y - position.y;
+                dz = fldGlobalBase.z - position.z;
                 if (fsqrtf(dx * dx + dy * dy + dz * dz) < 200.0f) {
                     fldSetWeatherEffectPos(position.x, position.y, position.z);
-                    fldAreaState.collectedCount++;
-                    fldAreaState.score += 0x32;
+                    fldGlobalBase.collectedCount++;
+                    fldGlobalBase.score += 0x32;
                     fldSparkControlState.sequenceRemaining--;
                     p2sdPlaySE(0x670013, 0x7F, 0x3F);
                     fldReleaseCameraModel(3);
@@ -4383,11 +4383,11 @@ void func_0014C468(void) {
     evtStoreValueAndCaptureWindowPanelValue(2);
     evtSetMessageWindowOptionWhenOpen(0);
     evtBitOn(0x81A);
-    entry = (FldEnt110 *)fldFindFieldEntryByKeyPair(fldAreaState.area, fldAreaState.floor + 1);
+    entry = (FldEnt110 *)fldFindFieldEntryByKeyPair(fldGlobalBase.area, fldGlobalBase.floor + 1);
     fldSparkControlState.phase = 0;
-    fldAreaState.score = 0;
+    fldGlobalBase.score = 0;
     fldSparkControlState.countdown = entry->duration;
-    fldAreaState.transitionMode = 1;
+    fldGlobalBase.transitionMode = 1;
     fldSparkControlState.dialogPhase = 1;
     fldSparkControlState.terminated = 0;
     fldSparkControlState.mode = 0;
@@ -4400,8 +4400,8 @@ void func_0014C468(void) {
     fldSparkControlState.entry = entry;
     fldSparkControlState.entryCount = entry->entryCount;
     fldSparkControlState.cursor = 0;
-    fldAreaState.collectedCount = 0;
-    fldAreaState.unk10C = 0.0f;
+    fldGlobalBase.collectedCount = 0;
+    fldGlobalBase.unk10C = 0.0f;
     fldResetSparkTable();
     fldResetPlayerSceneObjectState();
 }
@@ -4425,7 +4425,7 @@ extern void evtSetSolarOverlayFullyVisible(void);
 /* Restores field presentation once an active event finishes, then clears the
  * event latch. An already-cleared latch leaves field resources untouched. */
 void fldFinishEventFieldState(void) {
-    FldAreaWork *state = &fldAreaState;
+    FldAreaWork *state = &fldGlobalBase;
 
     if (state->transitionMode != 0) {
         D_0032E5C4[0] = 0;
@@ -4467,7 +4467,7 @@ void fldUpdateSparkMessageSequence(void) {
             evtFinishMessageWindowAndNotify();
             fclDestroyMessage();
             fldSparkControlState.dialogPhase = 11;
-            fldAreaState.transitionMode = 0;
+            fldGlobalBase.transitionMode = 0;
             evtSetSolarOverlayFullyVisible();
         }
         break;
@@ -4484,7 +4484,7 @@ void fldUpdateSparkMessageSequence(void) {
                 evtFinishMessageWindowAndNotify();
                 fclDestroyMessage();
                 fldSparkControlState.dialogPhase = 11;
-                fldAreaState.transitionMode = 0;
+                fldGlobalBase.transitionMode = 0;
                 evtSetSolarOverlayFullyVisible();
             } else {
                 evtFinishMessageWindowAndNotify();
@@ -4518,9 +4518,9 @@ void fldUpdateSparkMessageSequence(void) {
         if (pacFileCheckEnd(D_003BAFE8) != 0) {
             D_003BAFF0 = (u32)fileGetLoadPtr(D_003BAFE8);
             D_003BAFEC = fileGetMemHandle(D_003BAFE8);
-            position[0] = fldAreaState.x;
-            position[1] = fldAreaState.y;
-            position[2] = fldAreaState.z;
+            position[0] = fldGlobalBase.x;
+            position[1] = fldGlobalBase.y;
+            position[2] = fldGlobalBase.z;
             node = dds3AddBEDEffectObjectBasic2((void *)D_003BAFF0, position, rotation);
             fldSparkControlState.object = node;
             dds3EffectObjectBasicStatOff(node, 1);
@@ -4704,7 +4704,7 @@ void fldUpdateSparkEncounterScene(void) {
         }
         D_003BAFF0 = (u32)fileGetLoadPtr(D_003BAFE8);
         D_003BAFEC = fileGetMemHandle(D_003BAFE8);
-        area = &fldAreaState;
+        area = &fldGlobalBase;
         firstVector[0] = area->x;
         firstVector[1] = area->y;
         firstVector[2] = area->z;
@@ -4760,14 +4760,14 @@ void fldUpdateSparkEncounterScene(void) {
 void fldResetEventSceneState(void) {
     fldReleaseCameraModel(0);
     D_0032E5C4[0] = 0;
-    fldAreaState.playerModelAlternate = 0;
+    fldGlobalBase.playerModelAlternate = 0;
     fldClearObjectEntryHandles();
     fldReleaseWeatherEffects();
     fldPreparePlayerSceneCameraTarget();
-    fldAreaState.deferredExit = 1;
-    fldAreaState.transitionMode = 0;
+    fldGlobalBase.deferredExit = 1;
+    fldGlobalBase.transitionMode = 0;
     D_003D62A8[0] = 0;
-    fldAreaState.unk138 = 1;
+    fldGlobalBase.unk138 = 1;
     evtSetSolarOverlayFullyVisible();
 }
 
@@ -4781,13 +4781,13 @@ void fldStartDeferredFieldExit(void) {
 /* Completes deferred exit state 2 only after the message window stops being
  * controlled, then closes its display channel and restores the camera target. */
 void fldFinishDeferredExit(void) {
-    if (fldAreaState.deferredExit == 2) {
+    if (fldGlobalBase.deferredExit == 2) {
         dspRequestMessageWindowModeOne();
         if (!fclChkMessage()) {
             evtFinishMessageWindowAndNotify();
             fclDestroyMessage();
             fldPreparePlayerSceneCameraTarget();
-            fldAreaState.deferredExit = 0;
+            fldGlobalBase.deferredExit = 0;
         }
     }
 }
@@ -4809,11 +4809,11 @@ s32 fldGetEncounterSelection(void) {
 }
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAE78);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", fldCurrentBgmHandle);
+INCLUDE_SDATA(const s32, "game/code_001411F0", fldSeLastBgm);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldSceneSoundBase);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", fldPendingSoundCount);
+INCLUDE_SDATA(const s32, "game/code_001411F0", gFldSe3DNum);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAE90);
 
@@ -4821,9 +4821,9 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAE94);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldCurrentBgmMode);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", fldSceneBgmArchiveTrack);
+INCLUDE_SDATA(const s32, "game/code_001411F0", MidiNo);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", fldSceneBgmArchivePhase);
+INCLUDE_SDATA(const s32, "game/code_001411F0", fldBgmReloadStep);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldArchiveLoadPending);
 
@@ -4831,7 +4831,7 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", fldFixedArchiveLoadPhase);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAEAC);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", fldAreaFlagIndex);
+INCLUDE_SDATA(const s32, "game/code_001411F0", fldAutoMapField);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAEB4);
 
@@ -4851,13 +4851,13 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAED0);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAED4);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", fldSceneReady);
+INCLUDE_SDATA(const s32, "game/code_001411F0", AutoMapSeq);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", fldSceneRecords);
+INCLUDE_SDATA(const s32, "game/code_001411F0", fldAutoMapHeader);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", fldSceneRecordCount);
+INCLUDE_SDATA(const s32, "game/code_001411F0", fldAutoMapData);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", fldSceneRecordResource);
+INCLUDE_SDATA(const s32, "game/code_001411F0", fldAutoMapBuf);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAEE8);
 
@@ -4893,7 +4893,7 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF24);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF28);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", fldRoomEffectEntryCount);
+INCLUDE_SDATA(const s32, "game/code_001411F0", fldNpcModelTable);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF30);
 
@@ -4935,7 +4935,7 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF78);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF7C);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", fldObjectSlotCount);
+INCLUDE_SDATA(const s32, "game/code_001411F0", fldTakaraCount);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF84);
 

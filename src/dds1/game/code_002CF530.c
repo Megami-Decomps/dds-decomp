@@ -11,7 +11,7 @@ extern void (*sdfTickCallback)(void);
 
 
 
-extern SdfHandlerNode *sdfHandlerNodeListHead;
+extern SdfHandlerNode *sdfDmacHandlerTable;
 
 extern s32 DisableIntc(s32);
 
@@ -88,13 +88,13 @@ SdfHandlerNode *sdfAddHandler(s32 kind, s32 channel, s32 handler, s32 arg, s32 n
     node->handlerKind = kind;
     node->channel = channel;
     node->handlerId = id;
-    node->next = sdfHandlerNodeListHead;
-    sdfHandlerNodeListHead = node;
+    node->next = sdfDmacHandlerTable;
+    sdfDmacHandlerTable = node;
     return node;
 }
 
 void sdfIpuRemoveHandler(SdfHandlerNode *target) {
-    SdfHandlerNode **link = &sdfHandlerNodeListHead;
+    SdfHandlerNode **link = &sdfDmacHandlerTable;
     SdfHandlerNode *node = *link;
 
     while (node != NULL) {
@@ -123,10 +123,10 @@ void sdfIpuRemoveHandler(SdfHandlerNode *target) {
 
 void sdfDrainPendingHandlers(void) {
     SdfHandlerNode *current;
-    while ((current = sdfHandlerNodeListHead) != 0) {
+    while ((current = sdfDmacHandlerTable) != 0) {
         sdfIpuRemoveHandler(current);
     }
 }
 
-SdfHandlerNode *sdfHandlerNodeListHead __attribute__((section(".sdata"))) = NULL;
+SdfHandlerNode *sdfDmacHandlerTable __attribute__((section(".sdata"))) = NULL;
 

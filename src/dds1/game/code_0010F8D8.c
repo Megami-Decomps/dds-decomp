@@ -9,7 +9,7 @@
 #include "dds3_vu_transform.h"
 #include "dds3_world_counter.h"
 
-extern u32 dds3WorldCounter;
+extern u32 dds3ObjectIdCounter;
 
 /* Load the cached VU matrix, or rebuild and cache it when flags bit 1 is clear. */
 void dds3GetTMPoseSet(EffWorldNode *object) {
@@ -87,8 +87,8 @@ s32 dds3CallBasicDrawProc(EffWorldNode *holder) {
 
 /* Advance and return the 16-bit sequence stored in a 32-bit backing word. */
 u32 dds3AllocObjectId(void) {
-    dds3WorldCounter = (dds3WorldCounter + 1) & 0xffff;
-    return dds3WorldCounter;
+    dds3ObjectIdCounter = (dds3ObjectIdCounter + 1) & 0xffff;
+    return dds3ObjectIdCounter;
 }
 
 void dds3SetUnitObjectId(EffWorldNode *node, u32 worldNodeValue) {
@@ -173,7 +173,7 @@ u32 worlddrawprocuder(EffWorldNode *obj) {
 }
 
 extern EffWorldNode *dds3AllocBasic(u32 kind);
-extern EffWorldNode *dds3ActiveWorld;
+extern EffWorldNode *dds3TheWorld;
 
 EffWorldNode *dds3AddWorld(s32 capacity) {
     EffWorldNode *world;
@@ -181,7 +181,7 @@ EffWorldNode *dds3AddWorld(s32 capacity) {
     struct SdfMemBlock *allocation;
     s32 index;
 
-    if (dds3ActiveWorld != NULL) {
+    if (dds3TheWorld != NULL) {
         return NULL;
     }
     if ((u32)capacity - 0x20u >= 0x7FE0u) {
@@ -211,11 +211,11 @@ EffWorldNode *dds3AddWorld(s32 capacity) {
     info->freeHeadIndex = 0;
     info->freeTailIndex = capacity - 1;
     info->freeEntryCount = capacity;
-    dds3ActiveWorld = world;
+    dds3TheWorld = world;
     return world;
 }
 
-INCLUDE_SDATA(const s32, "game/code_0010F8D8", dds3WorldCounter);
+INCLUDE_SDATA(const s32, "game/code_0010F8D8", dds3ObjectIdCounter);
 
-INCLUDE_SDATA(const s32, "game/code_0010F8D8", dds3ActiveWorld);
+INCLUDE_SDATA(const s32, "game/code_0010F8D8", dds3TheWorld);
 

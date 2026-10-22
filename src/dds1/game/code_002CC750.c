@@ -130,7 +130,7 @@ void sdfAppendFormattedDebugLogPair(s32 left, s32 right) {
 
 /* Clear the complete per-unit profile-record table in game state. */
 void ptyClearProfileRecords(void) {
-    memset(datGameState->profileRecords, 0, sizeof(datGameState->profileRecords));
+    memset(DDS3_GBWK->profileRecords, 0, sizeof(DDS3_GBWK->profileRecords));
 }
 
 s8 scrSelectOperandIndex(DatPartyRecord *unit, s32 profileId);
@@ -202,7 +202,7 @@ void ptyApplyProfilePreset(s32 useCurrentProfile, DatPartyRecord *unit) {
             profileId = D_00393A80[presetIndex].profileIds[groupIndex][profileIndex];
             available = 1;
             for (i = 0; i < 5; i++) {
-                partyUnit = &datGameState->party[i];
+                partyUnit = &DDS3_GBWK->party[i];
                 occupied = partyUnit->flags & PTY_PROFILE_UNIT_OCCUPIED_BIT;
                 if (occupied != 0 && profileId != 0) {
                     if (ptyTestPrimaryProfileFlag(partyUnit, profileId) != 0) {
@@ -306,7 +306,7 @@ void ptyRebuildProfileSkills(s32 useCurrentProfile, DatPartyRecord *unit) {
 void ptyRebuildAllProfiles(void) {
     s32 unitIndex;
     for (unitIndex = 0; unitIndex < 5; unitIndex++) {
-        DatPartyRecord *unit = &datGameState->party[unitIndex];
+        DatPartyRecord *unit = &DDS3_GBWK->party[unitIndex];
         if ((unit->flags & PTY_PROFILE_UNIT_OCCUPIED_BIT) != 0) {
             s32 candidateUnitId;
             for (candidateUnitId = 0; candidateUnitId < PTY_PROFILE_UNIT_ID_COUNT; candidateUnitId++) {
@@ -498,7 +498,7 @@ s32 ptyTestPrimaryProfileFlag(DatPartyRecord *partyRecord, u16 id) {
     u32 shift;
 
     prfDecodeFlagPair(id, &word, &shift);
-    return (datGameState->mantraBits[partyRecord->unitId].words[word] & (1 << shift)) != 0;
+    return (DDS3_GBWK->mantraBits[partyRecord->unitId].words[word] & (1 << shift)) != 0;
 }
 
 /* Require the primary profile flag for every row not marked as excluded. */
@@ -522,7 +522,7 @@ void ptySetSecondaryProfileFlag(DatPartyRecord *unit, u16 id) {
 
     prfDecodeFlagPair(id, &word, &shift);
     shift++;
-    datGameState->mantraBits[unit->unitId].words[word] |= 1U << shift;
+    DDS3_GBWK->mantraBits[unit->unitId].words[word] |= 1U << shift;
 }
 
 /* Test the second bit of the decoded profile flag pair for this unit. */
@@ -532,7 +532,7 @@ s32 ptyTestSecondaryProfileFlag(DatPartyRecord *partyRecord, u16 id) {
 
     prfDecodeFlagPair(id, &word, &shift);
     shift++;
-    return (datGameState->mantraBits[partyRecord->unitId].words[word] & (1 << shift)) != 0;
+    return (DDS3_GBWK->mantraBits[partyRecord->unitId].words[word] & (1 << shift)) != 0;
 }
 
 s8 scrGetSelectedOperandIndex(DatPartyRecord *op) {
@@ -541,7 +541,7 @@ s8 scrGetSelectedOperandIndex(DatPartyRecord *op) {
 
 /* Address an unchecked profile record within the unit's record bank. */
 DatProfileRecord *ptyGetProfileRecord(DatPartyRecord *unit, u16 profileId) {
-    return &datGameState->profileRecords[unit->unitId][profileId];
+    return &DDS3_GBWK->profileRecords[unit->unitId][profileId];
 }
 
 u32 ptyGetProfileRecordValue(DatPartyRecord *unit, u16 profileId) {
@@ -610,7 +610,7 @@ void scrSetGlobalSeenBit(u32 flagId) {
     if (flagId < SCR_GLOBAL_FLAG_FIRST_ID) return;
     if (flagId >= SCR_GLOBAL_FLAG_END_ID) return;
     bitIndex = flagId + SCR_GLOBAL_FLAG_WRAP_BIAS;
-    datGameState->scriptFlags[bitIndex >> SCR_GLOBAL_FLAG_WORD_SHIFT] |= SCR_FLAG_PRIMARY_BIT << (bitIndex & SCR_GLOBAL_FLAG_BIT_MASK);
+    DDS3_GBWK->scriptFlags[bitIndex >> SCR_GLOBAL_FLAG_WORD_SHIFT] |= SCR_FLAG_PRIMARY_BIT << (bitIndex & SCR_GLOBAL_FLAG_BIT_MASK);
 }
 
 /* Return the global bit's raw word mask, not a normalized boolean. */
@@ -619,7 +619,7 @@ u32 scrTestGlobalSeenBit(u32 flagId) {
     if (bitIndex < SCR_GLOBAL_FLAG_FIRST_ID) return 0;
     if (bitIndex >= SCR_GLOBAL_FLAG_END_ID) return 0;
     bitIndex = bitIndex + SCR_GLOBAL_FLAG_WRAP_BIAS;
-    return datGameState->scriptFlags[bitIndex >> SCR_GLOBAL_FLAG_WORD_SHIFT] & (SCR_FLAG_PRIMARY_BIT << (bitIndex & SCR_GLOBAL_FLAG_BIT_MASK));
+    return DDS3_GBWK->scriptFlags[bitIndex >> SCR_GLOBAL_FLAG_WORD_SHIFT] & (SCR_FLAG_PRIMARY_BIT << (bitIndex & SCR_GLOBAL_FLAG_BIT_MASK));
 }
 
 /* Set only bit 2 of the selected flag nibble. */
@@ -957,7 +957,7 @@ s32 ptyAreReqProfilesInParty(PrfDds1RequirementSlot *operand) {
             s32 profileId = profileIds[profileIndex];
             s32 unitIndex;
             for (unitIndex = 0; unitIndex < 5; unitIndex++) {
-                DatPartyRecord *partyUnit = &datGameState->party[unitIndex];
+                DatPartyRecord *partyUnit = &DDS3_GBWK->party[unitIndex];
                 if ((partyUnit->flags & PTY_PROFILE_UNIT_OCCUPIED_BIT) != 0) {
                     if (ptyTestPrimaryProfileFlag(partyUnit, (u16)profileId) != 0) {
                         profilePresent = 1;
@@ -983,7 +983,7 @@ u32 prfReqCheckUnitLevel(DatPartyRecord *unit, PrfDds1RequirementSlot *operand) 
 
 /* Test the global currency counter against a prerequisite threshold. */
 u32 prfReqCheckGlobalCounter(PrfDds1RequirementSlot *operand) {
-    if (datGameState->header.currency < (u32)operand->sourceValue) {
+    if (DDS3_GBWK->header.currency < (u32)operand->sourceValue) {
         return 0;
     }
     return 1;
@@ -1134,7 +1134,7 @@ s32 prfSelectSatisfiedUnsetRequirementGroup(u32 start) {
                 s32 minimum = D_00393220[i].requirement[j].minimum;
 
                 if (id != 0) {
-                    if (datGameState->inventory.counts[id] < minimum) {
+                    if (DDS3_GBWK->inventory.counts[id] < minimum) {
                         met = 0;
                     }
                 }
@@ -1288,14 +1288,14 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
     color = effSampleColorAlphaTracks(&work->params.color, &work->params.alpha, frame, maxFrames);
     count = work->params.count;
     spawnRange = count >> 4;
-    halfFov = sdfSceneProjectionParameters.camera.fov * 0.5f;
+    halfFov = dds3ScreenParam.camera.fov * 0.5f;
     mark = work->marks;
     vertices = work->vertices;
     colors = work->colors;
     spreadX = sdfAtan(halfFov * 1.5f * 512.0f / 448.0f);
     spreadY = sdfAtan(halfFov);
     /* Retail evaluates these two as well and never uses the results. */
-    sdfAtan(sdfSceneProjectionParameters.camera.fov);
+    sdfAtan(dds3ScreenParam.camera.fov);
     sdfAtan(3.14159265f / 4.0f);
     if (spawnRange != 0) {
         spawn = dds3GetRandA((EffRandState *)effSharedRandomState) % spawnRange + 1;

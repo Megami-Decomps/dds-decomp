@@ -91,7 +91,7 @@ extern void btlSetCommandPanelFadeMode(s8, s32);
 
 extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32);
 
-extern SndPad kwlnTaskPadButtonStates;
+extern SndPad dds3PadButtonState;
 
 extern s8 D_00324530[];
 
@@ -226,7 +226,7 @@ s32 btlSelectSerialEncounter(void) {
 
     entries = datBattleAdjustmentRecords[encounterPack].groups[groupIndex].entries;
     chance = entries[selectionIndex].serialEncounterChanceAdjustment;
-    if ((datGameState->world.fieldFlags & 2) != 0) {
+    if ((DDS3_GBWK->world.fieldFlags & 2) != 0) {
         chance *= 5;
     }
     if (chance > 90) {
@@ -297,11 +297,11 @@ s32 btlRollSurpriseAttack(void) {
     count = 0;
     /* The ordering bytes select the first three active members of five slots. */
     for (i = 0; i < 5 && count < 3; i++) {
-        u8 slot = datGameState->partyOrder[i];
-        if (datGameState->party[slot].flags & 1) {
-            if (datGameState->party[slot].flags & 2) {
+        u8 slot = DDS3_GBWK->partyOrder[i];
+        if (DDS3_GBWK->party[slot].flags & 1) {
+            if (DDS3_GBWK->party[slot].flags & 2) {
                 count++;
-                partyLevel += datGameState->party[slot].level;
+                partyLevel += DDS3_GBWK->party[slot].level;
             }
         }
     }
@@ -336,9 +336,9 @@ s32 btlRollSurpriseAttack(void) {
     chance = (s32)((f32)chance * levelScale[difference]);
     ratio = 1.0f;
     for (i = 0; i < 5; i++) {
-        if (datGameState->party[i].flags & 1) {
-            if (datGameState->party[i].flags & 2) {
-                if (btlCheckSpecialAbility(&datGameState->party[i], 0x22D)) {
+        if (DDS3_GBWK->party[i].flags & 1) {
+            if (DDS3_GBWK->party[i].flags & 2) {
+                if (btlCheckSpecialAbility(&DDS3_GBWK->party[i], 0x22D)) {
                     ratio *= datAbilityParameters[0x22D - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
                 }
             }
@@ -910,7 +910,7 @@ void btlGetActorClassPair(s8 classId, u32 *first, u32 *second) {
     *second = pairs.values[classId * 2 + 1];
 }
 
-extern SndPad kwlnTaskPadButtonStates;
+extern SndPad dds3PadButtonState;
 
 extern s32 btlBuildActorLinkageSkillList(BtlUnit *, BattleRosterTable *);
 
@@ -967,10 +967,10 @@ void func_001AADF8(BattleSceneObject *object) {
     switch (fldGetSceneObjectState()) {
     case 1:
     case 2: {
-        if (kwlnTaskPadButtonStates.confirm >= 0 && kwlnTaskPadButtonStates.primaryCancel >= 0) {
-            if ((kwlnTaskPadButtonStates.alternateNext & 2) != 0) {
+        if (dds3PadButtonState.confirm >= 0 && dds3PadButtonState.primaryCancel >= 0) {
+            if ((dds3PadButtonState.alternateNext & 2) != 0) {
                 for (; changed == 0;) {
-                    if (btlCommandPanelWork->classIndex != 5 || kwlnTaskPadButtonStates.alternateNext < 0) {
+                    if (btlCommandPanelWork->classIndex != 5 || dds3PadButtonState.alternateNext < 0) {
                         btlCommandPanelWork->classIndex++;
                         btlCommandPanelWork->labelFade = 0xF0;
                         btlLinkedSelectionTaskBuffer->backdropFade = 0;
@@ -991,9 +991,9 @@ void func_001AADF8(BattleSceneObject *object) {
                         changed = 1;
                     }
                 }
-            } else if ((kwlnTaskPadButtonStates.alternatePrev & 2) != 0) {
+            } else if ((dds3PadButtonState.alternatePrev & 2) != 0) {
                 for (; changed == 0;) {
-                    if (btlCommandPanelWork->classIndex != 0 || kwlnTaskPadButtonStates.alternatePrev < 0) {
+                    if (btlCommandPanelWork->classIndex != 0 || dds3PadButtonState.alternatePrev < 0) {
                         btlCommandPanelWork->classIndex--;
                         btlCommandPanelWork->labelFade = 0xF0;
                         btlLinkedSelectionTaskBuffer->backdropFade = 0;
@@ -1711,7 +1711,7 @@ void btlClearSharedBattleStateWords(void) {
     s32 temp_v0;
 
     temp_v0 = 2;
-    puVar1 = datGameState->battleFlags;
+    puVar1 = DDS3_GBWK->battleFlags;
     do {
         temp_v0 = temp_v0 - 1;
         *puVar1 = 0;
@@ -1738,13 +1738,13 @@ s32 btlAccessRecordedLinkageSkillFlag(s32 id, s32 operation) {
     }
     switch (selector) {
     case 0:
-        datGameState->battleFlags[word] |= 1 << bit;
+        DDS3_GBWK->battleFlags[word] |= 1 << bit;
         break;
     case 1:
-        datGameState->battleFlags[word] &= ~(1 << bit);
+        DDS3_GBWK->battleFlags[word] &= ~(1 << bit);
         break;
     default:
-        return ((datGameState->battleFlags[word] & (1 << bit)) != 0);
+        return ((DDS3_GBWK->battleFlags[word] & (1 << bit)) != 0);
     }
     return 1;
 }
@@ -4190,7 +4190,7 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
         row = entry - cursor;
         state = object->state;
         if (state == 2 && (optionCount = btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 1)) >= 2) {
-            if ((kwlnTaskPadButtonStates.prev & 2) || (kwlnTaskPadButtonStates.next & 2)) {
+            if ((dds3PadButtonState.prev & 2) || (dds3PadButtonState.next & 2)) {
                 /* Retail compares cached entry with the relative row at 001B2FE4. */
                 if (D_003BD834->cursor != cursor || D_003BD834->entry != row || D_003BD834->row != row) {
                     D_003BD834->alpha = 128;
@@ -4314,8 +4314,8 @@ s32 func_001B3FB0(KwlnTask *task) {
     s32 opacity;
     u32 shade;
 
-    if (work->fadeCountdowns[0] <= 0 || kwlnTaskPadButtonStates.confirm < 0 ||
-        kwlnTaskPadButtonStates.primaryCancel < 0) {
+    if (work->fadeCountdowns[0] <= 0 || dds3PadButtonState.confirm < 0 ||
+        dds3PadButtonState.primaryCancel < 0) {
         return -1;
     }
     for (i = 0; i < 4; i++) {
@@ -4778,7 +4778,7 @@ void btlReleaseRegisteredTaskBuffer(KwlnTask *unused) {
 
 /* The notice callback permits its LINKAGE tutorial while all three flag words are clear. */
 s32 btlIsLinkageTutorialEligible(void) {
-    u32 *slot = datGameState->battleFlags;
+    u32 *slot = DDS3_GBWK->battleFlags;
     s32 i;
     for (i = 0; i < 3; i++) {
         if (slot[i] != 0) {
@@ -5592,13 +5592,13 @@ void btlCreateReserveActorPanelTask(void) {
     memset(&work->reserveEntries[1], 0, sizeof(BattleActorPanelEntry));
     memset(&work->reserveEntries[2], 0, sizeof(BattleActorPanelEntry));
     memset(&work->reserveEntries[3], 0, sizeof(BattleActorPanelEntry));
-    for (i = 0; i < datGameState->partyCount; i++) {
-        if (datGameState->party[i].flags & 2) {
+    for (i = 0; i < DDS3_GBWK->partyCount; i++) {
+        if (DDS3_GBWK->party[i].flags & 2) {
             work->reserveCount++;
         }
     }
-    work->reserveCount = datGameState->partyCount - work->reserveCount;
-    work->activeCount = datGameState->partyCount - work->reserveCount;
+    work->reserveCount = DDS3_GBWK->partyCount - work->reserveCount;
+    work->activeCount = DDS3_GBWK->partyCount - work->reserveCount;
     for (i = 0; i < work->reserveCount; i++) {
         work->reserveEntries[i].position[0] = positions.entries[i][0];
         work->reserveEntries[i].position[1] = positions.entries[i][1];
@@ -5644,19 +5644,19 @@ s32 btlUpdateReservePanelSelection(KwlnTask *task, BtlState *battle) {
     if (commandTask != NULL) {
         command = (BattleSceneObject *)dds3GetProcessData(commandTask);
         if (command->state == 6) {
-            if (kwlnTaskPadButtonStates.confirm < 0) {
-                work->partyRecordIndex = datGameState->partyOrder[work->selectedReserveIndex + work->activeCount];
+            if (dds3PadButtonState.confirm < 0) {
+                work->partyRecordIndex = DDS3_GBWK->partyOrder[work->selectedReserveIndex + work->activeCount];
                 sndSetStationedSeVolume(8);
                 command->state = 8;
                 command->commandData->phase = 9;
-            } else if (kwlnTaskPadButtonStates.primaryCancel < 0) {
+            } else if (dds3PadButtonState.primaryCancel < 0) {
                 btlSlotBankPromoteStates(work);
                 command->state = 7;
                 sndSetStationedSeVolume(0xA);
                 btlSetActionActorPanelPresentation(command->owner, 0, 0);
             } else {
-                if (kwlnTaskPadButtonStates.alternateNext & 2) {
-                    if (work->selectedReserveIndex != count - 1 || kwlnTaskPadButtonStates.alternateNext < 0) {
+                if (dds3PadButtonState.alternateNext & 2) {
+                    if (work->selectedReserveIndex != count - 1 || dds3PadButtonState.alternateNext < 0) {
                         work->selectedReserveIndex++;
                         if (work->selectedReserveIndex >= count) {
                             work->selectedReserveIndex = 0;
@@ -5665,8 +5665,8 @@ s32 btlUpdateReservePanelSelection(KwlnTask *task, BtlState *battle) {
                         btlSlotBankPromoteStates(work);
                         work->reserveEntries[work->selectedReserveIndex].presentation.presentationState = 2;
                     }
-                } else if (kwlnTaskPadButtonStates.alternatePrev & 2) {
-                    if (work->selectedReserveIndex != 0 || kwlnTaskPadButtonStates.alternatePrev < 0) {
+                } else if (dds3PadButtonState.alternatePrev & 2) {
+                    if (work->selectedReserveIndex != 0 || dds3PadButtonState.alternatePrev < 0) {
                         work->selectedReserveIndex--;
                         if (work->selectedReserveIndex < 0) {
                             work->selectedReserveIndex = count - 1;
@@ -5903,7 +5903,7 @@ s32 btlUpdateAndDrawReserveActorPanels(KwlnTask *task) {
     i = 0;
     if (reserveCount > 0) {
         do {
-            DatGameState *game = datGameState;
+            DatGameState *game = DDS3_GBWK;
             s32 partyIndex = game->partyOrder[i + work->activeCount];
             s16 baseFade;
             u32 color;
@@ -7864,7 +7864,7 @@ void btlBuildEligibleActorList(s32 unused, s16 *count) {
     s32 index = *(s32 *)(context + 0x27C);
     s32 total = 0;
     if ((datBattleSceneRecords[index].flags & 0x800) == 0) {
-        u8 *selected = datGameState->inventory.counts;
+        u8 *selected = DDS3_GBWK->inventory.counts;
         DatItemSkillRecord *items = datItemSkillRecords;
         u8 *out = D_00358FE0;
         s32 i;
@@ -7907,7 +7907,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
     u16 *commands;
     u16 *picked;
 
-    if (kwlnTaskPadButtonStates.confirm < 0) {
+    if (dds3PadButtonState.confirm < 0) {
         switch (kind) {
         case 0:
             if (entry == 0 && cursor == 0) {
@@ -7998,12 +7998,12 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
                 s32 capacity = 0;
                 s32 i;
 
-                for (i = 0; i < datGameState->partyCount; i++) {
-                    if ((datGameState->party[i].flags & 2) != 0) {
+                for (i = 0; i < DDS3_GBWK->partyCount; i++) {
+                    if ((DDS3_GBWK->party[i].flags & 2) != 0) {
                         capacity++;
                     }
                 }
-                capacity = datGameState->partyCount - capacity;
+                capacity = DDS3_GBWK->partyCount - capacity;
                 if ((datBattleSceneRecords[battle->battleMode].flags & 0x800) != 0) {
                     capacity = 0;
                 }
@@ -8045,7 +8045,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
         default:
             return 0;
         }
-    } else if (kwlnTaskPadButtonStates.primaryCancel < 0) {
+    } else if (dds3PadButtonState.primaryCancel < 0) {
         if ((u32)(object->state - 1) < 2) {
             if (kind == 4) {
                 btlSetActionActorPanelPresentation(object->owner, 1, 0);
@@ -8059,14 +8059,14 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
             object->selections[0].cursor = 0;
             sndSetStationedSeVolume(10);
         }
-    } else if ((kwlnTaskPadButtonStates.prev & 2) != 0) {
+    } else if ((dds3PadButtonState.prev & 2) != 0) {
         if (entry > 0) {
             if (entry == cursor + 1 && cursor > 0) {
                 cursor--;
             }
             entry--;
             sndSetStationedSeVolume(0);
-        } else if (kwlnTaskPadButtonStates.prev < 0) {
+        } else if (dds3PadButtonState.prev < 0) {
             entry = (s16)(count - 1);
             cursor = entry - 3;
             if (cursor < 0) {
@@ -8075,7 +8075,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
                 sndSetStationedSeVolume(0);
             }
         }
-    } else if ((kwlnTaskPadButtonStates.next & 2) != 0) {
+    } else if ((dds3PadButtonState.next & 2) != 0) {
         if (entry < count - 1) {
             entry++;
             if (entry == cursor + 3 && cursor < count - 4) {
@@ -8084,14 +8084,14 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
             if (count >= 2) {
                 sndSetStationedSeVolume(0);
             }
-        } else if (kwlnTaskPadButtonStates.next < 0) {
+        } else if (dds3PadButtonState.next < 0) {
             entry = 0;
             cursor = 0;
             if (count >= 2) {
                 sndSetStationedSeVolume(0);
             }
         }
-    } else if (kwlnTaskPadButtonStates.buttons[0] < 0) {
+    } else if (dds3PadButtonState.buttons[0] < 0) {
         if (kind == 4) {
             btlSetActionActorPanelPresentation(object->owner, 1, 0);
         }
@@ -8309,7 +8309,7 @@ void func_001BE590(BattleSceneObject *object) {
                 }
                 break;
             case 1: {
-                DatGameState *state = datGameState;
+                DatGameState *state = DDS3_GBWK;
                 s32 count = state->partyCount;
                 /* Count active members, then convert to available capacity. */
                 s16 capacity = 0;
@@ -8621,10 +8621,10 @@ s32 btlUpdateBattleSceneCommands(KwlnTask *task) {
             panel->activeEntries[slot].presentation.unkF0 = 0;
             panel->activeEntries[slot].presentation.pendingSceneState = 5;
             panel->activeEntries[slot].presentation.hpState = 3;
-            panel->activeEntries[slot].presentation.hpLevel = datGameState->party[panel->partyRecordIndex].hp;
+            panel->activeEntries[slot].presentation.hpLevel = DDS3_GBWK->party[panel->partyRecordIndex].hp;
             panel->activeEntries[slot].presentation.hpTarget = panel->activeEntries[slot].presentation.hpLevel;
             panel->activeEntries[slot].presentation.mpState = 3;
-            panel->activeEntries[slot].presentation.mpLevel = datGameState->party[panel->partyRecordIndex].mp;
+            panel->activeEntries[slot].presentation.mpLevel = DDS3_GBWK->party[panel->partyRecordIndex].mp;
             panel->activeEntries[slot].presentation.mpTarget = panel->activeEntries[slot].presentation.mpLevel;
             panel->activeEntries[slot].presentation.presentationState = 2;
             panel->activeEntries[slot].presentation.presentationValue = 0;
@@ -9085,7 +9085,7 @@ void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode
     s32 selection = 0;
     u32 count;
 
-    if (kwlnTaskPadButtonStates.confirm < 0) {
+    if (dds3PadButtonState.confirm < 0) {
         task = dds3SearchProcessName(btlCommandPanelTaskNameRef);
         object = (BattleSceneObject *)dds3GetProcessData(task);
         if (object->state == 8) {
@@ -9104,7 +9104,7 @@ void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode
         return;
     }
 
-    if (kwlnTaskPadButtonStates.primaryCancel < 0) {
+    if (dds3PadButtonState.primaryCancel < 0) {
         work->state = 4;
         sndSetStationedSeVolume(10);
         if (fldGetSceneObjectState() == 8) {
@@ -9134,45 +9134,45 @@ void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode
 
     switch (mode) {
     case 0:
-        if ((kwlnTaskPadButtonStates.alternateNext & 2) != 0) selection = 1;
-        else if ((kwlnTaskPadButtonStates.alternatePrev & 2) != 0) selection = 2;
+        if ((dds3PadButtonState.alternateNext & 2) != 0) selection = 1;
+        else if ((dds3PadButtonState.alternatePrev & 2) != 0) selection = 2;
         break;
     case 1:
-        if ((kwlnTaskPadButtonStates.alternatePrev & 2) != 0) selection = 1;
-        else if ((kwlnTaskPadButtonStates.alternateNext & 2) != 0) selection = 2;
+        if ((dds3PadButtonState.alternatePrev & 2) != 0) selection = 1;
+        else if ((dds3PadButtonState.alternateNext & 2) != 0) selection = 2;
         break;
     case 2:
-        if (((u8)kwlnTaskPadButtonStates.prev & 2) != 0) selection = 1;
-        else if (((u8)kwlnTaskPadButtonStates.next & 2) != 0) selection = 2;
+        if (((u8)dds3PadButtonState.prev & 2) != 0) selection = 1;
+        else if (((u8)dds3PadButtonState.next & 2) != 0) selection = 2;
         break;
     case 3:
-        if (((u8)kwlnTaskPadButtonStates.next & 2) != 0) selection = 1;
-        else if (((u8)kwlnTaskPadButtonStates.prev & 2) != 0) selection = 2;
+        if (((u8)dds3PadButtonState.next & 2) != 0) selection = 1;
+        else if (((u8)dds3PadButtonState.prev & 2) != 0) selection = 2;
         break;
     case 4:
         if (battle->battleMode == 0x10E) {
-            if (((u8)kwlnTaskPadButtonStates.next & 2) != 0) selection = 1;
-            else if (((u8)kwlnTaskPadButtonStates.prev & 2) != 0) selection = 2;
-            else if ((kwlnTaskPadButtonStates.alternateNext & 2) != 0) selection = 3;
-            else if ((kwlnTaskPadButtonStates.alternatePrev & 2) != 0) selection = 4;
+            if (((u8)dds3PadButtonState.next & 2) != 0) selection = 1;
+            else if (((u8)dds3PadButtonState.prev & 2) != 0) selection = 2;
+            else if ((dds3PadButtonState.alternateNext & 2) != 0) selection = 3;
+            else if ((dds3PadButtonState.alternatePrev & 2) != 0) selection = 4;
         } else {
-            if (((u8)kwlnTaskPadButtonStates.prev & 2) != 0 || (kwlnTaskPadButtonStates.alternateNext & 2) != 0) {
+            if (((u8)dds3PadButtonState.prev & 2) != 0 || (dds3PadButtonState.alternateNext & 2) != 0) {
                 selection = 1;
-            } else if (((u8)kwlnTaskPadButtonStates.next & 2) != 0 || (kwlnTaskPadButtonStates.alternatePrev & 2) != 0) {
+            } else if (((u8)dds3PadButtonState.next & 2) != 0 || (dds3PadButtonState.alternatePrev & 2) != 0) {
                 selection = 2;
             }
         }
         break;
     case 5:
         if (battle->battleMode == 0x10E) {
-            if (((u8)kwlnTaskPadButtonStates.prev & 2) != 0) selection = 1;
-            else if (((u8)kwlnTaskPadButtonStates.next & 2) != 0) selection = 2;
-            else if ((kwlnTaskPadButtonStates.alternatePrev & 2) != 0) selection = 3;
-            else if ((kwlnTaskPadButtonStates.alternateNext & 2) != 0) selection = 4;
+            if (((u8)dds3PadButtonState.prev & 2) != 0) selection = 1;
+            else if (((u8)dds3PadButtonState.next & 2) != 0) selection = 2;
+            else if ((dds3PadButtonState.alternatePrev & 2) != 0) selection = 3;
+            else if ((dds3PadButtonState.alternateNext & 2) != 0) selection = 4;
         } else {
-            if (((u8)kwlnTaskPadButtonStates.next & 2) != 0 || (kwlnTaskPadButtonStates.alternatePrev & 2) != 0) {
+            if (((u8)dds3PadButtonState.next & 2) != 0 || (dds3PadButtonState.alternatePrev & 2) != 0) {
                 selection = 1;
-            } else if (((u8)kwlnTaskPadButtonStates.prev & 2) != 0 || (kwlnTaskPadButtonStates.alternateNext & 2) != 0) {
+            } else if (((u8)dds3PadButtonState.prev & 2) != 0 || (dds3PadButtonState.alternateNext & 2) != 0) {
                 selection = 2;
             }
         }
@@ -9381,7 +9381,7 @@ SceneAiWork *btlCreateTargetSelectionWork(BtlTask *source) {
             dds3SearchProcessName(D_003BB3B0));
         count = btlCountFlaggedSceneActors();
         if (count < 2 &&
-            (datGameState->party[other->partyRecordIndex].status & 0x4800)) {
+            (DDS3_GBWK->party[other->partyRecordIndex].status & 0x4800)) {
             btlBuildEligibleTargetIndexList(source, work->listA, 1, 4, -0x4801);
         } else {
             btlBuildEligibleTargetIndexList(source, work->listA, 1, 4, -1);

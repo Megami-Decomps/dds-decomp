@@ -4905,8 +4905,8 @@ void btlChoosePartyDerivedShadowSkill(ActionStateLink *actor) {
     }
     entry = NULL;
     for (i = 0; i < 5; i++) {
-        if (datGameState->party[i].unitId == partyId) {
-            entry = &datGameState->party[i];
+        if (DDS3_GBWK->party[i].unitId == partyId) {
+            entry = &DDS3_GBWK->party[i];
             break;
         }
     }

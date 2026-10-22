@@ -160,8 +160,8 @@ void mtrMantraSetBitAll(void) {
     s32 recordIndex;
 
     for (recordIndex = 0; recordIndex < MTR_RECORD_COUNT; recordIndex++) {
-        if (datGameState->party[recordIndex].flags & 1) {
-            mtrMantraSetBit(&datGameState->party[recordIndex]);
+        if (DDS3_GBWK->party[recordIndex].flags & 1) {
+            mtrMantraSetBit(&DDS3_GBWK->party[recordIndex]);
         }
     }
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraSetBitAll()]*****************\n");
@@ -438,7 +438,7 @@ void mtrMantraEquipRelease(s32 key, s32 initResult) {
 
 extern DspUnitName *datUnitNames;
 extern DspMantraName *D_00435E50;
-extern s8 kwlnTaskPadButtonStates[];
+extern s8 dds3PadButtonState[];
 extern DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *);
 extern u16 mnuGetSelectedPanelValue(MnuStatusResource *);
 extern MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *);
@@ -482,7 +482,7 @@ s32 mtrMantraEquipUpdate(void) {
     selectedPanelFlags = mnuGetSelectedPanelValue(work);
     switch (equip->state) {
     case 1:
-        if (kwlnTaskPadButtonStates[0x21] < 0) {
+        if (dds3PadButtonState[0x21] < 0) {
             resultKind = 1;
             if (scrGetSelectedScriptEntryId(selectedRecord) == (u32)selectedEntryId) {
                 if (((u32)selectedPanelFlags >> 8) & 1) {
@@ -498,14 +498,14 @@ s32 mtrMantraEquipUpdate(void) {
                     equip->state = 3;
                 } else {
                     sourceAmount = mnuGetMantraSourceValue((u16)selectedEntryId);
-                    if ((u32)datGameState->header.currency < (u32)sourceAmount) {
+                    if ((u32)DDS3_GBWK->header.currency < (u32)sourceAmount) {
                         equip->state = 7;
                     } else {
                         equip->state = 2;
                     }
                 }
             }
-        } else if (kwlnTaskPadButtonStates[0x23] >= 0) {
+        } else if (dds3PadButtonState[0x23] >= 0) {
             break;
         } else {
             resultKind = 2;
@@ -573,7 +573,7 @@ s32 mtrMantraEquipUpdate(void) {
         equip->state = 12;
         if ((((u32)selectedPanelFlags >> 8) & 2) == 0) {
             sourceAmount = mnuGetMantraSourceValue(sourceEntryId);
-            datGameState->header.currency -= sourceAmount;
+            DDS3_GBWK->header.currency -= sourceAmount;
         }
         work->flags.equipApplied = 1;
         scrSelectScriptEntryAndInitialize(selectedRecord, selectedEntryId);
@@ -726,11 +726,11 @@ MenuList *mtrBuildUnitSelectionList(void) {
     list->drawCallback = mtrDrawUnitSelectionRow;
     memset(slots, 0, sizeof(slots));
     for (i = 0; i < 5; i++) {
-        if (datGameState->party[i].flags & 1) {
-            if (datGameState->party[i].unitId == 8) {
+        if (DDS3_GBWK->party[i].flags & 1) {
+            if (DDS3_GBWK->party[i].unitId == 8) {
                 slots[0] = i + 1;
             } else {
-                slots[datGameState->party[i].unitId] = i + 1;
+                slots[DDS3_GBWK->party[i].unitId] = i + 1;
             }
         }
     }
@@ -739,7 +739,7 @@ MenuList *mtrBuildUnitSelectionList(void) {
         if (*p != 0) {
             node = mnuListAppendNode(list, 0);
             partyIndex = *p - 1;
-            node->items = (u8 *)&datGameState->party[partyIndex];
+            node->items = (u8 *)&DDS3_GBWK->party[partyIndex];
         }
         p++;
     }
@@ -903,7 +903,7 @@ s32 mtrDrawUnitSelectionOverlay(MnuStatusResource *resourceWork) {
     return 0;
 }
 
-extern s8 kwlnTaskPadButtonStates[];
+extern s8 dds3PadButtonState[];
 extern MenuListNode *mnuRetreatListCursorDefault(MenuList *);
 extern MenuListNode *mnuAdvanceListCursorDefault(MenuList *);
 extern void mnuClearListFlagsOneAndTwo(MenuList *);
@@ -913,25 +913,25 @@ s32 mnuHandleMantraSelectionInput(MnuStatusResource *resourceWork) {
     s32 action = 0;
     MenuList *list = resourceWork->list;
 
-    if (kwlnTaskPadButtonStates[0x26] & 2) {
+    if (dds3PadButtonState[0x26] & 2) {
         if (mnuRetreatListCursorDefault(list) != NULL) {
             sound = 1;
             mnuRebuildProfilePanelFromRenderSnapshot(resourceWork);
         }
-    } else if (kwlnTaskPadButtonStates[0x27] & 2) {
+    } else if (dds3PadButtonState[0x27] & 2) {
         if (mnuAdvanceListCursorDefault(list) != NULL) {
             sound = 1;
             mnuRebuildProfilePanelFromRenderSnapshot(resourceWork);
         }
-    } else if (kwlnTaskPadButtonStates[0x21] < 0) {
+    } else if (dds3PadButtonState[0x21] < 0) {
         action = 2;
         sound = 2;
-    } else if (kwlnTaskPadButtonStates[0x23] < 0) {
+    } else if (dds3PadButtonState[0x23] < 0) {
         action = 3;
         sound = 3;
     }
-    if (kwlnTaskPadButtonStates[0x21] < 0 ||
-        (kwlnTaskPadButtonStates[0x26] == 0 && kwlnTaskPadButtonStates[0x27] == 0)) {
+    if (dds3PadButtonState[0x21] < 0 ||
+        (dds3PadButtonState[0x26] == 0 && dds3PadButtonState[0x27] == 0)) {
         mnuClearListFlagsOneAndTwo(list);
     }
     switch (sound) {

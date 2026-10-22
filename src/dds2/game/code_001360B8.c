@@ -17,7 +17,7 @@ extern u32 D_0038BB60[];
 extern s32 fldCameraColorFade;
 
 extern u32 D_00436128;
-extern u32 fldDisplayStateWords[];
+extern u32 fldRunDanteGunFlag[];
 
 
 extern void *D_004360F0;
@@ -88,17 +88,17 @@ void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode) {
                 lightSetIndex = D_00436128;
             }
             light = &((FldLightSet *)fldSkyLightSetBuffer)[lightSetIndex];
-            D_0043616C = fldDisplayStateWords[11];
-            fldDisplayStateWords[11] = lightSetIndex;
+            D_0043616C = fldRunDanteGunFlag[11];
+            fldRunDanteGunFlag[11] = lightSetIndex;
             D_00436168 = lightSetIndex;
             area = light->fadeArea;
-            fldDisplayStateWords[13] = area;
-            fldDisplayStateWords[14] = light->displayStateSlot14;
+            fldRunDanteGunFlag[13] = area;
+            fldRunDanteGunFlag[14] = light->displayStateSlot14;
             value = light->fadeMode;
-            fldDisplayStateWords[15] = value;
-            fldDisplayStateWords[16] = light->swayMode;
+            fldRunDanteGunFlag[15] = value;
+            fldRunDanteGunFlag[16] = light->swayMode;
             fldSetFadeTarget(area, value, duration);
-            fldSetFilterAnime(fldDisplayStateWords[16]);
+            fldSetFilterAnime(fldRunDanteGunFlag[16]);
             vec[0] = light->drawColorFixedR * 0.00390625f;
             vec[1] = light->drawColorFixedG * 0.00390625f;
             vec[2] = light->drawColorFixedB * 0.00390625f;
@@ -154,8 +154,8 @@ extern s32 D_00436168;
 void fldSetFileResolverIdx(u32 state) {
     D_00436128 = state;
     D_00436158 = 0;
-    fldDisplayStateWords[12] = 0;
-    fldDisplayStateWords[11] = state;
+    fldRunDanteGunFlag[12] = 0;
+    fldRunDanteGunFlag[11] = state;
     D_00436168 = 0;
 }
 
@@ -186,8 +186,8 @@ void fldApplySkyLightSetToPlayerVU(void) {
         } else {
             light = &((FldLightSet *)fldSkyLightSetBuffer)[D_00436128];
         }
-        fldSetFadeTarget(fldDisplayStateWords[13], fldDisplayStateWords[15], 0);
-        fldSetFilterAnime(fldDisplayStateWords[16]);
+        fldSetFadeTarget(fldRunDanteGunFlag[13], fldRunDanteGunFlag[15], 0);
+        fldSetFilterAnime(fldRunDanteGunFlag[16]);
 
         vec[0] = light->drawColorFixedR * 0.00390625f;
         vec[1] = light->drawColorFixedG * 0.00390625f;
@@ -297,13 +297,13 @@ void fldSkyBattle(void) {
     s32 value;
 
     area = light->fadeArea;
-    fldDisplayStateWords[13] = area;
-    fldDisplayStateWords[14] = light->displayStateSlot14;
+    fldRunDanteGunFlag[13] = area;
+    fldRunDanteGunFlag[14] = light->displayStateSlot14;
     value = light->fadeMode;
-    fldDisplayStateWords[15] = value;
-    fldDisplayStateWords[16] = light->swayMode;
+    fldRunDanteGunFlag[15] = value;
+    fldRunDanteGunFlag[16] = light->swayMode;
     fldSetFadeTarget(area, value, 0);
-    fldSetFilterAnime(fldDisplayStateWords[16]);
+    fldSetFilterAnime(fldRunDanteGunFlag[16]);
     vec[0] = light->drawColorFixedR * 0.00390625f;
     vec[1] = light->drawColorFixedG * 0.00390625f;
     vec[2] = light->drawColorFixedB * 0.00390625f;
@@ -356,13 +356,13 @@ void fldApplyLightSetIndex(s32 index) {
 
     D_00436128 = index;
     area = light->fadeArea;
-    fldDisplayStateWords[13] = area;
-    fldDisplayStateWords[14] = light->displayStateSlot14;
+    fldRunDanteGunFlag[13] = area;
+    fldRunDanteGunFlag[14] = light->displayStateSlot14;
     value = light->fadeMode;
-    fldDisplayStateWords[15] = value;
-    fldDisplayStateWords[16] = light->swayMode;
+    fldRunDanteGunFlag[15] = value;
+    fldRunDanteGunFlag[16] = light->swayMode;
     fldSetFadeTarget(area, value, 0);
-    fldSetFilterAnime(fldDisplayStateWords[16]);
+    fldSetFilterAnime(fldRunDanteGunFlag[16]);
     vec[0] = light->drawColorFixedR * 0.00390625f;
     vec[1] = light->drawColorFixedG * 0.00390625f;
     vec[2] = light->drawColorFixedB * 0.00390625f;

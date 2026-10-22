@@ -136,7 +136,7 @@ typedef struct FrFontSpritePacket {
 } FrFontSpritePacket;
 
 extern FrFontSystem frFontWork;
-extern FntList frFontResourceList;
+extern FntList gFGC;
 
 /* Decode encoded text into glyph nodes, optionally extending an existing chain. */
 #ifdef VERSION_DDS1

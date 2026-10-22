@@ -25,9 +25,9 @@ extern void frDelFontStyle(s32 slotId);
 
 extern s32 mnuQueryTitleSoundBusy(void);
 
-extern u32 frFontSharedRenderFlags;
+extern u32 gFontDrawOT;
 
-extern u32 frFontContextCursorSpacing;
+extern u32 gMessageStepY;
 
 
 
@@ -36,7 +36,7 @@ extern s32 D_0043656C;
 extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s32 positionNext);
 
 
-extern u8 frFontSharedGlyphFlags;
+extern u8 gModeFlag;
 
 
 
@@ -45,7 +45,7 @@ void frFontCreateContext();
 
 extern u8 D_00436578[];
 
-extern s32 frFontDefaultGlyphCellSize;
+extern s32 frDefaultFontHandle;
 
 
 extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
@@ -120,7 +120,7 @@ void frDelStyleAll(void) {
     }
 }
 
-extern u8 frFontImageBlockData[];
+extern u8 frFontClutTable[];
 /* This caller passes the full image-buffer word; the callee consumes its low half. */
 extern void frCopyFontClutToVram(s32 buffer, s32 image);
 
@@ -132,7 +132,7 @@ void frSetFontClut(void) {
     s32 sourceWordOffset = 0;
     FrFontSystem *work = &frFontWork;
     u32 *imageBuffer = work->imageBuffers;
-    const u8 *sourceTable = frFontImageBlockData;
+    const u8 *sourceTable = frFontClutTable;
 
     do {
         u32 *outputWord = imageWords;
@@ -238,7 +238,7 @@ u32 frFontGetInitialGlyphY(s8 fontIndex, s32 glyphIndex) {
 }
 
 extern u16 frFontGetSlotCellWidth(s32 index);
-extern s8 frFontGlyphAdvanceBySlot[];
+extern s8 gFontBaseWidth[];
 
 /* Fill cell dimensions, advance and horizontal bearing for one glyph. */
 void frFontFillGlyphMetrics(void *opaqueWork, s32 glyphIndex) {
@@ -265,7 +265,7 @@ void frFontFillGlyphMetrics(void *opaqueWork, s32 glyphIndex) {
         work->cellWidth = frFontGetGlyphCellWidth(fontIndex);
     }
     work->cellHeight = frFontGetGlyphCellHeight(work->fontIndex);
-    work->advance = frFontGlyphAdvanceBySlot[work->fontIndex];
+    work->advance = gFontBaseWidth[work->fontIndex];
 
     if (defaultSlot != 0) {
         scale = (f32)(work->cellWidth + 3) /
@@ -361,7 +361,7 @@ FrFontGlyph *frSetUserImage(FrFontRecord *source, FrFontGlyph *destination) {
         previous->next = glyph;
     }
     glyph->sourceItem = source;
-    glyph->advance = frFontGlyphAdvanceBySlot[0];
+    glyph->advance = gFontBaseWidth[0];
     glyph->cellDimensions.cellWidth = frFontGetGlyphCellWidth(0);
     glyph->cellDimensions.cellHeight = frFontGetGlyphCellHeight(0);
     glyph->previous = previous;
@@ -461,7 +461,7 @@ void frInitTextHandle(FrFontChildGlyph *glyph, s32 glyphId, s32 fontIndex, s32 f
     glyph->renderValueOrSetupOrShade.setupBytes.secondOption = secondOption;
     glyph->glyphCodeOrContext.glyphCode = glyphId;
     glyph->parentDimensionsOrRenderWord.renderWord = packedFlags & ~FR_FONT_BYTE_MASK;
-    glyph->renderValueOrSetupOrShade.setupBytes.sharedFlags = frFontSharedGlyphFlags;
+    glyph->renderValueOrSetupOrShade.setupBytes.sharedFlags = gModeFlag;
     glyph->x = 0;
     glyph->y = 0;
     glyph->advance = 0;
@@ -669,21 +669,21 @@ void frSetFontColor(FrFontGlyph *parentNode, u32 colorWord) {
 
 /* OR the requested mask into the shared byte, preserving implicit narrowing. */
 void frEnableMode(s32 mask) {
-    mask |= frFontSharedGlyphFlags;
-    frFontSharedGlyphFlags = mask;
+    mask |= gModeFlag;
+    gModeFlag = mask;
 }
 
 /* Clear flag bits from the shared font flag byte; returns the previous value. */
 u8 frDisableMode(u8 mask) {
-    u8 previousFlags = frFontSharedGlyphFlags;
+    u8 previousFlags = gModeFlag;
 
-    frFontSharedGlyphFlags = previousFlags & ~mask;
+    gModeFlag = previousFlags & ~mask;
     return previousFlags;
 }
 
 /* Replace the complete shared render-flag word used by subsequent drawing. */
 void frSetFontDrawOT(u32 renderFlags) {
-    frFontSharedRenderFlags = renderFlags;
+    gFontDrawOT = renderFlags;
 }
 
 /* Step only second-option-2 children: decrease the low byte by eight, clamp at
@@ -820,7 +820,7 @@ s32 frFontDrawGlyphInDefaultMode(FrFontGlyph *glyph) {
 
 /* Pass the selected mode and current shared render-flag word to the renderer. */
 s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *glyph, s8 mode) {
-    return frFontDrawGlyphChain(glyph, mode, frFontSharedRenderFlags);
+    return frFontDrawGlyphChain(glyph, mode, gFontDrawOT);
 }
 
 /* Draw every child glyph, advance each parent chain, and report its total
@@ -1064,7 +1064,7 @@ u32 frFontGetGlyphCellWidth(u8 fontIndex) {
 
     if (entryIndex < FR_FONT_DEFAULT_CELL_SLOT_COUNT) {
         if (entryIndex >= 0) {
-            return frFontDefaultGlyphCellSize;
+            return frDefaultFontHandle;
         }
     }
     return frFontWork.entries[entryIndex].resourceHeader->cellWidth;
@@ -1077,7 +1077,7 @@ u32 frFontGetGlyphCellHeight(u8 fontIndex) {
 
     if (entryIndex < FR_FONT_DEFAULT_CELL_SLOT_COUNT) {
         if (entryIndex >= 0) {
-            return frFontDefaultGlyphCellSize;
+            return frDefaultFontHandle;
         }
     }
     return frFontWork.entries[entryIndex].resourceHeader->cellHeight;
@@ -1085,12 +1085,12 @@ u32 frFontGetGlyphCellHeight(u8 fontIndex) {
 
 /* Restore this game's cursor spacing (DDS1: 21, DDS2: 25). */
 void frFontResetContextCursorSpacing(void) {
-    frFontContextCursorSpacing = FR_FONT_DEFAULT_CURSOR_SPACING;
+    gMessageStepY = FR_FONT_DEFAULT_CURSOR_SPACING;
 }
 
 /* Store unscaled cursor spacing; advancement applies its factor of eight later. */
 void frFontSetContextCursorSpacing(u32 spacing) {
-    frFontContextCursorSpacing = spacing;
+    gMessageStepY = spacing;
 }
 
 /* Count the y-bands in a glyph chain, using the same band walk as frFontGetGlyphPositionAtIndex. */
@@ -1328,24 +1328,24 @@ void frFontCheckPendingGlyphState(FrFontCtx *ctx) {
 
 /* Advance by eight times cursor spacing and request both context updates. */
 void frMessageReturnCode(FrFontCtx *ctx) {
-    ctx->y += frFontContextCursorSpacing * FR_FONT_CONTEXT_CURSOR_SCALE;
+    ctx->y += gMessageStepY * FR_FONT_CONTEXT_CURSOR_SCALE;
     ctx->pendingCreate = 1;
     ctx->pendingPosition = 1;
 }
 
 s8 frFontEncodedTextGlyphSpacing __attribute__((section(".sdata"))) = 1;
 
-u32 frFontContextCursorSpacing __attribute__((section(".sdata"))) = 25;
+u32 gMessageStepY __attribute__((section(".sdata"))) = 25;
 
-s32 frFontDefaultGlyphCellSize __attribute__((section(".sdata"))) = 20;
+s32 frDefaultFontHandle __attribute__((section(".sdata"))) = 20;
 
 u32 itfTextLipsUnitId __attribute__((section(".sdata"))) = 0;
 
 u32 itfTextLipsMotionId __attribute__((section(".sdata"))) = 0;
 
-u8 frFontSharedGlyphFlags __attribute__((section(".sdata"))) = 0x16;
+u8 gModeFlag __attribute__((section(".sdata"))) = 0x16;
 
-u32 frFontSharedRenderFlags __attribute__((section(".sdata"))) = 0x54;
+u32 gFontDrawOT __attribute__((section(".sdata"))) = 0x54;
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_0043656C);
 

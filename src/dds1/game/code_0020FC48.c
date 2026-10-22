@@ -988,8 +988,8 @@ u16 btlCheckPartyCommandCounterEligibility(s32 commandId, u32 memberMask) {
 
     for (i = 0; i < 5; i++) {
         if (memberMask & (1 << i)) {
-            if (datGameState->party[i].flags & 1) {
-                entryList[count++] = (u8 *)&datGameState->party[i];
+            if (DDS3_GBWK->party[i].flags & 1) {
+                entryList[count++] = (u8 *)&DDS3_GBWK->party[i];
             }
         }
     }
@@ -1000,17 +1000,17 @@ u16 btlCheckPartyCommandCounterEligibility(s32 commandId, u32 memberMask) {
     }
     switch (commandId) {
     case 0xC4:
-        if (datGameState->world.fieldFlags & 1) {
+        if (DDS3_GBWK->world.fieldFlags & 1) {
             return 4;
         }
         break;
     case 0xC5:
-        if (datGameState->world.fieldFlags & 2) {
+        if (DDS3_GBWK->world.fieldFlags & 2) {
             return 4;
         }
         break;
     case 0xC6:
-        if (datGameState->world.fieldFlags & 4) {
+        if (DDS3_GBWK->world.fieldFlags & 4) {
             return 4;
         }
         break;
@@ -1275,7 +1275,7 @@ void btlCopyPaletteLowByteToAlpha(s32 *colors) {
     } while (i >= 0);
 }
 
-extern SdfTex *kwlnHeldTextureReference;
+extern SdfTex *dds3RenderTexture;
 
 /* Queue the held texture as a centered scaled quad with caller primitive/color/depth. */
 void btlDrawScaledHeldTextureQuad(SdfListHead *list, s32 primitive, s32 color, s32 depth, f32 scale) {
@@ -1290,7 +1290,7 @@ void btlDrawScaledHeldTextureQuad(SdfListHead *list, s32 primitive, s32 color, s
     s32 horizontal[4];
     s32 vertical[4];
 
-    sdf2DLinkTexPacket(list, kwlnHeldTextureReference, (primitive >> 9) & 1);
+    sdf2DLinkTexPacket(list, dds3RenderTexture, (primitive >> 9) & 1);
     halfWidth = 0x1000;
     halfHeight = 0x700;
     xOffset = (s32)((f32)halfWidth * scale);
@@ -1507,7 +1507,7 @@ void btlDrawCapturedScreenTileOverlay(SdfListHead *packets, u32 cellColor, u32 b
 
     if (btlRuntimeState.options & 1) {
         SdfPacket *clampPacket;
-        sdf2DLinkTexPacket(packets, kwlnHeldTextureReference, 0);
+        sdf2DLinkTexPacket(packets, dds3RenderTexture, 0);
         clampPacket = (SdfPacket *)sdfGrAllocPacketBuff(0x30);
         clampPacket[0].unk0 = 2;
         clampPacket[0].unk8 = (((u64)0x50000002 << 16 | 0x1000) << 16);
@@ -1791,7 +1791,7 @@ void btlInitializeGraphicsRuntime(void) {
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
     SdfListHead *packetList = (SdfListHead *)sdfPrimAllocDrawTag(0);
-    sdfLinkLoadImage(packetList, kwlnHeldTextureReference->primaryResource,
+    sdfLinkLoadImage(packetList, dds3RenderTexture->primaryResource,
                               0, 0, 0x200, 0xe0, (s32)runtime->request, 0);
     D_00325708.append(&D_00325708, packetList);
     sdfMemFreeDelayedDirect((struct SdfMemBlock *)runtime->handle);
@@ -1804,7 +1804,7 @@ void btlInitializeOverlayGraphics(void) {
     SdfListHead *packetList = (SdfListHead *)sdfPrimAllocDrawTag(0);
     SdfLinkedPacketList *context = (SdfLinkedPacketList *)sdfGrAllocPacketBuff(16);
     sdfPreDrawTagInit(context);
-    sdfPrimLinkFrameMovePacket(packetList, context, kwlnHeldTextureReference->primaryResource, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
+    sdfPrimLinkFrameMovePacket(packetList, context, dds3RenderTexture->primaryResource, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
     sdfPreDrawChainLink((SdfPacketChain *)D_00325860, context);
     D_00325708.append(&D_00325708, packetList);
     btlRuntimeState.options |= 1;
@@ -1813,7 +1813,7 @@ void btlInitializeOverlayGraphics(void) {
 extern void fldSkyDrawFilter(void);
 
 
-extern u32 kwlnDrawControlFlags;
+extern u32 dds3DrawFlag;
 
 extern s32 sdfDelayedResrcCheck(void);
 
@@ -1849,10 +1849,10 @@ s32 btlUpdateRuntimeFadeState(void) {
             mode = btlRuntimeState.fadeMode;
             if (mode == 2) {
                 kwlnFadeBackgroundStartOut(0);
-                kwlnDrawControlFlags |= 0x10000000;
+                dds3DrawFlag |= 0x10000000;
                 if (btlRuntimeState.counter < 3) {
                     fldSkyDrawFilter();
-                    kwlnDrawControlFlags |= 0x02000000;
+                    dds3DrawFlag |= 0x02000000;
                     btlBossDebugPrintf(D_003A69D8);
                     break;
                 }
@@ -2129,12 +2129,12 @@ void btlDrawUnitAffinityDebug(BtlUnit *unit, s32 x, s32 y) {
 }
 
 /* Two logical pads, each with sixteen held/trigger/new-press state bytes. */
-extern s8 sdfPadButtonStates[0x20];
+extern s8 dds3PadBitTable[0x20];
 
 /* Apply up/down/page-down/page-up precedence, including endpoint wrapping.
  * Returns 1 only for button 1's new-press bit when no direction branch ran. */
 s32 mnuListMoveCursor(BtlDebugMenuCursor *menuList) {
-    if (sdfPadButtonStates[6] & MNU_LIST_INPUT_FLAG) {
+    if (dds3PadBitTable[6] & MNU_LIST_INPUT_FLAG) {
         if (menuList->cursor != 0) {
             menuList->cursor--;
             if (menuList->cursor == menuList->top && menuList->cursor != 0) {
@@ -2144,7 +2144,7 @@ s32 mnuListMoveCursor(BtlDebugMenuCursor *menuList) {
             menuList->cursor = menuList->count - 1;
             menuList->top = menuList->count - menuList->rows;
         }
-    } else if (sdfPadButtonStates[7] & MNU_LIST_INPUT_FLAG) {
+    } else if (dds3PadBitTable[7] & MNU_LIST_INPUT_FLAG) {
         if (menuList->cursor >= menuList->count - 1) {
             menuList->cursor = 0;
             menuList->top = 0;
@@ -2154,7 +2154,7 @@ s32 mnuListMoveCursor(BtlDebugMenuCursor *menuList) {
                 menuList->top++;
             }
         }
-    } else if (sdfPadButtonStates[5] & MNU_LIST_INPUT_FLAG) {
+    } else if (dds3PadBitTable[5] & MNU_LIST_INPUT_FLAG) {
         if (menuList->top + menuList->rows * 2 < menuList->count) {
             menuList->top += menuList->rows;
             menuList->cursor += menuList->rows;
@@ -2162,7 +2162,7 @@ s32 mnuListMoveCursor(BtlDebugMenuCursor *menuList) {
             menuList->cursor = menuList->count - 1;
             menuList->top = menuList->count - menuList->rows;
         }
-    } else if (sdfPadButtonStates[4] & MNU_LIST_INPUT_FLAG) {
+    } else if (dds3PadBitTable[4] & MNU_LIST_INPUT_FLAG) {
         if (menuList->top >= menuList->rows) {
             menuList->top -= menuList->rows;
             menuList->cursor -= menuList->rows;
@@ -2170,7 +2170,7 @@ s32 mnuListMoveCursor(BtlDebugMenuCursor *menuList) {
             menuList->cursor = 0;
             menuList->top = 0;
         }
-    } else if (sdfPadButtonStates[1] < 0) {
+    } else if (dds3PadBitTable[1] < 0) {
         return 1;
     }
     return 0;
@@ -2399,7 +2399,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
                     (s16)state->encounterParamA, (s16)state->encounterParamB);
                 btlBossDebugPrintfN(150, 420, 0, "POS:[%.2f,%.2f,%.2f]",
                     (double)position[0], (double)position[1], (double)position[2]);
-                if (sdfPadButtonStates[9] & 2) {
+                if (dds3PadBitTable[9] & 2) {
                     btlStartTask(btlCreateEffObjB(unit, D_003BB93E));
                     D_003BB93E = D_003BB93E < 0xCD ? D_003BB93E + 1 : 0;
                 }
@@ -2421,7 +2421,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             case 5: state->debug.phase = 8; break;
             case 6: state->debug.phase = 9; break;
             }
-        } else if (sdfPadButtonStates[3] < 0) {
+        } else if (dds3PadBitTable[3] < 0) {
             state->debug.phase = 10;
         }
         mnuDrawMenuFrameSizedToRows((u8 *)24, (u8 *)256, 100,
@@ -2456,7 +2456,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
                 unit->partyRecord.flags |= 0x23;
             }
             state->debug.phase = 10;
-        } else if (sdfPadButtonStates[3] < 0) {
+        } else if (dds3PadBitTable[3] < 0) {
             state->debug.phase = 2;
         }
         if (unit->partyRecord.flags & 0x20) {
@@ -2501,7 +2501,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         btlDebugMenuRecordNoOp(&btlDebugPartyRecordEditor);
         btlDebugMenuAfterRecordNoOp();
         btlDrawUnitAffinityDebug(unit, 256, 32);
-        if (sdfPadButtonStates[0] & 2) {
+        if (dds3PadBitTable[0] & 2) {
             btlDebugEditorPartyRecord.hp /= 2;
             if (btlDebugEditorPartyRecord.hp == 0) {
                 btlDebugEditorPartyRecord.hp = 1;
@@ -2519,9 +2519,9 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         memcpy(&unit->partyRecord, &btlDebugEditorPartyRecord, sizeof(btlDebugEditorPartyRecord));
         btlRefreshUnitMotionSelection(unit);
         if (unit->status.flags & 0x200) {
-            memcpy(&datGameState->party[unit->partyIndex], &btlDebugEditorPartyRecord, sizeof(btlDebugEditorPartyRecord));
+            memcpy(&DDS3_GBWK->party[unit->partyIndex], &btlDebugEditorPartyRecord, sizeof(btlDebugEditorPartyRecord));
         }
-        if (sdfPadButtonStates[3] < 0) {
+        if (dds3PadBitTable[3] < 0) {
             state->debug.phase = 2;
         }
         break;
@@ -2529,10 +2529,10 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         unit = state->debug.selectedUnit;
         if (mnuListMoveCursor(&state->debug.motionMenu)) {
             state->debugMotionCountdown = 0;
-        } else if (sdfPadButtonStates[3] < 0) {
+        } else if (dds3PadBitTable[3] < 0) {
             state->debug.phase = 2;
         }
-        if (sdfPadButtonStates[0] < 0) {
+        if (dds3PadBitTable[0] < 0) {
             state->debugMotionCountdown = state->timingRate * 3;
         }
         if (state->debugMotionCountdown > 0) {
@@ -2568,14 +2568,14 @@ s32 btlUpdateBattleModelDebugEditor(void) {
                 btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));
                 state->debug.phase = 2;
             }
-        } else if (sdfPadButtonStates[3] < 0) {
+        } else if (dds3PadBitTable[3] < 0) {
             state->debug.phase = 2;
         }
         mnuDrawMenuFrameSizedToRows((u8 *)24, (u8 *)32, 164, &state->debug.gunMenu, state->debug.gunNames);
         break;
     case 7:
         unit = state->debug.selectedUnit;
-        if (sdfPadButtonStates[3] < 0) {
+        if (dds3PadBitTable[3] < 0) {
             state->battleFlags &= ~0x400000;
             btlRefreshUnitMotionSelection(unit);
             state->debug.phase = 2;
@@ -2592,13 +2592,13 @@ s32 btlUpdateBattleModelDebugEditor(void) {
     case 8:
         unit = state->debug.selectedUnit;
         if (unit->status.flags & 0x400) {
-            if (sdfPadButtonStates[3] < 0) {
+            if (dds3PadBitTable[3] < 0) {
                 state->battleFlags &= ~0x400000;
                 btlRefreshUnitMotionSelection(unit);
                 state->debug.phase = 2;
             } else {
                 transform = btlSelectSharedOrIndexedTransformParameters(unit->resourceKind, unit->species);
-                if (sdfPadButtonStates[2] < 0) {
+                if (dds3PadBitTable[2] < 0) {
                     record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
                     transform->reach = record->reach;
                     transform->height = record->height;
@@ -2680,7 +2680,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
                 }
             }
         }
-        if (sdfPadButtonStates[3] < 0) {
+        if (dds3PadBitTable[3] < 0) {
             btlRefreshUnitMotionSelection(unit);
             state->debug.phase = 2;
         }
@@ -2725,7 +2725,7 @@ extern char D_003BBB00[];
 
 extern char D_003BBB08[];
 
-extern u8 sdfPfsDebugMode;
+extern u8 sdfHddValid;
 
 
 extern char *sdfFileGetHostRoot(void);
@@ -2797,7 +2797,7 @@ void btlWriteActorModelTableFile(void) {
         cursor += sprintf(cursor, "{%2d,%2d}", motion->alphaDuration, motion->unk12);
         cursor += sprintf(cursor, D_003BBB00);
     }
-    if (sdfPfsDebugMode) {
+    if (sdfHddValid) {
         fd = sceOpen("pfs0:/model/table.txt", 0x602, 0666);
     } else {
         sprintf(path, "%smodel/table.txt", sdfFileGetHostRoot());
@@ -2905,12 +2905,12 @@ s32 btlUpdateDebugEncounterSelector(void) {
     struct FrFontGlyph *glyph;
     s32 encounter;
 
-    if (sdfPadButtonStates[3] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         state->battleFlags = (state->battleFlags & 0xFFFDFE3F) | 0x11000000;
         state->unk_1FC |= 0x40;
         D_003BBB20 = 1;
     }
-    if (sdfPadButtonStates[13] < 0) {
+    if (dds3PadBitTable[13] < 0) {
         D_003BBB0F ^= 1;
     }
     if (D_003BBB0F != 0) {
@@ -2946,9 +2946,9 @@ s32 btlUpdateDebugEncounterSelector(void) {
         }
     } else {
         btlBossDebugPrintfN(btlDebugEncounterWindowView.x + 185, btlDebugEncounterWindowView.y + 4, 0,
-            D_003BBB50, datGameState->conditionalEncounterGauge, btlGetConditionalEncounterInterval(D_003BBB14));
+            D_003BBB50, DDS3_GBWK->conditionalEncounterGauge, btlGetConditionalEncounterInterval(D_003BBB14));
     }
-    if (sdfPadButtonStates[1] < 0) {
+    if (dds3PadBitTable[1] < 0) {
         D_003BBB0D = 1;
     }
     if (D_003BBB0D == 0) {
@@ -2994,46 +2994,46 @@ void btlApplyDebugEncounterPartySelection(void) {
 
     if (D_003BBB0E != 0) {
         btlGetRuntime();
-        datGameState->partyCount = 5;
-        for (i = 0; i < datGameState->partyCount; i++) {
+        DDS3_GBWK->partyCount = 5;
+        for (i = 0; i < DDS3_GBWK->partyCount; i++) {
             if (D_003BBB58 != 0) {
-                memcpy(&datGameState->party[i], &btlDebugPartyPresets[i],
+                memcpy(&DDS3_GBWK->party[i], &btlDebugPartyPresets[i],
                        sizeof(DatPartyRecord));
                 for (n = 0; btlDebugPartyEffectDataOverrides[i][n] >= 0; n++) {
-                    datGameState->party[i].effectData[n] = btlDebugPartyEffectDataOverrides[i][n];
+                    DDS3_GBWK->party[i].effectData[n] = btlDebugPartyEffectDataOverrides[i][n];
                 }
                 for (; n < 24; n++) {
-                    datGameState->party[i].effectData[n] = 0;
+                    DDS3_GBWK->party[i].effectData[n] = 0;
                 }
-                datGameState->party[i].effectDataCount = 0;
+                DDS3_GBWK->party[i].effectDataCount = 0;
             }
             if (i < D_003BBB10) {
-                datGameState->party[i].flags |= 0x1002;
+                DDS3_GBWK->party[i].flags |= 0x1002;
             } else {
-                datGameState->party[i].flags =
-                    (datGameState->party[i].flags | 0x1000) & ~2;
+                DDS3_GBWK->party[i].flags =
+                    (DDS3_GBWK->party[i].flags | 0x1000) & ~2;
             }
-            datGameState->partyOrder[i] = i;
-            datGameState->party[i].maxHp =
-                btlComputeSkillAdjustedMaxHp(&datGameState->party[i]);
-            datGameState->party[i].maxMp =
-                btlComputeSkillAdjustedMaxMp(&datGameState->party[i]);
-            if (datGameState->party[i].maxHp < datGameState->party[i].hp ||
+            DDS3_GBWK->partyOrder[i] = i;
+            DDS3_GBWK->party[i].maxHp =
+                btlComputeSkillAdjustedMaxHp(&DDS3_GBWK->party[i]);
+            DDS3_GBWK->party[i].maxMp =
+                btlComputeSkillAdjustedMaxMp(&DDS3_GBWK->party[i]);
+            if (DDS3_GBWK->party[i].maxHp < DDS3_GBWK->party[i].hp ||
                 D_003BBB58 != 0) {
-                datGameState->party[i].hp = datGameState->party[i].maxHp;
+                DDS3_GBWK->party[i].hp = DDS3_GBWK->party[i].maxHp;
             }
-            if (datGameState->party[i].maxMp < datGameState->party[i].mp ||
+            if (DDS3_GBWK->party[i].maxMp < DDS3_GBWK->party[i].mp ||
                 D_003BBB58 != 0) {
-                datGameState->party[i].mp = datGameState->party[i].maxMp;
+                DDS3_GBWK->party[i].mp = DDS3_GBWK->party[i].maxMp;
             }
-            datGameState->party[i].menuValue = 0xA1;
+            DDS3_GBWK->party[i].menuValue = 0xA1;
         }
         for (; i < 5; i++) {
-            memset(&datGameState->party[i], 0, sizeof(DatPartyRecord));
+            memset(&DDS3_GBWK->party[i], 0, sizeof(DatPartyRecord));
         }
-        datGameState->inventory.counts[0] = 0;
+        DDS3_GBWK->inventory.counts[0] = 0;
         for (i = 1; i < 192; i++) {
-            datGameState->inventory.counts[i] = 99;
+            DDS3_GBWK->inventory.counts[i] = 99;
         }
         evtBitOn(0x62);
         evtBitOn(0x68);
@@ -3042,7 +3042,7 @@ void btlApplyDebugEncounterPartySelection(void) {
         evtBitOn(0x65);
         evtBitOn(0x66);
         evtBitOn(0x81B);
-        datGameState->world.slotFlags |= 0xC;
+        DDS3_GBWK->world.slotFlags |= 0xC;
         D_003BBB58 = 0;
     }
 }

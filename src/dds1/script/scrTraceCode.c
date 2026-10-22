@@ -5,7 +5,7 @@
 #include "scr_arg_read.h"
 
 extern const ScrCommand D_0039E288[];
-extern u32 (*scrOpcodeHandlers[])(ScrData *scr);
+extern u32 (*codefunc[])(ScrData *scr);
 
 void CodeFunc_2Operation(ScrData *scr, s32 operatorCode);
 
@@ -26,14 +26,14 @@ u32 CodeFunc_PushF(ScrData *scr)
 
 u32 CodeFunc_PushIX(ScrData *scr)
 {
-    PushInt(scr, datGameState->script.ints[scr->instructions[scr->pc].parts.sOperand]);
+    PushInt(scr, DDS3_GBWK->script.ints[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
 
 u32 CodeFunc_PushFX(ScrData *scr)
 {
-    PushFloat(scr, datGameState->script.floats[scr->instructions[scr->pc].parts.sOperand]);
+    PushFloat(scr, DDS3_GBWK->script.floats[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
@@ -71,7 +71,7 @@ u32 CodeFunc_PushReg(ScrData *scr)
 
 u32 CodeFunc_PopIX(ScrData *scr)
 {
-    datGameState->script.ints[scr->instructions[scr->pc].parts.sOperand] = PopInt(scr);
+    DDS3_GBWK->script.ints[scr->instructions[scr->pc].parts.sOperand] = PopInt(scr);
     scr->pc++;
     return 1;
 }
@@ -81,7 +81,7 @@ u32 CodeFunc_PopFX(ScrData *scr)
     f32 floatValue;
 
     floatValue = PopFloat(scr);
-    datGameState->script.floats[scr->instructions[scr->pc].parts.sOperand] = floatValue;
+    DDS3_GBWK->script.floats[scr->instructions[scr->pc].parts.sOperand] = floatValue;
     scr->pc++;
     return 1;
 }
@@ -112,7 +112,7 @@ u32 CodeFunc_Comm(ScrData *scr)
     s32 commandPc = scr->pc;
     s32 commandIndex = scr->instructions[commandPc].parts.sOperand;
 
-    scrCurrentContext = scr;
+    nowpwork = scr;
     if (D_0039E288[commandIndex].func() == 0) {
         return 2;
     }
@@ -158,175 +158,175 @@ u32 CodeFunc_Goto(ScrData *scr)
     return 1;
 }
 
-extern s32 scrBinaryIntegerLeftOperand;
-extern s32 scrBinaryIntegerRightOperand;
-extern s32 scrBinaryIntegerResult;
-extern f32 scrBinaryFloatLeftOperand;
-extern f32 scrBinaryFloatRightOperand;
-extern f32 scrBinaryFloatResult;
-extern s32 scrBinaryLeftOperandType;
-extern s32 scrBinaryRightOperandType;
+extern s32 CodeFunc_2Operation_i1;
+extern s32 CodeFunc_2Operation_i2;
+extern s32 CodeFunc_2Operation_ri;
+extern f32 CodeFunc_2Operation_f1;
+extern f32 CodeFunc_2Operation_f2;
+extern f32 CodeFunc_2Operation_rf;
+extern s32 CodeFunc_2Operation_t1;
+extern s32 CodeFunc_2Operation_t2;
 
 void CodeFunc_2Operation(ScrData *scr, s32 operatorCode)
 {
-    scrBinaryLeftOperandType = scr->stackTypes[scr->sp - 1];
-    scrBinaryRightOperandType = scr->stackTypes[scr->sp - 2];
-    if ((scrBinaryLeftOperandType == 0 || scrBinaryLeftOperandType == 2) && (scrBinaryRightOperandType == 0 || scrBinaryRightOperandType == 2)) {
-        scrBinaryIntegerLeftOperand = PopInt(scr);
-        scrBinaryIntegerRightOperand = PopInt(scr);
+    CodeFunc_2Operation_t1 = scr->stackTypes[scr->sp - 1];
+    CodeFunc_2Operation_t2 = scr->stackTypes[scr->sp - 2];
+    if ((CodeFunc_2Operation_t1 == 0 || CodeFunc_2Operation_t1 == 2) && (CodeFunc_2Operation_t2 == 0 || CodeFunc_2Operation_t2 == 2)) {
+        CodeFunc_2Operation_i1 = PopInt(scr);
+        CodeFunc_2Operation_i2 = PopInt(scr);
         switch (operatorCode) {
         case 0:
-            scrBinaryIntegerResult = scrBinaryIntegerLeftOperand + scrBinaryIntegerRightOperand;
+            CodeFunc_2Operation_ri = CodeFunc_2Operation_i1 + CodeFunc_2Operation_i2;
             break;
         case 1:
-            scrBinaryIntegerResult = scrBinaryIntegerLeftOperand - scrBinaryIntegerRightOperand;
+            CodeFunc_2Operation_ri = CodeFunc_2Operation_i1 - CodeFunc_2Operation_i2;
             break;
         case 2:
-            scrBinaryIntegerResult = scrBinaryIntegerLeftOperand * scrBinaryIntegerRightOperand;
+            CodeFunc_2Operation_ri = CodeFunc_2Operation_i1 * CodeFunc_2Operation_i2;
             break;
         case 3:
-            scrBinaryIntegerResult = scrBinaryIntegerLeftOperand / scrBinaryIntegerRightOperand;
+            CodeFunc_2Operation_ri = CodeFunc_2Operation_i1 / CodeFunc_2Operation_i2;
             break;
         case 4:
-            if (scrBinaryIntegerLeftOperand != 0 || scrBinaryIntegerRightOperand != 0) {
-                scrBinaryIntegerResult = 1;
+            if (CodeFunc_2Operation_i1 != 0 || CodeFunc_2Operation_i2 != 0) {
+                CodeFunc_2Operation_ri = 1;
             } else {
-                scrBinaryIntegerResult = 0;
+                CodeFunc_2Operation_ri = 0;
             }
             break;
         case 5:
-            if (scrBinaryIntegerLeftOperand != 0 && scrBinaryIntegerRightOperand != 0) {
-                scrBinaryIntegerResult = 1;
+            if (CodeFunc_2Operation_i1 != 0 && CodeFunc_2Operation_i2 != 0) {
+                CodeFunc_2Operation_ri = 1;
             } else {
-                scrBinaryIntegerResult = 0;
+                CodeFunc_2Operation_ri = 0;
             }
             break;
         case 6:
-            if (scrBinaryIntegerLeftOperand == scrBinaryIntegerRightOperand) {
-                scrBinaryIntegerResult = 1;
+            if (CodeFunc_2Operation_i1 == CodeFunc_2Operation_i2) {
+                CodeFunc_2Operation_ri = 1;
             } else {
-                scrBinaryIntegerResult = 0;
+                CodeFunc_2Operation_ri = 0;
             }
             break;
         case 7:
-            if (scrBinaryIntegerLeftOperand != scrBinaryIntegerRightOperand) {
-                scrBinaryIntegerResult = 1;
+            if (CodeFunc_2Operation_i1 != CodeFunc_2Operation_i2) {
+                CodeFunc_2Operation_ri = 1;
             } else {
-                scrBinaryIntegerResult = 0;
+                CodeFunc_2Operation_ri = 0;
             }
             break;
         case 8:
-            if (scrBinaryIntegerLeftOperand < scrBinaryIntegerRightOperand) {
-                scrBinaryIntegerResult = 1;
+            if (CodeFunc_2Operation_i1 < CodeFunc_2Operation_i2) {
+                CodeFunc_2Operation_ri = 1;
             } else {
-                scrBinaryIntegerResult = 0;
+                CodeFunc_2Operation_ri = 0;
             }
             break;
         case 9:
-            if (scrBinaryIntegerLeftOperand > scrBinaryIntegerRightOperand) {
-                scrBinaryIntegerResult = 1;
+            if (CodeFunc_2Operation_i1 > CodeFunc_2Operation_i2) {
+                CodeFunc_2Operation_ri = 1;
             } else {
-                scrBinaryIntegerResult = 0;
+                CodeFunc_2Operation_ri = 0;
             }
             break;
         case 10:
-            if (scrBinaryIntegerLeftOperand <= scrBinaryIntegerRightOperand) {
-                scrBinaryIntegerResult = 1;
+            if (CodeFunc_2Operation_i1 <= CodeFunc_2Operation_i2) {
+                CodeFunc_2Operation_ri = 1;
             } else {
-                scrBinaryIntegerResult = 0;
+                CodeFunc_2Operation_ri = 0;
             }
             break;
         case 11:
-            if (scrBinaryIntegerLeftOperand >= scrBinaryIntegerRightOperand) {
-                scrBinaryIntegerResult = 1;
+            if (CodeFunc_2Operation_i1 >= CodeFunc_2Operation_i2) {
+                CodeFunc_2Operation_ri = 1;
             } else {
-                scrBinaryIntegerResult = 0;
+                CodeFunc_2Operation_ri = 0;
             }
             break;
         }
-        PushInt(scr, scrBinaryIntegerResult);
+        PushInt(scr, CodeFunc_2Operation_ri);
     } else {
-        scrBinaryFloatLeftOperand = PopFloat(scr);
-        scrBinaryFloatRightOperand = PopFloat(scr);
+        CodeFunc_2Operation_f1 = PopFloat(scr);
+        CodeFunc_2Operation_f2 = PopFloat(scr);
         switch (operatorCode) {
         case 0:
-            scrBinaryFloatResult = scrBinaryFloatLeftOperand + scrBinaryFloatRightOperand;
+            CodeFunc_2Operation_rf = CodeFunc_2Operation_f1 + CodeFunc_2Operation_f2;
             break;
         case 1:
-            scrBinaryFloatResult = scrBinaryFloatLeftOperand - scrBinaryFloatRightOperand;
+            CodeFunc_2Operation_rf = CodeFunc_2Operation_f1 - CodeFunc_2Operation_f2;
             break;
         case 2:
-            scrBinaryFloatResult = scrBinaryFloatLeftOperand * scrBinaryFloatRightOperand;
+            CodeFunc_2Operation_rf = CodeFunc_2Operation_f1 * CodeFunc_2Operation_f2;
             break;
         case 3:
-            scrBinaryFloatResult = scrBinaryFloatLeftOperand / scrBinaryFloatRightOperand;
+            CodeFunc_2Operation_rf = CodeFunc_2Operation_f1 / CodeFunc_2Operation_f2;
             break;
         case 4:
-            if (scrBinaryFloatLeftOperand != 0.0 || scrBinaryFloatRightOperand != 0.0) {
-                scrBinaryIntegerResult = 1;
+            if (CodeFunc_2Operation_f1 != 0.0 || CodeFunc_2Operation_f2 != 0.0) {
+                CodeFunc_2Operation_ri = 1;
             } else {
-                scrBinaryIntegerResult = 0;
+                CodeFunc_2Operation_ri = 0;
             }
-            PushInt(scr, scrBinaryIntegerResult);
+            PushInt(scr, CodeFunc_2Operation_ri);
             return;
         case 5:
-            if (scrBinaryFloatLeftOperand != 0.0 && scrBinaryFloatRightOperand != 0.0) {
-                scrBinaryIntegerResult = 1;
+            if (CodeFunc_2Operation_f1 != 0.0 && CodeFunc_2Operation_f2 != 0.0) {
+                CodeFunc_2Operation_ri = 1;
             } else {
-                scrBinaryIntegerResult = 0;
+                CodeFunc_2Operation_ri = 0;
             }
-            PushInt(scr, scrBinaryIntegerResult);
+            PushInt(scr, CodeFunc_2Operation_ri);
             return;
         case 6:
-            if (scrBinaryFloatLeftOperand == scrBinaryFloatRightOperand) {
-                scrBinaryIntegerResult = 1;
+            if (CodeFunc_2Operation_f1 == CodeFunc_2Operation_f2) {
+                CodeFunc_2Operation_ri = 1;
             } else {
-                scrBinaryIntegerResult = 0;
+                CodeFunc_2Operation_ri = 0;
             }
-            PushInt(scr, scrBinaryIntegerResult);
+            PushInt(scr, CodeFunc_2Operation_ri);
             return;
         case 7:
-            if (scrBinaryFloatLeftOperand != scrBinaryFloatRightOperand) {
-                scrBinaryIntegerResult = 1;
+            if (CodeFunc_2Operation_f1 != CodeFunc_2Operation_f2) {
+                CodeFunc_2Operation_ri = 1;
             } else {
-                scrBinaryIntegerResult = 0;
+                CodeFunc_2Operation_ri = 0;
             }
-            PushInt(scr, scrBinaryIntegerResult);
+            PushInt(scr, CodeFunc_2Operation_ri);
             return;
         case 8:
-            if (scrBinaryFloatLeftOperand < scrBinaryFloatRightOperand) {
-                scrBinaryIntegerResult = 1;
+            if (CodeFunc_2Operation_f1 < CodeFunc_2Operation_f2) {
+                CodeFunc_2Operation_ri = 1;
             } else {
-                scrBinaryIntegerResult = 0;
+                CodeFunc_2Operation_ri = 0;
             }
-            PushInt(scr, scrBinaryIntegerResult);
+            PushInt(scr, CodeFunc_2Operation_ri);
             return;
         case 9:
-            if (scrBinaryFloatLeftOperand > scrBinaryFloatRightOperand) {
-                scrBinaryIntegerResult = 1;
+            if (CodeFunc_2Operation_f1 > CodeFunc_2Operation_f2) {
+                CodeFunc_2Operation_ri = 1;
             } else {
-                scrBinaryIntegerResult = 0;
+                CodeFunc_2Operation_ri = 0;
             }
-            PushInt(scr, scrBinaryIntegerResult);
+            PushInt(scr, CodeFunc_2Operation_ri);
             return;
         case 10:
-            if (scrBinaryFloatLeftOperand <= scrBinaryFloatRightOperand) {
-                scrBinaryIntegerResult = 1;
+            if (CodeFunc_2Operation_f1 <= CodeFunc_2Operation_f2) {
+                CodeFunc_2Operation_ri = 1;
             } else {
-                scrBinaryIntegerResult = 0;
+                CodeFunc_2Operation_ri = 0;
             }
-            PushInt(scr, scrBinaryIntegerResult);
+            PushInt(scr, CodeFunc_2Operation_ri);
             return;
         case 11:
-            if (scrBinaryFloatLeftOperand >= scrBinaryFloatRightOperand) {
-                scrBinaryIntegerResult = 1;
+            if (CodeFunc_2Operation_f1 >= CodeFunc_2Operation_f2) {
+                CodeFunc_2Operation_ri = 1;
             } else {
-                scrBinaryIntegerResult = 0;
+                CodeFunc_2Operation_ri = 0;
             }
-            PushInt(scr, scrBinaryIntegerResult);
+            PushInt(scr, CodeFunc_2Operation_ri);
             return;
         }
-        PushFloat(scr, scrBinaryFloatResult);
+        PushFloat(scr, CodeFunc_2Operation_rf);
     }
 }
 
@@ -367,12 +367,12 @@ u32 CodeFunc_Minus(ScrData *scr) {
         scr->stackValues[scr->sp - 1].f = -scr->stackValues[scr->sp - 1].f;
         break;
     case 2:
-        datGameState->script.ints[scr->stackValues[scr->sp - 1].i] =
-            -datGameState->script.ints[scr->stackValues[scr->sp - 1].i];
+        DDS3_GBWK->script.ints[scr->stackValues[scr->sp - 1].i] =
+            -DDS3_GBWK->script.ints[scr->stackValues[scr->sp - 1].i];
         break;
     case 3:
-        datGameState->script.floats[scr->stackValues[scr->sp - 1].i] =
-            -datGameState->script.floats[scr->stackValues[scr->sp - 1].i];
+        DDS3_GBWK->script.floats[scr->stackValues[scr->sp - 1].i] =
+            -DDS3_GBWK->script.floats[scr->stackValues[scr->sp - 1].i];
         break;
     case 4:
         break;
@@ -488,7 +488,7 @@ s32 scrTraceCode(ScrData *scr)
     u32 handlerResult;
 
     while (1) {
-        handlerResult = scrOpcodeHandlers[scr->instructions[scr->pc].parts.opCode](scr);
+        handlerResult = codefunc[scr->instructions[scr->pc].parts.opCode](scr);
         if (handlerResult == 0) {
             scr->cmdTimer = 0;
             return 2;
@@ -508,7 +508,7 @@ s32 scrTraceCode(ScrData *scr)
 /* Script command parameter `parameterIndex` (0 = first) as an int, converting floats and
  * dereferencing global variable references. */
 s32 scrGetIntPara(s32 parameterIndex) {
-    ScrData *scr = scrCurrentContext;
+    ScrData *scr = nowpwork;
     s32 stackIndex = scr->sp - parameterIndex - 1;
 
     switch (scr->stackTypes[stackIndex]) {
@@ -518,16 +518,16 @@ s32 scrGetIntPara(s32 parameterIndex) {
     case 1:
         return scr->stackValues[stackIndex].f;
     case 2:
-        return datGameState->script.ints[scr->stackValues[stackIndex].i];
+        return DDS3_GBWK->script.ints[scr->stackValues[stackIndex].i];
     case 3:
-        return datGameState->script.floats[scr->stackValues[stackIndex].i];
+        return DDS3_GBWK->script.floats[scr->stackValues[stackIndex].i];
     }
     return 0;
 }
 
 f32 scrGetFloatPara(s32 parameterIndex)
 {
-    ScrData *scr = scrCurrentContext;
+    ScrData *scr = nowpwork;
     s32 stackIndex = scr->sp - parameterIndex - 1;
 
     switch (scr->stackTypes[stackIndex]) {
@@ -537,9 +537,9 @@ f32 scrGetFloatPara(s32 parameterIndex)
     case 1:
         return scr->stackValues[stackIndex].f;
     case 2:
-        return (f32)datGameState->script.ints[scr->stackValues[stackIndex].i];
+        return (f32)DDS3_GBWK->script.ints[scr->stackValues[stackIndex].i];
     case 3:
-        return datGameState->script.floats[scr->stackValues[stackIndex].i];
+        return DDS3_GBWK->script.floats[scr->stackValues[stackIndex].i];
     }
     return 0.0f;
 }
@@ -547,7 +547,7 @@ f32 scrGetFloatPara(s32 parameterIndex)
 /* Return a string parameter only when its VM stack tag is STRING. */
 char *scrGetStrPara(s32 parameterIndex)
 {
-    ScrData *scr = scrCurrentContext;
+    ScrData *scr = nowpwork;
     s32 stackIndex = scr->sp - parameterIndex - 1;
     s32 stackType = (s8)scr->stackTypes[stackIndex];
 
@@ -563,12 +563,12 @@ char *scrGetStrPara(s32 parameterIndex)
 
 /* A command's return value: its type tag, then its value, in the running
  * context's return slot. The tag goes through the context as read on entry,
- * the value through scrCurrentContext read again, since the byte store may
+ * the value through nowpwork read again, since the byte store may
  * have changed it as far as C knows; retail reads it twice. */
 #define SCR_SET_RETURN_VALUE(scr, type, member, value)                   \
     do {                                                                 \
         (scr)->stackTypes[SCR_STACK_RET] = (type);                       \
-        scrCurrentContext->stackValues[SCR_STACK_RET].member = (value);  \
+        nowpwork->stackValues[SCR_STACK_RET].member = (value);  \
     } while (0)
 
 /* The setters return the context they set the value in, which retail
@@ -576,14 +576,14 @@ char *scrGetStrPara(s32 parameterIndex)
  * result, and a nonzero result tells CodeFunc_Comm the command is done. */
 ScrData *scrSetIntReturnValue(s32 retVal)
 {
-    ScrData *scr = scrCurrentContext;
+    ScrData *scr = nowpwork;
     SCR_SET_RETURN_VALUE(scr, 0, i, retVal);
     return scr;
 }
 
 ScrData *scrSetFloatReturnValue(f32 retVal)
 {
-    ScrData *scr = scrCurrentContext;
+    ScrData *scr = nowpwork;
     SCR_SET_RETURN_VALUE(scr, 1, f, retVal);
     return scr;
 }

@@ -18,13 +18,13 @@ extern void sdfIpuInit(void);
 
 extern s32 scrGetIntPara(s32);
 
-extern u16 mnuMovieTaskState;
+extern u16 dds3VblanksPerFrame;
 
 extern s32 mnuMovieShutdownCounter;
 
 extern MovObj mnuMovieDrawContext;
 
-extern MnuMovieTransfer mnuMovieDrawSources;
+extern MnuMovieTransfer movieViewerDebugFlag;
 
 extern char mnuMovieViewerTaskName[];
 
@@ -33,8 +33,8 @@ extern MnuMovieList mnuMovieList;
 extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 
 
-extern s8 sdfPadButtonStates[32];
-extern s8 kwlnTaskPadButtonStates[64];
+extern s8 dds3PadBitTable[32];
+extern s8 dds3PadButtonState[64];
 extern SdfMovieDescriptor mnuMovieViewerDrawDescriptor;
 extern u16 D_00438A90[4];
 extern u16 D_00438FF0;
@@ -51,7 +51,7 @@ void movieStop(void);
 s32 mnuCheckMovieDecoderStatus(void);
 
 s32 movieMan_Process(void) {
-    sdfAdvanceStreamPlayback(0x3c / mnuMovieTaskState);
+    sdfAdvanceStreamPlayback(0x3c / dds3VblanksPerFrame);
     return 0;
 }
 
@@ -194,19 +194,19 @@ s32 mnuMovieViewer(void) {
     MnuMovieListNode *node;
     s32 nextTop;
 
-    if (kwlnTaskPadButtonStates[0x2D] != 0) {
+    if (dds3PadButtonState[0x2D] != 0) {
         mnuMovieDrawContext.soundNode.playbackCadenceStep = 1;
     } else {
         mnuMovieDrawContext.soundNode.playbackCadenceStep = 0x1E;
     }
 
-    if (kwlnTaskPadButtonStates[0x28] < 0) {
+    if (dds3PadButtonState[0x28] < 0) {
         mnuMovieViewerDrawDescriptor.unk00 = 0x7000;
         mnuMovieViewerDrawDescriptor.unk02 = 0x7900;
         mnuMovieViewerDrawDescriptor.unk08 = 0x2000;
         mnuMovieViewerDrawDescriptor.unk0A = 0x0E00;
     }
-    if (kwlnTaskPadButtonStates[0x2A] < 0) {
+    if (dds3PadButtonState[0x2A] < 0) {
         mnuMovieViewerDrawDescriptor.unk00 = 0x7000;
         mnuMovieViewerDrawDescriptor.unk02 = 0x7B00;
         mnuMovieViewerDrawDescriptor.unk08 = 0x2000;
@@ -222,7 +222,7 @@ s32 mnuMovieViewer(void) {
                 mnuMovieList.playing = 0;
             }
         }
-    } else if (kwlnTaskPadButtonStates[0x21] < 0 || kwlnTaskPadButtonStates[0x28] < 0 || kwlnTaskPadButtonStates[0x2A] < 0) {
+    } else if (dds3PadButtonState[0x21] < 0 || dds3PadButtonState[0x28] < 0 || dds3PadButtonState[0x2A] < 0) {
         node = movieViewerStep();
         if (node != NULL) {
             movieStop();
@@ -232,13 +232,13 @@ s32 mnuMovieViewer(void) {
             movieStop();
             mnuRequestIndexedMovieResource(0x30);
         }
-    } else if (((u8)kwlnTaskPadButtonStates[0x27] & 2) != 0 && mnuMovieList.cursor < mnuMovieList.total - 1) {
+    } else if (((u8)dds3PadButtonState[0x27] & 2) != 0 && mnuMovieList.cursor < mnuMovieList.total - 1) {
         mnuMovieList.cursor++;
         nextTop = mnuMovieList.cursor - 7;
         if (mnuMovieList.top < nextTop) {
             mnuMovieList.top = nextTop;
         }
-    } else if (((u8)kwlnTaskPadButtonStates[0x26] & 2) != 0 && mnuMovieList.cursor > 0) {
+    } else if (((u8)dds3PadButtonState[0x26] & 2) != 0 && mnuMovieList.cursor > 0) {
         mnuMovieList.cursor--;
         if (mnuMovieList.cursor < mnuMovieList.top) {
             mnuMovieList.top = mnuMovieList.cursor;
@@ -270,23 +270,23 @@ void FinishMovieViewer(void) {
 }
 
 void movieViewerSetFlags(void) {
-    mnuMovieDrawSources.wordPending = 1;
-    mnuMovieDrawSources.blockPending = 1;
+    movieViewerDebugFlag.wordPending = 1;
+    movieViewerDebugFlag.blockPending = 1;
 }
 
 void movieViewerInitRegs(void) {
-    mnuMovieDrawSources.wordSource = 0x10002010;
-    mnuMovieDrawSources.blockSource = (u32)&mnuMovieDrawContext;
+    movieViewerDebugFlag.wordSource = 0x10002010;
+    movieViewerDebugFlag.blockSource = (u32)&mnuMovieDrawContext;
     movieViewerSetFlags();
 }
 
 /* Copy a source word and a 0x40-byte block when their pending flags are set. */
 void movieViewerDrawInfo(void) {
-    if (mnuMovieDrawSources.wordPending != 0) {
-        mnuMovieDrawSources.word = *(s32 *)mnuMovieDrawSources.wordSource;
+    if (movieViewerDebugFlag.wordPending != 0) {
+        movieViewerDebugFlag.word = *(s32 *)movieViewerDebugFlag.wordSource;
     }
-    if (mnuMovieDrawSources.blockPending != 0) {
-        memcpy(mnuMovieDrawSources.block, (void *)mnuMovieDrawSources.blockSource, sizeof(mnuMovieDrawSources.block));
+    if (movieViewerDebugFlag.blockPending != 0) {
+        memcpy(movieViewerDebugFlag.block, (void *)movieViewerDebugFlag.blockSource, sizeof(movieViewerDebugFlag.block));
     }
 }
 
@@ -298,65 +298,65 @@ s32 movieViewerDebugDraw(void) {
     s32 y;
     s32 col;
 
-    if (mnuMovieDrawSources.started == 0) {
-        mnuMovieDrawSources.started = 1;
+    if (movieViewerDebugFlag.started == 0) {
+        movieViewerDebugFlag.started = 1;
         movieViewerInitRegs();
     }
-    if (sdfPadButtonStates[0x11] != 0) {
+    if (dds3PadBitTable[0x11] != 0) {
         movieViewerSetFlags();
-    } else if (sdfPadButtonStates[0x12] != 0) {
+    } else if (dds3PadBitTable[0x12] != 0) {
         movieViewerInitRegs();
-    } else if (sdfPadButtonStates[0x15] & 2) {
-        mnuMovieDrawSources.cursor++;
-        if (mnuMovieDrawSources.cursor == 0x10) {
-            mnuMovieDrawSources.cursor = 0;
+    } else if (dds3PadBitTable[0x15] & 2) {
+        movieViewerDebugFlag.cursor++;
+        if (movieViewerDebugFlag.cursor == 0x10) {
+            movieViewerDebugFlag.cursor = 0;
         }
-    } else if (sdfPadButtonStates[0x14] & 2) {
-        if (mnuMovieDrawSources.cursor != 0) {
-            mnuMovieDrawSources.cursor--;
+    } else if (dds3PadBitTable[0x14] & 2) {
+        if (movieViewerDebugFlag.cursor != 0) {
+            movieViewerDebugFlag.cursor--;
         } else {
-            mnuMovieDrawSources.cursor = 0xF;
+            movieViewerDebugFlag.cursor = 0xF;
         }
     } else {
-        n = 1 << ((~mnuMovieDrawSources.cursor & 7) * 4);
-        i = mnuMovieDrawSources.cursor >> 3;
-        if (sdfPadButtonStates[0x17] & 2) {
+        n = 1 << ((~movieViewerDebugFlag.cursor & 7) * 4);
+        i = movieViewerDebugFlag.cursor >> 3;
+        if (dds3PadBitTable[0x17] & 2) {
             if (i == 0) {
-                mnuMovieDrawSources.wordPending = 0;
-                mnuMovieDrawSources.wordSource += n;
+                movieViewerDebugFlag.wordPending = 0;
+                movieViewerDebugFlag.wordSource += n;
             } else {
-                mnuMovieDrawSources.blockPending = 0;
-                mnuMovieDrawSources.blockSource += n;
+                movieViewerDebugFlag.blockPending = 0;
+                movieViewerDebugFlag.blockSource += n;
             }
         }
-        if (sdfPadButtonStates[0x16] & 2) {
+        if (dds3PadBitTable[0x16] & 2) {
             if (i == 0) {
-                mnuMovieDrawSources.wordPending = 0;
-                mnuMovieDrawSources.wordSource -= n;
+                movieViewerDebugFlag.wordPending = 0;
+                movieViewerDebugFlag.wordSource -= n;
             } else {
-                mnuMovieDrawSources.blockPending = 0;
-                mnuMovieDrawSources.blockSource -= n;
+                movieViewerDebugFlag.blockPending = 0;
+                movieViewerDebugFlag.blockSource -= n;
             }
         }
     }
     movieViewerDrawInfo();
     packets = dds3FontReqAllocDrawTag();
     sdfDrawTagLink(packets, (u32)dds3PrimFrameRect(0x7150, 0x79A8, 0xFF007E, 0x1860, 0x3F0, 0x60000000, 0x40806020));
-    sdfPrimLinkRect(packets, 0x80A03000, 0, (mnuMovieDrawSources.cursor & 7) * 0xC0 + 0x7180, (mnuMovieDrawSources.cursor >> 3) * 0xC0 + 0x79C0, (mnuMovieDrawSources.cursor & 7) * 0xC0 + 0x7240, (mnuMovieDrawSources.cursor >> 3) * 0xC0 + 0x7A20, 0xFF007F, 0);
-    sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x7180, 0x79C0, 0xFF0080, 0, "%08X", mnuMovieDrawSources.wordSource));
-    if (mnuMovieDrawSources.wordPending != 0) {
-        sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x7840, 0x79C0, 0xFF0080, 0, "%08X", mnuMovieDrawSources.word));
+    sdfPrimLinkRect(packets, 0x80A03000, 0, (movieViewerDebugFlag.cursor & 7) * 0xC0 + 0x7180, (movieViewerDebugFlag.cursor >> 3) * 0xC0 + 0x79C0, (movieViewerDebugFlag.cursor & 7) * 0xC0 + 0x7240, (movieViewerDebugFlag.cursor >> 3) * 0xC0 + 0x7A20, 0xFF007F, 0);
+    sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x7180, 0x79C0, 0xFF0080, 0, "%08X", movieViewerDebugFlag.wordSource));
+    if (movieViewerDebugFlag.wordPending != 0) {
+        sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x7840, 0x79C0, 0xFF0080, 0, "%08X", movieViewerDebugFlag.word));
     } else {
         sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x7840, 0x79C0, 0xFF0080, 0, D_0042A428));
     }
     n = 0;
     y = 0x7A80;
     for (i = 0; i != 8; i++, y += 0x60) {
-        sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x7180, y, 0xFF0080, 0, "%08X", mnuMovieDrawSources.blockSource + n));
+        sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x7180, y, 0xFF0080, 0, "%08X", movieViewerDebugFlag.blockSource + n));
         x = 0x7840;
         for (col = 0; col != 8; col++, x += 0x240, n++) {
-            if (mnuMovieDrawSources.blockPending != 0) {
-                sdfDrawTagLink(packets, (u32)sdfDevPrintf(x, y, 0xFF0080, 0, "%02X", mnuMovieDrawSources.block[n]));
+            if (movieViewerDebugFlag.blockPending != 0) {
+                sdfDrawTagLink(packets, (u32)sdfDevPrintf(x, y, 0xFF0080, 0, "%02X", movieViewerDebugFlag.block[n]));
             } else {
                 sdfDrawTagLink(packets, (u32)sdfDevPrintf(x, y, 0xFF0080, 0, "**"));
             }
@@ -394,7 +394,7 @@ INCLUDE_SDATA(const s32, "game/code_002A8048", D_00437B6C);
 
 INCLUDE_SDATA(const s32, "game/code_002A8048", D_00437B6E);
 
-INCLUDE_SDATA(const s32, "game/code_002A8048", mnuCampTaskState);
+INCLUDE_SDATA(const s32, "game/code_002A8048", campExitState);
 
 INCLUDE_SDATA(const s32, "game/code_002A8048", D_00437B73);
 

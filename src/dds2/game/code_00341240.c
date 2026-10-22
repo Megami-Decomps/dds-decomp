@@ -15,7 +15,7 @@ extern EffRandState D_0040BAE8;
 void sdfRandomize(EffRandState *state, u32 seed);
 s32 sdfGetCdClock(ClockTime *now);
 
-extern s8 sndSynchronousCommandMode;
+extern s8 sdfSndBurstReqMode;
 
 /* Uniform float in [0, 1): 24 random bits scaled by 2^-24. */
 f32 dds3GetRandFloatA(EffRandState *state) {
@@ -94,15 +94,15 @@ u32 sndReserveIopWorkMemory(s32 size) {
 
 extern SndRingPacket sndCommandRing[32];
 /* Shared with the producer and its worker-thread wakeups. */
-extern vu16 sndCommandReadIndex;
-extern vu16 sndCommandWriteIndex;
+extern vu16 sdfSndCmdIndex;
+extern vu16 sdfSndCmdTailIndex;
 
 /* Attempt one queued SIF packet: 0 means sent, 1 means empty or rejected. */
 s32 sndTryDispatchQueuedCommand(void) {
-    s32 readIndex = (s16)sndCommandReadIndex;
+    s32 readIndex = (s16)sdfSndCmdIndex;
     SndRingPacket *packet;
 
-    if (readIndex == (s16)sndCommandWriteIndex) {
+    if (readIndex == (s16)sdfSndCmdTailIndex) {
         return 1;
     }
     packet = &sndCommandRing[readIndex];
@@ -110,7 +110,7 @@ s32 sndTryDispatchQueuedCommand(void) {
         return 1;
     }
     readIndex = (readIndex + 1) & 31;
-    sndCommandReadIndex = readIndex;
+    sdfSndCmdIndex = readIndex;
     return 0;
 }
 
@@ -119,7 +119,7 @@ void sdfSndCmdIFThread(void) {
     for (;;) {
         do {
             SleepThread();
-        } while (sndSynchronousCommandMode != 0);
+        } while (sdfSndBurstReqMode != 0);
         while (sndTryDispatchQueuedCommand() == 0) {
         }
     }
@@ -129,7 +129,7 @@ extern SdfKernelThreadParam sndCommandThreadParameters;
 extern u8 sndCommandThreadStack[];
 extern u8 sndRpcServerThreadStack[];
 extern void *_gp;
-extern s32 sndCommandThreadId;
+extern s32 sdfSndCmdBuf;
 extern s32 D_00438B94;
 extern s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 extern void SifRpcServerThreadProc(void);
@@ -145,10 +145,10 @@ s32 sndStartIopCommandAndRpcWorkers(void) {
     sndCommandThreadParameters.stackSize = 0x1000;
     sndCommandThreadParameters.priority = 0x42;
     sndCommandThreadParameters.gp = &_gp;
-    sndCommandReadIndex = 0;
-    sndCommandWriteIndex = 0;
+    sdfSndCmdIndex = 0;
+    sdfSndCmdTailIndex = 0;
     threadId = CreateThread(&sndCommandThreadParameters);
-    sndCommandThreadId = threadId;
+    sdfSndCmdBuf = threadId;
     _StartThread(threadId, 0);
     threadId = CreateThreadSimple(SifRpcServerThreadProc, sndRpcServerThreadStack, 0x1000, 0x43);
     D_00438B94 = threadId;

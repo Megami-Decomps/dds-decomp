@@ -286,8 +286,8 @@ void mtrMantraBitReset(void) {
     s32 i;
 
     for (i = 0; i < 32; i++) {
-        if (datGameState->party[i].flags & 1) {
-            mtrMantraBitResetUnit(&datGameState->party[i]);
+        if (DDS3_GBWK->party[i].flags & 1) {
+            mtrMantraBitResetUnit(&DDS3_GBWK->party[i]);
         }
     }
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraBitReset()]*****************\n");
@@ -372,10 +372,10 @@ void mtrSynchronizeMantraFlagsAcrossParty(void) {
     second.unitId = 2;
     merged.unitId = 8;
     for (i = 0; i < 16; i++) {
-        if (datGameState->templates[i].unitId == 2) {
-            secondId = scrGetSelectedScriptEntryId(&datGameState->templates[i]);
-        } else if (datGameState->templates[i].unitId == 1) {
-            firstId = scrGetSelectedScriptEntryId(&datGameState->templates[i]);
+        if (DDS3_GBWK->templates[i].unitId == 2) {
+            secondId = scrGetSelectedScriptEntryId(&DDS3_GBWK->templates[i]);
+        } else if (DDS3_GBWK->templates[i].unitId == 1) {
+            firstId = scrGetSelectedScriptEntryId(&DDS3_GBWK->templates[i]);
         }
     }
     if (firstId == secondId) {

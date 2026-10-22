@@ -10,7 +10,7 @@
 extern s32 mnuGetSlidePathSegmentWeight(s32);
 extern s32 mnuMovieMenuSlidePathData[];
 
-extern s32 mnuMovieMenuState;
+extern s32 titleWork;
 
 extern void mnuReleaseMenuResourceSlots(void);
 
@@ -34,7 +34,7 @@ typedef struct SpriteMenuState {
 extern s16 mnuMovieMenuSpritePlacements[][4];
 
 s32 mnuSpriteGraphicHandle(u32 index) {
-    SprWork *work = (SprWork *)mnuMovieMenuState;
+    SprWork *work = (SprWork *)titleWork;
     return work->gfx[mnuMovieMenuSpritePlacements[index][0]];
 }
 
@@ -52,7 +52,7 @@ void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode,
                   depth,
                   (u32)((f32)alpha * 256.0f * 0.0078125f),
                   drawMode,
-                  ((SprWork *)mnuMovieMenuState)
+                  ((SprWork *)titleWork)
                       ->gfx[mnuMovieMenuSpritePlacements[spriteIndex][0]],
                   mnuMovieMenuSpritePlacements[spriteIndex][1],
                   drawContext);
@@ -67,46 +67,46 @@ extern void mnuDrawMovieMenuListItem();
 void mnuRecreateMenuSelectionList(void) {
     s32 i;
     struct MenuList *node;
-    if (((SpriteMenuState *)mnuMovieMenuState)->list != 0) {
-        mnuDestroyListState(((SpriteMenuState *)mnuMovieMenuState)->list);
+    if (((SpriteMenuState *)titleWork)->list != 0) {
+        mnuDestroyListState(((SpriteMenuState *)titleWork)->list);
     }
     node = mnuCreateListState(0, 3, 0);
-    ((SpriteMenuState *)mnuMovieMenuState)->list = node;
+    ((SpriteMenuState *)titleWork)->list = node;
     node->drawCallback = mnuDrawMovieMenuListItem;
     for (i = 0; i < 3; i++) {
-        mnuListAppendNode(((SpriteMenuState *)mnuMovieMenuState)->list, 0);
+        mnuListAppendNode(((SpriteMenuState *)titleWork)->list, 0);
     }
 }
 
 void mnuDestroyMovieMenuSelectionList(void) {
-    mnuDestroyListState(((SpriteMenuState *)mnuMovieMenuState)->list);
+    mnuDestroyListState(((SpriteMenuState *)titleWork)->list);
 }
 
 u32 mnuGetMovieMenuSelectionIndex(void) {
-    return ((SpriteMenuState *)mnuMovieMenuState)->list->cursor->index;
+    return ((SpriteMenuState *)titleWork)->list->cursor->index;
 }
 
 struct MenuList;
 extern void mnuSelectFirstListNode(struct MenuList *list);
 
 void mnuSelectMenuListCursorByAdvance(s32 advanceCount) {
-    mnuSelectFirstListNode(((SpriteMenuState *)mnuMovieMenuState)->list);
+    mnuSelectFirstListNode(((SpriteMenuState *)titleWork)->list);
     if (0 < advanceCount) {
         do {
             advanceCount = advanceCount - 1;
-            mnuAdvanceListCursorDefault(((SpriteMenuState *)mnuMovieMenuState)->list);
+            mnuAdvanceListCursorDefault(((SpriteMenuState *)titleWork)->list);
         } while (advanceCount != 0);
     }
 }
 
-extern s8 kwlnTaskPadButtonStates[];
+extern s8 dds3PadButtonState[];
 
 s32 mnuIsAnyMenuInputPressed(void) {
-    if (kwlnTaskPadButtonStates[0x21] < 0 || kwlnTaskPadButtonStates[0x23] < 0 ||
-        kwlnTaskPadButtonStates[0x22] < 0 || kwlnTaskPadButtonStates[0x20] < 0 ||
-        kwlnTaskPadButtonStates[0x2a] < 0 || kwlnTaskPadButtonStates[0x2b] < 0 ||
-        kwlnTaskPadButtonStates[0x28] < 0 || kwlnTaskPadButtonStates[0x29] < 0 ||
-        kwlnTaskPadButtonStates[0x2d] < 0 || kwlnTaskPadButtonStates[0x2c] < 0) {
+    if (dds3PadButtonState[0x21] < 0 || dds3PadButtonState[0x23] < 0 ||
+        dds3PadButtonState[0x22] < 0 || dds3PadButtonState[0x20] < 0 ||
+        dds3PadButtonState[0x2a] < 0 || dds3PadButtonState[0x2b] < 0 ||
+        dds3PadButtonState[0x28] < 0 || dds3PadButtonState[0x29] < 0 ||
+        dds3PadButtonState[0x2d] < 0 || dds3PadButtonState[0x2c] < 0) {
         return 1;
     }
     return 0;
@@ -119,46 +119,46 @@ extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 
 
 void mnuLoadMovieMenuResourceSlots(void) {
-    u32 *state = (u32 *)mnuMovieMenuState;
+    u32 *state = (u32 *)titleWork;
     u32 resource;
 
     if (state[1] == 0) {
         resource = (u32)effLoadIndexedResource((const char *)D_00437A48,
             (const char *)mnuMovieMenuSpriteResourceNames, 0);
-        state = (u32 *)mnuMovieMenuState;
+        state = (u32 *)titleWork;
         state[1] = resource;
     }
     if (state[3] == 0) {
         const char *name = (const char *)mnuMovieMenuSpriteResourceNames;
         name += 0x20;
         resource = (u32)effLoadIndexedResource((const char *)D_00437A48, name, 0);
-        state = (u32 *)mnuMovieMenuState;
+        state = (u32 *)titleWork;
         state[3] = resource;
     }
 }
 
 void mnuReleaseMenuResourceSlots(void) {
-    u32 *state = (u32 *)mnuMovieMenuState;
+    u32 *state = (u32 *)titleWork;
     if (state[1] != 0) {
         effDestroyResourceSlotSet((struct EffectSlotSet *)state[1]);
-        state = (u32 *)mnuMovieMenuState;
+        state = (u32 *)titleWork;
         state[1] = 0;
     }
     if (state[3] != 0) {
         effDestroyResourceSlotSet((struct EffectSlotSet *)state[3]);
-        state = (u32 *)mnuMovieMenuState;
+        state = (u32 *)titleWork;
         state[3] = 0;
     }
 }
 
 void mnuEnsureMovieMenuSpriteHandle(s32 loadImmediately) {
-    u32 *handle = (u32 *)&((SpriteMenuState *)mnuMovieMenuState)->spriteHandle;
+    u32 *handle = (u32 *)&((SpriteMenuState *)titleWork)->spriteHandle;
 
     if (*handle == 0) {
         if (loadImmediately != 0) {
             const char *name = (const char *)mnuMovieMenuSpriteResourceNames;
             name += 0x10;
-            ((SpriteMenuState *)mnuMovieMenuState)->spriteHandle =
+            ((SpriteMenuState *)titleWork)->spriteHandle =
                 (u32)effLoadIndexedResource((const char *)D_00437A48, name, 0);
         } else {
             const char *name = (const char *)mnuMovieMenuSpriteResourceNames;
@@ -170,13 +170,13 @@ void mnuEnsureMovieMenuSpriteHandle(s32 loadImmediately) {
 }
 
 u8 mnuHasSpriteHandle(void) {
-    return ((SpriteMenuState *)mnuMovieMenuState)->spriteHandle != 0;
+    return ((SpriteMenuState *)titleWork)->spriteHandle != 0;
 }
 
 void mnuReleaseSpriteHandle(void) {
-    if (((SpriteMenuState *)mnuMovieMenuState)->spriteHandle != 0) {
-        effDestroyResourceSlotSet((struct EffectSlotSet *)((SpriteMenuState *)mnuMovieMenuState)->spriteHandle);
-        ((SpriteMenuState *)mnuMovieMenuState)->spriteHandle = 0;
+    if (((SpriteMenuState *)titleWork)->spriteHandle != 0) {
+        effDestroyResourceSlotSet((struct EffectSlotSet *)((SpriteMenuState *)titleWork)->spriteHandle);
+        ((SpriteMenuState *)titleWork)->spriteHandle = 0;
     }
 }
 
@@ -679,7 +679,7 @@ void mnuDrawMovieMenuSlideBar(SlideBarTimed *primary, SlideBar *secondary, s32 d
         mnuDrawSprite(0, 0, 0, primaryPos / 4, 0, 0x1D, drawContext);
         return;
     }
-    fade = (MovieMenuFadeState *)mnuMovieMenuState;
+    fade = (MovieMenuFadeState *)titleWork;
     if (fade->active == 0) {
         x = 0x80;
     } else {

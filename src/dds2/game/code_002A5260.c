@@ -48,9 +48,9 @@ typedef struct MenuTitleState {
     u32 movieFrame;      /* 0x114 */
 } MenuTitleState;
 
-extern MenuTitleState *mnuMovieMenuState;
+extern MenuTitleState *titleWork;
 
-extern u16 mnuMovieTaskState;
+extern u16 dds3VblanksPerFrame;
 
 /* Complete A8..BB scroll control retained by the staff-task allocation. */
 typedef struct StaffScrollTransition {
@@ -113,7 +113,7 @@ void movieStop(void);
 
 extern SdfPoolNode D_003803C8;
 
-extern KwlnTask *mnuMovieDrawTask;
+extern KwlnTask *PlayingNo;
 
 extern char D_00437AC0[];
 
@@ -212,7 +212,7 @@ void mnuDrawMovieChoiceTransition(s32 mode, s32 frame) {
             }
             alpha = (s32)(factor * 128.0f);
             mnuDrawSprite(0, 0, 0, alpha, 0, i + 12, 0x53);
-            if (i == ((MenuTitleState *)mnuMovieMenuState)->selectionList->cursor->index) {
+            if (i == ((MenuTitleState *)titleWork)->selectionList->cursor->index) {
                 mnuDrawSprite(0, 0, 0, alpha, 0, i + 6, 0x53);
             }
         }
@@ -230,7 +230,7 @@ void mnuDrawMovieChoiceTransition(s32 mode, s32 frame) {
             }
             alpha = (s32)(factor * 128.0f);
             mnuDrawSprite(0, 0, 0, alpha, 0, i + 12, 0x53);
-            if (i == ((MenuTitleState *)mnuMovieMenuState)->selectionList->cursor->index) {
+            if (i == ((MenuTitleState *)titleWork)->selectionList->cursor->index) {
                 mnuDrawSprite(0, 0, 0, alpha, 0, i + 6, 0x53);
             }
         }
@@ -243,7 +243,7 @@ void mnuDrawMovieChoiceTransition(s32 mode, s32 frame) {
         alpha = (s32)(factor * 128.0f);
         for (i = 0; i < 3; i++) {
             mnuDrawSprite(0, 0, 0, alpha, 0, i + 12, 0x53);
-            if (i == ((MenuTitleState *)mnuMovieMenuState)->selectionList->cursor->index) {
+            if (i == ((MenuTitleState *)titleWork)->selectionList->cursor->index) {
                 mnuDrawSprite(0, 0, 0, alpha, 0, i + 6, 0x53);
             }
         }
@@ -254,7 +254,7 @@ void mnuDrawMovieChoiceTransition(s32 mode, s32 frame) {
 extern void p2sdPlayBGMFade(s32 trackId);
 
 void mnuResetTitleMovieMenuStateAndStartTrack(void) {
-    MenuTitleState *state = mnuMovieMenuState;
+    MenuTitleState *state = titleWork;
 
     state->phase = 0;
     state->selectedPage = 0;
@@ -263,7 +263,7 @@ void mnuResetTitleMovieMenuStateAndStartTrack(void) {
 }
 
 void mnuClearGlobalMenuStateFields(void) {
-    MenuTitleState *state = (MenuTitleState *)mnuMovieMenuState;
+    MenuTitleState *state = (MenuTitleState *)titleWork;
 
     state->phase = 0;
     state->selectedPage = 0;
@@ -271,29 +271,29 @@ void mnuClearGlobalMenuStateFields(void) {
 }
 
 void dds3TitleClearFade(void) {
-    MenuTitleState *state = (MenuTitleState *)mnuMovieMenuState;
+    MenuTitleState *state = (MenuTitleState *)titleWork;
 
     state->phase = 0;
     state->selectedPage = 0;
 }
 
 s32 mnuPollMovieMenuInputAndTimeout(void) {
-    MenuTitleState *state = (MenuTitleState *)mnuMovieMenuState;
+    MenuTitleState *state = (MenuTitleState *)titleWork;
     switch (state->phase) {
     case 0:
         if (mnuIsAnyMenuInputPressed() == 0) {
-            MenuTitleState *opening = (MenuTitleState *)mnuMovieMenuState;
+            MenuTitleState *opening = (MenuTitleState *)titleWork;
             if (opening->selectedPage < 30) {
                 opening->selectedPage++;
             } else {
                 opening->phase = 1;
                 opening->selectedPage = 0;
             }
-            mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 0, 1);
+            mnuSetMovieWorkFlag((s32)&titleWork->movie, 0, 1);
             return 0;
         }
         p2sdPlaySE(8, 127, 63);
-        mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 0, 0);
+        mnuSetMovieWorkFlag((s32)&titleWork->movie, 0, 0);
         return 1;
     case 1:
         if (state->selectedPage < 90) {
@@ -303,10 +303,10 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
         }
         if (mnuIsAnyMenuInputPressed() != 0) {
             p2sdPlaySE(8, 127, 63);
-            mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 0, 0);
+            mnuSetMovieWorkFlag((s32)&titleWork->movie, 0, 0);
             return 1;
         }
-        state = (MenuTitleState *)mnuMovieMenuState;
+        state = (MenuTitleState *)titleWork;
         state->sequenceTimer++;
         if (state->sequenceTimer >= 601) {
             state->sequenceTimer = 0;
@@ -325,7 +325,7 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
 }
 
 void mnuUpdateTitlePageByMode(void) {
-    MenuTitleState *title = mnuMovieMenuState;
+    MenuTitleState *title = titleWork;
 
     switch (title->phase) {
     case 0:
@@ -349,7 +349,7 @@ mnuDrawMovieMenuListItem(s32 x, s32 y, s32 unused, struct MenuList *list, struct
     }
 }
 
-extern s8 kwlnTaskPadButtonStates[];
+extern s8 dds3PadButtonState[];
 extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern u32 mnuGetMovieMenuSelectionIndex(void);
 
@@ -357,21 +357,21 @@ s32 mnuHandleMovieMenuInput(void) {
     s32 moved = 0;
     s32 selection;
 
-    if (kwlnTaskPadButtonStates[0x26] & 2) {
-        if (mnuRetreatListCursorDefault(mnuMovieMenuState->selectionList) != NULL) {
+    if (dds3PadButtonState[0x26] & 2) {
+        if (mnuRetreatListCursorDefault(titleWork->selectionList) != NULL) {
             p2sdPlaySE(0, 127, 63);
         }
         moved = 1;
-    } else if (kwlnTaskPadButtonStates[0x27] & 2) {
-        if (mnuAdvanceListCursorDefault(mnuMovieMenuState->selectionList) != NULL) {
+    } else if (dds3PadButtonState[0x27] & 2) {
+        if (mnuAdvanceListCursorDefault(titleWork->selectionList) != NULL) {
             p2sdPlaySE(0, 127, 63);
         }
         moved = 1;
     }
-    if ((kwlnTaskPadButtonStates[0x26] == 0) & (kwlnTaskPadButtonStates[0x27] == 0)) {
-        mnuClearListFlagsOneAndTwo(&mnuMovieMenuState->selectionList->stateFlags);
+    if ((dds3PadButtonState[0x26] == 0) & (dds3PadButtonState[0x27] == 0)) {
+        mnuClearListFlagsOneAndTwo(&titleWork->selectionList->stateFlags);
     }
-    if (kwlnTaskPadButtonStates[0x21] < 0) {
+    if (dds3PadButtonState[0x21] < 0) {
         selection = mnuGetMovieMenuSelectionIndex();
         if (selection < 0) {
             return 1;
@@ -385,7 +385,7 @@ s32 mnuHandleMovieMenuInput(void) {
         }
         return 1;
     }
-    if (kwlnTaskPadButtonStates[0x23] < 0) {
+    if (dds3PadButtonState[0x23] < 0) {
         p2sdPlaySE(10, 127, 63);
         return 2;
     }
@@ -393,7 +393,7 @@ s32 mnuHandleMovieMenuInput(void) {
 }
 
 void mnuTitleResetSequenceTimers(void) {
-    MenuTitleState *title = (MenuTitleState *)mnuMovieMenuState;
+    MenuTitleState *title = (MenuTitleState *)titleWork;
     title->phase = 1;
     title->sequenceTimer = title->selectedPage = 0;
 }
@@ -406,74 +406,74 @@ extern s32 mnuUpdateMovieMenuInputState(void);
 s32 mnuUpdateMovieMenuInputState(void) {
     s32 result;
 
-    switch (mnuMovieMenuState->phase) {
+    switch (titleWork->phase) {
     case 1:
-        if (mnuMovieMenuState->selectedPage < 23) {
-            mnuMovieMenuState->selectedPage++;
+        if (titleWork->selectedPage < 23) {
+            titleWork->selectedPage++;
         } else {
-            mnuMovieMenuState->selectedPage = 0;
-            mnuMovieMenuState->phase = 2;
+            titleWork->selectedPage = 0;
+            titleWork->phase = 2;
         }
-        if (mnuMovieMenuState->selectedPage >= 4) {
+        if (titleWork->selectedPage >= 4) {
             result = mnuHandleMovieMenuInput();
             switch (result) {
             case 0:
             default:
-                mnuMovieMenuState->sequenceTimer = 0;
+                titleWork->sequenceTimer = 0;
                 break;
             case 2:
-                mnuMovieMenuState->phase = 4;
-                mnuMovieMenuState->selectedPage = 0;
+                titleWork->phase = 4;
+                titleWork->selectedPage = 0;
                 break;
             case 1:
-                mnuMovieMenuState->phase = 3;
-                mnuMovieMenuState->selectedPage = 0;
+                titleWork->phase = 3;
+                titleWork->selectedPage = 0;
                 break;
             }
         }
         break;
     case 0:
-        if (mnuMovieMenuState->selectedPage < 14) {
-            mnuMovieMenuState->selectedPage++;
+        if (titleWork->selectedPage < 14) {
+            titleWork->selectedPage++;
         } else {
-            mnuMovieMenuState->selectedPage = 0;
-            mnuMovieMenuState->phase = 2;
+            titleWork->selectedPage = 0;
+            titleWork->phase = 2;
         }
         break;
     case 2:
         result = mnuHandleMovieMenuInput();
         switch (result) {
         case 1:
-            mnuMovieMenuState->phase = 3;
-            mnuMovieMenuState->selectedPage = 0;
+            titleWork->phase = 3;
+            titleWork->selectedPage = 0;
             break;
         case 2:
-            mnuMovieMenuState->phase = 4;
-            mnuMovieMenuState->selectedPage = 0;
+            titleWork->phase = 4;
+            titleWork->selectedPage = 0;
             break;
         case 0:
-            if (mnuMovieMenuState->sequenceTimer < 450) {
-                mnuMovieMenuState->sequenceTimer++;
+            if (titleWork->sequenceTimer < 450) {
+                titleWork->sequenceTimer++;
             } else {
-                mnuMovieMenuState->phase = 4;
-                mnuMovieMenuState->sequenceTimer = 0;
-                mnuMovieMenuState->selectedPage = 0;
+                titleWork->phase = 4;
+                titleWork->sequenceTimer = 0;
+                titleWork->selectedPage = 0;
             }
             break;
         default:
-            mnuMovieMenuState->sequenceTimer = 0;
+            titleWork->sequenceTimer = 0;
             break;
         }
         break;
     case 3:
-        if (mnuMovieMenuState->selectedPage < 10) {
-            mnuMovieMenuState->selectedPage++;
+        if (titleWork->selectedPage < 10) {
+            titleWork->selectedPage++;
             break;
         }
         return 1;
     case 4:
-        if (mnuMovieMenuState->selectedPage < 10) {
-            mnuMovieMenuState->selectedPage++;
+        if (titleWork->selectedPage < 10) {
+            titleWork->selectedPage++;
             break;
         }
         return 2;
@@ -483,23 +483,23 @@ s32 mnuUpdateMovieMenuInputState(void) {
 
 
 void mnuDrawTitleSceneForPhase(void) {
-    switch (((MenuTitleState *)mnuMovieMenuState)->phase) {
+    switch (((MenuTitleState *)titleWork)->phase) {
     case 1:
-        mnuDrawTitleMenuFadeOverlay(2, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
-        mnuDrawMovieChoiceTransition(0, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
-        mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 1, 1);
+        mnuDrawTitleMenuFadeOverlay(2, ((MenuTitleState *)titleWork)->selectedPage);
+        mnuDrawMovieChoiceTransition(0, ((MenuTitleState *)titleWork)->selectedPage);
+        mnuSetMovieWorkFlag((s32)&titleWork->movie, 1, 1);
         return;
     case 0:
-        mnuDrawMovieChoiceTransition(1, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
-        mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 1, 1);
+        mnuDrawMovieChoiceTransition(1, ((MenuTitleState *)titleWork)->selectedPage);
+        mnuSetMovieWorkFlag((s32)&titleWork->movie, 1, 1);
         return;
     case 2:
-        mnuCallInitWide(0, 0, 0, (s32)((MenuTitleState *)mnuMovieMenuState)->selectionList, 0x53);
+        mnuCallInitWide(0, 0, 0, (s32)((MenuTitleState *)titleWork)->selectionList, 0x53);
         return;
     case 3:
     case 4:
-        mnuDrawMovieChoiceTransition(2, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
-        mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 1, 0);
+        mnuDrawMovieChoiceTransition(2, ((MenuTitleState *)titleWork)->selectedPage);
+        mnuSetMovieWorkFlag((s32)&titleWork->movie, 1, 0);
         break;
     }
 }
@@ -508,23 +508,23 @@ void mnuArmTitleMovieDrawAndResetFrame(u32 movieIndex, s32 startTransparent) {
     MenuTitleState *work;
 
     mnuRequestIndexedMovieResource(movieIndex);
-    work = mnuMovieMenuState;
-    if (mnuMovieMenuState != 0) {
-        ((MenuTitleState *)mnuMovieMenuState)->movieDrawActive = 1;
+    work = titleWork;
+    if (titleWork != 0) {
+        ((MenuTitleState *)titleWork)->movieDrawActive = 1;
         if (startTransparent == 0) {
             work->drawAlpha = 0x80;
         }
         else {
             work->drawAlpha = 0;
         }
-        ((MenuTitleState *)mnuMovieMenuState)->movieFrame = 0;
+        ((MenuTitleState *)titleWork)->movieFrame = 0;
     }
 }
 
 void mnuStopTitleMovieDraw(void) {
     movieStop();
-    if (mnuMovieMenuState != 0) {
-        ((MenuTitleState *)mnuMovieMenuState)->movieDrawActive = 0;
+    if (titleWork != 0) {
+        ((MenuTitleState *)titleWork)->movieDrawActive = 0;
     }
 }
 
@@ -532,8 +532,8 @@ u32 mnuIsTitleMovieDrawActive(void) {
     u32 state;
 
     state = 0;
-    if (mnuMovieMenuState != 0) {
-        state = ((MenuTitleState *)mnuMovieMenuState)->movieDrawActive;
+    if (titleWork != 0) {
+        state = ((MenuTitleState *)titleWork)->movieDrawActive;
     }
     return state;
 }
@@ -1089,11 +1089,11 @@ s32 mnuStaffImageProc(void) {
                 mnuMovieWork->imageAlpha = 256;
             }
         } else {
-            if (kwlnTaskPadButtonStates[0x21] < 0 || kwlnTaskPadButtonStates[0x23] < 0 ||
-                kwlnTaskPadButtonStates[0x22] < 0 || kwlnTaskPadButtonStates[0x20] < 0 ||
-                kwlnTaskPadButtonStates[0x2A] < 0 || kwlnTaskPadButtonStates[0x2B] < 0 ||
-                kwlnTaskPadButtonStates[0x28] < 0 || kwlnTaskPadButtonStates[0x29] < 0 ||
-                kwlnTaskPadButtonStates[0x2D] < 0 || kwlnTaskPadButtonStates[0x2C] < 0) {
+            if (dds3PadButtonState[0x21] < 0 || dds3PadButtonState[0x23] < 0 ||
+                dds3PadButtonState[0x22] < 0 || dds3PadButtonState[0x20] < 0 ||
+                dds3PadButtonState[0x2A] < 0 || dds3PadButtonState[0x2B] < 0 ||
+                dds3PadButtonState[0x28] < 0 || dds3PadButtonState[0x29] < 0 ||
+                dds3PadButtonState[0x2D] < 0 || dds3PadButtonState[0x2C] < 0) {
                 /* 0x002A6330..0x002A6370: predicate retained in retail; body compiled out */
             }
             if (mnuMovieWork->imageHoldFrames >= timing[mnuMovieWork->scrollPaused - 1].holdFrames) {
@@ -1632,7 +1632,7 @@ s32 mnuUpdateStaffMoviePresentation(void) {
 void mnuFinishStaffMovieAndFreeState(KwlnTask *task) {
     s32 pending;
 
-    mnuMovieTaskState = 2;
+    dds3VblanksPerFrame = 2;
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
     mnuReleaseStaffRollText();
@@ -1673,7 +1673,7 @@ void mnuCreateStaffTask(void) {
     mnuMovieWork->handle = handle;
     mnuMovieWork->state = 0;
     mnuMovieWork->frame = 0;
-    mnuMovieTaskState = 1;
+    dds3VblanksPerFrame = 1;
     frFontUploadClearedTexture();
     dds3StartProcess(D_00429968, 0x408, 0, 0, mnuUpdateStaffRoll, mnuFinishStaffMovieAndFreeState, 0);
 }
@@ -1697,9 +1697,9 @@ s32 movieDrawProc(KwlnTask *task) {
 extern char D_0042A338[]; /* "mnuMovieDraw" */
 
 void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *descriptor) {
-    if (mnuMovieDrawTask == 0) {
+    if (PlayingNo == 0) {
         movieOpenStream(&mnuMovieDrawContext, descriptor, fileName);
-        mnuMovieDrawTask = dds3StartProcess(D_0042A338, 0x2afb, 1, 1, movieDrawProc, 0, 0);
+        PlayingNo = dds3StartProcess(D_0042A338, 0x2afb, 1, 1, movieDrawProc, 0, 0);
     }
 }
 
@@ -1795,7 +1795,7 @@ extern SdfTexResource *D_00437AD8;
 extern u32 D_00437ADC, D_00437AE0, D_00437AE4;
 
 s32 mnuMovieDrawNextProc(s32 procedure) {
-    if (mnuMovieDrawTask == 0) {
+    if (PlayingNo == 0) {
         printf(D_0042A348);
         return -1;
     }
@@ -1811,7 +1811,7 @@ s32 mnuMovieDrawNextProc(s32 procedure) {
 s32 mnuRestartMovieStreamAfterStop(KwlnTask *task) {
     MovObj *movie;
 
-    if (mnuMovieDrawTask == 0) {
+    if (PlayingNo == 0) {
         if (D_00437AD4 != 0) {
             sdfGsMemFree(D_00437AD8);
             D_00437AD4 = 0;
@@ -1839,7 +1839,7 @@ KwlnTask *mnuRequestMoviePlayback(const char *file, const SdfMovieDescriptor *pa
     MovObj *context;
 
     mnuMoviePlaybackDescriptor = *params;
-    if (mnuMovieDrawTask != 0) {
+    if (PlayingNo != 0) {
         context = &mnuMovieDrawContext;
         D_00437AD4 = 1;
         D_00437AD8 = context->soundNode.textureHead;
@@ -1855,9 +1855,9 @@ KwlnTask *mnuRequestMoviePlayback(const char *file, const SdfMovieDescriptor *pa
     } else {
         D_00437AD4 = 0;
         movieOpenStream(&mnuMovieDrawContext, &mnuMoviePlaybackDescriptor, file);
-        mnuMovieDrawTask = dds3StartProcess(D_0042A338, 0x2AFB, 1, 1, movieDrawProc, 0, 0);
+        PlayingNo = dds3StartProcess(D_0042A338, 0x2AFB, 1, 1, movieDrawProc, 0, 0);
     }
-    return mnuMovieDrawTask;
+    return PlayingNo;
 }
 
 void dds3PlayMovieByIndex(s32 index) {
@@ -1866,12 +1866,12 @@ void dds3PlayMovieByIndex(s32 index) {
 }
 
 void movieStop(void) {
-    if (mnuMovieDrawTask == 0) {
+    if (PlayingNo == 0) {
         return;
     }
     movieCloseStream(&mnuMovieDrawContext);
-    dds3KillProcess(mnuMovieDrawTask, 0);
-    mnuMovieDrawTask = 0;
+    dds3KillProcess(PlayingNo, 0);
+    PlayingNo = 0;
 }
 
 s32 mnuCheckMovieDecoderStatus(void) {

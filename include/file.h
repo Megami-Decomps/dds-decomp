@@ -203,7 +203,7 @@ typedef struct FileManWork {
 
 typedef char FileManWork_size_must_be_0x40[(sizeof(FileManWork) == 0x40) ? 1 : -1];
 
-extern FileManWork fileManagerWork;
+extern FileManWork fileQueueHead;
 
 /* Queue a callback-kind request without a completion callback; return its work. */
 struct FileRequest *fileLoad(const char *requestName);

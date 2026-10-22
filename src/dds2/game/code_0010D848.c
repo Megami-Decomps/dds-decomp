@@ -11,39 +11,39 @@ extern s8 D_0040B7D9[];
 
 
 u32 scrGetProcedureCodeAddress(s32 procedureIndex) {
-    return scrCurrentContext->procedures[procedureIndex].addr;
+    return nowpwork->procedures[procedureIndex].addr;
 }
 
 u32 scrGetLabelCodeAddress(s32 labelIndex) {
-    return scrCurrentContext->labels[labelIndex].addr;
+    return nowpwork->labels[labelIndex].addr;
 }
 
 u32 scrGetCodePointer(void) {
-    return scrCurrentContext->pc;
+    return nowpwork->pc;
 }
 
 void scrSetCodePointer(u32 address) {
-    scrCurrentContext->pc = address;
+    nowpwork->pc = address;
 }
 
 u32 scrGetScriptTimer(void) {
-    return scrCurrentContext->timer;
+    return nowpwork->timer;
 }
 
 u32 scrGetCommandTimer(void) {
-    return scrCurrentContext->cmdTimer;
+    return nowpwork->cmdTimer;
 }
 
 u32 scrGetMessageHandle(void) {
-    return scrCurrentContext->resourceIndex;
+    return nowpwork->resourceIndex;
 }
 
 ScrData *scrGetScriptHandle(void) {
-    return scrCurrentContext;
+    return nowpwork;
 }
 
 void *scrGetData(void) {
-    return scrCurrentContext->actor;
+    return nowpwork->actor;
 }
 
 s32 scrCommand_KEY(void) {

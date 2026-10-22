@@ -80,7 +80,7 @@ extern s32 sdfFileCmdFileSize(DevState *state);
 
 #define SDF_DEV_REPLY_SEMAPHORE_LIMIT 0x80
 
-extern u8 sdfDevicePriorityOverrideTicks;
+extern u8 sdfFileCmdThreadPrioCheckCounter;
 
 extern u32 D_004391A4;
 
@@ -88,22 +88,22 @@ extern s32 sdfDiscRequestPending;
 
 extern u32 sdfDiscRequestSemaphore;
 
-extern SdfDiscFileRecord *sdfOpenDiscFileRecord;
+extern SdfDiscFileRecord *sdfCdImageCurrFile;
 
-extern u32 sdfDiscSemaphore;
+extern u32 sdfCdImageFd;
 
-extern u32 sdfDevControlReplyValue;
+extern u32 sdfFileLengthWork;
 
-extern u32 sdfDevOperationReplyValue;
+extern u32 sdfFileSeekWork;
 
-extern u32 sdfConsoleColorPalette[];
+extern u32 sdfDevConsColorTable[];
 
-extern char sdfDevCurrentDirectory[];
+extern char sdfFileHostRootPath[];
 
 
-extern s32 sdfDeviceWorkerPriority;
+extern s32 sdfFileCmdThreadPrio;
 
-extern DevWorkerEntry sdfDeviceWorkerEntries[];
+extern DevWorkerEntry sdfFileDeviceCB[];
 
 
 
@@ -119,14 +119,14 @@ extern u8 D_00438B58[];
 
 
 
-extern u8 sdfDevRpcBuffer[];
+extern u8 sdfPrintRpcBuff[];
 
 extern u32 sdfDiscType;
 
 
 void sdfDevWaitForDisc(void);
 
-extern s32 sdfDiscLoadFilename;
+extern s32 dds3ImgPath;
 
 extern void sceCdDiskReady(s32);
 
@@ -143,14 +143,14 @@ extern void sdfFileCmdAllocHandle(DevState *state);
 extern DevState *sdfFileCmdNewHandle(char *resolvedPath, s32 workerIndex, s32 operation,
                                 void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext);
 
-extern u16 sdfDefaultDevRequestOptions;
+extern u16 sdfFileCmdDefaultCreateMode;
 extern void sceCdMmode(u32 discType);
 
-extern s32 sdfDevReplySemaphore;
+extern s32 sdfFileSemaId;
 
 extern char D_0042E3A0[]; /* "cdrom0:\\IRX\\DEV9.IRX;1 resident fail.\n", followed by padding no C emits */
 
-extern u8 sdfDevModuleLoaded;
+extern u8 sdfDev9LoadFlag;
 
 extern u8 D_00438B68;
 
@@ -190,10 +190,10 @@ extern void sdfDevConsInit(void);
 struct SdfTex;
 
 
-extern u32 sdfConsoleGlyphTexcoords[96];
+extern u32 sdfDevConsFontUvTable[96];
 
 /* Cached texture keeps the provider's opaque pointer/address boundary. */
-extern u32 sdfConsoleFontTexture;
+extern u32 sdfDebugFontHandle;
 
 void *sdfDevVprintf(SifCommand *input, const char *format, void *arguments) {
     char text[0x200];
@@ -226,7 +226,7 @@ void *sdfDevVprintf(SifCommand *input, const char *format, void *arguments) {
         while ((character = *textCursor++) != 0) {
             if (character >= 0x20) {
                 SdfConsoleGlyph *glyph = (SdfConsoleGlyph *)cursor;
-                u32 uv = sdfConsoleGlyphTexcoords[character - 0x20];
+                u32 uv = sdfDevConsFontUvTable[character - 0x20];
 
                 glyph->color = color;
                 glyph->firstUv = uv;
@@ -254,7 +254,7 @@ void *sdfDevVprintf(SifCommand *input, const char *format, void *arguments) {
         header->textureClampRegister = 8;
         header->textureFilter = 1;
         header->textureFilterRegister = 0x14;
-        header->textureState = sdfTexGetTex0Reg((struct SdfTex *)sdfConsoleFontTexture);
+        header->textureState = sdfTexGetTex0Reg((struct SdfTex *)sdfDebugFontHandle);
         header->textureStateRegister = 6;
         header->glyphTag = 0x5400000000008000ULL | glyphCount;
         header->glyphRegisters = 0x53531;
@@ -280,7 +280,7 @@ void *sdfDevPrintf(s32 source, s32 end, s32 argument, s32 index, const char *fmt
 }
 
 void sdfPktSetCmd(SifCommand *packet, s32 index) {
-    packet->command = sdfConsoleColorPalette[index];
+    packet->command = sdfDevConsColorTable[index];
 }
 
 void sdfPktInit(SifCommand *packet, s32 source, s32 end, s32 argument, s32 index) {
@@ -306,7 +306,7 @@ void sdfPrintRpcThread(void) {
     u8 rpcQueue[SDF_DEV_RPC_QUEUE_BYTES];
     u8 rpcServer[SDF_DEV_RPC_SERVER_BYTES];
     sceSifSetRpcQueue(rpcQueue, GetThreadId());
-    sceSifRegisterRpc(rpcServer, SDF_DEV_RPC_SERVER_ID, sdfPrintRpcFunc, sdfDevRpcBuffer, 0, 0, rpcQueue);
+    sceSifRegisterRpc(rpcServer, SDF_DEV_RPC_SERVER_ID, sdfPrintRpcFunc, sdfPrintRpcBuff, 0, 0, rpcQueue);
     sceSifRpcLoop(rpcQueue);
 }
 
@@ -373,7 +373,7 @@ u32 sdfCdImageGetDirData(void) {
 void sdfDevWaitForDisc(void) {
     u8 file[0x30];
     s32 status;
-    WaitSema(sdfDiscSemaphore);
+    WaitSema(sdfCdImageFd);
     for (;;) {
         sdfDelayThread(100);
         sceCdDiskReady(0);
@@ -385,11 +385,11 @@ void sdfDevWaitForDisc(void) {
         } else if (status != 18) {
             continue;
         }
-        if (sceCdSearchFile(file, sdfDiscLoadFilename) != 0) {
+        if (sceCdSearchFile(file, dds3ImgPath) != 0) {
             break;
         }
     }
-    SignalSema(sdfDiscSemaphore);
+    SignalSema(sdfCdImageFd);
 }
 
 extern u8 sdfDiscReadMode;
@@ -412,9 +412,9 @@ void sdfCdStStart(s32 request) {
     options[2] = 0;
     options[3] = 0;
     for (;;) {
-        WaitSema(sdfDiscSemaphore);
+        WaitSema(sdfCdImageFd);
         ready = sceCdStStart(request, options);
-        SignalSema(sdfDiscSemaphore);
+        SignalSema(sdfCdImageFd);
         if (ready != 0) {
             break;
         }
@@ -447,11 +447,11 @@ void sdfDevSeekDiscWithRequestGate(s32 request) {
     options[2] = 0;
     options[3] = 0;
     for (;;) {
-        WaitSema(sdfDiscSemaphore);
+        WaitSema(sdfCdImageFd);
         sdfDiscRequestPending = 1;
         WaitSema(sdfDiscRequestSemaphore);
         ready = sceCdStStart(request, options);
-        SignalSema(sdfDiscSemaphore);
+        SignalSema(sdfCdImageFd);
         if (ready != 0) {
             break;
         }
@@ -471,9 +471,9 @@ void sdfDevReadDiscUntilComplete(s32 size, s32 buffer) {
     s32 result;
 
     for (;;) {
-        WaitSema(sdfDiscSemaphore);
+        WaitSema(sdfCdImageFd);
         result = sceCdStRead(size, buffer, 1, &status);
-        SignalSema(sdfDiscSemaphore);
+        SignalSema(sdfCdImageFd);
         if (status == 0 && result == size) {
             break;
         }
@@ -481,9 +481,9 @@ void sdfDevReadDiscUntilComplete(s32 size, s32 buffer) {
             sdfDevWaitForDisc();
             sdfCdStStart(sdfDiscReadPosition);
         } else {
-            WaitSema(sdfDiscSemaphore);
+            WaitSema(sdfCdImageFd);
             sceCdStStop();
-            SignalSema(sdfDiscSemaphore);
+            SignalSema(sdfCdImageFd);
             sdfCdStStart(sdfDiscReadPosition);
         }
     }
@@ -524,20 +524,20 @@ SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(u32 pathAddress, u8 *sect
         cursor[2] = 0;
     }
     for (;;) {
-        WaitSema(sdfDiscSemaphore);
+        WaitSema(sdfCdImageFd);
         if (sceCdSearchFile(file, (s32)name) != 0) {
             fd = sceOpen(path, 1);
             if (fd < 0) {
-                SignalSema(sdfDiscSemaphore);
+                SignalSema(sdfCdImageFd);
                 continue;
             }
             D_00476940.size = sceLseek(fd, 0, 2);
             sceClose(fd);
-            SignalSema(sdfDiscSemaphore);
+            SignalSema(sdfCdImageFd);
             break;
         }
         status = sceCdStatus();
-        SignalSema(sdfDiscSemaphore);
+        SignalSema(sdfCdImageFd);
         if (status == 1) {
             sdfDevWaitForDisc();
         } else {
@@ -626,9 +626,9 @@ SdfDiscFileRecord *sdfCdImageSearchFile(u32 pathAddress, u8 *sectorOut, u32 flag
 
 extern s32 D_004391AC;
 
-extern s32 sdfDevReadSectorBytesAvailable;
+extern s32 sdfCdImageCurrActive;
 
-extern u8 *sdfDevReadSectorCursor;
+extern u8 *sdfCdImageOffset;
 
 extern u8 sdfDevReadSectorBuffer[SDF_DEV_DISC_SECTOR_BYTES];
 
@@ -643,8 +643,8 @@ s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
     result = -1;
     if (file != 0) {
         D_004391AC = file->size;
-        sdfOpenDiscFileRecord = file;
-        sdfDevReadSectorBytesAvailable = 0;
+        sdfCdImageCurrFile = file;
+        sdfCdImageCurrActive = 0;
         if (name[1] == 0x76 || name[1] == 0x56) {
             sdfDevSeekDiscWithRequestGate(request[0]);
         } else {
@@ -674,15 +674,15 @@ s32 sdfCdImageRead(void *buffer, s32 byteCount) {
     }
 
     bytes = byteCount;
-    transferBytes = sdfDevReadSectorBytesAvailable;
+    transferBytes = sdfCdImageCurrActive;
     if (transferBytes > 0) {
         if (transferBytes > byteCount) {
             transferBytes = byteCount;
         }
-        memcpy(destination, sdfDevReadSectorCursor, transferBytes);
+        memcpy(destination, sdfCdImageOffset, transferBytes);
         destination += transferBytes;
-        sdfDevReadSectorCursor += transferBytes;
-        sdfDevReadSectorBytesAvailable -= transferBytes;
+        sdfCdImageOffset += transferBytes;
+        sdfCdImageCurrActive -= transferBytes;
         bytes -= transferBytes;
     }
     if (bytes > 0) {
@@ -697,8 +697,8 @@ s32 sdfCdImageRead(void *buffer, s32 byteCount) {
             if (t > 0) {
                 sdfDevReadDiscUntilComplete(1, (s32)sdfDevReadSectorBuffer);
                 memcpy(destination + transferBytes, sdfDevReadSectorBuffer, t);
-                sdfDevReadSectorCursor = sdfDevReadSectorBuffer + t;
-                sdfDevReadSectorBytesAvailable = SDF_DEV_DISC_SECTOR_BYTES - t;
+                sdfCdImageOffset = sdfDevReadSectorBuffer + t;
+                sdfCdImageCurrActive = SDF_DEV_DISC_SECTOR_BYTES - t;
             }
         } else {
             while (transferBytes >= SDF_DEV_DISC_SECTOR_BYTES) {
@@ -710,8 +710,8 @@ s32 sdfCdImageRead(void *buffer, s32 byteCount) {
             if (transferBytes > 0) {
                 sdfDevReadDiscUntilComplete(1, (s32)sdfDevReadSectorBuffer);
                 memcpy(destination, sdfDevReadSectorBuffer, transferBytes);
-                sdfDevReadSectorCursor = sdfDevReadSectorBuffer + transferBytes;
-                sdfDevReadSectorBytesAvailable = SDF_DEV_DISC_SECTOR_BYTES - transferBytes;
+                sdfCdImageOffset = sdfDevReadSectorBuffer + transferBytes;
+                sdfCdImageCurrActive = SDF_DEV_DISC_SECTOR_BYTES - transferBytes;
             }
         }
     }
@@ -723,11 +723,11 @@ s32 sdfCdImageRead(void *buffer, s32 byteCount) {
 }
 
 void sdfCdImageClose(void) {
-    if (sdfOpenDiscFileRecord != 0) {
-        WaitSema(sdfDiscSemaphore);
+    if (sdfCdImageCurrFile != 0) {
+        WaitSema(sdfCdImageFd);
         sceCdStStop();
-        SignalSema(sdfDiscSemaphore);
-        sdfOpenDiscFileRecord = 0;
+        SignalSema(sdfCdImageFd);
+        sdfCdImageCurrFile = 0;
     }
 }
 
@@ -753,10 +753,10 @@ s32 sdfCdImageGetFileSize(u32 index) {
 }
 
 s32 sdfCdImageGetCurrFileSize(void) {
-    if (sdfOpenDiscFileRecord == 0) {
+    if (sdfCdImageCurrFile == 0) {
         FatalError("file didn't open.");
     }
-    return sdfOpenDiscFileRecord->size;
+    return sdfCdImageCurrFile->size;
 }
 
 
@@ -786,7 +786,7 @@ void sdfCdImageInit(const char *discFileName, const char *preloadFileName) {
     u32 discFileRecord[SDF_DEV_DISC_FILE_WORDS];
     s32 iopHeapAddress;
 
-    sdfDiscLoadFilename = (u32)discFileName;
+    dds3ImgPath = (u32)discFileName;
     sdfCdImageLoadDir(preloadFileName);
     if (sceCdSearchFile(discFileRecord, (s32)discFileName) == 0) {
         FatalError(D_0042E288, discFileName);
@@ -798,7 +798,7 @@ void sdfCdImageInit(const char *discFileName, const char *preloadFileName) {
 }
 
 void sdfInitDeviceSemaphores(void) {
-    sdfDiscSemaphore = sdfCreateSema(1, 0xff, 0);
+    sdfCdImageFd = sdfCreateSema(1, 0xff, 0);
     sdfDiscRequestSemaphore = sdfCreateSema(0, 0xff, 0);
     sdfDiscRequestPending = 0;
     sceCdInit(0);
@@ -831,7 +831,7 @@ void sdfFileSetCdFilename(char *dst, char *src) {
 
 char *sdfFileSetHostFilename(char *dst, char *src) {
     if (*src == 0x2F) {
-        strcpy(dst, sdfDevCurrentDirectory);
+        strcpy(dst, sdfFileHostRootPath);
         return strcat(dst, src);
     }
     *(Bytes7 *)dst = D_00438AF0[0];
@@ -913,22 +913,22 @@ char *sdfFileMakeFilename(char *path) {
 void sdfFileCallback(DevState *state, s32 event, s32 unused, s32 value, s32 callbackContext) {
     if (event != SDF_DEV_EVENT_SEEK_REPLY) {
         if (event == SDF_DEV_EVENT_SIZE_REPLY) {
-            sdfDevControlReplyValue = value;
+            sdfFileLengthWork = value;
         }
     } else {
-        sdfDevOperationReplyValue = value;
+        sdfFileSeekWork = value;
     }
-    SignalSema(sdfDevReplySemaphore);
+    SignalSema(sdfFileSemaId);
 }
 
 /* Open a path using the shared reply callback and wait for its initial completion. */
 DevState *sdfFileOpen(const char *path) {
     DevState *state;
-    if (sdfDevReplySemaphore < 0) {
-        sdfDevReplySemaphore = sdfCreateSema(0, SDF_DEV_REPLY_SEMAPHORE_LIMIT, 0);
+    if (sdfFileSemaId < 0) {
+        sdfFileSemaId = sdfCreateSema(0, SDF_DEV_REPLY_SEMAPHORE_LIMIT, 0);
     }
     state = sdfFileCmdReadOpen(path, sdfFileCallback, 0);
-    WaitSema(sdfDevReplySemaphore);
+    WaitSema(sdfFileSemaId);
     sdfFileCmdClearError(state);
     return state;
 }
@@ -953,47 +953,47 @@ s32 sdfFileCheckExist(char *path) {
 
 void sdfFileClose(DevState *state) {
     sdfFileCmdClose(state);
-    WaitSema(sdfDevReplySemaphore);
+    WaitSema(sdfFileSemaId);
     sdfFileCmdFree(state);
 }
 
 /* Queue a byte-counted read, then wait for its reply callback. */
 void sdfFileRead(DevState *state, void *buffer, s32 byteCount) {
     sdfFileCmdRead(state, buffer, byteCount);
-    WaitSema(sdfDevReplySemaphore);
+    WaitSema(sdfFileSemaId);
 }
 
 u32 sdfFileLength(DevState *state) {
     sdfFileCmdFileSize(state);
-    WaitSema(sdfDevReplySemaphore);
-    return sdfDevControlReplyValue;
+    WaitSema(sdfFileSemaId);
+    return sdfFileLengthWork;
 }
 
 extern s32 sdfFileCmdSeek(DevState *state, s32 seekOffset, s32 seekOrigin);
 
 u32 sdfFileSeek(DevState *state, s32 seekOffset, s32 seekOrigin) {
     sdfFileCmdSeek(state, seekOffset, seekOrigin);
-    WaitSema(sdfDevReplySemaphore);
-    return sdfDevOperationReplyValue;
+    WaitSema(sdfFileSemaId);
+    return sdfFileSeekWork;
 }
 
 /* Set the current device directory, ending in a slash; path is assumed nonempty. */
 void sdfFileSetHostRoot(char *path) {
     s32 length = strlen(path);
 
-    ((DevPathPrefix *)sdfDevCurrentDirectory)->head = ((DevPathPrefix *)D_00438AF0)->head;
-    ((DevPathPrefix *)sdfDevCurrentDirectory)->tail = ((DevPathPrefix *)D_00438AF0)->tail;
-    memcpy(sdfDevCurrentDirectory + 6, path, length);
+    ((DevPathPrefix *)sdfFileHostRootPath)->head = ((DevPathPrefix *)D_00438AF0)->head;
+    ((DevPathPrefix *)sdfFileHostRootPath)->tail = ((DevPathPrefix *)D_00438AF0)->tail;
+    memcpy(sdfFileHostRootPath + 6, path, length);
     if (path[length - 1] != '/') {
-        sdfDevCurrentDirectory[length + 6] = '/';
-        sdfDevCurrentDirectory[length + 7] = 0;
+        sdfFileHostRootPath[length + 6] = '/';
+        sdfFileHostRootPath[length + 7] = 0;
     } else {
-        sdfDevCurrentDirectory[length + 6] = 0;
+        sdfFileHostRootPath[length + 6] = 0;
     }
 }
 
 char *sdfFileGetHostRoot(void) {
-    return sdfDevCurrentDirectory;
+    return sdfFileHostRootPath;
 }
 
 extern void sdfDevSetFallbackDeviceWorker(s32 worker);
@@ -1029,7 +1029,7 @@ void sdfFileCmdAllocHandle(DevState *state) {
     DevState *last;
 
     interrupts = DIntr(state);
-    worker = &sdfDeviceWorkerEntries[state->workerIndex];
+    worker = &sdfFileDeviceCB[state->workerIndex];
     if (worker->threadId < 0) {
         sdfFileCmdStartThread(state->workerIndex);
     }
@@ -1111,7 +1111,7 @@ void sdfFileCmdDequeue(DevState *state) {
     } else {
         next->previous = prev;
     }
-    worker = &sdfDeviceWorkerEntries[state->workerIndex];
+    worker = &sdfFileDeviceCB[state->workerIndex];
     prev = state->workerPrev;
     next = state->workerNext;
     if (prev == NULL) {
@@ -1666,7 +1666,7 @@ DevState *sdfFileCmdWriteOpen(const char *path, void (*callback)(DevState *, s32
         return NULL;
     }
     state = sdfFileCmdNewHandle(resolvedPath, workerIndex, SDF_DEV_OPERATION_OPEN_WRITE, callback, callbackContext);
-    state->options = options != 0 ? options : sdfDefaultDevRequestOptions;
+    state->options = options != 0 ? options : sdfFileCmdDefaultCreateMode;
     sdfFileCmdAllocHandle(state);
     return state;
 }
@@ -1679,7 +1679,7 @@ s32 sdfFileCmdSeek(DevState *state, s32 seekOffset, s32 seekOrigin) {
     state->operationArg = seekOffset;
     state->options = seekOrigin;
     state->operation = SDF_DEV_OPERATION_SEEK;
-    SignalSema(sdfDeviceWorkerEntries[state->workerIndex].semaphore);
+    SignalSema(sdfFileDeviceCB[state->workerIndex].semaphore);
     return 0;
 }
 
@@ -1689,7 +1689,7 @@ s32 sdfFileCmdFileSize(DevState *state) {
         return -1;
     }
     state->operation = SDF_DEV_OPERATION_GET_SIZE;
-    SignalSema(sdfDeviceWorkerEntries[state->workerIndex].semaphore);
+    SignalSema(sdfFileDeviceCB[state->workerIndex].semaphore);
     return 0;
 }
 
@@ -1701,7 +1701,7 @@ s32 sdfFileCmdRead(DevState *state, void *readBuffer, s32 byteCount) {
     state->requestExtra = byteCount;
     state->operation = SDF_DEV_OPERATION_READ;
     state->requestData = readBuffer;
-    SignalSema(sdfDeviceWorkerEntries[state->workerIndex].semaphore);
+    SignalSema(sdfFileDeviceCB[state->workerIndex].semaphore);
     return 0;
 }
 
@@ -1713,7 +1713,7 @@ s32 sdfFileCmdWrite(DevState *state, const void *buffer, s32 byteCount) {
     state->requestExtra = byteCount;
     state->operation = SDF_DEV_OPERATION_WRITE;
     state->requestData = (void *)buffer;
-    SignalSema(sdfDeviceWorkerEntries[state->workerIndex].semaphore);
+    SignalSema(sdfFileDeviceCB[state->workerIndex].semaphore);
     return 0;
 }
 
@@ -1735,7 +1735,7 @@ s32 sdfFileCmdClose(DevState *request) {
         return -1;
     }
     request->operation = requestState;
-    SignalSema(sdfDeviceWorkerEntries[request->workerIndex].semaphore);
+    SignalSema(sdfFileDeviceCB[request->workerIndex].semaphore);
     return 0;
 }
 
@@ -1782,7 +1782,7 @@ DevState *sdfFileCmdWriteFile(const char *path, void *buffer, s32 byteCount,
     state = sdfFileCmdNewHandle(resolvedPath, workerIndex, SDF_DEV_OPERATION_WRITE_BUFFER, callback, callbackContext);
     state->requestExtra = byteCount;
     state->requestData = buffer;
-    state->options = options != 0 ? options : sdfDefaultDevRequestOptions;
+    state->options = options != 0 ? options : sdfFileCmdDefaultCreateMode;
     state->operationArg = 0;
     sdfFileCmdAllocHandle(state);
     return state;
@@ -1793,11 +1793,11 @@ void sdfFileCmdThreadSetPrio(s32 priority) {
     DevWorkerEntry *worker;
     u32 index;
 
-    if (sdfDeviceWorkerPriority == priority) {
+    if (sdfFileCmdThreadPrio == priority) {
         return;
     }
-    sdfDeviceWorkerPriority = priority;
-    worker = sdfDeviceWorkerEntries;
+    sdfFileCmdThreadPrio = priority;
+    worker = sdfFileDeviceCB;
     index = 0;
     do {
         s32 threadId = worker->threadId;
@@ -1812,7 +1812,7 @@ void sdfFileCmdThreadSetPrio(s32 priority) {
 
 /* Apply the temporary numeric priority for three countdown ticks. */
 void sdfFileCmdThreadSetLoPrio(void) {
-    sdfDevicePriorityOverrideTicks = SDF_DEV_PRIORITY_OVERRIDE_TICKS;
+    sdfFileCmdThreadPrioCheckCounter = SDF_DEV_PRIORITY_OVERRIDE_TICKS;
     sdfFileCmdThreadSetPrio(SDF_DEV_OVERRIDE_PRIORITY);
 }
 
@@ -1823,13 +1823,13 @@ void sdfFileCmdThreadSetHiPrio(void) {
 
 /* Decrement an active override and restore the default when it expires. */
 void sdfFileCmdThreadCheckPrio(void) {
-    u8 remainingTicks = sdfDevicePriorityOverrideTicks;
+    u8 remainingTicks = sdfFileCmdThreadPrioCheckCounter;
     u8 nextTicks;
 
     if (remainingTicks == 0) {
         return;
     }
-    sdfDevicePriorityOverrideTicks = remainingTicks - 1;
+    sdfFileCmdThreadPrioCheckCounter = remainingTicks - 1;
     nextTicks = remainingTicks - 1;
     if (nextTicks != 0) {
         return;
@@ -1839,7 +1839,7 @@ void sdfFileCmdThreadCheckPrio(void) {
 
 /* Start worker thread `index` if it isn't running; slot 3 runs the alternate entry point. */
 void sdfFileCmdStartThread(s32 index) {
-    DevWorkerEntry *worker = &sdfDeviceWorkerEntries[index];
+    DevWorkerEntry *worker = &sdfFileDeviceCB[index];
     void (*entry)();
     s32 thread;
 
@@ -1850,7 +1850,7 @@ void sdfFileCmdStartThread(s32 index) {
         if (index != 3) {
             entry = sdfFileCmdThread;
         }
-        sdfDeviceWorkerPriority = 0x48;
+        sdfFileCmdThreadPrio = 0x48;
         thread = sdfCreateThreadWithStack(entry, 0x4000, 0x48);
         worker->threadId = thread;
         _StartThread(thread, (s32)worker);
@@ -1873,7 +1873,7 @@ void sdfPowerOffInterruptCallback(void *semaphore) {
     iSignalSema((s32)semaphore);
 }
 
-extern u8 sdfPfsDebugMode;
+extern u8 sdfHddValid;
 
 extern char sdfDevHddModuleArguments[];
 
@@ -1904,7 +1904,7 @@ void sdfDevInitializeHddPfsDebugMode(char *path) {
     s32 semaphore;
     s32 thread;
 
-    sdfPfsDebugMode = 0;
+    sdfHddValid = 0;
     sdfDev9LoadModule();
     if (D_00438B68 == 0) {
         return;
@@ -1928,12 +1928,12 @@ void sdfDevInitializeHddPfsDebugMode(char *path) {
     sceFsInit();
     sprintf(buffer, "hdd0:%s,", path);
     sceMount(D_00438B60, buffer, 0, 0, 0);
-    sdfPfsDebugMode = 1;
+    sdfHddValid = 1;
 }
 
 void sdfDev9LoadModule(void) {
     s32 resident;
-    if (sdfDevModuleLoaded == 0) {
+    if (sdfDev9LoadFlag == 0) {
         D_00438B68 = 0;
         if (sceSifLoadStartModule("cdrom0:\\IRX\\DEV9.IRX;1", 0, NULL, &resident) < 0) {
             printf("cdrom0:\\IRX\\DEV9.IRX;1 could't load.\n");
@@ -1944,12 +1944,12 @@ void sdfDev9LoadModule(void) {
             return;
         }
         D_00438B68 = 1;
-        sdfDevModuleLoaded = 1;
+        sdfDev9LoadFlag = 1;
     }
 }
 
 /* Writable device directory; its suffix is replaced by the path setter. */
-char sdfDevCurrentDirectory[64] = "host0:";
+char sdfFileHostRootPath[64] = "host0:";
 
 INCLUDE_RODATA(const s32, "game/code_0033D5D0", D_0042E3A0);
 
@@ -1965,7 +1965,7 @@ INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfDiscType);
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AE0);
 
-INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfDevReplySemaphore);
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfFileSemaId);
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfDiscPathPrefix);
 
@@ -1989,11 +1989,11 @@ INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B1C);
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B1E);
 
-INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfDevicePriorityOverrideTicks);
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfFileCmdThreadPrioCheckCounter);
 
-INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfDeviceWorkerPriority);
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfFileCmdThreadPrio);
 
-INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfDefaultDevRequestOptions);
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfFileCmdDefaultCreateMode);
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438B28);
 

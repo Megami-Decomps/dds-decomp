@@ -131,7 +131,7 @@ extern SdfPoolNode *D_003E9DC0[];
 extern SdfPoolNode *D_003E9F38[];
 extern u32 D_003E9BE0[];
 extern SdfPoolNode *D_003E9C28[];
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 
 typedef struct EffectStateSnapshot {
     s128 vectors[4];
@@ -1181,7 +1181,7 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     effBlurDrawFramebufferQuad(out);
 }
 
-extern f32 sdfViewEyeVector[4];
+extern f32 aViewTarget[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewMatrix[4][4];
 extern f32 sdfProjectionMatrix[4][4];
@@ -1231,7 +1231,7 @@ void func_002DF6C8(EffKindWork *work) {
     blended[0] = packed;
     out->color = blended[0];
     stretch = effSampleScalarCurve(&config->blendB, frame, duration);
-    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
@@ -4927,7 +4927,7 @@ void effDrawFourPointGroups(EffPointSet *set, Matrix4 *matrix) {
             blendPacket->registerList = 0xE;
             blendPacket->registerAddress = 0x42;
             sdfDrawTagLink(setup, (u32)blendPacket);
-            effSubmitSurfacePacket(&kwlnDrawSurfaces[surfaceId], setup);
+            effSubmitSurfacePacket(&sdfGrOtTable[surfaceId], setup);
             blendPacket = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
             blendPacket->dmaTag = 2;
             blendPacket->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
@@ -4943,7 +4943,7 @@ void effDrawFourPointGroups(EffPointSet *set, Matrix4 *matrix) {
             }
             blendPacket->registerAddress = 0x42;
             sdfDrawTagLink(list, (u32)blendPacket);
-            effSubmitSurfacePacket(&kwlnDrawSurfaces[surfaceId], list);
+            effSubmitSurfacePacket(&sdfGrOtTable[surfaceId], list);
         }
     }
 }
@@ -5859,7 +5859,7 @@ void effFreeIndexedEntries(EffClassWork *work) {
 }
 
 extern f32 sdfViewTargetVector[4];
-extern f32 sdfViewEyeVector[4];
+extern f32 aViewTarget[4];
 
 /* Advance radial five-point wave strips from the class orientation. */
 void effUpdateRadialWavePointRows(EffClassWork *work) {
@@ -5898,7 +5898,7 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
         return;
     }
     VU0_LOAD_VF(vf10, sdfViewTargetVector);
-    VU0_LOAD_VF(vf11, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, aViewTarget);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, view);
     VU0_LOAD_VF(vf10, work->vectors.orientation);
@@ -6350,7 +6350,7 @@ void effReleaseBillPointEntries(EffClassWork *work) {
 
 /* Actual same-title provider contracts; full four-float VU buffers remain. */
 extern f32 sdfViewTargetVector[4];
-extern f32 sdfViewEyeVector[4];
+extern f32 aViewTarget[4];
 extern f32 atanf(f32);
 
 /* Advance orbiting entries and rebuild their camera-facing, wavy point spans. */
@@ -6396,7 +6396,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
         return;
     }
     VU0_LOAD_VF(vf10, sdfViewTargetVector);
-    VU0_LOAD_VF(vf11, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, aViewTarget);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, view);
     widths[0] = 0;
@@ -7068,7 +7068,7 @@ void effAcquireStripRecord(EffectStripNode *node) {
     }
 }
 
-extern f32 sdfViewUpVector[4];
+extern f32 aViewDown[4];
 void effDrawEffectStrip(EffectStripNode *node) {
     Matrix4 matrix;
     f32 nodeTint[4];
@@ -7133,12 +7133,12 @@ void effDrawEffectStrip(EffectStripNode *node) {
     opacity = node->opacity;
     billSize = node->copiedHeader.billSize;
     dds3BillboardSetMode(billboard, (s16)info->alphaTrack.surfaceIndex);
-    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF_UNCLOBBERED(vf10, view);
-    VU0_LOAD_VF(vf11, sdfViewUpVector);
+    VU0_LOAD_VF(vf11, aViewDown);
     VU0_STORE_VF_UNCLOBBERED(vf11, up);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, right);
@@ -9117,7 +9117,7 @@ typedef struct EffGsPairPacket {
 } EffGsPairPacket;
 
 extern SdfPoolNode *D_003E9EF0[];
-extern vu8 sdfCurrentBufferIndex;
+extern vu8 sdfFrameId;
 extern u8 kwlnFrameDrawPacketRecords[];
 extern s32 dds3GetFrameID(void);
 extern void sdfMatUpdatePacket(SdfAsset *, s32);
@@ -9193,15 +9193,15 @@ void func_002F3F70(u8 *owner, void *matrix) {
     sdfMatSetMultiTex((SdfAsset *)work->handle, texture);
     sdfMatSetMultiMethod((SdfAsset *)work->handle, mode);
     row = 0;
-    sdfMatUpdatePacket((SdfAsset *)work->handle, (s8)sdfCurrentBufferIndex);
-    entry = (SdfAssetEntry *)((SdfAsset *)work->handle)->drawEntries[(s8)sdfCurrentBufferIndex];
+    sdfMatUpdatePacket((SdfAsset *)work->handle, (s8)sdfFrameId);
+    entry = (SdfAssetEntry *)((SdfAsset *)work->handle)->drawEntries[(s8)sdfFrameId];
     entry->secondaryTextureState.clamp = 0x7F000FFF;
     entry->primaryTextureState.clamp = 0x02007F000FFFULL;
     entry->secondaryMode = mode;
     entry->alphaState = registerId;
     referencePacket = sdfGrAllocPacketBuff(0x20);
     sdfMatMakePacket((SdfAsset *)work->handle, (SdfDmaTagHeader *)referencePacket,
-                                       (s8)sdfCurrentBufferIndex);
+                                       (s8)sdfFrameId);
     referencePacket[1] = 0;
     sdfAppendReferencePacket(list, (u32)referencePacket);
     dmaPacket = sdfGrAllocPacketBuff(0x40);
@@ -13739,7 +13739,7 @@ u32 effStoreBattleCameraSnapshot(u32 value) {
 }
 
 extern EffQueuedFileObject D_003FFBB0;
-extern s8 sdfPadButtonStates[];
+extern s8 dds3PadBitTable[];
 extern char D_00438740[];
 extern u32 btlReturnDebugMenuSetupWord(u32);
 extern void btlDebugMenuBeforeRecordNoOp(void);
@@ -13804,14 +13804,14 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const void *sourceRows, 
     btlDebugMenuAfterRecordNoOp();
     sdfMemFreeDirect(allocation);
 
-    if (sdfPadButtonStates[1] < 0 && count != 0) {
+    if (dds3PadBitTable[1] < 0 && count != 0) {
         u32 selected = D_003FFBB0.cursor;
         requestIndex = (u32)entries[selected].payload.numeric.step;
         effAppendPositionedCameraFileJob(&requests[requestIndex].request);
         result = 0x800000;
     } else {
         result = 0;
-        if (sdfPadButtonStates[3] >= 0) {
+        if (dds3PadBitTable[3] >= 0) {
             result = 0x200001;
         }
     }
@@ -14040,7 +14040,7 @@ u32 effPollNamedFileJob(void) {
 
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 extern char D_0042D030[], D_0042D048[];
-extern s8 sdfPadButtonStates[];
+extern s8 dds3PadBitTable[];
 extern f32 D_003FFCB0[4];
 
 INCLUDE_RODATA(const s32, "game/code_002DE248", D_0042D030);
@@ -14057,17 +14057,17 @@ s32 effHandleDebugOrbitInput(void) {
     btlBossDebugPrintfN(8, 8, 0, D_0042D030);
     btlBossDebugPrintfN(8, 20, 0, D_0042D048);
     btlBossDebugPrintfN(8, 32, 0, "R2   & L2   : RADIUS");
-    if (sdfPadButtonStates[6] & 2) {
+    if (dds3PadBitTable[6] & 2) {
         D_0045C2F0[1] -= 10.0f;
         flags = 3;
-    } else if (sdfPadButtonStates[7] & 2) {
+    } else if (dds3PadBitTable[7] & 2) {
         D_0045C2F0[1] += 10.0f;
         flags = 3;
     }
-    if (sdfPadButtonStates[11] & 2) {
+    if (dds3PadBitTable[11] & 2) {
         step = -10.0f;
         flags |= 2;
-    } else if (sdfPadButtonStates[9] & 2) {
+    } else if (dds3PadBitTable[9] & 2) {
         step = 10.0f;
         flags |= 2;
     } else {
@@ -14082,10 +14082,10 @@ s32 effHandleDebugOrbitInput(void) {
         VU0_LOAD_VF(vf10, vector);
         VU0_LENGTH_VF10(length);
         angle = 0.0f;
-        if (sdfPadButtonStates[5] & 2) {
+        if (dds3PadBitTable[5] & 2) {
             angle = (100.0f / length) * 0.08726646f;
             flags |= 2;
-        } else if (sdfPadButtonStates[4] & 2) {
+        } else if (dds3PadBitTable[4] & 2) {
             angle = (100.0f / length) * -0.08726646f;
             flags |= 2;
         }
@@ -14104,7 +14104,7 @@ s32 effHandleDebugOrbitInput(void) {
     vector[2] += D_003FFCB0[2] * step;
     D_0045C2F0[0] = vector[0];
     D_0045C2F0[2] = vector[2];
-    if (sdfPadButtonStates[3] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         flags &= ~1;
     } else {
         flags |= 0x200000;
@@ -14228,7 +14228,7 @@ s32 func_002FF360(void) {
     btlBossDebugPrintfN(8, 8, 0, D_0042D030);
     btlBossDebugPrintfN(8, 20, 0, D_0042D048);
     btlBossDebugPrintfN(8, 32, 0, "R2   & L2   : ROLL");
-    if (sdfPadButtonStates[6] & 2) {
+    if (dds3PadBitTable[6] & 2) {
         if ((s8)D_00438758 == 8) {
             D_0043875B = -1;
             D_00438759 += 8;
@@ -14244,7 +14244,7 @@ s32 func_002FF360(void) {
         }
         D_00438758 += D_0043875B;
         flags = 3;
-    } else if (sdfPadButtonStates[7] & 2) {
+    } else if (dds3PadBitTable[7] & 2) {
         if ((s8)D_00438758 == 8) {
             D_0043875B = 1;
             D_00438759 += 8;
@@ -14263,7 +14263,7 @@ s32 func_002FF360(void) {
     }
     /* At either pole, directional input changes roll instead of azimuth.
      * It consumes this tick's roll input as well. */
-    if (sdfPadButtonStates[5] & 2) {
+    if (dds3PadBitTable[5] & 2) {
         if ((s8)D_00438758 == 8 || (s8)D_00438758 == -8) {
             /* Retail 0x002FF4F4 and 0x002FF4FC beq .L002FF578: increaseRoll is
              * also entered by fall-through from the beql at 0x002FF570. */
@@ -14275,7 +14275,7 @@ s32 func_002FF360(void) {
             D_00438759++;
         }
         flags |= 2;
-    } else if (sdfPadButtonStates[4] & 2) {
+    } else if (dds3PadBitTable[4] & 2) {
         if ((s8)D_00438758 == 8 || (s8)D_00438758 == -8) {
             /* Retail 0x002FF534 and 0x002FF53C beq .L002FF5A4: decreaseRoll is
              * also entered by fall-through from the beqz at 0x002FF59C. */
@@ -14292,7 +14292,7 @@ s32 func_002FF360(void) {
         }
         flags |= 2;
     }
-    if (sdfPadButtonStates[11] & 2) {
+    if (dds3PadBitTable[11] & 2) {
 increaseRoll:
         if ((s8)D_0043875A == 15) {
             D_0043875A = 0;
@@ -14300,7 +14300,7 @@ increaseRoll:
             D_0043875A++;
         }
         flags |= 2;
-    } else if (sdfPadButtonStates[9] & 2) {
+    } else if (dds3PadBitTable[9] & 2) {
 decreaseRoll:
         {
             s32 roll = (s8)D_0043875A;
@@ -14359,7 +14359,7 @@ decreaseRoll:
     D_0045C110[0x88] = D_00438758;
     D_0045C110[0x89] = D_00438759;
     D_0045C110[0x8A] = D_0043875A;
-    if (sdfPadButtonStates[3] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         flags &= ~1;
     } else {
         flags |= 0x200000;
@@ -14975,7 +14975,7 @@ void btlResetEffectWork(void) {
     D_004387B0 = 0;
 }
 
-extern s8 sdfPadButtonStates[];
+extern s8 dds3PadBitTable[];
 extern EffScalarTrack D_0045C348;
 extern f32 D_004387B4;
 extern f32 D_004387B8;
@@ -15068,46 +15068,46 @@ s32 effEditScalarTrack(EffScalarTrack *track, u32 frames, void *panelWork, void 
         switch (D_004387B0) {
         case 0:
             if (cursor != 0 && cursor != count) {
-                if (sdfPadButtonStates[0xB] & 2) {
+                if (dds3PadBitTable[0xB] & 2) {
                     status = 0x400003;
                     position = D_004387B8 + step * 10.0f;
                     D_004387B8 = position;
-                } else if (sdfPadButtonStates[9] & 2) {
+                } else if (dds3PadBitTable[9] & 2) {
                     status = 0x400003;
                     position = D_004387B8 - step * 10.0f;
                     D_004387B8 = position;
-                } else if (sdfPadButtonStates[5] & 2) {
+                } else if (dds3PadBitTable[5] & 2) {
                     status = 0x400003;
                     position = D_004387B8 + step;
                     D_004387B8 = position;
-                } else if (sdfPadButtonStates[4] & 2) {
+                } else if (dds3PadBitTable[4] & 2) {
                     status = 0x400003;
                     position = D_004387B8 - step;
                     D_004387B8 = position;
                 }
             }
-            if (sdfPadButtonStates[6] & 2) {
+            if (dds3PadBitTable[6] & 2) {
                 if ((s32)D_004387AC > 0) {
                     D_004387AC--;
                 }
-            } else if (sdfPadButtonStates[7] & 2) {
+            } else if (dds3PadBitTable[7] & 2) {
                 if (D_004387AC < count) {
                     D_004387AC++;
                 } else {
                     D_004387B0++;
                     panel->flags &= ~0x10;
                 }
-            } else if (sdfPadButtonStates[1] < 0) {
+            } else if (dds3PadBitTable[1] < 0) {
                 D_004387A8 = 1;
             }
             break;
         case 1:
-            if (sdfPadButtonStates[6] & 2) {
+            if (dds3PadBitTable[6] & 2) {
                 if (panel->flags & 0x20) {
                     D_004387B0 = 0;
                     panel->flags |= 0x10;
                 }
-            } else if (sdfPadButtonStates[7] & 2) {
+            } else if (dds3PadBitTable[7] & 2) {
                 if (panel->flags & 0x20) {
                     D_004387B0 = 0;
                     D_004387AC = 0;
@@ -15207,7 +15207,7 @@ s32 effEditScalarTrack(EffScalarTrack *track, u32 frames, void *panelWork, void 
         btlDebugDrawPoint2DNoOp(x1, y1, 0x80008080);
     }
     btlBossDebugPrintfN(0xC, 0x15C, 8, D_004387E0, frames);
-    if (sdfPadButtonStates[3] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         if (D_004387A8 == 0) {
             status &= ~1;
         } else {
@@ -15397,35 +15397,35 @@ s32 func_003025A8(SdfAlphaTrack *range, s32 frames) {
 
     D_0045C338 = *range;
     btlReturnDebugMenuSetupWord((u32)D_004002B8);
-    if (sdfPadButtonStates[0xB] & 2) {
+    if (dds3PadBitTable[0xB] & 2) {
         if (D_00438774 == 1) {
             D_0045C338.fadeInFraction += step * 10.0f;
         } else {
             D_0045C338.fadeOutFraction += step * 10.0f;
         }
         flags = 0x400003;
-    } else if (sdfPadButtonStates[9] & 2) {
+    } else if (dds3PadBitTable[9] & 2) {
         if (D_00438774 == 1) {
             D_0045C338.fadeInFraction -= step * 10.0f;
         } else {
             D_0045C338.fadeOutFraction -= step * 10.0f;
         }
         flags = 0x400003;
-    } else if (sdfPadButtonStates[5] & 2) {
+    } else if (dds3PadBitTable[5] & 2) {
         if (D_00438774 == 1) {
             D_0045C338.fadeInFraction += step;
         } else {
             D_0045C338.fadeOutFraction += step;
         }
         flags = 0x400003;
-    } else if (sdfPadButtonStates[4] & 2) {
+    } else if (dds3PadBitTable[4] & 2) {
         if (D_00438774 == 1) {
             D_0045C338.fadeInFraction -= step;
         } else {
             D_0045C338.fadeOutFraction -= step;
         }
         flags = 0x400003;
-    } else if ((sdfPadButtonStates[6] & 2) || (sdfPadButtonStates[7] & 2)) {
+    } else if ((dds3PadBitTable[6] & 2) || (dds3PadBitTable[7] & 2)) {
         if (D_00438774 == 1) {
             D_00438774 = 2;
         } else {
@@ -15483,7 +15483,7 @@ s32 func_003025A8(SdfAlphaTrack *range, s32 frames) {
     }
     btlDebugDrawLine2D(0xC8, graphY - 4, 0xC8, graphY + 20, 0x80808080);
     btlBossDebugPrintfN(0xC, graphY + 24, 8, D_004387A0, frames);
-    if (sdfPadButtonStates[3] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         flags &= ~1;
     }
     return flags;
@@ -17038,7 +17038,7 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     sdfDrawTagInit(packetList);
     sdf2DLinkTexPacket(packetList, texture, 0);
     sdfDrawTagLink(packetList, (u32)packet);
-    effSubmitSurfacePacket(&kwlnDrawSurfaces[surfaceId], packetList);
+    effSubmitSurfacePacket(&sdfGrOtTable[surfaceId], packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
 }
 
@@ -17194,7 +17194,7 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     sdfDrawTagInit(packetList);
     sdf2DLinkTexPacket(packetList, texture, 0);
     sdfDrawTagLink(packetList, packet);
-    effSubmitSurfacePacket(&kwlnDrawSurfaces[surfaceId], packetList);
+    effSubmitSurfacePacket(&sdfGrOtTable[surfaceId], packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
 }
 

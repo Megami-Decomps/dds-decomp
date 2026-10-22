@@ -14,7 +14,7 @@ extern SdfMotionBindingDispatch D_0040B480;
 
 extern s32 (*sdfMotionCommandHandlers[])(void *object, s32 command);
 
-extern SdfMotionBindingDispatch sdfMotionSlotPairDispatch;
+extern SdfMotionBindingDispatch sdfMotMorphTable;
 
 
 
@@ -39,7 +39,7 @@ SdfMotionSlotPairBinding *sdfMotGenMorph(Motion *motion,
                                                            s32 unused, s32 entryIndex) {
     SdfMotionSlotPairBinding *entry = sdfChipAllocDirect(sizeof(SdfMotionSlotPairBinding));
 
-    sdfMotGenMorphInit(entry, motion, &sdfMotionSlotPairDispatch, entryIndex);
+    sdfMotGenMorphInit(entry, motion, &sdfMotMorphTable, entryIndex);
     return entry;
 }
 

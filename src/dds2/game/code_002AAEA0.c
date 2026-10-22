@@ -272,7 +272,7 @@ s32 mtrHasEnoughOwnedMantras(void) {
     }
     for (i = 0; i < D_00437B6E; i++) {
         s32 mantraId = mnuRingItemDisplayOrder[i];
-        if (datGameState->inventory.counts[mantraId] != 0) {
+        if (DDS3_GBWK->inventory.counts[mantraId] != 0) {
             if (mtrMantraIdIsValid(mantraId) == 0) {
                 owned++;
             }
@@ -318,7 +318,7 @@ void mnuDrawCampGridEntry(s32 x, s32 y, s32 depth, s32 offset, struct MenuList *
     color = fclBlendColor(0xA09DC380, 0xA09DC300, scale);
     mnuDrawCampGridResourceSlot(x, y, depth, (s32)list, (u32)node, texture);
     markerY = y + 0x40;
-    if (datGameState->inventory.counts[node->sortKeySecondary] != 0) {
+    if (DDS3_GBWK->inventory.counts[node->sortKeySecondary] != 0) {
         struct FrFontGlyph *glyph;
 
         if (node->flags48 & 1) {
@@ -326,7 +326,7 @@ void mnuDrawCampGridEntry(s32 x, s32 y, s32 depth, s32 offset, struct MenuList *
         }
         glyph = itfCreateFont2TextGlyph(x + offset + 0x840, y + 0x20, depth, color, D_00437BB8, 0);
         frSetFontColorNo(glyph, 0);
-        sprintf(buffer, D_00437BC0, datGameState->inventory.counts[node->sortKeySecondary]);
+        sprintf(buffer, D_00437BC0, DDS3_GBWK->inventory.counts[node->sortKeySecondary]);
         glyph = itfCreateFont2TextGlyph(x + offset + 0x910, y + 0x20, depth, color, buffer, glyph);
         frFontDrawGlyphChain(glyph, 1, texture);
         frDestroyFontRequestAfter(glyph);

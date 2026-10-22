@@ -44,20 +44,20 @@ enum {
 
 
 s32 sdfGsMemCheckMerge(SdfTexResource *block);
-extern u8 sdfDeferredGsImageCapturePending;
+extern u8 sdfGrCaptureBuff;
 
-extern u8 *sdfDeferredGsImageCaptureDestination;
+extern u8 *sdfGrCaptureReq;
 
-extern void (*sdfDeferredGsImageCaptureCallback)(u8 *);
-
-
-extern SdfPendingRequest sdfTextureUpdateQueue;
+extern void (*sdfGrCaptureTarget)(u8 *);
 
 
+extern SdfPendingRequest gsMemDelayedResrcCB;
 
-extern SdfTexResource *sdfTextureBlockListHead;
 
-extern SdfTexResource *sdfTextureListHead;
+
+extern SdfTexResource *gsMemHandleLinkTail;
+
+extern SdfTexResource *gsMemHandleLinkHead;
 
 extern void (*D_004389F4)(s32 size, s32 allocationMode);
 
@@ -67,24 +67,24 @@ extern SdfTexResource *sdfGsMemAllocFromHead(s32 size, s32 allocationMode);
 
 extern SdfTexResource *sdfGsMemAllocFromTail(s32 size, s32 allocationMode);
 
-extern SdfTextureQueue sdfTextureQueueWork;
-extern s8 sdfBufferSlotIndices[2];
+extern SdfTextureQueue sdfImageSetCb;
+extern s8 sdfDispFrameId[2];
 
-extern volatile s8 sdfBusyBufferIndex;
+extern volatile s8 sdfGrDrawBusy;
 
-extern vu8 sdfCurrentBufferIndex;
+extern vu8 sdfFrameId;
 
 
 
 void sdfGrReqCapture(u8 *destination, void (*onComplete)(u8 *)) {
-    sdfDeferredGsImageCaptureDestination = destination;
-    sdfDeferredGsImageCaptureCallback = onComplete;
-    sdfDeferredGsImageCapturePending = 1;
+    sdfGrCaptureReq = destination;
+    sdfGrCaptureTarget = onComplete;
+    sdfGrCaptureBuff = 1;
 }
 
 extern sceGsStoreImage sdfGsCaptureStoreImage;
 extern SdfGraphObj D_0040B290;
-extern volatile u8 sdfGraphicsTransferState;
+extern volatile u8 sdfDispThreadFlag;
 
 
 /* Interleave rows from both color buffers into the queued destination. */
@@ -101,7 +101,7 @@ void sdfGrCapture(void) {
     u8 *source;
     u8 *destination;
 
-    if (sdfDeferredGsImageCapturePending) {
+    if (sdfGrCaptureBuff) {
         width = D_0040B290.width;
         height = D_0040B290.height;
         format = D_0040B290.bufferFormat;
@@ -111,7 +111,7 @@ void sdfGrCapture(void) {
         }
         rowBytes = pixelBytes * width;
         stride = rowBytes * 2;
-        sdfGraphicsTransferState = 5;
+        sdfDispThreadFlag = 5;
         allocation = sdfMemAllocDirect(rowBytes * height);
         pixels = (u8 *)sdfMemLock(allocation);
         sceGsSetDefStoreImage(
@@ -120,7 +120,7 @@ void sdfGrCapture(void) {
             width / 64, format, 0, 0, width, height);
         sceGsExecStoreImage(&sdfGsCaptureStoreImage, pixels);
         sceGsSyncPath(0, 0);
-        destination = sdfDeferredGsImageCaptureDestination;
+        destination = sdfGrCaptureReq;
         source = pixels;
         rows = height;
         do {
@@ -134,7 +134,7 @@ void sdfGrCapture(void) {
             width / 64, format, 0, 0, width, height);
         sceGsExecStoreImage(&sdfGsCaptureStoreImage, pixels);
         sceGsSyncPath(0, 0);
-        destination = sdfDeferredGsImageCaptureDestination + rowBytes;
+        destination = sdfGrCaptureReq + rowBytes;
         source = pixels;
         rows = height;
         do {
@@ -143,9 +143,9 @@ void sdfGrCapture(void) {
             source += rowBytes;
         } while (--rows != 0);
         sdfMemFreeDirect(allocation);
-        sdfDeferredGsImageCapturePending = 0;
-        if (sdfDeferredGsImageCaptureCallback) {
-            sdfDeferredGsImageCaptureCallback(sdfDeferredGsImageCaptureDestination);
+        sdfGrCaptureBuff = 0;
+        if (sdfGrCaptureTarget) {
+            sdfGrCaptureTarget(sdfGrCaptureReq);
         }
     }
 }
@@ -153,31 +153,31 @@ void sdfGrCapture(void) {
 /* Switch both references off the finished double-buffer slot before
  * publishing the slot currently in use. */
 void sdfDeliverDrawStart(s32 oldBuffer, s32 nextBuffer) {
-    if (sdfBufferSlotIndices[0] == oldBuffer) {
-        sdfBufferSlotIndices[0] = oldBuffer ^ 1;
+    if (sdfDispFrameId[0] == oldBuffer) {
+        sdfDispFrameId[0] = oldBuffer ^ 1;
     }
-    if (sdfBufferSlotIndices[1] == oldBuffer) {
-        sdfBufferSlotIndices[1] = oldBuffer ^ 1;
+    if (sdfDispFrameId[1] == oldBuffer) {
+        sdfDispFrameId[1] = oldBuffer ^ 1;
     }
-    sdfBusyBufferIndex = nextBuffer;
+    sdfGrDrawBusy = nextBuffer;
 }
 
 /* Update one slot or both slots, then clear the busy-buffer status. */
 void sdfDeliverDrawEnd(s32 updateSingleSlot, s32 bufferIndex, s32 slotIndex) {
     if (updateSingleSlot == 0) {
-        sdfBufferSlotIndices[0] = bufferIndex;
-        sdfBufferSlotIndices[1] = bufferIndex;
+        sdfDispFrameId[0] = bufferIndex;
+        sdfDispFrameId[1] = bufferIndex;
     } else {
-        sdfBufferSlotIndices[slotIndex] = bufferIndex;
+        sdfDispFrameId[slotIndex] = bufferIndex;
     }
-    sdfBusyBufferIndex = SDF_NO_BUSY_BUFFER;
+    sdfGrDrawBusy = SDF_NO_BUSY_BUFFER;
 }
 
-extern s8 sdfGraphBufferRecreationPending;
-extern s8 sdfGsModeResetRequested;
-extern volatile s32 sdfGsImageUploadSemaphore;
+extern s8 reqMakeFrameBuff;
+extern s8 reqGsReset;
+extern volatile s32 dds3GsSema;
 extern volatile u8 D_00438A1D;
-extern volatile u8 sdfGrDrawStopRequested;
+extern volatile u8 sdfDrawFrameFlag;
 extern u16 D_00438A1E;
 extern s32 sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
 extern void sdfGrMakeFrameSet(SdfGraphObj *);
@@ -188,27 +188,27 @@ extern s32 sdfDrawThIntHandler(s32);
 void sdfDrawThread(void) {
     u32 startTicks;
 
-    sdfGraphicsTransferState = 0;
+    sdfDispThreadFlag = 0;
     sdfAddHandler(1, 1, sdfDrawThIntHandler, -1, 0);
     EnableDmac(1);
     for (;;) {
         CancelWakeupThread(GetThreadId());
-        sdfGraphicsTransferState = 1;
+        sdfDispThreadFlag = 1;
         SleepThread();
         startTicks = sdfGetRunTimeCountBase();
-        WaitSema(sdfGsImageUploadSemaphore);
-        if (sdfGraphBufferRecreationPending != 0) {
-            sdfGraphBufferRecreationPending = 0;
+        WaitSema(dds3GsSema);
+        if (reqMakeFrameBuff != 0) {
+            reqMakeFrameBuff = 0;
             sdfGrMakeFrameSet(&D_0040B290);
         }
-        if (sdfGsModeResetRequested != 0) {
-            sdfGsModeResetRequested = 0;
+        if (reqGsReset != 0) {
+            reqGsReset = 0;
             sdfGrGsReset();
         }
         D_00438A1D = 1;
         sdfGrDrawFrame();
         D_00438A1D = 0;
-        if (sdfGrDrawStopRequested != 0) {
+        if (sdfDrawFrameFlag != 0) {
             /* Preserve the controller enable state while stopping VIF1. */
             u32 enabledChannels = HW_READ(D_ENABLER);
             HW_WRITE(D_ENABLEW, 0x10000);
@@ -216,19 +216,19 @@ void sdfDrawThread(void) {
             HW_WRITE(D_ENABLEW, enabledChannels);
             sceGsResetPath();
             HW_WRITE(GS_BUSDIR, 0);
-            sdfGrDrawStopRequested = 1;
+            sdfDrawFrameFlag = 1;
         } else {
             sdfGrCapture();
         }
-        SignalSema(sdfGsImageUploadSemaphore);
+        SignalSema(dds3GsSema);
         D_00438A1E = sdfGetRunTimeCount(startTicks);
     }
 }
 
-extern u8 sdfGrDisplayField;
-extern s32 sdfGraphicsTransferThreadId;
-extern s32 sdfGrDrawStartSemaphore;
-extern volatile u8 sdfPacketSlotIndex;
+extern u8 sdfFrameEvenOdd;
+extern s32 sdfDrawThreadId;
+extern s32 dds3GsThreadId;
+extern volatile u8 sdfReqDrawDelayCount;
 extern void sdfWaitVblank(s32);
 extern void sdfDevSignalPendingSemaphore(void);
 extern void sdfGrSetDisp(s32);
@@ -244,27 +244,27 @@ void sdfServiceGraphicsBuffers(void) {
 
     for (;;) {
         sdfWaitVblank(0);
-        if ((sdfGrDisplayField & 1) == 0) {
+        if ((sdfFrameEvenOdd & 1) == 0) {
             sdfDevSignalPendingSemaphore();
         }
         invertedField = (~HW_READ(GS_CSR) >> SDF_GS_CSR_FIELD_SHIFT) & 1;
-        sdfGrDisplayField = invertedField ^ 1;
-        if (sdfGraphicsTransferState == 1) {
-            sdfGraphicsTransferState = 2;
-            WakeupThread(sdfGraphicsTransferThreadId);
-            WaitSema(sdfGrDrawStartSemaphore);
+        sdfFrameEvenOdd = invertedField ^ 1;
+        if (sdfDispThreadFlag == 1) {
+            sdfDispThreadFlag = 2;
+            WakeupThread(sdfDrawThreadId);
+            WaitSema(dds3GsThreadId);
         }
-        bufferIndex = sdfBufferSlotIndices[sdfGrDisplayField];
+        bufferIndex = sdfDispFrameId[sdfFrameEvenOdd];
         if (bufferIndex >= 0) {
             sdfGrSetDisp(bufferIndex);
         }
-        if (sdfPacketSlotIndex != 0) {
-            sdfPacketSlotIndex--;
+        if (sdfReqDrawDelayCount != 0) {
+            sdfReqDrawDelayCount--;
         }
     }
 }
 
-extern u8 sdfCurrentDisplayModeIndex;
+extern u8 sdfGrScreenMode;
 extern u8 D_004389D9;
 extern SdfThreadNode sdfGraphicsBufferThread;
 extern u8 sdfGraphicsTransferThreadStack[0x8000];
@@ -281,20 +281,20 @@ void sdfGrInit(s32 packetBufferBytes) {
     SdfGraphObj *graph = &D_0040B290;
 
     sceGsResetPath();
-    sdfCurrentDisplayModeIndex = 1;
+    sdfGrScreenMode = 1;
     sdfGrSetFrameSetMode(graph, 1, 1);
     sdfGrMakeFrameSet(graph);
     D_004389D9 = 0;
-    sdfBufferSlotIndices[0] = sdfBufferSlotIndices[1] = -1;
-    sdfBusyBufferIndex = -1;
-    sdfGsModeResetRequested = 1;
+    sdfDispFrameId[0] = sdfDispFrameId[1] = -1;
+    sdfGrDrawBusy = -1;
+    reqGsReset = 1;
     sdfGrMakePacketBuff(packetBufferBytes);
     sdfGrInitDraw();
     sdfTexInit();
-    sdfGsImageUploadSemaphore = sdfCreateSema(1, 0x20, 0);
-    sdfGrDrawStartSemaphore = sdfCreateSema(0, 0x20, 0);
+    dds3GsSema = sdfCreateSema(1, 0x20, 0);
+    dds3GsThreadId = sdfCreateSema(0, 0x20, 0);
     thread = CreateThreadSimple((s32)sdfDrawThread, (s32)sdfGraphicsTransferThreadStack, 0x8000, 0x44);
-    sdfGraphicsTransferThreadId = thread;
+    sdfDrawThreadId = thread;
     _StartThread(thread, 0);
     sdfStartThreadAndWait(&sdfGraphicsBufferThread, sdfServiceGraphicsBuffers, sdfGraphicsBufferThreadStack,
                           0x1000, 0x40, 0);
@@ -304,13 +304,13 @@ extern void sdfGrSetupPacketBuff(s32 bufferIndex);
 
 /* Wait until the other buffer is no longer busy before selecting it. */
 void sdfWaitAndSelectBuffer(void) {
-    s8 nextBuffer = sdfCurrentBufferIndex ^ 1;
+    s8 nextBuffer = sdfFrameId ^ 1;
 
     /* Do not select a buffer while its index is the busy-buffer status. */
-    while (sdfBusyBufferIndex == nextBuffer) {
+    while (sdfGrDrawBusy == nextBuffer) {
     }
-    sdfCurrentBufferIndex = nextBuffer;
-    sdfGrSetupPacketBuff((s8)sdfCurrentBufferIndex);
+    sdfFrameId = nextBuffer;
+    sdfGrSetupPacketBuff((s8)sdfFrameId);
     sdfVuClearTransformCache();
 }
 
@@ -366,7 +366,7 @@ s32 sdfGetTexelBitCount(u32 format) {
 }
 
 s32 sdfGsMemCheckHandle(SdfTex *target) {
-    SdfTexResource *node = sdfTextureListHead;
+    SdfTexResource *node = gsMemHandleLinkHead;
 
     if (node == NULL) {
         return 0;
@@ -387,7 +387,7 @@ SdfTexResource *sdfGsMemAllocFromHead(s32 size, s32 allocationMode) {
     s32 interruptsEnabled;
 
     interruptsEnabled = DIntr();
-    for (block = sdfTextureListHead;; block = block->prev) {
+    for (block = gsMemHandleLinkHead;; block = block->prev) {
         if (block == NULL) {
             if (interruptsEnabled != 0) {
                 EIntr();
@@ -409,7 +409,7 @@ SdfTexResource *sdfGsMemAllocFromHead(s32 size, s32 allocationMode) {
         allocated = sdfChipAllocDirect(sizeof(*allocated));
         allocated->next = block->next;
         if (allocated->next == NULL) {
-            sdfTextureListHead = allocated;
+            gsMemHandleLinkHead = allocated;
         } else {
             block->next->prev = allocated;
         }
@@ -433,7 +433,7 @@ SdfTexResource *sdfGsMemAllocFromTail(s32 size, s32 allocationMode) {
     s32 interruptsEnabled;
 
     interruptsEnabled = DIntr();
-    for (block = sdfTextureBlockListHead;; block = block->next) {
+    for (block = gsMemHandleLinkTail;; block = block->next) {
         if (block == NULL) {
             if (interruptsEnabled != 0) {
                 EIntr();
@@ -455,7 +455,7 @@ SdfTexResource *sdfGsMemAllocFromTail(s32 size, s32 allocationMode) {
         allocated = sdfChipAllocDirect(sizeof(*allocated));
         allocated->prev = block->prev;
         if (allocated->prev == NULL) {
-            sdfTextureBlockListHead = allocated;
+            gsMemHandleLinkTail = allocated;
         } else {
             block->prev->next = allocated;
         }
@@ -502,7 +502,7 @@ s32 sdfGsMemCheckMerge(SdfTexResource *block) {
             if (beforePreviousBlock != NULL) {
                 previousBlock->prev->next = block;
             } else {
-                sdfTextureBlockListHead = block;
+                gsMemHandleLinkTail = block;
             }
             sdfChipFreeDirect(previousBlock);
             return 1;
@@ -515,11 +515,11 @@ s32 sdfGsMemCheckMerge(SdfTexResource *block) {
 void sdfGsMemCheckLinkConsistence(void) {
     SdfTexResource *node;
 
-    node = sdfTextureListHead;
+    node = gsMemHandleLinkHead;
     while (node->prev != NULL) {
         node = node->prev;
     }
-    node = sdfTextureBlockListHead;
+    node = gsMemHandleLinkTail;
     while (node->next != NULL) {
         node = node->next;
     }
@@ -548,7 +548,7 @@ void sdfGsMemFree(SdfTexResource *textureBlock) {
 }
 
 void sdfGsMemFreeDelayed(SdfTexResource *texture) {
-    sdfDelayedResrcEntry(&sdfTextureUpdateQueue, texture);
+    sdfDelayedResrcEntry(&gsMemDelayedResrcCB, texture);
 }
 
 void sdfGsMemInit(void) {
@@ -560,9 +560,9 @@ void sdfGsMemInit(void) {
     head->prev = NULL;
     head->allocationMode = 0;
     head->word = 0;
-    sdfTextureListHead = head;
-    sdfTextureBlockListHead = head;
-    sdfDelayedResrcInitCB(&sdfTextureUpdateQueue, sdfGsMemFree);
+    gsMemHandleLinkHead = head;
+    gsMemHandleLinkTail = head;
+    sdfDelayedResrcInitCB(&gsMemDelayedResrcCB, sdfGsMemFree);
 }
 
 /* Align the storage rows, pack 16-bit formats two pixels per word, then allocate whole GS pages. */
@@ -592,11 +592,11 @@ SdfTexResource *sdfGsAllocFrameBuff(s32 width, s32 height, s32 format) {
 }
 
 SdfTexResource *sdfGsMemGetLinkHead(void) {
-    return sdfTextureListHead;
+    return gsMemHandleLinkHead;
 }
 
 SdfTexResource *sdfGsMemGetLinkTail(void) {
-    return sdfTextureBlockListHead;
+    return gsMemHandleLinkTail;
 }
 
 /* Transfer size in 16-byte quadwords; low bits of a partial quadword are discarded. */
@@ -633,7 +633,7 @@ s32 sdfImageDataSize(u32 format, s32 width, s32 height) {
 
 
 void sdfImageSetReq(SdfImageUploadRequest *request) {
-    SdfTextureQueue *queue = &sdfTextureQueueWork;
+    SdfTextureQueue *queue = &sdfImageSetCb;
     SdfTextureReleaseHead *releaseEntry;
     SdfTextureDmaTail *oldTail;
     u64 *setup;
@@ -737,7 +737,7 @@ void sdfImageSetReq(SdfImageUploadRequest *request) {
 
 
 void sdfImageSetChainTag(SdfDmaAddress packetAddress, SdfTextureDmaTail *packet) {
-    SdfTextureQueue *obj = &sdfTextureQueueWork;
+    SdfTextureQueue *obj = &sdfImageSetCb;
     SdfTextureDmaTail *last;
 
     WaitSema(obj->semaphoreId);
@@ -753,7 +753,7 @@ void sdfImageSetChainTag(SdfDmaAddress packetAddress, SdfTextureDmaTail *packet)
 }
 
 void sdfImageSetChainReleaseMem(s32 address) {
-    SdfTextureQueue *obj = &sdfTextureQueueWork;
+    SdfTextureQueue *obj = &sdfImageSetCb;
     SdfTextureReleaseHead *entry;
 
     if (address != 0) {
@@ -795,7 +795,7 @@ extern u8 D_0040B2B0[];
 
 /* Detach one queued batch, wait for its DMA, then release its owned source and packet allocations. */
 void sdfImageSetTrans(void) {
-    SdfTextureQueue *work = &sdfTextureQueueWork;
+    SdfTextureQueue *work = &sdfImageSetCb;
     SdfTextureReleaseHead *entry;
     SdfTextureDmaTail *packet;
     SdfDmaAddress dmaPacketAddress;
@@ -842,7 +842,7 @@ void sdfImageSetTrans(void) {
 void sdfImageSetInit(void) {
     SdfTextureQueue *obj;
 
-    obj = &sdfTextureQueueWork;
+    obj = &sdfImageSetCb;
     obj->semaphoreId = sdfCreateSema(1, 0x7F, 0);
     sdfImageSetClearCb(obj);
 }
@@ -1034,13 +1034,13 @@ void sdfTexClutToGs(SdfTex *tex) {
 
 void sdfTexLink(SdfTex *texture) {
     texture->next = NULL;
-    if (sdfResourceListHead != NULL) {
-        texture->prev = sdfResourceListHead;
-        sdfResourceListHead->next = texture;
+    if (sdfTexHandleLink != NULL) {
+        texture->prev = sdfTexHandleLink;
+        sdfTexHandleLink->next = texture;
     } else {
         texture->prev = NULL;
     }
-    sdfResourceListHead = texture;
+    sdfTexHandleLink = texture;
 }
 
 
@@ -1136,21 +1136,21 @@ SdfTexResource *sdfTexAllocClut(s32 type, s32 kind, s32 unused) {
     return head;
 }
 
-INCLUDE_SDATA(const s32, "game/code_00329F60", sdfDeferredGsImageCapturePending);
+INCLUDE_SDATA(const s32, "game/code_00329F60", sdfGrCaptureBuff);
 
-INCLUDE_SDATA(const s32, "game/code_00329F60", sdfGraphicsTransferState);
+INCLUDE_SDATA(const s32, "game/code_00329F60", sdfDispThreadFlag);
 
-INCLUDE_SDATA(const s32, "game/code_00329F60", sdfDeferredGsImageCaptureDestination);
+INCLUDE_SDATA(const s32, "game/code_00329F60", sdfGrCaptureReq);
 
-INCLUDE_SDATA(const s32, "game/code_00329F60", sdfDeferredGsImageCaptureCallback);
+INCLUDE_SDATA(const s32, "game/code_00329F60", sdfGrCaptureTarget);
 
-INCLUDE_SDATA(const s32, "game/code_00329F60", sdfGrDrawStartSemaphore);
+INCLUDE_SDATA(const s32, "game/code_00329F60", dds3GsThreadId);
 
-INCLUDE_SDATA(const s32, "game/code_00329F60", sdfBufferSlotIndices);
+INCLUDE_SDATA(const s32, "game/code_00329F60", sdfDispFrameId);
 
-INCLUDE_SDATA(const s32, "game/code_00329F60", sdfBusyBufferIndex);
+INCLUDE_SDATA(const s32, "game/code_00329F60", sdfGrDrawBusy);
 
 INCLUDE_SDATA(const s32, "game/code_00329F60", D_004389F4);
 
-INCLUDE_SDATA(const s32, "game/code_00329F60", sdfResourceListHead);
+INCLUDE_SDATA(const s32, "game/code_00329F60", sdfTexHandleLink);
 

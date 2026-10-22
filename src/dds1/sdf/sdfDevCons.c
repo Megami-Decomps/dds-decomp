@@ -21,10 +21,10 @@ void sdfDevConsDrawBG(DevConsState *console, ConsBuf *packetBuffers);
 void sdfDevConsDraw(DevConsState *console, ConsBuf *packetBuffers);
 void sdfDevConsDrawInit(ConsBuf *packetBuffers, u8 *storageBase, s32 storageCapacityBytes);
 struct SdfTex;
-extern struct SdfTex *sdfConsoleFontTexture;
+extern struct SdfTex *sdfDebugFontHandle;
 extern DevConsState *D_003BD3C0;
-extern u32 sdfConsoleGlyphTexcoords[];
-extern u32 sdfConsoleColorPalette[];
+extern u32 sdfDevConsFontUvTable[];
+extern u32 sdfDevConsColorTable[];
 
 /* Scroll only at the last row; otherwise advance it. Always reset the column. */
 void sdfDevConsNewLine(DevConsState *console) {
@@ -254,8 +254,8 @@ void sdfDevConsDraw(DevConsState *console, ConsBuf *buffers) {
                     writeCursor = (vu64 *)buffers->writeCursor;
                     packetStart = buffers->packetStart;
                 }
-                glyph = sdfConsoleGlyphTexcoords[character - 0x20];
-                color = sdfConsoleColorPalette[attribute];
+                glyph = sdfDevConsFontUvTable[character - 0x20];
+                color = sdfDevConsColorTable[attribute];
                 writeCursor[0] = color;
                 writeCursor[1] = glyph;
                 writeCursor[2] = top;
@@ -288,7 +288,7 @@ void sdfDevConsDrawInit(ConsBuf *packetBuffers, u8 *storageBase, s32 storageCapa
     packetBuffers->bufferAddresses[1] = ring + halfBufferBytes;
     packetBuffers->packetStart = ring;
     packetBuffers->activeBufferIndex = 0;
-    textureState = sdfTexGetTex0Reg(sdfConsoleFontTexture);
+    textureState = sdfTexGetTex0Reg(sdfDebugFontHandle);
     packet = (vu64 *)ring;
     packet[0] = 0x10AB400000008005ULL;
     packet[1] = 0xE;

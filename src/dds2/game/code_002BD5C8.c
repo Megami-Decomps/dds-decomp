@@ -47,7 +47,7 @@ s32 mnuGetPanelWindowTransitionState(MenuPageWindow *window, s32 row) {
         highlighted = 1;
     }
     if (flags & 0x10) {
-        party = datGameState->party;
+        party = DDS3_GBWK->party;
         if (party[window->records->slots[row].index].flags & DAT_PARTY_FLAG_FRONTLINE) {
             highlighted = 1;
         }
@@ -92,7 +92,7 @@ u8 mnuGetItemRequirementCount(s32 itemId) {
     if (itemId == 0) {
         return 0;
     }
-    return datGameState->itemRequirementCounts[itemId - 0xC0];
+    return DDS3_GBWK->itemRequirementCounts[itemId - 0xC0];
 }
 
 extern u8 *D_00435E3C;
@@ -147,7 +147,7 @@ void mnuDrawRemainingAndTotalCounts(s32 x, s32 y, s32 alpha, s32 entryId, Effect
 
 void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex, MenuSprites *page, s32 surface) {
     char text[0x20];
-    DatPartyRecord *party = &datGameState->party[partyIndex];
+    DatPartyRecord *party = &DDS3_GBWK->party[partyIndex];
     void **sprite = page->item;
     u32 i = 0;
     s32 alpha = page->drawAlpha;
@@ -255,7 +255,7 @@ extern s32 scrGetIndexedRecordAddress(s32, s32 *);
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, s32 unused,
                                       s32 partyIndex, s32 surface) {
     s32 outValue;
-    s32 profileId = ptyGetCurrentProfileId(&datGameState->party[partyIndex]);
+    s32 profileId = ptyGetCurrentProfileId(&DDS3_GBWK->party[partyIndex]);
     s32 code;
     s32 texture;
     struct FrFontGlyph *item;
@@ -281,7 +281,7 @@ extern void mnuDrawIconRow(s32, s32, s32, s32, MenuSprites *, s32);
 void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
                    s32 partyIndex, u32 flags, s32 surface) {
     char text[0x40];
-    DatPartyRecord *unit = &datGameState->party[partyIndex];
+    DatPartyRecord *unit = &DDS3_GBWK->party[partyIndex];
     u32 color;
     s32 remainingExp;
     FrFontGlyph *glyph;

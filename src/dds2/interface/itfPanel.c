@@ -52,7 +52,7 @@ void itfPnlSetPositionOffset(UiSprite *panel, s32 leftDelta, s32 topDelta, s32 r
     }
 }
 
-extern void (*itfPanelColorCallbacks[])();
+extern void (*CreateColorTable[])();
 
 /* Store the RGBA words in packet order, then notify with context.
  * The panel renderers consume these channels directly. */
@@ -61,8 +61,8 @@ void itfPnlSetColor(UiSprite *panel, s32 redValue, s32 greenValue, s32 blueValue
     panel->green = greenValue;
     panel->blue = blueValue;
     panel->alpha = alphaValue;
-    if (itfPanelColorCallbacks[panel->kind] != 0) {
-        itfPanelColorCallbacks[panel->kind](panel->payload);
+    if (CreateColorTable[panel->kind] != 0) {
+        CreateColorTable[panel->kind](panel->payload);
     }
 }
 

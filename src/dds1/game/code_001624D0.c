@@ -214,13 +214,13 @@ EffParamWork *dds3EffectPartCreate(u16 kind, void *source) {
 
     work = sdfChipAllocDirect(sizeof(EffParamWork));
     work->kind = kind;
-    work->payload = effParamWorkFactories[kind].create(source);
+    work->payload = dds3EffectFuncTable[kind].create(source);
     return work;
 }
 
 /* Dispatch the payload before freeing its compact owner; this callback is required. */
 void dds3EffectPartDelete(EffParamWork *work) {
-    effParamWorkFactories[work->kind].release(work->payload);
+    dds3EffectFuncTable[work->kind].release(work->payload);
     sdfChipFreeDirect(work);
 }
 
@@ -228,7 +228,7 @@ void dds3EffectPartDelete(EffParamWork *work) {
 void dds3EffectPartDraw(EffParamWork *work) {
     u16 kind = work->kind;
 
-    effParamWorkFactories[kind].dispatch(work->payload);
+    dds3EffectFuncTable[kind].dispatch(work->payload);
 }
 
 /* Allocate a second compact owner and duplicate the source payload by kind. */
@@ -237,44 +237,44 @@ EffParamWork *dds3EffectPartCopy(EffParamWork *source) {
 
     work = sdfChipAllocDirect(sizeof(EffParamWork));
     work->kind = source->kind;
-    work->payload = effParamWorkFactories[source->kind].duplicate(source->payload);
+    work->payload = dds3EffectFuncTable[source->kind].duplicate(source->payload);
     return work;
 }
 
 /* Optional compact-work operations, indexed by effect kind. */
 void dds3EffectPartSetPosition(EffParamWork *work, void *source) {
-    if (effParamWorkFactories[work->kind].callback0 != NULL) {
-        effParamWorkFactories[work->kind].callback0(work->payload, source);
+    if (dds3EffectFuncTable[work->kind].callback0 != NULL) {
+        dds3EffectFuncTable[work->kind].callback0(work->payload, source);
     }
 }
 
 void dds3EffectPartSetScale(EffParamWork *work, f32 scale) {
-    if (effParamWorkFactories[work->kind].setScale != NULL) {
-        effParamWorkFactories[work->kind].setScale(work->payload, scale);
+    if (dds3EffectFuncTable[work->kind].setScale != NULL) {
+        dds3EffectFuncTable[work->kind].setScale(work->payload, scale);
     }
 }
 
 void dds3EffectPartSetRotateMatrix(EffParamWork *work, void *matrix) {
-    if (effParamWorkFactories[work->kind].callback2 != NULL) {
-        effParamWorkFactories[work->kind].callback2(work->payload, matrix);
+    if (dds3EffectFuncTable[work->kind].callback2 != NULL) {
+        dds3EffectFuncTable[work->kind].callback2(work->payload, matrix);
     }
 }
 
 void dds3EffectPartSetColor(EffParamWork *work, u32 value) {
-    if (effParamWorkFactories[work->kind].callback3 != NULL) {
-        effParamWorkFactories[work->kind].callback3(work->payload, value);
+    if (dds3EffectFuncTable[work->kind].callback3 != NULL) {
+        dds3EffectFuncTable[work->kind].callback3(work->payload, value);
     }
 }
 
 void dds3EffectPartSetDirection(EffParamWork *work, void *matrix) {
-    if (effParamWorkFactories[work->kind].callback4 != NULL) {
-        effParamWorkFactories[work->kind].callback4(work->payload, matrix);
+    if (dds3EffectFuncTable[work->kind].callback4 != NULL) {
+        dds3EffectFuncTable[work->kind].callback4(work->payload, matrix);
     }
 }
 
 void dds3EffectPartSetArea(EffParamWork *work, f32 sizeInput) {
-    if (effParamWorkFactories[work->kind].callback5 != NULL) {
-        effParamWorkFactories[work->kind].callback5(work->payload, sizeInput);
+    if (dds3EffectFuncTable[work->kind].callback5 != NULL) {
+        dds3EffectFuncTable[work->kind].callback5(work->payload, sizeInput);
     }
 }
 
@@ -393,23 +393,23 @@ EffParamWorkEx *dds3EffectPCPCreate(u32 *source) {
     work = sdfChipAllocDirect(sizeof(EffParamWorkEx));
     work->kind = dds3EffectPCPDataGetKateg(source);
     work->tableIndex = dds3EffectPCPDataGetParam(source);
-    if (effParameterWorkOperations[work->kind].duplicate == NULL) {
-        work->payload = effParameterWorkOperations[work->kind].create(effParameterPresetBanks[work->kind][work->tableIndex]);
+    if (EffectPCPFuncTable[work->kind].duplicate == NULL) {
+        work->payload = EffectPCPFuncTable[work->kind].create(effParameterPresetBanks[work->kind][work->tableIndex]);
     } else {
-        work->payload = effParameterWorkOperations[work->kind].create(source);
+        work->payload = EffectPCPFuncTable[work->kind].create(source);
     }
     return work;
 }
 
 /* Release the extended payload through its required kind callback, then its owner. */
 void dds3EffectPCPDelete(EffParamWorkEx *work) {
-    effParameterWorkOperations[work->kind].release(work->payload);
+    EffectPCPFuncTable[work->kind].release(work->payload);
     sdfChipFreeDirect(work);
 }
 
 /* Invoke the extended work's required dispatch callback. */
 void dds3EffectPCPDraw(EffParamWorkEx *work) {
-    effParameterWorkOperations[work->kind].dispatch(work->payload);
+    EffectPCPFuncTable[work->kind].dispatch(work->payload);
 }
 
 /* Recreate table-backed payloads; duplicate payloads only for raw-source kinds. */
@@ -419,10 +419,10 @@ EffParamWorkEx *dds3EffectPCPCopy(EffParamWorkEx *source) {
     work = sdfChipAllocDirect(sizeof(EffParamWorkEx));
     work->kind = source->kind;
     work->tableIndex = source->tableIndex;
-    if (effParameterWorkOperations[work->kind].duplicate == NULL) {
-        work->payload = effParameterWorkOperations[work->kind].create(effParameterPresetBanks[work->kind][work->tableIndex]);
+    if (EffectPCPFuncTable[work->kind].duplicate == NULL) {
+        work->payload = EffectPCPFuncTable[work->kind].create(effParameterPresetBanks[work->kind][work->tableIndex]);
     } else {
-        work->payload = effParameterWorkOperations[work->kind].duplicate(source->payload);
+        work->payload = EffectPCPFuncTable[work->kind].duplicate(source->payload);
     }
     return work;
 }
@@ -430,38 +430,38 @@ EffParamWorkEx *dds3EffectPCPCopy(EffParamWorkEx *source) {
 /* Optional extended-work dispatches; preserve the native column order,
  * including the reversed fourth/fifth column addresses. */
 void dds3EffectPCPSetPosition(EffParamWorkEx *work, void *source) {
-    if (effParameterWorkOperations[work->kind].callback0 != NULL) {
-        effParameterWorkOperations[work->kind].callback0(work->payload, source);
+    if (EffectPCPFuncTable[work->kind].callback0 != NULL) {
+        EffectPCPFuncTable[work->kind].callback0(work->payload, source);
     }
 }
 
 void dds3EffectPCPSetScale(EffParamWorkEx *work, f32 scale) {
-    if (effParameterWorkOperations[work->kind].setScale != NULL) {
-        effParameterWorkOperations[work->kind].setScale(work->payload, scale);
+    if (EffectPCPFuncTable[work->kind].setScale != NULL) {
+        EffectPCPFuncTable[work->kind].setScale(work->payload, scale);
     }
 }
 
 void dds3EffectPCPSetRotateMatrix(EffParamWorkEx *work, void *matrix) {
-    if (effParameterWorkOperations[work->kind].callback2 != NULL) {
-        effParameterWorkOperations[work->kind].callback2(work->payload, matrix);
+    if (EffectPCPFuncTable[work->kind].callback2 != NULL) {
+        EffectPCPFuncTable[work->kind].callback2(work->payload, matrix);
     }
 }
 
 void dds3EffectPCPSetDirection(EffParamWorkEx *work, void *matrix) {
-    if (effParameterWorkOperations[work->kind].callback4 != NULL) {
-        effParameterWorkOperations[work->kind].callback4(work->payload, matrix);
+    if (EffectPCPFuncTable[work->kind].callback4 != NULL) {
+        EffectPCPFuncTable[work->kind].callback4(work->payload, matrix);
     }
 }
 
 void dds3EffectPCPSetColor(EffParamWorkEx *work, u32 value) {
-    if (effParameterWorkOperations[work->kind].callback3 != NULL) {
-        effParameterWorkOperations[work->kind].callback3(work->payload, value);
+    if (EffectPCPFuncTable[work->kind].callback3 != NULL) {
+        EffectPCPFuncTable[work->kind].callback3(work->payload, value);
     }
 }
 
 void dds3EffectPCPSetArea(EffParamWorkEx *work, f32 sizeInput) {
-    if (effParameterWorkOperations[work->kind].callback5 != NULL) {
-        effParameterWorkOperations[work->kind].callback5(work->payload, sizeInput);
+    if (EffectPCPFuncTable[work->kind].callback5 != NULL) {
+        EffectPCPFuncTable[work->kind].callback5(work->payload, sizeInput);
     }
 }
 

@@ -1,0 +1,13 @@
+# Data symbols that keep their current name although the SMT3HD name is proven
+# (smt3-decomp tools/dds_data_names.py skips them). ee-gcc's GCSE hashes a
+# SYMBOL_REF by the symbol's name, so a data rename can change the code emitted
+# for a function that reads it (docs/idioms.md). These renames did.
+# <version> <address>  # reason
+dds1 0x0034DF38  # dds3EffectBase: the effDefaultRandomState spelling is what dds3Particle_SparkBuffInit and its offset sibling match on
+dds2 0x003AA868  # dds3EffectBase twin
+dds1 0x00337C60  # fldDoorParamTable tips fldInitializeActorMotionSlots (game/code_00138C30)
+dds2 0x003931A0  # fldDoorParamTable twin
+dds1 0x003D6480  # ParRand: the effEmitterDelayRandomState spelling is what dds3Particle_SparkBuffInit matches on
+dds2 0x00451F20  # ParRand twin
+dds2 0x0037F690  # aViewEye tips sdfDrawTexturedQuad (game/code_002DE248); the name also reads as an IDA auto-name, not a recovered original
+dds1 0x00324690  # aViewEye twin

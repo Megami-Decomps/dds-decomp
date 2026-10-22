@@ -9,8 +9,8 @@
 #include "eff_bill_resource_init.h"
 
 #include "sdf.h"
-extern s32 billPendingChildList;
-extern BillObj *effBillResourceOwners[];
+extern s32 dds3BillboardTag;
+extern BillObj *hGeneralBillboard[];
 extern BillObj *billCreateFromResource(s32 kind, const char *path);
 
 extern EffBillResourceInit effBillResourceInitTable[];
@@ -21,7 +21,7 @@ EffNode *dds3EffectCopy(const EffNode *source) {
 
     copy->type = source->type;
     copy->arg = source->arg;
-    copy->instance = effNodeTypeOperations[source->type].cloneInstanceWord(argument);
+    copy->instance = EffMajorTable[source->type].cloneInstanceWord(argument);
     return copy;
 }
 
@@ -71,13 +71,13 @@ void effInitializeBillResourceOwners(void) {
     BillObj *billboard;
     BillChildPayload *payload;
 
-    billPendingChildList = 0;
+    dds3BillboardTag = 0;
     billboardIndex = 0;
     do {
         billboard = billCreateFromResource(effBillResourceInitTable[billboardIndex].billboardKind,
                                            (const char *)(u32)effBillResourceInitTable[billboardIndex].word00);
         payload = billboard->child;
-        effBillResourceOwners[billboardIndex] = billboard;
+        hGeneralBillboard[billboardIndex] = billboard;
         payload->halfWidth *= effBillResourceInitTable[billboardIndex].scale;
         payload->halfHeight *= effBillResourceInitTable[billboardIndex].scale;
         billboardIndex++;
@@ -87,9 +87,9 @@ void effInitializeBillResourceOwners(void) {
 void effBillDispatchAll(void) {
     u32 billboardIndex;
 
-    billPendingChildList = 0;
+    dds3BillboardTag = 0;
     for (billboardIndex = 0; billboardIndex < 15; billboardIndex++) {
-        dds3BillboardDelete(effBillResourceOwners[billboardIndex]);
+        dds3BillboardDelete(hGeneralBillboard[billboardIndex]);
     }
 }
 

@@ -104,7 +104,7 @@ s32 fldSetMapSlotValueFlag(s32 worldKey, s32 roomGroup, s32 roomNumber, s32 enab
 
 
 
-extern u32 kwlnDrawControlFlags;
+extern u32 dds3DrawFlag;
 
 
 void evtPathStop(void *unit);
@@ -598,7 +598,7 @@ s32 evtCommand_FIELD_CLS(void)
     evtFreeStage();
     while (sdfDelayedResrcCheck()) {
     }
-    kwlnDrawControlFlags |= 0x2000000;
+    dds3DrawFlag |= 0x2000000;
     printf("event stage shutdown !!\n");
     evtPrintDeveloperConsoleMessage("field shutdown.\n");
     return 1;
@@ -612,7 +612,7 @@ s32 evtCommand_FIELD_CLS_STOP(void)
     evtFreeStage();
     while (sdfDelayedResrcCheck()) {
     }
-    kwlnDrawControlFlags |= 0x2000000;
+    dds3DrawFlag |= 0x2000000;
     printf("event stage shutdown2 !!\n");
     evtPrintDeveloperConsoleMessage("field shutdown2.\n");
     return 1;
@@ -861,7 +861,7 @@ s32 evtCommand_OBJ_PATH_MOVE(void) {
         if (target->value != 0) {
             roomNumber = fldCommand_GetHojiID((char *)target->value);
             if (roomNumber > 0)
-                fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 1);
+                fldSetMapSlotValueFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomNumber, 1);
         }
         break;
     case 1:
@@ -869,7 +869,7 @@ s32 evtCommand_OBJ_PATH_MOVE(void) {
         if (target->value != 0) {
             roomNumber = fldCommand_GetHojiID((char *)target->value);
             if (roomNumber > 0)
-                fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 0);
+                fldSetMapSlotValueFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomNumber, 0);
         }
         break;
     }
@@ -1200,9 +1200,9 @@ s32 evtCommand_PATH_RATE(void) {
     roomNumber = fldCommand_GetHojiID(roomName);
     if (roomNumber > 0) {
         if (scrGetFloatPara(1) > 0.5f) {
-            fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 1);
+            fldSetMapSlotValueFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomNumber, 1);
         } else {
-            fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 0);
+            fldSetMapSlotValueFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomNumber, 0);
         }
     }
     return 1;
@@ -1234,9 +1234,9 @@ s32 evtCommand_PATH_DIR(void) {
     roomNumber = fldCommand_GetHojiID(roomName);
     if (roomNumber > 0) {
         if (scrGetIntPara(1) == 0) {
-            fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 1);
+            fldSetMapSlotValueFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomNumber, 1);
         } else {
-            fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 0);
+            fldSetMapSlotValueFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomNumber, 0);
         }
     }
     return 1;

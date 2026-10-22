@@ -677,8 +677,8 @@ typedef char SdfAssetEntry_vifItopCommand_offset_must_be_0x98[
 typedef char SdfAssetEntry_vifMscalCommand_offset_must_be_0x9C[
     ((u32)&((SdfAssetEntry *)0)->vifMscalCommand == 0x9C) ? 1 : -1];
 
-extern s32 sdfTrackedThreadSemaphore;
-extern SdfThreadNode *sdfTrackedThreadHead;
+extern s32 sdfThreadSema;
+extern SdfThreadNode *sdfVblankThreadId;
 
 /* General-heap allocation descriptor (0x10); links bound the represented span. */
 typedef struct SdfMemBlock {
@@ -700,7 +700,7 @@ typedef struct SdfMemHeap {
 typedef char SdfMemBlock_size_must_be_0x10[(sizeof(SdfMemBlock) == 0x10) ? 1 : -1];
 typedef char SdfMemHeap_size_must_be_0x28[(sizeof(SdfMemHeap) == 0x28) ? 1 : -1];
 
-extern SdfMemHeap sdfGeneralHeap;
+extern SdfMemHeap sdfMemCB;
 
 #define SDF_CHIP_CLASS_COUNT 7
 
@@ -758,13 +758,13 @@ typedef struct SdfChipClassTable {
 
 typedef char SdfChipClassTable_size_must_be_0x58[(sizeof(SdfChipClassTable) == 0x58) ? 1 : -1];
 
-extern SdfChipPage *sdfChipPages;
-extern SdfChipPage *sdfFreeChipPages;
-extern u8 *sdfChipHeapStart;
-extern u8 *sdfChipHeapEnd;
+extern SdfChipPage *sdfChipPageInfo;
+extern SdfChipPage *sdfChipPageFreeLink;
+extern u8 *sdfChipPageTop;
+extern u8 *sdfChipPageEnd;
 extern s32 sdfChipPageCount[2];
-extern SdfPendingRequest sdfChipReleaseRequest;
-extern SdfChipClassTable sdfChipClassTable;
+extern SdfPendingRequest dds3CleanupList;
+extern SdfChipClassTable sdfChipCB;
 
 enum SdfColorTrackMode {
     SDF_COLOR_TRACK_MODE_ENDPOINTS = 0,

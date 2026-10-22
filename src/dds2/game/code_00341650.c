@@ -27,9 +27,9 @@
 void p2sdLoadSMGFile(s32 trackId);
 
 /* Sound command work block: header, 16 channels/buffers, 13 track slots. */
-extern SndWork sndMidiTrackState;
+extern SndWork sdfSndMap;
 extern u32 sndReserveIopWorkMemory(s32 size);
-extern s8 sndSynchronousCommandMode;
+extern s8 sdfSndBurstReqMode;
 extern s32 D_004391EC;
 extern s32 sndStartIopCommandAndRpcWorkers(void);
 extern void sdfSndTransToIOP(s32, void *, s32);
@@ -37,9 +37,9 @@ extern void sdfSndTransToIOP(s32, void *, s32);
 extern SndRingPacket sndCommandRing[SND_COMMAND_RING_ENTRY_COUNT];
 extern u32 D_00438B90;
 /* The worker consumes entries while this producer publishes and polls cursors. */
-extern vu16 sndCommandReadIndex;
-extern vu16 sndCommandWriteIndex;
-extern s32 sndCommandThreadId;
+extern vu16 sdfSndCmdIndex;
+extern vu16 sdfSndCmdTailIndex;
+extern s32 sdfSndCmdBuf;
 extern s32 sndTryDispatchQueuedCommand(void);
 
 u32 sdfSndSendCmd(u32 command, u32 channel, const void *packet, s32 payloadBytes) {
@@ -51,16 +51,16 @@ u32 sdfSndSendCmd(u32 command, u32 channel, const void *packet, s32 payloadBytes
     if (++D_00438B90 == 0) {
         D_00438B90 = 1;
     }
-    nextWriteIndex = ((s16)sndCommandWriteIndex + 1) & SND_COMMAND_RING_INDEX_MASK;
-    if (nextWriteIndex == (s16)sndCommandReadIndex) {
+    nextWriteIndex = ((s16)sdfSndCmdTailIndex + 1) & SND_COMMAND_RING_INDEX_MASK;
+    if (nextWriteIndex == (s16)sdfSndCmdIndex) {
         for (wakeAttemptsRemaining = 8; wakeAttemptsRemaining != 0; wakeAttemptsRemaining--) {
             do {
-                WakeupThread(sndCommandThreadId);
-            } while ((s16)sndCommandReadIndex != nextWriteIndex);
+                WakeupThread(sdfSndCmdBuf);
+            } while ((s16)sdfSndCmdIndex != nextWriteIndex);
         }
         return 0;
     }
-    entry = &sndCommandRing[(s16)sndCommandWriteIndex];
+    entry = &sndCommandRing[(s16)sdfSndCmdTailIndex];
     entry->sequence = D_00438B90;
     if (payloadBytes != 0) {
         memcpy(entry->payload, packet, payloadBytes);
@@ -71,12 +71,12 @@ u32 sdfSndSendCmd(u32 command, u32 channel, const void *packet, s32 payloadBytes
     entry->command = (command << SND_COMMAND_ID_SHIFT) |
                      (channel & SND_COMMAND_CHANNEL_MASK) |
                      (transferQuadwords << SND_COMMAND_LENGTH_SHIFT);
-    sndCommandWriteIndex = nextWriteIndex;
-    if (sndSynchronousCommandMode != 0) {
+    sdfSndCmdTailIndex = nextWriteIndex;
+    if (sdfSndBurstReqMode != 0) {
         while (sndTryDispatchQueuedCommand() != 0) {
         }
     } else {
-        WakeupThread(sndCommandThreadId);
+        WakeupThread(sdfSndCmdBuf);
     }
     return D_00438B90;
 }
@@ -93,19 +93,19 @@ u32 sdfSndSendSyncCmd(u32 command, u32 channel, const void *packet, u32 size) {
 }
 
 /* Descriptor consumed by sceSifSetDma: EE source, IOP destination, byte size, attributes. */
-extern SifDmaTransfer sndIopDmaTransfer;
+extern SifDmaTransfer sdfSndTransBuf;
 
 /* Transfer an EE buffer to IOP memory, retrying submission and waiting for completion. */
 void sdfSndTransToIOP(s32 destination, void *source, s32 size) {
     s32 dmaId;
     s32 delay;
 
-    sndIopDmaTransfer.source = (u32)source;
-    sndIopDmaTransfer.destination = destination;
-    sndIopDmaTransfer.size = size;
-    sndIopDmaTransfer.attributes = 0;
+    sdfSndTransBuf.source = (u32)source;
+    sdfSndTransBuf.destination = destination;
+    sdfSndTransBuf.size = size;
+    sdfSndTransBuf.attributes = 0;
     FlushCache(0);
-    while ((dmaId = sceSifSetDma(&sndIopDmaTransfer, 1)) == 0) {
+    while ((dmaId = sceSifSetDma(&sdfSndTransBuf, 1)) == 0) {
         /* Busy-wait before retrying a full SIF DMA queue. */
         delay = 0x186A0;
         while (delay != 0) {
@@ -117,7 +117,7 @@ void sdfSndTransToIOP(s32 destination, void *source, s32 size) {
     }
 }
 
-extern u8 sdfPfsDebugMode;
+extern u8 sdfHddValid;
 
 /* Load the sound modules; debug PFS may override only the SDF sound manager. */
 void sndLoadIopSoundModules(void) {
@@ -130,7 +130,7 @@ void sndLoadIopSoundModules(void) {
     sceSifLoadModule("cdrom0:\\SOUNDIRX\\MODMIDI.IRX;1", 0, NULL);
     sceSifLoadModule("cdrom0:\\SOUNDIRX\\MODMSIN.IRX;1", 0, NULL);
     module = "cdrom0:\\USERIRX\\SDFSDMAN.IRX;1";
-    if (sdfPfsDebugMode != 0 &&
+    if (sdfHddValid != 0 &&
         sceGetstat("pfs:/userirx/SDFSDMAN.IRX", &info) == 0 &&
         (info.mode & 0xF000) == 0x2000) {
         module = "pfs:/userirx/SDFSDMAN.IRX";
@@ -142,8 +142,8 @@ void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
     SndChannel *channel;
     s32 i;
 
-    sndMidiTrackState.header = header;
-    channel = sndMidiTrackState.channels;
+    sdfSndMap.header = header;
+    channel = sdfSndMap.channels;
     for (i = 0; i < SND_CHANNEL_COUNT; i++) {
         channel->index = i;
         channel->unk1 = 0x20;
@@ -153,13 +153,13 @@ void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
         channel->unkC = 0;
         channel++;
     }
-    sndMidiTrackState.channels[0].iopWorkAddress = sndReserveIopWorkMemory(0x3B600);
-    sndMidiTrackState.opaque200 = 0;
-    sndMidiTrackState.opaque204 = 0;
+    sdfSndMap.channels[0].iopWorkAddress = sndReserveIopWorkMemory(0x3B600);
+    sdfSndMap.opaque200 = 0;
+    sdfSndMap.opaque204 = 0;
     for (i = 0; i < SND_TRACK_SLOT_COUNT; i++) {
-        sndMidiTrackState.slots[i].id = -1;
-        sndMidiTrackState.slots[i].balanceFirstComponent = 0;
-        sndMidiTrackState.slots[i].balanceSecondComponent = 0;
+        sdfSndMap.slots[i].id = -1;
+        sdfSndMap.slots[i].balanceFirstComponent = 0;
+        sdfSndMap.slots[i].balanceSecondComponent = 0;
     }
 }
 
@@ -171,8 +171,8 @@ void sndAllocateAlignedIopBuffers(s32 *bufferSizes, s32 bufferCount) {
     s32 bufferIndex;
     u32 iopAddress;
 
-    sndMidiTrackState.bufferCount = bufferCount;
-    buffer = sndMidiTrackState.buffers;
+    sdfSndMap.bufferCount = bufferCount;
+    buffer = sdfSndMap.buffers;
     totalBytes = 0;
     bufferIndex = 0;
     do {
@@ -184,33 +184,33 @@ void sndAllocateAlignedIopBuffers(s32 *bufferSizes, s32 bufferCount) {
         bufferIndex++;
     } while (bufferIndex != bufferCount);
     for (; bufferIndex < SND_IOP_BUFFER_COUNT; bufferIndex++) {
-        sndMidiTrackState.buffers[bufferIndex].size = 0;
-        sndMidiTrackState.buffers[bufferIndex].iopAddress = 0;
+        sdfSndMap.buffers[bufferIndex].size = 0;
+        sdfSndMap.buffers[bufferIndex].iopAddress = 0;
     }
     iopAddress = sndReserveIopWorkMemory(totalBytes);
     bufferIndex = 0;
     do {
-        sndMidiTrackState.buffers[bufferIndex].iopAddress = iopAddress;
-        iopAddress += sndMidiTrackState.buffers[bufferIndex].size;
+        sdfSndMap.buffers[bufferIndex].iopAddress = iopAddress;
+        iopAddress += sdfSndMap.buffers[bufferIndex].size;
         bufferIndex++;
     } while (bufferIndex != bufferCount);
 }
 
 void sndInitializeIopSoundSystem(s32 unused, s32 header, s32 *bufferSizes, s32 bufferCount) {
-    sndSynchronousCommandMode = 1;
+    sdfSndBurstReqMode = 1;
     sndLoadIopSoundModules();
     sceSifInitIopHeap();
     sndStartIopCommandAndRpcWorkers();
-    sndMidiTrackState.iopBufferAddress = sndReserveIopWorkMemory(0x4000);
-    sndMidiTrackState.iopBufferBytes = 0x4000;
+    sdfSndMap.iopBufferAddress = sndReserveIopWorkMemory(0x4000);
+    sdfSndMap.iopBufferBytes = 0x4000;
     sndInitializeChannelAndTrackState(unused, header);
     sndAllocateAlignedIopBuffers(bufferSizes, bufferCount);
     D_004391EC = sndReserveIopWorkMemory(0x8D0);
-    sndMidiTrackState.eeWorkAddress = &sndMidiTrackState;
-    sndMidiTrackState.eeWorkByteCount = 0x8D0;
-    sdfSndTransToIOP(D_004391EC, &sndMidiTrackState, 0x8D0);
+    sdfSndMap.eeWorkAddress = &sdfSndMap;
+    sdfSndMap.eeWorkByteCount = 0x8D0;
+    sdfSndTransToIOP(D_004391EC, &sdfSndMap, 0x8D0);
     sdfSndSendSyncCmd(0, 0, &D_004391EC, 4);
-    sndSynchronousCommandMode = 0;
+    sdfSndBurstReqMode = 0;
 }
 
 /* Starts a track with the default 0x7f setting after preparing its identifier. */
@@ -337,11 +337,11 @@ void sndSetSpatialSequenceVolumePan(s32 trackId, f32 angle, f32 distance) {
 
 void p2sdLoadSMGFile(s32 trackId);
 
-extern SndTrackSlot sndTrackBalanceEntries[];
+extern SndTrackSlot LastLoad[];
 
 extern s32 sndFindPackedTrackLoadStatus(s32 packedTrack);
 
-extern s32 sndRequestedMidiBankId;
+extern s32 p2sdSmgHandle;
 
 extern u8 D_0047AA50[];
 
@@ -389,7 +389,7 @@ void p2sdSetStandPos(f32 firstPointX, f32 firstPointY, f32 firstPointZ,
 /* Returns 1 when the track id (high half of `packed`) is in the slot table, 2 when it is the
    current track, else 0. */
 s32 sndFindPackedTrackLoadStatus(s32 packed) {
-    SndWork *work = &sndMidiTrackState;
+    SndWork *work = &sdfSndMap;
     s32 id = packed >> 16;
     SndTrackSlot *slot;
     s32 i;
@@ -402,10 +402,10 @@ s32 sndFindPackedTrackLoadStatus(s32 packed) {
         }
         slot++;
     }
-    return sndRequestedMidiBankId == id ? 2 : 0;
+    return p2sdSmgHandle == id ? 2 : 0;
 }
 
-extern s32 (*fileIdleUpdateCallback)(void);
+extern s32 (*p2sdSmgBuf)(void);
 
 /* Make sure the MIDI bank named by the packed track id is resident, loading it if not. */
 void p2sdLoadSMGFile(s32 packed) {
@@ -420,15 +420,15 @@ void p2sdLoadSMGFile(s32 packed) {
         sprintf(name, "MIDI%04X.SMG", id);
         mnuBuildSoundResourcePath(path, name);
         sdfSndSendSyncCmd(0xA0, 0, path, strlen(path) + 1);
-        sndRequestedMidiBankId = id;
+        p2sdSmgHandle = id;
         break;
     case 1:
         break;
     case 2:
         do {
             sdfDelayThread(2);
-            if (fileIdleUpdateCallback != NULL) {
-                fileIdleUpdateCallback();
+            if (p2sdSmgBuf != NULL) {
+                p2sdSmgBuf();
             }
         } while (sndFindPackedTrackLoadStatus(packed) != 1);
         break;
@@ -458,7 +458,7 @@ void p2sdSetPcmBuffer(u32 data, s32 size) {
         *packet = data;
         sdfSndSendSyncCmd(0x1B0, 0, packet, 4);
     }
-    sndRequestedMidiBankId = -1;
+    p2sdSmgHandle = -1;
 }
 
 u32 sndSendChannelControlCommand(u32 channel) {
@@ -480,24 +480,24 @@ void sndReleaseMidiTrack(s32 id) {
         packet[0] = id;
         sdfSndSendSyncCmd(0xB0, 0, packet, 0x10);
         id >>= 16;
-        if (sndRequestedMidiBankId == id) {
-            sndRequestedMidiBankId = -1;
+        if (p2sdSmgHandle == id) {
+            p2sdSmgHandle = -1;
         }
     }
 }
 
 /* Read the byte used as the minuend by the nonnegative balance query. */
 u8 sndGetTrackBalanceFirstComponent(s32 trackSlotIndex) {
-    return sndTrackBalanceEntries[trackSlotIndex].balanceFirstComponent;
+    return LastLoad[trackSlotIndex].balanceFirstComponent;
 }
 
 /* Read the byte subtracted by the nonnegative balance query. */
 u8 sndGetTrackBalanceSecondComponent(s32 trackSlotIndex) {
-    return sndTrackBalanceEntries[trackSlotIndex].balanceSecondComponent;
+    return LastLoad[trackSlotIndex].balanceSecondComponent;
 }
 
 s32 sndGetNonnegativeEntryBalance(s32 trackSlotIndex) {
-    SndTrackSlot *entry = &sndTrackBalanceEntries[trackSlotIndex];
+    SndTrackSlot *entry = &LastLoad[trackSlotIndex];
     s32 difference = entry->balanceFirstComponent - entry->balanceSecondComponent;
 
     if (difference <= 0) {
@@ -512,15 +512,15 @@ u8 *sndGetMidiChannelTable(void) {
 }
 
 SndTrackSlot *sndGetTrackSlotTable(void) {
-    return sndTrackBalanceEntries;
+    return LastLoad;
 }
 
 /* Return one opaque MIDI word and optionally copy its adjacent word. */
 u32 sndGetMidiStateWordPair(u32 *outSecondaryValue) {
     if (outSecondaryValue != NULL) {
-        *outSecondaryValue = sndMidiTrackState.opaque20C;
+        *outSecondaryValue = sdfSndMap.opaque20C;
     }
-    return sndMidiTrackState.opaque208;
+    return sdfSndMap.opaque208;
 }
 
 /* Pack two 24-byte MIDI state groups into out; NULL leaves the state untouched. */
@@ -531,7 +531,7 @@ void sndCopyGroupedMidiStateBytes(u8 *out) {
     if (out == NULL) {
         return;
     }
-    state = (u8 *)&sndMidiTrackState;
+    state = (u8 *)&sdfSndMap;
     for (group = 0; group < 2; group++) {
         s32 i;
 
@@ -560,5 +560,5 @@ void p2sdStopBGM(u32 trackHandle) {
     sdfSndSendCmd(0xd0, 0, packet, 0x10);
 }
 
-INCLUDE_SDATA(const s32, "game/code_00341650", sndRequestedMidiBankId);
+INCLUDE_SDATA(const s32, "game/code_00341650", p2sdSmgHandle);
 

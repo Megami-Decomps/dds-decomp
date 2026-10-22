@@ -402,19 +402,19 @@ void mnuDrawAnimatedCurrencyCounter(s32 x, s32 y, s32 depth, s32 alpha,
                   (u32)((f32)(alpha << 8) * 0.0078125f), 0,
                   (s32)resource,
                   mnuMantraCommonSpritePlacements[34].spriteIndex, context);
-    if (datGameState->header.currency != scene->displayedCurrency) {
+    if (DDS3_GBWK->header.currency != scene->displayedCurrency) {
         p2sdPlaySE(0x13, 0x7F, 0x3F);
         scene->currencyFrame++;
         sprintf(currencyText, D_003BC4C8,
                       scene->displayedCurrency +
-                      (datGameState->header.currency - scene->displayedCurrency) *
+                      (DDS3_GBWK->header.currency - scene->displayedCurrency) *
                           scene->currencyFrame / 20);
         if (scene->currencyFrame == 20) {
-            scene->displayedCurrency = datGameState->header.currency;
+            scene->displayedCurrency = DDS3_GBWK->header.currency;
             scene->currencyFrame = 0;
         }
     } else {
-        sprintf(currencyText, D_003BC4C8, datGameState->header.currency);
+        sprintf(currencyText, D_003BC4C8, DDS3_GBWK->header.currency);
     }
     itfDrawGlyphChainWithWidthQuery(x + 0x191, y + 0x39, depth, color,
                                     0, currencyText, 0, context);

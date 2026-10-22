@@ -11,9 +11,9 @@
 #include "sdf_resource.h"
 
 #include "sdf.h"
-extern s8 sdfPadButtonStates[0x20];
+extern s8 dds3PadBitTable[0x20];
 extern s8 D_0040B7DB[];
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 #include "sdf_packet_alloc.h"
 #include "sdf_bordered_rectangle_packet.h"
 extern s32 sdf2DGetPrimPtr(s32 packetAddress);
@@ -47,7 +47,7 @@ extern EffHandler D_003B2074[];
 
 extern EffHandler D_003B2070[];
 
-extern u8 sdfPfsDebugMode;
+extern u8 sdfHddValid;
 
 extern u32 effDataDirectoryIndex;
 
@@ -70,7 +70,7 @@ extern u8 sdfProjectionMatrix[];
 
 extern u8 D_0037F660[];
 extern u8 sdfViewTargetVector[];
-extern u8 sdfViewUpVector[];
+extern u8 aViewDown[];
 
 
 /* Allocate the dispatch owner before calling the selected payload constructor. */
@@ -302,7 +302,7 @@ s8 func_00194AA0(void) {
 s32 dds3EffectDirOpen(void *name) {
     u8 path[EFF_DIRECTORY_PATH_BYTES];
 
-    if (sdfPfsDebugMode != 0) {
+    if (sdfHddValid != 0) {
         sprintf(path, D_00436448, name);
         return sceDopen(path);
     } else {
@@ -313,7 +313,7 @@ s32 dds3EffectDirOpen(void *name) {
 
 /* Run the native directory callback only in debug filesystem mode; its result is ignored. */
 void dds3EffectDirClose(s32 directory) {
-    if (sdfPfsDebugMode != 0) {
+    if (sdfHddValid != 0) {
         sceDclose(directory);
     }
 }
@@ -322,7 +322,7 @@ void dds3EffectDirClose(s32 directory) {
 /* Debug mode delegates to the native iterator. Built-in mode copies the next name,
    clears flag mask 0x1000, and returns name length; zero also marks table exhaustion. */
 s32 dds3EffectDirRead(s32 directory, EffDirEnt *entry) {
-    if (sdfPfsDebugMode != 0) {
+    if (sdfHddValid != 0) {
         return sceDread(directory, entry);
     }
     if ((u32)effDataDirectoryIndex >= EFF_BUILTIN_NAME_COUNT) {
@@ -345,7 +345,7 @@ EffResourceList *dds3EffectFileListCreate(char *path, s32 flags) {
     s32 type;
     directory = dds3EffectDirOpen(path);
     list = sdfChipAllocDirect(sizeof(*list));
-    if (sdfPfsDebugMode != 0) {
+    if (sdfHddValid != 0) {
         list->directoryPath = sdfChipAllocDirect(strlen(path) + 1);
         strcpy(list->directoryPath, path);
     } else {
@@ -459,7 +459,7 @@ s32 dds3EffectFileListWindowDraw(EffResourceDescriptor *descriptor) {
         EffResourceListNode *navigationEntry;
         EffResourceListNode *selectedEntry;
         s32 navigationStep;
-        if ((sdfPadButtonStates[6] & 2) != 0) {
+        if ((dds3PadBitTable[6] & 2) != 0) {
             if (descriptor->selectedEntry->previous != NULL) {
                 descriptor->selectedEntry = descriptor->selectedEntry->previous;
                 descriptor->selectedIndex--;
@@ -473,7 +473,7 @@ s32 dds3EffectFileListWindowDraw(EffResourceDescriptor *descriptor) {
                     }
                 }
             }
-        } else if ((sdfPadButtonStates[7] & 2) != 0) {
+        } else if ((dds3PadBitTable[7] & 2) != 0) {
             if (descriptor->selectedEntry->next != NULL) {
                 descriptor->selectedEntry = descriptor->selectedEntry->next;
                 descriptor->selectedIndex++;
@@ -485,7 +485,7 @@ s32 dds3EffectFileListWindowDraw(EffResourceDescriptor *descriptor) {
                     }
                 }
             }
-        } else if ((sdfPadButtonStates[9] & 2) != 0) {
+        } else if ((dds3PadBitTable[9] & 2) != 0) {
             selectedEntry = descriptor->selectedEntry;
             for (navigationStep = 0; navigationStep < 0xF; navigationStep++) {
                 navigationEntry = selectedEntry->previous;
@@ -505,7 +505,7 @@ s32 dds3EffectFileListWindowDraw(EffResourceDescriptor *descriptor) {
                     }
                 }
             }
-        } else if ((sdfPadButtonStates[11] & 2) != 0) {
+        } else if ((dds3PadBitTable[11] & 2) != 0) {
             for (navigationStep = 0; navigationStep < 0xF; navigationStep++) {
                 navigationEntry = descriptor->selectedEntry->next;
                 if (navigationEntry != NULL) {
@@ -521,9 +521,9 @@ s32 dds3EffectFileListWindowDraw(EffResourceDescriptor *descriptor) {
                     }
                 }
             }
-        } else if (sdfPadButtonStates[3] < 0) {
+        } else if (dds3PadBitTable[3] < 0) {
             descriptor->result = 2;
-        } else if (sdfPadButtonStates[1] < 0) {
+        } else if (dds3PadBitTable[1] < 0) {
             descriptor->result = 1;
         } else {
             EffResourceListNode *cachedEntry = descriptor->cachedEntry;
@@ -590,7 +590,7 @@ s32 dds3EffectFileListWindowDraw(EffResourceDescriptor *descriptor) {
         }
         visibleEntry = visibleEntry->next;
     }
-    surface = &kwlnDrawSurfaces[descriptor->drawSurface];
+    surface = &sdfGrOtTable[descriptor->drawSurface];
     surface->append(surface, packetList);
     return descriptor->result;
 }
@@ -745,7 +745,7 @@ s32 effPCPBlurScreenOffset(f32 scale) {
     VU0_MOVE_VF(vf12, vf10);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, sdfViewUpVector);
+    VU0_LOAD_VF(vf11, aViewDown);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_LOAD_VF_MEMORY(vf11, scaleVector);

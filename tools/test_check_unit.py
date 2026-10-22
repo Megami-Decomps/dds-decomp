@@ -527,11 +527,11 @@ segments:
     def test_rejects_same_size_wrong_name(self):
         emitted = [(0x00, 0x40, "wrongManagerWork", True)]
         problems = self.ownership_problems(
-            emitted, {"fileManagerWork": 0x003DC658}
+            emitted, {"fileQueueHead": 0x003DC658}
         )
         self.assertIn("extra emitted symbol wrongManagerWork", problems)
         self.assertIn(
-            "missing retail symbol fileManagerWork at +0x0 size 0x40", problems
+            "missing retail symbol fileQueueHead at +0x0 size 0x40", problems
         )
 
     def test_rejects_wrong_symbol_order(self):
@@ -575,24 +575,24 @@ segments:
         )
 
     def test_rejects_non_object_and_wrong_retail_address(self):
-        emitted = [(0x00, 0x40, "fileManagerWork", False)]
+        emitted = [(0x00, 0x40, "fileQueueHead", False)]
         problems = self.ownership_problems(
-            emitted, {"fileManagerWork": 0x003DC65C}
+            emitted, {"fileQueueHead": 0x003DC65C}
         )
-        self.assertIn("fileManagerWork is not STT_OBJECT", problems)
+        self.assertIn("fileQueueHead is not STT_OBJECT", problems)
         self.assertIn(
             "retail inventory begins at +0x4, expected +0x0",
             problems,
         )
         self.assertIn(
-            "fileManagerWork is at +0x0, retail inventory requires +0x4",
+            "fileQueueHead is at +0x0, retail inventory requires +0x4",
             problems,
         )
 
     def test_rejects_anonymous_padding_overlap_and_section_size(self):
-        gap = [(0x04, 0x3C, "fileManagerWork", True)]
+        gap = [(0x04, 0x3C, "fileQueueHead", True)]
         problems = self.ownership_problems(
-            gap, {"fileManagerWork": 0x003DC65C}
+            gap, {"fileQueueHead": 0x003DC65C}
         )
         self.assertIn(
             "retail inventory begins at +0x4, expected +0x0",
@@ -611,8 +611,8 @@ segments:
         self.assertIn(
             "section size 0x44, retail span 0x40",
             self.ownership_problems(
-                [(0x00, 0x40, "fileManagerWork", True)],
-                {"fileManagerWork": 0x003DC658},
+                [(0x00, 0x40, "fileQueueHead", True)],
+                {"fileQueueHead": 0x003DC658},
                 section_size=0x44,
             ),
         )
@@ -683,7 +683,7 @@ segments:
         for version in ("dds1", "dds2"):
             with self.subTest(version=version, section=".bss"):
                 syms = symbols(version)
-                start = syms["fileManagerWork"]
+                start = syms["fileQueueHead"]
                 end = syms["fileRequestEntries"]
                 yaml_text = self.YAML.replace("0x003DC658", hex(start)).replace(
                     "0x003DC698", hex(end)
@@ -694,7 +694,7 @@ segments:
                         yaml_text,
                         "file/fileManager",
                         0x40,
-                        [(0, 0x40, "fileManagerWork", True)],
+                        [(0, 0x40, "fileQueueHead", True)],
                         syms,
                     ),
                     [],
@@ -702,8 +702,8 @@ segments:
 
             with self.subTest(version=version, section=".sbss"):
                 syms = symbols(version)
-                start = syms["sdfTrackedThreadSemaphore"]
-                end = syms["sdfThreadWakeWorkerId"]
+                start = syms["sdfThreadSema"]
+                end = syms["sdfVblankSema"]
                 yaml_text = self.YAML.replace(".bss", ".sbss", 1).replace(
                     "file/fileManager", "sdf/sdfThread"
                 ).replace("0x003DC658", hex(start)).replace(
@@ -717,8 +717,8 @@ segments:
                         ".sbss",
                         8,
                         [
-                            (0, 4, "sdfTrackedThreadSemaphore", True),
-                            (4, 4, "sdfTrackedThreadHead", True),
+                            (0, 4, "sdfThreadSema", True),
+                            (4, 4, "sdfVblankThreadId", True),
                         ],
                         syms,
                     ),
@@ -746,7 +746,7 @@ SYMBOL TABLE:
 SYMBOL TABLE:
 00000000 l    d  .sbss 00000000 .sbss
 00000000 g     O .sbss 00000008 sdfTrackedThreadState
-00000000 g     O .bss  00000040 fileManagerWork
+00000000 g     O .bss  00000040 fileQueueHead
 """
         self.assertEqual(
             nobits_symbols(table, ".sbss"),
@@ -801,13 +801,13 @@ segments:
 
     def test_common_symbols_are_kept_out_of_owned_bss(self):
         nm = """\
-00000004 00000040 c fileManagerWork
+00000004 00000040 c fileQueueHead
 00000000 00000040 B explicitFileManagerWork
 00000080 00000008 C ordinaryCommon
 """
         self.assertEqual(
             common_symbols(nm),
-            [("fileManagerWork", 0x40), ("ordinaryCommon", 8)],
+            [("fileQueueHead", 0x40), ("ordinaryCommon", 8)],
         )
 
 
@@ -816,7 +816,7 @@ class SectionOwnershipTests(unittest.TestCase):
 00000000 g     O .sdata 00000008 D_003BC7D8
 00000008 g     O .sdata 00000008 D_003BC7E0
 00000000 g     O .data  00000008 unrelated
-00000000         *UND*  00000040 fileManagerWork
+00000000         *UND*  00000040 fileQueueHead
 """
 
     def test_parses_only_requested_section(self):

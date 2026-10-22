@@ -8,23 +8,23 @@ extern u32 effFieldColorFlags;
 
 extern u32 effFieldColorOriginalSelector;
 
-extern u32 effFieldColorVariantSelector;
+extern u32 effBTLSkillState;
 
-extern u32 effFieldColorOverrideSelector;
+extern u32 effBTLSkillID;
 
 extern u32 effFieldColorFinalSelector;
 
 /* Keep the original selector and optional overrides separately for field-color lookups. */
 void effBTLFieldColorSetSelectors(s32 baseId, u32 variant, s32 overrideId, s32 finalId) {
-    effFieldColorOverrideSelector = (u32)baseId;
-    effFieldColorOriginalSelector = effFieldColorOverrideSelector;
+    effBTLSkillID = (u32)baseId;
+    effFieldColorOriginalSelector = effBTLSkillID;
     if (overrideId != 0) {
-        effFieldColorOverrideSelector = (u32)overrideId;
+        effBTLSkillID = (u32)overrideId;
     }
     if (finalId != 0) {
         baseId = finalId;
     }
-    effFieldColorVariantSelector = variant;
+    effBTLSkillState = variant;
     effFieldColorFinalSelector = (s32)baseId;
 }
 
@@ -33,11 +33,11 @@ u32 effBTLFieldColorGetOriginalSelector(void) {
 }
 
 u32 effBTLFieldColorGetVariantSelector(void) {
-    return effFieldColorVariantSelector;
+    return effBTLSkillState;
 }
 
 u32 effBTLFieldColorGetOverrideSelector(void) {
-    return effFieldColorOverrideSelector;
+    return effBTLSkillID;
 }
 
 u32 effBTLFieldColorGetFinalSelector(void) {
@@ -125,9 +125,9 @@ f32 effGetActorScaleForParameterWork(BtlUnit *unit) {
 
 INCLUDE_SDATA(const s32, "game/code_00161838", effFieldColorOriginalSelector);
 
-INCLUDE_SDATA(const s32, "game/code_00161838", effFieldColorVariantSelector);
+INCLUDE_SDATA(const s32, "game/code_00161838", effBTLSkillState);
 
-INCLUDE_SDATA(const s32, "game/code_00161838", effFieldColorOverrideSelector);
+INCLUDE_SDATA(const s32, "game/code_00161838", effBTLSkillID);
 
 INCLUDE_SDATA(const s32, "game/code_00161838", effFieldColorFinalSelector);
 

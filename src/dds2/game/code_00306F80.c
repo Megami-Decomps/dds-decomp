@@ -206,7 +206,7 @@ void itfDrawGridOverlayPacket(GridDrawWork *work, u8 *data, SdfListHead *context
     itfCreateGridPacketWithDefaultFlags(work->overlayHandle, width, height, data, context);
 }
 
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 extern s32 sdf2DGetPrimPtr(s32 packet);
@@ -226,7 +226,7 @@ GridDrawWork *itfSubmitGridPacketsAndDraw(GridDrawWork *object, u8 *data, s32 ki
     }
     itfCreateGridPacketWithDefaultFlags(object->packetHandle, object->width,
                   object->height, cursor, context);
-    entry = &kwlnDrawSurfaces[kind];
+    entry = &sdfGrOtTable[kind];
     entry->append(entry, context);
     return object;
 }
@@ -633,22 +633,22 @@ extern ConsMatrixPacket D_0045C600[2];
 extern SdfLightSources D_0037F770;
 extern f32 kwlnDefaultColorVector[4];
 extern u8 sdfViewMatrix[0x40];
-extern u8 sdfViewEyeVector[];
+extern u8 aViewTarget[];
 extern u8 sdfViewTargetVector[];
-extern u8 sdfViewUpVector[];
+extern u8 aViewDown[];
 extern void sdf3DLinkInitPacket(SdfListHead *, DmaPacketHeader *);
 
 /* Rebuild the view matrix and both frame banks' matrix and lighting packet lists. */
 void itfInitDoubleBufferedScenePackets(void) {
     s32 i;
 
-    sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);
-    LookAtMatrix(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
+    sdfCameraBuildProjection(&dds3ScreenParam.camera);
+    LookAtMatrix(aViewTarget, sdfViewTargetVector, aViewDown);
     VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
     for (i = 0; i < 2; i++) {
         sdfDrawTagInit(&D_0045C380[i]);
         sdf3DLinkInitPacket(&D_0045C380[i], &D_0045C3C0[i]);
-        sdf3DMakeViewportPacket((struct ConsMatrixPacket *)&D_0045C600[i], &sdfSceneProjectionParameters, sdfViewMatrix);
+        sdf3DMakeViewportPacket((struct ConsMatrixPacket *)&D_0045C600[i], &dds3ScreenParam, sdfViewMatrix);
         sdfDrawTagLink(&D_0045C380[i], (u32)&D_0045C600[i]);
         sdfDrawTagInit(&D_0045C400[i]);
         sdf3DMakeLightParallelPacket(&D_0045C440[i], D_0037F770, kwlnDefaultColorVector);
@@ -674,7 +674,7 @@ void cmpDrawSpriteFlag(u8 enabled, s32 alternate, s32 kind) {
     context = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
-    entry = &kwlnDrawSurfaces[kind];
+    entry = &sdfGrOtTable[kind];
     entry->append(entry, context);
 }
 
@@ -699,7 +699,7 @@ void cmpDrawSprite(u64 data, s32 alternate, s32 kind) {
     context = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
-    entry = &kwlnDrawSurfaces[kind];
+    entry = &sdfGrOtTable[kind];
     entry->append(entry, context);
 }
 
@@ -724,7 +724,7 @@ void cmpDrawSprite2(s32 data, s32 alternate, s32 kind) {
     context = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
-    entry = &kwlnDrawSurfaces[kind];
+    entry = &sdfGrOtTable[kind];
     entry->append(entry, context);
 }
 
@@ -745,7 +745,7 @@ void cmpDrawSpriteIndexed(s32 data, s32 kind) {
     context = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
-    entry = &kwlnDrawSurfaces[kind];
+    entry = &sdfGrOtTable[kind];
     entry->append(entry, context);
 }
 
@@ -762,7 +762,7 @@ void cmpDrawSpriteIndexed2(s32 data, s32 kind) {
     context = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
-    entry = &kwlnDrawSurfaces[kind];
+    entry = &sdfGrOtTable[kind];
     entry->append(entry, context);
 }
 
@@ -805,7 +805,7 @@ void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 sur
     list = (SdfListHead *)sdfGrAllocPacketBuff(sizeof(SdfListHead));
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)packet);
-    surface = &kwlnDrawSurfaces[surfaceIndex];
+    surface = &sdfGrOtTable[surfaceIndex];
     surface->append(surface, list);
 }
 
@@ -852,7 +852,7 @@ void itfDrawVertexColoredRectangle(u32 x, u32 y, u32 z, u32 width, u32 height, c
     list = (SdfListHead *)sdfGrAllocPacketBuff(sizeof(SdfListHead));
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)packet);
-    surface = &kwlnDrawSurfaces[surfaceIndex];
+    surface = &sdfGrOtTable[surfaceIndex];
     surface->append(surface, list);
 }
 
@@ -898,7 +898,7 @@ void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
     list = (SdfListHead *)sdfGrAllocPacketBuff(sizeof(SdfListHead));
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)packet);
-    surface = &kwlnDrawSurfaces[surfaceIndex];
+    surface = &sdfGrOtTable[surfaceIndex];
     surface->append(surface, list);
 }
 
@@ -945,7 +945,7 @@ void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
     textureCoordinates[2][0] = 0.0f;
     textureCoordinates[2][1] = 0.0f;
     sdfDrawTagLink(list, (u32)sdf3DPrimMakePoly(&request));
-    surface = &kwlnDrawSurfaces[surfaceIndex];
+    surface = &sdfGrOtTable[surfaceIndex];
     surface->append(surface, list);
 }
 
@@ -957,7 +957,7 @@ void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
     sdfDrawTagLinkRefGif(list, (u32)texture);
     {
-        SdfPoolNode *surface = &kwlnDrawSurfaces[surfaceIndex];
+        SdfPoolNode *surface = &sdfGrOtTable[surfaceIndex];
         surface->append(surface, list);
     }
 }
@@ -974,7 +974,7 @@ void sdfDispatchSurfaceWithPreparedTexturePacket(surfaceIndex)
     sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
     sdfDrawTagLinkRefGif(list, (u32)texture);
     {
-        SdfPoolNode *surface = &kwlnDrawSurfaces[surfaceIndex];
+        SdfPoolNode *surface = &sdfGrOtTable[surfaceIndex];
         surface->append(surface, list);
     }
 }

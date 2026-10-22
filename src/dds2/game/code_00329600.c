@@ -20,7 +20,7 @@
 
 
 
-extern SdfPendingRequest sdfGeneralReleaseRequest;
+extern SdfPendingRequest sdfMemDelayedResrcCB;
 
 
 
@@ -145,7 +145,7 @@ void sdfMemFreeHandleDirect(s32 *handleSlot) {
 /* Zero is a sentinel and is never submitted to the pending queue. */
 void sdfMemFreeDelayedDirect(struct SdfMemBlock *allocation) {
     if (allocation != NULL) {
-        sdfDelayedResrcEntry(&sdfGeneralReleaseRequest, allocation);
+        sdfDelayedResrcEntry(&sdfMemDelayedResrcCB, allocation);
     }
 }
 
@@ -165,7 +165,7 @@ void sdfMemUnlock(SdfMemBlock *allocation) {
 
 /* The address must belong to an existing used block: the end-marker path does not end this scan. */
 SdfMemBlock *sdfMemGetHandleByPtr(void *address) {
-    SdfMemHeap *heap = &sdfGeneralHeap;
+    SdfMemHeap *heap = &sdfMemCB;
     SdfMemBlock *block;
     s32 interruptsDisabled;
 
@@ -188,7 +188,7 @@ SdfMemBlock *sdfMemGetHandleByPtr(void *address) {
 
 /* Walk the general heap's block list and write its statistics: total bytes, free bytes, largest and smallest free block, block count and free block count. */
 void sdfMemGetInfo(SdfGeneralHeapStats *stats) {
-    SdfMemBlock *block = sdfGeneralHeap.head.next;
+    SdfMemBlock *block = sdfMemCB.head.next;
     s32 totalBytes = 0;
     s32 freeBytes = 0;
     s32 largestFreeBytes = 0;
@@ -224,7 +224,7 @@ void sdfMemGetInfo(SdfGeneralHeapStats *stats) {
 
 /* Find the used heap block that contains `address`; NULL when the end marker is reached. */
 SdfMemBlock *sdfFindGeneralBlockContaining(s32 address) {
-    SdfMemBlock *block = sdfGeneralHeap.head.next;
+    SdfMemBlock *block = sdfMemCB.head.next;
     SdfMemBlock *nextBlock;
 
     for (;; block = nextBlock) {
@@ -239,7 +239,7 @@ SdfMemBlock *sdfFindGeneralBlockContaining(s32 address) {
     }
 }
 
-extern SifRpcClientDataPrefix sdfNamedResourceRpcClient;
+extern SifRpcClientDataPrefix sdfIopRpcClient;
 
 /* Pack name/data lengths, a terminated name and optional data; return transport error or server result. */
 s32 SdfIopFileRpc(const char *name, s32 dataSize, const void *data, s32 *outSize) {
@@ -258,7 +258,7 @@ s32 SdfIopFileRpc(const char *name, s32 dataSize, const void *data, s32 *outSize
     }
     /* Align the two-word reply within the stack scratch buffer to 64 bytes. */
     replyWords = (u32 *)(((u32)replyScratch + SDF_RPC_REPLY_ALIGNMENT_MASK) & ~SDF_RPC_REPLY_ALIGNMENT_MASK);
-    result = sceSifMCallRpc(&sdfNamedResourceRpcClient, 1, 0, requestWords, requestBytes, replyWords, 8, NULL, NULL);
+    result = sceSifMCallRpc(&sdfIopRpcClient, 1, 0, requestWords, requestBytes, replyWords, 8, NULL, NULL);
     if (result >= 0) {
         if (outSize != NULL) {
             *outSize = replyWords[1];
@@ -282,8 +282,8 @@ void sdfLoadModulesAndBindNamedResourceRpc(const char *modulePath, const char *o
         sceSifMInitRpc(0);
     }
     while (1) {
-        sceSifMBindRpc(&sdfNamedResourceRpcClient, SDF_NAMED_RESOURCE_RPC_ID, 0);
-        if (sdfNamedResourceRpcClient.server != NULL) {
+        sceSifMBindRpc(&sdfIopRpcClient, SDF_NAMED_RESOURCE_RPC_ID, 0);
+        if (sdfIopRpcClient.server != NULL) {
             break;
         }
         retryStartTick = sdfGetRunTimeCountBase();

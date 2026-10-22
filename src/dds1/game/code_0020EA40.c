@@ -277,7 +277,7 @@ void btlUpdateBossUnitScaleTransition(void);
 s32 btlOffsetSpecialTargetPositionForActionHook(BtlLinkedCommand *, s32, s32);
 s32 btlDefeatCameraHookPresetB(BtlLinkedCommand *, BtlCamState *, s32);
 
-extern u32 kwlnDrawControlFlags;
+extern u32 dds3DrawFlag;
 
 /* Copy the verified four-byte EE callback representation into its actual slot.
  * Some callback slots remain byte storage or carry older shared prototypes. */
@@ -477,7 +477,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         break;
     }
     case 0x10E:
-        kwlnDrawControlFlags |= 0x20000000;
+        dds3DrawFlag |= 0x20000000;
         battle->commandRestrictFlags |= 0x281;
         effBTLFieldColorSetFlags(1);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlMapLinkedCommandResult);

@@ -129,8 +129,8 @@ extern void mnuApplyModelCamera(MdlCtx *);
 extern void evtStageTestApplyEntryRotation(MdlCtx *);
 extern void evtStageTestUpdateCamera(void);
 extern u8 sdfViewTargetVector[];
-extern u8 sdfViewEyeVector[];
-extern u8 sdfViewUpVector[];
+extern u8 aViewTarget[];
+extern u8 aViewDown[];
 extern u8 sdfViewShakeVector[];
 extern u8 evtStageTestViewUpVector[];
 extern u8 sdfViewMatrix[];
@@ -1528,7 +1528,7 @@ void mnuInitPartyPanelSlots(PartyPanel *panel) {
     panel->frontlineCount = 0;
     panel->reserveCount = 0;
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
-        partyEntry = &datGameState->party[partyIndex];
+        partyEntry = &DDS3_GBWK->party[partyIndex];
         if (partyEntry->flags & 1) {
             mnuPopulatePartyPanelSlot(partyEntry, 0, partyIndex, panel);
             panel->slots[partyIndex].index = partyIndex;
@@ -1538,7 +1538,7 @@ void mnuInitPartyPanelSlots(PartyPanel *panel) {
     }
 }
 
-extern s8 kwlnTaskPadButtonStates[];
+extern s8 dds3PadButtonState[];
 extern u8 D_00324530[];
 
 /* Translate requested inputs using native sign-bit/trigger-bit and nonzero tests.
@@ -1547,12 +1547,12 @@ s32 mnuMapPadMaskToFlags(s32 buttonMask) {
     s32 inputFlags = 0;
 
     if (buttonMask & MNU_INPUT_PRIORITY_BIT) {
-        if (kwlnTaskPadButtonStates[0x21] < 0) {
+        if (dds3PadButtonState[0x21] < 0) {
             inputFlags = MNU_INPUT_PRIORITY_BIT;
         }
     }
     if (buttonMask & 0x2) {
-        if (kwlnTaskPadButtonStates[0x23] < 0) {
+        if (dds3PadButtonState[0x23] < 0) {
             inputFlags |= 0x2;
         }
     }
@@ -1577,12 +1577,12 @@ s32 mnuMapPadMaskToFlags(s32 buttonMask) {
         }
     }
     if (buttonMask & 0x4) {
-        if (kwlnTaskPadButtonStates[0x22] < 0) {
+        if (dds3PadButtonState[0x22] < 0) {
             inputFlags |= 0x4;
         }
     }
     if (buttonMask & 0x8) {
-        if (kwlnTaskPadButtonStates[0x20] < 0) {
+        if (dds3PadButtonState[0x20] < 0) {
             inputFlags |= 0x8;
         }
     }
@@ -1607,70 +1607,70 @@ s32 mnuMapPadMaskToFlags(s32 buttonMask) {
         }
     }
     if (buttonMask & 0x1000) {
-        if (kwlnTaskPadButtonStates[0x2C] < 0) {
+        if (dds3PadButtonState[0x2C] < 0) {
             inputFlags |= 0x1000;
         }
     }
     if (buttonMask & 0x2000) {
-        if (kwlnTaskPadButtonStates[0x2D] < 0) {
+        if (dds3PadButtonState[0x2D] < 0) {
             inputFlags |= 0x2000;
         }
     }
     if (buttonMask & 0x20000) {
-        if (kwlnTaskPadButtonStates[0x2A] < 0) {
+        if (dds3PadButtonState[0x2A] < 0) {
             inputFlags |= 0x20000;
         }
     }
     if (buttonMask & 0x10000) {
-        if (kwlnTaskPadButtonStates[0x28] < 0) {
+        if (dds3PadButtonState[0x28] < 0) {
             inputFlags |= 0x10000;
         }
     }
     if (buttonMask & 0x80000) {
-        if (kwlnTaskPadButtonStates[0x2B] < 0) {
+        if (dds3PadButtonState[0x2B] < 0) {
             inputFlags |= 0x80000;
         }
     }
     if (buttonMask & 0x40000) {
-        if (kwlnTaskPadButtonStates[0x29] < 0) {
+        if (dds3PadButtonState[0x29] < 0) {
             inputFlags |= 0x40000;
         }
     }
     if (buttonMask & 0x10) {
-        if (kwlnTaskPadButtonStates[0x26] != 0) {
+        if (dds3PadButtonState[0x26] != 0) {
             inputFlags |= 0x100000;
         }
     }
     if (buttonMask & 0x20) {
-        if (kwlnTaskPadButtonStates[0x27] != 0) {
+        if (dds3PadButtonState[0x27] != 0) {
             inputFlags |= 0x200000;
         }
     }
     if (buttonMask & 0x40) {
-        if (kwlnTaskPadButtonStates[0x24] != 0) {
+        if (dds3PadButtonState[0x24] != 0) {
             inputFlags |= 0x400000;
         }
     }
     if (buttonMask & 0x80) {
-        if (kwlnTaskPadButtonStates[0x25] != 0) {
+        if (dds3PadButtonState[0x25] != 0) {
             inputFlags |= 0x800000;
         }
-        if (kwlnTaskPadButtonStates[0x2A] != 0) {
+        if (dds3PadButtonState[0x2A] != 0) {
             inputFlags |= 0x1000000;
         }
     }
     if (buttonMask & 0x40) {
-        if (kwlnTaskPadButtonStates[0x28] != 0) {
+        if (dds3PadButtonState[0x28] != 0) {
             inputFlags |= 0x2000000;
         }
     }
     if (buttonMask & 0x80) {
-        if (kwlnTaskPadButtonStates[0x2B] != 0) {
+        if (dds3PadButtonState[0x2B] != 0) {
             inputFlags |= 0x4000000;
         }
     }
     if (buttonMask & 0x40) {
-        if (kwlnTaskPadButtonStates[0x29] != 0) {
+        if (dds3PadButtonState[0x29] != 0) {
             inputFlags |= 0x8000000;
         }
     }
@@ -1758,7 +1758,7 @@ void mnuPlayDefaultInputSounds(u32 inputFlags) {
 /* Find the first occupied slot with the same table ID; zero also serves as no-match. */
 s32 mnuFindMatchingPartyEntryIndex(DatPartyRecord *targetEntry) {
     s32 partyIndex;
-    DatPartyRecord *partyEntry = datGameState->party;
+    DatPartyRecord *partyEntry = DDS3_GBWK->party;
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++, partyEntry++) {
         if ((partyEntry->flags & 1) &&
             targetEntry->unitId == partyEntry->unitId) {
@@ -1868,7 +1868,7 @@ u16 mnuGetAdjustedPartyRangeValue(s32 id) {
     if (mnuGetRangeEntryKind(index) == DAT_COMMAND_COST_MODE_HP) {
         s32 count = 0;
         s32 sum = 0;
-        DatPartyRecord *entry = datGameState->party;
+        DatPartyRecord *entry = DDS3_GBWK->party;
         s32 i;
 
         for (i = 0; i < 5; i++) {
@@ -2014,7 +2014,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRe
         s32 queueArgument;
 
         for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
-            entry = &datGameState->party[partyIndex];
+            entry = &DDS3_GBWK->party[partyIndex];
             if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
                 mask = mnuGetMatchingPartyEntryMask(entry);
 
@@ -2031,7 +2031,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRe
 
         queueArgument = 0;
         for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
-            entry = &datGameState->party[partyIndex];
+            entry = &DDS3_GBWK->party[partyIndex];
             if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
                 mnuQueuePartyPanelSlotBlend(context, mnuFindMatchingPartyEntryIndex(entry), 0, queueArgument);
             }
@@ -2127,9 +2127,9 @@ s32 ptyCountBulletItem(s32 bulletId) {
     if (bulletId >= 0xBF) {
         return 0;
     }
-    totalCount = datGameState->inventory.counts[bulletId];
+    totalCount = DDS3_GBWK->inventory.counts[bulletId];
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
-        if (bulletId == mnuGetPartyEntryMenuValue(&datGameState->party[partyIndex])) {
+        if (bulletId == mnuGetPartyEntryMenuValue(&DDS3_GBWK->party[partyIndex])) {
             totalCount++;
         }
     }
@@ -2299,7 +2299,7 @@ s32 mnuGetSelectionFromFlags(DatPartyRecord *partyRecord) {
 /* Return one bit for the first occupied matching table ID, or zero when absent. */
 s32 mnuGetMatchingPartyEntryMask(DatPartyRecord *targetEntry) {
     s32 partyIndex;
-    DatPartyRecord *partyEntry = datGameState->party;
+    DatPartyRecord *partyEntry = DDS3_GBWK->party;
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++, partyEntry++) {
         if ((partyEntry->flags & 1) &&
             partyEntry->unitId == targetEntry->unitId) {
@@ -2451,18 +2451,18 @@ void evtStageTestResetViewAndLighting(void)
     dds3SetAmbientColor(0, backgroundColor);
     dds3SetFogColor(0, drawColor);
     dds3SetFogPara(0, 255.0f, 255.0f, 2000.0f, 30000.0f);
-    sdfSceneProjectionParameters.camera.fov = 0.7551905f;
+    dds3ScreenParam.camera.fov = 0.7551905f;
     PCP_COPY_VECTOR(sdfViewTargetVector, evtStageTestViewTargetVector);
-    PCP_COPY_VECTOR(sdfViewEyeVector, evtStageTestViewEyeVector);
-    PCP_COPY_VECTOR(sdfViewUpVector, evtStageTestViewUpVector);
+    PCP_COPY_VECTOR(aViewTarget, evtStageTestViewEyeVector);
+    PCP_COPY_VECTOR(aViewDown, evtStageTestViewUpVector);
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    sdf3DSetCamera(&sdfSceneProjectionParameters, sdfViewMatrix);
+    sdf3DSetCamera(&dds3ScreenParam, sdfViewMatrix);
 }
 
 /* Set the horizontal projection offset while retaining the native GS-coordinate bias. */
 void mnuSetStageTestCameraOffset(f32 offset) {
-    sdfSceneProjectionParameters.camera.offsetY = EVT_STAGE_PROJECTION_BIAS;
-    sdfSceneProjectionParameters.camera.offsetX = offset + EVT_STAGE_PROJECTION_BIAS;
+    dds3ScreenParam.camera.offsetY = EVT_STAGE_PROJECTION_BIAS;
+    dds3ScreenParam.camera.offsetX = offset + EVT_STAGE_PROJECTION_BIAS;
     evtStageTestResetViewAndLighting();
 }
 
@@ -2515,8 +2515,8 @@ void btlStopStage(void) {
 /* Stop the viewer and reset both projection offsets to the native coordinate bias. */
 void mnuResetWorkFloats(void) {
     btlStopStage();
-    sdfSceneProjectionParameters.camera.offsetX = EVT_STAGE_PROJECTION_BIAS;
-    sdfSceneProjectionParameters.camera.offsetY = EVT_STAGE_PROJECTION_BIAS;
+    dds3ScreenParam.camera.offsetX = EVT_STAGE_PROJECTION_BIAS;
+    dds3ScreenParam.camera.offsetY = EVT_STAGE_PROJECTION_BIAS;
 }
 
 /* Remember the model asset request result for the stage viewer. */
@@ -2726,10 +2726,10 @@ void evtStageTestUpdateCamera(void)
     drawBufferIndex = dds3GetFrameID();
     evtStageTestResetViewAndLighting();
     PCP_COPY_VECTOR(sdfViewTargetVector, evtStageTestViewTargetVector);
-    PCP_COPY_VECTOR(sdfViewEyeVector, evtStageTestViewEyeVector);
-    PCP_COPY_VECTOR(sdfViewUpVector, evtStageTestViewUpVector);
-    sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);
-    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    PCP_COPY_VECTOR(aViewTarget, evtStageTestViewEyeVector);
+    PCP_COPY_VECTOR(aViewDown, evtStageTestViewUpVector);
+    sdfCameraBuildProjection(&dds3ScreenParam.camera);
+    VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
@@ -2741,10 +2741,10 @@ void evtStageTestUpdateCamera(void)
     VU0_LOAD_VF(vf10, sdfViewTargetVector);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, &target);
-    LookAtMatrix(&eye, &target, sdfViewUpVector);
+    LookAtMatrix(&eye, &target, aViewDown);
     VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
-    sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(D_003270F0 + drawBufferIndex * 8000), &sdfSceneProjectionParameters, sdfViewMatrix);
-    sdf3DSetCamera(&sdfSceneProjectionParameters, sdfViewMatrix);
+    sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(D_003270F0 + drawBufferIndex * 8000), &dds3ScreenParam, sdfViewMatrix);
+    sdf3DSetCamera(&dds3ScreenParam, sdfViewMatrix);
 }
 
 s8 evtStageTestUpdate(struct SdfPoolNode **surfaces) {
@@ -2911,7 +2911,7 @@ s32 evtStageTestHasModelEffect(void) {
 extern s32 D_003BC7BC;
 extern const char *D_003BC7B8;
 extern char D_003BC7C0[];
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 extern f32 dds3CameraObjectBasicGetFovy(EffWorldNode *camera);
 
 INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2520);
@@ -2935,7 +2935,7 @@ void evtStageTestDrawCameraTransformDebug(void) {
     if (world == NULL) {
         return;
     }
-    if (kwlnTaskPadButtonStates[0x2D] < 0) {
+    if (dds3PadButtonState[0x2D] < 0) {
         if (D_003BC7BC != 0) {
             D_003BC7BC = 0;
         } else {
@@ -2949,7 +2949,7 @@ void evtStageTestDrawCameraTransformDebug(void) {
     if (camera == NULL) {
         return;
     }
-    if (kwlnTaskPadButtonStates[0x20] < 0) {
+    if (dds3PadButtonState[0x20] < 0) {
         if (camera->next != NULL) {
             camera = camera->next;
         } else {
@@ -2957,7 +2957,7 @@ void evtStageTestDrawCameraTransformDebug(void) {
         }
         dds3SetActiveCameraSceneBasic((EffWorldNode *)dds3GetActiveScene(), camera);
         dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
-    } else if (kwlnTaskPadButtonStates[0x22] < 0) {
+    } else if (dds3PadButtonState[0x22] < 0) {
         if (camera->previous != NULL) {
             camera = camera->previous;
         } else {
@@ -2981,10 +2981,10 @@ void evtStageTestDrawCameraTransformDebug(void) {
                                                            camera->inner->rotation[0],
                                                            camera->inner->rotation[1],
                                                            camera->inner->rotation[2]));
-    surface = &kwlnDrawSurfaces[96];
+    surface = &sdfGrOtTable[96];
     surface->append(surface, list);
     list = dds3FontReqAllocDrawTag();
-    (&kwlnDrawSurfaces[40])->append(&kwlnDrawSurfaces[40], list);
+    (&sdfGrOtTable[40])->append(&sdfGrOtTable[40], list);
 }
 
 u32 evtStageTestCameraUpdate(void) {
@@ -3019,20 +3019,20 @@ s32 evtBattleStageTestScreen(KwlnTask *task) {
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
     D_00325708.append(&D_00325708, packetList);
-    if (kwlnTaskPadButtonStates[0x21] < 0) {
+    if (dds3PadButtonState[0x21] < 0) {
         evtLoadArea(D_003BC7D0, D_003BC7D4);
         return (s32)evtCreateBattleStageTestCamera;
     }
-    if (kwlnTaskPadButtonStates[0x25] & MNU_PAD_TRIGGER_BIT) {
+    if (dds3PadButtonState[0x25] & MNU_PAD_TRIGGER_BIT) {
         D_003BC7D0++;
     }
-    if (kwlnTaskPadButtonStates[0x24] & MNU_PAD_TRIGGER_BIT) {
+    if (dds3PadButtonState[0x24] & MNU_PAD_TRIGGER_BIT) {
         D_003BC7D0--;
     }
-    if (kwlnTaskPadButtonStates[0x2A] & MNU_PAD_TRIGGER_BIT) {
+    if (dds3PadButtonState[0x2A] & MNU_PAD_TRIGGER_BIT) {
         D_003BC7D4++;
     }
-    if (kwlnTaskPadButtonStates[0x28] & MNU_PAD_TRIGGER_BIT) {
+    if (dds3PadButtonState[0x28] & MNU_PAD_TRIGGER_BIT) {
         D_003BC7D4--;
     }
     return 0;

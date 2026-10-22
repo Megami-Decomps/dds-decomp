@@ -993,7 +993,7 @@ void effSelectPresetByKind(u32 mode, u32 value) {
 }
 
 
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 typedef struct SdfTex SdfTex;
 typedef struct SdfDrawPacket SdfDrawPacket;
 
@@ -1080,7 +1080,7 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     sdfDrawTagInit(packetList);
     sdf2DLinkTexPacket(packetList, texture, 0);
     sdfDrawTagLink(packetList, packet);
-    drawSurface = &kwlnDrawSurfaces[surfaceId];
+    drawSurface = &sdfGrOtTable[surfaceId];
     drawSurface->append(drawSurface, packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
 }
@@ -1235,7 +1235,7 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     sdfDrawTagInit(packetList);
     sdf2DLinkTexPacket(packetList, texture, 0);
     sdfDrawTagLink(packetList, packet);
-    drawSurface = &kwlnDrawSurfaces[surfaceId];
+    drawSurface = &sdfGrOtTable[surfaceId];
     drawSurface->append(drawSurface, packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
 }

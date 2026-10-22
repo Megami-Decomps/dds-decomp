@@ -108,9 +108,9 @@ extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
 
 
-extern SndPad kwlnTaskPadButtonStates;
+extern SndPad dds3PadButtonState;
 
-extern u32 kwlnDrawControlFlags;
+extern u32 dds3DrawFlag;
 
 extern void btlDestroyUnit(u8 *);
 
@@ -143,7 +143,7 @@ u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *object);
 
 extern EffRandState effSharedRandomState[];
 
-extern SndPad kwlnTaskPadButtonStates;
+extern SndPad dds3PadButtonState;
 
 extern void btlInitializeWorldCamera(void);
 
@@ -1509,9 +1509,9 @@ u32 btlAwardHuntExperience(s32 address) {
             }
         }
         for (index = 0; index < 5; index++) {
-            u16 flags = datGameState->party[index].flags;
+            u16 flags = DDS3_GBWK->party[index].flags;
             if (flags & 1) {
-                if (!(flags & 2) && !(datGameState->party[index].status & 0x4040)) {
+                if (!(flags & 2) && !(DDS3_GBWK->party[index].status & 0x4040)) {
                     count++;
                 }
             }
@@ -1532,10 +1532,10 @@ u32 btlAwardHuntExperience(s32 address) {
             }
         }
         for (index = 0; index < 5; index++) {
-            u16 flags = datGameState->party[index].flags;
+            u16 flags = DDS3_GBWK->party[index].flags;
             if (flags & 1) {
-                if (!(flags & 2) && !(datGameState->party[index].status & 0x4040)) {
-                    datGameState->party[index].huntExp += share;
+                if (!(flags & 2) && !(DDS3_GBWK->party[index].status & 0x4040)) {
+                    DDS3_GBWK->party[index].huntExp += share;
                 }
             }
         }
@@ -1738,13 +1738,13 @@ void btlUpdateAutoMusic(void) {
         return;
     }
     if (flags & 0x8000) {
-        if (kwlnTaskPadButtonStates.primaryTriangle < 0 || kwlnTaskPadButtonStates.primaryCancel < 0) {
+        if (dds3PadButtonState.primaryTriangle < 0 || dds3PadButtonState.primaryCancel < 0) {
             *(u32 *)(context + 0x1F4) = flags & ~0x8000;
             p2sdPlaySE(6, 0x7F, 0x3F);
             btlSetTrackedTaskDisplayMode(0);
             btlBossDebugPrintf(D_003A3A40);
         }
-    } else if (kwlnTaskPadButtonStates.primaryTriangle < 0) {
+    } else if (dds3PadButtonState.primaryTriangle < 0) {
         *(u32 *)(context + 0x1F4) = flags | 0x8000;
         p2sdPlaySE(5, 0x7F, 0x3F);
         btlSetTrackedTaskDisplayMode(1);
@@ -3883,7 +3883,7 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
         btlBindActorModel(unit, resourceKind, resourceId);
         btlReleaseModelAssetByMode((u32)unit, resourceKind, resourceId);
         if (args->duration == 0) {
-            kwlnDrawControlFlags |= 0x2000000;
+            dds3DrawFlag |= 0x2000000;
         }
         btlSetUnitPosition(unit, unit->currentPosition);
         btlSetUnitRotation(unit, unit->orientation);

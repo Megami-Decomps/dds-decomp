@@ -13,7 +13,7 @@
 #define SDF_WAKE_WORKER_PRIORITY 0x3E
 #define SDF_SLEEP_THREAD_PRIORITY 0x7C
 
-s32 sdfThreadWakeTick __attribute__((section(".sdata"), aligned(8))) = 0;
+s32 sdfVblankFlag __attribute__((section(".sdata"), aligned(8))) = 0;
 
 extern void sdfDeleteTrackedThread(SdfThreadNode *node);
 
@@ -25,13 +25,13 @@ void sdfUnlinkAndDeleteCurrentThread(void) {
     sdfDeleteTrackedThread(threadNode);
 }
 
-extern s32 sdfThreadWakeWorkerId;
+extern s32 sdfVblankSema;
 extern u8 D_00438B70;
 
 /* Wake the worker only for its registered event; the byte counter never underflows. */
 s32 VblankIntcHandler(s32 eventId) {
     if (eventId == SDF_THREAD_COMPLETION_EVENT) {
-        iWakeupThread(sdfThreadWakeWorkerId);
+        iWakeupThread(sdfVblankSema);
         if (D_00438B70 != 0) {
             D_00438B70--;
         }
@@ -49,12 +49,12 @@ void VblankThreadProc(void) {
     EnableIntc(SDF_THREAD_COMPLETION_EVENT);
     for (;;) {
         SleepThread();
-        sdfThreadWakeTick++;
-        WaitSema(sdfTrackedThreadSemaphore);
-        for (threadEntry = sdfTrackedThreadHead; threadEntry != NULL; threadEntry = threadEntry->next) {
+        sdfVblankFlag++;
+        WaitSema(sdfThreadSema);
+        for (threadEntry = sdfVblankThreadId; threadEntry != NULL; threadEntry = threadEntry->next) {
             WakeupThread(threadEntry->threadId);
         }
-        SignalSema(sdfTrackedThreadSemaphore);
+        SignalSema(sdfThreadSema);
     }
 }
 
@@ -67,11 +67,11 @@ s32 sdfInitThreadSystem(void) {
     s32 threadId;
 
     InitThread();
-    sdfThreadWakeTick = 0;
-    sdfTrackedThreadHead = NULL;
-    sdfTrackedThreadSemaphore = sdfCreateSema(1, 1, 0);
+    sdfVblankFlag = 0;
+    sdfVblankThreadId = NULL;
+    sdfThreadSema = sdfCreateSema(1, 1, 0);
     threadId = CreateThreadSimple((void *)VblankThreadProc, D_0045E8A0, SDF_WAKE_WORKER_STACK_BYTES, SDF_WAKE_WORKER_PRIORITY);
-    sdfThreadWakeWorkerId = threadId;
+    sdfVblankSema = threadId;
     return _StartThread(threadId, 0);
 }
 
@@ -127,9 +127,9 @@ SdfChipCell *sdfChipAllocPageGrow(SdfChipClass *sizeClass, SdfChipPage *page) {
 }
 
 SdfChipCell *sdfChipAllocNewPage(SdfChipClass *sizeClass) {
-    SdfChipPage *page = sdfFreeChipPages;
+    SdfChipPage *page = sdfChipPageFreeLink;
 
-    sdfFreeChipPages = page->next;
+    sdfChipPageFreeLink = page->next;
     page->usedCells = 0;
     page->allocate = sdfChipAllocPageGrow;
     sizeClass->currentPage = page;
@@ -150,7 +150,7 @@ void *sdfChipAllocDirect(s32 size) {
         EE_MMI_PLZCW(sizeClassIndex, size - 1);
         sizeClassIndex = 27 - (sizeClassIndex & 0xFF);
     }
-    sizeClass = &sdfChipClassTable.classes[sizeClassIndex];
+    sizeClass = &sdfChipCB.classes[sizeClassIndex];
     interruptsDisabled = DIntr();
     if (sizeClass->currentPage == NULL) {
         result = sdfChipAllocNewPage(sizeClass);

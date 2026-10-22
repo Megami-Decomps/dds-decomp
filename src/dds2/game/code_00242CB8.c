@@ -22,9 +22,9 @@ extern s32 scrGetIntPara(s32 idx);
 
 
 
-extern f32 evtSolarOverlayAlpha;
+extern f32 gMoonCnt;
 
-extern u32 kwlnDrawControlFlags;
+extern u32 dds3DrawFlag;
 
 
 
@@ -308,11 +308,11 @@ u32 evtOpcodeInitializeEffectSoundChannel(void) {
 
 u32 evtCommandSetDrawFlagWhileWaiting(void) {
     if (scrGetIntPara(0) <= 0) {
-        kwlnDrawControlFlags |= 0x2000000;
+        dds3DrawFlag |= 0x2000000;
         return 1;
     }
     if ((s32)scrGetCommandTimer() < scrGetIntPara(0)) {
-        kwlnDrawControlFlags |= 0x2000000;
+        dds3DrawFlag |= 0x2000000;
         return 0;
     }
     return 1;
@@ -321,19 +321,19 @@ u32 evtCommandSetDrawFlagWhileWaiting(void) {
 
 
 void evtClearSolarOverlayControl(void) {
-    datGameState->world.overlayFlag = 0;
+    DDS3_GBWK->world.overlayFlag = 0;
 }
 
 /* Reset the field-transition expiry counter at world offset 0xA4C. */
 void evtResetFieldTransitionCounter(void) {
-    datGameState->world.fieldTransitionCycleCount = 0;
+    DDS3_GBWK->world.fieldTransitionCycleCount = 0;
 }
 
 /* Fold phases 9-15 back toward zero for the symmetric solar animation. */
 s32 evtGetMirroredSolarPhase(void) {
     s32 phase;
 
-    phase = datGameState->world.phase;
+    phase = DDS3_GBWK->world.phase;
     if (phase >= 9) {
         phase = 8 - (phase & 7);
     }
@@ -341,39 +341,39 @@ s32 evtGetMirroredSolarPhase(void) {
 }
 
 s32 evtGetAgeOfMoon16(void) {
-    return datGameState->world.phase;
+    return DDS3_GBWK->world.phase;
 }
 
 void evtSetAgeOfMoon(s32 phase) {
-    datGameState->world.phase = phase & 0xf;
-    datGameState->world.phaseTimer = 0;
+    DDS3_GBWK->world.phase = phase & 0xf;
+    DDS3_GBWK->world.phaseTimer = 0;
 }
 
 void evtEnableMoonCalc(void) {
-    datGameState->world.flags = datGameState->world.flags | 1;
+    DDS3_GBWK->world.flags = DDS3_GBWK->world.flags | 1;
 }
 
 void evtDisableMoonCalc(void) {
-    datGameState->world.flags = datGameState->world.flags & 0xfe;
+    DDS3_GBWK->world.flags = DDS3_GBWK->world.flags & 0xfe;
 }
 
 void evtSetSolarOverlayFullyVisible(void) {
-    datGameState->world.flags = datGameState->world.flags | 2;
-    evtSolarOverlayAlpha = 1.0f;
+    DDS3_GBWK->world.flags = DDS3_GBWK->world.flags | 2;
+    gMoonCnt = 1.0f;
     evtBeginSolarOverlayFadeIn(0);
 }
 
 void evtDisableMoonDraw(void) {
-    datGameState->world.flags = datGameState->world.flags & 0xfd;
-    evtSolarOverlayAlpha = 0.0f;
+    DDS3_GBWK->world.flags = DDS3_GBWK->world.flags & 0xfd;
+    gMoonCnt = 0.0f;
 }
 
 void evtEnableMoonDraw2(void) {
-    datGameState->world.flags = datGameState->world.flags | 2;
+    DDS3_GBWK->world.flags = DDS3_GBWK->world.flags | 2;
 }
 
 void evtDisableMoonDraw2(void) {
-    datGameState->world.flags = datGameState->world.flags & 0xfd;
+    DDS3_GBWK->world.flags = DDS3_GBWK->world.flags & 0xfd;
 }
 
 s32 evtUpdateSolarOverlayFade(KwlnTask *task) {
@@ -387,15 +387,15 @@ s32 evtUpdateSolarOverlayFade(KwlnTask *task) {
         return 0;
     }
     overlay = (SolarOverlayWork *)dds3GetProcessData(task);
-    state = &datGameState->world;
-    alpha = evtSolarOverlayAlpha;
+    state = &DDS3_GBWK->world;
+    alpha = gMoonCnt;
     if ((state->flags & 2) != 0) {
         if (alpha < 1.0f) {
             alpha += 0.1f;
             if (alpha > 1.0f) {
                 alpha = 1.0f;
             }
-            evtSolarOverlayAlpha = alpha;
+            gMoonCnt = alpha;
         }
     } else {
         if (alpha > f) {
@@ -403,11 +403,11 @@ s32 evtUpdateSolarOverlayFade(KwlnTask *task) {
             if (alpha < f) {
                 alpha = f;
             }
-            evtSolarOverlayAlpha = alpha;
+            gMoonCnt = alpha;
         }
     }
     /* Two jal sites in retail: the DDS1 twin issues extra draw calls in the first arm, removed here. The flags are re-read from the global; the cached state copy does not match. */
-    if ((datGameState->world.flags & 2) != 0) {
+    if ((DDS3_GBWK->world.flags & 2) != 0) {
         evtAdvanceSolarOverlayFadeAndDraw(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
     } else if (alpha > 0.0f) {
         evtAdvanceSolarOverlayFadeAndDraw(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
@@ -423,38 +423,38 @@ extern void fldLightMaClearMsg(void);
 
 /* Advance the enabled solar clock and expire its associated field controls. */
 void evtAdvanceSolarClockAndExpireControls(f32 travelDistance) {
-    if (datGameState->world.flags & 1) {
-        datGameState->world.phaseTimer += travelDistance;
-        if (datGameState->world.phaseTimer > 4500.0f) {
-            datGameState->world.phaseTimer = 0;
-            evtSetAgeOfMoon((datGameState->world.phase + 1) & 0xF);
+    if (DDS3_GBWK->world.flags & 1) {
+        DDS3_GBWK->world.phaseTimer += travelDistance;
+        if (DDS3_GBWK->world.phaseTimer > 4500.0f) {
+            DDS3_GBWK->world.phaseTimer = 0;
+            evtSetAgeOfMoon((DDS3_GBWK->world.phase + 1) & 0xF);
             D_004371FC = 30;
             if (evtGetMirroredSolarPhase() == 0) {
                 fldEsutoMaClearMsg();
                 fldRiberaMaClearMsg();
             }
-            if (datGameState->world.fieldFlags & 4) {
-                datGameState->world.fieldTransitionCycleCount++;
-                if (datGameState->world.fieldTransitionCycleCount >= 6U) {
+            if (DDS3_GBWK->world.fieldFlags & 4) {
+                DDS3_GBWK->world.fieldTransitionCycleCount++;
+                if (DDS3_GBWK->world.fieldTransitionCycleCount >= 6U) {
                     fldRifutoMaClearMsg();
-                    datGameState->world.fieldTransitionCycleCount = 0;
+                    DDS3_GBWK->world.fieldTransitionCycleCount = 0;
                 }
             }
-            if (datGameState->world.fieldFlags & 8) {
-                datGameState->world.overlayFlag++;
-                if (datGameState->world.overlayFlag >= 6) {
+            if (DDS3_GBWK->world.fieldFlags & 8) {
+                DDS3_GBWK->world.overlayFlag++;
+                if (DDS3_GBWK->world.overlayFlag >= 6) {
                     fldLightMaClearMsg();
-                    datGameState->world.overlayFlag = 0;
+                    DDS3_GBWK->world.overlayFlag = 0;
                 }
             }
             if (evtBitCheck(0x802)) {
-                datGameState->world.secondaryPhase++;
-                if (datGameState->world.secondaryPhase >= 81) {
+                DDS3_GBWK->world.secondaryPhase++;
+                if (DDS3_GBWK->world.secondaryPhase >= 81) {
                     evtBitOff(0x802);
-                    datGameState->world.secondaryPhase = 0;
+                    DDS3_GBWK->world.secondaryPhase = 0;
                 }
             }
-            datGameState->world.specialEncounterAttemptCount = 0;
+            DDS3_GBWK->world.specialEncounterAttemptCount = 0;
         }
     }
 }
@@ -477,34 +477,34 @@ void evtFreeSolarOverlayWork(KwlnTask *task) {
     overlay = (SolarOverlayWork *)dds3GetProcessData(task);
     evtReleaseSolarNoiseSprite(&overlay->noiseSprite);
     sdfChipFreeDirect(overlay);
-    evtSolarOverlayTask = 0;
+    moonprocess_id = 0;
 }
 
 /* One scheduler task owns the overlay; a second start leaves its state intact. */
 void evtEnsureSolarOverlayTaskAndResetPhase(void) {
-    if (evtSolarOverlayTask != 0) {
+    if (moonprocess_id != 0) {
         return;
     }
-    evtSolarOverlayTask = dds3StartProcess(D_00437208, 0x2B0B, 1, 1, evtCreateSolarOverlayWork, evtFreeSolarOverlayWork, 0);
+    moonprocess_id = dds3StartProcess(D_00437208, 0x2B0B, 1, 1, evtCreateSolarOverlayWork, evtFreeSolarOverlayWork, 0);
     evtEnableMoonCalc();
     evtDisableMoonDraw();
     evtSetAgeOfMoon(0);
-    datGameState->world.secondaryPhase = 0;
-    datGameState->world.overlayFlag = 0;
-    datGameState->world.fieldTransitionCycleCount = 0;
+    DDS3_GBWK->world.secondaryPhase = 0;
+    DDS3_GBWK->world.overlayFlag = 0;
+    DDS3_GBWK->world.fieldTransitionCycleCount = 0;
 }
 
 void evtStopSolarOverlay(void) {
-    if (evtSolarOverlayTask != 0) {
-        dds3KillProcess(evtSolarOverlayTask, 1);
+    if (moonprocess_id != 0) {
+        dds3KillProcess(moonprocess_id, 1);
     }
 }
 
-INCLUDE_SDATA(const s32, "game/code_00242CB8", evtSolarOverlayAlpha);
+INCLUDE_SDATA(const s32, "game/code_00242CB8", gMoonCnt);
 
 INCLUDE_SDATA(const s32, "game/code_00242CB8", D_004371FC);
 
-INCLUDE_SDATA(const s32, "game/code_00242CB8", evtSolarOverlayTask);
+INCLUDE_SDATA(const s32, "game/code_00242CB8", moonprocess_id);
 
 INCLUDE_SDATA(const s32, "game/code_00242CB8", D_00437208);
 

@@ -43,7 +43,7 @@ typedef struct {
 /* Constructor, update and destructor operations share one 0xC-byte entry,
  * selected by the emitter's 16-bit dispatch index at +0x140. */
 
-extern ParDispatch parKindConstructorEntries[];
+extern ParDispatch dds3ParticleFuncTable[];
 /* Restart callbacks: each takes the object, which retail leaves in a0. */
 extern void (*D_0034E2F0[])(ParObj *);
 
@@ -519,8 +519,8 @@ void dds3Particle_BlurClearItem(ParTable *table, s32 slotIndex) {
     table->slots[slotIndex].pointCount = 0;
 }
 
-extern f32 parSharedViewDelta[];
-extern f32 parSharedCrossScale[];
+extern f32 parLook[];
+extern f32 parTrack_w[];
 extern void dds3TrackPolyColorSet(ParSystem *system, s32 index, u32 color);
 
 /* Rebuild one slot's two-vertex strip cells from its point history: each cell is
@@ -559,10 +559,10 @@ void dds3Particle_TrackSetExp(ParSystem *system, s32 index, const f32 *origin, u
             VU0_LOAD_VF(vf12, point);
             VU0_MOVE_VF(vf11, vf12);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_LOAD_VF(vf11, parSharedViewDelta);
+            VU0_LOAD_VF(vf11, parLook);
             VU0_CROSS_XYZ(vf10, vf10, vf11);
             VU0_NORMALIZE_VF10();
-            VU0_LOAD_VF(vf11, parSharedCrossScale);
+            VU0_LOAD_VF(vf11, parTrack_w);
             VU0_MUL(vf10, vf10, vf11);
             VU0_MOVE_VF(vf2, vf10);
             VU0_MOVE_VF(vf10, vf12);
@@ -616,10 +616,10 @@ void dds3Particle_Track2SetExp(ParSystem *system, s32 index, const f32 *origin, 
             VU0_LOAD_VF(vf12, point);
             VU0_MOVE_VF(vf11, vf12);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_LOAD_VF(vf11, parSharedViewDelta);
+            VU0_LOAD_VF(vf11, parLook);
             VU0_CROSS_XYZ(vf10, vf10, vf11);
             VU0_NORMALIZE_VF10();
-            VU0_LOAD_VF(vf11, parSharedCrossScale);
+            VU0_LOAD_VF(vf11, parTrack_w);
             VU0_MUL(vf10, vf10, vf11);
             VU0_MOVE_VF(vf2, vf10);
             VU0_MOVE_VF(vf10, vf12);
@@ -660,13 +660,13 @@ u32 dds3ParticleColorBlend(u32 colorA, u32 colorB) {
 void dds3ParticleCreate(s32 dispatchIndex, void *creationData) {
     ParObj *createdObject;
 
-    createdObject = parKindConstructorEntries[dispatchIndex].func(creationData);
+    createdObject = dds3ParticleFuncTable[dispatchIndex].func(creationData);
     createdObject->dispatchIndex = dispatchIndex;
 }
 
 /* Invoke the selected destructor with the existing empty argument list. */
 void dds3ParticleDelete(ParObj *obj) {
-    parKindConstructorEntries[obj->dispatchIndex].destroy(obj);
+    dds3ParticleFuncTable[obj->dispatchIndex].destroy(obj);
 }
 
 /* Draw live particles after applying the requested number of emitter updates. */
@@ -681,10 +681,10 @@ void dds3ParticleDraw(ParObj *effect) {
         return;
     }
     if (effect->pendingRestartSteps == 0) {
-        parKindConstructorEntries[effect->dispatchIndex].update(effect);
+        dds3ParticleFuncTable[effect->dispatchIndex].update(effect);
     } else {
         for (step = 0; step < effect->pendingRestartSteps; step++) {
-            parKindConstructorEntries[effect->dispatchIndex].update(effect);
+            dds3ParticleFuncTable[effect->dispatchIndex].update(effect);
         }
         effect->pendingRestartSteps = 0;
     }
@@ -714,7 +714,7 @@ void dds3ParticleDraw(ParObj *effect) {
 ParObj *dds3ParticleCopy(ParObj *obj) {
     ParObj *createdObject;
 
-    createdObject = parKindConstructorEntries[obj->dispatchIndex].func(obj);
+    createdObject = dds3ParticleFuncTable[obj->dispatchIndex].func(obj);
     createdObject->dispatchIndex = obj->dispatchIndex;
     return createdObject;
 }

@@ -31,7 +31,7 @@
 
 extern ParSystem *D_003BB014;
 
-extern ParReleaseRecord *parRecordListHead;
+extern ParReleaseRecord *hDrawListTop;
 
 
 
@@ -40,7 +40,7 @@ struct SdfListHead;
 extern void *effPkt3DPrimMakePoly(EffPacketParams *);
 
 
-extern ParDispatch parKindConstructorEntries[];
+extern ParDispatch dds3ParticleFuncTable[];
 
 
 
@@ -73,9 +73,9 @@ extern void dds3TrackPolySet2(ParSystem *, s32, const u128 *);
 
 
 
-extern f32 parSharedViewDelta[];
+extern f32 parLook[];
 
-extern f32 parSharedCrossScale[];
+extern f32 parTrack_w[];
 
 extern f32 D_0034E590[];
 
@@ -85,7 +85,7 @@ extern f32 D_0034E5C0[];
 
 extern f32 D_0034E5D0[];
 
-extern u8 sdfViewEyeVector[];
+extern u8 aViewTarget[];
 
 extern u8 sdfViewTargetVector[];
 
@@ -147,21 +147,21 @@ ParObj *dds3ParticleExpCreate(s32 kind, ParKindResource *resource) {
 
     if (resource->type != 3 || resource->offset != 0) {
         object->billboardCloneMarker = PAR_BILLBOARD_CLONE_FROM_RESOURCE;
-        object = parKindConstructorEntries[kind].func(object);
+        object = dds3ParticleFuncTable[kind].func(object);
         billboard = dds3BillboardCreate(resource->type, (u32)(resource + 1));
         dds3BillboardSetScale(billboard, object->billboardScale, object->billboardScaleY);
         dds3BillboardSetMode(billboard, object->billboardMode);
         dds3BillboardSetAnimColorAdvMode(billboard);
         object->billboard = billboard;
     } else {
-        object = parKindConstructorEntries[kind].func(object);
+        object = dds3ParticleFuncTable[kind].func(object);
     }
     object->dispatchIndex = kind;
     return object;
 }
 
 ParObj *dds3ParticleExpCopy(ParObj *source) {
-    ParObj *particle = parKindConstructorEntries[source->dispatchIndex].func(source);
+    ParObj *particle = dds3ParticleFuncTable[source->dispatchIndex].func(source);
     particle->dispatchIndex = source->dispatchIndex;
     if (source->billboardCloneMarker == PAR_BILLBOARD_CLONE_FROM_RESOURCE) {
         BillObj *billboard = dds3BillboardCopy(source->billboard);
@@ -174,7 +174,7 @@ ParObj *dds3ParticleExpCopy(ParObj *source) {
 }
 
 void dds3ParticleExpDelete(ParObj *object) {
-    parKindConstructorEntries[object->dispatchIndex].destroy(object);
+    dds3ParticleFuncTable[object->dispatchIndex].destroy(object);
 }
 
 extern void dds3BillboardDraw(BillObj *);
@@ -195,10 +195,10 @@ void dds3ParticleExpDraw(ParObj *effect) {
         return;
     }
     if (effect->pendingRestartSteps == 0) {
-        parKindConstructorEntries[effect->dispatchIndex].update(effect);
+        dds3ParticleFuncTable[effect->dispatchIndex].update(effect);
     } else {
         for (step = 0; step < effect->pendingRestartSteps; step++) {
-            parKindConstructorEntries[effect->dispatchIndex].update(effect);
+            dds3ParticleFuncTable[effect->dispatchIndex].update(effect);
         }
         particleCount = effect->particleCount;
         scaleStep = (effect->scaleEnd - effect->billboardScale) / effect->lifetimeFrames;
@@ -305,23 +305,23 @@ void dds3Particle_EffectInit(ParKindState *obj) {
         return;
     case PAR_KIND_STATE_BILLBOARD_CROSS_STRIP:
         scale = obj->payload.crossStrip.scale;
-        parSharedCrossScale[0] = parSharedCrossScale[1] = parSharedCrossScale[2] = scale;
+        parTrack_w[0] = parTrack_w[1] = parTrack_w[2] = scale;
         break;
     case PAR_KIND_STATE_BILLBOARD_CROSS_TRIANGLE:
         scale = obj->payload.crossTriangle.scale;
-        parSharedCrossScale[0] = parSharedCrossScale[1] = parSharedCrossScale[2] = scale;
+        parTrack_w[0] = parTrack_w[1] = parTrack_w[2] = scale;
         break;
     case PAR_KIND_STATE_TRACK_POLYGON_CROSS_AXES:
         scale = obj->payload.trackPolygon.scale;
-        parSharedCrossScale[0] = parSharedCrossScale[1] = parSharedCrossScale[2] = scale;
+        parTrack_w[0] = parTrack_w[1] = parTrack_w[2] = scale;
         break;
     default:
         return;
     }
-    VU0_LOAD_VF($vf10, sdfViewEyeVector);
+    VU0_LOAD_VF($vf10, aViewTarget);
     VU0_LOAD_VF($vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_STORE_VF($vf10, parSharedViewDelta);
+    VU0_STORE_VF($vf10, parLook);
 }
 
 
@@ -372,10 +372,10 @@ void dds3Particle_TrackSet(s32 particle, s32 index, u32 color) {
     u128 axis[2];
     VU0_MOVE_VF(vf11, vf12);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, parSharedViewDelta);
+    VU0_LOAD_VF(vf11, parLook);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
-    VU0_LOAD_VF(vf11, parSharedCrossScale);
+    VU0_LOAD_VF(vf11, parTrack_w);
     VU0_MUL(vf10, vf10, vf11);
     VU0_MOVE_VF(vf2, vf10);
     VU0_MOVE_VF(vf10, vf12);
@@ -399,10 +399,10 @@ void dds3Particle_Track2Set(s32 particle, s32 index, u32 color) {
     u128 axis[3];
     VU0_MOVE_VF(vf11, vf12);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, parSharedViewDelta);
+    VU0_LOAD_VF(vf11, parLook);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
-    VU0_LOAD_VF(vf11, parSharedCrossScale);
+    VU0_LOAD_VF(vf11, parTrack_w);
     VU0_MUL(vf10, vf10, vf11);
     VU0_MOVE_VF(vf2, vf10);
     VU0_MOVE_VF(vf10, vf12);
@@ -423,10 +423,10 @@ void dds3Particle_Track3Set(EffTrackPolyList *list, s32 index, u32 color) {
     u128 axis[2];
     VU0_MOVE_VF(vf11, vf12);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, parSharedViewDelta);
+    VU0_LOAD_VF(vf11, parLook);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
-    VU0_LOAD_VF(vf11, parSharedCrossScale);
+    VU0_LOAD_VF(vf11, parTrack_w);
     VU0_MUL(vf10, vf10, vf11);
     VU0_MOVE_VF(vf2, vf10);
     VU0_MOVE_VF(vf10, vf12);
@@ -446,7 +446,7 @@ u32 dds3Particle_TrackPolyGetRecTiming(void) {
 }
 
 void dds3PolygonManagerInit(void) {
-    parRecordListHead = 0;
+    hDrawListTop = 0;
     dds3TrackPolyInit();
     sdfRandomizeByTime((EffRandState *)&D_003D64B0);
 }
@@ -506,11 +506,11 @@ void dds3PolygonDelete(ParReleaseRecord *record) {
 }
 
 void dds3PolygonDraw(ParReleaseRecord *node) {
-    node->next = parRecordListHead;
-    parRecordListHead = node;
+    node->next = hDrawListTop;
+    hDrawListTop = node;
 }
 
-extern SdfPoolNode kwlnDrawSurfaces[0x62];
+extern SdfPoolNode sdfGrOtTable[0x62];
 
 static inline void parAppendDrawSurfacePool(SdfPoolNode *pool, SdfListHead *packet) {
     pool->append(pool, packet);
@@ -522,9 +522,9 @@ void dds3PolygonLinkOt(void) {
     s32 remaining;
     s16 flags;
     SdfPoolNode *priorityPool;
-    record = parRecordListHead;
+    record = hDrawListTop;
     if (record != NULL) {
-        priorityPool = &kwlnDrawSurfaces[51];
+        priorityPool = &sdfGrOtTable[51];
         do {
             if (record->drawCount != 0 && record->flags != 1) {
                 packet = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
@@ -554,13 +554,13 @@ void dds3PolygonLinkOt(void) {
                 }
                 record->drawCount = 0;
                 if (flags & 0x10) parAppendDrawSurfacePool(priorityPool, packet);
-                else if (flags & 0x20) parAppendDrawSurfacePool(&kwlnDrawSurfaces[55], packet);
-                else parAppendDrawSurfacePool(&kwlnDrawSurfaces[39], packet);
+                else if (flags & 0x20) parAppendDrawSurfacePool(&sdfGrOtTable[55], packet);
+                else parAppendDrawSurfacePool(&sdfGrOtTable[39], packet);
             }
             record = record->next;
         } while (record != NULL);
     }
-    parRecordListHead = NULL;
+    hDrawListTop = NULL;
 }
 
 /* Replace the record asset's primary texture and dirty its draw state. */
@@ -1693,7 +1693,7 @@ void dds3TrackPolyLinkOt(void) {
         packet[4] = 0x8000000026ULL;
         packet[5] = 0x42;
         sdfDrawTagLink(specialList, (u32)packet);
-        parAppendDrawSurfacePool(&kwlnDrawSurfaces[56], specialList);
+        parAppendDrawSurfacePool(&sdfGrOtTable[56], specialList);
         packet = (u64 *)sdfGrAllocPacketBuff(0x30);
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
@@ -1702,7 +1702,7 @@ void dds3TrackPolyLinkOt(void) {
         packet[4] = 0x42;
         packet[5] = 0x42;
         sdfDrawTagLink(lists[4], (u32)packet);
-        parAppendDrawSurfacePool(&kwlnDrawSurfaces[56], lists[4]);
+        parAppendDrawSurfacePool(&sdfGrOtTable[56], lists[4]);
     }
     D_003BB014 = NULL;
 }
@@ -1778,7 +1778,7 @@ ParEmitDesc *dds3SpPoly_Ring_Old_Create(ParEmitDesc *src) {
     return desc;
 }
 
-INCLUDE_SDATA(const s32, "game/code_0015A758", parRecordListHead);
+INCLUDE_SDATA(const s32, "game/code_0015A758", hDrawListTop);
 
 INCLUDE_SDATA(const s32, "game/code_0015A758", D_003BB014);
 

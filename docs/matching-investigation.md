@@ -104,7 +104,7 @@ The NOBITS checker removes only the validated aliases from object-boundary
 inference, checks each alias lies inside its primary extent, and still requires
 the exact section span and complete source `STT_OBJECT` inventory. Allocating
 another C object for an alias remains an error. The paired `ItfMesGlobals` banks
-are each one 0x520-byte object; `itfWindowSlots` aliases the first node's state
+are each one 0x520-byte object; `pinst` aliases the first node's state
 word at +0x2C. Real-field offset guards validate the other mixed-code aliases.
 These BSS storage extents are distinct from initialized retail bytes.
 

@@ -5,7 +5,7 @@
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "kwln_task_lifecycle.h"
-extern KwlnTask *fldInputPanelTaskHandle;
+extern KwlnTask *inputpanel_id;
 
 
 
@@ -15,23 +15,23 @@ void fldInputPanelShutdown(KwlnTask *panelTask) {
 
     panelChipBlock = (void *)dds3GetProcessData(panelTask);
     sdfChipFreeDirect(panelChipBlock);
-    fldInputPanelTaskHandle = 0;
+    inputpanel_id = 0;
 }
 
 void fldInitInputPanel(void) {
-    fldInputPanelTaskHandle = dds3StartProcess("inputpanel", 0x2B0B, 1, 1, fldInputPanelProcess1, fldInputPanelShutdown, 0);
+    inputpanel_id = dds3StartProcess("inputpanel", 0x2B0B, 1, 1, fldInputPanelProcess1, fldInputPanelShutdown, 0);
 }
 
 void fldFreeInputPanel(void) {
-    if (fldInputPanelTaskHandle != 0) {
-        dds3KillProcess(fldInputPanelTaskHandle, 1);
+    if (inputpanel_id != 0) {
+        dds3KillProcess(inputpanel_id, 1);
     }
 }
 
 FldTitleBannerMenu *fldInputPanelSetDraw(s32 isPending) {
     FldTitleBannerMenu *menu;
 
-    menu = (FldTitleBannerMenu *)dds3GetProcessData(fldInputPanelTaskHandle);
+    menu = (FldTitleBannerMenu *)dds3GetProcessData(inputpanel_id);
     menu->pending = isPending;
     return menu;
 }
@@ -39,10 +39,10 @@ FldTitleBannerMenu *fldInputPanelSetDraw(s32 isPending) {
 FldTitleBannerMenu *fldInputPanelSetMessage(s32 choice) {
     FldTitleBannerMenu *menu;
 
-    menu = (FldTitleBannerMenu *)dds3GetProcessData(fldInputPanelTaskHandle);
+    menu = (FldTitleBannerMenu *)dds3GetProcessData(inputpanel_id);
     menu->choice = choice;
     return menu;
 }
 
-INCLUDE_SDATA(const s32, "field/fldPanel", fldInputPanelTaskHandle);
+INCLUDE_SDATA(const s32, "field/fldPanel", inputpanel_id);
 

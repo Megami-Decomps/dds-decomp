@@ -69,11 +69,11 @@
 extern SdfSubParam *sdfMatAllocTexUvwParm(void);
 
 extern u32 sdfForcedAssetTextureMode;
-extern f32 sdf3DSoften;
-extern f32 sdf3DBias;
-extern SdfPendingRequest sdfResourceReleaseQueue;
-extern SdfPendingRequest sdfAssetReleaseQueue;
-extern s32 sdfLiveAssetCount;
+extern f32 sdfFaceDivSoften;
+extern f32 sdfFaceDivBias;
+extern SdfPendingRequest sdfMatDelayedResrcCB;
+extern SdfPendingRequest sdfMatDelayedResrcCB2;
+extern s32 sdfMatAllocCount;
 
 
 
@@ -95,7 +95,7 @@ extern u16 D_00398198[];
 extern SdfTex *sdfTexClone(SdfTex *);
 extern void sdfTexBlendPaletteToTintedIntensityVU(SdfTex *, s32, f32);
 
-extern vu8 sdfCurrentBufferIndex;
+extern vu8 sdfFrameId;
 extern void sdfMatListCopyStat(DevRequest *, DevRequest *);
 
 
@@ -115,7 +115,7 @@ void sdfModelCopyStat(SdfModel *destination, SdfModel *source) {
     VU0_STORE_MATRIX(destination->matrix);
     PCP_COPY_VECTOR(destination->rotationQuaternion, source->rotationQuaternion);
     PCP_COPY_VECTOR(destination->scaleVector, source->scaleVector);
-    buffer = (s8)sdfCurrentBufferIndex;
+    buffer = (s8)sdfFrameId;
     destination->lighting = source->lighting;
     destination->scalarOverrideFirst = source->scalarOverrideFirst;
     destination->secondaryLighting = source->secondaryLighting;
@@ -366,7 +366,7 @@ f32 sdfModelGetFaceDivSoften(SdfModel *model) {
     if ((model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) != 0) {
         return model->scalarOverrideFirst;
     }
-    return sdf3DSoften;
+    return sdfFaceDivSoften;
 }
 
 /* Return the second override value when selected, otherwise its shared default. */
@@ -374,7 +374,7 @@ f32 sdfModelGetFaceDivBias(SdfModel *model) {
     if ((model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) != 0) {
         return model->scalarOverrideSecond;
     }
-    return sdf3DBias;
+    return sdfFaceDivBias;
 }
 
 /* Set the native mode word; its consumers distinguish mode one from other values. */
@@ -463,8 +463,8 @@ void sdfTexListSetClutColor(DevRequest *list, s32 tint, f32 amount) {
 }
 
 void sdfMatInitSystem(void) {
-    sdfDelayedResrcInitCB(&sdfResourceReleaseQueue, sdfMatListFree);
-    sdfDelayedResrcInitCB(&sdfAssetReleaseQueue, sdfMatFree);
+    sdfDelayedResrcInitCB(&sdfMatDelayedResrcCB, sdfMatListFree);
+    sdfDelayedResrcInitCB(&sdfMatDelayedResrcCB2, sdfMatFree);
 }
 
 DevRequest *sdfMatListNew(s32 capacity) {
@@ -486,7 +486,7 @@ void sdfMatListFreeResrc(void *resource, s32 retained) {
         return;
     }
     if (retained != 0) {
-        sdfDelayedResrcEntry(&sdfResourceReleaseQueue, resource);
+        sdfDelayedResrcEntry(&sdfMatDelayedResrcCB, resource);
     } else {
         sdfItemArrayFree(resource);
     }
@@ -649,7 +649,7 @@ SdfAsset *sdfMatNew(void) {
     u32 *entryWords;
     s32 entryIndex;
 
-    sdfLiveAssetCount++;
+    sdfMatAllocCount++;
     asset = sdfAllocAndClearQuadwords(sizeof(SdfAsset));
     asset->dirtyFlags = SDF_ASSET_ALL_STATE_DIRTY;
     for (entryIndex = 0; entryIndex != SDF_ASSET_ENTRY_COUNT; entryIndex++) {
@@ -735,7 +735,7 @@ void sdfMatFree(SdfAsset *asset) {
     if (asset == NULL) {
         return;
     }
-    sdfLiveAssetCount--;
+    sdfMatAllocCount--;
     sdfChipFreeDirect(asset->drawEntries[0]);
     sdfChipFreeDirect(asset->drawEntries[1]);
     sdfChipFreeDirect(asset->primarySubParam);
@@ -746,7 +746,7 @@ void sdfMatFree(SdfAsset *asset) {
 /* Queue the non-null asset address for deferred release. */
 void sdfMatFreeDelayed(SdfAsset *asset) {
     if (asset != NULL) {
-        sdfDelayedResrcEntry(&sdfAssetReleaseQueue, asset);
+        sdfDelayedResrcEntry(&sdfMatDelayedResrcCB2, asset);
     }
 }
 
@@ -978,7 +978,7 @@ void *sdfMotionNodeNew(Motion *motion, u32 commandWord, s32 targetIndex) {
     return (void *)D_003981A8[commandWord >> 16]((u32)motion, commandWord, targetIndex);
 }
 
-INCLUDE_SDATA(const s32, "game/code_002D9748", sdfLiveAssetCount);
+INCLUDE_SDATA(const s32, "game/code_002D9748", sdfMatAllocCount);
 
 INCLUDE_SDATA(const s32, "game/code_002D9748", sdfForcedAssetTextureMode);
 

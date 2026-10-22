@@ -47,9 +47,9 @@ extern u32 fldCameraColorEnabled;
 
 extern SdfTex *fldRainTextureReference;
 
-extern u32 fldAuxRecordBuffer;
+extern u32 fldItemBoxObjBuf;
 
-extern FldValueRecord *fldValueRecords;
+extern FldValueRecord *fldMatterTable;
 
 extern u32 fldAuxRecordResource;
 
@@ -143,12 +143,12 @@ void fldAllocPlaneTable(void) {
 
     fldValueRecordResource = (u32)allocation;
     storage = (void *)sdfMemLock(allocation);
-    fldValueRecords = storage;
+    fldMatterTable = storage;
     memset(storage, 0, FIELD_VALUE_RECORD_STORAGE_SIZE);
     allocation = sdfMemAllocDirect(FIELD_AUX_RECORD_STORAGE_SIZE);
     fldAuxRecordResource = (u32)allocation;
     storage = (void *)sdfMemLock(allocation);
-    fldAuxRecordBuffer = (u32)storage;
+    fldItemBoxObjBuf = (u32)storage;
     memset(storage, 0, FIELD_AUX_RECORD_STORAGE_SIZE);
 }
 
@@ -156,10 +156,10 @@ void fldAllocPlaneTable(void) {
 void fldFreeMatterTable(void) {
     sdfMemUnlock((struct SdfMemBlock *)fldValueRecordResource);
     sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldValueRecordResource);
-    fldValueRecords = NULL;
+    fldMatterTable = NULL;
     sdfMemUnlock((struct SdfMemBlock *)fldAuxRecordResource);
     sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldAuxRecordResource);
-    fldAuxRecordBuffer = 0;
+    fldItemBoxObjBuf = 0;
 }
 
 /* Dot product of XYZ only; any fourth vector component is ignored. */
@@ -214,7 +214,7 @@ struct EffWorldNode *fldFindMatterIndex(s32 id) {
     s32 index = 0;
 
     if (fldValueRecordCount > 0) {
-        FldValueRecord *record = fldValueRecords;
+        FldValueRecord *record = fldMatterTable;
         do {
             if (record->id == id) {
                 return record->worldNode;
@@ -231,8 +231,8 @@ void fldFindMatterIndexFrom(s32 id, struct EffWorldNode *worldNode) {
     s32 index;
 
     for (index = 0; index < fldValueRecordCount; index++) {
-        if (fldValueRecords[index].id == id) {
-            fldValueRecords[index].worldNode = worldNode;
+        if (fldMatterTable[index].id == id) {
+            fldMatterTable[index].worldNode = worldNode;
         }
     }
 }
@@ -240,15 +240,15 @@ void fldFindMatterIndexFrom(s32 id, struct EffWorldNode *worldNode) {
 void fldClrCollision(void) {
     s32 index;
     for (index = 0; index < fldValueRecordCount; index++) {
-        fldValueRecords[index].worldNode = 0;
+        fldMatterTable[index].worldNode = 0;
     }
     fldValueRecordCount = 0;
-    fldAreaState.unkA0 = -1;
-    fldAreaState.unkA4 = -1;
-    fldAreaState.unkAC = -1;
+    fldGlobalBase.unkA0 = -1;
+    fldGlobalBase.unkA4 = -1;
+    fldGlobalBase.unkAC = -1;
     D_00436188 = 0;
     D_0043617C = 0;
-    if (fldValueRecords != NULL) {
+    if (fldMatterTable != NULL) {
         fldFreeMatterTable();
     }
 }
@@ -284,7 +284,7 @@ void fldMakePlane(FldCollisionDescriptor *geometry, f32 *translation,
     f32 runningMinimum;
     s32 i;
     s32 component;
-    if (fldValueRecords == NULL) {
+    if (fldMatterTable == NULL) {
         fldAllocPlaneTable();
     }
     for (pass = 0; pass < 5; pass++) {
@@ -300,7 +300,7 @@ void fldMakePlane(FldCollisionDescriptor *geometry, f32 *translation,
             remaining = faceCount;
             for (; remaining != 0; remaining--, face++, trianglesRemaining--) {
                 u32 vertexIndex;
-                record = &fldValueRecords[fldValueRecordCount];
+                record = &fldMatterTable[fldValueRecordCount];
                 record->count = trianglesRemaining > 0 ? 3 : 4;
                 vertexIndex = face->vertexIndices[0];
                 vertices[0][0] = sourceVertices[vertexIndex][0] + translation[0];
@@ -943,16 +943,16 @@ void fldHitChkUnitElvOnly(f32 *input) {
     absoluteDelta[2] = ffabsf(input[2] - fldResolvedPosition[2]);
     margin = 45.0f;
     for (index = 0; index < fldValueRecordCount; index++) {
-        if (!(fldValueRecords[index].face->attributes & 0x80)) {
+        if (!(fldMatterTable[index].face->attributes & 0x80)) {
             continue;
         }
-        if (fldTestRoomSceneFlag(fldAreaState.area, fldAreaState.floor + 1,
-                                 fldValueRecords[index].sceneFlag)) {
+        if (fldTestRoomSceneFlag(fldGlobalBase.area, fldGlobalBase.floor + 1,
+                                 fldMatterTable[index].sceneFlag)) {
             continue;
         }
-        if (fldValueRecords[index].ownerIndex > 0) {
-            if (fldTestMapSlotAuxiliaryFlag(fldAreaState.area, fldAreaState.floor + 1,
-                                            fldValueRecords[index].ownerIndex)) {
+        if (fldMatterTable[index].ownerIndex > 0) {
+            if (fldTestMapSlotAuxiliaryFlag(fldGlobalBase.area, fldGlobalBase.floor + 1,
+                                            fldMatterTable[index].ownerIndex)) {
                 continue;
             }
         }
@@ -962,8 +962,8 @@ void fldHitChkUnitElvOnly(f32 *input) {
         savedPrevious[0] = previous[0];
         savedPrevious[1] = previous[1];
         savedPrevious[2] = previous[2];
-        if (fldValueRecords[index].worldNode != 0) {
-            transform = fldValueRecords[index].worldNode->inner;
+        if (fldMatterTable[index].worldNode != 0) {
+            transform = fldMatterTable[index].worldNode->inner;
             relative = 1;
             position[0] -= transform->position[0];
             position[1] -= transform->position[1];
@@ -974,30 +974,30 @@ void fldHitChkUnitElvOnly(f32 *input) {
         } else {
             relative = 0;
         }
-        distance = fldVecDot(position, fldValueRecords[index].normal);
-        distance -= fldValueRecords[index].planeConstant;
+        distance = fldVecDot(position, fldMatterTable[index].normal);
+        distance -= fldMatterTable[index].planeConstant;
         if (ffabsf(distance) < margin) {
-            record = &fldValueRecords[index];
+            record = &fldMatterTable[index];
             HitPositionInside2(&clearance, record->mode, record->count, 45.0f, position, record);
             inside = clearance < 0.0f ? 0 : 1;
             if (inside == 1) {
-                if (fldValueRecords[index].worldNode != 0) {
-                    if (fldAreaState.unk90 == -1 ||
-                        fldValueRecords[fldAreaState.unk90].worldNode->key ==
-                            fldValueRecords[index].worldNode->key) {
-                        fldAreaState.unk90 = index;
+                if (fldMatterTable[index].worldNode != 0) {
+                    if (fldGlobalBase.unk90 == -1 ||
+                        fldMatterTable[fldGlobalBase.unk90].worldNode->key ==
+                            fldMatterTable[index].worldNode->key) {
+                        fldGlobalBase.unk90 = index;
                     } else {
-                        fldAreaState.unk94 = index;
+                        fldGlobalBase.unk94 = index;
                     }
-                    anchor = fldValueRecords[index].worldNode->inner;
-                    fldValueRecords[index].previousPosition[0] = anchor->position[0];
-                    fldValueRecords[index].previousPosition[1] = anchor->position[1];
-                    fldValueRecords[index].previousPosition[2] = anchor->position[2];
+                    anchor = fldMatterTable[index].worldNode->inner;
+                    fldMatterTable[index].previousPosition[0] = anchor->position[0];
+                    fldMatterTable[index].previousPosition[1] = anchor->position[1];
+                    fldMatterTable[index].previousPosition[2] = anchor->position[2];
                 }
             }
         }
         if (relative) {
-            transform = fldValueRecords[index].worldNode->inner;
+            transform = fldMatterTable[index].worldNode->inner;
             position[0] += transform->position[0];
             position[1] += transform->position[1];
             position[2] += transform->position[2];
@@ -1018,39 +1018,39 @@ void fldHitChkUnitElv(f32 *position) {
 
     memset(movement, 0, sizeof(movement));
     movement[3] = 1.0f;
-    fldAreaState.positionPending = 0;
-    if (fldAreaState.unk90 == -1) {
+    fldGlobalBase.positionPending = 0;
+    if (fldGlobalBase.unk90 == -1) {
         fldHitChkUnitElvOnly(position);
     }
-    index = fldAreaState.unk90;
+    index = fldGlobalBase.unk90;
     if (index != -1) {
-        if (fldValueRecords[index].worldNode != 0) {
+        if (fldMatterTable[index].worldNode != 0) {
             ObjectTransform *transform;
 
-            transform = fldValueRecords[index].worldNode->inner;
-            movement[0] = transform->position[0] - fldValueRecords[index].previousPosition[0];
-            movement[1] = transform->position[1] - fldValueRecords[index].previousPosition[1];
-            movement[2] = transform->position[2] - fldValueRecords[index].previousPosition[2];
-            fldValueRecords[index].previousPosition[0] = transform->position[0];
-            fldValueRecords[index].previousPosition[1] = transform->position[1];
-            fldValueRecords[index].previousPosition[2] = transform->position[2];
+            transform = fldMatterTable[index].worldNode->inner;
+            movement[0] = transform->position[0] - fldMatterTable[index].previousPosition[0];
+            movement[1] = transform->position[1] - fldMatterTable[index].previousPosition[1];
+            movement[2] = transform->position[2] - fldMatterTable[index].previousPosition[2];
+            fldMatterTable[index].previousPosition[0] = transform->position[0];
+            fldMatterTable[index].previousPosition[1] = transform->position[1];
+            fldMatterTable[index].previousPosition[2] = transform->position[2];
         }
-        if (fldTestRoomSceneFlag(fldAreaState.area, fldAreaState.floor + 1,
-                               fldValueRecords[index].sceneFlag) == 0) {
-            index = fldAreaState.unk94;
-            if (index != -1 && fldTestRoomSceneFlag(fldAreaState.area,
-                        fldAreaState.floor + 1,
-                        fldValueRecords[index].sceneFlag) == 0) {
-                if (fldValueRecords[index].worldNode != 0) {
+        if (fldTestRoomSceneFlag(fldGlobalBase.area, fldGlobalBase.floor + 1,
+                               fldMatterTable[index].sceneFlag) == 0) {
+            index = fldGlobalBase.unk94;
+            if (index != -1 && fldTestRoomSceneFlag(fldGlobalBase.area,
+                        fldGlobalBase.floor + 1,
+                        fldMatterTable[index].sceneFlag) == 0) {
+                if (fldMatterTable[index].worldNode != 0) {
                     ObjectTransform *transform;
 
-                    transform = fldValueRecords[index].worldNode->inner;
-                    movement[0] += transform->position[0] - fldValueRecords[index].previousPosition[0];
-                    movement[1] += transform->position[1] - fldValueRecords[index].previousPosition[1];
-                    movement[2] += transform->position[2] - fldValueRecords[index].previousPosition[2];
-                    fldValueRecords[index].previousPosition[0] = transform->position[0];
-                    fldValueRecords[index].previousPosition[1] = transform->position[1];
-                    fldValueRecords[index].previousPosition[2] = transform->position[2];
+                    transform = fldMatterTable[index].worldNode->inner;
+                    movement[0] += transform->position[0] - fldMatterTable[index].previousPosition[0];
+                    movement[1] += transform->position[1] - fldMatterTable[index].previousPosition[1];
+                    movement[2] += transform->position[2] - fldMatterTable[index].previousPosition[2];
+                    fldMatterTable[index].previousPosition[0] = transform->position[0];
+                    fldMatterTable[index].previousPosition[1] = transform->position[1];
+                    fldMatterTable[index].previousPosition[2] = transform->position[2];
                 }
             }
             newPosition[0] = position[0] + movement[0];
@@ -1059,10 +1059,10 @@ void fldHitChkUnitElv(f32 *position) {
             previous[0] = fldResolvedPosition[0];
             previous[1] = fldResolvedPosition[1];
             previous[2] = fldResolvedPosition[2];
-            fldAreaState.positionPending = 1;
-            fldAreaState.targetX = newPosition[0];
-            fldAreaState.targetY = newPosition[1];
-            fldAreaState.targetZ = newPosition[2];
+            fldGlobalBase.positionPending = 1;
+            fldGlobalBase.targetX = newPosition[0];
+            fldGlobalBase.targetY = newPosition[1];
+            fldGlobalBase.targetZ = newPosition[2];
             position[0] = newPosition[0];
             position[1] = newPosition[1];
             position[2] = newPosition[2];
@@ -1073,7 +1073,7 @@ void fldHitChkUnitElv(f32 *position) {
     }
 }
 
-/* Non-owning native alias of fldAreaState.terrainAttritionKind (FldAreaWork + 0x11C). */
+/* Non-owning native alias of fldGlobalBase.terrainAttritionKind (FldAreaWork + 0x11C). */
 extern s32 D_0038988C[];
 
 /* Classify flagged zone faces after checking the current movement. */
@@ -1123,20 +1123,20 @@ void fldHitChkUnitDamage(f32 *position) {
     for (pass = 0; pass < 2; pass++) {
         recordIndex = 0;
         if (fldValueRecordCount > 0) {
-            areaState = &fldAreaState;
+            areaState = &fldGlobalBase;
             do {
                 EffWorldNode *node;
 
-                margin = fldValueRecords[recordIndex].mode == 1 ? 45.0f : 60.0f;
+                margin = fldMatterTable[recordIndex].mode == 1 ? 45.0f : 60.0f;
                 if (pass == 0) {
-                    if (fldValueRecords[recordIndex].mode == selectedAxis) {
+                    if (fldMatterTable[recordIndex].mode == selectedAxis) {
                         continue;
                     }
-                } else if (fldValueRecords[recordIndex].mode != selectedAxis) {
+                } else if (fldMatterTable[recordIndex].mode != selectedAxis) {
                     continue;
                 }
 
-                if (fldTestRoomSceneFlag(areaState->area, areaState->floor + 1, fldValueRecords[recordIndex].sceneFlag) != 0) {
+                if (fldTestRoomSceneFlag(areaState->area, areaState->floor + 1, fldMatterTable[recordIndex].sceneFlag) != 0) {
                     continue;
                 }
 
@@ -1147,7 +1147,7 @@ void fldHitChkUnitDamage(f32 *position) {
                 savedReference[1] = reference[1];
                 savedReference[2] = reference[2];
 
-                node = fldValueRecords[recordIndex].worldNode;
+                node = fldMatterTable[recordIndex].worldNode;
                 if (node != 0) {
                     point[0] = savedPoint[0] - node->inner->position[0];
                     point[1] = savedPoint[1] - node->inner->position[1];
@@ -1157,10 +1157,10 @@ void fldHitChkUnitDamage(f32 *position) {
                     reference[2] = savedReference[2] - node->inner->position[2];
                 }
 
-                planeDistance = fldVecDot(point, fldValueRecords[recordIndex].normal);
+                planeDistance = fldVecDot(point, fldMatterTable[recordIndex].normal);
                 {
-                    u32 faceAttributes = fldValueRecords[recordIndex].face->attributes;
-                    planeDistance = ffabsf(planeDistance - fldValueRecords[recordIndex].planeConstant);
+                    u32 faceAttributes = fldMatterTable[recordIndex].face->attributes;
+                    planeDistance = ffabsf(planeDistance - fldMatterTable[recordIndex].planeConstant);
                     if ((faceAttributes & 0x4000) == 0) {
                         continue;
                     }
@@ -1171,15 +1171,15 @@ void fldHitChkUnitDamage(f32 *position) {
                         }
                         HitPositionInside2(
                             &classifiedMargin,
-                            fldValueRecords[recordIndex].mode,
-                            fldValueRecords[recordIndex].count,
+                            fldMatterTable[recordIndex].mode,
+                            fldMatterTable[recordIndex].count,
                             margin, point,
-                            &fldValueRecords[recordIndex]);
+                            &fldMatterTable[recordIndex]);
                         if (!(classifiedMargin < 0.0f)) {
                             accepted = 1;
                         }
                         if (accepted == 1) {
-                            FldCollisionFace *face = fldValueRecords[recordIndex].face;
+                            FldCollisionFace *face = fldMatterTable[recordIndex].face;
                             s32 soundClass = face->sound & 0xF0;
                             if (soundClass == 0x20) {
                                 areaState->terrainAttritionKind = 3;
@@ -1279,7 +1279,7 @@ s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
 
     found = -1;
     secondary = dds3GetControlScene();
-    if (!((u32)(fldAreaState.area - 200) < 300)) {
+    if (!((u32)(fldGlobalBase.area - 200) < 300)) {
         fldToggleWorldNodeState(0);
     }
     origin[0] = start[0];
@@ -1289,21 +1289,21 @@ s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
     target[1] = end[1];
     target[2] = end[2];
     for (index = 0; index < fldValueRecordCount; index++) {
-        if (fldValueRecords[index].mode == 1) {
-            if (!(fldValueRecords[index].face->attributes & 0x100)) {
+        if (fldMatterTable[index].mode == 1) {
+            if (!(fldMatterTable[index].face->attributes & 0x100)) {
                 continue;
             }
         }
-        if (fldValueRecords[index].face->attributes & 0xA01) {
+        if (fldMatterTable[index].face->attributes & 0xA01) {
             continue;
         }
-        if (fldTestRoomSceneFlag(fldAreaState.area, fldAreaState.floor + 1,
-                                 fldValueRecords[index].sceneFlag)) {
+        if (fldTestRoomSceneFlag(fldGlobalBase.area, fldGlobalBase.floor + 1,
+                                 fldMatterTable[index].sceneFlag)) {
             continue;
         }
-        if (fldValueRecords[index].worldNode != 0) {
+        if (fldMatterTable[index].worldNode != 0) {
             relative = 1;
-            transform = fldValueRecords[index].worldNode->inner;
+            transform = fldMatterTable[index].worldNode->inner;
             origin[0] -= transform->position[0];
             origin[1] -= transform->position[1];
             origin[2] -= transform->position[2];
@@ -1319,10 +1319,10 @@ s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
         probeEnd[0] = target[0];
         probeEnd[1] = target[1];
         probeEnd[2] = target[2];
-        startDistance = fldVecDot(probeStart, fldValueRecords[index].normal) -
-                        fldValueRecords[index].planeConstant;
-        endDistance = fldVecDot(probeEnd, fldValueRecords[index].normal) -
-                      fldValueRecords[index].planeConstant;
+        startDistance = fldVecDot(probeStart, fldMatterTable[index].normal) -
+                        fldMatterTable[index].planeConstant;
+        endDistance = fldVecDot(probeEnd, fldMatterTable[index].normal) -
+                      fldMatterTable[index].planeConstant;
         if ((startDistance < 0.0f && 0.0f <= endDistance) || (endDistance < 0.0f && 0.0f <= startDistance)) {
             startDistance = ffabsf(startDistance);
             endDistance = ffabsf(endDistance);
@@ -1337,11 +1337,11 @@ s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
             probeStart[0] += delta[0] * ratio;
             probeStart[1] += delta[1] * ratio;
             probeStart[2] += delta[2] * ratio;
-            clearance = HitPositionInside3(fldValueRecords[index].mode, fldValueRecords[index].count, 2.0f, probeStart, &fldValueRecords[index]);
+            clearance = HitPositionInside3(fldMatterTable[index].mode, fldMatterTable[index].count, 2.0f, probeStart, &fldMatterTable[index]);
             if (0.0f <= clearance) {
-                if (fldValueRecords[index].face->attributes & 0x400) {
-                    entry = &((FldStopEntry *)fldValueRecords[index].stopData)
-                                [fldValueRecords[index].face->stop];
+                if (fldMatterTable[index].face->attributes & 0x400) {
+                    entry = &((FldStopEntry *)fldMatterTable[index].stopData)
+                                [fldMatterTable[index].face->stop];
                     dds3MatterObjectBasicSetAlpMode(dds3SceneBasicSearchNameAndType(secondary, 6, entry->name), 4);
                 } else {
                 found = index;
@@ -1362,7 +1362,7 @@ s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
             }
         }
         if (relative) {
-            transform = fldValueRecords[index].worldNode->inner;
+            transform = fldMatterTable[index].worldNode->inner;
             origin[0] += transform->position[0];
             origin[1] += transform->position[1];
             origin[2] += transform->position[2];
@@ -1403,27 +1403,27 @@ s32 fldHitChkEnemy(f32 *start, f32 *end, f32 *hitPoint) {
     target[1] = end[1];
     target[2] = end[2];
     for (index = 0; index < fldValueRecordCount; index++) {
-        if (fldValueRecords[index].mode == 1) {
-            if (!(fldValueRecords[index].face->attributes & 0x100)) {
+        if (fldMatterTable[index].mode == 1) {
+            if (!(fldMatterTable[index].face->attributes & 0x100)) {
                 continue;
             }
         }
-        if (fldValueRecords[index].face->attributes & 0xA01) {
+        if (fldMatterTable[index].face->attributes & 0xA01) {
             continue;
         }
-        if (fldTestRoomSceneFlag(fldAreaState.area, fldAreaState.floor + 1,
-                                 fldValueRecords[index].sceneFlag)) {
+        if (fldTestRoomSceneFlag(fldGlobalBase.area, fldGlobalBase.floor + 1,
+                                 fldMatterTable[index].sceneFlag)) {
             continue;
         }
-        if (!(fldValueRecords[index].face->attributes & 0x8000)) {
+        if (!(fldMatterTable[index].face->attributes & 0x8000)) {
             continue;
         }
-        if (fldValueRecords[index].face->special[0] != 4) {
+        if (fldMatterTable[index].face->special[0] != 4) {
             continue;
         }
-        if (fldValueRecords[index].worldNode != 0) {
+        if (fldMatterTable[index].worldNode != 0) {
             relative = 1;
-            transform = fldValueRecords[index].worldNode->inner;
+            transform = fldMatterTable[index].worldNode->inner;
             origin[0] -= transform->position[0];
             origin[1] -= transform->position[1];
             origin[2] -= transform->position[2];
@@ -1439,10 +1439,10 @@ s32 fldHitChkEnemy(f32 *start, f32 *end, f32 *hitPoint) {
         probeEnd[0] = target[0];
         probeEnd[1] = target[1];
         probeEnd[2] = target[2];
-        startDistance = fldVecDot(probeStart, fldValueRecords[index].normal) -
-                        fldValueRecords[index].planeConstant;
-        endDistance = fldVecDot(probeEnd, fldValueRecords[index].normal) -
-                      fldValueRecords[index].planeConstant;
+        startDistance = fldVecDot(probeStart, fldMatterTable[index].normal) -
+                        fldMatterTable[index].planeConstant;
+        endDistance = fldVecDot(probeEnd, fldMatterTable[index].normal) -
+                      fldMatterTable[index].planeConstant;
         if ((startDistance < 0.0f && 0.0f <= endDistance) || (endDistance < 0.0f && 0.0f <= startDistance)) {
             startDistance = ffabsf(startDistance);
             endDistance = ffabsf(endDistance);
@@ -1457,7 +1457,7 @@ s32 fldHitChkEnemy(f32 *start, f32 *end, f32 *hitPoint) {
             probeStart[0] += delta[0] * ratio;
             probeStart[1] += delta[1] * ratio;
             probeStart[2] += delta[2] * ratio;
-            clearance = HitPositionInside3(fldValueRecords[index].mode, fldValueRecords[index].count, 2.0f, probeStart, &fldValueRecords[index]);
+            clearance = HitPositionInside3(fldMatterTable[index].mode, fldMatterTable[index].count, 2.0f, probeStart, &fldMatterTable[index]);
             if (0.0f <= clearance) {
                 found = index;
                 ratio = (startDistance + clearance) / total;
@@ -1476,7 +1476,7 @@ s32 fldHitChkEnemy(f32 *start, f32 *end, f32 *hitPoint) {
             }
         }
         if (relative) {
-            transform = fldValueRecords[index].worldNode->inner;
+            transform = fldMatterTable[index].worldNode->inner;
             origin[0] += transform->position[0];
             origin[1] += transform->position[1];
             origin[2] += transform->position[2];
@@ -1506,105 +1506,105 @@ void fldAddItemBoxObject(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
      * the final Z/extent use on minZ; local allocation keeps Z with maxZ. */
     maxZ = z + extent;
     minZ = z - extent;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].geometry.vertexCount = 8;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].geometry.faceCount = 4;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].geometry.triangleCount = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].geometry.vertices = ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].geometry.faces = ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].geometry.stopData = NULL;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[0][0] = minX;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[0][1] = minY;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[0][2] = maxZ;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[0][3] = 1.0f;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[1][0] = maxX;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[1][1] = minY;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[1][2] = maxZ;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[1][3] = 1.0f;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[2][0] = minX;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[2][1] = minY;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[2][2] = minZ;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[2][3] = 1.0f;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[3][0] = maxX;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[3][1] = minY;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[3][2] = minZ;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[3][3] = 1.0f;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[4][0] = minX;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[4][1] = y;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[4][2] = maxZ;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[4][3] = 1.0f;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[5][0] = maxX;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[5][1] = y;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[5][2] = maxZ;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[5][3] = 1.0f;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[6][0] = minX;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[6][1] = y;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[6][2] = minZ;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[6][3] = 1.0f;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[7][0] = maxX;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[7][1] = y;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[7][2] = minZ;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[7][3] = 1.0f;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].attributes = 128;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].moveFloor = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].sound = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].stop = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].place = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].automap[0] = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].automap[1] = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].vertexIndices[0] = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].vertexIndices[1] = 1;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].vertexIndices[2] = 5;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].vertexIndices[3] = 4;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].encounterType = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].encounter = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].special[0] = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].special[1] = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].attributes = 128;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].moveFloor = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].sound = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].stop = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].place = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].automap[0] = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].automap[1] = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].vertexIndices[0] = 1;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].vertexIndices[1] = 3;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].vertexIndices[2] = 7;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].vertexIndices[3] = 5;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].encounterType = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].encounter = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].special[0] = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].special[1] = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].attributes = 128;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].moveFloor = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].sound = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].stop = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].place = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].automap[0] = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].automap[1] = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].vertexIndices[0] = 3;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].vertexIndices[1] = 2;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].vertexIndices[2] = 6;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].vertexIndices[3] = 7;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].encounterType = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].encounter = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].special[0] = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].special[1] = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].attributes = 128;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].moveFloor = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].sound = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].stop = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].place = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].automap[0] = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].automap[1] = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].vertexIndices[0] = 2;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].vertexIndices[1] = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].vertexIndices[2] = 4;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].vertexIndices[3] = 6;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].encounterType = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].encounter = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].special[0] = 0;
-    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].special[1] = 0;
-    fldMakePlane(&((FldWallMeshRecord *)fldAuxRecordBuffer)[index].geometry,
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].geometry.vertexCount = 8;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].geometry.faceCount = 4;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].geometry.triangleCount = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].geometry.vertices = ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].geometry.faces = ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].geometry.stopData = NULL;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[0][0] = minX;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[0][1] = minY;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[0][2] = maxZ;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[0][3] = 1.0f;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[1][0] = maxX;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[1][1] = minY;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[1][2] = maxZ;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[1][3] = 1.0f;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[2][0] = minX;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[2][1] = minY;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[2][2] = minZ;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[2][3] = 1.0f;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[3][0] = maxX;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[3][1] = minY;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[3][2] = minZ;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[3][3] = 1.0f;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[4][0] = minX;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[4][1] = y;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[4][2] = maxZ;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[4][3] = 1.0f;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[5][0] = maxX;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[5][1] = y;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[5][2] = maxZ;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[5][3] = 1.0f;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[6][0] = minX;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[6][1] = y;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[6][2] = minZ;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[6][3] = 1.0f;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[7][0] = maxX;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[7][1] = y;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[7][2] = minZ;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].vertices[7][3] = 1.0f;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[0].attributes = 128;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[0].moveFloor = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[0].sound = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[0].stop = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[0].place = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[0].automap[0] = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[0].automap[1] = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[0].vertexIndices[0] = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[0].vertexIndices[1] = 1;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[0].vertexIndices[2] = 5;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[0].vertexIndices[3] = 4;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[0].encounterType = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[0].encounter = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[0].special[0] = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[0].special[1] = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[1].attributes = 128;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[1].moveFloor = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[1].sound = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[1].stop = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[1].place = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[1].automap[0] = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[1].automap[1] = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[1].vertexIndices[0] = 1;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[1].vertexIndices[1] = 3;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[1].vertexIndices[2] = 7;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[1].vertexIndices[3] = 5;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[1].encounterType = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[1].encounter = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[1].special[0] = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[1].special[1] = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[2].attributes = 128;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[2].moveFloor = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[2].sound = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[2].stop = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[2].place = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[2].automap[0] = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[2].automap[1] = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[2].vertexIndices[0] = 3;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[2].vertexIndices[1] = 2;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[2].vertexIndices[2] = 6;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[2].vertexIndices[3] = 7;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[2].encounterType = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[2].encounter = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[2].special[0] = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[2].special[1] = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[3].attributes = 128;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[3].moveFloor = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[3].sound = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[3].stop = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[3].place = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[3].automap[0] = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[3].automap[1] = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[3].vertexIndices[0] = 2;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[3].vertexIndices[1] = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[3].vertexIndices[2] = 4;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[3].vertexIndices[3] = 6;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[3].encounterType = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[3].encounter = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[3].special[0] = 0;
+    ((FldWallMeshRecord *)fldItemBoxObjBuf)[index].faces[3].special[1] = 0;
+    fldMakePlane(&((FldWallMeshRecord *)fldItemBoxObjBuf)[index].geometry,
                   origin, dds3AllocObjectId(), 0, id);
     D_0043617C++;
 }
@@ -1613,11 +1613,11 @@ void evtMessageExtraActionNoOp(void) {
 }
 INCLUDE_SDATA(const s32, "game/code_00136EF8", fldCameraColorLayerScroll);
 
-INCLUDE_SDATA(const s32, "game/code_00136EF8", fldAuxRecordBuffer);
+INCLUDE_SDATA(const s32, "game/code_00136EF8", fldItemBoxObjBuf);
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_0043617C);
 
-INCLUDE_SDATA(const s32, "game/code_00136EF8", fldValueRecords);
+INCLUDE_SDATA(const s32, "game/code_00136EF8", fldMatterTable);
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", fldValueRecordCount);
 

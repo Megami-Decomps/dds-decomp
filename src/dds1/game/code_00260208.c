@@ -31,7 +31,7 @@ extern s8 brsUiUpdateAllowed;
 
 extern s8 brsUpdateBlocked;
 
-extern s8 brsTaskState;
+extern s8 gProcessStat_4;
 
 
 
@@ -707,7 +707,7 @@ void brsApplyPartyRewards(BrsSkillPackageWork *partyWork, BrsRewardBatch *batch)
     for (partyOffset = 0, partyIndex = 0; partyIndex < 5;
          partyIndex++, partyOffset += sizeof(DatPartyRecord)) {
         currentPartyUnit =
-            (DatPartyRecord *)((u8 *)datGameState->party + partyOffset);
+            (DatPartyRecord *)((u8 *)DDS3_GBWK->party + partyOffset);
 
         if ((currentPartyUnit->flags & 1) != 0 &&
             (currentPartyUnit->status & 0x4000) != 0) {
@@ -855,7 +855,7 @@ void brsMarkPartyRows(BrsProgressRow *dst, BrsRewardBatch *state, s32 flags) {
 
     for (i = 0; i < state->count; i++) {
         BrsProgressRow *d = dst;
-        DatPartyRecord *unit = datGameState->party;
+        DatPartyRecord *unit = DDS3_GBWK->party;
         s32 j;
 
         for (j = 4; j >= 0; j--) {
@@ -950,7 +950,7 @@ void brsStaffTaskDestroy(KwlnTask *task) {
     effDestroyEffectList(context->resourceList);
     fclDestroyMessage();
     sdfMemFreeDirect(context->allocation);
-    brsTaskState = 2;
+    gProcessStat_4 = 2;
 }
 
 extern char brsStaffInputTaskName[];
@@ -967,7 +967,7 @@ s32 mnuStaffCreateTasks(void) {
     dds3StartProcess(brsStaffInputTaskName, 0x405, 1, 0, brsMessageInputStep, 0, (u32)work);
     dds3StartProcess(mnuStaffPrimaryPanelTaskName, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, (u32)work);
     secondaryPanelTaskHandle = (s32)dds3StartProcess(mnuStaffSecondaryPanelTaskName, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, (u32)work);
-    brsTaskState = 1;
+    gProcessStat_4 = 1;
     return secondaryPanelTaskHandle;
 }
 
@@ -976,7 +976,7 @@ extern char mnuStaffPrimaryPanelTaskName[];
 extern char mnuStaffSecondaryPanelTaskName[];
 
 u32 mnuStaffDestroyTasks(void) {
-    s8 state = brsTaskState;
+    s8 state = gProcessStat_4;
 
     if (state == 1) {
         dds3KillProcessName(brsStaffInputTaskName, 0);
@@ -989,7 +989,7 @@ u32 mnuStaffDestroyTasks(void) {
 }
 
 s32 brsTaskConsumeDone(void) {
-    s32 state = brsTaskState;
+    s32 state = gProcessStat_4;
     if (state == 1) {
         return 1;
     }
@@ -997,13 +997,13 @@ s32 brsTaskConsumeDone(void) {
         return 0;
     }
     if (state == 2) {
-        brsTaskState = 0;
+        gProcessStat_4 = 0;
     }
     return 0;
 }
 
 u32 brsTaskTryDestroy(void) {
-    if (brsTaskState == 1) {
+    if (gProcessStat_4 == 1) {
         mnuStaffDestroyTasks();
         return 1;
     }
@@ -1171,7 +1171,7 @@ INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFAE8);
 
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC520);
 
-INCLUDE_SDATA(const s32, "game/code_00260208", brsTaskState);
+INCLUDE_SDATA(const s32, "game/code_00260208", gProcessStat_4);
 
 INCLUDE_SDATA(const s32, "game/code_00260208", brsPendingRowsLatched);
 

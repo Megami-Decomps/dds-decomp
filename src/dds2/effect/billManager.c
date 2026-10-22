@@ -30,12 +30,12 @@ BillData *billCreateAnimationDataFromResource(void *resourceData);
 typedef struct DmaPacketHeader DmaPacketHeader;
 extern void sdf3DMakeDirectRefPacket(DmaPacketHeader *packet, u32 source, s32 bytes);
 extern void sdfBillBoardMakeTMPacket(u8 *packet, const f32 *matrix);
-extern f32 sdfViewEyeVector[4];
+extern f32 aViewTarget[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 billChildFacingReferenceAxis[4];
-extern f32 billChildFacingScale[4];
+extern f32 dds3BillboardTagParam[4];
 extern f64 fabs(f64 value);
-extern BillChildPayload *billPendingChildList;
+extern BillChildPayload *dds3BillboardTag;
 
 /* Keep each child's pending list synchronized with the instance's draw mode,
  * then append one quad to its fifteen-record streams. */
@@ -74,17 +74,17 @@ void dds3BillboardTagLink(BillObj *obj, BillChildPayload *child) {
             sdfTexGetPacketLength(child->texture));
         sdfAppendReferencePacket(child->pendingLists[selected], packet);
         if ((u16)(child->variant & 1) != 0) {
-            VU0_LOAD_VF(vf10, sdfViewEyeVector);
+            VU0_LOAD_VF(vf10, aViewTarget);
             VU0_LOAD_VF(vf11, sdfViewTargetVector);
             VU0_SUB(vf10, vf10, vf11);
             VU0_NORMALIZE_VF10();
             VU0_LOAD_VF(vf11, billChildFacingReferenceAxis);
             VU0_DOT_XYZ(dot, vf10, vf11);
-            billChildFacingScale[1] = 1.0 - fabs(dot);
+            dds3BillboardTagParam[1] = 1.0 - fabs(dot);
             VU0_STORE_VF(vf10, direction);
             VU0_MOVE_VF_EXTENDED(vf11, vf10);
             VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
-            VU0_LOAD_VF_MEMORY(vf10, billChildFacingScale);
+            VU0_LOAD_VF_MEMORY(vf10, dds3BillboardTagParam);
             VU0_SCALE_MATRIX_ROWS(vf10);
             VU0_STORE_MATRIX(matrix);
         } else {
@@ -94,8 +94,8 @@ void dds3BillboardTagLink(BillObj *obj, BillChildPayload *child) {
         sdfBillBoardMakeTMPacket(geometry, matrix);
         sdfDrawTagLink(child->pendingLists[selected], (u32)geometry);
         if (child->next == child) {
-            child->next = billPendingChildList;
-            billPendingChildList = child;
+            child->next = dds3BillboardTag;
+            dds3BillboardTag = child;
         }
     }
     work = child->work;
@@ -149,13 +149,13 @@ void dds3BillboardTagLink(BillObj *obj, BillChildPayload *child) {
 
 
 
-extern BillChildPayload *billPendingChildList;
+extern BillChildPayload *dds3BillboardTag;
 extern SdfPoolNode *D_003AA960[5];
 
 void billFlushPendingChildPackets(void) {
     BillChildPayload *node;
 
-    node = billPendingChildList;
+    node = dds3BillboardTag;
     if (node != NULL) {
         do {
             BillPacketWork *work = node->work;
@@ -185,7 +185,7 @@ void billFlushPendingChildPackets(void) {
             }
         } while (node != NULL);
     }
-    billPendingChildList = NULL;
+    dds3BillboardTag = NULL;
 }
 
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
@@ -261,7 +261,7 @@ void billAppendPairedQuadEntry(BillObj *obj, BillRenderPair *node) {
         sdfAppendReferencePacket(node->packetList, packet);
         geometry = (u8 *)sdfGrAllocPacketBuff(0x38);
         if (node->cameraFacingMode == 1) {
-            VU0_LOAD_VF(vf10, sdfViewEyeVector);
+            VU0_LOAD_VF(vf10, aViewTarget);
             VU0_LOAD_VF(vf11, sdfViewTargetVector);
             VU0_SUB(vf10, vf10, vf11);
             VU0_NORMALIZE_VF10();

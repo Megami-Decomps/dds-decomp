@@ -55,26 +55,26 @@
 #define BTL_GROUP_RESOURCE_SLOT_COUNT 8
 
 #define BTL_GROUP_OWNS_RESOURCES_FLAG 1
-extern u32 mdlGroupJobSemaphore;
+extern u32 mdlManagerWork;
 
-extern BattleGroupNode *btlGroupNodeHeads[];
+extern BattleGroupNode *mdlResrcMajorList[];
 
-extern BattleGroupIdEntry *btlGroupIdHeads[];
+extern BattleGroupIdEntry *mdlLoadingMajorList[];
 
 /* Create the model-job semaphore and clear both lists for all eight groups. */
 void mdlInitManager(void) {
     s32 groupIndex;
 
-    mdlGroupJobSemaphore = sdfCreateSema(1, 0x7f, 0);
+    mdlManagerWork = sdfCreateSema(1, 0x7f, 0);
     for (groupIndex = 0; groupIndex != 8; groupIndex++) {
-        btlGroupNodeHeads[groupIndex] = 0;
-        btlGroupIdHeads[groupIndex] = 0;
+        mdlResrcMajorList[groupIndex] = 0;
+        mdlLoadingMajorList[groupIndex] = 0;
     }
 }
 
 /* Return the first node of this type in group, or NULL. */
 BattleGroupNode *mdlSearchResrc(s32 group, s32 type) {
-    BattleGroupNode *entry = btlGroupNodeHeads[group];
+    BattleGroupNode *entry = mdlResrcMajorList[group];
     while (entry != 0) {
         if (entry->type == type) {
             break;
@@ -86,7 +86,7 @@ BattleGroupNode *mdlSearchResrc(s32 group, s32 type) {
 
 /* Return whether this group's separate ID list contains id. */
 s32 mdlCheckLoading(s32 groupIndex, s32 wantedId) {
-    BattleGroupIdEntry *idCursor = btlGroupIdHeads[groupIndex];
+    BattleGroupIdEntry *idCursor = mdlLoadingMajorList[groupIndex];
     while (idCursor != 0) {
         if (idCursor->id == wantedId) {
             return 1;
@@ -99,7 +99,7 @@ s32 mdlCheckLoading(s32 groupIndex, s32 wantedId) {
 /* Prepend id to this group's ID list; duplicate IDs are allowed. */
 void mdlRegLoading(s32 groupIndex, s32 newId) {
     BattleGroupIdEntry *idEntry = sdfChipAllocDirect(sizeof(BattleGroupIdEntry));
-    BattleGroupIdEntry **groupHead = &btlGroupIdHeads[groupIndex];
+    BattleGroupIdEntry **groupHead = &mdlLoadingMajorList[groupIndex];
     idEntry->id = newId;
     idEntry->next = *groupHead;
     *groupHead = idEntry;
@@ -110,7 +110,7 @@ void mdlUnRegLoading(s32 groupIndex, s32 wantedId) {
     BattleGroupIdEntry **idLink;
     BattleGroupIdEntry *idCursor;
 
-    idLink = &btlGroupIdHeads[groupIndex];
+    idLink = &mdlLoadingMajorList[groupIndex];
     idCursor = *idLink;
     if (idCursor == 0) {
         return;
@@ -134,11 +134,11 @@ void mdlRegist(s32 groupIndex, s32 entityType, s32 ownershipFlags, DevRequest *r
     s32 slotIndex;
     mdlUnRegist(groupIndex, entityType);
     groupNode = sdfChipAllocDirect(sizeof(BattleGroupNode));
-    previousHead = btlGroupNodeHeads[groupIndex];
+    previousHead = mdlResrcMajorList[groupIndex];
     if (previousHead != NULL) {
         previousHead->prev = groupNode;
     }
-    btlGroupNodeHeads[groupIndex] = groupNode;
+    mdlResrcMajorList[groupIndex] = groupNode;
     groupNode->next = previousHead;
     groupNode->group = groupIndex;
     groupNode->type = entityType;
@@ -177,7 +177,7 @@ void mdlUnRegistResrc(BattleGroupNode *groupNode) {
     previousNode = groupNode->prev;
     nextNode = groupNode->next;
     if (previousNode == NULL) {
-        btlGroupNodeHeads[groupNode->group] = nextNode;
+        mdlResrcMajorList[groupNode->group] = nextNode;
     } else {
         previousNode->next = nextNode;
     }
@@ -216,7 +216,7 @@ void mdlUnRegist(s32 groupIndex, s32 entityType) {
 /* Destroy every group node, saving the next link before each unlink/free. */
 void mdlUnRegistAll(void) {
     u32 groupIndex = 0;
-    BattleGroupNode **groupHead = btlGroupNodeHeads;
+    BattleGroupNode **groupHead = mdlResrcMajorList;
     do {
         BattleGroupNode *groupNode = *groupHead;
         while (groupNode != 0) {
@@ -278,7 +278,7 @@ Motion *mdlGetMotionCtrlr(MdlCtx *ctx, s32 searchId);
 void mdlMotion(MdlCtx *ctx, s32 searchId, s32 motionIndex, s32 loopEnabled,
                                      f32 blendLeadFrames, f32 blendDurationFrames);
 
-extern u32 mdlGroupJobSemaphore;
+extern u32 mdlManagerWork;
 
 void mdlFreeMotionCtrlr(MdlCtx *ctx, Motion *node) {
     if (ctx->slots[node->slotIndex] == node) {
@@ -374,9 +374,9 @@ BattleGroupNode *mdlWaitLoadEnd(s32 group, s32 id) {
 
 void TbMbAbLoadEnd(MdlLoadRequest *request) {
     mdlRegistModelSet(request->group, request->id, request->options, &request->payload);
-    WaitSema(mdlGroupJobSemaphore);
+    WaitSema(mdlManagerWork);
     mdlUnRegLoading(request->group, request->id);
-    SignalSema(mdlGroupJobSemaphore);
+    SignalSema(mdlManagerWork);
     sdfChipFreeDirect(request);
 }
 
@@ -437,14 +437,14 @@ s32 mdlPrepare(s32 group, s32 id, s32 blocking) {
     char *extension;
     s32 packedBundle;
 
-    WaitSema(mdlGroupJobSemaphore);
+    WaitSema(mdlManagerWork);
     entity = mdlSearchResrc(group, id);
     if (entity != NULL) {
-        SignalSema(mdlGroupJobSemaphore);
+        SignalSema(mdlManagerWork);
         return (s32)entity;
     }
     if (mdlCheckLoading(group, id)) {
-        SignalSema(mdlGroupJobSemaphore);
+        SignalSema(mdlManagerWork);
         if (blocking != 0) {
             return (s32)mdlWaitLoadEnd(group, id);
         }
@@ -459,7 +459,7 @@ s32 mdlPrepare(s32 group, s32 id, s32 blocking) {
         packedBundle = strcasecmp(extension, D_003BBB68) == 0;
     }
     mdlRegLoading(group, id);
-    SignalSema(mdlGroupJobSemaphore);
+    SignalSema(mdlManagerWork);
     if (packedBundle != 0) {
         mdlSetFileName(requestPath, paths->path);
         mdlFileLoad(group, id, 0x101, requestPath,
@@ -1389,9 +1389,9 @@ void mdlFileCbFree(MdlDoneJob *ownerBlock) {
 void mdlFileLoadCallback(FilePacRequest *requestOwner, MdlDoneJob *completionJob) {
     completionJob->owner = requestOwner;
     mdlPackSet(requestOwner->packet.queueHead, completionJob->group, completionJob->id, completionJob->arg);
-    WaitSema(mdlGroupJobSemaphore);
+    WaitSema(mdlManagerWork);
     mdlUnRegLoading(completionJob->group, completionJob->id);
-    SignalSema(mdlGroupJobSemaphore);
+    SignalSema(mdlManagerWork);
     if (completionJob->done != NULL) {
         completionJob->done(completionJob->doneArg);
         mdlFileCbFree(completionJob);

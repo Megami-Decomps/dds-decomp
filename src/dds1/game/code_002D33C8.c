@@ -84,29 +84,29 @@ extern void sdfWaitVblank(s32 requestedSleepCount);
 
 extern u16 D_003BD334;
 extern s32 D_003BD340;
-extern s8 sdfImageUploadPending;
-extern vu8 sdfCurrentBufferIndex;
+extern s8 sdfDrawImageTrans;
+extern vu8 sdfFrameId;
 
-extern SdfPendingNode *sdfPendingQueueHead;
-extern s8 sdfPendingQueueRotationActive;
+extern SdfPendingNode *sdfDelayedResrcLink;
+extern s8 sdfDelayedResrcFlag;
 extern s32 sdfPendingQueueSlots[2];
 
 
 extern SdfDmaNode *sdfGrNewExPacket(SdfDmaTag *sourceTag);
 
-extern s32 sdfPacketBufferSize;
+extern s32 sdfGrPacketBuffSize;
 extern s32 sdfPacketBuffers[2];
-extern s32 sdfPacketCursor;
-extern s32 sdfPacketBufferEnd;
+extern s32 sdfGrPacketBuffPtr;
+extern s32 sdfGrPacketBuffLimit;
 
 extern s32 sdfDelayedResrcCheckFunc(void);
 
-extern s32 sdfPendingQueueSemaphore;
-extern SdfPendingRequest sdfTextureReleaseQueue;
-extern SdfPendingRequest sdfObjectListReleaseQueue;
-extern volatile s8 sdfPacketSlotIndex;
-extern s32 sdfFramePacketSlotIndex;
-extern SdfPacketSlot sdfFramePacketSlots[];
+extern s32 sdfDelayedResrcSemaId;
+extern SdfPendingRequest sdfTexDelayedResrcCB;
+extern SdfPendingRequest sdfModelDelayedResrcCB;
+extern volatile s8 sdfReqDrawDelayCount;
+extern s32 sdfDrawReqQueueIndex;
+extern SdfPacketSlot sdfGrDrawState[];
 
 extern SdfGraphObj D_003980E0;
 
@@ -178,7 +178,7 @@ void sdfTexBlendPaletteToTintedIntensityVU(SdfTex *texture, s32 tint, f32 amount
 
 /* Find a texture by resource key, walking from the newest node to older ones. */
 SdfTex *sdfTexSearch(s32 resourceKey) {
-    SdfTex *texture = sdfResourceListHead;
+    SdfTex *texture = sdfTexHandleLink;
 
     while (texture != NULL) {
         if (texture->resourceKey == resourceKey) {
@@ -190,7 +190,7 @@ SdfTex *sdfTexSearch(s32 resourceKey) {
 }
 
 void sdfTexInit(void) {
-    sdfDelayedResrcInitCB(&sdfTextureReleaseQueue, sdfTexRelease);
+    sdfDelayedResrcInitCB(&sdfTexDelayedResrcCB, sdfTexRelease);
 }
 
 /* Transfer setup, deferred image metadata, and its linked primitive-reset tail. */
@@ -311,8 +311,8 @@ void sdfLinkLoadImage(SdfListHead *list, SdfTexResource *source,
 
 /* Register a completion callback, creating the shared semaphore on first use. */
 void sdfDelayedResrcInitCB(SdfPendingRequest *request, SdfPendingCallback callback) {
-    if (sdfPendingQueueSemaphore < 0) {
-        sdfPendingQueueSemaphore = sdfCreateSema(1, 0x7f, 0);
+    if (sdfDelayedResrcSemaId < 0) {
+        sdfDelayedResrcSemaId = sdfCreateSema(1, 0x7f, 0);
     }
     request->handler = callback;
     request->pending = NULL;
@@ -325,16 +325,16 @@ void sdfDelayedResrcEntry(SdfPendingRequest *owner, void *entry) {
     s32 freeEntries;
 
     if (entry != NULL) {
-        WaitSema(sdfPendingQueueSemaphore);
+        WaitSema(sdfDelayedResrcSemaId);
         pendingNode = owner->pending;
         if (pendingNode == NULL) {
             pendingNode = (SdfPendingNode *)sdfChipAllocDirect(sizeof(SdfPendingNode));
             pendingNode->remaining = 0;
-            pendingNode->next = sdfPendingQueueHead;
+            pendingNode->next = sdfDelayedResrcLink;
             pendingNode->buffer = NULL;
             pendingNode->owner = owner;
             owner->pending = pendingNode;
-            sdfPendingQueueHead = pendingNode;
+            sdfDelayedResrcLink = pendingNode;
         }
         freeEntries = pendingNode->remaining;
         entryBuffer = pendingNode->buffer;
@@ -347,16 +347,16 @@ void sdfDelayedResrcEntry(SdfPendingRequest *owner, void *entry) {
         }
         entryBuffer->entry[SDF_PENDING_BUFFER_CAPACITY - freeEntries] = entry;
         pendingNode->remaining = freeEntries - 1;
-        SignalSema(sdfPendingQueueSemaphore);
+        SignalSema(sdfDelayedResrcSemaId);
     }
 }
 
 /* Detach the pending chain and clear each callback owner's pending node. */
 SdfPendingNode *sdfDelayedResrcClose(void) {
-    SdfPendingNode *head = sdfPendingQueueHead;
+    SdfPendingNode *head = sdfDelayedResrcLink;
     SdfPendingNode *node;
 
-    sdfPendingQueueHead = NULL;
+    sdfDelayedResrcLink = NULL;
     for (node = head; node != NULL; node = node->next) {
         node->owner->pending = NULL;
     }
@@ -403,25 +403,25 @@ void sdfDelayedResrcRelease(SdfPendingNode *pendingNode) {
 void sdfDelayedResrcProc(void) {
     u32 slotIndex;
 
-    sdfPendingQueueRotationActive = 1;
-    WaitSema(sdfPendingQueueSemaphore);
+    sdfDelayedResrcFlag = 1;
+    WaitSema(sdfDelayedResrcSemaId);
     sdfDelayedResrcRelease((SdfPendingNode *)sdfPendingQueueSlots[0]);
     for (slotIndex = 0; slotIndex < SDF_PENDING_LAST_SLOT; slotIndex++) {
         sdfPendingQueueSlots[slotIndex] = sdfPendingQueueSlots[slotIndex + 1];
     }
     sdfPendingQueueSlots[SDF_PENDING_LAST_SLOT] = (s32)sdfDelayedResrcClose();
-    SignalSema(sdfPendingQueueSemaphore);
-    sdfPendingQueueRotationActive = 0;
+    SignalSema(sdfDelayedResrcSemaId);
+    sdfDelayedResrcFlag = 0;
 }
 
 /* Return one for an active rotation, a queued chain, or either delayed slot. */
 s32 sdfDelayedResrcCheckFunc(void) {
     u32 slotIndex;
     s32 *slotCursor;
-    if (sdfPendingQueueRotationActive != 0) {
+    if (sdfDelayedResrcFlag != 0) {
         return 1;
     }
-    if (sdfPendingQueueHead != NULL) {
+    if (sdfDelayedResrcLink != NULL) {
         return 1;
     }
     slotIndex = 0;
@@ -448,48 +448,48 @@ s32 sdfDelayedResrcCheck(void) {
     return pendingWork;
 }
 
-extern struct SdfMemBlock *sdfDoubleBufferAllocation;
+extern struct SdfMemBlock *sdfGrPacketBuffHandle;
 
 /* Replace both packet buffers with one allocation, rounding each half to 128 bytes. */
 void sdfGrMakePacketBuff(s32 bufferBytes) {
     s32 allocationAddress;
-    if (sdfDoubleBufferAllocation != 0) {
-        sdfMemFreeDirect(sdfDoubleBufferAllocation);
-        sdfDoubleBufferAllocation = 0;
+    if (sdfGrPacketBuffHandle != 0) {
+        sdfMemFreeDirect(sdfGrPacketBuffHandle);
+        sdfGrPacketBuffHandle = 0;
     }
     bufferBytes = (bufferBytes + SDF_PACKET_BUFFER_ALIGNMENT_MASK) & ~SDF_PACKET_BUFFER_ALIGNMENT_MASK;
-    sdfPacketBufferSize = bufferBytes;
-    sdfDoubleBufferAllocation = sdfMemAllocDirect(bufferBytes * SDF_PACKET_BUFFER_COUNT);
-    allocationAddress = sdfMemLock(sdfDoubleBufferAllocation);
+    sdfGrPacketBuffSize = bufferBytes;
+    sdfGrPacketBuffHandle = sdfMemAllocDirect(bufferBytes * SDF_PACKET_BUFFER_COUNT);
+    allocationAddress = sdfMemLock(sdfGrPacketBuffHandle);
     sdfPacketBuffers[0] = allocationAddress;
     sdfPacketBuffers[1] = allocationAddress + bufferBytes;
 }
 
 /* Select one buffer half and reset the byte-address cursor and end bound. */
 void sdfGrSetupPacketBuff(s32 bufferIndex) {
-    sdfPacketCursor = sdfPacketBuffers[bufferIndex];
-    sdfPacketBufferEnd = sdfPacketBuffers[bufferIndex] + sdfPacketBufferSize;
+    sdfGrPacketBuffPtr = sdfPacketBuffers[bufferIndex];
+    sdfGrPacketBuffLimit = sdfPacketBuffers[bufferIndex] + sdfGrPacketBuffSize;
 }
 
 s32 sdfGrGetPacketBuffRemain(void) {
-    return sdfPacketBufferEnd - sdfPacketCursor;
+    return sdfGrPacketBuffLimit - sdfGrPacketBuffPtr;
 }
 
 s32 sdfGrAllocPacketBuff(s32 size) {
     s32 packet;
 
-    packet = sdfPacketCursor;
-    sdfPacketCursor = sdfPacketCursor + ((size + 0xfU) & 0xfffffff0);
+    packet = sdfGrPacketBuffPtr;
+    sdfGrPacketBuffPtr = sdfGrPacketBuffPtr + ((size + 0xfU) & 0xfffffff0);
     return packet;
 }
 
 s32 sdfGrOpenPacketBuff(void) {
-    return sdfPacketCursor;
+    return sdfGrPacketBuffPtr;
 }
 
 /* Round a supplied byte address upward to the next quadword boundary. */
 void sdfGrClosePacketBuff(s32 cursorAddress) {
-    sdfPacketCursor = (cursorAddress + SDF_QWORD_ALIGNMENT_MASK) & ~SDF_QWORD_ALIGNMENT_MASK;
+    sdfGrPacketBuffPtr = (cursorAddress + SDF_QWORD_ALIGNMENT_MASK) & ~SDF_QWORD_ALIGNMENT_MASK;
 }
 
 void sdfDrawTagInit(SdfListHead *list) {
@@ -1003,15 +1003,15 @@ void sdfGrReqDraw(SdfListHead *list, SdfPacketChain *chain) {
     s32 index;
     SdfPacketSlot *slot;
 
-    while (sdfPacketSlotIndex != 0) {
+    while (sdfReqDrawDelayCount != 0) {
     }
     D_003BD334 = sdfGetRunTimeCount(start);
     interrupts = DIntr();
-    index = sdfFramePacketSlotIndex + 1;
+    index = sdfDrawReqQueueIndex + 1;
     if (index == 3) {
         index = 0;
     }
-    slot = &sdfFramePacketSlots[index];
+    slot = &sdfGrDrawState[index];
     slot->packetList = NULL;
     slot->callbackHead = NULL;
     slot->slotUpdatePhase = 0;
@@ -1023,10 +1023,10 @@ void sdfGrReqDraw(SdfListHead *list, SdfPacketChain *chain) {
                 chain->tail->last->next = NULL;
             }
         }
-        slot->queuedBufferIndex = sdfCurrentBufferIndex;
+        slot->queuedBufferIndex = sdfFrameId;
     }
-    sdfFramePacketSlotIndex = index;
-    sdfImageUploadPending = 1;
+    sdfDrawReqQueueIndex = index;
+    sdfDrawImageTrans = 1;
     D_003BD340++;
     if (interrupts != 0) {
         EIntr();
@@ -1034,13 +1034,13 @@ void sdfGrReqDraw(SdfListHead *list, SdfPacketChain *chain) {
 }
 
 void sdfGrReqDrawDelay(s32 value) {
-    sdfPacketSlotIndex = (value < 0) ? 0 : value;
+    sdfReqDrawDelayCount = (value < 0) ? 0 : value;
 }
 
 void sdfGrInitDraw(void) {
-    sdfPacketSlotIndex = 0;
-    sdfFramePacketSlots[0].packetList = NULL;
-    sdfFramePacketSlotIndex = 0;
+    sdfReqDrawDelayCount = 0;
+    sdfGrDrawState[0].packetList = NULL;
+    sdfDrawReqQueueIndex = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", sdfGrDrawFrame);
@@ -1049,15 +1049,15 @@ extern vu8 D_003BD32D;
 
 /* Wait for the shared busy flag, then sleep until the active slot is empty or ready. */
 void sdfDrawSync(void) {
-    SdfPacketSlot *table = sdfFramePacketSlots;
+    SdfPacketSlot *table = sdfGrDrawState;
 
     for (;;) {
         while (D_003BD32D != 0) {
         }
-        if (table[sdfFramePacketSlotIndex].packetList == NULL) {
+        if (table[sdfDrawReqQueueIndex].packetList == NULL) {
             break;
         }
-        if (table[sdfFramePacketSlotIndex].slotUpdatePhase >= 2) {
+        if (table[sdfDrawReqQueueIndex].slotUpdatePhase >= 2) {
             break;
         }
         sdfWaitVblank(0);
@@ -1680,7 +1680,7 @@ void sdfPrimLinkBoxLine(SdfListHead *list, s32 color, s32 primitive, s32 left, s
 }
 
 void sdfModelInitSystem(void) {
-    sdfDelayedResrcInitCB(&sdfObjectListReleaseQueue, sdfModelRootFreeResrc);
+    sdfDelayedResrcInitCB(&sdfModelDelayedResrcCB, sdfModelRootFreeResrc);
 }
 
 
@@ -1777,7 +1777,7 @@ void sdfModelRootFree(SdfModel *slot, s32 recycle, s32 release) {
         sdfItemArrayFree(slot->slotPairs);
     }
     if (recycle != 0) {
-        sdfDelayedResrcEntry(&sdfObjectListReleaseQueue, slot);
+        sdfDelayedResrcEntry(&sdfModelDelayedResrcCB, slot);
     } else {
         sdfItemArrayFree(slot->list);
         sdfChipFreeDirect(slot);
@@ -1897,19 +1897,19 @@ void sdfModelNodeSetParent(SdfDrawNode *node, SdfDrawNode *owner) {
     }
 }
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfPendingQueueSemaphore);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfDelayedResrcSemaId);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfDoubleBufferAllocation);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfGrPacketBuffHandle);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfPacketBufferSize);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfGrPacketBuffSize);
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfPacketBuffers);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfPacketCursor);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfGrPacketBuffPtr);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfPacketBufferEnd);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfGrPacketBuffLimit);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfGrDrawStopRequested);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfDrawFrameFlag);
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD32D);
 
@@ -1917,19 +1917,19 @@ INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD32E);
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfGrFrameComplete);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfGrDrawBufferIndex);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfGrDrawFrameId);
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfGrBufferSlotIndex);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfPacketSlotIndex);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfReqDrawDelayCount);
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD334);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfFramePacketSlotIndex);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfDrawReqQueueIndex);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfGrLastSentChain);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfGrDrawFrameTagHead);
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD340);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", sdf3DSoftenOff);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", corePktSoftenBias);
 

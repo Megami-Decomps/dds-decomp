@@ -3,8 +3,8 @@
 #include "sdf.h"
 #include "sdf_thread.h"
 
-s32 sdfTrackedThreadSemaphore __attribute__((section(".sbss")));
-SdfThreadNode *sdfTrackedThreadHead __attribute__((section(".sbss")));
+s32 sdfThreadSema __attribute__((section(".sbss")));
+SdfThreadNode *sdfVblankThreadId __attribute__((section(".sbss")));
 
 
 
@@ -18,14 +18,14 @@ SdfThreadNode *sdfFindThreadNode(s32 threadId) {
     if (requestedId < 0) {
         requestedId = GetThreadId();
     }
-    WaitSema(sdfTrackedThreadSemaphore);
-    node = sdfTrackedThreadHead;
+    WaitSema(sdfThreadSema);
+    node = sdfVblankThreadId;
     while (node != NULL) {
         if (node->threadId == requestedId) {
             break;
         }
         node = node->next;
     }
-    SignalSema(sdfTrackedThreadSemaphore);
+    SignalSema(sdfThreadSema);
     return node;
 }

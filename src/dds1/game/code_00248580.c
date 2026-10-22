@@ -172,7 +172,7 @@ s32 mnuTerminalScoreBox(DatPartyRecord *unit) {
 void mnuRefreshThresholdNodeFlags(struct MenuList *owner) {
     struct MenuListNode *node = owner->first;
     if (node != 0) {
-        DatGameState *state = datGameState;
+        DatGameState *state = DDS3_GBWK;
         do {
             u32 currency = state->header.currency;
             if (currency < node->terminal.requiredAmount) {
@@ -208,7 +208,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, struct Me
     MenuTerminalWork *host = (MenuTerminalWork *)list->context;
     s32 scale = list->scale;
     MenuThresholdEntry *entry = &node->terminal;
-    DatPartyRecord *record = &datGameState->party[entry->entryId];
+    DatPartyRecord *record = &DDS3_GBWK->party[entry->entryId];
     s32 selected = 0;
     struct FrFontGlyph *glyph;
     MenuEffectPair *panels;
@@ -282,7 +282,7 @@ void mnuUpdateGroupResources(u8 *scene) {
     struct MenuListNode *node = *(struct MenuListNode **)(*(u8 **)(scene + 0x74) + 0x10);
 
     while (node != NULL) {
-        node->childPanel = mnuCreateDualPercentPanel(&datGameState->party[node->terminal.entryId], (s32)scene);
+        node->childPanel = mnuCreateDualPercentPanel(&DDS3_GBWK->party[node->terminal.entryId], (s32)scene);
         node = node->next;
     }
 }
@@ -321,7 +321,7 @@ void mnuBuildTerminalNodeList(MenuTerminalWork *host) {
     list->updateCallback = (s32)mnuDrawTerminalRecoveryListEntry;
     list->visible = 0;
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
-        DatPartyRecord *unit = &datGameState->party[partyIndex];
+        DatPartyRecord *unit = &DDS3_GBWK->party[partyIndex];
 
         if ((u16)(unit->flags & 1)) {
             s32 recoveryCost = mnuTerminalScoreBox(unit);
@@ -1984,7 +1984,7 @@ s32 mnuHandleTerminalRecoverySelection(KwlnTask *request) {
             if (!(node->flags48 & 1)) {
                 entry = &node->terminal;
                 buttons = 0;
-                fldSaveSceneOptionsAndClearFlags(&datGameState->party[entry->entryId]);
+                fldSaveSceneOptionsAndClearFlags(&DDS3_GBWK->party[entry->entryId]);
                 p2sdPlaySE(0x10, 0x7F, 0x3F);
                 mnuReleaseSelectedProgressPanel(host);
                 datAddCurrencyClamped(-entry->requiredAmount);
@@ -2022,7 +2022,7 @@ void mnuDrawTerminalAmountText(s32 fading, s32 state) {
     struct FrFontGlyph *sprite;
 
     index = fldGetModeFrameRecordIndex(work);
-    sprintf(text, D_003BC3F0, datGameState->header.currency);
+    sprintf(text, D_003BC3F0, DDS3_GBWK->header.currency);
     if (fading == 0) {
         color = (*(u8 *)&work->resourceSets[0]->workEntries[index].geometry.cornerColors[0]) | 0xA09DC300;
     } else {

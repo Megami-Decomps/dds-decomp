@@ -34,7 +34,7 @@ extern char mnuCampDrawTaskName[]; /* "camp_draw" */
 
 extern char mnuCampOwnerTaskName[]; /* "camp_update" */
 
-extern s8 mnuCampTaskState;
+extern s8 campExitState;
 
 extern void *const mnuCampCommandLabels[];
 
@@ -128,7 +128,7 @@ StaffMenuWork *mnuCreateStaffCampWork(void) {
     return menu;
 }
 
-extern s8 mnuCampTaskState;
+extern s8 campExitState;
 
 extern void mnuReleaseAssets(MenuAssets *assets);
 extern void p2sdBgmVolUp(void);
@@ -150,7 +150,7 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     mnuReleaseStaffSpriteHandles(menu);
     effDestroyEffectList(menu->resourceQueue);
     sdfMemFreeDirect(menu->resource);
-    mnuCampTaskState = MNU_CAMP_STATE_CLEANED_UP;
+    campExitState = MNU_CAMP_STATE_CLEANED_UP;
     p2sdBgmVolUp();
 }
 
@@ -216,7 +216,7 @@ void mnuCreateCampTasks(void) {
     dds3LinkProcess(drawTask, dds3StartProcess("camp_fade", 0x2B08, 1, 0, mnuDrawAndStepStaffGradientFade, 0, (u32)menu));
     dds3LinkProcess(drawTask, dds3StartProcess("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, (u32)menu));
     dds3FadeIn(0, 0, 0, MNU_CAMP_OPEN_FADE_FRAMES);
-    mnuCampTaskState = MNU_CAMP_STATE_ACTIVE;
+    campExitState = MNU_CAMP_STATE_ACTIVE;
 }
 
 /* Destroy the three named camp task hierarchies; owner teardown frees userdata. */
@@ -229,7 +229,7 @@ void mnuDestroyCampTasks(void) {
 /* Report active camp; acknowledge cleanup only for the exact cleaned-up state.
  * Other non-active states return 0 without being rewritten. */
 s32 mnuAcknowledgeCampState(void) {
-    s8 campState = mnuCampTaskState;
+    s8 campState = campExitState;
     if (campState == MNU_CAMP_STATE_ACTIVE) {
         return 1;
     }
@@ -237,7 +237,7 @@ s32 mnuAcknowledgeCampState(void) {
         return 0;
     }
     if (campState == MNU_CAMP_STATE_CLEANED_UP) {
-        mnuCampTaskState = MNU_CAMP_STATE_IDLE;
+        campExitState = MNU_CAMP_STATE_IDLE;
     }
     return 0;
 }
@@ -266,7 +266,7 @@ void mnuDrawStaffCampSlotsAndCurrency(s32 unused0, s32 unused1, s32 z, s32 first
 
     itfDrawGridWithResolvedSlot(0x150, 0xD08, 0, 1, (EffectSlotSet *)(u32)firstSlot, 0, drawFlags);
     itfDrawGridWithResolvedSlot(0x2B0, 0xCE8, 0, 1, (EffectSlotSet *)(u32)secondSlot, 3, drawFlags);
-    sprintf(text, D_003BC6C0, datGameState->header.currency);
+    sprintf(text, D_003BC6C0, DDS3_GBWK->header.currency);
     glyph = itfCreateTightFont3TextGlyph(0x4B0, 0xCD8, z, 0x80808080, (u32)text, 0);
     frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, drawFlags);
     frDestroyFontRequestAfter((FrFontGlyph *)glyph);

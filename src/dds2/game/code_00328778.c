@@ -102,10 +102,10 @@ void dds3InitSubsystems(u32 heapSize, u32 initialHeapSize, u32 packetBufferBytes
 /* Register the thread under the list semaphore before starting it. */
 void sdfStartThreadAndWait(SdfThreadNode *node, void (*entry)(void), void *stack, s64 stackSize, s32 priority, s32 threadArgument) {
     node->threadId = CreateThreadSimple((void *)entry, stack, (s32)stackSize, priority);
-    WaitSema(sdfTrackedThreadSemaphore);
-    node->next = sdfTrackedThreadHead;
-    sdfTrackedThreadHead = node;
-    SignalSema(sdfTrackedThreadSemaphore);
+    WaitSema(sdfThreadSema);
+    node->next = sdfVblankThreadId;
+    sdfVblankThreadId = node;
+    SignalSema(sdfThreadSema);
     _StartThread(node->threadId, threadArgument);
 }
 
@@ -130,15 +130,15 @@ void sdfDeleteTrackedThread(SdfThreadNode *node) {
     SdfThreadNode *current;
     s32 threadId;
 
-    WaitSema(sdfTrackedThreadSemaphore);
-    link = &sdfTrackedThreadHead;
+    WaitSema(sdfThreadSema);
+    link = &sdfVblankThreadId;
     current = *link;
     while (current != node) {
         link = &current->next;
         current = current->next;
     }
     *link = node->next;
-    SignalSema(sdfTrackedThreadSemaphore);
+    SignalSema(sdfThreadSema);
     threadId = node->threadId;
     if (threadId == GetThreadId()) {
         ExitDeleteThread();

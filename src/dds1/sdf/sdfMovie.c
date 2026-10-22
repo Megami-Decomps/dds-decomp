@@ -9,7 +9,7 @@
 #include "sdf_dev_state.h"
 
 s32 sdfFileCmdFileSize(DevState *state);
-extern s32 sdfMoviePacRingSemaphore;
+extern s32 movieStreamSema;
 
 /* Queue up to 0x4000 bytes into the linear ring; state 5 means insufficient room. */
 void movieReadNextChunk(MovObj *movie) {
@@ -184,7 +184,7 @@ s32 movieReadChunk(DevState *deviceState, s32 operation, void *readBuffer, s32 b
                     s32 ringLength;
                     s32 wrappedBytes;
 
-                    WaitSema(sdfMoviePacRingSemaphore);
+                    WaitSema(movieStreamSema);
                     ringLength = stream->ringLength;
                     writeOffset = stream->ringOffset + ringLength;
                     writeOffset += (writeOffset > 0xFFFF) * -0x10000;
@@ -205,7 +205,7 @@ s32 movieReadChunk(DevState *deviceState, s32 operation, void *readBuffer, s32 b
                     } else {
                         stream->ringLength = wrappedBytes;
                     }
-                    SignalSema(sdfMoviePacRingSemaphore);
+                    SignalSema(movieStreamSema);
                 } else {
                     s32 restoreInterrupts = DIntr();
 

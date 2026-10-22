@@ -365,7 +365,7 @@ extern void mnuClearStaffSceneConfigEntries(MenuPanelGroup *);
 void mnuDrawStaffPartySelectionPanel(KwlnTask *task) {
     MenuContext *context = (MenuContext *)dds3GetProcessData(task);
     MenuStaffChoices *choices = (MenuStaffChoices *)context->party;
-    DatPartyRecord *unit = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
+    DatPartyRecord *unit = &DDS3_GBWK->party[context->partyWindow.lists[0]->cursor->index];
     s32 selection;
     FrFontGlyph *glyph;
 
@@ -504,8 +504,8 @@ s32 mnuApplyRandomStatItemEffect(u8 *menu, DatPartyRecord *entry, s32 itemId) {
     } while (i < 20);
 
     entryIndex = mnuGetPartyEntryCurrentId(entry) - 0xC0;
-    datGameState->itemStatBonuses[entryIndex][statIndex] += choices->thirdListValue;
-    datGameState->itemRequirementCounts[entryIndex]++;
+    DDS3_GBWK->itemStatBonuses[entryIndex][statIndex] += choices->thirdListValue;
+    DDS3_GBWK->itemRequirementCounts[entryIndex]++;
     ptyRecomputeMaxHpMp(entry);
     ptyAdjustItemQuantity(itemId, -1);
     return weightCount >= 2;
@@ -514,7 +514,7 @@ s32 mnuApplyRandomStatItemEffect(u8 *menu, DatPartyRecord *entry, s32 itemId) {
 s32 mnuUpdatePartySlotAssignmentPopup(KwlnTask *callback) {
     s32 context = dds3GetProcessData(callback);
     s32 *popup = ((MenuContext *)context)->popupState;
-    DatPartyRecord *slot = &datGameState->party[((MenuContext *)context)->partyWindow.lists[0]->cursor->index];
+    DatPartyRecord *slot = &DDS3_GBWK->party[((MenuContext *)context)->partyWindow.lists[0]->cursor->index];
     u8 *menu = (u8 *)((MenuContext *)context)->party;
     s32 state = mnuDispatchPopupTransition(&((MenuContext *)context)->transitionWork, popup, 0, (void *)callback);
     s32 label;
@@ -557,15 +557,15 @@ void mnuClearPartySelectionValues(DatPartyRecord *entry, s32 selection) {
     }
     selection -= 0xc0;
     for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
-        datGameState->itemStatBonuses[selection][i] = 0;
+        DDS3_GBWK->itemStatBonuses[selection][i] = 0;
     }
-    datGameState->itemRequirementCounts[selection] = 0;
+    DDS3_GBWK->itemRequirementCounts[selection] = 0;
     ptyRecomputeMaxHpMp(entry);
 }
 
 u32 mnuEnterSlotLabel(KwlnTask *task) {
     s32 context = dds3GetProcessData(task);
-    DatPartyRecord *slot = &datGameState->party[((MenuContext *)context)->partyWindow.lists[0]->cursor->index];
+    DatPartyRecord *slot = &DDS3_GBWK->party[((MenuContext *)context)->partyWindow.lists[0]->cursor->index];
     s32 selectedEntry;
     mnuSetStateValue(context + 0xaa50, 1);
     selectedEntry = mnuGetPartyEntryCurrentId(slot);
@@ -584,7 +584,7 @@ u32 mnuPartySlotClearLeaveNoOp(void) {
 s32 mnuPartySlotConfirmClearUpdate(KwlnTask *callback) {
     s32 context = dds3GetProcessData(callback);
     s32 *popup = ((MenuContext *)context)->popupState;
-    DatPartyRecord *slot = &datGameState->party[((MenuContext *)context)->partyWindow.lists[0]->cursor->index];
+    DatPartyRecord *slot = &DDS3_GBWK->party[((MenuContext *)context)->partyWindow.lists[0]->cursor->index];
     s32 state = mnuDispatchPopupTransition(&((MenuContext *)context)->transitionWork, popup, 0, (void *)callback);
     s32 selectedEntry;
     if (state != 0) {
@@ -656,13 +656,13 @@ void mnuCreatePartySelectionWindow(MenuContext *context) {
     window->list->drawCallback = mnuDrawPartySelectionListEntry;
 
     for (i = 0; i < 5; i++) {
-        if ((datGameState->party[i].flags & 1) != 0) {
-            s32 id = datGameState->party[i].unitId;
+        if ((DDS3_GBWK->party[i].flags & 1) != 0) {
+            s32 id = DDS3_GBWK->party[i].unitId;
             MenuListNode *node = mnuAppendWindowListNode(window,
                 datUnitNames + id * 17);
 
             node->sortKeyPrimary = id - 1;
-            node->sortKeySecondary = datGameState->party[i].level;
+            node->sortKeySecondary = DDS3_GBWK->party[i].level;
         }
     }
     mnuAppendWindowListNode(window, D_00437BE8);
@@ -713,8 +713,8 @@ void mnuCopyPartyEntries(context)
 
     menuWork->activeCount = 0;
     for (entryIndex = 0; entryIndex < MNU_STAFF_PARTY_SLOT_COUNT; entryIndex++) {
-        *entryCursor = *(DatPartyRecord *)(partyCopyByteOffset + (s32)datGameState + (s32)&((DatGameState *)0)->party);
-        if (((DatPartyRecord *)((s32)datGameState + partyFlagsByteOffset))->flags & MNU_STAFF_PARTY_ACTIVE_BIT) {
+        *entryCursor = *(DatPartyRecord *)(partyCopyByteOffset + (s32)DDS3_GBWK + (s32)&((DatGameState *)0)->party);
+        if (((DatPartyRecord *)((s32)DDS3_GBWK + partyFlagsByteOffset))->flags & MNU_STAFF_PARTY_ACTIVE_BIT) {
             menuWork->activeCount = menuWork->activeCount + 1;
         }
         partyFlagsByteOffset += sizeof(DatPartyRecord);
@@ -786,7 +786,7 @@ void mnuRestorePartyEntriesAndRefresh(context)
     }
     backupByteOffset = 0;
     for (entryCounter = MNU_STAFF_PARTY_LAST_SLOT; entryCounter >= 0; entryCounter--) {
-        *(DatPartyRecord *)(backupByteOffset + (s32)datGameState + (s32)&((DatGameState *)0)->party) = *(DatPartyRecord *)(backupByteOffset + (s32)menuWork + (s32)&((PartyMenuData *)0)->backup);
+        *(DatPartyRecord *)(backupByteOffset + (s32)DDS3_GBWK + (s32)&((DatGameState *)0)->party) = *(DatPartyRecord *)(backupByteOffset + (s32)menuWork + (s32)&((PartyMenuData *)0)->backup);
         backupByteOffset += sizeof(DatPartyRecord);
     }
     panelWork = &((MenuContext *)context)->partyWindow;
@@ -800,7 +800,7 @@ void mnuRestorePartyEntriesAndRefresh(context)
 s32 mnuCountActiveSlots(void) {
     s32 activeCount = 0;
     s32 entryCountdown;
-    DatPartyRecord *entryCursor = datGameState->party;
+    DatPartyRecord *entryCursor = DDS3_GBWK->party;
     for (entryCountdown = MNU_STAFF_PARTY_LAST_SLOT; entryCountdown >= 0; entryCountdown--) {
         activeCount += entryCursor->flags & MNU_STAFF_PARTY_ACTIVE_BIT;
         entryCursor++;
@@ -865,7 +865,7 @@ s32 mnuInitializePartySelectionState(KwlnTask *task) {
 
     mnuClearPartySelectionAndActivateSlots(contextAddress);
     for (slotIndex = 0; slotIndex < 5; slotIndex++) {
-        memcpy(&menuWork->original[slotIndex], &datGameState->party[slotIndex],
+        memcpy(&menuWork->original[slotIndex], &DDS3_GBWK->party[slotIndex],
                sizeof(DatPartyRecord));
         memcpy(menuWork->panelSnapshots[slotIndex],
                &context->partyWindow.slots[slotIndex].hp,
@@ -1402,7 +1402,7 @@ s32 mnuCreatePanels(KwlnTask *callback) {
     MenuContext *menuContext = (MenuContext *)context;
     MenuList *list = menuContext->partyWindow.lists[0];
     s32 index = list->cursor->index;
-    DatPartyRecord *data = &datGameState->party[index];
+    DatPartyRecord *data = &DDS3_GBWK->party[index];
     MenuPageWindow *window = &((MenuContext *)context)->partyWindow;
     StaffMenuRuntime *party = (StaffMenuRuntime *)menuContext->party;
     MenuProfilePanel *profile;
@@ -1557,7 +1557,7 @@ s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
 }
 
 void mnuDrawSlotIcons(s32 x, MenuPageWindow *page) {
-    DatPartyRecord *slot = &datGameState->party[page->lists[0]->cursor->index];
+    DatPartyRecord *slot = &DDS3_GBWK->party[page->lists[0]->cursor->index];
     s32 i;
     s32 y = 0xb40;
     FrFontGlyph *handle;
@@ -1611,7 +1611,7 @@ void mnuDrawIconPanelFullFade(u32 x, u32 y, u32 depth, MenuIconState *panel, s32
 s32 mnuDrawSelectedStaffPartyView(KwlnTask *callback) {
     s32 contextAddress = (s32)dds3GetProcessData(callback);
     MenuContext *context = (MenuContext *)contextAddress;
-    DatGameState *gameState = datGameState;
+    DatGameState *gameState = DDS3_GBWK;
     StaffMenuRuntime *menuWork = (StaffMenuRuntime *)context->party;
     s32 partyIndex = context->partyWindow.lists[0]->cursor->index;
     DatPartyRecord *partyEntry = &gameState->party[partyIndex];
@@ -1760,7 +1760,7 @@ void ptySkillMenuDrawEquippedSkillEntry(s32 x, s32 y, s32 depth, MenuList *list,
 
         selected = locked == 0;
     }
-    actor = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
+    actor = &DDS3_GBWK->party[context->partyWindow.lists[0]->cursor->index];
     if (node->flags48 & 2) {
         selected = 1;
     }
@@ -1804,7 +1804,7 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, KwlnTask *callback) {
     MenuListDefaults defaults = D_0042AE18;
     s32 selected = context->partyWindow.lists[0]->cursor->index;
     SkillMenuRuntime *party = (SkillMenuRuntime *)context->party;
-    DatPartyRecord *entry = &datGameState->party[selected];
+    DatPartyRecord *entry = &DDS3_GBWK->party[selected];
     s32 skillCount = brsGetLevelStepForValue(entry->level);
     s32 placement;
     MenuWindowContainer *window;
@@ -1829,7 +1829,7 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, KwlnTask *callback) {
     window->list->context = context;
     window->list->drawCallback = ptySkillMenuDrawEquippedSkillEntry;
     for (i = 0; i < skillCount; i++) {
-        u16 skill = datGameState->party[selected].effectData[i];
+        u16 skill = DDS3_GBWK->party[selected].effectData[i];
         MenuListNode *node;
 
         if (skill != 0) {
@@ -1929,7 +1929,7 @@ void mnuDrawSkillCategoryEntry(s32 x, s32 y, s32 depth, MenuList *list,
 
     mnuDrawCampGridResourceSlot(x, y, depth, (s32)list, (u32)node, texture);
     selected = list->cursor == node;
-    actor = &datGameState->party[
+    actor = &DDS3_GBWK->party[
         context->partyWindow.lists[0]->cursor->index];
     if (node == list->head && list->categoryMarkerEnabled != 0) {
         category = list->categoryIndex;
@@ -2001,7 +2001,7 @@ extern u32 scrGetSecondaryScriptFlag(DatPartyRecord *, u16);
 /* Secondary script bits enable the category marker independently of learned skills. */
 void mnuRefreshSkillWindowOwnershipFlags(MenuContext *context) {
     MenuWindowContainer **windows = ((SkillMenuRuntime *)context->party)->skillWindows;
-    DatPartyRecord *owner = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
+    DatPartyRecord *owner = &DDS3_GBWK->party[context->partyWindow.lists[0]->cursor->index];
     s32 windowIndex;
 
     for (windowIndex = 0; windowIndex < 4; windowIndex++) {
@@ -2085,7 +2085,7 @@ void ptySkillMenuInitPages(MenuContext *context) {
     s32 category;
 
     if (menu->skillMenuActive == 0) {
-        owner = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
+        owner = &DDS3_GBWK->party[context->partyWindow.lists[0]->cursor->index];
         skillBits = (u32 *)mnuBuildOwnedSkillBits();
         menu->skillPanel = mnuCreatePanelState(4, 0x2C0);
         mnuSetPanelFirstGridSlot(menu->skillPanel, 0, 0, (EffectSlotSet *)context->labelHandle, 0x1B);
@@ -2242,7 +2242,7 @@ s32 ptySkillMenuShellUpdate(KwlnTask *callback) {
         categoryWindow = context->imageHandle;
         if (categoryWindow->list->cursor->index == 0) {
             partyIndex = context->partyWindow.lists[0]->cursor->index;
-            partyRecord = &datGameState->party[partyIndex];
+            partyRecord = &DDS3_GBWK->party[partyIndex];
             if (!(partyRecord->status & 0x10)) {
                 if (runtime->selectedWindow != NULL) {
                     mnuDestroySelectedPartyWindow(callback);
@@ -2439,7 +2439,7 @@ void ptySkillMenuHandleSelection(KwlnTask *callback) {
     s32 skillId;
     s32 partyIndex = context->partyWindow.lists[0]->cursor->index;
     MenuListNode *categoryCursor = menuWork->categoryList->cursor;
-    DatGameState *gameState = datGameState;
+    DatGameState *gameState = DDS3_GBWK;
 
     list->stateFlags &= ~MNU_LIST_SELECTION_FLAG;
     partyEntry = &gameState->party[partyIndex];
@@ -2497,7 +2497,7 @@ void ptySkillMenuHandleSlotReorder(KwlnTask *callback) {
     s32 menuWork = ((MenuContext *)context)->party;
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_REORDER_INPUT_MASK);
     MenuWindowContainer *window = ((SkillMenuRuntime *)menuWork)->selectedWindow;
-    DatPartyRecord *partyEntry = &datGameState->party[((MenuContext *)context)->partyWindow.lists[0]->cursor->index];
+    DatPartyRecord *partyEntry = &DDS3_GBWK->party[((MenuContext *)context)->partyWindow.lists[0]->cursor->index];
     MenuList *list = window->list;
 
     list->stateFlags &= ~MNU_LIST_SELECTION_FLAG;
@@ -2647,8 +2647,8 @@ s32 ptySkillMenuApplyFieldUseAndCost(id, context)
     s32 context;
 {
     MenuPageWindow *window = &((MenuContext *)context)->partyWindow;
-    DatPartyRecord *slotA = &datGameState->party[((MenuContext *)context)->partyWindow.lists[0]->cursor->index];
-    DatPartyRecord *slotB = &datGameState->party[((MenuContext *)context)->partyWindow.lists[1]->cursor->index];
+    DatPartyRecord *slotA = &DDS3_GBWK->party[((MenuContext *)context)->partyWindow.lists[0]->cursor->index];
+    DatPartyRecord *slotB = &DDS3_GBWK->party[((MenuContext *)context)->partyWindow.lists[1]->cursor->index];
     if (mnuIsEntryCostUnaffordable(id, slotA) != 0) {
         return 0;
     }
@@ -2664,7 +2664,7 @@ s32 ptySkillMenuApplyFieldUseAndCost(id, context)
 
 /* Mark entries whose field-use cost cannot be paid by the selected party member. */
 void mnuFlagMatchingEntries(s32 context) {
-    DatPartyRecord *slot = &datGameState->party[((MenuContext *)context)->partyWindow.lists[0]->cursor->index];
+    DatPartyRecord *slot = &DDS3_GBWK->party[((MenuContext *)context)->partyWindow.lists[0]->cursor->index];
     MenuListNode *link = ((SkillMenuRuntime *)((MenuContext *)context)->party)->selectedWindow->list->first;
     if (link != NULL) {
         do {
@@ -3004,7 +3004,7 @@ void mnuCollectFrontlinePartySlots(DatPartyRecord **out, s32 max) {
     }
     i = 0;
     while (count < max) {
-        DatPartyRecord *entry = &datGameState->party[i];
+        DatPartyRecord *entry = &DDS3_GBWK->party[i];
 
         if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
             out[count] = entry;

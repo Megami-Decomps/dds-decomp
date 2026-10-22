@@ -27,9 +27,9 @@ extern char D_003B1168[]; /* "staffProc" */
 
 extern MnuMovieResourceEntry mnuMovieResourceEntries[];
 
-extern KwlnTask *mnuMovieDrawTask;
+extern KwlnTask *PlayingNo;
 
-extern u16 mnuMovieTaskState;
+extern u16 dds3VblanksPerFrame;
 
 extern MnuStaffMovieWork *mnuMovieWork;
 
@@ -435,7 +435,7 @@ s32 mnuStaffImageProc(KwlnTask *task) {
 void mnuFinishStaffMovieAndFreeState(KwlnTask *task) {
     s32 pendingWork;
 
-    mnuMovieTaskState = 2;
+    dds3VblanksPerFrame = 2;
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
     mnuReleaseStaffRollText();
@@ -472,7 +472,7 @@ void mnuInitializeMovieRollViewport(void) {
 
 extern u32 D_003BA8EC;
 
-extern u16 mnuMovieTaskState;
+extern u16 dds3VblanksPerFrame;
 
 extern char D_003B1168[];
 
@@ -495,7 +495,7 @@ void mnuMovieCreateTask(void) {
     movie->phase = 0;
     movie->scrollTicks = 0;
     mnuQueueTitleSoundStreamEntry(0x13);
-    mnuMovieTaskState = 1;
+    dds3VblanksPerFrame = 1;
     dds3StartProcess(D_003B1168, 0x408, 0, 0, mnuUpdateStaffRoll, mnuFinishStaffMovieAndFreeState, 0);
 }
 
@@ -516,9 +516,9 @@ s32 movieDrawProc(KwlnTask *task) {
 }
 
 void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *descriptor) {
-    if (mnuMovieDrawTask == 0) {
+    if (PlayingNo == 0) {
         movieOpenStream(&mnuMovieDrawContext, descriptor, fileName);
-        mnuMovieDrawTask = dds3StartProcess(D_003B1A78, 0x2afb, 1, 1, movieDrawProc, 0, 0);
+        PlayingNo = dds3StartProcess(D_003B1A78, 0x2afb, 1, 1, movieDrawProc, 0, 0);
     }
 }
 
@@ -529,12 +529,12 @@ void dds3PlayMovieByIndex(s32 movieIndex) {
 }
 
 void movieStop(void) {
-    if (mnuMovieDrawTask == 0) {
+    if (PlayingNo == 0) {
         return;
     }
     movieCloseStream(&mnuMovieDrawContext);
-    dds3KillProcess(mnuMovieDrawTask, 0);
-    mnuMovieDrawTask = 0;
+    dds3KillProcess(PlayingNo, 0);
+    PlayingNo = 0;
 }
 
 extern s32 sdfMovieIsFinished(MovObj *job);
@@ -710,5 +710,5 @@ INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC620);
 
 INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC628);
 
-INCLUDE_SDATA(const s32, "game/code_0026EC90", mnuMovieDrawTask);
+INCLUDE_SDATA(const s32, "game/code_0026EC90", PlayingNo);
 

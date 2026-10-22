@@ -27,7 +27,7 @@ typedef char FldRoomEffectEntry_object_offset_check[
 typedef char FldRoomEffectEntry_room_offset_check[
     ((u32)&((FldRoomEffectEntry *)0)->room == 0x38) ? 1 : -1];
 
-extern FldRoomEffectEntry fldRoomEffectEntries[];
-extern s32 fldRoomEffectEntryCount;
+extern FldRoomEffectEntry fldModelSlotTable[];
+extern s32 fldNpcModelTable;
 
 #endif /* FLD_ROOM_EFFECT_ENTRY_H */

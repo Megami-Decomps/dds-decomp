@@ -22,6 +22,9 @@ TARGETS = [
     (ROOT / "config", "not_functions.txt"),
     (ROOT / "config", "devbuild.json"),
     (ROOT / "config", "shared_names_exclude.txt"),
+    # A renamed data symbol must move here in step, or the alias contract
+    # (name equals owner plus offset, by name) stops validating.
+    (ROOT / "config", "symbol_aliases.json"),
     (ROOT / "README.md", None),
     (ROOT / "permuter_settings.toml", None),
 ]

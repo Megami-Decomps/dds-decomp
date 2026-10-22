@@ -16,7 +16,7 @@ extern u32 fldLoadAreaRoomResources(const char *);
 
 
 
-extern EffWorldNode *dds3ActiveWorld;
+extern EffWorldNode *dds3TheWorld;
 
 
 u32 dds3AddBasicArray(WorldValueIndices *object, s32 count) {
@@ -28,10 +28,10 @@ u32 dds3AddBasicArray(WorldValueIndices *object, s32 count) {
     if (count == 0) {
         return 1;
     }
-    if (dds3ActiveWorld == NULL) {
+    if (dds3TheWorld == NULL) {
         return 0;
     }
-    world = dds3ActiveWorld->data;
+    world = dds3TheWorld->data;
     if (world->freeEntryCount < count || count < 0) {
         return 0;
     }
@@ -81,7 +81,7 @@ u32 dds3SetBasicArray(WorldValueIndices *object, u32 wordValue) {
     if (object->cursorIndex < 0) {
         return 0;
     }
-    ((WorldInfo *)dds3ActiveWorld->data)->entries[object->cursorIndex].value = wordValue;
+    ((WorldInfo *)dds3TheWorld->data)->entries[object->cursorIndex].value = wordValue;
     return 1;
 }
 
@@ -92,7 +92,7 @@ u32 dds3GetBasicArray(const WorldValueIndices *object) {
     if (object->cursorIndex < 0) {
         return 0;
     }
-    return ((WorldInfo *)dds3ActiveWorld->data)->entries[object->cursorIndex].value;
+    return ((WorldInfo *)dds3TheWorld->data)->entries[object->cursorIndex].value;
 }
 
 /* Signed comparison via complement-and-shift: zero counts as nonnegative. */
@@ -105,7 +105,7 @@ u32 dds3SetNextBasicArray(WorldValueIndices *object) {
     if (object->cursorIndex < 0) {
         return 0;
     }
-    object->cursorIndex = ((WorldInfo *)dds3ActiveWorld->data)->entries[object->cursorIndex].nextIndex;
+    object->cursorIndex = ((WorldInfo *)dds3TheWorld->data)->entries[object->cursorIndex].nextIndex;
     return (u32)~(s32)object->cursorIndex >> 0x1f;
 }
 

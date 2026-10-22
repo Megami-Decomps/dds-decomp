@@ -31,29 +31,29 @@ extern void DebugProcessTree(KwlnTask* task, s32 depth);
 
 #include "sdf_debug_api.h"
 
-extern KwlnTask* kwlnDelayedStartTaskHead;
+extern KwlnTask* startinglistf;
 
-extern s32 kwlnDelayedStartTaskCount;
+extern s32 startinglistcnt;
 
-extern KwlnTask* kwlnDelayedDestroyTaskHead;
+extern KwlnTask* endinglistf;
 
-extern s32 kwlnDelayedDestroyTaskCount;
+extern s32 endinglistcnt;
 
-extern KwlnTask* kwlnActiveTaskHead;
+extern KwlnTask* runninglistf;
 
-extern s32 kwlnActiveTaskCount;
+extern s32 runninglistcnt;
 
-extern KwlnTask *kwlnExecutingTask;
+extern KwlnTask *runprocess;
 
 extern u8 D_003BA828[];
 
 extern u8 D_003BA830[];
 
-extern u8 kwlnTaskTreePrefix[];
+extern u8 dds3ProcessTreeDepth[];
 
-extern s8 kwlnPadButtonStates[2][2][16];
+extern s8 dds3PadButtonPrev[2][2][16];
 
-extern u8 kwlnTaskPadButtonStates[2][2][16];
+extern u8 dds3PadButtonState[2][2][16];
 
 extern u8 D_003BA860[2][2][2];
 extern s8 D_003BA868[2][2];
@@ -82,7 +82,7 @@ void StartingProcess(void)
     KwlnTask* node;
     KwlnTask* curr;
 
-    node = kwlnDelayedStartTaskHead;
+    node = startinglistf;
     while (node != 0) {
         if (node->startDelayTicks > 0) {
             node->startDelayTicks--;
@@ -103,13 +103,13 @@ s32 RunProcess(KwlnTask *task) {
     if (task->flags & 0x20) {
         return 1;
     }
-    kwlnExecutingTask = task;
+    runprocess = task;
 
     if (task->flags & 0x10) {
         for (port = 0; port < 2; port++) {
             for (inputIndex = 0; inputIndex < 16; inputIndex++) {
-                kwlnTaskPadButtonStates[0][port][inputIndex] = 0;
-                kwlnTaskPadButtonStates[1][port][inputIndex] = 0;
+                dds3PadButtonState[0][port][inputIndex] = 0;
+                dds3PadButtonState[1][port][inputIndex] = 0;
             }
             for (inputIndex = 0; inputIndex < 2; inputIndex++) {
                 D_003BA870[port][inputIndex][0] = 0;
@@ -120,8 +120,8 @@ s32 RunProcess(KwlnTask *task) {
     } else {
         for (port = 0; port < 2; port++) {
             for (inputIndex = 0; inputIndex < 16; inputIndex++) {
-                kwlnTaskPadButtonStates[0][port][inputIndex] = kwlnPadButtonStates[0][port][inputIndex];
-                kwlnTaskPadButtonStates[1][port][inputIndex] = kwlnPadButtonStates[1][port][inputIndex];
+                dds3PadButtonState[0][port][inputIndex] = dds3PadButtonPrev[0][port][inputIndex];
+                dds3PadButtonState[1][port][inputIndex] = dds3PadButtonPrev[1][port][inputIndex];
             }
             for (inputIndex = 0; inputIndex < 2; inputIndex++) {
                 D_003BA870[port][inputIndex][0] = D_003BA860[port][inputIndex][0];
@@ -138,19 +138,19 @@ s32 RunProcess(KwlnTask *task) {
         }
         if (nextUpdate == -1 && (task->flags & KWLN_TASK_STATE_MASK) == KWLN_TASK_ACTIVE) {
             EndProcess(task);
-            kwlnExecutingTask = 0;
+            runprocess = 0;
             return 0;
         }
     }
     task->timer++;
-    kwlnExecutingTask = 0;
+    runprocess = 0;
     return 1;
 }
 
 void RunningProcess(void)
 {
-    KwlnTask* active = kwlnActiveTaskHead;
-    KwlnTask* delayed = kwlnDelayedDestroyTaskHead;
+    KwlnTask* active = runninglistf;
+    KwlnTask* delayed = endinglistf;
     KwlnTask* current;
     /* The two single-queue drains share a predecessor snapshot; the merge
      * keeps its own. A step may unlink the selected node. SMT3 RunningProcess
@@ -168,7 +168,7 @@ void RunningProcess(void)
                     if (RunProcess(current) != 0) {
                         active = current->listNext;
                     } else {
-                        active = previous != 0 ? previous->listNext : kwlnActiveTaskHead;
+                        active = previous != 0 ? previous->listNext : runninglistf;
                     }
                 } else {
                     current = delayed;
@@ -176,7 +176,7 @@ void RunningProcess(void)
                     if (RunProcess(current) != 0) {
                         delayed = current->listNext;
                     } else {
-                        delayed = previous != 0 ? previous->listNext : kwlnDelayedDestroyTaskHead;
+                        delayed = previous != 0 ? previous->listNext : endinglistf;
                     }
                 }
             } else {
@@ -187,7 +187,7 @@ void RunningProcess(void)
                     if (RunProcess(current) != 0) {
                         active = current->listNext;
                     } else {
-                        active = drainPrevious != 0 ? drainPrevious->listNext : kwlnActiveTaskHead;
+                        active = drainPrevious != 0 ? drainPrevious->listNext : runninglistf;
                     }
                 } while (active != 0);
                 return;
@@ -201,7 +201,7 @@ void RunningProcess(void)
                     if (RunProcess(current) != 0) {
                         delayed = current->listNext;
                     } else {
-                        delayed = drainPrevious != 0 ? drainPrevious->listNext : kwlnDelayedDestroyTaskHead;
+                        delayed = drainPrevious != 0 ? drainPrevious->listNext : endinglistf;
                     }
                 } while (delayed != 0);
             }
@@ -254,7 +254,7 @@ void dds3EndingProcess(void)
     KwlnTask* node;
     KwlnTask* curr;
 
-    node = kwlnDelayedDestroyTaskHead;
+    node = endinglistf;
     while (node != 0) {
         if (node->destroyDelayTicks > 0) {
             node->destroyDelayTicks--;
@@ -301,13 +301,13 @@ void ChangeProcessFlag(s32 setFlags, KwlnTask *task, u32 flags, s32 scope)
         for (state = 0; state < 3; state++) {
             switch (state) {
             case 0:
-                node = kwlnDelayedStartTaskHead;
+                node = startinglistf;
                 break;
             case 1:
-                node = kwlnActiveTaskHead;
+                node = runninglistf;
                 break;
             case 2:
-                node = kwlnDelayedDestroyTaskHead;
+                node = endinglistf;
                 break;
             }
             if (node != NULL) {
@@ -337,11 +337,11 @@ s32 dds3GetProcessCount(u32 state)
 {
     switch (state & KWLN_TASK_STATE_MASK) {
     case KWLN_TASK_DELAYED_START:
-        return kwlnDelayedStartTaskCount;
+        return startinglistcnt;
     case KWLN_TASK_ACTIVE:
-        return kwlnActiveTaskCount;
+        return runninglistcnt;
     case KWLN_TASK_DESTROY_PENDING:
-        return kwlnDelayedDestroyTaskCount;
+        return endinglistcnt;
     default:
         return 0;
     }
@@ -349,17 +349,17 @@ s32 dds3GetProcessCount(u32 state)
 
 KwlnTask *dds3SearchProcessNumber(u32 taskState, s32 taskIndex)
 {
-    KwlnTask *task = kwlnDelayedStartTaskHead;
+    KwlnTask *task = startinglistf;
     s32 listPosition;
 
     switch (taskState & KWLN_TASK_STATE_MASK) {
     case KWLN_TASK_DELAYED_START:
         break;
     case KWLN_TASK_ACTIVE:
-        task = kwlnActiveTaskHead;
+        task = runninglistf;
         break;
     case KWLN_TASK_DESTROY_PENDING:
-        task = kwlnDelayedDestroyTaskHead;
+        task = endinglistf;
         break;
     case KWLN_TASK_DETACHED:
     default:
@@ -386,32 +386,32 @@ void dds3PrintProcessList(void)
 {
     u8* queueCountFormat;
 
-    kwlnTraverseDiagnosticTaskQueue(kwlnDelayedStartTaskHead, D_0039DE88);
+    kwlnTraverseDiagnosticTaskQueue(startinglistf, D_0039DE88);
     queueCountFormat = D_0039DEB8;
-    printf(queueCountFormat, kwlnDelayedStartTaskCount);
-    kwlnTraverseDiagnosticTaskQueue(kwlnActiveTaskHead, D_0039DEC8);
-    printf(queueCountFormat, kwlnActiveTaskCount);
-    kwlnTraverseDiagnosticTaskQueue(kwlnDelayedDestroyTaskHead, D_0039DEF8);
-    printf(queueCountFormat, kwlnDelayedDestroyTaskCount);
+    printf(queueCountFormat, startinglistcnt);
+    kwlnTraverseDiagnosticTaskQueue(runninglistf, D_0039DEC8);
+    printf(queueCountFormat, runninglistcnt);
+    kwlnTraverseDiagnosticTaskQueue(endinglistf, D_0039DEF8);
+    printf(queueCountFormat, endinglistcnt);
     printf(D_003BA828);
 }
 
 void DebugProcessTree(KwlnTask *task, s32 depth)
 {
-    printf(D_003BA830, kwlnTaskTreePrefix, task);
+    printf(D_003BA830, dds3ProcessTreeDepth, task);
     if (task->childList != NULL) {
         if (task->parent == NULL) {
-            kwlnTaskTreePrefix[0] = ' ';
+            dds3ProcessTreeDepth[0] = ' ';
         } else {
             if (task->next == NULL) {
-                kwlnTaskTreePrefix[depth * 4] = ' ';
+                dds3ProcessTreeDepth[depth * 4] = ' ';
             } else {
-                kwlnTaskTreePrefix[depth * 4] = '|';
+                dds3ProcessTreeDepth[depth * 4] = '|';
             }
         }
-        kwlnTaskTreePrefix[depth * 4 + 4] = 0;
+        dds3ProcessTreeDepth[depth * 4 + 4] = 0;
         DebugProcessTree(task->childList, depth + 1);
-        kwlnTaskTreePrefix[depth * 4] = 0;
+        dds3ProcessTreeDepth[depth * 4] = 0;
     }
     if (task->next != NULL) {
         DebugProcessTree(task->next, depth);
@@ -425,23 +425,23 @@ void dds3PrintProcessTree(void)
     s32 prefixByteIndex;
 
     for (prefixByteIndex = 0; prefixByteIndex < 0x40; prefixByteIndex++) {
-        kwlnTaskTreePrefix[prefixByteIndex] = 0x20;
+        dds3ProcessTreeDepth[prefixByteIndex] = 0x20;
     }
-    for (task = kwlnDelayedStartTaskHead; task != NULL; task = task->listNext) {
+    for (task = startinglistf; task != NULL; task = task->listNext) {
         if (task->parent == NULL) {
-            kwlnTaskTreePrefix[0] = 0;
+            dds3ProcessTreeDepth[0] = 0;
             DebugProcessTree(task, 0);
         }
     }
-    for (task = kwlnActiveTaskHead; task != NULL; task = task->listNext) {
+    for (task = runninglistf; task != NULL; task = task->listNext) {
         if (task->parent == NULL) {
-            kwlnTaskTreePrefix[0] = 0;
+            dds3ProcessTreeDepth[0] = 0;
             DebugProcessTree(task, 0);
         }
     }
-    for (task = kwlnDelayedDestroyTaskHead; task != NULL; task = task->listNext) {
+    for (task = endinglistf; task != NULL; task = task->listNext) {
         if (task->parent == NULL) {
-            kwlnTaskTreePrefix[0] = 0;
+            dds3ProcessTreeDepth[0] = 0;
             DebugProcessTree(task, 0);
         }
     }
@@ -582,13 +582,13 @@ KwlnTask* dds3SearchProcessName(const char* name)
     for (; queueIndex < 3; queueIndex++) {
         switch (queueIndex) {
         case 0:
-            task = kwlnDelayedStartTaskHead;
+            task = startinglistf;
             break;
         case 1:
-            task = kwlnActiveTaskHead;
+            task = runninglistf;
             break;
         case 2:
-            task = kwlnDelayedDestroyTaskHead;
+            task = endinglistf;
             break;
         }
 
@@ -620,13 +620,13 @@ KwlnTask* dds3SearchProcessPriority(u32 prio)
         switch (taskListIndex)
         {
         case 0:
-            node = kwlnDelayedStartTaskHead;
+            node = startinglistf;
             break;
         case 1:
-            node = kwlnActiveTaskHead;
+            node = runninglistf;
             break;
         case 2:
-            node = kwlnDelayedDestroyTaskHead;
+            node = endinglistf;
             break;
         }
         while (node != 0)
@@ -653,13 +653,13 @@ s32 dds3ExistProcess(KwlnTask* target)
         switch (taskListIndex)
         {
         case 0:
-            node = kwlnDelayedStartTaskHead;
+            node = startinglistf;
             break;
         case 1:
-            node = kwlnActiveTaskHead;
+            node = runninglistf;
             break;
         case 2:
-            node = kwlnDelayedDestroyTaskHead;
+            node = endinglistf;
             break;
         }
         while (node != 0)
@@ -726,7 +726,7 @@ INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DEC8);
 
 INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DEF8);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", kwlnExecutingTask);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", runprocess);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_003BA828);
 

@@ -157,9 +157,9 @@ extern void itfMiscDrawAlphaPrim(SdfListHead *list, s32 context, s32 mode);
 extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
-extern SndPad kwlnTaskPadButtonStates;
+extern SndPad dds3PadButtonState;
 
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 
 #define BTL_ENTRY_STATUS_MASK 0x7FFF
 

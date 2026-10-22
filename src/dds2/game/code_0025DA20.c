@@ -107,7 +107,7 @@ extern CampFlagRow mnuCampFlagRows[];
 
 extern u8 mnuShopMessageSequencePopupEntry[];
 
-extern SdfTex *kwlnHeldTextureReference;
+extern SdfTex *dds3RenderTexture;
 
 
 extern s32 evtStopEventBgm(s32 id, s32 fade);
@@ -129,7 +129,7 @@ extern char D_00424BC0[]; /* "camp_draw" */
 
 extern char D_00424BD0[]; /* "camp_update" */
 
-extern s8 mnuPanelTaskCompletionState;
+extern s8 gProcessStat_0;
 
 
 
@@ -190,7 +190,7 @@ extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 mnuCampQuadBounds[4];
 extern s32 mnuCampQuadTexcoords[4];
 extern s32 mnuCampQuadColor[4];
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode sdfGrOtTable[];
 
 
 extern ShopRankPriceRow mnuShopRankPriceRows[];
@@ -815,7 +815,7 @@ void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display) {
             itfMiscDrawSpritePrim(mnuCampQuadBounds, mnuCampQuadTexcoords, mnuCampQuadColor,
                                           0xFF, texture, 0, packet);
         }
-        surface = &kwlnDrawSurfaces[surfaceIndex];
+        surface = &sdfGrOtTable[surfaceIndex];
         surface->append(surface, packet);
     }
 }
@@ -967,7 +967,7 @@ extern void mnuShopQueueAuxiliaryTexture(EvtRuntime *scene);
 void mnuAdvanceShopMenuState(EvtRuntime *scene) {
     switch (scene->menuState) {
     case 1:
-        if (kwlnHeldTextureReference == 0) {
+        if (dds3RenderTexture == 0) {
             dds3AllocRenderTexture(CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT, 100.75f);
         }
         scene->menuState = scene->menuState + 1;
@@ -1019,7 +1019,7 @@ void mnuShopSubmitDescriptor(u8 *scene) {
     if (((EvtRuntime *)scene)->pendingWork != 0) {
         drawPacket = sdfPrimAllocDrawTag(0);
         sdfLinkLoadImage(drawPacket,
-                                  kwlnHeldTextureReference->primaryResource, 0, 0,
+                                  dds3RenderTexture->primaryResource, 0, 0,
                                   CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT,
                                   ((EvtRuntime *)scene)->pendingWork, 0);
         D_00380708.append(&D_00380708, drawPacket);
@@ -1036,7 +1036,7 @@ void func_0025F130(s32 alpha) {
     SdfPacket *packet;
     u32 color;
 
-    if (kwlnHeldTextureReference == NULL) {
+    if (dds3RenderTexture == NULL) {
         return;
     }
     if (alpha == 0) {
@@ -1071,7 +1071,7 @@ void func_0025F130(s32 alpha) {
     packet[1].unk18 = 0x42;
     sdfDrawTagLink(list, (u32)packet);
     itfMiscDrawSpritePrim(D_003C99F0, D_003C9A00, D_003C9A10,
-                                  0xFEFF9B, kwlnHeldTextureReference, 0, list);
+                                  0xFEFF9B, dds3RenderTexture, 0, list);
     D_003805A8.append(&D_003805A8, list);
 }
 
@@ -1127,8 +1127,8 @@ void mnuValidateCampTimelineScriptRegisters(EvtRuntime *scene) {
                 key = key->next;
             }
             if (!found) {
-                if (datGameState->script.ints[CAMP_TIMELINE_SCRIPT_REGISTER_BASE + slotIndex] != -1) {
-                    datGameState->script.ints[CAMP_TIMELINE_SCRIPT_REGISTER_BASE + slotIndex] = -1;
+                if (DDS3_GBWK->script.ints[CAMP_TIMELINE_SCRIPT_REGISTER_BASE + slotIndex] != -1) {
+                    DDS3_GBWK->script.ints[CAMP_TIMELINE_SCRIPT_REGISTER_BASE + slotIndex] = -1;
                 }
             }
         }
@@ -1465,7 +1465,7 @@ s32 mnuCampHasEligibleOwnedItems(void *context) {
         if (mnuIsHighRangeItemId(i) != 0) {
             continue;
         }
-        if (datGameState->inventory.counts[i] == 0) {
+        if (DDS3_GBWK->inventory.counts[i] == 0) {
             continue;
         }
         if ((datItemSkillRecords[i].flags & 3) != 0) {
@@ -1530,7 +1530,7 @@ void mnuBuildEnabledCampEntryWindow(MenuTerminalContext *scene) {
     if (scene->hasHighRangeStock != 0) {
         options.enabled[2] = 1;
     }
-    if (datGameState->progressTotal != 0) {
+    if (DDS3_GBWK->progressTotal != 0) {
         options.enabled[4] = 1;
     }
     if (scene->extraEntryEnabled != 0) {
@@ -1658,7 +1658,7 @@ s32 mnuCountActivePartyEntries(void) {
 
     enabledCount = 0;
     entryCountdown = CAMP_PARTY_SCAN_LAST;
-    entryFlagsCursor = datGameState->party;
+    entryFlagsCursor = DDS3_GBWK->party;
     do {
         entryFlags = entryFlagsCursor->flags;
         entryFlagsCursor++;
@@ -1680,10 +1680,10 @@ s32 mnuCampResolveProgressTierValue(void) {
 
     for (i = 0; i < 3; i++) {
         if (i + 1 < 3) {
-            if (mnuShopCurrencyAwardTiers[i].threshold > datGameState->savedCurrency) {
+            if (mnuShopCurrencyAwardTiers[i].threshold > DDS3_GBWK->savedCurrency) {
                 break;
             }
-        } else if (mnuShopCurrencyAwardTiers[i].threshold <= datGameState->savedCurrency) {
+        } else if (mnuShopCurrencyAwardTiers[i].threshold <= DDS3_GBWK->savedCurrency) {
             break;
         }
     }
@@ -1701,7 +1701,7 @@ void mnuCampClearListedItemCounts(void) {
         entryId = *(u16 *)entry;
         entry = (s8 *)((s32)entry + 8);
         listedItemIndex = listedItemIndex + 1;
-        datGameState->inventory.counts[(u32)entryId] = 0;
+        DDS3_GBWK->inventory.counts[(u32)entryId] = 0;
     } while (listedItemIndex < 3);
 }
 
@@ -1737,7 +1737,7 @@ void mnuTerminalReleaseContextAndResources(KwlnTask *task) {
         fclDestroyMessage();
         evtReleaseResourcePairHandle(&scene->messageResources);
         sdfMemFreeDirect(scene->resourceHandle);
-        mnuPanelTaskCompletionState = 2;
+        gProcessStat_0 = 2;
     }
 }
 
@@ -1775,7 +1775,7 @@ void mnuCreateCampShopPopupTasks(const s32 *stockGroup) {
     fadeTask = dds3StartProcess("shop_fade", 0x2B13, 1, 0,
         mnuTerminalSyncMessageWindowControl, NULL, (u32)scene);
     dds3LinkProcess(drawTask, fadeTask);
-    mnuPanelTaskCompletionState = 1;
+    gProcessStat_0 = 1;
 }
 
 void mnuCampDestroyPanelTasks(void) {
@@ -1785,7 +1785,7 @@ void mnuCampDestroyPanelTasks(void) {
 }
 
 s32 mnuCampConsumePanelTaskCompletion(void) {
-    s32 state = mnuPanelTaskCompletionState;
+    s32 state = gProcessStat_0;
     if (state == 1) {
         return 1;
     }
@@ -1793,7 +1793,7 @@ s32 mnuCampConsumePanelTaskCompletion(void) {
         return 0;
     }
     if (state == 2) {
-        mnuPanelTaskCompletionState = 0;
+        gProcessStat_0 = 0;
     }
     return 0;
 }
@@ -2082,7 +2082,7 @@ s32 mnuCampResolveOwnedItemVariant(s32 rewardRow, s32 column) {
     u8 *entry = mnuCampWideRewardEntries + column * 0xC + rewardRow * 0xC0;
     s32 id = *(s32 *)(mnuCampWideRewardEntries + column * 0xC + rewardRow * 0xC0 + 4);
 
-    if (entry[1] == 0 && mnuIsHighRangeItemId(id) != 0 && datGameState->inventory.counts[id] != 0) {
+    if (entry[1] == 0 && mnuIsHighRangeItemId(id) != 0 && DDS3_GBWK->inventory.counts[id] != 0) {
         id = *(u16 *)(entry + 8);
     }
     return id;
@@ -2098,15 +2098,15 @@ s32 mnuCampCountRemainingUses(s32 itemMode, s32 itemId, MenuTerminalContext *rec
     if (itemMode == 1) {
         value -= ptyCountBulletItem(itemId);
     } else if (itemMode == 3) {
-        value = 1 - datGameState->inventory.counts[itemId];
+        value = 1 - DDS3_GBWK->inventory.counts[itemId];
     } else if (itemMode == 2) {
-        value = 1 - datGameState->inventory.counts[itemId];
+        value = 1 - DDS3_GBWK->inventory.counts[itemId];
     } else {
-        value = 99 - datGameState->inventory.counts[itemId];
+        value = 99 - DDS3_GBWK->inventory.counts[itemId];
     }
     if (mnuCampFindListedItemIndex(itemId) >= 0) {
         if (value >= 2) {
-            value = datGameState->inventory.counts[itemId] == 0;
+            value = DDS3_GBWK->inventory.counts[itemId] == 0;
         }
     }
     return value < 0 ? 0 : value;
@@ -2127,14 +2127,14 @@ s32 mnuCampGetCurrentRowQuantityLimit(MenuTerminalContext *scene) {
     case 1:
     case 2:
     case 3:
-        count = datGameState->header.currency / price;
+        count = DDS3_GBWK->header.currency / price;
         remaining = mnuCampCountRemainingUses(mode, id, scene);
         if (remaining < count) {
             count = remaining;
         }
         break;
     case 4:
-        owned = datGameState->inventory.counts[id];
+        owned = DDS3_GBWK->inventory.counts[id];
         if (owned * price > 9999999) {
             count = 9999999.0f / (f32)price;
         } else {
@@ -2150,7 +2150,7 @@ s32 mnuCampGetAffordablePurchaseCount(MenuTerminalContext *scene) {
     s32 affordable;
     s32 remaining;
 
-    affordable = datGameState->header.currency / item->price;
+    affordable = DDS3_GBWK->header.currency / item->price;
     remaining = mnuCampCountRemainingUses(item->mode, item->id, scene);
     if (affordable == 0) {
         return -1;
@@ -2176,7 +2176,7 @@ void mnuCampDisableUnavailableItemEntries(MenuTerminalContext *scene) {
     for (i = 0; i < scene->window->list->count; i++) {
         item = &node->camp;
         /* Keep the unchecked division: retail traps when the row price is zero. */
-        count = datGameState->header.currency / item->price;
+        count = DDS3_GBWK->header.currency / item->price;
         remaining = mnuCampCountRemainingUses(item->mode, item->id, scene);
         if (remaining < count) {
             count = remaining;
@@ -2216,7 +2216,7 @@ s32 mnuCampScalePriceByTier(s32 quantity, s32 price) {
             }
         }
     } else {
-        price = price * mnuShopProgressSlotPricePercentView[datGameState->progressSlot].percent / 100;
+        price = price * mnuShopProgressSlotPricePercentView[DDS3_GBWK->progressSlot].percent / 100;
     }
     return price;
 }
@@ -2467,7 +2467,7 @@ s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *scene) {
         if (mnuIsBulletItemId(i) != 0 || mnuIsHighRangeItemId(i) != 0) {
             continue;
         }
-        if (datGameState->inventory.counts[i] != 0) {
+        if (DDS3_GBWK->inventory.counts[i] != 0) {
             if ((datItemSkillRecords[i].flags & 3) != 0) {
                 params = &mnuAppendWindowListNode(scene->window, D_00435E5C + i * 0x19)->camp;
                 value = datItemSkillRecords[i].price;
@@ -2629,7 +2629,7 @@ s32 evtInitializeSelectedSlot(KwlnTask *task) {
     }
     windowState = ((MenuTerminalContext *)stateAddress)->ownedWindows[0]->list->context;
     selectedSlot = mnuCampHasEligibleOwnedItems(stateAddress);
-    ((MenuTerminalContext *)stateAddress)->previousValue = datGameState->header.currency;
+    ((MenuTerminalContext *)stateAddress)->previousValue = DDS3_GBWK->header.currency;
     windowState->selectedSlot = selectedSlot;
     ((MenuTerminalContext *)stateAddress)->selectedSlot = selectedSlot;
     return 1;
@@ -3226,7 +3226,7 @@ s32 evtGetRemainingSlotThreshold(u32 slotIndex) {
     if (threshold == 0) {
         return -1;
     }
-    remaining = threshold - datGameState->progressTotal;
+    remaining = threshold - DDS3_GBWK->progressTotal;
     if (remaining > 0) {
         return remaining;
     }
@@ -3236,13 +3236,13 @@ s32 evtGetRemainingSlotThreshold(u32 slotIndex) {
 s32 evtShowResultText(void) {
     char formattedText[0x40];
     evtCopyEntryStringToActiveWindow(0, (const void *)(datUnitNames + 0x11));
-    sprintf(formattedText, D_00437840, datGameState->progressTotal);
+    sprintf(formattedText, D_00437840, DDS3_GBWK->progressTotal);
     evtCopyEntryStringToActiveWindow(1, formattedText);
-    evtCopyEntryStringToActiveWindow(2, (const void *)(D_003C9A20[datGameState->progressSlot]));
-    sprintf(formattedText, D_00437840, evtGetRemainingSlotThreshold(datGameState->progressSlot + 1));
+    evtCopyEntryStringToActiveWindow(2, (const void *)(D_003C9A20[DDS3_GBWK->progressSlot]));
+    sprintf(formattedText, D_00437840, evtGetRemainingSlotThreshold(DDS3_GBWK->progressSlot + 1));
     evtCopyEntryStringToActiveWindow(3, formattedText);
-    if (evtGetRemainingSlotThreshold(datGameState->progressSlot + 1) >= 0) {
-        fclStartMessage(datGameState->progressSlot + 0x1a);
+    if (evtGetRemainingSlotThreshold(DDS3_GBWK->progressSlot + 1) >= 0) {
+        fclStartMessage(DDS3_GBWK->progressSlot + 0x1a);
     } else {
         fclStartMessage(0x21);
     }
@@ -3509,10 +3509,10 @@ s32 mnuShopBeginTransactionMessage(KwlnTask *task) {
     s32 mode = state->ownedWindows[0]->list->cursor->camp.value + 1;
     char text[16];
 
-    state->previousValue = datGameState->header.currency;
+    state->previousValue = DDS3_GBWK->header.currency;
     state->elapsedFrames = 0;
     if (mode == 4) {
-        if ((u32)(item->value * state->multiplier + datGameState->header.currency) > 9999999U) {
+        if ((u32)(item->value * state->multiplier + DDS3_GBWK->header.currency) > 9999999U) {
             entry = 12;
         }
     }
@@ -3533,7 +3533,7 @@ s32 evtUpdateSlotItemCompletionState(KwlnTask *task) {
     s32 nextStage = ((MenuTerminalContext *)stateAddress)->ownedWindows[0]->list->cursor->camp.value + 1;
     s32 itemId = ((MenuTerminalContext *)stateAddress)->window->list->cursor->camp.id;
     if (nextStage == 4) {
-        if (datGameState->inventory.counts[itemId] == 0) {
+        if (DDS3_GBWK->inventory.counts[itemId] == 0) {
             mnuRemoveListCursorNode(((MenuTerminalContext *)stateAddress)->window->list);
         }
         if (((MenuTerminalContext *)stateAddress)->window->list->count == 0) {
@@ -3579,7 +3579,7 @@ void evtMarkSceneFollowupReadyAndQueueAction(KwlnTask *task) {
 void evtAccumulateEligibleStageMultiplierValue(MenuTerminalContext *state) {
     CampWindowParams *entryValues = &state->window->list->cursor->camp;
     if (mnuIsSolarPricedItemId(entryValues->id)) {
-        datGameState->world.score += entryValues->value * state->multiplier;
+        DDS3_GBWK->world.score += entryValues->value * state->multiplier;
     }
 }
 
@@ -3598,11 +3598,11 @@ s32 evtApplyShopProgressDelta(s32 progressDelta) {
     if (progressDelta == 0) {
         progressDelta = 1;
     }
-    datGameState->progressTotal += progressDelta;
-    if ((u32)datGameState->progressTotal > EVT_PROGRESS_UNSIGNED_LIMIT) {
-        datGameState->progressTotal = 999999;
+    DDS3_GBWK->progressTotal += progressDelta;
+    if ((u32)DDS3_GBWK->progressTotal > EVT_PROGRESS_UNSIGNED_LIMIT) {
+        DDS3_GBWK->progressTotal = 999999;
     }
-    return datGameState->progressTotal;
+    return DDS3_GBWK->progressTotal;
 }
 
 /* Apply the selected shop transaction and preserve its progress baseline. */
@@ -3618,14 +3618,14 @@ s32 evtApplyShopQuantityTransaction(KwlnTask *task) {
     itemId = values->id;
     operation = state->ownedWindows[0]->list->cursor->camp.value + 1;
     total = values->value * state->multiplier;
-    state->previousProgressTotal = datGameState->progressTotal;
+    state->previousProgressTotal = DDS3_GBWK->progressTotal;
     switch (operation) {
     case 1:
     case 2:
     case 3:
         datAddCurrencyClamped(-total);
         if (mnuCampFindListedItemIndex(itemId) < 0) {
-            datGameState->inventory.counts[itemId] += state->multiplier;
+            DDS3_GBWK->inventory.counts[itemId] += state->multiplier;
         }
         if (!evtIsAllowedId(itemId)) {
             evtApplyShopProgressDelta(total / 100);
@@ -3633,7 +3633,7 @@ s32 evtApplyShopQuantityTransaction(KwlnTask *task) {
         break;
     case 4:
         datAddCurrencyClamped(total);
-        datGameState->inventory.counts[itemId] -= state->multiplier;
+        DDS3_GBWK->inventory.counts[itemId] -= state->multiplier;
         if (itemId == 0x54) {
             evtBitOff(0xA20);
         }
@@ -3954,11 +3954,11 @@ s32 evtAdvancePendingRewardMessage(KwlnTask *callbackContext) {
 /* Mark each newly completed slot and advance the persistent slot index. */
 s32 evtAdvanceSlotFlags(void) {
     s32 advancedSlots = 0;
-    while (evtGetRemainingSlotThreshold(datGameState->progressSlot + advancedSlots + 1) == 0) {
-        evtBitOn(mnuShopProgressCompletionFlagView[(datGameState->progressSlot + advancedSlots) * EVT_PROGRESS_RECORD_WORDS + EVT_PROGRESS_RECORD_WORDS]);
+    while (evtGetRemainingSlotThreshold(DDS3_GBWK->progressSlot + advancedSlots + 1) == 0) {
+        evtBitOn(mnuShopProgressCompletionFlagView[(DDS3_GBWK->progressSlot + advancedSlots) * EVT_PROGRESS_RECORD_WORDS + EVT_PROGRESS_RECORD_WORDS]);
         advancedSlots++;
     }
-    datGameState->progressSlot += advancedSlots;
+    DDS3_GBWK->progressSlot += advancedSlots;
     return advancedSlots;
 }
 
@@ -4013,7 +4013,7 @@ s32 evtTriggerProgressFlagGate(s32 unusedContext) {
     EvtFlagGate *gateEntry = (EvtFlagGate *)D_003CE400;
     u32 gateIndex;
     for (gateIndex = 0; gateIndex < EVT_PROGRESS_FLAG_GATE_COUNT; gateIndex++, gateEntry++) {
-        if ((u32)(datGameState->progressSlot + 1) >= (u32)gateEntry->threshold) {
+        if ((u32)(DDS3_GBWK->progressSlot + 1) >= (u32)gateEntry->threshold) {
             u32 progressFlag = gateEntry->flag;
             if (evtBitCheck(progressFlag) == 0) {
                 evtBitOn(progressFlag);
@@ -4029,10 +4029,10 @@ s32 evtShowSlotText(KwlnTask *task) {
     char formattedText[0x40];
     if (((MenuTerminalContext *)dds3GetProcessData(task))->advancedSlots > 0) {
         evtCopyEntryStringToActiveWindow(0, (const void *)(datUnitNames + 0x11));
-        sprintf(formattedText, D_00437840, mnuShopProgressSlotRows[datGameState->progressSlot * EVT_PROGRESS_RECORD_WORDS]);
+        sprintf(formattedText, D_00437840, mnuShopProgressSlotRows[DDS3_GBWK->progressSlot * EVT_PROGRESS_RECORD_WORDS]);
         evtCopyEntryStringToActiveWindow(1, formattedText);
-        evtCopyEntryStringToActiveWindow(2, (const void *)(D_003C9A20[datGameState->progressSlot]));
-        if (evtGetRemainingSlotThreshold(datGameState->progressSlot + 1) >= 0) {
+        evtCopyEntryStringToActiveWindow(2, (const void *)(D_003C9A20[DDS3_GBWK->progressSlot]));
+        if (evtGetRemainingSlotThreshold(DDS3_GBWK->progressSlot + 1) >= 0) {
             fclStartMessage(0x24);
         } else {
             fclStartMessage(0x25);
@@ -4078,7 +4078,7 @@ s32 evtAdvanceProgressGateMessage(KwlnTask *callbackContext) {
 
 /* Select the highest reached reward tier, retiring earlier tier flags first. */
 s32 mnuSelectUnclaimedProgressRewardTier(void) {
-    DatGameState *state = datGameState;
+    DatGameState *state = DDS3_GBWK;
     s32 index;
     s32 selected = -1;
     s32 flag;
@@ -4410,7 +4410,7 @@ void mnuAwardCampProgressCurrency(void) {
     evtCopyEntryStringToActiveWindow(0, formattedText);
     fclStartMessage(0x19);
     datAddCurrencyClamped(amount);
-    ptyAdjustItemQuantity(0x81, -datGameState->inventory.counts[0x81]);
+    ptyAdjustItemQuantity(0x81, -DDS3_GBWK->inventory.counts[0x81]);
     evtBitOff(0xA01);
 }
 

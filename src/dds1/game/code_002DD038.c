@@ -13,7 +13,7 @@
 extern SdfMotionBindingDispatch D_003982D0;
 
 extern s32 (*sdfMotionCommandHandlers[])(void *object, s32 command, s32 targetIndex);
-extern SdfMotionBindingDispatch sdfMotionSlotPairDispatch;
+extern SdfMotionBindingDispatch sdfMotMorphTable;
 
 /* Direct secondary-text sampling has an intentionally empty capturePrevious callback. */
 void sdfMotCLBK_matMultiUvw2InitBlend(void) {
@@ -35,7 +35,7 @@ SdfMotionSlotPairBinding *sdfMotGenMorph(Motion *motion,
                                                            s32 unused, s32 entryIndex) {
     SdfMotionSlotPairBinding *entry = sdfChipAllocDirect(sizeof(SdfMotionSlotPairBinding));
 
-    sdfMotGenMorphInit(entry, motion, &sdfMotionSlotPairDispatch, entryIndex);
+    sdfMotGenMorphInit(entry, motion, &sdfMotMorphTable, entryIndex);
     return entry;
 }
 

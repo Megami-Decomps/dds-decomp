@@ -16,7 +16,7 @@ extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern void dds3TrackPolyColorSet(u32 system, s32 index, u32 value);
 
-extern f32 sdfViewEyeVector[4];
+extern f32 aViewTarget[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 D_00354C00[4];
 
@@ -71,7 +71,7 @@ void effPCPNeedleSpiralDraw(EffPCPNeedleWork *work) {
     width[0] = value;
     width[1] = value;
     width[2] = value;
-    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, viewDirection);

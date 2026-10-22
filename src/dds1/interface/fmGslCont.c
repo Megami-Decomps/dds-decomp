@@ -4,24 +4,24 @@
 
 /* Release the group's handles once and clear its active-node flag. */
 s32 fmDestroyFontMemControl(void) {
-    if (frFontResourceList.head == 0) {
+    if (gFGC.head == 0) {
         return 0;
     }
-    sdfMemFreeDirect(frFontResourceList.nodeAllocation);
-    sdfMemFreeDirect(frFontResourceList.recordStorageAllocation);
-    frFontResourceList.head = 0;
+    sdfMemFreeDirect(gFGC.nodeAllocation);
+    sdfMemFreeDirect(gFGC.recordStorageAllocation);
+    gFGC.head = 0;
     return 1;
 }
 
 /* Unlink the first live node after the sentinel, or NULL when its slot is empty. */
 FntNode *fmRentFontMem(void) {
-    FntNode *resourceNode = frFontResourceList.head->next;
+    FntNode *resourceNode = gFGC.head->next;
 
     if (resourceNode->nodeIndex == 0) {
         return NULL;
     }
     resourceNode->prev->next = resourceNode->next;
-    frFontResourceList.count -= 1;
+    gFGC.count -= 1;
     resourceNode->next->prev = resourceNode->prev;
     return resourceNode;
 }

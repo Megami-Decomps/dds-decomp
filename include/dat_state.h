@@ -450,7 +450,7 @@ extern BattleAdjustmentRecord *D_00435E0C;
 
 extern DatBattleSceneRecord *datBattleSceneRecords;
 
-extern DatGameState *datGameState;
+extern DatGameState *DDS3_GBWK;
 
 /* Maps one exact channel flag to its stat/element index; unmatched or combined
  * flags return -1 (see the paired datCalc.c lookup switches). */

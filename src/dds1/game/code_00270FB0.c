@@ -113,7 +113,7 @@ void movReleaseActivePartyCategoryModels(struct EffectSlotSet **modelHandles, s3
 
     effResolveAndReleaseResource(modelHandles[0]);
     for (partyIndex = 0; partyIndex < MNU_STAFF_PARTY_COUNT; partyIndex++) {
-        DatPartyRecord *partyRecord = &datGameState->party[partyIndex];
+        DatPartyRecord *partyRecord = &DDS3_GBWK->party[partyIndex];
 
         if ((partyRecord->flags & MNU_STAFF_PARTY_PRESENT_BIT) != 0) {
             s32 modelIndex = partyRecord->unitId + D_003BC6B5;
@@ -229,7 +229,7 @@ void mnuInitializeStaffPageWindows(MenuPageWindow *container, StaffSlots *resour
 
 INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B2058);
 
-INCLUDE_SDATA(const s32, "game/code_00270FB0", mnuCampTaskState);
+INCLUDE_SDATA(const s32, "game/code_00270FB0", campExitState);
 
 INCLUDE_SDATA(const s32, "game/code_00270FB0", D_003BC6B5);
 

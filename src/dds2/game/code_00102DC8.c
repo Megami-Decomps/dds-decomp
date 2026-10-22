@@ -40,19 +40,19 @@ extern u8 D_00435C60;
 
 extern u32 kwlnTextureViewerPageIndex;
 
-extern u32 kwlnTextureReferenceFlag;
+extern u32 dds3RenderTex;
 
 extern SdfTexResource *D_00435CC4;
 
-extern SdfTex *kwlnHeldTextureReference;
+extern SdfTex *dds3RenderTexture;
 
 extern u16 D_00435CE8;
 
-extern u32 kwlnDrawControlFlags;
+extern u32 dds3DrawFlag;
 
-extern u16 kwlnFadeCounter;
+extern u16 fadenow;
 
-extern u16 kwlnFadeDuration;
+extern u16 fademax;
 
 extern s16 D_00435CEA;
 
@@ -92,9 +92,9 @@ typedef void (*KwlnTaskDestroyCallback)();
 
 extern s32 D_00435BA4;
 
-extern s32 kwlnDistanceBlurErrorCount;
+extern s32 distblurovercnt;
 
-extern s32 kwlnRippleBlurErrorCount;
+extern s32 ripblurovercnt;
 
 extern SdfPoolNode D_00380708;
 
@@ -107,7 +107,7 @@ extern s32 kwlnCurrentIncompleteResource;
 
 extern s32 kwlnTextureViewerHandlePad(void);
 
-extern s8 sdfPadButtonStates[32];
+extern s8 dds3PadBitTable[32];
 
 extern s32 kwlnSelectIncompleteResourceAtPageIndex(s32);
 
@@ -129,7 +129,7 @@ extern s8 kwlnBackgroundFadeMode;
 
 extern u8 kwlnLargeMotorTarget;
 
-extern u8 kwlnPadMotorLevels[2];
+extern u8 dds3PadVibrationState[2];
 
 extern s32 dds3AdminPollModeCompletion(KwlnTask *task);
 extern void dds3AdminiNeoShutdown(KwlnTask *task);
@@ -343,7 +343,7 @@ s32 kwlnConfigureNamedSlotMode2(const char *name, TaskUpdate update, TaskDestroy
 void dds3InitDebugSystem(void) {
 }
 
-extern s8 kwlnTaskPadButtonStates[64];
+extern s8 dds3PadButtonState[64];
 
 /* Fresh presses wrap; repeat-bit input stops at the implemented end bounds.
  * Without scrolling, forward motion is bounded by visibleRows, not itemCount. */
@@ -357,7 +357,7 @@ void SelectSub(s32 *scrollOffset, s32 *cursorRow, s32 itemCount, s32 visibleRows
     if (itemCount < 2) {
         return;
     }
-    backwardState = kwlnTaskPadButtonStates[backwardInput + padSet * KWLN_PAD_INPUTS_PER_SET];
+    backwardState = dds3PadButtonState[backwardInput + padSet * KWLN_PAD_INPUTS_PER_SET];
     if (backwardState < 0) {
         if (scrollOffset == NULL) {
             if (*cursorRow > 0) {
@@ -377,7 +377,7 @@ void SelectSub(s32 *scrollOffset, s32 *cursorRow, s32 itemCount, s32 visibleRows
         } else {
             *cursorRow = itemCount - 1;
         }
-    } else if (kwlnTaskPadButtonStates[backwardInput + padSet * KWLN_PAD_INPUTS_PER_SET] & KWLN_PAD_REPEAT_BIT) {
+    } else if (dds3PadButtonState[backwardInput + padSet * KWLN_PAD_INPUTS_PER_SET] & KWLN_PAD_REPEAT_BIT) {
         if (scrollOffset == NULL) {
             if (*cursorRow > 0) {
                 (*cursorRow)--;
@@ -388,7 +388,7 @@ void SelectSub(s32 *scrollOffset, s32 *cursorRow, s32 itemCount, s32 visibleRows
             (*scrollOffset)--;
         }
     }
-    forwardState = kwlnTaskPadButtonStates[forwardInput + padSet * KWLN_PAD_INPUTS_PER_SET];
+    forwardState = dds3PadButtonState[forwardInput + padSet * KWLN_PAD_INPUTS_PER_SET];
     if (forwardState < 0) {
         if (scrollOffset == NULL) {
             if (*cursorRow < visibleRows - 1) {
@@ -404,7 +404,7 @@ void SelectSub(s32 *scrollOffset, s32 *cursorRow, s32 itemCount, s32 visibleRows
             *scrollOffset = 0;
             *cursorRow = 0;
         }
-    } else if (kwlnTaskPadButtonStates[forwardInput + padSet * KWLN_PAD_INPUTS_PER_SET] & KWLN_PAD_REPEAT_BIT) {
+    } else if (dds3PadButtonState[forwardInput + padSet * KWLN_PAD_INPUTS_PER_SET] & KWLN_PAD_REPEAT_BIT) {
         if (scrollOffset == NULL) {
             if (*cursorRow < visibleRows - 1) {
                 (*cursorRow)++;
@@ -423,17 +423,17 @@ s32 dds3SelectMenu(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 seconda
     SelectSub(primaryScroll, primaryCursor, primaryCount, primaryVisible, padSet, 7, 6);
     SelectSub(secondaryScroll, secondaryCursor, secondaryCount, secondaryVisible, padSet, 5, 4);
     if (padSet == 0) {
-        if (kwlnTaskPadButtonStates[1] < 0) {
+        if (dds3PadButtonState[1] < 0) {
             return 1;
         }
-        if (kwlnTaskPadButtonStates[3] < 0) {
+        if (dds3PadButtonState[3] < 0) {
             return -1;
         }
     } else {
-        if (kwlnTaskPadButtonStates[KWLN_ALT_CONFIRM_INPUT] < 0) {
+        if (dds3PadButtonState[KWLN_ALT_CONFIRM_INPUT] < 0) {
             return 1;
         }
-        if (kwlnTaskPadButtonStates[KWLN_ALT_CANCEL_INPUT] < 0) {
+        if (dds3PadButtonState[KWLN_ALT_CANCEL_INPUT] < 0) {
             return -1;
         }
     }
@@ -463,7 +463,7 @@ s32 dds3PadVibrationTest(KwlnTask *task) {
 
 extern u32 kwlnPadButtonHoldCounters[4][16];
 extern u32 kwlnPadStickHoldCounters[2][2];
-extern s8 kwlnPadButtonStates[2][2][16];
+extern s8 dds3PadButtonPrev[2][2][16];
 extern u8 D_00435C30[2][2][2];
 extern s8 D_00435C38[2][2];
 extern u8 D_00435C40[2][2][2];
@@ -480,8 +480,8 @@ void dds3PadInitialize(void) {
     for (port = 0; port < 2; port++) {
         for (bank = 0; bank < 2; bank++) {
             for (i = 0; i < 16; i++) {
-                kwlnPadButtonStates[bank][port][i] = 0;
-                kwlnTaskPadButtonStates[bank * 32 + port * 16 + i] = 0;
+                dds3PadButtonPrev[bank][port][i] = 0;
+                dds3PadButtonState[bank * 32 + port * 16 + i] = 0;
                 inputTimers[bank * 2 + port][i] = 0;
             }
         }
@@ -495,10 +495,10 @@ void dds3PadInitialize(void) {
             D_00435C48[port][i] = 0;
         }
     }
-    kwlnPadMotorLevels[KWLN_PAD_SMALL_MOTOR] = 0;
+    dds3PadVibrationState[KWLN_PAD_SMALL_MOTOR] = 0;
     D_00438D98[KWLN_PAD_SMALL_MOTOR] = 0;
     D_00438DA0[KWLN_PAD_SMALL_MOTOR] = 0;
-    kwlnPadMotorLevels[KWLN_PAD_LARGE_MOTOR] = 0;
+    dds3PadVibrationState[KWLN_PAD_LARGE_MOTOR] = 0;
     D_00438D98[KWLN_PAD_LARGE_MOTOR] = 0;
     D_00438DA0[KWLN_PAD_LARGE_MOTOR] = 0;
 }
@@ -536,7 +536,7 @@ void kwlnUpdatePadInputState(void) {
     forward[2] = -1.0f;
     for (pad = 0; pad < 2; pad++) {
         for (i = 0; i < 16; i++) {
-            if (sdfPadButtonStates[pad * 16 + i] != 0) {
+            if (dds3PadBitTable[pad * 16 + i] != 0) {
                 buttons[0][i] = 1;
                 buttons[1][i] = 1;
             } else {
@@ -609,16 +609,16 @@ void kwlnUpdatePadInputState(void) {
         for (j = 0; j < 2; j++) {
             for (i = 0; i < 16; i++) {
                 if (buttons[j][i] != 0) {
-                    kwlnPadButtonStates[j][pad][i] = 1;
+                    dds3PadButtonPrev[j][pad][i] = 1;
                     if (++kwlnPadButtonHoldCounters[j * 2 + pad][i] == 1) {
-                        kwlnPadButtonStates[j][pad][i] = -0x7D;
+                        dds3PadButtonPrev[j][pad][i] = -0x7D;
                     }
                 } else {
-                    kwlnPadButtonStates[j][pad][i] = 0;
+                    dds3PadButtonPrev[j][pad][i] = 0;
                     kwlnPadButtonHoldCounters[j * 2 + pad][i] = 0;
                 }
                 if (kwlnPadButtonHoldCounters[j * 2 + pad][i] >= 8 && !(kwlnPadButtonHoldCounters[j * 2 + pad][i] & 1)) {
-                    kwlnPadButtonStates[j][pad][i] |= 2;
+                    dds3PadButtonPrev[j][pad][i] |= 2;
                 }
             }
         }
@@ -651,20 +651,20 @@ void kwlnUpdatePadInputState(void) {
 void kwlnPadStepLargeMotorLevel(void) {
     u8 target = kwlnLargeMotorTarget;
 
-    if (kwlnPadMotorLevels[1] < target) {
-        if (target - kwlnPadMotorLevels[1] > 0x20) {
-            kwlnPadMotorLevels[1] = kwlnPadMotorLevels[1] + 0x20;
+    if (dds3PadVibrationState[1] < target) {
+        if (target - dds3PadVibrationState[1] > 0x20) {
+            dds3PadVibrationState[1] = dds3PadVibrationState[1] + 0x20;
         } else {
-            kwlnPadMotorLevels[1] = target;
+            dds3PadVibrationState[1] = target;
         }
-    } else if (target < kwlnPadMotorLevels[1]) {
-        if (kwlnPadMotorLevels[1] - target > 0x20) {
-            kwlnPadMotorLevels[1] = kwlnPadMotorLevels[1] - 0x20;
+    } else if (target < dds3PadVibrationState[1]) {
+        if (dds3PadVibrationState[1] - target > 0x20) {
+            dds3PadVibrationState[1] = dds3PadVibrationState[1] - 0x20;
         } else {
-            kwlnPadMotorLevels[1] = target;
+            dds3PadVibrationState[1] = target;
         }
     } else {
-        kwlnPadMotorLevels[1] = target;
+        dds3PadVibrationState[1] = target;
     }
 }
 
@@ -687,7 +687,7 @@ void dds3PadVibrationSet(u32 motor, u8 level, s32 duration) {
     }
     if (motor == KWLN_PAD_SMALL_MOTOR) {
         D_00438D98[KWLN_PAD_SMALL_MOTOR] = level;
-        kwlnPadMotorLevels[KWLN_PAD_SMALL_MOTOR] = level;
+        dds3PadVibrationState[KWLN_PAD_SMALL_MOTOR] = level;
     } else {
         D_00438D98[motor] = level;
         kwlnPadStepLargeMotorLevel();
@@ -696,7 +696,7 @@ void dds3PadVibrationSet(u32 motor, u8 level, s32 duration) {
     if (motor == KWLN_PAD_SMALL_MOTOR) {
         sdfPadSetAct0(0, level);
     } else {
-        sdfPadSetAct1(0, kwlnPadMotorLevels[motor]);
+        sdfPadSetAct1(0, dds3PadVibrationState[motor]);
     }
 }
 
@@ -704,8 +704,8 @@ extern void sdfPadSetAct(s32 padIndex, s32 smallMotor, s32 largeMotor);
 
 /* Clear motor levels and countdowns, then send both zero strengths to pad 0. */
 void kwlnPadResetMotorLevelsAndOutput(void) {
-    kwlnPadMotorLevels[KWLN_PAD_SMALL_MOTOR] = 0;
-    kwlnPadMotorLevels[KWLN_PAD_LARGE_MOTOR] = 0;
+    dds3PadVibrationState[KWLN_PAD_SMALL_MOTOR] = 0;
+    dds3PadVibrationState[KWLN_PAD_LARGE_MOTOR] = 0;
     D_00438DA0[KWLN_PAD_SMALL_MOTOR] = 0;
     D_00438DA0[KWLN_PAD_LARGE_MOTOR] = 0;
     sdfPadSetAct(0, 0, 0);
@@ -714,7 +714,7 @@ void kwlnPadResetMotorLevelsAndOutput(void) {
 
 void dds3UpdateVibrationSlots(void) {
     s32 largeMotor = KWLN_PAD_LARGE_MOTOR;
-    u8 *levels = kwlnPadMotorLevels;
+    u8 *levels = dds3PadVibrationState;
     u8 *targets = D_00438D98;
     u8 *largeLevel;
     s32 motor;
@@ -919,7 +919,7 @@ void kwlnDrawTextureResourceDetails(SdfListHead *packetList, SdfTex *texture) {
 
 /* Count texture entries without a reference clone source. */
 s32 kwlnTextureCountIncompleteResources(void) {
-    SdfTex *texture = sdfResourceListHead;
+    SdfTex *texture = sdfTexHandleLink;
     SdfTex *previousTexture;
     s32 incompleteCount = 0;
     while (texture != NULL) {
@@ -943,7 +943,7 @@ u32 kwlnTextureGetPageIndex(void) {
 /* DDS2 first skips clone-source entries at the head, even for requested index zero.
  * This assumes a nonempty list; initial exhaustion returns 0 before selection writes. */
 s32 kwlnSelectIncompleteResourceAtPageIndex(s32 requestedIndex) {
-    SdfTex *texture = sdfResourceListHead;
+    SdfTex *texture = sdfTexHandleLink;
     SdfTex *previousTexture;
     s32 visitedIndex = 0;
 
@@ -980,20 +980,20 @@ s32 kwlnSelectIncompleteResourceAtPageIndex(s32 requestedIndex) {
 /* Exit input returns 0 immediately; otherwise apply one prioritized page step,
  * select its reached index, then optionally toggle the viewer mode and return 1. */
 s32 kwlnTextureViewerHandlePad(void) {
-    if (sdfPadButtonStates[0x13] < 0) {
+    if (dds3PadBitTable[0x13] < 0) {
         return 0;
     }
-    if (sdfPadButtonStates[0x14] & KWLN_PAD_REPEAT_BIT) {
+    if (dds3PadBitTable[0x14] & KWLN_PAD_REPEAT_BIT) {
         kwlnTextureViewerPageIndex -= 1;
-    } else if (sdfPadButtonStates[0x15] & KWLN_PAD_REPEAT_BIT) {
+    } else if (dds3PadBitTable[0x15] & KWLN_PAD_REPEAT_BIT) {
         kwlnTextureViewerPageIndex += 1;
-    } else if ((sdfPadButtonStates[0x18] & KWLN_PAD_REPEAT_BIT) || (sdfPadButtonStates[0x19] & KWLN_PAD_REPEAT_BIT)) {
+    } else if ((dds3PadBitTable[0x18] & KWLN_PAD_REPEAT_BIT) || (dds3PadBitTable[0x19] & KWLN_PAD_REPEAT_BIT)) {
         kwlnTextureViewerPageIndex -= KWLN_VIEWER_FAST_PAGE_STEP;
-    } else if ((sdfPadButtonStates[0x1A] & KWLN_PAD_REPEAT_BIT) || (sdfPadButtonStates[0x1B] & KWLN_PAD_REPEAT_BIT)) {
+    } else if ((dds3PadBitTable[0x1A] & KWLN_PAD_REPEAT_BIT) || (dds3PadBitTable[0x1B] & KWLN_PAD_REPEAT_BIT)) {
         kwlnTextureViewerPageIndex += KWLN_VIEWER_FAST_PAGE_STEP;
     }
     kwlnTextureViewerPageIndex = kwlnSelectIncompleteResourceAtPageIndex(kwlnTextureViewerPageIndex);
-    if (sdfPadButtonStates[0x12] < 0) {
+    if (dds3PadBitTable[0x12] < 0) {
         D_00435C60 ^= 1;
     }
     return 1;
@@ -1047,7 +1047,7 @@ void kwlnDrawTextureViewerFrame(void *surfaceContext, s32 handle) {
 s32 kwlnSwapActiveResource(s32 surfaceAddress) {
     s32 inputStatus;
 
-    if (sdfResourceListHead == 0) {
+    if (sdfTexHandleLink == 0) {
         return 0;
     }
     inputStatus = kwlnTextureViewerHandlePad();
@@ -1057,7 +1057,7 @@ s32 kwlnSwapActiveResource(s32 surfaceAddress) {
 
 /* Use the default surface: empty list returns 0, exit input -1, drawing 0. */
 s32 kwlnLoadDefaultResource(void) {
-    if (sdfResourceListHead == 0) {
+    if (sdfTexHandleLink == 0) {
         return 0;
     }
     if (kwlnTextureViewerHandlePad() == 0) {
@@ -1070,7 +1070,7 @@ s32 kwlnLoadDefaultResource(void) {
 /* Initialize viewer state and return its default renderer for the first eligible
  * node. Exhausting a nonempty list returns NULL after the initial state writes. */
 s32 (*kwlnTextureFindIncompleteResource(void))(void) {
-    SdfTex *texture = sdfResourceListHead;
+    SdfTex *texture = sdfTexHandleLink;
     if (texture == NULL) {
         return NULL;
     }
@@ -1211,17 +1211,17 @@ void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
     sdfGrSetStdDrawEnv(&D_00380870[bufferIndex].scene, &D_0040B290);
     /* Set the RGBAQ color word while retaining its floating-point Q word. */
     *(u32 *)&D_00380870[bufferIndex].scene.centeredBounds.rgbaq.value = D_00435CBC;
-    if (kwlnDrawControlFlags & 0x10000000) {
+    if (dds3DrawFlag & 0x10000000) {
         sdfGrSetClearPacket(&D_00380870[bufferIndex].scene.centeredBounds, 0, 0,
                                          D_0040B290.bufferFormat,
                                          D_0040B290.auxiliaryFormat);
-        kwlnDrawControlFlags &= 0xEFFFFFFF;
+        dds3DrawFlag &= 0xEFFFFFFF;
     }
     sdfGrLinkStdDrawEnv(&D_00380870[bufferIndex].sceneList,
                                  &D_00380870[bufferIndex].linkedList,
                                  &D_00380870[bufferIndex].scene.link);
     sdf3DMakeViewportPacket(&D_00380870[bufferIndex].sceneMatrix,
-                             &sdfSceneProjectionParameters, sdfViewMatrix);
+                             &dds3ScreenParam, sdfViewMatrix);
     sdfDrawTagLink(&D_00380870[bufferIndex].sceneList, (u32)&D_00380870[bufferIndex].sceneMatrix);
     sdf3DMakeLightParallelPacket(&D_00380870[bufferIndex].scenePacketStorage, D_0037F770, kwlnDefaultColorVector);
     sdfDrawTagLink(&D_00380870[bufferIndex].sceneList, (u32)&D_00380870[bufferIndex].scenePacketStorage);
@@ -1242,7 +1242,7 @@ extern void eglInit(void);
 /* Select display mode 1, rebuild both projection blocks and reset draw-vector state. */
 void dds3InitDrawEnv(void) {
     sdfGrSetScreen(1);
-    sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);
+    sdfCameraBuildProjection(&dds3ScreenParam.camera);
     sdfCameraBuildProjection(&D_0037F980.camera);
     kwlnInitializeFrameDrawPackets(0);
     kwlnInitializeFrameDrawPackets(1);
@@ -1255,7 +1255,7 @@ void dds3InitDrawEnv(void) {
 /* One 0x1F40-byte draw bank of the held-texture render target. */
 #include "kwln_texture_bank.h"
 
-extern SdfGraphObj kwlnHeldTextureDrawTarget;
+extern SdfGraphObj dds3RenderTexId;
 extern u16 D_00435CCC;
 extern u16 D_00435CCE;
 extern u32 D_00435CD0;
@@ -1267,18 +1267,18 @@ extern u8 kwlnHeldTextureViewMatrix[0x40];
 void dds3InitRenderDrawEnv(void) {
     s32 i;
 
-    kwlnHeldTextureDrawTarget.width = D_00435CCC;
-    kwlnHeldTextureDrawTarget.unk2 = D_00435CCE;
-    kwlnHeldTextureDrawTarget.height = D_00435CCE;
-    kwlnHeldTextureDrawTarget.bufferFormat = 0;
-    kwlnHeldTextureDrawTarget.auxiliaryFormat = 0x30;
-    kwlnHeldTextureDrawTarget.buffers[0] = D_00435CC4;
-    kwlnHeldTextureDrawTarget.buffers[1] = 0;
-    kwlnHeldTextureDrawTarget.buffers[2] = D_0040B290.buffers[2];
+    dds3RenderTexId.width = D_00435CCC;
+    dds3RenderTexId.unk2 = D_00435CCE;
+    dds3RenderTexId.height = D_00435CCE;
+    dds3RenderTexId.bufferFormat = 0;
+    dds3RenderTexId.auxiliaryFormat = 0x30;
+    dds3RenderTexId.buffers[0] = D_00435CC4;
+    dds3RenderTexId.buffers[1] = 0;
+    dds3RenderTexId.buffers[2] = D_0040B290.buffers[2];
     sdfCameraBuildProjection(&D_0037F7B0.camera);
     for (i = 0; i != 2; i++) {
         sdfDrawTagInit(&D_00380870[i].heldTexture.list);
-        sdfGrSetDrawEnv(&D_00380870[i].heldTexture.scene, &kwlnHeldTextureDrawTarget, 0);
+        sdfGrSetDrawEnv(&D_00380870[i].heldTexture.scene, &dds3RenderTexId, 0);
         *(u32 *)&D_00380870[i].heldTexture.scene.centeredBounds.rgbaq.value = D_00435CD0;
         sdfDrawTagLink(&D_00380870[i].heldTexture.list, (u32)&D_00380870[i].heldTexture.scene);
         sdf3DMakeViewportPacket(&D_00380870[i].heldTexture.matrix, &D_0037F7B0, kwlnHeldTextureViewMatrix);
@@ -1299,10 +1299,10 @@ extern SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, 
 s32 dds3AllocRenderTexture(u16 width, u16 height, f32 aspect) {
     SdfTex *texture;
 
-    if (kwlnHeldTextureReference != 0) {
+    if (dds3RenderTexture != 0) {
         dds3FreeRenderTexture();
     }
-    kwlnTextureReferenceFlag = 0;
+    dds3RenderTex = 0;
     D_00435CCC = width;
     D_00435CCE = height;
     D_00435CC4 = sdfGsAllocFrameBuff(width, height, 0);
@@ -1313,7 +1313,7 @@ s32 dds3AllocRenderTexture(u16 width, u16 height, f32 aspect) {
     if (texture == 0) {
         return 0;
     }
-    kwlnHeldTextureReference = texture;
+    dds3RenderTexture = texture;
     sdfTexSetWrapMode(texture, KWLN_HELD_TEXTURE_CLAMP_MODE);
     sdfTexMakeGIFPacket(texture);
     D_0037F7B0.camera.aspect = aspect;
@@ -1325,12 +1325,12 @@ s32 dds3AllocRenderTexture(u16 width, u16 height, f32 aspect) {
 
 /* Release the held texture if present and clear tracking; no separate buffer free. */
 void dds3FreeRenderTexture(void) {
-    if (kwlnHeldTextureReference != 0) {
-        sdfTexReleaseReference(kwlnHeldTextureReference);
+    if (dds3RenderTexture != 0) {
+        sdfTexReleaseReference(dds3RenderTexture);
     }
-    kwlnHeldTextureReference = 0;
+    dds3RenderTexture = 0;
     D_00435CC4 = 0;
-    kwlnTextureReferenceFlag = 0;
+    dds3RenderTex = 0;
 }
 
 /* Set the flag and return 1 when a held handle exists; otherwise leave it and return 0. */
@@ -1339,23 +1339,23 @@ void dds3FreeRenderTexture(void) {
 s32 dds3RenderTextureON(void) {
     s32 result = 0;
 
-    if (kwlnHeldTextureReference == 0) {
+    if (dds3RenderTexture == 0) {
         return result;
     }
-    kwlnTextureReferenceFlag = 1;
+    dds3RenderTex = 1;
     return 1;
 }
 
 void dds3RenderTextureOFF(void) {
-    kwlnTextureReferenceFlag = 0;
+    dds3RenderTex = 0;
 }
 
 u32 dds3CheckRenderTexture(void) {
-    return kwlnTextureReferenceFlag;
+    return dds3RenderTex;
 }
 
 SdfTex *dds3GetRenderTexture(void) {
-    return kwlnHeldTextureReference;
+    return dds3RenderTexture;
 }
 
 extern f32 sdfViewShakeVector[];
@@ -1457,126 +1457,126 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", dds3InitZClearDrawTag);
 SdfListHead *dds3LinkZClearDrawTag(s32 stateIndex) {
     SdfListHead *packetList = dds3FontReqAllocDrawTag();
 
-    sdfDrawTagLink(packetList, (u32)&evtFrameStatePacketTemplates[stateIndex][dds3GetFrameID()]);
+    sdfDrawTagLink(packetList, (u32)&dds3ZClearDrawTag[stateIndex][dds3GetFrameID()]);
     return packetList;
 }
 
 /* Cancel the foreground direction and zero RGBA; timing words are unchanged. */
 void dds3FadeClear(void) {
-    kwlnDrawControlFlags &= ~KWLN_FADE_DIRECTION_BITS;
-    kwlnFadeColor.r = 0;
-    kwlnFadeColor.g = 0;
-    kwlnFadeColor.b = 0;
-    kwlnFadeColor.a = 0;
+    dds3DrawFlag &= ~KWLN_FADE_DIRECTION_BITS;
+    fadergba.r = 0;
+    fadergba.g = 0;
+    fadergba.b = 0;
+    fadergba.a = 0;
 }
 
 /* Store RGBA and cancel foreground direction flags without changing timing. */
 void dds3FadeSet(s32 red, s32 green, s32 blue, s32 alpha) {
-    kwlnDrawControlFlags &= ~KWLN_FADE_DIRECTION_BITS;
-    kwlnFadeColor.r = red;
-    kwlnFadeColor.g = green;
-    kwlnFadeColor.b = blue;
-    kwlnFadeColor.a = alpha;
+    dds3DrawFlag &= ~KWLN_FADE_DIRECTION_BITS;
+    fadergba.r = red;
+    fadergba.g = green;
+    fadergba.b = blue;
+    fadergba.a = alpha;
 }
 
 /* Return the live color address through outColor, rather than copying channels. */
 void kwlnFadeGetColor(KwlnFadeColor **outColor) {
-    *outColor = &kwlnFadeColor;
+    *outColor = &fadergba;
 }
 
 /* Replace RGB only; alpha, direction flags and timing are preserved. */
 void kwlnFadeSetRGB(s8 red, s8 green, s8 blue) {
-    kwlnFadeColor.r = red;
-    kwlnFadeColor.g = green;
-    kwlnFadeColor.b = blue;
+    fadergba.r = red;
+    fadergba.g = green;
+    fadergba.b = blue;
 }
 
 /* Start the countdown with caller RGB. A zero duration also clears RGB via FadeClear.
  * The signed alpha byte -0x80 carries the raw maximum-alpha value 0x80. */
 void dds3FadeIn(s32 red, s32 green, s32 blue, s32 duration) {
-    kwlnFadeColor.r = red;
-    kwlnFadeColor.g = green;
-    kwlnFadeColor.b = blue;
-    kwlnFadeColor.a = -KWLN_FADE_MAX_ALPHA;
+    fadergba.r = red;
+    fadergba.g = green;
+    fadergba.b = blue;
+    fadergba.a = -KWLN_FADE_MAX_ALPHA;
     if (duration == 0) {
-        kwlnFadeColor.a = 0;
-        kwlnFadeCounter = 0;
-        kwlnFadeDuration = 0;
+        fadergba.a = 0;
+        fadenow = 0;
+        fademax = 0;
         dds3FadeClear();
         return;
     }
-    kwlnFadeDuration = duration;
-    kwlnFadeCounter = duration;
-    kwlnDrawControlFlags = (kwlnDrawControlFlags | KWLN_FADE_COUNT_DOWN_BIT) & ~KWLN_FADE_COUNT_UP_BIT;
+    fademax = duration;
+    fadenow = duration;
+    dds3DrawFlag = (dds3DrawFlag | KWLN_FADE_COUNT_DOWN_BIT) & ~KWLN_FADE_COUNT_UP_BIT;
 }
 
 /* Start the same countdown using existing RGB; zero duration preserves RGB. */
 void dds3FadeIn2(s32 duration) {
-    kwlnFadeColor.a = -KWLN_FADE_MAX_ALPHA;
+    fadergba.a = -KWLN_FADE_MAX_ALPHA;
     if (duration == 0) {
-        kwlnFadeColor.a = 0;
-        kwlnFadeCounter = 0;
-        kwlnDrawControlFlags &= ~KWLN_FADE_DIRECTION_BITS;
-        kwlnFadeDuration = 0;
+        fadergba.a = 0;
+        fadenow = 0;
+        dds3DrawFlag &= ~KWLN_FADE_DIRECTION_BITS;
+        fademax = 0;
         return;
     }
-    kwlnFadeDuration = duration;
-    kwlnFadeCounter = duration;
-    kwlnDrawControlFlags = (kwlnDrawControlFlags | KWLN_FADE_COUNT_DOWN_BIT) & ~KWLN_FADE_COUNT_UP_BIT;
+    fademax = duration;
+    fadenow = duration;
+    dds3DrawFlag = (dds3DrawFlag | KWLN_FADE_COUNT_DOWN_BIT) & ~KWLN_FADE_COUNT_UP_BIT;
 }
 
 /* Start the count-up with caller RGB; zero duration leaves maximum alpha. */
 void dds3FadeOut(s32 red, s32 green, s32 blue, s32 duration) {
-    kwlnFadeColor.r = red;
-    kwlnFadeColor.g = green;
-    kwlnFadeColor.b = blue;
-    kwlnFadeColor.a = 0;
+    fadergba.r = red;
+    fadergba.g = green;
+    fadergba.b = blue;
+    fadergba.a = 0;
     if (duration == 0) {
-        kwlnFadeCounter = 0;
-        kwlnFadeDuration = 0;
-        kwlnFadeColor.a = -KWLN_FADE_MAX_ALPHA;
-        kwlnDrawControlFlags &= ~KWLN_FADE_DIRECTION_BITS;
+        fadenow = 0;
+        fademax = 0;
+        fadergba.a = -KWLN_FADE_MAX_ALPHA;
+        dds3DrawFlag &= ~KWLN_FADE_DIRECTION_BITS;
         return;
     }
-    kwlnFadeDuration = duration;
-    kwlnFadeCounter = 0;
-    kwlnDrawControlFlags = (kwlnDrawControlFlags & ~KWLN_FADE_COUNT_DOWN_BIT) | KWLN_FADE_COUNT_UP_BIT;
+    fademax = duration;
+    fadenow = 0;
+    dds3DrawFlag = (dds3DrawFlag & ~KWLN_FADE_COUNT_DOWN_BIT) | KWLN_FADE_COUNT_UP_BIT;
 }
 
 /* Start the same count-up using existing RGB; zero duration preserves RGB. */
 void dds3FadeOut2(s32 duration) {
-    kwlnFadeColor.a = 0;
+    fadergba.a = 0;
     if (duration == 0) {
-        kwlnFadeCounter = 0;
-        kwlnFadeColor.a = -KWLN_FADE_MAX_ALPHA;
-        kwlnDrawControlFlags &= ~KWLN_FADE_DIRECTION_BITS;
-        kwlnFadeDuration = 0;
+        fadenow = 0;
+        fadergba.a = -KWLN_FADE_MAX_ALPHA;
+        dds3DrawFlag &= ~KWLN_FADE_DIRECTION_BITS;
+        fademax = 0;
         return;
     }
-    kwlnFadeDuration = duration;
-    kwlnFadeCounter = 0;
-    kwlnDrawControlFlags = (kwlnDrawControlFlags & ~KWLN_FADE_COUNT_DOWN_BIT) | KWLN_FADE_COUNT_UP_BIT;
+    fademax = duration;
+    fadenow = 0;
+    dds3DrawFlag = (dds3DrawFlag & ~KWLN_FADE_COUNT_DOWN_BIT) | KWLN_FADE_COUNT_UP_BIT;
 }
 
 /* Return whether either foreground counter direction is enabled. */
 s32 dds3FadeCheck(void) {
-    return (kwlnDrawControlFlags & KWLN_FADE_DIRECTION_BITS) != 0;
+    return (dds3DrawFlag & KWLN_FADE_DIRECTION_BITS) != 0;
 }
 
 /* Step the u16 counter and sample alpha before testing exact completion.
  * Completion clears timing/flags but leaves the sampled endpoint alpha intact. */
 void dds3FadeUpdate(void) {
     if (dds3FadeCheck() != 0) {
-        if (kwlnDrawControlFlags & KWLN_FADE_COUNT_DOWN_BIT) {
-            kwlnFadeCounter -= 1;
+        if (dds3DrawFlag & KWLN_FADE_COUNT_DOWN_BIT) {
+            fadenow -= 1;
         } else {
-            kwlnFadeCounter += 1;
+            fadenow += 1;
         }
-        kwlnFadeColor.a = (kwlnFadeCounter << KWLN_FADE_ALPHA_SHIFT) / kwlnFadeDuration;
-        if (((kwlnDrawControlFlags & KWLN_FADE_COUNT_DOWN_BIT) && kwlnFadeCounter == 0) || ((kwlnDrawControlFlags & KWLN_FADE_COUNT_UP_BIT) && kwlnFadeCounter == kwlnFadeDuration)) {
-            kwlnFadeCounter = 0;
-            kwlnFadeDuration = 0;
-            kwlnDrawControlFlags &= ~KWLN_FADE_DIRECTION_BITS;
+        fadergba.a = (fadenow << KWLN_FADE_ALPHA_SHIFT) / fademax;
+        if (((dds3DrawFlag & KWLN_FADE_COUNT_DOWN_BIT) && fadenow == 0) || ((dds3DrawFlag & KWLN_FADE_COUNT_UP_BIT) && fadenow == fademax)) {
+            fadenow = 0;
+            fademax = 0;
+            dds3DrawFlag &= ~KWLN_FADE_DIRECTION_BITS;
         }
     }
 }
@@ -1587,14 +1587,14 @@ void dds3DrawDistRipOverError(void) {
     SdfListHead *packetList;
 
     if (D_00435BA4 != 0) {
-        if (kwlnDistanceBlurErrorCount != 0 || kwlnRippleBlurErrorCount != 0) {
+        if (distblurovercnt != 0 || ripblurovercnt != 0) {
             packetList = (SdfListHead *)sdfGrAllocPacketBuff(KWLN_DIAG_PACKET_LIST_BYTES);
             sdfDrawTagInit(packetList);
-            if (kwlnDistanceBlurErrorCount > 0) {
-                sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, D_004112F0, kwlnDistanceBlurErrorCount));
+            if (distblurovercnt > 0) {
+                sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, D_004112F0, distblurovercnt));
             }
-            if (kwlnRippleBlurErrorCount > 0) {
-                sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x73C0, 0x7B40, 0xFEFFFF, 4, D_00411308, kwlnRippleBlurErrorCount));
+            if (ripblurovercnt > 0) {
+                sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x73C0, 0x7B40, 0xFEFFFF, 4, D_00411308, ripblurovercnt));
             }
             D_00380708.append(&D_00380708, packetList);
         }
@@ -1606,7 +1606,7 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnQueueBackgroundFadeOverlayPacke
 /* Cancel background direction, zero RGBA and restore the inactive ramp maxima.
  * This reset does not rewrite the background counter or duration. */
 void kwlnFadeResetBackground(void) {
-    kwlnDrawControlFlags &= KWLN_BGFADE_KEEP_OTHER_BITS;
+    dds3DrawFlag &= KWLN_BGFADE_KEEP_OTHER_BITS;
     kwlnBackgroundFadeColor[0] = 0;
     kwlnBackgroundFadeColor[1] = 0;
     kwlnBackgroundFadeColor[2] = 0;
@@ -1631,7 +1631,7 @@ void kwlnFadeBackgroundStartOut(s32 duration) {
     } else {
         kwlnBackgroundFadeDuration = duration;
         kwlnBackgroundFadeCounter = duration;
-        kwlnDrawControlFlags = (kwlnDrawControlFlags | KWLN_BGFADE_COUNT_DOWN_BIT) & KWLN_BGFADE_CLEAR_UP_MASK;
+        dds3DrawFlag = (dds3DrawFlag | KWLN_BGFADE_COUNT_DOWN_BIT) & KWLN_BGFADE_CLEAR_UP_MASK;
     }
     D_0037F5EC[2] = 2048.0f;
 }
@@ -1646,13 +1646,13 @@ void kwlnFadeBackgroundStartIn(s32 duration) {
         kwlnBackgroundFadeCounter = 0;
         kwlnBackgroundFadeDuration = 0;
         kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
-        kwlnDrawControlFlags &= KWLN_BGFADE_KEEP_OTHER_BITS;
+        dds3DrawFlag &= KWLN_BGFADE_KEEP_OTHER_BITS;
         kwlnBackgroundFadeFirstRamp = 0;
         kwlnBackgroundFadeSecondRamp = 0;
     } else {
         kwlnBackgroundFadeDuration = duration;
         kwlnBackgroundFadeCounter = 0;
-        kwlnDrawControlFlags = (kwlnDrawControlFlags & KWLN_BGFADE_CLEAR_DOWN_MASK) | KWLN_BGFADE_COUNT_UP_BIT;
+        dds3DrawFlag = (dds3DrawFlag & KWLN_BGFADE_CLEAR_DOWN_MASK) | KWLN_BGFADE_COUNT_UP_BIT;
     }
     D_0037F5EC[2] = 2041.0f;
 }
@@ -1660,7 +1660,7 @@ void kwlnFadeBackgroundStartIn(s32 duration) {
 /* Direction flags take precedence; idle visibility uses alpha in mode zero,
  * otherwise it tests whether the first ramp differs from its inactive maximum. */
 s32 kwlnFadeIsBackgroundOverlayActive(void) {
-    if (kwlnDrawControlFlags & KWLN_BGFADE_DIRECTION_BITS) {
+    if (dds3DrawFlag & KWLN_BGFADE_DIRECTION_BITS) {
         return 1;
     }
     if (kwlnBackgroundFadeMode == 0) {
@@ -1690,8 +1690,8 @@ void kwlnFadeSetMode(s32 visibilityMode) {
 void kwlnStepBackgroundFade(void) {
     f32 fadeRatio;
 
-    if (kwlnDrawControlFlags & KWLN_BGFADE_DIRECTION_BITS) {
-        if (kwlnDrawControlFlags & KWLN_BGFADE_COUNT_DOWN_BIT) {
+    if (dds3DrawFlag & KWLN_BGFADE_DIRECTION_BITS) {
+        if (dds3DrawFlag & KWLN_BGFADE_COUNT_DOWN_BIT) {
             kwlnBackgroundFadeCounter--;
         } else {
             kwlnBackgroundFadeCounter++;
@@ -1700,11 +1700,11 @@ void kwlnStepBackgroundFade(void) {
         kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = (kwlnBackgroundFadeCounter << KWLN_FADE_ALPHA_SHIFT) / kwlnBackgroundFadeDuration;
         kwlnBackgroundFadeFirstRamp = KWLN_BGFADE_FIRST_RAMP_SCALE - fadeRatio * KWLN_BGFADE_FIRST_RAMP_SCALE;
         kwlnBackgroundFadeSecondRamp = KWLN_BGFADE_SECOND_RAMP_SCALE - fadeRatio * KWLN_BGFADE_SECOND_RAMP_SCALE;
-        if (((kwlnDrawControlFlags & KWLN_BGFADE_COUNT_DOWN_BIT) && kwlnBackgroundFadeCounter == 0) ||
-            ((kwlnDrawControlFlags & KWLN_BGFADE_COUNT_UP_BIT) && kwlnBackgroundFadeCounter == kwlnBackgroundFadeDuration)) {
+        if (((dds3DrawFlag & KWLN_BGFADE_COUNT_DOWN_BIT) && kwlnBackgroundFadeCounter == 0) ||
+            ((dds3DrawFlag & KWLN_BGFADE_COUNT_UP_BIT) && kwlnBackgroundFadeCounter == kwlnBackgroundFadeDuration)) {
             kwlnBackgroundFadeCounter = 0;
             kwlnBackgroundFadeDuration = 0;
-            kwlnDrawControlFlags &= KWLN_BGFADE_KEEP_OTHER_BITS;
+            dds3DrawFlag &= KWLN_BGFADE_KEEP_OTHER_BITS;
         }
     }
 }
@@ -1793,15 +1793,15 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnTextureViewerPageIndex);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CB0);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnDrawSurfaceIndex);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", egl_OT_Offset);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CBC);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnTextureReferenceFlag);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", dds3RenderTex);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CC4);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnHeldTextureReference);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", dds3RenderTexture);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CCC);
 
@@ -1809,13 +1809,13 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CCE);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CD0);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnDrawControlFlags);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", dds3DrawFlag);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnDrawOverlayEnabled);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", dds3ScreenBlurFlag);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnDrawOverlayAlpha);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", dds3ScreenBlurAlpha);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnDrawOverlayScale);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", dds3ScreenBlurScale);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CE0);
 
@@ -1829,13 +1829,13 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CEC);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CEE);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnFadeColor);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", fadergba);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CF1);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CF2);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CF3);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", dds3FadeState);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnBackgroundFadeColor);
 
@@ -1849,9 +1849,9 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnBackgroundFadeSecondRamp);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D02);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnDistanceBlurErrorCount);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", distblurovercnt);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnRippleBlurErrorCount);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", ripblurovercnt);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D10);
 

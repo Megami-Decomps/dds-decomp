@@ -466,7 +466,7 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, EffWorldNode 
     if (base->motion != NULL) {
         roomObjectIndex = ((EffectObjectData *)object->data)->word04;
         if (roomObjectIndex > 0) {
-            if (fldTestRoomObjectModeFlag(fldAreaState.area, fldAreaState.floor + 1, roomObjectIndex) == 0) {
+            if (fldTestRoomObjectModeFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomObjectIndex) == 0) {
                 switch (base->mode) {
                 case 0:
                     base->weight = 1.0f;

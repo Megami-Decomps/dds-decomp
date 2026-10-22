@@ -1771,7 +1771,7 @@ extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
 void mnuRebuildPartySlotResources(MenuPageWindow *window, s32 partySlotIndex, s32 kind) {
     MenuPageSlot *slot = &window->slots[partySlotIndex];
     PartyPanelEntry *entry = &window->records->slots[partySlotIndex];
-    DatPartyRecord *actor = &datGameState->party[entry->index];
+    DatPartyRecord *actor = &DDS3_GBWK->party[entry->index];
     s32 resourceIndex;
     s32 selection;
 
@@ -2072,7 +2072,7 @@ void mnuSelectPage(MenuPageWindow *window, s32 selected) {
         effReleaseTextureHandlesAndResetSlots(window->handlesC[i]);
     }
 
-    selection = mnuGetSelectionFromFlags(&datGameState->party[
+    selection = mnuGetSelectionFromFlags(&DDS3_GBWK->party[
         window->records->slots[selected].index]);
     for (i = 0; i < 5; i++) {
         if (i == selection) {
@@ -2215,7 +2215,7 @@ s32 mnuGetPartyRowDrawState(MenuPageWindow *window, s32 row) {
         highlighted = 1;
     }
     if (flags & 0x10) {
-        party = datGameState->party;
+        party = DDS3_GBWK->party;
         if (party[window->records->slots[row].index].flags & DAT_PARTY_FLAG_FRONTLINE) {
             highlighted = 1;
         }
@@ -2245,7 +2245,7 @@ extern void uiDrawSurfaceAtNearDepth(u32);
 void mnuDrawPartyRowFrameVariant(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     s32 index, s32 force, s32 context) {
     s32 alpha = menu->fade / 2 + 0x80;
-    u16 *partyFlags = &datGameState->party[menu->records->slots[index].index].flags;
+    u16 *partyFlags = &DDS3_GBWK->party[menu->records->slots[index].index].flags;
 
     if (mnuGetPartyRowDrawState(menu, index) == 1 || force != 0) {
         if (*partyFlags & 2) {
@@ -2295,7 +2295,7 @@ void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *pag
     s32 color;
     FrFontGlyph *glyph;
 
-    value = mnuGetPartyEntryMenuValue(&datGameState->party[partyIndex]);
+    value = mnuGetPartyEntryMenuValue(&DDS3_GBWK->party[partyIndex]);
     alpha = page->drawAlpha;
     color = fclBlendColor(0xA09DC380, 0xA09DC300, alpha);
     x += page->slideOffset * 16;
@@ -2363,7 +2363,7 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 s
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, MenuPageSlot *unusedSlot,
                      s32 partyIndex, s32 surface) {
     u8 *outValue;
-    s32 profileId = ptyGetCurrentProfileId(&datGameState->party[partyIndex]);
+    s32 profileId = ptyGetCurrentProfileId(&DDS3_GBWK->party[partyIndex]);
     s32 code;
     s32 color;
     FrFontGlyph *glyph;
@@ -2388,7 +2388,7 @@ extern char D_003BC740[];
 void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
                    s32 partyIndex, u32 flags, s32 surface) {
     char text[0x40];
-    DatPartyRecord *unit = &datGameState->party[partyIndex];
+    DatPartyRecord *unit = &DDS3_GBWK->party[partyIndex];
     s32 color;
     s32 remainingExp;
     struct FrFontGlyph *glyph;
@@ -2518,7 +2518,7 @@ void mnuQueuePartyPanelSlotBlend(MenuPageWindow *menu, s32 window, u32 kind, s32
             bestIndex = i;
         }
     }
-    flags = datGameState->party[window].flags;
+    flags = DDS3_GBWK->party[window].flags;
     panel->work[bestIndex].kind = kind;
     panel->work[bestIndex].blend = 0x200;
     panel->work[bestIndex].delay = delay;

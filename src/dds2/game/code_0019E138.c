@@ -136,7 +136,7 @@ u32 itfReadEncodedCode(FrFontCtx *stream) {
 extern void frFontCheckPendingGlyphState(FrFontCtx *);
 extern void frMessageReturnCode(FrFontCtx *);
 extern void frFontAppendIndexedTextToGlyphChain(u8, FrFontCtx *);
-extern u8 frFontSharedGlyphFlags;
+extern u8 gModeFlag;
 extern void mnuSetTitleVoicePrefixIndex(s32);
 extern void mnuPlayTitleVoiceFile(char *);
 extern s32 mnuGetTitleEffectFrameCounter(void);
@@ -181,7 +181,7 @@ s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
         *position = payloadPosition + 1;
         break;
     case 0xF10F:
-        if (!(frFontSharedGlyphFlags & 4)) {
+        if (!(gModeFlag & 4)) {
             frMessageReturnCode(stream);
         }
         break;
@@ -191,7 +191,7 @@ s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
     case 0xF111:
         /* Retail 0x0019E43C beql .L0019E458: checkAutomaticLine has one entry
          * and falls into the frMessageReturnCode call at 0x0019E460. */
-        if (!(frFontSharedGlyphFlags & 8)) {
+        if (!(gModeFlag & 8)) {
             goto checkAutomaticLine;
         }
         /* This flagged form requests the same stop as opcode F104. */
@@ -200,7 +200,7 @@ s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
         return 1;
 
 checkAutomaticLine:
-        if (!(frFontSharedGlyphFlags & 0x20)) {
+        if (!(gModeFlag & 0x20)) {
             break;
         }
         frMessageReturnCode(stream);
@@ -289,7 +289,7 @@ FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
                 break;
             }
         } else if (value == 10) {
-            if (!(frFontSharedGlyphFlags & 4)) {
+            if (!(gModeFlag & 4)) {
                 continue;
             }
             frMessageReturnCode(stream);

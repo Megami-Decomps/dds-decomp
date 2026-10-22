@@ -71,7 +71,7 @@ extern u32 D_00438918;
 
 extern s32 D_00435BB0;
 
-extern s16 mnuMovieTaskState;
+extern s16 dds3VblanksPerFrame;
 
 extern s32 (*D_0040ABF0[])(u8 *work);
 extern s32 (*D_0040ABE0[])(u8 *work);
@@ -142,7 +142,7 @@ void mdlCreateViewerPackageTask(void) {
     MnuShootingWork *handle;
 
     D_00435BB0 = 0;
-    mnuMovieTaskState = 1;
+    dds3VblanksPerFrame = 1;
     handle = mdlAllocateViewerPackageWork();
     D_0043891C = handle;
     mnuInitializeShootingScene(handle);
@@ -154,7 +154,7 @@ u8 mdlViewerPackageTaskExists(void) {
 }
 
 u32 mdlStopViewerPackageTask(void) {
-    mnuMovieTaskState = 2;
+    dds3VblanksPerFrame = 2;
     D_00435BB0 = 1;
     mdlDestroyOptionalViewerPackageWork(D_0043891C);
     dds3KillProcessName(D_0042D4D0, 1);
@@ -962,7 +962,7 @@ void mnuReleaseShootingSectionResources(MnuShootingWork *work) {
     evtPrintDeveloperConsoleMessage("stgRelease_Section !!\n");
 }
 
-extern u8 kwlnTaskPadButtonStates[2][2][16];
+extern u8 dds3PadButtonState[2][2][16];
 extern void mnuToggleShootingPause(MnuShootingWork *);
 extern s32 mnuPollPauseChoiceInput(MnuShootingWork *);
 extern s32 mnuAdvanceCursorStepUntilThreshold(void);
@@ -997,7 +997,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
     s32 alternateAction;
     s32 mode;
 
-    if ((s8)kwlnTaskPadButtonStates[1][0][12] < 0 && work->phase == 2 &&
+    if ((s8)dds3PadButtonState[1][0][12] < 0 && work->phase == 2 &&
         !D_0040ABF8.flagsBits.updated && D_0040ABF8.inputCountdown == 0 &&
         !D_0040ABF8.flagsBits.inputDisabled) {
         mnuToggleShootingPause(work);
@@ -1038,12 +1038,12 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
     mnuAdvanceRuntimeHitTargets();
     memset(&input, 0, sizeof(input));
     if (!((work->flags >> 2) & 1)) {
-        if ((s8)kwlnTaskPadButtonStates[1][0][6] != 0) input.verticalNegative = 1;
-        else if ((s8)kwlnTaskPadButtonStates[1][0][7] != 0) input.verticalPositive = 1;
-        if ((s8)kwlnTaskPadButtonStates[1][0][4] != 0) {
+        if ((s8)dds3PadButtonState[1][0][6] != 0) input.verticalNegative = 1;
+        else if ((s8)dds3PadButtonState[1][0][7] != 0) input.verticalPositive = 1;
+        if ((s8)dds3PadButtonState[1][0][4] != 0) {
             if ((f32)work->horizontalTilt < 20.0f) work->horizontalTilt = (f32)work->horizontalTilt + 1.0f;
             input.horizontalNegative = 1;
-        } else if ((s8)kwlnTaskPadButtonStates[1][0][5] != 0) {
+        } else if ((s8)dds3PadButtonState[1][0][5] != 0) {
             if ((f32)work->horizontalTilt > -20.0f) work->horizontalTilt = (f32)work->horizontalTilt - 1.0f;
             input.horizontalPositive = 1;
         }
@@ -1051,10 +1051,10 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
             work->horizontalTilt = (f32)work->horizontalTilt - 1.0f;
         if (!input.horizontalPositive && (f32)work->horizontalTilt < 0.0f)
             work->horizontalTilt = (f32)work->horizontalTilt + 1.0f;
-        if (((s8)kwlnTaskPadButtonStates[1][0][0] < 0) | ((s8)kwlnTaskPadButtonStates[1][0][1] != 0))
+        if (((s8)dds3PadButtonState[1][0][0] < 0) | ((s8)dds3PadButtonState[1][0][1] != 0))
             input.actionSlot0 = 1;
-        alternateAction = (s8)kwlnTaskPadButtonStates[1][0][3];
-        actionFlags = (s8)kwlnTaskPadButtonStates[1][0][2];
+        alternateAction = (s8)dds3PadButtonState[1][0][3];
+        actionFlags = (s8)dds3PadButtonState[1][0][2];
         actionFlags |= alternateAction;
         if (actionFlags < 0)
             input.actionSlot1 = 1;
@@ -1109,7 +1109,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         return 1;
     }
     dds3UpdateSoundSlots();
-    if ((s8)kwlnTaskPadButtonStates[1][1][13] < 0) work->phase = 3;
+    if ((s8)dds3PadButtonState[1][1][13] < 0) work->phase = 3;
     if (D_00438934 > 0) {
         D_00438934--;
         if (D_00438934 == 0) {

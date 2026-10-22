@@ -666,8 +666,8 @@ void ptyAdjustAllActiveRosterStats(s32 statIndex, s32 amount) {
     s32 index;
 
     for (index = 0; index < 5; index++) {
-        if ((u16)(datGameState->party[index].flags & 1) != 0) {
-            DatPartyRecord *entry = &datGameState->party[index];
+        if ((u16)(DDS3_GBWK->party[index].flags & 1) != 0) {
+            DatPartyRecord *entry = &DDS3_GBWK->party[index];
 
             if (statIndex == DAT_BASE_STAT_COUNT) {
                 s32 stat;

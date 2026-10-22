@@ -156,7 +156,7 @@ typedef struct FldAreaWork {
 typedef char FldAreaWork_frameTravelDistance_at_FC[((u32)&((FldAreaWork *)0)->frameTravelDistance == 0xFC) ? 1 : -1];
 typedef char FldAreaWork_attritionDistance_at_120[((u32)&((FldAreaWork *)0)->attritionDistance == 0x120) ? 1 : -1];
 
-extern FldAreaWork fldAreaState;
+extern FldAreaWork fldGlobalBase;
 
 #define FLD_AREA_OFFSET(member) ((u32)&((FldAreaWork *)0)->member)
 typedef char FldResourceBlock_size_check[(sizeof(FldResourceBlock) == 8) ? 1 : -1];

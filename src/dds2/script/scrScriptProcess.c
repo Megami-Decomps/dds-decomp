@@ -55,8 +55,8 @@ void dds3GlobalWorkClearFlags(void)
     /* Countdown with a forward index; gcc keeps a single pointer (see asm). */
     for (globalClearCountdown = 255; globalClearCountdown >= 0; globalClearCountdown--)
     {
-        datGameState->script.ints[255 - globalClearCountdown] = 0;
-        datGameState->script.floats[255 - globalClearCountdown] = 0;
+        DDS3_GBWK->script.ints[255 - globalClearCountdown] = 0;
+        DDS3_GBWK->script.floats[255 - globalClearCountdown] = 0;
     }
 }
 
@@ -123,7 +123,7 @@ void scrDestroyAllNamedProcesses(void)
     ScrData *processNode;
     ScrData *nextProcessNode;
 
-    processNode = scrNamedProcessHead;
+    processNode = scrHandleFirst;
     if (processNode == NULL) {
         return;
     }
@@ -172,7 +172,7 @@ s32 scrStartProcessProcedure(ScrData *process, s32 procedureIndex)
 
 /* Find the node whose name matches, or NULL when the table is exhausted. */
 ScrData *scrSearchScriptName(const char *name) {
-    ScrData *processNode = scrNamedProcessHead;
+    ScrData *processNode = scrHandleFirst;
 
     while (processNode != NULL) {
         if (strcmp(name, processNode->name) == 0) {

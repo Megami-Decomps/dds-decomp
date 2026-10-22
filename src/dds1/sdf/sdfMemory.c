@@ -9,7 +9,7 @@
 #define SDF_HEAP_BLOCK_END 2
 #define SDF_HEAP_ALIGNMENT_MASK 0x7F
 
-SdfMemHeap sdfGeneralHeap __attribute__((section(".bss"), aligned(8)));
+SdfMemHeap sdfMemCB __attribute__((section(".bss"), aligned(8)));
 
 extern void (*D_003BD2DC)(s32);
 
@@ -46,7 +46,7 @@ u8 *sdfMemGetPtr(const SdfMemBlock *block) {
 /* Low-end first-fit with 128-byte rounding; returns an allocation handle.
  * At the end marker, call the optional out-of-memory hook and continue searching. */
 SdfMemBlock *sdfMemAllocDirect(s32 requestedBytes) {
-    SdfMemHeap *heap = &sdfGeneralHeap;
+    SdfMemHeap *heap = &sdfMemCB;
     s32 alignedBytes = (requestedBytes + SDF_HEAP_ALIGNMENT_MASK) & ~SDF_HEAP_ALIGNMENT_MASK;
     s32 interruptsWereEnabled;
     SdfMemBlock *block;
@@ -90,7 +90,7 @@ SdfMemBlock *sdfMemAllocDirect(s32 requestedBytes) {
 /* Search backward and carve the upper end of a free span with 128-byte rounding.
  * End markers restore interrupts but do not terminate the search or invoke the hook. */
 SdfMemBlock *sdfMemAllocFromTailDirect(s32 requestedBytes) {
-    SdfMemHeap *heap = &sdfGeneralHeap;
+    SdfMemHeap *heap = &sdfMemCB;
     s32 alignedBytes = (requestedBytes + SDF_HEAP_ALIGNMENT_MASK) & ~SDF_HEAP_ALIGNMENT_MASK;
     s32 interruptsWereEnabled;
     SdfMemBlock *block;
@@ -133,7 +133,7 @@ SdfMemBlock *sdfMemAllocFromTailDirect(s32 requestedBytes) {
 /* Low-end first-fit without the out-of-memory hook; return NULL at the end marker.
  * Rounding and split layout are the same as the normal low-end allocator. */
 SdfMemBlock *sdfMemAlloc2Direct(s32 requestedBytes) {
-    SdfMemHeap *heap = &sdfGeneralHeap;
+    SdfMemHeap *heap = &sdfMemCB;
     s32 alignedBytes = (requestedBytes + SDF_HEAP_ALIGNMENT_MASK) & ~SDF_HEAP_ALIGNMENT_MASK;
     s32 interruptsWereEnabled;
     SdfMemBlock *block;

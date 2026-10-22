@@ -1894,7 +1894,7 @@ code under their existing flags.
 ## Battle records and saved-party ownership
 
 The DDS1 battle getters return the canonical `DatPartyRecord` entries in
-`datGameState->party`. The current-entry getter forwards its roster ID to
+`DDS3_GBWK->party`. The current-entry getter forwards its roster ID to
 `dds3FindEntryIndex`; it does not load that ID through a pointer argument.
 Use the shared record for party scans and command-power snapshots, and the
 shared game-state inventory, battle-flag bank and 40-byte scene records
@@ -2282,11 +2282,11 @@ array base through an inline accessor, then select the current row:
 
 ```c
 static inline SdfPoolNode *fldGetDisplaySurfaceBase(void) {
-    return kwlnDrawSurfaces;
+    return sdfGrOtTable;
 }
 
 static inline void fldAppendToDisplaySurface(SdfListHead *list) {
-    SdfPoolNode *surface = &fldGetDisplaySurfaceBase()[fldDisplayRow];
+    SdfPoolNode *surface = &fldGetDisplaySurfaceBase()[rsetFrameMaskOtOffset];
     surface->append(surface, list);
 }
 ```
@@ -2295,7 +2295,7 @@ This is a base-address contract, not a cached row: the row is read again at
 each dispatch. In the qualified ordinary/hooked compiler trace, expansion
 materializes the base independently of the index. `09.loop` moves the
 complete HIGH/LO_SUM pair out of the outer loop and retains a `REG_EQUAL`
-note identifying `kwlnDrawSurfaces`. Reload can therefore rematerialize the
+note identifying `sdfGrOtTable`. Reload can therefore rematerialize the
 whole address at each callback, using `$2` for both halves at the first
 dispatch and `$6` for both halves at the second.
 
@@ -2683,7 +2683,7 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     **Switch with the symbol used in every arm** (4 arms, field accesses and a
     call each): `W *w = &G;` initialised before the switch and used in every arm
     gives ONE `lui`/`addiu` in the prologue held in a saved register for the
-    whole function (retail DDS1 `func_002890B8`: `lui/addiu &fileManagerWork` in
+    whole function (retail DDS1 `func_002890B8`: `lui/addiu &fileQueueHead` in
     $19 before the switch). Writing `G.a`, `G.b` (direct field accesses) or
     assigning `w = &G` inside each arm rematerialises per arm (4 pairs). A
     self-assigned `FileManWork *work = work;` placeholder, as in the old
@@ -2932,7 +2932,7 @@ after both; cc1probe `--sched`, hooked==unhooked):
   loaded from the pointer a call returned). Every int store that precedes such
   a load therefore inherits the load's priority (here 10 against 2-3 for the
   `li` constants) and issues before them. Retail has the clear of the word at
-  `fldAreaState + 0x10C` after both `li` and after the loads' latency slot,
+  `fldGlobalBase + 0x10C` after both `li` and after the loads' latency slot,
   i.e. no dependence chain. The word is an `f32` (`FldAreaWork.unk10C`); its
   float alias set breaks the chain and the clear sits at priority 2 like the
   halfword stores. A `const` pointer or typed members of `FldEnt110` did not
@@ -2946,7 +2946,7 @@ after both; cc1probe `--sched`, hooked==unhooked):
   shared base that comes last in the source is therefore issued first of its
   tied group, and the others keep source order. `func_0014C468`: writing the
   `0x10C` clear after `collectedCount = 0` made it the last user of the
-  `fldAreaState` base, which put it ahead of the `sh $0, 0x106` that retail
+  `fldGlobalBase` base, which put it ahead of the `sh $0, 0x106` that retail
   leaves in the `jal` delay slot; the same rule explains why the source order
   of tied stores often looks reversed against the retail issue order
   (`kind`, `mode`, `entry` stores in `func_0013C138`).
@@ -4220,7 +4220,7 @@ not the packed eight-byte flags/reference state or its reference count.
 ## Integer VM setter is void; preserve the original fall-off callback
 
 `scrSetIntReturnValue` has a void C provider in both games. Its retail
-leaf incidentally leaves `scrCurrentContext` in `$2`; that is not a public
+leaf incidentally leaves `nowpwork` in `$2`; that is not a public
 return contract. Keep its declarations void and ordinary opcode callers
 as `scrSetIntReturnValue(value); return 1;` where native returns one.
 
@@ -4898,7 +4898,7 @@ distinct from the complete primary actor-status record above.
 ## GS graphics transfer-worker control
 
 DDS2 `0032A230` uses the separate control bytes `D_00438A1C` and
-`D_00438A1D`, not `sdfBusyBufferIndex` or the `sdfTextureUpdateQueue`
+`D_00438A1D`, not `sdfGrDrawBusy` or the `gsMemDelayedResrcCB`
 object. The transfer drain rechecks `D_00438A1C` after `SleepThread`;
 `sdfDrawSync` polls volatile `D_00438A1D`. Keep both control bytes
 volatile, clear the active byte before testing the reset byte, and retain
@@ -5043,7 +5043,7 @@ The DDS1 loader allocates/reads `0x12400` bytes, or 256 records, and
 `fldSetFadeTarget` writes the selected record's mode rather than a flat
 `area * 73` word offset. The signed sky-alpha adjustment is the separate
 `D_0032E570 + 0x38` word (`D_0032E5A8`), not `FldAreaWork + 0x38`:
-the real `fldAreaState` base is `0x0032E3B0`.
+the real `fldGlobalBase` base is `0x0032E3B0`.
 The renderers clamp three corners' adjusted alpha but leave the bottom-left
 corner unclamped; their ordinary float-to-int C casts emit `CVT.W.S`.
 The renderer bodies remain assembly pending a genuine source-shape match.
@@ -5353,7 +5353,7 @@ needed.
 ## Save confirmation restores maxima before currents
 
 DDS2 `002D0498` walks the five canonical `DatPartyRecord` entries in
-forward order and re-reads `datGameState` across the selector/stat calls.
+forward order and re-reads `DDS3_GBWK` across the selector/stat calls.
 Its natural early guards and signed index let gcc derive the native
 countdown. After computing maximum MP, the source sets `maxMp` before
 restoring current HP and MP; ee-gcc schedules the native stores to
@@ -6296,7 +6296,7 @@ because the equivalent DDS1 change regresses two existing exact bodies.
 
 ## Room resource registration returns its slot index
 
-DDS1 `00138ED0` and DDS2 `0013BAB8` return the old `fldTaskSlotCount`
+DDS1 `00138ED0` and DDS2 `0013BAB8` return the old `fldEveRngCount`
 before incrementing it (`0013A6A8` / `0013D290` move that value to `v0`).
 The paired action constructors immediately multiply the result by `0x140`
 to update the corresponding room record. Their `FldFileResource *`,
@@ -7420,7 +7420,7 @@ function's own `D_003A2608` and `D_003A27C8` data inclusions.
 ## Model viewer surfaces use the canonical SDK pool owner
 
 `D_00325048` (DDS1) and `D_00380048` (DDS2) are the native interior
-symbols for `kwlnDrawSurfaces[40]`: each is `0x500` bytes after the
+symbols for `sdfGrOtTable[40]`: each is `0x500` bytes after the
 array base, whose canonical `SdfPoolNode` entries are `0x20` bytes.
 Their callback at `+0x10` is therefore `append(SdfPoolNode *,
 SdfListHead *)`, not a separate viewer-device callback taking an
@@ -8497,7 +8497,7 @@ alternate table views or compiler flags.
 DDS2 `ptyApplyProfilePreset` (`0x00313D80`, 520 bytes) uses the same source
 form with its title-specific completion calls. Its existing 0xA0-byte
 `PtyPresetRecord` owns four 12-byte profile-ID rows at +0x10. The party scan
-resolves `&datGameState->party[i]` each iteration, preserving the native fresh
+resolves `&DDS3_GBWK->party[i]` each iteration, preserving the native fresh
 game-state read after the profile-flag callback; a captured party pointer
 incremented across those calls misses this read epoch. The `u16` occupied
 mask and selected profile ID retain their actual flag and callback widths.
@@ -8615,7 +8615,7 @@ uses separate direction-vector length, dot product and angle values, then a
 loop-local stick magnitude. The degree conversion, 22-degree bias, division
 by 45 and remainder modulo eight are genuine signed-integer stages. This
 natural source shape matches both bodies at `-O2 -G8`; no declaration-order
-steering is needed. The primary `sdfPadButtonStates` is a flat `s8[32]`,
+steering is needed. The primary `dds3PadBitTable` is a flat `s8[32]`,
 indexed by `pad * 16 + button`, as its producer and most native users already
 do; bit seven marks a new press. Length, normalization and dot operations use
 the existing SDK VU0 macros, not game-code assembly.
@@ -9677,7 +9677,7 @@ the field-state target-position offsets differ between games.
 
 The deciding source property **P** is an index-first address `PLUS` for
 the record's fields. The pointer control, which captures
-`record = &((FldValueRecord *)fldValueRecords)[index]`, has two residual
+`record = &((FldValueRecord *)fldMatterTable)[index]`, has two residual
 words in each game: at `+0x7C`, `addu v1,a1,a0` instead of retail
 `addu v1,a0,a1`, and at `+0x13C`, `addu v1,v0,s0` instead of retail
 `addu v1,s0,v0`. Spelling pointer arithmetic instead of subscripting in
@@ -9687,7 +9687,7 @@ Canonical `cc1probe --all` traces of the current-owner pointer control and
 the exact indexed form have hooked/unhooked assembly and all-RTL parity.
 At entry to **cse1**, control instruction `uid97` is already
 `PLUS(base reg106, scaled-index reg105)`. Direct accesses such as
-`((FldValueRecord *)fldValueRecords)[index].worldNode` instead enter cse1
+`((FldValueRecord *)fldMatterTable)[index].worldNode` instead enter cse1
 with `uid97 = PLUS(scaled-index reg105, base reg99)`. The field form
 retains the native operand order through the later passes. This evidence
 locates the distinction in address-expression lowering, before cse1;
@@ -9910,7 +9910,7 @@ return widths, and neighboring misnamed sound APIs are left unchanged.
 
 The `effFlash*Clone` entry points in both games are the `duplicate` callbacks
 at offset `0xC` in the native `0x28`-byte `EffDispatchEntry` rows of
-`effParameterWorkOperations`. `dds3EffectPCPCopy` invokes this
+`EffectPCPFuncTable`. `dds3EffectPCPCopy` invokes this
 slot with the source payload after allocating the new owner/kind/index work.
 The table base is DDS1 `0x00353880` / DDS2 `0x003B01B0`.
 
@@ -9935,7 +9935,7 @@ they do not copy those live runtime fields from the source. Existing random
 draws and their ordering remain unchanged.
 
 These are not the `restart` callbacks in the separate compact
-`effNodeTypeOperations` table. The earlier rotating-streak dispatch row has
+`EffMajorTable` table. The earlier rotating-streak dispatch row has
 no duplicate callback; the named streak clone belongs to kind 15.
 
 ## Action camera blends and the shared camera cursor
@@ -9980,7 +9980,7 @@ extra arguments, pointer casts, VU macros and title-specific constants.
 The two linkage flag accessors have the same operation protocol: `0` marks,
 `1` clears, and every other narrowed operation queries. Both index by the
 linkage skill ID minus `0x1AB`. `btlAccessRecordedLinkageSkillFlag` uses
-`datGameState->battleFlags`; `btlAccessPendingLinkageSkillFlag` uses the
+`DDS3_GBWK->battleFlags`; `btlAccessPendingLinkageSkillFlag` uses the
 scratch words which deduplicate notices before their roster is recorded.
 `btlClearPendingLinkageSkillFlags` clears three words in DDS1 and four in
 DDS2. Preserve each title's word count, narrowing, unchecked indexing and
@@ -10206,7 +10206,7 @@ A real stage-field pointer tests the zero-offset MEM(REG) property:
 ```c
 s32 *stage;
 /* After the existing weather update. */
-stage = &fldSceneLifecycleFlags.stage;
+stage = &fldAutoMapSeqFlags.stage;
 if (*stage < 2 || D_00389988[10] == 0 ||
     fldGetEncounterRuntimeResult() != 0) {
     return 0;
@@ -10760,7 +10760,7 @@ declaration/statement order and native snapshot/save/restore order are retained.
 | `btlUpdateEventPlayback` | `0020FC48` | `0022AC10` | Release/prepare/play/finish phase driver; native `eve mot` diagnostic. |
 | `btlRequestSceneEventResources` | `0020FF50` | `0022AF90` | Scene event script/resource request and BE/script sequence task linkage. |
 | `btlBindEventEffectResources` | `002101C8` | `0022B288` | Available keys 50–64 installed into slots 11–25; native `invoke effect` diagnostics. |
-| `btlDrawScaledHeldTextureQuad` | `00211A60` | `0022CE30` | Centered scaled quad from `kwlnHeldTextureReference`. |
+| `btlDrawScaledHeldTextureQuad` | `00211A60` | `0022CE30` | Centered scaled quad from `dds3RenderTexture`. |
 | `btlUpdateRuntimeFadeState` | `00213808` | `0022E0E0` | Initial setup/fade, outgoing fade, cleanup and frame counter; DDS2 name already established. |
 | `btlIsFadeInPhaseOrIdle` | `00213B60` | `0022E460` | Inactive/state 0/state 2, **not** a test that fading has completed. |
 | `btlIsFadeOutCompleteOrIdle` | `00213B90` | `0022E490` | Inactive/state 0/state 4, after the outgoing fade and before cleanup. |
@@ -11229,7 +11229,7 @@ slot in `sdf_grid.h`. Its empty zero-argument C definitions are retained,
 as are the allocator bodies and their `INCLUDE_ASM` lines.
 
 `sdfDrawColoredTriangleFan` (`0x002CAAC8` / `0x00311F20`) submits XY pairs
-and either a shared color or per-vertex colors through `kwlnDrawSurfaces`.
+and either a shared color or per-vertex colors through `sdfGrOtTable`.
 The packet-header initializer copies primitive bits directly into GIF PRIM:
 `0x14D` has low bits five, selecting a triangle **fan**, not a strip.
 The existing ITF fan/strip constants independently distinguish `0x4D` from
@@ -11908,7 +11908,7 @@ changed by this naming closure.
 ## Named inactive PCP operation slots
 
 The numeric-kind names identify real registrations, not guessed effect classes.
-Retail `effParameterWorkOperations` starts at DDS1 `0x00353880` and DDS2
+Retail `EffectPCPFuncTable` starts at DDS1 `0x00353880` and DDS2
 `0x003B01B0`; `EffDispatchEntry` in `include/eff_param_operations.h` defines its
 `0x28`-byte rows and the corresponding runtime consumers dispatch those slots.
 The kind-88 rows are DDS1 `0x00354640` / DDS2 `0x003B0F70`; kind 95 uses
@@ -12033,7 +12033,7 @@ naming closure because the DDS1 adapter is still claimed.
 
 ## Dispatch-node slots and event-setup no-op stages
 
-The retail `effNodeTypeOperations` type-three rows start at DDS1
+The retail `EffMajorTable` type-three rows start at DDS1
 0x0034DEA8 and DDS2 0x003AA7D8. `EffTypeOps` is a 0x30-byte row:
 restart at +0x0C, condition query at +0x10, vector/matrix/word setters at
 +0x14/+0x18/+0x1C, instance clone at +0x28 and scale at +0x2C.
@@ -12062,7 +12062,7 @@ forwarders and the unknown control-byte reader remain unnamed.
 
 ## Parameter-node default callbacks
 
-The retail `effNodeTypeOperations` type-four rows start at DDS1
+The retail `EffMajorTable` type-four rows start at DDS1
 0x0034DED8 and DDS2 0x003AA808. Their factory is `dds3EffectPartCreate`,
 which allocates compact parameter work and creates its kind-specific payload.
 The names of the four manager stubs follow their actual `EffTypeOps` slots:
@@ -14229,7 +14229,7 @@ declarations and fixed-point values remain unchanged.
 
 `itfPanelLayoutCallbacks` is indexed after setting or advancing panel
 corners and render value; the advance path also forwards all four updated
-corners. `itfPanelColorCallbacks` is the separate bank notified after RGBA
+corners. `CreateColorTable` is the separate bank notified after RGBA
 stores. Retain the existing unprototyped callback declarations and differing
 argument lists, rather than inventing one new shared signature.
 
@@ -14286,18 +14286,18 @@ trailing zero index words. `effThunderEndCapPoints` is the full eight-vector
 template copied into newly allocated cap storage. Those three native tables
 are byte-identical between games; no constant is reconstructed or reordered.
 
-`effThunderHistoryDrawParams` and `effThunderEndCapDrawParams` are separate
+`dds3BezierVertexCount` and `dds3BezierTrackPolyVertex` are separate
 0x30-byte BSS descriptors. Creation clears only each native 0x2C prefix, then
 assigns its respective index bank. Rendering fills their different point and
 color inputs. Preserve both owner types and the partial clears. The separate
-`effThunderHistorySurfaces` bank is indexed by `surfaceIndex` before appending
+`dds3BezierTrackPolyParam` bank is indexed by `surfaceIndex` before appending
 the combined packet list; its pointer bytes differ between games.
 
 `effBattleAnchorHeightFactors` scales the selected anchor height; its native
-six floats are `(-1,0,1,1.5,0,0)`. `effBattleDirectionAngles` supplies the eight
+six floats are `(-1,0,1,1.5,0,0)`. `effBTL_Ptr_D` supplies the eight
 compass angles and four zero entries to the existing rotation builders. Both
 tables have identical native bytes across titles, but the existing DDS1 and
-DDS2 rotation-provider calls are not made uniform. `effBattlePositionCallbacks`
+DDS2 rotation-provider calls are not made uniform. `GetPositionPtrTable`
 dispatches by request kind and returns a position through `vf10`; retain the
 unprototyped callback contract. Its fourteen native cells include three null
 tails, not a new array bound or a byte-identical cross-title pointer table.
@@ -14339,7 +14339,7 @@ The direct-submission banks remain distinct: `effScaledFanDrawSurfaces`,
 triangle and transformed-fan banks and the existing separate state/drawing
 lists for non-direct fan modes. Do not rename their shared pool-node pointees.
 
-`effRingBasisScratchVector` is mutable global scratch, initially `(0,-1,0,0)`.
+`effPCPFlashPolyRingExpHVertex` is mutable global scratch, initially `(0,-1,0,0)`.
 The ring builder writes XYZ before the quadword load and normalization; its
 untouched W is not a reason to replace the record with a local or constant.
 
@@ -14424,18 +14424,18 @@ individual NUL strings, add C literals, or manufacture DDS1 counterparts.
 
 ## Graphics workers, general release requests and motion slot dispatch
 
-`sdfGeneralReleaseRequest` is initialized with `sdfMemFreeDirect`
+`sdfMemDelayedResrcCB` is initialized with `sdfMemFreeDirect`
 and receives allocations through the general-release queue. It is distinct
-from the already named chip-release request. `sdfNamedResourceRpcClient`
+from the already named chip-release request. `sdfIopRpcClient`
 is bound to the named-resource service and reused for the packed name/data
 requests; its existing SDK client-prefix declaration is unchanged.
 
 The graphics buffer-service worker uses `sdfGraphicsBufferThread` and its
 0x1000-byte `sdfGraphicsBufferThreadStack`. The transfer worker uses the
 separate 0x8000-byte `sdfGraphicsTransferThreadStack`; its stored
-`sdfGraphicsTransferThreadId` is also woken by the graph interrupt callback.
+`sdfDrawThreadId` is also woken by the graph interrupt callback.
 Keep the existing byte arrays, stack sizes, priorities and per-game pointer
-versus integer argument carriers. `sdfGsModeResetRequested` is set during
+versus integer argument carriers. `reqGsReset` is set during
 worker initialization and cleared immediately before the current-mode GS
 reset. `sdfGsCaptureStoreImage` is the existing SDK descriptor reused for
 both color-buffer captures; its existing uncached-address expression stays
@@ -14443,7 +14443,7 @@ unchanged, not a new alias view.
 
 `sdfMotionCommandHandlers` retains the native constructor pointer followed
 by a null entry and the existing unchecked low-halfword index dispatch.
-`sdfMotionSlotPairDispatch` binds model slot indices and weights; its five
+`sdfMotMorphTable` binds model slot indices and weights; its five
 release/bind/sample/capture/blend callbacks and final opaque word are kept.
 Pointer words differ between titles, so this is common role/shape evidence,
 not byte identity. No callback prototype, declaration, bound, data, storage,
@@ -14494,19 +14494,19 @@ parameter numerically instead, so no artificial counterpart is introduced.
 ## Sound command transport and startup storage
 
 `sndCommandRing` is the existing thirty-two-entry, 0x80-byte packet ring.
-`sndCommandReadIndex` and `sndCommandWriteIndex` retain their volatile u16
+`sdfSndCmdIndex` and `sdfSndCmdTailIndex` retain their volatile u16
 declarations, signed cursor casts and unchecked payload-copy contract.
 The worker consumes entries and advances the read cursor; the producer
 publishes the write cursor. No synchronization or wrap logic changes.
 
-`sndSynchronousCommandMode` is set only during sound initialization: the
+`sdfSndBurstReqMode` is set only during sound initialization: the
 producer dispatches commands itself while this flag is nonzero, and otherwise
-wakes `sndCommandThreadId`. The startup descriptor
+wakes `sdfSndCmdBuf`. The startup descriptor
 `sndCommandThreadParameters` retains its 0x30-byte owner, priority 0x42 and
 0x1000-byte `sndCommandThreadStack`; `sndRpcServerThreadStack` is the separate
 0x1000-byte RPC-server stack submitted at priority 0x43.
 
-`sndIopDmaTransfer` is the existing SIF transfer descriptor filled before
+`sdfSndTransBuf` is the existing SIF transfer descriptor filled before
 `sceSifSetDma`. Naming leaves its type, fields and existing retry body alone.
 `sndCachedListenerState` caches six scaled integer values for command 0x160;
 preserve the opaque two-word prefix and the complete 32-byte copy rather
@@ -14554,20 +14554,20 @@ layout/type migration accompanies these names.
 
 ## Developer console tables and buffered device-read state
 
-`sdfConsoleGlyphTexcoords` retains the writable, eight-byte-aligned bank of
+`sdfDevConsFontUvTable` retains the writable, eight-byte-aligned bank of
 96 packed glyph UV words for characters 0x20 through 0x7F.
-`sdfConsoleColorPalette` is the separate mutable sixteen-word RGBA bank,
+`sdfDevConsColorTable` is the separate mutable sixteen-word RGBA bank,
 also indexed by the packet command setter. Neither is made const or bounded
-differently. `sdfConsoleFontTexture` retains the existing DDS1 pointer and
+differently. `sdfDebugFontHandle` retains the existing DDS1 pointer and
 DDS2 integer-handle declarations rather than imposing a new common view.
 
-`sdfDevCurrentDirectory` remains the 64-byte, C-owned `host0:` buffer. Its
+`sdfFileHostRootPath` remains the 64-byte, C-owned `host0:` buffer. Its
 six-byte prefix copy and unchecked path/slash/NUL appending are unchanged.
 `sdfDevRpcClient` keeps the existing 0x30-byte context owner and its SDK
 client prefix; naming introduces no alternate RPC layout.
 
-`sdfDevReadSectorBuffer`, `sdfDevReadSectorCursor` and
-`sdfDevReadSectorBytesAvailable` retain partial reads from the same 0x800-byte
+`sdfDevReadSectorBuffer`, `sdfCdImageOffset` and
+`sdfCdImageCurrActive` retain partial reads from the same 0x800-byte
 disc sector. Keep the existing signed byte-count arithmetic and transfer
 calls. `sdfDevHddModuleArguments` and `sdfDevPfsModuleArguments` are packed
 NUL-separated arguments, not format strings: the loader consumes 0xC bytes
@@ -14660,8 +14660,8 @@ before both billboard scale components are set. Its eight native floats
 are `(1,1,0.25,0.75,0.5,0.5,0.25,0)` in both games.
 
 The narrow-cone, variable-height, wide-cone and cone-burst spawners mutate
-separate `effNarrowConeSpawnParams`, `effVariableHeightSpawnParams`,
-`effWideConeSpawnParams` and `effConeBurstSpawnParams` objects. Preserve their
+separate `effPCPZiodin02Param`, `effPCPZiodin03Param`,
+`effPCPZiodin04Param` and `effPCPShockWave02Param` objects. Preserve their
 0x54-byte existing parameter views and all default words, even where two
 objects initially have identical bytes. `effFixedOriginSpawnParams` and
 `effSideBurstSpawnParams` each retain two records selected by a random bit.
@@ -14747,15 +14747,15 @@ all pointer words, imported pointees, declarations, casts, storage and flow.
 
 ## Thunder fade presets and tracked-polygon draw storage
 
-`effExpandingThunderFadeParams`, `effGrowingThunderFadeParams`,
-`effShortThunderFadeParams` and `effScalingThunderFadeParams` are the
+`effPCP_ShockWave01_ThunderSpherePoly_Param`, `effPCP_Houden01_ThunderSpherePoly_Param`,
+`effPCP_Megidora01_ThunderSpherePoly_Param` and `effPCP_Megidoraon01_ThunderSpherePoly_Param` are the
 native alpha-system inputs of their matched initializers. These are
 0x4C-byte `EffThunderAlphaParams` records, not the distinct 0x54-byte
 fragment presets. The native cellCount values are 9, 9, 8 and 8. Preserve
 all source byte-array declarations, owner casts, alpha words and four- or
 twelve-byte zero alignment tails rather than merging equal fields.
 
-`effPairedDriftReferenceAxis` is `(0,1,0,0)`, the constant used in both
+`effPCPRadiateTBParam` is `(0,1,0,0)`, the constant used in both
 cross products around the view axis in the paired drift update. Its
 existing const f32[4] declaration and sixteen-byte alignment remain.
 The separate imported staggered-pulse constant is deliberately excluded.
@@ -14807,7 +14807,7 @@ and mutable scale vectors. `billChildFacingReferenceAxis` and
 `1.0-fabs(dot)` before its existing matrix-row scaling. Preserve the
 floating expression, writable declarations and distinct objects.
 
-`billPendingChildList` links children with newly pending packets and is
+`dds3BillboardTag` links children with newly pending packets and is
 cleared by the flush and resource-dispatch lifecycle. Its existing pointer
 declaration in billManager and s32 zero-store carrier declaration in the
 initialization unit are retained. `billPendingRenderPairList` is the
@@ -15531,7 +15531,7 @@ retail initializes the cached owner at target `+0x34/+0x38`, before the record
 loop, and keeps it in the frame-pointer register through packet construction.
 The remainder's divisor 3 is materialized locally rather than owning that register.
 
-The draw surfaces are the existing 0x62-entry `kwlnDrawSurfaces` array, not
+The draw surfaces are the existing 0x62-entry `sdfGrOtTable` array, not
 independent objects at interior addresses. The particle routes use entries
 51, 55 and 39; existing cell work also uses entry 56. A unit-local pool-dispatch
 inline performs the ordinary object method `pool->append(pool, packet)`.
@@ -15933,5 +15933,5 @@ and the complete timed record remains `0x10` bytes. The native setter writes
 the same active/position pair at `+0`/`+4`.
 
 Timed producers and readers use `control.active` / `control.pos`. Generic
-bar updaters receive `&mnuMovieMenuState->timedB.control`, not a cast of the
+bar updaters receive `&titleWork->timedB.control`, not a cast of the
 complete timed owner to a second nominal prefix type.

@@ -67,11 +67,11 @@ extern u32 sdfMovieDrawColor;
 extern u32 D_003BD61C;
 
 
-extern u32 sdfSoundCommandStatus;
+extern u32 p2sdPcmBusy;
 
-extern u32 sdfSoundCommandBusy;
+extern u32 p2sdPcmState;
 extern char D_00398948[];
-extern s32 sdfSoundRpcSemaphore;
+extern s32 sifRpcServerSema;
 extern u32 D_003FEAC0[16];
 
 extern s32 sdfPrintf(const char *fmt, ...);
@@ -94,7 +94,7 @@ typedef union SdfSoundCommand {
 extern SdfSoundCommand D_003BD494;
 
 
-extern SdfStreamFrameNode *sdfSoundNodeHead;
+extern SdfStreamFrameNode *sdfIpuTaskLink;
 extern SdfStreamFrameNode *sdfIpuInputStream;
 extern s32 D_003BDA94;
 extern s32 D_003BDAB4;
@@ -106,9 +106,9 @@ extern void sdfIpuRemoveHandler(void *);
 extern DevRequest *sdfTexListNew(u32 capacity);
 
 
-extern SdfStreamFrameNode *sdfStreamNodeListHead;
+extern SdfStreamFrameNode *sdfIpuQueueHead;
 
-extern SdfStreamFrameNode *sdfStreamNodeListTail;
+extern SdfStreamFrameNode *sdfIpuQueueTail;
 
 
 extern void sdfIpuMakeBltPacket(SdfStreamFrameNode *node);
@@ -126,7 +126,7 @@ void p2sdSetBgmTrack(s32 channel) {
 }
 
 s32 p2sdLoadPcmFile(const char *name, u8 channel) {
-    if (sdfSoundCommandBusy != 0) {
+    if (p2sdPcmState != 0) {
         return 1;
     }
     strcpy(D_00398948, name);
@@ -135,7 +135,7 @@ s32 p2sdLoadPcmFile(const char *name, u8 channel) {
 }
 
 u32 p2sdGetPcmState(void) {
-    return sdfSoundCommandBusy;
+    return p2sdPcmState;
 }
 
 void p2sdSyncSound(void) {
@@ -157,7 +157,7 @@ void sdfSoundSetChannelCount(u32 channelCount) {
 }
 
 u32 p2sdSetPcmCallback(u32 command) {
-    if (sdfSoundCommandStatus != 0) {
+    if (p2sdPcmBusy != 0) {
         return 0;
     }
     D_003BD494.word = command;
@@ -167,7 +167,7 @@ u32 p2sdSetPcmCallback(u32 command) {
 /* Send opcode 0x120 with the channel's group (bits 3-6) unless a command is
  * pending; returns nonzero when busy. */
 s32 p2sdPlayPcm(u8 channel) {
-    if (sdfSoundCommandStatus) {
+    if (p2sdPcmBusy) {
         return 1;
     }
     channel = (channel >> 3) & 0xF;
@@ -176,7 +176,7 @@ s32 p2sdPlayPcm(u8 channel) {
 }
 
 u32 sdfSoundGetCommandStatus(void) {
-    return sdfSoundCommandStatus;
+    return p2sdPcmBusy;
 }
 
 /* Stop the movie's named sound playback after its stream is released. */
@@ -201,12 +201,12 @@ s32 sdfFileRpcCallback(s32 unused, u32 event) {
         FlushCache(0);
         /* Fall through: flush and wake the waiting thread. */
     case SDF_DEV_EVENT_SIZE_REPLY:
-        SignalSema(sdfSoundRpcSemaphore);
+        SignalSema(sifRpcServerSema);
         break;
     case SDF_DEV_EVENT_INACTIVE:
     case SDF_DEV_EVENT_OPENED:
     case SDF_DEV_EVENT_CLOSED:
-        SignalSema(sdfSoundRpcSemaphore);
+        SignalSema(sifRpcServerSema);
         break;
     }
     return 0;
@@ -230,12 +230,12 @@ u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
             D_003FEAC0[0] = 0;
             break;
         }
-        sdfSoundCommandBusy = 1;
+        p2sdPcmState = 1;
         mnuBuildVoiceResourcePath(path, D_00398948);
         state = sdfFileCmdReadOpen(path, sdfFileRpcCallback, 0);
         D_003BDA7C = state;
         if (state != NULL) {
-            WaitSema(sdfSoundRpcSemaphore);
+            WaitSema(sifRpcServerSema);
             state = D_003BDA7C;
             if (state->result != 0) {
                 sdfFileCmdClearError(state);
@@ -255,7 +255,7 @@ u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
         buffer = (void *)sdfMemLock(allocation);
         if (buffer != NULL) {
             sdfFileCmdRead(D_003BDA7C, buffer, D_003BDA74->byteCount);
-            WaitSema(sdfSoundRpcSemaphore);
+            WaitSema(sifRpcServerSema);
             sdfSndTransToIOP(D_003BDA74->destination, buffer, D_003BDA74->byteCount);
             sdfMemFreeDirect(allocation);
             D_003FEAC0[0] = D_003BDA74->byteCount;
@@ -266,10 +266,10 @@ u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
     }
     case 2:
         sdfFileCmdClose(D_003BDA7C);
-        WaitSema(sdfSoundRpcSemaphore);
+        WaitSema(sifRpcServerSema);
         sdfFileCmdFree(D_003BDA7C);
         D_003BDA7C = NULL;
-        sdfSoundCommandBusy = 0;
+        p2sdPcmState = 0;
         D_003FEAC0[0] = 0;
         break;
     case 3:
@@ -291,7 +291,7 @@ u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
     case 6: {
         u32 word = D_003BD494.word;
         if (word != 0) {
-            sdfSoundCommandStatus = 1;
+            p2sdPcmBusy = 1;
         }
         D_003FEAC0[0] = word;
         break;
@@ -309,7 +309,7 @@ u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
         break;
     }
     case 8:
-        sdfSoundCommandStatus = 0;
+        p2sdPcmBusy = 0;
         D_003FEAC0[0] = 0;
         break;
     }
@@ -320,7 +320,7 @@ void SifRpcServerThreadProc(void) {
     u8 queue[0x20];
     u8 server[0x50];
     s32 semaphore = sdfCreateSema(0, 1, 0);
-    sdfSoundRpcSemaphore = semaphore;
+    sifRpcServerSema = semaphore;
     if (semaphore <= 0) {
         for (;;) {
         }
@@ -331,7 +331,7 @@ void SifRpcServerThreadProc(void) {
 }
 
 extern s32 D_003BDA8C;
-extern u8 sndMidiTrackState[];
+extern u8 sdfSndMap[];
 
 void sdfSoundSetTableEntry(u32 kind, u8 *src) {
     u8 *table;
@@ -340,98 +340,98 @@ void sdfSoundSetTableEntry(u32 kind, u8 *src) {
 
     switch (kind) {
     case 0:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         dst = table + 0x210;
         for (i = 0; i < 0x20; i++) {
             *dst++ = src[i];
         }
         break;
     case 1:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         dst = table + 0x290;
         for (i = 0; i < 0x80; i++) {
             *dst++ = src[i];
         }
         break;
     case 2:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         dst = table + 0x310;
         for (i = 0; i < 0x80; i++) {
             *dst++ = src[i];
         }
         break;
     case 3:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         dst = table + 0x390;
         for (i = 0; i < 0x20; i++) {
             *dst++ = src[i];
         }
         break;
     case 4:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         dst = table + 0x410;
         for (i = 0; i < 0x20; i++) {
             *dst++ = src[i];
         }
         break;
     case 5:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         dst = table + 0x490;
         for (i = 0; i < 2; i++) {
             *dst++ = src[i];
         }
         break;
     case 6:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         dst = table + 0x510;
         for (i = 0; i < 2; i++) {
             *dst++ = src[i];
         }
         break;
     case 7:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         dst = table + 0x590;
         for (i = 0; i < 2; i++) {
             *dst++ = src[i];
         }
         break;
     case 8:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         dst = table + 0x610;
         for (i = 0; i < 2; i++) {
             *dst++ = src[i];
         }
         break;
     case 9:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         dst = table + 0x690;
         for (i = 0; i < 2; i++) {
             *dst++ = src[i];
         }
         break;
     case 10:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         dst = table + 0x710;
         for (i = 0; i < 2; i++) {
             *dst++ = src[i];
         }
         break;
     case 11:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         dst = table + 0x790;
         for (i = 0; i < 2; i++) {
             *dst++ = src[i];
         }
         break;
     case 12:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         dst = table + 0x810;
         for (i = 0; i < 2; i++) {
             *dst++ = src[i];
         }
         break;
     }
-    sdfSndTransToIOP(D_003BDA8C, sndMidiTrackState, 0x8D0);
+    sdfSndTransToIOP(D_003BDA8C, sdfSndMap, 0x8D0);
     sdfSndSendSyncCmd(0x1F0, 0, 0, 0);
 }
 
@@ -443,91 +443,91 @@ void sdfSoundGetTableEntry(u32 kind, u8 *dst) {
     sdfSndSendSyncCmd(0x200, 0, 0, 0);
     switch (kind) {
     case 0:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         src = table + 0x210;
         for (i = 0; i < 0x20; i++) {
             dst[i] = *src++;
         }
         return;
     case 1:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         src = table + 0x290;
         for (i = 0; i < 0x80; i++) {
             dst[i] = *src++;
         }
         return;
     case 2:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         src = table + 0x310;
         for (i = 0; i < 0x80; i++) {
             dst[i] = *src++;
         }
         return;
     case 3:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         src = table + 0x390;
         for (i = 0; i < 0x20; i++) {
             dst[i] = *src++;
         }
         return;
     case 4:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         src = table + 0x410;
         for (i = 0; i < 0x20; i++) {
             dst[i] = *src++;
         }
         return;
     case 5:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         src = table + 0x490;
         for (i = 0; i < 0x2; i++) {
             dst[i] = *src++;
         }
         return;
     case 6:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         src = table + 0x510;
         for (i = 0; i < 0x2; i++) {
             dst[i] = *src++;
         }
         return;
     case 7:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         src = table + 0x590;
         for (i = 0; i < 0x2; i++) {
             dst[i] = *src++;
         }
         return;
     case 8:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         src = table + 0x610;
         for (i = 0; i < 0x2; i++) {
             dst[i] = *src++;
         }
         return;
     case 9:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         src = table + 0x690;
         for (i = 0; i < 0x2; i++) {
             dst[i] = *src++;
         }
         return;
     case 10:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         src = table + 0x710;
         for (i = 0; i < 0x2; i++) {
             dst[i] = *src++;
         }
         return;
     case 11:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         src = table + 0x790;
         for (i = 0; i < 0x2; i++) {
             dst[i] = *src++;
         }
         return;
     case 12:
-        table = sndMidiTrackState;
+        table = sdfSndMap;
         src = table + 0x810;
         for (i = 0; i < 0x2; i++) {
             dst[i] = *src++;
@@ -1178,12 +1178,12 @@ void sdfIpuDetachQueue(SdfStreamFrameNode *node, s32 skipInterruptGuard) {
         previousNode = node->streamPrev;
         nextNode = node->streamNext;
         if (previousNode == 0) {
-            sdfStreamNodeListHead = nextNode;
+            sdfIpuQueueHead = nextNode;
         } else {
             previousNode->streamNext = nextNode;
         }
         if (nextNode == 0) {
-            sdfStreamNodeListTail = previousNode;
+            sdfIpuQueueTail = previousNode;
         } else {
             nextNode->streamPrev = previousNode;
         }
@@ -1204,14 +1204,14 @@ void sdfIpuAttachQueue(SdfStreamFrameNode *node, s32 skipInterruptGuard) {
         sdfIpuDetachQueue(node, 1);
     }
     node->queued = 1;
-    if (sdfStreamNodeListTail == 0) {
-        sdfStreamNodeListHead = node;
+    if (sdfIpuQueueTail == 0) {
+        sdfIpuQueueHead = node;
     } else {
-        sdfStreamNodeListTail->streamNext = node;
+        sdfIpuQueueTail->streamNext = node;
     }
-    node->streamPrev = sdfStreamNodeListTail;
+    node->streamPrev = sdfIpuQueueTail;
     node->streamNext = 0;
-    sdfStreamNodeListTail = node;
+    sdfIpuQueueTail = node;
     if (skipInterruptGuard == 0 && interruptsEnabled != 0) {
         EIntr();
     }
@@ -1219,7 +1219,7 @@ void sdfIpuAttachQueue(SdfStreamFrameNode *node, s32 skipInterruptGuard) {
 
 /* Walk link addresses to append to the independent singly-linked sound list. */
 void sdfIpuAttachTask(SdfStreamFrameNode *node) {
-    SdfStreamFrameNode **tailLink = &sdfSoundNodeHead;
+    SdfStreamFrameNode **tailLink = &sdfIpuTaskLink;
     SdfStreamFrameNode *currentNode = *tailLink;
     if (currentNode != NULL) {
         tailLink = &currentNode->next;
@@ -1233,7 +1233,7 @@ void sdfIpuAttachTask(SdfStreamFrameNode *node) {
 
 /* Unlink the first matching sound node; absence leaves the list unchanged. */
 void sdfIpuDetachTask(SdfStreamFrameNode *node) {
-    SdfStreamFrameNode **nodeLink = &sdfSoundNodeHead;
+    SdfStreamFrameNode **nodeLink = &sdfIpuTaskLink;
     SdfStreamFrameNode *currentNode = *nodeLink;
     while (currentNode != NULL) {
         if (currentNode == node) {
@@ -1464,7 +1464,7 @@ void sdfIpuAllocGsRect(SdfStreamFrameNode *node) {
     }
 }
 
-extern SdfStreamFrameNode *sdfIpuOutputStream;
+extern SdfStreamFrameNode *sdfCurrIpuDecodeCb;
 extern void sdfImageSetChainReleaseMem(s32);
 extern void sdfGsMemFreeDelayed(SdfTexResource *texture);
 
@@ -1478,7 +1478,7 @@ void sdfIpuFree(SdfStreamFrameNode *node) {
     node->drained = 1;
     sdfIpuDetachTask(node);
     sdfIpuDetachQueue(node, 1);
-    if (sdfIpuOutputStream == node) {
+    if (sdfCurrIpuDecodeCb == node) {
         HW_WRITE(IPU_CTRL, 0x40000000);
         sceIpuSync(0, 0);
         dmaEnable = HW_READ(D_ENABLER);
@@ -1486,7 +1486,7 @@ void sdfIpuFree(SdfStreamFrameNode *node) {
         HW_WRITE(D4_CHCR, 1);
         HW_WRITE(D3_CHCR, 0);
         HW_WRITE(D_ENABLER, dmaEnable);
-        sdfIpuOutputStream = NULL;
+        sdfCurrIpuDecodeCb = NULL;
         wasActive = 1;
     }
     if (interruptsEnabled != 0) {
@@ -1612,14 +1612,14 @@ void sdfIpuExecQueue(s32 skipInterruptGuard) {
     SdfStreamFrameNode *node;
     s32 interruptsEnabled = 0;
 
-    if (sdfIpuOutputStream != NULL) {
+    if (sdfCurrIpuDecodeCb != NULL) {
         return;
     }
     if (skipInterruptGuard == 0) {
         interruptsEnabled = DIntr();
     }
 
-    node = sdfStreamNodeListHead;
+    node = sdfIpuQueueHead;
     while (node != 0) {
         if (node->completedBufferCount + node->pendingPlaybackSubmissions < 2 &&
             (node->active != 1 || node->filledSlots != 0)) {
@@ -1645,7 +1645,7 @@ void sdfIpuDecodeThread(void) {
 
     for (;;) {
         SleepThread();
-        work = sdfIpuOutputStream;
+        work = sdfCurrIpuDecodeCb;
         if (work == NULL) {
             continue;
         }
@@ -1657,7 +1657,7 @@ void sdfIpuDecodeThread(void) {
             work->playbackPhase = SDF_STREAM_PLAYBACK_FIRST_COMPLETION;
         }
         work->completedBufferCount++;
-        sdfIpuOutputStream = NULL;
+        sdfCurrIpuDecodeCb = NULL;
         work->tickCount++;
         if (work->tickCount == work->cycleLength) {
             if (work->loopMode != 0) {
@@ -1764,14 +1764,14 @@ extern u32 D_003BD614;
 
 /* Advance playback cadence, refill active feeds and retry a deferred IPU input. */
 void sdfAdvanceStreamPlayback(s32 cadence) {
-    SdfStreamFrameNode *node = sdfIpuOutputStream;
+    SdfStreamFrameNode *node = sdfCurrIpuDecodeCb;
     s32 elapsed;
     s32 interruptsEnabled;
 
     if (node != NULL && node->inputDmaStartPending != 0) {
         sdfIpuSetToIpuDma(node);
     }
-    node = sdfSoundNodeHead;
+    node = sdfIpuTaskLink;
     while (node != NULL) {
         if (node->pendingPlaybackSubmissions != 0) {
             node->pendingPlaybackSubmissions--;
@@ -1841,20 +1841,20 @@ void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, SoundFormat *f
 
 extern s32 sdfAddHandler(s32, s32, void *, s32, s32);
 extern s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
-extern u8 sdfIpuStreamThreadStack[];
+extern u8 sdfIpuDecodeThStack[];
 extern void sdfIpuDecodeThread();
 void sdfIpuInit(void) {
     s32 thread;
 
     sceIpuInit();
     HW_WRITE(IPU_CMD, 0x90000000);
-    sdfSoundNodeHead = 0;
-    sdfIpuOutputStream = NULL;
+    sdfIpuTaskLink = 0;
+    sdfCurrIpuDecodeCb = NULL;
     D_003BDA9C = sdfAddHandler(1, 3, sdfIpuFromDmacHandler, -1, 0);
     EnableDmac(3);
     D_003BDAA0 = sdfAddHandler(1, 4, sdfIpuToDmacHandler, -1, 0);
     EnableDmac(4);
-    thread = CreateThreadSimple((void *)sdfIpuDecodeThread, sdfIpuStreamThreadStack, 0x800, 0x46);
+    thread = CreateThreadSimple((void *)sdfIpuDecodeThread, sdfIpuDecodeThStack, 0x800, 0x46);
     D_003BDAB4 = thread;
     _StartThread(thread, 0);
 }
@@ -1896,7 +1896,7 @@ void sdfSetGridScaledDrawBounds(s32 column, s32 row, s32 width, s32 height, u32 
 
 INCLUDE_ASM(const s32, "game/code_002E9708", sdfMovieQueueFrameSprite);
 
-extern MovObj *sdfMoviePacSoundMovie;
+extern MovObj *movieSemaId;
 extern void *movieWaitSema(s32);
 extern void sdfMovieQueueFrameSprite(MovObj *, SdfPoolNode *);
 
@@ -1935,7 +1935,7 @@ void sdfMovieDrawFrame(MovObj *movie, SdfPoolNode *pool) {
     if (movie->pacEnabled != 0 && movie->pad21 == 0 &&
         movie->stream.pac->ringLength >= 0x1000) {
         movie->pad21 = 1;
-        sdfMoviePacSoundMovie = movie;
+        movieSemaId = movie;
         p2sdSetPcmCallback((u32)movieWaitSema);
         p2sdPlayPcm(movie->packetLimit);
     }
@@ -1986,15 +1986,15 @@ void sdfMovieDrawFrame(MovObj *movie, SdfPoolNode *pool) {
 
 INCLUDE_SDATA(const s32, "game/code_002E9708", D_003BD494);
 
-INCLUDE_SDATA(const s32, "game/code_002E9708", sdfSoundCommandBusy);
+INCLUDE_SDATA(const s32, "game/code_002E9708", p2sdPcmState);
 
-INCLUDE_SDATA(const s32, "game/code_002E9708", sdfSoundCommandStatus);
+INCLUDE_SDATA(const s32, "game/code_002E9708", p2sdPcmBusy);
 
 INCLUDE_SDATA(const s32, "game/code_002E9708", D_003BD4A0);
 
 INCLUDE_SDATA(const s32, "game/code_002E9708", D_003BD4A4);
 
-INCLUDE_SDATA(const s32, "game/code_002E9708", fileIdleUpdateCallback);
+INCLUDE_SDATA(const s32, "game/code_002E9708", p2sdSmgBuf);
 
 INCLUDE_SDATA(const s32, "game/code_002E9708", D_003BD4B0);
 
@@ -2088,7 +2088,7 @@ INCLUDE_SDATA(const s32, "game/code_002E9708", sdfGsMemoryTypeFormat);
 
 INCLUDE_SDATA(const s32, "game/code_002E9708", D_003BD614);
 
-INCLUDE_SDATA(const s32, "game/code_002E9708", sdfMoviePacRingSemaphore);
+INCLUDE_SDATA(const s32, "game/code_002E9708", movieStreamSema);
 
 INCLUDE_SDATA(const s32, "game/code_002E9708", D_003BD61C);
 

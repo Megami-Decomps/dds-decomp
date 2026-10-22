@@ -27,7 +27,7 @@ enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
 
 SdfTexBuf *sdfTexMakeGIFPacketSub(SdfTex *texture, s32 variant);
 
-extern SdfPendingRequest sdfTextureReleaseQueue;
+extern SdfPendingRequest sdfTexDelayedResrcCB;
 
 
 /* Return palette bytes: 8-bit indices use 256 colors, other indices 16. */
@@ -128,7 +128,7 @@ void sdfTexRelease(SdfTex *texture) {
     if (next != NULL) {
         next->prev = prev;
     } else {
-        sdfResourceListHead = prev;
+        sdfTexHandleLink = prev;
     }
     sdfFreeAuto(texture->paletteData);
     sdfFreeAuto(texture->intensityMap);
@@ -163,7 +163,7 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
         ref->refCount = remainingReferenceCount;
         if (remainingReferenceCount == 0) {
             texture->resourceKey = 0;
-            sdfDelayedResrcEntry(&sdfTextureReleaseQueue, texture);
+            sdfDelayedResrcEntry(&sdfTexDelayedResrcCB, texture);
         }
     }
 }
@@ -230,7 +230,7 @@ SdfTex *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header, s32 mode)
     s32 key = header->resourceKey;
 
     if (key != 0) {
-        SdfTex *existing = sdfResourceListHead;
+        SdfTex *existing = sdfTexHandleLink;
         while (existing != NULL) {
             if (existing->resourceKey == key) {
                 existing->reference->refCount++;

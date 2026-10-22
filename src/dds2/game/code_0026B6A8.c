@@ -62,7 +62,7 @@ s32 dspStartFlagEvent(void *context) {
                 }
             }
             for (i = 0; i < 5; i++) {
-                slot = &datGameState->party[i];
+                slot = &DDS3_GBWK->party[i];
                 if ((slot->flags & 1) != 0 && evtBitCheck(mnuPartyFlagEventEntries[slot->unitId].requiredFlag) != 0
                     && evtBitCheck(mnuPartyFlagEventEntries[slot->unitId].handledFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
@@ -219,7 +219,7 @@ s32 mnuFirstPresentMainCharacterIndex(void) {
     s32 i;
 
     for (i = 0; i < 5; i++) {
-        slot = &datGameState->party[i];
+        slot = &DDS3_GBWK->party[i];
         if (slot->flags & 1) {
             switch (slot->unitId) {
             case 1:

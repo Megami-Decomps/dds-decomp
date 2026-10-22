@@ -40,7 +40,7 @@ typedef char SdfProjectionRecord_size_must_be_0xA0[(sizeof(SdfProjectionRecord) 
 typedef char SdfProjectionRecord_inverseOrigin_must_be_0x90[
     ((u32)&((SdfProjectionRecord *)0)->inverseOrigin == 0x90) ? 1 : -1];
 
-extern SdfProjectionRecord sdfSceneProjectionParameters;
+extern SdfProjectionRecord dds3ScreenParam;
 #ifdef VERSION_DDS1
 extern SdfProjectionRecord D_003247B0;
 extern SdfProjectionRecord D_00324980;

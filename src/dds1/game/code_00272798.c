@@ -171,7 +171,7 @@ void mnuDrawStaffItemListEntry(s32 x, s32 y, s32 z, struct MenuList *list,
                   struct MenuListNode *node, s32 drawArg) {
     StaffMenuWork *context = (StaffMenuWork *)list->context;
     u32 itemId = node->sortKeySecondary;
-    u8 quantity = datGameState->inventory.counts[itemId];
+    u8 quantity = DDS3_GBWK->inventory.counts[itemId];
     u32 color = 0xA09DC380;
 
     if (quantity != 0) {
@@ -186,7 +186,7 @@ void mnuDrawStaffItemListEntry(s32 x, s32 y, s32 z, struct MenuList *list,
                                           D_003BC6C8, 0);
         frSetFontColorNo(label, 0);
         sprintf(buffer, D_003BC6D0,
-                       datGameState->inventory.counts[node->sortKeySecondary]);
+                       DDS3_GBWK->inventory.counts[node->sortKeySecondary]);
         count = (FrFontGlyph *)itfCreateFont2TextGlyph(x + 0x910, y + 0x20, z, color,
                                           buffer, (s32)label);
         frFontDrawGlyphChain(count, 1, drawArg);
