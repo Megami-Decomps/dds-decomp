@@ -9012,7 +9012,80 @@ u16 *btlGatherActorCommandsByKind(s32 address, s16 *outCount, u16 firstKind, u16
     return out;
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", btlGatherEnemyCommands);
+extern u16 D_003E6500[];
+extern u16 D_00437B6C;
+
+typedef struct BattleRankedCommand {
+    u16 id;
+    u16 rank;
+} BattleRankedCommand;
+
+/* DDS2 ranks the gathered commands in menu order, preserving ties. */
+u16 *btlGatherEnemyCommands(BtlUnit *actor, s16 *outCount) {
+    BattleRankedCommand ranked[8];
+    DatEnemyRecord *enemy;
+    DatCommandRecord *records;
+    u16 *skills;
+    u16 *gathered = D_003B6810;
+    u16 *out;
+    s32 count = 0;
+    s32 skillIndex;
+
+    btlGetRuntime();
+    enemy = datEnemyRecords;
+    enemy += actor->partyRecord.unitId;
+    skills = enemy->skills;
+    memset(gathered, 0, 0x18);
+    records = datCommandRecords;
+    for (skillIndex = 0; skillIndex < 8; skillIndex++) {
+        u16 id = skills[skillIndex];
+        if ((id >= 0x220 || (records[id].menuFlags & 2) != 0) && id != 0) {
+            gathered[count] = id;
+            count++;
+        }
+    }
+    out = D_003B55D0;
+    memcpy(out, D_003B6810, count * 2);
+    if (count >= 2) {
+        s32 i;
+        s32 rankIndex;
+        s32 swapped;
+        for (i = 0; i < count; i++) {
+            u16 id = out[i];
+            BattleRankedCommand *command = &ranked[i];
+            command->id = id;
+            command->rank = 0xFFFF;
+        }
+        for (rankIndex = 0; rankIndex < D_00437B6C; rankIndex++) {
+            for (i = 0; i < count; i++) {
+                if (D_003E6500[rankIndex] == ranked[i].id) {
+                    ranked[i].rank = rankIndex;
+                }
+            }
+        }
+        do {
+            swapped = 0;
+            for (i = 0; i < count - 1; i++) {
+                BattleRankedCommand *command = &ranked[i + 1];
+                if (command->rank < command[-1].rank) {
+                    u16 id = command[-1].id;
+                    u16 rank = command[-1].rank;
+                    command[-1].id = command->id;
+                    command[-1].rank = command->rank;
+                    command->id = id;
+                    command->rank = rank;
+                    swapped = 1;
+                }
+            }
+        } while (swapped);
+        for (i = 0; i < count; i++) {
+            out[i] = ranked[i].id;
+        }
+    }
+    *outCount = count;
+    return out;
+}
+
 
 /* Pack available roster IDs and their values into consecutive byte pairs. */
 void fldCollectAvailableRosterEntries(s32 unused, s16 *count) {
