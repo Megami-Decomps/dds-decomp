@@ -207,7 +207,7 @@ extern void p2sdStopSe();
 
 
 
-extern s32 fldFieldTaskUpdate(void);
+extern s32 fldFieldTaskUpdate(dds3ProcessID_t *task);
 
 extern s32 D_0032E3C0[];
 
@@ -346,7 +346,7 @@ extern void func_00147188(s32);
 
 extern s32 gFldElvFloorNow;
 
-s32 fldFieldTaskUpdate(void) {
+s32 fldFieldTaskUpdate(dds3ProcessID_t *task) {
     if (fldProcCampChk() != 0) {
         return 0;
     }
@@ -367,7 +367,7 @@ s32 fldFieldTaskUpdate(void) {
     return 0;
 }
 
-void *fldAddressProcess1(dds3ProcessID_t *task) {
+s32 fldAddressProcess1(dds3ProcessID_t *task) {
     s32 *work;
 
     work = sdfChipAllocDirect(0x10);
@@ -376,7 +376,7 @@ void *fldAddressProcess1(dds3ProcessID_t *task) {
     work[2] = 0;
     work[3] = 0;
     dds3SetProcessData(task, (u32)work);
-    return fldFieldTaskUpdate;
+    return (s32)(u32)fldFieldTaskUpdate;
 }
 
 void fldAddressShutdown(dds3ProcessID_t *task) {
