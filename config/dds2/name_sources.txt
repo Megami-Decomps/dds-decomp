@@ -8486,7 +8486,7 @@
 0x00291400	mnuFindPanelPositionRecordByScriptId	inferred	Searches one 37-record panel-position bank for a record matching the script ID. Source: src/dds2/game/code_0028FD30.c. LiteH-2 b23.
 0x00292B90	mnuAcquireTutorialMantraNodeAndNeighbors	inferred	Acquires tutorial mantra node 8 and unlocks its neighbors; called by tutorial state 14. Source: src/dds2/game/code_0028FD30.c. LiteH-2 b23.
 0x002933A8	mnuBeginMantraTutorialFromNormalMode	inferred	Initializes tutorial state 3 and resets its counters before the normal-mode transition out. Source: src/dds2/game/code_0028FD30.c. LiteH-2 b23.
-0x002945B8	mnuSetCurrentTerminalContext	inferred	Stores the active MenuTerminalContext pointer in D_00438FC8. Source: src/dds2/game/code_0028FD30.c. LiteH-2 b23.
+0x002945B8	mnuSetCurrentTerminalContext	inferred	Stores the active MenuTerminalContext pointer in mnuCurrentTerminalContext. Source: src/dds2/game/code_0028FD30.c. LiteH-2 b23.
 0x002AB3A8	mnuRunCampFieldSkillDisplayTask	inferred	Camp field-skill display task callback prepares the display and returns success. Source: src/dds2/game/code_002AAEA0.c. LiteH-2 b23.
 0x002C5498	mnuIsSolarPricedItemId	inferred	Accepts item IDs 0x60-0x6C; used with the solar-phase price table. DDS1 twin 0x00286A00 accepts 0x60-0x7E. Source: src/dds2/game/code_002BE628.c. LiteH-2 b23.
 0x002C54B0	mnuIsHighRangeItemId	inferred	Accepts item IDs 0xC0-0xFF; used by staff and camp item filters. Source: src/dds2/game/code_002BE628.c. LiteH-2 b23.
@@ -10035,4 +10035,8 @@
 0x00435FB8	fldRoomKF2Chunk	inferred	The room's KF2 transfer chunk, whose scene request fldProcessFieldRequestAlternate runs; relocated back on release. DDS1 twin 0x003BAC28.
 0x00435FBC	fldRoomKF2Data	inferred	The KF2 resource data fldRoomKF2Chunk lies in, its relocation base. DDS1 twin 0x003BAC2C.
 0x00435FC0	fldRelocateOnRelease	inferred	Set by fldSetRelocateOnRelease: field teardown relocates the room's remaining transfer chunks back when it is set. DDS1 twin 0x003BAC30.
+0x00438FC8	mnuCurrentTerminalContext	inferred	The terminal menu being drawn (MenuTerminalContext), set by mnuSetCurrentTerminalContext; its draws take sprites from its effect slots.
+0x003E9578	fileJobZeroPadding	inferred	Sixteen zero bytes fileJobWriteSerializedPayload writes to pad a job file's primary buffer to sixteen bytes. DDS1 twin 0x0037E508.
+0x003B49D8	itfSoundSelectorBorderColor	inferred	The sound selector option panel's border colour (DrawColorRec 0x3D, 5, 0, 0x4D), for itfDrawThreePanelBorderBands. DDS1 twin 0x00357FE8.
 0x00380788	kwlnSceneSurfaceSets	inferred	Thirteen sets of four draw surfaces (SdfPoolNode *[13][4]) that kwlnBuildFrameScenePackets stores each frame; a model draws through the set of its pass. DDS1 twin 0x00325788.
+0x00319A58	mnuPlaceShootingEntryObject	inferred	The shooting game's active-work visitor: places an entry's model node or sprite instance at its screen position (progress origin, entry position, parameter offset), orients, scales and tints it, draws it through its pass's surface set, and applies its keyed motion.

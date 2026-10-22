@@ -50,6 +50,7 @@ void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *skillPackage) {
 
 extern void brsAnimateSkillIconRows(BrsSkillPackageWork *work);
 extern void brsDrawResultPanelSprites(BrsSkillPackageWork *work);
+extern u32 brsPackProgressPanelColor(BrsSkillPackageWork *work);
 
 void mnuTitleRenderFadeAndPanels(BrsSkillPackageWork *work) {
     s32 remaining = 0x100 - work->fadeProgress;

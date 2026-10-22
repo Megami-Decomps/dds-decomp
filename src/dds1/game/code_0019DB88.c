@@ -141,8 +141,8 @@ void itfInitializeCursorResetState(ItfMesBlk40 *cursor) {
     cursor->selectedIndex = -1;
     cursor->savedIndex = -1;
     cursor->rowCount = 0;
-    cursor->unk18 = 0;
-    cursor->unk1C = 0;
+    cursor->widestRowX = 0;
+    cursor->widestRowWidth = 0;
     cursor->glyphColorIntensity = 0;
     cursor->optionCount = 0;
 }

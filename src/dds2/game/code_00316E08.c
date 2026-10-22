@@ -693,7 +693,7 @@ void mnuInitializeShootingScene(MnuShootingWork *handle) {
     mnuResetProgressLimitAndStep(1, 1);
     mnuSetWorkEntryStartCallback(mnuCreateShootingEntryObject);
     mnuSetWorkEntryFinishOrDeactivateCallback(func_00319388);
-    mnuSetActiveWorkVisitor(func_00319A58);
+    mnuSetActiveWorkVisitor(mnuPlaceShootingEntryObject);
     mnuSetRuntimeRecordInitializationCallback(mnuApplyPlayerRuntimeRecordFeedback);
     mnuSetRuntimeWorkHitCallback(mnuApplyShootingRuntimeRecordEvent);
     mnuSetRuntimeRecordPairCallback(mnuAdvanceShootingProgressFromRecord);
@@ -1146,7 +1146,7 @@ extern void itfDrawFullExtentWorkPanels(MnuShootingWork *work);
 extern void itfDispatchObjectFadeSequenceMode(MnuShootingWork *work);
 extern void mnuUpdateAndDrawPauseChoiceFade(MnuShootingWork *work);
 extern MnuModelNode *D_00438928;
-extern struct SdfPoolNode *D_00380788[13][4];
+extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
     MenuProgressParameters *origin = mnuGetResourceProgressParameters();
@@ -1274,7 +1274,7 @@ s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
             mnuBroadcastNodeModelState((u8 *)D_00438928, 0x80664C4C);
             break;
         }
-        mdlProcessContextNodesAndTransforms(D_00438928->model, D_00380788[0]);
+        mdlProcessContextNodesAndTransforms(D_00438928->model, kwlnSceneSurfaceSets[0]);
     }
 
     itfDrawFullExtentWorkPanels(work);
@@ -1324,7 +1324,7 @@ void mnuCreateShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
             entry->object.modelNode = node;
             if (node != NULL) {
                 if (tagClass == MNU_WORK_TAG_MOVEMENT_TABLE) node->flags |= 2;
-                func_00319A58(entry, work);
+                mnuPlaceShootingEntryObject(entry, work);
             } else {
                 evtPrintDeveloperConsoleMessage("model none\n");
             }
@@ -1335,7 +1335,7 @@ void mnuCreateShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
         entry->object.modelInstance = instance;
         if (instance != NULL) {
             instance->scale = (f32)parameters->scale / 100.0f;
-            func_00319A58(entry, work);
+            mnuPlaceShootingEntryObject(entry, work);
         } else {
             printf("sprite none\n");
         }
@@ -1510,7 +1510,7 @@ void func_00319388(MenuWorkEntry *entry, MnuShootingWork *work) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00319A58);
+INCLUDE_ASM(const s32, "game/code_00316E08", mnuPlaceShootingEntryObject);
 
 void mnuApplyPlayerRuntimeRecordFeedback(MenuRuntimeRecord *record) {
     MnuModelNode *node;
