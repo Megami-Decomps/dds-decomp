@@ -3724,7 +3724,7 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     return 0;
 }
 
-BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *unit, s32 index, f32 scale) {
+BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *unit, BtlUnit *target, f32 scale) {
     BtlRuntimeTask *task = btlAllocTask(24);
     BtlApproachTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
@@ -3735,7 +3735,7 @@ BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *unit, s32 index, f32 scal
     task->onStart = 0;
     args = btlGetTaskArguments(task);
     args->unit = unit;
-    args->target = (BtlUnit *)(u32)index;
+    args->target = target;
     args->scale = scale;
     args->offset = 0.0f;
     args->count = 0;
