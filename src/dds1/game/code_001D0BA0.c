@@ -5239,15 +5239,7 @@ void btlApplyUnitEffectScale(BtlUnit *unit) {
     }
 }
 
-typedef struct BtlCameraModeDefinition {
-    void (*initialize)(BtlLinkedCommand *);
-    void (*update)(BtlLinkedCommand *);
-    u8 allowRepeat;
-    u8 pad09[3];
-    void *unk0C;
-} BtlCameraModeDefinition;
-
-typedef char BtlCameraModeDefinitionSize[(sizeof(BtlCameraModeDefinition) == 16) ? 1 : -1];
+#include "btl_camera_mode_definition.h"
 
 extern BtlCameraModeDefinition btlCameraModeDefinitions[];
 
