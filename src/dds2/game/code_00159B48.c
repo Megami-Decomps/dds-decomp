@@ -26,6 +26,7 @@
 #include "sdf_asset_create.h"
 extern s32 effEmitterDelayRandomState[];
 #include "eff.h"
+#include "eff_particle_emitter_variants.h"
 #include "eff_template_scale_record.h"
 #include "eff_particle_view.h"
 #include "eff_look_at_ring.h"
@@ -1229,21 +1230,6 @@ void dds3Particle_SmokeDelete(u32 effect) {
     sdfChipFreeDirect(effect);
 }
 
-typedef struct EffDiscEmitter {
-    EffEmitterHead head;
-    u8 flag150;
-    u8 pad151[3];
-    u32 spread;      /* 0x154 */
-    f32 radius;      /* 0x158 */
-    f32 f15C;
-    f32 f160;
-    f32 f164;
-    f32 f168;
-    f32 f16C;
-    f32 jitterA;     /* 0x170 */
-    f32 jitterB;     /* 0x174 */
-} EffDiscEmitter;
-
 /* Seed a random planar position and direction; radialDistance may be negative. */
 void dds3Particle_SmokeBuffInit(EffDiscEmitter *effect, u32 packetIndex) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
@@ -1412,22 +1398,6 @@ void dds3Particle_SparkDelete(u32 effect) {
     dds3Particle_BasicDelete((EffEmitterHead *)effect);
     sdfChipFreeDirect(effect);
 }
-
-typedef struct EffBallisticEmitter {
-    EffEmitterHead head;
-    u8 mode;         /* 0x150 */
-    u8 loop;         /* 0x151 */
-    u8 pad152[2];
-    u32 spread;      /* 0x154 */
-    u8 randomDir;    /* 0x158 */
-    u8 pad159[3];
-    f32 radius;      /* 0x15C */
-    f32 cone;        /* 0x160 */
-    f32 gravity;     /* 0x164 */
-    f32 speed;       /* 0x168 */
-    f32 decayPct;    /* 0x16C */
-    f32 jitter;      /* 0x170 */
-} EffBallisticEmitter;
 
 void dds3Particle_SparkBuffInit(EffBallisticEmitter *effect, s32 index);
 /* Twelve authored ballistic launch directions, stored as four-float vectors. */
