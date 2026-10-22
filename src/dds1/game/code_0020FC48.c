@@ -2580,12 +2580,12 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             btlRefreshUnitMotionSelection(unit);
             state->debug.phase = 2;
         } else {
-            PCP_COPY_VECTOR(btlDebugEditorPosition.value, unit->position);
+            SDF_VU0_COPYVECTOR(btlDebugEditorPosition.value, unit->position);
             btlDebugMenuSetupNoOp(&btlDebugPositionEditor);
             btlDebugMenuBeforeRecordNoOp();
             btlDebugMenuRecordNoOp(&btlDebugPositionEditor);
             btlDebugMenuAfterRecordNoOp();
-            PCP_COPY_VECTOR(unit->position, btlDebugEditorPosition.value);
+            SDF_VU0_COPYVECTOR(unit->position, btlDebugEditorPosition.value);
             btlSetUnitPosition(unit, unit->position);
         }
         break;

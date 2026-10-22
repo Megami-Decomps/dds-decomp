@@ -211,7 +211,7 @@ void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted) {
     s32 i;
     s32 shade;
 
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_CLEAR_W(vf10);
     VU0_MOVE_VF(vf30, vf10);
     VU0_STORE_VF(vf10, axis);
@@ -224,7 +224,7 @@ void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted) {
         VU0_LOAD_VF(vf11, D_0040B540);
     }
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_CLEAR_W(vf10);
     VU0_MOVE_VF(vf28, vf10);
     VU0_MOVE_VF(vf11, vf10);
@@ -235,7 +235,7 @@ void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted) {
     VU0_MOVE_VF(vf31, vf0);
     sdfPostmultiplyVuMatrixFromMemory(sdfViewMatrix);
     VU0_LOAD_VF(vf10, D_00386470);
-    VU0_MUL_MATRIX_ROWS_VF10();
+    SDF_VU0_SCALE_XYZ_REV();
     axis[0] = (f32)x;
     axis[1] = (f32)y;
     axis[2] = 160.0f;
@@ -1164,7 +1164,7 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
     }
     D_0043E5E0[3] = 1.0f;
     VU0_LOAD_VF_PTR(vf10, D_0043E5E0);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF_UNCLOBBERED(vf10, D_0043E5E0);
     /* Retail still stores this full-length vector at11F43C..11F44C;
      * the later per-slot geometry uses slotExtrusion instead. */
@@ -1173,7 +1173,7 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
     extrusion[2] = D_0043E5E0[2] * length;
     extrusion[3] = 1.0f;
     VU0_LOAD_VF_PTR(vf10, D_0043E5E0);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF_UNCLOBBERED(vf10, D_0043E5E0);
     for (slot = 0; slot < base->resourceSlotCount; slot++) {
         length = extrusionLengths[slot];
@@ -1187,7 +1187,7 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
     viewDirection[2] = aViewTarget[2] - sdfViewTargetVector[2];
     viewDirection[3] = 1.0f;
     VU0_LOAD_VF_PTR(vf10, viewDirection);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF_UNCLOBBERED(vf10, viewDirection);
     rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
     rsetAlpha(1);
@@ -1327,7 +1327,7 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
             planeVertices[2][3] = thirdVertex[3];
             fldMakeEveHitPlanes(planeVertices[0], &plane[0], &plane[1], &plane[2], &plane[3]);
             VU0_LOAD_VF_PTR(vf10, plane);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_LOAD_VF_PTR(vf11, D_0043E5E0);
             VU0_DOT_XYZ(facing, vf10, vf11);
             if (facing < 0.0f) {
@@ -1480,7 +1480,7 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
                     if (pass == 0) {
                         VU0_LOAD_VF_PTR(vf10, edgeStart);
                         VU0_TRANSFORM_POINT(vf10, vf10);
-                        VU0_PERSPECTIVE_DIVIDE_VF10();
+                        SDF_VU0_PERSVECTOR();
                         VU0_APPLY_VIEWPORT(vf10, vf10, vf11, vf12);
                         VU0_STORE_VF_UNCLOBBERED(vf10, projectedStart);
                         if (projectedStart[0] < minimumX) minimumX = projectedStart[0];
@@ -1489,7 +1489,7 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
                         else if (projectedStart[1] > maximumY) maximumY = projectedStart[1];
                         VU0_LOAD_VF_PTR(vf10, edgeEnd);
                         VU0_TRANSFORM_POINT(vf10, vf10);
-                        VU0_PERSPECTIVE_DIVIDE_VF10();
+                        SDF_VU0_PERSVECTOR();
                         VU0_APPLY_VIEWPORT(vf10, vf10, vf11, vf12);
                         VU0_STORE_VF_UNCLOBBERED(vf10, projectedEnd);
                         if (projectedEnd[0] < minimumX) minimumX = projectedEnd[0];
@@ -1498,7 +1498,7 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
                         else if (projectedEnd[1] > maximumY) maximumY = projectedEnd[1];
                         VU0_LOAD_VF_PTR(vf10, extrudedEnd);
                         VU0_TRANSFORM_POINT(vf10, vf10);
-                        VU0_PERSPECTIVE_DIVIDE_VF10();
+                        SDF_VU0_PERSVECTOR();
                         VU0_APPLY_VIEWPORT(vf10, vf10, vf11, vf12);
                         VU0_STORE_VF_UNCLOBBERED(vf10, projectedExtrudedEnd);
                         if (projectedExtrudedEnd[0] < minimumX) minimumX = projectedExtrudedEnd[0];
@@ -1507,7 +1507,7 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
                         else if (projectedExtrudedEnd[1] > maximumY) maximumY = projectedExtrudedEnd[1];
                         VU0_LOAD_VF_PTR(vf10, extrudedStart);
                         VU0_TRANSFORM_POINT(vf10, vf10);
-                        VU0_PERSPECTIVE_DIVIDE_VF10();
+                        SDF_VU0_PERSVECTOR();
                         VU0_APPLY_VIEWPORT(vf10, vf10, vf11, vf12);
                         VU0_STORE_VF_UNCLOBBERED(vf10, projectedExtrudedStart);
                         if (projectedExtrudedStart[0] < minimumX) minimumX = projectedExtrudedStart[0];

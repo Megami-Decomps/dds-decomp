@@ -3304,9 +3304,9 @@ void evtStageTestResetViewAndLighting(void)
     dds3SetFogColor(0, drawColor);
     dds3SetFogPara(0, 255.0f, 255.0f, 2000.0f, 30000.0f);
     dds3ScreenParam.camera.fov = 0.7551905f;
-    PCP_COPY_VECTOR(sdfViewTargetVector, evtStageTestViewTargetVector);
-    PCP_COPY_VECTOR(aViewTarget, evtStageTestViewEyeVector);
-    PCP_COPY_VECTOR(aViewDown, evtStageTestViewUpVector);
+    SDF_VU0_COPYVECTOR(sdfViewTargetVector, evtStageTestViewTargetVector);
+    SDF_VU0_COPYVECTOR(aViewTarget, evtStageTestViewEyeVector);
+    SDF_VU0_COPYVECTOR(aViewDown, evtStageTestViewUpVector);
     VU0_LOAD_MATRIX(sdfViewMatrix);
     sdf3DSetCamera(&dds3ScreenParam, sdfViewMatrix);
 }
@@ -3551,14 +3551,14 @@ void evtStageTestUpdateCamera(void)
 
     drawBufferIndex = dds3GetFrameID();
     evtStageTestResetViewAndLighting();
-    PCP_COPY_VECTOR(sdfViewTargetVector, evtStageTestViewTargetVector);
-    PCP_COPY_VECTOR(aViewTarget, evtStageTestViewEyeVector);
-    PCP_COPY_VECTOR(aViewDown, evtStageTestViewUpVector);
+    SDF_VU0_COPYVECTOR(sdfViewTargetVector, evtStageTestViewTargetVector);
+    SDF_VU0_COPYVECTOR(aViewTarget, evtStageTestViewEyeVector);
+    SDF_VU0_COPYVECTOR(aViewDown, evtStageTestViewUpVector);
     sdfCameraBuildProjection(&dds3ScreenParam.camera);
     VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_SCALAR_OP(600.0f, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_ADD(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, sdfViewShakeVector);

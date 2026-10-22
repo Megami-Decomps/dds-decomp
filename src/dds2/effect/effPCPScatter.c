@@ -296,7 +296,7 @@ void effPCPHamaCardSpiralDraw(PcpScatterRadialWork *work) {
                 VU0_LOAD_VF(vf10, next);
                 VU0_LOAD_VF(vf11, position);
                 VU0_SUB(vf10, vf10, vf11);
-                VU0_NORMALIZE_VF10();
+                SDF_VU0_NORMALIZE();
                 VU0_STORE_VF_UNCLOBBERED(vf10, direction);
                 VU0_LOAD_VF(vf11, halfWidth);
                 VU0_MUL(vf10, vf10, vf11);
@@ -308,7 +308,7 @@ void effPCPHamaCardSpiralDraw(PcpScatterRadialWork *work) {
                 VU0_LOAD_VF(vf10, direction);
                 VU0_LOAD_VF(vf11, radial);
                 VU0_CROSS_XYZ(vf10, vf10, vf11);
-                VU0_NORMALIZE_VF10();
+                SDF_VU0_NORMALIZE();
                 VU0_LOAD_VF(vf11, halfHeight);
                 VU0_MUL(vf10, vf10, vf11);
                 VU0_STORE_VF_UNCLOBBERED(vf10, side);
@@ -320,9 +320,9 @@ void effPCPHamaCardSpiralDraw(PcpScatterRadialWork *work) {
                 VU0_SUB(vf10, vf10, vf11);
                 VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 3);
                 if (j == 1) {
-                    PCP_COPY_VECTOR(duplicatePosition, position);
+                    SDF_VU0_COPYVECTOR(duplicatePosition, position);
                 }
-                PCP_COPY_VECTOR(position, next);
+                SDF_VU0_COPYVECTOR(position, next);
             }
             if (moving) {
                 particle->radius += particle->radiusStep;
@@ -362,7 +362,7 @@ void effPCPHamaCardSpiralDraw(PcpScatterRadialWork *work) {
 
 /* Copy one packed four-component vector; no scalar reconstruction of the W lane. */
 void effPCPHamaCardSpiralSetPosition(void *destination, void *source) {
-    PCP_COPY_VECTOR(destination, source);
+    SDF_VU0_COPYVECTOR(destination, source);
 }
 
 /* Store the radial work's packed color; this does not replace duplicated handles. */
@@ -515,7 +515,7 @@ void effPCPHamaCardSpherePartInit(PcpScatterSpinWork *work, s32 index)
     direction[1] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
     direction[2] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
     VU0_LOAD_VF(vf10, direction);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, direction);
     sprite->age = 0;
     sprite->dirX = direction[0];
@@ -630,7 +630,7 @@ void effPCPHamaCardSphereDraw(PcpScatterSpinWork *work) {
                 VU0_LOAD_VF(vf10, next);
                 VU0_LOAD_VF(vf11, position);
                 VU0_SUB(vf10, vf10, vf11);
-                VU0_NORMALIZE_VF10();
+                SDF_VU0_NORMALIZE();
                 VU0_STORE_VF_UNCLOBBERED(vf10, direction);
                 VU0_LOAD_VF(vf11, halfWidth);
                 VU0_MUL(vf10, vf10, vf11);
@@ -642,7 +642,7 @@ void effPCPHamaCardSphereDraw(PcpScatterSpinWork *work) {
                 VU0_LOAD_VF(vf10, direction);
                 VU0_LOAD_VF(vf11, radial);
                 VU0_CROSS_XYZ(vf10, vf10, vf11);
-                VU0_NORMALIZE_VF10();
+                SDF_VU0_NORMALIZE();
                 VU0_LOAD_VF(vf11, halfHeight);
                 VU0_MUL(vf10, vf10, vf11);
                 VU0_STORE_VF_UNCLOBBERED(vf10, side);
@@ -654,9 +654,9 @@ void effPCPHamaCardSphereDraw(PcpScatterSpinWork *work) {
                 VU0_SUB(vf10, vf10, vf11);
                 VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 3);
                 if (j == 1) {
-                    PCP_COPY_VECTOR(duplicatePosition, position);
+                    SDF_VU0_COPYVECTOR(duplicatePosition, position);
                 }
-                PCP_COPY_VECTOR(position, next);
+                SDF_VU0_COPYVECTOR(position, next);
             }
             if (moving) {
                 particle->radius += particle->radiusStep;
@@ -694,7 +694,7 @@ void effPCPHamaCardSphereDraw(PcpScatterSpinWork *work) {
 
 /* Copy the spin variant's packed parameter vector, including its existing W lane. */
 void effPCPHamaCardSphereSetPosition(void *destination, void *source) {
-    PCP_COPY_VECTOR(destination, source);
+    SDF_VU0_COPYVECTOR(destination, source);
 }
 
 /* Replace the spin work's packed color. */
@@ -947,7 +947,7 @@ void effPCPHamaCardScatterDraw(PcpScatterRibbonWork *work) {
                 VU0_LOAD_VF(vf10, next);
                 VU0_LOAD_VF(vf11, position);
                 VU0_SUB(vf10, vf10, vf11);
-                VU0_NORMALIZE_VF10();
+                SDF_VU0_NORMALIZE();
                 VU0_STORE_VF_UNCLOBBERED(vf10, direction);
                 VU0_LOAD_VF(vf11, halfWidth);
                 VU0_MUL(vf10, vf10, vf11);
@@ -966,9 +966,9 @@ void effPCPHamaCardScatterDraw(PcpScatterRibbonWork *work) {
                 VU0_SUB(vf10, vf10, vf11);
                 VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 3);
                 if (j == 1) {
-                    PCP_COPY_VECTOR(duplicatePosition, position);
+                    SDF_VU0_COPYVECTOR(duplicatePosition, position);
                 }
-                PCP_COPY_VECTOR(position, next);
+                SDF_VU0_COPYVECTOR(position, next);
             }
             if (age < duration) {
                 f32 tiltLimit = particle->tiltHalfAngle * 0.5f;
@@ -1012,7 +1012,7 @@ void effPCPHamaCardScatterDraw(PcpScatterRibbonWork *work) {
 
 /* Copy the ribbon variant's packed parameter vector without rebuilding components. */
 void effPCPHamaCardScatterSetPosition(void *destination, void *source) {
-    PCP_COPY_VECTOR(destination, source);
+    SDF_VU0_COPYVECTOR(destination, source);
 }
 
 /* Replace the ribbon work's packed color. */
@@ -1405,14 +1405,14 @@ void effPCPWhirlwindPolyDraw(PcpScatterInstanceA *work) {
         particle++;
     }
     draw->scale = work->scale;
-    PCP_COPY_VECTOR(draw->origin, work->params.origin);
+    SDF_VU0_COPYVECTOR(draw->origin, work->params.origin);
     dds3WhirlwindPolyListSetRotateMatrix(draw, work);
     dds3WhirlwindPolyListDraw(draw);
 }
 
 /* Replace the packed origin at the start of the copied parameters. */
 void effPCPWhirlwindPolySetPosition(PcpScatterInstanceA *work, void *source) {
-    PCP_COPY_VECTOR(&work->params, source);
+    SDF_VU0_COPYVECTOR(&work->params, source);
 }
 
 /* Set the drawable scale multiplier; unlike radius rescaling, this is an assignment. */
@@ -1429,7 +1429,7 @@ void effPCPWhirlwindPolySetColor(PcpScatterInstanceA *work, u32 color) {
 /* vu0 routine: compose params.matrix and source via the native product into work->matrix. */
 void effPCPWhirlwindPolySetRotateMatrix(PcpScatterInstanceA *work, void *source) {
     VU0_LOAD_MATRIX(source);
-    VU0_LOAD_MATRIX_B(work->params.matrix);
+    SDF_VU0_LOADMATRIX_B(work->params.matrix);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(work);
 }
@@ -1699,14 +1699,14 @@ void effPCPWhirlwind2PolyDraw(PcpScatterInstanceB *work) {
         work->age++;
     }
     draw->scale = work->scale;
-    PCP_COPY_VECTOR(draw->origin, work->params.origin);
+    SDF_VU0_COPYVECTOR(draw->origin, work->params.origin);
     dds3WhirlwindPolyListSetRotateMatrix(draw, work);
     dds3WhirlwindPolyListDraw(draw);
 }
 
 /* Replace the radius-damped ring's packed parameter origin. */
 void effPCPWhirlwind2PolySetPosition(PcpScatterInstanceB *work, void *source) {
-    PCP_COPY_VECTOR(&work->params, source);
+    SDF_VU0_COPYVECTOR(&work->params, source);
 }
 
 /* Assign the radius-damped instance's drawable scale multiplier. */
@@ -1723,7 +1723,7 @@ void effPCPWhirlwind2PolySetColor(PcpScatterInstanceB *work, u32 color) {
 /* vu0 routine: compose params.matrix and source via the native product into work->matrix. */
 void effPCPWhirlwind2PolySetRotateMatrix(PcpScatterInstanceB *work, void *source) {
     VU0_LOAD_MATRIX(source);
-    VU0_LOAD_MATRIX_B(work->params.matrix);
+    SDF_VU0_LOADMATRIX_B(work->params.matrix);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(work);
 }
@@ -1996,14 +1996,14 @@ void effPCPWhirlwind3PolyDraw(PcpScatterInstanceC *work) {
         work->age++;
     }
     draw->scale = work->scale;
-    PCP_COPY_VECTOR(draw->origin, work->params.origin);
+    SDF_VU0_COPYVECTOR(draw->origin, work->params.origin);
     dds3WhirlwindPolyListSetRotateMatrix(draw, work);
     dds3WhirlwindPolyListDraw(draw);
 }
 
 /* Replace the two-color ring's packed parameter origin. */
 void effPCPWhirlwind3PolySetPosition(PcpScatterInstanceC *work, void *source) {
-    PCP_COPY_VECTOR(&work->params, source);
+    SDF_VU0_COPYVECTOR(&work->params, source);
 }
 
 /* Assign the two-color instance's drawable scale multiplier. */
@@ -2020,7 +2020,7 @@ void effPCPWhirlwind3PolySetColor(PcpScatterInstanceC *work, u32 color) {
 /* vu0 routine: compose params.matrix and source via the native product into work->matrix. */
 void effPCPWhirlwind3PolySetRotateMatrix(PcpScatterInstanceC *work, void *source) {
     VU0_LOAD_MATRIX(source);
-    VU0_LOAD_MATRIX_B(work->params.matrix);
+    SDF_VU0_LOADMATRIX_B(work->params.matrix);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(work);
 }
@@ -2238,7 +2238,7 @@ void effPCPWwSpherePolyDraw(PcpScatterPlainInstance *work) {
         particle++;
     }
     draw->scale = work->scale;
-    PCP_COPY_VECTOR(draw->origin, work->params.origin);
+    SDF_VU0_COPYVECTOR(draw->origin, work->params.origin);
     dds3WhirlwindPolyListSetRotateMatrix(draw, work);
     dds3WhirlwindPolyListDraw(draw);
 }

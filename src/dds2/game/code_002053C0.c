@@ -365,9 +365,9 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
     for (i = count - 1; i >= 0; i--) {
         unit = actors[i];
         if (!(unit->status.flags & 0x80000)) {
-            PCP_COPY_VECTOR(unit->rotation, D_003BE070);
+            SDF_VU0_COPYVECTOR(unit->rotation, D_003BE070);
         } else if (unit->status.flags & 0xE0) {
-            PCP_COPY_VECTOR(unit->rotation, D_003BE070);
+            SDF_VU0_COPYVECTOR(unit->rotation, D_003BE070);
         } else {
             btlUnitGetMuzzlePosVU(unit);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
@@ -399,7 +399,7 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
             position[1] = center[1];
             position[2] = center[2] - sdfCos(adjustedAngle) * radius;
         }
-        PCP_COPY_VECTOR(unit->position, position);
+        SDF_VU0_COPYVECTOR(unit->position, position);
         btlSetUnitPosition(unit, position);
         angle += step;
     }
@@ -459,12 +459,12 @@ s32 btlArrangeFormationSlots(s32 filter) {
         maxSpacing = 75.0f;
         minSpacing = 75.0f;
         radius = -800.0f;
-        PCP_COPY_VECTOR(rotation, D_003BE080);
+        SDF_VU0_COPYVECTOR(rotation, D_003BE080);
     } else {
         radius = 1000.0f;
         maxSpacing = 100.0f;
         minSpacing = 50.0f;
-        PCP_COPY_VECTOR(rotation, D_003BE090);
+        SDF_VU0_COPYVECTOR(rotation, D_003BE090);
     }
     if (count >= 2) {
         spacing = 1200.0f;
@@ -510,9 +510,9 @@ s32 btlArrangeFormationSlots(s32 filter) {
         position[0] = sdfSin(angle) * radius;
         position[1] = 0.0f;
         position[2] = (distance - sdfCos(angle) * radius) * direction;
-        PCP_COPY_VECTOR(unit->position, position);
+        SDF_VU0_COPYVECTOR(unit->position, position);
         btlSetUnitPosition(unit, position);
-        PCP_COPY_VECTOR(unit->rotation, rotation);
+        SDF_VU0_COPYVECTOR(unit->rotation, rotation);
         angle += halfAngle;
         btlSetUnitRotation(unit, (s128 *)rotation);
         angle += spacingAngle;
@@ -525,7 +525,7 @@ s32 btlArrangeFormationSlots(s32 filter) {
 
 s32 btlRepositionPartyAroundBattleCenter(void) {
     f32 v[4] __attribute__((aligned(16)));
-    PCP_COPY_VECTOR(v, btlGetRuntime());
+    SDF_VU0_COPYVECTOR(v, btlGetRuntime());
     return btlExpandPartyFormationAroundCenter(v);
 }
 
@@ -856,7 +856,7 @@ void btlAlignTripleFormationWithTarget(ActionStateLink *link, BtlUnit *first, Bt
         VU0_STORE_VF_UNCLOBBERED(vf10, targetPosition);
         VU0_LOAD_VF(vf11, position);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_GET_VF10_X(offsetX);
+        SDF_VU0_GETVECTOR_X(offsetX);
         targetPosition[2] -= target->reach * target->scale;
         offset = -(500.0f - (targetPosition[2] - position[2]));
         if (work->commandRestrictFlags & 0x200) {
@@ -904,7 +904,7 @@ void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other)
                     btlClearUnitDefeatCandidate(unit);
                     btlSetUnitPosition(unit, (f32 *)&D_003BE0A0);
                     if ((btlUnitStatusPair(unit) & 0x102) == 0x102) {
-                        PCP_COPY_VECTOR(pos, &D_003BE0A0);
+                        SDF_VU0_COPYVECTOR(pos, &D_003BE0A0);
                         pos[1] += 1000000.0f;
                         dds3SetPosPoseSet(unit->effectObject, (u128 *)pos);
                     }
@@ -921,7 +921,7 @@ void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other)
     VU0_SCALAR_OP_CLOBBER(0.0f, "vaddx.y vf10, vf0, vf2x");
     VU0_LOAD_VF(vf11, &D_003BE0A0);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_NEGATE_XYZ(vf10);
     VU0_STORE_VF(vf10, dir);
     for (i = 0; i < 2; i++) {
@@ -1029,7 +1029,7 @@ void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
                     btlClearUnitDefeatCandidate(unit);
                     btlSetUnitPosition(unit, center);
                     if ((btlUnitStatusPair(unit) & 0x102) == 0x102) {
-                        PCP_COPY_VECTOR(position, center);
+                        SDF_VU0_COPYVECTOR(position, center);
                         position[1] += 1000000.0f;
                         dds3SetPosPoseSet(unit->effectObject, (u128 *)position);
                     }
@@ -1132,7 +1132,7 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
         VU0_LOAD_VF(vf11, targetPosition);
         VU0_SUB(vf10, vf10, vf11);
         VU0_SET_VF10_COMPONENT(y, flatY);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_SCALAR_OP_CLOBBER(distance, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_LOAD_VF(vf11, targetPosition);
         VU0_ADD(vf10, vf10, vf11);
@@ -1178,8 +1178,8 @@ void btlPlaceBothSidesInRadialFormation(ActionStateLink *link, BtlUnit *firstAct
             unit = unit->nextActor;
         } while (unit != NULL);
     }
-    PCP_COPY_VECTOR(firstDirection, D_003E9130);
-    PCP_COPY_VECTOR(secondDirection, D_003E9130);
+    SDF_VU0_COPYVECTOR(firstDirection, D_003E9130);
+    SDF_VU0_COPYVECTOR(secondDirection, D_003E9130);
     SetRotateMatrixY(1.0471975f);
     VU0_LOAD_VF(vf10, firstDirection);
     VU0_ROTATE_VEC(vf10, vf10);

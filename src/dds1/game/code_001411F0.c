@@ -1952,9 +1952,9 @@ void func_00145B18(void) {
     eye[0] = D_003BAEBC;
     eye[1] = -24000.0f;
     eye[2] = D_003BAEC0;
-    PCP_COPY_VECTOR(&kwlnOverlayEyeVector, eye);
-    PCP_COPY_VECTOR(&D_00324A20, focus);
-    PCP_COPY_VECTOR(&kwlnOverlayUpVector, &up);
+    SDF_VU0_COPYVECTOR(&kwlnOverlayEyeVector, eye);
+    SDF_VU0_COPYVECTOR(&D_00324A20, focus);
+    SDF_VU0_COPYVECTOR(&kwlnOverlayUpVector, &up);
     kwlnOverlayFrustumParameters.fogNear = 255.0f;
     kwlnOverlayFrustumParameters.depthNear = 1000.0f;
     kwlnOverlayFrustumParameters.fogFar = 255.0f;
@@ -2075,9 +2075,9 @@ void fldEnterSceneCamera(void) {
     eye[0] = ix;
     eye[1] = -24000.0f;
     eye[2] = iz;
-    PCP_COPY_VECTOR(&kwlnOverlayEyeVector, eye);
-    PCP_COPY_VECTOR(&D_00324A20, focus);
-    PCP_COPY_VECTOR(&kwlnOverlayUpVector, &up);
+    SDF_VU0_COPYVECTOR(&kwlnOverlayEyeVector, eye);
+    SDF_VU0_COPYVECTOR(&D_00324A20, focus);
+    SDF_VU0_COPYVECTOR(&kwlnOverlayUpVector, &up);
     kwlnOverlayFrustumParameters.fogNear = 255.0f;
     kwlnOverlayFrustumParameters.depthNear = 1000.0f;
     kwlnOverlayFrustumParameters.fogFar = 255.0f;
@@ -2133,9 +2133,9 @@ void fldLoadSceneModelsAndCamera(void) {
     eye[0] = ix;
     eye[1] = -24000.0f;
     eye[2] = iz;
-    PCP_COPY_VECTOR(&kwlnOverlayEyeVector, eye);
-    PCP_COPY_VECTOR(&D_00324A20, focus);
-    PCP_COPY_VECTOR(&kwlnOverlayUpVector, &up);
+    SDF_VU0_COPYVECTOR(&kwlnOverlayEyeVector, eye);
+    SDF_VU0_COPYVECTOR(&D_00324A20, focus);
+    SDF_VU0_COPYVECTOR(&kwlnOverlayUpVector, &up);
     kwlnOverlayFrustumParameters.fogNear = 255.0f;
     kwlnOverlayFrustumParameters.depthNear = 1000.0f;
     kwlnOverlayFrustumParameters.fogFar = 255.0f;
@@ -2305,17 +2305,17 @@ void fldUpdateAutomapInput(void) {
     eye[0] = D_003BAEBC;
     eye[1] = -24000.0f;
     eye[2] = D_003BAEC0;
-    PCP_COPY_VECTOR(&kwlnOverlayEyeVector, eye);
-    PCP_COPY_VECTOR(&D_00324A20, focus);
-    PCP_COPY_VECTOR(&kwlnOverlayUpVector, up);
+    SDF_VU0_COPYVECTOR(&kwlnOverlayEyeVector, eye);
+    SDF_VU0_COPYVECTOR(&D_00324A20, focus);
+    SDF_VU0_COPYVECTOR(&kwlnOverlayUpVector, up);
     kwlnOverlayFrustumParameters.fogNear = 255.0f;
     kwlnOverlayFrustumParameters.depthNear = 1000.0f;
     kwlnOverlayFrustumParameters.fogFar = 255.0f;
     kwlnOverlayFrustumParameters.depthFar = 20000.0f;
     kwlnOverlayFrustumParameters.fogColor = 0x808080;
-    PCP_COPY_VECTOR(sdfViewTargetVector, eye);
-    PCP_COPY_VECTOR(aViewTarget, focus);
-    PCP_COPY_VECTOR(aViewDown, up);
+    SDF_VU0_COPYVECTOR(sdfViewTargetVector, eye);
+    SDF_VU0_COPYVECTOR(aViewTarget, focus);
+    SDF_VU0_COPYVECTOR(aViewDown, up);
 }
 
 /* Re-centers the scene camera on the current scene's entry point. */
@@ -2344,9 +2344,9 @@ void fldCenterCameraOnEntry(void) {
     eye[0] = ix;
     eye[1] = -24000.0f;
     eye[2] = iz;
-    PCP_COPY_VECTOR(&kwlnOverlayEyeVector, eye);
-    PCP_COPY_VECTOR(&D_00324A20, focus);
-    PCP_COPY_VECTOR(&kwlnOverlayUpVector, up);
+    SDF_VU0_COPYVECTOR(&kwlnOverlayEyeVector, eye);
+    SDF_VU0_COPYVECTOR(&D_00324A20, focus);
+    SDF_VU0_COPYVECTOR(&kwlnOverlayUpVector, up);
     kwlnOverlayFrustumParameters.fogNear = 255.0f;
     kwlnOverlayFrustumParameters.depthNear = 1000.0f;
     kwlnOverlayFrustumParameters.fogFar = 255.0f;
@@ -3136,7 +3136,7 @@ void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
     direction[2] = sdfCos(radians);
     direction[3] = 0.0f;
     VU0_LOAD_VF(vf10, direction);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     evtSetUnitLightDir(unit, 0);
     red = row[0];
     green = row[1];
@@ -3148,7 +3148,7 @@ void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
     colorB = red | (blue << 16) | (green << 8) | 0x80000000;
     evtSetUnitLightAndAmbient(unit, 0, colorA, colorB);
     VU0_LOAD_VF(vf10, direction);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     evtSetUnitLightDir(unit, 0);
     evtSetUnitLightAndAmbient(unit, 0, colorA, colorB);
 }
@@ -4136,8 +4136,8 @@ void fldResetSparkTable(void) {
 }
 
 s32 fldSetSparkVectors(s32 index, const u128 *position, const u128 *rotation) {
-    PCP_COPY_VECTOR(fldSparkSlots[index].position, position);
-    PCP_COPY_VECTOR(fldSparkSlots[index].rotation, rotation);
+    SDF_VU0_COPYVECTOR(fldSparkSlots[index].position, position);
+    SDF_VU0_COPYVECTOR(fldSparkSlots[index].rotation, rotation);
     fldSparkSlots[index].hasVectors = 1;
     return 1;
 }
@@ -4171,7 +4171,7 @@ s32 fldBindSparkSlotObject(s32 index, s32 reserved) {
     }
     D_003D62DC[0] = (slot + 1) % 16;
     if (fldSparkSlots[index].hasVectors == 1) {
-        PCP_COPY_VECTOR(&position, fldSparkSlots[index].position);
+        SDF_VU0_COPYVECTOR(&position, fldSparkSlots[index].position);
         dds3SetPosPoseSet(fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].position);
         dds3SetRotPoseSet(fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].rotation);
         flags = (s32 *)dds3ObjectBaseGetModelHandle(fldSparkObjectEntries[slot].objectHandle);
@@ -4270,7 +4270,7 @@ void fldUpdateSparkSequence(void) {
             fldSparkSlots[i].tickCounter++;
             if (fldSparkSlots[i].objectSlot != -1 && fldSparkControlState.mode == 1 &&
                 fldSparkControlState.pulse != 0 && (u32)(fldSparkControlState.modeCountdown - 10) < 6) {
-                PCP_COPY_VECTOR(&position, fldSparkSlots[i].position);
+                SDF_VU0_COPYVECTOR(&position, fldSparkSlots[i].position);
                 dx = fldGlobalBase.x - position.x;
                 dy = fldGlobalBase.y - position.y;
                 dz = fldGlobalBase.z - position.z;

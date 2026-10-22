@@ -26,7 +26,7 @@ extern void dds3ScatterPolyListTexResourceDelete(PcpScatterRes *);
 
 /* Copy the flat effect's source vector; the renderer reads the embedded copy. */
 void effPCPWwSpherePolySetPosition(PcpScatterPlainInstance *work, void *src) {
-    PCP_COPY_VECTOR(work->params.origin, src);
+    SDF_VU0_COPYVECTOR(work->params.origin, src);
 }
 
 /* Set the instance scale that its update forwards to the drawable. */
@@ -146,7 +146,7 @@ void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object) {
     object->matrix[13] = object->origin[1];
     object->matrix[14] = object->origin[2];
     VU0_LOAD_MATRIX(object->matrix);
-    VU0_LOAD_MATRIX_B(matrix);
+    SDF_VU0_LOADMATRIX_B(matrix);
     sdfComposeVuMatrixFromRegisters();
     sdf3DPrimLinkTm(packet, 0);
     if (object->sharedResource != NULL) {

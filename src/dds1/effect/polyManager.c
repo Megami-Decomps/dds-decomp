@@ -167,8 +167,8 @@ void dds3SpPoly_Ring_Old_New(PolyNode *node, s32 cellIndex) {
         angle += step;
     }
     hist = cell->history;
-    PCP_COPY_VECTOR(p, hist);
-    PCP_COPY_VECTOR(p + 1, hist + 1);
+    SDF_VU0_COPYVECTOR(p, hist);
+    SDF_VU0_COPYVECTOR(p + 1, hist + 1);
 }
 
 /* Apply the same displacement to both points of each pair along their separation direction. */
@@ -188,7 +188,7 @@ void dds3SpPoly_Ring_Old_Move(PolyNode *node, s32 cellIndex) {
         VU0_LOAD_VF(vf10, p + 4);
         VU0_LOAD_VF(vf11, p);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_MOVE_VF(vf11, vf12);
         VU0_MUL(vf10, vf10, vf11);
         VU0_MOVE_VF(vf11, vf10);
@@ -348,8 +348,8 @@ void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius)
         angle += angleStep;
     }
     firstPointPair = (f32 *)entry->history;
-    PCP_COPY_VECTOR(pointCursor, firstPointPair);
-    PCP_COPY_VECTOR(pointCursor + 4, firstPointPair + 4);
+    SDF_VU0_COPYVECTOR(pointCursor, firstPointPair);
+    SDF_VU0_COPYVECTOR(pointCursor + 4, firstPointPair + 4);
 }
 
 /* Add one radius step and local-y lift step to existing point pairs, then close the strip. */
@@ -399,8 +399,8 @@ void dds3SpPoly_RingMove(PolyBand *band, s32 index) {
         angle += angleStep;
     }
     firstPointPair = (f32 *)entry->history;
-    PCP_COPY_VECTOR(pointCursor, firstPointPair);
-    PCP_COPY_VECTOR(pointCursor + 4, firstPointPair + 4);
+    SDF_VU0_COPYVECTOR(pointCursor, firstPointPair);
+    SDF_VU0_COPYVECTOR(pointCursor + 4, firstPointPair + 4);
 }
 
 /* Scale the band's row width, lift step, and initial/target radii in retail order. */
@@ -593,8 +593,8 @@ void dds3SpPoly_SphereRingMove(PolyArc *arc, s32 recordIndex) {
         angle += angleStep;
     }
     firstPointPair = (f32 *)stripEntry->history;
-    PCP_COPY_VECTOR(pointCursor, firstPointPair);
-    PCP_COPY_VECTOR(pointCursor + 4, firstPointPair + 4);
+    SDF_VU0_COPYVECTOR(pointCursor, firstPointPair);
+    SDF_VU0_COPYVECTOR(pointCursor + 4, firstPointPair + 4);
 }
 
 /* Scale the arc's base radius, leaving its jitter fraction unchanged. */
@@ -764,7 +764,7 @@ void dds3SpPoly_RollRingMove(PolyRotatingBand *rotatingBand, s32 index)
     value = rec->radius;
     rec->radius = value + rec->radiusStep;
     step = 3.14159265f * 2.0f / (f32)rotatingBand->segments;
-    VU0_LOAD_MATRIX_B(rotatingBand->head.matrix);
+    SDF_VU0_LOADMATRIX_B(rotatingBand->head.matrix);
     MultMatrixRevNoArg();
     VEC3_SPLAT(baseRadiusVector, value);
     VEC3_SPLAT(offsetRadiusVector, value + rotatingBand->radialWidth);
@@ -790,8 +790,8 @@ void dds3SpPoly_RollRingMove(PolyRotatingBand *rotatingBand, s32 index)
         value += step;
     }
     first = (f32 *)entry->history;
-    PCP_COPY_VECTOR(out, first);
-    PCP_COPY_VECTOR(out + 4, first + 4);
+    SDF_VU0_COPYVECTOR(out, first);
+    SDF_VU0_COPYVECTOR(out + 4, first + 4);
 }
 /* Scale the rotating band's initial and target radii. */
 void dds3SpPoly_RollRingSetScale(f32 scale, PolyRotatingBand *rotatingBand) {

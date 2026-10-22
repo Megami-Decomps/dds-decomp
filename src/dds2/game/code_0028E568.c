@@ -243,8 +243,8 @@ s32 mnuAdvanceMantraSelectionCursor(MnuStatusResource *object, s32 centerOnNode)
     movement[0] = target[0] - work->scrollX;
     movement[1] = target[1] - work->scrollY;
     VU0_LOAD_VF_PTR(vf10, movement);
-    VU0_LENGTH_VF10(distance);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_GETLENGTH(distance);
+    SDF_VU0_NORMALIZE();
     step = distance - distance * 0.9f;
     if (step < 12.0f) {
         step = 12.0f;

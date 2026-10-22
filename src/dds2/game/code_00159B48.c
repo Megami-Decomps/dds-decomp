@@ -114,7 +114,7 @@ sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 index) {
 }
 
 void effCopyVector(void *dst, const void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void dds3BillboardSetRotate(billHandle_t *effect, float angle) {
@@ -350,7 +350,7 @@ f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
     VU0_LOAD_VF(vf10, position);
     VU0_MOVE_VF(vf12, vf10);
     VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
+    SDF_VU0_PERSVECTOR();
     VU0_LOAD_VF(vf11, D_0037F650);
     VU0_MUL(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, D_0037F660);
@@ -363,7 +363,7 @@ f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
     VU0_MOVE_VF(vf11, vf12);
     VU0_ADD(vf10, vf10, vf11);
     VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
+    SDF_VU0_PERSVECTOR();
     VU0_LOAD_VF(vf11, D_0037F650);
     VU0_MUL(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, D_0037F660);
@@ -374,7 +374,7 @@ f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
     projectedDelta[1] = projectedPosition[1] - projectedEndpoint[1];
     projectedDelta[2] = 0.0f;
     VU0_LOAD_VF(vf10, projectedDelta);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, projectedDelta);
     return sdfAtan2(projectedDelta[1], projectedDelta[0]);
 }
@@ -390,7 +390,7 @@ f32 dds3BillboardGetDirectionScale(void *unused, f32 *direction) {
     VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, direction);
     VU0_DOT_XYZ(dot, vf10, vf11);
@@ -507,7 +507,7 @@ void dds3P2APolygonDraw(EffInstance *instance) {
     list = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit((sdfDrawTag_t *)list);
     VU0_LOAD_MATRIX(instance->transform);
-    VU0_LOAD_MATRIX_B(instance->localMatrix);
+    SDF_VU0_LOADMATRIX_B(instance->localMatrix);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX_UNCLOBBERED(matrix);
     matrix[3][0] = instance->billboard->position[0];
@@ -1129,7 +1129,7 @@ void dds3Particle_SpiralDraw(EffRingEmitter *effect) {
     packetCount = effect->head.particleCount;
     lifetimeFrames = effect->head.lifetimeFrames;
     repeatEnabled = effect->flag151;
-    PCP_COPY_VECTOR(origin, effect->head.origin);
+    SDF_VU0_COPYVECTOR(origin, effect->head.origin);
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
 
@@ -1257,7 +1257,7 @@ void dds3Particle_SmokeBuffInit(EffDiscEmitter *effect, u32 packetIndex) {
     directionVector[1] = 0;
     directionVector[2] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, directionVector);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, directionVector);
     packet->pos[0] = directionVector[0] * radialDistance;
     packet->pos[1] = 0;
@@ -1273,7 +1273,7 @@ void dds3Particle_SmokeBuffInit(EffDiscEmitter *effect, u32 packetIndex) {
     directionVector[1] = 0;
     directionVector[2] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, directionVector);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, packet->vel);
     packet->f30 = effect->f164 * (dds3GetRandFloatA(effDefaultRandomState) * effect->jitterB + (1.0f - effect->jitterB));
     packet->f34 = 0;
@@ -1455,7 +1455,7 @@ void dds3Particle_SparkBuffInit(EffBallisticEmitter *effect, s32 index) {
             direction[1] = 0;
             direction[2] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
             VU0_LOAD_VF(vf10, direction);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, direction);
             packet->pos[0] = direction[0] * radius;
             packet->pos[1] = 0;
@@ -1471,7 +1471,7 @@ void dds3Particle_SparkBuffInit(EffBallisticEmitter *effect, s32 index) {
             direction[1] = -(1.0f - cone);
             direction[2] = (dds3GetRandFloatA(effEmitterDelayRandomState) - 0.5f) * 2.0f * cone;
             VU0_LOAD_VF(vf10, direction);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, direction);
             jitter = dds3GetRandFloatA(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
             packet->vel[0] = direction[0] * speed * jitter;
@@ -1507,7 +1507,7 @@ void dds3Particle_SparkBuffInit(EffBallisticEmitter *effect, s32 index) {
             direction[1] = -((dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f);
             direction[2] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
             VU0_LOAD_VF(vf10, direction);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, direction);
             jitter = dds3GetRandFloatA(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
             packet->vel[0] = direction[0] * speed * jitter;
@@ -1533,7 +1533,7 @@ void dds3Particle_SparkBuffInit(EffBallisticEmitter *effect, s32 index) {
             direction[1] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
             direction[2] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
             VU0_LOAD_VF(vf10, direction);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, direction);
             jitter = dds3GetRandFloatA(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
             direction[0] *= speed * jitter;
@@ -1721,7 +1721,7 @@ void dds3Particle_RadiateBuffInit(EffLookAtRingEmitter *effect, u32 packetIndex)
     LookAtMatrix(aViewTarget, sdfViewTargetVector, aViewDown);
     ReverseMatrix();
     if (effect->mode == 0) {
-        PCP_COPY_VECTOR(packet, effect->head.origin);
+        SDF_VU0_COPYVECTOR(packet, effect->head.origin);
         period = effect->period;
         angle = (3.14159265f * 2.0f) / period * (packetIndex % period);
         packet->vel[0] = sdfCos(angle);
@@ -1897,13 +1897,13 @@ void dds3Particle_SphereSpiralBuffInit(EffBurstEmitter *effect, u32 packetIndex)
     directionVector[1] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
     directionVector[2] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, directionVector);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, directionVector);
     packet->vel[0] = speed * (dds3GetRandFloatA(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[0];
     packet->vel[1] = speed * (dds3GetRandFloatA(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[1];
     packet->vel[2] = speed * (dds3GetRandFloatA(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[2];
     VU0_LOAD_VF(vf10, packet->vel);
-    VU0_LENGTH_VF10(velocityLength);
+    SDF_VU0_GETLENGTH(velocityLength);
     VU0_LOAD_MATRIX(effect->head.matrix);
     VU0_LOAD_VF(vf10, packet->vel);
     VU0_ROTATE_VEC(vf10, vf10);
@@ -1916,7 +1916,7 @@ void dds3Particle_SphereSpiralBuffInit(EffBurstEmitter *effect, u32 packetIndex)
         directionVector[1] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
         directionVector[2] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
         VU0_LOAD_VF(vf10, directionVector);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF(vf10, directionVector);
         packet->f30 = directionVector[0];
         packet->f34 = directionVector[1];
@@ -1956,13 +1956,13 @@ void dds3Particle_SphereSpiralDraw(EffBurstEmitter *effect) {
     s32 packetIndex;
 
     dds3Particle_EffectInit(&effect->head.sub);
-    VU0_LOAD_MATRIX_B(effect->head.matrix);
+    SDF_VU0_LOADMATRIX_B(effect->head.matrix);
     packetCount = effect->head.particleCount;
     lifetimeFrames = effect->head.lifetimeFrames;
     completedCount = 0;
     rotationStep = effect->spinRate * (3.14159265f / 180.0f);
     repeatEnabled = effect->loop;
-    PCP_COPY_VECTOR(origin, effect->head.origin);
+    SDF_VU0_COPYVECTOR(origin, effect->head.origin);
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
 
@@ -1977,12 +1977,12 @@ void dds3Particle_SphereSpiralDraw(EffBurstEmitter *effect) {
                 VU0_LOAD_VF(vf12, packet);
             }
             VU0_LOAD_VF(vf10, packet->vel);
-            VU0_LENGTH_VF10(velocityLength);
+            SDF_VU0_GETLENGTH(velocityLength);
             velocityLength += packet->f3C;
             scaleVector[0] = velocityLength;
             scaleVector[1] = velocityLength;
             scaleVector[2] = velocityLength;
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_LOAD_VF(vf11, scaleVector);
             VU0_MUL(vf10, vf10, vf11);
             VU0_STORE_VF(vf10, packet->vel);
@@ -2099,7 +2099,7 @@ void dds3Particle_SphereSmokeBuffInit(EffSphereEmitter *effect, u32 packetIndex)
     directionVector[1] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
     directionVector[2] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, directionVector);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, directionVector);
     packet->pos[0] = radius * (dds3GetRandFloatA(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[0];
     packet->pos[1] = radius * (dds3GetRandFloatA(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[1];
@@ -2115,7 +2115,7 @@ void dds3Particle_SphereSmokeBuffInit(EffSphereEmitter *effect, u32 packetIndex)
     packet->vel[1] = 0;
     packet->vel[2] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, packet->vel);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, packet->vel);
     packet->f30 = effect->f164 * (dds3GetRandFloatA(effDefaultRandomState) * effect->f174 + (1.0f - effect->f174));
     packet->f34 = 0;
@@ -2334,7 +2334,7 @@ void dds3Particle_SphereRingDraw(EffExpandingRingEmitter *effect) {
     repeatEnabled = effect->loop;
     rotationCos = sdfCos(rotationStep);
     rotationSin = sdfSin(rotationStep);
-    PCP_COPY_VECTOR(origin, effect->head.origin);
+    SDF_VU0_COPYVECTOR(origin, effect->head.origin);
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
 
@@ -2617,7 +2617,7 @@ void dds3Particle_SphereAtomBuffInit(EffTemplatePacketList *effect, s32 index) {
         direction[1] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
         direction[2] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
         VU0_LOAD_VF(vf10, direction);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF(vf10, direction);
         packet->position[0] = radius * dds3GetRandFloatA(effDefaultRandomState) * direction[0];
         packet->position[1] = radius * dds3GetRandFloatA(effDefaultRandomState) * direction[1];
@@ -2633,17 +2633,17 @@ void dds3Particle_SphereAtomBuffInit(EffTemplatePacketList *effect, s32 index) {
         direction[1] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
         direction[2] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
         VU0_LOAD_VF(vf10, direction);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF(vf10, packet->velocity);
         packet->age = -(dds3GetRandA((EffRandState *)effEmitterDelayRandomState) % (effect->delayRange + 1));
     } else {
-        PCP_COPY_VECTOR(packet->position, effect->head.origin);
+        SDF_VU0_COPYVECTOR(packet->position, effect->head.origin);
         value = (3.14159265f * 2.0f) / effect->head.particleCount * index;
         direction[0] = sdfCos(value);
         direction[1] = sdfSin(value);
         direction[2] = 0;
         VU0_LOAD_VF(vf10, direction);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF(vf10, packet->velocity);
         packet->age = -(dds3GetRandA((EffRandState *)effEmitterDelayRandomState) % (effect->delayRange + 1));
     }
@@ -2707,7 +2707,7 @@ void dds3Particle_SphereAtomDraw(EffTemplatePacketList *effect) {
             }
         }
     }
-    PCP_COPY_VECTOR(origin, effect->head.origin);
+    SDF_VU0_COPYVECTOR(origin, effect->head.origin);
     for (index = 0; index < packetCount; index++, packet++) {
         s32 age = packet->age;
         f32 distance;
@@ -2723,7 +2723,7 @@ void dds3Particle_SphereAtomDraw(EffTemplatePacketList *effect) {
             packet->color = dds3ParticleColorAnim((ParColorRamp *)effect->head.fade, packet->color, age);
             packet->color = dds3ParticleColorBlend(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
-                PCP_COPY_VECTOR(previousPosition, packet->pos);
+                SDF_VU0_COPYVECTOR(previousPosition, packet->pos);
             }
             magnitude = packet->f30;
             dx = packet->vel[0] * magnitude;
@@ -2738,9 +2738,9 @@ void dds3Particle_SphereAtomDraw(EffTemplatePacketList *effect) {
             VU0_LOAD_VF(vf11, origin);
             VU0_SUB(vf10, vf10, vf11);
             VU0_MOVE_VF(vf12, vf10);
-            VU0_LENGTH_VF10(distance);
+            SDF_VU0_GETLENGTH(distance);
             VU0_MOVE_VF(vf10, vf12);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, normal);
             if (distance > radius) {
                 VU0_LOAD_VF(vf10, packet->vel);
@@ -2750,7 +2750,7 @@ void dds3Particle_SphereAtomDraw(EffTemplatePacketList *effect) {
                 VU0_LOAD_VF(vf10, origin);
                 VU0_LOAD_VF(vf11, packet->pos);
                 VU0_SUB(vf10, vf10, vf11);
-                VU0_NORMALIZE_VF10();
+                SDF_VU0_NORMALIZE();
                 VU0_MOVE_VF(vf11, vf12);
                 VU0_MOVE_VF(vf12, vf10);
                 VU0_DOT_XYZ(dot, vf10, vf11);
@@ -2762,7 +2762,7 @@ void dds3Particle_SphereAtomDraw(EffTemplatePacketList *effect) {
                 VU0_MUL(vf10, vf10, vf11);
                 VU0_LOAD_VF(vf11, packet->vel);
                 VU0_ADD(vf10, vf10, vf11);
-                VU0_NORMALIZE_VF10();
+                SDF_VU0_NORMALIZE();
                 VU0_STORE_VF(vf10, packet->vel);
                 boundaryScale[0] = radius;
                 boundaryScale[1] = radius;
@@ -2959,12 +2959,12 @@ void dds3Particle_SparkOffsetBuffInit(EffOffsetGravityEmitter *effect, s32 index
             direction[1] = 0;
             direction[2] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
             VU0_LOAD_VF(vf10, direction);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, direction);
             packet->f30 = direction[0] * radius;
             packet->f34 = 0;
             packet->f38 = direction[2] * radius;
-            PCP_COPY_VECTOR(packet->pos, effect->head.origin);
+            SDF_VU0_COPYVECTOR(packet->pos, effect->head.origin);
             VU0_LOAD_MATRIX(effect->head.matrix);
             VU0_LOAD_VF(vf10, &packet->f30);
             VU0_APPLY_MATRIX(vf10, vf10);
@@ -2973,7 +2973,7 @@ void dds3Particle_SparkOffsetBuffInit(EffOffsetGravityEmitter *effect, s32 index
             direction[1] = -(1.0f - cone);
             direction[2] = (dds3GetRandFloatA(effEmitterDelayRandomState) - 0.5f) * 2.0f * cone;
             VU0_LOAD_VF(vf10, direction);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, direction);
             jitter = dds3GetRandFloatA(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
             packet->vel[0] = direction[0] * speed * jitter;
@@ -3003,12 +3003,12 @@ void dds3Particle_SparkOffsetBuffInit(EffOffsetGravityEmitter *effect, s32 index
             packet->f30 = 0;
             packet->f34 = 0;
             packet->f38 = 0;
-            PCP_COPY_VECTOR(packet->pos, effect->head.origin);
+            SDF_VU0_COPYVECTOR(packet->pos, effect->head.origin);
             direction[0] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
             direction[1] = -((dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f);
             direction[2] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
             VU0_LOAD_VF(vf10, direction);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, direction);
             jitter = dds3GetRandFloatA(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
             packet->vel[0] = direction[0] * speed * jitter;
@@ -3035,7 +3035,7 @@ void dds3Particle_SparkOffsetBuffInit(EffOffsetGravityEmitter *effect, s32 index
             direction[1] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
             direction[2] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
             VU0_LOAD_VF(vf10, direction);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, direction);
             jitter = dds3GetRandFloatA(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
             direction[0] *= speed * jitter;
@@ -3104,7 +3104,7 @@ void dds3Particle_SparkOffsetDraw(EffOffsetGravityEmitter *effect) {
     packetCount = effect->head.particleCount;
     lifetimeFrames = effect->head.lifetimeFrames;
     repeatEnabled = effect->loop;
-    PCP_COPY_VECTOR(origin, effect->head.origin);
+    SDF_VU0_COPYVECTOR(origin, effect->head.origin);
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
 
@@ -3234,7 +3234,7 @@ void dds3Particle_SmokeOffsetBuffInit(EffDiscAuxEmitter *effect, u32 packetIndex
     directionVector[1] = 0;
     directionVector[2] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, directionVector);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, directionVector);
     (*auxiliaryCursor)[0] = directionVector[0] * radialDistance;
     (*auxiliaryCursor)[1] = 0;
@@ -3247,7 +3247,7 @@ void dds3Particle_SmokeOffsetBuffInit(EffDiscAuxEmitter *effect, u32 packetIndex
     directionVector[1] = 0;
     directionVector[2] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, directionVector);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, packet->vel);
     packet->f30 = effect->f164 * (dds3GetRandFloatA(effDefaultRandomState) * effect->f174 + (1.0f - effect->f174));
     packet->f34 = 0;
@@ -3255,7 +3255,7 @@ void dds3Particle_SmokeOffsetBuffInit(EffDiscAuxEmitter *effect, u32 packetIndex
     packet->f3C = effect->f15C * (dds3GetRandFloatA(effDefaultRandomState) * effect->f170 + (1.0f - effect->f170));
     packet->age = -(dds3GetRandA((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
-    PCP_COPY_VECTOR(packet, effect->head.origin);
+    SDF_VU0_COPYVECTOR(packet, effect->head.origin);
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.scale[0] * (dds3GetRandFloatA(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
@@ -3293,7 +3293,7 @@ void dds3Particle_SmokeOffsetDraw(EffDiscAuxEmitter *effect) {
     lifetimeFrames = effect->head.lifetimeFrames;
     repeatEnabled = effect->flag150;
     waveRate = effect->f168;
-    PCP_COPY_VECTOR(origin, effect->head.origin);
+    SDF_VU0_COPYVECTOR(origin, effect->head.origin);
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++, auxiliaryCursor++) {
         s32 age = packet->age;
 

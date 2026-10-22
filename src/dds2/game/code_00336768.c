@@ -35,7 +35,7 @@ void SetRotateMatrixX_B(f32 angle) {
     m[1][2] = s;
     m[2][1] = -s;
     m[2][2] = c;
-    VU0_LOAD_MATRIX_B((f32 *)m);
+    SDF_VU0_LOADMATRIX_B((f32 *)m);
 }
 
 void sdfVuLoadSecondaryRotationMatrixY(f32 angle) {
@@ -48,7 +48,7 @@ void sdfVuLoadSecondaryRotationMatrixY(f32 angle) {
     m[0][2] = -s;
     m[2][0] = s;
     m[2][2] = c;
-    VU0_LOAD_MATRIX_B((f32 *)m);
+    SDF_VU0_LOADMATRIX_B((f32 *)m);
 }
 
 void SetRotateMatrixZ_B(f32 angle) {
@@ -61,7 +61,7 @@ void SetRotateMatrixZ_B(f32 angle) {
     m[0][1] = s;
     m[1][0] = -s;
     m[1][1] = c;
-    VU0_LOAD_MATRIX_B((f32 *)m);
+    SDF_VU0_LOADMATRIX_B((f32 *)m);
 }
 
 /* Build an axis-angle matrix in the VU0 secondary matrix registers. */
@@ -69,7 +69,7 @@ void SetRotateMatrixAxis_B(const RwV3d* axis, f32 angle)
 {
     RwMatrix matrix;
     StoreRotateMatrixAxis(angle, axis, &matrix);
-    VU0_LOAD_MATRIX_B(&matrix);
+    SDF_VU0_LOADMATRIX_B(&matrix);
 }
 
 extern void SetRotateMatrixZ_B(f32 angle);

@@ -1109,9 +1109,9 @@ s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, command->backCamera.position);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(distance);
+    SDF_VU0_GETLENGTH(distance);
     command->backCamera.distance = distance;
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, command->backCamera.direction);
     command->backCamera.distance += 45.0f;
     btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);

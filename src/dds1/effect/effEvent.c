@@ -1253,13 +1253,13 @@ void effEventUpdateEffectParameters(effEveBEDCutHandle_t *work) {
                 /* The callback can change the entry's scale kind. */
                 if (entry->aimParams.kind == 5) {
                     sdfModelGetMarkPosMatrix(model, entry->aimParams.count);
-                    VU0_LOAD_MATRIX_B(rotationMatrix);
+                    SDF_VU0_LOADMATRIX_B(rotationMatrix);
                     sdfComposeVuMatrixFromRegisters();
                     VU0_STORE_MATRIX_NOCLOBBER(matrix);
                     dds3EffectPartSetRotateMatrix(effect->parameterWorks[entryIndex], matrix);
                 } else {
                     mdlGetScale(work->actor->owner);
-                    VU0_GET_VF10_X(scale);
+                    SDF_VU0_GETVECTOR_X(scale);
                     sdfModelGetMarkPosMatrix(model, entry->aimParams.count);
                     if (scale != 0.0f) {
                         VU0_SET_ONES_XYZ(vf10);
@@ -1369,7 +1369,7 @@ void effEveBEDPartGetPositionPtr(EffEventInit *source, EffectVectorRequest *para
         radius = (f32)rangeOverride;
     }
     half = source->height * 0.5f;
-    PCP_COPY_VECTOR(pos, source->position);
+    SDF_VU0_COPYVECTOR(pos, source->position);
     if (aimMode == 5) {
         if (directionMode == 8 || directionMode == 10) {
             y = -1.0f;
@@ -1506,7 +1506,7 @@ void effEVECombParSmokePartInit(EffEventBillSet *work, s32 index) {
     direction[1] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
     direction[2] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
     VU0_LOAD_VF(vf10, direction);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, direction);
     /* Each coordinate consumes its own radial random factor, not one shared radius. */
     particle->position[0] = spawnRadius * dds3GetRandFloatA(effDefaultRandomState) * direction[0];
@@ -1516,7 +1516,7 @@ void effEVECombParSmokePartInit(EffEventBillSet *work, s32 index) {
     particle->motion[1] = 0;
     particle->motion[2] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
     VU0_LOAD_VF(vf10, particle->motion);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, particle->motion);
     particle->swayAmplitude = work->head.swayAmplitude * (dds3GetRandFloatA(effDefaultRandomState) * work->head.swayRandomness + (1.0f - work->head.swayRandomness));
     particle->swayPhase = 0;
@@ -1543,7 +1543,7 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
     VU0_SUB(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, aViewDown);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, lateral);
     particle = work->particles;
     particleCount = work->head.particleCount;
@@ -1555,7 +1555,7 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
     color = work->head.color;
     swayPhaseStep = work->head.swayPhaseStep;
     swayAmplitudeStep = work->head.swayAmplitudeStep;
-    PCP_COPY_VECTOR(origin, work->head.position);
+    SDF_VU0_COPYVECTOR(origin, work->head.position);
     dds3BillboardSetMode((billHandle_t *)D_003BB144, work->head.drawMode);
     dds3BillboardSetMode((billHandle_t *)D_003BB148, 3);
     for (index = 0; index < particleCount; index++, particle++) {
@@ -1688,7 +1688,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     VU0_SUB(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, aViewDown);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, lateral);
     particle = work->particles;
     particleCount = work->head.particleCount;
@@ -1702,7 +1702,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     color = work->head.color;
     swayPhaseStep = work->head.swayPhaseStep;
     swayAmplitudeStep = work->head.swayAmplitudeStep;
-    PCP_COPY_VECTOR(origin, work->head.position);
+    SDF_VU0_COPYVECTOR(origin, work->head.position);
     for (index = 0; index < particleCount; index++, particle++) {
         s32 age = particle->age;
         if (age == 0) {
@@ -1772,7 +1772,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
                 f32 cosine, sine, cornerX, cornerY;
                 f32 center = 0.0f;
             slot = primary.count;
-            PCP_COPY_VECTOR(&primary.positions[slot], position);
+            SDF_VU0_COPYVECTOR(&primary.positions[slot], position);
             u = (s16)((u16)primaryTexture->width << 4);
             v = (s16)((u16)primaryTexture->height << 4);
             primary.colors[slot] = primaryColor;
@@ -1810,7 +1810,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
                 f32 cosine, sine, cornerX, cornerY;
                 f32 center = 0.0f;
             slot = secondary.count;
-            PCP_COPY_VECTOR(&secondary.positions[slot], position);
+            SDF_VU0_COPYVECTOR(&secondary.positions[slot], position);
             u = (s16)((u16)secondaryTexture->width << 4);
             v = (s16)((u16)secondaryTexture->height << 4);
             secondary.colors[slot] = secondaryColor;
@@ -1904,7 +1904,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
 
 /* Copy one full vector quadword through vf10, including its fourth component. */
 void effEVECombParSmokeSetPosition(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 /* Set the native byte flag without normalizing it to a boolean. */

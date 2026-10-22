@@ -120,7 +120,7 @@ extern KwlnDrawVectorParams kwlnDrawVector;
 
 /* Copy one complete vector into the default draw color state. */
 void dds3SetAmbient(u128 *source) {
-    PCP_COPY_VECTOR(&kwlnDefaultColorVector, source);
+    SDF_VU0_COPYVECTOR(&kwlnDefaultColorVector, source);
 }
 
 
@@ -921,12 +921,12 @@ void dds3RotationArc(void) {
     identity[3] = 1.0f;
 
     VU0_CLEAR_W(vf10);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf2, vf10);
     VU0_MOVE_VF(vf10, vf11);
     VU0_MOVE_VF(vf11, vf2);
     VU0_CLEAR_W(vf10);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf2, vf10);
     VU0_MOVE_VF(vf10, vf11);
     VU0_MOVE_VF(vf11, vf2);
@@ -938,19 +938,19 @@ void dds3RotationArc(void) {
     }
 
     if (dot <= -0.9999f) {
-        VU0_GET_VF10_Y(component);
+        SDF_VU0_GETVECTOR_Y(component);
         if (0.9999f <= fabsf(component)) {
             VU0_MOVE_VF(vf10, vf0);
             VU0_CLEAR_W(vf10);
             VU0_SET_VF10_COMPONENT(z, -1.0f);
         } else {
-            VU0_GET_VF10_Z(component);
+            SDF_VU0_GETVECTOR_Z(component);
             axis[0] = -component;
             axis[1] = 0.0f;
-            VU0_GET_VF10_X(axis[2]);
+            SDF_VU0_GETVECTOR_X(axis[2]);
             axis[3] = 0.0f;
             VU0_LOAD_VF(vf10, axis);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
         }
 
         VU0_DOT_XYZ(dot, vf10, vf11);
@@ -961,7 +961,7 @@ void dds3RotationArc(void) {
 
     VU0_MOVE_VF(vf12, vf10);
     VU0_ADD(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf11, vf12);
     VU0_DOT_XYZ(dot, vf10, vf11);
     VU0_CROSS_XYZ(vf10, vf10, vf11);

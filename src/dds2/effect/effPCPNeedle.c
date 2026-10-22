@@ -181,7 +181,7 @@ void effPCPNeedleSpiralDraw(EffPCPNeedleWork *work) {
                     VU0_SUB(vf10, vf10, vf11);
                     VU0_LOAD_VF(vf11, viewDirection);
                     VU0_CROSS_XYZ(vf10, vf10, vf11);
-                    VU0_NORMALIZE_VF10();
+                    SDF_VU0_NORMALIZE();
                     VU0_LOAD_VF(vf11, width);
                     VU0_MUL(vf10, vf10, vf11);
                     VU0_MOVE_VF(vf2, vf10);
@@ -213,7 +213,7 @@ void effPCPNeedleSpiralDraw(EffPCPNeedleWork *work) {
 
 
 void effPCPNeedleSpiralSetPosition(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 /* Copy the supplied transform into the needle's resource matrix. */

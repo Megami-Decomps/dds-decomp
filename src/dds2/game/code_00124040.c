@@ -1810,7 +1810,7 @@ s32 fldUpdateTravelAndEncounters(void) {
     VU0_LOAD_VF(vf11, previousPosition);
     VU0_STORE_VF(vf10, previousPosition);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(distance);
+    SDF_VU0_GETLENGTH(distance);
     if (distance < 0.2f) distance = 0.0f;
     fldGlobalBase.frameTravelDistance = distance;
     previousPhase = evtGetAgeOfMoon16();

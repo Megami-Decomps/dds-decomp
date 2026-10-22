@@ -3855,9 +3855,9 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, EvtRuntime *v
         case 13:
             destination = entry->payload;
             source = D_00324770[0];
-            PCP_COPY_VECTOR(destination, source);
-            PCP_COPY_VECTOR(destination + 1, source + 1);
-            PCP_COPY_VECTOR(destination + 2, kwlnDefaultColorVector);
+            SDF_VU0_COPYVECTOR(destination, source);
+            SDF_VU0_COPYVECTOR(destination + 1, source + 1);
+            SDF_VU0_COPYVECTOR(destination + 2, kwlnDefaultColorVector);
             break;
         case 14:
             entry->p08.f = sdfFaceDivSoften;

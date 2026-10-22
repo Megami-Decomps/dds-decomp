@@ -244,7 +244,7 @@ void dds3ParticleExpDraw(ParObj *effect) {
             s32 age = record->age;
 
             if (age < lifetime && age >= 0) {
-                PCP_COPY_VECTOR(billboard, record->position);
+                SDF_VU0_COPYVECTOR(billboard, record->position);
                 billboard->rotationAngle = record->spin;
                 billboard->childParam = record->color;
                 billboard->childScaleX = billboard->childScaleY = record->scale;
@@ -282,7 +282,7 @@ u16 dds3ParticleExpGetState(ParObj *obj) {
 }
 
 void dds3ParticleExpSetPosition(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 extern void dds3ParticleSetRotateMatrix(ParObj *effect, void *matrix);
@@ -375,7 +375,7 @@ void dds3Particle_TrackSet(s32 particle, s32 index, u32 color) {
     VU0_LOAD_VF(vf11, parLook);
 ;
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_LOAD_VF(vf11, parTrack_w);
 ;
     VU0_MUL(vf10, vf10, vf11);
@@ -402,7 +402,7 @@ void dds3Particle_Track2Set(s32 particle, s32 index, u32 color) {
     VU0_LOAD_VF(vf11, parLook);
 ;
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_LOAD_VF(vf11, parTrack_w);
 ;
     VU0_MUL(vf10, vf10, vf11);
@@ -431,7 +431,7 @@ void dds3Particle_Track3Set(effMTPolyListHandle_t *list, s32 index, u32 color) {
     VU0_LOAD_VF(vf11, parLook);
 ;
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_LOAD_VF(vf11, parTrack_w);
 ;
     VU0_MUL(vf10, vf10, vf11);
@@ -679,7 +679,7 @@ void dds3TrackPolySet(ParSystem *system, s32 cellIndex, const u128 *vertices) {
         vertex = cell->history + shiftCount;
         for (i = 0; i < shiftCount; i++) {
             vertex--;
-            PCP_COPY_VECTOR(vertex + 2, vertex);
+            SDF_VU0_COPYVECTOR(vertex + 2, vertex);
         }
         cell->historyAdvanceCountdown = system->groupDivisor;
         if (cell->vertexCount < shiftCount + 2) {
@@ -689,8 +689,8 @@ void dds3TrackPolySet(ParSystem *system, s32 cellIndex, const u128 *vertices) {
         cell->historyAdvanceCountdown--;
         vertex = cell->history;
     }
-    PCP_COPY_VECTOR(vertex, vertices);
-    PCP_COPY_VECTOR(vertex + 1, vertices + 1);
+    SDF_VU0_COPYVECTOR(vertex, vertices);
+    SDF_VU0_COPYVECTOR(vertex + 1, vertices + 1);
 }
 
 void dds3TrackPolyMove(ParSystem *system, s32 cellIndex, const u128 *delta) {
@@ -722,7 +722,7 @@ void dds3TrackPolySet2(ParSystem *system, s32 cellIndex, const u128 *vertices) {
         vertex = cell->history + shiftCount;
         for (i = 0; i < shiftCount; i++) {
             vertex--;
-            PCP_COPY_VECTOR(vertex + 3, vertex);
+            SDF_VU0_COPYVECTOR(vertex + 3, vertex);
         }
         cell->historyAdvanceCountdown = system->groupDivisor;
         if (cell->vertexCount < shiftCount + 3) {
@@ -732,9 +732,9 @@ void dds3TrackPolySet2(ParSystem *system, s32 cellIndex, const u128 *vertices) {
         cell->historyAdvanceCountdown--;
         vertex = cell->history;
     }
-    PCP_COPY_VECTOR(vertex, vertices);
-    PCP_COPY_VECTOR(vertex + 1, vertices + 1);
-    PCP_COPY_VECTOR(vertex + 2, vertices + 2);
+    SDF_VU0_COPYVECTOR(vertex, vertices);
+    SDF_VU0_COPYVECTOR(vertex + 1, vertices + 1);
+    SDF_VU0_COPYVECTOR(vertex + 2, vertices + 2);
 }
 
 void dds3TrackPolyMove2(ParSystem *system, s32 cellIndex, const u128 *delta) {

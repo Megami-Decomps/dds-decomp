@@ -4717,8 +4717,8 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 }
                 {
                     dds3PoseSet_t *transform = group->info->inner;
-                    PCP_COPY_VECTOR(group->savedPosition, transform->position);
-                    PCP_COPY_VECTOR(group->savedRotation, transform->rotation);
+                    SDF_VU0_COPYVECTOR(group->savedPosition, transform->position);
+                    SDF_VU0_COPYVECTOR(group->savedRotation, transform->rotation);
                 }
             }
         }

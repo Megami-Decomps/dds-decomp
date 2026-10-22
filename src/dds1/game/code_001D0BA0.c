@@ -2234,7 +2234,7 @@ void btlDumpTaskQueue(void) {
 extern u128 btlDefaultUnitBodyOffset;
 
 void btlInitUnitFxDefaults(BtlUnit *fx) {
-    PCP_COPY_VECTOR(fx->bodyOffset, &btlDefaultUnitBodyOffset);
+    SDF_VU0_COPYVECTOR(fx->bodyOffset, &btlDefaultUnitBodyOffset);
     fx->height = 220.0f;
     fx->reach = 80.0f;
     fx->cameraRadius = 75.0f;
@@ -2245,13 +2245,13 @@ extern u128 btlDefaultUnitPosition;
 extern u128 btlDefaultUnitRotation;
 
 void btlInitFxLights(BtlUnit *fx) {
-    PCP_COPY_VECTOR(fx->position, &btlDefaultUnitPosition);
-    PCP_COPY_VECTOR(fx->rotation, &btlDefaultUnitRotation);
+    SDF_VU0_COPYVECTOR(fx->position, &btlDefaultUnitPosition);
+    SDF_VU0_COPYVECTOR(fx->rotation, &btlDefaultUnitRotation);
     fx->unk58Bits = 0;
     fx->actorScale = 1.0f;
     fx->baseColor = 0x80808080;
-    PCP_COPY_VECTOR(fx->currentPosition, &btlDefaultUnitPosition);
-    PCP_COPY_VECTOR(fx->orientation, &btlDefaultUnitRotation);
+    SDF_VU0_COPYVECTOR(fx->currentPosition, &btlDefaultUnitPosition);
+    SDF_VU0_COPYVECTOR(fx->orientation, &btlDefaultUnitRotation);
     fx->scale = 1.0f;
     fx->overlayColor = 0x80808080;
     fx->positionZOffsetBits = 0;
@@ -2262,7 +2262,7 @@ void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *fx, s32 kind, s32 inde
     BtlEffectResource *base = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(kind, index);
 
     if (alt->overrideEnabled == 0.0f) {
-        PCP_COPY_VECTOR(fx->bodyOffset, base);
+        SDF_VU0_COPYVECTOR(fx->bodyOffset, base);
         fx->reach = base->reach;
         fx->height = base->height;
         fx->cameraRadius = base->cameraRadius;
@@ -2274,7 +2274,7 @@ void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *fx, s32 kind, s32 inde
         fx->reach = alt->reach;
         fx->height = alt->height;
     }
-    PCP_COPY_VECTOR(fx->muzzleOffset, base);
+    SDF_VU0_COPYVECTOR(fx->muzzleOffset, base);
     fx->bodyRadius = base->reach;
     fx->geometryHeight = base->height;
     fx->cameraRadius = base->cameraRadius;
@@ -2956,7 +2956,7 @@ void btlSetUnitPosition(BtlUnit *object, void *position) {
 
 /* Copy the stored current-position vector, without the runtime world offset. */
 void btlCopyUnitCurrentPosition(u8 *object, void *position) {
-    PCP_COPY_VECTOR(position, object + 0x60);
+    SDF_VU0_COPYVECTOR(position, object + 0x60);
 }
 
 void btlGetUnitWorldPos(u8 *object, void *worldPosition) {
@@ -3094,7 +3094,7 @@ void btlSetUnitRotation(BtlUnit *object, void *rotation) {
 }
 
 void btlCopyUnitRotationQuaternion(BtlUnit *unit, void *dst) {
-    PCP_COPY_VECTOR(dst, unit->orientation);
+    SDF_VU0_COPYVECTOR(dst, unit->orientation);
 }
 
 void btlSetUnitColor(BtlUnit *unit, u32 color, s32 mode) {
@@ -3425,7 +3425,7 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
         VU0_LOAD_VF(vf10, muzzlePos);
         VU0_LOAD_VF(vf11, bodyPos);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
     } else {
         VU0_LOAD_VF(vf10, unit->orientation);
         effMiscQuaternionToMatrixVU();
@@ -3453,7 +3453,7 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
         VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
         VU0_LOAD_VF(vf11, world);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(distance);
+        SDF_VU0_GETLENGTH(distance);
         if (distance < 2.0f * (unit->bodyRadius * unit->scale)) {
             dds3SetPosPoseSet(unit->effectObject, (u128 *)world);
             unit->status.stateFlags |= 0x8000;
@@ -3581,7 +3581,7 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     VU0_LOAD_VF_PTR(vf11, toPos);
     VU0_MOVE_VF(vf12, vf10);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_SCALAR_OP(reach, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_ADD(vf10, vf10, vf11);
     VU0_MOVE_VF(vf11, vf12);
@@ -3589,7 +3589,7 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     VU0_STORE_VF(vf10, pos);
     VU0_LOAD_VF(vf11, fromPos);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(dist);
+    SDF_VU0_GETLENGTH(dist);
     VU0_LOAD_VF(vf10, &unit->orientation);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, &unit->bodyOffset);
@@ -3639,7 +3639,7 @@ s32 btlUpdateUnitPositionInterpolationTask(BtlPosLerpTaskArgs *args) {
     if (t < 1.0f && args->rate > 0.0f && args->rate < 1.0f) {
         rate = args->rate;
         if (args->count == 0) {
-            PCP_COPY_VECTOR(&args->from, unit->currentPosition);
+            SDF_VU0_COPYVECTOR(&args->from, unit->currentPosition);
         }
         args->t = t + (1.0f - t) * rate;
         if (args->t > 0.999f) {
@@ -3672,8 +3672,8 @@ BtlRuntimeTask *btlCreateUnitPositionLerpTowardTargetTask(BtlUnit *unit, const f
     args->unit = unit;
     args->t = 0.0f;
     args->count = 0;
-    PCP_COPY_VECTOR(&args->from, unit->currentPosition);
-    PCP_COPY_VECTOR(&args->to, target);
+    SDF_VU0_COPYVECTOR(&args->from, unit->currentPosition);
+    SDF_VU0_COPYVECTOR(&args->to, target);
     return task;
 }
 
@@ -3692,7 +3692,7 @@ s32 btlStepUnitRotationNlerp(BtlRotationTaskArgs *args) {
         rate = args->rate;
         if (rate > 0.0f && rate < 1.0f) {
             if (args->count == 0) {
-                PCP_COPY_VECTOR(&args->from, unit->orientation);
+                SDF_VU0_COPYVECTOR(&args->from, unit->orientation);
             }
             args->t = t + (1.0f - t) * rate;
             if (args->t > 0.999f) {
@@ -3724,8 +3724,8 @@ BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *unit, const f32 
     args->unit = unit;
     args->t = 0.0f;
     args->count = 0;
-    PCP_COPY_VECTOR(&args->from, unit->orientation);
-    PCP_COPY_VECTOR(&args->to, targetOrientation);
+    SDF_VU0_COPYVECTOR(&args->from, unit->orientation);
+    SDF_VU0_COPYVECTOR(&args->to, targetOrientation);
     return task;
 }
 
@@ -4066,7 +4066,7 @@ u8 *btlCreateUnitTask10(u8 *unit, f32 *spawnPosition, s32 value) {
     args = btlGetTaskArguments(task);
     args[5] = (u32)unit;
     args[4] = value;
-    PCP_COPY_VECTOR(args, spawnPosition);
+    SDF_VU0_COPYVECTOR(args, spawnPosition);
     return task;
 }
 
@@ -4469,14 +4469,14 @@ u32 btlUnitBaseLightTask(BtlUnitBaseLightArgs *work) {
             target = (dds3Basic_t *)ext->currentTransitionValue;
             if (target != NULL && (ext->flags & 0x40000)) {
                 info = target->data;
-                PCP_COPY_VECTOR(unit->colorStart, info->firstColor);
-                PCP_COPY_VECTOR(unit->colorEnd, info->secondColor);
-                PCP_COPY_VECTOR(unit->lightDirection, info->direction);
+                SDF_VU0_COPYVECTOR(unit->colorStart, info->firstColor);
+                SDF_VU0_COPYVECTOR(unit->colorEnd, info->secondColor);
+                SDF_VU0_COPYVECTOR(unit->lightDirection, info->direction);
             } else {
                 f32 *defaultLight = D_00324770[0];
-                PCP_COPY_VECTOR(unit->colorStart, defaultLight);
-                PCP_COPY_VECTOR(unit->colorEnd, kwlnDefaultColorVector);
-                PCP_COPY_VECTOR(unit->lightDirection, defaultLight + 4);
+                SDF_VU0_COPYVECTOR(unit->colorStart, defaultLight);
+                SDF_VU0_COPYVECTOR(unit->colorEnd, kwlnDefaultColorVector);
+                SDF_VU0_COPYVECTOR(unit->lightDirection, defaultLight + 4);
                 btlBossDebugPrintf("btl:base light error[%p]\n", unit);
             }
             unit->status.stateFlags |= 0x10;
@@ -5478,7 +5478,7 @@ s32 btlAdjustCameraDirectionForDefaultPlane(BtlCamState *state) {
             VU0_LOAD_VF(vf10, vector);
             VU0_SET_VF10_COMPONENT(y, 0.0f);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, direction);
             delta = y - (-20.0f);
             scale = fsqrtf(delta * delta + length * length);
@@ -5486,7 +5486,7 @@ s32 btlAdjustCameraDirectionForDefaultPlane(BtlCamState *state) {
             vector[1] = delta;
             vector[2] = -direction[2] * scale;
             VU0_LOAD_VF(vf10, vector);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, state->direction);
             changed = 1;
         }
@@ -5518,7 +5518,7 @@ s32 btlAdjustCameraDirectionForPlane(BtlCamState *state, f32 height) {
             VU0_LOAD_VF(vf10, vector);
             VU0_SET_VF10_COMPONENT(y, 0.0f);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, direction);
             delta = y - height;
             scale = fsqrtf(delta * delta + length * length);
@@ -5526,7 +5526,7 @@ s32 btlAdjustCameraDirectionForPlane(BtlCamState *state, f32 height) {
             vector[1] = delta;
             vector[2] = -direction[2] * scale;
             VU0_LOAD_VF(vf10, vector);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, state->direction);
             changed = 1;
         }
@@ -5749,7 +5749,7 @@ void btlUpdateBattleCameraFrame(void) {
     dds3CameraObjectBasicSetFovy(camera, scene->cameraCommand.camera.fov);
     data->fovUpdatePending |= 1;
     dds3SetRotPoseSet(camera, (u128 *)btlCameraOutputRotation);
-    PCP_COPY_VECTOR(&data->localUp, btlCameraLocalUpVector);
+    SDF_VU0_COPYVECTOR(&data->localUp, btlCameraLocalUpVector);
     scene->cameraCommand.state++;
 }
 
@@ -5809,8 +5809,8 @@ void btlClearPendingSoundList(void) {
 }
 
 void btlCopyMotionTransform(BtlCamState *dst, const BtlCamState *src) {
-    PCP_COPY_VECTOR(dst->position, src->position);
-    PCP_COPY_VECTOR(dst->direction, src->direction);
+    SDF_VU0_COPYVECTOR(dst->position, src->position);
+    SDF_VU0_COPYVECTOR(dst->direction, src->direction);
     dst->distance = src->distance;
     dst->fov = src->fov;
 }

@@ -86,7 +86,7 @@ void effUpdatePairedResources(PairedEffectResources *work) {
 
 /* Copy the endpoint vector; the remaining paired-resource state is unchanged. */
 void effCopyPairedResourceEndpoint(PairedEffectResources *dst, PairedEffectResources *src) {
-    PCP_COPY_VECTOR(dst->startVec, src->startVec);
+    SDF_VU0_COPYVECTOR(dst->startVec, src->startVec);
 }
 
 void effSetPairedResourceColor(PairedEffectResources *pair, u32 colorWithAlpha) {

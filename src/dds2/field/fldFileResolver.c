@@ -2086,10 +2086,10 @@ void fldPoint3To2(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
 
     VU0_LOAD_MATRIX_MEMORY(sdfViewMatrix);
     sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
-    VU0_MOVE_MATRIX_TO_B();
+    SDF_VU0_COPYMATRIX_A_TO_B();
     VU0_LOAD_VF_MEMORY(vf10, vec);
     VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
+    SDF_VU0_PERSVECTOR();
     VU0_LOAD_VF_MEMORY(vf11, D_0037F650);
     VU0_MUL(vf10, vf10, vf11);
     VU0_LOAD_VF_MEMORY(vf11, D_0037F660);
@@ -2105,10 +2105,10 @@ void fldPoint3To2H(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
 
     VU0_LOAD_MATRIX_MEMORY(D_00384790);
     sdfPostmultiplyVuMatrixFromMemory(D_0037F9B0);
-    VU0_MOVE_MATRIX_TO_B();
+    SDF_VU0_COPYMATRIX_A_TO_B();
     VU0_LOAD_VF_MEMORY(vf10, vec);
     VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
+    SDF_VU0_PERSVECTOR();
     VU0_LOAD_VF_MEMORY(vf11, D_0037F9F0);
     VU0_MUL(vf10, vf10, vf11);
     VU0_LOAD_VF_MEMORY(vf11, D_0037FA00);
@@ -2123,7 +2123,7 @@ void fldPrepareProjectionMatrix(void) {
     VU0_LOAD_MATRIX_MEMORY(sdfViewMatrix);
     matrix = sdfProjectionMatrix;
     sdfPostmultiplyVuMatrixFromMemory(matrix);
-    VU0_MOVE_MATRIX_TO_B();
+    SDF_VU0_COPYMATRIX_A_TO_B();
     matrix += 0x40;
     VU0_LOAD_VF_MEMORY(vf11, matrix);
     VU0_LOAD_VF_MEMORY(vf12, D_0037F660);
@@ -2134,7 +2134,7 @@ void fldProjectPointWithPreparedMatrix(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z
     f32 result[4];
     VU0_LOAD_VF_MEMORY(vf10, vec);
     VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
+    SDF_VU0_PERSVECTOR();
     VU0_MUL(vf10, vf10, vf11);
     VU0_ADD(vf10, vf10, vf12);
     VU0_STORE_VF(vf10, result);
@@ -3530,8 +3530,8 @@ void fldInitializeCameraViewFromPlayer(void) {
     referencePoint.f[0] = area->x;
     referencePoint.f[1] = area->y + fldCameraFollowRows[area->rowIdx].y;
     referencePoint.f[2] = positionZ;
-    PCP_COPY_VECTOR(&referenceCopy, &referencePoint);
-    PCP_COPY_VECTOR(&farCopy, &farPoint);
+    SDF_VU0_COPYVECTOR(&referenceCopy, &referencePoint);
+    SDF_VU0_COPYVECTOR(&farCopy, &farPoint);
 
     fldHitChkCamera(farCopy.f, referenceCopy.f, collisionPoint.f);
 
@@ -3552,8 +3552,8 @@ void fldInitializeCameraViewFromPlayer(void) {
         ((referencePoint.f[1] - collisionPoint.f[1]) / distance * scale) - heightOffset;
 
     dds3SetPosPoseSet(node, &farPoint.q);
-    PCP_COPY_VECTOR(fldLookAtNearPoint, &nearPoint);
-    PCP_COPY_VECTOR(fldCamTarget, &farPoint);
+    SDF_VU0_COPYVECTOR(fldLookAtNearPoint, &nearPoint);
+    SDF_VU0_COPYVECTOR(fldCamTarget, &farPoint);
     node = *sceneSlot;
     node->ops->update(node);
     fldUpdateLookAtSegmentDistance();
@@ -3598,8 +3598,8 @@ void fldCamUpdateFollow(void) {
     farPoint.f[0] = D_0038BB00[0] * ratio + D_0038BB00[0] * remaining;
     farPoint.f[1] = D_0038BB00[1] * ratio + D_0038BB00[1] * remaining;
     farPoint.f[2] = D_0038BB00[2] * ratio + D_0038BB00[2] * remaining;
-    PCP_COPY_VECTOR(fldLookAtNearPoint, &nearPoint);
-    PCP_COPY_VECTOR(fldCamTarget, &farPoint);
+    SDF_VU0_COPYVECTOR(fldLookAtNearPoint, &nearPoint);
+    SDF_VU0_COPYVECTOR(fldCamTarget, &farPoint);
     dds3SetPosPoseSet(*world, &farPoint.q);
     node = *world;
     node->ops->update(node);
@@ -3641,8 +3641,8 @@ void fldUpdateCameraViewFromPlayer(void) {
     farPoint[1] = fldCamTarget[1] + (farPoint[1] - fldCamTarget[1]);
     farPoint[2] = fldCamTarget[2] + (farPoint[2] - fldCamTarget[2]);
     dds3SetPosPoseSet(*world, (u128 *)farPoint);
-    PCP_COPY_VECTOR(fldLookAtNearPoint, nearPoint);
-    PCP_COPY_VECTOR(fldCamTarget, farPoint);
+    SDF_VU0_COPYVECTOR(fldLookAtNearPoint, nearPoint);
+    SDF_VU0_COPYVECTOR(fldCamTarget, farPoint);
     node = *world;
     node->ops->update(node);
     fldGlobalBase.dist = fsqrtf((nearPoint[0] - farPoint[0]) * (nearPoint[0] - farPoint[0]) +
@@ -4150,7 +4150,7 @@ void fldUpdateCameraTarget(void) {
             dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
             VU0_STORE_VF(vf10, &vec);
             dst = (u128 *)(*(u32 *)(fldPlayerObject + 0x1C) + 0x70);
-            PCP_COPY_VECTOR(dst, &vec);
+            SDF_VU0_COPYVECTOR(dst, &vec);
         }
     }
 }
@@ -5076,7 +5076,7 @@ s32 fldSynchronizePlayerPositionAndAreaState(void) {
     dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
     VU0_STORE_VF_UNCLOBBERED(vf10, position);
     inner = ((dds3Basic_t *)fldPlayerObject)->inner;
-    PCP_COPY_VECTOR(inner->smoothedPosition, position);
+    SDF_VU0_COPYVECTOR(inner->smoothedPosition, position);
     dds3OffPoseSetFlag(inner, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
     return 0;
 }

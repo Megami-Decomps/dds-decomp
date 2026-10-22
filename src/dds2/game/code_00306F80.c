@@ -934,9 +934,9 @@ void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
     vertexColors[1] = secondColor;
     vertexColors[2] = thirdColor;
     request.vertexColors = vertexColors;
-    PCP_COPY_VECTOR(positions[0], first);
-    PCP_COPY_VECTOR(positions[1], second);
-    PCP_COPY_VECTOR(positions[2], third);
+    SDF_VU0_COPYVECTOR(positions[0], first);
+    SDF_VU0_COPYVECTOR(positions[1], second);
+    SDF_VU0_COPYVECTOR(positions[2], third);
     /* Retail00308D44..00308D5C initializes UV pairs with the stream disabled. */
     textureCoordinates[0][0] = 0.0f;
     textureCoordinates[0][1] = 0.0f;

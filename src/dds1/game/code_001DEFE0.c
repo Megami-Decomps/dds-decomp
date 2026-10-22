@@ -488,7 +488,7 @@ void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *action, BtlCamState *
     VU0_LOAD_VF(vf10, centers[2]);
     VU0_LOAD_VF(vf11, centers[1]);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, out->direction);
 
@@ -708,7 +708,7 @@ void btlBuildSideSelectedActorCameraBlend(BtlLinkedCommand *action, BtlCamState 
         VU0_LOAD_VF(vf10, muzzle);
         VU0_LOAD_VF(vf11, from->position);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(distance);
+        SDF_VU0_GETLENGTH(distance);
         if (muzzle[0] < from->direction[0] * -distance + from->position[0]) {
             pose = 0;
         } else {
@@ -781,7 +781,7 @@ void btlBuildDistanceClampedActionCameraBlend(BtlLinkedCommand *action, BtlCamSt
             VU0_LOAD_VF(vf11, targetPosition);
             VU0_SUB(vf10, vf10, vf11);
             VU0_SET_VF10_COMPONENT(x, 0.0f);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, to->direction);
             halfFov = to->fov * 0.5f;
             minimumDistance = unit->cameraRadius * unit->scale / tanf(halfFov);
@@ -1288,8 +1288,8 @@ f32 angle, f32 blend) {
     VU0_LOAD_VF(vf10, pose->position);
     VU0_LOAD_VF(vf11, point);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(distance);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_GETLENGTH(distance);
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, pose->direction);
     distance += projected / tanf(fov);
     projected = btlProjectOnPlaneVU(plane, pose->position, lastPosition);
@@ -1300,7 +1300,7 @@ f32 angle, f32 blend) {
         VU0_LOAD_VF(vf10, point);
         VU0_LOAD_VF(vf11, pose->position);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
+        SDF_VU0_GETLENGTH(length);
         secondDistance -= length;
         pose->distance = distance < secondDistance ? secondDistance : distance;
     }
@@ -1388,7 +1388,7 @@ void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *action, BtlCamState *p
     VU0_SCALAR_OP(0.5f, "vsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w");
     VU0_STORE_VF(vf10, midpoint);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(midpointDistance);
+    SDF_VU0_GETLENGTH(midpointDistance);
 
     if (!reverse) {
         sideLength = fsqrtf(midpointDistance * midpointDistance - scaledReach * scaledReach);
@@ -1430,8 +1430,8 @@ void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *action, BtlCamState *p
     VU0_STORE_VF(vf10, pose->position);
     VU0_MOVE_VF(vf11, vf12);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(span);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_GETLENGTH(span);
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, pose->direction);
 
     halfFov = pose->fov * 0x1.555554p+0f * 0.5f;
@@ -1526,20 +1526,20 @@ void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState
                         if (unit->status.flags & 0x200) {
                             if (sampledX < firstExtreme[0]) {
                                 firstActor = unit;
-                                PCP_COPY_VECTOR(firstExtreme, currentMuzzle);
+                                SDF_VU0_COPYVECTOR(firstExtreme, currentMuzzle);
                             }
                             if (secondExtreme[0] < sampledX) {
                                 secondActor = unit;
-                                PCP_COPY_VECTOR(secondExtreme, currentMuzzle);
+                                SDF_VU0_COPYVECTOR(secondExtreme, currentMuzzle);
                             }
                         } else {
                             if (firstExtreme[0] < sampledX) {
                                 firstActor = unit;
-                                PCP_COPY_VECTOR(firstExtreme, currentMuzzle);
+                                SDF_VU0_COPYVECTOR(firstExtreme, currentMuzzle);
                             }
                             if (sampledX < secondExtreme[0]) {
                                 secondActor = unit;
-                                PCP_COPY_VECTOR(secondExtreme, currentMuzzle);
+                                SDF_VU0_COPYVECTOR(secondExtreme, currentMuzzle);
                             }
                         }
                     }
@@ -1567,11 +1567,11 @@ void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState
         VU0_SUB(vf10, vf10, vf11);
         if (btlPointInBox((BtlVec3 *)targetPoint, (BtlVec3 *)actorPoint, (BtlVec3 *)projection)) {
             f32 projectedLength;
-            VU0_LENGTH_VF10(projectedLength);
+            SDF_VU0_GETLENGTH(projectedLength);
             framingDistances[0] += projectedLength;
         } else {
             f32 projectedLength;
-            VU0_LENGTH_VF10(projectedLength);
+            SDF_VU0_GETLENGTH(projectedLength);
             framingDistances[0] -= projectedLength;
         }
         distance = btlProjectOnPlaneVU(targetPoint, actorPoint, secondExtreme);
@@ -1583,11 +1583,11 @@ void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState
         VU0_SUB(vf10, vf10, vf11);
         if (btlPointInBox((BtlVec3 *)targetPoint, (BtlVec3 *)actorPoint, (BtlVec3 *)projection)) {
             f32 projectedLength;
-            VU0_LENGTH_VF10(projectedLength);
+            SDF_VU0_GETLENGTH(projectedLength);
             framingDistances[1] += projectedLength;
         } else {
             f32 projectedLength;
-            VU0_LENGTH_VF10(projectedLength);
+            SDF_VU0_GETLENGTH(projectedLength);
             framingDistances[1] -= projectedLength;
         }
     } else {
@@ -1608,8 +1608,8 @@ void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState
     VU0_STORE_VF(vf10, pose->position);
     VU0_LOAD_VF(vf11, actorPoint);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(distance);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_GETLENGTH(distance);
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, pose->direction);
     length = distance + (actorMargin + actorMargin) / tanf(halfFov);
     if (framingDistances[1] < framingDistances[0]) {
@@ -1677,11 +1677,11 @@ void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out
     VU0_LOAD_VF(vf11, center);
     VU0_SUB(vf10, vf10, vf11);
     VU0_MOVE_VF(vf12, vf10);
-    VU0_LENGTH_VF10(firstLength);
+    SDF_VU0_GETLENGTH(firstLength);
     VU0_LOAD_VF(vf10, targetPosition);
     VU0_SCALAR_OP(center[0], "vaddx.x vf10, vf0, vf2x");
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(secondLength);
+    SDF_VU0_GETLENGTH(secondLength);
     VU0_MOVE_VF(vf11, vf12);
     VU0_DOT_XYZ(dot, vf10, vf11);
     angle = acosf(dot / (firstLength * secondLength));
@@ -1692,8 +1692,8 @@ void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out
     VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
     VU0_LOAD_VF(vf11, targetPosition);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(centerDistance);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_GETLENGTH(centerDistance);
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF_UNCLOBBERED(vf10, out->direction);
     diameter = extent + extent;
     t = diameter / sinf(1.5707963f - halfFov);
@@ -1868,7 +1868,7 @@ s32 btlBuildMaskedGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState 
     projected += rightActor->reach * rightActor->scale * 1.5f;
     VU0_LOAD_VF(vf11, camera->position);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(pointDistance);
+    SDF_VU0_GETLENGTH(pointDistance);
     xOffset = -pointDistance;
     tangent = tanf(halfFov * 0x1.555554p+0f);
     projected /= tangent;
@@ -2029,11 +2029,11 @@ void btlBuildApproachCamera(BtlLinkedCommand *action, BtlCamState *out) {
     VU0_STORE_VF_UNCLOBBERED(vf10, targetPos);
     VU0_LOAD_VF(vf11, userPos);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_GETLENGTH(length);
     factor = ratio * (BTL_APPROACH_DIST_END - BTL_APPROACH_DIST_START);
     factor += BTL_APPROACH_DIST_START;
     length *= factor;
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, dir);
     VU0_SCALE_VF_MFC1(vf10, length);
     VU0_ADD(vf10, vf10, vf11);
@@ -2091,7 +2091,7 @@ void btlSetupActionCameraPair(BtlLinkedCommand *command) {
     VU0_STORE_VF(vf10, command->frontCamera.position);
     VU0_LOAD_VF(vf11, lookPos);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, command->frontCamera.direction);
     btlUnitFaceTarget(user, target);
 }
@@ -2146,9 +2146,9 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
         VU0_STORE_VF_UNCLOBBERED(vf10, userPos);
         VU0_LOAD_VF(vf11, targetPos);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
+        SDF_VU0_GETLENGTH(length);
         length *= 0.6f;
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF(vf10, dir);
         VU0_SCALE_VF_MFC1(vf10, length);
         VU0_ADD(vf10, vf10, vf11);
@@ -2399,8 +2399,8 @@ void btlBuildActorGroupProjectionCameraPose(BtlLinkedCommand *source, BtlCamStat
     VU0_STORE_VF_PTR(vf10, out->position);
     VU0_LOAD_VF_PTR(vf11, projected);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_GETLENGTH(length);
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF_PTR(vf10, out->direction);
 
     fov *= 0x1.555554p-1f;
@@ -2463,7 +2463,7 @@ void btlBuildShoulderActionCamera(BtlLinkedCommand *action, BtlCamState *pose, B
         VU0_LOAD_VF(vf11, view);
         VU0_CROSS_XYZ(vf10, vf10, vf11);
         VU0_CROSS_XYZ(vf10, vf10, vf11);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_MOVE_VF(vf12, vf10);
         VU0_LOAD_VF(vf10, focus);
         VU0_LOAD_VF(vf11, mirror);
@@ -2547,12 +2547,12 @@ void btlBuildShoulderActionCamera(BtlLinkedCommand *action, BtlCamState *pose, B
             VU0_STORE_VF(vf10, pose->position);
             VU0_LOAD_VF(vf11, focus);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, pose->direction);
             VU0_LOAD_VF(vf10, eye);
             VU0_SCALAR_OP_CLOBBER(focus[1], "vaddx.y vf10, vf0, vf2x");
             VU0_SUB(vf10, vf10, vf11);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, view);
             VU0_LOAD_VF(vf10, eye);
             VU0_SCALAR_OP_CLOBBER(-focus[0], "vaddx.x vf10, vf0, vf2x");
@@ -2565,12 +2565,12 @@ void btlBuildShoulderActionCamera(BtlLinkedCommand *action, BtlCamState *pose, B
             VU0_STORE_VF(vf10, pose->position);
             VU0_LOAD_VF(vf11, focus);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, pose->direction);
             VU0_LOAD_VF(vf10, eye);
             VU0_SCALAR_OP_CLOBBER(focus[1], "vaddx.y vf10, vf0, vf2x");
             VU0_SUB(vf10, vf10, vf11);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, view);
             nearFit = fit * 1.2f / tanf(halfFov);
         }
@@ -2589,7 +2589,7 @@ void btlBuildShoulderActionCamera(BtlLinkedCommand *action, BtlCamState *pose, B
         VU0_LOAD_VF(vf10, eye);
         VU0_LOAD_VF(vf11, focus);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(offset);
+        SDF_VU0_GETLENGTH(offset);
         diameter = 2.0f * unitExtent;
         if (span[0] < diameter) {
             fits[2] = offset + diameter / tanf(halfFov);
@@ -2774,8 +2774,8 @@ void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
                     VU0_LOAD_VF_PTR(vf10, pose->position);
                     VU0_LOAD_VF_PTR(vf11, vectors.interpolated);
                     VU0_SUB(vf10, vf10, vf11);
-                    VU0_LENGTH_VF10(pose->distance);
-                    VU0_NORMALIZE_VF10();
+                    SDF_VU0_GETLENGTH(pose->distance);
+                    SDF_VU0_NORMALIZE();
                     VU0_STORE_VF_PTR(vf10, pose->direction);
                     btlAdjustCameraDirectionForDefaultPlane(pose);
                     return;
@@ -2829,8 +2829,8 @@ void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
     VU0_LERP_VF10(0.5f);
     VU0_STORE_VF_PTR(vf10, pose->position);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_GETLENGTH(length);
+    SDF_VU0_NORMALIZE();
     if (mode == 0) {
         VU0_ROTATE_VEC(vf10, vf10);
     }
@@ -2870,7 +2870,7 @@ void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *command, Btl
     VU0_SET_VF10_COMPONENT(y, -btlUnitGetTopY(actor));
     VU0_LOAD_VF(vf11, out);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(distance);
+    SDF_VU0_GETLENGTH(distance);
     distance += (actor->cameraRadius * actor->scale * 2.0f) /
                 tanf(out->fov * 0.5f);
     if (out->distance < distance) {
@@ -2932,8 +2932,8 @@ void btlFrameLeftmostUnitCameraPair(BtlCamState *source, BtlCamState *from,
     VU0_STORE_VF(vf10, from->position);
     VU0_LOAD_VF(vf11, point);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_GETLENGTH(length);
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, from->direction);
     from->distance = length + selected->cameraRadius * selected->scale * 3.5f /
                               tanf(fov * 0.5f);
@@ -2972,7 +2972,7 @@ void btlBuildGroupFramingCameraPose(BtlCamState *source, BtlCamState *out) {
     VU0_LOAD_VF(vf10, target);
     VU0_LOAD_VF(vf11, out->position);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, out->direction);
     fov *= 1.3333333f;
     if (span < 250.0f) {
@@ -3147,9 +3147,9 @@ void btlStepUnitHeightFramedCamera(BtlLinkedCommand *action) {
             VU0_LOAD_VF(vf10, targetPos);
             VU0_LOAD_VF(vf11, userPos);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_LENGTH_VF10(length);
+            SDF_VU0_GETLENGTH(length);
             length *= 0.5f;
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF_UNCLOBBERED(vf10, direction);
             VU0_LOAD_VF(vf10, D_00359EE0);
             effMiscQuaternionToMatrixVU();
@@ -3165,8 +3165,8 @@ void btlStepUnitHeightFramedCamera(BtlLinkedCommand *action) {
             VU0_STORE_VF_UNCLOBBERED(vf10, from->position);
             VU0_LOAD_VF(vf11, userPos);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_LENGTH_VF10(from->distance);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_GETLENGTH(from->distance);
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF_UNCLOBBERED(vf10, from->direction);
             fov = action->camera.fov * 1.3333333f;
             if (height[0] * 0.5f < length) {
@@ -3311,11 +3311,11 @@ void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *action, BtlCamState *
     VU0_LOAD_VF(vf10, targetPos);
     VU0_LOAD_VF(vf11, userPos);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_GETLENGTH(length);
     factor = ratio * (BTL_APPROACH_DIST_END - BTL_APPROACH_DIST_START);
     factor += BTL_APPROACH_DIST_START;
     length *= factor;
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, dir);
     VU0_SCALE_VF_MFC1(vf10, length);
     VU0_ADD(vf10, vf10, vf11);
@@ -4478,8 +4478,8 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, eye);
         VU0_LOAD_VF(vf11, focus);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(measuredDistance);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(measuredDistance);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
         if (measuredDistance < framingDistance + p->eyePolicy.distance)
             measuredDistance = framingDistance + p->eyePolicy.distance;
@@ -4580,7 +4580,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, eye);
         VU0_LOAD_VF(vf11, focus);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.direction);
         /* 001E7DD8: the unchanged scale value is consumed again. */
         VU0_SCALE_VF(vf10, framingDistance);
@@ -4642,8 +4642,8 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_ADD(vf10, vf10, vf11);
         VU0_LOAD_VF(vf11, focus);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(length);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.direction);
         VU0_SCALE_VF(vf10, framingDistance);
         VU0_LOAD_VF(vf11, focus);
@@ -4689,8 +4689,8 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, eye);
         VU0_LOAD_VF(vf11, out->position);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(length);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
         VU0_LOAD_VF(vf10, out->position);
         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
@@ -4710,8 +4710,8 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
         VU0_LOAD_VF(vf11, eye);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(measuredDistance);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(measuredDistance);
+        SDF_VU0_NORMALIZE();
         VU0_SCALE_VF(vf10, measuredDistance * 0.7f);
         VU0_LOAD_VF(vf11, eye);
         VU0_ADD(vf10, vf10, vf11);
@@ -4725,8 +4725,8 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, destination);
         VU0_LOAD_VF(vf11, focus);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(length);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
         VU0_LOAD_VF(vf10, eye);
         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
@@ -4745,8 +4745,8 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, eye);
         VU0_LOAD_VF(vf11, focus);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(length);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
         measuredDistance = span / tanf(halfFov);
         VU0_LOAD_VF(vf10, direction);
@@ -4851,8 +4851,8 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathEnd);
         VU0_LOAD_VF(vf11, btlCameraCursor.targetTo);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(length);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
         VU0_SCALE_VF(vf10, measuredDistance);
         VU0_LOAD_VF(vf11, btlCameraCursor.targetTo);
@@ -4894,8 +4894,8 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, btlCameraCursor.cameraFrom);
         VU0_LOAD_VF(vf11, terminalPoint);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(measuredDistance);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(measuredDistance);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
         direction[0] = 0.0f;
         measuredDistance *= 1.5f;
@@ -4968,9 +4968,9 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, actorPoint);
         VU0_LOAD_VF(vf11, alternatePoint);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(measuredDistance);
+        SDF_VU0_GETLENGTH(measuredDistance);
         measuredDistance *= 0.5f;
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
         VU0_LOAD_VF(vf10, direction);
         VU0_SCALE_VF(vf10, measuredDistance);
@@ -4981,8 +4981,8 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, focus);
         VU0_LOAD_VF(vf11, eye);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(length);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
         framingDistance += p->eyePolicy.distance;
         if (framingDistance <= 650.0f) framingDistance = 650.0f;
@@ -5069,8 +5069,8 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf11, focus);
         VU0_LOAD_VF(vf10, eye);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(length);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
         VU0_LOAD_VF(vf10, direction);
         VU0_SCALE_VF(vf10, (framingDistance + measuredDistance) + 270.0f);
@@ -5121,8 +5121,8 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, eye);
         VU0_LOAD_VF(vf11, focus);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(length);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
         VU0_LOAD_VF(vf10, direction);
         VU0_SCALE_VF(vf10, measuredDistance);
@@ -5154,8 +5154,8 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, eye);
         VU0_LOAD_VF(vf11, focus);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(length);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
         if (framingDistance < measuredDistance * 0.5f)
             framingDistance = measuredDistance; /* entire measuredDistance, not half */
@@ -5207,8 +5207,8 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, eye);
         VU0_LOAD_VF(vf11, focus);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(length);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
         VU0_LOAD_VF(vf10, p->boundsSeed);
         VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
@@ -5260,8 +5260,8 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, eye);
         VU0_LOAD_VF(vf11, focus);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(length);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
         measuredDistance = span / tanf(halfFov);
         VU0_LOAD_VF(vf10, direction);
@@ -5283,9 +5283,9 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
     VU0_LOAD_VF(vf10, focus);
     VU0_LOAD_VF(vf11, eye);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_GETLENGTH(length);
     out->distance = length;
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF_UNCLOBBERED(vf10, out->direction);
     worldAxis[1] = 0.0f;
 
@@ -5314,9 +5314,9 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, eye);
         VU0_LOAD_VF(vf11, destination);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
+        SDF_VU0_GETLENGTH(length);
         btlCameraTerminalDistance = length;
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalDirection);
         VU0_LOAD_VF(vf10, eye);
         VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalEye);
@@ -5340,9 +5340,9 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, eye);
         VU0_LOAD_VF(vf11, destination);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
+        SDF_VU0_GETLENGTH(length);
         btlCameraTerminalDistance = length;
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalDirection);
         VU0_LOAD_VF(vf10, eye);
         VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalEye);
@@ -5373,9 +5373,9 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, eye);
         VU0_LOAD_VF(vf11, destination);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
+        SDF_VU0_GETLENGTH(length);
         btlCameraTerminalDistance = length;
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalDirection);
         VU0_LOAD_VF(vf10, eye);
         VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalEye);
@@ -5399,9 +5399,9 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, eye);
         VU0_LOAD_VF(vf11, destination);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
+        SDF_VU0_GETLENGTH(length);
         btlCameraTerminalDistance = length;
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalDirection);
         VU0_LOAD_VF(vf10, eye);
         VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalEye);
@@ -5750,9 +5750,9 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
                 VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
                 VU0_LOAD_VF(vf11, oldFocus);
                 VU0_SUB(vf10, vf10, vf11);
-                VU0_LENGTH_VF10(distance);
+                SDF_VU0_GETLENGTH(distance);
                 pose->distance = distance;
-                VU0_NORMALIZE_VF10();
+                SDF_VU0_NORMALIZE();
                 VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
             }
             ++instruction;
@@ -6073,16 +6073,16 @@ s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *action, BtlCamState *pose
         VU0_LOAD_VF(vf10, pose->position);
         VU0_LOAD_VF(vf11, &plane);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(planeDistance);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(planeDistance);
+        SDF_VU0_NORMALIZE();
         scale = distance * distance - planeDistance * planeDistance;
         point.f[1] = pose->position[1];
         scale = fsqrtf(scale);
         VU0_LOAD_VF(vf10, &point);
         VU0_LOAD_VF(vf11, pose->position);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(pointDistance);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(pointDistance);
+        SDF_VU0_NORMALIZE();
         VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_LOAD_VF(vf11, &plane);
         VU0_ADD(vf10, vf10, vf11);
@@ -6094,9 +6094,9 @@ s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *action, BtlCamState *pose
     VU0_LOAD_VF(vf10, pose->position);
     VU0_LOAD_VF(vf11, &point);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(adjustedDistance);
+    SDF_VU0_GETLENGTH(adjustedDistance);
     pose->distance = adjustedDistance;
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, pose->direction);
     return 1;
 }
@@ -6221,8 +6221,8 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
         VU0_LOAD_VF(vf10, CURSOR->cameraTo);
         VU0_LOAD_VF(vf11, CURSOR->cameraFrom);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(distance);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(distance);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF(vf10, axis);
         VU0_LOAD_VF(vf10, CURSOR->cameraFrom);
         VU0_STORE_VF(vf10, point);
@@ -6242,8 +6242,8 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
         VU0_LOAD_VF(vf10, pose->position);
         VU0_LOAD_VF(vf11, endpoint);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(focusDistance);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(focusDistance);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF(vf10, pose->direction);
         break;
     }
@@ -6264,18 +6264,18 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
             VU0_LOAD_VF(vf10, CURSOR->pathStart);
             VU0_LOAD_VF(vf11, endpoint);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_LENGTH_VF10(timedFraction);
+            SDF_VU0_GETLENGTH(timedFraction);
             VU0_STORE_VF(vf10, delta);
             VU0_LOAD_VF(vf10, CURSOR->pathEnd);
             VU0_LOAD_VF(vf11, endpoint);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_LENGTH_VF10(timedFraction);
+            SDF_VU0_GETLENGTH(timedFraction);
             VU0_STORE_VF(vf10, point);
             VU0_LOAD_VF(vf10, delta);
             VU0_LOAD_VF(vf11, point);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_LENGTH_VF10(distance);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_GETLENGTH(distance);
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF_UNCLOBBERED(vf10, axis);
             distance = (distance / CURSOR->duration) *
                     ((f32)CURSOR->frame - CURSOR->startFrame);
@@ -6289,9 +6289,9 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
             VU0_LOAD_VF(vf10, position);
             VU0_LOAD_VF(vf11, endpoint);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_LENGTH_VF10(focusDistance);
+            SDF_VU0_GETLENGTH(focusDistance);
             pose->distance = focusDistance;
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, pose->direction);
         }
         break;
@@ -6313,9 +6313,9 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
         VU0_LOAD_VF(vf10, CURSOR->targetTo);
         VU0_LOAD_VF(vf11, CURSOR->targetFrom);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(pathLength);
+        SDF_VU0_GETLENGTH(pathLength);
         distance = pathLength;
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF(vf10, axis);
 
         progress = CURSOR->blendRate;
@@ -6360,8 +6360,8 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
             VU0_LOAD_VF(vf10, CURSOR->cameraTo);
             VU0_LOAD_VF(vf11, CURSOR->cameraFrom);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_LENGTH_VF10(distance);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_GETLENGTH(distance);
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, axis);
             VU0_LOAD_VF(vf10, CURSOR->cameraFrom);
             VU0_STORE_VF(vf10, point);
@@ -6381,8 +6381,8 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
         VU0_LOAD_VF(vf10, pose->position);
         VU0_LOAD_VF(vf11, endpoint);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(focusDistance);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(focusDistance);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF(vf10, pose->direction);
         if (CURSOR->kind == 4) {
             pose->distance = focusDistance;
@@ -6404,8 +6404,8 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
             VU0_LOAD_VF(vf10, CURSOR->targetTo);
             VU0_LOAD_VF(vf11, CURSOR->targetFrom);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_LENGTH_VF10(distance);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_GETLENGTH(distance);
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, axis);
             progress = CURSOR->blendRate;
             action->motionParameter = progress;
@@ -6428,8 +6428,8 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
             VU0_LOAD_VF(vf10, pose->position);
             VU0_LOAD_VF(vf11, endpoint);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_LENGTH_VF10(focusDistance);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_GETLENGTH(focusDistance);
+            SDF_VU0_NORMALIZE();
             VU0_STORE_VF(vf10, pose->direction);
         }
         break;
@@ -6545,7 +6545,7 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                     VU0_LOAD_VF(vf10, CURSOR->pathStart);
                     VU0_LOAD_VF(vf11, CURSOR->pathEnd);
                     VU0_SUB(vf10, vf10, vf11);
-                    VU0_LENGTH_VF10(length);
+                    SDF_VU0_GETLENGTH(length);
                     blend = value[0];
                     command->motionParameter = blend;
                     if (instruction->startFrame == (f32)CURSOR->frame) {
@@ -6566,8 +6566,8 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                         VU0_LOAD_VF(vf10, pose->position);
                         VU0_LOAD_VF(vf11, focus);
                         VU0_SUB(vf10, vf10, vf11);
-                        VU0_LENGTH_VF10(pose->distance);
-                        VU0_NORMALIZE_VF10();
+                        SDF_VU0_GETLENGTH(pose->distance);
+                        SDF_VU0_NORMALIZE();
                         VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
                     } else {
                         VU0_LOAD_VF(vf10, pose->direction);
@@ -6588,8 +6588,8 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                     VU0_LOAD_VF(vf10, CURSOR->pathStart);
                     VU0_LOAD_VF(vf11, CURSOR->pathEnd);
                     VU0_SUB(vf10, vf10, vf11);
-                    VU0_LENGTH_VF10(length);
-                    VU0_NORMALIZE_VF10();
+                    SDF_VU0_GETLENGTH(length);
+                    SDF_VU0_NORMALIZE();
                     VU0_STORE_VF_UNCLOBBERED(vf10, direction);
                     blend = value[0];
                     command->motionParameter = blend;
@@ -6607,8 +6607,8 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                     VU0_LOAD_VF(vf10, pose->position);
                     VU0_LOAD_VF(vf11, focus);
                     VU0_SUB(vf10, vf10, vf11);
-                    VU0_LENGTH_VF10(pose->distance);
-                    VU0_NORMALIZE_VF10();
+                    SDF_VU0_GETLENGTH(pose->distance);
+                    SDF_VU0_NORMALIZE();
                     VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
                     VU0_LOAD_VF(vf10, btlCameraTerminalDirection);
                     VU0_NEGATE_XYZ(vf10);
@@ -6641,8 +6641,8 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                         VU0_LOAD_VF(vf10, pose->position);
                         VU0_LOAD_VF(vf11, btlCameraTerminalEye);
                         VU0_SUB(vf10, vf10, vf11);
-                        VU0_LENGTH_VF10(pose->distance);
-                        VU0_NORMALIZE_VF10();
+                        SDF_VU0_GETLENGTH(pose->distance);
+                        SDF_VU0_NORMALIZE();
                         VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
                     }
                     break;
@@ -6655,9 +6655,9 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                     VU0_LOAD_VF(vf10, focus);
                     VU0_LOAD_VF(vf11, savedPosition);
                     VU0_SUB(vf10, vf10, vf11);
-                    VU0_LENGTH_VF10(blend);
+                    SDF_VU0_GETLENGTH(blend);
                     blend = blend * 4.0f / 5.0f;
-                    VU0_NORMALIZE_VF10();
+                    SDF_VU0_NORMALIZE();
                     VU0_STORE_VF_UNCLOBBERED(vf10, direction);
                     blend += 300.0f;
                     VU0_LOAD_VF(vf10, focus);
@@ -6743,8 +6743,8 @@ f32 btlMeasureBattleSideBoundsWithSeed(s32 sides, f32 *top, f32 *bottom, const f
         VU0_LOAD_VF_PTR(vf10, to);
         VU0_LOAD_VF_PTR(vf11, from);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(length);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF_PTR(vf10, direction);
     }
     first = 1;
@@ -6975,8 +6975,8 @@ f32 btlMeasureFilteredActorBounds(s32 mask, BtlUnit *included, BtlUnit *excluded
         VU0_LOAD_VF(vf10, to);
         VU0_LOAD_VF(vf11, from);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(length);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF(vf10, direction);
     }
     maxHeight = 0.0f;
@@ -7160,7 +7160,7 @@ f32 btlMeasureFilteredActorBounds(s32 mask, BtlUnit *included, BtlUnit *excluded
         VU0_LOAD_VF(vf10, edge);
         VU0_LOAD_VF(vf11, center);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(distance);
+        SDF_VU0_GETLENGTH(distance);
         if (radius <= distance) radius = distance;
         VU0_LOAD_VF(vf10, center);
         return radius;
@@ -7201,8 +7201,8 @@ f32 btlMeasureSideFilteredActorBounds(s32 mask, BtlUnit *included, BtlUnit *excl
         VU0_LOAD_VF(vf10, to);
         VU0_LOAD_VF(vf11, from);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(length);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(length);
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF(vf10, direction);
     }
     maxHeight = 0.0f;
@@ -7363,8 +7363,8 @@ f32 btlBuildProjectedActorPairBoundsVU(s32 mask, BtlUnit *first, BtlUnit *second
         VU0_LOAD_VF(vf10, lineEnd);
         VU0_LOAD_VF(vf11, lineStart);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(lineLength);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_GETLENGTH(lineLength);
+        SDF_VU0_NORMALIZE();
         /* VU-only direction scratch, immediately reloaded with no scalar read. */
         VU0_STORE_VF_UNCLOBBERED(vf10, &vectors[3]);
         VU0_LOAD_VF(vf10, &vectors[3]);
@@ -10775,9 +10775,9 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
     for (i = count - 1; i >= 0; i--) {
         unit = actors[i];
         if (!(unit->status.flags & 0x80000)) {
-            PCP_COPY_VECTOR(unit->rotation, D_0035F9B0);
+            SDF_VU0_COPYVECTOR(unit->rotation, D_0035F9B0);
         } else if (unit->status.flags & 0xE0) {
-            PCP_COPY_VECTOR(unit->rotation, D_0035F9B0);
+            SDF_VU0_COPYVECTOR(unit->rotation, D_0035F9B0);
         } else {
             btlUnitGetMuzzlePosVU(unit);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
@@ -10809,7 +10809,7 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
             position[1] = center[1];
             position[2] = center[2] - sdfCos(adjustedAngle) * radius;
         }
-        PCP_COPY_VECTOR(unit->position, position);
+        SDF_VU0_COPYVECTOR(unit->position, position);
         btlSetUnitPosition(unit, position);
         angle += step;
     }
@@ -10867,12 +10867,12 @@ s32 btlArrangeFormationSlots(s32 filter) {
         maxSpacing = 75.0f;
         minSpacing = 75.0f;
         radius = -800.0f;
-        PCP_COPY_VECTOR(rotation, D_0035F9C0);
+        SDF_VU0_COPYVECTOR(rotation, D_0035F9C0);
     } else {
         radius = 1000.0f;
         maxSpacing = 100.0f;
         minSpacing = 50.0f;
-        PCP_COPY_VECTOR(rotation, D_0035F9D0);
+        SDF_VU0_COPYVECTOR(rotation, D_0035F9D0);
     }
     if (count >= 2) {
         spacing = 1200.0f;
@@ -10918,9 +10918,9 @@ s32 btlArrangeFormationSlots(s32 filter) {
         position[0] = sdfSin(angle) * radius;
         position[1] = 0.0f;
         position[2] = (distance - sdfCos(angle) * radius) * direction;
-        PCP_COPY_VECTOR(unit->position, position);
+        SDF_VU0_COPYVECTOR(unit->position, position);
         btlSetUnitPosition(unit, position);
-        PCP_COPY_VECTOR(unit->rotation, rotation);
+        SDF_VU0_COPYVECTOR(unit->rotation, rotation);
         angle += halfAngle;
         btlSetUnitRotation(unit, rotation);
         angle += spacingAngle;
@@ -10936,7 +10936,7 @@ extern s32 btlExpandPartyFormationAroundCenter(f32 *);
 s32 btlRepositionPartyAroundBattleCenter(void) {
     f32 vector[4];
     u8 *context = (u8 *)btlGetRuntime();
-    PCP_COPY_VECTOR(vector, context);
+    SDF_VU0_COPYVECTOR(vector, context);
     return btlExpandPartyFormationAroundCenter(vector);
 }
 
@@ -11185,7 +11185,7 @@ void btlAlignTripleFormationWithTarget(BtlTask *link, BtlUnit *first, BtlUnit *s
         VU0_STORE_VF_UNCLOBBERED(vf10, targetPosition);
         VU0_LOAD_VF(vf11, position);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_GET_VF10_X(offsetX);
+        SDF_VU0_GETVECTOR_X(offsetX);
         targetPosition[2] -= target->reach * target->scale;
         offsetZ = -(500.0f - (targetPosition[2] - position[2]));
         if (*(u32 *)(runtime + 0x1F8) & 0x200) {
@@ -11286,7 +11286,7 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
         VU0_LOAD_VF(vf11, targetPosition);
         VU0_SUB(vf10, vf10, vf11);
         VU0_SET_VF10_COMPONENT(y, flatY);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_SCALAR_OP_CLOBBER(distance, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_LOAD_VF(vf11, targetPosition);
         VU0_ADD(vf10, vf10, vf11);

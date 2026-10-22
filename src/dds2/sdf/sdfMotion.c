@@ -614,17 +614,17 @@ void sdfMotCLBK_modelVisibleInitBlend(SdfMotionKeyFlagBinding *binding) {
 
 void sdfMotCLBK_modelPosInitBlend(void *bindingData) {
     SdfMotionDrawBinding *binding = bindingData;
-    PCP_COPY_VECTOR(binding->capturedVector, binding->node->translation);
+    SDF_VU0_COPYVECTOR(binding->capturedVector, binding->node->translation);
 }
 
 void sdfMotCLBK_modelRotInitBlend(void *bindingData) {
     SdfMotionDrawBinding *binding = bindingData;
-    PCP_COPY_VECTOR(binding->capturedVector, binding->node->quaternion);
+    SDF_VU0_COPYVECTOR(binding->capturedVector, binding->node->quaternion);
 }
 
 void sdfMotCLBK_modelScaleInitBlend(void *bindingData) {
     SdfMotionDrawBinding *binding = bindingData;
-    PCP_COPY_VECTOR(binding->capturedVector, binding->node->scale);
+    SDF_VU0_COPYVECTOR(binding->capturedVector, binding->node->scale);
 }
 
 s32 sdfMotGenMatNode(void *handlerContext, s32 handlerIndex) {

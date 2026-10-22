@@ -293,7 +293,7 @@ void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction) {
         if (blendFrames == 0) {
             dds3DrawFlag &= ~blendFlag;
             VU0_LOAD_VF(vf10, direction);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_CLEAR_W(vf10);
             VU0_STORE_VF(vf10, D_00324770[lightIndex] + 4);
         } else {
@@ -302,11 +302,11 @@ void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction) {
             dds3DrawFlag |= blendFlag;
             VU0_LOAD_VF(vf10, direction);
             VU0_CLEAR_W(vf10);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_MOVE_VF(vf11, vf10);
             VU0_LOAD_VF(vf10, D_00324770[lightIndex] + 4);
             VU0_CLEAR_W(vf10);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             /* No memory clobber here: retail recomputes the slot offset after the call. */
             VU0_STORE_VF_UNCLOBBERED(vf10, D_003C2BC0[lightIndex]);
             dds3RotationArc();
@@ -491,10 +491,10 @@ void dds3SceneLightUpdateFirst(void) {
         VU0_SCALE_VF(vf10, 1.0f - ratio);
         VU0_SCALAR_OP(ratio, "vmulx.xyzw vf11, vf11, vf2x");
         VU0_ADD(vf10, vf10, vf11);
-        VU0_GET_VF10_X(kwlnDrawVector.fogNear);
-        VU0_GET_VF10_Y(kwlnDrawVector.fogFar);
-        VU0_GET_VF10_Z(kwlnDrawVector.depthNear);
-        VU0_GET_VF10_W(kwlnDrawVector.depthFar);
+        SDF_VU0_GETVECTOR_X(kwlnDrawVector.fogNear);
+        SDF_VU0_GETVECTOR_Y(kwlnDrawVector.fogFar);
+        SDF_VU0_GETVECTOR_Z(kwlnDrawVector.depthNear);
+        SDF_VU0_GETVECTOR_W(kwlnDrawVector.depthFar);
         if (D_003BD6F8 >= D_003BD6FA) {
             dds3DrawFlag &= ~EVT_DRAW_VECTOR_BLEND_FLAG;
         }

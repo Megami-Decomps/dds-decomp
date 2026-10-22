@@ -177,7 +177,7 @@ void sdfCoreDrawSetLight(u32 matrixAddress) {
 void sdfCoreDrawSetFog(u8 *sourceObject) {
     if (D_003BDA2C != (u32)sourceObject) {
         D_003BDA2C = (u32)sourceObject;
-        PCP_COPY_VECTOR(&D_003F9890, sourceObject + 0x10);
+        SDF_VU0_COPYVECTOR(&D_003F9890, sourceObject + 0x10);
     }
 }
 
@@ -429,7 +429,7 @@ void sdf3DMakeLightParallelPacket(SdfLightingPacketStorage *packet, SdfLightSour
                 first = light;
             }
             VU0_LOAD_VF(vf10, light[1]);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_SCALE_VF(vf10, -1.0f);
             VU0_STORE_VF(vf10, direction);
             packet->normal[0][i] = direction[0];
@@ -440,14 +440,14 @@ void sdf3DMakeLightParallelPacket(SdfLightingPacketStorage *packet, SdfLightSour
             VU0_STORE_VF(vf10, packet->color[i]);
         }
     }
-    PCP_COPY_VECTOR(packet->normal[3], packet->color[0]);
+    SDF_VU0_COPYVECTOR(packet->normal[3], packet->color[0]);
     VU0_STORE_VF(vf11, packet->combinedColor);
     if (first == NULL) {
         EE_MMI_UNIT_MATRIX(packet->basis);
         return;
     }
     VU0_LOAD_VF(vf10, first[1]);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_CLEAR_W(vf10);
     VU0_MOVE_VF(vf30, vf10);
     VU0_STORE_VF(vf10, axis);
@@ -461,7 +461,7 @@ void sdf3DMakeLightParallelPacket(SdfLightingPacketStorage *packet, SdfLightSour
         VU0_LOAD_VF(vf11, D_00398390);
     }
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_CLEAR_W(vf10);
     VU0_MOVE_VF(vf28, vf10);
     VU0_MOVE_VF(vf11, vf10);
@@ -472,11 +472,11 @@ void sdf3DMakeLightParallelPacket(SdfLightingPacketStorage *packet, SdfLightSour
     VU0_MOVE_VF(vf31, vf0);
     DiagMatrix();
     VU0_LOAD_VF(vf10, first[1]);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfCameraTm + 8);
     VU0_ADD(vf10, vf10, vf11);
     VU0_NEGATE_XYZ(vf10);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(packet->basis);
 }

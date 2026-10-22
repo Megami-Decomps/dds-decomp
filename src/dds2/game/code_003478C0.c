@@ -313,7 +313,7 @@ SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s3
         VU0_TRANSFORM_POINT(vf11, vf11);
         VU0_CLIPW_XYZ(vf10);
         VU0_CLIPW_XYZ(vf11);
-        VU0_READ_CLIP_FLAGS_WAIT5(clipFlags);
+        SDF_VU0_CLIPTESTWAIT(clipFlags);
         firstClip = (clipFlags >> 6) & 0x3F;
         secondClip = clipFlags & 0x3F;
         if ((firstClip & secondClip) != 0 || (firstClip & 0x20) != 0 || (secondClip & 0x20) != 0) {
@@ -342,7 +342,7 @@ SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s3
                         break;
                     }
                     VU0_CLIP_SEGMENT_UPDATE(vf10, vf8);
-                    VU0_READ_CLIP_FLAGS_WAIT5(firstClip);
+                    SDF_VU0_CLIPTESTWAIT(firstClip);
                     firstClip &= 0x3F;
                     if (firstClip & secondClip) {
                         break;
@@ -369,7 +369,7 @@ SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s3
                         break;
                     }
                     VU0_CLIP_SEGMENT_UPDATE(vf11, vf9);
-                    VU0_READ_CLIP_FLAGS_WAIT5(secondClip);
+                    SDF_VU0_CLIPTESTWAIT(secondClip);
                     secondClip &= 0x3F;
                     if (firstClip & secondClip) {
                         break;

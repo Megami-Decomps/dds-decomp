@@ -272,7 +272,7 @@ one at a time with only the declarations they need, keeping a function only if
 `check_unit` stays clean. ee-gcc's CONTEXT effect (see `docs/idioms.md`) makes a
 bulk port flip neighbouring functions, so this recovers the ports that a single
 bad neighbour would otherwise undo. It also adds `#include "pcp_vu0.h"` /
-`"fpu.h"` when a kept body uses `PCP_COPY_VECTOR` / `fsqrtf`.
+`"fpu.h"` when a kept body uses `SDF_VU0_COPYVECTOR` / `fsqrtf`.
 
 ```sh
 python tools/shared_funcs.py port --units effPCPMisc --near --greedy --fix-immediates --keep-types

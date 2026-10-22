@@ -76,7 +76,7 @@ void effPCPThunderSpherePolyDelete(EffThunderVectorWork *work) {
 
 /* vu0 routine: copy the entire quadword, including its fourth component. */
 void effPCPThunderSpherePolySetPosition(void *destination, void *source) {
-    PCP_COPY_VECTOR(destination, source);
+    SDF_VU0_COPYVECTOR(destination, source);
 }
 
 /* Set the packed modulation color applied to every vector cell. */
@@ -111,7 +111,7 @@ void effPCPThunderSphereInit(EffThunderVectorWork *work, s32 index) {
     scratchVector[1] = 0;
     scratchVector[2] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
     VU0_LOAD_VF(vf10, scratchVector);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, scratchVector);
     scratchVector[1] = work->head.vector.heightScale * EFF_THUNDER_HALF_SCALE * ((dds3GetRandFloatA(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN);
     cell->placementVector[0] = scratchVector[0];
@@ -121,7 +121,7 @@ void effPCPThunderSphereInit(EffThunderVectorWork *work, s32 index) {
     scratchVector[1] = 1.0f;
     scratchVector[2] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_AXIS_JITTER;
     VU0_LOAD_VF(vf10, scratchVector);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, scratchVector);
     cell->rotationAxis[0] = scratchVector[0];
     cell->rotationAxis[1] = scratchVector[1];
@@ -178,14 +178,14 @@ void effPCPThunderSphereRotate(EffThunderVectorWork *work, s32 index) {
     placement[0] = source->placementVector[0];
     placement[1] = 0.0f;
     placement[2] = source->placementVector[2];
-    PCP_COPY_VECTOR(origin, work->head.vector.origin);
+    SDF_VU0_COPYVECTOR(origin, work->head.vector.origin);
     origin[1] += source->placementVector[1];
 
     for (i = 0; i < count; i++) {
         position[0] = origin[0] + placement[0] * radius;
         position[1] = origin[1] + placement[1] * radius;
         position[2] = origin[2] + placement[2] * radius;
-        PCP_COPY_VECTOR(axis, originalAxis);
+        SDF_VU0_COPYVECTOR(axis, originalAxis);
         rotation[0] = dds3GetRandFloatA(effDefaultRandomState) * (75.0f * (EFF_THUNDER_HALF_TURN / 180.0f));
         rotation[1] = dds3GetRandFloatA(effDefaultRandomState) * (75.0f * (EFF_THUNDER_HALF_TURN / 180.0f));
         rotation[2] = dds3GetRandFloatA(effDefaultRandomState) * (75.0f * (EFF_THUNDER_HALF_TURN / 180.0f));
@@ -377,7 +377,7 @@ EffThunderVectorWork *effThunderSpawnIndexedVector(void *parameters) {
 
 /* vu0 routine: copy the entire quadword, including its fourth component. */
 void effPCPThunderSpherePolyLowSetPosition(void *destination, void *source) {
-    PCP_COPY_VECTOR(destination, source);
+    SDF_VU0_COPYVECTOR(destination, source);
 }
 
 /* Set the shared packed modulation color, not an individual cell's sampled color. */
@@ -408,7 +408,7 @@ void effPCPThunderSphereLowInit(EffThunderVectorWork *work, s32 index) {
     scratchVector[1] = 0;
     scratchVector[2] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
     VU0_LOAD_VF(vf10, scratchVector);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, scratchVector);
     scratchVector[1] = work->head.vector.heightScale * EFF_THUNDER_HALF_SCALE * ((dds3GetRandFloatA(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN);
     cell->placementVector[0] = scratchVector[0];
@@ -418,7 +418,7 @@ void effPCPThunderSphereLowInit(EffThunderVectorWork *work, s32 index) {
     scratchVector[1] = 1.0f;
     scratchVector[2] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_AXIS_JITTER;
     VU0_LOAD_VF(vf10, scratchVector);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, scratchVector);
     cell->rotationAxis[0] = scratchVector[0];
     cell->rotationAxis[1] = scratchVector[1];
@@ -469,14 +469,14 @@ void effPCPThunderSphereLowRotate(EffThunderVectorWork *work, s32 index) {
     placement[0] = source->placementVector[0];
     placement[1] = 0.0f;
     placement[2] = source->placementVector[2];
-    PCP_COPY_VECTOR(origin, work->head.vector.origin);
+    SDF_VU0_COPYVECTOR(origin, work->head.vector.origin);
     origin[1] += source->placementVector[1];
 
     for (i = 0; i < count; i++) {
         position[0] = origin[0] + placement[0] * radius;
         position[1] = origin[1] + placement[1] * radius;
         position[2] = origin[2] + placement[2] * radius;
-        PCP_COPY_VECTOR(axis, originalAxis);
+        SDF_VU0_COPYVECTOR(axis, originalAxis);
         rotation[0] = dds3GetRandFloatA(effDefaultRandomState) * (EFF_THUNDER_HALF_TURN * 0.5f);
         rotation[1] = dds3GetRandFloatA(effDefaultRandomState) * (EFF_THUNDER_HALF_TURN * 0.5f);
         rotation[2] = dds3GetRandFloatA(effDefaultRandomState) * (EFF_THUNDER_HALF_TURN * 0.5f);
@@ -641,7 +641,7 @@ void effThunderReleaseSparkWork(EffThunderSparkWork *work) {
 
 /* vu0 routine: copy one whole quadword, including its fourth component. */
 void effThunderCopySparkVector(void *destination, void *source) {
-    PCP_COPY_VECTOR(destination, source);
+    SDF_VU0_COPYVECTOR(destination, source);
 }
 
 /* Set the spark work's packed modulation color, separate from the age fade. */
@@ -707,7 +707,7 @@ void effThunderBuildSparkStripCell(EffThunderSparkWork *work, s32 index) {
     VU0_LOAD_VF(vf10, work->head.position);
     VU0_LOAD_VF(vf11, work->head.loweredPosition);
     VU0_SUB_EXTENDED(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(distance);
+    SDF_VU0_GETLENGTH(distance);
     VU0_NORMALIZE_VF10_EXTENDED();
     VU0_STORE_VF_UNCLOBBERED(vf10, direction);
     distance /= work->head.halfLife;
@@ -722,7 +722,7 @@ void effThunderBuildSparkStripCell(EffThunderSparkWork *work, s32 index) {
     VU0_STORE_VF_UNCLOBBERED(vf10, side);
     phase = dds3GetRandFloatA(effDefaultRandomState) * (EFF_THUNDER_HALF_TURN * 2.0f);
     cycle = phase - (EFF_THUNDER_HALF_TURN * 2.0f);
-    PCP_COPY_VECTOR(position, work->head.loweredPosition);
+    SDF_VU0_COPYVECTOR(position, work->head.loweredPosition);
     currentWave = amplitude * sdfSin(phase);
     VEC3_SPLAT(waveScale, currentWave);
     VU0_LOAD_VF(vf10, side);
@@ -768,8 +768,8 @@ void effThunderBuildSparkStripCell(EffThunderSparkWork *work, s32 index) {
         VU0_SUB_EXTENDED(vf11, vf11, vf10);
         VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 1);
         vertices += 2;
-        PCP_COPY_VECTOR(previousSide, basis);
-        PCP_COPY_VECTOR(position, next);
+        SDF_VU0_COPYVECTOR(previousSide, basis);
+        SDF_VU0_COPYVECTOR(position, next);
         VU0_LOAD_VF(vf10, basis);
         VU0_LOAD_VF(vf11, width);
         VU0_MUL_EXTENDED(vf10, vf10, vf11);
@@ -867,7 +867,7 @@ void effThunderUpdateOrbitingSparks(EffThunderSparkWork *work) {
     u32 color;
 
     tintColor = work->tintColor;
-    PCP_COPY_VECTOR(origin, work->head.origin);
+    SDF_VU0_COPYVECTOR(origin, work->head.origin);
     count = work->head.sparkCount;
     spark = work->sparks;
     for (i = 0; i < count; i++, spark++) {
@@ -1046,7 +1046,7 @@ void effPCP_ThunderPolyPartRefresh(EffThunderFragmentWork *work, s32 index) {
     VU0_LOAD_VF(vf10, work->head.end);
     VU0_LOAD_VF(vf11, work->head.start);
     VU0_SUB_EXTENDED(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(distance);
+    SDF_VU0_GETLENGTH(distance);
     VU0_NORMALIZE_VF10_EXTENDED();
     VU0_STORE_VF_UNCLOBBERED(vf10, direction);
     distance /= work->head.halfLife;
@@ -1061,7 +1061,7 @@ void effPCP_ThunderPolyPartRefresh(EffThunderFragmentWork *work, s32 index) {
     VU0_STORE_VF_UNCLOBBERED(vf10, side);
     phase = dds3GetRandFloatA(effDefaultRandomState) * (EFF_THUNDER_HALF_TURN * 2.0f);
     cycle = phase - (EFF_THUNDER_HALF_TURN * 2.0f);
-    PCP_COPY_VECTOR(position, work->head.start);
+    SDF_VU0_COPYVECTOR(position, work->head.start);
     currentWave = amplitude * sdfSin(phase);
     VEC3_SPLAT(waveScale, currentWave);
     VU0_LOAD_VF(vf10, side);
@@ -1122,8 +1122,8 @@ void effPCP_ThunderPolyPartRefresh(EffThunderFragmentWork *work, s32 index) {
         VU0_SUB_EXTENDED(vf11, vf11, vf10);
         VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 4);
         vertices += 5;
-        PCP_COPY_VECTOR(previousSide, basis);
-        PCP_COPY_VECTOR(position, next);
+        SDF_VU0_COPYVECTOR(previousSide, basis);
+        SDF_VU0_COPYVECTOR(position, next);
         VU0_LOAD_VF(vf10, position);
         VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 2);
         VU0_LOAD_VF(vf10, basis);
@@ -1353,7 +1353,7 @@ void effPCP_ThunderPolyLowPartRefresh(EffThunderFragmentWork *work, s32 index) {
     VU0_LOAD_VF(vf10, work->head.end);
     VU0_LOAD_VF(vf11, work->head.start);
     VU0_SUB_EXTENDED(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(distance);
+    SDF_VU0_GETLENGTH(distance);
     VU0_NORMALIZE_VF10_EXTENDED();
     VU0_STORE_VF_UNCLOBBERED(vf10, direction);
     distance /= work->head.halfLife;
@@ -1368,7 +1368,7 @@ void effPCP_ThunderPolyLowPartRefresh(EffThunderFragmentWork *work, s32 index) {
     VU0_STORE_VF_UNCLOBBERED(vf10, side);
     phase = dds3GetRandFloatA(effDefaultRandomState) * (EFF_THUNDER_HALF_TURN * 2.0f);
     cycle = phase - (EFF_THUNDER_HALF_TURN * 2.0f);
-    PCP_COPY_VECTOR(position, work->head.start);
+    SDF_VU0_COPYVECTOR(position, work->head.start);
     currentWave = amplitude * sdfSin(phase);
     VEC3_SPLAT(waveScale, currentWave);
     VU0_LOAD_VF(vf10, side);
@@ -1427,8 +1427,8 @@ void effPCP_ThunderPolyLowPartRefresh(EffThunderFragmentWork *work, s32 index) {
         VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 2);
         coreVertices += 2;
         vertices += 3;
-        PCP_COPY_VECTOR(previousSide, basis);
-        PCP_COPY_VECTOR(position, next);
+        SDF_VU0_COPYVECTOR(previousSide, basis);
+        SDF_VU0_COPYVECTOR(position, next);
         VU0_LOAD_VF(vf10, basis);
         VU0_LOAD_VF(vf11, width);
         VU0_MUL_EXTENDED(vf10, vf10, vf11);
@@ -1581,7 +1581,7 @@ void effPCP_ThunderRadiatePolyDelete(EffThunderCellWork *work) {
 
 /* vu0 routine: copy the entire quadword, not only its XYZ components. */
 void effPCP_ThunderRadiatePolySetPosition(void *destination, void *source) {
-    PCP_COPY_VECTOR(destination, source);
+    SDF_VU0_COPYVECTOR(destination, source);
 }
 
 /* Store the opaque work word; no C consumer establishes a color/control interpretation. */
@@ -1649,7 +1649,7 @@ void effPCP_ThunderRadiatePolyPartRefresh(EffThunderCellWork *work, s32 index) {
     VU0_NORMALIZE_VF10_EXTENDED();
     VU0_STORE_VF_UNCLOBBERED(vf10, side);
     distance = work->head.length / work->head.halfLife;
-    PCP_COPY_VECTOR(position, work->head.origin);
+    SDF_VU0_COPYVECTOR(position, work->head.origin);
 
     for (i = 0; i < segments; i++) {
         VU0_LOAD_VF(vf10, direction);
@@ -1891,7 +1891,7 @@ void effPCP_ThunderPolyListPartRefresh(EffThunderFragmentWork *work, s32 index, 
     VU0_LOAD_VF(vf10, work->head.end);
     VU0_LOAD_VF(vf11, seed + 3);
     VU0_SUB_EXTENDED(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(distance);
+    SDF_VU0_GETLENGTH(distance);
     VU0_NORMALIZE_VF10_EXTENDED();
     VU0_STORE_VF_UNCLOBBERED(vf10, direction);
     distance /= work->head.halfLife;
@@ -1906,7 +1906,7 @@ void effPCP_ThunderPolyListPartRefresh(EffThunderFragmentWork *work, s32 index, 
     VU0_STORE_VF_UNCLOBBERED(vf10, side);
     phase = dds3GetRandFloatA(effDefaultRandomState) * (EFF_THUNDER_HALF_TURN * 2.0f);
     cycle = phase - (EFF_THUNDER_HALF_TURN * 2.0f);
-    PCP_COPY_VECTOR(position, seed + 3);
+    SDF_VU0_COPYVECTOR(position, seed + 3);
     currentWave = amplitude * sdfSin(phase);
     VEC3_SPLAT(waveScale, currentWave);
     VU0_LOAD_VF(vf10, side);
@@ -1969,15 +1969,15 @@ void effPCP_ThunderPolyListPartRefresh(EffThunderFragmentWork *work, s32 index, 
             VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 4);
             vertices += 5;
         } else {
-            PCP_COPY_VECTOR(vertices, seed);
-            PCP_COPY_VECTOR(vertices + 1, seed + 1);
-            PCP_COPY_VECTOR(vertices + 2, seed + 2);
-            PCP_COPY_VECTOR(vertices + 3, seed + 3);
-            PCP_COPY_VECTOR(vertices + 4, seed + 4);
+            SDF_VU0_COPYVECTOR(vertices, seed);
+            SDF_VU0_COPYVECTOR(vertices + 1, seed + 1);
+            SDF_VU0_COPYVECTOR(vertices + 2, seed + 2);
+            SDF_VU0_COPYVECTOR(vertices + 3, seed + 3);
+            SDF_VU0_COPYVECTOR(vertices + 4, seed + 4);
             vertices += 5;
         }
-        PCP_COPY_VECTOR(previousSide, basis);
-        PCP_COPY_VECTOR(position, next);
+        SDF_VU0_COPYVECTOR(previousSide, basis);
+        SDF_VU0_COPYVECTOR(position, next);
         VU0_LOAD_VF(vf10, position);
         VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 2);
         VU0_LOAD_VF(vf10, basis);
@@ -2072,8 +2072,8 @@ void effPCP_ThunderPolyListDraw(EffThunderGroup *group) {
 
     for (; i < segmentCount; i++) {
         work = group->handles[i];
-        PCP_COPY_VECTOR(work->head.start, points[0]);
-        PCP_COPY_VECTOR(work->head.end, points[1]);
+        SDF_VU0_COPYVECTOR(work->head.start, points[0]);
+        SDF_VU0_COPYVECTOR(work->head.end, points[1]);
         points++;
         fragmentCount = work->head.fragmentCount;
         color = effMagaCylinderCalcColor(group->color, work->color);
@@ -2304,7 +2304,7 @@ void effThunderUpdateCurveGroup(EffPcpThunderGroup *group) {
     mode = group->params.mode;
     color = group->tintColor;
     slot = group->slots;
-    PCP_COPY_VECTOR(origin, group->params.origin);
+    SDF_VU0_COPYVECTOR(origin, group->params.origin);
     place.payload[4] = 0.0f;
     place.payload[5] = 0.0f;
     place.payload[6] = 0.0f;
@@ -2339,7 +2339,7 @@ void effThunderUpdateCurveGroup(EffPcpThunderGroup *group) {
             VU0_LOAD_VF(vf10, end);
             VU0_LOAD_VF(vf11, start);
             VU0_SUB_EXTENDED(vf10, vf10, vf11);
-            VU0_LENGTH_VF10(distance);
+            SDF_VU0_GETLENGTH(distance);
             VU0_NORMALIZE_VF10_EXTENDED();
             VU0_STORE_VF_UNCLOBBERED(vf10, direction);
             switch (mode) {
@@ -2595,7 +2595,7 @@ void effThunderUpdateCurveGroup(EffPcpThunderGroup *group) {
                     VU0_MOVE_VF_EXTENDED(vf10, vf12);
                     VU0_SUB_EXTENDED(vf11, vf11, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf11, ribbon[2]);
-                    PCP_COPY_VECTOR(previous, point);
+                    SDF_VU0_COPYVECTOR(previous, point);
                     dds3BezierTrackPolySetVC(slot->fragment, (u128 *)ribbon);
                 }
                 effPCPBezierEval(&slot->curve, point);
@@ -2626,9 +2626,9 @@ void effThunderUpdateCurveGroup(EffPcpThunderGroup *group) {
                 slot->position[0] = point[0];
                 slot->position[1] = point[1];
                 slot->position[2] = point[2];
-                PCP_COPY_VECTOR(cap[0], ribbon[1]);
-                PCP_COPY_VECTOR(cap[1], ribbon[0]);
-                PCP_COPY_VECTOR(cap[7], ribbon[2]);
+                SDF_VU0_COPYVECTOR(cap[0], ribbon[1]);
+                SDF_VU0_COPYVECTOR(cap[1], ribbon[0]);
+                SDF_VU0_COPYVECTOR(cap[7], ribbon[2]);
                 oppositeSide[0] = -side[0];
                 oppositeSide[1] = -side[1];
                 oppositeSide[2] = -side[2];
@@ -2691,7 +2691,7 @@ void effThunderUpdateCurveGroup(EffPcpThunderGroup *group) {
 
 
 void effCopyResourceGroupVector(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effThunderSetCurveGroupTint(s32 work, u32 value) {
@@ -2794,16 +2794,16 @@ void dds3BezierTrackPolySetVC(EffPcpThunderFragmentResources *history, u128 *sou
     u128 *points = history->points;
     s32 count;
 
-    PCP_COPY_VECTOR(&points[position], source);
-    PCP_COPY_VECTOR(&points[position + 1], source + 1);
-    PCP_COPY_VECTOR(&points[position + 2], source + 2);
+    SDF_VU0_COPYVECTOR(&points[position], source);
+    SDF_VU0_COPYVECTOR(&points[position + 1], source + 1);
+    SDF_VU0_COPYVECTOR(&points[position + 2], source + 2);
     position += 3;
     count = history->pointCapacity;
     history->nextPointWriteIndex = position;
     if (position == count) {
-        PCP_COPY_VECTOR(&points[0], source);
-        PCP_COPY_VECTOR(&points[1], source + 1);
-        PCP_COPY_VECTOR(&points[2], source + 2);
+        SDF_VU0_COPYVECTOR(&points[0], source);
+        SDF_VU0_COPYVECTOR(&points[1], source + 1);
+        SDF_VU0_COPYVECTOR(&points[2], source + 2);
         history->nextPointWriteIndex = 3;
     }
     if (history->activePointCount < count - 3) {

@@ -322,7 +322,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
         VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
         VU0_LOAD_VF(vf11, baseline);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(distance);
+        SDF_VU0_GETLENGTH(distance);
         if (distance < unit->reach * unit->scale * 4.0f) {
             candidate[0] = baseline[0];
             candidate[2] = baseline[2];

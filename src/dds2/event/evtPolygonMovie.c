@@ -203,10 +203,10 @@ void evtHokanSceneFog(s32 enable, f32 t, EvtBlendVecColor *a, EvtBlendVecColor *
     }
     VU0_SCALE_VF(vf10, t);
     VU0_ADD(vf10, vf10, vf11);
-    VU0_GET_VF10_X(out->vec[0]);
-    VU0_GET_VF10_Y(out->vec[1]);
-    VU0_GET_VF10_Z(out->vec[2]);
-    VU0_GET_VF10_W(out->vec[3]);
+    SDF_VU0_GETVECTOR_X(out->vec[0]);
+    SDF_VU0_GETVECTOR_Y(out->vec[1]);
+    SDF_VU0_GETVECTOR_Z(out->vec[2]);
+    SDF_VU0_GETVECTOR_W(out->vec[3]);
     if (a != NULL) {
         eeUnpackRGBAWordFloat(a->color, 1.0f / 128.0f);
     } else {

@@ -3057,8 +3057,8 @@ void btlCommandTaskReleaseActor(s32 task) {
             }
             {
                 u8 *model = (u8 *)*(s32 *)(task + 0x18);
-                PCP_COPY_VECTOR(model + 0x60, model + 0x30);
-                PCP_COPY_VECTOR(model + 0x70, model + 0x40);
+                SDF_VU0_COPYVECTOR(model + 0x60, model + 0x30);
+                SDF_VU0_COPYVECTOR(model + 0x70, model + 0x40);
                 *(s32 *)(model + 0x2F0) = -1;
             }
             *(u32 *)(task + 0x18) = 0;

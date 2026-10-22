@@ -50,9 +50,9 @@ s32 dds3UpdateCameraObject(dds3Basic_t *camera) {
         dds3SetRadiusPoseSet(inner);
     }
     if (dds3GetActiveCameraSceneBasic(dds3GetControlScene()) == camera) {
-        PCP_COPY_VECTOR(sdfViewTargetVector, &inner->position);
-        PCP_COPY_VECTOR(aViewTarget, &data->worldEye);
-        PCP_COPY_VECTOR(aViewDown, &data->worldUp);
+        SDF_VU0_COPYVECTOR(sdfViewTargetVector, &inner->position);
+        SDF_VU0_COPYVECTOR(aViewTarget, &data->worldEye);
+        SDF_VU0_COPYVECTOR(aViewDown, &data->worldUp);
         if (data->fovUpdatePending & 1) {
             dds3SetScreenFovy(data->fieldOfView);
             data->fovUpdatePending &= ~1;
@@ -122,8 +122,8 @@ dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 key, void *targetPosition, voi
     dds3SetRotPoseSet(camera, rotation);
     dds3SetPosPoseSet(camera, targetPosition);
     dds3SetRadiusPoseSet(camera->inner);
-    PCP_COPY_VECTOR(&data->localUp, &initialUp);
-    PCP_COPY_VECTOR(&data->localEyeOffset, &initialEyeOffset);
+    SDF_VU0_COPYVECTOR(&data->localUp, &initialUp);
+    SDF_VU0_COPYVECTOR(&data->localEyeOffset, &initialEyeOffset);
     MakeCamera(camera);
     return camera;
 }
@@ -137,8 +137,8 @@ dds3Basic_t *dds3AddCameraObjectBasicTypeLookAt(s32 key, void *targetPosition, u
     data->eyeIsRelative = 0;
     dds3SetPosPoseSet(obj, targetPosition);
     dds3SetRadiusPoseSet(obj->inner);
-    PCP_COPY_VECTOR(&data->localUp, localUp);
-    PCP_COPY_VECTOR(&data->worldEye, worldEye);
+    SDF_VU0_COPYVECTOR(&data->localUp, localUp);
+    SDF_VU0_COPYVECTOR(&data->worldEye, worldEye);
     MakeCamera(obj);
     return obj;
 }
@@ -153,10 +153,10 @@ dds3Basic_t *dds3AddCameraObjectBasic(s32 key, f32 fieldOfView, void *targetPosi
     data->eyeIsRelative = eyeIsRelative;
     dds3SetPosPoseSet(obj, targetPosition);
     dds3SetRadiusPoseSet(obj->inner);
-    PCP_COPY_VECTOR(&data->localUp, localUp);
-    PCP_COPY_VECTOR(&data->localEyeOffset, eyeVector);
+    SDF_VU0_COPYVECTOR(&data->localUp, localUp);
+    SDF_VU0_COPYVECTOR(&data->localEyeOffset, eyeVector);
     if (eyeIsRelative == 0) {
-        PCP_COPY_VECTOR(&data->worldEye, eyeVector);
+        SDF_VU0_COPYVECTOR(&data->worldEye, eyeVector);
     }
     MakeCamera(obj);
     return obj;
@@ -173,7 +173,7 @@ void dds3LoadObjectMatrixPointerIntoVu(dds3Basic_t *camera) {
 
 /* Copy the supplied vector to the camera's world-space eye position. */
 void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *camera, u128 *worldEye) {
-    PCP_COPY_VECTOR(&((CameraData *)camera->data)->worldEye, worldEye);
+    SDF_VU0_COPYVECTOR(&((CameraData *)camera->data)->worldEye, worldEye);
 }
 
 /* Return the camera's world-space eye vector in vf10. */

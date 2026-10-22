@@ -34,7 +34,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
             VU0_STORE_VF(vf10, pathVector);
             dds3SetPosPoseSet(targetObject, (u128 *)pathVector);
             if (((u8 *)&targetObject->kindTag)[3] == DDS3_MOVER_POSITION_COPY_KIND) {
-                PCP_COPY_VECTOR(&((EffectTransformData *)targetObject->data)->position, pathVector);
+                SDF_VU0_COPYVECTOR(&((EffectTransformData *)targetObject->data)->position, pathVector);
             }
         }
         if (slotResource->path->counter.flags & DDS3_PATH_ROTATION_CHANNEL) {
