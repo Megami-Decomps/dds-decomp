@@ -9,12 +9,13 @@ s32 CB_ReleaseObjectBasic(void *areaObject) {
 }
 
 /* A missing callback returns one; otherwise propagate its return unchanged. */
-s32 CB_BasicDrawProcuder(Dds3AreaObjectView *areaObject) {
+s32 CB_BasicDrawProcuder(void *areaObject) {
+    Dds3AreaObjectView *area = areaObject;
     s32 (*callback)(Dds3AreaObjectView *);
 
-    callback = areaObject->callbackRecord->callback;
+    callback = area->callbackRecord->callback;
     if (callback == NULL) {
         return 1;
     }
-    return callback(areaObject);
+    return callback(area);
 }

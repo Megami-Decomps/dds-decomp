@@ -110,7 +110,7 @@ u32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *object) {
 }
 
 /* Call `callback` with every value of the object's list in order; stop and return 0 as soon as one callback returns 0. Returns 1 when the object has no values, no callback is given, or all callbacks succeeded. */
-s32 dds3ForEachBasicArray(dds3BasicArrayHandle_t *object, s32 (*callback)(u32)) {
+s32 dds3ForEachBasicArray(dds3BasicArrayHandle_t *object, s32 (*callback)(void *)) {
     u32 more;
 
     if (callback == NULL) {
@@ -120,7 +120,7 @@ s32 dds3ForEachBasicArray(dds3BasicArrayHandle_t *object, s32 (*callback)(u32)) 
         return 1;
     }
     for (more = dds3SetFirstBasicArray(object); more != 0; more = dds3SetNextBasicArray(object)) {
-        if (callback(dds3GetBasicArray(object)) == 0) {
+        if (callback((void *)dds3GetBasicArray(object)) == 0) {
             return 0;
         }
     }

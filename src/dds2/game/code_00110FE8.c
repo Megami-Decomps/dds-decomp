@@ -129,8 +129,8 @@ void AreaBasicDestructor(dds3Basic_t *object) {
     u32 i;
 
     indexNodes = object->data;
-    dds3ForEachBasicArray((dds3BasicArrayHandle_t *)indexNodes[0], (s32 (*)(u32))CB_ReleaseObjectBasic);
-    dds3ForEachBasicArray((dds3BasicArrayHandle_t *)indexNodes[1], (s32 (*)(u32))CB_ReleaseObjectBasic);
+    dds3ForEachBasicArray((dds3BasicArrayHandle_t *)indexNodes[0], CB_ReleaseObjectBasic);
+    dds3ForEachBasicArray((dds3BasicArrayHandle_t *)indexNodes[1], CB_ReleaseObjectBasic);
     for (i = 0; i < 2; i++) {
         dds3FreeBasicArrayHandle(indexNodes[i]);
     }
@@ -144,6 +144,6 @@ u32 AreaBasicMainprocuder(void) {
 s32 AreaBasicDrawprocuder(dds3Basic_t *object) {
     WorldIndexNode **indexNodes = object->data;
 
-    dds3ForEachBasicArray((dds3BasicArrayHandle_t *)indexNodes[0], (s32 (*)(u32))CB_BasicDrawProcuder);
+    dds3ForEachBasicArray((dds3BasicArrayHandle_t *)indexNodes[0], CB_BasicDrawProcuder);
     return 1;
 }
