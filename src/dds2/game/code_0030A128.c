@@ -664,7 +664,7 @@ extern s8 evtGetCapturedWindowPanelValue(void);
 /* Legacy calls pass the RGB bytes as promoted integer arguments. */
 extern void sdfClearCounterDisplayFlags(void);
 extern s32 sdfCounterGetDisplayValue(void);
-extern void fldSetPendingSceneAction(u32);
+extern void fldSetPendingSceneAction(s32);
 extern void sdfInitInnerVectors(void);
 extern void fldUpdateSelectedValueTransition(void);
 extern void fldSkyCalcFilter(void);
