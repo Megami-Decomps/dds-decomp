@@ -23,6 +23,7 @@
 #include "btl_actor_work.h"
 #include "sdf_texture_offset_list.h"
 #include "btl_state.h"
+#include "btl_action_state_handler.h"
 #include "btl_model_record.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
@@ -3104,13 +3105,7 @@ void btlAdvanceUnitWhenActionGateClears(u32 unit) {
     }
 }
 
-typedef struct BattleActionState {
-    void (*start)(void *);
-    void (*update)(void *);
-    const char *name; /* +8: debug label, not a finish callback. */
-} BattleActionState;
-
-extern BattleActionState D_00359B28[];
+extern BtlActionStateHandler D_00359B28[];
 
 void btlDispatchStateHandler(void *object, s32 kind) {
     ((s32 *)object)[0] = kind;
