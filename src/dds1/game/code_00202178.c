@@ -2201,7 +2201,7 @@ s32 btlGetEffectTaskActorMatchCode(u8 *task) {
 
 extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 
-extern s32 btlCreateSecondaryCommandSoundTask();
+extern u8 *btlCreateSecondaryCommandSoundTask(void);
 
 extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
 
