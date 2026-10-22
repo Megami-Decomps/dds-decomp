@@ -8272,6 +8272,7 @@ effColorRectangleParameters = 0x003B2260;
 frFontSlotLoadedFlags = 0x003B2F30;
 itfHeldPanelCursor = 0x003B4780;
 itfSoundSelectorBorderColor = 0x003B49D8; // type:s32 size:0x10
+btlStatusEffectStyles = 0x003BDD08; // size:0x110
 btlGroupNodeHeads = 0x003C86F0;
 btlGroupIdHeads = 0x003C8710;
 evtViewerFrameColumnCategories = 0x003C953A; // type:s8 size:0x14A
