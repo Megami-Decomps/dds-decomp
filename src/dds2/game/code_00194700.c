@@ -344,7 +344,7 @@ EffResourceList *dds3EffectFileListCreate(char *path, s32 flags) {
     EffResourceListNode *node;
     EffResourceListNode *tail;
     s32 length;
-    s32 type;
+    EffResourceKind kind;
     directory = dds3EffectDirOpen(path);
     list = sdfChipAllocDirect(sizeof(*list));
     if (sdfHddValid != 0) {
@@ -362,28 +362,28 @@ EffResourceList *dds3EffectFileListCreate(char *path, s32 flags) {
         if (length < 5) continue;
         if (length >= 0x2F) continue;
         if ((flags & 0x10 ? entry.name[length - 3] : entry.name[length - 4]) != '.') continue;
-        type = 0;
+        kind = EFF_RESOURCE_KIND_NONE;
         if ((flags & 1) &&
             ((entry.name[length-3]=='t' && entry.name[length-2]=='m' && entry.name[length-1]=='x') ||
-             (entry.name[length-3]=='T' && entry.name[length-2]=='M' && entry.name[length-1]=='X'))) type = 1;
+             (entry.name[length-3]=='T' && entry.name[length-2]=='M' && entry.name[length-1]=='X'))) kind = EFF_RESOURCE_KIND_TMX;
         else if ((flags & 2) &&
             ((entry.name[length-3]=='p' && entry.name[length-2]=='2' && entry.name[length-1]=='a') ||
-             (entry.name[length-3]=='P' && entry.name[length-2]=='2' && entry.name[length-1]=='A'))) type = 2;
+             (entry.name[length-3]=='P' && entry.name[length-2]=='2' && entry.name[length-1]=='A'))) kind = EFF_RESOURCE_KIND_P2A;
         else if ((flags & 4) &&
             ((entry.name[length-3]=='d' && entry.name[length-2]=='3' && entry.name[length-1]=='p') ||
-             (entry.name[length-3]=='D' && entry.name[length-2]=='3' && entry.name[length-1]=='P'))) type = 4;
+             (entry.name[length-3]=='D' && entry.name[length-2]=='3' && entry.name[length-1]=='P'))) kind = EFF_RESOURCE_KIND_D3P;
         else if ((flags & 8) &&
             ((entry.name[length-3]=='b' && entry.name[length-2]=='e' && entry.name[length-1]=='d') ||
-             (entry.name[length-3]=='B' && entry.name[length-2]=='E' && entry.name[length-1]=='D'))) type = 8;
+             (entry.name[length-3]=='B' && entry.name[length-2]=='E' && entry.name[length-1]=='D'))) kind = EFF_RESOURCE_KIND_BED;
         else if ((flags & 0x10) &&
             ((entry.name[length-2]=='p' && entry.name[length-1]=='b') ||
-             (entry.name[length-2]=='P' && entry.name[length-1]=='B'))) type = 0x10;
+             (entry.name[length-2]=='P' && entry.name[length-1]=='B'))) kind = EFF_RESOURCE_KIND_PB;
         else if ((flags & 0x20) &&
             ((entry.name[length-3]=='p' && entry.name[length-2]=='c' && entry.name[length-1]=='f') ||
-             (entry.name[length-3]=='P' && entry.name[length-2]=='C' && entry.name[length-1]=='F'))) type = 0x20;
-        if (type == 0) continue;
+             (entry.name[length-3]=='P' && entry.name[length-2]=='C' && entry.name[length-1]=='F'))) kind = EFF_RESOURCE_KIND_PCF;
+        if (kind == EFF_RESOURCE_KIND_NONE) continue;
         node = sdfChipAllocDirect(sizeof(*node));
-        node->type = type;
+        node->kind = kind;
         strcpy(node->name, entry.name);
         if (tail != NULL) tail->next = node;
         else list->head = node;
@@ -531,7 +531,7 @@ s32 dds3EffectFileListWindowDraw(EffResourceDescriptor *descriptor) {
             EffResourceListNode *cachedEntry = descriptor->cachedEntry;
             selectedEntry = descriptor->selectedEntry;
             if (cachedEntry != selectedEntry) {
-                s32 category = selectedEntry->type;
+                s32 category = selectedEntry->kind;
                 switch (category) {
                 case 1: {
                     char resourceName[0x70];
@@ -630,7 +630,7 @@ u32 dds3EffectFileListWindowGetState(EffResourceDescriptor *work) {
    Buffer capacity and record pointers remain unchecked. */
 u32 dds3EffectFileListWindowGetFilename(EffResourceDescriptor *message, char *destination) {
     sprintf(destination, D_00436450, message->resourceList->directoryPath, message->selectedEntry->name);
-    return message->selectedEntry->type;
+    return message->selectedEntry->kind;
 }
 
 /* Set the navigation repeat delay. */

@@ -3,9 +3,19 @@
 
 #include "sdf.h"
 
+typedef enum EffResourceKind {
+    EFF_RESOURCE_KIND_NONE = 0,
+    EFF_RESOURCE_KIND_TMX = 1,
+    EFF_RESOURCE_KIND_P2A = 2,
+    EFF_RESOURCE_KIND_D3P = 4,
+    EFF_RESOURCE_KIND_BED = 8,
+    EFF_RESOURCE_KIND_PB = 0x10,
+    EFF_RESOURCE_KIND_PCF = 0x20
+} EffResourceKind;
+
 /* Directory list roots and filename nodes have distinct allocation extents. */
 typedef struct EffResourceListNode {
-    s32 type;
+    EffResourceKind kind;
     char name[0x30];
     struct EffResourceListNode *previous;
     struct EffResourceListNode *next;
