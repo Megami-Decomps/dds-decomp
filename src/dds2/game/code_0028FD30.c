@@ -36,7 +36,7 @@ typedef struct MenuPanelTransition {
     u16 action;
 } MenuPanelTransition;
 
-extern s32 mnuDispatchMantraPanelCommand(void *, s32, s32);
+extern s32 mnuDispatchMantraPanelCommand(MnuStatusResource *, s32, s32);
 
 
 typedef struct MantraPanelPool MantraPanelPool;
@@ -1142,8 +1142,7 @@ INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427720);
 
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427740);
 
-s32 mnuDispatchMantraPanelCommand(void *context, s32 panelId, s32 action) {
-    MnuStatusResource *object = context;
+s32 mnuDispatchMantraPanelCommand(MnuStatusResource *object, s32 panelId, s32 action) {
     MantraMenuWork *state = &object->menu;
     MantraNodePos *position;
     u16 id = panelId;
