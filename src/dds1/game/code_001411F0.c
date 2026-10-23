@@ -1045,8 +1045,8 @@ extern FldPoint D_003D40B0[];
 void fldResetSceneResourceTables(void) {
     s32 i;
 
-    fldGlobalBase.unkC4 = -1;
-    fldGlobalBase.unkC8 = -1;
+    fldGlobalBase.primaryMapLabelSelection = -1;
+    fldGlobalBase.secondaryMapLabelSelection = -1;
     fldAutoMapBuf = 0;
     fldAutoMapHeader = 0;
     fldAutoMapData = 0;
@@ -2677,7 +2677,7 @@ interpolate:
     yOffset = (s32)positionY;
 
     work = &fldGlobalBase;
-    map = work->unkC8;
+    map = work->secondaryMapLabelSelection;
     if (map != -1) {
         if (D_003D4460[map] < 2) {
             return;
@@ -2697,7 +2697,7 @@ interpolate:
         y = (yOffset + 0x12) / 2;
         fldKanjiDraw(xOffset + x, y, 0xF0DC6480, (const u8 *)D_0034286C[record]);
     } else {
-        lookupIndex = work->unkC4;
+        lookupIndex = work->primaryMapLabelSelection;
         if (lookupIndex == map || D_003D43B0[lookupIndex] < 2) {
             return;
         }
