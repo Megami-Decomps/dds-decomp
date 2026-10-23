@@ -1256,10 +1256,10 @@ void dds3Particle_SmokeBuffInit(EffDiscEmitter *effect, u32 packetIndex) {
     SDF_VU0_LOADVECTOR(directionVector);
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(packet->vel);
-    packet->f30 = effect->f164 * (dds3GetRandFloatA(effDefaultRandomState) * effect->jitterB + (1.0f - effect->jitterB));
+    packet->f30 = effect->initialWaveAmplitude * (dds3GetRandFloatA(effDefaultRandomState) * effect->jitterB + (1.0f - effect->jitterB));
     packet->f34 = 0;
     packet->f38 = 0;
-    packet->f3C = effect->f15C * (dds3GetRandFloatA(effDefaultRandomState) * effect->jitterA + (1.0f - effect->jitterA));
+    packet->f3C = effect->initialVerticalSpeed * (dds3GetRandFloatA(effDefaultRandomState) * effect->jitterA + (1.0f - effect->jitterA));
     packet->age = -(dds3GetRandA((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
@@ -1289,12 +1289,12 @@ void dds3Particle_SmokeDraw(EffDiscEmitter *effect) {
 
     dds3Particle_EffectInit(&effect->head.sub);
     VU0_LOAD_MATRIX(effect->head.matrix);
-    phaseStep = effect->f160 * (3.14159265f / 180.0f);
-    verticalScale = effect->f16C / 100.0f + 1.0f;
+    phaseStep = effect->phaseStepDegreesPerFrame * (3.14159265f / 180.0f);
+    verticalScale = effect->verticalSpeedScalePercent / 100.0f + 1.0f;
     lifetimeFrames = effect->head.lifetimeFrames;
     packetCount = effect->head.particleCount;
     repeatEnabled = effect->flag150;
-    waveRate = effect->f168;
+    waveRate = effect->waveAmplitudeStep;
     completedCount = 0;
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;

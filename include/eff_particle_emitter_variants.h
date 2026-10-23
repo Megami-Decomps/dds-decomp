@@ -10,11 +10,11 @@ typedef struct EffDiscEmitter {
     u8 pad151[3];
     u32 spread;      /* 0x154 */
     f32 radius;      /* 0x158 */
-    f32 f15C;
-    f32 f160;
-    f32 f164;
-    f32 f168;
-    f32 f16C;
+    f32 initialVerticalSpeed;
+    f32 phaseStepDegreesPerFrame;
+    f32 initialWaveAmplitude;
+    f32 waveAmplitudeStep;
+    f32 verticalSpeedScalePercent;
     f32 jitterA;     /* 0x170 */
     f32 jitterB;     /* 0x174 */
 } EffDiscEmitter;
