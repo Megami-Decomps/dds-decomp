@@ -418,7 +418,7 @@ typedef struct SdfRelocatedResource {
     u32 unk10;
 } SdfRelocatedResource;
 
-extern void dds3ApplyRelocationOffsets(void *, void *, void *, u32);
+extern void dds3ApplyRelocationOffsets(u8 *base, u32 adjustment, u32 *offsets, u32 size);
 
 
 SdfRelocatedResource *sdfCloneRelocatedResourceGroups(MnuCallbackListPair *owner, MnuCallbackList **source,
@@ -429,8 +429,8 @@ SdfRelocatedResource *sdfCloneRelocatedResourceGroups(MnuCallbackListPair *owner
     DdsCountedPayload *record;
     DdsPackedObject *sourceHeader;
     DdsPackedObject *relocationHeader;
-    void *data;
-    void *relocations;
+    u8 *data;
+    u32 *relocations;
     u8 *cursor;
     u32 size;
 
@@ -447,7 +447,7 @@ SdfRelocatedResource *sdfCloneRelocatedResourceGroups(MnuCallbackListPair *owner
     memset(data, 0, sourceHeader->maxPackedOffset);
     relocations = sdfAllocateOwnedResourceBuffer(owner, relocationHeader->maxPackedOffset);
     memset(relocations, 0, relocationHeader->maxPackedOffset);
-    dds3ApplyRelocationOffsets(data, data, relocations, relocationHeader->maxPackedOffset);
+    dds3ApplyRelocationOffsets(data, (u32)data, relocations, relocationHeader->maxPackedOffset);
     free(relocations);
     result->data = data;
     result->firstCount = (*source)->count;
