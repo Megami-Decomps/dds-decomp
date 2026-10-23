@@ -130,7 +130,7 @@ void dds3SetFog(KwlnDrawVectorParams *source) {
 }
 
 /* Store a light-source pointer in the indexed light table. */
-void dds3SetLight(void *lightSource, s32 index) {
+void dds3SetLight(f32 *lightSource, s32 index) {
     D_0037F770[index] = lightSource;
 }
 
