@@ -7790,19 +7790,19 @@ extern char D_003A4B08[]; /* "btl:free field F1\n" */
 void btlFreeFieldBlocks(void) {
     BtlState *context = (BtlState *)btlGetRuntime();
     btlWaitForPendingWorkAndReleaseBuffers();
-    if (context->fieldTBResourceId != 0) {
-        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)context->fieldTBResourceId);
-        context->fieldTBResourceId = 0;
+    if (context->fieldTBResourceId != NULL) {
+        sdfMemFreeDelayedDirect(context->fieldTBResourceId);
+        context->fieldTBResourceId = NULL;
         btlBossDebugPrintf(D_003A4AD8);
     }
-    if (context->fieldF2ResourceId != 0) {
-        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)context->fieldF2ResourceId);
-        context->fieldF2ResourceId = 0;
+    if (context->fieldF2ResourceId != NULL) {
+        sdfMemFreeDelayedDirect(context->fieldF2ResourceId);
+        context->fieldF2ResourceId = NULL;
         btlBossDebugPrintf(D_003A4AF0);
     }
-    if (context->fieldF1ResourceId != 0) {
-        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)context->fieldF1ResourceId);
-        context->fieldF1ResourceId = 0;
+    if (context->fieldF1ResourceId != NULL) {
+        sdfMemFreeDelayedDirect(context->fieldF1ResourceId);
+        context->fieldF1ResourceId = NULL;
         btlBossDebugPrintf(D_003A4B08);
     }
     context = (BtlState *)btlGetRuntime();
@@ -8173,15 +8173,15 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
             while (node != NULL) {
                 switch (i) {
                 case 0:
-                    blocks->fieldTBResourceId = (s32)(u32)node->resourceHandle;
+                    blocks->fieldTBResourceId = node->resourceHandle;
                     args->fieldTB = (const SdfTextureOffsetListHeader *)node->dataCursor;
                     break;
                 case 1:
-                    blocks->fieldF2ResourceId = (s32)(u32)node->resourceHandle;
+                    blocks->fieldF2ResourceId = node->resourceHandle;
                     args->fieldF2 = node->dataCursor;
                     break;
                 case 2:
-                    blocks->fieldF1ResourceId = (s32)(u32)node->resourceHandle;
+                    blocks->fieldF1ResourceId = node->resourceHandle;
                     args->fieldF1 = node->dataCursor;
                     break;
                 }
@@ -8196,9 +8196,9 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
                                              (s32)args->fieldF1, (s32)args->fieldF2,
                                              args->fieldTB, 0);
             btlInitializeSceneLightingAndTint();
-            if (blocks->fieldTBResourceId != 0) {
-                sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)blocks->fieldTBResourceId);
-                blocks->fieldTBResourceId = 0;
+            if (blocks->fieldTBResourceId != NULL) {
+                sdfMemFreeDelayedDirect(blocks->fieldTBResourceId);
+                blocks->fieldTBResourceId = NULL;
                 btlBossDebugPrintf(D_003A4AD8);
             }
             blocks->battleFlags |= 2;
