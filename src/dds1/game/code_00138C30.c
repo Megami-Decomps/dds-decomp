@@ -3259,7 +3259,7 @@ extern void fldDrawInputCursor(s32, s32);
 extern u8 D_0033E900[];
 
 s32 fldUpdateTitleBannerTask(dds3ProcessID_t *task) {
-    u16 *ticket;
+    FldTitleBannerMenu *menu;
     u8 *label;
     s32 width;
     s32 x;
@@ -3285,28 +3285,28 @@ s32 fldUpdateTitleBannerTask(dds3ProcessID_t *task) {
     if (fldIsEventPhaseAtLeastTwo() != 0) {
         return 0;
     }
-    ticket = (u16 *)dds3GetProcessData(task);
-    if (ticket[2] != 0) {
-        label = D_0033E900 + ticket[1] * 32;
+    menu = (FldTitleBannerMenu *)dds3GetProcessData(task);
+    if (menu->pending != 0) {
+        label = D_0033E900 + menu->choice * 32;
         width = frFontMeasureTextAdvance(label, 1, 0x13);
         x = 0xF6 - (width >> 1);
         fldDrawGaugeBar(width);
         fldDrawInputCursor(x, 0x131);
-        fldKanjiDraw(x + 0x14, 0x98, 0xA09DC380, D_0033E900 + ticket[1] * 32);
-        ticket[0] = ticket[0] + 1;
-        ticket[2] = 0;
+        fldKanjiDraw(x + 0x14, 0x98, 0xA09DC380, D_0033E900 + menu->choice * 32);
+        menu->position = menu->position + 1;
+        menu->pending = 0;
     }
     return 0;
 }
 
 s32 fldInputPanelProcess1(dds3ProcessID_t *task) {
-    u16 *ticket = sdfChipAllocDirect(8);
+    FldTitleBannerMenu *menu = sdfChipAllocDirect(sizeof(FldTitleBannerMenu));
 
-    ticket[1] = 1;
-    ticket[0] = 0;
-    ticket[2] = 0;
-    ticket[3] = 0;
-    dds3SetProcessData(task, (u32)ticket);
+    menu->choice = 1;
+    menu->position = 0;
+    menu->pending = 0;
+    menu->reserved = 0;
+    dds3SetProcessData(task, (u32)menu);
     return (s32)fldUpdateTitleBannerTask;
 }
 
@@ -3365,4 +3365,3 @@ INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE68);
 INCLUDE_SDATA(const s32, "game/code_00138C30", fldPickedActorTemplateKind);
 
 INCLUDE_SDATA(const s32, "game/code_00138C30", addressprocess_id);
-
