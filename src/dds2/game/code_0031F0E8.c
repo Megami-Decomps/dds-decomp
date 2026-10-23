@@ -67,7 +67,7 @@ typedef struct DdsNestedRecord {
 
 typedef struct DdsCallbackCollection {
     u8 pad00[4];
-    u32 callbacks[3]; /* 0x04, 0x08, 0x0C */
+    MnuCallbackList *callbacks[3]; /* 0x04, 0x08, 0x0C */
 } DdsCallbackCollection;
 
 /* Allocation block: bytes used so far and its 0x10000-byte buffer
@@ -154,9 +154,9 @@ DdsPackedObject *dds3CreatePackedObject(void) {
 
 void dds3ReleaseCallbackCollectionAndNodes(u32 node) {
     DdsCallbackCollection *collection = (DdsCallbackCollection *)node;
-    dds3DestroyCallbackNodeAfterLastNotification((MnuCallbackList *)collection->callbacks[0]);
-    dds3DestroyCallbackNodeAfterLastNotification((MnuCallbackList *)collection->callbacks[1]);
-    dds3DestroyCallbackNodeAfterLastNotification((MnuCallbackList *)collection->callbacks[2]);
+    dds3DestroyCallbackNodeAfterLastNotification(collection->callbacks[0]);
+    dds3DestroyCallbackNodeAfterLastNotification(collection->callbacks[1]);
+    dds3DestroyCallbackNodeAfterLastNotification(collection->callbacks[2]);
     free((void *)node);
 }
 
