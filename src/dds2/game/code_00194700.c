@@ -21,6 +21,7 @@ extern s32 sdf2DGetPrimPtr(s32 packetAddress);
 extern s8 D_0043643D;
 
 #include "eff.h"
+#include "eff_magatuhi_api.h"
 #include "eff_math.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
@@ -100,9 +101,9 @@ void *dds3MagatuhiGetHandle(EffWork *work) {
     return work->payload;
 }
 
-/* Read the dispatch owner's type word; the pointer remains unchecked. */
-u32 dds3MagatuhiGetType(u32 *word) {
-    return *word;
+/* Read the type field from the dispatch owner; the pointer remains unchecked. */
+u32 dds3MagatuhiGetType(EffWork *work) {
+    return work->type;
 }
 
 /* Native node type-three restart slot: no instance state is changed. */
@@ -965,4 +966,3 @@ INCLUDE_SDATA(const s32, "game/code_00194700", D_00436440);
 INCLUDE_SDATA(const s32, "game/code_00194700", D_00436448);
 
 INCLUDE_SDATA(const s32, "game/code_00194700", D_00436450);
-

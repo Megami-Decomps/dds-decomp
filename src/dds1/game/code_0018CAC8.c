@@ -14,6 +14,7 @@
 #include "pcp_vu0.h"
 #include "fpu.h"
 #include "eff.h"
+#include "eff_magatuhi_api.h"
 #include "eff_math.h"
 #include "sdf_texture_file.h"
 #include "sdf_projection.h"
@@ -89,9 +90,9 @@ void *dds3MagatuhiGetHandle(EffWork *work) {
     return work->payload;
 }
 
-/* Read the dispatch owner's type word; the pointer remains unchecked. */
-u32 dds3MagatuhiGetType(u32 *word) {
-    return *word;
+/* Read the type field from the dispatch owner; the pointer remains unchecked. */
+u32 dds3MagatuhiGetType(EffWork *work) {
+    return work->type;
 }
 
 /* Native node type-three restart slot: no instance state is changed. */
@@ -953,4 +954,3 @@ INCLUDE_SDATA(const s32, "game/code_0018CAC8", D_003BB050);
 INCLUDE_SDATA(const s32, "game/code_0018CAC8", D_003BB058);
 
 INCLUDE_SDATA(const s32, "game/code_0018CAC8", D_003BB060);
-
