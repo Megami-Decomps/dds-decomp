@@ -1326,7 +1326,7 @@ extern u32 brsTaskAllowUpdate(void);
 
 extern void btlClearPartyRecordStatusBits(datUnitWork_t *, s32);
 
-extern s32 mnuIsTitleEntryAvailable();
+extern s32 mnuIsTitleEntryAvailable(datUnitWork_t *unit);
 
 extern s32 datAddHp(datUnitWork_t *unit, s32 delta);
 
