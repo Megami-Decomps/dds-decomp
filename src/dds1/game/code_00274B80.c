@@ -172,11 +172,6 @@ typedef struct MenuInputNode {
 
 
 
-typedef struct MenuItemCount {
-    u8 pad00[0x20];
-    s32 count; /* 0x20 */
-} MenuItemCount;
-
 typedef struct MenuSpriteArguments {
     u8 pad00[0x55];
     s8 variant; /* 0x55: passed to sprite renderer */
@@ -223,8 +218,8 @@ void mnuSelectPartySelectionVisuals(u32 context) {
 void mnuNoOpPartySelectionCleanup(s32 context) {
 }
 
-s32 mnuIsFinalItemIndex(s32 nodeIndex, s32 listAddress) {
-    if (nodeIndex < (((MenuItemCount *)listAddress)->count - 1)) {
+s32 mnuIsFinalItemIndex(s32 nodeIndex, const struct MenuList *list) {
+    if (nodeIndex < (list->count - 1)) {
         return 0;
     }
     return 1;
@@ -241,7 +236,7 @@ void mnuDrawPartySelectionListEntry(s32 x, s32 y, s32 z, struct MenuList *list, 
     _FRQ *glyph;
     s32 posX;
 
-    switch (mnuIsFinalItemIndex(node->index, (s32)list)) {
+    switch (mnuIsFinalItemIndex(node->index, list)) {
     case 0:
         posX = x + 0x640;
         y += 0x30;
@@ -530,7 +525,7 @@ s32 mnuHandlePartySelectionInput(s32 callback) {
         }
         mnuClearWindowPanelTransitionFlag(window);
         if (inputFlags & 1) {
-            switch (mnuIsFinalItemIndex(window->list->cursor->index, (s32)window->list)) {
+            switch (mnuIsFinalItemIndex(window->list->cursor->index, window->list)) {
             case 0:
                 if ((u16)(menuWork->current[entryIndex].flags & 1) != 0) {
                     window->list->cursor->flags48 |= 1;
@@ -676,7 +671,7 @@ void mnuDrawPartySelectionPreview(s32 contextAddress) {
     s32 found = 0;
 
     node = menu->primaryWindow->list->cursor;
-    if (mnuIsFinalItemIndex(node->index, (s32)menu->primaryWindow->list)) {
+    if (mnuIsFinalItemIndex(node->index, menu->primaryWindow->list)) {
         selectionKey = menu->selectionKey;
         mnuUpdateStaffFade(0, menu);
     } else {

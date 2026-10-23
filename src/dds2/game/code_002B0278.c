@@ -630,8 +630,8 @@ void mnuSelectPartySelectionVisuals(u32 context) {
 void mnuNoOpPartySelectionCleanup(u32 callback) {
 }
 
-s32 mnuIsFinalItemIndex(s32 nodeIndex, s32 listAddress) {
-    if (nodeIndex < (((MenuList *)listAddress)->count - 1)) {
+s32 mnuIsFinalItemIndex(s32 nodeIndex, const MenuList *list) {
+    if (nodeIndex < (list->count - 1)) {
         return 0;
     }
     return 1;
@@ -927,7 +927,7 @@ s32 mnuHandlePartySelectionInput(dds3ProcessID_t *callback) {
         }
         mnuClearWindowPanelTransitionFlag(window);
         if (inputFlags & 1) {
-            switch (mnuIsFinalItemIndex(window->list->cursor->index, (s32)window->list)) {
+            switch (mnuIsFinalItemIndex(window->list->cursor->index, window->list)) {
             case 0:
                 if ((u16)(menuWork->current[entryIndex].flags & 1) != 0) {
                     window->list->cursor->flags48 |= 1;
@@ -1113,7 +1113,7 @@ void mnuDrawPartySelectionPreview(MenuContext *context) {
     u32 i;
 
     node = menu->primaryWindow->list->cursor;
-    if (mnuIsFinalItemIndex(node->index, (s32)menu->primaryWindow->list)) {
+    if (mnuIsFinalItemIndex(node->index, menu->primaryWindow->list)) {
         selectionKey = menu->previousSelection;
         mnuUpdateStaffFade(0, menu);
     } else {
@@ -1177,7 +1177,7 @@ s32 mnuOpenStaffPartySelectionPanel(dds3ProcessID_t *callback) {
     mnuDrawCampScreenDefault(callback);
     mnuCreateStaffImageSprite(0x17);
     list = menu->primaryWindow->list;
-    if (mnuIsFinalItemIndex(list->cursor->index, (s32)list)) {
+    if (mnuIsFinalItemIndex(list->cursor->index, list)) {
         menu->primaryWindow->list->stateFlags |= 0x10;
     } else {
         menu->primaryWindow->list->stateFlags &= ~0x10;

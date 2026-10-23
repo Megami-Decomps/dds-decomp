@@ -333,7 +333,7 @@ void mnuSelectPartySelectionVisuals(u32 context);
 
 void mnuNoOpPartySelectionCleanup(u32 callback);
 
-s32 mnuIsFinalItemIndex(s32 index, s32 item);
+s32 mnuIsFinalItemIndex(s32 index, const struct MenuList *list);
 
 
 
