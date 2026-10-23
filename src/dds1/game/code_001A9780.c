@@ -844,14 +844,15 @@ s32 btlHasHighPriorityState(void) {
 }
 
 s32 btlCountFlaggedSceneActors(void) {
-    BtlUnit *actor = *(BtlUnit **)((u8 *)btlGetRuntime() + 0x228);
+    BtlState *controller = (BtlState *)btlGetRuntime();
+    BtlUnit *actor;
     s32 count = 0;
-    while (actor != 0) {
+
+    for (actor = controller->units; actor != 0; actor = actor->next) {
         if ((btlUnitStatusPair(actor) & 0x321) == 0x301 &&
-            (*(u16 *)((u8 *)actor + 0x12E) & 0x800) == 0) {
+            (actor->partyRecord.status & 0x800) == 0) {
             count++;
         }
-        actor = *(BtlUnit **)((u8 *)actor + 0x344);
     }
     return count;
 }
