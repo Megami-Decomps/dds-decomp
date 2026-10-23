@@ -105,7 +105,7 @@ extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
 extern void sdfBuildFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
-extern u32 dds3NullDrawProc();
+extern u32 dds3NullDrawProc(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 
 
@@ -404,14 +404,14 @@ void effDrawBlurListWithFramePacket(void *list) {
     D_003253E8.append(&D_003253E8, list);
 }
 
-extern u32 dds3NullDrawProc();
+extern u32 dds3NullDrawProc(void);
 extern void effAppendBlurRenderState();
 
 /* Queue blend setup and both rectangle packets, then finish with the filter draw. */
 void effDrawBlurSource(const BlurSource *source, sdfTexHandle_t *resource, u8 fixedPointCoordinates) {
     void *list;
 
-    if (dds3NullDrawProc(source) == 0) {
+    if (dds3NullDrawProc() == 0) {
         list = (void *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         effAppendBlurRenderState(list, source->blendControl, resource);
@@ -451,7 +451,7 @@ void dds3EffectPartialMultiBlurDelete(EffBlurTemplate *owner) {
 void effDrawBlurPixelRectWithResource(EffBlurTemplate *rect) {
     s32 centerX, centerY, halfExtent;
 
-    if (dds3NullDrawProc(rect) == 0) {
+    if (dds3NullDrawProc() == 0) {
         centerX = rect->body.source.position[0] + 0x100;
         centerY = rect->body.source.position[1] + 0xE0;
         halfExtent = rect->body.extent;
@@ -467,7 +467,7 @@ void effDrawBlurPixelRectWithResource(EffBlurTemplate *rect) {
 void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner) {
     s32 centerX, centerY, halfExtent;
 
-    if (dds3NullDrawProc(owner) == 0) {
+    if (dds3NullDrawProc() == 0) {
         centerX = owner->body.source.position[0] + 0x1000;
         centerY = (owner->body.source.position[1] + 0xE00) >> 1;
         halfExtent = owner->body.extent;
