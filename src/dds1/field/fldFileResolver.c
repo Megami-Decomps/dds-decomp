@@ -698,8 +698,6 @@ extern u8 D_00324660[];
 
 extern char D_003C9200[];
 
-extern u32 fldDisplayValues[];
-
 extern s16 D_003C9518[];
 
 extern void fldFormatAreaResourceName(char *out);
@@ -849,7 +847,7 @@ extern dds3Basic_t *dds3AddEventBasic(s32 key, void *work, const char *name);
 
 extern dds3Basic_t *dds3AddPathBasic(s32 key, void *work, const char *name);
 
-extern u32 fldEveHit_AddEveData(u32, dds3Basic_t *);
+extern u32 fldEveHit_AddEveData(FldFileResource *, dds3Basic_t *);
 
 extern s32 fldRegisterRoomObject(FldFileResource *, dds3Basic_t *);
 
@@ -948,7 +946,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                 }
                 event = spawnResource->data;
                 spawnedObject = dds3AddEventBasic(spawnResource->id, (void *)event->label, spawnResource->name);
-                fldEveHit_AddEveData((u32)spawnResource, spawnedObject);
+                fldEveHit_AddEveData(spawnResource, spawnedObject);
             }
             break;
         case 9:
