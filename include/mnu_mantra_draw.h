@@ -15,6 +15,15 @@ typedef struct MantraDisplayNode {
     struct MantraDisplayNode *next;
 } MantraDisplayNode;
 
+typedef enum MnuMantraDrawState {
+    MNU_MANTRA_DRAW_STATE_START_DELAY = 1,
+    MNU_MANTRA_DRAW_STATE_END_DELAY = 2,
+    MNU_MANTRA_DRAW_STATE_CREATE = 3,
+    MNU_MANTRA_DRAW_STATE_RUNNING = 4,
+    MNU_MANTRA_DRAW_STATE_RELEASE = 5,
+    MNU_MANTRA_DRAW_STATE_DEACTIVATE = 6
+} MnuMantraDrawState;
+
 /* One draw process: construction supplies data, update requests completion,
  * draw runs each active frame, and release receives the item record. */
 typedef struct MantraDrawItem {
@@ -24,7 +33,7 @@ typedef struct MantraDrawItem {
         struct {
             u32 active : 1;
             u32 unkBits : 2;
-            u32 state : 8;
+            MnuMantraDrawState state : 8;
             u32 released : 1;
             u32 category : 8;
             u32 unkHigh : 12;
