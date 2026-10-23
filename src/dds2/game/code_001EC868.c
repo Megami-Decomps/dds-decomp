@@ -301,7 +301,7 @@ extern BtlRuntimeTask *btlFindTaskByHandle(u64);
 
 extern struct SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id);
 
-extern void btlSetUnitPosition(BtlUnit *unit, f32 *position);
+extern void btlSetUnitPosition(BtlUnit *unit, const f32 *position);
 
 extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
 

@@ -2441,7 +2441,7 @@ extern struct SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id);
 
 extern void btlResetUnitModelProgress(BtlUnit *unit);
 
-extern void btlSetUnitPosition(BtlUnit *unit, f32 *position);
+extern void btlSetUnitPosition(BtlUnit *unit, const f32 *position);
 
 extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
 
@@ -3059,7 +3059,7 @@ s32 btlIsUnitModelStateFive(BtlUnit *unit) {
     return unit->ext->owner->first->state == SDF_MOTION_STATE_TERMINAL;
 }
 
-void btlSetUnitPosition(BtlUnit *unit, f32 *vec) {
+void btlSetUnitPosition(BtlUnit *unit, const f32 *vec) {
     f32 pos[4];
     if (!(unit->status.stateFlags & 0x80)) {
         u8 *work = (u8 *)btlGetRuntime();
