@@ -76,9 +76,9 @@ void CommitVarTable(u8 **table);
 
 s32 GetMessageWidth(_FRQ *glyph);
 
-extern s32 CalcMsgMng_Process(void);
+extern s32 CalcMsgMng_Process(dds3ProcessID_t *task);
 
-extern void DrawMsgMng_Shutdown(void);
+extern void DrawMsgMng_Shutdown(dds3ProcessID_t *task);
 
 extern s32 DrawMsgMng_Process(dds3ProcessID_t *task);
 
@@ -959,8 +959,8 @@ void itfMesMngInitializeManager(void) {
     for (poolNode = itfMesMngManager.pool.firstFree; poolNode != NULL; poolNode = poolNode->next) {
         poolNode->state = NULL;
     }
-    dds3StartProcess("CalcMsgMng", 0x409, 0, 0, (TaskUpdate)CalcMsgMng_Process, (TaskDestroy)DrawMsgMng_Shutdown, 0);
-    dds3StartProcess("DrawMsgMng", 0x2B1A, 0, 0, DrawMsgMng_Process, (TaskDestroy)DrawMsgMng_Shutdown, 0);
+    dds3StartProcess("CalcMsgMng", 0x409, 0, 0, CalcMsgMng_Process, DrawMsgMng_Shutdown, 0);
+    dds3StartProcess("DrawMsgMng", 0x2B1A, 0, 0, DrawMsgMng_Process, DrawMsgMng_Shutdown, 0);
 }
 
 /* Set manager flags; the stored result is narrowed to its existing u16 field. */

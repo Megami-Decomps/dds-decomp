@@ -803,7 +803,7 @@ void itfDrawSoundSelectorFadeLayers(instanceMes_tag *panel) {
 }
 
 
-s32 CalcMsgMng_Process(void) {
+s32 CalcMsgMng_Process(dds3ProcessID_t *task) {
     mesflow_tag *node = itfMesMngManager.pool.activeHead;
     while (node != 0) {
         itfUpdateBattleDisplayAndFadeIndicator(node->state);
@@ -828,7 +828,7 @@ s32 DrawMsgMng_Process(dds3ProcessID_t *task) {
     return 0;
 }
 
-void DrawMsgMng_Shutdown(void) {
+void DrawMsgMng_Shutdown(dds3ProcessID_t *task) {
     mesflow_tag *node = itfMesMngManager.pool.activeHead;
     s32 window;
     while (node != 0) {
