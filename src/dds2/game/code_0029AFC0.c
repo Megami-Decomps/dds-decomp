@@ -36,16 +36,16 @@ extern char D_004379B0[];
 extern char D_004379B8[];
 
 /* All five signed-byte plus table-word totals must meet the minimum. */
-s32 mnuCheckTableSums(datUnitWork_t *bytes, BrsSkillPackageWork *table) {
-    s32 *tableValues = table->statGains;
-    s8 *byteValues = bytes->baseStats;
+s32 mnuCheckTableSums(const datUnitWork_t *unit, const BrsSkillPackageWork *skillPackage) {
+    const s32 *statGains = skillPackage->statGains;
+    const s8 *baseStats = unit->baseStats;
     s32 statIndex = 0;
 
     do {
-        s32 total = *byteValues + *tableValues;
+        s32 total = *baseStats + *statGains;
 
-        byteValues++;
-        tableValues++;
+        baseStats++;
+        statGains++;
         if (total < MENU_SUM_MINIMUM) {
             return 0;
         }
