@@ -1693,7 +1693,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->cameraTiltActive = 0;
     area->unkB4 = 0;
     area->cameraTilt = 0.0f;
-    area->unk100 = 0;
+    area->pendingEntryDialogRequest = 0;
     area->transitionMode = 0;
     area->collectedCount = 0;
     area->score = 0;
