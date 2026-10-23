@@ -3783,23 +3783,23 @@ void btlAdvanceCommandCursor(BtlLinkedCommand *action, BtlCamState *state) {
     CURSOR->frame++;
 }
 
-s32 btlFindLinkedActorById(s32 owner, s32 id) {
-    s32 first = *(s32 *)(*(s32 *)(owner + 0xF4) + 0x18);
-    s32 second;
-    s32 third;
+BtlUnit *btlFindLinkedActorById(BtlLinkedCommand *action, s32 id) {
+    BtlUnit *first = action->task->unit;
+    BtlUnit *second;
+    BtlUnit *third;
 
-    if (*(u8 *)(first + 0x11C) == id) {
+    if (first->lookupId == id) {
         return first;
     }
-    second = *(s32 *)(owner + 0xF8);
-    if (*(u8 *)(second + 0x11C) == id) {
+    second = action->linkedA;
+    if (second->lookupId == id) {
         return second;
     }
-    third = *(s32 *)(owner + 0xFC);
-    if (third != 0 && *(u8 *)(third + 0x11C) == id) {
+    third = action->linkedB;
+    if (third != NULL && third->lookupId == id) {
         return third;
     }
-    return 0;
+    return NULL;
 }
 
 extern BtlCameraPathPreset D_00359EF0[18];
@@ -4098,7 +4098,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
     case 3:
     case 0x14:
         if (p->focusPolicy.kind == 0x14) {
-            unit = (BtlUnit *)btlFindLinkedActorById((s32)action, 1);
+            unit = btlFindLinkedActorById(action, 1);
         } else if (p->focusPolicy.kind == 0) {
             unit = action->task->unit;
         } else if (p->focusPolicy.kind == 2) {
@@ -4452,7 +4452,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         break;
 
     case 1: case 0x12: case 0x13: case 0x15: /* 001E7888 */
-        if (p->eyePolicy.kind == 0x15) unit = (BtlUnit *)btlFindLinkedActorById((s32)action, 1);
+        if (p->eyePolicy.kind == 0x15) unit = btlFindLinkedActorById(action, 1);
         else if (p->eyePolicy.kind == 1) unit = action->task->unit;
         else if (p->eyePolicy.kind == 0x12) unit = action->linkedA;
         else unit = action->linkedB;
@@ -4953,14 +4953,14 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
 
     case 0xB: case 0xC: /* 001E8C60 */
         if (btlNextScaledRandom(2) == 0) {
-            btlUnitGetPosVU((BtlUnit *)btlFindLinkedActorById((s32)action, 0), 0);
+            btlUnitGetPosVU(btlFindLinkedActorById(action, 0), 0);
             VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-            btlUnitGetPosVU((BtlUnit *)btlFindLinkedActorById((s32)action, 1), 0);
+            btlUnitGetPosVU(btlFindLinkedActorById(action, 1), 0);
             VU0_STORE_VF_UNCLOBBERED(vf10, alternatePoint);
         } else {
-            btlUnitGetPosVU((BtlUnit *)btlFindLinkedActorById((s32)action, 1), 0);
+            btlUnitGetPosVU(btlFindLinkedActorById(action, 1), 0);
             VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-            btlUnitGetPosVU((BtlUnit *)btlFindLinkedActorById((s32)action, 2), 0);
+            btlUnitGetPosVU(btlFindLinkedActorById(action, 2), 0);
             VU0_STORE_VF_UNCLOBBERED(vf10, alternatePoint);
         }
         VU0_LOAD_VF(vf10, actorPoint);
