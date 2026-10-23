@@ -11326,10 +11326,10 @@ void effDrawMovingRadialCylinder(EffActiveResource *work) {
 }
 
 void effSyncFadeColorToTargets(void) {
-    s32 owner = (s32)(u32)btlGetRuntime();
+    BtlState *state = (BtlState *)btlGetRuntime();
 
-    if ((((BtlState *)owner)->battleFlags & 0x6000000) == 0x6000000) {
-        BtlUnit *node = ((BtlState *)owner)->units;
+    if ((state->battleFlags & 0x6000000) == 0x6000000) {
+        BtlUnit *node = state->units;
 
         while (node != 0) {
             if (node->status.flags & 2) {
