@@ -10782,7 +10782,7 @@ s32 btlUpdateTargetSelectionTask(dds3ProcessID_t *handle) {
 
 
 
-extern s32 btlBuildUnitIndexList(void *source, BtlIndexList *list, s32, s32, s32);
+extern s32 btlBuildUnitIndexList(ActionStateLink *source, BtlIndexList *list, s32, s32, s32);
 
 extern u32 btlSelectCommandTargetPolicy(ActionStateLink *source, BtlIndexList *list, s32);
 
@@ -10805,9 +10805,9 @@ SceneAiWork *btlCreateTargetSelectionWork(ActionStateLink *source) {
         other = (BattleActorPanelWork *)dds3GetProcessData(dds3SearchProcessName(D_004367CC));
         count = btlCountFlaggedSceneActors();
         if (count < 2 && (DDS3_GBWK->party[other->partyRecordIndex].status & 0x4800)) {
-            btlBuildUnitIndexList((void *)source, work->listA, 1, 4, -0x4801);
+            btlBuildUnitIndexList(source, work->listA, 1, 4, -0x4801);
         } else {
-            btlBuildUnitIndexList((void *)source, work->listA, 1, 4, -1);
+            btlBuildUnitIndexList(source, work->listA, 1, 4, -1);
         }
         btlGetIndexListCount(work->listA);
         work->result = 0;

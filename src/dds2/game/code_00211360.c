@@ -109,7 +109,7 @@ extern s32 btlReadCurrentUnitMp(datUnitWork_t *);
 
 extern s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *);
 
-extern s32 btlBuildUnitIndexList(void *, BtlIndexList *, s32, s32, s32);
+extern s32 btlBuildUnitIndexList(ActionStateLink *, BtlIndexList *, s32, s32, s32);
 
 extern s32 btlUnitHasNegativeActionQueryResult(BtlUnit *unit, s32 mask);
 
@@ -1083,14 +1083,14 @@ u8 btlQueryActorOptionAvailability(u32 unitAddress) {
 s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
     u32 entryIndex;
     u32 entryCount;
-    s32 contextAddress;
+    ActionStateLink *actor;
     BtlIndexList *indexList;
     if (unit->status.flags & 0x400) {
         return 0;
     }
-    contextAddress = (s32)btlActionScratchWork->actor;
+    actor = btlActionScratchWork->actor;
     indexList = btlAllocateIndexList(13);
-    btlBuildUnitIndexList((void *)contextAddress, indexList, 2, 0, 0);
+    btlBuildUnitIndexList(actor, indexList, 2, 0, 0);
     entryCount = btlGetIndexListCount(indexList);
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
         if (btlAreUnitStatusAndEntryFlagsClear((BtlUnit *)btlGetIndexListEntry(indexList, entryIndex)) != 0) {
