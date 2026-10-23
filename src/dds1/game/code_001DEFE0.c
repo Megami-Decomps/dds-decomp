@@ -9023,14 +9023,14 @@ u32 btlWaitUnitListIdle(void) {
     return 1;
 }
 
-void *btlCreateWaitUnitListIdleTask(u32 sound) {
+BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32 sound) {
     u8 *task = btlAllocTask(4);
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x30;
     *(void **)(task + 0x4C) = btlWaitUnitListIdle;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u32 *)btlGetTaskArguments(task) = sound;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 u32 sndApplyToActiveActors(u32 *soundId) {
@@ -9050,14 +9050,14 @@ u32 sndApplyToActiveActors(u32 *soundId) {
     return 1;
 }
 
-void *btlCreateApplyToActiveActorsTask(u32 sound) {
+BtlRuntimeTask *btlCreateApplyToActiveActorsTask(u32 sound) {
     u8 *task = btlAllocTask(4);
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x31;
     *(void **)(task + 0x4C) = sndApplyToActiveActors;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u32 *)btlGetTaskArguments(task) = sound;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 u32 btlCancelTimedFadeTask(void) {
@@ -9165,7 +9165,7 @@ u32 btlTaskStartFadeIn(u32 *taskArgs) {
     return 1;
 }
 
-void *btlCreateFadeInTask(u32 sound) {
+BtlRuntimeTask *btlCreateFadeInTask(u32 sound) {
     u8 *task = btlAllocTask(4);
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x35;
@@ -9173,7 +9173,7 @@ void *btlCreateFadeInTask(u32 sound) {
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u32 *)(task + 0x48) = 0;
     *(u32 *)btlGetTaskArguments(task) = sound;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 u32 btlTaskStartCustomFadeIn(u8 *taskArgs) {

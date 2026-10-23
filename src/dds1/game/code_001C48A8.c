@@ -881,8 +881,8 @@ void fldEnableSceneGroupAdvancement(void);
 struct BtlRuntimeTask;
 extern s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex);
 extern struct BtlRuntimeTask * btlCreateFadeStateResetTask(void);
-extern void * btlCreateApplyToActiveActorsTask(u32 sound);
-extern void * btlCreateWaitUnitListIdleTask(u32 sound);
+extern struct BtlRuntimeTask *btlCreateApplyToActiveActorsTask(u32 sound);
+extern struct BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32 sound);
 
 s32 fldSceneStateWaitScriptRelease(u8 *scene) {
     s32 finished = 1;
