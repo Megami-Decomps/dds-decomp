@@ -32,7 +32,7 @@ typedef char ObjBase_size_must_be_0xB4[(sizeof(dds3ObjectBaseControlWorkData_t) 
 typedef char ObjBase_resourceSlotFamily_offset_must_be_0xAC[
     ((u32)&((dds3ObjectBaseControlWorkData_t *)0)->resourceSlotFamily == 0xAC) ? 1 : -1];
 
-dds3ObjectBaseControlWorkData_t *dds3CreateSlotResourceState(void *owner);
+dds3ObjectBaseControlWorkData_t *dds3CreateSlotResourceState(dds3Basic_t *owner);
 void dds3ObjectBaseCreateMover(void *object);
 dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *object);
 void *dds3ObjectBaseGetModelHandle(dds3Basic_t *object);
