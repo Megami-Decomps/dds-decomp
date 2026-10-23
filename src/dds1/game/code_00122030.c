@@ -1712,7 +1712,7 @@ s32 fldUpdateTravelAndEncounters(void) {
     if (!fldGlobalBase.transitionMode && !fldRunDanteGunFlag[0x44 / 4]) return 0;
     if (!fldEncountTestFlag(0x10)) return 0;
     fldGlobalBase.encounterMode = 0;
-    encounter = fldGlobalBase.unkE0;
+    encounter = fldGlobalBase.encounterOverrideId;
     if (encounter == 0) encounter = fldGlobalBase.defaultEncounterId;
     D_003BAC08.tableIndex = encounter;
     selection = &D_003BAC08.encounterSelection;
