@@ -47,13 +47,13 @@ void evtFreeAllUnit(void) {
     }
 }
 
-extern char D_003C8BA0[];
+extern f32 D_003C8BA0[];
 extern KwlnDrawVectorParams D_003C8C60[];
 extern char D_003C8C80[];
 extern dds3Basic_t *dds3AddScene(void);
 extern void evtSetTestCamera(void);
 extern void dds3SetScreenFovy(f32 fieldOfView);
-extern void dds3SetLight(void *lightSource, s32 index);
+extern void dds3SetLight(f32 *lightSource, s32 index);
 extern void dds3SetFog(KwlnDrawVectorParams *source);
 extern void dds3SetAmbient(u128 *source);
 
@@ -78,8 +78,8 @@ s32 evtLoadArea(s32 area, s32 room)
         dds3SetScreenFovy(0.75398216f);
     }
     dds3SetLight(D_003C8BA0, 0);
-    dds3SetLight(D_003C8BA0 + 0x40, 1);
-    dds3SetLight(D_003C8BA0 + 0x80, 2);
+    dds3SetLight(D_003C8BA0 + 0x10, 1);
+    dds3SetLight(D_003C8BA0 + 0x20, 2);
     dds3SetFog(D_003C8C60);
     dds3SetAmbient((u128 *)D_003C8C80);
     return 1;
@@ -106,8 +106,8 @@ s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1D
     evtSetTestCamera();
     dds3SetScreenFovy(0.75398216f);
     dds3SetLight(D_003C8BA0, 0);
-    dds3SetLight(D_003C8BA0 + 0x40, 1);
-    dds3SetLight(D_003C8BA0 + 0x80, 2);
+    dds3SetLight(D_003C8BA0 + 0x10, 1);
+    dds3SetLight(D_003C8BA0 + 0x20, 2);
     dds3SetFog(D_003C8C60);
     dds3SetAmbient((u128 *)D_003C8C80);
     while (sdfDelayedResrcCheck() != 0) {
