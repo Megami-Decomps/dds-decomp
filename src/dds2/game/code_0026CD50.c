@@ -26,7 +26,7 @@ extern EvtLoadedRecord *mnuMantraPanelPositionTable;
 
 extern EvtLoadedRecord *mnuMantraNodePositionTable;
 
-extern EvtLoadedRecord *evtCreateLoadedRecord(u32 sourceAddress);
+extern EvtLoadedRecord *evtCreateLoadedRecord(const u8 *resourceData);
 
 /* Packed resource header in front of the record data and its relocation list. */
 typedef struct EvtLoadedRecordHeader {
@@ -42,22 +42,22 @@ extern void dds3ApplyRelocationOffsets(u8 *base, u32 adjustment, u32 *offsets, u
 
 /* Copy a loaded resource's records into a new block behind the handle header
  * and relocate them in place; the relocation list lives in a temporary block. */
-EvtLoadedRecord *evtCreateLoadedRecord(u32 sourceAddress) {
+EvtLoadedRecord *evtCreateLoadedRecord(const u8 *resourceData) {
     u8 fileHeader[0x10];
     EvtLoadedRecordHeader header;
     u32 offset;
-    u8 *source;
+    const u8 *source;
     struct sdfMemHandle_t *handle;
     EvtLoadedRecord *record;
     u8 *records;
     struct sdfMemHandle_t *relocationHandle;
     u32 *relocations;
 
-    memcpy(fileHeader, (void *)sourceAddress, sizeof(fileHeader));
+    memcpy(fileHeader, resourceData, sizeof(fileHeader));
     offset = sizeof(fileHeader);
-    memcpy(&header, (u8 *)sourceAddress + offset, sizeof(header));
+    memcpy(&header, resourceData + offset, sizeof(header));
     offset += sizeof(header);
-    source = (u8 *)sourceAddress + offset;
+    source = resourceData + offset;
     handle = sdfMemAllocDirect(header.dataBytes + sizeof(EvtLoadedRecord));
     record = (EvtLoadedRecord *)sdfMemGetPtr(handle);
     record->recordCount = header.recordCount;
@@ -78,7 +78,7 @@ EvtLoadedRecord *evtCreateLoadedRecord(u32 sourceAddress) {
 }
 
 extern void mnuRebuildMantraCategoryAvailability(void);
-void mnuLoadMantraNodePositionTable(u32 resourceId);
+void mnuLoadMantraNodePositionTable(const u8 *resourceData);
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
@@ -90,7 +90,7 @@ void mtrLoadMantraNodePositions(void) {
     request = fileLoad("/facility/data/mtrMantraBlockData.tbl");
     while (!pacFileCheckEnd(request)) {
     }
-    mnuLoadMantraNodePositionTable((u32)fileGetLoadPtr(request));
+    mnuLoadMantraNodePositionTable(fileGetLoadPtr(request));
     mnuRebuildMantraCategoryAvailability();
     sdfMemFreeDirect(fileGetMemHandle(request));
     fileHandleFree(request);
@@ -99,11 +99,11 @@ void mtrLoadMantraNodePositions(void) {
 void mnuReleaseMantraNodePositionTable(void);
 
 /* Replace the node-position resource, releasing an existing table first. */
-void mnuLoadMantraNodePositionTable(u32 resourceId) {
+void mnuLoadMantraNodePositionTable(const u8 *resourceData) {
     if (mnuMantraNodePositionTable != 0) {
         mnuReleaseMantraNodePositionTable();
     }
-    mnuMantraNodePositionTable = evtCreateLoadedRecord(resourceId);
+    mnuMantraNodePositionTable = evtCreateLoadedRecord(resourceData);
 }
 
 /* Release the retained node-position handle and clear the global table address. */
@@ -151,11 +151,11 @@ u32 mnuGetMantraNodePositionRecordCount(void) {
 void mnuReleaseMantraPanelPositionTable(void);
 
 /* Replace the panel-position resource, releasing an existing table first. */
-void mnuLoadMantraPanelPositionTable(u32 resourceId) {
+void mnuLoadMantraPanelPositionTable(const u8 *resourceData) {
     if (mnuMantraPanelPositionTable != 0) {
         mnuReleaseMantraPanelPositionTable();
     }
-    mnuMantraPanelPositionTable = evtCreateLoadedRecord(resourceId);
+    mnuMantraPanelPositionTable = evtCreateLoadedRecord(resourceData);
 }
 
 /* Release the retained panel-position handle and clear the global table address. */
@@ -538,4 +538,3 @@ void scrClearPartyProfileEntryBit15(datUnitWork_t *context, u8 entry) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_0026CD50", D_00425098);
-
