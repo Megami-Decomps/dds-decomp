@@ -1252,16 +1252,18 @@ u32 btlMode313KeepDefaultSceneVariant(void) {
 extern s32 btlFindScriptResource(char *name);
 
 s32 btlConsumeReadyEventScriptResource(void) {
+    BattleEventResourceTriggerState *trigger;
+    BtlState *battle;
     s32 result = -1;
-    s32 state;
 
-    state = *(s32 *)((u8 *)btlGetRuntime() + 0x718);
-    if (*(s8 *)(state + 0) != 0) {
-        if (*(s8 *)(state + 1) != 0) {
-            *(u8 *)(state + 1) = 0;
+    battle = (BtlState *)btlGetRuntime();
+    trigger = &battle->effect->eventTrigger;
+    if ((s8)trigger->consumed != 0) {
+        if ((s8)trigger->armed != 0) {
+            trigger->armed = 0;
             return btlFindScriptResource(D_00436CF8);
         }
-        *(u8 *)(state + 0) = 0;
+        trigger->consumed = 0;
         return -1;
     }
     return result;
