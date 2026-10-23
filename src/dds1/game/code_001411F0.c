@@ -24,6 +24,7 @@
 #include "fld_spark_slot.h"
 #include "fld_spark_controller_state.h"
 #include "sdf_math_vector4.h"
+#include "sdf_vu_matrix.h"
 #include "kwln_fade.h"
 #include "mnu_title_stream.h"
 #include "eff_random.h"
@@ -3153,11 +3154,140 @@ void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
     evtSetUnitLightAndAmbient(unit, 0, colorA, colorB);
 }
 
-INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0718);
+/* Area/floor/name rules select an NPC model, animation and LOD. */
+typedef struct FldNpcPlacementRule {
+    s16 area, floor;
+    char name[16];
+    s8 kind;
+    u8 resource;
+    s8 lod, motion;
+    s16 alternateFlag;
+    u8 alternateResource;
+    s8 alternateLod, alternateMotion, behavior;
+    s16 requiredFlagA, requiredFlagB, requiredFlagC;
+} FldNpcPlacementRule;
+typedef char FldNpcPlacementRule_size_check[
+    (sizeof(FldNpcPlacementRule) == 0x24) ? 1 : -1];
 
-INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0728);
+extern FldNpcPlacementRule D_00349030[400];
+extern void FromRotation(f32 angle);
+extern dds3Basic_t *dds3AddUnitObjectBasic(s32 value, void *position, void *rotation);
+extern void dds3RebuildObjectModelContext(dds3Basic_t *node, s32 kind, s32 resource);
+extern void dds3GetRadiusPoseSet(dds3Basic_t *node, f32 value);
+extern u32 sdfGetLodChunkValue(sdfModelRootNode_t *model);
+extern void fldAddItemBoxObject(s32 room, f32 x, f32 y, f32 z, f32 radius, f32 height);
+extern void fldSpawnNpcTrigger(f32 x, f32 y, f32 z, f32 height, const char *name, s32 arg1, s32 room, s32 index);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_001480D0);
+void func_001480D0(u32 key, f32 *orientation, f32 x, f32 y, f32 z,
+                   s32 room, const char *name, s32 argument) {
+    f32 position[4];
+    f32 rotation[4];
+    s32 outputIndex;
+    s32 kind, resource, motion, lod;
+    s32 behavior = 0;
+    s32 i;
+    f32 radius, height, hitHeight, size;
+    dds3Basic_t *object;
+    dds3ModelHandle_t *model;
+    sdfModelRootNode_t *inner;
+
+    memset(position, 0, sizeof(position));
+    position[3] = 1.0f;
+    memset(rotation, 0, sizeof(rotation));
+    {
+        f32 scale[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+        f32 axis[4] = {0.0f, 1.0f, 0.0f, 1.0f};
+        kind = 3;
+        resource = 9;
+        motion = 0;
+        lod = 0;
+        outputIndex = fldNpcModelTable;
+        fldModelSlotTable[outputIndex].x = x;
+        fldModelSlotTable[outputIndex].y = y;
+        fldModelSlotTable[outputIndex].z = z;
+        fldModelSlotTable[outputIndex].orientation[0] = orientation[0];
+        fldModelSlotTable[outputIndex].orientation[1] = orientation[1];
+        fldModelSlotTable[outputIndex].orientation[2] = orientation[2];
+        fldModelSlotTable[outputIndex].unk0 = key;
+        fldModelSlotTable[outputIndex].orientation[3] = orientation[3];
+        fldModelSlotTable[outputIndex].unk2C = 0.0f;
+        fldModelSlotTable[outputIndex].unk30 = 0;
+        fldModelSlotTable[outputIndex].unk3C = 0;
+        fldModelSlotTable[outputIndex].object = NULL;
+        fldModelSlotTable[outputIndex].unk34 = 0;
+        fldModelSlotTable[outputIndex].room = room;
+        strcpy(fldModelSlotTable[outputIndex].name, name);
+        for (i = 0; i < 400; i++) {
+            if (D_00349030[i].area == fldGlobalBase.area &&
+                D_00349030[i].floor == fldGlobalBase.floor + 1 &&
+                strcmp(D_00349030[i].name, name) == 0) {
+                if (D_00349030[i].requiredFlagA != 0 && !evtBitCheck(D_00349030[i].requiredFlagA)) return;
+                if (D_00349030[i].requiredFlagB != 0 && !evtBitCheck(D_00349030[i].requiredFlagB)) return;
+                if (D_00349030[i].requiredFlagC != 0 && !evtBitCheck(D_00349030[i].requiredFlagC)) return;
+                behavior = D_00349030[i].behavior;
+                kind = D_00349030[i].kind;
+                resource = D_00349030[i].resource;
+                motion = D_00349030[i].motion;
+                lod = D_00349030[i].lod;
+                if (D_00349030[i].alternateFlag != 0 && evtBitCheck(D_00349030[i].alternateFlag)) {
+                    resource = D_00349030[i].alternateResource;
+                    motion = D_00349030[i].alternateMotion;
+                    lod = D_00349030[i].alternateLod;
+                }
+                break;
+            }
+        }
+        fldModelSlotTable[outputIndex].kind = kind;
+        fldModelSlotTable[outputIndex].kindId = resource;
+        fldModelSlotTable[outputIndex].unk3E = lod;
+        if (behavior == 1) {
+            radius = 50.0f; height = 180.0f; hitHeight = 100.0f;
+            size = 30.0f;
+        } else if (behavior == 2) {
+            radius = 100.0f; height = 230.0f; hitHeight = 100.0f;
+            size = 80.0f;
+        } else {
+            radius = 20.0f; height = 160.0f; hitHeight = 100.0f;
+            size = 0.0f;
+        }
+        fldModelSlotTable[outputIndex].size = size;
+        if (dds3SceneBasicSearchName(dds3GetControlScene(), "TEX_UNIT") == NULL) {
+            object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
+            dds3SetUnitObjectId(object, (u32)"TEX_UNIT");
+            dds3RebuildObjectModelContext(object, 3, 0x60);
+            dds3ObjectBaseOffFlag(object, 0x400);
+            model = dds3ObjectBaseGetModelHandle(object);
+            model->flags |= 1;
+        }
+        position[0] = x;
+        position[1] = y;
+        position[2] = z;
+        SDF_VU0_LOADVECTOR(axis);
+        FromRotation(3.14159265f);
+        SDF_VU0_LOADVECTOR_B(orientation);
+        effMiscQuatMultiplyVU();
+        /* Audited SDK-style store: the complete output goes directly to opaque
+         * constructor calls, with no scalar C readback or loop reuse. */
+        SDF_VU0_STOREVECTOR_NOMEM(rotation);
+        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
+        dds3SetUnitObjectId(object, (u32)"NPC_MDL_UNIT");
+        fldModelSlotTable[outputIndex].object = (s32 *)object;
+        dds3RebuildObjectModelContext(object, kind, resource);
+        dds3SetSclPoseSet(object, (u128 *)scale);
+        if (kind == 3 && resource == 8) dds3GetRadiusPoseSet(object, 50.0f);
+        model = dds3ObjectBaseGetModelHandle(object);
+        model->first->frameStep = 1.0f;
+        mdlLoopMotion(model, 0, motion);
+        inner = model->inner;
+        sdfGetLodChunkValue(inner);
+        inner->lodIndex = lod;
+        dds3ObjectBaseOnFlag(object, 0x400);
+        fldInitializeHuntSparkUnit(evtGetUnitHandle2(object));
+        fldAddItemBoxObject(room, x, y, z, radius, hitHeight);
+        fldSpawnNpcTrigger(x, y, z, height, name, argument, room, fldNpcModelTable);
+        fldNpcModelTable++;
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0758);
 
