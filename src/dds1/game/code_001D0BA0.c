@@ -2842,11 +2842,11 @@ void btlUpdateUnitEffects(void) {
 
     while (object != 0) {
         if ((u32)object->status.flags & 2) {
-            u8 *resource =
-                (u8 *)btlGetSideIndexedActorStatusTable(object->resourceKind, object->species);
+            BtlEffectResource *resource = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(
+                object->resourceKind, object->species);
             dds3ModelHandle_t *model = object->ext->owner;
             s32 node = mdlGetMotionNum(model, 0);
-            if (*(s16 *)(resource + node * 20 + 0x30) == 1 &&
+            if (resource->nodes[node].rateKind == 1 &&
                 btlIsActorModeAcceptedByBattleHook(object) == 0) {
                 btlRefreshUnitMotionSelection(object);
                 btlApplyUnitMotionSelection(object, object->effectIndex, object->effectParameter,
