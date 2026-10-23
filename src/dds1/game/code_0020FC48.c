@@ -1155,14 +1155,14 @@ void btlReleaseFoundModelEntry(s32 modelKind, s32 modelId) {
 }
 
 extern SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id);
-extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId);
+extern const SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId);
 
 /* Finalize the existing kind/id entry: adopt or release its motion-SE packet
  * resources, retire the pack request, and mark the cache entry ready. */
 void btlFinalizeModelPackEntry(s32 kind, s32 id) {
     BattleModelEntry *entry = btlFindModelEntry(kind, id);
     PacWork *node;
-    SoundSlotTableEntry *parts;
+    const SoundSlotTableEntry *parts;
     s32 i;
 
     if (entry->finalized == BTL_MODEL_ENTRY_UNFINALIZED) {
@@ -1175,7 +1175,7 @@ void btlFinalizeModelPackEntry(s32 kind, s32 id) {
                 for (i = 0; i < count; i++) {
                     /* Capture the row before field access; see docs/idioms.md,
                      * "Trace-justified pointer staging: sound-table row". */
-                    SoundSlotTableEntry *part = parts + i;
+                    const SoundSlotTableEntry *part = parts + i;
                     if (part->resourceOffset >= 0) {
                         entry->soundOwner->work.resourceHandles[i] = (struct sdfMemHandle_t *)node->resourceHandle;
                         node = node->next;

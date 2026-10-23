@@ -9327,13 +9327,13 @@ void sndClearList(void) {
     }
 }
 
-extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId);
+extern const SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId);
 
 /* Return the category/id/slot's packed motion-SE key, or zero if unavailable. */
 u32 sndBuildMotSeResourceKey(const SoundSlotOwner *sound, u32 slot) {
     u32 id = sound->work.id;
     u32 category = sound->category;
-    SoundSlotTableEntry *table = btlSelectSideIndexedActorParameterTable(category, id);
+    const SoundSlotTableEntry *table = btlSelectSideIndexedActorParameterTable(category, id);
     s32 specialCategory = 1;
     s32 scaledId = id * 0x20;
     s32 offset;
@@ -9494,8 +9494,8 @@ s32 sndHasActiveFileLoad(void) {
 /* Queue a ready owner's packed track; stream slot 11 only supplies its file ID. */
 void btlQueueUnitSoundSlotFileLoad(BtlRuntimeTaskArgs *args) {
     SoundSlotOwner *owner = ((BtlUnit *)args->actor)->soundSlotOwner;
-    SoundSlotTableEntry *table;
-    SoundSlotTableEntry *entry;
+    const SoundSlotTableEntry *table;
+    const SoundSlotTableEntry *entry;
     if (owner == 0) {
         return;
     }

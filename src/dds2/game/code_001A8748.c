@@ -1839,11 +1839,11 @@ BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 sid
     return (BtlActorTransformParameters *)(D_00435E00 + index * 24);
 }
 
-SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId) {
+const SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId) {
     if (category == 0) {
-        return (SoundSlotTableEntry *)(D_00435DE4 + actorId * 0x74);
+        return (const SoundSlotTableEntry *)(D_00435DE4 + actorId * 0x74);
     }
-    return (SoundSlotTableEntry *)(D_00435DF8 + actorId * 0x74);
+    return (const SoundSlotTableEntry *)(D_00435DF8 + actorId * 0x74);
 }
 
 s32 btlGetLoggedIndexedCommandItem(s32 index) {
