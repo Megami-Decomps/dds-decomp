@@ -137,7 +137,7 @@ extern s8 D_003D7588[];
 
 extern BattleRuntimeState btlRuntimeState;
 
-extern s32 btlMatchActorEntryCode(void *, s32);
+extern s32 btlMatchActorEntryCode(BtlUnit *, s32);
 
 extern s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *);
 
@@ -763,7 +763,7 @@ s32 btlIndexListNoExpiredEntryCodes(BtlIndexList *indexList, s32 commandId) {
     s32 entryCount = btlGetIndexListCount(indexList);
     s32 entryIndex;
     u32 codeIndex;
-    void *actorEntry;
+    BtlUnit *actorEntry;
     s32 requirementBits;
 
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
