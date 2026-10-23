@@ -4025,7 +4025,7 @@ extern f32 btlGetUnitCameraClearance(BtlUnit *, u8, f32, f32);
 
 extern BtlUnit *btlFindActiveActorById(s32 id);
 
-extern u32 btlCountUnitsByFlags(u32);
+extern s32 btlCountUnitsByFlags(u32);
 
 extern f32 btlMeasureBattleSideBoundsWithSeed(s32, f32 *, f32 *, const f32 *, const f32 *, const f32 *, f32);
 
@@ -4797,7 +4797,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
     case 0x17: case 0x19: case 0x29: /* 001E86A0 */
         if (p->eyePolicy.kind != 0x29) {
             worldAxis[0] = p->eyePolicy.side;
-            if ((s32)btlCountUnitsByFlags(0x200) < 3) {
+            if (btlCountUnitsByFlags(0x200) < 3) {
                 if (p->eyePolicy.kind == 0x19) {
                     sourceId = action->task->unit->lookupId;
                     if (sourceId == 1 || action->linkedA->lookupId == 1) {
@@ -4817,7 +4817,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             span = btlMeasureMaskedUnitBounds(0x200, 0, 0);
             measuredDistance = span / tanf(halfFov);
             VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-            if ((s32)btlCountUnitsByFlags(0x200) < 3) {
+            if (btlCountUnitsByFlags(0x200) < 3) {
                 if (action->task->unit->lookupId == 1 || action->linkedA->lookupId == 1)
                     measuredDistance *= 1.3f;
             }
@@ -7487,7 +7487,7 @@ f32 btlBuildProjectedActorPairBoundsVU(s32 mask, BtlUnit *first, BtlUnit *second
     return radius;
 }
 
-u32 btlCountUnitsByFlags(u32 mask) {
+s32 btlCountUnitsByFlags(u32 mask) {
     s32 context = (s32)(u32)btlGetRuntime();
     BtlUnit *actor = *(BtlUnit **)(context + 0x228);
     s32 count = 0;
