@@ -2980,7 +2980,7 @@ extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *, s32);
 
 extern void btlRefreshUnitFxVectors(BtlUnit *);
 
-s32 btlSetActorEffectParameter(object, value)
+s8 btlSetActorEffectParameter(object, value)
 BtlUnit *object;
 s32 value;
 {
