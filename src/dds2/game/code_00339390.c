@@ -42,7 +42,7 @@ typedef struct {
     u32 ringWrapCount;     /* 0x70 */
     u32 ringCount;         /* 0x74 */
     VuBlendNode *blend;    /* 0x78 */
-    u32 ringEnd;           /* 0x7C */
+    VuBlendNode **ringEnd; /* 0x7C: next-link destination */
     u32 state;             /* 0x80 */
     u32 header;            /* 0x84 */
     u8 *dataStart;         /* 0x88 */
