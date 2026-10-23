@@ -31,7 +31,7 @@ void dds3EffectRippleBlurReset(EffBlurScaleWork *work) {
 /* Allocate an owner and slot array from only the serialized parameter prefix. */
 EffBlurScaleWork *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *src) {
     s32 count = src->count;
-    void *allocation = sdfMemAllocDirect(count * 0x30 + 0x38);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(count * 0x30 + 0x38);
     EffBlurScaleWork *work = (EffBlurScaleWork *)sdfMemLock(allocation);
     EffBlurScaleSlot *slot;
     s32 i = 0;
