@@ -812,7 +812,7 @@ sdfMemHandle_t *evtPolygonMovieSynthesizePmd3Header(PmdHeader **out) {
 
     memset(buffer, 0, headerBytes);
     memcpy(buffer + 8, D_004373B8, 4);
-    *(s32 *)(buffer + 0x14) = 9;
+    ((PmdHeader *)buffer)->kind = 9;
     handle = sdfMemAllocDirect(headerBytes);
     address = (u8 *)sdfMemLock(handle);
     memcpy(address, buffer, headerBytes);
