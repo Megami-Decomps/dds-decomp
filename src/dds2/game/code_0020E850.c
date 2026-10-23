@@ -131,15 +131,15 @@ extern const u8 *D_003BEB50[];
 extern const u8 *D_003BEB58[];
 extern const u8 *D_003BEB60[];
 extern s32 btlRollAiBucket(void);
-extern s32 btlPollCategoryLabelTask(void *args);
-extern s32 btlPollActorOrEntryLabelTask(void *args);
+extern s32 btlPollCategoryLabelTask(BtlEffLink *args);
+extern s32 btlPollActorOrEntryLabelTask(BtlEffLink *args);
 extern s32 func_0020FA98(BtlLinkedEffectArgs *args);
-extern s32 btlPollTimedTaskLink(void *args);
-extern s32 btlPollActorDialogTask(void *args);
-extern s32 btlUpdateLinkedDialogueEffect(void *args);
-extern s32 btlPollTimedPresentationTask(void *args);
-extern s32 btlPollEffectWaitTask(void *args);
-extern s32 btlAdvanceActorEffectLabelTask(void *args);
+extern s32 btlPollTimedTaskLink(BtlEffLink *args);
+extern s32 btlPollActorDialogTask(BtlEffLink *args);
+extern s32 btlUpdateLinkedDialogueEffect(BtlEffLink *args);
+extern s32 btlPollTimedPresentationTask(BtlEffLink *args);
+extern s32 btlPollEffectWaitTask(BtlEffLink *args);
+extern s32 btlAdvanceActorEffectLabelTask(BtlEffLink *args);
 
 extern s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args);
 
@@ -840,8 +840,7 @@ BtlRuntimeTask *btlCreateEffectCounterTask(BtlUnit *owner, s32 kind) {
     return task;
 }
 
-s32 btlPollActorOrEntryLabelTask(void *arguments) {
-    BtlEffLink *link = arguments;
+s32 btlPollActorOrEntryLabelTask(BtlEffLink *link) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
     BtlUnit *owner = link->owner;
 
@@ -888,8 +887,7 @@ BtlRuntimeTask *btlCreateEffObjD(BtlUnit *owner, s32 resourceIndex) {
     return task;
 }
 
-s32 btlPollTimedTaskLink(void *arguments) {
-    BtlEffLink *link = arguments;
+s32 btlPollTimedTaskLink(BtlEffLink *link) {
     btlGetRuntime();
     if (link->elapsedTicks == 0) {
         btlCreateSkillNamePanel(D_00435E5C + link->arg * 25);
@@ -918,8 +916,7 @@ BtlRuntimeTask *btlCreateOwnerLinkedTimedTask(BtlUnit *owner, s32 skillNameIndex
     return task;
 }
 
-s32 btlPollCategoryLabelTask(void *arguments) {
-    BtlEffLink *link = arguments;
+s32 btlPollCategoryLabelTask(BtlEffLink *link) {
     BtlUnit *owner;
 
     btlGetRuntime();
@@ -990,8 +987,7 @@ BtlRuntimeTask *btlCreateEffObjA(BtlUnit *owner, s32 category) {
     return task;
 }
 
-s32 btlPollActorDialogTask(void *arguments) {
-    BtlEffLink *link = arguments;
+s32 btlPollActorDialogTask(BtlEffLink *link) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
     BtlUnit *owner = link->owner;
 
@@ -1027,8 +1023,7 @@ BtlRuntimeTask *btlCreateEffObjB(BtlUnit *owner, s32 messageId) {
     return task;
 }
 
-s32 btlUpdateLinkedDialogueEffect(void *arguments) {
-    BtlEffLink *link = arguments;
+s32 btlUpdateLinkedDialogueEffect(BtlEffLink *link) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
     BtlUnit *owner = link->owner;
 
@@ -1089,8 +1084,7 @@ BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 messageId) {
     return task;
 }
 
-s32 btlPollTimedPresentationTask(void *arguments) {
-    BtlEffLink *link = arguments;
+s32 btlPollTimedPresentationTask(BtlEffLink *link) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
     BtlUnit *owner = link->owner;
 
@@ -1124,8 +1118,7 @@ BtlRuntimeTask *btlCreateOwnerLinkedTimedPresentation(BtlUnit *owner, s32 messag
     return task;
 }
 
-s32 btlPollEffectWaitTask(void *arguments) {
-    BtlEffLink *link = arguments;
+s32 btlPollEffectWaitTask(BtlEffLink *link) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
 
     if (link->elapsedTicks == 0) {
@@ -1196,8 +1189,7 @@ BtlRuntimeTask *btlCreateEffectTask44(BtlUnit *owner) {
     return task;
 }
 
-s32 btlAdvanceActorEffectLabelTask(void *arguments) {
-    BtlEffLink *link = arguments;
+s32 btlAdvanceActorEffectLabelTask(BtlEffLink *link) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
     BtlUnit *owner = link->owner;
     char text[0x100];
