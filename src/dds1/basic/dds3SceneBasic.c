@@ -82,7 +82,7 @@ void dds3SceneBasicReleaseScriptFile(dds3Basic_t *worldNode) {
 
 /* Starts the named script task on the scene object's resource; stays asm:
    retail's beqz/b merge of the two exit paths has no plain-C shape. */
-s32 evtStartSceneResourceTask(dds3Basic_t *worldNode, const char *taskName) {
+dds3ProcessID_t *evtStartSceneResourceTask(dds3Basic_t *worldNode, const char *taskName) {
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
     struct BfFlw0Header *sceneScript = worldData->sceneScript;
     s32 scriptIndex;
@@ -100,7 +100,7 @@ s32 evtStartSceneResourceTask(dds3Basic_t *worldNode, const char *taskName) {
     if (dds3SearchProcessName(taskName) != NULL) {
         return 0;
     }
-    return (s32)scrStartScript2(0x3EA, sceneScript, scriptIndex);
+    return scrStartScript2(0x3EA, sceneScript, scriptIndex);
 }
 
 /* Destroy the task selected by taskName; NULL or an absent task is a no-op.

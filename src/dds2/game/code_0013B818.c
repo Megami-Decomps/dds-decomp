@@ -101,7 +101,7 @@ extern u32 fldValueRecordResource;
 extern s32 D_004361F8;
 
 
-extern u32 fldRoomTaskHandles[];
+extern dds3ProcessID_t *fldRoomTaskHandles[];
 
 
 extern s32 fldEveRngCount;
@@ -284,7 +284,8 @@ void fldResetZoneRecordsAndActorSlots(void) {
             fldEveHitTable[roomIndex].plane[vectorIndex][3] = 1.0f;
             fldEveHitTable[roomIndex].limit[vectorIndex] = 0.0f;
         }
-        fldRoomTaskHandles[roomIndex] = 0;
+        /* Retain the native word clear in this register-sensitive reset loop. */
+        *(u32 *)&fldRoomTaskHandles[roomIndex] = 0;
         fldEveHitTable[roomIndex].worldObjectKey = 0;
         fldEveHitTable[roomIndex].sizeX = 0.0f;
         fldEveHitTable[roomIndex].sizeY = 0.0f;
@@ -320,7 +321,7 @@ void fldEveHit_End(void) {
 
     fldEveHitState = 1;
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
-        fldRoomTaskHandles[slotIndex] = 0;
+        fldRoomTaskHandles[slotIndex] = NULL;
     }
     gFldEveRngIdx = -1;
     gFldEveRngIdx_N = -1;
@@ -573,7 +574,7 @@ s32 fldRoomContainsPoint(f32 *direction, s32 index) {
 INCLUDE_ASM(const s32, "game/code_0013B818", fldStartRoomEventTask);
 
 s32 fldEveHit_ScriptEnd(char *flag, u32 slot) {
-    fldRoomTaskHandles[slot] = 0;
+    fldRoomTaskHandles[slot] = NULL;
     if (scrSearchScriptName(flag) != 0) {
         dds3SceneBasicEndScript(dds3GetActiveScene(), flag);
         return 0;
@@ -582,12 +583,12 @@ s32 fldEveHit_ScriptEnd(char *flag, u32 slot) {
 }
 
 u32 fldEveHit_ScriptEnd2(u32 index) {
-    u32 *taskSlot = &fldRoomTaskHandles[index];
+    dds3ProcessID_t **taskSlot = &fldRoomTaskHandles[index];
 
-    if (dds3ExistProcess((dds3ProcessID_t *)*taskSlot) != 0) {
-        dds3KillProcess((dds3ProcessID_t *)*taskSlot, 0);
+    if (dds3ExistProcess(*taskSlot) != 0) {
+        dds3KillProcess(*taskSlot, 0);
     }
-    *taskSlot = 0;
+    *taskSlot = NULL;
     return 0;
 }
 
@@ -635,10 +636,10 @@ void fldPurgeEveRngProcesses(void) {
     s32 count = fldEveRngCount;
     s32 slotIndex = 0;
     if (count > 0) {
-        u32 *taskSlot = fldRoomTaskHandles;
+        dds3ProcessID_t **taskSlot = fldRoomTaskHandles;
         do {
-            if (dds3ExistProcess((dds3ProcessID_t *)*taskSlot) == 0) {
-                *taskSlot = 0;
+            if (dds3ExistProcess(*taskSlot) == 0) {
+                *taskSlot = NULL;
             }
             slotIndex++;
             taskSlot++;
@@ -650,7 +651,7 @@ void fldPurgeEveRngProcesses(void) {
 s32 fldEveHitResID_Find(dds3ProcessID_t *task) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
-        if (fldRoomTaskHandles[slotIndex] == (u32)task) {
+        if (fldRoomTaskHandles[slotIndex] == task) {
             return fldRoomResources[slotIndex]->id;
         }
     }
@@ -662,7 +663,7 @@ s32 fldFindEveRngIndex(dds3ProcessID_t *task) {
     s32 slotIndex;
 
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
-        if (fldRoomTaskHandles[slotIndex] == (u32)task) {
+        if (fldRoomTaskHandles[slotIndex] == task) {
             return fldEveHitTable[slotIndex].roomId;
         }
     }
@@ -673,7 +674,7 @@ s32 fldFindEveRngIndex(dds3ProcessID_t *task) {
 const char *fldEveHitResName_Find(dds3ProcessID_t *task) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
-        if (fldRoomTaskHandles[slotIndex] == (u32)task) {
+        if (fldRoomTaskHandles[slotIndex] == task) {
             return fldRoomResources[slotIndex]->name;
         }
     }
@@ -821,7 +822,7 @@ s32 fldCheckEntryActive(s32 entry) {
 s32 fldCheckEveRngEncount(void) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
-        if (fldRoomTaskHandles[slotIndex] != 0) {
+        if (fldRoomTaskHandles[slotIndex] != NULL) {
             return 1;
         }
     }

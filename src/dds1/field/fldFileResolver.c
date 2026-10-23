@@ -744,9 +744,6 @@ extern f32 D_003306C0[];
 
 extern f32 D_00330670[];
 
-extern u32 fldRoomTaskHandles[];
-
-
 extern s32 fldUpdateTitleBannerTask(dds3ProcessID_t *task);
 
 extern s32 btlGetRuntimeResult(void);
