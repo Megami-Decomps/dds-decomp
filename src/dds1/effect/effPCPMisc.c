@@ -5010,13 +5010,15 @@ void effPCPRadiateBEDSetColor(EffPCPDriftEventWork *work, u32 val) {
 /* Clone the source effect header, then give every entry two events (placed at the unit scale) and a random negative start frame. */
 EffPCPPairedEventWork *effPCPRadiateTBCreate(EffPCPPairedEventParams *src, void *paramsA, void *paramsB) {
     u32 count = src->count;
-    struct sdfMemHandle_t *handle = sdfMemAllocDirect(count * 32 + 0xA4);
-    EffPCPPairedEventWork *work = (void *)sdfMemLock(handle);
+    struct sdfMemHandle_t *handle;
+    EffPCPPairedEventWork *work;
     EffPCPEventPlace place;
     EffPCPPairedEventRow *entry;
     s32 life;
     u32 i;
 
+    handle = sdfMemAllocDirect(sizeof(*work) + count * sizeof(*entry));
+    work = (void *)sdfMemLock(handle);
     work->params = *src;
     entry = (EffPCPPairedEventRow *)(work + 1);
     work->handle = handle;
@@ -5064,13 +5066,15 @@ EffPCPPairedEventWork *effPCPRadiateTBCreatePCF(void *args) {
 
 EffPCPPairedEventWork *effPCPRadiateTBCopy(EffPCPPairedEventWork *src) {
     u32 count = src->params.count;
-    struct sdfMemHandle_t *handle = sdfMemAllocDirect(count * 32 + 0xA4);
-    EffPCPPairedEventWork *work = (void *)sdfMemLock(handle);
+    struct sdfMemHandle_t *handle;
+    EffPCPPairedEventWork *work;
     EffPCPEventPlace place;
     EffPCPPairedEventRow *entry;
     s32 life;
     u32 i;
 
+    handle = sdfMemAllocDirect(sizeof(*work) + count * sizeof(*entry));
+    work = (void *)sdfMemLock(handle);
     work->params = src->params;
     entry = (EffPCPPairedEventRow *)(work + 1);
     work->handle = handle;
@@ -5271,13 +5275,15 @@ void effPCPRadiateTBSetColor(EffPCPPairedEventWork *work, u32 val) {
 /* Clone the source header, then give every entry one event (placed at the unit scale) and a random negative start frame. */
 EffPCPSpawnRangeWork *effPCPSpiralBEDCreate(EffPCPSpawnRangeParams *src, void *params) {
     u32 count = src->count;
-    struct sdfMemHandle_t *handle = sdfMemAllocDirect(count * 32 + 0xAC);
-    EffPCPSpawnRangeWork *work = (void *)sdfMemLock(handle);
+    struct sdfMemHandle_t *handle;
+    EffPCPSpawnRangeWork *work;
     EffPCPEventPlace place;
     EffPCPSpawnRangeEventRow *entry;
     s32 life;
     u32 i;
 
+    handle = sdfMemAllocDirect(sizeof(*work) + count * sizeof(*entry));
+    work = (void *)sdfMemLock(handle);
     work->params = *src;
     entry = (EffPCPSpawnRangeEventRow *)(work + 1);
     work->handle = handle;
@@ -5322,13 +5328,15 @@ EffPCPSpawnRangeWork *effPCPSpiralBEDCreatePCF(void *args) {
 
 EffPCPSpawnRangeWork *effPCPSpiralBEDCopy(EffPCPSpawnRangeWork *src) {
     u32 count = src->params.count;
-    struct sdfMemHandle_t *handle = sdfMemAllocDirect(count * 32 + 0xAC);
-    EffPCPSpawnRangeWork *work = (void *)sdfMemLock(handle);
+    struct sdfMemHandle_t *handle;
+    EffPCPSpawnRangeWork *work;
     EffPCPEventPlace place;
     EffPCPSpawnRangeEventRow *entry;
     s32 life;
     u32 i;
 
+    handle = sdfMemAllocDirect(sizeof(*work) + count * sizeof(*entry));
+    work = (void *)sdfMemLock(handle);
     work->params = src->params;
     entry = (EffPCPSpawnRangeEventRow *)(work + 1);
     work->handle = handle;
