@@ -230,11 +230,12 @@ extern s32 filePollSlotDetectionAndBranch(void);
 
 extern s32 slSizeChk(void);
 
-extern u32 fileMenuContinuation;
+typedef s32 (*FileMenuContinuationCallback)(void);
+extern FileMenuContinuationCallback fileMenuContinuation;
 
 extern s32 mcdFinishFileDetection(void);
 
-extern s32 fileBeginDetectionRequest(u32 callback);
+extern s32 fileBeginDetectionRequest(FileMenuContinuationCallback callback);
 
 extern s32 filePollSlotRequestAndResumeFlow(void);
 
@@ -1409,14 +1410,14 @@ s32 slExitWaitProc(void) {
     s32 remaining = fileWaitTicksRemaining - 1;
     fileWaitTicksRemaining = remaining;
     if (remaining <= 0) {
-        if (fileMenuContinuation == -1) {
+        if (fileMenuContinuation == (FileMenuContinuationCallback)-1) {
             return -1;
         }
         return ((s32 (*)())fileWaitContinuation)();
     }
     return 0;
 }
-s32 fileSetMenuCallbackAndClearResult(u32 menuCallback) {
+s32 fileSetMenuCallbackAndClearResult(FileMenuContinuationCallback menuCallback) {
     fileMenuContinuation = menuCallback;
     D_00437D40 = 0;
     return (s32)mcdFinishFileDetection;
@@ -1431,15 +1432,15 @@ s32 mcdFinishFileDetection(void) {
         if (mcdOriginalTitleFileMode == 0) {
             p2sdStopBGM(0x310000);
         }
-        if (fileMenuContinuation == (u32)-1) {
+        if (fileMenuContinuation == (FileMenuContinuationCallback)-1) {
             return slExitWait((void *)-1);
         }
-        return ((s32 (*)())fileMenuContinuation)();
+        return fileMenuContinuation();
     }
     return 0;
 }
 
-s32 fileBeginDetectionRequest(u32 callback) {
+s32 fileBeginDetectionRequest(FileMenuContinuationCallback callback) {
     fileMenuContinuation = callback;
     D_00437D40 = 0;
     fileReqBegin(fileMemoryCardRequestIndex);
@@ -1461,10 +1462,10 @@ s32 filePollSlotRequestAndResumeFlow(void) {
             slSetInfo(0);
             D_00437D3C = 0;
             D_00437CF8 = 0;
-            if (fileMenuContinuation == -1) {
+            if (fileMenuContinuation == (FileMenuContinuationCallback)-1) {
                 return slExitWait((void *)-1);
             }
-            return ((s32 (*)())fileMenuContinuation)();
+            return fileMenuContinuation();
         }
         reqStatus = fileReqGetStatus(fileMemoryCardRequestIndex);
         switch (reqStatus) {
@@ -1791,7 +1792,7 @@ s32 fileOnAllWritten(void) {
     fileReqSetSlotFlags(fileMemoryCardRequestIndex, fileSelectedSlotIndex, FILE_REQ_SLOT_CAN_READ_SAVE);
     fileReqSetSlotFlags(fileMemoryCardRequestIndex, fileSelectedSlotIndex, FILE_REQ_SLOT_DELETE_BEFORE_WRITE);
     slSetInfo(4);
-    return fileBeginDetectionRequest((u32)fileScanSlotStates);
+    return fileBeginDetectionRequest(fileScanSlotStates);
 }
 
 s32 fileWriteIconSysComplete(void) {
@@ -1999,7 +2000,7 @@ s32 mcHandleDetectionResult(void) {
         return (s32)slErrorWait;
     }
     slSetInfo(6);
-    return fileBeginDetectionRequest((u32)fileRestartSlotScan);
+    return fileBeginDetectionRequest(fileRestartSlotScan);
 }
 
 s32 slFormatStart(void) {
@@ -2097,7 +2098,7 @@ s32 mcdHandleSaveSetupDone(void) {
             fileRestoreSlotFlagsToState();
         }
         slSetInfo(13);
-        return fileSetMenuCallbackAndClearResult(-1);
+        return fileSetMenuCallbackAndClearResult((FileMenuContinuationCallback)-1);
     }
     sdfMemFreeDirect(fileSaveReadBufferResource);
     slSetInfo(0);
@@ -2111,7 +2112,7 @@ extern s32 mcdContinueLoadSelection();
 
 s32 mcdAdvanceToLoadSelection(void) {
     slSetInfo(13);
-    return fileSetMenuCallbackAndClearResult((u32)mcdContinueLoadSelection);
+    return fileSetMenuCallbackAndClearResult(mcdContinueLoadSelection);
 }
 
 extern s32 D_00437D00;
@@ -3275,12 +3276,12 @@ s32 mcdFinishFileDetectionWithAudio(void) {
         fileIsLoadedAndConditionTrue((u32)dds3PadButtonState[0x23] >> 31)) {
         slSetInfo(0);
         p2sdPlaySE(8, 0x7f, 0x3f);
-        return ((s32 (*)())fileMenuContinuation)();
+        return fileMenuContinuation();
     }
     return 0;
 }
 
-s32 fileCreateDetectionAudioCallback(u32 callback) {
+s32 fileCreateDetectionAudioCallback(FileMenuContinuationCallback callback) {
     fileMenuContinuation = callback;
     D_00437D40 = 0;
     return (s32)mcdFinishFileDetectionWithAudio;
@@ -3429,7 +3430,7 @@ s32 fileStartLoadDetectionAfterBranchDialog(void) {
     D_00437D1C = 0;
     slSetInfo(0x18);
     fileLoadSelectionWork->applyLoadResult = 1;
-    return fileCreateDetectionAudioCallback((u32)fileBeginLoadBranchDialog);
+    return fileCreateDetectionAudioCallback(fileBeginLoadBranchDialog);
 }
 
 s32 fileRestartSelectionFlow(void) {
@@ -3447,7 +3448,7 @@ extern s32 fileNextMenuFlowState(void);
 
 s32 fileWaitForLoadStepBeforeDetection(void) {
     if (slChkWindowOpenDone() != 0) {
-        return fileCreateDetectionAudioCallback((u32)fileNextMenuFlowState);
+        return fileCreateDetectionAudioCallback(fileNextMenuFlowState);
     }
     return 0;
 }
