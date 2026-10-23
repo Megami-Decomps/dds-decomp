@@ -87,7 +87,7 @@ void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode) {
             if (lightSetIndex == 0) {
                 lightSetIndex = D_00436128;
             }
-            light = &((FldLightSet *)fldSkyLightSetBuffer)[lightSetIndex];
+            light = &fldSkyLightSetBuffer->lightSets[lightSetIndex];
             D_0043616C = fldRunDanteGunFlag[11];
             fldRunDanteGunFlag[11] = lightSetIndex;
             D_00436168 = lightSetIndex;
@@ -182,9 +182,9 @@ void fldApplySkyLightSetToPlayerVU(void) {
 
     if (D_00389780[0] != 1 && D_00389780[0] < 200) {
         if (D_00436168 != 0) {
-            light = &((FldLightSet *)fldSkyLightSetBuffer)[D_00436168];
+            light = &fldSkyLightSetBuffer->lightSets[D_00436168];
         } else {
-            light = &((FldLightSet *)fldSkyLightSetBuffer)[D_00436128];
+            light = &fldSkyLightSetBuffer->lightSets[D_00436128];
         }
         fldSetFadeTarget(fldRunDanteGunFlag[13], fldRunDanteGunFlag[15], 0);
         fldSetFilterAnime(fldRunDanteGunFlag[16]);
@@ -259,7 +259,7 @@ void fldApplySkyLightSetToPlayerVU(void) {
 extern u32 D_00435F1C;
 
 void fldApplyLightSetToChaseCameraUnit(void) {
-    FldLightSet *light = &((FldLightSet *)fldSkyLightSetBuffer)[D_00436128];
+    FldLightSet *light = &fldSkyLightSetBuffer->lightSets[D_00436128];
     f32 dir[4];
     evtUnitHandle_t *unit;
     u32 colorA;
@@ -348,7 +348,7 @@ void fldSkyBattle(void) {
 }
 
 void fldApplyLightSetIndex(s32 index) {
-    FldLightSet *light = &((FldLightSet *)fldSkyLightSetBuffer)[index];
+    FldLightSet *light = &fldSkyLightSetBuffer->lightSets[index];
     f32 vec[4];
     f32 dir[4];
     s32 area;

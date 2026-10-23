@@ -5865,7 +5865,7 @@ void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode) {
         D_003BADC8 = skyLightSetIndex;
         D_003BADA8 = 0;
         if (state->sceneCommand == 0) {
-            light = &((FldLightSet *)fldSkyLightSetBuffer)[skyLightSetIndex];
+            light = &fldSkyLightSetBuffer->lightSets[skyLightSetIndex];
             area = light->fadeArea;
             fldRunDanteGunFlag[13] = area;
             fldRunDanteGunFlag[14] = light->displayStateSlot14;
@@ -6012,7 +6012,7 @@ void fldTransitionSkyLightSet(s32 lightSetIndex, s32 mode) {
             D_003BADA8 = 1;
             D_003BAD98 = lightSetIndex;
             if (fldGlobalBase.sceneCommand == 0) {
-                light = &((FldLightSet *)fldSkyLightSetBuffer)[lightSetIndex];
+                light = &fldSkyLightSetBuffer->lightSets[lightSetIndex];
                 fldRunDanteGunFlag[11] = lightSetIndex;
                 area = light->fadeArea;
                 fldRunDanteGunFlag[13] = area;
@@ -6124,7 +6124,7 @@ void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode) {
             if (lightSetIndex == 0) {
                 lightSetIndex = D_003BAD98;
             }
-            light = &((FldLightSet *)fldSkyLightSetBuffer)[lightSetIndex];
+            light = &fldSkyLightSetBuffer->lightSets[lightSetIndex];
             D_003BADDC = fldRunDanteGunFlag[11];
             fldRunDanteGunFlag[11] = lightSetIndex;
             D_003BADD8 = lightSetIndex;
@@ -6226,9 +6226,9 @@ void fldApplySkyLightSetToPlayerVU(void) {
 
     if (D_0032E3C0[0] != 1 && D_0032E3C0[0] < 200) {
         if (D_003BADD8 != 0) {
-            light = &((FldLightSet *)fldSkyLightSetBuffer)[D_003BADD8];
+            light = &fldSkyLightSetBuffer->lightSets[D_003BADD8];
         } else {
-            light = &((FldLightSet *)fldSkyLightSetBuffer)[D_003BAD98];
+            light = &fldSkyLightSetBuffer->lightSets[D_003BAD98];
         }
         fldSetFadeTarget(fldRunDanteGunFlag[13], fldRunDanteGunFlag[15], 0);
         fldSetFilterAnime(fldRunDanteGunFlag[16]);
@@ -6358,7 +6358,7 @@ void fldSkyBattle(void) {
 }
 
 void fldApplyLightSetIndex(s32 index) {
-    FldLightSet *light = &((FldLightSet *)fldSkyLightSetBuffer)[index];
+    FldLightSet *light = &fldSkyLightSetBuffer->lightSets[index];
     f32 vec[4];
     f32 dir[4];
     s32 area;
