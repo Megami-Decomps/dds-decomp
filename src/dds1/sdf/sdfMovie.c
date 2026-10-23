@@ -125,7 +125,7 @@ void movieReadHeaderChunk(movieStream_t *movie) {
 }
 
 /* Process movie-PAC header, block-mask and payload completions; always return 0. */
-s32 movieReadChunk(sdfFileCmdHandle_t *deviceState, s32 operation, void *readBuffer, s32 bytesRead, movieStream_t *movie) {
+s32 movieReadChunk(sdfFileCmdHandle_t *deviceState, s32 operation, const void *readBuffer, s32 bytesRead, movieStream_t *movie) {
     MovPacStream *stream;
 
     movie->deviceState = deviceState;
@@ -171,7 +171,7 @@ s32 movieReadChunk(sdfFileCmdHandle_t *deviceState, s32 operation, void *readBuf
         break;
     case SDF_MOVIE_STATE_DATA_READ: {
         if (operation == SDF_DEV_EVENT_READ_REPLY) {
-            u8 *source = readBuffer;
+            const u8 *source = readBuffer;
             s32 blockBytes = stream->blockBytes;
             s32 blocksRemaining = bytesRead / blockBytes;
             do {

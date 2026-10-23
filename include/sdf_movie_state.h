@@ -22,6 +22,6 @@ enum {
 s32 movieGetStreamSize(struct sdfFileCmdHandle_t *deviceState, s32 operation,
                                     void *data, s32 bytesRead, struct movieStream_t *movie);
 s32 movieReadChunk(struct sdfFileCmdHandle_t *deviceState, s32 operation,
-                                 void *readBuffer, s32 bytesRead, struct movieStream_t *movie);
+                                 const void *readBuffer, s32 bytesRead, struct movieStream_t *movie);
 
 #endif /* SDF_MOVIE_STATE_H */
