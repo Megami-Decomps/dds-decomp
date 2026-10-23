@@ -80,14 +80,14 @@ scrProcessWork_s *scrCreateTaskWithDefaultOption(BfFlw0Header *header) {
 
 dds3ProcessID_t *scrRunScriptEx(u32 priority, BfFlw0Header *header,
     ScrSection *procedureSection, ScrLabel *procedures, ScrLabel *labels,
-    ScrInstr *instructions, void *auxiliaryData, char *strings, s32 procedureIndex)
+    ScrInstr *instructions, struct ItfMesSub *auxiliaryData, char *strings, s32 procedureIndex)
 {
     return scrStartScriptProcess(priority, bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, procedureIndex));
 }
 
 scrProcessWork_s *scrCreateProcessAtFirstProcedure(BfFlw0Header *header, ScrSection *procedureSection,
     ScrLabel *procedures, ScrLabel *labels, ScrInstr *instructions,
-    void *auxiliaryData, char *strings)
+    struct ItfMesSub *auxiliaryData, char *strings)
 {
     return bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, 0);
 }
@@ -212,4 +212,3 @@ s32 scrSearchProcedureName(const BfFlw0Header *header, const char *procedureName
 }
 
 INCLUDE_RODATA(const s32, "script/scrScriptProcess", D_00411408);
-

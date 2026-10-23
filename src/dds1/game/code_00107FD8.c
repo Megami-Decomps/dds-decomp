@@ -1927,14 +1927,14 @@ void scrUnlinkHandle(scrProcessWork_s *node) {
 }
 
 
-extern s32 itfMesMngInitialize(void *data);
+extern s32 itfMesMngInitialize(ItfMesSub *data);
 
 INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E220);
 
 INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E238);
 
 scrProcessWork_s *bfContextCreate(BfFlw0Header *header, ScrSection *sections, ScrLabel *procedures,
-                        ScrLabel *labels, ScrInstr *instructions, void *auxiliaryData,
+                        ScrLabel *labels, ScrInstr *instructions, struct ItfMesSub *auxiliaryData,
                         char *strings, s32 procedureIndex) {
     scrProcessWork_s *process;
     s32 i;
@@ -2011,7 +2011,7 @@ scrProcessWork_s *fldFlowParse(BfFlw0Header *header, s32 procedureIndex) {
     ScrLabel *procedures = NULL;
     ScrLabel *labels = NULL;
     ScrInstr *instructions = NULL;
-    void *auxiliaryData = NULL;
+    struct ItfMesSub *auxiliaryData = NULL;
     char *strings = NULL;
     s32 i;
 
@@ -2063,4 +2063,3 @@ INCLUDE_SDATA(const s32, "game/code_00107FD8", scrHandleCount);
 INCLUDE_SDATA(const s32, "game/code_00107FD8", scrHandleFirst);
 
 INCLUDE_SDATA(const s32, "game/code_00107FD8", scrHandleLast);
-
