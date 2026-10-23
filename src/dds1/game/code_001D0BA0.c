@@ -370,7 +370,7 @@ u32 btlClassifyActionOperand(BtlUnit *actor, BattleIndexWork *work) {
     case 1: {
         u32 count = btlGetIndexListCount(work->indices);
         if ((btlUnitStatusPair(actor) & 0x1200) == 0x1200 &&
-            (*(u16 *)((u8 *)actor + 0x12E) & 0x1000) == 0 &&
+            (actor->partyRecord.status & 0x1000) == 0 &&
             count == 1) {
             BtlOperandGroup *group = work->groups;
             if (group->parameter == 2 && group->reflected == 0) {
@@ -1696,25 +1696,25 @@ void *btlScheduleMoneyPacketTask(u8 *owner, u32 value) {
 }
 
 u32 btlRefreshEligibleActors(void) {
-    u8 *context = (u8 *)btlGetRuntime();
-    BtlUnit *actor = *(BtlUnit **)(context + 0x228);
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlUnit *actor = state->units;
     while (actor != 0) {
         u32 flags = (u32)actor->status.flags;
         if (flags & 0x400) {
             if (flags & 1) {
                 if ((flags & 0xE0) == 0 &&
-                    (u16)(*(u16 *)((u8 *)actor + 0x124) - 1) < 0x17F) {
-                    u32 entry = datEnemyRecords[*(u16 *)((u8 *)actor + 0x124)].flags;
+                    (u16)(actor->partyRecord.unitId - 1) < 0x17F) {
+                    u32 entry = datEnemyRecords[actor->partyRecord.unitId].flags;
                     if ((entry & 0x40) == 0) {
                         if ((entry & 0x400) == 0) {
                             if ((actor->status.stateFlags & 8) == 0) {
-                                u16 prior = *(u16 *)((u8 *)actor + 0x12E);
+                                u16 prior = actor->partyRecord.status;
                                 btlRaisePartyRecordStatusValue(&actor->partyRecord, 1);
                                 btlRefreshUnitMotionSelection(actor);
-                                if (*(u16 *)((u8 *)actor + 0x12E) == 1 &&
-                                    prior != *(u16 *)((u8 *)actor + 0x12E)) {
+                                if (actor->partyRecord.status == 1 &&
+                                    prior != actor->partyRecord.status) {
                                     actor->status.stateFlags |= 4;
-                                    *(u32 *)(context + 0x1F8) |= 0x100;
+                                    state->commandRestrictFlags |= 0x100;
                                 }
                             }
                         }
@@ -1722,7 +1722,7 @@ u32 btlRefreshEligibleActors(void) {
                 }
             }
         }
-        actor = *(BtlUnit **)((u8 *)actor + 0x344);
+        actor = actor->next;
     }
     return 1;
 }
@@ -3380,11 +3380,11 @@ s32 btlFormatUnitBedName(BtlUnit *actor, char *filename) {
     }
     if (flags & 0x1000) {
         sprintf(filename, D_003A3BA8, D_003BB5F8, 0,
-                      *(u16 *)((u8 *)actor + 0x124));
+                      actor->partyRecord.unitId);
     } else {
         sprintf(filename, D_003A3BA8, D_003BB5F8,
                       btlGetActorBedAssetIdFromIndex(actor->partyRecord.menuValue),
-                      *(u16 *)((u8 *)actor + 0x124));
+                      actor->partyRecord.unitId);
     }
     return 1;
 }
