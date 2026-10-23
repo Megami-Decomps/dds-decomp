@@ -1693,7 +1693,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->unkC8 = -1;
     area->overlayMode = 1;
     area->overlayCounter = 0;
-    area->unkD4 = 1;
+    area->mapBannerFadeMode = 1;
     area->unkD8 = -1;
     area->rowIdx = 0;
     area->sequenceCode = 1;
@@ -1853,7 +1853,7 @@ void fldInitializeAreaWork(void) {
     area->cameraTilt = 0.0f;
     area->frameTravelDistance = 0.0f;
     area->nextFloor = -1;
-    area->unkD4 = 1;
+    area->mapBannerFadeMode = 1;
     fldRunDanteGunFlag[0] = 0;
     fldRunDanteGunFlag[1] = 0;
     fldRunDanteGunFlag[2] = 0;

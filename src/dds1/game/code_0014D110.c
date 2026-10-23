@@ -512,7 +512,7 @@ s32 fldCmdSetSolarOverlayMode(void) {
     fldGlobalBase.overlayMode = mode;
     fldGlobalBase.overlayCounter = 0;
     if (mode < 4) {
-        fldGlobalBase.unkD4 = mode;
+        fldGlobalBase.mapBannerFadeMode = mode;
     }
     switch (fldGlobalBase.overlayMode) {
     case 0:
