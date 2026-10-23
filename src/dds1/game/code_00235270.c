@@ -2421,7 +2421,7 @@ extern void mnuShopRestoreTransform(u8 *);
 extern void dds3SetLightColor(s32, s32, f32 *);
 extern void dds3SetLightDir(s32, s32, f32 *);
 extern void dds3SetAmbientColor(s32, f32 *);
-extern void evtSetSlotVectors(s32, s32, s32, f32 *, f32 *, f32 *);
+extern void evtSetSlotVectors(s32, EvtUnitVectorSlotState, s32, const f32 *, const f32 *, const f32 *);
 
 
 /* Select and draw one light-color bank at the current panel offset. */

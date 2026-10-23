@@ -1149,7 +1149,7 @@ extern void dds3FadeClear(void);
 extern void dds3SetLightColor(s32, s32, f32 *);
 extern void dds3SetLightDir(s32, s32, f32 *);
 extern void dds3SetAmbientColor(s32, f32 *);
-extern void evtSetSlotVectors(s32, s32, s32, f32 *, f32 *, f32 *);
+extern void evtSetSlotVectors(s32, EvtUnitVectorSlotState, s32, const f32 *, const f32 *, const f32 *);
 extern void evtSetSlotVector(s32, f32, f32);
 extern void dds3SetFogPara(s32, f32, f32, f32, f32);
 extern f32 evtHokanFloat(s32, f32, f32, f32);
@@ -4595,4 +4595,3 @@ INCLUDE_SDATA(const s32, "event/evtEventViewer", D_004373A0);
 INCLUDE_SDATA(const s32, "event/evtEventViewer", D_004373A8);
 
 INCLUDE_SDATA(const s32, "event/evtEventViewer", D_004373B0);
-
