@@ -93,10 +93,10 @@ void movieOpenStream(movieStream_t *owner, SdfMovieDescriptor *descriptor, const
     allocation = sdfMemAllocDirect(0x24000);
     pacWork->allocation = allocation;
     {
-        u32 resource = sdfMemLock(allocation);
-        pacWork->pacInputBuffer = (u8 *)resource;
-        pacWork->pacBuffer = (u8 *)(resource + 0x4000);
-        pacWork->ringBuffer = (u8 *)(resource + 0x14000);
+        u8 *resource = (u8 *)sdfMemLock(allocation);
+        pacWork->pacInputBuffer = resource;
+        pacWork->pacBuffer = resource + 0x4000;
+        pacWork->ringBuffer = (u8 *)((u32)resource + 0x14000);
     }
     pacWork->scratchSize = 0x20;
     pacWork->scratch = pacWork->scratchBuffer;
