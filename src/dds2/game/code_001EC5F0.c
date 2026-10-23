@@ -64,9 +64,9 @@ void btlUpdateEscapeCameraNoOp(void) {
 
 void btlInitLinkedUnitActionCursor(ActionStateLink *linkState);
 
-void btlInitializeCursorForLinkedAction(s32 action) {
-    if (((BtlLinkedCommand *)action)->link != 0) {
-        btlInitLinkedUnitActionCursor(((BtlLinkedCommand *)action)->link);
+void btlInitializeCursorForLinkedAction(BtlLinkedCommand *action) {
+    if (action->link != 0) {
+        btlInitLinkedUnitActionCursor(action->link);
         return;
     }
 }
