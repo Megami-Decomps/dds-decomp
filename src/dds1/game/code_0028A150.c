@@ -2,6 +2,7 @@
 #define SDK_SKIP_memset
 #include "sdk_ps2.h"
 #include "common.h"
+#include "file_config_list_node.h"
 #include "sdf_vu0.h"
 #include "file_job_type.h"
 #include "file_config_task.h"
@@ -3331,19 +3332,6 @@ s32 fileTestSavedSlotFlags(u32 kind) {
 }
 
 
-/* Each configuration node owns this separately allocated four-byte payload. */
-typedef struct FileConfigCountdown {
-    s32 ticks;
-} FileConfigCountdown;
-
-typedef struct FileConfigListNode {
-    s32 index;
-    u8 pad04[0x54];
-    struct FileConfigListNode *next; /* 0x58 */
-    u8 pad5C[0x14];
-    FileConfigCountdown *resource;   /* 0x70 */
-} FileConfigListNode;
-
 extern FileConfigTask *GBWK;
 
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
@@ -3351,7 +3339,10 @@ extern MenuResourceWork *mnuRequestEffectResource(const char *, const char *);
 extern u8 mnuHasEffectResourceHandle(MenuResourceWork *);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern s32 effRequestResourceByMode(const char *, const char *, s32, u32 *);
-extern void fileDrawConfigurationMenuEntry();
+extern void fileDrawConfigurationMenuEntry(s32 x, s32 y, s32 depth,
+                                           struct MenuList *list,
+                                           FileConfigListNode *node,
+                                           s32 drawArg);
 extern char D_003BC8E0[];
 
 /* Allocate the save/config task, its five-row list and its effect resource slots. */
