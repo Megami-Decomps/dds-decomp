@@ -135,7 +135,7 @@ extern s32 btlSelectTargetsExcludingActorUnit(s32);
 
 extern s32 btlIsActorCategoryMarked(BtlLinkedCommand *);
 
-extern void btlPrepareRandomizedActionCameraPose(s32, s32, s32);
+extern void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 
@@ -2570,7 +2570,7 @@ s32 btlStartLinkedActionMotionPrimary(BtlLinkedCommand *command) {
         command->motionProgress = 0;
         return 0;
     case 0x17E:
-        btlPrepareRandomizedActionCameraPose((s32)command, (s32)command + 0x30, (s32)command + 0xC0);
+        btlPrepareRandomizedActionCameraPose(command, &command->frontCamera, &command->backCamera);
         command->stepKind = 4;
         return 1;
     }
@@ -3791,7 +3791,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
         switch (command->actionCode) {
         case 0x198:
             btlBossDebugPrintf("VURI:I-G ++++\n");
-            btlPrepareRandomizedActionCameraPose((s32)command, (s32)&command->frontCamera, (s32)&command->backCamera);
+            btlPrepareRandomizedActionCameraPose(command, &command->frontCamera, &command->backCamera);
             btlFlagAllUnitDefeatCandidatesTask();
             command->stepKind = 4;
             return 1;
@@ -3828,7 +3828,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
                 return 1;
             case 2:
                 btlBossDebugPrintf("VURI:I-2 ++++\n");
-                btlPrepareRandomizedActionCameraPose((s32)command, (s32)&command->frontCamera, (s32)&command->backCamera);
+                btlPrepareRandomizedActionCameraPose(command, &command->frontCamera, &command->backCamera);
                 btlFlagAllUnitDefeatCandidatesTask();
                 command->stepKind = 4;
                 return 1;
@@ -3841,7 +3841,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
         case 0x10D:
         case 0x10E:
             btlBossDebugPrintf("VURI_A:N_A ++++\n");
-            btlPrepareRandomizedActionCameraPose((s32)command, (s32)&command->frontCamera, (s32)&command->backCamera);
+            btlPrepareRandomizedActionCameraPose(command, &command->frontCamera, &command->backCamera);
             btlFlagAllUnitDefeatCandidatesTask();
             command->stepKind = 4;
             return 1;
@@ -3873,7 +3873,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
         case 0x10D:
         case 0x10E:
             btlBossDebugPrintf("VURI_A:N_B ++++\n");
-            btlPrepareRandomizedActionCameraPose((s32)command, (s32)&command->frontCamera, (s32)&command->backCamera);
+            btlPrepareRandomizedActionCameraPose(command, &command->frontCamera, &command->backCamera);
             btlFlagAllUnitDefeatCandidatesTask();
             command->stepKind = 4;
             return 1;
@@ -7062,7 +7062,7 @@ s32 btlSelectLinkedActionCameraPose(BtlLinkedCommand *command, s8 modeA, s8 mode
         }
         return 0;
     }
-    btlPrepareRandomizedActionCameraPose((s32)command, (s32)&command->frontCamera, (s32)&command->backCamera);
+    btlPrepareRandomizedActionCameraPose(command, &command->frontCamera, &command->backCamera);
     command->stepKind = 4;
     return 1;
 }
@@ -7676,7 +7676,7 @@ s32 btlSelectSatanLinkedActionCamera(BtlLinkedCommand *command, s8 modeA, s8 mod
         btlChooseSatanGroupAwareCamera(command);
         break;
     case 2:
-        btlPrepareRandomizedActionCameraPose((s32)command, (s32)&command->frontCamera, (s32)&command->backCamera);
+        btlPrepareRandomizedActionCameraPose(command, &command->frontCamera, &command->backCamera);
         command->stepKind = 4;
         break;
     }
