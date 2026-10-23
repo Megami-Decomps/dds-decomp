@@ -5,6 +5,8 @@
 
 #ifndef VERSION_DDS2
 
+#include "dat_state.h"
+
 struct ItfMesSub;
 
 typedef struct DspParticle {
@@ -48,9 +50,14 @@ typedef struct MenuSceneMetadata {
     u8 pad1C[4];
     s32 messageShadeFrames;
     struct MenuProgressHost *attachedEffect;
-    u32 attachedEffectControl;
-    u16 entryId;
-    u8 pad02E[0x19E];
+    union {
+        struct {
+            u32 attachedEffectControl;
+            u16 entryId;
+            u8 pad02E[0x19E];
+        };
+        datUnitWork_t partySnapshot;
+    };
     DspParticleState sparkles; /* 0x1CC: shared timer and eight particles */
     struct MnuSpriteResourceGroup *spriteResources; /* 0x238: drifting sprite cues */
     s32 displayedCurrency;
@@ -63,6 +70,8 @@ typedef struct MenuSceneMetadata {
 typedef char MenuSceneParticleLayoutAssert[
     (sizeof(DspParticle) == 0x0C && sizeof(DspParticleState) == 0x6C &&
      sizeof(MenuSceneMetadata) == 0x248 &&
+     sizeof(((MenuSceneMetadata *)0)->partySnapshot) == 0x1A4 &&
+     (unsigned long)&((MenuSceneMetadata *)0)->partySnapshot == 0x28 &&
      (unsigned long)&((MenuSceneMetadata *)0)->sparkles == 0x1CC &&
      (unsigned long)&((MenuSceneMetadata *)0)->displayedCurrency == 0x23C)
         ? 1 : -1];
