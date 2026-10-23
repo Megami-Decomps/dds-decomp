@@ -121,7 +121,7 @@ extern void *sdfDebugFontHandle;
 
 extern u32 sdf3DFogDefault;
 
-extern u32 sdf3DLightDefault;
+extern const struct SdfDmaTagHeader *sdf3DLightDefault;
 
 extern u32 D_003BDA2C;
 
@@ -325,8 +325,8 @@ void sdf3DSetCamera(SdfProjectionRecord *node, void *transformMatrix) {
 }
 
 /* Set the first DMA reference fallback used when a model has no override. */
-void sdf3DSetDefaultLight(u32 referenceSource) {
-    sdf3DLightDefault = referenceSource;
+void sdf3DSetDefaultLight(const struct SdfDmaTagHeader *lightingPacket) {
+    sdf3DLightDefault = lightingPacket;
 }
 
 /* Set the second DMA reference fallback used when a model has no override. */

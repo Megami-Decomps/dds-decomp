@@ -213,7 +213,7 @@ extern void fldConfigureRenderCleanupMessage(void);
 #include "sdf_packet_alloc.h"
 #include "sdf_message.h"
 extern void sdf3DMakeFogPacket(struct ConsFrustumPacket *, KwlnDrawVectorParams *);
-extern void sdf3DSetDefaultLight(u32);
+extern void sdf3DSetDefaultLight(const struct SdfDmaTagHeader *lightingPacket);
 extern void sdf3DSetDefaultFog(u32);
 extern sdfDrawTag_t *dds3LinkZClearDrawTag(s32);
 extern void eglSetOt(u32);
@@ -332,7 +332,7 @@ s32 kwlnBuildFrameScenePackets(dds3ProcessID_t *task) {
                                               &providerSurfaces[81], &providerSurfaces[82]);
         sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[12], &providerSurfaces[-5], &providerSurfaces[-4],
                                               &providerSurfaces[-3], &providerSurfaces[-2]);
-        sdf3DSetDefaultLight((u32)(D_003820F0 + bufferIndex * 0x1F40 + 0xD0));
+        sdf3DSetDefaultLight((const struct SdfDmaTagHeader *)(D_003820F0 + bufferIndex * 0x1F40 + 0xD0));
         sdf3DSetDefaultFog((u32)viewFrustum);
 
     }
