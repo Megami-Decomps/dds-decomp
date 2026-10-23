@@ -4092,7 +4092,7 @@ void evtViewerReleaseResources(EvtRuntime *viewer) {
     if (viewer->pendingResource != 0) {
         sdfMemFreeDelayedDirect(viewer->pendingResource);
         viewer->pendingResource = 0;
-        viewer->pendingWork = 0;
+        viewer->pendingFrameBuffer = NULL;
     }
     while (sdfDelayedResrcCheck() != 0) {
     }
