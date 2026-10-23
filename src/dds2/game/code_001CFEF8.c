@@ -855,7 +855,7 @@ extern s32 btlHasScriptResource(void);
 extern void btlStartPrimaryScriptTask(void);
 extern void btlStartSecondaryScriptTask(void);
 extern void btlStartSkillEventTask(s32);
-extern s32 fldGetActiveSceneGroupValue(void);
+extern ActionStateLink *fldGetActiveSceneGroupValue(void);
 extern u32 dds3DrawFlag;
 
 void btlChooseAndStartSceneScript(BtlState *scene) {
@@ -892,7 +892,7 @@ void btlChooseAndStartSceneScript(BtlState *scene) {
         dds3DrawFlag &= 0xDFFFFFFF;
         return;
     case 0xF000000: {
-        ActionStateLink *task = (ActionStateLink *)fldGetActiveSceneGroupValue();
+        ActionStateLink *task = fldGetActiveSceneGroupValue();
 
         if (task != NULL) {
             btlStartTask(btlCreateCommandSoundUpdateTask());
@@ -2108,13 +2108,13 @@ void fldClearSceneAdvanceFlag(void) {
 }
 
 /* Prefer the special handle queue; otherwise return the front group's first task. */
-s32 fldGetActiveSceneGroupValue(void) {
-    u8 *scene = (u8 *)btlGetRuntime();
-    s32 headValue = (s32)((BtlState *)scene)->groupHandles[0];
-    if (headValue != 0) {
-        return headValue;
+ActionStateLink *fldGetActiveSceneGroupValue(void) {
+    BtlState *scene = (BtlState *)btlGetRuntime();
+    ActionStateLink *headTask = scene->groupHandles[0];
+    if (headTask != NULL) {
+        return headTask;
     }
-    return *(s32 *)fldGetSceneGroupResource(((BtlState *)scene)->slots[0].group);
+    return *fldGetSceneGroupResource(scene->slots[0].group);
 }
 
 /* Return a task from the front group, or null when the front slot is empty. */

@@ -5940,7 +5940,7 @@ return_zero:
     return 0;
 }
 
-extern s32 fldGetActiveSceneGroupValue(void);
+extern ActionStateLink *fldGetActiveSceneGroupValue(void);
 extern void dspRequestMessageWindowModeOne(void);
 extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
 extern u64 btlStartTask(void *);
@@ -6106,7 +6106,7 @@ s32 btlUpdateMajinTutorialTask(dds3ProcessID_t *task) {
         }
         break;
     default:
-        group = (ActionStateLink *)fldGetActiveSceneGroupValue();
+        group = fldGetActiveSceneGroupValue();
         if (group != 0 && (group->pendingFlags & 8)) {
             if (group->unit->status.flags & 0x200) {
                 btlStartTask(btlCreateCommandSoundTask((s32)group, 9));

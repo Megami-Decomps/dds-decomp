@@ -824,7 +824,7 @@ extern s32 btlHasScriptResource(void);
 extern void btlStartPrimaryScriptTask(void);
 extern void btlStartSecondaryScriptTask(void);
 extern void btlStartSkillEventTask(s32);
-extern s32 fldGetActiveSceneGroupValue(void);
+extern BtlTask *fldGetActiveSceneGroupValue(void);
 extern u32 dds3DrawFlag;
 
 /* Select a hook/fallback scene script and start its script/audio transition tasks. */
@@ -860,7 +860,7 @@ void btlChooseAndStartSceneScript(BattleSceneWork *scene) {
         dds3DrawFlag &= 0xDFFFFFFF;
         return;
     case 0xF000000: {
-        BtlTask *task = (BtlTask *)fldGetActiveSceneGroupValue();
+        BtlTask *task = fldGetActiveSceneGroupValue();
 
         if (task != NULL) {
             btlStartTask(btlCreateCommandSoundUpdateTask());
@@ -2041,18 +2041,15 @@ void fldClearSceneAdvanceFlag(void) {
 }
 
 /* Prefer the special handle queue; otherwise return the front group's first task. */
-s32 fldGetActiveSceneGroupValue(void) {
-    s32 scene;
-    s32 headValue;
-    u32 groupAddress;
+BtlTask *fldGetActiveSceneGroupValue(void) {
+    s32 scene = (s32)(u32)btlGetRuntime();
+    BtlTask *headTask;
 
-    scene = (s32)(u32)btlGetRuntime();
-    headValue = (s32)((BattleSceneWork *)scene)->groupHandles[0];
-    if (headValue != 0) {
-        return headValue;
+    headTask = ((BattleSceneWork *)scene)->groupHandles[0];
+    if (headTask != NULL) {
+        return headTask;
     }
-    groupAddress = fldGetSceneGroupResource(((BattleSceneWork *)scene)->slots[0].group);
-    return *(s32 *)groupAddress;
+    return *fldGetSceneGroupResource(((BattleSceneWork *)scene)->slots[0].group);
 }
 
 /* Read one task word from the front group; an empty front slot returns zero. */
