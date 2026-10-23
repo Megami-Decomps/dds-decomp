@@ -8559,7 +8559,7 @@ void effReleaseTextureAnimationWork(s32 work) {
     EffFrameState *state;
 
     state = (EffFrameState *)((EffClassWork *)work)->resource;
-    effReleaseScalyStripResources((u32)state->asset);
+    effReleaseScalyStripResources((u8 *)state->asset);
     sdfMemFreeDirect(state->allocation);
 }
 
@@ -8856,7 +8856,7 @@ void effReleaseBillboardFrameAsset(s32 work) {
     EffFrameState *state;
 
     state = (EffFrameState *)((EffClassWork *)work)->resource;
-    effReleaseScalyStripResources((u32)state->asset);
+    effReleaseScalyStripResources((u8 *)state->asset);
     sdfMemFreeDirect(state->allocation);
 }
 
