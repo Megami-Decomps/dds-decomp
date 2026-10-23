@@ -43,7 +43,7 @@ s32 evtCheckPathStat(dds3Basic_t *object) {
     return 1;
 }
 
-void evtPathLoop(void *worldObject, s32 enabled) {
+void evtPathLoop(dds3Basic_t *worldObject, s32 enabled) {
     dds3PathBasicControl_t *data = dds3ObjectBaseGetPathControl(worldObject);
 
     if (data == NULL) {

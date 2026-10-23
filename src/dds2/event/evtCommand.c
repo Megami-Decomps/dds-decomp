@@ -95,7 +95,7 @@ extern u32 dds3DrawFlag;
 void dds3RefreshStoredVec3(dds3Basic_t *object);
 
 
-void evtPathLoop(void *unit, s32 enabled);
+void evtPathLoop(dds3Basic_t *unit, s32 enabled);
 
 void evtEffectLoopControl(dds3Basic_t *unit, s32 flag);
 

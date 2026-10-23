@@ -1247,7 +1247,7 @@ s32 evtCommand_PATH_DIR(void) {
 s32 evtCommand_PATH_LOOP_ON(void)
 {
     s32 objectKind;
-    void *slotObject;
+    dds3Basic_t *slotObject;
 
     objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
     do {
@@ -1268,7 +1268,7 @@ s32 evtCommand_PATH_LOOP_ON(void)
 s32 evtCommand_PATH_LOOP_OFF(void)
 {
     s32 objectKind;
-    void *slotObject;
+    dds3Basic_t *slotObject;
 
     objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
     do {
