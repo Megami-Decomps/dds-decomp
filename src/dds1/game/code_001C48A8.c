@@ -2136,19 +2136,12 @@ void fldClearSceneSlotsAndGroups(void) {
 
 /* Apply the requested amount/mode unless its source task uses the handle group.
  * Always return 1, including the blocked path; keep both native mode loads. */
-u32 fldDispatchSceneGroupRequestWhenAllowed(s32 *request) {
-    u8 counterMode;
-
-    if (*request == 0) {
-        counterMode = (u8)request[2];
+u32 fldDispatchSceneGroupRequestWhenAllowed(BtlSceneCounterArgs *request) {
+    if (request->actor != 0 &&
+        (request->actor->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) != 0) {
+        return 1;
     }
-    else {
-        if ((*(u32 *)(*request + FLD_SCENE_TASK_FLAGS_OFFSET) & FLD_SCENE_TASK_HANDLE_GROUP_BIT) != 0) {
-            return 1;
-        }
-        counterMode = (u8)request[2];
-    }
-    fldConsumeSceneSlotCounters(request[1], counterMode);
+    fldConsumeSceneSlotCounters(request->amount, request->mode);
     return 1;
 }
 
@@ -2158,7 +2151,7 @@ extern void * btlAllocTask(s32 size);
 u8 *fldCreateSceneGroupAction(u8 *actorTask, u32 counterAmount, s32 counterMode) {
     u8 counterModeByte = counterMode;
     BtlRuntimeTask *actionTask = btlAllocTask(FLD_SCENE_COUNTER_REQUEST_BYTES);
-    u8 *requestData;
+    BtlSceneCounterArgs *requestData;
     actionTask->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     actionTask->taskId = FLD_SCENE_COUNTER_ACTION_ID;
     actionTask->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -2169,9 +2162,9 @@ u8 *fldCreateSceneGroupAction(u8 *actorTask, u32 counterAmount, s32 counterMode)
     actionTask->callback = fldDispatchSceneGroupRequestWhenAllowed;
     actionTask->onStart = 0;
     requestData = btlGetTaskArguments(actionTask);
-    *(u32 *)(requestData + 0) = (u32)actorTask;
-    *(u32 *)(requestData + 4) = counterAmount;
-    requestData[8] = counterModeByte;
+    requestData->actor = (BtlTask *)actorTask;
+    requestData->amount = counterAmount;
+    requestData->mode = counterModeByte;
     return (u8 *)actionTask;
 }
 
@@ -2185,24 +2178,24 @@ void fldStopSceneActorActionUpdate(void) {
 
 /* Enable advancement before checking the source task, then insert its requested slots.
  * A handle-group task skips insertion but still leaves advancement enabled. */
-u32 fldActivateRequestedSceneActor(s32 *request) {
+u32 fldActivateRequestedSceneActor(BtlSceneInsertArgs *request) {
     s32 scene = (s32)(u32)btlGetRuntime();
-    s32 actorTask = request[0];
 
     *(u32 *)(scene + FLD_SCENE_FLAGS_OFFSET) |= FLD_SCENE_ADVANCE_BIT;
-    if (actorTask != 0 && (*(u32 *)(actorTask + FLD_SCENE_TASK_FLAGS_OFFSET) & FLD_SCENE_TASK_HANDLE_GROUP_BIT) != 0) {
+    if (request->actor != 0 &&
+        (request->actor->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) != 0) {
         return 1;
     }
-    fldInsertSceneSlots(request[1]);
+    fldInsertSceneSlots(request->count);
     return 1;
 }
 
-extern u32 fldActivateRequestedSceneActor(s32 *);
+extern u32 fldActivateRequestedSceneActor(BtlSceneInsertArgs *);
 
 /* Allocate a slot-insert request; its update callback clears advancement. */
 u8 *fldCreateSceneActorAction(u8 *actorTask, s32 slotCount) {
     BtlRuntimeTask *actionTask = btlAllocTask(FLD_SCENE_INSERT_REQUEST_BYTES);
-    u8 *requestData;
+    BtlSceneInsertArgs *requestData;
     actionTask->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     actionTask->taskId = FLD_SCENE_INSERT_ACTION_ID;
     actionTask->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -2213,8 +2206,8 @@ u8 *fldCreateSceneActorAction(u8 *actorTask, s32 slotCount) {
     actionTask->onStart = fldStopSceneActorActionUpdate;
     actionTask->callback = fldActivateRequestedSceneActor;
     requestData = btlGetTaskArguments(actionTask);
-    *(u32 *)requestData = (u32)actorTask;
-    *(s32 *)(requestData + 4) = slotCount;
+    requestData->actor = (BtlTask *)actorTask;
+    requestData->count = slotCount;
     return (u8 *)actionTask;
 }
 
