@@ -549,7 +549,7 @@ extern void btlFindSoundTaskByWorkValue(s32 kind, s32 press);
 
 extern s32 btlRollAllFearChance(s32, BtlUnit *, u32, s32, u8);
 
-extern s32 btlRollFearChance(s32, u8 *, u32, u32);
+extern s32 btlRollFearChance(s32, BtlUnit *, u32, u32);
 
 extern s32 btlRollStoneDeathChance(BtlUnit *, s32);
 
@@ -994,7 +994,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
                 cumulativeHp < 0 && kind == 1 && !group->inactive && !group->reflected &&
                 !group->targetSpecialHit && !absorbed && addedStatus == 0 &&
                 !(datEnemyRecords[recipient->partyRecord.unitId].flags & 0x440)) {
-                if (btlRollFearChance((s32)source, (u8 *)recipient, 1, (u32)press)) {
+                if (btlRollFearChance((s32)source, recipient, 1, (u32)press)) {
                     group->entries[hitIndex].addedStatus = 1;
                     addedStatus = 1;
                     fearPending = 1;

@@ -376,12 +376,12 @@ s32 btlComputeStatusPenaltyFifth(BtlUnit *object) {
 
 extern s32 btlRollAiBucket(void);
 
-s32 btlRollFearChance(s32 unused, u8 *actor, u32 flags, u32 options) {
+s32 btlRollFearChance(s32 unused, BtlUnit *unit, u32 flags, u32 options) {
     s32 ratio;
     if ((((BtlState *)btlGetRuntime())->unk_1FC & 0x80) != 0) return 0;
-    if ((((BtlUnit *)actor)->status.stateFlags & 8) != 0) return 0;
+    if ((unit->status.stateFlags & 8) != 0) return 0;
     if ((flags & 1) == 0) return 0;
-    if ((((BtlUnit *)actor)->partyRecord.status & 1) != 0) return 0;
+    if ((unit->partyRecord.status & 1) != 0) return 0;
     ratio = 0;
     if (options & 2) {
         ratio = 30;
@@ -703,4 +703,3 @@ INCLUDE_RODATA(const s32, "game/code_001A5C40", D_003A1A78);
 INCLUDE_RODATA(const s32, "game/code_001A5C40", D_003A1A88);
 
 INCLUDE_RODATA(const s32, "game/code_001A5C40", D_003A1A98);
-
