@@ -30,7 +30,7 @@ extern void SetRotateMatrixY(f32 angle);
 extern u8 aViewTarget[];
 extern u8 sdfViewTargetVector[];
 extern u8 aViewDown[];
-extern f32 btlMeasureEffectTargetGroupBounds(u32 mask, s32 a, s32 b);
+extern f32 btlMeasureEffectTargetGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop);
 /* The selected position provider leaves its vector in vf10. */
 void effBTLPartGetPositionPtr(void *owner, EffectVectorRequest *request, u128 *out) {
     GetPositionPtrTable[request->kind](owner, request);
