@@ -2729,7 +2729,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         (((u32)unit->status.flags & 0x200) || (entryFlags & 0x200))) {
         index = 9;
     }
-    switch (*(u16 *)((u8 *)unit + 0x12E) & 0x7FFF) {
+    switch (unit->partyRecord.status & 0x7FFF) {
     case 1: case 8: case 0x10: case 0x20: case 0x40:
     case 0x80: case 0x100: case 0x200: case 0x400: case 0x2000:
         index = 2;
