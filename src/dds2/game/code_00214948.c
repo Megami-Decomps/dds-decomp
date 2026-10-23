@@ -8171,7 +8171,7 @@ u32 btlUpdateSpiralEdgeMarkedCamera(BtlLinkedCommand *unit) {
 extern void btlInitializeEffectVectorsFromSourceRecords();
 
 void btlResetUnitPlacement(void) {
-    BtlUnit *unit = *(BtlUnit **)((u8 *)btlGetRuntime() + 0x24C);
+    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
 
     if (unit == NULL) {
         return;
