@@ -138,7 +138,7 @@ void sdfMotionCtrlrFree(sdfMotionCtrlr_t *node)
 void sdfMotionChangeBlend(sdfMotionCtrlr_t *motion, s32 motionIndex, s32 loopEnabled, f32 blendLeadFrames,
                          f32 blendDurationFrames) {
     s32 i;
-    MotionEntry *entry;
+    const MotionEntry *entry;
     u8 *bindingData;
     SdfMotionBindingHead *binding;
 
