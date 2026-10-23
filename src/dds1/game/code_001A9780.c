@@ -3478,7 +3478,7 @@ void btlSetActorCommandSelection(s32 object, s16 first, s16 second, s16 slot) {
     BtlUnit *unit = ((BattleSceneObject *)object)->owner->unit;
 
     unit->partyRecord.savedCommandPhase = first;
-    unit->partyRecord.unk18E = second;
+    unit->partyRecord.savedCommandSelectionEntry = second;
     unit->partyRecord.actionSlot = slot;
 }
 
@@ -4099,7 +4099,7 @@ void btlInitializeCommandOptionState(BattleSceneObject *object) {
         object->selections[0].cursor = 0;
         break;
     case 2:
-        object->selections[0].entry = object->owner->unit->partyRecord.unk18E;
+        object->selections[0].entry = object->owner->unit->partyRecord.savedCommandSelectionEntry;
         btlGatherActorCommandsByKind((s32)object, &count, 0, 2, 3);
         if (count - 1 < object->selections[0].entry) {
             object->selections[0].entry = 0;
@@ -4109,7 +4109,7 @@ void btlInitializeCommandOptionState(BattleSceneObject *object) {
         }
         break;
     case 3:
-        object->selections[4].entry = object->owner->unit->partyRecord.unk18E;
+        object->selections[4].entry = object->owner->unit->partyRecord.savedCommandSelectionEntry;
         btlGetActorLinkageSkillList(object, (u16 *)&count);
         if (count - 1 < object->selections[4].entry) {
             object->selections[4].entry = 0;
@@ -4123,7 +4123,7 @@ void btlInitializeCommandOptionState(BattleSceneObject *object) {
         }
         break;
     case 10:
-        object->selections[0].entry = object->owner->unit->partyRecord.unk18E;
+        object->selections[0].entry = object->owner->unit->partyRecord.savedCommandSelectionEntry;
         btlGatherActorCommandsByKind((s32)object, &count, 0, 2, 3);
         object->selections[0].entry = (u16)count;
         if ((u16)count >= 3) {
