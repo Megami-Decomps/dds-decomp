@@ -315,7 +315,7 @@ void fldResetZoneRecordsAndActorSlots(void) {
 void fldEveHit_End(void) {
     s32 slotIndex;
     dds3Basic_t *world;
-    void *task;
+    const char *task;
     FldTaskInfo *taskInfo;
 
     fldEveHitState = 1;
