@@ -384,7 +384,7 @@ void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *object) {
 
 
 extern void mnuDestroyMantraDrawPool(struct MantraDrawPool *pool);
-extern void evtReleaseMantraSelectionWork(u32 *p);
+extern void evtReleaseMantraSelectionWork(MantraFlagResource *work);
 extern void mnuReleaseMantraIconSpriteHandle(u32 *sprite);
 
 void mnuReleaseMantraMenuDrawResources(MnuStatusResource *object) {
@@ -399,7 +399,7 @@ void mnuReleaseMantraMenuDrawResources(MnuStatusResource *object) {
     handle = state->slots;
     for (i = 5; i >= 0; i--) {
         if (*handle != 0) {
-            evtReleaseMantraSelectionWork((u32 *)*handle);
+            evtReleaseMantraSelectionWork(*handle);
         }
         *handle = 0;
         handle++;
@@ -1618,4 +1618,3 @@ void mnuSpawnMantraMapPanels(MnuStatusResource *object, u16 nodeId, u16 panelX) 
 INCLUDE_SDATA(const s32, "game/code_00289058", D_00437930);
 
 INCLUDE_SDATA(const s32, "game/code_00289058", D_00437938);
-
