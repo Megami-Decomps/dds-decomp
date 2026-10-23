@@ -5270,11 +5270,11 @@ void btlDestroyAllUnits(void) {
 }
 
 void btlRemoveActorsWithFlags(u32 mask) {
-    s32 actor = (s32)((BtlState *)btlGetRuntime())->units;
-    s32 next;
+    BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
+    BtlUnit *next;
     while (actor != 0) {
-        next = (s32)((BtlUnit *)actor)->nextActor;
-        if (((BtlUnit *)actor)->status.flags & mask) {
+        next = actor->nextActor;
+        if (actor->status.flags & mask) {
             btlDestroyUnit(actor);
         }
         actor = next;
