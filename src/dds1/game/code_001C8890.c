@@ -152,27 +152,27 @@ void btlCreateTargetSelectionTask(s32 sourceTask);
 
 void btlClearPartyRecordStatusBits(datUnitWork_t *record, s32 mask);
 
-void btlActionSeqStateSelect(u8 *task) {
+void btlActionSeqStateSelect(BtlTask *task) {
     u8 *work = (u8 *)btlGetRuntime();
-    BtlUnit *unit = *(BtlUnit **)(task + 0x18);
+    BtlUnit *unit = task->unit;
     s32 (*hook)(u8 *);
     s32 next;
     u32 flags;
-    *(u32 *)(task + 8) &= ~0x20;
-    if (*(u16 *)(task + 4) == 0) {
+    task->flags &= ~0x20;
+    if (task->actionNumber == 0) {
         btlDispatchStateHandler(task, 0x1A);
         btlBossDebugPrintf("btl:actnum 0 [%p]\n", task);
         return;
     }
     hook = *(s32 (**)(u8 *))(work + 0x5FC);
     if (hook != 0) {
-        next = hook(task);
+        next = hook((u8 *)task);
         if (next != -1) {
             btlDispatchStateHandler(task, next);
             return;
         }
     }
-    if (*(u32 *)(task + 8) & 0x40) {
+    if (task->flags & 0x40) {
         btlDispatchStateHandler(task, 0xA);
     } else {
         flags = (u32)unit->status.flags;
@@ -366,10 +366,10 @@ void btlEnterStartActionState(BtlTask *task) {
     task->flags = task->flags & 0xffffffef;
 }
 
-void btlActionSeqCheckDispatch(u8 *task) {
+void btlActionSeqCheckDispatch(BtlTask *task) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     u32 flags = scene->battleFlags;
-    BtlUnit *unit = ((BtlTask *)task)->unit;
+    BtlUnit *unit = task->unit;
     BtlUnit *actor;
     if (!(flags & 0x20)) {
         for (actor = scene->units; actor != 0; actor = actor->next) {
