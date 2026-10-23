@@ -24,7 +24,7 @@ extern dds3Basic_t *dds3AddMoverBasic(dds3Basic_t *object);
 
 
 s32 BasicTypeToItemType(u32 kind);
-void *dds3ObjectBaseGetUserValue(void *obj);
+void *dds3ObjectBaseGetUserValue(dds3Basic_t *object);
 void dds3MoverBasicSetCallBackPrimaryControl(dds3Basic_t *object, Dds3MoverUpdate update);
 void dds3MoverBasicMakePath(dds3Basic_t *object);
 void dds3MoverBasicFreePath(dds3Basic_t *object);
@@ -93,7 +93,7 @@ u8 dds3ObjectBaseCheckFlag(dds3Basic_t *object, u32 mask) {
 
 /* Replace the extension pointer without releasing its previous value.
  * Keep the existing extension getter call before the store. */
-void dds3ObjectBaseSetUserValue(void *object, void *extensionData) {
+void dds3ObjectBaseSetUserValue(dds3Basic_t *object, void *extensionData) {
     dds3ObjectBaseControlWorkData_t *base;
 
     base = dds3GetBaseControlWorkData(object);
@@ -102,7 +102,7 @@ void dds3ObjectBaseSetUserValue(void *object, void *extensionData) {
 }
 
 /* Return the stored extension pointer; no copy or ownership change. */
-void *dds3ObjectBaseGetUserValue(void *object) {
+void *dds3ObjectBaseGetUserValue(dds3Basic_t *object) {
     return dds3GetBaseControlWorkData(object)->extData;
 }
 

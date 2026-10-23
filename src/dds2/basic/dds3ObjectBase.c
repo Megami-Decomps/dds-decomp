@@ -99,11 +99,11 @@ u8 dds3ObjectBaseCheckFlag(dds3Basic_t *object, u32 mask) {
     return (base->flags & mask) != 0;
 }
 
-void *dds3ObjectBaseGetUserValue(void *object);
+void *dds3ObjectBaseGetUserValue(dds3Basic_t *object);
 
 /* Replace the extension pointer without releasing its previous value.
  * Keep the existing extension getter call before the store. */
-void dds3ObjectBaseSetUserValue(void *object, void *extensionData) {
+void dds3ObjectBaseSetUserValue(dds3Basic_t *object, void *extensionData) {
     dds3ObjectBaseControlWorkData_t *base;
 
     base = dds3GetBaseControlWorkData(object);
@@ -112,7 +112,7 @@ void dds3ObjectBaseSetUserValue(void *object, void *extensionData) {
 }
 
 /* Return the stored extension pointer; no copy or ownership change. */
-void *dds3ObjectBaseGetUserValue(void *object) {
+void *dds3ObjectBaseGetUserValue(dds3Basic_t *object) {
     return dds3GetBaseControlWorkData(object)->extData;
 }
 
