@@ -84,7 +84,7 @@ void effPCPFlashPolySphere2PartSetVC(PcpFlashTrianglePulseWork *work, s32 index,
 }
 
 /* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
-void effPCPFlashPolySphere2PartSetVertex(PcpFlashTrianglePulseWork *work, s32 index, void *view)
+void effPCPFlashPolySphere2PartSetVertex(PcpFlashTrianglePulseWork *work, s32 index, const f32 *view)
 {
     PcpFlashPulseParticle *part = &work->parts[index];
     f32 *quad = dds3FlashPolyList2GetVertex(work->resourceHandle, index);
@@ -124,7 +124,7 @@ void effPCPFlashPolySphere2PartSetVertex(PcpFlashTrianglePulseWork *work, s32 in
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(quad + 4);
 }
-extern void effPCPFlashPolySphere2PartSetVertex(PcpFlashTrianglePulseWork *work, s32 index, void *view);
+extern void effPCPFlashPolySphere2PartSetVertex(PcpFlashTrianglePulseWork *work, s32 index, const f32 *view);
 extern u8 aViewTarget[];
 extern u8 sdfViewTargetVector[];
 extern void effPCPFlashPolySpherePartSetVertex(PcpFlashStreakWork *work, s32 index, void *view);
