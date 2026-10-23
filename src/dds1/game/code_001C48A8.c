@@ -697,7 +697,7 @@ s32 fldAdvanceSceneVariant(BattleSceneWork *scene) {
     return btlResetSceneSlotFades();
 }
 
-extern void btlTickActorEntryCountdowns(u8 *);
+extern void btlTickActorEntryCountdowns(BtlUnit *);
 extern void btlClearNodeFlags(void);
 extern void btlClearActorSelectedEntryIndex(BtlUnit *);
 extern void btlRefreshUnitMotionSelection(BtlUnit *unit);
@@ -756,7 +756,7 @@ s32 btlAdvanceSceneWhenActorTasksReady(BattleSceneWork *scene) {
                             continue;
                         }
                         unit->status.flags = flags & ~0x10u;
-                        btlTickActorEntryCountdowns((u8 *)unit);
+                        btlTickActorEntryCountdowns(unit);
                         if ((unit->partyRecord.status & 0x122F) != 0) {
                             btlDispatchStateHandler(node, 4);
                         }

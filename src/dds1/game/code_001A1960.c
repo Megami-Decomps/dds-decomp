@@ -1628,9 +1628,9 @@ s32 btlLowestSetPairIndex(u32 mask) {
     return -step;
 }
 
-void btlTickActorEntryCountdowns(u8 *scene) {
+void btlTickActorEntryCountdowns(BtlUnit *unit) {
     u32 index;
-    s16 *timer = (s16 *)(scene + 0x2CA);
+    s16 *timer = &unit->entrySlots[0].countdown;
     for (index = 0; index < 7; index++, timer += 3) {
         if (*timer >= 0) {
             if (*timer == 0) {
