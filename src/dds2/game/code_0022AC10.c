@@ -2290,9 +2290,8 @@ s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
     return frDestroyFontRequestAfter(textGlyph);
 }
 
-/* Draw the visible text interval, highlighting the selected absolute index.
- * Keep pointer-typed coordinates and the legacy s32 fallthrough unchanged. */
-s32 btlDrawSelectableListRows(u8 *x, u8 *y, s32 unusedMode, u8 *selectionState, s32 *rowTexts) {
+/* Draw the visible text interval, highlighting the selected absolute index. */
+s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, u8 *selectionState, s32 *rowTexts) {
     u32 firstIndex;
     u32 visibleRowCount;
     u32 itemIndex;
@@ -2304,9 +2303,9 @@ s32 btlDrawSelectableListRows(u8 *x, u8 *y, s32 unusedMode, u8 *selectionState, 
     endIndex = firstIndex + visibleRowCount;
     itemIndex = firstIndex;
     selectedIndex = ((MenuList *)selectionState)->cursor;
-    rowY = (s32)y;
+    rowY = y;
     for (; itemIndex < endIndex; itemIndex++) {
-        struct _FRQ *textGlyph = itfCreateMeasuredTextGlyph((s32)x << 4, rowY << 3,
+        struct _FRQ *textGlyph = itfCreateMeasuredTextGlyph(x << 4, rowY << 3,
             MNU_LIST_TEXT_DEPTH,
             itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR,
             (const char *)(u32)rowTexts[itemIndex], NULL);
@@ -2317,15 +2316,15 @@ s32 btlDrawSelectableListRows(u8 *x, u8 *y, s32 unusedMode, u8 *selectionState, 
 }
 
 /* Size the frame from the visible rows, then forward the row-draw result. */
-s32 mnuDrawMenuFrameSizedToRows(u8 *x, u8 *y, s32 frameWidth, u8 *selectionState, s32 *rowTexts) {
+s32 mnuDrawMenuFrameSizedToRows(s32 x, s32 y, s32 frameWidth, u8 *selectionState, s32 *rowTexts) {
     s32 frameHeight = ((MenuList *)selectionState)->rows * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET;
-    btlDebugDrawTwoColorRectangle((s32)(x - MNU_LIST_FRAME_INSET), (s32)(y - MNU_LIST_FRAME_INSET), frameWidth, frameHeight, 0x80806020, 0x30000000);
+    btlDebugDrawTwoColorRectangle(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, frameWidth, frameHeight, 0x80806020, 0x30000000);
     return btlDrawSelectableListRows(x, y, frameWidth, selectionState, rowTexts);
 }
 
 /* Submit formatted indices in one packet list, then draw the text column.
  * Preserve the separate fixed-point and pixel-coordinate arithmetic. */
-s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 frameWidth, u8 *selectionState, s32 *rowTexts) {
+s32 mnuDrawSelectableMenuRows(s32 x, s32 y, s32 frameWidth, u8 *selectionState, s32 *rowTexts) {
     void *indexPackets;
     u32 firstIndex;
     u32 visibleRowCount;
@@ -2333,7 +2332,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 frameWidth, u8 *selectionState, 
     u32 endIndex;
     u32 selectedIndex;
     s32 rowY;
-    btlDebugDrawTwoColorRectangle((s32)(x - MNU_LIST_FRAME_INSET), (s32)(y - MNU_LIST_FRAME_INSET), frameWidth, ((MenuList *)selectionState)->rows * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET, 0x80806020, 0x30000000);
+    btlDebugDrawTwoColorRectangle(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, frameWidth, ((MenuList *)selectionState)->rows * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET, 0x80806020, 0x30000000);
     indexPackets = (void *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(indexPackets);
     firstIndex = ((MenuList *)selectionState)->top;
@@ -2342,13 +2341,13 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 frameWidth, u8 *selectionState, 
     itemIndex = firstIndex;
     selectedIndex = ((MenuList *)selectionState)->cursor;
     if (itemIndex < endIndex) {
-        rowY = (s32)y * 8 + 0x7900;
+        rowY = y * 8 + 0x7900;
         for (; itemIndex < endIndex; itemIndex++) {
             s32 selectionFlags = MNU_LIST_SELECTED_TEXT_FLAG;
             if (itemIndex != selectedIndex) {
                 selectionFlags = 0;
             }
-            sdfDrawTagLink(indexPackets, (u32)sdfDevPrintf((s32)x * 16 + 0x7000, rowY, MNU_LIST_TEXT_DEPTH, selectionFlags, (const char *)D_00436EF8, itemIndex));
+            sdfDrawTagLink(indexPackets, (u32)sdfDevPrintf(x * 16 + 0x7000, rowY, MNU_LIST_TEXT_DEPTH, selectionFlags, (const char *)D_00436EF8, itemIndex));
             rowY += MNU_LIST_FIXED_ROW_HEIGHT;
         }
     }
@@ -2536,7 +2535,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         } else if (dds3PadBitTable[3] < 0) {
             battle->debug.phase = 10;
         }
-        mnuDrawMenuFrameSizedToRows((u8 *)24, (u8 *)256, 100, (u8 *)actionMenu, btlDebugModelEditorActionNames);
+        mnuDrawMenuFrameSizedToRows(24, 256, 100, (u8 *)actionMenu, btlDebugModelEditorActionNames);
         break;
     case 3:
         modelMenu = &battle->debug.modelMenu;
@@ -2602,7 +2601,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
                 battle->debug.modelMenu.cursor = 0;
             }
         }
-        mnuDrawSelectableMenuRows((u8 *)24, (u8 *)64, 164, (u8 *)modelMenu,
+        mnuDrawSelectableMenuRows(24, 64, 164, (u8 *)modelMenu,
             (unit->partyRecord.flags & 0x20) ? battle->debug.enemyModelNames : battle->debug.partyModelNames);
         break;
     case 4:
@@ -2680,7 +2679,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             sprintf(text, "%3d/%3d\n", currentFrame, btlGetUnitModelFrameCount(unit));
             btlDebugDrawText(32, 400, 0, text);
         }
-        mnuDrawSelectableMenuRows((u8 *)24, (u8 *)32, 164, (u8 *)motionMenu, btlDebugModelMotionNames);
+        mnuDrawSelectableMenuRows(24, 32, 164, (u8 *)motionMenu, btlDebugModelMotionNames);
         break;
     case 6:
         gunMenu = &battle->debug.gunMenu;
@@ -2695,7 +2694,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         } else if (dds3PadBitTable[3] < 0) {
             battle->debug.phase = 2;
         }
-        mnuDrawMenuFrameSizedToRows((u8 *)24, (u8 *)32, 164, (u8 *)gunMenu, battle->debug.gunNames);
+        mnuDrawMenuFrameSizedToRows(24, 32, 164, (u8 *)gunMenu, battle->debug.gunNames);
         break;
     case 7:
         unit = battle->debug.selectedUnit;

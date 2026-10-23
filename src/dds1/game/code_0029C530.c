@@ -12581,8 +12581,9 @@ extern f32 D_003BD168;
 extern s32 D_003BD16C;
 extern char D_003BD190[];
 extern void btlDebugDrawRectangle(s32, s32, s32, s32);
-extern void btlDebugDrawTwoColorRectangle();
-extern void btlDebugDrawLine2D();
+extern void btlDebugDrawTwoColorRectangle(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1);
+extern void btlDebugDrawMappingColorSpan(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1);
+extern void btlDebugDrawLine2D(s32 x0, s32 y0, s32 x1, s32 y1, u32 color);
 extern void btlDebugDrawPoint2DNoOp();
 s32 effEditScalarTrack(EffScalarTrack *track, u32 frames, void *panelWork, void *subPanelWork) {
     EffQueuedFileObject *panel = panelWork;
