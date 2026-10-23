@@ -1081,11 +1081,11 @@ u8 btlIsCommandCodeF(u32 unused, s32 command) {
     return command == 0xf;
 }
 
-s32 btlSelectDisabledCommand(s32 battler) {
+s32 btlSelectDisabledCommand(BtlUnit *battler) {
     if (battler == 0) {
         return 15;
     }
-    return (((BtlUnit *)battler)->partyRecord.flags & 0x2000) ? 15 : -1;
+    return (battler->partyRecord.flags & 0x2000) ? 15 : -1;
 }
 
 /* Command condition words and the restriction flags tested by this boss mode. */

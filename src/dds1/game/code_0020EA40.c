@@ -208,7 +208,7 @@ extern void btlResetUnitPlacement(void);
 extern void btlRestoreHaritiFormation(void);
 extern void btlRestoreSlotEntriesFromEffect(void);
 extern u64 btlScheduleActionAndSoundSequence(BtlTask *action);
-extern s32 btlSelectDisabledCommand(s32 battler);
+extern s32 btlSelectDisabledCommand(BtlUnit *battler);
 extern u32 btlSelectResponseCodeForEnemyFlag(u32 unused, s32 unit);
 extern void btlSelectSlotEntries(void);
 extern u8 btlSelectSpecialActionCameraPose(BtlLinkedCommand *command, s8 a, s8 b);
