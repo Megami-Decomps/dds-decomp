@@ -246,7 +246,7 @@ extern struct SoundSlotOwner *sndAcquireSlotOwner(s32, s32);
 
 extern void btlSetUnitPosition(BtlUnit *object, const f32 *position);
 
-extern void btlSetUnitRotation(BtlUnit *object, void *rotation);
+extern void btlSetUnitRotation(BtlUnit *object, s128 *rotation);
 
 extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *, s32);
 
