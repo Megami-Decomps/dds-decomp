@@ -10,13 +10,13 @@ extern s32 dds3SearchDeleteBasicArray(dds3BasicArrayHandle_t *indexNode, dds3Bas
 
 /* Remove every entry for the node from the owner's world slot selected by the node's kind. */
 void dds3AreaBasicGetItemArray(dds3Basic_t *worldIndexOwner, dds3Basic_t *node) {
-    WorldIndexNode *slot = dds3AreaBasicReleaseItem(worldIndexOwner, dds3AreaBasicTypeHasItems(((u8 *)node)[0xF]));
+    WorldIndexNode *slot = dds3AreaBasicGetWorldIndexNode(worldIndexOwner, dds3AreaBasicTypeHasItems(((u8 *)node)[0xF]));
 
     dds3SearchDeleteBasicArray((dds3BasicArrayHandle_t *)slot, node, 0);
 }
 
 /* Select one of the kind-2 owner's two world index nodes. */
-WorldIndexNode *dds3AreaBasicReleaseItem(dds3Basic_t *worldIndexOwner, s32 slotIndex) {
+WorldIndexNode *dds3AreaBasicGetWorldIndexNode(dds3Basic_t *worldIndexOwner, s32 slotIndex) {
     WorldIndexNode **slot = worldIndexOwner->data;
 
     slot += slotIndex;
@@ -25,7 +25,7 @@ WorldIndexNode *dds3AreaBasicReleaseItem(dds3Basic_t *worldIndexOwner, s32 slotI
 #include "dds3_world_secondary.h"
 /* Copy the slot's world-object words (optionally filtered) into a fresh index node. */
 WorldIndexNode *dds3AreaBasicArrangeGetItemArray(dds3Basic_t *worldIndexOwner, s32 slotIndex, s32 (*filter)(u32)) {
-    WorldIndexNode *slot = dds3AreaBasicReleaseItem(worldIndexOwner, slotIndex);
+    WorldIndexNode *slot = dds3AreaBasicGetWorldIndexNode(worldIndexOwner, slotIndex);
     WorldIndexNode *result;
     u32 word;
 

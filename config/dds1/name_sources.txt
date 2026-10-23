@@ -555,7 +555,7 @@
 0x00111188	dds3AddAreaBasic	inferred	SMT3HD name via SLUS_209.11 0x0010F998, reloc-identical; was evtSpawnActionObj2
 0x001111C8	dds3AreaBasicRegistItem	inferred	SMT3HD name via SLUS_209.11 0x0010F9D8, reloc-identical; was dds3EnsureWorldNodeInSlot
 0x00111258	dds3AreaBasicGetItemArray	inferred	SMT3HD name via SLUS_209.11 0x0010FA68, reloc-identical; was dds3RemoveObjectFromOwnerWorldIndex
-0x001112A8	dds3AreaBasicReleaseItem	inferred	SMT3HD name via SLUS_209.11 0x0010FAB8, byte-identical; was dds3GetWorldSlotValue
+0x001112A8	dds3AreaBasicGetWorldIndexNode	inferred	renamed from imported dds3GetWorldSlotValue; behavior selects and returns the indexed WorldIndexNode from the owner
 0x001112C0	dds3AreaBasicArrangeGetItemArray	inferred	SMT3HD name via SLUS_209.11 0x0010FAD0, reloc-identical; was dds3CopyFilteredWorldSlot
 0x00111388	dds3GetFirstWorldObjectNodeOfKind2	inferred	Returns the first node in world-list kind 2 through a temporary indexed chain.
 0x00111400	MoverBasicConstructor	inferred	SMT3HD name via SLUS_209.11 0x0010FC38, reloc-identical; was dds3AllocateClearedObjectWork

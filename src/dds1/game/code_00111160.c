@@ -24,7 +24,7 @@ dds3Basic_t *dds3AddAreaBasic(s32 key, s32 objectName) {
 }
 
 void dds3AreaBasicRegistItem(dds3Basic_t *ownerObject, dds3Basic_t *node) {
-    WorldIndexNode *slot = dds3AreaBasicReleaseItem(ownerObject, dds3AreaBasicTypeHasItems(((u8 *)node)[0xF]));
+    WorldIndexNode *slot = dds3AreaBasicGetWorldIndexNode(ownerObject, dds3AreaBasicTypeHasItems(((u8 *)node)[0xF]));
 
     dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)slot);
     if (dds3SetSearchNextBasicArray((dds3BasicArrayHandle_t *)slot, node) != 1) {
