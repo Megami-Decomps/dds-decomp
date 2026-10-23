@@ -70,7 +70,7 @@ void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *base) {
 }
 
 /* Set mask bits in the object's resolved base. */
-void dds3ObjectBaseOnFlag(void *object, s32 mask) {
+void dds3ObjectBaseOnFlag(void *object, u32 mask) {
     dds3ObjectBaseControlWorkData_t *base;
 
     base = dds3GetBaseControlWorkData(object);
@@ -78,7 +78,7 @@ void dds3ObjectBaseOnFlag(void *object, s32 mask) {
 }
 
 /* Clear mask bits in the object's resolved base. */
-void dds3ObjectBaseOffFlag(void *object, s32 mask) {
+void dds3ObjectBaseOffFlag(void *object, u32 mask) {
     dds3ObjectBaseControlWorkData_t *base;
 
     base = dds3GetBaseControlWorkData(object);

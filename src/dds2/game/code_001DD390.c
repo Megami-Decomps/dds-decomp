@@ -5,6 +5,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "dds3_object_flags.h"
 #include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_raise_party_record_status_value.h"
@@ -85,7 +86,6 @@ extern EffRandState effSharedRandomState[];
 
 extern void btlDrawUnitTransparencyPasses(BtlUnit *, dds3ModelHandle_t *, sdfModelRootNode_t *, SdfPoolNode **, u32);
 
-extern void dds3ObjectBaseOffFlag(void *, u32);
 
 extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
@@ -3371,7 +3371,6 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, dds3ModelHandle_t *model, sdfM
     }
 }
 
-extern void dds3ObjectBaseOnFlag(void *, u32);
 
 void btlCreateUnitTransparency(BtlUnit *unit) {
     dds3ModelResrc_t *shape;

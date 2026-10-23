@@ -12,6 +12,7 @@
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "dds3_object_flags.h"
 #include "eff_inner_float_api.h"
 #include "sdf_trig.h"
 #include "sdf_vu_matrix.h"
@@ -1222,7 +1223,6 @@ void fldResetPlayerSceneObjectState(void) {
     D_0032E498[0] = 4;
 }
 
-extern void dds3ObjectBaseOffFlag(void *object, s32 mask);
 
 
 
@@ -1271,7 +1271,6 @@ extern void FromRotation(f32);
 extern void fldResetCameraModelHandles(void);
 
 
-extern void dds3ObjectBaseOnFlag(void *object, s32 mask);
 
 
 

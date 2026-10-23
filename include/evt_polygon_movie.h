@@ -129,7 +129,7 @@ sdfMemHandle_t *evtAllocMovieWork(PmdHeader **out);
 sdfMemHandle_t *evtPolygonMovieSynthesizePmd3Header(PmdHeader **out);
 void evtPolygonMovieSetFlagBits(struct dds3ProcessID_t *task, u32 bits);
 void evtPolygonMovieClearFlagBits(struct dds3ProcessID_t *task, u32 bits);
-void evtPolygonMovieSetObjectMode(struct dds3Basic_t *obj, u32 mode, s32 setFlags, s32 clearFlags);
+void evtPolygonMovieSetObjectMode(struct dds3Basic_t *obj, u32 mode, u32 setFlags, u32 clearFlags);
 s32 evtStopMover(struct dds3Basic_t *movie, s32 undo, s32 start, s32 end);
 
 #ifdef VERSION_DDS1

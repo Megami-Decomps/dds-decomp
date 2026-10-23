@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "dds3_object_flags.h"
 #include "eff.h"
 #include "eff_event_draw.h"
 #include "sdf_chip.h"
@@ -31,8 +32,6 @@
 u32 evtHokanColor(s32 enable, f32 t, u32 a, u32 b);
 
 extern evtUnitHandle_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *object);
-extern void dds3ObjectBaseOnFlag(dds3Basic_t *obj, s32 flags);
-extern void dds3ObjectBaseOffFlag(dds3Basic_t *obj, s32 flags);
 
 extern f32 D_003C9310[4];
 extern f32 D_003C9320[4];
@@ -419,7 +418,7 @@ void evtBlendParamsH(s32 enable, f32 t, const EvtBlendKey *a, const EvtBlendKey 
     }
 }
 
-void evtPolygonMovieSetObjectMode(dds3Basic_t *obj, u32 mode, s32 setFlags, s32 clearFlags) {
+void evtPolygonMovieSetObjectMode(dds3Basic_t *obj, u32 mode, u32 setFlags, u32 clearFlags) {
     switch (mode) {
     case 0:
         dds3GetUnitHandleObjectBasic(obj)->owner->flags &= ~MDL_SKIP_TRANSFORMS;

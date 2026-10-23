@@ -11,6 +11,7 @@
 #include "file_pac.h"
 #include "evt_world.h"
 #include "common.h"
+#include "dds3_object_flags.h"
 #include "snd_track_playback_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_clear_menu_entries_api.h"
@@ -3069,7 +3070,6 @@ void fldResetObjectSlots(void) {
     D_003BAF7C = 0;
 }
 
-extern void dds3ObjectBaseOnFlag(void *object, s32 mask);
 extern void sdfModelSetFaceDivParm(struct sdfModelRootNode_t *model, f32 first, f32 second);
 extern s32 D_0032E3C4[];
 extern u8 D_003D44A0[0x200];
@@ -3416,7 +3416,6 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_00149B68);
 
 extern s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
 
-extern void dds3ObjectBaseOnFlag();
 
 void fldNpcHojiRefresh(void) {
     s32 i;
@@ -4176,7 +4175,6 @@ s32 fldBindSparkSlotObject(s32 index, s32 reserved) {
     return 0;
 }
 
-extern void dds3ObjectBaseOffFlag();
 
 extern SdfMathVector4 D_003A0918;
 

@@ -4,6 +4,7 @@
 #include "eff_random.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "dds3_object_flags.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_raise_party_record_status_value.h"
 #include "btl_actor_status_table_api.h"
@@ -254,7 +255,6 @@ extern void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState
 struct dds3ModelHandle_t;
 struct SdfPoolNode;
 extern void btlDrawUnitTransparencyPasses(void *, void *, s32, u8 *, u32);
-extern void dds3ObjectBaseOffFlag(s32, s32);
 extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern u8 btlUnitTransparencySurfaces[];
 

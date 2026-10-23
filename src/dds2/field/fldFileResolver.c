@@ -54,8 +54,6 @@
 #include "itf.h"
 /* Declared before first use (were implicit int). */
 extern void btlResetAsyncState(void);
-extern void dds3ObjectBaseOffFlag(void *object, u32 mask);
-extern void dds3ObjectBaseOnFlag(void *object, u32 mask);
 extern void fldSetFileResolverIdx(u32 state);
 extern s32 fldSetEncounterMode(s32 encounterMode);
 

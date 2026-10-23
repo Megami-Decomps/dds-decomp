@@ -52,7 +52,6 @@ extern void dds3FreePoseSet(dds3Basic_t *node);
 extern void dds3UnitObjectBasicEL_LinkFree(dds3Basic_t *object);
 
 
-extern void dds3ObjectBaseOnFlag(void *object, u32 mask);
 
 u32 dds3GetStatusUnitObjectBasic(dds3Basic_t *object) {
     return (u32)((EffectObjectData *)object->data)->handle;
@@ -142,7 +141,6 @@ void effObjStepFollowAngleTowardPosition(dds3Basic_t *obj, const f32 *targetPosi
     data->word34 = 0;
 }
 
-extern void dds3ObjectBaseOffFlag(void *object, u32 mask);
 
 void effObjStepFollowAngleTowardZero(dds3Basic_t *object) {
     EffectObjectData *data = object->data;

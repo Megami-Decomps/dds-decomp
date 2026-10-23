@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_object_flags.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
 #include "eff_light.h"
@@ -24,7 +25,6 @@ dds3ObjectBaseControlWorkData_t *dds3EventObjectBasicGetControlWorkData(const dd
     return block->resourceState;
 }
 
-extern void dds3ObjectBaseOnFlag(void *object, u32 mask);
 
 /* Allocate the kind-9 light payload and its auxiliary buffer. */
 u32 lightconstructor(dds3Basic_t *object) {

@@ -9,6 +9,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "dds3_object_flags.h"
 #include "fld_stop_entry.h"
 #include "sdf_resource_list_release_api.h"
 #include "kwln_background_fade_api.h"
@@ -105,8 +106,6 @@
 #include "fld_index_pair.h"
 /* Declared before first use (were implicit int). */
 extern void btlResetAsyncState(void);
-extern void dds3ObjectBaseOffFlag(void *object, s32 mask);
-extern void dds3ObjectBaseOnFlag(void *object, s32 mask);
 extern void fldDrawCameraColorScrollingGradient(void);
 extern s32 fldSetEncounterMode(s32 encounterMode);
 

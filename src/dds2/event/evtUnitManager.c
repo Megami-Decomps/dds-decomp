@@ -3,6 +3,7 @@ struct SdfPoolNode;
 struct EffNodeDescriptor;
 
 #include "common.h"
+#include "dds3_object_flags.h"
 #include "btl_model_record.h"
 #include "sdf_model_scalars.h"
 #include "sdf_motion.h"
@@ -1129,9 +1130,7 @@ extern void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, s128 *vect
 
 extern s32 scrGetIntPara(s32 idx);
 
-extern void dds3ObjectBaseOnFlag(void *object, s32 flags);
 
-extern void dds3ObjectBaseOffFlag(void *object, s32 flags);
 
 extern void evtArmEffectObjectPendingValue(dds3Basic_t *object, s32 value);
 
