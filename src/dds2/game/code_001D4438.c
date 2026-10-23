@@ -122,7 +122,7 @@ extern SceneControl *btlCommandPanelWork;
 extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 extern f32 D_00433724;
 extern f32 *D_0037F770[];
-extern u32 btlGetActorCommandClass(s32, s8);
+extern u32 btlGetActorCommandClass(BattleSceneObject *, s8);
 extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *, u32);
 extern s32 btlCountTasksForOwner(s64);
 
