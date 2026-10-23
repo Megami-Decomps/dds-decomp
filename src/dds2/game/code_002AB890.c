@@ -39,7 +39,8 @@ extern s32 mnuIsHighRangeItemId(s32);
 extern s32 mnuIsSolarPricedItemId(s32);
 extern s32 mtrMantraFindIndex(s32);
 extern s32 evtCheckValueThreshold(s32 itemId, s32 minimum);
-extern void mnuDrawCampGridResourceSlot(s32, u32, u32, s32, u32, u32);
+extern void mnuDrawCampGridResourceSlot(s32, s32, s32, struct MenuList *,
+                                        struct MenuListNode *, s32);
 
 typedef struct MenuCatalogItem {
     u16 itemId;
@@ -272,7 +273,7 @@ void mnuDrawOrderedStaffItemEntry(s32 x, s32 y, s32 depth, struct MenuList *list
                 context->resources.baseResources[1], 0x1E, texture);
         }
     }
-    mnuDrawCampGridResourceSlot(x, y, depth, (s32)list, (u32)node, texture);
+    mnuDrawCampGridResourceSlot(x, y, depth, list, node, texture);
     cursor = list->cursor;
     if (cursor == node) {
         u32 locked = list->stateFlags & 8;

@@ -1904,7 +1904,8 @@ void mnuSelectSkillSelectionVisuals(u32 context) {
 void mnuNoOpItemSelectionTeardown(s32 context) {
 }
 
-extern void mnuDrawCampGridResourceSlot(s32, u32, u32, s32, u32, u32);
+extern void mnuDrawCampGridResourceSlot(s32, s32, s32, struct MenuList *,
+                                        struct MenuListNode *, s32);
 extern void mnuDispatchEntryWords(EffectSlotSet *, s32, MenuListNode *);
 extern void itfGridCopyEntryQuad(s32 resource, s32 entryIndex);
 typedef struct MnuCategoryPositions {
@@ -1927,7 +1928,7 @@ void mnuDrawSkillCategoryEntry(s32 x, s32 y, s32 depth, MenuList *list,
     u32 skill;
     datUnitWork_t *actor;
 
-    mnuDrawCampGridResourceSlot(x, y, depth, (s32)list, (u32)node, texture);
+    mnuDrawCampGridResourceSlot(x, y, depth, list, node, texture);
     selected = list->cursor == node;
     actor = &DDS3_GBWK->party[
         context->partyWindow.lists[0]->cursor->index];
@@ -2974,7 +2975,7 @@ void ptySkillMenuDrawEntry(s32 x, s32 y, s32 depth, MenuList *list,
     s32 markerY = y;
     s32 surfaceIndex = 0x53;
 
-    mnuDrawCampGridResourceSlot(x + 0x20, y, depth, (s32)list, (u32)node, texture);
+    mnuDrawCampGridResourceSlot(x + 0x20, y, depth, list, node, texture);
     if (skill != 0 && skill != 0xFFFF) {
         mnuDrawRangeCostAndIcon(x + 0x970, markerY + 0x30, depth, 0x1F0, list->scale, NULL,
                                 (u16)skill, selected, node->flags48 & 1,

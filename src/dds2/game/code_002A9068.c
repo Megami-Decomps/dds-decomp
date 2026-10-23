@@ -617,10 +617,12 @@ typedef struct StaffResourceHeader {
     MenuWindowContainer *resourceLists[3]; /* 0x104: three adjacent staff windows */
 } StaffResourceHeader;
 
-void mnuDrawCampGridResourceSlot(s32 drawWork, u32 y, u32 z, s32 record, u32 unused,
-                   u32 layer) {
-    itfDrawGridWithResolvedSlot(drawWork + 0x60, y, z, 1, (struct EffectSlotSet *)(u32)*(u32 *)(*(s32 *)(record + 0x30) + 100), 10,
-                  layer);
+void mnuDrawCampGridResourceSlot(s32 x, s32 y, s32 depth, struct MenuList *list,
+                                 struct MenuListNode *node, s32 texture) {
+    MenuStaffContext *context = (MenuStaffContext *)list->context;
+
+    itfDrawGridWithResolvedSlot(x + 0x60, y, depth, 1, context->resources.baseResources[1], 10,
+                                texture);
 }
 
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *window, const void *layout,

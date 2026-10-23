@@ -296,7 +296,8 @@ s32 mtrMantraFindIndex(s32 mantraId) {
 }
 
 extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
-extern void mnuDrawCampGridResourceSlot(s32, u32, u32, s32, u32, u32);
+extern void mnuDrawCampGridResourceSlot(s32, s32, s32, struct MenuList *,
+                                        struct MenuListNode *, s32);
 extern void mnuDispatchEntryWords(EffectSlotSet *, s32, struct MenuListNode *);
 extern void mnuDrawRepeatedPanelSprites(s32, s32, s32, s32, s32, EffectSlotSet *, s32, s32);
 extern void itfGridCopyEntryQuad(s32 resource, s32 entryIndex);
@@ -316,7 +317,7 @@ void mnuDrawCampGridEntry(s32 x, s32 y, s32 depth, s32 offset, struct MenuList *
 
     context = (MenuStaffContext *)list->context;
     color = fclBlendColor(0xA09DC380, 0xA09DC300, scale);
-    mnuDrawCampGridResourceSlot(x, y, depth, (s32)list, (u32)node, texture);
+    mnuDrawCampGridResourceSlot(x, y, depth, list, node, texture);
     markerY = y + 0x40;
     if (DDS3_GBWK->inventory.counts[node->sortKeySecondary] != 0) {
         struct _FRQ *glyph;
