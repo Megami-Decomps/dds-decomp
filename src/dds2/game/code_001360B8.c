@@ -22,7 +22,7 @@ extern u32 D_00436128;
 extern u32 fldRunDanteGunFlag[];
 
 
-extern void *D_004360F0;
+extern FldLightSet *D_004360F0;
 
 extern void dds3SetFogColor(s32, f32 *);
 
@@ -290,7 +290,7 @@ void fldApplyLightSetToChaseCameraUnit(void) {
 }
 
 void fldSkyBattle(void) {
-    FldLightSet *light = &((FldLightSet *)D_004360F0)[D_00436128];
+    FldLightSet *light = &D_004360F0[D_00436128];
     f32 vec[4];
     f32 dir[4];
     s32 area;
