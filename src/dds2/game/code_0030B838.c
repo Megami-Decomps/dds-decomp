@@ -882,13 +882,40 @@ void fldDecreaseMapSelectedCount(MapSelection *selection) {
     }
 }
 
-u32 fldCollectMapSelectionMask(s32 context) {
-    s32 task = *(s32 *)(context + 0x10);
+typedef struct MapSelectionNodeView {
+    u8 pad00[8];
+    s16 ordinal;
+} MapSelectionNodeView;
+
+typedef struct MapSelectionLinkView {
+    u8 pad00[0x58];
+    struct MapSelectionLinkView *next;
+    u8 pad5C[0x14];
+    MapSelectionNodeView *selection;
+} MapSelectionLinkView;
+
+typedef struct MapSelectionContextView {
+    u8 pad00[0x10];
+    MapSelectionLinkView *first;
+} MapSelectionContextView;
+
+typedef char MapSelectionNodeView_ordinal_at_8[
+    ((u32)&((MapSelectionNodeView *)0)->ordinal == 8) ? 1 : -1];
+typedef char MapSelectionLinkView_next_at_58[
+    ((u32)&((MapSelectionLinkView *)0)->next == 0x58) ? 1 : -1];
+typedef char MapSelectionLinkView_selection_at_70[
+    ((u32)&((MapSelectionLinkView *)0)->selection == 0x70) ? 1 : -1];
+typedef char MapSelectionContextView_first_at_10[
+    ((u32)&((MapSelectionContextView *)0)->first == 0x10) ? 1 : -1];
+
+u32 fldCollectMapSelectionMask(MapSelectionContextView *context) {
+    MapSelectionLinkView *node = context->first;
     u32 mask = 0;
     do {
-        mask |= 1 << (*(s16 *)(*(s32 *)(task + 0x70) + 8) - 1);
-        task = *(s32 *)(task + 0x58);
-    } while (task != 0);
+        MapSelectionNodeView *selection = node->selection;
+        node = node->next;
+        mask |= 1 << (selection->ordinal - 1);
+    } while (node != NULL);
     return mask;
 }
 
