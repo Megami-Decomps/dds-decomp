@@ -63,7 +63,7 @@ void effDrawGeneratedTextureQuad(sdfDrawTag_t *packet, EffGeneratedTextureDescri
 
 void effDrawCompositeTextureQuad(sdfDrawTag_t *packet, EffCompositeGsDescriptor *source);
 
-void dds3Particle_BasicCreate(void *effect);
+void dds3Particle_BasicCreate(EffEmitterHead *owner);
 
 void dds3Particle_SpiralAllBuffInit(EffTemplatePacketList *effect);
 
@@ -894,8 +894,7 @@ extern void dds3TrackPolyVCSet(void *, s32, void *, void *);
 /* Allocate drawing resources and reset the emitter's common runtime state. */
 /* The subrecord bitfield keeps native int-alias dependencies; see
  * docs/idioms.md, "Trace-justified alias sets: emitter subrecord count". */
-void dds3Particle_BasicCreate(void *effect) {
-    EffEmitterHead *owner = effect;
+void dds3Particle_BasicCreate(EffEmitterHead *owner) {
     EffTrackPolyParams params;
 
     owner->templateSize = 0x150;
@@ -1015,7 +1014,7 @@ s32 dds3Particle_SpiralCreate(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x180);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    dds3Particle_BasicCreate((void *)clone);
+    dds3Particle_BasicCreate((EffEmitterHead *)clone);
     dds3Particle_SpiralAllBuffInit(clone);
     return clone;
 }
@@ -1217,7 +1216,7 @@ s32 dds3Particle_SmokeCreate(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x180);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    dds3Particle_BasicCreate((void *)clone);
+    dds3Particle_BasicCreate((EffEmitterHead *)clone);
     dds3Particle_SmokeAllBuffInit(clone);
     return clone;
 }
@@ -1387,7 +1386,7 @@ s32 dds3Particle_SparkCreate(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x180);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    dds3Particle_BasicCreate((void *)clone);
+    dds3Particle_BasicCreate((EffEmitterHead *)clone);
     dds3Particle_SparkAllBuffInit(clone);
     return clone;
 }
@@ -1825,7 +1824,7 @@ s32 dds3Particle_SphereSpiralCreate(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x170);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    dds3Particle_BasicCreate((void *)clone);
+    dds3Particle_BasicCreate((EffEmitterHead *)clone);
     dds3Particle_SphereSpiralAllBuffInit(clone);
     return clone;
 }
@@ -2027,7 +2026,7 @@ s32 dds3Particle_SphereSmokeCreate(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x180);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    dds3Particle_BasicCreate((void *)clone);
+    dds3Particle_BasicCreate((EffEmitterHead *)clone);
     dds3Particle_SphereSmokeAllBuffInit(clone);
     return clone;
 }
@@ -2220,7 +2219,7 @@ s32 dds3Particle_SphereRingCreate(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x170);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    dds3Particle_BasicCreate((void *)clone);
+    dds3Particle_BasicCreate((EffEmitterHead *)clone);
     dds3Particle_SphereRingAllBuffInit(clone);
     return clone;
 }
@@ -2394,7 +2393,7 @@ s32 dds3Particle_Spark2Create(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x180);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    dds3Particle_BasicCreate((void *)clone);
+    dds3Particle_BasicCreate((EffEmitterHead *)clone);
     dds3Particle_Spark2AllBuffInit(clone);
     return clone;
 }
@@ -2565,7 +2564,7 @@ s32 dds3Particle_SphereAtomCreate(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x170);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    dds3Particle_BasicCreate((void *)clone);
+    dds3Particle_BasicCreate((EffEmitterHead *)clone);
     dds3Particle_SphereAtomAllBuffInit(clone);
     return clone;
 }
@@ -2794,7 +2793,7 @@ void *effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
     memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->head.templateSize, tailBytes);
     clone->head.particleCount = 1;
     clone->head.lifetimeFrames = 0;
-    dds3Particle_BasicCreate(clone);
+    dds3Particle_BasicCreate(&clone->head);
     return clone;
 }
 
@@ -2886,7 +2885,7 @@ s32 dds3Particle_SparkOffsetCreate(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x190);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    dds3Particle_BasicCreate((void *)clone);
+    dds3Particle_BasicCreate((EffEmitterHead *)clone);
     dds3Particle_SparkOffsetAllBuffInit(clone);
     return clone;
 }
@@ -3171,7 +3170,7 @@ EffTemplatePacketList *dds3Particle_SmokeOffsetCreate(EffTemplatePacketList *sou
     auxAllocationHandle = sdfMemAllocDirect(clone->head.particleCount << 4);
     clone->auxiliaryAllocation = auxAllocationHandle;
     clone->auxiliaryData = (void *)sdfMemLock(auxAllocationHandle);
-    dds3Particle_BasicCreate(clone);
+    dds3Particle_BasicCreate(&clone->head);
     dds3Particle_SmokeOffsetAllBuffInit(clone);
     return clone;
 }
@@ -3370,7 +3369,7 @@ s32 dds3Particle_SphereSpiral2Create(EffTemplatePacketList *source) {
     memset((void *)copy, 0, 0x190);
     memcpy((void *)copy, source, source->head.templateSize);
     memcpy((void *)(copy + 0x150), (u8 *)source + source->head.templateSize, tailLen);
-    dds3Particle_BasicCreate((void *)copy);
+    dds3Particle_BasicCreate((EffEmitterHead *)copy);
     perRecord = 0;
     if (((EffTemplatePacketList *)copy)->head.sub.kind != 0) {
         count = ((EffTemplatePacketList *)copy)->head.particleCount;
