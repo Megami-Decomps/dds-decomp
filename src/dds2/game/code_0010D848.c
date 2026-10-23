@@ -10,19 +10,19 @@ extern s32 scrGetIntPara(s32 idx);
 extern s8 D_0040B7D9[];
 
 
-u32 scrGetProcedureCodeAddress(s32 procedureIndex) {
+s32 scrGetProcedureCodeAddress(s32 procedureIndex) {
     return nowpwork->procedures[procedureIndex].addr;
 }
 
-u32 scrGetLabelCodeAddress(s32 labelIndex) {
+s32 scrGetLabelCodeAddress(s32 labelIndex) {
     return nowpwork->labels[labelIndex].addr;
 }
 
-u32 scrGetCodePointer(void) {
+s32 scrGetCodePointer(void) {
     return nowpwork->pc;
 }
 
-void scrSetCodePointer(u32 address) {
+void scrSetCodePointer(s32 address) {
     nowpwork->pc = address;
 }
 

@@ -149,8 +149,8 @@ s32 scrCommandFadeBackgroundIn(void)
     return 1;
 }
 
-extern u32 scrGetLabelCodeAddress(s32 labelIndex);
-extern void scrSetCodePointer(u32 address);
+extern s32 scrGetLabelCodeAddress(s32 labelIndex);
+extern void scrSetCodePointer(s32 address);
 
 s32 scrCommand_SEL_JMP(void)
 {
