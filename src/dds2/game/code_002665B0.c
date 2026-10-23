@@ -42,8 +42,6 @@ extern void mnuSetScrollingStripSpeedsRandomly(DspScrollingStripState *state, s3
 
 #define MNU_PARTY_SLOT_COUNT 5
 #define MNU_PARTY_RECORD_BYTES 0x1C4
-#define MNU_PERCENT_PAIR_BYTES 0xA0
-#define MNU_PERCENT_PANEL_BYTES 0x50
 #define MNU_TERMINAL_SCENE_BYTES 0x3F8
 #define MNU_MENU_HOST_BYTES 0xA82C
 #define MNU_EFFECT_BATCH_COUNT 7
@@ -104,6 +102,16 @@ typedef struct MenuSlotState {
     MenuGradientFade gradientFade; /* 0x3E8 */
     s32 reducedMode;     /* 0x3F4 */
 } MenuSlotState;
+
+typedef struct MenuTerminalPercentPanelPair {
+    MenuPageBar panels[2];
+} MenuTerminalPercentPanelPair;
+
+typedef char MenuPageBar_size_check[sizeof(MenuPageBar) == 0x50 ? 1 : -1];
+typedef char MenuTerminalPercentPanelPair_size_check[
+    sizeof(MenuTerminalPercentPanelPair) == 0xA0 ? 1 : -1];
+typedef char MenuTerminalPercentPanelPair_second_panel_offset_check[
+    (u32)&((MenuTerminalPercentPanelPair *)0)->panels[1] == 0x50 ? 1 : -1];
 
 typedef char MenuSlotState_size_check[(sizeof(MenuSlotState) == 0x3F8) ? 1 : -1];
 typedef char MenuSlotState_bank0_check[((u32)&((MenuSlotState *)0)->resourceBank[0] == 0x64) ? 1 : -1];
@@ -413,7 +421,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, MenuList 
     datUnitWork_t *record = &DDS3_GBWK->party[entry->entryId];
     s32 selected = 0;
     _FRQ *glyph;
-    MenuPageBar *panels;
+    MenuTerminalPercentPanelPair *panels;
     s32 fade;
     s32 status;
 
@@ -438,10 +446,12 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, MenuList 
     if (scale != 0) {
         panels = node->childPanel;
         fade = (scale * 0xB3) / 256;
-        panels[0].fade = fade;
-        mnuDrawAndAdvanceRatioPanel(0xA70, rowY + 0xD0, depth, 0, -1, -1, &panels[0], priority);
-        panels[1].fade = fade;
-        mnuDrawAndAdvanceRatioPanel(0x1050, rowY + 0xD0, depth, 0, -1, -1, &panels[1], priority);
+        panels->panels[0].fade = fade;
+        mnuDrawAndAdvanceRatioPanel(0xA70, rowY + 0xD0, depth, 0, -1, -1,
+            &panels->panels[0], priority);
+        panels->panels[1].fade = fade;
+        mnuDrawAndAdvanceRatioPanel(0x1050, rowY + 0xD0, depth, 0, -1, -1,
+            &panels->panels[1], priority);
     }
     status = mnuGetSelectionFromFlags(record);
     if (status >= 0) {
@@ -452,23 +462,23 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, MenuList 
 
 /* Allocate adjacent HP/MP percentage panels, preserving the native 0x50 stride.
  * The source is a party-vitals record; the context supplies the retained camp texture. */
-void *mnuCreateDualPercentPanel(datUnitWork_t *unit, MenuSlotState *host) {
-    s32 panel = (s32)sdfChipAllocDirect(MNU_PERCENT_PAIR_BYTES);
-    mnuDrawPanelSequenceByRow((MenuPageBar *)panel, 0, 0, 0x1e,
+MenuTerminalPercentPanelPair *mnuCreateDualPercentPanel(datUnitWork_t *unit, MenuSlotState *host) {
+    MenuTerminalPercentPanelPair *panel = sdfChipAllocDirect(sizeof(*panel));
+
+    mnuDrawPanelSequenceByRow(&panel->panels[0], 0, 0, 0x1e,
         mnuPercentOrHundred(unit->hp, unit->maxHp),
         (EffectSlotSet *)host->imageHandles[1]);
-    mnuDrawPanelSequenceByRow((MenuPageBar *)(panel + MNU_PERCENT_PANEL_BYTES), 1, 0, 0x1e,
+    mnuDrawPanelSequenceByRow(&panel->panels[1], 1, 0, 0x1e,
         mnuPercentOrHundred(unit->mp, unit->maxMp),
         (EffectSlotSet *)host->imageHandles[1]);
-    return (void *)panel;
+    return panel;
 }
 
 /* Release both texture sets and the backing allocation for a nonzero panel pair. */
-void mnuReleaseDualPercentPanel(void *panelOwner) {
-    s32 panel = (s32)panelOwner;
-    if (panelOwner != NULL) {
-        mnuReleaseSpriteTextures((u32 *)panel);
-        mnuReleaseSpriteTextures((u32 *)(panel + MNU_PERCENT_PANEL_BYTES));
+void mnuReleaseDualPercentPanel(MenuTerminalPercentPanelPair *panel) {
+    if (panel != NULL) {
+        mnuReleaseSpriteTextures((u32 *)&panel->panels[0]);
+        mnuReleaseSpriteTextures((u32 *)&panel->panels[1]);
         sdfChipFreeDirect(panel);
         return;
     }
