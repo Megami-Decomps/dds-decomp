@@ -331,7 +331,8 @@ extern void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *, u32);
 
 extern s32 D_003BAC80;
 
-extern u32 fldCachedRoomResourceData, fldCachedRoomF1ResourceData, fldCachedRoomF2ResourceData, fldCachedRoomKF2ResourceData;
+extern const u8 *fldCachedRoomResourceData, *fldCachedRoomF1ResourceData, *fldCachedRoomF2ResourceData,
+    *fldCachedRoomKF2ResourceData;
 
 extern u32 fldCachedRoomResourceSize, fldCachedRoomF1ResourceSize, fldCachedRoomF2ResourceSize, fldCachedRoomKF2ResourceSize;
 

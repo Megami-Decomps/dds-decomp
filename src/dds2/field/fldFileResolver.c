@@ -548,7 +548,8 @@ extern char D_004130D8[];
 
 
 
-extern u32 fldCachedRoomResourceData, fldCachedRoomF1ResourceData, fldCachedRoomF2ResourceData, fldCachedRoomKF2ResourceData;
+extern const u8 *fldCachedRoomResourceData, *fldCachedRoomF1ResourceData, *fldCachedRoomF2ResourceData,
+    *fldCachedRoomKF2ResourceData;
 
 extern u32 fldCachedRoomResourceSize, fldCachedRoomF1ResourceSize, fldCachedRoomF2ResourceSize, fldCachedRoomKF2ResourceSize;
 
@@ -1319,7 +1320,7 @@ struct sdfMemHandle_t *fldLoadCachedRoomResourceIfLocationMatches(void **destina
             struct sdfMemHandle_t *allocation = sdfMemAllocDirect(fldCachedRoomResourceSize);
             void *data = (void *)sdfMemLock(allocation);
             *destination = data;
-            memcpy(data, (void *)fldCachedRoomResourceData, fldCachedRoomResourceSize);
+            memcpy(data, fldCachedRoomResourceData, fldCachedRoomResourceSize);
             return allocation;
         }
     }
@@ -1334,7 +1335,7 @@ struct sdfMemHandle_t *fldLoadCachedRoomF1ResourceIfLocationMatches(u8 **destina
             struct sdfMemHandle_t *allocation = sdfMemAllocDirect(fldCachedRoomF1ResourceSize);
             u8 *data = (u8 *)sdfMemLock(allocation);
             *destination = data;
-            memcpy(data, (void *)fldCachedRoomF1ResourceData, fldCachedRoomF1ResourceSize);
+            memcpy(data, fldCachedRoomF1ResourceData, fldCachedRoomF1ResourceSize);
             return allocation;
         }
     }
@@ -1349,7 +1350,7 @@ struct sdfMemHandle_t *fldLoadCachedRoomF2ResourceIfLocationMatches(u8 **destina
             struct sdfMemHandle_t *allocation = sdfMemAllocDirect(fldCachedRoomF2ResourceSize);
             u8 *data = (u8 *)sdfMemLock(allocation);
             *destination = data;
-            memcpy(data, (void *)fldCachedRoomF2ResourceData, fldCachedRoomF2ResourceSize);
+            memcpy(data, fldCachedRoomF2ResourceData, fldCachedRoomF2ResourceSize);
             return allocation;
         }
     }
@@ -1364,7 +1365,7 @@ struct sdfMemHandle_t *fldLoadCachedRoomKF2ResourceIfLocationMatches(u8 **destin
             struct sdfMemHandle_t *allocation = sdfMemAllocDirect(fldCachedRoomKF2ResourceSize);
             u8 *data = (u8 *)sdfMemLock(allocation);
             *destination = data;
-            memcpy(data, (void *)fldCachedRoomKF2ResourceData, fldCachedRoomKF2ResourceSize);
+            memcpy(data, fldCachedRoomKF2ResourceData, fldCachedRoomKF2ResourceSize);
             return allocation;
         }
     }
@@ -5903,13 +5904,13 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomF2ResourceAllocat
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomKF2ResourceAllocation);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomResourceData);
+INCLUDE_SDATA(const u8 *, "field/fldFileResolver", fldCachedRoomResourceData);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomF1ResourceData);
+INCLUDE_SDATA(const u8 *, "field/fldFileResolver", fldCachedRoomF1ResourceData);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomF2ResourceData);
+INCLUDE_SDATA(const u8 *, "field/fldFileResolver", fldCachedRoomF2ResourceData);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomKF2ResourceData);
+INCLUDE_SDATA(const u8 *, "field/fldFileResolver", fldCachedRoomKF2ResourceData);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomResourceSize);
 
