@@ -1208,18 +1208,18 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         return evtSetBokasi(0);
     case 12:
         if (previous != NULL) {
-            if (viewer->unk2288 != previous->p0C.i) {
+            if (viewer->cachedType12FadeAreaId != previous->p0C.i) {
                 fldSetFadeTarget(previous->p0C.i, previous->p08.sh[0], previous->duration);
                 evtSetSkyAlpha(previous->duration, previous->p08.sh[1]);
-                viewer->unk2288 = previous->p0C.i;
+                viewer->cachedType12FadeAreaId = previous->p0C.i;
             } else if (evtCheckSkyAlphaAnime() == 0) {
                 if (fldSkyGetAlpha() != previous->p08.sh[1]) {
                     return evtSetSkyAlpha(previous->duration, previous->p08.sh[1]);
                 }
             }
-        } else if (viewer->unk2288 != 0) {
+        } else if (viewer->cachedType12FadeAreaId != 0) {
             fldSetFadeTarget(0, 1, 0);
-            viewer->unk2288 = 0;
+            viewer->cachedType12FadeAreaId = 0;
         }
         break;
     case 6:
@@ -3061,7 +3061,7 @@ s32 evtViewerApplyCommandSelection(s32 unused0, s32 mode, EvtRuntime *viewer) {
             switch (viewer->frameGroup->type) {
             case 12:
                 key->p08.h[0] = (u16)viewer->cursor;
-                viewer->unk2288 = 0;
+                viewer->cachedType12FadeAreaId = 0;
                 break;
             case 10:
                 key->p14.h[0] = (u16)viewer->cursor;

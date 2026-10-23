@@ -124,7 +124,7 @@ typedef struct EvtRuntime {
     s32 historyCount;
     s32 actionMode;
     s32 commandResetId;
-    s32 unk2288; /* Cleared when committing a type-12 key option. */
+    s32 cachedType12FadeAreaId; /* Last type-12 fade area applied by the viewer. */
     struct dds3ProcessID_t *controlState;
     s32 blurRectangleEnabled;
     s32 texturedBlurEnabled;
