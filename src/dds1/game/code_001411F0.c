@@ -177,7 +177,7 @@ extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *, f32 *, f32 *);
 extern void dds3EffectObjectBasicStatOff(void *, s32);
 extern void dds3EffectObjectBasicStatOn(void *, s32);
-extern void dds3StartBEDEffectObjectBasic(void *, u32);
+extern void dds3StartBEDEffectObjectBasic(dds3Basic_t *, u32);
 extern void fldSetCameraNodeModeWithTen(void);
 extern u8 D_003A0978[];
 extern void sdfMemFreeDelayedDirect(struct sdfMemHandle_t *);
