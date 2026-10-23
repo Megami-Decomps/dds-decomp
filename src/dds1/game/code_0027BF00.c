@@ -2463,30 +2463,14 @@ void mnuDrawPartyPanelResourceIcons(s32 x, s32 y, s32 z, MenuPageSlot *panel, s3
     }
 }
 
-/* Each panel owns the color state blended with the neighboring panel. */
-typedef struct MenuBlendOwner {
-    u8 pad00[0x18];
-    s32 colorState;
-} MenuBlendOwner;
-
-typedef struct MenuBlendColors {
-    u8 pad00[0x14];
-    s32 output[4]; /* 0x14 */
-    u8 pad24[0x60];
-    s32 input[4];  /* 0x84 */
-} MenuBlendColors;
-
-void mnuBlendPanelSlots(s32 dst, s32 src, u32 amount) {
+void mnuBlendPanelSlots(EffectSlotSet *dst, EffectSlotSet *src, s32 amount) {
     s32 i;
-    s32 ctx = ((MenuBlendOwner *)dst)->colorState;
 
     for (i = 0; i < 4; i++) {
-        s32 result = fclBlendColor(((MenuBlendColors *)ctx)->input[i],
-                                   ((MenuBlendColors *)((MenuBlendOwner *)src)->colorState)->input[i],
-                                   (s32)amount / 2 + 0x80);
-        s32 current = ((MenuBlendOwner *)dst)->colorState;
-        ctx = current;
-        ((MenuBlendColors *)current)->output[i] = result;
+        dst->workEntries->geometry.cornerColors[i] = fclBlendColor(
+            dst->workEntries->savedColors[i],
+            src->workEntries->savedColors[i],
+            amount / 2 + 0x80);
     }
 }
 
@@ -2496,7 +2480,7 @@ void mnuDrawPartyPanelSlotWithBlend(s32 x, s32 y, s32 depth, MenuPageWindow *win
     EffectSlotSet *resource;
 
     if (mnuGetPartyRowDrawState(window, index) == blendState) {
-        mnuBlendPanelSlots((s32)pair[1], (s32)pair[0], window->fade);
+        mnuBlendPanelSlots(pair[1], pair[0], window->fade);
         resource = pair[1];
     } else {
         resource = pair[0];
