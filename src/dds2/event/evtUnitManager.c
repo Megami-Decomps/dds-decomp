@@ -1125,7 +1125,7 @@ extern BtlActorStatusRecord *D_00435DF0;
 extern void mnuInitializeCampPanelVisualDefaults(f32 *firstVector, f32 *secondVector, f32 *thirdVector, f32 *scalarA, f32 *scalarB);
 #include "dds3_world_secondary.h"
 
-extern void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(evtUnitHandle_t *, s32), s32 unusedLast);
+extern void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, const s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(evtUnitHandle_t *, s32), s32 unusedLast);
 
 
 
@@ -1198,7 +1198,7 @@ extern f32 evtComputeClampedModelScale(s32);
 
 
 /* Start a bounded vector transition; detach any previous secondary-world source. */
-void evtSetUnitRot1(evtUnitHandle_t *work, s128 *vector, s32 frames) {
+void evtSetUnitRot1(evtUnitHandle_t *work, const s128 *vector, s32 frames) {
     f32 *destination = work->targetVector;
 
     if ((u32)(frames - 1) < 100) {
@@ -1226,7 +1226,7 @@ void evtSetUnitRot2(evtUnitHandle_t *work, s32 worldObjectKey, s32 frames) {
 }
 
 /* Configure a mode-one vector transition, without retaining a world source. */
-void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(evtUnitHandle_t *, s32), s32 unusedLast) {
+void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, const s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(evtUnitHandle_t *, s32), s32 unusedLast) {
     f32 *destination = work->targetVector;
 
     work->motionSubmode = motionSubmode;

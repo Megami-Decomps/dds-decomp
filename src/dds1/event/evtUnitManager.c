@@ -1119,7 +1119,7 @@ extern s32 evtLoadUnit(s32 slotKind, s32 resource);
 
 extern s32 evtCheckUnitWait(evtUnitHandle_t *unit);
 #include "dds3_world_secondary.h"
-extern void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(evtUnitHandle_t *, s32), s32 unusedLast);
+extern void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, const s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(evtUnitHandle_t *, s32), s32 unusedLast);
 
 extern void evtResetObjectPendingValue(dds3Basic_t *object);
 extern void evtArmEffectObjectPendingValue(dds3Basic_t *object, s32 value);
@@ -1153,7 +1153,7 @@ extern void evtEndUnitValueTransition(evtUnitHandle_t *unit, s32 duration);
 extern dds3Basic_t *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
 extern const char D_003AC508[];
 
-void evtSetUnitRot1(evtUnitHandle_t *work, s128 *vector, s32 frames) {
+void evtSetUnitRot1(evtUnitHandle_t *work, const s128 *vector, s32 frames) {
     if (frames > 0 && frames <= 100) {
         work->linkedUnit = NULL;
         work->motionState = EVT_UNIT_MOTION_STATE_VECTOR;
@@ -1177,7 +1177,7 @@ void evtSetUnitRot2(evtUnitHandle_t *work, s32 worldObjectKey, s32 frames) {
     }
 }
 
-void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(evtUnitHandle_t *, s32), s32 unusedLast) {
+void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, const s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(evtUnitHandle_t *, s32), s32 unusedLast) {
     work->motionSubmode = motionSubmode;
     work->motionState = EVT_UNIT_MOTION_STATE_SOURCE;
     work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_COPIED_VECTOR;
