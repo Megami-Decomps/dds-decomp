@@ -1399,21 +1399,21 @@ s32 btlAnyGroup200HasQuery(s32 unused, s32 query) {
 }
 
 s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 query, u32 mask) {
-    u8 *node = (u8 *)((BtlState *)btlGetRuntime())->tasks;
-    while (node != 0) {
-        u8 *owner = (u8 *)((BtlTask *)node)->unit;
-        if (owner != 0) {
-            u32 flags = ((BtlUnit *)owner)->status.flags;
+    BtlTask *task = ((BtlState *)btlGetRuntime())->tasks;
+    while (task != 0) {
+        BtlUnit *unit = task->unit;
+        if (unit != 0) {
+            u32 flags = unit->status.flags;
             if ((flags & 1) && (flags & mask) && !(flags & 0x20)) {
                 s32 i;
                 for (i = 0; i < 8; i++) {
-                    if (((BtlTask *)node)->actions[i] == query) {
+                    if (task->actions[i] == query) {
                         return 1;
                     }
                 }
             }
         }
-        node = (u8 *)((BtlTask *)node)->next;
+        task = task->next;
     }
     return 0;
 }
