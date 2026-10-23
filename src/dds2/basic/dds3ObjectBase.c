@@ -587,7 +587,7 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, dds3Basic_t *
 
 /* Create and attach kind-3 slot data only when the data slot is empty.
  * Existing data is retained; attachment still uses the new object's kind. */
-void dds3ObjectBaseCreateMover(void *object) {
+void dds3ObjectBaseCreateMover(dds3Basic_t *object) {
     void *existingData;
     dds3Basic_t *newData;
 

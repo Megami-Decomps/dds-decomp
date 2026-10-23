@@ -5772,7 +5772,7 @@ extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32, void *, void *);
 
 extern void dds3GetRadiusPoseSet(dds3Basic_t *, f32);
 
-extern void dds3ObjectBaseCreateMover(void *);
+extern void dds3ObjectBaseCreateMover(dds3Basic_t *);
 
 /* vu0 routine: add the battle origin to the default camera position. */
 void btlInitializeWorldCamera(void) {
