@@ -62,7 +62,7 @@ extern MenuRuntimeRecord *mnuCreateRuntimeAnimationRecord(MenuStateRecord *recor
 extern MenuRuntimeList *mnuGetRuntimeHitTargetList(void);
 extern MenuRuntimeList *mnuGetRuntimeAnimationList(void);
 extern void mnuUpdateTimedSpawns(MnuCallbackList *callbackList, MenuRuntimeList *runtimeList,
-                                 u32 x, u32 y, f32 angle);
+                                 s32 x, s32 y, f32 angle);
 extern void mnuUpdateKindMaskedTimedSpawns(MnuCallbackList *callbackList,
                                            MenuRuntimeList *runtimeList, s32 kindMask,
                                            s32 x, s32 y, s32 enabled, f32 angle);
