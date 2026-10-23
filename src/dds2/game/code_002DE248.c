@@ -120,7 +120,7 @@ extern void btlBeginSceneLightColorTransition(f32 *, f32 *, s32);
 
 
 
-static inline void effSubmitSurfacePacket(SdfPoolNode *surface, void *list) {
+static inline void effSubmitSurfacePacket(SdfPoolNode *surface, sdfDrawTag_t *list) {
     surface->append(surface, list);
 }
 

@@ -99,7 +99,7 @@ extern void mnuRecordSetVector(void *record, const void *src);
 
 
 
-static inline void effSubmitSurfacePacket(SdfPoolNode *surface, void *list) {
+static inline void effSubmitSurfacePacket(SdfPoolNode *surface, sdfDrawTag_t *list) {
     surface->append(surface, list);
 }
 
