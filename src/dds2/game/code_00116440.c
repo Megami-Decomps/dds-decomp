@@ -10,12 +10,12 @@
 
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *node);
 
-dds3Basic_t *dds3AddEventObjectBasic(s32 initialValue, void *firstVector, void *secondVector) {
+dds3Basic_t *dds3AddEventObjectBasic(s32 initialValue, u128 *position, u128 *rotation) {
     dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_RESOURCE_OWNER);
 
     obj->key = initialValue;
-    dds3SetPosPoseSet(obj, firstVector);
-    dds3SetRotPoseSet(obj, secondVector);
+    dds3SetPosPoseSet(obj, position);
+    dds3SetRotPoseSet(obj, rotation);
     dds3SetRadiusPoseSet(obj->inner);
     return obj;
 }
