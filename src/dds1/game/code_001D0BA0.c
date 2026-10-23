@@ -4749,15 +4749,15 @@ void btlStartGunFinishLoad(GunLoadArgs *taskArgs) {
     if (((u32)actor->status.flags & 0x400) != 0) {
         return;
     }
-    if (*(s32 *)((u8 *)actor + 0x30C) != 0) {
-        sdfFreeAuto((void *)(u32)(*(u32 *)((u8 *)actor + 0x30C)));
-        *(s32 *)((u8 *)actor + 0x30C) = 0;
+    if (actor->gunResource != 0) {
+        sdfFreeAuto(actor->gunResource);
+        actor->gunResource = 0;
     }
     if (btlFormatUnitBedName(actor, filename)) {
         taskArgs->request = fileLoadUseTail(filename);
         btlBossDebugPrintf("btl:gun & finish load start[%s][%p]\n", filename, taskArgs->request);
     }
-    *(u32 *)((u8 *)actor + 0x118) = (*(u32 *)((u8 *)actor + 0x118) | 4) & ~8;
+    actor->gunResourceFlags = (actor->gunResourceFlags | 4) & ~8;
 }
 
 u32 btlPollGunLoad(u32 *taskArgs) {
