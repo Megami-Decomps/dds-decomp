@@ -287,11 +287,10 @@ extern void Eve_PartialMultiFilterSetDefTex(void);
 /* Release the event task's owned handles, then free its state.
  * File I/O is waited on even when the user-value handle is zero. */
 void evtWaitEventPackLoad(dds3ProcessID_t *task) {
-    s32 stateHandle = dds3GetProcessData(task);
-    EvtPackLoadState *packState = (EvtPackLoadState *)stateHandle;
+    EvtPackLoadState *packState = (EvtPackLoadState *)dds3GetProcessData(task);
 
     fileSyncAll();
-    if (stateHandle != 0) {
+    if (packState != NULL) {
         if (packState->effect72 != 0) {
             Eve_DistortionBlurSetDefTex();
             sdfTexReleaseReferenceViaHandler(packState->effect72);
@@ -321,7 +320,7 @@ void evtWaitEventPackLoad(dds3ProcessID_t *task) {
             sdfMemFreeDirect(packState->sceneAllocation2);
         }
     }
-    sdfChipFreeDirect(stateHandle);
+    sdfChipFreeDirect(packState);
 }
 
 INCLUDE_SDATA(const s32, "event/evtEventPack", evtMotionSeWork);
