@@ -116,7 +116,7 @@ s32 dds3ForEachBasicArray(dds3BasicArrayHandle_t *object, s32 (*callback)(void *
 WorldIndexNode *dds3SceneBasicGetList(dds3Basic_t *object, s32 kind);
 
 void dds3AreaBasicRegistItem(dds3Basic_t *indexOwner, dds3Basic_t *node);
-WorldIndexNode *dds3AreaBasicReleaseItem(dds3Basic_t *worldIndexOwner, s32 slotIndex);
+WorldIndexNode *dds3AreaBasicGetWorldIndexNode(dds3Basic_t *worldIndexOwner, s32 slotIndex);
 
 /* Eight-byte entries link both allocated and free world value chains. */
 typedef struct WorldValueEntry {
