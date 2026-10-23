@@ -2502,7 +2502,7 @@ s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *partyRecord, u32 entryId) 
 u32 btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode);
 
 s32 btlSelectActorAction(s32 state) {
-    s32 selection = btlSelectEnemyDropItem(state, 1);
+    s32 selection = btlSelectEnemyDropItem((BtlUnit *)state, 1);
     if (selection == 0) {
         selection = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) ? 2 : 9;
     }
@@ -2691,7 +2691,7 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
         controller->moneyEarned += amount;
         btlBossDebugPrintf(D_00415238, controller->moneyEarned, amount);
     }
-    item = btlSelectEnemyDropItem((s32)enemy, 0);
+    item = btlSelectEnemyDropItem(enemy, 0);
     if (item != 0) {
         btlAddItemDrop(item);
     }
