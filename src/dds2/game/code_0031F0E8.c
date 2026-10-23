@@ -240,11 +240,13 @@ u32 dds3ResolvePackedOffset(DdsPackedObject *object, u32 packedOffset) {
     u32 segmentIndex = packedOffset >> 16;
     u32 offset = packedOffset - (segmentIndex << 16);
     SdfListNode *segment;
+    DdsAllocBlock *block;
     if (packedOffset > object->maxPackedOffset) {
         return 0;
     }
     segment = mnuFindResourceNodeById(object->segments, segmentIndex);
-    return *(u32 *)((u32)segment->value + 4) + offset;
+    block = (DdsAllocBlock *)segment->value;
+    return (u32)block->buffer + offset;
 }
 
 /* Replace recorded pointer slots with their matching named addresses. */
