@@ -4017,8 +4017,8 @@ u8 *btlCreateModelChangeTask(u8 *unit, s32 resourceKind, s32 resourceId, s32 del
 }
 
 void btlApplyLinkedUnitStatusWhenActorActive(s32 taskArgs) {
-    if (((u32)((BtlUnit *)*(u32 *)(taskArgs + 0xc))->status.flags & 2) != 0) {
-        evtUnitLightOn(((BtlUnit *)*(u32 *)(taskArgs + 0xc))->ext);
+    if ((((BtlRuntimeTaskArgs *)taskArgs)->unitC->status.flags & 2) != 0) {
+        evtUnitLightOn(((BtlRuntimeTaskArgs *)taskArgs)->unitC->ext);
         return;
     }
 }
