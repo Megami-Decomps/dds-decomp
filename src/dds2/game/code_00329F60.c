@@ -19,6 +19,7 @@
 #include "sdf_texture_registry.h"
 #include "sdf_pending.h"
 #include "sdf_texture_release.h"
+#include "sdf_image_packets.h"
 #include "sdf_tex_copy_image_data_api.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_tex_packet.h"
@@ -637,7 +638,7 @@ void sdfImageSetReq(SdfImageUploadRequest *request) {
     SdfTextureQueue *queue = &sdfImageSetCb;
     SdfTextureReleaseHead *releaseEntry;
     SdfTextureDmaTail *oldTail;
-    u64 *setup;
+    SdfImageTransferPacket *setup;
     u64 *packet;
     void *allocation;
     u32 format;
@@ -672,7 +673,7 @@ void sdfImageSetReq(SdfImageUploadRequest *request) {
     releaseEntry->allocation = request->allocation;
     releaseEntry->releaseMode = request->allocationMode;
 
-    setup = (u64 *)((u8 *)allocation + 0x10);
+    setup = (SdfImageTransferPacket *)((u8 *)allocation + sizeof(SdfTextureReleaseHead));
     packet = (u64 *)((u8 *)allocation + 0x70);
     formatAndDestination = ((u64)format << 56) |
                           ((u64)bufferWidthUnits << 48) |
@@ -680,18 +681,18 @@ void sdfImageSetReq(SdfImageUploadRequest *request) {
     coordinates = ((u64)request->y << 48) | ((u64)request->x << 32);
     dimensions = ((u64)height << 32) | width;
 
-    setup[0] = 0x0000000010000005ULL;
-    setup[1] = 0x5000000500000000ULL;
-    setup[2] = 0x1000000000000004ULL;
-    setup[3] = 0x000000000000000EULL;
-    setup[4] = formatAndDestination;
-    setup[5] = 0x50ULL;
-    setup[6] = coordinates;
-    setup[7] = 0x51ULL;
-    setup[8] = dimensions;
-    setup[9] = 0x52ULL;
-    setup[10] = 0;
-    setup[11] = 0x53ULL;
+    setup->header.dmaTag = 0x0000000010000005ULL;
+    setup->header.vifCommands = 0x5000000500000000ULL;
+    setup->header.gifTag = 0x1000000000000004ULL;
+    setup->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    setup->transfer.bitbltbuf.value = formatAndDestination;
+    setup->transfer.bitbltbuf.registerId = SDF_GS_BITBLTBUF;
+    setup->transfer.trxpos.value = coordinates;
+    setup->transfer.trxpos.registerId = SDF_GS_TRXPOS;
+    setup->transfer.trxreg.value = dimensions;
+    setup->transfer.trxreg.registerId = SDF_GS_TRXREG;
+    setup->transfer.trxdir.value = 0;
+    setup->transfer.trxdir.registerId = SDF_GS_TRXDIR;
 
     sourceAddress = (u32)request->pixels & 0x0FFFFFFF;
     remaining = qwordCount;
@@ -724,7 +725,7 @@ void sdfImageSetReq(SdfImageUploadRequest *request) {
     }
     queue->releaseTail = releaseEntry;
 
-    setup = (u64 *)((u32)setup & 0x0FFFFFFF);
+    setup = (SdfImageTransferPacket *)((u32)setup & 0x0FFFFFFF);
     oldTail = queue->packetTail;
     if (oldTail != NULL) {
         oldTail->vifCodes = 0;
