@@ -1645,20 +1645,20 @@ u32 btlAddEpFromPacket(BtlRewardPacket *packet) {
 
 extern u32 btlAddEpFromPacket(BtlRewardPacket *);
 
-u8 *btlScheduleEpPacketTask(u8 *owner, s32 value) {
+BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *actor, s32 amount) {
     u8 *task = btlAllocTask(8);
-    u32 *arguments;
+    BtlRewardPacket *arguments;
 
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x4F;
     *(void **)(task + 0x4C) = btlAddEpFromPacket;
-    *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
+    *(u64 *)(task + 0x40) = actor->identity;
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    arguments[1] = value;
-    return task;
+    arguments->actor = actor;
+    arguments->amount = amount;
+    return (BtlRuntimeTask *)task;
 }
 
 u32 btlAddMoneyFromPacket(BtlRewardPacket *packet) {
@@ -1677,22 +1677,22 @@ u32 btlAddMoneyFromPacket(BtlRewardPacket *packet) {
 
 extern u32 btlAddMoneyFromPacket(BtlRewardPacket *);
 
-void *btlScheduleMoneyPacketTask(u8 *owner, u32 value) {
+BtlRuntimeTask *btlScheduleMoneyPacketTask(BtlUnit *actor, s32 amount) {
     u8 *task = btlAllocTask(8);
     s64 data;
-    u32 *arguments;
+    BtlRewardPacket *arguments;
 
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x50;
     *(void **)(task + 0x4C) = btlAddMoneyFromPacket;
-    data = *(s64 *)(owner + 0x108);
+    data = actor->identity;
     *(s64 *)(task + 0x40) = data;
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    arguments[1] = value;
-    return task;
+    arguments->actor = actor;
+    arguments->amount = amount;
+    return (BtlRuntimeTask *)task;
 }
 
 u32 btlRefreshEligibleActors(void) {

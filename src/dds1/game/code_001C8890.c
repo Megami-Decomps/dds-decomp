@@ -936,8 +936,8 @@ extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 extern s32 btlActionEntryIsEmpty(s32, BtlOperandGroup *, BtlOperandEntry *);
 extern void *btlCreateDeferredActorStatsTask(BtlUnit *, BtlOperandEntry *);
 extern u8 *btlCreateActorSoundOptionTask(BtlUnit *, s32);
-extern u8 *btlScheduleEpPacketTask(u8 *, s32);
-extern void *btlScheduleMoneyPacketTask(u8 *, u32);
+extern BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *, s32);
+extern BtlRuntimeTask *btlScheduleMoneyPacketTask(BtlUnit *, s32);
 extern void *btlCreateRefreshEligibleActorsTask(void);
 extern BtlRuntimeTask *btlCreateImmediateCompletionTask(void);
 extern BtlRuntimeTask *btlCreateUpdateUnitEffectsTask(void);
@@ -1260,12 +1260,12 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
                 btlStartTask(task);
             }
             if (groupIndex == 0 && operandIndex == operandCount - 1) {
-                task = (BtlRuntimeTask *)btlScheduleEpPacketTask((u8 *)action->unit, action->indexWork.battleExperienceReward);
+                task = btlScheduleEpPacketTask(action->unit, action->indexWork.battleExperienceReward);
                 task->startCondition.kind = 4;
                                 task->startCondition.value.handle = operandTask->handle;
                 task->ownerId = commandOwner;
                 btlStartTask(task);
-                task = btlScheduleMoneyPacketTask((u8 *)action->unit, action->indexWork.moneyReward);
+                task = btlScheduleMoneyPacketTask(action->unit, action->indexWork.moneyReward);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = operandTask->handle;
                 task->ownerId = commandOwner;
@@ -1721,12 +1721,12 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
                     btlStartTask(task);
                 }
                 if (groupIndex == 0 && operandIndex == operandCount - 1) {
-                    task = (BtlRuntimeTask *)btlScheduleEpPacketTask((u8 *)unit, action->indexWork.battleExperienceReward);
+                    task = btlScheduleEpPacketTask(unit, action->indexWork.battleExperienceReward);
                     task->startCondition.kind = 4;
                     task->startCondition.value.handle = operandTask->handle;
                     task->ownerId = commandOwner;
                     btlStartTask(task);
-                    task = btlScheduleMoneyPacketTask((u8 *)unit, action->indexWork.moneyReward);
+                    task = btlScheduleMoneyPacketTask(unit, action->indexWork.moneyReward);
                     task->startCondition.kind = 4;
                     task->startCondition.value.handle = operandTask->handle;
                     task->ownerId = commandOwner;
