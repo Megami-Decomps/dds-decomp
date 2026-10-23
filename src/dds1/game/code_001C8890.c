@@ -2904,7 +2904,7 @@ void btlResumeStandbyWhenActorTasksFinish(s32 object) {
 void btlFinalizeLinkedActionAndAdvanceHistory(void) {
 }
 
-extern void btlAdvanceHistoryCounter(s32 task);
+extern void btlAdvanceHistoryCounter(BtlTask *task);
 
 void btlUnitTurnEndCommit(s32 task) {
     void (*hook)(s32) = *(void (**)(s32))((u8 *)btlGetRuntime() + 0x600);
@@ -2914,7 +2914,7 @@ void btlUnitTurnEndCommit(s32 task) {
     if (hook != 0) {
         hook(task);
     }
-    btlAdvanceHistoryCounter(task);
+    btlAdvanceHistoryCounter(command);
     btlResetIndexWork(&command->indexWork);
     owner->pendingAbilityId = -1;
     command->options &= ~1;
