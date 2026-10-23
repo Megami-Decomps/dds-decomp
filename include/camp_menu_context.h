@@ -32,7 +32,7 @@ typedef struct CampMenuContext {
         s32 panelResource; /* 0xF0: first panel resource, used by other menu paths */
         EffectSlotSet *panelResources[10]; /* 0xF0: party-unit panel resources */
     };
-    s32 unk118;               /* 0x118: window sprite slot resource */
+    struct EffMappedResource *windowSpriteTarget; /* 0x118: window sprite slot resource. */
     const void *partySelectionLayout; /* 0x11C: copied panel layout address */
     struct EffMappedResource *panelTarget; /* 0x120: target resource used to build panel handles. */
     s32 panel;                /* 0x124 */
@@ -56,6 +56,8 @@ typedef char CampMenuContext_selectionResources_at_0xC4[
     ((u32)&((CampMenuContext *)0)->selectionResources == 0xC4) ? 1 : -1];
 typedef char CampMenuContext_panelResources_at_0xF0[
     ((u32)&((CampMenuContext *)0)->panelResources == 0xF0) ? 1 : -1];
+typedef char CampMenuContext_windowSpriteTarget_at_0x118[
+    ((u32)&((CampMenuContext *)0)->windowSpriteTarget == 0x118) ? 1 : -1];
 typedef char CampMenuContext_size_must_be_0x924[
     (sizeof(CampMenuContext) == 0x924) ? 1 : -1];
 
