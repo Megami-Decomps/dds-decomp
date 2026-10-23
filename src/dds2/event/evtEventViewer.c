@@ -484,7 +484,7 @@ extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *resource, void *position,
 extern void dds3StartBEDEffectObjectBasic(dds3Basic_t *obj, u32 entryId);
 struct EffNodeDescriptor;
 extern dds3Basic_t *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
-extern s32 dds3AddD3PEffectObjectBasic(s32 arg, f32 *vec0, f32 *vec1);
+extern dds3Basic_t *dds3AddD3PEffectObjectBasic(u32 parameter, void *firstVector, s32 secondVectorAddress);
 extern dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 kind, struct EffNodeDescriptor *descriptor);
 extern s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first,
                                                dds3Basic_t *second, dds3Basic_t *third,
@@ -494,7 +494,7 @@ extern s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first,
 s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *track, EvtRuntimeChild *key, EvtRuntime *viewer) {
     f32 vec0[4];
     f32 vec1[4];
-    s32 handle = 0;
+    dds3Basic_t *object = NULL;
     s32 slot;
     dds3Basic_t *n0;
     dds3Basic_t *n1;
@@ -515,42 +515,42 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *track, EvtRunti
     case 3:
     case 0x1A:
         if (track->type == 3) {
-            handle = (s32)effObjSpawnDescriptorBoundEffect((struct EffNodeDescriptor *)track->resourceData, vec0, vec1);
+            object = effObjSpawnDescriptorBoundEffect((struct EffNodeDescriptor *)track->resourceData, vec0, vec1);
         } else {
-            handle = dds3AddD3PEffectObjectBasic((s32)track->resourceData, vec0, vec1);
+            object = dds3AddD3PEffectObjectBasic((u32)track->resourceData, vec0, (s32)vec1);
         }
         if (key->p0C.sb[0] != 0) {
-            dds3EffectObjectPresetMG12((dds3Basic_t *)handle);
+            dds3EffectObjectPresetMG12(object);
         }
         if (track->metadata.option == 0) {
-            evtViewerBindNamedOwner((dds3Basic_t *)handle, key->p0C.sh[1], key->p0C.sb[1], key->frame, viewer);
+            evtViewerBindNamedOwner(object, key->p0C.sh[1], key->p0C.sb[1], key->frame, viewer);
         } else {
-            evtViewerBindNamedOwner((dds3Basic_t *)handle, key->p0C.sh[1], key->p0C.sb[1], 0, viewer);
+            evtViewerBindNamedOwner(object, key->p0C.sh[1], key->p0C.sb[1], 0, viewer);
         }
         break;
     case 0x14:
     case 0x15:
         switch (track->type) {
         case 0x14:
-            handle = (s32)dds3AddMG12EffectObjectBasic2(1, (struct EffNodeDescriptor *)track->resourceData);
+            object = dds3AddMG12EffectObjectBasic2(1, (struct EffNodeDescriptor *)track->resourceData);
             break;
         case 0x15:
-            handle = (s32)dds3AddMG12EffectObjectBasic2(2, (struct EffNodeDescriptor *)track->resourceData);
+            object = dds3AddMG12EffectObjectBasic2(2, (struct EffNodeDescriptor *)track->resourceData);
             break;
         }
         n0 = evtEventViewerGetNameObject(key->p0C.sb[0], viewer);
         n1 = evtEventViewerGetNameObject(key->p0C.sb[1], viewer);
         n2 = evtEventViewerGetNameObject(key->p0C.sb[2], viewer);
-        dds3EffectObjectSetMG12Pos((dds3Basic_t *)handle, n0, n1, n2,
+        dds3EffectObjectSetMG12Pos(object, n0, n1, n2,
                                            evtEventViewerGetNameObject(key->p0C.sb[3], viewer));
         if (key->p08.sb[1] != 0) {
-            dds3EffectObjectPresetMG12((dds3Basic_t *)handle);
+            dds3EffectObjectPresetMG12(object);
         }
         break;
     }
-    viewer->objects[slot] = (void *)handle;
-    if (handle != 0) {
-        dds3EffectObjectBasicStatOn((dds3Basic_t *)handle, 1);
+    viewer->objects[slot] = object;
+    if (object != NULL) {
+        dds3EffectObjectBasicStatOn(object, 1);
     }
     return slot;
 }
