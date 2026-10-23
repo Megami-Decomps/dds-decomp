@@ -599,7 +599,47 @@ s32 btlSelectEnemyAiConditionalTargets(s32 actor) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00202178", btlSelectLowestRankTarget);
+/* The index-list builder returns its policy and count as one query result. */
+typedef struct BtlIndexQuery {
+    u32 matching;
+    u32 count;
+} BtlIndexQuery;
+
+/* AI operation 10 ignores its operand; the direct wrapper passes zero. */
+s32 btlSelectLowestRankTarget(s32 task, s32 unusedOperand) {
+    u16 picked[12];
+    BtlIndexQuery query;
+    BtlIndexList *list;
+    u16 i;
+
+    list = btlBuildActorIndexListAndCount(task, &query.matching, &query.count);
+    switch (query.matching) {
+    case 0: {
+        u16 best = 0x7FFF;
+        u16 bestIndex = 0;
+
+        memset(picked, 0, sizeof(picked));
+        for (i = 0; i < query.count; i++) {
+            u16 value = ((BtlUnit *)btlGetIndexListEntry(list, i))->partyRecord.level;
+
+            if (value <= best) {
+                picked[bestIndex] = 0;
+                best = value;
+                picked[i] = 1;
+                bestIndex = i;
+            }
+        }
+        btlAppendIndexListEntry(((BtlTask *)task)->indexWork.indices, btlSelectFlaggedIndexListEntry(list, picked, query.count));
+        break;
+    }
+    case 1:
+    case 2:
+        btlCopyIndexList(((BtlTask *)task)->indexWork.indices, list);
+        break;
+    }
+    btlFreeIndexList(list);
+    return 1;
+}
 
 /* Select the highest current MP, preferring later entries on a tie. */
 s32 btlSelectHighestCurrentMpTarget(s32 actor, s32 unused) {

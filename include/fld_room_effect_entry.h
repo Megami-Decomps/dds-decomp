@@ -16,7 +16,8 @@ typedef struct FldRoomEffectEntry {
     s16 kind;           /* 0x24 */
     s16 kindId;         /* 0x26 */
     f32 size;           /* 0x28 */
-    s32 unk2C, unk30, unk34;
+    f32 unk2C;          /* 0x2C: float counter inferred from the paired SMT3 cntf layout. */
+    s32 unk30, unk34;
     s32 room;           /* 0x38 */
     s16 unk3C, unk3E;
     char name[0x10];    /* 0x40 */

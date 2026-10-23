@@ -15935,3 +15935,41 @@ the same active/position pair at `+0`/`+4`.
 Timed producers and readers use `control.active` / `control.pos`. Generic
 bar updaters receive `&titleWork->timedB.control`, not a cast of the
 complete timed owner to a second nominal prefix type.
+
+
+## Placed field models: infer the retained counter from the complete owner
+
+`FldRoomEffectEntry` is the shared 0x50-byte placed-field-model record. Its
+32 entries include NPC, treasure, save and heal placements. The native ranges
+are DDS1 `003D46A0..003D50A0` and DDS2 `0044FF90..00450990`.
+
+The word at `+0x2C` is represented as `f32`, based on comparative owner evidence,
+not on `sw zero` or a scheduling preference alone. The pinned SMT3 HD
+[`fldNpc_tag` declaration](https://github.com/smt-ret/smt3-reconstructed-sources/blob/cdcd3e5874d72e63afae6e771e3b2d8f85cf66b1/include/fldNpc_tag.h)
+has `cntf` (float), `cnti`, two animation counters, `npcmodel`, `hojiID` and
+`ItemBoxIdx`. Its
+[clear and placement routines](https://github.com/smt-ret/smt3-reconstructed-sources/blob/cdcd3e5874d72e63afae6e771e3b2d8f85cf66b1/src/fld_Npc.c)
+reset those roles in the same order, and use `cntf` in floating arithmetic.
+The DDS selective reset retains the sequence after removing the animation
+counter pair and effect cleanup. Independent DDS anchors are the room/hoji
+field at `+0x38`, treasure-ID store at `+0x3C` (`001487E0`), and NPC LOD store
+at `+0x3E` (`00148404`). The leading key, XYZ, orientation, object and size
+roles agree with the same owner family.
+
+This is an explicitly comparative type inference: the audited DDS users of
+`+0x2C/+0x30/+0x34` contain only zero writes, with no live arithmetic or scalar
+reads proving the first word's type directly. Do not rename the remaining
+unknown words or import the HD structure wholesale. DDS narrows and relocates
+other fields, and the larger HD/Nocturne record is not layout-compatible.
+
+The named reset clears selected members, deliberately leaving orientation,
+model kind/resource, size and name untouched. It is not a whole-record default
+initializer. The constructors' `memset` calls clear local vectors only; no row
+or counter subobject escapes to a reset API. Interior symbols at table `+0x20`
+are existing object-field aliases, not evidence for a second record owner.
+
+The primary-field correction lets the normal DDS2 NPC donor transfer reproduce
+all 1532 DDS1 bytes without initializer permutations, alternate views or extra
+writes, and preserves the exact DDS2 donor and both complete owners. Keep the
+DDS1 resolver's interleaved floating-argument declaration when transferring the
+body; independent EE integer/float banks can hide a C declaration-order mismatch.
