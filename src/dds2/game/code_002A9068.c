@@ -333,23 +333,23 @@ const char D_0042A940[] = "cursor.mot";
 const char D_0042A950[] = "/camp/spr/n_min/";
 
 struct EffectSlotSet **mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount,
-                                                 u8 *menuBytes) {
+                                                 MenuStaffContext *menu) {
     switch (category) {
     case 1:
         *outEntryCount = 1;
-        return (struct EffectSlotSet **)(menuBytes + 0xC8);
+        return &menu->titleFrames[1];
     case 2:
         *outEntryCount = 1;
-        return (struct EffectSlotSet **)(menuBytes + 0xC4);
+        return &menu->titleFrames[0];
     case 3:
         *outEntryCount = 2;
-        return (struct EffectSlotSet **)(menuBytes + 0x68);
+        return menu->resources.pairResources;
     case MNU_STAFF_PARTY_CATEGORY:
         *outEntryCount = 9;
-        return (struct EffectSlotSet **)(menuBytes + 0xCC);
+        return menu->partyTitles;
     case 5:
         *outEntryCount = 1;
-        return (struct EffectSlotSet **)(menuBytes + 0xF0);
+        return &menu->contextTitle;
     default:
         *outEntryCount = 0;
         return 0;
@@ -359,7 +359,7 @@ struct EffectSlotSet **mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCou
 /* Resolve entry zero and the active party's adjusted one-based model indices.
  * The supplied count and work are unused; model indices are not range-clamped. */
 void movReleaseActivePartyCategoryModels(struct EffectSlotSet **modelHandles, s32 unusedCount,
-                                         u8 *unusedWork) {
+                                         MenuStaffContext *unusedWork) {
     s32 partyIndex;
 
     effResolveAndReleaseResource(modelHandles[0]);
@@ -375,26 +375,26 @@ void movReleaseActivePartyCategoryModels(struct EffectSlotSet **modelHandles, s3
 }
 
 /* Resolve all category entries, except party models selected by active records. */
-void movReleaseCategoryModels(s32 category, u8 *menuBytes) {
+void movReleaseCategoryModels(s32 category, MenuStaffContext *menu) {
     s32 entryCount;
     struct EffectSlotSet **modelHandles =
-        mnuGetStaffCategoryEntries(category, &entryCount, menuBytes);
+        mnuGetStaffCategoryEntries(category, &entryCount, menu);
     if (category != MNU_STAFF_PARTY_CATEGORY) {
         s32 resourceIndex;
         for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++) {
             effResolveAndReleaseResource(modelHandles[resourceIndex]);
         }
     } else {
-        movReleaseActivePartyCategoryModels(modelHandles, entryCount, menuBytes);
+        movReleaseActivePartyCategoryModels(modelHandles, entryCount, menu);
     }
 }
 
 /* Release each category entry's textures without overwriting the handle array. */
-void mnuReleaseStaffCategoryTextureHandles(s32 category, u8 *menuBytes) {
+void mnuReleaseStaffCategoryTextureHandles(s32 category, MenuStaffContext *menu) {
     s32 entryCount;
     s32 resourceIndex = 0;
     struct EffectSlotSet **entries =
-        mnuGetStaffCategoryEntries(category, &entryCount, menuBytes);
+        mnuGetStaffCategoryEntries(category, &entryCount, menu);
 
     if (entryCount > 0) {
         struct EffectSlotSet **handleCursor = entries;
@@ -407,18 +407,18 @@ void mnuReleaseStaffCategoryTextureHandles(s32 category, u8 *menuBytes) {
 
 
 /* On a category change, release old textures and resolve the new model entries. */
-void mnuSwitchCampVisualCategory(s32 nextCategory, u8 *menuBytes) {
-    s32 previousCategory = ((MenuStaffContext *)menuBytes)->categoryKind;
+void mnuSwitchCampVisualCategory(s32 nextCategory, MenuStaffContext *menu) {
+    s32 previousCategory = menu->categoryKind;
     if (nextCategory == previousCategory) {
         return;
     }
     if (previousCategory != 0) {
-        mnuReleaseStaffCategoryTextureHandles(previousCategory, menuBytes);
+        mnuReleaseStaffCategoryTextureHandles(previousCategory, menu);
     }
     if (nextCategory != 0) {
-        movReleaseCategoryModels(nextCategory, menuBytes);
+        movReleaseCategoryModels(nextCategory, menu);
     }
-    ((MenuStaffContext *)menuBytes)->categoryKind = nextCategory;
+    menu->categoryKind = nextCategory;
 }
 
 extern u32 mnuCampMotionResourceNames[];
