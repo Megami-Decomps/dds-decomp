@@ -6,6 +6,10 @@
 /* Flag updates preserve the scheduler state and the upper four bits. */
 #define KWLN_TASK_MUTABLE_FLAGS_MASK 0x0FFFFFF0
 
+/* Per-task controls consumed by RunProcess in the paired kernel providers. */
+#define KWLN_TASK_CLEAR_INPUT_STATE 0x00000010
+#define KWLN_TASK_SKIP_UPDATE 0x00000020
+
 typedef enum KwlnTaskFlagScope {
     KWLN_TASK_FLAG_SCOPE_TARGET = 0,
     KWLN_TASK_FLAG_SCOPE_OTHER_QUEUED_TASKS = 1,

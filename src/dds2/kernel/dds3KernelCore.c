@@ -91,12 +91,12 @@ s32 RunProcess(dds3ProcessID_t *task) {
     s32 inputIndex;
     s32 nextUpdate;
 
-    if (task->flags & 0x20) {
+    if (task->flags & KWLN_TASK_SKIP_UPDATE) {
         return 1;
     }
     runprocess = task;
 
-    if (task->flags & 0x10) {
+    if (task->flags & KWLN_TASK_CLEAR_INPUT_STATE) {
         for (port = 0; port < 2; port++) {
             for (inputIndex = 0; inputIndex < 16; inputIndex++) {
                 dds3PadButtonState[0][port][inputIndex] = 0;
