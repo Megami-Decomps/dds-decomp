@@ -3110,8 +3110,9 @@ void btlAdvanceUnitWhenActionGateClears(u32 unit) {
 extern BtlActionStateHandler D_00359B28[];
 
 void btlDispatchStateHandler(void *object, s32 kind) {
-    ((s32 *)object)[0] = kind;
-    ((s32 *)object)[4] = 0;
+    BtlTask *task = object;
+    task->state = kind;
+    task->stateTime = 0;
     D_00359B28[kind].start(object);
 }
 
