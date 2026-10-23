@@ -531,7 +531,8 @@ extern f32 fldLookAtNearPoint[];
 
 extern f32 fldCamTarget[];
 
-extern u32 D_00444920[], D_00444930[], D_00444940[];
+extern u32 D_00444920[], D_00444940[];
+extern struct sdfMemHandle_t *D_00444930[];
 extern char D_00435FD0[];
 extern void fldMakeResouceBasicFL1(FldSpawnBatch *, u32);
 
@@ -1125,7 +1126,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
     D_00444920[2] = (u32)request->record->resourceC;
     D_00444920[3] = (u32)request->record->resourceD;
     for (resourceSlotIndex = 0; resourceSlotIndex < 4; resourceSlotIndex++) {
-        D_00444930[resourceSlotIndex] = 0;
+        D_00444930[resourceSlotIndex] = NULL;
         D_00444940[resourceSlotIndex] = 0;
     }
     if (fldGlobalBase.area < 500) {
@@ -1133,7 +1134,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
             if (D_00444920[resourceSlotIndex] != 0) {
                 fldMakeFilePath(directory, fldGlobalBase.area, fldGlobalBase.floor + 1);
                 sprintf(path, D_00435FD0, directory, D_00444920[resourceSlotIndex]);
-                D_00444930[resourceSlotIndex] = (u32)sdfDevLoadFileEx(path, &D_00444940[resourceSlotIndex], 0);
+                D_00444930[resourceSlotIndex] = sdfDevLoadFileEx(path, &D_00444940[resourceSlotIndex], 0);
             }
         }
     }
@@ -1710,7 +1711,7 @@ extern void fldReleaseIndexedResourceEffect();
 extern void mnuReleaseResourceEntries();
 
 
-extern u32 D_00444930[];
+extern struct sdfMemHandle_t *D_00444930[];
 
 extern u32 D_00444940[];
 
@@ -1784,9 +1785,9 @@ void fldReleaseFieldResources(void) {
     sdfTexListFree(fldRoomSoundResources, 1);
     fldRoomSoundResources = 0;
     for (i = 0; i < 4; i++) {
-        if (D_00444930[i] != 0) {
-            sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)D_00444930[i]);
-            D_00444930[i] = 0;
+        if (D_00444930[i] != NULL) {
+            sdfMemFreeDelayedDirect(D_00444930[i]);
+            D_00444930[i] = NULL;
             D_00444940[i] = 0;
         }
     }
@@ -6043,4 +6044,3 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0043615C);
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00436160);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00436164);
-
