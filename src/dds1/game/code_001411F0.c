@@ -156,7 +156,7 @@ extern void p2sdStopBGM(s32 trackHandle);
 
 
 
-extern void fldAddressResolver(u32 buffer, FldTransferChunk *chunk);
+extern void fldAddressResolver(u8 *buffer, FldTransferChunk *chunk);
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 
@@ -991,7 +991,7 @@ void fldLoadSceneRecordTable(void) {
 
     fldAutoMapBuf = sdfDevLoadFileEx(path, &resourceAddress, 0);
     transferStart = resourceAddress + 8;
-    fldAddressResolver(resourceAddress, (FldTransferChunk *)transferStart);
+    fldAddressResolver((u8 *)resourceAddress, (FldTransferChunk *)transferStart);
     header = (FldSceneRecordTableHeader *)fldGetInfoHeader((FldTransferChunk *)transferStart);
     rows = header->rows;
     count = header->count;
@@ -1004,7 +1004,7 @@ void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
         u8 *transferStart = chunk + 8;
 
         fldAutoMapBuf = (struct sdfMemHandle_t *)(u32)resourceHandle;
-        fldAddressResolver((u32)chunk, (FldTransferChunk *)transferStart);
+        fldAddressResolver(chunk, (FldTransferChunk *)transferStart);
         {
             FldSceneRecordTableHeader *header =
                 (FldSceneRecordTableHeader *)fldGetInfoHeader((FldTransferChunk *)transferStart);

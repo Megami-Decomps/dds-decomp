@@ -9768,15 +9768,14 @@ void effInitializeCopiedPayloadSlots(EffCopiedPayload *payload) {
     payload->selectedTargetIndex = dds3GetRandIntA(0, count);
 }
 
-extern void fldAddressResolver(u32, FldTransferChunk *);
+extern void fldAddressResolver(u8 *, FldTransferChunk *);
 
 
 
 EffCopiedPayload *effCreateAndInitializeCopiedPayload(u32 type, const void *source, s32 size) {
     EffCopiedPayload *effect = effAllocateCopiedEffectPayload(type, source, size);
-    u32 bodyAddress = (u32)effect->body;
-    fldAddressResolver(bodyAddress,
-                                   (struct FldTransferChunk *)(bodyAddress + 8));
+    fldAddressResolver(effect->body,
+                       (struct FldTransferChunk *)(effect->body + 8));
     effInitializeCopiedPayloadSlots(effect);
     return effect;
 }
