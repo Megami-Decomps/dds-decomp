@@ -139,7 +139,7 @@ extern s32 sdfDelayedResrcCheck(void);
 
 extern s8 dds3AdminiGetNextSequence(void);
 
-extern s32 dds3AdminiGetPrevHistoryFlag(void);
+extern u32 dds3AdminiGetPrevHistoryFlag(void);
 
 extern void func_0013F100(s32, u32);
 
@@ -2502,4 +2502,3 @@ typedef char FieldSequenceRecord_enabled_offset_check[
 INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FD30);
 
 INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FD40);
-
