@@ -70,7 +70,7 @@ extern s32 D_003BB668;
 
 extern s32 D_003BB664;
 
-void btlAimLinkedUnitAtMuzzle(u8 *action);
+void btlAimLinkedUnitAtMuzzle(BtlLinkedCommand *action);
 
 /* Allocate a native header followed by capacity pointer entries. */ BtlIndexList *btlAllocateIndexList(s32 capacity);
 
@@ -492,7 +492,7 @@ void btlInitializeLinkedActionCamera(BtlLinkedCommand *action) {
             btlSetupActionCameraPair(action);
         } else {
             btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
-            btlAimLinkedUnitAtMuzzle((u8 *)action);
+            btlAimLinkedUnitAtMuzzle(action);
             action->motionParameter = 200.0f;
             action->flags |= 0x41;
         }
@@ -897,7 +897,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
             btlBuildFilteredGroupCameraPair(action, &action->frontCamera, &action->backCamera);
         } else {
             btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
-            btlAimLinkedUnitAtMuzzle((u8 *)action);
+            btlAimLinkedUnitAtMuzzle(action);
             action->motionParameter = 200.0f;
             action->flags |= 0x41;
         }
