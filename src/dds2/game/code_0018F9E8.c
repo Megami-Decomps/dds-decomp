@@ -127,7 +127,7 @@ typedef struct dds3HermitianTrackPoly_tag dds3HermitianTrackPoly_tag;
 
 
 extern dds3HermitianTrackPoly_tag *dds3HermitianTrackPolyCreate(s32 historyLength, s32 steps);
-extern void dds3HermitianTrackPolySetVC(dds3HermitianTrackPoly_tag *data, u32 *gradientColors);
+extern void dds3HermitianTrackPolySetVC(dds3HermitianTrackPoly_tag *data, const u32 gradientColors[4]);
 extern void dds3HermitianTrackPolySetBlend(dds3HermitianTrackPoly_tag *data, u32 kind);
 
 /* Clone a model track with independent history and gradient storage. */
