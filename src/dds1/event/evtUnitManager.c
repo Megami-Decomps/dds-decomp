@@ -9,6 +9,7 @@ struct EffNodeDescriptor;
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
+#include "evt_effect_scale_object.h"
 #include "evt_unit_motion_setup.h"
 #include "sdf_float_counter.h"
 #include "evt_unit_motion_slot.h"
@@ -2666,7 +2667,7 @@ u32 evtCommand_EFFBED_START_EVO(void) {
         modelRecordIndex = scrGetIntPara(2);
         if (modelRecordIndex >= 0) {
             f32 value = evtComputeClampedModelScale(modelRecordIndex);
-            void *target = *(void **)(*(u8 **)((u8 *)unit + 0x18) + 0x2C);
+            void *target = ((EvtEffectObject *)unit)->inner->scaledObject;
             if (target != NULL) {
                 effEveBEDCutSetScale(target, value);
             }
