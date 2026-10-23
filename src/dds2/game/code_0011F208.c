@@ -25,6 +25,7 @@
 #include "fld.h"
 #include "evt_world.h"
 #include "dds3obj.h"
+#include "dds3_world_primary.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "dat_state.h"
@@ -893,7 +894,6 @@ void drawSceneBasicList(void) {
 
 /* All declarations below refer to the existing primary runtime owners. */
 extern evtUnitHandle_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *);
-extern void *dds3GetActiveScene(void);
 extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *, u32, s32);
 extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *, s32);
 extern void fldMakeEveHitPlanes(f32 *, f32 *, f32 *, f32 *, f32 *);
