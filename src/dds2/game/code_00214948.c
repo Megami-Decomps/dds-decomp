@@ -8047,7 +8047,7 @@ s32 btlOffsetKaliTargetForScriptAction(BtlLinkedCommand *command) {
             unit->resourceKind, unit->resourceIndex);
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
             s32 slot = command->link->indexWork.slot;
-            kind = *(s16 *)(table + slot * 0x14 + 0x2C);
+            kind = ((BtlActorStatusRecord *)table)->motions[slot].moveKind;
             if (kind == 2 || kind == 7) {
                 btlCopyUnitCurrentPosition(unit, pos);
                 pos[2] += 400.0f;

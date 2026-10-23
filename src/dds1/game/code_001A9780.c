@@ -27,6 +27,7 @@ extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 
 extern void itfSetTextDrawLimit(s32 limit);
 #include "btl_actor_status_table_api.h"
+#include "btl_model_record.h"
 #include "dsp_channel.h"
 #include "mdl_flag_api.h"
 #include "btl_stat_effect_offsets.h"
@@ -802,7 +803,7 @@ s32 btlIsBattleRecordEligible(BtlUnit *actor, BtlUnit *target, s32 recordIndex, 
         return 0;
     }
     resource = (u8 *)btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->species);
-    if (*(s16 *)(resource + recordIndex * 20 + 0x2C) != 2) {
+    if (((BtlActorStatusRecord *)resource)->motions[recordIndex].moveKind != 2) {
         return 0;
     }
     if (speciesIndex != 0 &&
