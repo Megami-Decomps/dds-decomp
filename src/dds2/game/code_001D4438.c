@@ -9,6 +9,7 @@
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_raise_party_record_status_value.h"
 #include "btl_actor_status_table_api.h"
+#include "btl_model_record.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_effect_active_api.h"
 #include "btl_task_state6_api.h"
@@ -2772,7 +2773,7 @@ void btlScheduleBatStateModelChange(u8 *task) {
     BtlUnit *actor;
     u8 *effectTask;
     BtlRuntimeTask *modelTask;
-    u8 *statusTable;
+    BtlActorStatusRecord *statusTable;
     s32 model;
 
     if (btlCountTasksByKind(0x1A) != 0 ||
@@ -2783,16 +2784,16 @@ void btlScheduleBatStateModelChange(u8 *task) {
 
     btlGetRuntime();
     actor = *(BtlUnit **)(task + 0x18);
-    statusTable = (u8 *)btlGetSideIndexedActorStatusTable(
-        *(s32 *)((u8 *)actor + 0xC4), *(s32 *)((u8 *)actor + 0xC8));
-    model = *(u16 *)(statusTable + 0x2A);
+    statusTable = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+        actor->resourceKind, actor->resourceIndex);
+    model = statusTable->model;
     effectTask = (u8 *)btlCreateEffObjB(actor, 0x7E);
     btlStartTask(effectTask);
     modelTask = btlCreateModelChangeTask(actor, 0, 0x1F, model, 0x12, 1);
     btlStartTask(modelTask);
 
     actor->status.flags = ((u32)actor->status.flags | 0x1000) & 0xEFFFFFFF;
-    *(u16 *)((u8 *)actor + 0x120) |= 0x1000;
+    actor->partyRecord.flags |= 0x1000;
     if (*(u32 *)(task + 8) & 0x10) {
         btlDispatchStateHandler(task, 0x1C);
     } else {

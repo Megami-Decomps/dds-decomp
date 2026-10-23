@@ -2202,7 +2202,7 @@ void btlScheduleBatStateModelChange(u8 *task) {
     btlGetRuntime();
     actor = *(BtlUnit **)(task + 0x18);
     statusTable = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
-        *(s32 *)((u8 *)actor + 0xC4), *(s32 *)((u8 *)actor + 0xC8));
+        actor->resourceKind, actor->species);
     model = statusTable->model;
     effectTask = (u8 *)btlCreateEffObjB(actor, 0x7E);
     btlStartTask(effectTask);
@@ -2210,7 +2210,7 @@ void btlScheduleBatStateModelChange(u8 *task) {
     btlStartTask(modelTask);
 
     actor->status.flags = ((u32)actor->status.flags | 0x1000) & 0xEFFFFFFF;
-    *(u16 *)((u8 *)actor + 0x120) |= 0x1000;
+    actor->partyRecord.flags |= 0x1000;
     if (*(u32 *)(task + 8) & 0x10) {
         btlDispatchStateHandler(task, 0x1B);
     } else {
