@@ -683,7 +683,7 @@ s32 mnuDrawCommandClosePhase(MenuTerminalContext *scene) {
 }
 
 
-extern s32 mnuStaffCreateTasks(void);
+extern dds3ProcessID_t *mnuStaffCreateTasks(void);
 
 void brsTaskStart(void) {
     mnuStaffCreateTasks();
@@ -1017,13 +1017,13 @@ extern s32 mnuStaffRunPanel1(dds3ProcessID_t *task);
 extern s32 mnuStaffRunPanel2(dds3ProcessID_t *task);
 extern void brsStaffTaskDestroy(dds3ProcessID_t *task);
 
-s32 mnuStaffCreateTasks(void) {
-    s32 secondaryPanelTaskHandle;
+dds3ProcessID_t *mnuStaffCreateTasks(void) {
+    dds3ProcessID_t *secondaryPanelTaskHandle;
     BrsSkillPackageWork *work = brsCreateRewardTaskWork();
 
     dds3StartProcess(brsStaffInputTaskName, 0x405, 1, 0, brsMessageInputStep, 0, (u32)work);
     dds3StartProcess(mnuStaffPrimaryPanelTaskName, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, (u32)work);
-    secondaryPanelTaskHandle = (s32)dds3StartProcess(mnuStaffSecondaryPanelTaskName, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, (u32)work);
+    secondaryPanelTaskHandle = dds3StartProcess(mnuStaffSecondaryPanelTaskName, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, (u32)work);
     brsTaskState = 1;
     return secondaryPanelTaskHandle;
 }
