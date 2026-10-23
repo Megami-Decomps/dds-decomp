@@ -5373,7 +5373,7 @@ extern FldCameraSetting *fldCameraSettings;
 
 extern FldCameraSetting D_003306D0;
 
-extern void *D_003BAD60;
+extern FldLightSet *D_003BAD60;
 
 extern FldSkyGradientRecord *D_003BAD74;
 
@@ -6300,7 +6300,7 @@ void fldApplySkyLightSetToPlayerVU(void) {
 }
 
 void fldSkyBattle(void) {
-    FldLightSet *light = &((FldLightSet *)D_003BAD60)[D_003BAD98];
+    FldLightSet *light = &D_003BAD60[D_003BAD98];
     f32 vec[4];
     f32 dir[4];
     s32 area;
@@ -8140,7 +8140,7 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAD58);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldSkyLightSetBuffer);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAD60);
+INCLUDE_SDATA(FldLightSet * const, "field/fldFileResolver", D_003BAD60);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCameraSettings);
 

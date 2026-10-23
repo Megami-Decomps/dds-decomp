@@ -5186,7 +5186,7 @@ INCLUDE_ASM(const s32, "field/fldFileResolver", fldUpdateCameraHeadingTransition
 extern SdfFlagListParams fldCameraColorParameters[];
 extern FldCameraSetting *fldCameraSettings;
 extern FldCameraSetting D_0038BB70;
-extern void *D_004360F0;
+extern FldLightSet *D_004360F0;
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_004132E0);
 
@@ -6001,7 +6001,7 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", D_004360E8);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldSkyLightSetBuffer);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_004360F0);
+INCLUDE_SDATA(FldLightSet * const, "field/fldFileResolver", D_004360F0);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCameraSettings);
 
