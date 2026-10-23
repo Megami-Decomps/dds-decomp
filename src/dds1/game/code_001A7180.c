@@ -90,9 +90,9 @@ extern s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *);
 
 extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
 
-extern s32 btlCalculateEnemyExperienceReward(u8 *, u8 *);
+extern s32 btlCalculateEnemyExperienceReward(BtlUnit *, BtlUnit *);
 
-extern s32 btlGetEnemyMoney(u8 *, u8 *);
+extern s32 btlGetEnemyMoney(BtlUnit *, BtlUnit *);
 
 u32 btlEncodeActorIndexAsSelectionMask(u32 id);
 
@@ -222,22 +222,22 @@ INCLUDE_ASM(const s32, "game/code_001A7180", btlResolveCommandHitResult);
 void func_001A7AD0(void) {
 }
 
-extern f32 btlGetRewardLevelMultiplier(u8 *, u8 *, s32);
+extern f32 btlGetRewardLevelMultiplier(BtlUnit *, BtlUnit *, s32);
 
 /* Scale the enemy's normal EP reward; flag 0x2000 multiplies it by 100. */
-s32 btlCalculateEnemyExperienceReward(u8 *acquirer, u8 *enemy) {
+s32 btlCalculateEnemyExperienceReward(BtlUnit *acquirer, BtlUnit *enemy) {
     s32 result = 0;
     DatEnemyRecord *entry;
     f32 ratio;
     u32 ep;
 
-    if (!(((BtlUnit *)enemy)->status.flags & 0x400)) {
+    if (!(enemy->status.flags & 0x400)) {
         return result;
     }
-    if (acquirer != 0 && !(((BtlUnit *)acquirer)->status.flags & 0x200)) {
+    if (acquirer != 0 && !(acquirer->status.flags & 0x200)) {
         return result;
     }
-    entry = &datEnemyRecords[((BtlUnit *)enemy)->partyRecord.unitId];
+    entry = &datEnemyRecords[enemy->partyRecord.unitId];
     ratio = btlGetRewardLevelMultiplier(acquirer, enemy, 1);
     ep = (u32)((f32)entry->experience * ratio);
     if (entry->flags & 0x2000) {
@@ -256,7 +256,7 @@ extern char D_003A1B90[];
 extern char D_003A1BA8[];
 
 /* Return the normal/hunt EP level multiplier with the native level-difference caps. */
-f32 btlGetRewardLevelMultiplier(u8 *acquirer, u8 *enemy, s32 rewardKind) {
+f32 btlGetRewardLevelMultiplier(BtlUnit *acquirer, BtlUnit *enemy, s32 rewardKind) {
     s32 level;
     s32 difference;
     f32 factor;
@@ -268,12 +268,12 @@ f32 btlGetRewardLevelMultiplier(u8 *acquirer, u8 *enemy, s32 rewardKind) {
     if (acquirer == NULL) {
         level = btlAverageLevelsForMaskExcludingStatus20(4);
     } else {
-        level = ((BtlUnit *)acquirer)->partyRecord.level;
+        level = acquirer->partyRecord.level;
     }
     if (level > 60) {
         level = 60;
     }
-    difference = level - ((BtlUnit *)enemy)->partyRecord.level;
+    difference = level - enemy->partyRecord.level;
     if (difference > 15) {
         difference = 15;
     } else if (difference < -15) {
@@ -289,17 +289,17 @@ INCLUDE_RODATA(const s32, "game/code_001A7180", D_003A1B90);
 
 INCLUDE_RODATA(const s32, "game/code_001A7180", D_003A1BA8);
 
-s32 btlGetEnemyMoney(u8 *acquirer, u8 *enemy) {
+s32 btlGetEnemyMoney(BtlUnit *acquirer, BtlUnit *enemy) {
     s32 result = 0;
     s32 money;
     DatEnemyRecord *entry;
-    if (!(((BtlUnit *)enemy)->status.flags & 0x400)) {
+    if (!(enemy->status.flags & 0x400)) {
         return result;
     }
-    if (acquirer != 0 && !(((BtlUnit *)acquirer)->status.flags & 0x200)) {
+    if (acquirer != 0 && !(acquirer->status.flags & 0x200)) {
         return result;
     }
-    entry = &datEnemyRecords[((BtlUnit *)enemy)->partyRecord.unitId];
+    entry = &datEnemyRecords[enemy->partyRecord.unitId];
     money = entry->money;
     if (entry->flags & 0x2000) {
         money *= 100;
@@ -312,11 +312,11 @@ s32 btlGetEnemyMoney(u8 *acquirer, u8 *enemy) {
     return money;
 }
 
-extern f32 btlGetRewardLevelMultiplier(u8 *, u8 *, s32);
+extern f32 btlGetRewardLevelMultiplier(BtlUnit *, BtlUnit *, s32);
 
 /* Hunt EP uses its own table quantity and the ratio calculator's mode 0. */
-s32 btlCalculateHuntEpReward(u8 *acquirer, u8 *enemy) {
-    DatEnemyRecord *entry = &datEnemyRecords[((BtlUnit *)enemy)->partyRecord.unitId];
+s32 btlCalculateHuntEpReward(BtlUnit *acquirer, BtlUnit *enemy) {
+    DatEnemyRecord *entry = &datEnemyRecords[enemy->partyRecord.unitId];
     f32 ratio = btlGetRewardLevelMultiplier(acquirer, enemy, 0);
     u32 ep = (u32)((f32)entry->huntExperience * ratio);
     if (entry->flags & 0x2000) {
