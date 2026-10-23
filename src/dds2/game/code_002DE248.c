@@ -9097,8 +9097,11 @@ extern s32 dds3GetFrameID(void);
 extern void sdfMatUpdatePacket(sdfMat_t *, s32);
 extern void sdfAppendReferencePacket(sdfDrawTag_t *, u32);
 extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *, u32);
-extern void sdfBuildMaskedFrameRegisterReference(s32, u32, s32);
-extern void sdfBuildFrameRegisterReference(s32, u32, s32);
+struct SdfDmaReferenceChainPacket;
+extern void sdfBuildMaskedFrameRegisterReference(
+    const u8 *source, struct SdfDmaReferenceChainPacket *packet, s32 gsContext);
+extern void sdfBuildFrameRegisterReference(
+    const u8 *source, struct SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
 void func_002F3F70(u8 *owner, void *matrix) {
     f32 normalizedColor[4];
@@ -9179,7 +9182,9 @@ void func_002F3F70(u8 *owner, void *matrix) {
     referencePacket[1] = 0;
     sdfAppendReferencePacket(list, (u32)referencePacket);
     dmaPacket = sdfGrAllocPacketBuff(0x40);
-    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + dds3GetFrameID() * 0x1F40), (u32)dmaPacket, 0);
+    sdfBuildMaskedFrameRegisterReference(
+        kwlnFrameDrawPacketRecords + dds3GetFrameID() * 0x1F40,
+        (struct SdfDmaReferenceChainPacket *)dmaPacket, 0);
     sdfDrawTagLinkRefGif(list, (u32)dmaPacket);
     packet = sdfGrAllocPacketBuff(0x40);
     packet->dmaTag = 3;
@@ -9246,7 +9251,9 @@ void func_002F3F70(u8 *owner, void *matrix) {
         colors++;
     }
     dmaPacket = sdfGrAllocPacketBuff(0x40);
-    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + dds3GetFrameID() * 0x1F40), (u32)dmaPacket, 0);
+    sdfBuildFrameRegisterReference(
+        kwlnFrameDrawPacketRecords + dds3GetFrameID() * 0x1F40,
+        (struct SdfDmaReferenceChainPacket *)dmaPacket, 0);
     sdfDrawTagLinkRefGif(list, (u32)dmaPacket);
     packet = sdfGrAllocPacketBuff(0x40);
     packet->dmaTag = 3;
