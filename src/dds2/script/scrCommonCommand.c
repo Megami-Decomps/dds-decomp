@@ -36,7 +36,7 @@ void dds3SetAmbientColor(s32 blendFrames, f32 *color);
 
 void dds3SetFogColor(s32 blendFrames, f32 *color);
 
-s32 dds3SetSoftenBias(s32 frames, f32 firstTarget, f32 secondTarget);
+void dds3SetSoftenBias(s32 frames, f32 firstTarget, f32 secondTarget);
 void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 
 void dds3SetFilter2Para(u32 blendControl);
