@@ -1090,7 +1090,7 @@ void btlCommandResultEffectSelect(u8 *task) {
     btlCreateTargetSelectionTask((ActionStateLink *)task);
 }
 
-extern u32 btlGetTargetSelectionState(void);
+extern s32 btlGetTargetSelectionState(void);
 extern BtlIndexList *btlGetSelectedTargetList(void);
 extern s32 btlGetCommandTargetEligibility(BtlIndexList *, s32);
 extern void btlRequestTargetSelectionClose(void);
@@ -1099,7 +1099,7 @@ extern s32 btlSetTaskPhase2(void);
 /* Validate/copy the selected target list and initialize the actor's chosen command. */
 void btlInitializeActorCommandState(ActionStateLink *task) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    u32 state;
+    s32 state;
     BtlIndexList *selected;
     s32 selection;
     s32 reason;

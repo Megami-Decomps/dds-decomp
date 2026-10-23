@@ -10850,7 +10850,7 @@ SceneAiWork *btlGetTargetSelectionWork(void) {
     return (SceneAiWork *)dds3GetProcessData(task);
 }
 
-u32 btlGetTargetSelectionState(void) {
+s32 btlGetTargetSelectionState(void) {
     return btlGetTargetSelectionWork()->state;
 }
 
