@@ -128,7 +128,7 @@ typedef struct evtUnitHandle_t {
     dds3Basic_t *currentTransitionTarget;  /* 0x84: active target world node */
     dds3Basic_t *previousTransitionTarget; /* 0x88: prior target during blend-in */
     struct dds3ModelHandle_t *owner;          /* 0x8C: model context and its SDK motion slots */
-    void *linkedUnit;              /* 0x90: retained source of a transition */
+    dds3Basic_t *linkedUnit;       /* 0x90: retained world/path transition source */
     s32 (*motionCallback)(struct evtUnitHandle_t *, s32); /* 0x94: returns 1 when motion completes. */
     f32 wobblePhase;               /* 0x98: wrapping radians used by model scale/rotation wobble. */
     s32 unk9C;                     /* 0x9C */
