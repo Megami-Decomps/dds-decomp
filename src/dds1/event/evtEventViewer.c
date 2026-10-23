@@ -3994,10 +3994,10 @@ s32 evtViewerUpdateFrame(dds3ProcessID_t *task) {
 
 /* Update the active viewer, then switch to its frame-variable task. */
 s32 evtViewerScheduleFrameVariableTask(dds3ProcessID_t *task) {
-    void *viewer;
+    EvtRuntime *viewer;
 
-    viewer = (void *)dds3GetProcessData(task);
-    evtApplyViewerTimelineFrame(((EvtRuntime *)viewer)->curFrame, viewer);
+    viewer = (EvtRuntime *)dds3GetProcessData(task);
+    evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
     dds3LinkProcess(task, (dds3ProcessID_t *)evtInitFrameVar());
     dds3DrawFlag |= 0x2000000;
     return (s32)(u32)evtViewerUpdateFrame;
