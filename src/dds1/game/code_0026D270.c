@@ -7,7 +7,7 @@
 extern MovieMenuState *mnuMovieMenuState;
 extern s8 dds3PadButtonState[];
 extern void mnuClearListFlagsOneAndTwo(u32 *);
-extern u32 mnuGetMovieMenuSelectionIndex(void);
+extern s32 mnuGetMovieMenuSelectionIndex(void);
 
 extern void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode, s32 spriteIndex,
                           s32 drawContext);
@@ -269,5 +269,4 @@ void mnuDrawMovieChoiceTransition(void) {
         break;
     }
 }
-
 

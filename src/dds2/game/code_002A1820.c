@@ -912,7 +912,7 @@ extern s32 mnuPollMovieMenuInputAndTimeout(void);
 extern void mnuUpdateTitlePageByMode(void);
 extern void mnuTitleResetSequenceTimers(void);
 extern void mnuDrawTitleSceneForPhase(void);
-extern u32 mnuGetMovieMenuSelectionIndex(void);
+extern s32 mnuGetMovieMenuSelectionIndex(void);
 extern s32 mnuUpdateMovieMenuInputState(void);
 extern void mnuResetTitleMovieMenuStateAndStartTrack(void);
 extern void mnuStartTitleMovieDraw(void);

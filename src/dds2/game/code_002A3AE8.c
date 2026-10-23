@@ -82,7 +82,7 @@ void mnuDestroyMovieMenuSelectionList(void) {
     mnuDestroyListState(((SpriteMenuState *)titleWork)->list);
 }
 
-u32 mnuGetMovieMenuSelectionIndex(void) {
+s32 mnuGetMovieMenuSelectionIndex(void) {
     return ((SpriteMenuState *)titleWork)->list->cursor->index;
 }
 
