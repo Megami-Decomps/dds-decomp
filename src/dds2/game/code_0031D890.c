@@ -9,9 +9,9 @@ enum { SLOT_IN_USE = 1 };
 
 extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
 
-/* Sprite-number work pool: count 0x14-byte items plus a 0xC-byte header. */
+/* Sprite-number work pool: one header followed by typed slots. */
 MnuSpriteNumberPool *itfCreateSpriteWorkPool(u32 count) {
-    u32 size = count * 0x14 + 0xC;
+    u32 size = count * sizeof(MnuSpriteNumberSlot) + sizeof(MnuSpriteNumberPool);
     sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
     MnuSpriteNumberPool *pool = (MnuSpriteNumberPool *)sdfMemGetPtr(allocation);
     memset(pool, 0, size);
@@ -155,9 +155,9 @@ void itfUpdateAndDrawSpriteNumbers(MnuSpriteNumberPool *pool, u32 flags) {
     }
 }
 
-/* Sprite-hit-effect work pool: count 0x10-byte items plus a 0xC-byte header. */
+/* Sprite-hit-effect work pool: one header followed by typed slots. */
 MnuHitEffectPool *itfCreateSpriteHitEffectWorkPool(u32 count) {
-    u32 size = count * 0x10 + 0xC;
+    u32 size = count * sizeof(MnuHitEffectSlot) + sizeof(MnuHitEffectPool);
     sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
     MnuHitEffectPool *pool = (MnuHitEffectPool *)sdfMemGetPtr(allocation);
 
