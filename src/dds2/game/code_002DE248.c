@@ -16443,6 +16443,9 @@ s32 effDestroyPackedBatch(EffMappedResource *batch) {
 typedef struct EffPackedResourceHeader {
     u8 pad00[0xC];
     u32 entriesOffset;
+    u8 pad10[4];
+    u16 textureCount;
+    u16 slotCount;
 } EffPackedResourceHeader;
 
 typedef struct EffPackedResourceEntry {
@@ -16674,7 +16677,7 @@ EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct sdfMemHandle_t *res
     set->sharesTextureReferences = 0;
     set->sourceAllocation = keepAllocation != 0 ? resourceAllocation : 0;
     resource = (u8 *)sdfMemLock(resourceAllocation);
-    set->textureCount = *(u16 *)(resource + 0x14);
+    set->textureCount = ((EffPackedResourceHeader *)resource)->textureCount;
     set->textureAllocation = sdfMemAllocDirect(
         set->textureCount * 4);
     set->textureReferences = (sdfTexHandle_t **)sdfMemLock(set->textureAllocation);
@@ -16682,7 +16685,7 @@ EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct sdfMemHandle_t *res
     entries = effResolveResourceSlots(set, resource,
         keepAllocation, -1);
 
-    set->count = *(u16 *)(resource + 0x16);
+    set->count = ((EffPackedResourceHeader *)resource)->slotCount;
     set->descriptionAllocation =
         sdfMemAllocDirect(set->count * 0x80);
     set->descriptions = (EffectSlotDescription *)sdfMemLock(set->descriptionAllocation);
