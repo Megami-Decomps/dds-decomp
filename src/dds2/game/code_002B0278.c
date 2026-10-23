@@ -2995,7 +2995,7 @@ void ptySkillMenuDrawEntry(s32 x, s32 y, s32 depth, MenuList *list,
 }
 
 /* Collect up to max pointers to occupied, frontline party slots. */
-void mnuCollectFrontlinePartySlots(datUnitWork_t **out, s32 max) {
+void mnuCollectFrontlinePartySlots(const datUnitWork_t **out, s32 max) {
     s32 count = 0;
     s32 i;
 
@@ -3004,7 +3004,7 @@ void mnuCollectFrontlinePartySlots(datUnitWork_t **out, s32 max) {
     }
     i = 0;
     while (count < max) {
-        datUnitWork_t *entry = &DDS3_GBWK->party[i];
+        const datUnitWork_t *entry = &DDS3_GBWK->party[i];
 
         if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
             out[count] = entry;
@@ -3041,7 +3041,7 @@ void ptySkillMenuBuildLinkageSkills(dds3ProcessID_t *task) {
     /* Both retail versions leave 16 bytes before the frontline array; only
      * the first window slot is used by this one-window builder. */
     MenuWindowContainer *windows[2];
-    datUnitWork_t *frontline[3];
+    const datUnitWork_t *frontline[3];
     MenuContext *context = (MenuContext *)dds3GetProcessData(task);
     SkillMenuRuntime *menu = (SkillMenuRuntime *)context->party;
     s32 i;
@@ -3076,7 +3076,7 @@ void ptySkillMenuBuildLinkageSkills(dds3ProcessID_t *task) {
                     node->sortKeySecondary = sortRank;
                 }
                 {
-                    s32 unavailable = ptyMatchAffinityPermutation((const s32 *)frontline, skill);
+                    s32 unavailable = ptyMatchAffinityPermutation(frontline, skill);
                     /* The permutation matcher returns only 0 or 1. A consumed
                      * local keeps the inverted result as XOR, rather than a
                      * comparison against a rematerialized loop constant. */

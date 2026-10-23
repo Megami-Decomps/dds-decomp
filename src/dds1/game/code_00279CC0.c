@@ -318,12 +318,12 @@ void ptyDrawLinkageSkillEntry(s32 x, s32 y, s32 depth, struct MenuList *list,
 
 
 /* Collect up to max pointers to occupied, frontline party slots. */
-void mnuCollectFrontlinePartySlots(datUnitWork_t **out, s32 max) {
+void mnuCollectFrontlinePartySlots(const datUnitWork_t **out, s32 max) {
     s32 count = 0;
     s32 i = 0;
 
     while (count < max) {
-        datUnitWork_t *entry = &DDS3_GBWK->party[i];
+        const datUnitWork_t *entry = &DDS3_GBWK->party[i];
 
         *out = 0;
         if ((entry->flags & 1) != 0 &&
@@ -369,7 +369,7 @@ void ptySkillMenuBuildLinkageSkills(dds3ProcessID_t *task) {
     /* Both retail versions place the frontline array at stack +0x10, after
      * the window workspace; only its first window is populated here. */
     MenuWindowContainer *windows[2];
-    datUnitWork_t *party[3];
+    const datUnitWork_t *party[3];
     s32 context = dds3GetProcessData(task);
     s32 menu = *(s32 *)(context + 0x90C);
     s32 i;
@@ -404,7 +404,7 @@ void ptySkillMenuBuildLinkageSkills(dds3ProcessID_t *task) {
                 node = mnuAppendWindowListNode(windows[0], D_003BAA8C + skill * 17);
                 node->sortKeyPrimary = skill;
                 {
-                    s32 unavailable = ptyMatchAffinityPermutation((const s32 *)party, skill);
+                    s32 unavailable = ptyMatchAffinityPermutation(party, skill);
                     /* The matcher returns 0/1. The consumed local preserves
                      * the inverted Boolean as XOR rather than a comparison. */
                     unavailable ^= 1;
@@ -1214,4 +1214,3 @@ u32 mnuTestListFlagTwo(u32 *flags) {
 INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2330);
 
 INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2348);
-

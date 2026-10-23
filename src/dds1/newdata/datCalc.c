@@ -403,7 +403,7 @@ enum {
 };
 
 extern u8 ptyAffinityPermutationOrders[];
-extern s32 ptyUnitMatchesAffinityRequirement(datUnitWork_t *unit, s32 affinity, u8 requirementIndex);
+extern s32 ptyUnitMatchesAffinityRequirement(const datUnitWork_t *unit, s32 affinity, u8 requirementIndex);
 
 
 extern u8 *datRosterDetails;
@@ -1058,7 +1058,7 @@ u32 ptyReturnOne(void) {
 extern DatSkillList *D_003BAA58;
 
 /* Test whether a party record satisfies one participant requirement of an affinity. */
-s32 ptyUnitMatchesAffinityRequirement(datUnitWork_t *unit, s32 affinity, u8 requirementIndex) {
+s32 ptyUnitMatchesAffinityRequirement(const datUnitWork_t *unit, s32 affinity, u8 requirementIndex) {
     DatAffinityRecord *record;
     s32 requirement;
     s32 requirementValue;
@@ -1109,7 +1109,7 @@ s32 ptyUnitMatchesAffinityRequirement(datUnitWork_t *unit, s32 affinity, u8 requ
 }
 
 /* Try the six stored orders; success requires exactly the non-sentinel requirement count. */
-s32 ptyMatchAffinityPermutation(const s32 *actors, s32 affinity) {
+s32 ptyMatchAffinityPermutation(const datUnitWork_t *const *actors, s32 affinity) {
     s32 *requirementCursor = datAffinityRecords[affinity - DAT_AFFINITY_FIRST_COMMAND].requirements;
     u32 i;
     s32 requiredCount = 0;
@@ -1117,8 +1117,8 @@ s32 ptyMatchAffinityPermutation(const s32 *actors, s32 affinity) {
     s32 orderOffset;
     s32 matchedCount;
     u8 *orderCursor;
-    s32 *actorCursor;
-    s32 actorValue;
+    const datUnitWork_t *const *actorCursor;
+    const datUnitWork_t *actor;
 
     for (i = 0; i < 3; i++) {
         if (*requirementCursor++ != -1) {
@@ -1128,8 +1128,8 @@ s32 ptyMatchAffinityPermutation(const s32 *actors, s32 affinity) {
     for (orderIndex = 0, orderOffset = 0; orderIndex < 6; orderIndex++, orderOffset += 3) {
         matchedCount = 0;
         for (i = 0, orderCursor = ptyAffinityPermutationOrders + orderOffset, actorCursor = actors; i < 3; i++, orderCursor++) {
-            actorValue = *actorCursor++;
-            if (actorValue != 0 && ptyUnitMatchesAffinityRequirement(actorValue, affinity, *orderCursor) != 0) {
+            actor = *actorCursor++;
+            if (actor != 0 && ptyUnitMatchesAffinityRequirement(actor, affinity, *orderCursor) != 0) {
                 matchedCount++;
             }
         }
@@ -2127,4 +2127,3 @@ INCLUDE_SDATA(const s32, "newdata/datCalc", btlSelectedConditionalEncounterIndex
 INCLUDE_SDATA(const s32, "newdata/datCalc", btlSelectedConditionalEncounterResult);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAAC4);
-
