@@ -1558,7 +1558,8 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
                 spacing = datEnemyRecords[action->unit->resourceIndex].attackSpacing;
                 if (repeatCount <= 0) repeatCount = 1;
             }
-            spacing = (s32)(spacing / *(f32 *)(statusTable + action->indexWork.slot * 20 + 0x34));
+            spacing = (s32)(spacing / ((BtlActorStatusRecord *)statusTable)->motions[
+                action->indexWork.slot].alphaFrameScale);
             spacing = (s32)(spacing / scale);
             if (spacing <= 0) spacing = 1;
             elapsed = 0xFFFFFF;
