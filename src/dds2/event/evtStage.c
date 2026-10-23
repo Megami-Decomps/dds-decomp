@@ -116,7 +116,7 @@ s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1D
 }
 
 extern char evtScriptResourcePathBuffer[];
-extern s32 scrStartScriptByName(s32 priority, const char *path, s32 option);
+extern dds3ProcessID_t *scrStartScriptByName(s32 priority, const char *path, s32 option);
 #include "sdf_debug_api.h"
 
 /* DDS2 twin of DDS1 func_00220110: start the event BF script by id. */

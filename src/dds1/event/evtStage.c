@@ -119,7 +119,7 @@ s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1D
     return 1;
 }
 
-extern s32 scrStartScriptByName(s32 priority, const char *path, s32 option);
+extern dds3ProcessID_t *scrStartScriptByName(s32 priority, const char *path, s32 option);
 extern char evtScriptResourcePathBuffer[];
 
 void evtStartEvent(s32 eventId) {

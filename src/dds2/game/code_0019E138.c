@@ -63,7 +63,7 @@ extern u8 *datItemMessages;
 extern void itfSetTextDrawLimit(s32);
 extern _FRQ *itfDrawBankTextWithSegmentCounter(s32, s32, s32, u16, FrFontTextBank *, s32);
 extern _FRQ *itfBuildGlyphChainFromEncodedStream(FrFontCtx *);
-extern s32 scrStartScriptByName(s32, const char *, s32);
+extern dds3ProcessID_t *scrStartScriptByName(s32, const char *, s32);
 extern s32 itfDrawBackgroundAndGetTaskReadyMask(dds3ProcessID_t *task);
 extern void itfReleaseFontTestTaskResources(dds3ProcessID_t *task);
 
@@ -88,7 +88,7 @@ extern u32 itfTextLipsUnitId;
 
 extern u32 itfTextLipsMotionId;
 
-extern u32 itfFontTestScriptTask;
+extern dds3ProcessID_t *itfFontTestScriptTask;
 
 extern s32 itfScanEncodedTextControls(FrFontCtx *args);
 
@@ -1196,7 +1196,7 @@ s32 itfDrawBackgroundAndGetTaskReadyMask(dds3ProcessID_t *task) {
     u32 readyMask;
 
     itfDrawBackgroundSprite();
-    taskState = dds3GetProcessStat((dds3ProcessID_t *)itfFontTestScriptTask);
+    taskState = dds3GetProcessStat(itfFontTestScriptTask);
     readyMask = 0xffffffff;
     if (taskState != KWLN_TASK_DESTROY_PENDING) {
         readyMask = 0;

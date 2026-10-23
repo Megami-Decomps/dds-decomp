@@ -57,7 +57,7 @@ extern void frDelFontStyle(s32 slotId);
 extern s8 dds3AdminiGetActiveSequence(void);
 #include "sdf_debug_api.h"
 
-extern u32 itfFontTestScriptTask;
+extern dds3ProcessID_t *itfFontTestScriptTask;
 extern u32 D_003BB18C;
 
 extern sdfTexHandle_t *itfBackgroundSpriteTexture;
@@ -1048,7 +1048,7 @@ void itfDrawBackgroundSprite(void) {
     }
 }
 
-extern s32 scrStartScriptByName(s32, char *, s32);
+extern dds3ProcessID_t *scrStartScriptByName(s32, const char *, s32);
 extern s32 itfDrawBackgroundAndGetTaskReadyMask(dds3ProcessID_t *task);
 extern void itfReleaseFontTestTaskResources(dds3ProcessID_t *task);
 
@@ -1071,7 +1071,7 @@ s32 itfDrawBackgroundAndGetTaskReadyMask(dds3ProcessID_t *task) {
     u32 readyMask;
 
     itfDrawBackgroundSprite();
-    taskState = dds3GetProcessStat((dds3ProcessID_t *)itfFontTestScriptTask);
+    taskState = dds3GetProcessStat(itfFontTestScriptTask);
     readyMask = 0xffffffff;
     if (taskState != KWLN_TASK_DESTROY_PENDING) {
         readyMask = 0;
