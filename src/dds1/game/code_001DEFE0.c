@@ -243,7 +243,7 @@ extern void *btlAllocTask(s32);
 
 extern struct SoundSlotOwner *sndAcquireSlotOwner(s32, s32);
 
-extern void btlSetUnitPosition(BtlUnit *object, void *position);
+extern void btlSetUnitPosition(BtlUnit *object, f32 *position);
 
 extern void btlSetUnitRotation(BtlUnit *object, void *rotation);
 

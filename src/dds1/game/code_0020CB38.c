@@ -27,7 +27,7 @@ extern s32 datActionAnimationRecords;
 
 extern void btlCopyUnitCurrentPosition(void *, void *);
 
-extern void btlSetUnitPosition(BtlUnit *, void *);
+extern void btlSetUnitPosition(BtlUnit *, f32 *);
 
 
 

@@ -1024,7 +1024,7 @@ void btlClearActorUnitDefeatCandidates(BtlIndexList *list) {
 
 
 extern s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *object);
-extern void btlSetUnitPosition(BtlUnit *object, void *position);
+extern void btlSetUnitPosition(BtlUnit *object, f32 *position);
 extern void btlSetUnitRotation(BtlUnit *object, void *rotation);
 extern void btlRefreshUnitMotionSelection(BtlUnit *unit);
 extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);

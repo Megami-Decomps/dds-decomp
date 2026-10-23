@@ -2336,7 +2336,7 @@ extern struct SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id);
 
 extern void btlResetUnitModelProgress(BtlUnit *);
 
-extern void btlSetUnitPosition(BtlUnit *object, void *position);
+extern void btlSetUnitPosition(BtlUnit *object, f32 *position);
 
 extern void btlSetUnitRotation(BtlUnit *object, void *rotation);
 
@@ -2941,7 +2941,7 @@ u32 btlIsUnitModelStateFive(BtlUnit *object) {
     return object->ext->owner->first->state == SDF_MOTION_STATE_TERMINAL;
 }
 
-void btlSetUnitPosition(BtlUnit *object, void *position) {
+void btlSetUnitPosition(BtlUnit *object, f32 *position) {
     f32 world[4] __attribute__((aligned(16)));
     s32 context;
     if ((object->status.stateFlags & 0x80) != 0) {
@@ -3654,9 +3654,9 @@ s32 btlUpdateUnitPositionInterpolationTask(BtlPosLerpTaskArgs *args) {
         VU0_LOAD_VF(vf11, &args->to);
         VU0_LERP_VF10(args->t);
         VU0_STORE_VF(vf10, &pos);
-        btlSetUnitPosition(unit, &pos);
+        btlSetUnitPosition(unit, (f32 *)&pos);
     } else {
-        btlSetUnitPosition(unit, &args->to);
+        btlSetUnitPosition(unit, (f32 *)&args->to);
         return 1;
     }
     args->count++;
@@ -5239,7 +5239,7 @@ void btlApplyUnitEffectScale(BtlUnit *unit) {
         VU0_STORE_VF(vf10, inner->scale);
         mdlSetScale(unit->ext->owner);
         mdlSetEffectScale(unit->ext->owner, unit->actorScale);
-        btlSetUnitPosition(unit, (u8 *)unit->currentPosition);
+        btlSetUnitPosition(unit, unit->currentPosition);
     }
 }
 
