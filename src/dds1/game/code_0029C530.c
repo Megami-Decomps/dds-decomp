@@ -14132,13 +14132,13 @@ INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BD10A);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BD10B);
 
-INCLUDE_SDATA(const s32, "game/code_0029C530", effResourceBankEntries);
+INCLUDE_SDATA(struct BtlResourceEntryList * const, "game/code_0029C530", effResourceBankEntries);
 
-INCLUDE_SDATA(const s32, "game/code_0029C530", effResourceBankDescriptor);
+INCLUDE_SDATA(struct BtlResourceDescriptor * const, "game/code_0029C530", effResourceBankDescriptor);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", effFileQueueNameRecord);
 
-INCLUDE_SDATA(const s32, "game/code_0029C530", effQueuedResourceNameRecord);
+INCLUDE_SDATA(struct BtlResourceNameRecord * const, "game/code_0029C530", effQueuedResourceNameRecord);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", effColorEditRgbMenuOpen);
 
