@@ -253,7 +253,7 @@ extern s32 evtPendingEventSelection;
 
 extern void evtStartEvent(s32 eventId);
 
-extern s32 evtInitSky(void);
+extern dds3ProcessID_t *evtInitSky(void);
 
 extern void evtChkEndProcess(void);
 
@@ -1364,7 +1364,7 @@ u32 evtKeepBattleStageTestModePending(void) {
     return 0;
 }
 
-s32 evtCreateTestAndSkyTasks(void) {
+dds3ProcessID_t *evtCreateTestAndSkyTasks(void) {
     D_00435BB0 = 0;
     D_00435D28 = 0;
     evtInitEventTest();

@@ -4135,7 +4135,7 @@ void evtEventViewerInitCampFontResource(EvtRuntime *viewer) {
 }
 
 extern u32 D_003BA8EC;
-extern s32 evtInitSky(void);
+extern dds3ProcessID_t *evtInitSky(void);
 
 void evtViewerCreateTaskWithSky(void) {
     sdfMemHandle_t *viewerHandle;
@@ -4148,7 +4148,7 @@ void evtViewerCreateTaskWithSky(void) {
     memset(viewer, 0, 0x2490);
     viewer->resourceHandle = viewerHandle;
     viewerTask = dds3StartProcess(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, evtEventViewerDestroyActive, (u32)viewer);
-    dds3LinkProcess(viewerTask, (dds3ProcessID_t *)evtInitSky());
+    dds3LinkProcess(viewerTask, evtInitSky());
     evtEventViewerInitCampFontResource(viewer);
 }
 
