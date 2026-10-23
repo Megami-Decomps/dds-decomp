@@ -8139,13 +8139,13 @@ u32 *effPrepareOwnedTextureAnimation(u8 *work) {
     return buffer;
 }
 
-void effReleaseScalyStripResources(s32 work);
+void effReleaseScalyStripResources(u8 *work);
 
 void effReleaseTextureAnimationWork(s32 work) {
     EffFrameState *state;
 
     state = (EffFrameState *)((EffClassWork *)work)->resource;
-    effReleaseScalyStripResources((u32)state->asset);
+    effReleaseScalyStripResources((u8 *)state->asset);
     sdfMemFreeDirect(state->allocation);
 }
 
@@ -8441,7 +8441,7 @@ void effReleaseBillboardFrameAsset(s32 work) {
     EffFrameState *state;
 
     state = (EffFrameState *)((EffClassWork *)work)->resource;
-    effReleaseScalyStripResources((u32)state->asset);
+    effReleaseScalyStripResources((u8 *)state->asset);
     sdfMemFreeDirect(state->allocation);
 }
 
@@ -8661,7 +8661,7 @@ u32 effCreateTexturedStripWithSharedTexture(u32 count, u32 repeat) {
     return strip;
 }
 
-void effReleaseScalyStripResources(s32 work) {
+void effReleaseScalyStripResources(u8 *work) {
     effReleaseScalyTextureReference((s32)effSharedScalyStripResource);
     sdfMatFreeDelayed(((EffStripWork *)work)->handle);
     sdfMemFreeDirect(((EffStripWork *)work)->allocation);
