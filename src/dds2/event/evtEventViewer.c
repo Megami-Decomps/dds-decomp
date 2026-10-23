@@ -707,7 +707,7 @@ void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
     if (activeEntry != 0) {
         selectedEntry = activeEntry;
     } else {
-        selectedEntry = (dds3Basic_t *)viewer->fallbackEntry;
+        selectedEntry = viewer->fallbackEntry;
     }
     if (selectedEntry != 0) {
         dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), selectedEntry);
@@ -1929,7 +1929,7 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
     }
 
     if (D_004372B8 != NULL) {
-        viewer->fallbackEntry = (s32)D_004372B8->info;
+        viewer->fallbackEntry = D_004372B8->info;
         evtViewerApplySelectedEntry(viewer);
     }
     evtEventViewerUpdateUnitTransitions(time, viewer);
