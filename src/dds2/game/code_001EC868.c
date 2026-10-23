@@ -8986,7 +8986,7 @@ void btlCreateIndexedSoundResourceNode(s32 slotIndex, void * handle) {
 
 #include "btl_sound_handle_node.h"
 
-SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
+SoundHandleNode *sndCreateSystemEffectHandle(struct dds3ModelHandle_t *actor, s32 index) {
     SoundHandleNode *node = sdfAllocAndClearQuadwords(sizeof(*node));
     BattleSoundArchiveEntry *entry = &D_003BDE18[index];
     node->actor = actor;
@@ -8997,8 +8997,8 @@ SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
 void btlUpdateJobPositionFromModel(s32 *args) {
     SoundHandleNode *node = (SoundHandleNode *)args;
     f32 pos[4];
-    if (sdfModelGetMarkPos(((dds3ModelHandle_t *)node->actor)->inner, 1) == 0) {
-        mdlGetPosition((dds3ModelHandle_t *)node->actor);
+    if (sdfModelGetMarkPos(node->actor->inner, 1) == 0) {
+        mdlGetPosition(node->actor);
         VU0_STORE_VF(vf10, pos);
         pos[1] -= 150.0f;
     } else {
