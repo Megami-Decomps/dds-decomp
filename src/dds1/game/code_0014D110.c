@@ -44,7 +44,6 @@ extern u32 fldDamEffectResource;
 
 extern u32 fldDamEffectData;
 
-extern u32 fldDamEffectNode;
 
 extern u32 fldDamEffectPositioned;
 
@@ -52,7 +51,6 @@ extern u32 fldYukEffectResource;
 
 extern u32 fldYukEffectData;
 
-extern u32 fldYukEffectNode;
 
 extern u32 fldYukEffectPositioned;
 
