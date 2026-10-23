@@ -85,9 +85,9 @@ extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern BtlRuntimeTask *btlCreateScriptResourceTask(BtlUnit *unit, u32 group);
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32 value);
 extern BtlRuntimeTask *sndCreateCustomTask(s32 value, s32 option);
-extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit);
 extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32 value);
 extern BtlRuntimeTask *btlCreateFadeInTask(u32 value);
+extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit);
 extern ActionStateLink *fldGetSceneGroupEntry(s32 entryIndex);
 
 extern void btlUpdateLinkedEffectUnitTransforms(void);
