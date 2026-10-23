@@ -177,7 +177,7 @@ extern s32 evtPendingEventSelection;
 
 extern void evtStartEvent(s32 eventId);
 
-extern s32 evtInitSky(void);
+extern dds3ProcessID_t *evtInitSky(void);
 
 typedef struct {
     f32 x;
@@ -1370,7 +1370,7 @@ u32 evtKeepBattleStageTestModePending(void) {
     return 0;
 }
 
-s32 evtCreateTestAndSkyTasks(void) {
+dds3ProcessID_t *evtCreateTestAndSkyTasks(void) {
     D_003BA730 = 0;
     D_003BA958 = 0;
     evtInitEventTest();

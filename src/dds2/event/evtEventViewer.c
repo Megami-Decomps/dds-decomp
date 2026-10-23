@@ -46,7 +46,7 @@
 #include "itf.h"
 #include "sdf_packet_list.h"
 /* Declared before first use (were implicit int). */
-extern s32 evtInitSky(void);
+extern dds3ProcessID_t *evtInitSky(void);
 extern void mnuCampSetPrimaryOption(EvtRuntime *scene, u32 option);
 extern void mnuCampSetSecondaryOption(EvtRuntime *scene, u32 option);
 extern s32 mnuGetSelectedTableValue(EvtRuntime *runtime);
@@ -4466,7 +4466,7 @@ void evtViewerCreateTaskWithSky(void) {
     memset(viewer, 0, 0x24BC);
     viewer->resourceHandle = viewerHandle;
     viewerTask = dds3StartProcess(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, evtEventViewerDestroyActive, (u32)viewer);
-    dds3LinkProcess(viewerTask, (dds3ProcessID_t *)evtInitSky());
+    dds3LinkProcess(viewerTask, evtInitSky());
     evtEventViewerInitCampFontResource(viewer);
 }
 

@@ -220,12 +220,12 @@ extern void fldSkySetAlpha(u32 drawState);
 extern void fldSkySetAlphaOfs(u32 alpha);
 extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
 
-s32 evtInitSky(void) {
+dds3ProcessID_t *evtInitSky(void) {
     fldSetFilterAnime(0);
     fldSkySetAlpha(0x80);
     fldSkySetAlphaOfs(0);
     fldSetFadeTarget(0, 1, 0);
-    return (s32)dds3StartProcess(evtSkyTaskName, 0x2B0E, 1, 1, evtSkyProcess1, evtSkyShutdown, 0);
+    return dds3StartProcess(evtSkyTaskName, 0x2B0E, 1, 1, evtSkyProcess1, evtSkyShutdown, 0);
 }
 
 /* Frame-variable task update: polls the parent task's user value each frame. */
