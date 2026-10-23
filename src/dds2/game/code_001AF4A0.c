@@ -75,7 +75,7 @@ typedef union UiQuadColor {
     s32 channels[4];
 } UiQuadColor;
 
-extern s32 dds3FindEntryIndex();
+extern s32 dds3FindEntryIndex(s32 unitId);
 
 extern datUnitWork_t *btlGetIndexedPartyEntryRecord(s32);
 
