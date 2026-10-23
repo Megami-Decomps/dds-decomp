@@ -80,7 +80,7 @@ typedef struct FldAreaWork {
     s32 nextFloor;
     u8 padF8[4];
     f32 frameTravelDistance;     /* 0xFC: current player displacement length. */
-    s32 unk100;
+    s32 pendingEntryDialogRequest;
     s16 transitionMode;          /* 0x104 */
     u16 collectedCount;          /* 0x106: spark pickups. */
     s32 score;                   /* 0x108: pickups add 50. */
