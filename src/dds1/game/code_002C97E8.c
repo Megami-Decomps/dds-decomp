@@ -355,7 +355,7 @@ s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 first, u32 second, s8 
     return result;
 }
 
-s32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, const void *text, s32 width, u32 color) {
+s32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, const u8 *text, s32 width, u32 color) {
     _FRQ *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, text, 0);
     s32 result;
 
@@ -1446,4 +1446,3 @@ const SdfGridDirections D_003BD2A0[1] __attribute__((section(".sdata"), aligned(
 const SdfGridDirections D_003BD2A8[1] __attribute__((section(".sdata"), aligned(8))) = {{0, -1, 1}};
 
 const SdfGridDirections D_003BD2B0[1] __attribute__((section(".sdata"), aligned(8))) = {{0, -1, 1}};
-
