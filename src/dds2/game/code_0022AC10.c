@@ -237,9 +237,9 @@ extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 
 
-extern u8 *btlFindUnitByModeClear(s32);
+extern BtlUnit *btlFindUnitByModeClear(s32);
 
-extern u8 *btlFindUnitByModeFlagged(s32);
+extern BtlUnit *btlFindUnitByModeFlagged(s32);
 
 extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode);
 
@@ -572,9 +572,9 @@ s32 btlCommandSelectEventAction(void) {
     BtlState *battleState;
     void *actionResource;
     if (modeSelector == 0) {
-        selectedUnit = (BtlUnit *)btlFindUnitByModeClear(unitId);
+        selectedUnit = btlFindUnitByModeClear(unitId);
     } else {
-        selectedUnit = (BtlUnit *)btlFindUnitByModeFlagged(unitId);
+        selectedUnit = btlFindUnitByModeFlagged(unitId);
     }
     if (selectedUnit == 0) {
         return 1;
@@ -626,7 +626,7 @@ s32 btlOpStartSelectedUnitModelChange(void) {
     s32 unitIndex = scrGetIntPara(1);
     s32 first = scrGetIntPara(2);
     s32 second = scrGetIntPara(3);
-    u8 *unit;
+    BtlUnit *unit;
     if ((u32)unitIndex >= 0x180) {
         return 1;
     }
@@ -641,7 +641,7 @@ s32 btlOpStartSelectedUnitModelChange(void) {
     if (unit == NULL) {
         return 1;
     }
-    btlStartTask(btlCreateModelChangeTask((BtlUnit *)unit, choice != 0, first, second, 0x18, 0));
+        btlStartTask(btlCreateModelChangeTask(unit, choice != 0, first, second, 0x18, 0));
     return 1;
 }
 
@@ -659,9 +659,9 @@ s32 btlCommandPlayUnitMotion(void) {
     BtlUnit *unit;
 
     if (choice == 0) {
-        unit = (BtlUnit *)btlFindUnitByModeClear(unitIndex);
+        unit = btlFindUnitByModeClear(unitIndex);
     } else {
-        unit = (BtlUnit *)btlFindUnitByModeFlagged(unitIndex);
+        unit = btlFindUnitByModeFlagged(unitIndex);
     }
     if (unit == 0) {
         return 1;
