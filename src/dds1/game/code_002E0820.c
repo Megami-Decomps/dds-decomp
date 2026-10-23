@@ -313,7 +313,7 @@ extern u8 sdfCameraTm[];
 extern u8 sdf3DEyeOffset[];
 
 /* Cache node data, its composed transform, and the transformed cached origin. */
-void sdf3DSetCamera(SdfProjectionRecord *node, void *transformMatrix) {
+void sdf3DSetCamera(SdfProjectionRecord *node, const void *transformMatrix) {
     VU0_LOAD_MATRIX(transformMatrix);
     VU0_STORE_MATRIX(sdfCameraTm);
     sdfPostmultiplyVuMatrixFromMemory(node->camera.matrix);

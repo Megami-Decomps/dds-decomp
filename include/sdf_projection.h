@@ -61,6 +61,6 @@ void effScreenOffset(void);
 void LookAtMatrix(const void *directionPoint, const void *basisOrigin, const void *up);
 struct ConsMatrixPacket;
 extern void sdf3DMakeViewportPacket(struct ConsMatrixPacket *, SdfProjectionRecord *, void *);
-extern void sdf3DSetCamera(SdfProjectionRecord *, void *);
+extern void sdf3DSetCamera(SdfProjectionRecord *, const void *);
 
 #endif /* SDF_PROJECTION_H */
