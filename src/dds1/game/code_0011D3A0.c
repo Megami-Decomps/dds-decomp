@@ -891,6 +891,7 @@ void drawSceneBasicList(void) {
 #include "eff_object.h"
 #include "evt_unit.h"
 #include "sdf_primitive.h"
+#include "sdf_primitive_packet_api.h"
 #include "sdf_packet_append.h"
 #include "sdf_packet_list.h"
 #include "sdf.h"
@@ -905,7 +906,6 @@ extern void aDrawBoxF_Direct(s32, s32, s32, s32, u32, u32, u32, u32);
 extern void fldSubmitPrimaryFramePacket(void);
 extern void fldSubmitAlternateFramePacket(void);
 extern void fldPrepareProjectionMatrix(void);
-extern void *sdf3DPrimMakePoly(SdfPrimitiveRequest *);
 extern SdfPoolNode sdfGrOtTable[];
 extern u32 rsetFrameMaskOtOffset;
 extern u32 D_003BACEC;
@@ -2324,4 +2324,3 @@ INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BABFC);
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", fldEncountFlags);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAC08);
-
