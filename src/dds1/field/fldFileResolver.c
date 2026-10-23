@@ -1559,7 +1559,7 @@ u8 fldCheckNextFile(void) {
     return strcmp(D_003C9200, buf) != 0;
 }
 
-extern void fldGetDoorEntry(const void *source);
+extern void fldGetDoorEntry(FldWaypointBlock *source);
 
 extern void fldInfLoadFromMem(const void *);
 
@@ -1594,7 +1594,7 @@ void fldLoadFieldPack(void) {
                     (struct sdfMemHandle_t *)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_ACTOR_WAYPOINT_TABLE:
-                fldGetDoorEntry(work->dataCursor);
+                fldGetDoorEntry((FldWaypointBlock *)work->dataCursor);
                 sdfMemFreeDelayedDirect(
                     (struct sdfMemHandle_t *)work->resourceHandle);
                 break;
