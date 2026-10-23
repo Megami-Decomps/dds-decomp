@@ -9,6 +9,8 @@ struct dds3ProcessID_t;
 struct EvtRuntime;
 struct dds3Basic_t;
 struct FileRequest;
+struct EvtCompactRow;
+struct EvtExtendedRow;
 
 /* User-value state shared by the DDS1 and DDS2 polygon-movie providers. */
 typedef struct EvtPolygonMovieTaskState {
@@ -74,11 +76,11 @@ typedef struct PolyMovieWork {
     u8 *subEntry1Data;    /* 0x7C */
     u32 subEntry1Value; /* 0x80: value from the secondary type-1 entry. */
     u8 *subEntry0Data;    /* 0x84 */
-    u8 *subEntry4Kind4Data; /* 0x88 */
-    u8 *subEntry4OtherData; /* 0x8C */
+    struct EvtCompactRow *subEntry4Kind4Data; /* 0x88 */
+    struct EvtExtendedRow *subEntry4OtherData; /* 0x8C */
     PmdHeader *sub2;   /* 0x90 */
     PmdEntry *sub2Entries; /* 0x94 */
-    u8 *secondEntry4Data; /* 0x98 */
+    struct EvtExtendedRow *secondEntry4Data; /* 0x98 */
     u32 extendedEntry4Count; /* 0x9C: rows in the extended type-4 table */
     u32 subEntry4Count; /* 0xA0 */
     u8 *subEntry5Data;    /* 0xA4 */

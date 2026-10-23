@@ -4528,37 +4528,37 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
 
 u16 evtGetRowValue(const PolyMovieWork *work, s32 row) {
     if (work->sub->kind == 4) {
-        return ((const EvtCompactRow *)work->subEntry4Kind4Data)[row].value;
+        return work->subEntry4Kind4Data[row].value;
     }
-    return ((const EvtExtendedRow *)work->subEntry4OtherData)[row].value;
+    return work->subEntry4OtherData[row].value;
 }
 
 s16 evtGetRowVariant(const PolyMovieWork *work, s32 row) {
     if (work->sub->kind == 4) {
-        return ((const EvtCompactRow *)work->subEntry4Kind4Data)[row].variant;
+        return work->subEntry4Kind4Data[row].variant;
     }
-    return ((const EvtExtendedRow *)work->subEntry4OtherData)[row].variant;
+    return work->subEntry4OtherData[row].variant;
 }
 
 u16 evtGetRowParameter(const PolyMovieWork *work, s32 row) {
     if (work->sub->kind == 4) {
-        return ((const EvtCompactRow *)work->subEntry4Kind4Data)[row].parameter;
+        return work->subEntry4Kind4Data[row].parameter;
     }
-    return ((const EvtExtendedRow *)work->subEntry4OtherData)[row].parameter;
+    return work->subEntry4OtherData[row].parameter;
 }
 
 u16 evtGetRowFlags(const PolyMovieWork *work, s32 row) {
     if (work->sub->kind == 4) {
-        return ((const EvtCompactRow *)work->subEntry4Kind4Data)[row].flags;
+        return work->subEntry4Kind4Data[row].flags;
     }
-    return ((const EvtExtendedRow *)work->subEntry4OtherData)[row].flags;
+    return work->subEntry4OtherData[row].flags;
 }
 
 u8 * evtGetRowPayloadAddress(PolyMovieWork *work, s32 row) {
     if (work->sub->kind == 4) {
-        return ((EvtCompactRow *)work->subEntry4Kind4Data)[row].payload;
+        return work->subEntry4Kind4Data[row].payload;
     }
-    return ((EvtExtendedRow *)work->subEntry4OtherData)[row].payload;
+    return work->subEntry4OtherData[row].payload;
 }
 
 
@@ -5248,10 +5248,10 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
                 key->p08.h[0] = *(u16 *)evtGetRowPayloadAddress(work, row);
             }
-        } else if (((EvtExtendedRow *)work->secondEntry4Data)[row].value == 5) {
+        } else if (work->secondEntry4Data[row].value == 5) {
             soundRowsPresent = 1;
-            key = evtCreateTrackKeyAtFrame(group, ((EvtExtendedRow *)work->secondEntry4Data)[row].parameter, runtime);
-            key->p08.h[0] = *(u16 *)((EvtExtendedRow *)work->secondEntry4Data)[row].payload;
+            key = evtCreateTrackKeyAtFrame(group, work->secondEntry4Data[row].parameter, runtime);
+            key->p08.h[0] = *(u16 *)work->secondEntry4Data[row].payload;
         }
     }
     group = evtEventViewerCreateEntry(0x13, runtime);
@@ -5268,11 +5268,11 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 key->p08.h[0] = *(u16 *)evtGetRowPayloadAddress(work, row);
                 key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 2);
             }
-        } else if (((EvtExtendedRow *)work->secondEntry4Data)[row].value == 0x13) {
+        } else if (work->secondEntry4Data[row].value == 0x13) {
             soundRowsPresent = 1;
-            key = evtCreateTrackKeyAtFrame(group, ((EvtExtendedRow *)work->secondEntry4Data)[row].parameter, runtime);
-            key->p08.h[0] = *(u16 *)((EvtExtendedRow *)work->secondEntry4Data)[row].payload;
-            key->p08.h[1] = *(u16 *)(((EvtExtendedRow *)work->secondEntry4Data)[row].payload + 2);
+            key = evtCreateTrackKeyAtFrame(group, work->secondEntry4Data[row].parameter, runtime);
+            key->p08.h[0] = *(u16 *)work->secondEntry4Data[row].payload;
+            key->p08.h[1] = *(u16 *)(work->secondEntry4Data[row].payload + 2);
         }
     }
 

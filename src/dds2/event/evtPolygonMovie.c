@@ -653,10 +653,10 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *mainHeade
         case 4:
             if (work->sub->kind == 4) {
                 work->subEntry4OtherData = NULL;
-                work->subEntry4Kind4Data = (u8 *)secondaryHeader + work->subEntries[arrayIndex].offset;
+                work->subEntry4Kind4Data = (struct EvtCompactRow *)((u8 *)secondaryHeader + work->subEntries[arrayIndex].offset);
             } else {
                 work->subEntry4Kind4Data = NULL;
-                work->subEntry4OtherData = (u8 *)secondaryHeader + work->subEntries[arrayIndex].offset;
+                work->subEntry4OtherData = (struct EvtExtendedRow *)((u8 *)secondaryHeader + work->subEntries[arrayIndex].offset);
             }
             work->subEntry4Count = work->subEntries[arrayIndex].value;
             break;
@@ -728,7 +728,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *mainHeade
     }
     for (arrayIndex = 0; arrayIndex < work->sub2->count; arrayIndex++) {
         if (work->sub2Entries[arrayIndex].type == 4) {
-            work->secondEntry4Data = (u8 *)tertiaryHeader + work->sub2Entries[arrayIndex].offset;
+            work->secondEntry4Data = (struct EvtExtendedRow *)((u8 *)tertiaryHeader + work->sub2Entries[arrayIndex].offset);
             work->extendedEntry4Count = work->sub2Entries[arrayIndex].value;
         }
     }
