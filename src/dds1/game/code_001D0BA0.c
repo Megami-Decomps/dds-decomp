@@ -535,8 +535,8 @@ extern s32 btlCalculateAbilityRecoveryAmount(BtlUnit *actor, BtlUnit *target);
 
 extern u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy);
 
-/* ASM-only definition; align the current pinned declaration in code_001A9780.c. */
-extern u32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, s32);
+/* The damage/restore result is signed; keep this cross-unit declaration aligned with its provider. */
+extern s32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
 
 extern s32 btlCalculateMpAttackOrRestoreAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
 
@@ -928,8 +928,8 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
             s32 mpDelta;
             f32 multiplier;
 
-            hpAttack = (s32)btlCalculateHpAttackOrRestoreAmount(source, recipient, command, maxHits, press, 1, (s32)calculationFlags);
-            hpRestore = (s32)btlCalculateHpAttackOrRestoreAmount(source, recipient, command, maxHits, press, 0, (s32)calculationFlags);
+            hpAttack = btlCalculateHpAttackOrRestoreAmount(source, recipient, command, maxHits, press, 1, calculationFlags);
+            hpRestore = btlCalculateHpAttackOrRestoreAmount(source, recipient, command, maxHits, press, 0, calculationFlags);
             hpAttack = hpAttack * ratio;
             mpAttack = btlCalculateMpAttackOrRestoreAmount(source, recipient, command, maxHits, press, 1, calculationFlags);
             mpRestore = btlCalculateMpAttackOrRestoreAmount(source, recipient, command, maxHits, press, 0, calculationFlags);

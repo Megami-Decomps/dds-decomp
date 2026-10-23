@@ -625,7 +625,7 @@ void btlBuildCombinedActorUnit(BtlUnit *dst, BtlUnit *first, BtlUnit *second, Bt
 extern BattleStartVoiceRow btlStartVoiceRows[];
 extern s32 btlRollAiBucket(void);
 extern s32 btlReadCurrentUnitHp(datUnitWork_t *);
-extern u32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, s32);
+extern s32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
 
 extern char D_003A1DD8[]; /* "btl:start voice off[ESC_OFF]\n" */
 extern char D_003A1DF8[]; /* "btl:start voice off[SERIAL]\n" */
@@ -10659,4 +10659,3 @@ INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB5C8);
 INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB5D0);
 
 INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB5D8);
-
