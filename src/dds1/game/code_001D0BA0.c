@@ -245,7 +245,7 @@ extern s32 btlCountTasksForOwner(s64);
 
 extern u8 *btlCreateSelectedEffectUpdateTask(u8 *);
 
-extern u8 *btlCreateUnitExitFadeTask(u8 *, u32);
+extern BtlRuntimeTask *btlCreateUnitExitFadeTask(BtlUnit *, s32);
 extern void btlBossDebugPrintfN(s32, s32, s32, s32, ...);
 
 BtlTask *btlFindUnitByActor(BtlUnit *target);
@@ -4332,18 +4332,18 @@ u32 btlStepUnitExitFade(u32 *arguments) {
 }
 
 /* Queue the selected exit-fade mode for this owner, starting at tick zero. */
-u8 *btlCreateUnitExitFadeTask(u8 *owner, u32 value) {
-    u8 *task = btlAllocTask(12);
+BtlRuntimeTask *btlCreateUnitExitFadeTask(BtlUnit *owner, s32 value) {
+    BtlRuntimeTask *task = (BtlRuntimeTask *)btlAllocTask(12);
     BtlUnitFadeTaskArgs *arguments;
 
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)(task + 0x20) = 0x15;
-    *(void **)(task + 0x4C) = btlStepUnitExitFade;
-    *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
-    *(u32 *)(task + 0x48) = 0;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->taskId = 0x15;
+    task->callback = btlStepUnitExitFade;
+    task->ownerId = owner->identity;
+    task->onStart = 0;
     arguments = (BtlUnitFadeTaskArgs *)btlGetTaskArguments(task);
-    arguments->unit = (BtlUnit *)owner;
+    arguments->unit = owner;
     arguments->durationOrMode = value;
     arguments->elapsed = 0;
     return task;

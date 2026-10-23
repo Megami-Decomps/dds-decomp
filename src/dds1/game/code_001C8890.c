@@ -2271,7 +2271,7 @@ void btlCommandTaskStartEffects(u8 *task) {
     }
 }
 
-extern u8 *btlCreateUnitExitFadeTask(u8 *, u32);
+extern BtlRuntimeTask *btlCreateUnitExitFadeTask(BtlUnit *, s32);
 
 u64 btlCommandTaskReturnStart(u8 *task) {
     BtlUnit *linked = *(BtlUnit **)(task + 0x34);
@@ -2306,7 +2306,7 @@ u64 btlCommandTaskReturnStart(u8 *task) {
     *(s32 *)(object + 0x28) = 0xF;
     *(u64 *)(object + 0x40) = *(u64 *)(*(u8 **)(task + 0x18) + 0x108);
     btlStartTask(object);
-    object = btlCreateUnitExitFadeTask(actor, 1);
+    object = (u8 *)btlCreateUnitExitFadeTask(actor, 1);
     *(s32 *)(object + 0x28) = 0xF;
     return btlStartTask(object);
 }
@@ -2603,7 +2603,7 @@ u64 btlStartOwnerEffectTasks(s32 *arguments) {
     BtlUnit *owner = (BtlUnit *)arguments[0x34 / 4];
     BtlRuntimeTask *value = btlCreateEffObjA(owner, arguments[0x20 / 4]);
     btlStartTask(value);
-    value = (BtlRuntimeTask *)btlCreateUnitExitFadeTask((u8 *)owner, 1);
+    value = btlCreateUnitExitFadeTask(owner, 1);
     value->startDelay = 7;
     return btlStartTask(value);
 }
@@ -2998,7 +2998,7 @@ void btlStartActorDefeatTransition(s32 command) {
                     btlRefreshUnitMotionSelection(actor);
                 }
             } else {
-                object = (BtlRuntimeTask *)btlCreateUnitExitFadeTask((u8 *)actor, 0);
+                object = btlCreateUnitExitFadeTask(actor, 0);
                 object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 object->startCondition.value.handle = sequence;
                 btlStartTask(object);
