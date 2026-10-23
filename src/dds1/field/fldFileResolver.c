@@ -5809,11 +5809,11 @@ void fldSetPlayerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
 
 extern void dds3SetFogColor(s32, f32 *);
 
-extern s32 dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
+extern void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
 
 extern void dds3SetAmbientColor(s32, f32 *);
 
-extern s32 dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
+extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
 
 extern void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 
@@ -5950,11 +5950,11 @@ extern u32 D_003BADD4;
 
 extern void dds3SetFogColor(s32, f32 *);
 
-extern s32 dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
+extern void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
 
 extern void dds3SetAmbientColor(s32, f32 *);
 
-extern s32 dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
+extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
 
 extern void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 
@@ -6071,11 +6071,11 @@ void fldSkySetTblLightMaDZ(s32 enabled) {
 /*BEGIN fldApplySceneLightSet*/
 extern void dds3SetFogColor(s32, f32 *);
 
-extern s32 dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
+extern void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
 
 extern void dds3SetAmbientColor(s32, f32 *);
 
-extern s32 dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
+extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
 
 extern void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 
@@ -6192,11 +6192,11 @@ void fldInitializeDisplayPointerTable(void) {
 
 extern void dds3SetFogColor(s32, f32 *);
 
-extern s32 dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
+extern void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
 
 extern void dds3SetAmbientColor(s32, f32 *);
 
-extern s32 dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
+extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
 
 extern void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 

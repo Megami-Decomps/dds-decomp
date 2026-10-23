@@ -31,7 +31,7 @@ void dds3SetBlur2Para(f32 rotation, f32 scale, u32 blendControl);
 void dds3SetFilter2Para(u32 blendControl);
 void dds3SetMFilterPara(u32 blendControl);
 void dds3SetScreenFovy(f32 fieldOfView);
-s32 dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
+void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 s32 fptodp(void);
 extern s8 dds3PadBitTable[];
 extern char D_0039F4D8[];
