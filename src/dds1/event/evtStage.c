@@ -149,7 +149,7 @@ void evtKillFieldScript(void)
     }
 }
 
-void evtPathStop(void *object)
+void evtPathStop(dds3Basic_t *object)
 {
     dds3PathBasicControl_t *slotData;
 
@@ -159,7 +159,7 @@ void evtPathStop(void *object)
     }
 }
 
-void evtPathStart(void *object)
+void evtPathStart(dds3Basic_t *object)
 {
     dds3PathBasicControl_t *slotData;
 
@@ -171,7 +171,7 @@ void evtPathStart(void *object)
 
 
 /* Scale the object's retained path time within the clamped multiplier range. */
-void evtPathRate(void *worldNode, f32 multiplier) {
+void evtPathRate(dds3Basic_t *worldNode, f32 multiplier) {
     dds3PathBasicControl_t *slotData;
 
     slotData = dds3ObjectBaseGetPathControl(worldNode);
@@ -186,7 +186,7 @@ void evtPathRate(void *worldNode, f32 multiplier) {
     }
 }
 
-void evtPathDir(void *worldNode, u32 direction) {
+void evtPathDir(dds3Basic_t *worldNode, u32 direction) {
     dds3PathBasicControl_t *slotData;
 
     slotData = dds3ObjectBaseGetPathControl(worldNode);

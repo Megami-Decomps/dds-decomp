@@ -1170,7 +1170,7 @@ extern void dds3ObjectBaseCreateMover(void *);
 extern void dds3MoverBasicMakePath(dds3Basic_t *object);
 
 
-extern void evtPathRate(void *object, f32 multiplier);
+extern void evtPathRate(dds3Basic_t *object, f32 multiplier);
 
 extern void dds3MoverBasicUpdate(dds3Basic_t *);
 

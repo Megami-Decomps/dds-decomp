@@ -1050,7 +1050,7 @@ extern s32 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern s32 fldCommand_SEARCH_ID(const char *);
 extern void dds3ObjectBaseCreateMover(void *);
 extern void dds3MoverBasicMakePath(dds3Basic_t *object);
-extern void evtPathRate(void *object, f32 multiplier);
+extern void evtPathRate(dds3Basic_t *object, f32 multiplier);
 extern void dds3MoverBasicUpdate(dds3Basic_t *);
 extern void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *, u32);
 extern char D_004130A8[], D_004130B8[], D_004130C8[];

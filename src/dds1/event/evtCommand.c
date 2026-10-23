@@ -96,7 +96,7 @@ void evtFreeStage(void);
 
 s32 evtPathLinkAndMake(dds3Basic_t *target, dds3Basic_t *path);
 
-void evtPathRate(void *unit, f32 value);
+void evtPathRate(dds3Basic_t *unit, f32 value);
 
 s32 fldCommand_GetHojiID(char *name);
 
@@ -107,11 +107,11 @@ s32 fldSetMapSlotValueFlag(s32 worldKey, s32 roomGroup, s32 roomNumber, s32 enab
 extern u32 dds3DrawFlag;
 
 
-void evtPathStop(void *unit);
+void evtPathStop(dds3Basic_t *unit);
 
-void evtPathStart(void *unit);
+void evtPathStart(dds3Basic_t *unit);
 
-void evtPathDir(void *worldNode, u32 direction);
+void evtPathDir(dds3Basic_t *worldNode, u32 direction);
 
 void evtPathLoop(void *unit, s32 enabled);
 
@@ -1138,39 +1138,39 @@ s32 evtCommand_PMV_RUN(void) {
 
 /* Look up a world unit across the six kinds before trying the fallback slot. */
 s32 evtCommand_PATH_STOP(void) {
-    s32 slotObject;
+    dds3Basic_t *slotObject;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
-        slotObject = (s32)evtSearchBasic(objectKind, scrGetIntPara(0));
+        slotObject = evtSearchBasic(objectKind, scrGetIntPara(0));
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && slotObject == 0);
     if (slotObject == 0) {
-        slotObject = (s32)(u32)fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
+        slotObject = fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
         if (slotObject == 0) {
             return 1;
         }
     }
-    evtPathStop((void *)(u32)slotObject);
+    evtPathStop(slotObject);
     return 1;
 }
 
-/* Clear the first matching unit's status flag, using the same fallback search. */
+/* Resume the first matching path controller, using the same fallback search. */
 s32 evtCommand_PATH_START(void) {
-    s32 slotObject;
+    dds3Basic_t *slotObject;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
-        slotObject = (s32)evtSearchBasic(objectKind, scrGetIntPara(0));
+        slotObject = evtSearchBasic(objectKind, scrGetIntPara(0));
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && slotObject == 0);
     if (slotObject == 0) {
-        slotObject = (s32)(u32)fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
+        slotObject = fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
         if (slotObject == 0) {
             return 1;
         }
     }
-    evtPathStart((void *)(u32)slotObject);
+    evtPathStart(slotObject);
     return 1;
 }
 
