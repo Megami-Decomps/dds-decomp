@@ -85,7 +85,7 @@ extern char D_00428680[];
 
 extern u32 D_00437A20[2];
 
-extern u32 D_00437A28;
+extern u8 *D_00437A28;
 
 extern void p2sdLoadSMGFile(s32);
 
@@ -104,8 +104,8 @@ s32 mnuCopySoundStreamOnStatusChange(const void *source, u32 words);
 
 /* The argument is a word count, not a source address; both use the EE buffer. */
 void sndUploadStreamToBothIopBuffers(u32 wordCount) {
-    sndCopyWordsToIopSynchronously((const void *)D_00437A28, D_00437A20[0], wordCount);
-    sndCopyWordsToIopSynchronously((const void *)D_00437A28, D_00437A20[1], wordCount);
+    sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[0], wordCount);
+    sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[1], wordCount);
     sceSdRemote(1, 0x8010, 0xf80, 0);
     sceSdRemote(1, 0x8010, 0x1080, 0);
     sceSdRemote(1, 0x80e0, 0, 2, 0, 0);
