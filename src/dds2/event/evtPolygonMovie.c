@@ -653,10 +653,10 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *mainHeade
         case 4:
             if (work->sub->kind == 4) {
                 work->subEntry4OtherData = NULL;
-                work->subEntry4Kind4Data = (struct EvtCompactRow *)((u8 *)secondaryHeader + work->subEntries[arrayIndex].offset);
+                work->subEntry4Kind4Data = (const struct EvtCompactRow *)((u8 *)secondaryHeader + work->subEntries[arrayIndex].offset);
             } else {
                 work->subEntry4Kind4Data = NULL;
-                work->subEntry4OtherData = (struct EvtExtendedRow *)((u8 *)secondaryHeader + work->subEntries[arrayIndex].offset);
+                work->subEntry4OtherData = (const struct EvtExtendedRow *)((u8 *)secondaryHeader + work->subEntries[arrayIndex].offset);
             }
             work->subEntry4Count = work->subEntries[arrayIndex].value;
             break;

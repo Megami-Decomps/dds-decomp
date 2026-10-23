@@ -76,8 +76,8 @@ typedef struct PolyMovieWork {
     u8 *subEntry1Data;    /* 0x7C */
     u32 subEntry1Value; /* 0x80: value from the secondary type-1 entry. */
     u8 *subEntry0Data;    /* 0x84 */
-    struct EvtCompactRow *subEntry4Kind4Data; /* 0x88 */
-    struct EvtExtendedRow *subEntry4OtherData; /* 0x8C */
+    const struct EvtCompactRow *subEntry4Kind4Data; /* 0x88 */
+    const struct EvtExtendedRow *subEntry4OtherData; /* 0x8C */
     PmdHeader *sub2;   /* 0x90 */
     PmdEntry *sub2Entries; /* 0x94 */
     const struct EvtExtendedRow *secondEntry4Data; /* 0x98 */
