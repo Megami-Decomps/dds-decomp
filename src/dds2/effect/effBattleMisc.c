@@ -38,7 +38,7 @@ void effBTLPartGetPositionPtr(void *owner, EffectVectorRequest *request, u128 *o
 extern u32 effBTLFieldColorGetOverrideSelector(void);
 extern u32 effBTLFieldColorGetFinalSelector(void);
 extern void effBattleComputeTargetPosition();
-extern f32 btlMeasureEffectTargetGroupBounds(u32 mask, s32 a, s32 b);
+extern f32 btlMeasureEffectTargetGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop);
 extern f32 btlGetMaxUnitTop(u32 mask);
 extern f32 btlGetExtremeUnitY(u32 mask);
 
