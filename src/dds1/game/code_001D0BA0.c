@@ -127,7 +127,7 @@ extern BtlRuntimeTask *btlDeferredTaskHead;
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern void btlApplyScaledUnitEffectParameter(u8 *, s32, s32, f32);
+extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 extern BtlActionAnimationRecord *datActionAnimationRecords;
 
 extern EffRandState effSharedRandomState[];
@@ -2394,9 +2394,9 @@ void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
     unit->motionEndFrame = 0;
     btlRefreshUnitMotionSelection(unit);
     if (unit->effectIndex != 0xB) {
-        btlApplyScaledUnitEffectParameter((u8 *)unit, unit->effectIndex, 1, 1.0f);
+        btlApplyScaledUnitEffectParameter(unit, unit->effectIndex, 1, 1.0f);
     } else {
-        btlApplyScaledUnitEffectParameter((u8 *)unit, 0xB, 2, 1.0f);
+        btlApplyScaledUnitEffectParameter(unit, 0xB, 2, 1.0f);
     }
     if (unit->resourceLink) {
         btlMarkTaskReady(unit->resourceLink);
@@ -2811,10 +2811,10 @@ s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *object) {
 
 extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
 
-void btlApplyScaledUnitEffectParameter(u8 *object, s32 index, s32 argument, f32 scale) {
-    u8 *resource = (u8 *)btlGetSideIndexedActorStatusTable(*(s32 *)(object + 0xC4), *(s32 *)(object + 0xC8));
-    f32 value = *(f32 *)(resource + index * 20 + 0x34);
-    btlApplyUnitMotionSelection(object, index, argument, value * scale);
+void btlApplyScaledUnitEffectParameter(BtlUnit *unit, s32 index, s32 argument, f32 scale) {
+    BtlEffectResource *resource = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(
+        unit->resourceKind, unit->species);
+    btlApplyUnitMotionSelection(unit, index, argument, resource->nodes[index].scale * scale);
 }
 
 s32 btlGetSlotRateKind(u8 *object, s32 index) {
@@ -3493,7 +3493,7 @@ void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit) {
 u32 btlApplyIndexedUnitEffectTask(u8 *arguments) {
     s32 index = *(s32 *)(arguments + 4);
     if (index >= 0) {
-        btlApplyScaledUnitEffectParameter(*(u8 **)arguments, index, *(s32 *)(arguments + 8),
+        btlApplyScaledUnitEffectParameter((BtlUnit *)*(u8 **)arguments, index, *(s32 *)(arguments + 8),
                         *(f32 *)(arguments + 0xC));
     }
     return 1;
@@ -3917,11 +3917,11 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
         if (args->elapsed == 1 && args->duration != 0) {
             entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->partyRecord);
             if (unit->status.flags & 0x20) {
-                btlApplyScaledUnitEffectParameter((u8 *)unit, 0xB,
+                btlApplyScaledUnitEffectParameter(unit, 0xB,
                     btlGetSlotRateKind((u8 *)unit, 0xB), 1.0f);
             } else if (args->transitionMode == 2) {
                 unit->motionId = -1;
-                btlApplyScaledUnitEffectParameter((u8 *)unit, 0xE,
+                btlApplyScaledUnitEffectParameter(unit, 0xE,
                     btlGetSlotRateKind((u8 *)unit, 0xE), 1.0f);
             } else if (args->transitionMode != 3 &&
                        ((unit->status.flags & 0x200) || (entryFlags & 0x200)) &&
@@ -3929,10 +3929,10 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
                        !(unit->partyRecord.status & 0x2000)) {
                 unit->motionId = -1;
                 if (unit->status.flags & 0x1000) {
-                    btlApplyScaledUnitEffectParameter((u8 *)unit, 0x10,
+                    btlApplyScaledUnitEffectParameter(unit, 0x10,
                         btlGetSlotRateKind((u8 *)unit, 0x10), 1.0f);
                 } else {
-                    btlApplyScaledUnitEffectParameter((u8 *)unit, 0x11,
+                    btlApplyScaledUnitEffectParameter(unit, 0x11,
                         btlGetSlotRateKind((u8 *)unit, 0x11), 1.0f);
                 }
             }
@@ -4629,7 +4629,7 @@ u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *task) {
                 parameter = runtime->chooseMotion(unit, 13, 0);
             }
             if (parameter != -1) {
-                btlApplyScaledUnitEffectParameter((u8 *)unit, parameter, 0, 1.0f);
+                btlApplyScaledUnitEffectParameter(unit, parameter, 0, 1.0f);
                 return 1;
             }
         }
@@ -4914,7 +4914,7 @@ void btlUpdateActiveActorModelState(void) {
                 parameter = runtime->chooseMotion(unit, 1, 0);
             }
             if (unit->motionId != parameter && parameter != -1) {
-                btlApplyScaledUnitEffectParameter((u8 *)unit, parameter, 0, 1.0f);
+                btlApplyScaledUnitEffectParameter(unit, parameter, 0, 1.0f);
             } else {
                 frame = (s32)btlGetUnitModelCurrentFrame(unit);
                 if (frame >= status->model) {
