@@ -571,13 +571,13 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
                         evtPrintDeveloperConsoleMessage(D_0042D2A8, sdfPacGetResrcFileName((SdfPacStreamPacketHeader *)node));
                         if (task->variant == 1) {
                             task->spriteSlots[slotIndex + 1] =
-                                (struct EffectSlotSet *)(u32)effCreateResourceSlotSetFromAllocation(node->resourceHandle, 0);
+                                effCreateResourceSlotSetFromAllocation(node->resourceHandle, 0);
                         } else if (task->variant == 2) {
                             task->spriteSlots[slotIndex + 9] =
-                                (struct EffectSlotSet *)(u32)effCreateResourceSlotSetFromAllocation(node->resourceHandle, 0);
+                                effCreateResourceSlotSetFromAllocation(node->resourceHandle, 0);
                         } else if (task->variant == 3) {
                             task->spriteSlots[slotIndex + 17] =
-                                (struct EffectSlotSet *)(u32)effCreateResourceSlotSetFromAllocation(node->resourceHandle, 0);
+                                effCreateResourceSlotSetFromAllocation(node->resourceHandle, 0);
                         }
                         sdfMemFreeDirect(node->resourceHandle);
                     }
