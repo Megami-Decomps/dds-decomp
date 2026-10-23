@@ -623,7 +623,7 @@ typedef struct EffTemplatePacketList {
             f32 unk168;
         };
     };
-    s32 recordList; /* 0x16C: start of the three-word packet records */
+    s32 *recordList; /* 0x16C: start of the three-word packet records */
     s32 recordsPerPacket; /* 0x170 */
     struct sdfMemHandle_t *listAllocation; /* 0x174: allocation descriptor */
     void *auxiliaryData; /* 0x178: optional 16 bytes per packet */

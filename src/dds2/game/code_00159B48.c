@@ -3385,7 +3385,7 @@ s32 dds3Particle_SphereSpiral2Create(EffTemplatePacketList *source) {
         addr = (s32 *)sdfMemLock(((EffTemplatePacketList *)copy)->listAllocation);
         i = 0;
         base = (s32)addr;
-        ((EffTemplatePacketList *)copy)->recordList = base;
+        ((EffTemplatePacketList *)copy)->recordList = addr;
         base = base + listBytes;
         if (count > 0) {
             step = perRecord * 16;
