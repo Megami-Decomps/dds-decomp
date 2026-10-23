@@ -704,7 +704,7 @@ s32 effUpdateTransformOpacityMode(dds3Basic_t *object) {
 
 extern void rsetOtOfs(s32 index);
 extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
-extern u32 fldPlayerObject;
+extern dds3Basic_t *fldPlayerObject;
 
 /* Submit the normal pass and the opacity-mode pass, temporarily neutralizing
  * the tint while the player is hidden. */
@@ -729,7 +729,7 @@ s32 effObjSubmitTransformOpacityPasses(dds3Basic_t *object) {
         if (opacityMode < EFFECT_OPACITY_MODE_ALPHA_FADE_END) {
             if (opacityMode >= EFFECT_OPACITY_MODE_ALPHA_FADE_START) {
                 if (object->color != EFFECT_OPACITY_COLOR_NEUTRAL) {
-                    if (dds3ObjectBaseCheckFlag((dds3Basic_t *)fldPlayerObject, 1)) {
+                    if (dds3ObjectBaseCheckFlag(fldPlayerObject, 1)) {
                         u32 savedColor = object->color;
 
                         object->color = EFFECT_OPACITY_COLOR_NEUTRAL;

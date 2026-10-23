@@ -2253,7 +2253,7 @@ INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAB2C);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAB30);
 
-INCLUDE_SDATA(const s32, "game/code_0011D3A0", fldPlayerObject);
+INCLUDE_SDATA(dds3Basic_t *, "game/code_0011D3A0", fldPlayerObject);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", fldPlayerModelContext);
 
