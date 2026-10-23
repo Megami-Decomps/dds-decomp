@@ -93,11 +93,18 @@ extern SdfPoolNode *btlUnitTransparencySurfaces[];
 
 typedef struct BtlUnit BtlUnit;
 
-typedef struct FxTask {
-    u8 pad0[0x10];
-    s32 unk10;
+typedef struct BtlUnitLightDirectionTaskArgs {
+    f32 direction[4];
+    s32 directionMode;
     BtlUnit *unit;
-} FxTask;
+} BtlUnitLightDirectionTaskArgs;
+
+typedef char BtlUnitLightDirectionTaskArgs_size_check[
+    sizeof(BtlUnitLightDirectionTaskArgs) == 0x18 ? 1 : -1];
+typedef char BtlUnitLightDirectionTaskArgs_directionMode_offset_check[
+    (u32)&((BtlUnitLightDirectionTaskArgs *)0)->directionMode == 0x10 ? 1 : -1];
+typedef char BtlUnitLightDirectionTaskArgs_unit_offset_check[
+    (u32)&((BtlUnitLightDirectionTaskArgs *)0)->unit == 0x14 ? 1 : -1];
 
 extern s128 btlDefaultUnitBodyOffset;
 
@@ -4159,25 +4166,25 @@ BtlRuntimeTask *btlCreateUnitTask0F(BtlUnit *unit, s32 firstColor, s32 secondCol
     return task;
 }
 
-void btlPrepareUnitStatusFxOnStart(s32 taskArgs) {
-    if ((((FxTask *)taskArgs)->unit->status.flags & 2) != 0) {
-        evtUnitLightOn(((FxTask *)taskArgs)->unit->ext);
+void btlPrepareUnitStatusFxOnStart(BtlUnitLightDirectionTaskArgs *task) {
+    if ((task->unit->status.flags & 2) != 0) {
+        evtUnitLightOn(task->unit->ext);
         return;
     }
 }
 
-s32 btlApplyUnitVectorFxWhenLoaded(FxTask *task) {
+s32 btlApplyUnitVectorFxWhenLoaded(BtlUnitLightDirectionTaskArgs *task) {
     BtlUnit *unit = task->unit;
     if (unit->status.flags & 2) {
         VU0_LOAD_VF_MEMORY(vf10, task);
-        evtSetUnitLightDir(unit->ext, task->unk10);
+        evtSetUnitLightDir(unit->ext, task->directionMode);
     }
     return 1;
 }
 
-BtlRuntimeTask *btlCreateUnitTask10(BtlUnit *unit, f32 *vec, s32 option) {
+BtlRuntimeTask *btlCreateUnitTask10(BtlUnit *unit, f32 *direction, s32 directionMode) {
     BtlRuntimeTask *task = btlAllocTask(0x18);
-    FxTask *args;
+    BtlUnitLightDirectionTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x10;
@@ -4186,8 +4193,8 @@ BtlRuntimeTask *btlCreateUnitTask10(BtlUnit *unit, f32 *vec, s32 option) {
     task->callback = btlApplyUnitVectorFxWhenLoaded;
     args = btlGetTaskArguments(task);
     args->unit = unit;
-    args->unk10 = option;
-    PCP_COPY_VECTOR(args, vec);
+    args->directionMode = directionMode;
+    PCP_COPY_VECTOR(args->direction, direction);
     return task;
 }
 
