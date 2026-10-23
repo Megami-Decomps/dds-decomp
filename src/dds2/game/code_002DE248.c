@@ -17817,13 +17817,13 @@ INCLUDE_SDATA(const s32, "game/code_002DE248", D_0043875A);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_0043875B);
 
-INCLUDE_SDATA(const s32, "game/code_002DE248", effResourceBankEntries);
+INCLUDE_SDATA(struct BtlResourceEntryList * const, "game/code_002DE248", effResourceBankEntries);
 
-INCLUDE_SDATA(const s32, "game/code_002DE248", effResourceBankDescriptor);
+INCLUDE_SDATA(struct BtlResourceDescriptor * const, "game/code_002DE248", effResourceBankDescriptor);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", effFileQueueNameRecord);
 
-INCLUDE_SDATA(const s32, "game/code_002DE248", effQueuedResourceNameRecord);
+INCLUDE_SDATA(struct BtlResourceNameRecord * const, "game/code_002DE248", effQueuedResourceNameRecord);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", effColorEditRgbMenuOpen);
 
