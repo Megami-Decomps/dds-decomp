@@ -9,8 +9,10 @@ struct datUnitWork_t;
  * State 0 reads two 0x14-byte slots starting at stateZeroFirstOperation. */
 typedef struct PrfDds1RequirementSlot {
     s32 operation;
-    u8 unknown04[4];
-    s32 sourceValue;
+    u8 levelThreshold;
+    u8 profileThreshold;
+    u8 reserved06[2];
+    s32 minimum;
     u8 profileIds[8];
 } PrfDds1RequirementSlot;
 
@@ -28,7 +30,9 @@ PrfDds1RequirementRecord *prfReqGetEntryRecord(u16 index);
 
 typedef char PrfDds1RequirementSlot_size[(sizeof(PrfDds1RequirementSlot) == 0x14) ? 1 : -1];
 typedef char PrfDds1RequirementSlot_status[((u32)&((PrfDds1RequirementSlot *)0)->operation == 0) ? 1 : -1];
-typedef char PrfDds1RequirementSlot_value[((u32)&((PrfDds1RequirementSlot *)0)->sourceValue == 8) ? 1 : -1];
+typedef char PrfDds1RequirementSlot_level[((u32)&((PrfDds1RequirementSlot *)0)->levelThreshold == 4) ? 1 : -1];
+typedef char PrfDds1RequirementSlot_profile[((u32)&((PrfDds1RequirementSlot *)0)->profileThreshold == 5) ? 1 : -1];
+typedef char PrfDds1RequirementSlot_minimum[((u32)&((PrfDds1RequirementSlot *)0)->minimum == 8) ? 1 : -1];
 typedef char PrfDds1RequirementSlot_ids[((u32)&((PrfDds1RequirementSlot *)0)->profileIds == 0xC) ? 1 : -1];
 typedef char PrfDds1RequirementRecord_size[(sizeof(PrfDds1RequirementRecord) == 0x54) ? 1 : -1];
 typedef char PrfDds1RequirementRecord_flags04[((u32)&((PrfDds1RequirementRecord *)0)->stateZeroFirstOperation == 4) ? 1 : -1];

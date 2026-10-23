@@ -217,7 +217,7 @@ s32 mnuGetMantraSourceValue(u16 profileId) {
     } else {
         return defaultValue;
     }
-    return sourceEntry->slots[slotIndex].sourceValue;
+    return sourceEntry->slots[slotIndex].minimum;
 }
 
 /* Populate a progress record from a party row's selected profile and its current/cap values. */
