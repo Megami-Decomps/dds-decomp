@@ -6,7 +6,7 @@
 struct BtlUnit;
 
 #ifdef VERSION_DDS1
-s32 btlSetActorEffectParameter(struct BtlUnit *unit, s32 mode);
+s8 btlSetActorEffectParameter(struct BtlUnit *unit, s32 mode);
 #else
 s8 btlSetActorEffectParameter(struct BtlUnit *unit, s32 mode);
 #endif
