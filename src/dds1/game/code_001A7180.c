@@ -83,7 +83,7 @@ extern s32 D_00358510[];
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern s32 btlCollectAvailableOptionSkills(s32, s32 *);
+extern s32 btlCollectAvailableOptionSkills(BtlUnit *, s32 *);
 
 
 extern s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *);
@@ -872,8 +872,8 @@ s32 btlCanSpawnAnotherEnemy(BtlUnit *requester) {
 }
 
 /* Count eligible option-skill IDs; a non-NULL output receives those IDs. */
-s32 btlCollectAvailableOptionSkills(s32 actorAddress, s32 *choices) {
-    u16 *ids = (u16 *)(actorAddress + 0x142);
+s32 btlCollectAvailableOptionSkills(BtlUnit *actor, s32 *choices) {
+    u16 *ids = actor->partyRecord.effectData;
     s32 count = 0;
     u32 i;
 
@@ -891,7 +891,7 @@ s32 btlCollectAvailableOptionSkills(s32 actorAddress, s32 *choices) {
                 continue;
             }
         }
-        if (btlGetCommandFailureReason((BtlUnit *)actorAddress, id) != 0) {
+        if (btlGetCommandFailureReason(actor, id) != 0) {
             continue;
         }
         if (choices != NULL) {
@@ -902,16 +902,16 @@ s32 btlCollectAvailableOptionSkills(s32 actorAddress, s32 *choices) {
     return count;
 }
 
-u8 btlHasAvailableOption(u32 actorAddress) {
+u8 btlHasAvailableOption(BtlUnit *actor) {
     s32 availableOptionCount;
 
-    availableOptionCount = btlCollectAvailableOptionSkills(actorAddress, 0);
+    availableOptionCount = btlCollectAvailableOptionSkills(actor, 0);
     return availableOptionCount != 0;
 }
 
-s32 btlChooseRandomAvailableOption(s32 object) {
+s32 btlChooseRandomAvailableOption(BtlUnit *actor) {
     s32 choices[24];
-    s32 count = btlCollectAvailableOptionSkills(object, choices);
+    s32 count = btlCollectAvailableOptionSkills(actor, choices);
     if (count != 0) {
         return choices[dds3GetRandIntA(0, count)];
     }

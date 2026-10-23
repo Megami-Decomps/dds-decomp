@@ -56,7 +56,7 @@ extern s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *actor);
 
 extern s32 btlGetCommandFailureReason(BtlUnit *, s32);
 
-extern u8 btlHasAvailableOption(u32 actorAddress);
+extern u8 btlHasAvailableOption(BtlUnit *actor);
 
 extern s32 btlMatchesActorEntryCodeCondition(BtlUnit *actor, s32 conditionIndex);
 
@@ -966,10 +966,10 @@ s32 btlIsUnitStatAtOrBelowRate(BtlUnit *unit, s32 percentage) {
 }
 
 /* Normalize option-skill availability. */
-u8 btlQueryActorOptionAvailability(u32 actorAddress) {
+u8 btlQueryActorOptionAvailability(BtlUnit *actor) {
     s32 result;
 
-    result = btlHasAvailableOption(actorAddress);
+    result = btlHasAvailableOption(actor);
     return result != 0;
 }
 

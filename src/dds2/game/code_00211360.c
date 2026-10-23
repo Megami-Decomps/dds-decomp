@@ -71,7 +71,7 @@ extern s32 btlUnitMatchesEntryCodeCondition(BtlUnit *, s32, s8);
 
 extern s32 btlMatchActorEntryCode(BtlUnit *, s32);
 
-extern u8 btlHasAvailableOption(u32);
+extern u8 btlHasAvailableOption(BtlUnit *);
 
 extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
@@ -1072,10 +1072,10 @@ s32 btlUnitStatAtLeast(BtlUnit *unit, u32 limit) {
 }
 
 /* Normalize the actor's option-skill availability to a byte boolean. */
-u8 btlQueryActorOptionAvailability(u32 unitAddress) {
+u8 btlQueryActorOptionAvailability(BtlUnit *unit) {
     s32 result;
 
-    result = btlHasAvailableOption(unitAddress);
+    result = btlHasAvailableOption(unit);
     return result != 0;
 }
 
