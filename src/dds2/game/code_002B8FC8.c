@@ -435,7 +435,7 @@ void mnuDrawSlotIcons(s32 x, MenuPageWindow *page);
 
 void mnuDrawSelectedPartySlotMarkers(s32 context, StaffSlots *resources);
 
-void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags);
+void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, const char *text, s32 flags);
 
 void mnuDrawPartySkillAndStatusPanel(datUnitWork_t *entry, MenuPageWindow *page, MenuPanelGroup *packedGroup, MenuSpriteState *spriteState, s32 unused, s32 spriteFlags);
 
