@@ -162,7 +162,8 @@ u32 btlHasMarkedEntry10(u8 *object) {
 extern f32 btlUnitGetTopY(BtlUnit *);
 
 s32 btlCheckActorDistanceLimit(void) {
-    BtlUnit *actor = *(BtlUnit **)((u8 *)btlGetRuntime() + 0x228);
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlUnit *actor = state->units;
 
     while (actor != 0) {
         u32 flags = (u32)actor->status.flags;
@@ -173,7 +174,7 @@ s32 btlCheckActorDistanceLimit(void) {
                 }
             }
         }
-        actor = *(BtlUnit **)((u8 *)actor + 0x344);
+        actor = actor->next;
     }
     return 1;
 }
