@@ -506,17 +506,17 @@ MnuSectionModelWork *mnuCreateSectionModelWork(s32 listCount, s32 *nodeCounts) {
     s32 listBytes = listCount * sizeof(MnuNodeList);
     s32 allocationSize = listBytes + sizeof(MnuSectionModelWork);
     s32 i;
-    u32 handle;
+    struct sdfMemHandle_t *allocation;
     MnuSectionModelWork *work;
     MnuNodeList *list;
     u8 *records;
 
     for (i = 0; i < listCount; i++) allocationSize += nodeCounts[i] * sizeof(MnuModelNode);
     evtPrintDeveloperConsoleMessage(D_0042DAE8, allocationSize);
-    handle = (u32)sdfMemAllocDirect(allocationSize);
-    work = (MnuSectionModelWork *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)handle);
+    allocation = sdfMemAllocDirect(allocationSize);
+    work = (MnuSectionModelWork *)sdfMemGetPtr(allocation);
     memset(work, 0, allocationSize);
-    work->allocation = (struct sdfMemHandle_t *)handle;
+    work->allocation = allocation;
     work->count = listCount;
     work->groups = (MnuNodeList *)(work + 1);
     list = work->groups;
