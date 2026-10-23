@@ -786,7 +786,7 @@ evtUnitHandle_t *evtCreateUnitTransitionWork(dds3Basic_t *effObj, dds3ModelHandl
     work->transitionMotionScale = 1.0f;
     work->effObj = effObj;
     work->owner = owner;
-    work->unkC0 = 10;
+    work->motionBlendDurationFrames = 10;
     EVT_UNIT_MOTION_SETUP(work)->endFrame = 10;
     work->motionBlendLeadFrames = 0;
     EVT_UNIT_MOTION_SETUP(work)->startFrame = 0;
@@ -852,7 +852,7 @@ void evtSetWaitMotionSpeed(evtUnitHandle_t *unit, f32 transitionMotionScale) {
 
 void evtSetWaitHokanFrame(evtUnitHandle_t *unit, s32 firstParameter, s32 secondParameter) {
     unit->motionBlendLeadFrames = firstParameter;
-    unit->unkC0 = secondParameter;
+    unit->motionBlendDurationFrames = secondParameter;
 }
 
 s32 evtCheckUnitWait(evtUnitHandle_t *unit) {
@@ -1372,7 +1372,7 @@ s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
                 if (model->first->state == 5) {
                     mdlSmoothLoopMotion(model, 0, unit->pendingMotionIndex,
                                         (f32)unit->motionBlendLeadFrames,
-                                        (f32)unit->unkC0);
+                                        (f32)unit->motionBlendDurationFrames);
                     model->first->frameStep = unit->transitionMotionScale;
                     unit->motionTicks = 0;
                 }
@@ -1380,7 +1380,7 @@ s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
                 if (model->first->state == 5) {
                     mdlSmoothLoopMotion(model, 0, currentMotion,
                                         (f32)unit->motionBlendLeadFrames,
-                                        (f32)unit->unkC0);
+                                        (f32)unit->motionBlendDurationFrames);
                     model->first->frameStep = unit->transitionMotionScale;
                     unit->motionTicks = 0;
                 }
@@ -1455,7 +1455,7 @@ s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
             if (unit->pendingMotionIndex != currentMotion) {
                 mdlSmoothLoopMotion(model, 0, unit->pendingMotionIndex,
                                     (f32)unit->motionBlendLeadFrames,
-                                    (f32)unit->unkC0);
+                                    (f32)unit->motionBlendDurationFrames);
                 model->first->frameStep = unit->transitionMotionScale;
                 unit->motionTicks = 0;
             }
@@ -2222,7 +2222,7 @@ u32 evtCommand_MODEL_WAIT_HOKAN(void) {
         return 1;
     }
     unit->motionBlendLeadFrames = scrGetIntPara(1);
-    unit->unkC0 = scrGetIntPara(2);
+    unit->motionBlendDurationFrames = scrGetIntPara(2);
     return 1;
 }
 
