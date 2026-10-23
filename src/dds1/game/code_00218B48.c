@@ -89,7 +89,7 @@ typedef struct MdlViewState {
     dds3ProcessID_t *unk00;
     dds3ProcessID_t *viewerTask;
     s8 exitCleanupStarted; /* 0x08: one-shot guard for viewer task/resource teardown. */
-    s8 unk09;
+    s8 selectionHighlightPhase;
     s8 taskPhase; /* 0x0A: one-based index into D_00367A40 */
     s8 unk0B;
     s8 unitStepMode;  /* 0x0C: toggled by the step button (D_003D24510[0x23]) */
@@ -1177,7 +1177,7 @@ s32 mdlUpdateViewerCursor(s16 *cursor, s32 entryCount) {
     }
     if (changed != 0) {
         *cursor = selectedIndex;
-        mdlViewerState.unk09 = 0;
+        mdlViewerState.selectionHighlightPhase = 0;
         return 1;
     }
     return 0;
@@ -1251,7 +1251,7 @@ s32 mdlUpdateViewerCursorWithPageStep(s16 *cursor, s32 entryCount, s32 pageStep)
     }
     if (changed != 0) {
         *cursor = selectedIndex;
-        mdlViewerState.unk09 = 0;
+        mdlViewerState.selectionHighlightPhase = 0;
         return 1;
     }
     return 0;
@@ -1361,7 +1361,7 @@ void mdlDrawViewerOptionLabels(void) {
     label = D_003679D0;
     i = 0;
     do {
-        s32 style = (i == mdlViewerState.selectedTaskIndex && mdlViewerState.unk09 < 0x14) ? 4 : 0;
+        s32 style = (i == mdlViewerState.selectedTaskIndex && mdlViewerState.selectionHighlightPhase < 0x14) ? 4 : 0;
         s32 xOffset;
         u32 row;
         u32 packet;
@@ -1631,7 +1631,7 @@ void mdlDrawViewerAssetSelection(void) {
     sdfDrawTagLink(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktInit(&packet, 0x8440, panelTop + mdlViewerState.selectedNodeId * 0x60,
-               0xFF0080, mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 0 ? 4 : 0);
+               0xFF0080, mdlViewerState.selectionHighlightPhase < 0x14 && mdlViewerState.selectionCursor == 0 ? 4 : 0);
     formatted = sdfDevPrintfEx(&packet, D_003BBC30, mdlViewerState.selectedResourceGroup + 0x30);
     sdfDrawTagLink(mdlViewerState.packetList, (u32)formatted);
 
@@ -1640,7 +1640,7 @@ void mdlDrawViewerAssetSelection(void) {
     sdfDrawTagLink(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktSetCmd(&packet,
-                 mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 1 ? 4 : 0);
+                 mdlViewerState.selectionHighlightPhase < 0x14 && mdlViewerState.selectionCursor == 1 ? 4 : 0);
     if (mdlViewerState.assetDisplayMode == 0) {
         format = D_003BBC40;
     } else {
@@ -1650,12 +1650,12 @@ void mdlDrawViewerAssetSelection(void) {
     sdfDrawTagLink(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktSetCmd(&packet,
-                 mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 3 ? 4 : 0);
+                 mdlViewerState.selectionHighlightPhase < 0x14 && mdlViewerState.selectionCursor == 3 ? 4 : 0);
     formatted = sdfDevPrintfEx(&packet, "    %02d", mdlViewerState.entryHeight);
     sdfDrawTagLink(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktSetCmd(&packet,
-                 mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 4 ? 4 : 0);
+                 mdlViewerState.selectionHighlightPhase < 0x14 && mdlViewerState.selectionCursor == 4 ? 4 : 0);
     formatted = sdfDevPrintfEx(&packet, D_003BBC50, mdlViewerState.entryWidth);
     sdfDrawTagLink(mdlViewerState.packetList, (u32)formatted);
 
@@ -1665,7 +1665,7 @@ void mdlDrawViewerAssetSelection(void) {
         s32 referenceCount = mdlGetNumOfCut(mdlViewerState.resources[0], index);
 
         if (mdlViewerState.selectedNodeId == index) {
-            s32 style = mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 2 ? 4 : 0;
+            s32 style = mdlViewerState.selectionHighlightPhase < 0x14 && mdlViewerState.selectionCursor == 2 ? 4 : 0;
 
             if (referenceCount == 0) {
                 formatted = sdfDevPrintf(
@@ -2183,7 +2183,7 @@ void mdlDrawViewerResourceMenu(void) {
             }
             break;
         }
-        if (mdlViewerState.unk09 < 20 && mdlViewerState.scrollPage == row) {
+        if (mdlViewerState.selectionHighlightPhase < 20 && mdlViewerState.scrollPage == row) {
             style = enabled ? 4 : 12;
         } else {
             style = enabled ? 0 : 8;
@@ -2405,7 +2405,7 @@ void mdlDrawViewerSettings(void) {
             0x7300, y, 0xFF0080, 0, D_00367B60[i],
             enabled[i] == 0 ? D_003BBC90 : D_003BBC98)));
     }
-    if (mdlViewerState.unk09 < 20) {
+    if (mdlViewerState.selectionHighlightPhase < 20) {
         sdfDrawTagLink(packetList, (u32)(sdfDevPrintf(
             0x7240, D_00367B38[mdlViewerState.settingsCursor], 0xFF0080, 0, D_003BBCA0)));
     }
@@ -2761,8 +2761,8 @@ s32 mdlViewer(dds3ProcessID_t *task) {
     s32 lodCount;
     s32 selection;
 
-    mdlViewerState.unk09 += 2;
-    if (mdlViewerState.unk09 == 30) mdlViewerState.unk09 = 0;
+    mdlViewerState.selectionHighlightPhase += 2;
+    if (mdlViewerState.selectionHighlightPhase == 30) mdlViewerState.selectionHighlightPhase = 0;
     if (D_00398636[0] < 0) {
         model = mdlViewerState.resources[0]->inner;
         lodCount = sdfGetLodChunkValue(model);
@@ -2793,7 +2793,7 @@ s32 mdlViewer(dds3ProcessID_t *task) {
                 mdlViewerState.selectedTaskIndex = selection + pageStep;
             }
         } else if (dds3PadButtonState[0x21] < 0) {
-            mdlViewerState.unk09 = 0;
+            mdlViewerState.selectionHighlightPhase = 0;
             mdlViewerState.taskPhase = (u8)mdlViewerState.selectedTaskIndex + 1;
             mdlRestartViewerPhaseTask();
         } else if (dds3PadButtonState[0x22] < 0) {
@@ -3043,7 +3043,7 @@ void mdlInitializeViewerTasksAndResources(void) {
     mdlViewerState.resourceId = 0;
     mdlViewerState.selectedResourceId = 0;
     mdlViewerState.exitCleanupStarted = 0;
-    mdlViewerState.unk09 = 0;
+    mdlViewerState.selectionHighlightPhase = 0;
     mdlViewerState.selectionCursor = 0;
     mdlViewerState.entryHeight = 0;
     mdlViewerState.entryWidth = 0;
