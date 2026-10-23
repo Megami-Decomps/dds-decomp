@@ -2699,7 +2699,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     s32 index;
     s32 selected;
     s32 mode;
-    u8 *rates;
+    BtlActorStatusRecord *statusTable;
     f32 rate;
     f32 speed;
     u32 color;
@@ -2758,8 +2758,9 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         unit->status.flags = (u32)unit->status.flags & (0x7FFFFFFF);
         unit->status.flags = (u32)unit->status.flags & (~0x2000);
     }
-    rates = (u8 *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species) + 0x14;
-    rate = *(f32 *)(rates + index * 20 + 0x20);
+    statusTable = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+        unit->resourceKind, unit->species);
+    rate = statusTable->motions[index].alphaFrameScale;
     chooseMotion = context->chooseMotion;
     if (chooseMotion != 0) {
         selected = chooseMotion(unit, index, 1);
@@ -2768,7 +2769,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         }
         if (index != selected) {
             index = selected;
-            rate = *(f32 *)(rates + index * 20 + 0x20);
+            rate = statusTable->motions[index].alphaFrameScale;
         }
     }
     unit->effectScale = rate;
