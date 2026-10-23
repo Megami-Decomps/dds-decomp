@@ -238,7 +238,7 @@ extern s32 fldGetActorMotionEntry(s32);
 
 extern s32 fldDoor_GetElvTbl(s32);
 
-extern u32 fldGetSelectedActorMotionId(void);
+extern s32 fldGetSelectedActorMotionId(void);
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 
