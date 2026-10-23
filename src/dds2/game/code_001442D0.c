@@ -3287,7 +3287,7 @@ extern u32 D_004362D8;
 
 extern EffNode *D_004362DC;
 
-extern u32 fldAreaDamageEffect;
+extern struct EffNode *fldAreaDamageEffect;
 
 extern s32 fldAreaDamageEffectPlaced;
 
@@ -3297,11 +3297,11 @@ void fldInitializeMenuResources(void) {
     if (fldGlobalBase.area < 200) {
         D_004362DC = dds3EffectLoad((EffNodeDescriptor *)D_004362D8);
         if (fldGlobalBase.area == 26) {
-            fldAreaDamageEffect = (u32)dds3EffectLoad((EffNodeDescriptor *)(u32)D_00438EE0);
+            fldAreaDamageEffect = dds3EffectLoad((EffNodeDescriptor *)(u32)D_00438EE0);
         } else if (fldGlobalBase.area == 29) {
-            fldAreaDamageEffect = (u32)dds3EffectLoad((EffNodeDescriptor *)(u32)D_00438EE8);
+            fldAreaDamageEffect = dds3EffectLoad((EffNodeDescriptor *)(u32)D_00438EE8);
         } else if (fldGlobalBase.area == 30) {
-            fldAreaDamageEffect = (u32)dds3EffectLoad((EffNodeDescriptor *)(u32)D_00438EF0);
+            fldAreaDamageEffect = dds3EffectLoad((EffNodeDescriptor *)(u32)D_00438EF0);
         } else {
             fldAreaDamageEffect = 0;
         }
@@ -3319,7 +3319,7 @@ extern EffNode *D_004362E8;
 
 extern EffNode *D_004362F4;
 
-extern u32 fldAreaDamageEffect;
+extern struct EffNode *fldAreaDamageEffect;
 
 /* Releases retained field texture references and menu effects. Each reference
  * is cleared immediately so repeated cleanup does not release it twice. */
@@ -3353,7 +3353,7 @@ void fldFreeSceneResources(void) {
         D_004362F4 = 0;
     }
     if (fldAreaDamageEffect != 0) {
-        dds3EffectDelete((EffNode *)(u32)fldAreaDamageEffect);
+        dds3EffectDelete(fldAreaDamageEffect);
         fldAreaDamageEffect = 0;
     }
 }
@@ -3742,8 +3742,8 @@ s32 fldPlaceAreaDamageEffect(f32 x, f32 y, f32 z) {
     pos[1] = y;
     pos[2] = z;
     pos[3] = 1.0f;
-    dds3EffectReset((EffNode *)(u32)fldAreaDamageEffect);
-    effCopyVectorToNodeInstance((EffNode *)(u32)fldAreaDamageEffect, pos);
+    dds3EffectReset(fldAreaDamageEffect);
+    effCopyVectorToNodeInstance(fldAreaDamageEffect, pos);
     fldAreaDamageEffectPlaced = 1;
     return 1;
 }
@@ -6920,7 +6920,7 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", D_004362C4);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", fldNpcModelTable);
 
-INCLUDE_SDATA(const s32, "game/code_001442D0", fldAreaDamageEffect);
+INCLUDE_SDATA(struct EffNode * const, "game/code_001442D0", fldAreaDamageEffect);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", fldAreaDamageEffectPlaced);
 
