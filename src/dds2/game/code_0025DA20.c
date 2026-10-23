@@ -960,7 +960,7 @@ void mnuEnterCampSceneMenuState(EvtRuntime *scene) {
 
 extern s32 dds3AllocRenderTexture(u16 width, u16 height, f32 value);
 extern void mnuShopCreateDescriptorSurface(EvtRuntime *scene);
-extern void mnuShopSubmitDescriptor(u8 *work);
+extern void mnuShopSubmitDescriptor(EvtRuntime *scene);
 extern void mnuShopQueueAuxiliaryTexture(EvtRuntime *scene);
 
 /* Stages 1, 3, 4 and 5 fall through; stage 0 stops. All other stages,
@@ -976,7 +976,7 @@ void mnuAdvanceShopMenuState(EvtRuntime *scene) {
         mnuShopCreateDescriptorSurface(scene);
         scene->menuState = scene->menuState + 1;
     case 4:
-        mnuShopSubmitDescriptor((u8 *)scene);
+        mnuShopSubmitDescriptor(scene);
         scene->menuState = scene->menuState + 1;
     case 5:
         if (scene->shopFlag == 1) {
@@ -1014,15 +1014,15 @@ void mnuShopCreateDescriptorSurface(EvtRuntime *scene) {
     D_00380708.append(&D_00380708, surface);
 }
 
-void mnuShopSubmitDescriptor(u8 *scene) {
+void mnuShopSubmitDescriptor(EvtRuntime *scene) {
     sdfDrawTag_t *drawPacket;
 
-    if (((EvtRuntime *)scene)->pendingFrameBuffer != NULL) {
+    if (scene->pendingFrameBuffer != NULL) {
         drawPacket = sdfPrimAllocDrawTag(0);
         sdfLinkLoadImage(drawPacket,
                                   dds3RenderTexture->primaryResource, 0, 0,
                                   CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT,
-                                  (s32)((EvtRuntime *)scene)->pendingFrameBuffer, 0);
+                                  (s32)scene->pendingFrameBuffer, 0);
         D_00380708.append(&D_00380708, drawPacket);
     }
 }
