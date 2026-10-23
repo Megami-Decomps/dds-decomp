@@ -2717,7 +2717,7 @@ interpolate:
     }
 }
 
-extern s32 fldEffectTextureLoadHandles[];
+extern struct sdfMemHandle_t *fldEffectTextureLoadHandles[];
 
 extern s32 fldEffectTextureData[];
 
@@ -2734,13 +2734,13 @@ void fldLoadFieldEffectTextureSlots(void) {
 
     memcpy(names, D_003A06B0, sizeof(names));
     for (i = 0; i < 4; i++) {
-        fldEffectTextureLoadHandles[i] = (s32)sdfDevLoadFileEx(names[i], (u32 *)&fldEffectTextureData[i], 0);
+        fldEffectTextureLoadHandles[i] = sdfDevLoadFileEx(names[i], (u32 *)&fldEffectTextureData[i], 0);
         fldEffectTextureNodes[i] = (s32)effCreateNodeFromParameter(fldEffectTextureData[i]);
         D_0034C8A0[i] = 0;
     }
 }
 
-extern s32 fldEffectTextureLoadHandles[4];
+extern struct sdfMemHandle_t *fldEffectTextureLoadHandles[4];
 
 extern s32 fldEffectTextureData[4];
 
@@ -2753,8 +2753,8 @@ void fldReleaseTextureSlots(void) {
         if (fldEffectTextureNodes[i] != 0) {
             dds3EffectDelete((EffNode *)(u32)fldEffectTextureNodes[i]);
             fldEffectTextureNodes[i] = 0;
-            sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldEffectTextureLoadHandles[i]);
-            fldEffectTextureLoadHandles[i] = 0;
+            sdfMemFreeDelayedDirect(fldEffectTextureLoadHandles[i]);
+            fldEffectTextureLoadHandles[i] = NULL;
             fldEffectTextureData[i] = 0;
         }
     }

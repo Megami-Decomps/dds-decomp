@@ -419,13 +419,13 @@ extern void p2sdLoadSMGFile(s32);
 
 extern s32 fldAutoMap_GetFloor(s32 scene, u32 index);
 
-extern s32 fldEffectTextureLoadHandles[];
+extern struct sdfMemHandle_t *fldEffectTextureLoadHandles[];
 
 extern s32 fldEffectTextureData[];
 
 extern s32 fldEffectTextureNodes[];
 
-extern s32 fldEffectTextureLoadHandles[4];
+extern struct sdfMemHandle_t *fldEffectTextureLoadHandles[4];
 
 extern s32 fldEffectTextureData[4];
 
@@ -3073,8 +3073,8 @@ void fldReleaseTextureSlots(void) {
         if (fldEffectTextureNodes[i] != 0) {
             dds3EffectDelete((EffNode *)(u32)fldEffectTextureNodes[i]);
             fldEffectTextureNodes[i] = 0;
-            sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldEffectTextureLoadHandles[i]);
-            fldEffectTextureLoadHandles[i] = 0;
+            sdfMemFreeDelayedDirect(fldEffectTextureLoadHandles[i]);
+            fldEffectTextureLoadHandles[i] = NULL;
             fldEffectTextureData[i] = 0;
         }
     }
