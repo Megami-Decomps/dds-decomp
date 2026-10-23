@@ -521,12 +521,12 @@ s32 evtOpReadDisplayValue(void) {
  * DDS2 passes the size-output address as an integer, unlike DDS1's pointer slot. */
 s32 fclLoadTexture(u32 path) {
     u32 info[2];
-    u32 allocation;
+    struct sdfMemHandle_t *allocation;
     s32 texture;
 
     allocation = sdfDevLoadFileEx((const char *)(u32)path, &info[0], (u32 *)&info[1]);
     texture = (s32)sdfTexSet((SdfTextureFileHeader *)(info[0]));
-    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(allocation));
+    sdfMemFreeDirect(allocation);
     return texture;
 }
 
