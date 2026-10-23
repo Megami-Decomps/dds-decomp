@@ -121,11 +121,11 @@ typedef struct FldAreaWork {
     f32 targetAngle;
 #ifdef VERSION_DDS1
     f32 previousCameraModelFrame;
-    f32 unk170;
+    f32 cameraSupportHeightDelta;
     f32 unk174;
 #else
     f32 previousCameraModelFrame;
-    f32 unk17C;
+    f32 cameraSupportHeightDelta;
     f32 unk180;
 #endif
     s32 positionMode;
