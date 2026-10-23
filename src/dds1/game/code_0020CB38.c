@@ -338,7 +338,7 @@ void btlInitializeBossUnitScaleTransition(BtlUnit *unit) {
 
 extern s8 btlGetActorIndexedSignedValue(BtlUnit *, s32);
 extern s32 btlMapCommandToSkill(u32);
-extern s32 btlCreateReferencedBattleEffectTask(u32, u32, u8 *, u16);
+extern BtlRuntimeTask *btlCreateReferencedBattleEffectTask(struct SoundResourceNode *, BtlUnit *, BtlUnit *, u16);
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 
 void btlStartPairedActorCommandEffect(BtlTask *task, s32 unusedCommand, BtlUnit *supplied,
@@ -379,8 +379,8 @@ void btlStartPairedActorCommandEffect(BtlTask *task, s32 unusedCommand, BtlUnit 
         return;
     }
 
-    created = (BtlRuntimeTask *)btlCreateReferencedBattleEffectTask(
-        (u32)state->resources[species - 0x12A], (u32)unit, (u8 *)supplied, 0);
+    created = btlCreateReferencedBattleEffectTask(
+        state->resources[species - 0x12A], unit, supplied, 0);
     switch (condition) {
     case -1:
     case 2:
