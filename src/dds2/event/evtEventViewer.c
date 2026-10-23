@@ -556,14 +556,12 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *track, EvtRunti
 }
 
 void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer) {
-    s32 resource;
-    s32 *slot;
+    dds3Basic_t *object;
 
-    slot = (s32 *)(index * 4 + (s32)viewer + 0x203c);
-    resource = *slot;
-    if (resource != 0) {
-        dds3DeleteSceneBasicData((struct dds3Basic_t *)resource);
-        *slot = 0;
+    object = viewer->objects[index];
+    if (object != NULL) {
+        dds3DeleteSceneBasicData(object);
+        viewer->objects[index] = NULL;
     }
 }
 
