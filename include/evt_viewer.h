@@ -158,8 +158,8 @@ typedef struct EvtRuntime {
     f32 floatValue;
     f32 floatMin;
     f32 floatMax;
-    s32 unk2328;
-    s32 unk232C;
+    s32 lightEditorSelectionIndex;
+    s32 lightEditorEditMode;
     f32 commandMatrix[12];
     f32 savedCommandMatrix[12];
     s32 messageField;
