@@ -2725,7 +2725,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         (((u32)unit->status.flags & 0x200) || (entryFlags & 0x200))) {
         index = 10;
     }
-    if (*(s32 *)((u8 *)unit + 0x2F0) > 0 &&
+    if (unit->selectedEntryIndex > 0 &&
         (((u32)unit->status.flags & 0x200) || (entryFlags & 0x200))) {
         index = 9;
     }
@@ -2759,8 +2759,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         unit->status.flags = (u32)unit->status.flags & (0x7FFFFFFF);
         unit->status.flags = (u32)unit->status.flags & (~0x2000);
     }
-    rates = (u8 *)btlGetSideIndexedActorStatusTable(*(s32 *)((u8 *)unit + 0xC4),
-                                                  *(s32 *)((u8 *)unit + 0xC8)) + 0x14;
+    rates = (u8 *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species) + 0x14;
     rate = *(f32 *)(rates + index * 20 + 0x20);
     chooseMotion = context->chooseMotion;
     if (chooseMotion != 0) {
@@ -2773,20 +2772,20 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
             rate = *(f32 *)(rates + index * 20 + 0x20);
         }
     }
-    *(f32 *)((u8 *)unit + 0x104) = rate;
+    unit->effectScale = rate;
     speed = rate * (30.0f / context->timingRate);
     speed *= context->modelFrameScale;
-    *(s32 *)((u8 *)unit + 0xFC) = index;
+    unit->effectIndex = index;
     evtSetWaitMotion(unit->ext, index);
     evtSetWaitMotionSpeed(unit->ext, speed);
     mode = 1;
     if (index == 11) {
         mode = 2;
     }
-    *(s32 *)((u8 *)unit + 0x100) = mode;
-    if (*(s32 *)((u8 *)unit + 0xEC) != 11 &&
+    unit->effectParameter = mode;
+    if (unit->motionId != 11 &&
         (btlIsActorModeAcceptedByBattleHook(unit) != 0 || index == 11) &&
-        *(s32 *)((u8 *)unit + 0xEC) != index) {
+        unit->motionId != index) {
         btlApplyUnitMotionSelection(unit, index, mode, rate);
     }
 }
@@ -2798,11 +2797,11 @@ s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *object) {
     }
     {
         s32 (*callback)(BtlUnit *) = ((BtlState *)btlGetRuntime())->statusMotionOverride;
-        if (callback != 0 && callback(0) == *(s32 *)((u8 *)object + 0xEC)) {
+        if (callback != 0 && callback(0) == object->motionId) {
             return 1;
         }
     }
-    value = *(s32 *)((u8 *)object + 0xEC);
+    value = object->motionId;
     switch (value) {
     case 0:
     case 2:
@@ -2839,24 +2838,23 @@ s32 btlGetSlotRateKind(BtlUnit *unit, s32 index) {
 }
 
 void btlUpdateUnitEffects(void) {
-    s32 context = (s32)(u32)btlGetRuntime();
-    BtlUnit *object = *(BtlUnit **)(context + 0x228);
+    BtlState *context = btlGetRuntime();
+    BtlUnit *object = context->units;
 
     while (object != 0) {
         if ((u32)object->status.flags & 2) {
-            u8 *resource = (u8 *)btlGetSideIndexedActorStatusTable(*(s32 *)((u8 *)object + 0xC4),
-                                                  *(s32 *)((u8 *)object + 0xC8));
+            u8 *resource =
+                (u8 *)btlGetSideIndexedActorStatusTable(object->resourceKind, object->species);
             dds3ModelHandle_t *model = object->ext->owner;
             s32 node = mdlGetMotionNum(model, 0);
             if (*(s16 *)(resource + node * 20 + 0x30) == 1 &&
                 btlIsActorModeAcceptedByBattleHook(object) == 0) {
                 btlRefreshUnitMotionSelection(object);
-                btlApplyUnitMotionSelection(object, *(s32 *)((u8 *)object + 0xFC),
-                              *(s32 *)((u8 *)object + 0x100),
-                              *(f32 *)((u8 *)object + 0x104));
+                btlApplyUnitMotionSelection(object, object->effectIndex, object->effectParameter,
+                                            object->effectScale);
             }
         }
-        object = *(BtlUnit **)((u8 *)object + 0x344);
+        object = object->next;
     }
 }
 
@@ -3477,16 +3475,16 @@ void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit) {
     if ((flags & 2) == 0) {
         return;
     }
-    if (*(s32 *)((u8 *)unit + 0xEC) != *(s32 *)((u8 *)unit + 0xFC)) {
+    if (unit->motionId != unit->effectIndex) {
         btlRefreshUnitMotionSelection(unit);
-        *(u16 *)((u8 *)unit + 0xF8) = 0;
-        *(u16 *)((u8 *)unit + 0xFA) = 0;
-        btlApplyUnitMotionSelection(unit, *(s32 *)((u8 *)unit + 0xFC),
-                      *(s32 *)((u8 *)unit + 0x100), *(f32 *)((u8 *)unit + 0x104));
+        unit->motionStartFrame = 0;
+        unit->motionEndFrame = 0;
+        btlApplyUnitMotionSelection(unit, unit->effectIndex, unit->effectParameter,
+                                    unit->effectScale);
         flags = (u32)unit->status.flags;
     }
     if ((flags & 0x2000) == 0) {
-        s32 index = *(s32 *)((u8 *)unit + 0xFC);
+        s32 index = unit->effectIndex;
         if (index != 11) {
             mdlLoopMotion(unit->ext->owner, 0, index);
         } else {
