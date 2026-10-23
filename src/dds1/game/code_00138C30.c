@@ -246,7 +246,7 @@ extern u32 D_003BACEC;
 
 extern sdfTexHandle_t *fldMarkerTexture;
 
-extern u32 fldDisplayValues[];
+extern FldFileResource *fldDisplayValues[];
 
 extern s16 D_003C9518[];
 
@@ -319,7 +319,7 @@ extern s32 fldRoomEventPlacementCount;
 
 extern dds3Basic_t *dds3AddEventBasic(s32 key, void *work, const char *name);
 
-extern u32 fldEveHit_AddEveData(u32, dds3Basic_t *);
+extern u32 fldEveHit_AddEveData(FldFileResource *, dds3Basic_t *);
 
 extern s32 fldRegisterRoomObject(FldFileResource *, dds3Basic_t *);
 
@@ -633,7 +633,7 @@ void fldEveHit_End(void) {
         for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
             taskInfo = (FldTaskInfo *)fldRoomResources[slotIndex]->data;
             if (taskInfo->slot >= 0) {
-                task = dds3EventBasicGetResource((dds3Basic_t *)dds3SearchSceneBasic(world, *(u32 *)fldDisplayValues[taskInfo->slot], 0xD));
+                task = dds3EventBasicGetResource((dds3Basic_t *)dds3SearchSceneBasic(world, fldDisplayValues[taskInfo->slot]->id, 0xD));
                 if (scrSearchScriptName(task) != 0) {
                     dds3SceneBasicEndScript(dds3GetActiveScene(), task);
                 }
@@ -642,11 +642,11 @@ void fldEveHit_End(void) {
     }
 }
 
-/* Append a display value and return its index; no capacity check is performed. */
-u32 fldEveHit_AddEveData(u32 value, dds3Basic_t *object) {
+/* Append a file resource for an event task and return its index. */
+u32 fldEveHit_AddEveData(FldFileResource *resource, dds3Basic_t *object) {
     s32 index = D_003BAE28;
 
-    fldDisplayValues[index] = value;
+    fldDisplayValues[index] = resource;
     D_003BAE28 = index + 1;
     return index;
 }
@@ -1005,7 +1005,7 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 radius) {
     object = dds3AddEventBasic(worldKey, D_00330780, D_00330760);
     fldActionRows[index].displayResource.id = worldKey;
     taskIndex = fldEveHit_AddEveData(
-        (u32)&fldActionRows[index].displayResource, object);
+        &fldActionRows[index].displayResource, object);
     fldActionRows[index].prefix.task.shape.radius = radius;
     fldActionRows[index].prefix.task.shape.kind = 0;
     fldActionRows[index].prefix.task.info.unk0 = 1;
@@ -1060,7 +1060,7 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
     }
     fldActionRows[index].displayResource.id = worldKey;
     taskIndex = fldEveHit_AddEveData(
-        (u32)&fldActionRows[index].displayResource, object);
+        &fldActionRows[index].displayResource, object);
     fldActionRows[index].prefix.task.shape.radius = radius;
     fldActionRows[index].prefix.task.shape.kind = 0;
     fldActionRows[index].prefix.task.info.unk0 = 1;

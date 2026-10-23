@@ -724,7 +724,7 @@ extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, s32, s32, s32);
 extern void dds3SetPathBasicSpline(dds3Basic_t *path, u32 value);
 extern dds3Basic_t *dds3AddEventBasic(s32 key, void *work, const char *name);
 extern dds3Basic_t *dds3AddPathBasic(s32 key, void *work, const char *name);
-extern s32 fldEveHit_AddEveData(u32, dds3Basic_t *);
+extern s32 fldEveHit_AddEveData(FldFileResource *, dds3Basic_t *);
 extern s32 fldRegisterRoomObject(FldFileResource *, dds3Basic_t *);
 extern void func_0014D380(s32 mode, u32 pointId, f32 *rotation,
                             f32 x, f32 y, f32 z);
@@ -818,7 +818,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                 }
                 event = spawnResource->data;
                 spawnedObject = dds3AddEventBasic(spawnResource->id, (void *)event->label, spawnResource->name);
-                fldEveHit_AddEveData((u32)spawnResource, spawnedObject);
+                fldEveHit_AddEveData(spawnResource, spawnedObject);
             }
             break;
         case 9:
