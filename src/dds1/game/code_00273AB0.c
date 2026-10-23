@@ -88,11 +88,11 @@ typedef char StaffImageContext_page_list_check[
 extern s32 mnuRefreshStaffBulletItemList(s32 itemToInsert, s32 inventoryItem, void *context);
 
 extern void mnuSelectPage(MenuPageWindow *, s32);
-extern void mnuCreateStaffBulletItemWindow();
+extern void mnuCreateStaffBulletItemWindow(struct StaffDisplayContext *context);
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern void mnuConfigurePartyPanelPage();
-extern void mnuReleaseStaffExtraWindow();
+extern void mnuReleaseStaffExtraWindow(struct StaffDisplayContext *context);
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 
@@ -333,7 +333,7 @@ s32 mnuInitializeStaffValuePage(dds3ProcessID_t *task) {
     s32 index = ((StaffImageContext *)context)->pageWindow.lists[0]->cursor->index;
 
     mnuSelectPage(&((StaffImageContext *)context)->pageWindow, index);
-    mnuCreateStaffBulletItemWindow(context);
+    mnuCreateStaffBulletItemWindow((struct StaffDisplayContext *)context);
     mnuReleaseStaffMenuResources((void *)(context + 0x60));
     mnuSetWindowResource(index, &((StaffImageContext *)context)->pageWindow,
                          ((StaffImageContext *)context)->spriteScene,
@@ -356,7 +356,7 @@ s32 mnuInitializeStaffValuePage(dds3ProcessID_t *task) {
 s32 mnuReleaseStaffValuePageResources(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
 
-    mnuReleaseStaffExtraWindow(context);
+    mnuReleaseStaffExtraWindow((struct StaffDisplayContext *)context);
     mnuConfigurePartyPanelPage(context + 0x15C, 0, 0, 0);
     mnuReleasePageHandlesAndClearSelection((MenuPageWindow *)(context + 0x15C));
     mnuClearEntries(&((StaffImageContext *)context)->pageWindow);
