@@ -352,7 +352,7 @@ s32 itfMesMngInitialize(ItfMesSub *sub) {
     mes->drawSurfaceIndex = 0x53;
     mes->renderValue = 0xFFFFF0;
     mes->panelMode = 0;
-    mes->callbackAddress = 0;
+    mes->entryGlyphCallback = 0;
     InitializeSpeaker(&mes->blk14, 1);
     InitializeMessage(&mes->entryBlock, 1);
     itfInitializeCursorResetState(&mes->blk40);
@@ -943,7 +943,7 @@ void itfMesMngSetDefaultSpeed(s32 window, u8 channelValue) {
 
 /* Store the optional callback address invoked without arguments during glyph building. */
 void itfMesMngSetKutiCallback(s32 window, void (*callback)(void)) {
-    pinst[window].mes->callbackAddress = (u32)callback;
+    pinst[window].mes->entryGlyphCallback = callback;
 }
 
 /* Initialize the fixed window pool, load its texture and register the named
@@ -1204,7 +1204,7 @@ void itfMesBuildEntryGlyph(instanceMes_tag *mes) {
     _FRQ *previousGlyph;
     u32 lipsValue;
     u32 interfaceMask;
-    void (*callback)();
+    void (*callback)(void);
 
     previousGlyph = entryBlock->glyphChain;
     if (previousGlyph != NULL) {
@@ -1233,7 +1233,7 @@ void itfMesBuildEntryGlyph(instanceMes_tag *mes) {
         mes->flags &= 0xFFFEFFFF;
     }
     if (frGetMessageResult(4) != 0) {
-        callback = (void (*)())mes->callbackAddress;
+        callback = mes->entryGlyphCallback;
         if (callback != NULL) {
             callback();
         }
