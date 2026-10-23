@@ -8979,7 +8979,7 @@ s32 sndPollEffectLoad(EffectLoadArgs *args) {
     btlBossDebugPrintf(D_003A4C88, args->name);
     resource = fileGetMemHandle(args->request);
     effect->resourceHandle =
-        sndMixerClone((void *)sdfMemLock(resource));
+        sndMixerClone((SoundMixer *)sdfMemLock(resource));
     sdfMemFreeDirect(resource);
     fileHandleFree(args->request);
     effect->flags = (effect->flags & ~1) | 2;
