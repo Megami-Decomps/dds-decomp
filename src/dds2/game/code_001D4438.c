@@ -71,7 +71,6 @@ extern s32 btlGetTrackedTaskHandle(s32);
 extern s32 btlIsNamedBattleTaskRegistered(void);
 extern s32 btlHasRegisteredGuidePanelTask(void);
 extern s32 btlHasRegisteredSkillNamePanelTask(void);
-extern s32 btlHasRegisteredAphNamePanelTask(void);
 extern SceneAiWork *btlCreateTargetSelectionWork(s32);
 extern void btlBossDebugPrintf(const char *, ...);
 extern SceneAiWork *btlGetTargetSelectionWork(void);

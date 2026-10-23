@@ -60,7 +60,7 @@ extern s32 (*btlPackedEffectHandlers[])(s32, u32);
 extern s32 btlWaitEffectTask();
 extern s32 func_001FDA78();
 extern s32 btlPollEffectWaitTask();
-extern s32 btlHasRegisteredAphNamePanelTask();
+extern u32 btlHasRegisteredAphNamePanelTask(void);
 extern void btlReplaceDialogTasksAndQueueMessage(s32, s32);
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 #include "sdf_debug_api.h"
