@@ -440,7 +440,7 @@ s32 btlSelectConditionalAiRoute(s32 context, s32 species, u32 *selected, u32 req
 
 /* Pick the first nonzero-weight slot whose 16-bit cumulative weight reaches the roll.
  * The unit argument is unused; preserve the runtime lookup, debug failure path and zero fallback. */
-u32 btlPickWeightedAiSlot(s32 unusedUnit, s32 speciesId, s32 rowIndex) {
+u32 btlPickWeightedAiSlot(BtlUnit *unusedUnit, s32 speciesId, s32 rowIndex) {
     u32 weightRoll;
     u32 cumulativeWeight;
     u32 slotIndex;
