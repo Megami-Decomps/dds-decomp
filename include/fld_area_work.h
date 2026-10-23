@@ -69,7 +69,7 @@ typedef struct FldAreaWork {
     s32 unkC8;                  /* -1 means no alternate label selection. */
     s32 overlayMode;
     s32 overlayCounter;
-    s32 unkD4;
+    s32 mapBannerFadeMode;
     s32 unkD8;
     s32 defaultEncounterId;      /* 0xDC: selected room encounter; D_0038984C in DDS2. */
     s32 unkE0;

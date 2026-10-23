@@ -2981,7 +2981,7 @@ void func_0014B0F8(void) {
     s32 labelX;
     if (fldGlobalBase.playerModelAlternate == 1) return;
     if (fldGlobalBase.area >= 200) return;
-    switch (fldGlobalBase.unkD4) {
+    switch (fldGlobalBase.mapBannerFadeMode) {
     case 0:
         progress = 0.0f;
         D_0043627C = progress;

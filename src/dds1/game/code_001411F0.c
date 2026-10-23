@@ -2622,7 +2622,7 @@ void func_00147188(s32 unused) {
         return;
     }
 
-    mode = fldGlobalBase.unkD4;
+    mode = fldGlobalBase.mapBannerFadeMode;
     switch (mode) {
     case 0:
         alpha = 0.0f;
