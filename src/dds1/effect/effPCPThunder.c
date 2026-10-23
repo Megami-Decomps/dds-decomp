@@ -96,7 +96,7 @@ EffThunderParameterHead *effPCPThunderSpherePolyGetParam(EffThunderVectorWork *w
 }
 
 extern void dds3TrackPolyVCSet(void *work, s32 sub, void *dispatchArgA, void *dispatchArgB);
-extern s32 effMagaCylinderCalcColor(s32 color, s32 param);
+extern u32 effMagaCylinderCalcColor(u32 color, u32 param);
 
 
 /* Resample timing, normalize X/Z before assigning Y, then sample the axis.
@@ -1523,7 +1523,7 @@ void effPCP_ThunderPolyLowDraw(EffThunderFragmentWork *work) {
     u32 tintColor = work->color;
     EffThunderFrag *fragment = work->fragments;
     ParCell *secondaryCells = secondarySystem->cells;
-    s32 packedColor;
+    u32 packedColor;
 
     if (fragmentCount > 0) {
         do {

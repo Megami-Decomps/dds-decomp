@@ -1359,7 +1359,7 @@ void effPCPWhirlwindPolyPartMove(PcpScatterInstanceA *work, s32 index)
     }
 }
 
-extern s32 effMagaCylinderCalcColor(s32 color, s32 param);
+extern u32 effMagaCylinderCalcColor(u32 color, u32 param);
 extern void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object);
 /* Advance delayed particles and submit the ring drawable.
  * Age zero seeds geometry without writing color; expired particles clear color and freeze.
@@ -1373,7 +1373,7 @@ void effPCPWhirlwindPolyDraw(PcpScatterInstanceA *work) {
     s32 duration = work->params.duration;
     s32 fadeIn;
     s32 fadeRange;
-    s32 color;
+    u32 color;
     loop = work->params.loop;
     fadeIn = work->params.fadeIn;
     fadeRange = work->params.fadeRange;
@@ -1649,7 +1649,7 @@ void effPCPWhirlwind2PolyDraw(PcpScatterInstanceB *work) {
     s32 fadeRange;
     u32 delayModulus;
     s32 instanceAge;
-    s32 color;
+    u32 color;
     s32 remaining;
     f32 instanceFade;
     f32 particleFade;
@@ -1940,10 +1940,10 @@ void effPCPWhirlwind3PolyDraw(PcpScatterInstanceC *work) {
     f32 instanceFade;
     f32 particleFade;
     f32 particleAgeFloat;
-    s32 tintColor;
-    s32 startColor;
-    s32 endColor;
-    s32 color;
+    u32 tintColor;
+    u32 startColor;
+    u32 endColor;
+    u32 color;
     u32 i;
 
     instanceAge = work->age;
@@ -2203,7 +2203,7 @@ void effPCPWwSpherePolyDraw(PcpScatterPlainInstance *work) {
     s32 duration = work->params.duration;
     s32 fadeIn;
     s32 fadeRange;
-    s32 color;
+    u32 color;
     loop = work->params.loop;
     fadeIn = work->params.fadeIn;
     fadeRange = work->params.fadeRange;
