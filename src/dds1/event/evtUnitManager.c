@@ -1472,7 +1472,8 @@ void evtResetUnitVectorSlots(void) {
     }
 }
 
-void evtSetSlotVectors(s32 slotIndex, s32 slotState, s32 unitId, f32 *firstEndpoint, f32 *secondEndpoint, f32 *color) {
+void evtSetSlotVectors(s32 slotIndex, EvtUnitVectorSlotState slotState, s32 unitId,
+                       const f32 *firstEndpoint, const f32 *secondEndpoint, const f32 *color) {
     if (slotIndex < 7) {
         D_003D7BD8[slotIndex].vec[0] = firstEndpoint[0];
         D_003D7BD8[slotIndex].state = slotState;
