@@ -101,7 +101,7 @@ void evtPathRate(dds3Basic_t *unit, f32 value);
 
 s32 fldCommand_GetHojiID(char *name);
 
-s32 fldSetMapSlotValueFlag(s32 worldKey, s32 roomGroup, s32 roomNumber, s32 enabled);
+void fldSetMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled);
 
 
 
