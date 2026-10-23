@@ -178,7 +178,7 @@ extern u32 sdfMemLock(struct sdfMemHandle_t *allocation);
  * kind/selector/payload stores ahead of the halfword/pointer stores by #dependents, reproducing retail's
  * sb kind, sb selector, sw payload, sh, sw next, sw alloc, sw head order. Loop cases 4/6/8 and 5/7 stay separate
  * bodies (a fall-through merges the argument moves). */
-void sdfModelLinkDrawPacket(sdfModelNode_t *node, u32 *commandList,
+void sdfModelLinkDrawPacket(sdfModelNode_t *node, const u32 *commandList,
                                 s32 packetSelector, s32 alternateSelector, s32 listIndex) {
     s32 commandNodeCount;
     s32 referenceQuadwords;
@@ -186,7 +186,7 @@ void sdfModelLinkDrawPacket(sdfModelNode_t *node, u32 *commandList,
     u32 count;
     SdfCommandNode *listNode;
     SdfDmaTagHeader *packet = NULL;
-    u32 *cursor;
+    const u32 *cursor;
     SdfMeasureCommandPrefix *command;
     struct sdfMemHandle_t *allocation;
     SdfCommandNode *next;

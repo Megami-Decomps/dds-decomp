@@ -72,7 +72,7 @@ typedef char SdfItemListRef_chunkTable_at_C[((u32)&((sdfModelDef_t *)0)->chunkTa
 sdfModelRootNode_t *sdfModelMakeRoot(DevRequest *resourceList, sdfModelDef_t *listRef);
 sdfModelRootNode_t *sdfModelMake(DevRequest *resourceList, sdfModelDef_t *listRef);
 sdfModelRootNode_t *sdfModelMakeEarly(DevRequest *resourceList, sdfModelDef_t *listRef);
-void sdfModelLinkDrawPacket(sdfModelNode_t *node, u32 *commandList,
+void sdfModelLinkDrawPacket(sdfModelNode_t *node, const u32 *commandList,
                                 s32 packetSelector, s32 alternateSelector,
                                 s32 listIndex);
 void sdfModelMakeLocalTm(sdfModelNode_t *node);
