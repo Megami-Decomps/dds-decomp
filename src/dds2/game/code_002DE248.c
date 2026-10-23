@@ -16460,13 +16460,13 @@ u32 effReleaseSlotWorkAllocation(EffectSlotSet *owner) {
 
 /* Return the normal slot address unless its stored alternate address is nonzero. */
 void *effGetSlotWorkOrOverride(EffectSlotSet *owner, s32 slotIndex) {
-    s32 alternateAddress;
+    void *alternatePayload;
     s32 entryAddress;
 
     entryAddress = slotIndex * EFF_SLOT_WORK_BYTES + (s32)owner->workEntries;
-    alternateAddress = ((BdWork *)entryAddress)->alternate.address;
-    if (alternateAddress != 0) {
-        entryAddress = alternateAddress;
+    alternatePayload = ((BdWork *)entryAddress)->alternate.payload;
+    if (alternatePayload != NULL) {
+        entryAddress = (s32)alternatePayload;
     }
     return (void *)entryAddress;
 }
@@ -16847,10 +16847,10 @@ EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entry
 }
 
 s32 effSetSlotOverrideWork(EffectSlotSet *owner, u32 slot, void *payload) {
-    if (owner->workEntries[slot].alternate.bits == 0) {
+    if (owner->workEntries[slot].alternate.payload == NULL) {
         effAttachSlotWorkOwner(owner, slot, payload);
     }
-    owner->workEntries[slot].alternate.bits = (u32)payload;
+    owner->workEntries[slot].alternate.payload = payload;
     return 1;
 }
 
@@ -16870,7 +16870,7 @@ u32 effSetMaterialSlots(EffectSlotSet *owner, s32 index, u32 materialFlags, void
 }
 
 u32 effClearSlotOverrideWork(s32 effect, s32 slot) {
-    ((EffectSlotSet *)effect)->workEntries[slot].alternate.bits = 0;
+    ((EffectSlotSet *)effect)->workEntries[slot].alternate.payload = NULL;
     return 1;
 }
 
