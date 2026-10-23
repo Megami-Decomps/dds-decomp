@@ -1607,15 +1607,15 @@ u8 *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *actor, s32 itemId) {
 }
 
 /* Add one to the argument's 16-bit item ID quantity, then complete the task. */
-u32 btlIncrementCommandItemQuantity(s32 argumentAddress) {
-    ptyAdjustItemQuantity(*(u16 *)(argumentAddress + 4), 1);
+u32 btlIncrementCommandItemQuantity(BtlRuntimeTaskArgs *taskArgs) {
+    ptyAdjustItemQuantity(taskArgs->optionId, 1);
     return 1;
 }
 
 /* Queue an owner-bound task that increments this item's inventory quantity. */
 u8 *btlCreateItemQuantityIncrementTask(u8 *actor, u16 itemId) {
     u8 *task = btlAllocTask(8);
-    u32 *data;
+    BtlRuntimeTaskArgs *data;
 
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
@@ -1624,8 +1624,8 @@ u8 *btlCreateItemQuantityIncrementTask(u8 *actor, u16 itemId) {
     *(u64 *)(task + 0x40) = *(u64 *)(actor + 0x108);
     *(s32 *)(task + 0x48) = 0;
     data = btlGetTaskArguments(task);
-    data[0] = (u32)actor;
-    ((u16 *)data)[2] = itemId;
+    data->actor = actor;
+    data->optionId = itemId;
     return task;
 }
 

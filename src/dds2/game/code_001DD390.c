@@ -1703,8 +1703,8 @@ BtlRuntimeTask *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *actor, s32 itemI
 }
 
 /* Add one to the argument's 16-bit item ID quantity, then complete the task. */
-u32 btlIncrementCommandItemQuantity(s32 taskArgs) {
-    ptyAdjustItemQuantity(*(u16 *)(taskArgs + 4), 1);
+u32 btlIncrementCommandItemQuantity(BtlRuntimeTaskArgs *taskArgs) {
+    ptyAdjustItemQuantity(taskArgs->optionId, 1);
     return 1;
 }
 
