@@ -72,7 +72,7 @@ typedef struct FldAreaWork {
     s32 mapBannerFadeMode;
     s32 unkD8;
     s32 defaultEncounterId;      /* 0xDC: selected room encounter; D_0038984C in DDS2. */
-    s32 unkE0;
+    s32 encounterOverrideId;
     s32 encounterMode;
     s32 cameraTargetGraceTicks; /* 0xE8: suppresses travel deltas after target install. */
     u32 transitionCount;

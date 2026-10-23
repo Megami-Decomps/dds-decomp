@@ -1709,7 +1709,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->sceneCommand = 0;
     area->colorEffectSuppressed = 0;
     area->defaultEncounterId = 0;
-    area->unkE0 = 0;
+    area->encounterOverrideId = 0;
     area->encounterMode = 0;
     area->transitionCount = 0;
     area->frameTravelDistance = 0.0f;
