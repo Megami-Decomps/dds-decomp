@@ -164,7 +164,7 @@ extern FileQueue *effAuxiliaryFileQueue;
 extern FileQueue *effFileQueue;
 extern void dds3PadVibrationSet(s32, u8, s32);
 
-extern u8 *effAllocateTexturedStripWork();
+extern u8 *effAllocateTexturedStripWork(u32 count, u32 repeat);
 
 extern u32 effScalyTextureHandle;
 
