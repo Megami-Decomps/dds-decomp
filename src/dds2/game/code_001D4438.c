@@ -518,7 +518,7 @@ extern void btlBuildPresetCameraPose(BtlLinkedCommand *, BtlCamState *, s16, s16
 extern void mnuReleaseSoundBufferLocked(void);
 
 extern void btlMoveActorOutOfActiveParty(BtlUnit *);
-extern s32 btlCreateUnitExitFadeTask(s32 owner, s32 option);
+extern BtlRuntimeTask *btlCreateUnitExitFadeTask(BtlUnit *owner, s32 option);
 
 
 extern void btlDebugPrintf(s32 tag, ...);
@@ -2993,7 +2993,7 @@ void btlCommandTaskReturnStart(ActionStateLink *task) {
         object->ownerId = task->unit->owner;
         btlStartTask(object);
     }
-    object = (BtlRuntimeTask *)btlCreateUnitExitFadeTask((s32)actor, 1);
+    object = btlCreateUnitExitFadeTask(actor, 1);
     object->startDelay = 0xF;
     btlStartTask(object);
     actor->status.stateFlags &= ~0x40000;
@@ -3320,10 +3320,11 @@ void btlScheduleSummonActionTasks(ActionStateLink *action) {
 u64 btlStartOwnerEffectTasks(s32 *arguments) {
     s32 owner = arguments[0x34 / 4];
     s32 value = btlCreateEffObjA(owner, arguments[0x20 / 4]);
+    BtlRuntimeTask *fadeTask;
     btlStartTask(value);
-    value = btlCreateUnitExitFadeTask(owner, 1);
-    *(s32 *)(value + 0x28) = 7;
-    return btlStartTask(value);
+    fadeTask = btlCreateUnitExitFadeTask((BtlUnit *)owner, 1);
+    fadeTask->startDelay = 7;
+    return btlStartTask(fadeTask);
 }
 
 extern void btlResetUnitLinks(BtlUnit *unit);
@@ -3738,7 +3739,7 @@ void btlStartActorDefeatTransition(ActionStateLink *command) {
                     btlRefreshUnitMotionSelection(actor);
                 }
             } else {
-                object = (BtlRuntimeTask *)btlCreateUnitExitFadeTask((s32)actor, 0);
+                object = btlCreateUnitExitFadeTask(actor, 0);
                 object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 object->startCondition.value.handle = sequence;
                 btlStartTask(object);
