@@ -145,7 +145,7 @@ extern void effMiscQuatMultiplyVU(void); extern void effMiscQuaternionToMatrixVU
 extern void sdfComposeVuMatrixFromRegisters(void);
 extern void effBTLPartGetPositionPtr(void *owner, EffectVectorRequest *request, u128 *out);
 extern void effBTLPartGetRotateMatrixPtr(EffectVectorRequest *request, u128 *out);
-extern f32 effBattleMiscQueryScalar(BtlUnit *unit, EffectVectorRequest *request);
+extern f32 effBattleMiscQueryScalar(const BtlUnit *unit, const EffectVectorRequest *request);
 extern u32 effBTLFieldColorGetOverrideSelector(void); extern u32 effBTLFieldColorGetFinalSelector(void);
 extern u32 effMagaCylinderCalcColor(u32, u32); extern u32 effBTLCutGetAllPartColor(u32, u32);
 extern void dds3SetQuake(s32, s32); extern void mdlGetScale(dds3ModelHandle_t *);

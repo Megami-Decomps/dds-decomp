@@ -292,7 +292,7 @@ void effBattleMiscApplyParamByte(u32 owner, EffectVectorRequest *request) {
     effBTLModelGetMarkPosition2((BtlUnit *)owner, request->count);
 }
 
-f32 effBattleMiscQueryScalar(BtlUnit *unit, EffectVectorRequest *request) {
+f32 effBattleMiscQueryScalar(const BtlUnit *unit, const EffectVectorRequest *request) {
     BtlUnit *other;
     f32 result = 0;
 
