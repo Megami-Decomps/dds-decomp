@@ -324,7 +324,7 @@ extern void fileDrawCursorPulse(s32, s32, s32);
 extern s32 D_00437D78;
 
 extern s32 fileReadSlotPreviewBegin(void);
-extern void sdfMcFuncRead(s32, u32, s32);
+extern void sdfMcFuncRead(s32, void *, s32);
 extern s32 slLoadProc_readFile(void);
 extern s32 fileSaveFileDescriptor;
 extern struct sdfMemHandle_t *fileSaveReadBufferResource;
@@ -937,7 +937,7 @@ s32 fileReadSlotPreviewBegin(void) {
     if (status == MC_POLL_SUCCESS) {
         fileSaveReadBufferResource = sdfMemAllocDirect(0x30);
         fileSaveReadBuffer = (void *)(u32)sdfMemLock(fileSaveReadBufferResource);
-        sdfMcFuncRead(fileSaveFileDescriptor, (u32)fileSaveReadBuffer, 0x30);
+        sdfMcFuncRead(fileSaveFileDescriptor, fileSaveReadBuffer, 0x30);
         return (s32)slHeadLoadProc_readFile;
     }
     return fileBeginSlotMetadataRefresh();
@@ -2051,7 +2051,7 @@ s32 slLoadProc_openFile(void) {
     fileSaveReadBufferResource = sdfMemAllocDirect(size);
     fileSaveReadBuffer = (void *)(u32)sdfMemLock(fileSaveReadBufferResource);
     if (status == MC_POLL_SUCCESS) {
-        sdfMcFuncRead(fileSaveFileDescriptor, (u32)fileSaveReadBuffer, size);
+        sdfMcFuncRead(fileSaveFileDescriptor, fileSaveReadBuffer, size);
         return (s32)slLoadProc_readFile;
     }
     slSetInfo(0);
