@@ -81,7 +81,7 @@ extern s32 btlRepositionPartyAroundBattleCenter(void);
 
 extern void mnuReleaseSoundBufferLocked(void);
 
-extern void btlSetUnitPosition(BtlUnit *unit, f32 *position);
+extern void btlSetUnitPosition(BtlUnit *unit, const f32 *position);
 
 extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
 

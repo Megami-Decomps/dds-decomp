@@ -206,7 +206,7 @@ extern u64 btlStartTask(void *);
 
 extern void btlCopyUnitCurrentPosition(void *, f32 *);
 
-extern void btlSetUnitPosition(BtlUnit *, f32 *);
+extern void btlSetUnitPosition(BtlUnit *, const f32 *);
 
 extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *, s32);
 
