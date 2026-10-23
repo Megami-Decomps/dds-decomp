@@ -4960,24 +4960,24 @@ s32 effCreateSurfaceNodeForGrid(s32 source) {
 }
 
 extern void effRebuildSurfaceHandles(s32, s32, s32);
-extern void effReplaceResourceRef(s32, s32, s32);
+extern void effReplaceResourceRef(s32, s32, const void *);
 
 s32 effResourceReferenceReplaceFromFile(FileJobPayload *source) {
-    s32 primary = (s32)fileResolvePrimaryBuffer(source);
-    s32 next = primary + 0x1C;
-    s32 object = effCreateSurfaceNodeForGrid(next);
+    u8 *primary = fileResolvePrimaryBuffer(source);
+    u8 *next = primary + 0x1C;
+    s32 object = effCreateSurfaceNodeForGrid((s32)next);
 
-    effRebuildSurfaceHandles(object, source->option, primary);
+    effRebuildSurfaceHandles(object, source->option, (s32)primary);
     effReplaceResourceRef(object, source->option, next);
     return object;
 }
 
 extern s32 effCreateSurfaceNodeForGrid(s32);
 
-s32 effCreateSurfaceNodeFromPayload(u16 kind, s32 source) {
-    s32 next = source + 0x1C;
-    s32 object = effCreateSurfaceNodeForGrid(next);
-    effRebuildSurfaceHandles(object, kind, source);
+s32 effCreateSurfaceNodeFromPayload(u16 kind, u8 *source) {
+    u8 *next = source + 0x1C;
+    s32 object = effCreateSurfaceNodeForGrid((s32)next);
+    effRebuildSurfaceHandles(object, kind, (s32)source);
     effReplaceResourceRef(object, kind, next);
     return object;
 }
@@ -5069,11 +5069,11 @@ void effDestroySurfaceNode(EffectSurfaceNode *node) {
 
 s32 effRecreateSurfaceNodeFromWork(u8 *work) {
     FileSlotTable *config = ((EffectSurfaceNode *)work)->record;
-    s32 arg = (s32)config->data1;
-    s32 object = effCreateSurfaceNodeForGrid(arg);
+    u8 *resource = config->data1;
+    s32 object = effCreateSurfaceNodeForGrid((s32)resource);
 
     effRebuildSurfaceHandles(object, ((EffectSurfaceNode *)work)->record->type, (s32)work + 0x10);
-    effReplaceResourceRef(object, ((EffectSurfaceNode *)work)->record->type, arg);
+    effReplaceResourceRef(object, ((EffectSurfaceNode *)work)->record->type, resource);
     return object;
 }
 
@@ -5082,11 +5082,11 @@ void effCloneSurfaceGridResources(EffectSurfaceNode *, u8 *);
 
 u32 effCreateSurfaceGridWithConfiguration(u8 *work) {
     FileSlotTable *config = ((EffectSurfaceNode *)work)->record;
-    s32 arg = (s32)config->data1;
-    s32 object = effCreateSurfaceNodeForGrid(arg);
+    u8 *resource = config->data1;
+    s32 object = effCreateSurfaceNodeForGrid((s32)resource);
 
     effRebuildSurfaceHandles(object, ((EffectSurfaceNode *)work)->record->type, (s32)work + 0x10);
-    effReplaceResourceRef(object, ((EffectSurfaceNode *)work)->record->type, arg);
+    effReplaceResourceRef(object, ((EffectSurfaceNode *)work)->record->type, resource);
     effCloneSurfaceGridResources((EffectSurfaceNode *)object, work);
     return object;
 }
@@ -5195,12 +5195,12 @@ void effRebuildSurfaceHandles(s32 nodeAddr, s32 kind, s32 source) {
     }
 }
 
-void effReplaceResourceRef(s32 nodeAddr, s32 entryId, s32 resource) {
+void effReplaceResourceRef(s32 nodeAddr, s32 entryId, const void *resource) {
     EffectSurfaceNode *node = (EffectSurfaceNode *)nodeAddr;
     if (node->record != NULL) {
         effPCPHelperBEDGetModel(node->record);
     }
-    node->record = fileAllocateGridRecordSlots(entryId & 0xffff, node->handleCount, (const void *)resource);
+    node->record = fileAllocateGridRecordSlots(entryId & 0xffff, node->handleCount, resource);
 }
 
 void effSetSurfaceRetainedResource(EffectSurfaceNode *node, s32 resourceId) {
@@ -10774,7 +10774,7 @@ u32 *effAllocateSurfaceNodeSlot(u32 owner) {
 
 u32 *effCreateConfiguredSurfaceNodeWork(s32 source, u16 kind, s32 *settings) {
     u32 *work = effAllocateSurfaceNodeSlot(source);
-    *work = effCreateSurfaceNodeFromPayload(7, source);
+    *work = effCreateSurfaceNodeFromPayload(7, (u8 *)source);
     effConfigureSurfaceNodeByKind((EffectSurfaceNode *)*work, kind, settings);
     return work;
 }
