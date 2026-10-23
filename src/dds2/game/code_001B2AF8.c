@@ -1679,12 +1679,12 @@ typedef struct BtlWeightTable {
     BtlWeightEntry entries[8];
 } BtlWeightTable;
 
-extern BtlWeightTable *D_00435E40;
+extern const BtlWeightTable *D_00435E40;
 
 u32 btlPickWeightedEntry(u16 index) {
     u32 offset = index * sizeof(BtlWeightTable);
-    BtlWeightEntry *counted = (BtlWeightEntry *)(offset + (u32)D_00435E40);
-    BtlWeightEntry *entry;
+    const BtlWeightEntry *counted = (const BtlWeightEntry *)(offset + (u32)D_00435E40);
+    const BtlWeightEntry *entry;
     s32 total = 0;
     s32 sum;
     s32 roll;
@@ -1696,7 +1696,7 @@ u32 btlPickWeightedEntry(u16 index) {
     }
     roll = dds3GetRandIntA(0, total);
     sum = 0;
-    entry = (BtlWeightEntry *)(offset + (u32)D_00435E40);
+    entry = (const BtlWeightEntry *)(offset + (u32)D_00435E40);
     for (i = 0; i < 8; i++, entry++) {
         if (entry->id != 0) {
             if (roll < sum + entry->weight) {
