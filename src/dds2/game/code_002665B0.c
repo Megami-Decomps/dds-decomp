@@ -186,7 +186,7 @@ extern const char D_00424F20[];
 
 extern dds3ProcessID_t *D_0043785C;
 
-extern struct MenuList *mnuCreateListState();
+extern struct MenuList *mnuCreateListState(u32 owner, u32 visibleCount, s32 rowSpacing);
 
 
 extern u8 D_00437870[];
@@ -656,7 +656,7 @@ void mnuThresholdNodeDrawCallback(s32 x, s32 y, s32 unused, MenuList *list, Menu
 
 /* Omit the input-array position `excluded`, not all entries with that same value. */
 MenuList *mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excludedEntryIndex, void *owner) {
-    MenuList *list = mnuCreateListState(0, count, 0x16, owner);
+    MenuList *list = mnuCreateListState(0, count, 0x16);
     s32 entryIndex;
     list->context = owner;
     list->drawCallback = mnuThresholdNodeDrawCallback;
