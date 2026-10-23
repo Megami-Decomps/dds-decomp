@@ -923,7 +923,7 @@ extern u8 *datRosterDetails;
 extern f32 btlGetActorEffectScale(BtlTask *);
 extern void *btlCreateTargetedCommandSoundTask(s32, s32, u32);
 extern u8 *btlAllocateApproachTargetTask(u8 *, s32, f32);
-extern s32 btlIsBattleRecordEligible(u8 *, u8 *, s32, s32);
+extern s32 btlIsBattleRecordEligible(BtlUnit *, BtlUnit *, s32, s32);
 extern SoundResourceNode *sndCreateResourceNode(SoundMixer *);
 extern BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *, BtlUnit *, BtlUnit *, u16);
 extern const char D_003A3658[];
@@ -1036,7 +1036,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
     btlStartTask(task);
     if (targetCount == 1) {
         indexedTarget = (BtlUnit *)btlGetIndexListEntry(indices, 0);
-        if (btlIsBattleRecordEligible((u8 *)action->unit, (u8 *)indexedTarget,
+        if (btlIsBattleRecordEligible(action->unit, indexedTarget,
                 action->indexWork.slot, action->indexWork.skillId) != 0) {
             if ((action->unit->status.flags & indexedTarget->status.flags & 0x600) == 0 ||
                     (indexedTarget->status.flags & 0x200) != 0) {

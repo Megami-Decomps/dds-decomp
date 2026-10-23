@@ -345,7 +345,7 @@ typedef struct BtlState {
     s32 (*summonEffectId)(s32); /* 0x674: -1 retains the default summon effect. */
     s32 (*summonEffectDelay)(u32); /* 0x678: delay for the selected summon species. */
     s32 (*actionPointsOverride)(u32, u32, s32); /* 0x67C */
-    u8 pad680[4];
+    s32 (*battleRecordEligibilityOverride)(BtlUnit *, BtlUnit *, s32); /* 0x680 */
     void (*actionResourceNameHook)(BtlTask *, s32, char *); /* 0x684: formats the action event resource name. */
     u8 pad688[4];
     s32 (*commandAvailabilityOverride)(BtlUnit *, s32); /* 0x68C: DDS1 001A6EDC..001A6EF4 gates command availability. */
