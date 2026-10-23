@@ -974,23 +974,23 @@ void *effPCPZiodin01Copy(void) {
  * duration of their update, then puts the original vectors back. */
 static inline void effPcpShiftThunderHandles(EffPCPThunderGroup *work, s32 count) {
     u128 saved[2];
-    u8 *obj;
+    EffThunderFragmentParams *obj;
     s32 i;
 
     for (i = 0; i < count; i++) {
-        obj = (u8 *)effPCP_ThunderPolyGetParam(work->handles[i]);
-        VU0_LOAD_VF($vf10, obj + 0x10);
+        obj = effPCP_ThunderPolyGetParam(work->handles[i]);
+        VU0_LOAD_VF($vf10, obj->end);
         VU0_STORE_VF($vf10, &saved[1]);
         VU0_LOAD_VF($vf11, work);
         SDF_VU0_ADDVECTOR();
-        VU0_STORE_VF($vf10, obj + 0x10);
-        VU0_LOAD_VF($vf10, obj);
+        VU0_STORE_VF($vf10, obj->end);
+        VU0_LOAD_VF($vf10, obj->start);
         VU0_STORE_VF($vf10, &saved[0]);
         SDF_VU0_ADDVECTOR();
-        VU0_STORE_VF($vf10, obj);
+        VU0_STORE_VF($vf10, obj->start);
         effPCP_ThunderPolyDraw(work->handles[i]);
-        SDF_VU0_COPYVECTOR(obj, &saved[0]);
-        SDF_VU0_COPYVECTOR(obj + 0x10, &saved[1]);
+        SDF_VU0_COPYVECTOR(obj->start, &saved[0]);
+        SDF_VU0_COPYVECTOR(obj->end, &saved[1]);
     }
 }
 
@@ -3765,7 +3765,7 @@ void effPcpUpdateMuzzleThunderRay(EffPCPBurstWork *work) {
     f32 y;
     f32 z;
     f32 distance;
-    u8 *params;
+    EffThunderFragmentParams *params;
 
     if (effBTLFieldColorUsesActorSelectors() != 0) {
         btlUnitGetMuzzlePosVU((BtlUnit *)effBTLFieldColorGetVariantSelector());
@@ -3773,7 +3773,7 @@ void effPcpUpdateMuzzleThunderRay(EffPCPBurstWork *work) {
         SDF_VU0_SUBVECTOR();
         SDF_VU0_NORMALIZE();
         SDF_VU0_STOREVECTOR(direction);
-        params = (u8 *)effPCP_ThunderPolyGetParam(work->fragmentWork);
+        params = effPCP_ThunderPolyGetParam(work->fragmentWork);
         distance = work->startDistance;
         dirX = direction[0];
         dirY = direction[1];
@@ -3784,12 +3784,12 @@ void effPcpUpdateMuzzleThunderRay(EffPCPBurstWork *work) {
         point[0] = x;
         point[1] = y;
         point[2] = z;
-        SDF_VU0_COPYVECTOR(params, point);
+        SDF_VU0_COPYVECTOR(params->start, point);
         distance = work->length;
         point[0] = x + dirX * distance;
         point[1] = y + dirY * distance;
         point[2] = z + dirZ * distance;
-        SDF_VU0_COPYVECTOR(params + 0x10, point);
+        SDF_VU0_COPYVECTOR(params->end, point);
         effPCP_ThunderPolySetColor(work->fragmentWork, work->tintColor);
         effPCP_ThunderPolyDraw(work->fragmentWork);
     }
