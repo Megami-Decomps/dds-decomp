@@ -23,7 +23,7 @@ extern const char evtFieldScriptTerminationFormat[0x28];
 
 extern dds3Basic_t *dds3AddScene(void);
 extern void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *object, u32 area, u32 room,
-                                                       u32 resource0Data, u32 resource1Data,
+                                                       u8 *resource0Data, u8 *resource1Data,
                                                        const SdfTextureOffsetListHeader *textureOffsets, u32 flags);
 extern void evtSetTestCamera(void);
 extern void dds3SetScreenFovy(f32 fieldOfView);
@@ -94,7 +94,7 @@ s32 evtLoadArea(s32 area, s32 room)
 extern s32 sdfDelayedResrcCheck(void);
 
 /* Build a field world object from the supplied resource parameters. */
-s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
+s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data,
                                      const SdfTextureOffsetListHeader *textureOffsets, s32 flags)
 {
     dds3Basic_t *worldObject;

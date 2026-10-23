@@ -377,13 +377,13 @@ void dds3SceneBasicMakeScene(dds3Basic_t *object, u32 resourceId) {
 }
 
 void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *object, u32 area, u32 room,
-                                    u32 resource0Data, u32 resource1Data,
+                                    u8 *resource0Data, u8 *resource1Data,
                                     const SdfTextureOffsetListHeader *textureOffsets, u32 flags) {
     EvtWorldTable *data;
     u32 handle;
 
     data = ((EvtWorldTable *)object->data);
-    handle = fldLoadAreaRoomResourcesFromRequest(area, room, resource0Data, resource1Data,
+    handle = fldLoadAreaRoomResourcesFromRequest(area, room, (u32)resource0Data, (u32)resource1Data,
                                                  textureOffsets, flags);
     data->indexedHandle = handle;
 }

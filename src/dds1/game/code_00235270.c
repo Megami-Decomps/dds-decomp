@@ -4612,7 +4612,7 @@ typedef char EvtViewerPackageRecord_size[(sizeof(EvtViewerPackageRecord) == 0x20
 typedef char EvtViewerResourceRecord_size[(sizeof(EvtViewerResourceRecord) == 0x10) ? 1 : -1];
 
 
-extern s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
+extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data,
                                             const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
 extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32 kind, EvtRuntime *runtime);
 extern s32 evtEventViewerAddName(const char *name, EvtRuntime *runtime);
@@ -4673,8 +4673,8 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
     if (work->mainEntry2Data != NULL) {
         packageId = ((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId;
         partId = ((EvtViewerPackageRecord *)work->mainEntry2Data)->partId;
-        evtLoadArea_FromMemory(packageId, partId, (s32)work->mainEntry10Data,
-            (s32)work->mainEntry11Data, (SdfTextureOffsetListHeader *)work->mainEntry12Data, 0);
+        evtLoadArea_FromMemory(packageId, partId, work->mainEntry10Data,
+            work->mainEntry11Data, (SdfTextureOffsetListHeader *)work->mainEntry12Data, 0);
         group = evtEventViewerCreateEntry(0, runtime);
         group->entryHeader = evtEventViewerAddName(
             (char *)work->mainEntry1Data + ((EvtViewerPackageRecord *)work->mainEntry2Data)->nameIndex * 32, runtime);

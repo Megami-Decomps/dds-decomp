@@ -8135,7 +8135,7 @@ extern char D_003A4BF8[]; /* "btl:floor load end 0\n" */
 
 extern char D_003A4C10[]; /* "btl:floor load end 1\n" */
 
-extern s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
+extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data,
                                             const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
 
 extern char D_003A4B50[]; /* "%sf%03d_%03d.LB" */
@@ -8188,7 +8188,7 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
         }
         if (args->fieldF1 != NULL && args->fieldF2 != NULL && args->fieldTB != NULL) {
             evtLoadArea_FromMemory(args->stage, args->variant,
-                                             (s32)args->fieldF1, (s32)args->fieldF2,
+                                             args->fieldF1, args->fieldF2,
                                              args->fieldTB, 0);
             btlInitializeSceneLightingAndTint();
             if (blocks->fieldTBResourceId != NULL) {
