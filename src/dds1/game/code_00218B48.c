@@ -86,8 +86,8 @@ typedef enum MdlViewerRecordKind {
  * only written by a defaults initialiser and never read in either game are
  * left as unkNN on purpose: there is no read to earn a role from. */
 typedef struct MdlViewState {
-    s32 unk00;
-    s32 viewerTask;
+    dds3ProcessID_t *unk00;
+    dds3ProcessID_t *viewerTask;
     s8 exitCleanupStarted; /* 0x08: one-shot guard for viewer task/resource teardown. */
     s8 unk09;
     s8 taskPhase; /* 0x0A: one-based index into D_00367A40 */
@@ -2735,16 +2735,16 @@ void mdlSubmitViewerResourceDrawPacket(void) {
 }
 
 void mdlViewerTaskDestroy(void) {
-    if (mdlViewerState.viewerTask != 0) {
-        dds3KillProcess((dds3ProcessID_t *)mdlViewerState.viewerTask, 0);
-        mdlViewerState.viewerTask = 0;
+    if (mdlViewerState.viewerTask != NULL) {
+        dds3KillProcess(mdlViewerState.viewerTask, 0);
+        mdlViewerState.viewerTask = NULL;
     }
 }
 
 void mdlRestartViewerPhaseTask(void) {
     mdlViewerTaskDestroy();
-    mdlViewerState.viewerTask = (s32)dds3StartProcess(D_00367A40[mdlViewerState.taskPhase - 1].name, 0x2B00, 1, 0, D_00367A40[mdlViewerState.taskPhase - 1].update, 0, D_00367A40[mdlViewerState.taskPhase - 1].data);
-    dds3LinkProcess((dds3ProcessID_t *)mdlViewerState.unk00, (dds3ProcessID_t *)mdlViewerState.viewerTask);
+    mdlViewerState.viewerTask = dds3StartProcess(D_00367A40[mdlViewerState.taskPhase - 1].name, 0x2B00, 1, 0, D_00367A40[mdlViewerState.taskPhase - 1].update, 0, D_00367A40[mdlViewerState.taskPhase - 1].data);
+    dds3LinkProcess(mdlViewerState.unk00, mdlViewerState.viewerTask);
 }
 
 #include "sdf_gs_header.h"
@@ -3064,9 +3064,9 @@ void mdlInitializeViewerTasksAndResources(void) {
     for (i = 0, task = D_00367AE0; i != 3; i++, task++) {
         fclEncycFreeEntries(task->name);
     }
-    mdlViewerState.unk00 = (s32)dds3StartProcess(D_003ABF78, 0x2AFF, 1, 0, mdlViewer, NULL, 0);
+    mdlViewerState.unk00 = dds3StartProcess(D_003ABF78, 0x2AFF, 1, 0, mdlViewer, NULL, 0);
     dds3StartProcess(D_003ABF88, 0x2B01, 1, 0, mdlViewerEnd, NULL, 0);
-    mdlViewerState.viewerTask = 0;
+    mdlViewerState.viewerTask = NULL;
     mdlRestartViewerPhaseTask();
 }
 
