@@ -781,6 +781,8 @@ typedef struct MenuTerminalContext {
 } MenuTerminalContext;
 
 typedef char MenuTerminalContext_size_must_be_0x38C[(sizeof(MenuTerminalContext) == 0x38C) ? 1 : -1];
+typedef char MenuTerminalContext_lastPopupEntry_offset[
+    ((u32)&((MenuTerminalContext *)0)->transitionWork.lastEntryAddress == 0x54) ? 1 : -1];
 typedef char MenuTerminalContext_firstPanel_offset[((u32)&((MenuTerminalContext *)0)->panelWork[0] == 0xE8) ? 1 : -1];
 typedef char MenuTerminalContext_secondPanel_offset[((u32)&((MenuTerminalContext *)0)->panelWork[1] == 0x17C) ? 1 : -1];
 typedef char MenuTerminalContext_campEffect_offset[((u32)&((MenuTerminalContext *)0)->campEffect == 0x210) ? 1 : -1];

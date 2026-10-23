@@ -152,9 +152,9 @@ extern char D_003CE998[];
 
 /* When the current panel is idle and no fade is running, start its queued step. */
 s32 mnuUpdateTerminalPanelPopupWhenIdle(dds3ProcessID_t *request) {
-    s32 state = dds3GetProcessData(request);
-    s32 *panelState = (s32 *)(state + 0x54);
-    s32 result = mnuDispatchPopupTransition((u8 *)state + 8, panelState, 0, request);
+    MenuTerminalContext *context = (MenuTerminalContext *)dds3GetProcessData(request);
+    s32 *panelState = (s32 *)&context->transitionWork.lastEntryAddress;
+    s32 result = mnuDispatchPopupTransition((u8 *)context + 8, panelState, 0, request);
     if (result == 0) {
         if (*panelState == 0 && dds3FadeCheck() == 0) {
             mnuSetPopupEntryFlagged(panelState, D_003CE998);
