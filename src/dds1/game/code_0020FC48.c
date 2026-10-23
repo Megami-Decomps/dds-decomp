@@ -1024,7 +1024,7 @@ BattleModelEntry *btlCreateModelEntry(void) {
     BtlState *battleState;
     BattleModelEntry *previousHead;
     cacheEntry->refCount = 1;
-    cacheEntry->state = 0;
+    cacheEntry->finalized = BTL_MODEL_ENTRY_UNFINALIZED;
     battleState = (BtlState *)btlGetRuntime();
     cacheEntry->prev = 0;
     previousHead = battleState->modelEntries;
@@ -1086,11 +1086,11 @@ void btlFormatModelResourcePath(s32 isDevil, s32 modelId, char *pathOut) {
     }
 }
 
-/* Nonzero cache state bypasses requests. Otherwise retain both native model
+/* Finalized entries bypass requests. Otherwise retain both native model
  * queries and the signed-byte readiness result. */
 s8 btlIsModelPackEntryReady(BattleModelEntry *cacheEntry) {
     s32 requestReady;
-    if (cacheEntry->state != 0) {
+    if (cacheEntry->finalized != BTL_MODEL_ENTRY_UNFINALIZED) {
         return 1;
     }
     if (mdlPrepare(cacheEntry->kind, cacheEntry->id, 0) == 0 ||
@@ -1170,7 +1170,7 @@ void btlFinalizeModelPackEntry(s32 kind, s32 id) {
     SoundSlotTableEntry *parts;
     s32 i;
 
-    if (entry->state == 0) {
+    if (entry->finalized == BTL_MODEL_ENTRY_UNFINALIZED) {
         if (entry->packRequest != NULL) {
             entry->soundOwner = sndAcquireSlotOwner(kind, id);
             if (entry->soundOwner->work.refCount == 1) {
@@ -1198,15 +1198,15 @@ void btlFinalizeModelPackEntry(s32 kind, s32 id) {
             pacFileHandleFree_(entry->packRequest);
             entry->packRequest = NULL;
         }
-        entry->state = 1;
+        entry->finalized = BTL_MODEL_ENTRY_FINALIZED;
     }
 }
 
-/* Return the sign-extended cache state, or zero when no entry exists. */
+/* Return the sign-extended finalization state, or zero when no entry exists. */
 s32 btlGetEntryState(s32 modelKind, s32 modelId) {
     BattleModelEntry *cacheEntry = btlFindModelEntry(modelKind, modelId);
     if (cacheEntry != 0) {
-        return cacheEntry->state;
+        return cacheEntry->finalized;
     }
     return 0;
 }
@@ -1232,7 +1232,7 @@ s32 btlEnsureModelAndSoundReady(s32 kind, s32 id, s32 unused) {
     entry = btlFindModelEntry(kind, id);
     if (entry != 0) {
         if (btlIsModelPackEntryReady(entry) != 0) {
-            if (entry->state == 0) {
+            if (entry->finalized == BTL_MODEL_ENTRY_UNFINALIZED) {
                 btlFinalizeModelPackEntry(kind, id);
             }
             return 1;
