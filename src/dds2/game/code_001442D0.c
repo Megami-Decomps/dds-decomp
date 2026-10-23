@@ -1206,8 +1206,8 @@ void fldReleaseSceneRecordChunk(void) {
 void fldResetSceneResourceTables(void) {
     s32 i;
 
-    fldGlobalBase.unkC4 = -1;
-    fldGlobalBase.unkC8 = -1;
+    fldGlobalBase.primaryMapLabelSelection = -1;
+    fldGlobalBase.secondaryMapLabelSelection = -1;
     fldAutoMapBuf = 0;
     fldAutoMapHeader = 0;
     fldAutoMapData = 0;
@@ -3031,16 +3031,16 @@ interpolate:
     x = (s32)fldBannerCoordinate(progress, 250.0f, 0.0f);
     y = (s32)fldBannerCoordinate(progress, 0.0f, 0.0f);
     itfSetTextDrawLimit(0x13);
-    if (fldGlobalBase.unkC8 != -1) {
-        if (D_0044FD48[fldGlobalBase.unkC8] < 2) return;
-        labelIndex = fldFindSecondaryMapLabelIndexByCoordinate(fldGlobalBase.area % 100, fldGlobalBase.unkC8);
+    if (fldGlobalBase.secondaryMapLabelSelection != -1) {
+        if (D_0044FD48[fldGlobalBase.secondaryMapLabelSelection] < 2) return;
+        labelIndex = fldFindSecondaryMapLabelIndexByCoordinate(fldGlobalBase.area % 100, fldGlobalBase.secondaryMapLabelSelection);
         width = frFontMeasureTextAdvance(D_0039E1A8[labelIndex].name, 1, 0);
         fldDrawAnimatedFieldBanner(width, x, y);
         if (width >= 0x9E) labelX = 0x14A; else labelX = 0x198 - width / 2;
         fldKanjiDraw(x + labelX, (y + 0x12) / 2, 0xF0DC6480, D_0039E1A8[labelIndex].name);
-    } else if (fldGlobalBase.unkC4 != fldGlobalBase.unkC8) {
-        if (D_0044FC98[fldGlobalBase.unkC4] < 2) return;
-        labelIndex = fldFindMapLabelIndexByCoordinate(fldGlobalBase.area % 100, fldGlobalBase.unkC4);
+    } else if (fldGlobalBase.primaryMapLabelSelection != fldGlobalBase.secondaryMapLabelSelection) {
+        if (D_0044FC98[fldGlobalBase.primaryMapLabelSelection] < 2) return;
+        labelIndex = fldFindMapLabelIndexByCoordinate(fldGlobalBase.area % 100, fldGlobalBase.primaryMapLabelSelection);
         width = frFontMeasureTextAdvance(D_0039A5A8[labelIndex].name, 1, 0);
         fldDrawAnimatedFieldBanner(width, x, y);
         if (width >= 0x9E) labelX = 0x14A; else labelX = 0x198 - width / 2;

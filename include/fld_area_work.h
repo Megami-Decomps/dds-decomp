@@ -65,8 +65,8 @@ typedef struct FldAreaWork {
     f32 cameraTilt;              /* 0xB8 */
     s32 flagNumber;
     s32 flagStage;                /* 0xC0: one-based stage associated with the current floor flag. */
-    s32 unkC4;                  /* -1 means no primary label selection. */
-    s32 unkC8;                  /* -1 means no alternate label selection. */
+    s32 primaryMapLabelSelection;   /* -1 means no primary label selection. */
+    s32 secondaryMapLabelSelection; /* -1 means no secondary label selection. */
     s32 overlayMode;
     s32 overlayCounter;
     s32 mapBannerFadeMode;

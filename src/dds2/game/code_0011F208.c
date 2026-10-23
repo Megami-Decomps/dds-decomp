@@ -1689,8 +1689,8 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->primaryMovingMatterIndex = -1;
     area->secondaryMovingMatterIndex = -1;
     area->unk98 = -1;
-    area->unkC4 = -1;
-    area->unkC8 = -1;
+    area->primaryMapLabelSelection = -1;
+    area->secondaryMapLabelSelection = -1;
     area->overlayMode = 1;
     area->overlayCounter = 0;
     area->mapBannerFadeMode = 1;
