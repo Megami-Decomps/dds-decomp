@@ -367,7 +367,7 @@ extern void fldResetPlayerSceneObjectState(void);
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 
-extern s32 mnuPositionedResourceNodes[];
+extern EffNode *mnuPositionedResourceNodes[];
 
 extern s32 mnuPositionedResourceActive[];
 
@@ -424,13 +424,13 @@ extern struct sdfMemHandle_t *fldEffectTextureLoadHandles[];
 
 extern s32 fldEffectTextureData[];
 
-extern s32 fldEffectTextureNodes[];
+extern EffNode *fldEffectTextureNodes[];
 
 extern struct sdfMemHandle_t *fldEffectTextureLoadHandles[4];
 
 extern s32 fldEffectTextureData[4];
 
-extern s32 fldEffectTextureNodes[4];
+extern EffNode *fldEffectTextureNodes[4];
 
 extern s32 D_00436300;
 
@@ -3060,7 +3060,7 @@ void fldLoadFieldEffectTextureSlots(void) {
     memcpy(names, D_00413860, sizeof(names));
     for (i = 0; i < 4; i++) {
         fldEffectTextureLoadHandles[i] = sdfDevLoadFileEx(names[i], &fldEffectTextureData[i], 0);
-        fldEffectTextureNodes[i] = (s32)effCreateNodeFromParameter(fldEffectTextureData[i]);
+        fldEffectTextureNodes[i] = effCreateNodeFromParameter(fldEffectTextureData[i]);
         D_003A8E60[i] = 0;
     }
 }
@@ -3070,7 +3070,7 @@ void fldReleaseTextureSlots(void) {
 
     for (i = 0; i < 4; i++) {
         if (fldEffectTextureNodes[i] != 0) {
-            dds3EffectDelete((EffNode *)(u32)fldEffectTextureNodes[i]);
+            dds3EffectDelete(fldEffectTextureNodes[i]);
             fldEffectTextureNodes[i] = 0;
             sdfMemFreeDelayedDirect(fldEffectTextureLoadHandles[i]);
             fldEffectTextureLoadHandles[i] = NULL;
@@ -3100,11 +3100,11 @@ void fldUpdatePositionedTextureNodes(void) {
             if (i == 3) {
                 position[1] -= 100.0f;
             }
-            effCopyVectorToNodeInstance((EffNode *)fldEffectTextureNodes[i], position);
+            effCopyVectorToNodeInstance(fldEffectTextureNodes[i], position);
             SetRotateMatrixY(-angle);
             VU0_STORE_MATRIX_UNCLOBBERED(matrix);
-            effApplyNodeTransformMatrix((EffNode *)fldEffectTextureNodes[i], matrix);
-            dds3EffectDraw((EffNode *)(u32)fldEffectTextureNodes[i]);
+            effApplyNodeTransformMatrix(fldEffectTextureNodes[i], matrix);
+            dds3EffectDraw(fldEffectTextureNodes[i]);
         }
     }
 }
@@ -3147,7 +3147,7 @@ void fldUpdateIndexedResourceEffectPosition(void) {
 void mnuInitializeResourceEntries(void) {
     s32 i;
     for (i = 0; i < 4; i++) {
-        mnuPositionedResourceNodes[i] = (s32)effCreateNodeFromParameter(D_0043633C);
+        mnuPositionedResourceNodes[i] = effCreateNodeFromParameter(D_0043633C);
         mnuPositionedResourceActive[i] = 0;
     }
 }
@@ -3156,15 +3156,15 @@ extern s32 mnuPositionedResourceCursor;
 
 void mnuSpawnResourceAtPosition(f32 x, f32 y, f32 z) {
     f32 pos[4] = {0.0f, 0.0f, 0.0f, 1.0f};
-    s32 handle;
+    EffNode *handle;
 
     handle = mnuPositionedResourceNodes[mnuPositionedResourceCursor];
-    if (handle != 0) {
+    if (handle != NULL) {
         pos[0] = x;
         pos[1] = y;
         pos[2] = z;
-        dds3EffectReset((EffNode *)(u32)handle);
-        effCopyVectorToNodeInstance((EffNode *)mnuPositionedResourceNodes[mnuPositionedResourceCursor], pos);
+        dds3EffectReset(handle);
+        effCopyVectorToNodeInstance(mnuPositionedResourceNodes[mnuPositionedResourceCursor], pos);
         mnuPositionedResourceActive[mnuPositionedResourceCursor] = 1;
         mnuPositionedResourceCursor = (mnuPositionedResourceCursor + 1) % 4;
     }
@@ -3190,7 +3190,7 @@ void mnuReleaseResourceEntries(void) {
     fldSecondaryEffectPositionPending = 0;
     for (i = 0; i < 4; i++) {
         if (mnuPositionedResourceNodes[i] != 0) {
-            dds3EffectDelete((EffNode *)(u32)mnuPositionedResourceNodes[i]);
+            dds3EffectDelete(mnuPositionedResourceNodes[i]);
             mnuPositionedResourceNodes[i] = 0;
         }
     }
@@ -3200,7 +3200,7 @@ void fldUpdateMenuResourceEffects(void) {
     s32 i;
     for (i = 0; i < 4; i++) {
         if (mnuPositionedResourceNodes[i] != 0 && mnuPositionedResourceActive[i] != 0) {
-            dds3EffectDraw((EffNode *)(u32)mnuPositionedResourceNodes[i]);
+            dds3EffectDraw(mnuPositionedResourceNodes[i]);
         }
     }
 }
