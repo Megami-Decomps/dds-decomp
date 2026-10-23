@@ -4370,11 +4370,11 @@ void fldUpdateModeOneCameraPose(void) {
     while (fldGlobalBase.angle < 0.0f) {
         fldGlobalBase.angle += 360.0f;
     }
-    while (fldGlobalBase.unk174 >= 360.0f) {
-        fldGlobalBase.unk174 -= 360.0f;
+    while (fldGlobalBase.modeOneCameraHeadingTarget >= 360.0f) {
+        fldGlobalBase.modeOneCameraHeadingTarget -= 360.0f;
     }
-    while (fldGlobalBase.unk174 < 0.0f) {
-        fldGlobalBase.unk174 += 360.0f;
+    while (fldGlobalBase.modeOneCameraHeadingTarget < 0.0f) {
+        fldGlobalBase.modeOneCameraHeadingTarget += 360.0f;
     }
     dds3GetRotPoseSet((dds3Basic_t *)fldPlayerObject);
     SDF_VU0_STOREVECTOR_NOMEM(quaternion);
@@ -4382,15 +4382,15 @@ void fldUpdateModeOneCameraPose(void) {
     VU0_LOAD_MATRIX(sdfViewMatrix);
     InversMatrix();
     motion = 23;
-    difference = fldAngleDifference(fldGlobalBase.angle, fldGlobalBase.unk174);
+    difference = fldAngleDifference(fldGlobalBase.angle, fldGlobalBase.modeOneCameraHeadingTarget);
     if (difference < 0.0f) {
         difference = -difference;
     }
     /* Native literal is 0x3D9F49F4; do not replace by rounded 14/180. */
     distance = (180.0f - difference) * 0x1.3e93e8p-4f;
-    position[0] = fldGlobalBase.x - sdfSin(-fldGlobalBase.unk174 * 3.14f / 180.0f) * distance;
+    position[0] = fldGlobalBase.x - sdfSin(-fldGlobalBase.modeOneCameraHeadingTarget * 3.14f / 180.0f) * distance;
     position[1] = fldGlobalBase.y;
-    position[2] = fldGlobalBase.z - sdfCos(-fldGlobalBase.unk174 * 3.14f / 180.0f) * distance;
+    position[2] = fldGlobalBase.z - sdfCos(-fldGlobalBase.modeOneCameraHeadingTarget * 3.14f / 180.0f) * distance;
     dds3SetPosPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)position);
     if (D_003BAB50 != 0) {
         fldGlobalBase.x = position[0];
@@ -4433,7 +4433,7 @@ void fldUpdateModeOneCameraPose(void) {
         }
         ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[3] = 1.0f;
     }
-    difference = fldAngleDifference(fldGlobalBase.angle, fldGlobalBase.unk174);
+    difference = fldAngleDifference(fldGlobalBase.angle, fldGlobalBase.modeOneCameraHeadingTarget);
     step = difference / 6.0f;
     if (step < 0.0f) {
         step = -step;
@@ -4443,7 +4443,7 @@ void fldUpdateModeOneCameraPose(void) {
     }
     if ((0.0f <= difference && difference <= step) ||
         (difference <= 0.0f && -step <= difference)) {
-        difference = fldGlobalBase.unk174;
+        difference = fldGlobalBase.modeOneCameraHeadingTarget;
     } else if (difference < 0.0f) {
         difference = fldGlobalBase.angle - step;
     } else {
