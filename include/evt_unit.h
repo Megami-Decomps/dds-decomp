@@ -72,7 +72,7 @@ typedef enum EvtUnitVectorSlotState {
 /* Native 0x40-byte slot: three vec4 followed by two auxiliary coordinates.
  * The static pool contains seven slots in DDS1 and ten in DDS2. */
 typedef struct EvtUnitVectorSlot {
-    s32 state;                    /* 0x00: EvtUnitVectorSlotState. */
+    EvtUnitVectorSlotState state; /* 0x00: slot ownership state. */
     s32 id;                       /* 0x04: unit bound to a state-3 slot. */
     f32 vec[12];                  /* 0x08: vec4 at 0x08/0x18/0x28. */
     f32 auxX;                     /* 0x38: auxiliary coordinates (scalar fields: */
