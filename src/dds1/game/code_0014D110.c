@@ -163,10 +163,6 @@ extern s32 D_003BAF3C;
 
 extern s32 D_003BAF4C;
 
-extern s32 D_003BAF58;
-
-extern s32 D_003BAF64;
-
 extern s32 fldNpcModelTable;
 
 extern s32 D_003BAF70;
