@@ -506,7 +506,7 @@ void itfSetTextDrawLimit(s32 limit) {
     frDefaultFontHandle = limit;
 }
 
-_FRQ *frwGetStaffFontFRQ(u32 x, u32 y, s32 depth, s32 alt, s32 measureFlag, u64 entryFlag, u32 colors, void *source) {
+_FRQ *frwGetStaffFontFRQ(u32 x, u32 y, s32 depth, s32 alt, s32 measureFlag, u64 entryFlag, u32 colors, const char *source) {
     _FRQ *glyph;
     s32 kind = 4;
 

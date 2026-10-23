@@ -513,7 +513,7 @@ s32 itfInitTextDrawArgs(u8 *encodedText, _FRQ *sub) {
     return itfScanEncodedTextControls(&args);
 }
 
-_FRQ *frwGetStaffFontFRQ(u32 x, u32 y, s32 depth, s32 alt, s32 measureFlag, s32 entryFlag, u32 colors, void *source) {
+_FRQ *frwGetStaffFontFRQ(u32 x, u32 y, s32 depth, s32 alt, s32 measureFlag, s32 entryFlag, u32 colors, const char *source) {
     _FRQ *glyph;
     s32 kind = 4;
 
