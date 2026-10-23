@@ -556,6 +556,7 @@ s32 btlCommandSetSequenceVolumePan(void) {
 }
 
 struct BattleScriptTaskData;
+struct BattleTaskData;
 
 /* 0x70-byte queued-task header, distinct from the unit's 0x170-byte BtlTask.
  * The callback union preserves each consumer's actual function prototype. */
@@ -579,6 +580,7 @@ typedef struct BattleTask {
         void (*update)(void);
         s32 (*run)(void *);
         u32 (*processScript)(struct BattleScriptTaskData *);
+        s32 (*runSceneActorEvent)(struct BattleTaskData *);
     } callback;
     void (*onFinish)(u32 *);
     void *args;
@@ -597,10 +599,9 @@ typedef struct BattleTaskData {
 
 extern BattleTask *btlAllocTask(s32);
 
-extern s32 btlRunSceneActorEventTask(void *);
+extern s32 btlRunSceneActorEventTask(BattleTaskData *);
 
-s32 btlRunSceneActorEventTask(void *args) {
-    BattleTaskData *data = args;
+s32 btlRunSceneActorEventTask(BattleTaskData *data) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     void *resource;
     BtlUnit *unit;
@@ -633,7 +634,7 @@ void *btlCreateActionTask(void *battler, s32 action) {
 
     task->enabled = 1;
     task->taskId = 0x62;
-    task->callback.run = btlRunSceneActorEventTask;
+    task->callback.runSceneActorEvent = btlRunSceneActorEventTask;
     task->status = 0;
     data = btlGetTaskArguments(task);
     data->battler = battler;
