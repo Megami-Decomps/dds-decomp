@@ -193,10 +193,10 @@ s32 btlUnitHasEitherSpecialAction(BtlUnit *unit) {
 
 /* Require the complete first queued-action word and unit status bit 0x1000.
  * Comparing only actions[0].actionId would discard the upper halfword. */
-s32 btlActionMatchesUnit(u8 *unit, s32 action) {
+s32 btlActionMatchesUnit(BtlUnit *unit, s32 action) {
     BtlTask *context = btlActionScratchWork->actor;
     if (context->actions[0] == action) {
-        if (((BtlUnit *)unit)->status.stateFlags & 0x1000) {
+        if (unit->status.stateFlags & 0x1000) {
             return 1;
         }
     }
