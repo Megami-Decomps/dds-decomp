@@ -55,7 +55,7 @@ extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *resource, s32 reso
 extern void kwlnDebugGraphSetEnabled(s8 enabled);
 extern void mnuDrawIconPanelDefaultFlag(s32 x, s32 y, s32 depth, s32 fade, MenuPanelHandles *list, s32 drawArg);
 extern void mnuUpdateWindowPanelHandleStates(MenuPanelHandles *panel);
-extern s32 sdfApplyCommandResults(s32 channel, s32 queryArg, datUnitWork_t *item);
+extern s32 sdfApplyCommandResults(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
 extern void sndDestroyFileQueueWrapper(u32 handle);
 /* Original-style implicit int, kept: matched code depends on it: sndCreateSystemEffectHandle. */
 
@@ -1975,7 +1975,7 @@ s32 mnuGetAbilityTargetCategory(u16 commandId) {
     return 0;
 }
 
-void datDelDevil(u16 ability, s32 target, datUnitWork_t *entry) {
+void datDelDevil(u16 ability, datUnitWork_t *target, datUnitWork_t *entry) {
     sdfApplyCommandResults(ability, target, entry);
 }
 
@@ -1999,7 +1999,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, datUnitWor
         if (btlCheckPartyCommandCounterEligibility(ability, mask) != 0) {
             return 0;
         }
-        datDelDevil(ability, (s32)target, entry);
+        datDelDevil(ability, target, entry);
         mnuQueuePartyPanelSlotBlend(context, mnuFindMatchingPartyEntryIndex(entry), 0, 0);
     } else {
         s32 partyIndex;
@@ -2011,7 +2011,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, datUnitWor
                 mask = mnuGetMatchingPartyEntryMask(entry);
 
                 if (btlCheckPartyCommandCounterEligibility(ability, mask) == 0) {
-                    datDelDevil(ability, (s32)target, entry);
+                    datDelDevil(ability, target, entry);
                     applied = 1;
                 }
             }

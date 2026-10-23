@@ -105,7 +105,7 @@ extern datUnitWork_t *btlGetIndexedPartyEntryRecord(s32);
 
 extern EffRandState effSharedRandomState[];
 
-extern s32 sdfCalculateCommandVitalDelta(s32, s32, datUnitWork_t *, u32, u8);
+extern s32 sdfCalculateCommandVitalDelta(s32, datUnitWork_t *, datUnitWork_t *, u32, u8);
 
 extern s32 evtRunContext(s32 script, s32 firstArgument, s32 secondArgument, s32 commandIndex, u16 options);
 
@@ -186,7 +186,7 @@ s32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s
     }
     btlBossDebugPrintf("btl:hp[atk=%.2f,def=%.2f,bat=%.2f,auto=%.2f]\n",
                        attack, defense, status, automatic);
-    result = sdfCalculateCommandVitalDelta(command, (s32)&attacker->partyRecord, &recipient->partyRecord, maxHits, 1);
+    result = sdfCalculateCommandVitalDelta(command, &attacker->partyRecord, &recipient->partyRecord, maxHits, 1);
     base = result;
     result = (s32)((f32)result * attack * defense * status * automatic);
     if (!(recipient->status.flags & 0x10) && press == 2 && result != 0) {
@@ -285,7 +285,7 @@ s32 btlCalculateMpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s
     }
     btlBossDebugPrintf("btl:mp[atk=%.2f,def=%.2f,bat=%.2f,auto=%.2f]\n",
                        attack, defense, status, automatic);
-    result = sdfCalculateCommandVitalDelta(command, (s32)&attacker->partyRecord, &recipient->partyRecord, maxHits, 2);
+    result = sdfCalculateCommandVitalDelta(command, &attacker->partyRecord, &recipient->partyRecord, maxHits, 2);
     base = result;
     result = (s32)((f32)result * attack * defense * status * automatic);
     if (press == 2 && result != 0) {

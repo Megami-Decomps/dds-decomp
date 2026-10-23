@@ -199,7 +199,7 @@ extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record);
 s32 btlGetAbilityAttributeMultiplierPercent(BtlUnit *actor, s32 attr);
-extern s32 sdfCalculateCommandVitalDelta(s32, s32, datUnitWork_t *, u32, u8);
+extern s32 sdfCalculateCommandVitalDelta(s32, datUnitWork_t *, datUnitWork_t *, u32, u8);
 s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
                                u32 maxHits, s32 actionKind, s32 side,
                                u32 calculationFlags) {
@@ -384,7 +384,7 @@ s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
     }
     btlBossDebugPrintf("btl:hp[atk=%.2f,def=%.2f,bat=%.2f,auto=%.2f,sn=%.2f]\n",
                        attack, defense, status, automatic, solar);
-    amount = sdfCalculateCommandVitalDelta(command, (s32)&source->partyRecord,
+    amount = sdfCalculateCommandVitalDelta(command, &source->partyRecord,
                                            &target->partyRecord, maxHits, 1);
     base = amount;
     amount = (s32)((f32)base * attack * defense * status * automatic * solar);
@@ -566,7 +566,7 @@ s32 btlCalculateMpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
     }
     btlBossDebugPrintf("btl:mp[atk=%.2f,def=%.2f,bat=%.2f,auto=%.2f,sn=%.2f]\n",
                        attack, defense, status, automatic, solar);
-    amount = sdfCalculateCommandVitalDelta(command, (s32)&source->partyRecord,
+    amount = sdfCalculateCommandVitalDelta(command, &source->partyRecord,
                                            &target->partyRecord, maxHits, 2);
     base = amount;
     amount = (s32)((f32)base * attack * defense * status * automatic * solar);

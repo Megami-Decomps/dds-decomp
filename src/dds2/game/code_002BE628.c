@@ -61,7 +61,7 @@ extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceInde
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *resource, s32 resourceIndex, s32 x, s32 y, s32 width, s32 height);
 extern void kwlnDebugGraphSetEnabled(s8 enabled);
 extern u8 ptyIsRosterEntryPresent(s32 rosterIndex);
-extern s32 sdfApplyCommandResults(s32 channel, s32 queryArg, datUnitWork_t *item);
+extern s32 sdfApplyCommandResults(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
 extern void sndDestroyFileQueueWrapper(u32 handle);
 /* Original-style implicit int, kept: matched code depends on it: qsort, sndCreateSystemEffectHandle. */
 
