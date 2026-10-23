@@ -98,7 +98,7 @@ void mnuBuildNamedResourceList(MnuCallbackList *callbackList, MenuRegistryRecord
 void mnuUpdateLinkedTimedStateList(MnuCallbackList *, MenuRuntimeList *, s32, s32, s32, f32);
 
 void mnuUpdateTimedSpawns(MnuCallbackList *callbackList, MenuRuntimeList *runtimeList,
-                   u32 x, u32 y, f32 angle) {
+                   s32 x, s32 y, f32 angle) {
     mnuUpdateLinkedTimedStateList(callbackList, runtimeList, x, y, 1, angle);
 }
 
