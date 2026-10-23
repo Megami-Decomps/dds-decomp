@@ -957,9 +957,9 @@ s32 effCountExpandedEntries(const EffExpandedList *list) {
 /* Serialized expanded list: 0x10-byte header, the entry table, then each entry's payload. */
 /* Copy a serialized list into one allocation and retain a shared texture reference per entry. */
 struct EffExpandedList *effCreateTextureAnimationSet(u32 sourceAddress) {
-    EffExpandedSource *source = (EffExpandedSource *)sourceAddress;
+    const EffExpandedSource *source = (const EffExpandedSource *)sourceAddress;
     u32 count = source->count;
-    EffExpandedEntry *sourceEntry = source->entries;
+    const EffExpandedEntry *sourceEntry = source->entries;
     u32 i = 0;
     struct sdfMemHandle_t *allocation;
     EffExpandedList *list;
