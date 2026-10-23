@@ -664,20 +664,11 @@ s32 btlHasRestrictedUnit(void) {
     return 0;
 }
 
-typedef struct BtlListStatus {
-    u8 pad00[6];
-    u16 primaryCurrent;   /* 0x06 */
-    u16 primaryLimit;     /* 0x08 */
-    u16 secondaryCurrent; /* 0x0A */
-    u16 secondaryLimit;   /* 0x0C */
-    u16 flags;            /* 0x0E */
-} BtlListStatus;
-
 /* Match exactly the marked flag after discarding bit 0x8000. */
-s32 btlListHasMarkedFlag(u8 **entryList, s32 entryCount) {
+s32 btlListHasMarkedFlag(datUnitWork_t **entryList, s32 entryCount) {
     s32 entryIndex;
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
-        if ((((BtlListStatus *)entryList[entryIndex])->flags & BTL_LIST_FLAG_MASK) == BTL_LIST_MARKED_FLAG) {
+        if ((entryList[entryIndex]->status & BTL_LIST_FLAG_MASK) == BTL_LIST_MARKED_FLAG) {
             return 1;
         }
     }
@@ -685,10 +676,10 @@ s32 btlListHasMarkedFlag(u8 **entryList, s32 entryCount) {
 }
 
 /* True only when every primary counter is >= its limit; an empty list passes. */
-s32 cmpButtonGuideShowDone(u8 **entryList, s32 entryCount) {
+s32 cmpButtonGuideShowDone(datUnitWork_t **entryList, s32 entryCount) {
     s32 entryIndex;
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
-        if (((BtlListStatus *)entryList[entryIndex])->primaryCurrent < ((BtlListStatus *)entryList[entryIndex])->primaryLimit) {
+        if (entryList[entryIndex]->hp < entryList[entryIndex]->maxHp) {
             return 0;
         }
     }
@@ -696,10 +687,10 @@ s32 cmpButtonGuideShowDone(u8 **entryList, s32 entryCount) {
 }
 
 /* The secondary-counter counterpart also accepts equality and empty lists. */
-s32 cmpButtonGuideHideDone(u8 **entryList, s32 entryCount) {
+s32 cmpButtonGuideHideDone(datUnitWork_t **entryList, s32 entryCount) {
     s32 entryIndex;
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
-        if (((BtlListStatus *)entryList[entryIndex])->secondaryCurrent < ((BtlListStatus *)entryList[entryIndex])->secondaryLimit) {
+        if (entryList[entryIndex]->mp < entryList[entryIndex]->maxMp) {
             return 0;
         }
     }
@@ -707,10 +698,10 @@ s32 cmpButtonGuideHideDone(u8 **entryList, s32 entryCount) {
 }
 
 /* Test any requested low-15-bit flag, rather than the exact marked pattern. */
-s32 btlListHasMatchingFlag(u8 **entryList, s32 entryCount, u32 requestedFlags) {
+s32 btlListHasMatchingFlag(datUnitWork_t **entryList, s32 entryCount, u32 requestedFlags) {
     s32 entryIndex;
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
-        if ((((BtlListStatus *)entryList[entryIndex])->flags & BTL_LIST_FLAG_MASK) & requestedFlags) {
+        if ((entryList[entryIndex]->status & BTL_LIST_FLAG_MASK) & requestedFlags) {
             return 1;
         }
     }
@@ -807,7 +798,7 @@ s32 btlIndexListNoExpiredEntryCodes(BtlIndexList *indexList, s32 commandId) {
 /* Return 3 for met requirements, or 0 for failed/inapplicable requirements.
  * A failed primary check suppresses later checks. DDS1 has no requirementBits
  * guard here; do not import DDS2's additional guards or cache table reads. */
-u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, BtlIndexList *indexList, s32 commandId) {
+u16 btlDetermineCommandCounterEligibility(datUnitWork_t **entryList, s32 entryCount, BtlIndexList *indexList, s32 commandId) {
     s32 eligibility = BTL_COUNTER_ELIGIBILITY_UNSET;
     if (datCommandRecords[commandId].options & 1) {
         switch (datCommandRecords[commandId].hpType) {
@@ -899,7 +890,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
 }
 
 s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
-    u8 *entryList[26];
+    datUnitWork_t *entryList[26];
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 count;
     s32 i;
@@ -918,7 +909,7 @@ s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
         return 0;
     }
     for (i = 0; i < count; i++) {
-        entryList[i] = (u8 *)btlGetIndexListEntry(indexList, i) + 0x120;
+        entryList[i] = &((BtlUnit *)btlGetIndexListEntry(indexList, i))->partyRecord;
     }
     if (datCommandRecords[commandId].effectType == 2 ||
         (datCommandRecords[commandId].flags & 0x20)) {
@@ -986,14 +977,14 @@ s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *list, s32 row) {
 
 /* Counter eligibility for a command against the selected party members. */
 u16 btlCheckPartyCommandCounterEligibility(s32 commandId, u32 memberMask) {
-    u8 *entryList[5];
+    datUnitWork_t *entryList[5];
     s32 count = 0;
     s32 i;
 
     for (i = 0; i < 5; i++) {
         if (memberMask & (1 << i)) {
             if (DDS3_GBWK->party[i].flags & 1) {
-                entryList[count++] = (u8 *)&DDS3_GBWK->party[i];
+                entryList[count++] = &DDS3_GBWK->party[i];
             }
         }
     }
