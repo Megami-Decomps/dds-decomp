@@ -1443,7 +1443,7 @@ void btlBuildCombinedActorUnit(BtlUnit *dst, BtlUnit *first, BtlUnit *second, Bt
 
 #include "btl_start_voice_row.h"
 
-extern BattleStartVoiceRow btlStartVoiceRows[16];
+extern const BattleStartVoiceRow btlStartVoiceRows[16];
 extern s8 btlMajinStartVoiceIds[16];
 extern char D_004158F8[], D_00415920[];
 extern s32 btlReadCurrentUnitHp(datUnitWork_t *);
@@ -1462,7 +1462,7 @@ s8 btlChooseStartVoice(void) {
     BtlUnit *candidates[3];
     BtlUnit *unit;
     BtlUnit *chosen;
-    s8 *voices;
+    const s8 *voices;
     u32 hp;
     u32 damage;
     s32 count;
