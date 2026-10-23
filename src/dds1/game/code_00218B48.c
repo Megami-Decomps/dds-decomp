@@ -3764,7 +3764,7 @@ s32 dds3BitEditorProcess(void) {
 extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 counter, f32 *position, f32 *rotation);
 
 
-extern void dds3ObjectBaseCreateMover();
+extern void dds3ObjectBaseCreateMover(void *object);
 #include "dds3_world_secondary.h"
 
 void evtSetTestCamera(void) {
