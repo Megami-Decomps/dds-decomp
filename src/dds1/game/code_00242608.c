@@ -25,6 +25,7 @@
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "sdf.h"
+#include "sdf_gs_packet.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
 #include "evt_unit.h"
@@ -966,7 +967,7 @@ extern s32 D_00368C30[4];
 
 void mnuShopQueueAuxiliaryTexturePacket(s32 alpha) {
     sdfDrawTag_t *list;
-    SdfPacket *packet;
+    sdfPrimTransPacket_t *packet;
     u32 color;
 
     if (dds3RenderTexture == NULL) {
@@ -993,15 +994,15 @@ void mnuShopQueueAuxiliaryTexturePacket(s32 alpha) {
     D_00368C20[3] = 0xB90;
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    packet = (SdfPacket *)sdfGrAllocPacketBuff(0x40);
-    packet[0].unk0 = 3;
-    packet[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    packet[0].unk10 = ((u64)0x10000000 << 32) | 0x8002;
-    packet[0].unk18 = 0xE;
-    packet[1].unk0 = 0x50002;
-    packet[1].unk8 = 0x47;
-    packet[1].unk10 = ((u64)(color >> 24) << 32) | 0x64;
-    packet[1].unk18 = 0x42;
+    packet = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+    packet->header.dmaTag = 3;
+    packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->header.gifTag = ((u64)0x10000000 << 32) | 0x8002;
+    packet->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    packet->registers.test.value = 0x50002;
+    packet->registers.test.registerId = SDF_GS_TEST_1;
+    packet->registers.alpha.value = ((u64)(color >> 24) << 32) | 0x64;
+    packet->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(list, (u32)packet);
     itfMiscDrawSpritePrim(D_00368C10, D_00368C20, D_00368C30,
                                   0xFEFF9B, dds3RenderTexture, 0, list);
