@@ -852,7 +852,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     s32 targetCount;
     s32 flaggedTargetCount;
     s32 targetIndex;
-    if (((BtlState *)btlGetRuntime())->unk_1FC & BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS) {
+    if (((BtlState *)btlGetRuntime())->runtimeFlags & BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS) {
         return 0;
     }
     if (commandId <= 0) {
@@ -906,7 +906,7 @@ s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
     s32 requirement;
     s32 code;
 
-    if (battle->unk_1FC & 0x40) {
+    if (battle->runtimeFlags & 0x40) {
         return 0;
     }
     if (commandId <= 0) {
@@ -2655,9 +2655,9 @@ s32 btlUpdateBattleModelDebugEditor(void) {
              btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target < (void *)&btlDebugEditorActorStatus.scale) ||
             btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target == &btlDebugEditorActorStatus.height ||
             btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target == &btlDebugEditorActorStatus.reach) {
-            state->unk_1FC |= 0x200;
+            state->runtimeFlags |= 0x200;
         } else {
-            state->unk_1FC &= ~0x200;
+            state->runtimeFlags &= ~0x200;
         }
         if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target == &btlDebugEditorMotionSlot.muzzleGuideScale) {
             btlUnitGetMuzzlePosVU(unit);
@@ -2909,7 +2909,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
 
     if (dds3PadBitTable[3] < 0) {
         state->battleFlags = (state->battleFlags & 0xFFFDFE3F) | 0x11000000;
-        state->unk_1FC |= 0x40;
+        state->runtimeFlags |= 0x40;
         D_003BBB20 = 1;
     }
     if (dds3PadBitTable[13] < 0) {
@@ -2924,11 +2924,11 @@ s32 btlUpdateDebugEncounterSelector(void) {
     }
     {
         BattleDebugWindow *window = &btlDebugEncounterWindowView;
-        D_003BBB28 = state->unk_1FC;
+        D_003BBB28 = state->runtimeFlags;
         D_003BBB24 = state->battleFlags;
         btlDebugMenuSetupNoOp(window);
         state->battleFlags = D_003BBB24;
-        state->unk_1FC = D_003BBB28;
+        state->runtimeFlags = D_003BBB28;
         btlDebugMenuBeforeRecordNoOp();
         btlDebugMenuRecordNoOp(window);
         btlDebugMenuAfterRecordNoOp();

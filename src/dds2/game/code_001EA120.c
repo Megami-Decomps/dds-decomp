@@ -1074,7 +1074,7 @@ extern void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *, BtlCamState *, Bt
 
 void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
     BtlUnit *target;
-    if (((BtlState *)btlGetRuntime())->unk220 & 1) {
+    if (((BtlState *)btlGetRuntime())->runtimeFlags & 1) {
         target = action->link->unit;
         if (target->status.flags & 0x400) {
             fldCamUpdateDefault(action, &action->camera, target);

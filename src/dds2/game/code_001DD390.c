@@ -845,7 +845,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             }
             if (datCommandRecords[command].flags & 2) {
                 kind = 4;
-            } else if (runtime->unk220 & 0x10) {
+            } else if (runtime->runtimeFlags & 0x10) {
                 kind = 1;
             } else {
                 switch (kind) {

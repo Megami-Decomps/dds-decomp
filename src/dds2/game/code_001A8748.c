@@ -2030,7 +2030,7 @@ u32 btlSelectCommandTargetPolicy(ActionStateLink *task, BtlIndexList *destinatio
         mask = -1;
         break;
     }
-    if (battle->unk220 & BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS) {
+    if (battle->runtimeFlags & BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS) {
         mode = 3;
         flags &= ~0xB;
         mask = 0;
@@ -3554,7 +3554,7 @@ s32 btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *defender, u32 comm
         fixed = 100;
     }
     if (datCommandRecords[command].effectType == 0) {
-        if (battle->unk220 & 0x1000) {
+        if (battle->runtimeFlags & 0x1000) {
             return 2;
         }
         if (critical == 0) {

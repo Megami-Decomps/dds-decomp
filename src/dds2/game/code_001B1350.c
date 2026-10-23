@@ -92,7 +92,7 @@ u32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, u32 command,
     s32 guardAbility;
     u32 result;
 
-    if (((BtlState *)btlGetRuntime())->unk220 & 0x80) {
+    if (((BtlState *)btlGetRuntime())->runtimeFlags & 0x80) {
         return 0;
     }
     guardAbility = -1;
@@ -247,7 +247,7 @@ s32 btlResolveCommandHitResult(BtlUnit *source, BtlUnit *target, s32 command) {
     entryFlags = datCommandRecords[command].flags;
     entryFlags = btlGetEntryFlagsUnlessDisabled(targetRecord);
     targetFlags = target->status.stateFlags;
-    runtimeFlags = runtime->unk220;
+    runtimeFlags = runtime->runtimeFlags;
     if (targetFlags & 0x4000) entryFlags |= 0x20;
     if (runtimeFlags & 0x10) return 0x20000;
     if (runtimeFlags & 8) return 0x40000;
