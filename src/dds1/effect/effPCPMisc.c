@@ -2089,7 +2089,7 @@ void effPCPMultiBlurExp2SetArea(EffPCPCompactFadeWork *work, f32 input) {
     work->unk34 = input;
 }
 
-void *effPCPFilterExpCreate(src)
+EffPCPFadeTimer *effPCPFilterExpCreate(src)
     EffPCPFadeTimerParams *src;
 {
     EffPCPFadeTimer *dst;
@@ -2109,7 +2109,7 @@ void *effPCPFilterExpCreatePCF(void *args) {
     return effPCPFilterExpCreate(param0);
 }
 
-void *effPCPFilterExpCopy(EffPCPFadeTimerParams *src) {
+EffPCPFadeTimer *effPCPFilterExpCopy(EffPCPFadeTimerParams *src) {
     return effPCPFilterExpCreate(src);
 }
 
