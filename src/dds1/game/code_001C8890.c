@@ -2791,7 +2791,7 @@ void btlEnterStatusDamageState(void) {
 }
 
 
-extern s32 btlSumOtherTargetHitAmounts(u8 *);
+extern s32 btlSumOtherTargetHitAmounts(BtlTask *);
 
 extern s32 btlComputeStatusPenaltyFifth(BtlUnit *);
 
@@ -2816,7 +2816,7 @@ void btlProcessPostActionStatusEffects(BtlTask *action) {
     }
     switch (unit->partyRecord.status & 0x7FFF) {
     case 0x400:
-        amount = btlSumOtherTargetHitAmounts((u8 *)action);
+        amount = btlSumOtherTargetHitAmounts(action);
         if (amount < 0) {
             btlStartTask(sndCreateStationedSeTask(0x1000A));
             memset(&spec, 0, sizeof(spec));

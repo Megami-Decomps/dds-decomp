@@ -610,9 +610,9 @@ s32 btlCalculateMpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
 }
 
 
-s32 btlSumOtherTargetHitAmounts(u8 *action) {
-    BtlTargetResult *result = *(BtlTargetResult **)(action + 0x88);
-    u32 count = btlGetIndexListCount(*(BtlIndexList **)(action + 0x60));
+s32 btlSumOtherTargetHitAmounts(ActionStateLink *action) {
+    BtlTargetResult *result = (BtlTargetResult *)action->indexWork.groups;
+    u32 count = btlGetIndexListCount(action->indexWork.indices);
     u32 i;
     u32 j;
     s32 total = 0;
@@ -629,8 +629,7 @@ s32 btlSumOtherTargetHitAmounts(u8 *action) {
         case 0x40000:
             break;
         default:
-            if (*(BtlUnit **)(action + 0x18) !=
-                btlGetIndexListEntry(*(BtlIndexList **)(action + 0x60), i)) {
+            if (action->unit != btlGetIndexListEntry(action->indexWork.indices, i)) {
                 for (j = 0; j < result->hitCount; j++) {
                     total += result->hits[j].amount;
                 }
