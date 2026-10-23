@@ -317,7 +317,7 @@ extern char D_003BAC40[];
 
 extern s32 fldRoomEventPlacementCount;
 
-extern dds3Basic_t *dds3AddEventBasic(s32 key, void *work, s32 name);
+extern dds3Basic_t *dds3AddEventBasic(s32 key, void *work, const char *name);
 
 extern u32 fldEveHit_AddEveData(u32, dds3Basic_t *);
 
@@ -991,7 +991,7 @@ extern char D_00330760[];
 
 extern char fldHitProgramName[];
 
-extern dds3Basic_t *dds3AddEventBasic(s32, void *, s32);
+extern dds3Basic_t *dds3AddEventBasic(s32, void *, const char *);
 
 extern char D_00330780[];
 
@@ -1002,7 +1002,7 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 radius) {
     dds3Basic_t *object;
     s32 taskIndex;
 
-    object = dds3AddEventBasic(worldKey, D_00330780, (s32)D_00330760);
+    object = dds3AddEventBasic(worldKey, D_00330780, D_00330760);
     fldActionRows[index].displayResource.id = worldKey;
     taskIndex = fldEveHit_AddEveData(
         (u32)&fldActionRows[index].displayResource, object);
@@ -1054,9 +1054,9 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
     s32 taskIndex;
 
     if (kind == 0) {
-        object = dds3AddEventBasic(worldKey, D_003307A0, (s32)D_00330760);
+        object = dds3AddEventBasic(worldKey, D_003307A0, D_00330760);
     } else {
-        object = dds3AddEventBasic(worldKey, D_00330790, (s32)D_00330760);
+        object = dds3AddEventBasic(worldKey, D_00330790, D_00330760);
     }
     fldActionRows[index].displayResource.id = worldKey;
     taskIndex = fldEveHit_AddEveData(

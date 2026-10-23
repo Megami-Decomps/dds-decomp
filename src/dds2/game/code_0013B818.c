@@ -704,7 +704,7 @@ static inline void fldInitializeActionTransform(FldActionTransformFields *transf
     transform->rotation[3] = 0.0f;
 }
 
-extern dds3Basic_t *dds3AddEventBasic(s32, void *, s32);
+extern dds3Basic_t *dds3AddEventBasic(s32, void *, const char *);
 
 void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
     FldActionTransformFields *transform;
@@ -717,7 +717,7 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
 
     index = fldActionRowCount;
     counter = dds3AllocObjectId();
-    object = dds3AddEventBasic(counter, D_0038BC20, (s32)D_0038BC00);
+    object = dds3AddEventBasic(counter, D_0038BC20, (const char *)D_0038BC00);
     fldActionRows[index].displayResource.id = counter;
     slot = fldEveHit_AddEveData((u32)&fldActionRows[index].displayResource, object);
     fldActionRows[index].prefix.task.shape.radius = triggerRadius;
@@ -755,9 +755,9 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
     s32 taskIndex;
 
     if (kind == 0) {
-        object = dds3AddEventBasic(worldKey, D_0038BC40, (s32)D_0038BC00);
+        object = dds3AddEventBasic(worldKey, D_0038BC40, (const char *)D_0038BC00);
     } else {
-        object = dds3AddEventBasic(worldKey, D_0038BC30, (s32)D_0038BC00);
+        object = dds3AddEventBasic(worldKey, D_0038BC30, (const char *)D_0038BC00);
     }
     fldActionRows[index].displayResource.id = worldKey;
     taskIndex = fldEveHit_AddEveData(

@@ -36,12 +36,12 @@ u32 dds3SearchSceneBasicWorkData(u32 id) {
     return ((Dds3PathStatePayload *)path->data)->value;
 }
 
-dds3Basic_t *dds3AddEventBasic(s32 key, void *work, s32 name) {
+dds3Basic_t *dds3AddEventBasic(s32 key, void *work, const char *name) {
     dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_ACTION_D);
 
     obj->data = work;
     obj->key = key;
-    obj->value = (const char *)name;
+    obj->value = name;
     return obj;
 }
 
