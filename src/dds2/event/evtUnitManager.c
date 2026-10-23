@@ -826,9 +826,9 @@ s32 evtDeleteUnitHandle(evtUnitHandle_t *transitionWork) {
         sdfChipFreeDirect(endpointWork);
         transitionWork->endpointWork = NULL;
     }
-    if (transitionWork->pathHandle != 0) {
-        dds3DeletePathControl((dds3PathBasicControl_t *)transitionWork->pathHandle);
-        transitionWork->pathHandle = 0;
+    if (transitionWork->pathControl != NULL) {
+        dds3DeletePathControl(transitionWork->pathControl);
+        transitionWork->pathControl = NULL;
     }
     sdfChipFreeDirect(transitionWork);
     return 1;
@@ -1066,12 +1066,12 @@ s32 evtUnitPrepareVerticalMoveSteps(evtUnitHandle_t *unit) {
 s32 evtUnitMoveTypePathTrace(evtUnitHandle_t *unit) {
     f32 v[4];
 
-    dds3PathBasicControlIsFinished(&((dds3PathBasicControl_t *)unit->pathHandle)->counter);
-    dds3PathBasicControlGetPos((dds3PathBasicControl_t *)unit->pathHandle);
+    dds3PathBasicControlIsFinished(&unit->pathControl->counter);
+    dds3PathBasicControlGetPos(unit->pathControl);
     VU0_STORE_VF($vf10, v);
     dds3SetPosPoseSet(unit->effObj, (u128 *)v);
     if (unit->flags & 0x10) {
-        dds3PathBasicControlGetRot((dds3PathBasicControl_t *)unit->pathHandle);
+        dds3PathBasicControlGetRot(unit->pathControl);
         VU0_MOVE_VF(vf11, vf10);
         sdfConvertEulerAnglesToQuaternionVU(0.0f, 3.14159265f, 0.0f);
         effMiscQuatMultiplyVU();
@@ -1261,11 +1261,11 @@ void evtSetUnitMove3(evtUnitHandle_t *work, s32 pathObjectKey, s32 frames, s32 v
     if (pathSource == NULL) {
         return;
     }
-    if (work->pathHandle != 0) {
-        dds3DeletePathControl((dds3PathBasicControl_t *)work->pathHandle);
+    if (work->pathControl != NULL) {
+        dds3DeletePathControl(work->pathControl);
     }
     path = dds3AllocPathBasicWorkData(pathSource);
-    work->pathHandle = (s32)path;
+    work->pathControl = path;
     work->pathSpeed = 40.0f / GetSplineLength(path);
     if (dirFlag == 0) {
         dds3PathBasicControlSetRatio(&path->counter, 0.0f);
