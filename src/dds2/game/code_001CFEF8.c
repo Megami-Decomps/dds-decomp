@@ -980,7 +980,7 @@ extern s32 btlDestroyTaskD(void);
 extern s32 btlChooseAvailableUnit(void);
 extern BtlRuntimeTask *btlCreateHookedUnitSoundTask(BtlUnit *, s32);
 extern BtlRuntimeTask *sndCreateClearBattleFlagTask(void);
-extern s32 btlGetSlotRateKind(u8 *, s32);
+extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
 extern void btlAdvanceTitleState(void);
 extern BtlRuntimeTask *sndCreateCustomTask(s32, s32);
@@ -1052,7 +1052,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
                     task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                     task->startCondition.value.handle = sound->handle;
                     btlStartTask(task);
-                    task = btlAllocateIndexedUnitEffectTask(unit, 0xF, btlGetSlotRateKind((u8 *)unit, 0xF), 1.0f);
+                    task = btlAllocateIndexedUnitEffectTask(unit, 0xF, btlGetSlotRateKind(unit, 0xF), 1.0f);
                     task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                     task->startCondition.value.handle = sound->handle;
                     btlStartTask(task);
