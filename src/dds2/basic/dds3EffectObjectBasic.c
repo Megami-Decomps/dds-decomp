@@ -553,7 +553,7 @@ dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *resource, void *position, void *
    The legacy constructor call and its argument types are deliberately unchanged. */
 void *dds3AddBEDEffectObjectBasic(void *resource, void *firstVector, void *secondVector) {
     u32 resolvedId;
-    void *resourceHandle;
+    struct sdfMemHandle_t *resourceHandle;
     void *created;
 
     resolvedId = 0;
@@ -693,7 +693,7 @@ dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 kind, struct EffNodeDescriptor *d
 /* Resolve a named resource for the kind/value constructor, then release that resource. */
 void *dds3AddMG12EffectObjectBasic(s32 kind, void *resource) {
     u32 resolvedId;
-    void *resourceHandle;
+    struct sdfMemHandle_t *resourceHandle;
     void *created;
 
     resolvedId = 0;
