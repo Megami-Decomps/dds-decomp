@@ -40,7 +40,7 @@ typedef dds3PoseSet_t EffectParameters;
 
 
 void dds3FreePoseSet(dds3Basic_t *node);
-void dds3ObjectBaseFreeControlWorkData(void *objectBase);
+void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *objectBase);
 /* Dispatchers take (bill handle, 16-byte vector, extra); the vector is
    loaded with lqc2 and the extra is forwarded to dds3AddEffectObjectBasic. */
 dds3Basic_t *AddP2AEffect(void *bill, void *vec, s32 extra);
