@@ -4927,7 +4927,7 @@ extern s32 fileTestSavedSlotFlags(u32);
 extern s32 D_004164C8[2][4];
 extern u16 *btlGatherActorCommandsByKind(s32, s16 *, u16, u16, u16);
 
-extern BattleRosterTable *btlGetActorLinkageSkillList(s32, u16 *);
+extern BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *, u16 *);
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004164B8);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004164C8);
@@ -5000,7 +5000,7 @@ void btlInitializeCommandOptionState(BattleSceneObject *object) {
         break;
     case 3:
         object->selections[4].entry = object->owner->unit->partyRecord.unk1AE;
-        btlGetActorLinkageSkillList((s32)object, (u16 *)&count);
+        btlGetActorLinkageSkillList(object, (u16 *)&count);
         if (count - 1 < object->selections[4].entry) {
             object->selections[4].entry = 0;
             object->selections[4].cursor = 0;
@@ -5503,7 +5503,7 @@ extern u32 btlGetActorCommandClass(BattleSceneObject *,s8);
 extern u32 fldUpdateSceneKindCounter(s32,s8,s8);
 extern u16 *btlGatherActorCommandsByKind(s32,s16 *,u16,u16,u16);
 extern void fldCollectAvailableRosterEntries(s32,s16 *);
-extern BattleRosterTable *btlGetActorLinkageSkillList(s32,u16 *);
+extern BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *,u16 *);
 extern void btlReleaseRegisteredTaskBuffer(s32);
 extern void btlDrawWindowHelpLine(s32,s32,u32,u32,u16,s16);
 extern u8 D_003B5B10[];
@@ -5594,7 +5594,7 @@ s32 func_001BFB58(dds3ProcessID_t *task) {
     case 4: {
         BtlCommandHintWork *skillWindow;
         u16 textId;
-        BattleRosterTable *entries = btlGetActorLinkageSkillList((s32)object, (u16 *)&count);
+        BattleRosterTable *entries = btlGetActorLinkageSkillList(object, (u16 *)&count);
         textId=entries->entries[row].skill;
         skillWindow = D_004367F8;
         draw = 1;
@@ -5724,7 +5724,8 @@ s32 btlRecordListedLinkageSkills(void) {
     BattleRosterTable *table;
     s32 i;
     if (task != 0) {
-        table = btlGetActorLinkageSkillList(dds3GetProcessData(task), &count);
+        table = btlGetActorLinkageSkillList(
+            (BattleSceneObject *)dds3GetProcessData(task), &count);
         for (i = 0; i < count; i++) {
             btlAccessRecordedLinkageSkillFlag(table->entries[i].skill, 0);
         }
@@ -5797,7 +5798,8 @@ s32 btlUpdateLinkageNoticeTask(dds3ProcessID_t *task) {
             work->phase = 6;
             break;
         }
-        list = btlGetActorLinkageSkillList(dds3GetProcessData(panelTask), &count);
+        list = btlGetActorLinkageSkillList(
+            (BattleSceneObject *)dds3GetProcessData(panelTask), &count);
         scanIndex = (u16)work->itemIndex;
         while (scanIndex < count) {
             id = list->entries[work->itemIndex].skill;
@@ -8909,7 +8911,7 @@ u32 fldUpdateSceneKindCounter(s32 ctx, s8 kind, s8 noClamp) {
         btlCommandSelectionHighlightWork->value[0] = buffer.ids[0] + 1;
         break;
     case 4:
-        btlGetActorLinkageSkillList(ctx, &buffer.count);
+        btlGetActorLinkageSkillList((BattleSceneObject *)ctx, &buffer.count);
         btlCommandSelectionHighlightWork->value[4] = buffer.ids[0];
         break;
     case 2:
@@ -9110,8 +9112,7 @@ void fldCollectAvailableRosterEntries(s32 unused, s16 *count) {
 }
 
 /* Cache the LINKAGE list count while returning shared skill/member records. */
-BattleRosterTable *btlGetActorLinkageSkillList(s32 address, u16 *outCount) {
-    BattleSceneObject *object = (BattleSceneObject *)address;
+BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *object, u16 *outCount) {
     s32 cachedCount = D_004367C0;
     if (cachedCount == 0) {
         cachedCount = btlBuildActorLinkageSkillList((s32)object->owner->unit, &D_003B5D10);
