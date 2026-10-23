@@ -1065,7 +1065,7 @@ extern void dds3MatterObjectBasicSetHojiID(dds3Basic_t *, u32);
 
 extern void dds3ObjectBaseMakeMatter(dds3Basic_t *);
 
-extern s32 dds3ObjectBaseRegistArea(void *);
+extern s32 dds3ObjectBaseRegistArea(dds3Basic_t *);
 
 void fldCreateResourceScriptObjects(void) {
     f32 position[4];

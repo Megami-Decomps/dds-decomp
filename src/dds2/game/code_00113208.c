@@ -11,7 +11,7 @@ extern void dds3SetRadiusPoseSet(dds3PoseSet_t *node);
 extern dds3Basic_t *dds3GetFirstWorldObjectNodeOfKind2(void);
 
 
-extern s32 dds3ObjectBaseRegistArea(void *object);
+extern s32 dds3ObjectBaseRegistArea(dds3Basic_t *object);
 
 s32 dds3CameraObjectBasicGetMode(dds3Basic_t *object) {
     return ((CameraData *)object->data)->eyeIsRelative;

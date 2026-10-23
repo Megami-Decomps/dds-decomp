@@ -3855,7 +3855,7 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
 }
 
 
-extern s32 dds3ObjectBaseRegistArea(void *obj);
+extern s32 dds3ObjectBaseRegistArea(dds3Basic_t *obj);
 
 s32 evtLoadUnit(s32 slotKind, s32 resource) {
     f32 pos[4];
