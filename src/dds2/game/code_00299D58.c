@@ -422,7 +422,7 @@ void brsUpdateStatSelectionExtent(BrsSkillPackageWork *scene) {
 }
 
 extern void evtStageTestUpdateCamera(void);
-extern s32 brsAdvanceSkillPackagePanel(s32);
+extern s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *);
 extern void ptyAccumulateStatGains(s32 *, s32, datUnitWork_t *);
 extern s32 mnuAdvanceTitleEntryAnimation(datUnitWork_t *);
 extern void mnuStaffCopyPanelBlock(datUnitWork_t *, BrsSkillPackageWork *);
@@ -449,7 +449,7 @@ s32 brsProcessNextPrimaryReward(dds3ProcessID_t *task) {
     if (result != 0) {
         return result;
     }
-    if (brsAdvanceSkillPackagePanel((s32)scene) != 0) {
+    if (brsAdvanceSkillPackagePanel(scene) != 0) {
         return 0;
     }
     if (*dispatchStatus == 0) {
