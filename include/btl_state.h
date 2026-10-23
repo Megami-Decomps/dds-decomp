@@ -230,7 +230,7 @@ typedef struct BtlState {
         };
         u32 cameraActorConfiguration; /* 0x244 */
     };
-    u16 turnPhase; /* 0x248 */
+    u16 preemptiveOutcome; /* 0x248: selected outcome carried into the battle mode. */
     u8 unk24A; /* Nonzero selects stream 2 when the scene has no override. */
     u8 pad24B[1];
     u16 mode; /* 0x24C */
@@ -473,7 +473,7 @@ typedef struct BtlState {
         };
         u32 cameraActorConfiguration; /* 0x268: mode and persistent actor count. */
     };
-    u16 unk26C;
+    u16 preemptiveOutcome; /* 0x26C: debug override or selected battle outcome. */
     u8 encounterKind; /* 0x26E: scene setup selects 0, 2 or 3. */
     u8 pad26F;
     u16 mode; /* 0x270 */

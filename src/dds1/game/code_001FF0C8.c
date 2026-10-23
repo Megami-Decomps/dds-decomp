@@ -943,7 +943,7 @@ s32 btlTurnReachedLimit(s32 unused, u32 minimumTurns) {
 /* Return true only in phase 2 with no counted turns. */
 s32 btlIsReadyWithoutTurns(void) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
-    if (battleState->turnPhase == 2) {
+    if (battleState->preemptiveOutcome == 2) {
         if (battleState->turnCount == 0) {
             return 1;
         }

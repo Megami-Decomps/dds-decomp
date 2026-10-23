@@ -3125,7 +3125,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
         state->background.ids.major = D_00436F6C;
         state->background.ids.minor = D_00436F6E;
     }
-    state->unk26C = D_00436F70;
+    state->preemptiveOutcome = D_00436F70;
     return 1;
 }
 
