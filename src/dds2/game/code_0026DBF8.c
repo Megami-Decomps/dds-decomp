@@ -112,10 +112,10 @@ typedef struct MantraMenu {
     MantraMenuWork work;
 } MantraMenu;
 extern u32 scrGetSelectedScriptEntryId(datUnitWork_t *);
-extern datUnitWork_t *mnuGetSelectedNodeValue(u8 *);
+extern datUnitWork_t *mnuGetSelectedNodeValue(MnuStatusResource *);
 extern struct MantraIconPool *mnuAllocateMantraIconPool(u32);
-extern u32 mnuCreateMantraIconListA();
-extern u32 mnuCreateMantraIconListB();
+extern u32 mnuCreateMantraIconListA(s32 unused, MnuStatusResource *resource);
+extern u32 mnuCreateMantraIconListB(s32 unused, MnuStatusResource *resource);
 extern u32 mnuCreateMantraIconListC();
 extern void mnuReleaseMantraFadeData(struct MantraDrawItem *);
 s32 mnuUpdateMantraLimitLineFade();
@@ -3680,7 +3680,7 @@ void mnuSpawnMantraIconWithShortLoop(MantraDrawPool *pool) {
 }
 
 /* Seed the fade list with the current selection and its saved node position. */
-u32 mnuCreateMantraIconListA(s32 unused, u8 *menu) {
+u32 mnuCreateMantraIconListA(s32 unused, MnuStatusResource *resource) {
     u32 data = (u32)sdfChipAllocDirect(0x10);
     MantraMenuWork *slot;
     MantraNodePos *first;
@@ -3689,8 +3689,8 @@ u32 mnuCreateMantraIconListA(s32 unused, u8 *menu) {
     memset((void *)data, 0, 0x10);
     ((MantraFadeData *)data)->iconPool = mnuAllocateMantraIconPool(0xA);
     ((MantraFadeData *)data)->state = 1;
-    slot = &((MantraMenu *)menu)->work;
-    first = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId(mnuGetSelectedNodeValue(menu)));
+    slot = &((MantraMenu *)resource)->work;
+    first = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId(mnuGetSelectedNodeValue(resource)));
     mnuSpawnMantraIcon(first->x / 10.0f * 40.0f, first->y / 10.0f * 39.0f, ((MantraFadeData *)data)->iconPool, 0x20);
     second = slot->selectedNode;
     mnuSpawnMantraIcon(second->x / 10.0f * 40.0f, second->y / 10.0f * 39.0f, ((MantraFadeData *)data)->iconPool, 0x10);
@@ -3751,7 +3751,7 @@ u32 mnuDrawMantraIconList(u32 unused, u32 obj) {
 }
 
 /* Seed the alternate-scale list from the same current and saved positions. */
-u32 mnuCreateMantraIconListB(s32 unused, u8 *menu) {
+u32 mnuCreateMantraIconListB(s32 unused, MnuStatusResource *resource) {
     u32 data = (u32)sdfChipAllocDirect(0x10);
     MantraMenuWork *slot;
     MantraNodePos *first;
@@ -3760,8 +3760,8 @@ u32 mnuCreateMantraIconListB(s32 unused, u8 *menu) {
     memset((void *)data, 0, 0x10);
     ((MantraFadeData *)data)->iconPool = mnuAllocateMantraIconPool(0xA);
     ((MantraFadeData *)data)->state = 1;
-    slot = &((MantraMenu *)menu)->work;
-    first = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId(mnuGetSelectedNodeValue(menu)));
+    slot = &((MantraMenu *)resource)->work;
+    first = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId(mnuGetSelectedNodeValue(resource)));
     mnuSpawnMantraIcon(first->x * 20 / 10.0f, first->y * 20 / 10.0f, ((MantraFadeData *)data)->iconPool, 0x60);
     second = slot->selectedNode;
     mnuSpawnMantraIcon(second->x * 20 / 10.0f, second->y * 20 / 10.0f, ((MantraFadeData *)data)->iconPool, 0x50);
