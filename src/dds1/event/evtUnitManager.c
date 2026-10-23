@@ -1140,11 +1140,11 @@ extern u8 D_003AC600[];
 extern u32 sdfGetLodChunkValue(sdfModelRootNode_t *model);
 extern u32 scrGetMessageHandle(void);
 extern void evtSetUnitKutiMotion(evtUnitHandle_t *unit, s32 firstSlot, s32 secondSlot);
-extern void *dds3AddMG12EffectObjectBasic(s32 kind, void *resource);
-extern void dds3EffectObjectBasicStatOn(void *object, s32 flags);
-extern void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *firstVector, void *secondVector);
+extern dds3Basic_t *dds3AddMG12EffectObjectBasic(s32 kind, void *resource);
+extern void dds3EffectObjectBasicStatOn(dds3Basic_t *object, s32 flags);
+extern dds3Basic_t *effObjSpawnLoadedResourceEffect(const char *resourceName, void *firstVector, void *secondVector);
 extern u8 D_003AC520[];
-extern void *dds3AddBEDEffectObjectBasic(void *resource, void *firstVector, void *secondVector);
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic(void *resource, void *firstVector, void *secondVector);
 
 extern void evtUnitLightOff(evtUnitHandle_t *unit, s32 duration);
 extern void evtEndUnitValueTransition(evtUnitHandle_t *unit, s32 duration);
@@ -2542,7 +2542,7 @@ u32 evtCommand_EFFECT_LOAD(void) {
     u8 buf1[16];
     u8 buf2[16];
     char *resourceName;
-    evtUnitHandle_t *unit;
+    dds3Basic_t *unit;
 
     memset(buf1, 0, 0x10);
     memset(buf2, 0, 0x10);
@@ -2554,7 +2554,7 @@ u32 evtCommand_EFFECT_LOAD(void) {
         scrSetIntReturnValue(0);
     } else {
         dds3EffectObjectBasicStatOn(unit, 1);
-        scrSetIntReturnValue(unit->objectId);
+        scrSetIntReturnValue(unit->key);
     }
     return 1;
 }
@@ -2563,7 +2563,7 @@ u32 evtCommand_EFFBED_LOAD(void) {
     f32 buf1[4];
     f32 buf2[4];
     char *param0;
-    evtUnitHandle_t *unit;
+    dds3Basic_t *unit;
 
     memset(buf1, 0, 0x10);
     memset(buf2, 0, 0x10);
@@ -2576,7 +2576,7 @@ u32 evtCommand_EFFBED_LOAD(void) {
         scrSetIntReturnValue(0);
     } else {
         dds3EffectObjectBasicStatOn(unit, 1);
-        scrSetIntReturnValue(unit->objectId);
+        scrSetIntReturnValue(unit->key);
     }
     return 1;
 }
@@ -2678,7 +2678,7 @@ u32 evtCommand_EFFBED_START_EVO(void) {
 
 u32 evtCommand_EFFMG1_LOAD(void) {
     char *param0;
-    evtUnitHandle_t *unit;
+    dds3Basic_t *unit;
 
     param0 = scrGetStrPara(0);
     unit = dds3AddMG12EffectObjectBasic(1, param0);
@@ -2688,7 +2688,7 @@ u32 evtCommand_EFFMG1_LOAD(void) {
         scrSetIntReturnValue(0);
     } else {
         dds3EffectObjectBasicStatOn(unit, 1);
-        scrSetIntReturnValue(unit->objectId);
+        scrSetIntReturnValue(unit->key);
     }
     return 1;
 }
@@ -2728,7 +2728,7 @@ u32 evtCommand_EFFMG1_BE(void) {
 
 u32 evtCommand_EFFMG2_LOAD(void) {
     char *param0;
-    evtUnitHandle_t *unit;
+    dds3Basic_t *unit;
 
     param0 = scrGetStrPara(0);
     unit = dds3AddMG12EffectObjectBasic(2, param0);
@@ -2738,7 +2738,7 @@ u32 evtCommand_EFFMG2_LOAD(void) {
         scrSetIntReturnValue(0);
     } else {
         dds3EffectObjectBasicStatOn(unit, 1);
-        scrSetIntReturnValue(unit->objectId);
+        scrSetIntReturnValue(unit->key);
     }
     return 1;
 }

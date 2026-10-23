@@ -452,7 +452,7 @@ dds3Basic_t *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descript
 }
 
 /* Load and bind the named resource, returning the created object. */
-void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *firstVector, void *secondVector) {
+dds3Basic_t *effObjSpawnLoadedResourceEffect(const char *resourceName, void *firstVector, void *secondVector) {
     struct EffNode *bill;
 
     bill = dds3EffectFileLoad(resourceName);
@@ -552,10 +552,10 @@ dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *resource, void *position, void *
 
 /* Resolve the resource identifier, create from it, then release the temporary resource.
    The legacy constructor call and its argument types are deliberately unchanged. */
-void *dds3AddBEDEffectObjectBasic(void *resource, void *firstVector, void *secondVector) {
+dds3Basic_t *dds3AddBEDEffectObjectBasic(void *resource, void *firstVector, void *secondVector) {
     u32 resolvedId;
     struct sdfMemHandle_t *resourceHandle;
-    void *created;
+    dds3Basic_t *created;
 
     resolvedId = 0;
     resourceHandle = sdfDevLoadFileEx(resource, &resolvedId, 0);
@@ -692,10 +692,10 @@ dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 kind, struct EffNodeDescriptor *d
 }
 
 /* Resolve a named resource for the kind/value constructor, then release that resource. */
-void *dds3AddMG12EffectObjectBasic(s32 kind, void *resource) {
+dds3Basic_t *dds3AddMG12EffectObjectBasic(s32 kind, void *resource) {
     u32 resolvedId;
     struct sdfMemHandle_t *resourceHandle;
-    void *created;
+    dds3Basic_t *created;
 
     resolvedId = 0;
     resourceHandle = sdfDevLoadFileEx(resource, &resolvedId, 0);
