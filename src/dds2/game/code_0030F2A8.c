@@ -276,7 +276,7 @@ void mtxStore(SdfMat4 *destination, SdfMat4 *source) {
 #include "sdf_vector_transform.h"
 
 
-f32 *sdfTransformDirectionByMatrix(f32 *direction, f32 *matrix) {
+f32 *sdfTransformDirectionByMatrix(f32 *direction, const f32 *matrix) {
     f32 transformed[4];
     f32 x = direction[0];
     f32 y = direction[1];
