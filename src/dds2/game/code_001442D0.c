@@ -323,7 +323,7 @@ extern s32 fldCurrentBgmId[];
 
 extern void p2sdStopSe(u32);
 
-extern void fldAddressResolver(u32 buffer, s32 chunk);
+extern void fldAddressResolver(u32 buffer, FldTransferChunk *chunk);
 
 extern s32 D_00389780[];
 
@@ -1157,28 +1157,28 @@ void fldLoadSceneRecordTable(void) {
     char path[0x80];
     char directory[0x40];
     s32 resourceHandle;
-    s32 transferStart;
+    FldTransferChunk *transferStart;
     FldSceneRecordTableHeader *header;
 
     fldMakeFilePath(directory, fldGlobalBase.area, 1);
     sprintf(path, (const char *)D_00413700, directory, fldGlobalBase.area);
     fldAutoMapBuf = sdfDevLoadFileEx(path, &resourceHandle, 0);
-    transferStart = resourceHandle + 8;
+    transferStart = (FldTransferChunk *)(resourceHandle + 8);
     fldAddressResolver(resourceHandle, transferStart);
-    header = (FldSceneRecordTableHeader *)fldGetInfoHeader((FldTransferChunk *)transferStart);
+    header = (FldSceneRecordTableHeader *)fldGetInfoHeader(transferStart);
     fldAutoMapHeader = header->rows;
     fldAutoMapData = header->count;
 }
 
 void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
     if (D_00389780[0] < 0xC8) {
-        u8 *transferStart = chunk + 8;
+        FldTransferChunk *transferStart = (FldTransferChunk *)(chunk + 8);
 
         fldAutoMapBuf = (struct sdfMemHandle_t *)(u32)resourceHandle;
-        fldAddressResolver((u32)chunk, (s32)(u32)transferStart);
+        fldAddressResolver((u32)chunk, transferStart);
         {
             FldSceneRecordTableHeader *header =
-                (FldSceneRecordTableHeader *)fldGetInfoHeader((FldTransferChunk *)transferStart);
+                (FldSceneRecordTableHeader *)fldGetInfoHeader(transferStart);
             FldSceneRecord *rows = header->rows;
             s32 count = header->count;
 
