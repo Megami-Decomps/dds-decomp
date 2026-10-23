@@ -58,7 +58,7 @@ extern void sdfConvertEulerAnglesToQuaternionScalar(f32 *out, f32 x, f32 y, f32 
 
 
 
-void mnuClearNodeBroadcastFlag(u8 *node);
+void mnuClearNodeBroadcastFlag(MnuEffectRecord *record);
 void dds3ReleaseSoundSlotPool(void);
 void mnuCreateNodeModelEntry(MnuModelNode *, s32, s32, s32, f32, f32, f32);
 
@@ -250,7 +250,7 @@ void mnuClearAllNodeBroadcastFlags(MnuEffectList *list) {
     s32 index = 0;
     if (list->count > 0) {
         do {
-            mnuClearNodeBroadcastFlag((u8 *)node);
+            mnuClearNodeBroadcastFlag(node);
             node++;
             index++;
         } while (list->count > index);
@@ -388,9 +388,7 @@ s32 mnuStartPositionedEffectBurst(MnuEffectList *list, MnuEffectPositionStep *st
     return 0;
 }
 
-void mnuClearNodeBroadcastFlag(u8 *node) {
-    MnuEffectRecord *record = (MnuEffectRecord *)node;
-
+void mnuClearNodeBroadcastFlag(MnuEffectRecord *record) {
     record->flags &= ~1U;
     fileQueueNotifyAllJobsComplete(record->queue);
 }
@@ -480,7 +478,7 @@ void mnuUpdateEffectQueues(MnuEffectWork *work, s32 flags) {
                     fileQueueUpdate(record->queue);
                     if (record->queue->updateFrame == D_0040AE10[(record->flags >> 1) & 0xFF] ||
                         ((record->flags >> 11) & 1)) {
-                        mnuClearNodeBroadcastFlag((u8 *)record);
+                        mnuClearNodeBroadcastFlag(record);
                     }
                 }
             }
