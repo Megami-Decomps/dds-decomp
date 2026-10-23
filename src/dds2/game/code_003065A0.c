@@ -124,8 +124,8 @@ void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 hei
 
 INCLUDE_ASM(const s32, "game/code_003065A0", effDrawTextureSlot);
 
-void effDrawSpriteWithWorkCornerColors(s32 x, s32 y, s32 z, s32 flags, EffectSlotSet *set, s32 slot, void *entry, s32 layer) {
-    effDrawTextureSlot(x, y, z, (u32 *)((u8 *)entry + 0x14), flags, set, slot, entry, layer);
+void effDrawSpriteWithWorkCornerColors(s32 x, s32 y, s32 z, s32 flags, EffectSlotSet *set, s32 slot, BdWork *entry, s32 layer) {
+    effDrawTextureSlot(x, y, z, entry->geometry.cornerColors, flags, set, slot, entry, layer);
 }
 void effDrawSpriteWithCornerColors(s32 x, s32 y, s32 z, u32 *palette, s32 flags, EffectSlotSet *set, s32 slot, s32 layer) {
     effDrawTextureSlot(x, y, z, palette, flags, set, slot,
