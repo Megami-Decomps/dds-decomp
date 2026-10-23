@@ -1001,14 +1001,14 @@ void mnuShopCreateDescriptorSurface(EvtRuntime *scene) {
     if (scene->pendingResource == 0) {
         allocation = sdfMemAllocFromTailDirect(0x70000);
         scene->pendingResource = allocation;
-        scene->pendingWork = (s32)sdfMemLock(allocation);
+        scene->pendingFrameBuffer = sdfMemLock(allocation);
     }
-    memset((void *)scene->pendingWork, 0x40, 0x70000);
+    memset(scene->pendingFrameBuffer, 0x40, 0x70000);
     surface = sdfPrimAllocDrawTag(0);
     context = (sdfPreDrawTag_t *)sdfGrAllocPacketBuff(0x10);
     sdfPreDrawTagInit(context);
     sdfLinkStoreFrameImage(surface, context, 0, 0, 0x200, 0xE0,
-                                    scene->pendingWork, 0, 0, 0);
+                                    (s32)scene->pendingFrameBuffer, 0, 0, 0);
     sdfPreDrawChainLink((SdfPacketChain *)D_00380860, context);
     D_00380708.append(&D_00380708, surface);
 }
@@ -1016,12 +1016,12 @@ void mnuShopCreateDescriptorSurface(EvtRuntime *scene) {
 void mnuShopSubmitDescriptor(u8 *scene) {
     sdfDrawTag_t *drawPacket;
 
-    if (((EvtRuntime *)scene)->pendingWork != 0) {
+    if (((EvtRuntime *)scene)->pendingFrameBuffer != NULL) {
         drawPacket = sdfPrimAllocDrawTag(0);
         sdfLinkLoadImage(drawPacket,
                                   dds3RenderTexture->primaryResource, 0, 0,
                                   CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT,
-                                  ((EvtRuntime *)scene)->pendingWork, 0);
+                                  (s32)((EvtRuntime *)scene)->pendingFrameBuffer, 0);
         D_00380708.append(&D_00380708, drawPacket);
     }
 }
