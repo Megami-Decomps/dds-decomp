@@ -59,7 +59,7 @@ typedef struct GridDrawWork {
 extern void *effGetSlotWorkOrOverride(EffectSlotSet *, s32);
 extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, void *);
 
-extern void effDrawSpriteWithWorkCornerColors(s32, s32, s32, s32, EffectSlotSet *, s32, void *, s32);
+extern void effDrawSpriteWithWorkCornerColors(s32, s32, s32, s32, EffectSlotSet *, s32, BdWork *, s32);
 
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 
@@ -68,7 +68,7 @@ extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChai
 
 /* Resolve the indexed render entry before applying position, depth, and draw flags. */
 void itfDrawGridWithResolvedSlot(u32 offsetX, u32 offsetY, u32 z, u32 drawFlags, EffectSlotSet *resource, u32 resourceIndex, u32 surfaceIndex) {
-    void *renderEntry = effGetSlotWorkOrOverride(resource, resourceIndex);
+    BdWork *renderEntry = (BdWork *)effGetSlotWorkOrOverride(resource, resourceIndex);
     effDrawSpriteWithWorkCornerColors(offsetX, offsetY, z, drawFlags, resource, resourceIndex, renderEntry, surfaceIndex);
 }
 
