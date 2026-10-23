@@ -3260,7 +3260,7 @@ void btlDestroySpecialUnitSlot(void) {
     }
 }
 
-extern u8 * btlCreateUnitDefeatFadeInTask(u8 *owner, u32 value);
+extern BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *owner, s32 value);
 
 /* Launch a subtask from the active slot and return its new scheduler handle.
  * Zero leaves the constructor's condition intact; otherwise wait for the
@@ -3268,7 +3268,7 @@ extern u8 * btlCreateUnitDefeatFadeInTask(u8 *owner, u32 value);
  */
 u64 btlStartSubtaskWithInput(u64 prerequisiteHandle) {
     u8 *subtaskSlot = (u8 *)((BtlState *)btlGetRuntime())->effect;
-    BtlRuntimeTask *task = (BtlRuntimeTask *)btlCreateUnitDefeatFadeInTask(*(void **)subtaskSlot, 12);
+    BtlRuntimeTask *task = btlCreateUnitDefeatFadeInTask(*(BtlUnit **)subtaskSlot, 12);
     if (prerequisiteHandle != 0) {
         task->startCondition.value.handle = prerequisiteHandle;
         task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;

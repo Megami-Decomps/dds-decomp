@@ -233,7 +233,7 @@ extern s32 btlCountTasksByKind(u16 kind);
 
 extern u8 *btlCreateGunLoadPollTask(u8 *);
 
-extern u8 *btlCreateUnitDefeatFadeInTask(u8 *, u32);
+extern BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *, s32);
 
 extern void btlResetUnitLinks(BtlUnit *);
 
@@ -4223,18 +4223,18 @@ u32 btlStepUnitDefeatFadeIn(u32 *arguments) {
     return 0;
 }
 
-u8 *btlCreateUnitDefeatFadeInTask(u8 *owner, u32 value) {
-    u8 *task = btlAllocTask(12);
+BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *owner, s32 value) {
+    BtlRuntimeTask *task = (BtlRuntimeTask *)btlAllocTask(12);
     BtlUnitFadeTaskArgs *arguments;
 
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)(task + 0x20) = 0x13;
-    *(void **)(task + 0x4C) = btlStepUnitDefeatFadeIn;
-    *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
-    *(u32 *)(task + 0x48) = 0;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->taskId = 0x13;
+    task->callback = btlStepUnitDefeatFadeIn;
+    task->ownerId = owner->identity;
+    task->onStart = 0;
     arguments = (BtlUnitFadeTaskArgs *)btlGetTaskArguments(task);
-    arguments->unit = (BtlUnit *)owner;
+    arguments->unit = owner;
     arguments->durationOrMode = value;
     arguments->elapsed = 0;
     return task;
