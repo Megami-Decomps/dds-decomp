@@ -944,7 +944,7 @@ extern struct dds3Basic_t *dds3AddMatterObjectBasic(s32 key, f32 *offset, f32 *r
 extern void dds3MatterObjectBasicSetOt(struct dds3Basic_t *, s32);
 extern s32 fldCommand_GetHojiID(char *);
 extern void dds3MatterObjectBasicSetHojiID(struct dds3Basic_t *, u32);
-extern void dds3ObjectBaseMakeMatter(void *);
+extern void dds3ObjectBaseMakeMatter(struct dds3Basic_t *);
 extern s32 dds3ObjectBaseRegistArea(void *);
 
 void fldCreateResourceScriptObjects(void) {

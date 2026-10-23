@@ -1062,7 +1062,7 @@ extern s32 fldCommand_GetHojiID(const char *);
 
 extern void dds3MatterObjectBasicSetHojiID(dds3Basic_t *, u32);
 
-extern void dds3ObjectBaseMakeMatter(void *);
+extern void dds3ObjectBaseMakeMatter(dds3Basic_t *);
 
 extern s32 dds3ObjectBaseRegistArea(void *);
 
