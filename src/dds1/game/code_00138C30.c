@@ -618,7 +618,7 @@ extern s32 fldEveHitState;
 void fldEveHit_End(void) {
     s32 slotIndex;
     void *world;
-    void *task;
+    const char *task;
     FldTaskInfo *taskInfo;
 
     fldEveHitState = 1;

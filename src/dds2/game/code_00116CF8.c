@@ -44,7 +44,7 @@ dds3Basic_t *dds3AddEventBasic(s32 key, void *work, s32 name) {
     return obj;
 }
 
-void *dds3EventBasicGetResource(dds3Basic_t *object) {
+const char *dds3EventBasicGetResource(dds3Basic_t *object) {
     return object->data;
 }
 

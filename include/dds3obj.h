@@ -40,7 +40,7 @@ dds3ObjectBaseControlWorkData_t *dds3CreateSlotResourceState(dds3Basic_t *owner)
 void dds3ObjectBaseCreateMover(dds3Basic_t *object);
 dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *object);
 void *dds3ObjectBaseGetModelHandle(dds3Basic_t *object);
-void *dds3EventBasicGetResource(dds3Basic_t *object);
+const char *dds3EventBasicGetResource(dds3Basic_t *object);
 /* Forward a callback to the object's slot-1 handler when one is present; returns 1 if it did. */
 u8 dds3ObjectBaseSetPadControl(dds3Basic_t *object,
                                    s32 (*update)(struct dds3PoseSet_t *, struct dds3Basic_t *));
