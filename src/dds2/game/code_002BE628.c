@@ -2165,12 +2165,12 @@ s32 mnuMapPadMaskToFlags(s32 buttonMask) {
     return inputFlags;
 }
 
-void mnuHandleListPageJumpInput(s32 active, MenuWindowContainer *window, u32 *buttons) {
+void mnuHandleListPageJumpInput(const void *resource, MenuWindowContainer *window, u32 *buttons) {
     struct MenuListNode *top = NULL;
     struct MenuListNode *bottom = NULL;
     MenuList *list = window->list;
 
-    if (active != 0) {
+    if (resource != NULL) {
         if (list->count >= list->visibleCount) {
             if (*buttons & 0x400) {
                 top = mnuScrollListToPreviousPage(list);
@@ -2193,7 +2193,7 @@ void mnuHandleListPageJumpInput(s32 active, MenuWindowContainer *window, u32 *bu
 }
 
 void mnuHandlePanelListPageJumpInput(MenuWindowContainer *window, u32 *buttons) {
-    mnuHandleListPageJumpInput((s32)window->resource, window, buttons);
+    mnuHandleListPageJumpInput(window->resource, window, buttons);
 }
 
 /* Bits 0x8000 and 0x4000 return early in that order; state bits may suppress navigation SE. */

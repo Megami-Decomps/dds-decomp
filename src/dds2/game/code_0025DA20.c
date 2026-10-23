@@ -2854,7 +2854,7 @@ s32 mnuShopPollBuyCommandSelection(dds3ProcessID_t *task) {
             mnuAdvanceWindowListSelection(state->window);
         }
 
-        mnuHandleListPageJumpInput((s32)state->windowResource, state->window,
+        mnuHandleListPageJumpInput(state->windowResource, state->window,
                                    (u32 *)&inputFlags);
     }
 
@@ -3093,7 +3093,7 @@ s32 mnuShopPollRangeFilteredCommandSelection(dds3ProcessID_t *callbackContext) {
         } else if (input & 0x20) {
             mnuAdvanceWindowListSelection(state->window);
         }
-        mnuHandleListPageJumpInput((s32)state->windowResource, state->window, &input);
+        mnuHandleListPageJumpInput(state->windowResource, state->window, &input);
     }
     if (rejected == 1) {
         input = 2;
