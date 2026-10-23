@@ -80,7 +80,7 @@ void itfMesInitializePanelPlacementSprite(instanceMes_tag *panel) {
     if (place->sprite == 0) {
         place->sprite = itfCreateUiSpriteByKind(6, (u32)itfMesMngManager.windowTexture);
         if (place->frame != 0) {
-            place->sprite->unk20 = panel->blk14.glyphChain->x + frFontMeasureGlyphStripWidth(0, panel->blk14.glyphChain);
+            place->sprite->textRightX = panel->blk14.glyphChain->x + frFontMeasureGlyphStripWidth(0, panel->blk14.glyphChain);
         }
     }
     spriteTop = pos->y + place->bounds[1];

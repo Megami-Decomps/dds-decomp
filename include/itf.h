@@ -32,7 +32,7 @@ typedef struct itfpanel_t {
     s32 top;
     s32 right;
     s32 bottom;
-    s32 unk20;
+    s32 textRightX;
     s32 screenY;
     s32 scrollSpan; /* Panel edge-fade divisor; both games read it as a signed word. */
     /* RGBA words consumed by the panel packet renderers. */
