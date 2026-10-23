@@ -2041,10 +2041,10 @@ u32 btlSelectCommandTargetPolicy(ActionStateLink *task, BtlIndexList *destinatio
     return category;
 }
 
-extern s32 btlFindEligibleTargetForMultiActorCommand(s32 actionTask, BtlIndexList *targets);
+extern s32 btlFindEligibleTargetForMultiActorCommand(ActionStateLink *actionTask, BtlIndexList *targets);
 
-s32 btlFindEligibleTargetForMultiActorCommand(s32 actionTask, BtlIndexList *targets) {
-    ActionStateLink *action = (ActionStateLink *)actionTask;
+s32 btlFindEligibleTargetForMultiActorCommand(ActionStateLink *actionTask, BtlIndexList *targets) {
+    ActionStateLink *action = actionTask;
     u32 count;
     u32 i;
     s32 command;
