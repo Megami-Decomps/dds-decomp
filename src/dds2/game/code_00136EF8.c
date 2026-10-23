@@ -176,7 +176,7 @@ f32 MATH_VectorLength(const f32 *vector) {
 /* Build a normalized plane from three vertices spaced four floats apart.
  * Snap near-zero normal components before deriving D from the third vertex.
  * Degenerate triangles retain the native divide-by-zero behavior. */
-void fldMakeEveHitPlanes(f32 *vertices, f32 *normalX, f32 *normalY, f32 *normalZ, f32 *planeConstant) {
+void fldMakeEveHitPlanes(const f32 *vertices, f32 *normalX, f32 *normalY, f32 *normalZ, f32 *planeConstant) {
     f32 firstPoint[4];
     f32 secondPoint[4];
     f32 thirdPoint[4];

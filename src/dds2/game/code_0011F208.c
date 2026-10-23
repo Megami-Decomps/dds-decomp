@@ -898,7 +898,7 @@ void drawSceneBasicList(void) {
 extern evtUnitHandle_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *);
 extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *, u32, s32);
 extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *, s32);
-extern void fldMakeEveHitPlanes(f32 *, f32 *, f32 *, f32 *, f32 *);
+extern void fldMakeEveHitPlanes(const f32 *, f32 *, f32 *, f32 *, f32 *);
 extern void aDrawBoxF(s32, s32, s32, s32, u32, u32, u32, u32);
 extern void aDrawBoxF_Direct(s32, s32, s32, s32, u32, u32, u32, u32);
 extern void fldSubmitPrimaryFramePacket(void);
