@@ -13,7 +13,7 @@
 
 extern SdfMotionBindingDispatch D_0040B480;
 
-extern s32 (*sdfMotionCommandHandlers[])(void *object, s32 command);
+extern s32 (*sdfMotionCommandHandlers[])(void *object, s32 command, s32 targetIndex);
 
 extern SdfMotionBindingDispatch sdfMotMorphTable;
 
@@ -24,8 +24,8 @@ extern SdfMotionBindingDispatch sdfMotMorphTable;
 void sdfMotCLBK_matMultiUvw2InitBlend(void) {
 }
 
-s32 sdfMotGenMorphNode(void *object, s32 command) {
-    return sdfMotionCommandHandlers[(u16)command](object, command);
+s32 sdfMotGenMorphNode(void *object, s32 command, s32 targetIndex) {
+    return sdfMotionCommandHandlers[(u16)command](object, command, targetIndex);
 }
 
 /* Bind the selected pair of model slot indices and weights. */

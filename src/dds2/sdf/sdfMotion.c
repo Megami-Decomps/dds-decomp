@@ -18,9 +18,9 @@
 
 f32 sdfMotInterpolateKeyFloat(SdfMotionKeyInterval *interval);
 
-extern s32 (*D_0040B368[])(void *binding, s32 selector);
+extern s32 (*D_0040B368[])(void *binding, s32 selector, s32 targetIndex);
 
-extern s32 (*D_0040B3F8[])(void *handlerContext, s32 handlerIndex);
+extern s32 (*D_0040B3F8[])(void *handlerContext, s32 handlerIndex, s32 targetIndex);
 
 
 extern SdfMotionBindingDispatch D_0040B420;
@@ -385,8 +385,8 @@ void sdfMotInterpolateKeyUvw(SdfMotionKeyInterval *src, f32 *dst) {
     sdfMotInterpolateKeyUvwSub(dst, src->firstKey, src->secondKey, src->weight);
 }
 
-s32 sdfMotGenNode(void *binding, s32 selector) {
-    return D_0040B368[(u16)selector](binding, selector);
+s32 sdfMotGenNode(void *binding, s32 selector, s32 targetIndex) {
+    return D_0040B368[(u16)selector](binding, selector, targetIndex);
 }
 
 void sdfMotGenModelInit(SdfMotionDrawTargetBinding *binding, sdfMotionCtrlr_t *motion,
@@ -628,8 +628,8 @@ void sdfMotCLBK_modelScaleInitBlend(void *bindingData) {
     SDF_VU0_COPYVECTOR(binding->capturedVector, binding->node->scale);
 }
 
-s32 sdfMotGenMatNode(void *handlerContext, s32 handlerIndex) {
-    return D_0040B3F8[(u16)handlerIndex](handlerContext, handlerIndex);
+s32 sdfMotGenMatNode(void *handlerContext, s32 handlerIndex, s32 targetIndex) {
+    return D_0040B3F8[(u16)handlerIndex](handlerContext, handlerIndex, targetIndex);
 }
 
 void sdfMotGenMatInit(SdfMotionIndexedBinding *binding, sdfMotionCtrlr_t *motion,
