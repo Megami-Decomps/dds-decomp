@@ -1972,7 +1972,7 @@ void effPCPMultiFilterExpDraw(EffPCPCompactFadeWork *work) {
             opacity = 1.0f;
         }
         color = work->color;
-        *(u32 *)rect->params.draw.color = effMagaCylinderCalcColor(
+        rect->params.draw.rgba = effMagaCylinderCalcColor(
             effColorBlend(color & 0xFFFFFF, color, opacity), work->baseColor);
         effResourceRectDrawPixels(rect);
         work->frame++;
