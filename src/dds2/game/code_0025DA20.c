@@ -2611,9 +2611,9 @@ s32 evtIsFadeDispatchIdle(void) {
         mnuSetPopupEntry(&(ctx)->popupState, (entry)); \
     } while (0)
 
-void evtInstallStateTable(s32 stateAddress) {
-    if (((MenuTerminalContext *)stateAddress)->dispatchMode == 2) {
-        MNU_INSTALL_STATE_TABLE(((MenuTerminalContext *)stateAddress), mnuShopCommandPopupEntries, mnuShopCommandPopupEntries + 0x118);
+void evtInstallStateTable(MenuTerminalContext *state) {
+    if (state->dispatchMode == 2) {
+        MNU_INSTALL_STATE_TABLE(state, mnuShopCommandPopupEntries, mnuShopCommandPopupEntries + 0x118);
     }
 }
 
@@ -2684,7 +2684,7 @@ s32 mnuShopPollCommandSelection(dds3ProcessID_t *task) {
         mnuSetPopupEntryFlagged(&state->popupState, mnuShopReturnDelayPopupEntry);
         return 0;
     case 3:
-        evtInstallStateTable((s32)state);
+        evtInstallStateTable(state);
         break;
     default:
         break;
@@ -2747,9 +2747,9 @@ s32 evtSetupDispatchSync(dds3ProcessID_t *callbackContext) {
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-void evtInstallStateTableB(s32 stateAddress) {
-    if (((MenuTerminalContext *)stateAddress)->dispatchMode == 1) {
-        MNU_INSTALL_STATE_TABLE(((MenuTerminalContext *)stateAddress), mnuShopCatalogPopupEntries, mnuShopCatalogPopupEntries + 0xfc);
+void evtInstallStateTableB(MenuTerminalContext *state) {
+    if (state->dispatchMode == 1) {
+        MNU_INSTALL_STATE_TABLE(state, mnuShopCatalogPopupEntries, mnuShopCatalogPopupEntries + 0xfc);
     }
 }
 
@@ -2821,7 +2821,7 @@ s32 mnuShopPollBuyCommandSelection(dds3ProcessID_t *task) {
         return 0;
     }
     case 6:
-        evtInstallStateTableB((s32)state);
+        evtInstallStateTableB(state);
         break;
     case -1:
         return 0;
@@ -2874,9 +2874,9 @@ s32 evtSetupDispatchSyncB(dds3ProcessID_t *callbackContext) {
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-void evtInstallStateTableC(s32 stateAddress) {
-    if (((MenuTerminalContext *)stateAddress)->dispatchMode == 1) {
-        MNU_INSTALL_STATE_TABLE(((MenuTerminalContext *)stateAddress), mnuShopFilteredCatalogPopupEntries, mnuShopFilteredCatalogPopupEntries + 0xe0);
+void evtInstallStateTableC(MenuTerminalContext *state) {
+    if (state->dispatchMode == 1) {
+        MNU_INSTALL_STATE_TABLE(state, mnuShopFilteredCatalogPopupEntries, mnuShopFilteredCatalogPopupEntries + 0xe0);
     }
 }
 
@@ -2942,7 +2942,7 @@ s32 mnuShopPollFilteredCommandSelection(dds3ProcessID_t *task) {
             state->stateStep = 10;
             break;
         case 6:
-            evtInstallStateTableC((s32)state);
+            evtInstallStateTableC(state);
         default:
             if (state->popupState == 0) {
                 if (inputFlags & 1) {
