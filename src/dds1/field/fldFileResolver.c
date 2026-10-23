@@ -1561,7 +1561,7 @@ u8 fldCheckNextFile(void) {
 
 extern void fldGetDoorEntry(FldWaypointBlock *source);
 
-extern void fldInfLoadFromMem(const void *);
+extern void fldInfLoadFromMem(const FldInfTable *source);
 
 extern void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle);
 
@@ -1579,7 +1579,7 @@ void fldLoadFieldPack(void) {
         for (work = request->packet.queueHead; work != NULL; work = work->next) {
             switch (*(u16 *)(work->packet + 2)) {
             case FLD_PACKED_RESOURCE_INFO_TABLE:
-                fldInfLoadFromMem(work->dataCursor);
+                fldInfLoadFromMem((const FldInfTable *)work->dataCursor);
                 sdfMemFreeDelayedDirect(
                     (struct sdfMemHandle_t *)work->resourceHandle);
                 break;

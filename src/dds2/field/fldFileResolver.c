@@ -1407,7 +1407,7 @@ u8 fldCheckNextFile(void) {
     return strcmp(D_00444950, buf) != 0;
 }
 
-extern void fldInfLoadFromMem(FldInfTable *);
+extern void fldInfLoadFromMem(const FldInfTable *source);
 
 extern void fldGetDoorEntry(FldWaypointBlock *source);
 
@@ -1430,7 +1430,7 @@ void fldLoadFieldPack(void) {
         for (work = request->packet.queueHead; work != NULL; work = work->next) {
             switch (*(u16 *)(work->packet + 2)) {
             case FLD_PACKED_RESOURCE_INFO_TABLE:
-                fldInfLoadFromMem((FldInfTable *)work->dataCursor);
+                fldInfLoadFromMem((const FldInfTable *)work->dataCursor);
                 sdfMemFreeDelayedDirect(
                     (struct sdfMemHandle_t *)work->resourceHandle);
                 break;
