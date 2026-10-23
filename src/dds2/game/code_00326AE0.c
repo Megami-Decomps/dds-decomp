@@ -11,7 +11,7 @@
 
 extern f32 sdfVec3Normalize(f32 *);
 
-extern s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
+extern s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority);
 
 
 extern void (*sdfTickCallback)(void);
@@ -263,11 +263,11 @@ extern void *_gp;
 
 /* Create a kernel thread from a zeroed descriptor that uses the caller's
  * workspace as its stack and the program's GP. */
-s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority) {
+s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority) {
     SdfKernelThreadParam param;
 
     memset(&param, 0, sizeof(param));
-    param.entry = entryAddress;
+    param.entry = (void (*)(void))entryAddress;
     param.stack = workspace;
     param.stackSize = stackBytes;
     param.priority = priority;
@@ -279,6 +279,6 @@ s32 sdfCreateThreadWithStack(void (*entryAddress)(), s32 stackBytes, s32 priorit
     void *workspace;
 
     workspace = sdfAllocAuto(stackBytes);
-    return CreateThreadSimple((void *)entryAddress, workspace, stackBytes, priority);
+    return CreateThreadSimple(entryAddress, workspace, stackBytes, priority);
 }
 

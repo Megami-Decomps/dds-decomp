@@ -1885,7 +1885,7 @@ extern char D_00438B60[];
 
 extern void sdfDev9LoadModule(void);
 
-extern s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
+extern s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority);
 
 typedef void (*SdfPowerOffCallback)(void *);
 
@@ -1922,7 +1922,7 @@ void sdfDevInitializeHddPfsDebugMode(char *path) {
         return;
     }
     semaphore = sdfCreateSema(0, 1, 0);
-    thread = CreateThreadSimple((void *)sdfPowerOffLoop, D_00477180, 0x800, 1);
+    thread = CreateThreadSimple(sdfPowerOffLoop, D_00477180, 0x800, 1);
     _StartThread(thread, semaphore);
     sceCdPOffCallback(sdfPowerOffInterruptCallback, (void *)semaphore);
     sceFsInit();

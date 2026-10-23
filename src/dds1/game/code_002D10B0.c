@@ -248,7 +248,7 @@ void sdfServiceGraphicsBuffers(void) {
     }
 }
 
-extern s32 CreateThreadSimple(void *, void *, s32, s32);
+extern s32 CreateThreadSimple(void (*)(), void *, s32, s32);
 
 extern u8 sdfGrScreenMode;
 extern u8 D_003BD2E9;
@@ -277,7 +277,7 @@ void sdfGrInit(s32 packetBufferBytes) {
     sdfTexInit();
     dds3GsSema = sdfCreateSema(1, 0x20, 0);
     dds3GsThreadId = sdfCreateSema(0, 0x20, 0);
-    thread = CreateThreadSimple((void *)sdfDrawThread, sdfGraphicsTransferThreadStack, 0x8000, 0x44);
+    thread = CreateThreadSimple(sdfDrawThread, sdfGraphicsTransferThreadStack, 0x8000, 0x44);
     sdfDrawThreadId = thread;
     _StartThread(thread, 0);
     sdfStartThreadAndWait(&sdfGraphicsBufferThread, sdfServiceGraphicsBuffers, sdfGraphicsBufferThreadStack,

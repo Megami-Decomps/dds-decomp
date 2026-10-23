@@ -76,7 +76,7 @@ extern void ptyMergeStockSkills(datUnitWork_t *);
 
 extern void (*sdfTickCallback)(void);
 
-extern s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
+extern s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority);
 
 extern u32 D_003BD2C8;
 
@@ -1483,11 +1483,11 @@ extern void *_gp;
 
 /* Create a kernel thread from a zeroed descriptor that uses the caller's
  * workspace as its stack and the program's GP. */
-s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority) {
+s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority) {
     SdfKernelThreadParam param;
 
     memset(&param, 0, sizeof(param));
-    param.entry = entryAddress;
+    param.entry = (void (*)(void))entryAddress;
     param.stack = workspace;
     param.stackSize = stackBytes;
     param.priority = priority;
@@ -1499,7 +1499,7 @@ s32 sdfCreateThreadWithStack(void (*entryAddress)(), s32 stackBytes, s32 priorit
     void *workspace;
 
     workspace = sdfAllocAuto(stackBytes);
-    return CreateThreadSimple((void *)entryAddress, workspace, stackBytes, priority);
+    return CreateThreadSimple(entryAddress, workspace, stackBytes, priority);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002CC750", sdfDebugLogAppendMode);

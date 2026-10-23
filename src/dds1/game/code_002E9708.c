@@ -1841,7 +1841,7 @@ void sdfSoundInitFormattedAndAppendNode(sdfIpuDecodeCb_t *node, SoundFormat *for
 }
 
 extern SdfHandlerNode *sdfAddHandler(s32, s32, SdfHandlerCallback, s32, s32);
-extern s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
+extern s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority);
 extern u8 sdfIpuDecodeThStack[];
 extern void sdfIpuDecodeThread();
 void sdfIpuInit(void) {
@@ -1855,7 +1855,7 @@ void sdfIpuInit(void) {
     EnableDmac(3);
     D_003BDAA0 = sdfAddHandler(1, 4, sdfIpuToDmacHandler, -1, 0);
     EnableDmac(4);
-    thread = CreateThreadSimple((void *)sdfIpuDecodeThread, sdfIpuDecodeThStack, 0x800, 0x46);
+    thread = CreateThreadSimple(sdfIpuDecodeThread, sdfIpuDecodeThStack, 0x800, 0x46);
     D_003BDAB4 = thread;
     _StartThread(thread, 0);
 }

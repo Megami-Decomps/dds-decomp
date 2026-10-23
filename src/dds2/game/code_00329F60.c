@@ -275,7 +275,7 @@ extern void sdfGrMakePacketBuff(s32);
 extern void sdfGrInitDraw(void);
 extern void sdfTexInit(void);
 
-extern s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
+extern s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority);
 
 /* Reset GS/buffer state and start graphics workers; packetBufferBytes sizes each packet-buffer half. */
 void sdfGrInit(s32 packetBufferBytes) {
@@ -295,7 +295,7 @@ void sdfGrInit(s32 packetBufferBytes) {
     sdfTexInit();
     dds3GsSema = sdfCreateSema(1, 0x20, 0);
     dds3GsThreadId = sdfCreateSema(0, 0x20, 0);
-    thread = CreateThreadSimple((s32)sdfDrawThread, (s32)sdfGraphicsTransferThreadStack, 0x8000, 0x44);
+    thread = CreateThreadSimple(sdfDrawThread, (s32)sdfGraphicsTransferThreadStack, 0x8000, 0x44);
     sdfDrawThreadId = thread;
     _StartThread(thread, 0);
     sdfStartThreadAndWait(&sdfGraphicsBufferThread, sdfServiceGraphicsBuffers, sdfGraphicsBufferThreadStack,

@@ -131,7 +131,7 @@ extern u8 sndRpcServerThreadStack[];
 extern void *_gp;
 extern s32 sdfSndCmdBuf;
 extern s32 D_00438B94;
-extern s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
+extern s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority);
 extern void SifRpcServerThreadProc(void);
 
 s32 sndStartIopCommandAndRpcWorkers(void) {

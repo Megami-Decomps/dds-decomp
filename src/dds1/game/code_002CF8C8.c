@@ -38,7 +38,7 @@ extern u8 D_003DFEF0[0x2000];
 
 
 
-extern s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
+extern s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority);
 
 
 
@@ -105,7 +105,7 @@ void dds3InitSubsystems(u32 heapSize, u32 initialHeapSize, u32 packetBufferBytes
 
 /* Register the thread under the list semaphore before starting it. */
 void sdfStartThreadAndWait(SdfThreadNode *node, void (*entry)(void), void *stack, s64 stackSize, s32 priority, s32 threadArgument) {
-    node->threadId = CreateThreadSimple((void *)entry, stack, (s32)stackSize, priority);
+    node->threadId = CreateThreadSimple(entry, stack, (s32)stackSize, priority);
     WaitSema(sdfThreadSema);
     node->next = sdfVblankThreadId;
     sdfVblankThreadId = node;

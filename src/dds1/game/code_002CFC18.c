@@ -61,7 +61,7 @@ void VblankThreadProc(void) {
 }
 
 extern void InitThread(void);
-extern s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
+extern s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority);
 extern char D_003E1EF0[];
 
 /* Initialize the tracked-thread list and its semaphore before starting the wake worker. */
@@ -72,7 +72,7 @@ s32 sdfInitThreadSystem(void) {
     sdfVblankFlag = 0;
     sdfVblankThreadId = NULL;
     sdfThreadSema = sdfCreateSema(1, 1, 0);
-    threadId = CreateThreadSimple((void *)VblankThreadProc, D_003E1EF0, SDF_WAKE_WORKER_STACK_BYTES, SDF_WAKE_WORKER_PRIORITY);
+    threadId = CreateThreadSimple(VblankThreadProc, D_003E1EF0, SDF_WAKE_WORKER_STACK_BYTES, SDF_WAKE_WORKER_PRIORITY);
     sdfVblankSema = threadId;
     return _StartThread(threadId, 0);
 }
