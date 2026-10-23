@@ -1751,7 +1751,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->targetAngle = 180.0f;
     area->angle = 0.0f;
     area->previousCameraModelFrame = 0.0f;
-    area->unk17C = 0.0f;
+    area->cameraSupportHeightDelta = 0.0f;
     area->unk180 = 0.0f;
     area->fieldTextures[0].texture = NULL;
     area->fieldTextures[1].texture = NULL;

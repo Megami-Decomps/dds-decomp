@@ -3423,7 +3423,7 @@ void fldProbeCameraSupportSurface(void) {
     dds3Basic_t *node;
 
     fldGlobalBase.unk5C = 0.0f;
-    fldGlobalBase.unk17C = 0.0f;
+    fldGlobalBase.cameraSupportHeightDelta = 0.0f;
     if (fldGlobalBase.overrideSupportRecordIndex != -1) {
         index = fldGlobalBase.overrideSupportRecordIndex;
     } else if (fldGlobalBase.unkA4 >= 0) {
@@ -3458,7 +3458,7 @@ void fldProbeCameraSupportSurface(void) {
     cam->unk5C = cam->y - fldCamCalcSlopeOffset(x,
         cam->z - sdfCos(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist, xs, ys, zs);
     x = cam->x - sdfSin(-cam->angle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist;
-    cam->unk17C = cam->y - fldCamCalcSlopeOffset(x,
+    cam->cameraSupportHeightDelta = cam->y - fldCamCalcSlopeOffset(x,
         cam->z - sdfCos(-cam->angle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist, xs, ys, zs);
     if (cam->overrideSupportRecordIndex == -1) {
         cam->unk5C = 0.0f;
@@ -4207,7 +4207,7 @@ void fldUpdateModeOneCameraPose(void) {
         dds3OnPoseSetFlag(fldPlayerObject->inner,
                           OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
         if (D_00435F30 != 0) {
-            if (fldGlobalBase.unk17C > 0.0f) {
+            if (fldGlobalBase.cameraSupportHeightDelta > 0.0f) {
                 fldGlobalBase.y = position[1] + 5.0f;
             } else {
                 fldGlobalBase.y = position[1] + 10.0f;
@@ -4643,7 +4643,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
                           OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
     }
     if (direction != -1 && D_00435F30 != 0) {
-        if (fldGlobalBase.unk17C > 0.0f) {
+        if (fldGlobalBase.cameraSupportHeightDelta > 0.0f) {
             fldGlobalBase.y = position[1] + 5.0f;
         } else {
             fldGlobalBase.y = position[1] + 10.0f;
@@ -4689,8 +4689,8 @@ s32 fldUpdateFieldPlayerMovement(void) {
             } else {
                 distance = 25.0f;
             }
-            if (fldGlobalBase.unk17C > 0.0f) {
-                distance += ffabsf(fldGlobalBase.unk17C) / 40.0f + 2.0f;
+            if (fldGlobalBase.cameraSupportHeightDelta > 0.0f) {
+                distance += ffabsf(fldGlobalBase.cameraSupportHeightDelta) / 40.0f + 2.0f;
             }
             difference = fldAngleDifference(fldGlobalBase.angle, heading);
             if (difference < 0.0f) {
