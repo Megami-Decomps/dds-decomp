@@ -170,7 +170,7 @@ extern u8 *fldSelectCurrentActorOnNextFloor(void);
 
 extern s32 D_003BAE68;
 
-extern u32 fldItemBoxObjBuf;
+extern FldWallMeshRecord *fldItemBoxObjBuf;
 
 extern FldValueRecord *fldMatterTable;
 
