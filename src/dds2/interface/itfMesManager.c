@@ -1193,16 +1193,16 @@ u8 *GetMessagePagePtr(ItfMesTable *table, s32 itemIndex) {
     return (u8 *)table->items[itemIndex];
 }
 
-extern s32 frFontCountGlyphBands();
-extern s32 itfGetTextLipsUnitId();
-extern s32 itfGetTextLipsMotionId();
+extern s32 frFontCountGlyphBands(_FRQ *glyph);
+extern u32 itfGetTextLipsUnitId(void);
+extern u32 itfGetTextLipsMotionId(void);
 /* Rebuild colored entry glyphs, synchronize interface flags/hooks and cache
  * the span count. Existing span helpers require a valid created chain. */
 void itfMesBuildEntryGlyph(instanceMes_tag *mes) {
     ItfMesEntryBlock *entryBlock = &mes->entryBlock;
     _FRQ *glyph;
     _FRQ *previousGlyph;
-    s32 lipsValue;
+    u32 lipsValue;
     u32 interfaceMask;
     void (*callback)();
 
@@ -1240,7 +1240,7 @@ void itfMesBuildEntryGlyph(instanceMes_tag *mes) {
     }
     if (frGetMessageResult(8) != 0) {
         lipsValue = itfGetTextLipsUnitId();
-        evtLipsExecFunction(lipsValue, itfGetTextLipsMotionId());
+        evtLipsExecFunction((s32)lipsValue, (s32)itfGetTextLipsMotionId());
     }
     ChangeZBuffer(glyph, mes->renderValue);
     entryBlock->lineCount = CountLineMessage(GetLastLinkFontHandle(glyph), glyph);
@@ -2801,4 +2801,3 @@ INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436618);
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436620);
 
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436628);
-
