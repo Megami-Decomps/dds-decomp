@@ -122,7 +122,7 @@ extern SdfPendingNode *sdfDelayedResrcLink;
 
 extern s8 sdfDelayedResrcFlag;
 
-extern s32 sdfPendingQueueSlots[2];
+extern SdfPendingNode *sdfPendingQueueSlots[2];
 
 #include "sdf_packet_alloc.h"
 
@@ -433,11 +433,11 @@ void sdfDelayedResrcProc(void) {
 
     sdfDelayedResrcFlag = 1;
     WaitSema(sdfDelayedResrcSemaId);
-    sdfDelayedResrcRelease((SdfPendingNode *)sdfPendingQueueSlots[0]);
+    sdfDelayedResrcRelease(sdfPendingQueueSlots[0]);
     for (slotIndex = 0; slotIndex < SDF_PENDING_LAST_SLOT; slotIndex++) {
         sdfPendingQueueSlots[slotIndex] = sdfPendingQueueSlots[slotIndex + 1];
     }
-    sdfPendingQueueSlots[SDF_PENDING_LAST_SLOT] = (s32)sdfDelayedResrcClose();
+    sdfPendingQueueSlots[SDF_PENDING_LAST_SLOT] = sdfDelayedResrcClose();
     SignalSema(sdfDelayedResrcSemaId);
     sdfDelayedResrcFlag = 0;
 }
@@ -445,7 +445,7 @@ void sdfDelayedResrcProc(void) {
 /* Test all three pending-work sources: flag, chain, and two slots. */
 s32 sdfDelayedResrcCheckFunc(void) {
     u32 slotIndex;
-    s32 *slotCursor;
+    SdfPendingNode **slotCursor;
     if (sdfDelayedResrcFlag != 0) {
         return 1;
     }
@@ -455,7 +455,7 @@ s32 sdfDelayedResrcCheckFunc(void) {
     slotIndex = 0;
     slotCursor = sdfPendingQueueSlots;
     do {
-        if (*slotCursor != 0) {
+        if (*slotCursor != NULL) {
             return 1;
         }
         slotCursor++;
@@ -1943,4 +1943,3 @@ INCLUDE_SDATA(const s32, "game/code_0032C278", sdfGrDrawFrameTagHead);
 INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A30);
 
 INCLUDE_SDATA(const s32, "game/code_0032C278", corePktSoftenBias);
-
