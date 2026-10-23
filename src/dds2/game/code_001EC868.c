@@ -403,7 +403,7 @@ s32 btlHasFirstLinkedCategoryFlag1000(BtlLinkedCommand *actor);
 
 void btlInitMotionTransformFromComponents(BtlCamState *object, f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, f32 vw, f32 fovDegrees);
 
-void btlInterpolateVectorStep(f32 *src);
+void btlInterpolateVectorStep(BtlCamState *camera);
 
 void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit);
 
@@ -870,7 +870,7 @@ void btlBuildDistanceClampedActionCameraBlend(BtlLinkedCommand *action, BtlCamSt
         if (btlHasSingleLinkedResource(action) == 0) {
             btlBuildBattleUnitFramingCameraPose(action, from, 17.5f);
             btlCopyMotionTransform(to, from);
-            btlInterpolateVectorStep(from->position);
+            btlInterpolateVectorStep(from);
             VU0_STORE_VF(vf10, targetPosition);
             if (btlSampleActorModelPositionVU(unit, 1) == 0) {
                 btlUnitGetMuzzlePosVU(unit);
@@ -2193,7 +2193,7 @@ void btlSetupActionCameraPair(BtlLinkedCommand *command) {
     command->flags |= 0x41;
     command->motionProgress = 0;
     command->motionParameter = 15.0f;
-    btlInterpolateVectorStep(command->frontCamera.position);
+    btlInterpolateVectorStep(&command->frontCamera);
     VU0_STORE_VF_UNCLOBBERED(vf10, lookPos);
     btlUnitGetMuzzlePosVU(user);
     VU0_MOVE_VF(vf11, vf10);
@@ -2845,7 +2845,7 @@ extern f32 btlMeasureUnitIndexListBounds(BtlIndexList *, f32 *, f32 *);
 
 
 
-extern void btlInterpolateVectorStep(f32 *);
+extern void btlInterpolateVectorStep(BtlCamState *camera);
 
 extern s32 btlAdjustCameraDirectionForDefaultPlane(BtlCamState *);
 
@@ -2888,7 +2888,7 @@ void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
             for (; i < count; i++) {
                 BtlUnit *entry = (BtlUnit *)btlGetIndexListEntry(indices, (s32)i);
                 if ((entry->status.flags & 0x20) != 0) {
-                    btlInterpolateVectorStep(pose->position);
+                    btlInterpolateVectorStep(pose);
                     VU0_STORE_VF_PTR(vf10, vectors.interpolated);
                     btlMeasureFilteredUnitGroupBounds(0x200, NULL, NULL);
                     VU0_STORE_VF_PTR(vf10, pose->position);

@@ -2776,7 +2776,7 @@ u8 btlSetLinkedPairActionCamera(BtlLinkedCommand *command, s8 unused1, s8 unused
     return 1;
 }
 
-extern void btlInterpolateVectorStep();
+extern void btlInterpolateVectorStep(BtlCamState *camera);
 
 /* Arm action 0x189 once, aiming its camera at the active mode-0x107 target. */
 s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
