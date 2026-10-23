@@ -241,7 +241,7 @@ extern dds3Basic_t *dds3AddLightObjectBasic(s32);
 
 extern dds3Basic_t *dds3AddPathBasic(s32 key, void *work, const char *name);
 
-extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, f32 *, const char *);
+extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, const f32 *, const char *);
 
 extern void dds3GetRadiusPoseSet(dds3Basic_t *, f32);
 
@@ -839,7 +839,7 @@ extern s32 fldCommand_GetHojiID(const char *);
 extern void fldMakePlane(FldCollisionDescriptor *geometry, f32 *translation,
                                                u32 id, s32 sceneFlag, s32 ownerIndex);
 
-extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, f32 *, const char *);
+extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, const f32 *, const char *);
 
 extern void dds3SetPathBasicSpline(dds3Basic_t *path, u32 value);
 

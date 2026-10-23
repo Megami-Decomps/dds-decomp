@@ -13,10 +13,10 @@ typedef struct ActionSub {
 } ActionSub;
 
 
-dds3Basic_t *dds3AddModelRangeBasicNew(s32 objectKey, s32 b, s32 c, s32 objectName) {
+dds3Basic_t *dds3AddModelRangeBasicNew(s32 objectKey, void *resourceData, const f32 *position, const char *objectName) {
     dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_ACTION_B);
 
-    obj->value = (const char *)objectName;
+    obj->value = objectName;
     ((ActionSub *)obj->data)->unk10 = 0;
     obj->key = objectKey;
     return obj;
