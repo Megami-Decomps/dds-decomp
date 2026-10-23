@@ -19,7 +19,7 @@
 #include "eff_dispatch_state.h"
 #include "eff_offset_triangle.h"
 
-extern u8 *sdf2DGetPrimPtr(s32 packetAddress);
+extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 extern sdfTexHandle_t *dds3GetRenderTexture(void);
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern SdfPoolNode D_00324B88;
@@ -471,7 +471,7 @@ void dds3UpdateCrossfade(void) {
         blendPacket[7] = 0x42;
         sdfDrawTagLink(list, (u32)blendPacket);
         sprite = sdf2DAllocSprite(1);
-        vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr((s32)sprite);
+        vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr(sprite);
         vertex->r = 0x80;
         vertex->g = 0x80;
         vertex->b = 0x80;
@@ -498,7 +498,7 @@ void dds3UpdateCrossfade(void) {
     sdfDrawTagInit(list);
     sdf2DLinkTexPacket(list, dds3GetRenderTexture(), 0);
     sprite = sdf2DAllocSprite(1);
-    vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr((s32)sprite);
+    vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr(sprite);
     vertex->r = 0x80;
     vertex->g = 0x80;
     vertex->b = 0x80;

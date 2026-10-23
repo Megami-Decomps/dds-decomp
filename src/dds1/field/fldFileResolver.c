@@ -572,7 +572,7 @@ extern u32 sdf2DMakeStdPacket(u32, s32);
 
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 
-extern u8 *sdf2DGetPrimPtr(s32);
+extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 
 extern s32 D_0032E3C0[];
 
@@ -2145,7 +2145,7 @@ SdfPoolNode *fldDrawGetOt(void) {
 
 void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, sdfTexHandle_t *texture) {
     void *handle = sdf2DAllocSprite(1);
-    FldSpriteVertex *vtx = (FldSpriteVertex *)sdf2DGetPrimPtr((s32)handle);
+    FldSpriteVertex *vtx = (FldSpriteVertex *)sdf2DGetPrimPtr(handle);
     s32 ubase = u * 16;
     s32 xl = x * 16 + 0x7000;
     s32 vbase = v * 16;
@@ -2208,7 +2208,7 @@ void DrwSprite2DC(s32 x, s32 y, s32 width, s32 height,
 
 void DrwSprite2DF(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, sdfTexHandle_t *texture) {
     void *handle = sdf2DAllocSprite(1);
-    FldSpriteVertex *vtx = (FldSpriteVertex *)sdf2DGetPrimPtr((s32)handle);
+    FldSpriteVertex *vtx = (FldSpriteVertex *)sdf2DGetPrimPtr(handle);
     s32 r = color & 0xFF;
     s32 g = (color >> 8) & 0xFF;
     s32 b = (color >> 16) & 0xFF;
@@ -2433,7 +2433,7 @@ void aDrawLineStripPrim(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 2));
     sdf2DMakePrimPacketHeader(packet, 0x49, 2, 0x41, 2);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
     hi = (u64)gsWord2 | (0x8000LL << 24);
     pos = coords;
@@ -2470,7 +2470,7 @@ void aDrawLineDirect(u32 x0, u32 y0, u32 x1, u32 y1, u32 gsWord0, u32 gsWord1, u
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 2));
     sdf2DMakePrimPacketHeader(packet, 0x49, 2, 0x41, 2);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
     hi = (u64)gsWord2 | (0x8000LL << 24);
     pos = coords;
@@ -2511,7 +2511,7 @@ void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
     hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
     pos = coords;
@@ -2553,7 +2553,7 @@ void aDrawBoxFZ(s32 x, s32 y, s32 w, s32 h, u32 vertexTag, u32 gsWord0, u32 gsWo
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     tag = vertexTag;
     lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
     hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
@@ -2595,7 +2595,7 @@ void aDrawBoxF_Direct(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, 
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
     hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
     pos = coords;
@@ -2631,7 +2631,7 @@ void aDrawTriG(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, u32 r0, u32 g0, u
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 3));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 3);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     for (i = 0; i < 3; i++) {
         if (i == 0) {
             dst[0] = (u64)r0 | ((u64)g0 << 32);
@@ -2675,7 +2675,7 @@ void fldSubmitGsGradientQuad(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0,
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
     sdf2DMakePrimPacketHeader(packet, 0x4C, 2, 0x41, 4);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     for (i = 0, pos = coords; i < 4; i++) {
         if (i == 0) {
             dst[0] = (u64)r0 | ((u64)g0 << 32);
@@ -2723,7 +2723,7 @@ void aDrawBoxGF(u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, 
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     for (i = 0, pos = coords; i < 4; i++) {
         if (i == 0) {
             dst[0] = (u64)r0 | ((u64)g0 << 32);
@@ -2774,7 +2774,7 @@ void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsW
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
     hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
     tag = vertexTag;
@@ -2947,7 +2947,7 @@ void fldSubmitTexturedOverlaySprite(void) {
     blendPacket->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(list, (u32)blendPacket);
     sprite = sdf2DAllocSprite(1);
-    vertex = (FldSpriteVertex *)sdf2DGetPrimPtr((s32)sprite);
+    vertex = (FldSpriteVertex *)sdf2DGetPrimPtr(sprite);
     vertex->r = 0x80;
     vertex->g = 0x80;
     vertex->b = 0x80;
@@ -3002,7 +3002,7 @@ void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
     blendPacket->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(list, (u32)blendPacket);
     sprite = sdf2DAllocSprite(1);
-    vertex = (FldSpriteVertex *)sdf2DGetPrimPtr((s32)sprite);
+    vertex = (FldSpriteVertex *)sdf2DGetPrimPtr(sprite);
     if (mode == 0) {
         vertex->r = 0x81;
         vertex->g = 0x81;
@@ -3064,7 +3064,7 @@ void fldSubmitOverlayStateAndSprite(s32 alpha) {
     blendPacket->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(list, (u32)blendPacket);
     sprite = sdf2DAllocSprite(1);
-    vertex = (FldSpriteVertex *)sdf2DGetPrimPtr((s32)sprite);
+    vertex = (FldSpriteVertex *)sdf2DGetPrimPtr(sprite);
     vertex->r = 0x80;
     vertex->g = 0x80;
     vertex->b = 0x80;
@@ -3486,7 +3486,7 @@ void fldSubmitAreaOverlayQuads(s32 alpha, s32 offset) {
     blendPacket[7] = 0x42;
     sdfDrawTagLink(list, (u32)blendPacket);
     handle = sdf2DAllocSprite(1);
-    vertex = (FldSpriteVertex *)sdf2DGetPrimPtr((s32)handle);
+    vertex = (FldSpriteVertex *)sdf2DGetPrimPtr(handle);
     vertex->r = 0x80;
     vertex->g = 0x80;
     vertex->b = 0x80;

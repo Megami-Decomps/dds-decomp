@@ -1214,7 +1214,7 @@ void itfMiscMoveFontPosition(_FRQ *entry, u32 xOffset, u32 yOffset) {
 
 #include "sdf_packet_alloc.h"
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
-extern u8 *sdf2DGetPrimPtr(s32);
+extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 extern u32 sdf2DMakeStdPacket(u32, s32);
 extern u64 D_00357998[];
 
@@ -1239,7 +1239,7 @@ void itfMiscDrawTrianglePrim(DrawVertex *vertices, DrawColorRec *colors, s32 xOf
 
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, ITF_TRIANGLE_VERTEX_COUNT));
     sdf2DMakePrimPacketHeader(packet, ITF_TRIANGLE_PRIMITIVE_BITS, 2, 0x51, ITF_TRIANGLE_VERTEX_COUNT);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     for (i = 0; i < ITF_TRIANGLE_VERTEX_COUNT; i++) {
         dst[0] = (u64)colors->components[0] | ((u64)colors->components[1] << 32);
         dst[1] = (u64)colors->components[2] | ((u64)colors->components[3] << 32);
@@ -1261,7 +1261,7 @@ void itfMiscDrawRectanglePrim(DrawVertex *vertices, DrawColorRec *colors, u8 *ve
 
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, ITF_QUAD_VERTEX_COUNT));
     sdf2DMakePrimPacketHeader(packet, ITF_QUAD_FAN_PRIMITIVE_BITS, 2, 0x51, ITF_QUAD_VERTEX_COUNT);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     for (i = 0; i < ITF_QUAD_VERTEX_COUNT; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
         DrawColorRec *color = &colors[*colorIndex++];
@@ -1324,7 +1324,7 @@ void itfMiscDrawTexPoly(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, u3
 
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(3, ITF_QUAD_VERTEX_COUNT));
     sdf2DMakePrimPacketHeader(packet, (flag << 9) | ITF_TEXTURED_FAN_PRIMITIVE_BITS, 3, 0x512, ITF_QUAD_VERTEX_COUNT);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     for (i = 0; i < ITF_QUAD_VERTEX_COUNT; i++) {
         f32 *uvDst = (f32 *)dst;
 
@@ -1361,7 +1361,7 @@ void itfMiscDrawSpritePrim(void *vertexData, void *uvData, void *colorData, s32 
     y0 = vertices[0].y + ITF_GS_Y_BIAS;
     x1 = vertices[1].x + ITF_GS_X_BIAS;
     y1 = vertices[1].y + ITF_GS_Y_BIAS;
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     dst[0] = (u64)colors->components[0] | ((u64)colors->components[1] << 32);
     dst[1] = (u64)colors->components[2] | ((u64)colors->components[3] << 32);
     dst[2] = (u64)uv->components[0] | ((u64)uv->components[1] << 32);
@@ -1386,7 +1386,7 @@ void itfMiscDrawSpritePrim2(DrawVertex *vertices, DrawColorRec *uv, DrawColorRec
     y0 = vertices[0].y + ITF_GS_Y_BIAS;
     x1 = vertices[1].x + ITF_GS_X_BIAS;
     y1 = vertices[1].y + ITF_GS_Y_BIAS;
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     dst[0] = (u64)colors->components[0] | ((u64)colors->components[1] << 32);
     dst[1] = (u64)colors->components[2] | ((u64)colors->components[3] << 32);
     dst[2] = (u64)uv->components[0] | ((u64)uv->components[1] << 32);
@@ -1405,7 +1405,7 @@ void itfMiscDrawSpritePlanePrim(DrawVertex *vertices, DrawColorRec *colors, u32 
 
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(3, 1));
     sdf2DMakePrimPacketHeader(packet, (flag << 9) | ITF_SPRITE_PRIMITIVE_BITS, 3, 0x551, 1);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     dst[0] = (u64)colors->components[0] | ((u64)colors->components[1] << 32);
     dst[1] = (u64)colors->components[2] | ((u64)colors->components[3] << 32);
     dst += 2;
@@ -1427,7 +1427,7 @@ void itfMiscDrawTriangleStripPrim(DrawVertex *vertices, DrawColorRec *colors, u8
 
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(4, pairCount));
     sdf2DMakePrimPacketHeader(packet, ITF_TRIANGLE_STRIP_PRIMITIVE_BITS, 4, 0x5151, pairCount);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     for (i = 0; i < count; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
         DrawColorRec *color = &colors[*colorIndex++];
@@ -1450,7 +1450,7 @@ void itfMiscDrawLineStripPrim(DrawVertex *vertices, DrawColorRec *colors, u8 *ve
 
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, count));
     sdf2DMakePrimPacketHeader(packet, ITF_LINE_STRIP_PRIMITIVE_BITS, 2, 0x51, count);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     for (i = 0; i < count; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
         DrawColorRec *color = &colors[*colorIndex++];
@@ -1473,7 +1473,7 @@ void itfMiscDrawLinePrim(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexI
 
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, count));
     sdf2DMakePrimPacketHeader(packet, ITF_LINES_PRIMITIVE_BITS, 2, 0x51, count);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     for (i = 0; i < count; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
         DrawColorRec *color = &colors[*colorIndex++];

@@ -17,7 +17,7 @@ extern s8 D_0040B7DB[];
 extern SdfPoolNode sdfGrOtTable[];
 #include "sdf_packet_alloc.h"
 #include "sdf_bordered_rectangle_packet.h"
-extern u8 *sdf2DGetPrimPtr(s32 packetAddress);
+extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 extern s8 D_0043643D;
 
 #include "eff.h"
@@ -680,7 +680,7 @@ void dds3EffectFileListWindowDrawSprite(EffResourceDescriptor *overlay) {
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         sprite = sdf2DAllocSprite(1);
-        vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr((s32)sprite);
+        vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr(sprite);
         vertex->a = 0x80;
         vertex->b = 0x80;
         vertex->g = 0x80;

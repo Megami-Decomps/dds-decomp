@@ -367,7 +367,7 @@ s32 kwlnBuildFrameScenePackets(dds3ProcessID_t *task) {
     return 0;
 }
 
-extern u8 *sdf2DGetPrimPtr(s32);
+extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 extern void dds3DrawDistRipOverError(void);
 extern void kwlnStepBackgroundFade(void);
 extern void kwlnDrawBackgroundFadeBands(void);
@@ -452,7 +452,7 @@ s32 kwlnRenderFrame(dds3ProcessID_t *task) {
             edgeDistances[i] = edgeDistances[i] * dds3ScreenBlurScale >> KWLN_FRAME_SCALE_FRACTION_BITS;
         }
         spritePacket = sdf2DAllocSprite(1);
-        vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr((s32)spritePacket);
+        vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr(spritePacket);
         vertex->r = KWLN_FRAME_NEUTRAL_COLOR;
         vertex->g = KWLN_FRAME_NEUTRAL_COLOR;
         vertex->b = KWLN_FRAME_NEUTRAL_COLOR;

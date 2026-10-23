@@ -273,8 +273,8 @@ s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount) {
 }
 
 /* Return the packet payload address after the DMA/GIF header. */
-u8 *sdf2DGetPrimPtr(s32 packetAddress) {
-    return (u8 *)(packetAddress + 0x20);
+u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet) {
+    return (u8 *)packet + sizeof(*packet);
 }
 
 /* Build packed GIF NLOOP/NREG/PRIM fields and its VIF DIRECT command. */
