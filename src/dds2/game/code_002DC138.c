@@ -525,8 +525,7 @@ void *effCreateResourceOwner(void *input) {
 }
 
 
-void effDestroyResourceOwner(void *work) {
-    EffResourceOwner *owner = work;
+void effDestroyResourceOwner(EffResourceOwner *owner) {
     u32 i;
 
     if (owner->model != 0) {
@@ -589,8 +588,7 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
 
 
 /* Complete queued jobs, sample the first model motion at zero, and clear the owner word. */
-void effResetModelMotionAndOwnerFlag(void *work) {
-    EffResourceOwner *owner = work;
+void effResetModelMotionAndOwnerFlag(EffResourceOwner *owner) {
     if (owner->buffer != NULL) {
         u32 count = owner->count;
         u32 i = 0;
@@ -774,25 +772,21 @@ void func_002DD448(EffResourceOwner *owner) {
 
 
 
-void effLoadModelPrimaryVector(void *obj, void *vec) {
-    EffResourceOwner *owner = obj;
+void effLoadModelPrimaryVector(EffResourceOwner *owner, void *vec) {
 SDF_VU0_LOADVECTOR_BARRIER(vec);
     mdlSetPosition(owner->model);
 }
 
-void effSetModelRotationQuaternion(void *obj, void *vec) {
-    EffResourceOwner *owner = obj;
+void effSetModelRotationQuaternion(EffResourceOwner *owner, void *vec) {
 SDF_VU0_LOADVECTOR_BARRIER(vec);
     mdlSetRotate(owner->model);
 }
 
-void effPropagateResourceModelMask(void *work, u32 color) {
-    EffResourceOwner *model = work;
-    mdlSetColor(model->model, color);
+void effPropagateResourceModelMask(EffResourceOwner *owner, u32 color) {
+    mdlSetColor(owner->model, color);
 }
 
-void effScaleModelVec(void *work, float scale) {
-    EffResourceOwner *owner = work;
+void effScaleModelVec(EffResourceOwner *owner, float scale) {
     u32 bits;
     SDF_VU0_SETSCALE1VECTOR();
     VU0_SCALAR_OP_TMP_MEMORY(bits, scale, "vmulx.xyzw vf10, vf10, vf2x");
@@ -1073,4 +1067,3 @@ INCLUDE_SDATA(const s32, "game/code_002DC138", D_00437E38);
 INCLUDE_SDATA(const s32, "game/code_002DC138", D_00437E3C);
 
 INCLUDE_SDATA(const s32, "game/code_002DC138", D_00437E40);
-
