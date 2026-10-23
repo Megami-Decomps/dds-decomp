@@ -10,7 +10,7 @@
 
 FileManWork fileQueueHead __attribute__((section(".bss")));
 
-extern s32 pacFileHandleFree(void *);
+extern s32 pacFileHandleFree(struct FilePacRequest *);
 #include "sdf_debug_api.h"
 #define FILE_REQUEST_KIND_CALLBACK 0
 #define FILE_REQUEST_KIND_PAC 1
@@ -26,7 +26,7 @@ extern s32 pacFileHandleFree(void *);
  * A pending non-PAC request returns one; request is required. */
 s32 fileHandleFree(struct FileRequest *request) {
     if (request->kind == FILE_REQUEST_KIND_PAC) {
-        return pacFileHandleFree(request);
+        return pacFileHandleFree((struct FilePacRequest *)request);
     }
     if (request->state == FILE_REQUEST_COMPLETE) {
         if (request->deviceRequest != NULL) {
