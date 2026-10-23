@@ -130,10 +130,10 @@ void dds3FontReqDestroy(void *owner) {
     sdfChipFreeDirect(node);
 }
 
-s32 dds3FontReqDrawFont(void *owner) {
+void dds3FontReqDrawFont(void *owner) {
     Dds3FontNode *node = owner;
 
-    return frFontDrawGlyphInDefaultMode(node->glyph);
+    frFontDrawGlyphInDefaultMode(node->glyph);
 }
 
 extern _FRQ * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
