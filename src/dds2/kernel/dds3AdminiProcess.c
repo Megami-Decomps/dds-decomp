@@ -33,7 +33,7 @@ u32 dds3GetAdminTaskValue(void) {
  * Mode and stored byte count retain their byte truncation (256 bytes records zero).
  * Previous data is released before copying; the history flag marks the old slot
  * when the requested mode is activated. */
-void dds3AdminiCallSequence(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory) {
+void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 dataBytes, s32 markHistory) {
     AdminWork *work;
     void *previousRequestData;
     u32 flags;
@@ -72,7 +72,7 @@ void dds3AdminiCallSequence(s32 requestedMode, void *requestData, u32 dataBytes,
 extern s32 dds3AdminPollModeCompletion(dds3ProcessID_t *task);
 
 /* Configure administrative state from three caller-supplied parameters. */
-void dds3AdminiOverwriteSequence(s32 requestedMode, void *requestData, u32 dataBytes)
+void dds3AdminiOverwriteSequence(s32 requestedMode, const void *requestData, u32 dataBytes)
 {
     AdminWork* work;
 

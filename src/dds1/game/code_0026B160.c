@@ -72,7 +72,7 @@ extern s32 mnuUpdateMovieMenuInputState(void);
 extern void mnuDrawMovieChoiceTransition(void);
 extern void mnuClearGlobalMenuStateFields(void);
 extern s32 mnuGetMovieMenuSelectionIndex(void);
-extern void dds3AdminiCallSequence(s32 requestedMode, void *requestData,
+extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData,
                                        u32 dataBytes, s32 markHistory);
 extern void mnuRestartRuntimeAfterViewer(s32 unused);
 extern void fldPrepareDeferredSceneTransition(void);

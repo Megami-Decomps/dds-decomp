@@ -1071,7 +1071,7 @@ s32 fileResetSelection(void) {
     D_00437CF8 = 1;
     return (s32)fileSlotStatusPoll;
 }
-extern void dds3AdminiCallSequence(s32, const s32 *, s32, s32);
+extern void dds3AdminiCallSequence(s32, const void *, u32, s32);
 extern s32 fileMenuWorkStart(void);
 
 

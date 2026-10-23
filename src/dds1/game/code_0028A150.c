@@ -368,7 +368,7 @@ extern void mnuRecordSetVector(void *record, const void *src);
 
 extern void fileSetRecordSecondVector(void *record, const void *src);
 
-extern void dds3AdminiCallSequence(s32 kind, void *data, s32 size, s32 flags);
+extern void dds3AdminiCallSequence(s32 kind, const void *data, u32 size, s32 flags);
 
 extern s32 D_003BC848;
 

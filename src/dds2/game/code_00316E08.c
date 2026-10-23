@@ -199,7 +199,7 @@ s32 mdlAdvanceViewerPackageTask(dds3ProcessID_t *task) {
 
 extern char D_0042D4E0[];
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
-extern void dds3AdminiCallSequence(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
+extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 dataBytes, s32 markHistory);
 extern void scrDestroyAllNamedProcesses(void);
 
 s32 evtCallShooting(void) {

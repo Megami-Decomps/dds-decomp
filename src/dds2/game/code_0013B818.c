@@ -41,7 +41,7 @@
 #include "dds3_world_counter.h"
 #include "fld_index_pair.h"
 /* Declared before first use (were implicit int). */
-extern void dds3AdminiCallSequence(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
+extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 dataBytes, s32 markHistory);
 extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
 extern s32 fldRegisterRoomObject(FldFileResource *, dds3Basic_t *);
 /* itfSetTextDrawLimit is void in the font TU; preserve C89 call scope here.

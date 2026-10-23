@@ -55,7 +55,7 @@ void dds3EffectObjectBasicStatOn(dds3Basic_t *unit, s32 flag);
 
 void evtStageAnimeControl(s32 modeSelector, s32 modeValue);
 
-void dds3AdminiCallSequence(s32 command, s32 payload, s32 payloadSize, s32 mode);
+void dds3AdminiCallSequence(s32 command, const void *payload, u32 payloadSize, s32 mode);
 void evtSubmitEventRequest(s32 eventId, s32 mode);
 
 void evtSubmitEventRequestImmediate(s32 eventId);
@@ -389,7 +389,7 @@ s32 evtCommand_CALL_SAVE(void)
 
     payload[0] = scrGetIntPara(0);
     payload[1] = scrGetIntPara(1);
-    dds3AdminiCallSequence(0x15, (s32)payload, EVT_PAIRED_REQUEST_SIZE, 0);
+    dds3AdminiCallSequence(0x15, payload, EVT_PAIRED_REQUEST_SIZE, 0);
     scrSetIntReturnValue(0);
     return 1;
 }
@@ -414,7 +414,7 @@ s32 evtCommand_CALL_EVENT(void)
 
     eventId = scrGetIntPara(0);
     printf("call_event:%d\n", eventId);
-    dds3AdminiCallSequence(6, (s32)&eventId, EVT_SCALAR_REQUEST_SIZE, 0);
+    dds3AdminiCallSequence(6, &eventId, EVT_SCALAR_REQUEST_SIZE, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }
@@ -438,7 +438,7 @@ void evtSubmitEventRequest(s32 eventId, s32 requestMode)
     evtPendingEventSelection = requestMode;
     payload[0] = 0;
     payload[1] = eventId;
-    dds3AdminiCallSequence(0xe, (s32)payload, EVT_PAIRED_REQUEST_SIZE, requestMode > 0);
+    dds3AdminiCallSequence(0xe, payload, EVT_PAIRED_REQUEST_SIZE, requestMode > 0);
     scrDestroyAllNamedProcesses();
 }
 
@@ -461,7 +461,7 @@ void evtSubmitEventRequestImmediate(s32 eventId)
     evtPendingEventSelection = 0;
     payload[0] = 0;
     payload[1] = eventId;
-    dds3AdminiCallSequence(0xe, (s32)payload, EVT_PAIRED_REQUEST_SIZE, 1);
+    dds3AdminiCallSequence(0xe, payload, EVT_PAIRED_REQUEST_SIZE, 1);
     scrDestroyAllNamedProcesses();
 }
 
@@ -498,7 +498,7 @@ s32 evtCommand_CALL_FIELD(void)
     kind = scrGetIntPara(1);
     sequenceName = scrGetStrPara(2);
     fldSetSceneParam2((s32)requestBuffer, stage, kind, sequenceName);
-    dds3AdminiCallSequence(5, (s32)requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
+    dds3AdminiCallSequence(5, requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }
@@ -513,7 +513,7 @@ s32 evtCommand_CALL_FIELD2(void)
     kind = scrGetIntPara(0);
     sequenceName = scrGetStrPara(1);
     fldSetSceneParam2((s32)requestBuffer, D_0032E3C0[0], kind, sequenceName);
-    dds3AdminiCallSequence(5, (s32)requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
+    dds3AdminiCallSequence(5, requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }
@@ -524,7 +524,7 @@ s32 evtCommandSubmitScalarAdminRequest(void)
     s32 payloadValue;
 
     payloadValue = scrGetIntPara(0);
-    dds3AdminiCallSequence(0x1c, (s32)&payloadValue, EVT_SCALAR_REQUEST_SIZE, 0);
+    dds3AdminiCallSequence(0x1c, &payloadValue, EVT_SCALAR_REQUEST_SIZE, 0);
     return 1;
 }
 
@@ -538,7 +538,7 @@ s32 evtCommand_CALL_FIELD3(void)
     kind = scrGetIntPara(0);
     sequenceName = scrGetStrPara(1);
     fldSetSceneParam3((s32)requestBuffer, D_0032E3C0[0], kind, sequenceName);
-    dds3AdminiCallSequence(5, (s32)requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
+    dds3AdminiCallSequence(5, requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }

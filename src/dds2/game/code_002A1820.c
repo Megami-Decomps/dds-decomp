@@ -919,7 +919,7 @@ extern void mnuStartTitleMovieDraw(void);
 extern void p2sdStopBGM(u32);
 extern void sdfSoundSetChannelCount(u32);
 extern void p2sdPlayBGMFade(s32);
-extern void dds3AdminiCallSequence(s32, void *, u32, s32);
+extern void dds3AdminiCallSequence(s32, const void *, u32, s32);
 extern void mnuRestartRuntimeAfterViewer(s32);
 extern void mnuAdvanceTimedSlideBar(SlideBarTimed *, s32);
 extern void mnuAdvanceMultiSpriteSlideBar(SlideBar *, s32);

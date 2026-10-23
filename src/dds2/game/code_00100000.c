@@ -70,7 +70,7 @@ extern void sdfCreateRuntimeTask(void);
 extern void sdfDevConsInit(void);
 extern void sdfResetChannels(void);
 
-extern void dds3AdminiCallSequence(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
+extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 dataBytes, s32 markHistory);
 
 void kwlnInitializeRuntime(void) {
     dds3InitDrawEnv();
