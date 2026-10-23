@@ -30,7 +30,7 @@ extern u32 effResourceDefaultTriangleColors[];
 extern SdfPoolNode *effResourceDrawSurfaces[];
 
 
-/* Create an effect resource work with count entries, its entry list inline at +0x74. */
+/* Create an effect resource work with count entries inline after its header. */
 EffResourceWork *dds3NeedleModelCreate(u32 count) {
     struct sdfMemHandle_t *allocation;
     EffResourceWork *work;
@@ -38,7 +38,7 @@ EffResourceWork *dds3NeedleModelCreate(u32 count) {
     sdfMat_t *asset;
     u32 i;
 
-    allocation = sdfMemAllocDirect(count * 20 + 0x74);
+    allocation = sdfMemAllocDirect(count * sizeof(EffResourceEntry) + sizeof(EffResourceWork));
     work = (EffResourceWork *)sdfMemLock(allocation);
     work->mode = 2;
     work->entries = (EffResourceEntry *)(work + 1);
