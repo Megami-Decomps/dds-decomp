@@ -252,7 +252,7 @@ dds3ObjectBaseControlWorkData_t *dds3EffectObjectBasicGetControlWorkData(dds3Bas
     return ((EffectDependencyState *)object->data)->objectHandle;
 }
 
-dds3Basic_t *dds3AddEffectObjectBasic(u32 worldCounter, void *firstVec, void *secondVec) {
+dds3Basic_t *dds3AddEffectObjectBasic(u32 worldCounter, const u128 *position, const u128 *rotation) {
     dds3Basic_t *obj;
     EffectDependencyState *data;
 
@@ -262,8 +262,8 @@ dds3Basic_t *dds3AddEffectObjectBasic(u32 worldCounter, void *firstVec, void *se
     }
     obj->key = worldCounter;
     dds3ObjectBaseCreateMover(obj);
-    dds3SetPosPoseSet(obj, (u128 *)firstVec);
-    dds3SetRotPoseSet(obj, (u128 *)secondVec);
+    dds3SetPosPoseSet(obj, (u128 *)position);
+    dds3SetRotPoseSet(obj, (u128 *)rotation);
     dds3SetRadiusPoseSet(obj->inner);
     data = obj->data;
     data->flags = 0;
@@ -290,7 +290,7 @@ dds3Basic_t *AddP2AEffect(bill, vec, extra)
     dds3Basic_t *id;
 
     memset(vector, 0, sizeof(vector));
-    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), vec, (void *)extra);
+    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), vec, (u128 *)extra);
     if (obj == NULL) {
         return NULL;
     }
@@ -419,7 +419,8 @@ dds3Basic_t *effObjCreateWithBoundBill(bill, firstVector, secondVector)
     dds3Basic_t *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
-    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), firstVector, secondVector);
+    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), (u128 *)firstVector,
+                                  (u128 *)secondVector);
     if (obj == NULL) {
         return NULL;
     }
@@ -472,7 +473,8 @@ dds3Basic_t *effObjCreateBillboardInWorld(bill, firstVector, secondVector)
     dds3Basic_t *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
-    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), firstVector, secondVector);
+    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), (u128 *)firstVector,
+                                  (u128 *)secondVector);
     if (obj == NULL) {
         return NULL;
     }
@@ -647,8 +649,8 @@ dds3Basic_t *AddMG12Effect(kind, descriptor)
     memcpy(twoRows, D_00412980, sizeof(twoRows));
     memcpy(fourRows, D_004129A8, sizeof(fourRows));
     bill = dds3EffectLoad(descriptor);
-    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), firstVector,
-                                 secondVector);
+    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), (u128 *)firstVector,
+                                  (u128 *)secondVector);
     if (obj == NULL) {
         return NULL;
     }
