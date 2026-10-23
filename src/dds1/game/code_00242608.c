@@ -1781,7 +1781,9 @@ s32 mnuBuildShopStandardCatalogList(ShopScene *scene) {
 }
 
 
-extern void mnuDrawCampItemListRow();
+extern void mnuDrawCampItemListRow(
+    s32 x, s32 y, s32 z, struct MenuList *list, struct MenuListNode *node, s32 mode
+);
 
 /* Rebuild the camp stock window from the shop's source price row, then append the
  * standard catalog and install the item row drawer. */
@@ -1910,8 +1912,6 @@ s32 mnuBuildShopCatalogList(ShopScene *scene) {
     return 0;
 }
 
-extern void mnuDrawCampItemListRow();
-
 /* As mnuCampRebuildItemStockWindow, keeping only the 0xA0-0xBF range of ordinary
  * stock, then appending the full shop catalog. */
 s32 mnuCampRebuildFilteredStockWindow(ShopScene *scene) {
@@ -1979,8 +1979,6 @@ s32 mnuCampRebuildFilteredStockWindow(ShopScene *scene) {
 extern char (*D_003BAA84)[25];
 
 extern u32 mnuShopSolarPhaseSalePrices[][16];
-extern void mnuDrawCampItemListRow();
-
 s32 mnuBuildCampItemList(ShopScene *scene) {
     CampWindowParams *parameters;
     void *block;
@@ -2063,7 +2061,6 @@ extern void mnuDrawDispatchProgressIcons(s32, s32);
 extern s32 mnuDrawCommandClosePhase(ShopScene *);
 
 extern void mnuStorePendingMenuCommandValue(struct MenuList *, u32);
-extern void mnuDrawCampItemListRow();
 extern u8 mnuShopReturnFadePopupEntry[];
 
 extern void mnuStepShopWindowTransition(ShopScene *, s32);
