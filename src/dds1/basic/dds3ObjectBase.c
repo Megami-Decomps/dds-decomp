@@ -36,9 +36,6 @@ void dds3ObjectBaseFreeModelHandle(dds3Basic_t *object);
 #define DDS3_OBJECT_OWNER_SLOT 0
 #define DDS3_OBJECT_HANDLER_SLOT 5
 #define DDS3_OBJECT_DATA_SLOT 1
-#define DDS3_OBJECT_RESOURCE_MODEL_CONTEXT 0
-#define DDS3_OBJECT_RESOURCE_DEV_MOTION 1
-#define DDS3_OBJECT_RESOURCE_RELEASED 3
 
 /* Process the owner's entry in the auxiliary handler index, destroy world nodes
  * in slots 1/2, release owned resources/devices, then free the index and base. */
@@ -304,7 +301,7 @@ void dds3ObjectBaseMakeMatter(void *object) {
     VU0_STORE_MATRIX(model->matrix);
     sdfModelEvalTm2(model, 0);
     sdfModelEvalTm2(model, 1);
-    base->resourceState = 1;
+    base->resourceState = DDS3_OBJECT_RESOURCE_DEV_MOTION;
     base->resourceHandle = model;
     base->motion = motion;
     base->weight = 1.0f;
@@ -629,4 +626,3 @@ dds3PathBasicControl_t *dds3ObjectBaseGetPathControl(dds3Basic_t *object) {
 }
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_003BA9C8);
-

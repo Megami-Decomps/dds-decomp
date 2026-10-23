@@ -8,6 +8,10 @@
  * Object resources, indexed slots and motion control share the same record. */
 #define DDS3_OBJECT_RESOURCE_SLOT_COUNT 24
 
+#define DDS3_OBJECT_RESOURCE_MODEL_CONTEXT 0
+#define DDS3_OBJECT_RESOURCE_DEV_MOTION 1
+#define DDS3_OBJECT_RESOURCE_RELEASED 3
+
 struct sdfMotionCtrlr_t;
 
 typedef struct dds3ObjectBaseControlWorkData_t {
