@@ -1051,7 +1051,7 @@ u32 *sdfMultiBillBoardMakeN(u128 *positions, void *attributes, void *halfAttribu
 /* Build a one-vertex textured-quad VIF packet with four corner colors: the
  * position, colors, UV corners (copied as unaligned words) and the eight quad
  * corner coordinates. */
-void sdfBillBoardVcMake1(u8 *packet, const f32 *position, const u32 *colors, const void *uv, const f32 *quad) {
+void sdfBillBoardVcMake1(u8 *packet, const f32 *position, const u32 *colors, const struct BillTextureQuad *uv, const f32 *quad) {
     *(u16 *)packet = 8;
     *(u32 *)(packet + 8) = 0x6C01C000;
     *(u32 *)(packet + 12) = 1;
