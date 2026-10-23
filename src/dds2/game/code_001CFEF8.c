@@ -205,7 +205,7 @@ void fldBattleSceneEnterInit(u8 *scene) {
     }
     btlRequestSceneEventResources();
     btlInitializeBossCallbacks(((BtlState *)scene)->battleMode);
-    btlSelectSceneAudioTrack(((BtlState *)scene)->effectLayer, ((BtlState *)scene)->battleMode);
+    btlSelectSceneAudioTrack(((BtlState *)scene)->encounterPack, ((BtlState *)scene)->battleMode);
     VU0_STORE_VF($vf0, scene);
 }
 

@@ -910,7 +910,7 @@ s32 btlSelectSerialEncounter(void) {
     state->requestMode = 0;
     state->requestArgument = 0;
     state->nextAdjustmentEntryIndex = selectionIndex;
-    encounterPack = (u16)state->effectLayer;
+    encounterPack = (u16)state->encounterPack;
     groupIndex = (u16)state->adjustmentGroupIndex;
 
     if (serialOverride != NULL) {
