@@ -130,7 +130,7 @@ typedef struct datUnitWork_t {
         u32 skillSnapshotWords[77]; /* Stock merge includes the reserved trailing word. */
     };
     u16 savedCommandPhase; /* +0x18C: saved action phase restored with actionSlot. */
-    u16 unk18E;
+    u16 savedCommandSelectionEntry; /* +0x18E: selected list entry restored with savedCommandPhase. */
     u16 actionSlot; /* 0x190: saved command-table slot; matches DDS2's actionSlot. */
     u8 pad192[2];
     s32 randomizedValue;
@@ -142,7 +142,7 @@ typedef struct datUnitWork_t {
     u8 pad56[2];
     u32 skillFlags[85];                    /* 0x058: scrClearFlagsTable clears all 0x154 bytes. */
     u16 savedCommandPhase; /* +0x1AC: saved action phase restored with actionSlot. */
-    u16 unk1AE; /* Synced from the active battle record. */
+    u16 savedCommandSelectionEntry; /* +0x1AE: selected list entry restored with savedCommandPhase. */
     s16 actionSlot;
     u16 itemId;
     s32 randomizedValue;                  /* 0x1B4: initialized to 0x12 minus a four-way roll. */

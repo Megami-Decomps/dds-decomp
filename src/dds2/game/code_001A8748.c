@@ -1488,7 +1488,7 @@ void btlSyncPlayerWork(BtlUnit *actor) {
     memcpy(dst->baseStats, src->baseStats, sizeof(dst->baseStats));
     dst->status = src->status & 0x7FFF;
     dst->savedCommandPhase = src->savedCommandPhase;
-    dst->unk1AE = src->unk1AE;
+    dst->savedCommandSelectionEntry = src->savedCommandSelectionEntry;
     dst->actionSlot = (u16)src->actionSlot;
     btlBossDebugPrintf("btl:player work set[%p]\n", actor);
 }
