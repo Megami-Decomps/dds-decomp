@@ -2436,20 +2436,21 @@ extern const char D_003A3AD0[];
 
 void btlReleaseActorModelResources(BtlUnit *object) {
     SoundSlotOwner *sound;
-    s32 load;
+    sdfModelRootNode_t *load;
     dds3Basic_t *model;
     u32 state;
     u32 flags;
-    if (((u8 *)object)[0xCC] == 0) {
-        sound = *(SoundSlotOwner **)((u8 *)object + 0x308);
+
+    if (object->modelBorrowed == 0) {
+        sound = object->soundSlotOwner;
         if (sound != 0) {
             sndReleaseSlotOwner(sound);
-            *(SoundSlotOwner **)((u8 *)object + 0x308) = 0;
+            object->soundSlotOwner = 0;
         }
-        load = *(s32 *)((u8 *)object + 0x324);
+        load = object->transparencyModel;
         if (load != 0) {
-            sdfModelRootFree((sdfModelRootNode_t *)load, 1, 1);
-            *(s32 *)((u8 *)object + 0x324) = 0;
+            sdfModelRootFree(load, 1, 1);
+            object->transparencyModel = 0;
             btlBossDebugPrintf(D_003A3AD0, object);
         }
         model = object->effectObject;
@@ -2459,16 +2460,16 @@ void btlReleaseActorModelResources(BtlUnit *object) {
             object->ext = 0;
         }
     } else {
-        *(s32 *)((u8 *)object + 0x308) = 0;
-        *(s32 *)((u8 *)object + 0x324) = 0;
+        object->soundSlotOwner = 0;
+        object->transparencyModel = 0;
         object->effectObject = 0;
         object->ext = 0;
     }
-    state = *(u32 *)((u8 *)object + 0x118) & ~1;
-    flags = (u32)object->status.flags & ~2;
+    state = object->gunResourceFlags & ~1;
+    flags = object->status.flags & ~2;
     state &= ~2;
     object->status.flags = flags;
-    *(u32 *)((u8 *)object + 0x118) = state;
+    object->gunResourceFlags = state;
 }
 
 extern s32 btlEnsureModelAndSoundReady(s32 kind, s32 id, s32 input);
