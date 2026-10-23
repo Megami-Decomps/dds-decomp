@@ -5133,7 +5133,7 @@ void fldClearCameraObjectTransitionFlags(void) {
     dds3ObjectBaseOffFlag(fldPlayerObject, 0x200);
 }
 
-extern void dds3OffPoseSetFlag(dds3PoseSet_t *, s32);
+extern void dds3OffPoseSetFlag(dds3PoseSet_t *, u32);
 
 /* State-first XYZ publication; SDK snapshot audit: docs/idioms.md. */
 s32 fldUpdateCameraObjectPose(void) {
