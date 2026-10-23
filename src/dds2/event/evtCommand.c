@@ -99,7 +99,7 @@ void evtPathLoop(void *unit, s32 enabled);
 
 void evtEffectLoopControl(void *unit, s32 flag);
 
-void dds3EffectObjectBasicStatOn(void *unit, s32 flag);
+void dds3EffectObjectBasicStatOn(dds3Basic_t *unit, u32 flag);
 
 
 

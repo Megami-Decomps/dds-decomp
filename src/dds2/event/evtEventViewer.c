@@ -479,8 +479,7 @@ void evtViewerBindNamedOwner(dds3Basic_t *effectObject, s32 ownerNameIndex, s32 
 }
 
 
-struct EffectObj;
-extern void dds3EffectObjectBasicStatOn(struct EffectObj *obj, u32 flags);
+extern void dds3EffectObjectBasicStatOn(dds3Basic_t *obj, u32 flags);
 extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *resource, void *position, void *scale);
 extern void dds3StartBEDEffectObjectBasic(dds3Basic_t *obj, u32 entryId);
 struct EffNodeDescriptor;
@@ -551,7 +550,7 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *track, EvtRunti
     }
     viewer->objects[slot] = (void *)handle;
     if (handle != 0) {
-        dds3EffectObjectBasicStatOn((struct EffectObj *)handle, 1);
+        dds3EffectObjectBasicStatOn((dds3Basic_t *)handle, 1);
     }
     return slot;
 }
