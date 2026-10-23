@@ -240,7 +240,7 @@ extern struct sdfMemHandle_t *fldIndexedResourceHandle;
 
 extern u32 fldIndexedResourceData;
 
-extern s32 fldIndexedResourceEffect;
+extern EffNode *fldIndexedResourceEffect;
 
 
 extern u32 D_0043623C;
@@ -3115,12 +3115,12 @@ void fldLoadResourceByIndex(s32 index) {
 
     memcpy(ids, D_00436330, sizeof(ids));
     fldIndexedResourceHandle = sdfDevLoadFileEx((const char *)(u32)ids[index], &fldIndexedResourceData, 0);
-    fldIndexedResourceEffect = (s32)dds3EffectLoad((EffNodeDescriptor *)fldIndexedResourceData);
+    fldIndexedResourceEffect = dds3EffectLoad((EffNodeDescriptor *)fldIndexedResourceData);
 }
 
 void fldReleaseIndexedResourceEffect(void) {
     if (fldIndexedResourceEffect != 0) {
-        dds3EffectDelete((EffNode *)(u32)fldIndexedResourceEffect);
+        dds3EffectDelete(fldIndexedResourceEffect);
         fldIndexedResourceEffect = 0;
         sdfMemFreeDelayedDirect(fldIndexedResourceHandle);
         fldIndexedResourceHandle = NULL;
@@ -3139,8 +3139,8 @@ void fldUpdateIndexedResourceEffectPosition(void) {
         position[0] = state->x;
         position[1] = state->y;
         position[2] = state->z;
-        effCopyVectorToNodeInstance((EffNode *)fldIndexedResourceEffect, position);
-        dds3EffectDraw((EffNode *)(u32)fldIndexedResourceEffect);
+        effCopyVectorToNodeInstance(fldIndexedResourceEffect, position);
+        dds3EffectDraw(fldIndexedResourceEffect);
     }
 }
 
@@ -6968,7 +6968,7 @@ INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_001442D0", fldIndexedRes
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", fldIndexedResourceData);
 
-INCLUDE_SDATA(const s32, "game/code_001442D0", fldIndexedResourceEffect);
+INCLUDE_SDATA(EffNode *, "game/code_001442D0", fldIndexedResourceEffect);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436330);
 
