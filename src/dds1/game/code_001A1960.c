@@ -34,6 +34,7 @@
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
+#include "snd_slot.h"
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
@@ -501,11 +502,11 @@ BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 sid
     return (BtlActorTransformParameters *)(D_003BAA30 + index * 24);
 }
 
-s32 btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId) {
+SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId) {
     if (category == 0) {
-        return D_003BAA14 + actorId * 0x74;
+        return (SoundSlotTableEntry *)(D_003BAA14 + actorId * 0x74);
     }
-    return D_003BAA28 + actorId * 0x74;
+    return (SoundSlotTableEntry *)(D_003BAA28 + actorId * 0x74);
 }
 
 extern char D_003A1788[];

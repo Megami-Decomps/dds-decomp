@@ -43,6 +43,7 @@
 #include "sdf.h"
 #include "sdf_projection.h"
 #include "btl_action.h"
+#include "snd_slot.h"
 #include "scr.h"
 #include "dat_state.h"
 #include "btl_resolve_unit_value_api.h"
@@ -1834,11 +1835,11 @@ BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 sid
     return (BtlActorTransformParameters *)(D_00435E00 + index * 24);
 }
 
-s32 btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId) {
+SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId) {
     if (category == 0) {
-        return D_00435DE4 + actorId * 0x74;
+        return (SoundSlotTableEntry *)(D_00435DE4 + actorId * 0x74);
     }
-    return D_00435DF8 + actorId * 0x74;
+    return (SoundSlotTableEntry *)(D_00435DF8 + actorId * 0x74);
 }
 
 s32 btlGetLoggedIndexedCommandItem(s32 index) {
