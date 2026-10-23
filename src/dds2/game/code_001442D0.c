@@ -290,7 +290,7 @@ extern void fldStartTitle(s32 field, s32 mode, s32 option);
 
 extern void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit);
 
-extern s32 fldFindEffectByName(char *str);
+extern s32 fldFindEffectByName(const char *name);
 
 extern s32 fldGetCurrentSceneSelectionResource(void);
 
@@ -3936,7 +3936,7 @@ void fldSetNpcPalette(const FldNpcPalette *src) {
 }
 
 
-s32 fldFindEffectByName(char *name) {
+s32 fldFindEffectByName(const char *name) {
     s32 i;
 
     for (i = 0; i < fldNpcModelTable; i++) {
