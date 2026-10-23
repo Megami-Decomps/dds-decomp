@@ -158,7 +158,7 @@ extern s32 sndPlaySkillSeTask(u32 *);
 
 extern u32 sndFinishEarringPlayback(void);
 
-extern BtlRuntimeTask *btlCreateMoveOtherUnitsTask(u8 *, u32);
+extern BtlRuntimeTask *btlCreateMoveOtherUnitsTask(BtlUnit *, u32);
 
 
 extern SoundResourceNode *sndAllocResourceNode(void);
@@ -10249,8 +10249,8 @@ void sndReleaseAllSlotOwners(void) {
     }
 }
 
-void btlStartMoveOtherUnitsTask(void *owner, s32 soundId) {
-    void *task = btlCreateMoveOtherUnitsTask(owner, soundId);
+void btlStartMoveOtherUnitsTask(BtlUnit *unit, s32 soundId) {
+    BtlRuntimeTask *task = btlCreateMoveOtherUnitsTask(unit, soundId);
     btlStartTask(task);
 }
 
@@ -10374,18 +10374,18 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
     return 0;
 }
 
-BtlRuntimeTask *btlCreateMoveOtherUnitsTask(u8 *owner, u32 soundId) {
+BtlRuntimeTask *btlCreateMoveOtherUnitsTask(BtlUnit *unit, u32 soundId) {
     u8 *task = btlAllocTask(16);
     SoundTaskArgs *arguments;
 
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x54;
-    *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
+    *(u64 *)(task + 0x40) = *(u64 *)((u8 *)unit + 0x108);
     *(void **)(task + 0x48) = btlQueueUnitSoundSlotFileLoad;
     *(void **)(task + 0x4C) = sndPollMotionSePlayback;
     arguments = btlGetTaskArguments(task);
-    arguments->actor = (BtlUnit *)owner;
+    arguments->actor = unit;
     arguments->slot = soundId;
     arguments->option = 0;
     arguments->waitFrames = 0;
