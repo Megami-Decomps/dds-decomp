@@ -1234,7 +1234,7 @@ u32 mnuCreateSelectState(dds3ProcessID_t *task, s32 staffView) {
     s32 context = dds3GetProcessData(task);
     struct sdfMemHandle_t *handle = sdfMemAllocDirect(0x30);
     StaffMenuRuntime *state = (StaffMenuRuntime *)sdfMemLock(handle);
-    *(StaffMenuRuntime **)(context + 0xaa48) = state;
+    ((MenuContext *)context)->party = state;
     memset(state, 0, 0x30);
     state->allocation = handle;
     state->staffView = staffView;
@@ -2189,7 +2189,7 @@ u32 mnuCreateItemState(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
     struct sdfMemHandle_t *allocation = sdfMemAllocDirect(sizeof(SkillMenuRuntime));
     SkillMenuRuntime *state = (SkillMenuRuntime *)sdfMemLock(allocation);
-    *(SkillMenuRuntime **)(context + 0xaa48) = state;
+    ((MenuContext *)context)->party = state;
     memset(state, 0, sizeof(*state));
     state->allocation = allocation;
     mnuSelectSkillSelectionVisuals(context);
