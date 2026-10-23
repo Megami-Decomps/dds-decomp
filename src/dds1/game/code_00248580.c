@@ -746,14 +746,14 @@ s32 mnuDrawLoadedProgressPanels(u8 *control, MenuProgressHost *work, s32 context
     return 1;
 }
 
-extern s32 D_003BC3E4;
+extern dds3ProcessID_t *D_003BC3E4;
 extern char mnuTerminalSpriteDirectory[];
 extern char D_003AF620[];
 extern s32 evtIsActiveFlagSet(s32);
 
 /* Wait for the terminal effect or world-menu transition to finish. */
 s32 mnuAdvanceTerminalTransition(s8 closing) {
-    MenuTerminalWork *work = (MenuTerminalWork *)dds3GetProcessData((dds3ProcessID_t *)D_003BC3E4);
+    MenuTerminalWork *work = (MenuTerminalWork *)dds3GetProcessData(D_003BC3E4);
 
     if (closing == 1) {
         if (work->mode == 0) {
@@ -962,7 +962,7 @@ extern const char D_003AF668[];
 
 extern const char D_003AF678[];
 
-extern s32 D_003BC3E4;
+extern dds3ProcessID_t *D_003BC3E4;
 
 
 extern s32 mnuPrepareTerminalPopupAndDispatch(dds3ProcessID_t *task);
@@ -975,7 +975,7 @@ s32 mnuTerminalCreateTasks(s32 reduced, s32 slot) {
     s32 result;
     MenuTerminalWork *work = mnuTerminalCreateScene(reduced, slot);
 
-    D_003BC3E4 = (s32)dds3StartProcess(D_003AF658, 0x404, 1, 1, mnuPrepareTerminalPopupAndDispatch, 0, (u32)work);
+    D_003BC3E4 = dds3StartProcess(D_003AF658, 0x404, 1, 1, mnuPrepareTerminalPopupAndDispatch, 0, (u32)work);
     dds3StartProcess(D_003AF668, 0x2B14, 1, 1, evtRunTerminalPanel, 0, (u32)work);
     result = (s32)dds3StartProcess(D_003AF678, 0x5210, 1, 1, evtRunTerminalPanelSync, mnuReleaseTerminalWorkAndResumeField, (u32)work);
     mnuTerminalTaskState = 1;
@@ -987,7 +987,7 @@ void fldStopSceneTasks(void) {
     dds3KillProcessName(D_003AF658, 0);
     dds3KillProcessName(D_003AF668, 0);
     dds3KillProcessName(D_003AF678, 0);
-    D_003BC3E4 = 0;
+    D_003BC3E4 = NULL;
 }
 
 /* Report one only for active state one; consume completed state two by clearing it. */
@@ -2525,7 +2525,7 @@ INCLUDE_SDATA(const s32, "game/code_00248580", mnuTerminalTaskState);
 
 INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3E1);
 
-INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3E4);
+INCLUDE_SDATA(dds3ProcessID_t * const, "game/code_00248580", D_003BC3E4);
 
 INCLUDE_SDATA(const s32, "game/code_00248580", mnuNumberSpriteFormat);
 
