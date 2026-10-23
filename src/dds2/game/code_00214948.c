@@ -7068,18 +7068,13 @@ s32 btlSelectLinkedActionCameraPose(BtlLinkedCommand *command, s8 modeA, s8 mode
 }
 
 /* Update a party owner's approach camera on request 0xE; return one only on update. */
-s32 btlUpdatePartyApproachCameraStep(s32 object) {
-    s32 state;
-    s32 battler;
-
-    if (btlIsActorCategoryMarked((BtlLinkedCommand *)object) == 0) {
-        state = (s32)((BtlLinkedCommand *)object)->link;
-        battler = (s32)((ActionStateLink *)state)->unit;
-        if ((((BtlUnit *)battler)->status.flags & 0x200) != 0) {
-            if (((BtlLinkedCommand *)object)->stepKind == 0xE) {
-                btlBuildAngledApproachCameraPose((BtlLinkedCommand *)object, (BtlCamState *)object, -0.8f, 0.225f, 35.0f);
-                ((BtlLinkedCommand *)object)->camera.distance += 500.0f;
-                btlAdjustCameraDirectionForDefaultPlane((BtlCamState *)object);
+s32 btlUpdatePartyApproachCameraStep(BtlLinkedCommand *command) {
+    if (btlIsActorCategoryMarked(command) == 0) {
+        if ((command->link->unit->status.flags & 0x200) != 0) {
+            if (command->stepKind == 0xE) {
+                btlBuildAngledApproachCameraPose(command, (BtlCamState *)command, -0.8f, 0.225f, 35.0f);
+                command->camera.distance += 500.0f;
+                btlAdjustCameraDirectionForDefaultPlane((BtlCamState *)command);
                 return 1;
             }
         }

@@ -1611,7 +1611,7 @@ extern s32 btlFinishBrahmanCameraByTableFlags(BtlLinkedCommand *unit);
 extern u32 btlMarkChaturbhujaCameraBlend(BtlLinkedCommand *unit);
 extern u32 btlStartChaturbhujaCameraStep(BtlLinkedCommand *unit);
 extern u32 btlGetDesertWindEffectOverride(u32 unused, s32 motion);
-extern s32 btlUpdatePartyApproachCameraStep(s32 object);
+extern s32 btlUpdatePartyApproachCameraStep(BtlLinkedCommand *command);
 extern s32 btlFinishRaisedActionCamera(BtlLinkedCommand *unit);
 extern s32 btlSelectSatanLinkedActionCamera(BtlLinkedCommand *command, s8 modeA, s8 modeB);
 extern s32 btlUpdateSatanApproachCameraStep(BtlLinkedCommand *unit);
