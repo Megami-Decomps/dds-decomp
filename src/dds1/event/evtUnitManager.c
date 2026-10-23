@@ -1719,9 +1719,9 @@ u32 evtCommand_MODEL_SHADOW_OFF(void) {
 }
 
 u32 evtOpQueueWorldObjectPendingValue(void) {
-    void *ctx;
+    dds3Basic_t *ctx;
     s32 worldObjectKey;
-    void *unit;
+    dds3Basic_t *unit;
     u32 ret = 1;
 
     ctx = dds3GetActiveScene();
@@ -1735,9 +1735,9 @@ u32 evtOpQueueWorldObjectPendingValue(void) {
 }
 
 u32 evtOpClearWorldObjectPendingValue(void) {
-    void *ctx;
+    dds3Basic_t *ctx;
     s32 worldObjectKey;
-    void *unit;
+    dds3Basic_t *unit;
     u32 ret = 1;
 
     ctx = dds3GetActiveScene();
