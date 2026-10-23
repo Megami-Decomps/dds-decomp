@@ -1681,7 +1681,7 @@ s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 co
 
 extern void btlRestoreLinkedEffectUnitPose(BtlUnit *);
 
-extern void btlInitializeEffectVectorsFromSourceRecords();
+extern void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *fx, s32 kind, s32 index);
 
 /* Re-pairs the two linked units of modes 0x107/0x108. While the effect is idle the 0x108 unit keeps its
  * position and rotation, the 0x107 unit copies them and both reload their effect vectors; a 0x108 unit with
