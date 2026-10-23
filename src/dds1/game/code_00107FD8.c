@@ -67,7 +67,7 @@ extern void FinishMovieViewer(void);
 extern s32 mnuDestroyTitleMenuTask(void);
 extern s32 mnuOpenShopSceneWithInitialSelection(s32 *initialSelection);
 extern u32 mnuOpenTitleMenuForMode(s32 mode);
-extern s32 mnuStaffCreateTasks(void);
+extern dds3ProcessID_t *mnuStaffCreateTasks(void);
 extern u32 mnuStaffDestroyTasks(void);
 extern u32 mnuStartStaffMovieRequest(void);
 extern s32 mnuStopStaffTasks(void);
@@ -1291,7 +1291,7 @@ u32 CheckTerminal(void) {
 }
 
 s32 CallResult2(void) {
-    return mnuStaffCreateTasks();
+    return (s32)mnuStaffCreateTasks();
 }
 
 u32 ExitResult2(void) {
@@ -1480,7 +1480,7 @@ u8 CheckTerminalTest(void) {
 }
 
 s32 evtCreateStaffTasksAlternate(void) {
-    return mnuStaffCreateTasks();
+    return (s32)mnuStaffCreateTasks();
 }
 
 u32 evtDestroyStaffTasksAlternate(void) {
