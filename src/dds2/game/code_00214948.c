@@ -283,9 +283,9 @@ s32 btlUnitHasEitherSpecialAction(BtlUnit *unit) {
 
 /* Require the complete first queued-action word and unit status bit 0x1000.
  * Comparing only actions[0].actionId would discard the upper halfword. */
-s32 btlActionMatchesUnit(s32 unit, s32 action) {
+s32 btlActionMatchesUnit(BtlUnit *unit, s32 action) {
     if (btlActionScratchWork->actor->actions[0].word == action) {
-        if (((BtlUnit *)unit)->status.stateFlags & 0x1000) {
+        if (unit->status.stateFlags & 0x1000) {
             return 1;
         }
     }
