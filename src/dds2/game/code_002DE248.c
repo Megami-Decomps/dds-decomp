@@ -9801,7 +9801,7 @@ s32 effCollectModelEffectActors(BtlUnit **out, u32 kind) {
     if (mask != 0) {
         u8 *link;
 
-        for (link = (u8 *)((BtlState *)state)->units; link != NULL; link = (u8 *)((BtlUnit *)link)->nextActor) {
+        for (link = (u8 *)((BtlState *)state)->units; link != NULL; link = (u8 *)((BtlUnit *)link)->next) {
             u32 flags = ((BtlUnit *)link)->status.flags;
 
             if (flags & 1) {
@@ -9854,7 +9854,7 @@ void effRestoreBattleActorLighting(u32 unusedResource) {
                 evtUnitLightOff(unit->ext, 0);
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
 }
 
@@ -10011,7 +10011,7 @@ void effSyncLinkedActorChildParameter(void) {
                 evtSetUnitColorRGB(child, 0, entry->baseColor);
             }
         }
-        entry = entry->nextActor;
+        entry = entry->next;
     }
 }
 
@@ -11340,7 +11340,7 @@ void effSyncFadeColorToTargets(void) {
                     evtSetUnitColorA(target, 0, node->baseColor);
                 }
             }
-            node = node->nextActor;
+            node = node->next;
         }
     }
 }

@@ -253,7 +253,7 @@ s32 btlUnitBlocksElementQueryForGroup(BtlUnit *unit, s32 action, u32 mask) {
 
 s32 btlAllUnitsPassCheck200(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; battler != 0; battler = battler->nextActor) {
+    for (; battler != 0; battler = battler->next) {
         if (btlUnitBlocksElementQueryForGroup(battler, action, 0x200) == 0) {
             return 0;
         }
@@ -263,7 +263,7 @@ s32 btlAllUnitsPassCheck200(s32 unused, s32 action) {
 
 s32 btlAllUnitsPassCheck400(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; battler != 0; battler = battler->nextActor) {
+    for (; battler != 0; battler = battler->next) {
         if (btlUnitBlocksElementQueryForGroup(battler, action, 0x400) == 0) {
             return 0;
         }
@@ -324,7 +324,7 @@ s32 btlFindEnemyLinkagePartnersByCount(BtlUnit *actor, s32 command, BtlUnit **ou
 
     unit = state->units;
     head = unit;
-    for (; unit != NULL; unit = unit->nextActor) {
+    for (; unit != NULL; unit = unit->next) {
         BtlUnit *partner;
 
         if (!(unit->status.flags & 1)) {
@@ -341,7 +341,7 @@ s32 btlFindEnemyLinkagePartnersByCount(BtlUnit *actor, s32 command, BtlUnit **ou
         }
 
         if (requiredCount == 3) {
-            for (partner = head; partner != NULL; partner = partner->nextActor) {
+            for (partner = head; partner != NULL; partner = partner->next) {
                 if (!(partner->status.flags & 1)) {
                     continue;
                 }
@@ -1503,7 +1503,7 @@ void btlStartUnitActionIfPairedSelected(void) {
     if (*(s8 *)work->sub == 0) {
         found = 0;
         other = 0;
-        for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
+        for (unit = work->actorList; unit != 0; unit = unit->next) {
             u32 flags = unit->status.flags;
 
             if (flags & 1) {
@@ -1551,7 +1551,7 @@ void btlQueueBossScriptResourceAndSound(ActionStateLink *action) {
                         }
                     }
                 }
-                unit = unit->nextActor;
+                unit = unit->next;
             }
             if (unit != 0) {
                 if (unit->status.flags & 0xE0) {
@@ -1637,7 +1637,7 @@ s32 btlCheckPhaseOnePartyStatusGate(void) {
         return -1;
     }
     count = 0;
-    for (battler = work->actorList; battler != 0; battler = battler->nextActor) {
+    for (battler = work->actorList; battler != 0; battler = battler->next) {
         u32 flags = battler->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
@@ -1710,7 +1710,7 @@ void btlStartReadyUnitAction(void) {
     ActionStateLink *handle;
 
     if (ctrl->unit != 0) {
-        for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
+        for (unit = work->actorList; unit != 0; unit = unit->next) {
             u32 flags = unit->status.flags;
 
             if (!(flags & 1)) {
@@ -1930,7 +1930,7 @@ s32 btlOverrideActionResultForEnemyMode(s32 battler, s32 action, s32 defaultValu
 
 s32 btlIsUnitListReady(void) {
     BtlUnit *unit;
-    for (unit = ((BattleWork *)btlGetRuntime())->actorList; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BattleWork *)btlGetRuntime())->actorList; unit != 0; unit = unit->next) {
         u32 flags = unit->status.flags;
         if (!(flags & 1)) {
             continue;
@@ -2032,7 +2032,7 @@ void btlApplyAbaddonOperandEffects(BtlUnit *unit, u8 *operandData) {
                     }
                 }
             }
-            actor = actor->nextActor;
+            actor = actor->next;
         }
         if (actor != 0) {
             btlRefreshUnitMotionSelection(actor);
@@ -2128,7 +2128,7 @@ s32 btlSelectSoleEligibleActor(void) {
     if (btlHasActiveSubtask() != 0) {
         current = btlGetSelectedOrCurrentActor();
         last = 0;
-        for (actor = work->actorList, count = 0; actor != 0; actor = actor->nextActor) {
+        for (actor = work->actorList, count = 0; actor != 0; actor = actor->next) {
             u32 flags = actor->status.flags;
             if (flags & 1) {
                 if (flags & 0x200) {
@@ -2258,7 +2258,7 @@ BtlUnit *btlGetSelectedOrCurrentActor(void) {
     if (selected != 0) {
         return selected;
     }
-    for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
+    for (unit = work->actorList; unit != 0; unit = unit->next) {
         u32 flags = unit->status.flags;
         if ((flags & 1) != 0) {
             if ((flags & 0x200) != 0) {
@@ -2317,7 +2317,7 @@ void btlStartReadyUnitActionCopy(void) {
     ActionStateLink *handle;
 
     if (ctrl->unit != 0) {
-        for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
+        for (unit = work->actorList; unit != 0; unit = unit->next) {
             u32 flags = unit->status.flags;
 
             if (!(flags & 1)) {
@@ -2427,7 +2427,7 @@ extern void btlSetUnitRotation(BtlUnit *, s128 *);
 void btlResetGateComponentTransforms(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
 
-    for (; unit != NULL; unit = unit->nextActor) {
+    for (; unit != NULL; unit = unit->next) {
         u32 flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x400) {
@@ -2673,7 +2673,7 @@ s32 btlGetSpecialEnemyActionStatus(BtlUnit *unit) {
                     }
                 }
             }
-            actor = actor->nextActor;
+            actor = actor->next;
         }
         if (actor != NULL) {
             return actor->motionId == 0x13 ? 0x13 : -1;
@@ -2706,7 +2706,7 @@ void btlRecenterActorsAroundLead(void) {
     f32 shift;
     f32 pos[4];
 
-    for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
+    for (unit = work->actorList; unit != 0; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 if (unit->partyRecord.unitId == 0x10D) {
@@ -2722,7 +2722,7 @@ void btlRecenterActorsAroundLead(void) {
         pos[0] = 0;
         SDF_VU0_COPYVECTOR(lead->position, pos);
         btlSetUnitPosition(lead, pos);
-        for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
+        for (unit = work->actorList; unit != 0; unit = unit->next) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x400) {
                     if (unit != lead) {
@@ -2742,7 +2742,7 @@ s32 btlDisableUnitsIfSpeciesFlagged(void) {
     BtlUnit *unit = ((BattleWork *)btlGetRuntime())->actorList;
     BtlUnit *head = unit;
     s32 result = -1;
-    for (; unit != NULL; unit = unit->nextActor) {
+    for (; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 if (unit->partyRecord.unitId == 0x10D) {
@@ -2755,7 +2755,7 @@ s32 btlDisableUnitsIfSpeciesFlagged(void) {
         }
     }
     if (result != -1) {
-        for (unit = head; unit != NULL; unit = unit->nextActor) {
+        for (unit = head; unit != NULL; unit = unit->next) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x400) {
                     if (unit->status.flags & 2) {
@@ -2879,7 +2879,7 @@ void btlUpdateSpecialActorFormation(void) {
     BtlUnit *unit;
     BattleSub *sub = work->sub;
 
-    for (unit = work->actorList; unit != NULL; unit = unit->nextActor) {
+    for (unit = work->actorList; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 switch (unit->partyRecord.unitId) {
@@ -3003,7 +3003,7 @@ void btlUpdateSpecialActorChunkFade(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
 }
 
@@ -3167,7 +3167,7 @@ void btlResetSpecialActionActorPresentation(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     btlUpdateSpecialActorFormation();
 }
@@ -3294,7 +3294,7 @@ f32 btlGetBossPresenceActionScale(BtlUnit *unit, BtlUnit *target) {
     f32 scale = 1.0f;
     if (unit->status.flags & 0x200) {
         if (target->partyRecord.unitId == 0x110) {
-            for (other = ((BattleWork *)btlGetRuntime())->actorList; other != 0; other = other->nextActor) {
+            for (other = ((BattleWork *)btlGetRuntime())->actorList; other != 0; other = other->next) {
                 if (other->status.flags & 1) {
                     if (other->status.flags & BTL_UNIT_BOSS_FLAG) {
                         if (!(other->status.flags & 0xE0)) {
@@ -3399,7 +3399,7 @@ void func_0021B828(ActionStateLink *task) {
     guards[0] = NULL;
     guards[1] = NULL;
     guardCount = 0;
-    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
         if (!(unit->status.flags & 1)) {
             continue;
         }
@@ -3569,7 +3569,7 @@ void btlQueueVritraTentacleActionTasks(ActionStateLink *handle, s32 unused, u64 
     hero = NULL;
     battle = (BtlState *)btlGetRuntime();
     state = &battle->effect->action;
-    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 s32 unitId = unit->partyRecord.unitId;
@@ -4608,7 +4608,7 @@ BtlUnit *btlFindUnitByMode(BtlUnit *unusedActor) {
     if (sub->b.active == 0) {
         return 0;
     }
-    for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
+    for (unit = work->actorList; unit != 0; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x200) {
                 if (sub->targetMode == unit->partyRecord.unitId) {
@@ -4702,7 +4702,7 @@ void btlRestoreMarkedUnitMotionOnStateChange(void) {
                         }
                     }
                 }
-                unit = unit->nextActor;
+                unit = unit->next;
             }
             if (unit != 0) {
                 btlRefreshUnitMotionSelection(unit);
@@ -4785,7 +4785,7 @@ void btlCenterMarkedFormationAroundLead(void) {
     f32 shift;
     f32 pos[4];
 
-    for (unit = scene->units; unit != 0; unit = unit->nextActor) {
+    for (unit = scene->units; unit != 0; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 if (unit->partyRecord.unitId == 0x115) {
@@ -4802,7 +4802,7 @@ void btlCenterMarkedFormationAroundLead(void) {
         pos[0] = 0;
         SDF_VU0_COPYVECTOR(lead->position, pos);
         btlSetUnitPosition(lead, pos);
-        for (unit = scene->units; unit != 0; unit = unit->nextActor) {
+        for (unit = scene->units; unit != 0; unit = unit->next) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x400) {
                     if (unit != lead) {
@@ -4821,7 +4821,7 @@ s32 btlStartOtherMarkedUnitTasks(void) {
     BtlUnit *unit = ((BattleActionScene *)btlGetRuntime())->units;
     BtlUnit *head = unit;
     s32 result = -1;
-    for (; unit != NULL; unit = unit->nextActor) {
+    for (; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 if (unit->partyRecord.unitId == 0x115) {
@@ -4834,7 +4834,7 @@ s32 btlStartOtherMarkedUnitTasks(void) {
         }
     }
     if (result != -1) {
-        for (unit = head; unit != NULL; unit = unit->nextActor) {
+        for (unit = head; unit != NULL; unit = unit->next) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x400) {
                     if (unit->status.flags & 2) {
@@ -4979,7 +4979,7 @@ s32 btlChoosePartyMemberShadowId(void) {
                     }
                 }
             }
-            unit = unit->nextActor;
+            unit = unit->next;
         } while (unit != NULL);
     }
     if (count == 0) {
@@ -5019,7 +5019,7 @@ u32 btlHasActiveSpecialMotionActor(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return 0;
 }
@@ -5057,7 +5057,7 @@ void btlScheduleCherunShadowSkillPresentation(ActionStateLink *actor, BtlUnit *t
         return;
     }
     battle = btlGetRuntime();
-    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 0x200) {
             task = btlCreateDefeatCandidateTask(unit);
             task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
@@ -5266,7 +5266,7 @@ void btlApplyMarkedCommandStateMotion(void) {
                         }
                     }
                 }
-                unit = unit->nextActor;
+                unit = unit->next;
             }
             if (unit != 0) {
                 btlRefreshUnitMotionSelection(unit);
@@ -5399,7 +5399,7 @@ s32 btlGetHealthyAllyActionStatus(BtlUnit *unit) {
                     }
                 }
             }
-            actor = actor->nextActor;
+            actor = actor->next;
         }
         if (actor != NULL) {
             s32 status = actor->motionId;
@@ -5433,7 +5433,7 @@ s32 btlOffsetSpecialEnemyForCommand(BtlLinkedCommand *command) {
 
     if (actionCode < 0x105) {
         if (actionCode >= 0x103) {
-            for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+            for (unit = battle->units; unit != NULL; unit = unit->next) {
                 if (unit->status.flags & 1) {
                     if (unit->status.flags & 0x400) {
                         if (unit->partyRecord.unitId == 0x11B) {
@@ -5555,7 +5555,7 @@ void btlQueueLoneFreeTeamHandle(void)
         second = NULL;
         firstUnavailable = 1;
         secondUnavailable = 1;
-        for (actor = battle->units; actor != NULL; actor = actor->nextActor) {
+        for (actor = battle->units; actor != NULL; actor = actor->next) {
             if (actor->status.flags & 1) {
                 if (actor->status.flags & 0x400) {
                     switch (actor->partyRecord.unitId) {
@@ -5713,7 +5713,7 @@ s32 btlGetKartikeyaLinkedMotionStatus(BtlUnit *unit) {
                     }
                 }
             }
-            found = found->nextActor;
+            found = found->next;
         }
         if (found == 0) {
             return -1;
@@ -6044,7 +6044,7 @@ void btlSetSpecialEnemyGeometry(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
 }
 
@@ -6093,7 +6093,7 @@ s32 btlFindSpecialActionIndex(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return selected;
 }
@@ -6245,7 +6245,7 @@ s32 btlQueueMarkedSpecialActorSceneGroup(void) {
         return -1;
     }
     found = 0;
-    for (unit = scene->units; unit != 0 && found == 0; unit = unit->nextActor) {
+    for (unit = scene->units; unit != 0 && found == 0; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 mode = unit->partyRecord.unitId;
@@ -6370,7 +6370,7 @@ void btlRefreshSpecialActionUnits(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     btlSetSpecialEnemyGeometry();
 }
@@ -6449,7 +6449,7 @@ u8 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camera
             }
         }
         /* A matching tail entry still exits without setting the camera. */
-        candidate = candidate->nextActor;
+        candidate = candidate->next;
         if (candidate == NULL || speciesPreset != -1) {
             break;
         }
@@ -7044,7 +7044,7 @@ s32 btlSelectLinkedActionCameraPose(BtlLinkedCommand *command, s8 modeA, s8 mode
         return 1;
     }
     if (command->actionCode == 0x105 || command->actionCode == 0x12D) {
-        for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+        for (unit = battle->units; unit != NULL; unit = unit->next) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x400) {
                     if (unit->partyRecord.unitId == 0x126) {
@@ -7520,7 +7520,7 @@ u8 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camer
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     if (unit != NULL) {
         SDF_VU0_COPYVECTOR(position, unit->position);
@@ -7977,7 +7977,7 @@ s32 btlSelectLowestStatTarget(ActionStateLink *actor) {
     }
     target = NULL;
     minimum = 99;
-    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
         u32 flags = unit->status.flags;
         s8 value;
 
@@ -8136,7 +8136,7 @@ s32 btlClearUnitRestrictionFlag(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return -1;
 }
@@ -8195,7 +8195,7 @@ void btlResetUnitPlacement(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     } while (unit != NULL);
 }
 
@@ -8210,7 +8210,7 @@ void btlClearSpecialEnemyEntryFlags(void) {
                 btlRefreshUnitMotionSelection(unit);
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
 }
 
@@ -8316,7 +8316,7 @@ void btlApplyRahuOperandEffects(BtlUnit *unit, BtlOperandEntry *entry) {
     }
     twin = NULL;
     mainUnit = NULL;
-    for (scan = ctx->firstUnit; scan != NULL; scan = scan->nextActor) {
+    for (scan = ctx->firstUnit; scan != NULL; scan = scan->next) {
         s32 scanFlags = scan->status.flags;
         if (scanFlags & 1) {
             if (scanFlags & 0x400) {
@@ -8432,7 +8432,7 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
 
     if (effect->linked.active == 1 || effect->linked.actor == 0) {

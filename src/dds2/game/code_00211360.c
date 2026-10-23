@@ -496,7 +496,7 @@ s32 btlIsUnitAtOrBelowHealthRate(BtlUnit *unit, s32 healthPercent) {
 /* Return whether an active enemy-side unit passes the HP percentage check; bit 0x20 is not filtered here. */
 s32 btlHasBossAtOrBelowHealthRate(s32 unused, s32 healthPercent) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
+    for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if ((btlUnitStatusPair(unitCursor) & BTL_ENEMY_ACTIVE_MASK) == BTL_ENEMY_ACTIVE_FLAGS &&
             btlIsUnitAtOrBelowHealthRate(unitCursor, healthPercent)) {
             return 1;
@@ -507,7 +507,7 @@ s32 btlHasBossAtOrBelowHealthRate(s32 unused, s32 healthPercent) {
 
 s32 btlHasUnitAtOrBelowHealthRate(s32 unused, s32 multiplier) {
     BtlUnit *unit = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unit != 0; unit = unit->nextActor) {
+    for (; unit != 0; unit = unit->next) {
         if ((btlUnitStatusPair(unit) & 0x221) == 0x201) {
             datUnitWork_t *stats = &unit->partyRecord;
             s32 current = btlReadCurrentUnitHp(stats);
@@ -522,7 +522,7 @@ s32 btlHasUnitAtOrBelowHealthRate(s32 unused, s32 multiplier) {
 
 s32 btlHasUnitAtOrAboveHealthRate(s32 unused, s32 multiplier) {
     BtlUnit *unit = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unit != 0; unit = unit->nextActor) {
+    for (; unit != 0; unit = unit->next) {
         if ((btlUnitStatusPair(unit) & 0x221) == 0x201) {
             datUnitWork_t *stats = &unit->partyRecord;
             s32 current = btlReadCurrentUnitHp(stats);
@@ -550,7 +550,7 @@ s32 btlResetAiCounterAtLimit(s32 unused, u32 minimumCount) {
 s32 btlIsGroup400CountAtMost(s32 unused, u32 maximumCount) {
     u32 matchingCount = 0;
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
+    for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if ((btlUnitStatusPair(unitCursor) & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS) {
             matchingCount++;
         }
@@ -565,7 +565,7 @@ s32 btlIsGroup400CountAtMost(s32 unused, u32 maximumCount) {
 s32 btlIsGroup200EligibleCountAtMost(s32 unused, u32 maximumCount) {
     u32 matchingCount = 0;
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
+    for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if ((btlUnitStatusPair(unitCursor) & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
             if (!(unitCursor->partyRecord.status & 0x800)) {
                 matchingCount++;
@@ -617,7 +617,7 @@ s32 btlIsModelGateActiveForEligibleUnit(BtlUnit *unit) {
 s32 btlIsGroup200CountAtMost(s32 unused, u32 maximumCount) {
     u32 matchingCount = 0;
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
+    for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if ((btlUnitStatusPair(unitCursor) & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
             matchingCount++;
         }
@@ -636,7 +636,7 @@ s32 btlUnitHasAnyStatusInMask(BtlUnit *unit, s32 actionMask) {
 /* Test active enemy-side units for any requested action bit; do not filter bit 0x20. */
 s32 btlAnyGroup400HasActionMask(s32 unused, s32 actionMask) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
+    for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if ((btlUnitStatusPair(unitCursor) & BTL_ENEMY_ACTIVE_MASK) == BTL_ENEMY_ACTIVE_FLAGS &&
             btlUnitHasAnyStatusInMask(unitCursor, actionMask)) {
             return 1;
@@ -650,7 +650,7 @@ s32 btlHasActorOrSlotMatchingActionQuery(s32 unused, u32 query) {
     datUnitWork_t *record;
     s32 i;
 
-    for (unit = ((BattleWork *)btlGetRuntime())->actorList; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BattleWork *)btlGetRuntime())->actorList; unit != 0; unit = unit->next) {
         if (unit->partyRecord.unitId == ((query >> 16) & 0x3F)) {
             if (unit->status.flags & 1) {
                 if (btlUnitHasAnyStatusInMask(unit, query & 0xFFFF)) {
@@ -680,7 +680,7 @@ s32 btlHasActorOrSlotMatchingActionQuery(s32 unused, u32 query) {
 /* Test party-side units for any requested action bit; DDS2 deliberately does not filter bit 0x20 here. */
 s32 btlAnyGroup200HasActionMask(s32 unused, s32 actionMask) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
+    for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if ((btlUnitStatusPair(unitCursor) & BTL_PARTY_ACTIVE_MASK) == BTL_PARTY_ACTIVE_FLAGS &&
             btlUnitHasAnyStatusInMask(unitCursor, actionMask)) {
             return 1;
@@ -692,7 +692,7 @@ s32 btlAnyGroup200HasActionMask(s32 unused, s32 actionMask) {
 /* Require every eligible party unit to intersect the requested mask; an empty selection succeeds. */
 s32 btlAllGroup200HaveActionMask(s32 unused, s32 actionMask) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
+    for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if ((btlUnitStatusPair(unitCursor) & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS &&
             !btlUnitHasAnyStatusInMask(unitCursor, actionMask)) {
             return 0;
@@ -704,7 +704,7 @@ s32 btlAllGroup200HaveActionMask(s32 unused, s32 actionMask) {
 /* Find an eligible party-side unit with the requested mode. */
 s32 btlHasGroup200UnitMode(s32 unused, s32 unitMode) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
+    for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if ((btlUnitStatusPair(unitCursor) & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS &&
             unitCursor->partyRecord.unitId == unitMode) {
             return 1;
@@ -716,7 +716,7 @@ s32 btlHasGroup200UnitMode(s32 unused, s32 unitMode) {
 /* Find an eligible enemy-side unit of the requested mode with a different native owner ID. */
 s32 btlHasOtherGroup400UnitMode(s32 excludedUnit, s32 unitMode) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
+    for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if ((btlUnitStatusPair(unitCursor) & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS &&
             unitCursor->partyRecord.unitId == unitMode &&
             unitCursor->owner != ((BtlUnit *)excludedUnit)->owner) {
@@ -826,7 +826,7 @@ s32 btlUnitHasAllTenActions(void *actor) {
 /* Return whether any eligible party unit meets the requested entry-code condition. */
 s32 btlAnyPartyMeetsEntryCodeCondition(s32 unused, s32 conditionIndex) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
+    for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if (((btlUnitStatusPair(unitCursor)) & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS &&
             btlMatchesActorEntryCodeCondition(unitCursor, conditionIndex)) {
             return 1;
@@ -838,7 +838,7 @@ s32 btlAnyPartyMeetsEntryCodeCondition(s32 unused, s32 conditionIndex) {
 /* Return whether any eligible enemy unit meets the requested entry-code condition. */
 s32 btlAnyEnemyMeetsEntryCodeCondition(s32 unused, s32 conditionIndex) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
+    for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if ((btlUnitStatusPair(unitCursor) & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS &&
             btlMatchesActorEntryCodeCondition(unitCursor, conditionIndex)) {
             return 1;
@@ -866,7 +866,7 @@ u8 btlCheckUnitActionModeOne(u32 unitAddress, u32 actionQuery) {
 /* Return whether an eligible party unit has a nonzero mode-zero query result. */
 s32 btlAnyPartyPassesEntryCheck(s32 unused, s32 actionQuery) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
+    for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if ((btlUnitStatusPair(unitCursor) & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS &&
             btlUnitMatchesEntryCodeCondition(unitCursor, actionQuery, 0)) {
             return 1;
@@ -878,7 +878,7 @@ s32 btlAnyPartyPassesEntryCheck(s32 unused, s32 actionQuery) {
 /* Return whether an eligible party unit has a nonzero mode-one query result. */
 s32 btlAnyPartyPassesInverseEntryCheck(s32 unused, s32 actionQuery) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
+    for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if ((btlUnitStatusPair(unitCursor) & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS &&
             btlUnitMatchesEntryCodeCondition(unitCursor, actionQuery, 1)) {
             return 1;
@@ -890,7 +890,7 @@ s32 btlAnyPartyPassesInverseEntryCheck(s32 unused, s32 actionQuery) {
 /* Return whether an eligible enemy unit has a nonzero mode-zero query result. */
 s32 btlAnyEnemyPassesEntryCheck(s32 unused, s32 actionQuery) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
+    for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if ((btlUnitStatusPair(unitCursor) & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS &&
             btlUnitMatchesEntryCodeCondition(unitCursor, actionQuery, 0)) {
             return 1;
@@ -902,7 +902,7 @@ s32 btlAnyEnemyPassesEntryCheck(s32 unused, s32 actionQuery) {
 /* Return whether an eligible enemy unit has a nonzero mode-one query result. */
 s32 btlAnyEnemyPassesInverseEntryCheck(s32 unused, s32 actionQuery) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
+    for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if ((btlUnitStatusPair(unitCursor) & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS &&
             btlUnitMatchesEntryCodeCondition(unitCursor, actionQuery, 1)) {
             return 1;
@@ -914,7 +914,7 @@ s32 btlAnyEnemyPassesInverseEntryCheck(s32 unused, s32 actionQuery) {
 /* Return whether an eligible party unit has a zero mode-zero query result. */
 s32 btlAnyPartyFailsEntryCheck(s32 unused, s32 actionQuery) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
+    for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if ((btlUnitStatusPair(unitCursor) & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS &&
             btlUnitMatchesEntryCodeCondition(unitCursor, actionQuery, 0) == 0) {
             return 1;
@@ -926,7 +926,7 @@ s32 btlAnyPartyFailsEntryCheck(s32 unused, s32 actionQuery) {
 /* Return whether an eligible enemy unit has a zero mode-zero query result. */
 s32 btlAnyEnemyFailsEntryCheck(s32 unused, s32 actionQuery) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
+    for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if ((btlUnitStatusPair(unitCursor) & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS &&
             btlUnitMatchesEntryCodeCondition(unitCursor, actionQuery, 0) == 0) {
             return 1;
@@ -938,7 +938,7 @@ s32 btlAnyEnemyFailsEntryCheck(s32 unused, s32 actionQuery) {
 /* Look for an eligible party unit with native flag 0x1000 clear; its meaning is not established here. */
 s32 btlAnyGroup200LacksFlag1000(void) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
+    for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if ((btlUnitStatusPair(unitCursor) & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS &&
             !(unitCursor->status.flags & 0x1000)) {
             return 1;
@@ -1187,7 +1187,7 @@ s32 btlUnitHasNegativeActionQueryResult(void *unit, s32 mask) {
 
 s32 btlAnyEnemyHasNegativeActionResult(s32 unused, s32 mask) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; battler != 0; battler = battler->nextActor) {
+    for (; battler != 0; battler = battler->next) {
         if ((btlUnitStatusPair(battler) & 0x401) == 0x401 &&
             btlUnitHasNegativeActionQueryResult(battler, mask)) {
             return 1;
@@ -1198,7 +1198,7 @@ s32 btlAnyEnemyHasNegativeActionResult(s32 unused, s32 mask) {
 
 s32 btlAnyPartyUnitHasNegativeActionResult(s32 unused, s32 mask) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; battler != 0; battler = battler->nextActor) {
+    for (; battler != 0; battler = battler->next) {
         if ((btlUnitStatusPair(battler) & 0x201) == 0x201 &&
             btlUnitHasNegativeActionQueryResult(battler, mask)) {
             return 1;
@@ -1209,7 +1209,7 @@ s32 btlAnyPartyUnitHasNegativeActionResult(s32 unused, s32 mask) {
 
 s32 btlHasGroup200DifferentUnitMode(s32 unused, s32 mode) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; battler != 0; battler = battler->nextActor) {
+    for (; battler != 0; battler = battler->next) {
         if ((btlUnitStatusPair(battler) & 0x221) == 0x201 &&
             battler->partyRecord.unitId != mode) {
             return 1;
@@ -1227,7 +1227,7 @@ s32 btlHasDistinctTargetSelection(s32 actor, s32 selection) {
         resolvedSelection = ((BtlUnit *)actor)->partyRecord.unitId;
     }
     battler = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; battler != 0; battler = battler->nextActor) {
+    for (; battler != 0; battler = battler->next) {
         if ((btlUnitStatusPair(battler) & 0x421) == 0x401 &&
             battler->partyRecord.unitId != resolvedSelection &&
             battler->owner != ((BtlUnit *)actor)->owner) {
@@ -1239,7 +1239,7 @@ s32 btlHasDistinctTargetSelection(s32 actor, s32 selection) {
 
 s32 btlAnyUnitPassesCheck200(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; battler != 0; battler = battler->nextActor) {
+    for (; battler != 0; battler = battler->next) {
         if (btlUnitBlocksElementQueryForGroup(battler, action, 0x200) == 0) {
             return 1;
         }
@@ -1249,7 +1249,7 @@ s32 btlAnyUnitPassesCheck200(s32 unused, s32 action) {
 
 s32 btlCanQueryElementAgainstParty(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; battler != 0; battler = battler->nextActor) {
+    for (; battler != 0; battler = battler->next) {
         if (btlUnitBlocksElementQueryForGroup(battler, action, 0x200) == 1) {
             return 0;
         }
@@ -1259,7 +1259,7 @@ s32 btlCanQueryElementAgainstParty(s32 unused, s32 action) {
 
 s32 btlAnyUnitPassesCheck400(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; battler != 0; battler = battler->nextActor) {
+    for (; battler != 0; battler = battler->next) {
         if (btlUnitBlocksElementQueryForGroup(battler, action, 0x400) == 0) {
             return 1;
         }
@@ -1269,7 +1269,7 @@ s32 btlAnyUnitPassesCheck400(s32 unused, s32 action) {
 
 s32 btlCanQueryElementAgainstEnemies(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; battler != 0; battler = battler->nextActor) {
+    for (; battler != 0; battler = battler->next) {
         if (btlUnitBlocksElementQueryForGroup(battler, action, 0x400) == 1) {
             return 0;
         }
@@ -1363,7 +1363,7 @@ s32 btlAnyGroup400HasAction(s32 unused, s32 action) {
 /* Search eligible group-0x400 actors' stored action IDs with the options gate enabled. */
 s32 btlAnyEnemyActionMatchesSelector(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; battler != 0; battler = battler->nextActor) {
+    for (; battler != 0; battler = battler->next) {
         if ((btlUnitStatusPair(battler) & 0x421) == 0x401 &&
             btlActionMatchesStatMask(action, battler->partyRecord.actionSlot, 0)) {
             return 1;
@@ -1388,7 +1388,7 @@ s32 btlAnyPartyActionMatchesSelector(s32 unused, s32 battler) {
 
 s32 btlAnyPartyUnitHasFullActionSet(void) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; battler != 0; battler = battler->nextActor) {
+    for (; battler != 0; battler = battler->next) {
         if ((btlUnitStatusPair(battler) & 0x221) == 0x201 &&
             btlUnitHasAllTenActions((s32)battler)) {
             return 1;
@@ -1399,7 +1399,7 @@ s32 btlAnyPartyUnitHasFullActionSet(void) {
 
 s32 btlAnyEnemyHasFullActionSet(void) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; battler != 0; battler = battler->nextActor) {
+    for (; battler != 0; battler = battler->next) {
         if ((btlUnitStatusPair(battler) & 0x421) == 0x401 &&
             btlUnitHasAllTenActions((s32)battler)) {
             return 1;
@@ -1455,7 +1455,7 @@ s32 btlHasUnitWithStatusBit(BtlUnit *unit, s32 scanEnemies) {
                     return 1;
                 }
             }
-            cursor = cursor->nextActor;
+            cursor = cursor->next;
         }
     } else {
         if ((btlUnitStatusPair(unit) & 0x21) == 1) {
@@ -1474,7 +1474,7 @@ s32 btlAreUnitsMissingStatusFlag(void) {
             (battler->status.flags & 0x1000) != 0) {
             return 0;
         }
-        battler = battler->nextActor;
+        battler = battler->next;
     }
     return 1;
 }
@@ -1486,7 +1486,7 @@ s32 btlAreUnitsHoldingStatusFlag(void) {
             (battler->status.flags & 0x1000) == 0) {
             return 0;
         }
-        battler = battler->nextActor;
+        battler = battler->next;
     }
     return 1;
 }
@@ -1497,7 +1497,7 @@ s32 btlIsHistoryCounterEmpty(void) {
 
 s32 btlAnyUnitBlocksGroup200Element(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; battler != 0; battler = battler->nextActor) {
+    for (; battler != 0; battler = battler->next) {
         if (btlUnitBlocksElementQuery(battler, action, 0x200)) {
             return 1;
         }
@@ -1507,7 +1507,7 @@ s32 btlAnyUnitBlocksGroup200Element(s32 unused, s32 action) {
 
 s32 btlAnyGroupUnitHasZeroStat(void) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; battler != 0; battler = battler->nextActor) {
+    for (; battler != 0; battler = battler->next) {
         if ((btlUnitStatusPair(battler) & 0x221) == 0x201 &&
             battler->partyRecord.mp == 0) {
             return 1;

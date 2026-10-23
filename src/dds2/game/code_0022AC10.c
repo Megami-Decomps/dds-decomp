@@ -888,7 +888,7 @@ s32 btlHasRestrictedUnit(void) {
                 return 1;
             }
         }
-        unitCursor = unitCursor->nextActor;
+        unitCursor = unitCursor->next;
     }
     return 0;
 }

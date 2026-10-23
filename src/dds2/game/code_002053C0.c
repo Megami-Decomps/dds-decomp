@@ -352,7 +352,7 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
     f32 adjustedAngle;
 
     battle = (BtlState *)btlGetRuntime();
-    for (unit = battle->units; unit != 0; unit = unit->nextActor) {
+    for (unit = battle->units; unit != 0; unit = unit->next) {
         s32 flags = unit->status.flags;
         if (flags & 0x200) {
             actors[count++] = unit;
@@ -441,7 +441,7 @@ s32 btlArrangeFormationSlots(s32 filter) {
     s32 isParty;
 
     battle = (BtlState *)btlGetRuntime();
-    for (unit = battle->units; unit != 0; unit = unit->nextActor) {
+    for (unit = battle->units; unit != 0; unit = unit->next) {
         s32 flags = unit->status.flags;
         if ((flags & filter) && (flags & 1)) {
             f32 halfWidth = unit->bodyRadius * unit->scale;
@@ -538,7 +538,7 @@ void btlMoveOtherUnitsAway(ActionStateLink *link) {
     f32 pos[4];
     BtlUnit *other = ((BtlState *)btlGetRuntime())->units;
     u32 mask = link->unit->status.flags & 0x600;
-    for (; other != NULL; other = other->nextActor) {
+    for (; other != NULL; other = other->next) {
         if ((other->status.flags & 1) && (other->status.flags & mask) && other != link->unit) {
             btlClearUnitDefeatCandidate(other);
             if ((btlUnitStatusPair(other) & 0x102) == 0x102) {
@@ -680,7 +680,7 @@ void btlPlaceTripleFormationAroundMiddleActor(ActionStateLink *link, BtlUnit *fi
         slot[first->lookupId] = first;
         slot[second->lookupId] = second;
     } else {
-        for (unit = work->units; unit != NULL; unit = unit->nextActor) {
+        for (unit = work->units; unit != NULL; unit = unit->next) {
             u32 flags = unit->status.flags;
             if (flags & 1) {
                 if (flags & 0x200) {
@@ -897,7 +897,7 @@ void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other)
         slot[0] = other;
         slot[1] = linked;
     }
-    for (unit = ((BtlState *)btlGetRuntime())->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != NULL; unit = unit->next) {
         u32 flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
@@ -1022,7 +1022,7 @@ void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
         SDF_VU0_STOREVECTOR(center);
         center[2] -= reach;
     }
-    for (unit = state->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = state->units; unit != NULL; unit = unit->next) {
         u32 flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
@@ -1176,7 +1176,7 @@ void btlPlaceBothSidesInRadialFormation(ActionStateLink *link, BtlUnit *firstAct
                     *secondEntry++ = unit;
                 }
             }
-            unit = unit->nextActor;
+            unit = unit->next;
         } while (unit != NULL);
     }
     SDF_VU0_COPYVECTOR(firstDirection, D_003E9130);

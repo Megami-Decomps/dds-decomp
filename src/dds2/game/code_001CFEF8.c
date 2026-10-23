@@ -488,7 +488,7 @@ void btlQueueSceneActorModelEntry(BtlState *scene) {
         chain = scene->beginBattleEntryTasks(0);
     }
     tail = NULL;
-    for (unit = scene->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = scene->units; unit != NULL; unit = unit->next) {
         if ((btlUnitStatusPair(unit) & 0x403) == 0x401) {
             kind = scene->selectEntryModelVariant != NULL ? scene->selectEntryModelVariant(unit) : unit->combatantKind;
             load = btlCreateModelLoadPollTask(unit, unit->modelResourceKind, kind, 0);
@@ -812,7 +812,7 @@ s32 btlAdvanceSceneWhenActorTasksReady(BtlState *scene) {
             s32 kind;
             BtlUnit *lastReadyUnit = NULL;
 
-            for (unit = scene->units; unit != NULL; unit = unit->nextActor) {
+            for (unit = scene->units; unit != NULL; unit = unit->next) {
                 u32 flags = unit->status.flags;
                 u32 marked = flags & 0x400;
 
@@ -1124,7 +1124,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
         break;
     }
     if (scene->eventReady != 5) {
-        for (unit = scene->units; unit != NULL; unit = unit->nextActor) {
+        for (unit = scene->units; unit != NULL; unit = unit->next) {
             u32 flags = unit->status.flags;
             if (!(flags & 1)) {
                 continue;
