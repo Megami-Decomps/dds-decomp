@@ -71,7 +71,7 @@ extern u8 mnuCampMessagePack[];
 
 extern void mnuBuildCampTitleEffectResourceList(u8 *);
 
-extern void mnuResetGradientFadeColor(u8 *, s32);
+extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
 
 extern void p2sdBgmVolDown(void);
 
@@ -842,7 +842,7 @@ u8 *mnuCreateStaffMenuWork(void) {
     fclInitMessage((struct ItfMesSub *)(s32)mnuCampMessagePack);
     movLoadTitleEffects(menuBytes);
     mnuBuildCampTitleEffectResourceList(menuBytes);
-    mnuResetGradientFadeColor(menuBytes + 0xAA50, 0x60);
+    mnuResetGradientFadeColor(&((MenuStaffContext *)menuBytes)->gradientFade, 0x60);
     mnuBuildListSlotTableA((ListSlotWork *)menuBytes);
     mnuBuildListSlotTableB((ListSlotWork *)menuBytes);
     mnuBuildSkillSlotTable((ListSlotWork *)menuBytes);
@@ -875,7 +875,7 @@ s32 mnuDrawAndStepStaffGradientFade(dds3ProcessID_t *task) {
     s32 work;
 
     work = dds3GetProcessData(task);
-    mnuDrawAndStepGradientFade(work + 0xaa50, 0x53);
+    mnuDrawAndStepGradientFade(&((MenuStaffContext *)work)->gradientFade, 0x53);
     return 0;
 }
 
