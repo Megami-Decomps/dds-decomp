@@ -1127,7 +1127,7 @@ extern s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId);
 extern void evtSetUnitMotion(evtUnitHandle_t *unit, s32 motionId, s32 startFrame, s32 endFrame, s32 mode);
 extern u8 D_003AC480[];
 
-extern void dds3StartBEDEffectObjectBasic(void *effectObject, u32 entryId);
+extern void dds3StartBEDEffectObjectBasic(dds3Basic_t *effectObject, u32 entryId);
 
 
 /* World object views used by the model-parameter opcodes. */

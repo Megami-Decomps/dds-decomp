@@ -482,7 +482,7 @@ void evtViewerBindNamedOwner(dds3Basic_t *effectObject, s32 ownerNameIndex, s32 
 struct EffectObj;
 extern void dds3EffectObjectBasicStatOn(struct EffectObj *obj, u32 flags);
 extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *resource, void *position, void *scale);
-extern void dds3StartBEDEffectObjectBasic(void *obj, u32 entryId);
+extern void dds3StartBEDEffectObjectBasic(dds3Basic_t *obj, u32 entryId);
 struct EffNodeDescriptor;
 extern dds3Basic_t *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
 extern s32 dds3AddD3PEffectObjectBasic(s32 arg, f32 *vec0, f32 *vec1);

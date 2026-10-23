@@ -1182,7 +1182,7 @@ extern void evtEndUnitValueTransition(evtUnitHandle_t *unit, s32 duration);
 
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
-extern void dds3StartBEDEffectObjectBasic(void *effectObject, u32 entryId);
+extern void dds3StartBEDEffectObjectBasic(dds3Basic_t *effectObject, u32 entryId);
 
 extern char D_00421AF8[];
 
