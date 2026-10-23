@@ -351,7 +351,7 @@ mnuDrawMovieMenuListItem(s32 x, s32 y, s32 unused, struct MenuList *list, struct
 
 extern s8 dds3PadButtonState[];
 extern void mnuClearListFlagsOneAndTwo(u32 *);
-extern u32 mnuGetMovieMenuSelectionIndex(void);
+extern s32 mnuGetMovieMenuSelectionIndex(void);
 
 s32 mnuHandleMovieMenuInput(void) {
     s32 moved = 0;
@@ -2053,4 +2053,3 @@ INCLUDE_RODATA(const s32, "game/code_002A5260", D_0042A348);
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_0042A380);
 
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_0042A3B0);
-

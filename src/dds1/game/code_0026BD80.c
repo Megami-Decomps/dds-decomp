@@ -77,7 +77,7 @@ void mnuDestroyMovieMenuSelectionList(void) {
     mnuDestroyListState(mnuMovieMenuState->selectionList);
 }
 
-u32 mnuGetMovieMenuSelectionIndex(void) {
+s32 mnuGetMovieMenuSelectionIndex(void) {
     return mnuMovieMenuState->selectionList->cursor->index;
 }
 
@@ -597,4 +597,3 @@ INCLUDE_SDATA(const s32, "game/code_0026BD80", D_003BC5F8);
 INCLUDE_SDATA(const s32, "game/code_0026BD80", D_003BC600);
 
 INCLUDE_SDATA(const s32, "game/code_0026BD80", D_003BC608);
-
