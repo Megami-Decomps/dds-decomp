@@ -510,7 +510,7 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelTempPacketLinkOt);
 
 #include "sdf.h"
 extern u8 corePktSoftenBias;
-extern void *sdf3DLightDefault;
+extern const struct SdfDmaTagHeader *sdf3DLightDefault;
 extern void *sdf3DFogDefault;
 extern f32 sdfFaceDivSoften, sdfFaceDivBias;
 extern f32 sdf3DScreenTm[16];
@@ -522,7 +522,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, sdfModelRootNode_t
     u32 modelColor;
     u32 modelDrawFlags;
     s32 nodeFlags;
-    void *lighting;
+    const struct SdfDmaTagHeader *lighting;
     s32 appended;
     u32 globalModeBits;
     u64 secondHeader;
