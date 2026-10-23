@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "eff_texture_table.h"
+#include "sdf_vu0.h"
 #include "eff_object_node.h"
 #include "eff_model_owner.h"
 #include "sdf_motion.h"
@@ -68,11 +69,11 @@ extern sdfTexHandle_t *D_00437E40;
 
 /* Initialize the VU transforms and the first node's float slot, if present. */
 void effInitModelVUState(dds3ModelHandle_t *model) {
-    VU0_MOVE_VF(vf10, vf0);
+    SDF_VU0_LOADIDENTITYVECTOR();
     mdlSetPosition(model);
-    VU0_MOVE_VF(vf10, vf0);
+    SDF_VU0_LOADIDENTITYVECTOR();
     mdlSetRotate(model);
-    VU0_SET_ONES_XYZ(vf10);
+    SDF_VU0_SETSCALE1VECTOR();
     mdlSetScale(model);
     mdlSetColor(model, 0x80808080);
     if (model->first != NULL) {
@@ -126,7 +127,7 @@ EffModelOwner *effCreateModelOwner(void *input) {
         data = fileResolveSecondaryBuffer(source);
         if (data != 0) {
             owner->model = effLoadViewerModelWithVUState(data, source->secondary.size);
-            VU0_SET_ONES_XYZ(vf10);
+            SDF_VU0_SETSCALE1VECTOR();
             VU0_SCALE_VF_MFC1(vf10, owner->scale);
             mdlSetScale(owner->model);
         }
@@ -164,7 +165,7 @@ void effRecreateModelFromSource(EffModelOwner *owner, EffModelOwner *source) {
     id = mdlGetMinorNum(source->model);
     model = mdlLoad(group, id);
     effInitModelVUState(model);
-    VU0_SET_ONES_XYZ(vf10);
+    SDF_VU0_SETSCALE1VECTOR();
     VU0_SCALAR_OP_CLOBBER(owner->scale, "vmulx.xyzw vf10, vf10, vf2x");
     mdlSetScale(model);
     owner->model = model;
@@ -187,12 +188,12 @@ void effRefreshModelLighting(EffModelOwner *work) {
 }
 
 void effApplyModelPrimaryVector(EffModelOwner *owner, u8 *vec) {
-VU0_LOAD_VF_MEMORY(vf10, vec);
+SDF_VU0_LOADVECTOR_BARRIER(vec);
     mdlSetPosition(owner->model);
 }
 
 void effApplyModelVecB(EffModelOwner *owner, u8 *vec) {
-VU0_LOAD_VF_MEMORY(vf10, vec);
+SDF_VU0_LOADVECTOR_BARRIER(vec);
     mdlSetRotate(owner->model);
 }
 
@@ -206,7 +207,7 @@ void effApplyScaledModelTertiaryVector(EffModelOwner *owner, float scale) {
 
     t = owner->scale * scale;
     v[0] = v[1] = v[2] = t;
-    VU0_LOAD_VF(vf10, v);
+    SDF_VU0_LOADVECTOR(v);
     mdlSetScale(owner->model);
 }
 
@@ -648,7 +649,7 @@ void func_002DD448(EffResourceOwner *owner) {
     u32 byteUnit;
 
     mdlGetScale(owner->model);
-    VU0_GET_VF10_X(scale);
+    SDF_VU0_GETVECTOR_X(scale);
     if (btlIsRuntimeAllocated() != 0) {
         haveTarget = 0;
         if (owner->extended.enableExplicitEndpoints != 0) {
@@ -656,9 +657,9 @@ void func_002DD448(EffResourceOwner *owner) {
                 mdlSetPosition(owner->model);
             }
             if (effResolveRequestPositionIntoVu(&owner->extended.end, owner->extended.endIndex) == 0) {
-                VU0_MOVE_VF(vf10, vf0);
+                SDF_VU0_LOADIDENTITYVECTOR();
             }
-            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            SDF_VU0_STOREVECTOR_NOMEM(position);
             if (owner->extended.end.kind == 5) {
                 position[1] -= 400.0f;
             }
@@ -668,7 +669,7 @@ void func_002DD448(EffResourceOwner *owner) {
             }
         } else if ((owner->base.alphaTrack.surfaceIndex & 0xFF0000) != 0) {
             effGetWorldVector(owner->base.alphaTrack.surfaceIndex >> 16);
-            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            SDF_VU0_STOREVECTOR_NOMEM(position);
             targetKind = owner->base.alphaTrack.surfaceIndex >> 16;
             if (targetKind == 5) {
                 position[1] -= 400.0f;
@@ -677,21 +678,21 @@ void func_002DD448(EffResourceOwner *owner) {
         }
         if (haveTarget != 0) {
             mdlGetPosition(owner->model);
-            VU0_STORE_VF_UNCLOBBERED(vf10, endpoint);
+            SDF_VU0_STOREVECTOR_NOMEM(endpoint);
             LookAtMatrix(position, endpoint, D_003E9660);
             ReverseMatrix();
-            VU0_LOAD_VF(vf10, position);
-            VU0_LOAD_VF(vf11, endpoint);
-            VU0_SUB(vf10, vf10, vf11);
-            VU0_LENGTH_VF10(distance);
+            SDF_VU0_LOADVECTOR(position);
+            SDF_VU0_LOADVECTOR_B(endpoint);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_GETLENGTH(distance);
             distanceScale = distance / 800.0f;
             distanceScale /= scale;
-            VU0_SET_ONES_XYZ(vf10);
+            SDF_VU0_SETSCALE1VECTOR();
             VU0_SCALAR_OP(distanceScale, "vmulx.xyzw vf10, vf10, vf2x");
-            VU0_SCALE_MATRIX_ROWS(vf10);
-            VU0_STORE_VF_UNCLOBBERED(vf28, owner->model->inner->matrix[0]);
-            VU0_STORE_VF_UNCLOBBERED(vf29, owner->model->inner->matrix[1]);
-            VU0_STORE_VF_UNCLOBBERED(vf30, owner->model->inner->matrix[2]);
+            SDF_VU0_SCALE_XYZ();
+            SDF_VU0_STORE_ROW0_NOMEM(owner->model->inner->matrix[0]);
+            SDF_VU0_STORE_ROW1_NOMEM(owner->model->inner->matrix[1]);
+            SDF_VU0_STORE_ROW2_NOMEM(owner->model->inner->matrix[2]);
         }
     }
     if (!(effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE)) {
@@ -710,18 +711,18 @@ void func_002DD448(EffResourceOwner *owner) {
             broadcastColor = mdlGetColor(owner->model);
             byteUnit = 0x3C000000;
             eeUnpackRGBAWord(broadcastColor, byteUnit);
-            VU0_MOVE_VF(vf11, vf10);
+            SDF_VU0_COPYVECTOR_A_TO_B();
             eeUnpackRGBAWord(sampledColor, byteUnit);
-            VU0_MUL(vf10, vf10, vf11);
+            SDF_VU0_MULVECTOR();
             color = eePackRGBAWord(128.0f);
             for (index = 0; index < count; index++, queue++) {
                 if (!(effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE)) {
                     sdfModelGetMarkPosMatrix(model, index);
                     VU0_STORE_VF_UNCLOBBERED(vf31, position);
                     if (scale != 0.0f) {
-                        VU0_SET_ONES_XYZ(vf10);
+                        SDF_VU0_SETSCALE1VECTOR();
                         VU0_SCALE_VF(vf10, 1.0f / (scale * distanceScale));
-                        VU0_SCALE_MATRIX_ROWS(vf10);
+                        SDF_VU0_SCALE_XYZ();
                     }
                     sdfVuLoadSecondaryRotationMatrixY(3.14159265f);
                     sdfComposeVuMatrixFromRegisters();
@@ -729,7 +730,7 @@ void func_002DD448(EffResourceOwner *owner) {
                     fileQueueSetPosition(*queue, position);
                     sdfVuMatrixToQuaternion(matrix);
                     Normalize();
-                    VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+                    SDF_VU0_STOREVECTOR_NOMEM(rotation);
                     fileQueueSetRotation(*queue, rotation);
                     if (applyDistanceScale != 0) {
                         fileQueueSetScale(*queue, scale * distanceScale);
@@ -745,22 +746,22 @@ void func_002DD448(EffResourceOwner *owner) {
                 sdfModelGetMarkPosMatrix(model, index);
                 VU0_STORE_VF_UNCLOBBERED(vf31, position);
                 VU0_STORE_MATRIX(matrix);
-                VU0_LOAD_VF(vf10, D_003E9130);
+                SDF_VU0_LOADVECTOR(D_003E9130);
                 VU0_SCALE_VF(vf10, 5000.0f);
-                VU0_TRANSFORM_POINT(vf10, vf10);
-                VU0_STORE_VF_UNCLOBBERED(vf10, endpoint);
+                SDF_VU0_APPLYMATRIX_XYZ1();
+                SDF_VU0_STOREVECTOR_NOMEM(endpoint);
                 btlDebugDrawSegment(position, endpoint, 0x80006000);
                 VU0_LOAD_MATRIX_MEMORY(matrix);
-                VU0_LOAD_VF(vf10, effWorldUpVector);
+                SDF_VU0_LOADVECTOR(effWorldUpVector);
                 VU0_SCALE_VF(vf10, 5000.0f);
-                VU0_TRANSFORM_POINT(vf10, vf10);
-                VU0_STORE_VF_UNCLOBBERED(vf10, endpoint);
+                SDF_VU0_APPLYMATRIX_XYZ1();
+                SDF_VU0_STOREVECTOR_NOMEM(endpoint);
                 btlDebugDrawSegment(position, endpoint, 0x80600000);
                 VU0_LOAD_MATRIX_MEMORY(matrix);
-                VU0_LOAD_VF(vf10, D_003E9120);
+                SDF_VU0_LOADVECTOR(D_003E9120);
                 VU0_SCALE_VF(vf10, 5000.0f);
-                VU0_TRANSFORM_POINT(vf10, vf10);
-                VU0_STORE_VF_UNCLOBBERED(vf10, endpoint);
+                SDF_VU0_APPLYMATRIX_XYZ1();
+                SDF_VU0_STOREVECTOR_NOMEM(endpoint);
                 btlDebugDrawSegment(position, endpoint, 0x80000060);
                 btlDebugDrawPoint(position);
             }
@@ -775,13 +776,13 @@ void func_002DD448(EffResourceOwner *owner) {
 
 void effLoadModelPrimaryVector(void *obj, void *vec) {
     EffResourceOwner *owner = obj;
-VU0_LOAD_VF_MEMORY(vf10, vec);
+SDF_VU0_LOADVECTOR_BARRIER(vec);
     mdlSetPosition(owner->model);
 }
 
 void effSetModelRotationQuaternion(void *obj, void *vec) {
     EffResourceOwner *owner = obj;
-VU0_LOAD_VF_MEMORY(vf10, vec);
+SDF_VU0_LOADVECTOR_BARRIER(vec);
     mdlSetRotate(owner->model);
 }
 
@@ -793,7 +794,7 @@ void effPropagateResourceModelMask(void *work, u32 color) {
 void effScaleModelVec(void *work, float scale) {
     EffResourceOwner *owner = work;
     u32 bits;
-    VU0_SET_ONES_XYZ(vf10);
+    SDF_VU0_SETSCALE1VECTOR();
     VU0_SCALAR_OP_TMP_MEMORY(bits, scale, "vmulx.xyzw vf10, vf10, vf2x");
     mdlSetScale(owner->model);
 }

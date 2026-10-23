@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "sdf_vu_rotation_axes.h"
 #include "eff_random_mod.h"
@@ -214,7 +215,7 @@ s32 btlCheckActorDistanceLimit(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return 1;
 }
@@ -494,7 +495,7 @@ void btlChooseCameraPoseByActorHeights(BtlLinkedCommand *action) {
     enemyHeight = 0.0f;
     allyHeight = 0.0f;
     unit = work->units;
-    for (; unit != NULL; unit = unit->nextActor) {
+    for (; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             height = btlUnitGetTopY(unit);
             if (unit->status.flags & 0x200) {
@@ -1046,9 +1047,9 @@ void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
         if (btlIsSpecialActorCategory((s32)action) != 0) {
             btlBuildBattleUnitFramingCameraPose(action, &action->camera, 0.0f);
             SetRotateMatrixX(-(10.0f * 0.017453293f));
-            VU0_STORE_VF_UNCLOBBERED(vf10, action->camera.direction);
-            VU0_ROTATE_VEC(vf10, vf10);
-            VU0_STORE_VF(vf10, action->camera.direction);
+            SDF_VU0_STOREVECTOR_NOMEM(action->camera.direction);
+            SDF_VU0_APPLYMATRIX_XYZ();
+            SDF_VU0_STOREVECTOR(action->camera.direction);
             action->camera.distance += 150.0f;
             out = &action->backCamera;
         } else {
@@ -1139,7 +1140,7 @@ void btlUpdateActionCameraFromTargetPolicy(BtlLinkedCommand *action) {
             singleIsTarget = link->unit == btlGetIndexListEntry(list, 0);
         }
         matchingActorCount = 0;
-        for (unit = runtime->units; unit != 0; unit = unit->nextActor) {
+        for (unit = runtime->units; unit != 0; unit = unit->next) {
             u32 flags = unit->status.flags;
             if ((flags & 1) != 0 || hasUnready != 0) {
                 if (flags & 0x200) {
@@ -1154,15 +1155,15 @@ void btlUpdateActionCameraFromTargetPolicy(BtlLinkedCommand *action) {
 
             btlUnitGetMuzzlePosVU(link->unit);
             /* Retail 001EBF84 keeps this SDK snapshot at SP+0x10. */
-            VU0_STORE_VF(vf10, positions[1]);
-            for (unit = runtime->units; unit != 0; unit = unit->nextActor) {
+            SDF_VU0_STOREVECTOR(positions[1]);
+            for (unit = runtime->units; unit != 0; unit = unit->next) {
                 if (unit != link->unit) {
                     u32 flags = unit->status.flags;
                     if ((flags & 1) != 0) {
                         if ((flags & 0x200) != 0) {
                             btlUnitGetMuzzlePosVU(unit);
                             /* Retail 001EBFCC keeps the ally snapshot at SP+0. */
-                            VU0_STORE_VF(vf10, positions[0]);
+                            SDF_VU0_STOREVECTOR(positions[0]);
                         }
                     }
                 }
@@ -1228,7 +1229,7 @@ void btlPrepareSingleTargetCameraBlend(BtlLinkedCommand *action) {
         return;
     }
     btlUnitGetBodyPosVU(target);
-    VU0_STORE_VF(vf10, targetPosition);
+    SDF_VU0_STOREVECTOR(targetPosition);
     if (targetPosition[0] > 0.0f) {
         poseKind = 2;
     } else {

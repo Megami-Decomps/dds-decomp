@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_column_packet_api.h"
 #include "kwln_draw_buffer.h"
 #include "kwln_frame_draw_buffer.h"
@@ -275,18 +276,18 @@ s32 kwlnBuildFrameScenePackets(dds3ProcessID_t *task) {
         *(u32 *)(kwlnOverlayMatrixPackets - 0x620 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = D_003BA8EC;
     }
     sdfCameraBuildProjection(&dds3ScreenParam.camera);
-    VU0_LOAD_VF(vf10, aViewTarget);
-    VU0_LOAD_VF(vf11, sdfViewTargetVector);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_LOADVECTOR(aViewTarget);
+    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
     VU0_SCALAR_OP(600.0f, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, sdfViewShakeVector);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, &eye);
-    VU0_LOAD_VF(vf10, sdfViewTargetVector);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF_UNCLOBBERED(vf10, &target);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_LOADVECTOR_B(sdfViewShakeVector);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&eye);
+    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&target);
     LookAtMatrix(&eye, &target, aViewDown);
     VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
     {

@@ -2,6 +2,7 @@
 #include "sdf_request.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_resource_list_release_api.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_trig.h"
@@ -113,8 +114,8 @@ void sdfModelCopyStat(sdfModelRootNode_t *destination, sdfModelRootNode_t *sourc
     destination->color = source->color;
     VU0_LOAD_MATRIX(source->matrix);
     VU0_STORE_MATRIX(destination->matrix);
-    PCP_COPY_VECTOR(destination->rotationQuaternion, source->rotationQuaternion);
-    PCP_COPY_VECTOR(destination->scaleVector, source->scaleVector);
+    SDF_VU0_COPYVECTOR(destination->rotationQuaternion, source->rotationQuaternion);
+    SDF_VU0_COPYVECTOR(destination->scaleVector, source->scaleVector);
     buffer = (s8)sdfFrameId;
     destination->lighting = source->lighting;
     destination->scalarOverrideFirst = source->scalarOverrideFirst;
@@ -133,9 +134,9 @@ void sdfModelCopyStat(sdfModelRootNode_t *destination, sdfModelRootNode_t *sourc
             destinationNode->flags = sourceNode->flags;
             destinationNode->color = sourceNode->color;
             destinationNode->drawFlagMask = sourceNode->drawFlagMask;
-            PCP_COPY_VECTOR(destinationNode->quaternion, sourceNode->quaternion);
-            PCP_COPY_VECTOR(destinationNode->translation, sourceNode->translation);
-            PCP_COPY_VECTOR(destinationNode->scale, sourceNode->scale);
+            SDF_VU0_COPYVECTOR(destinationNode->quaternion, sourceNode->quaternion);
+            SDF_VU0_COPYVECTOR(destinationNode->translation, sourceNode->translation);
+            SDF_VU0_COPYVECTOR(destinationNode->scale, sourceNode->scale);
             VU0_LOAD_MATRIX(sourceNode->localMatrix);
             VU0_STORE_MATRIX(destinationNode->localMatrix);
             VU0_LOAD_MATRIX(sourceNode->worldMatrix);
@@ -268,18 +269,18 @@ void sdfModelMakeMarkPosMatrix(sdfModelRootNode_t *model, SdfMapPositionRecord *
     u8 *vector;
 
     vector = (u8 *)&record->up;
-    VU0_LOAD_VF(vf10, vector);
-    VU0_MOVE_VF(vf30, vf10);
-    VU0_MOVE_VF(vf11, vf10);
+    SDF_VU0_LOADVECTOR(vector);
+    SDF_VU0_SET_ROW2();
+    SDF_VU0_COPYVECTOR_A_TO_B();
     vector = (u8 *)&record->direction;
-    VU0_LOAD_VF(vf10, vector);
-    VU0_NEGATE_XYZ(vf10);
-    VU0_MOVE_VF(vf29, vf10);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
-    VU0_MOVE_VF(vf28, vf10);
-    VU0_LOAD_VF(vf31, &record->position);
-    VU0_SET_W_ONE(vf31);
+    SDF_VU0_LOADVECTOR(vector);
+    SDF_VU0_NEGVECTOR_XYZ();
+    SDF_VU0_SET_ROW1();
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_SET_ROW0();
+    SDF_VU0_LOAD_ROW3(&record->position);
+    SDF_VU0_MATRIX_ROW3_W_SET_ONE();
     sdfPostmultiplyVuMatrixFromMemory(drawNode->worldMatrix);
 }
 
@@ -289,8 +290,8 @@ void sdfModelMakeMarkPos(sdfModelRootNode_t *model, SdfMapPositionRecord *record
     sdfModelNode_t *drawNode = sdfModelSearchNode(model, record->nodeId);
 
     VU0_LOAD_MATRIX(drawNode->worldMatrix);
-    VU0_LOAD_VF(vf10, &record->position);
-    VU0_TRANSFORM_POINT(vf10, vf10);
+    SDF_VU0_LOADVECTOR(&record->position);
+    SDF_VU0_APPLYMATRIX_XYZ1();
 }
 
 /* Search the fixed-size map-position records within the chunk's declared byte extent. */

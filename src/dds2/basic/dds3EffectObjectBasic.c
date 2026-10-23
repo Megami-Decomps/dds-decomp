@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "dds3_object_flags.h"
 #include "mdl.h"
 #include "sdf_chip.h"
@@ -98,43 +99,43 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
             } else {
                 switch (data->ownerKind) {
                 case 4: case 5: case 6: case 7: case 8: case 9:
-                    VU0_LOAD_VF(vf10, ((dds3Basic_t *)data->owner)->inner->rotation);
-                    VU0_STORE_VF(vf10, rotation);
+                    SDF_VU0_LOADVECTOR(((dds3Basic_t *)data->owner)->inner->rotation);
+                    SDF_VU0_STOREVECTOR(rotation);
                     effMiscQuaternionToMatrixVU();
                     break;
                 case EFF_OBJ_OWNER_KIND_EXTRA:
-                    VU0_LOAD_VF(vf10, ((EvtWorldSourceTransformPrefix *)((dds3Basic_t *)data->owner)->data)->rotation);
-                    VU0_STORE_VF(vf10, rotation);
+                    SDF_VU0_LOADVECTOR(((EvtWorldSourceTransformPrefix *)((dds3Basic_t *)data->owner)->data)->rotation);
+                    SDF_VU0_STOREVECTOR(rotation);
                     effMiscQuaternionToMatrixVU();
                     break;
                 default:
-                    VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+                    SDF_VU0_LOADIDENTITY();
                     break;
                 }
             }
-            VU0_MOVE_MATRIX_TO_B();
-            VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
-            VU0_LOAD_VF(vf10, &data->word10);
-            VU0_SET_W_ONE(vf10);
-            VU0_APPLY_MATRIX(vf31, vf10);
+            SDF_VU0_COPYMATRIX_A_TO_B();
+            SDF_VU0_LOADIDENTITY();
+            SDF_VU0_LOADVECTOR(&data->word10);
+            SDF_VU0_VECTOR_W_SET_ONE();
+            SDF_VU0_TRANSLATE();
             MultMatrixRevNoArg();
-            VU0_MOVE_VF(vf10, vf0);
-            VU0_APPLY_MATRIX(vf10, vf10);
+            SDF_VU0_LOADIDENTITYVECTOR();
+            SDF_VU0_APPLYMATRIX();
             if ((data->flags & EFF_OBJ_FLAG_OWNER_BILL_ENTRY) == 0) {
                 switch (data->ownerKind) {
                 case 4: case 5: case 6: case 7: case 8: case 9:
-                    VU0_LOAD_VF(vf11, ((dds3Basic_t *)data->owner)->inner->position);
-                    VU0_ADD(vf10, vf10, vf11);
+                    SDF_VU0_LOADVECTOR_B(((dds3Basic_t *)data->owner)->inner->position);
+                    SDF_VU0_ADDVECTOR();
                     break;
                 case EFF_OBJ_OWNER_KIND_EXTRA:
-                    VU0_LOAD_VF(vf11, &((EvtWorldSourceTransformPrefix *)((dds3Basic_t *)data->owner)->data)->position);
-                    VU0_ADD(vf10, vf10, vf11);
+                    SDF_VU0_LOADVECTOR_B(&((EvtWorldSourceTransformPrefix *)((dds3Basic_t *)data->owner)->data)->position);
+                    SDF_VU0_ADDVECTOR();
                     break;
                 }
             }
-            VU0_STORE_VF(vf10, position);
+            SDF_VU0_STOREVECTOR(position);
             dds3SetRadiusPoseSet(obj->inner);
-            VU0_STORE_VF(vf10, obj->inner->position);
+            SDF_VU0_STOREVECTOR(obj->inner->position);
             moved = 1;
             dds3OffPoseSetFlag(obj->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
         } else {
@@ -142,13 +143,13 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
         }
     } else {
         dds3OffPoseSetFlag(obj->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
-        VU0_LOAD_VF(vf10, obj->inner->position);
-        VU0_SET_W_ONE(vf10);
-        VU0_STORE_VF(vf10, position);
+        SDF_VU0_LOADVECTOR(obj->inner->position);
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_STOREVECTOR(position);
         dds3SetRadiusPoseSet(obj->inner);
-        VU0_LOAD_VF(vf10, obj->inner->rotation);
+        SDF_VU0_LOADVECTOR(obj->inner->rotation);
         Normalize();
-        VU0_STORE_VF(vf10, rotation);
+        SDF_VU0_STOREVECTOR(rotation);
         moved = 1;
     }
     switch (data->state) {
@@ -156,7 +157,7 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
         node = data->handle;
         if (node != NULL && moved) {
             effCopyVectorToNodeInstance(node, position);
-            VU0_LOAD_VF(vf10, rotation);
+            SDF_VU0_LOADVECTOR(rotation);
             effMiscQuaternionToMatrixVU();
             VU0_STORE_MATRIX(matrix);
             effApplyNodeTransformMatrix(node, matrix);
@@ -194,8 +195,8 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
                 u8 *record = data->vector;
 
                 if (record != NULL) {
-                    PCP_COPY_VECTOR(record, position);
-                    PCP_COPY_VECTOR(record + 0x10, rotation);
+                    SDF_VU0_COPYVECTOR(record, position);
+                    SDF_VU0_COPYVECTOR(record + 0x10, rotation);
                     effEveBEDCutSetParams((effEveBEDCutHandle_t *)eventNode, record);
                 }
             }
@@ -293,8 +294,8 @@ dds3Basic_t *AddP2AEffect(bill, vec, extra)
     if (obj == NULL) {
         return NULL;
     }
-    VU0_LOAD_VF(vf10, vec);
-    VU0_STORE_VF(vf10, vector);
+    SDF_VU0_LOADVECTOR(vec);
+    SDF_VU0_STOREVECTOR(vector);
     effCopyVector(bill, vector);
     data = obj->data;
     data->handle = bill;
@@ -360,8 +361,8 @@ dds3Basic_t *AddTMXEffect(bill, firstVector, secondVectorAddress)
     if (obj == NULL) {
         return NULL;
     }
-    VU0_LOAD_VF(vf10, firstVector);
-    VU0_STORE_VF(vf10, copiedVector);
+    SDF_VU0_LOADVECTOR(firstVector);
+    SDF_VU0_STOREVECTOR(copiedVector);
     effCopyVector(bill, copiedVector);
     data = obj->data;
     data->state = EFF_DEPENDENCY_STATE_BILLBOARD_NODE;
@@ -422,8 +423,8 @@ dds3Basic_t *effObjCreateWithBoundBill(bill, firstVector, secondVector)
     if (obj == NULL) {
         return NULL;
     }
-    VU0_LOAD_VF(vf10, firstVector);
-    VU0_STORE_VF(vf10, copiedVector);
+    SDF_VU0_LOADVECTOR(firstVector);
+    SDF_VU0_STOREVECTOR(copiedVector);
     effCopyVectorToNodeInstance(bill, copiedVector);
     data = obj->data;
     data->state = EFF_DEPENDENCY_STATE_BOUND_EFFECT_NODE;
@@ -475,8 +476,8 @@ dds3Basic_t *effObjCreateBillboardInWorld(bill, firstVector, secondVectorAddress
     if (obj == NULL) {
         return NULL;
     }
-    VU0_LOAD_VF(vf10, firstVector);
-    VU0_STORE_VF(vf10, copiedVector);
+    SDF_VU0_LOADVECTOR(firstVector);
+    SDF_VU0_STOREVECTOR(copiedVector);
     effCopyVectorToNodeInstance(bill, copiedVector);
     data = obj->data;
     data->state = EFF_DEPENDENCY_STATE_BOUND_EFFECT_NODE;
@@ -522,8 +523,8 @@ dds3Basic_t *AddBEDEffect(source, firstVector, secondVector)
     if (obj == NULL) {
         return NULL;
     }
-    PCP_COPY_VECTOR(parameters.firstVector, firstVector);
-    PCP_COPY_VECTOR(parameters.secondVector, secondVector);
+    SDF_VU0_COPYVECTOR(parameters.firstVector, firstVector);
+    SDF_VU0_COPYVECTOR(parameters.secondVector, secondVector);
     mixer = effEveBEDCreate(source);
     data = obj->data;
     data->state = EFF_DEPENDENCY_STATE_EVENT_CUT;
@@ -727,7 +728,7 @@ s32 GetESPPos(dds3Basic_t *obj) {
     if (CheckESP(obj) == NULL) {
         return 0;
     }
-    VU0_LOAD_VF(vf10, obj->inner->position);
+    SDF_VU0_LOADVECTOR(obj->inner->position);
     return 1;
 }
 
@@ -780,11 +781,11 @@ s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first, dds3Basic_t
     case EFF_DEPENDENCY_STATE_MAGATUHI_TWO_ROWS:
         parameterRows = data->vector;
         if (GetESPPos(first)) {
-            VU0_STORE_VF(vf10, parameterRows);
+            SDF_VU0_STOREVECTOR(parameterRows);
             parameterRows[8] = GetESPR(first);
         }
         if (GetESPPos(second)) {
-            VU0_STORE_VF(vf10, parameterRows + 4);
+            SDF_VU0_STOREVECTOR(parameterRows + 4);
             parameterRows[9] = GetESPR(second);
         }
         effMagaSCSetArea(data->handle, parameterRows);
@@ -792,19 +793,19 @@ s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first, dds3Basic_t
     case EFF_DEPENDENCY_STATE_MAGATUHI_FOUR_ROWS:
         parameterRows = data->vector;
         if (GetESPPos(first)) {
-            VU0_STORE_VF(vf10, parameterRows);
+            SDF_VU0_STOREVECTOR(parameterRows);
             parameterRows[16] = GetESPR(first);
         }
         if (GetESPPos(second)) {
-            VU0_STORE_VF(vf10, parameterRows + 4);
+            SDF_VU0_STOREVECTOR(parameterRows + 4);
             parameterRows[17] = GetESPR(second);
         }
         if (GetESPPos(third)) {
-            VU0_STORE_VF(vf10, parameterRows + 8);
+            SDF_VU0_STOREVECTOR(parameterRows + 8);
             parameterRows[18] = GetESPR(third);
         }
         if (GetESPPos(fourth)) {
-            VU0_STORE_VF(vf10, parameterRows + 12);
+            SDF_VU0_STOREVECTOR(parameterRows + 12);
             parameterRows[19] = GetESPR(fourth);
         }
         effMagaP4SetPoint(data->handle, parameterRows);

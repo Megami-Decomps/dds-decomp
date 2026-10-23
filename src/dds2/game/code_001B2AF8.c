@@ -13,6 +13,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "btl_indexed_ui_resource_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_actor_status_table_api.h"
@@ -235,7 +236,7 @@ s32 btlTryEscapeWithPhaseAdjustment(BtlUnit *actor) {
         return 1;
     }
     noEligibleEnemy = 1;
-    for (enemy = battle->units; enemy != NULL; enemy = enemy->nextActor) {
+    for (enemy = battle->units; enemy != NULL; enemy = enemy->next) {
         if ((enemy->status.flags & 1) != 0) {
             if ((enemy->status.flags & 0x400) != 0) {
                 if ((enemy->partyRecord.status & 0x2A0F) == 0) {
@@ -308,7 +309,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first
     }
 
     statAddresses[0] = (s32)&unit->partyRecord;
-    for (candidate = controller->units; candidate != NULL; candidate = candidate->nextActor) {
+    for (candidate = controller->units; candidate != NULL; candidate = candidate->next) {
         u32 flags = candidate->status.flags;
 
         if ((flags & 1) == 0) {
@@ -325,7 +326,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first
         }
         statAddresses[1] = (s32)&candidate->partyRecord;
         if (requiredCount == 3) {
-            for (partner = controller->units; partner != NULL; partner = partner->nextActor) {
+            for (partner = controller->units; partner != NULL; partner = partner->next) {
                 u32 partnerFlags = partner->status.flags;
 
                 if ((partnerFlags & 1) == 0) {
@@ -501,7 +502,7 @@ s32 btlCanSpawnAnotherEnemy(BtlUnit *requester) {
         limit = battle->enemyLimitOverride(requester, &datBattleSceneRecords[battle->battleMode], limit);
     }
     active = 0;
-    for (unit = battle->units; unit != 0; unit = unit->nextActor) {
+    for (unit = battle->units; unit != 0; unit = unit->next) {
         s32 flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x400) {
@@ -697,7 +698,7 @@ s32 btlAverageMaximumValueForMask(s32 mask, s8 skipDown) {
     s32 total = 0;
     s32 count = 0;
     u32 flags;
-    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->next) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (skipDown == 0 || !(flags & 0x20)) {
@@ -727,7 +728,7 @@ s32 btlAverageCurrentValueForMask(s32 mask, s8 skipDown) {
     s32 total = 0;
     s32 count = 0;
     u32 flags;
-    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->next) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (skipDown == 0 || !(flags & 0x20)) {
@@ -758,7 +759,7 @@ s32 btlAverageMaskedActorStat(s32 mask, s8 skipDown) {
     s32 total = 0;
     s32 count = 0;
     u32 flags;
-    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->next) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (skipDown == 0 || !(flags & 0x20)) {
@@ -788,7 +789,7 @@ s32 btlSumOrAverageActorAttribute(u32 mask, s32 attribute, s8 skipDown) {
     s32 sum = 0;
     s32 count = 0;
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
-    for (; unit != 0; unit = unit->nextActor) {
+    for (; unit != 0; unit = unit->next) {
         u32 flags = unit->status.flags;
         if ((flags & 1) != 0) {
             if (skipDown == 0 || (flags & 0x20) == 0) {
@@ -1119,7 +1120,7 @@ s32 btlRollSurpriseAttack(void) {
 void btlClearUnitStatusMask(void) {
     BtlUnit *unit;
     u32 flags;
-    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->next) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
@@ -1485,7 +1486,7 @@ s8 btlChooseStartVoice(void) {
         return -1;
     }
     count = 0;
-    for (unit = state->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = state->units; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x200) {
                 s32 flagId = btlStartVoiceRows[unit->partyRecord.unitId].flagId;
@@ -1519,7 +1520,7 @@ s8 btlChooseStartVoice(void) {
     }
     category = 2;
     hp = btlReadCurrentUnitHp(&chosen->partyRecord);
-    for (unit = state->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = state->units; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 damage = btlCalculateHpActionAmount(unit, chosen, 0, 1, 1, 1, 0);
@@ -1614,7 +1615,7 @@ s32 btlTestSideCountCommandEligibility(ActionStateLink *action) {
 
     activeSideA = 0;
     activeSideB = 0;
-    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
         s32 flags = unit->status.flags;
         if ((flags & 1) == 0) {
             continue;
@@ -1776,7 +1777,7 @@ s32 btlCountFlaggedSceneActors(void) {
     BtlState *controller = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     s32 count = 0;
-    for (unit = controller->units; unit != 0; unit = unit->nextActor) {
+    for (unit = controller->units; unit != 0; unit = unit->next) {
         if ((btlUnitStatusPair(unit) & 0x321) == 0x301) {
             if (!(unit->partyRecord.status & 0x800)) {
                 count++;
@@ -2585,7 +2586,7 @@ s32 btlSyncEligibleActorPanelHpMp(void) {
     }
     panel = (BattleActorPanelWork *)dds3GetProcessData(task);
     /* i is never advanced: the count only gates the walk on any eligible actor. */
-    for (i = 0; unit != NULL && i < eligibleCount; unit = unit->nextActor) {
+    for (i = 0; unit != NULL && i < eligibleCount; unit = unit->next) {
         if (btlHasRequiredActorStatusBits(unit) != 0) {
             s32 slot = unit->lookupId;
 
@@ -2619,7 +2620,7 @@ s32 btlSetEligibleActorPanelTransitionState(void) {
     eligibleCount = btlCountEligibleLinkedActors(battle);
     unit = battle->units;
     /* i is never advanced: the count only gates the walk on any eligible actor. */
-    for (i = 0; unit != NULL && i < eligibleCount; unit = unit->nextActor) {
+    for (i = 0; unit != NULL && i < eligibleCount; unit = unit->next) {
         if (btlHasRequiredActorStatusBits(unit) != 0) {
             panel->activeEntries[unit->lookupId].presentation.transitionState = 4;
         }
@@ -3769,12 +3770,12 @@ void btlUpdateAnalysisPanelWindowGeometry(BtlLinkedCommand *command, BtlAnalysis
     switch (work->page) {
     case 0:
         /* Audited original SDK pipeline: five stores precede all coordinate reads. */
-        VU0_LOAD_VF(vf10, center);
-        VU0_STORE_VF_UNCLOBBERED(vf10, panel->anchor);
-        VU0_STORE_VF_UNCLOBBERED(vf10, panel->corners[3]);
-        VU0_STORE_VF_UNCLOBBERED(vf10, panel->corners[0]);
-        VU0_STORE_VF_UNCLOBBERED(vf10, panel->corners[1]);
-        VU0_STORE_VF_UNCLOBBERED(vf10, panel->corners[2]);
+        SDF_VU0_LOADVECTOR(center);
+        SDF_VU0_STOREVECTOR_NOMEM(panel->anchor);
+        SDF_VU0_STOREVECTOR_NOMEM(panel->corners[3]);
+        SDF_VU0_STOREVECTOR_NOMEM(panel->corners[0]);
+        SDF_VU0_STOREVECTOR_NOMEM(panel->corners[1]);
+        SDF_VU0_STOREVECTOR_NOMEM(panel->corners[2]);
         {
             f32 centerZ = panel->anchor[2] + 200.0f;
             f32 lastZ = panel->corners[3][2] + 200.0f;
@@ -4372,7 +4373,7 @@ s32 btlCountEligibleLinkedActors(BtlState *battle) {
             (unit->partyRecord.flags & 2) != 0) {
             count++;
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return count;
 }
@@ -5970,7 +5971,7 @@ s32 btlUpdateMajinTutorialTask(dds3ProcessID_t *task) {
         break;
     case 1:
         count = 0;
-        for (unit = battle->units; unit != 0; unit = unit->nextActor) {
+        for (unit = battle->units; unit != 0; unit = unit->next) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x200) {
                     count++;
@@ -6013,7 +6014,7 @@ s32 btlUpdateMajinTutorialTask(dds3ProcessID_t *task) {
         unit = battle->units;
         count = 0;
         memset(eligible, 0, sizeof(eligible));
-        for (; unit != 0; unit = unit->nextActor) {
+        for (; unit != 0; unit = unit->next) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x200) {
                     if (count < 3) {
@@ -6356,7 +6357,7 @@ s32 btlSetActorPanelYForMode(s8 mode) {
     /* i is never advanced: the count only gates the walk on any eligible actor. */
     switch (state) {
     case 1:
-        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->nextActor) {
+        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->next) {
             if (btlHasRequiredActorStatusBits(actor)) {
                 slot = actor->lookupId;
                 work->activeEntries[slot].basePosition[1] += 6;
@@ -6369,7 +6370,7 @@ s32 btlSetActorPanelYForMode(s8 mode) {
         }
         break;
     case 2:
-        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->nextActor) {
+        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->next) {
             if (btlHasRequiredActorStatusBits(actor)) {
                 slot = actor->lookupId;
                 work->activeEntries[slot].basePosition[1] -= 6;
@@ -6382,7 +6383,7 @@ s32 btlSetActorPanelYForMode(s8 mode) {
         }
         break;
     case 3:
-        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->nextActor) {
+        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->next) {
             if (btlHasRequiredActorStatusBits(actor)) {
                 slot = actor->lookupId;
                 work->activeEntries[slot].basePosition[1] = 0x159;
@@ -6391,7 +6392,7 @@ s32 btlSetActorPanelYForMode(s8 mode) {
         }
         break;
     case 4:
-        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->nextActor) {
+        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->next) {
             if (btlHasRequiredActorStatusBits(actor)) {
                 slot = actor->lookupId;
                 work->activeEntries[slot].basePosition[1] = 0x143;
@@ -6452,7 +6453,7 @@ void btlUpdateActorPanelPresentation(BtlState *battle, BattleActorPanelWork *wor
                 }
                 ordinal++;
             }
-            actor = actor->nextActor;
+            actor = actor->next;
         }
     } else {
         ordinal = 0;
@@ -6511,7 +6512,7 @@ void btlUpdateActorPanelPresentation(BtlState *battle, BattleActorPanelWork *wor
                 }
                 ordinal++;
             }
-            actor = actor->nextActor;
+            actor = actor->next;
         }
     }
 }
@@ -6556,7 +6557,7 @@ s32 func_001C1F10(dds3ProcessID_t *task) {
     count = btlCountEligibleLinkedActors(battle);
     unit = battle->units;
     btlUpdateActorPanelPresentation(battle, work);
-    for (; unit != NULL && i < count; unit = unit->nextActor) {
+    for (; unit != NULL && i < count; unit = unit->next) {
         if (btlHasRequiredActorStatusBits(unit)) {
             slot = unit->lookupId;
             btlUpdateActorVitalEffectState(unit, work, slot);
@@ -7099,7 +7100,7 @@ void btlSetActionActorPanelPresentation(ActionStateLink *actor, s8 mode, s8 valu
     }
     count = 0;
     slot = 0;
-    for (; node != NULL; node = node->nextActor) {
+    for (; node != NULL; node = node->next) {
         if (btlHasRequiredActorStatusBits(node) != 0) {
             slot = node->lookupId;
             if (actor->unit->owner == node->owner) {
@@ -7136,7 +7137,7 @@ void btlUpdateActorSlotPresentationState(BtlUnit *object, s8 mode, s8 value) {
     void *task;
     s32 offset;
 
-    for (; node != 0; node = node->nextActor) {
+    for (; node != 0; node = node->next) {
         if (btlHasRequiredActorStatusBits(node) != 0) {
             slot = node->lookupId;
             if (object->owner == node->owner) {
@@ -7168,7 +7169,7 @@ void btlSetActorSecondaryPresentation(BtlUnit *actor, s32 unused, s8 mode) {
     dds3ProcessID_t *task;
     BattleActorPanelWork *work;
 
-    for (; node != NULL; node = node->nextActor) {
+    for (; node != NULL; node = node->next) {
         if (btlHasRequiredActorStatusBits(node) != 0) {
             slot = node->lookupId;
             if (actor->owner == node->owner) {
@@ -7207,7 +7208,7 @@ void btlResetActorSlotPresentationValue(BtlUnit *object, BattleSceneObject *scen
     BtlUnit *node = battle->units;
     u8 *entry;
     s32 offset;
-    for (; node != 0; node = node->nextActor) {
+    for (; node != 0; node = node->next) {
         if (btlHasRequiredActorStatusBits(node) != 0) {
             slot = object->lookupId;
             if (object->owner == node->owner) {
@@ -7323,7 +7324,7 @@ void btlSyncActorPanelCommandGroups(ActionStateLink *unused, BattleActorPanelWor
     s32 group;
     u8 slot;
 
-    for (; node != NULL; node = node->nextActor) {
+    for (; node != NULL; node = node->next) {
         if (btlHasRequiredActorStatusBits(node) == 0) {
             continue;
         }
@@ -10013,7 +10014,7 @@ s32 btlHasSpecialActiveSceneActor(void) {
                 return 1;
             }
         }
-        actor = actor->nextActor;
+        actor = actor->next;
     }
     return 0;
 }
@@ -10033,7 +10034,7 @@ s32 btlFindHuntTutorialSkill(void) {
                     }
                 }
             }
-            actor = actor->nextActor;
+            actor = actor->next;
         } while (actor != 0);
     }
     return 0;
@@ -10046,7 +10047,7 @@ s32 btlHasSelectedActiveSceneActor(void) {
             (actor->partyRecord.status & 1) != 0) {
             return 1;
         }
-        actor = actor->nextActor;
+        actor = actor->next;
     }
     return 0;
 }
@@ -10058,7 +10059,7 @@ s32 btlHaveActiveSceneActorEntriesCleared(void) {
             btlGetEntryFlagsUnlessDisabled(&actor->partyRecord) != 0) {
             return 0;
         }
-        actor = actor->nextActor;
+        actor = actor->next;
     }
     return 1;
 }
@@ -10409,9 +10410,9 @@ void func_001CB7A8(BtlUnit *unit, SceneAiWork *work, u32 index) {
         btlUnitGetMuzzlePosVU(unit);
     } else if ((unit->status.flags & 0x8000000) != 0) {
         btlUnitGetMuzzlePosVU(unit);
-        VU0_STORE_VF_UNCLOBBERED(vf10, muzzle);
+        SDF_VU0_STOREVECTOR_NOMEM(muzzle);
         muzzle[1] = -24.0f;
-        VU0_LOAD_VF(vf10, muzzle);
+        SDF_VU0_LOADVECTOR(muzzle);
     }
     if (btlProjectForwardPositionToScreen(position) == 0) {
         return;

@@ -4,6 +4,7 @@
 #include "prf_requirement.h"
 #include "eff_resource_slots.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
@@ -4453,9 +4454,9 @@ s32 mnuDrawMantraPanelOrbitingEffect(s32 x, s32 y, s32 z, s32 alpha, MantraPanel
         mnuDrawMantraSprite(drawX, drawY, 1, (s32)((f32)alpha * 0.4f), 0x7D, 0x40, packet);
     }
     for (i = 0; i < 2; i++) {
-        VU0_LOAD_VF(vf10, directions[i]);
+        SDF_VU0_LOADVECTOR(directions[i]);
         VU0_SCALE_VF(vf10, 150.0f);
-        VU0_STORE_VF(vf10, scaled);
+        SDF_VU0_STOREVECTOR(scaled);
         drawX = (s32)((f32)(x + offsets[i][0]) + scaled[0] * phases[i]);
         drawY = (s32)((f32)(y + offsets[i][1]) + scaled[1] * phases[i]);
         sdfSubmitGsAlphaOneRegisterPacket(0x58, packet);

@@ -725,7 +725,7 @@ void effResetFadeVectorFrame(EffFadeVectorWork *work) {
 INCLUDE_ASM(const s32, "game/code_002DE248", effDrawLensFlare);
 
 void effCopyFadeWorkVector(f32 *dst, const f32 *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effSetFadeVectorColor(EffFadeVectorWork *work, u32 value) {
@@ -1230,7 +1230,7 @@ void func_002DF6C8(EffKindWork *work) {
     VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_SCALAR_OP(100.0f, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, ahead);
@@ -1238,11 +1238,11 @@ void func_002DF6C8(EffKindWork *work) {
     sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
     VU0_LOAD_VF(vf10, ahead);
     VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
+    SDF_VU0_PERSVECTOR();
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, D_004582A0);
     VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
+    SDF_VU0_PERSVECTOR();
     VU0_SUB(vf10, vf10, vf11);
     do {
         VU0_STORE_VF(vf10, delta);
@@ -1253,7 +1253,7 @@ void func_002DF6C8(EffKindWork *work) {
         out->angle = atan2f(delta[0], delta[1]) * 57.29577637f;
     }
     out->displacement = stretch * length * 10.0f + 1.0f;
-    PCP_COPY_VECTOR(D_004582A0, ahead);
+    SDF_VU0_COPYVECTOR(D_004582A0, ahead);
     out->blendControl = work->mode;
     effBlurDrawFramebufferQuad(out);
 }
@@ -1449,14 +1449,14 @@ void effKindWorkFrameReset(EffKindWork *work) {
 }
 
 void effKindWorkFrameUpdate(EffKindWork *work) {
-    D_003E9810[work->kind].update();
+    D_003E9810[work->kind].update(work);
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         work->frame++;
     }
 }
 
 void effCopyKindWorkPosition(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effSetKindWorkColor(EffKindWork *work, u32 value) {
@@ -1549,7 +1549,7 @@ void effAlternateKindWorkFrameReset(EffKindWork *work) {
 
 
 void effAlternateKindWorkFrameUpdate(EffKindWork *work) {
-    D_003E98A0[work->kind].update();
+    D_003E98A0[work->kind].update(work);
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         work->frame++;
     }
@@ -1557,7 +1557,7 @@ void effAlternateKindWorkFrameUpdate(EffKindWork *work) {
 
 /* Copy the leading vector of alternate kind-table work. */
 void effCopyAlternateKindVector(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 /* Set the alternate kind-table work's packed color. */
@@ -1681,11 +1681,11 @@ void effUpdateScaledBillboardFrame(EffBillboardWork *work) {
 }
 
 void effCopyBillboardPosition(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effCopyBillboardOrientation(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst + 1, src);
+    SDF_VU0_COPYVECTOR(dst + 1, src);
 }
 
 void effSetBillboardColor(s32 work, u32 value) {
@@ -1875,8 +1875,8 @@ void billAdvanceFrameInstances(EffClassWork *work) {
             direction[2] = sdfSin(angle);
             VU0_LOAD_VF(vf10, direction);
             VU0_MOVE_VF(vf12, vf10);
-            VU0_GET_VF10_X(cosine);
-            VU0_GET_VF10_Z(sine);
+            SDF_VU0_GETVECTOR_X(cosine);
+            SDF_VU0_GETVECTOR_Z(sine);
             VU0_SCALAR_OP(sine, "vaddx.x vf10, vf0, vf2x");
             cosine = -cosine;
             VU0_SCALAR_OP(cosine, "vaddx.z vf10, vf0, vf2x");
@@ -2171,8 +2171,8 @@ void billAdvanceCellInstances(EffClassWork *work) {
             VU0_MOVE_VF(vf2, vf10);
             VU0_MOVE_VF(vf10, vf12);
             VU0_MOVE_VF(vf12, vf2);
-            VU0_GET_VF10_X(cosine);
-            VU0_GET_VF10_Z(sine);
+            SDF_VU0_GETVECTOR_X(cosine);
+            SDF_VU0_GETVECTOR_Z(sine);
             VU0_SET_VF10_COMPONENT(x, sine);
             cosine = -cosine;
             VU0_SET_VF10_COMPONENT(z, cosine);
@@ -2555,8 +2555,8 @@ void billAdvanceAnimatedFrameTransforms(EffClassWork *work) {
             direction[2] = sdfSin(angle);
             VU0_LOAD_VF(vf10, direction);
             VU0_MOVE_VF(vf12, vf10);
-            VU0_GET_VF10_X(cosine);
-            VU0_GET_VF10_Z(sine);
+            SDF_VU0_GETVECTOR_X(cosine);
+            SDF_VU0_GETVECTOR_Z(sine);
             VU0_SCALAR_OP(sine, "vaddx.x vf10, vf0, vf2x");
             cosine = -cosine;
             VU0_SCALAR_OP(cosine, "vaddx.z vf10, vf0, vf2x");
@@ -2862,8 +2862,8 @@ void billAdvanceEmitterInstances(EffClassWork *work) {
             VU0_SCALE_VF(vf10, distance);
             VU0_MOVE_VF(vf12, vf10);
             VU0_MOVE_VF(vf10, vf11);
-            VU0_GET_VF10_X(cosine);
-            VU0_GET_VF10_Z(sine);
+            SDF_VU0_GETVECTOR_X(cosine);
+            SDF_VU0_GETVECTOR_Z(sine);
             VU0_SCALAR_OP(sine, "vaddx.x vf10, vf0, vf2x");
             cosine = -cosine;
             VU0_SCALAR_OP(cosine, "vaddx.z vf10, vf0, vf2x");
@@ -3179,7 +3179,7 @@ void billAdvanceStripInstances(EffClassWork *work) {
             direction[1] = tilt + -1.0f;
             direction[2] = sine * tilt;
             VU0_LOAD_VF(vf10, direction);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_NORMALIZE();
             VU0_MOVE_VF(vf12, vf10);
 
             direction[0] = sine;
@@ -3803,11 +3803,11 @@ void effUpdateAndDrawActiveInstance(EffClassWork *work) {
 }
 
 void effCopyActiveInstancePosition(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effCopyActiveInstanceOrientation(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst + 1, src);
+    SDF_VU0_COPYVECTOR(dst + 1, src);
 }
 
 void effSetActiveInstanceColor(s32 work, u32 value) {
@@ -4501,15 +4501,15 @@ void effUpdateScaledClassFrameRows(BillCellDrawWork *work) {
         VU0_LOAD_VF(vf11, src + 0x30);
         VU0_STORE_VF(vf10, dst + 0x20);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_SCALAR_OP(*scales, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_ADD(vf10, vf10, vf12);
         VU0_STORE_VF(vf10, dst);
-        PCP_COPY_VECTOR(dst + 0x10, src + 0x50);
+        SDF_VU0_COPYVECTOR(dst + 0x10, src + 0x50);
         if (i == 0) {
-            PCP_COPY_VECTOR(dst + 0x30, wrap);
+            SDF_VU0_COPYVECTOR(dst + 0x30, wrap);
         } else {
-            PCP_COPY_VECTOR(dst + 0x30, src - 0x30);
+            SDF_VU0_COPYVECTOR(dst + 0x30, src - 0x30);
         }
         i++;
         dst += 0x40;
@@ -4554,8 +4554,8 @@ void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
 
         dst->color = work->baseColor;
         dst->scale = work->scale;
-        PCP_COPY_VECTOR(dst->transform, work);
-        PCP_COPY_VECTOR(dst->transform + 0x10, work->transform);
+        SDF_VU0_COPYVECTOR(dst->transform, work);
+        SDF_VU0_COPYVECTOR(dst->transform + 0x10, work->transform);
         effRunClassPostFrame(dst);
         out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
         out->flag = ((EffBillOutputHeader *)config)->outputMode;
@@ -4786,7 +4786,7 @@ void effInitializeClassFrame(EffClassWork *work) {
 void effAdvanceClassFrame(EffClassWork *work) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         EffClassOps *operations = &effClassWorkOperations[work->kind];
-        operations->update();
+        operations->update(work);
         work->frame++;
     }
 }
@@ -4801,11 +4801,11 @@ void effUpdateClassFrame(EffClassWork *work) {
 }
 
 void effSetClassWorkPrimaryTransformVector(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effSetClassWorkSecondaryTransformVector(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst + 1, src);
+    SDF_VU0_COPYVECTOR(dst + 1, src);
 }
 
 void effSetClassWorkColor(s32 work, u32 value) {
@@ -5452,7 +5452,7 @@ void effCopyRingFrameVectors(EffSurfaceGridNode *node, s128 *dst, s32 frame) {
     }
     src = node->buffer + index;
     for (i = 0; i < 3; i++) {
-        PCP_COPY_VECTOR(dst + i, src + i);
+        SDF_VU0_COPYVECTOR(dst + i, src + i);
     }
 }
 
@@ -5467,7 +5467,7 @@ void effAppendSurfaceGridVectors(EffSurfaceGridNode *work, const f32 (*source)[4
     s32 i;
 
     for (i = 0; i < 3; i++) {
-        PCP_COPY_VECTOR(destination + i, source + i);
+        SDF_VU0_COPYVECTOR(destination + i, source + i);
     }
     capacity = work->rows;
     work->field_28 = index + 3;
@@ -5475,7 +5475,7 @@ void effAppendSurfaceGridVectors(EffSurfaceGridNode *work, const f32 (*source)[4
         u128 *mirror = (u128 *)data;
         data = (const u128 *)source;
         for (i = 0; i < 3; i++) {
-            PCP_COPY_VECTOR(mirror + i, data + i);
+            SDF_VU0_COPYVECTOR(mirror + i, data + i);
         }
         work->field_28 = 3;
     }
@@ -5506,18 +5506,18 @@ void effInterpolateSurfaceGridVectors(EffSurfaceGridNode *work, const f32 (*vect
         effCopyRingFrameVectors(work, (s128 *)frames[0], 2);
         effCopyRingFrameVectors(work, (s128 *)frames[1], 1);
         for (j = 0; j < 3; j++) {
-            PCP_COPY_VECTOR(frames[2][j], vectors[j]);
-            PCP_COPY_VECTOR(frames[3][j], vectors[j]);
+            SDF_VU0_COPYVECTOR(frames[2][j], vectors[j]);
+            SDF_VU0_COPYVECTOR(frames[3][j], vectors[j]);
         }
         step = 1.0f / count;
         t = 0.0f;
         for (i = 0; i < count; i++) {
             t += step;
             for (j = 0; j < 3; j++) {
-                PCP_COPY_VECTOR(controlVectors[0], frames[0][j]);
-                PCP_COPY_VECTOR(controlVectors[1], frames[1][j]);
-                PCP_COPY_VECTOR(controlVectors[2], frames[2][j]);
-                PCP_COPY_VECTOR(controlVectors[3], frames[3][j]);
+                SDF_VU0_COPYVECTOR(controlVectors[0], frames[0][j]);
+                SDF_VU0_COPYVECTOR(controlVectors[1], frames[1][j]);
+                SDF_VU0_COPYVECTOR(controlVectors[2], frames[2][j]);
+                SDF_VU0_COPYVECTOR(controlVectors[3], frames[3][j]);
                 vuCatmullRomPoint(controlVectors, t);
                 VU0_STORE_VF(vf10, output[j]);
             }
@@ -5742,11 +5742,11 @@ void effResetRenderResourceKind(EffQuadWork *work) {
 INCLUDE_ASM(const s32, "game/code_002DE248", effDrawQuadWork);
 
 void effCopyRenderResourcePosition(EffQuadWork *work, const f32 *source) {
-    PCP_COPY_VECTOR(work->position, source);
+    SDF_VU0_COPYVECTOR(work->position, source);
 }
 
 void effCopyRenderResourceOrientation(EffQuadWork *work, const f32 *source) {
-    PCP_COPY_VECTOR(work->orientation, source);
+    SDF_VU0_COPYVECTOR(work->orientation, source);
 }
 
 void effSetRenderResourceColor(EffQuadWork *work, u32 color) {
@@ -5968,7 +5968,7 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
                     VU0_LOAD_VF(vf10, direction);
                     VU0_LOAD_VF(vf11, view);
                     VU0_CROSS_XYZ(vf10, vf10, vf11);
-                    VU0_NORMALIZE_VF10();
+                    SDF_VU0_NORMALIZE();
                     VU0_MOVE_VF(vf12, vf10);
                     VU0_LOAD_VF(vf11, direction);
                     VU0_CROSS_XYZ(vf10, vf10, vf11);
@@ -6214,8 +6214,8 @@ void effUpdateRadialClassInstances(EffClassWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     color = eePackRGBAWord(128.0f);
     scale = work->scale;
-    PCP_COPY_VECTOR(position, work->vectors.position);
-    PCP_COPY_VECTOR(orientation, work->vectors.orientation);
+    SDF_VU0_COPYVECTOR(position, work->vectors.position);
+    SDF_VU0_COPYVECTOR(orientation, work->vectors.orientation);
     for (i = 0; i < count; i++, entries++) {
         EffClassWork *entry = *entries;
         EffPointSetTable *points = (EffPointSetTable *)entry->resource;
@@ -6495,13 +6495,13 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                 VU0_ROTATE_VEC(vf10, vf10);
                 VU0_STORE_VF(vf10, position);
                 VU0_STORE_VF(vf10, previous);
-                VU0_NORMALIZE_VF10();
+                SDF_VU0_NORMALIZE();
                 VU0_STORE_VF(vf10, radial);
                 direction[0] = previous[0] - entry->position[0];
                 direction[1] = previous[1] - entry->position[1];
                 direction[2] = previous[2] - entry->position[2];
                 VU0_LOAD_VF(vf10, direction);
-                VU0_NORMALIZE_VF10();
+                SDF_VU0_NORMALIZE();
                 VU0_MOVE_VF(vf12, vf10);
                 VU0_LOAD_VF(vf11, radial);
                 VU0_STORE_VF(vf10, direction);
@@ -6510,7 +6510,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                 VU0_LOAD_VF(vf11, view);
                 VU0_MOVE_VF(vf10, vf12);
                 VU0_CROSS_XYZ(vf10, vf10, vf11);
-                VU0_NORMALIZE_VF10();
+                SDF_VU0_NORMALIZE();
                 VU0_MOVE_VF(vf12, vf10);
                 VU0_MOVE_VF(vf11, vf10);
                 VU0_SCALE_VF(vf10, width);
@@ -6566,7 +6566,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                     VU0_ROTATE_VEC(vf10, vf10);
                     VU0_STORE_VF(vf10, previous);
                     VU0_SUB(vf10, vf10, vf11);
-                    VU0_LENGTH_VF10(distance);
+                    SDF_VU0_GETLENGTH(distance);
                     tangentScale = atanf((slope - oldSlope) * 0.5f);
                     oldSlope = slope;
                     waveHeight = newHeight;
@@ -6873,11 +6873,11 @@ void effUpdateAndDrawClassResource(EffClassWork *work) {
 }
 
 void effCopyClassResourcePosition(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effCopyClassResourceOrientation(void *dst, void *src) {
-    PCP_COPY_VECTOR(((EffClassWork *)dst)->vectors.orientation, src);
+    SDF_VU0_COPYVECTOR(((EffClassWork *)dst)->vectors.orientation, src);
 }
 
 void effSetClassResourceColor(s32 work, u32 color) {
@@ -7122,7 +7122,7 @@ void effDrawEffectStrip(EffectStripNode *node) {
     VU0_LOAD_VF(vf10, aViewTarget);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF_UNCLOBBERED(vf10, view);
     VU0_LOAD_VF(vf11, aViewDown);
     VU0_STORE_VF_UNCLOBBERED(vf11, up);
@@ -7162,7 +7162,7 @@ void effDrawEffectStrip(EffectStripNode *node) {
                     VU0_TRANSFORM_POINT(vf10, vf10);
                     VU0_STORE_VF(vf10, position);
                 } else {
-                    PCP_COPY_VECTOR(position, entry->pos);
+                    SDF_VU0_COPYVECTOR(position, entry->pos);
                 }
                 eeUnpackRGBAWordFloat(entry->color, 1.0f / 128.0f);
                 VU0_LOAD_VF(vf11, tint);
@@ -8088,7 +8088,7 @@ void effUpdateBillSpiral(EffClassWork *work) {
                     VU0_MOVE_VF(vf11, vf12);
                     VU0_SUB(vf10, vf10, vf11);
                     VU0_CROSS_XYZ(vf10, vf10, vf11);
-                    VU0_NORMALIZE_VF10();
+                    SDF_VU0_NORMALIZE();
                     VU0_SCALE_VF(vf10, width);
                     VU0_MOVE_VF(vf11, vf10);
                     VU0_MOVE_VF(vf10, vf12);
@@ -8234,11 +8234,11 @@ void effUpdateAndDrawBlockResource(EffClassWork *work) {
 }
 
 void effCopyBlockResourcePosition(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effCopyBlockResourceOrientation(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst + 1, src);
+    SDF_VU0_COPYVECTOR(dst + 1, src);
 }
 
 void effSetBlockResourceColor(s32 work, u32 color) {
@@ -8996,11 +8996,11 @@ void effUpdateAndDrawModelBlock(EffClassWork *work) {
 }
 
 void effCopyModelBlockPosition(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effCopyModelBlockOrientation(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst + 1, src);
+    SDF_VU0_COPYVECTOR(dst + 1, src);
 }
 
 void effSetModelBlockColor(s32 work, u32 color) {
@@ -9526,11 +9526,11 @@ void effStepModelResourceCallbacks(EffModelResource *effect) {
 }
 
 void effSetModelResourcePrimaryTransformVector(EffModelResource *effect, const f32 *position) {
-    PCP_COPY_VECTOR(effect->position, position);
+    SDF_VU0_COPYVECTOR(effect->position, position);
 }
 
 void effSetModelResourceSecondaryTransformVector(EffModelResource *effect, const f32 *orientation) {
-    PCP_COPY_VECTOR(effect->orientation, orientation);
+    SDF_VU0_COPYVECTOR(effect->orientation, orientation);
 }
 
 void effSetModelResourceColor(EffModelResource *effect, u32 color) {
@@ -9804,7 +9804,7 @@ s32 effCollectModelEffectActors(BtlUnit **out, u32 kind) {
     if (mask != 0) {
         u8 *link;
 
-        for (link = (u8 *)((BtlState *)state)->units; link != NULL; link = (u8 *)((BtlUnit *)link)->nextActor) {
+        for (link = (u8 *)((BtlState *)state)->units; link != NULL; link = (u8 *)((BtlUnit *)link)->next) {
             u32 flags = ((BtlUnit *)link)->status.flags;
 
             if (flags & 1) {
@@ -9857,7 +9857,7 @@ void effRestoreBattleActorLighting(u32 unusedResource) {
                 evtUnitLightOff(unit->ext, 0);
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
 }
 
@@ -9947,7 +9947,7 @@ void effUpdateBattleActorLighting(EffActiveResource *work) {
                         }
                         VU0_LOAD_VF(vf11, work->position);
                         VU0_SUB(vf10, vf10, vf11);
-                        VU0_NORMALIZE_VF10();
+                        SDF_VU0_NORMALIZE();
                     } else if (request.kind < 0xB) {
                         effBattleMiscDirectionTo(actors[index], &request, direction);
                         VU0_LOAD_VF(vf10, direction);
@@ -9959,7 +9959,7 @@ void effUpdateBattleActorLighting(EffActiveResource *work) {
                         }
                         VU0_LOAD_VF(vf11, origin);
                         VU0_SUB(vf10, vf10, vf11);
-                        VU0_NORMALIZE_VF10();
+                        SDF_VU0_NORMALIZE();
                     }
                     evtSetUnitLightDir(effect, config->directionFadeIn);
                 }
@@ -10014,7 +10014,7 @@ void effSyncLinkedActorChildParameter(void) {
                 evtSetUnitColorRGB(child, 0, entry->baseColor);
             }
         }
-        entry = entry->nextActor;
+        entry = entry->next;
     }
 }
 
@@ -10097,7 +10097,7 @@ s32 effComputeLightDirectionVU(dds3ModelHandle_t *model, SdfLightingPacketStorag
     VU0_LOAD_VF(vf11, D_004584B0);
     VU0_SUB(vf10, vf10, vf11);
     VU0_CLEAR_W(vf10);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF(vf10, D_00458470);
     sdf3DMakeLightParallelPacket(target, D_003E9F50, D_004584A0);
     return 1;
@@ -10106,11 +10106,11 @@ s32 effComputeLightDirectionVU(dds3ModelHandle_t *model, SdfLightingPacketStorag
 void effResetDefaultColorTables(void) {
     u128 *dst = D_00458460;
     u128 *src = D_0037F770[0];
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
     dst++;
     src++;
-    PCP_COPY_VECTOR(dst, src);
-    PCP_COPY_VECTOR(D_004584A0, kwlnDefaultColorVector);
+    SDF_VU0_COPYVECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(D_004584A0, kwlnDefaultColorVector);
     D_00437E94 = 0;
 }
 
@@ -10153,7 +10153,7 @@ void effInitializeFieldLightColors(EffActiveResource *work) {
             request.kind = 2;
             break;
         case 5:
-            PCP_COPY_VECTOR(D_004584B0, work);
+            SDF_VU0_COPYVECTOR(D_004584B0, work);
             break;
         case 6:
             handle = effBTLFieldColorGetOverrideSelector();
@@ -10441,7 +10441,7 @@ s32 func_002F6D00(EffActiveResource *owner) {
     VU0_STORE_VF(vf10, &data->localUp);
     dds3SetPosPoseSet(camera, position);
     VU0_LOAD_VF(vf10, eyeOffset);
-    PCP_COPY_VECTOR(&data->localEyeOffset, eyeOffset);
+    SDF_VU0_COPYVECTOR(&data->localEyeOffset, eyeOffset);
     VU0_SCALAR_OP(1.0f, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_STORE_VF(vf10, &data->worldEye);
     dds3CameraObjectBasicSetFovy(camera, D_00437E90);
@@ -10747,9 +10747,9 @@ void effUpdateAimedClassResource(u8 *work) {
     VU0_LOAD_VF(vf10, first);
     VU0_LOAD_VF(vf11, second);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_GETLENGTH(length);
     ((EffAimState *)state)->length = length;
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf12, vf10);
     VU0_LOAD_VF(vf11, effWorldUpVector);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
@@ -10758,7 +10758,7 @@ void effUpdateAimedClassResource(u8 *work) {
     VU0_MOVE_VF(vf10, vf12);
     VU0_MOVE_VF(vf29, vf10);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf28, vf10);
     VU0_LOAD_VF(vf31, effZeroVector);
     VU0_SET_W_ONE(vf31);
@@ -11061,19 +11061,19 @@ void effOrientClassResourceAlongTargetOffset(u8 *work) {
     VU0_LOAD_VF(vf10, target);
     VU0_LOAD_VF(vf11, origin);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_GETLENGTH(length);
     ((EffAimState *)state)->length = length;
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf12, vf10);
     VU0_LOAD_VF(vf11, effWorldUpVector);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf30, vf10);
     VU0_MOVE_VF(vf11, vf10);
     VU0_MOVE_VF(vf10, vf12);
     VU0_MOVE_VF(vf29, vf10);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_NORMALIZE();
     VU0_MOVE_VF(vf28, vf10);
     VU0_LOAD_VF(vf31, effZeroVector);
     VU0_SET_W_ONE(vf31);
@@ -11343,7 +11343,7 @@ void effSyncFadeColorToTargets(void) {
                     evtSetUnitColorA(target, 0, node->baseColor);
                 }
             }
-            node = node->nextActor;
+            node = node->next;
         }
     }
 }
@@ -11507,7 +11507,7 @@ void effDrawGrowingTexturedStrip(EffActiveResource *work) {
     VU0_STORE_VF_UNCLOBBERED(vf10, second);
     VU0_LOAD_VF(vf11, first);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(distance);
+    SDF_VU0_GETLENGTH(distance);
     distance *= config->lengthScale * config->scale;
     width = config->scale * 120.0f;
     ratio = (f32)frame / (f32)config->growFrames;
@@ -11689,11 +11689,11 @@ void effAdvanceActiveResourceCallbacks(EffActiveResource *work) {
 }
 
 void effCopyActiveResourceVector(EffActiveResource *dst, const void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effCopyActiveResourceSecondaryVector(EffActiveResource *dst, const void *src) {
-    PCP_COPY_VECTOR((u8 *)dst + 0x10, src);
+    SDF_VU0_COPYVECTOR((u8 *)dst + 0x10, src);
 }
 
 void effSetActiveResourceColor(EffActiveResource *work, u32 color) {
@@ -12739,12 +12739,12 @@ void func_002FB998(EffSharedEffectWork *work) {
 
 /* Copy the vector consumed by the retained model's primary-vector setter. */
 void effCopySharedEffectPrimaryVector(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 /* Copy the quaternion consumed when rebuilding the retained model's rotation basis. */
 void effCopySharedEffectQuaternion(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst + 1, src);
+    SDF_VU0_COPYVECTOR(dst + 1, src);
 }
 
 /* Store packed color for the retained model's masked broadcast. */
@@ -12788,7 +12788,7 @@ void effResetFileResourceStores(void) {
 }
 
 void effSetBattleOffset(void *src) {
-    PCP_COPY_VECTOR(effBattleOffset, src);
+    SDF_VU0_COPYVECTOR(effBattleOffset, src);
 }
 
 void effComputeBattleCameraPositionVU(u8 *effect) {
@@ -14061,7 +14061,7 @@ s32 effHandleDebugOrbitInput(void) {
     vector[3] = 0.0f;
     if (vector[0] != 0.0f || vector[2] != 0.0f) {
         VU0_LOAD_VF(vf10, vector);
-        VU0_LENGTH_VF10(length);
+        SDF_VU0_GETLENGTH(length);
         angle = 0.0f;
         if (dds3PadBitTable[5] & 2) {
             angle = (100.0f / length) * 0.08726646f;
@@ -14078,7 +14078,7 @@ s32 effHandleDebugOrbitInput(void) {
         } else {
             VU0_LOAD_VF(vf10, vector);
         }
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_NORMALIZE();
         VU0_STORE_VF(vf10, D_003FFCB0);
     }
     vector[0] += D_003FFCB0[0] * step;
@@ -14129,18 +14129,18 @@ s32 effUpdateCameraDiagnostics(EffectStateSnapshot *state, s8 mode) {
         }
     }
 
-    PCP_COPY_VECTOR(D_0045C2F0, state->position);
+    SDF_VU0_COPYVECTOR(D_0045C2F0, state->position);
     btlReturnDebugMenuSetupWord((u32)D_003FFC78);
     btlDebugMenuBeforeRecordNoOp();
     btlDebugMenuRecordNoOp((u32)D_003FFC78);
     btlDebugMenuAfterRecordNoOp();
-    PCP_COPY_VECTOR(state->position, D_0045C2F0);
+    SDF_VU0_COPYVECTOR(state->position, D_0045C2F0);
     if (D_003FFC78[4] & 8) {
         flags |= 2;
     }
     if ((flags & 2) && (state->flags & 0x18)) {
         camFollowOffsetVec((u8 *)state, vectors[0]);
-        PCP_COPY_VECTOR(state->position, vectors[0]);
+        SDF_VU0_COPYVECTOR(state->position, vectors[0]);
     }
 
     if (selectedMode != 0) {
@@ -14152,7 +14152,7 @@ s32 effUpdateCameraDiagnostics(EffectStateSnapshot *state, s8 mode) {
     }
     VU0_STORE_VF(vf10, vectors[1]);
     VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_GETLENGTH(length);
 
     VU0_LOAD_VF(vf10, effBattleOffset);
     if (selectedMode != 0) {
@@ -14307,7 +14307,7 @@ decreaseRoll:
         sampleRadius = sdfCos(angle) * 200.0f;
         if ((s8)D_00438758 == i) {
             radius = sampleRadius;
-            PCP_COPY_VECTOR(selected, point);
+            SDF_VU0_COPYVECTOR(selected, point);
             btlDebugDrawRadiusGuide(point, sampleRadius, 0x80004040, 0);
         } else {
             btlDebugDrawRadiusGuide(point, sampleRadius, 0x80404040, 0);
@@ -14322,8 +14322,8 @@ decreaseRoll:
     VU0_LOAD_VF(vf10, point);
     VU0_LOAD_VF(vf11, center);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_GETLENGTH(length);
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF_UNCLOBBERED(vf10, direction);
     if (flags & 2) {
         pitch = -acosf(-direction[1]);
@@ -14377,7 +14377,7 @@ u32 effUpdateCameraSnapshotGuides(EffectStateSnapshot *state, s8 useBattlePositi
         }
     }
 
-    PCP_COPY_VECTOR(D_0045C300, state->quat);
+    SDF_VU0_COPYVECTOR(D_0045C300, state->quat);
     if (useBattlePosition != 0) {
         effComputeBattleCameraPositionVU((u8 *)state);
     } else {
@@ -14390,7 +14390,7 @@ u32 effUpdateCameraSnapshotGuides(EffectStateSnapshot *state, s8 useBattlePositi
     btlDebugMenuBeforeRecordNoOp();
     btlDebugMenuRecordNoOp((u32)&D_003FFD08);
     btlDebugMenuAfterRecordNoOp();
-    PCP_COPY_VECTOR(state->quat, D_0045C300);
+    SDF_VU0_COPYVECTOR(state->quat, D_0045C300);
     if (D_003FFD08.flags & 8) {
         result |= 2;
     }
@@ -14465,9 +14465,9 @@ s32 effRunWithStateBackup(void) {
     f32 *backup = snapshot.position;
     s32 result;
 
-    PCP_COPY_VECTOR(backup, &effEditedQueueHeader);
+    SDF_VU0_COPYVECTOR(backup, &effEditedQueueHeader);
     result = effUpdateCameraDiagnostics(&snapshot, 0);
-    PCP_COPY_VECTOR(&effEditedQueueHeader, backup);
+    SDF_VU0_COPYVECTOR(&effEditedQueueHeader, backup);
     if (result & 1) {
         result |= 0x800000;
     }

@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "snd_track_playback_api.h"
 #include "kwln_background_fade_api.h"
 #include "snd_sequence_volume_pan.h"
@@ -2371,38 +2372,38 @@ extern void FromRotation(f32 angle);
 void evtRotateViewerPositionFromPad(f32 *position)
 {
     if (dds3PadButtonState.incOne != 0) {
-        EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
+        SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix + 1);
         FromRotation(2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, position);
-        VU0_TRANSFORM_POINT(vf10, vf10);
-        VU0_SET_W_ONE(vf10);
-        VU0_STORE_VF(vf10, position);
+        SDF_VU0_LOADVECTOR(position);
+        SDF_VU0_APPLYMATRIX_XYZ1();
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_STOREVECTOR(position);
     } else if (dds3PadButtonState.decOne != 0) {
-        EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
+        SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix + 1);
         FromRotation(-2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, position);
-        VU0_TRANSFORM_POINT(vf10, vf10);
-        VU0_SET_W_ONE(vf10);
-        VU0_STORE_VF(vf10, position);
+        SDF_VU0_LOADVECTOR(position);
+        SDF_VU0_APPLYMATRIX_XYZ1();
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_STOREVECTOR(position);
     }
     if (dds3PadButtonState.incTen != 0) {
-        EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix);
+        SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix);
         FromRotation(-2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, position);
-        VU0_TRANSFORM_POINT(vf10, vf10);
-        VU0_SET_W_ONE(vf10);
-        VU0_STORE_VF(vf10, position);
+        SDF_VU0_LOADVECTOR(position);
+        SDF_VU0_APPLYMATRIX_XYZ1();
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_STOREVECTOR(position);
     } else if (dds3PadButtonState.decTen != 0) {
-        EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix);
+        SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix);
         FromRotation(2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, position);
-        VU0_TRANSFORM_POINT(vf10, vf10);
-        VU0_SET_W_ONE(vf10);
-        VU0_STORE_VF(vf10, position);
+        SDF_VU0_LOADVECTOR(position);
+        SDF_VU0_APPLYMATRIX_XYZ1();
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_STOREVECTOR(position);
     }
 }
 
@@ -2468,7 +2469,7 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
         } else {
             selected = 0;
         }
-        VU0_LOAD_VF(vf10, &runtime->commandMatrix[4]);
+        SDF_VU0_LOADVECTOR(&runtime->commandMatrix[4]);
         sdfDrawTagLink(list, (u32)dds3PrimLine3D(
             (s32)(0x88C0u + ((u32)runtime->lightPanelOffset << 4)),
             0x7BD0, 0xFF0080, selected));
@@ -4718,8 +4719,8 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 }
                 {
                     dds3PoseSet_t *transform = group->info->inner;
-                    PCP_COPY_VECTOR(group->savedPosition, transform->position);
-                    PCP_COPY_VECTOR(group->savedRotation, transform->rotation);
+                    SDF_VU0_COPYVECTOR(group->savedPosition, transform->position);
+                    SDF_VU0_COPYVECTOR(group->savedRotation, transform->rotation);
                 }
             }
         }

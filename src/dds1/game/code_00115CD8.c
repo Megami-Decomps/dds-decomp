@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "fld_bill_config.h"
 #include "sdf_chip.h"
 #include "bill_object_api.h"
@@ -108,9 +109,9 @@ void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *object) {
         direction[1] = -dy;
         direction[2] = -value;
         direction[3] = 1.0f;
-        VU0_LOAD_VF(vf10, direction);
-        VU0_NORMALIZE_VF10();
-        VU0_STORE_VF(vf10, normalizedDirection);
+        SDF_VU0_LOADVECTOR(direction);
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(normalizedDirection);
         {
             dds3PoseSet_t *inner;
 

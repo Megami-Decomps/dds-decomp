@@ -517,7 +517,7 @@ s32 btlBothSidesActive(BtlUnit *unit) {
     }
     a = 0;
     b = 0;
-    for (actor = ((BtlState *)btlGetRuntime())->units; actor != 0; actor = actor->nextActor) {
+    for (actor = ((BtlState *)btlGetRuntime())->units; actor != 0; actor = actor->next) {
         if (actor->status.flags & 1) {
             if (!(actor->status.flags & 0xE0)) {
                 if (actor->status.flags & 0x200) {
@@ -571,7 +571,7 @@ s32 btlResolveBattleTerminalOutcome(void) {
             return 1;
         }
     }
-    for (unit = state->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = state->units; unit != NULL; unit = unit->next) {
         if ((btlUnitStatusPair(unit) & 0x4000000020ULL) == 0x20) {
             defeatedCount++;
         } else if (unit->status.flags & 1) {
@@ -694,7 +694,7 @@ s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlTargetResul
         }
     }
     count = 0;
-    for (actor = controller->units; actor != NULL; actor = actor->nextActor) {
+    for (actor = controller->units; actor != NULL; actor = actor->next) {
         if (actor->status.flags & 1) {
             if (actor->status.flags & 0xE0) {
                 continue;

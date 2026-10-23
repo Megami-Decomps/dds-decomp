@@ -9,7 +9,7 @@
  * moves into the jr delay slot). `.set noreorder` keeps ee-as from filling
  * the slot too, as for fsqrtf. The destination is operand 0 so its address is formed first.
  */
-#define PCP_COPY_VECTOR(dst, src) __asm__ volatile ( \
+#define SDF_VU0_COPYVECTOR(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tlq $2, 0(%1)\n\tsq $2, 0(%0)\n\t.set reorder" \
     : : "r" (dst), "r" (src) : "$2", "memory")
 
@@ -23,14 +23,14 @@ typedef struct {
  * four float elements; this is not an integer or opaque-byte copy API.
  * Address expressions must have no evaluation side effects. Identical
  * source/destination is allowed. Unrelated memory is not clobbered;
- * PCP_COPY_VECTOR retains its established global-barrier contract. */
+ * SDF_VU0_COPYVECTOR retains its established global-barrier contract. */
 #define PCP_COPY_VECTOR_F32(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tlq $2, 0(%2)\n\tsq $2, 0(%1)\n\t.set reorder" \
     : "=m" (*(PcpVectorCopyF32 *)(dst)) \
     : "r" (dst), "r" (src), "m" (*(const PcpVectorCopyF32 *)(src)) \
     : "$2")
 
-/* PCP_COPY_VECTOR with register operands only and no memory clobber: values
+/* SDF_VU0_COPYVECTOR with register operands only and no memory clobber: values
  * the caller loaded before the copy stay live across it (DDS2 0020CEF8 keeps
  * its toggle byte), and each address gets a single asm reference, so local
  * allocation colors the destination before the source. The caller must not
@@ -112,7 +112,7 @@ typedef struct {
 
 /* Load four quadwords into the second matrix bank vf24-vf27 (the right-hand
  * operand of the sdf matrix-multiply routines). */
-#define VU0_LOAD_MATRIX_B(src) __asm__ volatile ( \
+#define SDF_VU0_LOADMATRIX_B(src) __asm__ volatile ( \
     ".set noreorder\n\t" \
     "lqc2 vf24, 0(%0)\n\t" \
     "lqc2 vf25, 16(%0)\n\t" \
@@ -140,7 +140,7 @@ typedef struct {
     : : "r" (src), "m" (*(const PcpMatrixF32 *)(src)))
 
 /* Store the second matrix bank vf24-vf27 to four quadwords. */
-#define VU0_STORE_MATRIX_B(dst) __asm__ volatile ( \
+#define SDF_VU0_STOREMATRIX_B(dst) __asm__ volatile ( \
     ".set noreorder\n\t" \
     "sqc2 vf24, 0(%0)\n\t" \
     "sqc2 vf25, 16(%0)\n\t" \
@@ -287,7 +287,7 @@ typedef struct {
 /* vf28-vf31 = transpose of vf28-vf31, via the GPR quadword halves and the
  * pext/pcpy lane shuffles. DDS1 sdfTransposeVuTransform / DDS2
  * code_00335EE8; the rigid-inverse routine builds on this. */
-#define VU0_MATRIX4_TRANSPOSE() __asm__ volatile ( \
+#define SDF_VU0_TRANSMATRIX() __asm__ volatile ( \
     ".set noreorder\n\t" \
     "qmfc2.ni $8, vf28\n\tqmfc2.ni $9, vf29\n\tqmfc2.ni $10, vf30\n\tqmfc2.ni $11, vf31\n\t" \
     "pextlw $12, $9, $8\n\tpextuw $13, $9, $8\n\tpextlw $14, $11, $10\n\tpextuw $15, $11, $10\n\t" \
@@ -296,7 +296,7 @@ typedef struct {
     ".set reorder\n")
 /* vf28-vf31 = rigid inverse of itself: transpose the 3x3 and set the
  * translation row to -(R^T * t). The transpose uses vf0 (not vf31) as its
- * fourth source, which is what distinguishes it from VU0_MATRIX4_TRANSPOSE.
+ * fourth source, which is what distinguishes it from SDF_VU0_TRANSMATRIX.
  * DDS1 ReverseMatrix / DDS2 code_00335EE8. */
 #define VU0_MATRIX4_INVERT_RIGID() __asm__ volatile ( \
     ".set noreorder\n\t" \
@@ -399,7 +399,7 @@ typedef struct {
 #define VU0_CLIPW_XYZ_WAIT2(vf) __asm__ volatile ( \
     ".set noreorder\n\tvnop\n\tvnop\n\tvclipw.xyz " #vf ", " #vf "w\n\t.set reorder")
 /* vf10 /= vf10.w, then w = 1: the perspective divide after a point transform. */
-#define VU0_PERSPECTIVE_DIVIDE_VF10() __asm__ volatile ( \
+#define SDF_VU0_PERSVECTOR() __asm__ volatile ( \
     ".set noreorder\n\tvdiv Q, vf0w, vf10w\n\tvmove.w vf10, vf0\n\tvwaitq\n\t" \
     "vmulq.xyzw vf10, vf10, Q\n\t.set reorder")
 /* Scale the rows of the primary matrix by src.xyz (vf28 *= x, vf29 *= y, vf30 *= z). */
@@ -440,13 +440,13 @@ typedef struct {
  *   vmul.xyz vf2,vf10,vf10; vaddy.x vf2,vf2,vf2y; vaddz.x vf2,vf2,vf2z;
  *   vsqrt Q,vf2x; vwaitq; cfc2.ni $2,vi22; mtc1 $2,out
  * $2 is declared clobbered, as in the matched blocks this replaces. */
-#define VU0_LENGTH_VF10(out) __asm__ volatile ( \
+#define SDF_VU0_GETLENGTH(out) __asm__ volatile ( \
     ".set noreorder\n\tvmul.xyz vf2, vf10, vf10\n\tvaddy.x vf2, vf2, vf2y\n\t" \
     "vaddz.x vf2, vf2, vf2z\n\tvsqrt Q, vf2x\n\tvwaitq\n\tcfc2.ni $2, $vi22\n\t" \
     "mtc1 $2, %0\n\t.set reorder" \
     : "=f" (out) : : "$2")
 /* Read the accumulated VU0 clip flags from vi18 into a typed integer lvalue. */
-#define VU0_READ_CLIP_FLAGS(out) __asm__ volatile ( \
+#define SDF_VU0_GETCLIPFLAG(out) __asm__ volatile ( \
     ".set noreorder\n\tcfc2.ni %0, $vi18\n\t.set reorder" \
     : "=r" (out))
 /* Reads with the explicit VU pipeline latency used by SDK-expanded clip
@@ -454,13 +454,13 @@ typedef struct {
 #define VU0_READ_CLIP_FLAGS_WAIT1(out) __asm__ volatile ( \
     ".set noreorder\n\tvnop\n\tcfc2.ni %0, $vi18\n\t.set reorder" \
     : "=r" (out))
-#define VU0_READ_CLIP_FLAGS_WAIT5(out) __asm__ volatile ( \
+#define SDF_VU0_CLIPTESTWAIT(out) __asm__ volatile ( \
     ".set noreorder\n\tvnop\n\tvnop\n\tvnop\n\tvnop\n\tvnop\n\tcfc2.ni %0, $vi18\n\t.set reorder" \
     : "=r" (out))
 /* vf10 = vf10 / |vf10.xyz| (w untouched):
  *   vmul.xyz vf2,vf10,vf10; vmulax.w ACC,vf0,vf2x; vmadday.w ACC,vf0,vf2y;
  *   vmaddz.w vf2,vf0,vf2z; vrsqrt Q,vf0w,vf2w; vwaitq; vmulq.xyz vf10,vf10,Q */
-#define VU0_NORMALIZE_VF10() __asm__ volatile ( \
+#define SDF_VU0_NORMALIZE() __asm__ volatile ( \
     ".set noreorder\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\t" \
     "vmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\t" \
     "vwaitq\n\tvmulq.xyz vf10, vf10, Q\n\t.set reorder")
@@ -470,7 +470,7 @@ typedef struct {
 /* out = a . b (xyz dot product) as a C float:
  *   vmul.xyz vf2,a,b; vaddy.x vf2,vf2,vf2y; vaddz.x vf2,vf2,vf2z;
  *   qmfc2.ni $2,vf2; mtc1 $2,out
- * $2 is declared clobbered, like VU0_LENGTH_VF10. */
+ * $2 is declared clobbered, like SDF_VU0_GETLENGTH. */
 #define VU0_DOT_XYZ(out, a, b) __asm__ volatile ( \
     ".set noreorder\n\tvmul.xyz vf2, " #a ", " #b "\n\tvaddy.x vf2, vf2, vf2y\n\t" \
     "vaddz.x vf2, vf2, vf2z\n\tqmfc2.ni $2, vf2\n\tmtc1 $2, %0\n\t.set reorder" \
@@ -551,7 +551,7 @@ typedef struct {
     "lqc2 vf23, 0x80(%2)\n\tvaddz.x vf23, vf23, vf2z\n\t.set reorder" \
     : : "r" (bias), "r" (eye), "r" (projection))
 
-#define VU0_MOVE_MATRIX_TO_B() __asm__ volatile ( \
+#define SDF_VU0_COPYMATRIX_A_TO_B() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf24, vf28\n\tvmove.xyzw vf25, vf29\n\t" \
     "vmove.xyzw vf26, vf30\n\tvmove.xyzw vf27, vf31\n\t.set reorder")
 /* A quadword between a VU0 register and a C lvalue (the "m" operand form,
@@ -611,16 +611,16 @@ typedef struct {
  *   y: qmfc2.ni $2,vf10; prot3w $2,$2; mtc1 $2,out   (prot3w rotates y into word 0)
  *   z: qmfc2.ni $2,vf10; pexew $2,$2; mtc1 $2,out    (pexew swaps words 0 and 2)
  *   w: vaddw.x vf2,vf0,vf10w; qmfc2.ni $2,vf2; mtc1 $2,out */
-#define VU0_GET_VF10_X(out) __asm__ volatile ( \
+#define SDF_VU0_GETVECTOR_X(out) __asm__ volatile ( \
     ".set noreorder\n\tqmfc2.ni $2, vf10\n\tmtc1 $2, %0\n\t.set reorder" \
     : "=f" (out) : : "$2")
-#define VU0_GET_VF10_Y(out) __asm__ volatile ( \
+#define SDF_VU0_GETVECTOR_Y(out) __asm__ volatile ( \
     ".set noreorder\n\tqmfc2.ni $2, vf10\n\tprot3w $2, $2\n\tmtc1 $2, %0\n\t.set reorder" \
     : "=f" (out) : : "$2")
-#define VU0_GET_VF10_Z(out) __asm__ volatile ( \
+#define SDF_VU0_GETVECTOR_Z(out) __asm__ volatile ( \
     ".set noreorder\n\tqmfc2.ni $2, vf10\n\tpexew $2, $2\n\tmtc1 $2, %0\n\t.set reorder" \
     : "=f" (out) : : "$2")
-#define VU0_GET_VF10_W(out) __asm__ volatile ( \
+#define SDF_VU0_GETVECTOR_W(out) __asm__ volatile ( \
     ".set noreorder\n\tvaddw.x vf2, vf0, vf10w\n\tqmfc2.ni $2, vf2\n\tmtc1 $2, %0\n\t.set reorder" \
     : "=f" (out) : : "$2")
 /* One component of vf10 set from a C float: the broadcast through vf2x of
@@ -649,7 +649,7 @@ typedef struct {
  * broadcast: vmul.xyz per row). This is the model root scale application
  * both games spell out (DDS1/DDS2 sdfModelEvalTm2); it differs
  * from VU0_SCALE_MATRIX_ROWS, which broadcasts one component per row. */
-#define VU0_MUL_MATRIX_ROWS_VF10() __asm__ volatile ( \
+#define SDF_VU0_SCALE_XYZ_REV() __asm__ volatile ( \
     ".set noreorder\n\tvmul.xyz vf28, vf28, vf10\n\tvmul.xyz vf29, vf29, vf10\n\t" \
     "vmul.xyz vf30, vf30, vf10\n\t.set reorder" \
     : : : "memory")

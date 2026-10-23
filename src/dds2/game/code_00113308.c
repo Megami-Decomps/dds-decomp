@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "mdl.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_trig.h"
 #include "sdf_model.h"
@@ -106,7 +107,7 @@ void effObjStepFollowAngleTowardPosition(dds3Basic_t *obj, const f32 *targetPosi
     f32 step;
 
     dds3GetPosPoseSet(obj);
-    VU0_STORE_VF(vf10, position);
+    SDF_VU0_STOREVECTOR(position);
     if (position[0] == targetPosition[0] &&
         position[2] == targetPosition[2]) {
         return;
@@ -287,36 +288,36 @@ s32 effUpdateFollowModelTransform(dds3Basic_t *obj) {
                 flag = 1;
             }
         }
-        VU0_LOAD_VF(vf10, &obj->inner->scale[0]);
+        SDF_VU0_LOADVECTOR(&obj->inner->scale[0]);
         if (data->transitionWork != 0 && flag != 0) {
-            VU0_MOVE_VF(vf11, vf10);
-            VU0_MOVE_VF(vf10, vf0);
-            VU0_CLEAR_W(vf10);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_LOADIDENTITYVECTOR();
+            SDF_VU0_VECTOR_W_SET_ZERO();
             VU0_SCALAR_OP_CLOBBER(sdfSin(data->transitionWork->wobblePhase) * 0.01f, "vaddx.x vf10, vf0, vf2x");
             VU0_SCALAR_OP_CLOBBER(sdfSin(data->transitionWork->wobblePhase) * 0.004f, "vaddx.y vf10, vf0, vf2x");
-            VU0_MUL(vf10, vf10, vf11);
-            VU0_ADD(vf10, vf10, vf11);
+            SDF_VU0_MULVECTOR();
+            SDF_VU0_ADDVECTOR();
         }
         mdlSetScale(model);
-        VU0_LOAD_VF(vf10, &obj->inner->rotation[0]);
+        SDF_VU0_LOADVECTOR(&obj->inner->rotation[0]);
         Normalize();
         if (data->transitionWork != 0 && flag != 0) {
-            VU0_MOVE_VF(vf11, vf10);
-            VU0_LOAD_VF(vf10, &axis);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_LOADVECTOR(&axis);
             FromRotation(sdfSin(data->transitionWork->wobblePhase) * 0.006f);
             effMiscQuatMultiplyVU();
         }
         if (data->word18 & 1) {
-            VU0_LOAD_VF(vf11, &D_004128A0);
+            SDF_VU0_LOADVECTOR_B(&D_004128A0);
             effMiscQuatMultiplyVU();
         }
         mdlSetRotate(model);
         if (dds3CheckPoseSetFlag(obj->inner, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION)) {
-            VU0_LOAD_VF(vf10, &obj->inner->smoothedPosition[0]);
-            VU0_SET_W_ONE(vf10);
+            SDF_VU0_LOADVECTOR(&obj->inner->smoothedPosition[0]);
+            SDF_VU0_VECTOR_W_SET_ONE();
         } else {
-            VU0_LOAD_VF(vf10, &obj->inner->position[0]);
-            VU0_SET_W_ONE(vf10);
+            SDF_VU0_LOADVECTOR(&obj->inner->position[0]);
+            SDF_VU0_VECTOR_W_SET_ONE();
         }
         mdlSetPosition(model);
         dds3SetRadiusPoseSet(obj->inner);
@@ -379,7 +380,7 @@ s32 dds3UpdateEffectObjectFollowParameters(dds3Basic_t *obj) {
     }
     pickMode = dds3ObjectBaseCheckFlag(obj, 0x8000) != 0;
     if (sdfModelGetMarkPos(target->owner->inner, 0)) {
-        VU0_STORE_VF(vf10, vec);
+        SDF_VU0_STOREVECTOR(vec);
         vec[1] = pickMode == 1 ? target->shadowY : obj->inner->position[1];
         fldDrawShadowDisc(vec[0], vec[1], vec[2], obj->inner->radius, level);
     } else {
@@ -705,7 +706,7 @@ s32 effUpdateFadingModelTransform(dds3Basic_t *object) {
     if (model != NULL) {
         dds3OffPoseSetFlag(object->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
         dds3GetRotPoseSet(object);
-        VU0_STORE_VF(vf10, model->rotationQuaternion);
+        SDF_VU0_STOREVECTOR(model->rotationQuaternion);
         dds3GetTMPoseSet(object);
         dds3GetPosPoseSet(object);
         if (fldStepActorMotionByKey(object->key, &coordinates[0], &coordinates[1], &coordinates[2]) != 0) {
@@ -722,7 +723,7 @@ s32 effUpdateFadingModelTransform(dds3Basic_t *object) {
             inner->position[1] = data->offset[1] + data->position[1];
             inner->position[2] = data->offset[2] + data->position[2];
         }
-        VU0_MOVE_VF(vf31, vf10);
+        SDF_VU0_SET_ROW3();
         VU0_STORE_MATRIX(model->matrix);
         dds3SetRadiusPoseSet(inner);
         sdfModelEvalTm(model);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu0.h"
 #include "btl.h"
 #include "eff_field_color.h"
 #include "pcp_vu0.h"
@@ -65,16 +66,16 @@ void effBTLFieldColorGetBaseColor(s32 colorId, s16 variant, s16 kind, f32 *outpu
 
     if ((u16)index >= 40 || kind <= 0 || kind >= 11) {
         printf("effBTLFieldColorGetBaseColor:DummyColorLoad\n");
-        VU0_LOAD_VF(vf10, D_003AF1B0);
+        SDF_VU0_LOADVECTOR(D_003AF1B0);
     } else {
-        VU0_LOAD_VF(vf10, D_003AD890[(index * 10) + kind - 1]);
+        SDF_VU0_LOADVECTOR(D_003AD890[(index * 10) + kind - 1]);
     }
     scaled[1] = D_003AB060[colorId].channelScales[1];
     scaled[2] = D_003AB060[colorId].channelScales[2];
     scaled[3] = D_003AB060[colorId].channelScales[3];
-    VU0_LOAD_VF(vf11, scaled);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, scaled);
+    SDF_VU0_LOADVECTOR_B(scaled);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_STOREVECTOR(scaled);
     output[0] = scaled[1];
     output[1] = scaled[2];
     output[2] = scaled[3];

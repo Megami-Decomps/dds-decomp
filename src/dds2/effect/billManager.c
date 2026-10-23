@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "sdf_gs_header.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "kwln_draw_buffer.h"
 #include "kwln_frame_draw_buffer.h"
 #include "bill_state_packet.h"
@@ -74,18 +75,18 @@ void dds3BillboardTagLink(billHandle_t *obj, BillChildPayload *child) {
             sdfTexGetPacketLength(child->texture));
         sdfAppendReferencePacket(child->pendingLists[selected], packet);
         if ((u16)(child->variant & 1) != 0) {
-            VU0_LOAD_VF(vf10, aViewTarget);
-            VU0_LOAD_VF(vf11, sdfViewTargetVector);
-            VU0_SUB(vf10, vf10, vf11);
-            VU0_NORMALIZE_VF10();
-            VU0_LOAD_VF(vf11, billChildFacingReferenceAxis);
-            VU0_DOT_XYZ(dot, vf10, vf11);
+            SDF_VU0_LOADVECTOR(aViewTarget);
+            SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_LOADVECTOR_B(billChildFacingReferenceAxis);
+            SDF_VU0_INNERPRODUCT(dot);
             dds3BillboardTagParam[1] = 1.0 - fabs(dot);
-            VU0_STORE_VF(vf10, direction);
-            VU0_MOVE_VF_EXTENDED(vf11, vf10);
-            VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
-            VU0_LOAD_VF_MEMORY(vf10, dds3BillboardTagParam);
-            VU0_SCALE_MATRIX_ROWS(vf10);
+            SDF_VU0_STOREVECTOR(direction);
+            SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED();
+            SDF_VU0_LOADIDENTITY();
+            SDF_VU0_LOADVECTOR_BARRIER(dds3BillboardTagParam);
+            SDF_VU0_SCALE_XYZ();
             VU0_STORE_MATRIX(matrix);
         } else {
             EE_MMI_UNIT_MATRIX(matrix);
@@ -100,7 +101,7 @@ void dds3BillboardTagLink(billHandle_t *obj, BillChildPayload *child) {
     }
     work = child->work;
     index = work->count;
-    PCP_COPY_VECTOR(work->positions[index], obj->position);
+    SDF_VU0_COPYVECTOR(work->positions[index], obj->position);
     work->colors[index] = obj->childParam;
     memcpy(&work->uv[index], &child->uv, sizeof(child->uv));
     x = child->x * obj->childScaleX;
@@ -261,18 +262,18 @@ void billAppendPairedQuadEntry(billHandle_t *obj, BillRenderPair *node) {
         sdfAppendReferencePacket(node->packetList, packet);
         geometry = (u8 *)sdfGrAllocPacketBuff(0x38);
         if (node->cameraFacingMode == 1) {
-            VU0_LOAD_VF(vf10, aViewTarget);
-            VU0_LOAD_VF(vf11, sdfViewTargetVector);
-            VU0_SUB(vf10, vf10, vf11);
-            VU0_NORMALIZE_VF10();
-            VU0_LOAD_VF(vf11, billPairFacingReferenceAxis);
-            VU0_DOT_XYZ(dot, vf10, vf11);
+            SDF_VU0_LOADVECTOR(aViewTarget);
+            SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_LOADVECTOR_B(billPairFacingReferenceAxis);
+            SDF_VU0_INNERPRODUCT(dot);
             billPairFacingScale[1] = 1.0 - fabs(dot);
-            VU0_STORE_VF(vf10, direction);
-            VU0_MOVE_VF_EXTENDED(vf11, vf10);
-            VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
-            VU0_LOAD_VF_MEMORY(vf10, billPairFacingScale);
-            VU0_SCALE_MATRIX_ROWS(vf10);
+            SDF_VU0_STOREVECTOR(direction);
+            SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED();
+            SDF_VU0_LOADIDENTITY();
+            SDF_VU0_LOADVECTOR_BARRIER(billPairFacingScale);
+            SDF_VU0_SCALE_XYZ();
             VU0_STORE_MATRIX(matrix);
         } else {
             EE_MMI_UNIT_MATRIX(matrix);
@@ -342,7 +343,7 @@ void billAppendPairedQuadEntry(billHandle_t *obj, BillRenderPair *node) {
         work->offsets[index][6] = cornerX * cosine - cornerY * sine;
         work->offsets[index][7] = cornerX * sine + cornerY * cosine;
     }
-    PCP_COPY_VECTOR(work->positions[index], obj->position);
+    SDF_VU0_COPYVECTOR(work->positions[index], obj->position);
     work->count++;
     if (work->count == 7) {
         dds3MultiBillboardPktLink(node);
@@ -588,10 +589,10 @@ u32 dds3Billboard_P2AColorMul(u32 colorA, u32 colorB) {
     u32 unit = 0x3C000000;
     color1[0] = colorA;
     EE_MMI_RGBA_UNPACK(color1, unit);
-    VU0_MOVE_VF(vf11, vf10);
+    SDF_VU0_COPYVECTOR_A_TO_B();
     color2[0] = colorB;
     EE_MMI_RGBA_UNPACK(color2, unit);
-    VU0_MUL(vf10, vf10, vf11);
+    SDF_VU0_MULVECTOR();
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     return blended[0];

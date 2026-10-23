@@ -13,6 +13,7 @@
 #include "pcp_vu0.h"
 #include "common.h"
 #include "dds3_object_flags.h"
+#include "sdf_vu0.h"
 #include "eff_inner_float_api.h"
 #include "sdf_trig.h"
 #include "sdf_vu_matrix.h"
@@ -929,11 +930,11 @@ void fldRebuildFieldScene(void) {
             }
         } else if (sceneWork->primaryState == 1) {
             transform = (f32 *)&sceneWork->position;
-            VU0_LOAD_VF(vf10, axis);
+            SDF_VU0_LOADVECTOR(axis);
             FromRotation(3.14159265f);
-            VU0_LOAD_VF(vf11, transform + 4);
+            SDF_VU0_LOADVECTOR_B(transform + 4);
             effMiscQuatMultiplyVU();
-            VU0_STORE_VF(vf10, transform + 4);
+            SDF_VU0_STOREVECTOR(transform + 4);
         }
         fldPreparePlayerAndCameraScene((u128 *)transform);
         fldPreparePlayerSceneCameraTarget();
@@ -1071,9 +1072,9 @@ void fldTogglePlayerModel(void) {
         {
             sceneWork = &fldSceneParam;
             dds3GetPosPoseSet(player);
-            VU0_STORE_VF_UNCLOBBERED(vf10, &sceneWork->position);
+            SDF_VU0_STOREVECTOR_NOMEM(&sceneWork->position);
             dds3GetRotPoseSet(player);
-            VU0_STORE_VF_UNCLOBBERED(vf10, &sceneWork->rotation);
+            SDF_VU0_STOREVECTOR_NOMEM(&sceneWork->rotation);
         }
         dds3DeleteUnitObjectBasic(fldPlayerObject);
         fldUnloadPlayerModel();
@@ -1082,16 +1083,16 @@ void fldTogglePlayerModel(void) {
          * rather than merging snapshot HIGH/base/+16 in local-alloc. */
         sceneWork = &fldSceneParam;
         fldGlobalBase.playerModelAlternate ^= 1;
-        VU0_LOAD_VF(vf10, &axis);
+        SDF_VU0_LOADVECTOR(&axis);
         FromRotation(3.1415926f);
-        VU0_LOAD_VF(vf11, &sceneWork->rotation);
+        SDF_VU0_LOADVECTOR_B(&sceneWork->rotation);
         effMiscQuatMultiplyVU();
-        VU0_STORE_VF_UNCLOBBERED(vf10, &sceneWork->rotation);
-        VU0_LOAD_VF(vf10, &axis);
+        SDF_VU0_STOREVECTOR_NOMEM(&sceneWork->rotation);
+        SDF_VU0_LOADVECTOR(&axis);
         FromRotation(3.1415926f);
-        VU0_LOAD_VF(vf11, &sceneWork->rotation);
+        SDF_VU0_LOADVECTOR_B(&sceneWork->rotation);
         effMiscQuatMultiplyVU();
-        VU0_STORE_VF_UNCLOBBERED(vf10, work);
+        SDF_VU0_STOREVECTOR_NOMEM(work);
     }
     fldPlayerObject = dds3AddUnitObjectBasic(dds3AllocObjectId(), sceneWork, work);
     dds3SetUnitObjectId(fldPlayerObject, (u32)D_0039FC50);
@@ -1155,9 +1156,9 @@ void fldReleasePlayerSceneResources(void) {
         if (dds3GetControlScene() != 0) {
             sceneWork = &fldSceneParam;
             dds3GetPosPoseSet(fldPlayerObject);
-            VU0_STORE_VF(vf10, &sceneWork->position);
+            SDF_VU0_STOREVECTOR(&sceneWork->position);
             dds3GetRotPoseSet(fldPlayerObject);
-            VU0_STORE_VF(vf10, &sceneWork->rotation);
+            SDF_VU0_STOREVECTOR(&sceneWork->rotation);
         }
         fldPlayerObject = 0;
         fldPlayerModelContext = 0;
@@ -1210,7 +1211,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
     fldGlobalBase.unk94 = -1;
     fldUpdateCameraTarget();
     dds3GetPosPoseSet(fldPlayerObject);
-    VU0_STORE_VF(vf10, position);
+    SDF_VU0_STOREVECTOR(position);
     position[1] += 10.0f;
     fldRefreshAreaStateFromPosition(position);
 }
@@ -1296,12 +1297,12 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
     quaternion.w = 1.0f;
     axis = D_0039FC60;
     scale = D_0039FC70;
-    VU0_LOAD_VF(vf10, &axis);
+    SDF_VU0_LOADVECTOR(&axis);
     rotation = transform + 1;
     FromRotation(3.1415926f);
-    VU0_LOAD_VF(vf11, rotation);
+    SDF_VU0_LOADVECTOR_B(rotation);
     effMiscQuatMultiplyVU();
-    VU0_STORE_VF(vf10, &quaternion);
+    SDF_VU0_STOREVECTOR(&quaternion);
     object = fldPlayerObject;
     if (object == 0) {
         object = dds3AddUnitObjectBasic(dds3AllocObjectId(), transform, &quaternion);
@@ -1316,9 +1317,9 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
         object = fldPlayerObject;
     } else {
         dds3PoseSet_t *inner = object->inner;
-        PCP_COPY_VECTOR(inner->position, transform);
-        PCP_COPY_VECTOR(inner->smoothedPosition, transform);
-        PCP_COPY_VECTOR(inner->rotation, rotation);
+        SDF_VU0_COPYVECTOR(inner->position, transform);
+        SDF_VU0_COPYVECTOR(inner->smoothedPosition, transform);
+        SDF_VU0_COPYVECTOR(inner->rotation, rotation);
     }
     dds3SetPosPoseSet(object, transform);
     dds3SetRotPoseSet(fldPlayerObject, (u128 *)&quaternion);
@@ -1651,16 +1652,16 @@ s32 fldUpdateTravelAndEncounters(void) {
     if (!player) return 0;
 
     dds3GetPosPoseSet(player);
-    VU0_LOAD_VF(vf11, previousPosition);
-    VU0_STORE_VF_UNCLOBBERED(vf10, previousPosition);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(distance);
+    SDF_VU0_LOADVECTOR_B(previousPosition);
+    SDF_VU0_STOREVECTOR_NOMEM(previousPosition);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(distance);
     if (distance < 0.2f) distance = 0.0f;
     fldGlobalBase.frameTravelDistance = distance;
     previousPhase = evtGetAgeOfMoon16();
     if (fldGlobalBase.cameraTargetGraceTicks > 0) {
         dds3GetPosPoseSet(player);
-        VU0_STORE_VF_UNCLOBBERED(vf10, previousPosition);
+        SDF_VU0_STOREVECTOR_NOMEM(previousPosition);
         fldGlobalBase.frameTravelDistance = 0.0f;
         return 0;
     }

@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_model_packet_callback.h"
 #include "sdf_measure_command.h"
 #include "sdf_asset_packets.h"
@@ -256,9 +257,9 @@ void sdfModelLinkDrawPacket(sdfModelNode_t *node, u32 *commandList,
 
 /* Build the local rotation basis and append its translation as the fourth row. */
 void sdfModelMakeLocalTm(sdfModelNode_t *node) {
-    VU0_LOAD_VF(vf10, node->quaternion);
+    SDF_VU0_LOADVECTOR(node->quaternion);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf31, node->translation);
+    SDF_VU0_LOAD_ROW3(node->translation);
     VU0_STORE_MATRIX(node->localMatrix);
 }
 
@@ -267,9 +268,9 @@ void sdfModelNodeBaseSet(sdfModelNode_t *node, SdfItem *item) {
     node->sourceItem = item;
     node->nodeId = item->nodeId;
     sdfConvertEulerAnglesToQuaternionVU(item->rotationX, item->rotationY, item->rotationZ);
-    VU0_STORE_VF(vf10, node->quaternion);
-    PCP_COPY_VECTOR(node->translation, &item->translation);
-    PCP_COPY_VECTOR(node->scale, &item->scale);
+    SDF_VU0_STOREVECTOR(node->quaternion);
+    SDF_VU0_COPYVECTOR(node->translation, &item->translation);
+    SDF_VU0_COPYVECTOR(node->scale, &item->scale);
     node->translation[3] = 1.0f;
     sdfModelMakeLocalTm(node);
     node->boundsCorners = item->boundsCorners;
@@ -432,17 +433,17 @@ void sdfModelEvalNode(sdfModelNode_t *drawNode, const f32 (*parentMatrix)[4], s3
     u8 *workspace;
     sdfModelNode_t *child;
 
-    VU0_LOAD_VF_MEMORY(vf28, xAxis);
+    SDF_VU0_LOAD_ROW0_BARRIER(xAxis);
     yAxis = drawNode->localMatrix[1];
-    VU0_LOAD_VF_MEMORY(vf29, yAxis);
+    SDF_VU0_LOAD_ROW1_BARRIER(yAxis);
     zAxis = drawNode->localMatrix[2];
-    VU0_LOAD_VF_MEMORY(vf30, zAxis);
+    SDF_VU0_LOAD_ROW2_BARRIER(zAxis);
     scale = drawNode->scale;
-    VU0_LOAD_VF_MEMORY(vf10, scale);
-    VU0_SCALE_MATRIX_ROWS(vf10);
+    SDF_VU0_LOADVECTOR_BARRIER(scale);
+    SDF_VU0_SCALE_XYZ();
     translation = drawNode->translation;
-    VU0_LOAD_VF_MEMORY(vf31, translation);
-    VU0_LOAD_MATRIX_B(parentMatrix);
+    SDF_VU0_LOAD_ROW3_BARRIER(translation);
+    SDF_VU0_LOADMATRIX_B(parentMatrix);
     MultMatrixRevNoArg();
     transformed = drawNode->worldMatrix;
     VU0_STORE_MATRIX(transformed);
@@ -469,8 +470,8 @@ void sdfModelEvalTm2(sdfModelRootNode_t *model, s32 frame) {
 
     VU0_LOAD_MATRIX(transform);
     scale = model->scaleVector;
-    VU0_LOAD_VF_MEMORY(vf10, scale);
-    VU0_MUL_MATRIX_ROWS_VF10();
+    SDF_VU0_LOADVECTOR_BARRIER(scale);
+    SDF_VU0_SCALE_XYZ_REV();
     VU0_STORE_MATRIX_M(rootMatrix[0], rootMatrix[1], rootMatrix[2], rootMatrix[3]);
     list = model->list;
     sdfModelEvalNode(((sdfModelNode_t **)list->buffer)[0], (const f32 (*)[4])rootMatrix, frame);
@@ -597,8 +598,8 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, sdfModelRootNode_t
             sdfModelCheckBounds(node->boundsCorners) != 0) {
             continue;
         }
-        VU0_MOVE_VF(vf10, vf31);
-        VU0_GET_VF10_W(depth);
+        SDF_VU0_GET_ROW3();
+        SDF_VU0_GETVECTOR_W(depth);
 
         color = modelColor;
         if (node->flags & SDF_DRAW_NODE_FLAG_USE_NODE_COLOR) {

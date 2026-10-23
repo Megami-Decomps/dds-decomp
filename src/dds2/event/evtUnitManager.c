@@ -4,6 +4,7 @@ struct EffNodeDescriptor;
 
 #include "common.h"
 #include "dds3_object_flags.h"
+#include "sdf_vu0.h"
 #include "btl_model_record.h"
 #include "sdf_model_scalars.h"
 #include "sdf_motion.h"
@@ -56,14 +57,14 @@ f32 GetSplineLength(dds3PathBasicControl_t *path) {
     dds3PathBasicControlSetRatio(&path->counter, 0.0f);
     dds3PathBasicControlGetPos(path);
     do {
-        VU0_MOVE_VF(vf11, vf10);
+        SDF_VU0_COPYVECTOR_A_TO_B();
         dds3PathBasicControlSetRatio(&path->counter, t);
         dds3PathBasicControlGetPos(path);
-        VU0_MOVE_VF(vf12, vf10);
-        VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(segmentLength);
+        SDF_VU0_COPYVECTOR_A_TO_C();
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_GETLENGTH(segmentLength);
         length += segmentLength;
-        VU0_MOVE_VF(vf10, vf12);
+        SDF_VU0_COPYVECTOR_C_TO_A();
         t += step;
     } while (t <= 1.0f);
     dds3PathBasicControlSetRatio(&path->counter, savedScaleFactor);
@@ -118,12 +119,12 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         factor = unit->rgbDuration ? (f32)unit->rgbElapsed / unit->rgbDuration : 1.0f;
         rgbTarget[0] = unit->color64;
         EE_MMI_RGBA_UNPACK_READONLY(rgbTarget, 0.0078125f);
-        VU0_MOVE_VF(vf11, vf10);
+        SDF_VU0_COPYVECTOR_A_TO_B();
         rgbSource[0] = unit->color60;
         EE_MMI_RGBA_UNPACK_READONLY(rgbSource, 0.0078125f);
         VU0_SCALE_VF(vf10, 1.0f - factor);
         VU0_SCALE_VF(vf11, factor);
-        VU0_ADD(vf10, vf10, vf11);
+        SDF_VU0_ADDVECTOR();
         oldColor = mdlGetColor((dds3ModelHandle_t *)unit->owner);
         EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
         rgbResult[0] = packed;
@@ -140,12 +141,12 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         factor = unit->alphaDuration ? (f32)unit->alphaElapsed / unit->alphaDuration : 1.0f;
         alphaTarget[0] = unit->color64;
         EE_MMI_RGBA_UNPACK_READONLY(alphaTarget, 0.0078125f);
-        VU0_MOVE_VF(vf11, vf10);
+        SDF_VU0_COPYVECTOR_A_TO_B();
         alphaSource[0] = unit->color60;
         EE_MMI_RGBA_UNPACK_READONLY(alphaSource, 0.0078125f);
         VU0_SCALE_VF(vf10, 1.0f - factor);
         VU0_SCALE_VF(vf11, factor);
-        VU0_ADD(vf10, vf10, vf11);
+        SDF_VU0_ADDVECTOR();
         oldColor = mdlGetColor((dds3ModelHandle_t *)unit->owner);
         EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
         alphaResult[0] = packed;
@@ -189,11 +190,11 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
             if (!sdfModelGetMarkPos(unit->owner->inner, 0)) {
                 mdlGetPosition(unit->owner);
             }
-            VU0_STORE_VF_UNCLOBBERED(vf10, position);
-            VU0_LOAD_VF(vf11, unit->currentTransitionTarget->inner->position);
-            VU0_SUB(vf10, vf10, vf11);
-            VU0_STORE_VF_UNCLOBBERED(vf10, targetDirection);
-            VU0_LENGTH_VF10(distance);
+            SDF_VU0_STOREVECTOR_NOMEM(position);
+            SDF_VU0_LOADVECTOR_B(unit->currentTransitionTarget->inner->position);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_STOREVECTOR_NOMEM(targetDirection);
+            SDF_VU0_GETLENGTH(distance);
             if (distance <= target->nearDistance) {
                 currentWeight = 1.0f;
             } else if (distance >= target->farDistance) {
@@ -204,11 +205,11 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
             }
             if (previous) {
                 f32 previousDistance;
-                VU0_LOAD_VF(vf10, position);
-                VU0_LOAD_VF(vf11, unit->previousTransitionTarget->inner->position);
-                VU0_SUB(vf10, vf10, vf11);
-                VU0_STORE_VF_UNCLOBBERED(vf10, previousDirection);
-                VU0_LENGTH_VF10(previousDistance);
+                SDF_VU0_LOADVECTOR(position);
+                SDF_VU0_LOADVECTOR_B(unit->previousTransitionTarget->inner->position);
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_STOREVECTOR_NOMEM(previousDirection);
+                SDF_VU0_GETLENGTH(previousDistance);
                 if (previousDistance <= previous->nearDistance) {
                     previousWeight = 1.0f;
                 } else if (previousDistance >= previous->farDistance) {
@@ -218,9 +219,9 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
                         (previous->farDistance - previous->nearDistance);
                 }
             }
-            VU0_LOAD_VF(vf10, targetDirection);
+            SDF_VU0_LOADVECTOR(targetDirection);
             if (target->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
-                VU0_STORE_VF_UNCLOBBERED(vf10, target->direction);
+                SDF_VU0_STOREVECTOR_NOMEM(target->direction);
                 flags = unit->flags;
                 ownVector = 1;
             } else {
@@ -259,23 +260,23 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         } else {
             factor = 1.0f;
         }
-        VU0_LOAD_VF(vf10, unit->vec20);
+        SDF_VU0_LOADVECTOR(unit->vec20);
         if (flags & 0x2000) {
-            VU0_LOAD_VF(vf11, unit->vec30);
+            SDF_VU0_LOADVECTOR_B(unit->vec30);
         } else if (ownVector) {
-            VU0_LOAD_VF(vf11, target->direction);
+            SDF_VU0_LOADVECTOR_B(target->direction);
         } else {
-            VU0_LOAD_VF(vf11, D_0037F770[0] + 4);
+            SDF_VU0_LOADVECTOR_B(D_0037F770[0] + 4);
         }
         dds3RotationArc();
-        VU0_MOVE_VF(vf11, vf10);
-        VU0_LOAD_VF(vf10, identity);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(identity);
         Lerp(factor);
         effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, unit->vec20);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec40);
-        VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec20);
+        SDF_VU0_LOADVECTOR(unit->vec20);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR_NOMEM(unit->vec40);
+        SDF_VU0_STOREVECTOR_NOMEM(unit->vec20);
         if (unit->directionFramesRemaining == 0) {
             flags = unit->flags;
             if (flags & 0x4000) {
@@ -288,48 +289,48 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         }
     } else if (!(flags & 0x400)) {
         if (ownVector) {
-            VU0_LOAD_VF(vf10, target->direction);
+            SDF_VU0_LOADVECTOR(target->direction);
         } else {
-            VU0_LOAD_VF(vf10, D_0037F770[0] + 4);
+            SDF_VU0_LOADVECTOR(D_0037F770[0] + 4);
         }
-        VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec40);
+        SDF_VU0_STOREVECTOR_NOMEM(unit->vec40);
     }
     if (target && !ownVector) {
         factor = transition;
-        VU0_LOAD_VF(vf10, unit->vec40);
-        VU0_LOAD_VF(vf11, targetDirection);
+        SDF_VU0_LOADVECTOR(unit->vec40);
+        SDF_VU0_LOADVECTOR_B(targetDirection);
         dds3RotationArc();
-        VU0_MOVE_VF(vf11, vf10);
-        VU0_LOAD_VF(vf10, identity);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(identity);
         Lerp(factor);
         effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, unit->vec40);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, blendedDirection);
+        SDF_VU0_LOADVECTOR(unit->vec40);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR_NOMEM(blendedDirection);
         if (previous) {
             factor = 1.0f;
-            VU0_LOAD_VF(vf10, unit->vec40);
-            VU0_LOAD_VF(vf11, previousDirection);
+            SDF_VU0_LOADVECTOR(unit->vec40);
+            SDF_VU0_LOADVECTOR_B(previousDirection);
             dds3RotationArc();
-            VU0_MOVE_VF(vf11, vf10);
-            VU0_LOAD_VF(vf10, identity);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_LOADVECTOR(identity);
             Lerp(factor);
             effMiscQuaternionToMatrixVU();
-            VU0_LOAD_VF(vf10, unit->vec40);
-            VU0_APPLY_MATRIX(vf10, vf10);
-            VU0_STORE_VF_UNCLOBBERED(vf10, oldDirection);
-            VU0_LOAD_VF(vf11, blendedDirection);
+            SDF_VU0_LOADVECTOR(unit->vec40);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_STOREVECTOR_NOMEM(oldDirection);
+            SDF_VU0_LOADVECTOR_B(blendedDirection);
             dds3RotationArc();
-            VU0_MOVE_VF(vf11, vf10);
-            VU0_LOAD_VF(vf10, identity);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_LOADVECTOR(identity);
             Lerp(transition);
             effMiscQuaternionToMatrixVU();
-            VU0_LOAD_VF(vf10, oldDirection);
-            VU0_APPLY_MATRIX(vf10, vf10);
+            SDF_VU0_LOADVECTOR(oldDirection);
+            SDF_VU0_APPLYMATRIX();
         }
-        VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec10);
+        SDF_VU0_STOREVECTOR_NOMEM(unit->vec10);
     } else {
-        PCP_COPY_VECTOR(unit->vec10, unit->vec40);
+        SDF_VU0_COPYVECTOR(unit->vec10, unit->vec40);
     }
     /* Advance the two local colour tracks before applying target influence. */
     originalFlags = unit->flags;
@@ -346,18 +347,18 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         firstSource[0] = unit->firstCurrent;
         EE_MMI_RGBA_UNPACK_READONLY(firstSource, 0.0078125f);
         VU0_SCALE_VF(vf10, 1.0f - factor);
-        VU0_MOVE_VF(vf11, vf10);
+        SDF_VU0_COPYVECTOR_A_TO_B();
         if (unit->flags & 0x800) {
             firstTarget[0] = unit->color08;
             EE_MMI_RGBA_UNPACK_READONLY(firstTarget, 0.0078125f);
         } else if (ownVector) {
-            VU0_LOAD_VF(vf10, target);
+            SDF_VU0_LOADVECTOR(target);
         } else {
-            VU0_LOAD_VF(vf10, D_0037F770[0]);
+            SDF_VU0_LOADVECTOR(D_0037F770[0]);
         }
         VU0_SCALE_VF(vf10, factor);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_CLEAR_W(vf10);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_VECTOR_W_SET_ZERO();
         EE_MMI_RGBA_PACK_UNIT(firstPacked, 128.0f);
         firstResult[0] = firstPacked;
         unit->firstCurrent = firstResult[0];
@@ -365,18 +366,18 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         secondSource[0] = unit->color54;
         EE_MMI_RGBA_UNPACK_READONLY(secondSource, 0.0078125f);
         VU0_SCALE_VF(vf10, 1.0f - factor);
-        VU0_MOVE_VF(vf11, vf10);
+        SDF_VU0_COPYVECTOR_A_TO_B();
         if (unit->flags & 0x800) {
             secondTarget[0] = unit->color58;
             EE_MMI_RGBA_UNPACK_READONLY(secondTarget, 0.0078125f);
         } else if (ownVector) {
-            VU0_LOAD_VF(vf10, target->secondColor);
+            SDF_VU0_LOADVECTOR(target->secondColor);
         } else {
-            VU0_LOAD_VF(vf10, kwlnDefaultColorVector);
+            SDF_VU0_LOADVECTOR(kwlnDefaultColorVector);
         }
         VU0_SCALE_VF(vf10, factor);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_SET_W_ONE(vf10);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_VECTOR_W_SET_ONE();
         EE_MMI_RGBA_PACK_UNIT(secondPacked, 128.0f);
         secondResult[0] = secondPacked;
         unit->color54 = secondResult[0];
@@ -394,9 +395,9 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         u32 secondPacked;
         if (!(originalFlags & EVT_UNIT_FLAG_USE_UNIT_FIRST_COLOR)) {
             if (ownVector) {
-                VU0_LOAD_VF(vf10, target);
+                SDF_VU0_LOADVECTOR(target);
             } else {
-                VU0_LOAD_VF(vf10, D_0037F770[0]);
+                SDF_VU0_LOADVECTOR(D_0037F770[0]);
             }
             EE_MMI_RGBA_PACK_UNIT(firstPacked, 128.0f);
             defaultFirst[0] = firstPacked;
@@ -404,9 +405,9 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         }
         if (!(originalFlags & EVT_UNIT_FLAG_USE_UNIT_SECOND_COLOR)) {
             if (ownVector) {
-                VU0_LOAD_VF(vf10, target->secondColor);
+                SDF_VU0_LOADVECTOR(target->secondColor);
             } else {
-                VU0_LOAD_VF(vf10, kwlnDefaultColorVector);
+                SDF_VU0_LOADVECTOR(kwlnDefaultColorVector);
             }
             EE_MMI_RGBA_PACK_UNIT(secondPacked, 128.0f);
             defaultSecond[0] = secondPacked;
@@ -421,24 +422,24 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         currentFirst[0] = unit->color0C;
         EE_MMI_RGBA_UNPACK_READONLY(currentFirst, 0.0078125f);
         VU0_SCALE_VF(vf10, 1.0f - factor);
-        VU0_LOAD_VF(vf11, target);
+        SDF_VU0_LOADVECTOR_B(target);
         VU0_SCALE_VF(vf11, factor);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, blendedDirection);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR_NOMEM(blendedDirection);
         if (previous) {
             factor = previousWeight;
             previousFirst[0] = unit->color0C;
             EE_MMI_RGBA_UNPACK_READONLY(previousFirst, 0.0078125f);
             VU0_SCALE_VF(vf10, 1.0f - factor);
-            VU0_LOAD_VF(vf11, previous);
+            SDF_VU0_LOADVECTOR_B(previous);
             VU0_SCALE_VF(vf11, factor);
-            VU0_ADD(vf10, vf10, vf11);
+            SDF_VU0_ADDVECTOR();
             VU0_SCALE_VF(vf10, 1.0f - transition);
-            VU0_LOAD_VF(vf11, blendedDirection);
+            SDF_VU0_LOADVECTOR_B(blendedDirection);
             VU0_SCALE_VF(vf11, transition);
-            VU0_ADD(vf10, vf10, vf11);
+            SDF_VU0_ADDVECTOR();
         }
-        VU0_CLEAR_W(vf10);
+        SDF_VU0_VECTOR_W_SET_ZERO();
         EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
         finalFirst[0] = packed;
         unit->color = finalFirst[0];
@@ -446,24 +447,24 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         currentSecond[0] = unit->color5C;
         EE_MMI_RGBA_UNPACK_READONLY(currentSecond, 0.0078125f);
         VU0_SCALE_VF(vf10, 1.0f - factor);
-        VU0_LOAD_VF(vf11, target->secondColor);
+        SDF_VU0_LOADVECTOR_B(target->secondColor);
         VU0_SCALE_VF(vf11, factor);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, blendedDirection);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR_NOMEM(blendedDirection);
         if (previous) {
             factor = previousWeight;
             previousSecond[0] = unit->color5C;
             EE_MMI_RGBA_UNPACK_READONLY(previousSecond, 0.0078125f);
             VU0_SCALE_VF(vf10, 1.0f - factor);
-            VU0_LOAD_VF(vf11, previous->secondColor);
+            SDF_VU0_LOADVECTOR_B(previous->secondColor);
             VU0_SCALE_VF(vf11, factor);
-            VU0_ADD(vf10, vf10, vf11);
+            SDF_VU0_ADDVECTOR();
             VU0_SCALE_VF(vf10, 1.0f - transition);
-            VU0_LOAD_VF(vf11, blendedDirection);
+            SDF_VU0_LOADVECTOR_B(blendedDirection);
             VU0_SCALE_VF(vf11, transition);
-            VU0_ADD(vf10, vf10, vf11);
+            SDF_VU0_ADDVECTOR();
         }
-        VU0_CLEAR_W(vf10);
+        SDF_VU0_VECTOR_W_SET_ZERO();
         EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
         finalSecond[0] = packed;
         unit->color50 = finalSecond[0];
@@ -521,9 +522,9 @@ void GetBaseLightRGB(evtUnitHandle_t *unit) {
         color = unit->color;
         EE_MMI_RGBA_UNPACK(&color, scale);
     } else if (ownVector) {
-        VU0_LOAD_VF(vf10, info);
+        SDF_VU0_LOADVECTOR(info);
     } else {
-        VU0_LOAD_VF(vf10, D_0037F770[0]);
+        SDF_VU0_LOADVECTOR(D_0037F770[0]);
     }
 }
 
@@ -545,9 +546,9 @@ void GetBaseAmbientRGB(evtUnitHandle_t *unit) {
         color = unit->color50;
         EE_MMI_RGBA_UNPACK(&color, scale);
     } else if (ownVector) {
-        VU0_LOAD_VF(vf10, info->secondColor);
+        SDF_VU0_LOADVECTOR(info->secondColor);
     } else {
-        VU0_LOAD_VF(vf10, kwlnDefaultColorVector);
+        SDF_VU0_LOADVECTOR(kwlnDefaultColorVector);
     }
 }
 
@@ -561,11 +562,11 @@ void GetBaseLightDir(evtUnitHandle_t *unit) {
         }
     }
     if (unit->flags & 0x400) {
-        VU0_LOAD_VF(vf10, unit->vec10);
+        SDF_VU0_LOADVECTOR(unit->vec10);
     } else if (ownVector) {
-        VU0_LOAD_VF(vf10, unit->vec10);
+        SDF_VU0_LOADVECTOR(unit->vec10);
     } else {
-        VU0_LOAD_VF(vf10, D_0037F770[0] + 4);
+        SDF_VU0_LOADVECTOR(D_0037F770[0] + 4);
     }
 }
 
@@ -598,13 +599,13 @@ void evtRefreshUnitEndpointWork(evtUnitHandle_t *unit) {
     packed0[0] = unit->color;
     scale0 = 0.0078125f;
     EE_MMI_RGBA_UNPACK(packed0, scale0);
-    VU0_STORE_VF(vf10, ends[0]);
-    VU0_LOAD_VF(vf10, unit->vec10);
-    VU0_STORE_VF(vf10, ends[1]);
+    SDF_VU0_STOREVECTOR(ends[0]);
+    SDF_VU0_LOADVECTOR(unit->vec10);
+    SDF_VU0_STOREVECTOR(ends[1]);
     packed1[0] = unit->color50;
     scale1 = 0.0078125f;
     EE_MMI_RGBA_UNPACK(packed1, scale1);
-    VU0_STORE_VF(vf10, color);
+    SDF_VU0_STOREVECTOR(color);
     color[3] = 1.0f;
     for (colorChannelIndex = 0; colorChannelIndex < 3; colorChannelIndex++) {
         if (color[colorChannelIndex] > 1.0f) {
@@ -685,11 +686,11 @@ void evtSetUnitLightAndAmbient(evtUnitHandle_t *unit, s32 duration, u32 firstCol
 /* vu0 routine: normalize the direction in vf10, store it to vec30, then vf10 from GetBaseLightDir to vec20 */
 void evtSetUnitLightDir(evtUnitHandle_t *unit, s32 directionMode) {
     unit->directionMode = directionMode;
-    VU0_CLEAR_W(vf10);
-    VU0_NORMALIZE_VF10();
-    VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec30);
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR_NOMEM(unit->vec30);
     GetBaseLightDir(unit);
-    VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec20);
+    SDF_VU0_STOREVECTOR_NOMEM(unit->vec20);
     unit->flags = (unit->flags | 0x2400) & ~0x4000;
 }
 
@@ -745,7 +746,7 @@ void evtUnitLightOff(evtUnitHandle_t *unit, s32 duration) {
     } else {
         evtSetUnitLightAndAmbient(unit, duration, 0, 0);
         unit->flags = (unit->flags & ~0x800) | 0x1000;
-        VU0_MOVE_VF(vf10, vf0);
+        SDF_VU0_LOADIDENTITYVECTOR();
         evtSetUnitLightDir(unit, duration);
         unit->flags = (unit->flags & ~0x2000) | 0x4000;
     }
@@ -789,9 +790,9 @@ evtUnitHandle_t *evtCreateUnitTransitionWork(dds3Basic_t *effObj, dds3ModelHandl
     work->unkBE = 0;
     EVT_UNIT_MOTION_SETUP(work)->startFrame = 0;
 
-    VU0_LOAD_VF(vf10, defaultVector);
-    VU0_STORE_VF_UNCLOBBERED(vf10, work->vec10);
-    VU0_STORE_VF_UNCLOBBERED(vf10, work->vec40);
+    SDF_VU0_LOADVECTOR(defaultVector);
+    SDF_VU0_STOREVECTOR_NOMEM(work->vec10);
+    SDF_VU0_STOREVECTOR_NOMEM(work->vec40);
     work->color0C = 0x00B2B2B2;
     work->color = 0x00B2B2B2;
     work->color5C = 0x80303030;
@@ -941,18 +942,18 @@ s32 evtRotateUnitTowardTarget(evtUnitHandle_t *unit, f32 *dir, f32 scale) {
     memcpy(a, D_004215E0, sizeof(a));
     memcpy(b, D_004215F0, sizeof(b));
     evtGetUnitDirVector(unit);
-    VU0_STORE_VF(vf10, a);
-    VU0_MOVE_VF(vf12, vf10);
+    SDF_VU0_STOREVECTOR(a);
+    SDF_VU0_COPYVECTOR_A_TO_C();
     evtVu0SubVectorXZAxis(dir, unit->effObj->inner->position);
-    VU0_NORMALIZE_VF10();
-    VU0_STORE_VF_UNCLOBBERED(vf10, out);
-    VU0_LOAD_VF(vf11, b);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
-    VU0_MOVE_VF(vf11, vf12);
-    VU0_DOT_XYZ(dot1, vf10, vf11);
-    VU0_LOAD_VF(vf10, out);
-    VU0_DOT_XYZ(rotationAngle, vf10, vf11);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR_NOMEM(out);
+    SDF_VU0_LOADVECTOR_B(b);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_COPYVECTOR_C_TO_B();
+    SDF_VU0_INNERPRODUCT(dot1);
+    SDF_VU0_LOADVECTOR(out);
+    SDF_VU0_INNERPRODUCT(rotationAngle);
     if (0.9998f <= rotationAngle) {
         return result;
     }
@@ -969,9 +970,9 @@ s32 evtRotateUnitTowardTarget(evtUnitHandle_t *unit, f32 *dir, f32 scale) {
             rotationAngle = (3.14159265f / 20.0f);
         }
     }
-    VU0_LOAD_VF(vf10, b);
+    SDF_VU0_LOADVECTOR(b);
     FromRotation(rotationAngle);
-    VU0_STORE_VF_UNCLOBBERED(vf10, q);
+    SDF_VU0_STOREVECTOR_NOMEM(q);
     dds3AddRotPoseSet(unit->effObj, (u128 *)q);
     return 0;
 }
@@ -982,15 +983,15 @@ s32 evtRotateUnitTowardTarget(evtUnitHandle_t *unit, f32 *dir, f32 scale) {
 s32 evtUnitRotationQuat(evtUnitHandle_t *unit, f32 *quat, f32 angle) {
     f32 v[4];
 
-    VU0_LOAD_VF(vf10, quat);
+    SDF_VU0_LOADVECTOR(quat);
     effMiscQuaternionToMatrixVU();
-    VU0_MOVE_VF(vf10, vf30);
-    VU0_SET_AXIS_CLEAR_W(0.0f, y);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_GET_ROW2();
+    VU0_SET_VF10_Y_CLEAR_W(0.0f);
+    SDF_VU0_NORMALIZE();
     VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_LOAD_VF(vf11, unit->effObj->inner->position);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, v);
+    SDF_VU0_LOADVECTOR_B(unit->effObj->inner->position);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(v);
     return evtRotateUnitTowardTarget(unit, v, angle);
 }
 
@@ -1004,15 +1005,15 @@ s32 evtUnitMoveType0(evtUnitHandle_t *unit) {
         evtGetUnitDirVector(unit);
         obj = unit->effObj;
     } else {
-        VU0_LOAD_VF(vf10, unit->targetVector);
+        SDF_VU0_LOADVECTOR(unit->targetVector);
         obj = unit->effObj;
-        VU0_LOAD_VF(vf11, obj->inner->position);
-        VU0_SUB(vf10, vf10, vf11);
-        VU0_NORMALIZE_VF10();
+        SDF_VU0_LOADVECTOR_B(obj->inner->position);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_NORMALIZE();
     }
     scale = unit->motionParameter * 0.1f;
     VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_STORE_VF(vf10, v);
+    SDF_VU0_STOREVECTOR(v);
     dds3GetPosPoseSetMCR(obj, (u128 *)v);
     return 1;
 }
@@ -1054,10 +1055,10 @@ s32 evtUnitPrepareVerticalMoveSteps(evtUnitHandle_t *unit) {
         unit->speedY = 0;
         return 0;
     }
-    VU0_LOAD_VF(vf10, unit->targetVector);
-    VU0_LOAD_VF(vf11, unit->effObj->inner->position);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, delta);
+    SDF_VU0_LOADVECTOR(unit->targetVector);
+    SDF_VU0_LOADVECTOR_B(unit->effObj->inner->position);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_STOREVECTOR(delta);
     unit->stepCount = simulatedStepCount;
     unit->speedY = delta[1] / (f32)simulatedStepCount;
     printf("ymove frameno = %d addvalue = %f total yzahyo=%f\n", simulatedStepCount, unit->speedY, delta[1]);
@@ -1073,7 +1074,7 @@ s32 evtUnitMoveTypePathTrace(evtUnitHandle_t *unit) {
     dds3SetPosPoseSet(unit->effObj, (u128 *)v);
     if (unit->flags & 0x10) {
         dds3PathBasicControlGetRot(unit->pathControl);
-        VU0_MOVE_VF(vf11, vf10);
+        SDF_VU0_COPYVECTOR_A_TO_B();
         sdfConvertEulerAnglesToQuaternionVU(0.0f, 3.14159265f, 0.0f);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF($vf10, v);
@@ -1083,7 +1084,7 @@ s32 evtUnitMoveTypePathTrace(evtUnitHandle_t *unit) {
 }
 
 void evtCopyUnitTargetVector(evtUnitHandle_t *work, void *src) {
-    PCP_COPY_VECTOR(work->targetVector, src);
+    SDF_VU0_COPYVECTOR(work->targetVector, src);
 }
 
 #include "sdf_trig.h"
@@ -1202,7 +1203,7 @@ void evtSetUnitRot1(evtUnitHandle_t *work, s128 *vector, s32 frames) {
     if ((u32)(frames - 1) < 100) {
         work->linkedUnit = NULL;
         work->motionState = EVT_UNIT_MOTION_STATE_VECTOR;
-        PCP_COPY_VECTOR(destination, vector);
+        SDF_VU0_COPYVECTOR(destination, vector);
         work->motionParameter = frames;
         work->directionOffset = 0;
         work->motionCallback = 0;
@@ -1231,7 +1232,7 @@ void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, s128 *vector, s32
     work->motionState = EVT_UNIT_MOTION_STATE_SOURCE;
     work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_COPIED_VECTOR;
     work->linkedUnit = NULL;
-    PCP_COPY_VECTOR(destination, vector);
+    SDF_VU0_COPYVECTOR(destination, vector);
     work->motionParameter = frames;
     work->directionOffset = valueB6;
     work->motionCallback = callback;
@@ -1895,7 +1896,7 @@ u32 evtCommand_MODEL_ROT_XYZ(void) {
     x = scrGetFloatPara(1) * toRad;
     y = scrGetFloatPara(2) * toRad;
     sdfConvertEulerAnglesToQuaternionVU(x, y, 0.0f);
-    VU0_MOVE_VF(vf11, vf10);
+    SDF_VU0_COPYVECTOR_A_TO_B();
     sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, scrGetFloatPara(3) * toRad);
     effMiscQuatMultiplyVU();
     VU0_STORE_VF($vf10, v);
@@ -2305,8 +2306,8 @@ u32 evtOpTurnUnitRelativeToWorldNode(void) {
 
     sourceTransform = source->data;
     dds3GetPosPoseSet(actor);
-    VU0_STORE_VF(vf10, actorPosition);
-    PCP_COPY_VECTOR(sourcePosition, &sourceTransform->position);
+    SDF_VU0_STOREVECTOR(actorPosition);
+    SDF_VU0_COPYVECTOR(sourcePosition, &sourceTransform->position);
 
     if ((unit->referenceAngleCacheFlags & EVT_UNIT_REFERENCE_ANGLE_CACHE_VALID) == 0) {
         dds3GetRotPoseSet(actor);
@@ -2329,7 +2330,7 @@ u32 evtOpTurnUnitRelativeToWorldNode(void) {
 
     sdfConvertEulerAnglesToQuaternionVU(0.0f, targetAngle * 0.017453293f, 0.0f);
     /* First write to this output vector; the SDK store touches only it. */
-    VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+    SDF_VU0_STOREVECTOR_NOMEM(rotation);
 
     frames = scrGetIntPara(2);
     if (frames >= 101) {
@@ -2380,7 +2381,7 @@ u32 evtOpRestoreUnitReferenceAngle(void) {
     referenceAngle = -(EulerAngleAxisY() * 57.29577637f);
     sdfConvertEulerAnglesToQuaternionVU(0.0f, unit->cachedReferenceAngleDegrees * 0.017453293f, 0.0f);
     /* This is the first write to the vector supplied to the transition. */
-    VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+    SDF_VU0_STOREVECTOR_NOMEM(rotation);
     frames = scrGetIntPara(1);
     if (frames >= 101) {
         frames = 100;
@@ -2474,14 +2475,14 @@ u32 evtCommand_MODEL_LIGHT_RGB(void) {
     VU0_SCALAR_OP(scrGetFloatPara(2), "vaddx.x vf10, vf0, vf2x");
     VU0_SCALAR_OP(scrGetFloatPara(3), "vaddx.y vf10, vf0, vf2x");
     VU0_SCALAR_OP(scrGetFloatPara(4), "vaddx.z vf10, vf0, vf2x");
-    VU0_CLEAR_W(vf10);
+    SDF_VU0_VECTOR_W_SET_ZERO();
     scale = 0x43000000;
     EE_MMI_RGBA_PACK_UNIT(packed1, scale);
     color1[0] = packed1;
     VU0_SCALAR_OP(scrGetFloatPara(5), "vaddx.x vf10, vf0, vf2x");
     VU0_SCALAR_OP(scrGetFloatPara(6), "vaddx.y vf10, vf0, vf2x");
     VU0_SCALAR_OP(scrGetFloatPara(7), "vaddx.z vf10, vf0, vf2x");
-    VU0_SET_W_ONE(vf10);
+    SDF_VU0_VECTOR_W_SET_ONE();
     EE_MMI_RGBA_PACK_UNIT(packed2, scale);
     color2[0] = packed2;
     evtSetUnitLightAndAmbient(unit, scrGetIntPara(1), packed1, packed2);
@@ -2504,7 +2505,7 @@ u32 evtCommand_MODEL_LIGHT_DIR(void) {
         evtPrintDeveloperConsoleMessage(D_00421A30);
         return 1;
     }
-    VU0_LOAD_VF(vf10, direction);
+    SDF_VU0_LOADVECTOR(direction);
     evtSetUnitLightDir(unit, scrGetIntPara(1));
     return 1;
 }
@@ -2531,7 +2532,7 @@ u32 evtCommand_MODEL_A(void) {
     u32 packed;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
-    VU0_MOVE_VF(vf10, vf0);
+    SDF_VU0_LOADIDENTITYVECTOR();
     VU0_SCALAR_OP(scrGetFloatPara(2), "vmulx.w vf10, vf0, vf2x");
     EE_MMI_RGBA_PACK_F128(packed);
     color[0] = packed;
@@ -2900,7 +2901,7 @@ u32 evtCommand_EFFECT_ROT_XYZ(void) {
         x = scrGetFloatPara(1) * toRad;
         y = scrGetFloatPara(2) * toRad;
         sdfConvertEulerAnglesToQuaternionVU(x, y, 0.0f);
-        VU0_MOVE_VF(vf11, vf10);
+        SDF_VU0_COPYVECTOR_A_TO_B();
         sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, scrGetFloatPara(3) * toRad);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF($vf10, v);
@@ -2941,4 +2942,3 @@ u32 evtCommand_EFFECT_POS(void) {
 INCLUDE_SDATA(const s32, "event/evtUnitManager", evtWindowMotionUnit);
 
 INCLUDE_SDATA(const s32, "event/evtUnitManager", D_004371F0);
-

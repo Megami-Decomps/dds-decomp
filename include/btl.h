@@ -262,7 +262,7 @@ typedef struct BtlUnit {
     u8 pad354[8];
     struct sdfMemHandle_t *handle; /* 0x35C: allocation that owns this unit. */
     struct BtlUnit *previousActor; /* 0x360 */
-    struct BtlUnit *nextActor; /* 0x364 */
+    struct BtlUnit *next; /* 0x364: actor-list link, not a task-chain link */
 } BtlUnit;
 typedef char BtlUnitPartyRecordOffsetCheck[((u32)&((BtlUnit *)0)->partyRecord == 0x120) ? 1 : -1];
 typedef char BtlUnitPartyRecordEndCheck[((u32)&((BtlUnit *)0)->partyIndex == 0x2E4) ? 1 : -1];

@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vector_latch.h"
 #include "sdf_resource.h"
@@ -440,15 +441,15 @@ void egl3Dto2D(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z) {
     point[3] = 1.0f;
     VU0_LOAD_MATRIX(sdfViewMatrix);
     sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
-    VU0_MOVE_MATRIX_TO_B();
-    VU0_LOAD_VF(vf10, point);
-    VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
-    VU0_LOAD_VF(vf11, D_0037F650);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, D_0037F660);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, screen);
+    SDF_VU0_COPYMATRIX_A_TO_B();
+    SDF_VU0_LOADVECTOR(point);
+    SDF_VU0_APPLYMATRIX_XYZ1();
+    SDF_VU0_PERSVECTOR();
+    SDF_VU0_LOADVECTOR_B(D_0037F650);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_LOADVECTOR_B(D_0037F660);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(screen);
     *gridX = ((s32)(screen[0] * 16.0f) - 0x7000) >> 4;
     *gridY = ((s32)(screen[1] * 16.0f) - 0x7900) >> 3;
 }

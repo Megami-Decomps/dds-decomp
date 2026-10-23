@@ -8,6 +8,7 @@
  * `bnez s1` slot instead of filling it unannulled.
  */
 #include "common.h"
+#include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_special_ability.h"
 #include "dat_unit_has_skill_api.h"
@@ -582,9 +583,9 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
                 pair[0] = btlGetIndexListEntry(targets, i);
                 pair[1] = btlGetIndexListEntry(targets, i + 1);
                 btlUnitGetMuzzlePosVU(pair[0]);
-                VU0_STORE_VF(vf10, muzzle[0]);
+                SDF_VU0_STOREVECTOR(muzzle[0]);
                 btlUnitGetMuzzlePosVU(pair[1]);
-                VU0_STORE_VF(vf10, muzzle[1]);
+                SDF_VU0_STOREVECTOR(muzzle[1]);
                 if ((pair[0]->status.flags & 0x400) && (pair[1]->status.flags & 0x400)) {
                     if (mode == 1) {
                         if (muzzle[0][0] > muzzle[1][0]) {

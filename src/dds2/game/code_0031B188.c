@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_mat4.h"
 #include "snd_sequence_volume_pan.h"
 #include "eff_random.h"
@@ -81,8 +82,8 @@ void CalcCamera(void) {
     camera = D_00438944;
     camera->ops->update(camera);
     cameraData = (CameraData *)D_00438944->data;
-    PCP_COPY_VECTOR(&cameraData->localUp, D_0040ABB0);
-    PCP_COPY_VECTOR(&cameraData->worldUp, D_0040ABB0);
+    SDF_VU0_COPYVECTOR(&cameraData->localUp, D_0040ABB0);
+    SDF_VU0_COPYVECTOR(&cameraData->worldUp, D_0040ABB0);
 }
 
 void dds3InitSoundSlotPool(void) {
@@ -425,10 +426,10 @@ void mnuOrientPositionedEffectTowardViewTarget(MnuEffectRecord *record, f32 xAng
                    sdfViewTargetVector[2] - position[2], 0.0f);
     mnuSetBasisRow(left, -1.0f, 0.0f, 0.0f, 0.0f);
     VU0_NORMALIZE_PACKED_VECTOR(vector);
-    VU0_LOAD_VF(vf10, vector);
-    VU0_LOAD_VF(vf11, left);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, up);
+    SDF_VU0_LOADVECTOR(vector);
+    SDF_VU0_LOADVECTOR_B(left);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_STOREVECTOR(up);
 
     memset(&basis, 0, sizeof(basis));
     mnuSetBasisRow(basis.m, left[0], left[1], left[2], 0.0f);
@@ -692,7 +693,7 @@ void mnuSetNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z) {
     modelNode->primary[1] = y;
     modelNode->primary[2] = z;
     modelNode->primary[3] = 0;
-    VU0_LOAD_VF(vf10, modelNode->primary);
+    SDF_VU0_LOADVECTOR(modelNode->primary);
     mdlSetPosition(modelNode->model);
 }
 
@@ -702,7 +703,7 @@ void mnuTranslateNodePrimaryVector(MnuModelNode *node, f32 x, f32 y, f32 z) {
     node->primary[0] += x;
     node->primary[1] += y;
     node->primary[2] += z;
-    VU0_LOAD_VF(vf10, node->primary);
+    SDF_VU0_LOADVECTOR(node->primary);
     mdlSetPosition(node->model);
 }
 
@@ -715,7 +716,7 @@ void mnuRefreshNodeSecondaryVector(u8 *node, f32 xAngle, f32 yAngle, f32 zAngle)
     ((MnuModelNode *)node)->rotationQuaternion[1] = quaternion[1];
     ((MnuModelNode *)node)->rotationQuaternion[2] = quaternion[2];
     ((MnuModelNode *)node)->rotationQuaternion[3] = quaternion[3];
-    VU0_LOAD_VF(vf10, node + 0x10);
+    SDF_VU0_LOADVECTOR(node + 0x10);
     mdlSetRotate(((MnuModelNode *)node)->model);
 }
 
@@ -731,10 +732,10 @@ void mnuSetViewFacingModelNodeRotation(MnuModelNode *node, f32 xAngle, f32 yAngl
                    sdfViewTargetVector[2] - node->primary[2], 0.0f);
     mnuSetBasisRow(left, -1.0f, 0.0f, 0.0f, 0.0f);
     VU0_NORMALIZE_PACKED_VECTOR(vector);
-    VU0_LOAD_VF(vf10, vector);
-    VU0_LOAD_VF(vf11, left);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, up);
+    SDF_VU0_LOADVECTOR(vector);
+    SDF_VU0_LOADVECTOR_B(left);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_STOREVECTOR(up);
 
     memset(&basis, 0, sizeof(basis));
     mnuSetBasisRow(basis.m, left[0], left[1], left[2], 0.0f);
@@ -750,7 +751,7 @@ void mnuSetViewFacingModelNodeRotation(MnuModelNode *node, f32 xAngle, f32 yAngl
     vector[1] = quaternion[1];
     vector[2] = quaternion[2];
     vector[3] = quaternion[3];
-    VU0_LOAD_VF(vf10, vector);
+    SDF_VU0_LOADVECTOR(vector);
     mdlSetRotate(node->model);
 }
 
@@ -762,7 +763,7 @@ void mnuSetNodeScaleVector(u8 *node, f32 value) {
     modelNode->tertiary[1] = value;
     modelNode->tertiary[2] = value;
     modelNode->tertiary[3] = 0;
-    VU0_LOAD_VF(vf10, modelNode->tertiary);
+    SDF_VU0_LOADVECTOR(modelNode->tertiary);
     mdlSetScale(modelNode->model);
 }
 
