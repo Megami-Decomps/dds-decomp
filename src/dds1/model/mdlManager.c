@@ -423,7 +423,7 @@ char *mdlSetFileName(char *dst, const char *src) {
 }
 
 extern char D_003BBB68[];
-extern void sdfCreateSemaphoreFromOptions(void);
+extern void sdfCreateSemaphoreFromOptions(u32 callbackArg);
 extern s32 mdlFileLoad(s32 group, s32 id, s32 jobArg,
                                      const char *requestPath,
                                      void (*onComplete)(u32), u32 callbackArg);
@@ -464,7 +464,7 @@ s32 mdlPrepare(s32 group, s32 id, s32 blocking) {
     if (packedBundle != 0) {
         mdlSetFileName(requestPath, paths->path);
         mdlFileLoad(group, id, 0x101, requestPath,
-                                  (void (*)(u32))sdfCreateSemaphoreFromOptions, 0);
+                                  sdfCreateSemaphoreFromOptions, 0);
     } else {
         request = sdfAllocAndClearQuadwords(sizeof(*request));
         request->options = 0x101;

@@ -108,7 +108,8 @@ void movieOpenStream(movieStream_t *owner, SdfMovieDescriptor *descriptor, const
                                         movieParseHeader, owner, descriptor->source);
 }
 
-extern void sdfCreateSemaphoreFromOptions(void);
+/* This no-op also serves as a void(u32) completion callback and ignores its word. */
+extern void sdfCreateSemaphoreFromOptions();
 extern void sdfIpuFree(sdfIpuDecodeCb_t *);
 extern void p2sdSyncMovie(void);
 

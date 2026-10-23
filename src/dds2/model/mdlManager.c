@@ -440,7 +440,7 @@ char *mdlSetFileName(char *dst, const char *src) {
 extern u32 mdlManagerWork;
 extern dds3ModelResrc_t *mdlWaitLoadEnd(s32 group, s32 id);
 extern const char D_00436FA8[];
-extern void sdfCreateSemaphoreFromOptions(void);
+extern void sdfCreateSemaphoreFromOptions(u32 callbackArg);
 extern void TbLoadCallback(struct FileRequest *, MdlLoadRequest *);
 extern s32 mdlFileLoad(s32 group, s32 id, s32 jobArg,
                                      const char *requestPath,
@@ -482,7 +482,7 @@ s32 mdlPrepare(s32 group, s32 id, s32 blocking) {
     if (packed != 0) {
         mdlSetFileName(pathBuffer, path->path);
         mdlFileLoad(group, id, 0x101, pathBuffer,
-                                  (void (*)(u32))sdfCreateSemaphoreFromOptions, 0);
+                                  sdfCreateSemaphoreFromOptions, 0);
     } else {
         request = sdfAllocAndClearQuadwords(sizeof(MdlLoadRequest));
         request->options = 0x101;

@@ -1461,7 +1461,7 @@ void sdfDisableFlagListViewTargetRelativeMode(void) {
     D_003BD2C8 = 0;
 }
 
-void sdfCreateSemaphoreFromOptions(void) {
+void sdfCreateSemaphoreFromOptions(u32 callbackArg) {
 }
 
 s32 sdfCreateSema(u32 initial, u32 option, u32 maximum) {

@@ -240,7 +240,7 @@ void sdfConvertEulerAnglesToQuaternionScalar(f32 *out, f32 x, f32 y, f32 z) {
     out[3] = cz * cy * cx - sz * sy * sx;
 }
 
-void sdfCreateSemaphoreFromOptions(void) {
+void sdfCreateSemaphoreFromOptions(u32 callbackArg) {
 }
 
 s32 sdfCreateSema(u32 initial, u32 option, u32 maximum) {
