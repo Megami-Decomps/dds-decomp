@@ -131,13 +131,13 @@ void sdfMemFreePtrDirect(void *address) {
 }
 
 /* Clear the owner's handle before releasing the allocation it contained. */
-void sdfMemFreeHandleDirect(s32 *handleSlot) {
-    s32 allocationHandle;
+void sdfMemFreeHandleDirect(struct sdfMemHandle_t **handleSlot) {
+    struct sdfMemHandle_t *allocationHandle;
 
     allocationHandle = *handleSlot;
-    if (allocationHandle != 0) {
-        *handleSlot = 0;
-        sdfMemFreeDirect((struct sdfMemHandle_t *)allocationHandle);
+    if (allocationHandle != NULL) {
+        *handleSlot = NULL;
+        sdfMemFreeDirect(allocationHandle);
         return;
     }
 }

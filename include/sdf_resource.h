@@ -52,7 +52,7 @@ void sdfFreeAutoDelayed(void *data);
 u32 sdfMemLock(struct sdfMemHandle_t *allocation);
 void sdfMemUnlock(struct sdfMemHandle_t *allocation);
 void sdfMemFreeDirect(struct sdfMemHandle_t *allocation);
-void sdfMemFreeHandleDirect(s32 *slot);
+void sdfMemFreeHandleDirect(struct sdfMemHandle_t **slot);
 
 /* The optional outputs contain a data address and file size, not a descriptor.
  * A null outAddress releases the allocation before returning its descriptor. */

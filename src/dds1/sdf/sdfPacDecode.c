@@ -303,7 +303,7 @@ void sdfPacTmxDecoderFunc(PacState *state) {
             }
         }
         resourceBuffer->texture = sdfTexSet((SdfTextureFileHeader *)sdfMemLock(resourceBuffer->resourceSlot));
-        sdfMemFreeHandleDirect((s32 *)&resourceBuffer->resourceSlot);
+        sdfMemFreeHandleDirect(&resourceBuffer->resourceSlot);
         state->onComplete(state);
     }
 }
@@ -320,7 +320,7 @@ void sdfPacTmxDecompDecoderFunc(PacState *state) {
     {
         PacBuf *resourceBuffer = state->resourceBuffer;
         resourceBuffer->texture = sdfTexSet((SdfTextureFileHeader *)sdfMemLock(resourceBuffer->resourceSlot));
-        sdfMemFreeHandleDirect((s32 *)&resourceBuffer->resourceSlot);
+        sdfMemFreeHandleDirect(&resourceBuffer->resourceSlot);
     }
     sdfChipFreeDirect(state->decoder);
     state->onComplete(state);

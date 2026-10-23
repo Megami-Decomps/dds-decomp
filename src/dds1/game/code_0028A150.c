@@ -2837,7 +2837,7 @@ void fileReleaseMenuResources(void) {
             fileHandleFree((struct FileRequest *)(u32)fileSaveIconRequest);
             fileSaveIconRequest = 0;
         }
-        sdfMemFreeHandleDirect((s32 *)&fileSaveIconResourceHandle);
+        sdfMemFreeHandleDirect(&fileSaveIconResourceHandle);
         dds3KillProcessName("FileMentCalc", 1);
         dds3SoftResetOn();
     }
@@ -7460,4 +7460,3 @@ INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC930);
 INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC938);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC940);
-

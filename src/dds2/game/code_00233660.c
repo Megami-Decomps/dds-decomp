@@ -346,8 +346,8 @@ void mdlReleaseHddFileList(void) {
     D_003C86B0[MDL_VIEWER_TABLE_SLOT].count = 0;
     D_003C6588[MDL_VIEWER_TABLE_SLOT].entries = NULL;
     D_003C6588[MDL_VIEWER_TABLE_SLOT].count = 0;
-    sdfMemFreeHandleDirect((s32 *)&D_00436FAC);
-    sdfMemFreeHandleDirect((s32 *)&D_00436FB0);
+    sdfMemFreeHandleDirect(&D_00436FAC);
+    sdfMemFreeHandleDirect(&D_00436FB0);
 }
 
 

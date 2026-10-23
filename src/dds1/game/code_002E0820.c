@@ -207,7 +207,7 @@ void sdfCoreDrawInit(s32 workspaceBytes) {
     HW_WRITE(dmaChannel, HW_READ(dmaChannel) & ~SDF_DMA_CHCR_TTE);
     sceDmaSendN(dmaChannel, D_003200A0, (D_00320630 - D_003200A0) >> SDF_DMA_QWORD_SHIFT);
     sceDmaSync(dmaChannel, 0, 0);
-    sdfMemFreeHandleDirect((s32 *)&D_003BD350);
+    sdfMemFreeHandleDirect(&D_003BD350);
     D_003BD350 = sdfMemAllocDirect(workspaceBytes);
     D_003BDA20 = sdfMemLock(D_003BD350);
 }
@@ -1688,4 +1688,3 @@ INCLUDE_SDATA(const s32, "game/code_002E0820", D_003BD3A9);
 INCLUDE_SDATA(const s32, "game/code_002E0820", D_003BD3C0);
 
 INCLUDE_SDATA(const s32, "game/code_002E0820", D_003BD3C4);
-
