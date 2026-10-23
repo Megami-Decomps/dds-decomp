@@ -727,7 +727,7 @@ extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 extern const s32 btlRequiredActionCategories[10];
 
 /* Require all ten category queries to succeed; retain the complete local copy of the native category table. */
-s32 btlUnitHasAllTenActions(void *actor) {
+s32 btlUnitHasAllTenActions(BtlUnit *actor) {
     s32 requiredCategories[BTL_REQUIRED_ACTION_CATEGORY_COUNT];
     s32 categoryIndex;
     memcpy(requiredCategories, btlRequiredActionCategories, sizeof(requiredCategories));

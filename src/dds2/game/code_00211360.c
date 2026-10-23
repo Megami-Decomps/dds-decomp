@@ -811,7 +811,7 @@ s32 btlUnitMatchesEntryCodeCondition(BtlUnit *unit, s32 conditionIndex, s8 inver
 extern const s32 btlRequiredActionCategories[10];
 
 /* Require all ten category queries to succeed; retain the complete local copy of the native category table. */
-s32 btlUnitHasAllTenActions(void *actor) {
+s32 btlUnitHasAllTenActions(BtlUnit *actor) {
     s32 requiredCategories[BTL_REQUIRED_ACTION_CATEGORY_COUNT];
     s32 categoryIndex;
     memcpy(requiredCategories, btlRequiredActionCategories, sizeof(requiredCategories));
@@ -1390,7 +1390,7 @@ s32 btlAnyPartyUnitHasFullActionSet(void) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if ((btlUnitStatusPair(battler) & 0x221) == 0x201 &&
-            btlUnitHasAllTenActions((s32)battler)) {
+            btlUnitHasAllTenActions(battler)) {
             return 1;
         }
     }
@@ -1401,7 +1401,7 @@ s32 btlAnyEnemyHasFullActionSet(void) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if ((btlUnitStatusPair(battler) & 0x421) == 0x401 &&
-            btlUnitHasAllTenActions((s32)battler)) {
+            btlUnitHasAllTenActions(battler)) {
             return 1;
         }
     }
