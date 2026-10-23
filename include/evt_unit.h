@@ -149,7 +149,7 @@ typedef struct evtUnitHandle_t {
 #else
     s16 pendingMotionIndex;        /* 0xBC: pending motion index for the next blend */
     s16 motionBlendLeadFrames;     /* 0xBE: frames before the motion blend begins */
-    s16 unkC0;                     /* 0xC0: duration of the motion blend */
+    s16 motionBlendDurationFrames; /* 0xC0: duration of the motion blend */
 #endif
     u8 padC2[2];
     s16 motionSetupId;             /* 0xC4: motion selected by evtSetUnitMotion */
