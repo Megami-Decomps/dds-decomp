@@ -222,7 +222,7 @@ EffWork *dds3MagatuhiParCopy(EffWork *work) {
 void effDispatchNodeScaleNoOp(void) {
 }
 
-extern void dds3AdminiCallSequence(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
+extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 dataBytes, s32 markHistory);
 
 void InitMagatuhiEditorProcess(void) {
     dds3AdminiCallSequence(0, 0, 0, 0);

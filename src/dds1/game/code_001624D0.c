@@ -193,7 +193,7 @@ void effBattleApplyUnitRgbKeyframe(BtlUnit *unit, EffBattleUnitRgbCommand *comma
     }
 }
 
-extern void dds3AdminiCallSequence(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
+extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 dataBytes, s32 markHistory);
 
 void dds3AdminSubmitEmptyModeRequest(void) {
     dds3AdminiCallSequence(0, 0, 0, 0);

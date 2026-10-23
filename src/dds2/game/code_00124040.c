@@ -306,7 +306,7 @@ extern void fileRestoreSlotFlagsToState(void);
 
 void fldSetDeferredFieldCommand(u32, u32);
 
-extern void dds3AdminiCallSequence(s32, void *, u32, s32);
+extern void dds3AdminiCallSequence(s32, const void *, u32, s32);
 
 
 extern void fldResetPlayerSceneTransformState(void);

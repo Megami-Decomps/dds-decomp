@@ -24,7 +24,7 @@
 #include "sdf_packet_list.h"
 #include "ee_mmi.h"
 /* Declared before first use (were implicit int). */
-extern void dds3AdminiCallSequence(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
+extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 dataBytes, s32 markHistory);
 extern void frFontUploadClearedTexture(void);
 extern void frwLoadStaffFont(void);
 extern void frwFreeStaffFont(void);

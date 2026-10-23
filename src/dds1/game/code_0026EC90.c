@@ -258,7 +258,7 @@ extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void mnuInitializeMovieRollViewport(void);
 extern void mnuReleaseMovieResourceAfterPendingWork(dds3ProcessID_t *task);
 extern s32 mnuStaffImageProc(dds3ProcessID_t *task);
-extern void dds3AdminiCallSequence(s32, void *, u32, s32);
+extern void dds3AdminiCallSequence(s32, const void *, u32, s32);
 
 s32 mnuUpdateStaffRoll(dds3ProcessID_t *task) {
     char text[128];

@@ -105,7 +105,7 @@
 #include "btl.h"
 #include "fld_index_pair.h"
 /* Declared before first use (were implicit int). */
-extern void dds3AdminiCallSequence(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
+extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 dataBytes, s32 markHistory);
 extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
 extern void fldSetFlagBit(s32 area, s32 floor, s32 bit);
 
