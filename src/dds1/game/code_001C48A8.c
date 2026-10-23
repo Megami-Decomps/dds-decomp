@@ -210,10 +210,14 @@ s32 btlLoadBankWhenTasksIdle(void) {
 extern u8 * btlCreateFloorLoadTask(u32 stage, u32 variant);
 
 u64 fldMarkGridTiles(u8 *context) {
-    BtlRuntimeTask *node = (BtlRuntimeTask *)fldCreateSceneTileTask(*(s16 *)(context + 0x288), *(s16 *)(context + 0x28A));
+    BtlState *state = (BtlState *)context;
+    BtlRuntimeTask *node =
+        (BtlRuntimeTask *)fldCreateSceneTileTask((s16)state->encounterParamA,
+                                                  (s16)state->encounterParamB);
     node->ownerId = 0x8000000000000001ULL;
     btlStartTask(node);
-    return btlStartTask(btlCreateFloorLoadTask(*(s16 *)(context + 0x288), *(s16 *)(context + 0x28A)));
+    return btlStartTask(btlCreateFloorLoadTask((s16)state->encounterParamA,
+                                               (s16)state->encounterParamB));
 }
 
 extern void btlResetTitleStreamOnBattleFlag(void);
@@ -224,11 +228,13 @@ extern void btlAdvanceWorldCounterAndSpawnActionObject(void);
 
 
 s32 btlStartOwnerTaskIfClear(u8 *object) {
+    BtlState *state = (BtlState *)object;
+
     if (btlCountTasksForOwner(0x8000000000000001ULL) == 0) {
         btlResetTitleStreamOnBattleFlag();
         btlInitializeWorldCamera();
         btlAdvanceWorldCounterAndSpawnActionObject();
-        btlCreateRainEffect(*(s16 *)(object + 0x288), *(s16 *)(object + 0x28A));
+        btlCreateRainEffect((s16)state->encounterParamA, (s16)state->encounterParamB);
         return 4;
     }
     return 0;
