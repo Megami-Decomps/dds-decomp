@@ -42,6 +42,6 @@ u16 evtGetRowValue(const PolyMovieWork *work, s32 row);
 s16 evtGetRowVariant(const PolyMovieWork *work, s32 row);
 u16 evtGetRowParameter(const PolyMovieWork *work, s32 row);
 u16 evtGetRowFlags(const PolyMovieWork *work, s32 row);
-u8 *evtGetRowPayloadAddress(PolyMovieWork *work, s32 row);
+const u8 *evtGetRowPayloadAddress(const PolyMovieWork *work, s32 row);
 
 #endif
