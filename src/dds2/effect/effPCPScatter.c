@@ -109,7 +109,7 @@ extern PcpScatterRadialWork *effPCPHamaCardSpiralCreate(
 
 /* Create radial work from the parameter, texture-resource and child-work blocks. */
 PcpScatterRadialWork *effPCPHamaCardSpiralCreatePCF(void *parameterTable) {
-    void *params;
+    const PcpScatterRadialParams *params;
     u32 resource;
     void *options;
 

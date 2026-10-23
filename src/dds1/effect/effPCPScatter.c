@@ -96,8 +96,11 @@ extern PcpScatterRes *dds3ScatterPolyListTexResourceCreate(u32 resId);
 /* Create radial work from the parameter, texture-resource and child-work blocks. */
 PcpScatterRadialWork *effPCPHamaCardSpiralCreatePCF(void *parameterTable)
 {
+    const PcpScatterRadialParams *params;
+
+    params = dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK);
     return effPCPHamaCardSpiralCreate(
-        dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK),
+        params,
         (u32)dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK),
         dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_CHILD_BLOCK));
 }
