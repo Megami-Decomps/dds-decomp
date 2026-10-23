@@ -269,7 +269,7 @@ s32 mnuRequestWeightedProfileMessage(BrsSkillPackageWork *scene) {
 }
 
 
-s32 mnuDispatchProfileSelectionScene(void *task) {
+s32 mnuDispatchProfileSelectionScene(dds3ProcessID_t *task) {
     s32 result;
     BrsSkillPackageWork *scene = (BrsSkillPackageWork *)dds3GetProcessData(task);
     s32 *dispatchStatus = &scene->transition.state;
