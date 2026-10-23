@@ -29,6 +29,8 @@ typedef struct SdfCamera {
 } SdfCamera;
 
 typedef char SdfCamera_size_must_be_0x90[(sizeof(SdfCamera) == 0x90) ? 1 : -1];
+typedef char SdfCamera_halfWidth_offset_must_be_0x70[
+    ((u32)&((SdfCamera *)0)->halfWidth == 0x70) ? 1 : -1];
 
 /* Complete static projection record, including the inverse-origin cache. */
 typedef struct SdfProjectionRecord {
@@ -41,6 +43,8 @@ typedef char SdfProjectionRecord_inverseOrigin_must_be_0x90[
     ((u32)&((SdfProjectionRecord *)0)->inverseOrigin == 0x90) ? 1 : -1];
 
 extern SdfProjectionRecord dds3ScreenParam;
+/* Output snapshot copied by sdf3DSetCamera for VU clipping and viewport draws. */
+extern SdfProjectionRecord sdf3DScreenParam;
 #ifdef VERSION_DDS1
 extern SdfProjectionRecord D_003247B0;
 extern SdfProjectionRecord D_00324980;

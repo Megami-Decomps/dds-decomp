@@ -329,7 +329,6 @@ extern u8 sdfCameraTm[];
 
 extern u8 sdf3DEyeOffset[];
 
-extern u8 sdf3DScreenParam[];
 
 /* Cache node data, its composed transform, and the transformed cached origin. */
 void sdf3DSetCamera(SdfProjectionRecord *node, void *transformMatrix) {
@@ -340,7 +339,7 @@ void sdf3DSetCamera(SdfProjectionRecord *node, void *transformMatrix) {
     VU0_STORE_MATRIX(sdf3DScreenTm);
     SDF_VU0_APPLYMATRIX_XYZ1();
         SDF_VU0_STOREVECTOR_NOMEM(sdf3DEyeOffset);
-    *(SdfProjectionRecord *)sdf3DScreenParam = *node;
+    sdf3DScreenParam = *node;
 }
 
 /* Set the first DMA reference fallback used when a model has no override. */

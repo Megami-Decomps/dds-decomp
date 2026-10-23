@@ -245,7 +245,6 @@ void corePktClipFace(corePktCb_t *work) {
 
 extern f32 D_003BDA30;
 extern f32 sdf3DEyeOffset[4];
-extern u8 sdf3DScreenParam[];
 /* vu0 routine: native clip-plane setup and ordinary triangle fans. */
 void corePktBuildFaceList(corePktCb_t *work) {
     s32 triangleCount;
@@ -256,7 +255,7 @@ void corePktBuildFaceList(corePktCb_t *work) {
     f32 scale = work->depth;
     f32 clipBias = D_003BDA30;
     const f32 *clipPlane = sdf3DEyeOffset;
-    const u8 *projection = sdf3DScreenParam;
+    const u8 *projection = (const u8 *)&sdf3DScreenParam;
 
     VU0_SET_CLIP_PLANES(clipBias, clipPlane, projection);
     if (work->selectedFlags & 0x4000) {
@@ -410,7 +409,7 @@ void corePktBuildBackFaceList(corePktCb_t *work) {
     s32 acceptAll;
     u128 *(*out)[3];
     const f32 *clipPlane = sdf3DEyeOffset;
-    const u8 *projection = sdf3DScreenParam;
+    const u8 *projection = (const u8 *)&sdf3DScreenParam;
 
     VU0_SET_CLIP_PLANES(scale, clipPlane, projection);
     acceptAll = corePktSoftenBias;

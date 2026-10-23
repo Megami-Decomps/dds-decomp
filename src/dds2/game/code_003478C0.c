@@ -10,6 +10,7 @@
 #include "sdf_semaphore_api.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
+#include "sdf_projection.h"
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
 #include "sdf_named_resource_request_api.h"
@@ -283,7 +284,6 @@ void sdfDecompInit(SdfPacDecoder *decoder, u8 *output) {
     decoder->state = 1;
 }
 
-extern u8 sdf3DScreenParam[];
 /* vu0 routine: clip homogeneous line pairs and build a coloured GS packet. */
 SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     SdfPacket *packet;
@@ -299,7 +299,7 @@ SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s3
 
     packet = (SdfPacket *)sdfGrOpenPacketBuff();
     cursor = (u128 *)(packet + 1);
-    viewport = (f32 (*)[4])(sdf3DScreenParam + 0x70);  /* its camera's viewport */
+    viewport = (f32 (*)[4])&sdf3DScreenParam.camera.halfWidth;
     VU0_LOAD_VF_AT(vf14, 0x0, viewport);
     VU0_LOAD_VF_AT(vf15, 0x10, viewport);
     emitted = 0;

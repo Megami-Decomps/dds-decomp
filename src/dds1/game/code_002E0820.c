@@ -305,7 +305,6 @@ void sdf3DMakeViewportPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node
     packet->unknownCC = 0;
 }
 
-extern u8 sdf3DScreenParam[];
 
 extern u8 sdf3DScreenTm[];
 
@@ -322,7 +321,7 @@ void sdf3DSetCamera(SdfProjectionRecord *node, void *transformMatrix) {
     VU0_STORE_MATRIX(sdf3DScreenTm);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_STOREVECTOR(sdf3DEyeOffset);
-    memcpy(sdf3DScreenParam, node, sizeof(*node));
+    sdf3DScreenParam = *node;
 }
 
 /* Set the first DMA reference fallback used when a model has no override. */
