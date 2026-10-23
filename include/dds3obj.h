@@ -55,8 +55,8 @@ dds3Basic_t *dds3AddSceneBasicData(s32 kind);
 /* Allocate and initialize the inner transform object for a world node. */
 s32 dds3InitPoseSet(dds3Basic_t *node);
 void dds3DeleteSceneBasicData(dds3Basic_t *node);
-/* Attach the resource indexed by resourceId to the object's world table. */
-void dds3SceneBasicMakeScene(dds3Basic_t *object, u32 resourceId);
+/* Load the named area resource and attach it to the object's world table. */
+void dds3SceneBasicMakeScene(dds3Basic_t *object, const char *resourcePath);
 /* Store the source object address used by a slot's later path replacement. */
 void dds3MoverBasicSetPath(dds3Basic_t *object, dds3Basic_t *sourceObject);
 dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *world);

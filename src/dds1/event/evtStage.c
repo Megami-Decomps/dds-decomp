@@ -76,7 +76,7 @@ s32 evtLoadArea(s32 area, s32 room)
     dds3SetMapNo(worldObject, (area << 16) + room);
     fldMakeFilePath(directory, area, room);
     sprintf(resourcePath, evtStageResourcePathFormat, directory, area, room);
-    dds3SceneBasicMakeScene(worldObject, (u32)resourcePath);
+    dds3SceneBasicMakeScene(worldObject, resourcePath);
     evtSetTestCamera();
     if (area < 10) {
         dds3SetScreenFovy(0.9424777031f);
