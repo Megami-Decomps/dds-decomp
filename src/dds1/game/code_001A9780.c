@@ -1945,7 +1945,7 @@ extern u32 btlHasRegisteredAnalysisPanelTask(void);
 s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
     BtlState *context = (BtlState *)btlGetRuntime();
     BtlAnalysisPanelWork *data;
-    s32 task;
+    dds3ProcessID_t *task;
 
     if (btlHasRegisteredAnalysisPanelTask() != 0) {
         dds3KillProcess((dds3ProcessID_t *)btlGetTrackedTaskHandle(11), 0);
@@ -1970,10 +1970,10 @@ s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
     data->duration = duration;
     data->entry = entry;
     data->frame = 0;
-    task = (s32)dds3StartProcess(btlAnalyzPanelTaskNameRef, 0x2B0E, 1, 1, btlUpdateAndDrawAnalysisPanel,
+    task = dds3StartProcess(btlAnalyzPanelTaskNameRef, 0x2B0E, 1, 1, btlUpdateAndDrawAnalysisPanel,
                           btlReleaseTaskAndRefreshCursorIfFlagged, (u32)data);
-    dds3LinkProcess(context->scriptOwner, (dds3ProcessID_t *)task);
-    btlSetTrackedTaskHandle(11, task);
+    dds3LinkProcess(context->scriptOwner, task);
+    btlSetTrackedTaskHandle(11, (s32)task);
     context->battleFlags &= ~0x100000;
     return 1;
 }
