@@ -795,8 +795,8 @@ void evtEventViewerApplyEffectToggles(EvtRuntime *viewer) {
 }
 
 void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
-    s32 selectedEntry;
-    s32 activeEntry;
+    dds3Basic_t *selectedEntry;
+    dds3Basic_t *activeEntry;
 
     activeEntry = viewer->activeEntryIndex;
     if (activeEntry != 0) {
@@ -807,8 +807,8 @@ void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
     if (selectedEntry == 0) {
         return;
     }
-    dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), (dds3Basic_t *)selectedEntry);
-    dds3SetScreenFovy(dds3CameraObjectBasicGetFovy((dds3Basic_t *)selectedEntry));
+    dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), selectedEntry);
+    dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(selectedEntry));
 }
 
 extern s32 evtViewerCreateObjectInFreeSlot(s32, EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntime *);
@@ -1783,7 +1783,7 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
     }
 
     if (D_003BBE80 != NULL) {
-        viewer->fallbackEntry = (s32)D_003BBE80->info;
+        viewer->fallbackEntry = D_003BBE80->info;
         evtViewerApplySelectedEntry(viewer);
     }
     evtEventViewerUpdateUnitTransitions(time, viewer);

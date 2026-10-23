@@ -114,7 +114,7 @@ typedef struct EvtRuntime {
     char entryName[256][32];
     dds3Basic_t *activeEntryIndex;
     u8 pad2028[4];
-    s32 fallbackEntry;
+    dds3Basic_t *fallbackEntry;
     s32 entryCount;
     EvtRuntimeGroup *groups;
     EvtRuntimeGroup *lastGroup;
