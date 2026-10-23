@@ -9702,7 +9702,7 @@ void sndStartBattleSceneStream(s32 adjustmentIndex, s32 sceneIndex) {
     }
     if (datBattleSceneRecords[sceneIndex].unk24 != 0) {
         selection = datBattleSceneRecords[sceneIndex].unk24;
-    } else if (runtime->unk24A != 0) {
+    } else if (runtime->encounterKind != 0) {
         selection = 2;
     }
     if (selection == 0) {

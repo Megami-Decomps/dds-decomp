@@ -232,7 +232,7 @@ typedef struct BtlState {
         u32 cameraActorConfiguration; /* 0x244 */
     };
     u16 preemptiveOutcome; /* 0x248: selected outcome carried into the battle mode. */
-    u8 unk24A; /* Nonzero selects stream 2 when the scene has no override. */
+    u8 encounterKind; /* 0 normal, 2 surprise; DDS2 also uses 3 for Majin. */
     u8 pad24B[1];
     u16 mode; /* 0x24C */
     u8 pad24E[2];

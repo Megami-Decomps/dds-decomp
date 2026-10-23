@@ -348,8 +348,8 @@ void btlInitializeBattleUnits(BtlState *scene) {
     scene->mode=scene->preemptiveOutcome;
     if (!(scene->battleFlags & 0x4000)) {
         s32 voice;
-        if (scene->unk24A) btlClearUnitStatusMask();
-        if (scene->unk24A == 2) scene->commandRestrictFlags &= ~2;
+        if (scene->encounterKind) btlClearUnitStatusMask();
+        if (scene->encounterKind == 2) scene->commandRestrictFlags &= ~2;
         voice=btlChooseStartVoice();
         if (voice>=0 && scene->preemptiveOutcome==1) {
             BtlRuntimeTask *sound=sndCreateAtracEffectLoadTask(voice);
@@ -598,7 +598,7 @@ u64 btlQueueSceneActorModelEntry(s32 sceneAddress) {
         task->ownerId = 0x8000000000000003ULL;
         btlStartTask(task);
     }
-    switch (scene->unk24A) {
+    switch (scene->encounterKind) {
         case 1:
             task = btlCreateEffObjB(NULL, 0xD);
             task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
