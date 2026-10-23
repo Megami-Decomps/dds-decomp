@@ -1225,18 +1225,18 @@ s32 btlIsCurrentActorFullyMarked(void) {
 }
 
 s32 btlHasPendingRuntimeActivity(void) {
-    s32 state;
+    BtlState *state;
     if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
-    state = (s32)btlRuntime;
-    if (*(s32 *)(state + 0x248) != 0) {
+    state = (BtlState *)btlRuntime;
+    if (state->tasks != 0) {
         return 1;
     }
-    if ((*(s32 *)(state + 0x1EC) & 2) != 0) {
+    if ((state->eventFlags & 2) != 0) {
         return 1;
     }
-    return *(u32 *)(state + 0x718) != 0;
+    return state->effect != 0;
 }
 
 void btlResetActorEntryState(void) {
