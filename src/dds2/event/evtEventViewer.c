@@ -2153,16 +2153,16 @@ void evtViewerSyncModelMotionChannels(s32 frame, dds3Basic_t *object, EvtRuntime
 /* Updates world units at position using the first track whose owner word
  * matches that unit's object-chain node. */
 void evtViewerSyncWorldGroups(u32 position, EvtRuntime *viewer) {
-    u8 *unitObject;
+    dds3Basic_t *unitObject;
     EvtRuntimeGroup *node;
     EvtRuntimeGroup *found;
 
     if (dds3GetActiveScene() != 0) {
-        unitObject = (u8 *)((EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data)->slots[EVT_WORLD_SLOT_UNIT].head;
-        while (unitObject != 0) {
+        unitObject = ((EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data)->slots[EVT_WORLD_SLOT_UNIT].head;
+        while (unitObject != NULL) {
             found = 0;
             for (node = viewer->groups; node != 0; node = node->next) {
-                if (node->info == (dds3Basic_t *)unitObject) {
+                if (node->info == unitObject) {
                     found = node;
                     break;
                 }
@@ -2170,7 +2170,7 @@ void evtViewerSyncWorldGroups(u32 position, EvtRuntime *viewer) {
             if (found != 0) {
                 evtViewerSyncModelMotionChannels(position, unitObject, node, viewer, 0);
             }
-            unitObject = (u8 *)((dds3Basic_t *)unitObject)->next;
+            unitObject = unitObject->next;
         }
     }
 }
