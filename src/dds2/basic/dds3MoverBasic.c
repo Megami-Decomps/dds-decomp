@@ -8,9 +8,6 @@
 extern void dds3BackupPoseSet(dds3PoseSet_t *transform);
 
 
-#define DDS3_MOVER_POSITION_COPY_KIND 6
-#define DDS3_MOVER_CAMERA_KIND 4
-#define DDS3_MOVER_WORLD_TRANSFORM_KIND 9
 #define DDS3_MOVER_FOV_UPDATE_BIT 1
 
 /* Apply enabled absolute path channels and step the path counter once, or apply
@@ -33,7 +30,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
             dds3PathBasicControlGetPos(slotResource->path);
             VU0_STORE_VF(vf10, pathVector);
             dds3SetPosPoseSet(targetObject, (u128 *)pathVector);
-            if (((u8 *)&targetObject->kindTag)[3] == DDS3_MOVER_POSITION_COPY_KIND) {
+            if (((u8 *)&targetObject->kindTag)[3] == EFF_WORLD_KIND_EFFECT_TRANSFORM) {
                 PCP_COPY_VECTOR(&((EffectTransformData *)targetObject->data)->position, pathVector);
             }
         }
@@ -43,7 +40,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
             dds3SetRotPoseSet(targetObject, (u128 *)pathVector);
         }
         if (slotResource->path->counter.flags & DDS3_PATH_SCALAR_CHANNEL) {
-            if (((u8 *)&targetObject->kindTag)[3] == DDS3_MOVER_CAMERA_KIND) {
+            if (((u8 *)&targetObject->kindTag)[3] == EFF_WORLD_KIND_CAMERA) {
                 fieldOfView = dds3PathBasicControlGetFovy(slotResource->path);
                 cameraData = targetObject->data;
                 cameraData->fieldOfView = fieldOfView;
@@ -51,7 +48,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
             }
         }
         if (slotResource->path->counter.flags & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {
-            if (((u8 *)&targetObject->kindTag)[3] == DDS3_MOVER_WORLD_TRANSFORM_KIND) {
+            if (((u8 *)&targetObject->kindTag)[3] == EFF_WORLD_KIND_LIGHT) {
                 dds3PathBasicControlNextStep(slotResource->path, &transformParams);
                 dds3SetLightObjectPathResoruce(targetObject, &transformParams);
             }
