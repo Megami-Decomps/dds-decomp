@@ -2967,9 +2967,9 @@ void btlCopyUnitCurrentPosition(u8 *object, void *position) {
     SDF_VU0_COPYVECTOR(position, object + 0x60);
 }
 
-void btlGetUnitWorldPos(u8 *object, void *worldPosition) {
+void btlGetUnitWorldPos(BtlUnit *unit, f32 *worldPosition) {
     s32 context = (s32)(u32)btlGetRuntime();
-    SDF_VU0_LOADVECTOR(object + 0x60);
+    SDF_VU0_LOADVECTOR(unit->currentPosition);
     SDF_VU0_LOADVECTOR_B(context);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(worldPosition);
