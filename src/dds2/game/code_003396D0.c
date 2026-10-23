@@ -836,7 +836,9 @@ typedef char SdfTexturedQuadVifPacket_quad_offset_check[
 
 /* Build a one-vertex textured-quad VIF packet: the position, color, the four
  * UV corners (copied as unaligned words) and the eight quad corner coordinates. */
-void sdfBillBoardMake1(u8 *packet, const f32 *position, u32 color, const void *uv,
+struct BillTextureQuad;
+void sdfBillBoardMake1(u8 *packet, const f32 *position, u32 color,
+                                   const struct BillTextureQuad *uv,
                                    const f32 *quad) {
     SdfTexturedQuadVifPacket *view = (SdfTexturedQuadVifPacket *)packet;
 
