@@ -11,16 +11,16 @@
 #include "sdf_vu_matrix.h"
 
 
-s32 evtCheckPathStat(void *obj) {
+s32 evtCheckPathStat(dds3Basic_t *object) {
     f32 target = 1.0f;
     void *slot;
     dds3PathBasicControl_t *handle;
     s32 kind;
 
-    if (obj == NULL) {
+    if (object == NULL) {
         return -1;
     }
-    slot = dds3ObjectBaseGetControlBasic(obj, 1);
+    slot = dds3ObjectBaseGetControlBasic(object, 1);
     if (slot == NULL) {
         return -1;
     }

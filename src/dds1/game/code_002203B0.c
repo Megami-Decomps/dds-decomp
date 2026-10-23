@@ -11,7 +11,7 @@
 #include "sdf_vu_matrix.h"
 
 
-s32 evtCheckPathStat(void *obj) {
+s32 evtCheckPathStat(dds3Basic_t *obj) {
     f32 target = 1.0f;
     void *slot;
     dds3PathBasicControl_t *handle;
