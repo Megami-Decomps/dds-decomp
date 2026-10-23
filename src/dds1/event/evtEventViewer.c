@@ -1802,23 +1802,23 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
 /* Clamps each movie object's playback interval using its linked track's first
  * key frame (or track offset) and the supplied endTime. */
 void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
-    s32 worldTable;
-    s32 worldSlots;
-    s32 movieObject;
+    EvtWorldTable *worldTable;
+    EvtWorldSlot *worldSlots;
+    dds3Basic_t *movieObject;
     EvtRuntimeGroup *trackEntry;
     s32 startFrame;
 
-    if (dds3GetActiveScene() != 0) {
-        worldTable = (s32)((EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data);
-        if (worldTable != 0) {
-            worldSlots = (s32)((EvtWorldTable *)worldTable)->slots;
-            if (worldSlots != 0) {
-                movieObject = (s32)((EvtWorldSlot *)worldSlots)[EVT_WORLD_SLOT_MOVIE].head;
-                if (movieObject != 0) {
+    if (dds3GetActiveScene() != NULL) {
+        worldTable = ((dds3Basic_t *)dds3GetActiveScene())->data;
+        if (worldTable != NULL) {
+            worldSlots = worldTable->slots;
+            if (worldSlots != NULL) {
+                movieObject = worldSlots[EVT_WORLD_SLOT_MOVIE].head;
+                if (movieObject != NULL) {
                     do {
                         trackEntry = viewer->groups;
                         while (trackEntry != NULL) {
-                            if (trackEntry->info != NULL && (void *)movieObject == dds3ObjectBaseGetControlBasic(trackEntry->info, 1)) {
+                            if (trackEntry->info != NULL && movieObject == dds3ObjectBaseGetControlBasic(trackEntry->info, 1)) {
                                 if (trackEntry->type == 2) {
                                     startFrame = 0;
                                     if (trackEntry->childCount != 0) {
@@ -1827,13 +1827,13 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
                                 } else {
                                     startFrame = trackEntry->metadata.value;
                                 }
-                                evtPolygonMovieClampTime((dds3Basic_t *)movieObject, 0, startFrame, endTime);
+                                evtPolygonMovieClampTime(movieObject, 0, startFrame, endTime);
                                 break;
                             }
                             trackEntry = trackEntry->next;
                         }
-                        movieObject = (s32)((dds3Basic_t *)movieObject)->next;
-                    } while (movieObject != 0);
+                        movieObject = movieObject->next;
+                    } while (movieObject != NULL);
                 }
             }
         }
