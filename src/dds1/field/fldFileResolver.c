@@ -105,6 +105,19 @@
 #include "btl.h"
 #include "itf.h"
 #include "fld_index_pair.h"
+
+typedef struct SdfGsTextureAlphaFlushPacket {
+    SdfGsPacketHeader header;
+    SdfGsRegisterWrite textureAlpha;
+    SdfGsRegisterWrite textureFlush;
+} SdfGsTextureAlphaFlushPacket;
+
+typedef char SdfGsTextureAlphaFlushPacket_size_must_be_0x40[
+    (sizeof(SdfGsTextureAlphaFlushPacket) == 0x40) ? 1 : -1];
+typedef char SdfGsTextureAlphaFlushPacket_payload_offsets_must_match[
+    (((u32)&((SdfGsTextureAlphaFlushPacket *)0)->textureAlpha == 0x20) &&
+     ((u32)&((SdfGsTextureAlphaFlushPacket *)0)->textureFlush == 0x30)) ? 1 : -1];
+
 /* Declared before first use (were implicit int). */
 extern void btlResetAsyncState(void);
 extern void fldDrawCameraColorScrollingGradient(void);
@@ -2910,33 +2923,33 @@ void fldDrawPoly3(s32 color0, s32 color1, s32 color2,
 void fldSubmitTexturedOverlaySprite(void) {
     sdfDrawTag_t *list = (sdfDrawTag_t *)sdfPrimAllocDrawTag(NULL);
     SdfDmaNode *reference = (SdfDmaNode *)sdfGrAllocPacketBuff(0x20);
-    u64 *texturePacket;
-    u64 *blendPacket;
+    SdfGsTextureAlphaFlushPacket *texturePacket;
+    sdfPrimTransPacket_t *blendPacket;
     void *sprite;
     FldSpriteVertex *vertex;
     SdfPoolNode *surface;
 
     sdfGrLinkDispFrameTex(list,
         (u32)(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes), reference);
-    texturePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
-    texturePacket[0] = 3;
-    texturePacket[1] = 0x5000000310000000ULL;
-    texturePacket[2] = 0x1000000000008002ULL;
-    texturePacket[3] = 0xE;
-    texturePacket[4] = 0x8000000080ULL;
-    texturePacket[5] = 0x3B;
-    texturePacket[6] = 0;
-    texturePacket[7] = 0x3F;
+    texturePacket = (SdfGsTextureAlphaFlushPacket *)sdfGrAllocPacketBuff(0x40);
+    texturePacket->header.dmaTag = 3;
+    texturePacket->header.vifCommands = 0x5000000310000000ULL;
+    texturePacket->header.gifTag = 0x1000000000008002ULL;
+    texturePacket->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    texturePacket->textureAlpha.value = 0x8000000080ULL;
+    texturePacket->textureAlpha.registerId = SDF_GS_TEXA;
+    texturePacket->textureFlush.value = 0;
+    texturePacket->textureFlush.registerId = SDF_GS_TEXFLUSH;
     sdfDrawTagLink(list, (u32)texturePacket);
-    blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
-    blendPacket[0] = 3;
-    blendPacket[1] = 0x5000000310000000ULL;
-    blendPacket[2] = 0x1000000000008002ULL;
-    blendPacket[3] = 0xE;
-    blendPacket[4] = 0x31001;
-    blendPacket[5] = 0x47;
-    blendPacket[6] = 0x44;
-    blendPacket[7] = 0x42;
+    blendPacket = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+    blendPacket->header.dmaTag = 3;
+    blendPacket->header.vifCommands = 0x5000000310000000ULL;
+    blendPacket->header.gifTag = 0x1000000000008002ULL;
+    blendPacket->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    blendPacket->registers.test.value = 0x31001;
+    blendPacket->registers.test.registerId = SDF_GS_TEST_1;
+    blendPacket->registers.alpha.value = 0x44;
+    blendPacket->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(list, (u32)blendPacket);
     sprite = sdf2DAllocSprite(1);
     vertex = (FldSpriteVertex *)sdf2DGetPrimPtr((s32)sprite);
@@ -2965,33 +2978,33 @@ void fldSubmitTexturedOverlaySprite(void) {
 void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
     sdfDrawTag_t *list = (sdfDrawTag_t *)sdfPrimAllocDrawTag(NULL);
     SdfDmaNode *reference = (SdfDmaNode *)sdfGrAllocPacketBuff(0x20);
-    u64 *texturePacket;
-    u64 *blendPacket;
+    SdfGsTextureAlphaFlushPacket *texturePacket;
+    sdfPrimTransPacket_t *blendPacket;
     void *sprite;
     FldSpriteVertex *vertex;
     SdfPoolNode *surface;
 
     sdfGrLinkDispFrameTex(list,
         (u32)(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes), reference);
-    texturePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
-    texturePacket[0] = 3;
-    texturePacket[1] = 0x5000000310000000ULL;
-    texturePacket[2] = 0x1000000000008002ULL;
-    texturePacket[3] = 0xE;
-    texturePacket[4] = 0x8000000080ULL;
-    texturePacket[5] = 0x3B;
-    texturePacket[6] = 0;
-    texturePacket[7] = 0x3F;
+    texturePacket = (SdfGsTextureAlphaFlushPacket *)sdfGrAllocPacketBuff(0x40);
+    texturePacket->header.dmaTag = 3;
+    texturePacket->header.vifCommands = 0x5000000310000000ULL;
+    texturePacket->header.gifTag = 0x1000000000008002ULL;
+    texturePacket->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    texturePacket->textureAlpha.value = 0x8000000080ULL;
+    texturePacket->textureAlpha.registerId = SDF_GS_TEXA;
+    texturePacket->textureFlush.value = 0;
+    texturePacket->textureFlush.registerId = SDF_GS_TEXFLUSH;
     sdfDrawTagLink(list, (u32)texturePacket);
-    blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
-    blendPacket[0] = 3;
-    blendPacket[1] = 0x5000000310000000ULL;
-    blendPacket[2] = 0x1000000000008002ULL;
-    blendPacket[3] = 0xE;
-    blendPacket[4] = 0x33001;
-    blendPacket[5] = 0x47;
-    blendPacket[6] = 0x8000000064ULL;
-    blendPacket[7] = 0x42;
+    blendPacket = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+    blendPacket->header.dmaTag = 3;
+    blendPacket->header.vifCommands = 0x5000000310000000ULL;
+    blendPacket->header.gifTag = 0x1000000000008002ULL;
+    blendPacket->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    blendPacket->registers.test.value = 0x33001;
+    blendPacket->registers.test.registerId = SDF_GS_TEST_1;
+    blendPacket->registers.alpha.value = 0x8000000064ULL;
+    blendPacket->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(list, (u32)blendPacket);
     sprite = sdf2DAllocSprite(1);
     vertex = (FldSpriteVertex *)sdf2DGetPrimPtr((s32)sprite);
@@ -3027,33 +3040,33 @@ void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
 void fldSubmitOverlayStateAndSprite(s32 alpha) {
     sdfDrawTag_t *list = (sdfDrawTag_t *)sdfPrimAllocDrawTag(NULL);
     SdfDmaNode *reference = (SdfDmaNode *)sdfGrAllocPacketBuff(0x20);
-    u64 *texturePacket;
-    u64 *blendPacket;
+    SdfGsTextureAlphaFlushPacket *texturePacket;
+    sdfPrimTransPacket_t *blendPacket;
     void *sprite;
     FldSpriteVertex *vertex;
     SdfPoolNode *surface;
 
     sdfGrLinkDispFrameTex(list,
         (u32)(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes), reference);
-    texturePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
-    texturePacket[0] = 3;
-    texturePacket[1] = 0x5000000310000000ULL;
-    texturePacket[2] = 0x1000000000008002ULL;
-    texturePacket[3] = 0xE;
-    texturePacket[4] = 0x8000000080ULL;
-    texturePacket[5] = 0x3B;
-    texturePacket[6] = 0;
-    texturePacket[7] = 0x3F;
+    texturePacket = (SdfGsTextureAlphaFlushPacket *)sdfGrAllocPacketBuff(0x40);
+    texturePacket->header.dmaTag = 3;
+    texturePacket->header.vifCommands = 0x5000000310000000ULL;
+    texturePacket->header.gifTag = 0x1000000000008002ULL;
+    texturePacket->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    texturePacket->textureAlpha.value = 0x8000000080ULL;
+    texturePacket->textureAlpha.registerId = SDF_GS_TEXA;
+    texturePacket->textureFlush.value = 0;
+    texturePacket->textureFlush.registerId = SDF_GS_TEXFLUSH;
     sdfDrawTagLink(list, (u32)texturePacket);
-    blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
-    blendPacket[0] = 3;
-    blendPacket[1] = 0x5000000310000000ULL;
-    blendPacket[2] = 0x1000000000008002ULL;
-    blendPacket[3] = 0xE;
-    blendPacket[4] = 0x33001;
-    blendPacket[5] = 0x47;
-    blendPacket[6] = ((u64)(u32)alpha << 32) | 0x64;
-    blendPacket[7] = 0x42;
+    blendPacket = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+    blendPacket->header.dmaTag = 3;
+    blendPacket->header.vifCommands = 0x5000000310000000ULL;
+    blendPacket->header.gifTag = 0x1000000000008002ULL;
+    blendPacket->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    blendPacket->registers.test.value = 0x33001;
+    blendPacket->registers.test.registerId = SDF_GS_TEST_1;
+    blendPacket->registers.alpha.value = ((u64)(u32)alpha << 32) | 0x64;
+    blendPacket->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(list, (u32)blendPacket);
     sprite = sdf2DAllocSprite(1);
     vertex = (FldSpriteVertex *)sdf2DGetPrimPtr((s32)sprite);
