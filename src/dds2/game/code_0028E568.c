@@ -276,7 +276,7 @@ extern MenuMantraRecord *mnuMantraPublishedSourceRecords;
 
 
 void mnuBuildMantraSourceList(MnuStatusResource *status) {
-    MenuMantraRecord *list = (MenuMantraRecord *)((u8 *)status + 0x824);
+    MenuMantraRecord *list = status->menu.records;
     MenuMantraRecord *record = list;
     MantraNodePos *node;
     s32 used;
@@ -329,7 +329,7 @@ void mnuBuildMantraSourceList(MnuStatusResource *status) {
         }
     }
     evtPrintDeveloperConsoleMessage("Used EventFlag [0x%x] - [0x%x]\n", 0x920, 0x923 + used);
-    mnuMantraPublishedSourceRecords = (MenuMantraRecord *)((u8 *)status + 0x824);
+    mnuMantraPublishedSourceRecords = status->menu.records;
 }
 
 extern const u16 mnuMantraMemberFlagBasePairs[14][2];
