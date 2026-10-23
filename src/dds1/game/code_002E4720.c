@@ -479,13 +479,13 @@ void sdfDevSeekDiscWithRequestGate(s32 request) {
     sdfDiscReadPosition = request;
 }
 
-void sdfDevReadDiscUntilComplete(s32 size, s32 buffer) {
+void sdfDevReadDiscUntilComplete(s32 size, void *buffer) {
     s32 status;
     s32 result;
 
     for (;;) {
         WaitSema(sdfCdImageFd);
-        result = sceCdStRead(size, buffer, 1, &status);
+        result = sceCdStRead(size, (s32)buffer, 1, &status);
         SignalSema(sdfCdImageFd);
         if (status == 0 && result == size) {
             break;
@@ -697,23 +697,23 @@ s32 sdfCdImageRead(void *buffer, s32 byteCount) {
             t = transferBytes - t * SDF_DEV_DISC_SECTOR_BYTES;
             transferBytes -= t;
             if (transferBytes > 0) {
-                sdfDevReadDiscUntilComplete(transferBytes >> SDF_DEV_DISC_SECTOR_SHIFT, (s32)destination);
+                sdfDevReadDiscUntilComplete(transferBytes >> SDF_DEV_DISC_SECTOR_SHIFT, destination);
             }
             if (t > 0) {
-                sdfDevReadDiscUntilComplete(1, (s32)sdfDevReadSectorBuffer);
+                sdfDevReadDiscUntilComplete(1, sdfDevReadSectorBuffer);
                 memcpy(destination + transferBytes, sdfDevReadSectorBuffer, t);
                 sdfCdImageOffset = sdfDevReadSectorBuffer + t;
                 sdfCdImageCurrActive = SDF_DEV_DISC_SECTOR_BYTES - t;
             }
         } else {
             while (transferBytes >= SDF_DEV_DISC_SECTOR_BYTES) {
-                sdfDevReadDiscUntilComplete(1, (s32)sdfDevReadSectorBuffer);
+                sdfDevReadDiscUntilComplete(1, sdfDevReadSectorBuffer);
                 memcpy(destination, sdfDevReadSectorBuffer, SDF_DEV_DISC_SECTOR_BYTES);
                 transferBytes -= SDF_DEV_DISC_SECTOR_BYTES;
                 destination += SDF_DEV_DISC_SECTOR_BYTES;
             }
             if (transferBytes > 0) {
-                sdfDevReadDiscUntilComplete(1, (s32)sdfDevReadSectorBuffer);
+                sdfDevReadDiscUntilComplete(1, sdfDevReadSectorBuffer);
                 memcpy(destination, sdfDevReadSectorBuffer, transferBytes);
                 sdfCdImageOffset = sdfDevReadSectorBuffer + transferBytes;
                 sdfCdImageCurrActive = SDF_DEV_DISC_SECTOR_BYTES - transferBytes;
