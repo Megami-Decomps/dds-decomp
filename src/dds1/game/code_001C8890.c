@@ -546,7 +546,7 @@ void btlStartCommandSoundAndEffectTasks(u8 *battleTask) {
         task = fldCreateSceneGroupAction(battleTask, 0x64, 1);
         *task = 7;
         *(u64 *)(task + 8) = value;
-        *(u64 *)(task + 0x40) = *(u64 *)((u8 *)unit + 0x108);
+        *(u64 *)(task + 0x40) = unit->identity;
         btlStartTask(task);
         btlDispatchStateHandler(battleTask, 0x1A);
         break;
@@ -554,7 +554,7 @@ void btlStartCommandSoundAndEffectTasks(u8 *battleTask) {
         task = fldCreateSceneGroupAction(battleTask, 0x64, 1);
         *task = 7;
         *(u64 *)(task + 8) = value;
-        *(u64 *)(task + 0x40) = *(u64 *)((u8 *)unit + 0x108);
+        *(u64 *)(task + 0x40) = unit->identity;
         btlStartTask(task);
         btlDispatchStateHandler(battleTask, 0x1A);
         break;
