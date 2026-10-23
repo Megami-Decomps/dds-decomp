@@ -927,12 +927,12 @@ s32 frDecodeFontRow(u8 *decodedBytes, s32 entryIndex, ItfRelativeSegmentResource
     wordIndex = start >> 4;
     remaining = range.end - start;
     state = (bitWords[wordIndex] | 0x10000) >> (start & 0xF);
-    root = (u16 *)(table + 2);
+    root = (u16 *)(table + ITF_PREFIX_TREE_ROOT_OFFSET);
     node = root;
     do {
         u16 index = node[state & 1];
 
-        node = (u16 *)(table + index * 6 + 2);
+        node = (u16 *)(table + index * ITF_PREFIX_TREE_NODE_BYTES + ITF_PREFIX_TREE_ROOT_OFFSET);
         if (*node == 0) {
             decodedBytes[produced++] = ((u8 *)node)[2];
             node = root;

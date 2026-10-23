@@ -4,6 +4,18 @@
 #include "common.h"
 #include "itf_bit_range.h"
 
+/* A prefix-tree node stores two child indices and the output byte for a leaf. */
+typedef struct ItfPrefixTreeNode {
+    u16 child[2];
+    u8 symbol;
+    u8 pad05;
+} ItfPrefixTreeNode;
+
+typedef char ItfPrefixTreeNode_size_check[
+    (sizeof(ItfPrefixTreeNode) == 6) ? 1 : -1];
+#define ITF_PREFIX_TREE_NODE_BYTES sizeof(ItfPrefixTreeNode)
+#define ITF_PREFIX_TREE_ROOT_OFFSET 2
+
 /* Relative offsets select three packed-font resource regions. */
 typedef struct ItfRelativeSegmentResourceView {
     s32 firstOffset; /* 0x00 */
