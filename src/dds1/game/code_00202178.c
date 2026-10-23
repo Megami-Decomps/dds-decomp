@@ -2026,27 +2026,27 @@ s32 btlAdjustDamageKind(BtlUnit *unit, s32 damageKind) {
     return damageKind;
 }
 
-u8 *btlFindFlaggedSpecialSpeciesUnit(s32 category, s32 species) {
-    u8 *unit;
+BtlUnit *btlFindFlaggedSpecialSpeciesUnit(s32 category, s32 species) {
+    BtlUnit *unit;
     if (category != 1) {
         return 0;
     }
     if (species != 0x124) {
         return 0;
     }
-    unit = (u8 *)((BtlState *)btlGetRuntime())->units;
+    unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
-        u32 flags = ((BtlUnit *)unit)->status.flags;
+        u32 flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x400) {
                 if (flags & 2) {
-                    if (((BtlUnit *)unit)->species == 0x124) {
+                    if (unit->species == 0x124) {
                         return unit;
                     }
                 }
             }
         }
-        unit = (u8 *)((BtlUnit *)unit)->next;
+        unit = unit->next;
     }
     return 0;
 }
@@ -3200,8 +3200,8 @@ void btlMarkSpecialUnit(u8 *unit) {
     ((BtlUnit *)unit)->status.stateFlags |= 0x200;
 }
 
-u8 *btlGetReadyUnitForSpecies(s32 mode, u32 species) {
-    u8 *unit;
+BtlUnit *btlGetReadyUnitForSpecies(s32 mode, u32 species) {
+    BtlUnit *unit;
     if (mode != 1) {
         return NULL;
     }
@@ -3213,11 +3213,11 @@ u8 *btlGetReadyUnitForSpecies(s32 mode, u32 species) {
     default:
         return NULL;
     }
-    unit = *(u8 **)((BtlState *)btlGetRuntime())->effect;
+    unit = *(BtlUnit **)((BtlState *)btlGetRuntime())->effect;
     if (unit == NULL) {
         return NULL;
     }
-    return (((BtlUnit *)unit)->status.flags & 2) ? unit : NULL;
+    return (unit->status.flags & 2) ? unit : NULL;
 }
 
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
