@@ -520,10 +520,10 @@ s32 mnuRefreshOwnedCatalogItemList(s32 itemId, MenuStaffContext *owner) {
     return resources->windows[4]->list->count != 0;
 }
 
-extern void mnuSwitchCampVisualCategory(s32 nextCategory, u8 *menuBytes);
+extern void mnuSwitchCampVisualCategory(s32 nextCategory, MenuStaffContext *menu);
 
 void mnuSelectStaffDisplayCategory(u32 context) {
-    mnuSwitchCampVisualCategory(2, context);
+    mnuSwitchCampVisualCategory(2, (MenuStaffContext *)context);
 }
 
 void mnuNoOpStaffDisplayTeardown(s32 object) {
