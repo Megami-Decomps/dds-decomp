@@ -15,7 +15,7 @@ extern void (*D_003BD2DC)(s32);
 
 
 /* Return the next descriptor unless it is the end marker; used blocks are not filtered. */
-sdfMemHandle_t *sdfMemGetNext(sdfMemHandle_t *block) {
+sdfMemHandle_t *sdfMemGetNext(const sdfMemHandle_t *block) {
     sdfMemHandle_t *nextBlock = block->next;
     if (nextBlock->state == SDF_HEAP_BLOCK_END) {
         return NULL;

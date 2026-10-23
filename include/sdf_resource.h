@@ -42,7 +42,7 @@ void sdfChipGetInfo(SdfChipHeapStats *stats);
 u8 *sdfMemGetPtr(const struct sdfMemHandle_t *block);
 s32 sdfMemGetSize(const struct sdfMemHandle_t *block);
 /* Advance one descriptor; return NULL when its successor is the end marker. */
-struct sdfMemHandle_t *sdfMemGetNext(struct sdfMemHandle_t *block);
+struct sdfMemHandle_t *sdfMemGetNext(const struct sdfMemHandle_t *block);
 
 /* Route payload addresses between the chip and general heaps. */
 void *sdfAllocAuto(s32 size);
