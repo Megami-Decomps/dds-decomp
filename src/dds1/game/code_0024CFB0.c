@@ -759,12 +759,12 @@ s32 evtOpReadDisplayValue(void) {
 
 /* Acquire the loaded data's texture reference, then release its temporary resource.
  * DDS1 passes the size output as a pointer, unlike DDS2's address-valued slot. */
-u32 fclLoadTexture(u32 path) {
+struct sdfTexHandle_t *fclLoadTexture(const char *path) {
     u32 info[2];
-    u32 allocation = (u32)sdfDevLoadFileEx((const char *)(u32)path, info, &info[1]);
-    u32 texture = (u32)sdfTexSet((SdfTextureFileHeader *)(info[0]));
+    struct sdfMemHandle_t *allocation = sdfDevLoadFileEx(path, info, &info[1]);
+    struct sdfTexHandle_t *texture = sdfTexSet((SdfTextureFileHeader *)(info[0]));
 
-    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(allocation));
+    sdfMemFreeDirect(allocation);
     return texture;
 }
 
