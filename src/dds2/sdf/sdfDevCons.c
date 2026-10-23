@@ -130,7 +130,7 @@ void sdfDevConsSetMode(sdfDevConsCB_tag *console, u8 controlByte) {
 }
 
 struct sdfTexHandle_t;
-extern u32 sdfDebugFontHandle;
+extern struct sdfTexHandle_t *sdfDebugFontHandle;
 
 /* Close the ordered register-list tag in the console's uncached DMA buffer.
  * Five eight-byte register values form one sprite; pad an odd value count. */
@@ -288,7 +288,7 @@ void sdfDevConsDrawInit(sdfDevConsDrawCB_t *packetBuffers, u8 *storageBase, s32 
     packetBuffers->bufferAddresses[1] = ring + halfBufferBytes;
     packetBuffers->packetStart = ring;
     packetBuffers->activeBufferIndex = 0;
-    textureState = sdfTexGetTex0Reg((struct sdfTexHandle_t *)sdfDebugFontHandle);
+    textureState = sdfTexGetTex0Reg(sdfDebugFontHandle);
     packet = (vu64 *)ring;
     packet[0] = 0x10AB400000008005ULL;
     packet[1] = 0xE;

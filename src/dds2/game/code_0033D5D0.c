@@ -192,8 +192,8 @@ struct sdfTexHandle_t;
 
 extern u32 sdfDevConsFontUvTable[96];
 
-/* Cached texture keeps the provider's opaque pointer/address boundary. */
-extern u32 sdfDebugFontHandle;
+/* Use the cached console font texture for this draw packet. */
+extern struct sdfTexHandle_t *sdfDebugFontHandle;
 
 void *sdfDevVprintf(SifCommand *input, const char *format, void *arguments) {
     char text[0x200];
@@ -254,7 +254,7 @@ void *sdfDevVprintf(SifCommand *input, const char *format, void *arguments) {
         header->textureClampRegister = 8;
         header->textureFilter = 1;
         header->textureFilterRegister = 0x14;
-        header->textureState = sdfTexGetTex0Reg((struct sdfTexHandle_t *)sdfDebugFontHandle);
+        header->textureState = sdfTexGetTex0Reg(sdfDebugFontHandle);
         header->textureStateRegister = 6;
         header->glyphTag = 0x5400000000008000ULL | glyphCount;
         header->glyphRegisters = 0x53531;
