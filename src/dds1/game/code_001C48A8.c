@@ -439,7 +439,7 @@ extern struct BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 extern u8 *btlCreateSecondaryCommandSoundTask(void);
 extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
 extern u8 *btlCreateModelLoadPollTask(u8 *, u32, u32, s8);
-extern void *btlCreateActorTransparencyTask(BtlUnit *);
+extern BtlRuntimeTask *btlCreateActorTransparencyTask(BtlUnit *);
 extern BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *, u32, u32);
 extern BtlRuntimeTask *sndCreateActorEffectTask(struct SoundResourceNode *, BtlUnit *, u32);

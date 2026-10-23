@@ -4830,7 +4830,7 @@ s32 btlCreateActorTransparency(BtlActorTransparencyArgs *arguments) {
     return 1;
 }
 
-void *btlCreateActorTransparencyTask(BtlUnit *actor) {
+BtlRuntimeTask *btlCreateActorTransparencyTask(BtlUnit *actor) {
     u8 *task = btlAllocTask(4);
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x25;
