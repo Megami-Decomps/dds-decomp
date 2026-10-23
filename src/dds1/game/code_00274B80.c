@@ -1657,7 +1657,7 @@ void ptySkillMenuInitPages(CampMenuContext *context) {
             list->context = context;
             list->categoryIndex = category;
             mnuAttachWindowTextureState(window, -0xE0, 0x370, 0, (u32)context->windowTextureVariantResource);
-            mnuConfigureWindowSpriteSlots(window->textures, (struct EffMappedResource *)context->unk118);
+            mnuConfigureWindowSpriteSlots(window->textures, context->windowSpriteTarget);
             node = mnuAppendWindowListNode(window, D_003BC708);
             node->camp.value = 0;
             node->camp.id = 0;
