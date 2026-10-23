@@ -652,7 +652,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, sdfModelRootNode_t
                 if (!skipCommands) {
                     u8 *referencePacket = (u8 *)sdfGrAllocPacketBuff(0x20);
                     *(u16 *)referencePacket = 0;
-                    *(u32 *)(referencePacket + 4) = ((u32)entry + 0x10) & 0x0FFFFFFF;
+                    *(u32 *)(referencePacket + 4) = (u32)(entry + 1) & 0x0FFFFFFF;
                     *(u64 *)(referencePacket + 8) = 0;
                     *(u128 *)(referencePacket + 16) = 0;
                     sdfDrawTagLinkCall(packets, (u32)referencePacket);
