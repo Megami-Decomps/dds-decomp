@@ -3,6 +3,6 @@
 
 #include "common.h"
 
-s32 btlAimHorizontalDirectionClampedVU(f32 *origin, f32 *targetPosition, f32 angle);
+s32 btlAimHorizontalDirectionClampedVU(const f32 *origin, const f32 *targetPosition, f32 angle);
 
 #endif

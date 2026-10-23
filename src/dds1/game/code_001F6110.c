@@ -1111,7 +1111,7 @@ s32 btlAimHorizontalDirectionVU(f32 *origin, f32 *targetPosition) {
 }
 
 
-s32 btlAimHorizontalDirectionClampedVU(f32 *origin, f32 *targetPosition, f32 angle) {
+s32 btlAimHorizontalDirectionClampedVU(const f32 *origin, const f32 *targetPosition, f32 angle) {
     f32 delta[4];
     f32 sine;
     f32 tangent;
