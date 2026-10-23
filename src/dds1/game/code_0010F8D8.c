@@ -28,7 +28,7 @@ void dds3GetTMPoseSet(dds3Basic_t *object) {
 
 extern float fabsf(float);
 
-s32 dds3ComparePosPoseSet(dds3PoseSet_t *left, dds3PoseSet_t *right) {
+s32 dds3ComparePosPoseSet(const dds3PoseSet_t *left, const dds3PoseSet_t *right) {
     f32 length;
     f32 leftLimit;
     f32 rightLimit;
