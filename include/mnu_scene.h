@@ -46,7 +46,7 @@ typedef struct MenuSceneMetadata {
     struct ItfMesSub *messageWindowResource;
     u8 pad10[4];
     struct ItfMesSub *entryMessageWindowResource; /* 0x14: selected-entry message resource */
-    s32 state;
+    enum MenuSceneState state;
     u8 pad1C[4];
     s32 messageShadeFrames;
     struct MenuProgressHost *attachedEffect;
@@ -71,6 +71,7 @@ typedef char MenuSceneParticleLayoutAssert[
     (sizeof(DspParticle) == 0x0C && sizeof(DspParticleState) == 0x6C &&
      sizeof(MenuSceneMetadata) == 0x248 &&
      sizeof(((MenuSceneMetadata *)0)->partySnapshot) == 0x1A4 &&
+     (unsigned long)&((MenuSceneMetadata *)0)->state == 0x18 &&
      (unsigned long)&((MenuSceneMetadata *)0)->partySnapshot == 0x28 &&
      (unsigned long)&((MenuSceneMetadata *)0)->sparkles == 0x1CC &&
      (unsigned long)&((MenuSceneMetadata *)0)->displayedCurrency == 0x23C)
