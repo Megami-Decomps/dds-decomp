@@ -24,13 +24,6 @@ typedef struct {
 } StaffWindowResources;
 
 
-/* Inventory quantities are byte entries indexed by each caller's original item ID. */
-typedef struct SaveItemCounts {
-    u8 pad00[0x12A0];
-    u8 counts[0x100];
-} SaveItemCounts;
-
-
 /* One staff display work allocation owns the window resources and party target list. */
 struct StaffDisplayContext {
     u8 pad00[0x54];
@@ -163,7 +156,7 @@ extern void mnuRemoveWindowListCursorNode(MenuWindowContainer *);
 s32 mnuIsStaffWindowReadyForItem(s32 itemId, StaffDisplayContext *context) {
     StaffWindowResources *resources = context->resources;
 
-    if (((SaveItemCounts *)DDS3_GBWK)->counts[itemId & 0xFFFF] == 0) {
+    if (DDS3_GBWK->inventory.counts[itemId & 0xFFFF] == 0) {
         mnuRemoveWindowListCursorNode(resources->windows[0]);
     }
     return resources->windows[0]->list->count != 0;
@@ -186,9 +179,9 @@ void mnuCreateStaffBulletItemWindow(StaffDisplayContext *context) {
     window->list->context = context;
     window->list->drawCallback = mnuDrawStaffItemListEntry;
     do {
-        if (((SaveItemCounts *)DDS3_GBWK)->counts[itemId] != 0 && mnuIsBulletItemId(itemId)) {
+        if (DDS3_GBWK->inventory.counts[itemId] != 0 && mnuIsBulletItemId(itemId)) {
             node = mnuAppendWindowListNode(window, D_003BAA84 + textOffset);
-            quantity = ((SaveItemCounts *)DDS3_GBWK)->counts[itemId];
+            quantity = DDS3_GBWK->inventory.counts[itemId];
             node->sortKeySecondary = itemId;
             node->sortKeyPrimary = quantity;
         }
@@ -427,7 +420,7 @@ void mnuRefreshStaffItemSelection(s32 selection, StaffDisplayContext *context) {
     consumed = mnuUseStaffItem(selection, context);
     if (consumed != 0) {
         resources->windows[0]->list->cursor->sortKeyPrimary =
-                  ((SaveItemCounts *)DDS3_GBWK)->counts[selection];
+                  DDS3_GBWK->inventory.counts[selection];
         resources->selection = selection;
     }
     mnuSetStateValue(&((StaffDisplayContext *)context)->gradient.active, 1);
