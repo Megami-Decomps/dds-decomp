@@ -2683,14 +2683,14 @@ extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 
 extern s32 scrStartScript2(s32 priority, s32 processId, s32 option);
 
-void btlBindActorSlot(BtlActor *actor, s32 taskArg) {
+void btlBindActorSlot(BtlTask *task, s32 taskArg) {
     BtlState *state = (BtlState *)btlGetRuntime();
     s32 slot = scrStartScript2((s32)state->scriptOwner->priority - 1, D_003BAAA8, taskArg);
     s32 handle;
-    scrSetUserData((dds3ProcessID_t *)slot, actor);
+    scrSetUserData((dds3ProcessID_t *)slot, task);
     handle = ((scrProcessWork_s *)dds3GetProcessData((dds3ProcessID_t *)slot))->resourceIndex;
     if (handle >= 0) {
-        BtlUnit *unit = actor->unit;
+        BtlUnit *unit = task->unit;
         itfMesSetTextSlotFromValue(handle, 0, unit->partyRecord.unitId, (unit->partyRecord.flags & 0x20) ? 1 : 2);
     }
     dds3LinkProcess(state->scriptOwner, (dds3ProcessID_t *)slot);

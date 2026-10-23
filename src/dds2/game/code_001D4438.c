@@ -1179,7 +1179,7 @@ void btlEnterAiActionState(s32 task) {
 extern AiSpecies *datEnemyAiRecords;
 extern s32 btlAllocAndCheck();
 extern void btlAssignTaskResultAndArgument();
-extern void btlBindActorSlot();
+extern void btlBindActorSlot(ActionStateLink *, s32);
 extern void btlRunRandomWeightedAiTableAction();
 extern s32 btlAiCheckStatusRollEligibility();
 

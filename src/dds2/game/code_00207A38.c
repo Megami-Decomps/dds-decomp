@@ -2989,22 +2989,22 @@ u32 btlScriptReturnOneBasedAiBucket(void) {
 extern s32 scrStartScript2(s32, s32, s32);
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 
-void btlBindActorSlot(s32 actor, s32 option) {
+void btlBindActorSlot(ActionStateLink *aiTask, s32 option) {
     s32 battle = (s32)(u32)btlGetRuntime();
     s32 task;
     s32 window;
 
     task = scrStartScript2((s32)((BtlState *)battle)->scriptOwner->priority - 1, D_00435E7C, option);
-    scrSetUserData((dds3ProcessID_t *)task, (void *)actor);
+    scrSetUserData((dds3ProcessID_t *)task, aiTask);
     window = ((scrProcessWork_s *)dds3GetProcessData((dds3ProcessID_t *)task))->resourceIndex;
     if (window >= 0) {
-        s32 unit = (s32)((BtlActor *)actor)->unit;
+        BtlUnit *unit = aiTask->unit;
         s32 width = 2;
 
-        if (((BtlUnit *)unit)->partyRecord.flags & 0x20) {
+        if (unit->partyRecord.flags & 0x20) {
             width = 1;
         }
-        itfMesSetTextSlotFromValue(window, 0, ((BtlUnit *)unit)->partyRecord.unitId, width);
+        itfMesSetTextSlotFromValue(window, 0, unit->partyRecord.unitId, width);
     }
     dds3LinkProcess(((BtlState *)battle)->scriptOwner, (dds3ProcessID_t *)task);
     ((BtlState *)battle)->boundTask = task;
@@ -4149,4 +4149,3 @@ INCLUDE_SDATA(const s32, "game/code_00207A38", D_00436C60);
 INCLUDE_SDATA(const s32, "game/code_00207A38", D_00436C68);
 
 INCLUDE_SDATA(const s32, "game/code_00207A38", D_00436C70);
-

@@ -86,7 +86,7 @@ extern s32 btlAllocAndCheck(s32);
 
 extern u32 btlAssignTaskResultAndArgument(s32);
 
-extern void btlBindActorSlot(void *, s32);
+extern void btlBindActorSlot(BtlTask *, s32);
 
 extern s32 btlRunRandomWeightedAiTableAction(BtlTask *);
 
