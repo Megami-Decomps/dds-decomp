@@ -3,12 +3,18 @@
 
 #include "common.h"
 
+typedef enum SdfHandlerKind {
+    SDF_HANDLER_KIND_INTERRUPT = 0,
+    SDF_HANDLER_KIND_DMA = 1,
+    SDF_HANDLER_KIND_SBUS = 2
+} SdfHandlerKind;
+
 /* Shared interrupt/DMA/SBUS handler-list node. The paired sdfAddHandler
  * providers allocate 0x10 bytes and write these four words at +0, +4, +8,
  * and +0xC; removal dispatch reads the three payload words. */
 typedef struct SdfHandlerNode {
     struct SdfHandlerNode *next;
-    s32 handlerKind;
+    SdfHandlerKind handlerKind;
     s32 channel;
     s32 handlerId;
 } SdfHandlerNode;

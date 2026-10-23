@@ -71,13 +71,13 @@ SdfHandlerNode *sdfAddHandler(s32 kind, s32 channel, s32 handler, s32 arg, s32 n
     s32 id;
 
     switch (kind) {
-    case 0:
+    case SDF_HANDLER_KIND_INTERRUPT:
         id = AddIntcHandler2(channel, handler, arg, next);
         break;
-    case 1:
+    case SDF_HANDLER_KIND_DMA:
         id = AddDmacHandler2(channel, handler, arg, next);
         break;
-    case 2:
+    case SDF_HANDLER_KIND_SBUS:
         id = AddSbusIntcHandler(channel, handler);
         break;
     default:
@@ -100,15 +100,15 @@ void sdfIpuRemoveHandler(SdfHandlerNode *target) {
     while (node != NULL) {
         if (node == target) {
             *link = node->next;
-            switch (node->handlerKind) {
-            case 0:
+            switch ((s32)node->handlerKind) {
+            case SDF_HANDLER_KIND_INTERRUPT:
                 DisableIntc(node->channel);
                 RemoveIntcHandler(node->channel, node->handlerId);
                 break;
-            case 1:
+            case SDF_HANDLER_KIND_DMA:
                 RemoveDmacHandler(node->channel, node->handlerId);
                 break;
-            case 2:
+            case SDF_HANDLER_KIND_SBUS:
                 RemoveSbusIntcHandler(node->channel);
                 break;
             }
@@ -129,4 +129,3 @@ void sdfDrainPendingHandlers(void) {
 }
 
 SdfHandlerNode *sdfDmacHandlerTable __attribute__((section(".sdata"))) = NULL;
-
