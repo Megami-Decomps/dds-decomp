@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_handler_node.h"
 #include "eeregs.h"
 #include "sdf_timer.h"
 #include "sdf_texture_queue.h"
@@ -179,7 +180,7 @@ extern volatile s32 dds3GsSema;
 extern volatile u8 D_00438A1D;
 extern volatile u8 sdfDrawFrameFlag;
 extern u16 D_00438A1E;
-extern s32 sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
+extern SdfHandlerNode *sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
 extern void sdfGrMakeFrameSet(sdfGrFrameSet_t *);
 extern void sdfGrGsReset(void);
 extern void sdfGrDrawFrame(void);

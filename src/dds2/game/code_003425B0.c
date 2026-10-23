@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_handler_node.h"
 #include "eeregs.h"
 #include "snd_command_packet.h"
 #include "mnu_voice_resource_path_api.h"
@@ -1847,10 +1848,10 @@ void sdfSoundInitFormattedAndAppendNode(sdfIpuDecodeCb_t *node, SoundFormat *for
     sdfIpuAttachTask(node);
 }
 
-extern s32 D_004391FC;
-extern s32 D_00439200;
+extern SdfHandlerNode *D_004391FC;
+extern SdfHandlerNode *D_00439200;
 extern u8 sdfIpuDecodeThStack[];
-extern s32 sdfAddHandler(s32 kind, s32 index, s32 handler, s32 argument, s32 option);
+extern SdfHandlerNode *sdfAddHandler(s32 kind, s32 index, s32 handler, s32 argument, s32 option);
 extern s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 extern void sdfIpuDecodeThread();
 
@@ -1867,9 +1868,9 @@ void sdfIpuInit(void) {
     _StartThread(D_00439214, 0);
 }
 
-extern s32 D_004391FC;
-extern s32 D_00439200;
-extern void sdfIpuRemoveHandler();
+extern SdfHandlerNode *D_004391FC;
+extern SdfHandlerNode *D_00439200;
+extern void sdfIpuRemoveHandler(SdfHandlerNode *target);
 
 /* Remove both IPU handlers and forward the final completion-source disable result. */
 s32 sdfIpuClose(void) {
