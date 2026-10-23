@@ -1661,7 +1661,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->cameraTargetGraceTicks = 0;
     area->sceneMode = 0;
     area->sceneState = 0;
-    area->unk88 = 0;
+    area->selectedRoomIndex = 0;
     area->unk8C = 0;
     area->primaryMovingMatterIndex = -1;
     area->secondaryMovingMatterIndex = -1;

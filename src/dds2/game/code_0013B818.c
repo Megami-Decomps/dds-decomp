@@ -1450,7 +1450,7 @@ u8 fldDoor_ChkWarp(void) {
 
 void fldApplySceneRoomSelection(FldActorEntry *actorEntry) {
     if (actorEntry->selectedRoom != 0) {
-        fldGlobalBase.unk88 = actorEntry->selectedRoom - 1;
+        fldGlobalBase.selectedRoomIndex = actorEntry->selectedRoom - 1;
     }
     fldGlobalBase.rowIdx = actorEntry->rowIndex;
 }
@@ -1977,7 +1977,7 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequ
                 fldGlobalBase.sequenceCode = entry->sequenceCode;
             }
             if (entry->selectedRoom != 0) {
-                fldGlobalBase.unk88 = entry->selectedRoom - 1;
+                fldGlobalBase.selectedRoomIndex = entry->selectedRoom - 1;
             }
         }
         return;
