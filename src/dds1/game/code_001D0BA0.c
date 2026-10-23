@@ -6009,12 +6009,12 @@ void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *command) {
     btlFlagMatchingUnitsDefeatCandidate((u32)command->task->unit->status.flags & 0x600);
 }
 
-void btlApplyCombinedActorFlags(u8 *resource) {
+void btlApplyCombinedActorFlags(BtlLinkedCommand *command) {
     u32 flags = 0;
-    u32 count = btlGetIndexListCount(*(struct BtlIndexList **)(resource + 0x118));
+    u32 count = btlGetIndexListCount(command->targetList);
     u32 index;
     for (index = 0; index < count; index++) {
-        BtlUnit *actor = (BtlUnit *)btlGetIndexListEntry(*(struct BtlIndexList **)(resource + 0x118), index);
+        BtlUnit *actor = (BtlUnit *)btlGetIndexListEntry(command->targetList, index);
         flags |= (u32)actor->status.flags & 0x600;
     }
     if (flags != 0) {

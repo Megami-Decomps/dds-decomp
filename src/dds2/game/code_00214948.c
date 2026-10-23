@@ -3912,7 +3912,7 @@ extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamSta
 extern s32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *);
 extern s32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
 extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
-extern void btlApplyCombinedActorFlags(u8 *);
+extern void btlApplyCombinedActorFlags(BtlLinkedCommand *);
 extern EffRandState effSharedRandomState[];
 extern char D_0041A5E0[], D_0041A5F8[];
 
@@ -3950,7 +3950,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
             if (entry->partyRecord.unitId == 0x110) {
                 if (btlCanUseActorCategoryFlag4(command)) {
                     btlClearAllUnitDefeatCandidatesTask();
-                    btlApplyCombinedActorFlags((u8 *)command);
+                    btlApplyCombinedActorFlags(command);
                     switch (dds3GetRandIntA(0, 2)) {
                     case 0:
                         btlBossDebugPrintf(D_0041A5E0);
@@ -6544,7 +6544,7 @@ void btlChooseBrahmaGroupCamera(u32 unit) {
 
 extern void btlClearAllUnitDefeatCandidatesTask(void);
 
-extern void btlApplyCombinedActorFlags(u8 *);
+extern void btlApplyCombinedActorFlags(BtlLinkedCommand *);
 
 void btlChooseBrahmaMoveCamera(BtlLinkedCommand *command) {
     BtlUnit *target = btlGetTargetUnitForLink(command);
@@ -6553,7 +6553,7 @@ void btlChooseBrahmaMoveCamera(BtlLinkedCommand *command) {
     }
     btlClearAllUnitDefeatCandidatesTask();
     btlFlagUnitDefeatCandidate(target);
-    btlApplyCombinedActorFlags((u8 *)command);
+    btlApplyCombinedActorFlags(command);
     switch (target->lookupId) {
     case 0:
         switch (btlFindSpecialActionIndex()) {
@@ -7450,7 +7450,7 @@ void btlChooseSatanGroupAwareCamera(s32 actor) {
     }
 }
 
-extern void btlApplyCombinedActorFlags(u8 *);
+extern void btlApplyCombinedActorFlags(BtlLinkedCommand *);
 
 void btlSelectTargetCameraPose(BtlLinkedCommand *command) {
     BtlUnit *target = btlGetTargetUnitForLink(command);
@@ -7460,7 +7460,7 @@ void btlSelectTargetCameraPose(BtlLinkedCommand *command) {
     }
     btlClearAllUnitDefeatCandidatesTask();
     btlFlagUnitDefeatCandidate(target);
-    btlApplyCombinedActorFlags((u8 *)command);
+    btlApplyCombinedActorFlags(command);
     switch (target->lookupId) {
     case 0:
         btlSetEffectCameraKeys((s32)command,
