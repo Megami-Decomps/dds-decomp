@@ -521,8 +521,8 @@ s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex) {
     return (D_00358518[maskTableIndex * 3] & btlEncodeActorIndexAsSelectionMask(actorIndex)) != 0;
 }
 
-s32 fldGetSelectedUnitStat(s32 unitAddress) {
-    s32 selectedEntryIndex = ((BtlUnit *)unitAddress)->selectedEntryIndex;
+s32 fldGetSelectedUnitStat(BtlUnit *unit) {
+    s32 selectedEntryIndex = unit->selectedEntryIndex;
     if (selectedEntryIndex == -1) {
         return 0;
     }

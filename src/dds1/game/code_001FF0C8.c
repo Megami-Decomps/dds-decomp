@@ -1420,7 +1420,7 @@ s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 query, u32 mask) {
 
 extern s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *, u32);
 
-extern s32 fldGetSelectedUnitStat(s32);
+extern s32 fldGetSelectedUnitStat(BtlUnit *);
 
 s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
     u32 flags = unit->status.flags;
@@ -1429,7 +1429,7 @@ s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
     if (flags & 1) {
         if (flags & mask) {
             if (!(flags & 0x20)) {
-                stat = fldGetSelectedUnitStat((s32)unit);
+                stat = fldGetSelectedUnitStat(unit);
                 if (action & 0x100000) {
                     s32 i;
                     for (i = 0; i < 19; i++) {
