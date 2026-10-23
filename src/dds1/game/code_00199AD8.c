@@ -58,7 +58,7 @@ extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern u8 D_00357BF0[], D_00357C08[], D_00357C20[];
 extern u8 D_00357C38[], D_00357C50[], D_00357C68[];
 extern u8 D_003BB1A8[8], D_003BB1B0[8];
-extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, sdfDrawTag_t *);
+extern void itfMiscDrawLineStripPrim(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, sdfDrawTag_t *command);
 extern u8 D_00357C78[];
 extern u8 D_00357C88[];
 extern u8 D_003BB1B8[8];
@@ -342,7 +342,7 @@ void DrawMesWin(itfpanel_t *panel, sdfDrawTag_t *command) {
         itfMiscDrawTriangleStripPrim(drawBuffer, colors, &D_00357BF0[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_00357C08[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, panel->renderValue, command);
     }
     for (rowIndex = 0; rowIndex < ITF_PANEL_SEVEN_SIDE_PASS_COUNT; rowIndex++) {
-        itfMiscDrawLineStripPrim(drawBuffer + 8 + rowIndex * 2, colors, D_003BB1A8, &D_00357C20[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->renderValue, command);
+        itfMiscDrawLineStripPrim((DrawVertex *)(drawBuffer + 8 + rowIndex * 2), (DrawColorRec *)colors, D_003BB1A8, &D_00357C20[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->renderValue, command);
     }
 }
 
@@ -362,7 +362,7 @@ void DrawSelWin(itfpanel_t *panel, sdfDrawTag_t *command) {
         itfMiscDrawTriangleStripPrim(drawBuffer, colors, &D_00357C38[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_00357C50[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, panel->renderValue, command);
     }
     for (rowIndex = 0; rowIndex < ITF_PANEL_FIVE_SIDE_PASS_COUNT; rowIndex++) {
-        itfMiscDrawLineStripPrim(drawBuffer + 8 + rowIndex * 2, colors, D_003BB1B0, &D_00357C68[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->renderValue, command);
+        itfMiscDrawLineStripPrim((DrawVertex *)(drawBuffer + 8 + rowIndex * 2), (DrawColorRec *)colors, D_003BB1B0, &D_00357C68[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->renderValue, command);
     }
 }
 
@@ -390,7 +390,7 @@ void DrawPlain(itfpanel_t *panel, sdfDrawTag_t *command) {
 
     itfMiscDrawRectanglePrim(buf, colors, D_003BB1B8, D_003BB1C0, panel->renderValue, command);
     for (i = 0; i < 3; i++) {
-        itfMiscDrawLineStripPrim(vertices, colors, &D_00357C78[i * 5], &D_00357C88[i * 5], 5, panel->renderValue, command);
+        itfMiscDrawLineStripPrim(vertices, (DrawColorRec *)colors, &D_00357C78[i * 5], &D_00357C88[i * 5], 5, panel->renderValue, command);
     }
 }
 

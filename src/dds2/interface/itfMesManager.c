@@ -2372,7 +2372,7 @@ extern u8 D_00436630[5];
 
 extern u8 D_00436638[5];
 
-extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, sdfDrawTag_t *);
+extern void itfMiscDrawLineStripPrim(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, sdfDrawTag_t *command);
 
 void DebugDrawWindowLine(itfpanel_t *sprite) {
     s32 vertices[4][2] = {
@@ -2385,7 +2385,7 @@ void DebugDrawWindowLine(itfpanel_t *sprite) {
 
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    itfMiscDrawLineStripPrim(vertices, D_003B4A18, D_00436630, D_00436638, 5, 0xFFFFFF, list);
+    itfMiscDrawLineStripPrim((DrawVertex *)vertices, (DrawColorRec *)D_003B4A18, D_00436630, D_00436638, 5, 0xFFFFFF, list);
     D_00380708.append(&D_00380708, list);
 }
 
