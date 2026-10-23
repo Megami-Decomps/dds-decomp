@@ -13,7 +13,7 @@
 #ifdef VERSION_DDS1
 typedef struct EffResourceOwner {
     u32 count;
-    u32 unk04;
+    u32 currentFrame;
     SdfColorTrack colorTrack; /* 0x08 */
     SdfAlphaTrack alphaTrack; /* 0x2C */
     u32 plainEntry; // 0x3C: add the model entry plain instead of flagged
@@ -51,7 +51,7 @@ typedef struct EffResourceExtendedConfig {
 
 typedef struct EffResourceOwner {
     u32 count;
-    s32 unk04;
+    s32 currentFrame;
     EffResourceConfig base;
     EffResourceExtendedConfig extended;
     FileQueue **entries;

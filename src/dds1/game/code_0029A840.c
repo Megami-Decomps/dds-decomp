@@ -570,7 +570,7 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
 
 void effResetModelMotionAndOwnerFlag(EffResourceOwner *work) {
     sdfMotionSeek(work->model->first, 0.0f);
-    work->unk04 = 0;
+    work->currentFrame = 0;
 }
 
 extern void effGetWorldVector(u32);
@@ -633,7 +633,7 @@ void func_0029B818(EffResourceOwner *owner) {
     }
     owner->model->first->frameStep = frameStep;
     mdlLink(owner->model, kwlnSceneSurfaceSets[10]);
-    frame = owner->unk04;
+    frame = owner->currentFrame;
     count = owner->count;
     limit = owner->plainEntry;
     model = owner->model->inner;
@@ -641,7 +641,7 @@ void func_0029B818(EffResourceOwner *owner) {
     if (frame < limit || limit == 0) {
         if (owner->queueAllocation != NULL) {
             sampledColor = effSampleColorAlphaTracks(&owner->colorTrack,
-                &owner->alphaTrack, owner->unk04, owner->plainEntry);
+                &owner->alphaTrack, owner->currentFrame, owner->plainEntry);
             broadcastColor = mdlGetColor(owner->model);
             byteUnit = 0x3C000000;
             eeUnpackRGBAWord(broadcastColor, byteUnit);
@@ -694,7 +694,7 @@ void func_0029B818(EffResourceOwner *owner) {
             }
         }
     }
-    owner->unk04++;
+    owner->currentFrame++;
 }
 
 /* Pass a vector to the VU0 model helpers via vf10 (gcc cannot do this from plain C). */
