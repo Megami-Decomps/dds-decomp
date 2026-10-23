@@ -7,7 +7,7 @@
 /* A room's placed NPC model, in placement order. DDS1 and DDS2 use the same
  * 0x50-byte layout. */
 typedef struct FldRoomEffectEntry {
-    s32 unk0;
+    s32 placementId; /* 0x00: source placement key; 999 excludes the row from name lookup. */
     f32 x;              /* 0x04 */
     f32 y;              /* 0x08 */
     f32 z;              /* 0x0C */

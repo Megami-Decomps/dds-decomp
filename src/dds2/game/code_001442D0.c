@@ -3362,7 +3362,7 @@ void fldClearMenuEntries(void) {
     s32 i;
 
     for (i = 0; i < 32; i++) {
-        fldModelSlotTable[i].unk0 = 0;
+        fldModelSlotTable[i].placementId = 0;
         fldModelSlotTable[i].x = 0.0f;
         fldModelSlotTable[i].y = 0.0f;
         fldModelSlotTable[i].z = 0.0f;
@@ -3529,7 +3529,7 @@ void func_0014C2B8(s32 key, f32 *orientation, s32 room, char *name, s32 argument
         fldModelSlotTable[outputIndex].orientation[0] = orientation[0];
         fldModelSlotTable[outputIndex].orientation[1] = orientation[1];
         fldModelSlotTable[outputIndex].orientation[2] = orientation[2];
-        fldModelSlotTable[outputIndex].unk0 = key;
+        fldModelSlotTable[outputIndex].placementId = key;
         fldModelSlotTable[outputIndex].orientation[3] = orientation[3];
         fldModelSlotTable[outputIndex].unk2C = 0;
         fldModelSlotTable[outputIndex].unk30 = 0;
@@ -3939,7 +3939,7 @@ s32 fldFindEffectByName(const char *name) {
     s32 i;
 
     for (i = 0; i < fldNpcModelTable; i++) {
-        if (fldModelSlotTable[i].unk0 != 999 && strcmp(fldModelSlotTable[i].name, name) == 0) {
+        if (fldModelSlotTable[i].placementId != 999 && strcmp(fldModelSlotTable[i].name, name) == 0) {
             return (s32)fldModelSlotTable[i].object->key;
         }
     }
