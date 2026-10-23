@@ -89,7 +89,7 @@ void dds3NeedleModelDraw(EffResourceWork *work) {
     matrix[5] = work->scale[1];
     matrix[10] = work->scale[2];
     VU0_LOAD_MATRIX(matrix);
-    VU0_LOAD_MATRIX_B(work->matrix);
+    SDF_VU0_LOADMATRIX_B(work->matrix);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(matrix);
     effResourceDrawParams.parameters = NULL;

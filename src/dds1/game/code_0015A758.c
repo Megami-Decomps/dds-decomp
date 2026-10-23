@@ -2,6 +2,7 @@
 #define SDK_SKIP_memcpy
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "par_release_record.h"
 #include "par_vertex_colors.h"
 #include "eff_random.h"
@@ -235,7 +236,7 @@ void dds3ParticleExpDraw(ParObj *effect) {
             s32 age = record->age;
 
             if (age < lifetime && age >= 0) {
-                PCP_COPY_VECTOR(billboard, record->position);
+                SDF_VU0_COPYVECTOR(billboard, record->position);
                 billboard->rotationAngle = record->spin;
                 billboard->childParam = record->color;
                 billboard->childScaleX = billboard->childScaleY = record->scale;
@@ -273,7 +274,7 @@ u16 dds3ParticleExpGetState(ParObj *obj) {
 }
 
 void dds3ParticleExpSetPosition(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 extern void dds3ParticleSetRotateMatrix(ParObj *effect, const Matrix4 *matrix);
@@ -321,7 +322,7 @@ void dds3Particle_EffectInit(ParKindState *obj) {
     }
     VU0_LOAD_VF($vf10, aViewTarget);
     VU0_LOAD_VF($vf11, sdfViewTargetVector);
-    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_SUBVECTOR();
     VU0_STORE_VF($vf10, parLook);
 }
 
@@ -371,22 +372,22 @@ extern void dds3TrackPolyColorSet(s32, s32, u32);
 
 void dds3Particle_TrackSet(s32 particle, s32 index, u32 color) {
     u128 axis[2];
-    VU0_MOVE_VF(vf11, vf12);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, parLook);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
-    VU0_LOAD_VF(vf11, parTrack_w);
-    VU0_MUL(vf10, vf10, vf11);
+    SDF_VU0_COPYVECTOR_C_TO_B();
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(parLook);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_LOADVECTOR_B(parTrack_w);
+    SDF_VU0_MULVECTOR();
     VU0_MOVE_VF(vf2, vf10);
-    VU0_MOVE_VF(vf10, vf12);
+    SDF_VU0_COPYVECTOR_C_TO_A();
     VU0_MOVE_VF(vf12, vf2);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_ADD(vf10, vf10, vf12);
-    VU0_STORE_VF(vf10, &axis[0]);
-    VU0_MOVE_VF(vf10, vf12);
-    VU0_SUB(vf11, vf11, vf10);
-    VU0_STORE_VF(vf11, &axis[1]);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_ADDVECTOR_A_C();
+    SDF_VU0_STOREVECTOR(&axis[0]);
+    SDF_VU0_COPYVECTOR_C_TO_A();
+    SDF_VU0_SUBVECTOR_B_A();
+    SDF_VU0_STOREVECTOR_B(&axis[1]);
     dds3TrackPolySet((ParSystem *)particle, index, axis);
     dds3TrackPolyVCRefresh_ParType1((ParSystem *)particle, index);
     dds3TrackPolyColorSet(particle, index, (color & 0xFF000000) | 0x808080);
@@ -398,23 +399,23 @@ extern void dds3TrackPolyVCRefresh_ParType2(ParSystem *system, s32 cellIndex);
 
 void dds3Particle_Track2Set(s32 particle, s32 index, u32 color) {
     u128 axis[3];
-    VU0_MOVE_VF(vf11, vf12);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, parLook);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
-    VU0_LOAD_VF(vf11, parTrack_w);
-    VU0_MUL(vf10, vf10, vf11);
+    SDF_VU0_COPYVECTOR_C_TO_B();
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(parLook);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_LOADVECTOR_B(parTrack_w);
+    SDF_VU0_MULVECTOR();
     VU0_MOVE_VF(vf2, vf10);
-    VU0_MOVE_VF(vf10, vf12);
+    SDF_VU0_COPYVECTOR_C_TO_A();
     VU0_MOVE_VF(vf12, vf2);
-    VU0_STORE_VF(vf10, &axis[1]);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_ADD(vf10, vf10, vf12);
-    VU0_STORE_VF(vf10, &axis[0]);
-    VU0_MOVE_VF(vf10, vf12);
-    VU0_SUB(vf11, vf11, vf10);
-    VU0_STORE_VF(vf11, &axis[2]);
+    SDF_VU0_STOREVECTOR(&axis[1]);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_ADDVECTOR_A_C();
+    SDF_VU0_STOREVECTOR(&axis[0]);
+    SDF_VU0_COPYVECTOR_C_TO_A();
+    SDF_VU0_SUBVECTOR_B_A();
+    SDF_VU0_STOREVECTOR_B(&axis[2]);
     dds3TrackPolySet2((ParSystem *)particle, index, axis);
     dds3TrackPolyVCRefresh_ParType2((ParSystem *)particle, index);
     dds3TrackPolyColorSet(particle, index, (color & 0xFF000000) | 0x808080);
@@ -422,22 +423,22 @@ void dds3Particle_Track2Set(s32 particle, s32 index, u32 color) {
 
 void dds3Particle_Track3Set(effMTPolyListHandle_t *list, s32 index, u32 color) {
     u128 axis[2];
-    VU0_MOVE_VF(vf11, vf12);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, parLook);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
-    VU0_LOAD_VF(vf11, parTrack_w);
-    VU0_MUL(vf10, vf10, vf11);
+    SDF_VU0_COPYVECTOR_C_TO_B();
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(parLook);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_LOADVECTOR_B(parTrack_w);
+    SDF_VU0_MULVECTOR();
     VU0_MOVE_VF(vf2, vf10);
-    VU0_MOVE_VF(vf10, vf12);
+    SDF_VU0_COPYVECTOR_C_TO_A();
     VU0_MOVE_VF(vf12, vf2);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_ADD(vf10, vf10, vf12);
-    VU0_STORE_VF(vf10, &axis[0]);
-    VU0_MOVE_VF(vf10, vf12);
-    VU0_SUB(vf11, vf11, vf10);
-    VU0_STORE_VF(vf11, &axis[1]);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_ADDVECTOR_A_C();
+    SDF_VU0_STOREVECTOR(&axis[0]);
+    SDF_VU0_COPYVECTOR_C_TO_A();
+    SDF_VU0_SUBVECTOR_B_A();
+    SDF_VU0_STOREVECTOR_B(&axis[1]);
     Eff_ModelTrackPolyListVertexSet(list, index, axis);
     effTrackPolySetIndexedColor(list, index, (color & 0xFF000000) | 0x808080);
 }
@@ -662,7 +663,7 @@ void dds3TrackPolySet(ParSystem *system, s32 cellIndex, const u128 *vertices) {
         vertex = cell->history + shiftCount;
         for (i = 0; i < shiftCount; i++) {
             vertex--;
-            PCP_COPY_VECTOR(vertex + 2, vertex);
+            SDF_VU0_COPYVECTOR(vertex + 2, vertex);
         }
         cell->historyAdvanceCountdown = system->groupDivisor;
         if (cell->vertexCount < shiftCount + 2) {
@@ -672,8 +673,8 @@ void dds3TrackPolySet(ParSystem *system, s32 cellIndex, const u128 *vertices) {
         cell->historyAdvanceCountdown--;
         vertex = cell->history;
     }
-    PCP_COPY_VECTOR(vertex, vertices);
-    PCP_COPY_VECTOR(vertex + 1, vertices + 1);
+    SDF_VU0_COPYVECTOR(vertex, vertices);
+    SDF_VU0_COPYVECTOR(vertex + 1, vertices + 1);
 }
 
 void dds3TrackPolyMove(ParSystem *system, s32 cellIndex, const u128 *delta) {
@@ -681,13 +682,13 @@ void dds3TrackPolyMove(ParSystem *system, s32 cellIndex, const u128 *delta) {
     s32 count = system->vertexWordCount;
     u128 *vertex = cell->history;
     s32 i;
-    VU0_LOAD_VF_MEMORY(vf11, delta);
+    SDF_VU0_LOADVECTOR_B_BARRIER(delta);
     if (count > 0) {
         i = count;
         do {
-            VU0_LOAD_VF(vf10, vertex);
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF(vf10, vertex);
+            SDF_VU0_LOADVECTOR(vertex);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(vertex);
             i--;
             vertex++;
         } while (i != 0);
@@ -705,7 +706,7 @@ void dds3TrackPolySet2(ParSystem *system, s32 cellIndex, const u128 *vertices) {
         vertex = cell->history + shiftCount;
         for (i = 0; i < shiftCount; i++) {
             vertex--;
-            PCP_COPY_VECTOR(vertex + 3, vertex);
+            SDF_VU0_COPYVECTOR(vertex + 3, vertex);
         }
         cell->historyAdvanceCountdown = system->groupDivisor;
         if (cell->vertexCount < shiftCount + 3) {
@@ -715,9 +716,9 @@ void dds3TrackPolySet2(ParSystem *system, s32 cellIndex, const u128 *vertices) {
         cell->historyAdvanceCountdown--;
         vertex = cell->history;
     }
-    PCP_COPY_VECTOR(vertex, vertices);
-    PCP_COPY_VECTOR(vertex + 1, vertices + 1);
-    PCP_COPY_VECTOR(vertex + 2, vertices + 2);
+    SDF_VU0_COPYVECTOR(vertex, vertices);
+    SDF_VU0_COPYVECTOR(vertex + 1, vertices + 1);
+    SDF_VU0_COPYVECTOR(vertex + 2, vertices + 2);
 }
 
 void dds3TrackPolyMove2(ParSystem *system, s32 cellIndex, const u128 *delta) {
@@ -725,19 +726,19 @@ void dds3TrackPolyMove2(ParSystem *system, s32 cellIndex, const u128 *delta) {
     s32 count = cell->vertexCount / 3;
     u128 *vertex = cell->history;
     s32 i;
-    VU0_LOAD_VF(vf11, delta);
+    SDF_VU0_LOADVECTOR_B(delta);
     if (count > 0) {
         i = count;
         do {
-            VU0_LOAD_VF(vf10, vertex);
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF(vf10, vertex);
-            VU0_LOAD_VF(vf10, vertex + 1);
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF(vf10, vertex + 1);
-            VU0_LOAD_VF(vf10, vertex + 2);
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF(vf10, vertex + 2);
+            SDF_VU0_LOADVECTOR(vertex);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(vertex);
+            SDF_VU0_LOADVECTOR(vertex + 1);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(vertex + 1);
+            SDF_VU0_LOADVECTOR(vertex + 2);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(vertex + 2);
             i--;
             vertex += 3;
         } while (i != 0);
@@ -756,20 +757,20 @@ void dds3TrackPolyVCRefresh_ParType1(ParSystem *system, s32 cellIndex) {
     if (count >= 2) {
         alpha[0] = word & 0xFF000000;
         EE_MMI_RGBA_UNPACK(alpha, 1.0f / 128.0f);
-        VU0_MOVE_VF(vf11, vf10);
-        VU0_LOAD_VF(vf10, D_0034E590);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(D_0034E590);
         VU0_LERP_VF10(1.0f / count);
-        VU0_MOVE_VF(vf12, vf10);
+        SDF_VU0_COPYVECTOR_A_TO_C();
         start[0] = word;
         EE_MMI_RGBA_UNPACK(start, 1.0f / 128.0f);
         for (i = 0; i < count; i++) {
-            VU0_MOVE_VF(vf11, vf10);
+            SDF_VU0_COPYVECTOR_A_TO_B();
             EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
             out[0] = packed;
             vertex[0] = packed;
             vertex[1] = packed;
-            VU0_SUB(vf11, vf11, vf12);
-            VU0_MOVE_VF(vf10, vf11);
+            SDF_VU0_SUBVECTOR_B_C();
+            SDF_VU0_COPYVECTOR_B_TO_A();
             vertex += 2;
         }
     }
@@ -802,40 +803,40 @@ void dds3TrackPolyVCRefresh_ParType2(ParSystem *system, s32 cellIndex) {
         edgeWord = vertex->edge0;
         alpha0[0] = middleWord & 0xFF000000;
         EE_MMI_RGBA_UNPACK(alpha0, 1.0f / 128.0f);
-        VU0_MOVE_VF(vf11, vf10);
-        VU0_LOAD_VF(vf10, D_0034E5A0);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(D_0034E5A0);
         VU0_LERP_VF10(1.0f / count);
-        VU0_STORE_VF(vf10, step0);
+        SDF_VU0_STOREVECTOR(step0);
         alpha1[0] = edgeWord & 0xFF000000;
         EE_MMI_RGBA_UNPACK(alpha1, 1.0f / 128.0f);
-        VU0_MOVE_VF(vf11, vf10);
-        VU0_LOAD_VF(vf10, D_0034E5A0);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(D_0034E5A0);
         VU0_LERP_VF10(1.0f / count);
-        VU0_STORE_VF_UNCLOBBERED(vf10, step1);
+        SDF_VU0_STOREVECTOR_NOMEM(step1);
         col0[0] = middleWord;
         EE_MMI_RGBA_UNPACK(col0, 1.0f / 128.0f);
-        VU0_STORE_VF_UNCLOBBERED(vf10, cur0);
+        SDF_VU0_STOREVECTOR_NOMEM(cur0);
         col1[0] = edgeWord;
         EE_MMI_RGBA_UNPACK(col1, 1.0f / 128.0f);
-        VU0_STORE_VF_UNCLOBBERED(vf10, cur1);
+        SDF_VU0_STOREVECTOR_NOMEM(cur1);
         for (j = 0; j < count; j++) {
-            VU0_LOAD_VF(vf10, cur0);
-            VU0_MOVE_VF(vf11, vf10);
+            SDF_VU0_LOADVECTOR(cur0);
+            SDF_VU0_COPYVECTOR_A_TO_B();
             EE_MMI_RGBA_PACK_UNIT(packedMiddle, 128.0f);
             out0[0] = packedMiddle;
             vertex->middle = packedMiddle;
-            VU0_LOAD_VF(vf12, step0);
-            VU0_SUB(vf11, vf11, vf12);
-            VU0_STORE_VF(vf11, cur0);
-            VU0_LOAD_VF(vf10, cur1);
-            VU0_MOVE_VF(vf11, vf10);
+            SDF_VU0_LOADVECTOR_C(step0);
+            SDF_VU0_SUBVECTOR_B_C();
+            SDF_VU0_STOREVECTOR_B(cur0);
+            SDF_VU0_LOADVECTOR(cur1);
+            SDF_VU0_COPYVECTOR_A_TO_B();
             EE_MMI_RGBA_PACK_UNIT(packedEdge, 128.0f);
             out1[0] = packedEdge;
             vertex->edge0 = packedEdge;
             vertex->edge1 = packedEdge;
-            VU0_LOAD_VF(vf12, step1);
-            VU0_SUB(vf11, vf11, vf12);
-            VU0_STORE_VF(vf11, cur1);
+            SDF_VU0_LOADVECTOR_C(step1);
+            SDF_VU0_SUBVECTOR_B_C();
+            SDF_VU0_STOREVECTOR_B(cur1);
             vertex++;
         }
     }
@@ -871,10 +872,10 @@ void dds3TrackPolyVCSet_Acute(ParSystem *system, u32 color) {
     u32 packed;
     alpha[0] = color & 0xFF000000;
     EE_MMI_RGBA_UNPACK(alpha, 1.0f / 128.0f);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, D_0034E5B0);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(D_0034E5B0);
     VU0_LERP_VF10(1.0f / perCell);
-    VU0_MOVE_VF(vf12, vf10);
+    SDF_VU0_COPYVECTOR_A_TO_C();
     i = 0;
     if (count != 0) {
         cell = (u8 *)system->cells + 4;
@@ -883,13 +884,13 @@ void dds3TrackPolyVCSet_Acute(ParSystem *system, u32 color) {
             start[0] = color;
             EE_MMI_RGBA_UNPACK(start, 1.0f / 128.0f);
             for (j = 0; j < perCell; j++) {
-                VU0_MOVE_VF(vf11, vf10);
+                SDF_VU0_COPYVECTOR_A_TO_B();
                 EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
                 out[0] = packed;
                 vertex[0] = packed;
                 vertex[1] = packed;
-                VU0_SUB(vf11, vf11, vf12);
-                VU0_MOVE_VF(vf10, vf11);
+                SDF_VU0_SUBVECTOR_B_C();
+                SDF_VU0_COPYVECTOR_B_TO_A();
                 vertex += 2;
             }
             i++;
@@ -915,10 +916,10 @@ void dds3TrackPolyVCSet_AcuteW(ParSystem *system, u32 color) {
     u32 packed;
     alpha[0] = color & 0xFF000000;
     EE_MMI_RGBA_UNPACK(alpha, 1.0f / 128.0f);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, D_0034E5C0);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(D_0034E5C0);
     VU0_LERP_VF10(1.0f / quarter);
-    VU0_MOVE_VF(vf12, vf10);
+    SDF_VU0_COPYVECTOR_A_TO_C();
     i = 0;
     if (count != 0) {
         base = color & 0xFFFFFF;
@@ -929,13 +930,13 @@ void dds3TrackPolyVCSet_AcuteW(ParSystem *system, u32 color) {
             start[0] = base;
             EE_MMI_RGBA_UNPACK(start, 1.0f / 128.0f);
             for (j = 0; j < quarter; j++) {
-                VU0_MOVE_VF(vf11, vf10);
+                SDF_VU0_COPYVECTOR_A_TO_B();
                 EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
                 rise[0] = packed;
                 vertex[0] = packed;
                 vertex[1] = packed;
-                VU0_ADD(vf11, vf11, vf12);
-                VU0_MOVE_VF(vf10, vf11);
+                SDF_VU0_ADDVECTOR_B_C();
+                SDF_VU0_COPYVECTOR_B_TO_A();
                 vertex += 2;
             }
             if (odd) {
@@ -944,13 +945,13 @@ void dds3TrackPolyVCSet_AcuteW(ParSystem *system, u32 color) {
                 vertex += 2;
             }
             for (j = 0; j < quarter; j++) {
-                VU0_MOVE_VF(vf11, vf10);
+                SDF_VU0_COPYVECTOR_A_TO_B();
                 EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
                 fall[0] = packed;
                 vertex[0] = packed;
                 vertex[1] = packed;
-                VU0_SUB(vf11, vf11, vf12);
-                VU0_MOVE_VF(vf10, vf11);
+                SDF_VU0_SUBVECTOR_B_C();
+                SDF_VU0_COPYVECTOR_B_TO_A();
                 vertex += 2;
             }
             i++;
@@ -1010,16 +1011,16 @@ void dds3TrackPolyVCSet2_Acute(ParSystem *system, u32 middleWord, u32 edgeWord) 
     u32 packedEdge;
     alpha0[0] = middleWord & 0xFF000000;
     EE_MMI_RGBA_UNPACK(alpha0, 1.0f / 128.0f);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, D_0034E5D0);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(D_0034E5D0);
     VU0_LERP_VF10(1.0f / perCell);
-    VU0_STORE_VF(vf10, step0);
+    SDF_VU0_STOREVECTOR(step0);
     alpha1[0] = edgeWord & 0xFF000000;
     EE_MMI_RGBA_UNPACK(alpha1, 1.0f / 128.0f);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, D_0034E5D0);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(D_0034E5D0);
     VU0_LERP_VF10(1.0f / perCell);
-    VU0_STORE_VF(vf10, step1);
+    SDF_VU0_STOREVECTOR(step1);
     i = 0;
     if (count != 0) {
         cell = (u8 *)system->cells + 4;
@@ -1027,28 +1028,28 @@ void dds3TrackPolyVCSet2_Acute(ParSystem *system, u32 middleWord, u32 edgeWord) 
             vertex = *(ParTriangleVertexColors **)cell;
             col0[0] = middleWord;
             EE_MMI_RGBA_UNPACK(col0, 1.0f / 128.0f);
-            VU0_STORE_VF(vf10, cur0);
+            SDF_VU0_STOREVECTOR(cur0);
             col1[0] = edgeWord;
             EE_MMI_RGBA_UNPACK(col1, 1.0f / 128.0f);
-            VU0_STORE_VF(vf10, cur1);
+            SDF_VU0_STOREVECTOR(cur1);
             for (j = 0; j < perCell; j++) {
-                VU0_LOAD_VF(vf10, cur0);
-                VU0_MOVE_VF(vf11, vf10);
+                SDF_VU0_LOADVECTOR(cur0);
+                SDF_VU0_COPYVECTOR_A_TO_B();
                 EE_MMI_RGBA_PACK_UNIT(packedMiddle, 128.0f);
                 out0[0] = packedMiddle;
                 vertex->middle = packedMiddle;
-                VU0_LOAD_VF(vf12, step0);
-                VU0_SUB(vf11, vf11, vf12);
-                VU0_STORE_VF(vf11, cur0);
-                VU0_LOAD_VF(vf10, cur1);
-                VU0_MOVE_VF(vf11, vf10);
+                SDF_VU0_LOADVECTOR_C(step0);
+                SDF_VU0_SUBVECTOR_B_C();
+                SDF_VU0_STOREVECTOR_B(cur0);
+                SDF_VU0_LOADVECTOR(cur1);
+                SDF_VU0_COPYVECTOR_A_TO_B();
                 EE_MMI_RGBA_PACK_UNIT(packedEdge, 128.0f);
                 out1[0] = packedEdge;
                 vertex->edge0 = packedEdge;
                 vertex->edge1 = packedEdge;
-                VU0_LOAD_VF(vf12, step1);
-                VU0_SUB(vf11, vf11, vf12);
-                VU0_STORE_VF(vf11, cur1);
+                SDF_VU0_LOADVECTOR_C(step1);
+                SDF_VU0_SUBVECTOR_B_C();
+                SDF_VU0_STOREVECTOR_B(cur1);
                 vertex++;
             }
             i++;

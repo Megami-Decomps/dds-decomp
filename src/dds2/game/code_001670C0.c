@@ -101,13 +101,13 @@ u16 dds3SpPolyGetState(EffectDispatchState *effect) {
 }
 
 void dds3SpPolySetPosition(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 /* vu0 routine: effect->composedMatrix = matrix * effect->sourceMatrix via sdfComposeVuMatrixFromRegisters */
 void dds3SpPolySetRotateMatrix(EffectDispatchState *effect, void *matrix) {
     VU0_LOAD_MATRIX(matrix);
-    VU0_LOAD_MATRIX_B(effect->sourceMatrix);
+    SDF_VU0_LOADMATRIX_B(effect->sourceMatrix);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(effect->composedMatrix);
 }
@@ -140,19 +140,19 @@ void dds3PolygonTriangleSet(EffOffsetTriangleView *work, const f32 *position) {
     f32 (*positions)[4];
     u16 flags;
 
-    PCP_COPY_VECTOR(point, position);
+    SDF_VU0_COPYVECTOR(point, position);
     positions = (f32 (*)[4])(((u32)count << 4) + (u32)work->positions);
-    PCP_COPY_VECTOR(positions[0], point);
+    SDF_VU0_COPYVECTOR(positions[0], point);
     point[1] += 5.0f;
-    PCP_COPY_VECTOR(positions[1], point);
+    SDF_VU0_COPYVECTOR(positions[1], point);
     point[2] += 5.0f;
-    PCP_COPY_VECTOR(positions[2], point);
+    SDF_VU0_COPYVECTOR(positions[2], point);
     flags = work->flags;
     if (flags & 2) {
         f32 (*normals)[4] = (f32 (*)[4])(((u32)count << 4) + (u32)work->normals);
-        PCP_COPY_VECTOR(normals[0], D_003AAEB0);
-        PCP_COPY_VECTOR(normals[1], D_003AAEB0);
-        PCP_COPY_VECTOR(normals[2], D_003AAEB0);
+        SDF_VU0_COPYVECTOR(normals[0], D_003AAEB0);
+        SDF_VU0_COPYVECTOR(normals[1], D_003AAEB0);
+        SDF_VU0_COPYVECTOR(normals[2], D_003AAEB0);
     }
     if (flags & 4) {
         u32 *colors = (u32 *)(((u32)count << 2) + (u32)work->colors);

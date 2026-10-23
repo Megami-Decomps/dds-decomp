@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu0.h"
 #include "eff_random.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
@@ -96,19 +97,19 @@ void dds3Particle_SphereSpiral2BuffInit(ParBurstEmitter *effect, u32 particleInd
     direction[0] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
     direction[1] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
     direction[2] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
-    VU0_LOAD_VF(vf10, direction);
-    VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, direction);
+    SDF_VU0_LOADVECTOR(direction);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(direction);
     /* Each component gets a separate jitter sample, not one shared radius draw. */
     packet->radialOffset[0] = initialRadius * (dds3GetRandFloatA(effDefaultRandomState) * jitterFactor + (1.0f - jitterFactor)) * direction[0];
     packet->radialOffset[1] = initialRadius * (dds3GetRandFloatA(effDefaultRandomState) * jitterFactor + (1.0f - jitterFactor)) * direction[1];
     packet->radialOffset[2] = initialRadius * (dds3GetRandFloatA(effDefaultRandomState) * jitterFactor + (1.0f - jitterFactor)) * direction[2];
-    VU0_LOAD_VF(vf10, packet->radialOffset);
-    VU0_LENGTH_VF10(initialRadiusLength);
+    SDF_VU0_LOADVECTOR(packet->radialOffset);
+    SDF_VU0_GETLENGTH(initialRadiusLength);
     VU0_LOAD_MATRIX(effect->head.matrix);
-    VU0_LOAD_VF(vf10, packet->radialOffset);
-    VU0_ROTATE_VEC(vf10, vf10);
-    VU0_STORE_VF_UNCLOBBERED(vf10, packet->radialOffset);
+    SDF_VU0_LOADVECTOR(packet->radialOffset);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_STOREVECTOR_NOMEM(packet->radialOffset);
     packet->position[0] = packet->radialOffset[0] + effect->head.origin[0];
     packet->position[1] = packet->radialOffset[1] + effect->head.origin[1];
     packet->position[2] = packet->radialOffset[2] + effect->head.origin[2];
@@ -116,9 +117,9 @@ void dds3Particle_SphereSpiral2BuffInit(ParBurstEmitter *effect, u32 particleInd
         direction[0] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
         direction[1] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
         direction[2] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
-        VU0_LOAD_VF(vf10, direction);
-        VU0_NORMALIZE_VF10();
-        VU0_STORE_VF(vf10, direction);
+        SDF_VU0_LOADVECTOR(direction);
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(direction);
         packet->rotationAxis[0] = direction[0];
         packet->rotationAxis[1] = direction[1];
         packet->rotationAxis[2] = direction[2];
@@ -177,13 +178,13 @@ void dds3Particle_SphereSpiral2Draw(ParBurstEmitter *effect) {
     capacity = effect->history.capacity;
     kind = effect->head.kindState.kind;
     dds3Particle_EffectInit(&effect->head.kindState);
-    VU0_LOAD_MATRIX_B(effect->head.matrix);
+    SDF_VU0_LOADMATRIX_B(effect->head.matrix);
     packetCount = effect->head.particleCount;
     lifetimeFrames = effect->head.lifetimeFrames;
     completedCount = 0;
     rotationStep = effect->rotationStepDegrees * (3.14159265f / 180.0f);
     repeatEnabled = effect->loop;
-    PCP_COPY_VECTOR(origin, effect->head.origin);
+    SDF_VU0_COPYVECTOR(origin, effect->head.origin);
     previousOrigin[0] = effect->previousOrigin[0];
     previousOrigin[1] = effect->previousOrigin[1];
     previousOrigin[2] = effect->previousOrigin[2];
@@ -199,18 +200,18 @@ void dds3Particle_SphereSpiral2Draw(ParBurstEmitter *effect) {
             packet->color = dds3ParticleColorAnim(&effect->head.colorRamp, packet->color, age);
             packet->color = dds3ParticleColorBlend(packet->color, effect->head.parameterWord);
             if (kind != 0) {
-                VU0_LOAD_VF(vf12, packet->radialOffset);
+                SDF_VU0_LOADVECTOR_C(packet->radialOffset);
             }
-            VU0_LOAD_VF(vf10, packet->radialOffset);
-            VU0_LENGTH_VF10(radius);
+            SDF_VU0_LOADVECTOR(packet->radialOffset);
+            SDF_VU0_GETLENGTH(radius);
             radius += packet->radiusStep;
             scaleVector[0] = radius;
             scaleVector[1] = radius;
             scaleVector[2] = radius;
-            VU0_NORMALIZE_VF10();
-            VU0_LOAD_VF(vf11, scaleVector);
-            VU0_MUL(vf10, vf10, vf11);
-            VU0_STORE_VF(vf10, packet->radialOffset);
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_LOADVECTOR_B(scaleVector);
+            SDF_VU0_MULVECTOR();
+            SDF_VU0_STOREVECTOR(packet->radialOffset);
             VU0_MOVE_VF(vf28, vf24);
             VU0_MOVE_VF(vf29, vf25);
             VU0_MOVE_VF(vf30, vf26);
@@ -219,16 +220,16 @@ void dds3Particle_SphereSpiral2Draw(ParBurstEmitter *effect) {
             rotationAxis[1] = packet->rotationAxis[1];
             rotationAxis[2] = packet->rotationAxis[2];
             rotationAxis[3] = 0;
-            VU0_LOAD_VF(vf10, rotationAxis);
-            VU0_ROTATE_VEC(vf10, vf10);
-            VU0_STORE_VF_UNCLOBBERED(vf10, rotationAxis);
+            SDF_VU0_LOADVECTOR(rotationAxis);
+            SDF_VU0_APPLYMATRIX_XYZ();
+            SDF_VU0_STOREVECTOR_NOMEM(rotationAxis);
             SetRotateMatrixAxis(rotationStep, (const RwV3d *)rotationAxis);
-            VU0_LOAD_VF(vf10, packet->radialOffset);
-            VU0_ROTATE_VEC(vf10, vf10);
-            VU0_LOAD_VF(vf11, origin);
-            VU0_STORE_VF(vf10, packet->radialOffset);
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF(vf10, packet->position);
+            SDF_VU0_LOADVECTOR(packet->radialOffset);
+            SDF_VU0_APPLYMATRIX_XYZ();
+            SDF_VU0_LOADVECTOR_B(origin);
+            SDF_VU0_STOREVECTOR(packet->radialOffset);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(packet->position);
             if (kind != 0) {
                 u32 color;
 
@@ -424,12 +425,12 @@ void dds3Particle_BlurSet(dds3Particle_BlurBuff_t *table, s32 slotIndex, u32 col
 
     for (i = 0; i < last; i++) {
         point--;
-        PCP_COPY_VECTOR(point + 1, point);
+        SDF_VU0_COPYVECTOR(point + 1, point);
     }
     if (slot->pointCount <= last) {
         slot->pointCount++;
     }
-    VU0_STORE_VF(vf12, point);
+    SDF_VU0_STOREVECTOR_C(point);
     slot->color = color;
     slot->billboardScale = billboardScale;
 }
@@ -446,7 +447,7 @@ void dds3Particle_BlurSetExp(dds3Particle_BlurBuff_t *table, s32 slotIndex, cons
     s32 pointCapacity;
     s32 pointIndex;
 
-    PCP_COPY_VECTOR(localOrigin, origin);
+    SDF_VU0_COPYVECTOR(localOrigin, origin);
     history = &source->records[slotIndex];
     slot = &table->slots[slotIndex];
     pointCount = history->count;
@@ -501,7 +502,7 @@ void dds3Particle_BlurDraw(dds3Particle_BlurBuff_t *table) {
             if (pointCount != 0) {
                 remainingPoints = pointCount;
                 do {
-                    PCP_COPY_VECTOR(billboard, point);
+                    SDF_VU0_COPYVECTOR(billboard, point);
                     alpha -= alphaStep;
                     --remainingPoints;
                     billboard->childParam = color | (alpha & 0xFF000000);
@@ -541,7 +542,7 @@ void dds3Particle_TrackSetExp(ParSystem *system, s32 index, const f32 *origin, u
         s32 lastIndex;
         s32 ring;
 
-        PCP_COPY_VECTOR(localOrigin, origin);
+        SDF_VU0_COPYVECTOR(localOrigin, origin);
         segments = count - 1;
         cell->vertexCount = segments * 2;
         ring = history->nextIndex;
@@ -552,28 +553,28 @@ void dds3Particle_TrackSetExp(ParSystem *system, s32 index, const f32 *origin, u
         point[2] = localOrigin[2] + history->points[ring][2];
         point[3] = 0;
         for (segmentIndex = 0; segmentIndex < segments; segmentIndex++) {
-            VU0_LOAD_VF(vf10, point);
+            SDF_VU0_LOADVECTOR(point);
             ring = ring == 0 ? lastIndex : ring - 1;
             point[0] = localOrigin[0] + history->points[ring][0];
             point[1] = localOrigin[1] + history->points[ring][1];
             point[2] = localOrigin[2] + history->points[ring][2];
-            VU0_LOAD_VF(vf12, point);
-            VU0_MOVE_VF(vf11, vf12);
-            VU0_SUB(vf10, vf10, vf11);
-            VU0_LOAD_VF(vf11, parLook);
-            VU0_CROSS_XYZ(vf10, vf10, vf11);
-            VU0_NORMALIZE_VF10();
-            VU0_LOAD_VF(vf11, parTrack_w);
-            VU0_MUL(vf10, vf10, vf11);
+            SDF_VU0_LOADVECTOR_C(point);
+            SDF_VU0_COPYVECTOR_C_TO_B();
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_LOADVECTOR_B(parLook);
+            SDF_VU0_OUTERPRODUCT();
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_LOADVECTOR_B(parTrack_w);
+            SDF_VU0_MULVECTOR();
             VU0_MOVE_VF(vf2, vf10);
-            VU0_MOVE_VF(vf10, vf12);
+            SDF_VU0_COPYVECTOR_C_TO_A();
             VU0_MOVE_VF(vf12, vf2);
-            VU0_MOVE_VF(vf11, vf10);
-            VU0_ADD(vf10, vf10, vf12);
-            VU0_STORE_VF_UNCLOBBERED(vf10, vertex);
-            VU0_MOVE_VF(vf10, vf12);
-            VU0_SUB(vf11, vf11, vf10);
-            VU0_STORE_VF_UNCLOBBERED(vf11, vertex + 1);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_ADDVECTOR_A_C();
+            SDF_VU0_STOREVECTOR_NOMEM(vertex);
+            SDF_VU0_COPYVECTOR_C_TO_A();
+            SDF_VU0_SUBVECTOR_B_A();
+            SDF_VU0_STOREVECTOR_B_NOMEM(vertex + 1);
             vertex += 2;
         }
         dds3TrackPolyVCRefresh_ParType1(system, index);
@@ -598,7 +599,7 @@ void dds3Particle_Track2SetExp(ParSystem *system, s32 index, const f32 *origin, 
         s32 lastIndex;
         s32 ring;
 
-        PCP_COPY_VECTOR(localOrigin, origin);
+        SDF_VU0_COPYVECTOR(localOrigin, origin);
         segments = count - 1;
         cell->vertexCount = segments * 3;
         ring = history->nextIndex;
@@ -609,29 +610,29 @@ void dds3Particle_Track2SetExp(ParSystem *system, s32 index, const f32 *origin, 
         point[2] = localOrigin[2] + history->points[ring][2];
         point[3] = 0;
         for (segmentIndex = 0; segmentIndex < segments; segmentIndex++) {
-            VU0_LOAD_VF(vf10, point);
+            SDF_VU0_LOADVECTOR(point);
             ring = ring == 0 ? lastIndex : ring - 1;
             point[0] = localOrigin[0] + history->points[ring][0];
             point[1] = localOrigin[1] + history->points[ring][1];
             point[2] = localOrigin[2] + history->points[ring][2];
-            VU0_LOAD_VF(vf12, point);
-            VU0_MOVE_VF(vf11, vf12);
-            VU0_SUB(vf10, vf10, vf11);
-            VU0_LOAD_VF(vf11, parLook);
-            VU0_CROSS_XYZ(vf10, vf10, vf11);
-            VU0_NORMALIZE_VF10();
-            VU0_LOAD_VF(vf11, parTrack_w);
-            VU0_MUL(vf10, vf10, vf11);
+            SDF_VU0_LOADVECTOR_C(point);
+            SDF_VU0_COPYVECTOR_C_TO_B();
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_LOADVECTOR_B(parLook);
+            SDF_VU0_OUTERPRODUCT();
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_LOADVECTOR_B(parTrack_w);
+            SDF_VU0_MULVECTOR();
             VU0_MOVE_VF(vf2, vf10);
-            VU0_MOVE_VF(vf10, vf12);
+            SDF_VU0_COPYVECTOR_C_TO_A();
             VU0_MOVE_VF(vf12, vf2);
-            VU0_STORE_VF_UNCLOBBERED(vf10, vertex + 1);
-            VU0_MOVE_VF(vf11, vf10);
-            VU0_ADD(vf10, vf10, vf12);
-            VU0_STORE_VF_UNCLOBBERED(vf10, vertex);
-            VU0_MOVE_VF(vf10, vf12);
-            VU0_SUB(vf11, vf11, vf10);
-            VU0_STORE_VF_UNCLOBBERED(vf11, vertex + 2);
+            SDF_VU0_STOREVECTOR_NOMEM(vertex + 1);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_ADDVECTOR_A_C();
+            SDF_VU0_STOREVECTOR_NOMEM(vertex);
+            SDF_VU0_COPYVECTOR_C_TO_A();
+            SDF_VU0_SUBVECTOR_B_A();
+            SDF_VU0_STOREVECTOR_B_NOMEM(vertex + 2);
             vertex += 3;
         }
         dds3TrackPolyVCRefresh_ParType2(system, index);
@@ -648,10 +649,10 @@ u32 dds3ParticleColorBlend(u32 colorA, u32 colorB) {
     u32 unit = 0x3C000000;
     color1[0] = colorA;
     EE_MMI_RGBA_UNPACK(color1, unit);
-    VU0_MOVE_VF(vf11, vf10);
+    SDF_VU0_COPYVECTOR_A_TO_B();
     color2[0] = colorB;
     EE_MMI_RGBA_UNPACK(color2, unit);
-    VU0_MUL(vf10, vf10, vf11);
+    SDF_VU0_MULVECTOR();
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     return blended[0];
@@ -700,7 +701,7 @@ void dds3ParticleDraw(ParObj *effect) {
             s32 age = record->age;
 
             if (age < lifetime && age >= 0) {
-                PCP_COPY_VECTOR(billboard, record->position);
+                SDF_VU0_COPYVECTOR(billboard, record->position);
                 billboard->childParam = record->color;
                 dds3BillboardDraw(billboard);
             }
@@ -754,13 +755,13 @@ u16 dds3ParticleGetState(ParObj *obj) {
 
 /* Copy one 16-byte vector with the existing EE/VU copy primitive. */
 void dds3ParticleSetPosition(void *destination, void *source) {
-    PCP_COPY_VECTOR(destination, source);
+    SDF_VU0_COPYVECTOR(destination, source);
 }
 
 /* vu0 routine: compose the supplied matrix with the emitter's source matrix. */
 void dds3ParticleSetRotateMatrix(ParObj *effect, const Matrix4 *matrix) {
     VU0_LOAD_MATRIX(matrix);
-    VU0_LOAD_MATRIX_B(effect->sourceMatrix);
+    SDF_VU0_LOADMATRIX_B(effect->sourceMatrix);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(effect->matrix);
 }

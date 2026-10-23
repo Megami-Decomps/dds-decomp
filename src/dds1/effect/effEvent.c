@@ -5,6 +5,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_vu_rotation_axes.h"
 #include "sdf_sif_command.h"
 #include "sdf_trig.h"
@@ -260,9 +261,9 @@ void effDebugPointDraw(f32 *position) {
     SdfPoolNode *scene;
 
     sdfDrawTagInit(list);
-    VU0_LOAD_VF(vf10, position);
+    SDF_VU0_LOADVECTOR(position);
     effScreenOffset();
-    VU0_STORE_VF(vf10, screen);
+    SDF_VU0_STOREVECTOR(screen);
     x = (s32)screen[0] - EFF_EVENT_PROJECTED_X_BIAS;
     y = (s32)screen[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
     pixel[0] = x;
@@ -282,9 +283,9 @@ void effDebugPointDraw2(f32 *position, s32 color) {
     SdfPoolNode *scene;
 
     sdfDrawTagInit(list);
-    VU0_LOAD_VF(vf10, position);
+    SDF_VU0_LOADVECTOR(position);
     effScreenOffset();
-    VU0_STORE_VF(vf10, screen);
+    SDF_VU0_STOREVECTOR(screen);
     x = (s32)screen[0] - EFF_EVENT_PROJECTED_X_BIAS;
     y = (s32)screen[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
     pixel[0] = x;
@@ -309,12 +310,12 @@ void effDebugLineDraw(f32 *from, f32 *to) {
     SdfPoolNode *scene;
 
     sdfDrawTagInit(list);
-    VU0_LOAD_VF(vf10, from);
+    SDF_VU0_LOADVECTOR(from);
     effScreenOffset();
-    VU0_STORE_VF(vf10, start);
-    VU0_LOAD_VF(vf10, to);
+    SDF_VU0_STOREVECTOR(start);
+    SDF_VU0_LOADVECTOR(to);
     effScreenOffset();
-    VU0_STORE_VF(vf10, end);
+    SDF_VU0_STOREVECTOR(end);
     x0 = (s32)start[0] - EFF_EVENT_PROJECTED_X_BIAS;
     y0 = (s32)start[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
     x1 = (s32)end[0] - EFF_EVENT_PROJECTED_X_BIAS;
@@ -341,12 +342,12 @@ void effDebugLineDraw2(f32 *from, f32 *to, s32 color) {
     SdfPoolNode *scene;
 
     sdfDrawTagInit(list);
-    VU0_LOAD_VF(vf10, from);
+    SDF_VU0_LOADVECTOR(from);
     effScreenOffset();
-    VU0_STORE_VF(vf10, start);
-    VU0_LOAD_VF(vf10, to);
+    SDF_VU0_STOREVECTOR(start);
+    SDF_VU0_LOADVECTOR(to);
     effScreenOffset();
-    VU0_STORE_VF(vf10, end);
+    SDF_VU0_STOREVECTOR(end);
     x0 = (s32)start[0] - EFF_EVENT_PROJECTED_X_BIAS;
     y0 = (s32)start[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
     x1 = (s32)end[0] - EFF_EVENT_PROJECTED_X_BIAS;
@@ -405,27 +406,27 @@ void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
             ringY = radius * sdfCos(latitude);
             ringRadius = radius * sdfSin(latitude);
             VU0_LOAD_MATRIX(matrix);
-            VU0_LOAD_VF(vf11, center);
+            SDF_VU0_LOADVECTOR_B(center);
             point[0] = ringRadius;
             point[1] = ringY;
             point[2] = 0.0f;
-            VU0_LOAD_VF(vf10, point);
-            VU0_CLEAR_W(vf10);
-            VU0_APPLY_MATRIX(vf10, vf10);
-            VU0_ADD(vf10, vf10, vf11);
+            SDF_VU0_LOADVECTOR(point);
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_ADDVECTOR();
 
             for (segment = 0; segment < 20; segment++) {
-                VU0_STORE_VF(vf10, *out);
+                SDF_VU0_STOREVECTOR(*out);
                 out++;
                 longitude += 0.31415924429893494f;
                 point[0] = sdfCos(longitude) * ringRadius;
                 point[1] = ringY;
                 point[2] = sdfSin(longitude) * ringRadius;
-                VU0_LOAD_VF(vf10, point);
-                VU0_CLEAR_W(vf10);
-                VU0_APPLY_MATRIX(vf10, vf10);
-                VU0_ADD(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, *out);
+                SDF_VU0_LOADVECTOR(point);
+                SDF_VU0_VECTOR_W_SET_ZERO();
+                SDF_VU0_APPLYMATRIX();
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR(*out);
                 out++;
             }
             sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 40, 0x80));
@@ -468,8 +469,8 @@ void effDebugSelectCursorDraw(f32 *position) {
     sdfDrawTagInit(list);
     SetRotateMatrixY(D_003BB06C);
     D_003BB06C += 0.10471974313259125f;
-    VU0_LOAD_VF(vf10, position);
-    VU0_ADD_XYZ(vf31, vf31, vf10);
+    SDF_VU0_LOADVECTOR(position);
+    VU0_ADD_VF31_VF10_XYZ();
     sdf3DPrimLinkTm(list, NULL);
     memset(&packet, 0, 0x2C);
     packet.primitive = 0x4000;
@@ -527,19 +528,19 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
         point[0] = radius;
         point[1] = y;
         point[2] = 0.0f;
-        VU0_LOAD_VF(vf11, center);
-        VU0_LOAD_VF(vf10, point);
-        VU0_ADD(vf10, vf10, vf11);
+        SDF_VU0_LOADVECTOR_B(center);
+        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_ADDVECTOR();
         for (segment = 0; segment < 20; segment++) {
-            VU0_STORE_VF(vf10, *out);
+            SDF_VU0_STOREVECTOR(*out);
             out++;
             angle += angleStep;
             point[0] = sdfCos(angle) * radius;
             point[1] = y;
             point[2] = sdfSin(angle) * radius;
-            VU0_LOAD_VF(vf10, point);
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF(vf10, *out);
+            SDF_VU0_LOADVECTOR(point);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(*out);
             out++;
         }
         sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 40, 0x80));
@@ -547,68 +548,68 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
     }
 
     out = vertices;
-    VU0_LOAD_VF(vf11, center);
+    SDF_VU0_LOADVECTOR_B(center);
     angle = 0.0f;
     for (segment = 0; segment < 20; segment++) {
         point[0] = sdfCos(angle) * radius;
         point[1] = -height * 0.5f;
         point[2] = sdfSin(angle) * radius;
-        VU0_LOAD_VF(vf10, point);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, *out);
+        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(*out);
         out++;
         point[0] = sdfCos(angle) * radius;
         point[1] = height * 0.5f;
         point[2] = sdfSin(angle) * radius;
-        VU0_LOAD_VF(vf10, point);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, *out);
+        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(*out);
         out++;
         angle += angleStep;
     }
     sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 40, 0x80));
 
     out = vertices;
-    VU0_LOAD_VF(vf11, center);
+    SDF_VU0_LOADVECTOR_B(center);
     angle = 0.0f;
     for (segment = 0; segment < 10; segment++) {
         point[0] = sdfCos(angle) * radius;
         point[1] = -height * 0.5f;
         point[2] = sdfSin(angle) * radius;
-        VU0_LOAD_VF(vf10, point);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, *out);
+        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(*out);
         out++;
         oppositeAngle = angle + 3.1415926f;
         point[0] = sdfCos(oppositeAngle) * radius;
         point[1] = -height * 0.5f;
         point[2] = sdfSin(oppositeAngle) * radius;
-        VU0_LOAD_VF(vf10, point);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, *out);
+        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(*out);
         out++;
         angle += angleStep;
     }
     sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 20, 0x80));
 
     out = vertices;
-    VU0_LOAD_VF(vf11, center);
+    SDF_VU0_LOADVECTOR_B(center);
     angle = 0.0f;
     for (segment = 0; segment < 10; segment++) {
         point[0] = sdfCos(angle) * radius;
         point[1] = height * 0.5f;
         point[2] = sdfSin(angle) * radius;
-        VU0_LOAD_VF(vf10, point);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, *out);
+        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(*out);
         out++;
         oppositeAngle = angle + 3.1415926f;
         point[0] = sdfCos(oppositeAngle) * radius;
         point[1] = height * 0.5f;
         point[2] = sdfSin(oppositeAngle) * radius;
-        VU0_LOAD_VF(vf10, point);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, *out);
+        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(*out);
         out++;
         angle += angleStep;
     }
@@ -1230,8 +1231,8 @@ void effEventUpdateEffectParameters(effEveBEDCutHandle_t *work) {
     effect = work->effect;
     frame = effect->currentFrame;
     list = effect->list;
-    VU0_LOAD_VF(vf10, work->init.orientation);
-    VU0_LOAD_VF(vf11, D_003A12E0);
+    SDF_VU0_LOADVECTOR(work->init.orientation);
+    SDF_VU0_LOADVECTOR_B(D_003A12E0);
     effMiscQuatMultiplyVU();
     effMiscQuaternionToMatrixVU();
     VU0_STORE_MATRIX_NOCLOBBER(rotationMatrix);
@@ -1242,29 +1243,29 @@ void effEventUpdateEffectParameters(effEveBEDCutHandle_t *work) {
         if (entry->zeroKindCount < frame && effect->parameterWorks[entryIndex] != NULL) {
             if (entry->aimParams.kind != 5 || work->actor == NULL) {
                 effEveBEDPartGetPositionPtr(&work->init, &entry->aimParams);
-                VU0_STORE_VF_UNCLOBBERED(vf10, position);
+                SDF_VU0_STOREVECTOR_NOMEM(position);
                 dds3EffectPartSetPosition(effect->parameterWorks[entryIndex], position);
                 dds3EffectPartSetRotateMatrix(effect->parameterWorks[entryIndex], rotationMatrix);
             } else {
                 model = work->actor->owner->inner;
                 sdfModelGetMarkPos(model, entry->aimParams.count);
-                VU0_STORE_VF_UNCLOBBERED(vf10, position);
+                SDF_VU0_STOREVECTOR_NOMEM(position);
                 dds3EffectPartSetPosition(effect->parameterWorks[entryIndex], position);
                 /* The callback can change the entry's scale kind. */
                 if (entry->aimParams.kind == 5) {
                     sdfModelGetMarkPosMatrix(model, entry->aimParams.count);
-                    VU0_LOAD_MATRIX_B(rotationMatrix);
+                    SDF_VU0_LOADMATRIX_B(rotationMatrix);
                     sdfComposeVuMatrixFromRegisters();
                     VU0_STORE_MATRIX_NOCLOBBER(matrix);
                     dds3EffectPartSetRotateMatrix(effect->parameterWorks[entryIndex], matrix);
                 } else {
                     mdlGetScale(work->actor->owner);
-                    VU0_GET_VF10_X(scale);
+                    SDF_VU0_GETVECTOR_X(scale);
                     sdfModelGetMarkPosMatrix(model, entry->aimParams.count);
                     if (scale != 0.0f) {
-                        VU0_SET_ONES_XYZ(vf10);
+                        SDF_VU0_SETSCALE1VECTOR();
                         VU0_SCALAR_OP(1.0f / scale, "vmulx.xyzw vf10, vf10, vf2x");
-                        VU0_SCALE_MATRIX_ROWS(vf10);
+                        SDF_VU0_SCALE_XYZ();
                     }
                     VU0_STORE_MATRIX_NOCLOBBER(matrix);
                     dds3EffectPartSetRotateMatrix(effect->parameterWorks[entryIndex], matrix);
@@ -1369,7 +1370,7 @@ void effEveBEDPartGetPositionPtr(EffEventInit *source, EffectVectorRequest *para
         radius = (f32)rangeOverride;
     }
     half = source->height * 0.5f;
-    PCP_COPY_VECTOR(pos, source->position);
+    SDF_VU0_COPYVECTOR(pos, source->position);
     if (aimMode == 5) {
         if (directionMode == 8 || directionMode == 10) {
             y = -1.0f;
@@ -1393,11 +1394,11 @@ void effEveBEDPartGetPositionPtr(EffEventInit *source, EffectVectorRequest *para
         pos[1] = y;
         LookAtMatrix(pos, sdfViewTargetVector, aViewDown);
         ReverseMatrix();
-        VU0_LOAD_VF(vf10, dir);
-        VU0_CLEAR_W(vf10);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_LOAD_VF(vf11, pos);
-        VU0_ADD(vf10, vf10, vf11);
+        SDF_VU0_LOADVECTOR(dir);
+        SDF_VU0_VECTOR_W_SET_ZERO();
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_LOADVECTOR_B(pos);
+        SDF_VU0_ADDVECTOR();
         return;
     }
     if (directionMode == 8 || directionMode == 10) {
@@ -1408,19 +1409,19 @@ void effEveBEDPartGetPositionPtr(EffEventInit *source, EffectVectorRequest *para
         dir[0] = 0.0f;
         dir[2] = 1.0f;
         dir[1] = 0.0f;
-        VU0_LOAD_VF(vf10, source->orientation);
+        SDF_VU0_LOADVECTOR(source->orientation);
         effMiscQuaternionToMatrixVU();
         sdfVuLoadSecondaryRotationMatrixY(D_003563B8[directionMode]);
         sdfComposeVuMatrixFromRegisters();
-        VU0_LOAD_VF(vf10, dir);
-        VU0_CLEAR_W(vf10);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF(vf10, dir);
+        SDF_VU0_LOADVECTOR(dir);
+        SDF_VU0_VECTOR_W_SET_ZERO();
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(dir);
         out[0] = pos[0] + radius * dir[0];
         out[1] = y + radius * dir[1];
         out[2] = pos[2] + radius * dir[2];
     }
-    VU0_LOAD_VF(vf10, out);
+    SDF_VU0_LOADVECTOR(out);
 }
 
 extern billHandle_t *billCreateFromResource(s32 kind, const char *path);
@@ -1505,9 +1506,9 @@ void effEVECombParSmokePartInit(EffEventBillSet *work, s32 index) {
     direction[0] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
     direction[1] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
     direction[2] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
-    VU0_LOAD_VF(vf10, direction);
-    VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, direction);
+    SDF_VU0_LOADVECTOR(direction);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(direction);
     /* Each coordinate consumes its own radial random factor, not one shared radius. */
     particle->position[0] = spawnRadius * dds3GetRandFloatA(effDefaultRandomState) * direction[0];
     particle->position[1] = spawnRadius * dds3GetRandFloatA(effDefaultRandomState) * direction[1];
@@ -1515,9 +1516,9 @@ void effEVECombParSmokePartInit(EffEventBillSet *work, s32 index) {
     particle->motion[0] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
     particle->motion[1] = 0;
     particle->motion[2] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
-    VU0_LOAD_VF(vf10, particle->motion);
-    VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, particle->motion);
+    SDF_VU0_LOADVECTOR(particle->motion);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(particle->motion);
     particle->swayAmplitude = work->head.swayAmplitude * (dds3GetRandFloatA(effDefaultRandomState) * work->head.swayRandomness + (1.0f - work->head.swayRandomness));
     particle->swayPhase = 0;
     particle->verticalSpeed = work->head.verticalSpeed * (dds3GetRandFloatA(effDefaultRandomState) * work->head.verticalSpeedRandomness + (1.0f - work->head.verticalSpeedRandomness));
@@ -1538,13 +1539,13 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
     u32 color;
     f32 acceleration, swayPhaseStep, swayAmplitudeStep;
 
-    VU0_LOAD_VF(vf10, aViewTarget);
-    VU0_LOAD_VF(vf11, sdfViewTargetVector);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, aViewDown);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, lateral);
+    SDF_VU0_LOADVECTOR(aViewTarget);
+    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(aViewDown);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(lateral);
     particle = work->particles;
     particleCount = work->head.particleCount;
     acceleration = work->head.accelerationPercent / 100.0f + 1.0f;
@@ -1555,7 +1556,7 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
     color = work->head.color;
     swayPhaseStep = work->head.swayPhaseStep;
     swayAmplitudeStep = work->head.swayAmplitudeStep;
-    PCP_COPY_VECTOR(origin, work->head.position);
+    SDF_VU0_COPYVECTOR(origin, work->head.position);
     dds3BillboardSetMode((billHandle_t *)D_003BB144, work->head.drawMode);
     dds3BillboardSetMode((billHandle_t *)D_003BB148, 3);
     for (index = 0; index < particleCount; index++, particle++) {
@@ -1602,10 +1603,10 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
             phaseCosine = sdfCos(particle->scalePhaseY);
             scaleX = scaleY + modulationX;
             scaleY = scaleY + particle->scaleAmplitudeY * phaseCosine;
-            VU0_LOAD_VF(vf10, position);
-            VU0_LOAD_VF(vf11, origin);
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF(vf10, position);
+            SDF_VU0_LOADVECTOR(position);
+            SDF_VU0_LOADVECTOR_B(origin);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(position);
             effCopyVector((billHandle_t *)D_003BB144, position);
             dds3BillboardSetScale((billHandle_t *)D_003BB144, scaleX, scaleY);
             dds3BillboardSetRGBA((billHandle_t *)D_003BB144, drawColor);
@@ -1683,13 +1684,13 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     geometryPacket = (u8 *)sdfGrAllocPacketBuff(0x38);
     sdfBillBoardMakeTMPacket(geometryPacket, matrix[0]);
     sdfDrawTagLink(secondaryList, (u32)geometryPacket);
-    VU0_LOAD_VF(vf10, aViewTarget);
-    VU0_LOAD_VF(vf11, sdfViewTargetVector);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, aViewDown);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, lateral);
+    SDF_VU0_LOADVECTOR(aViewTarget);
+    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(aViewDown);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(lateral);
     particle = work->particles;
     particleCount = work->head.particleCount;
     acceleration = work->head.accelerationPercent / 100.0f + 1.0f;
@@ -1702,7 +1703,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     color = work->head.color;
     swayPhaseStep = work->head.swayPhaseStep;
     swayAmplitudeStep = work->head.swayAmplitudeStep;
-    PCP_COPY_VECTOR(origin, work->head.position);
+    SDF_VU0_COPYVECTOR(origin, work->head.position);
     for (index = 0; index < particleCount; index++, particle++) {
         s32 age = particle->age;
         if (age == 0) {
@@ -1764,15 +1765,15 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
             phaseCosine = sdfCos(particle->scalePhaseY);
             scaleX = scaleY + modulationX;
             scaleY = scaleY + particle->scaleAmplitudeY * phaseCosine;
-            VU0_LOAD_VF(vf10, position);
-            VU0_LOAD_VF(vf11, origin);
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF(vf10, position);
+            SDF_VU0_LOADVECTOR(position);
+            SDF_VU0_LOADVECTOR_B(origin);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(position);
             {
                 f32 cosine, sine, cornerX, cornerY;
                 f32 center = 0.0f;
             slot = primary.count;
-            PCP_COPY_VECTOR(&primary.positions[slot], position);
+            SDF_VU0_COPYVECTOR(&primary.positions[slot], position);
             u = (s16)((u16)primaryTexture->width << 4);
             v = (s16)((u16)primaryTexture->height << 4);
             primary.colors[slot] = primaryColor;
@@ -1810,7 +1811,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
                 f32 cosine, sine, cornerX, cornerY;
                 f32 center = 0.0f;
             slot = secondary.count;
-            PCP_COPY_VECTOR(&secondary.positions[slot], position);
+            SDF_VU0_COPYVECTOR(&secondary.positions[slot], position);
             u = (s16)((u16)secondaryTexture->width << 4);
             v = (s16)((u16)secondaryTexture->height << 4);
             secondary.colors[slot] = secondaryColor;
@@ -1904,7 +1905,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
 
 /* Copy one full vector quadword through vf10, including its fourth component. */
 void effEVECombParSmokeSetPosition(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 /* Set the native byte flag without normalizing it to a boolean. */

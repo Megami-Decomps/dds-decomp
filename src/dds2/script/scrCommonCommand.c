@@ -1,5 +1,6 @@
 #include "dat_state.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "scr_integer_return_value_api.h"
 #include "kwln_background_fade_api.h"
 #include "eff_random_mod.h"
@@ -324,8 +325,8 @@ s32 scrCommand_SCENE_LIGHT_RGB(void)
     VU0_SET_AXIS_GPR(y, y);
     z = scrGetFloatPara(3);
     VU0_SET_AXIS_GPR(z, z);
-    VU0_CLEAR_W(vf10);
-    VU0_STORE_VF_TO(vf10, v);
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    SDF_VU0_STOREVECTOR_MEMOPS(v);
     dds3SetLightColor(scrGetIntPara(0), 0, &v.x);
     return 1;
 }
@@ -368,8 +369,8 @@ s32 scrCommand_SCENE_AMBIENT(void)
     VU0_SET_AXIS_GPR(y, y);
     z = scrGetFloatPara(3);
     VU0_SET_AXIS_GPR(z, z);
-    VU0_SET_W_ONE(vf10);
-    VU0_STORE_VF_TO(vf10, v);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_STOREVECTOR_MEMOPS(v);
     dds3SetAmbientColor(scrGetIntPara(0), &v.x);
     return 1;
 }

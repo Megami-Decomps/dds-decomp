@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "btl_boss_data_api.h"
 #include "btl_effect_active_api.h"
 #include "eff_random_mod.h"
@@ -122,7 +123,7 @@ s32 btlChooseLinkedPairMotion(BtlUnit *unit, s32 code, s32 unused) {
     effect = &battle->effect->linked;
     first = NULL;
     second = NULL;
-    for (actor = battle->units; actor != NULL; actor = actor->nextActor) {
+    for (actor = battle->units; actor != NULL; actor = actor->next) {
         u32 flags = actor->status.flags;
         if (flags & 1) {
             if (flags & 0x400) {
@@ -219,7 +220,7 @@ s32 btlGetLinkedEffectPhase(BtlUnit *unit) {
         if (effect->active == 1) {
             first = NULL;
             second = NULL;
-            for (node = battle->units; node != NULL; node = node->nextActor) {
+            for (node = battle->units; node != NULL; node = node->next) {
                 if (node->status.flags & 1) {
                     if (node->status.flags & 0x400) {
                         switch (node->partyRecord.unitId) {
@@ -328,7 +329,7 @@ BtlUnit *btlFindFlaggedSpecialSpeciesUnit(s32 category, s32 species) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return 0;
 }
@@ -365,7 +366,7 @@ void btlUpdateLinkedActorGroundHeight(void) {
             return;
         }
         dds3GetPosPoseSet(selected->effectObject);
-        VU0_STORE_VF(vf10, (u128 *)vector);
+        SDF_VU0_STOREVECTOR((u128 *)vector);
         if (!(vector[1] > -125.0f)) {
             return;
         }
@@ -401,7 +402,7 @@ void btlUpdateLinkedActorGroundHeight(void) {
                     if (flags & 0x200) {
                         if (flags & 2) {
                             dds3GetPosPoseSet(unit->effectObject);
-                            VU0_STORE_VF(vf10, (u128 *)vector);
+                            SDF_VU0_STOREVECTOR((u128 *)vector);
                             if (!(vector[1] > ceiling)) {
                                 if (vector[1] < lowerLimit) {
                                     height = effect->linked.height + effect->linked.speed;
@@ -421,7 +422,7 @@ void btlUpdateLinkedActorGroundHeight(void) {
                         }
                     }
                 }
-                unit = unit->nextActor;
+                unit = unit->next;
             }
         }
     }
@@ -444,7 +445,7 @@ void func_002279F0(void) {
     ActionStateLink *task;
 
     mainUnit = NULL;
-    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
         s32 flags = unit->status.flags;
 
         if (flags & 1) {
@@ -585,7 +586,7 @@ void btlQueueLinkedPairModelSwapTasks(ActionStateLink *action, s32 mode, u64 ref
         timedTask->ownerId = sequence;
         btlStartTask(timedTask);
 
-        for (unit = state->units; unit != NULL; unit = unit->nextActor) {
+        for (unit = state->units; unit != NULL; unit = unit->next) {
             s32 flags = unit->status.flags;
             s32 unitId;
             if ((flags & 1) == 0) {
@@ -642,7 +643,7 @@ void btlQueueLinkedPairModelSwapTasks(ActionStateLink *action, s32 mode, u64 ref
         return;
     }
 
-    for (unit = state->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = state->units; unit != NULL; unit = unit->next) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x400) {
@@ -662,7 +663,7 @@ void btlQueueLinkedPairModelSwapTasks(ActionStateLink *action, s32 mode, u64 ref
         timedTask->ownerId = sequence;
         btlStartTask(timedTask);
 
-        for (unit = state->units; unit != NULL; unit = unit->nextActor) {
+        for (unit = state->units; unit != NULL; unit = unit->next) {
             s32 flags = unit->status.flags;
             s32 unitId;
             if ((flags & 1) == 0) {
@@ -757,7 +758,7 @@ s32 btlGetSoleTargetKind(void) {
     target = btlGetEffectActor();
     last = NULL;
     count = 0;
-    for (unit = state->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = state->units; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x200) {
                 if (!(unit->status.flags & 0xE0)) {
@@ -788,7 +789,7 @@ s32 btlSetLinkFlagOff(BtlUnit *requestedUnit) {
     if (btlHasEffectActor() == 0) {
         return 1;
     }
-    for (unit = ((BtlState *)btlGetRuntime())->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 if (unit->partyRecord.unitId == 0x12F) {
@@ -825,7 +826,7 @@ s32 btlSetLinkFlagOn(BtlUnit *requestedUnit) {
     if (btlHasEffectActor() == 0) {
         return 1;
     }
-    for (unit = ((BtlState *)btlGetRuntime())->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 if (unit->partyRecord.unitId == 0x12F) {
@@ -872,7 +873,7 @@ void btlQueueLinkedActorModelStateTasks(ActionStateLink *action) {
     modelSequence = btlAdvanceRuntimeSequenceCounter();
     scriptSequence = btlAdvanceRuntimeSequenceCounter();
 
-    for (unit = battle->units; unit != 0; unit = unit->nextActor) {
+    for (unit = battle->units; unit != 0; unit = unit->next) {
         s32 flags = unit->status.flags;
         s32 unitId;
 
@@ -1016,7 +1017,7 @@ s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit) {
                 }
             }
         }
-        other = other->nextActor;
+        other = other->next;
     }
     btlStartTask(btlCreateUnitFadeOutTask(unit, 8, 10));
     unit->status.flags &= ~0x100;
@@ -1080,7 +1081,7 @@ s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
     if (command->actionCode != 0x189) {
         return 0;
     }
-    for (target = battle->units; target != 0; target = target->nextActor) {
+    for (target = battle->units; target != 0; target = target->next) {
         flags = target->status.flags;
         if ((flags & 1) != 0) {
             if ((flags & 0x400) != 0) {
@@ -1103,16 +1104,16 @@ s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
     command->motionProgress = 1;
     command->state = 0;
     effBTLModelGetMarkPosition2((BtlUnit *)target, 0);
-    VU0_STORE_VF_UNCLOBBERED(vf10, command->backCamera.position);
+    SDF_VU0_STOREVECTOR_NOMEM(command->backCamera.position);
     command->backCamera.position[1] += 150.0f;
     btlInterpolateVectorStep(&command->frontCamera);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, command->backCamera.position);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(distance);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(command->backCamera.position);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(distance);
     command->backCamera.distance = distance;
-    VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, command->backCamera.direction);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(command->backCamera.direction);
     command->backCamera.distance += 45.0f;
     btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
     return 1;
@@ -1222,7 +1223,7 @@ s32 btlIsSpecialEnemyEffectLinkSatisfied(void) {
             unit->partyRecord.unitId == 0x12F) {
             break;
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     if (unit == 0) {
         return 1;
@@ -1312,7 +1313,7 @@ s32 btlClearEffectNodeRuntimeFlagForActiveUnits(void) {
         if (unit->status.flags & 1) {
             unit->status.stateFlags &= ~0x100000;
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return -1;
 }

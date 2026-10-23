@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_vu_rotation_axes.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_quaternion.h"
@@ -165,7 +166,7 @@ void LoadMatrix(void *matrix) {
 }
 
 void LoadMatrix_B(void *matrix) {
-    VU0_LOAD_MATRIX_B(matrix);
+    SDF_VU0_LOADMATRIX_B(matrix);
 }
 
 void StoreMatrix(void *matrix) {
@@ -173,7 +174,7 @@ void StoreMatrix(void *matrix) {
 }
 
 void StoreMatrix_B(void *matrix) {
-    VU0_STORE_MATRIX_B(matrix);
+    SDF_VU0_STOREMATRIX_B(matrix);
 }
 
 void CopyMatrixAtoB(void) {
@@ -219,11 +220,11 @@ void CopyMatrixCtoB(void) {
 }
 
 void LoadIdentity(void) {
-    VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+    SDF_VU0_LOADIDENTITY();
 }
 
 void LoadIdentity_B(void) {
-    VU0_SET_UNIT_MATRIX(vf24, vf25, vf26, vf27);
+    SDF_VU0_LOADIDENTITY_B();
 }
 
 /* libvu0: sceVu0UnitMatrix */
@@ -234,7 +235,7 @@ void StoreIdentity(void *dst) {
 /* Transpose the four VU rows; EE MMI interleave is needed for packed vectors. */
 /* libvu0: sceVu0TransposeMatrix, register form (vf28-vf31 in and out) */
 void DiagMatrix(void) {
-    VU0_MATRIX4_TRANSPOSE();
+    SDF_VU0_TRANSMATRIX();
 }
 
 /* vu0 routine: rigid inverse of vf28-vf31 (transpose the 3x3, translation = -(R^T * t)) */
@@ -300,9 +301,9 @@ void StoreRotateMatrixAxis(f32 angle, const RwV3d *axis, RwMatrix *matrix) {
     f32 cosine = cosf(angle);
     f32 sine = sinf(angle);
 
-    VU0_LOAD_VF(vf10, axis);
-    VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, normalizedAxis);
+    SDF_VU0_LOADVECTOR(axis);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(normalizedAxis);
 
     x = normalizedAxis[0];
     y = normalizedAxis[1];

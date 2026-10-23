@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_dma_tag.h"
 #include "evt_window_shade_packet.h"
 #include "evt_camera_color_track_api.h"
@@ -2044,7 +2045,7 @@ void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer) {
                     dds3SetRotPoseSet(node->info,
                         (u128 *)node->savedRotation);
                     dds3GetPosPoseSet(node->info);
-                    VU0_STORE_VF(vf10, &node->info->inner->smoothedPosition);
+                    SDF_VU0_STOREVECTOR(&node->info->inner->smoothedPosition);
                     node->objectAttached = 0;
                 }
             } else if (best->frame == position) {
@@ -2056,7 +2057,7 @@ void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer) {
                     dds3SetRotPoseSet(node->info,
                         (u128 *)node->savedRotation);
                     dds3GetPosPoseSet(node->info);
-                    VU0_STORE_VF(vf10, &node->info->inner->smoothedPosition);
+                    SDF_VU0_STOREVECTOR(&node->info->inner->smoothedPosition);
                     node->objectAttached = 0;
                 } else {
                     dds3Basic_t *object = dds3SceneBasicSearchName(
@@ -3855,9 +3856,9 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, EvtRuntime *v
         case 13:
             destination = entry->payload;
             source = D_00324770[0];
-            PCP_COPY_VECTOR(destination, source);
-            PCP_COPY_VECTOR(destination + 1, source + 1);
-            PCP_COPY_VECTOR(destination + 2, kwlnDefaultColorVector);
+            SDF_VU0_COPYVECTOR(destination, source);
+            SDF_VU0_COPYVECTOR(destination + 1, source + 1);
+            SDF_VU0_COPYVECTOR(destination + 2, kwlnDefaultColorVector);
             break;
         case 14:
             entry->p08.f = sdfFaceDivSoften;

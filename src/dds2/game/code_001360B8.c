@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "pcp_vu0.h"
@@ -247,10 +248,10 @@ void fldApplySkyLightSetToPlayerVU(void) {
         dir[1] = light->unitLightDirection[1];
         dir[2] = light->unitLightDirection[2];
         dir[3] = 0.0f;
-        VU0_LOAD_VF(vf10, dir);
+        SDF_VU0_LOADVECTOR(dir);
         evtSetUnitLightDir(unit, 0);
         /* The setter replaces vf10, so the second update reloads it. */
-        VU0_LOAD_VF(vf10, dir);
+        SDF_VU0_LOADVECTOR(dir);
         evtSetUnitLightDir(unit, 0);
     }
 }
@@ -282,9 +283,9 @@ void fldApplyLightSetToChaseCameraUnit(void) {
     dir[1] = light->unitLightDirection[1];
     dir[2] = light->unitLightDirection[2];
     dir[3] = 0.0f;
-    VU0_LOAD_VF(vf10, dir);
+    SDF_VU0_LOADVECTOR(dir);
     evtSetUnitLightDir(unit, index);
-    VU0_LOAD_VF(vf10, dir);
+    SDF_VU0_LOADVECTOR(dir);
     evtSetUnitLightDir(unit, 0);
 }
 

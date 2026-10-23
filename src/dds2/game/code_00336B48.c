@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_vu_color_transform.h"
 #include "kwln.h"
 #include "sdf_asset_packets.h"
@@ -80,60 +81,60 @@ void MultMatrixRevNoArg_C(void) {
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 void MultMatrix(void *matrix) {
-    VU0_LOAD_MATRIX_B(matrix);
+    SDF_VU0_LOADMATRIX_B(matrix);
     sdfComposeVuMatrixFromRegisters();
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 void sdfPostmultiplyVuMatrixFromMemory(const void *matrix) {
-    VU0_LOAD_MATRIX_B(matrix);
+    SDF_VU0_LOADMATRIX_B(matrix);
     MultMatrixRevNoArg();
 }
 
 /* Transform inputVector by the matrix resident in VU0; write outputVector. */
 void ApplyMatrix(void *outputVector, void *inputVector) {
-    VU0_LOAD_VF(vf10, inputVector);
-    VU0_APPLY_MATRIX(vf10, vf10);
-    VU0_STORE_VF(vf10, outputVector);
+    SDF_VU0_LOADVECTOR(inputVector);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(outputVector);
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 f32 InnerProduct(void *left, void *right) {
     f32 dot;
-    VU0_LOAD_VF(vf10, left);
-    VU0_LOAD_VF(vf11, right);
-    VU0_DOT_XYZ(dot, vf10, vf11);
+    SDF_VU0_LOADVECTOR(left);
+    SDF_VU0_LOADVECTOR_B(right);
+    SDF_VU0_INNERPRODUCT(dot);
     return dot;
 }
 
 /* Write the XYZ cross product of leftVector and rightVector via VU0. */
 void OuterProduct(void *outputVector, void *leftVector, void *rightVector) {
-    VU0_LOAD_VF(vf10, leftVector);
-    VU0_LOAD_VF(vf11, rightVector);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, outputVector);
+    SDF_VU0_LOADVECTOR(leftVector);
+    SDF_VU0_LOADVECTOR_B(rightVector);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_STOREVECTOR(outputVector);
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 /* Build direction from the first vector relative to the second, then derive up/right. */
 /* vu0 routine: look-at basis in vf28-vf31 (forward, right, up, eye), then its rigid inverse */
 void LookAtMatrix(const void *directionPoint, const void *basisOrigin, const void *up) {
-    VU0_LOAD_VF(vf10, basisOrigin);
-    VU0_MOVE_VF(vf31, vf10);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, directionPoint);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
-    VU0_MOVE_VF(vf30, vf10);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF_MEMORY(vf10, up);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
-    VU0_MOVE_VF(vf28, vf10);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_MOVE_VF(vf10, vf30);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_MOVE_VF(vf29, vf10);
+    SDF_VU0_LOADVECTOR(basisOrigin);
+    SDF_VU0_SET_ROW3();
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(directionPoint);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_SET_ROW2();
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR_BARRIER(up);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_SET_ROW0();
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_GET_ROW2();
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_SET_ROW1();
     ReverseMatrix();
 }
 

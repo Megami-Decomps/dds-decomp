@@ -1,5 +1,6 @@
 #include "sdf_request.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "pcp_vu0.h"
@@ -382,9 +383,9 @@ void sdfMotCLBK_modelLinerPosSeek(SdfMotionDrawBinding *binding, f32 frame) {
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     EE_MMI_LOAD_VEC3(vf10, keyInterval.firstKey);
-    EE_MMI_LOAD_VEC3(vf11, keyInterval.secondKey);
+    SDF_VU0_LOADVECTOR_UNALIGN_B(keyInterval.secondKey);
         VU0_LERP_VF10_W(keyInterval.weight);
-    VU0_STORE_VF_UNCLOBBERED(vf10, binding->node->translation);
+    SDF_VU0_STOREVECTOR_NOMEM(binding->node->translation);
 }
 
 /* vu0 routine: interpolate translation keys, then blend with captured translation. */
@@ -393,11 +394,11 @@ void sdfMotCLBK_modelLinerPosBlendSeek(SdfMotionDrawBinding *binding, f32 frame,
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     EE_MMI_LOAD_VEC3(vf10, keyInterval.firstKey);
-    EE_MMI_LOAD_VEC3(vf11, keyInterval.secondKey);
+    SDF_VU0_LOADVECTOR_UNALIGN_B(keyInterval.secondKey);
         VU0_LERP_VF10_COPY(keyInterval.weight);
-    VU0_LOAD_VF(vf10, binding->capturedVector);
+    SDF_VU0_LOADVECTOR(binding->capturedVector);
         VU0_LERP_VF10_W(blendWeight);
-    VU0_STORE_VF_UNCLOBBERED(vf10, binding->node->translation);
+    SDF_VU0_STOREVECTOR_NOMEM(binding->node->translation);
 }
 
 SdfMotionDrawBinding *sdfMotGenModelLinerRotXYZ(sdfMotionCtrlr_t *motion, s32 unused, s32 nodeIndex) {
@@ -419,17 +420,17 @@ void sdfMotCLBK_modelLinerRotXYZSeek(SdfMotionDrawBinding *binding, f32 frame) {
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     EE_MMI_LOAD_VEC3(vf10, keyInterval.firstKey);
-    EE_MMI_LOAD_VEC3(vf11, keyInterval.secondKey);
+    SDF_VU0_LOADVECTOR_UNALIGN_B(keyInterval.secondKey);
     VU0_LERP_VF10_CLEAR_W(keyInterval.weight);
-    VU0_STORE_VF(vf10, (f32 *)angles);
+    SDF_VU0_STOREVECTOR((f32 *)angles);
     sdfConvertEulerAnglesToQuaternionVU(angles[0], angles[1], angles[2]);
     drawNode = binding->node;
-    VU0_STORE_VF(vf10, drawNode->quaternion);
+    SDF_VU0_STOREVECTOR(drawNode->quaternion);
     matrix = drawNode->localMatrix;
     effMiscQuaternionToMatrixVU();
-    VU0_STORE_VF_UNCLOBBERED(vf28, matrix[0]);
-    VU0_STORE_VF_UNCLOBBERED(vf29, matrix[1]);
-    VU0_STORE_VF_UNCLOBBERED(vf30, matrix[2]);
+    SDF_VU0_STORE_ROW0_NOMEM(matrix[0]);
+    SDF_VU0_STORE_ROW1_NOMEM(matrix[1]);
+    SDF_VU0_STORE_ROW2_NOMEM(matrix[2]);
 }
 
 /* vu0 routine: as above, then nlerp the result with the captured quaternion. */
@@ -441,20 +442,20 @@ void sdfMotCLBK_modelLinerRotXYZBlendSeek(SdfMotionDrawBinding *binding, f32 fra
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     EE_MMI_LOAD_VEC3(vf10, keyInterval.firstKey);
-    EE_MMI_LOAD_VEC3(vf11, keyInterval.secondKey);
+    SDF_VU0_LOADVECTOR_UNALIGN_B(keyInterval.secondKey);
     VU0_LERP_VF10_CLEAR_W(keyInterval.weight);
-    VU0_STORE_VF(vf10, (f32 *)angles);
+    SDF_VU0_STOREVECTOR((f32 *)angles);
     sdfConvertEulerAnglesToQuaternionVU(angles[0], angles[1], angles[2]);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, binding->capturedVector);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(binding->capturedVector);
     Lerp(blendWeight);
     drawNode = binding->node;
-    VU0_STORE_VF(vf10, drawNode->quaternion);
+    SDF_VU0_STOREVECTOR(drawNode->quaternion);
     matrix = drawNode->localMatrix;
     effMiscQuaternionToMatrixVU();
-    VU0_STORE_VF_UNCLOBBERED(vf28, matrix[0]);
-    VU0_STORE_VF_UNCLOBBERED(vf29, matrix[1]);
-    VU0_STORE_VF_UNCLOBBERED(vf30, matrix[2]);
+    SDF_VU0_STORE_ROW0_NOMEM(matrix[0]);
+    SDF_VU0_STORE_ROW1_NOMEM(matrix[1]);
+    SDF_VU0_STORE_ROW2_NOMEM(matrix[2]);
 }
 
 SdfMotionDrawBinding *sdfMotGenModelLinerScale(sdfMotionCtrlr_t *motion, s32 unused, s32 nodeIndex) {
@@ -471,9 +472,9 @@ void sdfMotCLBK_modelLinerScaleSeek(SdfMotionDrawBinding *binding, f32 frame) {
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     EE_MMI_LOAD_VEC3(vf10, keyInterval.firstKey);
-    EE_MMI_LOAD_VEC3(vf11, keyInterval.secondKey);
+    SDF_VU0_LOADVECTOR_UNALIGN_B(keyInterval.secondKey);
         VU0_LERP_VF10_W(keyInterval.weight);
-    VU0_STORE_VF(vf10, binding->node->scale);
+    SDF_VU0_STOREVECTOR(binding->node->scale);
 }
 
 /* vu0 routine: interpolate scale keys, then blend with captured scale. */
@@ -482,11 +483,11 @@ void sdfMotCLBK_modelLinerScaleBlendSeek(SdfMotionDrawBinding *binding, f32 fram
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     EE_MMI_LOAD_VEC3(vf10, keyInterval.firstKey);
-    EE_MMI_LOAD_VEC3(vf11, keyInterval.secondKey);
+    SDF_VU0_LOADVECTOR_UNALIGN_B(keyInterval.secondKey);
         VU0_LERP_VF10_COPY(keyInterval.weight);
-    VU0_LOAD_VF(vf10, binding->capturedVector);
+    SDF_VU0_LOADVECTOR(binding->capturedVector);
         VU0_LERP_VF10_W(blendWeight);
-    VU0_STORE_VF(vf10, binding->node->scale);
+    SDF_VU0_STOREVECTOR(binding->node->scale);
 }
 
 SdfMotionDrawBinding *sdfMotGenModelLerpRotQuat(sdfMotionCtrlr_t *motion, s32 unused, s32 nodeIndex) {
@@ -506,17 +507,17 @@ void sdfMotCLBK_modelLerpRotQuatSeek(SdfMotionDrawBinding *binding, f32 frame) {
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     keyData = keyInterval.firstKey;
-    EE_MMI_LOAD_S16X4_FIXED12(vf10, keyData);
+    SDF_VU0_LOADSHORTVECTOR(keyData);
     keyData = keyInterval.secondKey;
-    EE_MMI_LOAD_S16X4_FIXED12(vf11, keyData);
+    SDF_VU0_LOADSHORTVECTOR_B(keyData);
     Lerp(keyInterval.weight);
     drawNode = binding->node;
-    VU0_STORE_VF_UNCLOBBERED(vf10, drawNode->quaternion);
+    SDF_VU0_STOREVECTOR_NOMEM(drawNode->quaternion);
     matrix = drawNode->localMatrix;
     effMiscQuaternionToMatrixVU();
-    VU0_STORE_VF_UNCLOBBERED(vf28, matrix[0]);
-    VU0_STORE_VF_UNCLOBBERED(vf29, matrix[1]);
-    VU0_STORE_VF_UNCLOBBERED(vf30, matrix[2]);
+    SDF_VU0_STORE_ROW0_NOMEM(matrix[0]);
+    SDF_VU0_STORE_ROW1_NOMEM(matrix[1]);
+    SDF_VU0_STORE_ROW2_NOMEM(matrix[2]);
 }
 
 /* vu0 routine: nlerp sampled keys with the captured quaternion, then build the matrix. */
@@ -528,20 +529,20 @@ void sdfMotCLBK_modelLerpRotQuatBlendSeek(SdfMotionDrawBinding *binding, f32 fra
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     keyData = keyInterval.firstKey;
-    EE_MMI_LOAD_S16X4_FIXED12(vf10, keyData);
+    SDF_VU0_LOADSHORTVECTOR(keyData);
     keyData = keyInterval.secondKey;
-    EE_MMI_LOAD_S16X4_FIXED12(vf11, keyData);
+    SDF_VU0_LOADSHORTVECTOR_B(keyData);
     Lerp(keyInterval.weight);
     drawNode = binding->node;
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, binding->capturedVector);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(binding->capturedVector);
     Lerp(blendWeight);
-    VU0_STORE_VF_UNCLOBBERED(vf10, drawNode->quaternion);
+    SDF_VU0_STOREVECTOR_NOMEM(drawNode->quaternion);
     matrix = drawNode->localMatrix;
     effMiscQuaternionToMatrixVU();
-    VU0_STORE_VF_UNCLOBBERED(vf28, matrix[0]);
-    VU0_STORE_VF_UNCLOBBERED(vf29, matrix[1]);
-    VU0_STORE_VF_UNCLOBBERED(vf30, matrix[2]);
+    SDF_VU0_STORE_ROW0_NOMEM(matrix[0]);
+    SDF_VU0_STORE_ROW1_NOMEM(matrix[1]);
+    SDF_VU0_STORE_ROW2_NOMEM(matrix[2]);
 }
 
 SdfMotionKeyFlagBinding *sdfMotGenModelVisible(sdfMotionCtrlr_t *motion, s32 unused, s32 nodeIndex) {
@@ -584,15 +585,15 @@ void sdfMotCLBK_modelVisibleInitBlend(SdfMotionKeyFlagBinding *binding) {
 }
 
 void sdfMotCLBK_modelPosInitBlend(SdfMotionDrawBinding *binding) {
-    PCP_COPY_VECTOR(binding->capturedVector, binding->node->translation);
+    SDF_VU0_COPYVECTOR(binding->capturedVector, binding->node->translation);
 }
 
 void sdfMotCLBK_modelRotInitBlend(SdfMotionDrawBinding *binding) {
-    PCP_COPY_VECTOR(binding->capturedVector, binding->node->quaternion);
+    SDF_VU0_COPYVECTOR(binding->capturedVector, binding->node->quaternion);
 }
 
 void sdfMotCLBK_modelScaleInitBlend(SdfMotionDrawBinding *binding) {
-    PCP_COPY_VECTOR(binding->capturedVector, binding->node->scale);
+    SDF_VU0_COPYVECTOR(binding->capturedVector, binding->node->scale);
 }
 
 s32 sdfMotGenMatNode(void *handlerContext, s32 handlerIndex, s32 targetIndex) {

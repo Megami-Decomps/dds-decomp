@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "bf_flw0_header.h"
+#include "sdf_vu0.h"
 #include "sdf_channel.h"
 #include "scr_work_task_api.h"
 #include "dat_save_words.h"
@@ -173,14 +174,14 @@ void *dds3GetWorldNodeData(dds3Basic_t *node) {
 void evtLoadValueVectorIntoVu(dds3Basic_t *node) {
     void *vec = dds3GetWorldNodeData(node);
 
-    VU0_LOAD_VF_MEMORY(vf10, vec);
+    SDF_VU0_LOADVECTOR_BARRIER(vec);
 }
 
 /* Same, from the second quadword in the borrowed vector. */
 void evtLoadValueSecondaryVectorIntoVu(dds3Basic_t *node) {
     void *vec = (void *)((u8 *)dds3GetWorldNodeData(node) + 0x10);
 
-    VU0_LOAD_VF_MEMORY(vf10, vec);
+    SDF_VU0_LOADVECTOR_BARRIER(vec);
 }
 
 
@@ -936,4 +937,3 @@ INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DC5);
 INCLUDE_SDATA(const s32, "game/code_001176A0", DDS3_GBWK);
 
 INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DD4);
-

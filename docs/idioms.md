@@ -751,7 +751,7 @@ functions use trampolines and are a different case.
   matrix is read only by the `lqc2` asm through a bare address operand, so its
   element stores are dead as far as C can tell. One template matches all 12
   rotation loaders in both games (primary `VU0_LOAD_MATRIX` and secondary
-  `VU0_LOAD_MATRIX_B` banks):
+  `SDF_VU0_LOADMATRIX_B` banks):
   `volatile f32 m[4][4] __attribute__((aligned(16))); f32 c = cos(a); f32 s = sin(a);
   EE_MMI_UNIT_MATRIX((f32 *)m); <four cells>; VU0_LOAD_MATRIX((f32 *)m);`.
   The family is DDS1 `game/code_002DD038`/`code_002DD8B8` and DDS2
@@ -1014,7 +1014,7 @@ Tiny setters that copy one quadword compile in retail to `lq $2,0(src);
 sq $2,0(dst); jr $31; nop`. A plain `u128` copy in C gives `lq; jr; sq`
 (the store moves into the delay slot). The SDK implements
 `sceVu0CopyVector` as an asm statement, and the game did the same: use
-`PCP_COPY_VECTOR(dst, src)` from `include/pcp_vu0.h` (wrapped in
+`SDF_VU0_COPYVECTOR(dst, src)` from `include/pcp_vu0.h` (wrapped in
 `.set noreorder`, like `fsqrtf`). This is the only non-COP2 asm helper
 allowed, and only for this exact instruction pair.
 
@@ -1023,7 +1023,7 @@ For a copy between four-float vectors,
 without a global memory barrier. Both addresses must designate four float
 elements, be 16-byte aligned, and have no evaluation side effects.
 It is a float-vector API; do not use it for integer or opaque-byte objects.
-The existing `PCP_COPY_VECTOR` keeps its established barrier contract.
+The existing `SDF_VU0_COPYVECTOR` keeps its established barrier contract.
 A plain C quadword copy was tried first and produced 175 words rather than
 retail's 177-word orbit body.
 
@@ -1550,10 +1550,10 @@ the plain-C forms that were tried. Use these instead of writing the asm again.
 
 | Macro | Retail pattern |
 |---|---|
-| `PCP_COPY_VECTOR(dst, src)` | `lq $2,0(src); sq $2,0(dst); jr; nop` (libvu0 `sceVu0CopyVector` style) |
+| `SDF_VU0_COPYVECTOR(dst, src)` | `lq $2,0(src); sq $2,0(dst); jr; nop` (libvu0 `sceVu0CopyVector` style) |
 | `VU0_COPY_MATRIX(dst, src)` | `lqc2 vf28..vf31` from `src`, `sqc2 vf28..vf31` to `dst` |
 | `VU0_LOAD_MATRIX(src)` / `VU0_STORE_MATRIX(dst)` | the two halves of the copy above (primary matrix bank vf28-vf31) |
-| `VU0_LOAD_MATRIX_B(src)` / `VU0_STORE_MATRIX_B(dst)` | same for the second bank vf24-vf27 |
+| `SDF_VU0_LOADMATRIX_B(src)` / `SDF_VU0_STOREMATRIX_B(dst)` | same for the second bank vf24-vf27 |
 | `VU0_STORE_MATRIX_UNCLOBBERED(dst)` | `VU0_STORE_MATRIX` without the memory clobber (the destination address stays shared with later uses) |
 | `VU0_LOAD_VF(vf, src)` | `.set noreorder; lqc2 vf,0(src); .set reorder` (register input, no memory clobber) |
 | `VU0_LOAD_VF_MEMORY(vf, src)` | same `lqc2` with a memory clobber |
@@ -1568,15 +1568,15 @@ the plain-C forms that were tried. Use these instead of writing the asm again.
 | `VU0_APPLY_MATRIX(dst, src)` | `vmulax.xyzw ACC,vf28,srcx; vmadday vf29,srcy; vmaddaz vf30,srcz; vmaddw dst,vf31,srcw`: primary matrix times a vector (libvu0 `sceVu0ApplyMatrix` core) |
 | `VU0_ROTATE_VEC(dst, src)` | `vmulax.xyzw ACC,vf28,srcx; vmadday vf29,srcy; vmaddz.xyzw dst,vf30,srcz`: rotation part of the primary matrix times a vector (emitter init/update in `code_00151F58` / `code_00159B48`) |
 | `VU0_TRANSFORM_POINT(dst, src)` | as `VU0_APPLY_MATRIX` but `vmaddw dst,vf31,vf0w`: primary matrix times a point (w = 1) |
-| `VU0_PERSPECTIVE_DIVIDE_VF10()` | `vdiv Q,vf0w,vf10w; vmove.w vf10,vf0; vwaitq; vmulq.xyzw vf10,vf10,Q` |
+| `SDF_VU0_PERSVECTOR()` | `vdiv Q,vf0w,vf10w; vmove.w vf10,vf0; vwaitq; vmulq.xyzw vf10,vf10,Q` |
 | `VU0_SCALE_MATRIX_ROWS(src)` | `vmulx.xyzw vf28,vf28,srcx; vmuly.xyzw vf29,vf29,srcy; vmulz.xyzw vf30,vf30,srcz`: scale the primary matrix rows |
 | `VU0_SUB(dst, a, b)` / `VU0_ADD` / `VU0_MUL` | `vsub.xyzw` / `vadd.xyzw` / `vmul.xyzw dst,a,b` between calls (position differences, blend sums) |
 | `VU0_FTOI4(dst, src)` | `vftoi4.xyzw dst,src`: convert all four float components to signed 28.4 fixed-point integers (packed screen projection in DDS1 `func_001F6300` / DDS2 `func_00207C28`) |
 | `VU0_NEGATE_XYZ(vf)` | `vsub.xyz vf,vf0,vf`: negate xyz, w kept (reversed direction after a matrix apply; 95 sites) |
 | `VU0_CLEAR_W(vf)` / `VU0_SET_W_ONE(vf)` | `vmulx.w vf,vf,vf0x` (w = 0) / `vmove.w vf,vf0` (w = 1): the w fix-up before a colour pack or point store |
 | `VU0_SET_AXIS_CLEAR_W(f, axis)` | `mfc1 $2,f; qmtc2.ni $2,vf2; vaddx.axis vf10,vf0,vf2x; vmulx.w vf10,vf10,vf0x` as one block: vf10.axis = f, w = 0 (event unit path/aim vectors; separate `VU0_SCALAR_OP` + `VU0_CLEAR_W` moves a neighbouring `daddu`) |
-| `VU0_LENGTH_VF10(out)` | `vmul.xyz vf2,vf10,vf10; vaddy.x; vaddz.x; vsqrt Q,vf2x; vwaitq; cfc2.ni $2,vi22; mtc1 $2,out`: \|vf10.xyz\| as a C float (`$2` clobbered) |
-| `VU0_NORMALIZE_VF10()` | `vmul.xyz vf2,vf10,vf10; vmulax.w ACC,vf0,vf2x; vmadday.w; vmaddz.w vf2; vrsqrt Q,vf0w,vf2w; vwaitq; vmulq.xyz vf10,vf10,Q` |
+| `SDF_VU0_GETLENGTH(out)` | `vmul.xyz vf2,vf10,vf10; vaddy.x; vaddz.x; vsqrt Q,vf2x; vwaitq; cfc2.ni $2,vi22; mtc1 $2,out`: \|vf10.xyz\| as a C float (`$2` clobbered) |
+| `SDF_VU0_NORMALIZE()` | `vmul.xyz vf2,vf10,vf10; vmulax.w ACC,vf0,vf2x; vmadday.w; vmaddz.w vf2; vrsqrt Q,vf0w,vf2w; vwaitq; vmulq.xyz vf10,vf10,Q` |
 | `VU0_CROSS_XYZ(dst, a, b)` / `VU0_DOT_XYZ(out, a, b)` | `vopmula.xyz ACC,a,b; vopmsub.xyz dst,b,a` / `vmul.xyz vf2,a,b; vaddy.x; vaddz.x; qmfc2.ni $2,vf2; mtc1 $2,out` (`$2` clobbered) |
 
 ### Stored packed-color results
@@ -3859,7 +3859,7 @@ Use `BtlUnit.ext` and the primary `dds3Basic_t` payload. The existing
 flag `0x40000` is set, as also shown by `evtUnitManager.c`. Its light
 payload uses the shared `EvtTargetInfo` in `evt_unit.h`: first colour at
 zero, direction at `0x10`, and second colour at `0x40`. The six copies use the
-existing Sony-compatible `PCP_COPY_VECTOR` primitive, not new game-code
+existing Sony-compatible `SDF_VU0_COPYVECTOR` primitive, not new game-code
 assembly. Retain both target-owned diagnostic strings as literals so
 the complete unit's data remains exact.
 
@@ -4930,7 +4930,7 @@ operands of the equivalent inclusive comparison does not change tie-breaking.
 
 The matched `effObjSetInnerFirstVec` and `effObjSetInnerSecondVec` providers
 take `(dds3Basic_t *, u128 *)` (DDS1 `0010F6E0`/`0010F710`, DDS2
-`0010F908`/`0010F938`). They copy the packed vector through `PCP_COPY_VECTOR`
+`0010F908`/`0010F938`). They copy the packed vector through `SDF_VU0_COPYVECTOR`
 into the primary `dds3PoseSet_t.position`/`rotation` float arrays.
 The battle callers' float-vector scratch arrays remain float arrays; the
 `u128 *` conversion belongs at this SDK boundary, not in a second owner view.
@@ -5410,7 +5410,7 @@ unsupported unsigned formal, or regression of the matched builders is kept.
 
 DDS2 `func_00115358` builds a 48-byte, word-aligned parameter record from
 `D_00412950`, replacing its first two vectors with the established SDK
-`PCP_COPY_VECTOR` primitive. Retail's two fixed-scratch-register `lq`/`sq`
+`SDF_VU0_COPYVECTOR` primitive. Retail's two fixed-scratch-register `lq`/`sq`
 pairs support that macro use. The full record copy is `memcpy`, not typed
 structure assignment: the byte-copy alias contract preserves the dependency
 record's vector-pointer store before the unaligned eight-byte transfers.
@@ -8478,7 +8478,7 @@ The function also initializes three unused float UV pairs with the coordinate
 stream disabled. These are real retail stores (DDS1 `0x002C1314..0x002C132C`,
 DDS2 `0x00308D44..0x00308D5C`) retained in GCC 2.96's SDK memory-clobber
 context, not invented storage. The provider consumes only three packed color
-words. Its position rows use the existing `PCP_COPY_VECTOR` SDK macro, evidenced
+words. Its position rows use the existing `SDF_VU0_COPYVECTOR` SDK macro, evidenced
 by the adjacent native `LQ`/`SQ` pairs in both games; no new assembly is needed.
 
 
@@ -14967,7 +14967,7 @@ the loop. It is set before every use and no provider receives its address.
 This ordinary source order closes the final sum-copy versus FOV-store scheduler
 difference without adding an operation or lifetime.
 
-DDS2 follows `nextActor`, measures groups through its filtered-bounds provider,
+DDS2 follows the unit list's `next`, measures groups through its filtered-bounds provider,
 and rotates around Y. Inside the distance-below-1200 path it caps the absolute
 horizontal offset at 50 before adding it to camera distance. Keep the ordered
 `50.0f < horizontalSpan` comparison: NaN does not select the cap. These six

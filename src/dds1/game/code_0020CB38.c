@@ -2,6 +2,7 @@
 #include "sdf_debug_api.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_effect_position.h"
 #include "eff_random_mod.h"
@@ -195,12 +196,12 @@ void btlUpdateBossUnitScaleTransition(void) {
                             return;
                         }
                         effBTLModelGetMarkPosition2(effectActor, 0x1F);
-                        VU0_STORE_VF(vf10, effectPosition);
+                        SDF_VU0_STOREVECTOR(effectPosition);
 
                         switch (transition->active) {
                         case 0:
                             if (transition->unitId != 0) {
-                                PCP_COPY_VECTOR(unit->currentPosition, unit->position);
+                                SDF_VU0_COPYVECTOR(unit->currentPosition, unit->position);
                                 unit->scale = 1.0f;
                                 unit->overlayColor = (unit->baseColor & 0x00FFFFFF) | 0x80000000;
                                 transition->unitId = 0;
@@ -213,19 +214,19 @@ void btlUpdateBossUnitScaleTransition(void) {
                             } else {
                                 unit->overlayColor = 0;
                             }
-                            PCP_COPY_VECTOR(unit->currentPosition, effectPosition);
+                            SDF_VU0_COPYVECTOR(unit->currentPosition, effectPosition);
                             if (transition->modelValue >= 223) {
                                 transition->active = 2;
                             }
                             break;
                         case 2:
                             progress = btlScalarRangeStepQuadratic(&transition->range, 1.0f);
-                            VU0_LOAD_VF(vf10, unit->position);
-                            VU0_LOAD_VF(vf11, effectPosition);
-                            VU0_SUB(vf10, vf10, vf11);
+                            SDF_VU0_LOADVECTOR(unit->position);
+                            SDF_VU0_LOADVECTOR_B(effectPosition);
+                            SDF_VU0_SUBVECTOR();
                             VU0_SCALE_VF(vf10, progress);
-                            VU0_ADD(vf10, vf10, vf11);
-                            VU0_STORE_VF(vf10, unit->currentPosition);
+                            SDF_VU0_ADDVECTOR();
+                            SDF_VU0_STOREVECTOR(unit->currentPosition);
                             nextScale = transition->scale + (1.0f - transition->scale) * progress;
                             unit->scale = nextScale;
                             if (transition->modelValue >= 303) {
@@ -243,11 +244,11 @@ void btlUpdateBossUnitScaleTransition(void) {
                             evtSetUnitColorA(unit->ext, 0, 0);
                         }
                         btlSetUnitPosition(unit, position);
-                        VU0_SET_ONES_XYZ(vf10);
+                        SDF_VU0_SETSCALE1VECTOR();
                         VU0_SCALE_VF(vf10, unit->scale);
                         inner = unit->effectObject->inner;
                         inner->flags = (inner->flags | 1) & ~2;
-                        VU0_STORE_VF(vf10, inner->scale);
+                        SDF_VU0_STOREVECTOR(inner->scale);
                         mdlSetScale(unit->ext->owner);
                         mdlSetEffectScale(unit->ext->owner, unit->scale);
                         transition->modelValue++;
@@ -481,7 +482,7 @@ u8 btlOffsetSpecialTargetPositionForAction(BtlLinkedCommand *command, s8 unused1
         return 0;
     }
     if (command->actionCode == 0x175) {
-        PCP_COPY_VECTOR(pos, other->position);
+        SDF_VU0_COPYVECTOR(pos, other->position);
         pos[2] += 600.0f;
         btlSetUnitPosition(other, pos);
     }
@@ -574,7 +575,7 @@ void btlRecenterUnitsOnLead(void) {
         btlCopyUnitCurrentPosition(lead, pos);
         shift = -pos[0];
         pos[0] = 0;
-        PCP_COPY_VECTOR(lead->position, pos);
+        SDF_VU0_COPYVECTOR(lead->position, pos);
         btlSetUnitPosition(lead, pos);
         for (unit = work->units; unit != 0; unit = unit->next) {
             if (unit->status.flags & 1) {
@@ -582,7 +583,7 @@ void btlRecenterUnitsOnLead(void) {
                     if (unit != lead) {
                         btlCopyUnitCurrentPosition(unit, pos);
                         pos[0] = pos[0] + shift;
-                        PCP_COPY_VECTOR(unit->position, pos);
+                        SDF_VU0_COPYVECTOR(unit->position, pos);
                         btlSetUnitPosition(unit, pos);
                     }
                 }
@@ -723,9 +724,9 @@ u8 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camer
             break;
         }
         /* vu0 routine: rotate the camera direction by the prepared matrix. */
-        VU0_LOAD_VF(vf10, camera->direction);
-        VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF(vf10, camera->direction);
+        SDF_VU0_LOADVECTOR(camera->direction);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        SDF_VU0_STOREVECTOR(camera->direction);
     }
     return 1;
 }
@@ -759,7 +760,7 @@ s32 btlFrameMarkedTargetDefeatCamera(BtlLinkedCommand *command) {
                 btlFlagUnitDefeatCandidate(task->unit);
                 btlFlagUnitDefeatCandidate(target);
                 btlUnitGetMuzzlePosVU(task->unit);
-                VU0_STORE_VF(vf10, position);
+                SDF_VU0_STOREVECTOR(position);
                 if (position[0] < 0.0f) {
                     btlSetEffectCameraKeys(command,
                         451.8f, -62.8f, -471.5f, -0.135f, 0.038f, -0.019f, 0.981f,

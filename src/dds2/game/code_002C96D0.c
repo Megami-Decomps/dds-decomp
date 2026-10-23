@@ -3,6 +3,7 @@
 #include "sdk_ps2.h"
 #include "eff_surface_node.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "file_job_type.h"
 #include "file_config_task.h"
 #include "eff_emitter_type.h"
@@ -4421,13 +4422,13 @@ void mnuProjectViewPoint(void) {
     VU0_LOAD_MATRIX(sdfViewMatrix);
     matrix = sdfProjectionMatrix;
     sdfPostmultiplyVuMatrixFromMemory(matrix);
-    VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
+    SDF_VU0_APPLYMATRIX_XYZ1();
+    SDF_VU0_PERSVECTOR();
     matrix += 0x40;
-    VU0_LOAD_VF(vf11, matrix);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, D_0037F660);
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR_B(matrix);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_LOADVECTOR_B(D_0037F660);
+    SDF_VU0_ADDVECTOR();
 }
 
 extern u8 sdfViewTargetVector[];
@@ -4437,38 +4438,38 @@ s32 sdfProjectPointInForwardConeVU(void) {
     f32 distance, facing;
     f32 *projection;
 
-    VU0_MOVE_VF(vf12, vf10);
-    VU0_LOAD_VF(vf11, sdfViewTargetVector);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(distance);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(distance);
     if (!(distance > 16.0))
         return 0;
 
-    VU0_NORMALIZE_VF10();
-    VU0_MOVE_VF(vf11, vf10);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_COPYVECTOR_A_TO_B();
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    VU0_MOVE_MATRIX_TO_B();
+    SDF_VU0_COPYMATRIX_A_TO_B();
     ReverseMatrix();
-    VU0_MOVE_VF(vf10, vf30);
-    VU0_NORMALIZE_VF10();
-    VU0_DOT_XYZ(facing, vf10, vf11);
+    SDF_VU0_GET_ROW2();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_INNERPRODUCT(facing);
     if (facing <= 0.25f)
         return 0;
 
-    VU0_MOVE_VF(vf10, vf12);
+    SDF_VU0_COPYVECTOR_C_TO_A();
     VU0_MOVE_VF(vf28, vf24);
     VU0_MOVE_VF(vf29, vf25);
     VU0_MOVE_VF(vf30, vf26);
     VU0_MOVE_VF(vf31, vf27);
     projection = (f32 *)sdfProjectionMatrix;
     sdfPostmultiplyVuMatrixFromMemory(projection);
-    VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
+    SDF_VU0_APPLYMATRIX_XYZ1();
+    SDF_VU0_PERSVECTOR();
     projection += 16;
-    VU0_LOAD_VF(vf11, projection);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, D_0037F660);
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR_B(projection);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_LOADVECTOR_B(D_0037F660);
+    SDF_VU0_ADDVECTOR();
     return 1;
 }
 
@@ -4484,30 +4485,30 @@ f32 mnuMeasureProjectedPerpendicularDistance(f32 rate) {
     f32 dx;
     f32 dy;
 
-    VU0_STORE_VF(vf10, origin);
+    SDF_VU0_STOREVECTOR(origin);
     if (sdfProjectPointInForwardConeVU() == 0) {
         return 0.0f;
     }
-    VU0_STORE_VF(vf10, first);
+    SDF_VU0_STOREVECTOR(first);
     scale[0] = scale[1] = scale[2] = rate;
-    VU0_LOAD_VF(vf10, origin);
-    VU0_MOVE_VF(vf12, vf10);
-    VU0_LOAD_VF(vf11, sdfViewTargetVector);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, aViewDown);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
-    VU0_LOAD_VF(vf11, scale);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_MOVE_VF(vf11, vf12);
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR(origin);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(aViewDown);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_LOADVECTOR_B(scale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_COPYVECTOR_C_TO_B();
+    SDF_VU0_ADDVECTOR();
     if (sdfProjectPointInForwardConeVU() == 0) {
         return 0.0f;
     }
-    VU0_STORE_VF(vf10, second);
+    SDF_VU0_STOREVECTOR(second);
     dx = second[0] - first[0];
     dy = second[1] - first[1];
-    VU0_LOAD_VF(vf10, first);
+    SDF_VU0_LOADVECTOR(first);
     return fsqrtf(dx * dx + dy * dy);
 }
 
@@ -4522,48 +4523,48 @@ void vuCatmullRomPoint(f32 (*p)[4], f32 t)
     f32 t3 = t2 * t;
 
     VEC3_SPLAT(half, 0.5f);
-    VU0_LOAD_VF(vf10, p[1]);
-    VU0_LOAD_VF(vf11, p[0]);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_MOVE_VF(vf12, vf10);
-    VU0_LOAD_VF(vf10, p[2]);
-    VU0_LOAD_VF(vf11, p[1]);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_ADD(vf10, vf10, vf12);
-    VU0_LOAD_VF(vf11, half);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, tan[0]);
-    VU0_LOAD_VF(vf10, p[2]);
-    VU0_LOAD_VF(vf11, p[1]);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_MOVE_VF(vf12, vf10);
-    VU0_LOAD_VF(vf10, p[3]);
-    VU0_LOAD_VF(vf11, p[2]);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_ADD(vf10, vf10, vf12);
-    VU0_LOAD_VF(vf11, half);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, tan[1]);
+    SDF_VU0_LOADVECTOR(p[1]);
+    SDF_VU0_LOADVECTOR_B(p[0]);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR(p[2]);
+    SDF_VU0_LOADVECTOR_B(p[1]);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_ADDVECTOR_A_C();
+    SDF_VU0_LOADVECTOR_B(half);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_STOREVECTOR(tan[0]);
+    SDF_VU0_LOADVECTOR(p[2]);
+    SDF_VU0_LOADVECTOR_B(p[1]);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR(p[3]);
+    SDF_VU0_LOADVECTOR_B(p[2]);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_ADDVECTOR_A_C();
+    SDF_VU0_LOADVECTOR_B(half);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_STOREVECTOR(tan[1]);
     VEC3_SPLAT(h[0], 2.0f * t3 - 3.0f * t2 + 1.0f);
     VEC3_SPLAT(h[1], t3 - 2.0f * t2 + t);
     VEC3_SPLAT(h[2], t3 - t2);
     VEC3_SPLAT(h[3], -2.0f * t3 + 3.0f * t2);
-    VU0_LOAD_VF(vf10, h[0]);
-    VU0_LOAD_VF(vf11, p[1]);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_MOVE_VF(vf12, vf10);
-    VU0_LOAD_VF(vf10, h[1]);
-    VU0_LOAD_VF(vf11, tan[0]);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_ADD(vf12, vf12, vf10);
-    VU0_LOAD_VF(vf10, h[2]);
-    VU0_LOAD_VF(vf11, tan[1]);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_ADD(vf12, vf12, vf10);
-    VU0_LOAD_VF(vf10, h[3]);
-    VU0_LOAD_VF(vf11, p[2]);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_ADD(vf10, vf10, vf12);
+    SDF_VU0_LOADVECTOR(h[0]);
+    SDF_VU0_LOADVECTOR_B(p[1]);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR(h[1]);
+    SDF_VU0_LOADVECTOR_B(tan[0]);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_ADDVECTOR_C_A();
+    SDF_VU0_LOADVECTOR(h[2]);
+    SDF_VU0_LOADVECTOR_B(tan[1]);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_ADDVECTOR_C_A();
+    SDF_VU0_LOADVECTOR(h[3]);
+    SDF_VU0_LOADVECTOR_B(p[2]);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_ADDVECTOR_A_C();
 }
 
 extern u8 sdfViewTargetVector[];
@@ -4573,22 +4574,22 @@ extern u8 aViewDown[];
 /* vu0 routine: camera basis rows vf28-vf31 from eye sdfViewTargetVector, target aViewTarget and up aViewDown */
 void vuBuildLookAtBasis(void)
 {
-    VU0_LOAD_VF(vf10, sdfViewTargetVector);
-    VU0_MOVE_VF(vf31, vf10);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, aViewTarget);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
-    VU0_MOVE_VF(vf30, vf10);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, aViewDown);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
-    VU0_MOVE_VF(vf28, vf10);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_MOVE_VF(vf10, vf30);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_MOVE_VF(vf29, vf10);
+    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+    SDF_VU0_SET_ROW3();
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(aViewTarget);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_SET_ROW2();
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(aViewDown);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_SET_ROW0();
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_GET_ROW2();
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_SET_ROW1();
 }
 
 /* The quaternion result is returned in vf10 for the VU transform routines. */
@@ -4627,7 +4628,7 @@ void sdfVuMatrixToQuaternion(f32 matrix[4][4]) {
             quaternion[3] = 0.0f;
         }
     }
-    VU0_LOAD_VF(vf10, quaternion);
+    SDF_VU0_LOADVECTOR(quaternion);
 }
 
 FileJobPayload *fileCreateJob(FileJobType type) {
@@ -4984,8 +4985,8 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
     FileJob *job;
     f32 vec[4] __attribute__((aligned(16)));
 
-    PCP_COPY_VECTOR(queue->offset, source->offset);
-    PCP_COPY_VECTOR(queue->axis, source->offset);
+    SDF_VU0_COPYVECTOR(queue->offset, source->offset);
+    SDF_VU0_COPYVECTOR(queue->axis, source->offset);
     queue->scaleMultiplier = source->scaleMultiplier;
     queue->transformFlags = source->transformFlags;
     if (source->first != NULL) {
@@ -5069,10 +5070,10 @@ void fileQueueUpdate(FileQueue *queue)
     f32 total;
 
     if (queue->transformFlags & 0x60) {
-        PCP_COPY_VECTOR(savedQuat, queue->quat);
+        SDF_VU0_COPYVECTOR(savedQuat, queue->quat);
         camAimRotation((struct CamAim *)queue, aimQuat);
         fileQueueSetRotation(queue, aimQuat);
-        PCP_COPY_VECTOR(queue->quat, savedQuat);
+        SDF_VU0_COPYVECTOR(queue->quat, savedQuat);
     }
     total = queue->scale * queue->scaleMultiplier;
     limit = queue->updateFrame;
@@ -5085,20 +5086,20 @@ void fileQueueUpdate(FileQueue *queue)
         }
         if (job->xformFlags & 0x18) {
             camFollowOffsetVec(job, pos);
-            VU0_LOAD_VF(vf10, queue->quat);
+            SDF_VU0_LOADVECTOR(queue->quat);
             effMiscQuaternionToMatrixVU();
-            VU0_LOAD_VF(vf10, queue->position);
-            VU0_LOAD_VF(vf11, queue->offset);
-            VU0_ADD(vf10, vf10, vf11);
+            SDF_VU0_LOADVECTOR(queue->position);
+            SDF_VU0_LOADVECTOR_B(queue->offset);
+            SDF_VU0_ADDVECTOR();
             if (job->xformFlags & 4) {
                 VU0_SCALAR_OP(-5.0f, "vaddx.y vf10, vf0, vf2x");
             }
-            VU0_LOAD_VF(vf11, pos);
+            SDF_VU0_LOADVECTOR_B(pos);
             if (job->xformFlags & 0x80) {
                 VU0_SCALE_VF(vf11, total);
             }
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR_NOMEM(pos);
             fileJobInvokePositionCallback((FileJobPayload *)job->id, pos);
         }
         if (job->xformFlags & 0x60) {
@@ -5132,8 +5133,8 @@ FileQueue *fileQueueClone(const FileQueue *source) {
     const FileJob *src;
     f32 vec[4] __attribute__((aligned(16)));
 
-    PCP_COPY_VECTOR(queue, source);
-    PCP_COPY_VECTOR(queue->axis, source->axis);
+    SDF_VU0_COPYVECTOR(queue, source);
+    SDF_VU0_COPYVECTOR(queue->axis, source->axis);
     queue->scaleMultiplier = source->scaleMultiplier;
     queue->transformFlags = source->transformFlags;
     for (src = source->first; src != NULL; src = src->next) {
@@ -5167,28 +5168,28 @@ void fileQueueSetPosition(FileQueue *queue, const f32 vec[4])
     FileJob *job;
     f32 scale;
 
-    VU0_LOAD_VF(vf10, vec);
-    VU0_STORE_VF(vf10, queue->position);
-    VU0_LOAD_VF(vf11, queue->offset);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, base);
-    VU0_LOAD_VF(vf10, queue->quat);
+    SDF_VU0_LOADVECTOR(vec);
+    SDF_VU0_STOREVECTOR(queue->position);
+    SDF_VU0_LOADVECTOR_B(queue->offset);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(base);
+    SDF_VU0_LOADVECTOR(queue->quat);
     effMiscQuaternionToMatrixVU();
     VU0_STORE_MATRIX(rot);
     scale = queue->scale * queue->scaleMultiplier;
     for (job = queue->first; job != NULL; job = job->next) {
-        VU0_LOAD_VF(vf10, base);
+        SDF_VU0_LOADVECTOR(base);
         if (job->xformFlags & 4) {
             VU0_SCALAR_OP(-5.0f, "vaddx.y vf10, vf0, vf2x");
         }
-        VU0_LOAD_VF(vf11, job->offset);
+        SDF_VU0_LOADVECTOR_B(job->offset);
         if (job->xformFlags & 0x80) {
             VU0_SCALE_VF(vf11, scale);
         }
         VU0_LOAD_MATRIX(rot);
         VU0_ROTATE_VEC(vf11, vf11);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR_NOMEM(pos);
         fileJobInvokePositionCallback((FileJobPayload *)job->id, pos);
     }
 }
@@ -5199,18 +5200,18 @@ void fileQueueSetRotation(FileQueue *queue, const f32 rot[4])
     f32 pos[4];
     FileJob *job;
 
-    VU0_LOAD_VF(vf10, rot);
-    VU0_STORE_VF(vf10, queue->quat);
-    VU0_STORE_VF(vf10, quat);
+    SDF_VU0_LOADVECTOR(rot);
+    SDF_VU0_STOREVECTOR(queue->quat);
+    SDF_VU0_STOREVECTOR(quat);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, queue->axis);
-    VU0_ROTATE_VEC(vf10, vf10);
-    VU0_STORE_VF(vf10, queue->offset);
+    SDF_VU0_LOADVECTOR(queue->axis);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_STOREVECTOR(queue->offset);
     for (job = queue->first; job != NULL; job = job->next) {
-        VU0_LOAD_VF(vf10, job->quat);
-        VU0_LOAD_VF(vf11, quat);
+        SDF_VU0_LOADVECTOR(job->quat);
+        SDF_VU0_LOADVECTOR_B(quat);
         effMiscQuatMultiplyVU();
-        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+        SDF_VU0_STOREVECTOR_NOMEM(pos);
         fileJobInvokeRotationCallback((FileJobPayload *)job->id, pos);
     }
     fileQueueSetPosition(queue, queue->position);
@@ -5232,16 +5233,16 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
         }
         fileJobInvokeScaleCallback((FileJobPayload *)job->id, jobScale);
         if (job->xformFlags & 0x80) {
-            VU0_LOAD_VF(vf10, queue->position);
-            VU0_LOAD_VF(vf11, queue->offset);
-            VU0_ADD(vf10, vf10, vf11);
+            SDF_VU0_LOADVECTOR(queue->position);
+            SDF_VU0_LOADVECTOR_B(queue->offset);
+            SDF_VU0_ADDVECTOR();
             if (job->xformFlags & 4) {
                 VU0_SCALAR_OP(-5.0f, "vaddx.y vf10, vf0, vf2x");
             }
-            VU0_LOAD_VF(vf11, job->offset);
+            SDF_VU0_LOADVECTOR_B(job->offset);
             VU0_SCALAR_OP(total, "vmulx.xyzw vf11, vf11, vf2x");
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF_UNCLOBBERED(vf10, &pos);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR_NOMEM(&pos);
             fileJobInvokePositionCallback((FileJobPayload *)job->id, (f32 *)&pos);
         }
     }
@@ -5263,15 +5264,15 @@ void fileQueueSetColor(FileQueue *queue, u32 color) {
     queue->color = color;
     queueColor[0] = color;
     EE_MMI_RGBA_UNPACK(queueColor, 1.0f / 128.0f);
-    VU0_STORE_VF_UNCLOBBERED(vf10, tint);
+    SDF_VU0_STOREVECTOR_NOMEM(tint);
     for (job = queue->first; job != NULL; job = job->next) {
         u32 result;
         FileJobPayload *payload;
 
         jobColor[0] = job->color;
         EE_MMI_RGBA_UNPACK(jobColor, 1.0f / 128.0f);
-        VU0_LOAD_VF(vf11, tint);
-        VU0_MUL(vf10, vf10, vf11);
+        SDF_VU0_LOADVECTOR_B(tint);
+        SDF_VU0_MULVECTOR();
         EE_MMI_RGBA_PACK_UNIT(result, 0x43000000);
         payload = (FileJobPayload *)job->id;
         packed[0] = result;
@@ -5280,11 +5281,11 @@ void fileQueueSetColor(FileQueue *queue, u32 color) {
 }
 
 void fileQueueReadPosition(const FileQueue *queue, f32 position[4]) {
-    PCP_COPY_VECTOR(position, queue->position);
+    SDF_VU0_COPYVECTOR(position, queue->position);
 }
 
 void fileReadStoredQuaternion(void *work, void *dst) {
-    PCP_COPY_VECTOR(dst, ((FileQueue *)work)->quat);
+    SDF_VU0_COPYVECTOR(dst, ((FileQueue *)work)->quat);
 }
 
 f32 fileGetQueueScale(FileQueue *queue) {
@@ -5298,7 +5299,7 @@ u32 fileGetQueueColor(FileQueue *queue) {
 void fileQueueCopyRotationFromSource(FileQueue *queue, f32 matrix[4][4]) {
     f32 vec[4] __attribute__((aligned(16)));
     sdfVuMatrixToQuaternion(matrix);
-    VU0_STORE_VF(vf10, vec);
+    SDF_VU0_STOREVECTOR(vec);
     fileQueueSetRotation(queue, vec);
 }
 
@@ -5646,8 +5647,8 @@ FileQueue *fileQueueCreateFromCommandState(const char *entry) {
     sdfFileRead(command, image, size);
     sdfFileClose(command);
     queue = fileQueueCreate();
-    PCP_COPY_VECTOR(queue->offset, image->offset);
-    PCP_COPY_VECTOR(queue->axis, image->offset);
+    SDF_VU0_COPYVECTOR(queue->offset, image->offset);
+    SDF_VU0_COPYVECTOR(queue->axis, image->offset);
     queue->scaleMultiplier = image->scaleMultiplier;
     queue->transformFlags = image->transformFlags;
     for (i = 0, src = (FileJob *)((u8 *)image + image->entryOffset);
@@ -5746,28 +5747,28 @@ void camFollowOffsetVec(FileJob *obj, void *dst)
     u32 flags = obj->xformFlags;
 
     if ((flags & 0x18) == 0) {
-        PCP_COPY_VECTOR(dst, obj->offset);
+        SDF_VU0_COPYVECTOR(dst, obj->offset);
         return;
     }
-    VU0_LOAD_VF(vf10, obj->offset);
+    SDF_VU0_LOADVECTOR(obj->offset);
     if (obj->xformFlags & 0x10) {
         VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
     }
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_GETLENGTH(length);
     VEC3_SPLAT(len, length);
-    VU0_LOAD_VF(vf10, sdfViewTargetVector);
-    VU0_LOAD_VF(vf11, aViewTarget);
-    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewTarget);
+    SDF_VU0_SUBVECTOR();
     if (obj->xformFlags & 0x10) {
         VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
     }
-    VU0_NORMALIZE_VF10();
-    VU0_LOAD_VF(vf11, len);
-    VU0_MUL(vf10, vf10, vf11);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_LOADVECTOR_B(len);
+    SDF_VU0_MULVECTOR();
     if (obj->xformFlags & 0x10) {
         VU0_SCALAR_OP(obj->offset[1], "vaddx.y vf10, vf0, vf2x");
     }
-    VU0_STORE_VF(vf10, dst);
+    SDF_VU0_STOREVECTOR(dst);
 }
 
 /* dst = rotation facing unit(sdfViewTargetVector - aViewTarget) (pitch and yaw); flag 0x40 composes it onto obj->quat, no flag 0x60 copies obj->quat */
@@ -5778,25 +5779,25 @@ void camAimRotation(CamAim *obj, void *dst)
     u32 flags = obj->flags;
 
     if ((flags & 0x60) == 0) {
-        PCP_COPY_VECTOR(dst, obj->quat);
+        SDF_VU0_COPYVECTOR(dst, obj->quat);
         return;
     }
-    VU0_LOAD_VF(vf10, sdfViewTargetVector);
-    VU0_LOAD_VF(vf11, aViewTarget);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, v);
+    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewTarget);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(v);
     pitch = 0.0f;
     if ((flags & 0x40) == 0) {
         pitch = -acosf(-v[1]);
     }
     sdfConvertEulerAnglesToQuaternionVU(pitch, atan2f(v[0], v[2]), 0.0f);
     if (obj->flags & 0x40) {
-        VU0_MOVE_VF(vf11, vf10);
-        VU0_LOAD_VF(vf10, obj->quat);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(obj->quat);
         effMiscQuatMultiplyVU();
     }
-    VU0_STORE_VF(vf10, dst);
+    SDF_VU0_STOREVECTOR(dst);
 }
 
 
@@ -6131,7 +6132,7 @@ void fileDrawLoadObjectSlots(s32 object) {
     s32 textureTransformedFrame;
 
     eeUnpackRGBAWordFloat(obj->color, 0.0078125f);
-    VU0_STORE_VF(vf10, modulation);
+    SDF_VU0_STOREVECTOR(modulation);
     record = (FileSlotTable *)obj->record;
     count = record->count;
     if (count != 0) {
@@ -6146,8 +6147,8 @@ void fileDrawLoadObjectSlots(s32 object) {
                     if (slot->state >= 0) {
 
                         eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
-                        VU0_LOAD_VF(vf11, modulation);
-                        VU0_MUL(vf10, vf10, vf11);
+                        SDF_VU0_LOADVECTOR_B(modulation);
+                        SDF_VU0_MULVECTOR();
                         billDirectPacked = eePackRGBAWord(128.0f);
                         scale = slot->scale;
                         dds3BillboardSetRGBA(billboard, billDirectPacked);
@@ -6161,20 +6162,20 @@ void fileDrawLoadObjectSlots(s32 object) {
             } else {
                 fileReadRecordSecondVector((u8 *)obj->record, orientation);
                 fileReadVectorPtr20((u8 *)obj->record, origin);
-                VU0_LOAD_VF(vf10, orientation);
+                SDF_VU0_LOADVECTOR(orientation);
                 effMiscQuaternionToMatrixVU();
-                VU0_LOAD_VF(vf31, origin);
+                SDF_VU0_LOAD_ROW3(origin);
                 VU0_STORE_MATRIX(matrix);
                 for (i = 0; i < count; i++, slot++) {
                     if (slot->state >= 0) {
 
                         VU0_LOAD_MATRIX(matrix);
-                        VU0_LOAD_VF(vf10, slot->pos);
-                        VU0_TRANSFORM_POINT(vf10, vf10);
-                        VU0_STORE_VF(vf10, transformed);
+                        SDF_VU0_LOADVECTOR(slot->pos);
+                        SDF_VU0_APPLYMATRIX_XYZ1();
+                        SDF_VU0_STOREVECTOR(transformed);
                         eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
-                        VU0_LOAD_VF(vf11, modulation);
-                        VU0_MUL(vf10, vf10, vf11);
+                        SDF_VU0_LOADVECTOR_B(modulation);
+                        SDF_VU0_MULVECTOR();
                         billTransformedPacked = eePackRGBAWord(128.0f);
                         scale = slot->scale;
                         dds3BillboardSetRGBA(billboard, billTransformedPacked);
@@ -6197,8 +6198,8 @@ void fileDrawLoadObjectSlots(s32 object) {
                     if (slot->state >= 0) {
 
                         eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
-                        VU0_LOAD_VF(vf11, modulation);
-                        VU0_MUL(vf10, vf10, vf11);
+                        SDF_VU0_LOADVECTOR_B(modulation);
+                        SDF_VU0_MULVECTOR();
                         jobDirectPacked = eePackRGBAWord(128.0f);
                         fileDispatchJobTypeCallback(*jobs, jobDirectPacked);
                         fileJobInvokeScaleCallback(*jobs, slot->scale);
@@ -6209,9 +6210,9 @@ void fileDrawLoadObjectSlots(s32 object) {
             } else {
                 fileReadRecordSecondVector((u8 *)obj->record, orientation);
                 fileReadVectorPtr20((u8 *)obj->record, origin);
-                VU0_LOAD_VF(vf10, orientation);
+                SDF_VU0_LOADVECTOR(orientation);
                 effMiscQuaternionToMatrixVU();
-                VU0_LOAD_VF(vf31, origin);
+                SDF_VU0_LOAD_ROW3(origin);
                 VU0_STORE_MATRIX(matrix);
                 for (i = 0; i < count; i++, slot++, jobs++) {
                     if (slot->state == 0) {
@@ -6220,12 +6221,12 @@ void fileDrawLoadObjectSlots(s32 object) {
                     if (slot->state >= 0) {
 
                         VU0_LOAD_MATRIX(matrix);
-                        VU0_LOAD_VF(vf10, slot->pos);
-                        VU0_TRANSFORM_POINT(vf10, vf10);
-                        VU0_STORE_VF(vf10, transformed);
+                        SDF_VU0_LOADVECTOR(slot->pos);
+                        SDF_VU0_APPLYMATRIX_XYZ1();
+                        SDF_VU0_STOREVECTOR(transformed);
                         eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
-                        VU0_LOAD_VF(vf11, modulation);
-                        VU0_MUL(vf10, vf10, vf11);
+                        SDF_VU0_LOADVECTOR_B(modulation);
+                        SDF_VU0_MULVECTOR();
                         jobTransformedPacked = eePackRGBAWord(128.0f);
                         fileDispatchJobTypeCallback(*jobs, jobTransformedPacked);
                         fileJobInvokeScaleCallback(*jobs, slot->scale);
@@ -6245,8 +6246,8 @@ void fileDrawLoadObjectSlots(s32 object) {
                     if (slot->state >= 0) {
 
                         eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
-                        VU0_LOAD_VF(vf11, modulation);
-                        VU0_MUL(vf10, vf10, vf11);
+                        SDF_VU0_LOADVECTOR_B(modulation);
+                        SDF_VU0_MULVECTOR();
                         queueDirectPacked = eePackRGBAWord(128.0f);
                         fileQueueSetColor(*queues, queueDirectPacked);
                         fileQueueSetScale(*queues, slot->scale);
@@ -6257,9 +6258,9 @@ void fileDrawLoadObjectSlots(s32 object) {
             } else {
                 fileReadRecordSecondVector((u8 *)obj->record, orientation);
                 fileReadVectorPtr20((u8 *)obj->record, origin);
-                VU0_LOAD_VF(vf10, orientation);
+                SDF_VU0_LOADVECTOR(orientation);
                 effMiscQuaternionToMatrixVU();
-                VU0_LOAD_VF(vf31, origin);
+                SDF_VU0_LOAD_ROW3(origin);
                 VU0_STORE_MATRIX(matrix);
                 for (i = 0; i < count; i++, slot++, queues++) {
                     if (slot->state == 0) {
@@ -6268,12 +6269,12 @@ void fileDrawLoadObjectSlots(s32 object) {
                     if (slot->state >= 0) {
 
                         VU0_LOAD_MATRIX(matrix);
-                        VU0_LOAD_VF(vf10, slot->pos);
-                        VU0_TRANSFORM_POINT(vf10, vf10);
-                        VU0_STORE_VF(vf10, transformed);
+                        SDF_VU0_LOADVECTOR(slot->pos);
+                        SDF_VU0_APPLYMATRIX_XYZ1();
+                        SDF_VU0_STOREVECTOR(transformed);
                         eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
-                        VU0_LOAD_VF(vf11, modulation);
-                        VU0_MUL(vf10, vf10, vf11);
+                        SDF_VU0_LOADVECTOR_B(modulation);
+                        SDF_VU0_MULVECTOR();
                         queueTransformedPacked = eePackRGBAWord(128.0f);
                         fileQueueSetColor(*queues, queueTransformedPacked);
                         fileQueueSetScale(*queues, slot->scale);
@@ -6297,8 +6298,8 @@ void fileDrawLoadObjectSlots(s32 object) {
 
                         directInput[0] = slot->color;
                         EE_MMI_RGBA_UNPACK(directInput, 0.0078125f);
-                        VU0_LOAD_VF(vf11, modulation);
-                        VU0_MUL(vf10, vf10, vf11);
+                        SDF_VU0_LOADVECTOR_B(modulation);
+                        SDF_VU0_MULVECTOR();
                         {
                             u32 *__restrict packedOutput = directOutput;
                             const s32 *__restrict frameInput;
@@ -6318,28 +6319,28 @@ void fileDrawLoadObjectSlots(s32 object) {
                         params.scaleX = scale * sample.scaleX;
                         params.scaleY = scale * sample.scaleY;
                         params.angle = slot->angle + sample.angle;
-                        PCP_COPY_VECTOR(params.position, slot->pos);
+                        SDF_VU0_COPYVECTOR(params.position, slot->pos);
                         effSubmitGeneratedTexturePacket(textureSink, &params);
                     }
                 }
             } else {
                 fileReadRecordSecondVector((u8 *)obj->record, orientation);
                 fileReadVectorPtr20((u8 *)obj->record, origin);
-                VU0_LOAD_VF(vf10, orientation);
+                SDF_VU0_LOADVECTOR(orientation);
                 effMiscQuaternionToMatrixVU();
-                VU0_LOAD_VF(vf31, origin);
+                SDF_VU0_LOAD_ROW3(origin);
                 VU0_STORE_MATRIX(matrix);
                 for (i = 0; i < count; i++, slot++) {
                     if (slot->state >= 0) {
 
                         VU0_LOAD_MATRIX(matrix);
-                        VU0_LOAD_VF(vf10, slot->pos);
-                        VU0_TRANSFORM_POINT(vf10, vf10);
-                        VU0_STORE_VF(vf10, params.position);
+                        SDF_VU0_LOADVECTOR(slot->pos);
+                        SDF_VU0_APPLYMATRIX_XYZ1();
+                        SDF_VU0_STOREVECTOR(params.position);
                         transformedInput[0] = slot->color;
                         EE_MMI_RGBA_UNPACK(transformedInput, 0.0078125f);
-                        VU0_LOAD_VF(vf11, modulation);
-                        VU0_MUL(vf10, vf10, vf11);
+                        SDF_VU0_LOADVECTOR_B(modulation);
+                        SDF_VU0_MULVECTOR();
                         {
                             u32 *__restrict packedOutput = transformedOutput;
                             const s32 *__restrict frameInput;
@@ -6487,12 +6488,12 @@ u32 effSampleColorAlphaTracks(const SdfColorTrack *colorTrack,
 
     unitBits = 0x3C000000;
     eeUnpackRGBAWord(color0, unitBits);
-    VU0_MOVE_VF(vf11, vf10);
+    SDF_VU0_COPYVECTOR_A_TO_B();
     eeUnpackRGBAWord(color1, unitBits);
     inverseFactor = 1.0f - factor;
     VU0_SCALE_VF(vf10, inverseFactor);
     VU0_SCALE_VF(vf11, factor);
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_ADDVECTOR();
     packedColor = eePackRGBAWord(128.0f);
 
     fadeInFrame = (s32)(alphaTrack->fadeInFraction * durationFloat);
@@ -6585,15 +6586,15 @@ void fileSampleKeyTracks(FileSlot *out, FileKeyBlock *block, s32 frame, f32 *tar
     VU0_MOVE_VF(vf23, vf31);
     VU0_LOAD_MATRIX(sdfViewMatrix);
     sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
-    VU0_LOAD_VF(vf10, out->pos);
-    VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, target);
-    VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, delta);
+    SDF_VU0_LOADVECTOR(out->pos);
+    SDF_VU0_APPLYMATRIX_XYZ1();
+    SDF_VU0_PERSVECTOR();
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(target);
+    SDF_VU0_APPLYMATRIX_XYZ1();
+    SDF_VU0_PERSVECTOR();
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_STOREVECTOR(delta);
     if (delta[0] != 0.0f || delta[1] != 0.0f) {
         out->angle = atan2f(delta[1], delta[0]);
     } else {
@@ -6706,11 +6707,11 @@ void effUpdateGridRecordSlotHistory(FileSlotTable *record, FileSlot *slot) {
                 if (frame >= 2 && columns >= 3) {
                     if (group[rows * 2].state >= 0) {
                         FileSlot *previous;
-                        PCP_COPY_VECTOR(points[0], group[rows * 2].pos);
+                        SDF_VU0_COPYVECTOR(points[0], group[rows * 2].pos);
                         previous = group + rows;
-                        PCP_COPY_VECTOR(points[1], previous->pos);
-                        PCP_COPY_VECTOR(points[2], group->pos);
-                        PCP_COPY_VECTOR(points[3], group->pos);
+                        SDF_VU0_COPYVECTOR(points[1], previous->pos);
+                        SDF_VU0_COPYVECTOR(points[2], group->pos);
+                        SDF_VU0_COPYVECTOR(points[3], group->pos);
                         fraction = 0.0f;
                         cursor = previous - 1;
                         step = 1.0f / (f32)(rows + 1);
@@ -6720,25 +6721,25 @@ void effUpdateGridRecordSlotHistory(FileSlotTable *record, FileSlot *slot) {
                         angleDelta = group->angle - angle;
                         curveStartColor[0] = group->color;
                         EE_MMI_RGBA_UNPACK(curveStartColor, 0.0078125f);
-                        VU0_MOVE_VF(vf11, vf10);
+                        SDF_VU0_COPYVECTOR_A_TO_B();
                         curveEndColor[0] = previous->color;
                         EE_MMI_RGBA_UNPACK(curveEndColor, 0.0078125f);
-                        VU0_STORE_VF_UNCLOBBERED(vf10, color);
-                        VU0_SUB(vf11, vf11, vf10);
-                        VU0_SET_ONES_XYZ(vf10);
+                        SDF_VU0_STOREVECTOR_NOMEM(color);
+                        SDF_VU0_SUBVECTOR_B_A();
+                        SDF_VU0_SETSCALE1VECTOR();
                         VU0_SCALE_VF(vf10, step);
-                        VU0_MUL(vf10, vf10, vf11);
-                        VU0_STORE_VF_UNCLOBBERED(vf10, colorStep);
+                        SDF_VU0_MULVECTOR();
+                        SDF_VU0_STOREVECTOR_NOMEM(colorStep);
                         for (i = 0; i < rows - 1; i++) {
                             fraction += step;
                             vuCatmullRomPoint(points, fraction);
-                            VU0_STORE_VF_UNCLOBBERED(vf10, cursor->pos);
+                            SDF_VU0_STOREVECTOR_NOMEM(cursor->pos);
                             cursor->scale = scale + scaleDelta * fraction;
                             cursor->angle = angle + angleDelta * fraction;
-                            VU0_LOAD_VF(vf10, color);
-                            VU0_LOAD_VF(vf11, colorStep);
+                            SDF_VU0_LOADVECTOR(color);
+                            SDF_VU0_LOADVECTOR_B(colorStep);
                             VU0_ADD_EXTENDED(vf10, vf10, vf11);
-                            VU0_STORE_VF_UNCLOBBERED(vf10, color);
+                            SDF_VU0_STOREVECTOR_NOMEM(color);
                             EE_MMI_RGBA_PACK_UNIT(curveResultColor[0], 128.0f);
                             cursor->color = curveResultColor[0];
                             cursor->state = frame;
@@ -6758,30 +6759,30 @@ void effUpdateGridRecordSlotHistory(FileSlotTable *record, FileSlot *slot) {
                         angleDelta = group->angle - angle;
                         linearStartColor[0] = group->color;
                         EE_MMI_RGBA_UNPACK(linearStartColor, 0.0078125f);
-                        VU0_MOVE_VF(vf11, vf10);
+                        SDF_VU0_COPYVECTOR_A_TO_B();
                         linearEndColor[0] = previous->color;
                         EE_MMI_RGBA_UNPACK(linearEndColor, 0.0078125f);
-                        VU0_STORE_VF_UNCLOBBERED(vf10, color);
-                        VU0_SUB(vf11, vf11, vf10);
-                        VU0_SET_ONES_XYZ(vf10);
+                        SDF_VU0_STOREVECTOR_NOMEM(color);
+                        SDF_VU0_SUBVECTOR_B_A();
+                        SDF_VU0_SETSCALE1VECTOR();
                         VU0_SCALE_VF(vf10, step);
-                        VU0_MUL(vf10, vf10, vf11);
-                        VU0_STORE_VF_UNCLOBBERED(vf10, colorStep);
+                        SDF_VU0_MULVECTOR();
+                        SDF_VU0_STOREVECTOR_NOMEM(colorStep);
                         {
                             u32 *__restrict packedOutput = linearResultColor;
 
                             for (i = 0; i < rows - 1; i++) {
                                 fraction += step;
-                                VU0_LOAD_VF(vf10, shiftTarget->pos);
-                                VU0_LOAD_VF(vf11, group->pos);
+                                SDF_VU0_LOADVECTOR(shiftTarget->pos);
+                                SDF_VU0_LOADVECTOR_B(group->pos);
                                 VU0_LERP_VF10(fraction);
-                                VU0_STORE_VF_UNCLOBBERED(vf10, cursor->pos);
+                                SDF_VU0_STOREVECTOR_NOMEM(cursor->pos);
                                 cursor->scale = scale + scaleDelta * fraction;
                                 cursor->angle = angle + angleDelta * fraction;
-                                VU0_LOAD_VF(vf10, color);
-                                VU0_LOAD_VF(vf11, colorStep);
+                                SDF_VU0_LOADVECTOR(color);
+                                SDF_VU0_LOADVECTOR_B(colorStep);
                                 VU0_ADD_EXTENDED(vf10, vf10, vf11);
-                                VU0_STORE_VF_UNCLOBBERED(vf10, color);
+                                SDF_VU0_STOREVECTOR_NOMEM(color);
                                 {
                                     u8 *__restrict slotBytes;
 
@@ -6856,7 +6857,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
         mode = keys->heading.track.curve.headingMode;
         speedDecrease = keys->emitter.wave.axialDeceleration;
         radiusVector[3] = 0.0f;
-        VU0_LOAD_VF(vf10, keys->orientation);
+        SDF_VU0_LOADVECTOR(keys->orientation);
         effMiscQuaternionToMatrixVU();
         if (duration != 0 && (s32)record->references >= duration) {
             toSpawn = 0;
@@ -6903,9 +6904,9 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                                 motion->axis[1] = -1.0f;
                                 motion->axis[2] = 0.0f;
                             } else {
-                                VU0_LOAD_VF(vf10, effWaveEmitterNegativeYAxis);
-                                VU0_ROTATE_VEC(vf10, vf10);
-                                VU0_STORE_VF(vf10, direction);
+                                SDF_VU0_LOADVECTOR(effWaveEmitterNegativeYAxis);
+                                SDF_VU0_APPLYMATRIX_XYZ();
+                                SDF_VU0_STOREVECTOR(direction);
                                 motion->axis[0] = direction[0];
                                 motion->axis[1] = direction[1];
                                 motion->axis[2] = direction[2];
@@ -6914,12 +6915,12 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                             direction[1] = 0.0f;
                             direction[2] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f;
                             direction[3] = 0.0f;
-                            VU0_LOAD_VF(vf10, direction);
-                            VU0_NORMALIZE_VF10();
+                            SDF_VU0_LOADVECTOR(direction);
+                            SDF_VU0_NORMALIZE();
                             if (localSpace == 0) {
-                                VU0_ROTATE_VEC(vf10, vf10);
+                                SDF_VU0_APPLYMATRIX_XYZ();
                             }
-                            VU0_STORE_VF(vf10, direction);
+                            SDF_VU0_STOREVECTOR(direction);
                             motion->swayDirection[0] = direction[0];
                             motion->swayDirection[1] = direction[1];
                             motion->swayDirection[2] = direction[2];
@@ -6943,17 +6944,17 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                                 ((dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f);
                             VEC3_SPLAT(radiusVector, radius);
                             if (localSpace != 0) {
-                                VU0_LOAD_VF(vf10, direction);
-                                VU0_LOAD_VF(vf11, radiusVector);
-                                VU0_MUL(vf10, vf10, vf11);
+                                SDF_VU0_LOADVECTOR(direction);
+                                SDF_VU0_LOADVECTOR_B(radiusVector);
+                                SDF_VU0_MULVECTOR();
                             } else {
-                                VU0_LOAD_VF(vf10, direction);
-                                VU0_LOAD_VF(vf11, radiusVector);
-                                VU0_MUL(vf10, vf10, vf11);
-                                VU0_LOAD_VF(vf11, keys->pos);
-                                VU0_ADD(vf10, vf10, vf11);
+                                SDF_VU0_LOADVECTOR(direction);
+                                SDF_VU0_LOADVECTOR_B(radiusVector);
+                                SDF_VU0_MULVECTOR();
+                                SDF_VU0_LOADVECTOR_B(keys->pos);
+                                SDF_VU0_ADDVECTOR();
                             }
-                            VU0_STORE_VF(vf10, slot->pos);
+                            SDF_VU0_STOREVECTOR(slot->pos);
                             motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
@@ -6972,7 +6973,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                                 motion->angle = 0.0f;
                             }
                             slot->state = 0;
-                            PCP_COPY_VECTOR(previousPosition, slot->pos);
+                            SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
                                 f32 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
                                 distance = motion->speed * age;
@@ -7003,7 +7004,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                             toSpawn--;
                         }
                     } else {
-                        PCP_COPY_VECTOR(previousPosition, slot->pos);
+                        SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                         sine = sdfSin(motion->phase);
                         sway = motion->amplitude * (sine - motion->previousSine);
                         slot->pos[0] += motion->swayDirection[0] * sway;
@@ -7132,9 +7133,9 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                             delta[0] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f;
                             delta[1] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f;
                             delta[2] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f;
-                            VU0_LOAD_VF(vf10, delta);
-                            VU0_NORMALIZE_VF10();
-                            VU0_STORE_VF(vf10, delta);
+                            SDF_VU0_LOADVECTOR(delta);
+                            SDF_VU0_NORMALIZE();
+                            SDF_VU0_STOREVECTOR(delta);
                             motion->direction[0] = delta[0];
                             motion->direction[1] = delta[1];
                             motion->direction[2] = delta[2];
@@ -7146,20 +7147,20 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                                 VEC3_SPLAT(radiusVector, radius);
                             }
                             /* Retail initializes only XYZ of this radius vector; W is left untouched. */
-                            VU0_LOAD_VF(vf10, delta);
+                            SDF_VU0_LOADVECTOR(delta);
                             if (keys->emitter.radial.speed < 0.0f) {
-                                VU0_NEGATE_XYZ(vf10);
+                                SDF_VU0_NEGVECTOR_XYZ();
                             }
                             if (flags & 1) {
-                                VU0_LOAD_VF(vf11, radiusVector);
-                                VU0_MUL(vf10, vf10, vf11);
+                                SDF_VU0_LOADVECTOR_B(radiusVector);
+                                SDF_VU0_MULVECTOR();
                             } else {
-                                VU0_LOAD_VF(vf11, radiusVector);
-                                VU0_MUL(vf10, vf10, vf11);
-                                VU0_LOAD_VF(vf11, keys->pos);
-                                VU0_ADD(vf10, vf10, vf11);
+                                SDF_VU0_LOADVECTOR_B(radiusVector);
+                                SDF_VU0_MULVECTOR();
+                                SDF_VU0_LOADVECTOR_B(keys->pos);
+                                SDF_VU0_ADDVECTOR();
                             }
-                            VU0_STORE_VF(vf10, slot->pos);
+                            SDF_VU0_STOREVECTOR(slot->pos);
                             motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
@@ -7178,10 +7179,10 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                                 motion->angle = 0.0f;
                             }
                             slot->state = 0;
-                            PCP_COPY_VECTOR(previousPosition, slot->pos);
+                            SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
                                 f32 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
-                                VU0_LOAD_VF(vf11, slot->pos);
+                                SDF_VU0_LOADVECTOR_B(slot->pos);
                                 distance = motion->speed * age;
                                 distance += acceleration * age * age * 0.5f;
                                 if (distance < 0.0f) {
@@ -7191,9 +7192,9 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                                 delta[1] = distance * motion->direction[1];
                                 delta[2] = distance * motion->direction[2];
                                 delta[1] += gravity * age * age * 0.5f;
-                                VU0_LOAD_VF(vf10, delta);
-                                VU0_ADD(vf10, vf10, vf11);
-                                VU0_STORE_VF(vf10, slot->pos);
+                                SDF_VU0_LOADVECTOR(delta);
+                                SDF_VU0_ADDVECTOR();
+                                SDF_VU0_STOREVECTOR(slot->pos);
                                 slot->state = (s32)age;
                             }
                             fileSampleKeyTracks(slot, keys, slot->state, previousPosition);
@@ -7208,8 +7209,8 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                         }
                     } else {
                         f32 age;
-                        PCP_COPY_VECTOR(previousPosition, slot->pos);
-                        VU0_LOAD_VF(vf11, slot->pos);
+                        SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
+                        SDF_VU0_LOADVECTOR_B(slot->pos);
                         age = (f32)frame;
                         distance = motion->speed + acceleration * age;
                         if (distance < 0.0f) {
@@ -7219,9 +7220,9 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                         delta[1] = distance * motion->direction[1];
                         delta[2] = distance * motion->direction[2];
                         delta[1] += gravity * age;
-                        VU0_LOAD_VF(vf10, delta);
-                        VU0_ADD(vf10, vf10, vf11);
-                        VU0_STORE_VF(vf10, slot->pos);
+                        SDF_VU0_LOADVECTOR(delta);
+                        SDF_VU0_ADDVECTOR();
+                        SDF_VU0_STOREVECTOR(slot->pos);
                         fileSampleKeyTracks(slot, keys, frame, previousPosition);
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
@@ -7312,8 +7313,8 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
         direction[3] = 0.0f;
         position[3] = 0.0f;
         radiusVector[3] = 0.0f;
-        PCP_COPY_VECTOR(origin, keys->pos);
-        PCP_COPY_VECTOR(initialOrientation, keys->orientation);
+        SDF_VU0_COPYVECTOR(origin, keys->pos);
+        SDF_VU0_COPYVECTOR(initialOrientation, keys->orientation);
         if (duration != 0 && (s32)record->references >= duration) {
             toSpawn = 0;
             prewarm = 0;
@@ -7372,9 +7373,9 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                             direction[2] = sdfSin(motion->initialPhase);
                             motion->height = -keys->emitter.circular.initialAxialExtent * dds3GetRandFloatA(&effSharedRandomState);
                             VEC3_SPLAT(radiusVector, initialRadius);
-                            VU0_LOAD_VF(vf10, direction);
-                            VU0_LOAD_VF(vf11, radiusVector);
-                            VU0_MUL(vf10, vf10, vf11);
+                            SDF_VU0_LOADVECTOR(direction);
+                            SDF_VU0_LOADVECTOR_B(radiusVector);
+                            SDF_VU0_MULVECTOR();
                             VU0_SET_VF10_COMPONENT(y, motion->height);
                             localSpace = flags & 1;
                             if (localSpace == 0) {
@@ -7385,10 +7386,10 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                                 motion->orientation[1] = initialOrientation[1];
                                 motion->orientation[2] = initialOrientation[2];
                                 motion->orientation[3] = initialOrientation[3];
-                                VU0_LOAD_VF(vf11, origin);
-                                VU0_ADD(vf10, vf10, vf11);
+                                SDF_VU0_LOADVECTOR_B(origin);
+                                SDF_VU0_ADDVECTOR();
                             }
-                            VU0_STORE_VF(vf10, slot->pos);
+                            SDF_VU0_STOREVECTOR(slot->pos);
                             motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
@@ -7407,7 +7408,7 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                                 motion->angle = 0.0f;
                             }
                             slot->state = 0;
-                            PCP_COPY_VECTOR(previousPosition, slot->pos);
+                            SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
                                 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
                                 motion->height = motion->height - motion->axialSpeed * age + gravity * age * age * 0.5f;
@@ -7416,16 +7417,16 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                                 position[1] = motion->height;
                                 position[2] = sdfSin(motion->initialPhase) * motion->radius;
                                 if (localSpace == 0) {
-                                    VU0_LOAD_VF(vf10, initialOrientation);
+                                    SDF_VU0_LOADVECTOR(initialOrientation);
                                     effMiscQuaternionToMatrixVU();
-                                    VU0_LOAD_VF(vf10, position);
-                                    VU0_ROTATE_VEC(vf10, vf10);
-                                    VU0_LOAD_VF(vf11, origin);
-                                    VU0_ADD(vf10, vf10, vf11);
+                                    SDF_VU0_LOADVECTOR(position);
+                                    SDF_VU0_APPLYMATRIX_XYZ();
+                                    SDF_VU0_LOADVECTOR_B(origin);
+                                    SDF_VU0_ADDVECTOR();
                                 } else {
-                                    VU0_LOAD_VF(vf10, position);
+                                    SDF_VU0_LOADVECTOR(position);
                                 }
-                                VU0_STORE_VF(vf10, slot->pos);
+                                SDF_VU0_STOREVECTOR(slot->pos);
                                 slot->state = (s32)age;
                             }
                             fileSampleKeyTracks(slot, keys, slot->state, previousPosition);
@@ -7439,7 +7440,7 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                             toSpawn--;
                         }
                     } else {
-                        PCP_COPY_VECTOR(previousPosition, slot->pos);
+                        SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                         age = (f32)frame;
                         motion->height = motion->height - motion->axialSpeed + gravity * age;
                         motion->radius += motion->radiusStep;
@@ -7452,11 +7453,11 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                             orientation[1] = motion->orientation[1];
                             orientation[2] = motion->orientation[2];
                             orientation[3] = motion->orientation[3];
-                            VU0_LOAD_VF(vf10, orientation);
+                            SDF_VU0_LOADVECTOR(orientation);
                             effMiscQuaternionToMatrixVU();
-                            VU0_LOAD_VF(vf10, position);
-                            VU0_ROTATE_VEC(vf10, vf10);
-                            VU0_STORE_VF(vf10, position);
+                            SDF_VU0_LOADVECTOR(position);
+                            SDF_VU0_APPLYMATRIX_XYZ();
+                            SDF_VU0_STOREVECTOR(position);
                             position[0] += motion->origin[0];
                             position[1] += motion->origin[1];
                             position[2] += motion->origin[2];
@@ -7557,7 +7558,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
         position[3] = 0.0f;
         /* Retail also initializes this scratch vector's W; its XYZ are unused here. */
         radiusVector[3] = 0.0f;
-        PCP_COPY_VECTOR(origin, keys->pos);
+        SDF_VU0_COPYVECTOR(origin, keys->pos);
         if (duration != 0 && (s32)record->references >= duration) {
             toSpawn = 0;
             prewarm = 0;
@@ -7617,17 +7618,17 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                             direction[0] = sdfCos(motion->initialPhase) * initialRadius;
                             direction[1] = 0.0f;
                             direction[2] = sdfSin(motion->initialPhase) * initialRadius;
-                            VU0_LOAD_VF(vf10, direction);
-                            VU0_ROTATE_VEC(vf10, vf10);
+                            SDF_VU0_LOADVECTOR(direction);
+                            SDF_VU0_APPLYMATRIX_XYZ();
                             localSpace = flags & 1;
                             if (localSpace == 0) {
                                 motion->origin[0] = origin[0];
                                 motion->origin[1] = origin[1];
                                 motion->origin[2] = origin[2];
-                                VU0_LOAD_VF(vf11, origin);
-                                VU0_ADD(vf10, vf10, vf11);
+                                SDF_VU0_LOADVECTOR_B(origin);
+                                SDF_VU0_ADDVECTOR();
                             }
-                            VU0_STORE_VF(vf10, slot->pos);
+                            SDF_VU0_STOREVECTOR(slot->pos);
                             motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
@@ -7646,7 +7647,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                                 motion->angle = 0.0f;
                             }
                             slot->state = 0;
-                            PCP_COPY_VECTOR(previousPosition, slot->pos);
+                            SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
                                 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
                                 motion->height += gravity * age * age * 0.5f;
@@ -7655,14 +7656,14 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                                 direction[0] = sdfCos(motion->initialPhase) * radius;
                                 direction[1] = 0.0f;
                                 direction[2] = sdfSin(motion->initialPhase) * radius;
-                                VU0_LOAD_VF(vf10, direction);
-                                VU0_ROTATE_VEC(vf10, vf10);
+                                SDF_VU0_LOADVECTOR(direction);
+                                SDF_VU0_APPLYMATRIX_XYZ();
                                 if (localSpace == 0) {
-                                    VU0_MOVE_VF(vf11, vf10);
-                                    VU0_LOAD_VF(vf10, origin);
-                                    VU0_ADD(vf10, vf10, vf11);
+                                    SDF_VU0_COPYVECTOR_A_TO_B();
+                                    SDF_VU0_LOADVECTOR(origin);
+                                    SDF_VU0_ADDVECTOR();
                                 }
-                                VU0_STORE_VF(vf10, slot->pos);
+                                SDF_VU0_STOREVECTOR(slot->pos);
                                 slot->state = (s32)age;
                                 slot->pos[1] += motion->height;
                             }
@@ -7677,7 +7678,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                             toSpawn--;
                         }
                     } else {
-                        PCP_COPY_VECTOR(previousPosition, slot->pos);
+                        SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                         age = (f32)frame;
                         motion->height += gravity * age;
                         motion->radius += motion->radiusStep;
@@ -7689,9 +7690,9 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                         direction[0] = sdfCos(phase) * radius;
                         direction[1] = 0.0f;
                         direction[2] = sdfSin(phase) * radius;
-                        VU0_LOAD_VF(vf10, direction);
-                        VU0_ROTATE_VEC(vf10, vf10);
-                        VU0_STORE_VF(vf10, position);
+                        SDF_VU0_LOADVECTOR(direction);
+                        SDF_VU0_APPLYMATRIX_XYZ();
+                        SDF_VU0_STOREVECTOR(position);
                         if (!(flags & 1)) {
                             position[0] += motion->origin[0];
                             position[1] += motion->origin[1];
@@ -7768,7 +7769,7 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
         gravity = keys->emitter.directed.gravity;
         acceleration = keys->emitter.directed.acceleration;
         delta[3] = 0.0f;
-        VU0_LOAD_VF(vf10, keys->orientation);
+        SDF_VU0_LOADVECTOR(keys->orientation);
         effMiscQuaternionToMatrixVU();
         if (duration != 0 && (s32)record->references >= duration) {
             toSpawn = 0;
@@ -7814,13 +7815,13 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                             delta[0] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f * spread;
                             delta[1] = -(1.0f - spread);
                             delta[2] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f * spread;
-                            VU0_LOAD_VF(vf10, delta);
-                            VU0_NORMALIZE_VF10();
+                            SDF_VU0_LOADVECTOR(delta);
+                            SDF_VU0_NORMALIZE();
                             localSpace = flags & 1;
                             if (localSpace == 0) {
-                                VU0_ROTATE_VEC(vf10, vf10);
+                                SDF_VU0_APPLYMATRIX_XYZ();
                             }
-                            VU0_STORE_VF(vf10, delta);
+                            SDF_VU0_STOREVECTOR(delta);
                             motion->direction[0] = delta[0];
                             motion->direction[1] = delta[1];
                             motion->direction[2] = delta[2];
@@ -7832,20 +7833,20 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                                 VEC3_SPLAT(radiusVector, radius);
                             }
                             /* Retail initializes only XYZ of this radius vector; W is left untouched. */
-                            VU0_LOAD_VF(vf10, delta);
+                            SDF_VU0_LOADVECTOR(delta);
                             if (keys->emitter.directed.speed < 0.0f) {
-                                VU0_NEGATE_XYZ(vf10);
+                                SDF_VU0_NEGVECTOR_XYZ();
                             }
                             if (localSpace != 0) {
-                                VU0_LOAD_VF(vf11, radiusVector);
-                                VU0_MUL(vf10, vf10, vf11);
+                                SDF_VU0_LOADVECTOR_B(radiusVector);
+                                SDF_VU0_MULVECTOR();
                             } else {
-                                VU0_LOAD_VF(vf11, radiusVector);
-                                VU0_MUL(vf10, vf10, vf11);
-                                VU0_LOAD_VF(vf11, keys->pos);
-                                VU0_ADD(vf10, vf10, vf11);
+                                SDF_VU0_LOADVECTOR_B(radiusVector);
+                                SDF_VU0_MULVECTOR();
+                                SDF_VU0_LOADVECTOR_B(keys->pos);
+                                SDF_VU0_ADDVECTOR();
                             }
-                            VU0_STORE_VF(vf10, slot->pos);
+                            SDF_VU0_STOREVECTOR(slot->pos);
                             motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
@@ -7864,10 +7865,10 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                                 motion->angle = 0.0f;
                             }
                             slot->state = 0;
-                            PCP_COPY_VECTOR(previousPosition, slot->pos);
+                            SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
                                 f32 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
-                                VU0_LOAD_VF(vf11, slot->pos);
+                                SDF_VU0_LOADVECTOR_B(slot->pos);
                                 distance = motion->speed * age;
                                 distance += acceleration * age * age * 0.5f;
                                 if (distance < 0.0f) {
@@ -7877,9 +7878,9 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                                 delta[1] = distance * motion->direction[1];
                                 delta[2] = distance * motion->direction[2];
                                 delta[1] += gravity * age * age * 0.5f;
-                                VU0_LOAD_VF(vf10, delta);
-                                VU0_ADD(vf10, vf10, vf11);
-                                VU0_STORE_VF(vf10, slot->pos);
+                                SDF_VU0_LOADVECTOR(delta);
+                                SDF_VU0_ADDVECTOR();
+                                SDF_VU0_STOREVECTOR(slot->pos);
                                 slot->state = (s32)age;
                             }
                             fileSampleKeyTracks(slot, keys, slot->state, previousPosition);
@@ -7894,8 +7895,8 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                         }
                     } else {
                         f32 age;
-                        PCP_COPY_VECTOR(previousPosition, slot->pos);
-                        VU0_LOAD_VF(vf11, slot->pos);
+                        SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
+                        SDF_VU0_LOADVECTOR_B(slot->pos);
                         age = (f32)frame;
                         distance = motion->speed + acceleration * age;
                         if (distance < 0.0f) {
@@ -7905,9 +7906,9 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                         delta[1] = distance * motion->direction[1];
                         delta[2] = distance * motion->direction[2];
                         delta[1] += gravity * age;
-                        VU0_LOAD_VF(vf10, delta);
-                        VU0_ADD(vf10, vf10, vf11);
-                        VU0_STORE_VF(vf10, slot->pos);
+                        SDF_VU0_LOADVECTOR(delta);
+                        SDF_VU0_ADDVECTOR();
+                        SDF_VU0_STOREVECTOR(slot->pos);
                         fileSampleKeyTracks(slot, keys, frame, previousPosition);
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
@@ -7982,7 +7983,7 @@ void effUpdateSectorEmitterSlots(FileSlotTable *record) {
         gravity = keys->emitter.sector.gravity;
         acceleration = keys->emitter.sector.acceleration;
         delta[3] = 0.0f;
-        VU0_LOAD_VF(vf10, keys->orientation);
+        SDF_VU0_LOADVECTOR(keys->orientation);
         effMiscQuaternionToMatrixVU();
         if (duration != 0 && (s32)record->references >= duration) {
             toSpawn = 0;
@@ -8032,13 +8033,13 @@ void effUpdateSectorEmitterSlots(FileSlotTable *record) {
                             delta[0] = sdfCos(angle) * spread;
                             delta[1] = -(1.0f - spread);
                             delta[2] = sdfSin(angle) * spread;
-                            VU0_LOAD_VF(vf10, delta);
-                            VU0_NORMALIZE_VF10();
+                            SDF_VU0_LOADVECTOR(delta);
+                            SDF_VU0_NORMALIZE();
                             localSpace = flags & 1;
                             if (localSpace == 0) {
-                                VU0_ROTATE_VEC(vf10, vf10);
+                                SDF_VU0_APPLYMATRIX_XYZ();
                             }
-                            VU0_STORE_VF(vf10, delta);
+                            SDF_VU0_STOREVECTOR(delta);
                             motion->direction[0] = delta[0];
                             motion->direction[1] = delta[1];
                             motion->direction[2] = delta[2];
@@ -8050,20 +8051,20 @@ void effUpdateSectorEmitterSlots(FileSlotTable *record) {
                                 VEC3_SPLAT(radiusVector, radius);
                             }
                             /* Retail initializes only XYZ of this radius vector; W is left untouched. */
-                            VU0_LOAD_VF(vf10, delta);
+                            SDF_VU0_LOADVECTOR(delta);
                             if (keys->emitter.sector.speed < 0.0f) {
-                                VU0_NEGATE_XYZ(vf10);
+                                SDF_VU0_NEGVECTOR_XYZ();
                             }
                             if (localSpace != 0) {
-                                VU0_LOAD_VF(vf11, radiusVector);
-                                VU0_MUL(vf10, vf10, vf11);
+                                SDF_VU0_LOADVECTOR_B(radiusVector);
+                                SDF_VU0_MULVECTOR();
                             } else {
-                                VU0_LOAD_VF(vf11, radiusVector);
-                                VU0_MUL(vf10, vf10, vf11);
-                                VU0_LOAD_VF(vf11, keys->pos);
-                                VU0_ADD(vf10, vf10, vf11);
+                                SDF_VU0_LOADVECTOR_B(radiusVector);
+                                SDF_VU0_MULVECTOR();
+                                SDF_VU0_LOADVECTOR_B(keys->pos);
+                                SDF_VU0_ADDVECTOR();
                             }
-                            VU0_STORE_VF(vf10, slot->pos);
+                            SDF_VU0_STOREVECTOR(slot->pos);
                             motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
@@ -8082,10 +8083,10 @@ void effUpdateSectorEmitterSlots(FileSlotTable *record) {
                                 motion->angle = 0.0f;
                             }
                             slot->state = 0;
-                            PCP_COPY_VECTOR(previousPosition, slot->pos);
+                            SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
                                 f32 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
-                                VU0_LOAD_VF(vf11, slot->pos);
+                                SDF_VU0_LOADVECTOR_B(slot->pos);
                                 distance = motion->speed * age;
                                 distance += acceleration * age * age * 0.5f;
                                 if (distance < 0.0f) {
@@ -8095,9 +8096,9 @@ void effUpdateSectorEmitterSlots(FileSlotTable *record) {
                                 delta[1] = distance * motion->direction[1];
                                 delta[2] = distance * motion->direction[2];
                                 delta[1] += gravity * age * age * 0.5f;
-                                VU0_LOAD_VF(vf10, delta);
-                                VU0_ADD(vf10, vf10, vf11);
-                                VU0_STORE_VF(vf10, slot->pos);
+                                SDF_VU0_LOADVECTOR(delta);
+                                SDF_VU0_ADDVECTOR();
+                                SDF_VU0_STOREVECTOR(slot->pos);
                                 slot->state = (s32)age;
                             }
                             fileSampleKeyTracks(slot, keys, slot->state, previousPosition);
@@ -8112,8 +8113,8 @@ void effUpdateSectorEmitterSlots(FileSlotTable *record) {
                         }
                     } else {
                         f32 age;
-                        PCP_COPY_VECTOR(previousPosition, slot->pos);
-                        VU0_LOAD_VF(vf11, slot->pos);
+                        SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
+                        SDF_VU0_LOADVECTOR_B(slot->pos);
                         age = (f32)frame;
                         distance = motion->speed + acceleration * age;
                         if (distance < 0.0f) {
@@ -8123,9 +8124,9 @@ void effUpdateSectorEmitterSlots(FileSlotTable *record) {
                         delta[1] = distance * motion->direction[1];
                         delta[2] = distance * motion->direction[2];
                         delta[1] += gravity * age;
-                        VU0_LOAD_VF(vf10, delta);
-                        VU0_ADD(vf10, vf10, vf11);
-                        VU0_STORE_VF(vf10, slot->pos);
+                        SDF_VU0_LOADVECTOR(delta);
+                        SDF_VU0_ADDVECTOR();
+                        SDF_VU0_STOREVECTOR(slot->pos);
                         fileSampleKeyTracks(slot, keys, frame, previousPosition);
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
@@ -8202,7 +8203,7 @@ void vu0CubicBezierPoint(f32 *controlPoint0, f32 *controlPoint1,
     point[0] = controlPoint0[0] * weight[0] + controlPoint1[0] * weight[1] + controlPoint2[0] * weight[2] + controlPoint3[0] * weight[3];
     point[1] = controlPoint0[1] * weight[0] + controlPoint1[1] * weight[1] + controlPoint2[1] * weight[2] + controlPoint3[1] * weight[3];
     point[2] = controlPoint0[2] * weight[0] + controlPoint1[2] * weight[1] + controlPoint2[2] * weight[2] + controlPoint3[2] * weight[3];
-    VU0_LOAD_VF(vf10, point);
+    SDF_VU0_LOADVECTOR(point);
 }
 
 typedef struct FileCurveMotion {
@@ -8266,7 +8267,7 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
         start[0] = keys->emitter.curve.start[0];
         start[1] = keys->emitter.curve.start[1];
         start[2] = keys->emitter.curve.start[2];
-        VU0_LOAD_VF(vf10, keys->orientation);
+        SDF_VU0_LOADVECTOR(keys->orientation);
         effMiscQuaternionToMatrixVU();
         if (duration != 0 && (s32)record->references >= duration) {
             prewarm = 0;
@@ -8313,25 +8314,25 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                             endpoint[0] = keys->emitter.curve.end[0] + motion->endpointOffset[0];
                             endpoint[1] = keys->emitter.curve.end[1] + motion->endpointOffset[1];
                             endpoint[2] = keys->emitter.curve.end[2] + motion->endpointOffset[2];
-                            VU0_LOAD_VF(vf12, start);
-                            VU0_MOVE_VF(vf10, vf12);
-                            VU0_LOAD_VF(vf11, endpoint);
+                            SDF_VU0_LOADVECTOR_C(start);
+                            SDF_VU0_COPYVECTOR_C_TO_A();
+                            SDF_VU0_LOADVECTOR_B(endpoint);
                             VU0_LERP_VF10((f32)keys->emitter.curve.firstPercent / 100.0f);
-                            VU0_STORE_VF(vf10, firstPoint);
-                            VU0_MOVE_VF(vf10, vf12);
+                            SDF_VU0_STOREVECTOR(firstPoint);
+                            SDF_VU0_COPYVECTOR_C_TO_A();
                             VU0_LERP_VF10((f32)keys->emitter.curve.secondPercent / 100.0f);
-                            VU0_STORE_VF(vf10, secondPoint);
-                            VU0_MOVE_VF(vf10, vf12);
-                            VU0_SUB(vf10, vf10, vf11);
-                            VU0_LENGTH_VF10(motion->pathLength);
-                            VU0_NORMALIZE_VF10();
-                            VU0_STORE_VF(vf10, axis);
-                            VU0_MOVE_VF(vf12, vf10);
-                            VU0_LOAD_VF(vf11, effWorldUpVector);
-                            VU0_CROSS_XYZ(vf10, vf10, vf11);
-                            VU0_MOVE_VF(vf11, vf12);
-                            VU0_CROSS_XYZ(vf10, vf10, vf11);
-                            VU0_STORE_VF(vf10, lateral);
+                            SDF_VU0_STOREVECTOR(secondPoint);
+                            SDF_VU0_COPYVECTOR_C_TO_A();
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_GETLENGTH(motion->pathLength);
+                            SDF_VU0_NORMALIZE();
+                            SDF_VU0_STOREVECTOR(axis);
+                            SDF_VU0_COPYVECTOR_A_TO_C();
+                            SDF_VU0_LOADVECTOR_B(effWorldUpVector);
+                            SDF_VU0_OUTERPRODUCT();
+                            SDF_VU0_COPYVECTOR_C_TO_B();
+                            SDF_VU0_OUTERPRODUCT();
+                            SDF_VU0_STOREVECTOR(lateral);
                             angle = (f32)keys->emitter.curve.spreadDegrees *
                                 ((dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f) *
                                 0.5f * 0.0174532925f;
@@ -8339,25 +8340,25 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                             offset = keys->emitter.curve.firstOffset *
                                 (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.curve.firstRandomness +
                                  (1.0f - keys->emitter.curve.firstRandomness));
-                            VU0_LOAD_VF(vf10, firstPoint);
-                            VU0_LOAD_VF(vf12, lateral);
-                            VU0_MOVE_VF(vf11, vf12);
+                            SDF_VU0_LOADVECTOR(firstPoint);
+                            SDF_VU0_LOADVECTOR_C(lateral);
+                            SDF_VU0_COPYVECTOR_C_TO_B();
                             VU0_SCALE_VF(vf11, offset);
                             VU0_ROTATE_VEC(vf11, vf11);
-                            VU0_ADD(vf10, vf10, vf11);
-                            VU0_STORE_VF(vf10, point);
+                            SDF_VU0_ADDVECTOR();
+                            SDF_VU0_STOREVECTOR(point);
                             motion->firstControl[0] = point[0];
                             motion->firstControl[1] = point[1];
                             motion->firstControl[2] = point[2];
                             offset = keys->emitter.curve.secondOffset *
                                 (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.curve.secondRandomness +
                                  (1.0f - keys->emitter.curve.secondRandomness));
-                            VU0_LOAD_VF(vf10, secondPoint);
-                            VU0_MOVE_VF(vf11, vf12);
+                            SDF_VU0_LOADVECTOR(secondPoint);
+                            SDF_VU0_COPYVECTOR_C_TO_B();
                             VU0_SCALE_VF(vf11, offset);
                             VU0_ROTATE_VEC(vf11, vf11);
-                            VU0_ADD(vf10, vf10, vf11);
-                            VU0_STORE_VF(vf10, point);
+                            SDF_VU0_ADDVECTOR();
+                            SDF_VU0_STOREVECTOR(point);
                             motion->secondControl[0] = point[0];
                             motion->secondControl[1] = point[1];
                             motion->secondControl[2] = point[2];
@@ -8368,7 +8369,7 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                                 (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.curve.angularRandomness +
                                  (1.0f - keys->emitter.curve.angularRandomness));
                             motion->progress = 0.0f;
-                            PCP_COPY_VECTOR(slot->pos, start);
+                            SDF_VU0_COPYVECTOR(slot->pos, start);
                             motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
@@ -8387,7 +8388,7 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                                 motion->angle = 0.0f;
                             }
                             slot->state = 0;
-                            PCP_COPY_VECTOR(previousPosition, slot->pos);
+                            SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
                                 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
                                 travel = motion->travelSpeed * age;
@@ -8415,16 +8416,16 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                                 vu0CubicBezierPoint(keys->emitter.curve.start, motion->firstControl,
                                     motion->secondControl, sampledEndpoint, progress);
                                 if (rotation != 0.0f) {
-                                    VU0_STORE_VF(vf10, point);
+                                    SDF_VU0_STOREVECTOR(point);
                                     SetRotateMatrixAxis(rotation, (const struct RwV3d *)axis);
-                                    VU0_LOAD_VF(vf11, axis);
+                                    SDF_VU0_LOADVECTOR_B(axis);
                                     VU0_SCALE_VF(vf11, motion->pathLength * progress);
-                                    VU0_LOAD_VF(vf10, point);
-                                    VU0_SUB(vf10, vf10, vf11);
-                                    VU0_ROTATE_VEC(vf10, vf10);
-                                    VU0_ADD(vf10, vf10, vf11);
+                                    SDF_VU0_LOADVECTOR(point);
+                                    SDF_VU0_SUBVECTOR();
+                                    SDF_VU0_APPLYMATRIX_XYZ();
+                                    SDF_VU0_ADDVECTOR();
                                 }
-                                VU0_STORE_VF(vf10, slot->pos);
+                                SDF_VU0_STOREVECTOR(slot->pos);
                                 slot->state = (s32)age;
                             }
                             fileSampleKeyTracks(slot, keys, slot->state, previousPosition);
@@ -8438,7 +8439,7 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                             toSpawn--;
                         }
                     } else {
-                        PCP_COPY_VECTOR(previousPosition, slot->pos);
+                        SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                         age = (f32)frame;
                         travel = motion->travelSpeed * age;
                         travel += travelAcceleration * age * age * 0.5f;
@@ -8465,25 +8466,25 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                         vu0CubicBezierPoint(keys->emitter.curve.start, motion->firstControl,
                             motion->secondControl, sampledEndpoint, progress);
                         if (rotation != 0.0f) {
-                            VU0_STORE_VF(vf10, point);
+                            SDF_VU0_STOREVECTOR(point);
                             /* These native fields are read here without being written at spawn. */
                             endpoint[0] = motion->rotationReference[0];
                             endpoint[1] = motion->rotationReference[1];
                             endpoint[2] = motion->rotationReference[2];
-                            VU0_LOAD_VF(vf10, start);
-                            VU0_LOAD_VF(vf11, endpoint);
-                            VU0_SUB(vf10, vf10, vf11);
-                            VU0_NORMALIZE_VF10();
-                            VU0_STORE_VF(vf10, axis);
+                            SDF_VU0_LOADVECTOR(start);
+                            SDF_VU0_LOADVECTOR_B(endpoint);
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_NORMALIZE();
+                            SDF_VU0_STOREVECTOR(axis);
                             SetRotateMatrixAxis(rotation, (const struct RwV3d *)axis);
-                            VU0_LOAD_VF(vf11, axis);
+                            SDF_VU0_LOADVECTOR_B(axis);
                             VU0_SCALE_VF(vf11, motion->pathLength * progress);
-                            VU0_LOAD_VF(vf10, point);
-                            VU0_SUB(vf10, vf10, vf11);
-                            VU0_ROTATE_VEC(vf10, vf10);
-                            VU0_ADD(vf10, vf10, vf11);
+                            SDF_VU0_LOADVECTOR(point);
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_APPLYMATRIX_XYZ();
+                            SDF_VU0_ADDVECTOR();
                         }
-                        VU0_STORE_VF(vf10, slot->pos);
+                        SDF_VU0_STOREVECTOR(slot->pos);
                         fileSampleKeyTracks(slot, keys, frame, previousPosition);
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
@@ -8575,19 +8576,19 @@ void fileAcquireRecord(FileSlotTable *record) {
 }
 
 void fileReadVectorPtr20(u8 *obj, void *dst) {
-    PCP_COPY_VECTOR(dst, *(u8 **)(obj + 0x20));
+    SDF_VU0_COPYVECTOR(dst, *(u8 **)(obj + 0x20));
 }
 
 void mnuRecordSetVector(void *record, const void *src) {
-    PCP_COPY_VECTOR(*(u8 **)((u8 *)record + 0x20), src);
+    SDF_VU0_COPYVECTOR(*(u8 **)((u8 *)record + 0x20), src);
 }
 
 void fileReadRecordSecondVector(u8 *obj, void *dst) {
-    PCP_COPY_VECTOR(dst, *(u8 **)(obj + 0x20) + 0x10);
+    SDF_VU0_COPYVECTOR(dst, *(u8 **)(obj + 0x20) + 0x10);
 }
 
 void fileSetRecordSecondVector(void *record, const void *src) {
-    PCP_COPY_VECTOR(*(u8 **)((u8 *)record + 0x20) + 0x10, src);
+    SDF_VU0_COPYVECTOR(*(u8 **)((u8 *)record + 0x20) + 0x10, src);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", effModelUpdateControlFlags);

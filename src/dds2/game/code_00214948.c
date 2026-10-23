@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_skill_max_api.h"
@@ -252,7 +253,7 @@ s32 btlUnitBlocksElementQueryForGroup(BtlUnit *unit, s32 action, u32 mask) {
 
 s32 btlAllUnitsPassCheck200(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; battler != 0; battler = battler->nextActor) {
+    for (; battler != 0; battler = battler->next) {
         if (btlUnitBlocksElementQueryForGroup(battler, action, 0x200) == 0) {
             return 0;
         }
@@ -262,7 +263,7 @@ s32 btlAllUnitsPassCheck200(s32 unused, s32 action) {
 
 s32 btlAllUnitsPassCheck400(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
-    for (; battler != 0; battler = battler->nextActor) {
+    for (; battler != 0; battler = battler->next) {
         if (btlUnitBlocksElementQueryForGroup(battler, action, 0x400) == 0) {
             return 0;
         }
@@ -323,7 +324,7 @@ s32 btlFindEnemyLinkagePartnersByCount(BtlUnit *actor, s32 command, BtlUnit **ou
 
     unit = state->units;
     head = unit;
-    for (; unit != NULL; unit = unit->nextActor) {
+    for (; unit != NULL; unit = unit->next) {
         BtlUnit *partner;
 
         if (!(unit->status.flags & 1)) {
@@ -340,7 +341,7 @@ s32 btlFindEnemyLinkagePartnersByCount(BtlUnit *actor, s32 command, BtlUnit **ou
         }
 
         if (requiredCount == 3) {
-            for (partner = head; partner != NULL; partner = partner->nextActor) {
+            for (partner = head; partner != NULL; partner = partner->next) {
                 if (!(partner->status.flags & 1)) {
                     continue;
                 }
@@ -1250,9 +1251,9 @@ void btlFaceLinkedTargetAndFlagDirection(BtlLinkedCommand *command, void *unused
         btlFlagUnitDefeatCandidate(target);
     }
     btlUnitGetMuzzlePosVU(user);
-    VU0_STORE_VF(vf10, userPos);
+    SDF_VU0_STOREVECTOR(userPos);
     btlUnitGetMuzzlePosVU(target);
-    VU0_STORE_VF(vf10, targetPos);
+    SDF_VU0_STOREVECTOR(targetPos);
     btlUnitFaceTarget(target, user);
     if (userPos[0] < targetPos[0]) {
         command->flags |= 0x200;
@@ -1289,21 +1290,21 @@ void btlBuildAngledApproachCameraPose(BtlLinkedCommand *command, BtlCamState *ou
     extent = user->reach * user->scale;
     out->fov = command->camera.fov;
     btlUnitGetMuzzlePosVU(user);
-    VU0_STORE_VF(vf10, userPos);
+    SDF_VU0_STOREVECTOR(userPos);
     userPos[1] += user->height * user->scale * frontLift;
     btlUnitGetMuzzlePosVU(target);
-    VU0_STORE_VF_UNCLOBBERED(vf10, targetPos);
+    SDF_VU0_STOREVECTOR_NOMEM(targetPos);
     targetPos[1] += target->height * target->scale * backLift;
-    VU0_LOAD_VF(vf10, targetPos);
-    VU0_LOAD_VF(vf11, userPos);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_LOADVECTOR(targetPos);
+    SDF_VU0_LOADVECTOR_B(userPos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(length);
     length *= 0.6f;
-    VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, dir);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(dir);
     VU0_SCALE_VF_MFC1(vf10, length);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, out->position);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(out->position);
     angle *= 0.017453293f;
     extent += length * sinf(angle);
     length *= cosf(angle);
@@ -1313,9 +1314,9 @@ void btlBuildAngledApproachCameraPose(BtlLinkedCommand *command, BtlCamState *ou
         angle = -angle;
     }
     SetRotateMatrixY(angle);
-    VU0_LOAD_VF(vf10, dir);
-    VU0_APPLY_MATRIX(vf10, vf10);
-    VU0_STORE_VF(vf10, out->direction);
+    SDF_VU0_LOADVECTOR(dir);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(out->direction);
 }
 
 /* Build reciprocal target-focused cameras with a side offset and optional plane adjustment. */
@@ -1337,10 +1338,10 @@ void btlBuildTargetFocusedCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     userExtent = user->reach * user->scale;
     targetExtent = target->reach * target->scale;
     btlUnitGetMuzzlePosVU(user);
-    VU0_STORE_VF(vf10, userPos);
+    SDF_VU0_STOREVECTOR(userPos);
     userPos[1] = -btlUnitGetTopY(user);
     btlUnitGetMuzzlePosVU(target);
-    VU0_STORE_VF(vf10, targetPos);
+    SDF_VU0_STOREVECTOR(targetPos);
     targetPos[1] += target->height * target->scale * backLift;
     if (targetPos[0] <= userPos[0]) {
         userPos[0] -= userExtent;
@@ -1349,14 +1350,14 @@ void btlBuildTargetFocusedCameraPair(BtlLinkedCommand *command, BtlCamState *fro
         userPos[0] += userExtent;
         targetPos[0] -= targetExtent * sideScale;
     }
-    VU0_LOAD_VF(vf10, targetPos);
-    VU0_STORE_VF(vf10, front->position);
-    VU0_LOAD_VF(vf11, userPos);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_LOADVECTOR(targetPos);
+    SDF_VU0_STOREVECTOR(front->position);
+    SDF_VU0_LOADVECTOR_B(userPos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(length);
     front->distance = length;
-    VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, front->direction);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(front->direction);
     angle = front->fov * 1.3333333f * 0.5f;
     front->distance += userExtent * 2.5f / tanf(angle);
     minDistance = targetExtent / tanf(angle);
@@ -1397,24 +1398,24 @@ void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     userExtent = user->reach * user->scale;
     targetExtent = target->reach * target->scale;
     btlUnitGetMuzzlePosVU(user);
-    VU0_STORE_VF(vf10, userPos);
+    SDF_VU0_STOREVECTOR(userPos);
     userPos[1] += user->height * user->scale * frontLift;
     btlUnitGetMuzzlePosVU(target);
-    VU0_STORE_VF(vf10, targetPos);
+    SDF_VU0_STOREVECTOR(targetPos);
     targetPos[1] += target->height * target->scale * backLift;
     if (targetPos[0] <= userPos[0]) {
         targetPos[0] = targetPos[0] + targetExtent * sideScale;
     } else {
         targetPos[0] = targetPos[0] - targetExtent * sideScale;
     }
-    VU0_LOAD_VF(vf10, userPos);
-    VU0_STORE_VF(vf10, front->position);
-    VU0_LOAD_VF(vf11, targetPos);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_LOADVECTOR(userPos);
+    SDF_VU0_STOREVECTOR(front->position);
+    SDF_VU0_LOADVECTOR_B(targetPos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(length);
     front->distance = length;
-    VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, front->direction);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(front->direction);
     angle = front->fov * 1.3333333f * 0.5f;
     front->distance = front->distance + targetExtent * 1.5f / tanf(angle);
     minDistance = userExtent / tanf(angle);
@@ -1455,10 +1456,10 @@ void btlBuildInsetExchangeCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     userExtent = user->reach * user->scale;
     targetExtent = target->reach * target->scale;
     btlUnitGetMuzzlePosVU(user);
-    VU0_STORE_VF(vf10, userPos);
+    SDF_VU0_STOREVECTOR(userPos);
     userPos[1] += user->height * user->scale * frontLift;
     btlUnitGetMuzzlePosVU(target);
-    VU0_STORE_VF(vf10, targetPos);
+    SDF_VU0_STOREVECTOR(targetPos);
     targetPos[1] += target->height * target->scale * backLift;
     if (targetPos[0] <= userPos[0]) {
         targetPos[0] = targetPos[0] + targetExtent * targetSideScale;
@@ -1467,14 +1468,14 @@ void btlBuildInsetExchangeCameraPair(BtlLinkedCommand *command, BtlCamState *fro
         targetPos[0] = targetPos[0] - targetExtent * targetSideScale;
         userPos[0] = userPos[0] + userExtent * userSideScale;
     }
-    VU0_LOAD_VF(vf10, userPos);
-    VU0_STORE_VF(vf10, front->position);
-    VU0_LOAD_VF(vf11, targetPos);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(length);
+    SDF_VU0_LOADVECTOR(userPos);
+    SDF_VU0_STOREVECTOR(front->position);
+    SDF_VU0_LOADVECTOR_B(targetPos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(length);
     front->distance = length;
-    VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, front->direction);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(front->direction);
     angle = front->fov * 1.3333333f * 0.5f;
     front->distance = front->distance + targetExtent * 1.5f / tanf(angle);
     minDistance = userExtent / tanf(angle);
@@ -1502,7 +1503,7 @@ void btlStartUnitActionIfPairedSelected(void) {
     if (*(s8 *)work->sub == 0) {
         found = 0;
         other = 0;
-        for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
+        for (unit = work->actorList; unit != 0; unit = unit->next) {
             u32 flags = unit->status.flags;
 
             if (flags & 1) {
@@ -1550,7 +1551,7 @@ void btlQueueBossScriptResourceAndSound(ActionStateLink *action) {
                         }
                     }
                 }
-                unit = unit->nextActor;
+                unit = unit->next;
             }
             if (unit != 0) {
                 if (unit->status.flags & 0xE0) {
@@ -1636,7 +1637,7 @@ s32 btlCheckPhaseOnePartyStatusGate(void) {
         return -1;
     }
     count = 0;
-    for (battler = work->actorList; battler != 0; battler = battler->nextActor) {
+    for (battler = work->actorList; battler != 0; battler = battler->next) {
         u32 flags = battler->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
@@ -1709,7 +1710,7 @@ void btlStartReadyUnitAction(void) {
     ActionStateLink *handle;
 
     if (ctrl->unit != 0) {
-        for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
+        for (unit = work->actorList; unit != 0; unit = unit->next) {
             u32 flags = unit->status.flags;
 
             if (!(flags & 1)) {
@@ -1929,7 +1930,7 @@ s32 btlOverrideActionResultForEnemyMode(s32 battler, s32 action, s32 defaultValu
 
 s32 btlIsUnitListReady(void) {
     BtlUnit *unit;
-    for (unit = ((BattleWork *)btlGetRuntime())->actorList; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BattleWork *)btlGetRuntime())->actorList; unit != 0; unit = unit->next) {
         u32 flags = unit->status.flags;
         if (!(flags & 1)) {
             continue;
@@ -2031,7 +2032,7 @@ void btlApplyAbaddonOperandEffects(BtlUnit *unit, u8 *operandData) {
                     }
                 }
             }
-            actor = actor->nextActor;
+            actor = actor->next;
         }
         if (actor != 0) {
             btlRefreshUnitMotionSelection(actor);
@@ -2127,7 +2128,7 @@ s32 btlSelectSoleEligibleActor(void) {
     if (btlHasActiveSubtask() != 0) {
         current = btlGetSelectedOrCurrentActor();
         last = 0;
-        for (actor = work->actorList, count = 0; actor != 0; actor = actor->nextActor) {
+        for (actor = work->actorList, count = 0; actor != 0; actor = actor->next) {
             u32 flags = actor->status.flags;
             if (flags & 1) {
                 if (flags & 0x200) {
@@ -2257,7 +2258,7 @@ BtlUnit *btlGetSelectedOrCurrentActor(void) {
     if (selected != 0) {
         return selected;
     }
-    for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
+    for (unit = work->actorList; unit != 0; unit = unit->next) {
         u32 flags = unit->status.flags;
         if ((flags & 1) != 0) {
             if ((flags & 0x200) != 0) {
@@ -2316,7 +2317,7 @@ void btlStartReadyUnitActionCopy(void) {
     ActionStateLink *handle;
 
     if (ctrl->unit != 0) {
-        for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
+        for (unit = work->actorList; unit != 0; unit = unit->next) {
             u32 flags = unit->status.flags;
 
             if (!(flags & 1)) {
@@ -2426,7 +2427,7 @@ extern void btlSetUnitRotation(BtlUnit *, s128 *);
 void btlResetGateComponentTransforms(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
 
-    for (; unit != NULL; unit = unit->nextActor) {
+    for (; unit != NULL; unit = unit->next) {
         u32 flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x400) {
@@ -2672,7 +2673,7 @@ s32 btlGetSpecialEnemyActionStatus(BtlUnit *unit) {
                     }
                 }
             }
-            actor = actor->nextActor;
+            actor = actor->next;
         }
         if (actor != NULL) {
             return actor->motionId == 0x13 ? 0x13 : -1;
@@ -2705,7 +2706,7 @@ void btlRecenterActorsAroundLead(void) {
     f32 shift;
     f32 pos[4];
 
-    for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
+    for (unit = work->actorList; unit != 0; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 if (unit->partyRecord.unitId == 0x10D) {
@@ -2719,15 +2720,15 @@ void btlRecenterActorsAroundLead(void) {
         btlCopyUnitCurrentPosition(lead, pos);
         shift = -pos[0];
         pos[0] = 0;
-        PCP_COPY_VECTOR(lead->position, pos);
+        SDF_VU0_COPYVECTOR(lead->position, pos);
         btlSetUnitPosition(lead, pos);
-        for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
+        for (unit = work->actorList; unit != 0; unit = unit->next) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x400) {
                     if (unit != lead) {
                         btlCopyUnitCurrentPosition(unit, pos);
                         pos[0] = pos[0] + shift;
-                        PCP_COPY_VECTOR(unit->position, pos);
+                        SDF_VU0_COPYVECTOR(unit->position, pos);
                         btlSetUnitPosition(unit, pos);
                     }
                 }
@@ -2741,7 +2742,7 @@ s32 btlDisableUnitsIfSpeciesFlagged(void) {
     BtlUnit *unit = ((BattleWork *)btlGetRuntime())->actorList;
     BtlUnit *head = unit;
     s32 result = -1;
-    for (; unit != NULL; unit = unit->nextActor) {
+    for (; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 if (unit->partyRecord.unitId == 0x10D) {
@@ -2754,7 +2755,7 @@ s32 btlDisableUnitsIfSpeciesFlagged(void) {
         }
     }
     if (result != -1) {
-        for (unit = head; unit != NULL; unit = unit->nextActor) {
+        for (unit = head; unit != NULL; unit = unit->next) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x400) {
                     if (unit->status.flags & 2) {
@@ -2789,10 +2790,10 @@ void btlFadeAndTintNamedChunkTree(sdfModelNode_t *node, s32 color) {
     }
     source[0] = color;
     EE_MMI_RGBA_UNPACK(source, 1.0f / 128.0f);
-    VU0_MOVE_VF(vf11, vf10);
+    SDF_VU0_COPYVECTOR_A_TO_B();
     tint[0] = node->color | 0x808080;
     EE_MMI_RGBA_UNPACK(tint, 1.0f / 128.0f);
-    VU0_MUL(vf10, vf10, vf11);
+    SDF_VU0_MULVECTOR();
     EE_MMI_RGBA_PACK(packed[0]);
     child = node->children;
     node->color = packed[0];
@@ -2864,7 +2865,7 @@ extern void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *, s32, s32);
 
 /* The three formation actors retain a complete vector and their current dimensions. */
 static inline void btlCopyFormationDimensions(BtlUnit *unit) {
-    PCP_COPY_VECTOR(unit->muzzleOffset, unit->bodyOffset);
+    SDF_VU0_COPYVECTOR(unit->muzzleOffset, unit->bodyOffset);
     unit->bodyRadius = unit->reach;
     unit->geometryHeight = unit->height;
 }
@@ -2878,7 +2879,7 @@ void btlUpdateSpecialActorFormation(void) {
     BtlUnit *unit;
     BattleSub *sub = work->sub;
 
-    for (unit = work->actorList; unit != NULL; unit = unit->nextActor) {
+    for (unit = work->actorList; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 switch (unit->partyRecord.unitId) {
@@ -3002,7 +3003,7 @@ void btlUpdateSpecialActorChunkFade(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
 }
 
@@ -3140,7 +3141,7 @@ void btlResetSpecialActionActorPresentation(void) {
                         unit->status.flags &= ~0x80000;
                         /* Retail resets xyz; the copied fourth lane is unspecified. */
                         VEC3_SPLAT(position, 0.0f);
-                        PCP_COPY_VECTOR(unit->position, position);
+                        SDF_VU0_COPYVECTOR(unit->position, position);
                         btlSetUnitPosition(unit, position);
                     }
                 }
@@ -3166,7 +3167,7 @@ void btlResetSpecialActionActorPresentation(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     btlUpdateSpecialActorFormation();
 }
@@ -3293,7 +3294,7 @@ f32 btlGetBossPresenceActionScale(BtlUnit *unit, BtlUnit *target) {
     f32 scale = 1.0f;
     if (unit->status.flags & 0x200) {
         if (target->partyRecord.unitId == 0x110) {
-            for (other = ((BattleWork *)btlGetRuntime())->actorList; other != 0; other = other->nextActor) {
+            for (other = ((BattleWork *)btlGetRuntime())->actorList; other != 0; other = other->next) {
                 if (other->status.flags & 1) {
                     if (other->status.flags & BTL_UNIT_BOSS_FLAG) {
                         if (!(other->status.flags & 0xE0)) {
@@ -3398,7 +3399,7 @@ void func_0021B828(ActionStateLink *task) {
     guards[0] = NULL;
     guards[1] = NULL;
     guardCount = 0;
-    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
         if (!(unit->status.flags & 1)) {
             continue;
         }
@@ -3568,7 +3569,7 @@ void btlQueueVritraTentacleActionTasks(ActionStateLink *handle, s32 unused, u64 
     hero = NULL;
     battle = (BtlState *)btlGetRuntime();
     state = &battle->effect->action;
-    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 s32 unitId = unit->partyRecord.unitId;
@@ -3675,9 +3676,9 @@ s32 btlInitializeEffectVectors(BtlLinkedCommand *command) {
     btlBuildBattleUnitFramingCameraPose(command, pose, 25.0f);
     btlCopyMotionTransform(&command->backCamera, pose);
     SetRotateMatrixY(-0.87266463f);
-        VU0_STORE_VF(vf10, pose->direction);
-        VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF(vf10, command->backCamera.direction);
+        SDF_VU0_STOREVECTOR(pose->direction);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        SDF_VU0_STOREVECTOR(command->backCamera.direction);
     command->motionParameter = 125.0f;
     command->flags |= 0x841;
     return 1;
@@ -3737,9 +3738,9 @@ u8 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camer
             break;
         }
         /* vu0 routine: rotate the camera direction by the prepared matrix. */
-        VU0_LOAD_VF(vf10, camera->direction);
-        VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF(vf10, camera->direction);
+        SDF_VU0_LOADVECTOR(camera->direction);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        SDF_VU0_STOREVECTOR(camera->direction);
     }
     return 1;
 }
@@ -3776,9 +3777,9 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
         }
         SetRotateMatrixX_B(-0.34906585f);
         MultMatrixRevNoArg();
-        VU0_STORE_VF(vf10, command->frontCamera.direction);
-        VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF(vf10, command->backCamera.direction);
+        SDF_VU0_STOREVECTOR(command->frontCamera.direction);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        SDF_VU0_STOREVECTOR(command->backCamera.direction);
         command->motionParameter = 45.0f;
         command->flags |= 0x841;
         return 1;
@@ -4603,7 +4604,7 @@ BtlUnit *btlFindUnitByMode(BtlUnit *unusedActor) {
     if (sub->b.active == 0) {
         return 0;
     }
-    for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
+    for (unit = work->actorList; unit != 0; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x200) {
                 if (sub->targetMode == unit->partyRecord.unitId) {
@@ -4697,7 +4698,7 @@ void btlRestoreMarkedUnitMotionOnStateChange(void) {
                         }
                     }
                 }
-                unit = unit->nextActor;
+                unit = unit->next;
             }
             if (unit != 0) {
                 btlRefreshUnitMotionSelection(unit);
@@ -4780,7 +4781,7 @@ void btlCenterMarkedFormationAroundLead(void) {
     f32 shift;
     f32 pos[4];
 
-    for (unit = scene->units; unit != 0; unit = unit->nextActor) {
+    for (unit = scene->units; unit != 0; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 if (unit->partyRecord.unitId == 0x115) {
@@ -4795,15 +4796,15 @@ void btlCenterMarkedFormationAroundLead(void) {
         pos[2] = 200.0f;
         shift = -pos[0];
         pos[0] = 0;
-        PCP_COPY_VECTOR(lead->position, pos);
+        SDF_VU0_COPYVECTOR(lead->position, pos);
         btlSetUnitPosition(lead, pos);
-        for (unit = scene->units; unit != 0; unit = unit->nextActor) {
+        for (unit = scene->units; unit != 0; unit = unit->next) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x400) {
                     if (unit != lead) {
                         btlCopyUnitCurrentPosition(unit, pos);
                         pos[0] = pos[0] + shift;
-                        PCP_COPY_VECTOR(unit->position, pos);
+                        SDF_VU0_COPYVECTOR(unit->position, pos);
                         btlSetUnitPosition(unit, pos);
                     }
                 }
@@ -4816,7 +4817,7 @@ s32 btlStartOtherMarkedUnitTasks(void) {
     BtlUnit *unit = ((BattleActionScene *)btlGetRuntime())->units;
     BtlUnit *head = unit;
     s32 result = -1;
-    for (; unit != NULL; unit = unit->nextActor) {
+    for (; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 if (unit->partyRecord.unitId == 0x115) {
@@ -4829,7 +4830,7 @@ s32 btlStartOtherMarkedUnitTasks(void) {
         }
     }
     if (result != -1) {
-        for (unit = head; unit != NULL; unit = unit->nextActor) {
+        for (unit = head; unit != NULL; unit = unit->next) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x400) {
                     if (unit->status.flags & 2) {
@@ -4974,7 +4975,7 @@ s32 btlChoosePartyMemberShadowId(void) {
                     }
                 }
             }
-            unit = unit->nextActor;
+            unit = unit->next;
         } while (unit != NULL);
     }
     if (count == 0) {
@@ -5014,7 +5015,7 @@ u32 btlHasActiveSpecialMotionActor(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return 0;
 }
@@ -5052,7 +5053,7 @@ void btlScheduleCherunShadowSkillPresentation(ActionStateLink *actor, BtlUnit *t
         return;
     }
     battle = btlGetRuntime();
-    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 0x200) {
             task = btlCreateDefeatCandidateTask(unit);
             task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
@@ -5261,7 +5262,7 @@ void btlApplyMarkedCommandStateMotion(void) {
                         }
                     }
                 }
-                unit = unit->nextActor;
+                unit = unit->next;
             }
             if (unit != 0) {
                 btlRefreshUnitMotionSelection(unit);
@@ -5394,7 +5395,7 @@ s32 btlGetHealthyAllyActionStatus(BtlUnit *unit) {
                     }
                 }
             }
-            actor = actor->nextActor;
+            actor = actor->next;
         }
         if (actor != NULL) {
             s32 status = actor->motionId;
@@ -5428,7 +5429,7 @@ s32 btlOffsetSpecialEnemyForCommand(BtlLinkedCommand *command) {
 
     if (actionCode < 0x105) {
         if (actionCode >= 0x103) {
-            for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+            for (unit = battle->units; unit != NULL; unit = unit->next) {
                 if (unit->status.flags & 1) {
                     if (unit->status.flags & 0x400) {
                         if (unit->partyRecord.unitId == 0x11B) {
@@ -5550,7 +5551,7 @@ void btlQueueLoneFreeTeamHandle(void)
         second = NULL;
         firstUnavailable = 1;
         secondUnavailable = 1;
-        for (actor = battle->units; actor != NULL; actor = actor->nextActor) {
+        for (actor = battle->units; actor != NULL; actor = actor->next) {
             if (actor->status.flags & 1) {
                 if (actor->status.flags & 0x400) {
                     switch (actor->partyRecord.unitId) {
@@ -5708,7 +5709,7 @@ s32 btlGetKartikeyaLinkedMotionStatus(BtlUnit *unit) {
                     }
                 }
             }
-            found = found->nextActor;
+            found = found->next;
         }
         if (found == 0) {
             return -1;
@@ -5944,8 +5945,8 @@ u64 btlCreateLinkedActorTransformTasks(u64 prerequisiteHandle) {
     task->ownerId = owner;
     btlStartTask(task);
     unit = effect->actor;
-    PCP_COPY_VECTOR(unit->position, D_003BF910);
-    PCP_COPY_VECTOR(unit->rotation, D_003BF920);
+    SDF_VU0_COPYVECTOR(unit->position, D_003BF910);
+    SDF_VU0_COPYVECTOR(unit->rotation, D_003BF920);
     unit->status.flags &= ~0x80000;
     unit->status.flags &= ~1;
     unit->status.stateFlags |= 0x20000;
@@ -5962,7 +5963,7 @@ void btlRestoreLinkedActorSceneColor(void) {
     if (effect != NULL) {
         actor = effect->action.actor;
         if (actor != NULL && (actor->status.flags & 2)) {
-            VU0_LOAD_VF(vf10, D_0037F770[0]);
+            SDF_VU0_LOADVECTOR(D_0037F770[0]);
             EE_MMI_RGBA_PACK(packed[0]);
             evtSetUnitColorRGB(actor->ext, 0, packed[0]);
         }
@@ -6039,7 +6040,7 @@ void btlSetSpecialEnemyGeometry(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
 }
 
@@ -6088,7 +6089,7 @@ s32 btlFindSpecialActionIndex(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return selected;
 }
@@ -6240,7 +6241,7 @@ s32 btlQueueMarkedSpecialActorSceneGroup(void) {
         return -1;
     }
     found = 0;
-    for (unit = scene->units; unit != 0 && found == 0; unit = unit->nextActor) {
+    for (unit = scene->units; unit != 0 && found == 0; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 mode = unit->partyRecord.unitId;
@@ -6365,7 +6366,7 @@ void btlRefreshSpecialActionUnits(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     btlSetSpecialEnemyGeometry();
 }
@@ -6444,7 +6445,7 @@ u8 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camera
             }
         }
         /* A matching tail entry still exits without setting the camera. */
-        candidate = candidate->nextActor;
+        candidate = candidate->next;
         if (candidate == NULL || speciesPreset != -1) {
             break;
         }
@@ -6479,9 +6480,9 @@ u8 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camera
                 break;
             }
             }
-            VU0_LOAD_VF(vf10, camera->direction);
-            VU0_ROTATE_VEC(vf10, vf10);
-            VU0_STORE_VF(vf10, camera->direction);
+            SDF_VU0_LOADVECTOR(camera->direction);
+            SDF_VU0_APPLYMATRIX_XYZ();
+            SDF_VU0_STOREVECTOR(camera->direction);
         }
     }
     return 1;
@@ -7039,7 +7040,7 @@ s32 btlSelectLinkedActionCameraPose(BtlLinkedCommand *command, s8 modeA, s8 mode
         return 1;
     }
     if (command->actionCode == 0x105 || command->actionCode == 0x12D) {
-        for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+        for (unit = battle->units; unit != NULL; unit = unit->next) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x400) {
                     if (unit->partyRecord.unitId == 0x126) {
@@ -7140,9 +7141,9 @@ u8 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camer
             break;
         }
         /* vu0 routine: rotate the camera direction by the prepared matrix. */
-        VU0_LOAD_VF(vf10, camera->direction);
-        VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF(vf10, camera->direction);
+        SDF_VU0_LOADVECTOR(camera->direction);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        SDF_VU0_STOREVECTOR(camera->direction);
     }
     return 1;
 }
@@ -7515,10 +7516,10 @@ u8 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camer
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     if (unit != NULL) {
-        PCP_COPY_VECTOR(position, unit->position);
+        SDF_VU0_COPYVECTOR(position, unit->position);
         position[2] += 340.0f;
         btlSetUnitPosition(unit, position);
     }
@@ -7554,9 +7555,9 @@ u8 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camer
             break;
         }
         /* vu0 routine: rotate the camera direction by the prepared matrix. */
-        VU0_LOAD_VF(vf10, camera->direction);
-        VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF(vf10, camera->direction);
+        SDF_VU0_LOADVECTOR(camera->direction);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        SDF_VU0_STOREVECTOR(camera->direction);
     }
     return 1;
 }
@@ -7972,7 +7973,7 @@ s32 btlSelectLowestStatTarget(ActionStateLink *actor) {
     }
     target = NULL;
     minimum = 99;
-    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
         u32 flags = unit->status.flags;
         s8 value;
 
@@ -8131,7 +8132,7 @@ s32 btlClearUnitRestrictionFlag(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return -1;
 }
@@ -8190,7 +8191,7 @@ void btlResetUnitPlacement(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     } while (unit != NULL);
 }
 
@@ -8205,7 +8206,7 @@ void btlClearSpecialEnemyEntryFlags(void) {
                 btlRefreshUnitMotionSelection(unit);
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
 }
 
@@ -8247,7 +8248,7 @@ void btlRestoreLinkedEffectUnitPose(BtlUnit *source) {
         f32 translatedZ;
         f32 height;
 
-        PCP_COPY_VECTOR(position, source->position);
+        SDF_VU0_COPYVECTOR(position, source->position);
         translatedX = position[0] + 420.0f;
         translatedZ = position[2] + -50.0f;
         position[0] = translatedX;
@@ -8256,10 +8257,10 @@ void btlRestoreLinkedEffectUnitPose(BtlUnit *source) {
         position[1] = height;
         dds3SetPosPoseSet(unit->effectObject, (u128 *)position);
 
-        VU0_LOAD_VF(vf10, source->rotation);
-        VU0_LOAD_VF(vf11, D_0041B4D0);
+        SDF_VU0_LOADVECTOR(source->rotation);
+        SDF_VU0_LOADVECTOR_B(D_0041B4D0);
         effMiscQuatMultiplyVU();
-        VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+        SDF_VU0_STOREVECTOR_NOMEM(rotation);
         dds3SetRotPoseSet(effect->linked.actor->effectObject, (u128 *)rotation);
     }
 
@@ -8311,7 +8312,7 @@ void btlApplyRahuOperandEffects(BtlUnit *unit, BtlOperandEntry *entry) {
     }
     twin = NULL;
     mainUnit = NULL;
-    for (scan = ctx->firstUnit; scan != NULL; scan = scan->nextActor) {
+    for (scan = ctx->firstUnit; scan != NULL; scan = scan->next) {
         s32 scanFlags = scan->status.flags;
         if (scanFlags & 1) {
             if (scanFlags & 0x400) {
@@ -8427,16 +8428,16 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
 
     if (effect->linked.active == 1 || effect->linked.actor == 0) {
         mainUnit->position[0] = 0.0f;
         btlSetUnitPosition(mainUnit, mainUnit->position);
-        PCP_COPY_VECTOR(twin->position, mainUnit->position);
+        SDF_VU0_COPYVECTOR(twin->position, mainUnit->position);
         btlSetUnitPosition(twin, mainUnit->position);
         btlSetUnitRotation(mainUnit, (s128 *)mainUnit->rotation);
-        PCP_COPY_VECTOR(twin->rotation, mainUnit->rotation);
+        SDF_VU0_COPYVECTOR(twin->rotation, mainUnit->rotation);
         btlSetUnitRotation(twin, (s128 *)mainUnit->rotation);
         if (mainUnit->resourceIndex != twin->resourceIndex) {
             btlInitializeEffectVectorsFromSourceRecords(mainUnit,
@@ -8472,7 +8473,7 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
     } else {
         if (twin != NULL) {
             twin->status.stateFlags &= ~0x100;
-            PCP_COPY_VECTOR(position, twin->position);
+            SDF_VU0_COPYVECTOR(position, twin->position);
             position[0] += 420.0f;
             btlSetUnitPosition(twin, position);
             btlSetUnitRotation(twin, (s128 *)twin->rotation);
@@ -8489,7 +8490,7 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
         }
         if (mainUnit != NULL) {
             /* The snapshot is not used by the following main-unit refresh. */
-            PCP_COPY_VECTOR(position, twin->position);
+            SDF_VU0_COPYVECTOR(position, twin->position);
             btlSetUnitPosition(mainUnit, mainUnit->position);
             btlSetUnitRotation(mainUnit, (s128 *)mainUnit->rotation);
             btlInitializeEffectVectorsFromSourceRecords(mainUnit, 1, 0x12E);

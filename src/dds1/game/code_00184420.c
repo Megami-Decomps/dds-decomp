@@ -11,7 +11,7 @@ typedef struct {
 
 /* vu0 routine: copy the PCP event-work position vector, including its fourth lane. */
 void effPCPHelperBEDSetPosition(void *work, void *position) {
-    PCP_COPY_VECTOR(work, position);
+    SDF_VU0_COPYVECTOR(work, position);
 }
 
 /* Set the scale consumed by the PCP map-event update. */

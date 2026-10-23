@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu0.h"
 #include "fpu.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
@@ -34,7 +35,7 @@ void Normalize(void)
 f32 effMiscQuatLengthSqVU(void)
 {
     f32 componentMetric;
-    VU0_LENGTH_SQ_XYZW(componentMetric, vf10);
+    VU0_SEQ_SDF_2_C0510(componentMetric);
     return componentMetric;
 }
 
@@ -42,7 +43,7 @@ f32 effMiscQuatLengthSqVU(void)
 f32 SDF_QUAT_INNERPRODUCT(void)
 {
     f32 dotProduct;
-    VU0_DOT_XYZW(dotProduct, vf10, vf11);
+    VU0_QUAT_DOT_VF10_VF11(dotProduct);
     return dotProduct;
 }
 
@@ -99,7 +100,7 @@ void FromEulerXYZ(f32 x, f32 y, f32 z) {
     quaternion[1] = cz * sy * cx - sz * cy * sx;
     quaternion[2] = sz * cy * cx + cz * sy * sx;
     quaternion[3] = cz * cy * cx - sz * sy * sx;
-    VU0_LOAD_VF(vf10, (f32 *)quaternion);
+    SDF_VU0_LOADVECTOR((f32 *)quaternion);
 }
 
 void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z) {
@@ -125,7 +126,7 @@ void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z) {
     quaternion[1] = cz * sy * cx - sz * cy * sx;
     quaternion[2] = sz * cy * cx + cz * sy * sx;
     quaternion[3] = cz * cy * cx - sz * sy * sx;
-    VU0_LOAD_VF(vf10, (f32 *)quaternion);
+    SDF_VU0_LOADVECTOR((f32 *)quaternion);
 }
 
 extern f32 D_003988F0[4];
@@ -146,7 +147,7 @@ void LookAt(f32 xOffset, f32 yOffset) {
     f32 offsetSquared;
     f32 adjustedZ;
 
-    VU0_STORE_VF(vf10, input);
+    SDF_VU0_STOREVECTOR(input);
     t = 0.0f;
     x = -input[0];
     y = input[1];
@@ -157,9 +158,9 @@ void LookAt(f32 xOffset, f32 yOffset) {
     horizontalSquared = x * x + z * z;
     if (horizontalSquared < 0.000001f) {
         if (y < t) {
-            VU0_LOAD_VF(vf10, D_003988F0);
+            SDF_VU0_LOADVECTOR(D_003988F0);
         } else {
-            VU0_LOAD_VF(vf10, D_00398900);
+            SDF_VU0_LOADVECTOR(D_00398900);
         }
         return;
     }
@@ -172,7 +173,7 @@ void LookAt(f32 xOffset, f32 yOffset) {
     s = frsqrtf(1.0f, t * t + s);
     quaternion[0] = y * s;
     quaternion[3] = t * s;
-    VU0_LOAD_VF(vf10, quaternion);
+    SDF_VU0_LOADVECTOR(quaternion);
     /* Yaw quaternion from the normalized, offset-adjusted XZ direction. */
     s = 1.0f / horizontalLength;
     x *= s;
@@ -181,14 +182,14 @@ void LookAt(f32 xOffset, f32 yOffset) {
     t = x + xOffset;
     offsetSquared = t * t + adjustedZ * adjustedZ;
     if (offsetSquared < 0.000001f) {
-        VU0_LOAD_VF(vf11, D_00398910);
+        SDF_VU0_LOADVECTOR_B(D_00398910);
     } else {
         s = frsqrtf(1.0f, offsetSquared);
         quaternion[0] = 0.0f;
         quaternion[1] = t * s;
         quaternion[2] = 0.0f;
         quaternion[3] = adjustedZ * s;
-        VU0_LOAD_VF(vf11, quaternion);
+        SDF_VU0_LOADVECTOR_B(quaternion);
     }
     effMiscQuatMultiplyVU();
 }
@@ -203,12 +204,12 @@ void Slerp(f32 blendAmount) {
     f32 sineAngle;
     f32 angleBetween;
 
-    VU0_DOT_XYZW(dotProduct, vf10, vf11);
+    VU0_QUAT_DOT_VF10_VF11(dotProduct);
     if (dotProduct < 0.0f) {
         dotProduct = -dotProduct;
-        VU0_NEGATE_VF(vf12, vf11);
+        VU0_NEGATE_VF11_TO_VF12();
     } else {
-        VU0_MOVE_VF(vf12, vf11);
+        SDF_VU0_COPYVECTOR_B_TO_C();
     }
     firstWeight = 1.0f - blendAmount;
     secondWeight = blendAmount;
@@ -220,7 +221,7 @@ void Slerp(f32 blendAmount) {
         secondWeight = sdfSin(secondWeight * angleBetween) / sineAngle;
     }
     VU0_SET_SCALARS_VF2_VF3(firstWeight, secondWeight);
-    VU0_WEIGHTED_SUM_VF2X_VF3X(vf10, vf10, vf12);
+    VU0_WEIGHTED_SUM_VF10_VF12();
     Normalize();
 }
 
@@ -229,16 +230,16 @@ void Slerp(f32 blendAmount) {
 void Lerp(f32 blendAmount)
 {
     f32 dotProduct;
-    VU0_DOT_XYZW(dotProduct, vf10, vf11);
+    VU0_QUAT_DOT_VF10_VF11(dotProduct);
     if (dotProduct < 0.0f) {
-        VU0_NEGATE_VF(vf12, vf11);
+        VU0_NEGATE_VF11_TO_VF12();
     } else {
-        VU0_MOVE_VF(vf12, vf11);
+        SDF_VU0_COPYVECTOR_B_TO_C();
     }
     {
         f32 firstWeight = 1.0f - blendAmount;
         VU0_SET_SCALARS_VF2_VF3(firstWeight, blendAmount);
-        VU0_WEIGHTED_SUM_VF2X_VF3X(vf10, vf10, vf12);
+        VU0_WEIGHTED_SUM_VF10_VF12();
     }
     Normalize();
 }
@@ -251,9 +252,9 @@ f32 EulerAngleAxisY(void)
     f32 rotatedX;
     effMiscQuaternionToMatrixVU();
     /* PEXEW exchanges words 0 and 2: output 0 is Z, while output 1 is X. */
-    VU0_LOAD_VF_MEMORY(vf10, D_00398380);
-    VU0_ROTATE_VEC(vf10, vf10);
-    VU0_READ_ZX(rotatedZ, rotatedX, vf10);
+    SDF_VU0_LOADVECTOR_BARRIER(D_00398380);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    VU0_SEQ_EULER_ANGLE_AXIS_Y(rotatedZ, rotatedX);
     return sdfAtan2(rotatedZ, rotatedX);
 }
 

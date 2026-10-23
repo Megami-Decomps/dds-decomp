@@ -6,6 +6,7 @@
 #include "sdf_dev_console_node.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "kwln_background_fade_api.h"
 #include "dds3_admin_control_api.h"
 #include "sdf_heap_overlay_block.h"
@@ -285,19 +286,19 @@ void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color) {
         blendFlag = 4 << (lightIndex * 2);
         if (blendFrames == 0) {
             dds3DrawFlag &= ~blendFlag;
-            VU0_LOAD_VF(vf10, color);
-            VU0_CLEAR_W(vf10);
-            VU0_STORE_VF(vf10, D_0037F770[lightIndex]);
+            SDF_VU0_LOADVECTOR(color);
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            SDF_VU0_STOREVECTOR(D_0037F770[lightIndex]);
         } else {
             D_00438DD0[lightIndex] = blendFrames;
             D_00438DC8[lightIndex] = 0;
             dds3DrawFlag |= blendFlag;
-            VU0_LOAD_VF(vf10, light);
+            SDF_VU0_LOADVECTOR(light);
             EE_MMI_RGBA_PACK(packedStartColor);
             startColorWords[0] = packedStartColor;
             D_0043E320[lightIndex] = startColorWords[0];
-            VU0_LOAD_VF(vf10, color);
-            VU0_CLEAR_W(vf10);
+            SDF_VU0_LOADVECTOR(color);
+            SDF_VU0_VECTOR_W_SET_ZERO();
             EE_MMI_RGBA_PACK_UNCLOBBERED(packedTargetColor);
             targetColorWords[0] = packedTargetColor;
             D_0043E330[lightIndex] = targetColorWords[0];
@@ -319,25 +320,25 @@ void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction) {
         blendFlag = 8 << (lightIndex * 2);
         if (blendFrames == 0) {
             dds3DrawFlag &= ~blendFlag;
-            VU0_LOAD_VF(vf10, direction);
-            VU0_NORMALIZE_VF10();
-            VU0_CLEAR_W(vf10);
-            VU0_STORE_VF(vf10, D_0037F770[lightIndex] + 4);
+            SDF_VU0_LOADVECTOR(direction);
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            SDF_VU0_STOREVECTOR(D_0037F770[lightIndex] + 4);
         } else {
             D_00438DE0[lightIndex] = blendFrames;
             D_00438DD8[lightIndex] = 0;
             dds3DrawFlag |= blendFlag;
-            VU0_LOAD_VF(vf10, direction);
-            VU0_CLEAR_W(vf10);
-            VU0_NORMALIZE_VF10();
-            VU0_MOVE_VF(vf11, vf10);
-            VU0_LOAD_VF(vf10, D_0037F770[lightIndex] + 4);
-            VU0_CLEAR_W(vf10);
-            VU0_NORMALIZE_VF10();
+            SDF_VU0_LOADVECTOR(direction);
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_LOADVECTOR(D_0037F770[lightIndex] + 4);
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            SDF_VU0_NORMALIZE();
             /* No memory clobber here: retail recomputes the slot offset after the call. */
-            VU0_STORE_VF_UNCLOBBERED(vf10, D_0043E340[lightIndex]);
+            SDF_VU0_STOREVECTOR_NOMEM(D_0043E340[lightIndex]);
             dds3RotationArc();
-            VU0_STORE_VF(vf10, D_0043E370[lightIndex]);
+            SDF_VU0_STOREVECTOR(D_0043E370[lightIndex]);
         }
     }
 }
@@ -357,19 +358,19 @@ void dds3SetAmbientColor(s32 blendFrames, f32 *color) {
 
     if (blendFrames == 0) {
         dds3DrawFlag &= ~EVT_BACKGROUND_BLEND_FLAG;
-        VU0_LOAD_VF(vf10, color);
-        VU0_SET_W_ONE(vf10);
-        VU0_STORE_VF(vf10, kwlnDefaultColorVector);
+        SDF_VU0_LOADVECTOR(color);
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_STOREVECTOR(kwlnDefaultColorVector);
     } else {
         dds3DrawFlag |= EVT_BACKGROUND_BLEND_FLAG;
         D_00438DE8 = blendFrames;
         D_00438DE6 = 0;
-        VU0_LOAD_VF(vf10, kwlnDefaultColorVector);
+        SDF_VU0_LOADVECTOR(kwlnDefaultColorVector);
         EE_MMI_RGBA_PACK(packedStartColor);
         startColorWords[0] = packedStartColor;
         D_00438DEC = startColorWords[0];
-        VU0_LOAD_VF(vf10, color);
-        VU0_SET_W_ONE(vf10);
+        SDF_VU0_LOADVECTOR(color);
+        SDF_VU0_VECTOR_W_SET_ONE();
         EE_MMI_RGBA_PACK(packedTargetColor);
         targetColorWords[0] = packedTargetColor;
         D_00438DF0 = targetColorWords[0];
@@ -387,8 +388,8 @@ void dds3SetFogColor(s32 blendFrames, f32 *color) {
     u32 targetColorWords[4];
     u32 packedTargetColor;
 
-    VU0_LOAD_VF(vf10, color);
-    VU0_CLEAR_W(vf10);
+    SDF_VU0_LOADVECTOR(color);
+    SDF_VU0_VECTOR_W_SET_ZERO();
     EE_MMI_RGBA_PACK_F255(packedTargetColor);
     targetColorWords[0] = packedTargetColor;
     if (blendFrames == 0) {
@@ -455,11 +456,11 @@ void dds3SceneLightUpdateFirst(void) {
                 ratio = (f32)D_00438DC8[i] / D_00438DD0[i];
                 eeUnpackRGBAWordFloatReadOnly(D_0043E320[i], 0.0078125f);
                 VU0_SCALE_VF(vf10, 1.0f - ratio);
-                VU0_MOVE_VF(vf11, vf10);
+                SDF_VU0_COPYVECTOR_A_TO_B();
                 eeUnpackRGBAWordFloatReadOnly(D_0043E330[i], 0.0078125f);
                 VU0_SCALAR_OP(ratio, "vmulx.xyzw vf10, vf10, vf2x");
-                VU0_ADD(vf10, vf10, vf11);
-                VU0_STORE_VF_UNCLOBBERED(vf10, D_0037F770[i]);
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR_NOMEM(D_0037F770[i]);
                 if (D_00438DC8[i] >= D_00438DD0[i]) {
                     dds3DrawFlag &= ~mask;
                 }
@@ -467,14 +468,14 @@ void dds3SceneLightUpdateFirst(void) {
             if (dds3DrawFlag & (mask << 1)) {
                 ++D_00438DD8[i];
                 ratio = (f32)D_00438DD8[i] / D_00438DE0[i];
-                VU0_MOVE_VF(vf10, vf0);
-                VU0_SET_W_ONE(vf10);
-                VU0_LOAD_VF(vf11, &D_0043E370[i]);
+                SDF_VU0_LOADIDENTITYVECTOR();
+                SDF_VU0_VECTOR_W_SET_ONE();
+                SDF_VU0_LOADVECTOR_B(&D_0043E370[i]);
                 Lerp(ratio);
                 effMiscQuaternionToMatrixVU();
-                VU0_LOAD_VF(vf10, &D_0043E340[i]);
-                VU0_APPLY_MATRIX(vf10, vf10);
-                VU0_STORE_VF_UNCLOBBERED(vf10, D_0037F770[i] + 4);
+                SDF_VU0_LOADVECTOR(&D_0043E340[i]);
+                SDF_VU0_APPLYMATRIX();
+                SDF_VU0_STOREVECTOR_NOMEM(D_0037F770[i] + 4);
                 if (D_00438DD8[i] >= D_00438DE0[i]) {
                     dds3DrawFlag &= ~(mask << 1);
                 }
@@ -486,12 +487,12 @@ void dds3SceneLightUpdateFirst(void) {
         ratio = (f32)D_00438DE6 / D_00438DE8;
         eeUnpackRGBAWordFloatReadOnly(D_00438DEC, 0.0078125f);
         VU0_SCALE_VF(vf10, 1.0f - ratio);
-        VU0_MOVE_VF(vf11, vf10);
+        SDF_VU0_COPYVECTOR_A_TO_B();
         eeUnpackRGBAWordFloatReadOnly(D_00438DF0, 0.0078125f);
         VU0_SCALAR_OP(ratio, "vmulx.xyzw vf10, vf10, vf2x");
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_SET_W_ONE(vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, kwlnDefaultColorVector);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_STOREVECTOR_NOMEM(kwlnDefaultColorVector);
         if (D_00438DE6 >= D_00438DE8) {
             dds3DrawFlag &= ~EVT_BACKGROUND_BLEND_FLAG;
         }
@@ -501,10 +502,10 @@ void dds3SceneLightUpdateFirst(void) {
         ratio = (f32)D_00438DF4 / D_00438DF6;
         eeUnpackRGBAWordFloatReadOnly(D_00438DFC, 0.0078125f);
         VU0_SCALE_VF(vf10, 1.0f - ratio);
-        VU0_MOVE_VF(vf11, vf10);
+        SDF_VU0_COPYVECTOR_A_TO_B();
         eeUnpackRGBAWordFloatReadOnly(D_00438E00, 0.0078125f);
         VU0_SCALE_VF(vf10, ratio);
-        VU0_ADD(vf10, vf10, vf11);
+        SDF_VU0_ADDVECTOR();
         D_0037F7A0[0] = eePackRGBAWord(128.0f);
         if (D_00438DF4 >= D_00438DF6) {
             dds3DrawFlag &= ~EVT_DRAW_COLOR_BLEND_FLAG;
@@ -513,15 +514,15 @@ void dds3SceneLightUpdateFirst(void) {
     if (dds3DrawFlag & EVT_DRAW_VECTOR_BLEND_FLAG) {
         ++D_00438DF8;
         ratio = (f32)D_00438DF8 / D_00438DFA;
-        VU0_LOAD_VF(vf10, &D_0043E3A0);
-        VU0_LOAD_VF(vf11, &D_0043E3B0);
+        SDF_VU0_LOADVECTOR(&D_0043E3A0);
+        SDF_VU0_LOADVECTOR_B(&D_0043E3B0);
         VU0_SCALE_VF(vf10, 1.0f - ratio);
         VU0_SCALAR_OP(ratio, "vmulx.xyzw vf11, vf11, vf2x");
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_GET_VF10_X(kwlnDrawVector.fogNear);
-        VU0_GET_VF10_Y(kwlnDrawVector.fogFar);
-        VU0_GET_VF10_Z(kwlnDrawVector.depthNear);
-        VU0_GET_VF10_W(kwlnDrawVector.depthFar);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_GETVECTOR_X(kwlnDrawVector.fogNear);
+        SDF_VU0_GETVECTOR_Y(kwlnDrawVector.fogFar);
+        SDF_VU0_GETVECTOR_Z(kwlnDrawVector.depthNear);
+        SDF_VU0_GETVECTOR_W(kwlnDrawVector.depthFar);
         if (D_00438DF8 >= D_00438DFA) {
             dds3DrawFlag &= ~EVT_DRAW_VECTOR_BLEND_FLAG;
         }
@@ -1045,9 +1046,9 @@ void evtSelStateDestroy(void) {
     if (evtSelectionStateActive != 0) {
         sdfChipFreeDirect(evtSelectionState);
         evtSelectionStateActive = 0;
-        VU0_MOVE_VF(vf10, vf0);
-        VU0_CLEAR_W(vf10);
-        VU0_STORE_VF(vf10, sdfViewShakeVector);
+        SDF_VU0_LOADIDENTITYVECTOR();
+        SDF_VU0_VECTOR_W_SET_ZERO();
+        SDF_VU0_STOREVECTOR(sdfViewShakeVector);
     }
 }
 

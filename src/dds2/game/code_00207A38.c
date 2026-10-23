@@ -4,6 +4,7 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_boss_debug_api.h"
 #include "btl_vec3.h"
@@ -270,39 +271,39 @@ s32 btlProjectForwardPositionToScreen(s32 *out) {
     f32 *projection;
     BtlVec4 position;
 
-    VU0_MOVE_VF(vf12, vf10);
-    VU0_LOAD_VF(vf11, sdfViewTargetVector);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(distance);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(distance);
     if (!(distance > 16.0)) {
         return 0;
     }
-    VU0_NORMALIZE_VF10();
-    VU0_MOVE_VF(vf11, vf10);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_COPYVECTOR_A_TO_B();
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    VU0_MOVE_MATRIX_TO_B();
+    SDF_VU0_COPYMATRIX_A_TO_B();
     ReverseMatrix();
-    VU0_MOVE_VF(vf10, vf30);
-    VU0_NORMALIZE_VF10();
-    VU0_DOT_XYZ(facing, vf10, vf11);
+    SDF_VU0_GET_ROW2();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_INNERPRODUCT(facing);
     if (facing <= 0.5f) {
         return 0;
     }
-    VU0_MOVE_VF(vf10, vf12);
+    SDF_VU0_COPYVECTOR_C_TO_A();
     VU0_MOVE_VF(vf28, vf24);
     VU0_MOVE_VF(vf29, vf25);
     VU0_MOVE_VF(vf30, vf26);
     VU0_MOVE_VF(vf31, vf27);
     projection = sdfProjectionMatrix;
     sdfPostmultiplyVuMatrixFromMemory(projection);
-    VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
+    SDF_VU0_APPLYMATRIX_XYZ1();
+    SDF_VU0_PERSVECTOR();
     projection += 16;
-    VU0_LOAD_VF(vf11, projection);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, D_0037F660);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, &position);
+    SDF_VU0_LOADVECTOR_B(projection);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_LOADVECTOR_B(D_0037F660);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&position);
     out[0] = (s32)position.f[0] - 0x700;
     out[1] = (s32)position.f[1] * 2 - 0xF20;
     return 1;
@@ -314,40 +315,40 @@ s32 nbClipEffectNum(s32 screenPosition[4]) {
     f32 viewDistance, forwardDot;
     f32 *projectionData;
 
-    VU0_MOVE_VF(vf12, vf10);
-    VU0_LOAD_VF(vf11, sdfViewTargetVector);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_LENGTH_VF10(viewDistance);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(viewDistance);
     if (!(viewDistance > 16.0))
         return 0;
 
-    VU0_NORMALIZE_VF10();
-    VU0_MOVE_VF(vf11, vf10);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_COPYVECTOR_A_TO_B();
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    VU0_MOVE_MATRIX_TO_B();
+    SDF_VU0_COPYMATRIX_A_TO_B();
     ReverseMatrix();
-    VU0_MOVE_VF(vf10, vf30);
-    VU0_NORMALIZE_VF10();
-    VU0_DOT_XYZ(forwardDot, vf10, vf11);
+    SDF_VU0_GET_ROW2();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_INNERPRODUCT(forwardDot);
     if (forwardDot <= 0.5f)
         return 0;
 
-    VU0_MOVE_VF(vf10, vf12);
+    SDF_VU0_COPYVECTOR_C_TO_A();
     VU0_MOVE_VF(vf28, vf24);
     VU0_MOVE_VF(vf29, vf25);
     VU0_MOVE_VF(vf30, vf26);
     VU0_MOVE_VF(vf31, vf27);
     projectionData = sdfProjectionMatrix;
     sdfPostmultiplyVuMatrixFromMemory(projectionData);
-    VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_PERSPECTIVE_DIVIDE_VF10();
+    SDF_VU0_APPLYMATRIX_XYZ1();
+    SDF_VU0_PERSVECTOR();
     projectionData += 16;
-    VU0_LOAD_VF(vf11, projectionData);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, D_0037F660);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_FTOI4(vf10, vf10);
-    VU0_STORE_VF(vf10, screenPosition);
+    SDF_VU0_LOADVECTOR_B(projectionData);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_LOADVECTOR_B(D_0037F660);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_FTOI4();
+    SDF_VU0_STOREVECTOR(screenPosition);
     screenPosition[0] -= BTL_PACKED_SCREEN_X_BIAS;
     screenPosition[1] -= BTL_PACKED_SCREEN_Y_BIAS;
     return 1;
@@ -357,28 +358,28 @@ void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
     f32 pos[4];
     btlGetUnitWorldPos(unit, pos);
     pos[2] += unit->positionZOffset;
-    VU0_LOAD_VF(vf10, unit->orientation);;
+    SDF_VU0_LOADVECTOR(unit->orientation);;
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, unit->bodyOffset);;
+    SDF_VU0_LOADVECTOR(unit->bodyOffset);;
     VU0_SET_VF2X(unit->scale);
     VU0_MUL_VF2X(vf10, vf10);
-    VU0_APPLY_MATRIX(vf10, vf10);
-    VU0_LOAD_VF(vf11, pos);
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_LOADVECTOR_B(pos);
+    SDF_VU0_ADDVECTOR();
 }
 
 void btlUnitGetBodyPosVU(BtlUnit *unit) {
     f32 pos[4];
     btlGetUnitWorldPos(unit, pos);
     pos[2] += unit->positionZOffset;
-    VU0_LOAD_VF(vf10, unit->orientation);;
+    SDF_VU0_LOADVECTOR(unit->orientation);;
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, unit->muzzleOffset);;
+    SDF_VU0_LOADVECTOR(unit->muzzleOffset);;
     VU0_SET_VF2X(unit->scale);
     VU0_MUL_VF2X(vf10, vf10);
-    VU0_APPLY_MATRIX(vf10, vf10);
-    VU0_LOAD_VF(vf11, pos);
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_LOADVECTOR_B(pos);
+    SDF_VU0_ADDVECTOR();
 }
 
 void btlUnitGetEffectPosVU(BtlUnit *unit) {
@@ -388,15 +389,15 @@ void btlUnitGetEffectPosVU(BtlUnit *unit) {
         return;
     }
     dds3GetPosPoseSet(unit->effectObject);
-    VU0_STORE_VF(vf10, pos);
-    VU0_LOAD_VF(vf10, unit->orientation);
+    SDF_VU0_STOREVECTOR(pos);
+    SDF_VU0_LOADVECTOR(unit->orientation);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, unit->bodyOffset);
+    SDF_VU0_LOADVECTOR(unit->bodyOffset);
     VU0_SET_VF2X(unit->scale);
     VU0_MUL_VF2X(vf10, vf10);
-    VU0_APPLY_MATRIX(vf10, vf10);
-    VU0_LOAD_VF(vf11, pos);
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_LOADVECTOR_B(pos);
+    SDF_VU0_ADDVECTOR();
 }
 
 /* Return the larger unscaled extent multiplied by the unit scale. */
@@ -416,7 +417,7 @@ f32 btlUnitGetLargestScaledExtent(BtlUnit *unit) {
 f32 btlUnitGetTopY(BtlUnit *unit) {
     f32 position[4];
     btlUnitGetMuzzlePosVU(unit);
-    VU0_STORE_VF(vf10, position);;
+    SDF_VU0_STOREVECTOR(position);;
     return unit->height * unit->scale * 0.5f - position[1];
 }
 
@@ -424,7 +425,7 @@ f32 btlUnitGetTopY(BtlUnit *unit) {
 f32 btlUnitGetBottomY(BtlUnit *unit) {
     f32 position[4];
     btlUnitGetMuzzlePosVU(unit);
-    VU0_STORE_VF(vf10, position);;
+    SDF_VU0_STOREVECTOR(position);;
     return -position[1] - unit->height * unit->scale * 0.5f;
 }
 
@@ -466,7 +467,7 @@ f32 btlMeasureFilteredUnitGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop) 
             if (!(status & 0xC0)) {
                 if (status & mask) {
                     btlUnitGetMuzzlePosVU(unit);
-                    VU0_STORE_VF(vf10, position);
+                    SDF_VU0_STOREVECTOR(position);
                     scale = unit->scale;
                     reach = unit->reach * scale;
                     rightX = position[0] + reach;
@@ -531,7 +532,7 @@ f32 btlMeasureFilteredUnitGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop) 
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     position[0] = (maxX + minX) * 0.5f;
     position[1] = -highestTop * 0.5f;
@@ -551,7 +552,7 @@ f32 btlMeasureFilteredUnitGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop) 
             reach = halfHeight;
         }
     }
-    VU0_LOAD_VF(vf10, position);
+    SDF_VU0_LOADVECTOR(position);
     if (outMaxTop != NULL) {
         *outMaxTop = highestTop;
     }
@@ -598,7 +599,7 @@ f32 btlMeasureEffectTargetGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop) 
             statusBits = btlUnitStatusPair(unit);
             if ((statusBits & 0x21) && (unit->status.flags & mask)) {
                 btlUnitGetMuzzlePosVU(unit);
-                VU0_STORE_VF(vf10, position);
+                SDF_VU0_STOREVECTOR(position);
                 scale = unit->scale;
                 reach = unit->reach * scale;
                 rightX = position[0] + reach;
@@ -661,7 +662,7 @@ f32 btlMeasureEffectTargetGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop) 
                     }
                 }
             }
-            unit = unit->nextActor;
+            unit = unit->next;
         } while (unit != NULL);
     }
     position[0] = (maxX + minX) * 0.5f;
@@ -682,7 +683,7 @@ f32 btlMeasureEffectTargetGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop) 
             reach = halfTop;
         }
     }
-    VU0_LOAD_VF_MEMORY(vf10, position);
+    SDF_VU0_LOADVECTOR_BARRIER(position);
     if (outMaxTop != NULL) {
         *outMaxTop = maxTop;
     }
@@ -707,7 +708,7 @@ f32 btlGetMaxUnitTop(u32 mask) {
                 maxTopY = topY;
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return maxTopY;
 }
@@ -727,7 +728,7 @@ f32 btlGetMaxUnitReach(u32 mask) {
                 maxReach = scaledReach;
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return maxReach;
 }
@@ -744,7 +745,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
     while (unit != NULL) {
         if ((unit->status.flags & 1) && (unit->status.flags & mask)) {
             btlUnitGetMuzzlePosVU(unit);
-            VU0_STORE_VF(vf10, position);;
+            SDF_VU0_STOREVECTOR(position);;
             if (mask & 0x200) {
                 edgeZ = position[2] + unit->reach * unit->scale;
                 if (needsFirstSample) {
@@ -763,7 +764,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return extremeZ;
 }
@@ -806,7 +807,7 @@ f32 btlMeasureUnitIndexListBounds(BtlIndexList *list, f32 *maxTop, f32 *minTop) 
         do {
             unit = btlGetIndexListEntry(list, (s32)index);
             btlUnitGetMuzzlePosVU(unit);
-            VU0_STORE_VF(vf10, position);
+            SDF_VU0_STOREVECTOR(position);
             scale = unit->scale;
             reach = unit->reach * scale;
             rightX = position[0] + reach;
@@ -889,7 +890,7 @@ f32 btlMeasureUnitIndexListBounds(BtlIndexList *list, f32 *maxTop, f32 *minTop) 
             reach = halfHeight;
         }
     }
-    VU0_LOAD_VF(vf10, position);
+    SDF_VU0_LOADVECTOR(position);
     if (maxTop != NULL) {
         *maxTop = highestTop;
     }
@@ -909,7 +910,7 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
     f32 distance;
     BtlVec4 targetPos;
     btlUnitGetMuzzlePosVU(target);
-    VU0_STORE_VF(vf10, &targetPos);;
+    SDF_VU0_STOREVECTOR(&targetPos);;
     unit = state->units;
     nearest = NULL;
     needsFirstSample = 1;
@@ -921,9 +922,9 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
                     if (unit->status.flags & mask) {
                         btlUnitGetMuzzlePosVU(unit);
                                         VU0_SCALAR_OP_CLOBBER(targetPos.f[1], "vaddx.y vf10, vf0, vf2x");
-                        VU0_LOAD_VF(vf11, &targetPos);;
-                        VU0_SUB(vf10, vf10, vf11);
-                        VU0_LENGTH_VF10(distance);
+                        SDF_VU0_LOADVECTOR_B(&targetPos);;
+                        SDF_VU0_SUBVECTOR();
+                        SDF_VU0_GETLENGTH(distance);
                         if (needsFirstSample) {
                             nearestDistance = distance;
                             nearest = unit;
@@ -936,7 +937,7 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return nearest;
 }
@@ -954,9 +955,9 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
                 if (unit->status.flags & mask) {
                     btlUnitGetMuzzlePosVU(unit);
                     VU0_SCALAR_OP(point[1], "vaddx.y vf10, vf0, vf2x");
-                    VU0_LOAD_VF(vf11, point);
-                    VU0_SUB(vf10, vf10, vf11);
-                    VU0_LENGTH_VF10(distance);
+                    SDF_VU0_LOADVECTOR_B(point);
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_GETLENGTH(distance);
                     if (farthestDistance < distance) {
                         farthestDistance = distance;
                         farthest = unit;
@@ -964,7 +965,7 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return farthest;
 }
@@ -981,44 +982,44 @@ BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *reference, BtlIndexList *list) {
 
     for (; entryIndex < entryCount; entryIndex++) {
         unit = btlGetIndexListEntry(list, entryIndex);
-        PCP_COPY_VECTOR(&position, unit->position);
+        SDF_VU0_COPYVECTOR(&position, unit->position);
         position.f[2] += unit->positionZOffset;
         /* The indexed DDS2 path uses the vector at 0x40 and scale at 0x50,
          * unlike the ordinary muzzle accessor's 0x70/0x80 fields. */
-        VU0_LOAD_VF(vf10, unit->rotation);
+        SDF_VU0_LOADVECTOR(unit->rotation);
         effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, unit->bodyOffset);
+        SDF_VU0_LOADVECTOR(unit->bodyOffset);
         VU0_SET_VF2X(unit->actorScale);
         VU0_MUL_VF2X(vf10, vf10);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_LOAD_VF(vf11, &position);
-        VU0_ADD(vf10, vf10, vf11);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_LOADVECTOR_B(&position);
+        SDF_VU0_ADDVECTOR();
         if (selected == NULL) {
             selected = unit;
-            VU0_STORE_VF(vf10, &selectedPosition);
+            SDF_VU0_STOREVECTOR(&selectedPosition);
         } else {
-            VU0_STORE_VF(vf10, &position);
+            SDF_VU0_STOREVECTOR(&position);
             if (reference->status.flags & 0x200) {
                 if (position.f[0] < selectedPosition.f[0]) {
                     selected = unit;
-                    PCP_COPY_VECTOR(&selectedPosition, &position);
+                    SDF_VU0_COPYVECTOR(&selectedPosition, &position);
                 }
             } else {
                 if (position.f[0] > selectedPosition.f[0]) {
                     selected = unit;
-                    PCP_COPY_VECTOR(&selectedPosition, &position);
+                    SDF_VU0_COPYVECTOR(&selectedPosition, &position);
                 }
             }
         }
     }
-    VU0_LOAD_VF(vf10, &selectedPosition);
+    SDF_VU0_LOADVECTOR(&selectedPosition);
     return selected;
 }
 
 void btlFlagAllUnitsDefeatCandidate(void) {
     BtlUnit *unit;
     BtlState *work = (BtlState *)btlGetRuntime();
-    for (unit = work->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = work->units; unit != NULL; unit = unit->next) {
         btlFlagUnitDefeatCandidate(unit);
     }
 }
@@ -1026,7 +1027,7 @@ void btlFlagAllUnitsDefeatCandidate(void) {
 void btlClearAllUnitDefeatCandidates(void) {
     BtlUnit *unit;
     BtlState *work = (BtlState *)btlGetRuntime();
-    for (unit = work->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = work->units; unit != NULL; unit = unit->next) {
         btlClearUnitDefeatCandidate(unit);
     }
 }
@@ -1040,7 +1041,7 @@ void btlFlagMatchingUnitsDefeatCandidate(s32 mask) {
             if (unit->status.flags & mask) {
                 btlFlagUnitDefeatCandidate(unit);
             }
-            unit = unit->nextActor;
+            unit = unit->next;
         } while (unit != NULL);
     }
 }
@@ -1054,7 +1055,7 @@ void btlClearMatchingUnitDefeatCandidates(s32 mask) {
             if (unit->status.flags & mask) {
                 btlClearUnitDefeatCandidate(unit);
             }
-            unit = unit->nextActor;
+            unit = unit->next;
         } while (unit != NULL);
     }
 }
@@ -1108,7 +1109,7 @@ void btlUpdateUnitActors(void) {
         }
         unit->status.stateFlags &= ~0x8000;
         unit->status.stateFlags &= ~0x200000;
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     {
         void (*callback)(void) = state->afterUnitUpdate;
@@ -1134,7 +1135,7 @@ void btlRefreshUnitEffects(void) {
             if (unit->status.stateFlags & 0x10) {
                 effect = unit->ext;
                 evtUnitLightOn(effect);
-                VU0_LOAD_VF(vf10, unit->lightDirection);
+                SDF_VU0_LOADVECTOR(unit->lightDirection);
                 evtSetUnitLightDir(effect, 0);
                 if ((btlUnitStatusPair(unit) & 0x4E0) == 0x420) {
                     if (btlGetEntryFlagsUnlessDisabled(&unit->partyRecord) & 0x200) {
@@ -1143,7 +1144,7 @@ void btlRefreshUnitEffects(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     if (state->commandRestrictFlags & 0x800000) {
         dds3DrawFlag |= 0x2000000;
@@ -1164,7 +1165,7 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
             if (((unitFlags & mask) != 0) && ((unitFlags & 0x20) == 0)) {
                 activeCount += unitFlags & 1;
             }
-            unit = unit->nextActor;
+            unit = unit->next;
         } while (unit != NULL);
     }
     return activeCount;
@@ -1214,19 +1215,19 @@ s32 btlAimHorizontalDirectionClampedVU(f32 *origin, f32 *targetPosition, f32 ang
  * e = vertexB - vertexA, f = vertexC - vertexA.
  * The double cross lies in the triangle plane, despite the legacy normal name. */
 void btlTriangleNormalVU(const f32 *vertexA, const f32 *vertexB, const f32 *vertexC) {
-    VU0_LOAD_VF(vf10, vertexB);
-    VU0_LOAD_VF(vf11, vertexA);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_MOVE_VF(vf12, vf10);
-    VU0_LOAD_VF(vf11, vertexC);
-    VU0_LOAD_VF_MEMORY(vf10, vertexA);
-    VU0_SUB(vf11, vf11, vf10);
-    VU0_MOVE_VF(vf10, vf12);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_MOVE_VF(vf10, vf12);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_LOADVECTOR(vertexB);
+    SDF_VU0_LOADVECTOR_B(vertexA);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR_B(vertexC);
+    SDF_VU0_LOADVECTOR_BARRIER(vertexA);
+    SDF_VU0_SUBVECTOR_B_A();
+    SDF_VU0_COPYVECTOR_C_TO_A();
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_COPYVECTOR_C_TO_A();
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
 }
 
 /* Dot the normalized double-cross direction with vertexA - vertexC. */
@@ -1234,13 +1235,13 @@ f32 btlTriangleNormalDotEdge(const f32 *vertexA, const f32 *vertexB, const f32 *
     f32 direction[4];
     f32 projection;
     btlTriangleNormalVU(vertexA, vertexB, vertexC);
-    VU0_STORE_VF(vf10, direction);;
-    VU0_LOAD_VF(vf10, vertexA);;
-    VU0_LOAD_VF(vf11, vertexC);;
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, direction);;
-        VU0_DOT_XYZ(projection, vf10, vf11);
+    SDF_VU0_STOREVECTOR(direction);;
+    SDF_VU0_LOADVECTOR(vertexA);;
+    SDF_VU0_LOADVECTOR_B(vertexC);;
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(direction);;
+        SDF_VU0_INNERPRODUCT(projection);
     return projection;
 }
 
@@ -1248,13 +1249,13 @@ f32 btlTriangleNormalDotEdge(const f32 *vertexA, const f32 *vertexB, const f32 *
  * where projection is the double-cross direction dotted with vertexA - vertexC. */
 void btlPointOffPlaneVU(f32 *vertexA, f32 *vertexB, f32 *vertexC, f32 *point) {
     f32 projection = btlTriangleNormalDotEdge(vertexA, vertexB, vertexC);
-    VU0_LOAD_VF(vf10, point);
-    VU0_LOAD_VF(vf11, vertexC);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
+    SDF_VU0_LOADVECTOR(point);
+    SDF_VU0_LOADVECTOR_B(vertexC);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
     VU0_SCALAR_OP(projection, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_LOAD_VF(vf11, vertexC);
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR_B(vertexC);
+    SDF_VU0_ADDVECTOR();
 }
 
 /* vu0 routine: vf10 = vertexC + direction * dot(direction, vertexA - vertexC).
@@ -1263,16 +1264,16 @@ f32 btlProjectOnPlaneVU(const f32 *vertexA, const f32 *vertexB, const f32 *verte
     f32 direction[4];
     f32 projection;
     btlTriangleNormalVU(vertexA, vertexB, vertexC);
-    VU0_STORE_VF(vf10, direction);;
-    VU0_LOAD_VF(vf10, vertexA);
-    VU0_LOAD_VF(vf11, vertexC);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, direction);
-    VU0_DOT_XYZ(projection, vf10, vf11);
+    SDF_VU0_STOREVECTOR(direction);;
+    SDF_VU0_LOADVECTOR(vertexA);
+    SDF_VU0_LOADVECTOR_B(vertexC);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(direction);
+    SDF_VU0_INNERPRODUCT(projection);
     VU0_SCALAR_OP(projection, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_LOAD_VF(vf11, vertexC);
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_LOADVECTOR_B(vertexC);
+    SDF_VU0_ADDVECTOR();
     return projection;
 }
 
@@ -1300,12 +1301,12 @@ u32 btlBlendColor(u32 colorA, u32 colorB, f32 blendFactor) {
     channelScaleBits = 0x3C000000;
     colorBStorage[0] = colorB;
     EE_MMI_RGBA_UNPACK(colorBStorage, channelScaleBits);
-    VU0_MOVE_VF(vf11, vf10);;
+    SDF_VU0_COPYVECTOR_A_TO_B();;
     colorAStorage[0] = colorA;
     EE_MMI_RGBA_UNPACK(colorAStorage, channelScaleBits);
     VU0_SCALAR_OP_CLOBBER(1.0f - blendFactor, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALAR_OP_R3_CLOBBER(blendFactor, "vmulx.xyzw vf11, vf11, vf2x");
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_ADDVECTOR();
     EE_MMI_RGBA_PACK(packed);
     packedStorage[0] = packed;
     
@@ -1318,11 +1319,11 @@ u32 btlBlendColor(u32 colorA, u32 colorB, f32 blendFactor) {
 u32 btlBlendColorVec(f32 *colorA, f32 *colorB, f32 blendFactor) {
     u32 packed;
     s32 packedStorage[4];
-    VU0_LOAD_VF(vf10, colorA);
-    VU0_LOAD_VF(vf11, colorB);
+    SDF_VU0_LOADVECTOR(colorA);
+    SDF_VU0_LOADVECTOR_B(colorB);
     VU0_SCALAR_OP(1.0f - blendFactor, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALAR_OP_R3(blendFactor, "vmulx.xyzw vf11, vf11, vf2x");
-    VU0_ADD(vf10, vf10, vf11);
+    SDF_VU0_ADDVECTOR();
     EE_MMI_RGBA_PACK(packed);
     packedStorage[0] = packed;
     return packedStorage[0];
@@ -2606,7 +2607,7 @@ u32 btlScriptReturnUnitHpRatioPercent(void) {
                 return 1;
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     scrSetIntReturnValue(0);
     return 1;
@@ -3051,7 +3052,7 @@ void btlReleaseActiveUnitEffectsUnlessPaused(void) {
                     evtUnitLightOff(effect, 0);
                 }
             }
-            actor = (s32)((BtlUnit *)actor)->nextActor;
+            actor = (s32)((BtlUnit *)actor)->next;
         }
     }
 }

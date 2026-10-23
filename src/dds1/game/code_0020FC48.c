@@ -3,6 +3,7 @@
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_event_asset_api.h"
 #include "btl_skill_max_api.h"
@@ -1254,10 +1255,10 @@ u32 btlMulColor(u32 colorA, u32 colorB) {
 
     color1[0] = colorA;
     EE_MMI_RGBA_UNPACK(color1, unit);
-    VU0_MOVE_VF(vf11, vf10);
+    SDF_VU0_COPYVECTOR_A_TO_B();
     color2[0] = colorB;
     EE_MMI_RGBA_UNPACK(color2, unit);
-    VU0_MUL(vf10, vf10, vf11);
+    SDF_VU0_MULVECTOR();
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     return blended[0];
@@ -2581,12 +2582,12 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             btlRefreshUnitMotionSelection(unit);
             state->debug.phase = 2;
         } else {
-            PCP_COPY_VECTOR(btlDebugEditorPosition.value, unit->position);
+            SDF_VU0_COPYVECTOR(btlDebugEditorPosition.value, unit->position);
             btlDebugMenuSetupNoOp(&btlDebugPositionEditor);
             btlDebugMenuBeforeRecordNoOp();
             btlDebugMenuRecordNoOp(&btlDebugPositionEditor);
             btlDebugMenuAfterRecordNoOp();
-            PCP_COPY_VECTOR(unit->position, btlDebugEditorPosition.value);
+            SDF_VU0_COPYVECTOR(unit->position, btlDebugEditorPosition.value);
             btlSetUnitPosition(unit, unit->position);
         }
         break;
@@ -2647,7 +2648,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         }
         if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target == &btlDebugEditorActorStatus.positionGuideScale) {
             effBTLModelGetMarkPosition2(unit, 3);
-            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            SDF_VU0_STOREVECTOR_NOMEM(position);
             btlDebugDrawScaledPositionGuide(position, 0x10808080, 0, record->positionGuideScale * unit->scale);
         }
         if ((btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target >= (void *)btlDebugEditorActorStatus.position &&
@@ -2660,7 +2661,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         }
         if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target == &btlDebugEditorMotionSlot.muzzleGuideScale) {
             btlUnitGetMuzzlePosVU(unit);
-            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            SDF_VU0_STOREVECTOR_NOMEM(position);
             btlDebugDrawScaledPositionGuide(position, 0x10106020, 0, btlDebugEditorMotionSlot.muzzleGuideScale * btlDebugEditorActorStatus.scale);
         }
         if (btlDebugActorStatusEditor.flags & 8) {

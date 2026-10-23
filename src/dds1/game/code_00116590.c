@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_vu0.h"
 #include "evt_unit.h"
 #include "effect_value_object.h"
 #include "sdf_chip.h"
@@ -53,11 +54,11 @@ void dds3LinkSceneLight(dds3Basic_t *lightNode, s32 blendFrames) {
     } else {
         lightData->flags |= EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS;
         lightData->blendFrames = blendFrames;
-        VU0_LOAD_VF(vf10, D_00324770[0]);
+        SDF_VU0_LOADVECTOR(D_00324770[0]);
         EE_MMI_RGBA_PACK_F128(packed1);
         color1[0] = packed1;
         lightData->packedColorA = color1[0];
-        VU0_LOAD_VF(vf10, kwlnDefaultColorVector);
+        SDF_VU0_LOADVECTOR(kwlnDefaultColorVector);
         EE_MMI_RGBA_PACK(packed2);
         color2[0] = packed2;
         lightData->packedColorB = color2[0];
