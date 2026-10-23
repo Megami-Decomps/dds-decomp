@@ -4792,7 +4792,7 @@ void effAdvanceClassFrame(EffClassWork *work) {
 }
 
 void effRunClassPostFrame(EffClassWork *work) {
-    effClassWorkOperations[work->kind].draw((void *)work);
+    effClassWorkOperations[work->kind].draw(work);
 }
 
 void effUpdateClassFrame(EffClassWork *work) {

@@ -9,9 +9,9 @@ struct EffClassWork;
  * The two units dispatch each slot directly and read payloadSize for sizing. */
 typedef struct EffClassOps {
     void (*initialize)(struct EffClassWork *work);
-    void *(*createResource)();
-    void (*destroyResource)();
-    void (*update)();
+    void *(*createResource)(void *source);
+    void (*destroyResource)(void *resource);
+    void (*update)(struct EffClassWork *work);
     void (*draw)(struct EffClassWork *work);
     u32 payloadSize;
 } EffClassOps;
