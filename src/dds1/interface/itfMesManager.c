@@ -29,7 +29,7 @@ extern ItfMesDebugState D_00357D80;
 
 extern u32 itfMessageFlags;
 
-u32 scrGetMessageHandle(void);
+s32 scrGetMessageHandle(void);
 
 s32 scrGetIntPara(s32 parameterIndex);
 

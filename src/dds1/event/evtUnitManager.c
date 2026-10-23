@@ -1139,7 +1139,7 @@ extern u8 D_003AC5B0[];
 extern u8 D_003AC600[];
 
 extern u32 sdfGetLodChunkValue(sdfModelRootNode_t *model);
-extern u32 scrGetMessageHandle(void);
+extern s32 scrGetMessageHandle(void);
 extern void evtSetUnitKutiMotion(evtUnitHandle_t *unit, s32 firstSlot, s32 secondSlot);
 extern dds3Basic_t *dds3AddMG12EffectObjectBasic(s32 kind, void *resource);
 extern void dds3EffectObjectBasicStatOn(dds3Basic_t *object, s32 flags);
