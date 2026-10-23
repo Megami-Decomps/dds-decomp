@@ -59,8 +59,8 @@ typedef struct scrProcessWork_s {
     char *strings;
     s32 procedureIndex;
     s32 resourceIndex;
-    s32 timer;
-    s32 cmdTimer;
+    u32 timer;
+    u32 cmdTimer;
     struct sdfMemHandle_t *scriptHandle; /* 0xD8: allocation descriptor, not scriptHeader data */
     s32 *localInt;
     f32 *localFloat;
