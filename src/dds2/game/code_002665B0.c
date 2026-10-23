@@ -1460,7 +1460,7 @@ void mnuDrawTerminalFrameAndSlotLabels(s32 state) {
                       progress, 0x81, batch, 4, MNU_TEXT_DRAW_PRIORITY);
         batch = work->resourceBank[0];
     }
-    if (*(s32 *)((u8 *)state + 0xA0) != 0) {
+    if (work->fadeStarted != 0) {
         position[3].firstValue += 0x320;
     }
     itfDrawGridWithResolvedSlot(position[3].firstValue, position[3].secondValue, 0, 0x81,
@@ -2318,7 +2318,7 @@ s32 evtBReleaseImagesAndQueueMenuTransition(dds3ProcessID_t *task) {
     mnuTerminalSelectSlot(3, 4, state);
     mnuSetTerminalPanelMotionMode(2, (MenuSlotState *)state);
     evtRememberDispatchCallback(0, (MenuSlotState *)state);
-    *(u32 *)(state + 0xA0) = 0;
+    ((MenuSlotState *)state)->fadeStarted = 0;
     evtFinishMessageWindowAndNotify();
     fclDestroyMessage();
     return 1;
