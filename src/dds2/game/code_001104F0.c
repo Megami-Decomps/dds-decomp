@@ -366,12 +366,12 @@ struct WorldIndexNode *dds3SceneBasicGetList(dds3Basic_t *object, s32 kind) {
     return indexObject;
 }
 
-void dds3SceneBasicMakeScene(dds3Basic_t *object, u32 resourceId) {
+void dds3SceneBasicMakeScene(dds3Basic_t *object, const char *resourcePath) {
     EvtWorldTable *data;
     struct sdfMemHandle_t *handle;
 
     data = ((EvtWorldTable *)object->data);
-    handle = fldLoadAreaRoomResources((const char *)resourceId);
+    handle = fldLoadAreaRoomResources(resourcePath);
     data->indexedHandle = (u32)handle;
 }
 
