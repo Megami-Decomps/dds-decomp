@@ -4828,7 +4828,8 @@ void effPCPMakkaSetScale(EffPCPSprayWork *work, f32 val) {
 /* Clone the source header (a longer one with 0x18-byte entries), then give every entry one event and a random negative start delay. */
 EffPCPDriftEventWork *effPCPRadiateBEDCreate(EffPCPDriftEventParams *src, void *params) {
     u32 count = src->count;
-    struct sdfMemHandle_t *handle = sdfMemAllocDirect(count * 24 + 0x11C);
+    struct sdfMemHandle_t *handle = sdfMemAllocDirect(
+        count * sizeof(EffPCPDriftEventRow) + sizeof(EffPCPDriftEventWork));
     EffPCPDriftEventWork *work = (void *)sdfMemLock(handle);
     EffPCPEventPlace place;
     EffPCPDriftEventRow *entry;
@@ -4879,7 +4880,8 @@ EffPCPDriftEventWork *effPCPRadiateBEDCreatePCF(void *data) {
 
 EffPCPDriftEventWork *effPCPRadiateBEDCopy(EffPCPDriftEventWork *src) {
     u32 count = src->params.count;
-    struct sdfMemHandle_t *handle = sdfMemAllocDirect(count * 24 + 0x11C);
+    struct sdfMemHandle_t *handle = sdfMemAllocDirect(
+        count * sizeof(EffPCPDriftEventRow) + sizeof(EffPCPDriftEventWork));
     EffPCPDriftEventWork *work = (void *)sdfMemLock(handle);
     EffPCPEventPlace place;
     EffPCPDriftEventRow *entry;
