@@ -80,7 +80,7 @@ typedef struct PolyMovieWork {
     struct EvtExtendedRow *subEntry4OtherData; /* 0x8C */
     PmdHeader *sub2;   /* 0x90 */
     PmdEntry *sub2Entries; /* 0x94 */
-    struct EvtExtendedRow *secondEntry4Data; /* 0x98 */
+    const struct EvtExtendedRow *secondEntry4Data; /* 0x98 */
     u32 extendedEntry4Count; /* 0x9C: rows in the extended type-4 table */
     u32 subEntry4Count; /* 0xA0 */
     u8 *subEntry5Data;    /* 0xA4 */

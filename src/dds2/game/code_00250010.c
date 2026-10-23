@@ -5356,8 +5356,8 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         } else if (work->secondEntry4Data[row].value == 5) {
             needsBgm = 1;
             key = evtCreateViewerTimelineKey(group, work->secondEntry4Data[row].parameter, runtime);
-            key->p08.h[0] = ((EvtViewParam *)work->secondEntry4Data[row].payload)[0].h[0];
-            key->p08.h[1] = ((EvtViewParam *)work->secondEntry4Data[row].payload)[0].h[1];
+            key->p08.h[0] = ((const EvtViewParam *)work->secondEntry4Data[row].payload)[0].h[0];
+            key->p08.h[1] = ((const EvtViewParam *)work->secondEntry4Data[row].payload)[0].h[1];
         }
     }
     group = evtEventViewerCreateEntry(0x13, runtime);
@@ -5378,9 +5378,9 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         } else if (work->secondEntry4Data[row].value == 0x13) {
             needsBgm = 1;
             key = evtCreateViewerTimelineKey(group, work->secondEntry4Data[row].parameter, runtime);
-            key->p08.h[0] = ((EvtViewParam *)work->secondEntry4Data[row].payload)[0].h[0];
-            key->p08.h[1] = ((EvtViewParam *)work->secondEntry4Data[row].payload)[0].h[1];
-            key->p0C.h[0] = ((EvtViewParam *)work->secondEntry4Data[row].payload)[1].h[0];
+            key->p08.h[0] = ((const EvtViewParam *)work->secondEntry4Data[row].payload)[0].h[0];
+            key->p08.h[1] = ((const EvtViewParam *)work->secondEntry4Data[row].payload)[0].h[1];
+            key->p0C.h[0] = ((const EvtViewParam *)work->secondEntry4Data[row].payload)[1].h[0];
         }
     }
     group = evtEventViewerCreateEntry(6, runtime);

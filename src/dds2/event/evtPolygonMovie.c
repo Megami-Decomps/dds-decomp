@@ -728,7 +728,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *mainHeade
     }
     for (arrayIndex = 0; arrayIndex < work->sub2->count; arrayIndex++) {
         if (work->sub2Entries[arrayIndex].type == 4) {
-            work->secondEntry4Data = (struct EvtExtendedRow *)((u8 *)tertiaryHeader + work->sub2Entries[arrayIndex].offset);
+            work->secondEntry4Data = (const struct EvtExtendedRow *)((const u8 *)tertiaryHeader + work->sub2Entries[arrayIndex].offset);
             work->extendedEntry4Count = work->sub2Entries[arrayIndex].value;
         }
     }

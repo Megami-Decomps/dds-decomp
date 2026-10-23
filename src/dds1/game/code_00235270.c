@@ -5251,7 +5251,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         } else if (work->secondEntry4Data[row].value == 5) {
             soundRowsPresent = 1;
             key = evtCreateTrackKeyAtFrame(group, work->secondEntry4Data[row].parameter, runtime);
-            key->p08.h[0] = *(u16 *)work->secondEntry4Data[row].payload;
+            key->p08.h[0] = *(const u16 *)work->secondEntry4Data[row].payload;
         }
     }
     group = evtEventViewerCreateEntry(0x13, runtime);
@@ -5271,8 +5271,8 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         } else if (work->secondEntry4Data[row].value == 0x13) {
             soundRowsPresent = 1;
             key = evtCreateTrackKeyAtFrame(group, work->secondEntry4Data[row].parameter, runtime);
-            key->p08.h[0] = *(u16 *)work->secondEntry4Data[row].payload;
-            key->p08.h[1] = *(u16 *)(work->secondEntry4Data[row].payload + 2);
+            key->p08.h[0] = *(const u16 *)work->secondEntry4Data[row].payload;
+            key->p08.h[1] = *(const u16 *)(work->secondEntry4Data[row].payload + 2);
         }
     }
 
