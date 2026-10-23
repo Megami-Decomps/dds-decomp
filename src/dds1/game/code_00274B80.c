@@ -1626,10 +1626,10 @@ void ptySkillMenuInitPages(CampMenuContext *context) {
         owner = &DDS3_GBWK->party[context->partyWindow.lists[0]->cursor->index];
         skillBits = (u32 *)mnuBuildSkillCodeBitset();
         menu->panel = mnuCreatePanelState(4, 0x2B0);
-        mnuSetPanelFirstGridSlot(menu->panel, 0, 0, context->unkE8, 8);
+        mnuSetPanelFirstGridSlot(menu->panel, 0, 0, context->gridSlotResource, 8);
         mnuSetPanelThirdGridSlot(menu->panel, 0x5E0, 0x150, (struct EffectSlotSet *)context->variant, 0xA);
-        mnuSetPanelFourthGridSlot(menu->panel, 0x560, 0x48, context->unkE8, 0, (u32)mnuCampSkillHeadingFrameIndices);
-        mnuSetPanelSecondGridSlot(menu->panel, -0x80, -0x38, context->unkE8, 3);
+        mnuSetPanelFourthGridSlot(menu->panel, 0x560, 0x48, context->gridSlotResource, 0, (u32)mnuCampSkillHeadingFrameIndices);
+        mnuSetPanelSecondGridSlot(menu->panel, -0x80, -0x38, context->gridSlotResource, 3);
         mnuInitializePanelResource(menu->panel, (struct EffectSlotSet *)context->displayVariant, (struct EffMappedResource *)context->unk120);
         menu->categoryList = mnuCreateListState(0, 1, 1);
         for (category = 0; category < 4; category++) {
@@ -1655,7 +1655,7 @@ void ptySkillMenuInitPages(CampMenuContext *context) {
             list->drawCallback = ptySkillMenuDrawEntry;
             list->context = context;
             list->categoryIndex = category;
-            mnuAttachWindowTextureState(window, -0xE0, 0x370, 0, (u32)context->unkEC);
+            mnuAttachWindowTextureState(window, -0xE0, 0x370, 0, (u32)context->windowTextureVariantResource);
             mnuConfigureWindowSpriteSlots(window->textures, (struct EffMappedResource *)context->unk118);
             node = mnuAppendWindowListNode(window, D_003BC708);
             node->camp.value = 0;
