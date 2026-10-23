@@ -277,7 +277,7 @@ typedef struct ItfMesBlkA4 {
 } ItfMesBlkA4;
 
 typedef struct ItfMesTextSlots {
-    u32 addresses[0x20];
+    u8 *addresses[0x20];
     sdfMemHandle_t *handles[0x20];
 } ItfMesTextSlots;
 
