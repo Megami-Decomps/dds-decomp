@@ -14,6 +14,7 @@
 #include "eff_offset_if_owner_flag_clear.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
+#include "active_sound_node.h"
 #include "kwln.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
@@ -1430,7 +1431,7 @@ extern u8 *btlCreateFlaggedCommandItemConsumeTask(s32, s32);
 s32 btlFormatActionEventFilename(s32 skillIndex, char *output);
 extern BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *, const char *);
 extern BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *, BtlUnit *, s32, s32, BtlUnit *, u16);
-extern BtlRuntimeTask *sndCreateSkillSeTask(s32, u16);
+extern BtlRuntimeTask *sndCreateSkillSeTask(const ActiveSoundNode *, u16);
 extern void *btlCreateMaskedActorEntryUpdateTask(BtlUnit *, BtlOperandEntry *);
 extern void *btlCreateQueuedActorEntrySelectionTask(BtlUnit *, BtlOperandEntry *);
 
@@ -1610,7 +1611,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
                 groupTask->startDelay = groupDelay;
                 groupTask->ownerId = actionOwner;
                 btlStartTask(groupTask);
-                task = (BtlRuntimeTask *)sndCreateSkillSeTask((s32)unit->listNode, 2);
+                task = (BtlRuntimeTask *)sndCreateSkillSeTask(unit->listNode, 2);
                 task->startCondition.kind = 7;
                 task->startCondition.value.handle = masterOwner;
                 task->startDelay = groupDelay;
@@ -1848,7 +1849,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
             groupTask->endCondition.value.handle = actionOwner;
             groupTask->ownerId = btlAdvanceRuntimeSequenceCounter();
             btlStartTask(groupTask);
-            task = (BtlRuntimeTask *)sndCreateSkillSeTask((s32)unit->listNode, 1);
+            task = (BtlRuntimeTask *)sndCreateSkillSeTask(unit->listNode, 1);
             task->startCondition.kind = 7;
             task->startCondition.value.handle = masterOwner;
             task->endCondition.kind = 7;
@@ -3278,4 +3279,3 @@ INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB5E0);
 INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB5E8);
 
 INCLUDE_SDATA(const s32, "game/code_001C8890", btlDeferredTaskTail);
-
