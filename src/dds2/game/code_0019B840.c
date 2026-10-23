@@ -215,13 +215,13 @@ void frCreateUserFontPacket(s32 x, s32 y, s32 depth, _TEXT *glyph,
 
 extern volatile s32 dds3GsSema; 
 /* Upload an image to GS memory at the given buffer, serialized by the GS semaphore. */
-void frCopyFontClutToVram(s32 buffer, s32 image) {
+void frCopyFontClutToVram(s32 buffer, const u32 *image) {
     u8 loadImage[0x60];
 
     sceGsSetDefLoadImage(loadImage, (s16)buffer, 1, 0, 0, 0, 8, 2);
     WaitSema(dds3GsSema);
     FlushCache(0);
-    sceGsExecLoadImage(loadImage, image);
+    sceGsExecLoadImage(loadImage, (s32)image);
     sceGsSyncPath(0, 0);
     SignalSema(dds3GsSema);
 }
@@ -407,4 +407,3 @@ void frDelFontStyle(s32 slotId) {
     }
     entry->slots = NULL;
 }
-
