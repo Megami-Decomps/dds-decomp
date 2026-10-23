@@ -145,7 +145,7 @@ extern void evtExitSky(void);
 
 extern s8 evtSelectionStateActive;
 
-extern void *evtSelectionState;
+extern EvtSelState *evtSelectionState;
 
 extern u8 sdfViewShakeVector[];
 
@@ -1017,11 +1017,11 @@ s32 evtSelStateCreate(s32 countLimit, s16 frames, s32 firstValue, s32 secondValu
     } else {
         selectionState->limit = countLimit;
     }
-    ((EvtSelState *)evtSelectionState)->rampUpFrames = firstValue;
-    ((EvtSelState *)evtSelectionState)->rampDownFrames = secondValue;
-    ((EvtSelState *)evtSelectionState)->amplitude[0] = frames;
-    ((EvtSelState *)evtSelectionState)->amplitude[1] = frames;
-    ((EvtSelState *)evtSelectionState)->amplitude[2] = frames;
+    evtSelectionState->rampUpFrames = firstValue;
+    evtSelectionState->rampDownFrames = secondValue;
+    evtSelectionState->amplitude[0] = frames;
+    evtSelectionState->amplitude[1] = frames;
+    evtSelectionState->amplitude[2] = frames;
     evtSelectionStateActive = 1;
     return 1;
 }
