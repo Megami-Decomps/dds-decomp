@@ -6,11 +6,12 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import shlex
 import struct
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+
+import source_tokens
 
 
 PACK_COUNT = 8
@@ -371,7 +372,7 @@ def encode(inf: InfFile) -> bytes:
 
 def _tokens(line: str, line_number: int) -> list[str]:
     try:
-        return shlex.split(line, comments=True, posix=True)
+        return source_tokens.split(line)
     except ValueError as exc:
         raise InfError(f"line {line_number}: {exc}") from exc
 

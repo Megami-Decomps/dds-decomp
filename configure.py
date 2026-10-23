@@ -875,6 +875,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     "flw0",
                     str(source),
                     implicit=[
+                        "tools/source_tokens.py",
                         "tools/flw0.py",
                         "tools/flw0_profiles.py",
                         "tools/flw0_symbolic.py",
@@ -908,6 +909,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     "inf",
                     str(source),
                     implicit=[
+                        "tools/source_tokens.py",
                         "tools/inf.py",
                         "tools/flw0.py",
                         "tools/flw0_symbolic.py",
@@ -941,6 +943,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     "wap",
                     str(source),
                     implicit=[
+                        "tools/source_tokens.py",
                         "tools/wap.py",
                         "tools/flw0.py",
                         "tools/flw0_symbolic.py",
@@ -1006,7 +1009,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     str(output),
                     "amb",
                     str(source),
-                    implicit=["tools/amb.py", "tools/fld.py", "tools/reloc.py"],
+                    implicit=["tools/source_tokens.py", "tools/amb.py", "tools/fld.py", "tools/reloc.py"],
                     variables={"outdir": str(output.parent)},
                 )
                 amb_outputs.append(str(output))
@@ -1028,7 +1031,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 field_stem = source.stem.split("_", 1)[0]
                 scripts = Path("src") / version / "scripts" / "field" / f"{field_stem}.bfasm"
                 warps = fld_source_dir / f"{field_stem}.wapasm"
-                implicit = ["tools/fld.py", "tools/reloc.py"]
+                implicit = ["tools/source_tokens.py", "tools/fld.py", "tools/reloc.py"]
                 links = ""
                 if source.stem in linked_stems:
                     if not (ROOT / scripts).exists() or not (ROOT / warps).exists():
@@ -1061,6 +1064,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 "field_world",
                 implicit=[
                     "tools/field_world.py",
+                    "tools/source_tokens.py",
                     "tools/fld.py",
                     "tools/battle_tbl.py",
                     str(fld_manifest),
@@ -1089,7 +1093,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     str(output),
                     "fld1",
                     str(source),
-                    implicit=["tools/fld.py", "tools/reloc.py"],
+                    implicit=["tools/source_tokens.py", "tools/fld.py", "tools/reloc.py"],
                     variables={"outdir": str(output.parent)},
                 )
                 fld1_outputs.append(str(output))
@@ -1171,6 +1175,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 if source.stem == "aicalc":
                     dependencies.extend(
                         (
+                            "tools/source_tokens.py",
                             "tools/flw0.py",
                             "tools/flw0_symbolic.py",
                             "tools/flw0_semantic.py",
