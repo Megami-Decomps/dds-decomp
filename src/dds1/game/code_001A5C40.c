@@ -486,7 +486,7 @@ u8 btlGetActorDisplayByteWithDefault(s32 object, s32 index) {
 
 extern BtlActionAnimationRecord *datActionAnimationRecords;
 
-extern s32 btlActionAnimationModeRows[];
+extern BtlAnimationModeRow btlActionAnimationModeRows[];
 
 extern char D_003A1A58[]; /* "btl:delay=%d\n" */
 
@@ -504,7 +504,7 @@ s32 btlGetActionAnimationDelay(BtlUnit *unit, s32 actionId) {
     if (actionId == 0) {
         return 1;
     }
-    delayTable = btlActionAnimationModeRows;
+    delayTable = (s32 *)btlActionAnimationModeRows;
     delayTable++;
     delayIndex = datActionAnimationRecords[actionId].delayIndex;
     delay = delayTable + delayIndex * 2;
@@ -558,7 +558,7 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
         mode = unit->partyRecord.unitId == 6 ? 2 : 0;
     } else {
         u32 delayIndex = datActionAnimationRecords[actionId].delayIndex;
-        mode = ((BtlAnimationModeRow *)btlActionAnimationModeRows)[delayIndex].mode;
+        mode = btlActionAnimationModeRows[delayIndex].mode;
     }
     switch (mode) {
     case 0:
