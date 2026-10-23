@@ -2882,8 +2882,9 @@ void btlEnterPacketActionState(void) {
 
 
 void btlAdvanceStateWhenLinkedTasksFinish(s32 object) {
-    s32 owner = *(s32 *)(object + 0x18);
-    if (btlCountTasksForOwner(*(s64 *)(owner + 0x108)) == 0) {
+    BtlTask *task = (BtlTask *)object;
+    BtlUnit *owner = task->unit;
+    if (btlCountTasksForOwner(owner->identity) == 0) {
         btlDispatchStateHandler(object, 0x1C);
     }
 }
@@ -2893,8 +2894,8 @@ void btlAdvanceLinkedUnitWhenOwnerIdle(void) {
 
 /* Clear the actor's in-progress bit and return to STANDBY when its tasks finish. */
 void btlResumeStandbyWhenActorTasksFinish(s32 object) {
-    BtlUnit *owner = *(BtlUnit **)(object + 0x18);
-    if (btlCountTasksForOwner(*(s64 *)((u8 *)owner + 0x108)) == 0) {
+    BtlUnit *owner = ((BtlTask *)object)->unit;
+    if (btlCountTasksForOwner(owner->identity) == 0) {
         owner->status.flags = (u32)owner->status.flags & (~0x4000);
         btlDispatchStateHandler(object, 2);
     }
