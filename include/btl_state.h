@@ -207,7 +207,7 @@ typedef struct BtlState {
     s32 frame; /* 0x1F0 */
     u32 battleFlags; /* 0x1F4 */
     u32 commandRestrictFlags; /* 0x1F8: bit 0x10 blocks commands with the +0x30 restriction */
-    u32 unk_1FC; /* BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS bypasses block reasons. */
+    u32 runtimeFlags; /* 0x1FC: battle runtime and command flags. */
     struct dds3Basic_t *cameraObject; /* 0x200: world camera stored at 001DC1EC. */
     struct dds3Basic_t *sceneLightNode; /* 0x204: action node used for scene-light transitions. */
     s32 currentScene; /* 0x208 */
@@ -448,7 +448,7 @@ typedef struct BtlState {
     u8 pad214[4];
     u32 battleFlags; /* 0x218 */
     u32 commandRestrictFlags; /* 0x21C: bit 0x10 blocks commands with the +0x30 restriction */
-    u32 unk220; /* BTL_STATE_FLAG_DISABLE_COMMAND_TARGET_ELIGIBILITY; BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS. */
+    u32 runtimeFlags; /* 0x220: battle runtime and command flags. */
     struct dds3Basic_t *cameraObject; /* 0x224: world camera stored at 001E9514. */
     struct dds3Basic_t *sceneLightNode; /* 0x228: action node used for scene-light transitions. */
     s32 currentScene; /* 0x22C */

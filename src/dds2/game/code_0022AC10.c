@@ -1064,7 +1064,7 @@ s32 btlGetCommandBlockReason(ActionStateLink *actionTask, s32 commandId) {
     s32 targetCount;
     s32 flaggedTargetCount;
     s32 targetIndex;
-    if (((BtlState *)btlGetRuntime())->unk220 & BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS) {
+    if (((BtlState *)btlGetRuntime())->runtimeFlags & BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS) {
         return 0;
     }
     if (commandId <= 0) {
@@ -1111,7 +1111,7 @@ s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
     s32 requirement;
     s32 code;
 
-    if (battle->unk220 & BTL_STATE_FLAG_DISABLE_COMMAND_TARGET_ELIGIBILITY) {
+    if (battle->runtimeFlags & BTL_STATE_FLAG_DISABLE_COMMAND_TARGET_ELIGIBILITY) {
         return 0;
     }
     if (commandId <= 0) {
@@ -2782,9 +2782,9 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         if (((u32)selectedAddress >= (u32)&btlDebugEditorActorStatus.position[0] &&
              (u32)selectedAddress < (u32)&btlDebugEditorActorStatus.scale) ||
              selectedAddress == (u32)&btlDebugEditorActorStatus.height || selectedAddress == (u32)&btlDebugEditorActorStatus.reach) {
-            battle->unk220 |= 0x200;
+            battle->runtimeFlags |= 0x200;
         } else {
-            battle->unk220 &= ~0x200;
+            battle->runtimeFlags &= ~0x200;
         }
         if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress == (u32)&btlDebugEditorMotionSlot.muzzleGuideScale) {
             btlUnitGetMuzzlePosVU(unit);
@@ -3045,12 +3045,12 @@ s32 btlUpdateDebugEncounterSelector(void) {
 
     if (dds3PadBitTable[3] < 0) {
         state->battleFlags = (state->battleFlags & 0xFFFDFE3F) | 0x11010000;
-        state->unk220 |= BTL_STATE_FLAG_DISABLE_COMMAND_TARGET_ELIGIBILITY;
+        state->runtimeFlags |= BTL_STATE_FLAG_DISABLE_COMMAND_TARGET_ELIGIBILITY;
         D_00436F70 = 1;
     }
     if (dds3PadBitTable[0] < 0) {
         state->battleFlags = (state->battleFlags & 0xEFFEFE3F) | 0x01000000;
-        state->unk220 |= BTL_STATE_FLAG_DISABLE_COMMAND_TARGET_ELIGIBILITY;
+        state->runtimeFlags |= BTL_STATE_FLAG_DISABLE_COMMAND_TARGET_ELIGIBILITY;
         D_00436F70 = 1;
     }
     if (dds3PadBitTable[13] < 0) {
@@ -3065,11 +3065,11 @@ s32 btlUpdateDebugEncounterSelector(void) {
     }
     {
         BattleDebugWindow *window = &btlDebugEncounterWindowView;
-        D_00436F78 = state->unk220;
+        D_00436F78 = state->runtimeFlags;
         D_00436F74 = state->battleFlags;
         btlReturnDebugMenuSetupWord((u32)window);
         state->battleFlags = D_00436F74;
-        state->unk220 = D_00436F78;
+        state->runtimeFlags = D_00436F78;
         btlDebugMenuBeforeRecordNoOp();
         btlDebugMenuRecordNoOp((u32)window);
         btlDebugMenuAfterRecordNoOp();

@@ -561,7 +561,7 @@ void btlActionSeqStateSelect(ActionStateLink *task) {
                 btlDispatchStateHandler(task, 6);
             }
         } else if (flags & 0x400) {
-            if (!(work->unk220 & 1)) {
+            if (!(work->runtimeFlags & 1)) {
                 btlDispatchStateHandler(task, 8);
             } else {
                 btlDispatchStateHandler(task, 6);

@@ -1519,7 +1519,7 @@ s32 btlFinishScenePartyRecovery(BtlState *scene) {
 
 void fldMarkSceneRefresh(BtlState *scene) {
     btlResetDebugEncounterSelection((s32)scene);
-    scene->unk220 |= 4;
+    scene->runtimeFlags |= 4;
 }
 
 u32 fldBeginFadeWhenSceneReady(void) {

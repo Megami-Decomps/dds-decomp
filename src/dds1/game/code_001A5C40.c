@@ -378,7 +378,7 @@ extern s32 btlRollAiBucket(void);
 
 s32 btlRollFearChance(s32 unused, BtlUnit *unit, u32 flags, u32 options) {
     s32 ratio;
-    if ((((BtlState *)btlGetRuntime())->unk_1FC & 0x80) != 0) return 0;
+    if ((((BtlState *)btlGetRuntime())->runtimeFlags & 0x80) != 0) return 0;
     if ((unit->status.stateFlags & 8) != 0) return 0;
     if ((flags & 1) == 0) return 0;
     if ((unit->partyRecord.status & 1) != 0) return 0;
@@ -401,7 +401,7 @@ s32 btlRollAllFearChance(s32 unused, BtlUnit *unit, u32 flags, s32 unusedFlags,
     s32 threshold;
     u32 category;
 
-    if (((BtlState *)btlGetRuntime())->unk_1FC & 0x80) {
+    if (((BtlState *)btlGetRuntime())->runtimeFlags & 0x80) {
         return 0;
     }
     actionThreshold = 0;

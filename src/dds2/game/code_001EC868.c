@@ -7332,7 +7332,7 @@ void btlTickFieldSwayAndTint(void) {
 
     work = (s32)(u32)btlGetRuntime();
     if ((((((BtlState *)work)->battleFlags & 0x20000) != 0) && ((((BtlState *)work)->commandRestrictFlags & 0x20) == 0)) &&
-          ((((BtlState *)work)->unk220 & 0x4000000) == 0)) {
+          ((((BtlState *)work)->runtimeFlags & 0x4000000) == 0)) {
         fldUpdateSelectedValueTransition();
         fldSkyCalcFilter();
         fldSkyDrawFilter();

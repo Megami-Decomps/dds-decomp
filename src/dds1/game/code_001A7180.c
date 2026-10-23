@@ -126,7 +126,7 @@ s32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, s32 command, 
     s32 value;
     s32 guard;
 
-    if (((BtlState *)btlGetRuntime())->unk_1FC & 0x80) {
+    if (((BtlState *)btlGetRuntime())->runtimeFlags & 0x80) {
         return 0;
     }
     if (datCommandRecords[command].effectType != 2) {
