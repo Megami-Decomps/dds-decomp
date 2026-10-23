@@ -4,11 +4,12 @@
 #include "common.h"
 
 struct EffNode;
+struct dds3Basic_t;
 
 /* One of the 32 field object slots. DDS1 and DDS2 use the same 0x30-byte
  * layout. */
 typedef struct FldObjectSlot {
-    s32 unk0;
+    struct dds3Basic_t *unitObject; /* 0x00: borrowed world node owned by the active scene. */
     s32 id;
     s32 activationState;     /* 0x08 */
     s32 activationRequested; /* 0x0C */
@@ -24,6 +25,8 @@ typedef struct FldObjectSlot {
 
 typedef char FldObjectSlot_activationState_offset_must_be_0x08[
     ((u32)&((FldObjectSlot *)0)->activationState == 0x08) ? 1 : -1];
+typedef char FldObjectSlot_unitObject_offset_must_be_0x00[
+    ((u32)&((FldObjectSlot *)0)->unitObject == 0x00) ? 1 : -1];
 typedef char FldObjectSlot_effectNode_offset_must_be_0x24[
     ((u32)&((FldObjectSlot *)0)->effectNode == 0x24) ? 1 : -1];
 typedef char FldObjectSlot_size_must_be_0x30[sizeof(FldObjectSlot) == 0x30 ? 1 : -1];

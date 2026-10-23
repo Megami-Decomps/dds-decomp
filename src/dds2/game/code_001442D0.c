@@ -3383,7 +3383,7 @@ void fldResetObjectSlots(void) {
     fldTakaraCount = 0;
     for (i = 0; i < 32; i++) {
         fldTakaraSlotTable[i].id = -1;
-        fldTakaraSlotTable[i].unk0 = 0;
+        fldTakaraSlotTable[i].unitObject = NULL;
         fldTakaraSlotTable[i].activationState = 0;
         fldTakaraSlotTable[i].activationRequested = 0;
         if (fldTakaraSlotTable[i].effectNode != 0) {
@@ -3649,7 +3649,7 @@ void fldReleaseObjectSlots(void) {
     fldTakaraCount = 0;
     for (i = 0; i < 32; i++) {
         fldTakaraSlotTable[i].id = -1;
-        fldTakaraSlotTable[i].unk0 = 0;
+        fldTakaraSlotTable[i].unitObject = NULL;
         fldTakaraSlotTable[i].activationState = 0;
         fldTakaraSlotTable[i].activationRequested = 0;
     }
@@ -3663,7 +3663,7 @@ void fldUpdateObjectSlotActivation(void) {
         switch (fldTakaraSlotTable[i].activationState) {
         case 0:
             if (fldTakaraSlotTable[i].activationRequested == 1) {
-                resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle((dds3Basic_t *)(u32)fldTakaraSlotTable[i].unk0);
+                resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(fldTakaraSlotTable[i].unitObject);
                 mdlSingleMotion(resource, 0, 1);
                 fldTakaraSlotTable[i].activationState = fldTakaraSlotTable[i].activationRequested;
                 switch (fldTakaraSlotTable[i].effectVariant) {
@@ -3691,14 +3691,14 @@ void fldUpdateObjectSlotActivation(void) {
                     break;
                 }
             } else {
-                resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle((dds3Basic_t *)(u32)fldTakaraSlotTable[i].unk0);
+                resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(fldTakaraSlotTable[i].unitObject);
                 if (resource->first->state == SDF_MOTION_STATE_TERMINAL) {
                     mdlSingleMotion(resource, 0, 0);
                 }
             }
             break;
         case 1:
-            resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle((dds3Basic_t *)(u32)fldTakaraSlotTable[i].unk0);
+            resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(fldTakaraSlotTable[i].unitObject);
             if (resource->first->state == SDF_MOTION_STATE_TERMINAL) {
                 mdlLoopMotion(resource, 0, 2);
                 fldTakaraSlotTable[i].activationRequested = 2;
@@ -3707,7 +3707,7 @@ void fldUpdateObjectSlotActivation(void) {
             break;
         case 2:
             if (fldEncountTestFlag(0x40)) {
-                resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle((dds3Basic_t *)(u32)fldTakaraSlotTable[i].unk0);
+                resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(fldTakaraSlotTable[i].unitObject);
                 mdlLoopMotion(resource, 0, 3);
                 fldTakaraSlotTable[i].activationRequested = 3;
                 fldTakaraSlotTable[i].activationState = 3;
