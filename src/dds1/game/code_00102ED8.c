@@ -101,7 +101,7 @@ extern void eglInit(void);
 
 extern void sdfGrSetScreen(s32 displayModeIndex);
 #include "sdf_packet_alloc.h"
-extern void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y);
+extern void kwlnDrawTextureListDiagnostic(sdfDrawTag_t *packetList, s32 x, s32 y);
 extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 extern void dds3PadVibrationSet(u32, u8, s32);
 typedef s32 (*KwlnTaskUpdateCallback)();
@@ -1132,7 +1132,7 @@ void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, sdfGsMemS
 
 
 /* Draw the allocation-map border, then walk blocks through their prev links. */
-void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y) {
+void kwlnDrawTextureListDiagnostic(sdfDrawTag_t *packetList, s32 x, s32 y) {
     sdfGsMemSlice_t *block = sdfGsMemGetLinkHead();
 
     if (block != NULL) {
@@ -1826,4 +1826,3 @@ INCLUDE_SDATA(const s32, "game/code_00102ED8", distblurovercnt);
 INCLUDE_SDATA(const s32, "game/code_00102ED8", ripblurovercnt);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA940);
-
