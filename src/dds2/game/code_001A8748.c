@@ -1130,7 +1130,7 @@ void btlStart(s32 mode, s32 pack, s32 encounter) {
     btlCreateDrawTasks();
     switch (mode) {
     case 0:
-        ((BtlState *)btlRuntime)->effectLayer = pack;
+        ((BtlState *)btlRuntime)->encounterPack = pack;
         ((BtlState *)btlRuntime)->adjustmentGroupIndex = (u8)(encounter >> 24);
         ((BtlState *)btlRuntime)->adjustmentEntryIndex = (u8)(encounter >> 16);
         ((BtlState *)btlRuntime)->battleMode = (u16)encounter;

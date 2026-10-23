@@ -3111,7 +3111,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
         if (encounter == 0) {
             return 0;
         }
-        state->effectLayer = D_00436F64;
+        state->encounterPack = D_00436F64;
         D_00436F68 = encounter & 0xFFFF;
         btlBossDebugPrintf("btl:test encNo = %X\n", D_00436F68);
     }

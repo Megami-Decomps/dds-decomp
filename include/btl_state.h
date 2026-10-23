@@ -493,7 +493,7 @@ typedef struct BtlState {
     u32 skillSeLoadFrame; /* 0x28C: -1 disables the skill-SE frame gate. */
     u16 defeatedLevelCount; /* Number of defeated enemy levels accumulated for the reward average. */
     u16 defeatedLevelTotal; /* Sum of partyRecord.level for defeated enemies. */
-    s32 effectLayer; /* 0x294 */
+    s32 encounterPack; /* 0x294: encounter table selector, matching the DDS1 state field. */
     s32 adjustmentGroupIndex; /* 0x298: encounter pack's group selector */
     s32 adjustmentEntryIndex; /* 0x29C: entry selector within the group */
     s32 battleMode; /* 0x2A0 */
