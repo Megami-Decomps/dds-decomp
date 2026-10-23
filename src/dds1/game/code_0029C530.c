@@ -4741,7 +4741,7 @@ EffectSurfaceNode *effCreateSurfaceNodeForGrid(FileKeyBlock *grid) {
 }
 
 extern void effRebuildSurfaceHandles(EffectSurfaceNode *, u16, void *);
-void effReplaceResourceRef(EffectSurfaceNode *node, u32 entryId, void *resource);
+void effReplaceResourceRef(EffectSurfaceNode *node, u32 entryId, const void *resource);
 
 EffectSurfaceNode *effResourceReferenceReplaceFromFile(FileJobPayload *work) {
     u8 *source = fileResolvePrimaryBuffer(work);
@@ -4924,7 +4924,7 @@ void effRebuildSurfaceHandles(EffectSurfaceNode *node, u16 kind, void *source) {
 }
 
 
-void effReplaceResourceRef(EffectSurfaceNode *node, u32 entryId, void *resource) {
+void effReplaceResourceRef(EffectSurfaceNode *node, u32 entryId, const void *resource) {
     if (node->record != NULL) {
         effPCPHelperBEDGetModel(node->record);
     }
