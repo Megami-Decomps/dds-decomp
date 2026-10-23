@@ -61,7 +61,7 @@ void evtSubmitEventRequest(s32 eventId, s32 requestMode);
 
 void fldBgmStop(void);
 
-void fldRequestEncounterWithFade(u32 kind, s32 eventId);
+void fldRequestEncounterWithFade(s32 kind, s32 eventId);
 
 extern u32 evtPendingEventSelection;
 

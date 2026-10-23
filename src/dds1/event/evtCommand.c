@@ -134,7 +134,7 @@ s32 evtRegistBEField(s32 eventId, s32 resourceId);
 
 extern s32 D_0032E3C0[];
 
-void fldRequestEncounterWithFade(u32 kind, s32 eventId);
+void fldRequestEncounterWithFade(s32 kind, s32 eventId);
 
 extern u32 evtPendingEventSelection;
 

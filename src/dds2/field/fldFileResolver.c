@@ -3365,7 +3365,7 @@ s32 fldEncProc(dds3ProcessID_t *task) {
 
 extern void p2sdPlaySE(s32 sequence, s32 volume, s32 pan);
 
-void fldRequestEncounterWithFade(u32 encounterMode, s32 recordIndex) {
+void fldRequestEncounterWithFade(s32 encounterMode, s32 recordIndex) {
     if ((recordIndex < 0x400) && ((datBattleSceneRecords[recordIndex].flags & 0x8000) != 0))
     {
         kwlnFadeBackgroundStartOut(0);
