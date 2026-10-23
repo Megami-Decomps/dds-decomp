@@ -701,10 +701,10 @@ extern Bytes7 D_003BC4E8[];
 extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context);
 
 /* Select the cost marker from the record's icon index and draw at the fixed badge offset. */
-void mnuDrawMantraCostIcon(s32 x, s32 y, s32 depth, s32 recordAddress, s32 amount, s32 drawArg) {
+void mnuDrawMantraCostIcon(s32 x, s32 y, s32 depth, const struct datUnitWork_t *partyRecord, s32 amount, s32 drawArg) {
     Bytes7 table = D_003BC4E8[0];
 
-    mnuDrawPlacedSpriteFromTable(x - MNU_MANTRA_COST_ICON_X_OFFSET, y + MNU_MANTRA_COST_ICON_Y_OFFSET, depth, amount, table.b[*(u16 *)(recordAddress + 4)], drawArg);
+    mnuDrawPlacedSpriteFromTable(x - MNU_MANTRA_COST_ICON_X_OFFSET, y + MNU_MANTRA_COST_ICON_Y_OFFSET, depth, amount, table.b[partyRecord->unitId], drawArg);
 }
 
 /* Advance and draw one transient cost/list notification; report expiry at frame 11. */
@@ -719,13 +719,13 @@ s32 mnuUpdateMantraCostNotification(MnuSceneListNode *node, s32 index, s32 drawA
         if (progress > 1.0f) {
             progress = 1.0f;
         }
-        mnuDrawMantraCostIcon(0, 0, 0, node->payload.timedDraw.recordAddress,
+        mnuDrawMantraCostIcon(0, 0, 0, (const struct datUnitWork_t *)node->payload.timedDraw.recordAddress,
                               (s32)(progress * 128.0f), context);
     }
 
     if (node->next == NULL) {
         if (opening == 0) {
-            mnuDrawMantraCostIcon(0, 0, 0, node->payload.timedDraw.recordAddress, 0x80,
+            mnuDrawMantraCostIcon(0, 0, 0, (const struct datUnitWork_t *)node->payload.timedDraw.recordAddress, 0x80,
                                   context);
         }
     }
@@ -847,13 +847,13 @@ s32 mnuAdvanceDisplayList(MnuSceneListHead *head, s32 amount, s32 drawContext) {
     return 0;
 }
 
-extern void mnuDrawMantraCostIcon(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawMantraCostIcon(s32, s32, s32, const struct datUnitWork_t *, s32, s32);
 
 /* Draw the selected record's cost marker once the animated list reports completion. */
-void mnuDrawMantraCostAfterListAdvance(s32 recordAddress, MnuSceneListHead *head,
+void mnuDrawMantraCostAfterListAdvance(const struct datUnitWork_t *partyRecord, MnuSceneListHead *head,
                                        s32 amount, s32 drawContext) {
     if (mnuAdvanceDisplayList(head, amount, drawContext) != 0) {
-        mnuDrawMantraCostIcon(0, 0, 0, recordAddress, amount, drawContext);
+        mnuDrawMantraCostIcon(0, 0, 0, partyRecord, amount, drawContext);
     }
 }
 
@@ -892,4 +892,3 @@ INCLUDE_SDATA(const s32, "game/code_0025BC38", D_003BC4D8);
 INCLUDE_SDATA(const s32, "game/code_0025BC38", D_003BC4E0);
 
 INCLUDE_SDATA(const s32, "game/code_0025BC38", D_003BC4E8);
-
