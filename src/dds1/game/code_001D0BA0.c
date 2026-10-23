@@ -3539,10 +3539,10 @@ void *btlCreateScaledUnitModelTask(u8 *owner) {
     return task;
 }
 
-u32 btlPollThresholdTask(s32 *arguments) {
-    if ((s32)btlGetUnitModelCurrentFrame((BtlUnit *)arguments[0]) >= arguments[1]) {
-        if ((*(u32 *)(arguments[0] + 0xE8) & 1) == 0) {
-            btlResetUnitModelProgress((BtlUnit *)arguments[0]);
+u32 btlPollThresholdTask(BtlRuntimeTaskArgs *arguments) {
+    if ((s32)btlGetUnitModelCurrentFrame(arguments->actor) >= arguments->option) {
+        if ((((BtlUnit *)arguments->actor)->updateFlags & 1) == 0) {
+            btlResetUnitModelProgress(arguments->actor);
         }
         return 1;
     }
