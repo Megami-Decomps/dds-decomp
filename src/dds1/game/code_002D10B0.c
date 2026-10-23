@@ -163,7 +163,7 @@ extern volatile s32 dds3GsSema;
 extern volatile u8 D_003BD32D;
 extern volatile u8 sdfDrawFrameFlag;
 extern u16 D_003BD32E;
-extern SdfHandlerNode *sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
+extern SdfHandlerNode *sdfAddHandler(s32, s32, SdfHandlerCallback, s32, s32);
 extern void sdfGrMakeFrameSet(sdfGrFrameSet_t *);
 extern void sdfGrGsReset(void);
 extern void sdfGrDrawFrame(void);
