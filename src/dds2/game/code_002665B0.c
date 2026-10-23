@@ -539,7 +539,8 @@ void mnuReleaseSelectedProgressPanel(MenuSlotState *host) {
     mnuRemoveListCursorNode(host->progressList);
 }
 
-extern void mnuDrawEligibleTerminalSlotEntry();
+extern void mnuDrawEligibleTerminalSlotEntry(s32 x, s32 y, s32 unused, MenuList *list,
+                                             MenuListNode *node, s32 priority);
 extern u32 mnuBlendListNodeColorByFlags(u32, MenuListNode *);
 void mnuDrawEligibleTerminalSlotEntry(s32 x, s32 y, s32 unused, MenuList *list, MenuListNode *node, s32 priority) {
     s32 width = list->scale;
