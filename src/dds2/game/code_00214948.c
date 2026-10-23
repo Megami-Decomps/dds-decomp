@@ -6594,7 +6594,7 @@ void btlChooseBrahmaMoveCamera(BtlLinkedCommand *command) {
     }
 }
 
-u32 btlApplySingleTargetCameraOffset(BtlLinkedCommand *unit) {
+s32 btlApplySingleTargetCameraOffset(BtlLinkedCommand *unit) {
     ActionStateLink *actor = unit->link;
     BtlUnit *owner = actor->unit;
     if (owner->status.flags & 0x200) {
@@ -6941,7 +6941,7 @@ void btlSetRaisedActionFixedCamera(u32 unit) {
                     -0.141f, -0.004f, 0.979f, 40.0f);
 }
 
-u32 btlRaiseSingleTargetCameraPoints(BtlLinkedCommand *unit) {
+s32 btlRaiseSingleTargetCameraPoints(BtlLinkedCommand *unit) {
     ActionStateLink *actor = unit->link;
     BtlUnit *owner = actor->unit;
     if (owner->status.flags & 0x200) {
@@ -7570,7 +7570,7 @@ s32 btlUpdateSatanDefeatCamera(BtlLinkedCommand *command, BtlCamState *camera, s
 
 /* For a group-0x200 owner with one group-0x400 target, mark defeat candidates
  * and clear the action transition. Other owner/target combinations do nothing. */
-u32 btlTryTransitionSingleTargetAction(BtlLinkedCommand *unit) {
+s32 btlTryTransitionSingleTargetAction(BtlLinkedCommand *unit) {
     ActionStateLink *actor = unit->link;
     BtlUnit *owner = actor->unit;
     if (owner->status.flags & 0x200) {

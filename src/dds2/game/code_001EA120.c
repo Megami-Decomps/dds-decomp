@@ -1041,7 +1041,7 @@ void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
     category = btlMapActorCategory(action);
     if (category > 0 && category == action->stageCount++) {
         btlClearRuntimeFlag2000();
-        if (work->unk658 != 0 && work->unk658((BtlUnit *)action) != 0) {
+        if (work->timedCameraFinishHook != 0 && work->timedCameraFinishHook(action) != 0) {
             return;
         }
         if (btlIsSpecialActorCategory((s32)action) != 0) {

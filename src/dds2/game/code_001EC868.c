@@ -471,10 +471,10 @@ extern void btlInitializeActorClearanceCameraPair(BtlLinkedCommand *, BtlCamStat
 void btlRunDefaultActionPoseUnlessHooked(void *actor);
 
 /* Run the timed camera setup hook; return its result, or zero when unset. */
-s32 btlRunTimedCameraSetupHook(BtlUnit *unit);
+s32 btlRunTimedCameraSetupHook(BtlLinkedCommand *action);
 
 /* Run the timed camera finish hook; return its result, or zero when unset. */
-s32 btlRunTimedCameraFinishHook(BtlUnit *unit);
+s32 btlRunTimedCameraFinishHook(BtlLinkedCommand *action);
 
 extern f32 fabsf(f32);
 extern f32 btlUnitGetBottomY(BtlUnit *);
@@ -4735,8 +4735,7 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
         case 39:
             if (instruction->startFrame <= (f32)CURSOR->frame &&
                 (f32)CURSOR->frame < instruction->startFrame + instruction->duration) {
-                /* Legacy typed hook transports this command address unchanged. */
-                if (btlRunTimedCameraSetupHook((BtlUnit *)action) != 0) {
+                if (btlRunTimedCameraSetupHook(action) != 0) {
                     CURSOR->busy = 1;
                 }
             }
@@ -4750,8 +4749,7 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
         case 43:
             if (instruction->startFrame <= (f32)CURSOR->frame &&
                 (f32)CURSOR->frame < instruction->startFrame + instruction->duration) {
-                /* Legacy typed hook transports this command address unchanged. */
-                if (btlRunTimedCameraFinishHook((BtlUnit *)action) != 0) {
+                if (btlRunTimedCameraFinishHook(action) != 0) {
                     CURSOR->busy = 1;
                 }
             }
