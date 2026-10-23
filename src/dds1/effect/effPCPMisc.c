@@ -4378,12 +4378,14 @@ void effPCPRingPolyExp2SetRotateMatrix(EffPCPBeamLargeWork *work, void *src) {
 
 EffPCPGroupSet *effPCPRadiateThunderCreate(EffPCPGroupHead *header, void **sourceResources) {
     u32 entryCount = header->count;
-    struct sdfMemHandle_t *workResource = sdfMemAllocDirect(entryCount * 0x18 + 0x180);
-    EffPCPGroupSet *groupSet = (void *)sdfMemLock(workResource);
+    struct sdfMemHandle_t *workResource;
+    EffPCPGroupSet *groupSet;
     EffPCPGroupEntry *groupEntryCursor;
     u32 index;
     u32 duplicateIndex;
 
+    workResource = sdfMemAllocDirect(sizeof(*groupSet) + entryCount * sizeof(*groupEntryCursor));
+    groupSet = (void *)sdfMemLock(workResource);
     groupSet->head = *header;
     groupSet->scale = 1.0f;
     groupSet->color = 0x80808080;
