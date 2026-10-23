@@ -21,6 +21,7 @@
 #include "sdf_thread.h"
 #include "sdf_thread_sleep.h"
 #include "mnu_title_stream.h"
+#include "mnu_title_sound.h"
 #include "mnu_title_stream_status_snapshot.h"
 #include "mnu_title_stream_entry.h"
 
@@ -606,7 +607,7 @@ void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex) {
 /* Install an in-memory ATRAC stream and configure the decoder for its frame
  * format while holding the shared sound-buffer semaphore. The native code
  * has no default-format guard or buffer-capacity check. */
-void mnuInstallTitleSoundBufferFromData(void *compressedData, s32 dataBytes, s32 format) {
+void mnuInstallTitleSoundBufferFromData(const void *compressedData, s32 dataBytes, s32 format) {
     struct sdfMemHandle_t *allocation = NULL;
     u8 *bufferAddress;
     s32 frameCount;
