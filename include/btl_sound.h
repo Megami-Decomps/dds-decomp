@@ -312,6 +312,20 @@ typedef struct SoundDataFileArgs {
 typedef char SoundDataFileArgs_size_must_be_4[
     (sizeof(SoundDataFileArgs) == 4) ? 1 : -1];
 
+/* Fixed payload queued by the skill-sound retry task. */
+typedef struct SkillSeTaskArgs {
+    u32 packedTrackPosition;
+    u16 optionId;
+    u8 pad06[2];
+} SkillSeTaskArgs;
+
+typedef char SkillSeTaskArgs_size_must_be_8[
+    (sizeof(SkillSeTaskArgs) == 8) ? 1 : -1];
+typedef char SkillSeTaskArgs_optionId_offset_must_be_4[
+    ((u32)&((SkillSeTaskArgs *)0)->optionId == 4) ? 1 : -1];
+
+s32 sndPlaySkillSeTask(SkillSeTaskArgs *args);
+
 /* Fixed header followed by the copied filename in sound MotSE load tasks. */
 typedef struct SoundFileTaskArgs {
     ActiveSoundNode *node; /* 0x00: sound-list owner; file-load view is shared. */

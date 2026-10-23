@@ -396,7 +396,7 @@ extern s32 sndFindPackedTrackLoadStatus(u32);
 extern s64 btlForceSceneLightingRestore(SceneLightRestoreArgs *);
 
 
-extern s32 sndPlaySkillSeTask(u32 *);
+extern s32 sndPlaySkillSeTask(SkillSeTaskArgs *);
 
 extern BtlActionAnimationRecord *datActionAnimationRecords;
 

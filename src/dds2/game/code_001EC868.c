@@ -176,7 +176,7 @@ extern s64 btlForceSceneLightingRestore(SceneLightRestoreArgs *);
 
 extern s64 btlForceReleaseTintTransition(const BtlTintReleaseArgs *args);
 
-extern s32 sndPlaySkillSeTask(u32 *);
+extern s32 sndPlaySkillSeTask(SkillSeTaskArgs *);
 
 extern SoundResourceNode *sndAllocResourceNode(void);
 
@@ -9116,26 +9116,25 @@ s32 sndHasFlaggedActiveNode(void) {
     return 0;
 }
 
-s32 sndPlaySkillSeTask(u32 *taskArgs) {
-    u8 *taskData = (u8 *)taskArgs;
+s32 sndPlaySkillSeTask(SkillSeTaskArgs *args) {
     BtlState *work = (BtlState *)btlGetRuntime();
     u32 value;
 
-    if (*(u16 *)(taskData + 4) == 2 && work->skillSeLoadFrame < 6) {
+    if (args->optionId == 2 && work->skillSeLoadFrame < 6) {
         btlBossDebugPrintf("btl:skill SE ignore[frame:%d]\n", work->skillSeLoadFrame);
         return 1;
     }
     work->skillSeLoadFrame = 0;
-    if (sndFindPackedTrackLoadStatus(*(u32 *)taskData) != 0) {
-        switch (*(u16 *)(taskData + 4)) {
+    if (sndFindPackedTrackLoadStatus(args->packedTrackPosition) != 0) {
+        switch (args->optionId) {
         case 1:
-            value = *(u32 *)taskData;
+            value = args->packedTrackPosition;
             break;
         case 2:
-            value = *(u32 *)taskData | 1;
+            value = args->packedTrackPosition | 1;
             break;
         case 3:
-            value = *(u32 *)taskData | 1;
+            value = args->packedTrackPosition | 1;
             break;
         default:
             value = 0;
@@ -9145,19 +9144,19 @@ s32 sndPlaySkillSeTask(u32 *taskArgs) {
         btlBossDebugPrintf("btl:sound skillSE play[%X-%X]\n", value >> 16, value & 0xFFFF);
         return 1;
     }
-    btlBossDebugPrintf("btl:sound load wait[%X]\n", *(u16 *)(taskData + 2));
+    btlBossDebugPrintf("btl:sound load wait[%X]\n", args->packedTrackPosition >> 16);
     return 0;
 }
 
 BtlRuntimeTask *sndCreateSkillSeTask(const ActiveSoundNode *node, u16 optionId) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    BtlRuntimeTaskArgs *args;
+    SkillSeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x57;
     task->callback = sndPlaySkillSeTask;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = btlGetTaskArguments(task);
-    args->value = node->packedTrackPosition;
+    args->packedTrackPosition = node->packedTrackPosition;
     args->optionId = optionId;
     return task;
 }
