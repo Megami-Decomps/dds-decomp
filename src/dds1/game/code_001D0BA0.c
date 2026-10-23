@@ -1569,27 +1569,33 @@ u8 *btlCreateActorSoundOptionTask(BtlUnit *actor, s32 option) {
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 /* Consume one item when its table flag 4 is set, then signal task completion. */
-u32 btlConsumeFlaggedCommandItem(s32 argumentAddress) {
-    if ((datItemSkillRecords[*(s32 *)(argumentAddress + 4)].useFlags & 4) != 0) {
-        ptyAdjustItemQuantity(*(s32 *)(argumentAddress + 4), 0xffffffffffffffff);
+typedef struct {
+    BtlUnit *actor;
+    s32 itemId;
+} BtlCommandItemWork;
+
+u32 btlConsumeFlaggedCommandItem(BtlCommandItemWork *work) {
+    s32 itemId = work->itemId;
+    if ((datItemSkillRecords[itemId].useFlags & 4) != 0) {
+        ptyAdjustItemQuantity(itemId, 0xffffffffffffffff);
     }
     return 1;
 }
 
 /* Queue an actor/item argument pair for conditional inventory consumption. */
-u8 *btlCreateFlaggedCommandItemConsumeTask(s32 actorAddress, s32 itemId) {
+u8 *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *actor, s32 itemId) {
     u8 *task = btlAllocTask(8);
-    u32 *data;
+    BtlCommandItemWork *data;
 
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x4D;
     *(void **)(task + 0x4C) = btlConsumeFlaggedCommandItem;
-    *(u64 *)(task + 0x40) = *(u64 *)(actorAddress + 0x108);
+    *(u64 *)(task + 0x40) = actor->identity;
     *(s32 *)(task + 0x48) = 0;
-    data = btlGetTaskArguments(task);
-    data[0] = (u32)actorAddress;
-    data[1] = (u32)itemId;
+    data = (BtlCommandItemWork *)btlGetTaskArguments(task);
+    data->actor = actor;
+    data->itemId = itemId;
     return task;
 }
 
