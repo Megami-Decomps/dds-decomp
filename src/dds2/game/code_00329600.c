@@ -164,7 +164,7 @@ void sdfMemUnlock(sdfMemHandle_t *allocation) {
 }
 
 /* The address must belong to an existing used block: the end-marker path does not end this scan. */
-sdfMemHandle_t *sdfMemGetHandleByPtr(void *address) {
+sdfMemHandle_t *sdfMemGetHandleByPtr(const void *address) {
     SdfMemHeap *heap = &sdfMemCB;
     sdfMemHandle_t *block;
     s32 interruptsDisabled;
