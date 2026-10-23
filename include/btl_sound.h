@@ -142,7 +142,7 @@ typedef struct SoundResourceNode {
     u32 activeCount; /* 0x08: timed effects still using this resource. */
     s32 fadeCountdown;
     SoundMixer *resourceHandle; /* Owned clone, released by sndFreeResourceNode. */
-    void *sourceHandle; /* Borrowed archive data kept by indexed nodes. */
+    SoundMixer *sourceHandle; /* Borrowed archive mixer data; clones own resourceHandle. */
     struct SoundResourceNode *previous;
     struct SoundResourceNode *next;
 } SoundResourceNode;
