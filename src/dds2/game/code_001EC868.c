@@ -8919,9 +8919,8 @@ void sndLoadSysEffLb(void) {
     while (node != NULL) {
         if (D_003BDE18[i].enabled != 0) {
             u32 unk08 = (u32)node->resourceHandle;
-            u32 unk0C = (u32)node->dataCursor;
             D_003BDE18[i].opaque08 = unk08;
-            D_003BDE18[i].archiveData = unk0C;
+            D_003BDE18[i].archiveData = node->dataCursor;
             node = node->next;
         } else {
             D_003BDE18[i].archiveData = 0;
@@ -8944,8 +8943,7 @@ void btlRefreshSoundEntries(void) {
     btlGetRuntime();
     for (i = 0; i < BTL_SOUND_ENTRY_COUNT; i++) {
         if (D_003BDE18[i].archiveData != 0) {
-            /* Bank entries retain their original data-address word representation. */
-            btlCreateIndexedSoundResourceNode(i, (void *)D_003BDE18[i].archiveData);
+            btlCreateIndexedSoundResourceNode(i, D_003BDE18[i].archiveData);
         }
     }
 }
@@ -8982,7 +8980,7 @@ SoundHandleNode *sndCreateSystemEffectHandle(struct dds3ModelHandle_t *actor, s3
     SoundHandleNode *node = sdfAllocAndClearQuadwords(sizeof(*node));
     BattleSoundArchiveEntry *entry = &D_003BDE18[index];
     node->actor = actor;
-    node->queue = fileCloneQueueEntries((struct FileQueue *)entry->archiveData);
+    node->queue = fileCloneQueueEntries(entry->archiveData);
     return node;
 }
 

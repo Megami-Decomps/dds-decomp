@@ -8,11 +8,11 @@
 
 enum { BTL_SOUND_ENTRY_COUNT = 0x31 };
 
-/* One SYSEFF archive slot. The loader tests enabled, stores the archive data
- * word from node+0x0C, and retains node+0x08 without interpreting it. */
+/* One SYSEFF archive slot. The loader tests enabled, stores the archive payload
+ * pointer from node+0x0C, and retains node+0x08 without interpreting it. */
 typedef struct BattleSoundArchiveEntry {
     u32 enabled;       /* +0x00: nonzero rows consume one archive node. */
-    u32 archiveData;   /* +0x04: archive data address, kept as a 32-bit word. */
+    void *archiveData; /* +0x04: borrowed archive payload; opaque08 retains other metadata. */
     u32 opaque08;      /* +0x08: copied archive metadata; role not established. */
 } BattleSoundArchiveEntry;
 
