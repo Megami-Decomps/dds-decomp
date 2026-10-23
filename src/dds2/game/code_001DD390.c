@@ -2351,8 +2351,8 @@ void btlDumpTaskQueue(void) {
         btlBossDebugPrintf("btl:packet[%d]\n", ((BtlRuntimeTask *)node)->taskId);
         node = (s32)((BtlRuntimeTask *)node)->next;
     }
-    btlBossDebugPrintf("btl:packet head[%p]\n", *(void **)(context + 0x250));
-    btlBossDebugPrintf("btl:packet tail[%p]\n", *(void **)(context + 0x254));
+    btlBossDebugPrintf("btl:packet head[%p]\n", ((BtlState *)context)->taskTail);
+    btlBossDebugPrintf("btl:packet tail[%p]\n", ((BtlState *)context)->taskHead);
 }
 
 void btlInitUnitFxDefaults(BtlUnit *unit) {
