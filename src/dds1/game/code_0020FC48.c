@@ -418,8 +418,8 @@ void btlReleaseEventAssets(void) {
     btlBossDebugPrintf(D_003A6838);
 }
 
-extern u8 *btlFindUnitByModeClear(s32);
-extern u8 *btlFindUnitByModeFlagged(s32);
+extern BtlUnit *btlFindUnitByModeClear(s32);
+extern BtlUnit *btlFindUnitByModeFlagged(s32);
 
 /* Select a unit and event-resource key from script parameters.
  * Missing/inactive units or missing resources leave state untouched;
@@ -428,18 +428,18 @@ s32 btlCommandSelectEventAction(void) {
     s32 modeSelector = scrGetIntPara(0);
     s32 unitId = scrGetIntPara(1);
     s32 actionKey = scrGetIntPara(2);
-    u8 *selectedUnit;
+    BtlUnit *selectedUnit;
     BtlState *battleState;
     void *actionResource;
     if (modeSelector == 0) {
-        selectedUnit = (u8 *)btlFindUnitByModeClear(unitId);
+        selectedUnit = btlFindUnitByModeClear(unitId);
     } else {
-        selectedUnit = (u8 *)btlFindUnitByModeFlagged(unitId);
+        selectedUnit = btlFindUnitByModeFlagged(unitId);
     }
     if (selectedUnit == 0) {
         return 1;
     }
-    if ((((BtlUnit *)selectedUnit)->status.flags & 2) == 0) {
+    if ((selectedUnit->status.flags & 2) == 0) {
         return 1;
     }
     battleState = (BtlState *)btlGetRuntime();
@@ -448,7 +448,7 @@ s32 btlCommandSelectEventAction(void) {
         return 1;
     }
     battleState->eventResult = actionResource;
-    battleState->eventUnit = (BtlUnit *)selectedUnit;
+    battleState->eventUnit = selectedUnit;
     battleState->eventAction = actionKey;
     battleState->eventActive = 1;
     return 1;
@@ -483,9 +483,9 @@ s32 btlCommandWaitEventSoundDeadline(void) {
 
 extern s32 scrGetIntPara(s32);
 
-extern u8 *btlFindUnitByModeClear(s32);
+extern BtlUnit *btlFindUnitByModeClear(s32);
 
-extern u8 *btlFindUnitByModeFlagged(s32);
+extern BtlUnit *btlFindUnitByModeFlagged(s32);
 
 extern void *btlCreateModelChangeTask(void *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, s32 transitionMode);
 
@@ -494,7 +494,7 @@ s32 btlOpStartSelectedUnitModelChange(void) {
     s32 unitIndex = scrGetIntPara(1);
     s32 first = scrGetIntPara(2);
     s32 second = scrGetIntPara(3);
-    u8 *unit;
+    BtlUnit *unit;
     if ((u32)unitIndex >= 0x180) {
         return 1;
     }
@@ -527,9 +527,9 @@ s32 btlCommandStartSlotMotion(void) {
     BtlUnit *unit;
 
     if (choice == 0) {
-        unit = (BtlUnit *)btlFindUnitByModeClear(unitIndex);
+        unit = btlFindUnitByModeClear(unitIndex);
     } else {
-        unit = (BtlUnit *)btlFindUnitByModeFlagged(unitIndex);
+        unit = btlFindUnitByModeFlagged(unitIndex);
     }
     if (unit == NULL) {
         return 1;

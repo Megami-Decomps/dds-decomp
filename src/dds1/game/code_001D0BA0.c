@@ -5136,26 +5136,22 @@ s32 btlIsActiveActor(BtlUnit *candidate) {
     return 0;
 }
 
-s32 btlFindUnitByModeClear(s32 unitId) {
-    s32 node = *(s32 *)((u8 *)btlGetRuntime() + 0x228);
-
-    while (node != 0) {
-        if (((*(u16 *)(node + 0x120) & 0x20) == 0) && (*(u16 *)(node + 0x124) == unitId)) {
-            return node;
+BtlUnit *btlFindUnitByModeClear(s32 unitId) {
+    BtlUnit *unit;
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->next) {
+        if (!(unit->partyRecord.flags & 0x20) && unit->partyRecord.unitId == unitId) {
+            return unit;
         }
-        node = *(s32 *)(node + 0x344);
     }
     return 0;
 }
 
-s32 btlFindUnitByModeFlagged(s32 unitId) {
-    s32 node = *(s32 *)((u8 *)btlGetRuntime() + 0x228);
-
-    while (node != 0) {
-        if (((*(u16 *)(node + 0x120) & 0x20) != 0) && (*(u16 *)(node + 0x124) == unitId)) {
-            return node;
+BtlUnit *btlFindUnitByModeFlagged(s32 unitId) {
+    BtlUnit *unit;
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->next) {
+        if ((unit->partyRecord.flags & 0x20) && unit->partyRecord.unitId == unitId) {
+            return unit;
         }
-        node = *(s32 *)(node + 0x344);
     }
     return 0;
 }
