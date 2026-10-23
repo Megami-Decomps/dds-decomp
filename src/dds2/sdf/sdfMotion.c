@@ -360,8 +360,8 @@ void sdfMotInterpolateKeyXYZ(SdfMotionKeyInterval *interval) {
 }
 
 /* vu0 routine: blend the two bracketing RGBA colour keys by the key weight. */
-s32 sdfMotInterpolateKeyColor(SdfMotionKeyInterval *interval) {
-    s32 color;
+u32 sdfMotInterpolateKeyColor(SdfMotionKeyInterval *interval) {
+    u32 color;
 
     EE_MMI_RGBA_LERP(color, *(u32 *)interval->firstKey, *(u32 *)interval->secondKey, interval->weight, 0.5f);
     return color;
@@ -654,8 +654,8 @@ void sdfMotCLBK_matDiffuseSeek(SdfMotionIndexedValueBinding *binding, f32 frame)
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
 void sdfMotCLBK_matDiffuseBlendSeek(SdfMotionIndexedValueBinding *binding, f32 frame, f32 weight) {
     SdfMotionKeyInterval keyInterval;
-    s32 key;
-    s32 color;
+    u32 key;
+    u32 color;
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     key = sdfMotInterpolateKeyColor(&keyInterval);
@@ -684,8 +684,8 @@ void sdfMotCLBK_matAmbientSeek(SdfMotionIndexedValueBinding *binding, f32 frame)
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
 void sdfMotCLBK_matAmbientBlendSeek(SdfMotionIndexedValueBinding *binding, f32 frame, f32 weight) {
     SdfMotionKeyInterval keyInterval;
-    s32 key;
-    s32 color;
+    u32 key;
+    u32 color;
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     key = sdfMotInterpolateKeyColor(&keyInterval);
@@ -714,8 +714,8 @@ void sdfMotCLBK_matSpecularSeek(SdfMotionIndexedValueBinding *binding, f32 frame
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
 void sdfMotCLBK_matSpecularBlendSeek(SdfMotionIndexedValueBinding *binding, f32 frame, f32 weight) {
     SdfMotionKeyInterval keyInterval;
-    s32 key;
-    s32 color;
+    u32 key;
+    u32 color;
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     key = sdfMotInterpolateKeyColor(&keyInterval);
@@ -744,8 +744,8 @@ void sdfMotCLBK_matRefMapSeek(SdfMotionIndexedValueBinding *binding, f32 frame) 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
 void sdfMotCLBK_matRefMapBlendSeek(SdfMotionIndexedValueBinding *binding, f32 frame, f32 weight) {
     SdfMotionKeyInterval keyInterval;
-    s32 key;
-    s32 color;
+    u32 key;
+    u32 color;
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     key = sdfMotInterpolateKeyColor(&keyInterval);
@@ -874,8 +874,8 @@ void sdfMotCLBK_matMultiDiffuseSeek(SdfMotionIndexedValueBinding *binding, f32 f
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
 void sdfMotCLBK_matMultiDiffuseBlendSeek(SdfMotionIndexedValueBinding *binding, f32 frame, f32 weight) {
     SdfMotionKeyInterval keyInterval;
-    s32 key;
-    s32 color;
+    u32 key;
+    u32 color;
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     key = sdfMotInterpolateKeyColor(&keyInterval);
