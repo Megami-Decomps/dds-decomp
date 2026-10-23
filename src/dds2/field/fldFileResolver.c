@@ -164,7 +164,7 @@ extern void dds3EffectObjectBasicStatOff(dds3Basic_t *, u32);
 extern void dds3EffectObjectBasicSetFldEx(dds3Basic_t *, BillConfig *);
 extern dds3Basic_t *dds3AddLightObjectBasic(s32);
 extern dds3Basic_t *dds3AddPathBasic(s32 key, void *work, const char *name);
-extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, s32, s32, s32);
+extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, const f32 *, const char *);
 extern void dds3GetRadiusPoseSet(dds3Basic_t *, f32);
 extern void dds3SetLightObjectResoruce(dds3Basic_t *, WorldTransformSetup *);
 extern void fldMakePlane(FldCollisionDescriptor *geometry, f32 *translation,
@@ -345,7 +345,7 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
                     s32 room = fldCommand_GetHojiID((char *)resource->name);
                     fldMakePlane(((FldSpawnCollision *)resource->data)->header, position,
                                   resource->id, room, -1);
-                    spawnedObject = dds3AddModelRangeBasicNew(resource->id, (s32)resource->data, (s32)position, (s32)resource->name);
+                    spawnedObject = dds3AddModelRangeBasicNew(resource->id, resource->data, position, resource->name);
                     dds3SetPathBasicSpline(spawnedObject, pathIndex);
                 }
             }
@@ -720,7 +720,7 @@ extern s16 D_00389874[];
 extern s32 fldCommand_GetHojiID(char *);
 extern void fldMakePlane(FldCollisionDescriptor *geometry, f32 *translation,
                                                u32 id, s32 sceneFlag, s32 ownerIndex);
-extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, s32, s32, s32);
+extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, const f32 *, const char *);
 extern void dds3SetPathBasicSpline(dds3Basic_t *path, u32 value);
 extern dds3Basic_t *dds3AddEventBasic(s32 key, void *work, const char *name);
 extern dds3Basic_t *dds3AddPathBasic(s32 key, void *work, const char *name);
@@ -803,8 +803,8 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                     room = fldCommand_GetHojiID((char *)spawnResource->name);
                     fldMakePlane(((FldSpawnCollision *)spawnResource->data)->header,
                                  position, spawnResource->id, room, -1);
-                    spawnedObject = dds3AddModelRangeBasicNew(spawnResource->id, (s32)spawnResource->data,
-                                              (s32)position, (s32)spawnResource->name);
+                    spawnedObject = dds3AddModelRangeBasicNew(spawnResource->id, spawnResource->data,
+                                              position, spawnResource->name);
                     dds3SetPathBasicSpline(spawnedObject, pathState);
                 }
             }
