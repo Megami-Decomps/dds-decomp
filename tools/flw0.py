@@ -11,7 +11,6 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import shlex
 import struct
 import sys
 from dataclasses import dataclass, replace
@@ -20,6 +19,8 @@ from typing import Iterable
 
 import flw0_profiles
 import msg1
+
+import source_tokens
 
 
 HEADER_SIZE = 0x20
@@ -905,7 +906,7 @@ def _key_values(tokens: list[str], line_number: int) -> dict[str, str]:
 
 def _tokens(line: str, line_number: int) -> list[str]:
     try:
-        return shlex.split(line, comments=True)
+        return source_tokens.split(line)
     except ValueError as exc:
         raise Flw0Error(f"line {line_number}: {exc}") from exc
 

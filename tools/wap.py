@@ -5,11 +5,12 @@ from __future__ import annotations
 
 import argparse
 import json
-import shlex
 import struct
 import sys
 from dataclasses import dataclass, replace
 from pathlib import Path
+
+import source_tokens
 
 
 ELEVATOR_SIZE = 0x20
@@ -328,7 +329,7 @@ def encode(wap: WapFile) -> bytes:
 
 def _tokens(line: str, line_number: int) -> list[str]:
     try:
-        return shlex.split(line, comments=True, posix=True)
+        return source_tokens.split(line)
     except ValueError as exc:
         raise WapError(f"line {line_number}: {exc}") from exc
 

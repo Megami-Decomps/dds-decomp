@@ -35,6 +35,7 @@ MODULES = [
     "test_include_rodata",
     "test_lb",
     "test_m2ctx",
+    "test_source_tokens",
 ]
 BATCH = 4
 
