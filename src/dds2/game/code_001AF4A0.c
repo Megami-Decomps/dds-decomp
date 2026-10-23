@@ -112,7 +112,7 @@ extern EncBgRow *D_00435E14;
 extern s32 fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter);
 
 typedef char BtlStateTotalApDds2OffsetCheck[
-    ((u32)&((BtlState *)0)->unk2F8 == 0x2F8) ? 1 : -1];
+    ((u32)&((BtlState *)0)->totalAp == 0x2F8) ? 1 : -1];
 typedef char BtlStateCommandRangeOverrideDds2OffsetCheck[
     ((u32)&((BtlState *)0)->commandRangeOverride == 0x6DC) ? 1 : -1];
 
