@@ -3101,7 +3101,7 @@ void btlSetUnitRotation(BtlUnit *object, const f32 rotation[4]) {
     }
 }
 
-void btlCopyUnitRotationQuaternion(BtlUnit *unit, void *dst) {
+void btlCopyUnitRotationQuaternion(BtlUnit *unit, f32 dst[4]) {
     SDF_VU0_COPYVECTOR(dst, unit->orientation);
 }
 

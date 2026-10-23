@@ -10294,7 +10294,7 @@ extern void btlClearAllUnitDefeatCandidates(void);
 extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 extern void btlFlagAllUnitsDefeatCandidate(void);
 extern void btlFlagUnitDefeatCandidate(BtlUnit *);
-extern void btlCopyUnitRotationQuaternion(BtlUnit *, void *);
+extern void btlCopyUnitRotationQuaternion(BtlUnit *, f32 dst[4]);
 extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *, f32);
 extern f32 D_00437E90;
 extern u128 D_003E9F60, D_003E9F70, D_003E9F80, D_003E9F90, D_003E9FA0;

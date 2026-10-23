@@ -5946,7 +5946,7 @@ extern void dspRequestMessageWindowModeOne(void);
 extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
 extern u64 btlStartTask(void *);
 extern void btlCopyUnitCurrentPosition(void *, f32 *);
-extern void btlCopyUnitRotationQuaternion(BtlUnit *, void *);
+extern void btlCopyUnitRotationQuaternion(BtlUnit *, f32 dst[4]);
 extern void btlSetCommandPanelFadeMode(s8, s32);
 extern s32 fclDestroyMessage(void);
 extern BtlRuntimeTask *btlCreateFloatTask29(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);

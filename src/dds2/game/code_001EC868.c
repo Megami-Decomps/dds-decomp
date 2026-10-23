@@ -375,7 +375,7 @@ s32 btlCanUseLinkedActor(BtlLinkedCommand *actor);
 void btlClearUnitDefeatCandidate(BtlUnit *unit);
 
 
-void btlCopyUnitRotationQuaternion(BtlUnit *unit, void *dst);
+void btlCopyUnitRotationQuaternion(BtlUnit *unit, f32 dst[4]);
 
 void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *command);
 
