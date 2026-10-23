@@ -111,7 +111,7 @@ extern s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *);
 
 extern s32 btlBuildUnitIndexList(void *, BtlIndexList *, s32, s32, s32);
 
-extern s32 btlUnitHasNegativeActionQueryResult(void *unit, s32 mask);
+extern s32 btlUnitHasNegativeActionQueryResult(BtlUnit *unit, s32 mask);
 
 extern s8 D_00419C30[];
 
@@ -1157,7 +1157,7 @@ s32 btlElementToBitIndex(s32 mask, s32 elementIndex) {
     return -1;
 }
 
-s32 btlUnitHasNegativeActionQueryResult(void *unit, s32 mask) {
+s32 btlUnitHasNegativeActionQueryResult(BtlUnit *unit, s32 mask) {
     s32 i;
     s32 value;
     if (mask & 0x100000) {
@@ -1616,4 +1616,3 @@ const s32 btlElementMasks[20] = {
 INCLUDE_RODATA(const s32, "game/code_00211360", D_00419C30);
 
 INCLUDE_RODATA(const s32, "game/code_00211360", D_00419C58);
-

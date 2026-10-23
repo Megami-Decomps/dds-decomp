@@ -1058,7 +1058,7 @@ s32 btlElementToBitIndex(s32 mask, s32 elementIndex) {
 
 extern s32 btlGetUnitElementAffinity(BtlUnit *, s32);
 
-s32 btlUnitHasNegativeActionQueryResult(void *unit, s32 mask) {
+s32 btlUnitHasNegativeActionQueryResult(BtlUnit *unit, s32 mask) {
     s32 i;
     s32 value;
     if (mask & 0x100000) {
@@ -1086,7 +1086,7 @@ s32 btlUnitHasNegativeActionQueryResult(void *unit, s32 mask) {
     return 0;
 }
 
-extern s32 btlUnitHasNegativeActionQueryResult(void *unit, s32 mask);
+extern s32 btlUnitHasNegativeActionQueryResult(BtlUnit *unit, s32 mask);
 
 s32 btlAnyEnemyHasNegativeActionResult(s32 unused, s32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
@@ -1468,4 +1468,3 @@ INCLUDE_RODATA(const s32, "game/code_001FF0C8", btlElementMasks);
 INCLUDE_RODATA(const s32, "game/code_001FF0C8", D_003A5A80);
 
 INCLUDE_RODATA(const s32, "game/code_001FF0C8", D_003A5AA8);
-
