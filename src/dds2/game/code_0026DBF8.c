@@ -29,6 +29,8 @@ extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 #include "evt_world.h"
 #include "itf.h"
 
+typedef struct MnuStatusResource MnuStatusResource;
+
 #define MNU_MANTRA_DRAW_ITEM_BYTES 0x24
 #define MNU_MANTRA_DRAW_POOL_HEADER_BYTES 0xC
 #define MNU_MANTRA_DRAW_ACTIVE_FLAG 1
@@ -3867,7 +3869,7 @@ struct MantraPanelPool {
     MantraPanelDraw draw[974];
     MantraPanelInit init[974];
     MantraPanelRelease release[974];
-    s32 unk2DB4;
+    MnuStatusResource *menuOwner;
 };
 
 typedef char MantraPanelPool_size_must_be_0x2DB8[
@@ -3935,7 +3937,7 @@ extern s32 mnuDrawMantraPanelAccentTransition(s32, s32, u32, s32, MantraPanelPoo
 extern s32 mnuDrawMantraFourIconPanelTransition(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 extern s32 mnuDrawFadedMantraDualCyclePanel(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 extern s32 mnuDrawMantraNodeMasteryFlash(s32, s32, s32, s32, s32, u8 *, s32);
-MantraPanelPool *mnuCreateMantraPanelPool(s32 count, s32 userValue) {
+MantraPanelPool *mnuCreateMantraPanelPool(s32 count, MnuStatusResource *menuOwner) {
     MantraPanelInit initCallbacks[14] = {
         (MantraPanelInit)mnuInitMantraPanelCTransition,
         (MantraPanelInit)mnuResetMantraPulsePhase,
@@ -3996,7 +3998,7 @@ MantraPanelPool *mnuCreateMantraPanelPool(s32 count, s32 userValue) {
     pool->handle = (u32)handle;
     pool->items = (MantraPanelAnimation *)((u8 *)pool + 0x2DB8);
     pool->count = count;
-    pool->unk2DB4 = userValue;
+    pool->menuOwner = menuOwner;
 
     for (i = 0; i < 974; i++) {
         pool->draw[i] = drawCallbacks[i];
@@ -4489,8 +4491,6 @@ s32 mnuDrawMantraPanelOrbitingEffect(s32 x, s32 y, s32 z, s32 alpha, MantraPanel
 
 
 /* The full status resource is owned by the menu module. */
-typedef struct MnuStatusResource MnuStatusResource;
-
 extern u16 mnuGetPanelValueAt(MnuStatusResource *, s32);
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425A98);
@@ -4503,7 +4503,7 @@ s32 mnuDrawMantraPanelNodeTransition(s32 x, s32 y, u32 z, s32 alpha, MantraPanel
     s8 markerOffsets[6][2] = {
         {14, -24}, {27, 0}, {14, 24}, {-14, 24}, {-27, 0}, {-14, -24}
     };
-    MnuStatusResource *resource = (MnuStatusResource *)pool->unk2DB4;
+    MnuStatusResource *resource = pool->menuOwner;
     f32 panelFade;
     f32 shardFade;
     f32 shardSpread;
@@ -4931,7 +4931,7 @@ s32 mnuDrawMantraPanelBaseLayer(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool 
     s8 markerOffsets[6][2] = {
         {49, 22}, {69, 32}, {69, 62}, {49, 72}, {29, 62}, {29, 32}
     };
-    MnuStatusResource *resource = (MnuStatusResource *)pool->unk2DB4;
+    MnuStatusResource *resource = pool->menuOwner;
     f32 orbitPhase;
     f32 pulse;
     f32 angle;
@@ -5036,7 +5036,7 @@ s32 mnuDrawMantraPanelNodeReveal(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool
     s8 markerOffsets[6][2] = {
         {49, 22}, {69, 32}, {69, 62}, {49, 72}, {29, 62}, {29, 32}
     };
-    MnuStatusResource *resource = (MnuStatusResource *)pool->unk2DB4;
+    MnuStatusResource *resource = pool->menuOwner;
     f32 fade;
     f32 panelFade;
     f32 ringFade;
@@ -5230,7 +5230,7 @@ s32 mnuDrawMantraNeighborMarkers(s32 x, s32 y, s32 z, s32 alpha, MantraPanelPool
         {49, 72}, {29, 62}, {29, 32}
     };
     MantraPanelAnimation *panel = (MantraPanelAnimation *)object;
-    MnuStatusResource *panelObject = (MnuStatusResource *)pool->unk2DB4;
+    MnuStatusResource *panelObject = pool->menuOwner;
     MantraNodePos **neighbor;
     s32 mask;
     s32 i;
