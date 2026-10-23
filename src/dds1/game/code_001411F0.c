@@ -1000,11 +1000,11 @@ void fldLoadSceneRecordTable(void) {
     fldAutoMapHeader = rows;
 }
 
-void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
+void fldSetSceneRecordChunk(u8 *chunk, struct sdfMemHandle_t *resourceHandle) {
     if (D_0032E3C0[0] < 0xC8) {
         u8 *transferStart = chunk + 8;
 
-        fldAutoMapBuf = (struct sdfMemHandle_t *)(u32)resourceHandle;
+        fldAutoMapBuf = resourceHandle;
         fldAddressResolver(chunk, (FldTransferChunk *)transferStart);
         {
             FldSceneRecordTableHeader *header =

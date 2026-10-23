@@ -1412,7 +1412,7 @@ extern void fldGetDoorEntry(FldWaypointBlock *source);
 
 
 
-extern void fldSetSceneRecordChunk(u8 *chunk, s32 resourceId);
+extern void fldSetSceneRecordChunk(u8 *chunk, struct sdfMemHandle_t *resourceHandle);
 #include "fld_label_cache_api.h"
 
 void fldLoadFieldPack(void) {
@@ -1458,7 +1458,7 @@ void fldLoadFieldPack(void) {
                     (struct sdfMemHandle_t *)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_SCENE_RECORD_CHUNK:
-                fldSetSceneRecordChunk(work->dataCursor, (s32)work->resourceHandle);
+                fldSetSceneRecordChunk(work->dataCursor, work->resourceHandle);
                 break;
             }
         }
