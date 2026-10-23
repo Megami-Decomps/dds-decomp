@@ -1256,7 +1256,7 @@ void btlEnterAutoActionState(void) {
 }
 
 extern void btlDispatchCommandViaHookOrDefault(u8 *command, u8 *argument);
-extern s32 btlIsActiveActor();
+extern s32 btlIsActiveActor(BtlUnit *actor);
 
 extern s32 btlSetEligibleActorPanelTransitionState(void);
 

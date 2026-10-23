@@ -61,7 +61,7 @@ extern s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId);
 extern s32 btlGetStatusActionEffectId(BtlTask *task);
 extern void btlInitUnitFxDefaults(BtlUnit *fx);
 extern void btlInitializeBattleDebugMenu(void);
-extern s32 btlIsActiveActor(s32 candidate);
+extern s32 btlIsActiveActor(BtlUnit *candidate);
 extern s32 btlIsSupportedCommandKind(s32 *state);
 extern void btlRemovePartyActorAndShiftEntries(BtlUnit *unit);
 extern void btlResetActiveUnitList(void);
@@ -828,7 +828,7 @@ void btlChooseActorStateFromFirstLinkedUnit(u8 *actor) {
     }
     model = (BtlUnit *)btlGetIndexListEntry(*(struct BtlIndexList **)(actor + 0x60), 0);
     if (*(u32 *)(actor + 0x20) == 1 &&
-        (btlIsActiveActor((s32)model) == 0 ||
+        (btlIsActiveActor(model) == 0 ||
          (btlUnitStatusPair(model) & 0xE1) != 1)) {
         btlDispatchStateHandler(actor, 26);
     } else {
