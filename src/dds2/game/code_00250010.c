@@ -217,7 +217,7 @@ void evtExitSky(void) {
 extern void fldSetFilterAnime(u32 mode);
 extern void fldSkySetAlpha(u32 drawState);
 extern void fldSkySetAlphaOfs(u32 alpha);
-extern void fldSetFadeTarget();
+extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
 
 s32 evtInitSky(void) {
     fldSetFilterAnime(0);
