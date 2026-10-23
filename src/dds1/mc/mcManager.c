@@ -13,8 +13,8 @@
 /* The SDK's queued requests on an open file: its descriptor, and for a
  * transfer the EE buffer and its size. */
 s32 sceMcClose(s32 fileDescriptor);
-s32 sceMcRead(s32 fileDescriptor, u32 bufferAddress, s32 size);
-s32 sceMcWrite(s32 fileDescriptor, u32 dataAddress, u32 dataSize);
+s32 sceMcRead(s32 fileDescriptor, void *buffer, s32 size);
+s32 sceMcWrite(s32 fileDescriptor, const void *data, s32 size);
 
 
 /* Return 1 only for completed status zero, -1 for other completed statuses.
@@ -176,7 +176,7 @@ McPollResult sdfMcFuncClose1(void) {
 
 /* Queue the SDK's read of an open file into an EE buffer; do not poll it. */
 void sdfMcFuncRead(s32 fileDescriptor, u32 bufferAddress, s32 size) {
-    sceMcRead(fileDescriptor, bufferAddress, size);
+    sceMcRead(fileDescriptor, (void *)bufferAddress, size);
 }
 
 /* Any completed nonnegative status succeeds, but the SDK status is not
@@ -201,7 +201,7 @@ McPollResult sdfMcFuncRead1(void) {
 /* Queue the SDK's write of an EE buffer to an open file; this entry does
  * not report completion. */
 void sdfMcFuncWrite(s32 fileDescriptor, u32 dataAddress, u32 dataSize) {
-    sceMcWrite(fileDescriptor, dataAddress, dataSize);
+    sceMcWrite(fileDescriptor, (const void *)dataAddress, (s32)dataSize);
 }
 
 /* Poll once: any completed nonnegative write status returns 1; -4 becomes
