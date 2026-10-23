@@ -27,6 +27,7 @@ extern EvtFrameTableEntry D_003C9538[];
 
 struct sdfTexHandle_t;
 struct sdfMemHandle_t;
+struct ItfMesSub;
 
 /* The picture-task allocator creates this complete 0x08-byte state. */
 typedef struct EvtPictureWork {
@@ -40,14 +41,15 @@ typedef char EvtPictureWork_drawEnabled_at_0x00[
 typedef char EvtPictureWork_texture_at_0x04[
     ((u32)&((EvtPictureWork *)0)->texture == 0x04) ? 1 : -1];
 
-/* Native resource handle and the loader's corresponding data address. */
+/* Native resource handle and the relocatable message data it owns. */
 typedef struct EvtResourcePair {
     struct sdfMemHandle_t *handle;
-    u32 dataAddress;
+    struct ItfMesSub *messageData;
 } EvtResourcePair;
 
 typedef char EvtResourcePair_size_must_be_0x08[(sizeof(EvtResourcePair) == 0x08) ? 1 : -1];
-typedef char EvtResourcePair_dataAddress_offset_must_be_0x04[((u32)&((EvtResourcePair *)0)->dataAddress == 0x04) ? 1 : -1];
+typedef char EvtResourcePair_messageData_offset_must_be_0x04[
+    ((u32)&((EvtResourcePair *)0)->messageData == 0x04) ? 1 : -1];
 
 /* Loaded resource table header: the resource handle, the origin of a
  * 32-byte-stride record array, and its record count. */

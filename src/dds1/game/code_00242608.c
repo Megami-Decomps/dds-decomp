@@ -1421,7 +1421,7 @@ ShopScene *mnuShopCreateScene(void) {
     mnuShopLoadSpriteAssets(obj);
     mnuInitializeShopStatusBatches(obj);
     evtLoadResourcePair("/facility/msg/shop/mes_data.bmd", &obj->messageResource);
-    fclInitMessage((struct ItfMesSub *)obj->messageResource.dataAddress);
+    fclInitMessage(obj->messageResource.messageData);
     D_003BC520 = obj->spriteResource;
     obj->pendingPriceStage = mnuCampGetShopPriceStage();
     obj->activePartyCount = mnuCountActivePartyEntries();

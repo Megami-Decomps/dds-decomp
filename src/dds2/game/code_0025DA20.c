@@ -1407,7 +1407,7 @@ void mnuShopLoadMessageResource(MenuTerminalContext *scene) {
         evtLoadResourcePair("/facility/msg/shop/mes_04.bmd", &scene->messageResources);
         break;
     }
-    fclInitMessage((struct ItfMesSub *)scene->messageResources.dataAddress);
+    fclInitMessage(scene->messageResources.messageData);
 }
 
 
@@ -4455,4 +4455,3 @@ INCLUDE_SDATA(const s32, "game/code_0025DA20", D_00437840);
 INCLUDE_SDATA(const s32, "game/code_0025DA20", D_00437848);
 
 INCLUDE_SDATA(const s32, "game/code_0025DA20", D_00437850);
-

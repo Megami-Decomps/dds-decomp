@@ -1050,7 +1050,7 @@ MenuSlotState *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     obj->slotCopy = slot;
     mnuTerminalBuildMenus(obj);
     evtLoadResourcePair("/facility/msg/terminal/mes_data.bmd", &obj->messageResources);
-    fclInitMessage((struct ItfMesSub *)obj->messageResources.dataAddress);
+    fclInitMessage(obj->messageResources.messageData);
     for (i = 0; i < MNU_SELECTED_SLOT_COUNT; i++) {
         obj->selectedSlots[i] = -1;
     }
@@ -2333,7 +2333,7 @@ s32 mnuOpenTerminalSelectionMessageWindow(dds3ProcessID_t *task) {
     mnuTerminalSelectSlot(3, 0, state);
     mnuSetTerminalPanelMotionMode(1, (MenuSlotState *)state);
     evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (MenuSlotState *)state);
-    fclInitMessage((struct ItfMesSub *)((MenuSlotState *)state)->messageResources.dataAddress);
+    fclInitMessage(((MenuSlotState *)state)->messageResources.messageData);
     return 1;
 }
 
