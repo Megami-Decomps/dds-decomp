@@ -830,7 +830,7 @@ extern u32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
 extern s32 btlCanUseLinkedActor(BtlLinkedCommand *);
 extern u32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *);
 extern void btlClearAllUnitDefeatCandidatesTask(void);
-extern void btlApplyCombinedActorFlags(u8 *);
+extern void btlApplyCombinedActorFlags(BtlLinkedCommand *);
 extern void btlBuildRandomTargetCameraStates(u8 *, u8 *, u8 *);
 extern void btlBuildFilteredGroupCameraPair(u8 *, u8 *, u8 *);
 extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
@@ -859,7 +859,7 @@ s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 
         if (firstSide == 0 && secondSide == 1) {
             if (btlCanUseActorCategoryFlag4(command) && btlCanUseLinkedActor(command)) {
                 btlClearAllUnitDefeatCandidatesTask();
-                btlApplyCombinedActorFlags((u8 *)command);
+                btlApplyCombinedActorFlags(command);
                 switch (dds3GetRandIntA(0, 2)) {
                 case 0:
                     printf(D_003A6338);
@@ -880,7 +880,7 @@ s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 
             }
             if (choice == 0) {
                 btlClearAllUnitDefeatCandidatesTask();
-                btlApplyCombinedActorFlags((u8 *)command);
+                btlApplyCombinedActorFlags(command);
                 switch (dds3GetRandIntA(0, 2)) {
                 case 0:
                     printf(D_003A6398);

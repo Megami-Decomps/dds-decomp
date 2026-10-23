@@ -366,7 +366,7 @@ extern void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *, BtlCamState 
 
 /* The caller keeps the live count within the allocated capacity. */ void btlAppendIndexListEntry(BtlIndexList *list, BtlUnit *entry);
 
-void btlApplyCombinedActorFlags(u8 *fx);
+void btlApplyCombinedActorFlags(BtlLinkedCommand *command);
 
 void btlBlendUnitColor(BtlUnit *unit, u32 color, s32 mode);
 
@@ -4854,7 +4854,7 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
                 (f32)CURSOR->frame < instruction->startFrame + instruction->duration) {
                 ++instruction;
                 btlClearAllUnitDefeatCandidatesTask();
-                btlApplyCombinedActorFlags((u8 *)action);
+                btlApplyCombinedActorFlags(action);
             } else {
                 ++instruction;
             }

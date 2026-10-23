@@ -6187,13 +6187,13 @@ void btlFlagLinkedGroupDefeatCandidatesTask(s32 action) {
     btlFlagMatchingUnitsDefeatCandidate(((BtlLinkedCommand *)action)->link->unit->status.flags & 0x600);
 }
 
-void btlApplyCombinedActorFlags(u8 *fx) {
+void btlApplyCombinedActorFlags(BtlLinkedCommand *command) {
     u32 i = 0;
     s32 bits = 0;
-    u32 count = btlGetIndexListCount(((BtlLinkedCommand *)fx)->targetList);
+    u32 count = btlGetIndexListCount(command->targetList);
     if (count != 0) {
         do {
-            bits |= ((BtlUnit *)btlGetIndexListEntry(((BtlLinkedCommand *)fx)->targetList, i++))->status.flags & 0x600;
+            bits |= ((BtlUnit *)btlGetIndexListEntry(command->targetList, i++))->status.flags & 0x600;
         } while (i < count);
     }
     if (bits != 0) {
