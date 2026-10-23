@@ -282,7 +282,7 @@ SdfDrawPacket *sdf2DAllocSprite(s32 loopCount) {
 }
 
 /* Emit two matrices and three vectors; also cache the inverse origin in node. */
-void sdf3DMakeViewportPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node, void *transformMatrix) {
+void sdf3DMakeViewportPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node, const void *transformMatrix) {
     packet->quadwords = 0xC;
     packet->command = 0x6C0BC000;
     packet->reservedWord = 0;

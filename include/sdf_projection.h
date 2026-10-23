@@ -60,7 +60,7 @@ void effScreenOffset(void);
 /* Read vector inputs; VU0 forms first minus second and stores second in vf31. */
 void LookAtMatrix(const void *directionPoint, const void *basisOrigin, const void *up);
 struct ConsMatrixPacket;
-extern void sdf3DMakeViewportPacket(struct ConsMatrixPacket *, SdfProjectionRecord *, void *);
+extern void sdf3DMakeViewportPacket(struct ConsMatrixPacket *, SdfProjectionRecord *, const void *);
 extern void sdf3DSetCamera(SdfProjectionRecord *, const void *);
 
 #endif /* SDF_PROJECTION_H */
