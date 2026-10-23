@@ -1601,7 +1601,7 @@ extern s32 btlRemapKartikeyaMotionForLinkedState(BtlUnit *unit, s32 command);
 extern s32 btlGetKartikeyaLinkedMotionStatus(BtlUnit *unit);
 extern u32 btlAllowBrahmanDefeatCandidateSet(u32 unit);
 extern u32 btlAllowBrahmanDefeatCandidateClear(u32 unit);
-extern u32 btlBoostEternalZeroActorEntries(u32 unit, u32 actor, u32 action);
+extern u32 btlBoostEternalZeroActorEntries(BtlUnit *unit, BtlUnit *target, u32 action);
 extern void btlReplacePendingBossUnitAndQueueTasks(ActionStateLink *link);
 extern u8 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate);
 extern s32 btlAdvanceBrahmanTimedActionCamera(BtlLinkedCommand *unit);
