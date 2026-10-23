@@ -524,9 +524,8 @@ s32 btlGetActorBedAssetIdFromIndex(s32 itemIndex) {
 
 extern const char D_003A17A8[];
 
-s32 btlBuildEligibleTargetIndexList(void *actionArg, BtlIndexList *targets,
+s32 btlBuildEligibleTargetIndexList(BtlTask *action, BtlIndexList *targets,
                   s32 area, s32 rule, s32 excludedStatus) {
-    BtlTask *action = (BtlTask *)actionArg;
     BtlUnit *collected[16];
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 alliedArea;
@@ -631,7 +630,7 @@ s32 btlBuildEligibleTargetIndexList(void *actionArg, BtlIndexList *targets,
     return count != 0;
 }
 
-extern s32 btlBuildEligibleTargetIndexList(void *, BtlIndexList *, s32, s32, s32);
+extern s32 btlBuildEligibleTargetIndexList(BtlTask *, BtlIndexList *, s32, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1788);
 

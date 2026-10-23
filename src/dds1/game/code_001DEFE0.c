@@ -75,7 +75,7 @@
 #include "kwln_fade_timing.h"
 #include "btl_camera_setup_policy.h"
 /* Declared before first use (were implicit int). */
-extern s32 btlBuildEligibleTargetIndexList(void *actionArg, BtlIndexList *targets, s32 area, s32 rule, s32 excludedStatus);
+extern s32 btlBuildEligibleTargetIndexList(BtlTask *action, BtlIndexList *targets, s32 area, s32 rule, s32 excludedStatus);
 extern s32 btlGetSelectedUnitProperty(BtlUnit *unit);
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex);
 extern void effBTLFieldColorResetFlags(void);
