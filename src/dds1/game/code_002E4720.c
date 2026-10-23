@@ -1748,7 +1748,7 @@ s32 sdfFileCmdFree(sdfFileCmdHandle_t *state) {
 }
 
 /* Enqueue a one-shot read: negative byte count requests the whole file. */
-sdfFileCmdHandle_t *sdfFileCmdReadFile(const char *path, s32 buffer, s32 byteCount,
+sdfFileCmdHandle_t *sdfFileCmdReadFile(const char *path, void *buffer, s32 byteCount,
                         void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32), s32 callbackContext) {
     char *resolvedPath;
     s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
@@ -1759,14 +1759,14 @@ sdfFileCmdHandle_t *sdfFileCmdReadFile(const char *path, s32 buffer, s32 byteCou
     }
     state = sdfFileCmdNewHandle(resolvedPath, workerIndex, SDF_DEV_OPERATION_READ_BUFFER, callback, callbackContext);
     state->requestExtra = byteCount;
-    state->requestData = (void *)buffer;
+    state->requestData = buffer;
     state->operationArg = 0;
     sdfFileCmdAllocHandle(state);
     return state;
 }
 
 /* Enqueue a one-shot write using the supplied buffer, byte count and creation options. */
-sdfFileCmdHandle_t *sdfFileCmdWriteFile(const char *path, s32 buffer, s32 byteCount,
+sdfFileCmdHandle_t *sdfFileCmdWriteFile(const char *path, void *buffer, s32 byteCount,
                         void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32),
                         s32 callbackContext, s32 options) {
     char *resolvedPath;
@@ -1778,7 +1778,7 @@ sdfFileCmdHandle_t *sdfFileCmdWriteFile(const char *path, s32 buffer, s32 byteCo
     }
     state = sdfFileCmdNewHandle(resolvedPath, workerIndex, SDF_DEV_OPERATION_WRITE_BUFFER, callback, callbackContext);
     state->requestExtra = byteCount;
-    state->requestData = (void *)buffer;
+    state->requestData = buffer;
     state->options = options != 0 ? options : sdfFileCmdDefaultCreateMode;
     state->operationArg = 0;
     sdfFileCmdAllocHandle(state);
