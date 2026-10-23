@@ -69,6 +69,7 @@ enum {
 };
 
 struct BfFlw0Header;
+struct dds3ProcessID_t;
 
 /* The object's 18 per-kind intrusive lists. */
 typedef struct EvtWorldSlot {
@@ -104,8 +105,8 @@ void dds3SetMapNo(dds3Basic_t *worldNode, u32 areaRoomKey);
 s32 dds3GetMapNo(dds3Basic_t *worldNode);
 
 /* Scene resource scripts are selected by name on a world node. The start
- * result is the task-handle word returned by the script task creator. */
-s32 evtStartSceneResourceTask(dds3Basic_t *worldNode, const char *taskName);
+ * result is the scheduler task created for the script, or NULL on failure. */
+struct dds3ProcessID_t *evtStartSceneResourceTask(dds3Basic_t *worldNode, const char *taskName);
 void dds3SceneBasicEndScript(void *unusedContext, const char *taskName);
 
 #endif /* EVT_WORLD_H */
