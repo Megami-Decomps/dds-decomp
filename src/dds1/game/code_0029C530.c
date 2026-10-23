@@ -9525,22 +9525,22 @@ void effUpdateBattleActorLighting(EffActiveResource *work) {
 }
 
 void effSyncLinkedActorChildParameter(void) {
-    u8 *state = (u8 *)btlGetRuntime();
-    u8 *effect;
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlUnit *unit;
 
-    if ((((BtlState *)state)->battleFlags & 0x6000000) == 0) {
+    if ((state->battleFlags & 0x6000000) == 0) {
         return;
     }
-    effect = (u8 *)((BtlState *)state)->units;
-    while (effect != NULL) {
-        if (((BtlUnit *)effect)->status.flags & 2) {
-            u8 *work = (u8 *)((BtlUnit *)effect)->ext;
-            if (work != NULL) {
-                ((evtUnitHandle_t *)work)->color60 = ((BtlUnit *)effect)->baseColor;
-                evtSetUnitColorRGB((evtUnitHandle_t *)work, 0, ((BtlUnit *)effect)->baseColor);
+    unit = state->units;
+    while (unit != NULL) {
+        if (unit->status.flags & 2) {
+            evtUnitHandle_t *effect = unit->ext;
+            if (effect != NULL) {
+                effect->color60 = unit->baseColor;
+                evtSetUnitColorRGB(effect, 0, unit->baseColor);
             }
         }
-        effect = (u8 *)((BtlUnit *)effect)->next;
+        unit = unit->next;
     }
 }
 
