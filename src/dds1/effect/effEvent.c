@@ -32,6 +32,7 @@
 #include "sdf_vu_transform_api.h"
 #include "sdf_texture_primary_buffer_api.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_gs_blend.h"
 
 #define EFF_EVENT_VECTOR_COMPONENTS 4
 #define EFF_EVENT_BEZIER_WEIGHT_COUNT 4
@@ -1657,7 +1658,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     s32 textureBytes;
     u8 *geometryPacket;
     sdfDrawTag_t *stateList;
-    u64 *statePacket;
+    sdfPrimTransPacket_t *statePacket;
     SdfPoolNode *surface;
     primary.count = 0;
     secondary.count = 0;
@@ -1872,30 +1873,30 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     }
     stateList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(stateList);
-    statePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
-    statePacket[0] = 3;
-    statePacket[1] = 0x5000000310000000ULL;
-    statePacket[2] = 0x1000000000008002ULL;
-    statePacket[3] = 0xE;
-    if (work->flag) statePacket[4] = 0x51801;
-    else statePacket[4] = 0x31801;
-    statePacket[5] = 0x47;
-    statePacket[6] = 0x44;
-    statePacket[7] = 0x42;
+    statePacket = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+    statePacket->header.dmaTag = 3;
+    statePacket->header.vifCommands = 0x5000000310000000ULL;
+    statePacket->header.gifTag = 0x1000000000008002ULL;
+    statePacket->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    if (work->flag) statePacket->registers.test.value = 0x51801;
+    else statePacket->registers.test.value = 0x31801;
+    statePacket->registers.test.registerId = SDF_GS_TEST_1;
+    statePacket->registers.alpha.value = 0x44;
+    statePacket->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(stateList, (u32)statePacket);
     D_003252A8.append(&D_003252A8, stateList);
     stateList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(stateList);
-    statePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
-    statePacket[0] = 3;
-    statePacket[1] = 0x5000000310000000ULL;
-    statePacket[2] = 0x1000000000008002ULL;
-    statePacket[3] = 0xE;
-    if (work->flag) statePacket[4] = 0x51801;
-    else statePacket[4] = 0x31801;
-    statePacket[5] = 0x47;
-    statePacket[6] = 0x42;
-    statePacket[7] = 0x42;
+    statePacket = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+    statePacket->header.dmaTag = 3;
+    statePacket->header.vifCommands = 0x5000000310000000ULL;
+    statePacket->header.gifTag = 0x1000000000008002ULL;
+    statePacket->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    if (work->flag) statePacket->registers.test.value = 0x51801;
+    else statePacket->registers.test.value = 0x31801;
+    statePacket->registers.test.registerId = SDF_GS_TEST_1;
+    statePacket->registers.alpha.value = 0x42;
+    statePacket->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(stateList, (u32)statePacket);
     surface = &sdfGrOtTable[60];
     surface->append(surface, stateList);
@@ -2058,4 +2059,3 @@ INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB144);
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB148);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB14C);
-
