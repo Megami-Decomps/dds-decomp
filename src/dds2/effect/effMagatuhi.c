@@ -1025,7 +1025,7 @@ void effMagaCylinderDraw(EffMagatuhiRingWork *work) {
 }
 
 /* Copy the ring origin as one quadword, including its fourth component. */
-void effMagaCylinderSetPosition(EffMagatuhiRingWork *work, void *origin) {
+void effMagaCylinderSetPosition(EffMagatuhiRingWork *work, const EffMagatuhiPosition *origin) {
     SDF_VU0_COPYVECTOR(work->head.origin, origin);
 }
 
@@ -1035,7 +1035,7 @@ void effMagaCylinderSetRGBA(EffMagatuhiRingWork *work, u32 color) {
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effMagaCylinderSetRotateMatrix(EffMagatuhiRingWork *work, void *matrix) {
+void effMagaCylinderSetRotateMatrix(EffMagatuhiRingWork *work, const f32 matrix[16]) {
     VU0_COPY_MATRIX(work->matrix, matrix);
 }
 
@@ -1232,7 +1232,7 @@ void effMagaSpiralDraw(EffMagatuhiOrbitWork *work) {
 }
 
 /* Copy the orbit origin as one quadword, preserving the source w. */
-void effMagaSpiralSetPosition(EffMagatuhiOrbitWork *work, void *origin) {
+void effMagaSpiralSetPosition(EffMagatuhiOrbitWork *work, const EffMagatuhiPosition *origin) {
     SDF_VU0_COPYVECTOR(work->head.origin, origin);
 }
 
@@ -1242,7 +1242,7 @@ void effMagaSpiralSetRGBA(EffMagatuhiOrbitWork *work, u32 color) {
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effMagaSpiralSetRotateMatrix(EffMagatuhiOrbitWork *work, void *matrix) {
+void effMagaSpiralSetRotateMatrix(EffMagatuhiOrbitWork *work, const f32 matrix[16]) {
     VU0_COPY_MATRIX(work->matrix, matrix);
 }
 
@@ -1473,7 +1473,7 @@ void effMagaSmokeDraw(EffMagatuhiDriftWork *work) {
 }
 
 /* Copy the drift origin as one quadword, preserving the source w. */
-void effMagaSmokeSetPosition(EffMagatuhiDriftWork *work, void *origin) {
+void effMagaSmokeSetPosition(EffMagatuhiDriftWork *work, const EffMagatuhiPosition *origin) {
     SDF_VU0_COPYVECTOR(work->head.origin, origin);
 }
 
@@ -1483,7 +1483,7 @@ void effMagaSmokeSetRGBA(EffMagatuhiDriftWork *work, u32 color) {
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effMagaSmokeSetRotateMatrix(EffMagatuhiDriftWork *work, void *matrix) {
+void effMagaSmokeSetRotateMatrix(EffMagatuhiDriftWork *work, const f32 matrix[16]) {
     VU0_COPY_MATRIX(work->matrix, matrix);
 }
 
