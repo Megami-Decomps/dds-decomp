@@ -1521,16 +1521,18 @@ void func_0022D040(void) {
     f32 direction[4] __attribute__((aligned(16)));
     f32 value;
 
-    btlRuntimeState.unk20 = cosf(3.1415926f / 6.0f) * 15.0f;
-    btlRuntimeState.unk24 = 0xB;
-    btlRuntimeState.particlesPerRow = 0x200 / (btlRuntimeState.unk20 * 2) + 1;
-    btlRuntimeState.particleRowCount = 0x1C0 / (btlRuntimeState.unk24 << 1) + 1;
+    btlRuntimeState.particleGridHalfCellWidth = cosf(3.1415926f / 6.0f) * 15.0f;
+    btlRuntimeState.particleGridHalfCellHeight = 0xB;
+    btlRuntimeState.particlesPerRow =
+        0x200 / (btlRuntimeState.particleGridHalfCellWidth * 2) + 1;
+    btlRuntimeState.particleRowCount =
+        0x1C0 / (btlRuntimeState.particleGridHalfCellHeight << 1) + 1;
     btlRuntimeState.ownedData = sdfAllocAuto(
         btlRuntimeState.particlesPerRow * btlRuntimeState.particleRowCount * sizeof(BtlFadeParticle));
-    btlRuntimeState.unk28 = 0;
-    btlRuntimeState.unk2C = 128.0f;
-    btlRuntimeState.unk30 = -128.0f;
-    btlRuntimeState.unk34 = 128.0f;
+    btlRuntimeState.waveRadius = 0;
+    btlRuntimeState.waveRadiusSpeed = 128.0f;
+    btlRuntimeState.particleActivationRadius = -128.0f;
+    btlRuntimeState.particleActivationRadiusStep = 128.0f;
 
     for (row = 0; row < btlRuntimeState.particleRowCount; row++) {
         for (column = 0; column < btlRuntimeState.particlesPerRow; column++) {
@@ -1687,9 +1689,9 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
         packet->registers.alpha.value = 0x8000000064ULL;
         packet->registers.alpha.registerId = 0x42;
         sdfDrawTagLink(tiles, (u32)packet);
-        xStep = btlRuntimeState.unk20 << 5;
-        yStep = btlRuntimeState.unk24 << 5;
-        phase = -(btlRuntimeState.unk28 / waveRadius) * 1.5707963f;
+        xStep = btlRuntimeState.particleGridHalfCellWidth << 5;
+        yStep = btlRuntimeState.particleGridHalfCellHeight << 5;
+        phase = -(btlRuntimeState.waveRadius / waveRadius) * 1.5707963f;
         y = 0;
         for (row = 0; row < (u32)btlRuntimeState.particleRowCount; row++) {
             x = (row & 1) ? xStep >> 1 : 0;
@@ -1698,7 +1700,7 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
                 dy = (f32)(y - 0xE00);
                 if (dx > 0.0001f || dy > 0.0001f || dx < -0.0001f || dy < -0.0001f) {
                     radius = fsqrtf(dx * dx + dy * dy);
-                    influence = btlRuntimeState.unk28 / radius;
+                    influence = btlRuntimeState.waveRadius / radius;
                     directionX = dx / radius;
                     directionY = dy / radius;
                     if (influence > 1.0f) {
@@ -1716,7 +1718,7 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
                     directionY = 0.0f;
                     LoadIdentity();
                 }
-                if (radius < btlRuntimeState.unk30) {
+                if (radius < btlRuntimeState.particleActivationRadius) {
                     if (btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].delay == 0) {
                         u32 age;
                         fade = (f32)btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].age / 18.0f;
@@ -1796,13 +1798,13 @@ draw_tile:
             }
             y += yStep;
         }
-        btlRuntimeState.unk28 += btlRuntimeState.unk2C;
-        btlRuntimeState.unk2C += -5.877550602f;
-        if (btlRuntimeState.unk2C < 45.71428299f) {
-            btlRuntimeState.unk2C = 45.71428299f;
+        btlRuntimeState.waveRadius += btlRuntimeState.waveRadiusSpeed;
+        btlRuntimeState.waveRadiusSpeed += -5.877550602f;
+        if (btlRuntimeState.waveRadiusSpeed < 45.71428299f) {
+            btlRuntimeState.waveRadiusSpeed = 45.71428299f;
         }
         if ((s32)color >= 0) {
-            btlRuntimeState.unk30 += btlRuntimeState.unk34;
+            btlRuntimeState.particleActivationRadius += btlRuntimeState.particleActivationRadiusStep;
         }
         packet = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
         packet->header.dmaTag = 3;
