@@ -1630,7 +1630,7 @@ u8 *btlCreateItemQuantityIncrementTask(u8 *actor, u16 itemId) {
 }
 
 u32 btlAddEpFromPacket(BtlRewardPacket *packet) {
-    s32 context = (s32)(u32)btlGetRuntime();
+    BtlState *work = (BtlState *)btlGetRuntime();
 
     if (packet->amount == 0) {
         return 1;
@@ -1638,8 +1638,8 @@ u32 btlAddEpFromPacket(BtlRewardPacket *packet) {
     if ((u32)packet->actor->status.flags & 0x400) {
         return 1;
     }
-    *(s32 *)(context + 0x2CC) += packet->amount;
-    btlBossDebugPrintf("btl:epall=%d[%d](packet)\n", *(s32 *)(context + 0x2CC), packet->amount);
+    work->epEarned += packet->amount;
+    btlBossDebugPrintf("btl:epall=%d[%d](packet)\n", work->epEarned, packet->amount);
     return 1;
 }
 
@@ -1662,7 +1662,7 @@ u8 *btlScheduleEpPacketTask(u8 *owner, s32 value) {
 }
 
 u32 btlAddMoneyFromPacket(BtlRewardPacket *packet) {
-    s32 context = (s32)(u32)btlGetRuntime();
+    BtlState *work = (BtlState *)btlGetRuntime();
 
     if (packet->amount == 0) {
         return 1;
@@ -1670,8 +1670,8 @@ u32 btlAddMoneyFromPacket(BtlRewardPacket *packet) {
     if ((u32)packet->actor->status.flags & 0x400) {
         return 1;
     }
-    *(s32 *)(context + 0x2C0) += packet->amount;
-    btlBossDebugPrintf("btl:money=%d[%d](packet)\n", *(s32 *)(context + 0x2C0), packet->amount);
+    work->moneyEarned += packet->amount;
+    btlBossDebugPrintf("btl:money=%d[%d](packet)\n", work->moneyEarned, packet->amount);
     return 1;
 }
 
