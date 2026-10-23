@@ -619,7 +619,7 @@ u8 dds3ObjectBaseSetPrimaryControl(dds3Basic_t *object, Dds3MoverUpdate update) 
 /* Store the source object on the data-slot handler, then replace the supplied
  * object's curve work. The replacement call uses object, not handler;
  * unlike the conditional dispatcher, this path does not check for NULL. */
-void dds3ObjectBaseMakePath(void *object, dds3Basic_t *sourceObject) {
+void dds3ObjectBaseMakePath(dds3Basic_t *object, dds3Basic_t *sourceObject) {
     void *handler;
 
     handler = dds3ObjectBaseGetControlBasic(object, DDS3_OBJECT_DATA_SLOT);
@@ -629,7 +629,7 @@ void dds3ObjectBaseMakePath(void *object, dds3Basic_t *sourceObject) {
 
 /* Release the data slot's curve work and clear its handle, not the slot pointer.
  * The caller must have established the data slot. */
-void dds3ObjectBaseFreePath(void *object) {
+void dds3ObjectBaseFreePath(dds3Basic_t *object) {
     dds3MoverBasicFreePath(dds3ObjectBaseGetControlBasic(object, DDS3_OBJECT_DATA_SLOT));
 }
 
