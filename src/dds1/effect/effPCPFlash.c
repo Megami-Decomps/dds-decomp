@@ -80,7 +80,7 @@ void effPCPFlashPolySphere2Delete(PcpFlashTrianglePulseWork *work)
     sdfMemFreeDirect(work->allocationHandle);
 }
 
-void effPCPFlashPolySphere2SetPosition(void *dst, void *src) {
+void effPCPFlashPolySphere2SetPosition(f32 *dst, const f32 *src) {
     SDF_VU0_COPYVECTOR(dst, src);
 }
 
@@ -271,7 +271,7 @@ void effPCPFlashPolySphereDelete(PcpFlashStreakWork *work)
     sdfMemFreeDirect(work->allocationHandle);
 }
 
-void effPCPFlashPolySphereSetPosition(void *dst, void *src) {
+void effPCPFlashPolySphereSetPosition(f32 *dst, const f32 *src) {
     SDF_VU0_COPYVECTOR(dst, src);
 }
 
@@ -545,7 +545,7 @@ void effPCPFlashPolyRingDelete(PcpFlashScalingOrbitWork *work)
     sdfMemFreeDirect(work->allocationHandle);
 }
 
-void effPCPFlashPolyRingSetPosition(void *dst, void *src) {
+void effPCPFlashPolyRingSetPosition(f32 *dst, const f32 *src) {
     SDF_VU0_COPYVECTOR(dst, src);
 }
 
@@ -788,7 +788,7 @@ void effPCPFlashPolyPipeDelete(PcpFlashAccumulatingWork *work)
     sdfMemFreeDirect(work->allocationHandle);
 }
 
-void effPCPFlashPolyPipeSetPosition(void *dst, void *src) {
+void effPCPFlashPolyPipeSetPosition(f32 *dst, const f32 *src) {
     SDF_VU0_COPYVECTOR(dst, src);
 }
 
@@ -1050,7 +1050,7 @@ void effPCPFlashPolyRingExpDelete(PcpFlashOrbitArcWork *work)
     sdfMemFreeDirect(work->allocationHandle);
 }
 
-void effPCPFlashPolyRingExpSetPosition(void *dst, void *src) {
+void effPCPFlashPolyRingExpSetPosition(f32 *dst, const f32 *src) {
     SDF_VU0_COPYVECTOR(dst, src);
 }
 
@@ -1304,7 +1304,7 @@ void effPCPFlashPolySphereExpDelete(PcpFlashRotatingQuadWork *work)
     sdfMemFreeDirect(work->allocationHandle);
 }
 
-void effPCPFlashPolySphereExpSetPosition(void *dst, void *src) {
+void effPCPFlashPolySphereExpSetPosition(f32 *dst, const f32 *src) {
     SDF_VU0_COPYVECTOR(dst, src);
 }
 
@@ -1558,7 +1558,7 @@ void effPCPFlashPolySphere2ExpDelete(PcpFlashRadialTriangleWork *work)
     sdfMemFreeDirect(work->allocationHandle);
 }
 
-void effPCPFlashPolySphere2ExpSetPosition(void *dst, void *src) {
+void effPCPFlashPolySphere2ExpSetPosition(f32 *dst, const f32 *src) {
     SDF_VU0_COPYVECTOR(dst, src);
 }
 
@@ -1756,7 +1756,7 @@ void effPCPFlashPolySphere3Delete(PcpFlashRadialStripWork *work)
     sdfMemFreeDirect(work->allocationHandle);
 }
 
-void effPCPFlashPolySphere3SetPosition(void *dst, void *src) {
+void effPCPFlashPolySphere3SetPosition(f32 *dst, const f32 *src) {
     SDF_VU0_COPYVECTOR(dst, src);
 }
 
@@ -2024,7 +2024,7 @@ void effPCPFlashPolyRingExp2Delete(PcpFlashFadingOrbitWork *work)
     sdfMemFreeDirect(work->allocationHandle);
 }
 
-void effPCPFlashPolyRingExp2SetPosition(void *dst, void *src) {
+void effPCPFlashPolyRingExp2SetPosition(f32 *dst, const f32 *src) {
     SDF_VU0_COPYVECTOR(dst, src);
 }
 
@@ -2260,7 +2260,7 @@ void effPCPFlashPolyCircleDelete(PcpFlashOffsetRadialWork *work)
     sdfMemFreeDirect(work->allocationHandle);
 }
 
-void effPCPFlashPolyCircleSetPosition(void *dst, void *src) {
+void effPCPFlashPolyCircleSetPosition(f32 *dst, const f32 *src) {
     SDF_VU0_COPYVECTOR(dst, src);
 }
 

@@ -131,7 +131,7 @@ void effPCPFlashPolyRingExpHDelete(EffRingWork *ring) {
 }
 
 /* Copy one quadword; the fourth component is copied along with XYZ. */
-void effPCPFlashPolyRingExpHSetPosition(void *destination, void *source) {
+void effPCPFlashPolyRingExpHSetPosition(f32 *destination, const f32 *source) {
     SDF_VU0_COPYVECTOR(destination, source);
 }
 
