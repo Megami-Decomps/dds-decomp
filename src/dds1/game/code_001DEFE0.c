@@ -8,6 +8,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_camera_quaternion_pair.h"
 #include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_action_camera_preset.h"
@@ -2988,12 +2989,6 @@ void btlBuildGroupFramingCameraPose(BtlCamState *source, BtlCamState *out) {
 void fldCamSetChase(BtlLinkedCommand *command, BtlCamState *pose) {
     btlBuildBattleUnitFramingCameraPose(command, pose, 0.0f);
 }
-
-/* Front and back camera rotations of one animated-unit framing preset. */
-typedef struct BtlCameraQuaternionPair {
-    f32 front[4];
-    f32 back[4];
-} BtlCameraQuaternionPair;
 
 extern const BtlCameraQuaternionPair D_003A4408[3];
 
