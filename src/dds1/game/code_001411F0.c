@@ -2993,9 +2993,9 @@ extern s32 D_003BAF3C;
 
 extern s32 D_003BAF4C;
 
-extern s32 D_003BAF58;
+extern EffNode *D_003BAF58;
 
-extern s32 D_003BAF64;
+extern EffNode *D_003BAF64;
 
 void fldReleaseResourceHandles(void) {
     if (D_003BAF30 != 0) {
@@ -3015,11 +3015,11 @@ void fldReleaseResourceHandles(void) {
         D_003BAF4C = 0;
     }
     if (D_003BAF58 != 0) {
-        dds3EffectDelete((EffNode *)(u32)D_003BAF58);
+        dds3EffectDelete(D_003BAF58);
         D_003BAF58 = 0;
     }
     if (D_003BAF64 != 0) {
-        dds3EffectDelete((EffNode *)(u32)D_003BAF64);
+        dds3EffectDelete(D_003BAF64);
         D_003BAF64 = 0;
     }
     if (D_003BAF3C != 0) {
@@ -3340,18 +3340,18 @@ void fldUpdateObjectSlotActivation(void) {
                 case 0:
                 case 3:
                     if (D_003BAF58 != 0) {
-                        dds3EffectDelete((EffNode *)(u32)D_003BAF58);
+                        dds3EffectDelete(D_003BAF58);
                         D_003BAF58 = 0;
                     }
-                    D_003BAF58 = (s32)dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BAF54);
+                    D_003BAF58 = dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BAF54);
                     dds3EffectReset((EffNode *)(u32)D_003BAF4C);
                     break;
                 case 1:
                     if (D_003BAF64 != 0) {
-                        dds3EffectDelete((EffNode *)(u32)D_003BAF64);
+                        dds3EffectDelete(D_003BAF64);
                         D_003BAF64 = 0;
                     }
-                    D_003BAF64 = (s32)dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BAF60);
+                    D_003BAF64 = dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BAF60);
                     dds3EffectReset((EffNode *)(u32)D_003BAF4C);
                     break;
                 }
@@ -3377,11 +3377,11 @@ void fldUpdateObjectSlotActivation(void) {
                 fldTakaraSlotTable[i].activationRequested = 3;
                 fldTakaraSlotTable[i].activationState = 3;
                 if (D_003BAF58 != 0) {
-                    dds3EffectDelete((EffNode *)(u32)D_003BAF58);
+                    dds3EffectDelete(D_003BAF58);
                     D_003BAF58 = 0;
                 }
                 if (D_003BAF64 != 0) {
-                    dds3EffectDelete((EffNode *)(u32)D_003BAF64);
+                    dds3EffectDelete(D_003BAF64);
                     D_003BAF64 = 0;
                 }
             }
@@ -5035,13 +5035,13 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF50);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF54);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF58);
+INCLUDE_SDATA(EffNode *, "game/code_001411F0", D_003BAF58);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF5C);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF60);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF64);
+INCLUDE_SDATA(EffNode *, "game/code_001411F0", D_003BAF64);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF68);
 

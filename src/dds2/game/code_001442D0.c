@@ -3345,11 +3345,11 @@ void fldFreeSceneResources(void) {
         D_004362DC = 0;
     }
     if (D_004362E8 != 0) {
-        dds3EffectDelete((EffNode *)(u32)D_004362E8);
+        dds3EffectDelete(D_004362E8);
         D_004362E8 = 0;
     }
     if (D_004362F4 != 0) {
-        dds3EffectDelete((EffNode *)(u32)D_004362F4);
+        dds3EffectDelete(D_004362F4);
         D_004362F4 = 0;
     }
     if (fldAreaDamageEffect != 0) {
@@ -3670,7 +3670,7 @@ void fldUpdateObjectSlotActivation(void) {
                 case 0:
                 case 3:
                     if (D_004362E8 != 0) {
-                        dds3EffectDelete((EffNode *)(u32)D_004362E8);
+                        dds3EffectDelete(D_004362E8);
                         D_004362E8 = 0;
                     }
                     if (fldGlobalBase.area == 29 || fldGlobalBase.area == 30) {
@@ -3683,7 +3683,7 @@ void fldUpdateObjectSlotActivation(void) {
                     break;
                 case 1:
                     if (D_004362F4 != 0) {
-                        dds3EffectDelete((EffNode *)(u32)D_004362F4);
+                        dds3EffectDelete(D_004362F4);
                         D_004362F4 = 0;
                     }
                     D_004362F4 = dds3EffectLoad(D_004362F0);
@@ -3712,11 +3712,11 @@ void fldUpdateObjectSlotActivation(void) {
                 fldTakaraSlotTable[i].activationRequested = 3;
                 fldTakaraSlotTable[i].activationState = 3;
                 if (D_004362E8 != 0) {
-                    dds3EffectDelete((EffNode *)(u32)D_004362E8);
+                    dds3EffectDelete(D_004362E8);
                     D_004362E8 = 0;
                 }
                 if (D_004362F4 != 0) {
-                    dds3EffectDelete((EffNode *)(u32)D_004362F4);
+                    dds3EffectDelete(D_004362F4);
                     D_004362F4 = 0;
                 }
             }
@@ -6934,13 +6934,13 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", D_004362E0);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004362E4);
 
-INCLUDE_SDATA(const s32, "game/code_001442D0", D_004362E8);
+INCLUDE_SDATA(EffNode *, "game/code_001442D0", D_004362E8);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004362EC);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004362F0);
 
-INCLUDE_SDATA(const s32, "game/code_001442D0", D_004362F4);
+INCLUDE_SDATA(EffNode *, "game/code_001442D0", D_004362F4);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004362F8);
 
