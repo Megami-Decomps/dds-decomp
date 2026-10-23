@@ -162,11 +162,11 @@ extern void btlSpawnBattleWorldAction();
 extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 
 
-extern s32 btlCreateWaitUnitListIdleTask();
+extern BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32 value);
 
-extern s32 btlCreateApplyToActiveActorsTask();
+extern BtlRuntimeTask *btlCreateApplyToActiveActorsTask(u32 value);
 
-extern s32 btlCreateFadeStateResetTask();
+extern BtlRuntimeTask *btlCreateFadeStateResetTask(void);
 
 extern void btlCreateGuidePanelTask();
 
