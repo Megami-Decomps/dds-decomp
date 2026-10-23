@@ -1977,10 +1977,9 @@ INCLUDE_RODATA(const s32, "game/code_00107EF8", D_004113A0);
 
 INCLUDE_RODATA(const s32, "game/code_00107EF8", D_004113B8);
 
-scrProcessWork_s *bfContextCreate(void *rawHeader, ScrSection *sections, ScrLabel *procedures,
+scrProcessWork_s *bfContextCreate(BfFlw0Header *header, ScrSection *sections, ScrLabel *procedures,
                         ScrLabel *labels, ScrInstr *instructions, void *auxiliaryData,
                         char *strings, s32 procedureIndex) {
-    BfFlw0Header *header = rawHeader;
     scrProcessWork_s *process;
     s32 i;
     s8 *types;

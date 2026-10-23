@@ -15,7 +15,7 @@
 
 
 
-scrProcessWork_s *fldFlowParse(void *header, s32 procedureIndex);
+scrProcessWork_s *fldFlowParse(BfFlw0Header *header, s32 procedureIndex);
 
 
 /* Load a script resource, create its VM process and retain its resource handle. */
@@ -31,7 +31,7 @@ scrProcessWork_s *scrLoadScriptFile(const char *path, s32 option)
     {
         return 0;
     }
-    process = fldFlowParse((void *)resourceAddress, option);
+    process = fldFlowParse((BfFlw0Header *)resourceAddress, option);
     if (process != NULL)
     {
         process->scriptHandle = handle;
@@ -71,21 +71,21 @@ scrProcessWork_s *scrCreateProcessWithDefaultOption(const char *path) {
 
 s32 scrStartScript2(s32 priority, s32 processId, s32 option)
 {
-    return (s32)scrStartScriptProcess(priority, fldFlowParse((void *)processId, option));
+    return (s32)scrStartScriptProcess(priority, fldFlowParse((BfFlw0Header *)(u32)processId, option));
 }
 
-scrProcessWork_s *scrCreateTaskWithDefaultOption(void *header) {
+scrProcessWork_s *scrCreateTaskWithDefaultOption(BfFlw0Header *header) {
     return fldFlowParse(header, 0);
 }
 
-dds3ProcessID_t *scrRunScriptEx(u32 priority, void *header,
+dds3ProcessID_t *scrRunScriptEx(u32 priority, BfFlw0Header *header,
     ScrSection *procedureSection, ScrLabel *procedures, ScrLabel *labels,
     ScrInstr *instructions, void *auxiliaryData, char *strings, s32 procedureIndex)
 {
     return scrStartScriptProcess(priority, bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, procedureIndex));
 }
 
-scrProcessWork_s *scrCreateProcessAtFirstProcedure(void *header, ScrSection *procedureSection,
+scrProcessWork_s *scrCreateProcessAtFirstProcedure(BfFlw0Header *header, ScrSection *procedureSection,
     ScrLabel *procedures, ScrLabel *labels, ScrInstr *instructions,
     void *auxiliaryData, char *strings)
 {
