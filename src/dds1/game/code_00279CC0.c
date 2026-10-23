@@ -993,8 +993,8 @@ void mnuSetGridSpriteSlot(MenuListNode *node, s32 row, s32 col, s32 x, s32 y, s3
     itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)sprite, effect, x, y, x, y);
 }
 
-struct MenuListNode *mnuWalkNodeList(s32 targetIndex, void *listOwner) {
-    struct MenuListNode *node = *(struct MenuListNode **)((u8 *)listOwner + 0x10);
+struct MenuListNode *mnuWalkNodeList(s32 targetIndex, MenuList *list) {
+    struct MenuListNode *node = list->first;
     s32 index = 0;
 
     if (node != NULL && targetIndex != index) {
