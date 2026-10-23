@@ -1027,7 +1027,8 @@ u32 itfGetPackedResourceHeaderWord(u32 resourceBase) {
 /* Decode entryIndex's bit span through the resource's six-byte prefix-tree records.
  * Write terminal bytes to decodedBytes and return/cache the count. The font atlas
  * uses these bytes as pixels; neither entry nor output bounds are checked. */
-s32 frDecodeFontRow(u8 *decodedBytes, s32 entryIndex, void *resourceBase, ItfPackedResourceSegments *segments) {
+s32 frDecodeFontRow(u8 *decodedBytes, s32 entryIndex, ItfRelativeSegmentResourceView *resourceBase,
+                    ItfPackedResourceSegments *segments) {
     ItfBitRange range;
     s32 produced;
     u8 *table = segments->treeNodes;

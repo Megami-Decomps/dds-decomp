@@ -29,7 +29,7 @@ typedef char ItfPackedBitstreamOffsetCheck[((u32)&((ItfPackedResourceSegments *)
 void frGetFontImagePtrs(ItfRelativeSegmentResourceView *resource,
                               ItfPackedResourceSegments *segments);
 s32 frDecodeFontRow(u8 *decodedBytes, s32 entryIndex,
-                                void *resourceBase,
+                                ItfRelativeSegmentResourceView *resourceBase,
                                 ItfPackedResourceSegments *segments);
 
 #endif
