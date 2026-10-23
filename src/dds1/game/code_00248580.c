@@ -764,9 +764,9 @@ s32 mnuAdvanceTerminalTransition(s8 closing) {
                 return 1;
             }
         } else if (D_003BC3E1 == 0) {
-            if (work->effectHandle == 0) {
-                work->effectHandle = (u32)mnuRequestEffectResource(mnuTerminalSpriteDirectory, D_003AF620);
-            } else if (mnuHasEffectResourceHandle((MenuResourceWork *)work->effectHandle) != 0) {
+            if (work->effectHandle == NULL) {
+                work->effectHandle = mnuRequestEffectResource(mnuTerminalSpriteDirectory, D_003AF620);
+            } else if (mnuHasEffectResourceHandle(work->effectHandle) != 0) {
                 dds3FadeIn(0, 0, 0, 15);
                 D_003BC3E1 = 1;
                 work->effectStage = 1;
@@ -789,9 +789,9 @@ s32 mnuAdvanceTerminalTransition(s8 closing) {
         dds3FadeOut(0, 0, 0, 15);
         D_003BC3E1 = -1;
     } else if (dds3FadeCheck() == 0) {
-        if (work->effectHandle != 0) {
-            mnuReleaseEffectResource((MenuResourceWork *)work->effectHandle);
-            work->effectHandle = 0;
+        if (work->effectHandle != NULL) {
+            mnuReleaseEffectResource(work->effectHandle);
+            work->effectHandle = NULL;
             work->effectStage = 0;
         }
         D_003BC3E1 = 0;
@@ -1091,9 +1091,9 @@ s32 mnuDrawTerminalEffectIfAvailable(s32 state) {
     if (result != 0) {
         result = work->reduced < 3;
         if (result && work->reduced > 0) {
-            result = work->effectHandle;
+            result = (s32)work->effectHandle;
             if (result != 0) {
-                result = mnuHasEffectResourceHandle((MenuResourceWork *)work->effectHandle);
+                result = mnuHasEffectResourceHandle(work->effectHandle);
                 if (result != 0) {
                     result = mnuDrawMantraPulseAndSparks((void *)work->effectHandle, 0x80, 0x53);
                 }
@@ -2397,9 +2397,9 @@ s32 mnuUpdateTerminalActionPopup(dds3ProcessID_t *input) {
                     break;
                 case 2:
                     if (dds3FadeCheck() == 0) {
-                        if (context->effectHandle != 0) {
-                            mnuReleaseEffectResource((MenuResourceWork *)context->effectHandle);
-                            context->effectHandle = 0;
+                        if (context->effectHandle != NULL) {
+                            mnuReleaseEffectResource(context->effectHandle);
+                            context->effectHandle = NULL;
                         }
                         mnuFadeOrPlayCloseSfx(0, (u8 *)context);
                         mnuTerminalSelectResourceBank((MenuTerminalWork *)context);
@@ -2452,7 +2452,7 @@ u32 evtBEndDispatchAndReloadEffectResource(dds3ProcessID_t *task) {
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(0, 0);
     if (context->mode != 0) {
-        context->effectHandle = (u32)mnuRequestEffectResource(mnuTerminalSpriteDirectory, D_003AF620);
+        context->effectHandle = mnuRequestEffectResource(mnuTerminalSpriteDirectory, D_003AF620);
     }
     return 1;
 }
@@ -2479,7 +2479,7 @@ s32 evtOpenTerminalActionPopupWhenReady(dds3ProcessID_t *input) {
                     canOpen = 1;
                 }
             } else {
-                if (mnuHasEffectResourceHandle((MenuResourceWork *)context->effectHandle) != 0) {
+                if (mnuHasEffectResourceHandle(context->effectHandle) != 0) {
                     if (context->effectStage == 0) {
                         dds3FadeIn(0, 0, 0, 15);
                         context->effectStage = 1;
@@ -2534,4 +2534,3 @@ INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3F0);
 INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3F8);
 
 INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC400);
-

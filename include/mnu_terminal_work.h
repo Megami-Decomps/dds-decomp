@@ -8,6 +8,8 @@
 #include "eff_resource_records.h"
 #include "mnu_list.h"
 
+struct MenuResourceWork;
+
 /* The Karma Terminal's menu scene: its resources, list and panel state. */
 typedef struct MenuTerminalWork {
     struct sdfMemHandle_t *allocation; /* 0x00: retained scene allocation */
@@ -38,7 +40,7 @@ typedef struct MenuTerminalWork {
     s32 reduced;             /* 0xDC */
     u32 imageHandles[7];     /* 0xE0: copied by mnuResolveStaffImageHandles */
     u8 padFC[0x5C];
-    u32 effectHandle; /* 0x158: effect-resource address word. */
+    struct MenuResourceWork *effectHandle; /* 0x158: owned effect-resource work. */
     s32 effectStage; /* 0x15C */
     u32 bgmHandle;           /* 0x160: encoded bank/track handle */
 } MenuTerminalWork; /* 0x164 allocation (mnuTerminalCreateScene) */
