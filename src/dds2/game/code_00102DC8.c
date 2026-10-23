@@ -70,7 +70,7 @@ extern void dds3PadVibrationSet(u32, u8, s32);
 #include "evt_frame_state_packet.h"
 
 
-extern void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y);
+extern void kwlnDrawTextureListDiagnostic(sdfDrawTag_t *packetList, s32 x, s32 y);
 
 extern u32 kwlnTextureGetPageIndex(void);
 
@@ -1154,7 +1154,7 @@ void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, sdfGsMemS
 
 
 /* Draw the allocation-map border, then walk blocks through their prev links. */
-void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y) {
+void kwlnDrawTextureListDiagnostic(sdfDrawTag_t *packetList, s32 x, s32 y) {
     sdfGsMemSlice_t *block = sdfGsMemGetLinkHead();
 
     if (block != NULL) {
@@ -1849,4 +1849,3 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", distblurovercnt);
 INCLUDE_SDATA(const s32, "game/code_00102DC8", ripblurovercnt);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D10);
-
