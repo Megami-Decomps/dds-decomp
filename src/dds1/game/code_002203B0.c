@@ -74,14 +74,8 @@ typedef struct EvtNodeInner {
     void *node;         /* 0x0C */
 } EvtNodeInner;
 
-typedef struct EvtNodeOwner {
-    u8 pad00[0x18];
-    EvtNodeInner *inner; /* 0x18 */
-} EvtNodeOwner;
-
-
-void evtEffectLoopControl(EvtNodeOwner *owner, s32 nodeFlag) {
-    EvtNodeInner *inner = owner->inner;
+void evtEffectLoopControl(dds3Basic_t *owner, s32 nodeFlag) {
+    EvtNodeInner *inner = (EvtNodeInner *)owner->data;
     void *node;
 
     switch (inner->kind) {
