@@ -912,7 +912,7 @@ MenuTerminalWork *mnuTerminalCreateScene(reduced, slot)
     obj->selectedSlot = slot;
     mnuTerminalBuildMenus(obj);
     evtLoadResourcePair("/facility/msg/terminal/mes_data.bmd", &obj->messageResources);
-    fclInitMessage((struct ItfMesSub *)obj->messageResources.dataAddress);
+    fclInitMessage(obj->messageResources.messageData);
     for (i = 0; i < MNU_SELECTED_SLOT_COUNT; i++) {
         obj->cursor[i] = -1;
     }
@@ -2143,7 +2143,7 @@ s32 mnuOpenTerminalSelectionMessageWindow(dds3ProcessID_t *task) {
     mnuAnimateTerminalSelection(1, (MenuTerminalWork *)context);
     evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (MenuTerminalWork *)context);
     ((MenuTerminalWork *)context)->exitPending = 0;
-    fclInitMessage((struct ItfMesSub *)((MenuTerminalWork *)context)->messageResources.dataAddress);
+    fclInitMessage(((MenuTerminalWork *)context)->messageResources.messageData);
     if (((MenuTerminalWork *)context)->mode != 0) {
         p2sdPlayBGMFade(((MenuTerminalWork *)context)->bgmHandle);
     }

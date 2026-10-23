@@ -7,5 +7,5 @@
 /* Reopen the message window over the terminal scene's loaded message data. */
 void evtCloseDisplayChannelAndEnsureMessageWindow(MenuSlotFlagEventView *context) {
     fclDestroyMessage();
-    fclInitMessage((struct ItfMesSub *)context->messageResources.dataAddress);
+    fclInitMessage(context->messageResources.messageData);
 }

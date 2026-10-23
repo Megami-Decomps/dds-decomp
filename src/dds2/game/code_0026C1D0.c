@@ -207,7 +207,7 @@ void shuffleIndices(u8 *buffer, u32 length, s32 swapCount) {
 
 /* Store the resource handle in word zero and the loader's data address in word one. */
 void evtLoadResourcePair(const char *resourcePath, EvtResourcePair *record) {
-    record->handle = sdfDevLoadFileEx(resourcePath, &record->dataAddress, 0);
+    record->handle = sdfDevLoadFileEx(resourcePath, (u32 *)&record->messageData, 0);
 }
 
 /* Release the handle without clearing either word of the caller's record. */
@@ -597,4 +597,3 @@ INCLUDE_SDATA(const s32, "game/code_0026C1D0", D_00437890);
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", mnuMantraNodePositionTable);
 
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", mnuMantraPanelPositionTable);
-

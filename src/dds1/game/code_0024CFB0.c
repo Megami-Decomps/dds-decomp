@@ -108,7 +108,7 @@ extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
 /* Recreate the message window from the terminal's loaded message resource. */
 void evtCloseDisplayChannelAndEnsureMessageWindow(struct MenuTerminalWork *work) {
     fclDestroyMessage();
-    fclInitMessage((struct ItfMesSub *)work->messageResources.dataAddress);
+    fclInitMessage(work->messageResources.messageData);
 }
 
 /* Start the first eligible special, scene, or active-party flag event.
@@ -472,7 +472,7 @@ void shuffleIndices(u8 *buffer, u32 length, s32 swapCount) {
 
 /* Store the resource handle in word zero and the loader's data address in word one. */
 void evtLoadResourcePair(const char *resourcePath, EvtResourcePair *record) {
-    record->handle = sdfDevLoadFileEx(resourcePath, &record->dataAddress, 0);
+    record->handle = sdfDevLoadFileEx(resourcePath, (u32 *)&record->messageData, 0);
 }
 
 /* Release the handle without clearing either word of the caller's record. */
