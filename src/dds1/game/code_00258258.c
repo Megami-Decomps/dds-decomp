@@ -107,7 +107,7 @@ extern char D_003BC488[];
 extern char D_003BC490[];
 extern char D_003BC498[];
 extern TaskWork *mnuSceneResourceContext;
-extern u32 mnuGetSelectedNodeValue(void);
+extern MnuProfileProgress *mnuGetSelectedNodeValue(void);
 extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *scene, MnuProfileProgress *target);
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern s32 frFontMeasureAndQueueGlyph(s32, s32, s32, u32, const u8 *, s32);
@@ -128,7 +128,7 @@ void mnuDrawMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cel
     if (scene == NULL) {
         return;
     }
-    selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
+    selection = mnuGetSelectedNodeValue();
     states = (MnuMantraNodeState *)(u32)grid->userData;
     sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     record = &mnuMantraPrerequisiteRecords[scene->sceneId];
