@@ -65,7 +65,7 @@ u8 *GetSpeakerName(instanceMes_tag *mes);
 
 void ResolveResourceAddress(ItfMesSub *resource);
 
-u32 scrGetMessageHandle(void);
+s32 scrGetMessageHandle(void);
 
 s32 scrGetIntPara(s32 parameterIndex);
 

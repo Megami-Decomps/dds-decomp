@@ -1188,7 +1188,7 @@ extern void dds3StartBEDEffectObjectBasic(dds3Basic_t *effectObject, u32 entryId
 extern char D_00421AF8[];
 
 extern s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId);
-extern u32 scrGetMessageHandle(void);
+extern s32 scrGetMessageHandle(void);
 
 
 extern void evtSetUnitKutiMotion(evtUnitHandle_t *unit, s32 firstSlot, s32 secondSlot);

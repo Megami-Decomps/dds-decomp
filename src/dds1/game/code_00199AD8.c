@@ -33,7 +33,7 @@
 
 extern PanelEntry pinst[];
 extern void (*DrawTable[])(itfpanel_t *, sdfDrawTag_t *);
-extern u32 scrGetMessageHandle(void);
+extern s32 scrGetMessageHandle(void);
 extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
 extern void itfMesMngRequestSelectRelease(s32 window);
 extern void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock);

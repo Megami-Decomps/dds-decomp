@@ -34,7 +34,7 @@ u32 scrGetCommandTimer(void) {
     return nowpwork->cmdTimer;
 }
 
-u32 scrGetMessageHandle(void) {
+s32 scrGetMessageHandle(void) {
     return nowpwork->resourceIndex;
 }
 
