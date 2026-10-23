@@ -52,8 +52,7 @@ extern char D_003BA9B0[];
 
 /* Each transform section owns its row coordinate; see docs/idioms.md,
  * "Trace-justified diagnostic row coordinates". */
-s32 DispBaseData(void *worldNode, s32 x, s32 y, sdfDrawTag_t *list) {
-    dds3Basic_t *node = worldNode;
+s32 DispBaseData(dds3Basic_t *node, s32 x, s32 y, sdfDrawTag_t *list) {
     dds3PoseSet_t *transform;
     s32 labelX;
     s32 valueX;
@@ -101,7 +100,7 @@ s32 DispBaseData(void *worldNode, s32 x, s32 y, sdfDrawTag_t *list) {
 
 extern const char D_0039F5F8[]; /* "FLAG  : 0x%08X" */
 
-u32 DispObjectBaseData(void *worldNode, s32 x, s32 y, void *list) {
+u32 DispObjectBaseData(dds3Basic_t *worldNode, s32 x, s32 y, void *list) {
     dds3ObjectBaseControlWorkData_t *handle;
     void *command;
 
@@ -127,22 +126,22 @@ extern s32 evtSceneDispProcess(void *task);
 /* Draw the task's status panel; the returned value is the follow-up handler (or -1 / 0). */
 s32 dds3DebugBasic(dds3ProcessID_t *task) {
     s32 width;
-    u8 *node;
+    dds3Basic_t *node;
     sdfDrawTag_t *list;
     sdfDrawTag_t *spriteList;
 
     if (dds3GetActiveScene() == NULL) {
         return -1;
     }
-    node = (u8 *)dds3GetProcessData(task);
-    if (dds3SceneBasicExistBasic(dds3GetActiveScene(), (dds3Basic_t *)node) == 0) {
+    node = (dds3Basic_t *)dds3GetProcessData(task);
+    if (dds3SceneBasicExistBasic(dds3GetActiveScene(), node) == 0) {
         return (s32)evtSceneDispProcess;
     }
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     width = DispBaseData(node, 3, 0xA, list) + 0xB;
-    if (node[0xF] < 0xA) {
-        if (node[0xF] >= 4) {
+    if ((node->kindTag >> 24) < 0xA) {
+        if ((node->kindTag >> 24) >= 4) {
             width += DispObjectBaseData(node, 3, width, list);
         }
     }
