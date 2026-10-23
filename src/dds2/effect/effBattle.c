@@ -65,7 +65,7 @@ void effBTLCutSetCutEndCallbackFunc(effBTLCutHandle_t *effect, BattleEffectCallb
 }
 
 /* Read the frame used by the source-frame callback equality test. */
-u32 effBTLCutGetMotionChangeFrame(effBTLCutHandle_t *effect) {
+s32 effBTLCutGetMotionChangeFrame(effBTLCutHandle_t *effect) {
     return effect->list->callbackFrame;
 }
 
