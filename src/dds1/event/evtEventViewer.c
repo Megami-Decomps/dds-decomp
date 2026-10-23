@@ -52,8 +52,8 @@ extern void effEventSetBlurTemplateParameters(dds3Effect_PartialMultiBlurParam_t
 extern void mfilterSetParam(dds3Effect_PartialMultiFilterParam_t *parameters);
 extern void rblurSetParam(dds3Effect_RippleBlurParam_t *parameters);
 extern void effEventSetScatterBlurParameters(dds3Effect_DistortionBlurParam_t *parameters);
-extern void effSetLoadDescA(void *parameters);
-extern void effSetLoadDescD(void *parameters);
+extern void effSetLoadDescA(const dds3Effect_Blur_t *parameters);
+extern void effSetLoadDescD(const dds3Effect_Blur_t *parameters);
 extern s32 fldTitleIsActive(void);
 extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern void mnuCampSetPrimaryOption(EvtRuntime *scene, u32 option);
@@ -1083,7 +1083,7 @@ extern void evtHokanDistBlur(s32, f32, dds3Effect_DistortionBlurParam_t *, dds3E
 extern void evtHokanRipBlur(s32, f32, dds3Effect_RippleBlurParam_t *, dds3Effect_RippleBlurParam_t *, dds3Effect_RippleBlurParam_t *);
 extern void evtBlendParamsG(s32, f32, dds3Effect_Blur_t *, dds3Effect_Blur_t *, dds3Effect_Blur_t *);
 extern void evtHokanFilter(s32, f32, dds3Effect_Filter_t *, dds3Effect_Filter_t *, dds3Effect_Filter_t *);
-extern void effSetLoadDescA(void *);
+extern void effSetLoadDescA(const dds3Effect_Blur_t *);
 extern void Eve_PartialMultiBlurSetParam(dds3Effect_PartialMultiBlurParam_t *);
 extern void Eve_DistortionBlurSetParam(dds3Effect_DistortionBlurParam_t *);
 extern void Eve_RippleBlurSetParam(dds3Effect_RippleBlurParam_t *);
