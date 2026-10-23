@@ -2342,7 +2342,7 @@ extern void btlResetUnitModelProgress(BtlUnit *);
 
 extern void btlSetUnitPosition(BtlUnit *object, const f32 *position);
 
-extern void btlSetUnitRotation(BtlUnit *object, void *rotation);
+extern void btlSetUnitRotation(BtlUnit *object, s128 *rotation);
 
 /* vu0 routine: initialize the actor world transform with the SDK unit vector. */
 void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
@@ -3082,7 +3082,7 @@ s32 btlIsUnitAtStoredPosition(u8 *object) {
 
 extern u8 D_003A3B70[];
 
-void btlSetUnitRotation(BtlUnit *object, void *rotation) {
+void btlSetUnitRotation(BtlUnit *object, s128 *rotation) {
     u8 vector[16];
     if ((object->status.stateFlags & 0x100) != 0) {
         return;
