@@ -8538,7 +8538,7 @@ s32 sndLookupResourceType(s32 sound, s32 index) {
             return value;
         }
     }
-    return *(u8 *)(datActionAnimationRecords + index * 0x20 + 3);
+    return ((BtlActionTableEntry *)datActionAnimationRecords)[index].resourceType;
 }
 
 void btlSetCommandEffectLinkFlags(BtlTask *task, BattleIndexWork *work) {
