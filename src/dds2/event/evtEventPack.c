@@ -26,7 +26,7 @@ enum {
     EVT_PACK_LOAD_COMPLETE = 2
 };
 
-extern s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
+extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data,
                                             const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
 extern void fldFileAddrResetMode(u32 relocateOnRelease);
 extern u32 dds3DrawFlag;
@@ -93,8 +93,8 @@ s32 evtRegistBEField(s32 eventId, s32 resourceId) {
     s32 entryCount;
     s32 remainingEntryCount;
     s32 *areaRoomIds;
-    s32 *resource0Data;
-    s32 *resource1Data;
+    u8 *resource0Data;
+    u8 *resource1Data;
     const SdfTextureOffsetListHeader *textureOffsets;
 
     packState = evtGetPackProcessData(eventId);
@@ -110,10 +110,10 @@ s32 evtRegistBEField(s32 eventId, s32 resourceId) {
             if (entry->resourceId == resourceId) {
                 switch (entry->kind) {
                 case 2:
-                    resource0Data = (s32 *)(packState->data + entry->dataOffset);
+                    resource0Data = packState->data + entry->dataOffset;
                     break;
                 case 3:
-                    resource1Data = (s32 *)(packState->data + entry->dataOffset);
+                    resource1Data = packState->data + entry->dataOffset;
                     break;
                 case 4:
                     textureOffsets = (const SdfTextureOffsetListHeader *)(packState->data + entry->dataOffset);
@@ -128,7 +128,7 @@ s32 evtRegistBEField(s32 eventId, s32 resourceId) {
     }
 
     if (areaRoomIds != NULL && resource0Data != NULL && resource1Data != NULL && textureOffsets != NULL) {
-        evtLoadArea_FromMemory(areaRoomIds[0], areaRoomIds[1], (s32)resource0Data, (s32)resource1Data, textureOffsets, 0);
+        evtLoadArea_FromMemory(areaRoomIds[0], areaRoomIds[1], resource0Data, resource1Data, textureOffsets, 0);
         fldFileAddrResetMode(1);
         dds3DrawFlag |= 0x02000000;
         return 1;

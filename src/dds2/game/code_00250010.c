@@ -4857,7 +4857,7 @@ typedef struct EvtPmdRuntimeHeader {
     s32 frameCount;
     s32 metadata;
 } EvtPmdRuntimeHeader;
-extern s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1Data, const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
+extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data, const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
 extern void mdlPackDecode(s32, s32, s32, s32, s32);
 extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
 extern evtUnitHandle_t *evtGetUnitHandle(s32);
@@ -4903,7 +4903,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         resourceGroup = ((EvtPmdWorldResource *)work->mainEntry2Data)->area;
         resourceId = ((EvtPmdWorldResource *)work->mainEntry2Data)->room;
         evtLoadArea_FromMemory(resourceGroup, resourceId,
-            (s32)work->mainEntry10Data, (s32)work->mainEntry11Data,
+            work->mainEntry10Data, work->mainEntry11Data,
             (SdfTextureOffsetListHeader *)work->mainEntry12Data, 0);
         group = evtEventViewerCreateEntry(0, runtime);
         group->entryHeader = evtEventViewerAddName((char *)work->mainEntry1Data +

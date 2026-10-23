@@ -83,7 +83,7 @@ extern void effBTLFieldColorResetFlags(void);
 extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
 extern void effSweepFloorModelList(void);
 extern void effTickSlotVolumeFade(void);
-extern s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1Data, const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
+extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data, const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
 extern void evtFreeStage(void);
 extern void evtFreeAllUnit(void);
 extern u32 fileClearRenderFlag(u32 mask);
