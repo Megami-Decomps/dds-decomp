@@ -5506,13 +5506,13 @@ void btlNormalizeActionCameraKeyScales(BtlLinkedCommand *action) {
     }
 }
 
-void btlInterpolateVectorStep(f32 *src) {
+void btlInterpolateVectorStep(BtlCamState *camera) {
     f32 vec[4];
-    f32 step = -src[8];
+    f32 step = -camera->distance;
     vec[3] = 0.0f;
-    vec[0] = src[4] * step + src[0];
-    vec[1] = src[5] * step + src[1];
-    vec[2] = src[6] * step + src[2];
+    vec[0] = camera->direction[0] * step + camera->position[0];
+    vec[1] = camera->direction[1] * step + camera->position[1];
+    vec[2] = camera->direction[2] * step + camera->position[2];
     VU0_LOAD_VF_MEMORY(vf10, vec);
 }
 

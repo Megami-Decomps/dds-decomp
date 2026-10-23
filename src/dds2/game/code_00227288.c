@@ -22,7 +22,7 @@
 #include "mdl_flag_api.h"
 #include "btl_scene_initializer.h"
 
-extern void btlInterpolateVectorStep();
+extern void btlInterpolateVectorStep(BtlCamState *camera);
 
 extern struct EffRandState effSharedRandomState;
 extern void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *, f32, f32, f32, s8, s8);
@@ -2388,4 +2388,3 @@ INCLUDE_SDATA(const s32, "game/code_00227288", D_00436F90);
 INCLUDE_SDATA(const s32, "game/code_00227288", D_00436F96);
 
 INCLUDE_SDATA(const s32, "game/code_00227288", D_00436F98);
-

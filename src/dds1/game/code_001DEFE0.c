@@ -356,7 +356,7 @@ s32 btlHasFirstLinkedCategoryFlag1000(BtlLinkedCommand *node);
 
 /* Return whether a live linked group has its byte at 0x10 marked. */ u32 btlHasMarkedEntry10(u8 *object);
 
-void btlInterpolateVectorStep(f32 *src);
+void btlInterpolateVectorStep(BtlCamState *camera);
 
 void btlReleaseUnitModelColorResource(BtlUnit *unit, s32 value, f32 scalar);
 
@@ -775,7 +775,7 @@ void btlBuildDistanceClampedActionCameraBlend(BtlLinkedCommand *action, BtlCamSt
         if (btlHasSingleLinkedResource(action) == 0) {
             btlBuildBattleUnitFramingCameraPose(action, from, 17.5f);
             btlCopyMotionTransform(to, from);
-            btlInterpolateVectorStep(from->position);
+            btlInterpolateVectorStep(from);
             VU0_STORE_VF(vf10, targetPosition);
             if (btlSampleActorModelPositionVU(unit, 1) == 0) {
                 btlUnitGetMuzzlePosVU(unit);
@@ -2085,7 +2085,7 @@ void btlSetupActionCameraPair(BtlLinkedCommand *command) {
     command->flags |= 0x41;
     command->motionProgress = 0;
     command->motionParameter = 15.0f;
-    btlInterpolateVectorStep(command->frontCamera.position);
+    btlInterpolateVectorStep(&command->frontCamera);
     VU0_STORE_VF_UNCLOBBERED(vf10, lookPos);
     btlUnitGetMuzzlePosVU(user);
     VU0_MOVE_VF(vf11, vf10);
@@ -2768,7 +2768,7 @@ void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
             for (; i < count; i++) {
                 BtlUnit *entry = (BtlUnit *)btlGetIndexListEntry(indices, (s32)i);
                 if ((entry->status.flags & 0x20) != 0) {
-                    btlInterpolateVectorStep(pose->position);
+                    btlInterpolateVectorStep(pose);
                     VU0_STORE_VF_PTR(vf10, vectors.interpolated);
                     btlMeasureMaskedUnitBounds(0x200, NULL, NULL);
                     VU0_STORE_VF_PTR(vf10, pose->position);
