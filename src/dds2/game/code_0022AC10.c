@@ -514,7 +514,7 @@ void btlReleaseEventData(void) {
     btlBossDebugPrintf(D_0041B768);
 }
 
-extern void btlCreateIndexedSoundResourceNode(s32 slotIndex, void *handle);
+extern void btlCreateIndexedSoundResourceNode(s32 slotIndex, SoundMixer *source);
 
 /* Bind available event effect keys 50–64 into slots 11–25; absent keys are skipped. */
 void btlBindEventEffectResources(void) {
