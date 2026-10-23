@@ -1186,12 +1186,12 @@ void sdfAddressResolverReset(u32 *table, u32 base, const u8 *data, s32 size) {
 }
 
 /* Relocate the words described by this packed-resource transfer chunk. */
-void fldAddressResolver(u32 buffer, FldTransferChunk *chunk) {
-    sdfAddressResolver((s32 *)buffer, (s32)buffer, (const u8 *)((s32)buffer + chunk->offset), chunk->size);
+void fldAddressResolver(u8 *buffer, FldTransferChunk *chunk) {
+    sdfAddressResolver((s32 *)buffer, (s32)(u32)buffer, buffer + chunk->offset, chunk->size);
 }
 
-void fldRelocateTransferChunkWords(u32 buffer, FldTransferChunk *chunk) {
-    sdfAddressResolverReset((u32 *)buffer, buffer, (u8 *)((s32)buffer + chunk->offset), chunk->size);
+void fldRelocateTransferChunkWords(u8 *buffer, FldTransferChunk *chunk) {
+    sdfAddressResolverReset((u32 *)buffer, (u32)buffer, buffer + chunk->offset, chunk->size);
 }
 
 void fldLoadNextFile_SetId_BtlRet(u32 area, u32 floor) {
@@ -1515,7 +1515,7 @@ extern void fldCreateResourceScriptObjects(void);
 extern u8 fldCheckNextFile(void);
 extern void fldLoadFieldPack(void);
 extern void fldFreePac0(void);
-extern void fldAddressResolver(u32 buffer, FldTransferChunk *chunk);
+extern void fldAddressResolver(u8 *buffer, FldTransferChunk *chunk);
 
 const char D_00413128[] = "%sk%03d_%03d.f2";
 
@@ -1603,7 +1603,7 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
                 chunk = (FldTransferChunk *)((u8 *)roomData + 8);
                 fldRoomF2Data = (u32)roomData;
                 fldRoomF2Chunk = chunk;
-                fldAddressResolver((u32)roomData, chunk);
+                fldAddressResolver(roomData, chunk);
                 fldProcessFieldRequest((FldSceneRequest *)fldGetInfoHeader(chunk));
                 break;
             case 2:
@@ -1612,7 +1612,7 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
                 chunk = (FldTransferChunk *)((u8 *)roomData + 8);
                 fldRoomF1Data = (u32)roomData;
                 fldRoomF1Chunk = chunk;
-                fldAddressResolver((u32)roomData, chunk);
+                fldAddressResolver(roomData, chunk);
                 fldLoadSceneRequestFiles((FldLoadRequest *)fldGetInfoHeader(chunk));
                 break;
             }
@@ -1639,7 +1639,7 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
         chunk = (FldTransferChunk *)((u8 *)roomData + 8);
         fldRoomF2Data = (u32)roomData;
         fldRoomF2Chunk = chunk;
-        fldAddressResolver((u32)roomData, chunk);
+        fldAddressResolver(roomData, chunk);
         fldProcessFieldRequest((FldSceneRequest *)fldGetInfoHeader(chunk));
     }
     if (fldGetLocationCoordinateValue(area, room) & 0x10) {
@@ -1652,7 +1652,7 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
         chunk = (FldTransferChunk *)((u8 *)roomData + 8);
         fldRoomKF2Data = (u32)roomData;
         fldRoomKF2Chunk = chunk;
-        fldAddressResolver((u32)roomData, chunk);
+        fldAddressResolver(roomData, chunk);
         fldProcessFieldRequestAlternate((FldSceneRequest *)fldGetInfoHeader(chunk));
     }
     if (isField == 0) {
@@ -1664,7 +1664,7 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
         chunk = (FldTransferChunk *)((u8 *)roomData + 8);
         fldRoomF1Data = (u32)roomData;
         fldRoomF1Chunk = chunk;
-        fldAddressResolver((u32)roomData, chunk);
+        fldAddressResolver(roomData, chunk);
         fldLoadSceneRequestFiles((FldLoadRequest *)fldGetInfoHeader(chunk));
     }
     fldCreateResourceScriptObjects();
@@ -1792,17 +1792,17 @@ void fldReleaseFieldResources(void) {
     }
     if (gFldFileResetMode != 0) {
         if (fldRoomF1Chunk != 0) {
-            fldRelocateTransferChunkWords(fldRoomF1Data, fldRoomF1Chunk);
+            fldRelocateTransferChunkWords((u8 *)fldRoomF1Data, fldRoomF1Chunk);
             fldRoomF1Chunk = 0;
             fldRoomF1Data = 0;
         }
         if (fldRoomF2Chunk != 0) {
-            fldRelocateTransferChunkWords(fldRoomF2Data, fldRoomF2Chunk);
+            fldRelocateTransferChunkWords((u8 *)fldRoomF2Data, fldRoomF2Chunk);
             fldRoomF2Chunk = 0;
             fldRoomF2Data = 0;
         }
         if (fldRoomKF2Chunk != 0) {
-            fldRelocateTransferChunkWords(fldRoomKF2Data, fldRoomKF2Chunk);
+            fldRelocateTransferChunkWords((u8 *)fldRoomKF2Data, fldRoomKF2Chunk);
             fldRoomKF2Chunk = 0;
             fldRoomKF2Data = 0;
         }
