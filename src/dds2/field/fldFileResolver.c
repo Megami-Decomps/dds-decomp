@@ -1979,6 +1979,18 @@ SdfPoolNode *fldDrawGetOt(void) {
 
 #include "fld_sprite_vertex.h"
 
+typedef struct SdfGsTextureAlphaFlushPacket {
+    SdfGsPacketHeader header;
+    SdfGsRegisterWrite textureAlpha;
+    SdfGsRegisterWrite textureFlush;
+} SdfGsTextureAlphaFlushPacket;
+
+typedef char SdfGsTextureAlphaFlushPacket_size_must_be_0x40[
+    (sizeof(SdfGsTextureAlphaFlushPacket) == 0x40) ? 1 : -1];
+typedef char SdfGsTextureAlphaFlushPacket_payload_offsets_must_match[
+    (((u32)&((SdfGsTextureAlphaFlushPacket *)0)->textureAlpha == 0x20) &&
+     ((u32)&((SdfGsTextureAlphaFlushPacket *)0)->textureFlush == 0x30)) ? 1 : -1];
+
 void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, sdfTexHandle_t *texture) {
     void *handle = sdf2DAllocSprite(1);
     FldSpriteVertex *vtx = (FldSpriteVertex *)sdf2DGetPrimPtr((s32)handle);
@@ -2714,8 +2726,8 @@ void fldSubmitTexturedOverlaySprite(void) {
     sdfDrawTag_t *packetList;
     SdfDmaNode *dmaPacket;
     s32 drawBufferIndex;
-    u64 *firstPacket;
-    u64 *secondPacket;
+    SdfGsTextureAlphaFlushPacket *firstPacket;
+    sdfPrimTransPacket_t *secondPacket;
     void *columnPacket;
     FldSpriteVertex *vertex;
     SdfPoolNode *surface;
@@ -2728,27 +2740,27 @@ void fldSubmitTexturedOverlaySprite(void) {
                         dmaPacket);
 
     /* Set texture alpha and flush the texture cache. */
-    firstPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
-    firstPacket[0] = 3;
-    firstPacket[1] = 0x5000000310000000ULL;
-    firstPacket[2] = 0x1000000000008002ULL;
-    firstPacket[3] = 14;
-    firstPacket[4] = 0x0000008000000080ULL;
-    firstPacket[5] = 0x3B;
-    firstPacket[6] = 0;
-    firstPacket[7] = 0x3F;
+    firstPacket = (SdfGsTextureAlphaFlushPacket *)sdfGrAllocPacketBuff(0x40);
+    firstPacket->header.dmaTag = 3;
+    firstPacket->header.vifCommands = 0x5000000310000000ULL;
+    firstPacket->header.gifTag = 0x1000000000008002ULL;
+    firstPacket->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    firstPacket->textureAlpha.value = 0x0000008000000080ULL;
+    firstPacket->textureAlpha.registerId = SDF_GS_TEXA;
+    firstPacket->textureFlush.value = 0;
+    firstPacket->textureFlush.registerId = SDF_GS_TEXFLUSH;
     sdfDrawTagLink(packetList, (u32)firstPacket);
 
     /* Set the primary-context alpha test and blending values. */
-    secondPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
-    secondPacket[0] = 3;
-    secondPacket[1] = 0x5000000310000000ULL;
-    secondPacket[2] = 0x1000000000008002ULL;
-    secondPacket[3] = 14;
-    secondPacket[4] = 0x0000000000031001ULL;
-    secondPacket[5] = 0x47;
-    secondPacket[6] = 0x44;
-    secondPacket[7] = 0x42;
+    secondPacket = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+    secondPacket->header.dmaTag = 3;
+    secondPacket->header.vifCommands = 0x5000000310000000ULL;
+    secondPacket->header.gifTag = 0x1000000000008002ULL;
+    secondPacket->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    secondPacket->registers.test.value = 0x0000000000031001ULL;
+    secondPacket->registers.test.registerId = SDF_GS_TEST_1;
+    secondPacket->registers.alpha.value = 0x44;
+    secondPacket->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(packetList, (u32)secondPacket);
 
     columnPacket = sdf2DAllocSprite(1);
@@ -2779,8 +2791,8 @@ void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
     sdfDrawTag_t *packetList;
     SdfDmaNode *dmaPacket;
     s32 drawBufferIndex;
-    u64 *firstPacket;
-    u64 *secondPacket;
+    SdfGsTextureAlphaFlushPacket *firstPacket;
+    sdfPrimTransPacket_t *secondPacket;
     void *columnPacket;
     FldSpriteVertex *vertex;
     SdfPoolNode *surface;
@@ -2792,26 +2804,26 @@ void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
                         (u32)(kwlnFrameDrawPacketRecords[drawBufferIndex].baseBytes),
                         dmaPacket);
 
-    firstPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
-    firstPacket[0] = 3;
-    firstPacket[1] = 0x5000000310000000ULL;
-    firstPacket[2] = 0x1000000000008002ULL;
-    firstPacket[3] = 14;
-    firstPacket[4] = 0x0000008000000080ULL;
-    firstPacket[5] = 0x3B;
-    firstPacket[6] = 0;
-    firstPacket[7] = 0x3F;
+    firstPacket = (SdfGsTextureAlphaFlushPacket *)sdfGrAllocPacketBuff(0x40);
+    firstPacket->header.dmaTag = 3;
+    firstPacket->header.vifCommands = 0x5000000310000000ULL;
+    firstPacket->header.gifTag = 0x1000000000008002ULL;
+    firstPacket->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    firstPacket->textureAlpha.value = 0x0000008000000080ULL;
+    firstPacket->textureAlpha.registerId = SDF_GS_TEXA;
+    firstPacket->textureFlush.value = 0;
+    firstPacket->textureFlush.registerId = SDF_GS_TEXFLUSH;
     sdfDrawTagLink(packetList, (u32)firstPacket);
 
-    secondPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
-    secondPacket[0] = 3;
-    secondPacket[1] = 0x5000000310000000ULL;
-    secondPacket[2] = 0x1000000000008002ULL;
-    secondPacket[3] = 14;
-    secondPacket[4] = 0x0000000000033001ULL;
-    secondPacket[5] = 0x47;
-    secondPacket[6] = 0x0000008000000064ULL;
-    secondPacket[7] = 0x42;
+    secondPacket = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+    secondPacket->header.dmaTag = 3;
+    secondPacket->header.vifCommands = 0x5000000310000000ULL;
+    secondPacket->header.gifTag = 0x1000000000008002ULL;
+    secondPacket->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    secondPacket->registers.test.value = 0x0000000000033001ULL;
+    secondPacket->registers.test.registerId = SDF_GS_TEST_1;
+    secondPacket->registers.alpha.value = 0x0000008000000064ULL;
+    secondPacket->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(packetList, (u32)secondPacket);
 
     columnPacket = sdf2DAllocSprite(1);
@@ -2849,8 +2861,8 @@ void fldSubmitOverlayStateAndSprite(s32 alpha) {
     sdfDrawTag_t *packetList;
     SdfDmaNode *dmaPacket;
     s32 drawBufferIndex;
-    u64 *texturePacket;
-    u64 *blendPacket;
+    SdfGsTextureAlphaFlushPacket *texturePacket;
+    sdfPrimTransPacket_t *blendPacket;
     void *columnPacket;
     FldSpriteVertex *vertex;
     SdfPoolNode *surface;
@@ -2862,26 +2874,26 @@ void fldSubmitOverlayStateAndSprite(s32 alpha) {
                         (u32)(kwlnFrameDrawPacketRecords[drawBufferIndex].baseBytes),
                         dmaPacket);
 
-    texturePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
-    texturePacket[0] = 3;
-    texturePacket[1] = 0x5000000310000000ULL;
-    texturePacket[2] = 0x1000000000008002ULL;
-    texturePacket[3] = 14;
-    texturePacket[4] = 0x0000008000000080ULL;
-    texturePacket[5] = 0x3B;
-    texturePacket[6] = 0;
-    texturePacket[7] = 0x3F;
+    texturePacket = (SdfGsTextureAlphaFlushPacket *)sdfGrAllocPacketBuff(0x40);
+    texturePacket->header.dmaTag = 3;
+    texturePacket->header.vifCommands = 0x5000000310000000ULL;
+    texturePacket->header.gifTag = 0x1000000000008002ULL;
+    texturePacket->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    texturePacket->textureAlpha.value = 0x0000008000000080ULL;
+    texturePacket->textureAlpha.registerId = SDF_GS_TEXA;
+    texturePacket->textureFlush.value = 0;
+    texturePacket->textureFlush.registerId = SDF_GS_TEXFLUSH;
     sdfDrawTagLink(packetList, (u32)texturePacket);
 
-    blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
-    blendPacket[0] = 3;
-    blendPacket[1] = 0x5000000310000000ULL;
-    blendPacket[2] = 0x1000000000008002ULL;
-    blendPacket[3] = 14;
-    blendPacket[4] = 0x0000000000033001ULL;
-    blendPacket[5] = 0x47;
-    blendPacket[6] = ((u64)(u32)alpha << 32) | 0x64;
-    blendPacket[7] = 0x42;
+    blendPacket = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+    blendPacket->header.dmaTag = 3;
+    blendPacket->header.vifCommands = 0x5000000310000000ULL;
+    blendPacket->header.gifTag = 0x1000000000008002ULL;
+    blendPacket->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    blendPacket->registers.test.value = 0x0000000000033001ULL;
+    blendPacket->registers.test.registerId = SDF_GS_TEST_1;
+    blendPacket->registers.alpha.value = ((u64)(u32)alpha << 32) | 0x64;
+    blendPacket->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(packetList, (u32)blendPacket);
 
     columnPacket = sdf2DAllocSprite(1);
