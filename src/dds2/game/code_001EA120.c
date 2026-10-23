@@ -182,8 +182,8 @@ s32 btlCanUseLinkedActor(BtlLinkedCommand *actor) {
 }
 
 /* Return whether a live linked group has its byte at 0x10 marked. */
-s32 btlHasMarkedEntry10(s32 actor) {
-    ActionStateLink *linked = ((BtlLinkedCommand *)actor)->link;
+s32 btlHasMarkedEntry10(BtlLinkedCommand *command) {
+    ActionStateLink *linked = command->link;
     u32 count;
     BtlOperandGroup *entry;
     u32 i;

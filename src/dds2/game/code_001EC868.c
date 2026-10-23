@@ -401,7 +401,7 @@ s32 btlHasFirstLinkedCategoryFlag1000(BtlLinkedCommand *actor);
 
 /* Find an unmarked linked kind-two slot whose unit is not disabled. */ s32 btlHasIdleLinkedSlotKindTwo(u8 *actor);
 
-/* Return whether a live linked group has its byte at 0x10 marked. */ s32 btlHasMarkedEntry10(s32 actor);
+/* Return whether a live linked group has its byte at 0x10 marked. */ s32 btlHasMarkedEntry10(BtlLinkedCommand *command);
 
 void btlInitMotionTransformFromComponents(BtlCamState *object, f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, f32 vw, f32 fovDegrees);
 
@@ -695,7 +695,7 @@ void btlPrepareHeightScaledActionCameraPose(BtlLinkedCommand *action, BtlCamStat
 
         btlAdjustCameraDirectionForDefaultPlane(from);
         btlAdjustCameraDirectionForDefaultPlane(to);
-        if (btlHasMarkedEntry10((s32)action)) {
+        if (btlHasMarkedEntry10(action)) {
             action->durationFrames = btlGetUnitMotionDurationFrames(unit, unit->motionId);
             action->flags |= 0x11;
         } else {
