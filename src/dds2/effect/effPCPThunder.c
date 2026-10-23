@@ -2692,8 +2692,8 @@ void effCopyResourceGroupVector(void *dst, void *src) {
     SDF_VU0_COPYVECTOR(dst, src);
 }
 
-void effThunderSetCurveGroupTint(s32 work, u32 value) {
-    *(u32 *)(work + 0x54) = value;
+void effThunderSetCurveGroupTint(EffPcpThunderGroup *group, u32 value) {
+    group->tintColor = value;
 }
 
 extern EffThunderDrawParams dds3BezierVertexCount;
