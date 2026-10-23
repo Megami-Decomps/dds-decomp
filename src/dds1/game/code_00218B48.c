@@ -255,9 +255,9 @@ extern MdlResourceTable D_00365858[];
 
 extern MdlResourceTable D_00367900[];
 
-extern s32 D_003BBB6C;
+extern struct sdfMemHandle_t *D_003BBB6C;
 
-extern s32 D_003BBB70;
+extern struct sdfMemHandle_t *D_003BBB70;
 
 /* Load a viewer package; flag 2 enables the extra request-preparation step. */
 void mdlPackDecode(s32 first, s32 second, s32 flags, void *requestFirst, s32 requestSecond) {
@@ -299,8 +299,8 @@ void mdlReleaseHddFileList(void) {
     D_00367900[MDL_VIEWER_TABLE_SLOT].count = 0;
     D_00365858[MDL_VIEWER_TABLE_SLOT].entries = NULL;
     D_00365858[MDL_VIEWER_TABLE_SLOT].count = 0;
-    sdfMemFreeHandleDirect(&D_003BBB6C);
-    sdfMemFreeHandleDirect(&D_003BBB70);
+    sdfMemFreeHandleDirect((s32 *)&D_003BBB6C);
+    sdfMemFreeHandleDirect((s32 *)&D_003BBB70);
 }
 
 
@@ -314,14 +314,14 @@ void mdlMakeHddFileListDummy(void) {
     char *copiedText;
 
     mdlReleaseHddFileList();
-    D_003BBB6C = (u32)sdfMemAllocDirect(MDL_VIEWER_HEADER_BYTES);
-    D_003BD880 = (MdlResourceSelection *)sdfMemLock((struct sdfMemHandle_t *)(D_003BBB6C));
+    D_003BBB6C = sdfMemAllocDirect(MDL_VIEWER_HEADER_BYTES);
+    D_003BD880 = (MdlResourceSelection *)sdfMemLock(D_003BBB6C);
     D_003BD880->pathTable = 5;
     D_003BD880->pathIndex = 0;
     D_003BD880->unk4 = 0x1000;
     D_003BD880->unk6 = 0x3E8;
-    D_003BBB70 = (u32)sdfMemAllocDirect(MDL_VIEWER_NAME_TABLE_BYTES);
-    D_003BD884 = (MdlResourcePath *)sdfMemLock((struct sdfMemHandle_t *)(D_003BBB70));
+    D_003BBB70 = sdfMemAllocDirect(MDL_VIEWER_NAME_TABLE_BYTES);
+    D_003BD884 = (MdlResourcePath *)sdfMemLock(D_003BBB70);
     for (sourceIndex = 0; sourceIndex != MDL_VIEWER_LABEL_COUNT; sourceIndex++) {
         switch (sourceIndex) {
         case 0:
@@ -469,10 +469,10 @@ void mdlMakeHddFileList(void) {
         }
         if (count != 0) {
             index = 0;
-            D_003BBB6C = (u32)sdfMemAllocDirect(count * sizeof(MdlResourceSelection));
-            D_003BD880 = sdfMemLock((sdfMemHandle_t *)D_003BBB6C);
-            D_003BBB70 = (u32)sdfMemAllocDirect(count * sizeof(MdlResourcePath));
-            D_003BD884 = sdfMemLock((sdfMemHandle_t *)D_003BBB70);
+            D_003BBB6C = sdfMemAllocDirect(count * sizeof(MdlResourceSelection));
+            D_003BD880 = sdfMemLock(D_003BBB6C);
+            D_003BBB70 = sdfMemAllocDirect(count * sizeof(MdlResourcePath));
+            D_003BD884 = sdfMemLock(D_003BBB70);
             memset(D_003BD884, 0, count * sizeof(MdlResourcePath));
             file = D_003BD87C;
             while (file != NULL) {
@@ -3858,9 +3858,9 @@ void evtSetUnitPos(u32 targetKey, u32 sourceKey) {
     }
 }
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBB6C);
+INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_00218B48", D_003BBB6C);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBB70);
+INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_00218B48", D_003BBB70);
 
 INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBB78);
 
