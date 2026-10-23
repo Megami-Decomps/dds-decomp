@@ -3462,7 +3462,7 @@ s32 fldFindEffectByName(const char *name) {
 
     for (i = 0; i < fldNpcModelTable; i++) {
         if (fldModelSlotTable[i].unk0 != 999 && strcmp(fldModelSlotTable[i].name, name) == 0) {
-            return fldModelSlotTable[i].object[1];
+            return (s32)fldModelSlotTable[i].object->key;
         }
     }
     return 0;

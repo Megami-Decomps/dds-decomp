@@ -3603,7 +3603,7 @@ void func_0014C2B8(s32 key, f32 *orientation, s32 room, char *name, s32 argument
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
         object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
         dds3SetUnitObjectId(object, (u32)"NPC_MDL_UNIT");
-        fldModelSlotTable[outputIndex].object = (s32 *)object;
+        fldModelSlotTable[outputIndex].object = object;
         dds3RebuildObjectModelContext(object, kind, resource);
         dds3SetSclPoseSet(object, scale);
         if (kind == 3 && resource == 8) dds3GetRadiusPoseSet(object, 50.0f);
@@ -3941,7 +3941,7 @@ s32 fldFindEffectByName(const char *name) {
 
     for (i = 0; i < fldNpcModelTable; i++) {
         if (fldModelSlotTable[i].unk0 != 999 && strcmp(fldModelSlotTable[i].name, name) == 0) {
-            return fldModelSlotTable[i].object[1];
+            return (s32)fldModelSlotTable[i].object->key;
         }
     }
     return 0;
