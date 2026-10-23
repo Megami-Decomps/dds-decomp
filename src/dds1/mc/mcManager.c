@@ -200,8 +200,8 @@ McPollResult sdfMcFuncRead1(void) {
 
 /* Queue the SDK's write of an EE buffer to an open file; this entry does
  * not report completion. */
-void sdfMcFuncWrite(s32 fileDescriptor, u32 dataAddress, u32 dataSize) {
-    sceMcWrite(fileDescriptor, (const void *)dataAddress, (s32)dataSize);
+void sdfMcFuncWrite(s32 fileDescriptor, const void *data, u32 dataSize) {
+    sceMcWrite(fileDescriptor, data, (s32)dataSize);
 }
 
 /* Poll once: any completed nonnegative write status returns 1; -4 becomes

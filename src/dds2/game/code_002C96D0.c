@@ -1915,7 +1915,7 @@ s32 slSaveWriteFile(char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, voi
     return (s32)slSaveProc_openFile;
 }
 
-extern void sdfMcFuncWrite(s32 request, u32 first, u32 second);
+extern void sdfMcFuncWrite(s32 request, const void *data, u32 size);
 extern s32 slSaveProc_writeFile(void);
 extern s32 slSaveProc_waitDataReady(void);
 
@@ -1929,7 +1929,7 @@ s32 slSaveProc_openFile(void) {
         if (fileWritePendingRequestSlot != 0 && *fileWritePendingRequestSlot != 0) {
             return (s32)slSaveProc_waitDataReady;
         }
-        sdfMcFuncWrite(fileSaveFileDescriptor, *fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
+        sdfMcFuncWrite(fileSaveFileDescriptor, (const void *)*fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
         return (s32)slSaveProc_writeFile;
     }
     if (status == MC_POLL_ERROR) {
@@ -1983,7 +1983,7 @@ s32 slSaveProc_waitDataReady(void) {
     if (fileSaveIconRequest != 0) {
         return 0;
     }
-    sdfMcFuncWrite(fileSaveFileDescriptor, *fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
+    sdfMcFuncWrite(fileSaveFileDescriptor, (const void *)*fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
     return (s32)slSaveProc_writeFile;
 }
 
