@@ -2284,9 +2284,9 @@ u64 btlCommandTaskReturnStart(u8 *task) {
         actor = *(BtlUnit **)(task + 0x18);
     }
     if ((u32)actor->status.flags & 0x200) {
-        btlBossDebugPrintf("return:player=%X[%X]\n", ((u8 *)actor)[0x2C4], *(u16 *)((u8 *)actor + 0x124));
+        btlBossDebugPrintf("return:player=%X[%X]\n", actor->partyIndex, actor->partyRecord.unitId);
     } else {
-        btlBossDebugPrintf("return:enemy=%X\n", *(u16 *)((u8 *)actor + 0x124));
+        btlBossDebugPrintf("return:enemy=%X\n", actor->partyRecord.unitId);
     }
     if ((u32)actor->status.flags & 0x400) {
         btlStartTask(btlCreateCommandSoundUpdateTask());
