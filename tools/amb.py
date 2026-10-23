@@ -16,7 +16,6 @@ import hashlib
 import json
 import math
 import re
-import shlex
 import struct
 import sys
 from dataclasses import dataclass
@@ -24,6 +23,7 @@ from pathlib import Path
 
 import fld
 import reloc
+import source_tokens
 
 
 HEADER_SIZE = 0x20
@@ -770,7 +770,7 @@ def parse_source(source: str) -> tuple[Operation, ...]:
             tokens = ["bytes", raw_bytes.group(1)]
         else:
             try:
-                tokens = shlex.split(raw_line, comments=True, posix=True)
+                tokens = source_tokens.split(raw_line)
             except ValueError as exc:
                 raise AmbError(f"line {line_number}: {exc}") from exc
         if not tokens:

@@ -17,13 +17,13 @@ import hashlib
 import json
 import math
 import re
-import shlex
 import struct
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 
 import reloc
+import source_tokens
 
 
 HEADER_SIZE = 0x40
@@ -1127,7 +1127,7 @@ def validate_links(
     procedures: set[str] = set()
     for line_number, line in enumerate(script_source.splitlines(), 1):
         try:
-            tokens = shlex.split(line, comments=True, posix=True)
+            tokens = source_tokens.split(line)
         except ValueError as exc:
             raise FldError(f"script line {line_number}: {exc}") from exc
         if tokens and tokens[0] == "procedure":
@@ -1147,7 +1147,7 @@ def validate_links(
 
     for line_number, line in enumerate(wap_source.splitlines(), 1):
         try:
-            tokens = shlex.split(line, comments=True, posix=True)
+            tokens = source_tokens.split(line)
         except ValueError as exc:
             raise FldError(f"WAP line {line_number}: {exc}") from exc
         if not tokens:
@@ -2011,7 +2011,7 @@ def parse_source(source: str) -> tuple[Operation, ...]:
             tokens = [raw_bytes.group(1), raw_bytes.group(2)]
         else:
             try:
-                tokens = shlex.split(raw_line, comments=True, posix=True)
+                tokens = source_tokens.split(raw_line)
             except ValueError as exc:
                 raise FldError(f"line {line_number}: {exc}") from exc
         if not tokens:
