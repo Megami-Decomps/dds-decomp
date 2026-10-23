@@ -772,7 +772,7 @@ extern void fldDestroyTitleTask();
 
 extern void fldReleaseObjectSlots();
 
-extern void fldReleaseTitleSlots();
+extern void fldReleaseTitleSlots(void);
 
 extern void fldReleaseResourceHandles();
 
@@ -1689,8 +1689,6 @@ extern FieldPlayerSceneWork fldSceneParam;
 
 extern void fldDrwZAlloc(void);
 
-extern void fldReleaseTitleSlots();
-
 extern void fldCreateResourceScriptObjects(void);
 
 extern u8 fldCheckNextFile(void);
@@ -1910,13 +1908,13 @@ void fldReleaseFieldResources(void) {
     if (fldGlobalBase.area < 0xC8) {
         if (fldGlobalBase.reuseAreaResources != 0) {
             if ((u32)(fldGlobalBase.area - 0x1B) < 2U) {
-                fldReleaseTitleSlots(&fldGlobalBase);
+                fldReleaseTitleSlots();
                 fldReleaseMenuSlotsAfterWait();
                 fldReleaseSceneRecordChunk();
                 fldFreePac0();
             }
         } else {
-            fldReleaseTitleSlots(&fldGlobalBase);
+            fldReleaseTitleSlots();
             fldReleaseMenuSlotsAfterWait();
             fldReleaseSceneRecordChunk();
             fldReleaseResourceHandles();
@@ -8210,4 +8208,3 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BADF8);
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldAuxRecordResource);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldValueRecordResource);
-
