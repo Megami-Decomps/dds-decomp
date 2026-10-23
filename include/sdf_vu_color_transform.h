@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+struct SdfDmaTagHeader;
+
 /* VU0 input basis and emitted base/delta color vectors. */
 typedef struct SdfVuColorTransform {
     u8 opaque00[4]; /* 0x00 */
@@ -13,7 +15,8 @@ typedef struct SdfVuColorTransform {
     f32 colorDelta[4]; /* 0x20 */
 } SdfVuColorTransform;
 
-void corePktMakeFaceDivParm(SdfVuColorTransform *result, u32 reference,
+void corePktMakeFaceDivParm(SdfVuColorTransform *result,
+                                    const struct SdfDmaTagHeader *reference,
                                     u32 packedColor, u32 firstColor,
                                     u32 secondColor, f32 blend, f32 scale,
                                     f32 y);
