@@ -2073,12 +2073,11 @@ void *btlGetTaskArguments(void *task) {
 }
 
 /* Invoke the finish hook before unlinking, then release the task block. */
-void btlFreeTask(s32 taskAddress) {
+void btlFreeTask(BtlRuntimeTask *task) {
     BtlActorWork *context;
     BtlRuntimeTask *next;
     BtlRuntimeTask *previous;
     void (*cleanup)(u32 *);
-    BtlRuntimeTask *task = (BtlRuntimeTask *)taskAddress;
     cleanup = task->onFinish;
     if (cleanup != 0) {
         cleanup(task->args);
@@ -2096,7 +2095,7 @@ void btlFreeTask(s32 taskAddress) {
     } else {
         context->taskTail = task->prev;
     }
-    sdfChipFreeDirect((void *)taskAddress);
+    sdfChipFreeDirect(task);
 }
 
 /* Install a fresh handle/reset phase counters, invoke startup, then reread handle. */
@@ -2124,15 +2123,14 @@ void btlResetDeferredTaskQueue(void) {
 
 /* Advance a started task through wait/delay/update/release.
  * Fallthrough is intentional: zero delays permit all phases in one poll. */
-void btlRunTask(s32 taskAddress) {
-    BtlRuntimeTask *task = (BtlRuntimeTask *)taskAddress;
+void btlRunTask(BtlRuntimeTask *task) {
     u32 counter;
 
     if (!(task->flags & BTL_TASK_FLAG_STARTED)) {
         return;
     }
     if (task->flags & BTL_TASK_FLAG_RELEASE_REQUESTED) {
-        btlFreeTask(taskAddress);
+        btlFreeTask(task);
         return;
     }
     counter = task->pollCount;
@@ -2161,7 +2159,7 @@ void btlRunTask(s32 taskAddress) {
         }
     case BTL_TASK_PHASE_END_DELAY:
         if (task->endDelay <= 0) {
-            btlFreeTask(taskAddress);
+            btlFreeTask(task);
         } else {
             task->endDelay = task->endDelay - 1;
         }
@@ -2176,7 +2174,7 @@ void btlSweepFinishedTasks(void) {
     while (task != 0) {
         next = task->next;
         if (!(task->flags & BTL_TASK_FLAG_DEFERRED)) {
-            btlRunTask((s32)task);
+            btlRunTask(task);
         } else {
             task->deferNext = 0;
             if (btlDeferredTaskTail != 0) {
@@ -2197,7 +2195,7 @@ void btlClearDeferredTasks(void) {
     BtlRuntimeTask *node = btlDeferredTaskHead;
     while (node != 0) {
         BtlRuntimeTask *next = node->deferNext;
-        btlRunTask((s32)node);
+        btlRunTask(node);
         node = next;
     }
     btlDeferredTaskTail = 0;
@@ -2209,7 +2207,7 @@ void btlClearTaskLists(void) {
     BtlRuntimeTask *task = ((BtlActorWork *)btlGetRuntime())->taskTail;
     while (task != 0) {
         BtlRuntimeTask *next = task->prev;
-        btlFreeTask((s32)task);
+        btlFreeTask(task);
         task = next;
     }
     btlDeferredTaskTail = 0;
