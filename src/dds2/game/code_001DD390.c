@@ -6183,8 +6183,8 @@ void btlClearAllUnitDefeatCandidatesTask(void) {
     btlClearAllUnitDefeatCandidates();
 }
 
-void btlFlagLinkedGroupDefeatCandidatesTask(s32 action) {
-    btlFlagMatchingUnitsDefeatCandidate(((BtlLinkedCommand *)action)->link->unit->status.flags & 0x600);
+void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *command) {
+    btlFlagMatchingUnitsDefeatCandidate(command->link->unit->status.flags & 0x600);
 }
 
 void btlApplyCombinedActorFlags(BtlLinkedCommand *command) {

@@ -377,7 +377,7 @@ void btlClearUnitDefeatCandidate(BtlUnit *unit);
 
 void btlCopyUnitRotationQuaternion(BtlUnit *unit, void *dst);
 
-void btlFlagLinkedGroupDefeatCandidatesTask(s32 action);
+void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *command);
 
 void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 
@@ -3969,7 +3969,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         btlBuildPresetCameraPose(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 4);
         btlClearAllUnitDefeatCandidatesTask();
-        btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+        btlFlagLinkedGroupDefeatCandidatesTask(command);
         break;
     case 0x1D3:
         CURSOR->scriptSetIndex = 1;
@@ -3978,7 +3978,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         btlBuildPresetCameraPose(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 4);
         btlClearAllUnitDefeatCandidatesTask();
-        btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+        btlFlagLinkedGroupDefeatCandidatesTask(command);
         break;
     case 0x1DC:
         CURSOR->scriptSetIndex = 2;
@@ -3987,7 +3987,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         CURSOR->scriptIndex = 0x17;
         btlInitializeCameraCursorFromPreset(command, pose, 0, 4);
         btlClearAllUnitDefeatCandidatesTask();
-        btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+        btlFlagLinkedGroupDefeatCandidatesTask(command);
         break;
     case 0x1BB:
         CURSOR->scriptSetIndex = 3;
@@ -4003,7 +4003,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         CURSOR->scriptIndex = 0x16;
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         btlClearAllUnitDefeatCandidatesTask();
-        btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+        btlFlagLinkedGroupDefeatCandidatesTask(command);
         break;
     case 0x1D2:
         CURSOR->scriptSetIndex = 2;
@@ -4012,7 +4012,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         CURSOR->scriptIndex = pathChoices[(s16)btlNextScaledRandom(4)];
         btlInitializeCameraCursorFromPreset(command, pose, 0, 4);
         btlClearAllUnitDefeatCandidatesTask();
-        btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+        btlFlagLinkedGroupDefeatCandidatesTask(command);
         break;
     case 0x1D7:
         CURSOR->scriptSetIndex = 2;
@@ -4025,7 +4025,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         }
         btlInitializeCameraCursorFromPreset(command, pose, 0, 4);
         btlClearAllUnitDefeatCandidatesTask();
-        btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+        btlFlagLinkedGroupDefeatCandidatesTask(command);
         break;
     case 0x1CF:
         CURSOR->scriptSetIndex = 3;
@@ -4086,7 +4086,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         btlBuildPresetCameraPose(command, pose, 1, sideChoices[choice]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         btlClearAllUnitDefeatCandidatesTask();
-        btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+        btlFlagLinkedGroupDefeatCandidatesTask(command);
         break;
     case 0x1E4:
     case 0x1E5:
@@ -4114,7 +4114,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         btlBuildPresetCameraPose(command, pose, 1, sideChoices[choice]);
         btlInitializeCameraCursorFromPreset(command, pose, 0, 5);
         btlClearAllUnitDefeatCandidatesTask();
-        btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+        btlFlagLinkedGroupDefeatCandidatesTask(command);
         break;
     case 0x5B:
     case 0x5C:
@@ -4705,7 +4705,7 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
                 (f32)CURSOR->frame < instruction->startFrame + instruction->duration) {
                 ++instruction;
                 btlClearAllUnitDefeatCandidatesTask();
-                btlFlagLinkedGroupDefeatCandidatesTask((s32)action);
+                btlFlagLinkedGroupDefeatCandidatesTask(action);
             } else {
                 ++instruction;
             }
