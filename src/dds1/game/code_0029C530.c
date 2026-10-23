@@ -12279,12 +12279,10 @@ typedef struct EffectPollRecord {
     char fullName[0xC8]; /* Formatted path or selected built-in name. */
     s32 type;   // 0xC8
     s32 state;  // 0xCC
-    s32 value;  // 0xD0
+    s32 pathVariant; // 0xD0
 } EffectPollRecord;
 
-void effPollResourceBank(s32 flags, void *out) {
-    EffectPollRecord *record = out;
-
+void effPollResourceBank(s32 flags, EffectPollRecord *record) {
     if (effResourceBankEntries == 0) {
         effResourceBankEntries = btlScanDirectory(0, flags);
         if (flags & BTL_RESOURCE_SCAN_GENERAL) {
@@ -12305,7 +12303,7 @@ void effPollResourceBank(s32 flags, void *out) {
         btlUpdateAndDrawResourceBrowser(effResourceBankDescriptor);
         record->state = btlGetResourceBrowserSelectionStatus(effResourceBankDescriptor);
         record->type = btlFormatSelectedResourceName(effResourceBankDescriptor, record->fullName);
-        record->value = btlGetResourcePathVariant(effResourceBankDescriptor);
+        record->pathVariant = btlGetResourcePathVariant(effResourceBankDescriptor);
         if (record->state == BTL_RESOURCE_SELECTION_ACCEPTED) {
             btlDestroyResourceDescriptor(effResourceBankDescriptor);
             effResourceBankDescriptor = 0;
@@ -13071,35 +13069,29 @@ s32 effEditUSpherePolygonFadeTrack(s32 work) {
 
 
 
-/* Poll record from the resource-bank queue; count is negated to find its entry. */
-typedef struct EffBankStatus {
-    char fullName[0xC8]; /* Formatted path or selected built-in name. */
-    s32 type;         // 0xC8
-    s32 state;        // 0xCC
-    s32 count;        // 0xD0
-} EffBankStatus;
-
-extern void effPollResourceBank(s32, void *);
+/* Poll record from the resource-bank queue; the path variant selects its entry. */
+extern void effPollResourceBank(s32, EffectPollRecord *);
 
 s32 effPollFileQueueRecord(s32 request) {
     u8 record[0xE0];
+    EffectPollRecord *status = (EffectPollRecord *)record;
     s32 kind;
     s32 result = 0x600001;
 
-    effPollResourceBank(request, record);
-    kind = ((EffBankStatus *)record)->state;
+    effPollResourceBank(request, status);
+    kind = status->state;
     if (kind == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
     } else if (kind == BTL_RESOURCE_SELECTION_ACCEPTED) {
-        if (((EffBankStatus *)record)->type != 8) {
-            FileJob *entry = fileQueueGetAt(effFileQueue, -((EffBankStatus *)record)->count);
+        if (status->type != 8) {
+            FileJob *entry = fileQueueGetAt(effFileQueue, -status->pathVariant);
             if (effCurrentFileQueueEntry != entry) {
                 fileQueueDetachSectorFollower(effFileQueue, effCurrentFileQueueEntry);
                 fileQueueLinkJobToSectorLeader(effFileQueue, effCurrentFileQueueEntry, entry);
             }
         } else {
             fileQueueDetachSectorFollower(effFileQueue, effCurrentFileQueueEntry);
-            fileJobSetSecondaryData(effQueuedFileHandle, record + 0xD0, 4, 4);
+            fileJobSetSecondaryData(effQueuedFileHandle, &status->pathVariant, 4, 4);
         }
         result = 0x400002;
     }
