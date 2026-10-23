@@ -1326,13 +1326,13 @@ struct sdfMemHandle_t *fldLoadCachedRoomResourceIfLocationMatches(void **destina
     return NULL;
 }
 
-struct sdfMemHandle_t *fldLoadCachedRoomF1ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
+struct sdfMemHandle_t *fldLoadCachedRoomF1ResourceIfLocationMatches(u8 **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldGlobalBase;
 
     if (state->resourceArea == area) {
         if (state->resourceFloor == room) {
             struct sdfMemHandle_t *allocation = sdfMemAllocDirect(fldCachedRoomF1ResourceSize);
-            void *data = (void *)sdfMemLock(allocation);
+            u8 *data = (u8 *)sdfMemLock(allocation);
             *destination = data;
             memcpy(data, (void *)fldCachedRoomF1ResourceData, fldCachedRoomF1ResourceSize);
             return allocation;
@@ -1341,13 +1341,13 @@ struct sdfMemHandle_t *fldLoadCachedRoomF1ResourceIfLocationMatches(void **desti
     return NULL;
 }
 
-struct sdfMemHandle_t *fldLoadCachedRoomF2ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
+struct sdfMemHandle_t *fldLoadCachedRoomF2ResourceIfLocationMatches(u8 **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldGlobalBase;
 
     if (state->resourceArea == area) {
         if (state->resourceFloor == room) {
             struct sdfMemHandle_t *allocation = sdfMemAllocDirect(fldCachedRoomF2ResourceSize);
-            void *data = (void *)sdfMemLock(allocation);
+            u8 *data = (u8 *)sdfMemLock(allocation);
             *destination = data;
             memcpy(data, (void *)fldCachedRoomF2ResourceData, fldCachedRoomF2ResourceSize);
             return allocation;
@@ -1356,13 +1356,13 @@ struct sdfMemHandle_t *fldLoadCachedRoomF2ResourceIfLocationMatches(void **desti
     return NULL;
 }
 
-struct sdfMemHandle_t *fldLoadCachedRoomKF2ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
+struct sdfMemHandle_t *fldLoadCachedRoomKF2ResourceIfLocationMatches(u8 **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldGlobalBase;
 
     if (state->resourceArea == area) {
         if (state->resourceFloor == room) {
             struct sdfMemHandle_t *allocation = sdfMemAllocDirect(fldCachedRoomKF2ResourceSize);
-            void *data = (void *)sdfMemLock(allocation);
+            u8 *data = (u8 *)sdfMemLock(allocation);
             *destination = data;
             memcpy(data, (void *)fldCachedRoomKF2ResourceData, fldCachedRoomKF2ResourceSize);
             return allocation;
@@ -1527,7 +1527,7 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
     char path[0x80];
     char directory[0x40];
     void *roomOffsets;
-    void *roomData;
+    u8 *roomData;
     FldTransferChunk *chunk;
     struct FileRequest *request;
     FieldPlayerSceneWork *sceneWork = &fldSceneParam;
@@ -1634,9 +1634,9 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
         sprintf(path, D_00436030, resourceName);
         fldCachedRoomF2ResourceAllocation = fldLoadCachedRoomF2ResourceIfLocationMatches(&roomData, area, room);
         if (fldCachedRoomF2ResourceAllocation == NULL) {
-            fldCachedRoomF2ResourceAllocation = sdfDevLoadFileEx(path, &roomData, 0);
+            fldCachedRoomF2ResourceAllocation = sdfDevLoadFileEx(path, (u32 *)&roomData, 0);
         }
-        chunk = (FldTransferChunk *)((u8 *)roomData + 8);
+        chunk = (FldTransferChunk *)(roomData + 8);
         fldRoomF2Data = roomData;
         fldRoomF2Chunk = chunk;
         fldAddressResolver(roomData, chunk);
@@ -1647,9 +1647,9 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
         sprintf(path, D_00413128, directory, area, room);
         fldCachedRoomKF2ResourceAllocation = fldLoadCachedRoomKF2ResourceIfLocationMatches(&roomData, area, room);
         if (fldCachedRoomKF2ResourceAllocation == NULL) {
-            fldCachedRoomKF2ResourceAllocation = sdfDevLoadFileEx(path, &roomData, 0);
+            fldCachedRoomKF2ResourceAllocation = sdfDevLoadFileEx(path, (u32 *)&roomData, 0);
         }
-        chunk = (FldTransferChunk *)((u8 *)roomData + 8);
+        chunk = (FldTransferChunk *)(roomData + 8);
         fldRoomKF2Data = roomData;
         fldRoomKF2Chunk = chunk;
         fldAddressResolver(roomData, chunk);
@@ -1659,9 +1659,9 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
         sprintf(path, D_00436038, resourceName);
         fldCachedRoomF1ResourceAllocation = fldLoadCachedRoomF1ResourceIfLocationMatches(&roomData, area, room);
         if (fldCachedRoomF1ResourceAllocation == NULL) {
-            fldCachedRoomF1ResourceAllocation = sdfDevLoadFileEx(path, &roomData, 0);
+            fldCachedRoomF1ResourceAllocation = sdfDevLoadFileEx(path, (u32 *)&roomData, 0);
         }
-        chunk = (FldTransferChunk *)((u8 *)roomData + 8);
+        chunk = (FldTransferChunk *)(roomData + 8);
         fldRoomF1Data = roomData;
         fldRoomF1Chunk = chunk;
         fldAddressResolver(roomData, chunk);
