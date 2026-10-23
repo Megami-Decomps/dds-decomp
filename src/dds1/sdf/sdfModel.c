@@ -347,7 +347,7 @@ DevRequest *sdfMatListMake(DevRequest *lookup, u32 *data);
 
 /* Build the buffered model, parse its asset records and create one draw node per
  * item, linking each node under its parent item's node when it has one. */
-sdfModelRootNode_t *sdfModelMakeRoot(void *assetData, sdfModelDef_t *listRef) {
+sdfModelRootNode_t *sdfModelMakeRoot(DevRequest *resourceList, sdfModelDef_t *listRef) {
     s32 itemIndex = 0;
     sdfModelRootNode_t *model = sdfModelRootNew();
     SdfItemList *list;
@@ -356,8 +356,8 @@ sdfModelRootNode_t *sdfModelMakeRoot(void *assetData, sdfModelDef_t *listRef) {
     sdfModelNode_t *node;
     sdfModelNode_t *parent;
 
-    model->assetData = assetData;
-    model->resources = sdfMatListMake(assetData, listRef->serializedAssetData);
+    model->assetData = resourceList;
+    model->resources = sdfMatListMake(resourceList, listRef->serializedAssetData);
     model->chunkTable = listRef->chunkTable;
     sdfModelMakeMorphList(model, listRef->slotPairCount);
     list = listRef->items;
@@ -382,9 +382,9 @@ sdfModelRootNode_t *sdfModelMakeRoot(void *assetData, sdfModelDef_t *listRef) {
 }
 
 /* Attach each 0x50-byte item to the corresponding model draw node. */
-sdfModelRootNode_t *sdfModelMake(void *assetData, sdfModelDef_t *listRef) {
+sdfModelRootNode_t *sdfModelMake(DevRequest *resourceList, sdfModelDef_t *listRef) {
     s32 itemIndex = 0;
-    sdfModelRootNode_t *model = sdfModelMakeRoot(assetData, listRef);
+    sdfModelRootNode_t *model = sdfModelMakeRoot(resourceList, listRef);
     SdfItemList *list = listRef->items;
     s32 count = list->count;
     SdfItem *item = list->firstItem;
@@ -400,9 +400,9 @@ sdfModelRootNode_t *sdfModelMake(void *assetData, sdfModelDef_t *listRef) {
 }
 
 /* Attach each item using the alternate draw-node setup path. */
-sdfModelRootNode_t *sdfModelMakeEarly(void *assetData, sdfModelDef_t *listRef) {
+sdfModelRootNode_t *sdfModelMakeEarly(DevRequest *resourceList, sdfModelDef_t *listRef) {
     s32 itemIndex = 0;
-    sdfModelRootNode_t *model = sdfModelMakeRoot(assetData, listRef);
+    sdfModelRootNode_t *model = sdfModelMakeRoot(resourceList, listRef);
     SdfItemList *list;
     s32 count;
     SdfItem *item;
