@@ -21,7 +21,7 @@ extern MenuWorkCallback mnuWorkEntryFinishOrDeactivateCallback;
 
 extern MenuWorkCallback mnuWorkEntryStartCallback;
 
-extern u32 mnuWorkEntryPool;
+extern MenuWorkEntry *mnuWorkEntryPool;
 
 extern s32 mnuWorkEntryPoolCount;
 
