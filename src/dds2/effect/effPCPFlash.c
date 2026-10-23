@@ -127,7 +127,7 @@ void effPCPFlashPolySphere2PartSetVertex(PcpFlashTrianglePulseWork *work, s32 in
 extern void effPCPFlashPolySphere2PartSetVertex(PcpFlashTrianglePulseWork *work, s32 index, const f32 *view);
 extern u8 aViewTarget[];
 extern u8 sdfViewTargetVector[];
-extern void effPCPFlashPolySpherePartSetVertex(PcpFlashStreakWork *work, s32 index, void *view);
+extern void effPCPFlashPolySpherePartSetVertex(PcpFlashStreakWork *work, s32 index, const f32 *view);
 extern void dds3FlashPolyList2Draw(dds3FlashPolyList_t *pool);
 
 
@@ -329,7 +329,7 @@ void effPCPFlashPolySpherePartInit(PcpFlashStreakWork *work, s32 index, void *or
 }
 
 /* vu0 routine: the four corner offsets of a rotating particle's billboard around its scaled position */
-void effPCPFlashPolySpherePartSetVertex(PcpFlashStreakWork *work, s32 index, void *view)
+void effPCPFlashPolySpherePartSetVertex(PcpFlashStreakWork *work, s32 index, const f32 *view)
 {
     PcpFlashRotatingParticle *part = &work->parts[index];
     f32 *quad = dds3FlashPolyListGetVertex(work->resourceHandle, index);
@@ -440,7 +440,7 @@ void effPCPFlashPolySphereDraw(PcpFlashStreakWork *work) {
 
         if (part->age == 0) {
             effPCPFlashPolySpherePartInit(work, index, &axis);
-            effPCPFlashPolySpherePartSetVertex(work, index, &axis);
+            effPCPFlashPolySpherePartSetVertex(work, index, (const f32 *)&axis);
             effPCPFlashPolySpherePartSetVC(work, index, 0);
             if (ramp == 0) {
                 part->scale = maxScale;
@@ -465,7 +465,7 @@ void effPCPFlashPolySphereDraw(PcpFlashStreakWork *work) {
                     }
                 }
                 effPCPFlashPolySpherePartRotate(work, index, &axis);
-                effPCPFlashPolySpherePartSetVertex(work, index, &axis);
+                effPCPFlashPolySpherePartSetVertex(work, index, (const f32 *)&axis);
                 if (part->age < half) {
                     blend = (f32)age / (f32)half;
                 } else {
@@ -1346,7 +1346,7 @@ void effPCPFlashPolySphereExpPartInit(PcpFlashRotatingQuadWork *work, s32 index,
 }
 
 /* vu0 routine: corner offsets of a flash particle's billboard, turned around the view axis by the particle's angle */
-void effPCPFlashPolySphereExpPartSetVertex(PcpFlashRotatingQuadWork *work, s32 index, void *view)
+void effPCPFlashPolySphereExpPartSetVertex(PcpFlashRotatingQuadWork *work, s32 index, const f32 *view)
 {
     PcpFlashRotatingQuadParticle *part = &work->parts[index];
     f32 *quad = dds3FlashPolyListGetVertex(work->resourceHandle, index);
@@ -1450,7 +1450,7 @@ void effPCPFlashPolySphereExpDraw(PcpFlashRotatingQuadWork *work) {
 
         if (part->age == 0) {
             effPCPFlashPolySphereExpPartInit(work, index, &axis);
-            effPCPFlashPolySphereExpPartSetVertex(work, index, &axis);
+            effPCPFlashPolySphereExpPartSetVertex(work, index, (const f32 *)&axis);
             effPCPFlashPolySphereExpPartSetVC(work, index, 0);
             if (ramp == 0) {
                 part->scale = maxScale;
@@ -1477,7 +1477,7 @@ void effPCPFlashPolySphereExpDraw(PcpFlashRotatingQuadWork *work) {
                     }
                 }
                 effPCPFlashPolySphereExpPartRotate(work, index, &axis);
-                effPCPFlashPolySphereExpPartSetVertex(work, index, &axis);
+                effPCPFlashPolySphereExpPartSetVertex(work, index, (const f32 *)&axis);
                 age = part->age;
                 if (age < fadeIn && fadeIn != 0) {
                     blend = (f32)age / (f32)fadeIn;
@@ -1791,7 +1791,7 @@ void effPCPFlashPolySphere3PartInit(PcpFlashRadialStripWork *work, s32 index, vo
 }
 
 /* vu0 routine: two quads of corner offsets for a flash particle (a strip and its mirror), turned around the view axis by the particle's angle */
-void effPCPFlashPolySphere3PartSetVertex(PcpFlashRadialStripWork *work, s32 index, void *view)
+void effPCPFlashPolySphere3PartSetVertex(PcpFlashRadialStripWork *work, s32 index, const f32 *view)
 {
     PcpFlashRadialStripParticle *part = &work->parts[index];
     f32 *quad = dds3FlashPolyList3GetVertex(work->resourceHandle, index * 2);
@@ -1912,7 +1912,7 @@ void effPCPFlashPolySphere3Draw(PcpFlashRadialStripWork *work) {
         } else {
             if (age == 0) {
                 effPCPFlashPolySphere3PartInit(work, index, &axis);
-                effPCPFlashPolySphere3PartSetVertex(work, index, &axis);
+                effPCPFlashPolySphere3PartSetVertex(work, index, (const f32 *)&axis);
                 effPCPFlashPolySphere3PartSetVC(work, index, 0);
                 part->thickness = maxThickness;
                 part->radius = startA;
@@ -1926,7 +1926,7 @@ void effPCPFlashPolySphere3Draw(PcpFlashRadialStripWork *work) {
                 part->radialSpeed = speed * decay;
                 part->radius = part->radius + speed;
                 effPCPFlashPolySphere3PartRotate(work, index, &axis);
-                effPCPFlashPolySphere3PartSetVertex(work, index, &axis);
+                effPCPFlashPolySphere3PartSetVertex(work, index, (const f32 *)&axis);
                 age = part->age;
                 if (age < fadeIn && fadeIn != 0) {
                     blend = (f32)age / (f32)fadeIn;
