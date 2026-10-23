@@ -2263,7 +2263,7 @@ INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAB40);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAB50);
 
-INCLUDE_SDATA(const s32, "game/code_0011D3A0", fldPlayerModelResource);
+INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_0011D3A0", fldPlayerModelResource);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAB58);
 
