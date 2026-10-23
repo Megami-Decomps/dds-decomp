@@ -3,6 +3,7 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "dds_nested_resource.h"
+#include "dds_packed_object_api.h"
 #include "mnu_callback_list.h"
 #include "sdf_sprite_record.h"
 #include "sdf_word_array_record.h"
@@ -13,10 +14,6 @@ typedef struct DdsSpriteFileHeader {
     u32 reserved[2];
 } DdsSpriteFileHeader;
 
-extern u32 *dds3PackWordArrayRecords(u32 **);
-extern u32 *dds3PackNestedResourceRecords(u32 **);
-extern u32 *dds3PackSpriteRecords(u32 **);
-extern u32 *dds3PackExtendedSpriteRecords(u32 **);
 extern const char D_00438980[];
 extern const char D_00438988[];
 extern const char D_00438990[];
@@ -54,17 +51,6 @@ typedef struct DdsNamedList {
     u8 pad00[4];
     DdsNamedNode *first; /* 0x04 */
 } DdsNamedList;
-
-typedef struct DdsPackedObject {
-    u32 maxPackedOffset;                 /* 0x00 */
-    MnuCallbackList *segments;           /* 0x04: owns packed value buffers */
-    MnuCallbackList *namedReferences;    /* 0x08: owns named offset records */
-    MnuCallbackList *pendingReferences;  /* 0x0C: owns pending relocation records */
-} DdsPackedObject;
-typedef char DdsPackedObject_size_must_be_0x10[(sizeof(DdsPackedObject) == 0x10) ? 1 : -1];
-typedef char DdsPackedObject_segments_offset_must_be_4[((u32)&((DdsPackedObject *)0)->segments == 4) ? 1 : -1];
-typedef char DdsPackedObject_namedReferences_offset_must_be_8[((u32)&((DdsPackedObject *)0)->namedReferences == 8) ? 1 : -1];
-typedef char DdsPackedObject_pendingReferences_offset_must_be_C[((u32)&((DdsPackedObject *)0)->pendingReferences == 0xC) ? 1 : -1];
 
 extern DdsPackedObject *dds3CreatePackedObject(void);
 
@@ -250,20 +236,19 @@ DdsNamedRecord *dds3FindNamedRecord(MnuCallbackList *list, const char *name) {
 }
 
 /* Split a packed segment:offset reference and resolve it to a live address. */
-u32 dds3ResolvePackedOffset(u32 *object, u32 packedOffset) {
+u32 dds3ResolvePackedOffset(DdsPackedObject *object, u32 packedOffset) {
     u32 segmentIndex = packedOffset >> 16;
     u32 offset = packedOffset - (segmentIndex << 16);
     SdfListNode *segment;
-    if (packedOffset > ((DdsPackedObject *)object)->maxPackedOffset) {
+    if (packedOffset > object->maxPackedOffset) {
         return 0;
     }
-    segment = mnuFindResourceNodeById(((DdsPackedObject *)object)->segments, segmentIndex);
+    segment = mnuFindResourceNodeById(object->segments, segmentIndex);
     return *(u32 *)((u32)segment->value + 4) + offset;
 }
 
 /* Replace recorded pointer slots with their matching named addresses. */
-s32 dds3ApplyNamedRelocations(u32 *object) {
-    DdsPackedObject *packedObject = (DdsPackedObject *)object;
+s32 dds3ApplyNamedRelocations(DdsPackedObject *packedObject) {
     DdsNamedNode *node = (DdsNamedNode *)packedObject->pendingReferences->head;
     if (node != NULL) {
         do {
@@ -274,7 +259,7 @@ s32 dds3ApplyNamedRelocations(u32 *object) {
             if (found == NULL) {
                 return 0;
             }
-            address = dds3ResolvePackedOffset(object, record->value);
+            address = (u32)dds3ResolvePackedOffset(packedObject, record->value);
             replacement = found->value;
             node = node->next;
             *(u32 *)address = replacement;
@@ -283,38 +268,38 @@ s32 dds3ApplyNamedRelocations(u32 *object) {
     return 1;
 }
 
-u32 dds3WritePendingNamedReferenceValues(u32 object) {
-    DdsNamedNode *node = ((DdsNamedList *)((DdsPackedObject *)object)->pendingReferences)->first;
-    u32 destination;
+DdsPackedObject *dds3WritePendingNamedReferenceValues(DdsPackedObject *object) {
+    DdsNamedNode *node = ((DdsNamedList *)object->pendingReferences)->first;
+    DdsPackedObject *destination;
     if (node == NULL) {
         return 0;
     }
-    destination = (u32)dds3CreatePackedObject();
+    destination = dds3CreatePackedObject();
     do {
-        dds3WritePackedValue(destination, ((DdsNamedRecord *)node->record)->value, 4);
+        dds3WritePackedValue((u32)destination, ((DdsNamedRecord *)node->record)->value, 4);
         node = node->next;
     } while (node != NULL);
     return destination;
 }
 
-u32 dds3RegisterPendingNamedReferences(u32 *object, SdkFileStream *stream) {
-    DdsNamedNode *node = ((DdsNamedList *)object[1])->first;
+u32 dds3RegisterPendingNamedReferences(DdsPackedObject *object, SdkFileStream *stream) {
+    DdsNamedNode *node = ((DdsNamedList *)object->segments)->first;
     while (node) {
         DdsAllocBlock *record = node->record;
         fwrite(record->buffer, record->used, 1, stream);
         node = node->next;
     }
-    return object[0];
+    return object->maxPackedOffset;
 }
 
 extern const char D_00438968[];
 extern const char D_00438970[];
 
-s32 dds3WritePackedReferenceFile(u32 *object, s32 directory, s32 name) {
+s32 dds3WritePackedReferenceFile(DdsPackedObject *object, s32 directory, s32 name) {
     char buffer[0x100];
     u32 record[2];
     SdkFileStream *handle;
-    u32 *pendingValues;
+    DdsPackedObject *pendingValues;
 
     sprintf(buffer, D_00438968, directory, name);
     handle = fopen(buffer, D_00438970);
@@ -322,9 +307,9 @@ s32 dds3WritePackedReferenceFile(u32 *object, s32 directory, s32 name) {
         return 0;
     }
     dds3ApplyNamedRelocations(object);
-    pendingValues = (u32 *)dds3WritePendingNamedReferenceValues((u32)object);
-    record[0] = object[0];
-    record[1] = pendingValues[0];
+    pendingValues = dds3WritePendingNamedReferenceValues(object);
+    record[0] = object->maxPackedOffset;
+    record[1] = pendingValues->maxPackedOffset;
     fwrite(record, 8, 1, handle);
     dds3RegisterPendingNamedReferences(object, handle);
     dds3RegisterPendingNamedReferences(pendingValues, handle);
@@ -343,7 +328,7 @@ void dds3ApplyRelocationOffsets(u8 *base, u32 adjustment, u32 *offsets, u32 size
 
 /* Pack *source in header, word-array, then sixteen-byte payload order.
  * Return the packed owner; resolving its named references is a separate step. */
-u32 *dds3PackWordArrayRecords(u32 **source) {
+DdsPackedObject *dds3PackWordArrayRecords(u32 **source) {
     DdsPackedObject *object = dds3CreatePackedObject();
     DdsNamedNode *node;
     SdfWordArrayRecord *record;
@@ -378,12 +363,12 @@ u32 *dds3PackWordArrayRecords(u32 **source) {
         dds3RegisterNamedPackedOffset(object, name);
         dds3AppendPackedBytes(object, record->info, sizeof(*record->info));
     }
-    return (u32 *)object;
+    return object;
 }
 
 /* Pack *source and its optional nested headers, groups and counted payloads.
  * Return the packed owner with named references still awaiting resolution. */
-u32 *dds3PackNestedResourceRecords(u32 **source) {
+DdsPackedObject *dds3PackNestedResourceRecords(MnuCallbackList **source) {
     DdsPackedObject *object = dds3CreatePackedObject();
     DdsNamedNode *node;
     DdsNestedRecord *record;
@@ -486,12 +471,12 @@ u32 *dds3PackNestedResourceRecords(u32 **source) {
             }
         }
     }
-    return (u32 *)object;
+    return object;
 }
 
 /* Pack basic sprite headers and named references before sixteen-byte payloads.
  * Return the packed owner; leave its relocation resolution to the caller. */
-u32 *dds3PackSpriteRecords(u32 **source) {
+DdsPackedObject *dds3PackSpriteRecords(u32 **source) {
     DdsPackedObject *object = dds3CreatePackedObject();
     DdsNamedNode *node;
     SdfSpriteVectorRecord *record;
@@ -518,12 +503,12 @@ u32 *dds3PackSpriteRecords(u32 **source) {
         dds3RegisterNamedPackedOffset(object, name);
         dds3AppendPackedBytes(object, record->vector, sizeof(*record->vector));
     }
-    return (u32 *)object;
+    return object;
 }
 
 /* Pack extended sprite headers, including eight inline bytes, then payloads.
  * Return the packed owner with the data references still unresolved. */
-u32 *dds3PackExtendedSpriteRecords(u32 **source) {
+DdsPackedObject *dds3PackExtendedSpriteRecords(u32 **source) {
     DdsPackedObject *object = dds3CreatePackedObject();
     DdsNamedNode *node;
     SdfSpriteExtendedRecord *record;
@@ -556,7 +541,7 @@ u32 *dds3PackExtendedSpriteRecords(u32 **source) {
         dds3RegisterNamedPackedOffset(object, name);
         dds3AppendPackedBytes(object, record->vector, sizeof(*record->vector));
     }
-    return (u32 *)object;
+    return object;
 }
 
 /* The native SDK entry returns zero; no more specific caller role is established. */
@@ -570,20 +555,20 @@ s32 dds3WriteArraySpriteFile(const char *directory, const char *name, u32 **sour
     DdsSpriteFileHeader header;
     u32 info[5];
     char path[128];
-    u32 *packed = dds3PackWordArrayRecords(source);
-    u32 *references;
+    DdsPackedObject *packed = dds3PackWordArrayRecords(source);
+    DdsPackedObject *references;
     SdkFileStream *file;
 
     dds3ApplyNamedRelocations(packed);
-    references = (u32 *)dds3WritePendingNamedReferenceValues((u32)packed);
+    references = dds3WritePendingNamedReferenceValues(packed);
     memset(&header, 0, sizeof(header));
     header.version = 0x1000000;
     strncpy(header.format, D_00438980, 4);
     memset(info, 0, sizeof(info));
-    info[0] = packed[0];
+    info[0] = packed->maxPackedOffset;
     info[1] = (*source)[0];
-    info[2] = packed[0];
-    info[3] = references[0];
+    info[2] = packed->maxPackedOffset;
+    info[3] = references->maxPackedOffset;
     info[4] = 0;
     memset(path, 0, sizeof(path));
     sprintf(path, D_00438988, directory, name);
@@ -614,24 +599,24 @@ MnuCallbackListPair *dds3LoadOwnedSpriteRecordList(const char *source, const cha
 
 /* Write nested resource records to directory + name in SPR0 format.
  * Native behavior returns 1 even when the file cannot be opened. */
-s32 dds3WriteNestedSpriteFile(const char *directory, const char *name, u32 **source) {
+s32 dds3WriteNestedSpriteFile(const char *directory, const char *name, MnuCallbackList **source) {
     DdsSpriteFileHeader header;
     u32 info[5];
     char path[128];
-    u32 *packed = dds3PackNestedResourceRecords(source);
-    u32 *references;
+    DdsPackedObject *packed = dds3PackNestedResourceRecords(source);
+    DdsPackedObject *references;
     SdkFileStream *file;
 
     dds3ApplyNamedRelocations(packed);
-    references = (u32 *)dds3WritePendingNamedReferenceValues((u32)packed);
+    references = dds3WritePendingNamedReferenceValues(packed);
     memset(&header, 0, sizeof(header));
     header.version = 0x1000000;
     strncpy(header.format, D_00438980, 4);
     memset(info, 0, sizeof(info));
-    info[0] = packed[0];
-    info[1] = (*source)[0];
-    info[2] = packed[0];
-    info[3] = references[0];
+    info[0] = packed->maxPackedOffset;
+    info[1] = (*source)->count;
+    info[2] = packed->maxPackedOffset;
+    info[3] = references->maxPackedOffset;
     info[4] = 0;
     memset(path, 0, sizeof(path));
     sprintf(path, D_00438988, directory, name);
@@ -666,20 +651,20 @@ s32 dds3WriteSpriteFile(const char *directory, const char *name, u32 **source) {
     DdsSpriteFileHeader header;
     u32 info[5];
     char path[128];
-    u32 *packed = dds3PackSpriteRecords(source);
-    u32 *references;
+    DdsPackedObject *packed = dds3PackSpriteRecords(source);
+    DdsPackedObject *references;
     SdkFileStream *file;
 
     dds3ApplyNamedRelocations(packed);
-    references = (u32 *)dds3WritePendingNamedReferenceValues((u32)packed);
+    references = dds3WritePendingNamedReferenceValues(packed);
     memset(&header, 0, sizeof(header));
     header.version = 0x1000000;
     strncpy(header.format, D_00438980, 4);
     memset(info, 0, sizeof(info));
-    info[0] = packed[0];
+    info[0] = packed->maxPackedOffset;
     info[1] = (*source)[0];
-    info[2] = packed[0];
-    info[3] = references[0];
+    info[2] = packed->maxPackedOffset;
+    info[3] = references->maxPackedOffset;
     info[4] = 0;
     memset(path, 0, sizeof(path));
     sprintf(path, D_00438988, directory, name);
@@ -715,20 +700,20 @@ s32 dds3WriteExtendedSpriteFile(const char *directory, const char *name, u32 **s
     DdsSpriteFileHeader header;
     u32 info[5];
     char path[128];
-    u32 *packed = dds3PackExtendedSpriteRecords(source);
-    u32 *references;
+    DdsPackedObject *packed = dds3PackExtendedSpriteRecords(source);
+    DdsPackedObject *references;
     SdkFileStream *file;
 
     dds3ApplyNamedRelocations(packed);
-    references = (u32 *)dds3WritePendingNamedReferenceValues((u32)packed);
+    references = dds3WritePendingNamedReferenceValues(packed);
     memset(&header, 0, sizeof(header));
     header.version = 0x1000000;
     strncpy(header.format, D_00438980, 4);
     memset(info, 0, sizeof(info));
-    info[0] = packed[0];
+    info[0] = packed->maxPackedOffset;
     info[1] = (*source)[0];
-    info[2] = packed[0];
-    info[3] = references[0];
+    info[2] = packed->maxPackedOffset;
+    info[3] = references->maxPackedOffset;
     info[4] = 0;
     memset(path, 0, sizeof(path));
     sprintf(path, D_00438988, directory, name);

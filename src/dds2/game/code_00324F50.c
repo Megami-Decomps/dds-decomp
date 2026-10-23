@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "dds_nested_resource.h"
+#include "dds_packed_object_api.h"
 #include "mnu_callback_list.h"
 #include "sdf_sprite_record.h"
 #include "sdf_word_array_record.h"
@@ -417,12 +418,6 @@ typedef struct SdfRelocatedResource {
     u32 unk10;
 } SdfRelocatedResource;
 
-extern u32 *dds3PackNestedResourceRecords(MnuCallbackList **);
-
-extern s32 dds3ApplyNamedRelocations(u32 *);
-
-extern u32 *dds3WritePendingNamedReferenceValues(u32 *);
-
 extern void dds3ApplyRelocationOffsets(void *, void *, void *, u32);
 
 
@@ -432,8 +427,8 @@ SdfRelocatedResource *sdfCloneRelocatedResourceGroups(MnuCallbackListPair *owner
     SdfListNode *node;
     DdsCountedPayload *payload;
     DdsCountedPayload *record;
-    u32 *sourceHeader;
-    u32 *relocationHeader;
+    DdsPackedObject *sourceHeader;
+    DdsPackedObject *relocationHeader;
     void *data;
     void *relocations;
     u8 *cursor;
@@ -448,11 +443,11 @@ SdfRelocatedResource *sdfCloneRelocatedResourceGroups(MnuCallbackListPair *owner
     sourceHeader = dds3PackNestedResourceRecords(source);
     dds3ApplyNamedRelocations(sourceHeader);
     relocationHeader = dds3WritePendingNamedReferenceValues(sourceHeader);
-    data = sdfAllocateOwnedResourceBuffer(owner, *sourceHeader);
-    memset(data, 0, *sourceHeader);
-    relocations = sdfAllocateOwnedResourceBuffer(owner, *relocationHeader);
-    memset(relocations, 0, *relocationHeader);
-    dds3ApplyRelocationOffsets(data, data, relocations, *relocationHeader);
+    data = sdfAllocateOwnedResourceBuffer(owner, sourceHeader->maxPackedOffset);
+    memset(data, 0, sourceHeader->maxPackedOffset);
+    relocations = sdfAllocateOwnedResourceBuffer(owner, relocationHeader->maxPackedOffset);
+    memset(relocations, 0, relocationHeader->maxPackedOffset);
+    dds3ApplyRelocationOffsets(data, data, relocations, relocationHeader->maxPackedOffset);
     free(relocations);
     result->data = data;
     result->firstCount = (*source)->count;
