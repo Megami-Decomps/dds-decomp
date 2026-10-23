@@ -412,18 +412,18 @@ u8 *dds3P2APolygonCopy(u8 *source) {
     return (u8 *)instance;
 }
 
-void dds3P2APolygonDelete(u32 instance) {
-    sdfMatFreeDelayed((sdfMat_t *)((EffUnitObject *)instance)->resource);
-    dds3BillboardDelete(((EffUnitObject *)instance)->billboard);
+void dds3P2APolygonDelete(EffUnitObject *instance) {
+    sdfMatFreeDelayed((sdfMat_t *)instance->resource);
+    dds3BillboardDelete(instance->billboard);
     sdfChipFreeDirect(instance);
 }
 
-void dds3P2APolygonSetPosition(s32 instance, s128 *position) {
-    effCopyVector((s128 *)((EffUnitObject *)instance)->billboard, position);
+void dds3P2APolygonSetPosition(EffUnitObject *instance, s128 *position) {
+    effCopyVector((s128 *)instance->billboard, position);
 }
 
-void dds3P2APolygonSetScale(s32 instance, float scale) {
-    dds3BillboardSetScale(((EffUnitObject *)instance)->billboard, scale, scale);
+void dds3P2APolygonSetScale(EffUnitObject *instance, float scale) {
+    dds3BillboardSetScale(instance->billboard, scale, scale);
 }
 
 /* vu0 routine: copy the supplied 4x4 matrix to the instance's second matrix. */
@@ -432,8 +432,8 @@ void dds3P2APolygonSetRotateMatrix(u8 *instanceBytes, void *matrix) {
     VU0_STORE_MATRIX(((EffUnitObject *)instanceBytes)->transform);
 }
 
-void dds3P2APolygonSetRGBA(s32 instance, u32 value) {
-    dds3BillboardSetRGBA(((EffUnitObject *)instance)->billboard, value);
+void dds3P2APolygonSetRGBA(EffUnitObject *instance, u32 value) {
+    dds3BillboardSetRGBA(instance->billboard, value);
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
