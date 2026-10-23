@@ -4357,7 +4357,7 @@ extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind
 u32 btlUpdateSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *arguments) {
     BtlUnit *unit = arguments->unit;
     SoundResourceNode *work;
-    void *handle;
+    SoundMixer *handle;
 
     if (!(unit->status.flags & 2)) {
         return 1;
