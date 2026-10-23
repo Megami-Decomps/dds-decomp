@@ -2261,7 +2261,7 @@ void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
 void billResetParticleIndices(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     EffTrackSet *descriptor = ((EffBillFrameState *)source)->asset;
-    u8 *entry = ((EffBillFrameState *)source)->entries;
+    EffBillParticleEntry *entry = (EffBillParticleEntry *)((EffBillFrameState *)source)->entries;
     s32 count = ((EffBillTimedHeader *)((EffClassWork *)owner)->payload)->count;
 
     memset(descriptor->buffer, 0, descriptor->rows * 0x10);
@@ -2269,8 +2269,8 @@ void billResetParticleIndices(u8 *owner) {
         s32 remaining = count;
         do {
             --remaining;
-            *(s32 *)entry = -1;
-            entry += 0x2C;
+            entry->age = -1;
+            ++entry;
         } while (remaining);
     }
 }
