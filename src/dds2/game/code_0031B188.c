@@ -230,8 +230,7 @@ MnuEffectWork *mnuCreateEffectWork(s32 listCount, s32 *recordCounts) {
 }
 
 /* Clear each record while preserving the traversal's 16-bit index wrap. */
-void mnuClearNodeRecords(s32 *listAddress) {
-    MnuEffectList *list = (MnuEffectList *)listAddress;
+void mnuClearNodeRecords(MnuEffectList *list) {
     MnuEffectRecord *record;
     u32 index;
 
@@ -246,8 +245,7 @@ void mnuClearNodeRecords(s32 *listAddress) {
     }
 }
 
-void mnuClearAllNodeBroadcastFlags(s32 *listAddress) {
-    MnuEffectList *list = (MnuEffectList *)listAddress;
+void mnuClearAllNodeBroadcastFlags(MnuEffectList *list) {
     MnuEffectRecord *node = list->records;
     s32 index = 0;
     if (list->count > 0) {
@@ -259,8 +257,7 @@ void mnuClearAllNodeBroadcastFlags(s32 *listAddress) {
     }
 }
 
-void mnuDestroyNodeJobQueues(s32 *listAddress) {
-    MnuEffectList *list = (MnuEffectList *)listAddress;
+void mnuDestroyNodeJobQueues(MnuEffectList *list) {
     MnuEffectRecord *node = list->records;
     s16 index = 0;
 

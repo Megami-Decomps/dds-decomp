@@ -89,7 +89,7 @@ extern void mnuInitializeShootingScene(MnuShootingWork *handle);
 
 extern void dds3ReleaseSoundSlotPool(void);
 extern sdfMemHandle_t *D_00438948;
-extern void mnuDestroyNodeJobQueues(s32 *);
+extern void mnuDestroyNodeJobQueues(MnuEffectList *);
 extern void mnuUpdateHighScoreFlag(MnuShootingWork *);
 /* Retail passes the task work to this otherwise empty legacy callback. */
 extern void mnuCleanupShootingPauseNoOp();
@@ -725,7 +725,7 @@ void mnuDestroyShootingWork(MnuShootingWork *work) {
     }
     if (work->effectWork != NULL) {
         for (i = 0; i < work->effectWork->count; i++) {
-            mnuDestroyNodeJobQueues((s32 *)&work->effectWork->lists[i]);
+            mnuDestroyNodeJobQueues(&work->effectWork->lists[i]);
         }
         sdfMemFreeDirect(work->effectWork->allocation);
         work->effectWork = NULL;
@@ -804,9 +804,9 @@ extern void mnuInitializeNodeTransforms(MnuNodeList *group, f32 x, f32 y, f32 z,
 extern void mnuPopulateModelNodeList(MnuNodeList *list, s32 resourceGroup, s32 resourceId, s32 entryFlags, f32 x, f32 y, f32 z);
 extern void mnuDeactivateAllModelNodes(MnuNodeList *list);
 extern MnuEffectWork *mnuCreateEffectWork(s32 listCount, s32 *recordCounts);
-extern void mnuClearNodeRecords(s32 *listAddress);
+extern void mnuClearNodeRecords(MnuEffectList *list);
 extern void mnuAssignEffectRecordQueues(MnuEffectList *list, s32 resourceIndex, FileQueue **sources);
-extern void mnuClearAllNodeBroadcastFlags(s32 *listAddress);
+extern void mnuClearAllNodeBroadcastFlags(MnuEffectList *list);
 extern void itfInstallIndexedImageResourceBanks(u32 *source, s32 count);
 extern ModelInstanceWork *itfCreateModelInstanceWork(s32 listCount, s32 *instanceCounts);
 extern void itfClearModelInstances(ModelInstanceList *list);
@@ -879,9 +879,9 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
         for (i = 0; i < work->effectWork->count; i++) {
             MnuEffectList *list = &effects[i];
 
-            mnuClearNodeRecords((s32 *)list);
+            mnuClearNodeRecords(list);
             mnuAssignEffectRecordQueues(list, i, work->queueCopies);
-            mnuClearAllNodeBroadcastFlags((s32 *)list);
+            mnuClearAllNodeBroadcastFlags(list);
             evtPrintDeveloperConsoleMessage("Effect Load!!\n");
         }
     }
