@@ -124,7 +124,6 @@ extern struct sdfMemHandle_t *fldIndexedResourceHandle;
 
 extern u32 fldIndexedResourceData;
 
-extern s32 fldIndexedResourceEffect;
 
 extern u32 D_0043623C;
 
