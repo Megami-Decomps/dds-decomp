@@ -49,8 +49,8 @@ void *dds3ObjectBaseSetControlBasicType(dds3Basic_t *object, void *slotData, s32
 void *dds3ObjectBaseGetControlBasic(dds3Basic_t *object, s32 slotIndex);
 void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *object, u32 value);
 dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *world, u32 key, s32 kind);
-dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *world, s32 slotIndex, const u8 *name);
-dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *world, const u8 *name);
+dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *world, s32 slotIndex, const char *name);
+dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *world, const char *name);
 dds3Basic_t *dds3AddSceneBasicData(s32 kind);
 /* Allocate and initialize the inner transform object for a world node. */
 s32 dds3InitPoseSet(dds3Basic_t *node);

@@ -57,9 +57,10 @@ s32 dds3GetMapNo(dds3Basic_t *worldNode) {
     return ((EvtWorldTable *)worldNode->data)->areaRoomKey;
 }
 
-dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *object, s32 slotIndex, const u8 *name) {
+dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *object, s32 slotIndex, const char *name) {
     dds3Basic_t *node;
     u8 *s;
+    const u8 *nameBytes = (const u8 *)name;
     s32 i;
 
     if (object == NULL || name == NULL) {
@@ -77,20 +78,20 @@ dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *object, s32 slotIndex,
             continue;
         }
         i = 0;
-        if (name[0] == s[0]) {
+        if (nameBytes[0] == s[0]) {
             do {
-                if (name[i] == '\0') {
+                if (nameBytes[i] == '\0') {
                     return node;
                 }
                 i++;
-            } while (name[i] == ((u8 *)node->value)[i]);
+            } while (nameBytes[i] == ((u8 *)node->value)[i]);
         }
         node = node->next;
     }
     return NULL;
 }
 
-dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *object, const u8 *name) {
+dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *object, const char *name) {
     dds3Basic_t *node;
     s32 i;
 
