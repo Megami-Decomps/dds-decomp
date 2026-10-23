@@ -375,7 +375,7 @@ extern void dds3FadeUpdate(void);
 extern void kwlnQueueBackgroundFadeOverlayPacket(void);
 extern void dds3BlurUpdate(void);
 extern u32 dds3NullDrawProc(void);
-extern void sdfGrFlushOtChain(u32 sourceAddress);
+extern void sdfGrFlushOtChain(const void *source);
 extern void sdfGrReqDraw(sdfDrawTag_t *, SdfPacketChain *);
 extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
