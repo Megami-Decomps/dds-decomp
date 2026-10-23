@@ -604,8 +604,8 @@ s32 mnuDrawMenuFadePhase(s32 unused, MenuFadeWork *work) {
 
 /* Summarize two requirement slots: bit 0 marks a qualifying list of at least three IDs;
  * bit 1 reflects the conjunction of the two native record flags. */
-s32 mnuGetProfileRequirementFlags(u16 profileId) {
-    s32 resultFlags = 0;
+u32 mnuGetProfileRequirementFlags(u16 profileId) {
+    u32 resultFlags = 0;
     u8 *profileRecord = (u8 *)prfReqGetEntryRecord(profileId);
     s32 requirementWordIndex = 0;
     u8 *slotStatusBase = profileRecord + 0xC;
