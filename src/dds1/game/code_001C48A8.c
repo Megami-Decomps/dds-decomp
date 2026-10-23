@@ -1503,20 +1503,20 @@ extern SceneInitializer D_00359A88[];
 
 /* Select a scene and reset its frame/state before invoking its initializer. */
 void btlSetScene(s32 sceneId) {
-    s32 scene = (s32)(u32)btlGetRuntime();
+    BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
 
-    ((BattleSceneWork *)scene)->currentScene = sceneId;
-    ((BattleSceneWork *)scene)->frame = 0;
-    ((BattleSceneWork *)scene)->sceneState = 0;
-    D_00359A88[sceneId].initialize(scene);
+    scene->currentScene = sceneId;
+    scene->frame = 0;
+    scene->sceneState = 0;
+    D_00359A88[sceneId].initialize((s32)scene);
 }
 
 /* Queue a transition for the next scene update. */
 void btlQueueScene(u32 sceneId) {
-    s32 scene;
+    BattleSceneWork *scene;
 
-    scene = (s32)(u32)btlGetRuntime();
-    ((BattleSceneWork *)scene)->queuedScene = sceneId;
+    scene = (BattleSceneWork *)btlGetRuntime();
+    scene->queuedScene = sceneId;
 }
 
 extern void btlSetScene(s32);
@@ -1524,27 +1524,27 @@ extern void btlSetScene(s32);
 
 /* Consume a queued transition, run the current updater, and advance its frame. */
 void btlUpdateScene(void) {
-    s32 scene = (s32)(u32)btlGetRuntime();
-    s32 queuedSceneId = ((BattleSceneWork *)scene)->queuedScene;
+    BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
+    s32 queuedSceneId = scene->queuedScene;
     s32 updateResult;
     if (queuedSceneId != 0) {
         btlSetScene(queuedSceneId);
-        ((BattleSceneWork *)scene)->queuedScene = 0;
+        scene->queuedScene = 0;
     }
-    updateResult = D_00359A88[((BattleSceneWork *)scene)->currentScene].update(scene);
+    updateResult = D_00359A88[scene->currentScene].update((s32)scene);
     if (updateResult != 0) {
         btlQueueScene(updateResult);
     }
-    ((BattleSceneWork *)scene)->frame += 1;
+    scene->frame += 1;
 }
 
 /* Enter the initial scene and discard any queued transition. */
 void btlResetToInitialScene(void) {
-    s32 scene;
+    BattleSceneWork *scene;
 
-    scene = (s32)(u32)btlGetRuntime();
+    scene = (BattleSceneWork *)btlGetRuntime();
     btlSetScene(FLD_SCENE_INITIAL_ID);
-    ((BattleSceneWork *)scene)->queuedScene = 0;
+    scene->queuedScene = 0;
 }
 
 void btlGetCurrentSceneRecordValue(void) {
@@ -1560,21 +1560,21 @@ s32 fldGetSceneDescriptorProperty(void) {
 
 /* Select the task's group array; the handle-group bit takes precedence. */
 BtlTask **fldGetActorSceneGroupResource(BtlTask *task) {
-    s32 scene = (s32)(u32)btlGetRuntime();
-    BtlTask **groupEntries = ((BattleSceneWork *)scene)->groupSecondary;
+    BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
+    BtlTask **groupEntries = scene->groupSecondary;
     u32 actorGroupBits;
     if (task->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) {
-        return ((BattleSceneWork *)scene)->groupHandles;
+        return scene->groupHandles;
     }
     actorGroupBits = task->unit->status.flags & FLD_SCENE_ACTOR_GROUP_MASK;
     switch (actorGroupBits) {
     case FLD_SCENE_ACTOR_PRIMARY_BIT:
-        groupEntries = ((BattleSceneWork *)scene)->groupPrimary;
+        groupEntries = scene->groupPrimary;
         break;
     case FLD_SCENE_ACTOR_SECONDARY_BIT:
         break;
     case FLD_SCENE_ACTOR_TERTIARY_BIT:
-        groupEntries = ((BattleSceneWork *)scene)->groupTertiary;
+        groupEntries = scene->groupTertiary;
         break;
     default:
         groupEntries = 0;
