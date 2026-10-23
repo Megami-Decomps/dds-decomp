@@ -11,9 +11,9 @@
 #include "eff.h"
 #include "eff_field_color.h"
 
-extern s32 effBTLFieldColorGetVariantSelector(void);
+extern u32 effBTLFieldColorGetVariantSelector(void);
 
-extern s32 effBTLFieldColorGetOriginalSelector(void);
+extern u32 effBTLFieldColorGetOriginalSelector(void);
 
 
 extern u32 effBattleTransitionDurations[];
