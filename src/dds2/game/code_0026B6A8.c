@@ -11,6 +11,7 @@
 #include "dat_state.h"
 #include "eff.h"
 #include "eff_transform.h"
+#include "eff_light.h"
 #include "dds3obj.h"
 #include "eff_random.h"
 #include "mdl_flag_api.h"
@@ -364,11 +365,11 @@ s32 evtCopyWorldObjectEntryValue(s32 id, s32 dst) {
     dds3Basic_t *src;
     dds3Basic_t *destinationNode;
 
-    src = dds3SceneBasicSearchNameAndType((dds3Basic_t *)dds3GetControlScene(), 9,
+    src = dds3SceneBasicSearchNameAndType((dds3Basic_t *)dds3GetControlScene(), EFF_WORLD_KIND_LIGHT,
                                                (const u8 *)id);
     if (src != NULL) {
         destinationNode = (dds3Basic_t *)dst;
-        *(s32 *)((u8 *)destinationNode->data + 0x80) = *(s32 *)((u8 *)src->data + 0x78);
+        *(s32 *)((u8 *)destinationNode->data + 0x80) = (s32)((EffLightData *)src->data)->buffer;
         return 1;
     }
     return 0;
