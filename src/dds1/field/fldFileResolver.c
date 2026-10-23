@@ -1165,7 +1165,7 @@ extern s32 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 extern s32 fldCommand_SEARCH_ID(const char *);
 
-extern void dds3ObjectBaseCreateMover(void *);
+extern void dds3ObjectBaseCreateMover(dds3Basic_t *);
 
 extern void dds3MoverBasicMakePath(dds3Basic_t *object);
 
