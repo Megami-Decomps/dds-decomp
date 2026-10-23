@@ -170,10 +170,10 @@ extern DspUnitName *datUnitNames;
 extern DspUnitName *datSkillNames;
 extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
-extern s32 scrGetIndexedRecordAddress(u16, s32 *);
+extern u32 scrGetIndexedRecordAddress(u32, const u8 **);
 
 void prfCapPresentMessages(BrsSkillPackageWork *scene) {
-    s32 message;
+    const u8 *message;
     datUnitWork_t *item = scene->selectedRewardRow->unit;
     s32 profileId = ptyGetCurrentProfileId(item);
     u16 skillId;
@@ -182,7 +182,7 @@ void prfCapPresentMessages(BrsSkillPackageWork *scene) {
         evtCopyEntryStringToActiveWindow(
             0, datUnitNames[item->unitId].encodedText);
         scrGetIndexedRecordAddress(profileId & 0xFFFF, &message);
-        evtCopyEntryStringToActiveWindow(1, (const void *)(message));
+        evtCopyEntryStringToActiveWindow(1, (const char *)message);
         dspSetActive(1);
         fclStartMessage(item->unitId + 3);
         scene->selectionApplied = 0;

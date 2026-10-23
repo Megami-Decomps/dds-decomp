@@ -872,7 +872,7 @@ void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork 
 #include "fr_font.h"
 #include "fr_font_draw_glyph.h"
 
-extern u32 scrGetIndexedRecordAddress(u32, s32 *);
+extern u32 scrGetIndexedRecordAddress(u32, const u8 **);
 extern s32 mnuIsTitleEntryAvailable(datUnitWork_t *);
 
 typedef struct BrsProfilePalette { u32 values[4]; } BrsProfilePalette;
@@ -889,7 +889,7 @@ void brsDrawProfileProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork 
                                   BrsProgressRow *row, s32 context, s32 index) {
     BrsProfilePalette palette = D_004285F0;
     BrsProfileBarCoordinates coordinates = D_00428600;
-    s32 textAddress;
+    const u8 *textAddress;
     s32 currentProfile;
     s32 cap;
     s32 remaining;
@@ -936,7 +936,7 @@ void brsDrawProfileProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork 
         /* Name/fallback acquisition precedes its placement choice. */
         textOffset = scrGetIndexedRecordAddress(profileId, &textAddress) ? 0 : 18;
         glyph = itfCreateConvertedTextGlyph(x + ((textOffset + 0x149) << 4), y + 0xB8, depth,
-                                            color, (const u8 *)textAddress, NULL);
+                                            color, textAddress, NULL);
         frFontDrawGlyphChain(glyph, 1, context);
         frDestroyFontRequestAfter(glyph);
     } else {

@@ -238,7 +238,7 @@ extern const u8 D_00437BF0[];
 extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
 extern void cmpDrawTriG(const u32 *, const u32 *, u32, const u32 *, u32);
 extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
-extern u32 scrGetIndexedRecordAddress(u32, s32 *);
+extern u32 scrGetIndexedRecordAddress(u32, const u8 **);
 extern void mnuDrawMenuTextById(s32, s32, s32, s32, s32, s32);
 
 /* Menu runtime fields shared by the party, panel and resource handlers. */
@@ -972,7 +972,7 @@ void mnuDrawPartySelectionPreviewPanel(MenuContext *context, MenuPageBar *hpBar,
     u32 y[3];
     u32 colors[3];
     MenuPanelDrawLayout layout;
-    s32 textAddress;
+    const u8 *textAddress;
     s32 labelId;
     u32 textColor;
     s32 i;
@@ -1036,7 +1036,7 @@ void mnuDrawPartySelectionPreviewPanel(MenuContext *context, MenuPageBar *hpBar,
             mnuDrawMenuTextById(0xE10, 0xBB0, 0, textColor, labelId, 0x53);
         } else {
             glyph = itfCreateConvertedTextGlyph(0xE10, 0xBB0, 0, textColor,
-                                                (const u8 *)(u32)textAddress, 0);
+                                                textAddress, 0);
             frFontDrawGlyphChain(glyph, 1, 0x53);
             frDestroyFontRequestAfter(glyph);
         }

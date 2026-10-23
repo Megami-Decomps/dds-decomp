@@ -437,8 +437,8 @@ void prfCopyMantraNamePart(u16 scriptId, s32 namePartMode, char *destination) {
 }
 
 
-u32 scrGetIndexedRecordAddress(u32 scriptId, s32 *record) {
-    *record = (s32)&D_00435E50[scriptId & 0xffff];
+u32 scrGetIndexedRecordAddress(u32 scriptId, const u8 **text) {
+    *text = D_00435E50[scriptId & 0xffff].encodedText;
     return 1;
 }
 

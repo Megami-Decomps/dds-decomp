@@ -250,11 +250,11 @@ void mnuDrawMenuTextById(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 su
 }
 
 extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
-extern s32 scrGetIndexedRecordAddress(s32, s32 *);
+extern u32 scrGetIndexedRecordAddress(u32, const u8 **);
 
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, s32 unused,
                                       s32 partyIndex, s32 surface) {
-    s32 outValue;
+    const u8 *outValue;
     s32 profileId = ptyGetCurrentProfileId(&DDS3_GBWK->party[partyIndex]);
     s32 code;
     s32 texture;
@@ -267,7 +267,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
             mnuDrawMenuTextById(0x16B0, 0x4B8, depth, texture, code, surface);
             return;
         }
-        item = itfCreateConvertedTextGlyph(0x16B0, 0x4B8, depth, texture, (const u8 *)outValue, 0);
+        item = itfCreateConvertedTextGlyph(0x16B0, 0x4B8, depth, texture, outValue, 0);
         frFontDrawGlyphChain((_FRQ *)item, 1, surface);
         frDestroyFontRequestAfter((_FRQ *)item);
     }
