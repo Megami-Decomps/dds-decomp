@@ -1211,7 +1211,7 @@ void btlClearSpecialEnemyRestrictionAfterAction(BtlTask *task) {
 }
 
 extern u64 btlStartTask(void *);
-extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
+extern BtlRuntimeTask *btlCreateUnitFadeOutTask(BtlUnit *, u32, u32);
 
 s32 btlDisableNonBossUnits(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
@@ -2737,7 +2737,7 @@ u64 btlScheduleActionAndSoundSequence(BtlTask *action) {
     }
 }
 
-extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
+extern BtlRuntimeTask *btlCreateUnitFadeOutTask(BtlUnit *, u32, u32);
 
 extern u64 btlStartTask(void *);
 

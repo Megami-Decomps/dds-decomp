@@ -39,7 +39,7 @@ extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
 
 
 
-extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
+extern BtlRuntimeTask *btlCreateUnitFadeOutTask(BtlUnit *, u32, u32);
 
 extern u64 btlStartTask(void *);
 
