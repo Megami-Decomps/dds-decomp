@@ -271,8 +271,8 @@ s32 btlTryEscapeWithPhaseAdjustment(BtlUnit *actor) {
 }
 
 s32 btlIsSelectedActorStatusAndRecordClear(BtlUnit *unit) {
-    s32 work = (s32)(u32)btlGetRuntime();
-    if (datBattleSceneRecords[*(s32 *)(work + 0x2A0)].voice != 0) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    if (datBattleSceneRecords[battle->battleMode].voice != 0) {
         return 0;
     }
     if (unit->partyRecord.status & 0x2A0F) {
