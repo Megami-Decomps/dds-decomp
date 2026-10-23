@@ -4,6 +4,13 @@
 #include "common.h"
 #include "eff_transform.h"
 
+/* Result of querying a path object's movement state. */
+typedef enum EvtPathStatus {
+    EVT_PATH_STATUS_INVALID = -1,
+    EVT_PATH_STATUS_AT_ENDPOINT = 0,
+    EVT_PATH_STATUS_IN_PROGRESS = 1
+} EvtPathStatus;
+
 /* Native 0x0A-byte frame editor row: count followed by eight signed column kinds. */
 typedef struct EvtFrameTableEntry {
     s16 columns;

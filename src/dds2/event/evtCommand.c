@@ -291,12 +291,12 @@ s32 evtCommand_EFFECT_PATH_MOVE(void) {
     return 1;
 }
 
-extern s32 evtCheckPathStat(dds3Basic_t *object);
+extern EvtPathStatus evtCheckPathStat(dds3Basic_t *object);
 
 s32 evtCommand_EFFECT_PATH_WAIT(void) {
     s32 effectId = scrGetIntPara(0);
     dds3Basic_t *effectObject = evtSearchBasic(7, effectId);
-    s32 scaleStatus;
+    EvtPathStatus scaleStatus;
 
     if (effectObject == NULL) {
         evtPrintDeveloperConsoleMessage("EFFECT_PATH_WAIT not found eff!\n");
@@ -304,11 +304,11 @@ s32 evtCommand_EFFECT_PATH_WAIT(void) {
     }
     scaleStatus = evtCheckPathStat(effectObject);
     switch (scaleStatus) {
-    case 0:
+    case EVT_PATH_STATUS_AT_ENDPOINT:
         return 1;
-    case 1:
+    case EVT_PATH_STATUS_IN_PROGRESS:
         return 0;
-    case -1:
+    case EVT_PATH_STATUS_INVALID:
         return 1;
     default:
         return 0;
@@ -669,7 +669,7 @@ s32 evtCommand_CAM_PATH_MOVE(void) {
 
 s32 evtCommand_CAM_PATH_WAIT(void) {
     dds3Basic_t *cameraOwner;
-    s32 scaleStatus;
+    EvtPathStatus scaleStatus;
 
     if (scrGetIntPara(0) < 0) {
         cameraOwner = fldGetPlayerSceneState();
@@ -681,11 +681,11 @@ s32 evtCommand_CAM_PATH_WAIT(void) {
     }
     scaleStatus = evtCheckPathStat(cameraOwner);
     switch (scaleStatus) {
-    case 0:
+    case EVT_PATH_STATUS_AT_ENDPOINT:
         return 1;
-    case 1:
+    case EVT_PATH_STATUS_IN_PROGRESS:
         return 0;
-    case -1:
+    case EVT_PATH_STATUS_INVALID:
         return 1;
     default:
         return 0;
@@ -920,7 +920,7 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_00421E98);
 s32 evtCommand_OBJ_PATH_WAIT(void) {
     s32 objectId = scrGetIntPara(0);
     dds3Basic_t *worldObject = evtSearchBasic(6, objectId);
-    s32 scaleStatus;
+    EvtPathStatus scaleStatus;
 
     if (worldObject == NULL) {
         objectId = scrGetIntPara(0);
@@ -934,11 +934,11 @@ s32 evtCommand_OBJ_PATH_WAIT(void) {
     }
     scaleStatus = evtCheckPathStat(worldObject);
     switch (scaleStatus) {
-    case 0:
+    case EVT_PATH_STATUS_AT_ENDPOINT:
         return 1;
-    case 1:
+    case EVT_PATH_STATUS_IN_PROGRESS:
         return 0;
-    case -1:
+    case EVT_PATH_STATUS_INVALID:
         return 1;
     default:
         return 0;

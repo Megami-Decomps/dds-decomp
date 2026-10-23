@@ -13,34 +13,34 @@
 #include "sdf_vu_matrix.h"
 
 
-s32 evtCheckPathStat(dds3Basic_t *object) {
+EvtPathStatus evtCheckPathStat(dds3Basic_t *object) {
     f32 target = 1.0f;
     void *slot;
     dds3PathBasicControl_t *handle;
     s32 kind;
 
     if (object == NULL) {
-        return -1;
+        return EVT_PATH_STATUS_INVALID;
     }
     slot = dds3ObjectBaseGetControlBasic(object, 1);
     if (slot == NULL) {
-        return -1;
+        return EVT_PATH_STATUS_INVALID;
     }
     handle = dds3MoverBasicGetPathControl(slot);
     if (handle == NULL) {
-        return -1;
+        return EVT_PATH_STATUS_INVALID;
     }
     kind = dds3PathBasicControlGetMode(&handle->counter);
     if (kind != 0) {
         if (kind != 1) {
-            return -1;
+            return EVT_PATH_STATUS_INVALID;
         }
         target = 0.0f;
     }
     if (dds3PathBasicControlGetRatio(&handle->counter) == target) {
-        return 0;
+        return EVT_PATH_STATUS_AT_ENDPOINT;
     }
-    return 1;
+    return EVT_PATH_STATUS_IN_PROGRESS;
 }
 
 void evtPathLoop(dds3Basic_t *worldObject, s32 enabled) {

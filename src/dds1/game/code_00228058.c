@@ -41,18 +41,18 @@ extern void evtSetSkyAlpha(s32 duration, s32 target);
 
 s32 scrGetIntPara(s32 idx);
 extern struct dds3Basic_t *evtSearchBasic(s32 objectKind, s32 worldObjectKey);
-extern s32 evtCheckPathStat(struct dds3Basic_t *object);
+extern EvtPathStatus evtCheckPathStat(struct dds3Basic_t *object);
 
 s32 evtCommand_LIGHT_PATH_WAIT(void) {
-    s32 status = evtCheckPathStat(
+    EvtPathStatus status = evtCheckPathStat(
         evtSearchBasic(9, scrGetIntPara(0)));
 
     switch (status) {
-    case 0:
+    case EVT_PATH_STATUS_AT_ENDPOINT:
         return 1;
-    case 1:
+    case EVT_PATH_STATUS_IN_PROGRESS:
         return 0;
-    case -1:
+    case EVT_PATH_STATUS_INVALID:
         return 1;
     default:
         return 0;
@@ -484,4 +484,3 @@ INCLUDE_SDATA(const s32, "game/code_00228058", D_003BBDBC);
 INCLUDE_SDATA(const s32, "game/code_00228058", moonprocess_id);
 
 INCLUDE_SDATA(const s32, "game/code_00228058", D_003BBDC8);
-
