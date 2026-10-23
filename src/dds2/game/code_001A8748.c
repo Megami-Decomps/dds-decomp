@@ -45,6 +45,7 @@
 #include "btl_action.h"
 #include "snd_slot.h"
 #include "scr.h"
+#include "bf_flw0_header.h"
 #include "dat_state.h"
 #include "btl_resolve_unit_value_api.h"
 #include "btl_select_transform_parameters_api.h"
@@ -202,14 +203,14 @@ extern s32 TestMsgMngC_Process(dds3ProcessID_t *task);
 
 extern u8 D_003B4A28[];
 
-extern s32 scrStartScript2(s32 priority, s32 processId, s32 option);
+extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, s32 option);
 
 void TestMsgReloadTexture(void);
 
 void itfDebugMesMngInitialize(void) {
     D_00435CBC = 0x80FFFFFF;
     TestMsgReloadTexture();
-    itfMesMngSetKutiCallback(((scrProcessWork_s *)dds3GetProcessData((dds3ProcessID_t *)scrStartScript2(0x3E8, (s32)D_003B4A28, 0)))->resourceIndex, itfDebugPrintMark);
+    itfMesMngSetKutiCallback(((scrProcessWork_s *)dds3GetProcessData(scrStartScript2(0x3E8, (BfFlw0Header *)D_003B4A28, 0)))->resourceIndex, itfDebugPrintMark);
     dds3StartProcess("TestMsgMngC", 0x3EF, 0, 0, TestMsgMngC_Process, 0, 0);
     dds3StartProcess("TestMsgMngD", 0x2AFE, 0, 0, TestMsgMngD_Process, 0, 0);
 }

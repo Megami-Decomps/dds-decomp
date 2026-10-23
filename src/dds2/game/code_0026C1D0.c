@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "bf_flw0_header.h"
 #include "dsp_entry_api.h"
 #include "dsp_message_window_api.h"
 #include "dsp_channel.h"
@@ -124,24 +125,24 @@ s32 fclScriptForcedEnd(s32 task) {
     }
 }
 
-extern s32 scrStartScript2();
+extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, s32 option);
 
 void evtClearActiveFlag(s32 flagIndex);
 
 /* Replace an optional task slot, clear active flag zero, and return the new task.
  * Creation is still attempted if no slot is supplied. */
-s32 fclScriptStart(s32 processId, s32 processValue, s32 *taskSlot) {
-    s32 task;
+s32 fclScriptStart(BfFlw0Header *script, s32 processValue, s32 *taskSlot) {
+    dds3ProcessID_t *task;
 
     if (taskSlot != NULL) {
         fclScriptForcedEnd(*taskSlot);
     }
-    task = scrStartScript2(EVT_SCRIPT_PROCESS_PRIORITY, processId, processValue);
+    task = scrStartScript2(EVT_SCRIPT_PROCESS_PRIORITY, script, processValue);
     evtClearActiveFlag(0);
     if (taskSlot != NULL) {
-        *taskSlot = task;
+        *taskSlot = (s32)task;
     }
-    return task;
+    return (s32)task;
 }
 
 /* Emit active game-entry indices in ascending order, excluding entry zero.

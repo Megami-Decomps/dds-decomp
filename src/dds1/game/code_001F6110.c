@@ -34,6 +34,7 @@
 #include "sdf_vu_transform_api.h"
 #include "kwln.h"
 #include "scr.h"
+#include "bf_flw0_header.h"
 #include "scr_arg_read.h"
 #include "sdf.h"
 #include "btl_resource_name.h"
@@ -2682,20 +2683,20 @@ u32 btlCmdClearSpecialEnemyFlags(void) {
 extern u8 *D_003BAAA8;
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 
-extern s32 scrStartScript2(s32 priority, s32 processId, s32 option);
+extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, s32 option);
 
 void btlBindActorSlot(BtlTask *task, s32 taskArg) {
     BtlState *state = (BtlState *)btlGetRuntime();
-    s32 slot = scrStartScript2((s32)state->scriptOwner->priority - 1, D_003BAAA8, taskArg);
+    dds3ProcessID_t *slot = scrStartScript2((s32)state->scriptOwner->priority - 1, (BfFlw0Header *)D_003BAAA8, taskArg);
     s32 handle;
-    scrSetUserData((dds3ProcessID_t *)slot, task);
-    handle = ((scrProcessWork_s *)dds3GetProcessData((dds3ProcessID_t *)slot))->resourceIndex;
+    scrSetUserData(slot, task);
+    handle = ((scrProcessWork_s *)dds3GetProcessData(slot))->resourceIndex;
     if (handle >= 0) {
         BtlUnit *unit = task->unit;
         itfMesSetTextSlotFromValue(handle, 0, unit->partyRecord.unitId, (unit->partyRecord.flags & 0x20) ? 1 : 2);
     }
-    dds3LinkProcess(state->scriptOwner, (dds3ProcessID_t *)slot);
-    state->boundTask = slot;
+    dds3LinkProcess(state->scriptOwner, slot);
+    state->boundTask = (s32)slot;
 }
 
 
