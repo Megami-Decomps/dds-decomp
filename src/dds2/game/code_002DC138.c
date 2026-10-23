@@ -602,7 +602,7 @@ void effResetModelMotionAndOwnerFlag(EffResourceOwner *owner) {
         }
     }
     sdfMotionSeek(owner->model->first, 0.0f);
-    owner->unk04 = 0;
+    owner->currentFrame = 0;
 }
 
 #include "eff_curve.h"
@@ -697,7 +697,7 @@ void func_002DD448(EffResourceOwner *owner) {
         owner->model->first->frameStep = frameStep;
         mdlLink(owner->model, kwlnSceneSurfaceSets[10]);
     }
-    frame = owner->unk04;
+    frame = owner->currentFrame;
     count = owner->count;
     limit = owner->base.plainEntry;
     model = owner->model->inner;
@@ -766,7 +766,7 @@ void func_002DD448(EffResourceOwner *owner) {
         }
     }
     if (!(effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE)) {
-        owner->unk04++;
+        owner->currentFrame++;
     }
 }
 
