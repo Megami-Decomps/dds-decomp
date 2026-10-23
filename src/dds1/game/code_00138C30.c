@@ -1711,7 +1711,7 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
         if (entry->floor == fldGlobalBase.floor + 1) {
             s32 motion = entry->motion;
 
-            fldGlobalBase.unk174 = fldActorSlots[index].firstValues[0];
+            fldGlobalBase.modeOneCameraHeadingTarget = fldActorSlots[index].firstValues[0];
             fldGlobalBase.positionMode = 1;
             if (motion == 1) {
                 dds3FadeOut(0xC0, 0xC0, 0xC0, 0xF);
