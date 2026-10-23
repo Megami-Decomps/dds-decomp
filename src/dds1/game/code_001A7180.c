@@ -759,7 +759,7 @@ s32 btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command) {
             do {
                 u32 loopFlags;
 
-                entry = (BtlTask *)fldGetSceneGroupEntry(i++);
+                entry = fldGetSceneGroupEntry(i++);
                 if (entry == NULL) {
                     return 0;
                 }
@@ -788,11 +788,11 @@ s32 btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command) {
             return result;
         }
         if (requiredCount == 2) {
-            entry = (BtlTask *)fldGetSceneGroupEntry(2);
+            entry = fldGetSceneGroupEntry(2);
             if (entry == NULL ||
                 (entry->unit->partyRecord.status & 0x2A0E) != 0 ||
                 (btlUnitStatusPair(entry->unit) & 0x4E0) != 0x400) {
-                entry = (BtlTask *)fldGetSceneGroupEntry(1);
+                entry = fldGetSceneGroupEntry(1);
                 if (entry == NULL) {
                     return 0;
                 }

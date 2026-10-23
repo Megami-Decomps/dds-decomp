@@ -1584,19 +1584,19 @@ BtlTask **fldGetActorSceneGroupResource(BtlTask *task) {
 }
 
 /* Resolve one of the three group IDs; all other IDs return a null address. */
-s32 fldGetSceneGroupResource(u8 groupId) {
+BtlTask **fldGetSceneGroupResource(u8 groupId) {
     s32 scene = (s32)(u32)btlGetRuntime();
-    s32 groupEntries;
+    BtlTask **groupEntries;
 
     switch (groupId) {
     case FLD_SCENE_GROUP_PRIMARY_ID:
-        groupEntries = (s32)((BattleSceneWork *)scene)->groupPrimary;
+        groupEntries = ((BattleSceneWork *)scene)->groupPrimary;
         break;
     case FLD_SCENE_GROUP_SECONDARY_ID:
-        groupEntries = (s32)((BattleSceneWork *)scene)->groupSecondary;
+        groupEntries = ((BattleSceneWork *)scene)->groupSecondary;
         break;
     case FLD_SCENE_GROUP_TERTIARY_ID:
-        groupEntries = (s32)((BattleSceneWork *)scene)->groupTertiary;
+        groupEntries = ((BattleSceneWork *)scene)->groupTertiary;
         break;
     default:
         groupEntries = 0;
@@ -2056,13 +2056,13 @@ s32 fldGetActiveSceneGroupValue(void) {
 }
 
 /* Read one task word from the front group; an empty front slot returns zero. */
-s32 fldGetSceneGroupEntry(s32 entryIndex) {
+BtlTask *fldGetSceneGroupEntry(s32 entryIndex) {
     s32 scene = (s32)(u32)btlGetRuntime();
 
     if (((BattleSceneWork *)scene)->slots[0].group == 0) {
         return 0;
     }
-    return *(s32 *)(fldGetSceneGroupResource(((BattleSceneWork *)scene)->slots[0].group) + entryIndex * FLD_SCENE_GROUP_WORD_BYTES);
+    return fldGetSceneGroupResource(((BattleSceneWork *)scene)->slots[0].group)[entryIndex];
 }
 
 extern s32 btlResolveBattleTerminalOutcome(void);
@@ -2099,7 +2099,7 @@ void fldAdvanceSceneGroupScheduler(void) {
             } else if (fldAreSceneSlotsFinished() != 0) {
                 scene->flags |= 0x400;
             } else {
-                task = *(BtlTask **)fldGetSceneGroupResource(scene->slots[0].group);
+            task = *fldGetSceneGroupResource(scene->slots[0].group);
                 if (task == 0 || (task->unit->status.flags & 0xE0) != 0 || task->state != 2 ||
                     (task->unit->status.flags & 0x30400000) != 0) {
                     return;
