@@ -10,7 +10,7 @@ extern s32 dds3SearchDeleteBasicArray(dds3BasicArrayHandle_t *indexNode, dds3Bas
 
 /* Remove every entry for the node from the owner's world slot selected by the node's kind. */
 void dds3AreaBasicGetItemArray(dds3Basic_t *worldIndexOwner, dds3Basic_t *node) {
-    WorldIndexNode *slot = dds3AreaBasicGetWorldIndexNode(worldIndexOwner, dds3AreaBasicTypeHasItems(((u8 *)node)[0xF]));
+    WorldIndexNode *slot = dds3AreaBasicGetWorldIndexNode(worldIndexOwner, dds3AreaBasicTypeHasItems(node->kindTag >> 24));
 
     dds3SearchDeleteBasicArray((dds3BasicArrayHandle_t *)slot, node, 0);
 }
