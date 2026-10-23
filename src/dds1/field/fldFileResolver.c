@@ -1192,7 +1192,7 @@ void fldMakeObjectBasic3(void) {
     char modelName[16];
     char collisionName[16];
     char pathName[16];
-    void *world = dds3GetControlScene();
+    dds3Basic_t *world = dds3GetControlScene();
     s32 roomFlagIndex;
 
     for (roomFlagIndex = 1; roomFlagIndex < 16; roomFlagIndex++) {
@@ -1212,12 +1212,12 @@ void fldMakeObjectBasic3(void) {
             if (modelKey == -1) {
                 object = fldGetMatter_From_ModelRangeID(collisionKey);
             } else {
-                object = (dds3Basic_t *)dds3SearchSceneBasic(world, modelKey, 6);
+                object = dds3SearchSceneBasic(world, modelKey, 6);
                 if (object == NULL) {
                     object = fldGetMatter_From_ModelRangeID(collisionKey);
                 }
             }
-            path = (dds3Basic_t *)dds3SceneBasicSearchNameAndType(world, 0x10, (const u8 *)pathName);
+            path = dds3SceneBasicSearchNameAndType(world, 0x10, (const u8 *)pathName);
             data = dds3MatterObjectBasicGetControlWorkData(object);
             slot = (dds3Basic_t *)data->slots[1];
             if (slot == NULL) {
@@ -1239,7 +1239,7 @@ void fldMakeObjectBasic3(void) {
 
             sprintf(modelName, D_0039FE08, roomFlagIndex);
             key = fldCommand_SEARCH_ID(modelName);
-            object = (dds3Basic_t *)dds3SearchSceneBasic(world, key, 6);
+            object = dds3SearchSceneBasic(world, key, 6);
             dds3MatterObjectBasicSetAlpMode(object, 2);
         }
     }
