@@ -89,7 +89,7 @@ extern s32 btlRollMajinEncounter();
 
 
 
-extern void btlSelectSceneAudioTrack();
+extern void btlSelectSceneAudioTrack(s32 soundIndex, s32 sceneIndex);
 
 typedef struct BattleEffectParams {
     f32 position[4];
