@@ -81,12 +81,12 @@ void mnuBuildNamedResourceList(MnuCallbackList *callbackList, MenuRegistryRecord
                     dds3AppendIndexedListNode(callbackList, 0, (u32)state);
                 } else if (tag->kind == 0x10) {
                     if (state != NULL) {
-                        memcpy(&state->pad12, tag, sizeof(*tag));
+                        memcpy(&state->valueGate, tag, sizeof(*tag));
                         state->flags.bits.valueGated = 1;
                     }
                 } else if (tag->kind == 0x30) {
                     if (state != NULL) {
-                        memcpy(&state->pad1A, tag, sizeof(*tag));
+                        memcpy(&state->range, tag, sizeof(*tag));
                         state->flags.bits.hasRange = 1;
                     }
                 }
@@ -179,10 +179,10 @@ s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record) {
     }
     if (record->flags.word & MNU_STATE_WAIT_PENDING) {
         /* A zero wait limit leaves the pending wait stalled. */
-        if (record->waitLimit == 0) {
+        if (record->valueGate.waitLimit == 0) {
             return 0;
         }
-        if (++record->waitCount < record->waitLimit) {
+        if (++record->waitCount < record->valueGate.waitLimit) {
             return 0;
         }
         record->waitCount = 0;
@@ -191,7 +191,7 @@ s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record) {
     }
     if (++record->elapsedCount >= record->tag.duration) {
         record->elapsedCount = 0;
-        if (!(record->flags.word & MNU_STATE_VALUE_GATED) || record->limit > record->value) {
+        if (!(record->flags.word & MNU_STATE_VALUE_GATED) || record->valueGate.limit > record->value) {
             record->flags.word |= MNU_STATE_COMPLETED;
             return 1;
         }
@@ -204,7 +204,8 @@ s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record) {
 
 /* Test the idle counter and value gate; the pending-wait bit is not checked. */
 s32 mnuCanAdvanceIdleStateRecord(MenuStateRecord *record) {
-    if (record->elapsedCount == 0 && (!(record->flags.word & MNU_STATE_VALUE_GATED) || record->limit > record->value)) {
+    if (record->elapsedCount == 0 &&
+        (!(record->flags.word & MNU_STATE_VALUE_GATED) || record->valueGate.limit > record->value)) {
         return 1;
     }
     return 0;
@@ -225,13 +226,13 @@ MenuRuntimeRecord *mnuCreateRuntimeAnimationRecord(MenuStateRecord *state, MenuR
     f32 baseY;
 
     if (state->flags.bits.hasRange) {
-        offsetX = state->offsetX;
-        offsetY = state->offsetY;
+        offsetX = state->range.offsetX;
+        offsetY = state->range.offsetY;
     } else {
         offsetY = 0;
     }
 
-    effect = state->effect;
+    effect = state->range.effect;
     if (effect > 0) {
         mnuCreateAnimatedEffect((u32)(effect - 1), (f32)(x + offsetX),
                                 (f32)(y + offsetY), angle);
@@ -260,7 +261,7 @@ MenuRuntimeRecord *mnuCreateRuntimeAnimationRecord(MenuStateRecord *state, MenuR
     record->angle = angle;
     record->speed = state->tag.index;
     flags = record->state.word & ~0x1Eu;
-    record->remaining = state->lifetime;
+    record->remaining = state->valueGate.lifetime;
     record->state.word = flags |
                          (state->flags.bits.direction << 1);
     state->value++;
