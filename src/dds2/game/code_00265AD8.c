@@ -232,15 +232,15 @@ extern void mnuDrawShopPanelDecorations(MenuTerminalContext *scene);
 extern void mnuDrawTerminalPanelTransition(MenuTerminalContext *object, s32 elapsedFrames);
 
 s32 evtAdvancePopupWithOptionalPreparation(dds3ProcessID_t *callback) {
-    s32 context = dds3GetProcessData(callback);
+    MenuTerminalContext *context = (MenuTerminalContext *)dds3GetProcessData(callback);
 
-    if (*(s32 *)(context + 0xE0) != 0) {
-        mnuDrawShopPanelDecorations((MenuTerminalContext *)context);
+    if (context->prepared != 0) {
+        mnuDrawShopPanelDecorations(context);
     }
-    if (*(s32 *)(context + 0xB8) != 0) {
-        mnuDrawTerminalPanelTransition(context, *(s32 *)(context + 0xB8));
+    if (context->retryFrames != 0) {
+        mnuDrawTerminalPanelTransition(context, context->retryFrames);
     }
-    return evtMenuSetHandler((void *)context, 1, (void *)callback);
+    return evtMenuSetHandler(context, 1, (void *)callback);
 }
 /* Route the supplied callback through dispatch mode 2 after menu setup. */
 s32 evtSetupDispatchSyncI(dds3ProcessID_t *callback) {
