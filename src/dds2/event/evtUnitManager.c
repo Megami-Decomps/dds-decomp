@@ -805,7 +805,7 @@ evtUnitHandle_t *evtCreateUnitTransitionWork(dds3Basic_t *effObj, dds3ModelHandl
     work->referenceAngleCacheFlags = 0;
     work->cachedReferenceAngleDegrees = 0;
     {
-        f32 *slot = &work->unk138[1];
+        f32 *slot = &work->tableMotionFrameStep[1];
 
         i = 10;
         do {
@@ -1500,8 +1500,8 @@ s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
                     if ((unit->flags & 0x1000000) == 0) {
                         mdlSmoothLoopMotion(model, i, unit->tableValues[i], 0.0f, 0.0f);
                     } else {
-                        mdlSmoothLoopMotion(model, i, unit->tableValues[i], (f32)unit->unk108[i], (f32)unit->unk120[i]);
-                        mdlSetMotionSpeedEx(model, i, unit->unk138[i]);
+                        mdlSmoothLoopMotion(model, i, unit->tableValues[i], (f32)unit->tableMotionBlendLeadFrames[i], (f32)unit->tableMotionBlendDurationFrames[i]);
+                        mdlSetMotionSpeedEx(model, i, unit->tableMotionFrameStep[i]);
                     }
                 } else if ((unit->flags & 0x1000000) && (unit->slotFlags[i] & 0x10)) {
                     mdlSmoothSingleMotion(model, i, unit->slotA[i], 0.0f, 1.0f);
@@ -2190,9 +2190,9 @@ u32 evtScriptSetUnitTableValueAndReset(void) {
         s32 tableValueIndex = scrGetIntPara(1);
         s32 value = scrGetIntPara(2);
         unit->tableValues[tableValueIndex] = value;
-        unit->unk108[tableValueIndex] = 0;
-        unit->unk120[tableValueIndex] = 0;
-        unit->unk138[tableValueIndex] = 1.0f;
+        unit->tableMotionBlendLeadFrames[tableValueIndex] = 0;
+        unit->tableMotionBlendDurationFrames[tableValueIndex] = 0;
+        unit->tableMotionFrameStep[tableValueIndex] = 1.0f;
     }
     return 1;
 }
