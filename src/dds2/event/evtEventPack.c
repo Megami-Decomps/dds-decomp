@@ -92,7 +92,7 @@ s32 evtRegistBEField(s32 eventId, s32 resourceId) {
     EvtPackEntry *entry;
     s32 entryCount;
     s32 remainingEntryCount;
-    s32 *areaRoomIds;
+    const EvtAreaRoomIds *areaRoomIds;
     u8 *resource0Data;
     u8 *resource1Data;
     const SdfTextureOffsetListHeader *textureOffsets;
@@ -121,14 +121,14 @@ s32 evtRegistBEField(s32 eventId, s32 resourceId) {
                 }
             }
             if (entry->secondaryResourceId == resourceId && entry->kind == 1) {
-                areaRoomIds = (s32 *)(packState->data + entry->dataOffset);
+                areaRoomIds = (const EvtAreaRoomIds *)(packState->data + entry->dataOffset);
             }
             entry++;
         } while (--remainingEntryCount != 0);
     }
 
     if (areaRoomIds != NULL && resource0Data != NULL && resource1Data != NULL && textureOffsets != NULL) {
-        evtLoadArea_FromMemory(areaRoomIds[0], areaRoomIds[1], resource0Data, resource1Data, textureOffsets, 0);
+        evtLoadArea_FromMemory(areaRoomIds->area, areaRoomIds->room, resource0Data, resource1Data, textureOffsets, 0);
         fldFileAddrResetMode(1);
         dds3DrawFlag |= 0x02000000;
         return 1;
