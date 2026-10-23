@@ -848,7 +848,7 @@ ItfMesSub *itfMesMngSetResourcePtr(s32 window, ItfMesSub *sub) {
     entry = GetTypeHeader2(sub);
     temporaryFontEntry = 0;
     if (sub->magic == ITF_MES_MAGIC_MSG1) {
-        temporaryFontEntry = *(u8 **)((u8 *)entry + 8);
+        temporaryFontEntry = ((ItfMesTrailingFontEntry *)entry)->temporaryFontEntry;
     }
     mes->temporaryFontEntry = temporaryFontEntry;
     return previous;
