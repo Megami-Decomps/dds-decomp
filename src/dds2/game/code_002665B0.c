@@ -809,7 +809,7 @@ MenuProgressHost *mnuCreateProgressHost(void) {
 
 /* Release staff/title texture work before the value record and allocation. */
 void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *host) {
-    mnuReleaseStaffMenuTextureHandles(&host->staffSlots);
+    mnuReleaseStaffMenuTextureHandles(&host->staffSlots.baseResources[0]);
     mnuReleaseTitleEffectSprites(&host->staffSlots);
     effDestroyEffectList(host->titleEffectHandle);
     sdfMemFreeDirect(host->allocation);
@@ -828,7 +828,7 @@ s32 mnuPollTitleEffectsReady(MenuProgressHost *host) {
     if (movAreTitleEffectsReady(host->titleEffectHandle, (StaffSlots *)((s32)host + 8)) == 0) {
         return 1;
     }
-    mnuReleaseStaffMenuResources(&host->staffSlots);
+    mnuReleaseStaffMenuResources(&host->staffSlots.baseResources[0]);
     host->loadState = 2;
     return 0;
 }

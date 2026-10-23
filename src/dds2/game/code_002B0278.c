@@ -1211,22 +1211,22 @@ void mnuReleaseMenuWindowHandles(s32 context) {
 }
 
 /* Release both staff resource slots; their menu indices differ between games. */
-void mnuReleaseStaffMenuResources(void *resourceBase) {
-    struct EffectSlotSet **resourceCursor = (struct EffectSlotSet **)(
-        (u8 *)resourceBase + sizeof(((StaffSlots *)0)->baseResources));
+void mnuReleaseStaffMenuResources(struct EffectSlotSet **baseResources) {
+    struct EffectSlotSet **pairResources = baseResources +
+        sizeof(((StaffSlots *)0)->baseResources) / sizeof(*baseResources);
     s32 resourceCountdown = 1;
     do {
-        effResolveAndReleaseResource(*resourceCursor++);
+        effResolveAndReleaseResource(*pairResources++);
     } while (--resourceCountdown >= 0);
 }
 
 /* Reset texture handles for the same two resource slots. */
-void mnuReleaseStaffMenuTextureHandles(void *resourceBase) {
-    struct EffectSlotSet **resourceCursor = (struct EffectSlotSet **)(
-        (u8 *)resourceBase + sizeof(((StaffSlots *)0)->baseResources));
+void mnuReleaseStaffMenuTextureHandles(struct EffectSlotSet **baseResources) {
+    struct EffectSlotSet **pairResources = baseResources +
+        sizeof(((StaffSlots *)0)->baseResources) / sizeof(*baseResources);
     s32 resourceCountdown = 1;
     do {
-        effReleaseTextureHandlesAndResetSlots(*resourceCursor++);
+        effReleaseTextureHandlesAndResetSlots(*pairResources++);
     } while (--resourceCountdown >= 0);
 }
 
