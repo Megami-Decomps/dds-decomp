@@ -15,7 +15,7 @@
 #include "mdl.h"
 #include "sdf_chunk.h"
 
-extern void effPCPCrackDraw(void *work);
+extern void effPCPCrackDraw(effPCPCrack_t *work);
 extern void effPCPCrackSetPosition(void *dst, void *src);
 extern PairedEffectResources *effPCPBossMETATOBeamCreate(PairedEffectParams *src);
 extern EffThunderGroup *effPCP_ThunderPolyListCreate(EffThunderGroupParams *src);
@@ -176,8 +176,7 @@ extern void dds3FlashPolyListSetABGR(dds3FlashPolyList_t *, u32);
 extern void dds3FlashPolyListDraw(dds3FlashPolyList_t *);
 
 /* Independent native reconstruction; prior KiB/Opal/Brass algorithms credited. */
-void effPCPCrackDraw(void *opaque) {
-    effPCPCrack_t *work = opaque;
+void effPCPCrackDraw(effPCPCrack_t *work) {
     f32 perpendicular[4];
     f32 direction[4];
     f32 axis[4];
