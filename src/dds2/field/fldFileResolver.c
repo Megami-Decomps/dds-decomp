@@ -420,7 +420,7 @@ extern void fldFreeNextFile(void);
 
 extern dds3ModelHandle_t *fldSecondarySceneModelContext;
 
-extern s32 fldSecondarySceneObject;
+extern dds3Basic_t *fldSecondarySceneObject;
 
 
 
@@ -4639,7 +4639,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
     dds3OnPoseSetFlag(fldPlayerObject->inner,
                       OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
     if (fldSecondarySceneObject != 0) {
-        dds3OnPoseSetFlag(((dds3Basic_t *)fldSecondarySceneObject)->inner,
+        dds3OnPoseSetFlag(fldSecondarySceneObject->inner,
                           OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
     }
     if (direction != -1 && D_00435F30 != 0) {
@@ -4779,7 +4779,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
         fldPlayerObject->inner->smoothedPosition[3] = 1.0f;
         if (fldSecondarySceneObject != 0) {
             dds3PoseSet_t *source = fldPlayerObject->inner;
-            dds3PoseSet_t *secondary = ((dds3Basic_t *)fldSecondarySceneObject)->inner;
+            dds3PoseSet_t *secondary = fldSecondarySceneObject->inner;
             secondary->smoothedPosition[0] = source->smoothedPosition[0];
             secondary->smoothedPosition[1] = source->smoothedPosition[1] + 0.0f;
             secondary->smoothedPosition[2] = source->smoothedPosition[2];
@@ -4812,7 +4812,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
     SDF_VU0_STOREVECTOR_NOMEM(quaternion);
     dds3SetRotPoseSet(fldPlayerObject, (u128 *)quaternion);
     if (fldSecondarySceneObject != 0) {
-        dds3SetRotPoseSet((dds3Basic_t *)fldSecondarySceneObject, (u128 *)quaternion);
+        dds3SetRotPoseSet(fldSecondarySceneObject, (u128 *)quaternion);
     }
     if (fldGlobalBase.mode != 3 && fldGlobalBase.mode != 1) {
         if (D_004360BC != 0) {
@@ -5604,7 +5604,7 @@ void fldSetPlayerAndPeerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
     f32 direction[4];
 
     if (fldSecondarySceneObject != 0) {
-        secondary = evtGetUnitHandle2((dds3Basic_t *)fldSecondarySceneObject);
+        secondary = evtGetUnitHandle2(fldSecondarySceneObject);
         evtUnitLightOn(secondary);
     }
     player = evtGetUnitHandle2(fldPlayerObject);
