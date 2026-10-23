@@ -125,7 +125,7 @@ extern u32 sdf3DLightDefault;
 
 extern u32 sdf3DFogDefault;
 
-extern u32 sdfDebugFontHandle;
+extern struct sdfTexHandle_t *sdfDebugFontHandle;
 
 extern f32 D_00439190;
 
@@ -1545,12 +1545,12 @@ void sdfPadInitManager(void) {
 void sdfDevConsInit(void) {
     if (D_00438AB4 == 0) {
         D_00438AB4 = 1;
-        sdfDebugFontHandle = (u32)sdfTexSet((SdfTextureFileHeader *)(D_00370B80));
+        sdfDebugFontHandle = sdfTexSet((SdfTextureFileHeader *)(D_00370B80));
     }
 }
 
 /* Ensure initialization and return the cached console texture. */
-u32 sdfDevConsGetFontHandle(void) {
+struct sdfTexHandle_t *sdfDevConsGetFontHandle(void) {
     sdfDevConsInit();
     return sdfDebugFontHandle;
 }
