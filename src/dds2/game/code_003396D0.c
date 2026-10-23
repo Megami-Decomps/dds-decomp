@@ -199,8 +199,8 @@ void sdfCoreDrawScanOneSkinNodes(sdfModelRootNode_t *model, SdfObjectRefCommand 
     }
 }
 
-void sdfCoreDrawSetLight(u32 matrixAddress) {
-    corePktCurrLight = matrixAddress;
+void sdfCoreDrawSetLight(const struct SdfDmaTagHeader *lightingPacket) {
+    corePktCurrLight = (u32)lightingPacket;
 }
 
 extern u8 D_00476240[];
