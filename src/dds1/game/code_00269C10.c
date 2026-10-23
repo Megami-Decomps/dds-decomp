@@ -37,17 +37,17 @@
 #define MNU_STREAM_COMMIT_COMPLETE 4
 
 
-extern s32 dds3AddCameraObjectBasicTypeFree(s32 counter, f32 *position, f32 *rotation);
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 counter, f32 *position, f32 *rotation);
 
 
-extern void dds3GetRadiusPoseSet(s32 object, f32 value);
+extern void dds3GetRadiusPoseSet(dds3Basic_t *object, f32 value);
 
 
 extern u8 mnuTitleCameraPosition[];
 
 extern u8 mnuTitleCameraRotation[];
 
-extern void *mnuTitleCameraObject;
+extern dds3Basic_t *mnuTitleCameraObject;
 
 extern char D_003AFD48[];
 
