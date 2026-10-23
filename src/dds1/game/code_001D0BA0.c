@@ -78,7 +78,7 @@ extern s32 fileTestSavedSlotFlags(u32);
 
 extern s32 btlGetCommandFailureReason(BtlUnit *, s32);
 
-extern u32 btlSelectCommandTargetPolicy(void *, BtlIndexList *, s32);
+extern u32 btlSelectCommandTargetPolicy(BtlTask *, BtlIndexList *, s32);
 
 extern BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *, BtlIndexList *);
 

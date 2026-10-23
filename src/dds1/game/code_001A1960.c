@@ -636,13 +636,12 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1788);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A17A8);
 
-u32 btlSelectCommandTargetPolicy(void *action, BtlIndexList *destination, s32 unused) {
+u32 btlSelectCommandTargetPolicy(BtlTask *task, BtlIndexList *destination, s32 unused) {
     s32 category = 3;
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 mode = 0;
     s32 flags = 0;
     s32 mask = 0;
-    BtlTask *task = (BtlTask *)action;
     s32 value = task->indexWork.phase;
 
     switch (value) {

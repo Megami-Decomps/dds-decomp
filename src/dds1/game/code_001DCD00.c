@@ -42,7 +42,7 @@
 #include "file_request_api.h"
 #include "dat_affinity.h"
 
-extern u32 btlSelectCommandTargetPolicy(void *, BtlIndexList *, s32);
+extern u32 btlSelectCommandTargetPolicy(BtlTask *, BtlIndexList *, s32);
 
 
 extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
