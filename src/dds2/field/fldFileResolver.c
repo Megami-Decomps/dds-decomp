@@ -464,7 +464,7 @@ extern u32 fldCameraColorEnabled;
 
 extern sdfTexHandle_t *fldRainTextureReference;
 
-extern s32 fldRainTextureResource;
+extern struct sdfMemHandle_t *fldRainTextureResource;
 
 extern u32 gFilterAnime;
 
@@ -5237,8 +5237,8 @@ void fldLoadSkyResource(s32 area) {
         command = sdfFileOpen(path);
         sdfFileRead(command, fldSkyLightSetBuffer, 0xE000);
         sdfFileClose(command);
-        if (area >= 2 && area < 100 && fldRainTextureResource == 0) {
-            fldRainTextureResource = (s32)(u32)sdfDevLoadFileEx(D_00413350, &fldRainTextureData, 0);
+        if (area >= 2 && area < 100 && fldRainTextureResource == NULL) {
+            fldRainTextureResource = sdfDevLoadFileEx(D_00413350, &fldRainTextureData, 0);
             fldRainTextureReference = sdfTexSet((SdfTextureFileHeader *)(fldRainTextureData));
         }
     }
@@ -5249,9 +5249,9 @@ void fldReleaseSkyResources(void) {
         sdfTexReleaseReferenceViaHandler(fldRainTextureReference);
         fldRainTextureReference = 0;
     }
-    if (fldRainTextureResource != 0) {
-        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldRainTextureResource);
-        fldRainTextureResource = 0;
+    if (fldRainTextureResource != NULL) {
+        sdfMemFreeDelayedDirect(fldRainTextureResource);
+        fldRainTextureResource = NULL;
     }
     if (fldCameraColorEffect != 0) {
         effReleaseSelectionFlagList(fldCameraColorEffect);
@@ -5264,8 +5264,8 @@ void fldUploadSkyBuffer(FldSkyBuffer *src) {
     gFilterAlpha = 0x80;
     *fldSkyLightSetBuffer = *src;
     fldReleaseSkyResources();
-    if (D_00389780[0] >= 2 && D_00389780[0] < 100 && fldRainTextureResource == 0) {
-        fldRainTextureResource = (s32)(u32)sdfDevLoadFileEx(D_00413350, &fldRainTextureData, 0);
+    if (D_00389780[0] >= 2 && D_00389780[0] < 100 && fldRainTextureResource == NULL) {
+        fldRainTextureResource = sdfDevLoadFileEx(D_00413350, &fldRainTextureData, 0);
         fldRainTextureReference = sdfTexSet((SdfTextureFileHeader *)(fldRainTextureData));
     }
 }

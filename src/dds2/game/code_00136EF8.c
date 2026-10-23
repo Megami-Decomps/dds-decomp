@@ -56,7 +56,7 @@ extern struct sdfMemHandle_t *fldAuxRecordResource;
 extern struct sdfMemHandle_t *fldValueRecordResource;
 
 
-extern s32 fldRainTextureResource;
+extern struct sdfMemHandle_t *fldRainTextureResource;
 
 extern char D_00413350[];
 
@@ -80,9 +80,9 @@ void fldInitializeCameraColorResource(void) {
     fldRainTextureResource = sdfDevLoadFileEx(D_00413350, &fldRainTextureData, 0);
     fldRainTextureReference = sdfTexSet((SdfTextureFileHeader *)(fldRainTextureData));
     fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
-    if (fldRainTextureResource != 0) {
-        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldRainTextureResource);
-        fldRainTextureResource = 0;
+    if (fldRainTextureResource != NULL) {
+        sdfMemFreeDelayedDirect(fldRainTextureResource);
+        fldRainTextureResource = NULL;
     }
     fldUpdateCameraColorEffect(fldCameraSettings);
     fldCameraColorEnabled = 1;
