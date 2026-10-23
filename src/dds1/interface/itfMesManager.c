@@ -64,9 +64,8 @@ void frFontCenterGlyphChainAt(s32 x, s32 y, _FRQ *glyphChain);
 
 
 
-s32 itfGetTextLipsUnitId();
-
-s32 itfGetTextLipsMotionId();
+extern u32 itfGetTextLipsUnitId(void);
+extern u32 itfGetTextLipsMotionId(void);
 
 void ChangeZBuffer(_FRQ *glyph, s32 renderValue);
 
@@ -1203,7 +1202,7 @@ void itfMesBuildEntryGlyph(instanceMes_tag *mes) {
     ItfMesEntryBlock *entryBlock = &mes->entryBlock;
     _FRQ *glyph;
     _FRQ *previousGlyph;
-    s32 lipsValue;
+    u32 lipsValue;
     u32 interfaceMask;
     void (*callback)();
 
@@ -1241,7 +1240,7 @@ void itfMesBuildEntryGlyph(instanceMes_tag *mes) {
     }
     if (frGetMessageResult(8) != 0) {
         lipsValue = itfGetTextLipsUnitId();
-        evtLipsExecFunction(lipsValue, itfGetTextLipsMotionId());
+        evtLipsExecFunction((s32)lipsValue, (s32)itfGetTextLipsMotionId());
     }
     ChangeZBuffer(glyph, mes->renderValue);
     entryBlock->lineCount = CountLineMessage(GetLastLinkFontHandle(glyph), glyph);
