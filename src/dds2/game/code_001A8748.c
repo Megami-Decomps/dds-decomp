@@ -1244,16 +1244,17 @@ void btlResetActorEntryState(void) {
     s32 context = (s32)btlRuntime;
     datUnitWork_t *party = DDS3_GBWK->party;
     u32 i;
-    *(s32 *)(context + 0x2E8) = 0;
-    *(s32 *)(context + 0x2EC) = 0;
-    *(s32 *)(context + 0x2F0) = 0;
-    *(s32 *)(context + 0x2F4) = 0;
-    *(s32 *)(context + 0x2F8) = 0;
-    *(u16 *)(context + 0x2FC) = 0;
+    ((BattleController *)context)->moneyEarned = 0;
+    ((BattleController *)context)->rewardMacca = 0;
+    ((BattleController *)context)->experienceEarned = 0;
+    ((BattleController *)context)->epEarned = 0;
+    ((BattleController *)context)->totalAp = 0;
+    ((BattleController *)context)->specialEnemyDefeats = 0;
     for (i = 0; i < 5; i++) {
         party[i].huntExp = 0;
     }
-    memset((u8 *)btlRuntime + 0x2DC, 0, 12);
+    memset(((BattleController *)btlRuntime)->itemDrops, 0,
+           sizeof(((BattleController *)btlRuntime)->itemDrops));
 }
 
 s32 btlCaptureRewardSummary(BrsRewardSummary *rewards) {
