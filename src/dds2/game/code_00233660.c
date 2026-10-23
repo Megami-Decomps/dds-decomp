@@ -131,7 +131,7 @@ typedef struct MdlViewState {
     s16 scrollPage;  /* 0x38: page stepped by mdlUpdateViewerCursorWithPageStep */
     s16 nodeCursor; /* 0x3A: selection within the loaded node count */
     s16 settingsCursor; /* 0x3C: selected row among the ten viewer settings. */
-    s16 unk3E;
+    s16 settingsPage;
     s16 editorMode; /* 0x40: 0 selects records, 1 edits a mark record */
     s16 selectedRecordIndex; /* 0x42: index across the shared and active-entry record lists */
     s16 effectListScroll; /* 0x44: first record displayed by the effect list */
@@ -2314,7 +2314,7 @@ void mdlSaveViewerPresentationConfig(void);
 
 /* Debug menu: page 0 selects an action, pages 1-4 edit the color channels and value steps. */
 void mdlUpdateViewerSettingsInput(void) {
-    switch (mdlViewerState.unk3E) {
+    switch (mdlViewerState.settingsPage) {
     case 0:
         if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.settingsCursor, 10, 1) != 0) {
             return;
@@ -2335,12 +2335,12 @@ void mdlUpdateViewerSettingsInput(void) {
         case 3:
         case 4:
         case 5:
-            mdlViewerState.unk3E = 1;
+            mdlViewerState.settingsPage = 1;
             break;
         case 6:
         case 7:
         case 8:
-            mdlViewerState.unk3E = mdlViewerState.settingsCursor - 4;
+            mdlViewerState.settingsPage = mdlViewerState.settingsCursor - 4;
             break;
         case 9:
             SDF_VU0_COPYVECTOR(&D_003C87C0, &D_00453620);
@@ -2352,26 +2352,26 @@ void mdlUpdateViewerSettingsInput(void) {
     case 1:
         fldStepColorChannelByPad(&D_00435CBC, mdlViewerState.settingsCursor - 3, dds3PadBitTable);
         if (dds3PadBitTable[1] < 0 || dds3PadBitTable[3] < 0) {
-            mdlViewerState.unk3E = 0;
+            mdlViewerState.settingsPage = 0;
         }
         break;
     case 2:
         if (dds3PadBitTable[1] < 0 || dds3PadBitTable[3] < 0) {
-            mdlViewerState.unk3E = 0;
+            mdlViewerState.settingsPage = 0;
         } else {
             dds3DebugIntEdit(&mdlViewerState.captureScale, 2, 1, 8, 1, 1);
         }
         break;
     case 3:
         if (dds3PadBitTable[1] < 0 || dds3PadBitTable[3] < 0) {
-            mdlViewerState.unk3E = 0;
+            mdlViewerState.settingsPage = 0;
         } else {
             dds3DebugIntEdit(&mdlViewerState.captureDivX, 2, 1, 8, 1, 1);
         }
         break;
     case 4:
         if (dds3PadBitTable[1] < 0 || dds3PadBitTable[3] < 0) {
-            mdlViewerState.unk3E = 0;
+            mdlViewerState.settingsPage = 0;
         } else {
             dds3DebugIntEdit(&mdlViewerState.captureDivY, 2, 1, 8, 1, 1);
         }
@@ -2425,7 +2425,7 @@ void mdlDrawViewerSettings(void) {
             0x7240, D_003C88E8[mdlViewerState.settingsCursor], 0xFF0080, 0, D_004370E0));
     }
     dds3PrimDebugTextBoxRGB(packetList, 0x7300, D_003C88E8[3],
-                           mdlViewerState.unk3E == 1 ? mdlViewerState.settingsCursor - 3 : -1,
+                           mdlViewerState.settingsPage == 1 ? mdlViewerState.settingsCursor - 3 : -1,
                            D_00435CBC, 0);
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7B40, 0x7C60, 0xFF0080, 0, "BACK COLOR"));
@@ -2439,7 +2439,7 @@ void mdlDrawViewerSettings(void) {
         }
         sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
             0x7300, 0x7D80 + i * 0x60, 0xFF0080, 0, D_003C8920[i], value));
-        style = i == mdlViewerState.settingsCursor - 6 && i == mdlViewerState.unk3E - 2 ? 6 : 0;
+        style = i == mdlViewerState.settingsCursor - 6 && i == mdlViewerState.settingsPage - 2 ? 6 : 0;
         sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
             0x7F00, 0x7D80 + i * 0x60, 0xFF0080, style, D_004370E8, value));
     }
