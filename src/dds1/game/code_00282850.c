@@ -94,11 +94,6 @@ extern char D_003BC7A0[];
 #define EVT_STAGE_ENTRY_BYTES 60
 #define EVT_STAGE_MODEL_RECORD_BYTES 624
 #define EVT_STAGE_COLUMN_VALUE_COUNT 8
-#define EVT_STAGE_MOTION_IDLE 0
-#define EVT_STAGE_MOTION_QUEUED 1
-#define EVT_STAGE_MOTION_PLAYING 2
-#define EVT_STAGE_MOTION_FALLBACK_STARTED 3
-#define EVT_STAGE_MOTION_FORCE_FALLBACK 4
 #define EVT_STAGE_MOTION_SUPPRESS_FALLBACK 1
 #define EVT_STAGE_DEFAULT_BLEND_FRAMES 15.0f
 #define EVT_STAGE_PROJECTION_BIAS 2048.0f
@@ -2836,7 +2831,7 @@ void evtStageTestForceDefaultMotion(void) {
 
 /* Idle and fallback-started states are settled; every other state is reported as pending. */
 s32 evtStageTestHasPendingMotion(void) {
-    s32 motionState = evtStageTestState.queue.slot[0].state;
+    StageTestMotionState motionState = evtStageTestState.queue.slot[0].state;
 
     if ((motionState == EVT_STAGE_MOTION_IDLE) || (motionState == EVT_STAGE_MOTION_FALLBACK_STARTED)) {
         return 0;

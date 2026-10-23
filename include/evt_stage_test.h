@@ -16,6 +16,14 @@ typedef struct StageTestEntry {
     f32 pad38;
 } StageTestEntry;
 
+typedef enum StageTestMotionState {
+    EVT_STAGE_MOTION_IDLE = 0,
+    EVT_STAGE_MOTION_QUEUED = 1,
+    EVT_STAGE_MOTION_PLAYING = 2,
+    EVT_STAGE_MOTION_FALLBACK_STARTED = 3,
+    EVT_STAGE_MOTION_FORCE_FALLBACK = 4
+} StageTestMotionState;
+
 typedef struct StageTestSlot {
     s32 entryIndex;          /* 0x00 */
     s32 assetResource;       /* 0x04: mode-selected model resource */
@@ -23,7 +31,7 @@ typedef struct StageTestSlot {
     s32 assetOption;         /* 0x0C: third argument to mdlPrepare */
     s32 initialMotionIndex;  /* 0x10: negative selects entry motionIndex */
     u32 flags;               /* 0x14: bit 0 suppresses fallback motion */
-    s32 state;               /* 0x18: idle/queued/playing/fallback state */
+    StageTestMotionState state; /* 0x18: idle/queued/playing/fallback state */
     s32 motionIndex;         /* 0x1C */
     s32 blendLeadFrames;     /* 0x20 */
     s32 blendDurationFrames; /* 0x24 */
