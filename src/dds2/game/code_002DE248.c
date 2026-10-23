@@ -1453,7 +1453,7 @@ void effKindWorkFrameReset(EffKindWork *work) {
 }
 
 void effKindWorkFrameUpdate(EffKindWork *work) {
-    D_003E9810[work->kind].update();
+    D_003E9810[work->kind].update(work);
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         work->frame++;
     }
@@ -1553,7 +1553,7 @@ void effAlternateKindWorkFrameReset(EffKindWork *work) {
 
 
 void effAlternateKindWorkFrameUpdate(EffKindWork *work) {
-    D_003E98A0[work->kind].update();
+    D_003E98A0[work->kind].update(work);
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         work->frame++;
     }
@@ -4790,7 +4790,7 @@ void effInitializeClassFrame(EffClassWork *work) {
 void effAdvanceClassFrame(EffClassWork *work) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         EffClassOps *operations = &effClassWorkOperations[work->kind];
-        operations->update();
+        operations->update(work);
         work->frame++;
     }
 }
