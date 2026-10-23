@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_handler_node.h"
 #include "sdf_chip.h"
 #include "ee_mmi.h"
 #include "sdf.h"
@@ -39,7 +40,7 @@ s32 VblankIntcHandler(s32 eventId) {
     return 0;
 }
 
-extern void sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
+extern SdfHandlerNode *sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
 
 /* Each wake-up broadcasts to every tracked thread under the list semaphore. */
 void VblankThreadProc(void) {
