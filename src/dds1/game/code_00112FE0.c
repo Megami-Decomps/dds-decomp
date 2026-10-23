@@ -21,7 +21,7 @@ dds3ObjectBaseControlWorkData_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic
 
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *node);
 extern dds3Basic_t *dds3GetFirstWorldObjectNodeOfKind2(void);
-extern s32 dds3ObjectBaseRegistArea(void *object);
+extern s32 dds3ObjectBaseRegistArea(dds3Basic_t *object);
 
 dds3Basic_t *dds3AddUnitObjectBasic(s32 a, void *firstVector, void *secondVector) {
     dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_FOLLOW_MODEL);

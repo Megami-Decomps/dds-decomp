@@ -363,7 +363,7 @@ void dds3ObjectBaseMatterAnimeSpeed(dds3Basic_t *object, u32 requestedMode) {
 
 /* Ensure the owner appears in its auxiliary handler's world index.
  * Return 0 for an absent handler, otherwise 1 after updating the index. */
-s32 dds3ObjectBaseRegistArea(void *object) {
+s32 dds3ObjectBaseRegistArea(dds3Basic_t *object) {
     dds3Basic_t *handler;
 
     handler = dds3ObjectBaseGetControlBasic(object, DDS3_OBJECT_HANDLER_SLOT);
