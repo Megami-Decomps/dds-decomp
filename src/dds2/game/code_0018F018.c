@@ -31,14 +31,15 @@ void dds3EffectRippleBlurReset(EffBlurScaleWork *work) {
 /* Allocate an owner and slot array from only the serialized parameter prefix. */
 EffBlurScaleWork *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *src) {
     s32 count = src->count;
-    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(count * 0x30 + 0x38);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(
+        count * sizeof(EffBlurScaleSlot) + sizeof(EffBlurScaleWork));
     EffBlurScaleWork *work = (EffBlurScaleWork *)sdfMemLock(allocation);
     EffBlurScaleSlot *slot;
     s32 i = 0;
 
     /* Copy through size, leaving the source handle, allocation and slots owned
        by this new work rather than reading a live-work tail from src. */
-    memcpy(work, src, 0x2C);
+    memcpy(work, src, sizeof(work->params));
     work->allocation = allocation;
     work->slots = (EffBlurScaleSlot *)(work + 1);
     work->texture = dds3BillboardGetGeneralTex(3);
@@ -276,4 +277,3 @@ void dds3EffectFilter(dds3Effect_Filter_t *source) {
     sdfDrawTagLink(list, (u32)drawPacket);
     D_003803C8.append(&D_003803C8, list);
 }
-
