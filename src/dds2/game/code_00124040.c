@@ -1309,7 +1309,7 @@ void fldReleaseResources(void) {
     }
 }
 
-extern u32 fldSecondarySceneObject;
+extern dds3Basic_t *fldSecondarySceneObject;
 
 extern dds3ModelHandle_t *fldPlayerModelContext;
 
@@ -1495,14 +1495,14 @@ void fldSpawnPlayerUnits(f32 *input) {
             SDF_VU0_LOADVECTOR_B(input + 4);
             effMiscQuatMultiplyVU();
             SDF_VU0_STOREVECTOR(work);
-            fldSecondarySceneObject = (u32)dds3AddUnitObjectBasic(dds3AllocObjectId(), input, work);
-            dds3SetUnitObjectId((dds3Basic_t *)fldSecondarySceneObject, (u32)D_00412F00);
-            dds3RebuildObjectModelContext((dds3Basic_t *)fldSecondarySceneObject, 2, D_0038A67C[0]);
-            dds3SetPosPoseSet((dds3Basic_t *)fldSecondarySceneObject, (u128 *)input);
-            dds3SetRotPoseSet((dds3Basic_t *)fldSecondarySceneObject, (u128 *)work);
-            dds3SetSclPoseSet((dds3Basic_t *)fldSecondarySceneObject, (u128 *)secondaryScale);
-            fldSecondarySceneModelContext = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle((dds3Basic_t *)(u32)fldSecondarySceneObject);
-            dds3GetRadiusPoseSet((dds3Basic_t *)fldSecondarySceneObject, 90.0f);
+            fldSecondarySceneObject = dds3AddUnitObjectBasic(dds3AllocObjectId(), input, work);
+            dds3SetUnitObjectId(fldSecondarySceneObject, (u32)D_00412F00);
+            dds3RebuildObjectModelContext(fldSecondarySceneObject, 2, D_0038A67C[0]);
+            dds3SetPosPoseSet(fldSecondarySceneObject, (u128 *)input);
+            dds3SetRotPoseSet(fldSecondarySceneObject, (u128 *)work);
+            dds3SetSclPoseSet(fldSecondarySceneObject, (u128 *)secondaryScale);
+            fldSecondarySceneModelContext = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(fldSecondarySceneObject);
+            dds3GetRadiusPoseSet(fldSecondarySceneObject, 90.0f);
             mdlLoopMotion(fldSecondarySceneModelContext, 0, 0);
             sdfModelSetFaceDivParm(fldSecondarySceneModelContext->inner, 15.0f, 0.0f);
             fldSecondarySceneModelContext->inner->flags |= 8;
