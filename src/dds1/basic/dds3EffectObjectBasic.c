@@ -47,7 +47,7 @@ dds3Basic_t *AddP2AEffect(void *bill, void *vec, s32 extra);
 void dds3BillboardSetAnimNumber(void *arg, u32 entryIndex);
 dds3Basic_t *AddTMXEffect(void *bill, void *vec, s32 extra);
 dds3Basic_t *effObjCreateWithBoundBill(void *bill, void *vec, void *secondVector);
-dds3Basic_t *effObjCreateBillboardInWorld(void *bill, void *vec, s32 extra);
+dds3Basic_t *effObjCreateBillboardInWorld(void *bill, void *firstVector, void *secondVector);
 dds3Basic_t *AddBEDEffect();
 dds3Basic_t *AddESPEffect(const char *name, void *firstVector, void *secondVector, f32 scale);
 /* Old-style (K&R) callee: callers pass (kind, value) positionally. */
@@ -458,7 +458,7 @@ dds3Basic_t *effObjSpawnLoadedResourceEffect(const char *resourceName, void *fir
 }
 
 /* The world-bill entry uses the same state-one/node-instance initialization as binding. */
-dds3Basic_t *effObjCreateBillboardInWorld(void *bill, void *firstVector, s32 secondVectorAddress) {
+dds3Basic_t *effObjCreateBillboardInWorld(void *bill, void *firstVector, void *secondVector) {
     u8 copiedVector[EFF_OBJ_VECTOR_BYTES];
     dds3Basic_t *obj;
     EffectDependencyState *data;
@@ -466,7 +466,7 @@ dds3Basic_t *effObjCreateBillboardInWorld(void *bill, void *firstVector, s32 sec
     dds3Basic_t *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
-    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), firstVector, (void *)secondVectorAddress);
+    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), firstVector, secondVector);
     if (obj == NULL) {
         return NULL;
     }
@@ -491,11 +491,11 @@ dds3Basic_t *effObjCreateBillboardInWorld(void *bill, void *firstVector, s32 sec
 }
 
 /* Feed the third source factory's result to the world-bill constructor. */
-dds3Basic_t *dds3AddD3PEffectObjectBasic(u32 parameter, void *firstVector, s32 secondVectorAddress) {
+dds3Basic_t *dds3AddD3PEffectObjectBasic(u32 parameter, void *firstVector, void *secondVector) {
     struct EffNode *bill;
 
     bill = effCreateNodeFromParameter(parameter);
-    return effObjCreateBillboardInWorld(bill, firstVector, secondVectorAddress);
+    return effObjCreateBillboardInWorld(bill, firstVector, secondVector);
 }
 
 extern const EffectEventVectorParameters D_0039F7D0;
