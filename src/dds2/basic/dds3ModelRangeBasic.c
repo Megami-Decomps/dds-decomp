@@ -10,7 +10,7 @@
  * The owning object's rangeData member is not cleared by this release. */
 void dds3ModelBasicFreeModel(Dds3ModelRangeObjectView *modelRangeObject) {
     Dds3ModelRangeDataView *rangeData;
-    void *resourceData;
+    const void *resourceData;
     sdfMemHandle_t *allocation;
 
     rangeData = modelRangeObject->rangeData;

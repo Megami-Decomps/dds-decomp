@@ -7,7 +7,7 @@
  * retained as opaque because only the stored backing-resource address is read. */
 typedef struct Dds3ModelRangeDataView {
     u8 opaque_00[4];
-    void *resourceData;
+    const void *resourceData;
 } Dds3ModelRangeDataView;
 
 /* Only the range-data pointer at +0x18 is established by the release provider;
