@@ -2101,15 +2101,15 @@ typedef struct MenuPanelSequenceSettings {
 } MenuPanelSequenceSettings;
 
 extern MenuPanelSequenceSettings D_003E7878;
-extern void mnuDrawPanelSequenceByRow(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPanelSequenceByRow(MenuPageBar *, s32, s32 *, s32, s32, EffectSlotSet *);
 
-void mnuDrawPartyVitalPanelSequences(MenuPageWindow *window, s32 texture) {
+void mnuDrawPartyVitalPanelSequences(MenuPageWindow *window, EffectSlotSet *texture) {
     u32 i;
 
     for (i = 0; i < 5; i++) {
-        mnuDrawPanelSequenceByRow((s32)&window->slots[i].hp, 0, (s32)D_003E7878.rows[i], 0x3C,
+        mnuDrawPanelSequenceByRow(&window->slots[i].hp, 0, D_003E7878.rows[i], 0x3C,
             mnuPercentOrHundred(window->records->slots[i].hp, window->records->slots[i].maxHp), texture);
-        mnuDrawPanelSequenceByRow((s32)&window->slots[i].mp, 1, (s32)D_003E7878.rows[i], 0x3C,
+        mnuDrawPanelSequenceByRow(&window->slots[i].mp, 1, D_003E7878.rows[i], 0x3C,
             mnuPercentOrHundred(window->records->slots[i].mp, window->records->slots[i].maxMp), texture);
     }
 }
