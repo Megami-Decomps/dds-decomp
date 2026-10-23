@@ -5,12 +5,12 @@
 #include "evt_solar.h"
 
 extern void evtDrawSolarNoiseLayerAtCenteredScale(s32 x, s32 y, s32 z, s32 alpha, s32 layer,
-                                                   s32 mode, s32 contextHandle, s32 color, f32 scale);
+                                                   s32 mode, SolarSpriteContext **contextHandle, s32 color, f32 scale);
 
 
 
 void evtDrawSolarNoiseLayerAtConfiguredScale(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
-                                             s32 contextHandle, s32 color);
+                                             SolarSpriteContext **contextHandle, s32 color);
 extern void sdfDrawColoredTriangleFan(s32 points, s32 tail, s32 *colors, s32 count,
                                       s32 useFirstColor, s32 surfaceIndex);
 extern void effDrawSpriteWithCornerFade(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
@@ -56,9 +56,9 @@ void evtPrepareSolarOverlayTestState(s32 renderHandle) {
 }
 
 void evtDrawSolarNoiseLayerAtConfiguredScale(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
-    s32 contextHandle, s32 color) {
+    SolarSpriteContext **contextHandle, s32 color) {
     {
-        SolarSpriteContext *context = *(SolarSpriteContext **)contextHandle;
+        SolarSpriteContext *context = *contextHandle;
         s32 spriteOffset = layer * sizeof(SolarSpriteLayer);
         s32 scalePercent = evtSolarNoiseLayerPlacements[layer][2];
         SolarSpriteLayer *sprite =
@@ -72,7 +72,7 @@ void evtDrawSolarNoiseLayerAtConfiguredScale(s32 x, s32 y, s32 z, s32 alpha, s32
     }
 
     {
-        SolarSpriteContext *restoredContext = *(SolarSpriteContext **)contextHandle;
+        SolarSpriteContext *restoredContext = *contextHandle;
         s32 restoredOffset = layer * sizeof(SolarSpriteLayer);
         SolarSpriteLayer *restoredSprite =
             (SolarSpriteLayer *)(restoredOffset + (s32)restoredContext->layers);
@@ -84,9 +84,9 @@ void evtDrawSolarNoiseLayerAtConfiguredScale(s32 x, s32 y, s32 z, s32 alpha, s32
 
 /* Draw a scaled sprite around its center, then restore its native dimensions. */
 void evtDrawSolarNoiseLayerAtCenteredScale(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
-    s32 contextHandle, s32 color, f32 scale) {
+    SolarSpriteContext **contextHandle, s32 color, f32 scale) {
     {
-        SolarSpriteContext *context = *(SolarSpriteContext **)contextHandle;
+        SolarSpriteContext *context = *contextHandle;
         s32 spriteOffset = layer * sizeof(SolarSpriteLayer);
         s32 scalePercent = evtSolarNoiseLayerPlacements[layer][2];
         SolarSpriteLayer *sprite =
@@ -102,7 +102,7 @@ void evtDrawSolarNoiseLayerAtCenteredScale(s32 x, s32 y, s32 z, s32 alpha, s32 l
     }
 
     {
-        SolarSpriteContext *restoredContext = *(SolarSpriteContext **)contextHandle;
+        SolarSpriteContext *restoredContext = *contextHandle;
         s32 restoredOffset = layer * sizeof(SolarSpriteLayer);
         SolarSpriteLayer *restoredSprite =
             (SolarSpriteLayer *)(restoredOffset + (s32)restoredContext->layers);
@@ -155,7 +155,7 @@ void evtDrawSolarOverlayShapeWithScaledAlpha(s32 unused0, s32 unused1, s32 alpha
 
 /* Indexed solar-table pass, then the shared layer setup with the 0xA rate. */
 void evtDrawIndexedSolarOverlayLayers(s32 x, s32 y, s32 unused2, s32 alpha, s32 entryCount,
-    s32 contextHandle, s32 renderHandle) {
+    SolarSpriteContext **contextHandle, s32 renderHandle) {
     s32 n;
     s32 zeroColor;
     s32 *p;
@@ -180,7 +180,7 @@ void evtDrawIndexedSolarOverlayLayers(s32 x, s32 y, s32 unused2, s32 alpha, s32 
 
 /* Indexed solar-table pass, then the shared layer setup with the 0x10 rate. */
 void evtDrawPartialSolarOverlay(s32 x, s32 y, s32 unused2, s32 alpha, s32 entryCount,
-    s32 contextHandle, s32 renderHandle) {
+    SolarSpriteContext **contextHandle, s32 renderHandle) {
     s32 n;
     s32 zeroColor;
     s32 *p;
@@ -204,7 +204,7 @@ void evtDrawPartialSolarOverlay(s32 x, s32 y, s32 unused2, s32 alpha, s32 entryC
 }
 
 /* Draw the selected solar-noise layer; intermediate layers also receive layer 9. */
-void evtDrawSolarLayerPair(s32 x, s32 y, s32 z, s32 width, s32 layer, s32 context, s32 color) {
+void evtDrawSolarLayerPair(s32 x, s32 y, s32 z, s32 width, s32 layer, SolarSpriteContext **context, s32 color) {
     evtDrawSolarNoiseLayerAtConfiguredScale(x, y, z, width, layer, 0, context, color);
     if (layer != 0 && layer != 4 && layer != 8) {
         evtDrawSolarNoiseLayerAtConfiguredScale(x, y, z, width, 9, 0, context, color);
@@ -326,7 +326,7 @@ void evtAdvanceLongSolarNoiseLayers(SolarNoiseState *state) {
     }
 }
 
-void evtDrawShortSolarNoiseLayers(s32 x, s32 y, s32 z, s32 width, SolarNoiseState *state, s32 context, s32 color) {
+void evtDrawShortSolarNoiseLayers(s32 x, s32 y, s32 z, s32 width, SolarNoiseState *state, SolarSpriteContext **context, s32 color) {
     SolarNoiseLayer *layer = state->layers;
     s32 i;
     s32 layerX;
@@ -351,7 +351,7 @@ void evtDrawShortSolarNoiseLayers(s32 x, s32 y, s32 z, s32 width, SolarNoiseStat
     }
 }
 
-void evtDrawLongSolarNoiseLayers(s32 x, s32 y, s32 z, s32 width, SolarNoiseState *state, s32 context, s32 color) {
+void evtDrawLongSolarNoiseLayers(s32 x, s32 y, s32 z, s32 width, SolarNoiseState *state, SolarSpriteContext **context, s32 color) {
     SolarNoiseLayer *layer = state->layers;
     s32 i;
     s32 layerX;
