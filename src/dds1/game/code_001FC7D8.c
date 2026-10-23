@@ -1175,12 +1175,12 @@ s32 btlRandomInclusiveRange(s32 lower, s32 upper) {
     return (s32)btlNextScaledRandom(0xFFFF) % lo + hi;
 }
 
-s32 btlAllocAndCheck(s32 object) {
+s32 btlAllocAndCheck(BtlTask *task) {
     BtlAiScratchWork *work = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
-    BtlUnit *actor = ((BtlTask *)object)->unit;
+    BtlUnit *actor = task->unit;
 
     btlActionScratchWork = work;
-    work->actor = (BtlTask *)object;
+    work->actor = task;
     if (btlIsLowHpActionReady(actor, 0) != 0) {
         sdfChipFreeDirect((void *)btlActionScratchWork);
         return 1;
@@ -1189,9 +1189,9 @@ s32 btlAllocAndCheck(s32 object) {
     return 0;
 }
 
-u32 btlAssignTaskResultAndArgument(s32 task) {
-    ((BtlTask *)task)->indexWork.phase = 0xb;
-    ((BtlTask *)task)->indexWork.skillId = 0xc2;
+u32 btlAssignTaskResultAndArgument(BtlTask *task) {
+    task->indexWork.phase = 0xb;
+    task->indexWork.skillId = 0xc2;
     return 1;
 }
 
@@ -1388,4 +1388,3 @@ INCLUDE_SDATA(const s32, "game/code_001FC7D8", btlRandomState);
 INCLUDE_SDATA(const s32, "game/code_001FC7D8", btlPreviousAiCandidateBucket);
 
 INCLUDE_SDATA(const s32, "game/code_001FC7D8", btlActionScratchWork);
-

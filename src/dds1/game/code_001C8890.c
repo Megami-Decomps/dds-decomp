@@ -82,9 +82,9 @@ extern s32 btlIsUnitInActiveList(BtlUnit *unit);
 
 extern AiSpecies *datEnemyAiRecords;
 
-extern s32 btlAllocAndCheck(s32);
+extern s32 btlAllocAndCheck(BtlTask *task);
 
-extern u32 btlAssignTaskResultAndArgument(s32);
+extern u32 btlAssignTaskResultAndArgument(BtlTask *task);
 
 extern void btlBindActorSlot(BtlTask *, s32);
 
@@ -764,8 +764,8 @@ s32 btlAiTaskUpdate(BtlTask *task) {
                 if (!(task->flags & 0x80)) {
                     index = task->unit->partyRecord.unitId;
                     scene->boundTask = 0;
-                    if (datEnemyAiRecords[index].kind != 1 && btlAllocAndCheck((s32)task) != 0) {
-                        btlAssignTaskResultAndArgument((s32)task);
+                    if (datEnemyAiRecords[index].kind != 1 && btlAllocAndCheck(task) != 0) {
+                        btlAssignTaskResultAndArgument(task);
                     } else if (datEnemyAiRecords[index].sceneSlot != 0) {
                         btlBindActorSlot(task, datEnemyAiRecords[index].sceneSlot);
                     } else {

@@ -1177,8 +1177,8 @@ void btlEnterAiActionState(s32 task) {
 }
 
 extern AiSpecies *datEnemyAiRecords;
-extern s32 btlAllocAndCheck();
-extern void btlAssignTaskResultAndArgument();
+extern s32 btlAllocAndCheck(ActionStateLink *task);
+extern u32 btlAssignTaskResultAndArgument(ActionStateLink *task);
 extern void btlBindActorSlot(ActionStateLink *, s32);
 extern void btlRunRandomWeightedAiTableAction();
 extern s32 btlAiCheckStatusRollEligibility();
