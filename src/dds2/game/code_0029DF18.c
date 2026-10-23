@@ -774,7 +774,7 @@ extern s32 sndStreamTransferIopHeapAddress;
 
 extern u32 D_00437A20[2];
 
-extern u32 D_00437A28;
+extern u8 *D_00437A28;
 
 extern char D_00428550[]; /* "result2_draw" */
 
@@ -1308,7 +1308,7 @@ void sndInitializeStreamTransferBuffers(s32 wordCount) {
     s32 bufferBytes = wordCount * SND_TRANSFER_WORD_BYTES;
     s32 halfwordIndex;
 
-    D_00437A28 = (u32)sdfMemGetPtr(sdfMemAllocDirect(bufferBytes));
+    D_00437A28 = sdfMemGetPtr(sdfMemAllocDirect(bufferBytes));
     for (halfwordIndex = 0; halfwordIndex < wordCount * SND_TRANSFER_WORD_HALFWORDS; halfwordIndex++) {
         ((u16 *)D_00437A28)[halfwordIndex] = 0;
     }
@@ -1319,8 +1319,8 @@ void sndInitializeStreamTransferBuffers(s32 wordCount) {
     }
     D_00437A20[0] = sndStreamTransferIopHeapAddress;
     D_00437A20[1] = sndStreamTransferIopHeapAddress + bufferBytes;
-    sndCopyWordsToIopSynchronously((const void *)D_00437A28, D_00437A20[0], wordCount);
-    sndCopyWordsToIopSynchronously((const void *)D_00437A28, D_00437A20[1], wordCount);
+    sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[0], wordCount);
+    sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[1], wordCount);
 }
 
 
