@@ -55,7 +55,7 @@ extern StaffImageCorners mnuStaffRollImageFadeControlPoints[];
 extern MnuStaffImageRecord mnuStaffRollImageRecords[];
 extern s32 D_003BC614;
 extern s32 mnuCheckMovieDecoderStatus(void);
-extern s32 mnuGetMoviePlaybackMode(void);
+extern u8 mnuGetMoviePlaybackMode(void);
 extern void mnuDrawScaledMovieRollSprite(s32 x, s32 y, s32 z, s32 alpha,
                                          EffectSlotSet *set, f32 scaleX, f32 scaleY,
                                          s32 index, s32 option, s32 texture);
@@ -544,7 +544,7 @@ s32 mnuCheckMovieDecoderStatus(void) {
 }
 
 
-s32 mnuGetMoviePlaybackMode(void) {
+u8 mnuGetMoviePlaybackMode(void) {
     return D_0037B8BC[0];
 }
 

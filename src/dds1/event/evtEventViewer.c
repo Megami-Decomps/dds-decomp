@@ -3912,7 +3912,7 @@ s32 evtViewerPickNextHandler(dds3ProcessID_t *task) {
 extern s16 D_003BBE7C;
 extern s8 dds3PadButtonState[];
 extern void mnuAdvanceShopMenuState(struct EvtRuntime *);
-extern s32 mnuGetMoviePlaybackMode(void);
+extern u8 mnuGetMoviePlaybackMode(void);
 extern s32 evtViewerPickNextHandler(dds3ProcessID_t *task);
 
 /* Advance the viewer timeline, deferred voice and task-update handoff. */
