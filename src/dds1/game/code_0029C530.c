@@ -6569,7 +6569,7 @@ EffectStripNode *effCreateStripNodeFromGrid(FileKeyBlock *grid) {
     return effCreateStripNode(n > 100 ? 100 : n);
 }
 
-extern void effReplaceFileResourceRef(EffectStripNode *, u32, void *);
+extern void effReplaceFileResourceRef(EffectStripNode *, u32, const void *);
 
 EffectStripNode *effFileResourceReferenceReplace(FileJobPayload *work) {
     u8 *source = fileResolvePrimaryBuffer(work);
@@ -6603,7 +6603,7 @@ EffectStripNode *effCloneStripResourceFromOwner(EffectStripNode *work) {
     return node;
 }
 
-void effReplaceFileResourceRef(EffectStripNode *node, u32 entryId, void *resource) {
+void effReplaceFileResourceRef(EffectStripNode *node, u32 entryId, const void *resource) {
     if (node->active != 0) {
         effPCPHelperBEDGetModel(node->active);
     }
