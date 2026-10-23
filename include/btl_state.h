@@ -7,6 +7,7 @@
 
 /* Broadens command targeting and suppresses command-block reasons when set. */
 #define BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS 0x800
+#define BTL_STATE_FLAG_DISABLE_COMMAND_TARGET_ELIGIBILITY 0x40
 
 struct dds3ProcessID_t;
 struct BtlRuntimeTask;
@@ -447,7 +448,7 @@ typedef struct BtlState {
     u8 pad214[4];
     u32 battleFlags; /* 0x218 */
     u32 commandRestrictFlags; /* 0x21C: bit 0x10 blocks commands with the +0x30 restriction */
-    u32 unk220; /* BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS bypasses block reasons. */
+    u32 unk220; /* BTL_STATE_FLAG_DISABLE_COMMAND_TARGET_ELIGIBILITY; BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS. */
     struct dds3Basic_t *cameraObject; /* 0x224: world camera stored at 001E9514. */
     struct dds3Basic_t *sceneLightNode; /* 0x228: action node used for scene-light transitions. */
     s32 currentScene; /* 0x22C */

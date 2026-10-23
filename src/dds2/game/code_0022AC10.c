@@ -1111,7 +1111,7 @@ s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
     s32 requirement;
     s32 code;
 
-    if (battle->unk220 & 0x40) {
+    if (battle->unk220 & BTL_STATE_FLAG_DISABLE_COMMAND_TARGET_ELIGIBILITY) {
         return 0;
     }
     if (commandId <= 0) {
@@ -3045,12 +3045,12 @@ s32 btlUpdateDebugEncounterSelector(void) {
 
     if (dds3PadBitTable[3] < 0) {
         state->battleFlags = (state->battleFlags & 0xFFFDFE3F) | 0x11010000;
-        state->unk220 |= 0x40;
+        state->unk220 |= BTL_STATE_FLAG_DISABLE_COMMAND_TARGET_ELIGIBILITY;
         D_00436F70 = 1;
     }
     if (dds3PadBitTable[0] < 0) {
         state->battleFlags = (state->battleFlags & 0xEFFEFE3F) | 0x01000000;
-        state->unk220 |= 0x40;
+        state->unk220 |= BTL_STATE_FLAG_DISABLE_COMMAND_TARGET_ELIGIBILITY;
         D_00436F70 = 1;
     }
     if (dds3PadBitTable[13] < 0) {
