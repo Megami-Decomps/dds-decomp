@@ -169,32 +169,25 @@ struct MantraNodePos *mnuGetMantraPanelPositionRecord(s16 index) {
     return (struct MantraNodePos *)(mnuMantraPanelPositionTable->records + ((index << 0x10) >> 0xb));
 }
 
-extern void mnuUpdateMantraRecordFlags(void *, s32, s32);
-
-typedef struct EvtMantraWork {
-    struct sdfMemHandle_t *allocation;
-    u32 capacity;
-    void *entries;
-    u8 data[0x160];
-} EvtMantraWork; /* 0x16C bytes */
+extern void mnuUpdateMantraRecordFlags(MantraFlagResource *, s32, s32);
 
 /* Allocate/zero the selection work and point its entries at its inline storage.
  * The existing initializer is called only for nonzero initialValue. */
-EvtMantraWork *evtAllocateMantraSelectionWork(s32 initialValue, s32 mode) {
+MantraFlagResource *evtAllocateMantraSelectionWork(s32 initialValue, s32 mode) {
     struct sdfMemHandle_t *allocation = sdfMemAllocDirect(MNU_MANTRA_SELECTION_WORK_BYTES);
-    EvtMantraWork *work = (EvtMantraWork *)sdfMemGetPtr(allocation);
+    MantraFlagResource *work = (MantraFlagResource *)sdfMemGetPtr(allocation);
 
     memset(work, 0, MNU_MANTRA_SELECTION_WORK_BYTES);
     work->allocation = allocation;
     work->capacity = 0xB0;
-    work->entries = work->data;
+    work->flags = work->data;
     if (initialValue != 0) {
         mnuUpdateMantraRecordFlags(work, initialValue, mode);
     }
     return work;
 }
 
-void evtReleaseMantraSelectionWork(EvtMantraWork *work) {
+void evtReleaseMantraSelectionWork(MantraFlagResource *work) {
     if (work != NULL) {
         sdfMemFreeDirect(work->allocation);
     }
@@ -220,8 +213,7 @@ extern s32 evtTestMantraNodePartyRequirements(u16, s32);
 extern const char D_00425098[];
 
 /* Populate mantra selection flags from rank, profile state and node rules. */
-void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
-    EvtMantraWork *work = selection;
+void mnuUpdateMantraRecordFlags(MantraFlagResource *work, s32 unitAddress, s32 mode) {
     datUnitWork_t *unit = (datUnitWork_t *)unitAddress;
     s32 rank;
     u32 selected;
@@ -232,7 +224,7 @@ void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
     rank = mnuGetActiveMantraModelFlagState();
     evtPrintDeveloperConsoleMessage(D_00425098, rank);
     selected = scrGetSelectedScriptEntryId(unit);
-    entry = work->entries;
+    entry = work->flags;
     node = (MantraNodePos *)mnuMantraNodePositionTable->records;
     for (; i < (s32)mnuMantraNodePositionTable->recordCount; i++, node++, entry++) {
         *entry = 0;
@@ -469,7 +461,7 @@ s32 mnuCheckMantraNeighborRequirements(u16 entry) {
 }
 
 /* The sixth work stores the combined availability state for the five profiles. */
-void mnuMergePartyMantraProfileCapStates(EvtMantraWork **selectionWorks) {
+void mnuMergePartyMantraProfileCapStates(MantraFlagResource **selectionWorks) {
     MantraNodePos *node;
     u16 *combinedEntry;
     s32 recordCount;
@@ -477,7 +469,7 @@ void mnuMergePartyMantraProfileCapStates(EvtMantraWork **selectionWorks) {
     s32 profileIndex;
 
     node = (MantraNodePos *)mnuMantraNodePositionTable->records;
-    combinedEntry = selectionWorks[5]->entries;
+    combinedEntry = selectionWorks[5]->flags;
     recordCount = (s32)mnuGetMantraNodePositionRecordCount();
     if (recordCount <= 0) {
         return;
@@ -487,7 +479,7 @@ void mnuMergePartyMantraProfileCapStates(EvtMantraWork **selectionWorks) {
         if (node->id != 0) {
             profileIndex = 0;
             while (selectionWorks[profileIndex] != NULL && profileIndex < 5) {
-                u16 *profileEntries = selectionWorks[profileIndex]->entries;
+                u16 *profileEntries = selectionWorks[profileIndex]->flags;
                 if ((u16)((profileEntries[node->id] >> 8) & 1)) {
                     *combinedEntry = (*combinedEntry & 0xFF0F) | 0x10;
                     break;

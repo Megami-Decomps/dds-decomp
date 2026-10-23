@@ -520,9 +520,9 @@ MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *resource) {
     return resource->menu.defaultSelector;
 }
 
-extern void mnuUpdateMantraRecordFlags(void *, s32, s32);
-extern void *evtAllocateMantraSelectionWork(s32, s32);
-extern void mnuMergePartyMantraProfileCapStates(void *);
+extern void mnuUpdateMantraRecordFlags(MantraFlagResource *, s32, s32);
+extern MantraFlagResource *evtAllocateMantraSelectionWork(s32, s32);
+extern void mnuMergePartyMantraProfileCapStates(MantraFlagResource **);
 
 s32 mnuRefreshMantraSelectionResources(MnuStatusResource *resource) {
     MantraMenuWork *menu;
@@ -2019,4 +2019,3 @@ INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437950);
 INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437958);
 
 MenuPanelEntryPool *mnuPanelSoundEntryPool = 0;
-
