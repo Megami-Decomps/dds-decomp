@@ -688,8 +688,11 @@ void effPCPMudoPartInit(EffPCPChargeWork *work) {
 }
 
 EffPCPChargeWork *effPCPMudoCreate(void *source) {
-    sdfMemHandle_t *resource = sdfMemAllocDirect(0x1354);
-    EffPCPChargeWork *work = (void *)sdfMemLock(resource);
+    sdfMemHandle_t *resource;
+    EffPCPChargeWork *work;
+
+    resource = sdfMemAllocDirect(sizeof(*work));
+    work = (void *)sdfMemLock(resource);
     work->allocationHandle = resource;
     work->primaryHandle = dds3EffectPCPDataPartCreate(source, 0);
     work->secondaryHandle = dds3EffectPCPDataPartCreate(source, 1);
@@ -711,9 +714,13 @@ void effPCPMudoDelete(EffPCPChargeWork *work) {
 /* Duplicate the parameter owners into fresh history storage; sampled arrays
  * are not copied from source. */
 EffPCPChargeWork *effPCPMudoCopy(EffPCPChargeWork *source) {
-    sdfMemHandle_t *resource = sdfMemAllocDirect(0x1354);
-    EffPCPChargeWork *work = (void *)sdfMemLock(resource);
-    effPartHandle_t *firstHandle = source->primaryHandle;
+    sdfMemHandle_t *resource;
+    EffPCPChargeWork *work;
+    effPartHandle_t *firstHandle;
+
+    resource = sdfMemAllocDirect(sizeof(*work));
+    work = (void *)sdfMemLock(resource);
+    firstHandle = source->primaryHandle;
     work->allocationHandle = resource;
     work->primaryHandle = dds3EffectPartCopy(firstHandle);
     work->secondaryHandle = dds3EffectPartCopy(source->secondaryHandle);
