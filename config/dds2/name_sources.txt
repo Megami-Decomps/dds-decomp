@@ -5479,6 +5479,7 @@
 0x0025EEE8	mnuEnterCampSceneMenuState	inferred	Sets the camp scene menu state when currently idle or closed. [names_reviewed8.tsv]
 0x0025EF10	mnuAdvanceShopMenuState	inferred	confidence=high; src/dds2/game/code_0025DA20.c:func_0025EF10; Advances shop menu states while setting up draw resources, submitting its descriptor, and handling the shop flag. [names_qp9.tsv]
 0x0025EFD8	mnuShopCreateDescriptorSurface	inferred	Reuses the pending work buffer to create and queue a patchable descriptor surface; DDS1 twin 0x00243BF0. [LiteG camp naming batch 2]
+0x0025F130	mnuShopQueueAuxiliaryTexturePacket	inferred	Builds the TEST/ALPHA GS packet for the shop auxiliary texture; DDS1 twin 0x00243D48.
 0x0025F2B0	mnuShopQueueAuxiliaryTexture	inferred	Queues the scene's auxiliary resource as a texture-bound quad; DDS1 twin 0x00243EC8. [LiteG camp naming batch 2]
 0x0025F330	mnuValidateCampTimelineScriptRegisters	inferred	Clears inactive type-4 camp timeline script registers for the current frame. DDS1 twin 0x00243F48.
 0x0025F568	fldRegisterCampSceneId	inferred	Appends a previously absent identifier to the camp scene's bounded 20-entry list at +0x2448.
