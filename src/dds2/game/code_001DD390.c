@@ -252,7 +252,7 @@ extern s32 btlGetLoggedIndexedCommandItem(s32);
 extern void scrSetGlobalBitFlag(u32);
 
 /* A hook result of -1 leaves dispatch to the command-kind handler. */
-void btlDispatchCommandViaHookOrDefault(u8 *command, u8 *argument) {
+void btlDispatchCommandViaHookOrDefault(u8 *command, BattleIndexWork *argument) {
     s32 (*handler)(s32, s32) = ((BtlState *)btlGetRuntime())->commandHook;
 
     if (handler != 0) {
@@ -262,22 +262,22 @@ void btlDispatchCommandViaHookOrDefault(u8 *command, u8 *argument) {
             return;
         }
     }
-    switch (*(s32 *)argument) {
+    switch (argument->phase) {
     case 1:
         btlDispatchStateHandler(command, 0xD);
         break;
     case 4:
-        *(s32 *)(argument + 4) = btlGetLoggedIndexedCommandItem(*(s32 *)(argument + 8));
+        argument->skillId = btlGetLoggedIndexedCommandItem(argument->reference);
         /* fallthrough */
     case 2:
     case 3:
     case 7:
     case 8:
-        if (datCommandSelectors[*(s32 *)(argument + 4)].kind != 1) {
+        if (datCommandSelectors[argument->skillId].kind != 1) {
             btlDispatchStateHandler(command, 0xE);
         } else {
             if ((u32)((ActionStateLink *)command)->unit->status.flags & 0x200) {
-                scrSetGlobalBitFlag(*(u16 *)(argument + 4));
+                scrSetGlobalBitFlag((u16)argument->skillId);
             }
             btlDispatchStateHandler(command, 0xF);
         }

@@ -56,7 +56,7 @@ extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *owner, u32 value, u32 va
 extern s32 btlCheckStatusActionEligibility(BtlTask *task);
 extern BtlRuntimeTask * btlCreateCommandSoundTask(s32 owner, s32 variant);
 extern u8 * btlCreateSecondaryCommandSoundTask(void);
-extern void btlDispatchCommandViaHookOrDefault(u8 *command, u8 *argument);
+extern void btlDispatchCommandViaHookOrDefault(u8 *command, BattleIndexWork *argument);
 extern u32 btlGetActiveUnitId(void);
 extern s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId);
 extern s32 btlGetStatusActionEffectId(BtlTask *task);
@@ -913,7 +913,7 @@ void btlDispatchEffectCommandWhenActorReady(u8 *command) {
         btlStartTask(btlCreateEffObjB((BtlUnit *)actor, *(u32 *)(command + 0x54)));
     }
     btlSetCommandEffectLinkFlags(command, command + 0x20);
-    btlDispatchCommandViaHookOrDefault(command, command + 0x20);
+    btlDispatchCommandViaHookOrDefault(command, (BattleIndexWork *)(command + 0x20));
 }
 
 /* Empty entry callback for the retail ATTACK action state. */

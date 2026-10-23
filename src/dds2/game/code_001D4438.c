@@ -1254,7 +1254,7 @@ s32 btlCommandStateSelectB(ActionStateLink *task) {
 void btlEnterAutoActionState(void) {
 }
 
-extern void btlDispatchCommandViaHookOrDefault(u8 *command, u8 *argument);
+extern void btlDispatchCommandViaHookOrDefault(u8 *command, BattleIndexWork *argument);
 extern s32 btlIsActiveActor(BtlUnit *actor);
 
 extern s32 btlSetEligibleActorPanelTransitionState(void);
@@ -1285,7 +1285,7 @@ s32 btlCommandStateSelectC(ActionStateLink *task) {
         } else if (!(task->flags & 8)) {
             btlDispatchStateHandler(task, 0xC);
         } else {
-            btlDispatchCommandViaHookOrDefault((u8 *)task, (u8 *)&task->indexWork);
+            btlDispatchCommandViaHookOrDefault((u8 *)task, &task->indexWork);
         }
     }
 }
@@ -1369,7 +1369,7 @@ void btlProcessEligibleCommandTaskEffects(ActionStateLink *task) {
         if (hook != 0) {
             hook((u8 *)task);
         }
-        btlDispatchCommandViaHookOrDefault((u8 *)task, (u8 *)commandData);
+        btlDispatchCommandViaHookOrDefault((u8 *)task, commandData);
     }
 }
 
