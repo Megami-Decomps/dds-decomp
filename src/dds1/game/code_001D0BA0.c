@@ -114,7 +114,7 @@ extern SndPad dds3PadButtonState;
 
 extern u32 dds3DrawFlag;
 
-extern void btlDestroyUnit(u8 *);
+extern void btlDestroyUnit(BtlUnit *);
 
 extern void btlInheritActorModelState(BtlUnit *, BtlUnit *);
 
@@ -3973,7 +3973,7 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
         break;
     case 2:
         if (unit->mirror != NULL) {
-            btlDestroyUnit((u8 *)unit->mirror);
+            btlDestroyUnit(unit->mirror);
             unit->mirror = NULL;
             if (unit->transparencyBufferAllocation != 0) {
                 sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)unit->transparencyBufferAllocation);
@@ -5074,23 +5074,18 @@ void btlReleaseUnitResources(BtlUnit *unit) {
 
 extern char D_003A3D38[]; /* "btl:unit delete[%p]\n" */
 
-void btlDestroyUnit(u8 *actor) {
-    u8 *next;
-    u8 *previous;
-
-    btlBossDebugPrintf(D_003A3D38, actor);
-    btlReleaseUnitResources(actor);
-    next = *(u8 **)(actor + 0x344);
-    if (next != 0) {
-        *(u8 **)(next + 0x340) = *(u8 **)(actor + 0x340);
+void btlDestroyUnit(BtlUnit *unit) {
+    btlBossDebugPrintf(D_003A3D38, unit);
+    btlReleaseUnitResources(unit);
+    if (unit->next != 0) {
+        unit->next->previousActor = unit->previousActor;
     }
-    previous = *(u8 **)(actor + 0x340);
-    if (previous != 0) {
-        *(u8 **)(previous + 0x344) = *(u8 **)(actor + 0x344);
+    if (unit->previousActor != 0) {
+        unit->previousActor->next = unit->next;
     } else {
-        *(u8 **)((u8 *)btlGetRuntime() + 0x228) = *(u8 **)(actor + 0x344);
+        ((BtlActorWork *)btlGetRuntime())->actorList = unit->next;
     }
-    sdfMemFreeDirect(((BtlUnit *)actor)->handle);
+    sdfMemFreeDirect(unit->handle);
 }
 
 void btlDestroyAllUnits(void) {
@@ -5098,15 +5093,14 @@ void btlDestroyAllUnits(void) {
     BtlUnit *next;
     for (unit = ((BtlActorWork *)btlGetRuntime())->actorList; unit != 0; unit = next) {
         next = unit->next;
-        btlDestroyUnit((u8 *)unit);
+        btlDestroyUnit(unit);
     }
 }
 
 void btlRemoveActorsWithFlags(u32 mask) {
-    s32 context = (s32)(u32)btlGetRuntime();
-    BtlUnit *actor = *(BtlUnit **)(context + 0x228);
+    BtlUnit *actor = ((BtlActorWork *)btlGetRuntime())->actorList;
     while (actor != 0) {
-        BtlUnit *next = *(BtlUnit **)((u8 *)actor + 0x344);
+        BtlUnit *next = actor->next;
         if ((u32)actor->status.flags & mask) {
             btlDestroyUnit(actor);
         }

@@ -1167,7 +1167,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
 }
 
 extern void dds3AdminiCallSequence(s32, void *, u32, s32);
-extern void btlDestroyUnit(u8 *);
+extern void btlDestroyUnit(BtlUnit *);
 extern void fldUnloadPlayerModel(void);
 const char D_003A3470[] __attribute__((aligned(8))) = "btl:wait ADPCM(Phase_END)\n";
 const char D_003A3490[] __attribute__((aligned(8))) = "btl:wait ExpMoneyItemPieceApGet\n";
