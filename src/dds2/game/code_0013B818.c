@@ -2068,7 +2068,7 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
     return 0;
 }
 
-extern void fldRequestAreaResource(s32 area, s32 room);
+extern s32 fldRequestAreaResource(s32 area, s32 room);
 
 /* Each warp kind keeps its own arm; retail compiles them separately and merges the tails. */
 void fldDoor_WarpCash(const char *name) {
