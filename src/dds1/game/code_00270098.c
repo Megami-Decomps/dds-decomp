@@ -63,7 +63,7 @@ void dds3PlayMovieByIndex(s32 index);
 
 s32 mnuCheckMovieDecoderStatus(void);
 
-s32 mnuGetMoviePlaybackMode(void);
+u8 mnuGetMoviePlaybackMode(void);
 
 void movieStop(void);
 
@@ -127,7 +127,7 @@ s32 mnuUpdateMovieDrawShutdownCountdown(void) {
 }
 
 u8 mnuCanDrawMovie(void) {
-    s32 movieState;
+    u8 movieState;
 
     movieState = mnuGetMoviePlaybackMode();
     return movieState == 2;
