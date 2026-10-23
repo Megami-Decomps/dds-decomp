@@ -2312,9 +2312,9 @@ INCLUDE_SDATA(struct dds3Basic_t * const, "game/code_0011F208", fldPlayerObject)
 
 INCLUDE_SDATA(struct dds3Basic_t * const, "game/code_0011F208", fldSecondarySceneObject);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", fldPlayerModelContext);
+INCLUDE_SDATA(dds3ModelHandle_t * const, "game/code_0011F208", fldPlayerModelContext);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", fldSecondarySceneModelContext);
+INCLUDE_SDATA(dds3ModelHandle_t * const, "game/code_0011F208", fldSecondarySceneModelContext);
 
 INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F1C);
 
