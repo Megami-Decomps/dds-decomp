@@ -335,7 +335,7 @@ extern u32 D_004362D8;
 
 extern u32 D_004362DC;
 
-extern u32 fldAreaDamageEffect;
+extern struct EffNode *fldAreaDamageEffect;
 
 extern s32 fldAreaDamageEffectPlaced;
 
@@ -345,7 +345,7 @@ extern u32 D_004362E8;
 
 extern u32 D_004362F4;
 
-extern u32 fldAreaDamageEffect;
+extern struct EffNode *fldAreaDamageEffect;
 
 extern s32 fldAreaDamageEffectPlaced;
 
