@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "bf_flw0_header.h"
 #include "sdf_channel.h"
 #include "scr_work_task_api.h"
 #include "dat_save_words.h"
@@ -24,9 +25,9 @@
 #include "mdl_flag_api.h"
 
 extern void scrDestroyWorkTask(void);
-extern void dds3WorkInit(void *header);
+extern void dds3WorkInit(BfFlw0Header *header);
 
-extern void *D_003BAAAC;
+extern BfFlw0Header *D_003BAAAC;
 
 /* Channel mask occupies the low 15 bits; the high status bit survives updates. */
 #define SDF_PACKED_STATUS_BIT 0x8000

@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "bf_flw0_header.h"
 #include "sdf_channel.h"
 #include "scr_work_task_api.h"
 #include "dat_save_words.h"
@@ -23,10 +24,10 @@
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
 
-extern void *D_00435E80;
+extern BfFlw0Header *D_00435E80;
 
 
-extern void dds3WorkInit(void *header);
+extern void dds3WorkInit(BfFlw0Header *header);
 extern s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
 extern char sdfRuntimeTaskName[]; /* "GBWK" */
 extern void sdfRuntimeTaskTeardownHook(void);

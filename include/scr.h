@@ -5,6 +5,7 @@
 #include "kwln.h"
 
 struct sdfMemHandle_t;
+struct BfFlw0Header;
 
 /* One 4-byte script operand slot; DDS1/2 script/scrTraceCode.c via scrProcessWork_s. */
 typedef union ScrStackValue {
@@ -49,7 +50,7 @@ typedef struct scrProcessWork_s {
     s32 sp;
     s8 stackTypes[28];
     ScrStackValue stackValues[28];
-    void *scriptHeader;
+    struct BfFlw0Header *scriptHeader;
     ScrSection *sections;
     ScrLabel *procedures;
     ScrLabel *labels;
@@ -88,17 +89,17 @@ void scrRunScript(scrProcessWork_s *context);
 s32 scrScriptProcess(dds3ProcessID_t *task);
 s32 scrTraceCode(scrProcessWork_s *context);
 void scrProcDestroyTask(scrProcessWork_s *process);
-scrProcessWork_s *bfContextCreate(void *header, ScrSection *sections, ScrLabel *procedures,
+scrProcessWork_s *bfContextCreate(struct BfFlw0Header *header, ScrSection *sections, ScrLabel *procedures,
                         ScrLabel *labels, ScrInstr *instructions, void *auxiliaryData,
                         char *strings, s32 procedureIndex);
-scrProcessWork_s *scrCreateTaskWithDefaultOption(void *header);
+scrProcessWork_s *scrCreateTaskWithDefaultOption(struct BfFlw0Header *header);
 void PushInt(scrProcessWork_s *script, s32 value);
 void PushFloat(scrProcessWork_s *script, f32 value);
 void PushStr(scrProcessWork_s *script, char *value);
 void PushRet(scrProcessWork_s *script, s32 value);
 s32 PopInt(scrProcessWork_s *script);
 f32 PopFloat(scrProcessWork_s *script);
-dds3ProcessID_t *scrRunScriptEx(u32 priority, void *header,
+dds3ProcessID_t *scrRunScriptEx(u32 priority, struct BfFlw0Header *header,
     ScrSection *sections, ScrLabel *procedures, ScrLabel *labels,
     ScrInstr *instructions, void *auxiliaryData, char *strings, s32 procedureIndex);
 

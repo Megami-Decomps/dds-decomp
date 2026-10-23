@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "bf_flw0_header.h"
 #include "evt_script_context.h"
 #include "evt_solar.h"
 #include "pty_roster_value_record.h"
@@ -1747,7 +1748,7 @@ s32 evtRunContext(s32 script, s32 firstArgument, s32 secondArgument, s32 command
 }
 
 /* Create the script task and clear its separate 24-byte context. */
-void dds3WorkInit(void *header) {
+void dds3WorkInit(BfFlw0Header *header) {
     evtWorkScriptTask = scrCreateTaskWithDefaultOption(header);
     memset(&evtWorkScriptContext, 0, sizeof(evtWorkScriptContext));
 }
@@ -2638,7 +2639,7 @@ INCLUDE_SDATA(const s32, "newdata/datCalc", datStatusHelpMessages);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435E7C);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435E80);
+INCLUDE_SDATA(BfFlw0Header *, "newdata/datCalc", D_00435E80);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", evtWorkScriptTask);
 
