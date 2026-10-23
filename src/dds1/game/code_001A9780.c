@@ -793,14 +793,14 @@ s32 btlTestSideCountEligibility(BtlTask *action) {
     return 1;
 }
 
-s32 btlIsBattleRecordEligible(u8 *actor, u8 *target, s32 recordIndex, s32 speciesIndex) {
-    s32 (*callback)(u8 *, u8 *, s32) =
-        *(s32 (**)(u8 *, u8 *, s32))((u8 *)btlGetRuntime() + 0x680);
+s32 btlIsBattleRecordEligible(BtlUnit *actor, BtlUnit *target, s32 recordIndex, s32 speciesIndex) {
+    s32 (*callback)(BtlUnit *, BtlUnit *, s32) =
+        ((BtlState *)btlGetRuntime())->battleRecordEligibilityOverride;
     u8 *resource;
     if (callback != 0 && callback(actor, target, speciesIndex) == 0) {
         return 0;
     }
-    resource = (u8 *)btlGetSideIndexedActorStatusTable(*(s32 *)(actor + 0xC4), *(s32 *)(actor + 0xC8));
+    resource = (u8 *)btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->species);
     if (*(s16 *)(resource + recordIndex * 20 + 0x2C) != 2) {
         return 0;
     }

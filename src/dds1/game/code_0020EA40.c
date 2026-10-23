@@ -502,7 +502,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->beforeMotionUpdate, 0x0, btlUpdateBossUnitScaleTransition);
         BTL_INSTALL_CALLBACK(battle->finishModelUnit, 0x0, btlInitializeBossUnitScaleTransition);
         BTL_INSTALL_CALLBACK(battle->postTargetHook, 0x0, btlStartPairedActorCommandEffect);
-        BTL_INSTALL_CALLBACK(battle->pad680, 0x0, btlAllowsSpeciesCondition);
+        BTL_INSTALL_CALLBACK(battle->battleRecordEligibilityOverride, 0x0, btlAllowsSpeciesCondition);
         battle->actionResourceNameHook = btlFormatBattleEffectResourceName;
         BTL_INSTALL_CALLBACK(battle->pad688, 0x0, btlGetHaritiActiveEnemyLimit);
         allocation = sdfAllocAuto(0x24);
