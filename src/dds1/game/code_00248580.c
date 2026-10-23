@@ -81,7 +81,7 @@ extern u8 mnuHasEffectResourceHandle(MenuResourceWork *);
 extern void mnuReleaseEffectResource(MenuResourceWork *);
 extern MenuResourceWork *mnuRequestEffectResource(const char *, const char *);
 
-extern void *mnuCreateDualPercentPanel(datUnitWork_t *, s32);
+extern void *mnuCreateDualPercentPanel(datUnitWork_t *, MenuTerminalWork *);
 
 
 extern s32 mnuPercentOrHundred(s32 value, s32 total);
@@ -255,14 +255,14 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, struct Me
 
 /* Allocate adjacent HP/MP percentage panels, preserving the native 0x54 stride.
  * The source is a party-vitals record; the context supplies the panel style. */
-void *mnuCreateDualPercentPanel(datUnitWork_t *unit, s32 workAddress) {
+void *mnuCreateDualPercentPanel(datUnitWork_t *unit, MenuTerminalWork *host) {
     s32 panel = (s32)sdfChipAllocDirect(MNU_PERCENT_PAIR_BYTES);
     mnuDrawPanelSequenceByRow(panel, 0, 0, 0x1e,
         mnuPercentOrHundred(unit->hp, unit->maxHp),
-        *(s32 *)(workAddress + 0xe0));
+        host->imageHandles[0]);
     mnuDrawPanelSequenceByRow(panel + MNU_PERCENT_PANEL_BYTES, 1, 0, 0x1e,
         mnuPercentOrHundred(unit->mp, unit->maxMp),
-        *(s32 *)(workAddress + 0xe0));
+        host->imageHandles[0]);
     return (void *)panel;
 }
 
@@ -278,11 +278,11 @@ void mnuReleaseDualPercentPanel(void *panelOwner) {
 }
 
 /* Rebuild each node's panel from its corresponding party entry. */
-void mnuUpdateGroupResources(u8 *scene) {
-    struct MenuListNode *node = *(struct MenuListNode **)(*(u8 **)(scene + 0x74) + 0x10);
+void mnuUpdateGroupResources(MenuTerminalWork *host) {
+    struct MenuListNode *node = host->list->first;
 
     while (node != NULL) {
-        node->childPanel = mnuCreateDualPercentPanel(&DDS3_GBWK->party[node->terminal.entryId], (s32)scene);
+        node->childPanel = mnuCreateDualPercentPanel(&DDS3_GBWK->party[node->terminal.entryId], host);
         node = node->next;
     }
 }
@@ -580,7 +580,7 @@ void mnuTerminalBuildMenus(MenuTerminalWork *host) {
     host->commandLists[0] = (struct MenuList *)mnuBuildThresholdNodeList(table + row * 5, count, excludedEntryIndex, (s32)host);
     mnuBuildTerminalNodeList(host);
     mnuResolveStaffImageHandles(host->imageHandles);
-    mnuUpdateGroupResources((u8 *)host);
+    mnuUpdateGroupResources(host);
     mnuBuildEligibleSlotList(host);
     mnuHighlightProgressNodeFromOwnerSelection(host);
     mnuHighlightProgressNodeByMode(host);
