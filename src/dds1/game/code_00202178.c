@@ -2098,7 +2098,7 @@ void btlUpdateRahuEffectActorHeights(void) {
     }
 }
 
-extern void fldAppendSceneGroupHandle(void *);
+extern void fldAppendSceneGroupHandle(BtlTask *);
 
 /* Rahu turn hook. While linked (active 1), a lone surviving head gets the 0x11
  * phase. Otherwise a downed twin head fades the effect actor out; a downed
