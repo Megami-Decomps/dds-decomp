@@ -1027,7 +1027,7 @@ s32 ptyGetRoundedAveragePartyLevel(void) {
 }
 
 extern void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, datUnitWork_t *unit);
-extern s32 ptyComputeTotalExp(datUnitWork_t *, s32);
+extern u32 ptyComputeTotalExp(datUnitWork_t *, s32);
 extern void ptyRecomputeMaxHpMp(datUnitWork_t *);
 extern void evtCopyRosterTableValue(datUnitWork_t *);
 extern void mtrRefreshMantraStateForUnit2(void);
@@ -2649,4 +2649,3 @@ INCLUDE_SDATA(const s32, "newdata/datCalc", btlSelectedConditionalEncounterIndex
 INCLUDE_SDATA(const s32, "newdata/datCalc", btlSelectedConditionalEncounterResult);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435E98);
-

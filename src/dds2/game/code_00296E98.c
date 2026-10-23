@@ -735,7 +735,7 @@ void gstApplyBundleMacca(BrsRewardSummary *batch) {
     datAddCurrencyClamped(batch->macca);
 }
 
-extern s32 ptyComputeTotalExp(datUnitWork_t *unit, s32 levelDelta);
+extern u32 ptyComputeTotalExp(datUnitWork_t *unit, s32 levelDelta);
 
 
 
@@ -1199,4 +1199,3 @@ INCLUDE_SDATA(const s32, "game/code_00296E98", D_00437998);
 INCLUDE_SDATA(const s32, "game/code_00296E98", D_004379A0);
 
 INCLUDE_SDATA(const s32, "game/code_00296E98", D_004379A8);
-
