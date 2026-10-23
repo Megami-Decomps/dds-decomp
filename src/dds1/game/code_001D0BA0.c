@@ -1742,21 +1742,21 @@ extern char D_003A3A40[];
 extern char D_003A3A50[];
 
 void btlUpdateAutoMusic(void) {
-    u8 *context = (u8 *)btlGetRuntime();
-    u32 flags = *(u32 *)(context + 0x1F4);
+    BtlState *context = (BtlState *)btlGetRuntime();
+    u32 flags = context->battleFlags;
     if ((flags & 0x100000) == 0 || (flags & 0x6000000) == 0x6000000 ||
         (flags & 0x800) != 0) {
         return;
     }
     if (flags & 0x8000) {
         if (dds3PadButtonState.primaryTriangle < 0 || dds3PadButtonState.primaryCancel < 0) {
-            *(u32 *)(context + 0x1F4) = flags & ~0x8000;
+            context->battleFlags = flags & ~0x8000;
             p2sdPlaySE(6, 0x7F, 0x3F);
             btlSetTrackedTaskDisplayMode(0);
             btlBossDebugPrintf(D_003A3A40);
         }
     } else if (dds3PadButtonState.primaryTriangle < 0) {
-        *(u32 *)(context + 0x1F4) = flags | 0x8000;
+        context->battleFlags = flags | 0x8000;
         p2sdPlaySE(5, 0x7F, 0x3F);
         btlSetTrackedTaskDisplayMode(1);
         btlBossDebugPrintf(D_003A3A50);
