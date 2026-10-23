@@ -68,7 +68,7 @@ extern u64 *effPkt2DAllocF4(u32 flags);
 extern void effBlurBuildSamplingQuad(const dds3Effect_Blur_t *source, EffBlurDrawData *data,
                                      u8 fixedPoint);
 
-extern void effAppendBlurRenderState(void *, s32, sdfTexHandle_t *);
+extern void effAppendBlurRenderState(struct sdfDrawTag_t *, s32, sdfTexHandle_t *);
 extern void effAppendBlurRectanglePackets(void *, const dds3Effect_Blur_t *, u8);
 extern void effDrawBlurListWithFramePacket(void *);
 extern void effBlurSecondUpdateSlotRect(EffBlurScaleWork *, EffBlurScaleSlot *);

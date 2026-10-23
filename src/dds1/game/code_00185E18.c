@@ -310,7 +310,7 @@ void effDrawBlurRectangle(const dds3Effect_Blur_t *source)
 
 extern void sdfBuildMaskedFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
-void effAppendBlurRenderState(void *list, s32 blendControl, sdfTexHandle_t *resource)
+void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, sdfTexHandle_t *resource)
 {
     SdfDmaReferenceChainPacket *framePacket;
     u64 *blendPacket;
@@ -406,7 +406,7 @@ void effDrawBlurListWithFramePacket(void *list) {
 }
 
 extern u32 dds3NullDrawProc(void);
-extern void effAppendBlurRenderState();
+extern void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, sdfTexHandle_t *resource);
 
 /* Queue blend setup and both rectangle packets, then finish with the filter draw. */
 void effDrawBlurSource(const BlurSource *source, sdfTexHandle_t *resource, u8 fixedPointCoordinates) {

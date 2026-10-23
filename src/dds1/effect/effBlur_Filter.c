@@ -81,7 +81,7 @@ void dds3EffectDistortionBlurDelete(EffBlurScatterWork *work) {
 extern u32 dds3NullDrawProc(void);
 #include "sdf_packet_alloc.h"
 struct sdfDrawTag_t;
-extern void effAppendBlurRenderState(void *list, s32 blendControl, struct sdfTexHandle_t *resource);
+extern void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, struct sdfTexHandle_t *resource);
 extern void effDrawBlurListWithFramePacket(void *list);
 extern f64 fabs(f64 value);
 
