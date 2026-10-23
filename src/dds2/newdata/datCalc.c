@@ -2269,7 +2269,7 @@ s32 evtPushRosterOrGlobalCounterValue(void) {
         result = DDS3_GBWK->header.currency;
     } else {
         s32 index = entry->unitId;
-        result = *(s32 *)((u8 *)&datEnemyRecords[index] + 0x28);
+        result = datEnemyRecords[index].money;
     }
     scrSetIntReturnValue(result);
     return 1;
