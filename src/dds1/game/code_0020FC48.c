@@ -21,6 +21,7 @@
 #include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
 #include "sdf_packet_list.h"
+#include "sdf_gs_packet.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
 #include "sdf_resource.h"
@@ -1497,7 +1498,7 @@ void btlDrawTexturedGridCell(sdfDrawTag_t *packets, s32 primitive, s32 x, s32 y,
 }
 
 void btlDrawCapturedScreenTileOverlay(sdfDrawTag_t *packets, u32 cellColor, u32 backColor, u32 textureColor, u32 windColor, s32 depth) {
-    SdfPacket *packet;
+    sdfPrimTransPacket_t *packet;
     s32 dx = btlRuntimeState.cellWidth << 5;
     s32 dy = btlRuntimeState.cellHeight << 4;
     s32 row;
@@ -1519,27 +1520,27 @@ void btlDrawCapturedScreenTileOverlay(sdfDrawTag_t *packets, u32 cellColor, u32 
         clampPacket[1].unk8 = 8;
         sdfDrawTagLink(packets, (u32)clampPacket);
     }
-    packet = (SdfPacket *)sdfGrAllocPacketBuff(0x40);
-    packet[0].unk0 = 3;
-    packet[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    packet[0].unk10 = ((u64)0x10000000 << 32) | 0x8002;
-    packet[0].unk18 = 0xE;
-    packet[1].unk0 = 0x30003;
-    packet[1].unk8 = 0x47;
-    packet[1].unk10 = 0x44;
-    packet[1].unk18 = 0x42;
+    packet = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+    packet->header.dmaTag = 3;
+    packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->header.gifTag = ((u64)0x10000000 << 32) | 0x8002;
+    packet->header.gifRegisters = 0xE;
+    packet->registers.test.value = 0x30003;
+    packet->registers.test.registerId = 0x47;
+    packet->registers.alpha.value = 0x44;
+    packet->registers.alpha.registerId = 0x42;
     sdfDrawTagLink(packets, (u32)packet);
     btlBuildOverlayQuadPacket(packets, 0x40, 0, depth);
     if (btlRuntimeState.options & 1) {
-        packet = (SdfPacket *)sdfGrAllocPacketBuff(0x40);
-        packet[0].unk0 = 3;
-        packet[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-        packet[0].unk10 = ((u64)0x10000000 << 32) | 0x8002;
-        packet[0].unk18 = 0xE;
-        packet[1].unk0 = 0x30003;
-        packet[1].unk8 = 0x47;
-        packet[1].unk10 = 0x44;
-        packet[1].unk18 = 0x42;
+        packet = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+        packet->header.dmaTag = 3;
+        packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
+        packet->header.gifTag = ((u64)0x10000000 << 32) | 0x8002;
+        packet->header.gifRegisters = 0xE;
+        packet->registers.test.value = 0x30003;
+        packet->registers.test.registerId = 0x47;
+        packet->registers.alpha.value = 0x44;
+        packet->registers.alpha.registerId = 0x42;
         sdfDrawTagLink(packets, (u32)packet);
         for (row = 0, y = 0; row < btlRuntimeState.gridHeight; row++, y += dy) {
             x = (row & 1) ? dx >> 1 : 0;
@@ -1559,15 +1560,15 @@ void btlDrawCapturedScreenTileOverlay(sdfDrawTag_t *packets, u32 cellColor, u32 
             }
         }
     } else {
-        packet = (SdfPacket *)sdfGrAllocPacketBuff(0x40);
-        packet[0].unk0 = 3;
-        packet[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-        packet[0].unk10 = ((u64)0x10000000 << 32) | 0x8002;
-        packet[0].unk18 = 0xE;
-        packet[1].unk0 = 0x32001;
-        packet[1].unk8 = 0x47;
-        packet[1].unk10 = 0x44;
-        packet[1].unk18 = 0x42;
+        packet = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+        packet->header.dmaTag = 3;
+        packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
+        packet->header.gifTag = ((u64)0x10000000 << 32) | 0x8002;
+        packet->header.gifRegisters = 0xE;
+        packet->registers.test.value = 0x32001;
+        packet->registers.test.registerId = 0x47;
+        packet->registers.alpha.value = 0x44;
+        packet->registers.alpha.registerId = 0x42;
         sdfDrawTagLink(packets, (u32)packet);
         for (row = 0, y = 0; row < btlRuntimeState.gridHeight; row++, y += dy) {
             x = (row & 1) ? dx >> 1 : 0;
@@ -1577,40 +1578,40 @@ void btlDrawCapturedScreenTileOverlay(sdfDrawTag_t *packets, u32 cellColor, u32 
         }
     }
     if (btlRuntimeState.options & 1) {
-        packet = (SdfPacket *)sdfGrAllocPacketBuff(0x40);
-        packet[0].unk0 = 3;
-        packet[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-        packet[0].unk10 = ((u64)0x10000000 << 32) | 0x8002;
-        packet[0].unk18 = 0xE;
-        packet[1].unk0 = 0x71001;
-        packet[1].unk8 = 0x47;
-        packet[1].unk10 = ((u64)(textureColor >> 24) << 32) | 0x64;
-        packet[1].unk18 = 0x42;
+        packet = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+        packet->header.dmaTag = 3;
+        packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
+        packet->header.gifTag = ((u64)0x10000000 << 32) | 0x8002;
+        packet->header.gifRegisters = 0xE;
+        packet->registers.test.value = 0x71001;
+        packet->registers.test.registerId = 0x47;
+        packet->registers.alpha.value = ((u64)(textureColor >> 24) << 32) | 0x64;
+        packet->registers.alpha.registerId = 0x42;
         sdfDrawTagLink(packets, (u32)packet);
         btlDrawScaledHeldTextureQuad(packets, 0x40, textureColor, depth + 1, 1.0f);
     }
     if (textureColor & 0xFF000000) {
-        packet = (SdfPacket *)sdfGrAllocPacketBuff(0x40);
-        packet[0].unk0 = 3;
-        packet[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-        packet[0].unk10 = ((u64)0x10000000 << 32) | 0x8002;
-        packet[0].unk18 = 0xE;
-        packet[1].unk0 = 0x70003;
-        packet[1].unk8 = 0x47;
-        packet[1].unk10 = 0x44;
-        packet[1].unk18 = 0x42;
+        packet = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+        packet->header.dmaTag = 3;
+        packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
+        packet->header.gifTag = ((u64)0x10000000 << 32) | 0x8002;
+        packet->header.gifRegisters = 0xE;
+        packet->registers.test.value = 0x70003;
+        packet->registers.test.registerId = 0x47;
+        packet->registers.alpha.value = 0x44;
+        packet->registers.alpha.registerId = 0x42;
         sdfDrawTagLink(packets, (u32)packet);
         btlBuildOverlayQuadPacket(packets, 0x40, backColor, depth + 2);
     }
-    packet = (SdfPacket *)sdfGrAllocPacketBuff(0x40);
-    packet[0].unk0 = 3;
-    packet[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    packet[0].unk10 = ((u64)0x10000000 << 32) | 0x8002;
-    packet[0].unk18 = 0xE;
-    packet[1].unk0 = 0x3000D;
-    packet[1].unk8 = 0x47;
-    packet[1].unk10 = 0x44;
-    packet[1].unk18 = 0x42;
+    packet = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+    packet->header.dmaTag = 3;
+    packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->header.gifTag = ((u64)0x10000000 << 32) | 0x8002;
+    packet->header.gifRegisters = 0xE;
+    packet->registers.test.value = 0x3000D;
+    packet->registers.test.registerId = 0x47;
+    packet->registers.alpha.value = 0x44;
+    packet->registers.alpha.registerId = 0x42;
     sdfDrawTagLink(packets, (u32)packet);
     for (row = 0, y = 0; row < btlRuntimeState.gridHeight; row++, y += dy) {
         x = (row & 1) ? dx >> 1 : 0;
@@ -1621,15 +1622,15 @@ void btlDrawCapturedScreenTileOverlay(sdfDrawTag_t *packets, u32 cellColor, u32 
         }
     }
     if (btlRuntimeState.options & 4) {
-        packet = (SdfPacket *)sdfGrAllocPacketBuff(0x40);
-        packet[0].unk0 = 3;
-        packet[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-        packet[0].unk10 = ((u64)0x10000000 << 32) | 0x8002;
-        packet[0].unk18 = 0xE;
-        packet[1].unk0 = 0x70003;
-        packet[1].unk8 = 0x47;
-        packet[1].unk10 = 0x44;
-        packet[1].unk18 = 0x42;
+        packet = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+        packet->header.dmaTag = 3;
+        packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
+        packet->header.gifTag = ((u64)0x10000000 << 32) | 0x8002;
+        packet->header.gifRegisters = 0xE;
+        packet->registers.test.value = 0x70003;
+        packet->registers.test.registerId = 0x47;
+        packet->registers.alpha.value = 0x44;
+        packet->registers.alpha.registerId = 0x42;
         sdfDrawTagLink(packets, (u32)packet);
         sdfPrimLinkF4(packets, 0x80000000, 0x40, 0x7000, 0x7900, 0x9000, 0x7900,
                         0x7000, 0x7A88, 0x9000, 0x7A88, depth, 0);
