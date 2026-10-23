@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "fld_area_work.h"
+#include "fld.h"
 #include "scr_integer_return_value_api.h"
 #include "common.h"
 #include "sdf_vu0.h"
@@ -71,11 +72,11 @@ void fldPauseBgm(void);
 void fldBgmFadeOut(void);
 
 
-void fldSetSceneParam2(s32 request, s32 sequence, s32 variant, char *name);
+void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char *name);
 
 extern s32 D_00389780[];
 
-void fldSetSceneParam3(s32 request, s32 sequence, s32 variant, char *name);
+void fldSetSceneParam3(fldSceneParam_t *record, s32 stage, s32 kind, const char *name);
 
 void sdfPrintf(const char *msg, ...);
 
@@ -460,14 +461,14 @@ s32 evtCommand_CALL_FIELD(void)
     s32 stage;
     s32 kind;
     char *sequenceName;
-    u8 requestBuffer[EVT_FIELD_SEQUENCE_REQUEST_SIZE];
+    fldSceneParam_t requestBuffer;
 
     fldBgmFadeOut();
     stage = scrGetIntPara(0);
     kind = scrGetIntPara(1);
     sequenceName = scrGetStrPara(2);
-    fldSetSceneParam2((s32)requestBuffer, stage, kind, sequenceName);
-    dds3AdminiCallSequence(5, requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
+    fldSetSceneParam2(&requestBuffer, stage, kind, sequenceName);
+    dds3AdminiCallSequence(5, &requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }
@@ -477,12 +478,12 @@ s32 evtCommand_CALL_FIELD2(void)
 {
     s32 kind;
     char *sequenceName;
-    u8 requestBuffer[EVT_FIELD_SEQUENCE_REQUEST_SIZE];
+    fldSceneParam_t requestBuffer;
 
     kind = scrGetIntPara(0);
     sequenceName = scrGetStrPara(1);
-    fldSetSceneParam2((s32)requestBuffer, D_00389780[0], kind, sequenceName);
-    dds3AdminiCallSequence(5, requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
+    fldSetSceneParam2(&requestBuffer, D_00389780[0], kind, sequenceName);
+    dds3AdminiCallSequence(5, &requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }
@@ -502,12 +503,12 @@ s32 evtCommand_CALL_FIELD3(void)
 {
     s32 kind;
     char *sequenceName;
-    u8 requestBuffer[EVT_FIELD_SEQUENCE_REQUEST_SIZE];
+    fldSceneParam_t requestBuffer;
 
     kind = scrGetIntPara(0);
     sequenceName = scrGetStrPara(1);
-    fldSetSceneParam3((s32)requestBuffer, D_00389780[0], kind, sequenceName);
-    dds3AdminiCallSequence(5, requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
+    fldSetSceneParam3(&requestBuffer, D_00389780[0], kind, sequenceName);
+    dds3AdminiCallSequence(5, &requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }
