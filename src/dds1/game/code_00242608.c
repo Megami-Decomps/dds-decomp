@@ -74,8 +74,6 @@ extern void fldDrawCameraColorLayerPass(void);
 #define CAMP_STATUS_BATCH_COUNT 2
 #define CAMP_STATUS_INITIAL_PARAMETER 15
 #define CAMP_SLOT_LAST_ROW_INDEX 4
-#define CAMP_SLOT_LAST_ROW_OFFSET 0x410
-#define CAMP_SLOT_ROW_STRIDE 0x104
 #define CAMP_PARTY_SCAN_LAST 4
 #define CAMP_PARTY_ACTIVE_FLAG 1
 
@@ -1265,15 +1263,14 @@ s32 campFlagRowValue(s32 row) {
     return mnuCampFlagRows[row].value[0];
 }
 
-extern u8 mnuShopRankPriceRows[];
+extern ShopRankPriceRow mnuShopRankPriceRows[];
 
 /* Highest matching row wins; rows with nonpositive flags are not queried. */
 s32 mnuCampFindActiveSlot(void) {
     s32 rowIndex;
-    u8 *slotTable = mnuShopRankPriceRows;
-    s16 *flagId = (s16 *)(slotTable + CAMP_SLOT_LAST_ROW_OFFSET);
-    for (rowIndex = CAMP_SLOT_LAST_ROW_INDEX; rowIndex >= 0; rowIndex--, flagId = (s16 *)((u8 *)flagId - CAMP_SLOT_ROW_STRIDE)) {
-        if (*flagId > 0 && evtBitCheck(*flagId)) {
+    for (rowIndex = CAMP_SLOT_LAST_ROW_INDEX; rowIndex >= 0; rowIndex--) {
+        s16 flagId = mnuShopRankPriceRows[rowIndex].unlockFlag;
+        if (flagId > 0 && evtBitCheck(flagId)) {
             return rowIndex;
         }
     }
@@ -1315,8 +1312,8 @@ s32 mnuShopHasExtraOption(ShopScene *scene) {
         return 0;
     }
     for (i = 0; i < 0x20; i++) {
-        itemId = ((ShopRankPriceRow *)mnuShopRankPriceRows)[row].entries[i].itemId;
-        type = ((ShopRankPriceRow *)mnuShopRankPriceRows)[row].entries[i].mode;
+        itemId = mnuShopRankPriceRows[row].entries[i].itemId;
+        type = mnuShopRankPriceRows[row].entries[i].mode;
         if (type != 1 && itemId - 0xA0 < 0x20) {
             return 1;
         }
@@ -1548,8 +1545,8 @@ s32 mnuCampGetRankedItemPrice(s32 entryIndex, s32 halfPrice) {
     s32 progressStage;
 
     rowOffset = (u8)mnuCampFindActiveSlot() * sizeof(ShopRankPriceRow);
-    entry = mnuShopRankPriceRows + entryIndex * sizeof(ShopRankPriceEntry) + rowOffset;
-    row = mnuShopRankPriceRows + rowOffset;
+    entry = (u8 *)mnuShopRankPriceRows + entryIndex * sizeof(ShopRankPriceEntry) + rowOffset;
+    row = (u8 *)mnuShopRankPriceRows + rowOffset;
     itemId = *(u16 *)(entry + 4);
     if (halfPrice == 0) {
         itemPrice = datItemSkillRecords[itemId].price;
@@ -1733,7 +1730,7 @@ s32 mnuBuildShopStandardCatalogList(ShopScene *scene) {
     if (rowIndex == -1) {
         return 0;
     }
-    row = (ShopRankPriceRow *)(mnuShopRankPriceRows + rowIndex * sizeof(ShopRankPriceRow));
+    row = &mnuShopRankPriceRows[rowIndex];
     for (i = 0; i < 0x20; i++) {
         u32 id = row->entries[i].itemId;
         u32 mode = row->entries[i].mode;
@@ -1870,7 +1867,7 @@ s32 mnuBuildShopCatalogList(ShopScene *scene) {
     if (rowIndex == -1) {
         return 0;
     }
-    entryCursor = mnuShopRankPriceRows + rowIndex * sizeof(ShopRankPriceRow);
+    entryCursor = (u8 *)mnuShopRankPriceRows + rowIndex * sizeof(ShopRankPriceRow);
     for (i = 0; i < 0x20; i++, entryCursor += sizeof(ShopRankPriceEntry)) {
         u16 itemId = *(u16 *)(entryCursor + 4);
         u8 mode = entryCursor[6];
@@ -3159,8 +3156,7 @@ s32 mnuTickShopMessageSequence(dds3ProcessID_t *task) {
                     if (index < 32) {
                         u32 stockOffset = index * sizeof(ShopRankPriceEntry) +
                                           activeSlot * (s32)sizeof(ShopRankPriceRow);
-                        u32 flagsAddress = (u32)&mnuShopRankPriceRows[8] + stockOffset;
-
+                        u32 flagsAddress = (u32)&((u8 *)mnuShopRankPriceRows)[8] + stockOffset;
                         do {
                             ShopRankPriceEntry *entry = (ShopRankPriceEntry *)(flagsAddress - sizeof(u32));
                             u16 itemId = entry->itemId;
