@@ -4270,22 +4270,22 @@ void mnuRebuildListLastFromCursor(MenuList *list);
 void mnuLinkItemList(MenuListNode **items, s32 count);
 
 /* Three-way comparison of unsigned primary keys, descending without subtraction. */
-s32 mnuComparePrimaryKeyDescending(s32 *left, s32 *right);
+s32 mnuComparePrimaryKeyDescending(MenuListNode **left, MenuListNode **right);
 
 /* Three-way comparison of unsigned primary keys, ascending without subtraction. */
-s32 mnuComparePrimaryKeyAscending(s32 *left, s32 *right);
+s32 mnuComparePrimaryKeyAscending(MenuListNode **left, MenuListNode **right);
 
 /* Three-way comparison of unsigned secondary keys, descending without subtraction. */
-s32 mnuCompareSecondaryKeyDescending(s32 *left, s32 *right);
+s32 mnuCompareSecondaryKeyDescending(MenuListNode **left, MenuListNode **right);
 
 /* Three-way comparison of unsigned secondary keys, ascending without subtraction. */
-s32 mnuCompareSecondaryKeyAscending(s32 *left, s32 *right);
+s32 mnuCompareSecondaryKeyAscending(MenuListNode **left, MenuListNode **right);
 
 /* Three-way comparison of unsigned tertiary keys, descending without subtraction. */
-s32 mnuCompareTertiaryKeyDescending(s32 *left, s32 *right);
+s32 mnuCompareTertiaryKeyDescending(MenuListNode **left, MenuListNode **right);
 
 /* Three-way comparison of unsigned tertiary keys, ascending without subtraction. */
-s32 mnuCompareTertiaryKeyAscending(s32 *left, s32 *right);
+s32 mnuCompareTertiaryKeyAscending(MenuListNode **left, MenuListNode **right);
 
 /* Sort the walked node pointers and rebuild the list from the cursor.
  * Nonzero ascending selects the last three comparators, not descending order.

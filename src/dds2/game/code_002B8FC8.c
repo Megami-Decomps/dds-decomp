@@ -1450,9 +1450,9 @@ void mnuLinkItemList(MenuListNode **nodeArray, s32 count) {
 }
 
 /* Three-way comparison of unsigned primary keys, descending without subtraction. */
-s32 mnuComparePrimaryKeyDescending(s32 *left, s32 *right) {
-    u32 leftKey = ((MenuListNode *)*left)->sortKeyPrimary;
-    u32 rightKey = ((MenuListNode *)*right)->sortKeyPrimary;
+s32 mnuComparePrimaryKeyDescending(MenuListNode **left, MenuListNode **right) {
+    u32 leftKey = (*left)->sortKeyPrimary;
+    u32 rightKey = (*right)->sortKeyPrimary;
 
     if (rightKey < leftKey) {
         return -1;
@@ -1461,9 +1461,9 @@ s32 mnuComparePrimaryKeyDescending(s32 *left, s32 *right) {
 }
 
 /* Three-way comparison of unsigned primary keys, ascending without subtraction. */
-s32 mnuComparePrimaryKeyAscending(s32 *left, s32 *right) {
-    u32 leftKey = ((MenuListNode *)*left)->sortKeyPrimary;
-    u32 rightKey = ((MenuListNode *)*right)->sortKeyPrimary;
+s32 mnuComparePrimaryKeyAscending(MenuListNode **left, MenuListNode **right) {
+    u32 leftKey = (*left)->sortKeyPrimary;
+    u32 rightKey = (*right)->sortKeyPrimary;
 
     if (rightKey < leftKey) {
         return 1;
@@ -1472,9 +1472,9 @@ s32 mnuComparePrimaryKeyAscending(s32 *left, s32 *right) {
 }
 
 /* Three-way comparison of unsigned secondary keys, descending without subtraction. */
-s32 mnuCompareSecondaryKeyDescending(s32 *left, s32 *right) {
-    u32 leftKey = ((MenuListNode *)*left)->sortKeySecondary;
-    u32 rightKey = ((MenuListNode *)*right)->sortKeySecondary;
+s32 mnuCompareSecondaryKeyDescending(MenuListNode **left, MenuListNode **right) {
+    u32 leftKey = (*left)->sortKeySecondary;
+    u32 rightKey = (*right)->sortKeySecondary;
 
     if (rightKey < leftKey) {
         return -1;
@@ -1483,9 +1483,9 @@ s32 mnuCompareSecondaryKeyDescending(s32 *left, s32 *right) {
 }
 
 /* Three-way comparison of unsigned secondary keys, ascending without subtraction. */
-s32 mnuCompareSecondaryKeyAscending(s32 *left, s32 *right) {
-    u32 leftKey = ((MenuListNode *)*left)->sortKeySecondary;
-    u32 rightKey = ((MenuListNode *)*right)->sortKeySecondary;
+s32 mnuCompareSecondaryKeyAscending(MenuListNode **left, MenuListNode **right) {
+    u32 leftKey = (*left)->sortKeySecondary;
+    u32 rightKey = (*right)->sortKeySecondary;
 
     if (rightKey < leftKey) {
         return 1;
@@ -1494,9 +1494,9 @@ s32 mnuCompareSecondaryKeyAscending(s32 *left, s32 *right) {
 }
 
 /* Three-way comparison of unsigned tertiary keys, descending without subtraction. */
-s32 mnuCompareTertiaryKeyDescending(s32 *left, s32 *right) {
-    u32 leftKey = ((MenuListNode *)*left)->sortKeyTertiary;
-    u32 rightKey = ((MenuListNode *)*right)->sortKeyTertiary;
+s32 mnuCompareTertiaryKeyDescending(MenuListNode **left, MenuListNode **right) {
+    u32 leftKey = (*left)->sortKeyTertiary;
+    u32 rightKey = (*right)->sortKeyTertiary;
 
     if (rightKey < leftKey) {
         return -1;
@@ -1505,9 +1505,9 @@ s32 mnuCompareTertiaryKeyDescending(s32 *left, s32 *right) {
 }
 
 /* Three-way comparison of unsigned tertiary keys, ascending without subtraction. */
-s32 mnuCompareTertiaryKeyAscending(s32 *left, s32 *right) {
-    u32 leftKey = ((MenuListNode *)*left)->sortKeyTertiary;
-    u32 rightKey = ((MenuListNode *)*right)->sortKeyTertiary;
+s32 mnuCompareTertiaryKeyAscending(MenuListNode **left, MenuListNode **right) {
+    u32 leftKey = (*left)->sortKeyTertiary;
+    u32 rightKey = (*right)->sortKeyTertiary;
 
     if (rightKey < leftKey) {
         return 1;
