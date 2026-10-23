@@ -57,12 +57,12 @@ typedef struct BattleRuntimeState {
     u32 color14;
     s32 particlesPerRow;
     s32 particleRowCount;
-    s32 unk20;
-    s32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
+    s32 particleGridHalfCellWidth;
+    s32 particleGridHalfCellHeight;
+    f32 waveRadius;
+    f32 waveRadiusSpeed;
+    f32 particleActivationRadius;
+    f32 particleActivationRadiusStep;
     BtlFadeParticle *ownedData;
     u8 *frameBuffer;
     struct sdfMemHandle_t *frameBufferAllocation;
