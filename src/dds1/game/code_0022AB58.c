@@ -37,7 +37,7 @@ void *evtGetDebugProcess(void) {
 
 extern s32 sdfFileCheckExist(const char *);
 
-extern dds3ProcessID_t *scrStartScriptByName(s32, const char *, s32);
+extern dds3ProcessID_t *scrStartScriptByName(u32, const char *, s32);
 
 extern SdfPoolNode D_00325708;
 

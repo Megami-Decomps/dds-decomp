@@ -63,7 +63,7 @@ extern u8 *datItemMessages;
 extern void itfSetTextDrawLimit(s32);
 extern _FRQ *itfDrawBankTextWithSegmentCounter(s32, s32, s32, u16, FrFontTextBank *, s32);
 extern _FRQ *itfBuildGlyphChainFromEncodedStream(FrFontCtx *);
-extern dds3ProcessID_t *scrStartScriptByName(s32, const char *, s32);
+extern dds3ProcessID_t *scrStartScriptByName(u32, const char *, s32);
 extern s32 itfDrawBackgroundAndGetTaskReadyMask(dds3ProcessID_t *task);
 extern void itfReleaseFontTestTaskResources(dds3ProcessID_t *task);
 

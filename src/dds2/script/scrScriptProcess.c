@@ -60,7 +60,7 @@ void dds3GlobalWorkClearFlags(void)
     }
 }
 
-dds3ProcessID_t *scrStartScriptByName(s32 priority, const char *path, s32 option)
+dds3ProcessID_t *scrStartScriptByName(u32 priority, const char *path, s32 option)
 {
     return scrStartScriptProcess(priority, scrLoadScriptFile(path, option));
 }
