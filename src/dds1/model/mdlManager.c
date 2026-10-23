@@ -1044,7 +1044,7 @@ void mdlSetEffectScale(dds3ModelHandle_t *ctx, f32 amount) {
 /* vu0 routine: project point with the model/camera matrices and viewport vectors.
  * Row scaling uses live vf10 before loading point; the result is left in vf10.
  * Preserve the distinct matrix-composition order of this single-point path. */
-void mdlGetScreenOffset(dds3ModelHandle_t *ctx, void *point)
+void mdlGetScreenOffset(dds3ModelHandle_t *ctx, const f32 point[4])
 {
     VU0_LOAD_MATRIX(sdfViewMatrix);
     sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
