@@ -160,7 +160,7 @@ extern s32 btlDisableNonBossUnits(void);
 extern s32 btlDisableUnitsIfSpeciesFlagged(void);
 extern s32 btlSetupDefeatCameraFromAnimationFlags(BtlLinkedCommand *command);
 extern s32 btlDispatchEligibleBossEvent(BtlLinkedCommand *entry);
-extern void btlDispatchSpecialEnemyActionWhenPhaseAllows(BtlUnit *unit, s32 action);
+extern void btlDispatchSpecialEnemyActionWhenPhaseAllows(BtlUnit *unit, s32 *action);
 extern s32 btlEffectTaskStartFinale(BtlTask *task);
 extern u64 btlEnsureEffectUnitModelLoadTask(u64 prerequisiteHandle);
 extern s32 btlFadeOtherEnemyUnitsWhenSpecialModeActive(void);
@@ -619,4 +619,3 @@ void btlReleaseBossData(void) {
 INCLUDE_RODATA(const s32, "game/code_0020EA40", D_003A66C0);
 
 INCLUDE_RODATA(const s32, "game/code_0020EA40", D_003A66D8);
-

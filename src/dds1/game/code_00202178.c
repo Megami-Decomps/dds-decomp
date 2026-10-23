@@ -1614,7 +1614,7 @@ void btlResetEffectState(void) {
     data->header.owner = 0;
 }
 
-extern void btlRestoreUnitMinimumValueAndClearStatus(BtlUnit *, s32);
+extern void btlRestoreUnitMinimumValueAndClearStatus(BtlUnit *, BtlOperandEntry *);
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5D50);
 
 const char D_003A5D60[] = "btl:RAHU damage = %d\n";
@@ -1672,7 +1672,7 @@ void btlApplyRahuOperandEffects(BtlUnit *actor, BtlOperandEntry *operand) {
     if (actor == mainUnit && !(actor->gunResourceFlags & 4)) {
         if (twin->status.flags & 0xE0) {
             if (!(effect->timer & 2)) {
-                btlRestoreUnitMinimumValueAndClearStatus(actor, (s32)operand);
+                btlRestoreUnitMinimumValueAndClearStatus(actor, operand);
             }
             effect->timer |= 2;
         } else {
@@ -1684,7 +1684,7 @@ void btlApplyRahuOperandEffects(BtlUnit *actor, BtlOperandEntry *operand) {
         if (!(effect->timer & 2)) {
             if (mainUnit->status.flags & 0xE0) {
                 if (!(effect->timer & 4)) {
-                    btlRestoreUnitMinimumValueAndClearStatus(actor, (s32)operand);
+                    btlRestoreUnitMinimumValueAndClearStatus(actor, operand);
                 }
                 effect->timer |= 4;
             } else {
@@ -4482,9 +4482,9 @@ s32 btlHasFirstSpecialEnemySpecies(void) {
     return species == 0x119;
 }
 
-extern void btlRestoreUnitMinimumValueAndClearStatus(BtlUnit *, s32);
+extern void btlRestoreUnitMinimumValueAndClearStatus(BtlUnit *, BtlOperandEntry *);
 
-void btlDispatchSpecialEnemyActionWhenPhaseAllows(BtlUnit *unit, s32 action) {
+void btlDispatchSpecialEnemyActionWhenPhaseAllows(BtlUnit *unit, s32 *action) {
     BtlEffectHeader *effectState;
     if ((unit->status.flags & 0x400) == 0) {
         return;
@@ -4496,7 +4496,7 @@ void btlDispatchSpecialEnemyActionWhenPhaseAllows(BtlUnit *unit, s32 action) {
     if (unit->partyRecord.unitId == 0x11a && effectState->formCount >= 3) {
         return;
     }
-    btlRestoreUnitMinimumValueAndClearStatus(unit, action);
+    btlRestoreUnitMinimumValueAndClearStatus(unit, (BtlOperandEntry *)action);
 }
 
 s32 btlSelectMissingHariSummon(void) {
