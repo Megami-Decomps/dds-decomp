@@ -10515,11 +10515,10 @@ void effReportResourceStatus(EffActiveResource *work) {
 
 /* Apply the selected battle state's stored tint vectors when both mask bits are set. */
 void effApplyBattleStateTint(void) {
-    s32 actor;
+    BtlState *battle = (BtlState *)btlGetRuntime();
 
-    actor = (s32)(u32)btlGetRuntime();
-    if ((((BtlState *)actor)->battleFlags & 0x6000000) == 0x6000000) {
-        btlBeginSceneLightColorTransition((f32 *)(actor + 0x50), (f32 *)(actor + 0x60), 0);
+    if ((battle->battleFlags & 0x6000000) == 0x6000000) {
+        btlBeginSceneLightColorTransition(battle->lightColor, battle->ambientColor, 0);
         return;
     }
 }
