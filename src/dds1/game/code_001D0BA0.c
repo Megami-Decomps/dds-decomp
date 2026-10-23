@@ -1333,9 +1333,9 @@ void *btlCreateDeferredActorStatsTask(BtlUnit *owner, BtlOperandEntry *spec) {
 
 u32 btlApplyDeferredUnitStatus(void *taskArgs) {
     BtlDeferredUnitStatusArgs *arguments = taskArgs;
-    s32 context = (s32)(u32)btlGetRuntime();
+    BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *unit = arguments->unit;
-    if ((*(u32 *)(context + 0x1F4) & 0x80) == 0) {
+    if ((work->battleFlags & 0x80) == 0) {
         return 1;
     }
     btlRaisePartyRecordStatusValue(&unit->partyRecord, arguments->minimumValue);
@@ -1367,9 +1367,9 @@ void *btlCreateDeferredUnitStatusTask(BtlUnit *owner, u32 value) {
 }
 
 u32 btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *args) {
-    s32 context = (s32)(u32)btlGetRuntime();
+    BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *unit = args->unit;
-    if ((*(u32 *)(context + 0x1F4) & 0x80) == 0) {
+    if ((work->battleFlags & 0x80) == 0) {
         return 1;
     }
     if (datCommandRecords[args->category].flags & 8) {
