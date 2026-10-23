@@ -3821,7 +3821,7 @@ extern u32 D_0037E9A0[20];
 extern u32 D_0037E9F0[12];
 extern u32 D_0037EA20[20];
 extern u32 D_0037EA70[16];
-extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(void *, RefObj *);
+extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(SdfPoolNode *, RefObj *);
 struct sdfMat_t;
 
 /* Draw track-set positions/colors/UVs; a null matrix selects the identity transform. */
