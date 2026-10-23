@@ -978,7 +978,7 @@ s32 mnuInitializeStaffPartyScene(dds3ProcessID_t *task) {
     mnuCacheProfilePanelGridPositions(profilePanel, context->staffParam, 5, 0xE, 0xF);
     menu->resourceList = mnuCreatePanelSpriteHandles(
         1, (EffectSlotSet *)(u32)context->displayVariant,
-        (struct EffMappedResource *)(u32)context->unk120);
+        context->panelTarget);
     if (mnuClassifyQuarterHalfPercent(record->hp, record->maxHp) < 2) {
         menu->motionSelection = -1;
     } else {
@@ -1630,7 +1630,8 @@ void ptySkillMenuInitPages(CampMenuContext *context) {
         mnuSetPanelThirdGridSlot(menu->panel, 0x5E0, 0x150, (struct EffectSlotSet *)context->variant, 0xA);
         mnuSetPanelFourthGridSlot(menu->panel, 0x560, 0x48, context->gridSlotResource, 0, (u32)mnuCampSkillHeadingFrameIndices);
         mnuSetPanelSecondGridSlot(menu->panel, -0x80, -0x38, context->gridSlotResource, 3);
-        mnuInitializePanelResource(menu->panel, (struct EffectSlotSet *)context->displayVariant, (struct EffMappedResource *)context->unk120);
+        mnuInitializePanelResource(menu->panel, (struct EffectSlotSet *)context->displayVariant,
+                                   context->panelTarget);
         menu->categoryList = mnuCreateListState(0, 1, 1);
         for (category = 0; category < 4; category++) {
             mnuListAppendNode(menu->categoryList, D_003BC708);

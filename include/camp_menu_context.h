@@ -34,7 +34,7 @@ typedef struct CampMenuContext {
     };
     s32 unk118;               /* 0x118: window sprite slot resource */
     const void *partySelectionLayout; /* 0x11C: copied panel layout address */
-    s32 unk120;
+    struct EffMappedResource *panelTarget; /* 0x120: target resource used to build panel handles. */
     s32 panel;                /* 0x124 */
     u8 pad128[4];
     s32 panelList;            /* 0x12C */
