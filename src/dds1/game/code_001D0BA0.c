@@ -32,6 +32,7 @@
 #include "sdf_model.h"
 #include "sdf_dev_slot_api.h"
 #include "btl.h"
+#include "btl_deferred_unit_status_args.h"
 #include "btl_position_effect_task_args.h"
 #include "btl_position_lerp_task_args.h"
 #include "btl_actor_work.h"
@@ -1325,13 +1326,13 @@ void *btlCreateDeferredActorStatsTask(BtlUnit *owner, BtlOperandEntry *spec) {
 }
 
 u32 btlApplyDeferredUnitStatus(void *taskArgs) {
-    u32 *taskData = (u32 *)taskArgs;
+    BtlDeferredUnitStatusArgs *arguments = taskArgs;
     s32 context = (s32)(u32)btlGetRuntime();
-    BtlUnit *unit = (BtlUnit *)taskData[0];
+    BtlUnit *unit = arguments->unit;
     if ((*(u32 *)(context + 0x1F4) & 0x80) == 0) {
         return 1;
     }
-    btlRaisePartyRecordStatusValue(&unit->partyRecord, taskData[1]);
+    btlRaisePartyRecordStatusValue(&unit->partyRecord, arguments->minimumValue);
     btlRefreshUnitMotionSelection(unit);
     btlIsUnitDefeatTriggeredByValueDelta(unit, 0);
     return 1;
@@ -1341,21 +1342,21 @@ extern void *btlAllocTask(s32);
 
 extern u32 btlApplyDeferredUnitStatus(void *);
 
-void *btlCreateDeferredUnitStatusTask(u8 *owner, u32 value) {
+void *btlCreateDeferredUnitStatusTask(BtlUnit *owner, u32 value) {
     u8 *task = btlAllocTask(8);
     s64 data;
-    u32 *arguments;
+    BtlDeferredUnitStatusArgs *arguments;
 
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x47;
     *(void **)(task + 0x4C) = btlApplyDeferredUnitStatus;
-    data = *(s64 *)(owner + 0x108);
+    data = owner->identity;
     *(s64 *)(task + 0x40) = data;
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    arguments[1] = value;
+    arguments->unit = owner;
+    arguments->minimumValue = value;
     return task;
 }
 

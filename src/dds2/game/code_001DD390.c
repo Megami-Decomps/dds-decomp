@@ -36,6 +36,7 @@
 #include "btl_command.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
+#include "btl_deferred_unit_status_args.h"
 #include "btl_sound.h"
 #include "btl_selected_unit_effect_task_args.h"
 #include "btl_approach_task_args.h"
@@ -1425,13 +1426,13 @@ BtlRuntimeTask *btlCreateDeferredActorStatsTask(BtlUnit *unit, BtlOperandEntry *
 }
 
 u32 btlApplyDeferredUnitStatus(void *taskArgs) {
-    s32 *taskData = taskArgs;
+    BtlDeferredUnitStatusArgs *args = taskArgs;
     BtlState *work = (BtlState *)btlGetRuntime();
-    BtlUnit *unit = (BtlUnit *)taskData[0];
+    BtlUnit *unit = args->unit;
     if (!(work->battleFlags & 0x80)) {
         return 1;
     }
-    btlRaisePartyRecordStatusValue(&unit->partyRecord, taskData[1]);
+    btlRaisePartyRecordStatusValue(&unit->partyRecord, args->minimumValue);
     btlRefreshUnitMotionSelection(unit);
     btlIsUnitDefeatTriggeredByValueDelta(unit, 0);
     return 1;
@@ -1439,7 +1440,7 @@ u32 btlApplyDeferredUnitStatus(void *taskArgs) {
 
 BtlRuntimeTask *btlCreateDeferredUnitStatusTask(BtlUnit *actor, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    BtlRuntimeTaskArgs *args;
+    BtlDeferredUnitStatusArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x4B;
@@ -1447,8 +1448,8 @@ BtlRuntimeTask *btlCreateDeferredUnitStatusTask(BtlUnit *actor, s32 option) {
     task->callback = btlApplyDeferredUnitStatus;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->actor = actor;
-    args->option = option;
+    args->unit = actor;
+    args->minimumValue = (u32)option;
     return task;
 }
 
