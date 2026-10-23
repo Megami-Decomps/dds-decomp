@@ -399,7 +399,7 @@ void sdfTexListFree(DevRequest *list, s32 releaseItems) {
     if (releaseItems != 0) {
         itemCount = list->usedCount;
         for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-            sdfTexReleaseReferenceViaHandler((sdfTexHandle_t *)((u32 *)list->buffer)[itemIndex]);
+            sdfTexReleaseReferenceViaHandler(((sdfTexHandle_t **)list->buffer)[itemIndex]);
         }
     }
     sdfItemArrayFree(list);
@@ -409,7 +409,7 @@ void sdfTexListAdd(DevRequest *list, sdfTexHandle_t *texture) {
     if (list->usedCount >= (s16)list->capacity) {
         sdfItemArrayGrow(list);
     }
-    ((u32 *)list->buffer)[list->usedCount] = (u32)texture;
+    ((sdfTexHandle_t **)list->buffer)[list->usedCount] = texture;
     list->usedCount++;
 }
 
@@ -427,8 +427,7 @@ void sdfTexListSetCapacity(DevRequest *list, s32 count, s32 enabled) {
     sdfDevResizeBufferedRequest(list, count);
 }
 
-/* Clone every texture into a new buffered list; null sources return null.
- * Entries remain address words, so bridge them explicitly at the texture API. */
+/* Clone every texture reference into a new buffered list; null sources return null. */
 DevRequest *sdfTexListDup(DevRequest *source) {
     s32 itemCount;
     DevRequest *clone;
@@ -440,7 +439,8 @@ DevRequest *sdfTexListDup(DevRequest *source) {
     itemCount = source->usedCount;
     clone = sdfTexListNew(itemCount);
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-        ((u32 *)clone->buffer)[itemIndex] = (u32)sdfTexClone((sdfTexHandle_t *)((u32 *)source->buffer)[itemIndex]);
+        ((sdfTexHandle_t **)clone->buffer)[itemIndex] =
+            sdfTexClone(((sdfTexHandle_t **)source->buffer)[itemIndex]);
     }
     clone->usedCount = itemCount;
     return clone;
