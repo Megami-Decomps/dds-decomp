@@ -11224,9 +11224,7 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
         if (actor == NULL) {
             continue;
         }
-        row = (const BattleFormationActionRow *)((u32)D_003BAA64 +
-              actionCode * sizeof(BattleFormationActionRow) -
-              BATTLE_FORMATION_ACTION_FIRST * sizeof(BattleFormationActionRow));
+        row = &D_003BAA64->rows[actionCode - BATTLE_FORMATION_ACTION_FIRST];
         selector = row->actorSelector[i];
         if (selector == -1) {
             continue;
@@ -11290,18 +11288,14 @@ u32 btlApplyLinkageFormation(BattleFormationActionArgs *args) {
 
     link = args->link;
     if (link->unit->status.flags & 0x400) {
-        row = (BattleFormationActionRow *)((u8 *)D_003BAA64 +
-              args->actionId * sizeof(BattleFormationActionRow) -
-              BATTLE_FORMATION_ACTION_FIRST * sizeof(BattleFormationActionRow));
+        row = &D_003BAA64->rows[args->actionId - BATTLE_FORMATION_ACTION_FIRST];
         if (row->kind == 7) {
             btlEnemyMode7FormationNoOp(args->link, first, args->second);
         }
         return 1;
     }
 
-    row = (BattleFormationActionRow *)((u8 *)D_003BAA64 +
-          args->actionId * sizeof(BattleFormationActionRow) -
-          BATTLE_FORMATION_ACTION_FIRST * sizeof(BattleFormationActionRow));
+    row = &D_003BAA64->rows[args->actionId - BATTLE_FORMATION_ACTION_FIRST];
     switch (row->kind) {
     case 0:
         break;
