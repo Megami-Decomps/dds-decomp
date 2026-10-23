@@ -26,8 +26,8 @@ typedef struct CampMenuContext {
     u8 padDC[4];
     s32 variant;              /* 0xE0 */
     s32 unkE4;               /* 0xE4: forwarded to the window resource helper */
-    EffectSlotSet *unkE8;     /* 0xE8: grid-slot resource */
-    EffectSlotSet *unkEC;     /* 0xEC: window texture variant resource */
+    EffectSlotSet *gridSlotResource; /* 0xE8: grid-slot resource */
+    EffectSlotSet *windowTextureVariantResource; /* 0xEC: window texture variant resource */
     union {
         s32 panelResource; /* 0xF0: first panel resource, used by other menu paths */
         EffectSlotSet *panelResources[10]; /* 0xF0: party-unit panel resources */
