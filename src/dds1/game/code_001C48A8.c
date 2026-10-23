@@ -441,7 +441,7 @@ extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
 extern u8 *btlCreateModelLoadPollTask(u8 *, u32, u32, s8);
 extern void *btlCreateActorTransparencyTask(BtlUnit *);
 extern u8 *btlCreateUnitFadeInTask(u8 *, u32, u32);
-extern u8 *btlCreateUnitDefeatFadeInTask(u8 *, u32);
+extern BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *, s32);
 extern BtlRuntimeTask *sndCreateActorEffectTask(struct SoundResourceNode *, BtlUnit *, u32);
 extern BtlRuntimeTask *btlCreateImmediateCompletionTask(void);
 extern u8 *btlCreateGunLoadPollTask(u8 *);
@@ -502,7 +502,7 @@ u64 btlQueueSceneActorModelEntry(s32 sceneAddress) {
         if ((btlUnitStatusPair(unit) & 0x403) == 0x401) {
             if (!(unit->status.stateFlags & 0x800) && !(scene->commandRestrictFlags & 8)) {
                 if (!(scene->commandRestrictFlags & 4) && btlIsActorModeActionCodeAllowed(unit)) {
-                    lastFade = (BtlRuntimeTask *)btlCreateUnitDefeatFadeInTask((u8 *)unit, 8);
+                    lastFade = btlCreateUnitDefeatFadeInTask(unit, 8);
                 } else {
                     lastFade = (BtlRuntimeTask *)btlCreateUnitFadeInTask((u8 *)unit, 4, 6);
                 }
@@ -525,7 +525,7 @@ u64 btlQueueSceneActorModelEntry(s32 sceneAddress) {
                     delay += 10;
                 }
             } else {
-                lastFade = (BtlRuntimeTask *)btlCreateUnitDefeatFadeInTask((u8 *)unit, 0);
+                lastFade = btlCreateUnitDefeatFadeInTask(unit, 0);
                 lastFade->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 lastFade->startCondition.value.handle = chain;
                 lastFade->startDelay = delay;
@@ -574,7 +574,7 @@ u64 btlQueueSceneActorModelEntry(s32 sceneAddress) {
                     btlStartTask(task);
                 }
             } else {
-                lastFade = (BtlRuntimeTask *)btlCreateUnitDefeatFadeInTask((u8 *)unit, 0);
+                lastFade = btlCreateUnitDefeatFadeInTask(unit, 0);
                 lastFade->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 lastFade->startDelay = 1;
                 lastFade->startCondition.value.handle = light->handle;

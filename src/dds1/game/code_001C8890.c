@@ -2368,7 +2368,7 @@ extern u8 *btlCreateControlObject(void);
 extern BtlTask *btlCreateActionSeq(void);
 extern void btlBindActorTaskAndSelectActionNumber(BtlTask *, BtlUnit *);
 extern void btlSetSceneTaskActiveFlag(BtlTask *);
-extern u8 *btlCreateUnitDefeatFadeInTask(u8 *, u32);
+extern BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *, s32);
 extern f32 btlMeasureMaskedUnitBounds(s32, f32 *, f32 *);
 extern void btlUnitGetBodyPosVU(BtlUnit *);
 extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
@@ -2526,7 +2526,7 @@ void btlScheduleSummonActionTasks(BtlTask *action) {
         fadeEnabled = battle->summonFadePredicate(action->indexWork.skillId);
     }
     if (fadeEnabled != 0) {
-        fadeTask = (BtlRuntimeTask *)btlCreateUnitDefeatFadeInTask((u8 *)unit, 0x12);
+        fadeTask = btlCreateUnitDefeatFadeInTask(unit, 0x12);
         fadeTask->startCondition.kind = 4;
         fadeTask->startDelay = 2;
         fadeTask->endDelay = 16;
@@ -2534,7 +2534,7 @@ void btlScheduleSummonActionTasks(BtlTask *action) {
         fadeTask->ownerId = action->unit->identity;
         btlStartTask(fadeTask);
     } else {
-        fadeTask = (BtlRuntimeTask *)btlCreateUnitDefeatFadeInTask((u8 *)unit, -1);
+        fadeTask = btlCreateUnitDefeatFadeInTask(unit, -1);
         fadeTask->startCondition.kind = 4;
         fadeTask->startDelay = 2;
         fadeTask->endDelay = 16;
@@ -2684,7 +2684,7 @@ void btlReloadLinkedUnitAndQueueEffects(BtlTask *task) {
     spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     spawned->startCondition.value.handle = load->handle;
     btlStartTask(spawned);
-    delayed = (BtlRuntimeTask *)btlCreateUnitDefeatFadeInTask((u8 *)unit, 0x12);
+    delayed = btlCreateUnitDefeatFadeInTask(unit, 0x12);
     delayed->ownerId = task->unit->identity;
     delayed->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     delayed->startDelay = 2;
