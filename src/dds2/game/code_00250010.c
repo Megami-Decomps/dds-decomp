@@ -4860,7 +4860,7 @@ extern s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 res
 extern void mdlPackDecode(s32, s32, s32, s32, s32);
 extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
 extern evtUnitHandle_t *evtGetUnitHandle(s32);
-extern s32 evtPathLinkAndMake(void *object, void *owner);
+extern s32 evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner);
 extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32, EvtRuntime *);
 extern EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *, s32, EvtRuntime *);
 extern s32 evtEventViewerAddName(const char *, EvtRuntime *);

@@ -94,7 +94,7 @@ s32 sdfDelayedResrcCheck(void);
 
 void evtFreeStage(void);
 
-s32 evtPathLinkAndMake(void *target, void *path);
+s32 evtPathLinkAndMake(dds3Basic_t *target, dds3Basic_t *path);
 
 void evtPathRate(void *unit, f32 value);
 
@@ -300,8 +300,8 @@ s32 evtCommand_EFFECT_OFF(void)
 }
 
 s32 evtCommand_EFFECT_PATH_MOVE(void) {
-    void *effect;
-    void *path;
+    dds3Basic_t *effect;
+    dds3Basic_t *path;
 
     effect = evtSearchBasic(7, scrGetIntPara(0));
     if (effect == NULL) {

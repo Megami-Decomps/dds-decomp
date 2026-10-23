@@ -428,7 +428,7 @@ dds3Basic_t *evtEventViewerGetNameObject(s32 index, EvtRuntime *viewer) {
 
 extern s32 dds3EffectObjectBasicLinkObjectIndex(dds3Basic_t *, dds3Basic_t *, s32);
 extern s32 dds3EffectObjectBasicLinkObject(dds3Basic_t *, dds3Basic_t *);
-extern s32 evtPathLinkAndMake(void *object, void *owner);
+extern s32 evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner);
 
 /* Billboard entries and polygon movies use distinct owner attachment paths. */
 void evtViewerBindNamedOwner(dds3Basic_t *effectObject, s32 ownerNameIndex, s32 billboardEntry, u32 startFrame, EvtRuntime *viewer) {
@@ -466,7 +466,7 @@ void evtViewerBindNamedOwner(dds3Basic_t *effectObject, s32 ownerNameIndex, s32 
         dds3EffectObjectBasicLinkObject(effectObject, owner);
         break;
     case EFF_WORLD_KIND_ACTION_10:
-        evtPathLinkAndMake(owner, (void *)effectObject);
+        evtPathLinkAndMake(owner, effectObject);
         movieObject = dds3GetBaseControlWorkData(effectObject)->slots[1];
         if (viewer->flags & 1) {
             evtStopMover(movieObject, 0, startFrame, currentFrame);
