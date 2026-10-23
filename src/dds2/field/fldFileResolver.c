@@ -722,7 +722,7 @@ extern void fldMakePlane(FldCollisionDescriptor *geometry, f32 *translation,
                                                u32 id, s32 sceneFlag, s32 ownerIndex);
 extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, s32, s32, s32);
 extern void dds3SetPathBasicSpline(dds3Basic_t *path, u32 value);
-extern dds3Basic_t *dds3AddEventBasic(s32 key, void *work, s32 name);
+extern dds3Basic_t *dds3AddEventBasic(s32 key, void *work, const char *name);
 extern dds3Basic_t *dds3AddPathBasic(s32 key, void *work, const char *name);
 extern s32 fldEveHit_AddEveData(u32, dds3Basic_t *);
 extern s32 fldRegisterRoomObject(FldFileResource *, dds3Basic_t *);
@@ -817,7 +817,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                     fldRoomEventPlacementCount++;
                 }
                 event = spawnResource->data;
-                spawnedObject = dds3AddEventBasic(spawnResource->id, (void *)event->label, (s32)spawnResource->name);
+                spawnedObject = dds3AddEventBasic(spawnResource->id, (void *)event->label, spawnResource->name);
                 fldEveHit_AddEveData((u32)spawnResource, spawnedObject);
             }
             break;
