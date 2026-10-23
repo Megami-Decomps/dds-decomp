@@ -202,7 +202,7 @@ typedef struct BtlState {
     BtlUnit *eventUnit; /* 0x1E0 */
     s32 sequenceHandle; /* 0x1E4 */
     s32 scriptHandle; /* 0x1E8 */
-    void *eventAssets; /* 0x1EC */
+    struct sdfMemHandle_t *eventAssets; /* 0x1EC */
     s32 frame; /* 0x1F0 */
     u32 battleFlags; /* 0x1F4 */
     u32 commandRestrictFlags; /* 0x1F8: bit 0x10 blocks commands with the +0x30 restriction */
@@ -443,7 +443,7 @@ typedef struct BtlState {
     BtlUnit *eventUnit; /* 0x204 */
     s32 sequenceHandle; /* 0x208 */
     s32 scriptHandle; /* 0x20C */
-    void *eventAssets; /* 0x210 */
+    struct sdfMemHandle_t *eventAssets; /* 0x210 */
     u8 pad214[4];
     u32 battleFlags; /* 0x218 */
     u32 commandRestrictFlags; /* 0x21C: bit 0x10 blocks commands with the +0x30 restriction */

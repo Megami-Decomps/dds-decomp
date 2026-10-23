@@ -550,11 +550,11 @@ void btlBindEventEffectResources(void) {
 /* Release the voice resources before the optional event asset allocation. */
 void btlReleaseEventAssets(void) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
-    void *eventAssets;
+    struct sdfMemHandle_t *eventAssets;
     btlReleaseEventData();
     eventAssets = battleState->eventAssets;
     if (eventAssets != 0) {
-        sdfMemFreeDirect((struct sdfMemHandle_t *)eventAssets);
+        sdfMemFreeDirect(eventAssets);
         battleState->eventAssets = 0;
     }
     btlBossDebugPrintf(D_0041B7D0);
@@ -5113,4 +5113,3 @@ INCLUDE_RODATA(const s32, "game/code_0022AC10", D_00420FA8);
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_00420FC0);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_00420FD8);
-
