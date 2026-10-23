@@ -8,6 +8,7 @@
 struct dds3ProcessID_t;
 struct EvtRuntime;
 struct dds3Basic_t;
+struct FileRequest;
 
 /* User-value state shared by the DDS1 and DDS2 polygon-movie providers. */
 typedef struct EvtPolygonMovieTaskState {
@@ -39,7 +40,7 @@ typedef struct PmdHeader {
 
 /* Three retained resources share request/handle/address slots. */
 typedef struct PolyMovieResourceSlot {
-    void *request;
+    struct FileRequest *request;
     sdfMemHandle_t *handle;
     PmdHeader *address;
 } PolyMovieResourceSlot;
