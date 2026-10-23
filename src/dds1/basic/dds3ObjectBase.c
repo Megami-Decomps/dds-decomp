@@ -287,7 +287,7 @@ void dds3RebuildObjectModelContext(dds3Basic_t *object, s32 resourceGroup, s32 r
 
 extern void dds3GetTMPoseSet(dds3Basic_t *object);
 
-void dds3ObjectBaseMakeMatter(void *object) {
+void dds3ObjectBaseMakeMatter(dds3Basic_t *object) {
     dds3ObjectBaseControlWorkData_t *base;
     dds3Basic_t *scriptModelObject;
     sdfMotionCtrlr_t *motion;
@@ -297,7 +297,7 @@ void dds3ObjectBaseMakeMatter(void *object) {
     scriptModelObject = dds3ObjectBaseGetControlBasic(object, 3);
     model = dds3ModelBasicMakeModel(scriptModelObject);
     motion = dds3ModelBasicSetMotion(scriptModelObject, model);
-    dds3GetTMPoseSet((dds3Basic_t *)object);
+    dds3GetTMPoseSet(object);
     VU0_STORE_MATRIX(model->matrix);
     sdfModelEvalTm2(model, 0);
     sdfModelEvalTm2(model, 1);
