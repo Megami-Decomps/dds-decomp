@@ -74,7 +74,7 @@ void dds3EffectObjectBasicDestructor(dds3Basic_t *obj) {
 }
 
 #include "dds3_world_primary.h"
-extern s32 dds3SceneBasicExistBasicFromType(dds3Basic_t *object, s32 slotIndex, dds3Basic_t *value);
+extern s32 dds3SceneBasicExistBasicFromType(dds3Basic_t *object, s32 slotIndex, const dds3Basic_t *value);
 extern void dds3OffPoseSetFlag(dds3PoseSet_t *node, u32 flags);
 extern void dds3EffectObjectBasicGetObjectIndex(dds3Basic_t *obj);
 extern void Normalize(void);

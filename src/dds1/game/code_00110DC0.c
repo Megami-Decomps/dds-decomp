@@ -7,7 +7,7 @@
 
 s32 CB_ReleaseObjectBasic(void *areaObject);
 
-const s32 dds3SceneBasicExistBasicFromType(dds3Basic_t *object, s32 slotIndex, dds3Basic_t *targetNode) {
+const s32 dds3SceneBasicExistBasicFromType(dds3Basic_t *object, s32 slotIndex, const dds3Basic_t *targetNode) {
     dds3Basic_t *node;
 
     if (object == NULL || targetNode == 0) {

@@ -74,7 +74,7 @@ f32 GetSplineLength(dds3PathBasicControl_t *path) {
 
 extern f32 sdfFaceDivSoften, sdfFaceDivBias;
 #include "dds3_world_primary.h"
-extern s32 dds3SceneBasicExistBasicFromType(dds3Basic_t *object, s32 slotIndex, dds3Basic_t *value);
+extern s32 dds3SceneBasicExistBasicFromType(dds3Basic_t *object, s32 slotIndex, const dds3Basic_t *value);
 extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 mapRecordId);
 extern void dds3RotationArc(void);
 extern s32 evtFindUnitSlotAuxCoordinates(evtUnitHandle_t *unit, f32 *outX, f32 *outY);
