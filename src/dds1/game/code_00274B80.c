@@ -186,7 +186,7 @@ extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern s32 mnuInitializeStaffPartyScene(dds3ProcessID_t *);
 extern void mnuClearWindowListSelectionFlags(s32);
 
-extern void mnuPlayInputSound(s32, u32, s32);
+extern void mnuPlayInputSound(s32, s32, u32 *);
 extern u8 mnuSkillMenuFieldUsePopupEntry[];
 extern u8 mnuSkillMenuEquippedSlotsPopupEntry[];
 extern u8 mnuStaffPartyBrowsePopupEntry[];
@@ -562,7 +562,7 @@ s32 mnuHandlePartySelectionInput(s32 callback) {
                     (struct EffectSlotSet *)(u32)context->displayVariant, 0, 1);
             }
         }
-        mnuPlayInputSound(0, inputFlags, (s32)&window->list->stateFlags);
+        mnuPlayInputSound(0, inputFlags, &window->list->stateFlags);
     }
     return 0;
 }
@@ -1967,7 +1967,7 @@ void mnuCampMenuHandleInput(dds3ProcessID_t *task) {
             mnuAdvanceWindowListSelection(window);
         }
         mnuClearWindowPanelTransitionFlag(window);
-        mnuPlayInputSound(0, inputFlags, (s32)((MenuInputNode *)window)->flags);
+        mnuPlayInputSound(0, inputFlags, &((MenuInputNode *)window)->flags->bits);
     }
 }
 
@@ -2028,7 +2028,7 @@ void ptySkillMenuHandleSelection(dds3ProcessID_t *callback) {
             mnuAdvanceWindowListSelection(window);
         }
         mnuClearWindowPanelTransitionFlag(window);
-        mnuPlayInputSound(0, inputFlags, (s32)&window->list->stateFlags);
+        mnuPlayInputSound(0, inputFlags, &window->list->stateFlags);
     }
 }
 
@@ -2088,7 +2088,7 @@ void ptySkillMenuHandleSlotReorder(dds3ProcessID_t *callback) {
             mnuAdvanceWindowListSelection(window);
         }
         mnuClearWindowPanelTransitionFlag(window);
-        mnuPlayInputSound(0, inputFlags, (s32)window->list);
+        mnuPlayInputSound(0, inputFlags, &window->list->stateFlags);
     }
 }
 
