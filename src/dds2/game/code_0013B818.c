@@ -3045,7 +3045,7 @@ typedef struct FldMenuState {
     u16 pending;
 } FldMenuState;
 
-s32 fldUpdateTitleBannerTask(void *task) {
+s32 fldUpdateTitleBannerTask(dds3ProcessID_t *task) {
     FldMenuState *menu;
 
     if (D_00389780[0] >= 200) {
