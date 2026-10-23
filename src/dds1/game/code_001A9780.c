@@ -37,6 +37,7 @@ extern void itfSetTextDrawLimit(s32 limit);
 #include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "eff_random.h"
+#include "eff_random_mod.h"
 #include "sdf_trig.h"
 #include "snd_pad.h"
 #include "sdf_packet_list.h"
@@ -141,7 +142,6 @@ extern char D_003BB450[];
 
 extern u8 *datRosterDetails;
 
-extern s32 dds3GetRandIntA(s32, s32);
 
 
 extern EffRandState effSharedRandomState[];

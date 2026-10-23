@@ -22,6 +22,7 @@
 #include "kwln_task_add_child.h"
 #include "btl_special_ability.h"
 #include "eff_random.h"
+#include "eff_random_mod.h"
 #include "sdf_trig.h"
 #include "snd_pad.h"
 #include "btl_roster_pair.h"
@@ -177,11 +178,7 @@ extern s32 evtGetMirroredSolarPhase(void);
 
 extern s32 btlRollAiBucket(void);
 
-extern u32 dds3GetRandIntA(void *state, u32 modulus);
-
 extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
-
-extern u32 dds3GetRandIntA(void *, u32);
 
 void btlClearActorEntrySlot(BtlUnit *unit, s32 index);
 
