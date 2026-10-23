@@ -634,7 +634,7 @@ void mnuBuildEligibleSlotList(MenuSlotState *host) {
     }
 }
 
-u32 mnuShouldExcludeTerminalMenuEntry(void) {
+u8 mnuShouldExcludeTerminalMenuEntry(void) {
     return 0;
 }
 
