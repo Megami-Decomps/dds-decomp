@@ -112,11 +112,11 @@ extern char D_00421F08[];
 
 extern char D_00421F68[];
 
-void evtPathStop(void *unit);
+void evtPathStop(dds3Basic_t *unit);
 
-void evtPathStart(void *unit);
+void evtPathStart(dds3Basic_t *unit);
 
-void evtPathRate(void *unit, f32 value);
+void evtPathRate(dds3Basic_t *unit, f32 value);
 
 s32 fldCommand_GetHojiID(char *name);
 
@@ -124,7 +124,7 @@ s32 fldSetMapSlotValueFlag(s32 worldKey, s32 roomGroup, s32 roomNumber, s32 enab
 
 
 
-void evtPathDir(void *worldNode, u32 direction);
+void evtPathDir(dds3Basic_t *worldNode, u32 direction);
 
 s32 evtPathLinkAndMake(dds3Basic_t *target, dds3Basic_t *path);
 
@@ -1139,7 +1139,7 @@ s32 evtCommand_PATH_STOP(void) {
     return 1;
 }
 
-/* Clear the first matching unit's status flag, using the same fallback search. */
+/* Resume the first matching path controller, using the same fallback search. */
 s32 evtCommand_PATH_START(void) {
     dds3Basic_t *slotObject;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
