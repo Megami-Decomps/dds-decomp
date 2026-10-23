@@ -951,8 +951,8 @@ s32 mdlChkMotionEndEx(const dds3ModelHandle_t *ctx, s32 searchId) {
 }
 
 /* Read the stored float, defaulting to zero when the searched node is absent. */
-f32 mdlGetMotionSpeedEx(dds3ModelHandle_t *ctx, s32 searchId) {
-    sdfMotionCtrlr_t *matchedNode = mdlGetMotionCtrlr(ctx, searchId);
+f32 mdlGetMotionSpeedEx(const dds3ModelHandle_t *ctx, s32 searchId) {
+    const sdfMotionCtrlr_t *matchedNode = mdlFindNodeByIdReadOnly(ctx, searchId);
     f32 result = 0.0f;
 
     if (matchedNode != NULL) {
