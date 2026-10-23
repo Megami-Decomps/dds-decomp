@@ -1578,11 +1578,11 @@ void mnuDrawSelectedPartySlotMarkers(s32 context, StaffSlots *resources) {
     effDrawTextureSlotWithBlendedCornerColors(0x30, 0xaf8, 0, alpha, 1, resources->baseResources[0], 0x1a, 0x53);
 }
 
-void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags) {
+void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, const char *text, s32 flags) {
     s32 top = y - 0x10;
     _FRQ *handle;
     frEnableMode(1);
-    handle = frFontAppendTextToGlyphChain((const char *)(u32)model, 0, 0, 0, 0);
+    handle = frFontAppendTextToGlyphChain(text, 0, 0, 0, 0);
     frSetDrawPosition(handle, x, top);
     frSetPriority(handle, width << 4);
     frSetFontColor(handle, color);
