@@ -105,18 +105,17 @@ extern MnuSceneFlagEntry mnuSceneFlagEventEntries[MNU_SCENE_FLAG_ENTRY_COUNT];
 extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
 
 
-/* Close the current display channel before ensuring a replacement window.
- * DDS1 retains the legacy argument taken from the context's resource pair. */
-void evtCloseDisplayChannelAndEnsureMessageWindow(void *context) {
+/* Recreate the message window from the terminal's loaded message resource. */
+void evtCloseDisplayChannelAndEnsureMessageWindow(struct MenuTerminalWork *work) {
     fclDestroyMessage();
-    fclInitMessage((struct ItfMesSub *)*(u32 *)((u8 *)context + 0x60));
+    fclInitMessage((struct ItfMesSub *)work->messageResources.dataAddress);
 }
 
 /* Start the first eligible special, scene, or active-party flag event.
  * Only panel kinds zero/one are accepted. Mark the handled flag immediately;
  * this is not a wait for dialogue completion, and dispatch results are ignored. */
-s32 dspStartFlagEvent(void *context) {
-    s32 panelKind = *(s32 *)((u8 *)context + 0x7C);
+s32 dspStartFlagEvent(struct MenuTerminalWork *work) {
+    s32 panelKind = work->mode;
     s32 index;
     datUnitWork_t *slot;
 
@@ -130,7 +129,7 @@ s32 dspStartFlagEvent(void *context) {
             }
             for (index = 0; index < sizeof(mnuSceneFlagEventEntries) / sizeof(mnuSceneFlagEventEntries[0]); index++) {
                 if (evtBitCheck(mnuSceneFlagEventEntries[index].requiredFlag) != 0 && evtBitCheck(mnuSceneFlagEventEntries[index].handledFlag) == 0) {
-                    evtCloseDisplayChannelAndEnsureMessageWindow(context);
+                    evtCloseDisplayChannelAndEnsureMessageWindow(work);
                     dspSetActive(1);
                     evtCopyEntryStringToActiveWindow(0, (const void *)(D_003BAA84 + mnuSceneFlagEventEntries[index].areaIndex * DSP_AREA_TEXT_BYTES));
                     evtCopyEntryStringToActiveWindow(1, (const void *)(D_003BAA78 + mnuSceneFlagEventEntries[index].nameIndex * DSP_NAME_TEXT_BYTES));
@@ -144,7 +143,7 @@ s32 dspStartFlagEvent(void *context) {
                 slot = &DDS3_GBWK->party[index];
                 if ((slot->flags & 1) != 0 && evtBitCheck(mnuPartyFlagEventEntries[slot->unitId].requiredFlag) != 0
                     && evtBitCheck(mnuPartyFlagEventEntries[slot->unitId].handledFlag) == 0) {
-                    evtCloseDisplayChannelAndEnsureMessageWindow(context);
+                    evtCloseDisplayChannelAndEnsureMessageWindow(work);
                     dspSetActive(1);
                     evtCopyEntryStringToActiveWindow(0, (const void *)(D_003BAA70 + slot->unitId * DSP_DIALOG_TEXT_BYTES));
                     fclStartMessage(DSP_FLAG_EVENT_PARTY_ENTRY);
@@ -183,7 +182,7 @@ s32 dspUpdateFlagEvent(dds3ProcessID_t *request) {
     }
     if (*popupSlot == 0) {
         if (fclChkMessage() == 0) {
-            if (dspStartFlagEvent((void *)(u32)workAddress) == 0) {
+            if (dspStartFlagEvent(work) == 0) {
                 mnuSetPopupEntryFlagged(popupSlot, mnuTerminalPopupEntries);
             }
         }
