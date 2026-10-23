@@ -110,7 +110,7 @@ void sdfVu1Init(void) {
 
 /* Split ring addressing at position 128; retain the native 96-byte stride. */
 void corePktSetupPointBuff(corePktCb_t *work, s32 ringPosition) {
-    void *ringEnd = (u8 *)work + 0x78;
+    VuBlendNode **ringEnd = &work->blendList;
     if (ringPosition < 0x80) {
         work->dmaCountA = 0x80 - ringPosition;
         work->dmaAddrB = D_003BDA20;
