@@ -47,7 +47,7 @@ s32 evtLoadEventBgm(s32 id);
 s32 evtCheckEventBgmLoaded(s32 id);
 
 extern dds3Basic_t *evtSearchBasic(s32 objectKind, s32 worldObjectKey);
-extern s32 evtCheckPathStat(void *object);
+extern s32 evtCheckPathStat(dds3Basic_t *object);
 
 s32 evtCommand_LIGHT_PATH_WAIT(void) {
     s32 status = evtCheckPathStat(
@@ -507,4 +507,3 @@ INCLUDE_SDATA(const s32, "game/code_00242CB8", D_004371FC);
 INCLUDE_SDATA(const s32, "game/code_00242CB8", moonprocess_id);
 
 INCLUDE_SDATA(const s32, "game/code_00242CB8", D_00437208);
-

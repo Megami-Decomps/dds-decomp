@@ -319,7 +319,7 @@ s32 evtCommand_EFFECT_PATH_MOVE(void) {
 
 extern char D_003AC750[];
 
-extern s32 evtCheckPathStat(void *object);
+extern s32 evtCheckPathStat(dds3Basic_t *object);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC700);
 
@@ -327,7 +327,7 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC728);
 
 s32 evtCommand_EFFECT_PATH_WAIT(void) {
     s32 effectId = scrGetIntPara(0);
-    void *effectObject = evtSearchBasic(7, effectId);
+    dds3Basic_t *effectObject = evtSearchBasic(7, effectId);
     s32 scaleStatus;
 
     if (effectObject == NULL) {
@@ -671,8 +671,8 @@ s32 evtCommand_CAM_SEL_FOVY(void) {
 
 /* Relink the selected camera owner to its path, reporting any failure. */
 s32 evtCommand_CAM_PATH_MOVE(void) {
-    void *owner;
-    void *path;
+    dds3Basic_t *owner;
+    dds3Basic_t *path;
 
     if (scrGetIntPara(0) < 0) {
         owner = fldGetPlayerSceneState();
@@ -696,7 +696,7 @@ s32 evtCommand_CAM_PATH_MOVE(void) {
 }
 
 s32 evtCommand_CAM_PATH_WAIT(void) {
-    void *cameraOwner;
+    dds3Basic_t *cameraOwner;
     s32 scaleStatus;
 
     if (scrGetIntPara(0) < 0) {
@@ -944,7 +944,7 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC908);
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC928);
 
 s32 evtCommand_OBJ_PATH_WAIT(void) {
-    void *worldObject = evtSearchBasic(6, scrGetIntPara(0));
+    dds3Basic_t *worldObject = evtSearchBasic(6, scrGetIntPara(0));
     s32 scaleStatus;
 
     if (worldObject == NULL) {

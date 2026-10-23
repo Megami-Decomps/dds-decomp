@@ -289,7 +289,7 @@ s32 evtCommand_EFFECT_PATH_MOVE(void) {
     return 1;
 }
 
-extern s32 evtCheckPathStat(void *object);
+extern s32 evtCheckPathStat(dds3Basic_t *object);
 
 s32 evtCommand_EFFECT_PATH_WAIT(void) {
     s32 effectId = scrGetIntPara(0);
@@ -1284,4 +1284,3 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_00421F68);
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421FB0);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421FC8);
-
