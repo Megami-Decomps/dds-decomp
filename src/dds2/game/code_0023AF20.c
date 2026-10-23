@@ -2,6 +2,7 @@
 #include "sdf_vu0.h"
 #include "sdf_float_counter.h"
 #include "eff_node.h"
+#include "eff_dependency.h"
 #include "dds3obj.h"
 #include "dds3_object_mode.h"
 #include "dds3_path.h"
@@ -68,25 +69,20 @@ dds3Basic_t *evtAddCamera(f32 *pos, f32 *rot) {
     return obj;
 }
 
-typedef struct EvtNodeInner {
-    u8 pad00[0x08];
-    s32 kind;           /* 0x08 */
-    void *node;         /* 0x0C */
-} EvtNodeInner;
-
 void evtEffectLoopControl(dds3Basic_t *owner, s32 nodeFlag) {
-    EvtNodeInner *inner = (EvtNodeInner *)owner->data;
-    void *node;
+    EffectDependencyState *state = owner->data;
+    s32 stateKind = state->state;
+    EffNode *node;
 
-    switch (inner->kind) {
-    case 1:
-    case 7:
-    case 8:
+    switch (stateKind) {
+    case EFF_DEPENDENCY_STATE_BOUND_EFFECT_NODE:
+    case EFF_DEPENDENCY_STATE_MAGATUHI_TWO_ROWS:
+    case EFF_DEPENDENCY_STATE_MAGATUHI_FOUR_ROWS:
         break;
     default:
         return;
     }
-    node = inner->node;
+    node = (EffNode *)state->handle;
     if (nodeFlag == 0) {
         effDispatchOptionalNodeFlag(node, nodeFlag);
     }
