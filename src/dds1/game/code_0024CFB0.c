@@ -111,8 +111,8 @@ void evtCloseDisplayChannelAndEnsureMessageWindow(void *context) {
 /* Start the first eligible special, scene, or active-party flag event.
  * Only panel kinds zero/one are accepted. Mark the handled flag immediately;
  * this is not a wait for dialogue completion, and dispatch results are ignored. */
-s32 dspStartFlagEvent(s32 context) {
-    s32 panelKind = *(s32 *)(context + 0x7C);
+s32 dspStartFlagEvent(void *context) {
+    s32 panelKind = *(s32 *)((u8 *)context + 0x7C);
     s32 index;
     datUnitWork_t *slot;
 
@@ -178,7 +178,7 @@ s32 dspUpdateFlagEvent(dds3ProcessID_t *request) {
     }
     if (*popupSlot == 0) {
         if (fclChkMessage() == 0) {
-            if (dspStartFlagEvent(workAddress) == 0) {
+            if (dspStartFlagEvent((void *)(u32)workAddress) == 0) {
                 mnuSetPopupEntryFlagged(popupSlot, mnuTerminalPopupEntries);
             }
         }
