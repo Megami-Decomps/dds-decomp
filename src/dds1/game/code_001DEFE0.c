@@ -2277,8 +2277,9 @@ void btlFrameCommandTargetGroups(BtlLinkedCommand *action) {
     btlAdjustCameraDirectionForDefaultPlane(&action->camera);
 
     {
-        u8 *statusTable = (u8 *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
-        f32 clearance = *(f32 *)(statusTable + unit->motionId * 0x14 + 0x38) * unit->scale;
+        BtlActorStatusRecord *statusTable = (BtlActorStatusRecord *)
+            btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
+        f32 clearance = statusTable->motions[unit->motionId].muzzleGuideScale * unit->scale;
         btlCopyUnitCurrentPosition(unit, position);
         if (position[2] - clearance < -100.0f) {
             position[2] += -100.0f - (position[2] - clearance);
