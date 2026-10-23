@@ -3271,7 +3271,7 @@ void func_001480D0(u32 key, f32 *orientation, f32 x, f32 y, f32 z,
         SDF_VU0_STOREVECTOR_NOMEM(rotation);
         object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
         dds3SetUnitObjectId(object, (u32)"NPC_MDL_UNIT");
-        fldModelSlotTable[outputIndex].object = (s32 *)object;
+        fldModelSlotTable[outputIndex].object = object;
         dds3RebuildObjectModelContext(object, kind, resource);
         dds3SetSclPoseSet(object, (u128 *)scale);
         if (kind == 3 && resource == 8) dds3GetRadiusPoseSet(object, 50.0f);
