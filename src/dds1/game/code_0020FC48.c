@@ -406,11 +406,11 @@ extern char D_003A6838[];
 /* Release the voice resources before the optional event asset allocation. */
 void btlReleaseEventAssets(void) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
-    void *eventAssets;
+    struct sdfMemHandle_t *eventAssets;
     btlReleaseEventData();
     eventAssets = battleState->eventAssets;
     if (eventAssets != 0) {
-        sdfMemFreeDirect((struct sdfMemHandle_t *)eventAssets);
+        sdfMemFreeDirect(eventAssets);
         battleState->eventAssets = 0;
     }
     btlBossDebugPrintf(D_003A6838);
