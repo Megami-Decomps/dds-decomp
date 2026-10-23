@@ -177,13 +177,13 @@ void fldBattleSceneEnterInit(u8 *scene) {
     BattleSceneWork *work = (BattleSceneWork *)scene;
     u32 id = work->sceneId;
     if (id < 0x400 && (datBattleSceneRecords[id].flags & 0x8000) != 0) {
-        *(u32 *)(scene + 0x1F8) |= 8;
+        work->subFlags |= 8;
         dds3FadeOut(0xFF, 0xFF, 0xFF, 0);
     }
     if (btlRollSurpriseAttack() != 0) {
-        *(u8 *)(scene + 0x24A) = 2;
+        work->encounterKind = 2;
     } else {
-        *(u8 *)(scene + 0x24A) = 0;
+        work->encounterKind = 0;
     }
     btlRequestSceneEventResources();
     btlInitializeBossCallbacks(work->sceneId);
