@@ -76,7 +76,7 @@ extern u8 *btlCreateStiffenDamageShakeTask(u8 *, f32);
 
 extern void btlSetUnitPosition(BtlUnit *, const f32 *);
 
-extern void btlSetUnitRotation(BtlUnit *, s128 *);
+extern void btlSetUnitRotation(BtlUnit *, const f32 rotation[4]);
 
 extern const s32 D_003A5D50[];
 
