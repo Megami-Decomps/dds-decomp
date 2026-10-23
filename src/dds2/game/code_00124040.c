@@ -1369,8 +1369,8 @@ void fldPreparePlayerSceneCameraTarget(void) {
     if (fldGlobalBase.sceneState < 5) {
         fldGlobalBase.sceneState = 5;
     }
-    fldGlobalBase.unk90 = -1;
-    fldGlobalBase.unk94 = -1;
+    fldGlobalBase.primaryMovingMatterIndex = -1;
+    fldGlobalBase.secondaryMovingMatterIndex = -1;
     fldUpdateCameraTarget();
     dds3GetPosPoseSet(fldPlayerObject);
     SDF_VU0_STOREVECTOR(position);

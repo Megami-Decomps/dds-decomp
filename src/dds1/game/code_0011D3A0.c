@@ -1663,8 +1663,8 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->sceneState = 0;
     area->unk88 = 0;
     area->unk8C = 0;
-    area->unk90 = -1;
-    area->unk94 = -1;
+    area->primaryMovingMatterIndex = -1;
+    area->secondaryMovingMatterIndex = -1;
     area->unk98 = -1;
     area->unkC4 = -1;
     area->unkC8 = -1;
@@ -1794,8 +1794,8 @@ void fldInitializeAreaWork(void) {
     area->consumedFlags = 0;
     area->unk54 = 0;
     area->unk8C = 0;
-    area->unk90 = -1;
-    area->unk94 = -1;
+    area->primaryMovingMatterIndex = -1;
+    area->secondaryMovingMatterIndex = -1;
     area->unk98 = -1;
     area->unkA0 = -1;
     area->unkA4 = -1;

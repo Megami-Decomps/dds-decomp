@@ -7384,12 +7384,12 @@ void fldHitChkUnitElvOnly(f32 *input) {
             inside = clearance < 0.0f ? 0 : 1;
             if (inside == 1) {
                 if (fldMatterTable[index].worldNode != 0) {
-                    if (fldGlobalBase.unk90 == -1 ||
-                        fldMatterTable[fldGlobalBase.unk90].worldNode->key ==
+                    if (fldGlobalBase.primaryMovingMatterIndex == -1 ||
+                        fldMatterTable[fldGlobalBase.primaryMovingMatterIndex].worldNode->key ==
                             fldMatterTable[index].worldNode->key) {
-                        fldGlobalBase.unk90 = index;
+                        fldGlobalBase.primaryMovingMatterIndex = index;
                     } else {
-                        fldGlobalBase.unk94 = index;
+                        fldGlobalBase.secondaryMovingMatterIndex = index;
                     }
                     anchor = fldMatterTable[index].worldNode->inner;
                     fldMatterTable[index].previousPosition[0] = anchor->position[0];
@@ -7421,10 +7421,10 @@ void fldHitChkUnitElv(f32 *position) {
     memset(movement, 0, sizeof(movement));
     movement[3] = 1.0f;
     fldGlobalBase.positionPending = 0;
-    if (fldGlobalBase.unk90 == -1) {
+    if (fldGlobalBase.primaryMovingMatterIndex == -1) {
         fldHitChkUnitElvOnly(position);
     }
-    index = fldGlobalBase.unk90;
+    index = fldGlobalBase.primaryMovingMatterIndex;
     if (index != -1) {
         if (fldMatterTable[index].worldNode != 0) {
             dds3PoseSet_t *transform;
@@ -7439,7 +7439,7 @@ void fldHitChkUnitElv(f32 *position) {
         }
         if (fldTestRoomSceneFlag(fldGlobalBase.area, fldGlobalBase.floor + 1,
                                fldMatterTable[index].sceneFlag) == 0) {
-            index = fldGlobalBase.unk94;
+            index = fldGlobalBase.secondaryMovingMatterIndex;
             if (index != -1 && fldTestRoomSceneFlag(fldGlobalBase.area,
                         fldGlobalBase.floor + 1,
                         fldMatterTable[index].sceneFlag) == 0) {
