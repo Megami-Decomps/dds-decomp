@@ -58,7 +58,7 @@ extern s32 btlGetCommandFailureReason(BtlUnit *, s32);
 
 extern u8 btlHasAvailableOption(u32 actorAddress);
 
-extern s32 btlMatchesActorEntryCodeCondition();
+extern s32 btlMatchesActorEntryCodeCondition(BtlUnit *actor, s32 conditionIndex);
 
 extern s32 btlUnitMatchesEntryCodeCondition(BtlUnit *, s32, s8);
 
@@ -631,39 +631,37 @@ s32 btlHasOtherGroup400UnitMode(BtlUnit *excludedUnit, s32 unitMode) {
 
 extern s32 btlEntryCodeConditionIndices[];
 
-extern s32 btlActorEntryIsExpired();
+extern s32 btlActorEntryIsExpired(BtlUnit *actor, s32 index);
 
 #include "btl_actor_entry_code_api.h"
 
-/* Kinds 0xB/0xC scan the even/odd entry codes; other kinds test their own
-   entry. Every failure falls out to the single trailing `return 0`. K&R:
-   callers pass one argument or none. */
-s32 btlMatchesActorEntryCodeCondition(actorAddress, conditionIndex)
-    s32 actorAddress;
-    s32 conditionIndex;
-{
+/* Kinds 0xB/0xC scan the even/odd entry codes; other kinds test their own entry. */
+s32 btlMatchesActorEntryCodeCondition(BtlUnit *actor, s32 conditionIndex) {
     s32 evenIndex;
     s32 oddIndex;
 
     if (conditionIndex == 0xB) {
         for (evenIndex = 0; evenIndex < BTL_ENTRY_CODE_SCAN_COUNT; evenIndex += 2) {
-            if (btlActorEntryIsExpired(actorAddress, btlEntryCodeConditionIndices[evenIndex]) != 0 && btlGetActorEntryCode((struct BtlUnit *)(u32)actorAddress, btlEntryCodeConditionIndices[evenIndex]) > 0) {
+            if (btlActorEntryIsExpired(actor, btlEntryCodeConditionIndices[evenIndex]) != 0 &&
+                btlGetActorEntryCode(actor, btlEntryCodeConditionIndices[evenIndex]) > 0) {
                 return 1;
             }
         }
     } else if (conditionIndex == 0xC) {
         for (oddIndex = 1; oddIndex < BTL_ENTRY_CODE_SCAN_COUNT; oddIndex += 2) {
-            if (btlActorEntryIsExpired(actorAddress, btlEntryCodeConditionIndices[oddIndex]) != 0 && btlGetActorEntryCode((struct BtlUnit *)(u32)actorAddress, btlEntryCodeConditionIndices[oddIndex]) <= 0) {
+            if (btlActorEntryIsExpired(actor, btlEntryCodeConditionIndices[oddIndex]) != 0 &&
+                btlGetActorEntryCode(actor, btlEntryCodeConditionIndices[oddIndex]) <= 0) {
                 return 1;
             }
         }
-    } else if (btlActorEntryIsExpired(actorAddress, btlEntryCodeConditionIndices[conditionIndex]) != 0 || conditionIndex == 0xA || conditionIndex == 0xD) {
+    } else if (btlActorEntryIsExpired(actor, btlEntryCodeConditionIndices[conditionIndex]) != 0 ||
+               conditionIndex == 0xA || conditionIndex == 0xD) {
         if ((conditionIndex & 1) == 0 || conditionIndex == 0xD) {
-            if (btlGetActorEntryCode((struct BtlUnit *)(u32)actorAddress, btlEntryCodeConditionIndices[conditionIndex]) > 0) {
+            if (btlGetActorEntryCode(actor, btlEntryCodeConditionIndices[conditionIndex]) > 0) {
                 return 1;
             }
         } else {
-            if (btlGetActorEntryCode((struct BtlUnit *)(u32)actorAddress, btlEntryCodeConditionIndices[conditionIndex]) <= 0) {
+            if (btlGetActorEntryCode(actor, btlEntryCodeConditionIndices[conditionIndex]) <= 0) {
                 return 1;
             }
         }
@@ -744,7 +742,7 @@ s32 btlAnyPartyMeetsEntryCodeCondition(s32 unused, s32 conditionIndex) {
     BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
     while (unitCursor != 0) {
         if ((btlUnitStatusPair(unitCursor) & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
-            if (btlMatchesActorEntryCodeCondition((s32)unitCursor, conditionIndex) != 0) {
+            if (btlMatchesActorEntryCodeCondition(unitCursor, conditionIndex) != 0) {
                 return 1;
             }
         }
@@ -758,7 +756,7 @@ s32 btlAnyEnemyMeetsEntryCodeCondition(s32 unused, s32 conditionIndex) {
     BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
     while (unitCursor != 0) {
         if ((btlUnitStatusPair(unitCursor) & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS) {
-            if (btlMatchesActorEntryCodeCondition((s32)unitCursor, conditionIndex) != 0) {
+            if (btlMatchesActorEntryCodeCondition(unitCursor, conditionIndex) != 0) {
                 return 1;
             }
         }
@@ -885,13 +883,13 @@ s32 btlAnyGroup200LacksFlag1000(void) {
 u8 btlUnitPassesActionTenCheck(u32 unitAddress) {
     s32 queryResult;
 
-    queryResult = btlMatchesActorEntryCodeCondition(unitAddress, 10);
+    queryResult = btlMatchesActorEntryCodeCondition((BtlUnit *)unitAddress, 10);
     return queryResult != 0;
 }
 
 /* Normalize the entry-code query. */
 s32 btlQueryActorEntryCondition(s32 actorAddress, s32 conditionIndex) {
-    return btlMatchesActorEntryCodeCondition(actorAddress, conditionIndex) != 0;
+    return btlMatchesActorEntryCodeCondition((BtlUnit *)(u32)actorAddress, conditionIndex) != 0;
 }
 
 /* Test record bit 0x2000 only outside actor group 0x200; its meaning is unknown. */
