@@ -1702,7 +1702,7 @@ extern void fldAddressResolver(u8 *buffer, FldTransferChunk *chunk);
 
 const char D_0039FF18[] = "%sk%03d_%03d.f2";
 
-u32 fldLoadAreaRoomResources(const char *resourceName) {
+struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
     char path[0x80];
     char directory[0x40];
     void *roomOffsets;
@@ -1860,7 +1860,7 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
     if (fldGlobalBase.transitionMode != 0) {
         fldUpdateSparkSlots();
     }
-    return (u32)fldCachedRoomF1ResourceAllocation;
+    return fldCachedRoomF1ResourceAllocation;
 }
 
 extern u32 fldLoadAreaRoomResourcesFromRequest(u32, u32, u32, u32,
