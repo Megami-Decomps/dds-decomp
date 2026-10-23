@@ -14,6 +14,7 @@
 #include "btl_task_condition.h"
 #include "eff_transform.h"
 #include "btl_state.h"
+#include "btl_affinity_row.h"
 #include "btl_command.h"
 #include "btl_command_affinity_api.h"
 #include "btl_model_record.h"
@@ -4707,7 +4708,7 @@ s32 func_0020A860(void) {
     return -1;
 }
 
-extern s32 *datExternalAffinityTable;
+extern const BtlAffinityRow *datExternalAffinityTable;
 
 /* Unit 0x11B command hook: when the command's mapped skill is a present enemy
  * unit, return that command's entry from affinity row 0x175. */
@@ -4730,7 +4731,7 @@ s32 func_0020AB08(datUnitWork_t *record, s32 command) {
             if (flags & 1) {
                 if (flags & 0x400) {
                     if (unit->partyRecord.unitId == skill) {
-                        return datExternalAffinityTable[0x175 * 19 + command];
+                        return ((const s32 *)datExternalAffinityTable)[0x175 * 19 + command];
                     }
                 }
             }

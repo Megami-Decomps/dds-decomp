@@ -6,6 +6,7 @@
 #include "pty_roster_value_record.h"
 #include "sdf.h"
 #include "dat_state.h"
+#include "btl_affinity_row.h"
 #include "btl_resolve_unit_value_api.h"
 #include "evt_randomize_entry_api.h"
 #include "mdl_flag_api.h"
@@ -231,9 +232,9 @@ s32 datRaiseCalculatedValueFloor(datUnitWork_t *unit, s32 packedValue) {
     return packedValue;
 }
 
-extern s32 *datAffinityTablePrimary;
-extern s32 *datAffinityTableAlternate;
-extern s32 *datExternalAffinityTable;
+extern const BtlAffinityRow *datAffinityTablePrimary;
+extern const BtlAffinityRow *datAffinityTableAlternate;
+extern const BtlAffinityRow *datExternalAffinityTable;
 
 s32 datGetEffectiveAffinity(datUnitWork_t *unit, s32 element) {
     s32 calculatedValue;
@@ -252,9 +253,9 @@ s32 datGetEffectiveAffinity(datUnitWork_t *unit, s32 element) {
     unitId = unit->unitId;
     if (!(unit->flags & DAT_EXTERNAL_SKILL_TABLE)) {
         if (unit->flags & 0x1000) {
-            calculatedValue = datAffinityTablePrimary[unitId * 19 + element];
+            calculatedValue = ((const s32 *)datAffinityTablePrimary)[unitId * 19 + element];
         } else {
-            calculatedValue = datAffinityTableAlternate[unitId * 19 + element];
+            calculatedValue = ((const s32 *)datAffinityTableAlternate)[unitId * 19 + element];
         }
         if (evtBitCheck(0x80E) && calculatedValue < 0) {
             calculatedValue = (calculatedValue & DAT_CALC_HIGH_MASK) |
@@ -262,9 +263,9 @@ s32 datGetEffectiveAffinity(datUnitWork_t *unit, s32 element) {
         }
     } else {
         if (unit->affinityTableIndex != 0) {
-            calculatedValue = datExternalAffinityTable[unit->affinityTableIndex * 19 + element];
+            calculatedValue = ((const s32 *)datExternalAffinityTable)[unit->affinityTableIndex * 19 + element];
         } else {
-            calculatedValue = datExternalAffinityTable[unitId * 19 + element];
+            calculatedValue = ((const s32 *)datExternalAffinityTable)[unitId * 19 + element];
         }
     }
 
@@ -272,13 +273,13 @@ s32 datGetEffectiveAffinity(datUnitWork_t *unit, s32 element) {
         calculatedValue = datRaiseCalculatedValueFloor(unit, calculatedValue);
     }
     if (unit->flags & 0x2000) {
-        calculatedValue = datExternalAffinityTable[383 * 19 + element];
+        calculatedValue = ((const s32 *)datExternalAffinityTable)[383 * 19 + element];
     }
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x800) {
-        calculatedValue = datExternalAffinityTable[382 * 19 + element];
+        calculatedValue = ((const s32 *)datExternalAffinityTable)[382 * 19 + element];
     }
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x1000) {
-        calculatedValue = datExternalAffinityTable[381 * 19 + element];
+        calculatedValue = ((const s32 *)datExternalAffinityTable)[381 * 19 + element];
     }
 
     low = calculatedValue & 0xFFFF;
