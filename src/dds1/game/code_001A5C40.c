@@ -323,9 +323,9 @@ s32 btlCalculateMpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s
 }
 
 
-s32 btlSumOtherTargetHitAmounts(u8 *action) {
-    BtlOperandGroup *result = *(BtlOperandGroup **)(action + 0x80);
-    u32 count = btlGetIndexListCount(*(BtlIndexList **)(action + 0x60));
+s32 btlSumOtherTargetHitAmounts(BtlTask *action) {
+    BtlOperandGroup *result = action->indexWork.groups;
+    u32 count = btlGetIndexListCount(action->indexWork.indices);
     u32 i;
     u32 j;
     s32 total = 0;
@@ -342,8 +342,7 @@ s32 btlSumOtherTargetHitAmounts(u8 *action) {
         case 0x40000:
             break;
         default:
-            if (*(BtlUnit **)(action + 0x18) !=
-                btlGetIndexListEntry(*(BtlIndexList **)(action + 0x60), i)) {
+            if (action->unit != btlGetIndexListEntry(action->indexWork.indices, i)) {
                 for (j = 0; j < result->count; j++) {
                     total += result->entries[j].hpDelta;
                 }

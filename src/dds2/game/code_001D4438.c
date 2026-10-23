@@ -3541,7 +3541,7 @@ void btlScheduleEscapeResultTasks(ActionStateLink *task) {
 void btlEnterStatusDamageState(void) {
 }
 
-extern s32 btlSumOtherTargetHitAmounts(u8 *);
+extern s32 btlSumOtherTargetHitAmounts(ActionStateLink *);
 extern s32 btlComputeStatusPenaltyFifth(BtlUnit *);
 extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *, f32);
@@ -3566,7 +3566,7 @@ void btlProcessPostActionStatusEffects(ActionStateLink *action) {
     switch (unit->partyRecord.status & 0x7FFF) {
     case 0x400:
         if (action->indexWork.stage != 3) {
-            amount = btlSumOtherTargetHitAmounts((u8 *)action);
+            amount = btlSumOtherTargetHitAmounts(action);
             if (amount < 0) {
                 btlStartTask(sndCreateStationedSeTask(0x1000A));
                 memset(&spec, 0, sizeof(spec));
