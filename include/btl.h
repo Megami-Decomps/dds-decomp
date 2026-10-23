@@ -154,7 +154,7 @@ typedef struct BtlUnit {
     u8 pad2C5;
     BtlUnitEntrySlot entrySlots[7]; /* 0x2C6 */
     s32 selectedEntryIndex; /* 0x2F0: -1 denotes no selected entry. */
-    u32 pendingAbilityId; /* 0x2F4: queued ability effect; -1 means none. */
+    s32 pendingAbilityId; /* 0x2F4: queued ability effect; -1 means none. */
     struct SoundResourceNode *resourceNode; /* 0x2F8: owned system-effect resource. */
     struct SoundResourceLink *resourceLink; /* 0x2FC: linked model-resource task. */
     struct SoundLink *link; /* 0x300: per-unit command effect. */
