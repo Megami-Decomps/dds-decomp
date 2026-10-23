@@ -307,7 +307,7 @@ extern char D_004363F0[]; /* "BARIA" */
 
 extern char *D_004361D8;
 
-extern void fldSetMapSlotValueFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
+extern void fldSetMapSlotValueFlag(s32 area, u32 slotIndex, s32 bit, s32 enabled);
 
 extern s32 fldResolveEventSelectorTarget(s32 index);
 
