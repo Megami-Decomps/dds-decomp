@@ -114,7 +114,6 @@ extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, E
 #define EVT_STAGE_USE_ENTRY_MOTION 0xffffffffffffffff
 
 extern s32 D_00437C9C;
-extern s32 mnuScrollListToPreviousPage();
 
 extern void mnuInitializeQueuedCommandEffect(MenuQueuedCommand *entry);
 extern void mnuInitRandomLineEffect(MenuQueuedCommand *entry);
@@ -2171,7 +2170,7 @@ s32 mnuMapPadMaskToFlags(s32 buttonMask) {
 }
 
 void mnuHandleListPageJumpInput(s32 active, MenuWindowContainer *window, u32 *buttons) {
-    s32 top = 0;
+    struct MenuListNode *top = NULL;
     struct MenuListNode *bottom = NULL;
     MenuList *list = window->list;
 
@@ -2183,10 +2182,10 @@ void mnuHandleListPageJumpInput(s32 active, MenuWindowContainer *window, u32 *bu
             if (*buttons & 0x800) {
                 bottom = mnuScrollListToEnd(window->list);
             }
-            if (top == 0) {
+            if (top == NULL) {
                 *buttons &= ~0x400;
             }
-            if (bottom == 0) {
+            if (bottom == NULL) {
                 *buttons &= ~0x800;
             }
             mnuClearWindowPanelTransitionFlag(window);
