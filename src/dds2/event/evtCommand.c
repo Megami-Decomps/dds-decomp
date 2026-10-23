@@ -126,7 +126,7 @@ s32 fldSetMapSlotValueFlag(s32 worldKey, s32 roomGroup, s32 roomNumber, s32 enab
 
 void evtPathDir(void *worldNode, u32 direction);
 
-s32 evtPathLinkAndMake(void *target, void *path);
+s32 evtPathLinkAndMake(dds3Basic_t *target, dds3Basic_t *path);
 
 extern char D_00421FB0[]; /* "LIGHT_PATH_MOVE error!\n" */
 
