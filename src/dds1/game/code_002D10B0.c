@@ -730,18 +730,18 @@ void sdfImageSetChainTag(SdfDmaAddress packetAddress, SdfTextureDmaTail *packet)
     SignalSema(obj->semaphoreId);
 }
 
-void sdfImageSetChainReleaseMem(s32 address) {
+void sdfImageSetChainReleaseMem(void *address) {
     SdfTextureQueue *obj = &sdfImageSetCb;
     SdfTextureReleaseHead *entry;
 
-    if (address != 0) {
+    if (address != NULL) {
         entry = sdfAllocAndClearQuadwords(sizeof(SdfTexReleaseEntry));
-        if (sdfChipCheck(address) != 0) {
-            entry->chipMemory = (void *)address;
+        if (sdfChipCheck((s32)address) != 0) {
+            entry->chipMemory = address;
             entry->releaseMode = SDF_TEX_RELEASE_CHIP_ADDRESS;
         } else {
             entry->releaseMode = SDF_TEX_RELEASE_GENERAL_ALLOCATION;
-            entry->allocation = sdfMemGetHandleByPtr((void *)address);
+            entry->allocation = sdfMemGetHandleByPtr(address);
         }
         WaitSema(obj->semaphoreId);
         if (obj->releaseTail != NULL) {
@@ -1128,4 +1128,3 @@ INCLUDE_SDATA(const s32, "game/code_002D10B0", sdfGrDrawBusy);
 INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD304);
 
 INCLUDE_SDATA(const s32, "game/code_002D10B0", sdfTexHandleLink);
-
