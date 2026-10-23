@@ -197,12 +197,12 @@ void btlUnitTurnEndStateSelect(u8 *task) {
     u32 flags = (u32)unit->status.flags;
     if (flags & 0x200) {
         if (flags & 0x1000) {
-            if ((unit->status.stateFlags & 0x40) && !(*(u16 *)((u8 *)unit + 0x12E) & 0x7C0E) &&
+            if ((unit->status.stateFlags & 0x40) && !(unit->partyRecord.status & 0x7C0E) &&
                 !(*(u32 *)(task + 8) & 0x100)) {
                 *(u16 *)(task + 0x50) = 4;
                 *(s32 *)(task + 0x54) = effOffsetIfOwnerFlagClear(unit, 0xA4);
                 unit->status.flags = ((u32)unit->status.flags & ~0x20) | 0x400000;
-                *(u16 *)((u8 *)unit + 0x120) |= 0x4000;
+                unit->partyRecord.flags |= 0x4000;
                 unit->status.stateFlags |= 0x2000;
                 btlDispatchStateHandler(task, 0x10);
             } else {
@@ -517,7 +517,7 @@ void btlStartCommandSoundAndEffectTasks(u8 *battleTask) {
     } else {
         btlStartTask(btlCreateCommandSoundTask(battleTask, 3));
     }
-    switch (*(u16 *)((u8 *)unit + 0x12E) & 0x7FFF) {
+    switch (unit->partyRecord.status & 0x7FFF) {
     case 0x200:
         btlSelectAndRunModeAiAction(battleTask, 0);
         btlDispatchStateHandler(battleTask, 0xC);
@@ -857,7 +857,7 @@ void btlCommandStartSoundTasks(u8 *task) {
         } else {
             btlStartTask(btlCreateCommandSoundTask(task, 3));
         }
-        if ((*(u16 *)((u8 *)unit + 0x12E) & 0x7FFF) == 0x20) {
+        if ((unit->partyRecord.status & 0x7FFF) == 0x20) {
             if ((u32)((BtlTask *)task)->unit->status.flags & 0x200) {
                 btlSelectAndRunModeAiAction(task, 2);
             } else {
@@ -2264,7 +2264,7 @@ void btlCommandTaskStartEffects(u8 *task) {
         *(s64 *)(object + 0x40) = *(s64 *)(*(u8 **)(task + 0x18) + 0x108);
         btlStartTask(object);
     }
-    if ((*(u16 *)(*(u8 **)(task + 0x18) + 0x12E) & 0x480) != 0) {
+    if ((((BtlTask *)task)->unit->partyRecord.status & 0x480) != 0) {
         btlDispatchStateHandler(task, 0x18);
     } else {
         btlDispatchStateHandler(task, 0x1A);
