@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "btl_actor_status_table_api.h"
+#include "btl_actor_entry_code_defaults.h"
 #include "btl_special_ability.h"
 #include "dat_unit_has_skill_api.h"
 #include "btl_animation_mode_entry.h"
@@ -37,15 +38,6 @@
 #include "snd_slot.h"
 
 extern void btlBossDebugPrintf(const char *format, ...);
-
-typedef struct EntryPair {
-    s16 first;
-    s16 second;
-    s16 initialValue;
-    s16 countdown;
-} EntryPair;
-
-extern EntryPair btlActorEntryCodeDefaults[];
 
 extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
 
@@ -1396,13 +1388,13 @@ s32 btlActorEntryIsExpired(BtlUnit *unit, s32 index) {
 
 s32 btlMatchActorEntryCode(BtlUnit *unit, s32 index) {
     s16 value = unit->entrySlots[index].code;
-    if (btlActorEntryCodeDefaults[index].first != 0) {
-        if (btlActorEntryCodeDefaults[index].first == value) {
+    if (btlActorEntryCodeDefaults[index].maxCode != 0) {
+        if (btlActorEntryCodeDefaults[index].maxCode == value) {
             return 1;
         }
     }
-    if (btlActorEntryCodeDefaults[index].second != 0) {
-        if (btlActorEntryCodeDefaults[index].second == value) {
+    if (btlActorEntryCodeDefaults[index].minCode != 0) {
+        if (btlActorEntryCodeDefaults[index].minCode == value) {
             return 2;
         }
     }
@@ -1414,15 +1406,15 @@ void btlAdjustActorEntryCode(BtlUnit *unit, s32 index, s16 delta) {
     s16 code = unit->entrySlots[index].code;
     code += delta;
 
-    if (code > btlActorEntryCodeDefaults[index].first) {
-        code = btlActorEntryCodeDefaults[index].first;
+    if (code > btlActorEntryCodeDefaults[index].maxCode) {
+        code = btlActorEntryCodeDefaults[index].maxCode;
     }
-    if (code < btlActorEntryCodeDefaults[index].second) {
-        code = btlActorEntryCodeDefaults[index].second;
+    if (code < btlActorEntryCodeDefaults[index].minCode) {
+        code = btlActorEntryCodeDefaults[index].minCode;
     }
     if (code != 0) {
         unit->entrySlots[index].unk02 = btlActorEntryCodeDefaults[index].initialValue;
-        unit->entrySlots[index].countdown = btlActorEntryCodeDefaults[index].countdown;
+        unit->entrySlots[index].countdown = btlActorEntryCodeDefaults[index].countdownFrames;
     }
     unit->entrySlots[index].code = code;
 }
