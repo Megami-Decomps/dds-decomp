@@ -5095,7 +5095,7 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", fldDamEffectResource);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldDamEffectData);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", fldDamEffectNode);
+INCLUDE_SDATA(EffNode *, "game/code_001411F0", fldDamEffectNode);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldDamEffectPositioned);
 
@@ -5103,7 +5103,7 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", fldYukEffectResource);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldYukEffectData);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", fldYukEffectNode);
+INCLUDE_SDATA(EffNode *, "game/code_001411F0", fldYukEffectNode);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldYukEffectPositioned);
 

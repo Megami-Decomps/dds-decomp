@@ -96,7 +96,6 @@ extern struct sdfMemHandle_t *D_00436380;
 
 extern u32 D_00436384;
 
-extern u32 fldDamEffectNode;
 
 extern u32 fldDamEffectPositioned;
 
@@ -104,7 +103,6 @@ extern struct sdfMemHandle_t *D_00436390;
 
 extern u32 D_00436394;
 
-extern u32 fldYukEffectNode;
 
 extern u32 fldYukEffectPositioned;
 

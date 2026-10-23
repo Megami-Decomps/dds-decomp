@@ -210,7 +210,7 @@ extern struct sdfMemHandle_t *D_00436380;
 
 extern u32 D_00436384;
 
-extern u32 fldDamEffectNode;
+extern EffNode *fldDamEffectNode;
 
 extern u32 fldDamEffectPositioned;
 
@@ -218,7 +218,7 @@ extern struct sdfMemHandle_t *D_00436390;
 
 extern u32 D_00436394;
 
-extern u32 fldYukEffectNode;
+extern EffNode *fldYukEffectNode;
 
 extern u32 fldYukEffectPositioned;
 
@@ -4392,10 +4392,10 @@ void fldLoadWeatherEffects(void) {
     D_004363B4 = sdfTexSet((SdfTextureFileHeader *)(data));
     sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)handle);
     D_00436380 = sdfDevLoadFileEx("/fld/f/bin/FH_DAM_2.EPL", &D_00436384, 0);
-    fldDamEffectNode = (u32)effCreateNodeFromParameter(D_00436384);
+    fldDamEffectNode = effCreateNodeFromParameter(D_00436384);
     fldDamEffectPositioned = 0;
     D_00436390 = sdfDevLoadFileEx("/fld/f/bin/YUK_2.EPL", &D_00436394, 0);
-    fldYukEffectNode = (u32)effCreateNodeFromParameter(D_00436394);
+    fldYukEffectNode = effCreateNodeFromParameter(D_00436394);
     fldYukEffectPositioned = 0;
 }
 
@@ -4412,13 +4412,13 @@ void fldReleaseWeatherEffects(void) {
         sdfTexReleaseReferenceViaHandler(D_004363B4);
         D_004363B4 = 0;
     }
-    dds3EffectDelete((EffNode *)(u32)fldDamEffectNode);
+    dds3EffectDelete(fldDamEffectNode);
     fldDamEffectNode = 0;
     fldDamEffectPositioned = 0;
     sdfMemFreeDelayedDirect(D_00436380);
     D_00436380 = NULL;
     D_00436384 = 0;
-    dds3EffectDelete((EffNode *)(u32)fldYukEffectNode);
+    dds3EffectDelete(fldYukEffectNode);
     fldYukEffectNode = 0;
     fldYukEffectPositioned = 0;
     sdfMemFreeDelayedDirect(D_00436390);
@@ -4435,26 +4435,26 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
         pos[0] = x;
         pos[1] = y;
         pos[2] = z;
-        dds3EffectReset((EffNode *)(u32)fldDamEffectNode);
-        effCopyVectorToNodeInstance((EffNode *)fldDamEffectNode, pos);
+        dds3EffectReset(fldDamEffectNode);
+        effCopyVectorToNodeInstance(fldDamEffectNode, pos);
         fldDamEffectPositioned = 1;
     }
     if (fldYukEffectNode != 0) {
         pos[0] = x;
         pos[1] = y;
         pos[2] = z;
-        dds3EffectReset((EffNode *)(u32)fldYukEffectNode);
-        effCopyVectorToNodeInstance((EffNode *)fldYukEffectNode, pos);
+        dds3EffectReset(fldYukEffectNode);
+        effCopyVectorToNodeInstance(fldYukEffectNode, pos);
         fldYukEffectPositioned = 1;
     }
 }
 
 void fldUpdateWeatherEffectNodes(void) {
     if (fldDamEffectNode != 0 && fldDamEffectPositioned != 0) {
-        dds3EffectDraw((EffNode *)(u32)fldDamEffectNode);
+        dds3EffectDraw(fldDamEffectNode);
     }
     if (fldYukEffectNode != 0 && fldYukEffectPositioned != 0) {
-        dds3EffectDraw((EffNode *)(u32)fldYukEffectNode);
+        dds3EffectDraw(fldYukEffectNode);
     }
 }
 
@@ -7012,7 +7012,7 @@ INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_001442D0", D_00436380);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436384);
 
-INCLUDE_SDATA(const s32, "game/code_001442D0", fldDamEffectNode);
+INCLUDE_SDATA(EffNode *, "game/code_001442D0", fldDamEffectNode);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", fldDamEffectPositioned);
 
@@ -7020,7 +7020,7 @@ INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_001442D0", D_00436390);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436394);
 
-INCLUDE_SDATA(const s32, "game/code_001442D0", fldYukEffectNode);
+INCLUDE_SDATA(EffNode *, "game/code_001442D0", fldYukEffectNode);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", fldYukEffectPositioned);
 
