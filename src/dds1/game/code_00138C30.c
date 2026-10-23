@@ -336,7 +336,7 @@ extern u32 fldCachedRoomResourceSize, fldCachedRoomF1ResourceSize, fldCachedRoom
 
 extern void fldGetDoorEntry(FldWaypointBlock *source);
 
-extern void fldInfLoadFromMem(const void *);
+extern void fldInfLoadFromMem(const FldInfTable *source);
 
 extern s32 fldRoomEventPlacementCount;
 
@@ -1472,7 +1472,7 @@ void fldInfLoad(s32 field) {
     }
 }
 
-void fldInfLoadFromMem(const void *source) {
+void fldInfLoadFromMem(const FldInfTable *source) {
     memcpy(&D_00332E30, source, sizeof(D_00332E30));
 }
 

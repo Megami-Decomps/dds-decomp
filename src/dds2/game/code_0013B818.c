@@ -1171,8 +1171,8 @@ void fldInfLoad(s32 field) {
     }
 }
 
-void fldInfLoadFromMem(FldInfTable *src) {
-    D_0038E2D0 = *src;
+void fldInfLoadFromMem(const FldInfTable *source) {
+    D_0038E2D0 = *source;
 }
 
 void fldInfToWAP(void) {
