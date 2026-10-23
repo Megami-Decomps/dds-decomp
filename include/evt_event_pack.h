@@ -7,9 +7,21 @@ struct sdfMemHandle_t;
 struct sdfTexHandle_t;
 struct FileRequest;
 
+/* Payload categories used by the fixed-stride BE resource table. */
+typedef enum EvtPackKind {
+    EVT_PACK_KIND_INVALID = -1,
+    EVT_PACK_KIND_ENTRY_POINT = 0,
+    EVT_PACK_KIND_AREA_ROOM_IDS = 1,
+    EVT_PACK_KIND_AREA_RESOURCE_PRIMARY = 2,
+    EVT_PACK_KIND_AREA_RESOURCE_SECONDARY = 3,
+    EVT_PACK_KIND_TEXTURE_OFFSETS = 4,
+    EVT_PACK_KIND_MODEL = 5,
+    EVT_PACK_KIND_MOTION_CUES = 6
+} EvtPackKind;
+
 /* BE resource files have a 0x20-byte header and fixed 0x20-byte records. */
 typedef struct EvtPackEntry {
-    s32 kind;                     /* 0x00 */
+    EvtPackKind kind;             /* 0x00 */
     s32 dataSize;                 /* 0x04: package byte count loaded at DDS1 241E7C. */
     s32 cueCount;                 /* 0x08: type-6 count at DDS2 0025D5EC/0025D634. */
     u32 dataOffset;               /* 0x0C: relative to the retained file base */

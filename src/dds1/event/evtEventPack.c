@@ -25,7 +25,6 @@ extern s32 evtPlaySe(s32 id, s32 fade);
 
 /* The selected script entry and the terminal value of the native load state. */
 enum {
-    EVT_PACK_ENTRY_POINT_KIND = 0,
     EVT_PACK_LOAD_COMPLETE = 2
 };
 
@@ -55,7 +54,7 @@ s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
         do {
             if (entry->secondaryResourceId == resourceId) {
                 switch (entry->kind) {
-                case 5:
+                case EVT_PACK_KIND_MODEL:
                     entrySize = entry->dataSize;
                     modelPayload = packState->data + entry->dataOffset;
                     printf("unit decode rid:%d, size:%d\n", resourceId, entrySize);
@@ -108,18 +107,18 @@ s32 evtRegistBEField(s32 eventId, s32 resourceId) {
         do {
             if (entry->resourceId == resourceId) {
                 switch (entry->kind) {
-                case 2:
+                case EVT_PACK_KIND_AREA_RESOURCE_PRIMARY:
                     resource0Data = packState->data + entry->dataOffset;
                     break;
-                case 3:
+                case EVT_PACK_KIND_AREA_RESOURCE_SECONDARY:
                     resource1Data = packState->data + entry->dataOffset;
                     break;
-                case 4:
+                case EVT_PACK_KIND_TEXTURE_OFFSETS:
                     textureOffsets = (const SdfTextureOffsetListHeader *)(packState->data + entry->dataOffset);
                     break;
                 }
             }
-            if (entry->secondaryResourceId == resourceId && entry->kind == 1) {
+            if (entry->secondaryResourceId == resourceId && entry->kind == EVT_PACK_KIND_AREA_ROOM_IDS) {
                 areaRoomIds = (const EvtAreaRoomIds *)(packState->data + entry->dataOffset);
             }
             entry++;
@@ -168,7 +167,7 @@ s32 evtMotionSeProcess1(dds3ProcessID_t *task) {
     motionId = mdlGetMotionCtrlr(unit->owner, 0)->motionIndex;
     motionFrame = unit->owner->first->currentFrame;
     for (entryIndex = 0; entryIndex < packState->header->entryCount; entryIndex++) {
-        if (packState->entries[entryIndex].kind == 6 &&
+        if (packState->entries[entryIndex].kind == EVT_PACK_KIND_MOTION_CUES &&
             packState->entries[entryIndex].resourceId == motionSeParams->resourceId &&
             packState->entries[entryIndex].motionId == motionId) {
             cues = (EvtMotionSeCue *)(packState->data + packState->entries[entryIndex].dataOffset);
@@ -250,7 +249,7 @@ void evtCheckEventScriptLoaded(EvtPackLoadState *state) {
             state->header = header;
             state->entries = header->entries;
             for (entryPointIndex = 0; entryPointIndex < state->header->entryCount; entryPointIndex++) {
-                if (state->entries[entryPointIndex].kind == EVT_PACK_ENTRY_POINT_KIND) {
+                if (state->entries[entryPointIndex].kind == EVT_PACK_KIND_ENTRY_POINT) {
                     state->entryPoint = state->data + state->entries[entryPointIndex].dataOffset;
                     break;
                 }
