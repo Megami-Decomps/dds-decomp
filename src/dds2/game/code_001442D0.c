@@ -38,6 +38,7 @@
 #include "sdf_chip.h"
 #include "sdf_dev_state.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "sdf_model.h"
 #include "fld_scene_record.h"
@@ -244,7 +245,7 @@ extern s32 fldIndexedResourceEffect;
 
 extern u32 D_0043623C;
 
-extern u32 addressprocess_id;
+extern dds3ProcessID_t *addressprocess_id;
 
 
 extern u32 fldSeLastBgm;
@@ -268,7 +269,7 @@ extern s32 D_00436358;
 extern s32 D_00436360;
 
 
-extern s32 fldTitleTaskUpdate();
+extern s32 fldTitleTaskUpdate(dds3ProcessID_t *task);
 
 extern sdfTexHandle_t *D_0043637C;
 
@@ -299,8 +300,6 @@ extern s32 fldGetCurrentSceneSelectionResource(void);
 
 
 extern s32 fldFieldTaskUpdate(dds3ProcessID_t *task);
-
-extern s32 dds3StartProcess(void *name, s32 priority, s32 startDelay, s32 destroyDelay, void *update, void *destroy, void *userValue);
 
 extern u8 D_00436208[];
 
@@ -593,18 +592,18 @@ void fldAddressShutdown(dds3ProcessID_t *task) {
 
     work = (void *)dds3GetProcessData(task);
     sdfChipFreeDirect(work);
-    addressprocess_id = 0;
+    addressprocess_id = NULL;
 }
 
 void fldInitAddressProcess(void) {
-    if (addressprocess_id == 0) {
+    if (addressprocess_id == NULL) {
         addressprocess_id = dds3StartProcess(D_00436208, 0x2B0B, 1, 1, fldAddressProcess1, fldAddressShutdown, 0);
     }
 }
 
 void fldFreeAddressProcess(void) {
-    if (addressprocess_id != 0) {
-        dds3KillProcess((dds3ProcessID_t *)addressprocess_id, 1);
+    if (addressprocess_id != NULL) {
+        dds3KillProcess(addressprocess_id, 1);
     }
 }
 
@@ -3969,7 +3968,7 @@ void nbPanelAnalyzeStart(void) {
 }
 
 /* Render the field title through delay, fade-in, hold and fade-out phases. */
-s32 fldTitleTaskUpdate(void) {
+s32 fldTitleTaskUpdate(dds3ProcessID_t *task) {
     s32 alpha;
     u32 color;
     s32 nextFrame;
@@ -4083,7 +4082,7 @@ s32 fldTitleTaskUpdate(void) {
     return 0;
 }
 
-void fldReleaseTitleTextures(void) {
+void fldReleaseTitleTextures(dds3ProcessID_t *task) {
     if (D_00436368 != 0) {
         sdfTexReleaseReferenceViaHandler(D_00436368);
         D_00436368 = 0;
@@ -4229,7 +4228,7 @@ s32 fldTitleMini(dds3ProcessID_t *task) {
     return 0;
 }
 
-void fldReleaseTitleMiniTexture(void) {
+void fldReleaseTitleMiniTexture(dds3ProcessID_t *task) {
     if (D_0043637C != 0) {
         sdfTexReleaseReferenceViaHandler(D_0043637C);
         D_0043637C = 0;
@@ -4242,7 +4241,7 @@ extern s32 D_00436378;
 
 extern s32 fldTitleMini(dds3ProcessID_t *task);
 
-extern void fldReleaseTitleMiniTexture(void);
+extern void fldReleaseTitleMiniTexture(dds3ProcessID_t *task);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413C80);
 

@@ -55,6 +55,7 @@
 #include "eff_create_node_from_parameter.h"
 #include "eff_node_descriptor.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_task_lifecycle.h"
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
@@ -132,7 +133,7 @@ extern u32 fldArchiveLoadPending;
 
 extern u32 fldSeLastBgm;
 
-extern u32 addressprocess_id;
+extern dds3ProcessID_t *addressprocess_id;
 
 extern s32 gFldSe3DNum;
 
@@ -251,8 +252,6 @@ typedef struct {
 
 extern FldTbl50 D_003D46C0[];
 
-
-extern s32 dds3StartProcess(void *name, s32 priority, s32 startDelay, s32 destroyDelay, void *update, void *destroy, void *userValue);
 
 extern u8 D_003BAE78[];
 
@@ -386,18 +385,18 @@ void fldAddressShutdown(dds3ProcessID_t *task) {
 
     work = (void *)dds3GetProcessData(task);
     sdfChipFreeDirect(work);
-    addressprocess_id = 0;
+    addressprocess_id = NULL;
 }
 
 void fldInitAddressProcess(void) {
-    if (addressprocess_id == 0) {
+    if (addressprocess_id == NULL) {
         addressprocess_id = dds3StartProcess(D_003BAE78, 0x2B0B, 1, 1, fldAddressProcess1, fldAddressShutdown, 0);
     }
 }
 
 void fldFreeAddressProcess(void) {
-    if (addressprocess_id != 0) {
-        dds3KillProcess((dds3ProcessID_t *)addressprocess_id, 1);
+    if (addressprocess_id != NULL) {
+        dds3KillProcess(addressprocess_id, 1);
     }
 }
 
@@ -3489,7 +3488,7 @@ void nbPanelAnalyzeStart(void) {
     D_003BAFA0 = 1;
 }
 
-s32 fldTitle(void) {
+s32 fldTitle(dds3ProcessID_t *task) {
     s32 nextFrame;
     s32 alpha;
     s32 nextPhase;
@@ -3597,14 +3596,14 @@ s32 fldTitle(void) {
     return 0;
 }
 
-void fldReleaseTitleTextureReference(void) {
+void fldReleaseTitleTextureReference(dds3ProcessID_t *task) {
     if (D_003BAFB4 != 0) {
         sdfTexReleaseReferenceViaHandler(D_003BAFB4);
         D_003BAFB4 = 0;
     }
 }
 
-extern s32 fldTitle(void);
+extern s32 fldTitle(dds3ProcessID_t *task);
 
 
 extern u32 D_003BAFA4;
@@ -3645,7 +3644,7 @@ s32 fldTitleMiniIsActive(void) {
 }
 
 /* Animate the unlock title's split caption, highlight and expanding fade. */
-s32 fldTitleMini(void) {
+s32 fldTitleMini(dds3ProcessID_t *task) {
     s32 alpha;
     u32 color;
     s32 x;
@@ -3809,7 +3808,7 @@ s32 fldTitleMini(void) {
 }
 
 
-void fldReleaseTitleMiniTexture(void) {
+void fldReleaseTitleMiniTexture(dds3ProcessID_t *task) {
     if (D_003BAFC4 != 0) {
         sdfTexReleaseReferenceViaHandler(D_003BAFC4);
         D_003BAFC4 = 0;
