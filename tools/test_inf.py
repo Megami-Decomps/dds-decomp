@@ -13,6 +13,7 @@ ROOT = TOOLS.parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
+import corpus  # noqa: E402
 import inf  # noqa: E402
 
 
@@ -97,9 +98,9 @@ end
             inf.parse_source(missing_symbol)
 
     def test_paired_bf_message_symbols(self) -> None:
-        by_index, by_name = inf.load_message_symbols(
-            ROOT / "src/dds1/scripts/field/f004.bfasm"
-        )
+        script = ROOT / "src/dds1/scripts/field/f004.bfasm"
+        corpus.require(script)
+        by_index, by_name = inf.load_message_symbols(script)
         self.assertEqual(by_name["DONT_OPEN"], 142)
         self.assertEqual(by_index[142], "DONT_OPEN")
 
@@ -112,7 +113,7 @@ end
                 expected[Path(path).stem] = digest
 
             source_dir = ROOT / f"src/{game}/data/field"
-            sources = sorted(source_dir.glob("*.infasm"))
+            sources = corpus.require_sources(source_dir, "*.infasm")
             self.assertEqual({path.stem for path in sources}, expected.keys())
             for source in sources:
                 with self.subTest(game=game, field=source.stem):

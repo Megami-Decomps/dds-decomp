@@ -16,11 +16,13 @@ if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
 import battle_tbl  # noqa: E402
+import corpus  # noqa: E402
 import flw0_semantic  # noqa: E402
 
 
 def _battle_symbols(game: str) -> battle_tbl.BattleSymbols:
     directory = ROOT / f"src/{game}/data/battle"
+    corpus.require(directory)
     source = directory / "msg.tblasm"
     table = battle_tbl.parse_message_source(
         source.read_text(encoding="utf-8"), source.parent
@@ -568,15 +570,14 @@ end
                 )
                 battle_tbl.validate_aicalc_references(table, skill)
 
-        dds1_text = (ROOT / "src/dds1/data/battle/aicalc.tblasm").read_text(
-            encoding="utf-8"
-        )
+        dds1_aicalc = ROOT / "src/dds1/data/battle/aicalc.tblasm"
+        dds2_aicalc = ROOT / "src/dds2/data/battle/aicalc.tblasm"
+        corpus.require(dds1_aicalc, dds2_aicalc)
+        dds1_text = dds1_aicalc.read_text(encoding="utf-8")
         self.assertIn("UNIT_HP_AT_OR_BELOW_RATE(25)", dds1_text)
         self.assertIn("effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)", dds1_text)
         self.assertIn("effect=7:0", dds1_text)
-        dds2_text = (ROOT / "src/dds2/data/battle/aicalc.tblasm").read_text(
-            encoding="utf-8"
-        )
+        dds2_text = dds2_aicalc.read_text(encoding="utf-8")
         self.assertIn("ACTION_REQUIREMENTS_MET(509)", dds2_text)
         self.assertIn("effect=SELECT_GROUP_200_WITH_FLAG_1000(0)", dds2_text)
         with self.assertRaisesRegex(
@@ -643,6 +644,7 @@ end
         for game, (text_counts, bank_counts) in expected.items():
             with self.subTest(game=game):
                 source = ROOT / f"src/{game}/data/battle/msg.tblasm"
+                corpus.require(source)
                 table = battle_tbl.parse_message_source(
                     source.read_text(encoding="utf-8"), source.parent
                 )
@@ -686,6 +688,7 @@ end
                 battle_tbl.validate_message_references(table, unit, skill)
 
         dds2_source = ROOT / "src/dds2/data/battle/msg.tblasm"
+        corpus.require(dds2_source)
         dds2 = battle_tbl.parse_message_source(
             dds2_source.read_text(encoding="utf-8"), dds2_source.parent
         )

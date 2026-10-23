@@ -18,6 +18,7 @@ if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
 import battle_tbl  # noqa: E402
+import corpus  # noqa: E402
 import fld  # noqa: E402
 import field_world  # noqa: E402
 
@@ -135,6 +136,7 @@ end_data
 
     def test_motion_keys_must_increase(self) -> None:
         source = ROOT / "src/dds1/data/field/f011_001.fldasm"
+        corpus.require(source)
         data = bytearray(fld.encode(fld.parse_source(source.read_text(encoding="utf-8"))))
         words, data_end, _ = fld._read_header(data)
         resources = fld._read_resources(data, fld._read_types(data, words, data_end))
@@ -376,6 +378,7 @@ end_data
         versions = json.loads((ROOT / "config/versions.json").read_text(encoding="utf-8"))
         for game in ("dds1", "dds2"):
             manifest = ROOT / "config" / game / "field_fld2.sha1"
+            corpus.require_sources(ROOT / "src" / game / "data" / "field", "*.fldasm")
             linked = set(versions[game].get("field_fld2_links", ()))
             self.assertEqual(
                 linked,
@@ -407,6 +410,7 @@ end_data
 
         for game in ("dds1", "dds2"):
             manifest = ROOT / "config" / game / "field_fld1.sha1"
+            corpus.require_sources(ROOT / "src" / game / "data" / "field", "*.f1asm")
             for line in manifest.read_text(encoding="utf-8").splitlines():
                 expected, output = line.split()
                 source = ROOT / "src" / game / "data" / "field" / (Path(output).stem + ".f1asm")
@@ -418,9 +422,10 @@ end_data
 
     def test_missing_script_event_is_rejected(self) -> None:
         source = ROOT / "src/dds1/data/field/f011_001.fldasm"
-        data = fld.encode(fld.parse_source(source.read_text(encoding="utf-8")))
         scripts = ROOT / "src/dds1/scripts/field/f011.bfasm"
         warps = source.with_name("f011.wapasm")
+        corpus.require(source, scripts, warps)
+        data = fld.encode(fld.parse_source(source.read_text(encoding="utf-8")))
         script_text = scripts.read_text(encoding="utf-8").replace('name="001_01eve_01"', 'name="missing"')
         with self.assertRaisesRegex(fld.FldError, "001_01eve_01"):
             fld.validate_links(

@@ -17,6 +17,7 @@ if str(TOOLS) not in sys.path:
 import battle_tbl  # noqa: E402
 import encounter_flow  # noqa: E402
 import fld  # noqa: E402
+import corpus
 import random_encounter_flow  # noqa: E402
 
 
@@ -87,6 +88,7 @@ class RandomEncounterFlowTests(unittest.TestCase):
         for game, expected_summary in expected.items():
             with self.subTest(game=game):
                 root = ROOT / "src" / game
+                corpus.require(root / "data", root / "scripts")
                 table, symbols = encounter_flow.load_sources(
                     root / "data" / "battle"
                 )

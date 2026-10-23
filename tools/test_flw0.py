@@ -17,6 +17,7 @@ TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
+import corpus
 import flw0
 import flw0_profiles
 import flw0_semantic
@@ -476,6 +477,7 @@ class Flw0Tests(unittest.TestCase):
 
     def test_semantic_source_lowers_exact_calls_assignments_and_expressions(self) -> None:
         path = TOOLS.parent / "src/dds1/scripts/event/e670.bfasm"
+        corpus.require(path)
         script = flw0.parse_source(path.read_text(encoding="utf-8"))
         source = flw0_symbolic.render(script, "dds1", semantic=True)
         self.assertIn(
@@ -819,7 +821,9 @@ end
         expected_files = {"dds1": 129, "dds2": 126}
         for game, expected in expected_files.items():
             files = 0
-            for path in sorted((root / f"src/{game}/scripts").rglob("*.bfasm")):
+            for path in corpus.require_sources(
+                root / f"src/{game}/scripts", "**/*.bfasm"
+            ):
                 text = path.read_text(encoding="utf-8")
                 if not text.startswith("flw0 2\n"):
                     continue
@@ -840,7 +844,9 @@ end
         }
         for game, expected_counts in expected.items():
             files = ifs = loops = 0
-            for path in sorted((root / f"src/{game}/scripts").rglob("*.bfasm")):
+            for path in corpus.require_sources(
+                root / f"src/{game}/scripts", "**/*.bfasm"
+            ):
                 text = path.read_text(encoding="utf-8")
                 if not text.startswith("flw0 2\n"):
                     continue
@@ -1124,6 +1130,7 @@ end
 
     def test_physical_source_names_strings_past_logical_type4_end(self) -> None:
         path = TOOLS.parent / "src/dds1/scripts/event/e503.bfasm"
+        corpus.require(path)
         script = flw0.parse_source(path.read_text(encoding="utf-8"))
         rendered = flw0.render_source(script, "dds1")
         self.assertIn("section 4 type=4 stride=0x1 count=48", rendered)
@@ -1744,13 +1751,14 @@ end
                 source_dir = root / f"src/{profile.name}/scripts/event"
                 event_ids = {
                     int(path.stem[1:])
-                    for path in source_dir.glob("e*.bfasm")
+                    for path in corpus.require_sources(source_dir, "e*.bfasm")
                     if path.stem[1:].isdigit()
                 }
                 self.assertEqual(profile.event_ids, event_ids)
 
     def test_reading_view_lifts_verified_commands_and_result_flow(self) -> None:
         path = TOOLS.parent / "src/dds1/scripts/event/e670.bfasm"
+        corpus.require(path)
         source = path.read_text(encoding="utf-8")
         self.assertEqual(flw0_view.source_profile_name(source), "dds1")
         view = flw0_view.render(flw0.parse_source(source), "dds1")
@@ -1764,6 +1772,7 @@ end
 
     def test_reading_view_cli_uses_the_source_profile(self) -> None:
         path = TOOLS.parent / "src/dds1/scripts/event/e670.bfasm"
+        corpus.require(path)
         result = subprocess.run(
             [sys.executable, str(TOOLS / "flw0.py"), "view", str(path)],
             capture_output=True,
@@ -1997,7 +2006,7 @@ end
         type5_uses = 0
         command_uses = 0
         profiled_command_uses = 0
-        for path in sorted(source_dir.rglob("*.bfasm")):
+        for path in corpus.require_sources(source_dir, "**/*.bfasm"):
             with self.subTest(source=path.relative_to(source_dir)):
                 source = path.read_text(encoding="utf-8")
                 script = flw0.parse_source(source)
@@ -2082,7 +2091,9 @@ end
             files = 0
             statements = 0
             explicit_pushes = 0
-            for path in sorted((root / f"src/{game}/scripts").rglob("*.bfasm")):
+            for path in corpus.require_sources(
+                root / f"src/{game}/scripts", "**/*.bfasm"
+            ):
                 source = path.read_text(encoding="utf-8")
                 view = flw0_view.render(
                     flw0.parse_source(source), game, semantic=True
@@ -2106,7 +2117,9 @@ end
         }
         for game, expected_counts in expected.items():
             totals = [0, 0, 0, 0]
-            for path in sorted((root / f"src/{game}/scripts").rglob("*.bfasm")):
+            for path in corpus.require_sources(
+                root / f"src/{game}/scripts", "**/*.bfasm"
+            ):
                 source = path.read_text(encoding="utf-8")
                 view = flw0_view.render(
                     flw0.parse_source(source), game, structured=True
@@ -2166,6 +2179,7 @@ end
 
     def test_tracked_e670_source_assembles_exact_file(self) -> None:
         path = TOOLS.parent / "src/dds1/scripts/event/e670.bfasm"
+        corpus.require(path)
         source = path.read_text(encoding="utf-8")
         script = flw0.parse_source(source)
         rebuilt = script.to_bytes()
@@ -2189,7 +2203,7 @@ end
             relative = output_path.relative_to("build/dds1/scripts")
             records.append((expected, source_dir / relative.with_suffix(".bfasm")))
 
-        tracked = sorted(source_dir.rglob("*.bfasm"))
+        tracked = corpus.require_sources(source_dir, "**/*.bfasm")
         self.assertEqual(sorted(source for _, source in records), tracked)
         self.assertEqual(len(records), 143)
 
@@ -2299,7 +2313,7 @@ end
             relative = output_path.relative_to("build/dds2/scripts")
             records.append((expected, source_dir / relative.with_suffix(".bfasm")))
 
-        tracked = sorted(source_dir.rglob("*.bfasm"))
+        tracked = corpus.require_sources(source_dir, "**/*.bfasm")
         self.assertEqual(sorted(source for _, source in records), tracked)
         self.assertEqual(len(records), 140)
 
