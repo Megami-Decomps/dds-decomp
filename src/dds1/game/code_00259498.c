@@ -182,7 +182,7 @@ extern char D_003BC458[];
 extern char D_003BC488[];
 extern char D_003BC490[];
 extern char D_003BC498[];
-extern u32 mnuGetSelectedNodeValue(void);
+extern MnuProfileProgress *mnuGetSelectedNodeValue(void);
 extern u32 mnuGetMantraPrerequisiteFlags(s32, MnuMantraGridEntry *, MnuMantraNodeState *, MnuProfileProgress *);
 extern s32 frFontMeasureAndQueueGlyph(s32, s32, s32, u32, const u8 *, s32);
 
@@ -205,7 +205,7 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, SdfGrid *grid,
     if (scene == NULL) {
         return;
     }
-    selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
+    selection = mnuGetSelectedNodeValue();
     states = (MnuMantraNodeState *)(u32)grid->userData;
     display = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     record = &mnuMantraPrerequisiteRecords[scene->sceneId];
@@ -436,7 +436,7 @@ void mnuDrawScaledMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCel
     }
     x = (s32)((f32)x + (f32)mnuMantraVariantSpritePlacements[scene->sceneId][2] / 10.0f);
     y = (s32)((f32)y + (f32)mnuMantraVariantSpritePlacements[scene->sceneId][3] / 10.0f);
-    selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
+    selection = mnuGetSelectedNodeValue();
     states = (MnuMantraNodeState *)(u32)grid->userData;
     sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     record = &mnuMantraPrerequisiteRecords[scene->sceneId];

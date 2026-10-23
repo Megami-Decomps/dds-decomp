@@ -558,7 +558,7 @@ typedef struct MnuPanelRegions {
 
 extern const MnuRequirementIds D_003BC4D8[];
 extern const MnuPanelRegions D_003AFA18;
-extern u32 mnuGetSelectedNodeValue(void);
+extern MnuProfileProgress *mnuGetSelectedNodeValue(void);
 extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
@@ -569,7 +569,7 @@ extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
  * then draw the grid and restore the surface state for the caller. */
 void mnuDrawMantraProfileSelectionSurface(s32 x, s32 y, s32 unusedDepth, s32 alpha,
                    MenuSceneWork *gridOwner, s32 context) {
-    MnuProfileProgress *profileOwner = (MnuProfileProgress *)mnuGetSelectedNodeValue();
+    MnuProfileProgress *profileOwner = mnuGetSelectedNodeValue();
 
     mnuAdvanceDisplayGridAndLoopingFrame(gridOwner, profileOwner);
     sdfSubmitGsTestOneRegisterPacket(0x30000, context);

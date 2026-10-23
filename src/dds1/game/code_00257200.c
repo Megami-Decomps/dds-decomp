@@ -102,7 +102,7 @@ extern void mnuDrawScaledMantraGridEntry(s32, s32, s32, s32, MnuProfileProgress 
 extern void mnuDrawMantraGridEntryIndicators(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, f32, f32, SdfGridCell *, s32);
 extern void mnuDrawMantraCursorTrail(s32, s32, s32, s32, MenuSceneWork *, s32);
 extern void mnuDrawMantraGridFeedback(s32, s32, s32, s32, MnuGridFeedbackState *, s32);
-extern u32 mnuGetSelectedNodeValue(void);
+extern MnuProfileProgress *mnuGetSelectedNodeValue(void);
 extern TaskWork *mnuSceneResourceContext;
 
 /* Draw the mantra pulse band and both entry passes at unit scale, placing the
@@ -212,7 +212,7 @@ void mnuDrawMantraPulseFrame(s32 x, s32 y, s32 depth, s32 amount,
     s32 offsetX;
     s32 offsetY;
 
-    selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
+    selection = mnuGetSelectedNodeValue();
     mnuUpdateMantraPulseGrid(work, selection);
     grid = work->gridHandle;
     offsetX = -9 - work->cursorPosition.x;
