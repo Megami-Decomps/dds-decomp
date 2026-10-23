@@ -43,7 +43,7 @@ extern void fldPlayArchiveSound(s32 archiveId, s32 soundId);
 
 extern void fldInitializeHuntSparkUnit(struct evtUnitHandle_t *unit);
 
-extern s32 fldFindEffectByName(char *str);
+extern s32 fldFindEffectByName(const char *name);
 
 extern void fldStartTitle(s32 field, s32 mode, s32 option);
 

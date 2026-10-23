@@ -194,7 +194,7 @@ extern void fldInitializeHuntSparkUnit(struct evtUnitHandle_t *unit);
 extern struct evtUnitHandle_t *evtGetUnitHandle(s32 param);
 
 
-extern s32 fldFindEffectByName(char *str);
+extern s32 fldFindEffectByName(const char *name);
 
 extern s32 fldGetCurrentSceneSelectionResource(void);
 
