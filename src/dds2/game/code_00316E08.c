@@ -1134,9 +1134,9 @@ extern void itfDrawScaledIndexedImage(s32 x, s32 y, s32 z, s32 alpha, f32 xScale
 extern void itfDrawRotatedIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 angle);
 extern void mnuUpdateEffectQueues(MnuEffectWork *work, s32 paused);
 extern void mnuUpdateSectionModelWork(MnuSectionModelWork *work, s32 paused);
-extern void mnuSetNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z);
-extern void mnuSetNodeScaleVector(u8 *node, f32 value);
-extern void mnuBroadcastNodeModelState(u8 *node, u32 state);
+extern void mnuSetNodePrimaryVector(MnuModelNode *node, f32 x, f32 y, f32 z);
+extern void mnuSetNodeScaleVector(MnuModelNode *node, f32 value);
+extern void mnuBroadcastNodeModelState(MnuModelNode *node, u32 state);
 struct SdfPoolNode;
 extern void itfDrawFullExtentWorkPanels(MnuShootingWork *work);
 extern void itfDispatchObjectFadeSequenceMode(MnuShootingWork *work);
@@ -1257,17 +1257,17 @@ s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
     }
 
     if (D_00438928 != NULL) {
-        mnuSetNodePrimaryVector((u8 *)D_00438928, 0.0f, 0.0f, 150.0f);
-        mnuSetNodeScaleVector((u8 *)D_00438928, 1.0f);
+        mnuSetNodePrimaryVector(D_00438928, 0.0f, 0.0f, 150.0f);
+        mnuSetNodeScaleVector(D_00438928, 1.0f);
         switch (work->round) {
         case 0:
-            mnuBroadcastNodeModelState((u8 *)D_00438928, 0x8059606C);
+            mnuBroadcastNodeModelState(D_00438928, 0x8059606C);
             break;
         case 1:
-            mnuBroadcastNodeModelState((u8 *)D_00438928, 0x80404C4C);
+            mnuBroadcastNodeModelState(D_00438928, 0x80404C4C);
             break;
         case 2:
-            mnuBroadcastNodeModelState((u8 *)D_00438928, 0x80664C4C);
+            mnuBroadcastNodeModelState(D_00438928, 0x80664C4C);
             break;
         }
         mdlLink(D_00438928->model, kwlnSceneSurfaceSets[0]);
@@ -1344,8 +1344,8 @@ void mnuCreateShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
 extern MenuRuntimeRecord *mnuCreateRuntimeRecord(MenuRuntimeList *, s32, s32, u8,
                                                 s32, s32, s32, s16, s16, f32);
 extern void itfProjectScreenPointToViewPlane(f32 *, s32, s32);
-extern void mnuSetNodePairValue(u8 *, s32);
-extern void mnuSetNodePosition(u8 *, f32, f32, f32);
+extern void mnuSetNodePairValue(MnuModelNode *, s32);
+extern void mnuSetNodePosition(MnuModelNode *, f32, f32, f32);
 extern void itfSetModelInstanceValuePair(ModelInstance *, s32);
 extern void itfSetModelInstanceSecondaryVector(ModelInstance *, f32, f32, f32);
 
@@ -1454,33 +1454,33 @@ void mnuFinishOrDeactivateShootingEntry(MenuWorkEntry *entry, MnuShootingWork *w
                 if (registry->parameterIndex == 0x22) {
                     switch (work->round) {
                     case 0:
-                        mnuBroadcastNodeModelState((u8 *)node, 0x80000080);
+                        mnuBroadcastNodeModelState(node, 0x80000080);
                         node->model->first->frameStep = 0.5f;
                         node->savedModelValue = 0.5f;
                         mdlSmoothLoopMotion(node->model, 0, 1, 0.0f, 30.0f);
-                        mnuSetNodePairValue((u8 *)node, 160);
-                        mnuSetNodePosition((u8 *)node, 0.0f, -0.5f, 0.0f);
+                        mnuSetNodePairValue(node, 160);
+                        mnuSetNodePosition(node, 0.0f, -0.5f, 0.0f);
                         break;
                     case 1:
-                        mnuBroadcastNodeModelState((u8 *)node, 0x80000080);
+                        mnuBroadcastNodeModelState(node, 0x80000080);
                         node->model->first->frameStep = 0.5f;
                         node->savedModelValue = 0.5f;
                         mdlSmoothLoopMotion(node->model, 0, 11, 0.0f, 30.0f);
-                        mnuSetNodePairValue((u8 *)node, 180);
-                        mnuSetNodePosition((u8 *)node, 0.0f, -0.5f, 0.0f);
+                        mnuSetNodePairValue(node, 180);
+                        mnuSetNodePosition(node, 0.0f, -0.5f, 0.0f);
                         break;
                     case 2:
-                        mnuBroadcastNodeModelState((u8 *)node, 0x80000080);
+                        mnuBroadcastNodeModelState(node, 0x80000080);
                         node->model->first->frameStep = 0.3f;
                         node->savedModelValue = 0.3f;
                         mdlSmoothLoopMotion(node->model, 0, 5, 0.0f, 30.0f);
-                        mnuSetNodePairValue((u8 *)node, 140);
-                        mnuSetNodePosition((u8 *)node, 0.0f, -0.5f, 0.0f);
+                        mnuSetNodePairValue(node, 140);
+                        mnuSetNodePosition(node, 0.0f, -0.5f, 0.0f);
                         break;
                     }
                 } else {
-                    mnuSetNodePairValue((u8 *)node, 10);
-                    mnuSetNodePosition((u8 *)node,
+                    mnuSetNodePairValue(node, 10);
+                    mnuSetNodePosition(node,
                                        step.x / 3.0f, step.y / 3.0f, step.z / 3.0f);
                 }
                 entry->object.modelNode = NULL;
