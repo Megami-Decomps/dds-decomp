@@ -384,17 +384,19 @@ extern s64 btlArrangeOpponentFormationSlots(void);
 extern void fldCreateSceneCleanupTask(void);
 
 s32 fldSceneStateRestoreDisplay(u8 *scene) {
+    BtlState *state = (BtlState *)scene;
+
     if (btlCountTasksForOwner(0x8000000000000002ULL) == 0) {
         btlArrangeOpponentFormationSlots();
-        if (!(*(u32 *)(scene + 0x1F4) & 0x4000)) {
+        if (!(state->battleFlags & 0x4000)) {
             btlRepositionPartyAroundBattleCenter();
         }
         btlMarkInactiveActorCandidates();
-        if (*(u32 *)(scene + 0x1F8) & 0x80) {
+        if (state->commandRestrictFlags & 0x80) {
             btlRestorePartySlotSnapshots();
-            *(u32 *)(scene + 0x1F8) &= ~0x80;
+            state->commandRestrictFlags &= ~0x80;
         }
-        if (!(*(u32 *)(scene + 0x1F4) & 0x4000)) {
+        if (!(state->battleFlags & 0x4000)) {
             kwlnFadeBackgroundStartOut(0);
             dds3SetBlur(0, 0, 1);
             dds3Blur2Off(0);
@@ -404,7 +406,7 @@ s32 fldSceneStateRestoreDisplay(u8 *scene) {
             dds3DistBlurOff(0);
             dds3RipBlurOff(0);
             btlMarkRuntimeUpdatePending();
-            if (!(*(u32 *)(scene + 0x1F8) & 8)) {
+            if (!(state->commandRestrictFlags & 8)) {
                 dds3FadeIn2(0);
             }
             if (fldGetEncounterRuntimeResult() != 0) {
@@ -412,13 +414,13 @@ s32 fldSceneStateRestoreDisplay(u8 *scene) {
             }
             evtSetSolarOverlayFullyVisible();
         }
-        if (*(s32 *)(scene + 0x2B0) == 0) {
+        if (state->cleanupTask == 0) {
             fldCreateSceneCleanupTask();
-            if (!(*(u32 *)(scene + 0x1F8) & 0x2000)) {
-                *(u32 *)(scene + 0x1F4) |= 0x100000;
+            if (!(state->commandRestrictFlags & 0x2000)) {
+                state->battleFlags |= 0x100000;
             } else {
-                *(u32 *)(scene + 0x1F8) &= ~0x2000;
-                *(u32 *)(scene + 0x1F4) &= ~0x100000;
+                state->commandRestrictFlags &= ~0x2000;
+                state->battleFlags &= ~0x100000;
             }
         }
         return 5;
@@ -639,7 +641,7 @@ extern s32 btlSelectSerialEncounter(void);
 extern void btlAddItemDrop(u16 item);
 
 s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *scene) {
-    BattleSceneWork *work = (BattleSceneWork *)scene;
+    BtlState *state = (BtlState *)scene;
     u32 i;
 
     if (btlCountTasksForOwner(0x8000000000000003ULL) == 0 &&
@@ -647,11 +649,11 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *scene) {
         btlIsFadeOutCompleteOrIdle() != 0) {
         fldInitializeSceneGroups();
         btlResetSceneSlotFades();
-        *(u8 *)(scene + 0x258) = 0;
+        state->eventReady = 0;
         btlSelectSerialEncounter();
-        if (datBattleSceneRecords[work->sceneId].itemDropId != 0) {
-            for (i = 0; i < datBattleSceneRecords[work->sceneId].itemDropCount; i++) {
-                btlAddItemDrop(datBattleSceneRecords[work->sceneId].itemDropId);
+        if (datBattleSceneRecords[state->battleMode].itemDropId != 0) {
+            for (i = 0; i < datBattleSceneRecords[state->battleMode].itemDropCount; i++) {
+                btlAddItemDrop(datBattleSceneRecords[state->battleMode].itemDropId);
             }
         }
         return 8;
@@ -885,8 +887,9 @@ extern struct BtlRuntimeTask *btlCreateApplyToActiveActorsTask(u32 sound);
 extern struct BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32 sound);
 
 s32 fldSceneStateWaitScriptRelease(u8 *scene) {
+    BtlState *owner = (BtlState *)scene;
     s32 finished = 1;
-    s32 state = *(s32 *)(scene + 0x21C);
+    s32 state = owner->scriptState;
 
     switch (state) {
     case 0xF000002:
@@ -903,9 +906,9 @@ s32 fldSceneStateWaitScriptRelease(u8 *scene) {
         break;
     case 0xF000000:
         finished = 0;
-        if (*(s32 *)(scene + 0x210) == 0x14) {
-            btlCreateGuidePanelTask(*(s32 *)(scene + 0x4A0), *(s32 *)(scene + 0x220));
-        } else if (*(s32 *)(scene + 0x210) >= 0x2D) {
+        if (owner->scenePhaseFrame == 0x14) {
+            btlCreateGuidePanelTask(*(s32 *)(scene + 0x4A0), owner->scriptArg);
+        } else if (owner->scenePhaseFrame >= 0x2D) {
             if (btlHasRegisteredGuidePanelTask() != 0) {
                 if (D_00324530[1] < 0) {
                     btlRequestGuidePanelClose();
@@ -926,11 +929,11 @@ s32 fldSceneStateWaitScriptRelease(u8 *scene) {
     }
 
     if (finished != 0) {
-        if ((*(u32 *)(scene + 0x1F4) & 0x800) == 0) {
+        if ((owner->battleFlags & 0x800) == 0) {
             fldEnableSceneGroupAdvancement();
-            *(u32 *)(scene + 0x1F4) &= ~0x400;
-            *(u32 *)(scene + 0x1F4) &= ~0x1000;
-            *(u32 *)(scene + 0x1F4) &= ~0x20;
+            owner->battleFlags &= ~0x400;
+            owner->battleFlags &= ~0x1000;
+            owner->battleFlags &= ~0x20;
             return 6;
         }
         return 9;
