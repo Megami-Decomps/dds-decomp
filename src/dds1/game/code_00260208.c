@@ -763,7 +763,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     StaffSlots *group = &work->staffSlots;
     MenuPanelGroup *panel;
 
-    mnuReleaseStaffMenuResources(group);
+    mnuReleaseStaffMenuResources(&group->baseResources[0]);
     mnuInitializeStaffPageWindows(&work->partyWindow, &work->staffSlots, 0, &work->partyPanel);
     panel = mnuCreatePanelGroup(work->staffSlots.pairResources[0]);
     work->panelHandle = panel;
@@ -792,7 +792,7 @@ void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
     mnuDestroyPanelGroup(ctx->panelHandle);
     mnuFreeSpriteStateWork(ctx->spriteHandle);
     mnuReleaseAssets(&ctx->assets);
-    mnuReleaseStaffMenuTextureHandles(&ctx->staffSlots);
+    mnuReleaseStaffMenuTextureHandles(&ctx->staffSlots.baseResources[0]);
     mnuReleaseStaffResourceGroups(&ctx->staffSlots);
     mnuResetWorkFloats();
 }

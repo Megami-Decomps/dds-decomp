@@ -334,7 +334,7 @@ s32 mnuInitializeStaffValuePage(dds3ProcessID_t *task) {
 
     mnuSelectPage(&((StaffImageContext *)context)->pageWindow, index);
     mnuCreateStaffBulletItemWindow((struct StaffDisplayContext *)context);
-    mnuReleaseStaffMenuResources((void *)(context + 0x60));
+    mnuReleaseStaffMenuResources((struct EffectSlotSet **)(u32)(context + 0x60));
     mnuSetWindowResource(index, &((StaffImageContext *)context)->pageWindow,
                          ((StaffImageContext *)context)->spriteScene,
                          ((StaffImageContext *)context)->windowParam);
@@ -370,7 +370,7 @@ s32 mnuReleaseStaffValuePageResources(dds3ProcessID_t *task) {
         ((StaffImageContext *)context)->spriteHandle = 0;
     }
     mnuSetStateValue((u32 *)(context + 0x914), 0);
-    mnuReleaseStaffMenuTextureHandles((void *)(context + 0x60));
+    mnuReleaseStaffMenuTextureHandles((struct EffectSlotSet **)(u32)(context + 0x60));
     return 1;
 }
 

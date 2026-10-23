@@ -755,9 +755,9 @@ void mnuReleaseMenuWindowHandles(s32 context) {
 }
 
 /* Release both staff resource slots; their menu indices differ between games. */
-void mnuReleaseStaffMenuResources(void *resourceBase) {
-    struct EffectSlotSet **pairResources = (struct EffectSlotSet **)(
-        (u8 *)resourceBase + sizeof(((StaffSlots *)0)->baseResources));
+void mnuReleaseStaffMenuResources(struct EffectSlotSet **baseResources) {
+    struct EffectSlotSet **pairResources =
+        baseResources + sizeof(((StaffSlots *)0)->baseResources) / sizeof(*baseResources);
     s32 resourceIndex;
     for (resourceIndex = 0; resourceIndex < 2; resourceIndex++) {
         effResolveAndReleaseResource(pairResources[resourceIndex]);
@@ -765,9 +765,9 @@ void mnuReleaseStaffMenuResources(void *resourceBase) {
 }
 
 /* Reset texture handles for the same two resource slots. */
-void mnuReleaseStaffMenuTextureHandles(void *resourceBase) {
-    struct EffectSlotSet **pairResources = (struct EffectSlotSet **)(
-        (u8 *)resourceBase + sizeof(((StaffSlots *)0)->baseResources));
+void mnuReleaseStaffMenuTextureHandles(struct EffectSlotSet **baseResources) {
+    struct EffectSlotSet **pairResources =
+        baseResources + sizeof(((StaffSlots *)0)->baseResources) / sizeof(*baseResources);
     s32 resourceIndex;
     for (resourceIndex = 0; resourceIndex < 2; resourceIndex++) {
         effReleaseTextureHandlesAndResetSlots(pairResources[resourceIndex]);

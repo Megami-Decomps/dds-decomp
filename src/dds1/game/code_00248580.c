@@ -663,7 +663,7 @@ MenuProgressHost *mnuCreateWorkBlock(void) {
 /* Release staff window/texture/resource work before the value record and allocation. */
 void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *work) {
     mnuShutdownContext(&work->partyWindow);
-    mnuReleaseStaffMenuTextureHandles(&work->staffSlots);
+    mnuReleaseStaffMenuTextureHandles(&work->staffSlots.baseResources[0]);
     mnuReleaseStaffResourceGroups(&work->staffSlots);
     effDestroyEffectList(work->titleEffectHandle);
     sdfMemFreeDirect(work->allocation);
@@ -689,7 +689,7 @@ s32 mnuTickInitState(MenuProgressHost *work) {
     if (mnuStaffSlotsAllFilled(work->titleEffectHandle, group) == 0) {
         return 1;
     }
-    mnuReleaseStaffMenuResources(group);
+    mnuReleaseStaffMenuResources(&group->baseResources[0]);
     mnuInitializeStaffPageWindows(&work->partyWindow, group, 0, &work->partyPanel);
     work->loadState = 2;
     return 0;
