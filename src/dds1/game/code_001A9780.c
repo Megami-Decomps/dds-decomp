@@ -5575,7 +5575,7 @@ typedef struct BattleReservePositions {
 extern const BattleReservePositions D_003A2C70;
 extern const char *D_003BB3B4;
 extern s32 btlUpdateAndDrawReserveActorPanels(dds3ProcessID_t *);
-extern void btlReleaseTrackedTaskResource(void);
+extern void btlReleaseTrackedTaskResource(dds3ProcessID_t *task);
 
 /* Build the reserve actor panels: place one row per inactive party member and start the panel task. */
 void btlCreateReserveActorPanelTask(void) {
@@ -5624,7 +5624,7 @@ void btlCreateReserveActorPanelTask(void) {
     memory = (void *)sdfMemLock(allocation);
     memset(memory, 0, 0x348);
     work->reserveUnitAllocation = allocation;
-    task = dds3StartProcess(D_003BB3B4, 0x2B0E, 1, 1, btlUpdateAndDrawReserveActorPanels, (TaskDestroy)btlReleaseTrackedTaskResource, (u32)memory);
+    task = dds3StartProcess(D_003BB3B4, 0x2B0E, 1, 1, btlUpdateAndDrawReserveActorPanels, btlReleaseTrackedTaskResource, (u32)memory);
     dds3LinkProcess(controller->scriptOwner, task);
     btlSetTrackedTaskHandle(8, (s32)task);
     btlSlotBankPromoteStates(work);
@@ -5960,7 +5960,7 @@ s32 btlUpdateAndDrawReserveActorPanels(dds3ProcessID_t *task) {
     return 0;
 }
 
-void btlReleaseTrackedTaskResource(void) {
+void btlReleaseTrackedTaskResource(dds3ProcessID_t *task) {
     dds3ProcessID_t *temp_v0;
     u32 temp_v1;
 
