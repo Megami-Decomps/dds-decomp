@@ -185,7 +185,7 @@ extern void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *, BtlCamState *
 
 extern void fldCamSetChase(BtlLinkedCommand *, BtlCamState *);
 
-extern void btlApplyScaledUnitEffectParameter(u8 *, s32, s32, f32);
+extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 extern u8 *datActionAnimationRecords;
 
 extern s32 btlArrangeFormationSlots(s32 filter);
@@ -8925,7 +8925,7 @@ s32 sndWaitEffectFramesAndApplyUnitParameter(TimedUnitEffectArgs *args) {
     if (args->frame >= frames) {
         args->source->activeCount -= 1;
         if (args->channel >= 0) {
-            btlApplyScaledUnitEffectParameter((u8 *)args->unit, args->channel, args->volume, 1.0f);
+            btlApplyScaledUnitEffectParameter(args->unit, args->channel, args->volume, 1.0f);
         }
         return 1;
     }
