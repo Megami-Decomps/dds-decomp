@@ -263,7 +263,7 @@ void *sdfDevVprintf(SifCommand *input, const char *format, void *arguments) {
     return start;
 }
 
-void *sdfDevPrintfEx(void *packet, const char *fmt, ...) {
+void *sdfDevPrintfEx(SifCommand *packet, const char *fmt, ...) {
     __builtin_va_list args;
 
     __builtin_stdarg_start(args, fmt);
