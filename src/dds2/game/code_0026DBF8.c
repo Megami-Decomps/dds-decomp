@@ -7374,12 +7374,11 @@ MantraBurstSlot *mnuSpawnBurstSlot(MantraBurstPool *pool, s8 wide, s8 side) {
     return 0;
 }
 
-u32 mnuRequestEffectResource(u32 context, u32 config) {
+MantraEffectResource *mnuRequestEffectResource(const char *resourcePath, const char *configPath) {
     MantraEffectResource *resource = (MantraEffectResource *)sdfChipAllocDirect(sizeof(MantraEffectResource));
     memset(resource, 0, sizeof(MantraEffectResource));
-    effRequestResourceByMode((const char *)context, (const char *)config, 0,
-                             (u32 *)&resource->resourceSlots);
-    return (u32)resource;
+    effRequestResourceByMode(resourcePath, configPath, 0, (u32 *)&resource->resourceSlots);
+    return resource;
 }
 
 u8 mnuHasEffectResourceHandle(MantraEffectResource *resource) {
