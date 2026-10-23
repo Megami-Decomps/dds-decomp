@@ -92,7 +92,7 @@ typedef struct MenuSlotState {
     s32 selectionStep; /* 0xDC */
     s32 slotCopy;   /* 0xE0 */
     s32 mode;       /* 0xE4 */
-    u32 imageHandles[2]; /* 0xE8: native camp texture pair */
+    EffectSlotSet *imageHandles[2]; /* 0xE8: native camp texture owners */
     u8 padF0[0x5C];
     s32 stage;      /* 0x14C */
     s32 panelHoldFrames; /* 0x150 */
@@ -140,7 +140,7 @@ extern const char *mnuTerminalCharacterBackgroundSpriteNames[4];
 
 
 extern void evtLoadResourcePair(const char *, EvtResourcePair *);
-extern void mnuSnapshotCampTextureHandles(u32 *);
+extern void mnuSnapshotCampTextureHandles(EffectSlotSet **);
 extern void mnuBuildEligibleSlotList();
 extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
 
@@ -217,7 +217,7 @@ typedef struct MenuList MenuList;
 extern u8 mnuTerminalPreparationPopupEntry[];
 
 
-extern void mnuReleaseCampTextureHandlesAndClearOutput(u32 *);
+extern void mnuReleaseCampTextureHandlesAndClearOutput(EffectSlotSet **);
 
 
 /* Destroy the camp effect's retained animation without freeing the effect. */
@@ -467,10 +467,10 @@ MenuTerminalPercentPanelPair *mnuCreateDualPercentPanel(datUnitWork_t *unit, Men
 
     mnuDrawPanelSequenceByRow(&panel->panels[0], 0, 0, 0x1e,
         mnuPercentOrHundred(unit->hp, unit->maxHp),
-        (EffectSlotSet *)host->imageHandles[1]);
+        host->imageHandles[1]);
     mnuDrawPanelSequenceByRow(&panel->panels[1], 1, 0, 0x1e,
         mnuPercentOrHundred(unit->mp, unit->maxMp),
-        (EffectSlotSet *)host->imageHandles[1]);
+        host->imageHandles[1]);
     return panel;
 }
 

@@ -173,22 +173,22 @@ void mnuLoadCampResources(void) {
 
 
 /* Resolve each global handle, then copy its post-call value into destination. */
-void mnuSnapshotCampTextureHandles(u32 *destination) {
+void mnuSnapshotCampTextureHandles(EffectSlotSet **destination) {
     s32 resourceIndex;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
         effResolveAndReleaseResource(mnuCampResourceHandles[resourceIndex]);
-        destination[resourceIndex] = (u32)mnuCampResourceHandles[resourceIndex];
+        destination[resourceIndex] = mnuCampResourceHandles[resourceIndex];
     }
 }
 
 /* Release textures through the global handles and clear the caller's slots. */
-void mnuReleaseCampTextureHandlesAndClearOutput(u32 *destination) {
+void mnuReleaseCampTextureHandlesAndClearOutput(EffectSlotSet **destination) {
     s32 resourceCountdown = MNU_STAFF_BASE_RESOURCE_COUNT - 1;
     u32 byteOffset = 0;
     do {
         effReleaseTextureHandlesAndResetSlots(
             *(struct EffectSlotSet **)((u8 *)mnuCampResourceHandles + byteOffset));
-        *(u32 *)((u8 *)destination + byteOffset) = 0;
+        *(EffectSlotSet **)((u8 *)destination + byteOffset) = NULL;
         byteOffset += 4;
     } while (--resourceCountdown >= 0);
 }
@@ -480,7 +480,7 @@ void mnuAppendCampSpriteRequests(struct EffectList *resourceList, StaffSlots *re
     s32 resourceIndex;
     s32 tableColumn;
 
-    mnuSnapshotCampTextureHandles((u32 *)resourceSlots->baseResources);
+    mnuSnapshotCampTextureHandles(resourceSlots->baseResources);
     tableColumn = mnuGetValueRecordOwner(resourceList) == 1;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
         effAppendListEntry(resourceList, (u32)D_0042A950, mnuCampMainResourceNamePairs[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->mainResources[resourceIndex]);
@@ -501,7 +501,7 @@ void mnuReleaseTitleEffectSprites(StaffSlots *resourceSlots) {
     struct EffectSlotSet **extraCursor;
     struct EffectSlotSet **pairCursor;
 
-    mnuReleaseCampTextureHandlesAndClearOutput((u32 *)resourceSlots->baseResources);
+    mnuReleaseCampTextureHandlesAndClearOutput(resourceSlots->baseResources);
     mainCursor = resourceSlots->mainResources;
     for (resourceCountdown = MNU_STAFF_MAIN_RESOURCE_COUNT - 1; resourceCountdown >= 0; resourceCountdown--) {
         effDestroyResourceSlotSet((struct EffectSlotSet *)*mainCursor++);
@@ -1169,4 +1169,3 @@ INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042AC70);
 INCLUDE_SDATA(const s32, "game/code_002A9068", mnuCampInputTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_002A9068", D_00437B80);
-
