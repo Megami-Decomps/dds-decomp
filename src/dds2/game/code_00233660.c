@@ -3817,7 +3817,7 @@ s32 dds3BitEditorProcess(void) {
 
 extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 world, void *pos, void *rot);
 
-s32 evtSetTestCamera(void) {
+void evtSetTestCamera(void) {
     f32 pos[4] = {0.0f, -100.0f, -600.0f, 0.0f};
     f32 rot[4];
     dds3Basic_t *obj;
