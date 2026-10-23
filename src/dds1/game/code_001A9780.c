@@ -719,12 +719,12 @@ u32 func_001AA848(void) {
     return 0xffffffff;
 }
 
-void btlRestoreUnitMinimumValueAndClearStatus(BtlUnit *object, s32 status) {
-    *(u16 *)(status + 0x26) &= ~3;
+void btlRestoreUnitMinimumValueAndClearStatus(BtlUnit *object, BtlOperandEntry *operand) {
+    operand->flags &= ~3;
     object->status.flags = (u32)object->status.flags & (~0x20);
-    *(u16 *)((u8 *)object + 0x12E) &= ~0x4080;
-    if (*(u16 *)((u8 *)object + 0x126) == 0) {
-        *(u16 *)((u8 *)object + 0x126) = 1;
+    object->partyRecord.status &= ~0x4080;
+    if (object->partyRecord.hp == 0) {
+        object->partyRecord.hp = 1;
     }
 }
 
