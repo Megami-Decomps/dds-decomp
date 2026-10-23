@@ -1574,8 +1574,7 @@ BtlRuntimeTask *btlCreateClearActorEntrySelectionTask(BtlUnit *unit) {
 extern datUnitWork_t *btlGetIndexedPartyEntryRecord(s32);
 
 /* Award hunt experience; the sharing ability also rewards eligible party records. */
-u32 btlAwardHuntExperience(s32 address) {
-    BtlHuntExpArgs *args = (BtlHuntExpArgs *)address;
+u32 btlAwardHuntExperience(BtlHuntExpArgs *args) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     BtlUnit *head;
@@ -1645,7 +1644,7 @@ u32 btlAwardHuntExperience(s32 address) {
     return 1;
 }
 
-extern u32 btlAwardHuntExperience(s32);
+extern u32 btlAwardHuntExperience(BtlHuntExpArgs *);
 
 BtlRuntimeTask *btlCreateActorSoundOptionTask(BtlUnit *actor, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(8);
