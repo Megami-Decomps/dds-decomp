@@ -136,7 +136,7 @@ void mnuRequestMantraResources(MnuResourceTaskWork *work) {
     }
 }
 
-s32 mnuAreResourceSlotsOccupied(void) {
+s32 mnuAreResourceSlotsOccupied(MenuSceneMetadata *unusedMetadata) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < MNU_MANTRA_RESOURCE_SLOT_COUNT; ++slotIndex) {
         if (mnuMantraSpriteSlots[slotIndex] == 0) {
@@ -389,7 +389,7 @@ s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
     state=task->unk04[0];
     switch (state) {
     case 0:
-        if (mnuTickInitState(metadata->attachedEffect)==0 && ((s32 (*)())mnuAreResourceSlotsOccupied)(metadata)==1) task->unk04[0]=6;
+        if (mnuTickInitState(metadata->attachedEffect)==0 && mnuAreResourceSlotsOccupied(metadata)==1) task->unk04[0]=6;
         return 0;
     case 6:
         selectedParty=(datUnitWork_t **)(u32)list->cursor->userValue;
