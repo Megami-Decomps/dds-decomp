@@ -1714,9 +1714,8 @@ BtlRuntimeTask *btlCreateItemQuantityIncrementTask(BtlUnit *actor, u16 itemId) {
     return task;
 }
 
-u32 btlAddEpFromPacket(s32 packetAddress) {
+u32 btlAddEpFromPacket(BtlRewardPacket *packet) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    BtlRewardPacket *packet = (BtlRewardPacket *)packetAddress;
     if (packet->amount == 0) {
         return 1;
     }
@@ -1728,7 +1727,7 @@ u32 btlAddEpFromPacket(s32 packetAddress) {
     return 1;
 }
 
-extern u32 btlAddEpFromPacket(s32);
+extern u32 btlAddEpFromPacket(BtlRewardPacket *);
 
 BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *actor, s32 amount) {
     BtlRuntimeTask *task = btlAllocTask(8);
@@ -1745,9 +1744,8 @@ BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *actor, s32 amount) {
     return task;
 }
 
-u32 btlAddMoneyFromPacket(s32 packetAddress) {
+u32 btlAddMoneyFromPacket(BtlRewardPacket *packet) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    BtlRewardPacket *packet = (BtlRewardPacket *)packetAddress;
     if (packet->amount == 0) {
         return 1;
     }
@@ -1759,7 +1757,7 @@ u32 btlAddMoneyFromPacket(s32 packetAddress) {
     return 1;
 }
 
-extern u32 btlAddMoneyFromPacket(s32);
+extern u32 btlAddMoneyFromPacket(BtlRewardPacket *);
 
 BtlRuntimeTask *btlScheduleMoneyPacketTask(BtlUnit *actor, s32 amount) {
     BtlRuntimeTask *task = btlAllocTask(8);

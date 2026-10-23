@@ -1616,9 +1616,8 @@ u8 *btlCreateItemQuantityIncrementTask(u8 *actor, u16 itemId) {
     return task;
 }
 
-u32 btlAddEpFromPacket(s32 packetAddress) {
+u32 btlAddEpFromPacket(BtlRewardPacket *packet) {
     s32 context = (s32)(u32)btlGetRuntime();
-    BtlRewardPacket *packet = (BtlRewardPacket *)packetAddress;
 
     if (packet->amount == 0) {
         return 1;
@@ -1631,7 +1630,7 @@ u32 btlAddEpFromPacket(s32 packetAddress) {
     return 1;
 }
 
-extern u32 btlAddEpFromPacket(s32);
+extern u32 btlAddEpFromPacket(BtlRewardPacket *);
 
 u8 *btlScheduleEpPacketTask(u8 *owner, s32 value) {
     u8 *task = btlAllocTask(8);
@@ -1649,9 +1648,8 @@ u8 *btlScheduleEpPacketTask(u8 *owner, s32 value) {
     return task;
 }
 
-u32 btlAddMoneyFromPacket(void *packetAddress) {
+u32 btlAddMoneyFromPacket(BtlRewardPacket *packet) {
     s32 context = (s32)(u32)btlGetRuntime();
-    BtlRewardPacket *packet = packetAddress;
 
     if (packet->amount == 0) {
         return 1;
@@ -1664,7 +1662,7 @@ u32 btlAddMoneyFromPacket(void *packetAddress) {
     return 1;
 }
 
-extern u32 btlAddMoneyFromPacket(void *);
+extern u32 btlAddMoneyFromPacket(BtlRewardPacket *);
 
 void *btlScheduleMoneyPacketTask(u8 *owner, u32 value) {
     u8 *task = btlAllocTask(8);
