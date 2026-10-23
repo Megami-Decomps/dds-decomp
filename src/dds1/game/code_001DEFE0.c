@@ -6653,13 +6653,13 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
 BtlUnit *btlFindActiveActorById(s32 id) {
     BtlUnit *node;
 
-    for (node = *(BtlUnit **)((u8 *)btlGetRuntime() + 0x228); node != 0; node = *(BtlUnit **)((u8 *)node + 0x344)) {
+    for (node = ((BtlState *)btlGetRuntime())->units; node != 0; node = node->next) {
         u32 flags = (u32)node->status.flags;
 
         if (flags & 1) {
             if ((flags & 0xC0) == 0) {
                 if (flags & 0x200) {
-                    if (*(u8 *)((u8 *)node + 0x11C) == id) {
+                    if (node->lookupId == id) {
                         return node;
                     }
                 }
