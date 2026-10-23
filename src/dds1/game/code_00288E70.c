@@ -290,7 +290,7 @@ void fileExecQueue(void) {
             job->allocationHandle = sdfMemAlloc2Direct(job->totalBytes);
             if (job->allocationHandle == NULL) {
                 sdfPrintf("alloc retry for %s\n",
-                                            ((sdfFileCmdHandle_t *)job->deviceRequest)->resolvedPath);
+                                            job->deviceRequest->resolvedPath);
                 job->retryCount--;
             } else {
                 u32 address = sdfMemLock(job->allocationHandle);

@@ -2,6 +2,8 @@
 #define FILE_REQUEST_H
 
 #include "common.h"
+
+struct sdfFileCmdHandle_t;
 #include "sdf_pac_state.h"
 
 struct sdfMemHandle_t;
@@ -30,7 +32,7 @@ typedef void (*FileRequestCallback)(void *request, u32 arg);
     u8 allocationMode;                    /* 0x03: a callback request's mode */ \
     Link *next;                           /* 0x04 */                         \
     char *name;                           /* 0x08: the duplicated request name */ \
-    void *deviceRequest;                  /* 0x0C */                         \
+    struct sdfFileCmdHandle_t *deviceRequest; /* 0x0C: owned file-device handle */ \
     s32 transferBytes;                    /* 0x10: a value-pair request's byte count */ \
     s32 totalBytes;                       /* 0x14 */                         \
     Callback completionCallback;          /* 0x18 */                         \
