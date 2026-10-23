@@ -25,7 +25,7 @@ typedef struct CampMenuContext {
     EffectSlotSet *selectionResources[6]; /* 0xC4: party-status marker slots */
     u8 padDC[4];
     s32 variant;              /* 0xE0 */
-    s32 unkE4;               /* 0xE4: forwarded to the window resource helper */
+    EffectSlotSet *windowSpriteResources; /* 0xE4: window sprite-resource set */
     EffectSlotSet *gridSlotResource; /* 0xE8: grid-slot resource */
     EffectSlotSet *windowTextureVariantResource; /* 0xEC: window texture variant resource */
     union {

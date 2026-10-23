@@ -1464,7 +1464,7 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, dds3ProcessID_t *task) {
     window = mnuCreateWindowContainer(0, 0x160, 0x10, skillCount, 0x15);
     mnuSetWindowFadeScale(window, 0x100);
     mnuForwardDupArg(window, (struct EffectSlotSet *)context->option, 0,
-                     (struct EffectSlotSet *)context->unkE4, 0x14);
+                     context->windowSpriteResources, 0x14);
     mnuSetWindowPanelBounds(window, context->partySelectionLayout,
                             0x130, 0x630, -0x90, 0xC20);
     mnuInitializeWindowEntryPlacement(0, window, (struct EffectSlotSet *)context->option, 0x14, placement);
@@ -1648,7 +1648,7 @@ void ptySkillMenuInitPages(CampMenuContext *context) {
             window = mnuCreateWindowContainer(0, 0x110, 0x10, 8, 0x15);
             mnuSetWindowFadeScale(window, 0x100);
             mnuConfigureWindowSpriteAndGrid(window, (struct EffectSlotSet *)context->option, 0,
-                                            (struct EffectSlotSet *)context->unkE4, 0x15, 0x15);
+                                            context->windowSpriteResources, 0x15, 0x15);
             mnuSetWindowPanelBounds(window, context->partySelectionLayout, 0x130, 0x630, -0x90, 0xC20);
             mnuInitializeWindowEntryPlacement(0, window, (struct EffectSlotSet *)context->option, 0x14, 0x18);
             list = window->list;
