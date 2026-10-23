@@ -419,7 +419,7 @@ extern scrProcessWork_s *evtWorkScriptTask;
 extern EvtScriptContext evtWorkScriptContext;
 
 extern s32 scrGetIntPara(s32 idx);
-extern struct scrProcessWork_s *scrSetIntReturnValue();
+extern struct scrProcessWork_s *scrSetIntReturnValue(s32 retVal);
 extern struct scrProcessWork_s *scrSetFloatReturnValue(f32 value);
 extern datUnitWork_t *dds3FindEntry(s32 rosterIndex);
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
