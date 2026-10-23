@@ -10016,13 +10016,13 @@ void effApplyOverlaySpecs(u8 *work) {
 
 extern void sndLoadAndPlayStationedSe(u32);
 
-void effReportResourceStatus(u8 *work) {
+void effReportResourceStatus(EffActiveResource *work) {
     u32 status;
 
-    if ((s32)((EffActiveResource *)work)->frame > 0) {
+    if ((s32)work->frame > 0) {
         return;
     }
-    status = *(u32 *)((EffActiveResource *)work)->payload;
+    status = *(u32 *)work->payload;
     switch (status) {
     case 0:
         sndLoadAndPlayStationedSe(0x1000A);
@@ -10044,15 +10044,15 @@ void effApplyBattleStateTint(void) {
 }
 
 /* Start the payload's packed-color tint transition on frame zero. */
-void effStartTintTransitionFromColors(u8 *work) {
+void effStartTintTransitionFromColors(EffActiveResource *work) {
     f32 from[3];
     f32 to[3];
     u32 *colors;
     u32 c;
 
     btlGetRuntime();
-    colors = ((EffActiveResource *)work)->payload;
-    if ((s32)((EffActiveResource *)work)->frame == 0) {
+    colors = work->payload;
+    if ((s32)work->frame == 0) {
         c = colors[0];
         from[0] = (c & 0xFF) / 255.0f;
         from[1] = ((c >> 8) & 0xFF) / 255.0f;
@@ -10176,14 +10176,14 @@ typedef struct EffTintTransitionParams {
     } tail;
 } EffTintTransitionParams;
 
-void effUpdateSlotTimerPair(u8 *work) {
+void effUpdateSlotTimerPair(EffActiveResource *work) {
     EffTintTransitionParams *slotData;
     u32 elapsed;
     u32 duration;
 
     btlGetRuntime();
-    elapsed = ((EffActiveResource *)work)->frame;
-    slotData = ((EffActiveResource *)work)->payload;
+    elapsed = work->frame;
+    slotData = (EffTintTransitionParams *)work->payload;
     duration = slotData->duration;
     if (duration < slotData->tail.delay) {
         return;
@@ -10201,14 +10201,14 @@ extern f32 D_003BC9A8;
 
 
 /* Interpolates camera field of view in degrees and stores it in radians. */
-void effApplyKeyframeAngle(u8 *work) {
+void effApplyKeyframeAngle(EffActiveResource *work) {
     u8 *state = (u8 *)btlGetRuntime();
-    f32 *span = ((EffActiveResource *)work)->payload;
+    f32 *span = (f32 *)work->payload;
     u32 count = *(u32 *)span;
     f32 value;
 
-    if (count != 0 && count >= ((EffActiveResource *)work)->frame) {
-        f32 t = (f32)(s32)((EffActiveResource *)work)->frame / (f32)count;
+    if (count != 0 && count >= work->frame) {
+        f32 t = (f32)(s32)work->frame / (f32)count;
         value = ((span[2] - span[1]) * t + span[1]) * 0.017453293f;
         btlSetMotionTransformFieldOfView(&((BtlState *)state)->cameraCommand.camera, value);
         D_003BC9A8 = value;
