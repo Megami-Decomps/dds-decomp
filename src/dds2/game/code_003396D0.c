@@ -1087,7 +1087,7 @@ void sdfBillBoardVcMake1(u8 *packet, const f32 *position, const u32 *colors, con
     *(u32 *)(packet + 140) = 0;
 }
 
-s32 sdfBillBoardVcGetPacketSize(s32 count) {
+u32 sdfBillBoardVcGetPacketSize(s32 count) {
     return (count * 0x4C + 0x4B) & ~0xF;
 }
 
