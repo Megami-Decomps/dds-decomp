@@ -202,7 +202,7 @@ extern void btlClearUnitDefeatCandidate(BtlUnit *unit);
 
 extern f32 btlMeasureUnitIndexListBounds(BtlIndexList *list, f32 *maxTop, f32 *minTop);
 
-extern void btlChoosePartyDerivedShadowSkill(s32);
+extern void btlChoosePartyDerivedShadowSkill(ActionStateLink *actor);
 
 extern void btlCmdAppendCurrentUnitIdToCommandIndices(s32);
 
@@ -1650,7 +1650,7 @@ u32 btlScriptSelectDirect(void) {
 
 /* Select a permitted party-derived shadow skill, or retain the empty command. */
 s32 btlScriptSelectShadowSkill(void) {
-    btlChoosePartyDerivedShadowSkill(scrGetData());
+    btlChoosePartyDerivedShadowSkill((ActionStateLink *)scrGetData());
     return 1;
 }
 
