@@ -246,7 +246,7 @@ extern struct SoundSlotOwner *sndAcquireSlotOwner(s32, s32);
 
 extern void btlSetUnitPosition(BtlUnit *object, const f32 *position);
 
-extern void btlSetUnitRotation(BtlUnit *object, s128 *rotation);
+extern void btlSetUnitRotation(BtlUnit *object, const f32 rotation[4]);
 
 extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *, s32);
 
@@ -1712,7 +1712,7 @@ void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out
         VU0_STORE_VF_UNCLOBBERED(vf10, userPosition);
         if (btlAimHorizontalDirectionVU(targetPosition, userPosition) != 0) {
             VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
-            btlSetUnitRotation(target, (s128 *)rotation);
+            btlSetUnitRotation(target, rotation);
         }
     }
     btlAdjustCameraDirectionForDefaultPlane(out);
@@ -1737,7 +1737,7 @@ void btlActionAimUserAtTargets(BtlLinkedCommand *command, BtlCamState *pose, Btl
         VU0_STORE_VF_UNCLOBBERED(vf10, vec[1]);
         if (btlAimHorizontalDirectionVU(vec[1], vec[0]) != 0) {
             VU0_STORE_VF_UNCLOBBERED(vf10, &rot);
-            btlSetUnitRotation(unit, &rot);
+            btlSetUnitRotation(unit, (const f32 *)&rot);
         }
     }
 }
@@ -2696,7 +2696,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
                     VU0_STORE_VF_UNCLOBBERED(vf10, vectors.firstActorPosition);
                     if (btlAimHorizontalDirectionVU(vectors.firstActorPosition, vectors.center) != 0) {
                         VU0_STORE_VF_UNCLOBBERED(vf10, vectors.rotation);
-                        btlSetUnitRotation((u8 *)unit, vectors.rotation);
+                        btlSetUnitRotation(unit, vectors.rotation);
                     }
                 }
             }
@@ -2715,7 +2715,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
                 btlAimHorizontalDirectionClampedVU(vectors.secondActorPosition, vectors.center,
                                                      0.34906585f);
                 VU0_STORE_VF_UNCLOBBERED(vf10, vectors.rotation);
-                btlSetUnitRotation((u8 *)unit, vectors.rotation);
+                btlSetUnitRotation(unit, vectors.rotation);
             }
         }
     }
@@ -5781,7 +5781,7 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
                     }
                     btlAimHorizontalDirectionVU(oldFocus, actorPosition);
                     VU0_STORE_VF_UNCLOBBERED(vf10, facing);
-                    btlSetUnitRotation(unit, (s128 *)facing);
+                    btlSetUnitRotation(unit, facing);
                 }
             }
             ++instruction;
@@ -7707,7 +7707,7 @@ void btlInitTargetCursorAndFacing(BtlLinkedCommand *action, BtlCamState *state) 
         VU0_STORE_VF_UNCLOBBERED(vf10, position);
         btlAimHorizontalDirectionVU(aimPosition, position);
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
-        btlSetUnitRotation(unit, (s128 *)rotation);
+        btlSetUnitRotation(unit, rotation);
     }
 }
 
@@ -10932,7 +10932,7 @@ void btlPlaceTripleFormationAroundCenter(BtlTask *link, BtlUnit *first, BtlUnit 
     btlSetUnitPosition(slot[1], pos);
     if (btlAimHorizontalDirectionVU(pos, center) != 0) {
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
-        btlSetUnitRotation(slot[1], (s128 *)rotation);
+        btlSetUnitRotation(slot[1], rotation);
     }
     angle = 30.0f * 0.017453293f;
     pos[0] = center[0] - sdfCos(angle) * radius;
@@ -10941,7 +10941,7 @@ void btlPlaceTripleFormationAroundCenter(BtlTask *link, BtlUnit *first, BtlUnit 
     btlSetUnitPosition(slot[0], pos);
     if (btlAimHorizontalDirectionVU(pos, center) != 0) {
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
-        btlSetUnitRotation(slot[0], (s128 *)rotation);
+        btlSetUnitRotation(slot[0], rotation);
     }
     pos[0] = center[0] + sdfCos(angle) * radius;
     pos[1] = 0.0f;
@@ -10949,7 +10949,7 @@ void btlPlaceTripleFormationAroundCenter(BtlTask *link, BtlUnit *first, BtlUnit 
     btlSetUnitPosition(slot[2], pos);
     if (btlAimHorizontalDirectionVU(pos, center) != 0) {
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
-        btlSetUnitRotation(slot[2], (s128 *)rotation);
+        btlSetUnitRotation(slot[2], rotation);
     }
 }
 
@@ -11113,7 +11113,7 @@ void btlOrientFrontAndBackUnitsTowardTargets(BtlTask *link, BtlUnit *a, BtlUnit 
         VU0_STORE_VF_UNCLOBBERED(vf10, vec[1]);
         if (btlAimHorizontalDirectionVU(vec[0], vec[1]) != 0) {
             VU0_STORE_VF_UNCLOBBERED(vf10, &rot);
-            btlSetUnitRotation(front, &rot);
+            btlSetUnitRotation(front, (const f32 *)&rot);
         }
     }
     btlUnitFaceTarget(back, front);

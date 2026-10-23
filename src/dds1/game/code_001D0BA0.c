@@ -2342,7 +2342,7 @@ extern void btlResetUnitModelProgress(BtlUnit *);
 
 extern void btlSetUnitPosition(BtlUnit *object, const f32 *position);
 
-extern void btlSetUnitRotation(BtlUnit *object, s128 *rotation);
+extern void btlSetUnitRotation(BtlUnit *object, const f32 rotation[4]);
 
 /* vu0 routine: initialize the actor world transform with the SDK unit vector. */
 void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
@@ -3082,7 +3082,7 @@ s32 btlIsUnitAtStoredPosition(u8 *object) {
 
 extern u8 D_003A3B70[];
 
-void btlSetUnitRotation(BtlUnit *object, s128 *rotation) {
+void btlSetUnitRotation(BtlUnit *object, const f32 rotation[4]) {
     u8 vector[16];
     if ((object->status.stateFlags & 0x100) != 0) {
         return;
@@ -3157,7 +3157,7 @@ void btlUnitFaceTarget(BtlUnit *object, BtlUnit *target) {
         SDF_VU0_STOREVECTOR_NOMEM(second);
         if (btlAimHorizontalDirectionVU((f32 *)first, (f32 *)second) != 0) {
             SDF_VU0_STOREVECTOR_NOMEM(result);
-            btlSetUnitRotation(object, result);
+            btlSetUnitRotation(object, (const f32 *)result);
         }
     }
 }
@@ -3173,7 +3173,7 @@ void btlUnitFaceTargetScaled(BtlUnit *object, BtlUnit *target, f32 scale) {
         SDF_VU0_STOREVECTOR_NOMEM(second);
         btlAimHorizontalDirectionClampedVU(first, second, scale);
         SDF_VU0_STOREVECTOR_NOMEM(result);
-        btlSetUnitRotation(object, result);
+        btlSetUnitRotation(object, (const f32 *)result);
     }
 }
 
@@ -3710,11 +3710,11 @@ s32 btlStepUnitRotationNlerp(BtlRotationTaskArgs *args) {
             SDF_VU0_LOADVECTOR_B(&args->to);
             Lerp(args->t);
             SDF_VU0_STOREVECTOR(&quat);
-            btlSetUnitRotation(unit, &quat);
+            btlSetUnitRotation(unit, (const f32 *)&quat);
             return 0;
         }
     }
-    btlSetUnitRotation(unit, &args->to);
+    btlSetUnitRotation(unit, (const f32 *)&args->to);
     return 1;
 }
 
@@ -4700,7 +4700,7 @@ u32 btlApplyQueuedActorRotation(s32 *taskArgs) {
 
     temp_v0 = (BtlUnit *)(u32)*taskArgs;
     temp_v0->status.flags = (u32)temp_v0->status.flags & 0xffffffef;
-    btlSetUnitRotation(temp_v0, (u8 *)temp_v0 + 0x40);
+    btlSetUnitRotation(temp_v0, (const f32 *)((u8 *)temp_v0 + 0x40));
     return 1;
 }
 
@@ -6120,7 +6120,7 @@ void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *action) {
             if (target->status.flags & 0x80000) {
                 if (btlAimHorizontalDirectionVU((f32 *)&vec[0], (f32 *)pos) != 0) {
                     SDF_VU0_STOREVECTOR_NOMEM(&vec[2]);
-                    btlSetUnitRotation(target, &vec[2]);
+                    btlSetUnitRotation(target, (const f32 *)&vec[2]);
                 }
             }
         }
@@ -6150,7 +6150,7 @@ void btlAimLinkedUnitAtMuzzle(BtlLinkedCommand *action) {
             if ((u32)target->status.flags & 0x80000) {
                 if (btlAimHorizontalDirectionVU((f32 *)&vec[0], (f32 *)pos) != 0) {
                     SDF_VU0_STOREVECTOR_NOMEM(&vec[2]);
-                    btlSetUnitRotation(target, &vec[2]);
+                    btlSetUnitRotation(target, (const f32 *)&vec[2]);
                 }
             }
         }
