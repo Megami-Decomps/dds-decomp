@@ -663,7 +663,7 @@ extern char *D_00398988[16];
 extern char *D_003989C8[8];
 extern s32 D_003989E8[16];
 
-void sdfGrFlushOtChain(const void *source) {
+void sdfGrFlushOtChain(u32 sourceAddress) {
     u32 *returnStack[2];
     u32 *cursor;
     u32 *wordCursor = NULL;
@@ -679,8 +679,8 @@ void sdfGrFlushOtChain(const void *source) {
     s32 done;
     u32 value;
 
-    sdfPrintf("<<< DMA-VIF dump start [%p] >>>\n", source);
-    cursor = (u32 *)source;
+    sdfPrintf("<<< DMA-VIF dump start [%p] >>>\n", (void *)sourceAddress);
+    cursor = (u32 *)sourceAddress;
     directRow = 0;
     tagAddress = 0;
     qwc = 0;

@@ -375,7 +375,7 @@ extern void dds3FadeUpdate(void);
 extern void kwlnQueueBackgroundFadeOverlayPacket(void);
 extern void dds3BlurUpdate(void);
 extern u32 dds3NullDrawProc(void);
-extern void sdfGrFlushOtChain(const void *source);
+extern void sdfGrFlushOtChain(u32 sourceAddress);
 extern void sdfGrReqDraw(sdfDrawTag_t *, SdfPacketChain *);
 extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
@@ -528,4 +528,3 @@ INCLUDE_RODATA(const s32, "game/code_001019F0", D_00411198);
 INCLUDE_SDATA(const s32, "game/code_001019F0", D_00435C0C);
 
 INCLUDE_SDATA(const s32, "game/code_001019F0", D_00435C14);
-
