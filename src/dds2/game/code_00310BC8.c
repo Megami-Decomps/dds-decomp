@@ -429,7 +429,7 @@ u32 frFontQueueTintedGlyphChainAndMeasure(s32 x, s32 y, s32 depth, u32 colors, u
 
 #include "sdf_packet_alloc.h"
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
-extern s32 sdf2DGetPrimPtr(s32);
+extern u8 *sdf2DGetPrimPtr(s32);
 extern SdfPoolNode sdfGrOtTable[];
 
 /* Submit count XY pairs as a colored GS triangle fan to surfaceIndex.

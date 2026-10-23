@@ -16957,7 +16957,7 @@ typedef union EffSpriteColor {
 
 extern void sdfTexSetFilter(sdfTexHandle_t *, s32, s32);
 extern s32 sdf2DGetPrimPacketSize(s32, s32);
-extern s32 sdf2DGetPrimPtr(s32);
+extern u8 *sdf2DGetPrimPtr(s32);
 extern void effSelectPresetByKind(u32, u32);
 void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
                    const EffSpriteUV *uvRect, const EffSpriteColor *color, u32 flipFlags,

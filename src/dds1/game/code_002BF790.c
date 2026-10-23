@@ -40,7 +40,7 @@ extern SdfPoolNode sdfGrOtTable[];
 
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 
-extern s32 sdf2DGetPrimPtr(s32 address);
+extern u8 *sdf2DGetPrimPtr(s32 address);
 
 
 #include "sdf_packet_alloc.h"

@@ -3837,7 +3837,7 @@ void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, void *textureRe
     descriptor->texture = sdfTexSet((SdfTextureFileHeader *)(textureResource));
 }
 
-extern s32 sdf2DGetPrimPtr(s32 packetAddress);
+extern u8 *sdf2DGetPrimPtr(s32 packetAddress);
 
 /* Queue the descriptor's preview texture as a quad at its screen position. */
 void btlDrawResourcePreview(BtlResourceDescriptor *descriptor) {

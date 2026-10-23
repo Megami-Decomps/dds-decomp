@@ -556,7 +556,7 @@ extern SdfPoolNode sdfGrOtTable[];
 
 
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
-extern s32 sdf2DGetPrimPtr(s32);
+extern u8 *sdf2DGetPrimPtr(s32);
 
 extern u8 *sdf2DMakeStdPacket(void *, s32);
 

@@ -19,7 +19,7 @@
 #include "eff_dispatch_state.h"
 #include "eff_offset_triangle.h"
 
-extern s32 sdf2DGetPrimPtr(s32 packetAddress);
+extern u8 *sdf2DGetPrimPtr(s32 packetAddress);
 extern sdfTexHandle_t *dds3GetRenderTexture(void);
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern SdfPoolNode D_00324B88;

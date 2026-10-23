@@ -564,7 +564,7 @@ extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 
 
-extern s32 sdf2DGetPrimPtr(s32);
+extern u8 *sdf2DGetPrimPtr(s32);
 
 
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];

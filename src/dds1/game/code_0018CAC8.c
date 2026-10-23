@@ -49,7 +49,7 @@ extern char D_003BB060[];
 extern char *D_003557A8[];
 extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData,
                                       u32 dataBytes, s32 markHistory);
-extern s32 sdf2DGetPrimPtr(s32 packetAddress);
+extern u8 *sdf2DGetPrimPtr(s32 packetAddress);
 
 
 extern EffCreateHandler D_00355730[];
