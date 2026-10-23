@@ -114,7 +114,7 @@ extern void fldDispatchSceneAction(u32 action);
 
 extern u32 fldPlayerObject;
 
-extern u32 fldPlayerModelResource;
+extern struct sdfMemHandle_t *fldPlayerModelResource;
 
 extern u32 D_0032E498[];
 
@@ -1006,19 +1006,19 @@ void fldLoadPlayerModel(void) {
     } else {
         model = fldGlobalBase.playerModelAlternate != 0;
     }
-    if (fldGlobalBase.playerModelVariant != model || fldPlayerModelResource == 0) {
-        if (fldPlayerModelResource != 0) {
+    if (fldGlobalBase.playerModelVariant != model || fldPlayerModelResource == NULL) {
+        if (fldPlayerModelResource != NULL) {
             fldUnloadPlayerModel();
         }
         switch (model) {
         case 0:
-            fldPlayerModelResource = (u32)sdfDevLoadFileEx("/model/field/player_a.PB", &D_003BAB5C, &D_003BAB64);
+            fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_a.PB", &D_003BAB5C, &D_003BAB64);
             break;
         case 1:
-            fldPlayerModelResource = (u32)sdfDevLoadFileEx("/model/field/player_b.PB", &D_003BAB5C, &D_003BAB64);
+            fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_b.PB", &D_003BAB5C, &D_003BAB64);
             break;
         default:
-            fldPlayerModelResource = (u32)sdfDevLoadFileEx("/model/field/player_l.PB", &D_003BAB5C, &D_003BAB64);
+            fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_l.PB", &D_003BAB5C, &D_003BAB64);
             break;
         }
         fldGlobalBase.playerModelVariant = model;
@@ -1026,9 +1026,9 @@ void fldLoadPlayerModel(void) {
 }
 
 void fldUnloadPlayerModel(void) {
-    if (fldPlayerModelResource != 0) {
-        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldPlayerModelResource);
-        fldPlayerModelResource = 0;
+    if (fldPlayerModelResource != NULL) {
+        sdfMemFreeDelayedDirect(fldPlayerModelResource);
+        fldPlayerModelResource = NULL;
         D_0032E4EC[0] = 0;
     }
 }
@@ -1099,7 +1099,7 @@ void fldTogglePlayerModel(void) {
     fldLoadPlayerModel();
     D_003BAB60 = D_003BAB64;
     D_003BAB58 = sdfMemAllocDirect(D_003BAB64);
-    source = (void *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)fldPlayerModelResource);
+    source = (void *)sdfMemGetPtr(fldPlayerModelResource);
     buffer = (void *)sdfMemGetPtr(D_003BAB58);
     memcpy(buffer, source, D_003BAB60);
     D_003BAB5C = (u32)buffer;
@@ -1128,7 +1128,7 @@ void fldPrepareResourceBuffer(void) {
     fldLoadPlayerModel();
     D_003BAB60 = D_003BAB64;
     D_003BAB58 = sdfMemAllocDirect(D_003BAB64);
-    source = (void *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)fldPlayerModelResource);
+    source = (void *)sdfMemGetPtr(fldPlayerModelResource);
     buffer = (void *)sdfMemGetPtr(D_003BAB58);
     memcpy(buffer, source, D_003BAB60);
     D_003BAB5C = (u32)buffer;
