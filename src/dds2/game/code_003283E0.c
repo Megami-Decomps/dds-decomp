@@ -18,7 +18,7 @@ void *sdfAllocAuto(s32 size) {
     return sdfChipAllocDirect(size);
 }
 
-extern void sdfMemFreePtrDirect(void *);
+extern void sdfMemFreePtrDirect(const void *);
 
 void sdfFreeAuto(void *allocation) {
     if (allocation != NULL) {

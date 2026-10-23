@@ -123,7 +123,7 @@ void sdfMemFreeDirect(struct sdfMemHandle_t *allocation) {
 }
 
 /* Resolve a data address to its allocation record before releasing it. */
-void sdfMemFreePtrDirect(void *address) {
+void sdfMemFreePtrDirect(const void *address) {
     sdfMemHandle_t *allocation;
 
     allocation = sdfMemGetHandleByPtr(address);

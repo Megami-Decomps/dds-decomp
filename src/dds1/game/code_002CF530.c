@@ -4,7 +4,7 @@
 #include "sdf_chip.h"
 #include "sdf_handler_node.h"
 
-extern void sdfMemFreePtrDirect(void *);
+extern void sdfMemFreePtrDirect(const void *);
 
 extern void (*sdfTickCallback)(void);
 
