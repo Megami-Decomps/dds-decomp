@@ -179,7 +179,7 @@ extern struct _FRQ *fileMenuConfiguredTextGlyph;
 
 extern struct _FRQ *fileMenuStringGlyph;
 
-extern s32 D_00437CD8;
+extern dds3ProcessID_t *D_00437CD8;
 
 extern s32 D_00437CE4;
 extern s32 fileSavePreviewPortraitTextures[];
@@ -483,9 +483,9 @@ extern char *sdfFileGetHostRoot(void);
 
 
 void slKillLoadProcess(void) {
-    if (D_00437CD8 != 0) {
-        dds3KillProcess((dds3ProcessID_t *)D_00437CD8, 1);
-        D_00437CD8 = 0;
+    if (D_00437CD8 != NULL) {
+        dds3KillProcess(D_00437CD8, 1);
+        D_00437CD8 = NULL;
         slLoadKillFlag = 0;
     }
 }
@@ -4053,7 +4053,7 @@ INCLUDE_SDATA(const s32, "game/code_002C96D0", slLoadKillFlag);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437CD5);
 
-INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437CD8);
+INCLUDE_SDATA(dds3ProcessID_t * const, "game/code_002C96D0", D_00437CD8);
 
 INCLUDE_SDATA(struct FileRequest * const, "game/code_002C96D0", fileSaveIconRequest);
 

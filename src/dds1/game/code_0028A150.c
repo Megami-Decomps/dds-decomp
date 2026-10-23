@@ -295,7 +295,7 @@ extern s32 D_003BC7FC;
 
 extern s8 slLoadKillFlag;
 
-extern s32 D_003BC7F0;
+extern dds3ProcessID_t *D_003BC7F0;
 
 /* Loader context at fileLoadMenuState. */
 extern FileLoadMenuState fileLoadMenuState;
@@ -490,9 +490,9 @@ extern void fileQueueAppend(FileQueue *queue, FileJob *job);
 extern s8 dds3ConfigState;
 
 void slKillLoadProcess(void) {
-    if (D_003BC7F0 != 0) {
-        dds3KillProcess((dds3ProcessID_t *)D_003BC7F0, 1);
-        D_003BC7F0 = 0;
+    if (D_003BC7F0 != NULL) {
+        dds3KillProcess(D_003BC7F0, 1);
+        D_003BC7F0 = NULL;
         slLoadKillFlag = 0;
     }
 }
@@ -3628,7 +3628,7 @@ INCLUDE_SDATA(const s32, "game/code_0028A150", slLoadKillFlag);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC7ED);
 
-INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC7F0);
+INCLUDE_SDATA(dds3ProcessID_t * const, "game/code_0028A150", D_003BC7F0);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", fileSaveIconRequest);
 
