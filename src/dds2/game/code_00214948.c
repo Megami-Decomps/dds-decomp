@@ -4654,7 +4654,7 @@ extern void btlSetRaisedActionFixedCamera(u32);
 
 extern void btlSetSatanFixedActionCamera(u32);
 
-extern void btlApplyMaskedActorEntryAdjustments(u32, u32, u32);
+extern void btlApplyMaskedActorEntryAdjustments(BtlUnit *unit, u32 flags, s16 delta);
 
 extern void btlSetUnitRotation(BtlUnit *, s128 *);
 
@@ -6205,7 +6205,7 @@ void btlPrepareSpecialActionSelection(BtlUnit *unit, BtlOperandEntry *entry) {
 }
 
 /* The three Eternal Zero entries apply +127 to actor entries 0 through 4. */
-u32 btlBoostEternalZeroActorEntries(u32 unit, u32 actor, u32 action) {
+u32 btlBoostEternalZeroActorEntries(BtlUnit *unit, BtlUnit *target, u32 action) {
     switch (action) {
     case 0x178:
     case 0x17d:
@@ -8513,4 +8513,3 @@ INCLUDE_SDATA(const s32, "game/code_00214948", D_00436CE0);
 INCLUDE_SDATA(const s32, "game/code_00214948", D_00436CE8);
 
 INCLUDE_SDATA(const s32, "game/code_00214948", D_00436CF0);
-
