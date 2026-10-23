@@ -5,6 +5,8 @@
 
 #ifndef VERSION_DDS2
 
+struct ItfMesSub;
+
 typedef struct DspParticle {
     s16 x;
     s16 y;
@@ -39,9 +41,9 @@ enum MenuSceneState {
 
 typedef struct MenuSceneMetadata {
     u8 pad00[0x0C];
-    s32 messageWindowResource;
+    struct ItfMesSub *messageWindowResource;
     u8 pad10[4];
-    s32 entryMessageWindowResource; /* 0x14: selected-entry message resource */
+    struct ItfMesSub *entryMessageWindowResource; /* 0x14: selected-entry message resource */
     s32 state;
     u8 pad1C[4];
     s32 messageShadeFrames;

@@ -1205,7 +1205,7 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
         break;
     case 10:
         fclDestroyMessage();
-        fclInitMessage((struct ItfMesSub *)metadata->entryMessageWindowResource);
+        fclInitMessage(metadata->entryMessageWindowResource);
         if (mnuDisplayNextPendingMantra((s32)work)) {
             fclDestroyMessage();
             work->phaseFrame = 0;
@@ -1267,7 +1267,7 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
         if (fclChkMessage() == 0) {
             if (work->entryMessageInProgress == 0) {
                 fclDestroyMessage();
-                fclInitMessage((struct ItfMesSub *)metadata->entryMessageWindowResource);
+                fclInitMessage(metadata->entryMessageWindowResource);
                 fclStartMessage(0);
                 work->entryMessageInProgress = 1;
             } else {
@@ -1632,7 +1632,7 @@ s32 mnuBeginMantraProfileSelection(void) {
     scene->state = MENU_SCENE_STATE_SELECTING;
     scene->pendingProfileId = entry->sceneId;
     fclDestroyMessage();
-    fclInitMessage((struct ItfMesSub *)scene->messageWindowResource);
+    fclInitMessage(scene->messageWindowResource);
     memcpy((u32 *)((u8 *)scene + 0x28), ((MnuProfileProgress *)mnuGetSelectedNodeValue())->partyRecord, 0x1A4);
     ((u8 *)scene)[0x7D] = (u8)scene->pendingProfileId;
     mnuSetupStaffMenuProfilePage((datUnitWork_t *)((u8 *)scene + 0x28), scene->attachedEffect);
