@@ -66,19 +66,19 @@ extern void FatalError(const char *format, ...) __attribute__((noreturn));
 extern s32 AddIntcHandler2(s32, s32, s32, s32);
 extern s32 AddDmacHandler2(s32, s32, s32, s32);
 
-SdfHandlerNode *sdfAddHandler(s32 kind, s32 channel, s32 handler, s32 arg, s32 next) {
+SdfHandlerNode *sdfAddHandler(s32 kind, s32 channel, SdfHandlerCallback handler, s32 arg, s32 next) {
     SdfHandlerNode *node;
     s32 id;
 
     switch (kind) {
     case SDF_HANDLER_KIND_INTERRUPT:
-        id = AddIntcHandler2(channel, handler, arg, next);
+        id = AddIntcHandler2(channel, (s32)handler, arg, next);
         break;
     case SDF_HANDLER_KIND_DMA:
-        id = AddDmacHandler2(channel, handler, arg, next);
+        id = AddDmacHandler2(channel, (s32)handler, arg, next);
         break;
     case SDF_HANDLER_KIND_SBUS:
-        id = AddSbusIntcHandler(channel, handler);
+        id = AddSbusIntcHandler(channel, (s32)handler);
         break;
     default:
         FatalError("sdfAddHandler : unknown type %d\n", kind);

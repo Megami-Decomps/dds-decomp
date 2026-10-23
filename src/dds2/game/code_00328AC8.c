@@ -40,7 +40,7 @@ s32 VblankIntcHandler(s32 eventId) {
     return 0;
 }
 
-extern SdfHandlerNode *sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
+extern SdfHandlerNode *sdfAddHandler(s32, s32, SdfHandlerCallback, s32, s32);
 
 /* Each wake-up broadcasts to every tracked thread under the list semaphore. */
 void VblankThreadProc(void) {
