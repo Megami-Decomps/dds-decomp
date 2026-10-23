@@ -37,17 +37,17 @@ void effBTLPartGetPositionPtr(void *owner, EffectVectorRequest *request, u128 *o
 
 extern u32 effBTLFieldColorGetOverrideSelector(void);
 extern u32 effBTLFieldColorGetFinalSelector(void);
-extern void effBattleComputeTargetPosition();
+extern void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *request);
 extern f32 btlMeasureEffectTargetGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop);
 extern f32 btlGetMaxUnitTop(u32 mask);
 extern f32 btlGetExtremeUnitY(u32 mask);
 
-void effBattleMiscCallByOwnerA(u32 unused, void *request) {
-    effBattleComputeTargetPosition(effBTLFieldColorGetOverrideSelector(), request);
+void effBattleMiscCallByOwnerA(u32 unused, EffectVectorRequest *request) {
+    effBattleComputeTargetPosition((BtlUnit *)effBTLFieldColorGetOverrideSelector(), request);
 }
 
-void effBattleMiscCallByFinalSelector(u32 unused, void *request) {
-    effBattleComputeTargetPosition(effBTLFieldColorGetFinalSelector(), request);
+void effBattleMiscCallByFinalSelector(u32 unused, EffectVectorRequest *request) {
+    effBattleComputeTargetPosition((BtlUnit *)effBTLFieldColorGetFinalSelector(), request);
 }
 
 void effBattleMiscQueryOverrideAttachment(u32 unused, EffectVectorRequest *request) {
