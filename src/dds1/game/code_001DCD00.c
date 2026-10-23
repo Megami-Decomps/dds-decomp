@@ -688,9 +688,9 @@ extern void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *, BtlCamState 
 
 void btlDispatchActionCameraStep(u8 *actor) {
     BtlState *runtime = (BtlState *)btlGetRuntime();
-    s32 (*callback)(u8 *) = runtime->actionCameraStepHook;
+    s32 (*callback)(BtlLinkedCommand *) = runtime->actionCameraStepHook;
 
-    if (callback != 0 && callback(actor) != 0) {
+    if (callback != 0 && callback((BtlLinkedCommand *)actor) != 0) {
         return;
     }
     switch (*(u16 *)(actor + 0x10C)) {
