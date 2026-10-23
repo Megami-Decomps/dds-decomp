@@ -19,6 +19,12 @@ typedef struct EvtPackEntry {
     s32 motionId;                 /* 0x1C: type-6 motion index at DDS2 0025D5D4. */
 } EvtPackEntry;
 
+/* Kind-1 BE payload prefix used to select the area and room to load. */
+typedef struct EvtAreaRoomIds {
+    s32 area;
+    s32 room;
+} EvtAreaRoomIds;
+
 typedef struct EvtPackHeader {
     u8 pad00[0x10];
     s32 entryCount;               /* 0x10 */
@@ -49,6 +55,7 @@ typedef struct EvtPackLoadState {
 } EvtPackLoadState;
 
 typedef char EvtPackEntry_size_must_be_0x20[(sizeof(EvtPackEntry) == 0x20) ? 1 : -1];
+typedef char EvtAreaRoomIds_size_must_be_0x08[(sizeof(EvtAreaRoomIds) == 0x08) ? 1 : -1];
 typedef char EvtPackHeader_size_must_be_0x20[(sizeof(EvtPackHeader) == 0x20) ? 1 : -1];
 typedef char EvtPackLoadState_size_must_be_0x48[(sizeof(EvtPackLoadState) == 0x48) ? 1 : -1];
 typedef char EvtPackLoadState_sceneAllocation1_at_0x24[
