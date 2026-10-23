@@ -166,7 +166,7 @@ void fldInitializeDisplayPointerTable(void) {
     displayTable[1] = (u32)D_0038BB60;
 }
 
-extern u32 fldPlayerObject;
+extern struct dds3Basic_t *fldPlayerObject;
 struct dds3Basic_t;
 
 /* Sky lighting also supplies the player's packed colors and VU direction. */
@@ -232,7 +232,7 @@ void fldApplySkyLightSetToPlayerVU(void) {
         vec[3] = 1.0f;
         dds3SetAmbientColor(0, vec);
 
-        unit = evtGetUnitHandle2((struct dds3Basic_t *)fldPlayerObject);
+        unit = evtGetUnitHandle2(fldPlayerObject);
         evtUnitLightOn(unit);
         red = light->unitColorA[0] * 128.0f;
         green = light->unitColorA[1] * 128.0f;

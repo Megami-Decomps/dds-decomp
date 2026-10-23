@@ -195,7 +195,7 @@ extern struct sdfMemHandle_t *fldPlayerModelResource;
 
 extern u32 D_003898B8[];
 
-extern u32 fldPlayerObject;
+extern struct dds3Basic_t *fldPlayerObject;
 
 extern u32 D_00389858[];
 
@@ -314,7 +314,7 @@ extern void fldLoadNextFile_SetId_BtlRet(s32 area, s32 floor);
 
 void fldUnloadPlayerModel(void);
 
-extern void dds3ObjectBaseOffFlag(u32, s32);
+extern void dds3ObjectBaseOffFlag(void *object, u32 mask);
 
 
 extern void dds3RebuildObjectModelContext(dds3Basic_t *object, s32 resourceGroup, s32 resourceId);
@@ -1076,7 +1076,7 @@ void fldRebuildFieldScene(void) {
             fldCreateChaseCameraObject();
             fldGlobalBase.targetGuideEnabled = 1;
         }
-        dds3SetActiveUnitSceneBasic(dds3GetControlScene(), (dds3Basic_t *)fldPlayerObject);
+        dds3SetActiveUnitSceneBasic(dds3GetControlScene(), fldPlayerObject);
         fldPreparePlayerSceneCameraTarget();
         fldCreateSecondaryWorldCamera();
         if (sceneWork->primaryState == 0) {
@@ -1227,7 +1227,7 @@ void fldTogglePlayerModel(void) {
     {
         FieldVec4 axis = D_00412EB0;
 
-        player = (dds3Basic_t *)fldPlayerObject;
+        player = fldPlayerObject;
         {
             sceneWork = &fldSceneParam;
             dds3GetPosPoseSet(player);
@@ -1235,7 +1235,7 @@ void fldTogglePlayerModel(void) {
             dds3GetRotPoseSet(player);
             VU0_STORE_VF_UNCLOBBERED(vf10, &sceneWork->rotation);
         }
-        dds3DeleteUnitObjectBasic((dds3Basic_t *)fldPlayerObject);
+        dds3DeleteUnitObjectBasic(fldPlayerObject);
         fldUnloadPlayerModel();
         /* Rebind the same local for the rebuild phase. Both definitions feed
          * real phase uses; the resulting two-definition pseudo stays global,
@@ -1253,9 +1253,9 @@ void fldTogglePlayerModel(void) {
         effMiscQuatMultiplyVU();
         VU0_STORE_VF_UNCLOBBERED(vf10, work);
     }
-    fldPlayerObject = (u32)dds3AddUnitObjectBasic(dds3AllocObjectId(), sceneWork, work);
-    dds3SetUnitObjectId((struct dds3Basic_t *)fldPlayerObject, (u32)D_00412EC0);
-    dds3SetActiveUnitSceneBasic(dds3GetControlScene(), (dds3Basic_t *)fldPlayerObject);
+    fldPlayerObject = dds3AddUnitObjectBasic(dds3AllocObjectId(), sceneWork, work);
+    dds3SetUnitObjectId(fldPlayerObject, (u32)D_00412EC0);
+    dds3SetActiveUnitSceneBasic(dds3GetControlScene(), fldPlayerObject);
     fldLoadPlayerModel();
     D_00435F40 = D_00435F44;
     D_00435F38 = sdfMemAllocDirect(D_00435F44);
@@ -1266,8 +1266,8 @@ void fldTogglePlayerModel(void) {
     mdlPackDecode(2, 0, 0x101, (s32)buffer, D_00435F40);
     sdfMemFreeDelayedDirect(D_00435F38);
     D_00435F38 = 0;
-    dds3RebuildObjectModelContext((dds3Basic_t *)fldPlayerObject, 2, fldSceneParam.sequenceWord3C);
-    fldPlayerModelContext = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle((dds3Basic_t *)fldPlayerObject);
+    dds3RebuildObjectModelContext(fldPlayerObject, 2, fldSceneParam.sequenceWord3C);
+    fldPlayerModelContext = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(fldPlayerObject);
     if (D_00389888[0] != 0) {
         mdlLoopMotion((dds3ModelHandle_t *)fldPlayerModelContext, 0, 2);
         mdlSetMotionSpeedEx((dds3ModelHandle_t *)fldPlayerModelContext, 1, 1.0f);
@@ -1320,9 +1320,9 @@ void fldSnapshotAndReleasePlayerSceneObject(void) {
     if (fldPlayerObject != 0) {
         if (dds3GetControlScene() != 0) {
             sceneWork = &fldSceneParam;
-            dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
+            dds3GetPosPoseSet(fldPlayerObject);
             VU0_STORE_VF(vf10, &sceneWork->position);
-            dds3GetRotPoseSet((dds3Basic_t *)fldPlayerObject);
+            dds3GetRotPoseSet(fldPlayerObject);
             VU0_STORE_VF(vf10, &sceneWork->rotation);
         }
         fldPlayerObject = 0;
@@ -1360,7 +1360,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
 
     if (fldPlayerObject != 0) {
         fldEncountSetFlag(0x40);
-        dds3ObjectBaseSetPrimaryControl((dds3Basic_t *)fldPlayerObject, fldPlayerCameraTargetNoPathUpdate);
+        dds3ObjectBaseSetPrimaryControl(fldPlayerObject, fldPlayerCameraTargetNoPathUpdate);
     }
     fldGlobalBase.cameraTargetGraceTicks = 4;
     if (fldGlobalBase.sceneMode < 4) {
@@ -1372,7 +1372,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
     fldGlobalBase.unk90 = -1;
     fldGlobalBase.unk94 = -1;
     fldUpdateCameraTarget();
-    dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
+    dds3GetPosPoseSet(fldPlayerObject);
     VU0_STORE_VF(vf10, position);
     position[1] += 10.0f;
     fldRefreshAreaStateFromPosition(position);
@@ -1381,7 +1381,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
 void fldResetPlayerSceneObjectState(void) {
     if (fldPlayerObject != 0) {
         fldEncountClearFlag(0x40);
-        dds3ObjectBaseSetPrimaryControl((dds3Basic_t *)fldPlayerObject, 0);
+        dds3ObjectBaseSetPrimaryControl(fldPlayerObject, 0);
     }
     D_00389858[0] = 4;
 }
@@ -1396,14 +1396,14 @@ void fldCreatePlayerObject(void) {
     memset(rotation, 0, sizeof(rotation));
     rotation[3] = 1.0f;
     if (fldPlayerObject == 0) {
-        fldPlayerObject = (u32)dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
-        dds3SetUnitObjectId((struct dds3Basic_t *)fldPlayerObject, (u32)D_00412EC0);
-        dds3SetActiveUnitSceneBasic(dds3GetControlScene(), (dds3Basic_t *)fldPlayerObject);
+        fldPlayerObject = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
+        dds3SetUnitObjectId(fldPlayerObject, (u32)D_00412EC0);
+        dds3SetActiveUnitSceneBasic(dds3GetControlScene(), fldPlayerObject);
         if (D_00435F30 != 0) {
             dds3ObjectBaseOffFlag(fldPlayerObject, 0x20);
         }
         fldPrepareResourceBuffer();
-        dds3RebuildObjectModelContext((dds3Basic_t *)fldPlayerObject, 2, D_0038A67C[0]);
+        dds3RebuildObjectModelContext(fldPlayerObject, 2, D_0038A67C[0]);
     }
 }
 
@@ -1454,18 +1454,18 @@ void fldSpawnPlayerUnits(f32 *input) {
         effMiscQuatMultiplyVU();
         VU0_STORE_VF(vf10, work);
 
-        player = (dds3Basic_t *)fldPlayerObject;
+        player = fldPlayerObject;
         if (player == NULL) {
             player = dds3AddUnitObjectBasic(dds3AllocObjectId(), input, work);
-            fldPlayerObject = (u32)player;
+            fldPlayerObject = player;
             dds3SetUnitObjectId(player, (u32)D_00412EC0);
-            dds3SetActiveUnitSceneBasic(dds3GetControlScene(), (dds3Basic_t *)fldPlayerObject);
+            dds3SetActiveUnitSceneBasic(dds3GetControlScene(), fldPlayerObject);
             if (D_00435F30 != 0) {
                 dds3ObjectBaseOffFlag(fldPlayerObject, 0x20);
             }
             fldPrepareResourceBuffer();
-            dds3RebuildObjectModelContext((dds3Basic_t *)fldPlayerObject, 2, D_0038A67C[0]);
-            player = (dds3Basic_t *)fldPlayerObject;
+            dds3RebuildObjectModelContext(fldPlayerObject, 2, D_0038A67C[0]);
+            player = fldPlayerObject;
         } else {
             dds3PoseSet_t *inner = player->inner;
             PCP_COPY_VECTOR_F32(inner->position, input);
@@ -1474,10 +1474,10 @@ void fldSpawnPlayerUnits(f32 *input) {
         }
 
         dds3SetPosPoseSet(player, (u128 *)input);
-        dds3SetRotPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)work);
-        dds3SetSclPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)unitScale);
-        fldPlayerModelContext = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle((dds3Basic_t *)(u32)fldPlayerObject);
-        dds3GetRadiusPoseSet((dds3Basic_t *)fldPlayerObject, 90.0f);
+        dds3SetRotPoseSet(fldPlayerObject, (u128 *)work);
+        dds3SetSclPoseSet(fldPlayerObject, (u128 *)unitScale);
+        fldPlayerModelContext = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(fldPlayerObject);
+        dds3GetRadiusPoseSet(fldPlayerObject, 90.0f);
 
         if (fldGlobalBase.playerModelAlternate == 0) {
             mdlLoopMotion(fldPlayerModelContext, 0, 2);
@@ -1510,9 +1510,9 @@ void fldSpawnPlayerUnits(f32 *input) {
         }
 
         if (fldSecondarySceneObject != 0) {
-            dds3ObjectBaseOnFlag((void *)fldPlayerObject, 0x400);
+            dds3ObjectBaseOnFlag(fldPlayerObject, 0x400);
         } else {
-            dds3ObjectBaseOnFlag((void *)fldPlayerObject, 0x200);
+            dds3ObjectBaseOnFlag(fldPlayerObject, 0x200);
         }
 
         if (fldGlobalBase.area < 0x14) {
@@ -1803,7 +1803,7 @@ s32 fldUpdateTravelAndEncounters(void) {
         !fldEncountTestFlag(0x40)) return 0;
     if (fldAutoMapSeqTestFlag(1) == 1) return 0;
     if (!dds3GetActiveScene()) return 0;
-    player = (dds3Basic_t *)fldPlayerObject;
+    player = fldPlayerObject;
     if (!player) return 0;
 
     dds3GetPosPoseSet(player);
@@ -2311,7 +2311,7 @@ s32 fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
         D_004360E8 = 1;
         if (fldEncountTestFlag(0x40) != 0 && fldEveHit_ChkEveHitAfter() != 0) return 0;
         if (fldEncountTestFlag(0x40) != 0 && fldGlobalBase.titleFade != 0) {
-            fldUpdateRoomTriggers((dds3Basic_t *)fldPlayerObject);
+            fldUpdateRoomTriggers(fldPlayerObject);
             break;
         }
         fldFinishDeferredExit();
@@ -2338,7 +2338,7 @@ s32 fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
             break;
         }
         fldUpdateCameraFrame();
-        if (fldEncountTestFlag(0x40) != 0) fldUpdateRoomTriggers((dds3Basic_t *)fldPlayerObject);
+        if (fldEncountTestFlag(0x40) != 0) fldUpdateRoomTriggers(fldPlayerObject);
         break;
     case 5:
         dds3VisibleSceneBasic(dds3GetActiveScene(), 0);
@@ -2635,4 +2635,3 @@ typedef char FieldSequenceRecord_enabled_offset_check[
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412FD0);
 
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412FE0);
-

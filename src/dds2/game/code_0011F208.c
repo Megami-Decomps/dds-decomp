@@ -2306,7 +2306,7 @@ INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F04);
 
 INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F08);
 
-INCLUDE_SDATA(const s32, "game/code_0011F208", fldPlayerObject);
+INCLUDE_SDATA(struct dds3Basic_t * const, "game/code_0011F208", fldPlayerObject);
 
 INCLUDE_SDATA(const s32, "game/code_0011F208", fldSecondarySceneObject);
 
