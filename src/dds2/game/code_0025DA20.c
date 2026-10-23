@@ -2610,7 +2610,7 @@ s32 evtIsFadeDispatchIdle(void) {
 /* Install a dispatch state table and point the popup at the shared terminal entry. */
 #define MNU_INSTALL_STATE_TABLE(ctx, table, entry) \
     do { \
-        (ctx)->stateTable = (s32)(table); \
+        (ctx)->popupTable = (MenuPopupEntry *)(table); \
         mnuSetPopupEntry(&(ctx)->popupState, (entry)); \
     } while (0)
 
@@ -3726,7 +3726,7 @@ s32 evtApplyDispatchModeState(dds3ProcessID_t *task) {
         mnuSetCommandPhase((MenuTerminalContext *)stateAddress, 6);
         break;
     case 2:
-        if (((MenuTerminalContext *)stateAddress)->stateTable != (s32)mnuShopCommandPopupEntries) {
+        if (((MenuTerminalContext *)stateAddress)->popupTable != (MenuPopupEntry *)mnuShopCommandPopupEntries) {
             mnuSetCommandPhase((MenuTerminalContext *)stateAddress, 5);
         }
         break;
@@ -3745,7 +3745,7 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(dds3ProcessID_t *callbackContext) {
     result = mnuDispatchPopupTransition(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, callbackContext);
     if (result == 0) {
         if ((*dispatchSlot == 0) && (result = fclChkMessage(), result == 0)) {
-            mnuSetPopupEntryFlagged(dispatchSlot, (void *)((MenuTerminalContext *)stateAddress)->stateTable);
+            mnuSetPopupEntryFlagged(dispatchSlot, ((MenuTerminalContext *)stateAddress)->popupTable);
         }
         result = 0;
     }
@@ -3780,7 +3780,7 @@ s32 mnuShopDrawMenuState(dds3ProcessID_t *callbackContext) {
         brsDrawResultIconPairWithAlpha((s32)state, 0x100, 3, 0x53);
         break;
     case 2:
-        if (state->stateTable == (s32)mnuShopCommandPopupEntries) {
+        if (state->popupTable == (MenuPopupEntry *)mnuShopCommandPopupEntries) {
             mnuDrawShopPanelWithTypeGraphic(0, 0, 0, state, 0x100, 0x53);
             mnuDrawTerminalPanelListRows(0, 0, 0, state, 0x100, 0x53);
             mnuDrawListChildrenWithCountdown(

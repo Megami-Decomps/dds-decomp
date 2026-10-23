@@ -729,7 +729,7 @@ typedef struct MenuTerminalContext {
     s32 type;
     MenuPopupState transitionWork;
     s32 popupState;
-    s32 stateTable;
+    MenuPopupEntry *popupTable;
     EvtResourcePair messageResources;
     struct EffectSlotSet *effectSlots[4];
     s32 state;

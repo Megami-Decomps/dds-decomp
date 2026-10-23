@@ -1049,7 +1049,7 @@ s32 mnuOpenTerminalPopupForAction(s32 action, s32 context) {
     switch (action) {
     case 3:
         if (work->list->count == 0) {
-            work->dispatchTable = (u32)mnuTerminalPopupEntries;
+            work->popupTable = (MenuPopupEntry *)mnuTerminalPopupEntries;
             mnuSetPopupEntry(&work->popupState, mnuTerminalPopupEntries + 0xC4);
             work->panelMode = 1;
             **(u32 **)&work->popupState |= 0x20000;
@@ -1058,7 +1058,7 @@ s32 mnuOpenTerminalPopupForAction(s32 action, s32 context) {
         break;
     case 2:
         if (work->owner->count == 0) {
-            work->dispatchTable = (u32)mnuTerminalPopupEntries;
+            work->popupTable = (MenuPopupEntry *)mnuTerminalPopupEntries;
             mnuSetPopupEntry(&work->popupState, mnuTerminalPopupEntries + 0xC4);
             work->panelMode = 2;
             **(u32 **)&work->popupState |= 0x20000;
@@ -2317,7 +2317,7 @@ s32 evtBContinueDispatchOrRestoreTable(dds3ProcessID_t *input) {
     dispatchResult = menuRunPanel((void *)context, 0, input);
     if (dispatchResult == 0) {
         if ((*dispatchState == 0) && (dispatchResult = fclChkMessage(), dispatchResult == 0)) {
-            mnuSetPopupEntry(dispatchState, ((MenuTerminalWork *)context)->dispatchTable);
+            mnuSetPopupEntry(dispatchState, ((MenuTerminalWork *)context)->popupTable);
         }
         dispatchResult = 0;
     }

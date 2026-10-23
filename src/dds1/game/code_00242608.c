@@ -2118,7 +2118,7 @@ s32 evtIsFadeDispatchIdle(void) {
 /* Install a dispatch state table and point the popup at the shared shop entry. */
 #define MNU_INSTALL_STATE_TABLE(ctx, table, entry) \
     do { \
-        (ctx)->stateTable = (s32)(table); \
+        (ctx)->popupTable = (MenuPopupEntry *)(table); \
         mnuSetPopupEntry(&(ctx)->dispatchState, (void *)(entry)); \
     } while (0)
 
@@ -3001,7 +3001,7 @@ s32 evtApplyDispatchModeState(dds3ProcessID_t *task) {
         mnuSetCommandPhase(state, 6);
         break;
     case 2:
-        if (state->stateTable != (s32)mnuShopCommandPopupEntries) {
+        if (state->popupTable != (MenuPopupEntry *)mnuShopCommandPopupEntries) {
             mnuSetCommandPhase(state, 5);
         }
         break;
@@ -3021,7 +3021,7 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(dds3ProcessID_t *callbackContext) {
     result = menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_POLL, callbackContext);
     if (result == 0) {
         if ((*dispatchSlot == 0) && (result = fclChkMessage(), result == 0)) {
-            mnuSetPopupEntryFlagged(dispatchSlot, (void *)(u32)(((ShopScene *)stateAddress)->stateTable));
+            mnuSetPopupEntryFlagged(dispatchSlot, ((ShopScene *)stateAddress)->popupTable);
         }
         result = 0;
     }
@@ -3048,7 +3048,7 @@ s32 mnuShopDrawMenuState(dds3ProcessID_t *callbackContext) {
         brsDrawResultIconPairWithAlpha((s32)state, 0x100, 3, 0x53);
         break;
     case 2:
-        if (state->stateTable == (s32)mnuShopCommandPopupEntries) {
+        if (state->popupTable == (MenuPopupEntry *)mnuShopCommandPopupEntries) {
             mnuDrawShopPanelWithPulsingIcon(0, 0, 0, state, 0x100, 0x53);
             mnuDrawStatusIconAndCompanion(0, 0, 0, state, 0x100, 0x53);
             mnuDrawListChildrenWithCountdown(0, 0, 0, state->ownedWindows[0]->list, 0x53);

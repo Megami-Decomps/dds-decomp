@@ -16,7 +16,7 @@ typedef struct MenuTerminalWork {
     u32 initFlags;          /* 0x04: entry initialization bits */
     MenuPopupState transitionWork; /* 0x08 */
     s32 popupState;         /* 0x54 */
-    u32 dispatchTable;       /* 0x58 */
+    MenuPopupEntry *popupTable; /* 0x58 */
     EvtResourcePair messageResources; /* 0x5C: loader handle and message data address */
     EffectSlotSet *resourceSets[2]; /* 0x64: the two loaded terminal sprite sets. */
     EffectSlotSet *alternateBatch; /* 0x6C */

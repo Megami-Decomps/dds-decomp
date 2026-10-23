@@ -175,7 +175,7 @@ typedef struct ShopScene {
     u8 pad04[4];
     MenuPopupState transitionWork;
     s32 dispatchState;
-    s32 stateTable;
+    MenuPopupEntry *popupTable;
     EvtResourcePair messageResource;
     struct EffectSlotSet *spriteResource;
     s32 batchState;
