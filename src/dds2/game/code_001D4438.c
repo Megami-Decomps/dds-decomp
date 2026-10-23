@@ -3545,14 +3545,12 @@ extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *, f32);
 
 /* After owned tasks finish, queue ailment damage, penalties and their effects. */
-void btlProcessPostActionStatusEffects(void *data) {
+void btlProcessPostActionStatusEffects(ActionStateLink *action) {
     BtlOperandEntry spec;
     s32 amount;
     BtlUnit *unit;
     BtlRuntimeTask *deltaTask;
     BtlRuntimeTask *effectTask;
-    ActionStateLink *action = data;
-
     if (btlCountTasksByKind(0x49) != 0) return;
     if (btlCountTasksByKind(0x4A) != 0) return;
     if (btlCountTasksByKind(0x4B) != 0) return;
