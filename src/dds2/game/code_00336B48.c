@@ -92,14 +92,14 @@ void sdfPostmultiplyVuMatrixFromMemory(const void *matrix) {
 }
 
 /* Transform inputVector by the matrix resident in VU0; write outputVector. */
-void ApplyMatrix(void *outputVector, void *inputVector) {
+void ApplyMatrix(f32 *outputVector, const f32 *inputVector) {
     SDF_VU0_LOADVECTOR(inputVector);
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_STOREVECTOR(outputVector);
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-f32 InnerProduct(void *left, void *right) {
+f32 InnerProduct(const f32 *left, const f32 *right) {
     f32 dot;
     SDF_VU0_LOADVECTOR(left);
     SDF_VU0_LOADVECTOR_B(right);
@@ -108,7 +108,7 @@ f32 InnerProduct(void *left, void *right) {
 }
 
 /* Write the XYZ cross product of leftVector and rightVector via VU0. */
-void OuterProduct(void *outputVector, void *leftVector, void *rightVector) {
+void OuterProduct(f32 *outputVector, const f32 *leftVector, const f32 *rightVector) {
     SDF_VU0_LOADVECTOR(leftVector);
     SDF_VU0_LOADVECTOR_B(rightVector);
     SDF_VU0_OUTERPRODUCT();
