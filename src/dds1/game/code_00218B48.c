@@ -9,6 +9,7 @@
 #include "sdf_packet_builders.h"
 #include "sdf_bordered_rectangle_packet.h"
 #include "common.h"
+#include "dds3_object_flags.h"
 #include "mdl_option_label.h"
 #include "eff_inner_float_api.h"
 #include "mdl_light_editor_state.h"
@@ -3784,7 +3785,6 @@ extern void dds3RebuildObjectModelContext(dds3Basic_t *object, s32, s32);
 
 extern dds3Basic_t *dds3AddUnitObjectBasic(s32 counter, void *position, void *rotation);
 
-extern void dds3ObjectBaseOnFlag(void *object, s32 flags);
 
 s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     f32 position[4];

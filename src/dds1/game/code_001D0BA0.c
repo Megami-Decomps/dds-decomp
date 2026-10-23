@@ -5,6 +5,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "dds3_object_flags.h"
 #include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_raise_party_record_status_value.h"
@@ -2326,9 +2327,7 @@ extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
 
 #include "dds3_world_primary.h"
 
-extern void dds3ObjectBaseOffFlag(void *, s32);
 
-extern void dds3ObjectBaseOnFlag(void *, s32);
 
 extern void mdlSetEffectScale(dds3ModelHandle_t *, f32);
 

@@ -6,6 +6,7 @@
 #include "fld_area_encounter_table.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "dds3_object_flags.h"
 #include "sdf_trig.h"
 #include "sdf_vu_matrix.h"
 #include "fld_scene_status_api.h"
@@ -315,7 +316,6 @@ extern void fldLoadNextFile_SetId_BtlRet(s32 area, s32 floor);
 
 void fldUnloadPlayerModel(void);
 
-extern void dds3ObjectBaseOffFlag(void *object, u32 mask);
 
 
 extern void dds3RebuildObjectModelContext(dds3Basic_t *object, s32 resourceGroup, s32 resourceId);
@@ -1408,7 +1408,6 @@ void fldCreatePlayerObject(void) {
 
 extern void FromRotation(f32);
 
-extern void dds3ObjectBaseOnFlag(void *, u32);
 
 extern void fldResetCameraModelHandles(void);
 

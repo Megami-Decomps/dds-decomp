@@ -1528,8 +1528,8 @@ void evtViewApplyMovieModeKeys(EvtRuntimeGroup *track, s32 time) {
     u32 objectMode = 0;
     u32 unitMode = 2;
     s32 pass;
-    s32 setFlags = 0;
-    s32 clearFlags = 0;
+    u32 setFlags = 0;
+    u32 clearFlags = 0;
     evtUnitHandle_t *unit = NULL;
     EvtRuntimeChild *key;
 

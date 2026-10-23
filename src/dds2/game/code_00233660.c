@@ -8,6 +8,7 @@
 #include "sdf_packet_builders.h"
 #include "sdf_bordered_rectangle_packet.h"
 #include "common.h"
+#include "dds3_object_flags.h"
 #include "mdl_option_label.h"
 #include "eff_inner_float_api.h"
 #include "mdl_light_editor_state.h"
@@ -199,7 +200,6 @@ typedef struct MdlCountNode {
 
 extern dds3Basic_t *dds3AddUnitObjectBasic(s32 world, void *pos, void *rot);
 
-extern void dds3ObjectBaseOnFlag(s32 obj, u32 flags);
 
 
 extern void dds3RebuildObjectModelContext(dds3Basic_t *obj, s32 a, s32 b);
@@ -3843,7 +3843,7 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     rot[3] = 1.0f;
     world = dds3AllocObjectId();
     obj = dds3AddUnitObjectBasic(world, pos, rot);
-    dds3ObjectBaseOnFlag((u32)obj, 0x20);
+    dds3ObjectBaseOnFlag(obj, 0x20);
     dds3GetRadiusPoseSet(obj, 10.0f);
     dds3RebuildObjectModelContext(obj, slotKind, resource);
     if (((dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(obj))->first != NULL) {
@@ -3868,14 +3868,14 @@ s32 evtLoadUnit(s32 slotKind, s32 resource) {
     rot[3] = 1.0f;
     world = dds3AllocObjectId();
     obj = dds3AddUnitObjectBasic(world, pos, rot);
-    dds3ObjectBaseOnFlag((u32)obj, 0x20);
+    dds3ObjectBaseOnFlag(obj, 0x20);
     dds3GetRadiusPoseSet(obj, 10.0f);
     dds3RebuildObjectModelContext(obj, slotKind, resource);
     mdlLoopMotion((dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(obj), 0, 0);
     dds3ObjectBaseSetControlBasic(obj, dds3SearchSceneBasic(dds3GetControlScene(), 0x10000, 2));
     dds3ObjectBaseRegistArea(obj);
     dds3ObjectBaseSetPadControl(obj, 0);
-    dds3ObjectBaseOnFlag((u32)obj, 0x400);
+    dds3ObjectBaseOnFlag(obj, 0x400);
     return world;
 }
 

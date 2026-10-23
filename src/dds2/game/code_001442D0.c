@@ -13,6 +13,7 @@
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "common.h"
+#include "dds3_object_flags.h"
 #include "snd_track_playback_api.h"
 #include "sdf_vu_matrix.h"
 #include "fld_scene_ready_api.h"
@@ -437,7 +438,6 @@ extern s32 D_0043630C;
 
 extern s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
 
-extern void dds3ObjectBaseOnFlag();
 
 
 
@@ -445,7 +445,6 @@ extern FldSparkSlot fldSparkSlots[];
 
 
 
-extern void dds3ObjectBaseOffFlag();
 
 extern SdfMathVector4 D_00413DE8;
 

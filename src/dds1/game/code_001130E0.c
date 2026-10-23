@@ -47,7 +47,6 @@ enum {
 #include "dds3_world_secondary.h"
 extern void dds3FreePoseSet(dds3Basic_t *node);
 extern void dds3UnitObjectBasicEL_LinkFree(dds3Basic_t *object);
-extern void dds3ObjectBaseOnFlag(void *, s32);
 
 u32 dds3GetStatusUnitObjectBasic(dds3Basic_t *obj) {
     return (u32)((EffectObjectData *)obj->data)->handle;
@@ -137,7 +136,6 @@ void effObjStepFollowAngleTowardPosition(dds3Basic_t *obj, const f32 *targetPosi
     data->word34 = 0;
 }
 
-extern void dds3ObjectBaseOffFlag(void *, s32);
 
 void effObjStepFollowAngleTowardZero(dds3Basic_t *object) {
     EffectObjectData *data = object->data;
