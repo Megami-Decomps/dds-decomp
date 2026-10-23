@@ -191,7 +191,7 @@ extern s32 D_00435F70;
 
 extern FieldPlayerSceneWork fldSceneParam;
 
-extern u32 fldPlayerModelResource;
+extern struct sdfMemHandle_t *fldPlayerModelResource;
 
 extern u32 D_003898B8[];
 
@@ -1144,42 +1144,42 @@ void fldLoadPlayerModel(void) {
     } else {
         model = fldGlobalBase.playerModelAlternate != 0;
     }
-    if (fldGlobalBase.playerModelVariant != model || fldPlayerModelResource == 0) {
-        if (fldPlayerModelResource != 0) {
+    if (fldGlobalBase.playerModelVariant != model || fldPlayerModelResource == NULL) {
+        if (fldPlayerModelResource != NULL) {
             fldUnloadPlayerModel();
         }
         switch (model) {
         case 0:
             if (evtBitCheck(0x31)) {
-                fldPlayerModelResource = (u32)sdfDevLoadFileEx("/model/field/player_13.PB", &D_00435F3C, &D_00435F44);
+                fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_13.PB", &D_00435F3C, &D_00435F44);
             } else if (evtBitCheck(0x25)) {
-                fldPlayerModelResource = (u32)sdfDevLoadFileEx("/model/field/player_d.PB", &D_00435F3C, &D_00435F44);
+                fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_d.PB", &D_00435F3C, &D_00435F44);
             } else if (evtBitCheck(0x1C)) {
-                fldPlayerModelResource = (u32)sdfDevLoadFileEx("/model/field/player_11.PB", &D_00435F3C, &D_00435F44);
+                fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_11.PB", &D_00435F3C, &D_00435F44);
             } else if (evtBitCheck(0x13)) {
-                fldPlayerModelResource = (u32)sdfDevLoadFileEx("/model/field/player_f.PB", &D_00435F3C, &D_00435F44);
+                fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_f.PB", &D_00435F3C, &D_00435F44);
             } else if (evtBitCheck(0x290)) {
-                fldPlayerModelResource = (u32)sdfDevLoadFileEx("/model/field/player_d.PB", &D_00435F3C, &D_00435F44);
+                fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_d.PB", &D_00435F3C, &D_00435F44);
             } else {
-                fldPlayerModelResource = (u32)sdfDevLoadFileEx("/model/field/player_a.PB", &D_00435F3C, &D_00435F44);
+                fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_a.PB", &D_00435F3C, &D_00435F44);
             }
             break;
         case 1:
-            fldPlayerModelResource = (u32)sdfDevLoadFileEx("/model/field/player_b.PB", &D_00435F3C, &D_00435F44);
+            fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_b.PB", &D_00435F3C, &D_00435F44);
             break;
         default:
             if (evtBitCheck(0x31)) {
-                fldPlayerModelResource = (u32)sdfDevLoadFileEx("/model/field/player_13.PB", &D_00435F3C, &D_00435F44);
+                fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_13.PB", &D_00435F3C, &D_00435F44);
             } else if (evtBitCheck(0x25)) {
-                fldPlayerModelResource = (u32)sdfDevLoadFileEx("/model/field/player_e.PB", &D_00435F3C, &D_00435F44);
+                fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_e.PB", &D_00435F3C, &D_00435F44);
             } else if (evtBitCheck(0x1C)) {
-                fldPlayerModelResource = (u32)sdfDevLoadFileEx("/model/field/player_12.PB", &D_00435F3C, &D_00435F44);
+                fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_12.PB", &D_00435F3C, &D_00435F44);
             } else if (evtBitCheck(0x13)) {
-                fldPlayerModelResource = (u32)sdfDevLoadFileEx("/model/field/player_10.PB", &D_00435F3C, &D_00435F44);
+                fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_10.PB", &D_00435F3C, &D_00435F44);
             } else if (evtBitCheck(0x290)) {
-                fldPlayerModelResource = (u32)sdfDevLoadFileEx("/model/field/player_e.PB", &D_00435F3C, &D_00435F44);
+                fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_e.PB", &D_00435F3C, &D_00435F44);
             } else {
-                fldPlayerModelResource = (u32)sdfDevLoadFileEx("/model/field/player_l.PB", &D_00435F3C, &D_00435F44);
+                fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_l.PB", &D_00435F3C, &D_00435F44);
             }
             break;
         }
@@ -1188,9 +1188,9 @@ void fldLoadPlayerModel(void) {
 }
 
 void fldUnloadPlayerModel(void) {
-    if (fldPlayerModelResource != 0) {
-        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldPlayerModelResource);
-        fldPlayerModelResource = 0;
+    if (fldPlayerModelResource != NULL) {
+        sdfMemFreeDelayedDirect(fldPlayerModelResource);
+        fldPlayerModelResource = NULL;
         D_003898B8[0] = 0;
     }
 }
@@ -1259,7 +1259,7 @@ void fldTogglePlayerModel(void) {
     fldLoadPlayerModel();
     D_00435F40 = D_00435F44;
     D_00435F38 = sdfMemAllocDirect(D_00435F44);
-    source = (void *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)fldPlayerModelResource);
+    source = (void *)sdfMemGetPtr(fldPlayerModelResource);
     buffer = (void *)sdfMemGetPtr(D_00435F38);
     memcpy(buffer, source, D_00435F40);
     D_00435F3C = (u32)buffer;
@@ -1289,7 +1289,7 @@ void fldPrepareResourceBuffer(void) {
     fldLoadPlayerModel();
     D_00435F40 = D_00435F44;
     D_00435F38 = sdfMemAllocDirect(D_00435F44);
-    source = (void *)sdfMemGetPtr((struct sdfMemHandle_t *)(u32)fldPlayerModelResource);
+    source = (void *)sdfMemGetPtr(fldPlayerModelResource);
     buffer = (void *)sdfMemGetPtr(D_00435F38);
     memcpy(buffer, source, D_00435F40);
     D_00435F3C = (u32)buffer;
