@@ -925,7 +925,7 @@ s32 itfMesMngGetWidth(s32 window, s32 entryIndex, s32 itemIndex) {
     }
     encodedText = GetMessagePagePtr(table, itemIndex);
     if (encodedText == 0) {
-        return encodedText;
+        return 0;
     }
     glyphChain = MessageRequest(0, 0, encodedText, 0);
     textExtent = GetMessageWidth(glyphChain);
