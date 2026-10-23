@@ -686,8 +686,8 @@ void btlUpdateNonActionState(void) {
 }
 
 /* Enter STANDBY DEAD by clearing this action's pre-status-processing flag. */
-void btlEnterStandbyDeadState(s32 task) {
-    ((ActionStateLink *)task)->pendingFlags = ((ActionStateLink *)task)->pendingFlags & 0xfffffdff;
+void btlEnterStandbyDeadState(ActionStateLink *task) {
+    task->pendingFlags = task->pendingFlags & 0xfffffdff;
 }
 
 extern void btlFlagUnitDefeatCandidate(BtlUnit *);
@@ -740,8 +740,8 @@ void btlReleaseIdleUnitSoundAndAdvanceTask(ActionStateLink *task) {
 }
 
 /* Initialize the retail STANDBY action flags without changing their bit meanings. */
-void btlEnterStandbyState(s32 task) {
-    ((ActionStateLink *)task)->pendingFlags = (((ActionStateLink *)task)->pendingFlags | 0x10) & ~0x200;
+void btlEnterStandbyState(ActionStateLink *task) {
+    task->pendingFlags = (task->pendingFlags | 0x10) & ~0x200;
 }
 
 void btlUnitStateSelectAfterAction(u8 *task) {
@@ -769,8 +769,8 @@ void btlUnitStateSelectAfterAction(u8 *task) {
 }
 
 /* Enter the retail START state by clearing action flag 0x10. */
-void btlEnterStartActionState(s32 task) {
-    ((ActionStateLink *)task)->pendingFlags = ((ActionStateLink *)task)->pendingFlags & 0xffffffef;
+void btlEnterStartActionState(ActionStateLink *task) {
+    task->pendingFlags = task->pendingFlags & 0xffffffef;
 }
 
 extern s32 btlBothSidesActive(BtlUnit *);

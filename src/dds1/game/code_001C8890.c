@@ -299,8 +299,8 @@ void btlUpdateNonActionState(void) {
 }
 
 /* Enter STANDBY DEAD by clearing this action's pre-status-processing flag. */
-void btlEnterStandbyDeadState(s32 task) {
-    *(u32 *)(task + 8) = *(u32 *)(task + 8) & 0xfffffdff;
+void btlEnterStandbyDeadState(BtlTask *task) {
+    task->flags = task->flags & 0xfffffdff;
 }
 
 void btlReleaseIdleUnitSoundAndAdvanceTask(BtlTask *task) {
@@ -335,8 +335,8 @@ void btlReleaseIdleUnitSoundAndAdvanceTask(BtlTask *task) {
 }
 
 /* Initialize the retail STANDBY action flags without changing their bit meanings. */
-void btlEnterStandbyState(s32 task) {
-    *(u32 *)(task + 8) = (*(u32 *)(task + 8) | 0x10) & ~0x200;
+void btlEnterStandbyState(BtlTask *task) {
+    task->flags = (task->flags | 0x10) & ~0x200;
 }
 
 void btlTaskUpdateFlags(BtlTask *task) {
@@ -362,8 +362,8 @@ void btlTaskUpdateFlags(BtlTask *task) {
 }
 
 /* Enter the retail START state by clearing action flag 0x10. */
-void btlEnterStartActionState(s32 task) {
-    *(u32 *)(task + 8) = *(u32 *)(task + 8) & 0xffffffef;
+void btlEnterStartActionState(BtlTask *task) {
+    task->flags = task->flags & 0xffffffef;
 }
 
 void btlActionSeqCheckDispatch(u8 *task) {
