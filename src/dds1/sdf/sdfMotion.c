@@ -64,7 +64,7 @@ sdfMotionCtrlr_t *sdfMotionCtrlrNew(sdfModelRootNode_t *model, MotionTable *tabl
     for (commandIndex = 0, command = motion->motionTable->commands;
          commandIndex < commandCount;
          commandIndex++, command++) {
-        ((void **)motion->request->buffer)[commandIndex] =
+        ((SdfMotionBindingHead **)motion->request->buffer)[commandIndex] =
             sdfMotionNodeNew(motion, command->packedCommand, command->targetIndex);
     }
     motion->state = SDF_MOTION_STATE_UNINITIALIZED;
@@ -79,7 +79,7 @@ void sdfMotionCtrlrFree(sdfMotionCtrlr_t *node)
     sdfMotionCtrlr_t **prev;
     sdfMotionCtrlr_t *cur;
     DevRequest *request;
-    void **bindings;
+    SdfMotionBindingHead **bindings;
     s32 bindingCount;
     s32 i;
 
@@ -98,7 +98,7 @@ void sdfMotionCtrlrFree(sdfMotionCtrlr_t *node)
     }
     request = node->request;
     bindingCount = request->usedCount;
-    bindings = request->buffer;
+    bindings = (SdfMotionBindingHead **)request->buffer;
     for (i = 0; i < bindingCount; i++) {
         sdfMotionNodeFree(bindings[i]);
     }
@@ -119,7 +119,7 @@ void sdfMotionChangeBlend(sdfMotionCtrlr_t *motion, s32 motionIndex, s32 loopEna
         motion->blendDurationFrames = blendDurationFrames;
         motion->blendStartFrame = -blendLeadFrames;
         for (i = 0; i < motion->request->usedCount; i++) {
-            binding = ((void **)motion->request->buffer)[i];
+            binding = ((SdfMotionBindingHead **)motion->request->buffer)[i];
             binding->dispatch->capturePrevious(binding);
         }
     } else {
@@ -140,7 +140,7 @@ void sdfMotionChangeBlend(sdfMotionCtrlr_t *motion, s32 motionIndex, s32 loopEna
     motion->frameCount = entry->frameCount;
     bindingData = (u8 *)entry->bindingData;
     for (i = 0; i < motion->request->usedCount; i++) {
-        binding = ((void **)motion->request->buffer)[i];
+        binding = ((SdfMotionBindingHead **)motion->request->buffer)[i];
         binding->dispatch->bindKeyTrack(binding, (SdfMotionKeyTrack *)bindingData);
         bindingData += ((SdfMotionKeyTrack *)bindingData)->nextTrackOffsetBytes;
     }
@@ -173,13 +173,13 @@ void sdfMotionSeek(sdfMotionCtrlr_t *motion, f32 frame) {
             frame = 0.0f;
         }
         for (i = 0; i < motion->request->usedCount; i++) {
-            binding = ((void **)motion->request->buffer)[i];
+            binding = ((SdfMotionBindingHead **)motion->request->buffer)[i];
             binding->dispatch->blend(binding, frame, weight);
         }
     } else {
         count = motion->request->usedCount;
         for (i = 0; i < count; i++) {
-            binding = ((void **)motion->request->buffer)[i];
+            binding = ((SdfMotionBindingHead **)motion->request->buffer)[i];
             binding->dispatch->sample(binding, frame);
         }
     }
