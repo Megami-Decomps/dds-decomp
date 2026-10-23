@@ -7,7 +7,8 @@
 #include "fld_scene_record.h"
 #include "dds3_path.h"
 #include "dds3_slot1_handler_api.h"
-extern const char *fldEveHitResName_Find(u32 task);
+struct dds3ProcessID_t;
+extern const char *fldEveHitResName_Find(struct dds3ProcessID_t *task);
 extern void fldApplyCurrentTaskScene(const char *name);
 #include "sdf.h"
 #include "fpu.h"
@@ -37,7 +38,7 @@ extern s32 scrGetIntPara(s32);
 extern void fldDispatchSceneAction(u32 action);
 
 
-extern s32 fldFindEveRngIndex(u32);
+extern s32 fldFindEveRngIndex(struct dds3ProcessID_t *task);
 
 extern u32 fldDamEffectResource;
 
@@ -195,7 +196,7 @@ extern void evtSetSolarOverlayFullyVisible(void);
 
 void fldNpcHojiRefresh(void);
 
-extern s32 fldEveHitResID_Find(u32 task);
+extern s32 fldEveHitResID_Find(struct dds3ProcessID_t *task);
 extern s32 fldResolvePendingTitleBanner(void);
 
 s32 fldCmdQueryActorEntrySceneStatus(void) {
@@ -208,7 +209,7 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find((u32)scrGetScriptHandle()->task), 0x11);
+    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find(scrGetScriptHandle()->task), 0x11);
     if (entry == 0) {
         scrSetIntReturnValue(0);
         return 1;
@@ -242,7 +243,7 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find((u32)scrGetScriptHandle()->task), 0x11);
+    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find(scrGetScriptHandle()->task), 0x11);
     if (entry == 0) {
         scrSetIntReturnValue(0);
         return 1;
@@ -293,7 +294,7 @@ s32 fldCmdTestActorEntryCondition(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find((u32)scrGetScriptHandle()->task), 0x11);
+    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find(scrGetScriptHandle()->task), 0x11);
     if (entry == 0) {
         scrSetIntReturnValue(0);
         return 1;
@@ -1118,7 +1119,7 @@ s32 fldCommand_FLD_CHK_EVE(void) {
 extern FldActivationEntry D_0034C8F0[];
 
 s32 fldCmdPushSceneParam(void) {
-    s32 room = fldFindEveRngIndex((u32)scrGetScriptHandle()->task);
+    s32 room = fldFindEveRngIndex(scrGetScriptHandle()->task);
 
     switch (scrGetIntPara(0)) {
     case 0:
@@ -1148,13 +1149,13 @@ u32 fldCommand_FLD_SET_TAKARA_OPEN(void) {
     s32 room;
 
     script = scrGetScriptHandle();
-    room = fldFindEveRngIndex((u32)script->task);
+    room = fldFindEveRngIndex(script->task);
     fldActivateFlaggedObject(room);
     return 1;
 }
 
 u32 fldCommand_FLD_CHK_TAKARA_OPEN(void) {
-    if (fldTestObjectActivationFlag(fldFindEveRngIndex((u32)scrGetScriptHandle()->task)) != 0) {
+    if (fldTestObjectActivationFlag(fldFindEveRngIndex(scrGetScriptHandle()->task)) != 0) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);
@@ -1169,7 +1170,7 @@ u32 fldCmdSetCurrentTaskScene(void) {
         fldApplyCurrentTaskScene(0);
         return 1;
     }
-    scene = fldEveHitResName_Find((u32)scrGetScriptHandle()->task);
+    scene = fldEveHitResName_Find(scrGetScriptHandle()->task);
     if (scene) {
         fldApplyCurrentTaskScene(scene);
     }

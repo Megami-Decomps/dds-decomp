@@ -9,7 +9,7 @@ struct evtUnitHandle_t;
 
 
 
-extern const char *fldEveHitResName_Find(u32 key);
+extern const char *fldEveHitResName_Find(dds3ProcessID_t *task);
 
 extern void fldDoor_ExitCamera(const char *entry);
 
@@ -65,7 +65,7 @@ s32 fldCommand_FLD_WARP_GET_DOOR(void) {
     return 1;
 }
 
-extern s32 fldEveHitResID_Find(u32 task);
+extern s32 fldEveHitResID_Find(dds3ProcessID_t *task);
 extern void fldApplyActorEntryTrigger(s32 checkTaskRecord);
 
 u32 fldCommand_FLD_WARP_RUN_START(void) {
@@ -73,7 +73,7 @@ u32 fldCommand_FLD_WARP_RUN_START(void) {
     if (fldDoor_ChkWarp()) {
         scene = 0;
     } else {
-        scene = fldEveHitResID_Find((u32)scrGetScriptHandle()->task);
+        scene = fldEveHitResID_Find(scrGetScriptHandle()->task);
     }
     fldApplyActorEntryTrigger(scene);
     return 1;
@@ -188,7 +188,7 @@ s32 fldCommand_FLD_SET_ENCOUNT(void) {
 /* Look up the command's task record before applying its associated entry. */
 s32 fldCommand_FLD_EXIT_CAMERA(void) {
     scrProcessWork_s *command = scrGetScriptHandle();
-    const char *record = fldEveHitResName_Find((u32)command->task);
+    const char *record = fldEveHitResName_Find(command->task);
 
     if (record != NULL) {
         fldDoor_ExitCamera(record);
