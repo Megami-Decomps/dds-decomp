@@ -204,7 +204,7 @@ extern s32 D_003D62A8[];
 
 extern s32 fldCurrentBgmId[];
 
-extern void p2sdStopSe();
+extern void p2sdStopSe(u32 soundId);
 
 
 
@@ -446,7 +446,6 @@ void fldPlayPendingSounds(void) {
 }
 
 extern f32 fldCamTarget[];
-extern void p2sdStopSe(u32);
 extern s32 D_003BAE90;
 extern s32 D_003BAE94;
 extern f32 fldLookAtNearPoint[];
