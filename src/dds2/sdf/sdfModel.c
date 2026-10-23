@@ -639,7 +639,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, sdfModelRootNode_t
                 lightingPacket->lightingCommand = 0x6E01C002;
                 lightingPacket->color = color;
                 lightingPacket->command = 0x6003C003;
-                lightingPacket->modelScalar = (*(u32 *)&model->modelScale);
+                *(u32 *)&lightingPacket->modelScale = *(u32 *)&model->modelScale;
                 lightingPacket->firstScalar = firstScalar;
                 lightingPacket->secondScalar = secondScalar;
                 lightingPacket->finalCommand = 0x04000004;

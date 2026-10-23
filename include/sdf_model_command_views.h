@@ -34,7 +34,7 @@ typedef struct SdfModelLightingCallPacket {
     u32 lightingCommand;
     s32 color;
     u32 command;
-    u32 modelScalar;
+    f32 modelScale;
     f32 firstScalar;
     f32 secondScalar;
     u32 finalCommand;
@@ -45,6 +45,8 @@ typedef char SdfModelLightingCallPacket_size[
     (sizeof(SdfModelLightingCallPacket) == 0x40) ? 1 : -1];
 typedef char SdfModelLightingCallPacket_secondHeader_at_0x18[
     ((u32)&((SdfModelLightingCallPacket *)0)->secondHeader == 0x18) ? 1 : -1];
+typedef char SdfModelLightingCallPacket_modelScale_at_0x2C[
+    ((u32)&((SdfModelLightingCallPacket *)0)->modelScale == 0x2C) ? 1 : -1];
 typedef char SdfModelLightingCallPacket_finalAddress_at_0x3C[
     ((u32)&((SdfModelLightingCallPacket *)0)->finalAddress == 0x3C) ? 1 : -1];
 
