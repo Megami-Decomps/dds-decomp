@@ -2408,9 +2408,11 @@ u32 btlScriptReturnTurnCount(void) {
 /* Actor +0x134 is partyRecord.level, not an action timer; return VM success. */
 u32 btlScriptReturnActorLevel(void) {
     void *context;
+    BtlUnit *actor;
 
     context = scrGetData();
-    scrSetIntReturnValue(*(u16 *)(*(s32 *)((u8 *)context + 0x18) + 0x134));
+    actor = (BtlUnit *)((BtlCommandContext *)context)->actor;
+    scrSetIntReturnValue(actor->partyRecord.level);
     return 1;
 }
 
