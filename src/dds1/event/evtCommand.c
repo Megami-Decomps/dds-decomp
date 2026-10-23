@@ -100,7 +100,7 @@ s32 evtPathLinkAndMake(dds3Basic_t *target, dds3Basic_t *path);
 
 void evtPathRate(dds3Basic_t *unit, f32 value);
 
-s32 fldCommand_GetHojiID(char *name);
+s32 fldCommand_GetHojiID(const char *name);
 
 void fldSetMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled);
 
@@ -861,7 +861,7 @@ s32 evtCommand_OBJ_PATH_MOVE(void) {
     case 0:
         dds3PathBasicControlAlterMode(&path->counter, 0);
         if (target->value != 0) {
-            roomNumber = fldCommand_GetHojiID((char *)target->value);
+            roomNumber = fldCommand_GetHojiID(target->value);
             if (roomNumber > 0)
                 fldSetMapSlotValueFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomNumber, 1);
         }
@@ -869,7 +869,7 @@ s32 evtCommand_OBJ_PATH_MOVE(void) {
     case 1:
         dds3PathBasicControlAlterMode(&path->counter, 1);
         if (target->value != 0) {
-            roomNumber = fldCommand_GetHojiID((char *)target->value);
+            roomNumber = fldCommand_GetHojiID(target->value);
             if (roomNumber > 0)
                 fldSetMapSlotValueFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomNumber, 0);
         }

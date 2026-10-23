@@ -561,7 +561,7 @@ s32 fldCommand_SEARCH_ID(const char *name) {
 extern char fldRoomNameSentinel[];
 
 
-s32 fldCommand_GetHojiID(char *name) {
+s32 fldCommand_GetHojiID(const char *name) {
     s32 index;
     if (strstr(name, fldRoomNameSentinel) == 0) return 0;
     for (index = 0; index < 32; index++) {

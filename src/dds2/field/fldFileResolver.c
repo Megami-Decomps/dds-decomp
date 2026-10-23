@@ -169,7 +169,7 @@ extern void dds3GetRadiusPoseSet(dds3Basic_t *, f32);
 extern void dds3SetLightObjectResoruce(dds3Basic_t *, WorldTransformSetup *);
 extern void fldMakePlane(FldCollisionDescriptor *geometry, f32 *translation,
                                                u32 id, s32 sceneFlag, s32 ownerIndex);
-extern s32 fldCommand_GetHojiID(char *);
+extern s32 fldCommand_GetHojiID(const char *);
 extern void dds3SetPathBasicSpline(dds3Basic_t *path, u32 value);
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00412FF0);
@@ -342,7 +342,7 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
                     rotation[3] = 0.0f;
                 }
                 if (((FldSpawnCollision *)resource->data)->kind == 0) {
-                    s32 room = fldCommand_GetHojiID((char *)resource->name);
+                    s32 room = fldCommand_GetHojiID(resource->name);
                     fldMakePlane(((FldSpawnCollision *)resource->data)->header, position,
                                   resource->id, room, -1);
                     spawnedObject = dds3AddModelRangeBasicNew(resource->id, resource->data, position, resource->name);
@@ -717,7 +717,7 @@ extern FldFileResource *D_00438EC0;
 extern u32 D_00438EC4;
 extern s32 fldRoomEventPlacementCount;
 extern s16 D_00389874[];
-extern s32 fldCommand_GetHojiID(char *);
+extern s32 fldCommand_GetHojiID(const char *);
 extern void fldMakePlane(FldCollisionDescriptor *geometry, f32 *translation,
                                                u32 id, s32 sceneFlag, s32 ownerIndex);
 extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, const f32 *, const char *);
@@ -800,7 +800,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                 spawnResource->id |= 0x10000;
                 fldCopySpawnTransform(position, rotation, spawnResource->transform);
                 if (((FldSpawnCollision *)spawnResource->data)->kind == 0) {
-                    room = fldCommand_GetHojiID((char *)spawnResource->name);
+                    room = fldCommand_GetHojiID(spawnResource->name);
                     fldMakePlane(((FldSpawnCollision *)spawnResource->data)->header,
                                  position, spawnResource->id, room, -1);
                     spawnedObject = dds3AddModelRangeBasicNew(spawnResource->id, spawnResource->data,
@@ -870,7 +870,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                     }
                     parameters = ((FldPlacementData *)spawnResource->data)->payload.words;
                     id = parameters[0];
-                    room = fldCommand_GetHojiID((char *)spawnResource->name);
+                    room = fldCommand_GetHojiID(spawnResource->name);
                     if (isAppended != 0) {
                         FldPlacementData *placement = spawnResource->data;
                         func_0014C2B8(id, rotation, position[0], position[1], position[2],
@@ -943,7 +943,7 @@ extern struct DevRequest *fldRoomSoundResources;
 struct dds3Basic_t;
 extern struct dds3Basic_t *dds3AddMatterObjectBasic(s32 key, f32 *offset, f32 *rotation);
 extern void dds3MatterObjectBasicSetOt(struct dds3Basic_t *, s32);
-extern s32 fldCommand_GetHojiID(char *);
+extern s32 fldCommand_GetHojiID(const char *);
 extern void dds3MatterObjectBasicSetHojiID(struct dds3Basic_t *, u32);
 extern void dds3ObjectBaseMakeMatter(struct dds3Basic_t *);
 extern s32 dds3ObjectBaseRegistArea(dds3Basic_t *);
@@ -1015,7 +1015,7 @@ void fldCreateResourceScriptObjects(void) {
         } else {
             dds3MatterObjectBasicSetOt(scriptObject, 7);
         }
-        dds3MatterObjectBasicSetHojiID(scriptObject, fldCommand_GetHojiID((char *)resource->name));
+        dds3MatterObjectBasicSetHojiID(scriptObject, fldCommand_GetHojiID(resource->name));
         dds3ObjectBaseSetControlBasic(scriptObject, dds3SearchSceneBasic(secondaryWorld, resource->id, 10));
         dds3ObjectBaseMakeMatter(scriptObject);
         bindingResource = D_00438EC0;
