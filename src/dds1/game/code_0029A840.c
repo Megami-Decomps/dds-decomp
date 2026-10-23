@@ -77,7 +77,7 @@ void effInitModelVUState(dds3ModelHandle_t *model) {
 
 extern u16 D_003BC944;
 
-extern void mdlPackDecode(s32, u16, s32, const u8 *, u32);
+extern void mdlPackDecode(s32, u16, s32, const u8 *, s32);
 
 extern void effInitModelVUState(dds3ModelHandle_t *);
 
