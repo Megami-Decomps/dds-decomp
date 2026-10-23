@@ -23,6 +23,10 @@ Pipeline per version (see README.md):
   LB (.lbasm)        tools/lb.py assemble over an extracted base -> build/<v>/data/field/
   battle (.tblasm)   tools/battle_tbl.py assemble -> build/<v>/data/battle/, then SHA-1 check
 
+Script and data sources are retail content and are not tracked; see
+docs/building.md for importing them. Their rules are emitted only for the
+sources present, so the executable targets build without them.
+
 Every version is linked as a byte-identical copy of the retail executable, so any
 edit that changes code or data shows up as a checksum failure.
 """
@@ -864,7 +868,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             script_output_dir = Path("build") / version / "scripts" / "event"
             script_sources = sorted((ROOT / script_source_dir).glob("*.bfasm"))
             script_stamp = script_output_dir / "event.ok"
-        if (ROOT / script_manifest).exists():
+        if (ROOT / script_manifest).exists() and script_sources:
             script_outputs = []
             for source in script_sources:
                 source = source.relative_to(ROOT)
@@ -889,10 +893,10 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
 
         field_data_stamps = []
         inf_manifest = Path("config") / version / "field_inf.sha1"
-        if (ROOT / inf_manifest).exists():
-            inf_source_dir = Path("src") / version / "data" / "field"
-            inf_output_dir = Path("build") / version / "data" / "field"
-            inf_sources = sorted((ROOT / inf_source_dir).glob("*.infasm"))
+        inf_source_dir = Path("src") / version / "data" / "field"
+        inf_output_dir = Path("build") / version / "data" / "field"
+        inf_sources = sorted((ROOT / inf_source_dir).glob("*.infasm"))
+        if (ROOT / inf_manifest).exists() and inf_sources:
             inf_outputs = []
             for source in inf_sources:
                 source = source.relative_to(ROOT)
@@ -927,10 +931,10 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             field_data_stamps.append(str(inf_stamp))
 
         wap_manifest = Path("config") / version / "field_wap.sha1"
-        if (ROOT / wap_manifest).exists():
-            wap_source_dir = Path("src") / version / "data" / "field"
-            wap_output_dir = Path("build") / version / "data" / "field"
-            wap_sources = sorted((ROOT / wap_source_dir).glob("*.wapasm"))
+        wap_source_dir = Path("src") / version / "data" / "field"
+        wap_output_dir = Path("build") / version / "data" / "field"
+        wap_sources = sorted((ROOT / wap_source_dir).glob("*.wapasm"))
+        if (ROOT / wap_manifest).exists() and wap_sources:
             wap_outputs = []
             for source in wap_sources:
                 source = source.relative_to(ROOT)
@@ -974,6 +978,8 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             environment_sources = sorted(
                 (ROOT / environment_source_dir).glob(f"*.{kind}asm")
             )
+            if not environment_sources:
+                continue
             environment_outputs = []
             for source in environment_sources:
                 source = source.relative_to(ROOT)
@@ -997,10 +1003,10 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             field_data_stamps.append(str(environment_stamp))
 
         amb_manifest = Path("config") / version / "field_amb.sha1"
-        if (ROOT / amb_manifest).exists():
-            amb_source_dir = Path("src") / version / "data" / "field"
-            amb_output_dir = Path("build") / version / "data" / "field"
-            amb_sources = sorted((ROOT / amb_source_dir).glob("*.ambasm"))
+        amb_source_dir = Path("src") / version / "data" / "field"
+        amb_output_dir = Path("build") / version / "data" / "field"
+        amb_sources = sorted((ROOT / amb_source_dir).glob("*.ambasm"))
+        if (ROOT / amb_manifest).exists() and amb_sources:
             amb_outputs = []
             for source in amb_sources:
                 source = source.relative_to(ROOT)
@@ -1019,10 +1025,10 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             field_data_stamps.append(str(amb_stamp))
 
         fld_manifest = Path("config") / version / "field_fld2.sha1"
-        if (ROOT / fld_manifest).exists():
-            fld_source_dir = Path("src") / version / "data" / "field"
-            fld_output_dir = Path("build") / version / "data" / "field"
-            fld_sources = sorted((ROOT / fld_source_dir).glob("*.fldasm"))
+        fld_source_dir = Path("src") / version / "data" / "field"
+        fld_output_dir = Path("build") / version / "data" / "field"
+        fld_sources = sorted((ROOT / fld_source_dir).glob("*.fldasm"))
+        if (ROOT / fld_manifest).exists() and fld_sources:
             linked_stems = set(VERSIONS[version].get("field_fld2_links", ()))
             fld_outputs = []
             for source in fld_sources:
@@ -1081,10 +1087,10 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             field_data_stamps.append(str(encounter_stamp))
 
         fld1_manifest = Path("config") / version / "field_fld1.sha1"
-        if (ROOT / fld1_manifest).exists():
-            fld1_source_dir = Path("src") / version / "data" / "field"
-            fld1_output_dir = Path("build") / version / "data" / "field"
-            fld1_sources = sorted((ROOT / fld1_source_dir).glob("*.f1asm"))
+        fld1_source_dir = Path("src") / version / "data" / "field"
+        fld1_output_dir = Path("build") / version / "data" / "field"
+        fld1_sources = sorted((ROOT / fld1_source_dir).glob("*.f1asm"))
+        if (ROOT / fld1_manifest).exists() and fld1_sources:
             fld1_outputs = []
             for source in fld1_sources:
                 source = source.relative_to(ROOT)
@@ -1103,10 +1109,10 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             field_data_stamps.append(str(fld1_stamp))
 
         lb_manifest = Path("config") / version / "field_lb.sha1"
-        if (ROOT / lb_manifest).exists():
-            lb_source_dir = Path("src") / version / "data" / "field"
-            lb_output_dir = Path("build") / version / "data" / "field"
-            lb_sources = sorted((ROOT / lb_source_dir).glob("*.lbasm"))
+        lb_source_dir = Path("src") / version / "data" / "field"
+        lb_output_dir = Path("build") / version / "data" / "field"
+        lb_sources = sorted((ROOT / lb_source_dir).glob("*.lbasm"))
+        if (ROOT / lb_manifest).exists() and lb_sources:
             missing_lb_bases = missing_field_archive_bases(version, lb_sources)
             lb_outputs = []
             for source in lb_sources:
@@ -1148,10 +1154,10 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             n.build(f"{version}-field-data", "phony", field_data_stamps)
 
         battle_manifest = Path("config") / version / "battle_tables.sha1"
-        if (ROOT / battle_manifest).exists():
-            battle_source_dir = Path("src") / version / "data" / "battle"
-            battle_output_dir = Path("build") / version / "data" / "battle"
-            battle_sources = sorted((ROOT / battle_source_dir).glob("*.tblasm"))
+        battle_source_dir = Path("src") / version / "data" / "battle"
+        battle_output_dir = Path("build") / version / "data" / "battle"
+        battle_sources = sorted((ROOT / battle_source_dir).glob("*.tblasm"))
+        if (ROOT / battle_manifest).exists() and battle_sources:
             battle_outputs = []
             for source in battle_sources:
                 source = source.relative_to(ROOT)
