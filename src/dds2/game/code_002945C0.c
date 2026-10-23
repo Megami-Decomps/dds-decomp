@@ -35,7 +35,8 @@ void itfEmitSelectedGlyph(MenuTerminalContext *context, s32 unused, s32 layoutFl
     }
 }
 
-extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, s32, s32, void *, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32,
+                                                      struct EffectSlotSet *, s32, s32);
 
 
 void mnuDrawType2PanelEffects(MenuTerminalContext *w, s32 blend, s32 layer) {
