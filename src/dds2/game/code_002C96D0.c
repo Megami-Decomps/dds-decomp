@@ -58,7 +58,7 @@
 extern void effLoadFlashTextures(void);
 extern void effLoadScalyTexture(void);
 extern void effLoadWindTexture(void);
-extern s32 slSaveWriteFile(char *fileName, void *dataAddressSlot, void *dataSizeSlot, void *continuation, void *pendingRequestStatus);
+extern s32 slSaveWriteFile(char *fileName, void *dataAddressSlot, u32 *dataSizeSlot, void *continuation, void *pendingRequestStatus);
 extern void dds3SoftResetOn(void);
 extern s32 slSaveData_chdir(void);
 extern void frEnableMode(s32 mask);
@@ -1813,7 +1813,7 @@ s32 fileBeginLabeledSlotWrite(void) {
     return slSaveWriteFile(D_0042B6B8, &D_00437D90, &D_00437D94, (void *)fileWriteIconSysComplete, 0);
 }
 
-extern s32 slSaveWriteFile(char *fileName, void *dataAddressSlot, void *dataSizeSlot, void *continuation, void *pendingRequestStatus);
+extern s32 slSaveWriteFile(char *fileName, void *dataAddressSlot, u32 *dataSizeSlot, void *continuation, void *pendingRequestStatus);
 extern s32 fileBeginLabeledSlotWrite(void);
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B698);
@@ -1903,9 +1903,9 @@ extern u32 fileWriteContinuation;
 extern u32 fileWritePendingRequestSlot;
 extern s32 slSaveProc_openFile(void);
 
-s32 slSaveWriteFile(char *fileName, void *dataAddressSlot, void *dataSizeSlot, void *continuation, void *pendingRequestStatus) {
+s32 slSaveWriteFile(char *fileName, void *dataAddressSlot, u32 *dataSizeSlot, void *continuation, void *pendingRequestStatus) {
     fileWriteDataAddressSlot = (u32 *)dataAddressSlot;
-    fileWriteDataSizeSlot = (u32 *)dataSizeSlot;
+    fileWriteDataSizeSlot = dataSizeSlot;
     fileWriteContinuation = (u32)continuation;
     fileWritePendingRequestSlot = (u32)pendingRequestStatus;
     sdfMcFuncOpen(fileMemoryCardRequestIndex, fileName, 0x203);
