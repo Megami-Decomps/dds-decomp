@@ -1187,9 +1187,9 @@ void btlAddItemDrop(u16 item) {
 
 extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
 
-extern s32 btlCalculateEnemyExperienceReward(u8 *, u8 *);
+extern s32 btlCalculateEnemyExperienceReward(BtlUnit *, BtlUnit *);
 
-extern s32 btlGetEnemyMoney(u8 *, u8 *);
+extern s32 btlGetEnemyMoney(BtlUnit *, BtlUnit *);
 
 extern char D_003A17F8[];
 
@@ -1224,12 +1224,12 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
     }
     controller->experienceEarned += reward;
     if ((btlUnitStatusPair(enemy) & 0x200800000ULL) == 0) {
-        amount = btlCalculateEnemyExperienceReward(NULL, (u8 *)enemy);
+        amount = btlCalculateEnemyExperienceReward(NULL, enemy);
         controller->epEarned += amount;
         btlBossDebugPrintf(D_003A1818, controller->epEarned, amount);
     }
     if ((enemy->status.stateFlags & 0x400) == 0) {
-        amount = btlGetEnemyMoney(NULL, (u8 *)enemy);
+        amount = btlGetEnemyMoney(NULL, enemy);
         controller->moneyEarned += amount;
         btlBossDebugPrintf(D_003A1830, controller->moneyEarned, amount);
     }

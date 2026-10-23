@@ -525,7 +525,7 @@ extern s32 btlQueryUnitChannelFlags(s32, s32, s32, s32, s32);
 
 extern s32 btlSelectActorAction(s32);
 
-extern s32 btlCalculateHuntEpReward(u8 *acquirer, u8 *enemy);
+extern s32 btlCalculateHuntEpReward(BtlUnit *acquirer, BtlUnit *enemy);
 
 /* Native hunt interface passes actor and target; HP recovery is zero in this title. */
 extern u32 btlGetHuntHpRecoveryAmount(BtlUnit *actor, BtlUnit *target);
@@ -555,9 +555,9 @@ extern s32 btlRollStoneDeathChance(BtlUnit *, s32);
 
 extern s32 btlRollActorEligibilityWithAbilityOverride(BtlUnit *);
 
-extern s32 btlCalculateEnemyExperienceReward(u8 *, u8 *);
+extern s32 btlCalculateEnemyExperienceReward(BtlUnit *, BtlUnit *);
 
-extern s32 btlGetEnemyMoney(u8 *, u8 *);
+extern s32 btlGetEnemyMoney(BtlUnit *, BtlUnit *);
 
 extern u8 btlGetActorDisplayByteWithDefault(s32 object, s32 index);
 
@@ -878,7 +878,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
             if (kind == 1) {
                 operandFlags |= 1;
                 addedStatus = 0x4000;
-                work->huntEpReward += btlCalculateHuntEpReward((u8 *)action->unit, (u8 *)recipient);
+                work->huntEpReward += btlCalculateHuntEpReward(action->unit, recipient);
                 work->stage = 5;
                 work->parameter = effOffsetIfOwnerFlagClear(target, 0x9C);
                 if (!huntRecovered) {
@@ -1048,7 +1048,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
                 operandFlags |= 1;
                 group->entries[hitCount - 1].flags |= 1;
                 group->entries[hitCount - 1].addedStatus = 0x4000;
-                work->huntEpReward += btlCalculateHuntEpReward((u8 *)action->unit, (u8 *)recipient);
+                work->huntEpReward += btlCalculateHuntEpReward(action->unit, recipient);
                 work->stage = 5;
                 work->parameter = effOffsetIfOwnerFlagClear(target, 0x9C);
                 if (!huntRecovered) {
@@ -1065,10 +1065,10 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
         }
         if (group->inactive && (action->unit->status.flags & 0x200) && (recipient->status.flags & 0x400)) {
             if (!(operandFlags & 1)) {
-                work->battleExperienceReward += btlCalculateEnemyExperienceReward((u8 *)action->unit, (u8 *)recipient);
+                work->battleExperienceReward += btlCalculateEnemyExperienceReward(action->unit, recipient);
                 recipient->status.stateFlags |= 2;
             }
-            work->moneyReward += btlGetEnemyMoney((u8 *)action->unit, (u8 *)recipient);
+            work->moneyReward += btlGetEnemyMoney(action->unit, recipient);
             runtime->defeatedLevelTotal += recipient->partyRecord.level;
             runtime->defeatedLevelCount++;
             recipient->status.stateFlags |= 0x400;
