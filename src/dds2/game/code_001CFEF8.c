@@ -31,7 +31,7 @@ void btlClearSceneTaskActiveFlag(ActionStateLink *task);
 void btlBindActorTaskAndSelectActionNumber(ActionStateLink *task, BtlUnit *actor);
 
 typedef char BtlStateTotalApOffsetCheck[
-    ((u32)&((BtlState *)0)->unk2F8 == 0x2F8) ? 1 : -1];
+    ((u32)&((BtlState *)0)->totalAp == 0x2F8) ? 1 : -1];
 
 #define FLD_SCENE_INITIAL_ID 1
 #define FLD_SCENE_GROUP_PRIMARY_ID 1
@@ -1200,8 +1200,8 @@ void btlFinalizeBattleRewards(BtlState *scene) {
     }
     scene->moneyEarned = (s32)((f32)(u32)scene->moneyEarned * epRatio);
     btlBossDebugPrintf("btl:auto money=%d[ratio=%.2f]\n", scene->moneyEarned, epRatio);
-    scene->unk2F8 += scene->epEarned;
-    btlBossDebugPrintf("btl:epTotal = %d\n", scene->unk2F8);
+    scene->totalAp += scene->epEarned;
+    btlBossDebugPrintf("btl:epTotal = %d\n", scene->totalAp);
     scene->epEarned = 0;
     scene->moneyTotal += scene->moneyEarned;
     btlBossDebugPrintf("btl:moneyTotal = %d\n", scene->moneyTotal);
@@ -1391,7 +1391,7 @@ void btlApplyPartyEntryWeightedDelta(BtlState *scene) {
             if (DDS3_GBWK->party[i].flags & 2) {
                 if (scene->eventReady == 1) {
                     if (DDS3_GBWK->party[i].huntExp != 0 ||
-                        scene->unk2F8 != 0) {
+                        scene->totalAp != 0) {
                         if (!(DDS3_GBWK->party[i].status & 0x40)) {
                             if (mnuIsTitleEntryAvailable(&DDS3_GBWK->party[i]) == 0) {
                                 datAddHp(&DDS3_GBWK->party[i], (s32)((f32)DDS3_GBWK->party[i].maxHp * scale));

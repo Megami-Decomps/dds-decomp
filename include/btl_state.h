@@ -516,7 +516,7 @@ typedef struct BtlState {
     s32 moneyTotal;
     s32 experienceEarned; /* 0x2F0 */
     s32 epEarned; /* 0x2F4 */
-    s32 unk2F8; /* 0x2F8: total AP (defeat EP) accumulated for the result screen. */
+    s32 totalAp; /* 0x2F8: total AP (defeat EP) accumulated for the result screen. */
     u16 specialEnemyDefeats; /* 0x2FC: defeated enemy kinds 100 through 103 */
     BtlSceneSlot slots[8]; /* 0x2FE */
     u8 pad316[2];
