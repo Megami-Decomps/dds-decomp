@@ -810,8 +810,7 @@ RefObj *effRetainSharedReference(RefObj *obj) {
 /* Native GS dimension SDK calls: 0029C16C/0029C17C.
  * Address normalization before TEX0 packing is also traced in
  * texture_renew_secondary_epoch_probe (parity OK, local-alloc q14/q16). */
-sdfTexHandle_t *sdfGetOrCreateTextureForReference(void *target, RefObj *source) {
-    SdfPoolNode *surface = target;
+sdfTexHandle_t *sdfGetOrCreateTextureForReference(SdfPoolNode *surface, RefObj *source) {
     sdfDrawTag_t *list;
     u16 width;
     u16 height;
@@ -973,7 +972,8 @@ void effSampleAnimSet(const EffExpandedList *set, u32 frame, EffAnimSample *out)
     out->angle = 0.0f;
 }
 
-sdfTexHandle_t *effAssignSampledSegmentReference(EffExpandedList *set, void *target, const EffAnimSample *sample) {
+sdfTexHandle_t *effAssignSampledSegmentReference(EffExpandedList *set, SdfPoolNode *target,
+                                                 const EffAnimSample *sample) {
     return sdfGetOrCreateTextureForReference(target, set->handles[sample->segment]);
 }
 
@@ -992,4 +992,3 @@ INCLUDE_SDATA(const s32, "game/code_0029A840", D_003BC950);
 INCLUDE_SDATA(const s32, "game/code_0029A840", D_003BC954);
 
 INCLUDE_SDATA(const s32, "game/code_0029A840", D_003BC958);
-

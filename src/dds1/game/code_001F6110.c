@@ -1331,7 +1331,7 @@ f32 btlScalarRangeStepQuadratic(BtlScalarRange *state, f32 timeStep) {
 
 extern s32 btlIndexedIconUvOrigins[16];
 struct RefObj;
-extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(void *, struct RefObj *);
+extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(struct SdfPoolNode *, struct RefObj *);
 #include "sdf_packet_alloc.h"
 
 /* Draw an indexed 64-pixel glyph with independent corner colors. */

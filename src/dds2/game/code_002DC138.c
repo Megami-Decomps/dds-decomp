@@ -880,11 +880,10 @@ RefObj *effRetainSharedReference(RefObj *obj) {
     return obj;
 }
 
-extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(void *, RefObj *);
+extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(SdfPoolNode *, RefObj *);
 #include "sdf_packet_builders.h"
 
-sdfTexHandle_t *sdfGetOrCreateTextureForReference(void *target, RefObj *source) {
-    SdfPoolNode *surface = target;
+sdfTexHandle_t *sdfGetOrCreateTextureForReference(SdfPoolNode *surface, RefObj *source) {
     sdfDrawTag_t *list;
     u16 width;
     u16 height;
@@ -1052,7 +1051,8 @@ void effSampleAnimSet(const EffExpandedList *set, u32 frame, EffAnimSample *out)
     out->angle = 0.0f;
 }
 
-sdfTexHandle_t *effAssignSampledSegmentReference(EffExpandedList *set, void *target, const EffAnimSample *sample) {
+sdfTexHandle_t *effAssignSampledSegmentReference(EffExpandedList *set, SdfPoolNode *target,
+                                                 const EffAnimSample *sample) {
     return sdfGetOrCreateTextureForReference(target, set->handles[sample->segment]);
 }
 

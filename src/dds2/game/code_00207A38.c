@@ -1399,7 +1399,7 @@ f32 btlScalarRangeStepQuadratic(BtlScalarRange *state, f32 timeStep) {
 }
 
 struct RefObj;
-extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(void *, struct RefObj *);
+extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(struct SdfPoolNode *, struct RefObj *);
 #include "sdf_packet_alloc.h"
 extern s32 btlIndexedIconUvOrigins[];
 
