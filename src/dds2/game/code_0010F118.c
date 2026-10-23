@@ -124,7 +124,7 @@ extern s8 D_0037F543[];
 extern s32 evtSceneDispProcess(void *task);
 
 /* Draw the task's status panel; the returned value is the follow-up handler (or -1 / 0). */
-s32 dds3DebugBasic(void *task) {
+s32 dds3DebugBasic(dds3ProcessID_t *task) {
     s32 width;
     u8 *node;
     sdfDrawTag_t *list;
