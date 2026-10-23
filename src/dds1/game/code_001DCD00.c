@@ -329,11 +329,11 @@ s32 btlHasActorCategoryFlag40(BtlLinkedCommand *action) {
     return 1;
 }
 
-s32 btlMatchLinkedActorFlags(s32 actor) {
-    s32 linked;
+s32 btlMatchLinkedActorFlags(BtlLinkedCommand *action) {
+    BtlTask *linked;
     BtlUnit *entry;
 
-    switch (*(u32 *)(actor + 0x104)) {
+    switch (action->status) {
     case 4:
     case 5:
     case 6:
@@ -341,15 +341,15 @@ s32 btlMatchLinkedActorFlags(s32 actor) {
     default:
         return 0;
     }
-    linked = *(s32 *)(actor + 0xF4);
+    linked = action->task;
     if (linked == 0) {
         return 0;
     }
-    if (btlGetIndexListCount(*(struct BtlIndexList **)(linked + 0x60)) >= 2) {
+    if (btlGetIndexListCount(linked->indexWork.indices) >= 2) {
         return 0;
     }
-    entry = btlGetIndexListEntry(*(struct BtlIndexList **)(linked + 0x60), 0);
-    return (((u32)((BtlTask *)linked)->unit->status.flags ^ (u32)entry->status.flags) & 0x600) == 0;
+    entry = btlGetIndexListEntry(linked->indexWork.indices, 0);
+    return (((u32)linked->unit->status.flags ^ (u32)entry->status.flags) & 0x600) == 0;
 }
 
 s32 btlHasFirstLinkedCategoryFlag1000(BtlLinkedCommand *node) {
@@ -486,7 +486,7 @@ void btlInitializeLinkedActionCamera(BtlLinkedCommand *action) {
             btlInitializeCameraCursorForActorMode(action, &action->camera);
         }
     } else {
-        if (btlMatchLinkedActorFlags((s32)action)) {
+        if (btlMatchLinkedActorFlags(action)) {
             btlFrameCommandTargetGroups(action);
         } else if (btlHasSingleLinkedResource(action)) {
             action->stepKind = 10;

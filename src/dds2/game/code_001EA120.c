@@ -371,11 +371,11 @@ s32 btlHasActorCategoryFlag40(BtlLinkedCommand *action) {
     return btlHasFlag(((BtlActionTableEntry *)datActionAnimationRecords)[category].flags, 0x40);
 }
 
-s32 btlMatchLinkedActorFlags(s32 actor) {
-    s32 linked;
+s32 btlMatchLinkedActorFlags(BtlLinkedCommand *action) {
+    ActionStateLink *linked;
     BtlUnit *entry;
 
-    switch (((BtlLinkedCommand *)actor)->status) {
+    switch (action->status) {
     case 4:
     case 5:
     case 6:
@@ -383,15 +383,15 @@ s32 btlMatchLinkedActorFlags(s32 actor) {
     default:
         return 0;
     }
-    linked = (s32)((BtlLinkedCommand *)actor)->link;
+    linked = action->link;
     if (linked == 0) {
         return 0;
     }
-    if (btlGetIndexListCount(((ActionStateLink *)linked)->indexWork.indices) >= 2) {
+    if (btlGetIndexListCount(linked->indexWork.indices) >= 2) {
         return 0;
     }
-    entry = btlGetIndexListEntry(((ActionStateLink *)linked)->indexWork.indices, 0);
-    return ((((ActionStateLink *)linked)->unit->status.flags ^ entry->status.flags) & 0x600) == 0;
+    entry = btlGetIndexListEntry(linked->indexWork.indices, 0);
+    return ((linked->unit->status.flags ^ entry->status.flags) & 0x600) == 0;
 }
 
 s32 btlHasFirstLinkedCategoryFlag1000(BtlLinkedCommand *actor) {
@@ -590,7 +590,7 @@ void btlInitializeLinkedCommandCursor(BtlLinkedCommand *action) {
             btlInitTargetCursorAndFacing(action, &action->camera);
         }
     } else {
-        if (btlMatchLinkedActorFlags((s32)action) != 0) {
+        if (btlMatchLinkedActorFlags(action) != 0) {
             btlFrameCommandTargetGroups(action);
         } else if (btlHasSingleLinkedResource(action) != 0) {
             btlPositionActorIndexUnits(action);
