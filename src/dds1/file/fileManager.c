@@ -31,7 +31,7 @@ s32 fileHandleFree(struct FileRequest *request) {
     }
     if (request->state == FILE_REQUEST_COMPLETE) {
         if (request->deviceRequest != NULL) {
-            sdfFileCmdFree((sdfFileCmdHandle_t *)request->deviceRequest);
+            sdfFileCmdFree(request->deviceRequest);
         }
         sdfChipFreeDirect(request->name);
         sdfChipFreeDirect(request);
@@ -296,6 +296,6 @@ void pacRead(FileRequest *request) {
         chunkBytes = FILE_READ_SLOT_BYTES;
     }
     SignalSema(work->sema);
-    sdfFileCmdRead((sdfFileCmdHandle_t *)request->deviceRequest,
+    sdfFileCmdRead(request->deviceRequest,
                     work->buffer + (slotIndex << FILE_READ_SLOT_SHIFT), chunkBytes);
 }

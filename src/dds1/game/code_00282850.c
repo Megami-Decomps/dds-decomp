@@ -3058,9 +3058,9 @@ s32 pacFileHandleFree(request)
     FilePacRequest *request;
 {
     if (request->state == FILE_REQUEST_COMPLETE_STATE) {
-        void *deviceRequest = request->deviceRequest;
+        sdfFileCmdHandle_t *deviceRequest = request->deviceRequest;
         if (deviceRequest != NULL) {
-            sdfFileCmdFree((sdfFileCmdHandle_t *)deviceRequest);
+            sdfFileCmdFree(deviceRequest);
         }
         sdfPacFree(&request->packet);
         sdfChipFreeDirect(request->name);
@@ -3103,4 +3103,3 @@ INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC7C8);
 INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC7D0);
 
 INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC7D4);
-
