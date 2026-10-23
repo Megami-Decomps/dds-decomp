@@ -568,18 +568,18 @@ extern const SdfGridDirections D_00438900[];
 SdfGridCell *sdfGridCursorRightToFilledCell(SdfGrid *grid) {
     SdfGridDirections directions = D_00438900[0];
     SdfGridCell *cell;
-    u32 cursorValue;
+    u32 cursorIndex;
     u32 cursorColumn;
     u32 cursorRow;
     s32 rowDistance;
 
-    cursorValue = (u32)grid->cursor;
-    cursorValue = ((SdfGridCell *)cursorValue)->index;
-    cursorColumn = cursorValue % grid->width;
+    cell = grid->cursor;
+    cursorIndex = cell->index;
+    cursorColumn = cursorIndex % grid->width;
     if (cursorColumn == grid->width - 1) {
         return NULL;
     }
-    cursorRow = cursorValue / grid->width;
+    cursorRow = cursorIndex / grid->width;
     rowDistance = 0;
     for (;;) {
         s32 columnOffset;
