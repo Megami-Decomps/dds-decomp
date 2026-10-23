@@ -5274,8 +5274,8 @@ void fileQueueReadPosition(const FileQueue *queue, f32 position[4]) {
     SDF_VU0_COPYVECTOR(position, queue->position);
 }
 
-void fileReadStoredQuaternion(void *work, void *dst) {
-    SDF_VU0_COPYVECTOR(dst, ((FileQueue *)work)->quat);
+void fileReadStoredQuaternion(const FileQueue *queue, f32 quaternion[4]) {
+    SDF_VU0_COPYVECTOR(quaternion, queue->quat);
 }
 
 f32 fileGetQueueScale(FileQueue *queue) {
