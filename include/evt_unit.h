@@ -6,6 +6,7 @@
 #include "eff_transform.h"
 
 struct dds3ModelHandle_t;
+struct dds3PathBasicControl_t;
 struct sdfTexHandle_t;
 struct SdfLightingPacketStorage;
 
@@ -131,7 +132,7 @@ typedef struct evtUnitHandle_t {
     s32 (*motionCallback)(struct evtUnitHandle_t *, s32); /* 0x94: returns 1 when motion completes. */
     f32 wobblePhase;               /* 0x98: wrapping radians used by model scale/rotation wobble. */
     s32 unk9C;                     /* 0x9C */
-    s32 pathHandle;                /* 0xA0: freed when replacing the path */
+    struct dds3PathBasicControl_t *pathControl; /* 0xA0: owned path-control work */
     f32 pathSpeed;                 /* 0xA4: signed progress increment */
     u32 flags;                     /* 0xA8 */
     s16 motionState;               /* 0xAC */

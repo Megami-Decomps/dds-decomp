@@ -155,7 +155,7 @@ s32 evtCheckMoveEnd(evtUnitHandle_t *unit) {
         }
         break;
     case 3:
-        value = dds3PathBasicControlGetRatio(&((dds3PathBasicControl_t *)unit->pathHandle)->counter);
+        value = dds3PathBasicControlGetRatio(&unit->pathControl->counter);
         if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (value == 0.0f) {
                 return 1;
@@ -180,7 +180,7 @@ s32 evtGetNextMovePos(evtUnitHandle_t *unit) {
     case EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE:
         break;
     case EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE:
-        t = dds3PathBasicControlGetRatio(&((dds3PathBasicControl_t *)unit->pathHandle)->counter);
+        t = dds3PathBasicControlGetRatio(&unit->pathControl->counter);
         if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (t == 0.0f) {
                 return 0;
@@ -197,8 +197,8 @@ s32 evtGetNextMovePos(evtUnitHandle_t *unit) {
         if (1.0f < t) {
             t = 1.0f;
         }
-        dds3PathBasicControlSetRatio(&((dds3PathBasicControl_t *)unit->pathHandle)->counter, t);
-        dds3PathBasicControlGetPos((dds3PathBasicControl_t *)unit->pathHandle);
+        dds3PathBasicControlSetRatio(&unit->pathControl->counter, t);
+        dds3PathBasicControlGetPos(unit->pathControl);
         VU0_STORE_VF($vf10, unit->targetVector);
         return 1;
     }
