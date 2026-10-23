@@ -152,7 +152,7 @@ extern sdfTexHandle_t *D_003BD390;
 extern s32 D_003BDA20;
 
 
-/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */ void MultMatrix(void *matrix);
+/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */ void MultMatrix(const f32 *matrix);
 
 INCLUDE_ASM(const s32, "game/code_002E0820", sdfCorePacketGen);
 

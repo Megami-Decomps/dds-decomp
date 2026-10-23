@@ -181,7 +181,7 @@ extern sdfTexHandle_t *D_00438A80;
 extern vu8 sdfFrameId;
 
 
-/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */ void MultMatrix(void *matrix);
+/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */ void MultMatrix(const f32 *matrix);
 
 INCLUDE_ASM(const s32, "game/code_003396D0", sdfCorePacketGen);
 
