@@ -9,6 +9,7 @@
 #include "itf_mes_window.h"
 #include "mnu.h"
 #include "mnu_list.h"
+#include "mnu_terminal_work.h"
 #include "sdf_resource.h"
 #include "kwln.h"
 #include "kwln_fade.h"
@@ -171,7 +172,8 @@ u32 mnuTerminalPanelLeaveNoOp(void) {
  * When its popup slot and message control are idle, fall back if no event starts. */
 s32 dspUpdateFlagEvent(dds3ProcessID_t *request) {
     s32 workAddress = dds3GetProcessData(request);
-    s32 *popupSlot = (s32 *)(workAddress + 0x54);
+    struct MenuTerminalWork *work = (struct MenuTerminalWork *)(u32)workAddress;
+    s32 *popupSlot = &work->popupState;
     s32 result = menuRunPanel((void *)workAddress, 0, (void *)request);
     if (result != 0) {
         return result;
@@ -205,10 +207,10 @@ void evtClearActiveFlag(s32 flagIndex);
 /* Reset display slots for a zero exit marker, otherwise start the existing fade-in.
  * The active-flag call's index is the zero the fade's arguments leave in a0. */
 u32 mnuApplyTerminalExitFadeOrReset(dds3ProcessID_t *task) {
-    s32 workAddress;
+    struct MenuTerminalWork *work;
 
-    workAddress = dds3GetProcessData(task);
-    if (*(s32 *)(workAddress + 0xdc) == 0) {
+    work = (struct MenuTerminalWork *)(u32)dds3GetProcessData(task);
+    if (work->reduced == 0) {
         evtClearActiveFlag(0);
         evtSetBoundedDisplayValue(0, 1);
         evtSetBoundedDisplayValue(1, 0);
@@ -237,7 +239,8 @@ extern char D_0036AE48[];
  * other kinds wait for the fade to finish. */
 s32 mnuUpdateTerminalReadyPopup(dds3ProcessID_t *request) {
     s32 workAddress = dds3GetProcessData(request);
-    s32 *popupSlot = (s32 *)(workAddress + 0x54);
+    struct MenuTerminalWork *work = (struct MenuTerminalWork *)(u32)workAddress;
+    s32 *popupSlot = &work->popupState;
     s32 result = menuRunPanel((void *)workAddress, 0, (void *)request);
     s32 ready;
 
@@ -245,7 +248,7 @@ s32 mnuUpdateTerminalReadyPopup(dds3ProcessID_t *request) {
         return result;
     }
     if (*popupSlot == 0) {
-        if (*(s32 *)(workAddress + 0x7C) == 0) {
+        if (work->mode == 0) {
             ready = dds3SearchProcessName(D_003AF710) == NULL;
             if (evtIsActiveFlagSet(0) != 0) {
                 ready = 1;
