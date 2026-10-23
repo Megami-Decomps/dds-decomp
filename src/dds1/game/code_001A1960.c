@@ -1123,10 +1123,10 @@ s32 btlCheckSpecialAbility(datUnitWork_t *object, s32 flag) {
 
 extern EffRandState effSharedRandomState[];
 
-extern s32 btlSelectEnemyDropItem(s32 actorAddress, s32 mode);
+extern s32 btlSelectEnemyDropItem(BtlUnit *actor, s32 mode);
 
 s32 btlSelectActorAction(s32 object) {
-    s32 result = btlSelectEnemyDropItem(object, 1);
+    s32 result = btlSelectEnemyDropItem((BtlUnit *)object, 1);
     if (result == 0) {
         result = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) != 0 ? 2 : 7;
     }
@@ -1136,8 +1136,7 @@ s32 btlSelectActorAction(s32 object) {
 extern s32 btlRollAiBucket(void);
 
 /* Select an enemy item drop; mode 1 bypasses the story-flag override item. */
-s32 btlSelectEnemyDropItem(s32 actorAddress, s32 mode) {
-    BtlUnit *actor = (BtlUnit *)actorAddress;
+s32 btlSelectEnemyDropItem(BtlUnit *actor, s32 mode) {
     DatEnemyRecord *enemy = &datEnemyRecords[actor->partyRecord.unitId];
     s32 item = 0;
     u16 i;
@@ -1232,7 +1231,7 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
         controller->moneyEarned += amount;
         btlBossDebugPrintf(D_003A1830, controller->moneyEarned, amount);
     }
-    item = btlSelectEnemyDropItem((s32)enemy, 0);
+    item = btlSelectEnemyDropItem(enemy, 0);
     if (item != 0) {
         btlAddItemDrop(item);
     }
