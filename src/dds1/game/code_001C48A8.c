@@ -1553,22 +1553,22 @@ s32 fldGetSceneDescriptorProperty(void) {
 }
 
 /* Select the task's group array; the handle-group bit takes precedence. */
-s32 *fldGetActorSceneGroupResource(s32 *task) {
+BtlTask **fldGetActorSceneGroupResource(BtlTask *task) {
     s32 scene = (s32)(u32)btlGetRuntime();
-    s32 *groupEntries = (s32 *)((BattleSceneWork *)scene)->groupSecondary;
+    BtlTask **groupEntries = ((BattleSceneWork *)scene)->groupSecondary;
     u32 actorGroupBits;
-    if (((BtlTask *)task)->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) {
-        return (s32 *)((BattleSceneWork *)scene)->groupHandles;
+    if (task->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) {
+        return ((BattleSceneWork *)scene)->groupHandles;
     }
-    actorGroupBits = ((BtlTask *)task)->unit->status.flags & FLD_SCENE_ACTOR_GROUP_MASK;
+    actorGroupBits = task->unit->status.flags & FLD_SCENE_ACTOR_GROUP_MASK;
     switch (actorGroupBits) {
     case FLD_SCENE_ACTOR_PRIMARY_BIT:
-        groupEntries = (s32 *)((BattleSceneWork *)scene)->groupPrimary;
+        groupEntries = ((BattleSceneWork *)scene)->groupPrimary;
         break;
     case FLD_SCENE_ACTOR_SECONDARY_BIT:
         break;
     case FLD_SCENE_ACTOR_TERTIARY_BIT:
-        groupEntries = (s32 *)((BattleSceneWork *)scene)->groupTertiary;
+        groupEntries = ((BattleSceneWork *)scene)->groupTertiary;
         break;
     default:
         groupEntries = 0;
@@ -1600,13 +1600,13 @@ s32 fldGetSceneGroupResource(u8 groupId) {
 }
 
 /* Return the selected group's capacity, not its ID; keep the native runtime call. */
-s32 fldClassifyActorSceneGroup(s32 *task) {
+s32 fldClassifyActorSceneGroup(BtlTask *task) {
     u32 actorGroupBits;
     btlGetRuntime();
-    if (((BtlTask *)task)->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) {
+    if (task->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) {
         return FLD_SCENE_HANDLE_TASK_COUNT;
     }
-    actorGroupBits = ((BtlTask *)task)->unit->status.flags & FLD_SCENE_ACTOR_GROUP_MASK;
+    actorGroupBits = task->unit->status.flags & FLD_SCENE_ACTOR_GROUP_MASK;
     switch (actorGroupBits) {
     case FLD_SCENE_ACTOR_PRIMARY_BIT: return FLD_SCENE_PRIMARY_TASK_COUNT;
     case FLD_SCENE_ACTOR_SECONDARY_BIT: return FLD_SCENE_SECONDARY_TASK_COUNT;
@@ -1917,8 +1917,8 @@ void fldInitializeSceneGroups(void) {
 
 /* Move a member behind its occupied successors; native membership/bounds are unchecked. */
 void btlMoveTaskToGroupTail(BtlTask *task) {
-    BtlTask **groupCursor = (BtlTask **)fldGetActorSceneGroupResource((s32 *)task);
-    u32 groupCapacity = fldClassifyActorSceneGroup((s32 *)task);
+    BtlTask **groupCursor = fldGetActorSceneGroupResource(task);
+    u32 groupCapacity = fldClassifyActorSceneGroup(task);
     u32 lastIndex;
     u32 entryIndex;
     for (entryIndex = 0; entryIndex < groupCapacity; entryIndex++, groupCursor++) {
@@ -1952,9 +1952,9 @@ void btlRotateGroupUntilTaskFirst(BtlTask *task) {
 /* Append at the first empty entry, then restore the former head's ordering.
  * Retain the native capacity query and unchecked append scan. */
 void fldAppendTaskToGroup(BtlTask *task) {
-    BtlTask **groupCursor = (BtlTask **)fldGetActorSceneGroupResource((s32 *)task);
+    BtlTask **groupCursor = fldGetActorSceneGroupResource(task);
     BtlTask *previousHead;
-    fldClassifyActorSceneGroup((s32 *)task);
+    fldClassifyActorSceneGroup(task);
     previousHead = *groupCursor;
     while (*groupCursor != 0) {
         groupCursor++;
@@ -1983,7 +1983,7 @@ void fldUpdateSceneGroupTask(s32 taskValue) {
     if ((task->flags & 0x40) == 0) {
         actor = task->unit;
         kind = (actor->status.flags & 0x200) != 0 ? 1 : 2;
-        if (task == *(BtlTask **)fldGetActorSceneGroupResource((s32 *)task) &&
+        if (task == *fldGetActorSceneGroupResource(task) &&
             scene->variant == kind) {
             scene->flags |= 8;
         }
@@ -1999,8 +1999,8 @@ void fldUpdateSceneGroupTask(s32 taskValue) {
 
 /* Clear the matching member and move that hole to the last group entry. */
 void btlRemoveTaskFromSceneGroup(BtlTask *task) {
-    BtlTask **groupEntries = (BtlTask **)fldGetActorSceneGroupResource((s32 *)task);
-    u32 groupCapacity = fldClassifyActorSceneGroup((s32 *)task);
+    BtlTask **groupEntries = fldGetActorSceneGroupResource(task);
+    u32 groupCapacity = fldClassifyActorSceneGroup(task);
     u32 entryIndex = 0;
     u32 lastIndex;
     for (; entryIndex < groupCapacity; entryIndex++) {
