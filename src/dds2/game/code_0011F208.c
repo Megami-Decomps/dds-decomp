@@ -1892,7 +1892,7 @@ void fldSetRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
 s32 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].flagBanks[0];
+        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomModeFlags;
         return (flags >> bit) & 1;
     }
     return 0;
@@ -1912,7 +1912,7 @@ void fldSetRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
 s32 fldTestRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].flagBanks[1];
+        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomObjectModeFlags;
         return (flags >> bit) & 1;
     }
     return 0;
@@ -1932,7 +1932,7 @@ void fldSetRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
 s32 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].flagBanks[2];
+        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomSceneFlags;
         return (flags >> bit) & 1;
     }
     return 0;
@@ -1952,7 +1952,7 @@ void fldSetMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
 s32 fldTestMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].flagBanks[3];
+        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].mapTargetFlags;
         return (flags >> bit) & 1;
     }
     return 0;
@@ -1972,7 +1972,7 @@ void fldSetAlternateMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled
 s32 fldTestAlternateMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].flagBanks[4];
+        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].alternateMapTargetFlags;
         return (flags >> bit) & 1;
     }
     return 0;
