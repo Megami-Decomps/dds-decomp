@@ -126,7 +126,7 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
             }
             SDF_VU0_COPYMATRIX_A_TO_B();
             SDF_VU0_LOADIDENTITY();
-            SDF_VU0_LOADVECTOR(&data->word10);
+            SDF_VU0_LOADVECTOR(data->ownerLocalOffset);
             SDF_VU0_VECTOR_W_SET_ONE();
             SDF_VU0_TRANSLATE();
             MultMatrixRevNoArg();
@@ -821,14 +821,14 @@ s32 dds3EffectObjectBasicLinkObject(dds3Basic_t *obj, dds3Basic_t *owner) {
         return 0;
     }
     data = obj->data;
-    data->word18 = NULL;
+    data->ownerLocalOffset[2] = 0.0f;
     data->owner = owner;
     data->entryId = 0;
     data->flags |= EFF_OBJ_FLAG_OWNER_LINK;
     data->flags &= ~EFF_OBJ_FLAG_OWNER_BILL_ENTRY;
-    data->word10 = 0;
+    data->ownerLocalOffset[0] = 0.0f;
     data->ownerKind = ((u8 *)&owner->kindTag)[3];
-    data->word14 = 0;
+    data->ownerLocalOffset[1] = 0.0f;
     return 1;
 }
 

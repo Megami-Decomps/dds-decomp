@@ -26,9 +26,7 @@ typedef struct EffectDependencyState {
     u32 flags;
     EffectDependencyStateKind state;
     void *handle;
-    u32 word10;
-    u32 word14;
-    void *word18;
+    f32 ownerLocalOffset[3];
     u8 pad1C[4];
     void *owner;
     u16 entryId;
@@ -42,6 +40,9 @@ typedef struct EffectDependencyState {
 
 typedef char EffectDependencyState_size_must_be_0x50[(sizeof(EffectDependencyState) == 0x50) ? 1 : -1];
 typedef char EffectDependencyState_handle_at_0x0C[((u32)&((EffectDependencyState *)0)->handle == 0x0C) ? 1 : -1];
+typedef char EffectDependencyState_ownerLocalOffset_at_0x10[
+    ((u32)&((EffectDependencyState *)0)->ownerLocalOffset == 0x10) ? 1 : -1];
+typedef char EffectDependencyState_pad1C_at_0x1C[((u32)&((EffectDependencyState *)0)->pad1C == 0x1C) ? 1 : -1];
 typedef char EffectDependencyState_owner_at_0x20[((u32)&((EffectDependencyState *)0)->owner == 0x20) ? 1 : -1];
 typedef char EffectDependencyState_node_at_0x2C[((u32)&((EffectDependencyState *)0)->node == 0x2C) ? 1 : -1];
 
