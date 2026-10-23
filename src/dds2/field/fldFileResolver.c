@@ -3422,7 +3422,7 @@ void fldProbeCameraSupportSurface(void) {
     s32 index;
     dds3Basic_t *node;
 
-    fldGlobalBase.unk5C = 0.0f;
+    fldGlobalBase.cameraSupportHeightOffset = 0.0f;
     fldGlobalBase.cameraSupportHeightDelta = 0.0f;
     if (fldGlobalBase.overrideSupportRecordIndex != -1) {
         index = fldGlobalBase.overrideSupportRecordIndex;
@@ -3455,13 +3455,13 @@ void fldProbeCameraSupportSurface(void) {
     ys[2] = fldMatterTable[index].vertices[2][1] + offset[1];
     zs[2] = fldMatterTable[index].vertices[2][2] + offset[2];
     x = cam->x - sdfSin(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist;
-    cam->unk5C = cam->y - fldCamCalcSlopeOffset(x,
+    cam->cameraSupportHeightOffset = cam->y - fldCamCalcSlopeOffset(x,
         cam->z - sdfCos(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist, xs, ys, zs);
     x = cam->x - sdfSin(-cam->angle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist;
     cam->cameraSupportHeightDelta = cam->y - fldCamCalcSlopeOffset(x,
         cam->z - sdfCos(-cam->angle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist, xs, ys, zs);
     if (cam->overrideSupportRecordIndex == -1) {
-        cam->unk5C = 0.0f;
+        cam->cameraSupportHeightOffset = 0.0f;
     }
 }
 
@@ -3533,11 +3533,11 @@ void fldInitializeCameraViewFromPlayer(void) {
     PCP_COPY_VECTOR_UNCLOBBERED(fldLookAtNearPoint, &nearPoint);
     PCP_COPY_VECTOR_UNCLOBBERED(fldCamTarget, &farPoint);
 
-    area->unk5C = 0.0f;
+    area->cameraSupportHeightOffset = 0.0f;
     area->overrideSupportRecordIndex = -1;
     area->unkA4 = -1;
-    area->unk60 = area->unk5C;
-    heightOffset = area->unk5C;
+    area->unk60 = area->cameraSupportHeightOffset;
+    heightOffset = area->cameraSupportHeightOffset;
     farPoint.f[1] += heightOffset;
     referencePoint.f[0] = area->x;
     referencePoint.f[1] = area->y + fldCameraFollowRows[area->rowIdx].y;

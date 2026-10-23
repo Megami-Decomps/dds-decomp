@@ -1697,7 +1697,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->unkD8 = -1;
     area->rowIdx = 0;
     area->sequenceCode = 1;
-    area->unk5C = 0.0f;
+    area->cameraSupportHeightOffset = 0.0f;
     area->unk60 = 0.0f;
     area->negatedAngle = 0.0f;
     area->cameraTargetAngle = 0.0f;

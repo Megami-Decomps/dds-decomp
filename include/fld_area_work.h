@@ -39,7 +39,7 @@ typedef struct FldAreaWork {
     s32 mode;                    /* 0x50: includes the focus modes */
     s32 unk54;
     s32 rowIdx;
-    f32 unk5C;
+    f32 cameraSupportHeightOffset;
     f32 unk60;
     f32 negatedAngle;
     f32 cameraTargetAngle;       /* 0x68 */
