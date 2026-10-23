@@ -97,21 +97,21 @@ void btlRunDefaultActionPoseUnlessHooked(void *actor) {
 }
 
 /* Run the timed camera setup hook; return its result, or zero when unset. */
-s32 btlRunTimedCameraSetupHook(BtlUnit *unit) {
-    s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->unk650;
+s32 btlRunTimedCameraSetupHook(BtlLinkedCommand *action) {
+    s32 (*hook)(BtlLinkedCommand *) = ((BtlState *)btlGetRuntime())->timedCameraSetupHook;
     s32 result = 0;
     if (hook != 0) {
-        result = hook(unit);
+        result = hook(action);
     }
     return result;
 }
 
 /* Run the timed camera finish hook; return its result, or zero when unset. */
-s32 btlRunTimedCameraFinishHook(BtlUnit *unit) {
-    s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->unk658;
+s32 btlRunTimedCameraFinishHook(BtlLinkedCommand *action) {
+    s32 (*hook)(BtlLinkedCommand *) = ((BtlState *)btlGetRuntime())->timedCameraFinishHook;
     s32 result = 0;
     if (hook != 0) {
-        result = hook(unit);
+        result = hook(action);
     }
     return result;
 }

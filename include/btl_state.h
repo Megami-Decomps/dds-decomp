@@ -581,9 +581,9 @@ typedef struct BtlState {
     s32 (*defeatCameraHook)(BtlLinkedCommand *, BtlCamState *, s32); /* 0x644: same linked-defeat camera override. */
     s32 (*unk648)(BtlUnit *);
     s32 (*unk64C)(BtlUnit *);
-    s32 (*unk650)(BtlUnit *);
+    s32 (*timedCameraSetupHook)(BtlLinkedCommand *);
     s32 (*actionCameraSetupHook)(BtlLinkedCommand *); /* 0x654: same action-camera setup override. */
-    s32 (*unk658)(BtlUnit *);
+    s32 (*timedCameraFinishHook)(BtlLinkedCommand *);
     s32 (*linkageStartDelayHook)(s32); /* 0x65C: LINKAGE skill-to-start-delay call-site contract. */
     s32 (*cameraPoseBlendHook)(BtlLinkedCommand *, s32, s32); /* 0x660: same target-side pose override as DDS1 +0x628. */
     s32 (*actionCameraStepHook)(struct BtlLinkedCommand *); /* 0x664: nonzero handles the camera step. */
