@@ -2131,9 +2131,7 @@ void effPCPMultiBlurExp2SetArea(EffPCPCompactFadeWork *work, f32 input) {
     work->unk34 = input;
 }
 
-EffPCPFadeTimer *effPCPFilterExpCreate(src)
-    EffPCPFadeTimerParams *src;
-{
+EffPCPFadeTimer *effPCPFilterExpCreate(const EffPCPFadeTimerParams *src) {
     EffPCPFadeTimer *dst;
 
     dst = sdfChipAllocDirect(0x30);
@@ -2196,9 +2194,7 @@ void effPCPFilterExpSetColor(EffPCPFadeTimer *work, u32 value) {
     work->colorFrom = value;
 }
 
-void *effPCPBlurExpCreate(src)
-    EffPCPFadeTimerLongParams *src;
-{
+EffPCPFadeTimerLong *effPCPBlurExpCreate(const EffPCPFadeTimerLongParams *src) {
     EffPCPFadeTimerLong *dst;
 
     dst = sdfChipAllocDirect(0x40);
