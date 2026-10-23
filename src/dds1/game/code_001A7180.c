@@ -29,7 +29,7 @@
 /* Declared before first use (were implicit int). */
 extern s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex);
 extern s32 fldCountSceneSlots(void);
-extern u32 sdfQueryChannelBits(s32 channel, s32 queryArg, datUnitWork_t *item);
+extern u32 sdfQueryChannelBits(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
 /* Original-style implicit int, kept: matched code depends on it: btlRollAiBucket. */
 
 typedef struct BattleController {
@@ -118,7 +118,7 @@ s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element);
 
 s32 btlFlagToElementIndex(s32 flag);
 
-extern s32 sdfQueryChannelValue(s32, datUnitWork_t *, datUnitWork_t *);
+extern u32 sdfQueryChannelValue(s32, datUnitWork_t *, datUnitWork_t *);
 #include "sdf_debug_api.h"
 
 s32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, s32 command, s32 variant, s32 mode) {
@@ -169,13 +169,13 @@ s32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, s32 command, 
     return value;
 }
 
-s32 btlQueryUnitChannelFlags(s32 source, s32 recipient, s32 command, s32 press, s32 kind) {
+s32 btlQueryUnitChannelFlags(BtlUnit *source, BtlUnit *recipient, s32 command, s32 press, s32 kind) {
     s32 flags;
     if (kind != 1) {
         return 0;
     }
-    flags = sdfQueryChannelBits(command, source + 0x120, recipient + 0x120);
-    if ((((BtlUnit *)recipient)->partyRecord.status & 8) != 0 && press == 2) {
+    flags = sdfQueryChannelBits(command, &source->partyRecord, &recipient->partyRecord);
+    if ((recipient->partyRecord.status & 8) != 0 && press == 2) {
         flags |= 8;
     }
     return flags;

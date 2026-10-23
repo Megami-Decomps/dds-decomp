@@ -70,7 +70,7 @@ extern DatEnemyRecord *datEnemyRecords;
 
 extern s32 datGetStatWithStatusOverride(datUnitWork_t *, s32 statIndex);
 
-extern u32 sdfRollActionHit(s32 channel, s32 queryArg, datUnitWork_t *item);
+extern u32 sdfRollActionHit(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
 
 extern void scrDestroyWorkTask(void);
 
@@ -595,7 +595,7 @@ f32 sdfGetHpBracketScale(datUnitWork_t *unit) {
     return datBattleParameters->partyHpScale[band];
 }
 
-s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, datUnitWork_t *item, u32 mode, u8 vital) {
+s32 sdfCalculateCommandVitalDelta(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item, u32 mode, u8 vital) {
     s32 healing;
     s32 damage;
     u16 current;
@@ -653,10 +653,10 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, datUnitWork_t *item
     case 2:
         switch (datCommandRecords[channel].effectType) {
         case 0:
-            healing = sdfDispatchCmd(channel, queryArg, (u32)item, vital);
+            healing = sdfDispatchCmd(channel, (u32)sourceRecord, (u32)item, vital);
             break;
         case 1:
-            healing = evtRunCommandContext10(channel, queryArg, (u32)item, vital);
+            healing = evtRunCommandContext10(channel, (u32)sourceRecord, (u32)item, vital);
             break;
         }
         healing += base;
@@ -665,7 +665,7 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, datUnitWork_t *item
         }
         break;
     case 7:
-        healing = sdfDispatchSubCmd(channel, queryArg, (u32)item, vital) + base;
+        healing = sdfDispatchSubCmd(channel, (u32)sourceRecord, (u32)item, vital) + base;
         if (healing == 0) {
             healing = 1;
         }
@@ -697,15 +697,15 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, datUnitWork_t *item
     case 16:
         switch (datCommandRecords[channel].effectType) {
         case 0:
-            damage = sdfDispatchPrimaryUnitScript(channel, queryArg, (u32)item, vital);
+            damage = sdfDispatchPrimaryUnitScript(channel, (u32)sourceRecord, (u32)item, vital);
             break;
         case 1:
-            damage = sdfDispatchUnitScriptDefault9(channel, queryArg, (u32)item, vital);
+            damage = sdfDispatchUnitScriptDefault9(channel, (u32)sourceRecord, (u32)item, vital);
             break;
         }
         damage += base;
         if (type == 16) {
-            damage = damage * sdfGetHpBracketScale((datUnitWork_t *)queryArg);
+            damage = damage * sdfGetHpBracketScale(sourceRecord);
         }
         if (type < 14) {
             if (type >= 12) {
@@ -722,7 +722,7 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, datUnitWork_t *item
         }
         break;
     case 6:
-        damage = evtRunCommandContext7(channel, queryArg, (u32)item, vital) + base;
+        damage = evtRunCommandContext7(channel, (u32)sourceRecord, (u32)item, vital) + base;
         if (damage == 0) {
             damage = 1;
         }
@@ -740,7 +740,7 @@ extern s32 datGetEffectiveAffinity(datUnitWork_t *, s32);
 extern char D_00412B08[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
 /* Rolls whether the action hits: returns the surviving channel mask, or 0 on a miss. */
-u32 sdfRollActionHit(s32 channel, s32 queryArg, datUnitWork_t *packed) {
+u32 sdfRollActionHit(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *packed) {
     u16 list[16];
     u16 count;
     u16 bit;
@@ -796,7 +796,7 @@ u32 sdfRollActionHit(s32 channel, s32 queryArg, datUnitWork_t *packed) {
 
         if (actor->hp * 100 / actor->maxHp >= 25) {
             mask &= 0xFFFE;
-        } else if (!(*(u16 *)queryArg & 4)) {
+        } else if (!(sourceRecord->flags & 4)) {
             mask &= 0xFFFE;
         } else if ((actor->flags & SDF_UNIT_ENEMY) == 0 ||
                    (datEnemyRecords[actor->unitId].flags & 0x440) != 0) {
@@ -813,7 +813,7 @@ u32 sdfRollActionHit(s32 channel, s32 queryArg, datUnitWork_t *packed) {
     }
     hit = 1;
     if (datCommandRecords[channel].attribute.parts.hitChance < 100) {
-        scaled = evtRunContext(0xC, queryArg, packed, channel, mask) * ((f32)ratio / 100.0f);
+        scaled = evtRunContext(0xC, (s32)sourceRecord, packed, channel, mask) * ((f32)ratio / 100.0f);
         printf(D_00412B08, scaled, ratio, mask);
         roll = dds3GetRandIntA(0, 100);
         hit = roll < scaled;
@@ -821,7 +821,7 @@ u32 sdfRollActionHit(s32 channel, s32 queryArg, datUnitWork_t *packed) {
     return hit ? mask : 0;
 }
 
-u32 sdfQueryChannelValue(s32 channel, s32 queryArg, datUnitWork_t *item) {
+u32 sdfQueryChannelValue(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item) {
     u32 result;
     u32 mode = datCommandRecords[channel].attribute.parts.kind;
 
@@ -829,20 +829,20 @@ u32 sdfQueryChannelValue(s32 channel, s32 queryArg, datUnitWork_t *item) {
         mode != DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK) {
         return 0;
     }
-    result = sdfRollActionHit(channel, queryArg, item);
+    result = sdfRollActionHit(channel, sourceRecord, item);
     if (!((item->status & SDF_PACKED_VALUE_MASK) < result)) {
         result = 0;
     }
     return result;
 }
 
-u32 sdfQueryChannelBits(s32 channel, s32 queryArg, datUnitWork_t *item) {
+u32 sdfQueryChannelBits(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item) {
     u32 result;
 
     if (datCommandRecords[channel].attribute.parts.kind != DAT_COMMAND_ATTRIBUTE_KIND_FLAG_MASK) {
         return 0;
     }
-    result = sdfRollActionHit(channel, queryArg, item);
+    result = sdfRollActionHit(channel, sourceRecord, item);
     if ((result & (item->status & SDF_PACKED_VALUE_MASK)) == 0) {
         result = 0;
     }
@@ -856,17 +856,17 @@ void sdfRaisePackedChannelValue(datUnitWork_t *item, u32 minimumValue);
 extern s32 datAddHp(datUnitWork_t *unit, s32 delta);
 extern s32 datAddMp(datUnitWork_t *unit, s32 delta);
 
-s32 sdfApplyCommandResults(s32 channel, s32 queryArg, datUnitWork_t *item) {
+s32 sdfApplyCommandResults(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item) {
     s32 hpDelta;
     s32 mpDelta;
     u32 value;
     u32 bits;
 
-    if (queryArg != 0 && item != NULL) {
-        hpDelta = sdfCalculateCommandVitalDelta(channel, queryArg, item, 1, 1);
-        mpDelta = sdfCalculateCommandVitalDelta(channel, queryArg, item, 1, 2);
-        value = sdfQueryChannelValue(channel, queryArg, item);
-        bits = sdfQueryChannelBits(channel, queryArg, item);
+    if (sourceRecord != 0 && item != NULL) {
+        hpDelta = sdfCalculateCommandVitalDelta(channel, sourceRecord, item, 1, 1);
+        mpDelta = sdfCalculateCommandVitalDelta(channel, sourceRecord, item, 1, 2);
+        value = sdfQueryChannelValue(channel, sourceRecord, item);
+        bits = sdfQueryChannelBits(channel, sourceRecord, item);
         if (hpDelta == 0 && mpDelta == 0 && value == 0 && bits == 0) {
             return 0;
         }

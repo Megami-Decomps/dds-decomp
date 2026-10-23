@@ -32,8 +32,8 @@
 #include "btl_target_result.h"
 /* Declared before first use (were implicit int). */
 extern s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex);
-extern u32 sdfQueryChannelBits(s32 channel, s32 queryArg, datUnitWork_t *item);
-extern u32 sdfQueryChannelValue(s32 channel, s32 queryArg, datUnitWork_t *item);
+extern u32 sdfQueryChannelBits(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
+extern u32 sdfQueryChannelValue(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
 
 extern s32 D_003B4F70[];
 
@@ -168,7 +168,7 @@ s32 btlQueryUnitChannelFlags(BtlUnit *source, BtlUnit *recipient, s32 command, s
     if (kind != 1) {
         return 0;
     }
-    flags = sdfQueryChannelBits(command, (s32)&source->partyRecord, (s32)&recipient->partyRecord);
+    flags = sdfQueryChannelBits(command, &source->partyRecord, &recipient->partyRecord);
     if ((recipient->partyRecord.status & 8) != 0 && press == 2) {
         flags |= 8;
     }

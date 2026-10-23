@@ -526,7 +526,7 @@ extern s32 btlDetermineActionPressResult(BtlUnit *, BtlUnit *, s32);
 
 extern s32 btlGetCommandAddedStatus(BtlUnit *, BtlUnit *, s32, s32, s32);
 
-extern s32 btlQueryUnitChannelFlags(s32, s32, s32, s32, s32);
+extern s32 btlQueryUnitChannelFlags(BtlUnit *, BtlUnit *, s32, s32, s32);
 
 extern s32 btlSelectActorAction(s32);
 
@@ -852,7 +852,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
             }
         }
         addedStatus = btlGetCommandAddedStatus(source, recipient, command, press, (s32)kind);
-        removedStatus = btlQueryUnitChannelFlags((s32)source, (s32)recipient, command, press, (s32)kind);
+        removedStatus = btlQueryUnitChannelFlags(source, recipient, command, press, (s32)kind);
         if (group->reflected) {
             addedStatus &= ~6;
         }
