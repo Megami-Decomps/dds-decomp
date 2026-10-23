@@ -1373,7 +1373,7 @@ extern void btlClearPartyRecordStatusBits(datUnitWork_t *, s32);
 
 extern s32 mnuIsTitleEntryAvailable(datUnitWork_t *);
 
-extern void datAddHp();
+extern s32 datAddHp(datUnitWork_t *unit, s32 delta);
 
 /* Nudge every active party entry's cursor by weight * 0.05 once scene flag
  * 0x40 is clear. */
@@ -2347,4 +2347,3 @@ INCLUDE_SDATA(const s32, "game/code_001CFEF8", D_00436908);
 INCLUDE_SDATA(const s32, "game/code_001CFEF8", D_00436910);
 
 INCLUDE_SDATA(const s32, "game/code_001CFEF8", D_00436918);
-
