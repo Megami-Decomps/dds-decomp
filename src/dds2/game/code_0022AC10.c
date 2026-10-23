@@ -1365,7 +1365,7 @@ void btlReleaseFoundModelEntry(s32 modelKind, s32 modelId) {
 }
 
 extern SoundSlotOwner * sndAcquireSlotOwner(s32 category, s32 id);
-extern s32 btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId);
+extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId);
 
 /* Finalize the existing kind/id entry's motion-SE pack ownership and ready state.
  * The native DDS2 twin also logs each adopted resource slot. */
@@ -1380,7 +1380,7 @@ void btlFinalizeModelPackEntry(s32 kind, s32 id) {
             entry->soundOwner = sndAcquireSlotOwner(kind, id);
             if (entry->soundOwner->work.refCount == 1) {
                 s32 count = kind == 0 ? 0x1D : 0x17;
-                parts = (SoundSlotTableEntry *)btlSelectSideIndexedActorParameterTable(kind, id);
+                parts = btlSelectSideIndexedActorParameterTable(kind, id);
                 node = entry->packRequest->packet.queueHead;
                 for (i = 0; i < count; i++) {
                     /* Capture the row before field access; see docs/idioms.md,
