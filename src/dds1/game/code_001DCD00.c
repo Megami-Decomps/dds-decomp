@@ -42,6 +42,13 @@
 #include "file_request_api.h"
 #include "dat_affinity.h"
 
+enum {
+    BTL_UNIT_STATUS_FLAG_ACTIVE = 1,
+    BTL_UNIT_STATUS_FLAG_ALLY = 0x200,
+    BTL_UNIT_STATUS_FLAG_ENEMY = 0x400,
+    BTL_UNIT_STATUS_SIDE_MASK = 0x600
+};
+
 extern u32 btlSelectCommandTargetPolicy(BtlTask *, BtlIndexList *, s32);
 
 
@@ -167,8 +174,8 @@ s32 btlCheckActorDistanceLimit(void) {
 
     while (actor != 0) {
         u32 flags = (u32)actor->status.flags;
-        if (flags & 1) {
-            if (flags & 0x400) {
+        if (flags & BTL_UNIT_STATUS_FLAG_ACTIVE) {
+            if (flags & BTL_UNIT_STATUS_FLAG_ENEMY) {
                 if (btlUnitGetTopY(actor) > 400.0f) {
                     return 0;
                 }
@@ -183,7 +190,7 @@ s32 btlCheckActorDistanceLimit(void) {
 extern f32 btlMeasureMaskedUnitBounds(s32, f32 *, f32 *);
 
 s32 btlIsEntryHeightWithinLimit(void) {
-    if (btlMeasureMaskedUnitBounds(0x400, 0, 0) > 600.0f) {
+    if (btlMeasureMaskedUnitBounds(BTL_UNIT_STATUS_FLAG_ENEMY, 0, 0) > 600.0f) {
         return 0;
     }
     return 1;
@@ -350,7 +357,7 @@ s32 btlMatchLinkedActorFlags(BtlLinkedCommand *action) {
         return 0;
     }
     entry = btlGetIndexListEntry(linked->indexWork.indices, 0);
-    return (((u32)linked->unit->status.flags ^ (u32)entry->status.flags) & 0x600) == 0;
+    return (((u32)linked->unit->status.flags ^ (u32)entry->status.flags) & BTL_UNIT_STATUS_SIDE_MASK) == 0;
 }
 
 s32 btlHasFirstLinkedCategoryFlag1000(BtlLinkedCommand *node) {
@@ -360,7 +367,7 @@ s32 btlHasFirstLinkedCategoryFlag1000(BtlLinkedCommand *node) {
     if (resource == 0) return 0;
     if (btlGetIndexListCount(resource->indexWork.indices) >= 2) return 0;
     actor = btlGetIndexListEntry(resource->indexWork.indices, 0);
-    if ((actor->status.flags & 0x400) == 0) return 0;
+    if ((actor->status.flags & BTL_UNIT_STATUS_FLAG_ENEMY) == 0) return 0;
     id = actor->species;
     if (id >= 0x180) return 0;
     if (datEnemyRecords[id].flags & 0x1000) return 1;
@@ -399,13 +406,13 @@ void btlChooseCameraPoseByActorHeights(BtlLinkedCommand *action) {
 
     unit = ((BtlState *)btlGetRuntime())->units;
     for (; unit != NULL; unit = unit->next) {
-        if (unit->status.flags & 1) {
+        if (unit->status.flags & BTL_UNIT_STATUS_FLAG_ACTIVE) {
             height = btlUnitGetTopY(unit);
-            if (unit->status.flags & 0x200) {
+            if (unit->status.flags & BTL_UNIT_STATUS_FLAG_ALLY) {
                 if (allyHeight < height) {
                     allyHeight = height;
                 }
-            } else if (unit->status.flags & 0x400) {
+            } else if (unit->status.flags & BTL_UNIT_STATUS_FLAG_ENEMY) {
                 if (enemyHeight < height) {
                     enemyHeight = height;
                 }
@@ -474,7 +481,7 @@ void btlInitializeLinkedActionCamera(BtlLinkedCommand *action) {
     if (hook != NULL && hook(action) != 0) {
         return;
     }
-    if (link->unit->status.flags & 0x200) {
+    if (link->unit->status.flags & BTL_UNIT_STATUS_FLAG_ALLY) {
         if (link->unit->status.flags & 0x1000) {
             if (btlHasSingleLinkedResource(action)) {
                 action->stepKind = 9;
@@ -562,17 +569,17 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
         count = btlGetIndexListCount(task->indexWork.indices);
         for (i = 0; i < count; i++) {
             BtlUnit *entry = (BtlUnit *)btlGetIndexListEntry(task->indexWork.indices, i);
-            if (entry->status.flags & 0x200) {
+            if (entry->status.flags & BTL_UNIT_STATUS_FLAG_ALLY) {
                 hasFlag200 = 1;
             }
-            if (entry->status.flags & 0x400) {
+            if (entry->status.flags & BTL_UNIT_STATUS_FLAG_ENEMY) {
                 hasFlag400 = 1;
             }
         }
         if (work->cameraPoseBlendHook != 0 && work->cameraPoseBlendHook(action, hasFlag200, hasFlag400) != 0) {
             return;
         }
-        if (task->unit->status.flags & 0x200) {
+        if (task->unit->status.flags & BTL_UNIT_STATUS_FLAG_ALLY) {
             if ((hasFlag200 == 1 || hasFlag400 != 1) && btlCanUseActorCategoryFlag4(action) == 0) {
                 if (btlHasSingleLinkedResource(action) == 0) {
                     if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
@@ -776,10 +783,10 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
     count = btlGetIndexListCount(task->indexWork.indices);
     for (i = 0; i < count; i++) {
         unit = btlGetIndexListEntry(task->indexWork.indices, i);
-        if (unit->status.flags & 0x200) {
+        if (unit->status.flags & BTL_UNIT_STATUS_FLAG_ALLY) {
             hasFlag200 = 1;
         }
-        if (unit->status.flags & 0x400) {
+        if (unit->status.flags & BTL_UNIT_STATUS_FLAG_ENEMY) {
             hasFlag400 = 1;
         }
     }
@@ -788,7 +795,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
         return;
     }
 
-    if (task->unit->status.flags & 0x200) {
+    if (task->unit->status.flags & BTL_UNIT_STATUS_FLAG_ALLY) {
         if (btlHasSingleLinkedResource(action)) {
             if (hasFlag200 != 1 && hasFlag400 == 1) {
                 if (btlIsActorCategoryMarked(action)) {
@@ -933,7 +940,7 @@ void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
 
     if (((BtlState *)btlGetRuntime())->runtimeFlags & 1) {
         target = action->task->unit;
-        if (target->status.flags & 0x400) {
+        if (target->status.flags & BTL_UNIT_STATUS_FLAG_ENEMY) {
             fldCamUpdateDefault(action, &action->camera);
             return;
         }
@@ -982,13 +989,13 @@ void btlUpdateActionCameraFromTargetPolicy(BtlLinkedCommand *action) {
         hasFlag400 = 0;
         for (i = 0; i < listCount; i++) {
             u32 flags = ((BtlUnit *)btlGetIndexListEntry(list, i))->status.flags;
-            if ((flags & 1) == 0) {
+            if ((flags & BTL_UNIT_STATUS_FLAG_ACTIVE) == 0) {
                 hasUnready = 1;
             }
-            if (flags & 0x200) {
+            if (flags & BTL_UNIT_STATUS_FLAG_ALLY) {
                 hasFlag200 = 1;
             }
-            if (flags & 0x400) {
+            if (flags & BTL_UNIT_STATUS_FLAG_ENEMY) {
                 hasFlag400 = 1;
             }
         }
@@ -999,8 +1006,8 @@ void btlUpdateActionCameraFromTargetPolicy(BtlLinkedCommand *action) {
         matchingActorCount = 0;
         for (unit = runtime->units; unit != 0; unit = unit->next) {
             u32 flags = unit->status.flags;
-            if ((flags & 1) != 0 || hasUnready != 0) {
-                if (flags & 0x200) {
+            if ((flags & BTL_UNIT_STATUS_FLAG_ACTIVE) != 0 || hasUnready != 0) {
+                if (flags & BTL_UNIT_STATUS_FLAG_ALLY) {
                     matchingActorCount++;
                 }
             }
@@ -1016,8 +1023,8 @@ void btlUpdateActionCameraFromTargetPolicy(BtlLinkedCommand *action) {
             for (unit = runtime->units; unit != 0; unit = unit->next) {
                 if (unit != link->unit) {
                     u32 flags = unit->status.flags;
-                    if ((flags & 1) != 0) {
-                        if ((flags & 0x200) != 0) {
+                    if ((flags & BTL_UNIT_STATUS_FLAG_ACTIVE) != 0) {
+                        if ((flags & BTL_UNIT_STATUS_FLAG_ALLY) != 0) {
                             btlUnitGetMuzzlePosVU(unit);
                             /* Retail 001DE794 keeps the ally snapshot at SP+0. */
                             SDF_VU0_STOREVECTOR(positions[0]);
@@ -1078,7 +1085,7 @@ void btlPrepareSingleTargetCameraBlend(BtlLinkedCommand *action) {
         return;
     }
     target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
-    if (action->task->unit->status.flags & 0x200) {
+    if (action->task->unit->status.flags & BTL_UNIT_STATUS_FLAG_ALLY) {
         btlApplyMarkedUnitActionCamera(action, &action->camera, target, 0);
         return;
     }
@@ -1105,7 +1112,7 @@ extern void btlInitSkillCommandCursor(BtlLinkedCommand *, BtlCamState *);
 
 void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    if (action->task->unit->status.flags & 0x400) {
+    if (action->task->unit->status.flags & BTL_UNIT_STATUS_FLAG_ENEMY) {
         if (work->cameraPoseBlendHook != 0) {
             s8 hasFlag200 = 0;
             s8 hasFlag400 = 0;
@@ -1113,10 +1120,10 @@ void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action) {
             u32 count = btlGetIndexListCount(action->task->indexWork.indices);
             for (i = 0; i < count; i++) {
                 BtlUnit *entry = (BtlUnit *)btlGetIndexListEntry(action->task->indexWork.indices, i);
-                if (entry->status.flags & 0x200) {
+                if (entry->status.flags & BTL_UNIT_STATUS_FLAG_ALLY) {
                     hasFlag200 = 1;
                 }
-                if (entry->status.flags & 0x400) {
+                if (entry->status.flags & BTL_UNIT_STATUS_FLAG_ENEMY) {
                     hasFlag400 = 1;
                 }
             }
@@ -1160,10 +1167,10 @@ void btlSelectActionCameraPose(BtlLinkedCommand *action) {
         do {
             unit = btlGetIndexListEntry(action->task->indexWork.indices, index++);
             flags = unit->status.flags;
-            if (flags & 0x200) {
+            if (flags & BTL_UNIT_STATUS_FLAG_ALLY) {
                 hasFlag200 = 1;
             }
-            if (flags & 0x400) {
+            if (flags & BTL_UNIT_STATUS_FLAG_ENEMY) {
                 hasFlag400 = 1;
             }
         } while (index < count);
@@ -1181,7 +1188,7 @@ void btlSelectActionCameraPose(BtlLinkedCommand *action) {
             action->flags |= 0x10041;
             return;
         }
-        if ((action->task->unit->status.flags & 0x400) && hasFlag200 == 0 && hasFlag400 == 1) {
+        if ((action->task->unit->status.flags & BTL_UNIT_STATUS_FLAG_ENEMY) && hasFlag200 == 0 && hasFlag400 == 1) {
             btlBuildGroupSizeActionCameraPair(action, &action->frontCamera, &action->backCamera);
             action->flags |= 0x10000;
             return;
