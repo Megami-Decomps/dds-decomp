@@ -42,6 +42,23 @@ typedef struct MenuInitialTag {
     s16 index;
 } MenuInitialTag;
 
+/* Optional eight-byte tags copied into the named record after its initial tag. */
+typedef struct MenuValueGateTag {
+    u8 kind;
+    u8 reserved;
+    s16 waitLimit;
+    s16 limit;
+    s16 lifetime;
+} MenuValueGateTag;
+
+typedef struct MenuRangeTag {
+    u8 kind;
+    u8 reserved;
+    s16 offsetX;
+    s16 offsetY;
+    s16 effect;
+} MenuRangeTag;
+
 /* Named-record constructors allocate and clear exactly 0x22 bytes. */
 typedef struct MenuStateRecord {
     union {
@@ -61,21 +78,20 @@ typedef struct MenuStateRecord {
     s16 elapsedCount;
     s16 value;
     MenuInitialTag tag; /* 0x0A: copied as one eight-byte group. */
-    u8 pad12[2];
-    s16 waitLimit;
-    s16 limit;
-    s16 lifetime;
-    u8 pad1A[2];
-    s16 offsetX;
-    s16 offsetY;
-    s16 effect;
+    MenuValueGateTag valueGate; /* 0x12: kind 0x10 payload. */
+    MenuRangeTag range;          /* 0x1A: kind 0x30 payload. */
 } MenuStateRecord;
 
 typedef char MenuStateRecordLayoutAssert[
-    (sizeof(MenuInitialTag) == 8 && sizeof(MenuStateRecord) == 0x22 &&
+    (sizeof(MenuInitialTag) == 8 && sizeof(MenuValueGateTag) == 8 &&
+     sizeof(MenuRangeTag) == 8 && sizeof(MenuStateRecord) == 0x22 &&
      (unsigned long)&((MenuStateRecord *)0)->tag == 0x0A &&
-     (unsigned long)&((MenuStateRecord *)0)->lifetime == 0x18 &&
-     (unsigned long)&((MenuStateRecord *)0)->effect == 0x20) ? 1 : -1];
+     (unsigned long)&((MenuStateRecord *)0)->valueGate == 0x12 &&
+     (unsigned long)&((MenuStateRecord *)0)->valueGate.kind == 0x12 &&
+     (unsigned long)&((MenuStateRecord *)0)->valueGate.waitLimit == 0x14 &&
+     (unsigned long)&((MenuStateRecord *)0)->range == 0x1A &&
+     (unsigned long)&((MenuStateRecord *)0)->range.kind == 0x1A &&
+     (unsigned long)&((MenuStateRecord *)0)->range.effect == 0x20) ? 1 : -1];
 
 MenuStateRecord *mnuCreateNamedRecord(const void *tagData);
 

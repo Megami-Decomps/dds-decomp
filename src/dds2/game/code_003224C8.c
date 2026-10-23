@@ -1056,9 +1056,9 @@ s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *entry, u32 mode) {
         record->flags.bits.completed = 1;
         record->flags.bits.hasRange = 1;
         record->flags.bits.direction = 1;
-        record->lifetime = 20;
-        record->offsetX = -20;
-        record->offsetY = -20;
+        record->valueGate.lifetime = 20;
+        record->range.offsetX = -20;
+        record->range.offsetY = -20;
     }
     dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
 
@@ -1071,8 +1071,8 @@ s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *entry, u32 mode) {
             tag.duration = 5;
             tag.index = 20;
             record = mnuCreateNamedRecord(&tag);
-            record->offsetY = 15;
-            record->offsetX = 0;
+            record->range.offsetY = 15;
+            record->range.offsetX = 0;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 2;
             dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
@@ -1084,8 +1084,8 @@ s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *entry, u32 mode) {
             tag.duration = 5;
             tag.index = 20;
             record = mnuCreateNamedRecord(&tag);
-            record->offsetX = 20;
-            record->offsetY = 5;
+            record->range.offsetX = 20;
+            record->range.offsetY = 5;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 3;
             dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
@@ -1095,8 +1095,8 @@ s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *entry, u32 mode) {
             tag.duration = 5;
             tag.index = 20;
             record = mnuCreateNamedRecord(&tag);
-            record->offsetX = -20;
-            record->offsetY = 5;
+            record->range.offsetX = -20;
+            record->range.offsetY = 5;
             record->flags.bits.direction = 4;
             record->flags.bits.hasRange = 1;
             dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
@@ -1108,8 +1108,8 @@ s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *entry, u32 mode) {
             tag.duration = 5;
             tag.index = 20;
             record = mnuCreateNamedRecord(&tag);
-            record->offsetY = 15;
-            record->offsetX = 0;
+            record->range.offsetY = 15;
+            record->range.offsetX = 0;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 2;
             dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
@@ -1119,8 +1119,8 @@ s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *entry, u32 mode) {
             tag.duration = 10;
             tag.index = 40;
             record = mnuCreateNamedRecord(&tag);
-            record->offsetX = 30;
-            record->offsetY = 5;
+            record->range.offsetX = 30;
+            record->range.offsetY = 5;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 3;
             dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
@@ -1130,8 +1130,8 @@ s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *entry, u32 mode) {
             tag.duration = 10;
             tag.index = 40;
             record = mnuCreateNamedRecord(&tag);
-            record->offsetX = -30;
-            record->offsetY = 5;
+            record->range.offsetX = -30;
+            record->range.offsetY = 5;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 4;
             dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
@@ -1143,8 +1143,8 @@ s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *entry, u32 mode) {
             tag.duration = 5;
             tag.index = 30;
             record = mnuCreateNamedRecord(&tag);
-            record->offsetX = 20;
-            record->offsetY = 5;
+            record->range.offsetX = 20;
+            record->range.offsetY = 5;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 3;
             dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
@@ -1154,8 +1154,8 @@ s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *entry, u32 mode) {
             tag.duration = 5;
             tag.index = 30;
             record = mnuCreateNamedRecord(&tag);
-            record->offsetX = -20;
-            record->offsetY = 5;
+            record->range.offsetX = -20;
+            record->range.offsetY = 5;
             record->flags.bits.direction = 4;
             record->flags.bits.hasRange = 1;
             dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
@@ -1165,8 +1165,8 @@ s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *entry, u32 mode) {
             tag.duration = 7;
             tag.index = 20;
             record = mnuCreateNamedRecord(&tag);
-            record->offsetX = 40;
-            record->offsetY = 5;
+            record->range.offsetX = 40;
+            record->range.offsetY = 5;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 3;
             dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
@@ -1176,8 +1176,8 @@ s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *entry, u32 mode) {
             tag.duration = 7;
             tag.index = 20;
             record = mnuCreateNamedRecord(&tag);
-            record->offsetX = -40;
-            record->offsetY = 5;
+            record->range.offsetX = -40;
+            record->range.offsetY = 5;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 4;
             dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
