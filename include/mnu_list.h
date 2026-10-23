@@ -128,6 +128,8 @@ struct MenuListNode *mnuRetreatListCursorDefault(struct MenuList *list);
 #ifdef VERSION_DDS2
 /* Scroll to the last visible page and return the resulting cursor, or NULL. */
 struct MenuListNode *mnuScrollListToEnd(struct MenuList *list);
+/* Retreat by one page and return the resulting cursor, or NULL if unchanged. */
+struct MenuListNode *mnuScrollListToPreviousPage(struct MenuList *list);
 #endif
 
 /* Move the visible list window and return its unchanged cursor node. */
