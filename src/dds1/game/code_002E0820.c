@@ -170,8 +170,8 @@ void sdfCoreDrawScanOneSkinNodes(sdfModelRootNode_t *model, SdfObjectRefCommand 
     }
 }
 
-void sdfCoreDrawSetLight(u32 matrixAddress) {
-    corePktCurrLight = matrixAddress;
+void sdfCoreDrawSetLight(const struct SdfDmaTagHeader *lightingPacket) {
+    corePktCurrLight = (u32)lightingPacket;
 }
 
 /* Cache the object's vector only when its address changes, not its contents. */

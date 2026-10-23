@@ -23,7 +23,7 @@ extern void sdfMatListUpdatePacket(DevRequest *list, s32 entryIndex);
 extern void sdfResourceListApplyEntryChanges(DevRequest *list, s32 entryIndex);
 extern void sdfSetForcedAssetTextureMode(u32 mode);
 extern void sdfCoreDrawSetFog(const SdfLightingPacketStorage *sourcePacket);
-extern void sdfCoreDrawSetLight(u32 matrixAddress);
+extern void sdfCoreDrawSetLight(const struct SdfDmaTagHeader *lightingPacket);
 
 void sdfModelMakeLocalTm(sdfModelNode_t *node);
 void sdfModelNodeBaseSet(sdfModelNode_t *node, SdfItem *item);
@@ -666,7 +666,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, sdfModelRootNode_t
                 break;
             case 3: {
                 u32 packet;
-                sdfCoreDrawSetLight((u32)lighting);
+                sdfCoreDrawSetLight(lighting);
                 sdfCoreDrawSetFog(secondaryLighting);
                 packet = sdfCorePacketGen(node, entry->payload, nodeFlags, color,
                                        firstScalar, secondScalar,
