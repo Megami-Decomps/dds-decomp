@@ -12,7 +12,7 @@ typedef struct EffFrameAsset {
     u32 frameCount;          /* 0x08 */
     u8 pad0C[0x0C];
     void *animationFrames;   /* 0x18 */
-    void *frameStorage;      /* 0x1C */
+    u32 *frameStorage;       /* 0x1C: per-entry frame counters for bill effects. */
     f32 *transformRows;      /* 0x20 */
     u32 pad24;
     u32 *colorRows;          /* 0x28 */

@@ -7409,12 +7409,12 @@ void effResetParticleBillFrameCounters(u8 *work) {
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u32 count = ((EffBillEmitterCommon *)((EffClassWork *)work)->payload)->header.timed.count;
     s32 *entry = *(s32 **)state;
-    s32 *flags = (s32 *)((EffFrameAsset *)((EffFrameState *)state)->asset)->frameStorage;
+    u32 *frameCounters = ((EffFrameAsset *)((EffFrameState *)state)->asset)->frameStorage;
 
     if (count != 0) {
         do {
             index++;
-            *flags++ = 0;
+            *frameCounters++ = 0;
             *entry = -1;
             entry = (s32 *)((u8 *)entry + 0x2C);
         } while (index < count);
