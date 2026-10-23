@@ -6763,7 +6763,191 @@ s32 btlSetSpecialLinkedActionCamera(BtlLinkedCommand *command) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", btlSelectBrahmaActorCategoryCamera);
+/* The two target-category inputs use their signed low bytes, as do the
+ * neighboring actor-category camera callbacks. */
+s32 btlSelectBrahmaActorCategoryCamera(BtlLinkedCommand *command, s32 argModeA, s32 argModeB) {
+    s8 modeA = argModeA;
+    s8 modeB = argModeB;
+    ActionStateLink *link;
+    u32 count;
+    u32 cameraMode;
+
+    if (btlIsActorCategoryMarked(command)) {
+        return 0;
+    }
+    link = command->link;
+    btlGetRuntime();
+    if (link->unit->status.flags & 0x200) {
+        count = btlGetIndexListCount(link->indexWork.indices);
+        if (modeA == 1 && modeB == 0) {
+            return 0;
+        }
+        if (count == 1 && modeA == 0 && modeB == 1) {
+            btlFlagAllUnitDefeatCandidatesTask();
+            if (btlCanUseActorCategoryFlag4(command)) {
+                switch (dds3GetRandIntA(0, 2)) {
+                case 0:
+                    btlBossDebugPrintf(D_0041A5E0);
+                    btlSetEffectCameraKeys((s32)command,
+                        -439.3f, 136.8f, -91.5f, -0.249f, -0.25f, 0.053f, 0.925f, -1187.9f,
+                        473.1f, -1411.8f, -0.197f, -0.254f, 0.04f, 0.937f, 40.0f, 20.0f);
+                    return 1;
+                case 1:
+                    btlBossDebugPrintf(D_0041A5F8);
+                    btlSetEffectCameraKeys((s32)command,
+                        643.5f, 149.6f, -340.1f, -0.158f, 0.28f, -0.061f, 0.935f, 987.9f,
+                        382.7f, -1488.1f, -0.184f, 0.204f, -0.052f, 0.951f, 40.0f, 18.0f);
+                    return 1;
+                }
+            } else {
+                if (btlCanUseLinkedActor(command)) {
+                    cameraMode = 0;
+                    if (btlCanUseActorCategoryFlag2(command) == 0) {
+                        cameraMode = dds3GetRandIntA(0, 2);
+                    }
+                } else {
+                    cameraMode = 1;
+                }
+                if (cameraMode == 0) {
+                    switch (btlFindSpecialActionIndex()) {
+                    case 0:
+                    case 1:
+                    case 2:
+                        switch (dds3GetRandIntA(0, 2)) {
+                        case 0:
+                            btlBossDebugPrintf("BRAHMA:T-0[012] ++++\n");
+                            btlSetEffectCameraKeys((s32)command,
+                                -397.2f, -1626.3f, -2293.5f, 0.128f, -0.035f, -0.017f, 0.982f, -2442.1f,
+                                -2177.1f, -1580.1f, 0.153f, -0.312f, -0.064f, 0.926f, 40.0f, 20.0f);
+                            return 1;
+                        case 1:
+                            btlBossDebugPrintf("BRAHMA:T-1[012] ++++\n");
+                            btlSetEffectCameraKeys((s32)command,
+                                2262.5f, -2170.8f, -1339.1f, 0.167f, 0.242f, 0.029f, 0.946f, 1853.1f,
+                                -931.8f, -1759.8f, 0.011f, 0.231f, -0.01f, 0.964f, 40.0f, 18.0f);
+                            return 1;
+                        }
+                        break;
+                    case 3:
+                        switch (dds3GetRandIntA(0, 2)) {
+                        case 0:
+                            btlBossDebugPrintf("BRAHMA:T-0[4] ++++\n");
+                            btlSetEffectCameraKeys((s32)command,
+                                1803.4f, 108.8f, -1025.4f, -0.143f, 0.297f, -0.058f, 0.93f, 2336.0f,
+                                -2090.1f, -1003.1f, 0.159f, 0.352f, 0.044f, 0.909f, 40.0f, 18.0f);
+                            return 1;
+                        case 1:
+                            btlBossDebugPrintf("BRAHMA:T-1[4] ++++\n");
+                            btlSetEffectCameraKeys((s32)command,
+                                2782.7f, -1808.7f, -374.4f, 0.148f, 0.468f, 0.072f, 0.856f, 1398.8f,
+                                -384.0f, -1378.1f, -0.089f, 0.183f, -0.022f, 0.968f, 40.0f, 30.0f);
+                            return 1;
+                        }
+                        break;
+                    default:
+                        switch (dds3GetRandIntA(0, 2)) {
+                        case 0:
+                            btlBossDebugPrintf("BRAHMA:T-0[5] ++++\n");
+                            btlSetEffectCameraKeys((s32)command,
+                                -1447.6f, -1413.1f, -1289.9f, 0.147f, -0.222f, -0.044f, 0.95f, -2133.9f,
+                                -2436.8f, -1314.7f, 0.217f, -0.28f, -0.076f, 0.918f, 40.0f, 20.0f);
+                            return 1;
+                        case 1:
+                            btlBossDebugPrintf("BRAHMA:T-1[5] ++++\n");
+                            btlSetEffectCameraKeys((s32)command,
+                                2262.5f, -2170.8f, -1339.1f, 0.167f, 0.242f, 0.029f, 0.946f, 1853.1f,
+                                -931.8f, -1759.8f, 0.011f, 0.231f, -0.01f, 0.964f, 40.0f, 18.0f);
+                            return 1;
+                        }
+                        break;
+                    }
+                    return 1;
+                }
+                btlBossDebugPrintf("BRAHMA:IT-Def ++++\n");
+                if (command->actionCode == 0x5A || command->actionCode == 0x8B) {
+                    btlChooseBrahmaGroupCamera((u32)command);
+                } else {
+                    btlUnitSetCameraOffset(command);
+                }
+            }
+            return 1;
+        }
+        btlFlagAllUnitDefeatCandidatesTask();
+        btlChooseBrahmaGroupCamera((u32)command);
+        return 1;
+    } else {
+        if (modeA == 0 && modeB == 1) {
+            btlBossDebugPrintf("BRAHMA:EFFP-MY-Def ++++\n");
+            btlBuildRandomizedActionCameraPosePair(command, &command->frontCamera, &command->backCamera);
+            btlFlagAllUnitDefeatCandidatesTask();
+            return 1;
+        }
+        if (btlCanUseLinkedActor(command)) {
+            cameraMode = 0;
+            if (btlCanUseActorCategoryFlag2(command) == 0) {
+                cameraMode = dds3GetRandIntA(0, 2);
+            }
+        } else {
+            cameraMode = 1;
+        }
+        count = btlGetIndexListCount(link->indexWork.indices);
+        if (btlCanUseActorCategoryFlag4(command) && modeA == 1 && modeB == 0) {
+            btlBossDebugPrintf("BRAHMA:EFFP-Def ++++\n");
+            btlBuildRandomizedActionCameraPosePair(command, &command->frontCamera, &command->backCamera);
+            return 1;
+        }
+        if (count == 1 && modeA == 1 && modeB == 0) {
+            if (cameraMode == 0) {
+                btlBossDebugPrintf("BRAHMA:T-Def ++++\n");
+                if (btlHasSingleLinkedResource(command)) {
+                    btlBuildRandomTargetCameraStates(command, &command->frontCamera, &command->backCamera);
+                    command->motionParameter = 30.0f;
+                    command->flags |= 0x41;
+                } else {
+                    btlBuildFilteredGroupCameraPair(command, &command->frontCamera, &command->backCamera);
+                }
+                return 1;
+            }
+            btlBossDebugPrintf("BRAHMA:IT-Def ++++\n");
+            btlBuildLinkedCommandCameraPair(command, &command->frontCamera, &command->backCamera,
+                0.8f, -0.65f, 0.65f, 0, 0);
+            command->frontCamera.distance += 700.0f;
+            command->backCamera.distance += 700.0f;
+            command->motionParameter = 30.0f;
+            command->flags |= 0x41;
+            return 1;
+        }
+        if (count >= 2 && modeA == 1 && modeB == 0) {
+            if (cameraMode == 0) {
+                btlBossDebugPrintf("BRAHMA:TP-Def ++++\n");
+                btlBuildFilteredGroupCameraPair(command, &command->frontCamera, &command->backCamera);
+                return 1;
+            }
+            btlFlagAllUnitDefeatCandidatesTask();
+            switch (dds3GetRandIntA(0, 3)) {
+            case 0:
+                btlBossDebugPrintf("BRAHMA:ITP-0 ++++\n");
+                btlSetEffectCameraKeys((s32)command,
+                    187.5f, 29.8f, -983.2f, -0.167f, 0.094f, -0.029f, 0.972f, -411.8f,
+                    180.2f, -1348.7f, -0.172f, -0.121f, 0.009f, 0.969f, 40.0f, 20.0f);
+                return 1;
+            case 1:
+                btlBossDebugPrintf("BRAHMA:ITP-1 ++++\n");
+                btlSetEffectCameraKeys((s32)command,
+                    234.9f, 122.2f, -928.7f, -0.243f, 0.145f, -0.049f, 0.949f, 530.4f,
+                    213.5f, -1323.9f, -0.193f, 0.149f, -0.042f, 0.96f, 40.0f, 20.0f);
+                return 1;
+            case 2:
+                btlBossDebugPrintf("BRAHMA:ITP-2 ++++\n");
+                btlSetEffectCameraKeys((s32)command,
+                    -460.3f, 137.4f, -1251.1f, -0.171f, -0.135f, 0.012f, 0.967f, 455.9f,
+                    151.0f, -1300.8f, -0.167f, 0.141f, -0.036f, 0.966f, 40.0f, 25.0f);
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 /* Advance marked action timing; install the camera only on its trigger frame. */
 s32 btlAdvanceBrahmanTimedActionCamera(BtlLinkedCommand *unit) {

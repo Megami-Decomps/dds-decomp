@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "fld_item_box_object_api.h"
 #include "fld_projected_sprite.h"
 #include "sdf_model_packet_callback.h"
 #include "dsp_entry_api.h"
@@ -7,6 +8,7 @@
 #include "fld_area_work.h"
 #include "fld_room_effect_entry.h"
 #include "fld_object_slot.h"
+#include "fld_activation_entry.h"
 #include "fld_npc_palette.h"
 #include "file_pac.h"
 #include "evt_world.h"
@@ -3076,7 +3078,7 @@ void fldResetObjectSlots(void) {
 
 extern void sdfModelSetFaceDivParm(struct sdfModelRootNode_t *model, f32 first, f32 second);
 extern s32 D_0032E3C4[];
-extern u8 D_003D44A0[0x200];
+extern FldNpcPalette D_003D44A0;
 extern f32 sdfCos(f32);
 
 void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
@@ -3096,7 +3098,7 @@ void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
     if (index >= 64) {
         index = 63;
     }
-    row = (FldNpcPaletteEntry *)(D_003D44A0 + index * 8);
+    row = &D_003D44A0.entries[index];
     height = 0.0f;
     angle = -EulerAngleAxisY();
     if (row->phase >= 20) {
@@ -3179,7 +3181,6 @@ extern dds3Basic_t *dds3AddUnitObjectBasic(s32 value, void *position, void *rota
 extern void dds3RebuildObjectModelContext(dds3Basic_t *node, s32 kind, s32 resource);
 extern void dds3GetRadiusPoseSet(dds3Basic_t *node, f32 value);
 extern u32 sdfGetLodChunkValue(sdfModelRootNode_t *model);
-extern void fldAddItemBoxObject(s32 room, f32 x, f32 y, f32 z, f32 radius, f32 height);
 extern void fldSpawnNpcTrigger(f32 x, f32 y, f32 z, f32 height, const char *name, s32 arg1, s32 room, s32 index);
 
 void func_001480D0(u32 key, f32 *orientation, f32 x, f32 y, f32 z,
@@ -3287,17 +3288,142 @@ void func_001480D0(u32 key, f32 *orientation, f32 x, f32 y, f32 z,
         inner->lodIndex = lod;
         dds3ObjectBaseOnFlag(object, 0x400);
         fldInitializeHuntSparkUnit(evtGetUnitHandle2(object));
-        fldAddItemBoxObject(room, x, y, z, radius, hitHeight);
+        fldAddItemBoxObject(x, y, z, radius, hitHeight, room);
         fldSpawnNpcTrigger(x, y, z, height, name, argument, room, fldNpcModelTable);
         fldNpcModelTable++;
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0758);
+extern FldActivationEntry D_0034C8F0[256];
+extern u8 fldTestObjectActivationFlag(u32 flagIndex);
+extern void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 radius);
 
-INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0768);
-
-INCLUDE_ASM(const s32, "game/code_001411F0", func_001486D0);
+void func_001486D0(u32 id, f32 *rotation, f32 x, f32 y, f32 z) {
+    f32 position[4];
+    f32 resultRotation[4];
+    s32 modelId = 21;
+    s32 entryIndex, floorIndex;
+    dds3Basic_t *object;
+    dds3ModelHandle_t *resource;
+    evtUnitHandle_t *unit;
+    FldNpcPaletteEntry *row;
+    f32 heading, lightAngle;
+    s32 red, green, blue;
+    u32 colorA, colorB;
+    memset(position, 0, sizeof(position));
+    position[3] = 1.0f;
+    memset(resultRotation, 0, sizeof(resultRotation));
+    {
+        f32 scale[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+        f32 direction[4];
+        entryIndex = fldNpcModelTable;
+        fldNpcModelTable = entryIndex + 1;
+        fldModelSlotTable[entryIndex].placementId = 999;
+        fldModelSlotTable[entryIndex].x = x;
+        fldModelSlotTable[entryIndex].y = y;
+        fldModelSlotTable[entryIndex].z = z;
+        fldModelSlotTable[entryIndex].orientation[0] = rotation[0];
+        fldModelSlotTable[entryIndex].orientation[1] = rotation[1];
+        fldModelSlotTable[entryIndex].orientation[2] = rotation[2];
+        fldModelSlotTable[entryIndex].orientation[3] = rotation[3];
+        fldModelSlotTable[entryIndex].unk2C = 0.0f;
+        fldModelSlotTable[entryIndex].unk30 = 0;
+        fldModelSlotTable[entryIndex].unk34 = 0;
+        fldModelSlotTable[entryIndex].room = 0;
+        fldModelSlotTable[entryIndex].unk3C = id;
+        position[0] = x;
+        position[1] = y;
+        position[2] = z;
+        switch (D_0034C8F0[id].kind) {
+        case 0:
+        case 3:
+            if (D_003BAF70 == 0) {
+                D_003BAF70 = (s32)dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BAF6C);
+                fldTakaraSlotTable[fldTakaraCount].effectNode = (EffNode *)(u32)D_003BAF70;
+            } else {
+                fldTakaraSlotTable[fldTakaraCount].effectNode =
+                    dds3EffectCopy((EffNode *)(u32)D_003BAF70);
+            }
+            modelId = 21;
+            break;
+        case 1:
+            if (D_003BAF7C == 0) {
+                D_003BAF7C = (s32)dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BAF78);
+                fldTakaraSlotTable[fldTakaraCount].effectNode = (EffNode *)(u32)D_003BAF7C;
+            } else {
+                fldTakaraSlotTable[fldTakaraCount].effectNode =
+                    dds3EffectCopy((EffNode *)(u32)D_003BAF7C);
+            }
+            modelId = 22;
+            break;
+        case 2:
+            modelId = 23;
+            break;
+        }
+        {
+            f32 axis[4] = {0.0f, 1.0f, 0.0f, 1.0f};
+            SDF_VU0_LOADVECTOR(axis);
+            FromRotation(3.1415926f);
+        }
+        SDF_VU0_LOADVECTOR_B(rotation);
+        effMiscQuatMultiplyVU();
+        SDF_VU0_STOREVECTOR_NOMEM(resultRotation);
+        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, resultRotation);
+        dds3SetUnitObjectId(object, "TAKARA_UNIT");
+        dds3RebuildObjectModelContext(object, 2, modelId);
+        dds3SetSclPoseSet(object, (u128 *)scale);
+        dds3ObjectBaseOnFlag(object, 0x100);
+        resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(object);
+        if (fldTestObjectActivationFlag(id)) {
+            mdlLoopMotion(resource, 0, 2);
+            fldTakaraSlotTable[fldTakaraCount].activationState = 3;
+        } else {
+            mdlSingleMotion(resource, 0, 0);
+            fldTakaraSlotTable[fldTakaraCount].activationState = 0;
+        }
+        fldTakaraSlotTable[fldTakaraCount].id = id;
+        fldTakaraSlotTable[fldTakaraCount].unitObject = object;
+        fldTakaraSlotTable[fldTakaraCount].x = x;
+        fldTakaraSlotTable[fldTakaraCount].y = y;
+        fldTakaraSlotTable[fldTakaraCount].z = z;
+        dds3GetRotPoseSet(object);
+        heading = EulerAngleAxisY();
+        fldTakaraSlotTable[fldTakaraCount].yaw = heading * 180.0f / 3.14f;
+        fldTakaraSlotTable[fldTakaraCount].effectVariant = D_0034C8F0[id].kind;
+        fldTakaraSlotTable[fldTakaraCount].effectKindIndex = id;
+        fldTakaraCount++;
+        fldAddItemBoxObject(x, y, z, 20.0f, 100.0f, -1);
+        floorIndex = D_0032E3C4[0] + 1;
+        if (floorIndex >= 64) {
+            floorIndex = 63;
+        }
+        row = &D_003D44A0.entries[floorIndex];
+        SDF_VU0_LOADVECTOR(resultRotation);
+        lightAngle = EulerAngleAxisY();
+        lightAngle = lightAngle * 180.0f;
+        lightAngle = lightAngle / 3.14f;
+        lightAngle += 80.0f;
+        unit = evtGetUnitHandle2(object);
+        evtUnitLightOn(unit);
+        red = row->colorA[0];
+        green = row->colorA[1];
+        blue = row->colorA[2];
+        colorA = red | (blue << 16) | (green << 8) | 0x80000000;
+        red = row->colorB[0];
+        green = row->colorB[1];
+        blue = row->colorB[2];
+        colorB = red | (blue << 16) | (green << 8) | 0x80000000;
+        evtSetUnitLightAndAmbient(unit, 0, colorA, colorB);
+        direction[0] = sdfSin(lightAngle * 3.14f / 180.0f);
+        direction[1] = 0.5f;
+        direction[2] = sdfCos(lightAngle * 3.14f / 180.0f);
+        direction[3] = 0.0f;
+        SDF_VU0_LOADVECTOR(direction);
+        SDF_VU0_NORMALIZE();
+        evtSetUnitLightDir(unit, 0);
+        fldSpawnRoomTrigger(id, position[0], position[1], position[2], 160.0f);
+    }
+}
 
 void fldFindTakaraSlot(s32 id) {
     s32 i;
@@ -3394,11 +3520,95 @@ void fldUpdateObjectSlotActivation(void) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0788);
+extern void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
+                                       f32 x, f32 y, f32 z, f32 radius);
 
-INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0798);
+void func_00148FF0(s32 kind, u32 id, f32 *rotation, f32 x, f32 y, f32 z) {
+    f32 position[4];
+    f32 resultRotation[4];
+    s32 entryIndex, floorIndex;
+    dds3Basic_t *object;
+    dds3ModelHandle_t *resource;
+    evtUnitHandle_t *unit;
+    FldNpcPaletteEntry *row;
+    f32 lightAngle;
+    s32 red, green, blue;
+    u32 colorA, colorB;
+    memset(position, 0, sizeof(position));
+    position[3] = 1.0f;
+    memset(resultRotation, 0, sizeof(resultRotation));
+    {
+        f32 scale[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+        f32 axis[4] = {0.0f, 1.0f, 0.0f, 1.0f};
+        f32 direction[4];
+        entryIndex = fldNpcModelTable;
+        fldNpcModelTable = entryIndex + 1;
+        fldModelSlotTable[entryIndex].placementId = 999;
+        fldModelSlotTable[entryIndex].x = x;
+        fldModelSlotTable[entryIndex].y = y;
+        fldModelSlotTable[entryIndex].z = z;
+        fldModelSlotTable[entryIndex].orientation[0] = rotation[0];
+        fldModelSlotTable[entryIndex].orientation[1] = rotation[1];
+        fldModelSlotTable[entryIndex].orientation[2] = rotation[2];
+        fldModelSlotTable[entryIndex].orientation[3] = rotation[3];
+        fldModelSlotTable[entryIndex].unk2C = 0.0f;
+        fldModelSlotTable[entryIndex].unk30 = 0;
+        fldModelSlotTable[entryIndex].unk34 = 0;
+        fldModelSlotTable[entryIndex].room = 0;
+        fldModelSlotTable[entryIndex].unk3C = 0;
+        position[0] = x;
+        position[1] = y;
+        position[2] = z;
+        SDF_VU0_LOADVECTOR(axis);
+        FromRotation(3.1415926f);
+        SDF_VU0_LOADVECTOR_B(rotation);
+        effMiscQuatMultiplyVU();
+        SDF_VU0_STOREVECTOR_NOMEM(resultRotation);
+        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, resultRotation);
+        if (kind == 0) {
+            dds3SetUnitObjectId(object, "SAVE_UNIT");
+            dds3RebuildObjectModelContext(object, 2, 3);
+        } else {
+            dds3SetUnitObjectId(object, "HEAL_UNIT");
+            dds3RebuildObjectModelContext(object, 2, 4);
+        }
+        dds3SetSclPoseSet(object, (u128 *)scale);
+        dds3ObjectBaseOnFlag(object, 0x100);
+        resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(object);
+        mdlLoopMotion(resource, 0, 0);
+        fldAddItemBoxObject(x, y, z, 28.0f, 400.0f, -1);
+        floorIndex = D_0032E3C4[0] + 1;
+        if (floorIndex >= 64) {
+            floorIndex = 63;
+        }
+        row = &D_003D44A0.entries[floorIndex];
+        SDF_VU0_LOADVECTOR(resultRotation);
+        lightAngle = EulerAngleAxisY();
+        lightAngle = lightAngle * 180.0f;
+        lightAngle = lightAngle / 3.14f;
+        lightAngle += 80.0f;
+        unit = evtGetUnitHandle2(object);
+        evtUnitLightOn(unit);
+        red = row->colorA[0];
+        green = row->colorA[1];
+        blue = row->colorA[2];
+        colorA = red | (blue << 16) | (green << 8) | 0x80000000;
+        red = row->colorB[0];
+        green = row->colorB[1];
+        blue = row->colorB[2];
+        colorB = red | (blue << 16) | (green << 8) | 0x80000000;
+        evtSetUnitLightAndAmbient(unit, 0, colorA, colorB);
+        direction[0] = sdfSin(lightAngle * 3.14f / 180.0f);
+        direction[1] = 0.5f;
+        direction[2] = sdfCos(lightAngle * 3.14f / 180.0f);
+        direction[3] = 0.0f;
+        SDF_VU0_LOADVECTOR(direction);
+        SDF_VU0_NORMALIZE();
+        evtSetUnitLightDir(unit, 0);
+        fldSpawnRoomTriggerVariant(kind, id, position[0], position[1], position[2], 160.0f);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00148FF0);
 
 extern s32 D_0032E4C8[];
 
@@ -3563,7 +3773,7 @@ void fldNpcHojiRefresh(void) {
     }
 }
 
-extern u8 D_003D44A0[0x200];
+extern FldNpcPalette D_003D44A0;
 
 
 
@@ -3579,13 +3789,13 @@ void fldLoadNpcPalette(s32 field) {
         fldMakeFilePath(directory, field, 1);
         sprintf(path, "%sF%03d.NPL", directory, field);
         command = sdfFileOpen(path);
-        sdfFileRead(command, D_003D44A0, 0x200);
+        sdfFileRead(command, &D_003D44A0, 0x200);
         sdfFileClose(command);
     }
 }
 
 void fldSetNpcPalette(const FldNpcPalette *src) {
-    memcpy(D_003D44A0, src, 0x200);
+    memcpy(&D_003D44A0, src, 0x200);
 }
 
 

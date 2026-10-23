@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "fld_item_box_object_api.h"
 #include "sdf_line_pair_packet_api.h"
 #include "sdf_gs_header.h"
 #include "sdf_pac_reloc.h"
@@ -7877,7 +7878,7 @@ s32 fldHitChkEnemy(f32 *start, f32 *end, f32 *hitPoint) {
 }
 
 /* Add the four vertical faces of an axis-aligned field collision box. */
-void fldAddItemBoxObject(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
+void fldAddItemBoxObject(f32 x, f32 y, f32 z, f32 extent, f32 height, s32 id) {
     f32 origin[4] = {0.0f, 0.0f, 0.0f, 1.0f};
     s32 index;
     f32 minX, minY, minZ, maxX, maxZ;

@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "fld_item_box_object_api.h"
 #include "fld_projected_sprite.h"
 #include "sdf_model_packet_callback.h"
 #include "fld_label_rows.h"
@@ -8,10 +9,12 @@
 #include "fld_area_work.h"
 #include "fld_room_effect_entry.h"
 #include "fld_object_slot.h"
+#include "fld_activation_entry.h"
 #include "fld_npc_palette.h"
 #include "file_pac.h"
 #include "evt_world.h"
 #include "evt_unit.h"
+#include "evt_unit_color_transition.h"
 #include "common.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
@@ -3495,7 +3498,6 @@ typedef char FldNpcPlacementRule_size_check[
 
 extern FldNpcPlacementRule D_003A55F0[400];
 extern u32 sdfGetLodChunkValue(sdfModelRootNode_t *model);
-extern void fldAddItemBoxObject(s32 room, f32 x, f32 y, f32 z, f32 radius, f32 height);
 extern void fldSpawnNpcTrigger(f32 x, f32 y, f32 z, f32 height, char *name, s32 arg1, s32 room, s32 index);
 
 void func_0014C2B8(s32 key, f32 *orientation, s32 room, char *name, s32 argument,
@@ -3615,17 +3617,157 @@ void func_0014C2B8(s32 key, f32 *orientation, s32 room, char *name, s32 argument
         if (!visible) dds3ObjectBaseOnFlag(object, 0x400);
         else dds3ObjectBaseOffFlag(object, 0x400);
         fldInitializeHuntSparkUnit(evtGetUnitHandle2(object));
-        fldAddItemBoxObject(room, x, y, z, radius, hitHeight);
+        fldAddItemBoxObject(x, y, z, radius, hitHeight, room);
         fldSpawnNpcTrigger(x, y, z, height, name, argument, room, fldNpcModelTable);
         fldNpcModelTable++;
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413B38);
+extern FldActivationEntry D_003A8EB0[256];
+extern u8 fldTestObjectActivationFlag(u32 flagIndex);
+extern void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 radius);
 
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413B48);
+void func_0014C9B0(u32 id, f32 *rotation, f32 x, f32 y, f32 z) {
+    f32 position[4];
+    f32 resultRotation[4];
+    s32 modelId = 21;
+    s32 entryIndex, floorIndex;
+    dds3Basic_t *object;
+    dds3ModelHandle_t *resource;
+    evtUnitHandle_t *unit;
+    FldNpcPaletteEntry *row;
+    f32 heading, lightAngle;
+    s32 red, green, blue;
+    u32 colorA, colorB;
+    memset(position, 0, sizeof(position));
+    position[3] = 1.0f;
+    memset(resultRotation, 0, sizeof(resultRotation));
+    {
+        f32 scale[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+        f32 direction[4];
+        entryIndex = fldNpcModelTable;
+        fldNpcModelTable = entryIndex + 1;
+        fldModelSlotTable[entryIndex].placementId = 999;
+        fldModelSlotTable[entryIndex].x = x;
+        fldModelSlotTable[entryIndex].y = y;
+        fldModelSlotTable[entryIndex].z = z;
+        fldModelSlotTable[entryIndex].orientation[0] = rotation[0];
+        fldModelSlotTable[entryIndex].orientation[1] = rotation[1];
+        fldModelSlotTable[entryIndex].orientation[2] = rotation[2];
+        fldModelSlotTable[entryIndex].orientation[3] = rotation[3];
+        fldModelSlotTable[entryIndex].unk2C = 0.0f;
+        fldModelSlotTable[entryIndex].unk30 = 0;
+        fldModelSlotTable[entryIndex].unk34 = 0;
+        fldModelSlotTable[entryIndex].room = 0;
+        fldModelSlotTable[entryIndex].unk3C = id;
+        position[0] = x;
+        position[1] = y;
+        position[2] = z;
+        switch (D_003A8EB0[id].kind) {
+        case 0:
+        case 3:
+            modelId = 21;
+            if (fldGlobalBase.area == 29 || fldGlobalBase.area == 30) {
+                if (D_00436300 == 0) {
+                    D_00436300 = (s32)dds3EffectLoad((EffNodeDescriptor *)(u32)D_00436314);
+                    fldTakaraSlotTable[fldTakaraCount].effectNode = (EffNode *)(u32)D_00436300;
+                } else {
+                    fldTakaraSlotTable[fldTakaraCount].effectNode =
+                        dds3EffectCopy((EffNode *)(u32)D_00436300);
+                }
+                modelId = 23;
+            }
+            break;
+        case 1:
+            if (fldGlobalBase.area == 29 || fldGlobalBase.area == 30) {
+                if (D_0043630C == 0) {
+                    D_0043630C = (s32)dds3EffectLoad((EffNodeDescriptor *)(u32)D_0043631C);
+                    fldTakaraSlotTable[fldTakaraCount].effectNode = (EffNode *)(u32)D_0043630C;
+                } else {
+                    fldTakaraSlotTable[fldTakaraCount].effectNode =
+                        dds3EffectCopy((EffNode *)(u32)D_0043630C);
+                }
+                modelId = 17;
+            } else {
+                if (D_0043630C == 0) {
+                    D_0043630C = (s32)dds3EffectLoad((EffNodeDescriptor *)(u32)D_00436308);
+                    fldTakaraSlotTable[fldTakaraCount].effectNode = (EffNode *)(u32)D_0043630C;
+                } else {
+                    fldTakaraSlotTable[fldTakaraCount].effectNode =
+                        dds3EffectCopy((EffNode *)(u32)D_0043630C);
+                }
+                modelId = 22;
+            }
+            break;
+        case 2:
+            modelId = 23;
+            break;
+        }
+        {
+            f32 axis[4] = {0.0f, 1.0f, 0.0f, 1.0f};
+            SDF_VU0_LOADVECTOR(axis);
+            FromRotation(3.1415926f);
+        }
+        SDF_VU0_LOADVECTOR_B(rotation);
+        effMiscQuatMultiplyVU();
+        SDF_VU0_STOREVECTOR_NOMEM(resultRotation);
+        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, resultRotation);
+        dds3SetUnitObjectId(object, "TAKARA_UNIT");
+        dds3RebuildObjectModelContext(object, 2, modelId);
+        dds3SetSclPoseSet(object, (u128 *)scale);
+        dds3ObjectBaseOnFlag(object, 0x100);
+        resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(object);
+        if (fldTestObjectActivationFlag(id)) {
+            mdlLoopMotion(resource, 0, 2);
+            fldTakaraSlotTable[fldTakaraCount].activationState = 3;
+        } else {
+            mdlSingleMotion(resource, 0, 0);
+            fldTakaraSlotTable[fldTakaraCount].activationState = 0;
+        }
+        fldTakaraSlotTable[fldTakaraCount].id = id;
+        fldTakaraSlotTable[fldTakaraCount].unitObject = object;
+        fldTakaraSlotTable[fldTakaraCount].x = x;
+        fldTakaraSlotTable[fldTakaraCount].y = y;
+        fldTakaraSlotTable[fldTakaraCount].z = z;
+        dds3GetRotPoseSet(object);
+        heading = EulerAngleAxisY();
+        fldTakaraSlotTable[fldTakaraCount].yaw = heading * 180.0f / 3.14f;
+        fldTakaraSlotTable[fldTakaraCount].effectVariant = D_003A8EB0[id].kind;
+        fldTakaraSlotTable[fldTakaraCount].effectKindIndex = id;
+        fldTakaraCount++;
+        fldAddItemBoxObject(x, y, z, 20.0f, 100.0f, -1);
+        floorIndex = fldGlobalBase.floor + 1;
+        if (floorIndex >= 64) {
+            floorIndex = 63;
+        }
+        row = &D_0044FD90.entries[floorIndex];
+        SDF_VU0_LOADVECTOR(resultRotation);
+        lightAngle = EulerAngleAxisY();
+        lightAngle = lightAngle * 180.0f;
+        lightAngle = lightAngle / 3.14f;
+        lightAngle += 80.0f;
+        unit = evtGetUnitHandle2(object);
+        evtUnitLightOn(unit);
+        red = row->colorA[0];
+        green = row->colorA[1];
+        blue = row->colorA[2];
+        colorA = red | (blue << 16) | (green << 8) | 0x80000000;
+        red = row->colorB[0];
+        green = row->colorB[1];
+        blue = row->colorB[2];
+        colorB = red | (blue << 16) | (green << 8) | 0x80000000;
+        evtSetUnitLightAndAmbient(unit, 0, colorA, colorB);
+        direction[0] = sdfSin(lightAngle * 3.14f / 180.0f);
+        direction[1] = 0.5f;
+        direction[2] = sdfCos(lightAngle * 3.14f / 180.0f);
+        direction[3] = 0.0f;
+        SDF_VU0_LOADVECTOR(direction);
+        SDF_VU0_NORMALIZE();
+        evtSetUnitLightDir(unit, 0);
+        fldSpawnRoomTrigger(id, position[0], position[1], position[2], 160.0f);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014C9B0);
 
 void fldFindTakaraSlot(s32 id) {
     s32 i;
@@ -3725,11 +3867,102 @@ void fldUpdateObjectSlotActivation(void) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413B68);
+extern void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
+                                       f32 x, f32 y, f32 z, f32 radius);
 
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413B78);
-
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014D380);
+void func_0014D380(s32 kind, u32 id, f32 *rotation, f32 x, f32 y, f32 z) {
+    f32 position[4];
+    f32 resultRotation[4];
+    s32 entryIndex, floorIndex;
+    dds3Basic_t *object;
+    dds3ModelHandle_t *resource;
+    evtUnitHandle_t *unit;
+    FldNpcPaletteEntry *row;
+    f32 lightAngle;
+    s32 red, green, blue;
+    u32 colorA, colorB;
+    memset(position, 0, sizeof(position));
+    position[3] = 1.0f;
+    memset(resultRotation, 0, sizeof(resultRotation));
+    {
+        f32 scale[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+        f32 axis[4] = {0.0f, 1.0f, 0.0f, 1.0f};
+        f32 direction[4];
+        entryIndex = fldNpcModelTable;
+        fldNpcModelTable = entryIndex + 1;
+        fldModelSlotTable[entryIndex].placementId = 999;
+        fldModelSlotTable[entryIndex].x = x;
+        fldModelSlotTable[entryIndex].y = y;
+        fldModelSlotTable[entryIndex].z = z;
+        fldModelSlotTable[entryIndex].orientation[0] = rotation[0];
+        fldModelSlotTable[entryIndex].orientation[1] = rotation[1];
+        fldModelSlotTable[entryIndex].orientation[2] = rotation[2];
+        fldModelSlotTable[entryIndex].orientation[3] = rotation[3];
+        fldModelSlotTable[entryIndex].unk2C = 0.0f;
+        fldModelSlotTable[entryIndex].unk30 = 0;
+        fldModelSlotTable[entryIndex].unk34 = 0;
+        fldModelSlotTable[entryIndex].room = 0;
+        fldModelSlotTable[entryIndex].unk3C = 0;
+        position[0] = x;
+        position[1] = y;
+        position[2] = z;
+        SDF_VU0_LOADVECTOR(axis);
+        FromRotation(3.1415926f);
+        SDF_VU0_LOADVECTOR_B(rotation);
+        effMiscQuatMultiplyVU();
+        SDF_VU0_STOREVECTOR_NOMEM(resultRotation);
+        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, resultRotation);
+        if (kind == 0) {
+            dds3SetUnitObjectId(object, "SAVE_UNIT");
+            if (fldGlobalBase.area == 29 || fldGlobalBase.area == 30) {
+                dds3RebuildObjectModelContext(object, 2, 15);
+            } else {
+                dds3RebuildObjectModelContext(object, 2, 3);
+            }
+        } else {
+            dds3SetUnitObjectId(object, "HEAL_UNIT");
+            if (fldGlobalBase.area == 29 || fldGlobalBase.area == 30) {
+                dds3RebuildObjectModelContext(object, 2, 18);
+            } else {
+                dds3RebuildObjectModelContext(object, 2, 4);
+            }
+        }
+        dds3SetSclPoseSet(object, (u128 *)scale);
+        dds3ObjectBaseOnFlag(object, 0x100);
+        resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(object);
+        mdlLoopMotion(resource, 0, 0);
+        fldAddItemBoxObject(x, y, z, 60.0f, 400.0f, -1);
+        floorIndex = fldGlobalBase.floor + 1;
+        if (floorIndex >= 64) {
+            floorIndex = 63;
+        }
+        row = &D_0044FD90.entries[floorIndex];
+        SDF_VU0_LOADVECTOR(resultRotation);
+        lightAngle = EulerAngleAxisY();
+        lightAngle = lightAngle * 180.0f;
+        lightAngle = lightAngle / 3.14f;
+        lightAngle += 80.0f;
+        unit = evtGetUnitHandle2(object);
+        evtUnitLightOn(unit);
+        red = row->colorA[0];
+        green = row->colorA[1];
+        blue = row->colorA[2];
+        colorA = red | (blue << 16) | (green << 8) | 0x80000000;
+        red = row->colorB[0];
+        green = row->colorB[1];
+        blue = row->colorB[2];
+        colorB = red | (blue << 16) | (green << 8) | 0x80000000;
+        evtSetUnitLightAndAmbient(unit, 0, colorA, colorB);
+        direction[0] = sdfSin(lightAngle * 3.14f / 180.0f);
+        direction[1] = 0.5f;
+        direction[2] = sdfCos(lightAngle * 3.14f / 180.0f);
+        direction[3] = 0.0f;
+        SDF_VU0_LOADVECTOR(direction);
+        SDF_VU0_NORMALIZE();
+        evtSetUnitLightDir(unit, 0);
+        fldSpawnRoomTriggerVariant(kind, id, position[0], position[1], position[2], 160.0f);
+    }
+}
 
 
 extern s32 fldAreaDamageEffectPlaced;

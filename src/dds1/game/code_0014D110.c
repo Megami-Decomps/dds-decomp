@@ -1117,10 +1117,10 @@ s32 fldCmdPushSceneParam(void) {
 
     switch (scrGetIntPara(0)) {
     case 0:
-        scrSetIntReturnValue(D_0034C8F0[room].selectedValue0);
+        scrSetIntReturnValue(D_0034C8F0[room].kind);
         break;
     case 1:
-        scrSetIntReturnValue(D_0034C8F0[room].selectedValue1);
+        scrSetIntReturnValue(D_0034C8F0[room].parameter);
         break;
     case 2:
         scrSetIntReturnValue(D_0034C8F0[room].selectedValue2);
