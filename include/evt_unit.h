@@ -142,9 +142,15 @@ typedef struct evtUnitHandle_t {
     s16 motionParameter;           /* 0xB4: frames in setup; direction scale in updater */
     s16 directionOffset;           /* 0xB6: updater multiplies by 0.01 */
     f32 transitionMotionScale;     /* 0xB8: set by evtSetWaitMotionSpeed */
-    s16 unkBC;                     /* 0xBC: stored script/motion parameter */
-    s16 unkBE;                     /* 0xBE: first stored short parameter */
-    s16 unkC0;                     /* 0xC0: second stored short parameter */
+#ifdef VERSION_DDS1
+    s16 pendingMotionIndex;        /* 0xBC: script-selected motion for the next blend */
+    s16 motionBlendLeadFrames;     /* 0xBE: frames before the motion blend begins */
+    s16 motionBlendDurationFrames; /* 0xC0: duration of the motion blend */
+#else
+    s16 pendingMotionIndex;        /* 0xBC: pending motion index for the next blend */
+    s16 motionBlendLeadFrames;     /* 0xBE: frames before the motion blend begins */
+    s16 unkC0;                     /* 0xC0: duration of the motion blend */
+#endif
     u8 padC2[2];
     s16 motionSetupId;             /* 0xC4: motion selected by evtSetUnitMotion */
     s16 motionSetupStartFrame;     /* 0xC6 */

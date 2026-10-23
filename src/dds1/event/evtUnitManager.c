@@ -778,9 +778,9 @@ evtUnitHandle_t *evtCreateUnitTransitionWork(dds3Basic_t *effObj, dds3ModelHandl
     work->transitionMotionScale = 1.0f;
     work->effObj = effObj;
     work->owner = owner;
-    work->unkC0 = 10;
+    work->motionBlendDurationFrames = 10;
     EVT_UNIT_MOTION_SETUP(work)->endFrame = 10;
-    work->unkBE = 0;
+    work->motionBlendLeadFrames = 0;
     EVT_UNIT_MOTION_SETUP(work)->startFrame = 0;
 
     SDF_VU0_LOADVECTOR(defaultVector);
@@ -826,7 +826,7 @@ s32 evtGetUnitStat(evtUnitHandle_t *unit) {
 /* Callers pass the promoted full-width value (one reads a byte table field);
  * only the low halfword is stored. */
 void evtSetWaitMotion(evtUnitHandle_t *unit, s32 storedParameter) {
-    unit->unkBC = storedParameter;
+    unit->pendingMotionIndex = storedParameter;
 }
 
 void evtSetWaitMotionSpeed(evtUnitHandle_t *unit, f32 transitionMotionScale) {
@@ -834,8 +834,8 @@ void evtSetWaitMotionSpeed(evtUnitHandle_t *unit, f32 transitionMotionScale) {
 }
 
 void evtSetWaitHokanFrame(evtUnitHandle_t *unit, s32 firstParameter, s32 secondParameter) {
-    unit->unkBE = firstParameter;
-    unit->unkC0 = secondParameter;
+    unit->motionBlendLeadFrames = firstParameter;
+    unit->motionBlendDurationFrames = secondParameter;
 }
 
 s32 evtCheckUnitWait(evtUnitHandle_t *unit) {
@@ -1316,15 +1316,19 @@ s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
              * and Nocturne 0x001E6864 retain the current-index load after tail merging. */
             s32 currentMotion = model->current.h.motionIndex;
 
-            if (unit->unkBC != currentMotion) {
+            if (unit->pendingMotionIndex != currentMotion) {
                 if (model->first->state == 5) {
-                    mdlSmoothLoopMotion(model, 0, unit->unkBC, (f32)unit->unkBE, (f32)unit->unkC0);
+                    mdlSmoothLoopMotion(model, 0, unit->pendingMotionIndex,
+                                        (f32)unit->motionBlendLeadFrames,
+                                        (f32)unit->motionBlendDurationFrames);
                     model->first->frameStep = unit->transitionMotionScale;
                     unit->motionTicks = 0;
                 }
             } else {
                 if (model->first->state == 5) {
-                    mdlSmoothLoopMotion(model, 0, currentMotion, (f32)unit->unkBE, (f32)unit->unkC0);
+                    mdlSmoothLoopMotion(model, 0, currentMotion,
+                                        (f32)unit->motionBlendLeadFrames,
+                                        (f32)unit->motionBlendDurationFrames);
                     model->first->frameStep = unit->transitionMotionScale;
                     unit->motionTicks = 0;
                 }
@@ -1394,8 +1398,10 @@ s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
             unit->motionState = EVT_UNIT_MOTION_STATE_VALUE;
             currentMotion = model->current.h.motionIndex;
             unit->flags &= ~0x800000;
-            if (unit->unkBC != currentMotion) {
-                mdlSmoothLoopMotion(model, 0, unit->unkBC, (f32)unit->unkBE, (f32)unit->unkC0);
+            if (unit->pendingMotionIndex != currentMotion) {
+                mdlSmoothLoopMotion(model, 0, unit->pendingMotionIndex,
+                                    (f32)unit->motionBlendLeadFrames,
+                                    (f32)unit->motionBlendDurationFrames);
                 model->first->frameStep = unit->transitionMotionScale;
                 unit->motionTicks = 0;
             }
@@ -2134,7 +2140,7 @@ u32 evtCommand_MODEL_WAIT_MOT(void) {
     if (unit == NULL) {
         return 1;
     }
-    unit->unkBC = scrGetIntPara(1);
+    unit->pendingMotionIndex = scrGetIntPara(1);
     return 1;
 }
 
@@ -2148,8 +2154,8 @@ u32 evtCommand_MODEL_WAIT_HOKAN(void) {
     if (unit == NULL) {
         return 1;
     }
-    unit->unkBE = scrGetIntPara(1);
-    unit->unkC0 = scrGetIntPara(2);
+    unit->motionBlendLeadFrames = scrGetIntPara(1);
+    unit->motionBlendDurationFrames = scrGetIntPara(2);
     return 1;
 }
 
