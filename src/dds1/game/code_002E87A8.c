@@ -33,7 +33,7 @@ extern u32 sndReserveIopWorkMemory(s32 size);
 extern s8 sdfSndBurstReqMode;
 extern s32 D_003BDA8C;
 extern s32 sndStartIopCommandAndRpcWorkers(void);
-extern void sdfSndTransToIOP(s32, void *, s32);
+extern void sdfSndTransToIOP(s32, const void *, s32);
 
 extern SndRingPacket sndCommandRing[SND_COMMAND_RING_ENTRY_COUNT];
 extern u32 D_003BD4A0;
@@ -97,7 +97,7 @@ u32 sdfSndSendSyncCmd(u32 command, u32 channel, const void *packet, u32 size) {
 extern SifDmaTransfer sdfSndTransBuf;
 
 /* Transfer an EE buffer to IOP memory, retrying submission and waiting for completion. */
-void sdfSndTransToIOP(s32 destination, void *source, s32 size) {
+void sdfSndTransToIOP(s32 destination, const void *source, s32 size) {
     s32 dmaId;
     s32 delay;
 

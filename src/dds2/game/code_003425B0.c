@@ -222,7 +222,7 @@ extern s32 D_004391D8;
 extern sdfFileCmdHandle_t *D_004391DC;
 extern SdfSoundResidentBuffer D_0047B418;
 extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void *callback, s32 callbackContext);
-extern void sdfSndTransToIOP(s32, void *, s32);
+extern void sdfSndTransToIOP(s32, const void *, s32);
 
 /* Handle sound-file/buffer RPC commands and return the shared reply words. */
 u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
