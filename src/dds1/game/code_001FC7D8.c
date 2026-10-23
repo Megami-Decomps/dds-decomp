@@ -1212,14 +1212,14 @@ void btlAdvanceHistoryCounter(BtlHistObj *obj) {
 }
 
 void btlClearNodeFlags(void) {
-    s32 node = *(s32 *)((u8 *)btlGetRuntime() + 0x224);
+    BtlTask *node = ((BtlState *)btlGetRuntime())->tasks;
 
     if (node != NULL) {
         do {
-            if (((BtlTask *)node)->unit != NULL) {
+            if (node->unit != NULL) {
                 ((BtlHistObj *)node)->counter = 0;
             }
-            node = (s32)((BtlTask *)node)->next;
+            node = node->next;
         } while (node != NULL);
     }
     btlHistoryCounter = 0;
