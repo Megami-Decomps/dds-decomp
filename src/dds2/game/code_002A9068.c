@@ -28,7 +28,7 @@
 /* Declared before first use (were implicit int). */
 extern void mnuDestroyEffectResources(MenuEffectResources *resources);
 extern void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface);
-extern void mnuDrawPartyVitalPanelSequences(MenuPageWindow *window, s32 texture);
+extern void mnuDrawPartyVitalPanelSequences(MenuPageWindow *window, EffectSlotSet *texture);
 extern void p2sdBgmVolUp(void);
 
 extern u32 mnuMovieShutdownCounter;
@@ -466,7 +466,7 @@ void mnuInitializeCampPanelResources(MenuPageWindow *container, StaffSlots *reso
     mnuInitPageWindow(container, records, resources->baseResources[0],
                  1, resources->baseResources[1], 0x2d,
                  resources->baseResources[1], 0x1d);
-    mnuDrawPartyVitalPanelSequences(container, (s32)resources->baseResources[1]);
+    mnuDrawPartyVitalPanelSequences(container, resources->baseResources[1]);
     mnuCopyPrimaryWindowHandles(container, resources->mainResources);
     mnuCopySecondaryWindowHandles(container, resources->mainResources + 8);
     mnuRegisterResourceHandles(container, resources->extraResources);
