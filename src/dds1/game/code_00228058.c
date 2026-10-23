@@ -318,9 +318,6 @@ u32 evtCommandSetDrawFlagWhileWaiting(void) {
 }
 
 
-#define SOLAR_PHASE_ADVANCE_FLAG 1
-#define SOLAR_ALPHA_ENABLED_FLAG 2
-
 /* Fold phases 9-15 back toward zero for the symmetric solar animation. */
 s32 evtGetMirroredSolarPhase(void) {
     s32 phase;
@@ -381,7 +378,7 @@ s32 evtUpdateSolarOverlayFade(dds3ProcessID_t *task) {
     overlay = (SolarOverlayWork *)dds3GetProcessData(task);
     state = &DDS3_GBWK->world;
     alpha = gMoonCnt;
-    if ((state->flags & 2) != 0) {
+    if ((state->flags & SOLAR_ALPHA_ENABLED_FLAG) != 0) {
         if (alpha < 1.0f) {
             alpha += 0.1f;
             if (alpha > 1.0f) {
@@ -398,7 +395,7 @@ s32 evtUpdateSolarOverlayFade(dds3ProcessID_t *task) {
             gMoonCnt = alpha;
         }
     }
-    if ((DDS3_GBWK->world.flags & 2) != 0) {
+    if ((DDS3_GBWK->world.flags & SOLAR_ALPHA_ENABLED_FLAG) != 0) {
         evtAdvanceSolarOverlayFadeAndDraw(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
         rsetOtOfs(0x53);
         rsetAlpha(0);

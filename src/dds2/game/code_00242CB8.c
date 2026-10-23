@@ -351,30 +351,30 @@ void evtSetAgeOfMoon(s32 phase) {
 }
 
 void evtEnableMoonCalc(void) {
-    DDS3_GBWK->world.flags = DDS3_GBWK->world.flags | 1;
+    DDS3_GBWK->world.flags = DDS3_GBWK->world.flags | SOLAR_PHASE_ADVANCE_FLAG;
 }
 
 void evtDisableMoonCalc(void) {
-    DDS3_GBWK->world.flags = DDS3_GBWK->world.flags & 0xfe;
+    DDS3_GBWK->world.flags = DDS3_GBWK->world.flags & ~SOLAR_PHASE_ADVANCE_FLAG;
 }
 
 void evtSetSolarOverlayFullyVisible(void) {
-    DDS3_GBWK->world.flags = DDS3_GBWK->world.flags | 2;
+    DDS3_GBWK->world.flags = DDS3_GBWK->world.flags | SOLAR_ALPHA_ENABLED_FLAG;
     gMoonCnt = 1.0f;
     evtBeginSolarOverlayFadeIn(0);
 }
 
 void evtDisableMoonDraw(void) {
-    DDS3_GBWK->world.flags = DDS3_GBWK->world.flags & 0xfd;
+    DDS3_GBWK->world.flags = DDS3_GBWK->world.flags & ~SOLAR_ALPHA_ENABLED_FLAG;
     gMoonCnt = 0.0f;
 }
 
 void evtEnableMoonDraw2(void) {
-    DDS3_GBWK->world.flags = DDS3_GBWK->world.flags | 2;
+    DDS3_GBWK->world.flags = DDS3_GBWK->world.flags | SOLAR_ALPHA_ENABLED_FLAG;
 }
 
 void evtDisableMoonDraw2(void) {
-    DDS3_GBWK->world.flags = DDS3_GBWK->world.flags & 0xfd;
+    DDS3_GBWK->world.flags = DDS3_GBWK->world.flags & ~SOLAR_ALPHA_ENABLED_FLAG;
 }
 
 s32 evtUpdateSolarOverlayFade(dds3ProcessID_t *task) {
@@ -390,7 +390,7 @@ s32 evtUpdateSolarOverlayFade(dds3ProcessID_t *task) {
     overlay = (SolarOverlayWork *)dds3GetProcessData(task);
     state = &DDS3_GBWK->world;
     alpha = gMoonCnt;
-    if ((state->flags & 2) != 0) {
+    if ((state->flags & SOLAR_ALPHA_ENABLED_FLAG) != 0) {
         if (alpha < 1.0f) {
             alpha += 0.1f;
             if (alpha > 1.0f) {
@@ -408,7 +408,7 @@ s32 evtUpdateSolarOverlayFade(dds3ProcessID_t *task) {
         }
     }
     /* Two jal sites in retail: the DDS1 twin issues extra draw calls in the first arm, removed here. The flags are re-read from the global; the cached state copy does not match. */
-    if ((DDS3_GBWK->world.flags & 2) != 0) {
+    if ((DDS3_GBWK->world.flags & SOLAR_ALPHA_ENABLED_FLAG) != 0) {
         evtAdvanceSolarOverlayFadeAndDraw(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
     } else if (alpha > 0.0f) {
         evtAdvanceSolarOverlayFadeAndDraw(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
@@ -424,7 +424,7 @@ extern void fldLightMaClearMsg(void);
 
 /* Advance the enabled solar clock and expire its associated field controls. */
 void evtAdvanceSolarClockAndExpireControls(f32 travelDistance) {
-    if (DDS3_GBWK->world.flags & 1) {
+    if (DDS3_GBWK->world.flags & SOLAR_PHASE_ADVANCE_FLAG) {
         DDS3_GBWK->world.phaseTimer += travelDistance;
         if (DDS3_GBWK->world.phaseTimer > 4500.0f) {
             DDS3_GBWK->world.phaseTimer = 0;

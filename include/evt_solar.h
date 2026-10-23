@@ -4,6 +4,10 @@
 #include "common.h"
 #include "kwln.h"
 
+/* DatWorldState control bits used by the shared solar clock and overlay. */
+#define SOLAR_PHASE_ADVANCE_FLAG 1
+#define SOLAR_ALPHA_ENABLED_FLAG 2
+
 /* Sprite resource layer stride used by the paired solar render helpers. */
 typedef struct SolarSpriteLayer {
     u8 pad00[0x0C];
