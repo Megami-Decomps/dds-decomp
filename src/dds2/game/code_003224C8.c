@@ -24,7 +24,7 @@ extern MenuWorkCallback mnuWorkEntryFinishOrDeactivateCallback;
 
 extern MenuWorkCallback mnuWorkEntryStartCallback;
 
-extern u32 mnuWorkEntryPool;
+extern MenuWorkEntry *mnuWorkEntryPool;
 
 extern s32 mnuWorkEntryPoolCount;
 
@@ -316,14 +316,14 @@ provider_complete:
     }
 }
 
-void mnuRegisterWorkEntryPool(u32 entries, u32 count) {
+void mnuRegisterWorkEntryPool(MenuWorkEntry *entries, u32 count) {
     mnuWorkEntryPool = entries;
     mnuWorkEntryPoolCount = count;
 }
 
 void mnuResetWorkEntryPool(void) {
     if (mnuWorkEntryPool != 0) {
-        memset((void *)mnuWorkEntryPool, 0, mnuWorkEntryPoolCount * 72);
+        memset(mnuWorkEntryPool, 0, mnuWorkEntryPoolCount * 72);
     }
 }
 
@@ -334,7 +334,7 @@ MenuWorkEntry *mnuFindUnusedWorkEntry(void) {
     MenuWorkEntry *entry;
 
     if (mnuWorkEntryPoolCount > 0) {
-        entry = (MenuWorkEntry *)mnuWorkEntryPool;
+        entry = mnuWorkEntryPool;
         do {
             if (!(entry->flags & MNU_WORK_ACTIVE)) {
                 return entry;
@@ -346,7 +346,7 @@ MenuWorkEntry *mnuFindUnusedWorkEntry(void) {
     return NULL;
 }
 
-u32 mnuGetWorkEntryPool(void) {
+MenuWorkEntry *mnuGetWorkEntryPool(void) {
     return mnuWorkEntryPool;
 }
 
@@ -576,7 +576,7 @@ s32 mnuUpdateActiveMenuWorkEntries(s32 context) {
     s32 entryIndex;
 
     for (entryIndex = 0; entryIndex < mnuWorkEntryPoolCount; entryIndex++) {
-        MenuWorkEntry *entry = (MenuWorkEntry *)mnuWorkEntryPool + entryIndex;
+        MenuWorkEntry *entry = mnuWorkEntryPool + entryIndex;
 
         if (entry->flags & MNU_WORK_ACTIVE) {
             f32 vector[4];
@@ -637,7 +637,7 @@ void mnuVisitActiveWorkAndEffectEntry(s32 context) {
     s32 entryIndex;
 
     for (entryIndex = 0; entryIndex < mnuWorkEntryPoolCount; entryIndex++) {
-        MenuWorkEntry *entry = &((MenuWorkEntry *)mnuWorkEntryPool)[entryIndex];
+        MenuWorkEntry *entry = &mnuWorkEntryPool[entryIndex];
 
         if (entry->flags & MNU_WORK_ACTIVE) {
             mnuActiveWorkVisitorCallback(entry, (struct MnuShootingWork *)context);
@@ -686,7 +686,8 @@ void mnuVisitActiveRecords(s32 context) {
     if ((s32)mnuWorkEntryPoolCount > 0) {
         s32 byteOffset = 0;
         do {
-            MenuWorkEntry *entry = (MenuWorkEntry *)(mnuWorkEntryPool + byteOffset);
+            /* This loop retains a byte offset into the typed entry array. */
+            MenuWorkEntry *entry = (MenuWorkEntry *)((u32)mnuWorkEntryPool + byteOffset);
             if ((entry->flags & MNU_WORK_ACTIVE) != 0) {
                 mnuProcessMenuWorkEntryLifecycle(entry, (struct MnuShootingWork *)context);
             }
@@ -850,7 +851,9 @@ s32 mnuDispatchRuntimeWorkOverlaps(MenuRuntimeList *list, struct MnuShootingWork
     s32 entryIndex;
 
     for (entryIndex = 0; entryIndex < 100; entryIndex++) {
-        MenuWorkEntry *entry = (MenuWorkEntry *)(entryIndex * sizeof(MenuWorkEntry) + mnuWorkEntryPool);
+        /* The product is already a byte offset; do not scale it as a pointer index. */
+        MenuWorkEntry *entry = (MenuWorkEntry *)(entryIndex * sizeof(MenuWorkEntry) +
+                                                   (u32)mnuWorkEntryPool);
 
         if (entry->flagsBits.active) {
             s32 entryX;
@@ -934,8 +937,10 @@ s32 mnuAdvanceWorkEntriesOverlappingInput(MenuWorkEntry *input) {
         return 0;
     }
     for (entryIndex = 0; entryIndex < 100; entryIndex++) {
+        /* Keep this byte-address calculation equivalent to the retail expression. */
         MenuWorkEntry *entry =
-            (MenuWorkEntry *)(entryIndex * sizeof(MenuWorkEntry) + mnuWorkEntryPool);
+            (MenuWorkEntry *)(entryIndex * sizeof(MenuWorkEntry) +
+                              (u32)mnuWorkEntryPool);
         MenuRegistry *registry;
         MenuRegistryParameters *parameters;
         MenuMovementRecord18 *inputRecord;

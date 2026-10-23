@@ -599,14 +599,14 @@ extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
 extern void dds3SetAmbientColor(s32, f32 *);
 extern void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 extern void dds3InitSoundSlotPool(void);
-extern void mnuRegisterWorkEntryPool(u32 entries, u32 count);
+extern void mnuRegisterWorkEntryPool(MenuWorkEntry *entries, u32 count);
 extern void mnuInitializeRuntimeHitTargetList(MenuRuntimeRecord *records, s32 capacity);
 extern void mnuInitializeRuntimeAnimationList(MenuRuntimeRecord *records, s32 capacity);
 extern void mnuResetProgressLimitAndStep(u8 cadenceLimit, u8 progressStep);
 extern void mnuSetWorkEntryFinishOrDeactivateCallback(MenuWorkCallback callback);
 extern void mnuSetRuntimeRecordPairCallback(MenuRuntimePairCallback callback);
 extern void mnuInitializeHighScoreState(MnuShootingWork *work);
-extern u32 D_0043894C;
+extern MenuWorkEntry *D_0043894C;
 extern MenuProgressParameters D_0040AC40;
 extern s32 D_004390B4;
 
@@ -663,8 +663,8 @@ void mnuInitializeShootingScene(MnuShootingWork *handle) {
     handle->hitEffectPool = itfCreateSpriteHitEffectWorkPool(100);
     dds3InitSoundSlotPool();
     D_00438948 = sdfMemAllocDirect(0x1C20);
-    D_0043894C = sdfMemGetPtr(D_00438948);
-    memset((void *)D_0043894C, 0, 0x1C20);
+    D_0043894C = (MenuWorkEntry *)sdfMemGetPtr(D_00438948);
+    memset(D_0043894C, 0, 0x1C20);
     mnuRegisterWorkEntryPool(D_0043894C, 100);
     block = sdfMemAllocDirect(0x1C30);
     lists[0] = (MnuSectionObjectList *)sdfMemGetPtr(block);
@@ -1123,7 +1123,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
 
 
 
-extern u32 mnuGetWorkEntryPool(void);
+extern MenuWorkEntry *mnuGetWorkEntryPool(void);
 extern void mnuVisitActiveWorkAndEffectEntry(s32 context);
 extern MenuRuntimeList *mnuGetRuntimeAnimationList(void);
 extern MenuRuntimeList *mnuGetRuntimeHitTargetList(void);
@@ -1646,4 +1646,4 @@ INCLUDE_SDATA(struct dds3Basic_t * const, "game/code_00316E08", D_00438944);
 
 INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438948);
 
-INCLUDE_SDATA(const s32, "game/code_00316E08", D_0043894C);
+INCLUDE_SDATA(MenuWorkEntry * const, "game/code_00316E08", D_0043894C);
