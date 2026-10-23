@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "mnu_title_sound.h"
 #include "btl_actor_status_table_api.h"
 #include "sdf_trig.h"
 #include "sdf_packet_list.h"
@@ -78,8 +79,6 @@ extern u8 D_003E9120[];
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 
 extern void mnuReleaseSoundBufferLocked(void);
-
-extern void mnuInstallTitleSoundBufferFromData(s32, s32, u8);
 
 extern void btlSetUnitPosition(BtlUnit *unit, f32 *position);
 
@@ -186,7 +185,7 @@ extern char D_00419468[]; /* "/soundat3/%s.at3" */
 s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
     char path[0x80];
     struct sdfMemHandle_t *resource;
-    s32 data;
+    const void *data;
     s32 size;
     if (args->state == 0) {
         sprintf(path, D_00419468, D_003E0F60[args->entryIndex].fileName);
@@ -252,7 +251,7 @@ void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
 }
 
 s32 sndDeadAtracPlaybackTask(BtlDeadLoadArgs *args) {
-    s32 data;
+    const void *data;
     s32 size;
     if (args->request == 0) {
         return 1;

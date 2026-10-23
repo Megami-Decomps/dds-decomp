@@ -14,6 +14,7 @@
 #include "btl_effect_position.h"
 #include "eff_offset_if_owner_flag_clear.h"
 #include "mnu_title_stream.h"
+#include "mnu_title_sound.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_scene_light_params.h"
 #include "btl_scene_lighting_task_args.h"
@@ -514,7 +515,6 @@ extern void btlInitUnitFxDefaults(BtlUnit *);
 extern void btlBuildPresetCameraPose(BtlLinkedCommand *, BtlCamState *, s16, s16);
 extern void mnuReleaseSoundBufferLocked(void);
 
-extern void mnuInstallTitleSoundBufferFromData(s32, s32, u8);
 extern void btlMoveActorOutOfActiveParty(BtlUnit *);
 extern s32 btlCreateUnitExitFadeTask(s32 owner, s32 option);
 

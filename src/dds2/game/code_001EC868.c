@@ -15,6 +15,7 @@
 #include "btl_rain_effect_api.h"
 #include "btl_blend_color_api.h"
 #include "mnu_title_stream.h"
+#include "mnu_title_sound.h"
 #include "eff_random_mod.h"
 #include "btl_tint_transition.h"
 #include "eff_random.h"
@@ -290,8 +291,6 @@ extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 extern SdfFlagListParams D_003BDCC8;
 
 extern void mnuReleaseSoundBufferLocked(void);
-
-extern void mnuInstallTitleSoundBufferFromData(s32, s32, u8);
 
 extern s32 btlGetLoggedIndexedCommandItem(s32);
 
@@ -9539,7 +9538,7 @@ u32 sndPollMotionSePlayback(BtlRuntimeTaskArgs *args) {
     SoundSlotOwner *owner = ((BtlUnit *)args->actor)->soundSlotOwner;
     SoundSlotWork *soundWork;
     u32 key;
-    u32 data;
+    const void *data;
     u32 size;
 
     if (owner == 0) {
@@ -9570,7 +9569,7 @@ u32 sndPollMotionSePlayback(BtlRuntimeTaskArgs *args) {
                 mnuResetSoundBufferLocked();
                 mnuReleaseSoundBufferLocked();
             }
-            data = (void *)sdfMemGetPtr(soundWork->resourceHandles[args->resourceIndex]);
+            data = sdfMemGetPtr(soundWork->resourceHandles[args->resourceIndex]);
             size = sdfMemGetSize(soundWork->resourceHandles[args->resourceIndex]);
             mnuInstallTitleSoundBufferFromData(data, size, 2);
             mnuClearInactiveSoundBufferState();
