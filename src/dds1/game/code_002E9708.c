@@ -26,6 +26,7 @@
 #include "sdf_stream_input_dma.h"
 #include "sdf_sound_rpc_records.h"
 #include "snd_midi_state_views.h"
+#include "sdf_handler_node.h"
 
 #define SDF_STREAM_NODE_BYTES 0x8C
 #define SDF_STREAM_SCRATCH_BYTES 0x10100
@@ -99,9 +100,9 @@ extern sdfIpuDecodeCb_t *sdfIpuInputStream;
 extern s32 D_003BDA94;
 extern s32 D_003BDAB4;
 extern void sdfIpuSetDecodeParams(sdfIpuDecodeCb_t *node, SoundFormat *format, u8 *sourceAddress, s32 sourceSize);
-extern s32 D_003BDA9C;
-extern s32 D_003BDAA0;
-extern void sdfIpuRemoveHandler(void *);
+extern SdfHandlerNode *D_003BDA9C;
+extern SdfHandlerNode *D_003BDAA0;
+extern void sdfIpuRemoveHandler(SdfHandlerNode *target);
 
 extern DevRequest *sdfTexListNew(u32 capacity);
 
@@ -1839,7 +1840,7 @@ void sdfSoundInitFormattedAndAppendNode(sdfIpuDecodeCb_t *node, SoundFormat *for
     sdfIpuAttachTask(node);
 }
 
-extern s32 sdfAddHandler(s32, s32, void *, s32, s32);
+extern SdfHandlerNode *sdfAddHandler(s32, s32, s32, s32, s32);
 extern s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 extern u8 sdfIpuDecodeThStack[];
 extern void sdfIpuDecodeThread();
@@ -1850,9 +1851,9 @@ void sdfIpuInit(void) {
     HW_WRITE(IPU_CMD, 0x90000000);
     sdfIpuTaskLink = 0;
     sdfCurrIpuDecodeCb = NULL;
-    D_003BDA9C = sdfAddHandler(1, 3, sdfIpuFromDmacHandler, -1, 0);
+    D_003BDA9C = sdfAddHandler(1, 3, (s32)sdfIpuFromDmacHandler, -1, 0);
     EnableDmac(3);
-    D_003BDAA0 = sdfAddHandler(1, 4, sdfIpuToDmacHandler, -1, 0);
+    D_003BDAA0 = sdfAddHandler(1, 4, (s32)sdfIpuToDmacHandler, -1, 0);
     EnableDmac(4);
     thread = CreateThreadSimple((void *)sdfIpuDecodeThread, sdfIpuDecodeThStack, 0x800, 0x46);
     D_003BDAB4 = thread;
@@ -1861,12 +1862,12 @@ void sdfIpuInit(void) {
 
 s32 sdfIpuClose(void) {
     if (D_003BDA9C != 0) {
-        sdfIpuRemoveHandler((void *)D_003BDA9C);
+        sdfIpuRemoveHandler(D_003BDA9C);
         D_003BDA9C = 0;
     }
     DisableDmac(3);
     if (D_003BDAA0 != 0) {
-        sdfIpuRemoveHandler((void *)D_003BDAA0);
+        sdfIpuRemoveHandler(D_003BDAA0);
         D_003BDAA0 = 0;
     }
     return DisableDmac(4);
