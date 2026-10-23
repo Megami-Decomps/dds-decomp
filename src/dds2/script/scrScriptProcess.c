@@ -69,9 +69,9 @@ scrProcessWork_s *scrCreateProcessWithDefaultOption(const char *path) {
     return scrLoadScriptFile(path, 0);
 }
 
-s32 scrStartScript2(s32 priority, s32 processId, s32 option)
+dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, s32 option)
 {
-    return (s32)scrStartScriptProcess(priority, fldFlowParse((BfFlw0Header *)(u32)processId, option));
+    return scrStartScriptProcess(priority, fldFlowParse(script, option));
 }
 
 scrProcessWork_s *scrCreateTaskWithDefaultOption(BfFlw0Header *header) {

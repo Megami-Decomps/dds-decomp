@@ -9,7 +9,7 @@
 
 struct sdfMemHandle_t;
 
-extern s32 scrStartScript2(s32 priority, s32 processId, s32 option);
+extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, s32 option);
 
 extern void fldReleaseFieldResources(void);
 
@@ -102,7 +102,7 @@ s32 evtStartSceneResourceTask(dds3Basic_t *worldNode, const char *taskName) {
     if (dds3SearchProcessName(taskName) != NULL) {
         return 0;
     }
-    return scrStartScript2(0x3EA, (s32)sceneScript, scriptIndex);
+    return (s32)scrStartScript2(0x3EA, sceneScript, scriptIndex);
 }
 
 /* Destroy the task selected by taskName; NULL or an absent task is a no-op.

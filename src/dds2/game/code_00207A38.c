@@ -35,6 +35,7 @@
 #include "sdf_vu_transform_api.h"
 #include "kwln.h"
 #include "scr.h"
+#include "bf_flw0_header.h"
 #include "scr_arg_read.h"
 #include "sdf.h"
 #include "btl_resource_name.h"
@@ -2987,17 +2988,17 @@ u32 btlScriptReturnOneBasedAiBucket(void) {
     return 1;
 }
 
-extern s32 scrStartScript2(s32, s32, s32);
+extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, s32 option);
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 
 void btlBindActorSlot(ActionStateLink *aiTask, s32 option) {
     s32 battle = (s32)(u32)btlGetRuntime();
-    s32 task;
+    dds3ProcessID_t *task;
     s32 window;
 
-    task = scrStartScript2((s32)((BtlState *)battle)->scriptOwner->priority - 1, D_00435E7C, option);
-    scrSetUserData((dds3ProcessID_t *)task, aiTask);
-    window = ((scrProcessWork_s *)dds3GetProcessData((dds3ProcessID_t *)task))->resourceIndex;
+    task = scrStartScript2((s32)((BtlState *)battle)->scriptOwner->priority - 1, (BfFlw0Header *)D_00435E7C, option);
+    scrSetUserData(task, aiTask);
+    window = ((scrProcessWork_s *)dds3GetProcessData(task))->resourceIndex;
     if (window >= 0) {
         BtlUnit *unit = aiTask->unit;
         s32 width = 2;
@@ -3007,8 +3008,8 @@ void btlBindActorSlot(ActionStateLink *aiTask, s32 option) {
         }
         itfMesSetTextSlotFromValue(window, 0, unit->partyRecord.unitId, width);
     }
-    dds3LinkProcess(((BtlState *)battle)->scriptOwner, (dds3ProcessID_t *)task);
-    ((BtlState *)battle)->boundTask = task;
+    dds3LinkProcess(((BtlState *)battle)->scriptOwner, task);
+    ((BtlState *)battle)->boundTask = (s32)task;
 }
 
 void func_0020CE28(void) {

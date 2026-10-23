@@ -16,7 +16,7 @@ extern void btlStartSkillEventTask(u32);
 
 extern char btlPrimaryScriptResourceName[];
 
-extern s32 scrStartScript2(s32, s32, s32);
+extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, s32 option);
 
 extern char btlSecondaryScriptResourceName[];
 
@@ -34,15 +34,15 @@ s32 btlFindScriptResource(char *name) {
  * The new task uses the owner's scheduler priority minus one. */
 void btlStartSkillEventTask(u32 skill) {
     BtlState *battle = (BtlState *)btlGetRuntime();
-    s32 taskId;
+    dds3ProcessID_t *taskId;
     if (battle->eventTaskId == -1) {
         return;
     }
     taskId = scrStartScript2((s32)battle->scriptOwner->priority - 1,
-                            battle->scriptHandle, skill);
-    scrSetUserData((dds3ProcessID_t *)taskId, NULL);
-    dds3LinkProcess(battle->scriptOwner, (dds3ProcessID_t *)taskId);
-    battle->scriptTask = taskId;
+                            (BfFlw0Header *)battle->scriptHandle, skill);
+    scrSetUserData(taskId, NULL);
+    dds3LinkProcess(battle->scriptOwner, taskId);
+    battle->scriptTask = (s32)taskId;
 }
 
 s32 btlReleaseScriptResource(void) {
@@ -75,7 +75,7 @@ s32 btlCanStartPrimaryScriptTask(void) {
 void btlStartPrimaryScriptTask(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 scriptId;
-    s32 taskId;
+    dds3ProcessID_t *taskId;
     if (battle->eventTaskId == -1) {
         return;
     }
@@ -84,10 +84,10 @@ void btlStartPrimaryScriptTask(void) {
         return;
     }
     taskId = scrStartScript2((s32)battle->scriptOwner->priority - 1,
-                            battle->scriptHandle, scriptId);
-    scrSetUserData((dds3ProcessID_t *)taskId, NULL);
-    dds3LinkProcess(battle->scriptOwner, (dds3ProcessID_t *)taskId);
-    battle->scriptTask = taskId;
+                            (BfFlw0Header *)battle->scriptHandle, scriptId);
+    scrSetUserData(taskId, NULL);
+    dds3LinkProcess(battle->scriptOwner, taskId);
+    battle->scriptTask = (s32)taskId;
     battle->scriptFlags |= 1;
 }
 
@@ -114,7 +114,7 @@ s32 btlHasScriptResource(void) {
 void btlStartSecondaryScriptTask(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 scriptId;
-    s32 taskId;
+    dds3ProcessID_t *taskId;
     if (battle->eventTaskId == -1) {
         return;
     }
@@ -123,10 +123,10 @@ void btlStartSecondaryScriptTask(void) {
         return;
     }
     taskId = scrStartScript2((s32)battle->scriptOwner->priority - 1,
-                            battle->scriptHandle, scriptId);
-    scrSetUserData((dds3ProcessID_t *)taskId, NULL);
-    dds3LinkProcess(battle->scriptOwner, (dds3ProcessID_t *)taskId);
-    battle->scriptTask = taskId;
+                            (BfFlw0Header *)battle->scriptHandle, scriptId);
+    scrSetUserData(taskId, NULL);
+    dds3LinkProcess(battle->scriptOwner, taskId);
+    battle->scriptTask = (s32)taskId;
     battle->scriptFlags |= 2;
 }
 
