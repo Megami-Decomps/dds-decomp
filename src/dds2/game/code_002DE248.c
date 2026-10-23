@@ -15997,7 +15997,7 @@ u32 mnuGetValueRecordOwner(const EffectList *list) {
 
 
 
-u32 effAppendListEntry(EffectList *list, u32 value, u32 length,
+s32 effAppendListEntry(EffectList *list, u32 value, u32 length,
                           u32 kind, u32 reference) {
     EffectListNode *node = (EffectListNode *)sdfChipAllocDirect(0x18);
     memset(node, 0, 0x18);
@@ -16016,7 +16016,7 @@ u32 effAppendListEntry(EffectList *list, u32 value, u32 length,
     return ++list->count;
 }
 
-u32 effRemoveListEntry(EffectList *list) {
+s32 effRemoveListEntry(EffectList *list) {
     EffectListNode *node = list->first;
     EffectListNode *next = node->next;
     sdfChipFreeDirect(node);
