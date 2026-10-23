@@ -2427,7 +2427,7 @@ extern void evtSetSlotVectors(s32, EvtUnitVectorSlotState, s32, const f32 *, con
 /* Select and draw one light-color bank at the current panel offset. */
 static inline void evtDrawLightRgbComponents(sdfDrawTag_t *list, EvtRuntime *runtime,
                                              s32 selected, s32 y, s32 firstComponent) {
-    if ((u32)selected >= 3U || runtime->unk232C != 1) {
+    if ((u32)selected >= 3U || runtime->lightEditorEditMode != 1) {
         selected = -1;
     }
     dds3PrimDebugTextBox(list,
@@ -2459,12 +2459,12 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
 
     sdfDrawTagLink(list, (u32)sdfDevPrintf(
         (s32)(0x8680u + ((u32)runtime->lightPanelOffset << 4)),
-        D_00368AC8[runtime->unk2328],
+        D_00368AC8[runtime->lightEditorSelectionIndex],
         0xFF0080, 0, D_003BC2C0));
 
     {
         s32 selected;
-        if (runtime->unk2328 == 3 && runtime->unk232C == 1) {
+        if (runtime->lightEditorSelectionIndex == 3 && runtime->lightEditorEditMode == 1) {
             selected = 1;
         } else {
             selected = 0;
@@ -2473,13 +2473,13 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
         sdfDrawTagLink(list, (u32)dds3PrimLine3D(
             (s32)(0x88C0u + ((u32)runtime->lightPanelOffset << 4)),
             0x7BD0, 0xFF0080, selected));
-        firstRgbMode = runtime->unk2328;
+        firstRgbMode = runtime->lightEditorSelectionIndex;
     }
 
     evtDrawLightRgbComponents(list, runtime, firstRgbMode, 0x7A20,
                               0);
     evtDrawLightRgbComponents(list, runtime,
-                              (s32)((u32)runtime->unk2328 - 4u), 0x7D80,
+                              (s32)((u32)runtime->lightEditorSelectionIndex - 4u), 0x7D80,
                               8);
 
     sdfDrawTagLink(list, (u32)sdfDevPrintf(
@@ -2501,7 +2501,7 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
     }
 
     if (dds3PadButtonState.confirm < 0) {
-        switch (runtime->unk2328) {
+        switch (runtime->lightEditorSelectionIndex) {
         case 7:
             mnuShopSavePrimaryTransform((u8 *)runtime);
             break;
@@ -2517,17 +2517,17 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
         }
     } else if (dds3PadButtonState.cancel < 0) {
         changed = -1;
-    } else if ((dds3PadButtonState.incTen & 2) != 0 && runtime->unk232C == 0) {
-        if (runtime->unk2328 < 9) {
-            runtime->unk2328++;
+    } else if ((dds3PadButtonState.incTen & 2) != 0 && runtime->lightEditorEditMode == 0) {
+        if (runtime->lightEditorSelectionIndex < 9) {
+            runtime->lightEditorSelectionIndex++;
         } else {
-            runtime->unk2328 = 0;
+            runtime->lightEditorSelectionIndex = 0;
         }
-    } else if ((dds3PadButtonState.decTen & 2) != 0 && runtime->unk232C == 0) {
-        if (runtime->unk2328 > 0) {
-            runtime->unk2328--;
+    } else if ((dds3PadButtonState.decTen & 2) != 0 && runtime->lightEditorEditMode == 0) {
+        if (runtime->lightEditorSelectionIndex > 0) {
+            runtime->lightEditorSelectionIndex--;
         } else {
-            runtime->unk2328 = 9;
+            runtime->lightEditorSelectionIndex = 9;
         }
     } else if (dds3PadButtonState.coarseIncrease != 0) {
         runtime->lightPanelOffset = (s32)((u32)runtime->lightPanelOffset + 8u);
@@ -2535,21 +2535,21 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
         runtime->lightPanelOffset = (s32)((u32)runtime->lightPanelOffset - 8u);
     }
 
-    submode = runtime->unk232C;
+    submode = runtime->lightEditorEditMode;
     if (changed == 1) {
         if (submode == 0) {
-            runtime->unk232C = 1;
+            runtime->lightEditorEditMode = 1;
         } else if (submode == 1) {
-            runtime->unk232C = 0;
+            runtime->lightEditorEditMode = 0;
         }
         return 0;
     } else if (changed == -1) {
         if (submode == 1) {
-            runtime->unk232C = 0;
+            runtime->lightEditorEditMode = 0;
             return 0;
         }
     } else if (submode == 1) {
-        mode = runtime->unk2328;
+        mode = runtime->lightEditorSelectionIndex;
         if ((u32)mode < 3U) {
             if ((dds3PadButtonState.incOne & 2) != 0) {
                 f32 candidate = runtime->commandMatrix[mode] + 0.01f;
@@ -2570,7 +2570,7 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
             evtRotateViewerPositionFromPad(&runtime->commandMatrix[4]);
         }
 
-        mode = runtime->unk2328;
+        mode = runtime->lightEditorSelectionIndex;
         if (((u32)mode - 4u) < 3U) {
             if ((dds3PadButtonState.incOne & 2) != 0) {
                 f32 candidate = runtime->commandMatrix[8 + mode - 4] + 0.01f;

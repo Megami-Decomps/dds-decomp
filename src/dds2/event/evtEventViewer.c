@@ -3534,8 +3534,8 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                     case 10: {
                         f32 *parameters = key->payload;
                         s32 i;
-                        viewer->unk2328 = 0;
-                        viewer->unk232C = 0;
+                        viewer->lightEditorSelectionIndex = 0;
+                        viewer->lightEditorEditMode = 0;
                         for (i = 0; i < 4; i++) {
                             viewer->commandMatrix[i] = parameters[i];
                             viewer->commandMatrix[i + 4] = parameters[i + 4];
