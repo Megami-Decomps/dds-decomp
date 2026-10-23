@@ -116,7 +116,7 @@ void frDelStyleAll(void) {
 
 extern u8 frFontClutTable[];
 /* This caller passes the full image-buffer word; the callee consumes its low half. */
-extern void frCopyFontClutToVram(s32 buffer, s32 image);
+extern void frCopyFontClutToVram(s32 buffer, const u32 *image);
 
 /* Assemble six 16-word image blocks from little-endian source bytes and upload
  * each to its matching GS buffer. The inner countdown includes zero. */
@@ -141,7 +141,7 @@ void frSetFontClut(void) {
             wordCountdown--;
         } while (wordCountdown >= 0);
 
-        frCopyFontClutToVram(*imageBuffer++, (s32)imageWords);
+        frCopyFontClutToVram(*imageBuffer++, imageWords);
         bufferIndex++;
         sourceWordOffset += FR_FONT_IMAGE_WORD_COUNT;
     } while (bufferIndex < FR_FONT_IMAGE_BUFFER_COUNT);
@@ -1316,4 +1316,3 @@ u32 gFontDrawOT __attribute__((section(".sdata"))) = 0x54;
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB17C);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB180);
-
