@@ -169,7 +169,7 @@ extern s32 sdfFileCmdAnalyzeFileName(const char *path, char **outResolvedPath);
 
 extern void sdfFileCmdAllocHandle(sdfFileCmdHandle_t *state);
 
-extern sdfFileCmdHandle_t *sdfFileCmdNewHandle(void *resource, s32 workerIndex, s32 operation,
+extern sdfFileCmdHandle_t *sdfFileCmdNewHandle(char *resolvedPath, s32 workerIndex, s32 operation,
                                 void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32), s32 callbackContext);
 
 extern u8 sdfDev9LoadFlag;
@@ -1624,10 +1624,10 @@ s32 sdfFileCmdAnalyzeFileName(const char *path, char **resolvedPath) {
 }
 
 /* Allocate a request state and retain the callback's opaque context word. */
-sdfFileCmdHandle_t *sdfFileCmdNewHandle(void *resource, s32 workerIndex, s32 operation,
+sdfFileCmdHandle_t *sdfFileCmdNewHandle(char *resolvedPath, s32 workerIndex, s32 operation,
                         void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32), s32 callbackContext) {
     sdfFileCmdHandle_t *state = (sdfFileCmdHandle_t *)sdfAllocAndClearQuadwords(sizeof(sdfFileCmdHandle_t));
-    state->resolvedPath = resource;
+    state->resolvedPath = resolvedPath;
     state->workerIndex = workerIndex;
     state->operation = operation;
     state->state = 0;
