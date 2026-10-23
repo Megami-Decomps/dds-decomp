@@ -272,7 +272,7 @@ typedef struct EffSub {
 /* Effect slot array owner and allocation handle (0xC); DDS1/2 game/code_0018CAC8/00194700.c. */
 typedef struct EffArrHdr {
     void *slots; /* Slot-array base; effMath and effEvent use different slot types. */
-    u32 unk4;   /* Slot count. */
+    u32 slotCount;
     struct sdfMemHandle_t *allocation; /* Retained allocation descriptor. */
 } EffArrHdr;
 
