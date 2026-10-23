@@ -74,7 +74,7 @@
 #include "btl_camera_setup_policy.h"
 /* Declared before first use (were implicit int). */
 extern s32 btlBuildEligibleTargetIndexList(void *actionArg, BtlIndexList *targets, s32 area, s32 rule, s32 excludedStatus);
-extern s32 btlGetSelectedUnitProperty(s32 unitAddress);
+extern s32 btlGetSelectedUnitProperty(BtlUnit *unit);
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex);
 extern void effBTLFieldColorResetFlags(void);
 extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
