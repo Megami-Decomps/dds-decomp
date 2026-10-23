@@ -3759,7 +3759,7 @@ void btlRequestModelOrReuse(u32 *arguments) {
         btlBossDebugPrintf(D_003A3BC8, effect, model);
     } else {
         btlRequestModelAssetByMode(object, effect, model);
-        *(u32 *)((u8 *)object + 0x118) |= 1;
+        object->gunResourceFlags |= 1;
         btlBossDebugPrintf(D_003A3BE8, effect, model);
     }
 }
@@ -3785,7 +3785,7 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
         evtSetUnitColorA(object->ext, 0, 0);
         object->overlayColor = object->baseColor & 0xFFFFFF;
     }
-    *(u32 *)((u8 *)object + 0x118) = (*(u32 *)((u8 *)object + 0x118) & ~1) | 2;
+    object->gunResourceFlags = (object->gunResourceFlags & ~1) | 2;
     return 1;
 }
 
