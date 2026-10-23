@@ -1465,7 +1465,7 @@ void sdfIpuAllocGsRect(sdfIpuDecodeCb_t *node) {
 }
 
 extern sdfIpuDecodeCb_t *sdfCurrIpuDecodeCb;
-extern void sdfImageSetChainReleaseMem(s32);
+extern void sdfImageSetChainReleaseMem(void *);
 extern void sdfGsMemFreeDelayed(sdfGsMemSlice_t *texture);
 
 void sdfIpuFree(sdfIpuDecodeCb_t *node) {
@@ -1495,8 +1495,8 @@ void sdfIpuFree(sdfIpuDecodeCb_t *node) {
     sdfFreeAuto(node->inputDmaChain);
     sdfFreeAuto(node->frameBuffers[0]);
     sdfFreeAuto(node->frameBuffers[1]);
-    sdfImageSetChainReleaseMem((s32)node->transferPacketBuffers[0]);
-    sdfImageSetChainReleaseMem((s32)node->transferPacketBuffers[1]);
+    sdfImageSetChainReleaseMem(node->transferPacketBuffers[0]);
+    sdfImageSetChainReleaseMem(node->transferPacketBuffers[1]);
     if (node->scratchBuffer != 0) {
         sdfFreeAuto(node->scratchBuffer - 0x100);
     }
