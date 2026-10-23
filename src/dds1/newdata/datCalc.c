@@ -5,6 +5,7 @@
 #include "evt_solar.h"
 #include "pty_roster_value_record.h"
 #include "dat_state.h"
+#include "dat_world_field_flags.h"
 #include "btl_affinity_row.h"
 #include "btl_resolve_unit_value_api.h"
 #include "evt_randomize_entry_api.h"
@@ -1968,7 +1969,7 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
     count = (s32)(counter / 100.0f);
     DDS3_GBWK->conditionalEncounterStepRemainder = counter - (f32)count * 100.0f;
     for (i = 0; i < count; i++) {
-        if (DDS3_GBWK->world.fieldFlags & 2) {
+        if (DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_ENCOUNTER_RATE_BOOST) {
             DDS3_GBWK->conditionalEncounterGauge = DDS3_GBWK->conditionalEncounterGauge + dds3GetRandIntA(0, 7) + 6;
         } else {
             DDS3_GBWK->conditionalEncounterGauge = DDS3_GBWK->conditionalEncounterGauge + dds3GetRandIntA(0, 3) + 2;
@@ -1992,7 +1993,7 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
         if (datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].sceneIndex != 0) {
             if (roll < count + datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].weight) {
                 scene = datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].sceneIndex;
-                if ((DDS3_GBWK->world.fieldFlags & 1) == 0 || btlCheckScenePartyLevelThreshold(scene) != 0) {
+                if ((DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_ENCOUNTER_LEVEL_GATE) == 0 || btlCheckScenePartyLevelThreshold(scene) != 0) {
                     packed = (group << 24) | (i << 16) | scene;
                     btlSelectedConditionalEncounterIndex = encounterIndex;
                     btlConditionalEncounterCachedInterval = 0;

@@ -4,6 +4,7 @@
 #include "kwln_task_add_child.h"
 #include "sdf_chip.h"
 #include "dat_state.h"
+#include "dat_world_field_flags.h"
 #include "scr.h"
 #include "scr_command_timer_api.h"
 #include "scr_string_parameter_api.h"

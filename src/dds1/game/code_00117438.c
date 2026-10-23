@@ -17,6 +17,7 @@
 #include "pcp_vu0.h"
 #include "btl_action.h"
 #include "dat_state.h"
+#include "dat_world_field_flags.h"
 #include "dat_unit_has_skill_api.h"
 #include "evt_randomize_entry_api.h"
 #include "dat_command.h"
@@ -851,16 +852,16 @@ s32 sdfApplyCommandResults(s32 channel, datUnitWork_t *sourceRecord, datUnitWork
     /* This dispatch compares the full row word as unsigned. */
     switch (datCommandRecords[channel].unk30) {
     case 5:
-        DDS3_GBWK->world.fieldFlags |= 1;
+        DDS3_GBWK->world.fieldFlags |= DAT_WORLD_FIELD_PRIMARY_SCENE_WORK;
         break;
     case 6:
-        DDS3_GBWK->world.fieldFlags |= 2;
+        DDS3_GBWK->world.fieldFlags |= DAT_WORLD_FIELD_SECONDARY_SCENE_WORK;
         break;
     case 7:
-        DDS3_GBWK->world.fieldFlags |= 4;
+        DDS3_GBWK->world.fieldFlags |= DAT_WORLD_FIELD_TRANSITION_WORK;
         break;
     case 8:
-        DDS3_GBWK->world.fieldFlags |= 8;
+        DDS3_GBWK->world.fieldFlags |= DAT_WORLD_FIELD_LIGHT_COMMAND_PENDING;
         break;
     }
     return 1;

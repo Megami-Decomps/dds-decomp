@@ -50,6 +50,7 @@
 #include "evt_task.h"
 #include "scr.h"
 #include "dat_state.h"
+#include "dat_world_field_flags.h"
 #include "dat_command.h"
 #include "file_request_api.h"
 #include "eff_packet_params.h"
@@ -1211,17 +1212,17 @@ u16 btlCheckSelectedPartyCommandEligibility(s32 commandId, u32 memberMask) {
     }
     switch (commandId) {
     case 0xC4:
-        if (DDS3_GBWK->world.fieldFlags & 1) {
+        if (DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_PRIMARY_SCENE_WORK) {
             return 4;
         }
         break;
     case 0xC5:
-        if (DDS3_GBWK->world.fieldFlags & 2) {
+        if (DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_SECONDARY_SCENE_WORK) {
             return 4;
         }
         break;
     case 0xC6:
-        if (DDS3_GBWK->world.fieldFlags & 4) {
+        if (DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_TRANSITION_WORK) {
             return 4;
         }
         break;

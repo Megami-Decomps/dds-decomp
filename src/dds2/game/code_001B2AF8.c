@@ -49,6 +49,7 @@
 #include "btl_ai_table.h"
 #include "scr.h"
 #include "dat_state.h"
+#include "dat_world_field_flags.h"
 #include "pty_roster_api.h"
 #include "mnu_result.h"
 #include "dat_command.h"
@@ -942,7 +943,7 @@ s32 btlSelectSerialEncounter(void) {
 
     entries = D_00435E0C[encounterPack].groups[groupIndex].entries;
     chance = entries[selectionIndex].serialEncounterChanceAdjustment;
-    if ((DDS3_GBWK->world.fieldFlags & 2) != 0) {
+    if ((DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_ENCOUNTER_RATE_BOOST) != 0) {
         chance *= 5;
     }
     if (chance > 90) {

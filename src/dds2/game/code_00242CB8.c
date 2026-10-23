@@ -3,6 +3,7 @@
 #include "kwln_task_add_child.h"
 #include "sdf_chip.h"
 #include "dat_state.h"
+#include "dat_world_field_flags.h"
 #include "scr.h"
 #include "scr_command_timer_api.h"
 #include "scr_string_parameter_api.h"
@@ -433,14 +434,14 @@ void evtAdvanceSolarClockAndExpireControls(f32 travelDistance) {
                 fldEsutoMaClearMsg();
                 fldRiberaMaClearMsg();
             }
-            if (DDS3_GBWK->world.fieldFlags & 4) {
+            if (DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_TRANSITION_WORK) {
                 DDS3_GBWK->world.fieldTransitionCycleCount++;
                 if (DDS3_GBWK->world.fieldTransitionCycleCount >= 6U) {
                     fldRifutoMaClearMsg();
                     DDS3_GBWK->world.fieldTransitionCycleCount = 0;
                 }
             }
-            if (DDS3_GBWK->world.fieldFlags & 8) {
+            if (DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_LIGHT_COMMAND_PENDING) {
                 DDS3_GBWK->world.overlayFlag++;
                 if (DDS3_GBWK->world.overlayFlag >= 6) {
                     fldLightMaClearMsg();

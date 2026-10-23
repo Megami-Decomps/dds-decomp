@@ -67,6 +67,7 @@ extern void itfSetTextDrawLimit(s32 limit);
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "dat_state.h"
+#include "dat_world_field_flags.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
@@ -228,7 +229,7 @@ s32 btlSelectSerialEncounter(void) {
 
     entries = datBattleAdjustmentRecords[encounterPack].groups[groupIndex].entries;
     chance = entries[selectionIndex].serialEncounterChanceAdjustment;
-    if ((DDS3_GBWK->world.fieldFlags & 2) != 0) {
+    if ((DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_ENCOUNTER_RATE_BOOST) != 0) {
         chance *= 5;
     }
     if (chance > 90) {

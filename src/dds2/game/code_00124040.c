@@ -39,6 +39,7 @@
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "dat_state.h"
+#include "dat_world_field_flags.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
@@ -1587,7 +1588,7 @@ u32 fldGetDefaultSceneCommandValue(void) {
 }
 
 void fldLightMaClearMsg(void) {
-    if ((DDS3_GBWK->world.fieldFlags & 8) != 0) {
+    if ((DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_LIGHT_COMMAND_PENDING) != 0) {
         fldLightMaClear();
         fldGlobalBase.consumedFlags |= 1;
     }
@@ -1597,7 +1598,7 @@ void fldLightMaClearMsg(void) {
 extern void evtClearSolarOverlayControl(void);
 
 void fldLightMaClear(void) {
-    DDS3_GBWK->world.fieldFlags &= ~8;
+    DDS3_GBWK->world.fieldFlags &= ~DAT_WORLD_FIELD_LIGHT_COMMAND_PENDING;
     fldGlobalBase.consumedFlags &= ~1;
     evtBitOff(0x818);
     evtClearSolarOverlayControl();
@@ -1609,20 +1610,20 @@ extern void fldPlayMenuSound(s32);
 void fldActivatePendingSceneCommand(void) {
     s32 value;
     if (fldGlobalBase.commandEnabled != 0) {
-        if ((DDS3_GBWK->world.fieldFlags & 8) == 0) {
+        if ((DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_LIGHT_COMMAND_PENDING) == 0) {
             fldPlayMenuSound(0x29);
         }
         evtBitOn(0x818);
         value = fldGetDefaultSceneCommandValue();
         fldGlobalBase.sceneCommand = value;
-        DDS3_GBWK->world.fieldFlags |= 8;
+        DDS3_GBWK->world.fieldFlags |= DAT_WORLD_FIELD_LIGHT_COMMAND_PENDING;
         fldGlobalBase.consumedFlags &= ~1;
         fldApplySceneLightSet((s16)value, 0);
     }
 }
 
 s32 fldGetSceneCommandState(void) {
-    if ((DDS3_GBWK->world.fieldFlags & 8) != 0) {
+    if ((DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_LIGHT_COMMAND_PENDING) != 0) {
         return 1;
     }
     if (D_0038989C[0] != 0) {
@@ -1641,7 +1642,7 @@ void fldUpdateSceneCommandSpeed(void) {
             scene->sceneCommand = 0;
             fldApplySceneLightSet(0, 0);
         }
-    } else if ((DDS3_GBWK->world.fieldFlags & 8) != 0) {
+    } else if ((DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_LIGHT_COMMAND_PENDING) != 0) {
         if (scene->sceneCommand == 0) {
             value = fldGetDefaultSceneCommandValue();
             scene->sceneCommand = value;
@@ -1656,11 +1657,8 @@ void fldUpdateSceneCommandSpeed(void) {
     }
 }
 
-/* Game-state work flags and area-state consumption markers use different bits. */
+/* Area-state consumption markers are separate from shared game-state flags. */
 enum {
-    FIELD_TRANSITION_WORK_FLAG = 4,
-    FIELD_SECONDARY_SCENE_WORK_FLAG = 2,
-    FIELD_PRIMARY_SCENE_WORK_FLAG = 1,
     FIELD_TRANSITION_CONSUMED_FLAG = 2,
     FIELD_SECONDARY_SCENE_CONSUMED_FLAG = 4,
     FIELD_PRIMARY_SCENE_CONSUMED_FLAG = 8
@@ -1668,7 +1666,7 @@ enum {
 
 /* Clear a set transition flag and mark its consumption in area state. */
 void fldRifutoMaClearMsg(void) {
-    if ((DDS3_GBWK->world.fieldFlags & FIELD_TRANSITION_WORK_FLAG) != 0) {
+    if ((DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_TRANSITION_WORK) != 0) {
         fldRifutoMaClear();
         fldGlobalBase.consumedFlags |= FIELD_TRANSITION_CONSUMED_FLAG;
     }
@@ -1678,27 +1676,27 @@ extern void evtResetFieldTransitionCounter(void);
 
 /* Clear the transition work flag and its area-state consumption marker. */
 void fldRifutoMaClear(void) {
-    DDS3_GBWK->world.fieldFlags &= ~FIELD_TRANSITION_WORK_FLAG;
+    DDS3_GBWK->world.fieldFlags &= ~DAT_WORLD_FIELD_TRANSITION_WORK;
     fldGlobalBase.consumedFlags &= ~FIELD_TRANSITION_CONSUMED_FLAG;
     evtResetFieldTransitionCounter();
 }
 
 /* Set the transition work flag and reset its area-state consumption marker. */
 void fldRifutoMaStart(void) {
-    DDS3_GBWK->world.fieldFlags |= FIELD_TRANSITION_WORK_FLAG;
+    DDS3_GBWK->world.fieldFlags |= DAT_WORLD_FIELD_TRANSITION_WORK;
     fldGlobalBase.consumedFlags &= ~FIELD_TRANSITION_CONSUMED_FLAG;
 }
 
 /* Return whether the transition work flag is set. */
 u8 fldRifutoMaChk(void) {
     s32 fieldFlags = DDS3_GBWK->world.fieldFlags;
-    fieldFlags &= FIELD_TRANSITION_WORK_FLAG;
+    fieldFlags &= DAT_WORLD_FIELD_TRANSITION_WORK;
     return fieldFlags != 0;
 }
 
 /* Clear a set secondary-scene flag and mark its consumption in area state. */
 void fldRiberaMaClearMsg(void) {
-    if ((DDS3_GBWK->world.fieldFlags & FIELD_SECONDARY_SCENE_WORK_FLAG) != 0) {
+    if ((DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_SECONDARY_SCENE_WORK) != 0) {
         fldRiberaMaClear();
         fldGlobalBase.consumedFlags |= FIELD_SECONDARY_SCENE_CONSUMED_FLAG;
     }
@@ -1706,26 +1704,26 @@ void fldRiberaMaClearMsg(void) {
 
 /* Clear the secondary-scene work flag and its consumption marker. */
 void fldRiberaMaClear(void) {
-    DDS3_GBWK->world.fieldFlags &= ~FIELD_SECONDARY_SCENE_WORK_FLAG;
+    DDS3_GBWK->world.fieldFlags &= ~DAT_WORLD_FIELD_SECONDARY_SCENE_WORK;
     fldGlobalBase.consumedFlags &= ~FIELD_SECONDARY_SCENE_CONSUMED_FLAG;
 }
 
 /* Select secondary rather than primary, resetting secondary's consume marker. */
 void fldRiberaMaStart(void) {
-    DDS3_GBWK->world.fieldFlags = (DDS3_GBWK->world.fieldFlags | FIELD_SECONDARY_SCENE_WORK_FLAG) & ~FIELD_PRIMARY_SCENE_WORK_FLAG;
+    DDS3_GBWK->world.fieldFlags = (DDS3_GBWK->world.fieldFlags | DAT_WORLD_FIELD_SECONDARY_SCENE_WORK) & ~DAT_WORLD_FIELD_PRIMARY_SCENE_WORK;
     fldGlobalBase.consumedFlags &= ~FIELD_SECONDARY_SCENE_CONSUMED_FLAG;
 }
 
 /* Return whether the secondary-scene work flag is set. */
 u8 fldRiberaMaChk(void) {
     s32 fieldFlags = DDS3_GBWK->world.fieldFlags;
-    fieldFlags &= FIELD_SECONDARY_SCENE_WORK_FLAG;
+    fieldFlags &= DAT_WORLD_FIELD_SECONDARY_SCENE_WORK;
     return fieldFlags != 0;
 }
 
 /* Clear a set primary-scene flag and mark its consumption in area state. */
 void fldEsutoMaClearMsg(void) {
-    if ((DDS3_GBWK->world.fieldFlags & FIELD_PRIMARY_SCENE_WORK_FLAG) != 0) {
+    if ((DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_PRIMARY_SCENE_WORK) != 0) {
         fldEsutoMaClear();
         fldGlobalBase.consumedFlags |= FIELD_PRIMARY_SCENE_CONSUMED_FLAG;
     }
@@ -1733,20 +1731,20 @@ void fldEsutoMaClearMsg(void) {
 
 /* Clear the primary-scene work flag and its area-state consumption marker. */
 void fldEsutoMaClear(void) {
-    DDS3_GBWK->world.fieldFlags &= ~FIELD_PRIMARY_SCENE_WORK_FLAG;
+    DDS3_GBWK->world.fieldFlags &= ~DAT_WORLD_FIELD_PRIMARY_SCENE_WORK;
     fldGlobalBase.consumedFlags &= ~FIELD_PRIMARY_SCENE_CONSUMED_FLAG;
 }
 
 /* Select primary rather than secondary, resetting primary's consume marker. */
 void fldEsutoMaStart(void) {
-    DDS3_GBWK->world.fieldFlags = (DDS3_GBWK->world.fieldFlags | FIELD_PRIMARY_SCENE_WORK_FLAG) & ~FIELD_SECONDARY_SCENE_WORK_FLAG;
+    DDS3_GBWK->world.fieldFlags = (DDS3_GBWK->world.fieldFlags | DAT_WORLD_FIELD_PRIMARY_SCENE_WORK) & ~DAT_WORLD_FIELD_SECONDARY_SCENE_WORK;
     fldGlobalBase.consumedFlags &= ~FIELD_PRIMARY_SCENE_CONSUMED_FLAG;
 }
 
 /* Return whether the primary-scene work flag is set. */
 u8 fldEsutoMaChk(void) {
     s32 fieldFlags = DDS3_GBWK->world.fieldFlags;
-    fieldFlags &= FIELD_PRIMARY_SCENE_WORK_FLAG;
+    fieldFlags &= DAT_WORLD_FIELD_PRIMARY_SCENE_WORK;
     if (fieldFlags == 0) return 0;
     return 1;
 }
@@ -1848,7 +1846,7 @@ s32 fldUpdateTravelAndEncounters(void) {
         if (!fldGlobalBase.terrainAttritionKind && ptyAnyUnitFlagMatch(0x80, 1)) interval = 1000.0f;
         if (fldGlobalBase.attritionDistance > interval) {
             if (fldGlobalBase.terrainAttritionKind) {
-                if (fldGlobalBase.terrainAttritionKind != 3 && (DDS3_GBWK->world.fieldFlags & 4)) {
+                if (fldGlobalBase.terrainAttritionKind != 3 && (DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_TRANSITION_WORK)) {
                     fldGlobalBase.unk190 = 0;
                     fldGlobalBase.attritionDistance = 0.0f;
                 } else {
