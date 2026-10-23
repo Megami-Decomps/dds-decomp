@@ -250,7 +250,7 @@ extern void p2sdLoadSMGFile(s32 sound);
 extern void effRequestResourceByMode(const char *prefix, const char *name,
                                      s32 mode, u32 *outInstance);
 #include "sdf_debug_api.h"
-extern MnuSectionObjectList *mnuLoadSectionObjectListWithRelocations(void *data);
+extern MnuSectionObjectList *mnuLoadSectionObjectListWithRelocations(const u8 *data);
 void mdlLoadViewerPackageFromWork(PacWork *entry);
 
 /* Advance the shooting package loader; only the completed state returns one. */
@@ -547,11 +547,11 @@ extern void dds3ApplyRelocationOffsets(u8 *base, u32 adjustment, u32 *offsets, u
 /* Copy a section's object payload into a fresh block and relocate it in place.
  * The data starts with a 16-byte header and five information words (payload
  * size, object count, an unused word, relocation size and an unused word). */
-MnuSectionObjectList *mnuLoadSectionObjectListWithRelocations(void *data) {
+MnuSectionObjectList *mnuLoadSectionObjectListWithRelocations(const u8 *data) {
     u8 header[16];
     u32 info[5];
     u32 offset;
-    u8 *payload;
+    const u8 *payload;
     sdfMemHandle_t *block;
     MnuSectionObjectList *list;
     u8 *objects;
@@ -560,9 +560,9 @@ MnuSectionObjectList *mnuLoadSectionObjectListWithRelocations(void *data) {
 
     memcpy(header, data, sizeof(header));
     offset = sizeof(header);
-    memcpy(info, (u8 *)data + offset, sizeof(info));
+    memcpy(info, data + offset, sizeof(info));
     offset += sizeof(info);
-    payload = (u8 *)data + offset;
+    payload = data + offset;
     block = sdfMemAllocDirect(info[0] + 0x10);
     list = (MnuSectionObjectList *)sdfMemGetPtr(block);
     objects = (u8 *)(list + 1);
