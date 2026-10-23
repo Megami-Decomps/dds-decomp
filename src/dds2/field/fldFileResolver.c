@@ -5639,7 +5639,7 @@ extern void dds3SetFogColor(s32, f32 *);
 extern void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
 extern void dds3SetAmbientColor(s32, f32 *);
 extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
-extern s32 dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
+extern void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 extern void fldSetFilterAnime(u32);
 extern u32 D_00436138, D_0043613C;
 extern f32 D_00436140;
