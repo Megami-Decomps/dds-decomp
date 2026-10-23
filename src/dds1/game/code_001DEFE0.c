@@ -9007,13 +9007,13 @@ BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *effect, const char *f
 extern u32 btlWaitUnitListIdle(void);
 
 u32 btlWaitUnitListIdle(void) {
-    s32 context = (s32)(u32)btlGetRuntime();
-    s32 unit;
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlUnit *unit;
 
-    if (*(u32 *)(context + 0x1F4) & 0x40000000) {
+    if (state->battleFlags & 0x40000000) {
         return 1;
     }
-    for (unit = *(s32 *)(context + 0x228); unit != 0; unit = *(s32 *)(unit + 0x344)) {
+    for (unit = state->units; unit != 0; unit = unit->next) {
     }
     return 1;
 }
