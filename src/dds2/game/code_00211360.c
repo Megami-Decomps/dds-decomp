@@ -10,6 +10,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "btl_action.h"
+#include "btl_ai_action_api.h"
 #include "btl_ai_table.h"
 #include "btl_ai_scratch.h"
 #include "btl_unit_tasks.h"
@@ -76,7 +77,6 @@ extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
 extern s8 btlHistoryCounter;
 
-extern s32 btlExecuteAiTableAction();
 extern void btlSyncEligibleActorPanelHpMp(ActionStateLink *);
 
 extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
