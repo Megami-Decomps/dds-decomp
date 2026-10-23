@@ -3756,7 +3756,7 @@ extern void SetRotateMatrixX_B(f32);
 
 extern void btlClearAllUnitDefeatCandidatesTask(void);
 
-extern void btlFlagLinkedGroupDefeatCandidatesTask(s32);
+extern void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *);
 
 /* VURI boss action camera: when this actor is the defeat target, pick a randomized camera key pair (or a
  * randomized action pose) by boss form (unit mode 0x110/0x111/0x112) and action code; otherwise frame the
@@ -3785,7 +3785,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
         return 1;
     }
     btlClearAllUnitDefeatCandidatesTask();
-    btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+    btlFlagLinkedGroupDefeatCandidatesTask(command);
     switch (link->unit->partyRecord.unitId) {
     case 0x110:
         switch (command->actionCode) {
@@ -4069,7 +4069,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
             if (btlGetIndexListCount(link->indexWork.indices) == 1) {
                 BtlUnit *revivedEntry;
                 btlClearAllUnitDefeatCandidatesTask();
-                btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+                btlFlagLinkedGroupDefeatCandidatesTask(command);
                 revivedEntry = btlGetIndexListEntry(link->indexWork.indices, 0);
                 if (!(revivedEntry->status.flags & 0x400)) {
                     return 0;
@@ -7389,31 +7389,31 @@ extern void btlClearAllUnitDefeatCandidatesTask(void);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
-extern void btlFlagLinkedGroupDefeatCandidatesTask(s32);
+extern void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *);
 
 extern char D_0041B3B8[];
 
 /* Choose one of three SATAN:ATTACK camera key pairs after marking all defeat candidates. */
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041B3B8);
 
-void btlChooseSatanAttackCamera(s32 actor) {
+void btlChooseSatanAttackCamera(BtlLinkedCommand *command) {
     btlFlagAllUnitDefeatCandidatesTask();
     switch (dds3GetRandIntA(NULL, 3)) {
     case 0:
         btlBossDebugPrintf(D_0041B3B8);
-        btlSetEffectCameraKeys(actor,
+        btlSetEffectCameraKeys((s32)command,
             -779.2f, -58.1f, -1169.4f, -0.128f, -0.276f, 0.029f, 0.943f, 648.2f,
             -57.0f, -1638.5f, -0.089f, 0.189f, -0.026f, 0.968f, 40.0f, 20.0f);
         break;
     case 1:
         btlBossDebugPrintf("SATAN:ATTACK-1 ++++\n");
-        btlSetEffectCameraKeys(actor,
+        btlSetEffectCameraKeys((s32)command,
             -1151.0f, 14.1f, -635.3f, -0.172f, -0.484f, 0.087f, 0.843f, -566.4f,
             -16.9f, -1472.1f, -0.114f, -0.182f, 0.012f, 0.967f, 40.0f, 25.0f);
         break;
     case 2:
         btlBossDebugPrintf("SATAN:ATTACK-2 ++++\n");
-        btlSetEffectCameraKeys(actor,
+        btlSetEffectCameraKeys((s32)command,
             789.1f, -88.3f, -251.3f, -0.305f, 0.444f, -0.171f, 0.814f, 727.7f,
             -9.4f, -1334.9f, -0.137f, 0.222f, -0.039f, 0.954f, 40.0f, 10.0f);
         break;
@@ -7422,19 +7422,19 @@ void btlChooseSatanAttackCamera(s32 actor) {
 
 
 /* Choose Satan keys; cases zero/one mark all candidates, case two marks only the linked group. */
-void btlChooseSatanGroupAwareCamera(s32 actor) {
+void btlChooseSatanGroupAwareCamera(BtlLinkedCommand *command) {
     switch (dds3GetRandIntA(NULL, 3)) {
     case 0:
         btlBossDebugPrintf("SATAN:I-0 ++++\n");
         btlFlagAllUnitDefeatCandidatesTask();
-        btlSetEffectCameraKeys(actor,
+        btlSetEffectCameraKeys((s32)command,
             -211.2f, -446.8f, -639.3f, -0.266f, -0.088f, 0.016f, 0.95f, 621.5f,
             -764.2f, -563.1f, -0.086f, 0.279f, -0.035f, 0.945f, 40.0f, 20.0f);
         break;
     case 1:
         btlBossDebugPrintf("SATAN:I-0 ++++\n");
         btlFlagAllUnitDefeatCandidatesTask();
-        btlSetEffectCameraKeys(actor,
+        btlSetEffectCameraKeys((s32)command,
             -583.4f, -1381.4f, -1169.0f, 0.118f, -0.198f, -0.034f, 0.962f, -632.8f,
             -425.2f, -989.0f, -0.167f, -0.226f, 0.028f, 0.949f, 40.0f, 20.0f);
         break;
@@ -7442,8 +7442,8 @@ void btlChooseSatanGroupAwareCamera(s32 actor) {
         btlBossDebugPrintf("SATAN:I-0 ++++\n");
         /* This preset marks only the actor's linked group. */
         btlClearAllUnitDefeatCandidatesTask();
-        btlFlagLinkedGroupDefeatCandidatesTask(actor);
-        btlSetEffectCameraKeys(actor,
+        btlFlagLinkedGroupDefeatCandidatesTask(command);
+        btlSetEffectCameraKeys((s32)command,
             706.9f, 48.6f, -363.8f, -0.333f, 0.341f, -0.146f, 0.855f, -674.4f,
             -115.1f, -856.2f, -0.23f, -0.259f, 0.053f, 0.926f, 40.0f, 25.0f);
         break;
@@ -7662,7 +7662,7 @@ s32 btlSelectSatanLinkedActionCamera(BtlLinkedCommand *command, s8 modeA, s8 mod
     }
     if (modeA != 1 || modeB == 1) {
         command->flags |= 0x800;
-        btlChooseSatanGroupAwareCamera((s32)command);
+        btlChooseSatanGroupAwareCamera(command);
         return 1;
     }
     if (command->actionCode == 0x109) {
@@ -7673,7 +7673,7 @@ s32 btlSelectSatanLinkedActionCamera(BtlLinkedCommand *command, s8 modeA, s8 mod
     switch (shot) {
     case 0:
     case 1:
-        btlChooseSatanGroupAwareCamera((s32)command);
+        btlChooseSatanGroupAwareCamera(command);
         break;
     case 2:
         btlPrepareRandomizedActionCameraPose((s32)command, (s32)&command->frontCamera, (s32)&command->backCamera);
@@ -7765,7 +7765,7 @@ s32 btlSelectSatanActorCategoryCamera(BtlLinkedCommand *command, s32 argModeA, s
         count = btlGetIndexListCount(link->indexWork.indices);
         if (count == 1 && modeA == 1 && modeB == 0) {
             if (command->actionCode == 0x106) {
-                btlChooseSatanAttackCamera((s32)command);
+                btlChooseSatanAttackCamera(command);
                 return 1;
             }
             if (cameraMode == 0) {
@@ -7791,7 +7791,7 @@ s32 btlSelectSatanActorCategoryCamera(BtlLinkedCommand *command, s32 argModeA, s
             return 1;
         } else if (count >= 2 && modeA == 1 && modeB == 0) {
             if (command->actionCode == 0x106) {
-                btlChooseSatanAttackCamera((s32)command);
+                btlChooseSatanAttackCamera(command);
                 return 1;
             }
             if (cameraMode == 0) {
