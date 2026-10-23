@@ -262,14 +262,14 @@ extern struct sdfMemHandle_t *D_003BBB6C;
 extern struct sdfMemHandle_t *D_003BBB70;
 
 /* Load a viewer package; flag 2 enables the extra request-preparation step. */
-void mdlPackDecode(s32 first, s32 second, s32 flags, void *requestFirst, s32 requestSecond) {
+void mdlPackDecode(s32 first, s32 second, s32 flags, const u8 *packageData, s32 packageSize) {
     PacState request;
 
     sdfPacInit(&request, 0);
     if (flags & 2) {
         sdfPacSetStay(&request);
     }
-    sdfPacDecode(&request, (const u8 *)requestFirst, requestSecond);
+    sdfPacDecode(&request, packageData, packageSize);
     mdlPackSet(request.queueHead, first, second, flags);
     sdfPacFree(&request);
 }

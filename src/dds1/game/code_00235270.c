@@ -4616,7 +4616,7 @@ extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *res
                                             const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
 extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32 kind, EvtRuntime *runtime);
 extern s32 evtEventViewerAddName(const char *name, EvtRuntime *runtime);
-extern void mdlPackDecode(s32 packageId, s32 partId, s32 flags, void *data, s32 length);
+extern void mdlPackDecode(s32 packageId, s32 partId, s32 flags, const u8 *data, s32 length);
 extern s32 mdlSpawnCameraSlotViewerObject(s32 packageId, s32 partId);
 extern evtUnitHandle_t *evtGetUnitHandle(s32 key);
 extern s32 evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner);

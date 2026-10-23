@@ -184,7 +184,7 @@ extern u32 D_003BAB60;
 
 extern u32 D_003BAB5C;
 
-extern void mdlPackDecode(s32, s32, s32, void *, s32);
+extern void mdlPackDecode(s32, s32, s32, const u8 *, s32);
 
 void fldLoadPlayerModel(void);
 

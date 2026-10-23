@@ -38,7 +38,7 @@ extern u16 D_003BB044;
 
 
 
-extern void mdlPackDecode(s32 resourceGroup, u16 resourceId, s32 flags, void *packageData, u32 packageSize);
+extern void mdlPackDecode(s32 resourceGroup, u16 resourceId, s32 flags, const u8 *packageData, u32 packageSize);
 
 extern u32 effBattleMiscGetTableEntry(s32 index);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
