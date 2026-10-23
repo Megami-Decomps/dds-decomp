@@ -688,7 +688,7 @@ extern void mnuDrawMantraEntryStatus(s32, s32, s32, SdfGrid *, SdfGridCell *, s3
 
 extern SdfGridCell *sdfGridCursorLeftToFilledCell(SdfGrid *);
 
-extern void mnuBuildMantraGridAndGetProfileCoordinates(MenuSceneWork *, s32, s32 *, s32 *);
+extern void mnuBuildMantraGridAndGetProfileCoordinates(MenuSceneWork *, MnuProfileProgress *, s32 *, s32 *);
 
 extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *, u32, u32);
 
@@ -707,7 +707,8 @@ void mnuInitializeMantraSelectionGrid(MenuSceneWork *sceneWork) {
     sceneWork->gridHandle->drawCell = mnuDrawMantraEntryStatus;
     resourceTaskAddress = sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
     fieldAddress = *(s32 *)(*(s32 *)(resourceTaskAddress + 0xC) + 0x1C);
-    mnuBuildMantraGridAndGetProfileCoordinates(sceneWork, *(s32 *)(fieldAddress + 0x70),
+    mnuBuildMantraGridAndGetProfileCoordinates(sceneWork,
+                  (MnuProfileProgress *)(u32)*(s32 *)(fieldAddress + 0x70),
                   &selectedCoordinates[0], &selectedCoordinates[1]);
     if (sdfGridSelectFilledCell(sceneWork->gridHandle,
                                 selectedCoordinates[0], selectedCoordinates[1]) == NULL) {
@@ -1497,8 +1498,7 @@ extern void sdfGridSetCellValue(SdfGrid *grid, s32 column, s32 row, u32 cellValu
 /* Rebuild the 88-entry mantra grid from the prerequisite coordinates (tenths, or required level / 5
  * when the record's x is -1), report the selected profile's cell, then set the three
  * requirement-group bits in boundsFlags. */
-void mnuBuildMantraGridAndGetProfileCoordinates(MenuSceneWork *work, s32 selectionAddress, s32 *outX, s32 *outY) {
-    MnuProfileProgress *selection = (MnuProfileProgress *)selectionAddress;
+void mnuBuildMantraGridAndGetProfileCoordinates(MenuSceneWork *work, MnuProfileProgress *selection, s32 *outX, s32 *outY) {
     MnuMantraNodeState *nodes = (MnuMantraNodeState *)work->gridHandle->userData;
     MnuMantraGridEntry *entry;
     SdfGrid *grid;
@@ -1588,7 +1588,7 @@ void mnuReinitializeSceneGrid(s32 sceneAddress) {
 }
 
 extern void sdfGridClear(SdfGrid *grid);
-extern void mnuBuildMantraGridAndGetProfileCoordinates(MenuSceneWork *work, s32 sceneId, s32 *x, s32 *y);
+extern void mnuBuildMantraGridAndGetProfileCoordinates(MenuSceneWork *work, MnuProfileProgress *selection, s32 *x, s32 *y);
 extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *grid, u32 x, u32 y);
 extern SdfGridCell *sdfGridCursorLeftToFilledCell(SdfGrid *grid);
 
@@ -1607,7 +1607,8 @@ s32 mnuRestoreMantraGridSelection(MenuSceneWork *work) {
     sdfGridClear(grid);
     scene = sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
     field = *(s32 *)(*(s32 *)(scene + 0xC) + 0x1C);
-    mnuBuildMantraGridAndGetProfileCoordinates(work, *(s32 *)(field + 0x70), NULL, NULL);
+    mnuBuildMantraGridAndGetProfileCoordinates(
+        work, (MnuProfileProgress *)(u32)*(s32 *)(field + 0x70), NULL, NULL);
     if (sdfGridSelectFilledCell(
             work->gridHandle, x, y) == NULL) {
         sdfGridCursorLeftToFilledCell(work->gridHandle);
@@ -2228,4 +2229,3 @@ void mnuDrawSelectedMantraProfile(s32 x, s32 y, s32 z, s32 alpha, DspTableWindow
 }
 
 INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC440);
-
