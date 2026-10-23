@@ -878,19 +878,19 @@ void evtActivateStoredUnitMotionSlot(evtUnitHandle_t *unit) {
 }
 
 void evtConfigureUnitMotionSlot(evtUnitHandle_t *unit, s32 slot, s32 slotAValue, s32 slotBValue,
-                                s32 slotCValue, s32 mode) {
+                                s32 slotCValue, EvtUnitMotionSlotMode mode) {
     unit->slotFlags[slot] = 3;
     unit->slotA[slot] = slotAValue;
     unit->slotB[slot] = slotBValue;
     unit->slotC[slot] = slotCValue;
     switch (mode) {
-    case 0:
+    case EVT_UNIT_MOTION_SLOT_MODE_LOOP_ON_MOTION_END:
         unit->slotFlags[slot] |= 0x4;
         break;
-    case 1:
+    case EVT_UNIT_MOTION_SLOT_MODE_LOOP_EXTERNAL_MOTION:
         unit->slotFlags[slot] |= 0x8;
         break;
-    case 2:
+    case EVT_UNIT_MOTION_SLOT_MODE_STOP_ON_BATTLE_ACTION:
         unit->slotFlags[slot] |= 0x10;
         break;
     }
@@ -1977,7 +1977,8 @@ u32 evtOpSetUnitParams6(void) {
         s32 scriptParam3 = scrGetIntPara(3);
         s32 scriptParam4 = scrGetIntPara(4);
         s32 scriptParam5 = scrGetIntPara(5);
-        evtConfigureUnitMotionSlot(unit, scriptParam1, scriptParam2, scriptParam3, scriptParam4, scriptParam5);
+        evtConfigureUnitMotionSlot(unit, scriptParam1, scriptParam2, scriptParam3, scriptParam4,
+                                   (EvtUnitMotionSlotMode)scriptParam5);
     }
     return 1;
 }
@@ -2011,7 +2012,8 @@ void evtLipsExecFunction(s32 unitUniqueId, s32 motionId) {
         printf("warning: call evtLipsExecFunction() but over have motionno fpr user specified motion no.\n");
         return;
     }
-    evtConfigureUnitMotionSlot(unit, 2, motionId, 0, 5, 1);
+    evtConfigureUnitMotionSlot(unit, 2, motionId, 0, 5,
+                               EVT_UNIT_MOTION_SLOT_MODE_LOOP_EXTERNAL_MOTION);
     D_004371F0 = unitUniqueId;
     printf("<lips %d %d> \n", unitUniqueId, motionId);
 }
@@ -2039,7 +2041,8 @@ void evtLipsStopFunction(void) {
         printf("warning: call evtLipsStopFunction() but over have motionno fpr user specified motion no.\n");
         return;
     }
-    evtConfigureUnitMotionSlot(unit, 2, 0, 0, 3, 2);
+    evtConfigureUnitMotionSlot(unit, 2, 0, 0, 3,
+                               EVT_UNIT_MOTION_SLOT_MODE_STOP_ON_BATTLE_ACTION);
     printf("<lips_stop> stopunitid = %d\n", D_004371F0);
     D_004371F0 = 0;
 }
