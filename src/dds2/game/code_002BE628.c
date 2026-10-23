@@ -2445,13 +2445,13 @@ s32 mnuConsumeEntryCost(s32 commandId, datUnitWork_t *actorEntry) {
         if (actorEntry->hp < cost) {
             return 0;
         }
-        datAddHp((u8 *)actorEntry, -cost);
+        datAddHp(actorEntry, -cost);
         return 1;
     case DAT_COMMAND_COST_MODE_MP:
         if (actorEntry->mp < cost) {
             return 0;
         }
-        datAddMp((u8 *)actorEntry, -cost);
+        datAddMp(actorEntry, -cost);
         return 1;
     default:
         return 1;
