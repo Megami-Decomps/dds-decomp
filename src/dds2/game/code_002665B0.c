@@ -1300,9 +1300,8 @@ void mnuDrawAndStepTerminalPanelFade(s32 decrement, MenuSlotState *state) {
 
 /* Classify panel fade: zero, nonzero below sixty, or at least sixty.
  * This is a blend weight, not a remaining-frame countdown. */
-s32 fldClassifyRemainingFrames(void *address) {
-    MenuSlotState *work = (MenuSlotState *)address;
-    s32 fade = work->panelFade;
+s32 fldClassifyRemainingFrames(MenuSlotState *state) {
+    s32 fade = state->panelFade;
 
     if (fade == 0) {
         return 0;
@@ -1968,7 +1967,7 @@ s32 evtDispatchSelectionAfterFieldFrameGate(dds3ProcessID_t *request) {
 
     mnuDrawTerminalBackdrop(state);
     mnuDrawAndStepTerminalPanelFade(0, (MenuSlotState *)state);
-    if (fldClassifyRemainingFrames((void *)state) != 2) {
+    if (fldClassifyRemainingFrames(dispatchState) != 2) {
         return 0;
     }
     mnuDispatchTransitionHostCallbacks(state);
@@ -2262,15 +2261,15 @@ u32 evtSelectFinalVisualNode(dds3ProcessID_t *task) {
 }
 
 s32 evtOpenTerminalFollowupPopupWhenIdle(dds3ProcessID_t *request) {
-    s32 state = dds3GetProcessData(request);
-    s32 *panel = (s32 *)(state + 0x54);
-    s32 result = mnuDispatchPopupTransition((u8 *)state + 8, panel, 0, (void *)request);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
+    s32 *panel = &state->dispatchStatus;
+    s32 result = mnuDispatchPopupTransition(&state->transitionWork, panel, 0, request);
     if (result != 0) {
         return result;
     }
     if (*panel == 0) {
         if (fclChkMessage() == 0) {
-            if (fldClassifyRemainingFrames((void *)state) == 0) {
+            if (fldClassifyRemainingFrames(state) == 0) {
                 mnuSetPopupEntry(panel, mnuTerminalFollowupFadePopupEntry);
             }
         }
@@ -2551,7 +2550,7 @@ s32 evtBStartSelectionChainAfterFade(dds3ProcessID_t *request) {
     s32 result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, request);
 
     if (result == 0) {
-        if (*dispatch == 0 && fldClassifyRemainingFrames((void *)state) == 0) {
+        if (*dispatch == 0 && fldClassifyRemainingFrames(state) == 0) {
             switch (state->stage) {
             case 1:
                 dds3FadeOut(0, 0, 0, 15);
