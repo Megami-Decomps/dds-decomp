@@ -6,6 +6,7 @@
 #include "sdf_semaphore_api.h"
 #include "sdf_thread.h"
 #include "sdf_thread_sleep.h"
+#include "sdf_handler_node.h"
 
 #define SDF_CURRENT_THREAD_SELECTOR 0xffffffffffffffff
 #define SDF_THREAD_COMPLETION_EVENT 2
@@ -40,7 +41,7 @@ s32 VblankIntcHandler(s32 eventId) {
     return 0;
 }
 
-extern void sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
+extern SdfHandlerNode *sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
 
 /* Each wake-up broadcasts to every tracked thread under the list semaphore. */
 void VblankThreadProc(void) {
