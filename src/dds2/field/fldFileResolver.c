@@ -3732,6 +3732,11 @@ extern void fldClearCameraObjectHighlightFlag(void);
 
 extern u8 fldEncountTestFlag(u32 mask);
 
+typedef struct FldModelMatrices {
+    u8 pad00[0xC];
+    u8 **rows; /* 0x0C: slot-indexed matrix blocks */
+} FldModelMatrices;
+
 void fldUpdateCameraProximity(void) {
     f32 vec[4];
     f32 range = 45.0f;
@@ -3755,7 +3760,7 @@ void fldUpdateCameraProximity(void) {
     }
     if (slot >= 0) {
         model = *modelRef;
-        matrices = *(u8 ***)(model + 0xC);
+        matrices = ((FldModelMatrices *)model)->rows;
         VU0_LOAD_MATRIX(matrices[slot] + 0xC0);
         VU0_LOAD_VF(vf10, vec);
         VU0_APPLY_MATRIX(vf10, vf10);
