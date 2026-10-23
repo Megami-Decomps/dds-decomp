@@ -40,7 +40,7 @@ extern SdfPoolNode sdfGrOtTable[];
 
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 
-extern u8 *sdf2DGetPrimPtr(s32 address);
+extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 
 
 #include "sdf_packet_alloc.h"
@@ -564,7 +564,7 @@ void cmpDrawSpriteFlag(u8 enabled, s32 alternate, s32 kind) {
     SdfPoolNode *entry;
 
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
-    descriptor = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    descriptor = (u64 *)sdf2DGetPrimPtr(packet);
     descriptor[0] = normalized;
     if (!alternate) {
         descriptor[1] = 0x4A;
@@ -589,7 +589,7 @@ void cmpDrawSprite(u64 data, s32 alternate, s32 kind) {
     SdfPoolNode *entry;
 
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
-    descriptor = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    descriptor = (u64 *)sdf2DGetPrimPtr(packet);
     descriptor[0] = data;
     if (!alternate) {
         descriptor[1] = 0x47;
@@ -614,7 +614,7 @@ void cmpDrawSprite2(s32 data, s32 alternate, s32 kind) {
     SdfPoolNode *entry;
 
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
-    descriptor = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    descriptor = (u64 *)sdf2DGetPrimPtr(packet);
     descriptor[0] = data;
     if (!alternate) {
         descriptor[1] = 0x42;
@@ -639,7 +639,7 @@ void cmpDrawSpriteIndexed(s32 data, s32 kind) {
     SdfPoolNode *entry;
 
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
-    descriptor = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    descriptor = (u64 *)sdf2DGetPrimPtr(packet);
     descriptor[1] = 0x49;
     descriptor[0] = data;
     context = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
@@ -656,7 +656,7 @@ void cmpDrawSpriteIndexed2(s32 data, s32 kind) {
     SdfPoolNode *entry;
 
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
-    descriptor = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    descriptor = (u64 *)sdf2DGetPrimPtr(packet);
     descriptor[1] = 0x14;
     descriptor[0] = data;
     context = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
@@ -691,7 +691,7 @@ void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 sur
 
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(6, 1));
     sdf2DMakePrimPacketHeader(packet, 0x14B, 6, 0x515151, 1);
-    vertices = (GridPackedVertex *)sdf2DGetPrimPtr((s32)packet);
+    vertices = (GridPackedVertex *)sdf2DGetPrimPtr(packet);
     cmpExpandColor(vertices[0].colorChannels, colors[0]);
     vertices[0].packedXY = (xs[0] + 0x7000) | ((u64)(ys[0] + 0x7900) << 32);
     vertices[0].depth = z;
@@ -732,7 +732,7 @@ void itfDrawColoredRectangle(u32 x, u32 y, u32 z, u32 width, u32 height, const u
 
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(8, 1));
     sdf2DMakePrimPacketHeader(packet, 0x14C | (gsContext << 9), 8, 0x51515151, 1);
-    vertices = (GridPackedVertex *)sdf2DGetPrimPtr((s32)packet);
+    vertices = (GridPackedVertex *)sdf2DGetPrimPtr(packet);
     cmpExpandColor(vertices[0].colorChannels, colors[0]);
     vertices[0].packedXY = (u64)left | topWord;
     vertices[0].depth = z;
@@ -786,7 +786,7 @@ void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
 
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(4, 1));
     sdf2DMakePrimPacketHeader(packet, 0x149, 4, 0x5151, 1);
-    vertices = (GridPackedVertex *)sdf2DGetPrimPtr((s32)packet);
+    vertices = (GridPackedVertex *)sdf2DGetPrimPtr(packet);
     cmpExpandColor(vertices[0].colorChannels, colors[0]);
     vertices[0].packedXY = (x0 + 0x7000) | ((u64)(y0 + 0x7900) << 32);
     vertices[0].depth = z0;

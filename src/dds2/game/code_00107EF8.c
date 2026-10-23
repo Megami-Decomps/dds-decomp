@@ -222,7 +222,7 @@ extern u32 sdf2DMakeStdPacket(u32, s32);
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 
 
-extern u8 *sdf2DGetPrimPtr(s32);
+extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 
@@ -763,7 +763,7 @@ void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 col
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     for (i = 0, pos = coords; i < 4; i++) {
         if (i == 0) {
             dst[0] = (u64)r0 | ((u64)g0 << 32);
@@ -826,7 +826,7 @@ void eglLinkTri(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 
     sdfDrawTagInit(command);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 3));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 3);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
     for (i = 0; i < 3; i++) {
         if (i == 0) {
             dst[0] = (u64)r0 | ((u64)g0 << 32);

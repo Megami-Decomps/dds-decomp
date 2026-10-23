@@ -49,7 +49,7 @@ extern char D_003BB060[];
 extern char *D_003557A8[];
 extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData,
                                       u32 dataBytes, s32 markHistory);
-extern u8 *sdf2DGetPrimPtr(s32 packetAddress);
+extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 
 
 extern EffCreateHandler D_00355730[];
@@ -668,7 +668,7 @@ void dds3EffectFileListWindowDrawSprite(EffResourceDescriptor *overlay) {
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         sprite = sdf2DAllocSprite(1);
-        vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr((s32)sprite);
+        vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr(sprite);
         vertex->a = 0x80;
         vertex->b = 0x80;
         vertex->g = 0x80;

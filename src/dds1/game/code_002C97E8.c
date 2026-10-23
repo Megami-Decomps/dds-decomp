@@ -420,7 +420,7 @@ s32 frFontDrawColoredGlyphChainAndMeasure(s32 x, s32 y, u32 first, u32 second, u
 
 #include "sdf_packet_alloc.h"
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
-extern u8 *sdf2DGetPrimPtr(s32);
+extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 extern SdfPoolNode sdfGrOtTable[];
 
 /* Submit count XY pairs as a colored GS triangle fan to surfaceIndex.
@@ -440,7 +440,7 @@ void sdfDrawColoredTriangleFan(s32 *points, u32 tail, u32 *colors, s32 count,
     sdfDrawTagInit(list);
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, count));
     sdf2DMakePrimPacketHeader(packet, 0x14D, 2, 0x41, count);
-    vertex = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    vertex = (u64 *)sdf2DGetPrimPtr(packet);
     for (i = 0; i < count; i++) {
         if (useFirstColor & 1) {
             selectedColors = colors;

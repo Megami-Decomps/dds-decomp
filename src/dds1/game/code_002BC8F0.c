@@ -1020,13 +1020,13 @@ typedef union EffSpriteColor {
 #include "sdf_packet_alloc.h"
 extern void sdfTexSetFilter(sdfTexHandle_t *, s32, s32);
 extern s32 sdf2DGetPrimPacketSize(s32, s32);
-extern u8 *sdf2DGetPrimPtr(s32);
+extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 extern void effSelectPresetByKind(u32, u32);
 void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
                    const EffSpriteUV *uvRect, const EffSpriteColor *color, u32 flipFlags,
                    u32 blendKind, s32 mode, sdfTexHandle_t *texture, s32 surfaceId) {
     u32 textureCoordinates[4];
-    s32 packet;
+    SdfDrawPacket *packet;
     sdfDrawTag_t *packetList;
     u64 *packetWords;
     s32 left;
@@ -1041,8 +1041,8 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     } else {
         sdfTexSetFilter(texture, 1, 1);
     }
-    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, 1));
-    sdf2DMakePrimPacketHeader((SdfDrawPacket *)packet, 0x156, 5, 0x43431, 1);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, 1));
+    sdf2DMakePrimPacketHeader(packet, 0x156, 5, 0x43431, 1);
     /* The SDK size helper also skips the packet's two header quadwords. */
     packetWords = (u64 *)sdf2DGetPrimPtr(packet);
     left = x + 0x7000;
@@ -1082,7 +1082,7 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
     sdf2DLinkTexPacket(packetList, texture, 0);
-    sdfDrawTagLink(packetList, packet);
+    sdfDrawTagLink(packetList, (u32)packet);
     drawSurface = &sdfGrOtTable[surfaceId];
     drawSurface->append(drawSurface, packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
@@ -1131,7 +1131,7 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     s32 y2;
     s32 x3;
     s32 y3;
-    s32 packet;
+    SdfDrawPacket *packet;
     sdfDrawTag_t *packetList;
     u64 *packetWords;
     s32 left;
@@ -1150,8 +1150,8 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     } else {
         sdfTexSetFilter(texture, 1, 1);
     }
-    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(3, 4));
-    sdf2DMakePrimPacketHeader((SdfDrawPacket *)packet, 0x15C, 3, 0x531, 4);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(3, 4));
+    sdf2DMakePrimPacketHeader(packet, 0x15C, 3, 0x531, 4);
     packetWords = (u64 *)sdf2DGetPrimPtr(packet);
     left = x + 0x7000;
     top = y + 0x7900;
@@ -1237,7 +1237,7 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
     sdf2DLinkTexPacket(packetList, texture, 0);
-    sdfDrawTagLink(packetList, packet);
+    sdfDrawTagLink(packetList, (u32)packet);
     drawSurface = &sdfGrOtTable[surfaceId];
     drawSurface->append(drawSurface, packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
