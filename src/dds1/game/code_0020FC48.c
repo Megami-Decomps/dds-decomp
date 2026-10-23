@@ -2349,7 +2349,7 @@ extern BtlRuntimeTask *btlCreateMoveOtherUnitsTask(u8 *, u32);
 extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 extern u8 *btlCreateGunLoadPollTask(u8 *);
 extern s32 btlGetUnitModelFrameCount(BtlUnit *);
-extern void btlSetUnitPosition(BtlUnit *, void *);
+extern void btlSetUnitPosition(BtlUnit *, f32 *);
 extern void btlApplyUnitEffectScale(BtlUnit *);
 extern void btlApplyUnitModelScaledValue(BtlUnit *);
 extern void btlSeekUnitModelFrameZero(BtlUnit *);

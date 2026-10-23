@@ -73,7 +73,7 @@ extern void btlCopyUnitCurrentPosition(void *, void *);
 
 extern u8 *btlCreateStiffenDamageShakeTask(u8 *, f32);
 
-extern void btlSetUnitPosition(BtlUnit *, void *);
+extern void btlSetUnitPosition(BtlUnit *, f32 *);
 
 extern void btlSetUnitRotation(BtlUnit *, void *);
 
