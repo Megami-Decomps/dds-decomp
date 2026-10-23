@@ -19,6 +19,8 @@
 #include "dds3obj.h"
 #include "sdf_texture_file.h"
 #include "eff_random.h"
+#include "eff_transform.h"
+#include "eff_light.h"
 #include "mdl_flag_api.h"
 #include "mnu_event_flag_entries.h"
 #include "eff_event_draw.h"
@@ -324,11 +326,12 @@ s32 evtCopyWorldObjectEntryValue(s32 objectId, s32 destination) {
     dds3Basic_t *source;
     dds3Basic_t *destinationNode;
 
-    source = dds3SceneBasicSearchNameAndType((dds3Basic_t *)dds3GetControlScene(), 9,
+    source = dds3SceneBasicSearchNameAndType((dds3Basic_t *)dds3GetControlScene(), EFF_WORLD_KIND_LIGHT,
                                                   (const u8 *)objectId);
     if (source != NULL) {
         destinationNode = (dds3Basic_t *)destination;
-        *(s32 *)((u8 *)destinationNode->data + 0x80) = *(s32 *)((u8 *)source->data + 0x78);
+        *(s32 *)((u8 *)destinationNode->data + 0x80) =
+            (s32)((EffLightData *)source->data)->buffer;
         return 1;
     }
     return 0;
