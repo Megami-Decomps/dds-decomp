@@ -7483,15 +7483,14 @@ f32 btlBuildProjectedActorPairBoundsVU(s32 mask, BtlUnit *first, BtlUnit *second
 }
 
 s32 btlCountUnitsByFlags(u32 mask) {
-    s32 context = (s32)(u32)btlGetRuntime();
-    BtlUnit *actor = *(BtlUnit **)(context + 0x228);
+    BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
     s32 count = 0;
     while (actor != 0) {
         u32 flags = (u32)actor->status.flags;
         if ((flags & 1) != 0 && (flags & mask) != 0 && (flags & 0x20) == 0) {
             count++;
         }
-        actor = *(BtlUnit **)((u8 *)actor + 0x344);
+        actor = actor->next;
     }
     return count;
 }
