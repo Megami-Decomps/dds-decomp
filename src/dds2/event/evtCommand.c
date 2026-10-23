@@ -97,7 +97,7 @@ void dds3RefreshStoredVec3(dds3Basic_t *object);
 
 void evtPathLoop(void *unit, s32 enabled);
 
-void evtEffectLoopControl(void *unit, s32 flag);
+void evtEffectLoopControl(dds3Basic_t *unit, s32 flag);
 
 void dds3EffectObjectBasicStatOn(dds3Basic_t *unit, u32 flag);
 

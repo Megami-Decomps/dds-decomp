@@ -49,7 +49,7 @@ s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first,
                                      dds3Basic_t *fourth);
 s32 dds3EffectObjectBasicLinkObjectIndex(dds3Basic_t *obj, dds3Basic_t *owner, s32 entryId);
 
-void evtEffectLoopControl(void *unit, s32 flag);
+void evtEffectLoopControl(dds3Basic_t *unit, s32 flag);
 
 void dds3EffectObjectBasicStatOn(dds3Basic_t *unit, s32 flag);
 
@@ -219,7 +219,7 @@ s32 evtCommand_EFFMG2_POS(void) {
 s32 evtCommand_EFFECT_ON(void)
 {
     s32 effectId;
-    void *effectObject;
+    dds3Basic_t *effectObject;
 
     effectId = scrGetIntPara(0);
     effectObject = evtSearchBasic(7, effectId);
@@ -234,7 +234,7 @@ s32 evtCommand_EFFECT_ON(void)
  * Missing paths or owners complete the command without binding anything. */
 s32 evtCommand_EFFECT_LINK(void) {
     dds3Basic_t *effectPath = evtSearchBasic(7, scrGetIntPara(0));
-    void *owner;
+    dds3Basic_t *owner;
     s32 objectKind;
 
     if (effectPath == NULL) {
@@ -255,7 +255,7 @@ s32 evtCommand_EFFECT_LINK(void) {
 /* Search the same owner kinds, then bind with the VM's third entry argument. */
 s32 evtCommand_EFFECT_LINK2(void) {
     dds3Basic_t *effectPath = evtSearchBasic(7, scrGetIntPara(0));
-    void *owner;
+    dds3Basic_t *owner;
     s32 objectKind;
 
     if (effectPath == NULL) {
@@ -276,7 +276,7 @@ s32 evtCommand_EFFECT_LINK2(void) {
 s32 evtCommand_EFFECT_UNLINK(void)
 {
     s32 effectId;
-    void *effectObject;
+    dds3Basic_t *effectObject;
 
     effectId = scrGetIntPara(0);
     effectObject = evtSearchBasic(7, effectId);
@@ -290,7 +290,7 @@ s32 evtCommand_EFFECT_UNLINK(void)
 s32 evtCommand_EFFECT_OFF(void)
 {
     s32 effectId;
-    void *effectObject;
+    dds3Basic_t *effectObject;
 
     effectId = scrGetIntPara(0);
     effectObject = evtSearchBasic(7, effectId);
