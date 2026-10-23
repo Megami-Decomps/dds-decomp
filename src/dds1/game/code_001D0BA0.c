@@ -3814,7 +3814,8 @@ u32 btlReleaseUnitModelTask(u32 *taskArgs) {
     return 1;
 }
 
-void *btlScheduleRefreshTask(u8 *owner) {
+BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *owner) {
+    u8 *ownerBytes = (u8 *)owner;
     u8 *task = btlAllocTask(4);
     u32 *arguments;
 
@@ -3822,10 +3823,10 @@ void *btlScheduleRefreshTask(u8 *owner) {
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = btlReleaseUnitModelTask;
     *(u16 *)(task + 0x20) = 0x19;
-    *(s64 *)(task + 0x40) = *(s64 *)(owner + 0x108);
+    *(s64 *)(task + 0x40) = *(s64 *)(ownerBytes + 0x108);
     arguments = btlGetTaskArguments(task);
     arguments[0] = (u32)owner;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 /* Task-start callbacks do not return a status to the scheduler. */
@@ -4125,7 +4126,8 @@ u32 btlUnitFadeInTask(BtlUnitColorFadeArgs *args) {
 
 extern u32 btlUnitFadeInTask(BtlUnitColorFadeArgs *);
 
-u8 *btlCreateUnitFadeInTask(u8 *owner, u32 value, u32 variant) {
+BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *owner, u32 value, u32 variant) {
+    u8 *ownerBytes = (u8 *)owner;
     u8 *task = btlAllocTask(20);
     BtlUnitColorFadeArgs *arguments;
 
@@ -4133,15 +4135,15 @@ u8 *btlCreateUnitFadeInTask(u8 *owner, u32 value, u32 variant) {
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = btlUnitFadeInTask;
     *(u16 *)(task + 0x20) = 0x11;
-    *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
+    *(u64 *)(task + 0x40) = *(u64 *)(ownerBytes + 0x108);
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
-    arguments->unit = (BtlUnit *)owner;
+    arguments->unit = owner;
     arguments->color = 0x80808080;
     arguments->fadeIn = value;
     arguments->fadeOut = variant;
     arguments->count = 0;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 u32 btlUnitFadeOutTask(BtlUnitColorFadeArgs *args) {

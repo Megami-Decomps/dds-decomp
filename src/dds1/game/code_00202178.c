@@ -2283,11 +2283,12 @@ extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 
 extern BtlRuntimeTask *sndCreateCustomTask(u32, u32);
 
-extern void *btlScheduleRefreshTask(u8 *);
 
 extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 
 extern BtlRuntimeTask *btlCreateFadeInTask(u32);
+
+extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit);
 
 extern BtlTask *fldGetSceneGroupEntry(s32);
 extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
@@ -2344,7 +2345,7 @@ void btlQueueLinkedPairModelSwapTasks(BtlTask *action, s32 mode, u64 refreshBarr
             if (unit->species != 0x124) {
                 continue;
             }
-            refreshTask = (BtlRuntimeTask *)btlScheduleRefreshTask((u8 *)unit);
+            refreshTask = btlScheduleRefreshTask(unit);
             refreshTask->startCondition.kind = 7;
             refreshTask->startCondition.value.owner = refreshBarrier;
             refreshTask->ownerId = action->unit->identity;
@@ -2429,7 +2430,7 @@ void btlQueueLinkedPairModelSwapTasks(BtlTask *action, s32 mode, u64 refreshBarr
             task->startDelay = 1;
             btlStartTask(task);
 
-            refreshTask = (BtlRuntimeTask *)btlScheduleRefreshTask((u8 *)unit);
+            refreshTask = btlScheduleRefreshTask(unit);
             refreshTask->startCondition.kind = 7;
             refreshTask->startCondition.value.owner = sequence;
             refreshTask->ownerId = action->unit->identity;
@@ -2678,7 +2679,7 @@ u64 btlScheduleActionAndSoundSequence(BtlTask *action) {
         }
 
         {
-            BtlRuntimeTask *refreshTask = (BtlRuntimeTask *)btlScheduleRefreshTask((u8 *)unit);
+            BtlRuntimeTask *refreshTask = btlScheduleRefreshTask(unit);
             refreshTask->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
             refreshTask->startCondition.value.handle = scriptSequence;
             refreshTask->ownerId = refreshSequence;
@@ -4386,7 +4387,7 @@ void func_00209EB8(BtlTask *action) {
         timedTask->ownerId = actionBarrier;
         btlStartTask(timedTask);
 
-        refreshTask = (BtlRuntimeTask *)btlScheduleRefreshTask((u8 *)unit);
+        refreshTask = btlScheduleRefreshTask(unit);
         refreshTask->startCondition.kind = 4;
         refreshTask->startCondition.value.handle = actionTask->handle;
         refreshTask->ownerId = refreshBarrier;
