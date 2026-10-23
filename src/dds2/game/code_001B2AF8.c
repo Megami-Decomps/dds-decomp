@@ -9607,7 +9607,7 @@ INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004366D0);
 
 INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004366D8);
 
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004366E0);
+INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_001B2AF8", D_004366E0);
 
 INCLUDE_SDATA(const s32, "game/code_001B2AF8", btlRuntime);
 
