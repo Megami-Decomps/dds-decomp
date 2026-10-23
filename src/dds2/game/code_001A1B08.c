@@ -56,7 +56,7 @@ extern u8 D_004365E0[8];
 extern void itfDrawThreePanelBorderBands(PanelRect *bounds, u32 *color, u32 tail, s32 borderWidth, sdfDrawTag_t *command);
 extern u32 D_003B4760[];
 #include "sdf_packet_alloc.h"
-extern u32 sdf2DMakeStdPacket(u32 packetAddress, s32 packetBytes);
+extern void *sdf2DMakeStdPacket(void *packet, s32 packetBytes);
 extern s32 scrGetIntPara(s32);
 extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern u8 D_003B45E8[], D_003B4600[], D_003B4618[];
@@ -608,14 +608,14 @@ void itfDrawTintedPanelRect(itfpanel_t *panel, sdfDrawTag_t *command) {
 
 /* Append two GS A+D state writes: TEST_1 (0x47), then ALPHA_1 (0x42). */
 void DrawTestAlphaPrim(sdfDrawTag_t *list) {
-    s32 packet = sdfGrAllocPacketBuff(ITF_PANEL_STATE_PACKET_BYTES);
+    void *packet = (void *)sdfGrAllocPacketBuff(ITF_PANEL_STATE_PACKET_BYTES);
     u64 *stateWords = (u64 *)sdf2DMakeStdPacket(packet, ITF_PANEL_STATE_PACKET_BYTES);
 
     stateWords[4] = 0x5101B;
     stateWords[5] = 0x47;
     stateWords[6] = 0x44;
     stateWords[7] = 0x42;
-    sdfDrawTagLink(list, packet);
+    sdfDrawTagLink(list, (u32)packet);
 }
 
 /* Poll/start an entry: one ends the command, zero keeps waiting.

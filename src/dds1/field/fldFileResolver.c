@@ -568,7 +568,7 @@ extern f32 D_00330660[];
 
 extern void btlActivateRuntime(s32 mode);
 
-extern u32 sdf2DMakeStdPacket(u32, s32);
+extern void *sdf2DMakeStdPacket(void *, s32);
 
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 
@@ -2339,32 +2339,32 @@ void rsetOtOfs(u32 displayRow) {
 
 void rsetTexa(s32 lower, s32 bits, u64 upper) {
     sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
-    s32 packet;
+    void *packet;
     u64 *entry;
     SdfPoolNode *descriptor;
 
     sdfDrawTagInit(command);
-    packet = sdfGrAllocPacketBuff(0x30);
+    packet = (void *)sdfGrAllocPacketBuff(0x30);
     entry = (u64 *)sdf2DMakeStdPacket(packet, 0x30);
     entry[5] = 0x3B;
     entry[4] = (u64)(bits << 15) | (upper << 32) | lower;
-    sdfDrawTagLink(command, packet);
+    sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     descriptor->append(descriptor, command);
 }
 
 void rsetTest(s32 bit0, s32 bit1, s32 bit4, s32 bit12, s32 bit14, s32 bit15, s32 unused, s32 bit17) {
     sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
-    s32 packet;
+    void *packet;
     u64 *data;
     SdfPoolNode *descriptor;
 
     sdfDrawTagInit(command);
-    packet = sdfGrAllocPacketBuff(0x30);
+    packet = (void *)sdfGrAllocPacketBuff(0x30);
     data = (u64 *)sdf2DMakeStdPacket(packet, 0x30);
     data[4] = (bit17 << 17) | 0x10000 | (bit15 << 15) | (bit14 << 14) | (bit12 << 12) | (bit4 << 4) | (bit1 << 1) | bit0;
     data[5] = 0x47;
-    sdfDrawTagLink(command, packet);
+    sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     descriptor->append(descriptor, command);
 }
@@ -2372,12 +2372,12 @@ void rsetTest(s32 bit0, s32 bit1, s32 bit4, s32 bit12, s32 bit14, s32 bit15, s32
 /* Write the selected blend equation to GS ALPHA_1. */
 void rsetAlpha(s32 mode) {
     sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
-    s32 packet;
+    void *packet;
     u64 *data;
     SdfPoolNode *descriptor;
 
     sdfDrawTagInit(command);
-    packet = sdfGrAllocPacketBuff(0x30);
+    packet = (void *)sdfGrAllocPacketBuff(0x30);
     data = (u64 *)sdf2DMakeStdPacket(packet, 0x30);
     switch (mode) {
     case 1:
@@ -2409,7 +2409,7 @@ void rsetAlpha(s32 mode) {
         break;
     }
     data[5] = 0x42;
-    sdfDrawTagLink(command, packet);
+    sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     descriptor->append(descriptor, command);
 }

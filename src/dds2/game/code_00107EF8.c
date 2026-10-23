@@ -217,7 +217,7 @@ extern SdfPoolNode sdfGrOtTable[];
 
 
 
-extern u32 sdf2DMakeStdPacket(u32, s32);
+extern void *sdf2DMakeStdPacket(void *, s32);
 
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 
@@ -577,7 +577,7 @@ void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s3
     EvtGsCommand *command;
     sdfDrawTagInit(list);
     packet = (void *)sdfGrAllocPacketBuff(EVT_GS_COMMAND_BYTES);
-    command = (EvtGsCommand *)sdf2DMakeStdPacket((u32)packet, EVT_GS_COMMAND_BYTES);
+    command = (EvtGsCommand *)sdf2DMakeStdPacket(packet, EVT_GS_COMMAND_BYTES);
     command->data = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) | (aref << 4) | (atst << 1) | ate;
     command->registerId = EVT_GS_TEST_PRIMARY;
     sdfDrawTagLink(list, (u32)packet);
@@ -594,7 +594,7 @@ void evtSubmitSecondaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, 
     EvtGsCommand *command;
     sdfDrawTagInit(list);
     packet = (void *)sdfGrAllocPacketBuff(EVT_GS_COMMAND_BYTES);
-    command = (EvtGsCommand *)sdf2DMakeStdPacket((u32)packet, EVT_GS_COMMAND_BYTES);
+    command = (EvtGsCommand *)sdf2DMakeStdPacket(packet, EVT_GS_COMMAND_BYTES);
     command->data = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) | (aref << 4) | (atst << 1) | ate;
     command->registerId = EVT_GS_TEST_SECONDARY;
     sdfDrawTagLink(list, (u32)packet);
@@ -612,7 +612,7 @@ void evtSubmitPrimaryAlphaBlendMode(s32 blendMode) {
 
     sdfDrawTagInit(list);
     packet = (void *)sdfGrAllocPacketBuff(EVT_GS_COMMAND_BYTES);
-    command = (EvtGsCommand *)sdf2DMakeStdPacket((u32)packet, EVT_GS_COMMAND_BYTES);
+    command = (EvtGsCommand *)sdf2DMakeStdPacket(packet, EVT_GS_COMMAND_BYTES);
     switch (blendMode) {
     case 1:
         command->data = 0x48;
@@ -657,7 +657,7 @@ void evtSubmitFixedAlphaBlend(s32 fixedAlpha) {
     EvtGsCommand *command;
     sdfDrawTagInit(list);
     packet = (void *)sdfGrAllocPacketBuff(EVT_GS_COMMAND_BYTES);
-    command = (EvtGsCommand *)sdf2DMakeStdPacket((u32)packet, EVT_GS_COMMAND_BYTES);
+    command = (EvtGsCommand *)sdf2DMakeStdPacket(packet, EVT_GS_COMMAND_BYTES);
     command->data = ((u64)fixedAlpha << 32) | EVT_FIXED_ALPHA_INTERPOLATION;
     command->registerId = EVT_GS_ALPHA_PRIMARY;
     sdfDrawTagLink(list, (u32)packet);

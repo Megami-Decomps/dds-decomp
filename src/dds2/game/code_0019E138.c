@@ -1611,36 +1611,36 @@ void itfMiscDrawLinePrim(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexI
     sdfDrawTagLink(command, (u32)packet);
 }
 
-extern u32 sdf2DMakeStdPacket(u32 packetAddress, s32 packetBytes);
+extern void *sdf2DMakeStdPacket(void *packet, s32 packetBytes);
 
 /* Write TEST for the selected GS context, not the ALPHA blend register. */
 void itfMiscDrawTestPrim(sdfDrawTag_t *list, s64 value, s32 flag) {
-    s32 packet = sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
+    void *packet = (void *)sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
     ItfGsStatePacket *command = (ItfGsStatePacket *)sdf2DMakeStdPacket(packet, ITF_STATE_PACKET_BYTES);
     command->value = value;
     command->registerCode = flag != 0 ? ITF_TEST_SECOND_CONTEXT : ITF_TEST_FIRST_CONTEXT;
-    sdfDrawTagLink(list, packet);
+    sdfDrawTagLink(list, (u32)packet);
 }
 
 extern s64 D_003B4390[];
 
 /* Write an unchecked table entry to ALPHA for the selected GS context. */
 void itfMiscDrawAlphaPrim(sdfDrawTag_t *list, s32 index, s32 flag) {
-    s32 packet = sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
+    void *packet = (void *)sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
     ItfGsStatePacket *command = (ItfGsStatePacket *)sdf2DMakeStdPacket(packet, ITF_STATE_PACKET_BYTES);
     s64 value = D_003B4390[index];
     command->value = value;
     command->registerCode = flag != 0 ? ITF_ALPHA_SECOND_CONTEXT : ITF_ALPHA_FIRST_CONTEXT;
-    sdfDrawTagLink(list, packet);
+    sdfDrawTagLink(list, (u32)packet);
 }
 
 /* Write CLAMP for the selected GS context. */
 void itfMiscDrawClampPrim(sdfDrawTag_t *list, s32 flag, s32 wms, s32 wmt, s32 minu, s32 maxu, s32 minv, s32 maxv) {
-    s32 packet = sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
+    void *packet = (void *)sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
     ItfGsStatePacket *command = (ItfGsStatePacket *)sdf2DMakeStdPacket(packet, ITF_STATE_PACKET_BYTES);
     command->value = ((u64)maxv << 34) | ((u64)minv << 24) | (maxu << 14) | (minu << 4) | (wmt << 2) | wms;
     command->registerCode = flag != 0 ? SDF_GS_CLAMP_2 : SDF_GS_CLAMP_1;
-    sdfDrawTagLink(list, packet);
+    sdfDrawTagLink(list, (u32)packet);
 }
 
 extern u8 D_00436598[8];

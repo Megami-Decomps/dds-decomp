@@ -215,17 +215,17 @@ u64 *pbAllocPrimPacket(u32 x, u32 y, u32 depth, u32 width, u32 height, u32 color
     return packet;
 }
 
-extern u32 sdf2DMakeStdPacket(u32 packetAddress, s32 packetBytes);
+extern void *sdf2DMakeStdPacket(void *packet, s32 packetBytes);
 
 u64 *pbMakeSpritePacket(u64 owner, s32 alternative) {
-    u64 *entry = (u64 *)sdf2DMakeStdPacket(sdfGrAllocPacketBuff(0x30), 0x30);
+    u64 *entry = (u64 *)sdf2DMakeStdPacket((void *)sdfGrAllocPacketBuff(0x30), 0x30);
     entry[4] = owner;
     entry[5] = alternative ? 0x48 : 0x47;
     return entry;
 }
 
 u64 *pbMakePrimPacket(u64 owner, s32 alternative) {
-    u64 *entry = (u64 *)sdf2DMakeStdPacket(sdfGrAllocPacketBuff(0x30), 0x30);
+    u64 *entry = (u64 *)sdf2DMakeStdPacket((void *)sdfGrAllocPacketBuff(0x30), 0x30);
     entry[4] = owner;
     entry[5] = alternative ? 0x43 : 0x42;
     return entry;
