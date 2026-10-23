@@ -1146,7 +1146,8 @@ extern const SdfGridDirections D_003BD298[];
 /* Select an occupied cell above and follow its viewport margins, or return NULL. */
 SdfGridCell *sdfGridCursorUpToFilledCell(SdfGrid *grid) {
     SdfGridDirections directions = D_003BD298[0];
-    u32 cursorValue;
+    SdfGridCell *cell;
+    u32 cursorIndex;
     s32 row;
     s32 column;
     s32 radius;
@@ -1154,13 +1155,13 @@ SdfGridCell *sdfGridCursorUpToFilledCell(SdfGrid *grid) {
     s32 direction;
     s32 candidateColumn;
 
-    cursorValue = (u32)grid->cursor;
-    cursorValue = ((SdfGridCell *)cursorValue)->index;
-    if (cursorValue < grid->width) {
+    cell = grid->cursor;
+    cursorIndex = cell->index;
+    if (cursorIndex < grid->width) {
         return NULL;
     }
-    row = cursorValue / grid->width;
-    column = cursorValue % grid->width;
+    row = cursorIndex / grid->width;
+    column = cursorIndex % grid->width;
     radius = 0;
     while (1) {
         radius++;
@@ -1174,9 +1175,9 @@ SdfGridCell *sdfGridCursorUpToFilledCell(SdfGrid *grid) {
             for (direction = 0; direction < 3; direction++) {
                 candidateColumn = column + directions.columns[direction] * radius;
                 if ((u32)candidateColumn < grid->width && candidateColumn >= 0) {
-                    cursorValue = (u32)sdfGridGetCell(grid, candidateColumn, row - depth);
-                    if (((SdfGridCell *)cursorValue)->value != 0) {
-                        grid->cursor = (SdfGridCell *)cursorValue;
+                    cell = sdfGridGetCell(grid, candidateColumn, row - depth);
+                    if (cell->value != 0) {
+                        grid->cursor = cell;
                         sdfGridFollowCursorWithinMargins(grid);
                         return grid->cursor;
                     }
@@ -1192,7 +1193,8 @@ extern const SdfGridDirections D_003BD2A0[];
 /* Select an occupied cell below and follow its viewport margins, or return NULL. */
 SdfGridCell *sdfGridCursorDownToFilledCell(SdfGrid *grid) {
     SdfGridDirections directions = D_003BD2A0[0];
-    u32 cursorValue;
+    SdfGridCell *cell;
+    u32 cursorIndex;
     u32 count = grid->cellCount;
     u32 width = grid->width;
     u32 rows;
@@ -1202,14 +1204,14 @@ SdfGridCell *sdfGridCursorDownToFilledCell(SdfGrid *grid) {
     s32 offset;
     s32 direction;
 
-    cursorValue = (u32)grid->cursor;
-    cursorValue = ((SdfGridCell *)cursorValue)->index;
-    if (cursorValue >= count - width) {
+    cell = grid->cursor;
+    cursorIndex = cell->index;
+    if (cursorIndex >= count - width) {
         return NULL;
     }
     rows = count / width;
-    cursorRow = cursorValue / width;
-    cursorColumn = cursorValue % width;
+    cursorRow = cursorIndex / width;
+    cursorColumn = cursorIndex % width;
     radius = 0;
     for (;;) {
         u32 row;
@@ -1230,9 +1232,9 @@ SdfGridCell *sdfGridCursorDownToFilledCell(SdfGrid *grid) {
                 if (column < 0) {
                     continue;
                 }
-                cursorValue = (u32)sdfGridGetCell(grid, column, row);
-                if (((SdfGridCell *)cursorValue)->value != 0) {
-                    grid->cursor = (SdfGridCell *)cursorValue;
+                cell = sdfGridGetCell(grid, column, row);
+                if (cell->value != 0) {
+                    grid->cursor = cell;
                     sdfGridFollowCursorWithinMargins(grid);
                     return grid->cursor;
                 }
