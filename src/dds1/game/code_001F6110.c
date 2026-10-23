@@ -2847,15 +2847,15 @@ void btlDebugDrawRectangle(s32 x, s32 y, s32 width, s32 height) {
 }
 
 /* Retail discards menu-frame rectangles; callers supply geometry and two colors. */
-void btlDebugDrawTwoColorRectangle(void) {
+void btlDebugDrawTwoColorRectangle(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1) {
 }
 
 /* Retail no-op for the colored span between adjacent mapping-plot knots. */
-void btlDebugDrawMappingColorSpan(void) {
+void btlDebugDrawMappingColorSpan(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1) {
 }
 
 /* Retail no-op: native plot guides supply two-dimensional endpoints and color. */
-void btlDebugDrawLine2D(void) {
+void btlDebugDrawLine2D(s32 x0, s32 y0, s32 x1, s32 y1, u32 color) {
 }
 
 void func_001FB158(void) {
