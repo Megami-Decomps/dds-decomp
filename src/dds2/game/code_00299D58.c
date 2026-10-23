@@ -43,7 +43,7 @@ extern FieldResourceRecord *D_00435E18;
 extern s32 fldGetSparkRewardProfileIndex(void);
 extern s16 fldGetSparkPickupCount(void);
 extern void brsSelectNextUnit(BrsSkillPackageWork *, s32);
-extern s32 brsStartPartyPanelResourcesOnce(s32);
+extern s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *);
 extern s32 btlHasPendingRuntimeActivity(void);
 extern char brsRewardFadeWaitPopupEntry[];
 extern char brsPrimaryRewardPopupEntry[];
@@ -310,7 +310,7 @@ s32 mnuDispatchProfileSelectionScene(dds3ProcessID_t *task) {
             if (btlHasPendingRuntimeActivity() != 0) {
                 return 0;
             }
-            brsStartPartyPanelResourcesOnce((s32)scene);
+            brsStartPartyPanelResourcesOnce(scene);
             mnuSetPopupEntryFlagged(dispatchStatus, brsPrimaryRewardPopupEntry);
             p2sdStopAllSe();
         }
