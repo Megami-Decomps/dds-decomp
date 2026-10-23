@@ -203,7 +203,7 @@ extern u32 D_004363D0;
 
 extern u32 D_004363D4;
 
-extern u32 D_00436380;
+extern struct sdfMemHandle_t *D_00436380;
 
 extern u32 D_00436384;
 
@@ -211,7 +211,7 @@ extern u32 fldDamEffectNode;
 
 extern u32 fldDamEffectPositioned;
 
-extern u32 D_00436390;
+extern struct sdfMemHandle_t *D_00436390;
 
 extern u32 D_00436394;
 
@@ -233,7 +233,7 @@ extern sdfTexHandle_t *D_00436368;
 
 extern sdfTexHandle_t *D_0043636C;
 
-extern u32 fldIndexedResourceHandle;
+extern struct sdfMemHandle_t *fldIndexedResourceHandle;
 
 extern u32 fldIndexedResourceData;
 
@@ -3115,7 +3115,7 @@ void fldLoadResourceByIndex(s32 index) {
     s32 ids[2];
 
     memcpy(ids, D_00436330, sizeof(ids));
-    fldIndexedResourceHandle = (u32)sdfDevLoadFileEx((const char *)(u32)ids[index], &fldIndexedResourceData, 0);
+    fldIndexedResourceHandle = sdfDevLoadFileEx((const char *)(u32)ids[index], &fldIndexedResourceData, 0);
     fldIndexedResourceEffect = (s32)dds3EffectLoad((EffNodeDescriptor *)fldIndexedResourceData);
 }
 
@@ -3123,8 +3123,8 @@ void fldReleaseIndexedResourceEffect(void) {
     if (fldIndexedResourceEffect != 0) {
         dds3EffectDelete((EffNode *)(u32)fldIndexedResourceEffect);
         fldIndexedResourceEffect = 0;
-        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)fldIndexedResourceHandle);
-        fldIndexedResourceHandle = 0;
+        sdfMemFreeDelayedDirect(fldIndexedResourceHandle);
+        fldIndexedResourceHandle = NULL;
         fldIndexedResourceData = 0;
     }
 }
@@ -4392,10 +4392,10 @@ void fldLoadWeatherEffects(void) {
     handle = sdfDevLoadFileEx("/fld/f/bin/d2_hunt3.tmx", &data, 0);
     D_004363B4 = sdfTexSet((SdfTextureFileHeader *)(data));
     sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)handle);
-    D_00436380 = (u32)sdfDevLoadFileEx("/fld/f/bin/FH_DAM_2.EPL", &D_00436384, 0);
+    D_00436380 = sdfDevLoadFileEx("/fld/f/bin/FH_DAM_2.EPL", &D_00436384, 0);
     fldDamEffectNode = (u32)effCreateNodeFromParameter(D_00436384);
     fldDamEffectPositioned = 0;
-    D_00436390 = (u32)sdfDevLoadFileEx("/fld/f/bin/YUK_2.EPL", &D_00436394, 0);
+    D_00436390 = sdfDevLoadFileEx("/fld/f/bin/YUK_2.EPL", &D_00436394, 0);
     fldYukEffectNode = (u32)effCreateNodeFromParameter(D_00436394);
     fldYukEffectPositioned = 0;
 }
@@ -4416,14 +4416,14 @@ void fldReleaseWeatherEffects(void) {
     dds3EffectDelete((EffNode *)(u32)fldDamEffectNode);
     fldDamEffectNode = 0;
     fldDamEffectPositioned = 0;
-    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)D_00436380);
-    D_00436380 = 0;
+    sdfMemFreeDelayedDirect(D_00436380);
+    D_00436380 = NULL;
     D_00436384 = 0;
     dds3EffectDelete((EffNode *)(u32)fldYukEffectNode);
     fldYukEffectNode = 0;
     fldYukEffectPositioned = 0;
-    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)D_00436390);
-    D_00436390 = 0;
+    sdfMemFreeDelayedDirect(D_00436390);
+    D_00436390 = NULL;
     D_00436394 = 0;
 }
 
@@ -6965,7 +6965,7 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", D_0043631C);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", fldTakaraCount);
 
-INCLUDE_SDATA(const s32, "game/code_001442D0", fldIndexedResourceHandle);
+INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_001442D0", fldIndexedResourceHandle);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", fldIndexedResourceData);
 
@@ -7009,7 +7009,7 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436378);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_0043637C);
 
-INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436380);
+INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_001442D0", D_00436380);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436384);
 
@@ -7017,7 +7017,7 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", fldDamEffectNode);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", fldDamEffectPositioned);
 
-INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436390);
+INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_001442D0", D_00436390);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436394);
 

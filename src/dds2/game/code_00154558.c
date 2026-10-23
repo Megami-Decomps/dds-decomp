@@ -27,6 +27,7 @@ extern void fldApplyCurrentTaskScene(const char *name);
 extern scrProcessWork_s *scrSetIntReturnValue(s32 retVal);
 
 struct evtUnitHandle_t;
+struct sdfMemHandle_t;
 
 struct sdfTexHandle_t;
 
@@ -91,7 +92,7 @@ extern u32 D_004363D0;
 
 extern u32 D_004363D4;
 
-extern u32 D_00436380;
+extern struct sdfMemHandle_t *D_00436380;
 
 extern u32 D_00436384;
 
@@ -99,7 +100,7 @@ extern u32 fldDamEffectNode;
 
 extern u32 fldDamEffectPositioned;
 
-extern u32 D_00436390;
+extern struct sdfMemHandle_t *D_00436390;
 
 extern u32 D_00436394;
 
@@ -121,7 +122,7 @@ extern struct sdfTexHandle_t *D_00436368;
 
 extern struct sdfTexHandle_t *D_0043636C;
 
-extern u32 fldIndexedResourceHandle;
+extern struct sdfMemHandle_t *fldIndexedResourceHandle;
 
 extern u32 fldIndexedResourceData;
 
@@ -1916,4 +1917,3 @@ INCLUDE_SDATA(const s32, "game/code_00154558", fldRoomNameSentinel);
 INCLUDE_SDATA(const s32, "game/code_00154558", D_004363F0);
 
 INCLUDE_SDATA(const s32, "game/code_00154558", D_004363F8);
-
