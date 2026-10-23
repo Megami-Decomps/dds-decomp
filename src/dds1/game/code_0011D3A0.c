@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "fld_area_work.h"
+#include "fld_runtime_reset_api.h"
 #include "fld_npc_motion.h"
 #include "sdf_packet_list.h"
 #include "ee_mmi.h"
@@ -1642,7 +1643,7 @@ void fldResetFieldMapState(void) {
 #include "fld_vr_reset_view.h"
 
 extern u32 fldRunDanteGunFlag[];
-void fldResetFieldRuntimeState(s32 mode) {
+void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     FldAreaWork *area = &fldGlobalBase;
     s32 i;
 
@@ -1744,7 +1745,7 @@ void fldResetFieldRuntimeState(s32 mode) {
     fldRunDanteGunFlag[19] = 1;
     fldRunDanteGunFlag[20] = 0;
     fldRunDanteGunFlag[21] = 0;
-    if (mode == 0) {
+    if (mode == FLD_RUNTIME_RESET_CLEAR_MAP_STATE) {
         fldResetFieldMapState();
         DDS3_GBWK->vr.previewX = 0;
         DDS3_GBWK->vr.previewY = 0;

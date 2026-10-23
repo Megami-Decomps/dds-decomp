@@ -2,6 +2,7 @@
 #include "scr.h"
 #include "mdl_motion_api.h"
 #include "fld_area_work.h"
+#include "fld_runtime_reset_api.h"
 #include "fld_area_encounter_table.h"
 #include "sdf_packet_list.h"
 #include "ee_mmi.h"
@@ -583,8 +584,6 @@ void fldPrepareDeferredSceneTransition(void) {
     }
 }
 
-extern void fldResetFieldRuntimeState(s32);
-
 extern char D_003BAB68[];
 
 void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char *name);
@@ -599,7 +598,7 @@ void fldMainLoadStart(void) {
         fldPrepareDeferredSceneTransition();
         return;
     }
-    fldResetFieldRuntimeState(1);
+    fldResetFieldRuntimeState(FLD_RUNTIME_RESET_PRESERVE_MAP_STATE);
     fldRunDanteGunFlag[0x4C / 4] = 0;
     fldRunDanteGunFlag[0x44 / 4] = 1;
     evtBitOn(0xC0F);

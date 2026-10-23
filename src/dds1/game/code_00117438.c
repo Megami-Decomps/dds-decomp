@@ -22,6 +22,7 @@
 #include "sdf.h"
 #include "sdf_dev_state.h"
 #include "kwln_task_lifecycle.h"
+#include "fld_runtime_reset_api.h"
 #include "mdl_flag_api.h"
 
 extern void scrDestroyWorkTask(void);
@@ -51,7 +52,6 @@ extern void ptyClearProfileRecords(void);
 extern void ptyRebuildAllProfiles(void);
 extern void evtUpdateFlaggedEntries(void);
 extern void dds3ForEachEntry(void);
-extern void fldResetFieldRuntimeState(s32 mode);
 extern void sdfSaveResetSnapshot(void);
 extern void sdfRestoreResetSnapshot(void);
 
@@ -216,7 +216,7 @@ void evtResetWorldAndProfileRuntime(void) {
     evtInitGlobalWork();
     DDS3_GBWK->world.updateMode = 8;
     ptyInitRuntime();
-    fldResetFieldRuntimeState(0);
+    fldResetFieldRuntimeState(FLD_RUNTIME_RESET_CLEAR_MAP_STATE);
     ptyClearProfileRecords();
     ptyRebuildAllProfiles();
     evtUpdateFlaggedEntries();
@@ -383,7 +383,7 @@ void sdfResetGameRuntime(s32 fullReset) {
     DDS3_GBWK->world.updateMode = 8;
     ptyInitRuntime();
     evtBitOff(0xC0E);
-    fldResetFieldRuntimeState(0);
+    fldResetFieldRuntimeState(FLD_RUNTIME_RESET_CLEAR_MAP_STATE);
     ptyClearProfileRecords();
     ptyRebuildAllProfiles();
     evtUpdateFlaggedEntries();

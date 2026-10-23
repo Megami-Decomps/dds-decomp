@@ -22,6 +22,7 @@
 #include "evt_randomize_entry_api.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
+#include "fld_runtime_reset_api.h"
 #include "mdl_flag_api.h"
 
 extern BfFlw0Header *D_00435E80;
@@ -218,7 +219,6 @@ s32 sdfBumpTickCounters(dds3ProcessID_t *task) {
 }
 
 extern void btlClearSharedBattleStateWords(void);
-extern void fldResetFieldRuntimeState(s32 mode);
 extern void mtrLoadMantraNodePositions(void);
 extern void ptyInitRuntime(void);
 
@@ -227,7 +227,7 @@ void evtResetWorldAndProfileRuntime(void) {
     evtInitGlobalWork();
     DDS3_GBWK->world.updateMode = 8;
     ptyInitRuntime();
-    fldResetFieldRuntimeState(0);
+    fldResetFieldRuntimeState(FLD_RUNTIME_RESET_CLEAR_MAP_STATE);
     ptyClearProfileRecords();
     mtrLoadMantraNodePositions();
     ptyRebuildAllProfiles();
@@ -386,7 +386,7 @@ void sdfResetGameRuntime(s32 fullReset) {
     ptyInitRuntime();
     evtBitOff(0xC0E);
     evtBitOn(0x801);
-    fldResetFieldRuntimeState(0);
+    fldResetFieldRuntimeState(FLD_RUNTIME_RESET_CLEAR_MAP_STATE);
     ptyClearProfileRecords();
     ptyRebuildAllProfiles();
     evtUpdateFlaggedEntries();
