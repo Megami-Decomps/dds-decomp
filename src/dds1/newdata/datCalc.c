@@ -11,6 +11,7 @@
 #include "pty_roster_api.h"
 #include "dat_unit_has_skill_api.h"
 #include "pty_item_quantity_update_view.h"
+#include "eff_random_mod.h"
 
 #define DAT_EXTERNAL_SKILL_TABLE 0x20
 #define DAT_INLINE_SKILL_COUNT 0x18
@@ -431,7 +432,6 @@ extern s32 btlAverageAllMaximumForMask(u32 partyRecordFlagsMask);
 extern s32 btlAverageAllCurrentForMask(u32 partyRecordFlagsMask);
 extern s32 btlAverageAllLevelsForMask(u32 actorMask);
 extern void evtBitOn(s32 flagIndex);
-extern s32 dds3GetRandIntA(u32 stream, u32 modulus);
 
 /* Flag-range items set their model flag regardless of quantityDelta.
  * Other items add the delta to their byte quantity and clamp it. */
@@ -1245,7 +1245,6 @@ void evtRandomizeEntryValue(datUnitWork_t *entry) {
 }
 
 
-extern s32 dds3GetRandIntA(u32 stream, u32 modulus);
 
 /* Clear a subset of per-unit status flags on occupied qualifying entries,
  * gated by the event RNG; report whether any flags were cleared. */

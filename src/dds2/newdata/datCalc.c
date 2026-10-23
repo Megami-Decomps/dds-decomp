@@ -12,6 +12,7 @@
 #include "pty_roster_api.h"
 #include "dat_unit_has_skill_api.h"
 #include "pty_item_quantity_update_view.h"
+#include "eff_random_mod.h"
 #include "btl.h"
 #include "scr_integer_return_value_api.h"
 /* Declared before first use (were implicit int). */
@@ -480,7 +481,6 @@ extern EvtScriptContext evtWorkScriptContext;
 
 extern void scrSetFloatReturnValue(f32 value);
 
-extern u32 dds3GetRandIntA(void *stream, u32 modulus);
 
 
 
