@@ -189,15 +189,15 @@ s32 mnuExitStaffImageAndSelectionLabel(dds3ProcessID_t *task) {
     return menuRunPanel((void *)context, 2, (void *)task);
 }
 
-s32 mnuHandleSecondaryStaffObjectInput(s32 task) {
-    StaffImageContext *context = (StaffImageContext *)dds3GetProcessData((dds3ProcessID_t *)task);
+s32 mnuHandleSecondaryStaffObjectInput(dds3ProcessID_t *task) {
+    StaffImageContext *context = (StaffImageContext *)dds3GetProcessData(task);
     s32 *popup = &context->popupState;
     StaffImageChoices *menu = context->menu;
     s32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 state;
     MenuWindowContainer *window;
 
-    state = menuRunPanel(context, 0, (void *)task);
+    state = menuRunPanel(context, 0, task);
     if (state != 0) {
         return state;
     }
