@@ -2578,7 +2578,7 @@ void fldSetDeferredFieldCommand(u32 command, u32 parameter) {
     fldDeferredCommandParameter = parameter;
 }
 
-extern s32 dds3AdminiGetPrevHistoryFlag(void);
+extern u32 dds3AdminiGetPrevHistoryFlag(void);
 
 extern s32 fldStartDeferredActorTransition(s32, u32);
 
