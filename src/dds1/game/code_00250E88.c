@@ -54,6 +54,23 @@
 
 #define MNU_REQUIREMENT_MIN_COUNT 2
 
+enum MnuMantraScenePhase {
+    MNU_MANTRA_PHASE_INITIALIZE = 0,
+    MNU_MANTRA_PHASE_WAIT_INITIAL_SHADE = 1,
+    MNU_MANTRA_PHASE_DELAYED_TASK_DEACTIVATION = 2,
+    MNU_MANTRA_PHASE_ACTIVE = 3,
+    MNU_MANTRA_PHASE_FADE_THEN_ATTACH_TASK_A = 4,
+    MNU_MANTRA_PHASE_FADE_THEN_ATTACH_TASK_B = 5,
+    MNU_MANTRA_PHASE_WAIT_ENTRY_MESSAGE = 6,
+    MNU_MANTRA_PHASE_FADE_OUT_RESOURCE_ANIMATION = 7,
+    MNU_MANTRA_PHASE_RESET_RESOURCE_ANIMATION = 8,
+    MNU_MANTRA_PHASE_WAIT_TASK_A_SHADE = 9,
+    MNU_MANTRA_PHASE_START_PENDING_MESSAGE = 10,
+    MNU_MANTRA_PHASE_WAIT_PENDING_MESSAGE = 11,
+    MNU_MANTRA_PHASE_APPLY_PENDING_SELECTION = 12,
+    MNU_MANTRA_PHASE_WAIT_TASK_B_SHADE = 13
+};
+
 
 extern s8 scrGetSelectedOperandIndex(struct datUnitWork_t *);
 
@@ -796,12 +813,12 @@ void mnuHandleMantraGridInput(MenuSceneWork *work) {
                 feedback = 3;
             } else {
                 feedback = 2;
-                work->scenePhase = 4;
+                work->scenePhase = MNU_MANTRA_PHASE_FADE_THEN_ATTACH_TASK_A;
             }
         }
     } else if (dds3PadButtonState[0x23] < 0 && work->transitionBlendCounter == 0) {
         feedback = 3;
-        work->scenePhase = 2;
+        work->scenePhase = MNU_MANTRA_PHASE_DELAYED_TASK_DEACTIVATION;
     } else if (dds3PadButtonState[0x28] < 0) {
         feedback = 4;
         mnuBeginTransition(work, 1);
@@ -810,7 +827,7 @@ void mnuHandleMantraGridInput(MenuSceneWork *work) {
         mnuBeginTransition(work, 2);
     } else if (dds3PadButtonState[0x20] < 0 && work->transitionBlendCounter == 0) {
         feedback = 2;
-        work->scenePhase = 5;
+        work->scenePhase = MNU_MANTRA_PHASE_FADE_THEN_ATTACH_TASK_B;
     }
     switch (feedback) {
     case 1:
@@ -1120,7 +1137,7 @@ MenuSceneWork *mnuCreateSceneWork(void) {
     memset(sceneWork, 0, MNU_SCENE_WORK_SIZE);
     ((MenuSceneWork *)sceneWork)->allocation = allocation;
     mnuInitializeMantraSelectionGrid((MenuSceneWork *)sceneWork);
-    ((MenuSceneWork *)sceneWork)->scenePhase = 0;
+    ((MenuSceneWork *)sceneWork)->scenePhase = MNU_MANTRA_PHASE_INITIALIZE;
     ((MenuSceneWork *)sceneWork)->phaseFrame = 0;
     ((MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY))->displayedCurrency = DDS3_GBWK->header.currency;
     mnuCopySceneCoordinates((MenuSceneWork *)sceneWork);
@@ -1164,12 +1181,12 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
     metadata = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext,
                                                        SDF_TASK_VALUE_USER_DATA_KEY);
     switch (work->scenePhase) {
-    case 0:
+    case MNU_MANTRA_PHASE_INITIALIZE:
         evtStageTestInit(0);
         work->unk52C = mnuScheduleUnlockedMantraMessages(work);
-        work->scenePhase = 1;
+        work->scenePhase = MNU_MANTRA_PHASE_WAIT_INITIAL_SHADE;
         return 0;
-    case 12:
+    case MNU_MANTRA_PHASE_APPLY_PENDING_SELECTION:
         work->phaseFrame++;
         if (work->phaseFrame >= 6) {
             sdfGridSelectFilledCell(work->gridHandle, work->pendingGridColumn,
@@ -1183,7 +1200,7 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
             work->cursorPosition.y = y;
             if (work->pendingPhase13) {
                 work->pendingPhase13 = 0;
-                work->scenePhase = 13;
+                work->scenePhase = MNU_MANTRA_PHASE_WAIT_TASK_B_SHADE;
                 work->phaseFrame = 0;
                 sdfAttachTaskItem(mnuSceneResourceContext, &D_0036C684);
                 sdfSetTaskItemMode(mnuSceneResourceContext, 1,
@@ -1191,34 +1208,34 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
                 return 0;
             } else {
                 work->phaseFrame = 0;
-                work->scenePhase = 1;
+                work->scenePhase = MNU_MANTRA_PHASE_WAIT_INITIAL_SHADE;
             }
         }
         break;
-    case 10:
+    case MNU_MANTRA_PHASE_START_PENDING_MESSAGE:
         fclDestroyMessage();
         fclInitMessage(metadata->entryMessageWindowResource);
         if (mnuDisplayNextPendingMantra((s32)work)) {
             fclDestroyMessage();
             work->phaseFrame = 0;
             work->unk52C = 0;
-            work->scenePhase = 12;
+            work->scenePhase = MNU_MANTRA_PHASE_APPLY_PENDING_SELECTION;
             return 0;
         } else {
-            work->scenePhase = 11;
+            work->scenePhase = MNU_MANTRA_PHASE_WAIT_PENDING_MESSAGE;
         }
         break;
-    case 11:
+    case MNU_MANTRA_PHASE_WAIT_PENDING_MESSAGE:
         if (work->phaseFrame < 10) {
             work->phaseFrame++;
         }
         mnuUpdateMantraSelectionPositions(work, 0);
         if (fclChkMessage() == 0) {
-            work->scenePhase = 10;
+            work->scenePhase = MNU_MANTRA_PHASE_START_PENDING_MESSAGE;
             evtFinishMessageWindowAndNotify();
         }
         return 0;
-    case 2:
+    case MNU_MANTRA_PHASE_DELAYED_TASK_DEACTIVATION:
         work->phaseFrame++;
         if (work->phaseFrame >= 10) {
             sdfSetTaskItemMode(mnuSceneResourceContext, 0,
@@ -1226,36 +1243,36 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
             return -1;
         }
         break;
-    case 4:
+    case MNU_MANTRA_PHASE_FADE_THEN_ATTACH_TASK_A:
         work->phaseFrame++;
         if (work->phaseFrame > MNU_SCENE_SHADE_FRAME_LIMIT) {
             work->phaseFrame = 0;
-            work->scenePhase = 9;
+            work->scenePhase = MNU_MANTRA_PHASE_WAIT_TASK_A_SHADE;
             sdfAttachTaskItem(mnuSceneResourceContext, &D_0036C670);
             sdfSetTaskItemMode(mnuSceneResourceContext, 1,
                                SDF_TASK_ITEM_MODE_SUSPENDED);
         }
         return 0;
-    case 5:
+    case MNU_MANTRA_PHASE_FADE_THEN_ATTACH_TASK_B:
         work->phaseFrame++;
         if (work->phaseFrame > MNU_SCENE_SHADE_FRAME_LIMIT) {
             work->phaseFrame = 0;
-            work->scenePhase = 13;
+            work->scenePhase = MNU_MANTRA_PHASE_WAIT_TASK_B_SHADE;
             sdfAttachTaskItem(mnuSceneResourceContext, &D_0036C684);
             sdfSetTaskItemMode(mnuSceneResourceContext, 1,
                                SDF_TASK_ITEM_MODE_SUSPENDED);
         }
         return 0;
-    case 1:
-    case 9:
-    case 13:
+    case MNU_MANTRA_PHASE_WAIT_INITIAL_SHADE:
+    case MNU_MANTRA_PHASE_WAIT_TASK_A_SHADE:
+    case MNU_MANTRA_PHASE_WAIT_TASK_B_SHADE:
         work->phaseFrame++;
         if (work->phaseFrame > MNU_SCENE_SHADE_FRAME_LIMIT) {
             work->phaseFrame = 0;
-            work->scenePhase = 3;
+            work->scenePhase = MNU_MANTRA_PHASE_ACTIVE;
         }
         break;
-    case 6:
+    case MNU_MANTRA_PHASE_WAIT_ENTRY_MESSAGE:
         if (fclChkMessage() == 0) {
             if (work->entryMessageInProgress == 0) {
                 fclDestroyMessage();
@@ -1263,30 +1280,30 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
                 fclStartMessage(0);
                 work->entryMessageInProgress = 1;
             } else {
-                work->scenePhase = 3;
+                work->scenePhase = MNU_MANTRA_PHASE_ACTIVE;
                 evtFinishMessageWindowAndNotify();
                 work->entryMessageInProgress = 0;
             }
         }
         return 0;
-    case 7:
+    case MNU_MANTRA_PHASE_FADE_OUT_RESOURCE_ANIMATION:
         blend = work->transitionBlendCounter;
         if (blend > 0) {
             blend = --work->transitionBlendCounter;
         } else {
-            work->scenePhase = 3;
+            work->scenePhase = MNU_MANTRA_PHASE_ACTIVE;
         }
         if (blend != 5) {
             break;
         }
         mnuStopResourceAnimation();
         goto reinitializeScene;
-    case 8:
+    case MNU_MANTRA_PHASE_RESET_RESOURCE_ANIMATION:
         blend = work->transitionBlendCounter;
         if (blend > 0) {
             blend = --work->transitionBlendCounter;
         } else {
-            work->scenePhase = 3;
+            work->scenePhase = MNU_MANTRA_PHASE_ACTIVE;
         }
         if (blend != 5) {
             break;
@@ -1296,9 +1313,9 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
     reinitializeScene:
         mnuReinitializeSceneGrid((s32)work);
         return 0;
-    case 3:
+    case MNU_MANTRA_PHASE_ACTIVE:
         if (work->unk52C) {
-            work->scenePhase = 10;
+            work->scenePhase = MNU_MANTRA_PHASE_START_PENDING_MESSAGE;
         }
         if (work->transitionBlendCounter > 0) {
             work->transitionBlendCounter--;
@@ -1958,7 +1975,7 @@ s32 mnuHandleMantraSceneInput(void) {
             host->phase = 2;
             host->frame = 0;
             work->pendingPhase13 = 1;
-            work->scenePhase = 10;
+            work->scenePhase = MNU_MANTRA_PHASE_START_PENDING_MESSAGE;
             return 0;
         }
         if (work->transitionBlendCounter > 0) {
