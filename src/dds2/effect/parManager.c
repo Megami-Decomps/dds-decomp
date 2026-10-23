@@ -10,6 +10,7 @@
 #include "par_object.h"
 #include "par_history.h"
 #include "sdf_quaternion.h"
+#include "eff_matrix4.h"
 
 #include "ee_mmi.h"
 
@@ -760,7 +761,7 @@ void dds3ParticleSetPosition(void *destination, void *source) {
 }
 
 /* vu0 routine: compose the supplied matrix with the emitter's source matrix. */
-void dds3ParticleSetRotateMatrix(ParObj *effect, void *matrix) {
+void dds3ParticleSetRotateMatrix(ParObj *effect, const Matrix4 *matrix) {
     VU0_LOAD_MATRIX(matrix);
     VU0_LOAD_MATRIX_B(effect->sourceMatrix);
     sdfComposeVuMatrixFromRegisters();

@@ -23,6 +23,7 @@
 #include "par_object_client_view.h"
 #include "eff.h"
 #include "eff_track_poly_list.h"
+#include "eff_matrix4.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -275,9 +276,9 @@ void dds3ParticleExpSetPosition(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-extern void dds3ParticleSetRotateMatrix(ParObj *effect, void *matrix);
+extern void dds3ParticleSetRotateMatrix(ParObj *effect, const Matrix4 *matrix);
 
-void dds3ParticleExpSetRotateMatrix(ParObj *effect, void *matrix) {
+void dds3ParticleExpSetRotateMatrix(ParObj *effect, const Matrix4 *matrix) {
     dds3ParticleSetRotateMatrix(effect, matrix);
 }
 
@@ -1781,4 +1782,3 @@ ParEmitDesc *dds3SpPoly_Ring_Old_Create(ParEmitDesc *src) {
 INCLUDE_SDATA(const s32, "game/code_0015A758", hDrawListTop);
 
 INCLUDE_SDATA(const s32, "game/code_0015A758", D_003BB014);
-
