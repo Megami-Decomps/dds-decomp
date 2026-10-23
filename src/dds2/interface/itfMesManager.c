@@ -94,7 +94,7 @@ extern void DrawMsgMng_Shutdown(dds3ProcessID_t *task);
 
 extern s32 DrawMsgMng_Process(dds3ProcessID_t *task);
 
-void SetVar();
+void SetVar(instanceMes_tag *mes, s32 slotIndex, const char *source, s32 byteCount);
 
 extern void frFontCenterGlyphChainAt(s32 x, s32 y, _FRQ *glyphChain);
 
@@ -825,12 +825,12 @@ void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 select
 
 /* Replace a text slot with a copied NUL-terminated encoded string. */
 void itfMesMngSetVarImmediate(s32 window, u32 slotIndex, const char *sourceText) {
-    SetVar((u32)pinst[window].mes, slotIndex, sourceText, 0);
+    SetVar(pinst[window].mes, slotIndex, sourceText, 0);
 }
 
 /* Copy text into one of the window's message text slots. */
 void itfMesMngSetVarImmediate2(s32 window, s32 slotIndex, const char *source, s32 byteCount) {
-    SetVar((u32)pinst[window].mes, slotIndex, source, byteCount);
+    SetVar(pinst[window].mes, slotIndex, source, byteCount);
 }
 
 /* Install/relocate a message resource and cache MSG1's trailing-entry word as
