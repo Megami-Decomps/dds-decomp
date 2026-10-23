@@ -235,11 +235,11 @@ void mnuDrawCampItemListRow(s32 x, s32 y, s32 z, struct MenuList *list, struct M
         break;
     }
     if (node == list->cursor) {
-        context->unk08++;
-        if (context->unk08 > 60) {
-            context->unk08 = 0;
+        context->cursorPulseTicks++;
+        if (context->cursorPulseTicks > 60) {
+            context->cursorPulseTicks = 0;
         }
-        pulse = sdfSin((f32)context->unk08 / 60.0f * 3.1415926f) * fade;
+        pulse = sdfSin((f32)context->cursorPulseTicks / 60.0f * 3.1415926f) * fade;
         index = list->cursor->index;
         row = index - first;
         effDrawSpriteWithCornerFade(0x3D0, (row * 21 + 0x98) << 3, 0, (u32)(fade * 256.0f), 0, layer, 0x20, mode);

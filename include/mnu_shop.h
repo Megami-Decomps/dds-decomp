@@ -164,7 +164,7 @@ void mnuForwardDupArg(MenuWindowContainer *window,
 typedef struct MnuShopListContext {
     s32 countdown;
     s32 mode;
-    s32 unk08;
+    s32 cursorPulseTicks;
     u16 extraOption;
     s16 pendingSelection;
 } MnuShopListContext;
