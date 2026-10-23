@@ -572,7 +572,7 @@ extern u32 sdf2DMakeStdPacket(u32, s32);
 
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 
-extern s32 sdf2DGetPrimPtr(s32);
+extern u8 *sdf2DGetPrimPtr(s32);
 
 extern s32 D_0032E3C0[];
 

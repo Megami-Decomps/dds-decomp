@@ -1214,7 +1214,7 @@ void itfMiscMoveFontPosition(_FRQ *entry, u32 xOffset, u32 yOffset) {
 
 #include "sdf_packet_alloc.h"
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
-extern s32 sdf2DGetPrimPtr(s32);
+extern u8 *sdf2DGetPrimPtr(s32);
 extern u32 sdf2DMakeStdPacket(u32, s32);
 extern u64 D_00357998[];
 

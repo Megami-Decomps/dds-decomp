@@ -369,7 +369,7 @@ s32 kwlnBuildFrameScenePackets(dds3ProcessID_t *task) {
 }
 
 
-extern s32 sdf2DGetPrimPtr(s32);
+extern u8 *sdf2DGetPrimPtr(s32);
 extern void dds3DrawDistRipOverError(void);
 extern void kwlnStepBackgroundFade(void);
 extern void kwlnDrawBackgroundFadeBands(void);

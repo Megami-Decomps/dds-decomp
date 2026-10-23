@@ -209,7 +209,7 @@ void itfDrawGridOverlayPacket(GridDrawWork *work, u8 *data, sdfDrawTag_t *contex
 extern SdfPoolNode sdfGrOtTable[];
 
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
-extern s32 sdf2DGetPrimPtr(s32 packet);
+extern u8 *sdf2DGetPrimPtr(s32 packet);
 
 
 

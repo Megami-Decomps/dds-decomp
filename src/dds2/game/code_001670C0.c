@@ -20,7 +20,7 @@
 #include "eff_offset_triangle.h"
 #include "eff_packet_params.h"
 
-extern s32 sdf2DGetPrimPtr(s32 packetAddress);
+extern u8 *sdf2DGetPrimPtr(s32 packetAddress);
 extern sdfTexHandle_t *dds3GetRenderTexture(void);
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern SdfPoolNode D_0037FB88;

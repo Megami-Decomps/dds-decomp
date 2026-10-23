@@ -56,7 +56,7 @@ extern void frSetWhiteSpaceW(s32 slotId, s32 entryFlag);
 
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 #include "sdf_packet_alloc.h"
-extern s32 sdf2DGetPrimPtr(s32);
+extern u8 *sdf2DGetPrimPtr(s32);
 
 extern u8 *datSkillMessages;
 extern u8 *datItemMessages;

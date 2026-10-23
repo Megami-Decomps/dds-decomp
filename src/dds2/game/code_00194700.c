@@ -17,7 +17,7 @@ extern s8 D_0040B7DB[];
 extern SdfPoolNode sdfGrOtTable[];
 #include "sdf_packet_alloc.h"
 #include "sdf_bordered_rectangle_packet.h"
-extern s32 sdf2DGetPrimPtr(s32 packetAddress);
+extern u8 *sdf2DGetPrimPtr(s32 packetAddress);
 extern s8 D_0043643D;
 
 #include "eff.h"
