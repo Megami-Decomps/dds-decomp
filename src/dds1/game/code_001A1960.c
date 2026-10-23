@@ -478,9 +478,10 @@ s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element) {
 extern s32 datGetEffectiveAffinity(datUnitWork_t *, s32);
 
 s32 btlResolveUnitValueWithOverride(datUnitWork_t *record, s32 value) {
-    s32 (*handler)(s32, s32) = *(s32 (**)(s32, s32))((u8 *)btlGetRuntime() + 0x670);
+    s32 (*handler)(datUnitWork_t *, s32) =
+        *(s32 (**)(datUnitWork_t *, s32))((u8 *)btlGetRuntime() + 0x670);
     if (handler != 0) {
-        s32 result = handler((s32)record, value);
+        s32 result = handler(record, value);
         if (result != -1) {
             return result;
         }
