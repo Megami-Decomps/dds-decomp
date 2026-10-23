@@ -90,7 +90,7 @@ extern void evtSubmitPrimaryGsTest();
 
 extern void evtSubmitPrimaryAlphaBlendMode();
 
-extern u32 fldItemBoxObjBuf;
+extern FldWallMeshRecord *fldItemBoxObjBuf;
 
 extern FldValueRecord *fldMatterTable;
 
