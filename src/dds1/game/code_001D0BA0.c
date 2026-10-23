@@ -3043,7 +3043,7 @@ s32 btlSampleActorModelPositionVU(BtlUnit *unit, s32 value) {
 
 extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *, s32);
 
-s32 btlSetActorAlternateEffectParameter(object, value)
+s8 btlSetActorAlternateEffectParameter(object, value)
 BtlUnit *object;
 s32 value;
 {
