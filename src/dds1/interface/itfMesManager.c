@@ -73,7 +73,7 @@ void ChangeZBuffer(_FRQ *glyph, s32 renderValue);
 _FRQ *GetLastLinkFontHandle(_FRQ *glyph);
 
 
-void CommitVarTable(s32 *table);
+void CommitVarTable(u8 **table);
 
 s32 GetMessageWidth(_FRQ *glyph);
 
@@ -389,7 +389,7 @@ s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex) {
     if (table->count == 0) {
         return 0;
     }
-    CommitVarTable((s32 *)mes->textSlots.addresses);
+    CommitVarTable(mes->textSlots.addresses);
     if (mes->temporaryFontEntry != 0) {
         frSetExtDic(mes->temporaryFontEntry);
     }
@@ -534,7 +534,7 @@ void itfMesBuildOptionList(s32 window, s32 entryIndex) {
     table = entry->table;
     visibleRowCount = GetNumSelectItem(table->bitCount, optionBlock->panelValue);
     firstRowY = optionBlock->y - ((visibleRowCount - 1) * ITF_MES_OPTION_ROW_SPACING << ITF_MES_TEXT_Y_SHIFT);
-    CommitVarTable((s32 *)mes->textSlots.addresses);
+    CommitVarTable(mes->textSlots.addresses);
     if (mes->temporaryFontEntry != 0) {
         frSetExtDic(mes->temporaryFontEntry);
     }
@@ -725,7 +725,7 @@ s16 itfMesMngGetMesCurrentPage(s32 window) {
 
 /* Return the replacement text stored in a window slot. */
 u8 *itfMesMngGetVar(s32 window, s32 slotIndex) {
-    return (u8 *)pinst[window].mes->textSlots.addresses[slotIndex];
+    return pinst[window].mes->textSlots.addresses[slotIndex];
 }
 
 extern u8 *D_003BAA70;
@@ -923,7 +923,7 @@ s32 itfMesMngGetWidth(s32 window, s32 entryIndex, s32 itemIndex) {
     if (table->count == 0) {
         return 0;
     }
-    CommitVarTable((s32 *)mes->textSlots.addresses);
+    CommitVarTable(mes->textSlots.addresses);
     if (mes->temporaryFontEntry != 0) {
         frSetExtDic(mes->temporaryFontEntry);
     }
@@ -1258,7 +1258,7 @@ void SetVar(mes, slotIndex, source, byteCount)
     s32 byteCount;
 {
     ItfMesTextSlots *slots = &mes->textSlots;
-    u32 *textAddress = &slots->addresses[slotIndex];
+    u8 **textAddress = &slots->addresses[slotIndex];
     s32 allocationBytes;
 
     if (*textAddress != 0) {
@@ -1268,23 +1268,23 @@ void SetVar(mes, slotIndex, source, byteCount)
     if (byteCount <= 0) {
         allocationBytes = (strlen(source) + ITF_MES_STRING_COPY_ROUND_BIAS) & ~ITF_MES_COPY_ALIGN_MASK;
         slots->handles[slotIndex] = sdfMemAllocDirect(allocationBytes);
-        *textAddress = sdfMemLock(slots->handles[slotIndex]);
+        *textAddress = (u8 *)sdfMemLock(slots->handles[slotIndex]);
         /* String mode copies the padded span, rather than only strlen + 1. */
-        memcpy((void *)*textAddress, source, allocationBytes);
+        memcpy(*textAddress, source, allocationBytes);
         return;
     }
     allocationBytes = (byteCount + ITF_MES_BINARY_COPY_ROUND_BIAS) & ~ITF_MES_COPY_ALIGN_MASK;
     slots->handles[slotIndex] = sdfMemAllocDirect(allocationBytes);
-    *textAddress = sdfMemLock(slots->handles[slotIndex]);
-    memset((void *)*textAddress, 0, allocationBytes);
-    memcpy((void *)*textAddress, source, byteCount);
+    *textAddress = (u8 *)sdfMemLock(slots->handles[slotIndex]);
+    memset(*textAddress, 0, allocationBytes);
+    memcpy(*textAddress, source, byteCount);
 }
 
 /* Install all replacement-text addresses into the font's fixed slot table. */
-void CommitVarTable(s32 *table) {
+void CommitVarTable(u8 **table) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < ITF_MES_TEXT_SLOT_COUNT; slotIndex++) {
-        frSetVariableRequest(slotIndex, table[slotIndex]);
+        frSetVariableRequest(slotIndex, (s32)table[slotIndex]);
     }
 }
 
@@ -1548,4 +1548,3 @@ INCLUDE_SDATA(const s32, "interface/itfMesManager", D_003BB218);
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_003BB220);
 
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_003BB228);
-

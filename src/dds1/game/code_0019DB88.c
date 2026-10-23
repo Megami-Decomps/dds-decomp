@@ -22,7 +22,7 @@
 #include "sdf.h"
 /* Declared before first use (were implicit int). */
 extern void itfMesBuildEntryGlyph(instanceMes_tag *mes);
-extern void CommitVarTable(s32 *table);
+extern void CommitVarTable(u8 **table);
 #include "sdf_debug_api.h"
 extern ItfMesGlobals itfMesMngManager;
 
@@ -159,7 +159,7 @@ void itfResetWindowResourceBlock(ItfMesBlkA4 *block) {
 
 void InitializeVariable(ItfMesTextSlots *slots) {
     s32 remaining;
-    u32 *cursor;
+    u8 **cursor;
 
     cursor = &slots->addresses[31];
     remaining = 0x1f;
@@ -383,7 +383,7 @@ void itfMesAdvanceEntryText(instanceMes_tag *mes) {
             entryBlock->textState = -1;
             return;
         }
-        CommitVarTable((s32 *)mes->textSlots.addresses);
+        CommitVarTable(mes->textSlots.addresses);
         if (mes->temporaryFontEntry != 0) {
             frSetExtDic(mes->temporaryFontEntry);
         }
@@ -1344,4 +1344,3 @@ INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB2A0);
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB2A8);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB2B0);
-
