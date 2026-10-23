@@ -7081,7 +7081,7 @@ extern u8 btlHasRequiredActorStatusBits(BtlUnit *node);
 
 extern const char *btlCommandPanelTaskNameRef;
 extern void btlClearClosingActorRowPulses(BattleActorPanelWork *, s8);
-extern void btlUpdateActorSlotStates(u8 *, s8);
+extern void btlUpdateActorSlotStates(BattleActorPanelWork *, s8);
 extern void btlSyncActorPanelCommandGroups(ActionStateLink *, BattleActorPanelWork *, s8);
 
 /* Set the action actor's panel state/value and apply mode-selected group updates. */
@@ -7118,7 +7118,7 @@ void btlSetActionActorPanelPresentation(ActionStateLink *actor, s8 mode, s8 valu
     }
     work = (BattleActorPanelWork *)dds3GetProcessData(task);
     btlClearClosingActorRowPulses(work, mode);
-    btlUpdateActorSlotStates((u8 *)work, 0);
+    btlUpdateActorSlotStates(work, 0);
     work->activeEntries[slot].presentation.presentationState = 2;
     work->activeEntries[slot].presentation.presentationValue = value;
     if (mode == 0) {
@@ -7291,8 +7291,8 @@ void btlClearFinishedActorSlotChannels(BattleActorPanelWork *work, s8 mode) {
     } while (--remaining >= 0);
 }
 
-void btlUpdateActorSlotStates(u8 *context, s8 mode) {
-    u8 *entry = context + 0x80;
+void btlUpdateActorSlotStates(BattleActorPanelWork *work, s8 mode) {
+    u8 *entry = (u8 *)work + 0x80;
     s32 modeZeroState = 3;
     s32 modeNonzeroState = 4;
     s32 i = 2;
@@ -8248,7 +8248,7 @@ void btlUpdateActorVitalChangeEffects(BtlUnit *unit, BattleActorPanelWork *work,
             work->activeEntries[slot].presentation.hpEffectFade;
         if (work->activeEntries[slot].presentation.hpEffectFade <= 0) {
             if (work->activeEntries[slot].presentation.hpEffectState == 0x21) {
-                btlUpdateActorSlotStates((u8 *)work, 0);
+                btlUpdateActorSlotStates(work, 0);
             }
             work->activeEntries[slot].presentation.hpEffectState = 0;
         }
@@ -10549,7 +10549,7 @@ void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode
             task = (dds3ProcessID_t *)dds3SearchProcessName(D_004367CC);
             if (task != 0) {
                 panel = (BattleActorPanelWork *)dds3GetProcessData((s32)task);
-                btlUpdateActorSlotStates((u8 *)panel, 0);
+                btlUpdateActorSlotStates(panel, 0);
             }
         }
         if (btlHasRegisteredAphNamePanelTask() == 0) {
@@ -10652,7 +10652,7 @@ extern void btlAdvanceTargetPanelAnimation(SceneAiWork *work, s32 mode);
 extern void func_001CB7A8(BtlUnit *unit, SceneAiWork *work, u32 index);
 extern s32 btlIsUnitInfoFlagOneEligible(BtlUnit *unit);
 extern void btlDrawCenteredPanelSegments(s32 width);
-extern void btlUpdateActorSlotStates(u8 *, s8);
+extern void btlUpdateActorSlotStates(BattleActorPanelWork *, s8);
 extern void btlSetActorSecondaryPresentation(BtlUnit *unit, s32 unused, s8 phase);
 extern DatEnemyRecord *datEnemyRecords;
 
@@ -10709,7 +10709,7 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
         if (unit->status.flags & 0x200) {
             panelTask = dds3SearchProcessName(D_004367CC);
             if (panelTask != NULL) {
-                btlUpdateActorSlotStates((u8 *)dds3GetProcessData(panelTask), 0);
+                btlUpdateActorSlotStates((BattleActorPanelWork *)dds3GetProcessData(panelTask), 0);
             }
         }
     }
@@ -11751,7 +11751,7 @@ void func_001CF800(void) {
                 dds3SearchProcessName(D_004367CC));
             btlClearClosingActorRowPulses(panel, 0);
             btlAdvancePendingSceneSlotStates((u8 *)panel);
-            btlUpdateActorSlotStates((u8 *)panel, 0);
+            btlUpdateActorSlotStates(panel, 0);
         } else {
             D_00438F58[D_00438F54->bank]->flags &= 0xFFF;
         }
