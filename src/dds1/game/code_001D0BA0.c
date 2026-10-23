@@ -12,6 +12,7 @@
 #include "btl_raise_party_record_status_value.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_unit_fade_task_args.h"
+#include "btl_unit_color_fade_args.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
 #include "snd_sequence_volume_pan.h"
@@ -206,14 +207,6 @@ typedef struct BtlRotationTaskArgs {
     s32 count;
     BtlUnit *unit;
 } BtlRotationTaskArgs;
-
-typedef struct BtlFadeArgs {
-    BtlUnit *unit;
-    s32 fadeIn;
-    s32 fadeOut;
-    u32 count;
-    u32 color;
-} BtlFadeArgs;
 
 extern s32 btlCountTasksByKind(u16 kind);
 
@@ -4089,7 +4082,7 @@ BtlRuntimeTask *btlCreateUnitTask10(BtlUnit *unit, f32 *direction, s32 direction
     return task;
 }
 
-u32 btlUnitFadeInTask(BtlFadeArgs *args) {
+u32 btlUnitFadeInTask(BtlUnitColorFadeArgs *args) {
     u32 total = args->fadeIn + args->fadeOut;
     BtlUnit *unit = args->unit;
     if (total != 0) {
@@ -4120,11 +4113,11 @@ u32 btlUnitFadeInTask(BtlFadeArgs *args) {
     return 0;
 }
 
-extern u32 btlUnitFadeInTask(BtlFadeArgs *);
+extern u32 btlUnitFadeInTask(BtlUnitColorFadeArgs *);
 
 u8 *btlCreateUnitFadeInTask(u8 *owner, u32 value, u32 variant) {
     u8 *task = btlAllocTask(20);
-    u32 *arguments;
+    BtlUnitColorFadeArgs *arguments;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
@@ -4133,15 +4126,15 @@ u8 *btlCreateUnitFadeInTask(u8 *owner, u32 value, u32 variant) {
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    arguments[4] = 0x80808080;
-    arguments[1] = value;
-    arguments[2] = variant;
-    arguments[3] = 0;
+    arguments->unit = (BtlUnit *)owner;
+    arguments->color = 0x80808080;
+    arguments->fadeIn = value;
+    arguments->fadeOut = variant;
+    arguments->count = 0;
     return task;
 }
 
-u32 btlUnitFadeOutTask(BtlFadeArgs *args) {
+u32 btlUnitFadeOutTask(BtlUnitColorFadeArgs *args) {
     u32 total = args->fadeIn + args->fadeOut;
     BtlUnit *unit = args->unit;
     if (total != 0) {
@@ -4167,11 +4160,11 @@ u32 btlUnitFadeOutTask(BtlFadeArgs *args) {
     return 0;
 }
 
-extern u32 btlUnitFadeOutTask(BtlFadeArgs *);
+extern u32 btlUnitFadeOutTask(BtlUnitColorFadeArgs *);
 
 u8 *btlCreateUnitFadeOutTask(u8 *owner, u32 value, u32 variant) {
     u8 *task = btlAllocTask(16);
-    u32 *arguments;
+    BtlUnitColorFadeArgs *arguments;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
@@ -4180,10 +4173,10 @@ u8 *btlCreateUnitFadeOutTask(u8 *owner, u32 value, u32 variant) {
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    arguments[1] = value;
-    arguments[2] = variant;
-    arguments[3] = 0;
+    arguments->unit = (BtlUnit *)owner;
+    arguments->fadeIn = value;
+    arguments->fadeOut = variant;
+    arguments->count = 0;
     return task;
 }
 

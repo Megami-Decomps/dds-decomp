@@ -68,6 +68,7 @@
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
 #include "btl_unit_fade_task_args.h"
+#include "btl_unit_color_fade_args.h"
 
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum {
@@ -4200,15 +4201,7 @@ BtlRuntimeTask *btlCreateUnitTask10(BtlUnit *unit, f32 *direction, s32 direction
     return task;
 }
 
-typedef struct BtlFadeArgs {
-    BtlUnit *unit;
-    s32 fadeIn;
-    s32 fadeOut;
-    u32 count;
-    u32 color;
-} BtlFadeArgs;
-
-s32 btlUnitFadeInTask(BtlFadeArgs *args) {
+s32 btlUnitFadeInTask(BtlUnitColorFadeArgs *args) {
     u32 total = args->fadeIn + args->fadeOut;
     BtlUnit *unit = args->unit;
     if (total != 0) {
@@ -4241,7 +4234,7 @@ s32 btlUnitFadeInTask(BtlFadeArgs *args) {
 
 BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *unit, u32 value, u32 variant) {
     BtlRuntimeTask *task = btlAllocTask(20);
-    BtlRuntimeTaskArgs *args;
+    BtlUnitColorFadeArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlUnitFadeInTask;
@@ -4249,15 +4242,15 @@ BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *unit, u32 value, u32 variant) {
     task->ownerId = unit->owner;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->actor = unit;
-    args->unk_10 = 0x80808080;
-    args->option = value;
-    args->unk_08 = variant;
-    args->unk_0C = 0;
+    args->unit = unit;
+    args->color = 0x80808080;
+    args->fadeIn = value;
+    args->fadeOut = variant;
+    args->count = 0;
     return task;
 }
 
-s32 btlUnitFadeOutTask(BtlFadeArgs *args) {
+s32 btlUnitFadeOutTask(BtlUnitColorFadeArgs *args) {
     u32 total = args->fadeIn + args->fadeOut;
     BtlUnit *unit = args->unit;
     if (total != 0) {
@@ -4285,7 +4278,7 @@ s32 btlUnitFadeOutTask(BtlFadeArgs *args) {
 
 BtlRuntimeTask *btlCreateUnitFadeOutTask(BtlUnit *unit, u32 value, u32 variant) {
     BtlRuntimeTask *task = btlAllocTask(16);
-    BtlRuntimeTaskArgs *args;
+    BtlUnitColorFadeArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlUnitFadeOutTask;
@@ -4293,10 +4286,10 @@ BtlRuntimeTask *btlCreateUnitFadeOutTask(BtlUnit *unit, u32 value, u32 variant) 
     task->ownerId = unit->owner;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->actor = unit;
-    args->option = value;
-    args->unk_08 = variant;
-    args->unk_0C = 0;
+    args->unit = unit;
+    args->fadeIn = value;
+    args->fadeOut = variant;
+    args->count = 0;
     return task;
 }
 
