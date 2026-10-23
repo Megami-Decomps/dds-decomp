@@ -4819,9 +4819,14 @@ BtlRuntimeTask *btlCreateUnitFxVectorRefreshTask(BtlUnit *unit) {
 
 extern s32 btlFormatUnitBedName(BtlUnit *, char *);
 
-void btlStartGunFinishLoad(s32 *task) {
+typedef struct GunLoadArgs {
+    BtlUnit *unit;
+    struct FileRequest *request;
+} GunLoadArgs;
+
+void btlStartGunFinishLoad(GunLoadArgs *taskArgs) {
     char filename[0x70];
-    BtlUnit *unit = *(BtlUnit **)task;
+    BtlUnit *unit = taskArgs->unit;
     if (unit->status.flags & 0x400) {
         return;
     }
@@ -4830,30 +4835,23 @@ void btlStartGunFinishLoad(s32 *task) {
         unit->gunResource = 0;
     }
     if (btlFormatUnitBedName(unit, filename)) {
-        s32 handle = (s32)fileLoadUseTail(filename);
-        task[1] = handle;
-        btlBossDebugPrintf("btl:gun & finish load start[%s][%p]\n", filename, handle);
+        taskArgs->request = fileLoadUseTail(filename);
+        btlBossDebugPrintf("btl:gun & finish load start[%s][%p]\n", filename, taskArgs->request);
     }
     unit->gunResourceFlags = (unit->gunResourceFlags | 4) & ~8;
 }
 
-typedef struct GunLoadArgs {
-    BtlUnit *unit;
-    s32 handle;
-} GunLoadArgs;
-
-u32 btlPollGunLoad(s32 taskArgs) {
-    GunLoadArgs *loadArgs = (GunLoadArgs *)taskArgs;
+u32 btlPollGunLoad(GunLoadArgs *loadArgs) {
     BtlUnit *unit = loadArgs->unit;
-    if (loadArgs->handle == 0) {
+    if (loadArgs->request == NULL) {
         return 1;
     }
-    if (pacFileCheckEnd((struct FileRequest *)loadArgs->handle) == 0) {
+    if (pacFileCheckEnd(loadArgs->request) == 0) {
         return 0;
     }
-    btlBossDebugPrintf("btl:gun & finish load end[%p]\n", loadArgs->handle);
-    unit->gunResource = (void *)sdfMemLock(fileGetMemHandle((struct FileRequest *)loadArgs->handle));
-    fileHandleFree((struct FileRequest *)(u32)loadArgs->handle);
+    btlBossDebugPrintf("btl:gun & finish load end[%p]\n", loadArgs->request);
+    unit->gunResource = (void *)sdfMemLock(fileGetMemHandle(loadArgs->request));
+    fileHandleFree(loadArgs->request);
     unit->gunResourceFlags = (unit->gunResourceFlags & ~4) | 8;
     return 1;
 }

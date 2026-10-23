@@ -4717,9 +4717,14 @@ void *btlCreateUnitFxVectorRefreshTask(u8 *owner) {
 
 INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3CA0);
 
-void btlStartGunFinishLoad(s32 task) {
+typedef struct GunLoadArgs {
+    BtlUnit *unit;
+    struct FileRequest *request;
+} GunLoadArgs;
+
+void btlStartGunFinishLoad(GunLoadArgs *taskArgs) {
     char filename[0x70];
-    BtlUnit *actor = *(BtlUnit **)task;
+    BtlUnit *actor = taskArgs->unit;
     if (((u32)actor->status.flags & 0x400) != 0) {
         return;
     }
@@ -4728,41 +4733,35 @@ void btlStartGunFinishLoad(s32 task) {
         *(s32 *)((u8 *)actor + 0x30C) = 0;
     }
     if (btlFormatUnitBedName(actor, filename)) {
-        s32 handle = (s32)fileLoadUseTail(filename);
-        *(s32 *)(task + 4) = handle;
-        btlBossDebugPrintf("btl:gun & finish load start[%s][%p]\n", filename, handle);
+        taskArgs->request = fileLoadUseTail(filename);
+        btlBossDebugPrintf("btl:gun & finish load start[%s][%p]\n", filename, taskArgs->request);
     }
     *(u32 *)((u8 *)actor + 0x118) = (*(u32 *)((u8 *)actor + 0x118) | 4) & ~8;
 }
 
-typedef struct GunLoadArgs {
-    BtlUnit *unit;
-    s32 handle;
-} GunLoadArgs;
-
 u32 btlPollGunLoad(u32 *taskArgs) {
     GunLoadArgs *loadArgs = (GunLoadArgs *)taskArgs;
     BtlUnit *unit = loadArgs->unit;
-    if (loadArgs->handle == 0) {
+    if (loadArgs->request == NULL) {
         return 1;
     }
-    if (pacFileCheckEnd((struct FileRequest *)loadArgs->handle) == 0) {
+    if (pacFileCheckEnd(loadArgs->request) == 0) {
         return 0;
     }
-    btlBossDebugPrintf("btl:gun & finish load end[%p]\n", loadArgs->handle);
-    unit->gunResource = (void *)sdfMemLock(fileGetMemHandle((struct FileRequest *)loadArgs->handle));
-    fileHandleFree((struct FileRequest *)(u32)loadArgs->handle);
+    btlBossDebugPrintf("btl:gun & finish load end[%p]\n", loadArgs->request);
+    unit->gunResource = (void *)sdfMemLock(fileGetMemHandle(loadArgs->request));
+    fileHandleFree(loadArgs->request);
     unit->gunResourceFlags = (unit->gunResourceFlags & ~4) | 8;
     return 1;
 }
 
-extern void btlStartGunFinishLoad(s32);
+extern void btlStartGunFinishLoad(GunLoadArgs *);
 
 extern u32 btlPollGunLoad(u32 *);
 
 u8 *btlCreateGunLoadPollTask(u8 *owner) {
     u8 *task = btlAllocTask(8);
-    u32 *arguments;
+    GunLoadArgs *arguments;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
@@ -4772,8 +4771,8 @@ u8 *btlCreateGunLoadPollTask(u8 *owner) {
     *(void **)(task + 0x48) = btlStartGunFinishLoad;
     *(void **)(task + 0x4C) = btlPollGunLoad;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    arguments[1] = 0;
+    arguments->unit = (BtlUnit *)owner;
+    arguments->request = NULL;
     return task;
 }
 
