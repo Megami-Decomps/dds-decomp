@@ -1571,7 +1571,7 @@ extern void ChangeFontPosition(_FRQ *glyph, s32 dx, s32 dy);
 
 extern void ChangeFontColor();
 
-extern void p2sdPlaySE();
+extern void p2sdPlaySE(s32 trackId, s32 volume, s32 pan);
 
 extern void SelectItemMove(ItfMesBlk40 *sel, s32 dir);
 
