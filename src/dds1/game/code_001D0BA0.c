@@ -221,7 +221,7 @@ typedef char BtlRotationTaskArgsUnitOffsetCheck[
 
 extern s32 btlCountTasksByKind(u16 kind);
 
-void *btlCreateActorParameterDeltaTask(BtlUnit *owner, BtlOperandEntry *spec);
+BtlRuntimeTask *btlCreateActorParameterDeltaTask(BtlUnit *owner, BtlOperandEntry *spec);
 
 extern s32 btlGetCommandTargetEligibility(BtlIndexList *indices, s32 selection);
 
@@ -1276,7 +1276,7 @@ s32 btlApplyActorParameterDelta(BtlOperandTaskArgs *arguments) {
 
 extern void *btlAllocTask(s32);
 
-void *btlCreateActorParameterDeltaTask(BtlUnit *owner, BtlOperandEntry *spec) {
+BtlRuntimeTask *btlCreateActorParameterDeltaTask(BtlUnit *owner, BtlOperandEntry *spec) {
     BtlRuntimeTask *task = btlAllocTask(0x2C);
     BtlOperandTaskArgs *arguments;
 

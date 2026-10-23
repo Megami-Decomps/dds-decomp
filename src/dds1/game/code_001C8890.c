@@ -399,7 +399,7 @@ void btlActionSeqCheckDispatch(BtlTask *task) {
 void btlEnterStatusRecoveryState(void) {
 }
 
-void *btlCreateActorParameterDeltaTask(BtlUnit *owner, BtlOperandEntry *spec);
+BtlRuntimeTask *btlCreateActorParameterDeltaTask(BtlUnit *owner, BtlOperandEntry *spec);
 
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
@@ -1273,7 +1273,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
                 btlStartTask(task);
             }
 
-            task = (BtlRuntimeTask *)btlCreateActorParameterDeltaTask(currentTarget, &group->entries[operandIndex]);
+            task = btlCreateActorParameterDeltaTask(currentTarget, &group->entries[operandIndex]);
             task->startCondition.kind = 4;
                 task->startCondition.value.handle = operandTask->handle;
                 task->ownerId = commandOwner;
@@ -1692,7 +1692,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
                     task->ownerId = unit->identity;
                     btlStartTask(task);
                 }
-                task = (BtlRuntimeTask *)btlCreateActorParameterDeltaTask(currentTarget, &group->entries[operandIndex]);
+                task = btlCreateActorParameterDeltaTask(currentTarget, &group->entries[operandIndex]);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = operandTask->handle;
                 task->ownerId = commandOwner;
