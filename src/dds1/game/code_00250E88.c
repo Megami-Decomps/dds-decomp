@@ -347,9 +347,6 @@ void mnuReleaseResourceTaskData(s32 unused, MnuResourceTask *task) {
     task = NULL;
 }
 
-/* Snapshot is one native datUnitWork_t: 0x1A4 bytes with word alignment. */
-typedef datUnitWork_t ResourcePartySnapshot;
-
 extern s8 dds3PadButtonState[];
 
 extern SdfTaskItemDesc D_0036C65C;
@@ -357,11 +354,6 @@ extern SdfTaskItemDesc D_0036C65C;
 extern s32 mnuTickInitState(MenuProgressHost *);
 
 extern void mnuCommitTitleStreamReadyState(void);
-
-/* The native party snapshot occupies scene metadata +0x28..+0x1CB. */
-static inline ResourcePartySnapshot *resourceTaskPartySnapshot(MenuSceneMetadata *metadata) {
-    return (ResourcePartySnapshot *)((u8 *)metadata + 0x28);
-}
 
 INCLUDE_RODATA(const s32, "game/code_00250E88", D_003AF758);
 
@@ -375,24 +367,24 @@ s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
     u32 state;
     MenuSceneMetadata *metadata=(MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext,-1);
     s32 frame;
-    ResourcePartySnapshot **selectedParty;
-    ResourcePartySnapshot *snapshot;
+    datUnitWork_t **selectedParty;
+    datUnitWork_t *snapshot;
     state=task->unk04[0];
     switch (state) {
     case 0:
         if (mnuTickInitState(metadata->attachedEffect)==0 && ((s32 (*)())mnuAreResourceSlotsOccupied)(metadata)==1) task->unk04[0]=6;
         return 0;
     case 6:
-        selectedParty=(ResourcePartySnapshot **)(u32)list->cursor->userValue;
+        selectedParty=(datUnitWork_t **)(u32)list->cursor->userValue;
         task->unk04[0]=1;
-        snapshot=resourceTaskPartySnapshot(metadata);
+        snapshot=&metadata->partySnapshot;
         *snapshot=**selectedParty;
         mnuSetupStaffMenuProfilePage(snapshot,metadata->attachedEffect);
         return 0;
     case 7:
-        selectedParty=(ResourcePartySnapshot **)(u32)list->cursor->userValue;
+        selectedParty=(datUnitWork_t **)(u32)list->cursor->userValue;
         task->unk04[0]=5;
-        snapshot=resourceTaskPartySnapshot(metadata);
+        snapshot=&metadata->partySnapshot;
         *snapshot=**selectedParty;
         mnuSetupStaffMenuProfilePage(snapshot,metadata->attachedEffect);
         return 0;
@@ -428,8 +420,8 @@ s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
             if (mnuMoveResourceListCursor(list, mnuRetreatListCursorDefault)!=NULL) {
                 action=1;
                 ((s32 (*)())mnuReleaseMenuVisualWorkResources)(metadata->attachedEffect);
-                selectedParty=(ResourcePartySnapshot **)(u32)list->cursor->userValue;
-                snapshot=resourceTaskPartySnapshot(metadata);
+                selectedParty=(datUnitWork_t **)(u32)list->cursor->userValue;
+                snapshot=&metadata->partySnapshot;
                 *snapshot=**selectedParty;
                 mnuSetupStaffMenuProfilePage(snapshot,metadata->attachedEffect);
             }
@@ -437,8 +429,8 @@ s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
             if (mnuMoveResourceListCursor(list, mnuAdvanceListCursorDefault)!=NULL) {
                 action=1;
                 ((s32 (*)())mnuReleaseMenuVisualWorkResources)(metadata->attachedEffect);
-                selectedParty=(ResourcePartySnapshot **)(u32)list->cursor->userValue;
-                snapshot=resourceTaskPartySnapshot(metadata);
+                selectedParty=(datUnitWork_t **)(u32)list->cursor->userValue;
+                snapshot=&metadata->partySnapshot;
                 *snapshot=**selectedParty;
                 mnuSetupStaffMenuProfilePage(snapshot,metadata->attachedEffect);
             }
@@ -1634,9 +1626,10 @@ s32 mnuBeginMantraProfileSelection(void) {
     scene->pendingProfileId = entry->sceneId;
     fclDestroyMessage();
     fclInitMessage(scene->messageWindowResource);
-    memcpy((u32 *)((u8 *)scene + 0x28), ((MnuProfileProgress *)mnuGetSelectedNodeValue())->partyRecord, 0x1A4);
-    ((u8 *)scene)[0x7D] = (u8)scene->pendingProfileId;
-    mnuSetupStaffMenuProfilePage((datUnitWork_t *)((u8 *)scene + 0x28), scene->attachedEffect);
+    memcpy(&scene->partySnapshot, ((MnuProfileProgress *)mnuGetSelectedNodeValue())->partyRecord,
+           sizeof(scene->partySnapshot));
+    scene->partySnapshot.profileId = scene->pendingProfileId;
+    mnuSetupStaffMenuProfilePage(&scene->partySnapshot, scene->attachedEffect);
     scene->stageFinished = 0;
     scene->stageStarted = 0;
     return 0;
