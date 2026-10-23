@@ -49,7 +49,7 @@ extern void mnuDrawTitleFadeSprites(BrsSkillPackageWork *);
 extern void brsStepAnimDecay(BrsSkillPackageWork *);
 extern void brsDrawActiveUnitProgressRows(s32, s32, s32, s32, BrsActiveProgressList *, s32);
 
-extern void brsAnimateSkillIconRows();
+extern void brsAnimateSkillIconRows(BrsSkillPackageWork *work);
 extern void mnuDrawItemPanelStatusIcons();
 
 void mnuRefreshPanelLayer(BrsSkillPackageWork *work) {
@@ -573,4 +573,3 @@ void brsDrawActiveUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProg
 }
 
 INCLUDE_RODATA(const s32, "game/code_002653A0", D_003AFBA0);
-
