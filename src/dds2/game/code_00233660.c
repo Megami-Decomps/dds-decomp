@@ -2969,7 +2969,7 @@ extern s32 sdfFileCheckExist(char *path);
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421420);
 
 void mdlLoadViewerPresentationConfig(void) {
-    s32 fileRequest;
+    struct FileRequest *fileRequest;
     struct sdfMemHandle_t *resourceHandle;
     char *fileData;
     s32 fileSize;
@@ -2989,12 +2989,12 @@ void mdlLoadViewerPresentationConfig(void) {
     if (sdfFileCheckExist(D_003C88A8) == 0) {
         return;
     }
-    fileRequest = (s32)fileLoad(D_003C88A8);
-    fileSync((struct FileRequest *)(u32)fileRequest);
-    resourceHandle = fileGetMemHandle((struct FileRequest *)(u32)fileRequest);
-    fileData = (char *)fileGetLoadPtr((struct FileRequest *)(u32)fileRequest);
-    fileSize = (s32)fileGetLoadSize((struct FileRequest *)(u32)fileRequest);
-    fileHandleFree((struct FileRequest *)(u32)fileRequest);
+    fileRequest = fileLoad(D_003C88A8);
+    fileSync(fileRequest);
+    resourceHandle = fileGetMemHandle(fileRequest);
+    fileData = (char *)fileGetLoadPtr(fileRequest);
+    fileSize = (s32)fileGetLoadSize(fileRequest);
+    fileHandleFree(fileRequest);
     lineOffset = 0;
     while (lineOffset < fileSize) {
         nextLineOffset = lineOffset;
