@@ -23,7 +23,7 @@ extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32, SdfQuad *, SdfQuad *);
 
 void fldCreateLocalMapCamera(void) {
     fldLocalMapCameraObject = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), &fldLocalMapFirstCameraVector, &fldLocalMapSecondCameraVector);
-    dds3SetUnitObjectId(fldLocalMapCameraObject, (u32)"Lmap_Cam");
+    dds3SetUnitObjectId(fldLocalMapCameraObject, "Lmap_Cam");
     dds3GetRadiusPoseSet(fldLocalMapCameraObject, 2.0f);
     dds3SetActiveCameraSceneBasic(dds3GetControlScene(), fldLocalMapCameraObject);
 }

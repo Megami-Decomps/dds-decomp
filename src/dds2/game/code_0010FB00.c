@@ -97,9 +97,9 @@ u32 dds3AllocObjectId(void) {
     return dds3ObjectIdCounter;
 }
 
-void dds3SetUnitObjectId(dds3Basic_t *node, u32 worldNodeValue) {
+void dds3SetUnitObjectId(dds3Basic_t *node, const char *objectName) {
     if (node != NULL) {
-        node->value = (const char *)worldNodeValue;
+        node->value = objectName;
     }
 }
 
@@ -226,4 +226,3 @@ dds3Basic_t *dds3AddWorld(s32 capacity) {
 INCLUDE_SDATA(const s32, "game/code_0010FB00", dds3ObjectIdCounter);
 
 INCLUDE_SDATA(const s32, "game/code_0010FB00", dds3TheWorld);
-

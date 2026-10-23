@@ -78,7 +78,7 @@ struct dds3Basic_t *fldMakeDmyMatter(void) {
     args[6] = 0;
     args[7] = 0;
     matter = dds3AddMatterObjectBasic(dds3AllocObjectId(), (f32 *)args, (f32 *)(args + 4));
-    dds3SetUnitObjectId(matter, (u32)D_00412FF0);
+    dds3SetUnitObjectId(matter, D_00412FF0);
     return matter;
 }
 
@@ -303,14 +303,14 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
                     rotation[3] = 0.0f;
                 }
                 spawnedObject = dds3AddLightObjectBasic(resource->id);
-                dds3SetUnitObjectId(spawnedObject, (u32)resource->name);
+                dds3SetUnitObjectId(spawnedObject, resource->name);
                 dds3SetPosPoseSet(spawnedObject, (u128 *)position);
                 /* Type-12 serialization uses this shared slot for outer radius. */
                 dds3GetRadiusPoseSet(spawnedObject, ((WorldTransformSetup *)resource->data)->transform.rotation[1]);
                 dds3SetLightObjectResoruce(spawnedObject, resource->data);
                 if ((u32)fldGlobalBase.area - 200U < 300U) {
                     ((EffLightData *)((dds3Basic_t *)spawnedObject)->data)->flags |= 8;
-                    dds3SetUnitObjectId(spawnedObject, (u32)"BTL_DEF_LIGHT");
+                    dds3SetUnitObjectId(spawnedObject, "BTL_DEF_LIGHT");
                 }
             }
             break;
@@ -904,7 +904,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                 fldCopySpawnTransform(position, rotation, spawnResource->transform);
                 spawnedObject = dds3AddCameraObjectBasicTypeFree(spawnResource->id, position, rotation);
                 ((CameraData *)spawnedObject->data)->fieldOfView = *(f32 *)spawnResource->data;
-                dds3SetUnitObjectId(spawnedObject, (u32)spawnResource->name);
+                dds3SetUnitObjectId(spawnedObject, spawnResource->name);
             }
             break;
         case 7:
@@ -992,7 +992,7 @@ void fldCreateResourceScriptObjects(void) {
             rotation[3] = 0.0f;
         }
         scriptObject = dds3AddMatterObjectBasic(resource->id, position, rotation);
-        dds3SetUnitObjectId(scriptObject, (u32)resource->name);
+        dds3SetUnitObjectId(scriptObject, resource->name);
         if (fldGlobalBase.area >= 200 && fldGlobalBase.area < 500) {
             if (fldGlobalBase.area == 230 && fldGlobalBase.floor == 6 && resourceIndex == 2) {
                 dds3MatterObjectBasicSetOt(scriptObject, 6);
