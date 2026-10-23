@@ -689,18 +689,17 @@ extern void mnuUpdateMantraSelectionPositions(MenuSceneWork *, s32);
 /* Construct the selection grid and callbacks, select its initial coordinates, then reset the cached scroll position. */
 void mnuInitializeMantraSelectionGrid(MenuSceneWork *sceneWork) {
     s32 selectedCoordinates[2];
-    s32 resourceTaskAddress;
-    s32 fieldAddress;
+    MnuResourceTask *resourceTask;
+    MnuProfileProgress *selection;
 
     sceneWork->gridHandle = sdfGridCreate(0xF, 0x11, 0x40, 0x43, 4, 4,
                                           sceneWork->nodes, 0);
     sdfSetShortPairValues(sceneWork->gridHandle, 1, 1);
     sceneWork->gridHandle->releaseCell = mnuFreeTaskData;
     sceneWork->gridHandle->drawCell = mnuDrawMantraEntryStatus;
-    resourceTaskAddress = sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
-    fieldAddress = *(s32 *)(*(s32 *)(resourceTaskAddress + 0xC) + 0x1C);
-    mnuBuildMantraGridAndGetProfileCoordinates(sceneWork,
-                  (MnuProfileProgress *)(u32)*(s32 *)(fieldAddress + 0x70),
+    resourceTask = (MnuResourceTask *)sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
+    selection = (MnuProfileProgress *)resourceTask->menuList->cursor->userValue;
+    mnuBuildMantraGridAndGetProfileCoordinates(sceneWork, selection,
                   &selectedCoordinates[0], &selectedCoordinates[1]);
     if (sdfGridSelectFilledCell(sceneWork->gridHandle,
                                 selectedCoordinates[0], selectedCoordinates[1]) == NULL) {
@@ -1593,14 +1592,13 @@ s32 mnuRestoreMantraGridSelection(MenuSceneWork *work) {
     MnuMantraNodeState *entries = (MnuMantraNodeState *)grid->userData;
     s16 x = entries[entryId].x;
     s16 y = entries[entryId].y;
-    s32 scene;
-    s32 field;
+    MnuResourceTask *resourceTask;
+    MnuProfileProgress *selection;
 
     sdfGridClear(grid);
-    scene = sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
-    field = *(s32 *)(*(s32 *)(scene + 0xC) + 0x1C);
-    mnuBuildMantraGridAndGetProfileCoordinates(
-        work, (MnuProfileProgress *)(u32)*(s32 *)(field + 0x70), NULL, NULL);
+    resourceTask = (MnuResourceTask *)(u32)sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
+    selection = (MnuProfileProgress *)resourceTask->menuList->cursor->userValue;
+    mnuBuildMantraGridAndGetProfileCoordinates(work, selection, NULL, NULL);
     if (sdfGridSelectFilledCell(
             work->gridHandle, x, y) == NULL) {
         sdfGridCursorLeftToFilledCell(work->gridHandle);
