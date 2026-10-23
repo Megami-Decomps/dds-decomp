@@ -1587,7 +1587,7 @@ extern void sdf3DMakeDirectRefPacket(struct DmaPacketHeader *packet, u32 sourceA
 extern void sdfBillBoardMakeTMPacket(u8 *packet, const f32 *matrix);
 extern SdfPoolNode D_003802A8;
 
-extern s32 dds3BillboardGetTex(billHandle_t *effect);
+extern sdfTexHandle_t *dds3BillboardGetTex(billHandle_t *effect);
 
 /* DDS2 event-bill renderer, reconstructed from the native owner and its
  * current providers. The VIF position stream consumes XYZ only: native never
@@ -1617,13 +1617,13 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     sdfDrawTagInit(primaryList);
     secondaryList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(secondaryList);
-    primaryTexture = (sdfTexHandle_t *)dds3BillboardGetTex((billHandle_t *)D_00436534);
+    primaryTexture = dds3BillboardGetTex((billHandle_t *)D_00436534);
     texturePacket = (struct DmaPacketHeader *)sdfGrAllocPacketBuff(0x20);
     textureBuffer = sdfTexGetPacket(primaryTexture);
     textureBytes = sdfTexGetPacketLength(primaryTexture);
     sdf3DMakeDirectRefPacket(texturePacket, (u32)textureBuffer, textureBytes);
     sdfAppendReferencePacket(primaryList, (u32)texturePacket);
-    secondaryTexture = (sdfTexHandle_t *)dds3BillboardGetTex((billHandle_t *)D_00436538);
+    secondaryTexture = dds3BillboardGetTex((billHandle_t *)D_00436538);
     texturePacket = (struct DmaPacketHeader *)sdfGrAllocPacketBuff(0x20);
     textureBuffer = sdfTexGetPacket(secondaryTexture);
     textureBytes = sdfTexGetPacketLength(secondaryTexture);

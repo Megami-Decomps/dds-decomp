@@ -195,11 +195,11 @@ void dds3BillboardSetCondition(billHandle_t *effect, s16 variant) {
     }
 }
 
-s32 dds3BillboardGetTex(billHandle_t *effect) {
+sdfTexHandle_t *dds3BillboardGetTex(billHandle_t *effect) {
     if (effect->kind == 0) {
-        return (s32)effect->child->texture;
+        return effect->child->texture;
     }
-    return 0;
+    return NULL;
 }
 
 u16 dds3BillboardGetType(billHandle_t *effect) {
