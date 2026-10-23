@@ -1977,31 +1977,31 @@ s32 evtViewFindGlyphAtOrBefore(EvtRuntime *viewer) {
     return (s32)result;
 }
 
-extern void evtSetMovieClipPositionClampedToDuration(s32 movie, s32 unused, s32 start, s32 end, s32 offset);
+extern void evtSetMovieClipPositionClampedToDuration(dds3Basic_t *movie, s32 unused, s32 start, s32 end, s32 offset);
 
 
 /* Clamps each movie object's playback interval using its linked track's first
  * key frame (or track offset), endTime, and the current key's extra parameter. */
 void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
-    s32 worldTable;
-    s32 worldSlots;
-    s32 movieObject;
+    EvtWorldTable *worldTable;
+    EvtWorldSlot *worldSlots;
+    dds3Basic_t *movieObject;
     EvtRuntimeGroup *trackEntry;
     s32 startFrame;
     s32 extra;
     EvtRuntimeChild *glyph;
 
     if (dds3GetActiveScene() != 0) {
-        worldTable = (s32)((EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data);
+        worldTable = (EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data;
         if (worldTable != 0) {
-            worldSlots = (s32)((EvtWorldTable *)worldTable)->slots;
+            worldSlots = worldTable->slots;
             if (worldSlots != 0) {
-                movieObject = (s32)((EvtWorldSlot *)worldSlots)[EVT_WORLD_SLOT_MOVIE].head;
+                movieObject = worldSlots[EVT_WORLD_SLOT_MOVIE].head;
                 if (movieObject != 0) {
                     do {
                         trackEntry = viewer->groups;
                         while (trackEntry != NULL) {
-                            if (trackEntry->info != NULL && (void *)movieObject == dds3ObjectBaseGetControlBasic(trackEntry->info, 1)) {
+                            if (trackEntry->info != NULL && movieObject == dds3ObjectBaseGetControlBasic(trackEntry->info, 1)) {
                                 if (trackEntry->type == 2) {
                                     startFrame = 0;
                                     if (trackEntry->childCount != 0) {
@@ -2021,7 +2021,7 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
                             }
                             trackEntry = trackEntry->next;
                         }
-                        movieObject = (s32)((dds3Basic_t *)movieObject)->next;
+                        movieObject = movieObject->next;
                     } while (movieObject != 0);
                 }
             }
