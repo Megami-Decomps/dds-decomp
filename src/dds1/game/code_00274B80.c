@@ -2032,15 +2032,12 @@ void ptySkillMenuHandleSelection(dds3ProcessID_t *callback) {
     }
 }
 
-void mnuSwapPartySkillSlots(s32 entry, s32 firstSlot, s32 secondSlot) {
-    u8 *slotBase = (u8 *)(entry + 2);
-    s32 firstOffset = firstSlot * 2 + 32;
-    s32 secondOffset = secondSlot * 2 + 32;
-    u16 firstCode = *(u16 *)(slotBase + firstOffset);
-    u16 secondCode = *(u16 *)(slotBase + secondOffset);
+void mnuSwapPartySkillSlots(datUnitWork_t *party, s32 firstSlot, s32 secondSlot) {
+    u16 firstCode = party->effectData[firstSlot];
+    u16 secondCode = party->effectData[secondSlot];
 
-    *(u16 *)(slotBase + firstOffset) = secondCode;
-    *(u16 *)(slotBase + secondOffset) = firstCode;
+    party->effectData[firstSlot] = secondCode;
+    party->effectData[secondSlot] = firstCode;
 }
 
 
@@ -2052,7 +2049,7 @@ void ptySkillMenuHandleSlotReorder(dds3ProcessID_t *callback) {
     StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)context)->menu;
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_REORDER_INPUT_MASK);
     MenuWindowContainer *window = (MenuWindowContainer *)menuWork->selectedList;
-    s32 partyEntry = (s32)&DDS3_GBWK->party[((CampMenuContext *)context)->partyWindow.lists[0]->cursor->index];
+    datUnitWork_t *partyEntry = &DDS3_GBWK->party[((CampMenuContext *)context)->partyWindow.lists[0]->cursor->index];
     struct MenuList *list = window->list;
 
     list->stateFlags &= ~MNU_LIST_SELECTION_FLAG;
