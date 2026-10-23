@@ -158,8 +158,8 @@ void dds3TrackPolyColorSet(EffectDispatchState *effect, s32 index, u32 value) {
     effect->entries[index].value = value;
 }
 
-BlurPacketQuad *effPkt2DGetPrimPtr(void *packet) {
-    return (BlurPacketQuad *)((u8 *)packet + 0x20);
+BlurPacketQuad *effPkt2DGetPrimPtr(SdfDrawPacket *packet) {
+    return (BlurPacketQuad *)(packet + 1);
 }
 
 SdfDrawPacket *effPkt2DAllocTriStrip(s32 height, s32 flags) {
@@ -670,4 +670,3 @@ INCLUDE_SDATA(const s32, "game/code_0015F4D0", D_003BB018);
 INCLUDE_SDATA(const s32, "game/code_0015F4D0", D_003BB01C);
 
 INCLUDE_SDATA(const s32, "game/code_0015F4D0", D_003BB020);
-

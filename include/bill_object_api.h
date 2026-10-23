@@ -9,13 +9,14 @@ struct BillOut;
 struct BillChildPayload;
 struct BillSnapshot;
 struct sdfTexHandle_t;
+struct SdfDrawPacket;
 struct SdfTextureFileHeader;
 struct BlurPacketQuad;
 
 void dds3BillboardDelete(struct billHandle_t *obj);
 struct sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 index);
 struct billHandle_t *effCreateBillboardSharingIndexedResource(s32 index);
-struct BlurPacketQuad *effPkt2DGetPrimPtr(void *packet);
+struct BlurPacketQuad *effPkt2DGetPrimPtr(struct SdfDrawPacket *packet);
 
 /* The selected kind interprets the opaque payload word. */
 struct billHandle_t *dds3BillboardCreate(s32 kind, u32 data);
