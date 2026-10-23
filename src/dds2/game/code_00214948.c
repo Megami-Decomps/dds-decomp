@@ -3041,11 +3041,11 @@ void btlSetUnitResourceFloatByMode(BtlUnit *unit, s32 group, f32 value) {
             break;
         case 0x111:
             unit->ext->tableValues[1] = group;
-            unit->ext->unk138[1] = value;
+            unit->ext->tableMotionFrameStep[1] = value;
             break;
         case 0x112:
             unit->ext->tableValues[2] = group;
-            unit->ext->unk138[2] = value;
+            unit->ext->tableMotionFrameStep[2] = value;
             break;
         }
     }
@@ -3062,12 +3062,12 @@ void btlSetUnitResourceHalvesByMode(BtlUnit *unit, s32 first, s32 second) {
             evtSetWaitHokanFrame(unit->ext, first, second);
             break;
         case 0x111:
-            unit->ext->unk108[1] = first;
-            unit->ext->unk120[1] = second;
+            unit->ext->tableMotionBlendLeadFrames[1] = first;
+            unit->ext->tableMotionBlendDurationFrames[1] = second;
             break;
         case 0x112:
-            unit->ext->unk108[2] = first;
-            unit->ext->unk120[2] = second;
+            unit->ext->tableMotionBlendLeadFrames[2] = first;
+            unit->ext->tableMotionBlendDurationFrames[2] = second;
             break;
         }
     }

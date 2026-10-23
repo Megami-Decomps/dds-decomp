@@ -201,9 +201,9 @@ typedef struct evtUnitHandle_t {
 #endif
 #ifdef VERSION_DDS2
     s16 tableValues[12];           /* 0xF0 */
-    s16 unk108[12];                /* 0x108 */
-    s16 unk120[12];                /* 0x120 */
-    f32 unk138[12];                /* 0x138 */
+    s16 tableMotionBlendLeadFrames[12]; /* 0x108 */
+    s16 tableMotionBlendDurationFrames[12]; /* 0x120 */
+    f32 tableMotionFrameStep[12];  /* 0x138 */
     s16 slotA[12];                 /* 0x168: opaque per-slot parameters */
     s16 slotB[12];                 /* 0x180 */
     s16 slotC[12];                 /* 0x198 */
