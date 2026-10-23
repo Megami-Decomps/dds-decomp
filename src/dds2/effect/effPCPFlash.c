@@ -992,7 +992,8 @@ PcpFlashOrbitArcWork *effPCPFlashPolyRingExpCreate(PcpFlashOrbitArcParams *param
     u32 spread;
     u32 i;
 
-    handle = sdfMemAllocDirect((u32)params->particleCount * 16 + 0x80);
+    handle = sdfMemAllocDirect(sizeof(PcpFlashOrbitArcWork) +
+                               (u32)params->particleCount * sizeof(PcpFlashMotionParticle));
     block = (PcpFlashOrbitArcBlock *)sdfMemLock(handle);
     ring = &block->header;
     memcpy(ring, params, 0x58);
