@@ -107,7 +107,7 @@ extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
 
 
-extern BtlRuntimeTask *btlCreateMoveOtherUnitsTask(u8 *, u32);
+extern BtlRuntimeTask *btlCreateMoveOtherUnitsTask(BtlUnit *, u32);
 
 extern s32 btlUpdateBattleModelDebugEditor(void);
 
@@ -1001,7 +1001,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
     lastOperandHandle = btlAdvanceRuntimeSequenceCounter();
     statusTable = (u8 *)btlGetSideIndexedActorStatusTable(action->unit->resourceKind, action->unit->species);
     if (skipMovement == 0) {
-        operandTask = btlCreateMoveOtherUnitsTask((u8 *)action->unit, action->indexWork.slot);
+        operandTask = btlCreateMoveOtherUnitsTask(action->unit, action->indexWork.slot);
         btlStartTask(operandTask);
         moveHandle = operandTask->handle;
     } else {
@@ -1521,7 +1521,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
         if (actors[groupIndex] != NULL) {
             s32 resourceIndex;
             if (action->indexWork.costValidationFailed == 0) {
-                BtlRuntimeTask *soundTask = btlCreateMoveOtherUnitsTask((u8 *)actors[groupIndex], slot);
+                BtlRuntimeTask *soundTask = btlCreateMoveOtherUnitsTask(actors[groupIndex], slot);
                 soundTask->startDelay = maxFrames - actorFrames[groupIndex];
                 btlStartTask(soundTask);
                 soundHandle = soundTask->handle;
@@ -1963,7 +1963,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
     if (!(unit->status.flags & 0x400020)) {
         unit->status.flags &= ~0x1000;
         unit->partyRecord.flags &= ~0x1000;
-        sound = (BtlRuntimeTask *)btlCreateMoveOtherUnitsTask((u8 *)unit, 0x11);
+        sound = btlCreateMoveOtherUnitsTask(unit, 0x11);
         btlStartTask(sound);
         for (other = state->units; other != NULL; other = other->next) {
             if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
@@ -2095,7 +2095,7 @@ void btlScheduleDevilStateModelChange(BtlTask *task) {
     if (!(unit->status.flags & 0x20000020)) {
         unit->status.flags |= 0x1000;
         unit->partyRecord.flags |= 0x1000;
-        sound = (BtlRuntimeTask *)btlCreateMoveOtherUnitsTask((u8 *)unit, 0x10);
+        sound = btlCreateMoveOtherUnitsTask(unit, 0x10);
         btlStartTask(sound);
         for (other = state->units; other != NULL; other = other->next) {
             if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
@@ -2832,7 +2832,7 @@ void btlProcessPostActionStatusEffects(BtlTask *action) {
             }
             if ((unit->status.flags & 0x200) != 0 && btlIsUnitDefeatTriggeredByValueDelta(unit, spec.hpDelta) != 0) {
                 btlStartTask(btlCreateActorModelBlendTask(unit, 0, 11, 2, 1.0f));
-                btlStartTask(btlCreateMoveOtherUnitsTask((u8 *)unit, 11));
+                btlStartTask(btlCreateMoveOtherUnitsTask(unit, 11));
             } else {
                 btlStartTask(btlCreateStiffenDamageShakeTask((u8 *)unit, 8.0f));
             }
@@ -2855,7 +2855,7 @@ void btlProcessPostActionStatusEffects(BtlTask *action) {
         }
         if ((unit->status.flags & 0x200) != 0 && btlIsUnitDefeatTriggeredByValueDelta(unit, spec.hpDelta) != 0) {
             btlStartTask(btlCreateActorModelBlendTask(unit, 0, 11, 2, 1.0f));
-            btlStartTask(btlCreateMoveOtherUnitsTask((u8 *)unit, 11));
+            btlStartTask(btlCreateMoveOtherUnitsTask(unit, 11));
         } else {
             btlStartTask(btlCreateStiffenDamageShakeTask((u8 *)unit, 8.0f));
         }
@@ -2949,7 +2949,7 @@ void btlStartActorDefeatTransition(s32 command) {
     btlRaisePartyRecordStatusValue(&actor->partyRecord, 0x4000);
     btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->species);
     if (!(commandTask->flags & 0x100)) {
-        soundTask = (BtlRuntimeTask *)btlCreateMoveOtherUnitsTask((u8 *)actor, 11);
+        soundTask = btlCreateMoveOtherUnitsTask(actor, 11);
         btlStartTask(soundTask);
         sequence = soundTask->handle;
     } else {

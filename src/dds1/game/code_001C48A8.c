@@ -953,7 +953,7 @@ extern s32 btlSetEligibleActorPanelTransitionState(void);
 extern s32 btlDestroyTaskC(void);
 extern s32 btlDestroyTaskD(void);
 extern s32 btlChooseAvailableUnit(void);
-extern BtlRuntimeTask *btlCreateMoveOtherUnitsTask(u8 *, u32);
+extern BtlRuntimeTask *btlCreateMoveOtherUnitsTask(BtlUnit *, u32);
 extern struct BtlRuntimeTask *sndCreateClearBattleFlagTask(void);
 extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
@@ -1010,7 +1010,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
                         actor = (BtlTask *)btlChooseAvailableUnit();
                     }
                     unit = actor->unit;
-                    sound = btlCreateMoveOtherUnitsTask((u8 *)unit, 0xF);
+                    sound = btlCreateMoveOtherUnitsTask(unit, 0xF);
                     sound->startDelay = 25;
                     btlStartTask(sound);
                     task = (BtlRuntimeTask *)sndCreateClearBattleFlagTask();

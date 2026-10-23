@@ -9973,7 +9973,7 @@ s32 func_002B3698(EffActiveResource *owner) {
 
 extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 
-extern void btlStartMoveOtherUnitsTask(void *, s32);
+extern void btlStartMoveOtherUnitsTask(BtlUnit *, s32);
 
 
 
