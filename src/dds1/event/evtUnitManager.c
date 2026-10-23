@@ -18,6 +18,7 @@ struct EffNodeDescriptor;
 #include "evt_unit_color_transition.h"
 #include "evt_unit_vertical_move.h"
 #include "eff_transform.h"
+#include "eff_object.h"
 #include "dds3obj.h"
 #include "mdl.h"
 #include "sdf_draw.h"
@@ -749,7 +750,7 @@ evtUnitHandle_t *evtGetUnitHandle(s32 worldObjectKey) {
     dds3Basic_t *obj = dds3SearchSceneBasic(dds3GetActiveScene(), worldObjectKey, EFF_WORLD_KIND_FOLLOW_MODEL);
 
     if (obj != NULL) {
-        return (evtUnitHandle_t *)*(s32 *)((u8 *)obj->data + 8);
+        return ((EffectObjectData *)obj->data)->transitionWork;
     }
     return NULL;
 }
@@ -758,7 +759,7 @@ evtUnitHandle_t *evtGetUnitHandle2(dds3Basic_t *obj) {
     if (obj == NULL) {
         return NULL;
     }
-    return (evtUnitHandle_t *)*(s32 *)((u8 *)obj->data + 8);
+    return ((EffectObjectData *)obj->data)->transitionWork;
 }
 
 extern const s32 D_003AC060[];
