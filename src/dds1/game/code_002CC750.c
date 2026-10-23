@@ -911,7 +911,7 @@ s32 ptyReqProfileCountAtLeast(datUnitWork_t *unit, PrfDds1RequirementSlot *opera
             }
         } while (profileIndex < profileCount);
     }
-    if (matchedCount < (u32)operand->sourceValue) {
+    if (matchedCount < (u32)operand->minimum) {
         return 0;
     }
     return 1;
@@ -924,12 +924,12 @@ s32 ptyProfileCountAtLeast(datUnitWork_t *unit, PrfDds1RequirementSlot *operand)
 
     for (profileIndex = 0; profileIndex < PRF_PROFILE_COUNT; profileIndex++) {
         if (ptyTestPrimaryProfileFlag(unit, (u16)profileIndex)) {
-            if (D_003907B0[profileIndex].value05 >= operand->unknown04[1]) {
+            if (D_003907B0[profileIndex].value05 >= operand->profileThreshold) {
                 matchedCount++;
             }
         }
     }
-    if (matchedCount < (u32)operand->sourceValue) {
+    if (matchedCount < (u32)operand->minimum) {
         return 0;
     }
     return 1;
@@ -964,7 +964,7 @@ s32 ptyAreReqProfilesInParty(PrfDds1RequirementSlot *operand) {
 
 /* Compare the unit's level word with the prerequisite's byte threshold. */
 u32 prfReqCheckUnitLevel(datUnitWork_t *unit, PrfDds1RequirementSlot *operand) {
-    if (unit->level < operand->unknown04[0]) {
+    if (unit->level < operand->levelThreshold) {
         return 0;
     }
     return 1;
@@ -972,7 +972,7 @@ u32 prfReqCheckUnitLevel(datUnitWork_t *unit, PrfDds1RequirementSlot *operand) {
 
 /* Test the global currency counter against a prerequisite threshold. */
 u32 prfReqCheckGlobalCounter(PrfDds1RequirementSlot *operand) {
-    if (DDS3_GBWK->header.currency < (u32)operand->sourceValue) {
+    if (DDS3_GBWK->header.currency < (u32)operand->minimum) {
         return 0;
     }
     return 1;
@@ -1507,4 +1507,3 @@ INCLUDE_SDATA(const s32, "game/code_002CC750", sdfDebugLogAppendMode);
 INCLUDE_SDATA(const s32, "game/code_002CC750", sdfDebugLogPairFormat);
 
 INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2C8);
-
