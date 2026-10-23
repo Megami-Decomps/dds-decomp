@@ -235,8 +235,7 @@ u32 frFontGetInitialGlyphY(s8 fontIndex, s32 glyphIndex) {
 extern u16 frFontGetSlotCellWidth(s32 index);
 
 /* Fill cell dimensions, advance and horizontal bearing for one glyph. */
-void frFontFillGlyphMetrics(void *opaqueWork, s32 glyphIndex) {
-    FrFontGlyphMeasureWork *work = opaqueWork;
+void frFontFillGlyphMetrics(FrFontGlyphMeasureWork *work, s32 glyphIndex) {
     s32 fontIndex;
     s32 defaultSlot = 0;
     s8 right;
@@ -471,7 +470,7 @@ void frFontInitGlyph(_FRQ *glyph) {
     glyph->contextModeEnabled = 0;
 }
 
-extern void frFontFillGlyphMetrics(void *opaqueWork, s32 glyphIndex);
+extern void frFontFillGlyphMetrics(FrFontGlyphMeasureWork *work, s32 glyphIndex);
 
 _TEXT *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 secondOption) {
     _TEXT *glyph;
@@ -495,7 +494,7 @@ _TEXT *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 firstOption, 
         glyphIndex = 0x147;
     }
     glyph->cachedItem = frTranslateFont2GS(glyph, glyphIndex);
-    frFontFillGlyphMetrics(glyph, glyphIndex);
+    frFontFillGlyphMetrics((FrFontGlyphMeasureWork *)glyph, glyphIndex);
     if (glyph->renderValueOrSetupOrShade.setupBytes.sharedFlags & 0x10) {
         glyph->y = frFontGetInitialGlyphY((s8)fontIndex, glyphIndex);
     } else {
@@ -989,7 +988,7 @@ u32 frGetStrWidth2(_FRQ *glyphChain) {
 
 u32 frFontGetGlyphCellWidth(u8 fontIndex);
 u32 frFontGetGlyphCellHeight(u8 fontIndex);
-extern void frFontFillGlyphMetrics(void *opaqueWork, s32 glyphIndex);
+extern void frFontFillGlyphMetrics(FrFontGlyphMeasureWork *work, s32 glyphIndex);
 
 s32 frFontMeasureTextAdvance(const u8 *text, u8 fontIndex, u8 mode) {
     FrFontGlyphMeasureWork work;
