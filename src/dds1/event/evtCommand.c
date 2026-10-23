@@ -114,7 +114,7 @@ void evtPathStart(dds3Basic_t *unit);
 
 void evtPathDir(dds3Basic_t *worldNode, u32 direction);
 
-void evtPathLoop(void *unit, s32 enabled);
+void evtPathLoop(dds3Basic_t *unit, s32 enabled);
 
 
 extern char D_003AC968[]; /* "BE ok! (%d)\n" */
@@ -1313,4 +1313,3 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC9F8);
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003ACA40);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003ACA58);
-
