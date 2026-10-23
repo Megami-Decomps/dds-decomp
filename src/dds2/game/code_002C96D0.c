@@ -60,7 +60,7 @@
 extern void effLoadFlashTextures(void);
 extern void effLoadScalyTexture(void);
 extern void effLoadWindTexture(void);
-extern s32 slSaveWriteFile(char *fileName, void *dataAddressSlot, u32 *dataSizeSlot, void *continuation, void *pendingRequestStatus);
+extern s32 slSaveWriteFile(char *fileName, void *dataAddressSlot, u32 *dataSizeSlot, void *continuation, struct FileRequest **pendingRequestStatus);
 extern void dds3SoftResetOn(void);
 extern s32 slSaveData_chdir(void);
 extern void frEnableMode(s32 mask);
@@ -1816,7 +1816,7 @@ s32 fileBeginLabeledSlotWrite(void) {
     return slSaveWriteFile(D_0042B6B8, &D_00437D90, &D_00437D94, (void *)fileWriteIconSysComplete, 0);
 }
 
-extern s32 slSaveWriteFile(char *fileName, void *dataAddressSlot, u32 *dataSizeSlot, void *continuation, void *pendingRequestStatus);
+extern s32 slSaveWriteFile(char *fileName, void *dataAddressSlot, u32 *dataSizeSlot, void *continuation, struct FileRequest **pendingRequestStatus);
 extern s32 fileBeginLabeledSlotWrite(void);
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B698);
@@ -1903,14 +1903,14 @@ s32 slSaveData_deleteIconSys(void) {
 extern u32 *fileWriteDataAddressSlot;
 extern u32 *fileWriteDataSizeSlot;
 extern u32 fileWriteContinuation;
-extern u32 fileWritePendingRequestSlot;
+extern struct FileRequest **fileWritePendingRequestSlot;
 extern s32 slSaveProc_openFile(void);
 
-s32 slSaveWriteFile(char *fileName, void *dataAddressSlot, u32 *dataSizeSlot, void *continuation, void *pendingRequestStatus) {
+s32 slSaveWriteFile(char *fileName, void *dataAddressSlot, u32 *dataSizeSlot, void *continuation, struct FileRequest **pendingRequestStatus) {
     fileWriteDataAddressSlot = (u32 *)dataAddressSlot;
     fileWriteDataSizeSlot = dataSizeSlot;
     fileWriteContinuation = (u32)continuation;
-    fileWritePendingRequestSlot = (u32)pendingRequestStatus;
+    fileWritePendingRequestSlot = pendingRequestStatus;
     sdfMcFuncOpen(fileMemoryCardRequestIndex, fileName, 0x203);
     return (s32)slSaveProc_openFile;
 }
@@ -1926,7 +1926,7 @@ s32 slSaveProc_openFile(void) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
-        if (fileWritePendingRequestSlot != 0 && *(u32 *)fileWritePendingRequestSlot != 0) {
+        if (fileWritePendingRequestSlot != 0 && *fileWritePendingRequestSlot != 0) {
             return (s32)slSaveProc_waitDataReady;
         }
         sdfMcFuncWrite(fileSaveFileDescriptor, *fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
