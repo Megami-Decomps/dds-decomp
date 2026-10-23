@@ -143,7 +143,7 @@ extern char mnuNumberSpriteFormat[];
 extern EffectPair D_00437878[];
 
 
-extern s32 fldGetModeFrameRecordIndex(s32);
+extern s32 fldGetModeFrameRecordIndex(MenuSlotState *);
 
 
 
@@ -1359,8 +1359,8 @@ void mnuDrawTerminalSelectedSlots(s32 state) {
 }
 
 /* Scene modes 1 and 2 select different entries from the same frame table. */
-s32 fldGetModeFrameRecordIndex(s32 object) {
-    switch (((MenuSlotState *)object)->mode) {
+s32 fldGetModeFrameRecordIndex(MenuSlotState *state) {
+    switch (state->mode) {
     case 1:
         return 0x32;
     case 2:
@@ -1373,7 +1373,7 @@ s32 fldGetModeFrameRecordIndex(s32 object) {
 u8 mnuGetTerminalFrameFade(MenuSlotState *scene) {
     s32 index;
 
-    index = fldGetModeFrameRecordIndex((s32)scene);
+    index = fldGetModeFrameRecordIndex(scene);
     return *(u8 *)&scene->resourceBank[0]->workEntries[index].geometry.cornerColors[0];
 }
 
@@ -1431,7 +1431,7 @@ void mnuDrawTerminalFrameAndSlotLabels(s32 state) {
         {0, 0}, {0x200, 0xF0}, {0x1280, 0xC8},
         {0x840, 0x220}, {0x1500, 0xD0}, {0x1410, 0x1E0}
     };
-    s32 index = fldGetModeFrameRecordIndex(state);
+    s32 index = fldGetModeFrameRecordIndex(work);
     EffectSlotSet *batch;
     BdWork *record;
     u32 progress;
@@ -2206,7 +2206,7 @@ void mnuQueueTerminalCurrencyLabel(s32 fading, s32 state) {
     u32 color;
     char text[16];
 
-    index = fldGetModeFrameRecordIndex(state);
+    index = fldGetModeFrameRecordIndex(work);
     sprintf(text, D_00437868, DDS3_GBWK->header.currency);
     if (fading == 0) {
         /* The scene record supplies the steady label's low packed-color byte. */
@@ -2693,4 +2693,3 @@ INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437868);
 INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437870);
 
 INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437878);
-
