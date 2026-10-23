@@ -6031,7 +6031,7 @@ void fileInvalidateSlotGroup(FileSlotTable *group, u8 *slot) {
 
     if (count != 0) {
         u8 *base = (u8 *)group->slots;
-        p = (FileSlot *)(base + ((group->instances + ((u32)(slot - base) >> 5) * count) << 5));
+        p = (FileSlot *)(base + ((group->instances + ((u32)((u8 *)slot - base) >> 5) * count) << 5));
         for (i = 0; i < count; i++) {
             p->state = -1;
             p++;
@@ -6040,7 +6040,7 @@ void fileInvalidateSlotGroup(FileSlotTable *group, u8 *slot) {
 }
 
 /* Same, but first copies the slot at `slot` over the group's first slot. */
-void fileCopyAndInvalidateSlotGroup(FileSlotTable *group, u8 *slot) {
+void fileCopyAndInvalidateSlotGroup(FileSlotTable *group, FileSlot *slot) {
     FileKeyBlock *dims = (FileKeyBlock *)group->data0;
     s32 rows = dims->rows;
     s32 columns = dims->columns;
@@ -6049,8 +6049,8 @@ void fileCopyAndInvalidateSlotGroup(FileSlotTable *group, u8 *slot) {
 
     if (count != 0) {
         u8 *base = (u8 *)group->slots;
-        p = (FileSlot *)(base + ((group->instances + ((u32)(slot - base) >> 5) * count) << 5));
-        *p = *(FileSlot *)slot;
+        p = (FileSlot *)(base + ((group->instances + ((u32)((u8 *)slot - base) >> 5) * count) << 5));
+        *p = *slot;
         p->state = -1;
     }
 }
@@ -6412,7 +6412,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                             slot->angle *= motion->angleMultiplier;
                             slot->angle += motion->angle;
                             if (prewarm != 0) {
-                                fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
+                                fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, slot);
                                 slot->state++;
                             }
                             toSpawn--;
@@ -6617,7 +6617,7 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                             slot->angle *= motion->angleMultiplier;
                             slot->angle += motion->angle;
                             if (prewarm != 0) {
-                                fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
+                                fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, slot);
                                 slot->state++;
                             }
                             toSpawn--;
@@ -6850,7 +6850,7 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                             slot->angle *= motion->angleMultiplier;
                             slot->angle += motion->angle;
                             if (prewarm != 0) {
-                                fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
+                                fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, slot);
                                 slot->state++;
                             }
                             toSpawn--;
@@ -7086,7 +7086,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                             slot->angle *= motion->angleMultiplier;
                             slot->angle += motion->angle;
                             if (prewarm != 0) {
-                                fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
+                                fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, slot);
                                 slot->state++;
                             }
                             toSpawn--;
@@ -7302,7 +7302,7 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                             slot->angle *= motion->angleMultiplier;
                             slot->angle += motion->angle;
                             if (prewarm != 0) {
-                                fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
+                                fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, slot);
                                 slot->state++;
                             }
                             toSpawn--;
