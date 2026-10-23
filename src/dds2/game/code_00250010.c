@@ -889,7 +889,7 @@ void evtDrawSelectedEntryLabel(sdfDrawTag_t *list, EvtRuntimeGroup *selected, s3
 }
 
 /* Draw one event-group row, highlighting the entry under the cursor. */
-void evtDrawEntrySelectionRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtDrawEntrySelectionRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     char names[33][30] = {
         "STAGE",
         "UNIT",
@@ -951,11 +951,11 @@ void evtDrawEntrySelectionRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx
         } else {
             style = 0;
         }
-        sdfDrawTagLink((sdfDrawTag_t *)list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004374D0, names[group->type]));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004374D0, names[group->type]));
     }
 }
 
-extern void evtDrawEntrySelectionRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx);
+extern void evtDrawEntrySelectionRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, EvtRuntime *ctx);
 
 s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *ctx) {
     sdfDrawTag_t *list;
