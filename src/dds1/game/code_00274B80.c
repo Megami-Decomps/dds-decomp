@@ -39,7 +39,7 @@ extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
 extern s32 mnuGetSelectionFromFlags(datUnitWork_t *);
 extern s32 evtStageTestSelectEntry(s32, s32, s32);
-extern void mnuConfigurePartyPanelPage(s32, s32, s32, s32);
+extern void mnuConfigurePartyPanelPage(MenuPageWindow *, s32, s32, s32);
 
 extern s32 mnuLookupRangeEntry(u16);
 extern u16 mnuGetAdjustedEntryValue(s32, datUnitWork_t *);
@@ -907,8 +907,7 @@ s32 mnuStepStaffCampPageControl(dds3ProcessID_t *callback) {
 extern void mnuResetPartyPanelFade(MenuPageWindow *, s32, s32, s32);
 extern void mnuSetPageParams(MenuSprites *, s32);
 
-void mnuConfigurePartyPanelPage(s32 windowAddress, s32 mode, s32 staffImage, s32 staffMode) {
-    MenuPageWindow *window = (MenuPageWindow *)windowAddress;
+void mnuConfigurePartyPanelPage(MenuPageWindow *window, s32 mode, s32 staffImage, s32 staffMode) {
     s32 fadeDirection = 1;
     s32 selectedIndex = window->lists[0]->cursor->index;
     MenuPageSlot *slot = &window->slots[selectedIndex];
@@ -986,7 +985,7 @@ s32 mnuInitializeStaffPartyScene(dds3ProcessID_t *task) {
         menu->motionSelection = 10;
     }
     evtStageTestSelectEntry(record->unitId, menu->motionSelection, 0);
-    mnuConfigurePartyPanelPage((s32)page, 1, menu->staffView, menu->staffMode);
+    mnuConfigurePartyPanelPage(page, 1, menu->staffView, menu->staffMode);
     return 1;
 }
 
@@ -1004,7 +1003,7 @@ s32 mnuStaffReleasePanelScene(dds3ProcessID_t *task) {
     MenuPageWindow *entryList = &((CampMenuContext *)context)->partyWindow;
     CampMenuContext *work = (CampMenuContext *)context;
 
-    mnuConfigurePartyPanelPage((s32)entryList, 0, menu->staffView, menu->staffMode);
+    mnuConfigurePartyPanelPage(entryList, 0, menu->staffView, menu->staffMode);
     btlStopStage();
     mnuClearEntries(entryList);
     mnuReleasePartyIconBundles(entryList);
@@ -1102,10 +1101,10 @@ s32 mnuStaffBrowsePartyUpdate(dds3ProcessID_t *callback) {
         if (inputFlags & MNU_STAFF_VIEW_TOGGLE_MASK) {
             if (menuWork->staffMode == 0) {
                 menuWork->staffMode = 1;
-                mnuConfigurePartyPanelPage((s32)&((CampMenuContext *)context)->partyWindow, 3, menuWork->staffView, 1);
+                mnuConfigurePartyPanelPage(&((CampMenuContext *)context)->partyWindow, 3, menuWork->staffView, 1);
             } else {
                 menuWork->staffMode = 0;
-                mnuConfigurePartyPanelPage((s32)&((CampMenuContext *)context)->partyWindow, 2, menuWork->staffView, 0);
+                mnuConfigurePartyPanelPage(&((CampMenuContext *)context)->partyWindow, 2, menuWork->staffView, 0);
             }
             menuWork->idleFrames = 0;
         }
