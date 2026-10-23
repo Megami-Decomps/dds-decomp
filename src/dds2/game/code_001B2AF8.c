@@ -11650,14 +11650,15 @@ s32 btlFindSceneSlotById(BtlSceneSlot *request) {
     return -1;
 }
 
-u8 *btlFindSceneSlotRecord(s32 index) {
+BtlSceneSlot *btlFindSceneSlotRecord(BtlSceneSlot *entry) {
     BtlState *scene = (BtlState *)btlGetRuntime();
-    s32 slot = btlFindSceneSlotById((BtlSceneSlot *)index);
-    u8 *entry = 0;
+    s32 slot = btlFindSceneSlotById(entry);
+    BtlSceneSlot *record = 0;
+
     if (slot != -1) {
-        entry = (u8 *)&scene->slots[slot];
+        record = &scene->slots[slot];
     }
-    return entry;
+    return record;
 }
 
 s32 btlFadeStaleSceneSlots(s32 lastFadeIndex) {
@@ -11668,7 +11669,7 @@ s32 btlFadeStaleSceneSlots(s32 lastFadeIndex) {
     BtlSceneSlot *slot = work->slots;
     for (; i < 8; i++, slot++, record++) {
         if (record->slot.id != slot->id) {
-            if (btlFindSceneSlotRecord((s32)record) == 0) {
+            if (btlFindSceneSlotRecord(&record->slot) == 0) {
                 if (record->alpha != 0) {
                     record->alpha = record->alpha - 8;
                     changed = 1;
