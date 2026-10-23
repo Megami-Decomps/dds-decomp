@@ -1590,7 +1590,7 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
     s32 complete = 1;
     sdfDrawTag_t *list;
     sdfDrawTag_t *tiles;
-    u64 *packet;
+    sdfPrimTransPacket_t *packet;
     u32 row;
     u32 column;
     u32 vertex;
@@ -1625,15 +1625,15 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
     if (color & 0xFF000000) {
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
-        packet = (u64 *)sdfGrAllocPacketBuff(0x40);
-        packet[0] = 3;
-        packet[1] = 0x5000000310000000ULL;
-        packet[2] = 0x1000000000008002ULL;
-        packet[3] = 0xE;
-        packet[4] = 0x30003;
-        packet[5] = 0x47;
-        packet[6] = 0x44;
-        packet[7] = 0x42;
+        packet = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+        packet->header.dmaTag = 3;
+        packet->header.vifCommands = 0x5000000310000000ULL;
+        packet->header.gifTag = 0x1000000000008002ULL;
+        packet->header.gifRegisters = 0xE;
+        packet->registers.test.value = 0x30003;
+        packet->registers.test.registerId = 0x47;
+        packet->registers.alpha.value = 0x44;
+        packet->registers.alpha.registerId = 0x42;
         sdfDrawTagLink(list, (u32)packet);
         btlBuildOverlayQuadPacket(list, 0x40, backgroundColor, -0x100);
         D_00380708.append(&D_00380708, list);
@@ -1641,15 +1641,15 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
     if (btlRuntimeState.options & 1) {
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
-        packet = (u64 *)sdfGrAllocPacketBuff(0x40);
-        packet[0] = 3;
-        packet[1] = 0x5000000310000000ULL;
-        packet[2] = 0x1000000000008002ULL;
-        packet[3] = 0xE;
-        packet[4] = 0x30003;
-        packet[5] = 0x47;
-        packet[6] = ((u64)((u32)color >> 24) << 32) | 0x64;
-        packet[7] = 0x42;
+        packet = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+        packet->header.dmaTag = 3;
+        packet->header.vifCommands = 0x5000000310000000ULL;
+        packet->header.gifTag = 0x1000000000008002ULL;
+        packet->header.gifRegisters = 0xE;
+        packet->registers.test.value = 0x30003;
+        packet->registers.test.registerId = 0x47;
+        packet->registers.alpha.value = ((u64)((u32)color >> 24) << 32) | 0x64;
+        packet->registers.alpha.registerId = 0x42;
         sdfDrawTagLink(list, (u32)packet);
         btlDrawScaledHeldTextureQuad(list, 0x40, color, -0x100, 1.0f);
         D_00380608.append(&D_00380608, list);
@@ -1677,15 +1677,15 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
         btlCapturedScreenTileDrawParams.texcoords = coordinates[0];
         height = tanf(D_0037F980.camera.fov * 0.5f) * 1000.0f;
         width = height * 1.333333254f;
-        packet = (u64 *)sdfGrAllocPacketBuff(0x40);
-        packet[0] = 3;
-        packet[1] = 0x5000000310000000ULL;
-        packet[2] = 0x1000000000008002ULL;
-        packet[3] = 0xE;
-        packet[4] = 0x30003;
-        packet[5] = 0x47;
-        packet[6] = 0x8000000064ULL;
-        packet[7] = 0x42;
+        packet = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+        packet->header.dmaTag = 3;
+        packet->header.vifCommands = 0x5000000310000000ULL;
+        packet->header.gifTag = 0x1000000000008002ULL;
+        packet->header.gifRegisters = 0xE;
+        packet->registers.test.value = 0x30003;
+        packet->registers.test.registerId = 0x47;
+        packet->registers.alpha.value = 0x8000000064ULL;
+        packet->registers.alpha.registerId = 0x42;
         sdfDrawTagLink(tiles, (u32)packet);
         xStep = btlRuntimeState.unk20 << 5;
         yStep = btlRuntimeState.unk24 << 5;
@@ -1804,15 +1804,15 @@ draw_tile:
         if ((s32)color >= 0) {
             btlRuntimeState.unk30 += btlRuntimeState.unk34;
         }
-        packet = (u64 *)sdfGrAllocPacketBuff(0x40);
-        packet[0] = 3;
-        packet[1] = 0x5000000310000000ULL;
-        packet[2] = 0x1000000000008002ULL;
-        packet[3] = 0xE;
-        packet[4] = 0x717FB;
-        packet[5] = 0x47;
-        packet[6] = 0x44;
-        packet[7] = 0x42;
+        packet = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+        packet->header.dmaTag = 3;
+        packet->header.vifCommands = 0x5000000310000000ULL;
+        packet->header.gifTag = 0x1000000000008002ULL;
+        packet->header.gifRegisters = 0xE;
+        packet->registers.test.value = 0x717FB;
+        packet->registers.test.registerId = 0x47;
+        packet->registers.alpha.value = 0x44;
+        packet->registers.alpha.registerId = 0x42;
         sdfDrawTagLink(tiles, (u32)packet);
         D_00380628.append(&D_00380628, tiles);
     }
