@@ -457,7 +457,7 @@ void btlUpdateEscapeCameraNoOp(void);
 
 void btlInitLinkedUnitActionCursor(ActionStateLink *linkState);
 
-void btlInitializeCursorForLinkedAction(s32 action);
+void btlInitializeCursorForLinkedAction(BtlLinkedCommand *action);
 
 void btlUpdateSingleActionCameraNoOp(void);
 
