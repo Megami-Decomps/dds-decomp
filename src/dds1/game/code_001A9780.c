@@ -9353,7 +9353,7 @@ s32 btlUpdateTargetSelectionTask(dds3ProcessID_t *handle) {
     return 0;
 }
 
-extern s32 btlBuildEligibleTargetIndexList(void *source, BtlIndexList *list, s32, s32, s32);
+extern s32 btlBuildEligibleTargetIndexList(BtlTask *source, BtlIndexList *list, s32, s32, s32);
 
 extern u32 btlSelectCommandTargetPolicy(void *source, BtlIndexList *list, s32);
 

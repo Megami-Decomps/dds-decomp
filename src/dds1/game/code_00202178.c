@@ -102,7 +102,7 @@ extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
 extern s32 btlReadCurrentUnitMp(datUnitWork_t *);
 
-extern s32 btlBuildEligibleTargetIndexList(void *, BtlIndexList *, s32, s32, s32);
+extern s32 btlBuildEligibleTargetIndexList(BtlTask *, BtlIndexList *, s32, s32, s32);
 
 extern s32 btlUnitBlocksElementQueryForGroup(BtlUnit *, s32, u32);
 
@@ -693,7 +693,7 @@ s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
         mode = 0;
         break;
     }
-    btlBuildEligibleTargetIndexList((void *)actor, list, 1, 2, 0);
+    btlBuildEligibleTargetIndexList((BtlTask *)actor, list, 1, 2, 0);
     count = btlGetIndexListCount(list);
     if (count == 0) {
         mode = 0;
@@ -733,7 +733,7 @@ s32 btlSelectTargetsByTargetType(s32 actor) {
     s32 candidateCount;
     s32 result;
 
-    btlBuildEligibleTargetIndexList((void *)actor, list, 2, 0, 0);
+    btlBuildEligibleTargetIndexList((BtlTask *)actor, list, 2, 0, 0);
     if (targetType != 0) {
         btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
         btlFreeIndexList(list);
@@ -762,7 +762,7 @@ s32 btlSelectTargetsByTargetType(s32 actor) {
 
 s32 btlAppendSelfAfterTargetScan(s32 actor) {
     BtlIndexList *list = btlAllocateIndexList(13);
-    btlBuildEligibleTargetIndexList((void *)actor, list, 1, 1, 0);
+    btlBuildEligibleTargetIndexList((BtlTask *)actor, list, 1, 1, 0);
     btlGetIndexListCount(list);
     btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, ((BtlTask *)actor)->unit);
     btlFreeIndexList(list);

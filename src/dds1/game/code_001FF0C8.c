@@ -973,20 +973,20 @@ u8 btlQueryActorOptionAvailability(u32 actorAddress) {
     return result != 0;
 }
 
-extern s32 btlBuildEligibleTargetIndexList(void *, BtlIndexList *, s32, s32, s32);
+extern s32 btlBuildEligibleTargetIndexList(BtlTask *, BtlIndexList *, s32, s32, s32);
 
 /* Query the context's index list, freeing it on both the first success and exhausted-list paths. */
 s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
     u32 entryIndex;
     u32 entryCount;
-    s32 contextAddress;
+    BtlTask *actor;
     BtlIndexList *indexList;
     if (unit->status.flags & 0x400) {
         return 0;
     }
-    contextAddress = (s32)btlActionScratchWork->actor;
+    actor = btlActionScratchWork->actor;
     indexList = btlAllocateIndexList(13);
-    btlBuildEligibleTargetIndexList((void *)contextAddress, indexList, 2, 0, 0);
+    btlBuildEligibleTargetIndexList(actor, indexList, 2, 0, 0);
     entryCount = btlGetIndexListCount(indexList);
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
         if (btlAreUnitStatusAndEntryFlagsClear((BtlUnit *)btlGetIndexListEntry(indexList, entryIndex)) != 0) {
