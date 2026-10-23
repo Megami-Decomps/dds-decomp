@@ -1944,7 +1944,7 @@ BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *value, s32 option, char *
 BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *effect,
         BtlUnit *sourceOwner, s32 source, s32 target, BtlUnit *actor,
         s32 frames);
-BtlRuntimeTask *sndCreateSkillSeTask(s32 *taskArgs, u16 optionId);
+BtlRuntimeTask *sndCreateSkillSeTask(const ActiveSoundNode *, u16 optionId);
 BtlRuntimeTask *btlCreateMaskedActorEntryUpdateTask(BtlUnit *unit,
         BtlOperandEntry *block);
 BtlRuntimeTask *btlCreateQueuedActorEntrySelectionTask(BtlUnit *unit,
@@ -2189,7 +2189,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
                 groupTask->startDelay = groupDelay;
                 groupTask->ownerId = actionOwner;
                 btlStartTask(groupTask);
-                task = sndCreateSkillSeTask((s32 *)unit->listNode, 2);
+                task = sndCreateSkillSeTask(unit->listNode, 2);
                 task->startCondition.kind = 7;
                 task->startCondition.value.handle = masterOwner;
                 task->startDelay = groupDelay;
@@ -2428,7 +2428,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
             groupTask->endCondition.value.handle = actionOwner;
             groupTask->ownerId = btlAdvanceRuntimeSequenceCounter();
             btlStartTask(groupTask);
-            task = sndCreateSkillSeTask((s32 *)unit->listNode, 1);
+            task = sndCreateSkillSeTask(unit->listNode, 1);
             task->startCondition.kind = 7;
             task->startCondition.value.handle = masterOwner;
             task->endCondition.kind = 7;

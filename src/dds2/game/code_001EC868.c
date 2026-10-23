@@ -34,6 +34,7 @@
 #include "snd_slot.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
+#include "active_sound_node.h"
 #include "sdf_resource.h"
 #include "sdf_model.h"
 #include "btl.h"
@@ -9157,7 +9158,7 @@ s32 sndPlaySkillSeTask(u32 *taskArgs) {
     return 0;
 }
 
-BtlRuntimeTask *sndCreateSkillSeTask(s32 *taskArgs, u16 optionId) {
+BtlRuntimeTask *sndCreateSkillSeTask(const ActiveSoundNode *node, u16 optionId) {
     BtlRuntimeTask *task = btlAllocTask(8);
     BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
@@ -9165,7 +9166,7 @@ BtlRuntimeTask *sndCreateSkillSeTask(s32 *taskArgs, u16 optionId) {
     task->callback = sndPlaySkillSeTask;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = btlGetTaskArguments(task);
-    args->value = taskArgs[2];
+    args->value = node->packedTrackPosition;
     args->optionId = optionId;
     return task;
 }
