@@ -4,6 +4,8 @@
 #include "common.h"
 #include "kwln.h"
 
+struct sdfMemHandle_t;
+
 /* One 4-byte script operand slot; DDS1/2 script/scrTraceCode.c via scrProcessWork_s. */
 typedef union ScrStackValue {
     s32 i;
@@ -58,7 +60,7 @@ typedef struct scrProcessWork_s {
     s32 resourceIndex;
     s32 timer;
     s32 cmdTimer;
-    void *scriptHandle;
+    struct sdfMemHandle_t *scriptHandle; /* 0xD8: allocation descriptor, not scriptHeader data */
     s32 *localInt;
     f32 *localFloat;
     dds3ProcessID_t *task;       /* 0xE4: scheduler object returned by dds3StartProcess */
@@ -69,6 +71,8 @@ typedef struct scrProcessWork_s {
 
 typedef char ScrData_size_must_be_0xF4[
     (sizeof(scrProcessWork_s) == 0xF4) ? 1 : -1];
+typedef char ScrData_scriptHandle_at_0xD8[
+    ((u32)&((scrProcessWork_s *)0)->scriptHandle == 0xD8) ? 1 : -1];
 
 extern scrProcessWork_s *nowpwork;
 extern scrProcessWork_s *scrHandleFirst;
