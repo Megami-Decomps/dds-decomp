@@ -28,15 +28,15 @@ extern void fileLinkCloseWait(FileManWork *work, FileRequest *job);
 extern void fileUnlinkCloseWait(FileManWork *work, FileRequest *job);
 
 extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path,
-                        s32 (*callback)(void *, s32, s32, s32, FileTransferJob *), FileTransferJob *job);
+                        s32 (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, FileTransferJob *), FileTransferJob *job);
 
 extern sdfFileCmdHandle_t *sdfFileCmdWriteOpen(const char *path,
-                        s32 (*callback)(void *, s32, s32, s32, FileTransferJob *), FileTransferJob *job,
+                        s32 (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, FileTransferJob *), FileTransferJob *job,
                         s32 options);
 
 extern s32 sdfPrintf(const char *fmt, ...);
 
-s32 pacLoadCallback(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
+s32 pacLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
     FileManWork *work = &fileQueueHead;
     s32 saved;
 
@@ -107,7 +107,7 @@ void fileRead(FileTransferJob *job) {
 }
 
 /* Drive allocation, chunked reads, close, and completion-list handoff. */
-s32 fileLoadCallback(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
+s32 fileLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
     FileManWork *work = &fileQueueHead;
     s32 saved;
 
@@ -206,7 +206,7 @@ void fileWrite(FileTransferJob *job) {
 }
 
 /* Advance a chunked write, then close and queue its completion callback. */
-s32 fileSaveCallback(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
+s32 fileSaveCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
     FileManWork *work = &fileQueueHead;
     s32 saved;
 
