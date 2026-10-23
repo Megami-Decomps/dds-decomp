@@ -191,7 +191,7 @@ extern u32 fldCameraColorEnabled;
 
 extern sdfTexHandle_t *fldRainTextureReference;
 
-extern u32 fldPlayerObject;
+extern dds3Basic_t *fldPlayerObject;
 
 extern u8 D_003BAB3C;
 
@@ -1357,7 +1357,7 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
         viewIndex = D_00332E30.sets[D_003BAE38].messages[target - 10].view & 0x7F;
     }
     if (viewIndex != 0) {
-        unit = ((EffectObjectData *)((dds3Basic_t *)fldPlayerObject)->data)->transitionWork;
+        unit = ((EffectObjectData *)fldPlayerObject->data)->transitionWork;
         if (unit != NULL) {
             if (D_00332E30.views[viewIndex].player != 0) {
                 fldDisableCameraObjectFlag();
@@ -1368,7 +1368,7 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
         if (D_00332E30.views[viewIndex].positionName[0] != 0) {
             node = dds3SceneBasicSearchName(world, (const u8 *)D_00332E30.views[viewIndex].positionName);
             if (node != NULL) {
-                evtSetUnitPos(((dds3Basic_t *)fldPlayerObject)->key, node->key);
+                evtSetUnitPos(fldPlayerObject->key, node->key);
             }
         }
         if (D_00332E30.views[viewIndex].cameraName[0] != 0) {
@@ -1413,7 +1413,7 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
             }
         }
         /* The action callbacks can replace the player's transition work. */
-        unit = ((EffectObjectData *)((dds3Basic_t *)fldPlayerObject)->data)->transitionWork;
+        unit = ((EffectObjectData *)fldPlayerObject->data)->transitionWork;
         if (unit != NULL) {
             unit->owner->flags &= ~1;
         }
