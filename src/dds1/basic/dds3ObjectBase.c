@@ -370,7 +370,7 @@ struct SdfPoolNode;
 extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 
-void dds3DrawObjectWithGradientOverlay(void *object) {
+void dds3DrawObjectWithGradientOverlay(dds3Basic_t *object) {
     dds3ObjectBaseControlWorkData_t *base;
     dds3ModelHandle_t *context;
     sdfModelRootNode_t *inner;
