@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
 import encounter_flow  # noqa: E402
+import corpus
 import field_graph  # noqa: E402
 import flw0_profiles  # noqa: E402
 import inf  # noqa: E402
@@ -132,6 +133,7 @@ class FieldGraphTests(unittest.TestCase):
         for game, expected_counts in expected.items():
             with self.subTest(game=game):
                 root = ROOT / f"src/{game}"
+                corpus.require(root / "data", root / "scripts")
                 encounter_table, battle_symbols = encounter_flow.load_sources(
                     root / "data/battle"
                 )
@@ -204,6 +206,7 @@ class FieldGraphTests(unittest.TestCase):
         field_dir = ROOT / "src/dds1/data/field"
         script_source = ROOT / "src/dds1/scripts/field/f022.bfasm"
         wap_source = field_dir / "f022.wapasm"
+        corpus.require(script_source, wap_source, field_dir / "f022.infasm")
         references = wap.load_references(
             script_source, field_dir / "f022.infasm"
         )
@@ -242,6 +245,7 @@ class FieldGraphTests(unittest.TestCase):
     def test_links_event_placements_to_reachable_script_procedures(self) -> None:
         source_script = ROOT / "src/dds1/scripts/field/f011.bfasm"
         field_source = ROOT / "src/dds1/data/field/f011_001.fldasm"
+        corpus.require(source_script, field_source)
         with tempfile.TemporaryDirectory() as temporary:
             script_dir = Path(temporary) / "scripts/field"
             script_dir.mkdir(parents=True)
@@ -289,6 +293,7 @@ class FieldGraphTests(unittest.TestCase):
         field_dir = ROOT / "src/dds1/data/field"
         source_script = ROOT / "src/dds1/scripts/field/f025.bfasm"
         event_source_dir = ROOT / "src/dds1/scripts/event"
+        corpus.require(source_script, event_source_dir)
         with tempfile.TemporaryDirectory() as temporary:
             script_dir = Path(temporary) / "scripts/field"
             event_dir = script_dir.parent / "event"
