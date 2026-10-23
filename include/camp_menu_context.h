@@ -21,13 +21,17 @@ typedef struct CampMenuContext {
     s32 actor;                /* 0x78 */
     EffectSlotSet *staffVariant; /* 0x7C: passed with display to menu drawing */
     s32 staffParam;           /* 0x80 */
-    u8 pad84[0x5C];
+    u8 pad84[0x40];
+    EffectSlotSet *selectionResources[6]; /* 0xC4: party-status marker slots */
+    u8 padDC[4];
     s32 variant;              /* 0xE0 */
     s32 unkE4;               /* 0xE4: forwarded to the window resource helper */
     EffectSlotSet *unkE8;     /* 0xE8: grid-slot resource */
     EffectSlotSet *unkEC;     /* 0xEC: window texture variant resource */
-    s32 panelResource;        /* 0xF0: grid resource handle */
-    u8 padF4[0x24];
+    union {
+        s32 panelResource; /* 0xF0: first panel resource, used by other menu paths */
+        EffectSlotSet *panelResources[10]; /* 0xF0: party-unit panel resources */
+    };
     s32 unk118;               /* 0x118: window sprite slot resource */
     const void *partySelectionLayout; /* 0x11C: copied panel layout address */
     s32 unk120;
@@ -47,5 +51,12 @@ typedef struct CampMenuContext {
     u8 pad910[0x10];
     MenuProfilePanel *extraResource; /* 0x920 */
 } CampMenuContext;
+
+typedef char CampMenuContext_selectionResources_at_0xC4[
+    ((u32)&((CampMenuContext *)0)->selectionResources == 0xC4) ? 1 : -1];
+typedef char CampMenuContext_panelResources_at_0xF0[
+    ((u32)&((CampMenuContext *)0)->panelResources == 0xF0) ? 1 : -1];
+typedef char CampMenuContext_size_must_be_0x924[
+    (sizeof(CampMenuContext) == 0x924) ? 1 : -1];
 
 #endif
