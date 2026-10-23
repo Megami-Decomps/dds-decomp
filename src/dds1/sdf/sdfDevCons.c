@@ -4,6 +4,7 @@
 #include "sdf.h"
 #include "sdf_dev_cons.h"
 #include "sdf_dev_cons_stack_packets.h"
+#include "sdf_console_packet.h"
 #include "ee_mmi.h"
 
 #define SDF_DEVCONS_CELL_BYTES 2
@@ -215,7 +216,7 @@ void sdfDevConsDrawBG(sdfDevConsCB_tag *console, sdfDevConsDrawCB_t *packetBuffe
  * The native do-loops have no zero-dimension guard. */
 void sdfDevConsDraw(sdfDevConsCB_tag *console, sdfDevConsDrawCB_t *buffers) {
     u8 *cells;
-    vu64 *writeCursor;
+    volatile SdfConsoleGlyph *writeCursor;
     u8 *packetStart;
     s32 row;
     s32 column;
@@ -236,7 +237,7 @@ void sdfDevConsDraw(sdfDevConsCB_tag *console, sdfDevConsDrawCB_t *buffers) {
     }
     cellStep = ((u32)buffers->rowStep << 16) | 0xC0;
     row = 0;
-    writeCursor = (vu64 *)buffers->writeCursor;
+    writeCursor = (volatile SdfConsoleGlyph *)buffers->writeCursor;
     packetStart = buffers->packetStart;
     cells = console->cells;
     y = console->screenOriginY;
@@ -251,17 +252,17 @@ void sdfDevConsDraw(sdfDevConsCB_tag *console, sdfDevConsDrawCB_t *buffers) {
                 if (buffers->bufferBytes < (u8 *)writeCursor - packetStart + 0x50) {
                     buffers->writeCursor = (u8 *)writeCursor;
                     sdfDevConsDrawFlush(buffers);
-                    writeCursor = (vu64 *)buffers->writeCursor;
+                    writeCursor = (volatile SdfConsoleGlyph *)buffers->writeCursor;
                     packetStart = buffers->packetStart;
                 }
                 glyph = sdfDevConsFontUvTable[character - 0x20];
                 color = sdfDevConsColorTable[attribute];
-                writeCursor[0] = color;
-                writeCursor[1] = glyph;
-                writeCursor[2] = top;
-                writeCursor[3] = glyph + 0xC000C0;
-                writeCursor[4] = top + cellStep;
-                writeCursor += 5;
+                writeCursor->color = color;
+                writeCursor->firstUv = glyph;
+                writeCursor->firstPosition = top;
+                writeCursor->secondUv = glyph + 0xC000C0;
+                writeCursor->secondPosition = top + cellStep;
+                writeCursor++;
             }
             column++;
             top += 0xC0;
