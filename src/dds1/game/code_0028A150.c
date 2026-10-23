@@ -6021,7 +6021,7 @@ void fileSampleKeyTracks(FileSlot *out, FileKeyBlock *block, s32 frame, f32 *tar
 
 
 /* Invalidates the cells x rows slots of the group that starts at `slot`. */
-void fileInvalidateSlotGroup(FileSlotTable *group, u8 *slot) {
+void fileInvalidateSlotGroup(FileSlotTable *group, FileSlot *slot) {
     FileKeyBlock *dims = (FileKeyBlock *)group->data0;
     s32 rows = dims->rows;
     s32 columns = dims->columns;
@@ -6302,7 +6302,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
             do {
                 if (slot->state >= length) {
                     slot->state = duration != 0 ? -2 : -1;
-                    fileInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
+                    fileInvalidateSlotGroup((FileSlotTable *)record, slot);
                 }
                 frame = slot->state;
                 if (frame != -2) {
@@ -6539,7 +6539,7 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
             do {
                 if (slot->state >= length) {
                     slot->state = duration != 0 ? -2 : -1;
-                    fileInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
+                    fileInvalidateSlotGroup((FileSlotTable *)record, slot);
                 }
                 frame = slot->state;
                 if (frame != -2) {
@@ -6759,7 +6759,7 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
             do {
                 if (slot->state >= length) {
                     slot->state = duration != 0 ? -2 : -1;
-                    fileInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
+                    fileInvalidateSlotGroup((FileSlotTable *)record, slot);
                 }
                 frame = slot->state;
                 if (frame != -2) {
@@ -7001,7 +7001,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
             do {
                 if (slot->state >= length) {
                     slot->state = duration != 0 ? -2 : -1;
-                    fileInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
+                    fileInvalidateSlotGroup((FileSlotTable *)record, slot);
                 }
                 frame = slot->state;
                 if (frame != -2) {
@@ -7214,7 +7214,7 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
             do {
                 if (slot->state >= length) {
                     slot->state = duration != 0 ? -2 : -1;
-                    fileInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
+                    fileInvalidateSlotGroup((FileSlotTable *)record, slot);
                 }
                 frame = slot->state;
                 if (frame != -2) {
