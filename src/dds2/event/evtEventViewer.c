@@ -484,7 +484,7 @@ extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *resource, void *position,
 extern void dds3StartBEDEffectObjectBasic(dds3Basic_t *obj, u32 entryId);
 struct EffNodeDescriptor;
 extern dds3Basic_t *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
-extern dds3Basic_t *dds3AddD3PEffectObjectBasic(u32 parameter, void *firstVector, void *secondVector);
+extern dds3Basic_t *dds3AddD3PEffectObjectBasic(void *resourceData, void *firstVector, void *secondVector);
 extern dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 kind, struct EffNodeDescriptor *descriptor);
 extern s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first,
                                                dds3Basic_t *second, dds3Basic_t *third,
@@ -517,7 +517,7 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *track, EvtRunti
         if (track->type == 3) {
             object = effObjSpawnDescriptorBoundEffect((struct EffNodeDescriptor *)track->resourceData, vec0, vec1);
         } else {
-            object = dds3AddD3PEffectObjectBasic((u32)track->resourceData, vec0, vec1);
+            object = dds3AddD3PEffectObjectBasic(track->resourceData, vec0, vec1);
         }
         if (key->p0C.sb[0] != 0) {
             dds3EffectObjectPresetMG12(object);

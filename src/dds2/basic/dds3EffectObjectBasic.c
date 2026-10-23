@@ -497,10 +497,10 @@ dds3Basic_t *effObjCreateBillboardInWorld(bill, firstVector, secondVector)
 }
 
 /* Feed the third source factory's result to the world-bill constructor. */
-dds3Basic_t *dds3AddD3PEffectObjectBasic(u32 parameter, void *firstVector, void *secondVector) {
+dds3Basic_t *dds3AddD3PEffectObjectBasic(void *resourceData, void *firstVector, void *secondVector) {
     struct EffNode *bill;
 
-    bill = effCreateNodeFromParameter(parameter);
+    bill = effCreateNodeFromParameter((u32)resourceData);
     return effObjCreateBillboardInWorld(bill, firstVector, secondVector);
 }
 
