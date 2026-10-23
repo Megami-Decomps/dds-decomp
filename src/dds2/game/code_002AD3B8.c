@@ -462,7 +462,7 @@ s32 mnuReleaseSelectedStaffPageResources(dds3ProcessID_t *task) {
         mnuFreeSpriteStateWork(((MenuStaffContext *)context)->spriteHandle);
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
-    mnuSetStateValue(&((MenuStaffContext *)context)->unkAA50, 0);
+    mnuSetStateValue(&((MenuStaffContext *)context)->gradientFade.active, 0);
     mnuReleaseStaffMenuTextureHandles(&((MenuStaffContext *)context)->resources.baseResources[0]);
     return 1;
 }
@@ -472,7 +472,7 @@ void mnuPrepareStaffSelectionChangeDialog(MenuStaffContext *context,
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     s32 current = mnuGetPartyEntryMenuValue(entry);
 
-    mnuSetStateValue(&context->unkAA50, 1);
+    mnuSetStateValue(&context->gradientFade.active, 1);
     if (current != target) {
         evtCopyEntryStringToActiveWindow(0, (const void *)(datUnitNames + entry->unitId * 0x11));
         evtCopyEntryStringToActiveWindow(1, (const void *)(D_00435E5C + current * 0x19));
@@ -566,7 +566,7 @@ s32 mnuUpdateStaffPartySelectionState(dds3ProcessID_t *task) {
     if (fclChkMessage() != 0) {
         return 0;
     }
-    mnuSetStateValue(&context->unkAA50, 0);
+    mnuSetStateValue(&context->gradientFade.active, 0);
 
     if (menu->firstListState == 0) {
         if (mnuStaffListInput((s32)task) == 0) {
@@ -728,7 +728,7 @@ s32 mnuReleaseStaffSelectionPageResources(dds3ProcessID_t *task) {
         mnuFreeSpriteStateWork(((MenuStaffContext *)context)->spriteHandle);
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
-    mnuSetStateValue(&((MenuStaffContext *)context)->unkAA50, 0);
+    mnuSetStateValue(&((MenuStaffContext *)context)->gradientFade.active, 0);
     mnuReleaseStaffMenuTextureHandles(&((MenuStaffContext *)context)->resources.baseResources[0]);
     return 1;
 }
@@ -738,7 +738,7 @@ void mnuStaffEntrySwapLabels(MenuStaffContext *context,
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     s32 current = mnuGetPartyEntryCurrentId(entry);
 
-    mnuSetStateValue(&context->unkAA50, 1);
+    mnuSetStateValue(&context->gradientFade.active, 1);
     if (target == 0) {
         evtCopyEntryStringToActiveWindow(0, (const void *)(datUnitNames + entry->unitId * 0x11));
         evtCopyEntryStringToActiveWindow(1, (const void *)(D_00435E5C + current * 0x19));
@@ -835,7 +835,7 @@ s32 mnuHandleStaffSelectionPageInput(dds3ProcessID_t *task) {
     if (fclChkMessage() != 0) {
         return 0;
     }
-    mnuSetStateValue(&context->unkAA50, 0);
+    mnuSetStateValue(&context->gradientFade.active, 0);
 
     if (menu->secondListReset == 0) {
         if (mnuHandleStaffSelectionListNavigation((s32)task) == 0) {
@@ -1075,7 +1075,7 @@ s32 mnuReleaseStaffValuePageResources(dds3ProcessID_t *task) {
         mnuFreeSpriteStateWork(((MenuStaffContext *)context)->spriteHandle);
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
-    mnuSetStateValue(&((MenuStaffContext *)context)->unkAA50, 0);
+    mnuSetStateValue(&((MenuStaffContext *)context)->gradientFade.active, 0);
     mnuReleaseStaffMenuTextureHandles(&((MenuStaffContext *)context)->resources.baseResources[0]);
     return 1;
 }
@@ -1088,7 +1088,7 @@ void mnuPrepareStaffValueChangeDialog(MenuStaffContext *context,
     s32 current;
     s32 base;
 
-    mnuSetStateValue(&context->unkAA50, 1);
+    mnuSetStateValue(&context->gradientFade.active, 1);
     current = mnuGetPartyEntryCurrentId(entry);
     evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E5C + current * 0x19));
     evtCopyEntryStringToActiveWindow(1, (const void *)(mnuRingCustomizationStatLabels[menu->thirdListIndex]));
@@ -1195,7 +1195,7 @@ s32 mnuHandleStaffOwnedCatalogInput(dds3ProcessID_t *task) {
     if (fclChkMessage() != 0) {
         return 0;
     }
-    mnuSetStateValue(&context->unkAA50, 0);
+    mnuSetStateValue(&context->gradientFade.active, 0);
     if (menu->thirdListState == 0) {
         window = menu->windows[4];
         if (mnuHandleStaffValuePageInput(task) != 0) {
@@ -1230,7 +1230,7 @@ s32 mnuHandleStaffOwnedCatalogInput(dds3ProcessID_t *task) {
                     if (mnuGetItemRequirementCount(current) != 0) {
                         mnuSetPopupEntry(&context->popupState, mnuRingCustomizationResetPopupEntry);
                     } else {
-                        mnuSetStateValue(&context->unkAA50, 1);
+                        mnuSetStateValue(&context->gradientFade.active, 1);
                         evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E5C + current * 0x19));
                         fclStartMessage(0xB);
                     }
@@ -1238,14 +1238,14 @@ s32 mnuHandleStaffOwnedCatalogInput(dds3ProcessID_t *task) {
                     if (mnuIsStaffRequirementUnmet(current) != 0) {
                         mnuSetPopupEntry(&context->popupState, mnuRingCustomizationApplyPopupEntry);
                     } else {
-                        mnuSetStateValue(&context->unkAA50, 1);
+                        mnuSetStateValue(&context->gradientFade.active, 1);
                         fclStartMessage(7);
                     }
                 } else {
                     input = 0;
                 }
             } else if (menu->windows[4]->list->cursor->index == 0) {
-                mnuSetStateValue(&context->unkAA50, 1);
+                mnuSetStateValue(&context->gradientFade.active, 1);
                 fclStartMessage(0xC);
             } else {
                 input = 0x8000;

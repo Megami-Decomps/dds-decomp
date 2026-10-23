@@ -928,8 +928,8 @@ typedef struct MenuStaffContext {
     u8 padAA3C[0xC];
     void *menu;           /* 0xAA48: menu-mode-specific child allocation */
     s32 categoryKind; /* 0xAA4C: currently resolved staff texture category. */
-    u32 unkAA50;
-    u8 padAA54[0x3CC];
+    MenuGradientFade gradientFade; /* 0xAA50: staff-menu overlay transition state. */
+    u8 padAA5C[0x3C4];
     u16 catalogOrdinals[0x100]; /* 0xAE20: item-ID-indexed list sorting keys */
     u8 padB020[0xEC];
     MenuFadeFields fade; /* 0xB10C: initialized by 002A9068; used by 002BAF50/002BB0E8. */

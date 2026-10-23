@@ -693,7 +693,7 @@ void mnuApplyResourceSelection(s32 index, MenuStaffContext *context) {
                   DDS3_GBWK->inventory.counts[index];
         resources->secondListState = index;
     }
-    mnuSetStateValue(&((MenuStaffContext *)context)->unkAA50, 1);
+    mnuSetStateValue(&((MenuStaffContext *)context)->gradientFade.active, 1);
 }
 
 u32 mnuFadeInStaffItemList(dds3ProcessID_t *task) {
@@ -734,7 +734,7 @@ s32 mnuHandleStaffInventoryListInput(dds3ProcessID_t *callback) {
     if (fclChkMessage() != 0) {
         return 0;
     }
-    mnuSetStateValue(&context->unkAA50, 0);
+    mnuSetStateValue(&context->gradientFade.active, 0);
     if (resources->secondListState == 0) {
         if (input & 1) {
             panel = resources->windows[0]->list;
