@@ -1845,7 +1845,7 @@ void btlGetActorClassPair(s8 classId, u32 *first, u32 *second) {
 
 extern s32 fldGetSceneObjectState(void);
 extern u32 fldUpdateSceneKindCounter(s32, s8, s8);
-extern u32 btlGetActorCommandClass(s32, s8);
+extern u32 btlGetActorCommandClass(BattleSceneObject *, s8);
 extern void sndSetStationedSeVolume(u32);
 extern void btlSetActionActorPanelPresentation(ActionStateLink *, s8, s8);
 extern void btlResetActorSlotPresentationValue(BtlUnit *, BattleSceneObject *);
@@ -1934,7 +1934,7 @@ void func_001B5A20(BattleSceneObject *object) {
     }
 
     if (changed != 0) {
-        s32 kind = btlGetActorCommandClass((s32)object, btlCommandPanelWork->classIndex);
+        s32 kind = btlGetActorCommandClass(object, btlCommandPanelWork->classIndex);
         u16 entry = object->selections[kind].entry;
 
         if (kind == 4) {
@@ -5499,7 +5499,7 @@ INCLUDE_ASM(const s32, "game/code_001B2AF8", btlDrawWindowHelpLine);
 
 extern const BattlePanelColors D_00416620;
 extern s32 fldGetSceneObjectState(void);
-extern u32 btlGetActorCommandClass(s32,s8);
+extern u32 btlGetActorCommandClass(BattleSceneObject *,s8);
 extern u32 fldUpdateSceneKindCounter(s32,s8,s8);
 extern u16 *btlGatherActorCommandsByKind(s32,s16 *,u16,u16,u16);
 extern void fldCollectAvailableRosterEntries(s32,s16 *);
@@ -5561,7 +5561,7 @@ s32 func_001BFB58(dds3ProcessID_t *task) {
 
     }
     if (evtBitCheck(0xC0E) == 0 && panelTask != NULL) {
-    kind = btlGetActorCommandClass((s32)object, btlCommandPanelWork->classIndex);
+    kind = btlGetActorCommandClass(object, btlCommandPanelWork->classIndex);
     optionCount = (s16)fldUpdateSceneKindCounter((s32)object,
                                          btlCommandPanelWork->classIndex, 1);
     row = object->selections[kind].entry;
@@ -8766,7 +8766,7 @@ extern BattleCmdPanel *btlCommandPanelWork;
 
 extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 
-extern u32 btlGetActorCommandClass(s32, s8);
+extern u32 btlGetActorCommandClass(BattleSceneObject *, s8);
 
 extern s32 btlCountFlaggedSceneActors(void);
 
@@ -8858,8 +8858,7 @@ extern const BtlSlotTable D_00436890[];
 extern const BtlSlotTable D_00436898[];
 
 /* Resolve the command class through the actor's status/party-flag-selected table. */
-u32 btlGetActorCommandClass(s32 address, s8 index) {
-    BattleSceneObject *object = (BattleSceneObject *)address;
+u32 btlGetActorCommandClass(BattleSceneObject *object, s8 index) {
     BtlUnit *unit = object->owner->unit;
     BtlSlotTable normal = D_00436880[0];
     s32 flags = unit->status.flags;
@@ -8900,7 +8899,7 @@ u32 fldUpdateSceneKindCounter(s32 ctx, s8 kind, s8 noClamp) {
         s16 ids[8];
         u16 count;
     } buffer;
-    u32 type = btlGetActorCommandClass(ctx, kind);
+    u32 type = btlGetActorCommandClass((BattleSceneObject *)ctx, kind);
     if (type != 4) {
         D_004367C0 = 0;
     }
@@ -9351,7 +9350,7 @@ extern void btlDrawStockCommandPanelRows(s32);
 extern void btlDrawRetreatCommandLabel(s32);
 
 void btlDrawCommandClassRows(s32 sceneContext) {
-    switch (btlGetActorCommandClass(sceneContext, btlCommandPanelWork->classIndex)) {
+    switch (btlGetActorCommandClass((BattleSceneObject *)sceneContext, btlCommandPanelWork->classIndex)) {
     case 0:
         btlDrawActorCommandRows((BattleSceneObject *)sceneContext, 0, 2, 3);
         return;
@@ -9898,7 +9897,7 @@ extern s32 btlAreLinkedSceneCountersAtThreshold(void);
 /* The same native command-selection sequence occurs in four switch paths. */
 static inline void btlUpdateSceneCommandSelection(BattleSceneObject *object) {
     btlDrawCommandClassRows((s32)object);
-    btlUpdateAndDrawCommandSelectionHighlight(object, btlGetActorCommandClass((s32)object, btlCommandPanelWork->classIndex));
+    btlUpdateAndDrawCommandSelectionHighlight(object, btlGetActorCommandClass(object, btlCommandPanelWork->classIndex));
 }
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004169F0);
@@ -10531,7 +10530,7 @@ void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode
         }
 
         state->state = 3;
-        if (btlGetActorCommandClass((s32)object, btlCommandPanelWork->classIndex) != 0) {
+        if (btlGetActorCommandClass(object, btlCommandPanelWork->classIndex) != 0) {
             return;
         }
         btlSetActorCommandSelection(object, D_004368BC, D_004368BE, D_004368C0);
