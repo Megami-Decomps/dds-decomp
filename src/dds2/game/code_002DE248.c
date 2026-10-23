@@ -13733,8 +13733,7 @@ typedef struct EffCameraCreateRow {
 typedef char EffCameraCreateRowSizeCheck[(sizeof(EffCameraCreateRow) == 0x1C) ? 1 : -1];
 
 /* Present named camera/file requests, maintaining a preview job and returning selection status. */
-u32 effSelectCameraFileJobFromRows(const char *nameKey, const void *sourceRows, u32 sourceCount) {
-    const EffCameraCreateRow *requests = (const EffCameraCreateRow *)sourceRows;
+u32 effSelectCameraFileJobFromRows(const char *nameKey, const EffCameraCreateRow *requests, u32 sourceCount) {
     EffQueuedFileObject *menuObject;
     EffQueuedFileObject *state;
     EffEditorRow *entries;
@@ -13836,7 +13835,7 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const void *sourceRows, 
 }
 
 
-extern u32 effSelectCameraFileJobFromRows(const char *, const void *, u32);
+extern u32 effSelectCameraFileJobFromRows(const char *, const EffCameraCreateRow *, u32);
 
 extern char D_0042CEF8[];
 
