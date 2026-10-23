@@ -1932,7 +1932,7 @@ void btlMarkLinkedActorStatusFlag(s32 task) {
 }
 
 extern u8 *btlCreateGunLoadPollTask(u8 *);
-extern u8 *btlCreateModelChangeTask(u8 *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode);
+extern BtlRuntimeTask *btlCreateModelChangeTask(u8 *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode);
 
 /* State-handler table entry (0x359BEC); the table holds s32 handlers (btlCommandStateSelectB) and this one
  * returns without a value, as retail's missing sibling calls show (DDS1 twin of dds2 func_001DA210).
@@ -1976,7 +1976,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
                 btlStartTask(spawned);
             }
         }
-        change = (BtlRuntimeTask *)btlCreateModelChangeTask((u8 *)unit, unit->modelId, unit->modelVariant, motion, 0x18,
+        change = btlCreateModelChangeTask((u8 *)unit, unit->modelId, unit->modelVariant, motion, 0x18,
                                                        0);
         change->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         change->startCondition.value.handle = sound->handle;
@@ -2047,7 +2047,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
         }
         unit->status.flags &= ~0x1000;
         unit->partyRecord.flags &= ~0x1000;
-        change = (BtlRuntimeTask *)btlCreateModelChangeTask((u8 *)unit, unit->modelId, unit->modelVariant, motion, 0x12,
+        change = btlCreateModelChangeTask((u8 *)unit, unit->modelId, unit->modelVariant, motion, 0x12,
                                                        3);
         btlStartTask(change);
         btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));
@@ -2108,7 +2108,7 @@ void btlScheduleDevilStateModelChange(BtlTask *task) {
                 btlStartTask(spawned);
             }
         }
-        change = (BtlRuntimeTask *)btlCreateModelChangeTask((u8 *)unit, unit->modelResourceKind, unit->displaySpecies, motion, 0x18,
+        change = btlCreateModelChangeTask((u8 *)unit, unit->modelResourceKind, unit->displaySpecies, motion, 0x18,
                                                        0);
         change->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         change->startCondition.value.handle = sound->handle;
@@ -2164,7 +2164,7 @@ void btlScheduleDevilStateModelChange(BtlTask *task) {
     } else {
         unit->status.flags |= 0x1000;
         unit->partyRecord.flags |= 0x1000;
-        change = (BtlRuntimeTask *)btlCreateModelChangeTask((u8 *)unit, unit->modelResourceKind, unit->displaySpecies, motion, 0x12,
+        change = btlCreateModelChangeTask((u8 *)unit, unit->modelResourceKind, unit->displaySpecies, motion, 0x12,
                                                        3);
         btlStartTask(change);
         btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));

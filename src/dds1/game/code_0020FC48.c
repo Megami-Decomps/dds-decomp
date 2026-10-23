@@ -488,7 +488,7 @@ extern BtlUnit *btlFindUnitByModeClear(s32);
 
 extern BtlUnit *btlFindUnitByModeFlagged(s32);
 
-extern void *btlCreateModelChangeTask(void *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, s32 transitionMode);
+extern BtlRuntimeTask *btlCreateModelChangeTask(void *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, s32 transitionMode);
 
 s32 btlOpStartSelectedUnitModelChange(void) {
     s32 choice = scrGetIntPara(0);
