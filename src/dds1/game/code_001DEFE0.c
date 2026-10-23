@@ -9035,18 +9035,18 @@ BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32 sound) {
 }
 
 u32 sndApplyToActiveActors(u32 *soundId) {
-    BtlUnit *object = *(BtlUnit **)((u8 *)btlGetRuntime() + 0x228);
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlUnit *object = state->units;
     while (object != 0) {
         u32 flags = (u32)object->status.flags;
         if (flags & 1) {
             if (flags & 2) {
-                if (*(u32 *)((u8 *)object + 0x320) != 0 &&
-                    (flags & 0xE0) == 0) {
-                    btlBlendUnitColor(object, *(u32 *)((u8 *)object + 0x54), *soundId);
+                if (object->ext != 0 && (flags & 0xE0) == 0) {
+                    btlBlendUnitColor(object, object->baseColor, *soundId);
                 }
             }
         }
-        object = *(BtlUnit **)((u8 *)object + 0x344);
+        object = object->next;
     }
     return 1;
 }
