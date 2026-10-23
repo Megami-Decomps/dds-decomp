@@ -857,7 +857,7 @@ s32 evtFormatPolygonMoviePaths(s32 eventId, s32 sceneId, char *path1, char *path
                          eventId / 10 * 10, eventId, eventId, sceneId, eventId, sceneId);
 }
 
-extern s32 sdfFileCheckExist(char *path);
+extern s32 sdfFileCheckExist(const char *path);
 const char evtMovieBeforePrimaryLoadMessage[] = "evtGetPolygonMovieWorkData2:0\n";
 const char evtMoviePrimaryLoadedMessage[] = "evtGetPolygonMovieWorkData2:1\n";
 const char evtMovieTertiaryLoadedMessage[] = "eventedit: load pm3 file\n";
@@ -912,7 +912,7 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
 
 
 extern u32 D_003BA8EC;
-extern s32 sdfFileCheckExist(char *path);
+extern s32 sdfFileCheckExist(const char *path);
 extern void evtEventViewerDestroyActiveAlternate(dds3ProcessID_t *task);
 extern void evtEventViewerInitCampFontResource(EvtRuntime *viewer);
 extern char D_003ADDB0[]; /* "(ZikkiPlayMode)EventViewer" */

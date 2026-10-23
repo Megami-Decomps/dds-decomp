@@ -35,7 +35,7 @@ void *evtGetDebugProcess(void) {
     return (void *)EventDebugProcess1;
 }
 
-extern s32 sdfFileCheckExist(char *);
+extern s32 sdfFileCheckExist(const char *);
 
 extern dds3ProcessID_t *scrStartScriptByName(s32, const char *, s32);
 

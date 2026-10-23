@@ -2963,7 +2963,7 @@ extern char D_00437108[]; /* "fovy=" */
 extern char D_00437110[]; /* "%f" */
 extern char D_00437118[]; /* "fog=" */
 extern KwlnDrawVectorParams kwlnDrawVector;
-extern s32 sdfFileCheckExist(char *path);
+extern s32 sdfFileCheckExist(const char *path);
 
 
 /* Read the viewer's config text file: bg-color=, eye-position=, target-position=, fovy=, fog= lines. */

@@ -120,7 +120,7 @@ extern DevWorkerEntry sdfFileDeviceCB[];
 
 extern u8 sdfPfsPathPrefix[];
 
-extern char *sdfFileMakeFilename(char *path);
+extern char *sdfFileMakeFilename(const char *path);
 
 
 
@@ -828,7 +828,7 @@ void sdfInitDeviceSemaphores(void) {
 extern char sdfDiscPathPrefix[];
 
 /* Convert a relative disc path to the drive's uppercase backslash form with ;1 suffix. */
-void sdfFileSetCdFilename(char *dst, char *src) {
+void sdfFileSetCdFilename(char *dst, const char *src) {
     s32 c;
     memcpy(dst, sdfDiscPathPrefix, 8);
     dst += 7;
@@ -855,7 +855,7 @@ typedef struct Bytes7 {
 extern Bytes7 D_003BD400[];
 
 
-char *sdfFileSetHostFilename(char *dst, char *src) {
+char *sdfFileSetHostFilename(char *dst, const char *src) {
     if (*src == 0x2F) {
         strcpy(dst, sdfFileHostRootPath);
         return strcat(dst, src);
@@ -864,30 +864,30 @@ char *sdfFileSetHostFilename(char *dst, char *src) {
     return strcat(dst, src);
 }
 
-void sdfFileSetHddFilename(char *destination, char *path) {
+void sdfFileSetHddFilename(char *destination, const char *path) {
     memcpy(destination, sdfPfsPathPrefix, 6);
     strcat(destination, path);
 }
 
 /* Retail disables the implicit-disc path probe used by the ordered device dispatch. */
-u32 sdfFileChkCdFile(char *path) {
+u32 sdfFileChkCdFile(const char *path) {
     return 0;
 }
 
 /* Retail disables the implicit-host probe; the host builder is still used explicitly. */
-u32 sdfFileChkHostFile(char *path) {
+u32 sdfFileChkHostFile(const char *path) {
     return 0;
 }
 
 /* Retail disables the implicit-PFS probe before the configured-device fallback. */
-u32 sdfFileChkHddFile(char *path) {
+u32 sdfFileChkHddFile(const char *path) {
     return 0;
 }
 
 extern char D_003BD410[]; 
 
 /* Return an allocated device path, normalizing disc-path case and separators. */
-char *sdfFileMakeFilename(char *path) {
+char *sdfFileMakeFilename(const char *path) {
     s32 length = strlen(path);
     char *result = sdfChipAllocDirect(0x80);
     char *cursor;
@@ -949,7 +949,7 @@ sdfFileCmdHandle_t *sdfFileOpen(const char *path) {
     return state;
 }
 
-s32 sdfFileCheckExist(char *path) {
+s32 sdfFileCheckExist(const char *path) {
     char *resolved = sdfFileMakeFilename(path);
     s32 fd;
 
