@@ -2837,7 +2837,7 @@ void fileReleaseMenuResources(void) {
             fileHandleFree(fileSaveIconRequest);
             fileSaveIconRequest = 0;
         }
-        sdfMemFreeHandleDirect((s32 *)&fileSaveIconResourceHandle);
+        sdfMemFreeHandleDirect(&fileSaveIconResourceHandle);
         dds3KillProcessName("FileMentCalc", 1);
         dds3SoftResetOn();
     }
