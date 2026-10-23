@@ -1328,7 +1328,7 @@ extern void btlClearPartyRecordStatusBits(datUnitWork_t *, s32);
 
 extern s32 mnuIsTitleEntryAvailable();
 
-extern void datAddHp();
+extern s32 datAddHp(datUnitWork_t *unit, s32 delta);
 
 /* Apply the gated five-percent party delta, then restart the field-load step. */
 void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
