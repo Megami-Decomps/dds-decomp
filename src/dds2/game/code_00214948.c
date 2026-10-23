@@ -165,7 +165,7 @@ extern s32 btlReadCurrentUnitHp(datUnitWork_t *);
 
 extern s32 btlReadCurrentUnitMp(datUnitWork_t *);
 
-extern s32 btlBuildUnitIndexList(void *, BtlIndexList *, s32, s32, s32);
+extern s32 btlBuildUnitIndexList(ActionStateLink *, BtlIndexList *, s32, s32, s32);
 
 extern s32 btlUnitBlocksElementQuery(BtlUnit *, s32, s32);
 
@@ -953,7 +953,7 @@ s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
             break;
         }
     }
-    btlBuildUnitIndexList((void *)actor, list, 1, 2, 0);
+    btlBuildUnitIndexList((ActionStateLink *)actor, list, 1, 2, 0);
     count = btlGetIndexListCount(list);
     if (count == 0) {
         mode = 0;
@@ -993,7 +993,7 @@ s32 btlSelectTargetsByTargetType(s32 actor) {
     s32 candidateCount;
     s32 result;
 
-    btlBuildUnitIndexList((void *)actor, list, 2, 0, 0);
+    btlBuildUnitIndexList((ActionStateLink *)actor, list, 2, 0, 0);
     if (targetType != 0) {
         btlCopyIndexList(((ActionStateLink *)actor)->indexWork.indices, list);
         btlFreeIndexList(list);
@@ -1022,7 +1022,7 @@ s32 btlSelectTargetsByTargetType(s32 actor) {
 
 u32 btlAppendSelfAfterTargetScan(s32 battle) {
     BtlIndexList *list = btlAllocateIndexList(13);
-    btlBuildUnitIndexList((void *)battle, list, 1, 1, 0);
+    btlBuildUnitIndexList((ActionStateLink *)battle, list, 1, 1, 0);
     btlGetIndexListCount(list);
     btlAppendIndexListEntry(((ActionStateLink *)battle)->indexWork.indices, ((ActionStateLink *)battle)->unit);
     btlFreeIndexList(list);

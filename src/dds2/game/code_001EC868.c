@@ -77,7 +77,7 @@
 #include "kwln_fade.h"
 #include "kwln_fade_timing.h"
 /* Declared before first use (were implicit int). */
-extern s32 btlBuildUnitIndexList(void *actionArg, BtlIndexList *targets, s32 area, s32 rule, s32 excludedStatus);
+extern s32 btlBuildUnitIndexList(ActionStateLink *action, BtlIndexList *targets, s32 area, s32 rule, s32 excludedStatus);
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex);
 extern void effBTLFieldColorResetFlags(void);
 extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
