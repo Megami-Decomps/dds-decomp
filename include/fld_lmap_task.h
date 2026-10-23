@@ -45,6 +45,7 @@ void fldAdvanceMapRequest(MapRequestState *state, s32 x, s32 y, s32 z);
 void fldSetMapRequestInterval(MapRequestState *, u16);
 
 struct FileRequest;
+struct EffectSlotSet;
 
 /* The file loader retains this subrecord at task + 0x78 between updates. */
 typedef struct LmapLoadState {
@@ -62,7 +63,7 @@ typedef struct LmapTaskState {
     u32 unknown00;                /* 0x00 */
     s32 phase;                    /* 0x04: task lifecycle phase */
     s32 variant;                  /* 0x08: selected local-map variant */
-    u32 spriteSlots[25];          /* 0x0C: SdfSlotSet-compatible slot array */
+    struct EffectSlotSet *spriteSlots[25]; /* 0x0C: retained local-map sprite owners */
     sdfMemHandle_t *allocation;      /* 0x70: loaded resource allocation */
     u32 resourceAddress;          /* 0x74: loaded resource address */
     LmapLoadState load;           /* 0x78 */

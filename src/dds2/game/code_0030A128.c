@@ -499,7 +499,8 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
         load->file = NULL;
         switch (files[load->entry].kind) {
         case 1:
-            effRequestResourceByMode(D_00438898, files[load->entry].name, 0, &task->spriteSlots[files[load->entry].argument]);
+            effRequestResourceByMode(D_00438898, files[load->entry].name, 0,
+                                     (u32 *)&task->spriteSlots[files[load->entry].argument]);
             break;
         case 2:
             if (task->variant != files[load->entry].argument) {
@@ -538,7 +539,7 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
             }
             break;
         case 1:
-            if (task->spriteSlots[files[load->entry].argument] != 0) {
+            if (task->spriteSlots[files[load->entry].argument] != NULL) {
                 load->phase = 4;
             }
             break;
@@ -569,11 +570,14 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
                     if (node->packet[0] == 1) {
                         evtPrintDeveloperConsoleMessage(D_0042D2A8, sdfPacGetResrcFileName((SdfPacStreamPacketHeader *)node));
                         if (task->variant == 1) {
-                            task->spriteSlots[slotIndex + 1] = (u32)effCreateResourceSlotSetFromAllocation(node->resourceHandle, 0);
+                            task->spriteSlots[slotIndex + 1] =
+                                (struct EffectSlotSet *)(u32)effCreateResourceSlotSetFromAllocation(node->resourceHandle, 0);
                         } else if (task->variant == 2) {
-                            task->spriteSlots[slotIndex + 9] = (u32)effCreateResourceSlotSetFromAllocation(node->resourceHandle, 0);
+                            task->spriteSlots[slotIndex + 9] =
+                                (struct EffectSlotSet *)(u32)effCreateResourceSlotSetFromAllocation(node->resourceHandle, 0);
                         } else if (task->variant == 3) {
-                            task->spriteSlots[slotIndex + 17] = (u32)effCreateResourceSlotSetFromAllocation(node->resourceHandle, 0);
+                            task->spriteSlots[slotIndex + 17] =
+                                (struct EffectSlotSet *)(u32)effCreateResourceSlotSetFromAllocation(node->resourceHandle, 0);
                         }
                         sdfMemFreeDirect(node->resourceHandle);
                     }
@@ -892,4 +896,3 @@ INCLUDE_SDATA(const s32, "game/code_0030A128", D_004388A8);
 INCLUDE_SDATA(const s32, "game/code_0030A128", D_004388AC);
 
 INCLUDE_SDATA(const s32, "game/code_0030A128", D_004388B0);
-

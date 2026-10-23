@@ -69,11 +69,11 @@ extern s32 sdfUpdateSelectedCounterMapCameraTransition();
 
 extern u8 D_00400BB0[];
 
-extern u32 sdfInstalledSpriteSlots[];
+extern struct EffectSlotSet *sdfInstalledSpriteSlots[];
 
 typedef struct SdfSlotSet {
     u8 pad00[0xC];
-    u32 slot[25];
+    struct EffectSlotSet *slot[25];
 } SdfSlotSet;
 extern SdfCameraVector D_00400990;
 extern SdfCameraVector D_004009A0;
@@ -112,8 +112,8 @@ extern void evtSubmitPrimaryAlphaBlendMode(s32);
 
 /* Resource bank, entry index, X offset, Y offset. */
 extern s32 D_00400DF0[][4];
-extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, u32, s32, s32);
-#define SDF_SPRITE(index) (((EffectSlotSet *)sdfInstalledSpriteSlots[D_00400DF0[index][0]])->workEntries + D_00400DF0[index][1])
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+#define SDF_SPRITE(index) (sdfInstalledSpriteSlots[D_00400DF0[index][0]]->workEntries + D_00400DF0[index][1])
 
 
 void sdfInitInnerVectors(void) {
@@ -958,12 +958,12 @@ void sdfInstallNonzeroSpriteSlots(SdfSlotSet *set) {
 
 void sdfReleaseAllSpriteSlots(void) {
     s32 remaining = 24;
-    u32 *slot = sdfInstalledSpriteSlots;
+    EffectSlotSet **slot = sdfInstalledSpriteSlots;
     do {
-        if (*slot != 0) {
+        if (*slot != NULL) {
             effDestroyResourceSlotSet(*slot);
         }
-        *slot++ = 0;
+        *slot++ = NULL;
     } while (--remaining >= 0);
 }
 
@@ -988,7 +988,7 @@ void sdfDrawSlotGridWithCornerColors(s32 x, s32 y, s32 z, u32 color0, u32 color1
     itfDrawGridWithResolvedSlot((x + D_00400DF0[placementIndex][2]) << 4,
                                 (y + D_00400DF0[placementIndex][3]) << 3,
                                 z, flags,
-                                (EffectSlotSet *)(u32)sdfInstalledSpriteSlots[D_00400DF0[placementIndex][0]],
+                                sdfInstalledSpriteSlots[D_00400DF0[placementIndex][0]],
                                 D_00400DF0[placementIndex][1], context);
     SDF_SPRITE(placementIndex)->geometry.cornerColors[0] = SDF_SPRITE(placementIndex)->savedColors[0];
     SDF_SPRITE(placementIndex)->geometry.cornerColors[1] = SDF_SPRITE(placementIndex)->savedColors[1];
