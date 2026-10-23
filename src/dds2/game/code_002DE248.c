@@ -12432,7 +12432,7 @@ typedef struct EffSharedEffectResource {
     dds3ModelHandle_t *model;
     u32 deviceSlot;
     SdfLightingPacketStorage *data;
-    u32 unk0C;
+    u32 lastProcessedKernelCount;
     u16 references;
     u8 pad12[2];
     void *entries;
@@ -12504,7 +12504,7 @@ u8 *effCreateSharedEffectResourceWork(FileJobPayload *source) {
         work->resource->model = NULL;
         work->resource->deviceSlot = 0;
         work->resource->data = NULL;
-        work->resource->unk0C = dds3GetKernelCount();
+        work->resource->lastProcessedKernelCount = dds3GetKernelCount();
         work->resource->references = 1;
         work->resource->data = sdfAllocAndClearQuadwords(0xE0);
         secondary = fileResolveSecondaryBuffer(source);
@@ -12592,10 +12592,10 @@ void func_002FB998(EffSharedEffectWork *work) {
         return;
     }
     frame = dds3GetKernelCount();
-    if (work->resource->unk0C == frame) {
+    if (work->resource->lastProcessedKernelCount == frame) {
         return;
     }
-    work->resource->unk0C = frame;
+    work->resource->lastProcessedKernelCount = frame;
     if (work->resource->model == NULL) {
         work->resource->model = effLoadViewerModelWithVUState(work->resource->entries, work->resource->entriesSize);
         VU0_SET_ONES_XYZ(vf10);
