@@ -3,6 +3,7 @@
 #include "sdk_ps2.h"
 #include "eff_surface_node.h"
 #include "common.h"
+#include "file_config_list_node.h"
 #include "sdf_vu0.h"
 #include "file_job_type.h"
 #include "file_config_task.h"
@@ -3766,18 +3767,6 @@ s32 fileTestSavedSlotFlags(u32 kind) {
     return fileTestSlotFlagsBit(kind, (s32 *)&DDS3_GBWK->world.slotFlags);
 }
 
-
-typedef struct FileConfigCountdown {
-    s32 ticks;
-} FileConfigCountdown;
-
-typedef struct FileConfigListNode {
-    s32 index;
-    u8 pad04[0x54];
-    struct FileConfigListNode *next; /* 0x58 */
-    u8 pad5C[0x14];
-    FileConfigCountdown *resource;   /* 0x70: separately allocated countdown */
-} FileConfigListNode;
 
 extern FileConfigTask *GBWK;
 
