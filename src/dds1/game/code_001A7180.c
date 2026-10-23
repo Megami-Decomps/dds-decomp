@@ -638,7 +638,7 @@ s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *actor) {
 }
 
 s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first, BtlUnit **second) {
-    s32 statAddresses[3];
+    datUnitWork_t *statRecords[3];
     u32 requiredCount = 0;
     BattleController *controller = (BattleController *)btlGetRuntime();
     s32 *requirementCursor;
@@ -656,7 +656,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first
         return 0;
     }
 
-    statAddresses[0] = (s32)&unit->partyRecord;
+    statRecords[0] = &unit->partyRecord;
     for (candidate = controller->actors; candidate != NULL; candidate = candidate->next) {
         u32 flags = candidate->status.flags;
 
@@ -672,7 +672,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first
         if (unit == candidate) {
             continue;
         }
-        statAddresses[1] = (s32)&candidate->partyRecord;
+        statRecords[1] = &candidate->partyRecord;
         if (requiredCount == 3) {
             for (partner = controller->actors; partner != NULL; partner = partner->next) {
                 u32 partnerFlags = partner->status.flags;
@@ -689,8 +689,8 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first
                 if (unit == partner || candidate == partner) {
                     continue;
                 }
-                statAddresses[2] = (s32)&partner->partyRecord;
-                if (ptyMatchAffinityPermutation(statAddresses, command) == 0) {
+                statRecords[2] = &partner->partyRecord;
+                if (ptyMatchAffinityPermutation(statRecords, command) == 0) {
                     continue;
                 }
                 if (first != NULL) {
@@ -702,8 +702,8 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first
                 return 1;
             }
         } else {
-            statAddresses[2] = 0;
-            if (ptyMatchAffinityPermutation(statAddresses, command) != 0) {
+            statRecords[2] = 0;
+            if (ptyMatchAffinityPermutation(statRecords, command) != 0) {
                 if (first != NULL) {
                     *first = candidate;
                 }
