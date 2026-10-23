@@ -4296,7 +4296,7 @@ void fldUpdateCameraTarget(void) {
             dds3GetPosPoseSet(fldPlayerObject);
             VU0_STORE_VF(vf10, &vec);
 ;
-            dst = (u128 *)(*(u32 *)((u32)fldPlayerObject + 0x1C) + 0x70);
+            dst = (u128 *)fldPlayerObject->inner->smoothedPosition;
             PCP_COPY_VECTOR(dst, &vec);
         }
     }
