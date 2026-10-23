@@ -51,7 +51,7 @@ s32 dds3EffectObjectBasicLinkObjectIndex(dds3Basic_t *obj, dds3Basic_t *owner, s
 
 void evtEffectLoopControl(void *unit, s32 flag);
 
-void dds3EffectObjectBasicStatOn(void *unit, s32 flag);
+void dds3EffectObjectBasicStatOn(dds3Basic_t *unit, s32 flag);
 
 void evtStageAnimeControl(s32 modeSelector, s32 modeValue);
 

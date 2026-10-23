@@ -5790,7 +5790,7 @@ void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
 
 extern EvtModelScaleEntry *D_00435DE0;
 extern EvtModelScaleEntry *D_00435DF0;
-extern void dds3EffectObjectBasicStatOn(void *object, s32 flags);
+extern void dds3EffectObjectBasicStatOn(dds3Basic_t *object, u32 flags);
 extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *obj, void *vecA, void *vecB);
 
 /* Spawn from a keyed task resource with two zeroed constructor vectors.
@@ -5799,7 +5799,7 @@ void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
     u8 vecA[16];
     u8 vecB[16];
     void *found;
-    void *obj;
+    dds3Basic_t *obj;
     EvtEffectInner *inner;
 
     memset(vecA, 0, 0x10);
