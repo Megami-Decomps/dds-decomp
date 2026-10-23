@@ -174,8 +174,8 @@ McPollResult sdfMcFuncClose1(void) {
 }
 
 /* Queue the SDK's read of an open file into an EE buffer; do not poll it. */
-void sdfMcFuncRead(s32 fileDescriptor, u32 bufferAddress, s32 size) {
-    sceMcRead(fileDescriptor, (void *)bufferAddress, size);
+void sdfMcFuncRead(s32 fileDescriptor, void *buffer, s32 size) {
+    sceMcRead(fileDescriptor, buffer, size);
 }
 
 /* Any completed nonnegative status succeeds, but the SDK status is not
