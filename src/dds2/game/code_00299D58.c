@@ -33,8 +33,8 @@ typedef struct FieldResourceRecord {
     u8 unk06[2];
     s16 unk08;
     s16 apMultiplier;
-    s16 unk0C;
-    s16 unk0E;
+    s16 sparkPickupThresholdMultiplier;
+    s16 mitamaThresholdMultiplier;
     u32 thresholds[4];
     u8 pad20[0xC0];
 } FieldResourceRecord;
@@ -253,8 +253,8 @@ s32 mnuRequestWeightedProfileMessage(BrsSkillPackageWork *scene) {
         if (profileIndex == -1) {
             return 0;
         }
-        value = scene->rewards.mitama * D_00435E18[profileIndex].unk0E;
-        value += fldGetSparkPickupCount() * D_00435E18[profileIndex].unk0C;
+        value = scene->rewards.mitama * D_00435E18[profileIndex].mitamaThresholdMultiplier;
+        value += fldGetSparkPickupCount() * D_00435E18[profileIndex].sparkPickupThresholdMultiplier;
         record = &D_00435E18[profileIndex];
         rank = 0;
         while (rank < 4 && value < record->thresholds[rank]) {
