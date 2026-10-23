@@ -208,6 +208,17 @@ typedef struct BtlRotationTaskArgs {
     BtlUnit *unit;
 } BtlRotationTaskArgs;
 
+typedef char BtlRotationTaskArgsSizeCheck[
+    sizeof(BtlRotationTaskArgs) == 0x30 ? 1 : -1];
+typedef char BtlRotationTaskArgsRateOffsetCheck[
+    (u32)&((BtlRotationTaskArgs *)0)->rate == 0x20 ? 1 : -1];
+typedef char BtlRotationTaskArgsTOffsetCheck[
+    (u32)&((BtlRotationTaskArgs *)0)->t == 0x24 ? 1 : -1];
+typedef char BtlRotationTaskArgsCountOffsetCheck[
+    (u32)&((BtlRotationTaskArgs *)0)->count == 0x28 ? 1 : -1];
+typedef char BtlRotationTaskArgsUnitOffsetCheck[
+    (u32)&((BtlRotationTaskArgs *)0)->unit == 0x2C ? 1 : -1];
+
 extern s32 btlCountTasksByKind(u16 kind);
 
 void *btlCreateActorParameterDeltaTask(BtlUnit *owner, BtlOperandEntry *spec);
@@ -3710,7 +3721,7 @@ s32 btlStepUnitRotationNlerp(BtlRotationTaskArgs *args) {
 }
 
 BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *unit, const f32 targetOrientation[4], f32 interpolationRate) {
-    BtlRuntimeTask *task = btlAllocTask(0x30);
+    BtlRuntimeTask *task = btlAllocTask(sizeof(BtlRotationTaskArgs));
     BtlRotationTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
