@@ -135,7 +135,7 @@ void mnuDrawMantraPartyListEntry(s32 x, s32 y, s32 layer, DspMenuList *list, Dsp
 }
 
 extern void prfCopyMantraNamePart(u32, s32, void *);
-extern s32 frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, u8, const void *, s32, u32);
+extern s32 frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, u8, const u8 *, s32, u32);
 
 /* Fetch the low-16-bit display record ID and draw its text with the supplied attributes and fixed RGB. */
 void itfDspDrawIndexedRecord(s32 x, s32 y, s32 layer, u32 textAttributes, u32 packedEntryId, s32 drawContext) {
@@ -727,4 +727,3 @@ INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC470);
 INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC478);
 
 INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC480);
-
