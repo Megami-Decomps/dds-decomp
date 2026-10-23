@@ -37,7 +37,7 @@ typedef struct MnuMantraGridEntry {
     u16 sceneId;
     u16 requiredLevel;
     u32 backgroundColorIndex;
-    s32 state;
+    enum MnuMantraGridEntryState state;
     PrfSkillList skills;
     MnuMantraGridPulse pulse;
     s8 profileFlag;
