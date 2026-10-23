@@ -38,8 +38,8 @@ typedef void (*FileRequestCallback)(void *request, u32 arg);
     Callback completionCallback;          /* 0x18 */                         \
     void *completionArg;                  /* 0x1C */                         \
     struct sdfMemHandle_t *allocationHandle; /* 0x20: descriptor passed to sdfMemLock */ \
-    u32 retainedAddress;                  /* 0x24: a value-pair request's source data */ \
-    u32 transferAddress;                  /* 0x28 */                         \
+    u8 *retainedAddress;                  /* 0x24: start of loaded/saved data */ \
+    u8 *transferAddress;                  /* 0x28: current byte cursor */   \
     Link *completionNext;                 /* 0x2C */                         \
     PacState packet;                      /* 0x30: PAC requests */           \
     u16 readinessEnabled;                 /* 0x68: a gate on completion, not a state value */ \

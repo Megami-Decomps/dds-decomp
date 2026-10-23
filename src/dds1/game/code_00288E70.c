@@ -102,7 +102,7 @@ void fileRead(FileTransferJob *job) {
     }
     job->state = FILE_JOB_TRANSFERRING;
     SignalSema(fileQueueHead.sema);
-    sdfFileCmdRead(job->deviceRequest, (void *)job->transferAddress,
+    sdfFileCmdRead(job->deviceRequest, job->transferAddress,
                     job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
 }
 
@@ -135,7 +135,7 @@ s32 fileLoadCallback(void *deviceRequest, s32 event, s32 unused, s32 byteCount, 
             job->allocationHandle = allocationHandle;
         }
         {
-            u32 address = sdfMemLock(allocationHandle);
+            u8 *address = (u8 *)sdfMemLock(allocationHandle);
 
             job->transferAddress = address;
             job->retainedAddress = address;
@@ -201,7 +201,7 @@ void fileWrite(FileTransferJob *job) {
     }
     job->state = FILE_JOB_TRANSFERRING;
     SignalSema(fileQueueHead.sema);
-    sdfFileCmdWrite(job->deviceRequest, (void *)job->transferAddress,
+    sdfFileCmdWrite(job->deviceRequest, job->transferAddress,
                      job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
 }
 
@@ -293,7 +293,7 @@ void fileExecQueue(void) {
                                             job->deviceRequest->resolvedPath);
                 job->retryCount--;
             } else {
-                u32 address = sdfMemLock(job->allocationHandle);
+                u8 *address = (u8 *)sdfMemLock(job->allocationHandle);
 
                 job->transferAddress = address;
                 job->retainedAddress = address;

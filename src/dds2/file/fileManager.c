@@ -182,9 +182,9 @@ struct sdfMemHandle_t *fileGetMemHandle(const struct FileRequest *request) {
     return request->allocationHandle;
 }
 
-/* Return the loaded payload address represented by the stored address word. */
+/* Return the loaded payload's retained byte address. */
 u8 *fileGetLoadPtr(const struct FileRequest *request) {
-    return (u8 *)request->retainedAddress;
+    return request->retainedAddress;
 }
 
 /* Return the recorded resource size; work is required. */
@@ -254,8 +254,8 @@ void fileSyncAll(void) {
 FileRequest *fileSaveEx(const char *requestName, const void *sourceData, s32 sourceByteCount, s32 callbackAddress, s32 userDataAddress) {
     FileRequest *request = sdfAllocAndClearQuadwords(FILE_REQUEST_HEADER_BYTES);
 
-    request->retainedAddress = (u32)sourceData;
-    request->transferAddress = (u32)sourceData;
+    request->retainedAddress = (u8 *)sourceData;
+    request->transferAddress = (u8 *)sourceData;
     request->totalBytes = sourceByteCount;
     request->transferBytes = sourceByteCount;
     fileLinkQueue(request, FILE_REQUEST_KIND_VALUE_PAIR, requestName, (void *)callbackAddress,
