@@ -2166,7 +2166,8 @@ u8 *fldCreateSceneGroupAction(u8 *actorTask, u32 counterAmount, s32 counterMode)
     actionTask->taskId = FLD_SCENE_COUNTER_ACTION_ID;
     actionTask->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     if (actorTask != 0) {
-        actionTask->ownerId = *(u64 *)(*(u8 **)(actorTask + 0x18) + 0x108);
+        BtlTask *sourceTask = (BtlTask *)actorTask;
+        actionTask->ownerId = sourceTask->unit->identity;
     }
     actionTask->callback = fldDispatchSceneGroupRequestWhenAllowed;
     actionTask->onStart = 0;
@@ -2209,7 +2210,8 @@ u8 *fldCreateSceneActorAction(u8 *actorTask, s32 slotCount) {
     actionTask->taskId = FLD_SCENE_INSERT_ACTION_ID;
     actionTask->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     if (actorTask != 0) {
-        actionTask->ownerId = *(u64 *)(*(u8 **)(actorTask + 0x18) + 0x108);
+        BtlTask *sourceTask = (BtlTask *)actorTask;
+        actionTask->ownerId = sourceTask->unit->identity;
     }
     actionTask->onStart = fldStopSceneActorActionUpdate;
     actionTask->callback = fldActivateRequestedSceneActor;
