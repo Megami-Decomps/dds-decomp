@@ -175,10 +175,10 @@ void sdfCoreDrawSetLight(u32 matrixAddress) {
 }
 
 /* Cache the object's vector only when its address changes, not its contents. */
-void sdfCoreDrawSetFog(u8 *sourceObject) {
-    if (D_003BDA2C != (u32)sourceObject) {
-        D_003BDA2C = (u32)sourceObject;
-        SDF_VU0_COPYVECTOR(&D_003F9890, sourceObject + 0x10);
+void sdfCoreDrawSetFog(const SdfLightingPacketStorage *sourcePacket) {
+    if (D_003BDA2C != (u32)sourcePacket) {
+        D_003BDA2C = (u32)sourcePacket;
+        SDF_VU0_COPYVECTOR(&D_003F9890, sourcePacket->normal[0]);
     }
 }
 
