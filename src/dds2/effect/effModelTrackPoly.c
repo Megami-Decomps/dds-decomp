@@ -231,7 +231,7 @@ void dds3HermitianTrackPolySetBlend(dds3HermitianTrackPoly_tag *data, u32 kind) 
     data->kind = kind;
 }
 
-void dds3HermitianTrackPolySetVC(dds3HermitianTrackPoly_tag *data, u32 *gradientColors) {
+void dds3HermitianTrackPolySetVC(dds3HermitianTrackPoly_tag *data, const u32 gradientColors[4]) {
     f32 t = 0.0f;
     u32 count = data->count >> 1;
     f32 step = 1.0f / count;
