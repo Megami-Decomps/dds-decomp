@@ -125,7 +125,7 @@ extern const struct SdfDmaTagHeader *sdf3DLightDefault;
 
 extern u32 D_003BDA2C;
 
-extern u32 corePktCurrLight;
+extern const struct SdfDmaTagHeader *corePktCurrLight;
 
 extern sdfDevConsCB_tag *D_003BD3C0;
 
@@ -171,7 +171,7 @@ void sdfCoreDrawScanOneSkinNodes(sdfModelRootNode_t *model, SdfObjectRefCommand 
 }
 
 void sdfCoreDrawSetLight(const struct SdfDmaTagHeader *lightingPacket) {
-    corePktCurrLight = (u32)lightingPacket;
+    corePktCurrLight = lightingPacket;
 }
 
 /* Cache the object's vector only when its address changes, not its contents. */

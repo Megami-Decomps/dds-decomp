@@ -23,7 +23,7 @@
 #include "sdf_texture_file.h"
 #include "sdf_vu_blend_node.h"
 
-extern u32 corePktCurrLight;
+extern const struct SdfDmaTagHeader *corePktCurrLight;
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 extern u8 sdfVuObjectBasisCache[];
@@ -191,12 +191,13 @@ void corePktInitCb(corePktCb_t *work, u16 *parameterWords, u32 selectionMask) {
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 /* vu0 routine: rotate the basis at vectors+0x40 into vf24-vf26 and cache the original vectors. */
 void corePktLoadWorldLightMtx(void *vectors) {
-    void *m = (void *)corePktCurrLight;
+    const struct SdfDmaTagHeader *m = corePktCurrLight;
     VU0_ROTATE_BASIS_AND_CACHE(vectors, m, sdfVuObjectBasisCache);
 }
 
 /* vu0 routine: modulate and clamp packed colors against the reference rows. */
-void corePktMakeFaceDivParm(SdfVuColorTransform *result, u32 reference, u32 packedColor,
+void corePktMakeFaceDivParm(SdfVuColorTransform *result,
+                   const struct SdfDmaTagHeader *reference, u32 packedColor,
                    u32 firstColor, u32 secondColor,
                    f32 blend, f32 scale, f32 y) {
     f32 scaledY;

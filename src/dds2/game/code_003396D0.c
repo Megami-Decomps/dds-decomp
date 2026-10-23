@@ -118,7 +118,7 @@ extern void DiagMatrix(void);
 
 #define SDF_CAMERA_HALF_HEIGHT_FLAG 1
 
-extern u32 corePktCurrLight;
+extern const struct SdfDmaTagHeader *corePktCurrLight;
 
 extern u32 D_0043918C;
 
@@ -200,7 +200,7 @@ void sdfCoreDrawScanOneSkinNodes(sdfModelRootNode_t *model, SdfObjectRefCommand 
 }
 
 void sdfCoreDrawSetLight(const struct SdfDmaTagHeader *lightingPacket) {
-    corePktCurrLight = (u32)lightingPacket;
+    corePktCurrLight = lightingPacket;
 }
 
 extern u8 D_00476240[];

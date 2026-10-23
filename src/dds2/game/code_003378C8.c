@@ -31,7 +31,7 @@
 
 #define SDF_VU_COLORED_BATCH_LIMIT 0x18
 
-extern u32 corePktCurrLight;
+extern const struct SdfDmaTagHeader *corePktCurrLight;
 
 
 
