@@ -4435,7 +4435,7 @@ EffPCPGroupSet *effPCPRadiateThunderCreate(EffPCPGroupHead *header, void **sourc
     groupSet->entries = groupEntryCursor;
     groupSet->duplicates = 0;
     if (sourceResources != NULL) {
-        u32 allocationBytes = entryCount * 16;
+        u32 allocationBytes = 4 * entryCount * sizeof(*groupSet->duplicates);
         void **sourceResourceCursor = sourceResources;
         u32 groupByteOffset;
         u32 groupByteWidth;
