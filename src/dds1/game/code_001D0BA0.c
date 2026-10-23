@@ -5124,14 +5124,14 @@ BtlUnit *btlFindActorForOwner(u64 ownerId) {
     return 0;
 }
 
-s32 btlIsActiveActor(s32 candidate) {
-    s32 context = (s32)(u32)btlGetRuntime();
-    s32 actor = *(s32 *)(context + 0x228);
+s32 btlIsActiveActor(BtlUnit *candidate) {
+    BtlState *context = (BtlState *)btlGetRuntime();
+    BtlUnit *actor = context->units;
     while (actor != 0) {
         if (actor == candidate) {
             return 1;
         }
-        actor = *(s32 *)(actor + 0x344);
+        actor = actor->next;
     }
     return 0;
 }
