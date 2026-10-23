@@ -262,9 +262,9 @@ s32 sdf2DLinkTexPacket(sdfDrawTag_t *packetList, sdfTexHandle_t *texture, s32 co
 }
 
 /* Exclude the two header quadwords from the reference payload count. */
-u32 sdf2DMakeStdPacket(u32 packetAddress, s32 packetBytes) {
-    sdfGrSetRegsPacketHeader((SdfGsPacketHeader *)packetAddress, (packetBytes >> SDF_DMA_QWORD_SHIFT) - 2);
-    return packetAddress;
+void *sdf2DMakeStdPacket(void *packet, s32 packetBytes) {
+    sdfGrSetRegsPacketHeader((SdfGsPacketHeader *)packet, (packetBytes >> SDF_DMA_QWORD_SHIFT) - 2);
+    return packet;
 }
 
 /* Packed GIF loops contain registerCount values, plus two header quadwords. */

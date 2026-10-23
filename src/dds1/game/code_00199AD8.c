@@ -44,7 +44,7 @@ extern void itfMiscDrawRectanglePrim(void *vertices, void *colors, u8 *vertexInd
 extern u8 D_003BB1C8[8];
 extern u8 D_003BB1D0[8];
 #include "sdf_packet_alloc.h"
-extern u32 sdf2DMakeStdPacket(u32, s32);
+extern void *sdf2DMakeStdPacket(void *, s32);
 extern void itfDrawThreePanelBorderBands(PanelRect *rect, u32 *colors, u32 tail, s32 width, sdfDrawTag_t *command);
 extern u32 D_00357D68[];
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *command, s32 index, s32 flag);
@@ -586,14 +586,14 @@ void itfDrawTintedPanelRect(itfpanel_t *panel, sdfDrawTag_t *command) {
 
 /* Append two GS A+D state writes: TEST_1 (0x47), then ALPHA_1 (0x42). */
 void DrawTestAlphaPrim(sdfDrawTag_t *list) {
-    s32 packet = sdfGrAllocPacketBuff(ITF_PANEL_STATE_PACKET_BYTES);
+    void *packet = (void *)sdfGrAllocPacketBuff(ITF_PANEL_STATE_PACKET_BYTES);
     u64 *stateWords = (u64 *)sdf2DMakeStdPacket(packet, ITF_PANEL_STATE_PACKET_BYTES);
 
     stateWords[4] = 0x5101B;
     stateWords[5] = 0x47;
     stateWords[6] = 0x44;
     stateWords[7] = 0x42;
-    sdfDrawTagLink(list, packet);
+    sdfDrawTagLink(list, (u32)packet);
 }
 
 /* Poll/start an entry: one ends the command, zero keeps waiting.

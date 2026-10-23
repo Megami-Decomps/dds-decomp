@@ -552,7 +552,7 @@ extern u32 fldCachedRoomResourceData, fldCachedRoomF1ResourceData, fldCachedRoom
 
 extern u32 fldCachedRoomResourceSize, fldCachedRoomF1ResourceSize, fldCachedRoomF2ResourceSize, fldCachedRoomKF2ResourceSize;
 
-extern u32 sdf2DMakeStdPacket(u32, s32);
+extern void *sdf2DMakeStdPacket(void *, s32);
 
 extern SdfPoolNode sdfGrOtTable[];
 
@@ -2161,32 +2161,32 @@ void rsetOtOfs(u32 displayIndex) {
 
 void rsetTexa(s32 lower, s32 bits, u64 upper) {
     sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
-    s32 packet;
+    void *packet;
     u64 *entry;
     SdfPoolNode *descriptor;
 
     sdfDrawTagInit(command);
-    packet = sdfGrAllocPacketBuff(0x30);
+    packet = (void *)sdfGrAllocPacketBuff(0x30);
     entry = (u64 *)sdf2DMakeStdPacket(packet, 0x30);
     entry[5] = 0x3B;
     entry[4] = (u64)(bits << 15) | (upper << 32) | lower;
-    sdfDrawTagLink(command, packet);
+    sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     descriptor->append(descriptor, command);
 }
 
 void rsetTest(s32 flag0, s32 flag1, s32 field4, s32 field12, s32 flag14, s32 flag15, s32 unused, s32 field17) {
     sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
-    s32 packet;
+    void *packet;
     u64 *data;
     SdfPoolNode *descriptor;
 
     sdfDrawTagInit(command);
-    packet = sdfGrAllocPacketBuff(0x30);
+    packet = (void *)sdfGrAllocPacketBuff(0x30);
     data = (u64 *)sdf2DMakeStdPacket(packet, 0x30);
     data[4] = (field17 << 17) | 0x10000 | (flag15 << 15) | (flag14 << 14) | (field12 << 12) | (field4 << 4) | (flag1 << 1) | flag0;
     data[5] = 0x47;
-    sdfDrawTagLink(command, packet);
+    sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     descriptor->append(descriptor, command);
 }
@@ -2194,12 +2194,12 @@ void rsetTest(s32 flag0, s32 flag1, s32 field4, s32 field12, s32 flag14, s32 fla
 /* Write the selected blend equation to GS ALPHA_1, including DDS2's FIX mode. */
 void rsetAlpha(s32 mode) {
     sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
-    s32 packet;
+    void *packet;
     u64 *data;
     SdfPoolNode *descriptor;
 
     sdfDrawTagInit(command);
-    packet = sdfGrAllocPacketBuff(0x30);
+    packet = (void *)sdfGrAllocPacketBuff(0x30);
     data = (u64 *)sdf2DMakeStdPacket(packet, 0x30);
     switch (mode) {
     case 1:
@@ -2234,7 +2234,7 @@ void rsetAlpha(s32 mode) {
         break;
     }
     data[5] = 0x42;
-    sdfDrawTagLink(command, packet);
+    sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     descriptor->append(descriptor, command);
 }

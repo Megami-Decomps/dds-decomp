@@ -1215,7 +1215,7 @@ void itfMiscMoveFontPosition(_FRQ *entry, u32 xOffset, u32 yOffset) {
 #include "sdf_packet_alloc.h"
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
-extern u32 sdf2DMakeStdPacket(u32, s32);
+extern void *sdf2DMakeStdPacket(void *, s32);
 extern u64 D_00357998[];
 
 /* Keep the sprite texture handle while releasing the temporary file allocation. */
@@ -1490,32 +1490,32 @@ void itfMiscDrawLinePrim(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexI
 
 /* Write TEST for the selected GS context, not the ALPHA blend register. */
 void itfMiscDrawTestPrim(sdfDrawTag_t *command, u64 value, s32 flag) {
-    s32 packet = sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
+    void *packet = (void *)sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
     ItfGsStatePacket *dst = (ItfGsStatePacket *)sdf2DMakeStdPacket(packet, ITF_STATE_PACKET_BYTES);
 
     dst->value = value;
     dst->registerCode = flag ? ITF_TEST_SECOND_CONTEXT : ITF_TEST_FIRST_CONTEXT;
-    sdfDrawTagLink(command, packet);
+    sdfDrawTagLink(command, (u32)packet);
 }
 
 /* Write an unchecked table entry to ALPHA for the selected GS context. */
 void itfMiscDrawAlphaPrim(sdfDrawTag_t *command, s32 index, s32 flag) {
-    s32 packet = sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
+    void *packet = (void *)sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
     ItfGsStatePacket *dst = (ItfGsStatePacket *)sdf2DMakeStdPacket(packet, ITF_STATE_PACKET_BYTES);
 
     dst->value = D_00357998[index];
     dst->registerCode = flag ? ITF_ALPHA_SECOND_CONTEXT : ITF_ALPHA_FIRST_CONTEXT;
-    sdfDrawTagLink(command, packet);
+    sdfDrawTagLink(command, (u32)packet);
 }
 
 /* Write CLAMP for the selected GS context. */
 void itfMiscDrawClampPrim(sdfDrawTag_t *command, s32 flag, s32 wms, s32 wmt, s32 minu, s32 maxu, s32 minv, s32 maxv) {
-    s32 packet = sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
+    void *packet = (void *)sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
     ItfGsStatePacket *dst = (ItfGsStatePacket *)sdf2DMakeStdPacket(packet, ITF_STATE_PACKET_BYTES);
 
     dst->value = ((u64)maxv << 34) | ((u64)minv << 24) | (maxu << 14) | (minu << 4) | (wmt << 2) | wms;
     dst->registerCode = flag ? SDF_GS_CLAMP_2 : SDF_GS_CLAMP_1;
-    sdfDrawTagLink(command, packet);
+    sdfDrawTagLink(command, (u32)packet);
 }
 
 extern u8 D_003BB198[8];
