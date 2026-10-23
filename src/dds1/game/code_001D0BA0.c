@@ -6132,17 +6132,17 @@ void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *action) {
     }
 }
 
-void btlAimLinkedUnitAtMuzzle(u8 *action) {
+void btlAimLinkedUnitAtMuzzle(BtlLinkedCommand *action) {
     s128 vec[3];
     s128 *pos;
     BtlUnit *target;
-    s32 count = btlGetIndexListCount(*(struct BtlIndexList **)(action + 0x118));
+    s32 count = btlGetIndexListCount(action->targetList);
     if (count != 0) {
-        target = *(BtlUnit **)(*(s32 *)(action + 0xF4) + 0x18);
+        target = action->task->unit;
         if (count == 1) {
-            btlUnitGetMuzzlePosVU((BtlUnit *)btlGetIndexListEntry(*(struct BtlIndexList **)(action + 0x118), 0));
+            btlUnitGetMuzzlePosVU((BtlUnit *)btlGetIndexListEntry(action->targetList, 0));
         } else {
-            func_001F6E28(*(BtlIndexList **)(action + 0x118), 0, 0);
+            func_001F6E28(action->targetList, 0, 0);
         }
         pos = &vec[1];
         VU0_STORE_VF(vf10, pos);
