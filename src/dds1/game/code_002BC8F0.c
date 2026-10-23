@@ -121,6 +121,9 @@ extern u8 D_003BD10A;
 typedef struct EffectResourceTable {
     u8 pad00[0xC];
     u32 entryOffset;
+    u8 pad10[4];
+    u16 textureCount;
+    u16 slotCount;
 } EffectResourceTable;
 
 typedef struct EffectResourceEntry {
@@ -730,7 +733,7 @@ EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct sdfMemHandle_t *res
     set->sharesTextureReferences = 0;
     set->sourceAllocation = keepAllocation != 0 ? resourceAllocation : 0;
     resource = (u8 *)sdfMemLock(resourceAllocation);
-    set->textureCount = *(u16 *)(resource + 0x14);
+    set->textureCount = ((EffectResourceTable *)resource)->textureCount;
     set->textureAllocation =
         sdfMemAllocDirect(set->textureCount * 4);
     set->textureReferences = (sdfTexHandle_t **)sdfMemLock(set->textureAllocation);
@@ -738,7 +741,7 @@ EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct sdfMemHandle_t *res
     entries = (u32 *)effResolveResourceSlots(set, resource,
         keepAllocation, -1);
 
-    set->count = *(u16 *)(resource + 0x16);
+    set->count = ((EffectResourceTable *)resource)->slotCount;
     set->descriptionAllocation =
         sdfMemAllocDirect(set->count * 0x80);
     set->descriptions = (EffectSlotDescription *)sdfMemLock(set->descriptionAllocation);
