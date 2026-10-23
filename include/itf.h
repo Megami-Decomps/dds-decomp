@@ -295,7 +295,7 @@ typedef struct instanceMes_tag {
     ItfMesBlkA4 blkA4;
     ItfMesTextSlots textSlots;
     BtlFade fade;
-    u32 callbackAddress;
+    void (*entryGlyphCallback)(void);
 } instanceMes_tag;
 
 typedef char ItfMesState_temporaryFontEntry_offset_must_be_0x08[
