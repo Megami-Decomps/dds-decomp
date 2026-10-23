@@ -10127,7 +10127,7 @@ void effResetActiveEffectSlots(void) {
     }
 }
 
-void effUpdateEffectSlotTransitions(s32 work) {
+void effUpdateEffectSlotTransitions(EffActiveResource *work) {
     s32 elapsed;
     u32 duration;
     u32 *slotData;
@@ -10136,9 +10136,9 @@ void effUpdateEffectSlotTransitions(s32 work) {
 
     index = 0;
     btlGetRuntime();
-    elapsed = ((EffActiveResource *)work)->frame;
-    slotColor = (u8 *)((EffActiveResource *)work)->payload + 0x18;
-    slotData = (u32 *)((u8 *)((EffActiveResource *)work)->payload + 0x10);
+    elapsed = (s32)work->frame;
+    slotColor = (u8 *)work->payload + 0x18;
+    slotData = (u32 *)((u8 *)work->payload + 0x10);
     do {
         duration = slotData[-4];
         if (duration < *slotData) {
