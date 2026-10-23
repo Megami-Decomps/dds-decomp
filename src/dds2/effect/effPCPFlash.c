@@ -123,7 +123,7 @@ void effPCPFlashPolySphere2PartSetVertex(PcpFlashTrianglePulseWork *work, s32 in
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad + 4);
 }
-extern void effPCPFlashPolySphere2PartSetVertex();
+extern void effPCPFlashPolySphere2PartSetVertex(PcpFlashTrianglePulseWork *work, s32 index, void *view);
 extern u8 aViewTarget[];
 extern u8 sdfViewTargetVector[];
 extern void effPCPFlashPolySpherePartSetVertex(PcpFlashStreakWork *work, s32 index, void *view);
