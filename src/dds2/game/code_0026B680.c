@@ -1,10 +1,11 @@
 #include "common.h"
 #include "evt_message_window_api.h"
 #include "dsp_channel.h"
+#include "menu_slot_flag_event_view.h"
 
 
-/* Pass the object's +0x60 word to the second operation after setup. */
-void evtCloseDisplayChannelAndEnsureMessageWindow(void *context) {
+/* Reopen the message window over the terminal scene's loaded message data. */
+void evtCloseDisplayChannelAndEnsureMessageWindow(MenuSlotFlagEventView *context) {
     fclDestroyMessage();
-    fclInitMessage((struct ItfMesSub *)*(u32 *)((u8 *)context + 0x60));
+    fclInitMessage((struct ItfMesSub *)context->messageResources.dataAddress);
 }

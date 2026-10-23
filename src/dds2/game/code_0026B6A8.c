@@ -15,6 +15,7 @@
 #include "eff_random.h"
 #include "mdl_flag_api.h"
 #include "mnu_event_flag_entries.h"
+#include "menu_slot_flag_event_view.h"
 
 struct MenuSlotState;
 extern void mnuTerminalSelectResourceBank(struct MenuSlotState *);
@@ -33,11 +34,11 @@ extern DspMantraName *D_00435E50;
 extern u8 *D_00435E4C;
 extern DspUnitName *datUnitNames;
 
-extern void evtCloseDisplayChannelAndEnsureMessageWindow(void *context);
+extern void evtCloseDisplayChannelAndEnsureMessageWindow(MenuSlotFlagEventView *context);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 
-s32 dspStartFlagEvent(void *context) {
-    s32 kind = *(s32 *)((u8 *)context + 0x84);
+s32 dspStartFlagEvent(MenuSlotFlagEventView *context) {
+    s32 kind = context->reduced;
     s32 i;
     datUnitWork_t *slot;
 
@@ -101,7 +102,7 @@ s32 dspUpdateFlagEvent(dds3ProcessID_t *request) {
     }
     if (*panel == 0) {
         if (fclChkMessage() == 0) {
-            if (dspStartFlagEvent((void *)(u32)state) == 0) {
+            if (dspStartFlagEvent((MenuSlotFlagEventView *)(u32)state) == 0) {
                 mnuSetPopupEntryFlagged(panel, mnuTerminalPopupEntries);
             }
         }
@@ -374,4 +375,3 @@ s32 evtCopyWorldObjectEntryValue(s32 id, s32 dst) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_0026B6A8", D_00425018);
-
