@@ -1961,8 +1961,8 @@ void fldAppendTaskToGroup(BtlTask *task) {
 }
 
 /* Append a handle to the first zero entry; the caller must leave room. */
-void fldAppendSceneGroupHandle(s32 handle) {
-    s32 *handleCursor = (s32 *)((BattleSceneWork *)btlGetRuntime())->groupHandles;
+void fldAppendSceneGroupHandle(BtlTask *handle) {
+    BtlTask **handleCursor = ((BattleSceneWork *)btlGetRuntime())->groupHandles;
     while (*handleCursor != 0) {
         handleCursor++;
     }
@@ -2254,4 +2254,3 @@ void btlBindActorTaskAndSelectActionNumber(BtlTask *task, BtlUnit *actorAddress)
 INCLUDE_RODATA(const s32, "game/code_001C48A8", D_003A35A8);
 
 INCLUDE_RODATA(const s32, "game/code_001C48A8", D_003A35B8);
-

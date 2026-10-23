@@ -561,7 +561,7 @@ extern u8 btlGetActorDisplayByteWithDefault(s32 object, s32 index);
 
 extern s32 btlRollPassiveAbilityAction(BtlUnit *);
 
-extern void fldAppendSceneGroupHandle(s32);
+extern void fldAppendSceneGroupHandle(BtlTask *);
 
 extern s16 btlGetCommandEffectId(BtlTask *, s32);
 
@@ -1080,7 +1080,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
             s32 counter = btlRollPassiveAbilityAction(target);
             if (counter > 0) {
                 BtlTask *reaction = btlFindUnitByActor(target);
-                fldAppendSceneGroupHandle((s32)reaction);
+                fldAppendSceneGroupHandle(reaction);
                 reaction->indexWork.phase = 1;
                 reaction->indexWork.skillId = counter;
                 btlAppendIndexListEntry(reaction->indexWork.indices, action->unit);
