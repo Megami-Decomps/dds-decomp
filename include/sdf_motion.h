@@ -16,7 +16,6 @@ typedef enum {
 } SdfMotionState;
 
 void sdfMotionChange(struct sdfMotionCtrlr_t *motion, s32 motionIndex, s32 loopEnabled);
-void *sdfMotionNodeNew(struct sdfMotionCtrlr_t *motion, u32 commandWord, s32 targetIndex);
 struct sdfMotionCtrlr_t *sdfMotionCtrlrNew(struct sdfModelRootNode_t *model, struct MotionTable *table);
 void sdfMotionCtrlrFree(struct sdfMotionCtrlr_t *motion);
 void sdfMotionChangeBlend(struct sdfMotionCtrlr_t *motion, s32 motionIndex, s32 loopEnabled,

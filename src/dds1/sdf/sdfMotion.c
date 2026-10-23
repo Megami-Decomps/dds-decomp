@@ -8,6 +8,7 @@
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "sdf_motion.h"
+#include "sdf_motion_node_api.h"
 #include "sdf_motion_bindings.h"
 #include "sdf_vu_matrix.h"
 #include "eff_quaternion_nlerp.h"

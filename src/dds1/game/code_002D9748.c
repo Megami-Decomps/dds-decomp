@@ -23,6 +23,7 @@
 #include "sdf_chunk.h"
 #include "sdf_draw_packet_groups.h"
 #include "sdf_motion.h"
+#include "sdf_motion_node_api.h"
 
 #define SDF_CHUNK_NAMED_IDS 0x4D4E444E
 #define SDF_ASSET_LIST_MIN_CAPACITY 0x20
@@ -975,11 +976,10 @@ void sdfMatListCopyStat(DevRequest *destination, DevRequest *source) {
 extern s32 (*D_003981A8[])(u32, u32, s32);
 
 /* The high halfword selects the handler, which receives the complete command word unchanged. */
-void *sdfMotionNodeNew(sdfMotionCtrlr_t *motion, u32 commandWord, s32 targetIndex) {
-    return (void *)D_003981A8[commandWord >> 16]((u32)motion, commandWord, targetIndex);
+struct SdfMotionBindingHead *sdfMotionNodeNew(sdfMotionCtrlr_t *motion, u32 commandWord, s32 targetIndex) {
+    return (struct SdfMotionBindingHead *)D_003981A8[commandWord >> 16]((u32)motion, commandWord, targetIndex);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002D9748", sdfMatAllocCount);
 
 INCLUDE_SDATA(const s32, "game/code_002D9748", sdfForcedAssetTextureMode);
-

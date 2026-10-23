@@ -24,6 +24,7 @@
 #include "sdf_chunk.h"
 #include "sdf_draw_packet_groups.h"
 #include "sdf_motion.h"
+#include "sdf_motion_node_api.h"
 
 extern u32 sdfForcedAssetTextureMode;
 
@@ -985,11 +986,10 @@ void sdfMatListCopyStat(DevRequest *destination, DevRequest *source) {
 
 extern s32 (*D_0040B358[])(u32, u32);
 /* The high halfword selects the handler, which receives the complete command word unchanged. */
-void *sdfMotionNodeNew(sdfMotionCtrlr_t *motion, u32 commandWord, s32 targetIndex) {
-    return (void *)D_0040B358[commandWord >> 16]((u32)motion, commandWord);
+struct SdfMotionBindingHead *sdfMotionNodeNew(sdfMotionCtrlr_t *motion, u32 commandWord, s32 targetIndex) {
+    return (struct SdfMotionBindingHead *)D_0040B358[commandWord >> 16]((u32)motion, commandWord);
 }
 
 INCLUDE_SDATA(const s32, "game/code_003325F8", sdfMatAllocCount);
 
 INCLUDE_SDATA(const s32, "game/code_003325F8", sdfForcedAssetTextureMode);
-
