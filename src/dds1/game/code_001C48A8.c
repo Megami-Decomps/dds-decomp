@@ -344,14 +344,14 @@ void btlInitializeBattleUnits(BtlState *scene) {
         initializeBattleUnitHook(scene,unit);
         index++;
     } while (index<9);
-    if (scene->turnPhase == 0) scene->turnPhase=btlSelectPreemptiveOutcome();
-    scene->mode=scene->turnPhase;
+    if (scene->preemptiveOutcome == 0) scene->preemptiveOutcome=btlSelectPreemptiveOutcome();
+    scene->mode=scene->preemptiveOutcome;
     if (!(scene->battleFlags & 0x4000)) {
         s32 voice;
         if (scene->unk24A) btlClearUnitStatusMask();
         if (scene->unk24A == 2) scene->commandRestrictFlags &= ~2;
         voice=btlChooseStartVoice();
-        if (voice>=0 && scene->turnPhase==1) {
+        if (voice>=0 && scene->preemptiveOutcome==1) {
             BtlRuntimeTask *sound=sndCreateAtracEffectLoadTask(voice);
             sound->ownerId=0x8000000000000002ULL;
             btlStartTask(sound);
@@ -1288,7 +1288,7 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
         }
         if (scene->eventReady == 5) {
             task = scene->tasks;
-            scene->turnPhase = 0;
+            scene->preemptiveOutcome = 0;
             scene->eventReady = 0;
             scene->spawnCount = 0;
             scene->turnCount = 0;

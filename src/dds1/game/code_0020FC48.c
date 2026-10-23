@@ -2975,7 +2975,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
         state->encounterParamA = D_003BBB1C;
         state->encounterParamB = D_003BBB1E;
     }
-    state->turnPhase = D_003BBB20;
+    state->preemptiveOutcome = D_003BBB20;
     return 1;
 }
 
