@@ -7,6 +7,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "btl_action.h"
+#include "btl_ai_action_api.h"
 #include "btl_ai_table.h"
 #include "btl_ai_scratch.h"
 #include "btl_unit_tasks.h"
@@ -18,10 +19,6 @@
 #include "mdl.h"
 
 #define BTL_AI_SLOT_COUNT 5
-
-extern s32 btlExecuteAiTableAction();
-
-
 
 extern BtlAiScratchWork *btlActionScratchWork;
 

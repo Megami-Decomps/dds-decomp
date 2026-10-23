@@ -16,6 +16,7 @@
 #include "btl_analysis_panel_wait_args.h"
 #include "btl_command.h"
 #include "btl_action.h"
+#include "btl_ai_action_api.h"
 #include "btl_ai_table.h"
 #include "btl_ai_scratch.h"
 #include "btl_state.h"
@@ -1353,7 +1354,6 @@ s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction) {
 
 extern AiSpecies *datEnemyAiRecords;
 extern void btlSelectTierMatrixAiRoute(BtlUnit *unit, u16 species, s32 *row, s32 requestedRow);
-extern s32 btlExecuteAiTableAction();
 
 /* Choose a row and a weighted slot of the unit's species AI table and run that action. */
 s32 btlRunRandomWeightedAiTableAction(ActionStateLink *task) {
