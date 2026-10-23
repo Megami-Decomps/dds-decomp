@@ -3080,7 +3080,7 @@ void fldReleaseTextureSlots(void) {
     }
 }
 
-extern u32 fldPlayerObject;
+extern struct dds3Basic_t *fldPlayerObject;
 
 extern f32 EulerAngleAxisY(void);
 void fldUpdatePositionedTextureNodes(void) {
@@ -3091,7 +3091,7 @@ void fldUpdatePositionedTextureNodes(void) {
 
     memset(position, 0, sizeof(position));
     position[3] = 1.0f;
-    dds3GetRotPoseSet((dds3Basic_t *)fldPlayerObject);
+    dds3GetRotPoseSet(fldPlayerObject);
     angle = EulerAngleAxisY();
     for (i = 0; i < 4; i++) {
         if (fldEffectTextureNodes[i] != 0) {

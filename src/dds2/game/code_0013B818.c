@@ -47,7 +47,7 @@ extern s32 fldRegisterRoomObject(FldFileResource *, dds3Basic_t *);
  * An early void declaration moves fldUpdateTitleBannerTask's position update
  * at +0x11C/+0x124/+0x12C from retail $3 to $2. */
 
-extern u32 fldPlayerObject;
+extern struct dds3Basic_t *fldPlayerObject;
 extern s32 D_003897C0[];
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void datAddCurrencyClamped(s32 delta);
@@ -1057,7 +1057,7 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
         viewIndex = D_0038E2D0.sets[D_004361C8].messages[target - 10].view & 0x7F;
     }
     if (viewIndex != 0) {
-        unit = ((EffectObjectData *)((dds3Basic_t *)fldPlayerObject)->data)->transitionWork;
+        unit = ((EffectObjectData *)(fldPlayerObject)->data)->transitionWork;
         if (unit != NULL) {
             if (D_0038E2D0.views[viewIndex].player != 0) {
                 fldShowSceneModels();
@@ -1068,7 +1068,7 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
         if (D_0038E2D0.views[viewIndex].positionName[0] != 0) {
             node = dds3SceneBasicSearchName(world, (const u8 *)D_0038E2D0.views[viewIndex].positionName);
             if (node != NULL) {
-                evtSetUnitPos(((dds3Basic_t *)fldPlayerObject)->key, node->key);
+                evtSetUnitPos((fldPlayerObject)->key, node->key);
             }
         }
         if (D_0038E2D0.views[viewIndex].cameraName[0] != 0) {
@@ -1113,7 +1113,7 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
             }
         }
         /* The action callbacks can replace the player's transition work. */
-        unit = ((EffectObjectData *)((dds3Basic_t *)fldPlayerObject)->data)->transitionWork;
+        unit = ((EffectObjectData *)(fldPlayerObject)->data)->transitionWork;
         if (unit != NULL) {
             unit->owner->flags &= ~1;
         }

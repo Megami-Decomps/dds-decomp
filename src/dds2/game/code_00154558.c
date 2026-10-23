@@ -69,7 +69,7 @@ extern s32 D_0043633C;
 
 extern s32 D_004363C4;
 
-extern u32 fldPlayerObject;
+extern struct dds3Basic_t *fldPlayerObject;
 
 
 extern s32 fldNpcModelTable;
@@ -385,7 +385,7 @@ extern s32 fldResolvePendingTitleBanner(void);
 
 s32 fldCmdQueryActorEntrySceneStatus(void) {
     dds3Basic_t *world = dds3GetActiveScene();
-    dds3Basic_t *unit = (dds3Basic_t *)fldPlayerObject;
+    dds3Basic_t *unit = fldPlayerObject;
     dds3Basic_t *entry;
     s32 result;
 
@@ -419,7 +419,7 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
 
 s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
     dds3Basic_t *world = dds3GetActiveScene();
-    dds3Basic_t *unit = (dds3Basic_t *)fldPlayerObject;
+    dds3Basic_t *unit = fldPlayerObject;
     dds3Basic_t *entry;
     s32 result;
 
@@ -471,7 +471,7 @@ s32 fldCommand_ACT_WIN_DSP3(void) {
 
 s32 fldCmdTestActorEntryCondition(void) {
     dds3Basic_t *world = dds3GetActiveScene();
-    dds3Basic_t *unit = (dds3Basic_t *)fldPlayerObject;
+    dds3Basic_t *unit = fldPlayerObject;
     dds3Basic_t *entry;
 
     if (unit == 0) {
@@ -508,7 +508,7 @@ s32 fldCommand_PAD_ENABLE(void) {
     if (fldPlayerObject == 0) {
         return 1;
     }
-    dds3ObjectBaseSetPrimaryControl((dds3Basic_t *)fldPlayerObject, 0);
+    dds3ObjectBaseSetPrimaryControl(fldPlayerObject, 0);
     fldSetCameraNodeModeWithTen();
     fldPreparePlayerSceneCameraTarget();
     D_003898B0[0] = 0;
