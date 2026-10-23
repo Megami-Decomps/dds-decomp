@@ -666,8 +666,8 @@ void btlConsumeSceneAdvanceFlags(void) {
 
 extern void fldClearSceneAdvanceFlag(void);
 
-s32 fldConsumeSceneInputFlags(s32 scene) {
-    u32 flags = *(u32 *)(scene + 0x1F4);
+s32 fldConsumeSceneInputFlags(BtlState *scene) {
+    u32 flags = scene->battleFlags;
     s32 result;
 
     if (flags & 0x800) {
@@ -679,7 +679,7 @@ s32 fldConsumeSceneInputFlags(s32 scene) {
     } else {
         return 0;
     }
-    *(u32 *)(scene + 0x1F4) |= 0x20;
+    scene->battleFlags |= 0x20;
     return result;
 }
 
