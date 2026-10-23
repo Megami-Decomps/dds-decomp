@@ -3495,17 +3495,18 @@ void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit) {
 }
 
 u32 btlApplyIndexedUnitEffectTask(u8 *arguments) {
-    s32 index = *(s32 *)(arguments + 4);
+    s32 index = ((BtlRuntimeTaskArgs *)arguments)->option;
     if (index >= 0) {
-        btlApplyScaledUnitEffectParameter((BtlUnit *)*(u8 **)arguments, index, *(s32 *)(arguments + 8),
-                        *(f32 *)(arguments + 0xC));
+        btlApplyScaledUnitEffectParameter(((BtlRuntimeTaskArgs *)arguments)->actor, index,
+                        ((BtlRuntimeTaskArgs *)arguments)->unk_08,
+                        ((BtlRuntimeTaskArgs *)arguments)->scale2);
     }
     return 1;
 }
 
 u8 *btlAllocateIndexedUnitEffectTask(u8 *owner, s32 index, s32 value, f32 scale) {
     u8 *task = btlAllocTask(16);
-    u32 *arguments;
+    BtlRuntimeTaskArgs *arguments;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
@@ -3514,10 +3515,10 @@ u8 *btlAllocateIndexedUnitEffectTask(u8 *owner, s32 index, s32 value, f32 scale)
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    arguments[1] = index;
-    arguments[2] = value;
-    *(f32 *)(arguments + 3) = scale;
+    arguments->actor = owner;
+    arguments->option = index;
+    arguments->unk_08 = value;
+    arguments->scale2 = scale;
     return task;
 }
 
