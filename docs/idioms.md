@@ -14967,7 +14967,7 @@ the loop. It is set before every use and no provider receives its address.
 This ordinary source order closes the final sum-copy versus FOV-store scheduler
 difference without adding an operation or lifetime.
 
-DDS2 follows `nextActor`, measures groups through its filtered-bounds provider,
+DDS2 follows the unit list's `next`, measures groups through its filtered-bounds provider,
 and rotates around Y. Inside the distance-below-1200 path it caps the absolute
 horizontal offset at 50 before adding it to camera distance. Keep the ordered
 `50.0f < horizontalSpan` comparison: NaN does not select the cap. These six

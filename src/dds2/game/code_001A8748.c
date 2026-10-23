@@ -1502,7 +1502,7 @@ BtlUnit *btlFindActiveActorByKind(s32 kind) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     u32 flags;
-    for (unit = battle->units; unit != 0; unit = unit->nextActor) {
+    for (unit = battle->units; unit != 0; unit = unit->next) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
@@ -1889,7 +1889,7 @@ s32 btlBuildUnitIndexList(void *actionArg, BtlIndexList *targets,
     unit = battle->units;
     count = 0;
     selected = -1;
-    for (; unit != NULL; unit = unit->nextActor) {
+    for (; unit != NULL; unit = unit->next) {
         s32 flags = unit->status.flags;
 
         if ((flags & 0x100) == 0) {
@@ -2102,7 +2102,7 @@ s32 btlMarkInactiveActorCandidates(void) {
                     count++;
                 }
             }
-            unit = unit->nextActor;
+            unit = unit->next;
         } while (unit != NULL);
     }
     if (count == 0) {
@@ -2165,7 +2165,7 @@ s32 btlBuildActorLinkageSkillList(BtlUnit *actor, BattleRosterTable *table) {
     actors[1] = NULL;
     actors[2] = NULL;
     actorCount = 1;
-    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
         if ((unit->status.flags & 0x200) == 0) {
             continue;
         }
@@ -2541,7 +2541,7 @@ u32 btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode) {
     u16 index;
     u16 roll;
 
-    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
         u32 flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
@@ -2706,7 +2706,7 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
 s32 btlAllActiveUnitsReady(void) {
     BtlUnit *unit;
     u32 flags;
-    for (unit = ((BattleController *)btlGetRuntime())->actors; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BattleController *)btlGetRuntime())->actors; unit != 0; unit = unit->next) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x400) {
@@ -2783,7 +2783,7 @@ s32 btlCountAvailableUnits(void) {
     BtlUnit *unit;
     s32 count = 0;
     u32 flags;
-    for (unit = ((BattleController *)btlGetRuntime())->actors; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BattleController *)btlGetRuntime())->actors; unit != 0; unit = unit->next) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
@@ -2803,7 +2803,7 @@ s32 btlCountAvailableParticipants(void) {
     s32 count = 0;
     s32 i;
     u32 flags;
-    for (unit = ((BattleController *)btlGetRuntime())->actors; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BattleController *)btlGetRuntime())->actors; unit != 0; unit = unit->next) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
@@ -3412,7 +3412,7 @@ void btlPushSavedPartyUnitStates(void) {
     BtlUnit *unit;
 
     memset(btlSavedPartyUnitStates, 0, sizeof(btlSavedPartyUnitStates));
-    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x200) {
                 btlSavedPartyUnitStates[count].flags = unit->status.flags;
@@ -3440,7 +3440,7 @@ void btlRestorePartySlotSnapshots(void) {
         if (btlSavedPartyUnitStates[index].unitId == 0) {
             continue;
         }
-        for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+        for (unit = battle->units; unit != NULL; unit = unit->next) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x200) {
                     if (unit->partyRecord.unitId == btlSavedPartyUnitStates[index].unitId) {

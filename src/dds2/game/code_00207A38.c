@@ -532,7 +532,7 @@ f32 btlMeasureFilteredUnitGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop) 
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     position[0] = (maxX + minX) * 0.5f;
     position[1] = -highestTop * 0.5f;
@@ -662,7 +662,7 @@ f32 btlMeasureEffectTargetGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop) 
                     }
                 }
             }
-            unit = unit->nextActor;
+            unit = unit->next;
         } while (unit != NULL);
     }
     position[0] = (maxX + minX) * 0.5f;
@@ -708,7 +708,7 @@ f32 btlGetMaxUnitTop(u32 mask) {
                 maxTopY = topY;
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return maxTopY;
 }
@@ -728,7 +728,7 @@ f32 btlGetMaxUnitReach(u32 mask) {
                 maxReach = scaledReach;
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return maxReach;
 }
@@ -764,7 +764,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return extremeZ;
 }
@@ -937,7 +937,7 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return nearest;
 }
@@ -965,7 +965,7 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return farthest;
 }
@@ -1019,7 +1019,7 @@ BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *reference, BtlIndexList *list) {
 void btlFlagAllUnitsDefeatCandidate(void) {
     BtlUnit *unit;
     BtlState *work = (BtlState *)btlGetRuntime();
-    for (unit = work->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = work->units; unit != NULL; unit = unit->next) {
         btlFlagUnitDefeatCandidate(unit);
     }
 }
@@ -1027,7 +1027,7 @@ void btlFlagAllUnitsDefeatCandidate(void) {
 void btlClearAllUnitDefeatCandidates(void) {
     BtlUnit *unit;
     BtlState *work = (BtlState *)btlGetRuntime();
-    for (unit = work->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = work->units; unit != NULL; unit = unit->next) {
         btlClearUnitDefeatCandidate(unit);
     }
 }
@@ -1041,7 +1041,7 @@ void btlFlagMatchingUnitsDefeatCandidate(s32 mask) {
             if (unit->status.flags & mask) {
                 btlFlagUnitDefeatCandidate(unit);
             }
-            unit = unit->nextActor;
+            unit = unit->next;
         } while (unit != NULL);
     }
 }
@@ -1055,7 +1055,7 @@ void btlClearMatchingUnitDefeatCandidates(s32 mask) {
             if (unit->status.flags & mask) {
                 btlClearUnitDefeatCandidate(unit);
             }
-            unit = unit->nextActor;
+            unit = unit->next;
         } while (unit != NULL);
     }
 }
@@ -1109,7 +1109,7 @@ void btlUpdateUnitActors(void) {
         }
         unit->status.stateFlags &= ~0x8000;
         unit->status.stateFlags &= ~0x200000;
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     {
         void (*callback)(void) = state->afterUnitUpdate;
@@ -1144,7 +1144,7 @@ void btlRefreshUnitEffects(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     if (state->commandRestrictFlags & 0x800000) {
         dds3DrawFlag |= 0x2000000;
@@ -1165,7 +1165,7 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
             if (((unitFlags & mask) != 0) && ((unitFlags & 0x20) == 0)) {
                 activeCount += unitFlags & 1;
             }
-            unit = unit->nextActor;
+            unit = unit->next;
         } while (unit != NULL);
     }
     return activeCount;
@@ -2607,7 +2607,7 @@ u32 btlScriptReturnUnitHpRatioPercent(void) {
                 return 1;
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     scrSetIntReturnValue(0);
     return 1;
@@ -3052,7 +3052,7 @@ void btlReleaseActiveUnitEffectsUnlessPaused(void) {
                     evtUnitLightOff(effect, 0);
                 }
             }
-            actor = (s32)((BtlUnit *)actor)->nextActor;
+            actor = (s32)((BtlUnit *)actor)->next;
         }
     }
 }

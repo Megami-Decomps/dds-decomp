@@ -215,7 +215,7 @@ s32 btlCheckActorDistanceLimit(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return 1;
 }
@@ -495,7 +495,7 @@ void btlChooseCameraPoseByActorHeights(BtlLinkedCommand *action) {
     enemyHeight = 0.0f;
     allyHeight = 0.0f;
     unit = work->units;
-    for (; unit != NULL; unit = unit->nextActor) {
+    for (; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             height = btlUnitGetTopY(unit);
             if (unit->status.flags & 0x200) {
@@ -1140,7 +1140,7 @@ void btlUpdateActionCameraFromTargetPolicy(BtlLinkedCommand *action) {
             singleIsTarget = link->unit == btlGetIndexListEntry(list, 0);
         }
         matchingActorCount = 0;
-        for (unit = runtime->units; unit != 0; unit = unit->nextActor) {
+        for (unit = runtime->units; unit != 0; unit = unit->next) {
             u32 flags = unit->status.flags;
             if ((flags & 1) != 0 || hasUnready != 0) {
                 if (flags & 0x200) {
@@ -1156,7 +1156,7 @@ void btlUpdateActionCameraFromTargetPolicy(BtlLinkedCommand *action) {
             btlUnitGetMuzzlePosVU(link->unit);
             /* Retail 001EBF84 keeps this SDK snapshot at SP+0x10. */
             SDF_VU0_STOREVECTOR(positions[1]);
-            for (unit = runtime->units; unit != 0; unit = unit->nextActor) {
+            for (unit = runtime->units; unit != 0; unit = unit->next) {
                 if (unit != link->unit) {
                     u32 flags = unit->status.flags;
                     if ((flags & 1) != 0) {

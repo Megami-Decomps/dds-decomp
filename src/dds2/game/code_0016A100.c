@@ -103,7 +103,7 @@ void effBattleApplyUnitColorDirection(BtlUnit *unit, EffBattleUnitColorCommand *
         break;
     }
     if (count == 0) {
-        for (current = battle->units; current != NULL; current = current->nextActor) {
+        for (current = battle->units; current != NULL; current = current->next) {
             u32 flags = current->status.flags;
             if ((flags & 2) && (current->status.stateFlags & 0x10) &&
                 current->ext != NULL && (flags & mask)) {

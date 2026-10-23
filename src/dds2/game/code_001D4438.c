@@ -614,7 +614,7 @@ extern u32 sndGetResourceStatus(SoundResourceNode *sound);
 s32 btlPollBattleResourceCleanup(BtlUnit *self) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     BtlUnit *actor;
-    for (actor = scene->units; actor != 0; actor = actor->nextActor) {
+    for (actor = scene->units; actor != 0; actor = actor->next) {
         if (actor->resourceNode != 0) {
             if (sndIsResourceNodeReferencedOrActive(actor->resourceNode) != 0) {
                 if (actor == self) {
@@ -634,7 +634,7 @@ s32 btlPollBattleResourceCleanup(BtlUnit *self) {
         sndFreeListNode(self->listNode);
         self->listNode = 0;
     }
-    for (actor = scene->units; actor != 0; actor = actor->nextActor) {
+    for (actor = scene->units; actor != 0; actor = actor->next) {
         if (actor->status.flags & 0x200) {
             if (actor->status.flags & 2) {
                 if ((actor->gunResourceFlags & 8) == 0) {
@@ -786,7 +786,7 @@ void btlActionSeqCheckDispatch(u8 *task) {
     BtlUnit *unit = ((ActionStateLink *)task)->unit;
     BtlUnit *actor;
     if (!(flags & 0x20)) {
-        for (actor = scene->units; actor != 0; actor = actor->nextActor) {
+        for (actor = scene->units; actor != 0; actor = actor->next) {
             u32 actorFlags = actor->status.flags;
             if (actorFlags & 0x4000) {
                 return;
@@ -2556,7 +2556,7 @@ s32 btlCommandGunChangeStart(ActionStateLink *task) {
         unit->partyRecord.flags &= ~0x1000;
         sound = btlCreateHookedUnitSoundTask(unit, 0x11);
         btlStartTask(sound);
-        for (other = state->units; other != NULL; other = other->nextActor) {
+        for (other = state->units; other != NULL; other = other->next) {
             if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
                 spawned = btlScheduleRefreshTask(other);
                 spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
@@ -2570,7 +2570,7 @@ s32 btlCommandGunChangeStart(ActionStateLink *task) {
         change->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         change->startCondition.value.handle = sound->handle;
         btlStartTask(change);
-        for (other = state->units; other != NULL; other = other->nextActor) {
+        for (other = state->units; other != NULL; other = other->next) {
             if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
                 load = btlCreateModelLoadPollTask(other, other->resourceKind, other->resourceIndex, 0);
                 load->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
@@ -2687,7 +2687,7 @@ void btlScheduleDevilStateModelChange(ActionStateLink *task) {
         unit->partyRecord.flags |= 0x1000;
         sound = btlCreateHookedUnitSoundTask(unit, 0x10);
         btlStartTask(sound);
-        for (other = state->units; other != NULL; other = other->nextActor) {
+        for (other = state->units; other != NULL; other = other->next) {
             if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
                 spawned = btlScheduleRefreshTask(other);
                 spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
@@ -2701,7 +2701,7 @@ void btlScheduleDevilStateModelChange(ActionStateLink *task) {
         change->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         change->startCondition.value.handle = sound->handle;
         btlStartTask(change);
-        for (other = state->units; other != NULL; other = other->nextActor) {
+        for (other = state->units; other != NULL; other = other->next) {
             if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
                 load = btlCreateModelLoadPollTask(other, other->resourceKind, other->resourceIndex, 0);
                 load->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
@@ -3494,7 +3494,7 @@ void btlScheduleEscapeResultTasks(ActionStateLink *task) {
             btlStartTask(btlCreateEffObjD(task->unit, 0x250));
         }
         delay = 0xF;
-        for (unit = state->units; unit; unit = unit->nextActor) {
+        for (unit = state->units; unit; unit = unit->next) {
             flags = unit->status.flags;
             /* Retail tests these three admission bits independently. */
             if (!(flags & 1)) continue;
@@ -3519,7 +3519,7 @@ void btlScheduleEscapeResultTasks(ActionStateLink *task) {
     } else {
         delay = 7;
         btlStartTask(btlCreateEffObjA(task->unit, task->indexWork.phase));
-        for (unit = state->units; unit; unit = unit->nextActor) {
+        for (unit = state->units; unit; unit = unit->next) {
             flags = unit->status.flags;
             if (!(flags & 1)) continue;
             if (!(flags & 0x200)) continue;

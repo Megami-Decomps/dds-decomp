@@ -531,7 +531,7 @@ void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *action, BtlCamState *
                 count++;
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
 
     if (count == 0) {
@@ -1131,7 +1131,7 @@ void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *action, BtlCamState *from
     muzzleHeight = 0.0f;
     /* Reuse the finished target count for eligible actors and their mean Y. */
     count = 0;
-    for (unit = work->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = work->units; unit != NULL; unit = unit->next) {
         u32 flags = unit->status.flags;
         if (!(flags & 1)) {
             continue;
@@ -1219,7 +1219,7 @@ void btlBuildGroupSizeActionCameraPair(BtlLinkedCommand *command, BtlCamState *f
     }
 
     count = 0;
-    for (unit = runtime->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = runtime->units; unit != NULL; unit = unit->next) {
         u32 flags = unit->status.flags;
         if (!(flags & 1)) continue;
         if (flags & 0xC0) continue;
@@ -1287,7 +1287,7 @@ f32 angle, f32 blend) {
     btlFlagMatchingUnitsDefeatCandidate(groups & 0x600);
     totalReach = 0.0f;
     last = NULL;
-    for (unit = runtime->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = runtime->units; unit != NULL; unit = unit->next) {
         s32 flags = unit->status.flags;
         if (!(flags & 1)) {
             continue;
@@ -1620,7 +1620,7 @@ void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState
     }
     firstActor = 0;
     secondActor = 0;
-    for (unit = state->units; unit; unit = unit->nextActor) {
+    for (unit = state->units; unit; unit = unit->next) {
         u32 unitFlags = unit->status.flags;
         if (unitFlags & 1) {
             if (!(unitFlags & 0xC0)) {
@@ -1868,7 +1868,7 @@ s32 btlBuildMaskedGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState 
     f32 y;
     f32 pointDistance;
 
-    for (unit = state->units; unit != 0; unit = unit->nextActor) {
+    for (unit = state->units; unit != 0; unit = unit->next) {
         u32 flags = (u32)unit->status.flags;
         if (flags & 1) {
             if ((flags & 0xC0) == 0) {
@@ -2346,7 +2346,7 @@ void btlFrameCommandTargetGroups(BtlLinkedCommand *action) {
                 }
             }
         }
-        actor = actor->nextActor;
+        actor = actor->next;
     }
 
     btlClearAllUnitDefeatCandidates();
@@ -2431,7 +2431,7 @@ void btlBuildActorGroupProjectionCameraPose(BtlLinkedCommand *source, BtlCamStat
     }
 
     markedCount = 0;
-    for (unit = state->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = state->units; unit != NULL; unit = unit->next) {
         u32 flags = unit->status.flags;
         if ((flags & 3) != 0 && (flags & 0x200) != 0) {
             markedCount++;
@@ -2750,7 +2750,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
     }
 
     actorCount = 0;
-    for (unit = runtime->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = runtime->units; unit != NULL; unit = unit->next) {
         s32 flags;
 
         if ((btlUnitStatusPair(unit) & 0x300) != 0x300) {
@@ -2793,7 +2793,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
 
     btlMeasureFilteredUnitGroupBounds(0x400, NULL, NULL);
     SDF_VU0_STOREVECTOR_NOMEM(vectors.center);
-    for (unit = runtime->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = runtime->units; unit != NULL; unit = unit->next) {
         s32 flags = unit->status.flags;
 
         if ((flags & 0x200) != 0) {
@@ -2812,7 +2812,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
 
     btlMeasureFilteredUnitGroupBounds(0x200, NULL, NULL);
     SDF_VU0_STOREVECTOR_NOMEM(vectors.center);
-    for (unit = runtime->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = runtime->units; unit != NULL; unit = unit->next) {
         s32 flags = unit->status.flags;
 
         if ((flags & 0x400) != 0) {
@@ -2976,7 +2976,7 @@ void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *command, Btl
     f32 span;
     f32 distance;
 
-    for (; actor != 0; actor = actor->nextActor) {
+    for (; actor != 0; actor = actor->next) {
         s32 flags = actor->status.flags;
         if (!(flags & 1)) {
             continue;
@@ -3032,7 +3032,7 @@ void btlFrameLeftmostUnitCameraPair(BtlCamState *source, BtlCamState *from, BtlC
     first = 1;
     selected = NULL;
     minX = 0.0f;
-    for (unit = work->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = work->units; unit != NULL; unit = unit->next) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
@@ -3113,7 +3113,7 @@ void func_001F2308(BtlCamState *source, BtlCamState *from, BtlCamState *to) {
     first = 1;
     selected = NULL;
     minX = bounds[0];
-    for (unit = work->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = work->units; unit != NULL; unit = unit->next) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
@@ -3229,7 +3229,7 @@ void btlFrameEarliestAnimatedUnitCameraPair(BtlLinkedCommand *action, BtlCamStat
     earliest = 0.0f;
     work = (BtlState *)btlGetRuntime();
     selected = NULL;
-    for (unit = work->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = work->units; unit != NULL; unit = unit->next) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
@@ -3600,7 +3600,7 @@ void btlChooseActionPoseBlendFromActorCount(BtlLinkedCommand *action,
     BtlUnit *unit;
     mask = ((BtlUnit *)btlGetIndexListEntry(action->targetList, 0))->status.flags & 0x600;
     count = 0;
-    for (unit = work->units; unit != 0; unit = unit->nextActor) {
+    for (unit = work->units; unit != 0; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & mask) {
                 count++;
@@ -4823,7 +4823,7 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
                                 btlClearUnitDefeatCandidate(unit);
                             }
                         }
-                        unit = unit->nextActor;
+                        unit = unit->next;
                     }
                 }
             }
@@ -4863,7 +4863,7 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
                             btlClearUnitDefeatCandidate(unit);
                         }
                     }
-                    unit = unit->nextActor;
+                    unit = unit->next;
                 }
             }
             ++instruction;
@@ -5908,7 +5908,7 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
 
 BtlUnit *btlFindActiveActorById(s32 id) {
     BtlUnit *unit;
-    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (!(unit->status.flags & 0xC0)) {
                 if (unit->status.flags & 0x200) {
@@ -6189,7 +6189,7 @@ f32 btlMeasureBattleSideBoundsWithSeed(s32 sides, f32 *top, f32 *bottom, const f
         if (pass == 1) {
             pass = 2;
         } else if (pass == 2) {
-            unit = unit->nextActor;
+            unit = unit->next;
         }
     }
     {
@@ -6316,7 +6316,7 @@ f32 btlMeasureFilteredActorBounds(s32 mask, BtlUnit *included, BtlUnit *excluded
     minActor = unit;
     trackedMaxX = 0.0f;
     verticalOffset = 0.0f;
-    for (; unit != 0; unit = unit->nextActor) {
+    for (; unit != 0; unit = unit->next) {
         s32 flags = unit->status.flags;
         f32 lowerX, upperX, lowerZ, upperZ;
         if (!(flags & 1)) continue;
@@ -6537,7 +6537,7 @@ f32 btlMeasureSideFilteredActorBounds(s32 mask, BtlUnit *included, BtlUnit *excl
     minZ = 0.0f;
     first = 1;
     unit = state->units;
-    for (; unit != 0; unit = unit->nextActor) {
+    for (; unit != 0; unit = unit->next) {
         s32 flags = unit->status.flags;
         f32 lowerX, upperX, lowerZ, upperZ;
         if (!(flags & 1)) continue;
@@ -6852,7 +6852,7 @@ f32 btlBuildProjectedActorPairBoundsVU(s32 mask, BtlUnit *first, BtlUnit *second
 s32 btlCountUnitsByFlags(u32 mask) {
     BtlUnit *unit;
     s32 count = 0;
-    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->next) {
         if ((unit->status.flags & 1) && (unit->status.flags & mask)) {
             if (!(unit->status.flags & 0x20)) {
                 count++;
@@ -7607,7 +7607,7 @@ u32 btlApplySceneLightingTransition(SceneLightTransitionArgs *args) {
     ambientColor = work->ambientColor;
     PCP_COPY_VECTOR_F32(ambientColor, second);
     PCP_COPY_VECTOR_F32(work->lightDirection, args->direction);
-    for (unit = work->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = work->units; unit != NULL; unit = unit->next) {
         if (!(unit->status.flags & 2)) {
             continue;
         }
@@ -7688,7 +7688,7 @@ s32 btlRestoreSceneTransformLighting(SceneLightRestoreArgs *args) {
         PCP_COPY_VECTOR_F32(work->lightColor, work->baselineLightColor);
         PCP_COPY_VECTOR_F32(work->ambientColor, work->baselineAmbientColor);
         PCP_COPY_VECTOR_F32(work->lightDirection, work->baselineLightDirection);
-        for (unit = work->units; unit != NULL; unit = unit->nextActor) {
+        for (unit = work->units; unit != NULL; unit = unit->next) {
             if (!(unit->status.flags & 2)) {
                 continue;
             }
@@ -8327,7 +8327,7 @@ u32 btlWaitUnitListIdle(void) {
     if (work->battleFlags & 0x40000000) {
         return 1;
     }
-    for (unit = work->units; unit != 0; unit = unit->nextActor) {
+    for (unit = work->units; unit != 0; unit = unit->next) {
     }
     return 1;
 }
@@ -8348,7 +8348,7 @@ u32 sndApplyToActiveActors(taskArgs)
     s32 *taskArgs;
 {
     BtlUnit *unit;
-    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 2) {
                 if (unit->ext != 0) {
@@ -8585,7 +8585,7 @@ s32 sndIsResourceNodeReferencedOrActive(SoundResourceNode *effect) {
 
 s32 sndHasActiveActor(void) {
     BtlUnit *unit;
-    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->next) {
         if (unit->resourceNode != 0 && sndIsResourceNodeReferencedOrActive(unit->resourceNode) != 0) {
             return 1;
         }

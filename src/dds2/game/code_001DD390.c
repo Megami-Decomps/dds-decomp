@@ -1586,7 +1586,7 @@ u32 btlAwardHuntExperience(s32 address) {
         record = btlGetIndexedPartyEntryRecord(args->actor->partyIndex);
         record->huntExp += args->amount;
         head = battle->units;
-        for (unit = head; unit != NULL; unit = unit->nextActor) {
+        for (unit = head; unit != NULL; unit = unit->next) {
             u32 flags = unit->status.flags;
             if (flags & 0x200) {
                 if (flags & 1) {
@@ -1608,7 +1608,7 @@ u32 btlAwardHuntExperience(s32 address) {
             return 1;
         }
         share = (u32)((f32)args->amount / (f32)count);
-        for (unit = head; unit != NULL; unit = unit->nextActor) {
+        for (unit = head; unit != NULL; unit = unit->next) {
             u32 flags = unit->status.flags;
             if (flags & 0x200) {
                 if (flags & 1) {
@@ -1804,7 +1804,7 @@ u32 btlRefreshEligibleActors(void) {
                 }
             }
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return 1;
 }
@@ -2409,7 +2409,7 @@ s32 btlHasMatchingModel(s32 effect, s32 model) {
             mdlGetMinorNum(unit->ext->owner) == model) {
             return 1;
         }
-        unit = unit->nextActor;
+        unit = unit->next;
     }
     return 0;
 }
@@ -2962,7 +2962,7 @@ void btlUpdateUnitEffects(void) {
                               object->effectScale);
             }
         }
-        object = object->nextActor;
+        object = object->next;
     }
 }
 
@@ -5055,7 +5055,7 @@ void btlUpdateActiveActorModelState(void) {
     if (beforeMotionUpdate != NULL) {
         beforeMotionUpdate();
     }
-    for (unit = runtime->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = runtime->units; unit != NULL; unit = unit->next) {
         if (!(unit->status.flags & 0x600) || !(unit->status.flags & 2)) {
             continue;
         }
@@ -5124,7 +5124,7 @@ void btlUpdateActorModelColorAndLinks(void) {
     BtlUnit *unit = work->units;
     s32 color;
 
-    for (; unit != 0; unit = unit->nextActor) {
+    for (; unit != 0; unit = unit->next) {
         if (unit->status.flags & 2) {
             dds3ModelHandle_t *model = unit->ext->owner;
             if (!(unit->status.stateFlags & 0x20000)) {
@@ -5200,9 +5200,9 @@ BtlUnit *btlCreateUnit(void) {
     unit->previousActor = 0;
     if (work->units != 0) {
         work->units->previousActor = unit;
-        unit->nextActor = work->units;
+        unit->next = work->units;
     } else {
-        unit->nextActor = 0;
+        unit->next = 0;
     }
     work->units = unit;
     btlBossDebugPrintf("btl:unit create[%p]\n", unit);
@@ -5246,13 +5246,13 @@ void btlReleaseUnitResources(BtlUnit *unit) {
 void btlDestroyUnit(BtlUnit *unit) {
     btlBossDebugPrintf("btl:unit delete[%p]\n", unit);
     btlReleaseUnitResources(unit);
-    if (unit->nextActor != 0) {
-        unit->nextActor->previousActor = unit->previousActor;
+    if (unit->next != 0) {
+        unit->next->previousActor = unit->previousActor;
     }
     if (unit->previousActor != 0) {
-        unit->previousActor->nextActor = unit->nextActor;
+        unit->previousActor->next = unit->next;
     } else {
-        ((BtlState *)btlGetRuntime())->units = unit->nextActor;
+        ((BtlState *)btlGetRuntime())->units = unit->next;
     }
     sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(unit->handle));
 }
@@ -5261,7 +5261,7 @@ void btlDestroyAllUnits(void) {
     BtlUnit *unit;
     BtlUnit *next;
     for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = next) {
-        next = unit->nextActor;
+        next = unit->next;
         btlDestroyUnit(unit);
     }
 }
@@ -5270,7 +5270,7 @@ void btlRemoveActorsWithFlags(u32 mask) {
     s32 actor = (s32)((BtlState *)btlGetRuntime())->units;
     s32 next;
     while (actor != 0) {
-        next = (s32)((BtlUnit *)actor)->nextActor;
+        next = (s32)((BtlUnit *)actor)->next;
         if (((BtlUnit *)actor)->status.flags & mask) {
             btlDestroyUnit(actor);
         }
@@ -5280,7 +5280,7 @@ void btlRemoveActorsWithFlags(u32 mask) {
 
 BtlUnit *btlFindActorForOwner(u64 owner) {
     BtlUnit *unit;
-    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->next) {
         if (unit->owner == owner) {
             return unit;
         }
@@ -5290,7 +5290,7 @@ BtlUnit *btlFindActorForOwner(u64 owner) {
 
 s32 btlIsActiveActor(BtlUnit *actor) {
     BtlUnit *unit;
-    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->next) {
         if (unit == actor) {
             return 1;
         }
@@ -5300,7 +5300,7 @@ s32 btlIsActiveActor(BtlUnit *actor) {
 
 BtlUnit *btlFindUnitByModeClear(s32 unitId) {
     BtlUnit *unit;
-    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->next) {
         if (!(unit->partyRecord.flags & 0x20) && unit->partyRecord.unitId == unitId) {
             return unit;
         }
@@ -5310,7 +5310,7 @@ BtlUnit *btlFindUnitByModeClear(s32 unitId) {
 
 BtlUnit *btlFindUnitByModeFlagged(s32 unitId) {
     BtlUnit *unit;
-    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->next) {
         if ((unit->partyRecord.flags & 0x20) && unit->partyRecord.unitId == unitId) {
             return unit;
         }
@@ -6230,7 +6230,7 @@ void btlResetCameraMotion(BtlLinkedCommand *action) {
     f32 current;
     f32 limit;
     if (work->cameraCommand.status == 1 || btlHasSingleLinkedResource(action) != 0) {
-        for (unit = work->units; unit != 0; unit = unit->nextActor) {
+        for (unit = work->units; unit != 0; unit = unit->next) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x200) {
                     if (unit->status.flags & 2) {
@@ -6276,7 +6276,7 @@ s32 btlPositionActorIndexUnits(BtlLinkedCommand *action) {
     if (unit->lookupId != count) {
         return 0;
     }
-    for (unit = work->units; unit != 0; unit = unit->nextActor) {
+    for (unit = work->units; unit != 0; unit = unit->next) {
         if ((unit->status.flags & 0x100) && unit->lookupId != 1) {
             btlCopyUnitCurrentPosition(unit, pos);
             pos[2] = unit->position[2] - 90.0f;
