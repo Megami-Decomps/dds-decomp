@@ -56,11 +56,12 @@
 #include "btl.h"
 #include "fr_font_draw_glyph.h"
 #include "itf.h"
+typedef s32 (*FileMenuContinuationCallback)(void);
 /* Declared before first use (were implicit int). */
 extern void effLoadFlashTextures(void);
 extern void effLoadScalyTexture(void);
 extern void effLoadWindTexture(void);
-extern s32 slSaveWriteFile(char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, void *continuation, struct FileRequest **pendingRequestStatus);
+extern s32 slSaveWriteFile(char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest **pendingRequestStatus);
 extern void dds3SoftResetOn(void);
 extern s32 slSaveData_chdir(void);
 extern void frEnableMode(s32 mask);
@@ -230,7 +231,6 @@ extern s32 filePollSlotDetectionAndBranch(void);
 
 extern s32 slSizeChk(void);
 
-typedef s32 (*FileMenuContinuationCallback)(void);
 extern FileMenuContinuationCallback fileMenuContinuation;
 
 extern s32 mcdFinishFileDetection(void);
@@ -1813,10 +1813,10 @@ s32 fileBeginLabeledSlotWrite(void) {
     fileSaveIconSysData[0xFA] = -0x7E;
     fileSaveIconSysData[0xF9] = q + 0x4F;
     fileSaveIconSysData[0xFB] = r + 0x4F;
-    return slSaveWriteFile(D_0042B6B8, &D_00437D90, &D_00437D94, (void *)fileWriteIconSysComplete, 0);
+    return slSaveWriteFile(D_0042B6B8, &D_00437D90, &D_00437D94, fileWriteIconSysComplete, 0);
 }
 
-extern s32 slSaveWriteFile(char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, void *continuation, struct FileRequest **pendingRequestStatus);
+extern s32 slSaveWriteFile(char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest **pendingRequestStatus);
 extern s32 fileBeginLabeledSlotWrite(void);
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B698);
@@ -1902,14 +1902,14 @@ s32 slSaveData_deleteIconSys(void) {
 
 extern u32 *fileWriteDataAddressSlot;
 extern u32 *fileWriteDataSizeSlot;
-extern u32 fileWriteContinuation;
+extern FileMenuContinuationCallback fileWriteContinuation;
 extern struct FileRequest **fileWritePendingRequestSlot;
 extern s32 slSaveProc_openFile(void);
 
-s32 slSaveWriteFile(char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, void *continuation, struct FileRequest **pendingRequestStatus) {
+s32 slSaveWriteFile(char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest **pendingRequestStatus) {
     fileWriteDataAddressSlot = dataAddressSlot;
     fileWriteDataSizeSlot = dataSizeSlot;
-    fileWriteContinuation = (u32)continuation;
+    fileWriteContinuation = continuation;
     fileWritePendingRequestSlot = pendingRequestStatus;
     sdfMcFuncOpen(fileMemoryCardRequestIndex, fileName, 0x203);
     return (s32)slSaveProc_openFile;
@@ -1961,7 +1961,7 @@ s32 slSaveProc_writeFile(void) {
     return 0;
 }
 
-extern u32 fileWriteContinuation;
+extern FileMenuContinuationCallback fileWriteContinuation;
 s32 slSaveProc_closeFile(void) {
     McPollResult status = sdfMcFuncClose1();
 
@@ -1969,7 +1969,7 @@ s32 slSaveProc_closeFile(void) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
-        return ((s32 (*)())fileWriteContinuation)();
+        return fileWriteContinuation();
     }
     if (status == MC_POLL_ERROR) {
         slSetInfo(0);

@@ -64,6 +64,8 @@
 #include "fr_font.h"
 #include "fr_font_draw_glyph.h"
 #include "itf.h"
+
+typedef s32 (*FileMenuContinuationCallback)(void);
 /* Declared before first use (were implicit int). */
 extern void effLoadFlashTextures(void);
 extern void effLoadScalyTexture(void);
@@ -190,13 +192,13 @@ extern u32 *fileWriteDataAddressSlot;
 
 extern u32 *fileWriteDataSizeSlot;
 
-extern void *fileWriteContinuation;
+extern FileMenuContinuationCallback fileWriteContinuation;
 
 extern u32 *fileWritePendingRequestSlot;
 
 extern u32 D_003BC824;
 
-extern s32 slSaveWriteFile(const char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, void *continuation, u32 *pendingRequestStatus);
+extern s32 slSaveWriteFile(const char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, FileMenuContinuationCallback continuation, u32 *pendingRequestStatus);
 
 extern s32 slSaveProc_openFile(void);
 
@@ -280,7 +282,6 @@ extern s32 D_003BC864;
 
 extern s8 fileSavePreviewVersionByteView[];
 
-typedef s32 (*FileMenuContinuationCallback)(void);
 extern FileMenuContinuationCallback fileMenuContinuation;
 
 extern struct sdfMemHandle_t *fileSaveIconResourceHandle;
@@ -2045,7 +2046,7 @@ s32 slSaveData_deleteIconSys(void) {
     return (s32)fileBuildMainBlobAfterDelete;
 }
 
-s32 slSaveWriteFile(const char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, void *continuation, u32 *pendingRequestStatus) {
+s32 slSaveWriteFile(const char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, FileMenuContinuationCallback continuation, u32 *pendingRequestStatus) {
     fileWriteDataAddressSlot = dataAddressSlot;
     fileWriteDataSizeSlot = dataSizeSlot;
     fileWriteContinuation = continuation;
@@ -2102,7 +2103,7 @@ s32 slSaveProc_closeFile(void) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
-        return ((s32 (*)())fileWriteContinuation)();
+        return fileWriteContinuation();
     }
     if (status == MC_POLL_ERROR) {
         slSetInfo(0);
