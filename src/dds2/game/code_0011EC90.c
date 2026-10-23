@@ -157,10 +157,10 @@ void dds3FontReqDestroy(void *owner) {
     sdfChipFreeDirect(node);
 }
 
-s32 dds3FontReqDrawFont(void *owner) {
+void dds3FontReqDrawFont(void *owner) {
     Dds3FontNode *node = owner;
 
-    return frFontDrawGlyphInDefaultMode(node->glyph);
+    frFontDrawGlyphInDefaultMode(node->glyph);
 }
 
 Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, void *text) {

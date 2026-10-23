@@ -63,7 +63,7 @@ void dds3FontReqListCount(void);
 Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, void *text);
 void dds3FontReqSetColorNo(Dds3FontNode *node, u8 value);
 void dds3FontReqDestroy(void *owner);
-s32 dds3FontReqDrawFont(void *owner);
+void dds3FontReqDrawFont(void *owner);
 void dds3FontReqFree(void *owner);
 
 typedef char Dds3IntrusiveNodeSizeCheck[sizeof(Dds3IntrusiveNode) == 0x10 ? 1 : -1];
