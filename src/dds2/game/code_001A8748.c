@@ -69,7 +69,7 @@ typedef union UiQuadColor {
     s32 channels[4];
 } UiQuadColor;
 
-extern s32 dds3FindEntryIndex();
+extern s32 dds3FindEntryIndex(s32 unitId);
 
 extern datUnitWork_t *btlGetIndexedPartyEntryRecord(s32);
 
@@ -1450,10 +1450,10 @@ datUnitWork_t *btlGetActorEntryData(BtlUnit *actor) {
     return &actor->partyRecord;
 }
 
-datUnitWork_t *btlGetCurrentPartyEntryRecord(s32 rosterIndex) {
+datUnitWork_t *btlGetCurrentPartyEntryRecord(s32 unitId) {
     s32 index;
 
-    index = dds3FindEntryIndex(rosterIndex);
+    index = dds3FindEntryIndex(unitId);
     return &DDS3_GBWK->party[index];
 }
 

@@ -3576,7 +3576,7 @@ typedef struct FileMultiFlagBonus {
 
 extern FileMultiFlagBonus ptyUnit7StatBonusFlagGroups[6];
 extern s8 (*D_00435E3C)[6];
-extern s32 dds3FindEntryIndex(s32);
+extern s32 dds3FindEntryIndex(s32 unitId);
 extern char D_0042B950[];
 
 /* Apply each unlocked story bonus once to the active party record. */

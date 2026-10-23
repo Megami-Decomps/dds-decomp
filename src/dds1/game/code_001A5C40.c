@@ -98,7 +98,7 @@ extern s32 fldCountSceneSlots(void);
 
 extern char D_003A1A40[];
 
-extern s32 dds3FindEntryIndex(s32);
+extern s32 dds3FindEntryIndex(s32 unitId);
 
 extern datUnitWork_t *btlGetIndexedPartyEntryRecord(s32);
 

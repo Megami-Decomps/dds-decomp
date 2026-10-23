@@ -499,7 +499,7 @@ extern s32 D_00386288[];
 
 extern u32 mnuSetPartyEntryCurrentId(datUnitWork_t *, u32);
 
-extern s32 ptyRebalanceFrontline(s32);
+extern s32 ptyRebalanceFrontline(s32 unitId);
 
 extern void scrRemoveAvailableSkillFlagAndSlot(datUnitWork_t *, s32);
 
@@ -595,14 +595,12 @@ u8 evtGetFlaggedRosterValue(datUnitWork_t *entry) {
     return *((u8 *)&datEnemyRecords[entry->unitId] + 4);
 }
 
-s32 dds3FindEntryIndex(rosterIndex)
-    s32 rosterIndex;
-{
+s32 dds3FindEntryIndex(s32 unitId) {
     s32 slotIndex = 0;
     datUnitWork_t *entry = DDS3_GBWK->party;
     do {
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
-            if (entry->unitId == rosterIndex) {
+            if (entry->unitId == unitId) {
                 return slotIndex;
             }
         }
@@ -936,14 +934,14 @@ datUnitWork_t *dds3FindEntry(s32 rosterIndex) {
     return 0;
 }
 
-s32 ptyRebalanceFrontline(s32 rosterIndex) {
+s32 ptyRebalanceFrontline(s32 unitId) {
     DatGameState *scanState;
     datUnitWork_t savedEntry;
     s32 selectedIndex;
     s32 scanIndex;
     s32 frontlineCount;
 
-    selectedIndex = dds3FindEntryIndex(rosterIndex);
+    selectedIndex = dds3FindEntryIndex(unitId);
     if (selectedIndex < 0) {
         return 0;
     }
@@ -1258,13 +1256,13 @@ void ptyMergeSavedUnitTemplates(datUnitWork_t *entry) {
     }
 }
 
-extern s32 ptyApplyUnlockedUnitStatBonusesOnce(s32 rosterIndex);
+extern s32 ptyApplyUnlockedUnitStatBonusesOnce(s32 unitId);
 extern s32 D_00386048[][4];
 
 /* Add a roster member to the first free party slot: initialise it from its saved template or by
  * roster kind, refill HP/MP, set its model flags and apply skill-boosted maxima. Returns the
  * slot, -1 if the member is already present or -2 if the party is full. */
-s32 ptyAddUnitWithFlags(s32 rosterIndex, s32 initFlags) {
+s32 ptyAddUnitWithFlags(s32 unitId, s32 initFlags) {
     datUnitWork_t *entry;
     datUnitWork_t *party;
     s32 slotIndex;
@@ -1272,7 +1270,7 @@ s32 ptyAddUnitWithFlags(s32 rosterIndex, s32 initFlags) {
     s32 modelFlagIndex;
     s32 *modelFlags;
 
-    if (dds3FindEntryIndex(rosterIndex) >= 0) {
+    if (dds3FindEntryIndex(unitId) >= 0) {
         return -1;
     }
 
@@ -1287,11 +1285,11 @@ s32 ptyAddUnitWithFlags(s32 rosterIndex, s32 initFlags) {
     }
 
     memset(entry, 0, sizeof(*entry));
-    if ((DDS3_GBWK->templates[rosterIndex].flags & 1) != 0 &&
-        DDS3_GBWK->templates[rosterIndex].level != 0) {
-        ptyRestoreUnitFromSavedTemplate(entry, rosterIndex, initFlags);
+    if ((DDS3_GBWK->templates[unitId].flags & 1) != 0 &&
+        DDS3_GBWK->templates[unitId].level != 0) {
+        ptyRestoreUnitFromSavedTemplate(entry, unitId, initFlags);
     } else {
-        switch (rosterIndex) {
+        switch (unitId) {
         case 2:
             ptyInitRosterAndClearItem(entry, initFlags);
             break;
@@ -1302,7 +1300,7 @@ s32 ptyAddUnitWithFlags(s32 rosterIndex, s32 initFlags) {
             ptyMergeSavedUnitTemplates(entry);
             break;
         default:
-            ptyCloneTemplateAtPartyMaxLevel(entry, rosterIndex);
+            ptyCloneTemplateAtPartyMaxLevel(entry, unitId);
             break;
         }
     }
@@ -1321,10 +1319,10 @@ s32 ptyAddUnitWithFlags(s32 rosterIndex, s32 initFlags) {
         party++;
     }
     if (occupiedCount == 0) {
-        ptyRebalanceFrontline(rosterIndex);
+        ptyRebalanceFrontline(unitId);
     }
 
-    modelFlags = D_00386048[rosterIndex];
+    modelFlags = D_00386048[unitId];
     for (modelFlagIndex = 0; modelFlagIndex < 4U; modelFlagIndex++) {
         s32 modelFlag = *modelFlags++;
         if (modelFlag != 0) {
@@ -1332,7 +1330,7 @@ s32 ptyAddUnitWithFlags(s32 rosterIndex, s32 initFlags) {
         }
     }
 
-    if (ptyApplyUnlockedUnitStatBonusesOnce(rosterIndex) != 0) {
+    if (ptyApplyUnlockedUnitStatBonusesOnce(unitId) != 0) {
         entry->maxHp = datComputeSkillBoostedMaxHp(entry);
         entry->maxMp = datComputeSkillBoostedMaxMp(entry);
         entry->hp = entry->maxHp;
@@ -1341,8 +1339,8 @@ s32 ptyAddUnitWithFlags(s32 rosterIndex, s32 initFlags) {
     return slotIndex;
 }
 
-s32 ptyAddUnit(s32 rosterIndex) {
-    return ptyAddUnitWithFlags(rosterIndex, 0);
+s32 ptyAddUnit(s32 unitId) {
+    return ptyAddUnitWithFlags(unitId, 0);
 }
 
 s32 ptyRemoveUnitWithFlags(s32 unitId, s32 flags) {
@@ -2544,12 +2542,12 @@ void btlSurpriseChanceHook(s32 chance) {
  * callee changes flag mask 2 and swaps roster records. Push whether the
  * operation returned exactly one. */
 s32 ptyScriptCheckOrRebalanceFrontline(void) {
-    s32 rosterIndex = scrGetIntPara(0);
+    s32 unitId = scrGetIntPara(0);
     s32 result;
     if (scrGetIntPara(1) == 0) {
-        result = ptyIsRosterEntryPresent(rosterIndex);
+        result = ptyIsRosterEntryPresent(unitId);
     } else {
-        result = ptyRebalanceFrontline(rosterIndex);
+        result = ptyRebalanceFrontline(unitId);
     }
     scrSetIntReturnValue(result == 1);
     return 1;

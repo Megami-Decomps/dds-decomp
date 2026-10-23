@@ -9,13 +9,13 @@
 
 extern s32 mtrHasEnoughOwnedMantras(void);
 
-extern s32 ptyAddUnitWithFlags(s32 rosterIndex, s32 initFlags);
+extern s32 ptyAddUnitWithFlags(s32 unitId, s32 initFlags);
 
 extern s32 ptyRemoveUnitWithFlags(s32 param0, s32 param1);
 
 extern s32 scrGetIntPara(s32 idx);
 
-extern s32 dds3FindEntryIndex(s32 rosterIndex);
+extern s32 dds3FindEntryIndex(s32 unitId);
 
 extern s32 scrSetFlag(datUnitWork_t *work, u16 index);
 
@@ -34,10 +34,10 @@ s32 ptyScriptRemoveUnitAndReturnResult(void) {
 
 /* Evaluate a two-operand VM expression and publish its result. */
 s32 ptyScriptAddUnitWithFlagsAndReturnResult(void) {
-    s32 rosterIndex = scrGetIntPara(0);
+    s32 unitId = scrGetIntPara(0);
     s32 initFlags = scrGetIntPara(1);
 
-    scrSetIntReturnValue(ptyAddUnitWithFlags(rosterIndex, initFlags));
+    scrSetIntReturnValue(ptyAddUnitWithFlags(unitId, initFlags));
     return 1;
 }
 
@@ -55,9 +55,9 @@ s32 scrCmdHasEnoughOwnedMantras(void) {
 }
 
 s32 scrCmdSetEntryFlagsInBothStores(void) {
-    s32 rosterIndex = scrGetIntPara(0);
+    s32 unitId = scrGetIntPara(0);
     u16 flagId = scrGetIntPara(1);
-    s32 index = dds3FindEntryIndex(rosterIndex);
+    s32 index = dds3FindEntryIndex(unitId);
     s32 result = 0;
 
     if (index >= 0) {

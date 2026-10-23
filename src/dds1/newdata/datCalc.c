@@ -507,13 +507,13 @@ u8 evtGetFlaggedRosterValue(datUnitWork_t *entry) {
     return datEnemyRecords[entry->unitId].pad04;
 }
 
-s32 dds3FindEntryIndex(s32 rosterIndex) {
+s32 dds3FindEntryIndex(s32 unitId) {
     datUnitWork_t *entry = DDS3_GBWK->party;
     s32 slotIndex = 0;
 
     do {
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
-            if (entry->unitId == rosterIndex) {
+            if (entry->unitId == unitId) {
                 return slotIndex;
             }
         }
@@ -824,10 +824,10 @@ datUnitWork_t *dds3FindEntry(s32 rosterIndex) {
 
 
 /* Promote the selected roster entry into the current frontline boundary. */
-s32 ptyRebalanceFrontline(s32 rosterIndex) {
+s32 ptyRebalanceFrontline(s32 unitId) {
     DatGameState *scanState;
     datUnitWork_t savedEntry;
-    const s32 selectedIndex = dds3FindEntryIndex(rosterIndex);
+    const s32 selectedIndex = dds3FindEntryIndex(unitId);
     s32 frontlineCount;
     s32 scanIndex;
 
@@ -919,7 +919,7 @@ extern void evtCopyRosterTableValue(datUnitWork_t *);
 extern s32 D_0032ACA8[128];
 
 /* Restore or initialise the first free roster slot and publish its model flags. */
-s32 ptyAddUnit(s32 rosterIndex) {
+s32 ptyAddUnit(s32 unitId) {
     s32 gains[DAT_BASE_STAT_COUNT];
     datUnitWork_t *entry;
     s32 slotIndex;
@@ -928,7 +928,7 @@ s32 ptyAddUnit(s32 rosterIndex) {
     s32 *gain;
     s32 *modelFlags;
 
-    if (dds3FindEntryIndex(rosterIndex) >= 0) {
+    if (dds3FindEntryIndex(unitId) >= 0) {
         return -1;
     }
     for (slotIndex = 0; slotIndex < 5; slotIndex++) {
@@ -942,11 +942,11 @@ s32 ptyAddUnit(s32 rosterIndex) {
     }
 
     memset(entry, 0, sizeof(*entry));
-    if ((DDS3_GBWK->templates[rosterIndex].flags & DAT_PARTY_FLAG_OCCUPIED) != 0 &&
-        DDS3_GBWK->templates[rosterIndex].level != 0) {
+    if ((DDS3_GBWK->templates[unitId].flags & DAT_PARTY_FLAG_OCCUPIED) != 0 &&
+        DDS3_GBWK->templates[unitId].level != 0) {
         s32 averageLevel = ptyGetAverageLevel();
-        memcpy(entry, &DDS3_GBWK->templates[rosterIndex], sizeof(*entry));
-        memset(&DDS3_GBWK->templates[rosterIndex], 0, sizeof(*entry));
+        memcpy(entry, &DDS3_GBWK->templates[unitId], sizeof(*entry));
+        memset(&DDS3_GBWK->templates[unitId], 0, sizeof(*entry));
         if (entry->level < averageLevel) {
             ptyAccumulateStatGains(gains, averageLevel - entry->level, entry);
             remaining = DAT_BASE_STAT_COUNT - 1;
@@ -968,7 +968,7 @@ s32 ptyAddUnit(s32 rosterIndex) {
         entry->status = 0;
     } else {
         s32 maximumLevel = dds3EntryMax();
-        memcpy(entry, &D_003BAA04[rosterIndex], sizeof(*entry));
+        memcpy(entry, &D_003BAA04[unitId], sizeof(*entry));
         if (entry->level < maximumLevel) {
             ptyAccumulateStatGains(gains, maximumLevel - entry->level, entry);
             remaining = DAT_BASE_STAT_COUNT - 1;
@@ -988,7 +988,7 @@ s32 ptyAddUnit(s32 rosterIndex) {
     }
 
     entry->flags &= ~DAT_PARTY_FLAG_FRONTLINE;
-    modelFlags = &D_0032ACA8[rosterIndex * 4];
+    modelFlags = &D_0032ACA8[unitId * 4];
     for (remaining = 0; remaining < 4U; remaining++) {
         s32 modelFlag = *modelFlags++;
         if (modelFlag != 0) {
