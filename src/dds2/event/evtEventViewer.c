@@ -1166,7 +1166,7 @@ extern void effSetLoadDescA(void *);
 extern void Eve_PartialMultiBlurSetParam(dds3Effect_PartialMultiBlurParam_t *);
 extern void Eve_DistortionBlurSetParam(dds3Effect_DistortionBlurParam_t *);
 extern void Eve_RippleBlurSetParam(dds3Effect_RippleBlurParam_t *);
-extern void effCopyFramebufferQuadParameters(void *);
+extern void effCopyFramebufferQuadParameters(const dds3Effect_Blur_t *source);
 extern void Eve_PartialMultiFilterSetParam(dds3Effect_PartialMultiFilterParam_t *);
 extern s32 mnuSolveCubicBezierYForX(s32,const s32 *,const s32 *);
 void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *future,

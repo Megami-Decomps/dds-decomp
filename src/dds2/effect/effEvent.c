@@ -741,8 +741,8 @@ void effDisableFramebufferQuad(void) {
 }
 
 /* Copy only the framebuffer source prefix, not the trailing screen-record bytes. */
-void effCopyFramebufferQuadParameters(void *parameters) {
-    memcpy(&D_003B2238, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
+void effCopyFramebufferQuadParameters(const dds3Effect_Blur_t *source) {
+    memcpy(&D_003B2238, source, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
 /* Expose the framebuffer-quad parameter block by address. */
