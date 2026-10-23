@@ -672,29 +672,27 @@ void mnuDeactivateModelNode(MnuModelNode *node) {
     node->model->flags |= MDL_SKIP_TRANSFORMS;
 }
 
-void mnuSetNodePairValue(u8 *node, s32 value) {
+void mnuSetNodePairValue(MnuModelNode *node, s32 value) {
     value &= 0xFFFF;
-    ((MnuModelNode *)node)->value48 = value;
-    ((MnuModelNode *)node)->value4A = value;
+    node->value48 = value;
+    node->value4A = value;
 }
 
-void mnuSetNodePosition(u8 *node, f32 x, f32 y, f32 z) {
-    ((MnuModelNode *)node)->x = x;
-    ((MnuModelNode *)node)->y = y;
-    ((MnuModelNode *)node)->z = z;
-    ((MnuModelNode *)node)->positionFlag = 0;
+void mnuSetNodePosition(MnuModelNode *node, f32 x, f32 y, f32 z) {
+    node->x = x;
+    node->y = y;
+    node->z = z;
+    node->positionFlag = 0;
 }
 
 /* Set the primary (0x00) vector and load it into the model. */
-void mnuSetNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z) {
-    MnuModelNode *modelNode = (MnuModelNode *)node;
-
-    modelNode->primary[0] = x;
-    modelNode->primary[1] = y;
-    modelNode->primary[2] = z;
-    modelNode->primary[3] = 0;
-    SDF_VU0_LOADVECTOR(modelNode->primary);
-    mdlSetPosition(modelNode->model);
+void mnuSetNodePrimaryVector(MnuModelNode *node, f32 x, f32 y, f32 z) {
+    node->primary[0] = x;
+    node->primary[1] = y;
+    node->primary[2] = z;
+    node->primary[3] = 0;
+    SDF_VU0_LOADVECTOR(node->primary);
+    mdlSetPosition(node->model);
 }
 
 /* Translate the primary (0x00) vector and load it into the model. */
@@ -708,16 +706,16 @@ void mnuTranslateNodePrimaryVector(MnuModelNode *node, f32 x, f32 y, f32 z) {
 }
 
 /* Build a quaternion from the incoming Euler angles and refresh the model basis. */
-void mnuRefreshNodeSecondaryVector(u8 *node, f32 xAngle, f32 yAngle, f32 zAngle) {
+void mnuRefreshNodeSecondaryVector(MnuModelNode *node, f32 xAngle, f32 yAngle, f32 zAngle) {
     f32 quaternion[4];
 
     sdfConvertEulerAnglesToQuaternionScalar(quaternion, xAngle, yAngle, zAngle);
-    ((MnuModelNode *)node)->rotationQuaternion[0] = quaternion[0];
-    ((MnuModelNode *)node)->rotationQuaternion[1] = quaternion[1];
-    ((MnuModelNode *)node)->rotationQuaternion[2] = quaternion[2];
-    ((MnuModelNode *)node)->rotationQuaternion[3] = quaternion[3];
-    SDF_VU0_LOADVECTOR(node + 0x10);
-    mdlSetRotate(((MnuModelNode *)node)->model);
+    node->rotationQuaternion[0] = quaternion[0];
+    node->rotationQuaternion[1] = quaternion[1];
+    node->rotationQuaternion[2] = quaternion[2];
+    node->rotationQuaternion[3] = quaternion[3];
+    SDF_VU0_LOADVECTOR(node->rotationQuaternion);
+    mdlSetRotate(node->model);
 }
 
 void mnuSetViewFacingModelNodeRotation(MnuModelNode *node, f32 xAngle, f32 yAngle, f32 zAngle) {
@@ -756,19 +754,17 @@ void mnuSetViewFacingModelNodeRotation(MnuModelNode *node, f32 xAngle, f32 yAngl
 }
 
 /* Fill the tertiary (0x20) vector with one value and load it into the model. */
-void mnuSetNodeScaleVector(u8 *node, f32 value) {
-    MnuModelNode *modelNode = (MnuModelNode *)node;
-
-    modelNode->tertiary[0] = value;
-    modelNode->tertiary[1] = value;
-    modelNode->tertiary[2] = value;
-    modelNode->tertiary[3] = 0;
-    SDF_VU0_LOADVECTOR(modelNode->tertiary);
-    mdlSetScale(modelNode->model);
+void mnuSetNodeScaleVector(MnuModelNode *node, f32 value) {
+    node->tertiary[0] = value;
+    node->tertiary[1] = value;
+    node->tertiary[2] = value;
+    node->tertiary[3] = 0;
+    SDF_VU0_LOADVECTOR(node->tertiary);
+    mdlSetScale(node->model);
 }
 
-void mnuBroadcastNodeModelState(u8 *node, u32 color) {
-    mdlApplyBroadcastVia(mdlSetColor, ((MnuModelNode *)node)->model, color);
+void mnuBroadcastNodeModelState(MnuModelNode *node, u32 color) {
+    mdlApplyBroadcastVia(mdlSetColor, node->model, color);
 }
 
 
