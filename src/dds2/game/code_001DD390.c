@@ -209,7 +209,7 @@ extern s32 btlTestActorStatusPredicate(BtlUnit *);
 
 extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *, s32);
 
-extern void btlApplyUnitModelScaledValue(u8 *);
+extern void btlApplyUnitModelScaledValue(BtlUnit *);
 
 extern s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *);
 
@@ -2850,7 +2850,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
             unit->status.flags |= 0x80002000;
         }
     } else if (unit->status.flags & 0x2000) {
-        btlApplyUnitModelScaledValue((u8 *)unit);
+        btlApplyUnitModelScaledValue(unit);
         unit->status.flags &= 0x7FFFFFFF;
         unit->status.flags &= ~0x2000;
     }
@@ -2865,7 +2865,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         ((unit->status.flags & 0x200) || (entryFlags & 0x200)) &&
         ((unit->status.stateFlags & 0x40) == 0)) {
         index = 11;
-        btlApplyUnitModelScaledValue((u8 *)unit);
+        btlApplyUnitModelScaledValue(unit);
         unit->status.flags &= 0x7FFFFFFF;
         unit->status.flags &= ~0x2000;
     }
@@ -2974,16 +2974,16 @@ void btlUpdateUnitEffects(void) {
     }
 }
 
-void btlApplyUnitModelScaledValue(u8 *object) {
+void btlApplyUnitModelScaledValue(BtlUnit *object) {
     s32 context;
     f32 volume;
-    if ((((BtlUnit *)object)->status.flags & 2) == 0) {
+    if ((object->status.flags & 2) == 0) {
         return;
     }
     context = (s32)(u32)btlGetRuntime();
-    ((BtlUnit *)object)->updateFlags &= ~1;
-    volume = ((BtlUnit *)object)->motionRate;
-    ((BtlUnit *)object)->ext->owner->first->frameStep =
+    object->updateFlags &= ~1;
+    volume = object->motionRate;
+    object->ext->owner->first->frameStep =
         volume * (30.0f / (f32)((BtlState *)context)->timingRate);
 }
 
@@ -3636,7 +3636,7 @@ BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *unit, s32 index, s32 v
 }
 
 u32 btlApplyScaledUnitModelTask(u32 *taskArgs) {
-    btlApplyUnitModelScaledValue(*taskArgs);
+    btlApplyUnitModelScaledValue((BtlUnit *)taskArgs[0]);
     return 1;
 }
 
