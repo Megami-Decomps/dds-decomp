@@ -94,7 +94,7 @@ extern u32 btlNextScaledRandom(u32);
 extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
 
 
-extern void *btlSelectFlaggedIndexListEntry(BtlIndexList *, u16 *, u16);
+extern BtlUnit *btlSelectFlaggedIndexListEntry(BtlIndexList *, u16 *, u16);
 
 extern s32 btlReadCurrentUnitHp(datUnitWork_t *);
 
@@ -215,7 +215,7 @@ s32 btlGroup400UnitHasAction(BtlUnit *unit, s32 action) {
 
 /* Pick a flagged entry starting from a random index and wrapping once. When
  * none is flagged, fall back to units whose status pair has 0x21 == 1. */
-void *btlSelectFlaggedIndexListEntry(BtlIndexList *list, u16 *flags, u16 count) {
+BtlUnit *btlSelectFlaggedIndexListEntry(BtlIndexList *list, u16 *flags, u16 count) {
     u16 fallback[12];
     u32 start;
     u32 i;
