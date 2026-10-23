@@ -1084,7 +1084,7 @@ s32 evtUnitMoveTypePathTrace(evtUnitHandle_t *unit) {
     return 1;
 }
 
-void evtCopyUnitTargetVector(evtUnitHandle_t *work, void *src) {
+void evtCopyUnitTargetVector(evtUnitHandle_t *work, const f32 src[4]) {
     SDF_VU0_COPYVECTOR(work->targetVector, src);
 }
 
