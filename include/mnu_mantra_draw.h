@@ -46,7 +46,7 @@ typedef struct MantraListState {
     u32 entries[8];
     s16 count;
     s16 index;
-    u32 unk2C;
+    u32 costIconFadeCountdown;
 } MantraListState;
 
 typedef struct MantraLampState {

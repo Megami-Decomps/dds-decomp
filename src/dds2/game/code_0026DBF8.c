@@ -914,9 +914,9 @@ s32 mnuDrawMantraSelectionListAndCost(s32 x, s32 y, s32 depth, MantraListState *
     }
 
     if (node == NULL) {
-        if (state->unk2C != 0) {
-            state->unk2C--;
-            fadeWeight = (f32)state->unk2C / 30.0f;
+        if (state->costIconFadeCountdown != 0) {
+            state->costIconFadeCountdown--;
+            fadeWeight = (f32)state->costIconFadeCountdown / 30.0f;
             fadeWeight = sdfSin(fadeWeight * 6.2831852f + (-1.5707963f));
             fadeWeight = (fadeWeight + 1.0f) * 0.5f;
         }
@@ -941,7 +941,7 @@ s32 mnuDrawMantraSelectionListAndCost(s32 x, s32 y, s32 depth, MantraListState *
 }
 
 void mnuResetMantraListFadeDelay(MantraListState *state) {
-    state->unk2C = 0x1e;
+    state->costIconFadeCountdown = 0x1e;
 }
 
 u32 mnuNoOpMantraDrawItemCallback(void) {
