@@ -120,7 +120,7 @@ extern BtlUnit *btlSelectRandomUnitFromMask(BtlIndexList *, u16 *, u16);
 
 extern char D_00436CC8[], D_00436CD0[], D_00436CD8[];
 
-extern void *btlCreateActionTask(void *, s32);
+extern BtlRuntimeTask *btlCreateActionTask(void *, s32);
 
 extern s32 btlFindScriptResource(char *);
 

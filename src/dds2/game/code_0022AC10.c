@@ -852,7 +852,7 @@ s32 btlUpdateScriptResourceTask(BattleScriptTaskData *record) {
 }
 
 /* Queue object/group event processing with zero elapsed frames; return the task. */
-void *btlCreateActionTask(void *object, s32 group) {
+BtlRuntimeTask *btlCreateActionTask(void *object, s32 group) {
     BtlRuntimeTask *task = btlAllocTask(12);
     BattleScriptTaskData *data;
 

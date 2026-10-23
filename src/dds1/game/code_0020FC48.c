@@ -631,7 +631,7 @@ s32 btlRunSceneActorEventTask(BattleTaskData *data) {
 }
 
 /* Queue a battler/action task with zero elapsed frames; return the task. */
-void *btlCreateActionTask(void *battler, s32 action) {
+BtlRuntimeTask *btlCreateActionTask(void *battler, s32 action) {
     BattleTask *task = btlAllocTask(12);
     BattleTaskData *data;
 

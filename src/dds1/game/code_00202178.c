@@ -2278,7 +2278,7 @@ extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
 extern u64 btlStartTask(void *);
 
-extern void *btlCreateActionTask(void *, s32);
+extern BtlRuntimeTask *btlCreateActionTask(void *, s32);
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 
@@ -2645,14 +2645,14 @@ u64 btlScheduleActionAndSoundSequence(BtlTask *action) {
 
         if ((flags & 0xE0) == 0) {
             if (unitId != 0x107) {
-                BtlRuntimeTask *scriptTask = (BtlRuntimeTask *)btlCreateActionTask(unit, 0x50);
+                BtlRuntimeTask *scriptTask = btlCreateActionTask(unit, 0x50);
                 ((BtlRuntimeTask *)scriptTask)->ownerId = scriptSequence;
                 btlStartTask((void *)scriptTask);
                 task = sndCreateStationedSeTask(battle->sequenceHandle);
                 task->ownerId = soundSequence;
                 btlStartTask(task);
             } else {
-                BtlRuntimeTask *scriptTask = (BtlRuntimeTask *)btlCreateActionTask(unit, 0x51);
+                BtlRuntimeTask *scriptTask = btlCreateActionTask(unit, 0x51);
                 ((BtlRuntimeTask *)scriptTask)->ownerId = scriptSequence;
                 btlStartTask((void *)scriptTask);
                 task = sndCreateStationedSeTask(battle->sequenceHandle + 1);
@@ -4364,7 +4364,7 @@ void func_00209EB8(BtlTask *action) {
             continue;
         }
         if (effect->formCount < 2) {
-            actionTask = (BtlRuntimeTask *)btlCreateActionTask(unit, 0x50);
+            actionTask = btlCreateActionTask(unit, 0x50);
             soundDelay = 0xBA;
             actionTask->ownerId = actionBarrier;
             btlStartTask(actionTask);
@@ -4372,7 +4372,7 @@ void func_00209EB8(BtlTask *action) {
             task->ownerId = actionBarrier;
             btlStartTask(task);
         } else {
-            actionTask = (BtlRuntimeTask *)btlCreateActionTask(unit, 0x51);
+            actionTask = btlCreateActionTask(unit, 0x51);
             soundDelay = 0x66;
             actionTask->ownerId = actionBarrier;
             btlStartTask(actionTask);
