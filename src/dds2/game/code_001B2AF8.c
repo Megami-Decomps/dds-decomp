@@ -1306,8 +1306,6 @@ s32 btlSelectCounterSkill(BtlUnit *unit, BtlUnit *target) {
     return result != 0 ? result : -1;
 }
 
-/* Roster detail table entries are 0x14 bytes; the leading halfword is the ranking value. */
-typedef struct {s16 base; u8 data[0x12];} BattleRosterDetail;
 void btlBuildCombinedActorUnit(BtlUnit *dst, BtlUnit *first, BtlUnit *second, BtlUnit *third)
 {
   BtlUnit *sources[3];
@@ -1405,8 +1403,8 @@ void btlBuildCombinedActorUnit(BtlUnit *dst, BtlUnit *first, BtlUnit *second, Bt
     dst->partyRecord.status |= src->partyRecord.status & 0x10;
     if (((btlUnitStatusPair(src) & 0x1200) == 0x200) && (src->partyRecord.menuValue != 0))
     {
-      currentScore = ((BattleRosterDetail *) datRosterDetails)[dst->partyRecord.unitId].base;
-      incomingScore = ((BattleRosterDetail *) datRosterDetails)[src->partyRecord.unitId].base;
+      currentScore = ((EventRosterStat *)datRosterDetails)[dst->partyRecord.unitId].base;
+      incomingScore = ((EventRosterStat *)datRosterDetails)[src->partyRecord.unitId].base;
       if (currentScore < incomingScore)
       {
         dst->partyRecord.unitId = src->partyRecord.unitId;
