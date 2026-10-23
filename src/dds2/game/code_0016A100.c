@@ -334,17 +334,17 @@ void *effParamCreateViewerWork(s32 *package) {
 }
 
 /* Run the context/node update with this game's fixed global argument. */
-void dds3EffectPartModelDraw(void *work) {
+void dds3EffectPartModelDraw(dds3ModelHandle_t *work) {
     mdlLink(work, kwlnSceneSurfaceSets[10]);
 }
 
 /* Release the model context owned by parameter work. */
-void dds3EffectPartModelDelete(void *work) {
+void dds3EffectPartModelDelete(dds3ModelHandle_t *work) {
     mdlFree(work);
 }
 
 /* Resolve the source's resource group/id, obtain its context, and initialize it. */
-void *dds3EffectPartModelCopy(void *source) {
+dds3ModelHandle_t *dds3EffectPartModelCopy(dds3ModelHandle_t *source) {
     s32 resourceGroup;
     s32 resourceId;
     dds3ModelHandle_t *work;
@@ -357,14 +357,14 @@ void *dds3EffectPartModelCopy(void *source) {
 }
 
 /* Load a full source quadword into vf10 and store it as the primary vector. */
-void dds3EffectPartModelSetPosition(void *work, void *vector) {
+void dds3EffectPartModelSetPosition(dds3ModelHandle_t *work, void *vector) {
     SDF_VU0_LOADVECTOR_BARRIER(vector);
     mdlSetPosition(work);
 }
 
 /* Initialize only three components before the quadword VU load.
  * The fourth component is not initialized here; retain the native array size. */
-void dds3EffectPartModelSetScale(void *work, f32 scalar) {
+void dds3EffectPartModelSetScale(dds3ModelHandle_t *work, f32 scalar) {
     f32 components[4];
 
     components[0] = components[1] = components[2] = scalar;
@@ -388,7 +388,7 @@ void dds3EffectPartModelSetRotateMatrix(dds3ModelHandle_t *work, void *matrix) {
 }
 
 /* Set model color and broadcast its alpha with neutral RGB to the resources. */
-void dds3EffectPartModelSetColor(void *work, u32 color) {
+void dds3EffectPartModelSetColor(dds3ModelHandle_t *work, u32 color) {
     mdlSetColor(work, color);
 }
 
