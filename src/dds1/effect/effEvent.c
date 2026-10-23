@@ -133,7 +133,7 @@ EffArrHdr *effCreateSlotArray(u32 count) {
     u32 index = 0;
     table->allocation = allocation;
     table->slots = slot;
-    table->unk4 = count; /* The shared array header's slot count. */
+    table->slotCount = count;
     if (count != 0) {
         do {
             index++;

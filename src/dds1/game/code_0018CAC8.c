@@ -831,7 +831,7 @@ EffArrHdr *dds3Bezier4PCreate(s32 count) {
 
     ((EffArrHdr *)headerAddress)->allocation = allocation;
     ((EffArrHdr *)headerAddress)->slots = retainedAddress;
-    ((EffArrHdr *)headerAddress)->unk4 = count;
+    ((EffArrHdr *)headerAddress)->slotCount = count;
     if (count != 0) {
         do {
             slotIndex++;
