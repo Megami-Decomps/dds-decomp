@@ -5739,7 +5739,7 @@ s32 evtGetEventPackStat(u32 taskId) {
     if (task == 0) {
         return -1;
     }
-    return ((EvtPackLoadState *)dds3GetProcessData(task))->loaded;
+    return ((EvtPackLoadState *)dds3GetProcessData(task))->loadPhase;
 }
 
 EvtPackLoadState *evtGetPackProcessData(u32 taskId) {
@@ -5761,7 +5761,7 @@ void *evtGetResorceData(u32 id, s32 key) {
         return 0;
     }
     data = (EvtPackLoadState *)dds3GetProcessData(task);
-    if (data->loaded != 2) {
+    if (data->loadPhase != EVT_PACK_LOAD_COMPLETE) {
         return 0;
     }
     for (i = 0; i < data->header->entryCount; i++) {

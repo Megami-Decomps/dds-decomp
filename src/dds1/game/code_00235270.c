@@ -5644,7 +5644,7 @@ s32 evtGetEventPackStat(u32 taskId) {
     task = evtSearchEventPack(taskId);
     if (task != 0) {
         EvtPackLoadState *state = (EvtPackLoadState *)dds3GetProcessData(task);
-        return state->loaded;
+        return state->loadPhase;
     }
     return -1;
 }
@@ -5668,7 +5668,7 @@ void *evtGetResorceData(u32 taskId, s32 key) {
     task = evtSearchEventPack(taskId);
     if (task != 0) {
         data = (EvtPackLoadState *)dds3GetProcessData(task);
-        if (data->loaded != 2) {
+        if (data->loadPhase != EVT_PACK_LOAD_COMPLETE) {
             return 0;
         }
         for (i = 0; i < data->header->entryCount; i++) {

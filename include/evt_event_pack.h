@@ -44,11 +44,18 @@ typedef struct EvtPackHeader {
     EvtPackEntry entries[0];      /* 0x20 */
 } EvtPackHeader;
 
+typedef s32 EvtPackLoadPhase;
+enum {
+    EVT_PACK_LOAD_NOT_STARTED = 0,
+    EVT_PACK_LOAD_REQUEST_PENDING = 1,
+    EVT_PACK_LOAD_COMPLETE = 2
+};
+
 /* The camp constructor allocates/clears 0x48 bytes and publishes this state to
  * the event-pack load and release callbacks. */
 typedef struct EvtPackLoadState {
     s32 eventId;                  /* 0x00 */
-    s32 loaded;                   /* 0x04 */
+    EvtPackLoadPhase loadPhase;    /* 0x04 */
     struct FileRequest *pendingRequest; /* 0x08: queued event-script request, then cleanup */
     struct sdfMemHandle_t *resourceAllocation; /* 0x0C: retained descriptor */
     u8 *data;                     /* 0x10 */
@@ -70,6 +77,8 @@ typedef char EvtPackEntry_size_must_be_0x20[(sizeof(EvtPackEntry) == 0x20) ? 1 :
 typedef char EvtAreaRoomIds_size_must_be_0x08[(sizeof(EvtAreaRoomIds) == 0x08) ? 1 : -1];
 typedef char EvtPackHeader_size_must_be_0x20[(sizeof(EvtPackHeader) == 0x20) ? 1 : -1];
 typedef char EvtPackLoadState_size_must_be_0x48[(sizeof(EvtPackLoadState) == 0x48) ? 1 : -1];
+typedef char EvtPackLoadState_loadPhase_at_0x04[
+    ((u32)&((EvtPackLoadState *)0)->loadPhase == 0x04) ? 1 : -1];
 typedef char EvtPackLoadState_sceneAllocation1_at_0x24[
     ((u32)&((EvtPackLoadState *)0)->sceneAllocation1 == 0x24) ? 1 : -1];
 typedef char EvtPackLoadState_sceneAllocation2_at_0x30[

@@ -23,11 +23,6 @@ void evtWaitEventPackLoad(dds3ProcessID_t *task);
 extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(dds3ModelHandle_t *ctx, s32 searchId);
 extern s32 evtPlaySe(s32 id, s32 fade);
 
-/* The selected script entry and the terminal value of the native load state. */
-enum {
-    EVT_PACK_LOAD_COMPLETE = 2
-};
-
 extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data,
                                             const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
 extern void fldFileAddrResetMode(u32 relocateOnRelease);
@@ -35,7 +30,7 @@ extern u32 dds3DrawFlag;
 
 extern s32 evtMotionSeWork;
 #include "sdf_debug_api.h"
-extern void mdlPackDecode(s32, s32, s32, void *, s32);
+extern void mdlPackDecode(s32, s32, s32, const u8 *, s32);
 extern s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource);
 
 /* Decode one retained unit payload and return its new viewer-object key. */
@@ -222,7 +217,7 @@ void evtLoadEventScript(EvtPackLoadState *state) {
     sprintf(evtPackScriptPathBuffer, evtPackScriptPathFormat, eventDirectoryId, eventId, eventId);
     request = fileLoad(evtPackScriptPathBuffer);
     state->pendingRequest = request;
-    state->loaded = 1;
+    state->loadPhase = EVT_PACK_LOAD_REQUEST_PENDING;
 }
 
 struct SdfResource;
@@ -257,22 +252,22 @@ void evtCheckEventScriptLoaded(EvtPackLoadState *state) {
         }
     } else {
         printf(D_003BC378);
-        state->loaded = EVT_PACK_LOAD_COMPLETE;
+        state->loadPhase = EVT_PACK_LOAD_COMPLETE;
     }
 }
 
 s32 evtCheckScriptDone(dds3ProcessID_t *task) {
     EvtPackLoadState *packState = (EvtPackLoadState *)dds3GetProcessData(task);
 
-    switch (packState->loaded) {
+    switch (packState->loadPhase) {
     default:
-        if (packState->loaded < 2) {
-            if (packState->loaded == 0) {
+        if (packState->loadPhase < EVT_PACK_LOAD_COMPLETE) {
+            if (packState->loadPhase == EVT_PACK_LOAD_NOT_STARTED) {
                 evtLoadEventScript(packState);
             }
         }
         break;
-    case 1:
+    case EVT_PACK_LOAD_REQUEST_PENDING:
         evtCheckEventScriptLoaded(packState);
         break;
     }
