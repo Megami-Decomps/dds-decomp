@@ -16,6 +16,7 @@
 #include "mdl.h"
 #include "dds3obj.h"
 #include "itf.h"
+#include "itf_mes_resource.h"
 #include "sdf_float_counter.h"
 #include "evt_blend_vec_color.h"
 
@@ -49,7 +50,7 @@ extern dds3Effect_PartialMultiFilterParam_t evtMovieDefaultResourceRect;
 extern dds3Effect_DistortionBlurParam_t evtMovieDefaultBlurScatter;
 extern dds3Effect_RippleBlurParam_t evtMovieDefaultBlurScale;
 extern dds3Effect_Blur_t D_003686A0;
-extern s32 itfMesMngInitialize(u8 *messageSubData);
+extern s32 itfMesMngInitialize(ItfMesSub *messageSub);
 extern void itfMesMngRelease(s32 handle);
 extern void fileSyncAll(void);
 extern s32 mnuQueryTitleSoundBusy(void);
@@ -612,7 +613,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *mainHeade
             if (work->entries[arrayIndex].value == 0) {
                 work->handle = -1;
             } else {
-                work->handle = itfMesMngInitialize(work->mainEntry6Data);
+                work->handle = itfMesMngInitialize((ItfMesSub *)work->mainEntry6Data);
             }
             break;
         case 7:
