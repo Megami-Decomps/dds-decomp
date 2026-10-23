@@ -2289,7 +2289,7 @@ extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 
 extern BtlRuntimeTask *btlCreateFadeInTask(u32);
 
-extern s32 fldGetSceneGroupEntry(s32);
+extern BtlTask *fldGetSceneGroupEntry(s32);
 extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 extern u8 *btlCreateFloatTask29(u8 *, f32, f32, f32, f32, f32, f32, f32, f32,
@@ -2449,7 +2449,7 @@ void btlQueueLinkedPairModelSwapTasks(BtlTask *action, s32 mode, u64 refreshBarr
         task->ownerId = action->unit->identity;
         btlStartTask(task);
 
-        scene = (BtlTask *)fldGetSceneGroupEntry(0);
+        scene = fldGetSceneGroupEntry(0);
         if (scene != NULL && (scene->flags & 8) != 0 &&
             (scene->unit->status.flags & 0x200) != 0) {
             /* Retail has separate publication arms at 00206E7C..00206EA0 and
@@ -2710,7 +2710,7 @@ u64 btlScheduleActionAndSoundSequence(BtlTask *action) {
         task->ownerId = action->unit->identity;
         btlStartTask(task);
 
-        sceneAction = (BtlTask *)fldGetSceneGroupEntry(0);
+        sceneAction = fldGetSceneGroupEntry(0);
         if (sceneAction != 0 && (sceneAction->flags & 8) != 0 &&
             (sceneAction->unit->status.flags & 0x200) != 0) {
             task = btlCreateCommandSoundTask((s32)sceneAction, 9);
@@ -2796,7 +2796,7 @@ u8 btlSetLinkedPairActionCamera(BtlLinkedCommand *command, s8 unused1, s8 unused
             return 0;
         }
     } else {
-        scene = (BtlTask *)fldGetSceneGroupEntry(0);
+        scene = fldGetSceneGroupEntry(0);
         if (scene != NULL && (scene->flags & 8) && (scene->unit->status.flags & 0x200)) {
             command->task = scene;
             command->status = 9;
