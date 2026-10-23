@@ -2110,7 +2110,7 @@ s32 mnuDrawMantraCostTransition(void) {
         mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, 0x80, 0xF, 0x53);
         mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scaled, 0x5B, 0x53);
         cost = mnuGetSelectedNodeValue();
-        mnuDrawMantraCostAfterListAdvance((u32)cost->partyRecord, &scene->costTransitionList, scaled, 0x53);
+        mnuDrawMantraCostAfterListAdvance(cost->partyRecord, &scene->costTransitionList, scaled, 0x53);
         mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0x20, 0, 0, scaled, 0xB, 0x53);
         break;
     case 2:
@@ -2124,7 +2124,7 @@ s32 mnuDrawMantraCostTransition(void) {
         mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, 0x80, 0xF, 0x53);
         mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scaled, 0x5B, 0x53);
         cost = mnuGetSelectedNodeValue();
-        mnuDrawMantraCostAfterListAdvance((u32)cost->partyRecord, &scene->costTransitionList, scaled, 0x53);
+        mnuDrawMantraCostAfterListAdvance(cost->partyRecord, &scene->costTransitionList, scaled, 0x53);
         mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0x20, 0, 0, scaled, 0xB, 0x53);
         break;
     case 1:
@@ -2143,7 +2143,7 @@ s32 mnuDrawMantraCostTransition(void) {
         mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, 0x80, 0xF, 0x53);
         mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, 0x80, 0x5B, 0x53);
         cost = mnuGetSelectedNodeValue();
-        mnuDrawMantraCostAfterListAdvance((u32)cost->partyRecord, &scene->costTransitionList, 0x80, 0x53);
+        mnuDrawMantraCostAfterListAdvance(cost->partyRecord, &scene->costTransitionList, 0x80, 0x53);
         mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0x20, 0, 0, 0x80, 0xB, 0x53);
         break;
     default:

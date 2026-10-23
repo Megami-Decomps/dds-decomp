@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+struct datUnitWork_t;
+
 /* One 0x14-byte node allocation backs both scene transition and timed-draw
  * lists. Payload words vary by list use; the link is always at +0x10. */
 typedef struct MnuSceneListNode {
@@ -16,7 +18,7 @@ typedef struct MnuSceneListNode {
         } transition;
         struct {
             u32 value04;       /* 0x04: not consumed by the timed-draw path */
-            s32 recordAddress; /* 0x08 */
+            s32 recordAddress; /* 0x08: integer-carried timed-draw address. */
             s16 kind;          /* 0x0C */
             u8 pad0E[2];
         } timedDraw;
@@ -53,7 +55,7 @@ MnuSceneListNode *mnuReleaseDisplayListNodeAndGetNext(MnuSceneListNode *node);
 void mnuReleaseDisplayListNodes(MnuSceneListHead *head);
 void mnuReleaseListNodes(MnuSceneListHead *head);
 s32 mnuAdvanceDisplayList(MnuSceneListHead *head, s32 amount, s32 drawContext);
-void mnuDrawMantraCostAfterListAdvance(s32 recordAddress,
+void mnuDrawMantraCostAfterListAdvance(const struct datUnitWork_t *partyRecord,
                                        MnuSceneListHead *head, s32 amount,
                                        s32 drawContext);
 
