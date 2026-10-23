@@ -701,11 +701,11 @@ void mnuDrawPartySelectionPreview(s32 contextAddress) {
     record = (datUnitWork_t *)&menu->original[selectionKey];
     statusIndex = mnuGetSelectionFromFlags(record);
     if (statusIndex >= 0) {
-        marker = *(EffectSlotSet **)((u8 *)context + 0xC4 + statusIndex * 4);
+        marker = context->selectionResources[statusIndex];
     } else {
         marker = NULL;
     }
-    sets = (EffectSlotSet **)((u8 *)context + 0xF0);
+    sets = context->panelResources;
 
     mnuDrawPartyVitalsAndProfile(sets,
                   &menu->panelSnapshots[selectionKey][0],
