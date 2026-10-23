@@ -91,7 +91,7 @@ extern void mnuSelectPage(MenuPageWindow *, s32);
 extern void mnuCreateStaffBulletItemWindow(struct StaffDisplayContext *context);
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
-extern void mnuConfigurePartyPanelPage();
+extern void mnuConfigurePartyPanelPage(MenuPageWindow *, s32, s32, s32);
 extern void mnuReleaseStaffExtraWindow(struct StaffDisplayContext *context);
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
@@ -348,7 +348,7 @@ s32 mnuInitializeStaffValuePage(dds3ProcessID_t *task) {
                              (struct EffectSlotSet *)((StaffImageContext *)context)->spriteScene);
     ((StaffImageContext *)context)->pageWindow.flags |= 0x400;
     ((StaffImageContext *)context)->pageWindow.flags &= ~0x100;
-    mnuConfigurePartyPanelPage(context + 0x15C, 1, 0, 0);
+    mnuConfigurePartyPanelPage((MenuPageWindow *)(context + 0x15C), 1, 0, 0);
     menu->listState = 0;
     return 1;
 }
@@ -357,7 +357,7 @@ s32 mnuReleaseStaffValuePageResources(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
 
     mnuReleaseStaffExtraWindow((struct StaffDisplayContext *)context);
-    mnuConfigurePartyPanelPage(context + 0x15C, 0, 0, 0);
+    mnuConfigurePartyPanelPage((MenuPageWindow *)(context + 0x15C), 0, 0, 0);
     mnuReleasePageHandlesAndClearSelection((MenuPageWindow *)(context + 0x15C));
     mnuClearEntries(&((StaffImageContext *)context)->pageWindow);
     mnuReleasePartyIconBundles(&((StaffImageContext *)context)->pageWindow);
