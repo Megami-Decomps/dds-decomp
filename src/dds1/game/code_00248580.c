@@ -48,6 +48,15 @@ extern void datAddCurrencyClamped(s32 delta);
 #define MNU_TERMINAL_EXIT_PROCESS 0x322
 #define MNU_COLOR_LOW_BYTE_MASK 0xFF
 
+typedef struct MenuTerminalPercentPanelPair {
+    MenuEffectPair panels[2];
+} MenuTerminalPercentPanelPair;
+
+typedef char MenuTerminalPercentPanelPair_size_check[
+    (sizeof(MenuTerminalPercentPanelPair) == MNU_PERCENT_PAIR_BYTES) ? 1 : -1];
+typedef char MenuTerminalPercentPanelPair_second_panel_offset_check[
+    ((u32)&((MenuTerminalPercentPanelPair *)0)->panels[1] == MNU_PERCENT_PANEL_BYTES) ? 1 : -1];
+
 
 extern void mnuCreateResourceTask(void);
 
@@ -81,7 +90,8 @@ extern u8 mnuHasEffectResourceHandle(MenuResourceWork *);
 extern void mnuReleaseEffectResource(MenuResourceWork *);
 extern MenuResourceWork *mnuRequestEffectResource(const char *, const char *);
 
-extern void *mnuCreateDualPercentPanel(datUnitWork_t *, MenuTerminalWork *);
+extern MenuTerminalPercentPanelPair *mnuCreateDualPercentPanel(datUnitWork_t *, MenuTerminalWork *);
+extern void mnuReleaseDualPercentPanel(MenuTerminalPercentPanelPair *panel);
 
 
 extern s32 mnuPercentOrHundred(s32 value, s32 total);
@@ -255,23 +265,22 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, struct Me
 
 /* Allocate adjacent HP/MP percentage panels, preserving the native 0x54 stride.
  * The source is a party-vitals record; the context supplies the panel style. */
-void *mnuCreateDualPercentPanel(datUnitWork_t *unit, MenuTerminalWork *host) {
-    s32 panel = (s32)sdfChipAllocDirect(MNU_PERCENT_PAIR_BYTES);
-    mnuDrawPanelSequenceByRow(panel, 0, 0, 0x1e,
+MenuTerminalPercentPanelPair *mnuCreateDualPercentPanel(datUnitWork_t *unit, MenuTerminalWork *host) {
+    MenuTerminalPercentPanelPair *panel = sdfChipAllocDirect(sizeof(*panel));
+    mnuDrawPanelSequenceByRow((s32)&panel->panels[0], 0, 0, 0x1e,
         mnuPercentOrHundred(unit->hp, unit->maxHp),
         host->imageHandles[0]);
-    mnuDrawPanelSequenceByRow(panel + MNU_PERCENT_PANEL_BYTES, 1, 0, 0x1e,
+    mnuDrawPanelSequenceByRow((s32)&panel->panels[1], 1, 0, 0x1e,
         mnuPercentOrHundred(unit->mp, unit->maxMp),
         host->imageHandles[0]);
-    return (void *)panel;
+    return panel;
 }
 
 /* Release both texture sets and the backing allocation for a nonzero panel pair. */
-void mnuReleaseDualPercentPanel(void *panelOwner) {
-    s32 panel = (s32)panelOwner;
-    if (panelOwner != NULL) {
-        mnuReleaseSpriteTextures((s32 *)panel);
-        mnuReleaseSpriteTextures((s32 *)((s32)panel + MNU_PERCENT_PANEL_BYTES));
+void mnuReleaseDualPercentPanel(MenuTerminalPercentPanelPair *panel) {
+    if (panel != NULL) {
+        mnuReleaseSpriteTextures((s32 *)&panel->panels[0]);
+        mnuReleaseSpriteTextures((s32 *)&panel->panels[1]);
         sdfChipFreeDirect(panel);
         return;
     }
@@ -292,7 +301,8 @@ void mnuDestroyThresholdNodePanels(MenuTerminalWork *host) {
     s32 entry;
 
     for (entry = (s32)host->list->first; entry != 0; entry = (s32)((struct MenuListNode *)entry)->next) {
-        mnuReleaseDualPercentPanel(((struct MenuListNode *)entry)->childPanel);
+        mnuReleaseDualPercentPanel(
+            (MenuTerminalPercentPanelPair *)((struct MenuListNode *)entry)->childPanel);
     }
 }
 
@@ -347,7 +357,8 @@ void mnuReleaseProgressWorkList(MenuTerminalWork *work) {
 
 /* Release the selected recovery panel, then pass its owning list to the follow-up. */
 void mnuReleaseSelectedProgressPanel(MenuTerminalWork *work) {
-    mnuReleaseDualPercentPanel(work->list->cursor->childPanel);
+    mnuReleaseDualPercentPanel(
+        (MenuTerminalPercentPanelPair *)work->list->cursor->childPanel);
     mnuRemoveListCursorNode(work->list);
 }
 
