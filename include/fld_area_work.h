@@ -50,7 +50,7 @@ typedef struct FldAreaWork {
     s32 resourceArea;
     s32 resourceFloor;
     s32 positionPending;
-    s32 unk88;
+    s32 selectedRoomIndex;
     s32 unk8C;
     s32 primaryMovingMatterIndex;   /* 0x90: -1 when no moving matter record is selected. */
     s32 secondaryMovingMatterIndex; /* 0x94: optional second moving matter record. */

@@ -4012,7 +4012,7 @@ void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
     fldGlobalBase.previousCameraModelFrame = currentFrame;
 
     if (fldGlobalBase.unk8C == 0) {
-        switch (fldGlobalBase.unk88) {
+        switch (fldGlobalBase.selectedRoomIndex) {
         case 1: sequenceCategory = 0x14; break;
         case 2: sequenceCategory = 0x18; break;
         case 3: sequenceCategory = 0x1C; break;
