@@ -31,7 +31,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
             dds3PathBasicControlGetPos(slotResource->path);
             SDF_VU0_STOREVECTOR(pathVector);
             dds3SetPosPoseSet(targetObject, (u128 *)pathVector);
-            if (((u8 *)&targetObject->kindTag)[3] == EFF_WORLD_KIND_EFFECT_TRANSFORM) {
+            if ((targetObject->kindTag >> 24) == EFF_WORLD_KIND_EFFECT_TRANSFORM) {
                 SDF_VU0_COPYVECTOR(&((EffectTransformData *)targetObject->data)->position, pathVector);
             }
         }
@@ -41,7 +41,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
             dds3SetRotPoseSet(targetObject, (u128 *)pathVector);
         }
         if (slotResource->path->counter.flags & DDS3_PATH_SCALAR_CHANNEL) {
-            if (((u8 *)&targetObject->kindTag)[3] == EFF_WORLD_KIND_CAMERA) {
+            if ((targetObject->kindTag >> 24) == EFF_WORLD_KIND_CAMERA) {
                 fieldOfView = dds3PathBasicControlGetFovy(slotResource->path);
                 cameraData = targetObject->data;
                 cameraData->fieldOfView = fieldOfView;
@@ -49,7 +49,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
             }
         }
         if (slotResource->path->counter.flags & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {
-            if (((u8 *)&targetObject->kindTag)[3] == EFF_WORLD_KIND_LIGHT) {
+            if ((targetObject->kindTag >> 24) == EFF_WORLD_KIND_LIGHT) {
                 dds3PathBasicControlNextStep(slotResource->path, &transformParams);
                 dds3SetLightObjectPathResoruce(targetObject, &transformParams);
             }
