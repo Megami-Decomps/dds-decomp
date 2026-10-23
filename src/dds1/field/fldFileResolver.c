@@ -1649,15 +1649,15 @@ extern s32 gFldInf_WpExit;
 
 extern FldTransferChunk *fldRoomF1Chunk;
 
-extern u32 fldRoomF1Data;
+extern u8 *fldRoomF1Data;
 
 extern FldTransferChunk *fldRoomF2Chunk;
 
-extern u32 fldRoomF2Data;
+extern u8 *fldRoomF2Data;
 
 extern FldTransferChunk *fldRoomKF2Chunk;
 
-extern u32 fldRoomKF2Data;
+extern u8 *fldRoomKF2Data;
 
 extern struct FileRequest *D_003BAC38;
 
@@ -1791,7 +1791,7 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
                 fldCachedRoomF2ResourceAllocation = NULL;
                 roomData = work->dataCursor;
                 chunk = (FldTransferChunk *)((u8 *)roomData + 8);
-                fldRoomF2Data = (u32)roomData;
+                fldRoomF2Data = roomData;
                 fldRoomF2Chunk = chunk;
                 fldAddressResolver(roomData, chunk);
                 fldProcessFieldRequest((FldSceneRequest *)fldGetInfoHeader(chunk));
@@ -1800,7 +1800,7 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
                 fldCachedRoomF1ResourceAllocation = NULL;
                 roomData = work->dataCursor;
                 chunk = (FldTransferChunk *)((u8 *)roomData + 8);
-                fldRoomF1Data = (u32)roomData;
+                fldRoomF1Data = roomData;
                 fldRoomF1Chunk = chunk;
                 fldAddressResolver(roomData, chunk);
                 fldLoadSceneRequestFiles((FldLoadRequest *)fldGetInfoHeader(chunk));
@@ -1827,7 +1827,7 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
             fldCachedRoomF2ResourceAllocation = sdfDevLoadFileEx(path, &roomData, 0);
         }
         chunk = (FldTransferChunk *)((u8 *)roomData + 8);
-        fldRoomF2Data = (u32)roomData;
+        fldRoomF2Data = roomData;
         fldRoomF2Chunk = chunk;
         fldAddressResolver(roomData, chunk);
         fldProcessFieldRequest((FldSceneRequest *)fldGetInfoHeader(chunk));
@@ -1840,7 +1840,7 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
             fldCachedRoomKF2ResourceAllocation = sdfDevLoadFileEx(path, &roomData, 0);
         }
         chunk = (FldTransferChunk *)((u8 *)roomData + 8);
-        fldRoomKF2Data = (u32)roomData;
+        fldRoomKF2Data = roomData;
         fldRoomKF2Chunk = chunk;
         fldAddressResolver(roomData, chunk);
         fldProcessFieldRequestAlternate((FldSceneRequest *)fldGetInfoHeader(chunk));
@@ -1852,7 +1852,7 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
             fldCachedRoomF1ResourceAllocation = sdfDevLoadFileEx(path, &roomData, 0);
         }
         chunk = (FldTransferChunk *)((u8 *)roomData + 8);
-        fldRoomF1Data = (u32)roomData;
+        fldRoomF1Data = roomData;
         fldRoomF1Chunk = chunk;
         fldAddressResolver(roomData, chunk);
         fldLoadSceneRequestFiles((FldLoadRequest *)fldGetInfoHeader(chunk));
@@ -1883,15 +1883,15 @@ extern s32 fldRoomEventPlacementCount;
 
 extern FldTransferChunk *fldRoomF1Chunk;
 
-extern u32 fldRoomF1Data;
+extern u8 *fldRoomF1Data;
 
 extern FldTransferChunk *fldRoomF2Chunk;
 
-extern u32 fldRoomF2Data;
+extern u8 *fldRoomF2Data;
 
 extern FldTransferChunk *fldRoomKF2Chunk;
 
-extern u32 fldRoomKF2Data;
+extern u8 *fldRoomKF2Data;
 
 extern struct FileRequest *D_003BAC38;
 
@@ -1951,19 +1951,19 @@ void fldReleaseFieldResources(void) {
     }
     if (gFldFileResetMode != 0) {
         if (fldRoomF1Chunk != 0) {
-            fldRelocateTransferChunkWords((u8 *)fldRoomF1Data, fldRoomF1Chunk);
+            fldRelocateTransferChunkWords(fldRoomF1Data, fldRoomF1Chunk);
             fldRoomF1Chunk = 0;
-            fldRoomF1Data = 0;
+            fldRoomF1Data = NULL;
         }
         if (fldRoomF2Chunk != 0) {
-            fldRelocateTransferChunkWords((u8 *)fldRoomF2Data, fldRoomF2Chunk);
+            fldRelocateTransferChunkWords(fldRoomF2Data, fldRoomF2Chunk);
             fldRoomF2Chunk = 0;
-            fldRoomF2Data = 0;
+            fldRoomF2Data = NULL;
         }
         if (fldRoomKF2Chunk != 0) {
-            fldRelocateTransferChunkWords((u8 *)fldRoomKF2Data, fldRoomKF2Chunk);
+            fldRelocateTransferChunkWords(fldRoomKF2Data, fldRoomKF2Chunk);
             fldRoomKF2Chunk = 0;
-            fldRoomKF2Data = 0;
+            fldRoomKF2Data = NULL;
         }
     }
     fldRoomEventPlacementCount = 0;
