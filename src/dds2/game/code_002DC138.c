@@ -50,7 +50,7 @@ extern EffectObjectNode *effFloorModelListHead;
 
 extern u32 D_00437E38;
 
-extern u32 D_00437E3C;
+extern SdfPoolNode *D_00437E3C;
 
 extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
 extern s32 effComputeLightDirectionVU(dds3ModelHandle_t *, SdfLightingPacketStorage *);
@@ -896,11 +896,11 @@ sdfTexHandle_t *sdfGetOrCreateTextureForReference(SdfPoolNode *surface, RefObj *
     u8 pixelFormat;
 
     if (source->index != -1 && D_00437E38 == source->index &&
-        D_00437E3C == (u32)surface) {
+        D_00437E3C == surface) {
         return D_00437E40;
     }
     D_00437E38 = source->index;
-    D_00437E3C = (u32)surface;
+    D_00437E3C = surface;
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     sdfLinkLoadImage(list, D_00437E40->secondaryResource, 0, 0,
@@ -1064,6 +1064,6 @@ INCLUDE_SDATA(const s32, "game/code_002DC138", effSharedTextureReferenceCount);
 
 INCLUDE_SDATA(const s32, "game/code_002DC138", D_00437E38);
 
-INCLUDE_SDATA(const s32, "game/code_002DC138", D_00437E3C);
+INCLUDE_SDATA(SdfPoolNode * const, "game/code_002DC138", D_00437E3C);
 
 INCLUDE_SDATA(const s32, "game/code_002DC138", D_00437E40);

@@ -417,7 +417,7 @@ extern EffectObjectNode *effFloorModelListHead;
 
 extern u32 D_00437E38;
 
-extern u32 D_00437E3C;
+extern SdfPoolNode *D_00437E3C;
 
 
 extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
