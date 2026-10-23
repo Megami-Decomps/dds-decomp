@@ -12,7 +12,7 @@ extern void dds3SetScreenFovy(f32 fieldOfView);
 extern u8 D_0040ABC0[];
 extern u8 D_0040ABB0[];
 extern u8 D_0040ABD0[];
-extern u8 D_00438938[];
+extern char D_00438938[];
 extern struct dds3Basic_t *D_00438944;
 extern f32 D_00435A7C;
 
@@ -164,7 +164,7 @@ void AddCamera(void) {
 
     camera = dds3AddCameraObjectBasicTypeLookAt(dds3AllocObjectId(), D_0040ABC0, worldEye, (u128 *)D_0040ABB0);
     D_00438944 = camera;
-    dds3SetUnitObjectId(camera, (u32)D_00438938);
+    dds3SetUnitObjectId(camera, D_00438938);
     dds3CameraObjectBasicGetCameraTM(D_00438944, worldEye);
     dds3GetRadiusPoseSet(D_00438944, 2.0f);
     world = dds3GetControlScene();

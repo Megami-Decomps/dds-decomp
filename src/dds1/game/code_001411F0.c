@@ -3253,7 +3253,7 @@ void func_001480D0(u32 key, f32 *orientation, f32 x, f32 y, f32 z,
         fldModelSlotTable[outputIndex].size = size;
         if (dds3SceneBasicSearchName(dds3GetControlScene(), "TEX_UNIT") == NULL) {
             object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
-            dds3SetUnitObjectId(object, (u32)"TEX_UNIT");
+            dds3SetUnitObjectId(object, "TEX_UNIT");
             dds3RebuildObjectModelContext(object, 3, 0x60);
             dds3ObjectBaseOffFlag(object, 0x400);
             model = dds3ObjectBaseGetModelHandle(object);
@@ -3270,7 +3270,7 @@ void func_001480D0(u32 key, f32 *orientation, f32 x, f32 y, f32 z,
          * constructor calls, with no scalar C readback or loop reuse. */
         SDF_VU0_STOREVECTOR_NOMEM(rotation);
         object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
-        dds3SetUnitObjectId(object, (u32)"NPC_MDL_UNIT");
+        dds3SetUnitObjectId(object, "NPC_MDL_UNIT");
         fldModelSlotTable[outputIndex].object = object;
         dds3RebuildObjectModelContext(object, kind, resource);
         dds3SetSclPoseSet(object, (u128 *)scale);
@@ -4188,7 +4188,7 @@ void fldCreateSparkSlotObjects(void) {
         }
         for (i = 0; i < 17; i++) {
             fldSparkObjectEntries[i].objectHandle = dds3AddUnitObjectBasic(dds3AllocObjectId(), &position, &rotation);
-            dds3SetUnitObjectId(fldSparkObjectEntries[i].objectHandle, (u32)D_003A0908);
+            dds3SetUnitObjectId(fldSparkObjectEntries[i].objectHandle, D_003A0908);
             if (i == 16) {
                 dds3RebuildObjectModelContext(fldSparkObjectEntries[i].objectHandle, 1, ((FldSparkEntryInfo *)fldSparkControlState.entry)->modelId);
             } else {

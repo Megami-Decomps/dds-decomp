@@ -693,7 +693,7 @@ INCLUDE_RODATA(const s32, "game/code_00269C10", D_003AFD48);
 
 void mnuCreateTitleCameraWorldEntry(void) {
     mnuTitleCameraObject = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), (f32 *)mnuTitleCameraPosition, (f32 *)mnuTitleCameraRotation);
-    dds3SetUnitObjectId(mnuTitleCameraObject, (u32)"title_camera");
+    dds3SetUnitObjectId(mnuTitleCameraObject, "title_camera");
     dds3GetRadiusPoseSet(mnuTitleCameraObject, 2.0f);
     dds3SetActiveCameraSceneBasic(dds3GetControlScene(), mnuTitleCameraObject);
 }
