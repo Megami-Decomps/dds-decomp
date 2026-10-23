@@ -1,5 +1,6 @@
 #include "sdf_vu0.h"
 #include "eff.h"
+#include "eff_magatuhi_api.h"
 #include "eff_magatuhi_orbit.h"
 #include "eff_magatuhi_ring_particle.h"
 #include "sdf_trig.h"
@@ -1038,8 +1039,6 @@ void effMagaCylinderSetRotateMatrix(EffMagatuhiRingWork *work, void *matrix) {
 }
 
 
-extern u32 dds3MagatuhiGetType(void *block);
-
 /* Replay the first slot of each three-slot group from a random age. */
 void effMagaCylinderRandomize(EffMagatuhiCallback *callback) {
     u32 k;
@@ -1246,8 +1245,6 @@ void effMagaSpiralSetRotateMatrix(EffMagatuhiOrbitWork *work, void *matrix) {
     VU0_COPY_MATRIX(work->matrix, matrix);
 }
 
-
-extern u32 dds3MagatuhiGetType(void *block);
 
 /* Advance the orbiting-particle family: each group of three slots is replayed from a random delay, one orbit step at a time, into the value table. */
 void effMagaSpiralRandomize(EffMagatuhiCallback *callback) {
@@ -1565,8 +1562,6 @@ void effMagaSmokeRandomize(EffMagatuhiCallback *callback) {
         }
     }
 }
-
-extern u32 dds3MagatuhiGetType(void *block);
 
 /* Dispatch replay side effects; retain the native s32 definition's fall-through. */
 s32 effMagaRandomize(EffMagatuhiCallback *work) {
