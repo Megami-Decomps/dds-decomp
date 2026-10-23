@@ -1217,7 +1217,7 @@ void btlClearNodeFlags(void) {
     if (node != NULL) {
         do {
             if (node->unit != NULL) {
-                ((BtlHistObj *)node)->counter = 0;
+                node->lowHpActionHold = 0;
             }
             node = node->next;
         } while (node != NULL);
