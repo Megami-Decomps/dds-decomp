@@ -2255,10 +2255,10 @@ void func_00149A00(void) {
     dds3VisibleSceneBasic((dds3Basic_t *)(u32)dds3GetActiveScene(), 0);
     p2sdPlaySE(0xE, 0x7F, 0x3F);
     cam = &fldGlobalBase;
-    D_0044F7F0[1] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[0].resourceAddress));
-    D_0044F7F0[2] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[1].resourceAddress));
-    D_0044F7F0[3] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[2].resourceAddress));
-    D_0044F7F0[6] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[4].resourceAddress));
+    D_0044F7F0[1] = sdfTexSet(cam->mapResources[0].resourceData);
+    D_0044F7F0[2] = sdfTexSet(cam->mapResources[1].resourceData);
+    D_0044F7F0[3] = sdfTexSet(cam->mapResources[2].resourceData);
+    D_0044F7F0[6] = sdfTexSet(cam->mapResources[4].resourceData);
     D_00436268 = 0;
     D_00436248 = cam->floor;
     AutoMapSeq = 1;
@@ -2471,10 +2471,10 @@ void fldLoadSceneModelsAndCamera(void) {
         D_0044F818[i].z = rec->pos->z;
     }
     cam = &fldGlobalBase;
-    D_0044F7F0[5] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[3].resourceAddress));
-    D_0044F7F0[7] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[5].resourceAddress));
-    D_0044F7F0[8] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[6].resourceAddress));
-    D_0044F7F0[9] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[7].resourceAddress));
+    D_0044F7F0[5] = sdfTexSet(cam->mapResources[3].resourceData);
+    D_0044F7F0[7] = sdfTexSet(cam->mapResources[5].resourceData);
+    D_0044F7F0[8] = sdfTexSet(cam->mapResources[6].resourceData);
+    D_0044F7F0[9] = sdfTexSet(cam->mapResources[7].resourceData);
     D_00436268 = 0;
     D_00436248 = cam->floor;
     D_0043624C = cam->flagStage;
@@ -3225,18 +3225,18 @@ void fldParseMixLb(void) {
     PacWork *node;
     u32 index;
 
-    fldGlobalBase.fieldTextures[0].allocation = sdfDevLoadFileEx("/fld/f/bin/d2_fild1.tmx", &fldGlobalBase.fieldTextures[0].resourceAddress, 0);
-    fldGlobalBase.fieldTextures[1].allocation = sdfDevLoadFileEx("/fld/f/bin/d2_fild2.tmx", &fldGlobalBase.fieldTextures[1].resourceAddress, 0);
-    fldGlobalBase.fieldTextures[2].allocation = sdfDevLoadFileEx("/fld/f/bin/d2_fild3.tmx", &fldGlobalBase.fieldTextures[2].resourceAddress, 0);
-    fldGlobalBase.fieldTextures[3].allocation = sdfDevLoadFileEx("/fld/f/bin/d2_fild4.tmx", &fldGlobalBase.fieldTextures[3].resourceAddress, 0);
-    fldGlobalBase.mapResources[0].allocation = sdfDevLoadFileEx("/fld/f/bin/autmap_1.tmx", &fldGlobalBase.mapResources[0].resourceAddress, 0);
-    fldGlobalBase.mapResources[1].allocation = sdfDevLoadFileEx("/fld/f/bin/autmap_2.tmx", &fldGlobalBase.mapResources[1].resourceAddress, 0);
-    fldGlobalBase.mapResources[2].allocation = sdfDevLoadFileEx("/fld/f/bin/autmap_3.tmx", &fldGlobalBase.mapResources[2].resourceAddress, 0);
-    fldGlobalBase.mapResources[3].allocation = sdfDevLoadFileEx("/fld/f/bin/autmap_5.tmx", &fldGlobalBase.mapResources[3].resourceAddress, 0);
-    fldGlobalBase.mapResources[4].allocation = sdfDevLoadFileEx("/fld/f/bin/autmap_6.tmx", &fldGlobalBase.mapResources[4].resourceAddress, 0);
-    fldGlobalBase.mapResources[5].allocation = sdfDevLoadFileEx("/fld/f/bin/autmap_7.tmx", &fldGlobalBase.mapResources[5].resourceAddress, 0);
-    fldGlobalBase.mapResources[6].allocation = sdfDevLoadFileEx("/fld/f/bin/autmap_8.tmx", &fldGlobalBase.mapResources[6].resourceAddress, 0);
-    fldGlobalBase.mapResources[7].allocation = sdfDevLoadFileEx("/fld/f/bin/autmap_9.tmx", &fldGlobalBase.mapResources[7].resourceAddress, 0);
+    fldGlobalBase.fieldTextures[0].allocation = sdfDevLoadFileEx("/fld/f/bin/d2_fild1.tmx", (u32 *)&fldGlobalBase.fieldTextures[0].resourceData, 0);
+    fldGlobalBase.fieldTextures[1].allocation = sdfDevLoadFileEx("/fld/f/bin/d2_fild2.tmx", (u32 *)&fldGlobalBase.fieldTextures[1].resourceData, 0);
+    fldGlobalBase.fieldTextures[2].allocation = sdfDevLoadFileEx("/fld/f/bin/d2_fild3.tmx", (u32 *)&fldGlobalBase.fieldTextures[2].resourceData, 0);
+    fldGlobalBase.fieldTextures[3].allocation = sdfDevLoadFileEx("/fld/f/bin/d2_fild4.tmx", (u32 *)&fldGlobalBase.fieldTextures[3].resourceData, 0);
+    fldGlobalBase.mapResources[0].allocation = sdfDevLoadFileEx("/fld/f/bin/autmap_1.tmx", (u32 *)&fldGlobalBase.mapResources[0].resourceData, 0);
+    fldGlobalBase.mapResources[1].allocation = sdfDevLoadFileEx("/fld/f/bin/autmap_2.tmx", (u32 *)&fldGlobalBase.mapResources[1].resourceData, 0);
+    fldGlobalBase.mapResources[2].allocation = sdfDevLoadFileEx("/fld/f/bin/autmap_3.tmx", (u32 *)&fldGlobalBase.mapResources[2].resourceData, 0);
+    fldGlobalBase.mapResources[3].allocation = sdfDevLoadFileEx("/fld/f/bin/autmap_5.tmx", (u32 *)&fldGlobalBase.mapResources[3].resourceData, 0);
+    fldGlobalBase.mapResources[4].allocation = sdfDevLoadFileEx("/fld/f/bin/autmap_6.tmx", (u32 *)&fldGlobalBase.mapResources[4].resourceData, 0);
+    fldGlobalBase.mapResources[5].allocation = sdfDevLoadFileEx("/fld/f/bin/autmap_7.tmx", (u32 *)&fldGlobalBase.mapResources[5].resourceData, 0);
+    fldGlobalBase.mapResources[6].allocation = sdfDevLoadFileEx("/fld/f/bin/autmap_8.tmx", (u32 *)&fldGlobalBase.mapResources[6].resourceData, 0);
+    fldGlobalBase.mapResources[7].allocation = sdfDevLoadFileEx("/fld/f/bin/autmap_9.tmx", (u32 *)&fldGlobalBase.mapResources[7].resourceData, 0);
     index = 0;
     D_004362E0 = sdfDevLoadFileEx("/fld/f/bin/TOPEN.D3P", &D_004362E4, 0);
     D_00436304 = sdfDevLoadFileEx("/fld/f/bin/TAKARA2.D3P", &D_00436308, 0);
@@ -3306,10 +3306,10 @@ void fldInitializeMenuResources(void) {
             fldAreaDamageEffect = 0;
         }
         fldAreaDamageEffectPlaced = 0;
-        fldGlobalBase.fieldTextures[0].texture = sdfTexSet((SdfTextureFileHeader *)(fldGlobalBase.fieldTextures[0].resourceAddress));
-        fldGlobalBase.fieldTextures[1].texture = sdfTexSet((SdfTextureFileHeader *)(fldGlobalBase.fieldTextures[1].resourceAddress));
-        fldGlobalBase.fieldTextures[2].texture = sdfTexSet((SdfTextureFileHeader *)(fldGlobalBase.fieldTextures[2].resourceAddress));
-        fldGlobalBase.fieldTextures[3].texture = sdfTexSet((SdfTextureFileHeader *)(fldGlobalBase.fieldTextures[3].resourceAddress));
+        fldGlobalBase.fieldTextures[0].texture = sdfTexSet(fldGlobalBase.fieldTextures[0].resourceData);
+        fldGlobalBase.fieldTextures[1].texture = sdfTexSet(fldGlobalBase.fieldTextures[1].resourceData);
+        fldGlobalBase.fieldTextures[2].texture = sdfTexSet(fldGlobalBase.fieldTextures[2].resourceData);
+        fldGlobalBase.fieldTextures[3].texture = sdfTexSet(fldGlobalBase.fieldTextures[3].resourceData);
     }
 }
 

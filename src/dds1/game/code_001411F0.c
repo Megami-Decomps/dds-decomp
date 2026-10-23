@@ -1927,8 +1927,8 @@ void func_00145B18(void) {
     dds3VisibleSceneBasic((dds3Basic_t *)(u32)dds3GetActiveScene(), 0);
     p2sdPlaySE(0xE, 0x7F, 0x3F);
     cam = &fldGlobalBase;
-    D_003D40A0[2] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[2].resourceAddress));
-    D_003D40A0[3] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[3].resourceAddress));
+    D_003D40A0[2] = sdfTexSet(cam->mapResources[2].resourceData);
+    D_003D40A0[3] = sdfTexSet(cam->mapResources[3].resourceData);
     D_003BAED4 = 0;
     D_003BAEB4 = cam->floor;
     AutoMapSeq = 1;
@@ -2112,8 +2112,8 @@ void fldLoadSceneModelsAndCamera(void) {
         D_003D40B0[i].z = rec->pos->z;
     }
     cam = &fldGlobalBase;
-    D_003D40A0[0] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[0].resourceAddress));
-    D_003D40A0[1] = sdfTexSet((SdfTextureFileHeader *)(cam->mapResources[1].resourceAddress));
+    D_003D40A0[0] = sdfTexSet(cam->mapResources[0].resourceData);
+    D_003D40A0[1] = sdfTexSet(cam->mapResources[1].resourceData);
     D_003BAED4 = 0;
     D_003BAEB4 = cam->floor;
     D_003BAEB8 = cam->flagStage;
@@ -2950,22 +2950,26 @@ void fldParseMixLb(void) {
         case 10:
             allocation = node->resourceHandle;
             fldGlobalBase.mapResources[0].allocation = allocation;
-            fldGlobalBase.mapResources[0].resourceAddress = sdfMemGetPtr(allocation);
+            fldGlobalBase.mapResources[0].resourceData =
+                (struct SdfTextureFileHeader *)sdfMemGetPtr(allocation);
             break;
         case 11:
             allocation = node->resourceHandle;
             fldGlobalBase.mapResources[1].allocation = allocation;
-            fldGlobalBase.mapResources[1].resourceAddress = sdfMemGetPtr(allocation);
+            fldGlobalBase.mapResources[1].resourceData =
+                (struct SdfTextureFileHeader *)sdfMemGetPtr(allocation);
             break;
         case 12:
             allocation = node->resourceHandle;
             fldGlobalBase.mapResources[2].allocation = allocation;
-            fldGlobalBase.mapResources[2].resourceAddress = sdfMemGetPtr(allocation);
+            fldGlobalBase.mapResources[2].resourceData =
+                (struct SdfTextureFileHeader *)sdfMemGetPtr(allocation);
             break;
         case 13:
             allocation = node->resourceHandle;
             fldGlobalBase.mapResources[3].allocation = allocation;
-            fldGlobalBase.mapResources[3].resourceAddress = sdfMemGetPtr(allocation);
+            fldGlobalBase.mapResources[3].resourceData =
+                (struct SdfTextureFileHeader *)sdfMemGetPtr(allocation);
             break;
         }
     }

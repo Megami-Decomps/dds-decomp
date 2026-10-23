@@ -5,16 +5,17 @@
 
 struct sdfTexHandle_t;
 struct sdfMemHandle_t;
+struct SdfTextureFileHeader;
 
-/* Field loaders retain the allocation owner and its resource address. */
+/* Field loaders retain the allocation owner and its texture-file data. */
 typedef struct FldResourceBlock {
     struct sdfMemHandle_t *allocation;
-    u32 resourceAddress;
+    struct SdfTextureFileHeader *resourceData;
 } FldResourceBlock;
 
 typedef struct FldTextureResource {
     struct sdfMemHandle_t *allocation;
-    u32 resourceAddress;
+    struct SdfTextureFileHeader *resourceData;
     struct sdfTexHandle_t *texture;
 } FldTextureResource;
 
@@ -161,6 +162,10 @@ extern FldAreaWork fldGlobalBase;
 #define FLD_AREA_OFFSET(member) ((u32)&((FldAreaWork *)0)->member)
 typedef char FldResourceBlock_size_check[(sizeof(FldResourceBlock) == 8) ? 1 : -1];
 typedef char FldTextureResource_size_check[(sizeof(FldTextureResource) == 0xC) ? 1 : -1];
+typedef char FldResourceBlock_resourceData_offset_check[
+    ((u32)&((FldResourceBlock *)0)->resourceData == 0x04) ? 1 : -1];
+typedef char FldTextureResource_resourceData_offset_check[
+    ((u32)&((FldTextureResource *)0)->resourceData == 0x04) ? 1 : -1];
 typedef char FldAreaWork_area_offset_check[(FLD_AREA_OFFSET(area) == 0x10) ? 1 : -1];
 typedef char FldAreaWork_defaultEncounterId_offset_check[(FLD_AREA_OFFSET(defaultEncounterId) == 0xDC) ? 1 : -1];
 typedef char FldAreaWork_resourceFlag_offset_check[(FLD_AREA_OFFSET(resourceFlag) == 0x78) ? 1 : -1];
