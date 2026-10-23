@@ -1509,7 +1509,7 @@ extern char D_00436038[];
 extern FieldPlayerSceneWork fldSceneParam;
 extern void fldDrwZAlloc(void);
 #include "fld_object_slot_api.h"
-extern void fldReleaseResourceSlots();
+extern void fldReleaseResourceSlots(void);
 extern void fldCreateResourceScriptObjects(void);
 extern u8 fldCheckNextFile(void);
 extern void fldLoadFieldPack(void);
@@ -1694,7 +1694,7 @@ extern void fldFreeSceneResources();
 
 extern void fldReleaseObjectSlots();
 
-extern void fldReleaseResourceSlots();
+extern void fldReleaseResourceSlots(void);
 
 
 
@@ -1759,13 +1759,13 @@ void fldReleaseFieldResources(void) {
     if (fldGlobalBase.area < 0xC8) {
         if (fldGlobalBase.reuseAreaResources != 0) {
             if ((u32)(fldGlobalBase.area - 0x1B) < 2U) {
-                fldReleaseResourceSlots(&fldGlobalBase);
+                fldReleaseResourceSlots();
                 fldReleaseMenuSlotsAfterWait();
                 fldReleaseSceneRecordChunk();
                 fldFreePac0();
             }
         } else {
-            fldReleaseResourceSlots(&fldGlobalBase);
+            fldReleaseResourceSlots();
             fldReleaseMenuSlotsAfterWait();
             fldReleaseSceneRecordChunk();
             fldFreeSceneResources();
