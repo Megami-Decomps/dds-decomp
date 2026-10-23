@@ -112,7 +112,7 @@ extern s32 evtRunContext(s32 script, s32 firstArgument, s32 secondArgument, s32 
 /* Clear the supplied party-record status mask. */
 
 s32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s32 command,
-                   s32 maxHits, s32 press, s32 attackMode, u32 calculationFlags) {
+                   u32 maxHits, s32 press, s32 attackMode, u32 calculationFlags) {
     f32 attack;
     f32 defense = 1.0f;
     f32 status;
@@ -219,7 +219,7 @@ s32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s
 }
 
 s32 btlCalculateMpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s32 command,
-                   s32 maxHits, s32 press, s32 attackMode, u32 calculationFlags) {
+                   u32 maxHits, s32 press, s32 attackMode, u32 calculationFlags) {
     f32 attack;
     f32 defense = 1.0f;
     f32 status;
