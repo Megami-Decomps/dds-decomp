@@ -1196,17 +1196,13 @@ u32 btlAssignTaskResultAndArgument(BtlTask *task) {
     return 1;
 }
 
-extern void btlShiftActorStateHistory(u8 *work, s8 flag);
+extern void btlShiftActorStateHistory(BtlTask *task, s8 flag);
 
-typedef struct BtlHistObj {
-    u8 pad00[0x146];
-    s8 counter; /* 0x146 */
-} BtlHistObj;
-
-void btlAdvanceHistoryCounter(BtlHistObj *obj) {
-    obj->counter++;
-    obj->counter = obj->counter <= 0 ? 0 : obj->counter >= 0x21 ? 0x20 : obj->counter;
-    btlShiftActorStateHistory((u8 *)obj, 0);
+void btlAdvanceHistoryCounter(BtlTask *task) {
+    task->lowHpActionHold++;
+    task->lowHpActionHold = task->lowHpActionHold <= 0 ? 0 :
+                            task->lowHpActionHold >= 0x21 ? 0x20 : task->lowHpActionHold;
+    btlShiftActorStateHistory(task, 0);
     btlHistoryCounter++;
     btlHistoryCounter = btlHistoryCounter <= 0 ? 0 : btlHistoryCounter >= 0x21 ? 0x20 : btlHistoryCounter;
 }
@@ -1276,17 +1272,17 @@ s32 btlRunRandomWeightedAiTableAction(BtlTask *task) {
     return 1;
 }
 
-void btlShiftActorStateHistory(u8 *work, s8 flag) {
+void btlShiftActorStateHistory(BtlTask *task, s8 flag) {
     s32 *slot;
     s32 i;
 
-    for (i = 6, slot = (s32 *)(work + 0x164); i >= 0; i--, slot--) {
+    for (i = 6, slot = (s32 *)&task->actions[7]; i >= 0; i--, slot--) {
         *slot = slot[-1];
     }
     if (flag == 0) {
-        *(s32 *)(work + 0x148) = *(s32 *)(work + 0x24);
+        task->actions[0] = task->indexWork.skillId;
     } else {
-        *(s32 *)(work + 0x148) = *(s16 *)(*(u8 **)(work + 0x18) + 0x2B0);
+        task->actions[0] = (s16)task->unit->partyRecord.actionSlot;
     }
 }
 
