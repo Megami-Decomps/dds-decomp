@@ -36,7 +36,7 @@ extern u8 *D_00435E4C;
 extern DspUnitName *datUnitNames;
 
 extern void evtCloseDisplayChannelAndEnsureMessageWindow(MenuSlotFlagEventView *context);
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 
 s32 dspStartFlagEvent(MenuSlotFlagEventView *context) {
     s32 kind = context->reduced;

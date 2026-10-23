@@ -64,7 +64,7 @@ u32 mnuProcessItemSelection(BrsSkillPackageWork *scene) {
 
 extern DspUnitName *D_003BAA70;
 extern DspUnitName *D_003BAA8C;
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
 extern s32 prfResolveMantraNameOrFallback(u16, u8 **);
 

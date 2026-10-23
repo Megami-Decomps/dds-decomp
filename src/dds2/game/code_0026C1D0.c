@@ -421,9 +421,9 @@ void dspRequestMessageWindowModeOne(void) {
 }
 
 /* Copy a string address into a window table slot; neither argument is an item id. */
-extern void itfMesMngSetVarImmediate(s32 window, u32 slotIndex, const void *sourceText);
+extern void itfMesMngSetVarImmediate(s32 window, u32 slotIndex, const char *sourceText);
 
-void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText) {
+void evtCopyEntryStringToActiveWindow(s32 slotIndex, const char *sourceText) {
     itfMesMngSetVarImmediate(gMsgID, slotIndex, sourceText);
 }
 

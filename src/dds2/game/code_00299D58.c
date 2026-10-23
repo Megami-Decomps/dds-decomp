@@ -168,7 +168,7 @@ u32 mnuProcessItemSelection(BrsSkillPackageWork *scene) {
 
 extern DspUnitName *datUnitNames;
 extern DspUnitName *datSkillNames;
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
 extern s32 scrGetIndexedRecordAddress(u16, s32 *);
 

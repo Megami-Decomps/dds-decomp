@@ -375,7 +375,7 @@ s32 mnuReleaseStaffValuePageResources(dds3ProcessID_t *task) {
 }
 
 extern u16 mnuGetPartyEntryMenuValue(datUnitWork_t *);
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern u8 *D_003BAA70;
 extern u8 *D_003BAA84;

@@ -45,7 +45,7 @@ struct StaffMenuRuntime;
 #include "itf.h"
 #include "menu_fade_entry.h"
 
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 
 extern u16 mnuGetPartyEntryCurrentId(datUnitWork_t *);
 

@@ -181,7 +181,7 @@ extern DspMantraName *D_00435E50;
 extern const MantraAttributeNameTable mnuMantraAttributeNames;
 extern const MantraAcquisitionDialogues D_004275E8;
 extern const char D_00437940[];
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern void prfSummarizeNonzeroEntryAttributes(s32, s32 *);
 extern void ptyAdjustAllActiveRosterStats(s32, s32);
 

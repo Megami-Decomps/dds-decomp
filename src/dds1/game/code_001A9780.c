@@ -19,7 +19,7 @@ extern s32 btlGetNamedTaskPairStatusOrUnavailable(void);
 extern u32 btlNextScaledRandom(u32 limit);
 extern u16 btlRefreshUnitMaximumHpAndClampCurrentHp(struct datUnitWork_t *entryAddress);
 extern u16 btlRefreshUnitMaximumMpAndClampCurrentMp(struct datUnitWork_t *entryAddress);
-extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText);
+extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const char *sourceText);
 extern s32 fldGetSceneObjectState(void);
 extern void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock);
 extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);

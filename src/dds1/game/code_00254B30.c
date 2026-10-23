@@ -243,7 +243,7 @@ void mnuDrawMantraCostPlaceholder(s32 x, s32 y, s32 z, s32 alpha, s32 sceneId, s
 extern DspUnitName *D_003BAA70;
 extern DspMantraName *D_003BAA78;
 extern MnuMantraGridEntry *fldGetSceneMetadataNode(void);
-extern void evtCopyEntryStringToActiveWindow(s32, void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern s32 mnuGetMantraSourceValue(u16);
 
 extern MnuProfileProgress *mnuGetSelectedNodeValue(void);

@@ -2219,7 +2219,7 @@ s32 evtBDispatchSync(dds3ProcessID_t *request) {
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 
 /* Bind the selected text row to message slot zero, then start the entry prompt. */
 u32 evtPrepareSelectedMenuEntry(dds3ProcessID_t *task) {

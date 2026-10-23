@@ -18,7 +18,7 @@ extern void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *context, s32 copyOpt
 extern const char *D_003D62F0[6];
 extern char (*datUnitNames)[17];
 extern char (*D_00435E5C)[25];
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern s32 mnuSelectEventFlagCode(void);
 extern void evtStageTestSetPendingEffect(u32);
 

@@ -638,7 +638,7 @@ s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src)
 }
 
 extern DspUnitName *datUnitNames;
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern void mnuActivateMantraNode(MnuStatusResource *, u16);
 extern s32 mnuFindMantraSourceCandidate(MnuStatusResource *, MantraMenuSrc *);
 extern s32 mnuSelectPreferredMantraNode(MnuStatusResource *, MantraMenuSrc *);

@@ -21,7 +21,7 @@ extern void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *);
 extern void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *, s32);
 extern void mnuRollExtraLevelReward(datUnitWork_t *, BrsSkillPackageWork *);
 extern u8 *datUnitNames;
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 
 extern s32 evtStageTestUpdateCamera(void);
 

@@ -78,7 +78,7 @@ extern u32 evtMenuSetProgressFlag(MenuTerminalContext *);
 extern s32 evtMenuSetTypeProgressFlagOnce(MenuTerminalContext *);
 extern u32 mnuGetTerminalMessageOption(void);
 extern s32 mnuCampFindActiveSlot(void);
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern void mnuAwardCampProgressCurrency(void);
 extern void dspStartActivePresetEntry(void);
 

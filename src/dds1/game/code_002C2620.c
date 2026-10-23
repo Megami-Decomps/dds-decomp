@@ -32,7 +32,7 @@ extern u32 D_003BD970;
 
 extern s32 D_003BD974;
 
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern char D_003BD250[];
 extern void p2sdStopBGM(u32);
 extern s32 fldReleaseLocalMapResources(void);

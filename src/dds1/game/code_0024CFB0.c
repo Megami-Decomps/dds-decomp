@@ -90,7 +90,7 @@ extern void mnuDrawTerminalEffectIfAvailable(s32 state);
 
 
 #include "dds3_world_secondary.h"
-extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText);
+extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const char *sourceText);
 extern void itfMesMngSetPhase(s32 windowIndex, s32 status);
 extern void itfMesMngSetSelPhase(s32 windowIndex, s32 status);
 extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
@@ -668,9 +668,9 @@ void dspRequestMessageWindowModeOne(void) {
 }
 
 /* Copy a string address into a window table slot; neither argument is an item id. */
-extern void itfMesMngSetVarImmediate(s32 window, u32 slotIndex, const void *sourceText);
+extern void itfMesMngSetVarImmediate(s32 window, u32 slotIndex, const char *sourceText);
 
-void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText) {
+void evtCopyEntryStringToActiveWindow(s32 slotIndex, const char *sourceText) {
     itfMesMngSetVarImmediate(gMsgID, slotIndex, sourceText);
 }
 

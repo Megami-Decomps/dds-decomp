@@ -16,7 +16,7 @@
 
 extern void dspRequestMessageWindowModeOne(void);
 extern u8 *D_003BAA70;
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern char D_003BC550[];
 extern char D_003BC558[];
 extern char *D_0036D3A8[];

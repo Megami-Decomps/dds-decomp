@@ -53,7 +53,7 @@
 extern u16 btlCheckSelectedPartyCommandEligibility(s32 commandId, u32 memberMask);
 extern s32 datAddHp(datUnitWork_t *unit, s32 delta);
 extern s32 datAddMp(datUnitWork_t *unit, s32 delta);
-extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText);
+extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const char *sourceText);
 extern void evtFreeStage(void);
 extern void fldActivatePendingSceneCommand(void);
 extern s32 fldGetSceneCommandState(void);

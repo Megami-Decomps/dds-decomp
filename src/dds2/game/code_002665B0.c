@@ -1773,7 +1773,7 @@ extern void mnuSelectFirstListNode(s32);
 
 
 
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 
 
 

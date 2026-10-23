@@ -445,7 +445,7 @@ extern MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *);
 extern u32 scrGetSelectedScriptEntryId(datUnitWork_t *);
 extern s32 mnuGetMantraSourceValue(u16);
 extern u8 scrSelectScriptEntryAndInitialize(datUnitWork_t *, u32);
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern void mnuShowMantraInfo(struct MantraDrawPool *pool);
 extern void mnuShowMantraScrollCursor(struct MantraDrawPool *pool);

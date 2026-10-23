@@ -50,7 +50,7 @@ extern u8 *D_00435E5C;
 extern u8 *datUnitNames;
 extern u16 mnuGetPartyEntryMenuValue(datUnitWork_t *);
 extern u16 mnuGetPartyEntryCurrentId(datUnitWork_t *);
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void mnuRefreshStaffWindowDescription();
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);

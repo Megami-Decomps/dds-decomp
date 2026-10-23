@@ -72,7 +72,7 @@ extern void sdfDisableFlagListViewTargetRelativeMode(void);
 extern void evtDisableMoonDraw(void);
 extern void evtFreeStage(void);
 extern sdfMemHandle_t *D_004388A4;
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern char D_004388A0[];
 extern void dspRequestMessageWindowModeOne(void);
 

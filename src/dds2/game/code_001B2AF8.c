@@ -5756,7 +5756,7 @@ extern u32 btlGetActiveUnitId(void);
 extern void dspRequestMessageWindowModeOne(void);
 extern void btlSetCommandPanelFadeMode(s8, s32);
 extern void sndSetStationedSeVolume(u32);
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern s32 btlAccessPendingLinkageSkillFlag(s32, s32);
 
 /* Advance new-LINKAGE notices; return -1 after closing and updating notice flags. */
@@ -10109,7 +10109,7 @@ extern void evtBitOff(s32);
 extern void evtBitOn(s32);
 extern void btlSetTrackedTaskHandle(s32, s32);
 extern s32 fclDestroyMessage(void);
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern s32 btlUpdateCommandNoticeTask(dds3ProcessID_t *);
 extern s32 btlUpdateMajinTutorialTask(dds3ProcessID_t *);
 extern s32 btlUpdateLinkageNoticeTask(dds3ProcessID_t *);
