@@ -64,7 +64,8 @@ extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern u32 dds3NullDrawProc(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern u64 *effPkt2DAllocF4(u32 flags);
-extern void effBlurBuildSamplingQuad();
+extern void effBlurBuildSamplingQuad(const dds3Effect_Blur_t *source, EffBlurDrawData *data,
+                                     u8 fixedPoint);
 
 extern void effAppendBlurRenderState(void *, s32, sdfTexHandle_t *);
 extern void effAppendBlurRectanglePackets(void *, const dds3Effect_Blur_t *, u8);
@@ -112,11 +113,8 @@ void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
 }
 
 
-void effBlurBuildSamplingQuad(source, data, fixedPoint)
-    const dds3Effect_Blur_t *source;
-    EffBlurDrawData *data;
-    u8 fixedPoint;
-{
+void effBlurBuildSamplingQuad(const dds3Effect_Blur_t *source, EffBlurDrawData *data,
+                              u8 fixedPoint) {
     f32 phase = source->angle * 0.017453292519943295f;
     f32 amplitude = source->displacement;
     f32 dx = sdfSin(phase) * amplitude;
@@ -225,7 +223,7 @@ void effBlurDrawFramebufferQuad(const dds3Effect_Blur_t *source)
         clampPacket[5] = 8;
         sdfDrawTagLink(list, (u32)clampPacket);
         drawPacket = effPkt2DAllocTriStrip(1, 0);
-        effBlurBuildSamplingQuad(source, effPkt2DGetPrimPtr(drawPacket), 0);
+        effBlurBuildSamplingQuad(source, (EffBlurDrawData *)effPkt2DGetPrimPtr(drawPacket), 0);
         sdfDrawTagLink(list, (u32)drawPacket);
         D_003803E8.append(&D_003803E8, list);
     }

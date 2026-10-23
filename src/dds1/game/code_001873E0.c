@@ -107,11 +107,8 @@ void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
     }
 }
 
-void effBlurBuildSamplingQuad(source, data, fixedPoint)
-    const dds3Effect_Blur_t *source;
-    EffBlurDrawData *data;
-    u8 fixedPoint;
-{
+void effBlurBuildSamplingQuad(const dds3Effect_Blur_t *source, EffBlurDrawData *data,
+                             u8 fixedPoint) {
     f32 phase = source->angle * 0.017453292519943295f;
     f32 amplitude = source->displacement;
     f32 dx = sdfSin(phase) * amplitude;
@@ -220,7 +217,7 @@ void effBlurDrawFramebufferQuad(const dds3Effect_Blur_t *source)
         clampPacket[5] = 8;
         sdfDrawTagLink(list, (u32)clampPacket);
         drawPacket = effPkt2DAllocTriStrip(1, 0);
-        effBlurBuildSamplingQuad(source, effPkt2DGetPrimPtr(drawPacket), 0);
+        effBlurBuildSamplingQuad(source, (EffBlurDrawData *)effPkt2DGetPrimPtr(drawPacket), 0);
         sdfDrawTagLink(list, (u32)drawPacket);
         D_003253E8.append(&D_003253E8, list);
     }
