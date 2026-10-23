@@ -5,7 +5,7 @@
 
 typedef struct SdfStreamReadRequest {
     u8 opaque00[4];
-    s32 destinationAddress; /* Caller-provided address word in the read request. */
+    u32 destinationAddress; /* Caller-provided unsigned address word in the read request. */
     s32 byteCount;
 } SdfStreamReadRequest;
 
