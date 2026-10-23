@@ -529,8 +529,8 @@ s32 fldGetSelectedUnitStat(s32 unitAddress) {
     return btlGetActionRecordLookupValue(selectedEntryIndex);
 }
 
-s32 btlGetSelectedUnitProperty(s32 unitAddress) {
-    s32 selectedEntryIndex = ((BtlUnit *)unitAddress)->selectedEntryIndex;
+s32 btlGetSelectedUnitProperty(BtlUnit *unit) {
+    s32 selectedEntryIndex = unit->selectedEntryIndex;
     if (selectedEntryIndex == -1) {
         return 0;
     }
