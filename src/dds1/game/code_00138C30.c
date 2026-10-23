@@ -950,10 +950,10 @@ void fldPurgeEveRngProcesses(void) {
 }
 
 /* Return the first matching task slot's record ID; -1 denotes a miss. */
-s32 fldEveHitResID_Find(u32 task) {
+s32 fldEveHitResID_Find(dds3ProcessID_t *task) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
-        if (fldRoomTaskHandles[slotIndex] == task) {
+        if (fldRoomTaskHandles[slotIndex] == (u32)task) {
             return fldRoomResources[slotIndex]->id;
         }
     }
@@ -963,11 +963,11 @@ s32 fldEveHitResID_Find(u32 task) {
 extern s32 fldEveRngCount;
 
 /* Return the first matching task slot's room ID; -1 denotes a miss. */
-s32 fldFindEveRngIndex(u32 task) {
+s32 fldFindEveRngIndex(dds3ProcessID_t *task) {
     s32 slotIndex;
 
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
-        if (fldRoomTaskHandles[slotIndex] == task) {
+        if (fldRoomTaskHandles[slotIndex] == (u32)task) {
             return fldEveHitTable[slotIndex].roomId;
         }
     }
@@ -975,10 +975,10 @@ s32 fldFindEveRngIndex(u32 task) {
 }
 
 /* Return the first matching task slot's record name; NULL on miss. */
-const char *fldEveHitResName_Find(u32 task) {
+const char *fldEveHitResName_Find(dds3ProcessID_t *task) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
-        if (fldRoomTaskHandles[slotIndex] == task) {
+        if (fldRoomTaskHandles[slotIndex] == (u32)task) {
             return fldRoomResources[slotIndex]->name;
         }
     }
@@ -1690,7 +1690,7 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
     FldActorEntry *entry;
 
     if (checkTaskRecord != 0) {
-        record = fldEveHitResName_Find((u32)scrGetScriptHandle()->task);
+        record = fldEveHitResName_Find(scrGetScriptHandle()->task);
         if (record == 0) {
             return;
         }

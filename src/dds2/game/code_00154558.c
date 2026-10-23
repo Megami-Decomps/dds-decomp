@@ -152,7 +152,7 @@ extern s32 D_00436360;
 
 extern struct sdfTexHandle_t *D_0043637C;
 
-extern s32 fldFindEveRngIndex(u32);
+extern s32 fldFindEveRngIndex(dds3ProcessID_t *task);
 
 extern s32 fldElvCheckEnd(void);
 
@@ -183,7 +183,7 @@ extern void fldPlayArchiveSound(s32 archiveId, s32 soundId);
 
 extern void fldStartTitle(s32 field, s32 mode, s32 option);
 
-extern const char *fldEveHitResName_Find(u32 key);
+extern const char *fldEveHitResName_Find(dds3ProcessID_t *task);
 
 extern void fldDoor_ExitCamera(const char *entry);
 
@@ -380,7 +380,7 @@ extern s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry
 
 extern s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry);
 
-extern s32 fldEveHitResID_Find(u32 task);
+extern s32 fldEveHitResID_Find(dds3ProcessID_t *task);
 extern s32 fldResolvePendingTitleBanner(void);
 
 s32 fldCmdQueryActorEntrySceneStatus(void) {
@@ -393,7 +393,7 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find((u32)scrGetScriptHandle()->task), 0x11);
+    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find(scrGetScriptHandle()->task), 0x11);
     if (entry == 0) {
         scrSetIntReturnValue(0);
         return 1;
@@ -427,7 +427,7 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find((u32)scrGetScriptHandle()->task), 0x11);
+    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find(scrGetScriptHandle()->task), 0x11);
     if (entry == 0) {
         scrSetIntReturnValue(0);
         return 1;
@@ -478,7 +478,7 @@ s32 fldCmdTestActorEntryCondition(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find((u32)scrGetScriptHandle()->task), 0x11);
+    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find(scrGetScriptHandle()->task), 0x11);
     if (entry == 0) {
         scrSetIntReturnValue(0);
         return 1;
@@ -1462,7 +1462,7 @@ INCLUDE_RODATA(const s32, "game/code_00154558", D_00414090);
 s32 fldCmdPushSceneParam(void) {
     s32 room;
 
-    room = fldFindEveRngIndex((u32)scrGetScriptHandle()->task);
+    room = fldFindEveRngIndex(scrGetScriptHandle()->task);
     switch (scrGetIntPara(0)) {
     case 0:
         scrSetIntReturnValue(D_003A8EB0[room].selectedValue0);
@@ -1490,7 +1490,7 @@ u32 fldCommand_FLD_SET_TAKARA_OPEN(void) {
     s32 room;
 
     script = scrGetScriptHandle();
-    room = fldFindEveRngIndex((u32)script->task);
+    room = fldFindEveRngIndex(script->task);
     fldActivateFlaggedObject(room);
     return 1;
 }
@@ -1498,7 +1498,7 @@ u32 fldCommand_FLD_SET_TAKARA_OPEN(void) {
 extern u8 fldTestObjectActivationFlag(u32 flagIndex);
 
 u32 fldCommand_FLD_CHK_TAKARA_OPEN(void) {
-    if (fldTestObjectActivationFlag(fldFindEveRngIndex((u32)scrGetScriptHandle()->task)) != 0) {
+    if (fldTestObjectActivationFlag(fldFindEveRngIndex(scrGetScriptHandle()->task)) != 0) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);
@@ -1513,7 +1513,7 @@ u32 fldCmdSetCurrentTaskScene(void) {
         fldApplyCurrentTaskScene(0);
         return 1;
     }
-    scene = fldEveHitResName_Find((u32)scrGetScriptHandle()->task);
+    scene = fldEveHitResName_Find(scrGetScriptHandle()->task);
     if (scene) {
         fldApplyCurrentTaskScene(scene);
     }
@@ -1617,7 +1617,7 @@ u32 fldCommand_FLD_WARP_RUN_START(void) {
     if (fldDoor_ChkWarp()) {
         scene = 0;
     } else {
-        scene = fldEveHitResID_Find((u32)scrGetScriptHandle()->task);
+        scene = fldEveHitResID_Find(scrGetScriptHandle()->task);
     }
     fldApplyActorEntryTrigger(scene);
     return 1;
@@ -1727,7 +1727,7 @@ s32 fldCommand_FLD_SET_ENCOUNT(void) {
 
 s32 fldCommand_FLD_EXIT_CAMERA(void) {
     scrProcessWork_s *work = scrGetScriptHandle();
-    const char *entry = fldEveHitResName_Find((u32)work->task);
+    const char *entry = fldEveHitResName_Find(work->task);
 
     if (entry != NULL) {
         fldDoor_ExitCamera(entry);
