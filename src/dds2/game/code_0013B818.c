@@ -3040,14 +3040,8 @@ void fldDrawTitleBannerCursor(s32 x, s32 y) {
     evtSubmitPrimaryAlphaBlendMode(0);
 }
 
-typedef struct FldMenuState {
-    u16 position;
-    u16 choice;
-    u16 pending;
-} FldMenuState;
-
 s32 fldUpdateTitleBannerTask(dds3ProcessID_t *task) {
-    FldMenuState *menu;
+    FldTitleBannerMenu *menu;
 
     if (D_00389780[0] >= 200) {
         return 0;
@@ -3073,14 +3067,14 @@ s32 fldUpdateTitleBannerTask(dds3ProcessID_t *task) {
     if (fldIsEventPhaseAtLeastTwo() != 0) {
         return 0;
     }
-    menu = (FldMenuState *)dds3GetProcessData(task);
+    menu = (FldTitleBannerMenu *)dds3GetProcessData(task);
     if (menu->pending != 0) {
         fldDrawTitleBannerFrame(menu->position);
         fldDrawTitleBannerCursor(D_00399F60[menu->choice] - 9, 0x130);
         itfSetTextDrawLimit(0x13);
         fldKanjiDraw(D_00399F60[menu->choice] + 10, 0x98, 0xA09DC380, D_00399EA0[menu->choice]);
         itfSetTextDrawLimit(-1);
-        menu->position++;
+        menu->position = menu->position + 1;
         menu->pending = 0;
     } else {
         menu->position = 0;
@@ -3089,12 +3083,12 @@ s32 fldUpdateTitleBannerTask(dds3ProcessID_t *task) {
 }
 
 s32 fldInputPanelProcess1(dds3ProcessID_t *task) {
-    s16 *node = sdfChipAllocDirect(8);
-    node[1] = 1;
-    node[0] = 0;
-    node[2] = 0;
-    node[3] = 0;
-    dds3SetProcessData(task, (u32)node);
+    FldTitleBannerMenu *menu = sdfChipAllocDirect(sizeof(FldTitleBannerMenu));
+    menu->choice = 1;
+    menu->position = 0;
+    menu->pending = 0;
+    menu->reserved = 0;
+    dds3SetProcessData(task, (u32)menu);
     return (s32)fldUpdateTitleBannerTask;
 }
 

@@ -10,10 +10,10 @@ extern dds3ProcessID_t *inputpanel_id;
 
 
 void fldInputPanelShutdown(dds3ProcessID_t *panelTask) {
-    void *panelChipBlock;
+    FldTitleBannerMenu *menu;
 
-    panelChipBlock = (void *)dds3GetProcessData(panelTask);
-    sdfChipFreeDirect(panelChipBlock);
+    menu = (FldTitleBannerMenu *)dds3GetProcessData(panelTask);
+    sdfChipFreeDirect(menu);
     inputpanel_id = 0;
 }
 
@@ -44,4 +44,3 @@ FldTitleBannerMenu *fldInputPanelSetMessage(s32 choice) {
 }
 
 INCLUDE_SDATA(const s32, "field/fldPanel", inputpanel_id);
-
