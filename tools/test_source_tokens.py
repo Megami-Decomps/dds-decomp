@@ -12,6 +12,15 @@ ROOT = Path(__file__).resolve().parent.parent
 SUFFIXES = ("*.fldasm", "*.bfasm", "*.infasm", "*.wapasm", "*.ambasm")
 
 
+def corpus_sources(*suffixes):
+    """Imported data and script sources, skipping the test when there are none."""
+    files = sorted(path for suffix in suffixes
+                   for path in (ROOT / "src").rglob(suffix))
+    if not files:
+        raise unittest.SkipTest("corpus not imported: src/*/{data,scripts}")
+    return files
+
+
 class SourceTokenTests(unittest.TestCase):
     def assertAgrees(self, line):
         self.assertEqual(source_tokens.split(line),
@@ -29,8 +38,7 @@ class SourceTokenTests(unittest.TestCase):
             self.assertAgrees(line)
 
     def test_every_tracked_data_source_agrees(self):
-        files = sorted(path for suffix in SUFFIXES
-                       for path in (ROOT / "src").rglob(suffix))
+        files = corpus_sources(*SUFFIXES)
         self.assertGreater(len(files), 100)
         quoted = 0
         for path in files[::7]:
@@ -43,7 +51,7 @@ class SourceTokenTests(unittest.TestCase):
 
     def test_quoted_lines_of_the_corpus_agree(self):
         for suffix in SUFFIXES:
-            for path in sorted((ROOT / "src").rglob(suffix))[::11]:
+            for path in corpus_sources(suffix)[::11]:
                 for line in path.read_text(encoding="utf-8").splitlines():
                     if source_tokens.QUOTING.search(line):
                         self.assertAgrees(line)
