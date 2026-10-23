@@ -2221,7 +2221,7 @@ void fldDrawScrollingLayerOverlay(void) {
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00148A98);
 
-extern s32 fldAutoMapSeqTestFlag(u32);
+extern u8 fldAutoMapSeqTestFlag(u32);
 extern void fldAutoMapSeqSetFlag(u32);
 extern void evtDisableMoonDraw(void);
 extern KwlnDrawVectorParams kwlnDrawVector;
@@ -3860,7 +3860,7 @@ void fldDrawLocationPanel(void) {
     }
 }
 
-extern s32 fldAutoMapSeqTestFlag(u32);
+extern u8 fldAutoMapSeqTestFlag(u32);
 
 void fldFlushQueuedEffectPositions(void) {
     if (fldGlobalBase.area < 0xC8) {
