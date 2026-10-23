@@ -1750,7 +1750,7 @@ void sdfDrawHeapSpanOverlay(sdfDrawTag_t *packetList, s32 x, s32 y,
 
 extern u16 sdfMemGetType(sdfMemHandle_t *);
 
-void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
+void sdfDrawHeapMapOverlay(sdfDrawTag_t *packetList, s32 x, s32 y) {
     SdfHeapOverlayBlock *snapshot;
     SdfHeapOverlayBlock *entry;
     sdfMemHandle_t *block;
@@ -1783,31 +1783,31 @@ void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
     sdfGrClosePacketBuff((s32)entry);
 
     entry = snapshot;
-    sdfDrawTagLink(list, (u32)dds3PrimFrameRect(x - 0x20, y - 0x10,
+    sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x - 0x20, y - 0x10,
         0x0FFFFF7F, 0x840, (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x20,
         0x80000000, 0x80806020));
     for (i = 0; i < count; i++) {
-        sdfDrawHeapSpanOverlay(list, x, y, heapBase, entry->address,
+        sdfDrawHeapSpanOverlay(packetList, x, y, heapBase, entry->address,
             entry->size, entry->state);
         entry++;
     }
     markerY = y;
     markerX = x + 0x820;
-    sdfPrimLinkLine(list, 0x80806020, 0, markerX, markerY,
+    sdfPrimLinkLine(packetList, 0x80806020, 0, markerX, markerY,
         x + 0x8C0, markerY, 0x0FFFFF80, NULL);
     for (offset = 0x100000; offset < D_003BA97C; offset += 0x100000) {
         markerY = y + (offset / (D_003BA97C >> 8)) * 8;
-        sdfPrimLinkLine(list, 0x80806020, 0, markerX, markerY,
+        sdfPrimLinkLine(packetList, 0x80806020, 0, markerX, markerY,
             x + 0x870, markerY, 0x0FFFFF80, NULL);
     }
     markerY = y + (D_003BA97C / (D_003BA97C >> 8)) * 8;
-    sdfPrimLinkLine(list, 0x80806020, 0, markerX, markerY,
+    sdfPrimLinkLine(packetList, 0x80806020, 0, markerX, markerY,
         markerX + 0xA0, markerY, 0x0FFFFF80, NULL);
 }
 
 
 
-extern void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y);
+extern void sdfDrawHeapMapOverlay(sdfDrawTag_t *packetList, s32 x, s32 y);
 extern char D_003BA980[];
 extern char D_003BA988[];
 
@@ -1817,12 +1817,12 @@ void evtDrawHeapUsageOverlay(SdfPoolNode *surface) {
     SdfGeneralHeapStats generalHeapStats;
     SdfChipHeapStats chipHeapStats;
     char statusText[100];
-    void *packetList;
+    sdfDrawTag_t *packetList;
 
     sdfMemGetInfo(&generalHeapStats);
     D_003BA97C = generalHeapStats.totalBytes;
     sdfChipGetInfo(&chipHeapStats);
-    packetList = (void *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
+    packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
     sdfDrawTagInit(packetList);
     sdfDrawHeapMapOverlay(packetList, 0x86C0, 0x79C0);
     sprintf(statusText, D_003BA980, generalHeapStats.freeBytes);
