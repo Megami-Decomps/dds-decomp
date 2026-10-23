@@ -151,7 +151,7 @@ extern void btlAllocatePanelTaskWork(void);
 
 extern void itfMesMngRelease(s32);
 
-extern s32 btlFindEligibleTargetForMultiActorCommand(s32 actionTask, BtlIndexList *targets);
+extern s32 btlFindEligibleTargetForMultiActorCommand(BtlTask *actionTask, BtlIndexList *targets);
 
 extern EffRandState effSharedRandomState[];
 
@@ -9394,7 +9394,7 @@ SceneAiWork *btlCreateTargetSelectionWork(BtlTask *source) {
     work->entry = 0;
     switch (work->result) {
     case 0:
-        entry = btlFindEligibleTargetForMultiActorCommand((s32)source, work->listA);
+        entry = btlFindEligibleTargetForMultiActorCommand(source, work->listA);
         work->entry = entry;
         btlAppendIndexListEntry(work->listB,
                                 btlGetIndexListEntry(work->listA, entry));

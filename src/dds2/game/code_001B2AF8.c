@@ -10786,7 +10786,7 @@ extern s32 btlBuildUnitIndexList(void *source, BtlIndexList *list, s32, s32, s32
 
 extern u32 btlSelectCommandTargetPolicy(ActionStateLink *source, BtlIndexList *list, s32);
 
-extern s32 btlFindEligibleTargetForMultiActorCommand(s32 actionTask, BtlIndexList *targets);
+extern s32 btlFindEligibleTargetForMultiActorCommand(ActionStateLink *actionTask, BtlIndexList *targets);
 
 /* Creates the AI work object for `source`: allocates two index lists and
  * fills them according to the current scene object state. */
@@ -10817,7 +10817,7 @@ SceneAiWork *btlCreateTargetSelectionWork(ActionStateLink *source) {
     work->entry = 0;
     switch (work->result) {
     case 0:
-        id = btlFindEligibleTargetForMultiActorCommand((s32)source, work->listA);
+        id = btlFindEligibleTargetForMultiActorCommand(source, work->listA);
         work->entry = id;
         btlAppendIndexListEntry(work->listB, btlGetIndexListEntry(work->listA, id));
         break;

@@ -705,10 +705,10 @@ u32 btlSelectCommandTargetPolicy(void *action, BtlIndexList *destination, s32 un
     return category;
 }
 
-extern s32 btlFindEligibleTargetForMultiActorCommand(s32 actionTask, BtlIndexList *targets);
+extern s32 btlFindEligibleTargetForMultiActorCommand(BtlTask *actionTask, BtlIndexList *targets);
 
-s32 btlFindEligibleTargetForMultiActorCommand(s32 actionTask, BtlIndexList *targets) {
-    BtlTask *action = (BtlTask *)actionTask;
+s32 btlFindEligibleTargetForMultiActorCommand(BtlTask *actionTask, BtlIndexList *targets) {
+    BtlTask *action = actionTask;
     u32 count;
     u32 i;
     s32 command;
