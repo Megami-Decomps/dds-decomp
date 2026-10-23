@@ -2081,10 +2081,12 @@ u8 mnuCampGetCompactRewardKind(s32 rewardRow, s32 column) {
 
 s32 mnuCampResolveOwnedItemVariant(s32 rewardRow, s32 column) {
     u8 *entry = mnuCampWideRewardEntries + column * 0xC + rewardRow * 0xC0;
-    s32 id = *(s32 *)(mnuCampWideRewardEntries + column * 0xC + rewardRow * 0xC0 + 4);
+    s32 id = *(s32 *)&((CampWideRewardEntry *)(mnuCampWideRewardEntries +
+        column * 0xC + rewardRow * 0xC0))->id;
 
-    if (entry[1] == 0 && mnuIsHighRangeItemId(id) != 0 && DDS3_GBWK->inventory.counts[id] != 0) {
-        id = *(u16 *)(entry + 8);
+    if (((CampWideRewardEntry *)entry)->kind == 0 &&
+        mnuIsHighRangeItemId(id) != 0 && DDS3_GBWK->inventory.counts[id] != 0) {
+        id = *(u16 *)&((CampWideRewardEntry *)entry)->variant;
     }
     return id;
 }
