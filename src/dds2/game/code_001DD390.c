@@ -214,7 +214,7 @@ extern s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *);
 
 extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
 
-extern s32 btlGetSlotRateKind(u8 *, s32);
+extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 
 extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *, f32);
 
@@ -2934,9 +2934,10 @@ void btlApplyScaledUnitEffectParameter(BtlUnit *unit, s32 index, s32 option, f32
     btlApplyUnitMotionSelection(unit, index, option, ((BtlEffectResource *)table)->nodes[index].scale * scale);
 }
 
-s32 btlGetSlotRateKind(u8 *unit, s32 index) {
-    u8 *table = (u8 *)btlGetSideIndexedActorStatusTable(((BtlUnit *)unit)->resourceKind, ((BtlUnit *)unit)->resourceIndex);
-    s32 value = ((BtlEffectResource *)table)->nodes[index].rateKind;
+s32 btlGetSlotRateKind(BtlUnit *unit, s32 index) {
+    BtlEffectResource *resource = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(
+        unit->resourceKind, unit->resourceIndex);
+    s32 value = resource->nodes[index].rateKind;
     switch (value) {
     case 0:
         return 0;
@@ -4038,21 +4039,21 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
             entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->partyRecord);
             if (unit->status.flags & 0x20) {
                 btlApplyScaledUnitEffectParameter(unit, 0xB,
-                    btlGetSlotRateKind((u8 *)unit, 0xB), 1.0f);
+                    btlGetSlotRateKind(unit, 0xB), 1.0f);
             } else if (args->transitionMode == 2) {
                 unit->motionId = -1;
                 btlApplyScaledUnitEffectParameter(unit, 0xE,
-                    btlGetSlotRateKind((u8 *)unit, 0xE), 1.0f);
+                    btlGetSlotRateKind(unit, 0xE), 1.0f);
             } else if (args->transitionMode != 3 &&
                        ((unit->status.flags & 0x200) || (entryFlags & 0x200)) &&
                        args->resourceId != 0x1F) {
                 unit->motionId = -1;
                 if (unit->status.flags & 0x1000) {
                     btlApplyScaledUnitEffectParameter(unit, 0x10,
-                        btlGetSlotRateKind((u8 *)unit, 0x10), 1.0f);
+                        btlGetSlotRateKind(unit, 0x10), 1.0f);
                 } else {
                     btlApplyScaledUnitEffectParameter(unit, 0x11,
-                        btlGetSlotRateKind((u8 *)unit, 0x11), 1.0f);
+                        btlGetSlotRateKind(unit, 0x11), 1.0f);
                 }
             }
         }

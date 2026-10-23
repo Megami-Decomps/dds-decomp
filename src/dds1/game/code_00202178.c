@@ -2250,7 +2250,7 @@ extern BtlRuntimeTask *btlCreateFadeInTask(u32);
 
 extern s32 fldGetSceneGroupEntry(s32);
 extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
-extern s32 btlGetSlotRateKind(u8 *, s32);
+extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 extern u8 *btlCreateFloatTask29(u8 *, f32, f32, f32, f32, f32, f32, f32, f32,
                                  f32, f32, f32, f32, f32, f32, f32, f32);
 
@@ -2382,7 +2382,7 @@ void btlQueueLinkedPairModelSwapTasks(BtlTask *action, s32 mode, u64 refreshBarr
             }
             task = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit,
                        action->indexWork.slot,
-                       btlGetSlotRateKind((u8 *)unit, action->indexWork.slot), 1.0f);
+                       btlGetSlotRateKind(unit, action->indexWork.slot), 1.0f);
             task->startCondition.kind = 4;
             task->startCondition.value.handle = effectBarrier;
             task->startDelay = 1;

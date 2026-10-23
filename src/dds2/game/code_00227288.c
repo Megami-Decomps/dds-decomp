@@ -551,7 +551,7 @@ s32 btlEffectTaskStartFinale(ActionStateLink *task) {
 }
 
 extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
-extern s32 btlGetSlotRateKind(u8 *, s32);
+extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 extern u8 *btlCreateFloatTask29(u8 *, f32, f32, f32, f32, f32, f32, f32, f32,
                                  f32, f32, f32, f32, f32, f32, f32, f32);
 
@@ -683,7 +683,7 @@ void btlQueueLinkedPairModelSwapTasks(ActionStateLink *action, s32 mode, u64 ref
             }
             task = btlAllocateIndexedUnitEffectTask(unit,
                        action->indexWork.slot,
-                       btlGetSlotRateKind((u8 *)unit, action->indexWork.slot), 1.0f);
+                       btlGetSlotRateKind(unit, action->indexWork.slot), 1.0f);
             task->startCondition.kind = 4;
             task->startCondition.value.handle = effectBarrier;
             task->startDelay = 1;

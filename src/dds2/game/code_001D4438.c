@@ -1411,7 +1411,7 @@ extern BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32 value);
 extern f32 btlGetActorStateScale(ActionStateLink *task);
 extern u32 btlGetIndexListCount(BtlIndexList *list);
 extern BtlUnit *btlGetIndexListEntry(BtlIndexList *list, s32 index);
-extern s32 btlGetSlotRateKind(u8 *unit, s32 index);
+extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 extern s32 btlMapActionCode(s32 unused, u32 id);
 extern BtlRuntimeTask *btlScheduleActorUpdate(BtlUnit *unit);
 extern BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *actor, s32 amount);
@@ -1493,7 +1493,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
     task->startCondition.value.handle = moveHandle;
     btlStartTask(task);
     task = btlAllocateIndexedUnitEffectTask(action->unit, action->indexWork.slot,
-        btlGetSlotRateKind((u8 *)action->unit, action->indexWork.slot), scale);
+        btlGetSlotRateKind(action->unit, action->indexWork.slot), scale);
     task->startCondition.kind = 4;
     task->startCondition.value.handle = moveHandle;
     btlStartTask(task);
@@ -1890,7 +1890,7 @@ void btlEnterLinkageActionState(void) {
 extern char D_00417398[];
 extern BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32);
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
-extern s32 btlGetSlotRateKind(u8 *, s32);
+extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);
 extern s32 btlMapActionCode(s32, u32);
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
@@ -2101,7 +2101,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
                 soundHandle = soundTask->handle;
             }
             task = btlAllocateIndexedUnitEffectTask(actors[groupIndex], slot,
-                btlGetSlotRateKind((u8 *)actors[groupIndex], slot), 1.0f);
+                btlGetSlotRateKind(actors[groupIndex], slot), 1.0f);
             task->startCondition.kind = 4;
             task->startCondition.value.handle = soundHandle;
             btlStartTask(task);
@@ -2598,7 +2598,7 @@ s32 btlCommandGunChangeStart(ActionStateLink *task) {
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
         spawned = btlAllocateIndexedUnitEffectTask(unit, 0x11,
-                                                                btlGetSlotRateKind((u8 *)unit, 0x11), 1.0f);
+                                                                btlGetSlotRateKind(unit, 0x11), 1.0f);
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
@@ -2728,7 +2728,7 @@ void btlScheduleDevilStateModelChange(ActionStateLink *task) {
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
-        spawned = btlAllocateIndexedUnitEffectTask(unit, 0x10, btlGetSlotRateKind((u8 *)unit, 0x10), 1.0f);
+        spawned = btlAllocateIndexedUnitEffectTask(unit, 0x10, btlGetSlotRateKind(unit, 0x10), 1.0f);
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
@@ -2838,7 +2838,7 @@ void btlStartAlternateModelChange(ActionStateLink *action) {
     spawned->startCondition.value.handle = sound->handle;
     btlStartTask(spawned);
     spawned = btlAllocateIndexedUnitEffectTask(unit, 0x10,
-        btlGetSlotRateKind((u8 *)unit, 0x10), 1.0f);
+        btlGetSlotRateKind(unit, 0x10), 1.0f);
     spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     spawned->flags |= 2;
     spawned->startCondition.value.handle = sound->handle;

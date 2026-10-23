@@ -233,7 +233,7 @@ extern s32 scrGetIntPara(s32);
 
 extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 
-extern s32 btlGetSlotRateKind(u8 *, s32);
+extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 
 
 extern u8 *btlFindUnitByModeClear(s32);
@@ -671,7 +671,7 @@ s32 btlCommandPlayUnitMotion(void) {
     if (motionIndex >= 0) {
         if (motionIndex < 0x1D) {
             btlApplyScaledUnitEffectParameter(unit, motionIndex,
-                btlGetSlotRateKind((u8 *)unit, motionIndex), 1.0f);
+                btlGetSlotRateKind(unit, motionIndex), 1.0f);
         } else {
             mdlSmoothSingleMotion(unit->ext->owner, 0, motionIndex, 0.0f, 0.0f);
         }
@@ -2802,7 +2802,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             btlApplyUnitEffectScale(unit);
             if (motion < mdlGetNumOfCut(unit->ext->owner, 0)) {
                 btlApplyScaledUnitEffectParameter(unit, motion,
-                    btlGetSlotRateKind((u8 *)unit, motion), 1.0f);
+                    btlGetSlotRateKind(unit, motion), 1.0f);
                 if (btlDebugEditorMotionSlot.kind == 2) {
                     btlSeekUnitModelFrameZero(unit);
                 }

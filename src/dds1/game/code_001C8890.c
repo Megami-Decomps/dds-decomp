@@ -136,7 +136,7 @@ extern s32 btlTestActorStatusPredicate(BtlUnit *);
 
 extern void btlRefreshUnitMotionSelection(BtlUnit *unit);
 
-extern s32 btlGetSlotRateKind(u8 *, s32);
+extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 
 extern u8 *btlCreateStiffenDamageShakeTask(u8 *, f32);
 
@@ -1019,7 +1019,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
     task->startCondition.value.handle = moveHandle;
     btlStartTask(task);
     task = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)action->unit, action->indexWork.slot,
-        btlGetSlotRateKind((u8 *)action->unit, action->indexWork.slot), scale);
+        btlGetSlotRateKind(action->unit, action->indexWork.slot), scale);
     task->startCondition.kind = 4;
     task->startCondition.value.handle = moveHandle;
     btlStartTask(task);
@@ -1526,7 +1526,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
                 soundHandle = soundTask->handle;
             }
             task = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)actors[groupIndex], slot,
-                btlGetSlotRateKind((u8 *)actors[groupIndex], slot), 1.0f);
+                btlGetSlotRateKind(actors[groupIndex], slot), 1.0f);
             task->startCondition.kind = 4;
             task->startCondition.value.handle = soundHandle;
             btlStartTask(task);
@@ -2013,7 +2013,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
         spawned = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, 0x11,
-                                                                btlGetSlotRateKind((u8 *)unit, 0x11), 1.0f);
+                                                                btlGetSlotRateKind(unit, 0x11), 1.0f);
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
@@ -2145,7 +2145,7 @@ void btlScheduleDevilStateModelChange(BtlTask *task) {
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
         spawned = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, 0x10,
-                                                                btlGetSlotRateKind((u8 *)unit, 0x10), 1.0f);
+                                                                btlGetSlotRateKind(unit, 0x10), 1.0f);
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
