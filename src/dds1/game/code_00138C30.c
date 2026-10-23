@@ -334,7 +334,7 @@ extern u32 fldCachedRoomResourceData, fldCachedRoomF1ResourceData, fldCachedRoom
 
 extern u32 fldCachedRoomResourceSize, fldCachedRoomF1ResourceSize, fldCachedRoomF2ResourceSize, fldCachedRoomKF2ResourceSize;
 
-extern void fldGetDoorEntry(const void *source);
+extern void fldGetDoorEntry(FldWaypointBlock *source);
 
 extern void fldInfLoadFromMem(const void *);
 
@@ -2705,7 +2705,7 @@ void fldDoorLoad(s32 field) {
     }
 }
 
-void fldGetDoorEntry(const void *source) {
+void fldGetDoorEntry(FldWaypointBlock *source) {
     memcpy(&fldActorWaypointRows, source, 0x6CA0);
 }
 
