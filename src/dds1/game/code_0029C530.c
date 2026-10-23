@@ -395,7 +395,8 @@ extern u8 *D_003BD074;
 
 extern void effDrawSurfaceNode(s32);
 
-extern u32 effSelectCameraFileJobFromRows(const char *, const void *, u32);
+struct EffCameraCreateRow;
+extern u32 effSelectCameraFileJobFromRows(const char *, const struct EffCameraCreateRow *, u32);
 
 extern char D_003B3968[];
 
@@ -11414,8 +11415,7 @@ u32 effStoreBattleCameraSnapshot(u32 value) {
 }
 
 /* Present named camera/file requests, maintaining a preview job and returning selection status. */
-u32 effSelectCameraFileJobFromRows(const char *nameKey, const void *sourceRows, u32 sourceCount) {
-    const EffCameraCreateRow *requests = (const EffCameraCreateRow *)sourceRows;
+u32 effSelectCameraFileJobFromRows(const char *nameKey, const EffCameraCreateRow *requests, u32 sourceCount) {
     EffQueuedFileObject *menuObject;
     EffQueuedFileObject *state;
     EffEditorRow *entries;
