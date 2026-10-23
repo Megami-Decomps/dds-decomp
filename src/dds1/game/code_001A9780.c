@@ -9355,7 +9355,7 @@ s32 btlUpdateTargetSelectionTask(dds3ProcessID_t *handle) {
 
 extern s32 btlBuildEligibleTargetIndexList(BtlTask *source, BtlIndexList *list, s32, s32, s32);
 
-extern u32 btlSelectCommandTargetPolicy(void *source, BtlIndexList *list, s32);
+extern u32 btlSelectCommandTargetPolicy(BtlTask *source, BtlIndexList *list, s32);
 
 extern s32 btlStepTargetGridSelection(s32, SceneAiWork *);
 
@@ -9389,7 +9389,7 @@ SceneAiWork *btlCreateTargetSelectionWork(BtlTask *source) {
         btlGetIndexListCount(work->listA);
         work->result = 0;
     } else if (source != 0) {
-        work->result = btlSelectCommandTargetPolicy((void *)source, work->listA, 0);
+        work->result = btlSelectCommandTargetPolicy(source, work->listA, 0);
     }
     work->entry = 0;
     switch (work->result) {

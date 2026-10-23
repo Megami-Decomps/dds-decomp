@@ -126,7 +126,7 @@ extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 
 extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 
-extern u32 btlSelectCommandTargetPolicy(void *, BtlIndexList *, s32);
+extern u32 btlSelectCommandTargetPolicy(BtlTask *, BtlIndexList *, s32);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 

@@ -41,7 +41,7 @@ extern void btlUnitFaceTarget(BtlUnit *, BtlUnit *);
 
 extern BtlUnit *btlGetEffectActor(void);
 
-extern u32 btlSelectCommandTargetPolicy(void *, BtlIndexList *, s32);
+extern u32 btlSelectCommandTargetPolicy(BtlTask *, BtlIndexList *, s32);
 
 extern BtlAiScratchWork *btlActionScratchWork;
 
@@ -269,7 +269,7 @@ BtlIndexList *btlBuildActorIndexListAndCount(s32 actor, u32 *matchingCount, u32 
     BtlIndexList *list;
 
     list = btlAllocateIndexList(0xd);
-    result = btlSelectCommandTargetPolicy((void *)actor, list, 0);
+    result = btlSelectCommandTargetPolicy((BtlTask *)actor, list, 0);
     *matchingCount = result;
     result = btlGetIndexListCount(list);
     *listCount = result;
