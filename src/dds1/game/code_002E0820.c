@@ -194,7 +194,7 @@ extern u8 D_003200A0[];
 
 extern u8 D_00320630[];
 
-extern s32 D_003BD350;
+extern struct sdfMemHandle_t *D_003BD350;
 
 extern s32 D_003BDA20;
 
@@ -207,9 +207,9 @@ void sdfCoreDrawInit(s32 workspaceBytes) {
     HW_WRITE(dmaChannel, HW_READ(dmaChannel) & ~SDF_DMA_CHCR_TTE);
     sceDmaSendN(dmaChannel, D_003200A0, (D_00320630 - D_003200A0) >> SDF_DMA_QWORD_SHIFT);
     sceDmaSync(dmaChannel, 0, 0);
-    sdfMemFreeHandleDirect(&D_003BD350);
-    D_003BD350 = (u32)sdfMemAllocDirect(workspaceBytes);
-    D_003BDA20 = sdfMemLock((struct sdfMemHandle_t *)(D_003BD350));
+    sdfMemFreeHandleDirect((s32 *)&D_003BD350);
+    D_003BD350 = sdfMemAllocDirect(workspaceBytes);
+    D_003BDA20 = sdfMemLock(D_003BD350);
 }
 
 /* Fixed allocation size; the texture is deliberately unused. */
@@ -1647,7 +1647,7 @@ u32 sdfDevConsColorTable[16] = {
 
 INCLUDE_RODATA(const s32, "game/code_002E0820", D_003B4548);
 
-INCLUDE_SDATA(const s32, "game/code_002E0820", D_003BD350);
+INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_002E0820", D_003BD350);
 
 INCLUDE_SDATA(const s32, "game/code_002E0820", sdfFaceDivSoften);
 
