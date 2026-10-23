@@ -398,11 +398,10 @@ u8 *dds3P2APolygonCreate(s32 entryIndex) {
 }
 
 /* Retain a cloned billboard's shared data, create a fresh render asset, and reset both matrices. */
-u8 *dds3P2APolygonCopy(u8 *source) {
+u8 *dds3P2APolygonCopy(EffUnitObject *source) {
     EffUnitObject *instance = sdfChipAllocDirect(sizeof(EffUnitObject));
 
-    instance->billboard = dds3BillboardCopy(
-        ((EffUnitObject *)source)->billboard);
+    instance->billboard = dds3BillboardCopy(source->billboard);
     instance->resource = sdfMatNew();
     sdfMatSetConstant(instance->resource, 1.0f);
     sdfMatSetDiffuse(instance->resource, 0x80808080);
@@ -428,9 +427,9 @@ void dds3P2APolygonSetScale(EffUnitObject *instance, float scale) {
 }
 
 /* vu0 routine: copy the supplied 4x4 matrix to the instance's second matrix. */
-void dds3P2APolygonSetRotateMatrix(u8 *instanceBytes, void *matrix) {
+void dds3P2APolygonSetRotateMatrix(EffUnitObject *instance, void *matrix) {
     VU0_LOAD_MATRIX(matrix);
-    VU0_STORE_MATRIX(((EffUnitObject *)instanceBytes)->transform);
+    VU0_STORE_MATRIX(instance->transform);
 }
 
 void dds3P2APolygonSetRGBA(EffUnitObject *instance, u32 value) {
