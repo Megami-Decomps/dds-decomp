@@ -169,11 +169,11 @@ struct MantraNodePos *mnuGetMantraPanelPositionRecord(s16 index) {
     return (struct MantraNodePos *)(mnuMantraPanelPositionTable->records + ((index << 0x10) >> 0xb));
 }
 
-extern void mnuUpdateMantraRecordFlags(MantraFlagResource *, s32, s32);
+extern void mnuUpdateMantraRecordFlags(MantraFlagResource *, datUnitWork_t *, s32);
 
 /* Allocate/zero the selection work and point its entries at its inline storage.
  * The existing initializer is called only for nonzero initialValue. */
-MantraFlagResource *evtAllocateMantraSelectionWork(s32 initialValue, s32 mode) {
+MantraFlagResource *evtAllocateMantraSelectionWork(datUnitWork_t *initialUnit, s32 mode) {
     struct sdfMemHandle_t *allocation = sdfMemAllocDirect(MNU_MANTRA_SELECTION_WORK_BYTES);
     MantraFlagResource *work = (MantraFlagResource *)sdfMemGetPtr(allocation);
 
@@ -181,8 +181,8 @@ MantraFlagResource *evtAllocateMantraSelectionWork(s32 initialValue, s32 mode) {
     work->allocation = allocation;
     work->capacity = 0xB0;
     work->flags = work->data;
-    if (initialValue != 0) {
-        mnuUpdateMantraRecordFlags(work, initialValue, mode);
+    if (initialUnit != NULL) {
+        mnuUpdateMantraRecordFlags(work, initialUnit, mode);
     }
     return work;
 }
@@ -213,8 +213,7 @@ extern s32 evtTestMantraNodePartyRequirements(u16, s32);
 extern const char D_00425098[];
 
 /* Populate mantra selection flags from rank, profile state and node rules. */
-void mnuUpdateMantraRecordFlags(MantraFlagResource *work, s32 unitAddress, s32 mode) {
-    datUnitWork_t *unit = (datUnitWork_t *)unitAddress;
+void mnuUpdateMantraRecordFlags(MantraFlagResource *work, datUnitWork_t *unit, s32 mode) {
     s32 rank;
     u32 selected;
     u16 *entry;
