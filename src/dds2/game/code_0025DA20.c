@@ -2528,6 +2528,13 @@ void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2
 #define EVT_PROGRESS_UNSIGNED_LIMIT 999999U
 #define EVT_PROGRESS_FLAG_GATE_COUNT 1
 
+typedef struct EvtFlagGate {
+    s8 threshold;
+    u8 pad1;
+    u16 cue;
+    u32 flag;
+} EvtFlagGate;
+
 extern s32 evtAdvanceSlotFlags(void);
 
 
@@ -2555,14 +2562,8 @@ extern void mnuBuildEnabledCampEntryWindow();
 extern s32 mnuCampHasEligibleOwnedItems();
 extern s32 mnuShopProgressCompletionFlagView[];
 extern u8 mnuShopSelectedRewardPopupEntry[];
-extern u8 D_003CE400[];
+extern const EvtFlagGate D_003CE400[];
 extern s32 mnuTickExtendedCommandPhase(MenuTerminalContext *);
-typedef struct EvtFlagGate {
-    s8 threshold;
-    u8 pad1;
-    u16 cue;
-    u32 flag;
-} EvtFlagGate;
 
 
 extern s32 mnuIsSolarPricedItemId();
@@ -4013,7 +4014,7 @@ s32 evtAdvanceSlotAdvanceMessage(dds3ProcessID_t *callbackContext) {
 
 /* Raise a gate's flag and play its cue only on the first threshold crossing. */
 s32 evtTriggerProgressFlagGate(s32 unusedContext) {
-    EvtFlagGate *gateEntry = (EvtFlagGate *)D_003CE400;
+    const EvtFlagGate *gateEntry = D_003CE400;
     u32 gateIndex;
     for (gateIndex = 0; gateIndex < EVT_PROGRESS_FLAG_GATE_COUNT; gateIndex++, gateEntry++) {
         if ((u32)(DDS3_GBWK->progressSlot + 1) >= (u32)gateEntry->threshold) {
