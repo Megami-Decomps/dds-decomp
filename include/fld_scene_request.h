@@ -7,10 +7,11 @@
 typedef struct FldLoadRecord {
     u32 unk00;
     u32 displayState;
-    void *resourceA;
-    void *resourceB;
-    void *resourceC;
-    void *resourceD;
+    /* Optional path suffixes appended by the field resource resolver. */
+    const char *resourceA;
+    const char *resourceB;
+    const char *resourceC;
+    const char *resourceD;
 } FldLoadRecord;
 
 /* Observed prefix of the transfer payload passed to the resource-batch loader. */
