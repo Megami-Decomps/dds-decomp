@@ -8467,6 +8467,7 @@
 0x0031E8D8	itfSetFadeParameter	inferred	Stores the supplied value in FadeEntry.parameter at offset 0x1C.
 0x0031E8E0	itfSetFadeSecondaryParameter	inferred	Stores the supplied value in FadeEntry.secondaryParameter at offset 0x20.
 0x0031E8E8	itfSetFadeGaugeDisplayValue	inferred	Stores the supplied displayValue in FadeGauge.displayValue. Called by shooting gauge phase setup with 0 or 1 and by round/phase reset with 0; the FadeGauge declaration separates this display value from its fade parameters and progress fields. No DDS1 FadeGauge API counterpart. [definition, type, callers]
+0x0031E8F0	itfDrawShootingProgressGauge	inferred	The sole caller configures this FadeGauge from shooting progress and completion; draws segmented progress, decay overlays, and the completion pulse.
 0x0031ED68	mnuSetPauseFadeChoice	inferred	Stores the pause-menu choice index in the FadeNumber display value consumed by mnuDrawFadeSequenceThree, which clamps and draws the three available rows. [code-quality cleanup, 2026-10-13]
 0x0031ED70	mnuDrawFadeSequenceThree	inferred	Draws two fixed glyphs and a third at a frame position clamped to 0..2.
 0x0031EE28	itfSetTwoChoiceFadeSelection	inferred	confidence=high; Sets choiceFade from choiceIndex in mnuAdvanceShootingRoundPhase. itfDispatchObjectFadeSequenceMode draws this same object using the two-row sequence; clamping remains in the drawer. [Namer1 b61]

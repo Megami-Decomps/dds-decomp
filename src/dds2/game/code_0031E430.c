@@ -181,7 +181,7 @@ void itfSetFadeGaugeDisplayValue(FadeGauge *entry, u32 displayValue) {
 }
 
 /* Draw the shooting progress segments, decay overlay, and completion pulse. */
-void func_0031E8F0(FadeGauge *entry) {
+void itfDrawShootingProgressGauge(FadeGauge *entry) {
     s32 segmentSize, remainder, rowCount;
     s32 texture, opacity, row, x;
     s32 cropWidth, rightCrop;

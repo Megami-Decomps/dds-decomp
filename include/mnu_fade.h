@@ -61,7 +61,7 @@ extern void itfSetFrameFadeDisplayValue(FadeNumber *, u32);
 extern void itfSetFadeParameter(FadeGauge *, u32);
 extern void itfSetFadeSecondaryParameter(FadeGauge *, u32);
 extern void itfSetFadeGaugeDisplayValue(FadeGauge *, u32);
-extern void func_0031E8F0(FadeGauge *);
+extern void itfDrawShootingProgressGauge(FadeGauge *);
 
 /* Renderers for numeric fade blocks share this callback interface. */
 typedef void (*MnuNumberFadeDraw)(FadeNumber *);
