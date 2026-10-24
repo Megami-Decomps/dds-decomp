@@ -4133,9 +4133,9 @@ BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 re
     return task;
 }
 
-void btlApplyLinkedUnitStatusWhenActorActive(s32 taskArgs) {
-    if ((((BtlRuntimeTaskArgs *)taskArgs)->unitC->status.flags & 2) != 0) {
-        evtUnitLightOn(((BtlRuntimeTaskArgs *)taskArgs)->unitC->ext);
+void btlApplyLinkedUnitStatusWhenActorActive(BtlRuntimeTaskArgs *taskArgs) {
+    if ((taskArgs->unitC->status.flags & 2) != 0) {
+        evtUnitLightOn(taskArgs->unitC->ext);
         return;
     }
 }
@@ -4157,7 +4157,7 @@ BtlRuntimeTask *btlCreateUnitTask0F(BtlUnit *unit, s32 firstColor, s32 secondCol
     task->onStart = btlApplyLinkedUnitStatusWhenActorActive;
     task->callback = btlApplyUnitFxWhenLoaded;
     args = btlGetTaskArguments(task);
-    args->unk_0C = (u32)unit;
+    args->unitC = unit;
     args->value = firstColor;
     args->option = secondColor;
     args->unk_08 = duration;

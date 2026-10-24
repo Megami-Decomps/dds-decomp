@@ -4013,9 +4013,9 @@ BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 re
     return (BtlRuntimeTask *)task;
 }
 
-void btlApplyLinkedUnitStatusWhenActorActive(s32 taskArgs) {
-    if ((((BtlRuntimeTaskArgs *)taskArgs)->unitC->status.flags & 2) != 0) {
-        evtUnitLightOn(((BtlRuntimeTaskArgs *)taskArgs)->unitC->ext);
+void btlApplyLinkedUnitStatusWhenActorActive(BtlRuntimeTaskArgs *taskArgs) {
+    if ((taskArgs->unitC->status.flags & 2) != 0) {
+        evtUnitLightOn(taskArgs->unitC->ext);
         return;
     }
 }
