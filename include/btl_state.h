@@ -602,8 +602,8 @@ typedef struct BtlState {
     };
     s32 (*actionHitOverride)(BtlUnit *, BtlUnit *, s32, s32); /* 0x67C */
     s32 (*reflectedHitOverride)(BtlUnit *, BtlUnit *, s32); /* 0x680 */
-    s32 (*unk684)(s32, s32);
-    s32 (*unk688)(s32, s32);
+    s32 (*unk684)(BtlUnit *, s32);
+    s32 (*unk688)(BtlUnit *, s32);
     void (*preActionHook)(struct ActionStateLink *, s32, u64, u64, u64);
     void (*postActionHook)(struct ActionStateLink *, s32, BtlUnit *, u64, u64, s32);
     union {

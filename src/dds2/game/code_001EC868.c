@@ -7793,8 +7793,8 @@ u32 sndGetResourceStatus(SoundResourceNode *sound) {
     return 0;
 }
 
-s32 sndLookupResourceType(s32 actor, s32 resourceIndex) {
-    s32 (*hook)(s32, s32) = ((BtlState *)btlGetRuntime())->unk684;
+s32 sndLookupResourceType(BtlUnit *actor, s32 resourceIndex) {
+    s32 (*hook)(BtlUnit *, s32) = ((BtlState *)btlGetRuntime())->unk684;
     s32 type;
     if (hook != 0) {
         type = hook(actor, resourceIndex);
@@ -9270,14 +9270,14 @@ void sndFormatResourceNameFromUnitMode(const BtlUnit *unit, char *output) {
     sprintf(output, D_004192E8, unit->partyRecord.unitId);
 }
 
-s32 sndResolveResourceId(s32 category, s32 id) {
+s32 sndResolveResourceId(BtlUnit *actor, s32 id) {
     BtlState *work = (BtlState *)btlGetRuntime();
     s32 type = -1;
     if (work->unk688 != 0) {
-        type = work->unk688(category, id);
+        type = work->unk688(actor, id);
     }
     if (type == -1) {
-        type = sndLookupResourceType(category, id);
+        type = sndLookupResourceType(actor, id);
     }
     if (type < 26) {
         if (type == 0) {
