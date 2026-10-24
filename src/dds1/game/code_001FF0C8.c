@@ -62,7 +62,7 @@ extern s32 btlMatchesActorEntryCodeCondition(BtlUnit *actor, s32 conditionIndex)
 
 extern s32 btlUnitMatchesEntryCodeCondition(BtlUnit *, s32, s8);
 
-extern s32 btlIsSelectedActorStatusAndRecordClear(s32);
+extern s32 btlIsSelectedActorStatusAndRecordClear(BtlUnit *unit);
 
 extern s8 btlHistoryCounter;
 
@@ -529,10 +529,10 @@ s32 btlIsGroup200EligibleCountAtMost(s32 unused, u32 maximumCount) {
 }
 
 /* Normalize the scene/status/AI-record gate. */
-u8 btlPassesSceneAndActorRecordGate(s32 object) {
+u8 btlPassesSceneAndActorRecordGate(BtlUnit *unit) {
     s32 result;
 
-    result = btlIsSelectedActorStatusAndRecordClear(object);
+    result = btlIsSelectedActorStatusAndRecordClear(unit);
     return result != 0;
 }
 

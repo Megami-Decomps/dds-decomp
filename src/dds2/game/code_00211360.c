@@ -580,10 +580,10 @@ s32 btlIsGroup200EligibleCountAtMost(s32 unused, u32 maximumCount) {
 
 /* Packed-effect callbacks decode the actor from the generic context word. */
 /* Normalize the scene/status/AI-record gate; the callback's second word is unused. */
-s32 btlPassesSceneAndActorRecordGate(s32 actorAddress, u32 unused) {
+s32 btlPassesSceneAndActorRecordGate(BtlUnit *actor, u32 unused) {
     s32 result;
 
-    result = btlIsSelectedActorStatusAndRecordClear((BtlUnit *)actorAddress);
+    result = btlIsSelectedActorStatusAndRecordClear(actor);
     return result != 0;
 }
 

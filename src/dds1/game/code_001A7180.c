@@ -618,15 +618,15 @@ s32 btlRollEscapeChance(BtlUnit *actor) {
 
 extern AiSpecies *datEnemyAiRecords;
 
-s32 btlIsSelectedActorStatusAndRecordClear(s32 object) {
+s32 btlIsSelectedActorStatusAndRecordClear(BtlUnit *unit) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     if (datBattleSceneRecords[battle->battleMode].voice != 0) {
         return 0;
     }
-    if ((((BtlUnit *)object)->partyRecord.status & 0x2A0F) != 0) {
+    if ((unit->partyRecord.status & 0x2A0F) != 0) {
         return 0;
     }
-    return datEnemyAiRecords[((BtlUnit *)object)->partyRecord.unitId].kind == 0;
+    return datEnemyAiRecords[unit->partyRecord.unitId].kind == 0;
 }
 
 /* Return true when neither actor status nor its entry flags contain bit 0x40. */
