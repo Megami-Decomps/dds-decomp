@@ -5557,8 +5557,19 @@ typedef struct FieldGridCoordPair {
     s16 y;
 } FieldGridCoordPair;
 
+/* Motion states consumed by fldDispatchTargetGuideMotionUpdate. */
+#define FLD_TARGET_GUIDE_MOTION_STOPPED 0
+#define FLD_TARGET_GUIDE_MOTION_WAIT_FOR_PLAYER 1
+#define FLD_TARGET_GUIDE_MOTION_SLOW_ROUTE 2
+#define FLD_TARGET_GUIDE_MOTION_FAST_ROUTE 3
+#define FLD_TARGET_GUIDE_MOTION_ARRIVAL_PAUSE 4
+#define FLD_TARGET_GUIDE_MOTION_CYCLE_ROUTE 5
+#define FLD_TARGET_GUIDE_MOTION_TIMED_IDLE_6 6
+#define FLD_TARGET_GUIDE_MOTION_TIMED_IDLE_7 7
+#define FLD_TARGET_GUIDE_MOTION_TIMED_IDLE_8 8
+
 typedef struct FieldTargetGuideState {
-    s32 mode;
+    s32 motionMode;
     s32 disabled;
     f32 position[3];
     f32 yaw;
@@ -5602,7 +5613,7 @@ void fldResetViewState(void) {
     fldTargetGuideState.guideMotionIndex = 0;
     fldTargetGuideState.updateFlags = 0;
     fldTargetGuideState.guideMode = 0;
-    fldTargetGuideState.mode = 0;
+    fldTargetGuideState.motionMode = FLD_TARGET_GUIDE_MOTION_STOPPED;
     fldTargetGuideState.cycleIndex = 0;
     fldTargetGuideState.cycleRoute = NULL;
     fldTargetGuideState.disabled = 0;
@@ -5820,8 +5831,8 @@ static inline void fldSetTargetGuideUpdateMode(s32 value) {
     }
 
 /* Hold the guide in place under a timed mode. */
-static inline void fldSetTargetGuideIdleMode(FieldTargetGuideState *state, s32 mode) {
-    state->mode = mode;
+static inline void fldSetTargetGuideIdleMode(FieldTargetGuideState *state, s32 motionMode) {
+    state->motionMode = motionMode;
     state->moveTimer = 0x1E;
     state->updateFlags |= 2;
     state->unk2A = 0;
@@ -5831,41 +5842,41 @@ static inline void fldSetTargetGuideIdleMode(FieldTargetGuideState *state, s32 m
 
 /* Switch the field target guide's motion mode, routing it toward the player
  * or along its cycle route as the mode requires. */
-void fldSetTargetGuideMotionMode(s32 mode) {
+void fldSetTargetGuideMotionMode(s32 motionMode) {
     FieldTargetGuideState *state = &fldTargetGuideState;
 
     state->age = 0;
     state->unk28 = 0;
-    if (mode == 0) {
-        state->mode = 0;
+    if (motionMode == FLD_TARGET_GUIDE_MOTION_STOPPED) {
+        state->motionMode = FLD_TARGET_GUIDE_MOTION_STOPPED;
         state->unk2A = 0;
         state->moveTimer = 0;
         state->stepDistance = 0.0f;
-    } else if (mode == 1) {
-        fldSetTargetGuideIdleMode(state, mode);
-    } else if (mode == 3) {
-        state->mode = mode;
+    } else if (motionMode == FLD_TARGET_GUIDE_MOTION_WAIT_FOR_PLAYER) {
+        fldSetTargetGuideIdleMode(state, motionMode);
+    } else if (motionMode == FLD_TARGET_GUIDE_MOTION_FAST_ROUTE) {
+        state->motionMode = motionMode;
         state->unk2A = 0;
         fldFindNearestOccupiedMapGridCell(state->position[0], state->position[2], &state->gridX, &state->gridY);
         FLD_ROUTE_TARGET_GUIDE(state, state->gridX, state->gridY, D_00438EF8.x, D_00438EF8.y, 20.0f, 0x14);
         fldSetTargetGuideUpdateMode(0x11);
-    } else if (mode == 2) {
-        state->mode = mode;
+    } else if (motionMode == FLD_TARGET_GUIDE_MOTION_SLOW_ROUTE) {
+        state->motionMode = motionMode;
         state->unk2A = 1;
         fldFindNearestOccupiedMapGridCell(state->position[0], state->position[2], &state->gridX, &state->gridY);
         fldFindNearestOccupiedMapGridCell(fldGlobalBase.x, fldGlobalBase.z, &D_00438EF8.x, &D_00438EF8.y);
         FLD_ROUTE_TARGET_GUIDE(state, state->gridX, state->gridY, D_00438EF8.x, D_00438EF8.y, 5.0f, 0x50);
         fldSetTargetGuideUpdateMode(0x10);
     } else {
-        if (mode == 4) {
+        if (motionMode == FLD_TARGET_GUIDE_MOTION_ARRIVAL_PAUSE) {
             state->moveTimer = 0x3C;
             state->guideMotionIndex = 0x14;
             state->updateFlags |= 2;
-            state->mode = mode;
+            state->motionMode = motionMode;
             state->unk2A = 0;
             state->stepDistance = 0.0f;
         }
-        if (mode == 5) {
+        if (motionMode == FLD_TARGET_GUIDE_MOTION_CYCLE_ROUTE) {
             s32 index = state->cycleIndex;
             s32 next;
 
@@ -5874,18 +5885,18 @@ void fldSetTargetGuideMotionMode(s32 mode) {
             if (state->cycleRoute[index + 1].x == -1) {
                 next = 0;
             }
-            state->mode = mode;
+            state->motionMode = motionMode;
             fldFindNearestOccupiedMapGridCell(state->position[0], state->position[2], &state->gridX, &state->gridY);
             fldFindNearestOccupiedMapGridCell(fldGlobalBase.x, fldGlobalBase.z, &D_00438EF8.x, &D_00438EF8.y);
             FLD_ROUTE_TARGET_GUIDE(state, state->cycleRoute[index].x, state->cycleRoute[index].y,
                                    state->cycleRoute[next].x, state->cycleRoute[next].y, 5.0f, 0x50);
             fldSetTargetGuideUpdateMode(0x12);
-        } else if (mode == 6) {
-            fldSetTargetGuideIdleMode(state, mode);
-        } else if (mode == 7) {
-            fldSetTargetGuideIdleMode(state, mode);
-        } else if (mode == 8) {
-            fldSetTargetGuideIdleMode(state, mode);
+        } else if (motionMode == FLD_TARGET_GUIDE_MOTION_TIMED_IDLE_6) {
+            fldSetTargetGuideIdleMode(state, motionMode);
+        } else if (motionMode == FLD_TARGET_GUIDE_MOTION_TIMED_IDLE_7) {
+            fldSetTargetGuideIdleMode(state, motionMode);
+        } else if (motionMode == FLD_TARGET_GUIDE_MOTION_TIMED_IDLE_8) {
+            fldSetTargetGuideIdleMode(state, motionMode);
         }
     }
 }
@@ -5933,7 +5944,7 @@ void fldUpdateTargetGuideFastRoute(void) {
             state->moveTimer = 20;
             state->stepDistance = 0.0f;
         } else {
-            fldSetTargetGuideMotionMode(3);
+            fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_FAST_ROUTE);
         }
     } else {
         state->position[0] += sdfSin(state->targetYaw * 3.14f / 180.0f) * state->stepDistance;
@@ -5974,7 +5985,7 @@ void fldUpdateTargetGuideSlowRoute(void) {
             state->moveTimer = 20;
             state->stepDistance = 0.0f;
         } else {
-            fldSetTargetGuideMotionMode(2);
+            fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_SLOW_ROUTE);
         }
     } else {
         state->position[0] += sdfSin(state->targetYaw * 3.14f / 180.0f) * state->stepDistance;
@@ -5993,7 +6004,7 @@ void fldTickTargetGuideAndNotify(void) {
         count = remaining;
     }
     if (count == 0) {
-        fldSetTargetGuideMotionMode(1);
+        fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_WAIT_FOR_PLAYER);
     }
 }
 
@@ -6015,7 +6026,7 @@ void fldUpdateTargetGuideCycleMotion(void) {
         } else {
             state->cycleIndex++;
         }
-        fldSetTargetGuideMotionMode(5);
+        fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_CYCLE_ROUTE);
     } else {
         state->position[0] += sdfSin(state->targetYaw * 3.14f / 180.0f) * state->stepDistance;
         state->position[2] += sdfCos(state->targetYaw * 3.14f / 180.0f) * state->stepDistance;
@@ -6088,34 +6099,34 @@ void fldUpdateTargetGuideMovementState(void) {
     areaPosition.z = areaZ;
     areaPosition.w = 1.0f;
 
-    if (state->mode == 0) {
+    if (state->motionMode == FLD_TARGET_GUIDE_MOTION_STOPPED) {
         return;
     }
-    if (state->mode == 1) {
+    if (state->motionMode == FLD_TARGET_GUIDE_MOTION_WAIT_FOR_PLAYER) {
         if (state->moveTimer > 0) {
             return;
         }
         if (state->gridX != D_00438EF8.x || state->gridY != D_00438EF8.y) {
-            fldSetTargetGuideMotionMode(2);
+            fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_SLOW_ROUTE);
         }
     }
     state = &fldTargetGuideState;
-    if (state->mode == 4) {
+    if (state->motionMode == FLD_TARGET_GUIDE_MOTION_ARRIVAL_PAUSE) {
         if (state->moveTimer > 0) {
             return;
         }
     }
-    if (state->mode == 3) {
+    if (state->motionMode == FLD_TARGET_GUIDE_MOTION_FAST_ROUTE) {
         if (state->gridX == D_00438EF8.x && state->gridY == D_00438EF8.y) {
-            fldSetTargetGuideMotionMode(4);
+            fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_ARRIVAL_PAUSE);
             state->updateFlags |= 0x80;
             return;
         }
     }
     state = &fldTargetGuideState;
-    if (state->mode == 2) {
+    if (state->motionMode == FLD_TARGET_GUIDE_MOTION_SLOW_ROUTE) {
         if (state->routeRecord != NULL && (state->routeRecord->flags & 1) != 0) {
-            fldSetTargetGuideMotionMode(3);
+            fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_FAST_ROUTE);
             state->updateFlags |= 0x80;
         }
         return;
@@ -6127,38 +6138,38 @@ void fldUpdateTargetGuideMovementState(void) {
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F20);
 
 void fldDispatchTargetGuideMotionUpdate(void) {
-    s32 mode = fldTargetGuideState.mode;
+    s32 motionMode = fldTargetGuideState.motionMode;
 
-    switch (mode) {
-    case 0:
+    switch (motionMode) {
+    case FLD_TARGET_GUIDE_MOTION_STOPPED:
         func_00151DD8();
         return;
-    case 1:
+    case FLD_TARGET_GUIDE_MOTION_WAIT_FOR_PLAYER:
         fldTickTargetGuideCounter();
         return;
-    case 2:
+    case FLD_TARGET_GUIDE_MOTION_SLOW_ROUTE:
         fldUpdateTargetGuideSlowRoute();
         return;
-    case 4:
+    case FLD_TARGET_GUIDE_MOTION_ARRIVAL_PAUSE:
         fldTickTargetGuideAndNotify();
         return;
-    case 5:
+    case FLD_TARGET_GUIDE_MOTION_CYCLE_ROUTE:
         fldUpdateTargetGuideCycleMotion();
         return;
-    case 6:
+    case FLD_TARGET_GUIDE_MOTION_TIMED_IDLE_6:
         func_00152390();
         return;
-    case 7:
+    case FLD_TARGET_GUIDE_MOTION_TIMED_IDLE_7:
         func_001523B0();
         return;
-    case 8:
+    case FLD_TARGET_GUIDE_MOTION_TIMED_IDLE_8:
         func_001523D0();
         return;
     }
     fldUpdateTargetGuideFastRoute();
     /* Retire the mode after the fast-route phase; see docs/idioms.md,
      * "Post-call guide mode cleanup" for the late-deletion trace. */
-    mode = 0;
+    motionMode = FLD_TARGET_GUIDE_MOTION_STOPPED;
 }
 
 extern void fldSetTargetGuideMode(s32 mode);
@@ -6641,7 +6652,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.yaw = 180.0f;
         fldTargetGuideState.targetYaw = 0.0f;
         fldMapIndexToPos(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        fldSetTargetGuideMotionMode(2);
+        fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_SLOW_ROUTE);
         fldUpdateTargetGuideEffects();
         p2sdStopSe(0x690061);
         p2sdPlaySE(0x690061, 0, 0x3F);
@@ -6652,7 +6663,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.yaw = 180.0f;
         fldTargetGuideState.targetYaw = 0.0f;
         fldMapIndexToPos(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        fldSetTargetGuideMotionMode(5);
+        fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_CYCLE_ROUTE);
         fldUpdateTargetGuideEffects();
         break;
     case 2:
@@ -6660,7 +6671,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.targetYaw = 0.0f;
         fldTargetGuideState.yaw = 180.0f;
         fldMapIndexToPos(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        fldSetTargetGuideMotionMode(6);
+        fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_TIMED_IDLE_6);
         fldUpdateTargetGuideEffects();
         break;
     case 3:
@@ -6670,7 +6681,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.yaw = 180.0f;
         fldTargetGuideState.targetYaw = 0.0f;
         fldMapIndexToPos(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        fldSetTargetGuideMotionMode(2);
+        fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_SLOW_ROUTE);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         p2sdStopSe(0x690061);
@@ -6683,7 +6694,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.targetYaw = 90.0f;
         fldTargetGuideState.yaw = 180.0f - fldTargetGuideState.targetYaw;
         fldMapIndexToPos(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        fldSetTargetGuideMotionMode(2);
+        fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_SLOW_ROUTE);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         p2sdStopSe(0x690061);
@@ -6696,7 +6707,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.yaw = 180.0f;
         fldTargetGuideState.targetYaw = 0.0f;
         fldMapIndexToPos(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        fldSetTargetGuideMotionMode(2);
+        fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_SLOW_ROUTE);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         p2sdStopSe(0x690061);
@@ -6709,7 +6720,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.targetYaw = 180.0f;
         fldTargetGuideState.yaw = 0.0f;
         fldMapIndexToPos(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        fldSetTargetGuideMotionMode(2);
+        fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_SLOW_ROUTE);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         D_00435F20->flags &= ~1;
@@ -6722,7 +6733,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.targetYaw = 180.0f;
         fldTargetGuideState.yaw = 0.0f;
         fldMapIndexToPos(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        fldSetTargetGuideMotionMode(6);
+        fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_TIMED_IDLE_6);
         fldUpdateTargetGuideEffects();
         p2sdStopSe(0x690061);
         break;
@@ -6733,7 +6744,7 @@ void fldSetTargetGuideMode(s32 mode) {
             fldTargetGuideState.targetYaw = 180.0f;
             fldTargetGuideState.yaw = 0.0f;
             fldMapIndexToPos(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-            fldSetTargetGuideMotionMode(3);
+            fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_FAST_ROUTE);
             fldTargetGuideState.updateFlags |= 2;
             fldUpdateTargetGuideEffects();
             p2sdStopSe(0x690061);
@@ -6747,7 +6758,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.yaw = 180.0f;
         fldTargetGuideState.targetYaw = 0.0f;
         fldMapIndexToPos(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        fldSetTargetGuideMotionMode(2);
+        fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_SLOW_ROUTE);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         D_00435F20->flags &= ~1;
@@ -6760,7 +6771,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.yaw = 180.0f;
         fldTargetGuideState.targetYaw = 0.0f;
         fldMapIndexToPos(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        fldSetTargetGuideMotionMode(6);
+        fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_TIMED_IDLE_6);
         fldUpdateTargetGuideEffects();
         p2sdStopSe(0x690061);
         break;
@@ -6771,7 +6782,7 @@ void fldSetTargetGuideMode(s32 mode) {
             fldTargetGuideState.yaw = 180.0f;
             fldTargetGuideState.targetYaw = 0.0f;
             fldMapIndexToPos(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-            fldSetTargetGuideMotionMode(3);
+            fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_FAST_ROUTE);
             fldTargetGuideState.updateFlags |= 2;
             fldUpdateTargetGuideEffects();
             p2sdStopSe(0x690061);
@@ -6785,7 +6796,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.targetYaw = 180.0f;
         fldTargetGuideState.yaw = 0.0f;
         fldMapIndexToPos(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        fldSetTargetGuideMotionMode(7);
+        fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_TIMED_IDLE_7);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         D_00435F20->flags |= 1;
@@ -6798,7 +6809,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.yaw = 180.0f;
         fldTargetGuideState.targetYaw = 0.0f;
         fldMapIndexToPos(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        fldSetTargetGuideMotionMode(7);
+        fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_TIMED_IDLE_7);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         D_00435F20->flags |= 1;
@@ -6812,7 +6823,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.yaw = 180.0f;
         fldTargetGuideState.position[0] = fldTargetGuideState.targetYaw;
         fldTargetGuideState.position[2] = fldTargetGuideState.targetYaw;
-        fldSetTargetGuideMotionMode(8);
+        fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_TIMED_IDLE_8);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         D_00435F20->flags |= 1;
@@ -6824,7 +6835,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.targetYaw = 180.0f;
         fldTargetGuideState.yaw = 0.0f;
         fldMapIndexToPos(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        fldSetTargetGuideMotionMode(2);
+        fldSetTargetGuideMotionMode(FLD_TARGET_GUIDE_MOTION_SLOW_ROUTE);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         p2sdStopSe(0x690061);
