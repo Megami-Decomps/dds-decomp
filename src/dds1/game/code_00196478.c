@@ -346,9 +346,9 @@ u32 frGetMessageResult(u32 mask) {
     return D_003BB15C & mask;
 }
 
-/* Store an unchecked replacement-text address word in the font's indexed table. */
-void frSetVariableRequest(s32 slotIndex, s32 encodedTextAddress) {
-    frFontIndexedTextSlots[slotIndex] = encodedTextAddress;
+/* Store a replacement-text byte pointer in the font's indexed table. */
+void frSetVariableRequest(s32 slotIndex, const u8 *encodedText) {
+    frFontIndexedTextSlots[slotIndex] = (u32)encodedText;
 }
 
 /* Return the unit identifier saved by text lip-sync control 0xF416. */

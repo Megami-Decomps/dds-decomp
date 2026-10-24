@@ -1285,7 +1285,7 @@ void SetVar(mes, slotIndex, source, byteCount)
 void CommitVarTable(u8 **table) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < ITF_MES_TEXT_SLOT_COUNT; slotIndex++) {
-        frSetVariableRequest(slotIndex, (s32)table[slotIndex]);
+        frSetVariableRequest(slotIndex, table[slotIndex]);
     }
 }
 
