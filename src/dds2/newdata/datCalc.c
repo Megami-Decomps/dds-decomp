@@ -503,7 +503,7 @@ extern u32 mnuSetPartyEntryCurrentId(datUnitWork_t *, u32);
 
 extern s32 ptyRebalanceFrontline(s32 unitId);
 
-extern void scrRemoveAvailableSkillFlagAndSlot(datUnitWork_t *, s32);
+extern void scrRemoveAvailableSkillFlagAndSlot(datUnitWork_t *, u16);
 
 
 extern s32 scrStartProcessProcedure(scrProcessWork_s *context, s32 procedureIndex);
