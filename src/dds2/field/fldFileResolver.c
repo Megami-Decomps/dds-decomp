@@ -4420,7 +4420,7 @@ s32 fldUpdateAreaDamageReaction(void) {
     dds3ModelHandle_t *model;
 
     if (work->unk190 > 0) {
-        if (work->terrainAttritionKind == 0 && ptyAnyUnitFlagMatch(0x80, 1) != 0) {
+        if (work->terrainAttritionKind == FLD_TERRAIN_ATTRITION_NONE && ptyAnyUnitFlagMatch(0x80, 1) != 0) {
             fldPlayMenuSound(0x22);
             dds3FadeIn(0x80, 0x20, 0x20, 6);
             dds3PadVibrationSet(0, 1, 6);

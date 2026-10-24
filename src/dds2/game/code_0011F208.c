@@ -1704,7 +1704,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->dist = 0.0f;
     memset(area->pad124, 0, sizeof(area->pad124));
     area->movementSoundActive = 0;
-    area->terrainAttritionKind = 0;
+    area->terrainAttritionKind = FLD_TERRAIN_ATTRITION_NONE;
     area->attritionDistance = 100.0f;
     area->sceneCommand = 0;
     area->colorEffectSuppressed = 0;
@@ -1838,7 +1838,7 @@ void fldInitializeAreaWork(void) {
     area->overlayMode = 1;
     area->overlayCounter = 0;
     area->unkD8 = -1;
-    area->terrainAttritionKind = 0;
+    area->terrainAttritionKind = FLD_TERRAIN_ATTRITION_NONE;
     area->unk190 = 0;
     area->cameraTiltActive = 0;
     area->targetGuideEnabled = 0;

@@ -1683,12 +1683,12 @@ s32 fldUpdateTravelAndEncounters(void) {
             return 0;
         }
     }
-    if (fldGlobalBase.terrainAttritionKind || ptyAnyUnitFlagMatch(0x80, 1)) {
+    if (fldGlobalBase.terrainAttritionKind != FLD_TERRAIN_ATTRITION_NONE || ptyAnyUnitFlagMatch(0x80, 1)) {
         fldGlobalBase.attritionDistance += distance;
         interval = 450.0f;
-        if (!fldGlobalBase.terrainAttritionKind && ptyAnyUnitFlagMatch(0x80, 1)) interval = 1000.0f;
+        if (fldGlobalBase.terrainAttritionKind == FLD_TERRAIN_ATTRITION_NONE && ptyAnyUnitFlagMatch(0x80, 1)) interval = 1000.0f;
         if (fldGlobalBase.attritionDistance > interval) {
-            if (fldGlobalBase.terrainAttritionKind) {
+            if (fldGlobalBase.terrainAttritionKind != FLD_TERRAIN_ATTRITION_NONE) {
                 if (DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_TRANSITION_WORK) {
                     fldGlobalBase.unk184 = 0;
                     fldGlobalBase.attritionDistance = 0.0f;

@@ -1812,7 +1812,7 @@ s32 fldUpdateTravelAndEncounters(void) {
     fldGlobalBase.frameTravelDistance = distance;
     previousPhase = evtGetAgeOfMoon16();
     if (fldGlobalBase.cameraTargetGraceTicks > 0) {
-        if (fldGlobalBase.terrainAttritionKind && fldRunDanteGunFlag[0x60 / 4]) {
+        if (fldGlobalBase.terrainAttritionKind != FLD_TERRAIN_ATTRITION_NONE && fldRunDanteGunFlag[0x60 / 4]) {
             fldGlobalBase.attritionDistance += distance;
         }
         dds3GetPosPoseSet(player);
@@ -1840,20 +1840,20 @@ s32 fldUpdateTravelAndEncounters(void) {
             return 0;
         }
     }
-    if (fldGlobalBase.terrainAttritionKind || ptyAnyUnitFlagMatch(0x80, 1)) {
+    if (fldGlobalBase.terrainAttritionKind != FLD_TERRAIN_ATTRITION_NONE || ptyAnyUnitFlagMatch(0x80, 1)) {
         if (fldRunDanteGunFlag[0x60 / 4]) fldGlobalBase.attritionDistance += distance;
         interval = 450.0f;
-        if (!fldGlobalBase.terrainAttritionKind && ptyAnyUnitFlagMatch(0x80, 1)) interval = 1000.0f;
+        if (fldGlobalBase.terrainAttritionKind == FLD_TERRAIN_ATTRITION_NONE && ptyAnyUnitFlagMatch(0x80, 1)) interval = 1000.0f;
         if (fldGlobalBase.attritionDistance > interval) {
-            if (fldGlobalBase.terrainAttritionKind) {
-                if (fldGlobalBase.terrainAttritionKind != 3 && (DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_TRANSITION_WORK)) {
+            if (fldGlobalBase.terrainAttritionKind != FLD_TERRAIN_ATTRITION_NONE) {
+                if (fldGlobalBase.terrainAttritionKind != FLD_TERRAIN_ATTRITION_SOUND_CLASS_20 && (DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_TRANSITION_WORK)) {
                     fldGlobalBase.unk190 = 0;
                     fldGlobalBase.attritionDistance = 0.0f;
                 } else {
                     fldGlobalBase.unk190 = 60;
                     fldGlobalBase.attritionDistance = 0.0f;
-                    if (fldGlobalBase.terrainAttritionKind == 3) ptyApplyFieldHpAttrition(3);
-                    else if (fldGlobalBase.terrainAttritionKind == 2) ptyApplyFieldHpAttrition(4);
+                    if (fldGlobalBase.terrainAttritionKind == FLD_TERRAIN_ATTRITION_SOUND_CLASS_20) ptyApplyFieldHpAttrition(3);
+                    else if (fldGlobalBase.terrainAttritionKind == FLD_TERRAIN_ATTRITION_SOUND_CLASS_30) ptyApplyFieldHpAttrition(4);
                     else ptyApplyFieldHpAttrition(2);
                 }
             } else {

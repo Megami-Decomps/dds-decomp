@@ -14,6 +14,15 @@ typedef enum FldAreaResourceRequestState {
     FLD_AREA_RESOURCE_REQUEST_SATISFIED_FROM_CACHE = 2
 } FldAreaResourceRequestState;
 
+typedef s32 FldTerrainAttritionKind;
+
+enum FldTerrainAttritionKind {
+    FLD_TERRAIN_ATTRITION_NONE = 0,
+    FLD_TERRAIN_ATTRITION_STANDARD = 1,
+    FLD_TERRAIN_ATTRITION_SOUND_CLASS_30 = 2,
+    FLD_TERRAIN_ATTRITION_SOUND_CLASS_20 = 3
+};
+
 /* Field loaders retain the allocation owner and its texture-file data. */
 typedef struct FldResourceBlock {
     struct sdfMemHandle_t *allocation;
@@ -96,7 +105,7 @@ typedef struct FldAreaWork {
     u32 pendingSceneRequest;
     s32 deferredExit;
     s32 playerModelAlternate;    /* 0x118: toggles the player_a/player_b model selection. */
-    s32 terrainAttritionKind; /* 0x11C: collision-zone terrain category for HP attrition. */
+    FldTerrainAttritionKind terrainAttritionKind; /* 0x11C: collision-zone category for HP attrition. */
     f32 attritionDistance;      /* 0x120: movement toward the next HP attrition tick. */
 #ifdef VERSION_DDS2
     u8 pad124[2];

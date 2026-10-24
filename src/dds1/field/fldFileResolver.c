@@ -4557,7 +4557,7 @@ s32 fldUpdateAreaDamageReaction(void) {
     dds3ModelHandle_t *model;
 
     if (work->unk184 > 0) {
-        if (work->terrainAttritionKind == 0 && ptyAnyUnitFlagMatch(0x80, 1) != 0) {
+        if (work->terrainAttritionKind == FLD_TERRAIN_ATTRITION_NONE && ptyAnyUnitFlagMatch(0x80, 1) != 0) {
             dds3FadeIn(0x80, 0x20, 0x20, 6);
             dds3PadVibrationSet(0, 1, 6);
             dds3PadVibrationSet(1, 0x96, 6);
@@ -7472,7 +7472,7 @@ void fldHitChkUnitElv(f32 *position) {
 }
 
 /* Non-owning native alias of fldGlobalBase.terrainAttritionKind (FldAreaWork + 0x11C). */
-extern s32 D_0032E4CC[];
+extern FldTerrainAttritionKind D_0032E4CC[];
 
 /* Classify flagged zone faces after checking the current movement. */
 void fldHitChkUnitDamage(f32 *position) {
@@ -7577,7 +7577,7 @@ void fldHitChkUnitDamage(f32 *position) {
                             accepted = 1;
                         }
                         if (accepted == 1) {
-                            areaState->terrainAttritionKind = accepted;
+                            areaState->terrainAttritionKind = FLD_TERRAIN_ATTRITION_STANDARD;
                         }
                     }
                 }

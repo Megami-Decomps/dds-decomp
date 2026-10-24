@@ -1076,7 +1076,7 @@ void fldHitChkUnitElv(f32 *position) {
 }
 
 /* Non-owning native alias of fldGlobalBase.terrainAttritionKind (FldAreaWork + 0x11C). */
-extern s32 D_0038988C[];
+extern FldTerrainAttritionKind D_0038988C[];
 
 /* Classify flagged zone faces after checking the current movement. */
 void fldHitChkUnitDamage(f32 *position) {
@@ -1184,11 +1184,11 @@ void fldHitChkUnitDamage(f32 *position) {
                             FldCollisionFace *face = fldMatterTable[recordIndex].face;
                             s32 soundClass = face->sound & 0xF0;
                             if (soundClass == 0x20) {
-                                areaState->terrainAttritionKind = 3;
+                                areaState->terrainAttritionKind = FLD_TERRAIN_ATTRITION_SOUND_CLASS_20;
                             } else if (soundClass == 0x30) {
-                                areaState->terrainAttritionKind = 2;
+                                areaState->terrainAttritionKind = FLD_TERRAIN_ATTRITION_SOUND_CLASS_30;
                             } else {
-                                areaState->terrainAttritionKind = accepted;
+                                areaState->terrainAttritionKind = FLD_TERRAIN_ATTRITION_STANDARD;
                             }
                         }
                     }
