@@ -656,8 +656,7 @@ s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args) {
 
 
 /* Decrement the linked-number task's unit counter without underflowing zero. */
-void effDecrementFirstCountdown(u32 *arguments) {
-    BtlLinkedEffectArgs *args = (BtlLinkedEffectArgs *)arguments;
+void effDecrementFirstCountdown(BtlLinkedEffectArgs *args) {
     BtlUnit *unit = args->unit;
     u8 count = unit->linkedNumberCount;
     if (count != 0) {
@@ -813,8 +812,7 @@ s32 func_0020FA98(BtlLinkedEffectArgs *args) {
 }
 
 /* Decrement the counter-display task's unit counter without underflowing zero. */
-void effDecrementSecondCountdown(u32 *arguments) {
-    BtlLinkedEffectArgs *args = (BtlLinkedEffectArgs *)arguments;
+void effDecrementSecondCountdown(BtlLinkedEffectArgs *args) {
     BtlUnit *unit = args->unit;
     u8 count = unit->counterDisplayCount;
     if (count != 0) {
