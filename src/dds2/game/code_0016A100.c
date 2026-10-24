@@ -38,7 +38,7 @@ extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 
 
-extern void dds3TrackPolyVCSet(void *work, s32 sub, void *a2, void *a3);
+extern void dds3TrackPolyVCSet(ParSystem *work, s32 sub, void *a2, void *a3);
 
 /* Parameter head (0x4C bytes) copied verbatim into the work. */
 

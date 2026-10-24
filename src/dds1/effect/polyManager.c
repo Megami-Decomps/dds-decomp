@@ -27,7 +27,7 @@ void dds3SpPoly_Ring_Old_Calc(PolyNode *node);
 void dds3SpPoly_Ring_Old_New(PolyNode *node, s32 cellIndex);
 void dds3SpPoly_Ring_Old_Move(PolyNode *node, s32 cellIndex);
 extern void memcpy(void *dst, const void *src, s32 size);
-extern void dds3TrackPolyVCSet(void *work, s32 sub, void *dispatchArgA, void *dispatchArgB);
+extern void dds3TrackPolyVCSet(ParSystem *work, s32 sub, void *dispatchArgA, void *dispatchArgB);
 void dds3SpPoly_RingAllBuffInit(PolyBand *band);
 void dds3SpPoly_SphereRingAllBuffInit(PolyArc *arc);
 void dds3SpPoly_RollRingAllBuffInit(PolyRotatingBand *rotatingBand);

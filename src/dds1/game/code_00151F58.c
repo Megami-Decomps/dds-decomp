@@ -888,7 +888,7 @@ struct ParColorRamp;
 extern void dds3ParticleSetColorTable(struct ParColorRamp *, s32);
 extern dds3Particle_BlurBuff_t *dds3Particle_BlurCreate(u32, u16, billHandle_t **);
 extern u32 dds3Particle_TrackPolyGetRecTiming(u16);
-extern void dds3TrackPolyVCSet(void *, s32, void *, void *);
+extern void dds3TrackPolyVCSet(ParSystem *, s32, void *, void *);
 
 /* Allocate drawing resources and reset the emitter's common runtime state. */
 /* The subrecord bitfield keeps native int-alias dependencies; see

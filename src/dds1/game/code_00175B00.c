@@ -220,7 +220,7 @@ void dds3WhirlwindPolyListSetRotateMatrix(dds3WhirlwindPolyList_tag *object, con
     VU0_STORE_MATRIX(object->matrix);
 }
 
-extern void dds3TrackPolyVCSet(u32, s32, s32, s32);
+extern void dds3TrackPolyVCSet(ParSystem *, s32, s32, s32);
 extern EffRandState effDefaultRandomState[];
 
 /* effPCPNeedleSpiralCreate */
@@ -245,7 +245,7 @@ EffPCPNeedleWork *effPCPNeedleSpiralCreate(EffPCPNeedleParams *params) {
     effBuildRadialFanStreams(resource, params->fanSegments, params->centerColor,
                             params->outerColor, params->radiusScale, params->viewOffset);
     work->system = dds3TrackPolyCreate(work->count, work->params.unk54, 0, PAR_CELL_TOPOLOGY_PAIR);
-    dds3TrackPolyVCSet((u32)work->system, 1, work->params.unk58, work->params.unk58);
+    dds3TrackPolyVCSet(work->system, 1, work->params.unk58, work->params.unk58);
     dds3TrackPolySetMode(work->system, (u16)work->params.mode);
     count = work->count;
     delayRange = params->randomDelayRange;

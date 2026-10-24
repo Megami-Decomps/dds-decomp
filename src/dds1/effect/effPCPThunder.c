@@ -96,7 +96,7 @@ EffThunderParameterHead *effPCPThunderSpherePolyGetParam(EffThunderVectorWork *w
     return &work->head;
 }
 
-extern void dds3TrackPolyVCSet(void *work, s32 sub, void *dispatchArgA, void *dispatchArgB);
+extern void dds3TrackPolyVCSet(ParSystem *work, s32 sub, void *dispatchArgA, void *dispatchArgB);
 extern u32 effMagaCylinderCalcColor(u32 color, u32 param);
 
 

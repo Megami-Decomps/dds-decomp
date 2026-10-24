@@ -1540,10 +1540,10 @@ void dds3TrackPolySetMode(ParSystem *system, u16 bucket) {
     system->bucket = bucket;
 }
 
-void dds3TrackPolyVCSet(void *work, s32 sub, void *dispatchArgA, void *dispatchArgB) {
-    u16 id = *(u16 *)work;
+void dds3TrackPolyVCSet(ParSystem *system, s32 sub, void *dispatchArgA, void *dispatchArgB) {
+    u16 id = system->kind;
 
-    D_0034E5E0[id * 3 + sub](work, dispatchArgA, dispatchArgB);
+    D_0034E5E0[id * 3 + sub](system, dispatchArgA, dispatchArgB);
 }
 
 extern const u32 D_0034E360[];
