@@ -2066,11 +2066,11 @@ s32 btlCheckActionRecordUnit(ActionStateLink *record) {
     return ((BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub)->unit == record->unit ? 12 : -1;
 }
 
-extern u8 *btlCreateCommandSoundUpdateTask(void);
+extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 
-extern u8 *btlCreateCommandSoundTask(u8 *, s32);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(u8 *, s32);
 
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 
