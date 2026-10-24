@@ -857,7 +857,7 @@ void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
 }
 
 s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *work) {
-    if (work->setupState != 0) {
+    if (work->setupState != BRS_SKILL_PANEL_SETUP_NOT_STARTED) {
         return 0;
     }
     p2sdLoadSMGFile(0x50000);
@@ -866,7 +866,7 @@ s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *work) {
     effRequestResourceByMode(D_00428358, D_00428368, 0,
                              (u32 *)&work->unitResource);
     mnuRequestEffectResources(&work->campEffect.resources);
-    work->setupState = 1;
+    work->setupState = BRS_SKILL_PANEL_SETUP_WAITING_FOR_RESOURCES;
     dds3FadeOut(0, 0, 0, 1);
     dds3FadeOut(0, 0, 0, 0);
     return 1;
@@ -876,10 +876,10 @@ extern s32 mnuBindCampEffectWhenLoaded(MenuCampEffect *);
 
 s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
 
-    if (ctx->setupState == 0) {
+    if (ctx->setupState == BRS_SKILL_PANEL_SETUP_NOT_STARTED) {
         return 1;
     }
-    if (ctx->setupState == 2) {
+    if (ctx->setupState == BRS_SKILL_PANEL_SETUP_COMPLETE) {
         return 0;
     }
     if (movAreTitleEffectsReady(ctx->resourceList, &ctx->staffSlots) == 0) {
@@ -895,7 +895,7 @@ s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
         return 1;
     }
     brsOpenSkillPackagePanel(ctx);
-    ctx->setupState = 2;
+    ctx->setupState = BRS_SKILL_PANEL_SETUP_COMPLETE;
     dds3FadeIn(0, 0, 0, 15);
     return 0;
 }

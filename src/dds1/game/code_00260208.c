@@ -804,7 +804,7 @@ extern void effRequestResourceByMode(char *, char *, s32, u32 *);
 extern void mnuRequestBaseAssets(MenuAssets *);
 
 s32 mnuStaffInitPanel(BrsSkillPackageWork *work) {
-    if (work->setupState != 0) {
+    if (work->setupState != BRS_SKILL_PANEL_SETUP_NOT_STARTED) {
         return 0;
     }
     p2sdLoadSMGFile(0x50000);
@@ -813,7 +813,7 @@ s32 mnuStaffInitPanel(BrsSkillPackageWork *work) {
     effRequestResourceByMode(D_003AFA88, D_003AFA98, 0,
                              (u32 *)&work->unitResource);
     mnuRequestBaseAssets(&work->assets);
-    work->setupState = 1;
+    work->setupState = BRS_SKILL_PANEL_SETUP_WAITING_FOR_RESOURCES;
     dds3FadeOut(0, 0, 0, 1);
     dds3FadeOut(0, 0, 0, 0);
     return 1;
@@ -824,10 +824,10 @@ extern void brsOpenSkillPackagePanel(BrsSkillPackageWork *);
 
 s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
 
-    if (ctx->setupState == 0) {
+    if (ctx->setupState == BRS_SKILL_PANEL_SETUP_NOT_STARTED) {
         return 1;
     }
-    if (ctx->setupState == 2) {
+    if (ctx->setupState == BRS_SKILL_PANEL_SETUP_COMPLETE) {
         return 0;
     }
     if (mnuStaffSlotsAllFilled(ctx->resourceList, &ctx->staffSlots) == 0) {
@@ -843,7 +843,7 @@ s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
         return 1;
     }
     brsOpenSkillPackagePanel(ctx);
-    ctx->setupState = 2;
+    ctx->setupState = BRS_SKILL_PANEL_SETUP_COMPLETE;
     dds3FadeIn(0, 0, 0, 15);
     return 0;
 }

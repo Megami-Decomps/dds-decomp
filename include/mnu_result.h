@@ -142,6 +142,11 @@ typedef struct BrsSkillIconRow {
     s32 y;
 } BrsSkillIconRow;
 
+/* Resource setup phases shared by the paired skill-package panel work records. */
+#define BRS_SKILL_PANEL_SETUP_NOT_STARTED 0
+#define BRS_SKILL_PANEL_SETUP_WAITING_FOR_RESOURCES 1
+#define BRS_SKILL_PANEL_SETUP_COMPLETE 2
+
 /* Allocation/zeroing: DDS1 00262684/0026269C; DDS2 0029959C/002995B4. */
 typedef struct BrsSkillPackageWork {
     struct sdfMemHandle_t *allocation;
