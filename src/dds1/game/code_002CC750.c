@@ -751,7 +751,7 @@ s32 scrRemoveSlot(datUnitWork_t *unit, u16 skillId) {
 
 /* Read the unchecked profile's label-display byte; DDS1 exposes it as a word. */
 s32 prfGetMantraDisplayParameter(u16 profileId) {
-    return D_003907B0[profileId].value04;
+    return D_003907B0[profileId].mantraDisplayParameter;
 }
 
 /* Read the threshold used by the profile-level check. */

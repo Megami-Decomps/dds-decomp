@@ -758,7 +758,7 @@ s32 scrRemoveSlot(datUnitWork_t *unit, u16 skillId) {
 
 /* Read the unchecked profile's display byte, used as a marker count in DDS2. */
 u8 prfGetMantraDisplayParameter(u16 profileId) {
-    return D_00401320[profileId].value04;
+    return D_00401320[profileId].mantraDisplayParameter;
 }
 
 /* Read the threshold used by the profile-level check. */

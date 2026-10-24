@@ -15,7 +15,7 @@
 
 typedef struct Dds1ProfileParamRecord {
     u32 flags;
-    u8 value04;
+    u8 mantraDisplayParameter;
     u8 value05;
     u16 requiredLevel;
     u32 capacity;
@@ -26,7 +26,7 @@ typedef char Dds1ProfileParamRecordLayoutCheck[
     (sizeof(Dds1ProfileParamRecord) == 0x1C &&
      PRF_SKILL_TABLE_STRIDE * sizeof(u16) == sizeof(Dds1ProfileParamRecord) &&
      (u32)&((Dds1ProfileParamRecord *)0)->flags == 0 &&
-     (u32)&((Dds1ProfileParamRecord *)0)->value04 == 4 &&
+     (u32)&((Dds1ProfileParamRecord *)0)->mantraDisplayParameter == 4 &&
      (u32)&((Dds1ProfileParamRecord *)0)->value05 == 5 &&
      (u32)&((Dds1ProfileParamRecord *)0)->requiredLevel == 6 &&
      (u32)&((Dds1ProfileParamRecord *)0)->capacity == 8 &&
@@ -43,7 +43,7 @@ typedef char Dds1ProfileParamTableExtentCheck[
 /* Native profile parameter data: 176 complete 0x24-byte records. */
 typedef struct PrfProfileParameters {
     u32 flags;
-    u8 value04;
+    u8 mantraDisplayParameter;
     u8 value05;
     u16 requiredLevel;
     u32 capacity;
@@ -55,7 +55,7 @@ typedef struct PrfProfileParameters {
 typedef char PrfProfileParametersLayoutCheck[
     (sizeof(PrfProfileParameters) == 0x24 &&
      (u32)&((PrfProfileParameters *)0)->flags == 0 &&
-     (u32)&((PrfProfileParameters *)0)->value04 == 4 &&
+     (u32)&((PrfProfileParameters *)0)->mantraDisplayParameter == 4 &&
      (u32)&((PrfProfileParameters *)0)->value05 == 5 &&
      (u32)&((PrfProfileParameters *)0)->requiredLevel == 6 &&
      (u32)&((PrfProfileParameters *)0)->capacity == 8 &&
