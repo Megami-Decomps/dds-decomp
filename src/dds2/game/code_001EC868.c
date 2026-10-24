@@ -468,7 +468,7 @@ void btlInitializeRotatedPresetCameraPair(BtlLinkedCommand *action);
 
 extern void btlInitializeActorClearanceCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-void btlRunDefaultActionPoseUnlessHooked(void *actor);
+void btlRunDefaultActionPoseUnlessHooked(BtlLinkedCommand *action);
 
 /* Run the timed camera setup hook; return its result, or zero when unset. */
 s32 btlRunTimedCameraSetupHook(BtlLinkedCommand *action);

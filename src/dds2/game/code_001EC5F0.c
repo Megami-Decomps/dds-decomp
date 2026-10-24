@@ -88,12 +88,12 @@ typedef struct {
 
 extern void btlInitializeActorClearanceCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-void btlRunDefaultActionPoseUnlessHooked(void *actor) {
+void btlRunDefaultActionPoseUnlessHooked(BtlLinkedCommand *action) {
     SoundEventCallbacks *callbacks = (SoundEventCallbacks *)btlGetRuntime();
-    if (callbacks->allowDefaultSound && callbacks->allowDefaultSound(actor)) {
+    if (callbacks->allowDefaultSound && callbacks->allowDefaultSound(action)) {
         return;
     }
-    btlInitializeActorClearanceCameraPair(actor, &((BtlLinkedCommand *)actor)->frontCamera, &((BtlLinkedCommand *)actor)->backCamera);
+    btlInitializeActorClearanceCameraPair(action, &action->frontCamera, &action->backCamera);
 }
 
 /* Run the timed camera setup hook; return its result, or zero when unset. */
