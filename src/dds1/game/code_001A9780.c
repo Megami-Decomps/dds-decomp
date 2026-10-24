@@ -830,7 +830,7 @@ s32 btlHasHighPriorityState(void) {
     BattleSelectionWork *resource;
     s8 index;
     s32 count;
-    if (btlCommandPanelWork->state == 2) {
+    if (btlCommandPanelWork->state == BTL_COMMAND_PANEL_STATE_ACTIVE) {
         resource = btlLinkedSelectionTaskBuffer;
         index = resource->selectedRow;
         count = resource->rowFade[index - 1];
@@ -875,7 +875,7 @@ void btlInitializeCommandPanelSlotTables(void) {
     s32 i;
 
     btlCommandPanelWork = sdfAllocAndClearQuadwords(0xCC);
-    btlCommandPanelWork->state = 1;
+    btlCommandPanelWork->state = BTL_COMMAND_PANEL_STATE_ENTERING;
     btlCommandPanelWork->classIndex = 0;
     btlCommandPanelWork->labelEntry = btlGetActorIdForClass(btlCommandPanelWork->classIndex);
     btlGetActorClassPair(btlCommandPanelWork->classIndex,
@@ -1080,7 +1080,7 @@ void btlUpdateCommandPanelRowFades(void) {
     s32 i;
 
     switch (btlCommandPanelWork->state) {
-    case 1:
+    case BTL_COMMAND_PANEL_STATE_ENTERING:
         for (i = 0; i < 5; i++) {
             btlCommandPanelWork->slotsA[i].fadeValue += 0x10;
             btlCommandPanelWork->slotsA[i].fadeValue = btlCommandPanelWork->slotsA[i].fadeValue <= 0 ? 0 :
@@ -1090,7 +1090,7 @@ void btlUpdateCommandPanelRowFades(void) {
                 btlCommandPanelWork->slotsB[i].fadeValue > 0xF0 ? 0xF0 : btlCommandPanelWork->slotsB[i].fadeValue;
         }
         break;
-    case 2:
+    case BTL_COMMAND_PANEL_STATE_ACTIVE:
         for (i = 0; i < 5; i++) {
             btlCommandPanelWork->slotsA[i].fadeValue -= 0x10;
             btlCommandPanelWork->slotsA[i].fadeValue = btlCommandPanelWork->slotsA[i].fadeValue <= 0x80 ? 0x80 :
@@ -1100,7 +1100,7 @@ void btlUpdateCommandPanelRowFades(void) {
                 btlCommandPanelWork->slotsB[i].fadeValue > 0xF0 ? 0xF0 : btlCommandPanelWork->slotsB[i].fadeValue;
         }
         break;
-    case 3:
+    case BTL_COMMAND_PANEL_STATE_CLOSING:
         for (i = 0; i < 5; i++) {
             btlCommandPanelWork->slotsA[i].fadeValue -= 0x10;
             btlCommandPanelWork->slotsA[i].fadeValue = btlCommandPanelWork->slotsA[i].fadeValue <= 0 ? 0 :
@@ -1110,7 +1110,7 @@ void btlUpdateCommandPanelRowFades(void) {
                 btlCommandPanelWork->slotsB[i].fadeValue > 0x80 ? 0x80 : btlCommandPanelWork->slotsB[i].fadeValue;
         }
         break;
-    case 4:
+    case BTL_COMMAND_PANEL_STATE_TIMED_CLOSE:
         for (i = 0; i < 5; i++) {
             btlCommandPanelWork->slotsA[i].fadeValue -= btlTrackedTaskHandles->status.bytes.fadeStep;
             btlCommandPanelWork->slotsA[i].fadeValue = btlCommandPanelWork->slotsA[i].fadeValue <= 0 ? 0 :
@@ -1143,7 +1143,7 @@ void func_001AB558(void) {
     memcpy(positionsA, D_003A20A0, sizeof(positionsA));
     memcpy(positionsB, D_003A20D0, sizeof(positionsB));
     if (btlCommandPanelWork->state < 5) {
-        if (btlCommandPanelWork->state > 0) {
+        if (btlCommandPanelWork->state > BTL_COMMAND_PANEL_STATE_INACTIVE) {
             for (i = 0; i < 5; i++) {
                 if (btlCommandPanelWork->slotsA[i].hidden == 0) {
                     colors[0] = btlCommandPanelWork->slotsA[i].fadeValue | 0x80808000;
@@ -1193,7 +1193,7 @@ void btlUpdateCommandPanelFades(void) {
     BattleCornerPhaseDefaults phases = D_003A2128;
     s32 i;
     switch (btlCommandPanelWork->state) {
-    case 1:
+    case BTL_COMMAND_PANEL_STATE_ENTERING:
         btlCommandPanelWork->labelFade += 0x10;
         btlCommandPanelWork->labelFade = btlCommandPanelWork->labelFade <= 0 ? 0 :
             btlCommandPanelWork->labelFade > 0x80 ? 0x80 : btlCommandPanelWork->labelFade;
@@ -1207,9 +1207,9 @@ void btlUpdateCommandPanelFades(void) {
             btlCommandPanelWork->cornerPhase[i] = phases.values[i];
         }
         if (btlCommandPanelWork->labelFade >= 0x80 && btlCommandPanelWork->slotsB[0].fadeValue >= 0xF0)
-            btlCommandPanelWork->state = 2;
+            btlCommandPanelWork->state = BTL_COMMAND_PANEL_STATE_ACTIVE;
         break;
-    case 2: {
+    case BTL_COMMAND_PANEL_STATE_ACTIVE: {
         btlCommandPanelWork->labelFade -= 8;
         btlCommandPanelWork->labelFade = btlCommandPanelWork->labelFade <= 0x80 ? 0x80 :
             btlCommandPanelWork->labelFade >= 0x100 ? 0xFF : btlCommandPanelWork->labelFade;
@@ -1224,7 +1224,7 @@ void btlUpdateCommandPanelFades(void) {
         }
         break;
     }
-    case 3:
+    case BTL_COMMAND_PANEL_STATE_CLOSING:
         btlCommandPanelWork->labelFade -= 0x10;
         btlCommandPanelWork->labelFade = btlCommandPanelWork->labelFade <= 0 ? 0 :
             btlCommandPanelWork->labelFade > 0x80 ? 0x80 : btlCommandPanelWork->labelFade;
@@ -1236,9 +1236,9 @@ void btlUpdateCommandPanelFades(void) {
             btlCommandPanelWork->cornerFade[i] = btlCommandPanelWork->cornerFade[i] <= 0 ? 0 :
                 btlCommandPanelWork->cornerFade[i] > 0x80 ? 0x80 : btlCommandPanelWork->cornerFade[i];
         }
-        if (btlCommandPanelWork->labelFade <= 0) btlCommandPanelWork->state = 0;
+        if (btlCommandPanelWork->labelFade <= 0) btlCommandPanelWork->state = BTL_COMMAND_PANEL_STATE_INACTIVE;
         break;
-    case 4:
+    case BTL_COMMAND_PANEL_STATE_TIMED_CLOSE:
         btlCommandPanelWork->labelFade -= btlTrackedTaskHandles->status.bytes.fadeStep;
         btlCommandPanelWork->labelFade = btlCommandPanelWork->labelFade <= 0 ? 0 :
             btlCommandPanelWork->labelFade > 0x80 ? 0x80 : btlCommandPanelWork->labelFade;
@@ -1250,7 +1250,7 @@ void btlUpdateCommandPanelFades(void) {
             btlCommandPanelWork->cornerFade[i] = btlCommandPanelWork->cornerFade[i] <= 0 ? 0 :
                 btlCommandPanelWork->cornerFade[i] > 0x80 ? 0x80 : btlCommandPanelWork->cornerFade[i];
         }
-        if (btlCommandPanelWork->labelFade <= 0) btlCommandPanelWork->state = 0;
+        if (btlCommandPanelWork->labelFade <= 0) btlCommandPanelWork->state = BTL_COMMAND_PANEL_STATE_INACTIVE;
         break;
     }
 }
@@ -1280,7 +1280,7 @@ void btlDrawCommandPanelClassLabel(void) {
     BattlePanelColors colors = D_003A2158;
     BattleClassLabelOffsets offsets = D_003A2168;
     if (btlCommandPanelWork->state < 5) {
-        if (btlCommandPanelWork->state > 0) {
+        if (btlCommandPanelWork->state > BTL_COMMAND_PANEL_STATE_INACTIVE) {
             colors.values[0] = btlCommandPanelWork->cornerFade[0] | 0x80808000;
             colors.values[1] = btlCommandPanelWork->cornerFade[1] | 0x80808000;
             colors.values[2] = btlCommandPanelWork->cornerFade[2] | 0x80808000;
@@ -2088,7 +2088,7 @@ void btlSetTaskPhase5(void) {
     dds3ProcessID_t *task = dds3SearchProcessName(btlCommandPanelTaskNameRef);
     if (task != 0) {
         ((BtlPhaseTask *)dds3GetProcessData(task))->phase = 5;
-        btlCommandPanelWork->state = 3;
+        btlCommandPanelWork->state = BTL_COMMAND_PANEL_STATE_CLOSING;
     }
 }
 
@@ -5258,9 +5258,9 @@ s32 func_001B6498(s8 mode) {
         BattleCmdPanel *panel;
         state = evtBitCheck(0xC0E) != 0 ? 1 : 2;
         panel = btlCommandPanelWork;
-        if (panel == NULL || panel->state == 0) {
+        if (panel == NULL || panel->state == BTL_COMMAND_PANEL_STATE_INACTIVE) {
             state = 1;
-        } else if (panel->state == 3) {
+        } else if (panel->state == BTL_COMMAND_PANEL_STATE_CLOSING) {
             state = 1;
         }
     } else {
@@ -7515,7 +7515,7 @@ void btlSetCommandPanelFadeMode(s8 mode, s32 duration) {
         s32 step;
         if (commandTask != NULL) {
             ((BattleSceneObject *)dds3GetProcessData(commandTask))->state = 11;
-            btlCommandPanelWork->state = 4;
+            btlCommandPanelWork->state = BTL_COMMAND_PANEL_STATE_TIMED_CLOSE;
         }
         if (panelTask != NULL) {
             btlTrackedTaskHandles->presentationState = 1;
@@ -7538,7 +7538,7 @@ void btlSetCommandPanelFadeMode(s8 mode, s32 duration) {
         s32 step;
         if (commandTask != NULL) {
             ((BattleSceneObject *)dds3GetProcessData(commandTask))->state = mode;
-            btlCommandPanelWork->state = mode;
+            btlCommandPanelWork->state = BTL_COMMAND_PANEL_STATE_ENTERING;
         }
         if (panelTask != NULL) {
             btlTrackedTaskHandles->presentationState = 2;
@@ -8732,13 +8732,13 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
     }
     object = btlGetCommandPanelTaskWork();
     if (object->state == 3) {
-        btlCommandPanelWork->state = 2;
+        btlCommandPanelWork->state = BTL_COMMAND_PANEL_STATE_ACTIVE;
         object->state = 1;
     } else if (object->state == 8) {
         object->state = 6;
-        btlCommandPanelWork->state = 2;
+        btlCommandPanelWork->state = BTL_COMMAND_PANEL_STATE_ACTIVE;
     } else if (object->state != 11) {
-        btlCommandPanelWork->state = 1;
+        btlCommandPanelWork->state = BTL_COMMAND_PANEL_STATE_ENTERING;
         object->state = 1;
     }
     btlLinkedSelectionTaskBuffer->selectedRow =
@@ -8750,7 +8750,7 @@ void btlRequestCommandPanelClose(void) {
     if (object != 0) {
         BattleCmdPanel *panel = btlCommandPanelWork;
         object->state = 5;
-        panel->state = 3;
+        panel->state = BTL_COMMAND_PANEL_STATE_CLOSING;
     }
 }
 

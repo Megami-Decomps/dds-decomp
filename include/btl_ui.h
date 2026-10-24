@@ -58,6 +58,14 @@ void btlOpenBattleCommandPanel(struct ActionStateLink *task);
 
 /* One allocated 0xCC-byte command panel, not a header plus overlapping rows.
  * Rows begin at +0x14/+0x64; the class Y coordinate occupies +0x10. */
+enum {
+    BTL_COMMAND_PANEL_STATE_INACTIVE = 0,
+    BTL_COMMAND_PANEL_STATE_ENTERING = 1,
+    BTL_COMMAND_PANEL_STATE_ACTIVE = 2,
+    BTL_COMMAND_PANEL_STATE_CLOSING = 3,
+    BTL_COMMAND_PANEL_STATE_TIMED_CLOSE = 4
+};
+
 typedef struct BattleCmdPanelSlot {
     s8 hidden; /* Nonzero grid entries are omitted by the row renderer. */
     u8 unk01; /* Initialized to 0/1 by bank; no consumer read established. */
@@ -67,7 +75,7 @@ typedef struct BattleCmdPanelSlot {
 } BattleCmdPanelSlot;
 
 typedef struct BattleCmdPanel {
-    s8 state;
+    s8 state; /* BTL_COMMAND_PANEL_STATE_* */
     s8 classIndex;
     u16 labelEntry;
     s16 labelFade;
