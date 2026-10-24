@@ -56,10 +56,10 @@ void sdfMotCLBK_morphSeek(SdfMotionSlotPairBinding *motion, f32 frame) {
     f32 inverse;
 
     sdfMotGetKey(&motion->keys, &sample, frame);
-    firstId = ((SdfSlotPair *)sample.firstKey)->index;
-    secondId = ((SdfSlotPair *)sample.secondKey)->index;
-    firstValue = ((SdfSlotPair *)sample.firstKey)->weight;
-    secondValue = ((SdfSlotPair *)sample.secondKey)->weight;
+    firstId = ((const SdfSlotPair *)sample.firstKey)->index;
+    secondId = ((const SdfSlotPair *)sample.secondKey)->index;
+    firstValue = ((const SdfSlotPair *)sample.firstKey)->weight;
+    secondValue = ((const SdfSlotPair *)sample.secondKey)->weight;
     weight = sample.weight;
     inverse = 1.0f - weight;
     out = motion->current->pair;
@@ -91,10 +91,10 @@ void sdfMotCLBK_morphBlendSeek(SdfMotionSlotPairBinding *motion, f32 frame, f32 
     f32 secondWeight;
 
     sdfMotGetKey(&motion->keys, &sample, frame);
-    firstId = ((SdfSlotPair *)sample.firstKey)->index;
-    secondId = ((SdfSlotPair *)sample.secondKey)->index;
-    firstValue = ((SdfSlotPair *)sample.firstKey)->weight;
-    secondValue = ((SdfSlotPair *)sample.secondKey)->weight;
+    firstId = ((const SdfSlotPair *)sample.firstKey)->index;
+    secondId = ((const SdfSlotPair *)sample.secondKey)->index;
+    firstValue = ((const SdfSlotPair *)sample.firstKey)->weight;
+    secondValue = ((const SdfSlotPair *)sample.secondKey)->weight;
     secondWeight = sample.weight;
     {
         const f32 sampleComplement = 1.0f - secondWeight;

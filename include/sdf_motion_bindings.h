@@ -26,8 +26,8 @@ void sdfMotionNodeBaseInit(SdfMotionBindingHead *binding, sdfMotionCtrlr_t *moti
                              SdfMotionBindingDispatch *dispatch);
 
 typedef struct SdfMotionKeyInterval {
-    f32 *firstKey;
-    f32 *secondKey;
+    const u8 *firstKey;
+    const u8 *secondKey;
     f32 weight;
 } SdfMotionKeyInterval;
 

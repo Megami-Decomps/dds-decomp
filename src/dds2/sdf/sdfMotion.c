@@ -323,23 +323,23 @@ void sdfMotGetKey(SdfMotionKeyBinding *binding,
     firstKeyData = keyData + middleKeyIndex * keyStride;
     nextKeyIndex = middleKeyIndex + 1;
     currentFrame = keyFrames[middleKeyIndex];
-    out->firstKey = (f32 *)firstKeyData;
+    out->firstKey = firstKeyData;
     if (nextKeyIndex == keyCount) {
         if (binding->motion->loopEnabled == SDF_MOTION_LOOP_DISABLED) {
-            out->secondKey = (f32 *)firstKeyData;
+            out->secondKey = firstKeyData;
             nextFrame = currentFrame;
         } else {
-            out->secondKey = (f32 *)keyData;
+            out->secondKey = keyData;
             nextFrame = binding->motion->frameCount;
         }
     } else {
         nextFrame = keyFrames[nextKeyIndex];
-        out->secondKey = (f32 *)(firstKeyData + keyStride);
+        out->secondKey = firstKeyData + keyStride;
     }
 
     duration = nextFrame - currentFrame;
     if (duration == 0) {
-        out->secondKey = (f32 *)firstKeyData;
+        out->secondKey = firstKeyData;
         out->weight = 0.0f;
         return;
     }
@@ -352,8 +352,8 @@ f32 sdfMotInterpolateKeyFloat(const SdfMotionKeyInterval *interval) {
     f32 interpolationWeight;
 
     interpolationWeight = interval->weight;
-    firstValue = *interval->firstKey;
-    return (firstValue + (*interval->secondKey * interpolationWeight)) -
+    firstValue = *(const f32 *)interval->firstKey;
+    return (firstValue + (*(const f32 *)interval->secondKey * interpolationWeight)) -
            (firstValue * interpolationWeight);
 }
 
@@ -366,7 +366,7 @@ void sdfMotInterpolateKeyXYZ(const SdfMotionKeyInterval *interval) {
 u32 sdfMotInterpolateKeyColor(const SdfMotionKeyInterval *interval) {
     u32 color;
 
-    EE_MMI_RGBA_LERP(color, *(u32 *)interval->firstKey, *(u32 *)interval->secondKey, interval->weight, 0.5f);
+    EE_MMI_RGBA_LERP(color, *(const u32 *)interval->firstKey, *(const u32 *)interval->secondKey, interval->weight, 0.5f);
     return color;
 }
 
@@ -384,7 +384,7 @@ void sdfMotInterpolateKeyUvwSub(f32 *dst, const f32 *src1, const f32 *src2, f32 
 }
 
 void sdfMotInterpolateKeyUvw(const SdfMotionKeyInterval *src, f32 *dst) {
-    sdfMotInterpolateKeyUvwSub(dst, src->firstKey, src->secondKey, src->weight);
+    sdfMotInterpolateKeyUvwSub(dst, (const f32 *)src->firstKey, (const f32 *)src->secondKey, src->weight);
 }
 
 s32 sdfMotGenNode(void *binding, s32 selector, s32 targetIndex) {
@@ -534,7 +534,7 @@ void sdfMotCLBK_modelLerpRotQuatSeek(SdfMotionDrawBinding *binding, f32 frame) {
     SdfMotionKeyInterval keyInterval;
     sdfModelNode_t *drawNode;
     f32 (*matrix)[4];
-    f32 *keyData;
+    const u8 *keyData;
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     keyData = keyInterval.firstKey;
@@ -556,7 +556,7 @@ void sdfMotCLBK_modelLerpRotQuatBlendSeek(SdfMotionDrawBinding *binding, f32 fra
     SdfMotionKeyInterval keyInterval;
     sdfModelNode_t *drawNode;
     f32 (*matrix)[4];
-    f32 *keyData;
+    const u8 *keyData;
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     keyData = keyInterval.firstKey;
@@ -590,7 +590,7 @@ void sdfMotCLBK_modelVisibleSeek(SdfMotionKeyFlagBinding *binding, f32 frame) {
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     node = binding->node;
-    if (*(u8 *)keyInterval.firstKey == 0) {
+    if (*keyInterval.firstKey == 0) {
         node->flags = node->flags | SDF_MOTION_KEY_SAMPLE_BYTE_ZERO;
     } else {
         node->flags = node->flags & ~SDF_MOTION_KEY_SAMPLE_BYTE_ZERO;
@@ -604,7 +604,7 @@ void sdfMotCLBK_modelVisibleBlendSeek(SdfMotionKeyFlagBinding *binding, f32 fram
 
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     node = binding->node;
-    if (*(u8 *)keyInterval.firstKey == 0) {
+    if (*keyInterval.firstKey == 0) {
         node->flags = node->flags | SDF_MOTION_KEY_SAMPLE_BYTE_ZERO;
     } else {
         node->flags = node->flags & ~SDF_MOTION_KEY_SAMPLE_BYTE_ZERO;
@@ -646,9 +646,9 @@ SdfMotionIndexedValueBinding *sdfMotGenMatDiffuse(sdfMotionCtrlr_t *motion, s32 
 }
 
 void sdfMotCLBK_matDiffuseSeek(SdfMotionIndexedValueBinding *binding, f32 frame) {
-    u8 buffer[16];
-    sdfMotGetKey((SdfMotionKeyBinding *)binding, (SdfMotionKeyInterval *)buffer, frame);
-    sdfMatSetDiffuse(binding->target, sdfMotInterpolateKeyColor(buffer));
+    SdfMotionKeyInterval keyInterval;
+    sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
+    sdfMatSetDiffuse(binding->target, sdfMotInterpolateKeyColor(&keyInterval));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -676,9 +676,9 @@ SdfMotionIndexedValueBinding *sdfMotGenMatAmbient(sdfMotionCtrlr_t *motion, s32 
 }
 
 void sdfMotCLBK_matAmbientSeek(SdfMotionIndexedValueBinding *binding, f32 frame) {
-    u8 buffer[16];
-    sdfMotGetKey((SdfMotionKeyBinding *)binding, (SdfMotionKeyInterval *)buffer, frame);
-    sdfMatSetAmbient(binding->target, sdfMotInterpolateKeyColor(buffer));
+    SdfMotionKeyInterval keyInterval;
+    sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
+    sdfMatSetAmbient(binding->target, sdfMotInterpolateKeyColor(&keyInterval));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -706,9 +706,9 @@ SdfMotionIndexedValueBinding *sdfMotGenMatSpecular(sdfMotionCtrlr_t *motion, s32
 }
 
 void sdfMotCLBK_matSpecularSeek(SdfMotionIndexedValueBinding *binding, f32 frame) {
-    u8 buffer[16];
-    sdfMotGetKey((SdfMotionKeyBinding *)binding, (SdfMotionKeyInterval *)buffer, frame);
-    sdfMatSetSpecular(binding->target, sdfMotInterpolateKeyColor(buffer));
+    SdfMotionKeyInterval keyInterval;
+    sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
+    sdfMatSetSpecular(binding->target, sdfMotInterpolateKeyColor(&keyInterval));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -736,9 +736,9 @@ SdfMotionIndexedValueBinding *sdfMotGenMatRefMap(sdfMotionCtrlr_t *motion, s32 u
 }
 
 void sdfMotCLBK_matRefMapSeek(SdfMotionIndexedValueBinding *binding, f32 frame) {
-    u8 buffer[16];
-    sdfMotGetKey((SdfMotionKeyBinding *)binding, (SdfMotionKeyInterval *)buffer, frame);
-    sdfSetPrimaryStateWordFourth(binding->target, sdfMotInterpolateKeyColor(buffer));
+    SdfMotionKeyInterval keyInterval;
+    sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
+    sdfSetPrimaryStateWordFourth(binding->target, sdfMotInterpolateKeyColor(&keyInterval));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -793,12 +793,12 @@ SdfMotionIndexedTextBinding *sdfMotGenMatUvw(sdfMotionCtrlr_t *motion, s32 unuse
 }
 
 void sdfMotCLBK_matUvwSeek(SdfMotionIndexedTextBinding *binding, f32 frame) {
-    u8 keys[16];
-    u8 interpolated[32];
+    SdfMotionKeyInterval keyInterval;
+    f32 interpolated[5];
 
-    sdfMotGetKey((SdfMotionKeyBinding *)binding, (SdfMotionKeyInterval *)keys, frame);
-    sdfMotInterpolateKeyUvw(keys, interpolated);
-    sdfMatSetTexUvwByPtr(binding->target, (const f32 *)interpolated);
+    sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
+    sdfMotInterpolateKeyUvw(&keyInterval, interpolated);
+    sdfMatSetTexUvwByPtr(binding->target, interpolated);
 }
 
 void sdfMotCLBK_matUvwBlendSeek(SdfMotionIndexedTextBinding *binding, f32 frame, f32 blendWeight) {
@@ -829,12 +829,12 @@ SdfMotionIndexedTextBinding *sdfMotGenMatMultiUvw(sdfMotionCtrlr_t *motion, s32 
 }
 
 void sdfMotCLBK_matMultiUvwSeek(SdfMotionIndexedTextBinding *binding, f32 frame) {
-    u8 keys[16];
-    u8 interpolated[32];
+    SdfMotionKeyInterval keyInterval;
+    f32 interpolated[5];
 
-    sdfMotGetKey((SdfMotionKeyBinding *)binding, (SdfMotionKeyInterval *)keys, frame);
-    sdfMotInterpolateKeyUvw(keys, interpolated);
-    sdfMatSetMultiTexUvwByPtr(binding->target, (const f32 *)interpolated);
+    sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
+    sdfMotInterpolateKeyUvw(&keyInterval, interpolated);
+    sdfMatSetMultiTexUvwByPtr(binding->target, interpolated);
 }
 
 void sdfMotCLBK_matMultiUvwBlendSeek(SdfMotionIndexedTextBinding *binding, f32 frame, f32 blendWeight) {
@@ -866,9 +866,9 @@ SdfMotionIndexedValueBinding *sdfMotGenMatMultiDiffuse(sdfMotionCtrlr_t *motion,
 }
 
 void sdfMotCLBK_matMultiDiffuseSeek(SdfMotionIndexedValueBinding *binding, f32 frame) {
-    u8 buffer[16];
-    sdfMotGetKey((SdfMotionKeyBinding *)binding, (SdfMotionKeyInterval *)buffer, frame);
-    sdfMatSetMultiDiffuse(binding->target, sdfMotInterpolateKeyColor(buffer));
+    SdfMotionKeyInterval keyInterval;
+    sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
+    sdfMatSetMultiDiffuse(binding->target, sdfMotInterpolateKeyColor(&keyInterval));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -899,14 +899,14 @@ void sdfMotCLBK_matUvw2Seek(SdfMotionIndexedTextBinding *binding, f32 frame) {
     SdfMotionKeyInterval sample;
 
     sdfMotGetKey(&binding->keys, &sample, frame);
-    sdfMatSetTexUvwByPtr(binding->target, sample.firstKey);
+    sdfMatSetTexUvwByPtr(binding->target, (const f32 *)sample.firstKey);
 }
 
 void sdfMotCLBK_matUvw2BlendSeek(SdfMotionIndexedTextBinding *binding, f32 frame) {
     SdfMotionKeyInterval sample;
 
     sdfMotGetKey(&binding->keys, &sample, frame);
-    sdfMatSetTexUvwByPtr(binding->target, sample.firstKey);
+    sdfMatSetTexUvwByPtr(binding->target, (const f32 *)sample.firstKey);
 }
 
 /* Direct primary-text sampling has an intentionally empty capturePrevious callback. */
@@ -926,12 +926,12 @@ void sdfMotCLBK_matMultiUvw2Seek(SdfMotionIndexedTextBinding *binding, f32 frame
     SdfMotionKeyInterval sample;
 
     sdfMotGetKey(&binding->keys, &sample, frame);
-    sdfMatSetMultiTexUvwByPtr(binding->target, sample.firstKey);
+    sdfMatSetMultiTexUvwByPtr(binding->target, (const f32 *)sample.firstKey);
 }
 
 void sdfMotCLBK_matMultiUvw2BlendSeek(SdfMotionIndexedTextBinding *binding, f32 frame) {
     SdfMotionKeyInterval sample;
 
     sdfMotGetKey(&binding->keys, &sample, frame);
-    sdfMatSetMultiTexUvwByPtr(binding->target, sample.firstKey);
+    sdfMatSetMultiTexUvwByPtr(binding->target, (const f32 *)sample.firstKey);
 }
