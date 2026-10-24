@@ -5,6 +5,7 @@
 #include "sdf_texture_draw_packet.h"
 
 struct sdfTexHandle_t;
+struct sdfDrawTag_t;
 
 /* Shared rectangle and sampling payload; color is packed or read by channel. */
 typedef struct dds3Effect_Blur_t {
@@ -135,7 +136,8 @@ void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work);
 EffBlurScaleWork *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *params);
 void dds3EffectRippleBlurDelete(EffBlurScaleWork *work);
 
-void effAppendBlurRectanglePackets(void *list, const dds3Effect_Blur_t *source, u8 fixedPointCoordinates);
+void effAppendBlurRectanglePackets(struct sdfDrawTag_t *list, const dds3Effect_Blur_t *source,
+                                   u8 fixedPointCoordinates);
 void effDrawBlurSource(const dds3Effect_Blur_t *source, struct sdfTexHandle_t *resource, u8 fixedPointCoordinates);
 void effDrawBlurRectangle(const dds3Effect_Blur_t *source);
 void effBlurDrawFramebufferQuad(const dds3Effect_Blur_t *source);

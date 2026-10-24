@@ -69,7 +69,7 @@ extern void effDrawBlurListWithFramePacket(void *);
 extern void effBlurSecondUpdateSlotRect(EffBlurScaleWork *, EffBlurScaleSlot *);
 
 void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
-    void *list;
+    struct sdfDrawTag_t *list;
     EffBlurScaleSlot *slot;
     s32 count;
     u32 sourceColor;
@@ -270,4 +270,3 @@ void dds3EffectFilter(dds3Effect_Filter_t *source) {
     sdfDrawTagLink(list, (u32)drawPacket);
     D_003253C8.append(&D_003253C8, list);
 }
-

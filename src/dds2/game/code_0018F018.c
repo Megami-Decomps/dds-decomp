@@ -69,13 +69,13 @@ extern void effBlurBuildSamplingQuad(const dds3Effect_Blur_t *source, EffBlurDra
                                      u8 fixedPoint);
 
 extern void effAppendBlurRenderState(struct sdfDrawTag_t *, s32, sdfTexHandle_t *);
-extern void effAppendBlurRectanglePackets(void *, const dds3Effect_Blur_t *, u8);
+extern void effAppendBlurRectanglePackets(struct sdfDrawTag_t *, const dds3Effect_Blur_t *, u8);
 extern void effDrawBlurListWithFramePacket(void *);
 extern void effBlurSecondUpdateSlotRect(EffBlurScaleWork *, EffBlurScaleSlot *);
 
 
 void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
-    void *list;
+    struct sdfDrawTag_t *list;
     EffBlurScaleSlot *slot;
     s32 count;
     u32 sourceColor;

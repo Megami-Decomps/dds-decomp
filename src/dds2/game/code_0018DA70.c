@@ -375,7 +375,8 @@ void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, sdfTe
 
 
 /* Build the two draw packets for `source` and append them to `list`. */
-void effAppendBlurRectanglePackets(void *list, const BlurSource *source, u8 fixedPointCoordinates) {
+void effAppendBlurRectanglePackets(struct sdfDrawTag_t *list, const BlurSource *source,
+                                   u8 fixedPointCoordinates) {
     SdfDrawPacket *packet;
 
     packet = effPkt2DAllocTriStrip(1, 0x200);
@@ -401,7 +402,7 @@ extern void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl
 
 /* Queue blend setup and both rectangle packets, then finish with the filter draw. */
 void effDrawBlurSource(const BlurSource *source, sdfTexHandle_t *resource, u8 fixedPointCoordinates) {
-    void *list;
+    struct sdfDrawTag_t *list;
 
     if (dds3NullDrawProc() == 0) {
         list = (void *)sdfGrAllocPacketBuff(0x20);

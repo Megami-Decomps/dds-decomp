@@ -87,7 +87,7 @@ extern f64 fabs(f64 value);
 
 void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work)
 {
-    void *list;
+    struct sdfDrawTag_t *list;
     EffBlurScatterSlot *slot;
     s32 count;
     u32 alpha;
@@ -167,7 +167,6 @@ void dds3EffectRipBlurPartInit(EffBlurScaleWork *work, EffBlurScaleSlot *slot) {
     quad->position[0] = work->params.position[0];
     quad->position[1] = work->params.position[1];
 }
-
 
 
 
