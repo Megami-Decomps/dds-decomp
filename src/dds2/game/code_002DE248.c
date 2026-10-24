@@ -13050,7 +13050,7 @@ u8 *effFindAssetData(FileJob *entry) {
     return NULL;
 }
 
-void *effFindAssetObject(FileJob *entry) {
+EffQueuedFileObject *effFindAssetObject(FileJob *entry) {
     FileJobPayload *requested = (FileJobPayload *)entry->id;
     u16 type = requested->type;
     u16 option = requested->option;
@@ -13620,7 +13620,7 @@ u32 effCloneSelectedFileJob(void) {
     }
 
     D_004386BC = (u32)effQueueEffectFileJob(asset);
-    object = (EffQueuedFileObject *)effFindAssetObject(job);
+    object = effFindAssetObject(job);
     effQueuedFileObject = object;
     object->linkedState = (u8 *)&effPartsListMenu;
     count = fileQueueCountLinkedJobs(effFileQueue);

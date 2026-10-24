@@ -10789,7 +10789,7 @@ u8 *effFindAssetData(FileJob *entry) {
     return NULL;
 }
 
-void *effFindAssetObject(FileJob *entry) {
+EffQueuedFileObject *effFindAssetObject(FileJob *entry) {
     FileJobPayload *requested = (FileJobPayload *)entry->id;
     u16 type = requested->type;
     u16 option = requested->option;
