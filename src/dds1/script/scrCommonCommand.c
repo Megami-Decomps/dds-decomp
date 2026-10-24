@@ -16,20 +16,20 @@
 #include "eff_event_draw.h"
 s32 dds3SetDistBlurPara(s32 filterCount, s32 size, s32 delaySpread, f32 angleStep,
                           f32 uvDisplacementAngleDegrees, f32 uvDisplacementAmplitude,
-                          s32 blendControl);
+                          s32 gsAlphaControl);
 s32 dds3SetRipBlurPara(s32 count, f32 phaseStep, f32 spacing,
                           f32 uvDisplacementAngleDegrees, f32 uvDisplacementAmplitude,
-                          f32 angleStep, s32 blendControl);
+                          f32 angleStep, s32 gsAlphaControl);
 
 void dds3SetSoftenBias(s32 frames, f32 firstTarget, f32 secondTarget);
 void dds3SetFogColor(s32 blendFrames, f32 *color);
-void dds3SetMultiBlurPara(f32 rotation, f32 scale, u32 blendControl);
+void dds3SetMultiBlurPara(f32 rotation, f32 scale, u32 gsAlphaControl);
 void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
 void dds3SetAmbientColor(s32 blendFrames, f32 *color);
 void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
-void dds3SetBlur2Para(f32 rotation, f32 scale, u32 blendControl);
-void dds3SetFilter2Para(u32 blendControl);
-void dds3SetMFilterPara(u32 blendControl);
+void dds3SetBlur2Para(f32 rotation, f32 scale, u32 gsAlphaControl);
+void dds3SetFilter2Para(u32 gsAlphaControl);
+void dds3SetMFilterPara(u32 gsAlphaControl);
 void dds3SetScreenFovy(f32 fieldOfView);
 void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 s32 fptodp(void);
@@ -409,25 +409,25 @@ s32 scrCommand_BLUR(void)
 }
 
 s32 scrCommand_MUL_BLUR_PARA(void) {
-    u32 blendControl;
+    u32 gsAlphaControl;
     f32 rotation;
     f32 scale;
 
     switch (scrGetIntPara(2)) {
     case 1:
-        blendControl = 0x48;
+        gsAlphaControl = 0x48;
         break;
     case 2:
-        blendControl = 0x42;
+        gsAlphaControl = 0x42;
         break;
     case 0:
     default:
-        blendControl = 0x44;
+        gsAlphaControl = 0x44;
         break;
     }
     rotation = scrGetFloatPara(0);
     scale = scrGetFloatPara(1);
-    dds3SetMultiBlurPara(rotation, scale, blendControl);
+    dds3SetMultiBlurPara(rotation, scale, gsAlphaControl);
     return 1;
 }
 
@@ -492,24 +492,24 @@ s32 scrCommand_DIST_BLUR_PARA(void)
     s32 delaySpread;
     s32 size;
     s32 filterCount;
-    s32 sel;
-    s32 kind;
+    s32 scriptBlendSelector;
+    s32 gsAlphaControl;
     f32 f4;
     f32 f3;
     f32 f5;
 
-    sel = scrGetIntPara(6);
-    switch (sel)
+    scriptBlendSelector = scrGetIntPara(6);
+    switch (scriptBlendSelector)
     {
     case 1:
-        kind = 0x48;
+        gsAlphaControl = 0x48;
         break;
     case 2:
-        kind = 0x42;
+        gsAlphaControl = 0x42;
         break;
     case 0:
     default:
-        kind = 0x44;
+        gsAlphaControl = 0x44;
         break;
     }
     filterCount = scrGetIntPara(0);
@@ -518,7 +518,7 @@ s32 scrCommand_DIST_BLUR_PARA(void)
     f3 = scrGetFloatPara(3);
     f4 = scrGetFloatPara(4);
     f5 = scrGetFloatPara(5);
-    dds3SetDistBlurPara(filterCount, size, delaySpread, f3, f4, f5, kind);
+    dds3SetDistBlurPara(filterCount, size, delaySpread, f3, f4, f5, gsAlphaControl);
     return 1;
 }
 
@@ -578,26 +578,26 @@ s32 scrCommand_DIST_BLUR_OFF(void)
 s32 scrCommand_RIP_BLUR_PARA(void)
 {
     s32 count;
-    s32 blendMode;
-    s32 blendControl;
+    s32 scriptBlendSelector;
+    s32 gsAlphaControl;
     f32 phaseStep;
     f32 spacing;
     f32 uvDisplacementAngleDegrees;
     f32 uvDisplacementAmplitude;
     f32 angleStep;
 
-    blendMode = scrGetIntPara(6);
-    switch (blendMode)
+    scriptBlendSelector = scrGetIntPara(6);
+    switch (scriptBlendSelector)
     {
     case 1:
-        blendControl = 0x48;
+        gsAlphaControl = 0x48;
         break;
     case 2:
-        blendControl = 0x42;
+        gsAlphaControl = 0x42;
         break;
     case 0:
     default:
-        blendControl = 0x44;
+        gsAlphaControl = 0x44;
         break;
     }
     count = scrGetIntPara(0);
@@ -607,7 +607,7 @@ s32 scrCommand_RIP_BLUR_PARA(void)
     uvDisplacementAmplitude = scrGetFloatPara(4);
     angleStep = scrGetFloatPara(5);
     dds3SetRipBlurPara(count, phaseStep, spacing, uvDisplacementAngleDegrees,
-                          uvDisplacementAmplitude, angleStep, blendControl);
+                          uvDisplacementAmplitude, angleStep, gsAlphaControl);
     return 1;
 }
 
@@ -666,31 +666,31 @@ s32 scrCommand_RIP_BLUR_OFF(void)
 
 s32 scrCommand_BLUR2_PARA(void)
 {
-    s32 blendControl;
-    s32 blendMode;
+    s32 gsAlphaControl;
+    s32 scriptBlendSelector;
     f32 rotation;
     f32 scale;
 
-    blendMode = scrGetIntPara(2);
-    switch (blendMode) {
+    scriptBlendSelector = scrGetIntPara(2);
+    switch (scriptBlendSelector) {
     case 0:
-        blendControl = 0x44;
+        gsAlphaControl = 0x44;
         break;
     case 1:
-        blendControl = 0x48;
+        gsAlphaControl = 0x48;
         break;
     case 2:
-        blendControl = 0x42;
+        gsAlphaControl = 0x42;
         break;
     default:
         evtPrintDeveloperConsoleMessage("error: BLUR2_PARA blend\n");
-        blendControl = 0x44;
+        gsAlphaControl = 0x44;
         break;
     }
 
     rotation = scrGetFloatPara(0);
     scale = scrGetFloatPara(1);
-    dds3SetBlur2Para(rotation, scale, blendControl);
+    dds3SetBlur2Para(rotation, scale, gsAlphaControl);
     return 1;
 }
 
@@ -748,29 +748,29 @@ s32 scrCommand_BLUR2_OFF(void)
 
 s32 scrCommand_FILTER2_PARA(void)
 {
-    s32 blendMode;
-    u32 blendControl;
-    blendMode = scrGetIntPara(0);
-    switch (blendMode)
+    s32 scriptBlendSelector;
+    u32 gsAlphaControl;
+    scriptBlendSelector = scrGetIntPara(0);
+    switch (scriptBlendSelector)
     {
     case 1:
-        blendControl = 0x48;
+        gsAlphaControl = 0x48;
         break;
     case 0:
-        blendControl = 0x44;
+        gsAlphaControl = 0x44;
         break;
     case 2:
-        blendControl = 0x42;
+        gsAlphaControl = 0x42;
         break;
     case 3:
-        blendControl = 6;
+        gsAlphaControl = 6;
         break;
     default:
         evtPrintDeveloperConsoleMessage(D_0039F550);
-        blendControl = 0x44;
+        gsAlphaControl = 0x44;
         break;
     }
-    dds3SetFilter2Para(blendControl);
+    dds3SetFilter2Para(gsAlphaControl);
     return 1;
 }
 
@@ -817,29 +817,29 @@ s32 scrCommand_FILTER2_OFF(void)
 
 s32 scrCommand_MFILTER_PARA(void)
 {
-    s32 blendMode;
-    u32 blendControl;
-    blendMode = scrGetIntPara(0);
-    switch (blendMode)
+    s32 scriptBlendSelector;
+    u32 gsAlphaControl;
+    scriptBlendSelector = scrGetIntPara(0);
+    switch (scriptBlendSelector)
     {
     case 1:
-        blendControl = 0x48;
+        gsAlphaControl = 0x48;
         break;
     case 0:
-        blendControl = 0x44;
+        gsAlphaControl = 0x44;
         break;
     case 2:
-        blendControl = 0x42;
+        gsAlphaControl = 0x42;
         break;
     case 3:
-        blendControl = 6;
+        gsAlphaControl = 6;
         break;
     default:
         evtPrintDeveloperConsoleMessage(D_0039F570);
-        blendControl = 0x44;
+        gsAlphaControl = 0x44;
         break;
     }
-    dds3SetMFilterPara(blendControl);
+    dds3SetMFilterPara(gsAlphaControl);
     return 1;
 }
 
