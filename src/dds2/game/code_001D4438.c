@@ -172,7 +172,7 @@ extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 extern BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32);
 extern BtlRuntimeTask *btlCreateApplyToActiveActorsTask(u32);
 extern BtlRuntimeTask *btlCreateFadeStateResetTask(void);
-extern void btlCreateGuidePanelTask();
+extern s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex);
 extern void btlRequestGuidePanelClose();
 extern void fldEnableSceneGroupAdvancement(void);
 extern s8 D_0037F531[];

@@ -168,7 +168,7 @@ extern BtlRuntimeTask *btlCreateApplyToActiveActorsTask(u32 value);
 
 extern BtlRuntimeTask *btlCreateFadeStateResetTask(void);
 
-extern void btlCreateGuidePanelTask();
+extern s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex);
 
 extern void btlRequestGuidePanelClose();
 
