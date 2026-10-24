@@ -4201,6 +4201,7 @@
 0x001F6C08	btlGetMaxUnitTop	inferred	max of func_001F6640 over units matching flag mask
 0x001F6CB0	btlGetMaxUnitReach	inferred	max of unk_B4*unk_80 over units matching flag mask
 0x001F6D40	btlGetExtremeUnitY	inferred	max/min of unit pos.y +- extent by mask bit 0x200
+0x001F6E28	btlMeasureIndexListBounds	inferred	Measures aggregate scaled X/Z bounds and vertical extrema for a BtlIndexList, writes the group center to VU0, and returns the largest half-span/half-height. Multi-target aiming and actor-set camera framing use the computed center and extent. [Binary Ninja retail provider and caller evidence, 2026-10-24]
 0x001F70C8	btlFindNearestUnit	inferred	Scans live units matching the mask, excludes the target and inactive units, then returns the closest unit to the target's muzzle position.
 0x001F71E8	btlFindFarthestUnit	inferred	farthest matching unit by horizontal distance from point
 0x001F72C8	btlSelectUnitAtExtremeX	inferred	confidence=high; matched-C; src/dds1/game/code_001F6110.c:402:func_001F72C8; Scans the indexed unit list and selects minimum computed target X when reference flag 0x200 is set, maximum otherwise. DDS1 uses the muzzle accessor; returns the unit and leaves its point in vf10, preserving empty-list behavior.; source=fresh-R_Names31-today [names_qp11.tsv]

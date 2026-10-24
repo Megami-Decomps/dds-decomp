@@ -2736,7 +2736,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
     btlAdjustCameraDirectionForDefaultPlane(pose);
 }
 
-extern f32 func_001F6E28(BtlIndexList *, f32 *, f32 *);
+extern f32 btlMeasureIndexListBounds(BtlIndexList *, f32 *, f32 *);
 
 
 /* Use the defeat-camera hook or frame the selected actor set with the native extent rules. */
@@ -2803,7 +2803,7 @@ void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
     if (mode == 0) {
         span = btlMeasureMaskedUnitBounds((s32)sideFlags, &height, &depth);
     } else {
-        span = func_001F6E28(indices, &height, &depth);
+        span = btlMeasureIndexListBounds(indices, &height, &depth);
     }
     VU0_STORE_VF_PTR(vf10, vectors.center);
     if (mode == 0 || runtime->cameraPresetMode == 3) {

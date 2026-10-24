@@ -6092,7 +6092,7 @@ void btlDebugPrintWorldTransform(s32 x, s32 y) {
     }
 }
 
-extern f32 func_001F6E28(BtlIndexList *, f32 *, f32 *);
+extern f32 btlMeasureIndexListBounds(BtlIndexList *, f32 *, f32 *);
 
 void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *action) {
     s128 vec[3];
@@ -6110,7 +6110,7 @@ void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *action) {
             }
             btlUnitGetMuzzlePosVU(first);
         } else {
-            func_001F6E28(action->targetList, 0, 0);
+            btlMeasureIndexListBounds(action->targetList, 0, 0);
         }
         pos = &vec[1];
         SDF_VU0_STOREVECTOR(pos);
@@ -6140,7 +6140,7 @@ void btlAimLinkedUnitAtMuzzle(BtlLinkedCommand *action) {
         if (count == 1) {
             btlUnitGetMuzzlePosVU((BtlUnit *)btlGetIndexListEntry(action->targetList, 0));
         } else {
-            func_001F6E28(action->targetList, 0, 0);
+            btlMeasureIndexListBounds(action->targetList, 0, 0);
         }
         pos = &vec[1];
         SDF_VU0_STOREVECTOR(pos);

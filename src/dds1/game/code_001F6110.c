@@ -64,7 +64,7 @@ enum {
 
 extern void btlClearUnitDefeatCandidate(BtlUnit *unit);
 
-extern f32 func_001F6E28(BtlIndexList *list, f32 *maxTop, f32 *minTop);
+extern f32 btlMeasureIndexListBounds(BtlIndexList *list, f32 *maxTop, f32 *minTop);
 extern void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 
 extern s32 D_00360348[];
@@ -718,7 +718,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
 }
 
 
-f32 func_001F6E28(BtlIndexList *list, f32 *maxTop, f32 *minTop) {
+f32 btlMeasureIndexListBounds(BtlIndexList *list, f32 *maxTop, f32 *minTop) {
     f32 position[4];
     BtlUnit *unit;
     f32 scale;
