@@ -585,7 +585,7 @@ extern void fldReleaseSkyResources(void);
 
 extern void fldCreatePlayerObject(void);
 
-extern u8 *fldSelectCurrentActorOnNextFloor(void);
+extern const char *fldSelectCurrentActorOnNextFloor(void);
 
 extern void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatches, u32 batchCount, s32 isAppended);
 

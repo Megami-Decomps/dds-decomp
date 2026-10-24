@@ -166,7 +166,7 @@ extern s32 D_0032E3C0[];
 
 extern s8 D_0032C9A0[];
 
-extern u8 *fldSelectCurrentActorOnNextFloor(void);
+extern const char *fldSelectCurrentActorOnNextFloor(void);
 
 extern s32 D_003BAE68;
 
@@ -903,7 +903,7 @@ u32 fldEveHit_ScriptEnd2(u32 slot) {
 }
 
 s32 fldEveHit_ChkEveHitAfter(void) {
-    u8 *object;
+    const char *object;
     u32 state = D_003BAB3C;
     if (!(state & 1)) {
         return 0;
@@ -914,8 +914,8 @@ s32 fldEveHit_ChkEveHitAfter(void) {
     D_0032C9A0[0] = 0;
     D_003BAB3C = 0;
     object = fldSelectCurrentActorOnNextFloor();
-    if (scrSearchScriptName((const char *)object) == 0) {
-        evtStartSceneResourceTask(dds3GetActiveScene(), (const char *)object);
+    if (scrSearchScriptName(object) == 0) {
+        evtStartSceneResourceTask(dds3GetActiveScene(), object);
     }
     return 1;
 }
@@ -1231,7 +1231,7 @@ extern s32 fldGetActorStat0(s32 attribute);
 /* Follow the INF flag/message graph to its terminal event or actor action.
  * Linked selectors recurse in tail position; the native routine loops without
  * growing the stack. Targets and eventHit are signed serialized bytes. */
-extern u8 *fldFindActorEntryByName(const char *);
+extern const char *fldFindActorEntryByName(const char *);
 
 INCLUDE_RODATA(const s32, "game/code_00138C30", D_003A0150);
 
@@ -1481,38 +1481,38 @@ void fldInfLoadFromMem(const FldInfTable *source) {
 
 extern s32 gFldInf_WpExit;
 
-extern u8 *fldFindActorEntryByName(const char *);
+extern const char *fldFindActorEntryByName(const char *);
 
 void fldInfToWAP(void) {
     s32 slot;
-    char *actor;
+    const char *actor;
 
     gFldInf_WpExit = 1;
     slot = gFldInf_HitIdx;
-    actor = (char *)fldFindActorEntryByName(fldRoomResources[slot]->name);
+    actor = fldFindActorEntryByName(fldRoomResources[slot]->name);
     if (scrSearchScriptName(actor) != NULL) {
         return;
     }
     fldRoomTaskHandles[slot] = evtStartSceneResourceTask(dds3GetActiveScene(), actor);
 }
 
-extern u8 D_003369B0[];
+extern const char D_003369B0[];
 
-extern u8 D_003369C0[];
+extern const char D_003369C0[];
 
-extern u8 D_003369D0[];
+extern const char D_003369D0[];
 
-extern u8 D_003369E0[];
+extern const char D_003369E0[];
 
-extern u8 D_00336A00[];
+extern const char D_00336A00[];
 
-extern u8 D_00336A10[];
+extern const char D_00336A10[];
 
-extern u8 D_00336A30[];
+extern const char D_00336A30[];
 
-extern u8 D_00336A40[];
+extern const char D_00336A40[];
 
-extern u8 D_00336A50[];
+extern const char D_00336A50[];
 
 extern s32 fldPickedActorTemplateKind;
 
@@ -1528,7 +1528,7 @@ INCLUDE_RODATA(const s32, "game/code_00138C30", D_003A01F8);
 
 INCLUDE_RODATA(const s32, "game/code_00138C30", D_003A0200);
 
-u8 *fldPickActorTemplateByName(const char *name) {
+const char *fldPickActorTemplateByName(const char *name) {
     s32 i = 0;
     FldActorEntry *entry;
     s16 flag;
@@ -1586,7 +1586,7 @@ u8 *fldPickActorTemplateByName(const char *name) {
     return 0;
 }
 
-u8 *fldFindActorEntryByName(const char *name) {
+const char *fldFindActorEntryByName(const char *name) {
     s32 i = 0;
     FldActorEntry *entry;
     s16 flag;
@@ -1648,9 +1648,9 @@ extern s32 D_003BAB40;
 
 extern s32 D_0032E3C4[];
 
-extern u8 D_00336A30[];
+extern const char D_00336A30[];
 
-u8 *fldSelectCurrentActorOnNextFloor(void) {
+const char *fldSelectCurrentActorOnNextFloor(void) {
     s32 index = D_003BAB40;
     FldActorEntry *entry = &fldActorWaypointRows.actors[index];
     if (entry->floor == D_0032E3C4[0] + 1 && entry->kind == 10) {

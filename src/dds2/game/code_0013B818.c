@@ -128,7 +128,7 @@ extern s32 fldLabelTaskSlot;
 
 extern void fldResetActorSlots(void);
 
-extern u8 *fldFindActorEntryByName(const char *);
+extern const char *fldFindActorEntryByName(const char *);
 
 extern void fldPlayMenuSound(s32);
 
@@ -182,25 +182,25 @@ extern s32 D_00435F28;
 
 extern s32 D_00389784[];
 
-extern u8 D_00391E50[];
+extern const char D_00391E50[];
 
-extern u8 D_00391E6C[];
+extern const char D_00391E6C[];
 
-extern u8 D_00391E88[];
+extern const char D_00391E88[];
 
-extern u8 D_00391EA4[];
+extern const char D_00391EA4[];
 
-extern u8 D_00391EDC[];
+extern const char D_00391EDC[];
 
-extern u8 D_00391EF8[];
+extern const char D_00391EF8[];
 
-extern u8 D_00391F30[];
+extern const char D_00391F30[];
 
-extern u8 D_00391F4C[];
+extern const char D_00391F4C[];
 
-extern u8 D_00391F68[];
+extern const char D_00391F68[];
 
-extern u8 D_00391F84[];
+extern const char D_00391F84[];
 
 extern s32 fldPickedActorTemplateKind;
 
@@ -596,10 +596,10 @@ extern s8 D_00387D60[];
 
 extern u8 D_00435F24;
 
-extern u8 *fldSelectCurrentActorOnNextFloor(void);
+extern const char *fldSelectCurrentActorOnNextFloor(void);
 
 s32 fldEveHit_ChkEveHitAfter(void) {
-    u8 *object;
+    const char *object;
     u32 state = D_00435F24;
     if (!(state & 1)) {
         return 0;
@@ -610,7 +610,7 @@ s32 fldEveHit_ChkEveHitAfter(void) {
     D_00387D60[0] = 0;
     D_00435F24 = 0;
     object = fldSelectCurrentActorOnNextFloor();
-    if (scrSearchScriptName((const char *)object) == 0) {
+    if (scrSearchScriptName(object) == 0) {
         evtStartSceneResourceTask(dds3GetActiveScene(), object);
     }
     return 1;
@@ -1179,10 +1179,10 @@ void fldInfLoadFromMem(const FldInfTable *source) {
 
 void fldInfToWAP(void) {
     s32 slot = gFldInf_HitIdx;
-    char *actor;
+    const char *actor;
 
     gFldInf_WpExit = 1;
-    actor = (char *)fldFindActorEntryByName(fldRoomResources[slot]->name);
+    actor = fldFindActorEntryByName(fldRoomResources[slot]->name);
     if (scrSearchScriptName(actor) == NULL) {
         fldRoomTaskHandles[slot] = evtStartSceneResourceTask(dds3GetActiveScene(), actor);
     }
@@ -1192,7 +1192,7 @@ void fldInfToWAP(void) {
  * template kind is also recorded for the caller in fldPickedActorTemplateKind. */
 INCLUDE_RODATA(const s32, "game/code_0013B818", D_00413448);
 
-u8 *fldPickActorTemplateByName(const char *name) {
+const char *fldPickActorTemplateByName(const char *name) {
     s32 i = 0;
     FldActorEntry *entry;
     s16 flag;
@@ -1255,7 +1255,7 @@ u8 *fldPickActorTemplateByName(const char *name) {
 
 /* Like the template lookup, but also records the matching actor slot and
  * the kind-specific scene state before returning its template. */
-u8 *fldFindActorEntryByName(const char *name) {
+const char *fldFindActorEntryByName(const char *name) {
     s32 i = 0;
     FldActorEntry *entry;
     s16 flag;
@@ -1317,7 +1317,7 @@ u8 *fldFindActorEntryByName(const char *name) {
 }
 
 /* Use the selected actor slot only when it belongs to this area and kind 10. */
-u8 *fldSelectCurrentActorOnNextFloor(void) {
+const char *fldSelectCurrentActorOnNextFloor(void) {
     s32 index = D_00435F28;
     FldActorEntry *entry = &fldDoorTable[index];
     if (entry->floor == D_00389784[0] + 1 && entry->kind == 10) {
