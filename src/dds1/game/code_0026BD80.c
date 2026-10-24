@@ -186,7 +186,8 @@ extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern void uiDrawActiveSurfaceRegion(s32);
 extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
-extern void sdfDrawColoredTriangleFan(void *, s32, u32 *, s32, s32, s32);
+extern void sdfDrawColoredTriangleFan(s32 *points, u32 tail, u32 *colors, s32 count,
+                                      s32 useFirstColor, s32 surfaceIndex);
 
 typedef struct MenuSurfacePair {
     s32 first;
@@ -220,7 +221,7 @@ void mnuDrawMovieMenuTransitionWipe(s32 base, s32 source, u32 alpha, s32 context
     uiDrawUniformColorRect(0, 0, -1, 0x2000, 0xE00, 0, context);
     uiDrawActiveSurfaceRegion(context);
     sdfSubmitGsTestOneRegisterPacket(0x3000DL, context);
-    sdfDrawColoredTriangleFan(surfacePairs, 0, &color, 4, 1, context);
+    sdfDrawColoredTriangleFan((s32 *)surfacePairs, 0, &color, 4, 1, context);
     sdfDispatchSurfaceWithPreparedTexturePacket(context);
     sdfSubmitGsAlphaOneRegisterPacket(0x48, context);
     sdfSubmitGsTestOneRegisterPacket(0x50000, context);

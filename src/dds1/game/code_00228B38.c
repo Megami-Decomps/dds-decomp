@@ -11,7 +11,7 @@ extern void evtDrawSolarNoiseLayerAtCenteredScale(s32 x, s32 y, s32 z, s32 alpha
 
 void evtDrawSolarNoiseLayerAtConfiguredScale(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
                                              SolarSpriteContext **contextHandle, s32 color);
-extern void sdfDrawColoredTriangleFan(s32 points, s32 tail, s32 *colors, s32 count,
+extern void sdfDrawColoredTriangleFan(s32 *points, u32 tail, u32 *colors, s32 count,
                                       s32 useFirstColor, s32 surfaceIndex);
 extern void effDrawSpriteWithCornerFade(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
                                         s32 textureSetHandle, s32 slotIndex, s32 layer);
@@ -118,7 +118,7 @@ void evtDrawSolarOverlayMarker(s32 unused0, s32 unused1, s32 alpha, s32 intensit
         47, 48, 76, 48, 72, 63, 63, 75, 51, 79, 38, 75, 29, 64,
         27, 48, 29, 32, 38, 20, 51, 16, 63, 20, 72, 31, 76, 48,
     };
-    s32 colors[14];
+    u32 colors[14];
     s32 i;
     s32 color = 0x335072;
 
@@ -126,13 +126,13 @@ void evtDrawSolarOverlayMarker(s32 unused0, s32 unused1, s32 alpha, s32 intensit
     for (i = 1; i < 14; i++) {
         colors[i] = color;
     }
-    sdfDrawColoredTriangleFan((s32)positions, alpha, colors, 14, 0, object);
+    sdfDrawColoredTriangleFan(positions, alpha, colors, 14, 0, object);
 }
 
 /* Scale a selected overlay shape's alpha values and submit it between GS states. */
 void evtDrawSolarOverlayShapeWithScaledAlpha(s32 unused0, s32 unused1, s32 alpha, s32 alphaScale,
     s32 entryIndex, s32 object) {
-    s32 colors[4];
+    u32 colors[4];
     s32 i;
     s32 tableIndex;
     u32 color;
@@ -148,7 +148,7 @@ void evtDrawSolarOverlayShapeWithScaledAlpha(s32 unused0, s32 unused1, s32 alpha
         colors[i] = (color & 0xFFFFFF) |
             ((s32)((f32)((s32)((color & 0xFF000000) >> 24) * alphaScale) * 0.0078125f) << 24);
     }
-    sdfDrawColoredTriangleFan((s32)evtSolarOverlayShapes[tableIndex].positions, alpha, colors,
+    sdfDrawColoredTriangleFan(evtSolarOverlayShapes[tableIndex].positions, alpha, colors,
                   evtSolarOverlayShapes[tableIndex].count, 0, object);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, object);
 }
@@ -157,7 +157,7 @@ void evtDrawSolarOverlayShapeWithScaledAlpha(s32 unused0, s32 unused1, s32 alpha
 void evtDrawIndexedSolarOverlayLayers(s32 x, s32 y, s32 unused2, s32 alpha, s32 entryCount,
     SolarSpriteContext **contextHandle, s32 renderHandle) {
     s32 n;
-    s32 zeroColor;
+    u32 zeroColor;
     s32 *p;
     if (entryCount == 0) {
         return;
@@ -168,7 +168,7 @@ void evtDrawIndexedSolarOverlayLayers(s32 x, s32 y, s32 unused2, s32 alpha, s32 
     if (n < 8) {
         p = (s32 *)D_0036832C + entryCount * 8;
         while (n < 8) {
-            sdfDrawColoredTriangleFan(p[-1], 0xFF, &zeroColor, p[0], 1, renderHandle);
+            sdfDrawColoredTriangleFan((s32 *)(u32)p[-1], 0xFF, &zeroColor, p[0], 1, renderHandle);
             n++;
             p += 8;
         }
@@ -182,7 +182,7 @@ void evtDrawIndexedSolarOverlayLayers(s32 x, s32 y, s32 unused2, s32 alpha, s32 
 void evtDrawPartialSolarOverlay(s32 x, s32 y, s32 unused2, s32 alpha, s32 entryCount,
     SolarSpriteContext **contextHandle, s32 renderHandle) {
     s32 n;
-    s32 zeroColor;
+    u32 zeroColor;
     s32 *p;
     if (entryCount == 0) {
         return;
@@ -193,7 +193,7 @@ void evtDrawPartialSolarOverlay(s32 x, s32 y, s32 unused2, s32 alpha, s32 entryC
     if (n < 8) {
         p = (s32 *)D_0036832C + entryCount * 8;
         while (n < 8) {
-            sdfDrawColoredTriangleFan(p[-1], 0xFF, &zeroColor, p[0], 1, renderHandle);
+            sdfDrawColoredTriangleFan((s32 *)(u32)p[-1], 0xFF, &zeroColor, p[0], 1, renderHandle);
             n++;
             p += 8;
         }
@@ -477,7 +477,7 @@ void evtDrawSolarPointTransitionShapes(s32 unused0, s32 unused1, s32 alpha, s32 
             colors[j] = (evtSolarOverlayShapes[i].pointColors[j] & 0xFFFFFF) |
                 ((s32)((f32)(s32)((evtSolarOverlayShapes[i].pointColors[j] & 0xFF000000) >> 24) * pulse * (f32)alphaScale * 0.0078125f) << 24);
         }
-        sdfDrawColoredTriangleFan((s32)evtSolarOverlayShapes[i].pointPositions, alpha, (s32 *)colors, evtSolarOverlayShapes[i].pointCount, 0, object);
+        sdfDrawColoredTriangleFan(evtSolarOverlayShapes[i].pointPositions, alpha, colors, evtSolarOverlayShapes[i].pointCount, 0, object);
     }
     sdfSubmitGsAlphaOneRegisterPacket(0x48, object);
     for (i = 0; i < 8; i++) {
@@ -495,7 +495,7 @@ void evtDrawSolarPointTransitionShapes(s32 unused0, s32 unused1, s32 alpha, s32 
             colors[j] = (evtSolarOverlayShapes[i].colors[j] & 0xFFFFFF) |
                 ((s32)((f32)(s32)((evtSolarOverlayShapes[i].colors[j] & 0xFF000000) >> 24) * pulse * (f32)alphaScale * 0.0078125f) << 24);
         }
-        sdfDrawColoredTriangleFan((s32)evtSolarOverlayShapes[i].positions, alpha, (s32 *)colors, evtSolarOverlayShapes[i].count, 0, object);
+        sdfDrawColoredTriangleFan(evtSolarOverlayShapes[i].positions, alpha, colors, evtSolarOverlayShapes[i].count, 0, object);
     }
     sdfSubmitGsAlphaOneRegisterPacket(0x44, object);
 }
