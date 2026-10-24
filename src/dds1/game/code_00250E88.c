@@ -1094,7 +1094,7 @@ extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *, u32, u32);
 
 /* Display the selected mantra and move the scene grid to its filled cell. */
-s32 mnuDisplayNextPendingMantra(s32 context) {
+s32 mnuDisplayNextPendingMantra(MenuSceneWork *work) {
     s16 mantraIds[8];
     s32 coordinates[8][2];
     MnuProfileProgress *selection;
@@ -1108,7 +1108,7 @@ s32 mnuDisplayNextPendingMantra(s32 context) {
     memcpy(coordinates, D_003AF850, sizeof(coordinates));
     selection = mnuGetSelectedNodeValue();
     fldGetSceneMetadataNode();
-    pendingFlags = ((MenuSceneWork *)context)->pendingMantras;
+    pendingFlags = work->pendingMantras;
     for (i = 0; i < 8; i++) {
         if (pendingFlags[i] != 0) {
             evtCopyEntryStringToActiveWindow(
@@ -1117,7 +1117,7 @@ s32 mnuDisplayNextPendingMantra(s32 context) {
                 1, D_003BAA78[mantraIds[i]].encodedText);
             fclStartMessage(1);
             pendingFlags[i] = 0;
-            grid = ((MenuSceneWork *)context)->gridHandle;
+            grid = work->gridHandle;
             y = coordinates[i][1];
             x = coordinates[i][0];
             sdfGridSelectFilledCell(grid, x, y);
@@ -1215,7 +1215,7 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
     case MNU_MANTRA_PHASE_START_PENDING_MESSAGE:
         fclDestroyMessage();
         fclInitMessage(metadata->entryMessageWindowResource);
-        if (mnuDisplayNextPendingMantra((s32)work)) {
+        if (mnuDisplayNextPendingMantra(work)) {
             fclDestroyMessage();
             work->phaseFrame = 0;
             work->unk52C = 0;
