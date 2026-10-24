@@ -8268,7 +8268,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     return result;
 }
 
-u8 *btlCreateFloorLoadTask(u32 stage, u32 variant) {
+BtlRuntimeTask *btlCreateFloorLoadTask(s32 stage, s32 variant) {
     u8 *task = btlAllocTask(20);
     BtlFloorLoadArgs *arguments;
 
@@ -8283,7 +8283,7 @@ u8 *btlCreateFloorLoadTask(u32 stage, u32 variant) {
     arguments->stage = stage;
     arguments->variant = variant;
     arguments->state = 0;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 extern u32 btlBlendColorVec(f32 *, f32 *, f32);

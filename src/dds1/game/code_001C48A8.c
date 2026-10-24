@@ -207,7 +207,7 @@ s32 btlLoadBankWhenTasksIdle(void) {
     return 0;
 }
 
-extern u8 * btlCreateFloorLoadTask(u32 stage, u32 variant);
+extern BtlRuntimeTask *btlCreateFloorLoadTask(s32 stage, s32 variant);
 
 u64 fldMarkGridTiles(u8 *context) {
     BtlState *state = (BtlState *)context;
