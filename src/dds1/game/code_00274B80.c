@@ -350,7 +350,7 @@ void mnuTransferPartyEntryToSelection(s32 partyIndex, s32 mode, s32 skipUpdate,
     menu->backup[menu->selection] = *(datUnitWork_t *)(partyIndex * (s32)sizeof(datUnitWork_t) + (s32)menu + PARTY_CURRENT_OFFSET);
     memset((datUnitWork_t *)(partyIndex * (s32)sizeof(datUnitWork_t) + (s32)menu + PARTY_CURRENT_OFFSET), 0, sizeof(datUnitWork_t));
 
-    if (mode == 2) {
+    if (mode == CAMP_PARTY_TRANSFER_FRONTLINE) {
         menu->backup[menu->selection].flags |= 2;
         context->partyWindow.slots[menu->selection].flags &= ~0x80;
         mnuPopulatePartyPanelSlot(&menu->backup[menu->selection], 0,
@@ -525,7 +525,7 @@ s32 mnuHandlePartySelectionInput(s32 callback) {
             case 0:
                 if ((u16)(menuWork->current[entryIndex].flags & 1) != 0) {
                     window->list->cursor->flags48 |= 1;
-                    mnuTransferPartyEntryToSelection(entryIndex, 2, 0, context);
+                    mnuTransferPartyEntryToSelection(entryIndex, CAMP_PARTY_TRANSFER_FRONTLINE, 0, context);
                 } else {
                     inputFlags = 0x8000;
                 }

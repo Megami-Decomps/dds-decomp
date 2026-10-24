@@ -3,6 +3,9 @@
 
 #include "mnu.h"
 
+/* Party-selection handoff mode that marks the transferred entry frontline. */
+#define CAMP_PARTY_TRANSFER_FRONTLINE 2
+
 /* Classify signed, truncated (amount * 100) / divisor: below 25 returns 2,
  * below 50 returns 1, otherwise 0. A zero divisor also returns 0. */
 s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);

@@ -735,7 +735,7 @@ void mnuAssignSelectedPartyEntry(s32 entryIndex, s32 mode, s32 skipRefresh, Menu
     memcpy(&menuWork->backup[menuWork->selection], &menuWork->current[entryIndex],
            sizeof(datUnitWork_t));
     memset(&menuWork->current[entryIndex], 0, sizeof(datUnitWork_t));
-    if (mode == 2) {
+    if (mode == CAMP_PARTY_TRANSFER_FRONTLINE) {
         s32 selection = menuWork->selection;
         context->partyWindow.slots[selection].flags &= ~0x40;
         menuWork->backup[selection].flags |= 2;
@@ -927,7 +927,7 @@ s32 mnuHandlePartySelectionInput(dds3ProcessID_t *callback) {
             case 0:
                 if ((u16)(menuWork->current[entryIndex].flags & 1) != 0) {
                     window->list->cursor->flags48 |= 1;
-                    mnuAssignSelectedPartyEntry(entryIndex, 2, 0, context);
+                    mnuAssignSelectedPartyEntry(entryIndex, CAMP_PARTY_TRANSFER_FRONTLINE, 0, context);
                 } else {
                     inputFlags = 0x8000;
                 }
