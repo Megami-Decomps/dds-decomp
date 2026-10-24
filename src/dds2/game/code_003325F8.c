@@ -490,7 +490,7 @@ void sdfMatListFree(DevRequest *list) {
     sdfItemArrayFree(list);
 }
 
-void sdfMatListFreeResrc(void *resource, s32 retained) {
+void sdfMatListFreeResrc(DevRequest *resource, s32 retained) {
     if (resource == NULL) {
         return;
     }
