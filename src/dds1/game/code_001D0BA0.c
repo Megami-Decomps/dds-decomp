@@ -1393,7 +1393,7 @@ u32 btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *args) {
 
 extern u32 btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *);
 
-BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *owner, u32 value, u32 extra) {
+BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *owner, s32 category, s32 amount) {
     u8 *task = btlAllocTask(12);
     BtlCategoryStatDamageArgs *arguments;
 
@@ -1405,8 +1405,8 @@ BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *owner, u32 value, u32 e
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
     arguments->unit = owner;
-    arguments->category = value;
-    arguments->amount = extra;
+    arguments->category = category;
+    arguments->amount = amount;
     return (BtlRuntimeTask *)task;
 }
 

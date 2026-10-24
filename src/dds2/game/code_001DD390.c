@@ -1482,7 +1482,7 @@ s32 btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *args) {
     }
 }
 
-BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *unit, u32 target, u32 option) {
+BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *unit, s32 category, s32 amount) {
     BtlRuntimeTask *task = btlAllocTask(12);
     BtlCategoryStatDamageArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
@@ -1493,8 +1493,8 @@ BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *unit, u32 target, u32 o
     task->onStart = 0;
     args = btlGetTaskArguments(task);
     args->unit = unit;
-    args->category = target;
-    args->amount = option;
+    args->category = category;
+    args->amount = amount;
     return task;
 }
 

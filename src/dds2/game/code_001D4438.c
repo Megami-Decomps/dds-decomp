@@ -1930,7 +1930,7 @@ BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source,
         BtlUnit *owner, u32 duration);
 s32 sndResolveResourceId(s32 category, s32 id);
 BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *unit,
-        u32 target, u32 option);
+        s32 category, s32 amount);
 BtlRuntimeTask *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *actor,
         s32 itemId);
 s32 btlFormatActionEventFilename(s32 skillIndex, char *output);
