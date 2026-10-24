@@ -572,7 +572,7 @@ extern void sdfTmxSetHeader(SdfTextureFileHeader *, s32, s32, s32, s32, s32);
 /* Acquire a 128x64 grayscale power lookup texture; release its temporary image. */
 void sdf3DInitSpecularTex2(void) {
     struct sdfMemHandle_t *allocation = sdfMemAllocDirect(0x2440);
-    SdfGeneratedLookupTexture *texture = (SdfGeneratedLookupTexture *)(u32)sdfMemLock(allocation);
+    SdfGeneratedLookupTexture *texture = sdfMemLock(allocation);
     s32 i;
     s32 j;
 
