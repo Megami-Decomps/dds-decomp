@@ -1555,7 +1555,7 @@ u32 btlAwardHuntExperience(BtlHuntExpArgs *args) {
 
 extern u32 btlAwardHuntExperience(BtlHuntExpArgs *);
 
-u8 *btlCreateActorSoundOptionTask(BtlUnit *actor, s32 option) {
+BtlRuntimeTask *btlCreateActorSoundOptionTask(BtlUnit *actor, s32 option) {
     u8 *task = btlAllocTask(8);
     BtlHuntExpArgs *data;
 
@@ -1568,7 +1568,7 @@ u8 *btlCreateActorSoundOptionTask(BtlUnit *actor, s32 option) {
     data = btlGetTaskArguments(task);
     data->actor = actor;
     data->amount = (u32)option;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);

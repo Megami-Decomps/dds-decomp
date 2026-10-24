@@ -935,7 +935,7 @@ extern s32 btlResolveSkillCategory(s32, u32);
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 extern s32 btlActionEntryIsEmpty(s32, BtlOperandGroup *, BtlOperandEntry *);
 extern BtlRuntimeTask *btlCreateDeferredActorStatsTask(BtlUnit *, BtlOperandEntry *);
-extern u8 *btlCreateActorSoundOptionTask(BtlUnit *, s32);
+extern BtlRuntimeTask *btlCreateActorSoundOptionTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlScheduleMoneyPacketTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateRefreshEligibleActorsTask(void);
@@ -1254,7 +1254,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
                 btlStartTask(task);
             }
             if (groupIndex == targetCount - 1 && operandIndex == operandCount - 1) {
-                task = (BtlRuntimeTask *)btlCreateActorSoundOptionTask(action->unit, action->indexWork.huntEpReward);
+                task = btlCreateActorSoundOptionTask(action->unit, action->indexWork.huntEpReward);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = operandTask->handle;
                 task->ownerId = commandOwner;
@@ -1716,7 +1716,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
                 task->ownerId = commandOwner;
                 btlStartTask(task);
                 if (groupIndex == targetCount - 1 && operandIndex == 0) {
-                    task = (BtlRuntimeTask *)btlCreateActorSoundOptionTask(unit, action->indexWork.huntEpReward);
+                    task = btlCreateActorSoundOptionTask(unit, action->indexWork.huntEpReward);
                     task->startCondition.kind = 4;
                     task->startCondition.value.handle = operandTask->handle;
                     task->ownerId = commandOwner;
