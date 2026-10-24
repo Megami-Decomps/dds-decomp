@@ -18,7 +18,7 @@ enum {
     PAC_CALLBACK_FINISHED = 1,
     PAC_CALLBACK_ALIGN = 2,
     PAC_CALLBACK_DROP_TAIL = 4,
-    PAC_PHASE_FINISHED = 0xFF,
+    PAC_PHASE_FINISHED = -1,
     PAC_INITIAL_PACKET_COUNTER = -1,
     PAC_STATE_USE_PACKET_MEMORY = 1,
     PAC_STATE_ALLOCATE_HIGH = 2
@@ -184,9 +184,9 @@ void sdfPacFree(PacState *state) {
     }
 }
 
-/* Mark the caller's phase byte finished. */
-void sdfPacMarkPhaseFinished(u8 *phaseByte) {
-    *phaseByte = PAC_PHASE_FINISHED;
+/* Mark the signed PAC state as finished. */
+void sdfPacMarkPhaseFinished(s8 *phase) {
+    *phase = PAC_PHASE_FINISHED;
 }
 
 /* Consume byteCount bytes without bounds checks, updating the cursor and both counters. */
