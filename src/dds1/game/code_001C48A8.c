@@ -646,8 +646,7 @@ extern s32 btlResetSceneSlotFades(void);
 extern s32 btlSelectSerialEncounter(void);
 extern void btlAddItemDrop(u16 item);
 
-s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *scene) {
-    BtlState *state = (BtlState *)scene;
+s32 btlInitializeSceneAfterTasksAndBuffersReady(BtlState *scene) {
     u32 i;
 
     if (btlCountTasksForOwner(0x8000000000000003ULL) == 0 &&
@@ -655,11 +654,11 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *scene) {
         btlIsFadeOutCompleteOrIdle() != 0) {
         fldInitializeSceneGroups();
         btlResetSceneSlotFades();
-        state->eventReady = 0;
+        scene->eventReady = 0;
         btlSelectSerialEncounter();
-        if (datBattleSceneRecords[state->battleMode].itemDropId != 0) {
-            for (i = 0; i < datBattleSceneRecords[state->battleMode].itemDropCount; i++) {
-                btlAddItemDrop(datBattleSceneRecords[state->battleMode].itemDropId);
+        if (datBattleSceneRecords[scene->battleMode].itemDropId != 0) {
+            for (i = 0; i < datBattleSceneRecords[scene->battleMode].itemDropCount; i++) {
+                btlAddItemDrop(datBattleSceneRecords[scene->battleMode].itemDropId);
             }
         }
         return 8;
