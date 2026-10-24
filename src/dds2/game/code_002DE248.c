@@ -11077,17 +11077,17 @@ void effOrientClassResourceAlongTargetOffset(u8 *work) {
 
 
 /* The model helpers read vf10, following the SDK's VU0 macro-mode convention. */
-void effApplyModelTransform(u8 *work) {
-    EffModelBindings *modelContext = (EffModelBindings *)((EffActiveResource *)work)->resource;
-    u8 *animation = ((EffActiveResource *)work)->payload;
+void effApplyModelTransform(EffActiveResource *work) {
+    EffModelBindings *modelContext = (EffModelBindings *)work->resource;
+    u8 *animation = work->payload;
     u32 bits;
     float scale;
-    VU0_LOAD_VF_MEMORY(vf10, work);
+    VU0_LOAD_VF_MEMORY(vf10, work->position);
     mdlSetPosition(modelContext->model);
-    VU0_LOAD_VF_MEMORY(vf10, work + 0x10);
+    VU0_LOAD_VF_MEMORY(vf10, work->orientation);
     mdlSetRotate(modelContext->model);
     VU0_SET_ONES_XYZ(vf10);
-    scale = ((EffActiveResource *)work)->scale;
+    scale = work->scale;
     VU0_SCALAR_OP_TMP_MEMORY(bits, scale, "vmulx.xyzw vf10, vf10, vf2x");
     mdlSetScale(modelContext->model);
     modelContext->model->first->frameStep =
