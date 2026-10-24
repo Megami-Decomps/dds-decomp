@@ -5,16 +5,16 @@
 
 extern void mnuClearPanelWorkState(u32 panel);
 
-void mnuClearPairedSpriteRecords(s32 scene, s32 groupIndex) {
+void mnuClearPairedSpriteRecords(MenuPageWindow *menu, s32 groupIndex) {
     s32 remaining;
-    s32 entry;
+    MenuPanelFade *work;
 
     remaining = 1;
-    entry = groupIndex * 0x134 + scene + 0x16c;
+    work = menu->slots[groupIndex].work;
     do {
         remaining = remaining - 1;
-        mnuClearPanelWorkState(entry);
-        entry = entry + 0x20;
+        mnuClearPanelWorkState((u32)work);
+        work++;
     } while (-1 < remaining);
 }
 
