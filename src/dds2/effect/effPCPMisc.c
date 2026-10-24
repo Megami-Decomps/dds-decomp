@@ -3444,8 +3444,8 @@ void effPCPBufuIceSetScale(EffPCPSpinWork *work, f32 val) {
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effPCPBufuIceSetRotateMatrix(EffPCPSpinWork *work, void *src) {
-    VU0_LOAD_MATRIX(src);
+void effPCPBufuIceSetRotateMatrix(EffPCPSpinWork *work, const Matrix4 *sourceMatrix) {
+    VU0_LOAD_MATRIX(sourceMatrix);
     VU0_STORE_MATRIX(work->matrix);
 }
 
@@ -3524,8 +3524,8 @@ void effPCPBufuraIceSetScale(EffPCPSpinWork *work, f32 val) {
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effPCPBufuraIceSetRotateMatrix(EffPCPSpinWork *work, void *src) {
-    VU0_LOAD_MATRIX(src);
+void effPCPBufuraIceSetRotateMatrix(EffPCPSpinWork *work, const Matrix4 *sourceMatrix) {
+    VU0_LOAD_MATRIX(sourceMatrix);
     VU0_STORE_MATRIX(work->matrix);
 }
 
@@ -3602,8 +3602,8 @@ void effPCPBufudnIceSetScale(EffPCPSpinWork *work, f32 val) {
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effPCPBufudnIceSetRotateMatrix(EffPCPSpinWork *work, void *src) {
-    VU0_LOAD_MATRIX(src);
+void effPCPBufudnIceSetRotateMatrix(EffPCPSpinWork *work, const Matrix4 *sourceMatrix) {
+    VU0_LOAD_MATRIX(sourceMatrix);
     VU0_STORE_MATRIX(work->matrix);
 }
 
