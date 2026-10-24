@@ -94,7 +94,7 @@ extern void dds3WhirlwindPolyListCopyTex(dds3WhirlwindPolyList_tag *object, dds3
 extern PcpScatterRes *dds3ScatterPolyListTexResourceCreate(u32 resId);
 
 /* Create radial work from the parameter, texture-resource and child-work blocks. */
-PcpScatterRadialWork *effPCPHamaCardSpiralCreatePCF(void *parameterTable)
+PcpScatterRadialWork *effPCPHamaCardSpiralCreatePCF(const EffParamTable *parameterTable)
 {
     const PcpScatterRadialParams *params;
 
@@ -432,7 +432,7 @@ PcpScatterSpinWork *effPCPHamaCardSphereCreate(params, resource, particleParams)
 }
 
 /* Create spin work from three parameter-table blocks, retaining native nested calls. */
-PcpScatterSpinWork *effPCPHamaCardSphereCreatePCF(void *parameterTable)
+PcpScatterSpinWork *effPCPHamaCardSphereCreatePCF(const EffParamTable *parameterTable)
 {
     return effPCPHamaCardSphereCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK), dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_CHILD_BLOCK));
 }
@@ -763,7 +763,7 @@ PcpScatterRibbonWork *effPCPHamaCardScatterCreate(params, resource, particlePara
 }
 
 /* Create ribbon work from the parameter, resource and child-work blocks. */
-void effPCPHamaCardScatterCreatePCF(void *parameterTable)
+void effPCPHamaCardScatterCreatePCF(const EffParamTable *parameterTable)
 {
     effPCPHamaCardScatterCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK), dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_CHILD_BLOCK));
 }
@@ -1219,7 +1219,7 @@ PcpScatterInstanceA *effPCPWhirlwindPolyCreate(src, resource)
 }
 
 /* Create ring work from the first two table blocks. */
-PcpScatterInstanceA *effPCPWhirlwindPolyCreatePCF(void *parameterTable)
+PcpScatterInstanceA *effPCPWhirlwindPolyCreatePCF(const EffParamTable *parameterTable)
 {
     return effPCPWhirlwindPolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
 }
@@ -1493,7 +1493,7 @@ PcpScatterInstanceB *effPCPWhirlwind2PolyCreate(src, resource)
 }
 
 /* Create radius-damped ring work from its parameter and resource table blocks. */
-PcpScatterInstanceB *effPCPWhirlwind2PolyCreatePCF(void *parameterTable)
+PcpScatterInstanceB *effPCPWhirlwind2PolyCreatePCF(const EffParamTable *parameterTable)
 {
     return effPCPWhirlwind2PolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
 }
@@ -1783,7 +1783,7 @@ PcpScatterInstanceC *effPCPWhirlwind3PolyCreate(src, resource)
 }
 
 /* Create two-color ring work from its parameter and resource table blocks. */
-PcpScatterInstanceC *effPCPWhirlwind3PolyCreatePCF(void *parameterTable)
+PcpScatterInstanceC *effPCPWhirlwind3PolyCreatePCF(const EffParamTable *parameterTable)
 {
     return effPCPWhirlwind3PolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
 }
@@ -2077,7 +2077,7 @@ PcpScatterPlainInstance *effPCPWwSpherePolyCreate(src, resource)
 }
 
 /* Create flat-ring work from its parameter and resource table blocks. */
-PcpScatterPlainInstance *effPCPWwSpherePolyCreatePCF(void *parameterTable)
+PcpScatterPlainInstance *effPCPWwSpherePolyCreatePCF(const EffParamTable *parameterTable)
 {
     return effPCPWwSpherePolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
 }
