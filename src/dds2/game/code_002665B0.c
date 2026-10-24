@@ -812,7 +812,7 @@ MenuProgressHost *mnuCreateProgressHost(void) {
     host->allocation = allocation;
     host->titleEffectHandle = mnuAllocateValueRecord(1);
     mnuInitPartyPanelSlots(&host->partyPanel);
-    mnuAppendCampSpriteRequests(host->titleEffectHandle, (StaffSlots *)((s32)host + 8));
+    mnuAppendCampSpriteRequests(host->titleEffectHandle, &host->staffSlots);
     host->loadState = 1;
     return host;
 }
@@ -835,7 +835,7 @@ s32 mnuPollTitleEffectsReady(MenuProgressHost *host) {
     if (state == 2) {
         return 0;
     }
-    if (movAreTitleEffectsReady(host->titleEffectHandle, (StaffSlots *)((s32)host + 8)) == 0) {
+    if (movAreTitleEffectsReady(host->titleEffectHandle, &host->staffSlots) == 0) {
         return 1;
     }
     mnuReleaseStaffMenuResources(&host->staffSlots.baseResources[0]);
