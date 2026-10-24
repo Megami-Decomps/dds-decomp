@@ -154,8 +154,8 @@ void dds3PolygonTriangleSet(EffOffsetTriangleView *work, const f32 *position) {
     work->count = count + 3;
 }
 
-void dds3TrackPolyColorSet(EffectDispatchState *effect, s32 index, u32 value) {
-    effect->entries[index].value = value;
+void dds3TrackPolyColorSet(void *entryOwner, s32 index, u32 value) {
+    ((EffectDispatchState *)entryOwner)->entries[index].value = value;
 }
 
 BlurPacketQuad *effPkt2DGetPrimPtr(SdfDrawPacket *packet) {

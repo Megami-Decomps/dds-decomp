@@ -71,7 +71,7 @@ extern void dds3Particle_TrackSet(s32 particle, s32 index, u32 color);
 
 extern void dds3Particle_Track2Set(s32 particle, s32 index, u32 color);
 
-extern void dds3TrackPolyColorSet(s32, s32, u32);
+extern void dds3TrackPolyColorSet(void *entryOwner, s32 index, u32 color);
 
 
 extern void dds3TrackPolyVCRefresh_ParType2(ParSystem *system, s32 cellIndex);
@@ -394,7 +394,7 @@ void dds3Particle_TrackSet(s32 particle, s32 index, u32 color) {
 ;
     dds3TrackPolySet((ParSystem *)particle, index, axis);
     dds3TrackPolyVCRefresh_ParType1((ParSystem *)particle, index);
-    dds3TrackPolyColorSet(particle, index, (color & 0xFF000000) | 0x808080);
+    dds3TrackPolyColorSet((void *)(u32)particle, index, (color & 0xFF000000) | 0x808080);
 }
 
 void dds3Particle_Track2Set(s32 particle, s32 index, u32 color) {
@@ -423,7 +423,7 @@ void dds3Particle_Track2Set(s32 particle, s32 index, u32 color) {
 ;
     dds3TrackPolySet2((ParSystem *)particle, index, axis);
     dds3TrackPolyVCRefresh_ParType2((ParSystem *)particle, index);
-    dds3TrackPolyColorSet(particle, index, (color & 0xFF000000) | 0x808080);
+    dds3TrackPolyColorSet((void *)(u32)particle, index, (color & 0xFF000000) | 0x808080);
 }
 
 void dds3Particle_Track3Set(effMTPolyListHandle_t *list, s32 index, u32 color) {

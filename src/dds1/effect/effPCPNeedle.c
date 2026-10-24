@@ -15,7 +15,7 @@
 
 extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
-extern void dds3TrackPolyColorSet(u32 system, s32 index, u32 value);
+extern void dds3TrackPolyColorSet(void *entryOwner, s32 index, u32 value);
 
 extern f32 aViewTarget[4];
 extern f32 sdfViewTargetVector[4];
@@ -197,11 +197,11 @@ void effPCPNeedleSpiralDraw(EffPCPNeedleWork *work) {
                     SDF_VU0_STOREVECTOR_B_NOMEM(vertices[1]);
                     dds3TrackPolySet(work->system, i, (const u128 *)vertices);
                     dds3TrackPolyVCRefresh_ParType1(work->system, i);
-                    dds3TrackPolyColorSet((u32)work->system, i, (color & 0xFF000000) | 0x808080);
+                    dds3TrackPolyColorSet(work->system, i, (color & 0xFF000000) | 0x808080);
                 }
             } else {
                 dds3NeedleModelSetColor(work->resource, i, 0);
-                dds3TrackPolyColorSet((u32)work->system, i, 0);
+                dds3TrackPolyColorSet(work->system, i, 0);
                 dds3TrackPolyListInit(work->system, i);
             }
             slot->age++;
