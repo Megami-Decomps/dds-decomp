@@ -20,6 +20,7 @@
 #include "sdf_vu0.h"
 #include "snd_track_playback_api.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_texture_draw_packet.h"
 #include "fld_scene_ready_api.h"
 #include "fld_clear_menu_entries_api.h"
 #include "fld_play_pending_sounds_api.h"
@@ -2060,7 +2061,7 @@ void func_00148188(f32 centerX, f32 centerY, f32 angle) {
 
     packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packet);
-    sdf2DLinkTexPacket(packet, D_0044F7F0[1], 0);
+    sdf2DLinkTexPacket(packet, D_0044F7F0[1], SDF_GS_CONTEXT_1);
 
     corners[0][0] = -4720.0f;
     corners[0][1] = 0.0f;

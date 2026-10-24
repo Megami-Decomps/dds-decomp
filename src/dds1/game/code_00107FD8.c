@@ -699,7 +699,7 @@ void evtSubmitTexturedGradientQuad(s32 x, s32 y, s32 width, s32 height,
     s32 uLeft, vTop, uRight, vBottom;
 
     list = dds3FontReqAllocDrawTag();
-    sdf2DLinkTexPacket(list, texture, 0);
+    sdf2DLinkTexPacket(list, texture, SDF_GS_CONTEXT_1);
     left = (x << 4) + 0x7000;
     top = (y << 3);
     right = (x << 4) + (width << 4) + 0x7000;

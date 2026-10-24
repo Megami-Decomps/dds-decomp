@@ -2022,7 +2022,7 @@ void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 c
     vtx->corner[1].flag = 0;
     command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
-    sdf2DLinkTexPacket(command, texture, 0);
+    sdf2DLinkTexPacket(command, texture, SDF_GS_CONTEXT_1);
     sdfDrawTagLink(command, (u32)handle);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     descriptor->append(descriptor, command);
@@ -2037,7 +2037,7 @@ void DrwSprite2DC(s32 x, s32 y, s32 width, s32 height,
     s32 uLeft, vTop, uRight, vBottom;
 
     list = dds3FontReqAllocDrawTag();
-    sdf2DLinkTexPacket(list, texture, 0);
+    sdf2DLinkTexPacket(list, texture, SDF_GS_CONTEXT_1);
     left = (x << 4) + 0x7000;
     top = (y << 3);
     right = (x << 4) + (width << 4) + 0x7000;
@@ -2089,7 +2089,7 @@ void DrwSprite2DF(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 
     vtx->corner[1].flag = 0;
     command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
-    sdf2DLinkTexPacket(command, texture, 0);
+    sdf2DLinkTexPacket(command, texture, SDF_GS_CONTEXT_1);
     sdfDrawTagLink(command, (u32)handle);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     descriptor->append(descriptor, command);

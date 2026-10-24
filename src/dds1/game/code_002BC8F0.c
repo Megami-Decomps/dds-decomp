@@ -1081,7 +1081,7 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     effSelectPresetByKind(blendKind, surfaceId);
     packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
-    sdf2DLinkTexPacket(packetList, texture, 0);
+    sdf2DLinkTexPacket(packetList, texture, SDF_GS_CONTEXT_1);
     sdfDrawTagLink(packetList, (u32)packet);
     drawSurface = &sdfGrOtTable[surfaceId];
     drawSurface->append(drawSurface, packetList);
@@ -1236,7 +1236,7 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     effSelectPresetByKind(blendKind, surfaceId);
     packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
-    sdf2DLinkTexPacket(packetList, texture, 0);
+    sdf2DLinkTexPacket(packetList, texture, SDF_GS_CONTEXT_1);
     sdfDrawTagLink(packetList, (u32)packet);
     drawSurface = &sdfGrOtTable[surfaceId];
     drawSurface->append(drawSurface, packetList);

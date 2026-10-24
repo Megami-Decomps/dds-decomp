@@ -506,7 +506,7 @@ void dds3UpdateCrossfade(void) {
                        (f32)(u32)D_00436410)) & 0xFF;
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    sdf2DLinkTexPacket(list, dds3GetRenderTexture(), 0);
+    sdf2DLinkTexPacket(list, dds3GetRenderTexture(), SDF_GS_CONTEXT_1);
     sprite = sdf2DAllocSprite(1);
     vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr(sprite);
     vertex->r = 0x80;

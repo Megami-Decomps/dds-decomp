@@ -331,7 +331,7 @@ void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, sdfTe
     blendPacket[6] = 0x44;
     blendPacket[7] = 0x43;
     sdfDrawTagLink(list, (u32)blendPacket);
-    sdf2DLinkTexPacket(list, resource, 1);
+    sdf2DLinkTexPacket(list, resource, SDF_GS_CONTEXT_2);
 
     blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
     blendPacket[0] = 3;

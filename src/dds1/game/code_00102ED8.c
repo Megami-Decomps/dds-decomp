@@ -819,7 +819,7 @@ void kwlnDrawImageOutline(sdfDrawTag_t *packetList, sdfTexHandle_t *image) {
     s32 drawWidth;
     s32 drawHeight;
 
-    sdf2DLinkTexPacket(packetList, image, 0);
+    sdf2DLinkTexPacket(packetList, image, SDF_GS_CONTEXT_1);
     drawWidth = width * 0x10;
     drawHeight = height * 8;
     if (width < height) {

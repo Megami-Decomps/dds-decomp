@@ -30,7 +30,7 @@ void effResourceQuadDraw(EffResourceRectDrawParams *params, sdfTexHandle_t *reso
     packet[6] = params->blendControl;
     packet[7] = 67;
     sdfDrawTagLink(list, (u32)packet);
-    sdf2DLinkTexPacket(list, resource, 1);
+    sdf2DLinkTexPacket(list, resource, SDF_GS_CONTEXT_2);
     drawPacket = effPkt2DAllocTriStrip(1, 0x200);
     quad = effPkt2DGetPrimPtr(drawPacket);
     quad->color[0] = params->color[0];

@@ -11886,7 +11886,7 @@ void func_002F9DF0(EffParticleSharedResource *work) {
     }
     packet->secondAddress = 0x42;
     sdfDrawTagLink(list, (u32)packet);
-    sdf2DLinkTexPacket(list, snapshot.texture, 0);
+    sdf2DLinkTexPacket(list, snapshot.texture, SDF_GS_CONTEXT_1);
     sdfPrimLinkGt4(list, 0x40,
         (s32)((f32)(corners[3][0] + 0x7000) + coordX), (s32)((f32)((corners[3][1] >> 1) + 0x7900) + coordY),
         snapshot.uv.components[0], snapshot.uv.components[1], packed,
@@ -17017,7 +17017,7 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     effSelectPresetByKind(blendKind, surfaceId);
     packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
-    sdf2DLinkTexPacket(packetList, texture, 0);
+    sdf2DLinkTexPacket(packetList, texture, SDF_GS_CONTEXT_1);
     sdfDrawTagLink(packetList, (u32)packet);
     effSubmitSurfacePacket(&sdfGrOtTable[surfaceId], packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
@@ -17173,7 +17173,7 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     effSelectPresetByKind(blendKind, surfaceId);
     packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
-    sdf2DLinkTexPacket(packetList, texture, 0);
+    sdf2DLinkTexPacket(packetList, texture, SDF_GS_CONTEXT_1);
     sdfDrawTagLink(packetList, (u32)packet);
     effSubmitSurfacePacket(&sdfGrOtTable[surfaceId], packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);

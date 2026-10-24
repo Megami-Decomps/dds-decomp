@@ -2268,7 +2268,7 @@ void mdlDrawViewerTexturePreview(void) {
         height = node->textures[index]->height;
         sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7780, 0x7A20,
             0xFF0080, 0, D_004370C8, width, height));
-        sdf2DLinkTexPacket(packetList, node->textures[index], 0);
+        sdf2DLinkTexPacket(packetList, node->textures[index], SDF_GS_CONTEXT_1);
         displayWidth = width << 4;
         displayHeight = height << 3;
         if (width < height) {

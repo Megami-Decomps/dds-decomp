@@ -698,7 +698,7 @@ void dds3EffectFileListWindowDrawSprite(EffResourceDescriptor *overlay) {
         vertex->corner[1].x = vertex->corner[0].x + 0x800;
         vertex->corner[1].y = vertex->corner[0].y + 0x400;
         vertex->corner[1].mask = 0xFF0000;
-        sdf2DLinkTexPacket(list, texture, 0);
+        sdf2DLinkTexPacket(list, texture, SDF_GS_CONTEXT_1);
         sdfDrawTagLink(list, (u32)sprite);
         D_003805A8.append(&D_003805A8, list);
     }

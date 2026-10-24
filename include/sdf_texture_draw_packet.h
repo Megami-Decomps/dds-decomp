@@ -3,6 +3,9 @@
 
 #include "sdf.h"
 
+#define SDF_GS_CONTEXT_1 0
+#define SDF_GS_CONTEXT_2 1
+
 /* Variable-sized packet header initialized by sdf2DMakePrimPacketHeader. */
 typedef struct SdfDrawPacket {
     u16 quadwords;
@@ -55,7 +58,7 @@ typedef char SdfTextureDrawPacket_registerAddressC_at_48[
 
 u32 sdf2DGetTexPacketSize(sdfTexHandle_t *texture);
 SdfTextureDrawPacket *sdf2DMakeTexPacket(SdfTextureDrawPacket *drawPacket,
-                                                   sdfTexHandle_t *texture, s32 contextOffset);
-s32 sdf2DLinkTexPacket(sdfDrawTag_t *packetList, sdfTexHandle_t *texture, s32 contextOffset);
+                                                   sdfTexHandle_t *texture, s32 context);
+s32 sdf2DLinkTexPacket(sdfDrawTag_t *packetList, sdfTexHandle_t *texture, s32 context);
 
 #endif

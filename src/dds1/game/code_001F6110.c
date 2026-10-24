@@ -1351,7 +1351,7 @@ void btlDrawButtonIconFixed64(SdfPoolNode *surface, s32 x, s32 y,
     texture = sdfGetOrCreateTextureForReference(surface, battle->buttonTextureHandle);
     packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packet);
-    sdf2DLinkTexPacket(packet, texture, 0);
+    sdf2DLinkTexPacket(packet, texture, SDF_GS_CONTEXT_1);
 
     xFixed = x * 16;
     yFixed = y * 8;
@@ -1423,7 +1423,7 @@ void btlDrawButtonIcon(SdfPoolNode *surface, s32 x, s32 y, s32 topLeftColor, s32
         texture = sdfGetOrCreateTextureForReference(surface, ((BtlState *)btlGetRuntime())->buttonTextureHandle);
         packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(packet);
-        sdf2DLinkTexPacket(packet, texture, 0);
+        sdf2DLinkTexPacket(packet, texture, SDF_GS_CONTEXT_1);
         xFixed = x * 0x10;
         yFixed = y * 8;
         sdfPrimLinkGt4(packet, 0x40,
@@ -3573,7 +3573,7 @@ void btlDrawResourcePreview(BtlResourceDescriptor *descriptor) {
         vertex->corner[1].x = vertex->corner[0].x + 0x800;
         vertex->corner[1].y = vertex->corner[0].y + 0x400;
         vertex->corner[1].mask = 0xFF0000;
-        sdf2DLinkTexPacket(list, texture, 0);
+        sdf2DLinkTexPacket(list, texture, SDF_GS_CONTEXT_1);
         sdfDrawTagLink(list, (u32)sprite);
         surface = &sdfGrOtTable[descriptor->drawSurfaceIndex];
         surface->append(surface, list);

@@ -10512,7 +10512,7 @@ void func_002B4BA0(EffParticleSharedResource *work) {
     }
     packet->registerAddress = 0x42;
     sdfDrawTagLink(list, (u32)packet);
-    sdf2DLinkTexPacket(list, snapshot.texture, 0);
+    sdf2DLinkTexPacket(list, snapshot.texture, SDF_GS_CONTEXT_1);
     sdfPrimLinkGt4(list, 0x40,
         (s32)((f32)(corners[3][0] + 0x7000) + coordX), (s32)((f32)((corners[3][1] >> 1) + 0x7900) + coordY),
         snapshot.uv.components[0], snapshot.uv.components[1], packed,

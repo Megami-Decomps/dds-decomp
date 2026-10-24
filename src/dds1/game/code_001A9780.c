@@ -7473,7 +7473,7 @@ s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
 
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    sdf2DLinkTexPacket(list, texture, 0);
+    sdf2DLinkTexPacket(list, texture, SDF_GS_CONTEXT_1);
     uFixed = u * 0x10;
     vFixed = v * 0x10;
     uRight = uFixed + width * 0x10;

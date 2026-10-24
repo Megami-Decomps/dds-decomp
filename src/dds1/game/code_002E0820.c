@@ -218,27 +218,27 @@ u32 sdf2DGetTexPacketSize(sdfTexHandle_t *texture) {
     return SDF_TEXTURE_DRAW_PACKET_BYTES;
 }
 
-/* Fill TEX1, TEX0 and CLAMP A+D writes; contextOffset 0/1 selects GS context. */
-SdfTextureDrawPacket *sdf2DMakeTexPacket(SdfTextureDrawPacket *drawPacket, sdfTexHandle_t *texture, s32 contextOffset) {
+/* Fill TEX1, TEX0 and CLAMP A+D writes for the selected GS context. */
+SdfTextureDrawPacket *sdf2DMakeTexPacket(SdfTextureDrawPacket *drawPacket, sdfTexHandle_t *texture, s32 context) {
     drawPacket->header.quadwords = 4;
     drawPacket->header.gifTag = 0x1000000000008003ULL;
     drawPacket->header.command = 0x50000004;
     drawPacket->header.pad08 = 0;
     drawPacket->header.payloadHeader = SDF_GIF_REGISTER_AD;
     drawPacket->textureWordA = sdfTexGetTex1Reg(texture);
-    drawPacket->registerAddressA = contextOffset + 0x14;
+    drawPacket->registerAddressA = context + 0x14;
     drawPacket->textureWordB = sdfTexGetTex0Reg(texture);
-    drawPacket->registerAddressB = contextOffset + 6;
+    drawPacket->registerAddressB = context + 6;
     drawPacket->textureWordC = sdfTexGetClampReg(texture);
-    drawPacket->registerAddressC = contextOffset + 8;
+    drawPacket->registerAddressC = context + 8;
     return drawPacket;
 }
 
 /* Allocate and append texture state; return its packet address. */
-s32 sdf2DLinkTexPacket(sdfDrawTag_t *packetList, sdfTexHandle_t *texture, s32 contextOffset) {
+s32 sdf2DLinkTexPacket(sdfDrawTag_t *packetList, sdfTexHandle_t *texture, s32 context) {
     s32 packetBytes = sdf2DGetTexPacketSize(texture);
     SdfTextureDrawPacket *packet = (SdfTextureDrawPacket *)sdfGrAllocPacketBuff(packetBytes);
-    s32 packetAddress = (s32)sdf2DMakeTexPacket(packet, texture, contextOffset);
+    s32 packetAddress = (s32)sdf2DMakeTexPacket(packet, texture, context);
     sdfDrawTagLink(packetList, packetAddress);
     return packetAddress;
 }

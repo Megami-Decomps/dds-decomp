@@ -1502,7 +1502,7 @@ void btlDrawCapturedScreenTileOverlay(sdfDrawTag_t *packets, u32 cellColor, u32 
 
     if (btlRuntimeState.options & 1) {
         SdfPacket *clampPacket;
-        sdf2DLinkTexPacket(packets, dds3RenderTexture, 0);
+        sdf2DLinkTexPacket(packets, dds3RenderTexture, SDF_GS_CONTEXT_1);
         clampPacket = (SdfPacket *)sdfGrAllocPacketBuff(0x30);
         clampPacket[0].unk0 = 2;
         clampPacket[0].unk8 = (((u64)0x50000002 << 16 | 0x1000) << 16);
