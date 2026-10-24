@@ -261,7 +261,7 @@ typedef struct BtlState {
     struct sdfMemHandle_t *fieldF2ResourceId; /* 0x294 */
     struct sdfMemHandle_t *fieldTBResourceId; /* 0x298 */
     struct dds3ProcessID_t *scriptOwner; /* 0x29C: parent task; script tasks use its priority minus one */
-    s32 scriptTask; /* 0x2A0: scheduler task handle, not another list pointer */
+    struct dds3ProcessID_t *scriptTask; /* 0x2A0: active battle script task. */
     s32 boundTask; /* 0x2A4: actor-slot binding task */
     struct dds3ProcessID_t *sceneObject; /* 0x2A8: command-panel task. */
     struct dds3ProcessID_t *spriteObject; /* 0x2AC: target-selection task. */
@@ -507,7 +507,7 @@ typedef struct BtlState {
     struct sdfMemHandle_t *fieldF2ResourceId; /* 0x2BC */
     struct sdfMemHandle_t *fieldTBResourceId; /* 0x2C0 */
     struct dds3ProcessID_t *scriptOwner; /* 0x2C4: parent task; script tasks use its priority minus one */
-    s32 scriptTask; /* 0x2C8: also supplies the task passed to scrSetUserData */
+    struct dds3ProcessID_t *scriptTask; /* 0x2C8: active battle script task. */
     s32 boundTask; /* 0x2CC */
     struct dds3ProcessID_t *sceneObject; /* 0x2D0: command-panel task created at 001CAB60. */
     struct dds3ProcessID_t *spriteObject; /* 0x2D4: scene sprite task; destroyed with its hierarchy. */

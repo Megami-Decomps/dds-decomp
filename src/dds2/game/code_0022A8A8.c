@@ -42,7 +42,7 @@ void btlStartSkillEventTask(u32 skill) {
                             (BfFlw0Header *)battle->scriptHandle, skill);
     scrSetUserData(taskId, NULL);
     dds3LinkProcess(battle->scriptOwner, taskId);
-    battle->scriptTask = (s32)taskId;
+    battle->scriptTask = taskId;
 }
 
 s32 btlReleaseScriptResource(void) {
@@ -50,7 +50,7 @@ s32 btlReleaseScriptResource(void) {
     if (battle->eventTaskId == -1) {
         return 1;
     }
-    if (dds3ExistProcess((dds3ProcessID_t *)battle->scriptTask) == 0) {
+    if (dds3ExistProcess(battle->scriptTask) == 0) {
         battle->scriptTask = 0;
         return 1;
     }
@@ -87,7 +87,7 @@ void btlStartPrimaryScriptTask(void) {
                             (BfFlw0Header *)battle->scriptHandle, scriptId);
     scrSetUserData(taskId, NULL);
     dds3LinkProcess(battle->scriptOwner, taskId);
-    battle->scriptTask = (s32)taskId;
+    battle->scriptTask = taskId;
     battle->scriptFlags |= 1;
 }
 
@@ -126,7 +126,7 @@ void btlStartSecondaryScriptTask(void) {
                             (BfFlw0Header *)battle->scriptHandle, scriptId);
     scrSetUserData(taskId, NULL);
     dds3LinkProcess(battle->scriptOwner, taskId);
-    battle->scriptTask = (s32)taskId;
+    battle->scriptTask = taskId;
     battle->scriptFlags |= 2;
 }
 

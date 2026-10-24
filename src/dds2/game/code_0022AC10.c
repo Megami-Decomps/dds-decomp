@@ -837,11 +837,11 @@ BtlRuntimeTask *btlCreateScriptResourceTask(BtlUnit *object, u32 group) {
 s32 btlUpdateScriptResourceTask(BattleScriptTaskData *record) {
     if (record->frames == 0) {
         BtlState *battle = (BtlState *)btlGetRuntime();
-        u32 object;
+        dds3ProcessID_t *object;
         btlStartSkillEventTask(record->group);
         object = battle->scriptTask;
-        if (object != 0) {
-            scrSetUserData((dds3ProcessID_t *)object, (void *)record->object);
+        if (object != NULL) {
+            scrSetUserData(object, (void *)record->object);
         }
     }
     if (btlReleaseScriptResource()) {
