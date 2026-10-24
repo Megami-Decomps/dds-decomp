@@ -504,20 +504,20 @@ s32 dds3KillProcess(dds3ProcessID_t* task, s32 delayTicks)
     if (task == 0 || task == (dds3ProcessID_t*)-1) {
         return 0;
     }
-    switch (task->flags & 0xF) {
-    case 1:
-    case 2:
+    switch (task->flags & KWLN_TASK_STATE_MASK) {
+    case KWLN_TASK_DELAYED_START:
+    case KWLN_TASK_ACTIVE:
         task->destroyDelayTicks = delayTicks;
         EndProcess(task);
         return 1;
-    case 3:
+    case KWLN_TASK_DESTROY_PENDING:
         task->destroyDelayTicks = delayTicks;
         if (task->destroyDelayTicks == 0) {
             kwlnTaskFinalizeDestroy(task);
             return 1;
         }
         break;
-    case 0:
+    case KWLN_TASK_DETACHED:
     default:
         return 0;
     }
@@ -723,4 +723,3 @@ INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", runprocess);
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_00435BF8);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_00435C00);
-
