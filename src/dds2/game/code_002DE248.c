@@ -1720,7 +1720,7 @@ u8 *effCreateBillFrameNode(EffBillFrameConfig *config, u32 handle) {
     u32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
     struct sdfMemHandle_t *base = sdfMemAllocDirect(count * 0x18 + headerSize);
-    u8 *body = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
+    u8 *body = (u8 *)sdfMemLock(base);
     u8 *node = body;
 
     body += headerSize;
@@ -1990,7 +1990,7 @@ u8 *billCreateCellNode(EffBillCellConfig *config, u32 handle) {
     u32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
     struct sdfMemHandle_t *base = sdfMemAllocDirect(count * 0x1C + headerSize);
-    u8 *body = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
+    u8 *body = (u8 *)sdfMemLock(base);
     u8 *node = body;
 
     body += headerSize;
@@ -2279,7 +2279,7 @@ u8 *billCreateParticleNode(EffBillParticleConfig *config, u32 handle) {
     u32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
     struct sdfMemHandle_t *base = sdfMemAllocDirect(count * 0x2C + headerSize);
-    u8 *body = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
+    u8 *body = (u8 *)sdfMemLock(base);
     u8 *node = body;
 
     body += headerSize;
@@ -2352,7 +2352,7 @@ void effClearAnimatedFrames(u8 *owner) {
 u8 *billAllocateAnimatedTransformEntries(EffBillAnimatedFrameConfig *config) {
     u32 headerSize = 0x10;
     struct sdfMemHandle_t *base = sdfMemAllocDirect(config->frame.output.timed.count * 0x18 + headerSize);
-    u8 *node = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
+    u8 *node = (u8 *)sdfMemLock(base);
     u8 *entries = node + headerSize;
 
     ((EffBillFrameState *)node)->allocation = base;
@@ -2656,7 +2656,7 @@ void billResetEmitterIndices(u8 *owner) {
 u8 *billAllocEmitterNode(u8 *config) {
     u32 headerSize = 0x10;
     struct sdfMemHandle_t *base = sdfMemAllocDirect(((EffBillTimedHeader *)config)->count * 0x18 + headerSize);
-    u8 *body = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
+    u8 *body = (u8 *)sdfMemLock(base);
     u8 *node = body;
 
     body += headerSize;
