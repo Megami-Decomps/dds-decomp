@@ -3388,8 +3388,8 @@ void fldResetObjectSlots(void) {
     for (i = 0; i < 32; i++) {
         fldTakaraSlotTable[i].id = -1;
         fldTakaraSlotTable[i].unitObject = NULL;
-        fldTakaraSlotTable[i].activationState = 0;
-        fldTakaraSlotTable[i].activationRequested = 0;
+        fldTakaraSlotTable[i].activationState = FLD_OBJECT_ACTIVATION_INACTIVE;
+        fldTakaraSlotTable[i].activationRequested = FLD_OBJECT_ACTIVATION_INACTIVE;
         if (fldTakaraSlotTable[i].effectNode != 0) {
             dds3EffectDelete(fldTakaraSlotTable[i].effectNode);
         }
@@ -3720,10 +3720,10 @@ void func_0014C9B0(u32 id, f32 *rotation, f32 x, f32 y, f32 z) {
         resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(object);
         if (fldTestObjectActivationFlag(id)) {
             mdlLoopMotion(resource, 0, 2);
-            fldTakaraSlotTable[fldTakaraCount].activationState = 3;
+            fldTakaraSlotTable[fldTakaraCount].activationState = FLD_OBJECT_ACTIVATION_ACTIVE;
         } else {
             mdlSingleMotion(resource, 0, 0);
-            fldTakaraSlotTable[fldTakaraCount].activationState = 0;
+            fldTakaraSlotTable[fldTakaraCount].activationState = FLD_OBJECT_ACTIVATION_INACTIVE;
         }
         fldTakaraSlotTable[fldTakaraCount].id = id;
         fldTakaraSlotTable[fldTakaraCount].unitObject = object;
@@ -3774,8 +3774,9 @@ void fldFindTakaraSlot(s32 id) {
     s32 i;
 
     for (i = 0; i < fldTakaraCount; i++) {
-        if (fldTakaraSlotTable[i].id == id && fldTakaraSlotTable[i].activationState == 0) {
-            fldTakaraSlotTable[i].activationRequested = 1;
+        if (fldTakaraSlotTable[i].id == id &&
+            fldTakaraSlotTable[i].activationState == FLD_OBJECT_ACTIVATION_INACTIVE) {
+            fldTakaraSlotTable[i].activationRequested = FLD_OBJECT_ACTIVATION_ANIMATING;
         }
     }
 }
@@ -3793,8 +3794,8 @@ void fldReleaseObjectSlots(void) {
     for (i = 0; i < 32; i++) {
         fldTakaraSlotTable[i].id = -1;
         fldTakaraSlotTable[i].unitObject = NULL;
-        fldTakaraSlotTable[i].activationState = 0;
-        fldTakaraSlotTable[i].activationRequested = 0;
+        fldTakaraSlotTable[i].activationState = FLD_OBJECT_ACTIVATION_INACTIVE;
+        fldTakaraSlotTable[i].activationRequested = FLD_OBJECT_ACTIVATION_INACTIVE;
     }
 }
 
@@ -3804,8 +3805,8 @@ void fldUpdateObjectSlotActivation(void) {
 
     for (i = 0; i < fldTakaraCount; i++) {
         switch (fldTakaraSlotTable[i].activationState) {
-        case 0:
-            if (fldTakaraSlotTable[i].activationRequested == 1) {
+        case FLD_OBJECT_ACTIVATION_INACTIVE:
+            if (fldTakaraSlotTable[i].activationRequested == FLD_OBJECT_ACTIVATION_ANIMATING) {
                 resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(fldTakaraSlotTable[i].unitObject);
                 mdlSingleMotion(resource, 0, 1);
                 fldTakaraSlotTable[i].activationState = fldTakaraSlotTable[i].activationRequested;
@@ -3840,20 +3841,20 @@ void fldUpdateObjectSlotActivation(void) {
                 }
             }
             break;
-        case 1:
+        case FLD_OBJECT_ACTIVATION_ANIMATING:
             resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(fldTakaraSlotTable[i].unitObject);
             if (resource->first->state == SDF_MOTION_STATE_TERMINAL) {
                 mdlLoopMotion(resource, 0, 2);
-                fldTakaraSlotTable[i].activationRequested = 2;
-                fldTakaraSlotTable[i].activationState = 2;
+                fldTakaraSlotTable[i].activationRequested = FLD_OBJECT_ACTIVATION_WAITING_FOR_ENCOUNTER;
+                fldTakaraSlotTable[i].activationState = FLD_OBJECT_ACTIVATION_WAITING_FOR_ENCOUNTER;
             }
             break;
-        case 2:
+        case FLD_OBJECT_ACTIVATION_WAITING_FOR_ENCOUNTER:
             if (fldEncountTestFlag(0x40)) {
                 resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(fldTakaraSlotTable[i].unitObject);
                 mdlLoopMotion(resource, 0, 3);
-                fldTakaraSlotTable[i].activationRequested = 3;
-                fldTakaraSlotTable[i].activationState = 3;
+                fldTakaraSlotTable[i].activationRequested = FLD_OBJECT_ACTIVATION_ACTIVE;
+                fldTakaraSlotTable[i].activationState = FLD_OBJECT_ACTIVATION_ACTIVE;
                 if (D_004362E8 != 0) {
                     dds3EffectDelete(D_004362E8);
                     D_004362E8 = 0;
