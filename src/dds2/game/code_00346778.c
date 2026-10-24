@@ -56,11 +56,11 @@ void movieOpenStream(movieStream_t *owner, SdfMovieDescriptor *descriptor, const
     }
     owner->isPac = isPac;
     owner->remainingBytes = 0x7FFFFFFF;
-    owner->unk04 = descriptor->unk00;
-    owner->unk08 = descriptor->unk04;
-    owner->unk06 = descriptor->unk02;
-    owner->unk0C = descriptor->unk08;
-    owner->unk0E = descriptor->unk0A;
+    owner->drawX = descriptor->drawX;
+    owner->drawZ = descriptor->drawZ;
+    owner->drawY = descriptor->drawY;
+    owner->drawWidth = descriptor->drawWidth;
+    owner->drawHeight = descriptor->drawHeight;
     soundFormat.hasAudio = descriptor->hasAudio;
     soundFormat.stereo = descriptor->stereo;
     soundFormat.loopMode = 0;

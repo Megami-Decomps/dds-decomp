@@ -274,11 +274,11 @@ void sdfAdvanceStreamPlayback(s32 cadence);
 void sdfSetStreamFrameDrawMode(u32 mode);
 
 typedef struct SdfMovieDescriptor {
-    u16 unk00;
-    u16 unk02;
-    u32 unk04;
-    u16 unk08;
-    u16 unk0A;
+    u16 drawX;
+    u16 drawY;
+    u32 drawZ;
+    u16 drawWidth;
+    u16 drawHeight;
     s32 source;
     u8 hasAudio;
     u8 stereo;
@@ -311,11 +311,11 @@ typedef struct movieStream_t {
     u8 state;
     u8 stopRequested;
     u8 isPac;
-    s16 unk04;
-    s16 unk06;
-    u32 unk08;
-    s16 unk0C;
-    s16 unk0E;
+    s16 drawX;
+    s16 drawY;
+    u32 drawZ;
+    s16 drawWidth;
+    s16 drawHeight;
     struct sdfFileCmdHandle_t *deviceState;
     s32 totalBytes;
     s32 remainingBytes;

@@ -1958,14 +1958,14 @@ void sdfMovieDrawFrame(movieStream_t *movie, SdfPoolNode *pool) {
     packet->color.registerId = SDF_GS_RGBAQ;
     packet->sourceOrigin.value = 0;
     packet->sourceOrigin.registerId = 3;
-    packet->vertexOrigin.value = ((u64)movie->unk08 << 32) |
-        (u32)(movie->unk06 << 16) | (u32)movie->unk04;
+    packet->vertexOrigin.value = ((u64)movie->drawZ << 32) |
+        (u32)(movie->drawY << 16) | (u32)movie->drawX;
     packet->vertexOrigin.registerId = SDF_GS_XYZ2;
     packet->sourceExtent.value = (height << 20) | (width << 4);
     packet->sourceExtent.registerId = 3;
-    packet->vertexExtent.value = ((u64)movie->unk08 << 32) |
-        (u32)((movie->unk06 + movie->unk0E) << 16) |
-        (u32)(movie->unk04 + movie->unk0C);
+    packet->vertexExtent.value = ((u64)movie->drawZ << 32) |
+        (u32)((movie->drawY + movie->drawHeight) << 16) |
+        (u32)(movie->drawX + movie->drawWidth);
     packet->vertexExtent.registerId = SDF_GS_XYZ2;
     list = sdfPrimAllocDrawTag(0);
     sdfDrawTagLink(list, (u32)packet);
