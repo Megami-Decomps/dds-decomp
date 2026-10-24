@@ -275,7 +275,7 @@ void effSwordTrackDrawTex(EffMagatuhiValueWork *work) {
             colors, D_00452110, offsets, pendingCount, 0);
         sdfDrawTagLink(list, (u32)vertexPacket);
     }
-    D_003B2050[work->unk10]->append(D_003B2050[work->unk10], list);
+    D_003B2050[work->drawQueueIndex]->append(D_003B2050[work->drawQueueIndex], list);
 }
 
 extern EffRandState effDefaultRandomState[];

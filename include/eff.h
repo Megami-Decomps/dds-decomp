@@ -49,7 +49,7 @@ typedef struct EffMagatuhiValueWork {
     u8 pad06[2];
     f32 historyDistanceScale; /* Segment length is clamped to three times this value. */
     f32 historyAngleStep; /* Radians per history update. */
-    u32 unk10;
+    u32 drawQueueIndex; /* 0x10: selects one of the four trail draw queues. */
     f32 (*positions)[4];
     u32 *colorTable;
     f32 *historyScalars;
@@ -68,7 +68,7 @@ typedef struct EffMagatuhiHistoryParams {
     f32 historyDistanceScale;
     u32 colorA;
     u32 colorB;
-    s32 unk14;
+    s32 drawQueueIndex; /* 0x14: copied to the render owner's queue selector. */
     f32 historyAngleStep;
 } EffMagatuhiHistoryParams;
 
@@ -88,12 +88,12 @@ void effMagaCylinderFreeParts(EffMagatuhiValueWork *work);
 void effMagaCylinderSetPart(EffMagatuhiValueWork *work, s32 index, u32 color);
 void effMagaCylinderBlendColor(EffMagatuhiValueWork *work, u32 colorA, u32 colorB);
 #ifdef VERSION_DDS2
-EffMagatuhiValueWork *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 historyDistanceScale, s32 param, f32 historyAngleStep);
+EffMagatuhiValueWork *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 historyDistanceScale, s32 drawQueueIndex, f32 historyAngleStep);
 void effMagaCylinderDrawTrack(EffMagatuhiOwner *owner);
 void effMagaCylinderSetPartPtrs(EffMagatuhiValueWork *work, s32 index);
 void effMagaCylinderSetPartPos(EffMagatuhiValueWork *work, s32 index, const f32 vector[4]);
 #else
-EffMagatuhiValueWork *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 historyDistanceScale, s32 param, f32 historyAngleStep);
+EffMagatuhiValueWork *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 historyDistanceScale, s32 drawQueueIndex, f32 historyAngleStep);
 void effMagaCylinderDrawTrack(EffMagatuhiOwner *owner);
 void effMagaCylinderSetPartPtrs(EffMagatuhiValueWork *work, s32 index);
 void effMagaCylinderSetPartPos(EffMagatuhiValueWork *work, s32 index, const f32 vector[4]);

@@ -13,7 +13,7 @@ EffMagatuhiOwner *effMagaCylinderAllocPart(const EffMagatuhiHistoryParams *sourc
 
     effect = sdfChipAllocDirect(sizeof(*effect));
     memcpy(&effect->params, source, sizeof(effect->params));
-    effect->valueWork = effMagaCylinderAllocTex(effect->params.count, effect->params.historyCount, effect->params.historyDistanceScale, effect->params.unk14, effect->params.historyAngleStep);
+    effect->valueWork = effMagaCylinderAllocTex(effect->params.count, effect->params.historyCount, effect->params.historyDistanceScale, effect->params.drawQueueIndex, effect->params.historyAngleStep);
     effMagaCylinderBlendColor(effect->valueWork, effect->params.colorA, effect->params.colorB);
     return effect;
 }
@@ -42,7 +42,7 @@ void effMagaCylinderSetPartPtrs(EffMagatuhiValueWork *work, s32 slotIndex) {
     angleRow[3] = 0.0f;
 }
 
-EffMagatuhiValueWork *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 historyDistanceScale, s32 param, f32 historyAngleStep) {
+EffMagatuhiValueWork *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 historyDistanceScale, s32 drawQueueIndex, f32 historyAngleStep) {
     s32 countFrames;
     s32 frameTerm;
     s32 countTerm;
@@ -77,7 +77,7 @@ EffMagatuhiValueWork *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 h
     resource->historyCount = historyCount;
     resource->historyAngleStep = historyAngleStep;
     resource->historyDistanceScale = historyDistanceScale;
-    resource->unk10 = param;
+    resource->drawQueueIndex = drawQueueIndex;
     resource->positions = (f32 (*)[4])positions;
     resource->colorTable = (u32 *)colorTable;
     resource->historyScalars = (f32 *)historyScalars;
