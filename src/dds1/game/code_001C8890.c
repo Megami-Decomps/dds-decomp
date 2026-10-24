@@ -934,7 +934,7 @@ extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);
 extern s32 btlResolveSkillCategory(s32, u32);
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 extern s32 btlActionEntryIsEmpty(s32, BtlOperandGroup *, BtlOperandEntry *);
-extern void *btlCreateDeferredActorStatsTask(BtlUnit *, BtlOperandEntry *);
+extern BtlRuntimeTask *btlCreateDeferredActorStatsTask(BtlUnit *, BtlOperandEntry *);
 extern u8 *btlCreateActorSoundOptionTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlScheduleMoneyPacketTask(BtlUnit *, s32);
@@ -951,7 +951,7 @@ extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(SoundResourceNode *, BtlUnit
 extern BtlRuntimeTask *sndCreateSetStateTask(void);
 extern BtlRuntimeTask *sndCreateClearStateTask(void);
 extern BtlRuntimeTask *btlScheduleActorUpdate(BtlUnit *unit);
-extern void *btlCreateClearActorEntrySelectionTask(BtlUnit *);
+extern BtlRuntimeTask *btlCreateClearActorEntrySelectionTask(BtlUnit *);
 extern u8 *btlCreateActorPositionEffectTask(u8 *);
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
@@ -1435,8 +1435,8 @@ s32 btlFormatActionEventFilename(s32 skillIndex, char *output);
 extern BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *, const char *);
 extern BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *, BtlUnit *, s32, s32, BtlUnit *, u16);
 extern BtlRuntimeTask *sndCreateSkillSeTask(const ActiveSoundNode *, u16);
-extern void *btlCreateMaskedActorEntryUpdateTask(BtlUnit *, BtlOperandEntry *);
-extern void *btlCreateQueuedActorEntrySelectionTask(BtlUnit *, BtlOperandEntry *);
+extern BtlRuntimeTask *btlCreateMaskedActorEntryUpdateTask(BtlUnit *, BtlOperandEntry *);
+extern BtlRuntimeTask *btlCreateQueuedActorEntrySelectionTask(BtlUnit *, BtlOperandEntry *);
 
 
 /* Schedule the LINKAGE action task chain (inferred role). */

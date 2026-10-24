@@ -1315,7 +1315,7 @@ u32 btlApplyDeferredActorStats(BtlOperandTaskArgs *arguments) {
     return 1;
 }
 
-void *btlCreateDeferredActorStatsTask(BtlUnit *owner, BtlOperandEntry *spec) {
+BtlRuntimeTask *btlCreateDeferredActorStatsTask(BtlUnit *owner, BtlOperandEntry *spec) {
     BtlRuntimeTask *task = btlAllocTask(0x2C);
     BtlOperandTaskArgs *arguments;
 
@@ -1417,7 +1417,7 @@ s32 btlApplyMaskedActorEntryUpdate(BtlOperandTaskArgs *args) {
 }
 
 /* Copy the operand into an owner-bound masked-entry-update task. */
-void *btlCreateMaskedActorEntryUpdateTask(BtlUnit *owner, BtlOperandEntry *spec) {
+BtlRuntimeTask *btlCreateMaskedActorEntryUpdateTask(BtlUnit *owner, BtlOperandEntry *spec) {
     BtlRuntimeTask *task = btlAllocTask(0x2C);
     BtlOperandTaskArgs *arguments;
 
@@ -1442,7 +1442,7 @@ u32 btlApplyQueuedActorEntrySelection(BtlOperandTaskArgs *taskArgs) {
 }
 
 /* Queue the operand's actor entry selection in an owner-bound task. */
-void *btlCreateQueuedActorEntrySelectionTask(BtlUnit *owner, BtlOperandEntry *spec) {
+BtlRuntimeTask *btlCreateQueuedActorEntrySelectionTask(BtlUnit *owner, BtlOperandEntry *spec) {
     BtlRuntimeTask *task = btlAllocTask(0x2C);
     BtlOperandTaskArgs *arguments;
 
@@ -1465,7 +1465,7 @@ u32 btlClearQueuedActorEntrySelection(BtlUnit **taskArgs) {
 }
 
 /* Create an owner-bound task to clear the actor's queued entry selection. */
-void *btlCreateClearActorEntrySelectionTask(BtlUnit *owner) {
+BtlRuntimeTask *btlCreateClearActorEntrySelectionTask(BtlUnit *owner) {
     BtlRuntimeTask *task = btlAllocTask(4);
     BtlUnit **arguments;
 
