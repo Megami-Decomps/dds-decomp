@@ -908,6 +908,13 @@ void evtConfigureUnitMotionSlot(evtUnitHandle_t *unit, s32 slot, s32 slotAValue,
 #define EVT_UNIT_FLAG_MOTION_START_PENDING 0x80
 #define EVT_UNIT_FLAG_MOTION_WOBBLE 0x40
 
+enum {
+    EVT_UNIT_MOTION_MODE_RESTART_PENDING_MOTION = 0,
+    EVT_UNIT_MOTION_MODE_LOOP = 1,
+    EVT_UNIT_MOTION_MODE_SINGLE = 2,
+    EVT_UNIT_MOTION_MODE_WOBBLE = 3,
+};
+
 void evtSetUnitMotion(evtUnitHandle_t *unit, s32 motionId, s32 startFrame, s32 endFrame, s32 mode) {
     unit->flags &= ~0x1;
     unit->flags &= ~0x20;
@@ -922,15 +929,15 @@ void evtSetUnitMotion(evtUnitHandle_t *unit, s32 motionId, s32 startFrame, s32 e
     unit->motionTicks = 0;
     unit->motionCallback = 0;
     switch (mode) {
-    case 0:
+    case EVT_UNIT_MOTION_MODE_RESTART_PENDING_MOTION:
         unit->flags |= 0x20;
         break;
-    case 1:
+    case EVT_UNIT_MOTION_MODE_LOOP:
         unit->flags |= 0x1;
         break;
-    case 2:
+    case EVT_UNIT_MOTION_MODE_SINGLE:
         break;
-    case 3:
+    case EVT_UNIT_MOTION_MODE_WOBBLE:
         unit->flags |= EVT_UNIT_FLAG_MOTION_WOBBLE;
         break;
     }
