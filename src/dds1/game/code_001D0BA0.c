@@ -3520,7 +3520,7 @@ u8 *btlAllocateIndexedUnitEffectTask(u8 *owner, s32 index, s32 value, f32 scale)
     return task;
 }
 
-u32 btlApplyScaledUnitModelTask(u32 *taskArgs) {
+u32 btlApplyScaledUnitModelTask(BtlUnit **taskArgs) {
     btlApplyUnitModelScaledValue(*taskArgs);
     return 1;
 }
@@ -3533,7 +3533,7 @@ void *btlCreateScaledUnitModelTask(u8 *owner) {
     *(u16 *)(task + 0x20) = 10;
     *(s64 *)(task + 0x40) = *(s64 *)(owner + 0x108);
     *(u32 *)(task + 0x48) = 0;
-    *(u32 *)btlGetTaskArguments(task) = (u32)owner;
+    *(BtlUnit **)btlGetTaskArguments(task) = (BtlUnit *)owner;
     return task;
 }
 
@@ -3806,16 +3806,16 @@ BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *owner, u32 effectId, u32 mod
     return task;
 }
 
-u32 btlReleaseUnitModelTask(u32 *taskArgs) {
+u32 btlReleaseUnitModelTask(BtlUnit **taskArgs) {
     btlClearUnitDefeatCandidate(*taskArgs);
-    btlReleaseActorModelResources((BtlUnit *)*taskArgs);
+    btlReleaseActorModelResources(*taskArgs);
     return 1;
 }
 
 BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *owner) {
     u8 *ownerBytes = (u8 *)owner;
     u8 *task = btlAllocTask(4);
-    u32 *arguments;
+    BtlUnit **arguments;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
@@ -3823,7 +3823,7 @@ BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *owner) {
     *(u16 *)(task + 0x20) = 0x19;
     *(s64 *)(task + 0x40) = *(s64 *)(ownerBytes + 0x108);
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
+    *arguments = owner;
     return (BtlRuntimeTask *)task;
 }
 
@@ -4721,7 +4721,7 @@ BtlRuntimeTask *btlScheduleActorUpdate(BtlUnit *unit) {
     return (BtlRuntimeTask *)task;
 }
 
-u32 btlRefreshUnitFxVectorTask(u32 *taskArgs) {
+u32 btlRefreshUnitFxVectorTask(BtlUnit **taskArgs) {
     btlRefreshUnitFxVectors(*taskArgs);
     return 1;
 }
@@ -4734,7 +4734,7 @@ void *btlCreateUnitFxVectorRefreshTask(u8 *owner) {
     *(u16 *)(task + 0x20) = 0x22;
     *(s64 *)(task + 0x40) = *(s64 *)(owner + 0x108);
     *(u32 *)(task + 0x48) = 0;
-    *(u32 *)btlGetTaskArguments(task) = (u32)owner;
+    *(BtlUnit **)btlGetTaskArguments(task) = (BtlUnit *)owner;
     return task;
 }
 

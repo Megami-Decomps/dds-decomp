@@ -3631,14 +3631,14 @@ BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *unit, s32 index, s32 v
     return task;
 }
 
-u32 btlApplyScaledUnitModelTask(u32 *taskArgs) {
-    btlApplyUnitModelScaledValue((BtlUnit *)taskArgs[0]);
+u32 btlApplyScaledUnitModelTask(BtlUnit **taskArgs) {
+    btlApplyUnitModelScaledValue(*taskArgs);
     return 1;
 }
 
 BtlRuntimeTask *btlCreateScaledUnitModelTask(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    BtlRuntimeTaskArgs *args;
+    BtlUnit **args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlApplyScaledUnitModelTask;
@@ -3646,7 +3646,7 @@ BtlRuntimeTask *btlCreateScaledUnitModelTask(BtlUnit *unit) {
     task->ownerId = unit->owner;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->actor = unit;
+    *args = unit;
     return task;
 }
 
@@ -3914,7 +3914,7 @@ BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *unit, u32 effectId, u32 mode
     return task;
 }
 
-u32 btlReleaseUnitModelTask(u32 *taskArgs) {
+u32 btlReleaseUnitModelTask(BtlUnit **taskArgs) {
     btlClearUnitDefeatCandidate(*taskArgs);
     btlReleaseActorModelResources(*taskArgs);
     return 1;
@@ -3922,14 +3922,14 @@ u32 btlReleaseUnitModelTask(u32 *taskArgs) {
 
 BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    BtlRuntimeTaskArgs *args;
+    BtlUnit **args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlReleaseUnitModelTask;
     task->taskId = 0x19;
     task->ownerId = unit->owner;
     args = btlGetTaskArguments(task);
-    args->actor = unit;
+    *args = unit;
     return task;
 }
 
@@ -4794,14 +4794,14 @@ BtlRuntimeTask *btlScheduleActorUpdate(BtlUnit *unit) {
     return task;
 }
 
-u32 btlRefreshUnitFxVectorTask(u32 *taskArgs) {
+u32 btlRefreshUnitFxVectorTask(BtlUnit **taskArgs) {
     btlRefreshUnitFxVectors(*taskArgs);
     return 1;
 }
 
 BtlRuntimeTask *btlCreateUnitFxVectorRefreshTask(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    BtlRuntimeTaskArgs *args;
+    BtlUnit **args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlRefreshUnitFxVectorTask;
@@ -4809,7 +4809,7 @@ BtlRuntimeTask *btlCreateUnitFxVectorRefreshTask(BtlUnit *unit) {
     task->ownerId = unit->owner;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->actor = unit;
+    *args = unit;
     return task;
 }
 
