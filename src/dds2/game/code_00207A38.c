@@ -129,7 +129,7 @@ extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 
-extern BtlRuntimeTask *btlCreateCommandSoundTask(s32 actor, s32 mode);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *, s32 mode);
 
 extern u32 D_00436B00;
 
@@ -2866,7 +2866,7 @@ u32 btlScriptQueueActorCommandSound(void) {
     btlStartTask(task);
     task = btlCreateSecondaryCommandSoundTask();
     btlStartTask(task);
-    task = btlCreateCommandSoundTask(scrGetData(), 0x11);
+    task = btlCreateCommandSoundTask((ActionStateLink *)scrGetData(), 0x11);
     btlStartTask(task);
     return 1;
 }

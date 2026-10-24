@@ -2070,7 +2070,7 @@ extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 
-extern BtlRuntimeTask *btlCreateCommandSoundTask(u8 *, s32);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *, s32);
 
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 
@@ -2087,7 +2087,7 @@ s32 btlStartActionRecordTasks(ActionStateLink *record) {
     }
     btlStartTask(btlCreateCommandSoundUpdateTask());
     btlStartTask(btlCreateSecondaryCommandSoundTask());
-    btlStartTask(btlCreateCommandSoundTask((u8 *)record, 9));
+    btlStartTask(btlCreateCommandSoundTask(record, 9));
     btlStartTask(btlCreateEffObjB(record->unit, 0xD8));
     task = fldCreateSceneGroupAction(record, 0x64, 1);
     task->startDelay = 0x16;

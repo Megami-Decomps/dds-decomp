@@ -5544,19 +5544,19 @@ u32 btlExecuteCommandSoundTask(BtlCommandSoundTaskArgs *arguments) {
     return 1;
 }
 
-BtlRuntimeTask *btlCreateCommandSoundTask(s32 owner, s32 variant) {
+BtlRuntimeTask *btlCreateCommandSoundTask(BtlTask *actor, s32 variant) {
     BtlRuntimeTask *task = (BtlRuntimeTask *)btlAllocTask(20);
     BtlCommandSoundTaskArgs *arguments;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x27;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
-    if (owner != 0 && ((BtlTask *)owner)->unit != NULL) {
-        task->ownerId = ((BtlTask *)owner)->unit->identity;
+    if (actor != NULL && actor->unit != NULL) {
+        task->ownerId = actor->unit->identity;
     }
     task->callback = btlExecuteCommandSoundTask;
     task->onStart = 0;
     arguments = btlGetTaskArguments(task);
-    arguments->actor = (BtlTask *)owner;
+    arguments->actor = actor;
     arguments->mode = variant;
     arguments->unitA = NULL;
     arguments->unitB = NULL;
@@ -5564,19 +5564,19 @@ BtlRuntimeTask *btlCreateCommandSoundTask(s32 owner, s32 variant) {
     return task;
 }
 
-void *btlCreateTargetedCommandSoundTask(s32 owner, s32 variant, u32 target) {
-    void *task = btlCreateCommandSoundTask(owner, variant);
+BtlRuntimeTask *btlCreateTargetedCommandSoundTask(BtlTask *actor, s32 variant, u32 target) {
+    BtlRuntimeTask *task = btlCreateCommandSoundTask(actor, variant);
     BtlCommandSoundTaskArgs *arguments = btlGetTaskArguments(task);
     arguments->category = target;
     return task;
 }
 
-void *btlCreateCommandSoundWithArguments(s32 owner, s32 variant, u32 first, u32 second, u32 third) {
-    void *task = btlCreateCommandSoundTask(owner, second);
+BtlRuntimeTask *btlCreateCommandSoundWithArguments(BtlTask *actor, BtlUnit *unitA, BtlUnit *unitB, u32 mode, u32 category) {
+    BtlRuntimeTask *task = btlCreateCommandSoundTask(actor, mode);
     BtlCommandSoundTaskArgs *arguments = btlGetTaskArguments(task);
-    arguments->category = third;
-    arguments->unitA = (BtlUnit *)variant;
-    arguments->unitB = (BtlUnit *)first;
+    arguments->category = category;
+    arguments->unitA = unitA;
+    arguments->unitB = unitB;
     return task;
 }
 

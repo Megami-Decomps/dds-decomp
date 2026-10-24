@@ -813,7 +813,7 @@ extern s32 sndHasActiveActor(void);
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
-extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *, s32);
 extern void btlSelectAndRunModeAiAction();
 extern s32 btlGetStatusActionEffectId();
 
@@ -899,7 +899,7 @@ void btlProcessStatusRecoveryAction(ActionStateLink *task) {
             btlStartTask(effect);
             btlStartTask(btlCreateCommandSoundUpdateTask());
             btlStartTask(btlCreateSecondaryCommandSoundTask());
-            btlStartTask(btlCreateCommandSoundTask((s32)task, 3));
+            btlStartTask(btlCreateCommandSoundTask(task, 3));
         }
         break;
     }
@@ -927,9 +927,9 @@ void btlStartCommandAudioAndSelectedAction(u8 *task) {
         btlStartTask(btlCreateCommandSoundUpdateTask());
         btlStartTask(btlCreateSecondaryCommandSoundTask());
         if (unit->status.flags & 0x200) {
-            btlStartTask(btlCreateCommandSoundTask(task, 9));
+            btlStartTask(btlCreateCommandSoundTask((ActionStateLink *)task, 9));
         } else {
-            btlStartTask(btlCreateCommandSoundTask(task, 3));
+            btlStartTask(btlCreateCommandSoundTask((ActionStateLink *)task, 3));
         }
         switch (unit->partyRecord.status & 0x7FFF) {
         case 0x200:
@@ -1024,7 +1024,7 @@ void btlUpdateCommandSelectionState(ActionStateLink *task) {
     if ((task->pendingFlags & 4) == 0 && sndHasActiveActor() == 0 && btlCountTasksByKind(0x2E) == 0) {
         btlStartTask(btlCreateCommandSoundUpdateTask());
         btlStartTask(btlCreateSecondaryCommandSoundTask());
-        btlStartTask(btlCreateCommandSoundTask((s32)task, 9));
+        btlStartTask(btlCreateCommandSoundTask(task, 9));
         task->pendingFlags |= 4;
     }
 
@@ -1112,7 +1112,7 @@ void btlInitializeActorCommandState(ActionStateLink *task) {
             btlStartTask(btlCreateCommandSoundUpdateTask());
             btlStartTask(btlCreateSecondaryCommandSoundTask());
         }
-        btlStartTask(btlCreateCommandSoundTask((s32)task, 0xA));
+        btlStartTask(btlCreateCommandSoundTask(task, 0xA));
         task->pendingFlags |= 4;
     }
     if (state == 3) {
@@ -1307,9 +1307,9 @@ void btlCommandStartSoundTasks(u8 *task) {
         btlStartTask(btlCreateCommandSoundUpdateTask());
         btlStartTask(btlCreateSecondaryCommandSoundTask());
         if (((BtlUnit *)unit)->status.flags & 0x200) {
-            btlStartTask(btlCreateCommandSoundTask(task, 9));
+            btlStartTask(btlCreateCommandSoundTask((ActionStateLink *)task, 9));
         } else {
-            btlStartTask(btlCreateCommandSoundTask(task, 3));
+            btlStartTask(btlCreateCommandSoundTask((ActionStateLink *)task, 3));
         }
         if ((((BtlUnit *)unit)->partyRecord.status & 0x7FFF) == 0x20) {
             if (((ActionStateLink *)task)->unit->status.flags & 0x200) {
@@ -1406,7 +1406,7 @@ extern BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *ef
                                                  BtlUnit *actor, u16 variant);
 extern BtlRuntimeTask *btlCreateRefreshEligibleActorsTask(void);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
-extern BtlRuntimeTask *btlCreateTargetedCommandSoundTask(s32 actor, s32 mode, u32 command);
+extern BtlRuntimeTask *btlCreateTargetedCommandSoundTask(ActionStateLink *, s32 mode, u32 command);
 extern BtlRuntimeTask *btlCreateUpdateUnitEffectsTask(void);
 extern BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32 value);
 extern f32 btlGetActorStateScale(ActionStateLink *task);
@@ -1498,7 +1498,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
     task->startCondition.kind = 4;
     task->startCondition.value.handle = moveHandle;
     btlStartTask(task);
-    task = btlCreateTargetedCommandSoundTask((s32)action, 4, 0);
+    task = btlCreateTargetedCommandSoundTask(action, 4, 0);
     task->startCondition.kind = 4;
     task->startCondition.value.handle = moveHandle;
     btlStartTask(task);
@@ -1928,8 +1928,7 @@ s32 btlGetActionDefaultOrOverride(s32 skillIndex);
 BtlRuntimeTask *sndCreateAcquireTask(s32 value, s32 option);
 BtlRuntimeTask *btlCreateLinkageFormationTask(ActionStateLink *link,
         u32 firstActorAddress, u32 secondActorAddress, u32 skillId, u32 flags);
-BtlRuntimeTask *btlCreateCommandSoundWithArguments(s32 actor, s32 option,
-        s32 flag, s32 mode, s32 command);
+BtlRuntimeTask *btlCreateCommandSoundWithArguments(ActionStateLink *, BtlUnit *, BtlUnit *, s32, s32);
 s32 sndLookupResourceType(s32 actor, s32 resourceIndex);
 BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source,
         BtlUnit *owner, u32 duration);
@@ -2092,7 +2091,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
         btlStartTask(task);
     }
     btlStartTask(btlCreateLinkageFormationTask(action, (u32)companionA, (u32)companionB, skill, 0));
-    btlStartTask(btlCreateCommandSoundWithArguments((s32)action, (s32)companionA, (s32)companionB, 7, skill));
+    btlStartTask(btlCreateCommandSoundWithArguments(action, companionA, companionB, 7, skill));
     for (groupIndex = 0; groupIndex < 3; groupIndex++) {
         if (actors[groupIndex] != NULL) {
             s32 resourceIndex;
@@ -2144,7 +2143,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
         btlStartTask(task);
     }
     if (action->indexWork.costValidationFailed == 0) {
-        task = btlCreateCommandSoundWithArguments((s32)action, (s32)companionA, (s32)companionB, 8, skill);
+        task = btlCreateCommandSoundWithArguments(action, companionA, companionB, 8, skill);
         task->startCondition.kind = 7;
         task->startCondition.value.handle = masterOwner;
         task->flags |= 2;
@@ -2596,7 +2595,7 @@ s32 btlCommandGunChangeStart(ActionStateLink *task) {
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
-        spawned = btlCreateCommandSoundTask((s32)task, 0xE);
+        spawned = btlCreateCommandSoundTask(task, 0xE);
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
@@ -2727,7 +2726,7 @@ void btlScheduleDevilStateModelChange(ActionStateLink *task) {
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
-        spawned = btlCreateCommandSoundTask((s32)task, 0xE);
+        spawned = btlCreateCommandSoundTask(task, 0xE);
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
@@ -2851,7 +2850,7 @@ void btlStartAlternateModelChange(ActionStateLink *action) {
     spawned->flags |= 2;
     spawned->startCondition.value.handle = sound->handle;
     btlStartTask(spawned);
-    spawned = btlCreateCommandSoundTask((s32)action, 0x12);
+    spawned = btlCreateCommandSoundTask(action, 0x12);
     spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     spawned->flags |= 2;
     spawned->startCondition.value.handle = sound->handle;
@@ -2906,7 +2905,7 @@ void btlCommandTaskStartEffects(ActionStateLink *task) {
     if ((task->unit->status.flags & 0x200) != 0 && (task->pendingFlags & 0x20) != 0) {
         btlStartTask(btlCreateCommandSoundUpdateTask());
         btlStartTask(btlCreateSecondaryCommandSoundTask());
-        btlStartTask(btlCreateCommandSoundTask((s32)task, 9));
+        btlStartTask(btlCreateCommandSoundTask(task, 9));
     }
     switch (task->indexWork.phase) {
     case 14:
@@ -2923,7 +2922,7 @@ void btlCommandTaskStartEffects(ActionStateLink *task) {
         if ((task->unit->status.flags & 0x400) != 0) {
             btlStartTask(btlCreateCommandSoundUpdateTask());
             btlStartTask(btlCreateSecondaryCommandSoundTask());
-            btlStartTask(btlCreateCommandSoundTask((s32)task, 3));
+            btlStartTask(btlCreateCommandSoundTask(task, 3));
         }
         delay = (task->unit->status.flags & 0x200) ? 0xF : 0x1E;
         countdown = 0x32;
@@ -2973,10 +2972,10 @@ void btlCommandTaskReturnStart(ActionStateLink *task) {
     }
     if (!(actor->status.stateFlags & 0x40000)) {
         if (actor->status.flags & 0x200) {
-            btlStartTask(btlCreateCommandSoundTask((s32)task, 9));
+            btlStartTask(btlCreateCommandSoundTask(task, 9));
             btlStartTask(btlCreateEffObjA(actor, task->indexWork.phase));
         } else if ((task->pendingFlags & 0x200) == 0) {
-            btlStartTask(btlCreateCommandSoundTask((s32)task, 0x10));
+            btlStartTask(btlCreateCommandSoundTask(task, 0x10));
             btlStartTask(btlCreateEffObjB(actor, 0xF));
         }
     }
@@ -3139,7 +3138,7 @@ void btlScheduleSummonActionTasks(ActionStateLink *action) {
         btlMarkInactiveActorCandidates();
         if (repositioned != 0) {
             btlStartTask(btlCreateCommandSoundUpdateTask());
-            btlStartTask(btlCreateCommandSoundTask((s32)action, 0xB));
+            btlStartTask(btlCreateCommandSoundTask(action, 0xB));
         }
         btlStartTask(btlCreateEffObjA(action->unit, action->indexWork.phase));
     } else {
@@ -3163,7 +3162,7 @@ void btlScheduleSummonActionTasks(ActionStateLink *action) {
         controlTask->startCondition.kind = 10;
         controlTask->startCondition.value.taskKind = 0x43;
         btlStartTask(controlTask);
-        task = btlCreateTargetedCommandSoundTask((s32)action, 0xB, action->indexWork.skillId);
+        task = btlCreateTargetedCommandSoundTask(action, 0xB, action->indexWork.skillId);
         task->startCondition.kind = 10;
         task->startCondition.value.taskKind = 0x43;
         btlStartTask(task);
@@ -3484,7 +3483,7 @@ void btlScheduleEscapeResultTasks(ActionStateLink *task) {
 
     btlStartTask(btlCreateCommandSoundUpdateTask());
     btlStartTask(btlCreateSecondaryCommandSoundTask());
-    btlStartTask(btlCreateCommandSoundTask((s32)task, 0xF));
+    btlStartTask(btlCreateCommandSoundTask(task, 0xF));
     if (state->battleFlags & 0x2000) {
         if (!btlCheckSpecialAbility(&task->unit->partyRecord, 0x250)) {
             btlStartTask(btlCreateEffObjA(task->unit, task->indexWork.phase));

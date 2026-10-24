@@ -5943,7 +5943,7 @@ return_zero:
 
 extern ActionStateLink *fldGetActiveSceneGroupValue(void);
 extern void dspRequestMessageWindowModeOne(void);
-extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *, s32);
 extern u64 btlStartTask(BtlRuntimeTask *);
 extern void btlCopyUnitCurrentPosition(BtlUnit *, f32 *);
 extern void btlCopyUnitRotationQuaternion(BtlUnit *, f32 dst[4]);
@@ -6110,7 +6110,7 @@ s32 btlUpdateMajinTutorialTask(dds3ProcessID_t *task) {
         group = fldGetActiveSceneGroupValue();
         if (group != 0 && (group->pendingFlags & 8)) {
             if (group->unit->status.flags & 0x200) {
-                btlStartTask(btlCreateCommandSoundTask((s32)group, 9));
+                btlStartTask(btlCreateCommandSoundTask(group, 9));
             }
         }
         fclDestroyMessage();

@@ -159,7 +159,7 @@ typedef union BtlVec4 {
 extern u8 *btlCreateSecondaryCommandSoundTask(void);
 
 struct BtlRuntimeTask;
-extern struct BtlRuntimeTask *btlCreateCommandSoundTask(s32 owner, s32 variant);
+extern struct BtlRuntimeTask *btlCreateCommandSoundTask(BtlTask *, s32 variant);
 
 extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 
@@ -2564,7 +2564,7 @@ u32 btlScriptQueueActorCommandSound(void) {
     btlStartTask(task);
     task = btlCreateSecondaryCommandSoundTask();
     btlStartTask(task);
-    task = btlCreateCommandSoundTask(scrGetData(), 0x11);
+    task = btlCreateCommandSoundTask((BtlTask *)scrGetData(), 0x11);
     btlStartTask(task);
     return 1;
 }

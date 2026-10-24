@@ -64,7 +64,7 @@ extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 
-extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *, s32);
 
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 
@@ -715,7 +715,7 @@ void btlQueueLinkedPairModelSwapTasks(ActionStateLink *action, s32 mode, u64 ref
             (scene->unit->status.flags & 0x200) != 0) {
             /* Retail has separate publication arms at 00206E7C..00206EA0 and
              * 00206EB0..00206ED0. */
-            task = btlCreateCommandSoundTask((s32)scene, 9);
+            task = btlCreateCommandSoundTask(scene, 9);
             task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
             task->startCondition.value.owner = nextSequence;
             task->ownerId = action->unit->owner;
@@ -967,7 +967,7 @@ void btlQueueLinkedActorModelStateTasks(ActionStateLink *action) {
         sceneAction = fldGetSceneGroupEntry(0);
         if (sceneAction != 0 && (sceneAction->pendingFlags & 8) != 0 &&
             (sceneAction->unit->status.flags & 0x200) != 0) {
-            task = btlCreateCommandSoundTask((s32)sceneAction, 9);
+            task = btlCreateCommandSoundTask(sceneAction, 9);
             task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
             task->startCondition.value.handle = modelSequence;
             task->ownerId = action->unit->owner;

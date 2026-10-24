@@ -456,7 +456,7 @@ s32 fldSceneStateRestoreDisplay(BtlState *scene) {
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
-extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *, s32);
 extern BtlRuntimeTask *btlCreateActorTransparencyTask(BtlUnit *);
 extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *, u32, u32);
 extern BtlRuntimeTask *sndCreateActorEffectTask(struct SoundResourceNode *, BtlUnit *, u32);
@@ -898,9 +898,9 @@ void btlChooseAndStartSceneScript(BtlState *scene) {
             btlStartTask(btlCreateCommandSoundUpdateTask());
             btlStartTask(btlCreateSecondaryCommandSoundTask());
             if (task->unit->status.flags & FLD_SCENE_ACTOR_PRIMARY_BIT) {
-                btlStartTask(btlCreateCommandSoundTask((s32)task, 9));
+                btlStartTask(btlCreateCommandSoundTask(task, 9));
             } else {
-                btlStartTask(btlCreateCommandSoundTask((s32)task, 3));
+                btlStartTask(btlCreateCommandSoundTask(task, 3));
             }
         }
         btlSetCommandPanelFadeMode(0, 20);
@@ -1048,7 +1048,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
                     task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                     task->startCondition.value.handle = sound->handle;
                     btlStartTask(task);
-                    task = btlCreateCommandSoundTask((s32)actor, 0xC);
+                    task = btlCreateCommandSoundTask(actor, 0xC);
                     task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                     task->startCondition.value.handle = sound->handle;
                     btlStartTask(task);

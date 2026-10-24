@@ -5698,20 +5698,20 @@ u32 btlExecuteCommandSoundTask(BtlRuntimeTaskArgs *taskArgs) {
     return 1;
 }
 
-BtlRuntimeTask *btlCreateCommandSoundTask(s32 actor, s32 mode) {
+BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *actor, s32 mode) {
     BtlRuntimeTask *task = btlAllocTask(0x14);
     BtlRuntimeTaskArgs *args;
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x2A;
-    if (actor != 0 && ((ActionStateLink *)actor)->unit != 0) {
-        task->ownerId = ((ActionStateLink *)actor)->unit->owner;
+    if (actor != NULL && actor->unit != NULL) {
+        task->ownerId = actor->unit->owner;
     }
     task->callback = btlExecuteCommandSoundTask;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->actor = (void *)actor;
+    args->actor = actor;
     args->unk_0C = mode;
     args->option = 0;
     args->unk_08 = 0;
@@ -5719,7 +5719,7 @@ BtlRuntimeTask *btlCreateCommandSoundTask(s32 actor, s32 mode) {
     return task;
 }
 
-BtlRuntimeTask *btlCreateTargetedCommandSoundTask(s32 actor, s32 mode, u32 command) {
+BtlRuntimeTask *btlCreateTargetedCommandSoundTask(ActionStateLink *actor, s32 mode, u32 command) {
     BtlRuntimeTask *task = btlCreateCommandSoundTask(actor, mode);
     BtlRuntimeTaskArgs *args = btlGetTaskArguments(task);
 
@@ -5727,13 +5727,13 @@ BtlRuntimeTask *btlCreateTargetedCommandSoundTask(s32 actor, s32 mode, u32 comma
     return task;
 }
 
-BtlRuntimeTask *btlCreateCommandSoundWithArguments(s32 actor, s32 option, s32 flag, s32 mode, s32 command) {
+BtlRuntimeTask *btlCreateCommandSoundWithArguments(ActionStateLink *actor, BtlUnit *unitA, BtlUnit *unitB, s32 mode, s32 command) {
     BtlRuntimeTask *task = btlCreateCommandSoundTask(actor, mode);
     BtlRuntimeTaskArgs *args = btlGetTaskArguments(task);
 
     args->unk_10 = command;
-    args->option = option;
-    args->unk_08 = flag;
+    args->unitA = unitA;
+    args->unitB = unitB;
     return task;
 }
 
