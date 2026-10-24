@@ -216,7 +216,7 @@ extern u32 D_003C91D0[];
 
 extern struct sdfMemHandle_t *D_003C91E0[];
 
-extern u32 D_003C91F0[];
+extern struct EffNodeDescriptor *D_003C91F0[];
 
 extern char D_003BAC40[];
 
@@ -354,7 +354,7 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
                     break;
                 case 2:
                     if (D_003C91F0[config->resourceIndex] != NULL) {
-                        spawnedObject = effObjSpawnDescriptorBoundEffect((struct EffNodeDescriptor *)D_003C91F0[config->resourceIndex], position, rotation);
+                        spawnedObject = effObjSpawnDescriptorBoundEffect(D_003C91F0[config->resourceIndex], position, rotation);
                         dds3EffectObjectBasicStatOn(spawnedObject, 1);
                         dds3EffectObjectBasicSetFldEx(spawnedObject, resource->data);
                     }
@@ -810,7 +810,8 @@ extern s32 D_003BAE5C;
 
 extern s32 D_003BAE60;
 
-extern u32 D_003C91D0[], D_003C91F0[];
+extern u32 D_003C91D0[];
+extern struct EffNodeDescriptor *D_003C91F0[];
 extern struct sdfMemHandle_t *D_003C91E0[];
 
 extern char D_003BAC40[];
@@ -1257,14 +1258,14 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
     D_003C91D0[3] = (u32)request->record->resourceD;
     for (resourceSlotIndex = 0; resourceSlotIndex < 4; resourceSlotIndex++) {
         D_003C91E0[resourceSlotIndex] = 0;
-        D_003C91F0[resourceSlotIndex] = 0;
+        D_003C91F0[resourceSlotIndex] = NULL;
     }
     if (fldGlobalBase.area < 500) {
         for (resourceSlotIndex = 0; resourceSlotIndex < 4; resourceSlotIndex++) {
             if (D_003C91D0[resourceSlotIndex] != 0) {
                 fldMakeFilePath(directory, fldGlobalBase.area, fldGlobalBase.floor + 1);
                 sprintf(path, D_003BAC40, directory, D_003C91D0[resourceSlotIndex]);
-                D_003C91E0[resourceSlotIndex] = sdfDevLoadFileEx(path, &D_003C91F0[resourceSlotIndex], 0);
+                D_003C91E0[resourceSlotIndex] = sdfDevLoadFileEx(path, (u32 *)&D_003C91F0[resourceSlotIndex], 0);
             }
         }
     }
@@ -1942,7 +1943,7 @@ void fldReleaseFieldResources(void) {
         if (D_003C91E0[i] != NULL) {
             sdfMemFreeDelayedDirect(D_003C91E0[i]);
             D_003C91E0[i] = NULL;
-            D_003C91F0[i] = 0;
+            D_003C91F0[i] = NULL;
         }
     }
     if (gFldFileResetMode != 0) {

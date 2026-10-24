@@ -152,7 +152,7 @@ typedef char FldSpawnBatchSize[(sizeof(FldSpawnBatch) == 12) ? 1 : -1];
 extern FldFileResource *D_00438EB8;
 extern u32 D_00438EBC;
 extern u32 D_00444920[];
-extern u32 D_00444940[];
+extern struct EffNodeDescriptor *D_00444940[];
 extern char D_00435FD0[];
 extern dds3Basic_t *effObjCreateResourceKindZero(const char *, void *, s32);
 extern dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *, void *, s32);
@@ -270,7 +270,7 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
                     break;
                 case 2:
                     if (D_00444940[config->resourceIndex] != NULL) {
-                        spawnedObject = effObjSpawnDescriptorBoundEffect((struct EffNodeDescriptor *)D_00444940[config->resourceIndex], position, rotation);
+                        spawnedObject = effObjSpawnDescriptorBoundEffect(D_00444940[config->resourceIndex], position, rotation);
                         dds3EffectObjectBasicStatOn(spawnedObject, 1);
                         dds3EffectObjectBasicSetFldEx(spawnedObject, resource->data);
                     }
@@ -531,7 +531,8 @@ extern f32 fldLookAtNearPoint[];
 
 extern f32 fldCamTarget[];
 
-extern u32 D_00444920[], D_00444940[];
+extern u32 D_00444920[];
+extern struct EffNodeDescriptor *D_00444940[];
 extern struct sdfMemHandle_t *D_00444930[];
 extern char D_00435FD0[];
 extern void fldMakeResouceBasicFL1(FldSpawnBatch *, u32);
@@ -1122,14 +1123,14 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
     D_00444920[3] = (u32)request->record->resourceD;
     for (resourceSlotIndex = 0; resourceSlotIndex < 4; resourceSlotIndex++) {
         D_00444930[resourceSlotIndex] = NULL;
-        D_00444940[resourceSlotIndex] = 0;
+        D_00444940[resourceSlotIndex] = NULL;
     }
     if (fldGlobalBase.area < 500) {
         for (resourceSlotIndex = 0; resourceSlotIndex < 4; resourceSlotIndex++) {
             if (D_00444920[resourceSlotIndex] != 0) {
                 fldMakeFilePath(directory, fldGlobalBase.area, fldGlobalBase.floor + 1);
                 sprintf(path, D_00435FD0, directory, D_00444920[resourceSlotIndex]);
-                D_00444930[resourceSlotIndex] = sdfDevLoadFileEx(path, &D_00444940[resourceSlotIndex], 0);
+                D_00444930[resourceSlotIndex] = sdfDevLoadFileEx(path, (u32 *)&D_00444940[resourceSlotIndex], 0);
             }
         }
     }
@@ -1709,7 +1710,7 @@ extern void mnuReleaseResourceEntries();
 
 extern struct sdfMemHandle_t *D_00444930[];
 
-extern u32 D_00444940[];
+extern struct EffNodeDescriptor *D_00444940[];
 
 extern s32 fldRoomEventPlacementCount;
 
@@ -1784,7 +1785,7 @@ void fldReleaseFieldResources(void) {
         if (D_00444930[i] != NULL) {
             sdfMemFreeDelayedDirect(D_00444930[i]);
             D_00444930[i] = NULL;
-            D_00444940[i] = 0;
+            D_00444940[i] = NULL;
         }
     }
     if (gFldFileResetMode != 0) {
