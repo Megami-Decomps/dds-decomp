@@ -156,6 +156,11 @@ typedef char BtlCategoryStatDamageArgsSizeCheck[
     (sizeof(BtlCategoryStatDamageArgs) == 0x0C) ? 1 : -1];
 
 /* The scene scheduler copies these request records into its argument block. */
+#define BTL_SCENE_COUNTER_MODE_NORMAL 1
+#define BTL_SCENE_COUNTER_MODE_CRITICAL 2
+#define BTL_SCENE_COUNTER_MODE_WEAKNESS 3
+#define BTL_SCENE_COUNTER_MODE_NOOP 0
+
 typedef struct BtlSceneCounterArgs {
 #ifdef VERSION_DDS1
     struct BtlTask *actor;
@@ -163,7 +168,7 @@ typedef struct BtlSceneCounterArgs {
     struct ActionStateLink *actor;
 #endif
     u32 amount;
-    u8 mode;
+    u8 counterMode;
     u8 pad09[3];
 } BtlSceneCounterArgs;
 

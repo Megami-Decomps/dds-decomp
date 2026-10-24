@@ -1833,17 +1833,17 @@ void fldCompactSceneSlots(void) {
     }
 }
 
-/* Mode 1 drains front counters; modes 2/3 spend full counters in steps of 50. */
-void fldConsumeSceneSlotCounters(s32 amount, u8 mode) {
+/* Normal drains front counters; critical and weakness spend full counters in steps of 50. */
+void fldConsumeSceneSlotCounters(s32 amount, u8 counterMode) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     u8 headGroup;
     u32 i;
     if (scene->battleFlags & 0x100) {
         headGroup = scene->slots[0].group;
-        switch (mode) {
-        case 0:
+        switch (counterMode) {
+        case BTL_SCENE_COUNTER_MODE_NOOP:
             break;
-        case 1:
+        case BTL_SCENE_COUNTER_MODE_NORMAL:
             if (amount < 100) {
                 if (amount < scene->slots[0].remaining) {
                     scene->slots[0].remaining -= amount;
@@ -1865,8 +1865,8 @@ void fldConsumeSceneSlotCounters(s32 amount, u8 mode) {
                 }
             }
             break;
-        case 2:
-        case 3:
+        case BTL_SCENE_COUNTER_MODE_CRITICAL:
+        case BTL_SCENE_COUNTER_MODE_WEAKNESS:
             while (amount > 0) {
                 for (i = 0; i < 8; i++) {
                     if (scene->slots[i].group == headGroup && scene->slots[i].remaining == 100) {
@@ -2218,7 +2218,7 @@ s32 fldDispatchSceneGroupRequestWhenAllowed(BtlSceneCounterArgs *request) {
         (request->actor->pendingFlags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) != 0) {
         return 1;
     }
-    fldConsumeSceneSlotCounters(request->amount, request->mode);
+    fldConsumeSceneSlotCounters(request->amount, request->counterMode);
     return 1;
 }
 
@@ -2238,7 +2238,7 @@ BtlRuntimeTask *fldCreateSceneGroupAction(ActionStateLink *actorTask, u32 counte
     requestData = btlGetTaskArguments(actionTask);
     requestData->actor = actorTask;
     requestData->amount = counterAmount;
-    requestData->mode = counterModeByte;
+    requestData->counterMode = counterModeByte;
     return actionTask;
 }
 
