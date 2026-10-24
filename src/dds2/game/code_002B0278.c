@@ -2810,6 +2810,7 @@ void mnuSeekSelectedWindowRow(s32 menu, s32 target) {
 
 s32 ptySkillMenuBrowseCandidatePages(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
+    SkillMenuRuntime *runtime = (SkillMenuRuntime *)((MenuContext *)context)->party;
     s32 *menu = (s32 *)((MenuContext *)context)->party;
     u32 input = mnuMapPadMaskToFlags(0xC37);
     s32 *popup = ((MenuContext *)context)->popupState;
@@ -2864,7 +2865,7 @@ s32 ptySkillMenuBrowseCandidatePages(dds3ProcessID_t *callback) {
         }
     }
     if (input & 4) {
-        menu[12] = 1;
+        runtime->unk30 = 1;
         mnuSetPopupEntry(popup, mnuSkillMenuPagePopupEntry);
         input = 1;
     }
@@ -2877,8 +2878,9 @@ s32 ptySkillMenuBrowseCandidatePages(dds3ProcessID_t *callback) {
 
 s32 mnuOpenSkillDetailPanel(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
-    s32 *menu = (s32 *)((MenuContext *)context)->party;
-    s32 index = ((MenuList *)menu[3])->cursor->index;
+    SkillMenuRuntime *runtime = (SkillMenuRuntime *)((MenuContext *)context)->party;
+    s32 *menu = (s32 *)runtime;
+    s32 index = runtime->categoryList->cursor->index;
     s32 label = ((MenuWindowContainer *)*(s32 *)((s32)menu + 0x10 + (index << 2)))->list->cursor->sortKeyPrimary;
     ptySkillMenuCopyPageState(context);
     mnuDrawCampScreenDefault(callback);
@@ -2888,7 +2890,7 @@ s32 mnuOpenSkillDetailPanel(dds3ProcessID_t *callback) {
     } else {
         mnuDrawCampGridAndLabelDefault(0, 0, 0, context, 1, 0x53);
     }
-    ((SkillMenuRuntime *)menu)->selectedWindow->list->stateFlags |= 8;
+    runtime->selectedWindow->list->stateFlags |= 8;
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuContext *)context)->transition, 0x53);
     mnuDrawStaffGridLabelsForKind(3, (struct EffectSlotSet *)(u32)(((MenuContext *)context)->displayHandle));
     return menuSetHandler((void *)context, 1, (void *)callback);
