@@ -44,7 +44,7 @@ void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *objectBa
 /* Dispatchers take (bill handle, 16-byte vector, extra); the vector is
    loaded with lqc2 and the extra is forwarded to dds3AddEffectObjectBasic. */
 dds3Basic_t *AddP2AEffect(void *bill, const u128 *vec, s32 extra);
-void dds3BillboardSetAnimNumber(void *arg, u32 entryIndex);
+void dds3BillboardSetAnimNumber(struct billHandle_t *arg, u32 entryIndex);
 dds3Basic_t *AddTMXEffect(void *bill, const u128 *vec, s32 extra);
 dds3Basic_t *effObjCreateWithBoundBill(void *bill, const u128 *vec, void *secondVector);
 dds3Basic_t *effObjCreateBillboardInWorld(void *bill, const u128 *firstVector, void *secondVector);
