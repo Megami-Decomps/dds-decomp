@@ -10524,7 +10524,7 @@ void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode
             state->state = 5;
             object->state = 9;
             object->commandData->linkedUnit =
-                (BtlUnit *)btlGetIndexListEntry(state->listA, state->entry);
+                (BtlUnit *)btlGetIndexListEntry(state->eligibleTargets, state->entry);
             btlSetActorCommandSelection(object, 0, 0, 0);
             sndSetStationedSeVolume(9);
             return;
@@ -10544,7 +10544,7 @@ void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode
         if (fldGetSceneObjectState() == 8) {
             return;
         }
-        flags = ((BtlUnit *)state->listA->entries[0])->status.flags;
+        flags = ((BtlUnit *)state->eligibleTargets->entries[0])->status.flags;
         if ((flags & 0x200) != 0) {
             task = (dds3ProcessID_t *)dds3SearchProcessName(D_004367CC);
             if (task != 0) {
@@ -10564,7 +10564,7 @@ void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode
         return;
     }
     oldIndex = state->entry;
-    count = btlGetIndexListCount(state->listA);
+    count = btlGetIndexListCount(state->eligibleTargets);
 
     switch (mode) {
     case 0:
@@ -10638,10 +10638,10 @@ void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode
     if (btlHasRegisteredAphNamePanelTask() != 0) {
         dds3KillProcess(btlGetTrackedTaskHandle(0), 0);
     }
-    btlClearIndexList(state->listB);
+    btlClearIndexList(state->selectedTargets);
     {
-        BtlUnit *entry = btlGetIndexListEntry(state->listA, state->entry);
-        btlAppendIndexListEntry(state->listB, entry);
+        BtlUnit *entry = btlGetIndexListEntry(state->eligibleTargets, state->entry);
+        btlAppendIndexListEntry(state->selectedTargets, entry);
     }
 }
 
@@ -10669,9 +10669,9 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
     s32 scene;
     dds3ProcessID_t *panelTask = NULL;
 
-    count = btlGetIndexListCount(work->listB);
+    count = btlGetIndexListCount(work->selectedTargets);
     if (count == 1 && btlHasRegisteredAphNamePanelTask() == 0 && work->state != 4) {
-        unit = btlGetIndexListEntry(work->listB, 0);
+        unit = btlGetIndexListEntry(work->selectedTargets, 0);
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x200) {
                 glyph = itfCreateConvertedTextGlyph(0x640, 0x200, 0, 0xA09DC380,
@@ -10705,7 +10705,7 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
     }
     scene = fldGetSceneObjectState();
     if (work->state != 3 && scene != 8) {
-        unit = btlGetIndexListEntry(work->listB, 0);
+        unit = btlGetIndexListEntry(work->selectedTargets, 0);
         if (unit->status.flags & 0x200) {
             panelTask = dds3SearchProcessName(D_004367CC);
             if (panelTask != NULL) {
@@ -10716,7 +10716,7 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
     btlAdvanceTargetRowAnimation(work, 0);
     btlAdvanceTargetPanelAnimation(work, 0);
     for (i = 0; i < count; i++) {
-        unit = btlGetIndexListEntry(work->listB, i);
+        unit = btlGetIndexListEntry(work->selectedTargets, i);
         if (btlIsUnitInfoFlagOneEligible(unit) == 0) {
             func_001CB7A8(unit, work, i);
         }
@@ -10799,31 +10799,31 @@ SceneAiWork *btlCreateTargetSelectionWork(ActionStateLink *source) {
     btlGetRuntime();
     work = (SceneAiWork *)sdfAllocAndClearQuadwords(0xA4);
     object = (BattleSceneObject *)dds3GetProcessData(dds3SearchProcessName(btlCommandPanelTaskNameRef));
-    work->listA = btlAllocateIndexList(0xD);
-    work->listB = btlAllocateIndexList(0xD);
+    work->eligibleTargets = btlAllocateIndexList(0xD);
+    work->selectedTargets = btlAllocateIndexList(0xD);
     if (object->state == 8) {
         other = (BattleActorPanelWork *)dds3GetProcessData(dds3SearchProcessName(D_004367CC));
         count = btlCountFlaggedSceneActors();
         if (count < 2 && (DDS3_GBWK->party[other->partyRecordIndex].status & 0x4800)) {
-            btlBuildUnitIndexList(source, work->listA, 1, 4, -0x4801);
+            btlBuildUnitIndexList(source, work->eligibleTargets, 1, 4, -0x4801);
         } else {
-            btlBuildUnitIndexList(source, work->listA, 1, 4, -1);
+            btlBuildUnitIndexList(source, work->eligibleTargets, 1, 4, -1);
         }
-        btlGetIndexListCount(work->listA);
+        btlGetIndexListCount(work->eligibleTargets);
         work->result = 0;
     } else if (source != 0) {
-        work->result = btlSelectCommandTargetPolicy(source, work->listA, 0);
+        work->result = btlSelectCommandTargetPolicy(source, work->eligibleTargets, 0);
     }
     work->entry = 0;
     switch (work->result) {
     case 0:
-        id = btlFindEligibleTargetForMultiActorCommand(source, work->listA);
+        id = btlFindEligibleTargetForMultiActorCommand(source, work->eligibleTargets);
         work->entry = id;
-        btlAppendIndexListEntry(work->listB, btlGetIndexListEntry(work->listA, id));
+        btlAppendIndexListEntry(work->selectedTargets, btlGetIndexListEntry(work->eligibleTargets, id));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(work->listB, work->listA);
+        btlCopyIndexList(work->selectedTargets, work->eligibleTargets);
         break;
     }
     work->source = (ActionStateLink *)source;
@@ -10832,8 +10832,8 @@ SceneAiWork *btlCreateTargetSelectionWork(ActionStateLink *source) {
 }
 
 void btlReleaseTargetSelectionWork(SceneAiWork *work) {
-    btlFreeIndexList(work->listB);
-    btlFreeIndexList(work->listA);
+    btlFreeIndexList(work->selectedTargets);
+    btlFreeIndexList(work->eligibleTargets);
     sdfChipFreeDirect(work);
 }
 
@@ -10855,7 +10855,7 @@ s32 btlGetTargetSelectionState(void) {
 }
 
 BtlIndexList *btlGetSelectedTargetList(void) {
-    return btlGetTargetSelectionWork()->listB;
+    return btlGetTargetSelectionWork()->selectedTargets;
 }
 
 void btlCreateTargetSelectionTask(ActionStateLink *sourceTask) {

@@ -27,8 +27,8 @@ typedef struct SceneAiWork {
     s32 state;              /* 0x00 */
     u32 result;             /* 0x04 */
     s32 entry;              /* 0x08 */
-    BtlIndexList *listA;     /* 0x0C */
-    BtlIndexList *listB;     /* 0x10 */
+    BtlIndexList *eligibleTargets; /* 0x0C: candidates available to target selection. */
+    BtlIndexList *selectedTargets; /* 0x10: targets committed by the selection policy. */
 #ifdef VERSION_DDS1
     struct BtlTask *source; /* 0x14: nullable command actor retained by the task. */
 #else

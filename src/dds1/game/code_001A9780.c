@@ -9004,7 +9004,7 @@ s32 btlStepTargetGridSelection(s32 direction, SceneAiWork *work) {
     s32 missing = 1;
     BtlUnit *unit;
 
-    count = (s32)btlGetIndexListCount(work->listA);
+    count = (s32)btlGetIndexListCount(work->eligibleTargets);
     oldId = ids[(s16)work->cursor.position.row * 3 + (s16)work->cursor.position.column];
 
     do {
@@ -9057,7 +9057,7 @@ s32 btlStepTargetGridSelection(s32 direction, SceneAiWork *work) {
                 if (index >= count) {
                     break;
                 }
-                unit = btlGetIndexListEntry(work->listA, index);
+                unit = btlGetIndexListEntry(work->eligibleTargets, index);
                 missing = unit->partyRecord.unitId != targetId;
                 if (missing == 0) {
                     break;
@@ -9093,7 +9093,7 @@ void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode
             work->state = 5;
             object->state = 9;
             object->commandData->linkedUnit =
-                (BtlUnit *)btlGetIndexListEntry(work->listA, work->entry);
+                (BtlUnit *)btlGetIndexListEntry(work->eligibleTargets, work->entry);
             btlSetActorCommandSelection(object, 0, 0, 0);
             sndSetStationedSeVolume(9);
             return;
@@ -9111,7 +9111,7 @@ void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode
         if (fldGetSceneObjectState() == 8) {
             return;
         }
-        unit = (BtlUnit *)work->listA->entries[0];
+        unit = (BtlUnit *)work->eligibleTargets->entries[0];
         if ((unit->status.flags & 0x200) != 0) {
             task = dds3SearchProcessName(D_003BB3B0);
             if (task != NULL) {
@@ -9131,7 +9131,7 @@ void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode
     }
 
     oldEntry = work->entry;
-    count = btlGetIndexListCount(work->listA);
+    count = btlGetIndexListCount(work->eligibleTargets);
 
     switch (mode) {
     case 0:
@@ -9204,9 +9204,9 @@ void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode
         task = (dds3ProcessID_t *)btlGetTrackedTaskHandle(0);
         dds3KillProcess(task, 0);
     }
-    btlClearIndexList(work->listB);
-    unit = (BtlUnit *)btlGetIndexListEntry(work->listA, work->entry);
-    btlAppendIndexListEntry(work->listB, unit);
+    btlClearIndexList(work->selectedTargets);
+    unit = (BtlUnit *)btlGetIndexListEntry(work->eligibleTargets, work->entry);
+    btlAppendIndexListEntry(work->selectedTargets, unit);
 }
 
 
@@ -9231,9 +9231,9 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
     s32 scene;
     dds3ProcessID_t *panelTask = NULL;
 
-    count = btlGetIndexListCount(work->listB);
+    count = btlGetIndexListCount(work->selectedTargets);
     if (count == 1 && btlHasRegisteredAphNamePanelTask() == 0 && work->state != 4) {
-        unit = btlGetIndexListEntry(work->listB, 0);
+        unit = btlGetIndexListEntry(work->selectedTargets, 0);
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x200) {
                 glyph = itfCreateConvertedTextGlyph(0x640, 0x200, 0, 0xA09DC380,
@@ -9268,7 +9268,7 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
     }
     scene = fldGetSceneObjectState();
     if (work->state != 3 && scene != 8) {
-        unit = btlGetIndexListEntry(work->listB, 0);
+        unit = btlGetIndexListEntry(work->selectedTargets, 0);
         if (unit->status.flags & 0x200) {
             panelTask = dds3SearchProcessName(D_003BB3B0);
             if (panelTask != NULL) {
@@ -9279,7 +9279,7 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
     btlAdvanceTargetRowAnimation(work, 0);
     btlAdvanceTargetPanelAnimation(work, 0);
     for (i = 0; i < count; i++) {
-        unit = btlGetIndexListEntry(work->listB, i);
+        unit = btlGetIndexListEntry(work->selectedTargets, i);
         if (btlIsUnitInfoFlagOneEligible(unit) == 0) {
             func_001BFDE0(unit, work, i);
         }
@@ -9321,7 +9321,7 @@ s32 btlUpdateTargetSelectionTask(dds3ProcessID_t *handle) {
         state->state = 2;
         break;
     case 2:
-        owner = state->listA;
+        owner = state->eligibleTargets;
         mode = 1;
         switch (work->battleMode) {
         case 0x108:
@@ -9332,7 +9332,7 @@ s32 btlUpdateTargetSelectionTask(dds3ProcessID_t *handle) {
         case 0x10E:
             count = btlGetIndexListCount(owner);
             for (i = 0; i < count; i++) {
-                if (((BtlUnit *)btlGetIndexListEntry(state->listA, i))->status.flags & 0x200) {
+                if (((BtlUnit *)btlGetIndexListEntry(state->eligibleTargets, i))->status.flags & 0x200) {
                     break;
                 }
             }
@@ -9375,34 +9375,34 @@ SceneAiWork *btlCreateTargetSelectionWork(BtlTask *source) {
     work = (SceneAiWork *)sdfAllocAndClearQuadwords(sizeof(SceneAiWork));
     object = (BattleSceneObject *)dds3GetProcessData(
         dds3SearchProcessName(btlCommandPanelTaskNameRef));
-    work->listA = btlAllocateIndexList(0xD);
-    work->listB = btlAllocateIndexList(0xD);
+    work->eligibleTargets = btlAllocateIndexList(0xD);
+    work->selectedTargets = btlAllocateIndexList(0xD);
     if (object->state == 8) {
         other = (BattleActorPanelWork *)dds3GetProcessData(
             dds3SearchProcessName(D_003BB3B0));
         count = btlCountFlaggedSceneActors();
         if (count < 2 &&
             (DDS3_GBWK->party[other->partyRecordIndex].status & 0x4800)) {
-            btlBuildEligibleTargetIndexList(source, work->listA, 1, 4, -0x4801);
+            btlBuildEligibleTargetIndexList(source, work->eligibleTargets, 1, 4, -0x4801);
         } else {
-            btlBuildEligibleTargetIndexList(source, work->listA, 1, 4, -1);
+            btlBuildEligibleTargetIndexList(source, work->eligibleTargets, 1, 4, -1);
         }
-        btlGetIndexListCount(work->listA);
+        btlGetIndexListCount(work->eligibleTargets);
         work->result = 0;
     } else if (source != 0) {
-        work->result = btlSelectCommandTargetPolicy(source, work->listA, 0);
+        work->result = btlSelectCommandTargetPolicy(source, work->eligibleTargets, 0);
     }
     work->entry = 0;
     switch (work->result) {
     case 0:
-        entry = btlFindEligibleTargetForMultiActorCommand(source, work->listA);
+        entry = btlFindEligibleTargetForMultiActorCommand(source, work->eligibleTargets);
         work->entry = entry;
-        btlAppendIndexListEntry(work->listB,
-                                btlGetIndexListEntry(work->listA, entry));
+        btlAppendIndexListEntry(work->selectedTargets,
+                                btlGetIndexListEntry(work->eligibleTargets, entry));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(work->listB, work->listA);
+        btlCopyIndexList(work->selectedTargets, work->eligibleTargets);
         break;
     }
     work->source = source;
@@ -9410,13 +9410,13 @@ SceneAiWork *btlCreateTargetSelectionWork(BtlTask *source) {
     if (battle->battleMode != 0x10E || work->result != 0) {
         return work;
     }
-    listCount = btlGetIndexListCount(work->listA);
+    listCount = btlGetIndexListCount(work->eligibleTargets);
     i = 0;
 nextActor:
     if (i >= listCount) {
         goto selectTarget;
     }
-    actor = (BtlUnit *)btlGetIndexListEntry(work->listA, i++);
+    actor = (BtlUnit *)btlGetIndexListEntry(work->eligibleTargets, i++);
     if (!(actor->status.flags & 0x200)) {
         goto nextActor;
     }
@@ -9425,15 +9425,15 @@ selectTarget:
     work->cursor.position.row = 2;
     work->cursor.position.column = 1;
     btlStepTargetGridSelection(0, work);
-    btlClearIndexList(work->listB);
-    btlAppendIndexListEntry(work->listB,
-                            btlGetIndexListEntry(work->listA, work->entry));
+    btlClearIndexList(work->selectedTargets);
+    btlAppendIndexListEntry(work->selectedTargets,
+                            btlGetIndexListEntry(work->eligibleTargets, work->entry));
     return work;
 }
 
 void btlReleaseTargetSelectionWork(SceneAiWork *work) {
-    btlFreeIndexList(work->listB);
-    btlFreeIndexList(work->listA);
+    btlFreeIndexList(work->selectedTargets);
+    btlFreeIndexList(work->eligibleTargets);
     sdfChipFreeDirect(work);
 }
 
@@ -9460,7 +9460,7 @@ s32 btlGetTargetSelectionState(void) {
 }
 
 BtlIndexList *btlGetSelectedTargetList(void) {
-    return btlGetTargetSelectionWork()->listB;
+    return btlGetTargetSelectionWork()->selectedTargets;
 }
 
 extern s32 btlUpdateTargetSelectionTask(dds3ProcessID_t *);
