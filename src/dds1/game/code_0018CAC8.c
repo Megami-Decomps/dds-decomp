@@ -288,7 +288,7 @@ s32 func_0018CE68(void) {
 
 /* Debug filesystem mode opens the formatted pfs0 directory; otherwise reset built-in iteration.
    Return the native directory-open result, or zero for built-in mode. */
-s32 dds3EffectDirOpen(void *name) {
+s32 dds3EffectDirOpen(const char *name) {
     u8 path[EFF_DIRECTORY_PATH_BYTES];
 
     if (sdfHddValid != 0) {
@@ -326,7 +326,7 @@ s32 dds3EffectDirRead(s32 directory, EffDirEnt *entry) {
 
 
 /* Enumerate enabled resource extensions into an owned doubly linked filename list. */
-EffResourceList *dds3EffectFileListCreate(char *path, s32 flags) {
+EffResourceList *dds3EffectFileListCreate(const char *path, s32 flags) {
     EffDirEnt entry;
     s32 directory;
     EffResourceList *list;

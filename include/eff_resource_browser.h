@@ -65,7 +65,7 @@ void dds3EffectFileListWindowSetOt(EffResourceDescriptor *work, u32 delay);
 void dds3EffectFileListWindowSetPadWait(EffResourceDescriptor *work, u32 surface);
 void dds3EffectFileListWindowSetWindowColor(EffResourceDescriptor *work, u32 borderColor, u32 fillColor);
 void dds3EffectListSetTexture(EffResourceDescriptor *work, const char *textureResource);
-EffResourceList *dds3EffectFileListCreate(char *path, s32 flags);
+EffResourceList *dds3EffectFileListCreate(const char *path, s32 flags);
 s32 dds3EffectFileListWindowDraw(EffResourceDescriptor *work);
 void dds3EffectFileListWindowDrawSprite(EffResourceDescriptor *overlay);
 
