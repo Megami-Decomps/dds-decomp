@@ -126,6 +126,7 @@ s32 sdfDecomp(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes) {
     s32 count;
     s32 offset;
     u8 *output;
+    u8 *shortBackrefSource;
     u32 sourceAddress;
 
     if (decoder->state == 0) {
@@ -223,11 +224,11 @@ s32 sdfDecomp(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes) {
                     decoder->state = SDF_DECODE_READ_COMMAND;
                     break;
                 case SDF_DECODE_COPY_SHORT_BACKREF:
-                    sourceAddress = (u32)(output - *input++);
+                    shortBackrefSource = output - *input++;
                     count = decoder->pendingBytes;
                     inputBytes--;
                     do {
-                        *output++ = *(u8 *)sourceAddress++;
+                        *output++ = *shortBackrefSource++;
                     } while (--count != 0);
                     decoder->state = SDF_DECODE_READ_COMMAND;
                     break;
