@@ -9473,7 +9473,7 @@ extern s32 btlUpdateTargetSelectionTask(dds3ProcessID_t *);
 
 extern SceneAiWork *btlCreateTargetSelectionWork(BtlTask *);
 
-void btlCreateTargetSelectionTask(s32 sourceTask) {
+void btlCreateTargetSelectionTask(BtlTask *sourceTask) {
     BtlState *scene;
     dds3ProcessID_t *task;
     dds3SearchProcessName(D_003BB3A0);
@@ -9491,7 +9491,7 @@ void btlCreateTargetSelectionTask(s32 sourceTask) {
     }
     scene = (BtlState *)btlGetRuntime();
     task = dds3StartProcess(D_003BB3A0, 0x2B0E, 1, 1, btlUpdateTargetSelectionTask, btlReleaseTargetSelectionTask,
-                          (u32)btlCreateTargetSelectionWork((BtlTask *)sourceTask));
+                          (u32)btlCreateTargetSelectionWork(sourceTask));
     dds3LinkProcess(scene->scriptOwner, task);
     scene->spriteObject = task;
 }

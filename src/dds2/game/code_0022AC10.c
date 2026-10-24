@@ -2403,7 +2403,7 @@ typedef char BtlDebugValueEntryStride[(sizeof(BtlDebugValueEntry) == 0x18) ? 1 :
 
 extern BtlIndexList *btlGetSelectedTargetList(void);
 extern s32 btlGetTargetSelectionState(void);
-extern void btlCreateTargetSelectionTask(s32 sourceTask);
+extern void btlCreateTargetSelectionTask(ActionStateLink *sourceTask);
 extern void btlRequestTargetSelectionClose(void);
 extern void btlCopyUnitCurrentPosition(BtlUnit *unit, f32 *destination);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);

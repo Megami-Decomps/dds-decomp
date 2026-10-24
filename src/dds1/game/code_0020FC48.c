@@ -2332,7 +2332,7 @@ extern s32 btlDebugEditorSelectedEntryIndex;
 extern s32 btlGetTargetSelectionState(void);
 extern BtlIndexList *btlGetSelectedTargetList(void);
 extern void btlRequestTargetSelectionClose(void);
-extern void btlCreateTargetSelectionTask(s32 sourceTask);
+extern void btlCreateTargetSelectionTask(BtlTask *sourceTask);
 extern void btlCopyUnitCurrentPosition(BtlUnit *, f32 *);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern u8 *btlCreateControlObject(void);
