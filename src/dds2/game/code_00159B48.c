@@ -60,7 +60,7 @@ typedef struct EffInstance {
     f32 localMatrix[4][4]; /* 0x00: VU0 matrix initialized on clone. */
     f32 transform[4][4]; /* 0x40: VU0 matrix copied by dds3P2APolygonSetRotateMatrix. */
     billHandle_t *billboard; /* 0x80 */
-    void *renderState; /* 0x84 */
+    struct sdfMat_t *material; /* 0x84: owned render material */
 } EffInstance;
 typedef char EffInstance_size_check[(sizeof(EffInstance) == EFF_INSTANCE_BYTES) ? 1 : -1];
 typedef char EffInstance_localMatrix_offset_check[
@@ -69,8 +69,8 @@ typedef char EffInstance_transform_offset_check[
     ((u32)&((EffInstance *)0)->transform == EFF_MATRIX_BYTES) ? 1 : -1];
 typedef char EffInstance_billboard_offset_check[
     ((u32)&((EffInstance *)0)->billboard == 0x80) ? 1 : -1];
-typedef char EffInstance_renderState_offset_check[
-    ((u32)&((EffInstance *)0)->renderState == 0x84) ? 1 : -1];
+typedef char EffInstance_material_offset_check[
+    ((u32)&((EffInstance *)0)->material == 0x84) ? 1 : -1];
 
 extern billHandle_t *hGeneralBillboard[];
 
@@ -405,8 +405,8 @@ u8 *dds3P2APolygonCreate(s32 entryIndex) {
     EffInstance *instance = sdfChipAllocDirect(EFF_INSTANCE_BYTES);
 
     instance->billboard = dds3BillboardCreate(1, entryIndex);
-    instance->renderState = sdfMatNew();
-    sdfMatSetConstant(instance->renderState, 1.0f);
+    instance->material = sdfMatNew();
+    sdfMatSetConstant(instance->material, 1.0f);
     EE_MMI_UNIT_MATRIX(instance->transform);
     return (u8 *)instance;
 }
@@ -416,18 +416,18 @@ u8 *dds3P2APolygonCopy(EffInstance *source) {
     EffInstance *instance = sdfChipAllocDirect(EFF_INSTANCE_BYTES);
 
     instance->billboard = dds3BillboardCopy(source->billboard);
-    instance->renderState = sdfMatNew();
-    sdfMatSetConstant(instance->renderState, 1.0f);
-    sdfMatSetDiffuse(instance->renderState, 0x80808080);
-    sdfMatSetAmbient(instance->renderState, 0x80808080);
-    sdfMatSetSpecular(instance->renderState, 0x80808080);
+    instance->material = sdfMatNew();
+    sdfMatSetConstant(instance->material, 1.0f);
+    sdfMatSetDiffuse(instance->material, 0x80808080);
+    sdfMatSetAmbient(instance->material, 0x80808080);
+    sdfMatSetSpecular(instance->material, 0x80808080);
     EE_MMI_UNIT_MATRIX(instance->transform);
     EE_MMI_UNIT_MATRIX(instance->localMatrix);
     return (u8 *)instance;
 }
 
 void dds3P2APolygonDelete(EffInstance *instance) {
-    sdfMatFreeDelayed((sdfMat_t *)instance->renderState);
+    sdfMatFreeDelayed(instance->material);
     dds3BillboardDelete(instance->billboard);
     sdfChipFreeDirect(instance);
 }
@@ -566,7 +566,7 @@ void dds3P2APolygonDraw(EffInstance *instance) {
     uv[2][1] = child->uv.components[7] * height;
     uv[3][0] = child->uv.components[4] * width;
     uv[3][1] = child->uv.components[5] * height;
-    sdfSetAssetPrimaryTextureAddress((sdfMat_t *)instance->renderState, texture);
+    sdfSetAssetPrimaryTextureAddress(instance->material, texture);
     switch ((u32)modeValues[0]) {
     case 2:
     case 3:
@@ -612,10 +612,10 @@ void dds3P2APolygonDraw(EffInstance *instance) {
         secondaryUv[2][1] = child->uv.components[7] / height;
         secondaryUv[3][0] = child->uv.components[4] / width;
         secondaryUv[3][1] = child->uv.components[5] / height;
-        sdfMatSetMultiTex((sdfMat_t *)instance->renderState, texture);
+        sdfMatSetMultiTex(instance->material, texture);
         break;
     }
-    sdf3DPrimLinkMat((sdfDrawTag_t *)list, (sdfMat_t *)instance->renderState, 0);
+    sdf3DPrimLinkMat((sdfDrawTag_t *)list, instance->material, 0);
     sdfDrawTagLink((sdfDrawTag_t *)list, (u32)effPkt3DPrimMakePoly(&params));
     surface = D_003AA9E0[instance->billboard->requestedPacketListIndex];
     surface->append(surface, (sdfDrawTag_t *)list);

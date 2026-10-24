@@ -391,8 +391,8 @@ u8 *dds3P2APolygonCreate(s32 entryIndex) {
     EffUnitObject *instance = sdfChipAllocDirect(sizeof(EffUnitObject));
 
     instance->billboard = dds3BillboardCreate(1, entryIndex);
-    instance->resource = sdfMatNew();
-    sdfMatSetConstant(instance->resource, 1.0f);
+    instance->material = sdfMatNew();
+    sdfMatSetConstant(instance->material, 1.0f);
     EE_MMI_UNIT_MATRIX(instance->transform);
     return (u8 *)instance;
 }
@@ -402,18 +402,18 @@ u8 *dds3P2APolygonCopy(EffUnitObject *source) {
     EffUnitObject *instance = sdfChipAllocDirect(sizeof(EffUnitObject));
 
     instance->billboard = dds3BillboardCopy(source->billboard);
-    instance->resource = sdfMatNew();
-    sdfMatSetConstant(instance->resource, 1.0f);
-    sdfMatSetDiffuse(instance->resource, 0x80808080);
-    sdfMatSetAmbient(instance->resource, 0x80808080);
-    sdfMatSetSpecular(instance->resource, 0x80808080);
+    instance->material = sdfMatNew();
+    sdfMatSetConstant(instance->material, 1.0f);
+    sdfMatSetDiffuse(instance->material, 0x80808080);
+    sdfMatSetAmbient(instance->material, 0x80808080);
+    sdfMatSetSpecular(instance->material, 0x80808080);
     EE_MMI_UNIT_MATRIX(instance->transform);
     EE_MMI_UNIT_MATRIX(instance->localMatrix);
     return (u8 *)instance;
 }
 
 void dds3P2APolygonDelete(EffUnitObject *instance) {
-    sdfMatFreeDelayed((sdfMat_t *)instance->resource);
+    sdfMatFreeDelayed(instance->material);
     dds3BillboardDelete(instance->billboard);
     sdfChipFreeDirect(instance);
 }
@@ -552,7 +552,7 @@ void dds3P2APolygonDraw(EffUnitObject *instance) {
     uv[2][1] = child->uv.components[7] * height;
     uv[3][0] = child->uv.components[4] * width;
     uv[3][1] = child->uv.components[5] * height;
-    sdfSetAssetPrimaryTextureAddress((sdfMat_t *)instance->resource, texture);
+    sdfSetAssetPrimaryTextureAddress(instance->material, texture);
     switch ((u32)modeValues[0]) {
     case 2:
     case 3:
@@ -598,10 +598,10 @@ void dds3P2APolygonDraw(EffUnitObject *instance) {
         secondaryUv[2][1] = child->uv.components[7] / height;
         secondaryUv[3][0] = child->uv.components[4] / width;
         secondaryUv[3][1] = child->uv.components[5] / height;
-        sdfMatSetMultiTex((sdfMat_t *)instance->resource, texture);
+        sdfMatSetMultiTex(instance->material, texture);
         break;
     }
-    sdf3DPrimLinkMat((sdfDrawTag_t *)list, (sdfMat_t *)instance->resource, 0);
+    sdf3DPrimLinkMat((sdfDrawTag_t *)list, instance->material, 0);
     sdfDrawTagLink((sdfDrawTag_t *)list, (u32)effPkt3DPrimMakePoly(&params));
     surface = D_0034E0B0[instance->billboard->requestedPacketListIndex];
     surface->append(surface, (sdfDrawTag_t *)list);
