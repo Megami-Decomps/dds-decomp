@@ -618,7 +618,7 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *track, EvtRunti
     case 3:
     case 0x1A:
         if (track->type == 3) {
-            object = effObjSpawnDescriptorBoundEffect((struct EffNodeDescriptor *)track->resourceData, vec0, vec1);
+            object = effObjSpawnDescriptorBoundEffect(track->effectDescriptor, vec0, vec1);
         } else {
             object = dds3AddD3PEffectObjectBasic(track->resourceData, vec0, vec1);
         }
@@ -635,10 +635,10 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *track, EvtRunti
     case 0x15:
         switch (track->type) {
         case 0x14:
-            object = dds3AddMG12EffectObjectBasic2(1, (struct EffNodeDescriptor *)track->resourceData);
+            object = dds3AddMG12EffectObjectBasic2(1, track->effectDescriptor);
             break;
         case 0x15:
-            object = dds3AddMG12EffectObjectBasic2(2, (struct EffNodeDescriptor *)track->resourceData);
+            object = dds3AddMG12EffectObjectBasic2(2, track->effectDescriptor);
             break;
         }
         n0 = evtEventViewerGetNameObject(key->p0C.sb[0], viewer);
