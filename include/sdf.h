@@ -306,9 +306,11 @@ typedef union MovObjStream {
     struct MovPacStream *pac;
 } MovObjStream;
 
+typedef u8 SdfMovieState;
+
 typedef struct movieStream_t {
     u8 active;
-    u8 state;
+    SdfMovieState state;
     u8 stopRequested;
     u8 isPac;
     s16 drawX;
