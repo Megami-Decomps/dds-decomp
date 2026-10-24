@@ -156,7 +156,6 @@ void func_00271B48(void) {
 }
 
 
-extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 
 /* Filter staff entries, size the window and preserve each entry's original ordinal. */
 MenuWindowContainer *mnuCreateFilteredStaffEntryWindow(void *const *entries, s32 count, s32 width,

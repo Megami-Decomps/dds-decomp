@@ -58,7 +58,6 @@ typedef char StaffDisplayContext_size[(sizeof(StaffDisplayContext) == 0x924) ? 1
 
 
 typedef struct MenuWindowSpriteGroup MenuWindowSpriteGroup;
-extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 extern void mnuDrawStaffItemListEntry(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
 extern s32 mnuIsBulletItemId(s32);
 extern char *D_003BAA84;

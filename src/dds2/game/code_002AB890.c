@@ -33,7 +33,6 @@ void mnuDrawStaffItemListEntry(s32 x, s32 y, s32 z, s32 list, s32 node, s32 draw
 }
 
 extern char (*D_00435E5C)[25];
-extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 extern s32 mnuIsBulletItemId(s32);
 extern s32 mnuIsHighRangeItemId(s32);
 extern s32 mnuIsSolarPricedItemId(s32);

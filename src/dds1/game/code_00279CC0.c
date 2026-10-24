@@ -360,7 +360,6 @@ extern const u8 D_003BC708[];
 extern void mnuAttachWindowTextureState(MenuWindowContainer *, u32, u32, u32, u32);
 extern void mnuSortItems(MenuList *, s32, s32);
 extern void mnuSetWindowFadeScale(MenuWindowContainer *, u32);
-extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 
 /* Build the linkage-skill window: every recorded linkage skill with an
  * available slot resource, flagged when the frontline party cannot form it,

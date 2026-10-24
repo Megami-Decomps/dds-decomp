@@ -261,7 +261,6 @@ void mnuDrawPartySelectionListEntry(s32 x, s32 y, s32 z, struct MenuList *list, 
     }
 }
 
-extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 extern void mnuDrawPartySelectionListEntry(s32, s32, s32, struct MenuList *, struct MenuListNode *);
 extern char D_003BC6E8[];
 void mnuCreatePartySelectionWindow(CampMenuContext *context) {

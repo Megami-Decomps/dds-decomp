@@ -349,11 +349,6 @@ extern s32 mnuGetEntryUseStatus(datUnitWork_t *, u16);
 extern void ptySkillMenuDrawEquippedSkillEntry(s32, s32, s32, MenuList *, MenuListNode *, s32);
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
-/* Copy the native panel layout, override its bounds, and mark its transition flag. */
-void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const void *layout, u32 left, u32 top,
-                   u32 right, u32 bottom);
-
-
 extern void mnuDrawStaffPartySelectionPanel(dds3ProcessID_t *task);
 
 extern const char *D_003E78D0[];

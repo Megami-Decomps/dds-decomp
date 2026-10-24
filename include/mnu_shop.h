@@ -213,4 +213,14 @@ typedef char ShopScene_size_must_be_0xB4[(sizeof(ShopScene) == 0xB4) ? 1 : -1];
 /* Draw a window container owned by the menu window subsystem. */
 void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, s32 drawArg);
 
+#ifdef VERSION_DDS2
+void mnuSetWindowPanelBounds(MenuWindowContainer *panel,
+                             const struct MenuIconState *layout,
+                             u32 left, u32 top, u32 right, u32 bottom);
+#else
+void mnuSetWindowPanelBounds(MenuWindowContainer *panel,
+                             const MenuPanelHandles *layout,
+                             u32 left, u32 top, u32 right, u32 bottom);
+#endif
+
 #endif

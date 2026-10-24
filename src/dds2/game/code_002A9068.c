@@ -625,9 +625,6 @@ void mnuDrawCampGridResourceSlot(s32 x, s32 y, s32 depth, struct MenuList *list,
                                 texture);
 }
 
-extern void mnuSetWindowPanelBounds(MenuWindowContainer *window, const void *layout,
-                                    u32 left, u32 top, u32 right, u32 bottom);
-
 /* Filter staff entries, size the window and preserve each entry's original ordinal. */
 MenuWindowContainer *mnuCreateStaffResourceListWindow(void *const *entries, s32 count,
                                                       s32 width, s32 rowHeight,

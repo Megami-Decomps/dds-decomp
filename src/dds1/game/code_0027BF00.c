@@ -340,7 +340,8 @@ void mnuInitializeWindowEntryPlacement(s32 value, MenuWindowContainer *entry, Ef
 
 
 /* Copy the native panel layout, override its bounds, and mark its transition flag. */
-void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const void *layout, u32 left, u32 top,
+void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const MenuPanelHandles *layout,
+                             u32 left, u32 top,
                    u32 right, u32 bottom) {
     memcpy(&panel->panel, layout, MNU_PANEL_LAYOUT_BYTES);
     panel->panel.left = left;
