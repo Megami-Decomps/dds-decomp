@@ -2253,7 +2253,7 @@ extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void dds3BezierTrackPolyReset(EffPcpThunderFragmentResources *history);
-extern void dds3BezierTrackPolySetVC(EffPcpThunderFragmentResources *history, u128 *source);
+extern void dds3BezierTrackPolySetVC(EffPcpThunderFragmentResources *history, const u128 *source);
 void dds3BezierTrackPolyDraw(EffPcpThunderFragmentResources *);
 
 /* Each slot owns two joined cubic segments, a ribbon history and an end cap.
@@ -2787,7 +2787,7 @@ void dds3BezierTrackPolyCreate(EffPcpThunderFragmentResources *history, u32 *gra
     }
 }
 
-void dds3BezierTrackPolySetVC(EffPcpThunderFragmentResources *history, u128 *source) {
+void dds3BezierTrackPolySetVC(EffPcpThunderFragmentResources *history, const u128 *source) {
     s32 position = history->nextPointWriteIndex;
     u128 *points = history->points;
     s32 count;
