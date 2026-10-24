@@ -439,7 +439,7 @@ extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern struct BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 extern BtlRuntimeTask *btlCreateCommandSoundTask(BtlTask *, s32);
-extern u8 *btlCreateModelLoadPollTask(u8 *, u32, u32, s8);
+extern BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *, u32, u32, s8);
 extern BtlRuntimeTask *btlCreateActorTransparencyTask(BtlUnit *);
 extern BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *, u32, u32);
@@ -477,7 +477,7 @@ u64 btlQueueSceneActorModelEntry(s32 sceneAddress) {
     for (unit = scene->units; unit != NULL; unit = unit->next) {
         if ((btlUnitStatusPair(unit) & 0x403) == 0x401) {
             kind = scene->callback5CC != NULL ? scene->callback5CC(unit) : unit->displaySpecies;
-            load = (BtlRuntimeTask *)btlCreateModelLoadPollTask((u8 *)unit, unit->modelResourceKind, kind, 0);
+            load = btlCreateModelLoadPollTask(unit, unit->modelResourceKind, kind, 0);
             load->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             load->startDelay = 1;
             load->startCondition.value.handle = chain;
@@ -542,9 +542,9 @@ u64 btlQueueSceneActorModelEntry(s32 sceneAddress) {
     for (unit = tail; unit != NULL; unit = unit->previousActor) {
         if ((btlUnitStatusPair(unit) & 0x203) == 0x201) {
             if (unit->status.flags & 0x1000) {
-                load = (BtlRuntimeTask *)btlCreateModelLoadPollTask((u8 *)unit, unit->modelResourceKind, unit->displaySpecies, 0);
+                load = btlCreateModelLoadPollTask(unit, unit->modelResourceKind, unit->displaySpecies, 0);
             } else {
-                load = (BtlRuntimeTask *)btlCreateModelLoadPollTask((u8 *)unit, unit->modelId, unit->modelVariant, 0);
+                load = btlCreateModelLoadPollTask(unit, unit->modelId, unit->modelVariant, 0);
             }
             load->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             load->startDelay = 1;
