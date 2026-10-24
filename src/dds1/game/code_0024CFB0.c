@@ -392,10 +392,10 @@ void fclInitPanelPos(s32 firstWord, s32 secondWord, s32 thirdWord, s32 firstHalf
 }
 
 /* Destroy a nonzero, registered task. The declared return value is not set. */
-s32 fclScriptForcedEnd(s32 task) {
+s32 fclScriptForcedEnd(dds3ProcessID_t *task) {
     if (task != 0) {
-        if (dds3GetProcessStat((dds3ProcessID_t *)task)) {
-            dds3KillProcess((dds3ProcessID_t *)task, 0);
+        if (dds3GetProcessStat(task)) {
+            dds3KillProcess(task, 0);
         }
     }
 }
@@ -408,7 +408,7 @@ s32 fclScriptStart(BfFlw0Header *script, s32 processValue, s32 *taskSlot) {
     dds3ProcessID_t *task;
 
     if (taskSlot != 0) {
-        fclScriptForcedEnd(*taskSlot);
+        fclScriptForcedEnd((dds3ProcessID_t *)*taskSlot);
     }
     task = scrStartScript2(EVT_SCRIPT_PROCESS_PRIORITY, script, processValue);
     evtClearActiveFlag(0);
