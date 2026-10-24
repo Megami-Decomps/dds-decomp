@@ -4,6 +4,7 @@
 #include "common.h"
 
 struct dds3Basic_t;
+struct DevRequest;
 struct MotionTable;
 struct sdfModelDef_t;
 
@@ -13,7 +14,7 @@ typedef struct EvtScriptModelWork {
     struct dds3Basic_t *fallbackModelObject;
     struct sdfModelDef_t *itemList;
     struct MotionTable *motionTable;
-    void *loadedModelResource;
+    struct DevRequest *loadedModelResource;
     u8 opaqueTail10[0x0C];
 } EvtScriptModelWork;
 
@@ -25,6 +26,6 @@ struct dds3Basic_t *dds3AddModelBasic(s32 key, struct sdfModelDef_t *itemList,
     const char *name);
 struct dds3Basic_t *dds3AddModelBasic2(s32 key,
     struct sdfModelDef_t *itemList, struct MotionTable *motionTable,
-    void *loadedModelResource, const char *name);
+    struct DevRequest *loadedModelResource, const char *name);
 
 #endif /* EVT_SCRIPT_MODEL_H */

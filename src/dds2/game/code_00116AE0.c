@@ -27,7 +27,7 @@ dds3Basic_t *dds3AddModelBasic(s32 key, sdfModelDef_t *itemList, MotionTable *mo
 }
 
 /* Create a script object with its loaded resource already supplied. */
-dds3Basic_t *dds3AddModelBasic2(s32 key, sdfModelDef_t *itemList, MotionTable *motionTable, void *loadedModelResource, const char *name) {
+dds3Basic_t *dds3AddModelBasic2(s32 key, sdfModelDef_t *itemList, MotionTable *motionTable, DevRequest *loadedModelResource, const char *name) {
     dds3Basic_t *object = dds3AddSceneBasicData(EFF_WORLD_KIND_SCRIPT_OBJECT);
     EvtScriptModelWork *work = object->data;
 
