@@ -7,7 +7,7 @@
 typedef struct FldLightSet {
     u8 fadeArea; /* 0x00: selects the fade state entry */
     u8 pad1[3];
-    s32 displayStateSlot14; /* 0x04 */
+    s32 filterAlphaOffset; /* 0x04 */
     s32 fadeMode; /* 0x08 */
     s32 swayMode; /* 0x0C */
     u8 pad10[0xC];
@@ -47,6 +47,8 @@ typedef struct FldLightSet {
 
 typedef char FldLightSet_size_must_be_0xE0[
     sizeof(FldLightSet) == 0xE0 ? 1 : -1];
+typedef char FldLightSet_filterAlphaOffset_offset_must_be_0x04[
+    ((u32)&((FldLightSet *)0)->filterAlphaOffset) == 0x04 ? 1 : -1];
 typedef char FldLightSet_fadeMode_offset_must_be_0x08[
     ((u32)&((FldLightSet *)0)->fadeMode) == 0x08 ? 1 : -1];
 typedef char FldLightSet_fogNear_offset_must_be_0x1C[

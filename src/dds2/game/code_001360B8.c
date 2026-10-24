@@ -93,7 +93,7 @@ void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode) {
             D_00436168 = lightSetIndex;
             area = light->fadeArea;
             fldRunDanteGunFlag[13] = area;
-            fldRunDanteGunFlag[14] = light->displayStateSlot14;
+            fldRunDanteGunFlag[14] = light->filterAlphaOffset;
             value = light->fadeMode;
             fldRunDanteGunFlag[15] = value;
             fldRunDanteGunFlag[16] = light->swayMode;
@@ -298,7 +298,7 @@ void fldSkyBattle(void) {
 
     area = light->fadeArea;
     fldRunDanteGunFlag[13] = area;
-    fldRunDanteGunFlag[14] = light->displayStateSlot14;
+    fldRunDanteGunFlag[14] = light->filterAlphaOffset;
     value = light->fadeMode;
     fldRunDanteGunFlag[15] = value;
     fldRunDanteGunFlag[16] = light->swayMode;
@@ -357,7 +357,7 @@ void fldApplyLightSetIndex(s32 index) {
     D_00436128 = index;
     area = light->fadeArea;
     fldRunDanteGunFlag[13] = area;
-    fldRunDanteGunFlag[14] = light->displayStateSlot14;
+    fldRunDanteGunFlag[14] = light->filterAlphaOffset;
     value = light->fadeMode;
     fldRunDanteGunFlag[15] = value;
     fldRunDanteGunFlag[16] = light->swayMode;

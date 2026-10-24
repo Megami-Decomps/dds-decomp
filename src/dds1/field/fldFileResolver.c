@@ -5868,7 +5868,7 @@ void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode) {
             light = &fldSkyLightSetBuffer->lightSets[skyLightSetIndex];
             area = light->fadeArea;
             fldRunDanteGunFlag[13] = area;
-            fldRunDanteGunFlag[14] = light->displayStateSlot14;
+            fldRunDanteGunFlag[14] = light->filterAlphaOffset;
             value = light->fadeMode;
             fldRunDanteGunFlag[15] = value;
             fldRunDanteGunFlag[16] = light->swayMode;
@@ -6016,7 +6016,7 @@ void fldTransitionSkyLightSet(s32 lightSetIndex, s32 mode) {
                 fldRunDanteGunFlag[11] = lightSetIndex;
                 area = light->fadeArea;
                 fldRunDanteGunFlag[13] = area;
-                fldRunDanteGunFlag[14] = light->displayStateSlot14;
+                fldRunDanteGunFlag[14] = light->filterAlphaOffset;
                 value = light->fadeMode;
                 fldRunDanteGunFlag[15] = value;
                 fldRunDanteGunFlag[16] = light->swayMode;
@@ -6130,7 +6130,7 @@ void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode) {
             D_003BADD8 = lightSetIndex;
             area = light->fadeArea;
             fldRunDanteGunFlag[13] = area;
-            fldRunDanteGunFlag[14] = light->displayStateSlot14;
+            fldRunDanteGunFlag[14] = light->filterAlphaOffset;
             value = light->fadeMode;
             fldRunDanteGunFlag[15] = value;
             fldRunDanteGunFlag[16] = light->swayMode;
@@ -6308,7 +6308,7 @@ void fldSkyBattle(void) {
 
     area = light->fadeArea;
     fldRunDanteGunFlag[13] = area;
-    fldRunDanteGunFlag[14] = light->displayStateSlot14;
+    fldRunDanteGunFlag[14] = light->filterAlphaOffset;
     value = light->fadeMode;
     fldRunDanteGunFlag[15] = value;
     fldRunDanteGunFlag[16] = light->swayMode;
@@ -6367,7 +6367,7 @@ void fldApplyLightSetIndex(s32 index) {
     D_003BAD98 = index;
     area = light->fadeArea;
     fldRunDanteGunFlag[13] = area;
-    fldRunDanteGunFlag[14] = light->displayStateSlot14;
+    fldRunDanteGunFlag[14] = light->filterAlphaOffset;
     value = light->fadeMode;
     fldRunDanteGunFlag[15] = value;
     fldRunDanteGunFlag[16] = light->swayMode;
