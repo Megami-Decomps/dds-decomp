@@ -72,7 +72,7 @@ extern void dds3ScatterPolyListSetTex(PcpScatterPool *work, u32 resId);
 extern EffRandState effDefaultRandomState[];
 extern f32 *dds3WhirlwindPolyListGetVertex(dds3WhirlwindPolyList_tag *object, s32 index);
 extern f32 *dds3WhirlwindPolyListGetUV(dds3WhirlwindPolyList_tag *object, s32 index);
-extern void SetRotateMatrixXYZ(f32 *rot);
+extern void SetRotateMatrixXYZ(const RwV3d *rot);
 
 extern void dds3ScatterPolyListDelete(PcpScatterPool *work);
 
@@ -2171,7 +2171,7 @@ void effPCPWwSpherePolyPartMove(PcpScatterPlainInstance *work, s32 index)
     if (ring->age >= work->params.radialDecayStart) {
         ring->radialSpeed *= work->params.radialDamping;
     }
-    SetRotateMatrixXYZ(ring->rot);
+    SetRotateMatrixXYZ((const RwV3d *)ring->rot);
     ring->radius = radius;
     ring->angle = angle;
     ring->angularSpeed *= work->params.angularDamping;
