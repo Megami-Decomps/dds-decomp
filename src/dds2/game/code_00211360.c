@@ -1124,8 +1124,8 @@ s32 btlIsLowHpActionReady(BtlUnit *unit, s32 unused) {
 }
 
 /* Test native unit flag 0x1000 without assigning it an unverified gameplay meaning. */
-s32 btlUnitHasFlag1000(s32 unitAddress) {
-    return (((s32)((BtlUnit *)unitAddress)->status.flags & 0x1000) > 0);
+s32 btlUnitHasFlag1000(const BtlUnit *unit) {
+    return (((s32)unit->status.flags & 0x1000) > 0);
 }
 
 u8 btlIsCommandAvailable(BtlUnit *unit, s32 command) {
