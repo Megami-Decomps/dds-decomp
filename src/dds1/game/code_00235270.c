@@ -40,7 +40,7 @@
 extern void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer);
 
 extern s32 evtIsMenuTableEntryEnabled(s32 *);
-extern s32 evtDrawFrameListColumnHeadings();
+extern s32 evtDrawFrameListColumnHeadings(sdfDrawTag_t *list, s32 x, s32 y, EvtRuntime *ctx);
 
 extern void evtWriteSerializedBytes(s32 output, void *data, s32 size);
 
@@ -941,8 +941,7 @@ extern s8 D_00368750[];
 extern char D_003BC0D0[];
 
 /* Header row of the frame list: one text cell per column of the selected group's table row. */
-s32 evtDrawFrameListColumnHeadings(sdfDrawTag_t *list, s32 x, s32 y, u8 *runtimeContext) {
-    EvtRuntime *ctx = (EvtRuntime *)runtimeContext;
+s32 evtDrawFrameListColumnHeadings(sdfDrawTag_t *list, s32 x, s32 y, EvtRuntime *ctx) {
     s32 type = ctx->frameGroup->type;
     s32 i;
     s32 kind;

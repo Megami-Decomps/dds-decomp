@@ -122,7 +122,7 @@ extern char D_00437508[]; /* "%03d" */
 extern s32 dds3SelectMenu(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 secondaryVisible,
                                   s32 primaryVisible, s32 *secondaryScroll, s32 *primaryScroll,
                                   s32 *secondaryCursor, s32 *primaryCursor);
-extern s32 evtDrawFrameListColumnHeadings();
+extern s32 evtDrawFrameListColumnHeadings(sdfDrawTag_t *list, s32 x, s32 y, EvtRuntime *ctx);
 extern s32 evtIsMenuTableEntryEnabled(s32 *);
 
 extern void p2sdLoadSMGFile(s32 sound);
@@ -986,8 +986,7 @@ extern s8 D_003C9520[];
 extern char D_00437518[];
 
 /* Header row of the frame list: one text cell per column of the selected group's table row. */
-s32 evtDrawFrameListColumnHeadings(sdfDrawTag_t *list, s32 x, s32 y, u8 *runtimeContext) {
-    EvtRuntime *ctx = (EvtRuntime *)runtimeContext;
+s32 evtDrawFrameListColumnHeadings(sdfDrawTag_t *list, s32 x, s32 y, EvtRuntime *ctx) {
     s32 type = ctx->frameGroup->type;
     s32 i;
     s32 kind;
