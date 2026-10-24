@@ -322,7 +322,7 @@ typedef struct SkillMenuRuntime {
     MenuWindowContainer *selectedWindow;
     s32 activeMark;
     u32 unk2C; /* 2B6FE8 clears this after rebuilding selection. */
-    u32 unk30; /* 2B5358 clears this after updating the image. */
+    u32 selectionFlags; /* 0x30: resets the selected skill entry. */
     u32 selectedIndex;
     s32 fade; /* 0x38: shared skill-category marker fade. */
 } SkillMenuRuntime;
@@ -2327,7 +2327,7 @@ s32 mnuUpdateEmptySkillSelectionCursor(dds3ProcessID_t *callback) {
     s32 index = -1;
     MenuListNode *node;
 
-    if (work->unk30 != 0) {
+    if (work->selectionFlags != 0) {
         mnuSeekListNode(0, work->selectedWindow->list);
         mnuClearSelectedListNodeId(callback);
     } else if (((MenuWindowContainer *)context->imageHandle)->list->cursor->index != 0) {
@@ -2357,7 +2357,7 @@ u32 mnuClearSkillSelectionImageState(dds3ProcessID_t *task) {
     if (image->list->cursor->index == 0) {
         mnuBeginWindowFadeTransition(image, &((MenuContext *)context)->transition);
     }
-    state->unk30 = 0;
+    state->selectionFlags = 0;
     return 1;
 }
 
@@ -2861,7 +2861,7 @@ s32 ptySkillMenuBrowseCandidatePages(dds3ProcessID_t *callback) {
         }
     }
     if (input & 4) {
-        runtime->unk30 = 1;
+        runtime->selectionFlags = 1;
         mnuSetPopupEntry(popup, mnuSkillMenuPagePopupEntry);
         input = 1;
     }
