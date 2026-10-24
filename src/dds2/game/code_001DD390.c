@@ -6059,8 +6059,8 @@ u32 btlGetActiveUnitId(void) {
     return ((BtlState *)workAddress)->cameraCommand.status;
 }
 
-f32 btlGetPoseBlendProgress(u8 *unit) {
-    return ((BtlLinkedCommand *)unit)->progress;
+f32 btlGetPoseBlendProgress(BtlLinkedCommand *command) {
+    return command->progress;
 }
 
 s32 btlIsUnitInActiveList(BtlUnit *unit) {
