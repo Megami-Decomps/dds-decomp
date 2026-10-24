@@ -2805,31 +2805,31 @@ u32 evtCommand_EFFMG2_BE(void) {
 
 u32 evtCommand_EFFMG2_PRESET(void) {
     s32 worldObjectKey;
-    void *obj;
+    dds3Basic_t *obj;
 
     worldObjectKey = scrGetIntPara(0);
     obj = evtSearchBasic(7, worldObjectKey);
     if (obj != NULL) {
-        dds3EffectObjectPresetMG12((dds3Basic_t *)obj);
+        dds3EffectObjectPresetMG12(obj);
     }
     return 1;
 }
 
 u32 evtCommand_EFFECT_PRESET(void) {
     s32 worldObjectKey;
-    void *obj;
+    dds3Basic_t *obj;
 
     worldObjectKey = scrGetIntPara(0);
     obj = evtSearchBasic(7, worldObjectKey);
     if (obj != NULL) {
-        dds3EffectObjectPresetMG12((dds3Basic_t *)obj);
+        dds3EffectObjectPresetMG12(obj);
     }
     return 1;
 }
 
 u32 evtCommand_EFFECT_CLS(void) {
     s32 worldObjectKey;
-    void *obj;
+    dds3Basic_t *obj;
 
     worldObjectKey = scrGetIntPara(0);
     obj = evtSearchBasic(7, worldObjectKey);
