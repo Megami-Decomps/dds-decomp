@@ -1277,78 +1277,78 @@ void sdfPadControl(SdfPadEntry *entry) {
     reply[0] = -1;
     padState = scePadGetState(port, slot);
     switch (entry->state) {
-    case 0:
+    case SDF_PAD_CONTROL_APPLY_REQUESTED_MODE:
         if (padState == 2 || padState == 6) {
             entry->lastSmallMotor = -1;
             entry->lastLargeMotor = -1;
             requestedMode = entry->mode = entry->requestedMode;
             switch (requestedMode) {
             case SDF_PAD_MODE_KEEP_CURRENT:
-                entry->state = 3;
+                entry->state = SDF_PAD_CONTROL_PROBE_ACTUATORS;
                 break;
             case SDF_PAD_MODE_DIGITAL_UNLOCKED:
                 if (padState == 6) {
                     if (scePadSetMainMode(port, slot, 0, 0) == 1) {
-                        entry->state = 1;
+                        entry->state = SDF_PAD_CONTROL_WAIT_FOR_MODE_CHANGE;
                     }
                 } else {
-                    entry->state = 3;
+                    entry->state = SDF_PAD_CONTROL_PROBE_ACTUATORS;
                 }
                 break;
             case SDF_PAD_MODE_DIGITAL_LOCKED:
                 if (padState == 6) {
                     if (scePadSetMainMode(port, slot, 0, 3) == 1) {
-                        entry->state = 1;
+                        entry->state = SDF_PAD_CONTROL_WAIT_FOR_MODE_CHANGE;
                     }
                 } else {
-                    entry->state = 3;
+                    entry->state = SDF_PAD_CONTROL_PROBE_ACTUATORS;
                 }
                 break;
             case SDF_PAD_MODE_DUALSHOCK_LOCKED:
                 if (padState == 6) {
                     if (scePadSetMainMode(port, slot, 1, 3) == 1) {
-                        entry->state = 1;
+                        entry->state = SDF_PAD_CONTROL_WAIT_FOR_MODE_CHANGE;
                     }
                 } else {
-                    entry->state = 3;
+                    entry->state = SDF_PAD_CONTROL_PROBE_ACTUATORS;
                 }
                 break;
             }
         }
         break;
-    case 1:
+    case SDF_PAD_CONTROL_WAIT_FOR_MODE_CHANGE:
         if (padState == 6) {
-            entry->state = 3;
+            entry->state = SDF_PAD_CONTROL_PROBE_ACTUATORS;
         } else if (padState != 5) {
-            entry->state = 0;
+            entry->state = SDF_PAD_CONTROL_APPLY_REQUESTED_MODE;
         }
         break;
-    case 2:
+    case SDF_PAD_CONTROL_UNKNOWN_2:
         break;
-    case 3:
+    case SDF_PAD_CONTROL_PROBE_ACTUATORS:
         if (scePadInfoAct(port, slot, -1, 0) != 0) {
             if (scePadSetActAlign(port, slot, sdfPadCb_0) != 0) {
-                entry->state = 4;
+                entry->state = SDF_PAD_CONTROL_WAIT_FOR_ACTUATOR_ALIGNMENT;
             }
         } else {
-            entry->state = 5;
+            entry->state = SDF_PAD_CONTROL_READ_INPUT_AND_UPDATE_MOTORS;
         }
         break;
-    case 4:
+    case SDF_PAD_CONTROL_WAIT_FOR_ACTUATOR_ALIGNMENT:
         alignmentStatus = scePadGetReqState(port, slot);
         if (alignmentStatus != 0) {
             if (alignmentStatus == 1) {
-                entry->state = 3;
+                entry->state = SDF_PAD_CONTROL_PROBE_ACTUATORS;
             }
         } else {
-            entry->state = 5;
+            entry->state = SDF_PAD_CONTROL_READ_INPUT_AND_UPDATE_MOTORS;
         }
         break;
-    case 5:
+    case SDF_PAD_CONTROL_READ_INPUT_AND_UPDATE_MOTORS:
         if (padState != 2 && padState != 6) {
-            entry->state = 0;
+            entry->state = SDF_PAD_CONTROL_APPLY_REQUESTED_MODE;
         } else if (entry->mode != entry->requestedMode) {
-            entry->state = 0;
+            entry->state = SDF_PAD_CONTROL_APPLY_REQUESTED_MODE;
         } else {
             scePadRead(port, slot, reply);
             smallMotor = entry->smallMotor;
@@ -1520,7 +1520,7 @@ void sdfPadInitManager(void) {
         entry = &sdfPadCb[padIndex];
         entry->port = port;
         entry->slot = slot;
-        entry->state = 0;
+        entry->state = SDF_PAD_CONTROL_APPLY_REQUESTED_MODE;
         entry->mode = SDF_PAD_MODE_KEEP_CURRENT;
         entry->requestedMode = SDF_PAD_MODE_KEEP_CURRENT;
         entry->buttons = 0;

@@ -3,6 +3,15 @@
 
 #include "sdf_pad_mode.h"
 
+enum {
+    SDF_PAD_CONTROL_APPLY_REQUESTED_MODE = 0,
+    SDF_PAD_CONTROL_WAIT_FOR_MODE_CHANGE = 1,
+    SDF_PAD_CONTROL_UNKNOWN_2 = 2,
+    SDF_PAD_CONTROL_PROBE_ACTUATORS = 3,
+    SDF_PAD_CONTROL_WAIT_FOR_ACTUATOR_ALIGNMENT = 4,
+    SDF_PAD_CONTROL_READ_INPUT_AND_UPDATE_MOTORS = 5
+};
+
 typedef struct SdfPadEntry {
     u8 port;                 /* 0x00 */
     u8 slot;                 /* 0x01 */
