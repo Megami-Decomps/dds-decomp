@@ -3738,16 +3738,16 @@ extern char D_003A3BC8[];
 
 extern char D_003A3BE8[];
 
-void btlRequestModelOrReuse(u32 *arguments) {
-    BtlUnit *object = (BtlUnit *)arguments[0];
-    u32 effect = arguments[1];
-    u32 model = arguments[2];
+void btlRequestModelOrReuse(BtlRuntimeTaskArgs *arguments) {
+    BtlUnit *object = arguments->actor;
+    u32 effect = arguments->option;
+    u32 model = arguments->unk_08;
     if (((u32)object->status.flags & 2) != 0) {
         return;
     }
     if (btlHasMatchingModel(effect, model)) {
         btlBindActorModel(object, effect, model);
-        if (*(char *)(arguments + 3) == 0) {
+        if (arguments->mode == 0) {
             btlClearUnitDefeatCandidate(object);
             evtSetUnitColorA(object->ext, 0, 0);
             object->overlayColor = object->baseColor & 0xFFFFFF;
@@ -3764,10 +3764,10 @@ extern char D_003A3C08[];
 
 extern s32 btlCheckModelAssetByMode(u8 *, u32, u32);
 
-u32 btlPollModelLoadCompletion(u32 *arguments) {
-    BtlUnit *object = (BtlUnit *)arguments[0];
-    u32 effect = arguments[1];
-    u32 model = arguments[2];
+u32 btlPollModelLoadCompletion(BtlRuntimeTaskArgs *arguments) {
+    BtlUnit *object = arguments->actor;
+    u32 effect = arguments->option;
+    u32 model = arguments->unk_08;
     if (((u32)object->status.flags & 2) == 0) {
         if (!btlCheckModelAssetByMode(object, effect, model)) {
             return 0;
@@ -3776,7 +3776,7 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
         btlReleaseModelAssetByMode(object, effect, model);
         btlBossDebugPrintf(D_003A3C08, effect, model, object);
     }
-    if (*(s8 *)(arguments + 3) == 0) {
+    if (arguments->mode == 0) {
         btlClearUnitDefeatCandidate(object);
         evtSetUnitColorA(object->ext, 0, 0);
         object->overlayColor = object->baseColor & 0xFFFFFF;
@@ -3787,7 +3787,7 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
 
 BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *owner, u32 effectId, u32 modelId, s8 preserveDefeatCandidate) {
     BtlRuntimeTask *task = btlAllocTask(16);
-    u32 *arguments;
+    BtlRuntimeTaskArgs *arguments;
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -3797,10 +3797,10 @@ BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *owner, u32 effectId, u32 mod
     task->onStart = btlRequestModelOrReuse;
     task->callback = btlPollModelLoadCompletion;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    arguments[1] = effectId;
-    arguments[2] = modelId;
-    *(s8 *)(arguments + 3) = preserveDefeatCandidate;
+    arguments->actor = owner;
+    arguments->option = effectId;
+    arguments->unk_08 = modelId;
+    arguments->mode = preserveDefeatCandidate;
     return task;
 }
 
