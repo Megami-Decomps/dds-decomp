@@ -53,23 +53,23 @@ void mnuLoadStaffImageHandles(void) {
 }
 
 /* Resolve each global handle, then copy its post-call value into destination. */
-void mnuResolveStaffImageHandles(u32 *destination) {
+void mnuResolveStaffImageHandles(struct EffectSlotSet **destination) {
     s32 resourceIndex;
 
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
         struct EffectSlotSet **sourceSlot = &mnuCampResourceHandles[resourceIndex];
-        u32 *destinationSlot = &destination[resourceIndex];
+        struct EffectSlotSet **destinationSlot = &destination[resourceIndex];
 
         effResolveAndReleaseResource(*sourceSlot);
-        *destinationSlot = (u32)*sourceSlot;
+        *destinationSlot = *sourceSlot;
     }
 }
 
 /* Release textures through the global handles and clear the caller's slots. */
-void mnuReleaseStaffImageHandles(u32 *resources) {
+void mnuReleaseStaffImageHandles(struct EffectSlotSet **resources) {
     s32 resourceIndex;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
-        u32 *outputSlot = &resources[resourceIndex];
+        struct EffectSlotSet **outputSlot = &resources[resourceIndex];
         effReleaseTextureHandlesAndResetSlots(mnuCampResourceHandles[resourceIndex]);
         *outputSlot = 0;
     }
@@ -234,4 +234,3 @@ INCLUDE_SDATA(const s32, "game/code_00270FB0", campExitState);
 INCLUDE_SDATA(const s32, "game/code_00270FB0", D_003BC6B5);
 
 INCLUDE_SDATA(const s32, "game/code_00270FB0", mnuCampInputTaskName);
-

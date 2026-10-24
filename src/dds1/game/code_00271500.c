@@ -37,15 +37,15 @@ extern char D_003B2020[];
 
 void mnuInitializeStaffPageWindows(MenuPageWindow *container, StaffSlots *resources, u32 unused, PartyPanel *partyPanel);
 
-/* Release textures through the global handles and clear the caller's slots. */ void mnuReleaseStaffImageHandles(u32 *resources);
+/* Release textures through the global handles and clear the caller's slots. */ void mnuReleaseStaffImageHandles(struct EffectSlotSet **resources);
 
-/* Resolve each global handle, then copy its post-call value into destination. */ void mnuResolveStaffImageHandles(u32 *destination);
+/* Resolve each global handle, then copy its post-call value into destination. */ void mnuResolveStaffImageHandles(struct EffectSlotSet **destination);
 
 void mnuAppendCampSpriteRequests(EffectList *resourceList, StaffSlots *resourceSlots) {
     s32 resourceIndex;
     s32 tableColumn;
 
-    mnuResolveStaffImageHandles((u32 *)resourceSlots->baseResources);
+    mnuResolveStaffImageHandles(resourceSlots->baseResources);
     tableColumn = mnuGetValueRecordOwner(resourceList) == 1;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
         effAppendListEntry(resourceList, (u32)D_003B2020, mnuCampMainResourceNamePairs[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->mainResources[resourceIndex]);
@@ -62,7 +62,7 @@ void mnuAppendCampSpriteRequests(EffectList *resourceList, StaffSlots *resourceS
 void mnuReleaseStaffResourceGroups(StaffSlots *resources) {
     s32 resourceIndex;
 
-    mnuReleaseStaffImageHandles((u32 *)resources->baseResources);
+    mnuReleaseStaffImageHandles(resources->baseResources);
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
         effDestroyResourceSlotSet(resources->mainResources[resourceIndex]);
     }
@@ -245,4 +245,3 @@ MenuWindowContainer *mnuCreateFilteredStaffEntryWindow(void *const *entries, s32
 INCLUDE_RODATA(const s32, "game/code_00271500", mnuCampDrawTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_00271500", mnuCampOwnerTaskName);
-

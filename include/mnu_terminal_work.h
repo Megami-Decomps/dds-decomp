@@ -38,7 +38,7 @@ typedef struct MenuTerminalWork {
     s32 transitionStage;     /* 0xD4 */
     s32 selectedSlot;        /* 0xD8 */
     s32 reduced;             /* 0xDC */
-    u32 imageHandles[7];     /* 0xE0: copied by mnuResolveStaffImageHandles */
+    EffectSlotSet *imageHandles[7]; /* 0xE0: retained staff image owners. */
     u8 padFC[0x5C];
     struct MenuResourceWork *effectHandle; /* 0x158: owned effect-resource work. */
     s32 effectStage; /* 0x15C */

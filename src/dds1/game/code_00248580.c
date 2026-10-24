@@ -269,10 +269,10 @@ MenuTerminalPercentPanelPair *mnuCreateDualPercentPanel(datUnitWork_t *unit, Men
     MenuTerminalPercentPanelPair *panel = sdfChipAllocDirect(sizeof(*panel));
     mnuDrawPanelSequenceByRow((s32)&panel->panels[0], 0, 0, 0x1e,
         mnuPercentOrHundred(unit->hp, unit->maxHp),
-        host->imageHandles[0]);
+        (s32)host->imageHandles[0]);
     mnuDrawPanelSequenceByRow((s32)&panel->panels[1], 1, 0, 0x1e,
         mnuPercentOrHundred(unit->mp, unit->maxMp),
-        host->imageHandles[0]);
+        (s32)host->imageHandles[0]);
     return panel;
 }
 
@@ -553,7 +553,7 @@ void mnuHighlightProgressNodeByMode(MenuTerminalWork *host) {
     }
 }
 
-extern void mnuResolveStaffImageHandles(u32 *);
+extern void mnuResolveStaffImageHandles(struct EffectSlotSet **);
 
 extern s32 mnuTerminalMenuTemplate[];
 
@@ -597,7 +597,7 @@ void mnuTerminalBuildMenus(MenuTerminalWork *host) {
     mnuHighlightProgressNodeByMode(host);
 }
 
-extern void mnuReleaseStaffImageHandles(u32 *);
+extern void mnuReleaseStaffImageHandles(struct EffectSlotSet **);
 
 /* Release command/progress lists, child percentage panels and staff image handles.
  * Release the owned command-list array before the remaining resources. */
