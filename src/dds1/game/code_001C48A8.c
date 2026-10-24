@@ -2210,13 +2210,13 @@ u8 *fldCreateSceneActorAction(u8 *actorTask, s32 slotCount) {
 }
 
 /* Spend the request's counter amount and conditionally swap the front slots. */
-u32 fldApplySceneSlotSwapRequest(u32 *request) {
+s32 fldApplySceneSlotSwapRequest(s32 *request) {
     fldSwapSceneSlots(*request);
     return 1;
 }
 
 /* Allocate a one-word counter-spend/swap request, without an actor-owner link. */
-s32 *fldCreateActorAction(s32 counterAmount) {
+BtlRuntimeTask *fldCreateActorAction(s32 counterAmount) {
     BtlRuntimeTask *actionTask = btlAllocTask(FLD_SCENE_SWAP_REQUEST_BYTES);
     actionTask->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     actionTask->taskId = FLD_SCENE_SWAP_ACTION_ID;
@@ -2224,7 +2224,7 @@ s32 *fldCreateActorAction(s32 counterAmount) {
     actionTask->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     actionTask->onStart = 0;
     *(s32 *)btlGetTaskArguments(actionTask) = counterAmount;
-    return (s32 *)actionTask;
+    return actionTask;
 }
 
 /* Set the task's active bit without changing its other flags. */
