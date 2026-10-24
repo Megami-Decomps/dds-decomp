@@ -4392,7 +4392,7 @@ void btlStartRegisteredChildTask(void) {
 
 /* Reset panel entrance mode and its initial horizontal offset. */
 void btlResetRegisteredPanelEntrance(BattleRegisteredPanelWork *work) {
-    work->mode = 1;
+    work->mode = BTL_REGISTERED_PANEL_MODE_ENTRANCE;
     work->x = 0x80;
     work->y = 0;
     work->state = 0;
@@ -4417,7 +4417,7 @@ s32 btlUpdateRegisteredPanelTask(dds3ProcessID_t *task) {
     }
     work = (BattleRegisteredPanelWork *)dds3GetProcessData(task);
     switch (work->mode) {
-    case 1:
+    case BTL_REGISTERED_PANEL_MODE_ENTRANCE:
         work->spriteAlpha += 32;
         work->spriteAlpha = work->spriteAlpha <= 0 ? 0 :
             work->spriteAlpha >= 128 ? 128 : work->spriteAlpha;
@@ -4432,7 +4432,7 @@ s32 btlUpdateRegisteredPanelTask(dds3ProcessID_t *task) {
                 work->backdropAlpha >= 128 ? 128 : work->backdropAlpha;
         }
         break;
-    case 2:
+    case BTL_REGISTERED_PANEL_MODE_SETTLED:
         work->x -= 16;
         work->x = work->x <= 0 ? 0 : work->x >= 128 ? 128 : work->x;
         if (work->x <= 16) {
@@ -4444,7 +4444,7 @@ s32 btlUpdateRegisteredPanelTask(dds3ProcessID_t *task) {
                 work->overlayAlpha >= 255 ? 255 : work->overlayAlpha;
         }
         break;
-    case 3:
+    case BTL_REGISTERED_PANEL_MODE_EXIT:
         work->spriteAlpha -= 32;
         work->spriteAlpha = work->spriteAlpha <= 0 ? 0 :
             work->spriteAlpha >= 128 ? 128 : work->spriteAlpha;
@@ -4455,7 +4455,7 @@ s32 btlUpdateRegisteredPanelTask(dds3ProcessID_t *task) {
         work->overlayAlpha = work->overlayAlpha <= 0 ? 0 :
             work->overlayAlpha >= 255 ? 255 : work->overlayAlpha;
         break;
-    case 4:
+    case BTL_REGISTERED_PANEL_MODE_OVERLAY_TRANSITION:
         work->x -= 16;
         work->x = work->x <= 0 ? 0 : work->x >= 128 ? 128 : work->x;
         if (work->x <= 16) {
@@ -4470,12 +4470,12 @@ s32 btlUpdateRegisteredPanelTask(dds3ProcessID_t *task) {
         work->overlayAlpha = work->overlayAlpha <= 64 ? 64 :
             work->overlayAlpha >= 255 ? 255 : work->overlayAlpha;
         if (work->spriteAlpha <= 128) {
-            work->mode = 2;
+            work->mode = BTL_REGISTERED_PANEL_MODE_SETTLED;
         }
         break;
     }
-    if (work->mode < 5) {
-        if (work->mode > 0) {
+    if (work->mode < BTL_REGISTERED_PANEL_MODE_DRAW_LIMIT) {
+        if (work->mode > BTL_REGISTERED_PANEL_MODE_INACTIVE) {
             sprite = work->variant == 0 ? 0x27 : 0x26;
             for (i = 0; i < 4; i++) {
                 colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 0x29, i, work->backdropAlpha);
@@ -4502,7 +4502,7 @@ s32 btlUpdateRegisteredPanelTask(dds3ProcessID_t *task) {
             }
             effDrawSpriteWithCornerColors((work->x + 0x1BB) << 4, (work->y + 0x36) << 3,
                          0, colors, 0, btlResourceBlock->resC, sprite, 0x53);
-            if (work->mode == 4 || sprite == 0x26) {
+            if (work->mode == BTL_REGISTERED_PANEL_MODE_OVERLAY_TRANSITION || sprite == 0x26) {
                 for (i = 0; i < 4; i++) {
                     colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, sprite, i, work->overlayAlpha);
                 }
@@ -8654,7 +8654,8 @@ void btlSetCommandPanelFadeMode(s8 mode, s32 duration) {
             btlTrackedTaskHandles->presentationState = 1;
         }
         if (registeredTask != NULL) {
-            ((BattleRegisteredPanelWork *)dds3GetProcessData(registeredTask))->mode = 3;
+            ((BattleRegisteredPanelWork *)dds3GetProcessData(registeredTask))->mode =
+                BTL_REGISTERED_PANEL_MODE_EXIT;
         }
         {
             BattleTrackedTaskWork *tracked = btlTrackedTaskHandles;

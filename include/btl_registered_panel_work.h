@@ -3,10 +3,20 @@
 
 #include "common.h"
 
+typedef s32 BattleRegisteredPanelMode;
+enum {
+    BTL_REGISTERED_PANEL_MODE_INACTIVE = 0,
+    BTL_REGISTERED_PANEL_MODE_ENTRANCE = 1,
+    BTL_REGISTERED_PANEL_MODE_SETTLED = 2,
+    BTL_REGISTERED_PANEL_MODE_EXIT = 3,
+    BTL_REGISTERED_PANEL_MODE_OVERLAY_TRANSITION = 4,
+    BTL_REGISTERED_PANEL_MODE_DRAW_LIMIT = 5
+};
+
 /* Work shared by the registered battle-panel task in both titles. */
 typedef struct BattleRegisteredPanelWork {
     s32 state;
-    s32 mode;
+    BattleRegisteredPanelMode mode;
     s32 variant;
     s32 x;
     s32 y;
