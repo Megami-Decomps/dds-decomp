@@ -235,8 +235,8 @@ s32 btlIsEntryHeightWithinLimit(void) {
 }
 
 /* Find an unmarked linked kind-two slot whose unit is not disabled. */
-s32 btlHasIdleLinkedSlotKindTwo(u8 *actor) {
-    ActionStateLink *linked = ((BtlLinkedCommand *)actor)->link;
+s32 btlHasIdleLinkedSlotKindTwo(BtlLinkedCommand *actor) {
+    ActionStateLink *linked = actor->link;
     u32 count;
     u32 i;
     BtlOperandGroup *entry;
@@ -256,8 +256,8 @@ s32 btlHasIdleLinkedSlotKindTwo(u8 *actor) {
 }
 
 /* Find a type-two linked group whose associated unit is not disabled. */
-s32 btlHasEligibleLinkedEntryTypeTwo(u8 *actor) {
-    ActionStateLink *linked = ((BtlLinkedCommand *)actor)->link;
+s32 btlHasEligibleLinkedEntryTypeTwo(BtlLinkedCommand *actor) {
+    ActionStateLink *linked = actor->link;
     u32 count;
     u32 i;
     BtlOperandGroup *entry;

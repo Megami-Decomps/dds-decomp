@@ -395,11 +395,11 @@ f32 btlGetUnitModelCurrentFrame(BtlUnit *unit);
 
 void btlGetUnitWorldPos(BtlUnit *unit, f32 *dst);
 
-/* Find a type-two linked group whose associated unit is not disabled. */ s32 btlHasEligibleLinkedEntryTypeTwo(u8 *actor);
+/* Find a type-two linked group whose associated unit is not disabled. */ s32 btlHasEligibleLinkedEntryTypeTwo(BtlLinkedCommand *actor);
 
 s32 btlHasFirstLinkedCategoryFlag1000(BtlLinkedCommand *actor);
 
-/* Find an unmarked linked kind-two slot whose unit is not disabled. */ s32 btlHasIdleLinkedSlotKindTwo(u8 *actor);
+/* Find an unmarked linked kind-two slot whose unit is not disabled. */ s32 btlHasIdleLinkedSlotKindTwo(BtlLinkedCommand *actor);
 
 /* Return whether a live linked group has its byte at 0x10 marked. */ s32 btlHasMarkedEntry10(BtlLinkedCommand *command);
 
@@ -939,8 +939,8 @@ void btlBeginActionEndCameraPullback(BtlLinkedCommand *action, BtlCamState *pose
         frames = btlGetUnitMotionDurationFrames(user, user->motionId);
         frames = (s32)((f32)frames / btlGetActorStateScale(action->link));
         if (action->state == frames && (target->status.flags & 0x200)) {
-            idle = btlHasIdleLinkedSlotKindTwo((u8 *)action);
-            eligible = btlHasEligibleLinkedEntryTypeTwo((u8 *)action);
+            idle = btlHasIdleLinkedSlotKindTwo(action);
+            eligible = btlHasEligibleLinkedEntryTypeTwo(action);
             if (idle == 0 && eligible == 0) {
                 return;
             }
@@ -2236,8 +2236,8 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
     frames = btlGetUnitMotionDurationFrames(user, user->motionId);
     frames = (s32)((f32)frames / btlGetActorStateScale(action->link));
     if (action->state == frames && (target->status.flags & 0x200)) {
-        idle = btlHasIdleLinkedSlotKindTwo((u8 *)action);
-        eligible = btlHasEligibleLinkedEntryTypeTwo((u8 *)action);
+        idle = btlHasIdleLinkedSlotKindTwo(action);
+        eligible = btlHasEligibleLinkedEntryTypeTwo(action);
         if (idle == 0 && eligible == 0) {
             return;
         }
