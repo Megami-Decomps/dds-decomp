@@ -2532,8 +2532,13 @@ EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s3
 }
 
 
+enum {
+    EVT_VIEWER_PLAYBACK_PAUSED = 0,
+    EVT_VIEWER_PLAYBACK_RUNNING = 1,
+};
+
 /* Apply the viewer playback mode to unit, motion and movie-object tracks. */
-void evtEventViewerApplyPlaybackMode(s32 mode, u32 frame, EvtRuntime *viewer) {
+void evtEventViewerApplyPlaybackMode(s32 playbackMode, u32 frame, EvtRuntime *viewer) {
     EvtWorldTable *table;
     dds3Basic_t *object;
     EvtRuntimeGroup *track;
@@ -2568,7 +2573,7 @@ void evtEventViewerApplyPlaybackMode(s32 mode, u32 frame, EvtRuntime *viewer) {
     while (object != NULL) {
         motion = ((EffectTransformData *)object->data)->resourceState->motion;
         if (motion != NULL) {
-            if (mode == 0) {
+            if (playbackMode == EVT_VIEWER_PLAYBACK_PAUSED) {
                 sdfMotionSeek(motion, (f32)frame);
                 sdfMotionPause(motion);
             } else {
@@ -2581,7 +2586,7 @@ void evtEventViewerApplyPlaybackMode(s32 mode, u32 frame, EvtRuntime *viewer) {
     while (object != NULL) {
         path = ((Dds3SlotResource *)object->data)->path;
         if (path != NULL) {
-            if (mode == 0) {
+            if (playbackMode == EVT_VIEWER_PLAYBACK_PAUSED) {
                 dds3PathBasicPauseOn(&path->counter);
             } else {
                 dds3PathBasicPauseOff(&path->counter);
@@ -2614,9 +2619,9 @@ updateMovie:
                         movie = dds3GetBaseControlWorkData(object)->slots[1];
                         if (movie != NULL) {
                             if (useTrackTime == 0) {
-                                evtStopMover(movie, mode, key->frame, frame);
+                                evtStopMover(movie, playbackMode, key->frame, frame);
                             } else {
-                                evtStopMover(movie, mode, 0, frame);
+                                evtStopMover(movie, playbackMode, 0, frame);
                             }
                         }
                     }
@@ -2634,10 +2639,10 @@ updateMovie:
 /* Dispatch one of two viewer modes based on its lowest flag bit. */
 void evtViewerDispatchFlagMode(EvtRuntime *viewer) {
     if ((viewer->flags & 1) != 0) {
-        evtEventViewerApplyPlaybackMode(0, viewer->curFrame, viewer);
+        evtEventViewerApplyPlaybackMode(EVT_VIEWER_PLAYBACK_PAUSED, viewer->curFrame, viewer);
         return;
     }
-    evtEventViewerApplyPlaybackMode(1, viewer->curFrame, viewer);
+    evtEventViewerApplyPlaybackMode(EVT_VIEWER_PLAYBACK_RUNNING, viewer->curFrame, viewer);
 }
 
 /* Returns the nearest kind-2 key strictly after the current frame, or NULL.
