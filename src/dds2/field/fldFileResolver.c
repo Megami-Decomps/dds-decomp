@@ -610,7 +610,7 @@ extern s32 btlGetRuntimeResult(void);
 
 extern s32 fldEncProc(dds3ProcessID_t *task);
 
-extern void btlUpdateRuntimeFadeState(void);
+extern s32 btlUpdateRuntimeFadeState(void);
 
 
 
