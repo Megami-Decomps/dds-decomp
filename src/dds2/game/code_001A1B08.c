@@ -439,7 +439,6 @@ void DrawLeftFade(itfpanel_t *panel, sdfDrawTag_t *command) {
 extern u32 D_003B4690[];
 extern DrawColorRec D_003B4700;
 extern DrawColorRec D_003B4710;
-extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 
 /* Draw the framed panel: two bordered bands, then six texture-bound strips whose
  * rectangles are rebuilt from the live panel bounds. */
@@ -468,7 +467,7 @@ void itfDrawFramedPanelWithTextureStrips(itfpanel_t *panel, sdfDrawTag_t *comman
     rect.y0 = panel->top + 0x48;
     rect.x1 = panel->left + 0xB40;
     rect.y1 = panel->bottom;
-    itfMiscDrawSpritePrim(&rect, &D_003B4700, color, panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_003B4700, (DrawColorRec *)color, panel->renderValue, payload->texture, 0, command);
     if (panel->scrollSpan > 0 && panel->screenY != panel->top) {
         alpha = 0x80 - ((panel->screenY - panel->top) << 7) / panel->scrollSpan;
     } else {
@@ -479,37 +478,36 @@ void itfDrawFramedPanelWithTextureStrips(itfpanel_t *panel, sdfDrawTag_t *comman
     rect.y0 = panel->top;
     rect.x1 = panel->right + 0x140;
     rect.y1 = panel->bottom - 0x48;
-    itfMiscDrawSpritePrim(&rect, &D_003B4710, &D_003B4690[12], panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_003B4710, (DrawColorRec *)&D_003B4690[12], panel->renderValue, payload->texture, 0, command);
     D_003B4690[11] = panel->alpha * 70 / 128;
     rect.x0 = panel->left - 0x140;
     rect.y0 = panel->top - 0xB8;
     rect.x1 = panel->left + 0x1A40;
     rect.y1 = panel->top + 8;
-    itfMiscDrawSpritePrim(&rect, &D_003B4710 - 1, &D_003B4690[8], panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_003B4710 - 1, (DrawColorRec *)&D_003B4690[8], panel->renderValue, payload->texture, 0, command);
     rect.x0 = panel->left + 0x8B0;
     rect.y0 = panel->top - 0x10;
     rect.x1 = panel->left + 0xFC0;
     rect.y1 = panel->top;
-    itfMiscDrawSpritePrim(&rect, &D_003B4710 - 3, color, panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_003B4710 - 3, (DrawColorRec *)color, panel->renderValue, payload->texture, 0, command);
     x = rect.x1;
     rect.x0 = x;
     rect.x1 = x + 0x1040;
-    itfMiscDrawSpritePrim(&rect, &D_003B4710 - 2, color, panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_003B4710 - 2, (DrawColorRec *)color, panel->renderValue, payload->texture, 0, command);
     rect.x0 = panel->left + 0x1020;
     rect.y0 = panel->bottom - 0x10;
     rect.x1 = panel->left + 0x1730;
     rect.y1 = panel->bottom;
-    itfMiscDrawSpritePrim(&rect, &D_003B4710 - 4, color, panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_003B4710 - 4, (DrawColorRec *)color, panel->renderValue, payload->texture, 0, command);
     x = rect.x0;
     rect.x1 = x;
     rect.x0 = x - 0x1220;
-    itfMiscDrawSpritePrim(&rect, &D_003B4710 - 2, color, panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_003B4710 - 2, (DrawColorRec *)color, panel->renderValue, payload->texture, 0, command);
 }
 /*END itfDrawFramedPanelWithTextureStrips*/
 
 extern DrawColorRec D_003B4720;
 extern DrawColorRec D_003B4730;
-extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 extern void itfMiscDrawSpritePrim2(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, sdfDrawTag_t *);
 
 /* Bind the texture for the left cap, then draw the center and reversed right
@@ -525,7 +523,7 @@ void DrawSpkWin2(itfpanel_t *panel, sdfDrawTag_t *command) {
     rect[0].y = panel->top;
     rect[1].x = leftInset;
     rect[1].y = panel->bottom;
-    itfMiscDrawSpritePrim(rect, &D_003B4720, color, panel->renderValue,
+    itfMiscDrawSpritePrim((DrawVertex *)rect, (DrawColorRec *)&D_003B4720, (DrawColorRec *)color, panel->renderValue,
                                   payload->texture, 0, command);
 
     rect[0].x = leftInset;
@@ -576,19 +574,19 @@ void DrawFacility(itfpanel_t *panel, sdfDrawTag_t *command) {
         rect[0].y = top;
         rect[1].x = panel->right;
         rect[1].y = topEnd;
-        itfMiscDrawSpritePrim(rect, &D_003B4470, color, panel->renderValue,
+        itfMiscDrawSpritePrim((DrawVertex *)rect, (DrawColorRec *)&D_003B4470, (DrawColorRec *)color, panel->renderValue,
                                       payload->texture, 0, command);
         rect[0].y = topEnd;
         rect[1].y = bottomStart;
-        itfMiscDrawSpritePrim(rect, &D_003B4480, color, panel->renderValue,
+        itfMiscDrawSpritePrim((DrawVertex *)rect, (DrawColorRec *)&D_003B4480, (DrawColorRec *)color, panel->renderValue,
                                       payload->texture, 0, command);
         rect[0].y = bottomStart;
         rect[1].y = panel->bottom;
-        itfMiscDrawSpritePrim(rect, &D_003B4490, color, panel->renderValue,
+        itfMiscDrawSpritePrim((DrawVertex *)rect, (DrawColorRec *)&D_003B4490, (DrawColorRec *)color, panel->renderValue,
                                       payload->texture, 0, command);
     } else {
-        itfMiscDrawSpritePrim(&panel->left, &D_003B44A0,
-                                      &panel->red, panel->renderValue,
+        itfMiscDrawSpritePrim((DrawVertex *)&panel->left, (DrawColorRec *)&D_003B44A0,
+                                      (DrawColorRec *)&panel->red, panel->renderValue,
                                       payload->texture, 0, command);
     }
 }

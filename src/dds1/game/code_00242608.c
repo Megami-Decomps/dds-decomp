@@ -28,6 +28,7 @@
 #include "sdf_gs_packet.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
+#include "itf_panel_draw.h"
 #include "evt_unit.h"
 #include "evt_event_pack.h"
 #include "dat_state.h"
@@ -454,7 +455,6 @@ void mnuSampleCampPanelVisualTrack(EvtRuntime *runtime, EvtRuntimeGroup *group, 
 
 #include "sdf_packet_alloc.h"
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *packet, s32 table, s32 mode);
-extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 extern s32 mnuCampQuadBounds[4];
 extern s32 mnuCampQuadTexcoords[4];
 extern s32 mnuCampQuadColor[4];
@@ -742,7 +742,7 @@ void mnuDrawCampScaledTexture(sdfTexHandle_t *texture, CampDisplayDefaults *disp
         } else if (variant == 2) {
             itfMiscDrawAlphaPrim(packetList, 2, 0);
         }
-        itfMiscDrawSpritePrim(mnuCampQuadBounds, mnuCampQuadTexcoords, mnuCampQuadColor,
+        itfMiscDrawSpritePrim((DrawVertex *)mnuCampQuadBounds, (DrawColorRec *)mnuCampQuadTexcoords, (DrawColorRec *)mnuCampQuadColor,
                                       0xFF, texture, 0, packetList);
         D_003255A8.append(&D_003255A8, packetList);
     }
@@ -1002,7 +1002,7 @@ void mnuShopQueueAuxiliaryTexturePacket(s32 alpha) {
     packet->registers.alpha.value = ((u64)(color >> 24) << 32) | 0x64;
     packet->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(list, (u32)packet);
-    itfMiscDrawSpritePrim(D_00368C10, D_00368C20, D_00368C30,
+    itfMiscDrawSpritePrim((DrawVertex *)D_00368C10, (DrawColorRec *)D_00368C20, (DrawColorRec *)D_00368C30,
                                   0xFEFF9B, dds3RenderTexture, 0, list);
     D_003255A8.append(&D_003255A8, list);
 }

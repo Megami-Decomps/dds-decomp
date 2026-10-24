@@ -1349,10 +1349,10 @@ void itfMiscDrawTexPoly(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, u3
 
 /* Bind the texture and emit one two-corner sprite using two packed UV pairs.
  * Unwritten padding words in the native packet remain untouched. */
-void itfMiscDrawSpritePrim(void *vertexData, void *uvData, void *colorData, s32 tail, sdfTexHandle_t *texture, s32 flag, sdfDrawTag_t *command) {
-    DrawVertex *vertices = vertexData;
-    DrawColorRec *uv = uvData;
-    DrawColorRec *colors = colorData;
+void itfMiscDrawSpritePrim(DrawVertex *vertices, DrawColorRec *uv,
+                            DrawColorRec *colors, s32 tail,
+                            sdfTexHandle_t *texture, s32 flag,
+                            sdfDrawTag_t *command) {
     SdfDrawPacket *packet;
     u64 *dst;
     s32 x0, y0, x1, y1;

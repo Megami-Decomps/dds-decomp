@@ -29,4 +29,10 @@ typedef struct UiSpriteBandPayload {
 typedef char UiSpriteBandPayload_size[(sizeof(UiSpriteBandPayload) == 0x64) ? 1 : -1];
 typedef char UiSpriteBandPayload_vertices[((u32)&((UiSpriteBandPayload *)0)->vertices == 4) ? 1 : -1];
 typedef char UiSpriteBandPayload_colors[((u32)&((UiSpriteBandPayload *)0)->colors == 0x44) ? 1 : -1];
+
+/* Bind a texture and emit a sprite from two vertices and packed UV/color pairs. */
+void itfMiscDrawSpritePrim(DrawVertex *vertices, DrawColorRec *uv,
+                           DrawColorRec *colors, s32 tail,
+                           sdfTexHandle_t *texture, s32 flag,
+                           sdfDrawTag_t *command);
 #endif

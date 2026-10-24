@@ -4,13 +4,13 @@
 #include "kwln.h"
 #include "sdf.h"
 #include "evt_picture.h"
+#include "itf_panel_draw.h"
 extern u8 evtPictureQuadBounds[];
 extern u8 evtPictureQuadTexcoords[];
 extern u8 evtPictureQuadColor[];
 extern SdfPoolNode D_003805A8;
 #include "sdf_packet_alloc.h"
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *packet, s32 index, s32 flag);
-extern void itfMiscDrawSpritePrim(void *vertexData, void *uvData, void *colorData, s32 tail, sdfTexHandle_t *texture, s32 flag, sdfDrawTag_t *command);
 
 void evtSubmitPictureDrawPacket(struct sdfTexHandle_t *texture) {
     sdfDrawTag_t *packet;
@@ -18,7 +18,7 @@ void evtSubmitPictureDrawPacket(struct sdfTexHandle_t *texture) {
     packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packet);
     itfMiscDrawAlphaPrim(packet, 0, 0);
-    itfMiscDrawSpritePrim(evtPictureQuadBounds, evtPictureQuadTexcoords, evtPictureQuadColor, 0xFFF, texture, 0, packet);
+    itfMiscDrawSpritePrim((DrawVertex *)evtPictureQuadBounds, (DrawColorRec *)evtPictureQuadTexcoords, (DrawColorRec *)evtPictureQuadColor, 0xFFF, texture, 0, packet);
     D_003805A8.append(&D_003805A8, packet);
 }
 

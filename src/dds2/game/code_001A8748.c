@@ -179,7 +179,6 @@ extern u8 D_003B4D28[];
 
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *list, s32 context, s32 mode);
 
-extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
 extern SndPad dds3PadButtonState;
@@ -240,7 +239,7 @@ s32 TestMsgMngD_Process(dds3ProcessID_t *task) {
         mem = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(mem);
         itfMiscDrawAlphaPrim(mem, 0, 0);
-        itfMiscDrawSpritePrim(D_003B4D08, D_003B4D18, D_003B4D28, 0xFFF, sndTestMessageTexture, 0, mem);
+        itfMiscDrawSpritePrim((DrawVertex *)D_003B4D08, (DrawColorRec *)D_003B4D18, (DrawColorRec *)D_003B4D28, 0xFFF, sndTestMessageTexture, 0, mem);
         D_003805A8.append(&D_003805A8, mem);
         return 0;
     }

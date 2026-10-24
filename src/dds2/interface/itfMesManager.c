@@ -1560,7 +1560,6 @@ extern void DestructFlow(s32 window);
 
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *list, s32 context, s32 mode);
 
-extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 
 
 extern void ChangeFontPosition(_FRQ *glyph, s32 dx, s32 dy);
@@ -2251,7 +2250,7 @@ void itfDrawSelectedSoundRow(instanceMes_tag *panel) {
     color.components[1] = 0x80;
     color.components[2] = 0x80;
     color.components[3] = 0x26;
-    itfMiscDrawSpritePrim(bounds, &uv, &color, panel->renderValue,
+    itfMiscDrawSpritePrim((DrawVertex *)bounds, (DrawColorRec *)&uv, (DrawColorRec *)&color, panel->renderValue,
                                   itfMesMngManager.windowTexture, 0, list);
 
     bounds[0].x = x - 0xF0;
@@ -2304,10 +2303,10 @@ void itfDrawSoundSelectorFadeLayers(instanceMes_tag *panel) {
     packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packet);
     D_003B4A08[3] = 0xFF;
-    itfMiscDrawSpritePrim(bounds, D_003B49F8, D_003B4A08, panel->renderValue,
+    itfMiscDrawSpritePrim((DrawVertex *)bounds, (DrawColorRec *)D_003B49F8, (DrawColorRec *)D_003B4A08, panel->renderValue,
                                   itfMesMngManager.windowTexture, 0, packet);
     D_003B4A08[3] = fade->alpha;
-    itfMiscDrawSpritePrim(bounds, D_003B49E8, D_003B4A08, panel->renderValue,
+    itfMiscDrawSpritePrim((DrawVertex *)bounds, (DrawColorRec *)D_003B49E8, (DrawColorRec *)D_003B4A08, panel->renderValue,
                                   itfMesMngManager.windowTexture, 0, packet);
     if (fade->timer > 0) {
         expansion = 0x80 - fade->timer;
@@ -2317,7 +2316,7 @@ void itfDrawSoundSelectorFadeLayers(instanceMes_tag *panel) {
         bounds[3] += expansion;
         D_003B4A08[3] = fade->timer;
         itfMiscDrawAlphaPrim(packet, 1, 0);
-        itfMiscDrawSpritePrim(bounds, D_003B49E8, D_003B4A08, panel->renderValue,
+        itfMiscDrawSpritePrim((DrawVertex *)bounds, (DrawColorRec *)D_003B49E8, (DrawColorRec *)D_003B4A08, panel->renderValue,
                                       itfMesMngManager.windowTexture, 0, packet);
         itfMiscDrawAlphaPrim(packet, 0, 0);
     }
@@ -2499,7 +2498,7 @@ void itfQueueOffsetTexturedRect(s32 *bounds, s32 *region, s32 x, s32 y,
     uv[2] = (region[0] + region[2]) << 4;
     uv[3] = (region[1] + region[3]) << 4;
     color.alpha = alpha;
-    itfMiscDrawSpritePrim(positions, uv, &color, 0, texture, 0, command);
+    itfMiscDrawSpritePrim((DrawVertex *)positions, (DrawColorRec *)uv, (DrawColorRec *)&color, 0, texture, 0, command);
 }
 
 extern const s32 D_00414D60[12][4];

@@ -26,6 +26,7 @@
 #include "sdf_gs_packet.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
+#include "itf_panel_draw.h"
 #include "kwln.h"
 #include "kwln_task_priority_query.h"
 #include "kwln_task_create.h"
@@ -184,7 +185,6 @@ extern f32 mnuShopSavedFirstTransformVector[];
 extern s32 mnuShopRestoreMiddleVector;
 #include "sdf_packet_alloc.h"
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *packet, s32 table, s32 mode);
-extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 extern void eglSetOt(u32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
@@ -810,10 +810,10 @@ void mnuDrawCampScaledTexture(sdfTexHandle_t *texture, CampDisplayDefaults *disp
             eglSetOt(0x3E);
             evtSubmitPrimaryAlphaBlendMode(0);
             evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-            itfMiscDrawSpritePrim(mnuCampQuadBounds, mnuCampQuadTexcoords, mnuCampQuadColor,
+            itfMiscDrawSpritePrim((DrawVertex *)mnuCampQuadBounds, (DrawColorRec *)mnuCampQuadTexcoords, (DrawColorRec *)mnuCampQuadColor,
                                           0xFF, texture, 0, packet);
         } else {
-            itfMiscDrawSpritePrim(mnuCampQuadBounds, mnuCampQuadTexcoords, mnuCampQuadColor,
+            itfMiscDrawSpritePrim((DrawVertex *)mnuCampQuadBounds, (DrawColorRec *)mnuCampQuadTexcoords, (DrawColorRec *)mnuCampQuadColor,
                                           0xFF, texture, 0, packet);
         }
         surface = &sdfGrOtTable[surfaceIndex];
@@ -1071,7 +1071,7 @@ void mnuShopQueueAuxiliaryTexturePacket(s32 alpha) {
     packet->registers.alpha.value = ((u64)(color >> 24) << 32) | 0x64;
     packet->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(list, (u32)packet);
-    itfMiscDrawSpritePrim(D_003C99F0, D_003C9A00, D_003C9A10,
+    itfMiscDrawSpritePrim((DrawVertex *)D_003C99F0, (DrawColorRec *)D_003C9A00, (DrawColorRec *)D_003C9A10,
                                   0xFEFF9B, dds3RenderTexture, 0, list);
     D_003805A8.append(&D_003805A8, list);
 }

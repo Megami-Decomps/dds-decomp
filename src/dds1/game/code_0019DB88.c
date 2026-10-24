@@ -682,7 +682,6 @@ void itfMesRenderActivePanelSprites(instanceMes_tag *panel) {
 extern DrawColorRec D_00357FC8[];
 #include "sdf_packet_alloc.h"
 extern void itfDrawThreePanelBorderBands(DrawVertex *bounds, DrawColorRec *color, u32 tail, s32 borderWidth, sdfDrawTag_t *command);
-extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 extern void itfMiscDrawSpritePrim2(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, sdfDrawTag_t *);
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *, s32, s32);
 
@@ -726,7 +725,7 @@ void itfDrawSelectedSoundRow(instanceMes_tag *panel) {
     color.components[1] = 0x80;
     color.components[2] = 0x80;
     color.components[3] = 0x26;
-    itfMiscDrawSpritePrim(bounds, &uv, &color, panel->renderValue,
+    itfMiscDrawSpritePrim((DrawVertex *)bounds, (DrawColorRec *)&uv, (DrawColorRec *)&color, panel->renderValue,
                                   itfMesMngManager.windowTexture, 0, list);
 
     bounds[0].x = x - 0xF0;
@@ -761,7 +760,6 @@ INCLUDE_ASM(const s32, "game/code_0019DB88", itfDrawSoundSelectorOptionPanel);
 extern u8 D_00358008[];
 extern u8 D_00357FF8[];
 extern s32 D_00358018[];
-extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *, s32, s32);
 
 /* Draw the sound selector frame, its fade layer and the expanding timer outline. */
@@ -779,10 +777,10 @@ void itfDrawSoundSelectorFadeLayers(instanceMes_tag *panel) {
     packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packet);
     D_00358018[3] = 0xFF;
-    itfMiscDrawSpritePrim(bounds, D_00358008, D_00358018, panel->renderValue,
+    itfMiscDrawSpritePrim((DrawVertex *)bounds, (DrawColorRec *)D_00358008, (DrawColorRec *)D_00358018, panel->renderValue,
                                   itfMesMngManager.windowTexture, 0, packet);
     D_00358018[3] = fade->alpha;
-    itfMiscDrawSpritePrim(bounds, D_00357FF8, D_00358018, panel->renderValue,
+    itfMiscDrawSpritePrim((DrawVertex *)bounds, (DrawColorRec *)D_00357FF8, (DrawColorRec *)D_00358018, panel->renderValue,
                                   itfMesMngManager.windowTexture, 0, packet);
     if (fade->timer > 0) {
         expansion = 0x80 - fade->timer;
@@ -792,7 +790,7 @@ void itfDrawSoundSelectorFadeLayers(instanceMes_tag *panel) {
         bounds[3] += expansion;
         D_00358018[3] = fade->timer;
         itfMiscDrawAlphaPrim(packet, 1, 0);
-        itfMiscDrawSpritePrim(bounds, D_00357FF8, D_00358018, panel->renderValue,
+        itfMiscDrawSpritePrim((DrawVertex *)bounds, (DrawColorRec *)D_00357FF8, (DrawColorRec *)D_00358018, panel->renderValue,
                                       itfMesMngManager.windowTexture, 0, packet);
         itfMiscDrawAlphaPrim(packet, 0, 0);
     }
@@ -1022,7 +1020,7 @@ s32 TestMsgMngD_Process(dds3ProcessID_t *task) {
         mem = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(mem);
         itfMiscDrawAlphaPrim(mem, 0, 0);
-        itfMiscDrawSpritePrim(D_00358318, D_00358328, D_00358338, 0xFFF, sndTestMessageTexture, 0, mem);
+        itfMiscDrawSpritePrim((DrawVertex *)D_00358318, (DrawColorRec *)D_00358328, (DrawColorRec *)D_00358338, 0xFFF, sndTestMessageTexture, 0, mem);
         D_003255A8.append(&D_003255A8, mem);
         return 0;
     }
