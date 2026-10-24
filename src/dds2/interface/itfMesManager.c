@@ -1141,7 +1141,7 @@ void ResolveResourceAddress(ItfMesSub *resource)
         payload = (u8 *)resource->entries;
         fixupTable = (u8 *)resource + resource->fixupTableOffset;
         fixupSize = resource->fixupTableBytes;
-        sdfAddressResolver((s32 *)payload, (s32)payload, fixupTable, fixupSize);
+        sdfAddressResolver((s32 *)payload, (u32)payload, fixupTable, fixupSize);
         resource->relocated = 1;
     }
 }

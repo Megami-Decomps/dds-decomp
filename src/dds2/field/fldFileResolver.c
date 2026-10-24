@@ -1184,7 +1184,7 @@ void sdfAddressResolverReset(u32 *table, u32 base, const u8 *data, s32 size) {
 
 /* Relocate the words described by this packed-resource transfer chunk. */
 void fldAddressResolver(u8 *buffer, FldTransferChunk *chunk) {
-    sdfAddressResolver((s32 *)buffer, (s32)(u32)buffer, buffer + chunk->offset, chunk->size);
+    sdfAddressResolver((s32 *)buffer, (u32)buffer, buffer + chunk->offset, chunk->size);
 }
 
 void fldRelocateTransferChunkWords(u8 *buffer, FldTransferChunk *chunk) {

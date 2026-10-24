@@ -11,7 +11,7 @@ typedef struct PacReloc {
     u8 payload[0]; /* 0x10: variable-length relocated payload */
 } PacReloc;
 
-void sdfAddressResolver(s32 *words, s32 relocationBase, const u8 *table, s32 tableBytes);
+void sdfAddressResolver(s32 *words, u32 relocationBase, const u8 *table, s32 tableBytes);
 
 typedef char PacReloc_tableOffset_must_be_at_0[
     ((u32)&((PacReloc *)0)->tableOffset == 0) ? 1 : -1];

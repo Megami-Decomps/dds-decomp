@@ -1105,7 +1105,7 @@ DevRequest *sndLoadNamedOffsetResourceList(const char *name) {
 u8 *sdfRelocatePackedResourcePayload(SdfPackedRelocationHeader *resource) {
     u8 *payload = (u8 *)resource + SDF_PACKED_RESOURCE_HEADER_BYTES;
 
-    sdfAddressResolver((s32 *)payload, (s32)payload,
+    sdfAddressResolver((s32 *)payload, (u32)payload,
                                    payload + resource->relocationOffset, resource->relocationByteCount);
     return payload;
 }
@@ -1122,7 +1122,7 @@ sdfMemHandle_t *sdfLoadPackedResourceWithRelocatedPayload(const char *name, u8 *
 u8 *sdfRelocatePackedResourceWordsFromHeader(SdfPackedRelocationHeader *resource) {
     u8 *payload = (u8 *)resource + SDF_PACKED_RESOURCE_HEADER_BYTES;
 
-    sdfAddressResolver((s32 *)payload, (s32)payload,
+    sdfAddressResolver((s32 *)payload, (u32)payload,
                                    payload + resource->relocationOffset, resource->relocationByteCount);
     return payload;
 }
@@ -1139,7 +1139,7 @@ sdfMemHandle_t *sdfReadPackedResourceAndRelocateHeader(const char *name, u8 **ou
  * Low tag bits select one-, two-, or three-byte deltas; tag 7 encodes a run.
  * tableBytes bounds the encoded byte stream, not the number of relocated words.
  */
-void sdfAddressResolver(s32 *words, s32 relocationBase, const u8 *table, s32 tableBytes) {
+void sdfAddressResolver(s32 *words, u32 relocationBase, const u8 *table, s32 tableBytes) {
     const u8 *commandCursor = table;
     s32 value;
     s32 runIndex;

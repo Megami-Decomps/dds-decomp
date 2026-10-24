@@ -1143,7 +1143,7 @@ void DestructFlow(s32 window) {
 /* Semantic reference: Persona 4 func_00278d50 @ 00278D50 (src/itfMesManager.c). */
 void ResolveResourceAddress(ItfMesSub *resource) {
     if (resource->relocated == 0) {
-        sdfAddressResolver((s32 *)resource->entries, (s32)resource->entries,
+        sdfAddressResolver((s32 *)resource->entries, (u32)resource->entries,
                       (u8 *)resource + resource->fixupTableOffset, resource->fixupTableBytes);
         resource->relocated = 1;
     }

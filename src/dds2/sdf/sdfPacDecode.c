@@ -274,7 +274,7 @@ void sdfPacModelDecoderEndFunc(PacState *state) {
     s32 tableBytes = record->tableBytes;
     work->dataCursor = payload;
     if (tableBytes != 0) {
-        sdfAddressResolver((s32 *)payload, (s32)payload, payload + record->tableOffset, tableBytes);
+        sdfAddressResolver((s32 *)payload, (u32)payload, payload + record->tableOffset, tableBytes);
         record->tableBytes = 0;
     }
     sdfDecodePacNodeAndAdvanceTail(state);
@@ -294,7 +294,7 @@ void sdfPacMotionDecoderEndFunc(PacState *state) {
     s32 tableBytes = record->tableBytes;
     work->dataCursor = payload;
     if (tableBytes != 0) {
-        sdfAddressResolver((s32 *)payload, (s32)payload, payload + record->tableOffset, tableBytes);
+        sdfAddressResolver((s32 *)payload, (u32)payload, payload + record->tableOffset, tableBytes);
         record->tableBytes = 0;
     }
     sdfDecodePacNodeAndAdvanceTail(state);
