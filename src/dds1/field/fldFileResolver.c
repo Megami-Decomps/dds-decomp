@@ -214,6 +214,8 @@ extern u32 D_003BD7B4;
 
 extern u32 D_003C91D0[];
 
+extern struct sdfMemHandle_t *D_003C91E0[];
+
 extern u32 D_003C91F0[];
 
 extern char D_003BAC40[];
@@ -814,7 +816,8 @@ extern s32 D_003BAE5C;
 
 extern s32 D_003BAE60;
 
-extern u32 D_003C91D0[], D_003C91E0[], D_003C91F0[];
+extern u32 D_003C91D0[], D_003C91F0[];
+extern struct sdfMemHandle_t *D_003C91E0[];
 
 extern char D_003BAC40[];
 
@@ -1267,7 +1270,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
             if (D_003C91D0[resourceSlotIndex] != 0) {
                 fldMakeFilePath(directory, fldGlobalBase.area, fldGlobalBase.floor + 1);
                 sprintf(path, D_003BAC40, directory, D_003C91D0[resourceSlotIndex]);
-                D_003C91E0[resourceSlotIndex] = (u32)sdfDevLoadFileEx(path, &D_003C91F0[resourceSlotIndex], 0);
+                D_003C91E0[resourceSlotIndex] = sdfDevLoadFileEx(path, &D_003C91F0[resourceSlotIndex], 0);
             }
         }
     }
@@ -1942,9 +1945,9 @@ void fldReleaseFieldResources(void) {
     sdfTexListFree(fldRoomSoundResources, 1);
     fldRoomSoundResources = 0;
     for (i = 0; i < 4; i++) {
-        if (D_003C91E0[i] != 0) {
-            sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)D_003C91E0[i]);
-            D_003C91E0[i] = 0;
+        if (D_003C91E0[i] != NULL) {
+            sdfMemFreeDelayedDirect(D_003C91E0[i]);
+            D_003C91E0[i] = NULL;
             D_003C91F0[i] = 0;
         }
     }
