@@ -527,7 +527,7 @@ extern u8 D_00386480[];
 extern char *D_00386488[];
 
 /* Draw three RGB value rows and their clamped colour preview. */
-void dds3PrimDebugTextBox(void *packetList, s32 x, s32 y, s32 selectedChannel, f32 *rgbValues) {
+void dds3PrimDebugTextBox(sdfDrawTag_t *packetList, s32 x, s32 y, s32 selectedChannel, f32 *rgbValues) {
     char text[16];
     u32 previewColor = 0x80000000;
     s32 channelIndex;
@@ -577,7 +577,7 @@ extern char D_00435ED0[];
 
 extern char D_00435ED8[];
 
-void dds3PrimDebugTextBoxRGB(void *packetList, s32 x, s32 y, s32 selectedChannel,
+void dds3PrimDebugTextBoxRGB(sdfDrawTag_t *packetList, s32 x, s32 y, s32 selectedChannel,
                    u32 packedColor, s32 showNormalizedValues) {
     s32 channelIndex;
     s32 selectedStyle;

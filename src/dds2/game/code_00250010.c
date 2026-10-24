@@ -2534,7 +2534,7 @@ extern const char D_00424150[];
 extern const char D_00424160[];
 extern const char D_00424170[];
 extern u64 *dds3PrimLine3D(s32, s32, s32, s32);
-extern void dds3PrimDebugTextBox(void *, s32, s32, s32, f32 *);
+extern void dds3PrimDebugTextBox(sdfDrawTag_t *, s32, s32, s32, f32 *);
 extern void mnuShopSavePrimaryTransform(EvtRuntime *);
 extern void mnuShopSaveFullTransform(EvtRuntime *);
 extern void mnuShopRestoreTransform(EvtRuntime *);
@@ -3287,7 +3287,7 @@ s32 evtPollRuntimeControlReady(dds3ProcessID_t *task) {
 
 typedef char EvtViewKey_size_must_be_0x38[(sizeof(EvtRuntimeChild) == 0x38) ? 1 : -1];
 
-extern void dds3PrimDebugTextBoxRGB(void *packetList, s32 x, s32 y,
+extern void dds3PrimDebugTextBoxRGB(sdfDrawTag_t *packetList, s32 x, s32 y,
                                    s32 selected, u32 color,
                                    s32 showNormalized);
 extern char D_00437780[];
@@ -3574,7 +3574,7 @@ INCLUDE_SDATA(const s32, "game/code_00250010", D_004377A8);
 
 s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
     EvtCameraColorPayload *key;
-    s32 packetList;
+    sdfDrawTag_t *packetList;
     s32 selectedChannel;
     s32 color;
     s32 style;
@@ -3584,15 +3584,15 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
     s32 textY;
     s32 step;
 
-    packetList = (s32)dds3FontReqAllocDrawTag();
+    packetList = dds3FontReqAllocDrawTag();
     panelX = 0x138;
-    dds3ConsPanelTagLink((void *)packetList, panelX, 0x30, 0xD, 0x10);
+    dds3ConsPanelTagLink(packetList, panelX, 0x30, 0xD, 0x10);
     key = evtEventViewerGetPendingNode(runtime)->payload;
 
     style = runtime->colorSelection == 0 ? 6 : 0;
-    sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7000 + (panelX << 4), 0x7A80, 0xFEFFFF, 0, "SPEED:"));
-    sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7000 + (panelX << 4), 0x7A80, 0xFEFFFF, style, "       %d", key->parameters.x));
 
     if (runtime->colorSelection > 0 && runtime->editField < 4) {
@@ -3601,29 +3601,29 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
         selectedChannel = -1;
     }
     color = key->parameters.w[0] | (key->parameters.w[1] << 8) | (key->parameters.w[2] << 16);
-    dds3PrimDebugTextBoxRGB((void *)packetList, 0x7000 + (panelX << 4), 0x7AE0,
+    dds3PrimDebugTextBoxRGB(packetList, 0x7000 + (panelX << 4), 0x7AE0,
                            selectedChannel, color, 0);
 
     style = runtime->colorSelection == 4 ? 6 : 0;
-    sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7000 + (panelX << 4), 0x7C00, 0xFEFFFF, 0, D_00437790));
-    sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7000 + (panelX << 4), 0x7C00, 0xFEFFFF, style, D_004376F8, key->parameters.w[3]));
 
     style = runtime->colorSelection == 5 ? 6 : 0;
-    sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, 0, D_00437798));
     switch ((s32)key->parameters.flagWord) {
     case 0:
-        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
             0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, style, D_00424210));
         break;
     case 1:
-        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
             0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, style, D_00424220));
         break;
     case 2:
-        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
             0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, style, D_00424230));
         break;
     }
@@ -3633,25 +3633,25 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
     for (; bank < 3; bank++) {
         style = runtime->colorSelection == bank * 2 + 6 ? 6 : 0;
         textY = 0x7900 + ((bank * 36 + 144) << 3);
-        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
             textX, textY, 0xFEFFFF, 0,
             "S%d SPEED:", bank));
-        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
             textX, textY, 0xFEFFFF, style,
             "          %d", key->parameters.y[bank]));
 
         style = runtime->colorSelection == bank * 2 + 7 ? 6 : 0;
         textY = 0x7900 + ((bank * 36 + 156) << 3);
-        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
             textX, textY, 0xFEFFFF, 0,
             "S0 ALPHA:"));
-        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
             textX, textY, 0xFEFFFF, style,
             "          %d", key->parameters.z[bank]));
     }
 
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface,
-                                     (sdfDrawTag_t *)packetList);
+                                     packetList);
     fldApplyCameraColorKeyWords(runtime, &key->parameters);
 
     step = 0;
