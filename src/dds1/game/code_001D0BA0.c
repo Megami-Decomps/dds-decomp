@@ -3862,7 +3862,7 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
     s32 entryFlags;
 
     switch (args->phase) {
-    case 0:
+    case BTL_MODEL_CHANGE_WAITING_FOR_ASSET:
         if (args->delay > args->elapsed) {
             break;
         }
@@ -3881,10 +3881,10 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
             btlSetUnitRotation(unit->mirror, unit->orientation);
             btlSetUnitColor(unit->mirror, unit->baseColor, 0);
             unit->mirror->status.flags |= 8;
-            args->phase = 1;
+            args->phase = BTL_MODEL_CHANGE_CROSSFADE;
             args->elapsed = 0;
         } else {
-            args->phase = 2;
+            args->phase = BTL_MODEL_CHANGE_CLEANUP;
         }
         btlReleaseActorModelResources(unit);
         btlRefreshUnitMaximumHpAndClampCurrentHp(&unit->partyRecord);
@@ -3910,7 +3910,7 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
             evtSetUnitLightAndAmbient(unit->ext, 0, firstColor, secondColor);
         }
         unit->gunResourceFlags = (unit->gunResourceFlags & ~1) | 2;
-        if (args->phase == 1) {
+        if (args->phase == BTL_MODEL_CHANGE_CROSSFADE) {
             u32 baseRgb = unit->baseColor & 0xFFFFFF;
 
             unit->overlayColor = baseRgb;
@@ -3918,7 +3918,7 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
             evtSetUnitColorA(unit->ext, 0, 0);
         }
         break;
-    case 1:
+    case BTL_MODEL_CHANGE_CROSSFADE:
         if (args->elapsed == 1 && args->duration != 0) {
             entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->partyRecord);
             if (unit->status.flags & 0x20) {
@@ -3972,10 +3972,10 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
             }
             unit->overlayColor = unit->baseColor;
             unit->mirror->overlayColor = 0;
-            args->phase = 2;
+            args->phase = BTL_MODEL_CHANGE_CLEANUP;
         }
         break;
-    case 2:
+    case BTL_MODEL_CHANGE_CLEANUP:
         if (unit->mirror != NULL) {
             btlDestroyUnit(unit->mirror);
             unit->mirror = NULL;
@@ -4011,7 +4011,7 @@ BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 re
     args->delay = delay;
     args->duration = duration;
     args->transitionMode = transitionMode;
-    args->phase = 0;
+    args->phase = BTL_MODEL_CHANGE_WAITING_FOR_ASSET;
     args->elapsed = 0;
     return (BtlRuntimeTask *)task;
 }

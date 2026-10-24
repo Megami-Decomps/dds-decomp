@@ -122,6 +122,12 @@ typedef struct BtlActorModelBlendArgs {
 typedef char BtlActorModelBlendArgsSizeCheck[sizeof(BtlActorModelBlendArgs) == 0x1C ? 1 : -1];
 
 /* The model-change task allocates this 0x1C-byte record in both titles. */
+enum {
+    BTL_MODEL_CHANGE_WAITING_FOR_ASSET = 0,
+    BTL_MODEL_CHANGE_CROSSFADE = 1,
+    BTL_MODEL_CHANGE_CLEANUP = 2
+};
+
 typedef struct BtlModelChangeArgs {
     struct BtlUnit *unit; /* 0x00 */
     u32 resourceKind;     /* 0x04 */
@@ -129,7 +135,7 @@ typedef struct BtlModelChangeArgs {
     s32 delay;            /* 0x0C */
     u32 duration;         /* 0x10 */
     s32 elapsed;          /* 0x14 */
-    u8 phase;             /* 0x18 */
+    u8 phase;             /* 0x18: BTL_MODEL_CHANGE_* */
     u8 transitionMode;    /* 0x19 */
     u8 opaque_1A[2];      /* 0x1A: allocated but not interpreted by these readers. */
 } BtlModelChangeArgs;
