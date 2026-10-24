@@ -21,7 +21,7 @@ typedef struct fldSceneParam_t {
     char name[16];
     s32 stage;
     s32 kind;
-    s32 retainCachedAreaResource;
+    u32 retainCachedAreaResource;
     s32 mode;
     u16 code;
     u16 sequenceMode;
