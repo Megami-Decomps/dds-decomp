@@ -4,6 +4,10 @@
 #include "btl_ui.h"
 #include "kwln.h"
 
+#define BTL_PANEL_TRANSITION_STATE_FADE_IN 0
+#define BTL_PANEL_TRANSITION_STATE_HOLD 1
+#define BTL_PANEL_TRANSITION_STATE_FADE_OUT 2
+
 /* Shared skill-name panel task state in both battle titles. */
 typedef struct BtlPanelTransitionWork {
     dds3ProcessID_t *task;
@@ -13,7 +17,7 @@ typedef struct BtlPanelTransitionWork {
     s32 width;
     s32 unk14;
     s32 verticalShift;
-    s8 state;
+    s8 state; /* BTL_PANEL_TRANSITION_STATE_* */
     u8 pad1D;
     s16 fade;
     s16 fadeLevels[4];

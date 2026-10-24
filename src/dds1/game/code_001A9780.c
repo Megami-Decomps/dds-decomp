@@ -4395,21 +4395,21 @@ s32 btlUpdateSkillNamePanelTask(dds3ProcessID_t *task) {
     }
     work = (BtlPanelTransitionWork *)dds3GetProcessData(task);
     switch (work->state) {
-    case 0:
+    case BTL_PANEL_TRANSITION_STATE_FADE_IN:
         btlUpdatePanelTransitionGradients(work);
         work->fade += 0x20;
         work->fade = work->fade <= 0 ? 0 : work->fade > 0x80 ? 0x80 : work->fade;
         if (work->fade >= 0x80) {
-            work->state = 1;
+            work->state = BTL_PANEL_TRANSITION_STATE_HOLD;
         }
         break;
-    case 1:
+    case BTL_PANEL_TRANSITION_STATE_HOLD:
         btlUpdatePanelTransitionGradients(work);
         if (work->elapsed++ >= work->frames) {
-            work->state = 2;
+            work->state = BTL_PANEL_TRANSITION_STATE_FADE_OUT;
         }
         break;
-    case 2:
+    case BTL_PANEL_TRANSITION_STATE_FADE_OUT:
         for (fade = work->fadeLevels, i = 3; i >= 0; i--, fade++) {
             *fade -= 0x20;
             *fade = *fade <= 0 ? 0 : *fade > 0x80 ? 0x80 : *fade;
