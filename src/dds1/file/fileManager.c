@@ -7,6 +7,7 @@
 #include "file_manager_api.h"
 #include "file_request.h"
 #include "file_request_kind.h"
+#include "file_transfer_job.h"
 
 FileManWork fileQueueHead __attribute__((section(".bss")));
 
@@ -264,7 +265,7 @@ struct FileRequest *fileSave(const char *requestName, const void *sourceData, s3
  * four-slot cursor; this does not search for an empty slot. Mark transferring
  * under the semaphore, then start the read after unlocking. Cap at 64 KiB but
  * preserve the absence of a lower size bound and the original request size. */
-void pacRead(FileRequest *request) {
+void pacRead(FileTransferJob *job) {
     FileManWork *work = &fileQueueHead;
     u8 slotIndex;
     s32 chunkBytes;
@@ -274,25 +275,25 @@ void pacRead(FileRequest *request) {
         SignalSema(work->sema);
         return;
     }
-    if (request->state != FILE_JOB_READY) {
+    if (job->state != FILE_JOB_READY) {
         SignalSema(work->sema);
         return;
     }
-    request->state = FILE_JOB_TRANSFERRING;
+    job->state = FILE_JOB_TRANSFERRING;
     slotIndex = work->nextSlot;
     if (slotIndex == FILE_LAST_READ_SLOT) {
         work->nextSlot = 0;
     } else {
         work->nextSlot = slotIndex + 1;
     }
-    request->slot = slotIndex;
+    job->slot = slotIndex;
     work->freeSlots--;
-    work->slots[slotIndex].request = request;
-    chunkBytes = request->transferBytes;
+    work->slots[slotIndex].request = (FileRequest *)job;
+    chunkBytes = job->transferBytes;
     if (chunkBytes > FILE_READ_SLOT_BYTES) {
         chunkBytes = FILE_READ_SLOT_BYTES;
     }
     SignalSema(work->sema);
-    sdfFileCmdRead(request->deviceRequest,
+    sdfFileCmdRead(job->deviceRequest,
                     work->buffer + (slotIndex << FILE_READ_SLOT_SHIFT), chunkBytes);
 }
