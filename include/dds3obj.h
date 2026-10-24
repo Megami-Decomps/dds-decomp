@@ -45,9 +45,9 @@ const char *dds3EventBasicGetResource(dds3Basic_t *object);
 /* Forward a callback to the object's slot-1 handler when one is present; returns 1 if it did. */
 u8 dds3ObjectBaseSetPadControl(dds3Basic_t *object,
                                    s32 (*update)(struct dds3PoseSet_t *, struct dds3Basic_t *));
-void *dds3ObjectBaseSetControlBasic(dds3Basic_t *object, dds3Basic_t *slotData);
+dds3Basic_t *dds3ObjectBaseSetControlBasic(dds3Basic_t *object, dds3Basic_t *slotData);
 void *dds3ObjectBaseSetControlBasicType(dds3Basic_t *object, void *slotData, s32 slotIndex);
-void *dds3ObjectBaseGetControlBasic(dds3Basic_t *object, s32 slotIndex);
+dds3Basic_t *dds3ObjectBaseGetControlBasic(dds3Basic_t *object, s32 slotIndex);
 void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *object, u32 value);
 dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *world, u32 key, s32 kind);
 dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *world, s32 slotIndex, const char *name);

@@ -108,7 +108,7 @@ void *dds3ObjectBaseGetUserValue(dds3Basic_t *object) {
 }
 
 /* Exchange the slot selected by the data kind; NULL data leaves every slot alone. */
-void *dds3ObjectBaseSetControlBasic(dds3Basic_t *object, dds3Basic_t *slotData) {
+dds3Basic_t *dds3ObjectBaseSetControlBasic(dds3Basic_t *object, dds3Basic_t *slotData) {
     if (slotData == NULL) {
         return NULL;
     }
@@ -125,7 +125,7 @@ void *dds3ObjectBaseSetControlBasicType(dds3Basic_t *object, void *slotData, s32
 }
 
 /* Read an indexed slot; the caller supplies a valid index. */
-void *dds3ObjectBaseGetControlBasic(dds3Basic_t *object, s32 slotIndex) {
+dds3Basic_t *dds3ObjectBaseGetControlBasic(dds3Basic_t *object, s32 slotIndex) {
     return dds3GetBaseControlWorkData(object)->slots[slotIndex];
 }
 
@@ -577,7 +577,7 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, dds3Basic_t *
 /* Create and attach kind-3 slot data only when the data slot is empty.
  * Existing data is retained; attachment still uses the new object's kind. */
 void dds3ObjectBaseCreateMover(dds3Basic_t *object) {
-    void *existingData;
+    dds3Basic_t *existingData;
     dds3Basic_t *newData;
 
     existingData = dds3ObjectBaseGetControlBasic(object, DDS3_OBJECT_DATA_SLOT);
@@ -595,7 +595,7 @@ u8 dds3ObjectBaseSetPadControl(dds3Basic_t *object, Dds3MoverUpdate update) {
 /* Returns whether a slot-1 handler took the callback (0/1). The bool-width result is why
  * the wrapper above stays jal + epilogue in retail (001127A8, not a sibling j). */
 u8 dds3ObjectBaseSetPrimaryControl(dds3Basic_t *obj, Dds3MoverUpdate update) {
-    void *handler;
+    dds3Basic_t *handler;
 
     handler = dds3ObjectBaseGetControlBasic(obj, 1);
     if (handler == NULL) {
@@ -609,7 +609,7 @@ u8 dds3ObjectBaseSetPrimaryControl(dds3Basic_t *obj, Dds3MoverUpdate update) {
  * object's curve work. The replacement call uses object, not handler;
  * unlike the conditional dispatcher, this path does not check for NULL. */
 void dds3ObjectBaseMakePath(dds3Basic_t *object, dds3Basic_t *sourceObject) {
-    void *handler;
+    dds3Basic_t *handler;
 
     handler = dds3ObjectBaseGetControlBasic(object, DDS3_OBJECT_DATA_SLOT);
     dds3MoverBasicSetPath(handler, sourceObject);

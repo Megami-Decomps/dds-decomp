@@ -15,7 +15,7 @@
 
 EvtPathStatus evtCheckPathStat(dds3Basic_t *object) {
     f32 target = 1.0f;
-    void *slot;
+    dds3Basic_t *slot;
     dds3PathBasicControl_t *handle;
     s32 kind;
 
