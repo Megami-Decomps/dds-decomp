@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+struct EffectSlotSet;
+
 typedef struct EffectRecord {
     void *owner;
     s32 slot;
@@ -11,7 +13,7 @@ typedef struct EffectRecord {
 } EffectRecord;
 
 typedef struct EffectOwnerRecord {
-    void *owner;
+    struct EffectSlotSet *owner;
     EffectRecord *entries[16];
 } EffectOwnerRecord;
 

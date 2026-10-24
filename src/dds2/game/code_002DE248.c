@@ -16187,10 +16187,10 @@ void effRequestMappedResource(const char *base, const char *name,
 }
 
 /* Create an owner list with sixteen initially empty record buckets. */
-EffectOwnerRecord *effCreateOwnerRecordList(u32 ownerAddress) {
+EffectOwnerRecord *effCreateOwnerRecordList(EffectSlotSet *owner) {
     EffectOwnerRecord *list = (EffectOwnerRecord *)sdfChipAllocDirect(EFF_OWNER_LIST_BYTES);
     memset(list, 0, EFF_OWNER_LIST_BYTES);
-    list->owner = (void *)ownerAddress;
+    list->owner = owner;
     return list;
 }
 
@@ -16265,9 +16265,9 @@ s32 effDispatchRecordBuckets(s32 refresh, EffectOwnerRecord *list, s32 drawOptio
     for (bucketCountdown = EFF_RECORD_LAST_BUCKET; bucketCountdown >= 0; bucketCountdown--, bucketHead++) {
         EffectRecord *record = *bucketHead;
         while (record != 0) {
-            itfDrawGridWithResolvedSlot(0, 0, 0, 0, (EffectSlotSet *)(u32)list->owner, record->slot, drawOption);
+            itfDrawGridWithResolvedSlot(0, 0, 0, 0, list->owner, record->slot, drawOption);
             if (refresh != 0) {
-                itfGridLookupValueOrDefault((u32)list->owner, record->slot);
+                itfGridLookupValueOrDefault(list->owner, record->slot);
             }
             record = record->next;
         }

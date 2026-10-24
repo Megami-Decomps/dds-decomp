@@ -266,7 +266,7 @@ void effRequestMappedResource(const char *base, const char *name,
 }
 
 /* Create an owner list with sixteen initially empty record buckets. */
-EffectOwnerRecord *effCreateOwnerRecordList(void *owner) {
+EffectOwnerRecord *effCreateOwnerRecordList(EffectSlotSet *owner) {
     EffectOwnerRecord *list = sdfChipAllocDirect(sizeof(EffectOwnerRecord));
     memset(list, 0, EFF_OWNER_LIST_BYTES);
     list->owner = owner;
@@ -351,7 +351,7 @@ u32 effDispatchRecordBuckets(u32 refresh, EffectOwnerRecord *list, s32 drawOptio
     do {
         EffectRecord *record = *bucketHead;
         while (record != 0) {
-            itfDrawGridWithResolvedSlot(0, 0, 0, 0, (EffectSlotSet *)list->owner, record->slot, drawOption);
+            itfDrawGridWithResolvedSlot(0, 0, 0, 0, list->owner, record->slot, drawOption);
             if (refresh != 0) {
                 itfGridLookupValueOrDefault(list->owner, record->slot);
             }
@@ -1252,4 +1252,3 @@ void effSelectPresetAndDispatch(u32 x, u32 y, u32 z, u32 width,
     uiDrawGradientColorRect(x, y, z, width, height, (const u32 *)vertexColors, presetValue);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, presetValue);
 }
-
