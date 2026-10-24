@@ -929,19 +929,19 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         }
         break;
     case 4:
-        if (viewer->windowContext->handle == -1 || evtViewerHasUpdateFlag(viewer) != 0) {
+        if (viewer->windowContext->messageManagerHandle == -1 || evtViewerHasUpdateFlag(viewer) != 0) {
             break;
         }
         mnuUnpackNibbleFields(key, &nibbles[0], &nibbles[1]);
         if (key->frame != currentFrame) {
             break;
         }
-        if (itfMesGetWindowEntryItems(viewer->windowContext->handle, nibbles[0]) == NULL) {
+        if (itfMesGetWindowEntryItems(viewer->windowContext->messageManagerHandle, nibbles[0]) == NULL) {
             if (!evtViewerTestIndexedCondition(key->p08.sh[1])) {
                 break;
             }
             if (mnuQueryTitleSoundBusy()) {
-                selectedText = itfMesSelectTableItemText(viewer->windowContext->handle, nibbles[0], 0);
+                selectedText = itfMesSelectTableItemText(viewer->windowContext->messageManagerHandle, nibbles[0], 0);
                 if (selectedText == 1) {
                     evtPrintDeveloperConsoleMessage(D_003ACFE8, nibbles[0]);
                     mnuStopTitleVoicePlayback();
@@ -951,10 +951,10 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
                     break;
                 }
             }
-            itfMesStartEntry(viewer->windowContext->handle, nibbles[0], 0);
+            itfMesStartEntry(viewer->windowContext->messageManagerHandle, nibbles[0], 0);
         } else {
             viewer->windowResultVariableIndex = nibbles[1] + 0xC7;
-            itfMesBuildOptionList(viewer->windowContext->handle, nibbles[0]);
+            itfMesBuildOptionList(viewer->windowContext->messageManagerHandle, nibbles[0]);
             viewer->flags |= 1;
             evtViewerDispatchFlagMode(viewer);
         }
@@ -2085,7 +2085,7 @@ void evtViewerActivateWindowForGlyphEntry(s32 timelinePosition, EvtRuntime *view
     EvtRuntimeChild *glyph;
 
     if (viewer->windowContext != 0) {
-        if (viewer->windowContext->handle != -1) {
+        if (viewer->windowContext->messageManagerHandle != -1) {
             for (node = viewer->groups; node != NULL; node = node->next) {
                 if (node->type != 4) {
                     continue;
@@ -2096,7 +2096,7 @@ void evtViewerActivateWindowForGlyphEntry(s32 timelinePosition, EvtRuntime *view
                     }
                     mnuUnpackNibbleFields(glyph, &entryIndex, &entryMode);
                     if (itfMesGetWindowEntryItems(
-                            viewer->windowContext->handle, entryIndex) != (u32 *)1) {
+                            viewer->windowContext->messageManagerHandle, entryIndex) != (u32 *)1) {
                         continue;
                     }
                     evtViewerMarkWindowActive(viewer);
@@ -2546,19 +2546,19 @@ void evtUpdateViewerMessageWindow(EvtRuntime *viewer) {
     if (viewer->windowContext == 0) {
         return;
     }
-    if (viewer->windowContext->handle == -1) {
+    if (viewer->windowContext->messageManagerHandle == -1) {
         return;
     }
-    if (itfMesMngGetStat(viewer->windowContext->handle) & 4) {
+    if (itfMesMngGetStat(viewer->windowContext->messageManagerHandle) & 4) {
         if ((viewer->flags & 1) == 0) {
-            itfMesMngRequestMessageRelease(viewer->windowContext->handle, 1);
-            itfMesMngMsgWndCls(viewer->windowContext->handle);
+            itfMesMngRequestMessageRelease(viewer->windowContext->messageManagerHandle, 1);
+            itfMesMngMsgWndCls(viewer->windowContext->messageManagerHandle);
         }
     }
-    if (itfMesMngGetSelPhase(viewer->windowContext->handle) < 0) {
-        itfMesMngSetSelPhase(viewer->windowContext->handle, 0);
-        DDS3_GBWK->script.ints[viewer->windowResultVariableIndex] = itfMesMngGetSelect(viewer->windowContext->handle);
-        itfMesMngRequestSelectRelease(viewer->windowContext->handle);
+    if (itfMesMngGetSelPhase(viewer->windowContext->messageManagerHandle) < 0) {
+        itfMesMngSetSelPhase(viewer->windowContext->messageManagerHandle, 0);
+        DDS3_GBWK->script.ints[viewer->windowResultVariableIndex] = itfMesMngGetSelect(viewer->windowContext->messageManagerHandle);
+        itfMesMngRequestSelectRelease(viewer->windowContext->messageManagerHandle);
         evtViewerMarkWindowInactive(viewer);
         viewer->flags ^= 1;
         evtViewerDispatchFlagMode(viewer);
@@ -2575,17 +2575,17 @@ void evtViewerCleanupMessageWindow(EvtRuntime *viewer) {
     if (windowContext == 0) {
         return;
     }
-    window = windowContext->handle;
+    window = windowContext->messageManagerHandle;
     if (window == -1) {
         return;
     }
     itfMesMngRequestMessageRelease(window, 1);
     windowContext = viewer->windowContext;
-    itfMesMngMsgWndCls(windowContext->handle);
+    itfMesMngMsgWndCls(windowContext->messageManagerHandle);
     windowContext = viewer->windowContext;
-    itfMesMngSetSelPhase(windowContext->handle, 0);
+    itfMesMngSetSelPhase(windowContext->messageManagerHandle, 0);
     windowContext = viewer->windowContext;
-    itfMesMngRequestSelectRelease(windowContext->handle);
+    itfMesMngRequestSelectRelease(windowContext->messageManagerHandle);
     viewer->windowActive = 0;
     viewer->windowShadeFade = 0;
 }
@@ -3352,7 +3352,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                     viewer->messageField = 0;
                     viewer->value = value;
                     viewer->valueMin = 0;
-                    viewer->valueMax = itfMesGetEntryCount(viewer->windowContext->handle) - 1;
+                    viewer->valueMax = itfMesGetEntryCount(viewer->windowContext->messageManagerHandle) - 1;
                     evtViewerPushCommandHistory(13, 180, 120, viewer);
                     break;
                 }
@@ -3952,7 +3952,7 @@ s32 evtViewerUpdateFrame(dds3ProcessID_t *task) {
     }
     if (viewer->voicePending == 1 && evtViewerHasUpdateFlag(viewer) == 0 &&
         mnuQueryTitleSoundBusy() == 0) {
-        itfMesStartEntry(viewer->windowContext->handle,
+        itfMesStartEntry(viewer->windowContext->messageManagerHandle,
             viewer->voiceMessage, 0);
         viewer->voicePending = 0;
         evtPrintDeveloperConsoleMessage("[conflict voice play      ] mesno= %d\n",

@@ -112,7 +112,7 @@ typedef struct PolyMovieWork {
     u32 subEntry21Count; /* 0xF8: rows in the sub type-21 group metadata table */
     u8 *subEntry25Data;   /* 0xFC */
     u32 subEntry25Count;       /* 0x100 */
-    s32 handle;        /* 0x104 */
+    s32 messageManagerHandle; /* 0x104: ItfMesMng handle for the main type-6 entry. */
     struct dds3ProcessID_t *task; /* 0x108: scheduler task created for this viewer */
     s32 eventId;       /* 0x10C */
     s32 sceneId;       /* 0x110 */
@@ -126,7 +126,8 @@ typedef struct PolyMovieState {
 } PolyMovieState;
 
 typedef char PolyMovieWork_size_must_be_0x11C[(sizeof(PolyMovieWork) == 0x11C) ? 1 : -1];
-typedef char PolyMovieWork_handle_at_0x104[((u32)&((PolyMovieWork *)0)->handle == 0x104) ? 1 : -1];
+typedef char PolyMovieWork_messageManagerHandle_at_0x104[
+    ((u32)&((PolyMovieWork *)0)->messageManagerHandle == 0x104) ? 1 : -1];
 typedef char PolyMovieWork_task_at_0x108[((u32)&((PolyMovieWork *)0)->task == 0x108) ? 1 : -1];
 typedef char PolyMovieWork_eventId_at_0x10C[((u32)&((PolyMovieWork *)0)->eventId == 0x10C) ? 1 : -1];
 typedef char PolyMovieState_clip_at_0x4[((u32)&((PolyMovieState *)0)->clip == 0x4) ? 1 : -1];

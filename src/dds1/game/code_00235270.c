@@ -1533,7 +1533,7 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, EvtRuntime *work) {
 /* Draw the message count from the runtime window context
  * and its entry handle, returning two rows used. */
 s32 mnuDrawMessageMenuLabel(sdfDrawTag_t *list, s32 x, s32 y, EvtRuntime *work) {
-    s32 count = itfMesGetEntryCount(work->windowContext->handle);
+    s32 count = itfMesGetEntryCount(work->windowContext->messageManagerHandle);
     sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "MESSAGE MENU (MESMAX %3d)", count));
     return 2;
 }
@@ -1584,9 +1584,9 @@ void evtDrawMessageDataRow(sdfDrawTag_t *list, s32 x, s32 y, u32 kind, EvtRuntim
             color = 0;
         }
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC058, ctx->value & 0xFFF));
-        if (ctx->windowContext->handle == -1) {
+        if (ctx->windowContext->messageManagerHandle == -1) {
             sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x600, y, 0xFEFFFF, color, "NONE MESDATA!!"));
-        } else if (itfMesGetWindowEntryItems(ctx->windowContext->handle, ctx->value & 0xFFF) == NULL) {
+        } else if (itfMesGetWindowEntryItems(ctx->windowContext->messageManagerHandle, ctx->value & 0xFFF) == NULL) {
             sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x600, y, 0xFEFFFF, color, "(NORMAL)"));
         } else {
             sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x600, y, 0xFEFFFF, color, "(BRANCH)"));
@@ -1665,7 +1665,7 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
         ctx->messageField = !field;
     }
     if (dds3PadButtonState.confirm < 0) {
-        handle = ctx->windowContext->handle;
+        handle = ctx->windowContext->messageManagerHandle;
         if (handle != -1) {
             if (branch == 0) {
                 if (itfMesGetWindowEntryItems(handle, number) == NULL) {
@@ -5220,8 +5220,8 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
     }
 
     /* 002409AC..00240A84: message track exists only for a live populated window. */
-    if (work->handle != -1 && itfMesGetEntryCount(work->handle) != 0) {
-        itfMesMngChangeWindowType(work->handle, 3, 0);
+    if (work->messageManagerHandle != -1 && itfMesGetEntryCount(work->messageManagerHandle) != 0) {
+        itfMesMngChangeWindowType(work->messageManagerHandle, 3, 0);
         group = evtEventViewerCreateEntry(4, runtime);
         for (row = 0; row < (s32)work->subEntry4Count; row++) {
             if (evtGetRowValue(work, row) == 4) {
@@ -5231,7 +5231,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 key->p08.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
             }
         }
-        itfMesMngMarkBitStat(work->handle, 0xD00000);
+        itfMesMngMarkBitStat(work->messageManagerHandle, 0xD00000);
     }
 
     /* Primary rows precede version 6; later versions use the extended table. */

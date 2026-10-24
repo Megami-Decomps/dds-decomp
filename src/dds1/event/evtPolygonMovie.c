@@ -560,7 +560,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *mainHeade
         return NULL;
     }
     work->unk_114 = 0;
-    work->handle = -1;
+    work->messageManagerHandle = -1;
     work->buffer = sdfChipAllocDirect(0x1FC);
     for (arrayIndex = 0; arrayIndex < 0x7F; arrayIndex++) {
         work->buffer[arrayIndex] = 0;
@@ -612,9 +612,9 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *mainHeade
         case 6:
             work->mainEntry6Data = (u8 *)mainHeader + work->entries[arrayIndex].offset;
             if (work->entries[arrayIndex].value == 0) {
-                work->handle = -1;
+                work->messageManagerHandle = -1;
             } else {
-                work->handle = itfMesMngInitialize((ItfMesSub *)work->mainEntry6Data);
+                work->messageManagerHandle = itfMesMngInitialize((ItfMesSub *)work->mainEntry6Data);
             }
             break;
         case 7:
@@ -767,9 +767,9 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work)
         if (work->buffer != NULL) {
             sdfChipFreeDirect(work->buffer);
         }
-        if (work->handle >= 0) {
-            itfMesMngRelease(work->handle);
-            work->handle = -1;
+        if (work->messageManagerHandle >= 0) {
+            itfMesMngRelease(work->messageManagerHandle);
+            work->messageManagerHandle = -1;
         }
         fileSyncAll();
         if (work->mainResource.request != 0) {
