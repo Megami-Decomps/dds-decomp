@@ -2087,7 +2087,7 @@ extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
 extern void mnuDrawShopSelectedRowDetails(s32, s32, s32, ShopScene *, s32);
 extern void mnuDrawShopSelectedRowTotal(s32, s32, s32, ShopScene *, s32);
 extern void mnuDrawShopCurrencyBalance(ShopScene *, s32);
-extern void brsDrawResultIconPairWithAlpha(s32, u32, s32, s32);
+extern void brsDrawResultIconPairWithAlpha(ShopScene *, u32, s32, s32);
 typedef struct {
     s32 values[2];
 } MenuSelectionPair;
@@ -2959,10 +2959,10 @@ s32 evtRedrawShopSceneSelection(dds3ProcessID_t *task) {
     switch (selectedIndex) {
     case 0:
     case 1:
-        brsDrawResultIconPairWithAlpha((s32)state, 0x100, 1, 0x53);
+        brsDrawResultIconPairWithAlpha(state, 0x100, 1, 0x53);
         break;
     case 2:
-        brsDrawResultIconPairWithAlpha((s32)state, 0x100, 0, 0x53);
+        brsDrawResultIconPairWithAlpha(state, 0x100, 0, 0x53);
         break;
     }
     return mnuDispatchPopupTransition(&state->transitionWork, &state->dispatchState, 1, task);
@@ -3045,7 +3045,7 @@ s32 mnuShopDrawMenuState(dds3ProcessID_t *callbackContext) {
         mnuDrawIfActive(0, 0, 0, state->window, 0x53);
         mnuDrawShopPricePlaceholder(0, 0, 0, state, 0x53);
         mnuDrawShopCurrencyBalance(state, 0xA09DC380);
-        brsDrawResultIconPairWithAlpha((s32)state, 0x100, 3, 0x53);
+        brsDrawResultIconPairWithAlpha(state, 0x100, 3, 0x53);
         break;
     case 2:
         if (state->popupTable == (MenuPopupEntry *)mnuShopCommandPopupEntries) {
@@ -3053,7 +3053,7 @@ s32 mnuShopDrawMenuState(dds3ProcessID_t *callbackContext) {
             mnuDrawStatusIconAndCompanion(0, 0, 0, state, 0x100, 0x53);
             mnuDrawListChildrenWithCountdown(0, 0, 0, state->ownedWindows[0]->list, 0x53);
             mnuDrawShopCurrencyBalance(state, 0xA09DC380);
-            brsDrawResultIconPairWithAlpha((s32)state, 0x100, 4, 0x53);
+            brsDrawResultIconPairWithAlpha(state, 0x100, 4, 0x53);
         } else {
             mnuDrawShopPanelWithPulsingIcon(0, 0, 0, state, 0x100, 0x53);
             mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
@@ -3061,7 +3061,7 @@ s32 mnuShopDrawMenuState(dds3ProcessID_t *callbackContext) {
             mnuClearWindowPanelTransitionFlag(state->ownedWindows[0]);
             mnuDrawIconFixedEntryWithBadge(0, 0, 0, (s32)state, 0x100, 0x53);
             mnuDrawShopCurrencyBalance(state, 0xA09DC380);
-            brsDrawResultIconPairWithAlpha((s32)state, 0x100, 2, 0x53);
+            brsDrawResultIconPairWithAlpha(state, 0x100, 2, 0x53);
         }
         break;
     }
