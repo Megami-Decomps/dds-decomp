@@ -187,13 +187,13 @@ void effRefreshModelLighting(EffModelOwner *work) {
     mdlLink(model, kwlnSceneSurfaceSets[10]);
 }
 
-void effApplyModelPrimaryVector(EffModelOwner *owner, u8 *vec) {
-SDF_VU0_LOADVECTOR_BARRIER(vec);
+void effApplyModelPrimaryVector(EffModelOwner *owner, const f32 *position) {
+SDF_VU0_LOADVECTOR_BARRIER(position);
     mdlSetPosition(owner->model);
 }
 
-void effApplyModelVecB(EffModelOwner *owner, u8 *vec) {
-SDF_VU0_LOADVECTOR_BARRIER(vec);
+void effApplyModelVecB(EffModelOwner *owner, const f32 *rotation) {
+SDF_VU0_LOADVECTOR_BARRIER(rotation);
     mdlSetRotate(owner->model);
 }
 
@@ -774,13 +774,13 @@ void func_002DD448(EffResourceOwner *owner) {
 
 
 
-void effLoadModelPrimaryVector(EffResourceOwner *owner, void *vec) {
-SDF_VU0_LOADVECTOR_BARRIER(vec);
+void effLoadModelPrimaryVector(EffResourceOwner *owner, const f32 *position) {
+SDF_VU0_LOADVECTOR_BARRIER(position);
     mdlSetPosition(owner->model);
 }
 
-void effSetModelRotationQuaternion(EffResourceOwner *owner, void *vec) {
-SDF_VU0_LOADVECTOR_BARRIER(vec);
+void effSetModelRotationQuaternion(EffResourceOwner *owner, const f32 *rotationQuaternion) {
+SDF_VU0_LOADVECTOR_BARRIER(rotationQuaternion);
     mdlSetRotate(owner->model);
 }
 

@@ -176,13 +176,13 @@ void effRefreshModelLighting(EffModelOwner *work) {
 }
 
 /* Pass a vector to the VU0 model helpers via vf10 (gcc cannot do this from plain C). */
-void effApplyModelPrimaryVector(EffModelOwner *owner, void *vec) {
-    SDF_VU0_LOADVECTOR(vec);
+void effApplyModelPrimaryVector(EffModelOwner *owner, const f32 *position) {
+    SDF_VU0_LOADVECTOR(position);
     mdlSetPosition(owner->model);
 }
 
-void effApplyModelVecB(EffModelOwner *owner, void *vec) {
-    SDF_VU0_LOADVECTOR(vec);
+void effApplyModelVecB(EffModelOwner *owner, const f32 *rotation) {
+    SDF_VU0_LOADVECTOR(rotation);
     mdlSetRotate(owner->model);
 }
 
@@ -703,13 +703,13 @@ void func_0029B818(EffResourceOwner *owner) {
 }
 
 /* Pass a vector to the VU0 model helpers via vf10 (gcc cannot do this from plain C). */
-void effLoadModelPrimaryVector(EffResourceOwner *work, void *vec) {
-    SDF_VU0_LOADVECTOR(vec);
+void effLoadModelPrimaryVector(EffResourceOwner *work, const f32 *position) {
+    SDF_VU0_LOADVECTOR(position);
     mdlSetPosition(work->model);
 }
 
-void effSetModelRotationQuaternion(EffResourceOwner *work, void *vec) {
-    SDF_VU0_LOADVECTOR(vec);
+void effSetModelRotationQuaternion(EffResourceOwner *work, const f32 *rotationQuaternion) {
+    SDF_VU0_LOADVECTOR(rotationQuaternion);
     mdlSetRotate(work->model);
 }
 
