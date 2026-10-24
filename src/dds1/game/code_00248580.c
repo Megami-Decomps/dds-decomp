@@ -742,7 +742,7 @@ void effUpdateAttached(s32 x, s32 y, s32 mode, void *owner, s32 layer) {
     mnuDrawAndAdvanceProfilePanel(x, y, mode, work->currentEffect, layer);
 }
 
-s32 mnuDrawLoadedProgressPanels(u8 *control, MenuProgressHost *work, s32 context) {
+s32 mnuDrawLoadedProgressPanels(datUnitWork_t *partyRecord, MenuProgressHost *work, s32 context) {
     if (work->loadState != 2) {
         return 0;
     }
@@ -750,9 +750,9 @@ s32 mnuDrawLoadedProgressPanels(u8 *control, MenuProgressHost *work, s32 context
     mnuDrawStaffPageMarkerIcons(&work->partyWindow, &work->staffSlots);
     mnuDrawStaffPanelGridBackdrop(0, &work->staffSlots);
     work->partyWindow.flags |= 0x500;
-    mnuDrawStageTestList(0, 0, 0, ((datUnitWork_t *)control)->profileId,
+    mnuDrawStageTestList(0, 0, 0, partyRecord->profileId,
         &work->partyWindow, context);
-    mnuDrawPartyProfilePanelContents(0, 0, 0, (datUnitWork_t *)control, ((datUnitWork_t *)control)->profileId,
+    mnuDrawPartyProfilePanelContents(0, 0, 0, partyRecord, partyRecord->profileId,
         work->effectResource, context);
     return 1;
 }

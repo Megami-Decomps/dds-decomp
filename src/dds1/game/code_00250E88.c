@@ -1787,7 +1787,7 @@ s32 mnuUpdateMantraSceneState(void) {
 extern void dspRequestMessageWindowModeOne(void);
 extern void mnuDrawMantraSparkScene(MenuSceneMetadata *, s32, s32);
 extern void mnuDrawAnimatedCurrencyCounter(s32, s32, s32, s32, MenuSceneMetadata *, s32);
-extern s32 mnuDrawLoadedProgressPanels(void *control, MenuProgressHost *work, s32 context);
+extern s32 mnuDrawLoadedProgressPanels(datUnitWork_t *partyRecord, MenuProgressHost *work, s32 context);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
 struct SdfPoolNode;
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);
@@ -1805,7 +1805,7 @@ s32 mnuUpdateMantraSceneDisplay(void) {
     dspRequestMessageWindowModeOne();
     mnuDrawMantraSparkScene(sceneMetadata, 0x80, 0x4A);
     mnuDrawAnimatedCurrencyCounter(0, -27, 0, 0x80, sceneMetadata, MNU_SCENE_DRAW_CONTEXT);
-    if (mnuDrawLoadedProgressPanels(&sceneMetadata->attachedEffectControl, sceneMetadata->attachedEffect, MNU_SCENE_DRAW_CONTEXT) != 0) {
+    if (mnuDrawLoadedProgressPanels(&sceneMetadata->partySnapshot, sceneMetadata->attachedEffect, MNU_SCENE_DRAW_CONTEXT) != 0) {
         if (sceneMetadata->stageStarted == 0) {
             evtStageTestSelectEntryWithoutInitialValue(sceneMetadata->entryId, 0);
         }
