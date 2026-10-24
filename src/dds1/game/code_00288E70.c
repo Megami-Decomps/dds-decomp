@@ -8,6 +8,7 @@
 #include "file.h"
 #include "file_slot_flags.h"
 #include "file_request_entry.h"
+#include "file_request_kind.h"
 #include "file_manager_api.h"
 #include "file_transfer_job.h"
 #include "sdf_dev_event.h"
@@ -289,7 +290,7 @@ void fileExecQueue(void) {
     }
     locked = 1;
     switch (job->kind) {
-    case 0:
+    case FILE_REQUEST_KIND_CALLBACK:
         switch (job->state) {
         case FILE_JOB_QUEUED:
             job->state = FILE_JOB_OPENING;
@@ -314,7 +315,7 @@ void fileExecQueue(void) {
             break;
         }
         break;
-    case 1:
+    case FILE_REQUEST_KIND_PAC:
         switch (job->state) {
         case FILE_JOB_QUEUED:
             job->state = FILE_JOB_OPENING;
@@ -329,7 +330,7 @@ void fileExecQueue(void) {
             break;
         }
         break;
-    case 2:
+    case FILE_REQUEST_KIND_VALUE_PAIR:
         if (job->state == FILE_JOB_QUEUED) {
             job->state = FILE_JOB_OPENING;
             locked = 0;
@@ -374,7 +375,7 @@ s32 fileManager(void) {
         FileTransferJob *job = (FileTransferJob *)work->slots[slot].request;
         u8 kind = job->kind;
 
-        if (kind == 1) {
+        if (kind == FILE_REQUEST_KIND_PAC) {
             FilePacRequest *request = (FilePacRequest *)job;
             if (request != NULL &&
                 sdfPacDecode(&request->packet, input, work->slots[slot].value) == SDF_PAC_PHASE_COMPLETE) {
