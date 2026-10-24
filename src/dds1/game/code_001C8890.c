@@ -1420,7 +1420,7 @@ extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(
     SoundResourceNode *, BtlUnit *, u16, s32, u32);
 
 void btlBuildActionLightParameters(s32 skillIndex, BtlSceneLightParams *light);
-extern void *btlCreateEffectTaskWithSourceParams(u8 *, u32);
+extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *, u32);
 s32 btlGetActionDefaultOrOverride(s32 skillIndex);
 extern u8 *btlCreateLinkageFormationTask(u8 *, u32, u32, u32, u32);
 extern void *btlCreateCommandSoundWithArguments(s32, s32, u32, u32, u32);
