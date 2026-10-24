@@ -218,6 +218,6 @@ void effPCPNeedleSpiralSetPosition(void *dst, void *src) {
 }
 
 /* Copy the supplied transform into the needle's resource matrix. */
-void effNeedleSetResourceMatrix(EffPCPNeedleWork *work, void *matrix) {
+void effNeedleSetResourceMatrix(EffPCPNeedleWork *work, const Matrix4 *matrix) {
     dds3NeedleModelSetMatrix((Matrix4 *)work->resource->matrix, matrix);
 }
