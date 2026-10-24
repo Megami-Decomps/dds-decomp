@@ -1145,12 +1145,12 @@ u8 mdlHasMotionEx(dds3ModelHandle_t *ctx, s32 searchId) {
 }
 
 /* Read the context resource-group halfword; ctx/sub are required. */
-u16 mdlGetMajorNum(dds3ModelHandle_t *ctx) {
+u16 mdlGetMajorNum(const dds3ModelHandle_t *ctx) {
     return ctx->sub->group;
 }
 
 /* Read the context resource-id halfword; ctx/sub are required. */
-u16 mdlGetMinorNum(dds3ModelHandle_t *ctx) {
+u16 mdlGetMinorNum(const dds3ModelHandle_t *ctx) {
     return ctx->sub->type;
 }
 
