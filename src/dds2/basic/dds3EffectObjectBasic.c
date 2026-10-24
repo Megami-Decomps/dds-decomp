@@ -176,13 +176,13 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
     case EFF_DEPENDENCY_STATE_BILLBOARD_ANIMATION:
         bill = data->handle;
         if (bill != NULL && moved) {
-            effCopyVector(bill, position);
+            effCopyVector(bill->position, position);
         }
         result = dds3BillboardGetAnimState(bill);
         goto expired;
     case EFF_DEPENDENCY_STATE_BILLBOARD_NODE:
         if (data->handle != NULL && moved) {
-            effCopyVector(data->handle, position);
+            effCopyVector(((billHandle_t *)data->handle)->position, position);
         }
         return 1;
     case EFF_DEPENDENCY_STATE_BORROWED_HANDLE:
@@ -283,7 +283,7 @@ dds3Basic_t *AddP2AEffect(bill, vec, extra)
     const u128 *vec;
     s32 extra;
 {
-    u8 vector[0x10];
+    f32 vector[4];
     dds3Basic_t *obj;
     EffectDependencyState *data;
     dds3ObjectBaseControlWorkData_t *handle;
@@ -296,7 +296,7 @@ dds3Basic_t *AddP2AEffect(bill, vec, extra)
     }
     SDF_VU0_LOADVECTOR(vec);
     SDF_VU0_STOREVECTOR(vector);
-    effCopyVector(bill, vector);
+    effCopyVector(((billHandle_t *)bill)->position, vector);
     data = obj->data;
     data->handle = bill;
     data->flags = 0;
@@ -350,7 +350,7 @@ dds3Basic_t *AddTMXEffect(bill, firstVector, secondVectorAddress)
     const u128 *firstVector;
     s32 secondVectorAddress;
 {
-    u8 copiedVector[EFF_OBJ_VECTOR_BYTES];
+    f32 copiedVector[4];
     dds3Basic_t *obj;
     EffectDependencyState *data;
     dds3ObjectBaseControlWorkData_t *objectHandle;
@@ -363,7 +363,7 @@ dds3Basic_t *AddTMXEffect(bill, firstVector, secondVectorAddress)
     }
     SDF_VU0_LOADVECTOR(firstVector);
     SDF_VU0_STOREVECTOR(copiedVector);
-    effCopyVector(bill, copiedVector);
+    effCopyVector(((billHandle_t *)bill)->position, copiedVector);
     data = obj->data;
     data->state = EFF_DEPENDENCY_STATE_BILLBOARD_NODE;
     data->handle = bill;

@@ -1090,7 +1090,7 @@ void mdlLinkEffect(dds3ModelHandle_t *owner, dds3ModelEffectCtrlr_t *anchorRecor
     case MDL_RESOURCE_BILLBOARD:
         mdlEffect_P2A_D3P_GetPos(model, anchorRecord, position);
         resourceInstance = anchorRecord->payload.part.instance;
-        effCopyVector(resourceInstance, position);
+        effCopyVector(((billHandle_t *)resourceInstance)->position, position);
         dds3BillboardDraw((billHandle_t *)resourceInstance);
         break;
     case MDL_RESOURCE_EFFECT:

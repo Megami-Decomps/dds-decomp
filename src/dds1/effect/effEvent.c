@@ -1608,12 +1608,12 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
             SDF_VU0_LOADVECTOR_B(origin);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(position);
-            effCopyVector((billHandle_t *)D_003BB144, position);
+            effCopyVector(((billHandle_t *)D_003BB144)->position, position);
             dds3BillboardSetScale((billHandle_t *)D_003BB144, scaleX, scaleY);
             dds3BillboardSetRGBA((billHandle_t *)D_003BB144, drawColor);
             dds3BillboardSetRotate((billHandle_t *)D_003BB144, particle->rotation);
             dds3BillboardDraw((billHandle_t *)D_003BB144);
-            effCopyVector((billHandle_t *)D_003BB148, position);
+            effCopyVector(((billHandle_t *)D_003BB148)->position, position);
             dds3BillboardSetScale((billHandle_t *)D_003BB148, scaleX, scaleY);
             dds3BillboardSetRGBA((billHandle_t *)D_003BB148, drawColor);
             dds3BillboardSetRotate((billHandle_t *)D_003BB148, particle->rotation);

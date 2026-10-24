@@ -1470,7 +1470,7 @@ void effUpdateScaledBillboardFrame(EffBillboardWork *work) {
         height = work->heightScale * work->scale;
         dds3BillboardSetScale(work->billboard, width, height);
         dds3BillboardSetRotate(work->billboard, angle);
-        effCopyVector(work->billboard, work);
+        effCopyVector(work->billboard->position, work->position);
         dds3BillboardDraw(work->billboard);
         work->frame++;
     }
@@ -6743,7 +6743,7 @@ void effDrawEffectStrip(EffectStripNode *node) {
                 dds3BillboardSetRGBA(billboard, childColor);
                 dds3BillboardSetScale(billboard, billExtent, billExtent);
                 dds3BillboardSetRotate(billboard, entry->angle);
-                effCopyVector(billboard, position);
+                effCopyVector(billboard->position, position);
                 dds3BillboardDraw(billboard);
                 along = longSize * scale * 1.5f;
                 side = sideSize * scale * 1.5f;

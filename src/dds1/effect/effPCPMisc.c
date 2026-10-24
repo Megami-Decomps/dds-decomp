@@ -182,7 +182,7 @@ void effPCPSparkleSphereDraw(EffPCPRingWork *work) {
     VU0_LOAD_VF($vf11, work);
     SDF_VU0_ADDVECTOR();
     VU0_STORE_VF($vf10, pos);
-    effCopyVector(handle, pos);
+    effCopyVector(handle->position, pos);
     scale = work->scale;
     color = 0x10808080;
     for (i = 0; i < 10; i++) {
@@ -792,7 +792,7 @@ void effPCPMudoDraw(EffPCPChargeWork *work) {
                 work->sampleAges[i][point]++;
                 work->sampleScales[i][point] = size;
                 dds3BillboardSetScale(bill, size, size);
-                effCopyVector(bill, work->samplePositions[i][point]);
+                effCopyVector(bill->position, work->samplePositions[i][point]);
                 dds3BillboardDraw(bill);
                 dds3BillboardSetAnimKey(bill, work->animationFrames[i][point]);
                 work->animationFrames[i][point]++;

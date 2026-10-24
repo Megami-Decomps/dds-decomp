@@ -115,8 +115,8 @@ sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 index) {
     return hGeneralBillboard[index]->child->texture;
 }
 
-void effCopyVector(void *dst, const void *src) {
-    SDF_VU0_COPYVECTOR(dst, src);
+void effCopyVector(void *destination, const void *source) {
+    SDF_VU0_COPYVECTOR(destination, source);
 }
 
 void dds3BillboardSetRotate(billHandle_t *effect, float angle) {
@@ -432,8 +432,8 @@ void dds3P2APolygonDelete(EffInstance *instance) {
     sdfChipFreeDirect(instance);
 }
 
-void dds3P2APolygonSetPosition(EffInstance *instance, void *position) {
-    effCopyVector(instance->billboard, position);
+void dds3P2APolygonSetPosition(EffInstance *instance, const f32 position[4]) {
+    effCopyVector(instance->billboard->position, position);
 }
 
 void dds3P2APolygonSetScale(EffInstance *instance, f32 scale) {

@@ -97,8 +97,8 @@ sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 index) {
     return hGeneralBillboard[index]->child->texture;
 }
 
-void effCopyVector(void *dst, const void *src) {
-    SDF_VU0_COPYVECTOR(dst, src);
+void effCopyVector(void *destination, const void *source) {
+    SDF_VU0_COPYVECTOR(destination, source);
 }
 
 /* Set the radian rotation applied to the billboard quad corners. */
@@ -418,8 +418,8 @@ void dds3P2APolygonDelete(EffUnitObject *instance) {
     sdfChipFreeDirect(instance);
 }
 
-void dds3P2APolygonSetPosition(EffUnitObject *instance, s128 *position) {
-    effCopyVector((s128 *)instance->billboard, position);
+void dds3P2APolygonSetPosition(EffUnitObject *instance, const f32 position[4]) {
+    effCopyVector(instance->billboard->position, position);
 }
 
 void dds3P2APolygonSetScale(EffUnitObject *instance, float scale) {

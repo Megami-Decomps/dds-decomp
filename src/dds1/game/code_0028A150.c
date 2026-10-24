@@ -5618,7 +5618,7 @@ void fileDrawLoadObjectSlots(s32 object) {
                         dds3BillboardSetRGBA(billboard, packedColor);
                         dds3BillboardSetScale(billboard, scale, scale);
                         dds3BillboardSetRotate(billboard, slot->angle);
-                        effCopyVector(billboard, slot->pos);
+                        effCopyVector(billboard->position, slot->pos);
                         dds3BillboardSetAnimKey(billboard, slot->state);
                         dds3BillboardDraw(billboard);
                     }
@@ -5645,7 +5645,7 @@ void fileDrawLoadObjectSlots(s32 object) {
                         dds3BillboardSetRGBA(billboard, packedColor);
                         dds3BillboardSetScale(billboard, scale, scale);
                         dds3BillboardSetRotate(billboard, slot->angle);
-                        effCopyVector(billboard, transformed);
+                        effCopyVector(billboard->position, transformed);
                         dds3BillboardSetAnimKey(billboard, slot->state);
                         dds3BillboardDraw(billboard);
                     }
