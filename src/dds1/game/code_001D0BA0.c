@@ -4263,7 +4263,8 @@ u32 btlStepUnitDefeatFadeOut(u32 *arguments) {
 }
 
 /* Create the owner-bound defeat fade-out task with a zero elapsed count. */
-u8 *btlCreateUnitDefeatFadeOutTask(u8 *owner, u32 value) {
+BtlRuntimeTask *btlCreateUnitDefeatFadeOutTask(BtlUnit *unit, s32 durationOrMode) {
+    u8 *unitBytes = (u8 *)unit;
     u8 *task = btlAllocTask(12);
     BtlUnitFadeTaskArgs *arguments;
 
@@ -4271,13 +4272,13 @@ u8 *btlCreateUnitDefeatFadeOutTask(u8 *owner, u32 value) {
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x14;
     *(void **)(task + 0x4C) = btlStepUnitDefeatFadeOut;
-    *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
+    *(u64 *)(task + 0x40) = *(u64 *)(unitBytes + 0x108);
     *(u32 *)(task + 0x48) = 0;
     arguments = (BtlUnitFadeTaskArgs *)btlGetTaskArguments(task);
-    arguments->unit = (BtlUnit *)owner;
-    arguments->durationOrMode = value;
+    arguments->unit = unit;
+    arguments->durationOrMode = durationOrMode;
     arguments->elapsed = 0;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 /* Arguments hold unit, mode and elapsed ticks; return one after the exit fade. */

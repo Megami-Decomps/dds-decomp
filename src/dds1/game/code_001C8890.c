@@ -2719,7 +2719,7 @@ void btlRecordEscapeAttemptOutcome(BtlTask *task) {
     }
 }
 
-extern u8 *btlCreateUnitDefeatFadeOutTask(u8 *owner, u32 value);
+extern BtlRuntimeTask *btlCreateUnitDefeatFadeOutTask(BtlUnit *unit, s32 durationOrMode);
 
 /* Queue escape-result sounds and stagger eligible party effects; successful
  * escapes also fade each eligible actor, with its identity as the task owner. */
@@ -2750,7 +2750,7 @@ void btlScheduleEscapeResultTasks(BtlTask *task) {
             effect = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, 0xD, 2, 1.0f);
             effect->startDelay = delay;
             btlStartTask(effect);
-            effect = (BtlRuntimeTask *)btlCreateUnitDefeatFadeOutTask((u8 *)unit, 6);
+            effect = btlCreateUnitDefeatFadeOutTask(unit, 6);
             {
                 /* Capture the full-width owner before deriving the fade delay:
                  * see docs/idioms.md, "Trace-justified staging: escape-result task metadata". */
