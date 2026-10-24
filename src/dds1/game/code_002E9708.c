@@ -1044,12 +1044,12 @@ sdfMemHandle_t *sdfDevLoadFile(const char *name, u32 *outData, u32 *outSize, s32
     sdfFileCmdHandle_t *state = sdfFileOpen(name);
     s32 size = sdfFileLength(state);
     sdfMemHandle_t *handle = sdfMemAllocDirect(size + extra);
-    u32 address = sdfMemLock(handle);
+    void *data = sdfMemLock(handle);
 
-    sdfFileRead(state, (void *)address, size);
+    sdfFileRead(state, data, size);
     sdfFileClose(state);
     if (outData != NULL) {
-        *outData = address;
+        *outData = (u32)data;
     } else {
         sdfMemUnlock(handle);
     }
