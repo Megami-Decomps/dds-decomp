@@ -27,6 +27,20 @@
 #define MTR_SELECTION_ALPHA_SCALE 128.0f
 #define MTR_UNIT_FADE_FRAMES 10
 
+enum MtrMantraEquipState {
+    MTR_MANTRA_EQUIP_STATE_WAIT_MENU_INPUT = 1,
+    MTR_MANTRA_EQUIP_STATE_START_CONFIRMATION_MESSAGE_0 = 2,
+    MTR_MANTRA_EQUIP_STATE_START_CONFIRMATION_MESSAGE_1 = 3,
+    MTR_MANTRA_EQUIP_STATE_WAIT_CONFIRMATION_RESULT = 4,
+    MTR_MANTRA_EQUIP_STATE_APPLY_SELECTED_ENTRY = 6,
+    MTR_MANTRA_EQUIP_STATE_SHOW_INSUFFICIENT_CURRENCY_MESSAGE = 7,
+    MTR_MANTRA_EQUIP_STATE_MESSAGE_INDEX_4 = 8,
+    MTR_MANTRA_EQUIP_STATE_MESSAGE_INDEX_5 = 9,
+    MTR_MANTRA_EQUIP_STATE_MESSAGE_INDEX_6 = 10,
+    MTR_MANTRA_EQUIP_STATE_MESSAGE_INDEX_7 = 11,
+    MTR_MANTRA_EQUIP_STATE_WAIT_COMPLETION_AND_RESTORE_MENU = 12
+};
+
 extern void mtrMantraSetBit(datUnitWork_t *);
 
 struct MnuStatusResource;
@@ -389,7 +403,7 @@ s32 mtrMantraEquipInit(void) {
     mnuRefreshPartyPanelBars(&work->progressHost->partyWindow);
     work->flags.fadeProgress = 0;
     work->flags.profileReady = 0;
-    equip->state = 1;
+    equip->state = MTR_MANTRA_EQUIP_STATE_WAIT_MENU_INPUT;
     equip->timer = 0;
     evtPrintDeveloperConsoleMessage(D_00426218);
     return 0;
@@ -481,27 +495,27 @@ s32 mtrMantraEquipUpdate(void) {
     selectedEntryId = defaultSelector->selector.fields.index;
     selectedPanelFlags = mnuGetSelectedPanelValue(work);
     switch (equip->state) {
-    case 1:
+    case MTR_MANTRA_EQUIP_STATE_WAIT_MENU_INPUT:
         if (dds3PadButtonState[0x21] < 0) {
             resultKind = 1;
             if (scrGetSelectedScriptEntryId(selectedRecord) == (u32)selectedEntryId) {
                 if (((u32)selectedPanelFlags >> 8) & 1) {
-                    equip->state = 11;
+                    equip->state = MTR_MANTRA_EQUIP_STATE_MESSAGE_INDEX_7;
                 } else {
-                    equip->state = 8;
+                    equip->state = MTR_MANTRA_EQUIP_STATE_MESSAGE_INDEX_4;
                 }
             } else {
                 selectedHighFlags = (selectedPanelFlags & 0xFF00) >> 8;
                 if (selectedHighFlags & 1) {
-                    equip->state = 10;
+                    equip->state = MTR_MANTRA_EQUIP_STATE_MESSAGE_INDEX_6;
                 } else if (selectedHighFlags & 2) {
-                    equip->state = 3;
+                    equip->state = MTR_MANTRA_EQUIP_STATE_START_CONFIRMATION_MESSAGE_1;
                 } else {
                     sourceAmount = mnuGetMantraSourceValue((u16)selectedEntryId);
                     if ((u32)DDS3_GBWK->header.currency < (u32)sourceAmount) {
-                        equip->state = 7;
+                        equip->state = MTR_MANTRA_EQUIP_STATE_SHOW_INSUFFICIENT_CURRENCY_MESSAGE;
                     } else {
-                        equip->state = 2;
+                        equip->state = MTR_MANTRA_EQUIP_STATE_START_CONFIRMATION_MESSAGE_0;
                     }
                 }
             }
@@ -510,12 +524,12 @@ s32 mtrMantraEquipUpdate(void) {
         } else {
             resultKind = 2;
             if (work->flags.fadeProgress != 0) {
-                equip->state = 12;
+                equip->state = MTR_MANTRA_EQUIP_STATE_WAIT_COMPLETION_AND_RESTORE_MENU;
             }
         }
         break;
 
-    case 2:
+    case MTR_MANTRA_EQUIP_STATE_START_CONFIRMATION_MESSAGE_0:
         evtCopyEntryStringToActiveWindow(0, datUnitNames[selectedRecord->unitId].encodedText);
         evtCopyEntryStringToActiveWindow(
             1, D_00435E50[scrGetSelectedScriptEntryId(selectedRecord)].encodedText);
@@ -527,10 +541,10 @@ s32 mtrMantraEquipUpdate(void) {
         evtSetMessageWindowOptionWhenOpen(0);
         fclStartMessage(0);
         evtStoreValueAndCaptureWindowPanelValue(8);
-        equip->state = 4;
+        equip->state = MTR_MANTRA_EQUIP_STATE_WAIT_CONFIRMATION_RESULT;
         break;
 
-    case 3:
+    case MTR_MANTRA_EQUIP_STATE_START_CONFIRMATION_MESSAGE_1:
         evtCopyEntryStringToActiveWindow(0, datUnitNames[selectedRecord->unitId].encodedText);
         evtCopyEntryStringToActiveWindow(
             1, D_00435E50[scrGetSelectedScriptEntryId(selectedRecord)].encodedText);
@@ -542,24 +556,24 @@ s32 mtrMantraEquipUpdate(void) {
         evtSetMessageWindowOptionWhenOpen(0);
         fclStartMessage(1);
         evtStoreValueAndCaptureWindowPanelValue(8);
-        equip->state = 4;
+        equip->state = MTR_MANTRA_EQUIP_STATE_WAIT_CONFIRMATION_RESULT;
         break;
 
-    case 4:
+    case MTR_MANTRA_EQUIP_STATE_WAIT_CONFIRMATION_RESULT:
         if (fclChkMessage() != 0) {
             break;
         }
         if (evtGetCapturedWindowPanelValue() != 0) {
-            equip->state = 12;
+            equip->state = MTR_MANTRA_EQUIP_STATE_WAIT_COMPLETION_AND_RESTORE_MENU;
         } else {
-            equip->state = 6;
+            equip->state = MTR_MANTRA_EQUIP_STATE_APPLY_SELECTED_ENTRY;
         }
         break;
 
     case 5:
         break;
 
-    case 6:
+    case MTR_MANTRA_EQUIP_STATE_APPLY_SELECTED_ENTRY:
         sourceEntryId = (u16)selectedEntryId;
         evtCopyEntryStringToActiveWindow(0, datUnitNames[selectedRecord->unitId].encodedText);
         evtCopyEntryStringToActiveWindow(
@@ -570,7 +584,7 @@ s32 mtrMantraEquipUpdate(void) {
         sprintf(text, "%d", sourceAmount);
         evtCopyEntryStringToActiveWindow(3, text);
         fclStartMessage(2);
-        equip->state = 12;
+        equip->state = MTR_MANTRA_EQUIP_STATE_WAIT_COMPLETION_AND_RESTORE_MENU;
         if ((((u32)selectedPanelFlags >> 8) & 2) == 0) {
             sourceAmount = mnuGetMantraSourceValue(sourceEntryId);
             DDS3_GBWK->header.currency -= sourceAmount;
@@ -579,32 +593,32 @@ s32 mtrMantraEquipUpdate(void) {
         scrSelectScriptEntryAndInitialize(selectedRecord, selectedEntryId);
         break;
 
-    case 7:
+    case MTR_MANTRA_EQUIP_STATE_SHOW_INSUFFICIENT_CURRENCY_MESSAGE:
         fclStartMessage(3);
-        equip->state = 12;
+        equip->state = MTR_MANTRA_EQUIP_STATE_WAIT_COMPLETION_AND_RESTORE_MENU;
         break;
 
-    case 8:
+    case MTR_MANTRA_EQUIP_STATE_MESSAGE_INDEX_4:
         fclStartMessage(4);
-        equip->state = 12;
+        equip->state = MTR_MANTRA_EQUIP_STATE_WAIT_COMPLETION_AND_RESTORE_MENU;
         break;
 
-    case 9:
+    case MTR_MANTRA_EQUIP_STATE_MESSAGE_INDEX_5:
         fclStartMessage(5);
-        equip->state = 12;
+        equip->state = MTR_MANTRA_EQUIP_STATE_WAIT_COMPLETION_AND_RESTORE_MENU;
         break;
 
-    case 10:
+    case MTR_MANTRA_EQUIP_STATE_MESSAGE_INDEX_6:
         fclStartMessage(6);
-        equip->state = 12;
+        equip->state = MTR_MANTRA_EQUIP_STATE_WAIT_COMPLETION_AND_RESTORE_MENU;
         break;
 
-    case 11:
+    case MTR_MANTRA_EQUIP_STATE_MESSAGE_INDEX_7:
         fclStartMessage(7);
-        equip->state = 12;
+        equip->state = MTR_MANTRA_EQUIP_STATE_WAIT_COMPLETION_AND_RESTORE_MENU;
         break;
 
-    case 12:
+    case MTR_MANTRA_EQUIP_STATE_WAIT_COMPLETION_AND_RESTORE_MENU:
         if (work->flags.fadeProgress == 0 || fclChkMessage() != 0) {
             break;
         }
