@@ -3577,9 +3577,9 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     scale = args->scale == 0.0f ? 1.0f : args->scale;
     if (args->count == 0) {
         BtlEffectResource *table = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
-        args->offset = table->nodes[unit->motionId].reachOffset * unit->scale;
+        args->motionReachOffset = table->nodes[unit->motionId].reachOffset * unit->scale;
     }
-    reach = args->offset + target->reach * target->scale;
+    reach = args->motionReachOffset + target->reach * target->scale;
     btlUnitGetMuzzlePosVU(unit);
     SDF_VU0_STOREVECTOR(fromPos);
     btlUnitGetMuzzlePosVU(target);
@@ -3633,7 +3633,7 @@ BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *unit, BtlUnit *target, f3
     arguments->unit = unit;
     arguments->target = target;
     arguments->scale = scale;
-    arguments->offset = 0.0f;
+    arguments->motionReachOffset = 0.0f;
     arguments->count = 0;
     return task;
 }
