@@ -3095,16 +3095,17 @@ s32 btlLowestSetPairIndex(u32 mask) {
 }
 
 void btlTickActorEntryCountdowns(BtlUnit *unit) {
-    s16 *entry = &unit->entrySlots[0].countdown;
+    /* Stride through the slot-array bytes, then access each actual countdown member. */
+    u8 *countdownBytes = (u8 *)&unit->entrySlots + (u32)&((BtlUnitEntrySlot *)0)->countdown;
     u32 i;
-    for (i = 0; i < 7; i++) {
-        if (*entry >= 0) {
-            if (*entry == 0) {
-                *entry = -1;
+    for (i = 0; i < 7; i++, countdownBytes += sizeof(BtlUnitEntrySlot)) {
+        s16 *countdown = (s16 *)countdownBytes;
+        if (*countdown >= 0) {
+            if (*countdown == 0) {
+                *countdown = -1;
             }
-            *entry = *entry - 1;
+            *countdown = *countdown - 1;
         }
-        entry += 3;
     }
 }
 
