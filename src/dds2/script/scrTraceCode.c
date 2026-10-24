@@ -12,44 +12,44 @@ extern const ScrCommand D_00411408[];
 u32 CodeFunc_PushIS(scrProcessWork_s *scr) {
     PushInt(scr, scr->instructions[scr->pc].parts.sOperand);
     scr->pc++;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_PushF(scrProcessWork_s *scr) {
     scr->pc++;
     PushFloat(scr, scr->instructions[scr->pc].fOperand);
     scr->pc++;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_PushIX(scrProcessWork_s *scr) {
     PushInt(scr, DDS3_GBWK->script.ints[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_PushFX(scrProcessWork_s *scr) {
     PushFloat(scr, DDS3_GBWK->script.floats[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_PushLIX(scrProcessWork_s *scr) {
     PushInt(scr, scr->localInt[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_PushLFX(scrProcessWork_s *scr) {
     PushFloat(scr, scr->localFloat[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_PushSTR(scrProcessWork_s *scr) {
     PushStr(scr, scr->strings + scr->instructions[scr->pc].parts.sOperand);
     scr->pc++;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 /* Copy the VM's reserved return slot back onto its active operand stack. */
@@ -58,13 +58,13 @@ u32 CodeFunc_PushReg(scrProcessWork_s *scr) {
     scr->stackValues[scr->sp].i = scr->stackValues[SCR_STACK_RET].i;
     scr->sp++;
     scr->pc++;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_PopIX(scrProcessWork_s *scr) {
     DDS3_GBWK->script.ints[scr->instructions[scr->pc].parts.sOperand] = PopInt(scr);
     scr->pc++;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_PopFX(scrProcessWork_s *scr) {
@@ -73,7 +73,7 @@ u32 CodeFunc_PopFX(scrProcessWork_s *scr) {
     floatValue = PopFloat(scr);
     DDS3_GBWK->script.floats[scr->instructions[scr->pc].parts.sOperand] = floatValue;
     scr->pc++;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_PopLIX(scrProcessWork_s *scr) {
@@ -82,18 +82,18 @@ u32 CodeFunc_PopLIX(scrProcessWork_s *scr) {
     integerValue = PopInt(scr);
     scr->localInt[scr->instructions[scr->pc].parts.sOperand] = integerValue;
     scr->pc++;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_PopLFX(scrProcessWork_s *scr) {
     scr->localFloat[scr->instructions[scr->pc].parts.sOperand] = PopFloat(scr);
     scr->pc++;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_Proc(scrProcessWork_s *scr) {
     scr->pc++;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 /* Yield without consuming operands until the command completes. */
@@ -103,44 +103,44 @@ u32 CodeFunc_Comm(scrProcessWork_s *scr) {
 
     nowpwork = scr;
     if (D_00411408[commandIndex].func() == 0) {
-        return 2;
+        return SCR_OPCODE_HANDLER_RESULT_YIELDED;
     }
     scr->sp -= D_00411408[commandIndex].paramCount;
     if (programCounter == scr->pc) {
         scr->pc = programCounter + 1;
     }
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_End(scrProcessWork_s *scr)
 {
     if (scr->sp == 0) {
-        return 0;
+        return SCR_OPCODE_HANDLER_RESULT_FINISHED;
     }
     scr->pc = PopInt(scr) + 1;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_Jump(scrProcessWork_s *scr) {
     scr->pc = scr->procedures[scr->instructions[scr->pc].parts.sOperand].addr;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 /* Save the return PC before transferring control to a procedure. */
 u32 CodeFunc_Call(scrProcessWork_s *scr) {
     PushRet(scr, scr->pc);
     scr->pc = scr->procedures[scr->instructions[scr->pc].parts.sOperand].addr;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_Run(scrProcessWork_s *scr) {
     scr->pc++;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_Goto(scrProcessWork_s *scr) {
     scr->pc = scr->labels[scr->instructions[scr->pc].parts.sOperand].addr;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 extern s32 CodeFunc_2Operation_i1;
@@ -321,25 +321,25 @@ void CodeFunc_2Operation(scrProcessWork_s *scr, s32 operatorCode)
 u32 CodeFunc_Add(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 0);
     scr->pc = scr->pc + 1;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_Sub(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 1);
     scr->pc = scr->pc + 1;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_Mul(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 2);
     scr->pc = scr->pc + 1;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_Div(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 3);
     scr->pc = scr->pc + 1;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_Minus(scrProcessWork_s *scr) {
@@ -362,7 +362,7 @@ u32 CodeFunc_Minus(scrProcessWork_s *scr) {
         break;
     }
     scr->pc++;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_Not(scrProcessWork_s *scr) {
@@ -379,55 +379,55 @@ u32 CodeFunc_Not(scrProcessWork_s *scr) {
         break;
     }
     scr->pc++;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_Or(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 4);
     scr->pc = scr->pc + 1;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_And(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 5);
     scr->pc = scr->pc + 1;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_EQ(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 6);
     scr->pc = scr->pc + 1;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_NEQ(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 7);
     scr->pc = scr->pc + 1;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_S(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 8);
     scr->pc = scr->pc + 1;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_L(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 9);
     scr->pc = scr->pc + 1;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_SE(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 10);
     scr->pc = scr->pc + 1;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_LE(scrProcessWork_s *scr) {
     CodeFunc_2Operation(scr, 0xb);
     scr->pc = scr->pc + 1;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 u32 CodeFunc_IF(scrProcessWork_s *scr)
@@ -454,7 +454,7 @@ u32 CodeFunc_IF(scrProcessWork_s *scr)
         scr->pc++;
     else
         scr->pc = scr->labels[scr->instructions[scr->pc].parts.sOperand].addr;
-    return 1;
+    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 /* Run instructions until one stops the context: returns 2 when a handler returns 0 (finished),
@@ -464,14 +464,14 @@ s32 scrTraceCode(scrProcessWork_s *scr) {
 
     while (1) {
         handlerResult = codefunc[scr->instructions[scr->pc].parts.opCode](scr);
-        if (handlerResult == 0) {
+        if (handlerResult == SCR_OPCODE_HANDLER_RESULT_FINISHED) {
             scr->cmdTimer = 0;
             return SCR_TRACE_RESULT_FINISHED;
         }
-        if (handlerResult == 2) {
+        if (handlerResult == SCR_OPCODE_HANDLER_RESULT_YIELDED) {
             break;
         }
-        if (handlerResult == 1) {
+        if (handlerResult == SCR_OPCODE_HANDLER_RESULT_CONTINUE) {
             scr->cmdTimer = 0;
         }
     }
