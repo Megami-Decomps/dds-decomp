@@ -844,7 +844,7 @@ s32 evtDeleteUnitHandle(evtUnitHandle_t *transitionWork) {
     return 1;
 }
 
-s32 evtGetUnitStat(evtUnitHandle_t *unit) {
+EvtUnitMotionState evtGetUnitStat(evtUnitHandle_t *unit) {
     return unit->motionState;
 }
 
@@ -863,7 +863,7 @@ void evtSetWaitHokanFrame(evtUnitHandle_t *unit, s32 firstParameter, s32 secondP
 }
 
 s32 evtCheckUnitWait(evtUnitHandle_t *unit) {
-    s32 state = evtGetUnitStat(unit);
+    EvtUnitMotionState state = evtGetUnitStat(unit);
 
     if (state == EVT_UNIT_MOTION_STATE_IDLE) {
         return 1;
