@@ -10714,9 +10714,9 @@ void effReleaseOwnedClassResourceWork(u32 handle) {
 }
 
 /* vu0 routine: orient along the vector between two requested positions and advance the resource. */
-void effUpdateAimedClassResource(u8 *work) {
-    u8 *object = ((EffActiveResource *)work)->payload;
-    s32 *handle = (s32 *)((EffActiveResource *)work)->resource;
+void effUpdateAimedClassResource(EffActiveResource *work) {
+    u8 *object = work->payload;
+    s32 *handle = (s32 *)work->resource;
     u128 mtx[4];
     f32 first[4];
     f32 second[4];
@@ -10725,11 +10725,11 @@ void effUpdateAimedClassResource(u8 *work) {
     u8 *state;
 
     if (effResolveRequestPositionIntoVu((EffectVectorRequest *)(object + 0x88), *(s16 *)(object + 0x98)) == 0) {
-        VU0_LOAD_VF(vf10, work);
+        VU0_LOAD_VF(vf10, work->position);
     }
     VU0_STORE_VF_UNCLOBBERED(vf10, first);
     if (effResolveRequestPositionIntoVu((EffectVectorRequest *)(object + 0x90), *(s16 *)(object + 0x9A)) == 0) {
-        VU0_LOAD_VF(vf10, work);
+        VU0_LOAD_VF(vf10, work->position);
     }
     VU0_STORE_VF_UNCLOBBERED(vf10, second);
     effCopyClassResourcePosition((s128 *)handle[0], (s128 *)first);
