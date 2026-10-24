@@ -256,7 +256,7 @@ void effUploadModelTextures(EffModelOwner *owner) {
 extern void effFloorModelListPush(EffModelOwner *);
 
 /* Track floor models only while battle is active and the current actor is not fully marked. */
-EffModelOwner *effCreateFloorModelOwner(void *source) {
+EffModelOwner *effCreateFloorModelOwner(FileJobPayload *source) {
     EffModelOwner *owner;
     s32 battleActive;
 
