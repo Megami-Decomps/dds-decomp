@@ -246,9 +246,9 @@ s32 dds3BillboardGetCurrentAnimNumber(billHandle_t *effect) {
     return 0;
 }
 
-s32 dds3BillboardGetAnimNumber(s32 billboard) {
-    if (((billHandle_t *)billboard)->kind == 1) {
-        return ((BillLinkedValue *)((billHandle_t *)billboard)->animationData->base)->value;
+s32 dds3BillboardGetAnimNumber(billHandle_t *billboard) {
+    if (billboard->kind == 1) {
+        return ((BillLinkedValue *)billboard->animationData->base)->value;
     }
     return 0;
 }
@@ -313,9 +313,9 @@ u16 dds3BillboardGetAnimState(const billHandle_t *effect) {
 }
 
 
-s32 dds3BillboardGetAnimType(s32 billboard) {
-    if (((billHandle_t *)billboard)->kind == 1) {
-        return ((billHandle_t *)billboard)->modeFlags;
+s32 dds3BillboardGetAnimType(billHandle_t *billboard) {
+    if (billboard->kind == 1) {
+        return billboard->modeFlags;
     }
     return 0;
 }
