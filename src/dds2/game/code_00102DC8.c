@@ -112,7 +112,7 @@ extern s8 dds3PadBitTable[32];
 
 extern s32 kwlnSelectIncompleteResourceAtPageIndex(s32);
 
-extern void kwlnDrawTextureViewerFrame(void *data, sdfTexHandle_t *image);
+extern void kwlnDrawTextureViewerFrame(SdfPoolNode *surface, sdfTexHandle_t *image);
 
 extern SdfPoolNode kwlnPositionedTextSurface;
 
@@ -1004,13 +1004,11 @@ extern s32 D_00435CB0;
 
 void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, sdfGsMemSlice_t *block, u8 mode);
 
-void kwlnDrawTextureViewerFrame(void *surfaceContext, sdfTexHandle_t *image) {
-    SdfPoolNode *surface;
+void kwlnDrawTextureViewerFrame(SdfPoolNode *surface, sdfTexHandle_t *image) {
     sdfDrawTag_t *packetList;
     s32 counter;
     s32 mode;
 
-    surface = (SdfPoolNode *)surfaceContext;
     if (image == NULL) {
         return;
     }
@@ -1042,15 +1040,15 @@ void kwlnDrawTextureViewerFrame(void *surfaceContext, sdfTexHandle_t *image) {
 }
 
 /* With a nonempty list, invoke its renderer even when input reports exit.
- * surfaceAddress identifies the submission callback owner; return input status. */
-s32 kwlnSwapActiveResource(s32 surfaceAddress) {
+ * The surface owns the packet submission callback; return input status. */
+s32 kwlnSwapActiveResource(SdfPoolNode *surface) {
     s32 inputStatus;
 
     if (sdfTexHandleLink == 0) {
         return 0;
     }
     inputStatus = kwlnTextureViewerHandlePad();
-    kwlnDrawTextureViewerFrame((void *)surfaceAddress, kwlnCurrentIncompleteResource);
+    kwlnDrawTextureViewerFrame(surface, kwlnCurrentIncompleteResource);
     return inputStatus;
 }
 
