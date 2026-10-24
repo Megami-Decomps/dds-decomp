@@ -3647,10 +3647,10 @@ BtlRuntimeTask *btlCreateScaledUnitModelTask(BtlUnit *unit) {
     return task;
 }
 
-u32 btlPollThresholdTask(BtlRuntimeTaskArgs *arguments) {
-    if ((s32)btlGetUnitModelCurrentFrame(arguments->actor) >= arguments->option) {
-        if ((((BtlUnit *)arguments->actor)->updateFlags & 1) == 0) {
-            btlResetUnitModelProgress(arguments->actor);
+u32 btlPollThresholdTask(BtlThresholdTaskArgs *arguments) {
+    if ((s32)btlGetUnitModelCurrentFrame(arguments->unit) >= arguments->frameThreshold) {
+        if ((arguments->unit->updateFlags & 1) == 0) {
+            btlResetUnitModelProgress(arguments->unit);
         }
         return 1;
     }
@@ -3659,7 +3659,7 @@ u32 btlPollThresholdTask(BtlRuntimeTaskArgs *arguments) {
 
 BtlRuntimeTask *btlScheduleThresholdTask(BtlUnit *actor, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    BtlRuntimeTaskArgs *args;
+    BtlThresholdTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0xB;
@@ -3667,8 +3667,8 @@ BtlRuntimeTask *btlScheduleThresholdTask(BtlUnit *actor, s32 option) {
     task->callback = btlPollThresholdTask;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->actor = actor;
-    args->option = option;
+    args->unit = actor;
+    args->frameThreshold = option;
     return task;
 }
 

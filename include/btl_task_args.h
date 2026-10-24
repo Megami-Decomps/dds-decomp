@@ -8,6 +8,18 @@ struct BtlTask;
 struct BtlRuntimeTask;
 struct ActionStateLink;
 
+/* Task 0x0B waits for a unit's model frame to reach a signed threshold. */
+typedef struct BtlThresholdTaskArgs {
+    struct BtlUnit *unit; /* 0x00 */
+    s32 frameThreshold;   /* 0x04 */
+} BtlThresholdTaskArgs;
+typedef char BtlThresholdTaskArgsSizeCheck[
+    sizeof(BtlThresholdTaskArgs) == 8 ? 1 : -1];
+typedef char BtlThresholdTaskArgsUnitOffsetCheck[
+    (u32)&((BtlThresholdTaskArgs *)0)->unit == 0 ? 1 : -1];
+typedef char BtlThresholdTaskArgsFrameThresholdOffsetCheck[
+    (u32)&((BtlThresholdTaskArgs *)0)->frameThreshold == 4 ? 1 : -1];
+
 /* The camera-transform task's complete 0x24-byte pose payload. */
 typedef struct BtlCameraTransformTaskArgs {
 #ifdef VERSION_DDS1
