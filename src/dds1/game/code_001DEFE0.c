@@ -11335,25 +11335,24 @@ u32 btlApplyLinkageFormation(BattleFormationActionArgs *args) {
 extern u32 btlApplyLinkageFormation(BattleFormationActionArgs *);
 
 /* Package the action, two companion addresses, skill and flags for formation. */
-u8 *btlCreateLinkageFormationTask(u8 *owner, u32 firstActorAddress, u32 secondActorAddress, u32 skillId, u32 flags) {
+BtlRuntimeTask *btlCreateLinkageFormationTask(BtlTask *owner, BtlUnit *firstActor,
+        BtlUnit *secondActor, u32 skillId, u32 flags) {
     u8 *task = btlAllocTask(20);
     BattleFormationActionArgs *arguments;
-    u8 *unit;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = btlApplyLinkageFormation;
-    unit = *(u8 **)(owner + 0x18);
     *(u16 *)(task + 0x20) = 0x5F;
     *(u32 *)(task + 0x48) = 0;
-    *(u64 *)(task + 0x40) = *(u64 *)(unit + 0x108);
+    *(u64 *)(task + 0x40) = owner->unit->identity;
     arguments = btlGetTaskArguments(task);
-    arguments->link = (BtlTask *)owner;
-    arguments->first = (BtlUnit *)firstActorAddress;
-    arguments->second = (BtlUnit *)secondActorAddress;
+    arguments->link = owner;
+    arguments->first = firstActor;
+    arguments->second = secondActor;
     arguments->actionId = skillId;
     arguments->unk10 = flags;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 INCLUDE_RODATA(const s32, "game/code_001DEFE0", D_003A5410);

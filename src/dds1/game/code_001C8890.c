@@ -1422,7 +1422,8 @@ extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(
 void btlBuildActionLightParameters(s32 skillIndex, BtlSceneLightParams *light);
 extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *, u32);
 s32 btlGetActionDefaultOrOverride(s32 skillIndex);
-extern u8 *btlCreateLinkageFormationTask(u8 *, u32, u32, u32, u32);
+extern BtlRuntimeTask *btlCreateLinkageFormationTask(BtlTask *, BtlUnit *,
+        BtlUnit *, u32, u32);
 extern BtlRuntimeTask *btlCreateCommandSoundWithArguments(BtlTask *, BtlUnit *, BtlUnit *, u32, u32);
 s32 sndLookupResourceType(s32 actor, s32 resourceIndex);
 BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source,
@@ -1516,7 +1517,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
         task->ownerId = actionOwner;
         btlStartTask(task);
     }
-    btlStartTask(btlCreateLinkageFormationTask((u8 *)action, (u32)companionA, (u32)companionB, skill, 0));
+    btlStartTask(btlCreateLinkageFormationTask(action, companionA, companionB, skill, 0));
     btlStartTask(btlCreateCommandSoundWithArguments(action, companionA, companionB, 7, skill));
     for (groupIndex = 0; groupIndex < 3; groupIndex++) {
         if (actors[groupIndex] != NULL) {
