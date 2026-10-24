@@ -99,7 +99,7 @@
 #include "kwln_fade_timing.h"
 #include "sdf_dev_slot_api.h"
 /* Declared before first use (were implicit int). */
-extern s32 btlAimHorizontalDirectionVU(f32 *origin, f32 *targetPosition);
+extern s32 btlAimHorizontalDirectionVU(const f32 *origin, const f32 *targetPosition);
 extern void btlInitTintTransitionDefault(u16 soundId);
 extern void btlInitTintTransitionResource(u32 resource, u16 soundId);
 extern u32 dds3BillboardGeneralNumber(void);

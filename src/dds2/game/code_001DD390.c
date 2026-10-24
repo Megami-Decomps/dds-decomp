@@ -3237,7 +3237,7 @@ void btlRefreshUnitFxVectors(BtlUnit *unit) {
     sdfModelEvalTm(unit->ext->owner->inner);
 }
 
-extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
+extern s32 btlAimHorizontalDirectionVU(const f32 *, const f32 *);
 
 extern void btlUnitGetBodyPosVU(BtlUnit *);
 

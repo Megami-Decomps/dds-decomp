@@ -3143,7 +3143,7 @@ void btlRefreshUnitFxVectors(BtlUnit *unit) {
 
 extern void btlUnitGetBodyPosVU(u8 *);
 
-extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
+extern s32 btlAimHorizontalDirectionVU(const f32 *, const f32 *);
 
 void btlUnitFaceTarget(BtlUnit *object, BtlUnit *target) {
     u8 first[16];

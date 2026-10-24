@@ -1175,7 +1175,7 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
 extern u128 btlHorizontalAimIdentityQuaternion;
 
 /* Aim along the horizontal origin-to-target delta; zero delta loads the default vf10. */
-s32 btlAimHorizontalDirectionVU(f32 *origin, f32 *targetPosition) {
+s32 btlAimHorizontalDirectionVU(const f32 *origin, const f32 *targetPosition) {
     f32 delta[4];
     delta[0] = targetPosition[0] - origin[0];
     delta[2] = targetPosition[2] - origin[2];

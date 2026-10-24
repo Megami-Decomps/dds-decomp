@@ -3056,7 +3056,7 @@ extern void btlInsertPartyActorByPriority(BtlUnit *, u8, u8);
 extern void btlBindActorTaskAndSelectActionNumber(ActionStateLink *, BtlUnit *);
 extern void btlSetSceneTaskActiveFlag(ActionStateLink *);
 extern void btlUnitGetBodyPosVU(BtlUnit *);
-extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
+extern s32 btlAimHorizontalDirectionVU(const f32 *, const f32 *);
 extern void btlApplyMaskedActorEntryAdjustments(BtlUnit *, u32, s16);
 
 void btlScheduleSummonActionTasks(ActionStateLink *action) {

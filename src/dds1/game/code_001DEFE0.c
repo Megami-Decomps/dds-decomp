@@ -255,7 +255,7 @@ extern void mdlGetPosition(dds3ModelHandle_t *);
 
 extern void btlUnitGetBodyPosVU(u8 *);
 
-extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
+extern s32 btlAimHorizontalDirectionVU(const f32 *, const f32 *);
 
 extern u8 D_0037E110[];
 

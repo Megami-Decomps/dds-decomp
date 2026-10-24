@@ -311,7 +311,7 @@ extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *, s32);
 
 extern void mdlGetPosition(dds3ModelHandle_t *);
 
-extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
+extern s32 btlAimHorizontalDirectionVU(const f32 *, const f32 *);
 
 extern void btlUnitGetBodyPosVU(BtlUnit *);
 
@@ -7040,7 +7040,7 @@ void btlInitTargetCursorAndFacing(BtlLinkedCommand *action, BtlCamState *state) 
             btlMeasureFilteredUnitGroupBounds(0x200, 0, 0);
         }
         SDF_VU0_STOREVECTOR_NOMEM(position);
-        btlAimHorizontalDirectionVU((f32 *)aimPosition, (f32 *)position);
+        btlAimHorizontalDirectionVU(aimPosition, position);
         SDF_VU0_STOREVECTOR_NOMEM(rotation);
         btlSetUnitRotation(unit, rotation);
     }

@@ -86,7 +86,7 @@ extern void btlSetUnitPosition(BtlUnit *unit, const f32 *position);
 extern void btlSetUnitRotation(BtlUnit *unit, const f32 rotation[4]);
 
 
-extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
+extern s32 btlAimHorizontalDirectionVU(const f32 *, const f32 *);
 
 extern void btlSetUnitRotation(BtlUnit *, const f32 [4]);
 
@@ -579,7 +579,7 @@ void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, 
     pos[1] = 0.0f;
     pos[2] = center[2] - radius;
     btlSetUnitPosition(slot[1], pos);
-    if (btlAimHorizontalDirectionVU((f32 *)pos, (f32 *)center) != 0) {
+    if (btlAimHorizontalDirectionVU(pos, center) != 0) {
         SDF_VU0_STOREVECTOR_NOMEM(rotation);
         btlSetUnitRotation(slot[1], rotation);
     }
@@ -588,7 +588,7 @@ void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, 
     pos[1] = 0.0f;
     pos[2] = center[2] - sdfSin(angle) * radius;
     btlSetUnitPosition(slot[0], pos);
-    if (btlAimHorizontalDirectionVU((f32 *)pos, (f32 *)center) != 0) {
+    if (btlAimHorizontalDirectionVU(pos, center) != 0) {
         SDF_VU0_STOREVECTOR_NOMEM(rotation);
         btlSetUnitRotation(slot[0], rotation);
     }
@@ -596,7 +596,7 @@ void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, 
     pos[1] = 0.0f;
     pos[2] = center[2] - sdfSin(angle) * radius;
     btlSetUnitPosition(slot[2], pos);
-    if (btlAimHorizontalDirectionVU((f32 *)pos, (f32 *)center) != 0) {
+    if (btlAimHorizontalDirectionVU(pos, center) != 0) {
         SDF_VU0_STOREVECTOR_NOMEM(rotation);
         btlSetUnitRotation(slot[2], rotation);
     }
@@ -735,7 +735,7 @@ void btlPlaceTripleFormationAroundMiddleActor(ActionStateLink *link, BtlUnit *fi
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR_NOMEM(pos);
             btlSetUnitPosition(slot[i], pos);
-            if (btlAimHorizontalDirectionVU((f32 *)pos, (f32 *)center) != 0) {
+            if (btlAimHorizontalDirectionVU(pos, center) != 0) {
                 SDF_VU0_STOREVECTOR_NOMEM(rot);
                 btlSetUnitRotation(slot[i], rot);
             }
@@ -941,7 +941,7 @@ void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other)
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR_NOMEM(pos);
         btlSetUnitPosition(slot[i], pos);
-        if (btlAimHorizontalDirectionVU((f32 *)pos, (f32 *)muzzle) != 0) {
+        if (btlAimHorizontalDirectionVU(pos, muzzle) != 0) {
             SDF_VU0_STOREVECTOR_NOMEM(rot);
             btlSetUnitRotation(slot[i], rot);
         }

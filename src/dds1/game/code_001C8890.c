@@ -2372,7 +2372,7 @@ extern void btlSetSceneTaskActiveFlag(BtlTask *);
 extern BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *, s32);
 extern f32 btlMeasureMaskedUnitBounds(s32, f32 *, f32 *);
 extern void btlUnitGetBodyPosVU(BtlUnit *);
-extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
+extern s32 btlAimHorizontalDirectionVU(const f32 *, const f32 *);
 
 void btlScheduleSummonActionTasks(BtlTask *action) {
     f32 center[4] __attribute__((aligned(16)));
