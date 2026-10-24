@@ -8182,8 +8182,8 @@ void effUpdateTintedScaledMesh(BillCellDrawWork *work) {
 }
 
 
-void effInitializeAnimationPositions(u8 *work) {
-    EffAnimationState *state = (EffAnimationState *)((EffClassWork *)work)->resource;
+void effInitializeAnimationPositions(EffClassWork *work) {
+    EffAnimationState *state = (EffAnimationState *)work->resource;
     FileSlotTable *record = state->record;
     float *positions = state->positions;
     u32 count = record->count;
