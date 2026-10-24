@@ -131,7 +131,7 @@ dds3ObjectBaseControlWorkData_t *dds3CreateSlotResourceState(dds3Basic_t *owner)
     WorldIndexNode *node;
 
     memset(state, 0, sizeof(dds3ObjectBaseControlWorkData_t));
-    state->resourceState = 3;
+    state->resourceState = DDS3_OBJECT_RESOURCE_RELEASED;
     node = dds3GetBasicArrayHandle(0);
     state->worldIndexNode = node;
     state->slots[0] = owner;
