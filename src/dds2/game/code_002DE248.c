@@ -13914,8 +13914,8 @@ u32 effCreatePolyThunderTask(void) {
 extern u8 D_003FEAD0[];
 
 /* Present the six POLY TWINKLE requests through the shared camera/file selector. */
-void effCreatePolyTwinkleTask(void) {
-    effSelectCameraFileJobFromRows("POLY TWINKLE", D_003FEAD0, 6);
+u32 effCreatePolyTwinkleTask(void) {
+    return effSelectCameraFileJobFromRows("POLY TWINKLE", D_003FEAD0, 6);
 }
 
 extern char D_0042CE78[];
