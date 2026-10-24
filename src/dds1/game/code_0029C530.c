@@ -4578,12 +4578,12 @@ void effUpdateClassFrame(EffClassWork *work) {
     effRunClassPostFrame(work);
 }
 
-void effSetClassWorkPrimaryTransformVector(void *dst, void *src) {
+void effSetClassWorkPrimaryTransformVector(s128 *dst, const s128 *src) {
     SDF_VU0_COPYVECTOR(dst, src);
 }
 
-void effSetClassWorkSecondaryTransformVector(void *work, void *src) {
-    SDF_VU0_COPYVECTOR(((EffClassWork *)work)->vectors.orientation, src);
+void effSetClassWorkSecondaryTransformVector(EffClassWork *work, const s128 *src) {
+    SDF_VU0_COPYVECTOR(work->vectors.orientation, src);
 }
 
 void effSetClassWorkColor(EffClassWork *work, u32 color) {
