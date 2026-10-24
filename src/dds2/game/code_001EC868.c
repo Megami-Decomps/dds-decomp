@@ -388,7 +388,7 @@ u32 btlGetActiveUnitId(void);
 
 
 
-/* Return the argument address recorded by allocation (zero for no arguments). */ void *btlGetTaskArguments(void *task);
+/* Return the argument address recorded by allocation (zero for no arguments). */ void *btlGetTaskArguments(struct BtlRuntimeTask *task);
 
 s32 btlGetUnitModelFrameCount(BtlUnit *unit);
 

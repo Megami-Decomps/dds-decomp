@@ -2066,8 +2066,8 @@ void *btlAllocTask(s32 size) {
 }
 
 /* Return the argument address recorded by allocation (zero for no arguments). */
-void *btlGetTaskArguments(void *task) {
-    return ((BtlRuntimeTask *)task)->args;
+void *btlGetTaskArguments(BtlRuntimeTask *task) {
+    return task->args;
 }
 
 /* Invoke the finish hook before unlinking, then release the task block. */

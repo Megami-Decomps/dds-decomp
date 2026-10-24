@@ -130,7 +130,7 @@ void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 
 /* The caller supplies an in-range index. */ BtlUnit *btlGetIndexListEntry(BtlIndexList *list, s32 index);
 
-/* Return the argument address recorded by allocation (zero for no arguments). */ void *btlGetTaskArguments(void *task);
+/* Return the argument address recorded by allocation (zero for no arguments). */ void *btlGetTaskArguments(struct BtlRuntimeTask *task);
 
 void btlUnitFaceTarget(BtlUnit *unit, BtlUnit *target);
 

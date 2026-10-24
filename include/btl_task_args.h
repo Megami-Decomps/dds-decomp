@@ -5,6 +5,7 @@
 
 struct BtlUnit;
 struct BtlTask;
+struct BtlRuntimeTask;
 struct ActionStateLink;
 
 /* The camera-transform task's complete 0x24-byte pose payload. */
@@ -131,7 +132,7 @@ typedef char BtlRewardPacketAmountOffsetCheck[
     (u32)&((BtlRewardPacket *)0)->amount == 4 ? 1 : -1];
 
 /* Return the runtime scheduler task's allocated argument block, or NULL. */
-void *btlGetTaskArguments(void *task);
+void *btlGetTaskArguments(struct BtlRuntimeTask *task);
 
 /* Category-stat damage task arguments, written by both title constructors. */
 typedef struct BtlCategoryStatDamageArgs {
