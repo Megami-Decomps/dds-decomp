@@ -117,7 +117,7 @@ extern void DiagMatrix(void);
 
 #define SDF_CAMERA_HALF_HEIGHT_FLAG 1
 
-extern void *sdfDebugFontHandle;
+extern struct sdfTexHandle_t *sdfDebugFontHandle;
 
 extern u32 sdf3DFogDefault;
 
@@ -1543,7 +1543,7 @@ void sdfDevConsInit(void) {
 }
 
 /* Ensure initialization and return the cached console texture. */
-void *sdfDevConsGetFontHandle(void) {
+struct sdfTexHandle_t *sdfDevConsGetFontHandle(void) {
     sdfDevConsInit();
     return sdfDebugFontHandle;
 }
