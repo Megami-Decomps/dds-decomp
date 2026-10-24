@@ -700,12 +700,10 @@ void mnuDestroyPartySelectionWindow(s32 context) {
 
 
 /* Snapshot the five party entries and cap the menu's displayed slot count. */
-extern void mnuCopyPartyEntries();
+extern void mnuCopyPartyEntries(MenuContext *context);
 /* Snapshot five party entries; at most three active slots are displayed. */
-void mnuCopyPartyEntries(context)
-    s32 context;
-{
-    PartyMenuData *menuWork = (PartyMenuData *)((MenuContext *)context)->party;
+void mnuCopyPartyEntries(MenuContext *context) {
+    PartyMenuData *menuWork = (PartyMenuData *)context->party;
     datUnitWork_t *entryCursor = menuWork->current;
     s32 entryIndex;
     s32 partyFlagsByteOffset = (s32)&((DatGameState *)0)->party;
@@ -766,13 +764,11 @@ void mnuAssignSelectedPartyEntry(s32 entryIndex, s32 mode, s32 skipRefresh, Menu
 
 
 /* Notify active snapshot entries, restore the backup, then refresh panel resources. */
-extern void mnuRestorePartyEntriesAndRefresh();
+extern void mnuRestorePartyEntriesAndRefresh(MenuContext *context);
 /* Notify active snapshot entries, restore the backup, then refresh panel resources.
  * The final loop counts down while copying backup entries forward. */
-void mnuRestorePartyEntriesAndRefresh(context)
-    s32 context;
-{
-    PartyMenuData *menuWork = (PartyMenuData *)((MenuContext *)context)->party;
+void mnuRestorePartyEntriesAndRefresh(MenuContext *context) {
+    PartyMenuData *menuWork = (PartyMenuData *)context->party;
     datUnitWork_t *entryCursor = menuWork->current;
     s32 entryCounter;
     s32 backupByteOffset;
@@ -780,7 +776,7 @@ void mnuRestorePartyEntriesAndRefresh(context)
 
     for (entryCounter = 0; entryCounter < MNU_STAFF_PARTY_SLOT_COUNT; entryCounter++) {
         if (entryCursor->flags & MNU_STAFF_PARTY_ACTIVE_BIT) {
-            mnuAssignSelectedPartyEntry(entryCounter, -3, 1, (MenuContext *)context);
+            mnuAssignSelectedPartyEntry(entryCounter, -3, 1, context);
         }
         entryCursor++;
     }
@@ -789,9 +785,9 @@ void mnuRestorePartyEntriesAndRefresh(context)
         *(datUnitWork_t *)(backupByteOffset + (s32)DDS3_GBWK + (s32)&((DatGameState *)0)->party) = *(datUnitWork_t *)(backupByteOffset + (s32)menuWork + (s32)&((PartyMenuData *)0)->backup);
         backupByteOffset += sizeof(datUnitWork_t);
     }
-    panelWork = &((MenuContext *)context)->partyWindow;
+    panelWork = &context->partyWindow;
     mnuReleasePartyPanelTextures(panelWork);
-    mnuInitPartyPanelSlots(&((MenuContext *)context)->partyPanel);
+    mnuInitPartyPanelSlots(&context->partyPanel);
     mnuReleaseAndRefreshWindowSlots(panelWork);
     mnuRefreshPartyPanelBars(panelWork);
 }
@@ -812,19 +808,19 @@ s32 mnuCountActiveSlots(void) {
 }
 
 /* Reset selection/backup state, activate all panel slots, and enable list nodes. */
-void mnuClearPartySelectionAndActivateSlots(s32 context) {
-    PartyMenuData *menuWork = (PartyMenuData *)((MenuContext *)context)->party;
+void mnuClearPartySelectionAndActivateSlots(MenuContext *context) {
+    PartyMenuData *menuWork = (PartyMenuData *)context->party;
     s32 entryIndex;
     s32 nodeAddress;
 
     mnuCopyPartyEntries(context);
     menuWork->selection = 0;
     memset(menuWork->backup, 0, MNU_STAFF_BACKUP_BYTES);
-    ((MenuContext *)context)->partyPanel.frontlineCount = 1;
-    ((MenuContext *)context)->partyPanel.reserveCount = mnuCountActiveSlots() - 1;
-    mnuReleaseAndRefreshWindowSlots(&((MenuContext *)context)->partyWindow);
+    context->partyPanel.frontlineCount = 1;
+    context->partyPanel.reserveCount = mnuCountActiveSlots() - 1;
+    mnuReleaseAndRefreshWindowSlots(&context->partyWindow);
     for (entryIndex = 0; entryIndex < MNU_STAFF_PARTY_SLOT_COUNT; entryIndex++) {
-        ((MenuContext *)context)->partyWindow.slots[entryIndex].flags |= 0x40;
+        context->partyWindow.slots[entryIndex].flags |= 0x40;
     }
     for (nodeAddress = (s32)menuWork->primaryWindow->list->first;
          nodeAddress != 0; nodeAddress = (s32)((MenuListNode *)nodeAddress)->next) {
@@ -863,7 +859,7 @@ s32 mnuInitializePartySelectionState(dds3ProcessID_t *task) {
         &context->partyWindow.slots[2],
         context->panelModels[0], 5, 0xA, 0xB);
 
-    mnuClearPartySelectionAndActivateSlots(contextAddress);
+    mnuClearPartySelectionAndActivateSlots(context);
     for (slotIndex = 0; slotIndex < 5; slotIndex++) {
         memcpy(&menuWork->original[slotIndex], &DDS3_GBWK->party[slotIndex],
                sizeof(datUnitWork_t));
@@ -890,14 +886,14 @@ u32 mnuReleasePartySelectionResources(dds3ProcessID_t *task) {
     return 1;
 }
 
-void mnuPreparePartyPanelTransition(s32 menu) {
-    PartyMenuData *party = (PartyMenuData *)((MenuContext *)menu)->party;
+void mnuPreparePartyPanelTransition(MenuContext *menu) {
+    PartyMenuData *party = (PartyMenuData *)menu->party;
 
     mnuRestorePartyEntriesAndRefresh(menu);
-    mnuSetPopupEntryFlagged(((MenuContext *)menu)->popupState, mnuCampPartySelectionReturnPopupEntry);
-    mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)menu)->panelHandle,
-                              (struct EffectSlotSet *)(u32)((MenuContext *)menu)->displayHandle, 0, 1);
-    mnuBeginWindowFadeTransition(((MenuContext *)menu)->imageHandle, &((MenuContext *)menu)->transition);
+    mnuSetPopupEntryFlagged(menu->popupState, mnuCampPartySelectionReturnPopupEntry);
+    mnuConfigurePanelResource((MenuScrollPanel *)(u32)menu->panelHandle,
+                              (struct EffectSlotSet *)(u32)menu->displayHandle, 0, 1);
+    mnuBeginWindowFadeTransition(menu->imageHandle, &menu->transition);
     party->freezePanel = 1;
 }
 
@@ -938,19 +934,19 @@ s32 mnuHandlePartySelectionInput(dds3ProcessID_t *callback) {
                 break;
             case 1:
                 if (menuWork->selection > 0) {
-                    mnuPreparePartyPanelTransition((s32)context);
+                    mnuPreparePartyPanelTransition(context);
                 } else {
                     inputFlags = 0x8000;
                 }
                 break;
             }
         } else if (menuWork->activeCount == menuWork->selection) {
-            mnuPreparePartyPanelTransition((s32)context);
+            mnuPreparePartyPanelTransition(context);
         }
         if (inputFlags & 2) {
             if (menuWork->selection > 0) {
                 mnuInitPartyPanelSlots(&context->partyPanel);
-                mnuClearPartySelectionAndActivateSlots((s32)context);
+                mnuClearPartySelectionAndActivateSlots(context);
                 mnuRefreshPartyPanelBars(&context->partyWindow);
             } else {
                 mnuSetPopupEntryFlagged(popup, mnuCampPartySelectionReturnPopupEntry);

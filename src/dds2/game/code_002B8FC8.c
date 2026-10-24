@@ -343,7 +343,7 @@ void mnuDestroyPartySelectionWindow(s32 context);
 
 
 /* Snapshot the five party entries and cap the menu's displayed slot count. */
-void mnuCopyPartyEntries();
+void mnuCopyPartyEntries(MenuContext *context);
 
 
 
@@ -351,14 +351,14 @@ extern void mnuAssignSelectedPartyEntry();
 
 /* Notify active snapshot entries, restore the backup, then refresh panel resources.
  * The second loop counts down while the backup byte offset advances forward. */
-void mnuRestorePartyEntriesAndRefresh();
+void mnuRestorePartyEntriesAndRefresh(MenuContext *context);
 
 /* Count active entries in the five-slot party array, capped at three. */
 s32 mnuCountActiveSlots(void);
 
 /* Reset selection/backup state, activate all panel slots, and enable list nodes.
  * Keep the native short-arity snapshot call unchanged. */
-void mnuClearPartySelectionAndActivateSlots(s32 context);
+void mnuClearPartySelectionAndActivateSlots(MenuContext *context);
 
 /* Release panel textures before reinitializing slots and updating handle state. */
 void mnuRefreshPartyPanelSlots(s32 context);
@@ -367,7 +367,7 @@ void mnuRefreshPartyPanelSlots(s32 context);
 
 u32 mnuReleasePartySelectionResources(dds3ProcessID_t *task);
 
-void mnuPreparePartyPanelTransition(s32 menu);
+void mnuPreparePartyPanelTransition(MenuContext *menu);
 
 
 
