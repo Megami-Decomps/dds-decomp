@@ -5685,14 +5685,14 @@ s32 btlAdjustCameraDirectionForPlane(BtlCamState *state, f32 height) {
     return changed;
 }
 
-u32 btlExecuteCommandSoundTask(BtlRuntimeTaskArgs *taskArgs) {
-    btlSetCameraCommandMode(taskArgs->unk_0C, taskArgs->actor, taskArgs->unitA, taskArgs->unitB, taskArgs->unk_10);
+u32 btlExecuteCommandSoundTask(BtlCommandSoundTaskArgs *taskArgs) {
+    btlSetCameraCommandMode(taskArgs->mode, taskArgs->actor, taskArgs->unitA, taskArgs->unitB, taskArgs->category);
     return 1;
 }
 
 BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *actor, s32 mode) {
     BtlRuntimeTask *task = btlAllocTask(0x14);
-    BtlRuntimeTaskArgs *args;
+    BtlCommandSoundTaskArgs *args;
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -5704,26 +5704,26 @@ BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *actor, s32 mode) {
     task->onStart = 0;
     args = btlGetTaskArguments(task);
     args->actor = actor;
-    args->unk_0C = mode;
-    args->option = 0;
-    args->unk_08 = 0;
-    args->unk_10 = 0;
+    args->mode = mode;
+    args->unitA = NULL;
+    args->unitB = NULL;
+    args->category = 0;
     return task;
 }
 
 BtlRuntimeTask *btlCreateTargetedCommandSoundTask(ActionStateLink *actor, s32 mode, u32 command) {
     BtlRuntimeTask *task = btlCreateCommandSoundTask(actor, mode);
-    BtlRuntimeTaskArgs *args = btlGetTaskArguments(task);
+    BtlCommandSoundTaskArgs *args = btlGetTaskArguments(task);
 
-    args->unk_10 = command;
+    args->category = command;
     return task;
 }
 
 BtlRuntimeTask *btlCreateCommandSoundWithArguments(ActionStateLink *actor, BtlUnit *unitA, BtlUnit *unitB, s32 mode, s32 command) {
     BtlRuntimeTask *task = btlCreateCommandSoundTask(actor, mode);
-    BtlRuntimeTaskArgs *args = btlGetTaskArguments(task);
+    BtlCommandSoundTaskArgs *args = btlGetTaskArguments(task);
 
-    args->unk_10 = command;
+    args->category = command;
     args->unitA = unitA;
     args->unitB = unitB;
     return task;

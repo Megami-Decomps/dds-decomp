@@ -73,10 +73,14 @@ typedef char BtlCameraKeyframesTaskArgsScaleOffsetCheck[
 typedef char BtlCameraKeyframesTaskArgsMotionParameterOffsetCheck[
     (u32)&((BtlCameraKeyframesTaskArgs *)0)->motionParameter == 0x40 ? 1 : -1];
 
-/* Kind 0x27 command-sound tasks allocate this 0x14-byte camera-mode packet.
- * The task builder fills actor/mode; targeted variants add category or units. */
+/* Command-sound tasks allocate this 0x14-byte camera-mode packet (task 0x27 in
+ * DDS1, 0x2A in DDS2); targeted variants add category or linked units. */
 typedef struct BtlCommandSoundTaskArgs {
+#ifdef VERSION_DDS1
     struct BtlTask *actor; /* 0x00: task owner passed to camera command mode. */
+#else
+    struct ActionStateLink *actor; /* 0x00: task owner passed to camera command mode. */
+#endif
     struct BtlUnit *unitA; /* 0x04: optional first linked camera unit. */
     struct BtlUnit *unitB; /* 0x08: optional second linked camera unit. */
     u32 mode; /* 0x0C: camera-command mode. */
