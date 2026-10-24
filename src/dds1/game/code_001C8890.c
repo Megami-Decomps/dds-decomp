@@ -2933,7 +2933,7 @@ void btlUnitTurnEndCommit(s32 task) {
 extern void btlAccumulateEnemyDefeatRewards(s32);
 
 
-extern u8 *btlCreateSelectedEffectUpdateTask(u8 *);
+extern BtlRuntimeTask *btlCreateSelectedEffectUpdateTask(BtlUnit *);
 
 
 void btlStartActorDefeatTransition(s32 command) {
@@ -2970,7 +2970,7 @@ void btlStartActorDefeatTransition(s32 command) {
     } else if (actor->status.flags & 0x400) {
         btlAccumulateEnemyDefeatRewards((s32)actor);
         if (actor->status.flags & 0x8000000) {
-            object = (BtlRuntimeTask *)btlCreateSelectedEffectUpdateTask((u8 *)actor);
+            object = btlCreateSelectedEffectUpdateTask(actor);
             object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             object->startCondition.value.handle = sequence;
             btlStartTask(object);

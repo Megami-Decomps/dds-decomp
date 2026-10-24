@@ -243,7 +243,7 @@ extern s32 btlCountTasksForOwner(s64);
 
 extern s32 btlCountTasksForOwner(s64);
 
-extern u8 *btlCreateSelectedEffectUpdateTask(u8 *);
+extern BtlRuntimeTask *btlCreateSelectedEffectUpdateTask(BtlUnit *);
 
 extern BtlRuntimeTask *btlCreateUnitExitFadeTask(BtlUnit *, s32);
 extern void btlBossDebugPrintfN(s32, s32, s32, s32, ...);
@@ -4401,10 +4401,9 @@ void btlFinishSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *arguments) {
     arguments->unit->status.flags |= 0x40;
 }
 
-u8 *btlCreateSelectedEffectUpdateTask(u8 *owner) {
+BtlRuntimeTask *btlCreateSelectedEffectUpdateTask(BtlUnit *unit) {
     u8 *task = btlAllocTask(20);
     BtlSelectedUnitEffectTaskArgs *arguments;
-    BtlUnit *unit = (BtlUnit *)owner;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
@@ -4419,7 +4418,7 @@ u8 *btlCreateSelectedEffectUpdateTask(u8 *owner) {
     arguments->effect = 0;
     arguments->counter = 0;
     arguments->duration = 0;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 extern void btlUpdateUnitActors(void);
