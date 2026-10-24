@@ -567,7 +567,7 @@ void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer) {
 }
 
 /* Create an event-viewer effect at the origin and attach its active event node. */
-dds3Basic_t *evtEventViewerCreateOriginEffect(void *resource, u32 entryId, s32 ownerNameIndex, s32 billboardEntry, u32 startFrame,
+dds3Basic_t *evtEventViewerCreateOriginEffect(struct SoundMixer *resource, u32 entryId, s32 ownerNameIndex, s32 billboardEntry, u32 startFrame,
                     EvtRuntime *viewer) {
     f32 position[4];
     f32 scale[4];
@@ -805,10 +805,10 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         if (currentFrame == key->frame) {
             DelBED(key);
             if (track->metadata.option == 0) {
-                key->payload = evtEventViewerCreateOriginEffect((void *)track->resourceData,
+                key->payload = evtEventViewerCreateOriginEffect(track->resourceData,
                     (s32)key->p0C.sb[0], key->p08.sh[1], -1, key->frame, viewer);
             } else {
-                key->payload = evtEventViewerCreateOriginEffect((void *)track->resourceData,
+                key->payload = evtEventViewerCreateOriginEffect(track->resourceData,
                     (s32)key->p0C.sb[0], key->p08.sh[1], -1, 0, viewer);
             }
         }

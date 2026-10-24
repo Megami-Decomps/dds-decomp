@@ -670,7 +670,7 @@ void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer)
 }
 
 /* Create an event-viewer effect at the origin and attach its active event node. */
-dds3Basic_t *evtEventViewerCreateOriginEffect(void *resource, u32 entryId, s32 ownerNameIndex, s32 billboardEntry, u32 startFrame,
+dds3Basic_t *evtEventViewerCreateOriginEffect(struct SoundMixer *resource, u32 entryId, s32 ownerNameIndex, s32 billboardEntry, u32 startFrame,
                     EvtRuntime *viewer) {
     f32 position[4];
     f32 scale[4];
@@ -815,7 +815,7 @@ void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
 extern s32 evtViewerCreateObjectInFreeSlot(s32, EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntime *);
 extern dds3Basic_t *evtEventViewerGetNameObject(s32, EvtRuntime *);
 extern s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *, dds3Basic_t *, dds3Basic_t *, dds3Basic_t *, dds3Basic_t *);
-extern dds3Basic_t *evtEventViewerCreateOriginEffect(void *, u32, s32, s32, u32, EvtRuntime *);
+extern dds3Basic_t *evtEventViewerCreateOriginEffect(struct SoundMixer *, u32, s32, s32, u32, EvtRuntime *);
 extern s32 evtPlaySe(s32 id, s32 fade);
 extern void mnuShopRegisterSceneObject(EvtRuntime *, s32);
 extern s32 evtPlayEventBgm(s32 id, s32 fade);
