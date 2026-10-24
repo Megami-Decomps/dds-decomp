@@ -227,7 +227,7 @@ extern s32 btlGetCommandTargetEligibility(BtlIndexList *indices, s32 selection);
 
 void btlResolveActionTargetResults(BtlTask *task, BattleIndexWork *work);
 
-extern BtlRuntimeTask *btlCreateModelChangeTask(u8 *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode);
+extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode);
 
 extern s32 btlCountTasksByKind(u16 kind);
 
@@ -3994,18 +3994,18 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
 
 extern u32 btlUpdateModelChangeTask(BtlModelChangeArgs *);
 
-BtlRuntimeTask *btlCreateModelChangeTask(u8 *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode) {
+BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode) {
     u8 *task = btlAllocTask(0x1C);
     BtlModelChangeArgs *args;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u16 *)(task + 0x20) = 0x1A;
     *(u16 *)(task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
-    *(u64 *)(task + 0x40) = *(u64 *)(unit + 0x108);
+    *(u64 *)(task + 0x40) = *(u64 *)((u8 *)unit + 0x108);
     *(void **)(task + 0x48) = btlBeginModelChange;
     *(void **)(task + 0x4C) = btlUpdateModelChangeTask;
     args = btlGetTaskArguments(task);
-    args->unit = (BtlUnit *)unit;
+    args->unit = unit;
     args->resourceKind = resourceKind;
     args->resourceId = resourceId;
     args->delay = delay;
