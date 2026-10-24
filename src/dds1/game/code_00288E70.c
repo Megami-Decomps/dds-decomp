@@ -66,7 +66,7 @@ s32 pacLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s3
         break;
     case SDF_DEV_EVENT_READ_REPLY:
         WaitSema(work->sema);
-        if (job->readinessEnabled != 0) {
+        if (job->pacDecodeComplete != 0) {
             job->state = FILE_JOB_CLOSING;
         } else {
             work->slots[job->slot].value = byteCount;
@@ -380,7 +380,7 @@ s32 fileManager(void) {
             if (request != NULL &&
                 sdfPacDecode(&request->packet, input, work->slots[slot].value) == SDF_PAC_PHASE_COMPLETE) {
                 fileUnlinkQueue((FileRequest *)request);
-                request->readinessEnabled = kind;
+                request->pacDecodeComplete = kind;
                 if (request->completionCallback != NULL) {
                     FilePacRequest **append = &work->pacCallbackHead;
                     FilePacRequest *next;

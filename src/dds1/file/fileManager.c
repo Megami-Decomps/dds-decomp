@@ -190,14 +190,14 @@ u32 fileGetLoadRemain(FileRequest *request) {
     return request->transferBytes;
 }
 
-/* Kind one additionally requires readinessEnabled; other kinds only require
- * state six. The enable word is a gate, not the expected state value. */
+/* PAC requests additionally require a decoded end marker; other kinds only
+ * require state six. */
 s32 pacFileCheckEnd(const FileRequest *request) {
     s32 result;
 
     if (request->kind == FILE_REQUEST_KIND_PAC) {
         result = 0;
-        if (request->readinessEnabled != 0) {
+        if (request->pacDecodeComplete != 0) {
             result = request->state == FILE_REQUEST_STATE_COMPLETE;
         }
         return result;
@@ -205,10 +205,10 @@ s32 pacFileCheckEnd(const FileRequest *request) {
     return request->state == FILE_REQUEST_STATE_COMPLETE;
 }
 
-/* Always require the enable gate and state six, irrespective of request kind. */
+/* Require PAC decode completion and state six. */
 s32 pacCheckEnd(const FileRequest *request) {
     s32 result = 0;
-    if (request->readinessEnabled != 0) {
+    if (request->pacDecodeComplete != 0) {
         result = request->state == FILE_REQUEST_STATE_COMPLETE;
     }
     return result;

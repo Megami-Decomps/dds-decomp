@@ -46,7 +46,7 @@ enum {
     u8 *transferAddress;                  /* 0x28: current byte cursor */   \
     Link *completionNext;                 /* 0x2C */                         \
     PacState packet;                      /* 0x30: PAC requests */           \
-    u16 readinessEnabled;                 /* 0x68: a gate on completion, not a state value */ \
+    u16 pacDecodeComplete;                /* 0x68: PAC end marker observed */ \
     u16 slot;                             /* 0x6A: the device-read slot */   \
     Link *callbackNext;                   /* 0x6C: PAC completion callback queue link */
 
@@ -69,8 +69,8 @@ typedef char FileRequest_completionNext_offset_check[
     ((u32)&((FileRequest *)0)->completionNext == 0x2C) ? 1 : -1];
 typedef char FileRequest_queue_must_be_at_0x60[
     ((u32)&((FileRequest *)0)->packet.queueHead == 0x60) ? 1 : -1];
-typedef char FileRequest_readinessEnabled_offset_check[
-    ((u32)&((FileRequest *)0)->readinessEnabled == 0x68) ? 1 : -1];
+typedef char FileRequest_pacDecodeComplete_offset_check[
+    ((u32)&((FileRequest *)0)->pacDecodeComplete == 0x68) ? 1 : -1];
 typedef char FileRequest_slot_offset_check[
     ((u32)&((FileRequest *)0)->slot == 0x6A) ? 1 : -1];
 typedef char FileRequest_callbackNext_offset_check[
