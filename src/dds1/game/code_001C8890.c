@@ -2920,7 +2920,7 @@ void btlUnitTurnEndCommit(s32 task) {
     btlResetIndexWork(&command->indexWork);
     owner->pendingAbilityId = -1;
     command->options &= ~1;
-    command->unk14 += 1;
+    command->completedTurns += 1;
     owner->status.flags &= ~0x4000;
     fldUpdateSceneGroupTask(task);
     if (command->unit->status.flags & 0x20) {

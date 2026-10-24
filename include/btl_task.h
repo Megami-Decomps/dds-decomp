@@ -203,7 +203,7 @@ typedef struct BtlTask {
         s32 actionFlags; /* +0x0C: AI context tests bit 1 as signed state */
     };
     s32 stateTime;
-    s32 unk14;
+    s32 completedTurns; /* +0x14: incremented when an actor turn is committed */
     BtlUnit *unit;
     u8 unk_1C[4];
     BattleIndexWork indexWork; /* +0x20..+0x87 */
