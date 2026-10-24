@@ -6,6 +6,7 @@
 struct sdfTexHandle_t;
 struct sdfMemHandle_t;
 struct SdfTextureFileHeader;
+struct dds3Basic_t;
 
 /* Field loaders retain the allocation owner and its texture-file data. */
 typedef struct FldResourceBlock {
@@ -22,7 +23,7 @@ typedef struct FldTextureResource {
 /* Shared field controller, camera/motion state and retained map resources.
  * XYZ is followed by saved XYZ history, not a homogeneous fourth component. */
 typedef struct FldAreaWork {
-    s32 taskHandle;              /* 0x00: stored task handle word */
+    struct dds3Basic_t *taskHandle; /* 0x00: first spawned area basic object */
     char *fallbackResourceName;
     u8 pad08[4];
     s32 consumedFlags;

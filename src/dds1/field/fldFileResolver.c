@@ -1049,7 +1049,7 @@ void fldSpawnActionObjects(FldActionSpawn *spawnList, u32 spawnCount) {
         struct dds3Basic_t *spawnedObject = dds3AddAreaBasic(spawnList->key, spawnList->objectName);
         spawnList++;
         if (spawnIndex == 0) {
-            fldGlobalBase.taskHandle = (s32)spawnedObject;
+            fldGlobalBase.taskHandle = spawnedObject;
         }
     }
 }
