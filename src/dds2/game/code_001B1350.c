@@ -18,6 +18,7 @@
 #include "itf_panel_draw.h"
 #include "itf_panel_api.h"
 #include "btl_state.h"
+#include "btl_terminal_outcome.h"
 #include "btl_ui.h"
 #include "sdf.h"
 #include "sdf_projection.h"
@@ -563,7 +564,7 @@ s32 btlResolveBattleTerminalOutcome(void) {
     s32 defeatedCount = 0;
 
     state = btlGetRuntime();
-    state->eventReady = 0;
+    state->eventReady = BTL_TERMINAL_OUTCOME_NONE;
     if (state->battleOutcomeOverride != NULL) {
         s32 result = state->battleOutcomeOverride();
         if (result != -1) {
@@ -589,29 +590,29 @@ s32 btlResolveBattleTerminalOutcome(void) {
     if (partyCount == 0) {
         if (defeatedCount != 0) {
             btlBossDebugPrintf("btl:lose[%d,%d,%d]\n", partyCount, enemyCount, stoneCount);
-            state->eventReady = 2;
+            state->eventReady = BTL_TERMINAL_OUTCOME_LOSS;
             return 1;
         } else {
-            state->eventReady = 4;
+            state->eventReady = BTL_TERMINAL_OUTCOME_ESCAPE;
             return 1;
         }
     }
     if (state->battleFlags & 0x2000) {
         btlBossDebugPrintf("btl:esc[%d,%d,%d]\n", partyCount, enemyCount, stoneCount);
-        state->eventReady = 4;
+        state->eventReady = BTL_TERMINAL_OUTCOME_ESCAPE;
         return 1;
     }
     if (partyCount == stoneCount) {
         btlBossDebugPrintf("btl:stone[%d,%d,%d]\n", partyCount, enemyCount, stoneCount);
-        state->eventReady = 3;
+        state->eventReady = BTL_TERMINAL_OUTCOME_ALL_STONE;
         return 1;
     }
     if (enemyCount == 0) {
         btlBossDebugPrintf("btl:win[%d,%d,%d]\n", partyCount, enemyCount, stoneCount);
         if (state->nextBattleMode != 0) {
-            state->eventReady = 5;
+            state->eventReady = BTL_TERMINAL_OUTCOME_SERIAL;
         } else {
-            state->eventReady = 1;
+            state->eventReady = BTL_TERMINAL_OUTCOME_WIN;
         }
         return 1;
     }
