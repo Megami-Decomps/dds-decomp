@@ -103,7 +103,7 @@ extern s32 btlCountTasksForOwner(s64);
 
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
-extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
+extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
 
 
 
@@ -1019,7 +1019,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
     task->startCondition.kind = 4;
     task->startCondition.value.handle = moveHandle;
     btlStartTask(task);
-    task = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)action->unit, action->indexWork.slot,
+    task = btlAllocateIndexedUnitEffectTask(action->unit, action->indexWork.slot,
         btlGetSlotRateKind(action->unit, action->indexWork.slot), scale);
     task->startCondition.kind = 4;
     task->startCondition.value.handle = moveHandle;
@@ -1104,7 +1104,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
                         groupTask->startDelay = groupDelay - spacing * operandIndex;
                         groupTask->ownerId = masterOwner;
                         btlStartTask(groupTask);
-                        operandTask = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)currentTarget,
+                        operandTask = btlAllocateIndexedUnitEffectTask(currentTarget,
                             group->reactionCode, 0, 1.0f);
                         operandTask->startCondition.kind = 4;
                         operandTask->startCondition.value.handle = moveHandle;
@@ -1205,7 +1205,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
                 extraKind = group->parameter;
             }
             if (resourceTimed == 0) {
-                operandTask = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)currentTarget, selection, 0, 1.0f);
+                operandTask = btlAllocateIndexedUnitEffectTask(currentTarget, selection, 0, 1.0f);
                 operandTask->startCondition.kind = 4;
                 operandTask->startCondition.value.handle = moveHandle;
                 operandTask->startDelay = groupTask->startDelay + operandDelay;
@@ -1528,7 +1528,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
                 btlStartTask(soundTask);
                 soundHandle = soundTask->handle;
             }
-            task = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)actors[groupIndex], slot,
+            task = btlAllocateIndexedUnitEffectTask(actors[groupIndex], slot,
                 btlGetSlotRateKind(actors[groupIndex], slot), 1.0f);
             task->startCondition.kind = 4;
             task->startCondition.value.handle = soundHandle;
@@ -2015,7 +2015,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
-        spawned = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, 0x11,
+        spawned = btlAllocateIndexedUnitEffectTask(unit, 0x11,
                                                                 btlGetSlotRateKind(unit, 0x11), 1.0f);
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
@@ -2147,7 +2147,7 @@ void btlScheduleDevilStateModelChange(BtlTask *task) {
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
-        spawned = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, 0x10,
+        spawned = btlAllocateIndexedUnitEffectTask(unit, 0x10,
                                                                 btlGetSlotRateKind(unit, 0x10), 1.0f);
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
@@ -2748,7 +2748,7 @@ void btlScheduleEscapeResultTasks(BtlTask *task) {
             if (!(flags & 0x200)) continue;
             if (flags & 0xE0) continue;
             if (btlTestActorStatusPredicate(unit)) continue;
-            effect = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, 0xD, 2, 1.0f);
+            effect = btlAllocateIndexedUnitEffectTask(unit, 0xD, 2, 1.0f);
             effect->startDelay = delay;
             btlStartTask(effect);
             effect = btlCreateUnitDefeatFadeOutTask(unit, 6);
@@ -2772,7 +2772,7 @@ void btlScheduleEscapeResultTasks(BtlTask *task) {
             if (!(flags & 0x200)) continue;
             if (flags & 0xE0) continue;
             if (btlTestActorStatusPredicate(unit)) continue;
-            effect = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, 0xD, 2, 1.0f);
+            effect = btlAllocateIndexedUnitEffectTask(unit, 0xD, 2, 1.0f);
             effect->startDelay = delay++;
             btlStartTask(effect);
         }

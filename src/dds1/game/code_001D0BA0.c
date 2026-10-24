@@ -107,7 +107,7 @@ extern s32 btlStepUnitRotationNlerp(BtlRotationTaskArgs *);
 
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
-extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
+extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
 
 
 
@@ -3500,22 +3500,23 @@ u32 btlApplyIndexedUnitEffectTask(BtlRuntimeTaskArgs *taskArgs) {
     return 1;
 }
 
-u8 *btlAllocateIndexedUnitEffectTask(u8 *owner, s32 index, s32 value, f32 scale) {
+BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *owner, s32 index, s32 value, f32 scale) {
     u8 *task = btlAllocTask(16);
+    u8 *ownerBytes = (u8 *)owner;
     BtlRuntimeTaskArgs *arguments;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u16 *)(task + 0x20) = 9;
     *(void **)(task + 0x4C) = btlApplyIndexedUnitEffectTask;
-    *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
+    *(u64 *)(task + 0x40) = *(u64 *)(ownerBytes + 0x108);
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
     arguments->actor = owner;
     arguments->option = index;
     arguments->unk_08 = value;
     arguments->scale2 = scale;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 u32 btlApplyScaledUnitModelTask(BtlUnit **taskArgs) {

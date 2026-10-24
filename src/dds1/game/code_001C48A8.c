@@ -955,7 +955,7 @@ extern s32 btlChooseAvailableUnit(void);
 extern BtlRuntimeTask *btlCreateMoveOtherUnitsTask(BtlUnit *, u32);
 extern struct BtlRuntimeTask *sndCreateClearBattleFlagTask(void);
 extern s32 btlGetSlotRateKind(BtlUnit *, s32);
-extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
+extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
 extern void btlAdvanceTitleState(void);
 extern struct BtlRuntimeTask *sndCreateCustomTask(u32, u32);
 extern void btlSyncPlayerWork(BtlUnit *);
@@ -1028,7 +1028,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
                     task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                     task->startCondition.value.handle = sound->handle;
                     btlStartTask(task);
-                    task = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, 0xF, btlGetSlotRateKind(unit, 0xF), 1.0f);
+                    task = btlAllocateIndexedUnitEffectTask(unit, 0xF, btlGetSlotRateKind(unit, 0xF), 1.0f);
                     task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                     task->startCondition.value.handle = sound->handle;
                     btlStartTask(task);

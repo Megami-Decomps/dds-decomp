@@ -2340,7 +2340,7 @@ extern void btlCopyUnitStats(BtlUnit *unit, datUnitWork_t *source);
 extern void btlInitializePartyRecordFromEnemy(datUnitWork_t *, s32);
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 extern BtlRuntimeTask *btlCreateMoveOtherUnitsTask(BtlUnit *, u32);
-extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
+extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
 extern u8 *btlCreateGunLoadPollTask(u8 *);
 extern s32 btlGetUnitModelFrameCount(BtlUnit *);
 extern void btlSetUnitPosition(BtlUnit *, const f32 *);
@@ -2540,7 +2540,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
                 BtlRuntimeTask *task;
                 task = btlCreateMoveOtherUnitsTask(unit, motion);
                 btlStartTask(task);
-                dependent = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, motion, 0, 1.0f);
+                dependent = btlAllocateIndexedUnitEffectTask(unit, motion, 0, 1.0f);
                 dependent->startCondition.kind = 4;
                 dependent->startCondition.value.handle = task->handle;
                 btlStartTask(dependent);

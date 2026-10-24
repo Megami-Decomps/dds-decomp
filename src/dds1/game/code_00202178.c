@@ -2282,7 +2282,7 @@ extern BtlRuntimeTask *btlCreateFadeInTask(u32);
 extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit);
 
 extern BtlTask *fldGetSceneGroupEntry(s32);
-extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
+extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
 extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 extern u8 *btlCreateFloatTask29(u8 *, f32, f32, f32, f32, f32, f32, f32, f32,
                                  f32, f32, f32, f32, f32, f32, f32, f32);
@@ -2413,7 +2413,7 @@ void btlQueueLinkedPairModelSwapTasks(BtlTask *action, s32 mode, u64 refreshBarr
             if (unit->species == 0x124) {
                 continue;
             }
-            task = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit,
+            task = btlAllocateIndexedUnitEffectTask(unit,
                        action->indexWork.slot,
                        btlGetSlotRateKind(unit, action->indexWork.slot), 1.0f);
             task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
