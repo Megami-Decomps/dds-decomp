@@ -2900,12 +2900,11 @@ s32 mnuDrawTimedPrompt(s32 x, s32 y, EvtRuntime *work) {
     return dds3PadButtonState.cancel >= 0 ? 0 : -1;
 }
 
-/* Store three command arguments. Timed prompts consume the first as a countdown
- * and the other two as text; the DDS1 API passes those addresses as words. */
-void evtSetRuntimeCommandValues(EvtRuntime *runtime, s32 first, s32 second, s32 third) {
-    runtime->commandFirst = first;
-    runtime->commandSecond.word = second;
-    runtime->commandThird.word = third;
+/* Store a countdown and the two optional strings used by timed prompts. */
+void evtSetRuntimeCommandValues(EvtRuntime *runtime, s32 frames, char *firstText, char *secondText) {
+    runtime->commandFirst = frames;
+    runtime->commandSecond.text = firstText;
+    runtime->commandThird.text = secondText;
 }
 
 extern char D_003BC300[]; /* "CURRENT" */

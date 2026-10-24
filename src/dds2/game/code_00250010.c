@@ -3023,8 +3023,7 @@ s32 mnuDrawTimedPrompt(s32 x, s32 y, EvtRuntime *ctx) {
     return -1;
 }
 
-/* Store three command arguments. Timed prompts consume the first as a countdown
- * and the other two as text; the DDS1 API passes those addresses as words. */
+/* Store a countdown and the two optional strings used by timed prompts. */
 void evtSetRuntimeCommandValues(EvtRuntime *runtime, s32 frames, char *firstText, char *secondText) {
     runtime->commandFirst = frames;
     runtime->commandSecond.text = firstText;
