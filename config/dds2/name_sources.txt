@@ -3333,7 +3333,7 @@
 0x001B28C8	btlGetActionRecordLookupValue	inferred	Indexes a secondary value table through the selected battle action record. [names_reviewed17.tsv]
 0x001B2900	btlTestSelectedItemCategoryMask	inferred	Tests the selected item category against a converted mask. [names_reviewed8.tsv]
 0x001B2970	fldGetSelectedUnitStat	inferred	Reads selected unit index from UI object +0x310, returns zero if unset, otherwise resolves unit stat.
-0x001B29A8	btlGetSelectedUnitProperty	inferred	Looks up selected unit index and resolves alternate property from D_003B4F74 table.
+0x001B29A8	btlGetSelectedCommandEffectTint	inferred	Looks up the selected command effect tint from D_003B4F74; callers unpack it as RGBA and multiply it into the battle effect color.
 0x001B2AF8	btlTryEscapeWithPhaseAdjustment	inferred	Inferred from the current C implementation in game/code_001B2AF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001B2CC0	btlIsSelectedActorStatusAndRecordClear	inferred	Requires clear selected entry, actor status flags and indexed record state. [names_reviewed16.tsv]
 0x001B2D38	btlAreUnitStatusAndEntryFlagsClear	inferred	Requires the matching unit status and entry permission bits both to be clear. [names_reviewed14.tsv]

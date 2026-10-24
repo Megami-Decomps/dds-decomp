@@ -79,7 +79,7 @@
 #include "btl_camera_setup_policy.h"
 /* Declared before first use (were implicit int). */
 extern s32 btlBuildEligibleTargetIndexList(BtlTask *action, BtlIndexList *targets, s32 area, s32 rule, s32 excludedStatus);
-extern s32 btlGetSelectedUnitProperty(BtlUnit *unit);
+extern s32 btlGetSelectedCommandEffectTint(BtlUnit *unit);
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex);
 extern void effBTLFieldColorResetFlags(void);
 extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, struct BtlUnit *owner, s32 value);
@@ -9513,9 +9513,9 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
     if (link->effectHandle != 0 && (actor->status.flags & 4) && (work->fadeColor & 0xFF000000)) {
         s32 actorColor[4];
         s32 fadeColor[4];
-        s32 propertyColor[4];
+        s32 effectTintColor[4];
         s32 blended[4];
-        u32 property = btlGetSelectedUnitProperty(actor);
+        u32 effectTint = btlGetSelectedCommandEffectTint(actor);
         u32 unit;
         u32 packed;
 
@@ -9527,8 +9527,8 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
         EE_MMI_RGBA_UNPACK(fadeColor, unit);
         VU0_MUL(vf10, vf10, vf11);
         VU0_MOVE_VF(vf11, vf10);
-        propertyColor[0] = property;
-        EE_MMI_RGBA_UNPACK(propertyColor, unit);
+        effectTintColor[0] = effectTint;
+        EE_MMI_RGBA_UNPACK(effectTintColor, unit);
         VU0_MUL(vf10, vf10, vf11);
         EE_MMI_RGBA_PACK(packed);
         blended[0] = packed;

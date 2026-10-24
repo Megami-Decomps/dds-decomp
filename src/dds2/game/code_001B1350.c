@@ -667,14 +667,14 @@ s32 fldGetSelectedUnitStat(BtlUnit *unit) {
     return btlGetActionRecordLookupValue(index);
 }
 
-s32 btlGetSelectedUnitProperty(BtlUnit *unit) {
+s32 btlGetSelectedCommandEffectTint(BtlUnit *unit) {
     s32 index = unit->selectedEntryIndex;
-    u16 property;
+    u16 commandEffectId;
     if (index == -1) {
         return 0;
     }
-    property = datCommandRecords[index].commandEffectId;
-    return D_003B4F74[property * 3];
+    commandEffectId = datCommandRecords[index].commandEffectId;
+    return D_003B4F74[commandEffectId * 3];
 }
 
 s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlTargetResult *results) {

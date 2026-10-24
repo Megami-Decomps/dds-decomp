@@ -530,7 +530,7 @@ s32 fldGetSelectedUnitStat(BtlUnit *unit) {
     return btlGetActionRecordLookupValue(selectedEntryIndex);
 }
 
-s32 btlGetSelectedUnitProperty(BtlUnit *unit) {
+s32 btlGetSelectedCommandEffectTint(BtlUnit *unit) {
     s32 selectedEntryIndex = unit->selectedEntryIndex;
     if (selectedEntryIndex == -1) {
         return 0;

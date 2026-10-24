@@ -322,7 +322,7 @@ extern void effBattleUpdate(effBTLCutHandle_t *);
 
 extern void func_002034A8(struct SoundResourceLink *);
 
-extern s32 btlGetSelectedUnitProperty(BtlUnit *);
+extern s32 btlGetSelectedCommandEffectTint(BtlUnit *);
 
 
 extern f32 btlUnitGetTopY(BtlUnit *);
@@ -8782,9 +8782,9 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
     if (link->effectHandle != 0 && (actor->status.flags & 4) && (work->fadeColor & 0xFF000000)) {
         s32 actorColor[4];
         s32 fadeColor[4];
-        s32 propertyColor[4];
+        s32 effectTintColor[4];
         s32 blended[4];
-        u32 property = btlGetSelectedUnitProperty(actor);
+        u32 effectTint = btlGetSelectedCommandEffectTint(actor);
         u32 unit;
         u32 packed;
 
@@ -8796,8 +8796,8 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
         EE_MMI_RGBA_UNPACK(fadeColor, unit);
         SDF_VU0_MULVECTOR();
         SDF_VU0_COPYVECTOR_A_TO_B();
-        propertyColor[0] = property;
-        EE_MMI_RGBA_UNPACK(propertyColor, unit);
+        effectTintColor[0] = effectTint;
+        EE_MMI_RGBA_UNPACK(effectTintColor, unit);
         SDF_VU0_MULVECTOR();
         EE_MMI_RGBA_PACK(packed);
         blended[0] = packed;

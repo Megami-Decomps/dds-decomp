@@ -5101,7 +5101,7 @@ extern void btlDrawUnitMirrorTransparency(BtlUnit *);
 
 extern void func_002034A8(struct SoundResourceLink *);
 
-extern s32 btlGetSelectedUnitProperty(BtlUnit *);
+extern s32 btlGetSelectedCommandEffectTint(BtlUnit *);
 
 extern void btlDrawActorGroundDisc(BtlUnit *);
 
