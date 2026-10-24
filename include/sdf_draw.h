@@ -165,7 +165,7 @@ typedef char SdfDrawNode_workspace_at_30[
 typedef struct sdfModelRootNode_t {
     DevRequest *list;
     sdfModelNode_t *rootNode;
-    void *assetData;
+    DevRequest *assetData;
     DevRequest *resources;
     DevRequest *slotPairs;
     struct sdfMotionCtrlr_t *motionList;
