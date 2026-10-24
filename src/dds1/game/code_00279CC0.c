@@ -506,12 +506,12 @@ typedef struct MenuContextSprites {
     u32 spriteE4;
 } MenuContextSprites;
 
-void mnuDrawSkillMenuFrameIcons(s32 menuContext) {
-    itfDrawGridWithResolvedSlot(0x1c0, 0xa60, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)menuContext)->sprite74, 0x1f, 0x53);
-    itfDrawGridWithResolvedSlot(0x150, 0xa00, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)menuContext)->sprite74, 0, 0x53);
-    itfDrawGridWithResolvedSlot(0xbb0, 0xa00, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)menuContext)->sprite74, 0, 0x53);
-    itfDrawGridWithResolvedSlot(0x250, 0x9c0, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)menuContext)->spriteE4, 0x18, 0x53);
-    itfDrawGridWithResolvedSlot(0xce0, 0x9e0, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)menuContext)->sprite64, 2, 0x53);
+void mnuDrawSkillMenuFrameIcons(MenuContextSprites *menuContext) {
+    itfDrawGridWithResolvedSlot(0x1c0, 0xa60, 0, 1, (EffectSlotSet *)(u32)menuContext->sprite74, 0x1f, 0x53);
+    itfDrawGridWithResolvedSlot(0x150, 0xa00, 0, 1, (EffectSlotSet *)(u32)menuContext->sprite74, 0, 0x53);
+    itfDrawGridWithResolvedSlot(0xbb0, 0xa00, 0, 1, (EffectSlotSet *)(u32)menuContext->sprite74, 0, 0x53);
+    itfDrawGridWithResolvedSlot(0x250, 0x9c0, 0, 1, (EffectSlotSet *)(u32)menuContext->spriteE4, 0x18, 0x53);
+    itfDrawGridWithResolvedSlot(0xce0, 0x9e0, 0, 1, (EffectSlotSet *)(u32)menuContext->sprite64, 2, 0x53);
 }
 
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, s32, s32, s32);
@@ -543,7 +543,7 @@ s32 mnuCampMenuDrawStatus(dds3ProcessID_t *callback) {
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (MenuWindowContainer *)*(s32 *)(slots + ((MenuPartyRuntime *)menu)->selectedPage * 4 + 0x20), 0x53);
     list = ((MenuWindowContainer *)*(s32 *)(slots + ((MenuPartyRuntime *)menu)->selectedPage * 4 + 0x20))->list;
     label = list->cursor->sortKeyPrimary;
-    mnuDrawSkillMenuFrameIcons(context);
+    mnuDrawSkillMenuFrameIcons((MenuContextSprites *)context);
     if (label != 0) {
         if (label != 0xFFFF) {
             label &= 0xFFFF;
