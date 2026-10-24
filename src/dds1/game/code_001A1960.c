@@ -1116,8 +1116,8 @@ extern EffRandState effSharedRandomState[];
 
 extern s32 btlSelectEnemyDropItem(BtlUnit *actor, s32 mode);
 
-s32 btlSelectActorAction(s32 object) {
-    s32 result = btlSelectEnemyDropItem((BtlUnit *)object, 1);
+s32 btlSelectActorAction(BtlUnit *actor) {
+    s32 result = btlSelectEnemyDropItem(actor, 1);
     if (result == 0) {
         result = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) != 0 ? 2 : 7;
     }

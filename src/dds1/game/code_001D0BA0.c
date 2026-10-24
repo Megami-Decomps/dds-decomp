@@ -528,7 +528,7 @@ extern s32 btlGetCommandAddedStatus(BtlUnit *, BtlUnit *, s32, s32, s32);
 
 extern s32 btlQueryUnitChannelFlags(BtlUnit *, BtlUnit *, s32, s32, s32);
 
-extern s32 btlSelectActorAction(s32);
+extern s32 btlSelectActorAction(BtlUnit *actor);
 
 extern s32 btlCalculateHuntEpReward(BtlUnit *acquirer, BtlUnit *enemy);
 
@@ -870,7 +870,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
             }
         }
         if (datCommandRecords[command].unk30 == 10) {
-            work->flags = btlSelectActorAction((s32)target);
+            work->flags = btlSelectActorAction(target);
             target->status.flags |= 0x4000000;
         }
         switch (datCommandRecords[command].unk30) {

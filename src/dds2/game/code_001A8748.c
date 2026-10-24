@@ -2501,8 +2501,8 @@ s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *partyRecord, u32 entryId) 
 
 u32 btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode);
 
-s32 btlSelectActorAction(s32 state) {
-    s32 selection = btlSelectEnemyDropItem((BtlUnit *)state, 1);
+s32 btlSelectActorAction(BtlUnit *actor) {
+    s32 selection = btlSelectEnemyDropItem(actor, 1);
     if (selection == 0) {
         selection = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) ? 2 : 9;
     }

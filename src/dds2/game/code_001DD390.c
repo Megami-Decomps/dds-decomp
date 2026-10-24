@@ -563,7 +563,7 @@ extern u32 btlGetCommandAddedStatus(BtlUnit *, BtlUnit *, u32, s32, s32);
 
 extern s32 btlQueryUnitChannelFlags(BtlUnit *, BtlUnit *, s32, s32, s32);
 
-extern s32 btlSelectActorAction(s32);
+extern s32 btlSelectActorAction(BtlUnit *actor);
 
 extern s32 btlCalculateMoneyDropAmount(BtlUnit *);
 
@@ -927,7 +927,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             }
         }
         if (datCommandRecords[command].unk30 == 10) {
-            work->flags = btlSelectActorAction((s32)target);
+            work->flags = btlSelectActorAction(target);
             target->status.flags |= 0x4000000;
         }
         if (datCommandRecords[command].unk30 == 21) {
