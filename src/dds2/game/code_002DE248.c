@@ -1618,14 +1618,14 @@ u8 *effCreateBillboardWork(FileJobPayload *source) {
     return work;
 }
 
-void effBillboardWorkRelease(u32 work) {
+void effBillboardWorkRelease(EffBillboardWork *work) {
     billHandle_t *billboard;
 
-    billboard = ((EffBillboardWork *)work)->billboard;
+    billboard = work->billboard;
     if (billboard != 0) {
         dds3BillboardDelete(billboard);
     }
-    sdfChipFreeDirect((void *)work);
+    sdfChipFreeDirect(work);
 }
 
 void effReplaceBillboardClone(s32 dst, s32 src);
