@@ -8,7 +8,7 @@ typedef struct PacReloc {
     s32 tableOffset; /* 0x00: relocation table displacement from payload */
     s32 tableBytes; /* 0x04: relocation table byte count */
     u8 pad08[8];
-    u8 payload[1]; /* 0x10: relocated payload */
+    u8 payload[0]; /* 0x10: variable-length relocated payload */
 } PacReloc;
 
 void sdfAddressResolver(s32 *words, s32 relocationBase, const u8 *table, s32 tableBytes);
