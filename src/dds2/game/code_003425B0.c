@@ -669,8 +669,8 @@ extern char *D_0040BB78[8];
 extern s32 D_0040BB98[16];
 
 void sdfGrFlushOtChain(u32 sourceAddress) {
-    u32 *returnStack[2];
-    u32 *cursor;
+    SdfDmaTag *returnStack[2];
+    SdfDmaTag *cursor;
     u32 *wordCursor = NULL;
     s32 dataMode = 0;
     s32 tagId = 0;
@@ -685,7 +685,7 @@ void sdfGrFlushOtChain(u32 sourceAddress) {
     u32 value;
 
     sdfPrintf("<<< DMA-VIF dump start [%p] >>>\n", (void *)sourceAddress);
-    cursor = (u32 *)sourceAddress;
+    cursor = (SdfDmaTag *)sourceAddress;
     directRow = 0;
     tagAddress = 0;
     qwc = 0;
@@ -701,14 +701,14 @@ void sdfGrFlushOtChain(u32 sourceAddress) {
                     sdfPrintf(D_0042E5B0, cursor);
                     return;
                 }
-                tag = cursor[0];
-                tagAddress = cursor[1];
+                tag = ((u32 *)cursor)[0];
+                tagAddress = cursor->address;
                 tagId = (tag >> 28) & 7;
                 qwc = tag & 0xFFFF;
                 sdfPrintf("\n%08X [DMA %s] : %08X %08X\n",
                                            cursor, D_0040BB18[tagId], tag, tagAddress);
-                wordCursor = cursor + 2;
-                cursor += 4;
+                wordCursor = ((u32 *)cursor) + 2;
+                cursor++;
                 wordsLeft = 2;
                 phase = 1;
                 break;
@@ -722,7 +722,7 @@ void sdfGrFlushOtChain(u32 sourceAddress) {
                     wordCursor = (u32 *)tagAddress;
                     break;
                 default:
-                    wordCursor = cursor;
+                    wordCursor = (u32 *)cursor;
                     break;
                 }
                 phase = 2;
@@ -734,10 +734,10 @@ void sdfGrFlushOtChain(u32 sourceAddress) {
                     done = 1;
                     break;
                 case 1:
-                    cursor += qwc * 4;
+                    cursor += qwc;
                     break;
                 case 2:
-                    cursor = (u32 *)tagAddress;
+                    cursor = (SdfDmaTag *)tagAddress;
                     break;
                 case 3:
                 case 4:
@@ -747,8 +747,8 @@ void sdfGrFlushOtChain(u32 sourceAddress) {
                         sdfPrintf("\ncall stack nest overflow!\n");
                         return;
                     }
-                    returnStack[depth++] = cursor + qwc * 4;
-                    cursor = (u32 *)tagAddress;
+                    returnStack[depth++] = cursor + qwc;
+                    cursor = (SdfDmaTag *)tagAddress;
                     break;
                 case 6:
                     if (depth == 0) {
