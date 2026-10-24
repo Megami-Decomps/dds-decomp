@@ -481,7 +481,7 @@ extern s32 D_00358514[];
 
 extern s32 D_00358518[];
 
-s32 btlSelectedEntryHitsElement(s32 unitAddress, BtlUnit *unit, s32 selectorIndex) {
+s32 btlSelectedEntryHitsElement(BtlUnit *source, BtlUnit *unit, s32 selectorIndex) {
     u32 indexedSelectorValue;
     s32 selectionMask;
     u32 maskTableIndex;
@@ -489,7 +489,7 @@ s32 btlSelectedEntryHitsElement(s32 unitAddress, BtlUnit *unit, s32 selectorInde
         return 0;
     }
     btlGetRuntime();
-    indexedSelectorValue = btlGetActorIndexedSignedValue(unitAddress, selectorIndex);
+    indexedSelectorValue = btlGetActorIndexedSignedValue(source, selectorIndex);
     selectionMask = btlEncodeActorIndexAsSelectionMask(indexedSelectorValue);
     maskTableIndex = datCommandRecords[unit->selectedEntryIndex].commandEffectId;
     if (maskTableIndex == 0) {

@@ -514,7 +514,7 @@ extern s32 btlGetCombinedPartyCommandPower(datUnitWork_t *, BtlUnit *, BtlUnit *
 
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
-extern s32 btlSelectedEntryHitsElement(s32, BtlUnit *, s32);
+extern s32 btlSelectedEntryHitsElement(BtlUnit *, BtlUnit *, s32);
 
 extern s32 btlGetActionRecordLookupValue(s32);
 
@@ -746,7 +746,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
         }
         target = btlGetIndexListEntry(work->indices, targetIndex);
         btlBossDebugPrintf("btl:target=%p\n", target);
-        if (btlSelectedEntryHitsElement((s32)source, target, command)) {
+        if (btlSelectedEntryHitsElement(source, target, command)) {
             kind = btlGetActionRecordLookupValue(target->selectedEntryIndex);
             group->targetSpecialHit = 1;
         } else {
@@ -782,7 +782,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
             } else if (btlCheckSpecialAbility(&target->partyRecord, 0x217)) {
                 ratio *= datAbilityParameters[0x17].value;
             }
-            if (btlSelectedEntryHitsElement((s32)action->unit, recipient, command)) {
+            if (btlSelectedEntryHitsElement(action->unit, recipient, command)) {
                 kind = btlGetActionRecordLookupValue(recipient->selectedEntryIndex);
                 group->sourceSpecialHit = 1;
             } else {
