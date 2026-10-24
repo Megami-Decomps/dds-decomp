@@ -2626,13 +2626,13 @@ void effPCPMegidoraon01SetColor(EffPCPFadeWork *work, u32 value) {
 /* The update uses unsigned frame bounds; the initial sweep interval is
  * computed as a signed difference of the parameter words. */
 
-EffPCPSpanWork *effPCPBreathCreate(void *params, EffNodeDescriptor *handleParams) {
-    EffPCPSpanParams *src = params;
+EffPCPSpanWork *effPCPBreathCreate(const EffPCPSpanParams *params,
+                                   EffNodeDescriptor *handleParams) {
     EffPCPSpanWork *work;
     f32 size;
 
     work = sdfChipAllocDirect(0x78);
-    work->params = *src;
+    work->params = *params;
     work->color = 0x80808080;
     work->frame = 0;
     size = work->params.sweepDegrees * 0.017453292f;
@@ -2647,11 +2647,11 @@ EffPCPSpanWork *effPCPBreathCreate(void *params, EffNodeDescriptor *handleParams
 }
 
 EffPCPSpanWork *effPCPBreathCreatePCF(void *args) {
-    void *param0;
-    void *param1;
+    const EffPCPSpanParams *param0;
+    EffNodeDescriptor *param1;
 
-    param0 = dds3EffectPCPDataGetData(args, 0);
-    param1 = dds3EffectPCPDataGetData(args, 1);
+    param0 = (const EffPCPSpanParams *)dds3EffectPCPDataGetData(args, 0);
+    param1 = (EffNodeDescriptor *)dds3EffectPCPDataGetData(args, 1);
     return effPCPBreathCreate(param0, param1);
 }
 
