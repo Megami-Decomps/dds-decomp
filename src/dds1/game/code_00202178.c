@@ -2741,23 +2741,23 @@ extern BtlRuntimeTask *btlCreateUnitFadeOutTask(BtlUnit *, u32, u32);
 
 extern u64 btlStartTask(void *);
 
-s32 btlTryScheduleMarkedUnitTask(u8 *unit) {
+s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit) {
     u8 *battle = (u8 *)btlGetRuntime();
     u8 *effect;
-    u8 *other;
-    if ((((BtlUnit *)unit)->status.flags & 0x400) == 0) {
+    BtlUnit *other;
+    if ((unit->status.flags & 0x400) == 0) {
         return 1;
     }
     effect = (u8 *)((BtlState *)battle)->effect;
     if (((BattleEffectState *)effect)->active != 0) {
         return 1;
     }
-    if (((BtlUnit *)unit)->species == 0x124) {
+    if (unit->species == 0x124) {
         return 1;
     }
-    other = (u8 *)((BtlState *)battle)->units;
+    other = ((BtlState *)battle)->units;
     while (other != 0) {
-        u32 flags = ((BtlUnit *)other)->status.flags;
+        u32 flags = other->status.flags;
         if (flags & 1) {
             if (flags & 0x400) {
                 if (other != unit) {
@@ -2767,10 +2767,10 @@ s32 btlTryScheduleMarkedUnitTask(u8 *unit) {
                 }
             }
         }
-        other = (u8 *)((BtlUnit *)other)->next;
+        other = other->next;
     }
     btlStartTask(btlCreateUnitFadeOutTask(unit, 8, 10));
-    ((BtlUnit *)unit)->status.flags &= ~0x100;
+    unit->status.flags &= ~0x100;
     return 1;
 }
 

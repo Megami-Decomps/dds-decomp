@@ -224,7 +224,7 @@ extern void btlSyncEffectActorToUnit(BtlUnit *unit, u8 *task);
 extern void btlTrackSpecialEnemyCommandRestrictionByTurn(u8 *unit, u8 *command);
 extern void btlTriggerSpecialUnitAction(void);
 extern void btlTriggerSpecialUnitActionAndResetPose(s32 unit);
-extern s32 btlTryScheduleMarkedUnitTask(u8 *unit);
+extern s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit);
 extern s32 btlTryStartTargetFacingActionEffect(u8 *unit);
 extern s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command);
 extern void btlUpdateReadyUnits(void);
