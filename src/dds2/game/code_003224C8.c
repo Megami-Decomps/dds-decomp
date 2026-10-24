@@ -632,17 +632,17 @@ s32 mnuUpdateActiveMenuWorkEntries(s32 context) {
     return 0;
 }
 
-void mnuVisitActiveWorkAndEffectEntry(s32 context) {
+void mnuVisitActiveWorkAndEffectEntry(struct MnuShootingWork *context) {
     s32 entryIndex;
 
     for (entryIndex = 0; entryIndex < mnuWorkEntryPoolCount; entryIndex++) {
         MenuWorkEntry *entry = &mnuWorkEntryPool[entryIndex];
 
         if (entry->flags & MNU_WORK_ACTIVE) {
-            mnuActiveWorkVisitorCallback(entry, (struct MnuShootingWork *)context);
+            mnuActiveWorkVisitorCallback(entry, context);
         }
     }
-    mnuActiveWorkVisitorCallback(mnuGetActiveEffectWorkEntry(), (struct MnuShootingWork *)context);
+    mnuActiveWorkVisitorCallback(mnuGetActiveEffectWorkEntry(), context);
 }
 
 void mnuProcessMenuWorkEntryLifecycle(MenuWorkEntry *entry, struct MnuShootingWork *context) {
@@ -680,7 +680,7 @@ void mnuProcessMenuWorkEntryLifecycle(MenuWorkEntry *entry, struct MnuShootingWo
 
 
 /* Walk allocated entries; only entries carrying the active bit are visited. */
-void mnuVisitActiveRecords(s32 context) {
+void mnuVisitActiveRecords(struct MnuShootingWork *context) {
     s32 entryIndex = 0;
     if ((s32)mnuWorkEntryPoolCount > 0) {
         s32 byteOffset = 0;
@@ -688,7 +688,7 @@ void mnuVisitActiveRecords(s32 context) {
             /* This loop retains a byte offset into the typed entry array. */
             MenuWorkEntry *entry = (MenuWorkEntry *)((u32)mnuWorkEntryPool + byteOffset);
             if ((entry->flags & MNU_WORK_ACTIVE) != 0) {
-                mnuProcessMenuWorkEntryLifecycle(entry, (struct MnuShootingWork *)context);
+                mnuProcessMenuWorkEntryLifecycle(entry, context);
             }
             entryIndex++;
             byteOffset += 0x48;
@@ -1413,4 +1413,3 @@ INCLUDE_SDATA(const s32, "game/code_003224C8", mnuRuntimeRecordPairCallback);
 INCLUDE_SDATA(const s32, "game/code_003224C8", D_004389B4);
 
 INCLUDE_SDATA(const s32, "game/code_003224C8", D_004389B8);
-

@@ -965,7 +965,7 @@ extern void mnuToggleShootingPause(MnuShootingWork *);
 extern s32 mnuPollPauseChoiceInput(MnuShootingWork *);
 extern s32 mnuAdvanceCursorStepUntilThreshold(void);
 extern s32 mnuTriggerProgressResourceRecords(MenuProgressState *);
-extern void mnuVisitActiveRecords(s32);
+extern void mnuVisitActiveRecords(MnuShootingWork *);
 extern void mnuProcessMenuWorkEntryLifecycle(MenuWorkEntry *, MnuShootingWork *);
 extern s32 mnuUpdateActiveMenuWorkEntries(s32);
 extern void mnuAdvanceRuntimeHitTargets(void);
@@ -1029,7 +1029,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
     }
     if (work->phase == 2) mnuAdvanceCursorStepUntilThreshold();
     mnuTriggerProgressResourceRecords(mnuGetResourceProgressStepState());
-    mnuVisitActiveRecords((s32)work);
+    mnuVisitActiveRecords(work);
     mnuProcessMenuWorkEntryLifecycle(&D_0040ABF8, work);
     if (work->phase == 2) mnuUpdateActiveMenuWorkEntries(0);
     else mnuUpdateActiveMenuWorkEntries(1);
@@ -1124,7 +1124,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
 
 
 extern MenuWorkEntry *mnuGetWorkEntryPool(void);
-extern void mnuVisitActiveWorkAndEffectEntry(s32 context);
+extern void mnuVisitActiveWorkAndEffectEntry(MnuShootingWork *context);
 extern MenuRuntimeList *mnuGetRuntimeAnimationList(void);
 extern MenuRuntimeList *mnuGetRuntimeHitTargetList(void);
 extern void itfDrawAndAdvanceModelInstances(ModelInstanceWork *work, u32 flags);
@@ -1156,7 +1156,7 @@ s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
     (void)mnuGetWorkEntryPool();
     originX = origin->x;
     originY = origin->y;
-    mnuVisitActiveWorkAndEffectEntry((s32)work);
+    mnuVisitActiveWorkAndEffectEntry(work);
 
     if (work->paused == 0) {
         itfDrawAndAdvanceModelInstances(work->work24, 0);
