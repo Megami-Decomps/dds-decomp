@@ -122,7 +122,7 @@ typedef struct MantraIconEntry {
     u32 state : 4;
     u32 leaving : 1;
     u32 shortLoop : 1;
-    u32 unk7 : 1;
+    u32 sharesCurrentIconPosition : 1;
     u32 variant : 1;
     u32 unk_bits : 23;
     /* 0x4 */ s16 x;
@@ -2891,10 +2891,10 @@ MantraIconEntry *mnuSpawnMantraIcon(s32 x, s32 y, MantraIconPool *pool, u32 mode
             entry->x = x;
             entry->y = y;
         }
-        entry->unk7 = 0;
+        entry->sharesCurrentIconPosition = 0;
         entry->timer = 0;
         if (pool->current != 0 && (mode & 0x10) && *(s32 *)&pool->current->x == *(s32 *)&entry->x) {
-            entry->unk7 = 1;
+            entry->sharesCurrentIconPosition = 1;
         }
         if (mode & 0x20) {
             entry->shortLoop = 1;
@@ -3178,7 +3178,7 @@ u32 mnuDrawMantraStandardIcon(s32 x, s32 y, s32 depth, s32 amount, MantraIconPoo
     f32 end;
     f32 brightness;
 
-    if (!icon->unk7) {
+    if (!icon->sharesCurrentIconPosition) {
         first = 3;
     }
     switch (icon->state) {
@@ -3217,7 +3217,7 @@ u32 mnuDrawMantraStandardIcon(s32 x, s32 y, s32 depth, s32 amount, MantraIconPoo
         mnuDrawMantraSprite((f32)x + offsets.points[first][0] * end, (f32)y + offsets.points[first][1] * end, depth, alpha, 0xA0, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * end, (f32)y + offsets.points[first + 1][1] * end, depth, alpha, 0xA1, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * end, (f32)y + offsets.points[first + 2][1] * end, depth, alpha, 0xA2, 0, 0x53);
-        if (icon->unk7) {
+        if (icon->sharesCurrentIconPosition) {
             timer = icon->timer;
             end = 1.0f;
             if (timer < 2) {
