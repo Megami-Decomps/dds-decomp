@@ -118,7 +118,7 @@ EffPCPBlockSetWork *effPCPAgiFireballCopy(EffPCPBlockSetWork *source);
 EffPCPBlockSetWork *effPCPAgiFireballSpCopy(EffPCPBlockSetWork *source);
 EffPCPBlockSetWork *effPCPAgiFireballSp2Copy(EffPCPBlockSetWork *source);
 void effPCPAgiFireballDelete(EffPCPBlockSetWork *work);
-void effPCPAgiFireballSetPosition(EffPCPBlockSetWork *work, const void *source);
+void effPCPAgiFireballSetPosition(EffPCPBlockSetWork *work, const f32 sourcePosition[4]);
 void effPCPAgiFireballSetRotateMatrix(EffPCPBlockSetWork *work, const void *source);
 void effPCPAgiFireballSetColor(EffPCPBlockSetWork *work, u32 color);
 

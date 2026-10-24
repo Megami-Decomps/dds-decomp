@@ -3186,8 +3186,8 @@ void effPcpBlockSetUpdate(EffPCPBlockSetWork *work) {
     work->frame++;
 }
 
-void effPCPAgiFireballSetPosition(EffPCPBlockSetWork *work, const void *src) {
-    SDF_VU0_COPYVECTOR(work->params.position, src);
+void effPCPAgiFireballSetPosition(EffPCPBlockSetWork *work, const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(work->params.position, sourcePosition);
 }
 
 void effPCPAgiFireballSetColor(EffPCPBlockSetWork *work, u32 value) {
@@ -3347,13 +3347,13 @@ void effPCPAgiFireball2Draw(EffPCPRotateWork *work) {
     work->frame = frame + 1;
 }
 
-void effPCPAgiFireball2SetPosition(EffPCPRotateWork *work, const void *src) {
+void effPCPAgiFireball2SetPosition(EffPCPRotateWork *work, const f32 sourcePosition[4]) {
     u32 i;
     EffPCPBlockSetWork **blockSets;
 
     blockSets = work->blockSets;
     for (i = 0; i < 3; i++) {
-        effPCPAgiFireballSetPosition(blockSets[i], src);
+        effPCPAgiFireballSetPosition(blockSets[i], sourcePosition);
     }
 }
 
