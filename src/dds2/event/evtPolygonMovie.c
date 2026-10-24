@@ -911,12 +911,12 @@ dds3ProcessID_t *evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
     work->eventId = event;
     work->sceneId = id;
     work->mainResource.request = fileLoad(path0);
-    work->flags |= 2;
+    work->flags |= EVT_POLY_MOVIE_MAIN_LOAD_PENDING;
     work->secondaryResource.request = fileLoad(path1);
-    work->flags |= 4;
+    work->flags |= EVT_POLY_MOVIE_SECONDARY_LOAD_PENDING;
     if (sdfFileCheckExist(path2) != 0) {
         work->tertiaryResource.request = fileLoad(path2);
-        work->flags |= 0x10;
+        work->flags |= EVT_POLY_MOVIE_TERTIARY_LOAD_PENDING;
     } else {
         work->tertiaryResource.request = 0;
         work->tertiaryResource.address = 0;

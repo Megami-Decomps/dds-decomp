@@ -41,6 +41,11 @@ typedef struct PmdHeader {
 } PmdHeader;
 
 /* Three retained resources share request/handle/address slots. */
+#define EVT_POLY_MOVIE_MAIN_LOAD_PENDING 0x02
+#define EVT_POLY_MOVIE_SECONDARY_LOAD_PENDING 0x04
+#define EVT_POLY_MOVIE_ASYNC_INITIALIZED 0x08
+#define EVT_POLY_MOVIE_TERTIARY_LOAD_PENDING 0x10
+
 typedef struct PolyMovieResourceSlot {
     struct FileRequest *request;
     sdfMemHandle_t *handle;

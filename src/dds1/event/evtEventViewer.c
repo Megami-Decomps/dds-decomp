@@ -4024,7 +4024,7 @@ s32 evtViewerAdvanceUpdate(dds3ProcessID_t *task) {
     evtEventViewerPollMovieResources(viewer->windowContext);
     window = viewer->windowContext;
     windowFlags = window->flags;
-    if ((windowFlags & 8) == 0) {
+    if ((windowFlags & EVT_POLY_MOVIE_ASYNC_INITIALIZED) == 0) {
         dds3DrawFlag |= 0x2000000;
         return 0;
     } else {
@@ -4161,10 +4161,10 @@ void evtEventViewerDestroyTask(void) {
 
 void evtEventViewerPollMovieResources(PolyMovieWork *assets) {
 
-    if (assets->flags & 8) {
+    if (assets->flags & EVT_POLY_MOVIE_ASYNC_INITIALIZED) {
         return;
     }
-    if (assets->flags & 2) {
+    if (assets->flags & EVT_POLY_MOVIE_MAIN_LOAD_PENDING) {
         if (assets->mainResource.request == 0) {
             return;
         }
@@ -4175,8 +4175,8 @@ void evtEventViewerPollMovieResources(PolyMovieWork *assets) {
         assets->mainResource.address = (PmdHeader *)sdfMemLock(assets->mainResource.handle);
         fileHandleFree(assets->mainResource.request);
         assets->mainResource.request = 0;
-        assets->flags &= ~2;
-    } else if (assets->flags & 4) {
+        assets->flags &= ~EVT_POLY_MOVIE_MAIN_LOAD_PENDING;
+    } else if (assets->flags & EVT_POLY_MOVIE_SECONDARY_LOAD_PENDING) {
         if (assets->secondaryResource.request == 0) {
             return;
         }
@@ -4187,8 +4187,8 @@ void evtEventViewerPollMovieResources(PolyMovieWork *assets) {
         assets->secondaryResource.address = (PmdHeader *)sdfMemLock(assets->secondaryResource.handle);
         fileHandleFree(assets->secondaryResource.request);
         assets->secondaryResource.request = 0;
-        assets->flags &= ~4;
-    } else if (assets->flags & 0x10) {
+        assets->flags &= ~EVT_POLY_MOVIE_SECONDARY_LOAD_PENDING;
+    } else if (assets->flags & EVT_POLY_MOVIE_TERTIARY_LOAD_PENDING) {
         if (assets->tertiaryResource.request == 0) {
             return;
         }
@@ -4199,10 +4199,10 @@ void evtEventViewerPollMovieResources(PolyMovieWork *assets) {
         assets->tertiaryResource.address = (PmdHeader *)sdfMemLock(assets->tertiaryResource.handle);
         fileHandleFree(assets->tertiaryResource.request);
         assets->tertiaryResource.request = 0;
-        assets->flags &= ~0x10;
+        assets->flags &= ~EVT_POLY_MOVIE_TERTIARY_LOAD_PENDING;
     } else if (assets->mainResource.address != NULL && assets->secondaryResource.address != NULL) {
         evtPolygonMovieInitWork(assets, assets->mainResource.address, assets->secondaryResource.address, assets->tertiaryResource.address);
-        assets->flags |= 8;
+        assets->flags |= EVT_POLY_MOVIE_ASYNC_INITIALIZED;
     }
 }
 
