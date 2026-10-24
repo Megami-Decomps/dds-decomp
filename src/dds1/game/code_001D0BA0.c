@@ -4857,16 +4857,16 @@ s32 btlAdvanceActorModelBlendTask(BtlActorModelBlendArgs *args) {
     target = args->target;
     if (args->stage == 0) {
         if (unit->status.flags & 2) {
-            args->previousModelValue = mdlGetMotionNum(unit->ext->owner, 0);
+            args->previousMotionIndex = mdlGetMotionNum(unit->ext->owner, 0);
         } else {
-            args->previousModelValue = unit->motionId;
+            args->previousMotionIndex = unit->motionId;
         }
         unit->motionStartFrame = 0;
         unit->motionEndFrame = 1;
         btlApplyScaledUnitEffectParameter(unit, args->index, args->value, args->scale);
     } else {
         if (unit != target) {
-            btlWarpUnitToMotionReach(unit, target, args->previousModelValue);
+            btlWarpUnitToMotionReach(unit, target, args->previousMotionIndex);
         }
         return 1;
     }
@@ -4889,7 +4889,7 @@ BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *actor, BtlUnit *target, s3
     arguments->index = index;
     arguments->value = value;
     arguments->scale = scale;
-    arguments->previousModelValue = -1;
+    arguments->previousMotionIndex = -1;
     arguments->stage = 0;
     return task;
 }

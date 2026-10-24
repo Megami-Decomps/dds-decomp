@@ -169,7 +169,7 @@ typedef struct BtlActorModelBlendArgs {
     struct BtlUnit *unit;
     struct BtlUnit *target;
     s32 index;
-    s32 previousModelValue;
+    s32 previousMotionIndex;
     s32 value;
     f32 scale;
     u32 stage;
