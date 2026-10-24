@@ -579,7 +579,7 @@ void btlQueueLinkedPairModelSwapTasks(ActionStateLink *action, s32 mode, u64 ref
         sequence = btlAdvanceRuntimeSequenceCounter();
         nextSequence = btlAdvanceRuntimeSequenceCounter();
         timedTask = sndCreateCustomTask(0x80FFFFFF, 0xC);
-        timedTask->startCondition.kind = 7;
+        timedTask->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
         timedTask->startCondition.value.owner = soundBarrier;
         timedTask->startDelay = 0x52;
         timedTask->endDelay = 0xC;
@@ -606,21 +606,21 @@ void btlQueueLinkedPairModelSwapTasks(ActionStateLink *action, s32 mode, u64 ref
                 continue;
             }
             refreshTask = btlScheduleRefreshTask(unit);
-            refreshTask->startCondition.kind = 7;
+            refreshTask->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
             refreshTask->startCondition.value.owner = refreshBarrier;
             refreshTask->ownerId = action->unit->owner;
             btlStartTask(refreshTask);
 
             loadTask = btlCreateModelLoadPollTask(unit, unit->resourceKind,
                                                    unit->partyRecord.unitId, 1);
-            loadTask->startCondition.kind = 4;
+            loadTask->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             loadTask->startCondition.value.handle = refreshTask->handle;
             loadTask->ownerId = nextSequence;
             btlStartTask(loadTask);
         }
 
         task = btlCreateCommandSoundUpdateTask();
-        task->startCondition.kind = 7;
+        task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
         task->startCondition.value.owner = nextSequence;
         task->ownerId = action->unit->owner;
         btlStartTask(task);
@@ -629,13 +629,13 @@ void btlQueueLinkedPairModelSwapTasks(ActionStateLink *action, s32 mode, u64 ref
                                          -0.307f, -0.045f, 0.937f, -424.3f,
                                          -352.6f, -852.0f, 0.075f, -0.307f,
                                          -0.037f, 0.939f, 40.0f, 30.0f);
-        task->startCondition.kind = 7;
+        task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
         task->startCondition.value.owner = nextSequence;
         task->ownerId = action->unit->owner;
         btlStartTask(task);
 
         timedTask = btlCreateFadeInTask(0x10);
-        timedTask->startCondition.kind = 7;
+        timedTask->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
         timedTask->startCondition.value.owner = nextSequence;
         timedTask->endDelay = 0x3C;
         timedTask->ownerId = action->unit->owner;
@@ -657,7 +657,7 @@ void btlQueueLinkedPairModelSwapTasks(ActionStateLink *action, s32 mode, u64 ref
         sequence = btlAdvanceRuntimeSequenceCounter();
         nextSequence = btlAdvanceRuntimeSequenceCounter();
         timedTask = sndCreateCustomTask(0x80FFFFFF, 0xC);
-        timedTask->startCondition.kind = 7;
+        timedTask->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
         timedTask->startCondition.value.owner = refreshBarrier;
         timedTask->endDelay = 0xC;
         timedTask->ownerId = sequence;
@@ -685,27 +685,27 @@ void btlQueueLinkedPairModelSwapTasks(ActionStateLink *action, s32 mode, u64 ref
             task = btlAllocateIndexedUnitEffectTask(unit,
                        action->indexWork.slot,
                        btlGetSlotRateKind(unit, action->indexWork.slot), 1.0f);
-            task->startCondition.kind = 4;
+            task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             task->startCondition.value.handle = effectBarrier;
             task->startDelay = 1;
             btlStartTask(task);
 
             refreshTask = btlScheduleRefreshTask(unit);
-            refreshTask->startCondition.kind = 7;
+            refreshTask->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
             refreshTask->startCondition.value.owner = sequence;
             refreshTask->ownerId = action->unit->owner;
             btlStartTask(refreshTask);
 
             loadTask = btlCreateModelLoadPollTask(unit, unit->resourceKind,
                                                    0x119, 1);
-            loadTask->startCondition.kind = 4;
+            loadTask->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             loadTask->startCondition.value.handle = refreshTask->handle;
             loadTask->ownerId = nextSequence;
             btlStartTask(loadTask);
         }
 
         task = btlCreateCommandSoundUpdateTask();
-        task->startCondition.kind = 7;
+        task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
         task->startCondition.value.owner = nextSequence;
         task->ownerId = action->unit->owner;
         btlStartTask(task);
@@ -716,20 +716,20 @@ void btlQueueLinkedPairModelSwapTasks(ActionStateLink *action, s32 mode, u64 ref
             /* Retail has separate publication arms at 00206E7C..00206EA0 and
              * 00206EB0..00206ED0. */
             task = btlCreateCommandSoundTask((s32)scene, 9);
-            task->startCondition.kind = 7;
+            task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
             task->startCondition.value.owner = nextSequence;
             task->ownerId = action->unit->owner;
             btlStartTask(task);
         } else {
             task = btlCreateCommandSoundTask(0, 3);
-            task->startCondition.kind = 7;
+            task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
             task->startCondition.value.owner = nextSequence;
             task->ownerId = action->unit->owner;
             btlStartTask(task);
         }
 
         timedTask = btlCreateFadeInTask(0x10);
-        timedTask->startCondition.kind = 7;
+        timedTask->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
         timedTask->startCondition.value.owner = nextSequence;
         timedTask->endDelay = 0x1F;
         timedTask->ownerId = action->unit->owner;
