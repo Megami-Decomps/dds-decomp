@@ -44,7 +44,7 @@ extern s32 evtDrawFrameListColumnHeadings(sdfDrawTag_t *list, s32 x, s32 y, EvtR
 
 extern void evtWriteSerializedBytes(s32 output, void *data, s32 size);
 
-extern s32 evtViewerCheckDirty(void);
+extern s8 evtViewerCheckDirty(void);
 extern s32 sndFindPackedTrackLoadStatus(s32 sequence);
 extern void p2sdLoadSMGFile(s32 sequence);
 extern s32 evtUpdateFrameVariableTask(dds3ProcessID_t *task);
@@ -3109,7 +3109,7 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
     return 0;
 }
 
-extern s32 mfilterRun();
+extern s8 mfilterRun(void);
 typedef struct EvtSelectionCache {
     u8 pad00[0x24];
     s32 selectedEntry; /* 0x24 */
@@ -3730,11 +3730,11 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
 }
 
 
-extern s32 effUpdateCh72Params(void);
-extern s32 effEventAdvanceBlurTemplateSetup(void);
-extern s32 effEventAdvanceScatterBlurSetup(void);
-extern s32 rblurProcess(void);
-extern s32 effEventAdvanceScreenDrawSetup(void);
+extern s8 effUpdateCh72Params(void);
+extern s8 effEventAdvanceBlurTemplateSetup(void);
+extern s8 effEventAdvanceScatterBlurSetup(void);
+extern s8 rblurProcess(void);
+extern s8 effEventAdvanceScreenDrawSetup(void);
 extern s32 evtEditEffectSpriteFrame(EvtRuntime *runtime);
 extern s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime);
 extern void *D_003BB0C0;

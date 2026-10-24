@@ -839,7 +839,7 @@ extern void effEventSetupAfterRecordNoOp(void);
 
 /* Prepare once per flag cycle, then run the registered operations while ready.
  * A negative control byte clears readiness only after those operations. */
-s32 effUpdateCh72Params(void) {
+s8 effUpdateCh72Params(void) {
     u8 ready = effRectangleBlurSetupReady;
 
     if (effRectangleBlurSetupReady == 0) {
@@ -883,7 +883,7 @@ extern s8 mblurDone;
 
 /* Prepare the blur-template callback from its explicit parameter block,
  * then process the channel; its optional copy still uses source/destination. */
-s32 effEventAdvanceBlurTemplateSetup(void) {
+s8 effEventAdvanceBlurTemplateSetup(void) {
     u8 ready = mblurDone;
 
     if (mblurDone == 0) {
@@ -926,7 +926,7 @@ extern EffEventSetupRecord dblurDebugMenu;
 extern s8 dblurDone;
 
 /* Prepare scatter setup from its explicit parameters, then process the channel. */
-s32 effEventAdvanceScatterBlurSetup(void) {
+s8 effEventAdvanceScatterBlurSetup(void) {
     u8 ready = dblurDone;
 
     if (dblurDone == 0) {
@@ -969,7 +969,7 @@ extern EffEventSetupRecord effFramebufferQuadSetupRecord;
 extern s8 D_003BB114;
 
 /* Prepare from the channel's source, process it, then honor the control-byte reset. */
-s32 effEventAdvanceScreenDrawSetup(void) {
+s8 effEventAdvanceScreenDrawSetup(void) {
     u8 ready = D_003BB114;
 
     if (D_003BB114 == 0) {
@@ -1012,7 +1012,7 @@ extern EffEventSetupRecord filterDebugMenu;
 extern s8 evtViewerDirty;
 
 /* Prepare solid-rectangle setup from the channel source, then process it. */
-s32 evtViewerCheckDirty(void) {
+s8 evtViewerCheckDirty(void) {
     u8 ready = evtViewerDirty;
 
     if (evtViewerDirty == 0) {
@@ -1055,7 +1055,7 @@ extern EffEventSetupRecord mfilterDebugMenu;
 extern s8 D_003BB12C;
 
 /* Prepare resource-template setup from its explicit body, then process the channel. */
-s32 mfilterRun(void) {
+s8 mfilterRun(void) {
     u8 ready = D_003BB12C;
 
     if (D_003BB12C == 0) {
@@ -1098,7 +1098,7 @@ extern EffEventSetupRecord rblurDebugMenu;
 extern s8 rblurDone;
 
 /* Prepare scale-blur setup from its explicit parameters, then process the channel. */
-s32 rblurProcess(void) {
+s8 rblurProcess(void) {
     u8 ready = rblurDone;
 
     if (rblurDone == 0) {

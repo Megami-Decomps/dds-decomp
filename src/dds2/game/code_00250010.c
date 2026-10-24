@@ -74,7 +74,7 @@ typedef struct {
 extern EvtTblEntry D_003C9730[];
 
 
-extern s32 evtViewerCheckDirty(void);
+extern s8 evtViewerCheckDirty(void);
 
 
 
@@ -96,11 +96,11 @@ extern s32 evtViewerCheckDirty(void);
 /* Native 0x24BC-byte viewer runtime shared by dialogs, task polls and file writers. */
 
 
-extern s32 effUpdateCh72Params(void);
-extern s32 effEventAdvanceBlurTemplateSetup(void);
-extern s32 effEventAdvanceScatterBlurSetup(void);
-extern s32 rblurProcess(void);
-extern s32 effEventAdvanceScreenDrawSetup(void);
+extern s8 effUpdateCh72Params(void);
+extern s8 effEventAdvanceBlurTemplateSetup(void);
+extern s8 effEventAdvanceScatterBlurSetup(void);
+extern s8 rblurProcess(void);
+extern s8 effEventAdvanceScreenDrawSetup(void);
 extern s32 evtEditEffectSpriteFrame(EvtRuntime *runtime);
 extern s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime);
 extern s32 func_002582D0(EvtRuntime *runtime);
@@ -3232,7 +3232,7 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
     return 0;
 }
 
-extern s32 mfilterRun();
+extern s8 mfilterRun(void);
 
 
 typedef struct EvtSelectionCache {
