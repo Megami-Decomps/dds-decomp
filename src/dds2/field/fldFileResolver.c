@@ -955,7 +955,7 @@ void fldCreateResourceScriptObjects(void) {
     f32 rotation[4];
     FldFileResource *resource = D_00438EB8;
     u32 resourceCount = D_00438EBC;
-    void *secondaryWorld;
+    dds3Basic_t *secondaryWorld;
     struct dds3Basic_t *scriptObject;
     FldFileResource *bindingResource;
     FldFileNameEntry *nameEntry;
