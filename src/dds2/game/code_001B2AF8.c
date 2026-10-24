@@ -10970,9 +10970,10 @@ void btlUpdateActorSlotOrderAnimation(void) {
                     if (D_00438F58[side]->state[i + 1] < 3) {
                         D_00438F58[side]->state[i + 1] = 1;
                     }
-                    if ((D_00438F58[side]->flags >> i) & 1) {
+                    if ((D_00438F58[side]->transitionFlags >> i) & 1) {
                         btlRequestActorSlotOrderTransition(i, 0);
-                        D_00438F58[D_00438F54->bank]->flags &= 0xFFF;
+                        D_00438F58[D_00438F54->bank]->transitionFlags &=
+                            ACTOR_SLOT_ORDER_PENDING_SLOT_MASK;
                     } else {
                         D_00438F58[side]->state[i]++;
                     }
@@ -11747,14 +11748,16 @@ void func_001CF800(void) {
         currentScene = scene->currentScene;
         lastIndex--;
         if (currentScene == 7) {
-            D_00438F58[D_00438F54->bank]->flags |= 0x1000;
+            D_00438F58[D_00438F54->bank]->transitionFlags |=
+                ACTOR_SLOT_ORDER_FLAG_SCENE7_TRANSITION_MODE;
             panel = (BattleActorPanelWork *)dds3GetProcessData(
                 dds3SearchProcessName(D_004367CC));
             btlClearClosingActorRowPulses(panel, 0);
             btlAdvancePendingSceneSlotStates((u8 *)panel);
             btlUpdateActorSlotStates(panel, 0);
         } else {
-            D_00438F58[D_00438F54->bank]->flags &= 0xFFF;
+            D_00438F58[D_00438F54->bank]->transitionFlags &=
+                ACTOR_SLOT_ORDER_PENDING_SLOT_MASK;
         }
     }
     records = scene->fading;
@@ -11764,7 +11767,8 @@ void func_001CF800(void) {
     btlDrawSceneSlotFadeTiles();
     /* Keep the scan bound from before the actor-flag update. */
     count = lastIndex;
-    D_00438F58[D_00438F54->bank]->flags &= 0xF000;
+    D_00438F58[D_00438F54->bank]->transitionFlags &=
+        ACTOR_SLOT_ORDER_MODE_BITS_MASK;
     for (i = 0; i <= count; i++) {
         record = &records[count - i];
         state = record->alpha;
@@ -11773,9 +11777,10 @@ void func_001CF800(void) {
                 u16 flags;
                 s8 slotState;
                 order = D_00438F58[D_00438F54->bank];
-                flags = order->flags;
-                if ((flags & 0x1000) && ((slotState = order->state[i]) == 1)) {
-                    order->flags = flags | (slotState << i);
+                flags = order->transitionFlags;
+                if ((flags & ACTOR_SLOT_ORDER_FLAG_SCENE7_TRANSITION_MODE) &&
+                    ((slotState = order->state[i]) == 1)) {
+                    order->transitionFlags = flags | (slotState << i);
                 } else {
                     btlRequestActorSlotOrderTransition(i, 0);
                 }

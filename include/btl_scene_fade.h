@@ -28,6 +28,10 @@ typedef char SceneSlotFadeWork_size[(sizeof(SceneSlotFadeWork) == 0xD8) ? 1 : -1
 typedef char SceneSlotFadeWork_phase_offset[((unsigned long)&((SceneSlotFadeWork *)0)->phase == 0x22) ? 1 : -1];
 typedef char SceneSlotFadeWork_fade_offset[((unsigned long)&((SceneSlotFadeWork *)0)->fade == 0x38) ? 1 : -1];
 
+#define ACTOR_SLOT_ORDER_FLAG_SCENE7_TRANSITION_MODE 0x1000
+#define ACTOR_SLOT_ORDER_PENDING_SLOT_MASK 0x0FFF
+#define ACTOR_SLOT_ORDER_MODE_BITS_MASK 0xF000
+
 /* Both bank buffers are allocated and cleared as 0x274 bytes. Existing
  * order-copy providers write at most eight entries; the independent
  * word range at +0x2C is not part of that destination. Phase-transition
@@ -39,7 +43,7 @@ typedef struct ActorSlotOrder {
     s8 state[8];
     u8 unk0A[2];
 #else
-    s16 flags; /* Signed mask: DDS2 001CD19C/001CD1AC LH, 001CD1B0 SRAV; includes bit 0x1000. */
+    s16 transitionFlags; /* Signed packed mask: DDS2 001CD19C/001CD1AC LH, 001CD1B0 SRAV. */
     s8 state[8];
 #endif
     s32 entries[8];
@@ -56,7 +60,8 @@ typedef struct ActorSlotOrder {
 } ActorSlotOrder;
 typedef char ActorSlotOrder_size[(sizeof(ActorSlotOrder) == 0x274) ? 1 : -1];
 #ifdef VERSION_DDS2
-typedef char ActorSlotOrder_flags_offset[((unsigned long)&((ActorSlotOrder *)0)->flags == 0x02) ? 1 : -1];
+typedef char ActorSlotOrder_transitionFlags_offset[
+    ((unsigned long)&((ActorSlotOrder *)0)->transitionFlags == 0x02) ? 1 : -1];
 #endif
 typedef char ActorSlotOrder_slotFade_offset[((unsigned long)&((ActorSlotOrder *)0)->slotFade == 0x2C) ? 1 : -1];
 typedef char ActorSlotOrder_rotationAngleDegrees_offset[
