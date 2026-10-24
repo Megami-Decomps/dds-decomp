@@ -643,17 +643,12 @@ void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsO
     *highBitsOut = key->p08.h[0] >> CAMP_KEY_HIGH_BITS_SHIFT;
 }
 
-typedef struct CampNameLookup {
-    u8 pad00[0x7C];
-    char (*nameTable)[32]; /* 0x7C: fixed-width names indexed by nameIndex */
-} CampNameLookup;
-
 /* Return the scene's matching name index, or -1 when the track list has no match. */
-s32 mnuCampFindMatchingEntryIndex(CampNameLookup *lookup, EvtRuntime *scene, s32 nameIndex) {
+s32 mnuCampFindMatchingEntryIndex(PolyMovieWork *lookup, EvtRuntime *scene, s32 nameIndex) {
     EvtRuntimeGroup *track = scene->groups;
     while (track != NULL) {
         if (strcmp(scene->entryName[track->entryHeader],
-                   lookup->nameTable[nameIndex]) == 0) {
+                   (char *)lookup->subEntry1Data + nameIndex * 32) == 0) {
             return track->entryHeader;
         }
         track = track->next;

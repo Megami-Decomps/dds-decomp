@@ -4640,8 +4640,7 @@ extern EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *, s32, EvtRunt
 extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32, EvtRuntime *);
 extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
 extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *, f32);
-/* The camp lookup receives the movie owner through its opaque API boundary. */
-extern s32 mnuCampFindMatchingEntryIndex(void *, EvtRuntime *, s32);
+extern s32 mnuCampFindMatchingEntryIndex(PolyMovieWork *, EvtRuntime *, s32);
 
 
 
