@@ -1715,8 +1715,8 @@ ParBlock *dds3TrianglePolyCreate(s32 count) {
     s32 points = count * 3;
     s32 colorBytes = points * 4;
     struct sdfMemHandle_t *allocation = sdfMemAllocDirect((colorBytes + points) * 4 + 0x18);
-    s32 base = sdfMemLock(allocation);
-    u8 *vertices = (u8 *)base + points * 16;
+    u8 *base = (u8 *)sdfMemLock(allocation);
+    u8 *vertices = base + points * 16;
     ParBlock *block = (ParBlock *)(vertices + colorBytes);
     block->color = 0x80808080;
     block->count = count;
