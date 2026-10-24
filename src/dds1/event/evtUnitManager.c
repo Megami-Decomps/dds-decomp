@@ -888,17 +888,20 @@ void evtConfigureUnitMotionSlot(evtUnitHandle_t *unit, s32 slot, s32 slotAValue,
     }
 }
 
+#define EVT_UNIT_FLAG_MOTION_START_PENDING 0x80
+#define EVT_UNIT_FLAG_MOTION_WOBBLE 0x40
+
 void evtSetUnitMotion(evtUnitHandle_t *unit, s32 motionId, s32 startFrame, s32 endFrame, s32 mode) {
     unit->flags &= ~0x1;
     unit->flags &= ~0x20;
-    unit->flags &= ~0x40;
+    unit->flags &= ~EVT_UNIT_FLAG_MOTION_WOBBLE;
     unit->flags &= ~0x400000;
     unit->flags &= ~0x800000;
     unit->motionState = EVT_UNIT_MOTION_STATE_MOTION;
     EVT_UNIT_MOTION_SETUP(unit)->motionId = motionId;
     EVT_UNIT_MOTION_SETUP(unit)->startFrame = startFrame;
     EVT_UNIT_MOTION_SETUP(unit)->endFrame = endFrame;
-    unit->flags |= 0x80;
+    unit->flags |= EVT_UNIT_FLAG_MOTION_START_PENDING;
     unit->motionTicks = 0;
     unit->motionCallback = 0;
     switch (mode) {
@@ -911,7 +914,7 @@ void evtSetUnitMotion(evtUnitHandle_t *unit, s32 motionId, s32 startFrame, s32 e
     case 2:
         break;
     case 3:
-        unit->flags |= 0x40;
+        unit->flags |= EVT_UNIT_FLAG_MOTION_WOBBLE;
         break;
     }
 }
@@ -1315,13 +1318,13 @@ s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
     switch (unit->motionState) {
     case EVT_UNIT_MOTION_STATE_IDLE:
     case EVT_UNIT_MOTION_STATE_VECTOR:
-        if (unit->flags & 0x80) {
+        if (unit->flags & EVT_UNIT_FLAG_MOTION_START_PENDING) {
             if (unit->flags & 1) {
                 mdlSmoothLoopMotion(model, 0, unit->motionSetupId, (f32)unit->motionSetupStartFrame, (f32)unit->motionSetupEndFrame);
             } else {
                 mdlSmoothSingleMotion(model, 0, unit->motionSetupId, (f32)unit->motionSetupStartFrame, (f32)unit->motionSetupEndFrame);
             }
-            unit->flags &= ~0x80;
+            unit->flags &= ~EVT_UNIT_FLAG_MOTION_START_PENDING;
         } else if (unit->flags & 0x20) {
             /* The selected-ID restart stays distinct in source: retail 0x00222FEC
              * and Nocturne 0x001E6864 retain the current-index load after tail merging. */
@@ -1345,7 +1348,7 @@ s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
                 }
             }
         }
-        if (unit->flags & 0x40) {
+        if (unit->flags & EVT_UNIT_FLAG_MOTION_WOBBLE) {
             wobble = 1;
         } else {
             wobble = 0;
@@ -1400,7 +1403,7 @@ s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
             } else {
                 mdlSmoothSingleMotion(model, 0, unit->motionSetupId, (f32)unit->motionSetupStartFrame, (f32)unit->motionSetupEndFrame);
             }
-            unit->flags &= ~0x80;
+            unit->flags &= ~EVT_UNIT_FLAG_MOTION_START_PENDING;
         } else if (model->first->state == 5) {
             unit->motionState = EVT_UNIT_MOTION_STATE_IDLE;
         } else if ((unit->flags & 0x800000) && (f32)unit->motionEndFrame <= model->first->currentFrame) {
