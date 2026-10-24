@@ -8,7 +8,7 @@ extern u8 D_003BC590[];
 extern u8 D_003BC598[];
 
 
-extern s32 evtFreeStage(void);
+extern void evtFreeStage(void);
 
 extern u8 D_003BC5A0[];
 
@@ -32,4 +32,3 @@ void mnuRestartRuntimeAfterViewer(s32 unused) {
     sdfDestroyRuntimeTask();
     sdfCreateRuntimeTask();
 }
-
