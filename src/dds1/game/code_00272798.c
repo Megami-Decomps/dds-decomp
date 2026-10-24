@@ -111,8 +111,8 @@ s32 mnuDrawStaffCampImageScreen(dds3ProcessID_t *task) {
 
 /* Submit a request to the active menu dispatcher in mode 2. */
 s32 mnuFinishStaffConfigPopup(dds3ProcessID_t *request) {
-    s32 context = dds3GetProcessData(request);
-    return menuRunPanel((void *)context, 2, (void *)request);
+    StaffMenuWork *context = (StaffMenuWork *)dds3GetProcessData(request);
+    return menuRunPanel(context, 2, (void *)request);
 }
 
 extern void mnuSetStaffDisplayMode(s32 nextCategory, StaffMenuWork *menu);
@@ -207,4 +207,3 @@ INCLUDE_SDATA(const s32, "game/code_00272798", D_003BC6C8);
 INCLUDE_SDATA(const s32, "game/code_00272798", D_003BC6D0);
 
 INCLUDE_SDATA(const s32, "game/code_00272798", D_003BC6D8);
-

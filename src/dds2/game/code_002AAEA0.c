@@ -183,10 +183,8 @@ s32 mnuDrawStaffImageScreen(dds3ProcessID_t *callback) {
 }
 
 s32 mnuFinishStaffImagePopup(dds3ProcessID_t *callback) {
-    s32 context;
-
-    context = dds3GetProcessData(callback);
-    return menuSetHandler((void *)context, 2, (void *)callback);
+    MenuStaffContext *context = (MenuStaffContext *)dds3GetProcessData(callback);
+    return menuSetHandler(context, 2, (void *)callback);
 }
 
 /* Registered field-skill display leave hook: no side effects; returns one. */
@@ -367,4 +365,3 @@ INCLUDE_SDATA(const s32, "game/code_002AAEA0", D_00437BB8);
 INCLUDE_SDATA(const s32, "game/code_002AAEA0", D_00437BC0);
 
 INCLUDE_SDATA(const s32, "game/code_002AAEA0", D_00437BC8);
-
