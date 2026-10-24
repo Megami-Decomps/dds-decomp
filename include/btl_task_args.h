@@ -211,7 +211,8 @@ typedef struct BtlRuntimeTaskArgs {
         f32 scale;
     };
     union {
-        u32 unk_08; /* Kind 9: indexed-unit-effect value; kind 0x2A: second linked camera unit. */
+        u32 unk_08;
+        s32 effectParameterOption; /* Kind 9: argument 3 to btlApplyScaledUnitEffectParameter. */
         struct BtlUnit *unitB;
         s32 resourceIndex; /* sdfMotionCtrlr_t-SE task: selected entry in its resource handle array. */
     };
