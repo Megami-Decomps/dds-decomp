@@ -343,7 +343,7 @@ typedef struct BtlState {
     s32 (*cameraModeInitializePredicate)(BtlLinkedCommand *); /* 0x664: permits the mode initializer in 001DB048. */
     s32 (*cameraUpdatePredicate)(BtlLinkedCommand *); /* 0x668: gates the active camera handler. */
     s32 (*allowPositionEffect)(BtlUnit *); /* 0x66C */
-    u8 pad670[4];
+    s32 (*unitValueOverrideHook)(datUnitWork_t *, s32); /* 0x670: custom value, or -1 for the normal resolver. */
     s32 (*summonEffectId)(s32); /* 0x674: -1 retains the default summon effect. */
     s32 (*summonEffectDelay)(u32); /* 0x678: delay for the selected summon species. */
     s32 (*actionPointsOverride)(u32, u32, s32); /* 0x67C */

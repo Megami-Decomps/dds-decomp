@@ -482,7 +482,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         effBTLFieldColorSetFlags(1);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlMapLinkedCommandResult);
         BTL_INSTALL_CALLBACK(battle->pad5B0, 0x0, func_0020A860);
-        BTL_INSTALL_CALLBACK(battle->pad670, 0x0, func_0020AB08);
+        BTL_INSTALL_CALLBACK(battle->unitValueOverrideHook, 0x0, func_0020AB08);
         BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlFadeOtherEnemyUnitsWhenSpecialModeActive);
         BTL_INSTALL_CALLBACK(battle->summonEffectId, 0x0, btlMapSkillToCode);
         BTL_INSTALL_CALLBACK(battle->summonEffectDelay, 0x0, btlMapSkillRange);
