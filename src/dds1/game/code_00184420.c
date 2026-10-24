@@ -1,26 +1,19 @@
 #include "common.h"
 #include "pcp_vu0.h"
-
-/* Partial PCP event-work view; effPCPMisc's owner confirms scale and color. */
-typedef struct {
-    u8 pad00[0x2C];
-    f32 scale;   /* 0x2C */
-    u8 pad30[0xC];
-    u32 color;  /* 0x3C */
-} EffPCPEventWorkFields;
+#include "eff_pcp_map_events.h"
 
 /* vu0 routine: copy the PCP event-work position vector, including its fourth lane. */
-void effPCPHelperBEDSetPosition(void *work, void *position) {
-    SDF_VU0_COPYVECTOR(work, position);
+void effPCPHelperBEDSetPosition(EffPCPMapEventWork *work, const f32 position[4]) {
+    SDF_VU0_COPYVECTOR(work->params.position, position);
 }
 
 /* Set the scale consumed by the PCP map-event update. */
-void effPCPHelperBEDSetScale(EffPCPEventWorkFields *work, f32 scale) {
+void effPCPHelperBEDSetScale(EffPCPMapEventWork *work, f32 scale) {
     work->scale = scale;
 }
 
 /* Set the packed color used to tint the map event's children. */
-void effPCPHelperBEDSetColor(EffPCPEventWorkFields *work, u32 color) {
+void effPCPHelperBEDSetColor(EffPCPMapEventWork *work, u32 color) {
     work->color = color;
 }
 
