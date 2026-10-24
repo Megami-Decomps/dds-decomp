@@ -32,7 +32,7 @@ void itfPnlSetPosition(itfpanel_t *panel, s32 left, s32 top, s32 right, s32 bott
     panel->right = right;
     panel->bottom = bottom;
     if (itfPanelLayoutCallbacks[panel->kind] != 0) {
-        itfPanelLayoutCallbacks[panel->kind](panel->payload);
+        itfPanelLayoutCallbacks[panel->kind](panel->payload, left, top, right, bottom);
     }
 }
 
