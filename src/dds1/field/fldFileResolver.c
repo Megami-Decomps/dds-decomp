@@ -240,7 +240,7 @@ extern void dds3EffectObjectBasicSetFldEx(dds3Basic_t *, BillConfig *);
 
 extern dds3Basic_t *dds3AddLightObjectBasic(s32);
 
-extern dds3Basic_t *dds3AddPathBasic(s32 key, void *work, const char *name);
+extern dds3Basic_t *dds3AddPathBasic(s32 key, Dds3PathCurveTable *work, const char *name);
 
 extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, const f32 *, const char *);
 
@@ -843,7 +843,7 @@ extern void dds3SetPathBasicSpline(dds3Basic_t *path, u32 value);
 
 extern dds3Basic_t *dds3AddEventBasic(s32 key, const char *resourcePath, const char *name);
 
-extern dds3Basic_t *dds3AddPathBasic(s32 key, void *work, const char *name);
+extern dds3Basic_t *dds3AddPathBasic(s32 key, Dds3PathCurveTable *work, const char *name);
 
 extern u32 fldEveHit_AddEveData(FldFileResource *, dds3Basic_t *);
 

@@ -3,6 +3,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_pac_reloc.h"
 #include "fld_script_resource.h"
+#include "dds3_path.h"
 #include "sdf_packet_header.h"
 #include "eff.h"
 #include "fld_player_scene_state.h"
@@ -163,7 +164,7 @@ extern void dds3EffectObjectBasicStatOn(dds3Basic_t *, u32);
 extern void dds3EffectObjectBasicStatOff(dds3Basic_t *, u32);
 extern void dds3EffectObjectBasicSetFldEx(dds3Basic_t *, BillConfig *);
 extern dds3Basic_t *dds3AddLightObjectBasic(s32);
-extern dds3Basic_t *dds3AddPathBasic(s32 key, void *work, const char *name);
+extern dds3Basic_t *dds3AddPathBasic(s32 key, Dds3PathCurveTable *work, const char *name);
 extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, const f32 *, const char *);
 extern void dds3GetRadiusPoseSet(dds3Basic_t *, f32);
 extern void dds3SetLightObjectResoruce(dds3Basic_t *, WorldTransformSetup *);
@@ -724,7 +725,7 @@ extern void fldMakePlane(FldCollisionDescriptor *geometry, f32 *translation,
 extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, const f32 *, const char *);
 extern void dds3SetPathBasicSpline(dds3Basic_t *path, u32 value);
 extern dds3Basic_t *dds3AddEventBasic(s32 key, const char *resourcePath, const char *name);
-extern dds3Basic_t *dds3AddPathBasic(s32 key, void *work, const char *name);
+extern dds3Basic_t *dds3AddPathBasic(s32 key, Dds3PathCurveTable *work, const char *name);
 extern s32 fldEveHit_AddEveData(FldFileResource *, dds3Basic_t *);
 extern s32 fldRegisterRoomObject(FldFileResource *, dds3Basic_t *);
 extern void func_0014D380(s32 mode, u32 pointId, f32 *rotation,

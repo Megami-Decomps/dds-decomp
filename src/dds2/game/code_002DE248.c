@@ -10211,7 +10211,7 @@ typedef struct EffCopiedSpawnList {
     u32 count;
     FldSpawnBatch *groups;
 } EffCopiedSpawnList;
-extern dds3Basic_t *dds3AddPathBasic(s32 key, void *work, const char *name);
+extern dds3Basic_t *dds3AddPathBasic(s32 key, Dds3PathCurveTable *work, const char *name);
 
 /* Capture constructor arguments before consuming the entry; see
  * docs/idioms.md, "Trace-justified cursor consumption: copied payload slots". */

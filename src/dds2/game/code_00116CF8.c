@@ -65,7 +65,7 @@ void dds3PathEvalSpline(u32 *segment, f32 *weight, const Dds3PathKeyframes *keys
     *weight = 1.0f;
 }
 
-dds3Basic_t *dds3AddPathBasic(s32 key, void *work, const char *name) {
+dds3Basic_t *dds3AddPathBasic(s32 key, Dds3PathCurveTable *work, const char *name) {
     dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_ACTION_10);
 
     obj->key = key;
