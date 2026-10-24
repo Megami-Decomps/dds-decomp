@@ -5286,30 +5286,39 @@ void fldUploadSkyBuffer(FldSkyBuffer *src) {
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00413350);
 
+enum {
+    FLD_SKY_FILTER_MODE_PHASE_STEP_0_1_OFFSET_32 = 1,
+    FLD_SKY_FILTER_MODE_PHASE_STEP_0_2_OFFSET_32 = 2,
+    FLD_SKY_FILTER_MODE_PHASE_STEP_0_05_OFFSET_32 = 3,
+    FLD_SKY_FILTER_MODE_PHASE_STEP_0_1_OFFSET_48 = 4,
+    FLD_SKY_FILTER_MODE_PHASE_STEP_0_2_OFFSET_48 = 5,
+    FLD_SKY_FILTER_MODE_PHASE_STEP_0_05_OFFSET_48 = 6,
+};
+
 void fldSkyCalcFilter(void) {
     gFilterAnimeOfsA = 0;
     switch (gFilterAnime) {
-    case 1:
+    case FLD_SKY_FILTER_MODE_PHASE_STEP_0_1_OFFSET_32:
         gFilterAnimeCntF += 0.1f;
         gFilterAnimeOfsA = sdfSin(gFilterAnimeCntF) * 32.0f;
         break;
-    case 2:
+    case FLD_SKY_FILTER_MODE_PHASE_STEP_0_2_OFFSET_32:
         gFilterAnimeCntF += 0.2f;
         gFilterAnimeOfsA = sdfSin(gFilterAnimeCntF) * 32.0f;
         break;
-    case 3:
+    case FLD_SKY_FILTER_MODE_PHASE_STEP_0_05_OFFSET_32:
         gFilterAnimeCntF += 0.05f;
         gFilterAnimeOfsA = sdfSin(gFilterAnimeCntF) * 32.0f;
         break;
-    case 4:
+    case FLD_SKY_FILTER_MODE_PHASE_STEP_0_1_OFFSET_48:
         gFilterAnimeCntF += 0.1f;
         gFilterAnimeOfsA = sdfSin(gFilterAnimeCntF) * 48.0f;
         break;
-    case 5:
+    case FLD_SKY_FILTER_MODE_PHASE_STEP_0_2_OFFSET_48:
         gFilterAnimeCntF += 0.2f;
         gFilterAnimeOfsA = sdfSin(gFilterAnimeCntF) * 48.0f;
         break;
-    case 6:
+    case FLD_SKY_FILTER_MODE_PHASE_STEP_0_05_OFFSET_48:
         gFilterAnimeCntF += 0.05f;
         gFilterAnimeOfsA = sdfSin(gFilterAnimeCntF) * 48.0f;
         break;
