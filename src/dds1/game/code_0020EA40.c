@@ -172,7 +172,7 @@ extern s32 btlFindSubsequentTurnScript(void);
 extern void btlFormatBattleEffectResourceName(BtlTask *actor, s32 action, char *pathBuffer);
 extern s32 btlFrameMarkedTargetDefeatCamera(BtlLinkedCommand *command);
 extern s32 btlGetAdjustedUnitDisplaySpecies(BtlUnit *unit);
-extern s32 btlGetEffectTaskActorMatchCode(u8 *task);
+extern s32 btlGetEffectTaskActorMatchCode(BtlTask *task);
 extern s32 btlGetEnabledEnemyActionResponse(BtlUnit *unit, s32 action);
 extern BtlUnit *btlGetReadyUnitForSpecies(s32 mode, u32 species);
 extern s32 btlGetSoleTargetKind(void);

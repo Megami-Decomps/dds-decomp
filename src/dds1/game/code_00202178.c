@@ -2222,13 +2222,13 @@ void func_00206608(void) {
     }
 }
 
-s32 btlGetEffectTaskActorMatchCode(u8 *task) {
+s32 btlGetEffectTaskActorMatchCode(BtlTask *task) {
     BtlEffectHeader *effect;
-    if ((((BtlTask *)task)->flags & 8) == 0) {
+    if ((task->flags & 8) == 0) {
         return -1;
     }
     effect = ((BtlState *)btlGetRuntime())->effect;
-    return effect->owner == (u32)((BtlTask *)task)->unit ? 12 : -1;
+    return effect->owner == (u32)task->unit ? 12 : -1;
 }
 
 extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
