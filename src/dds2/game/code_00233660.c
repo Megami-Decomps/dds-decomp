@@ -986,7 +986,7 @@ void mdlCreateEffect_TRACK(dds3ModelHandle_t *owner, MdlTrackPolyRecordView *rec
     effectParams.sampleInterval = record->sampleInterval;
     effectParams.historyLength = record->historyLength;
     effectParams.unk1C = 3;
-    effectParams.kind = record->drawKind;
+    effectParams.drawKind = record->drawKind;
     effectParams.gradientColors[0] = record->gradientColors[0];
     effectParams.gradientColors[1] = record->gradientColors[1];
     effectParams.gradientColors[2] = record->gradientColors[2];

@@ -2729,7 +2729,7 @@
 0x00188738	dds3HermitianTrackPolyCreate	inferred	SMT3HD name via SLUS_209.11 0x001A3868, reloc-identical; was effTrackPolyAllocateHistoryData
 0x00188820	pMeshDelete	inferred	SMT3HD name via SLUS_209.11 0x001A3950, shared-hash-in-run; was effTrackPolyFreeData
 0x00188850	dds3HermitianTrackPolyReset	inferred	SMT3HD name via SLUS_209.11 0x001A3980, shared-hash-in-run; was effTrackPolyInitData
-0x00188870	dds3HermitianTrackPolySetBlend	inferred	SMT3HD name via SLUS_209.11 0x001A39A0, shared-hash-in-run; was effTrackPolySetDrawKind
+0x00188870	dds3HermitianTrackPolySetDrawTarget	inferred	stores the caller's draw kind in the runtime draw-target field
 0x00188878	dds3HermitianTrackPolySetVC	inferred	SMT3HD name via SLUS_209.11 0x001A39A8, reloc-identical; was effTrackPolyFillGradientColors
 0x00188958	dds3HermitianTrackPolyGetVertex	inferred	SMT3HD name via SLUS_209.11 0x001A3A88, byte-identical; was effTrackPolyCopyHistoryPointPair
 0x001889B8	dds3HermitianTrackPolySetCurrent	inferred	SMT3HD name via SLUS_209.11 0x001A3AE8, byte-identical; was effTrackPolyAdvancePosition

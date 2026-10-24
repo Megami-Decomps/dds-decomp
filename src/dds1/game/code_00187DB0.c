@@ -130,7 +130,7 @@ typedef struct dds3HermitianTrackPoly_tag dds3HermitianTrackPoly_tag;
 
 extern dds3HermitianTrackPoly_tag *dds3HermitianTrackPolyCreate(s32 historyLength, s32 steps);
 extern void dds3HermitianTrackPolySetVC(dds3HermitianTrackPoly_tag *data, const u32 gradientColors[4]);
-extern void dds3HermitianTrackPolySetBlend(dds3HermitianTrackPoly_tag *data, u32 kind);
+extern void dds3HermitianTrackPolySetDrawTarget(dds3HermitianTrackPoly_tag *data, u32 drawTarget);
 
 /* Clone a model track with independent history and gradient storage. */
 EffTrackPolyWork *effTrackPolyCreateWork(EffTrackPolyParams *src) {
@@ -141,6 +141,6 @@ EffTrackPolyWork *effTrackPolyCreateWork(EffTrackPolyParams *src) {
     dst->updateCount = 0;
     dst->data = dds3HermitianTrackPolyCreate(dst->params.historyLength, 0xC);
     dds3HermitianTrackPolySetVC(dst->data, src->gradientColors);
-    dds3HermitianTrackPolySetBlend(dst->data, src->kind);
+    dds3HermitianTrackPolySetDrawTarget(dst->data, src->drawKind);
     return dst;
 }

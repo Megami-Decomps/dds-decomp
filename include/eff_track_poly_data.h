@@ -5,7 +5,7 @@
 
 /* Owner record stored after the track's point and gradient buffers. */
 typedef struct dds3HermitianTrackPoly_tag {
-    u32 kind;                   /* 0x00: draw-target selector */
+    u32 drawTarget;             /* 0x00: surface or special draw target */
     u32 color;                  /* 0x04 */
     s32 count;                  /* 0x08: slots, including the reserved pair */
     s32 activePointCount;       /* 0x0C */

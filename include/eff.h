@@ -112,7 +112,7 @@ typedef struct {
     u32 sampleInterval;
     s32 historyLength;
     u32 unk1C;
-    u32 kind;
+    u32 drawKind;
     u32 gradientColors[4];
 } EffTrackPolyParams;
 

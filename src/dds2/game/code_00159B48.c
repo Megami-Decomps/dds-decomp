@@ -945,7 +945,7 @@ void dds3Particle_BasicCreate(EffEmitterHead *owner) {
         params.sampleInterval = 1;
         params.historyLength = owner->sub.templateEntryCount;
         params.unk1C = 10;
-        params.kind = (u16)owner->drawKind;
+        params.drawKind = (u16)owner->drawKind;
         params.gradientColors[0] = owner->sub.payload.trackPolygon.firstGradientColor;
         params.gradientColors[1] = owner->sub.payload.trackPolygon.firstGradientColor;
         params.gradientColors[2] = owner->sub.payload.trackPolygon.secondGradientColor;

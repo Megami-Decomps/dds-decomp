@@ -199,7 +199,7 @@ dds3HermitianTrackPoly_tag *dds3HermitianTrackPolyCreate(s32 historyLength, s32 
 
     data->points = (u128 *)cursor;
     cursor += count * sizeof(u128);
-    data->kind = 2;
+    data->drawTarget = 2;
     data->color = 0x80808080;
     data->count = count;
     data->activePointCount = 0;
@@ -227,8 +227,8 @@ void dds3HermitianTrackPolyReset(dds3HermitianTrackPoly_tag *data) {
 }
 
 /* Select the draw target on the data created by the track constructor. */
-void dds3HermitianTrackPolySetBlend(dds3HermitianTrackPoly_tag *data, u32 kind) {
-    data->kind = kind;
+void dds3HermitianTrackPolySetDrawTarget(dds3HermitianTrackPoly_tag *data, u32 drawTarget) {
+    data->drawTarget = drawTarget;
 }
 
 void dds3HermitianTrackPolySetVC(dds3HermitianTrackPoly_tag *data, const u32 gradientColors[4]) {
@@ -468,8 +468,8 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *data) {
             draw->colors += pointsRemaining;
         }
     }
-    if (data->kind < 4) {
-        effTrackPolyDrawSurfaces[data->kind]->append(effTrackPolyDrawSurfaces[data->kind], list);
+    if (data->drawTarget < 4) {
+        effTrackPolyDrawSurfaces[data->drawTarget]->append(effTrackPolyDrawSurfaces[data->drawTarget], list);
     } else {
         list2 = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list2);
