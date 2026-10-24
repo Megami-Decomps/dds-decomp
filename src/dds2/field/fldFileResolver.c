@@ -445,7 +445,7 @@ extern u32 D_00436088;
 
 
 
-extern u32 D_004360AC;
+extern s32 D_004360AC;
 
 extern s32 D_004360C4;
 
@@ -3673,7 +3673,7 @@ dds3Basic_t *fldCamNowEveCamera(void) {
     return object;
 }
 
-void fldSetElvCameraScene(u32 mode) {
+void fldSetElvCameraScene(s32 mode) {
     D_004360AC = mode;
     dds3CameraObjectBasicGetTgtCam(dds3GetActiveCameraSceneBasic(dds3GetActiveScene()), D_00444980,
                                               D_00444970);

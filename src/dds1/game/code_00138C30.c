@@ -204,7 +204,7 @@ extern u32 D_003BAD3C;
 
 extern u32 D_003BAD40;
 
-extern u32 D_003BAD1C;
+extern s32 D_003BAD1C;
 
 extern u32 D_003BACF8;
 
