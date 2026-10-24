@@ -108,7 +108,7 @@ extern s32 fldEveRngCount;
 
 extern FldFileResource *fldRoomResources[];
 
-extern void fldDrawPos(f32 *pos);
+extern void fldDrawPos(const f32 position[3]);
 
 extern s32 gFldInf_HitIdx;
 

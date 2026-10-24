@@ -301,7 +301,7 @@ extern FldWaypointBlock fldActorWaypointRows;
 
 extern FldFileResource *fldRoomResources[];
 
-extern void fldDrawPos(f32 *pos);
+extern void fldDrawPos(const f32 position[3]);
 
 extern FldIndexPair D_0032EF18[];
 

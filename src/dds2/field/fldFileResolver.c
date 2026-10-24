@@ -2918,7 +2918,7 @@ void fldSubmitOverlayStateAndSprite(s32 alpha) {
     surface->append(surface, packetList);
 }
 
-void fldDrawPos(f32 *pos) {
+void fldDrawPos(const f32 position[3]) {
     FldMarkerPacket packet;
     f32 half = 36.0f;
 
@@ -2939,9 +2939,9 @@ void fldDrawPos(f32 *pos) {
     packet.quad[6] = -half;
     packet.quad[7] = half;
     packet.color = 0x8080FF80;
-    packet.pos[0] = pos[0];
-    packet.pos[1] = pos[1];
-    packet.pos[2] = pos[2];
+    packet.pos[0] = position[0];
+    packet.pos[1] = position[1];
+    packet.pos[2] = position[2];
     packet.scale = 0.0f;
     rsetOtOfs(0x39);
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 2);
@@ -2949,7 +2949,7 @@ void fldDrawPos(f32 *pos) {
     drawSprite3D(fldMarkerTexture, &packet);
 }
 
-void fldDrawMarkerQuadColored(f32 *pos, s32 color) {
+void fldDrawMarkerQuadColored(const f32 position[3], s32 color) {
     FldMarkerPacket packet;
     f32 half = 36.0f;
 
@@ -2970,9 +2970,9 @@ void fldDrawMarkerQuadColored(f32 *pos, s32 color) {
     packet.quad[6] = -half;
     packet.quad[7] = half;
     packet.color = color;
-    packet.pos[0] = pos[0];
-    packet.pos[1] = pos[1];
-    packet.pos[2] = pos[2];
+    packet.pos[0] = position[0];
+    packet.pos[1] = position[1];
+    packet.pos[2] = position[2];
     packet.scale = 0.0f;
     rsetOtOfs(0x39);
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 2);
