@@ -103,8 +103,6 @@ void itfMesInitializePanelPlacementSprite(instanceMes_tag *panel);
 
 void OpenCheckSpeakerWindow(instanceMes_tag *panel);
 
-extern itfpanel_t *itfCreateUiSpriteByKind(s32 kind, u32 payload);
-
 #define ITF_MES_SCRIPT_PANEL_BIT 0x200000
 #define ITF_MES_LOWER_STATUS_PAIR_MASK 0x300
 #define ITF_MES_LOWER_STATUS_FIRST_BIT 0x100
@@ -519,7 +517,7 @@ void itfMesBuildOptionFrame(instanceMes_tag *mes) {
     bounds[1] = 0x430;
     bounds[2] = 0x1200 + halfWidth;
     bounds[3] = 0x530 + rowsHeight;
-    panelBlock->overlay = itfCreateUiSpriteByKind(9, (u32)itfMesMngManager.windowTexture);
+    panelBlock->overlay = itfCreateUiSpriteByKind(9, itfMesMngManager.windowTexture);
     itfPnlSetPosition(panelBlock->overlay, bounds[0], bounds[1], bounds[2], bounds[3], mes->renderValue);
     itfPnlSetColor(panelBlock->overlay, 0, 0, 0, 0);
     mes->flags = (mes->flags & ~0xC00) | 0x400;
@@ -1565,8 +1563,6 @@ extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *list, s32 context, s32 mode);
 extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 
 
-extern itfpanel_t *itfCreateUiSpriteByKind(s32 kind, u32 payload);
-
 extern void ChangeFontPosition(_FRQ *glyph, s32 dx, s32 dy);
 
 extern void ChangeFontColor();
@@ -1597,7 +1593,7 @@ void itfMesInitializePanelPlacementSprite(instanceMes_tag *panel) {
     ItfMesBlkA4 *place = &panel->blkA4;
     s32 top;
     if (place->sprite == 0) {
-        place->sprite = itfCreateUiSpriteByKind(6, (u32)itfMesMngManager.windowTexture);
+        place->sprite = itfCreateUiSpriteByKind(6, itfMesMngManager.windowTexture);
         if (place->frame != 0) {
             place->sprite->textRightX = panel->blk14.glyphChain->x + frFontMeasureLineWidth(0, panel->blk14.glyphChain);
         }
@@ -1615,7 +1611,7 @@ void OpenCheckSpeakerWindow(instanceMes_tag *panel) {
     if (origin->glyphChain != NULL && !(panel->flags & 0x10000)) {
         if (place->frame == NULL) {
             s32 width = origin->glyphChain->advance * 16;
-            place->frame = itfCreateUiSpriteByKind(7, (u32)itfMesMngManager.windowTexture);
+            place->frame = itfCreateUiSpriteByKind(7, itfMesMngManager.windowTexture);
             itfPnlSetPosition(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0x110, panel->renderValue);
             itfPnlSetColor(place->frame, 0x7F, 0x7F, 0x7F, 0);
         }

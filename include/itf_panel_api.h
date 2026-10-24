@@ -5,6 +5,11 @@
 #include "sdf_packet_list.h"
 
 struct itfpanel_t;
+struct sdfTexHandle_t;
+
+/* Allocate the panel kind's payload and bind its shared UI texture handle. */
+struct itfpanel_t *itfCreateUiSpriteByKind(s32 kind,
+    struct sdfTexHandle_t *texture);
 
 void itfPnlDrawTag(struct itfpanel_t *panel, struct sdfDrawTag_t *list);
 void DrawTestAlphaPrim(struct sdfDrawTag_t *list);

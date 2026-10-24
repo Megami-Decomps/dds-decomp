@@ -37,8 +37,6 @@ extern void itfUpdateSoundSelectionTransition(instanceMes_tag *);
 
 extern s32 frFontMeasureGlyphStripWidth(s32 line, _FRQ *glyph);
 
-extern itfpanel_t *itfCreateUiSpriteByKind(s32 kind, u32 payload);
-
 extern SndPad dds3PadButtonState;
 
 extern SdfPoolNode sdfGrOtTable[];
@@ -78,7 +76,7 @@ void itfMesInitializePanelPlacementSprite(instanceMes_tag *panel) {
     ItfMesBlkA4 *place = &panel->blkA4;
     s32 spriteTop;
     if (place->sprite == 0) {
-        place->sprite = itfCreateUiSpriteByKind(6, (u32)itfMesMngManager.windowTexture);
+        place->sprite = itfCreateUiSpriteByKind(6, itfMesMngManager.windowTexture);
         if (place->frame != 0) {
             place->sprite->textRightX = panel->blk14.glyphChain->x + frFontMeasureGlyphStripWidth(0, panel->blk14.glyphChain);
         }
@@ -96,7 +94,7 @@ void OpenCheckSpeakerWindow(instanceMes_tag *panel) {
     if (origin->glyphChain != NULL && !(panel->flags & 0x10000)) {
         if (place->frame == NULL) {
             s32 width = origin->glyphChain->advance * 16;
-            place->frame = itfCreateUiSpriteByKind(7, (u32)itfMesMngManager.windowTexture);
+            place->frame = itfCreateUiSpriteByKind(7, itfMesMngManager.windowTexture);
             itfPnlSetPosition(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0xF0, panel->renderValue);
             itfPnlSetColor(place->frame, 0x7F, 0x7F, 0x7F, 0);
         }

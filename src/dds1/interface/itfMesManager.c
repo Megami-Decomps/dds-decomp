@@ -90,8 +90,6 @@ void itfMesInitializePanelPlacementSprite(instanceMes_tag *panel);
 
 void OpenCheckSpeakerWindow(instanceMes_tag *panel);
 
-extern itfpanel_t *itfCreateUiSpriteByKind(s32 kind, u32 payload);
-
 #define ITF_MES_MAGIC_MSG0 0x3047534d
 #define ITF_MES_MAGIC_MSG1 0x3147534d
 #define ITF_MES_SCRIPT_PANEL_BIT 0x200000
@@ -508,7 +506,7 @@ void itfMesBuildOptionFrame(instanceMes_tag *mes) {
     bounds[1] = 0x430;
     bounds[2] = 0x1200 + halfWidth;
     bounds[3] = 0x530 + rowsHeight;
-    panelBlock->overlay = itfCreateUiSpriteByKind(9, (u32)itfMesMngManager.windowTexture);
+    panelBlock->overlay = itfCreateUiSpriteByKind(9, itfMesMngManager.windowTexture);
     itfPnlSetPosition(panelBlock->overlay, bounds[0], bounds[1], bounds[2], bounds[3], mes->renderValue);
     itfPnlSetColor(panelBlock->overlay, 0, 0, 0, 0);
     mes->flags = (mes->flags & ~0xC00) | 0x400;

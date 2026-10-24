@@ -15,6 +15,7 @@
 #include "kwln_task_state.h"
 #include "sdf_resource.h"
 #include "itf.h"
+#include "itf_panel_api.h"
 #include "itf_mem_node.h"
 #include "itf_resource_segments.h"
 #include "sdf.h"
@@ -1712,7 +1713,7 @@ void itfCampStartProcess(void) {
 
 extern s32 D_003B44B0[];
 
-itfpanel_t *itfCreateUiSpriteByKind(s32 kind, u32 payload) {
+itfpanel_t *itfCreateUiSpriteByKind(s32 kind, sdfTexHandle_t *texture) {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(sizeof(itfpanel_t));
     itfpanel_t *work = (itfpanel_t *)sdfMemLock(allocation);
 
@@ -1721,19 +1722,19 @@ itfpanel_t *itfCreateUiSpriteByKind(s32 kind, u32 payload) {
     allocation = sdfMemAllocDirect(D_003B44B0[kind]);
     work->payloadAllocation = allocation;
     work->payload = (u32 *)sdfMemLock(allocation);
-    if (payload != 0) {
+    if (texture != NULL) {
         switch (kind) {
         case 6:
-            *work->payload = payload;
+            *work->payload = (u32)texture;
             break;
         case 7:
-            ((UiSpriteTexturePayload *)work->payload)->texture = (sdfTexHandle_t *)payload;
+            ((UiSpriteTexturePayload *)work->payload)->texture = texture;
             break;
         case 8:
-            ((UiSpriteBandPayload *)work->payload)->texture = (sdfTexHandle_t *)payload;
+            ((UiSpriteBandPayload *)work->payload)->texture = texture;
             break;
         case 9:
-            *work->payload = payload;
+            *work->payload = (u32)texture;
             break;
         }
     }

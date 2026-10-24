@@ -13,8 +13,8 @@ typedef struct DrawColorRec {
     u32 components[4];
 } DrawColorRec;
 
-/* Kind 7's allocation is exactly this texture pointer; its factory transports
- * the pointer through the existing u32 value argument. */
+/* Kinds 6/9 store this handle as a raw address word; kinds 7/8 retain it in
+ * their typed texture fields. */
 typedef struct UiSpriteTexturePayload {
     sdfTexHandle_t *texture;
 } UiSpriteTexturePayload;
