@@ -1039,7 +1039,7 @@ void sdfDumpChipMemory(void) {
 
 
 /* Read a named file through the dev RPC into a freshly allocated block; returns the block's handle.
- * outData receives the block address, outSize the file size; without outData the block is released. */
+ * outData receives the block address, outSize the file size; without outData the payload is unlocked. */
 sdfMemHandle_t *sdfDevLoadFile(const char *name, u32 *outData, u32 *outSize, s32 extra) {
     sdfFileCmdHandle_t *state = sdfFileOpen(name);
     s32 size = sdfFileLength(state);

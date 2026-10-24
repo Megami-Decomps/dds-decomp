@@ -55,7 +55,7 @@ void sdfMemFreeDirect(struct sdfMemHandle_t *allocation);
 void sdfMemFreeHandleDirect(struct sdfMemHandle_t **slot);
 
 /* The optional outputs contain a data address and file size, not a descriptor.
- * A null outAddress releases the allocation before returning its descriptor. */
+ * A null outAddress unlocks the payload but still returns its live descriptor. */
 struct sdfMemHandle_t *sdfDevLoadFile(
     const char *name, u32 *outAddress, u32 *outSize, s32 extraBytes);
 struct sdfMemHandle_t *sdfDevLoadFileEx(
