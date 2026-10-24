@@ -483,7 +483,7 @@ s32 mnuUpdateStaffPartySelectionState(dds3ProcessID_t *task) {
     if (fclChkMessage() != 0) {
         return 0;
     }
-    mnuSetStateValue((u32 *)&context->transitionFade, 0);
+    mnuSetStateValue(&context->transitionFade.active, 0);
     if (menu->listState == 0) {
         if (mnuHandleStaffValuePageInput(task) != 0) {
             return 0;
