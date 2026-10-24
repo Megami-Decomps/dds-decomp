@@ -2354,7 +2354,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
         }
     }
     packed.word = ctx->value;
-    count = mdlGetNumOfCut((dds3ModelHandle_t *)model, packed.bits.group);
+    count = mdlGetNumOfCut(model, packed.bits.group);
     switch (ctx->fieldIndex) {
     case 0:
         if (dds3PadButtonState.incOne & 2) {
@@ -2374,7 +2374,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
                 }
             } while (mdlGetMotionCtrlr(model, packed.bits.group) == NULL);
         }
-        if (packed.bits.motion >= mdlGetNumOfCut((dds3ModelHandle_t *)model, packed.bits.group)) {
+        if (packed.bits.motion >= mdlGetNumOfCut(model, packed.bits.group)) {
             packed.bits.motion = 0;
         }
         break;

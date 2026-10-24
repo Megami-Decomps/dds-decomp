@@ -227,7 +227,7 @@ void mdlSmoothLoopMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex, 
 u8 mdlHasMotionEx(dds3ModelHandle_t *ctx, s32 searchId);
 
 /* The referenced halfword is promoted to a word-sized SDK result. */
-s32 mdlGetNumOfCut(dds3ModelHandle_t *ctx, s32 searchId);
+s32 mdlGetNumOfCut(const dds3ModelHandle_t *ctx, s32 searchId);
 
 /* Count of following entity-slot packets in a grouped record. */
 u16 mdlPibGetMotionCount(const MdlRecord *record);

@@ -1166,8 +1166,8 @@ u32 mdlGetNumOfMinor(s32 tableIndex) {
 
 /* Read the referenced halfword or return zero for a missing node. A present
  * node's motion-table reference is dereferenced without a separate NULL check. */
-s32 mdlGetNumOfCut(dds3ModelHandle_t *ctx, s32 searchId) {
-    sdfMotionCtrlr_t *matchedNode = mdlGetMotionCtrlr(ctx, searchId);
+s32 mdlGetNumOfCut(const dds3ModelHandle_t *ctx, s32 searchId) {
+    const sdfMotionCtrlr_t *matchedNode = mdlFindNodeByIdReadOnly(ctx, searchId);
     if (matchedNode == NULL) {
         return 0;
     }
