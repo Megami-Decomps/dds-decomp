@@ -199,7 +199,7 @@ typedef struct BtlState {
     u8 pad1CE[2];
     s32 eventAction; /* 0x1D0 */
     struct SoundMixer *eventResult; /* 0x1D4 */
-    void *eventRequest; /* 0x1D8 */
+    struct SoundMixer *eventRequest; /* 0x1D8 */
     void *eventData; /* 0x1DC */
     BtlUnit *eventUnit; /* 0x1E0 */
     s32 sequenceHandle; /* 0x1E4 */
@@ -440,7 +440,7 @@ typedef struct BtlState {
     u8 pad1F2[2];
     s32 eventAction; /* 0x1F4 */
     struct SoundMixer *eventResult; /* 0x1F8 */
-    void *eventRequest; /* 0x1FC */
+    struct SoundMixer *eventRequest; /* 0x1FC */
     void *eventData; /* 0x200 */
     BtlUnit *eventUnit; /* 0x204 */
     s32 sequenceHandle; /* 0x208 */

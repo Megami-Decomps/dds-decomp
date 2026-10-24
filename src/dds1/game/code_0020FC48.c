@@ -193,7 +193,7 @@ void btlUpdateEventPlayback(void) {
             battle->eventData = NULL;
         }
         if (battle->eventRequest != NULL) {
-            sndReleaseAllVoices((SoundMixer *)battle->eventRequest);
+            sndReleaseAllVoices(battle->eventRequest);
             battle->eventRequest = NULL;
         }
         battle->eventAction = -1;
@@ -205,7 +205,7 @@ void btlUpdateEventPlayback(void) {
             battle->eventData = NULL;
         }
         if (battle->eventRequest != NULL) {
-            sndReleaseAllVoices((SoundMixer *)battle->eventRequest);
+            sndReleaseAllVoices(battle->eventRequest);
         }
         battle->eventRequest = sndMixerClone(battle->eventResult);
         battle->eventActive = 2;
@@ -215,7 +215,7 @@ void btlUpdateEventPlayback(void) {
         if (battle->eventData != NULL) {
             effBTLCutDelete((effBTLCutHandle_t *)battle->eventData);
         }
-        battle->eventData = effCreateBattleVoiceOwner((SoundMixer *)battle->eventRequest, 1,
+        battle->eventData = effCreateBattleVoiceOwner(battle->eventRequest, 1,
                                           battle->eventUnit, 0);
         battle->eventActive = 3;
         btlStartTask(sndCreateReleaseTask(0xC));
@@ -247,7 +247,7 @@ void btlUpdateEventPlayback(void) {
 
         {
             s32 selectedFrame = effBTLGetDrawEndFrame(
-                (SoundMixer *)battle->eventRequest, 1);
+                battle->eventRequest, 1);
             frame = (s32)effBTLCutGetFrame((effBTLCutHandle_t *)battle->eventData);
             if (frame == 1) {
                 battle->battleFlags &= ~0x40000;
