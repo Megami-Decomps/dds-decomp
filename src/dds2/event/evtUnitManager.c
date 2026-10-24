@@ -1094,6 +1094,7 @@ void evtCopyUnitTargetVector(evtUnitHandle_t *work, const f32 src[4]) {
 #include "kwln_task_add_child.h"
 #include "fpu.h"
 #include "mdl_motion_api.h"
+#include "mdl_motion_end_status.h"
 #include "mdl_world_object_source_vector_api.h"
 #include "itf_mes_window.h"
 #include "evt_world.h"
@@ -1496,7 +1497,7 @@ s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
                     mdlSmoothSingleMotion(model, i, unit->slotA[i], (f32)unit->slotB[i], (f32)unit->slotC[i]);
                 }
             }
-            if (mdlChkMotionEndEx(model, i) != 0) {
+            if (mdlChkMotionEndEx(model, i) != MDL_MOTION_END_NOT_TERMINAL) {
                 if (unit->slotFlags[i] & 4) {
                     if ((unit->flags & 0x1000000) == 0) {
                         mdlSmoothLoopMotion(model, i, unit->tableValues[i], 0.0f, 0.0f);
@@ -2123,7 +2124,7 @@ u32 evtCommand_MODEL_EXWAIT(void) {
     if (((unit->slotFlags[motionNodeIndex] & 1) & 0xFF) == 0) {
         return ret;
     }
-    return mdlChkMotionEndEx(unit->owner, scrGetIntPara(1)) != 0;
+    return mdlChkMotionEndEx(unit->owner, scrGetIntPara(1)) != MDL_MOTION_END_NOT_TERMINAL;
 }
 
 u32 evtCmdDestroySelectedWorldUnit(void) {

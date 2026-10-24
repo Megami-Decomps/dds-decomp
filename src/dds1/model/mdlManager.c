@@ -9,6 +9,7 @@
 #include "sdf_resource_list_release_api.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
+#include "mdl_motion_end_status.h"
 #include "mdl_part_tag_record.h"
 #include "mdl_resource_table.h"
 #include "sdf_motion.h"
@@ -906,7 +907,6 @@ static inline const sdfMotionCtrlr_t *mdlFindNodeByIdReadOnly(const dds3ModelHan
 }
 
 #define MDL_NODE_FIELD_MISSING (-1)
-#define MDL_NODE_MOTION_STATUS_MISSING 2
 
 /* Read the motion selector, widened to s32. Missing nodes return -1,
  * distinct from a present selector of 0xFFFF. */
@@ -940,12 +940,12 @@ s32 mdlGetMotionFrameEx(const dds3ModelHandle_t *ctx, s32 searchId) {
     return (s32)matchedNode->currentFrame;
 }
 
-/* Report whether a node is terminal, using 2 to distinguish a missing node. */
-s32 mdlChkMotionEndEx(const dds3ModelHandle_t *ctx, s32 searchId) {
+/* Report its terminal state, or the shared missing-node status. */
+MdlMotionEndStatus mdlChkMotionEndEx(const dds3ModelHandle_t *ctx, s32 searchId) {
     const sdfMotionCtrlr_t *matchedNode = mdlFindNodeByIdReadOnly(ctx, searchId);
 
     if (matchedNode == NULL) {
-        return MDL_NODE_MOTION_STATUS_MISSING;
+        return MDL_MOTION_END_NODE_MISSING;
     }
     return matchedNode->state == SDF_MOTION_STATE_TERMINAL;
 }
