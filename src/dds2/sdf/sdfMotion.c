@@ -18,7 +18,7 @@
 
 
 
-f32 sdfMotInterpolateKeyFloat(SdfMotionKeyInterval *interval);
+f32 sdfMotInterpolateKeyFloat(const SdfMotionKeyInterval *interval);
 
 extern s32 (*D_0040B368[])(void *binding, s32 selector, s32 targetIndex);
 
@@ -347,7 +347,7 @@ void sdfMotGetKey(SdfMotionKeyBinding *binding,
 }
 
 /* Linear blend of two sampled scalar keys: first + second*weight - first*weight. */
-f32 sdfMotInterpolateKeyFloat(SdfMotionKeyInterval *interval) {
+f32 sdfMotInterpolateKeyFloat(const SdfMotionKeyInterval *interval) {
     f32 firstValue;
     f32 interpolationWeight;
 
@@ -358,12 +358,12 @@ f32 sdfMotInterpolateKeyFloat(SdfMotionKeyInterval *interval) {
 }
 
 /* vu0 routine: blend the two bracketing vec3 keys by the key weight into vf10. */
-void sdfMotInterpolateKeyXYZ(SdfMotionKeyInterval *interval) {
+void sdfMotInterpolateKeyXYZ(const SdfMotionKeyInterval *interval) {
     VU0_LERP_VEC3_KEYS(interval->firstKey, interval->secondKey, interval->weight);
 }
 
 /* vu0 routine: blend the two bracketing RGBA colour keys by the key weight. */
-u32 sdfMotInterpolateKeyColor(SdfMotionKeyInterval *interval) {
+u32 sdfMotInterpolateKeyColor(const SdfMotionKeyInterval *interval) {
     u32 color;
 
     EE_MMI_RGBA_LERP(color, *(u32 *)interval->firstKey, *(u32 *)interval->secondKey, interval->weight, 0.5f);
@@ -371,7 +371,7 @@ u32 sdfMotInterpolateKeyColor(SdfMotionKeyInterval *interval) {
 }
 
 /* Interpolate exactly five scalar channels, retaining the retail arithmetic order. */
-void sdfMotInterpolateKeyUvwSub(f32 *dst, f32 *src1, f32 *src2, f32 weight) {
+void sdfMotInterpolateKeyUvwSub(f32 *dst, const f32 *src1, const f32 *src2, f32 weight) {
     s32 channelIndex;
     f32 inverseWeight;
 
@@ -383,7 +383,7 @@ void sdfMotInterpolateKeyUvwSub(f32 *dst, f32 *src1, f32 *src2, f32 weight) {
     } while (channelIndex != 5);
 }
 
-void sdfMotInterpolateKeyUvw(SdfMotionKeyInterval *src, f32 *dst) {
+void sdfMotInterpolateKeyUvw(const SdfMotionKeyInterval *src, f32 *dst) {
     sdfMotInterpolateKeyUvwSub(dst, src->firstKey, src->secondKey, src->weight);
 }
 
