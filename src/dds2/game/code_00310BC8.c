@@ -348,8 +348,8 @@ u32 frFontMeasureAndQueueGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *te
     return result;
 }
 
-u32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 depth, u32 colors, s8 type, void *glyphSource, s32 flag, s32 option) {
-    _FRQ *handle = frFontBuildGlyphChain(glyphSource, 0, type, 0, 0);
+u32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 depth, u32 colors, s8 type, const u8 *encodedText, s32 flag, s32 option) {
+    _FRQ *handle = frFontBuildGlyphChain((const char *)encodedText, 0, type, 0, 0);
     u32 result = 0;
     frSetFontColor(handle, colors);
     frSetDrawPosition(handle, x << 4, y << 3);

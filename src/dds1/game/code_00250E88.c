@@ -2213,7 +2213,7 @@ typedef struct DspTableWindowContext {
 
 extern DspUnitSpriteTable D_003BC440[];
 extern DspMantraName *D_003BAA78;
-extern s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 first, u32 second, s8 type, void *name, s32 flag, s32 option);
+extern s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 first, u32 second, s8 type, const u8 *encodedText, s32 flag, s32 option);
 
 /* Draw the selected mantra's display: sprite, fade-driven effect and its name (shifted left for long names). */
 void mnuDrawSelectedMantraProfile(s32 x, s32 y, s32 z, s32 alpha, DspTableWindowContext *windowContext, s32 drawContext) {
@@ -2229,10 +2229,12 @@ void mnuDrawSelectedMantraProfile(s32 x, s32 y, s32 z, s32 alpha, DspTableWindow
     scene->effectRoot->shade->shade = (s32)((f32)(alpha << 8) * 0.0078125f);
     effUpdateAttached(0xD80, 0xC30, 1, scene->effectRoot, 0x53);
     memset(scratch, 0, sizeof(scratch));
-    if (strlen((const char *)(D_003BAA78 + progress->profileId)) >= 5) {
-        frFontQueueTextAndOptionallyMeasure(x + 0xEF, y + 0x15E, z, alpha | 0xA09DC300, 0, D_003BAA78 + progress->profileId, 0x80000000, drawContext);
+    if (strlen((const char *)D_003BAA78[progress->profileId].encodedText) >= 5) {
+        frFontQueueTextAndOptionallyMeasure(x + 0xEF, y + 0x15E, z, alpha | 0xA09DC300, 0,
+                                            D_003BAA78[progress->profileId].encodedText, 0x80000000, drawContext);
     } else {
-        frFontQueueTextAndOptionallyMeasure(x + 0xF8, y + 0x15E, z, alpha | 0xA09DC300, 0, D_003BAA78 + progress->profileId, 0x80000000, drawContext);
+        frFontQueueTextAndOptionallyMeasure(x + 0xF8, y + 0x15E, z, alpha | 0xA09DC300, 0,
+                                            D_003BAA78[progress->profileId].encodedText, 0x80000000, drawContext);
     }
 }
 
