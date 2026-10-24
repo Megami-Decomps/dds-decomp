@@ -693,31 +693,31 @@ extern void btlUpdateApproachCameraPose(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *, BtlCamState *);
 
-void btlDispatchActionCameraStep(u8 *actor) {
+void btlDispatchActionCameraStep(BtlLinkedCommand *action) {
     BtlState *runtime = (BtlState *)btlGetRuntime();
     s32 (*callback)(BtlLinkedCommand *) = runtime->actionCameraStepHook;
 
-    if (callback != 0 && callback((BtlLinkedCommand *)actor) != 0) {
+    if (callback != 0 && callback(action) != 0) {
         return;
     }
-    switch (*(u16 *)(actor + 0x10C)) {
+    switch (action->stepKind) {
     case 2:
-        btlRefreshActionPoseBlendSnapshot(actor, actor);
+        btlRefreshActionPoseBlendSnapshot(action, action);
         break;
     case 9:
-        btlBuildApproachCamera((BtlLinkedCommand *)actor, &((BtlLinkedCommand *)actor)->camera);
+        btlBuildApproachCamera(action, &action->camera);
         break;
     case 4:
-        btlAimEffectPoseAtUnit(actor, actor);
+        btlAimEffectPoseAtUnit(action, action);
         break;
     case 5:
-        btlBeginActionEndCameraPullback(actor, actor);
+        btlBeginActionEndCameraPullback(action, action);
         break;
     case 7:
-        btlUpdateApproachCameraPose((BtlLinkedCommand *)actor, &((BtlLinkedCommand *)actor)->camera);
+        btlUpdateApproachCameraPose(action, &action->camera);
         break;
     case 8:
-        btlBuildHeightClampedApproachCamera((BtlLinkedCommand *)actor, &((BtlLinkedCommand *)actor)->camera);
+        btlBuildHeightClampedApproachCamera(action, &action->camera);
         break;
     }
 }
