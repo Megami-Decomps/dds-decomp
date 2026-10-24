@@ -13,6 +13,7 @@ typedef struct dds3ModelHandle_t dds3ModelHandle_t;
 
 struct MdlPartEntry;
 struct MdlObj;
+struct SdfPoolNode;
 /* Relative-linked viewer records share packed payload and parameter words.
  * Kinds 1/2 use the count and part-index halfwords at 0x0C/0x0E; kind 3
  * reads the whole parameter word. Kind 4 reads both selector halfwords at 0x08/0x0A. */
