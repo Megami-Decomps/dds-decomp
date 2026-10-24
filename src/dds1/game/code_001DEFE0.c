@@ -9660,8 +9660,7 @@ SoundHandleNode *sndCreateSystemEffectHandle(struct dds3ModelHandle_t *actor, s3
     return node;
 }
 
-void btlUpdateJobPositionFromModel(s32 *args) {
-    SoundHandleNode *node = (SoundHandleNode *)args;
+void btlUpdateJobPositionFromModel(SoundHandleNode *node) {
     f32 pos[4];
 
     if (sdfModelGetMarkPos(node->actor->inner, 1) == 0) {
@@ -9675,8 +9674,7 @@ void btlUpdateJobPositionFromModel(s32 *args) {
     fileQueueUpdate(node->queue);
 }
 
-void sndDestroyFileQueueWrapper(u32 handle) {
-    SoundHandleNode *node = (SoundHandleNode *)handle;
+void sndDestroyFileQueueWrapper(SoundHandleNode *node) {
     fileQueueDestroy(node->queue);
     sdfChipFreeDirect(node);
 }

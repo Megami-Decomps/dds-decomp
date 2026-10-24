@@ -56,7 +56,7 @@ extern void kwlnDebugGraphSetEnabled(s8 enabled);
 extern void mnuDrawIconPanelDefaultFlag(s32 x, s32 y, s32 depth, s32 fade, MenuPanelHandles *list, s32 drawArg);
 extern void mnuUpdateWindowPanelHandleStates(MenuPanelHandles *panel);
 extern s32 sdfApplyCommandResults(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
-extern void sndDestroyFileQueueWrapper(u32 handle);
+extern void sndDestroyFileQueueWrapper(struct SoundHandleNode *node);
 /* Original-style implicit int, kept: matched code depends on it: sndCreateSystemEffectHandle. */
 
 struct _FRQ;
@@ -121,7 +121,7 @@ extern void mnuInitPairedPanelResources(MenuEffectPair *, s32, s32 *, s32, s32, 
 
 
 extern void evtStageTestCreateModelEffect(s32);
-extern void btlUpdateJobPositionFromModel(s32);
+extern void btlUpdateJobPositionFromModel(struct SoundHandleNode *node);
 extern void mnuApplyModelCamera(dds3ModelHandle_t *);
 extern void evtStageTestApplyEntryRotation(dds3ModelHandle_t *);
 extern void evtStageTestUpdateCamera(void);
@@ -2880,7 +2880,7 @@ void evtStageTestCreateModelEffect(s32 unused) {
 /* Destroy a nonzero model-effect handle and clear it; zero is already released. */
 void evtStageTestDestroyModelEffect(void) {
     StageTestState *stage = &evtStageTestState;
-    u32 effectHandle = stage->effect;
+    struct SoundHandleNode *effectHandle = stage->effect;
 
     if (effectHandle == 0) {
         return;

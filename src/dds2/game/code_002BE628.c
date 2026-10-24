@@ -62,7 +62,7 @@ extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *resource, s32 reso
 extern void kwlnDebugGraphSetEnabled(s8 enabled);
 extern u8 ptyIsRosterEntryPresent(s32 rosterIndex);
 extern s32 sdfApplyCommandResults(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
-extern void sndDestroyFileQueueWrapper(u32 handle);
+extern void sndDestroyFileQueueWrapper(struct SoundHandleNode *node);
 /* Original-style implicit int, kept: matched code depends on it: qsort, sndCreateSystemEffectHandle. */
 
 extern void mnuSetGroupPair(struct MenuPanelItem *, u32, u32);
@@ -135,7 +135,7 @@ extern void evtStageTestApplyInitialMotion(s32 initialMotionIndex);
 extern void evtStageTestQueueMotionSegment(u32, f32, f32);
 extern void evtStageTestCreateModelEffect(s32);
 extern void evtStageTestUpdateCamera(void);
-extern void btlUpdateJobPositionFromModel(s32);
+extern void btlUpdateJobPositionFromModel(struct SoundHandleNode *node);
 extern u32 ptyGetSkillNibbleState(datUnitWork_t *, u16);
 
 extern void evtStageTestStop(void);
@@ -3709,7 +3709,7 @@ void evtStageTestCreateModelEffect(s32 unused) {
 /* Destroy a nonzero model-effect handle and clear it; zero is already released. */
 void evtStageTestDestroyModelEffect(void) {
     StageTestState *stage = &evtStageTestState;
-    u32 effectHandle = stage->effect;
+    struct SoundHandleNode *effectHandle = stage->effect;
 
     if (effectHandle == 0) {
         return;

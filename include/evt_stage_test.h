@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+struct SoundHandleNode;
+
 /* Fixed-size source entry consumed by both stage-test viewers. */
 typedef struct StageTestEntry {
     u8 modelId;      /* 0x00 */
@@ -57,7 +59,7 @@ typedef struct StageTestState {
     u8 pad0D[3];
     StageTestEntry *entries;
     StageTestQueue queue;
-    s32 effect;
+    struct SoundHandleNode *effect;
     s32 pendingEffect;
 #if defined(VERSION_DDS2)
     s32 modelUpdateStarted;
