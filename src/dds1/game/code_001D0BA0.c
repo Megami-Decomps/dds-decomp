@@ -3546,20 +3546,21 @@ u32 btlPollThresholdTask(BtlRuntimeTaskArgs *arguments) {
     return 0;
 }
 
-void *btlScheduleThresholdTask(u8 *owner, u32 threshold) {
+BtlRuntimeTask *btlScheduleThresholdTask(BtlUnit *actor, s32 option) {
     u8 *task = btlAllocTask(8);
-    u32 *arguments;
+    u8 *actorBytes = (u8 *)actor;
+    BtlRuntimeTaskArgs *arguments;
 
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0xB;
     *(void **)(task + 0x4C) = btlPollThresholdTask;
-    *(s64 *)(task + 0x40) = *(s64 *)(owner + 0x108);
+    *(s64 *)(task + 0x40) = *(s64 *)(actorBytes + 0x108);
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    arguments[1] = threshold;
-    return task;
+    arguments->actor = actor;
+    arguments->option = option;
+    return (BtlRuntimeTask *)task;
 }
 
 
