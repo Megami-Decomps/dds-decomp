@@ -254,7 +254,7 @@ extern s32 fileOnAllWritten(void);
 extern void dds3SoftResetOff(void);
 extern s8 dds3PadButtonState[];
 extern void p2sdStopBGM(s32 command);
-extern s32 slExitWait(void *callback);
+extern s32 slExitWait(FileMenuContinuationCallback callback);
 
 extern s32 mcHandleDetectionResult(void);
 
@@ -346,7 +346,7 @@ extern s32 fileResetSelection(void);
 /* 0x40-byte backing region; the browser uses the first ten slot states. */
 extern u32 fileSlotDisplayStates[16];
 
-extern void *fileWaitContinuation;
+extern FileMenuContinuationCallback fileWaitContinuation;
 
 extern s32 slExitWaitProc(void);
 
@@ -979,7 +979,7 @@ s32 fileStoreSlotHeader(void) {
     return fileBeginSlotMetadataRefresh();
 }
 
-s32 slExitWait(void *callback) {
+s32 slExitWait(FileMenuContinuationCallback callback) {
     dds3FadeOut(0, 0, 0, 15);
     fileWaitContinuation = callback;
     fileWaitTicksRemaining = 0x14;
@@ -1413,7 +1413,7 @@ s32 slExitWaitProc(void) {
         if (fileMenuContinuation == (FileMenuContinuationCallback)-1) {
             return -1;
         }
-        return ((s32 (*)())fileWaitContinuation)();
+        return fileWaitContinuation();
     }
     return 0;
 }
@@ -1433,7 +1433,7 @@ s32 mcdFinishFileDetection(void) {
             p2sdStopBGM(0x310000);
         }
         if (fileMenuContinuation == (FileMenuContinuationCallback)-1) {
-            return slExitWait((void *)-1);
+            return slExitWait((FileMenuContinuationCallback)-1);
         }
         return fileMenuContinuation();
     }
@@ -1463,7 +1463,7 @@ s32 filePollSlotRequestAndResumeFlow(void) {
             D_00437D3C = 0;
             D_00437CF8 = 0;
             if (fileMenuContinuation == (FileMenuContinuationCallback)-1) {
-                return slExitWait((void *)-1);
+                return slExitWait((FileMenuContinuationCallback)-1);
             }
             return fileMenuContinuation();
         }

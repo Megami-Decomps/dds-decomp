@@ -169,7 +169,7 @@ extern u32 D_003BC888;
 extern void *fileSaveReadBuffer;
 
 extern struct _FRQ *fileMenuConvertedTextGlyph;
-extern void *fileWaitContinuation;
+extern FileMenuContinuationCallback fileWaitContinuation;
 
 extern s32 fileWaitTicksRemaining;
 
@@ -377,7 +377,7 @@ extern s32 fileSlotScanIndex;
 
 extern char D_003B2658[];
 
-extern s32 slExitWait(void *callback);
+extern s32 slExitWait(FileMenuContinuationCallback callback);
 
 extern void mcFormatSaveFilename(char *dst, s32 number);
 
@@ -916,7 +916,7 @@ s32 fileStoreSlotHeader(void) {
     return fileBeginSlotMetadataRefresh();
 }
 
-s32 slExitWait(void *callback) {
+s32 slExitWait(FileMenuContinuationCallback callback) {
     dds3FadeOut(0, 0, 0, 15);
     fileWaitContinuation = callback;
     fileWaitTicksRemaining = 20;
@@ -1329,7 +1329,7 @@ s32 slExitWaitProc(void) {
         if (fileMenuContinuation == (FileMenuContinuationCallback)-1) {
             return -1;
         }
-        return ((s32 (*)())fileWaitContinuation)();
+        return fileWaitContinuation();
     }
     return 0;
 }
@@ -1348,7 +1348,7 @@ s32 mcdFinishFileDetection(void) {
         D_003BC810 = 0;
         p2sdStopBGM(0x310000);
         if (fileMenuContinuation == (FileMenuContinuationCallback)-1) {
-            return slExitWait((void *)-1);
+            return slExitWait((FileMenuContinuationCallback)-1);
         }
         return fileMenuContinuation();
     }
@@ -1378,7 +1378,7 @@ s32 filePollSlotRequestAndResumeFlow(void) {
             D_003BC854 = 0;
             D_003BC810 = 0;
             if (fileMenuContinuation == (FileMenuContinuationCallback)-1) {
-                return slExitWait((void *)-1);
+                return slExitWait((FileMenuContinuationCallback)-1);
             }
             return fileMenuContinuation();
         }
