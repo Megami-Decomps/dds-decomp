@@ -4592,14 +4592,13 @@ extern u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *);
 
 BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *owner, f32 value) {
     BtlRuntimeTask *task = (BtlRuntimeTask *)btlAllocTask(sizeof(BtlDamageShakeArgs));
-    u8 *ownerBytes = (u8 *)owner;
     BtlDamageShakeArgs *arguments;
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x1D;
     task->callback = btlStiffenDamageShakeStep;
-    task->ownerId = *(u64 *)(ownerBytes + 0x108);
+    task->ownerId = owner->identity;
     task->onStart = 0;
     arguments = btlGetTaskArguments(task);
     arguments->unit = owner;
@@ -4683,14 +4682,13 @@ extern u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *);
 /* Queue the actor's position effect with its tick counter reset. */
 BtlRuntimeTask *btlCreateActorPositionEffectTask(BtlUnit *unit) {
     BtlRuntimeTask *task = (BtlRuntimeTask *)btlAllocTask(0x10);
-    u8 *unitBytes = (u8 *)unit;
     BtlPositionEffectArgs *args;
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlAdvanceActorPositionEffectTask;
     task->taskId = 0x1E;
-    task->ownerId = *(u64 *)(unitBytes + 0x108);
+    task->ownerId = unit->identity;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
     args->unit = unit;
@@ -4699,28 +4697,28 @@ BtlRuntimeTask *btlCreateActorPositionEffectTask(BtlUnit *unit) {
 }
 
 /* Apply the queued actor's stored orientation and complete immediately. */
-u32 btlApplyQueuedActorRotation(BtlUnit **taskArgs) {
+u32 btlApplyQueuedActorRotation(BtlRuntimeTaskArgs *taskArgs) {
     BtlUnit *unit;
 
-    unit = *taskArgs;
+    unit = taskArgs->actor;
     unit->status.flags = (u32)unit->status.flags & 0xffffffef;
     btlSetUnitRotation(unit, unit->rotation);
     return 1;
 }
 
 BtlRuntimeTask *btlScheduleActorUpdate(BtlUnit *unit) {
-    u8 *task = btlAllocTask(4);
-    BtlUnit **arguments;
+    BtlRuntimeTask *task = btlAllocTask(4);
+    BtlRuntimeTaskArgs *arguments;
 
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(void **)(task + 0x4C) = btlApplyQueuedActorRotation;
-    *(u16 *)(task + 0x20) = 0x1F;
-    *(s64 *)(task + 0x40) = *(s64 *)((u8 *)unit + 0x108);
-    *(u32 *)(task + 0x48) = 0;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
+    task->callback = btlApplyQueuedActorRotation;
+    task->taskId = 0x1F;
+    task->ownerId = unit->identity;
+    task->onStart = 0;
     arguments = btlGetTaskArguments(task);
-    *arguments = unit;
-    return (BtlRuntimeTask *)task;
+    arguments->actor = unit;
+    return task;
 }
 
 u32 btlRefreshUnitFxVectorTask(BtlUnit **taskArgs) {
