@@ -580,7 +580,7 @@ void effResetModelMotionAndOwnerFlag(EffResourceOwner *work) {
 
 extern void effGetWorldVector(u32);
 extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *, s32);
-extern void sdfVuMatrixToQuaternion(f32 [4][4]);
+extern void sdfVuMatrixToQuaternion(const f32 [4][4]);
 extern void btlDebugDrawSegment(f32 *, f32 *, u32);
 extern void btlDebugDrawPoint(f32 *);
 extern f32 effWorldUpVector[4];

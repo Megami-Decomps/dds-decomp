@@ -269,7 +269,7 @@ extern s32 D_003E8008[];
 extern SdfPoolNode *effPacketSubmissionSurfaces[6];
 
 
-extern void sdfVuMatrixToQuaternion(f32 matrix[4][4]);
+extern void sdfVuMatrixToQuaternion(const f32 matrix[4][4]);
 
 /* Effect parameter-set dispatch tables. Every effect kind owns one 0x28-byte
  * entry per table; the handler lives at +0x0. Slots are declared as separate
@@ -4583,7 +4583,7 @@ void vuBuildLookAtBasis(void)
 }
 
 /* The quaternion result is returned in vf10 for the VU transform routines. */
-void sdfVuMatrixToQuaternion(f32 matrix[4][4]) {
+void sdfVuMatrixToQuaternion(const f32 matrix[4][4]) {
     f32 quaternion[4];
     f32 trace = matrix[0][0] + matrix[1][1] + matrix[2][2] + matrix[3][3];
     f32 scale;

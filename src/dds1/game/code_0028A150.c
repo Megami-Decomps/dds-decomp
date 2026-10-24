@@ -358,7 +358,7 @@ extern s32 mcHandleDetectionResult(void);
 
 extern void fileQueueInitTransform(void *queue);
 
-extern void sdfVuMatrixToQuaternion(f32 matrix[4][4]);
+extern void sdfVuMatrixToQuaternion(const f32 matrix[4][4]);
 
 
 
@@ -4146,7 +4146,7 @@ void vuBuildLookAtBasis(void)
 }
 
 /* The quaternion result is returned in vf10 for the VU transform routines. */
-void sdfVuMatrixToQuaternion(f32 matrix[4][4]) {
+void sdfVuMatrixToQuaternion(const f32 matrix[4][4]) {
     f32 quaternion[4];
     f32 trace = matrix[0][0] + matrix[1][1] + matrix[2][2] + matrix[3][3];
     f32 scale;

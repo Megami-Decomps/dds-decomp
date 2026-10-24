@@ -329,7 +329,7 @@ extern EffRecordBucket D_00400508[];
 
 extern void effSetCurveEmitterStartPosition(s32, void *);
 
-extern void sdfVuMatrixToQuaternion(f32 matrix[4][4]);
+extern void sdfVuMatrixToQuaternion(const f32 matrix[4][4]);
 
 extern f32 effWorldUpVector[4];
 
