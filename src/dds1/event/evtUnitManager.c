@@ -11,6 +11,7 @@ struct EffNodeDescriptor;
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
+#include "evt_unit_motion_slot_flags.h"
 #include "evt_unit_transition_flags.h"
 #include "evt_effect_scale_object.h"
 #include "evt_unit_motion_setup.h"
@@ -868,19 +869,20 @@ void evtActivateStoredUnitMotionSlot(evtUnitHandle_t *unit) {
 
 void evtConfigureUnitMotionSlot(evtUnitHandle_t *unit, s32 slot, s32 slotAValue, s32 slotBValue,
                                 s32 slotCValue, EvtUnitMotionSlotMode mode) {
-    unit->slotFlags[slot] = 3;
+    unit->slotFlags[slot] = EVT_UNIT_MOTION_SLOT_ENABLED |
+                            EVT_UNIT_MOTION_SLOT_START_PENDING;
     unit->slotA[slot] = slotAValue;
     unit->slotB[slot] = slotBValue;
     unit->slotC[slot] = slotCValue;
     switch (mode) {
     case EVT_UNIT_MOTION_SLOT_MODE_LOOP_ON_MOTION_END:
-        unit->slotFlags[slot] |= 0x4;
+        unit->slotFlags[slot] |= EVT_UNIT_MOTION_SLOT_LOOP_ON_MOTION_END;
         break;
     case EVT_UNIT_MOTION_SLOT_MODE_LOOP_EXTERNAL_MOTION:
-        unit->slotFlags[slot] |= 0x8;
+        unit->slotFlags[slot] |= EVT_UNIT_MOTION_SLOT_LOOP_EXTERNAL_MOTION;
         break;
     case EVT_UNIT_MOTION_SLOT_MODE_STOP_ON_BATTLE_ACTION:
-        unit->slotFlags[slot] |= 0x10;
+        unit->slotFlags[slot] |= EVT_UNIT_MOTION_SLOT_STOP_ON_BATTLE_ACTION;
         break;
     }
 }
@@ -1438,19 +1440,19 @@ s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
         unit->effObj->inner->flags = (unit->effObj->inner->flags | 1) & ~2;
     }
     for (i = 1; i < 12; i++) {
-        enabled = unit->slotFlags[i] & 1;
+        enabled = unit->slotFlags[i] & EVT_UNIT_MOTION_SLOT_ENABLED;
         if (enabled != 0) {
-            if (unit->slotFlags[i] & 2) {
-                unit->slotFlags[i] &= ~2;
+            if (unit->slotFlags[i] & EVT_UNIT_MOTION_SLOT_START_PENDING) {
+                unit->slotFlags[i] &= ~EVT_UNIT_MOTION_SLOT_START_PENDING;
                 printf("set exmot %d_%d\n", i, unit->slotA[i]);
-                if (unit->slotFlags[i] & 8) {
+                if (unit->slotFlags[i] & EVT_UNIT_MOTION_SLOT_LOOP_EXTERNAL_MOTION) {
                     mdlSmoothLoopMotion(model, i, unit->slotA[i], (f32)unit->slotB[i], (f32)unit->slotC[i]);
                 } else {
                     mdlSmoothSingleMotion(model, i, unit->slotA[i], (f32)unit->slotB[i], (f32)unit->slotC[i]);
                 }
             }
             if (mdlChkMotionEndEx(model, i) != MDL_MOTION_END_NOT_TERMINAL &&
-                (unit->slotFlags[i] & 4)) {
+                (unit->slotFlags[i] & EVT_UNIT_MOTION_SLOT_LOOP_ON_MOTION_END)) {
                 mdlSmoothLoopMotion(model, i, unit->tableValues[i], 0.0f, 0.0f);
             }
         }
@@ -2064,7 +2066,7 @@ u32 evtCommand_MODEL_EXWAIT(void) {
         return result;
     }
     motionNodeIndex = scrGetIntPara(1);
-    if (((unit->slotFlags[motionNodeIndex] & 1) & 0xFF) == 0) {
+    if (((unit->slotFlags[motionNodeIndex] & EVT_UNIT_MOTION_SLOT_ENABLED) & 0xFF) == 0) {
         return result;
     }
     return mdlChkMotionEndEx(unit->owner, scrGetIntPara(1)) != MDL_MOTION_END_NOT_TERMINAL;
