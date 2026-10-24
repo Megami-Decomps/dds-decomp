@@ -367,7 +367,7 @@ extern FntNode *fmRentFontMem(void);
 
 /* Retain one atlas item and submit its pixel upload with the requested ownership
  * mode. Coordinates are converted from sixteenths; pool exhaustion is unchecked. */
-GsFont_t *frTranslateUserData(s32 width, s32 height, void *pixels, s8 ownsPixels) {
+GsFont_t *frTranslateUserData(s32 width, s32 height, u8 *pixels, s8 ownsPixels) {
     s32 imagePosition[2];
     SdfImageUploadRequest uploadRequest;
     FntNode *atlasNode;
