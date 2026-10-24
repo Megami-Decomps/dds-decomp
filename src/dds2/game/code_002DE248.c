@@ -12486,7 +12486,7 @@ void effApplySharedModelParameters(EffSharedEffectWork *work) {
 }
 
 /* General-heap descriptors and retained buffer addresses are distinct owners. */
-u8 *effCreateSharedEffectResourceWork(FileJobPayload *source) {
+EffSharedEffectWork *effCreateSharedEffectResourceWork(FileJobPayload *source) {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(sizeof(EffSharedEffectWork));
     EffSharedEffectWork *work = (EffSharedEffectWork *)sdfMemLock(allocation);
     void *secondary;
@@ -12513,7 +12513,7 @@ u8 *effCreateSharedEffectResourceWork(FileJobPayload *source) {
         work->resource->entries = (void *)sdfMemLock(work->resource->allocation);
         memcpy(work->resource->entries, secondary, work->resource->entriesSize);
     }
-    return (u8 *)work;
+    return work;
 }
 
 
@@ -12548,19 +12548,22 @@ void effReleaseSharedResourceReference(EffSharedEffectWork *work) {
 
 
 
-void effShareReferenceCountedEffectObject(s32 target, s32 source);
+void effShareReferenceCountedEffectObject(EffSharedEffectWork *target,
+                                          EffSharedEffectWork *source);
 
 void *effCloneEffectRequest(void *src, u16 type) {
-    u8 *dst = effCreateSharedEffectResourceWork(0);
+    EffSharedEffectWork *source = (EffSharedEffectWork *)src;
+    EffSharedEffectWork *dst = effCreateSharedEffectResourceWork(0);
 
-    ((EffSharedEffectWork *)dst)->data = ((EffSharedEffectWork *)src)->data;
-    effShareReferenceCountedEffectObject((s32)dst, (s32)src);
+    dst->data = source->data;
+    effShareReferenceCountedEffectObject(dst, source);
     return dst;
 }
 
-void effShareReferenceCountedEffectObject(s32 target, s32 source) {
-    ((EffSharedEffectWork *)target)->resource = ((EffSharedEffectWork *)source)->resource;
-    ((EffSharedEffectWork *)source)->resource->references++;
+void effShareReferenceCountedEffectObject(EffSharedEffectWork *target,
+                                          EffSharedEffectWork *source) {
+    target->resource = source->resource;
+    source->resource->references++;
 }
 
 /* Sample the retained model's first motion at frame zero when a model is present. */
