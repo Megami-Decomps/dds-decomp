@@ -54,7 +54,7 @@ typedef struct DatModelFlags {
 typedef struct DatWorldState {
     u8 flags;
     u8 phase;
-    u8 secondaryPhase;
+    u8 timedEventSolarCycleCount;
     u8 overlayFlag;
     f32 phaseTimer;
     u32 specialEncounterAttemptCount; /* +0x08: attempts in the current solar cycle. */

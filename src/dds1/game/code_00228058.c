@@ -428,10 +428,10 @@ void evtAdvanceSolarClockAndExpireControls(f32 travelDistance) {
                 fldLightMaClearMsg();
             }
             if (evtBitCheck(0x819)) {
-                DDS3_GBWK->world.secondaryPhase++;
-                if (DDS3_GBWK->world.secondaryPhase >= 81) {
+                DDS3_GBWK->world.timedEventSolarCycleCount++;
+                if (DDS3_GBWK->world.timedEventSolarCycleCount >= 81) {
                     evtBitOff(0x819);
-                    DDS3_GBWK->world.secondaryPhase = 0;
+                    DDS3_GBWK->world.timedEventSolarCycleCount = 0;
                 }
             }
         }
@@ -466,7 +466,7 @@ void evtStartSolarOverlay(void) {
     evtEnableMoonCalc();
     evtDisableMoonDraw();
     evtSetAgeOfMoon(0);
-    DDS3_GBWK->world.secondaryPhase = 0;
+    DDS3_GBWK->world.timedEventSolarCycleCount = 0;
 }
 
 void evtStopSolarOverlay(void) {
