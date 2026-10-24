@@ -587,9 +587,9 @@ INCLUDE_RODATA(const s32, "game/code_002E9708", D_003B48E0);
 
 INCLUDE_RODATA(const s32, "game/code_002E9708", D_003B4900);
 
-void sdfDumpDmaChain(u32 *src) {
-    u32 *callStack[2];
-    u32 *cursor;
+void sdfDumpDmaChain(SdfDmaTag *src) {
+    SdfDmaTag *callStack[2];
+    SdfDmaTag *cursor;
     u32 tag;
     u32 tagAddress;
     s32 tagType;
@@ -604,21 +604,21 @@ void sdfDumpDmaChain(u32 *src) {
             sdfPrintf(D_003B48A0, cursor);
             return;
         }
-        tag = cursor[0];
-        tagAddress = cursor[1];
+        tag = ((u32 *)cursor)[0];
+        tagAddress = cursor->address;
         tagType = (tag >> 28) & 7;
         tagCount = tag & 0xFFFF;
-        sdfPrintf(D_003B48B8, cursor, D_00398968[tagType], tag, tagAddress, cursor[2], cursor[3]);
-        cursor += 4;
+        sdfPrintf(D_003B48B8, cursor, D_00398968[tagType], tag, tagAddress, ((u32 *)cursor)[2], ((u32 *)cursor)[3]);
+        cursor++;
         switch (tagType) {
         case 0:
             done = 1;
             break;
         case 1:
-            cursor += tagCount * 4;
+            cursor += tagCount;
             break;
         case 2:
-            cursor = (u32 *)tagAddress;
+            cursor = (SdfDmaTag *)tagAddress;
             break;
         case 3:
         case 4:
@@ -629,7 +629,7 @@ void sdfDumpDmaChain(u32 *src) {
                 return;
             }
             callStack[depth++] = cursor;
-            cursor = (u32 *)tagAddress;
+            cursor = (SdfDmaTag *)tagAddress;
             break;
         case 6:
             if (depth == 0) {
@@ -639,7 +639,7 @@ void sdfDumpDmaChain(u32 *src) {
             }
             break;
         case 7:
-            cursor += tagCount * 4;
+            cursor += tagCount;
             done = 1;
             break;
         }
