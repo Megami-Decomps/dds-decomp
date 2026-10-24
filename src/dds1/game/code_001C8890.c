@@ -952,7 +952,7 @@ extern BtlRuntimeTask *sndCreateSetStateTask(void);
 extern BtlRuntimeTask *sndCreateClearStateTask(void);
 extern BtlRuntimeTask *btlScheduleActorUpdate(BtlUnit *unit);
 extern BtlRuntimeTask *btlCreateClearActorEntrySelectionTask(BtlUnit *);
-extern u8 *btlCreateActorPositionEffectTask(u8 *);
+extern BtlRuntimeTask *btlCreateActorPositionEffectTask(BtlUnit *);
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
 
@@ -1219,7 +1219,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
             }
             lastOperandHandle = operandTask->handle;
             if (group->kind == 2 && operandIndex == 0) {
-                task = (BtlRuntimeTask *)btlCreateActorPositionEffectTask((u8 *)currentTarget);
+                task = btlCreateActorPositionEffectTask(currentTarget);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = operandTask->handle;
                 btlStartTask(task);
@@ -1659,7 +1659,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
                 }
                 latestOperandHandle = operandTask->handle;
                 if (group->kind == 2 && operandIndex == 0) {
-                    task = (BtlRuntimeTask *)btlCreateActorPositionEffectTask((u8 *)currentTarget);
+                    task = btlCreateActorPositionEffectTask(currentTarget);
                     task->startCondition.kind = 4;
                     task->startCondition.value.handle = operandTask->handle;
                     btlStartTask(task);

@@ -4678,18 +4678,19 @@ u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *task) {
 extern u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *);
 
 /* Queue the actor's position effect with its tick counter reset. */
-u8 *btlCreateActorPositionEffectTask(u8 *unit) {
-    u8 *task = btlAllocTask(0x10);
+BtlRuntimeTask *btlCreateActorPositionEffectTask(BtlUnit *unit) {
+    BtlRuntimeTask *task = (BtlRuntimeTask *)btlAllocTask(0x10);
+    u8 *unitBytes = (u8 *)unit;
     BtlPositionEffectArgs *args;
 
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(void **)(task + 0x4C) = btlAdvanceActorPositionEffectTask;
-    *(u16 *)(task + 0x20) = 0x1E;
-    *(u64 *)(task + 0x40) = *(u64 *)(unit + 0x108);
-    *(s32 *)(task + 0x48) = 0;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
+    task->callback = btlAdvanceActorPositionEffectTask;
+    task->taskId = 0x1E;
+    task->ownerId = *(u64 *)(unitBytes + 0x108);
+    task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->unit = (BtlUnit *)unit;
+    args->unit = unit;
     args->tick = 0;
     return task;
 }
