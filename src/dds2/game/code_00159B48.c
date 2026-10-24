@@ -3161,7 +3161,7 @@ EffTemplatePacketList *dds3Particle_SmokeOffsetCreate(EffTemplatePacketList *sou
     memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->head.templateSize, tailBytes);
     auxAllocationHandle = sdfMemAllocDirect(clone->head.particleCount * 0x10);
     clone->auxiliaryAllocation = auxAllocationHandle;
-    clone->auxiliaryData = (void *)sdfMemLock(auxAllocationHandle);
+    clone->auxiliaryVectors = sdfMemLock(auxAllocationHandle);
     dds3Particle_BasicCreate(&clone->head);
     dds3Particle_SmokeOffsetAllBuffInit(clone);
     return clone;

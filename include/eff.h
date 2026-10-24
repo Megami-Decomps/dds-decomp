@@ -626,7 +626,7 @@ typedef struct EffTemplatePacketList {
     s32 *recordList; /* 0x16C: start of the three-word packet records */
     s32 recordsPerPacket; /* 0x170 */
     struct sdfMemHandle_t *listAllocation; /* 0x174: allocation descriptor */
-    void *auxiliaryData; /* 0x178: optional 16 bytes per packet */
+    f32 (*auxiliaryVectors)[4]; /* 0x178: optional four-float record per packet */
     struct sdfMemHandle_t *auxiliaryAllocation; /* 0x17C: allocation descriptor */
 } EffTemplatePacketList;
 
