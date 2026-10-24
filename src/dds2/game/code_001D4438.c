@@ -773,12 +773,12 @@ void btlEnterStartActionState(ActionStateLink *task) {
 }
 
 extern s32 btlBothSidesActive(BtlUnit *);
-extern s32 btlCheckStatusActionEligibility(u8 *);
+extern s32 btlCheckStatusActionEligibility(ActionStateLink *);
 
-void btlActionSeqCheckDispatch(u8 *task) {
+void btlActionSeqCheckDispatch(ActionStateLink *task) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     u32 flags = scene->battleFlags;
-    BtlUnit *unit = ((ActionStateLink *)task)->unit;
+    BtlUnit *unit = task->unit;
     BtlUnit *actor;
     if (!(flags & 0x20)) {
         for (actor = scene->units; actor != 0; actor = actor->next) {
