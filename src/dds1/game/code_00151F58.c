@@ -2783,20 +2783,20 @@ void effScaleSingleParticleTemplate(float scale, EffTemplatePacketList *effect) 
 }
 
 /* Clone a single-particle template: the fixed prefix plus an empty appended tail. */
-void *effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
-    EffTemplatePacketList *clone = (EffTemplatePacketList *)sdfChipAllocDirect(0x150);
+EffEmitterHead *effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
+    EffEmitterHead *clone = sdfChipAllocDirect(0x150);
     s32 tailBytes = 0;
 
     memset(clone, 0, 0x150);
     memcpy(clone, source, source->head.templateSize);
     memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->head.templateSize, tailBytes);
-    clone->head.particleCount = 1;
-    clone->head.lifetimeFrames = 0;
-    dds3Particle_BasicCreate(&clone->head);
+    clone->particleCount = 1;
+    clone->lifetimeFrames = 0;
+    dds3Particle_BasicCreate(clone);
     return clone;
 }
 
-void effFreeSingleParticleTemplate(void *effect) {
+void effFreeSingleParticleTemplate(EffEmitterHead *effect) {
     dds3Particle_BasicDelete(effect);
     sdfChipFreeDirect(effect);
 }
