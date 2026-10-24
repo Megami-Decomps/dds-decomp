@@ -37,7 +37,7 @@ extern void mdlPackDecode(s32, u16, s32, void *, u32);
 
 extern u16 D_00437E2C;
 
-extern EffModelOwner *effCreateModelOwner(void *);
+extern EffModelOwner *effCreateModelOwner(FileJobPayload *);
 
 extern void effRecreateModelFromSource(EffModelOwner *, EffModelOwner *);
 
@@ -115,8 +115,7 @@ dds3ModelHandle_t *effCloneModelWithVUState(dds3ModelHandle_t *sourceModel) {
 }
 
 
-EffModelOwner *effCreateModelOwner(void *input) {
-    FileJobPayload *source = input;
+EffModelOwner *effCreateModelOwner(FileJobPayload *source) {
     EffModelOwner *owner = sdfAllocAndClearQuadwords(sizeof(*owner));
     owner->ownedBuffer = sdfAllocAndClearQuadwords(sizeof(*owner->ownedBuffer));
     if (source != NULL) {

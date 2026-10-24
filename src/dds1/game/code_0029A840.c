@@ -50,7 +50,7 @@ extern u8 btlIsRuntimeAllocated(void);
 
 extern s32 btlIsCurrentActorFullyMarked(void);
 
-extern EffModelOwner *effCreateModelOwner(void *);
+extern EffModelOwner *effCreateModelOwner(FileJobPayload *);
 
 extern u32 effSharedTextureReferenceCount;
 extern sdfTexHandle_t *D_003BC958;
@@ -96,8 +96,7 @@ void effDestroyModelContext(dds3ModelHandle_t *model) {
     mdlFree(model);
 }
 
-EffModelOwner *effCreateModelOwner(void *input) {
-    FileJobPayload *source = input;
+EffModelOwner *effCreateModelOwner(FileJobPayload *source) {
     EffModelOwner *owner = sdfAllocAndClearQuadwords(sizeof(EffModelOwner));
     owner->ownedBuffer = sdfAllocAndClearQuadwords(sizeof(*owner->ownedBuffer));
     if (source != NULL) {
@@ -242,7 +241,7 @@ EffModelOwner *effCreateFloorModelOwner(u8 *source) {
     EffModelOwner *owner;
     s32 battleActive;
 
-    owner = effCreateModelOwner(source);
+    owner = effCreateModelOwner((FileJobPayload *)source);
     effUploadModelTextures(owner);
     battleActive = btlIsRuntimeAllocated();
     if ((battleActive != 0) && (battleActive = btlIsCurrentActorFullyMarked(), battleActive == 0)) {
