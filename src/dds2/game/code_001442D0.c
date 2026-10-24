@@ -5091,7 +5091,7 @@ void func_00150800(void) {
         fclInitMessage(D_003A9EB0);
         fclStartMessage(6);
         D_00389874[0] = 1;
-        fldSparkControlState.state.dialogPhase = 12;
+        fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_UNAVAILABLE_MESSAGE;
         fldSparkControlState.state.phase = 0;
         fldSparkControlState.state.dialogTimer = 0;
         fldResetPlayerSceneObjectState();
@@ -5101,7 +5101,7 @@ void func_00150800(void) {
         fclInitMessage(D_003A9EB0);
         fclStartMessage(5);
         D_00389874[0] = 1;
-        fldSparkControlState.state.dialogPhase = 12;
+        fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_UNAVAILABLE_MESSAGE;
         fldSparkControlState.state.phase = 0;
         fldSparkControlState.state.dialogTimer = 0;
         fldResetPlayerSceneObjectState();
@@ -5123,7 +5123,7 @@ void func_00150800(void) {
     fldGlobalBase.collectedCount = 0;
     entryCount = record->entryCount;
     duration = record->duration;
-    control->state.dialogPhase = 1;
+    control->state.dialogPhase = FLD_SPARK_DIALOG_PHASE_ENTRY_PROMPT;
     control->state.countdown = duration;
     control->state.entryCount = entryCount;
     do {
@@ -5193,35 +5193,35 @@ void fldUpdateDevilizeEventSequence(void) {
     void *node;
 
     switch (fldSparkControlState.state.dialogPhase) {
-    case 12:
+    case FLD_SPARK_DIALOG_PHASE_UNAVAILABLE_MESSAGE:
         dspRequestMessageWindowModeOne();
         if (fclChkMessage() == 0) {
             evtFinishMessageWindowAndNotify();
             fclDestroyMessage();
-            fldSparkControlState.state.dialogPhase = 11;
+            fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_CANCELLED;
             fldGlobalBase.transitionMode = 0;
             evtSetSolarOverlayFullyVisible();
         }
         break;
-    case 1:
+    case FLD_SPARK_DIALOG_PHASE_ENTRY_PROMPT:
         dspRequestMessageWindowModeOne();
         if (fclChkMessage() == 0) {
             choice = evtGetCapturedWindowPanelValue();
             if (choice == 0) {
                 evtFinishMessageWindowAndNotify();
                 fclDestroyMessage();
-                fldSparkControlState.state.dialogPhase = 5;
+                fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_START_ARCHIVE_LOAD;
                 fldSparkControlState.state.dialogTimer = 0;
             } else if (choice == 1) {
                 evtFinishMessageWindowAndNotify();
                 fclDestroyMessage();
-                fldSparkControlState.state.dialogPhase = 11;
+                fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_CANCELLED;
                 fldGlobalBase.transitionMode = 0;
                 evtSetSolarOverlayFullyVisible();
             } else {
                 evtFinishMessageWindowAndNotify();
                 fclDestroyMessage();
-                fldSparkControlState.state.dialogPhase = 4;
+                fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_CONFIRM_PROMPT;
                 fldSparkControlState.state.dialogTimer = 0;
                 fclInitMessage(D_003A9EB0);
                 fclStartMessage(3);
@@ -5230,23 +5230,23 @@ void fldUpdateDevilizeEventSequence(void) {
             }
         }
         break;
-    case 4:
+    case FLD_SPARK_DIALOG_PHASE_CONFIRM_PROMPT:
         dspRequestMessageWindowModeOne();
         if (fclChkMessage() == 0) {
             evtFinishMessageWindowAndNotify();
             fclDestroyMessage();
-            fldSparkControlState.state.dialogPhase = 1;
+            fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_ENTRY_PROMPT;
             fldSparkControlState.state.dialogTimer = 0;
         }
         break;
-    case 5:
+    case FLD_SPARK_DIALOG_PHASE_START_ARCHIVE_LOAD:
         dds3WorkClear();
         fldBgmFadeOut();
         D_004363A0 = fileLoad("/fld/f/bin/DVILIZE.BED");
-        fldSparkControlState.state.dialogPhase = 6;
+        fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_WAIT_ARCHIVE_FILE;
         fldSparkControlState.state.dialogTimer = 0;
         break;
-    case 6:
+    case FLD_SPARK_DIALOG_PHASE_WAIT_ARCHIVE_FILE:
         if (pacFileCheckEnd(D_004363A0) != 0) {
             D_004363A8 = (u32)fileGetLoadPtr(D_004363A0);
             D_004363A4 = fileGetMemHandle(D_004363A0);
@@ -5261,10 +5261,10 @@ void fldUpdateDevilizeEventSequence(void) {
             D_003899E0[0] = 1;
             fldResetArchiveLoadPhase();
             fldSparkControlState.state.dialogTimer = 0;
-            fldSparkControlState.state.dialogPhase = 2;
+            fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_ARCHIVE_LOADING;
         }
         break;
-    case 2:
+    case FLD_SPARK_DIALOG_PHASE_ARCHIVE_LOADING:
         if (fldSparkControlState.state.dialogTimer == 20) {
             dds3EffectObjectBasicStatOn(fldSparkControlState.object, 1);
             dds3StartBEDEffectObjectBasic(fldSparkControlState.object, 0);
@@ -5272,10 +5272,10 @@ void fldUpdateDevilizeEventSequence(void) {
         fldSparkControlState.state.dialogTimer++;
         if (fldStepArchiveLoad() != 0) {
             mnuQueueTitleSoundStreamEntry(0x12);
-            fldSparkControlState.state.dialogPhase = 3;
+            fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_TITLE_STREAM_WAIT;
         }
         break;
-    case 3:
+    case FLD_SPARK_DIALOG_PHASE_TITLE_STREAM_WAIT:
         if (fldSparkControlState.state.dialogTimer == 20) {
             dds3EffectObjectBasicStatOn(fldSparkControlState.object, 1);
             dds3StartBEDEffectObjectBasic(fldSparkControlState.object, 0);
@@ -5283,10 +5283,10 @@ void fldUpdateDevilizeEventSequence(void) {
         fldSparkControlState.state.dialogTimer++;
         if (mnuPollTitleStreamStateLocked() == 2) {
             p2sdPlaySE(0x680010, 0x7F, 0x3F);
-            fldSparkControlState.state.dialogPhase = 8;
+            fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_PLAY_EVENT;
         }
         break;
-    case 8:
+    case FLD_SPARK_DIALOG_PHASE_PLAY_EVENT:
         if (fldSparkControlState.state.dialogTimer == 46) {
             dds3FadeOut(0xFF, 0xFF, 0xFF, 4);
         }
@@ -5296,39 +5296,39 @@ void fldUpdateDevilizeEventSequence(void) {
         }
         if (++fldSparkControlState.state.dialogTimer > 50) {
             fldSparkControlState.state.dialogTimer = 0;
-            fldSparkControlState.state.dialogPhase = 9;
+            fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_RESTORE_FIELD;
         }
         break;
-    case 9:
+    case FLD_SPARK_DIALOG_PHASE_RESTORE_FIELD:
         fldCreateSparkSlotObjects();
         fldLoadWeatherEffects();
         fldTogglePlayerModel();
         fldSetCameraModelMotionRequest(0x66, 0);
         fldSparkControlState.state.dialogTimer = 0;
-        fldSparkControlState.state.dialogPhase = 10;
+        fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_WAIT_FIELD_FADE;
         evtDisableMoonDraw();
         dds3FadeIn(0xFF, 0xFF, 0xFF, 4);
         break;
-    case 10:
+    case FLD_SPARK_DIALOG_PHASE_WAIT_FIELD_FADE:
         fldDrawSparkStatusOverlay();
         if (++fldSparkControlState.state.dialogTimer > 10) {
             dds3EffectObjectBasicStatOff(fldSparkControlState.object, 1);
             dds3DeleteSceneBasicData(fldSparkControlState.object);
             sdfMemFreeDelayedDirect(D_004363A4);
             fldSparkControlState.state.dialogTimer = 0;
-            fldSparkControlState.state.dialogPhase = 7;
+            fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_ENTER_ENCOUNTER;
             mnuResetTitleStreamAfterFileIdle();
         }
         break;
-    case 7:
+    case FLD_SPARK_DIALOG_PHASE_ENTER_ENCOUNTER:
         fldDrawSparkStatusOverlay();
-        fldSparkControlState.state.dialogPhase = 0;
+        fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_IDLE;
         fldSparkControlState.state.phase = 1;
         fldPreparePlayerSceneCameraTarget();
         break;
-    case 11:
+    case FLD_SPARK_DIALOG_PHASE_CANCELLED:
         fldSparkControlState.state.phase = 1;
-        fldSparkControlState.state.dialogPhase = 0;
+        fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_IDLE;
         fldPreparePlayerSceneCameraTarget();
         break;
     }

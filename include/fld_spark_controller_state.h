@@ -3,6 +3,21 @@
 
 #include "common.h"
 
+/* Values for the spark-event prompt, playback, and field-return state machine. */
+#define FLD_SPARK_DIALOG_PHASE_IDLE 0
+#define FLD_SPARK_DIALOG_PHASE_ENTRY_PROMPT 1
+#define FLD_SPARK_DIALOG_PHASE_ARCHIVE_LOADING 2
+#define FLD_SPARK_DIALOG_PHASE_TITLE_STREAM_WAIT 3
+#define FLD_SPARK_DIALOG_PHASE_CONFIRM_PROMPT 4
+#define FLD_SPARK_DIALOG_PHASE_START_ARCHIVE_LOAD 5
+#define FLD_SPARK_DIALOG_PHASE_WAIT_ARCHIVE_FILE 6
+#define FLD_SPARK_DIALOG_PHASE_ENTER_ENCOUNTER 7
+#define FLD_SPARK_DIALOG_PHASE_PLAY_EVENT 8
+#define FLD_SPARK_DIALOG_PHASE_RESTORE_FIELD 9
+#define FLD_SPARK_DIALOG_PHASE_WAIT_FIELD_FADE 10
+#define FLD_SPARK_DIALOG_PHASE_CANCELLED 11
+#define FLD_SPARK_DIALOG_PHASE_UNAVAILABLE_MESSAGE 12
+
 /* Shared field-spark phase, timer, and serialized-sequence progress state. */
 typedef struct FldSparkControllerState {
     s32 phase;
