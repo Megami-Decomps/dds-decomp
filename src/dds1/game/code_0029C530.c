@@ -9222,7 +9222,7 @@ extern u32 effBTLFieldColorGetOverrideSelector(void);
 
 extern u32 effBTLFieldColorGetFinalSelector(void);
 
-extern void effBTLPartGetPositionPtr(void *owner, EffectVectorRequest *request, u128 *out);
+extern void effBTLPartGetPositionPtr(BtlUnit *owner, EffectVectorRequest *request, u128 *out);
 
 void effGetWorldVector(u32 which) {
     EffectVectorRequest request;

@@ -143,7 +143,7 @@ extern f32 D_004144A0[4]; extern f32 D_004144B0[4]; extern f32 D_004144C0[4];
 extern s32 btlClassifySpecialEntryObject(BtlUnit *entry);
 extern void effMiscQuatMultiplyVU(void); extern void effMiscQuaternionToMatrixVU(void);
 extern void sdfComposeVuMatrixFromRegisters(void);
-extern void effBTLPartGetPositionPtr(void *owner, EffectVectorRequest *request, u128 *out);
+extern void effBTLPartGetPositionPtr(BtlUnit *owner, EffectVectorRequest *request, u128 *out);
 extern void effBTLPartGetRotateMatrixPtr(EffectVectorRequest *request, u128 *out);
 extern f32 effBattleMiscQueryScalar(const BtlUnit *unit, const EffectVectorRequest *request);
 extern u32 effBTLFieldColorGetOverrideSelector(void); extern u32 effBTLFieldColorGetFinalSelector(void);

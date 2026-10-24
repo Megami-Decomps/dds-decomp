@@ -33,7 +33,7 @@ extern f32 sdfViewTargetVector[4];
 extern f32 aViewDown[4];
 extern f32 btlMeasureEffectTargetGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop);
 /* The selected position provider leaves its vector in vf10. */
-void effBTLPartGetPositionPtr(void *owner, EffectVectorRequest *request, u128 *out) {
+void effBTLPartGetPositionPtr(BtlUnit *owner, EffectVectorRequest *request, u128 *out) {
     GetPositionPtrTable[request->kind](owner, request);
     SDF_VU0_STOREVECTOR(out);
 }

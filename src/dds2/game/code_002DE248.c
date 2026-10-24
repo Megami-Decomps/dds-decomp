@@ -237,7 +237,7 @@ typedef struct EffMotionResourceConfig {
 } EffMotionResourceConfig;
 
 
-extern void effBTLPartGetPositionPtr(void *owner, EffectVectorRequest *request, u128 *out);
+extern void effBTLPartGetPositionPtr(BtlUnit *owner, EffectVectorRequest *request, u128 *out);
 
 extern u32 effBTLFieldColorGetVariantSelector(void);
 
