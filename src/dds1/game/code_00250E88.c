@@ -252,9 +252,22 @@ void mnuInitializeProfileProgress(u16 partyIndex, MnuProfileProgress *progress) 
 /* Resource-task -> list -> selection chain used by the mantra display. */
 typedef struct MnuResourceTask {
     struct sdfMemHandle_t *allocation;
-    u32 unk04[2];
+    u32 state;
+    u32 frameCounter;
     struct MenuList *menuList;
 } MnuResourceTask;
+
+enum MnuResourceTaskState {
+    MNU_RESOURCE_TASK_STATE_WAIT_RESOURCES = 0,
+    MNU_RESOURCE_TASK_STATE_WAIT_PROFILE_PANEL = 1,
+    MNU_RESOURCE_TASK_STATE_WAIT_EXIT_FADE = 2,
+    MNU_RESOURCE_TASK_STATE_WAIT_TITLE_STREAM = 3,
+    MNU_RESOURCE_TASK_STATE_INPUT_READY = 4,
+    MNU_RESOURCE_TASK_STATE_WAIT_REOPENED_PROFILE_PANEL = 5,
+    MNU_RESOURCE_TASK_STATE_OPEN_INITIAL_PROFILE = 6,
+    MNU_RESOURCE_TASK_STATE_REOPEN_SELECTED_PROFILE = 7,
+    MNU_RESOURCE_TASK_STATE_RESET_TITLE_STREAM = 8,
+};
 
 
 extern void mnuDrawMantraPartyListEntry();
@@ -342,8 +355,8 @@ MnuResourceTask *mnuAllocateEmptyResourceListState(void) {
     memset(task, 0, MNU_RESOURCE_LIST_WORK_BYTES);
     task->allocation = allocation;
     mnuBuildMantraPartyList(task);
-    task->unk04[0] = 0;
-    task->unk04[1] = 0;
+    task->state = MNU_RESOURCE_TASK_STATE_WAIT_RESOURCES;
+    task->frameCounter = 0;
     return task;
 }
 
@@ -381,55 +394,55 @@ INCLUDE_RODATA(const s32, "game/code_00250E88", mnuResourceTaskName);
 s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
     s32 action=0;
     struct MenuList *list=task->menuList;
-    u32 state;
+    u32 taskState;
     MenuSceneMetadata *metadata=(MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext,-1);
     s32 frame;
     datUnitWork_t **selectedParty;
     datUnitWork_t *snapshot;
-    state=task->unk04[0];
-    switch (state) {
-    case 0:
-        if (mnuTickInitState(metadata->attachedEffect)==0 && mnuAreResourceSlotsOccupied(metadata)==1) task->unk04[0]=6;
+    taskState = task->state;
+    switch (taskState) {
+    case MNU_RESOURCE_TASK_STATE_WAIT_RESOURCES:
+        if (mnuTickInitState(metadata->attachedEffect)==0 && mnuAreResourceSlotsOccupied(metadata)==1) task->state=MNU_RESOURCE_TASK_STATE_OPEN_INITIAL_PROFILE;
         return 0;
-    case 6:
+    case MNU_RESOURCE_TASK_STATE_OPEN_INITIAL_PROFILE:
         selectedParty=(datUnitWork_t **)(u32)list->cursor->userValue;
-        task->unk04[0]=1;
+        task->state=MNU_RESOURCE_TASK_STATE_WAIT_PROFILE_PANEL;
         snapshot=&metadata->partySnapshot;
         *snapshot=**selectedParty;
         mnuSetupStaffMenuProfilePage(snapshot,metadata->attachedEffect);
         return 0;
-    case 7:
+    case MNU_RESOURCE_TASK_STATE_REOPEN_SELECTED_PROFILE:
         selectedParty=(datUnitWork_t **)(u32)list->cursor->userValue;
-        task->unk04[0]=5;
+        task->state=MNU_RESOURCE_TASK_STATE_WAIT_REOPENED_PROFILE_PANEL;
         snapshot=&metadata->partySnapshot;
         *snapshot=**selectedParty;
         mnuSetupStaffMenuProfilePage(snapshot,metadata->attachedEffect);
         return 0;
-    case 1:
-    case 5:
-        frame=(s32)task->unk04[1]+1;
-        task->unk04[1]=frame;
-        if ((f32)frame>=10.0f) {task->unk04[1]=0;task->unk04[0]=4;}
+    case MNU_RESOURCE_TASK_STATE_WAIT_PROFILE_PANEL:
+    case MNU_RESOURCE_TASK_STATE_WAIT_REOPENED_PROFILE_PANEL:
+        frame=(s32)task->frameCounter+1;
+        task->frameCounter=frame;
+        if ((f32)frame>=10.0f) {task->frameCounter=0;task->state=MNU_RESOURCE_TASK_STATE_INPUT_READY;}
         return 0;
-    case 2:
-        frame=(s32)task->unk04[1]+1;
-        task->unk04[1]=frame;
+    case MNU_RESOURCE_TASK_STATE_WAIT_EXIT_FADE:
+        frame=(s32)task->frameCounter+1;
+        task->frameCounter=frame;
         if ((f32)frame>=10.0f) {
             sdfAttachTaskItem(mnuSceneResourceContext,&D_0036C65C);
             sdfSetTaskItemMode(mnuSceneResourceContext,key,2);
-            task->unk04[0]=7;task->unk04[1]=0;
+            task->state=MNU_RESOURCE_TASK_STATE_REOPEN_SELECTED_PROFILE;task->frameCounter=0;
             mnuReleaseMenuVisualWorkResources(metadata->attachedEffect);
         }
         return 0;
-    case 3: {
-        s32 frames=(s32)task->unk04[1]+1;
-        task->unk04[1]=frames;
-        if(frames>=10) {task->unk04[0]=8;return 0;}
+    case MNU_RESOURCE_TASK_STATE_WAIT_TITLE_STREAM: {
+        s32 frames=(s32)task->frameCounter+1;
+        task->frameCounter=frames;
+        if(frames>=10) {task->state=MNU_RESOURCE_TASK_STATE_RESET_TITLE_STREAM;return 0;}
         break;
     }
-    case 8:
-        frame=(s32)task->unk04[1]+1;
-        task->unk04[1]=frame;
+    case MNU_RESOURCE_TASK_STATE_RESET_TITLE_STREAM:
+        frame=(s32)task->frameCounter+1;
+        task->frameCounter=frame;
         if (frame>=5) {mnuMarkTitleStreamResetPending();mnuResetTitleStreamLocked();return -1;}
         return 0;
     default:
@@ -452,10 +465,10 @@ s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
                 mnuSetupStaffMenuProfilePage(snapshot,metadata->attachedEffect);
             }
         } else if (dds3PadButtonState[0x21]<0) {
-            action=2; task->unk04[1]=0; task->unk04[0]=2;
+            action=2; task->frameCounter=0; task->state=MNU_RESOURCE_TASK_STATE_WAIT_EXIT_FADE;
         } else if (dds3PadButtonState[0x23]<0) {
             mnuCommitTitleStreamReadyState();
-            task->unk04[0]=3; task->unk04[1]=0;
+            task->state=MNU_RESOURCE_TASK_STATE_WAIT_TITLE_STREAM; task->frameCounter=0;
             action=3;
         }
         if ((dds3PadButtonState[0x26]==0) & (dds3PadButtonState[0x27]==0)) mnuClearListFlagsOneAndTwo(list);
