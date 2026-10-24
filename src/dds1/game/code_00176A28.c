@@ -209,17 +209,17 @@ void effReleaseOptionalResource(EffResourceWork *work) {
 }
 
 void dds3NeedleModelSetPosition(EffResourceWork *work, s32 index, f32 *vec) {
-    f32 *dst = (f32 *)(index * sizeof(EffResourceEntry) + (s32)work->entries);
-    dst[0] = vec[0];
-    dst[1] = vec[1];
-    dst[2] = vec[2];
+    EffResourceEntry *entry = (EffResourceEntry *)(index * sizeof(EffResourceEntry) + (s32)work->entries);
+    entry->position[0] = vec[0];
+    entry->position[1] = vec[1];
+    entry->position[2] = vec[2];
 }
 
-void dds3NeedleModelGetPosition(EffResourceWork *work, s32 index, f32 *vec) {
-    f32 *src = (f32 *)(index * sizeof(EffResourceEntry) + (s32)work->entries);
-    vec[0] = src[0];
-    vec[1] = src[1];
-    vec[2] = src[2];
+void dds3NeedleModelGetPosition(EffResourceWork *work, s32 index, f32 vec[3]) {
+    const EffResourceEntry *entry = (const EffResourceEntry *)(index * sizeof(EffResourceEntry) + (s32)work->entries);
+    vec[0] = entry->position[0];
+    vec[1] = entry->position[1];
+    vec[2] = entry->position[2];
 }
 
 void dds3NeedleModelSetColor(EffResourceWork *work, s32 index, u32 color) {
