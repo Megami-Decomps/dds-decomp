@@ -180,7 +180,7 @@ s32 evtMotionSeProcess1(dds3ProcessID_t *task) {
 
 /* Free the three-word parameter block owned by the motion-SE task. */
 void evtFreeScriptProcessData(dds3ProcessID_t *task) {
-    void *params = (void *)(u32)dds3GetProcessData(task);
+    EvtMotionSeTaskParams *params = (EvtMotionSeTaskParams *)(u32)dds3GetProcessData(task);
 
     sdfChipFreeDirect(params);
 }
@@ -195,8 +195,8 @@ dds3ProcessID_t *evtLoadModelSe(s32 modelKey, s32 eventTaskId, s32 resourceId) {
     EvtMotionSeTaskParams *params;
 
     sprintf(taskName, evtMotionSeTaskNameFormat, eventTaskId, resourceId);
-    params = sdfChipAllocDirect(0xC);
-    memset(params, 0, 0xC);
+    params = sdfChipAllocDirect(sizeof(*params));
+    memset(params, 0, sizeof(*params));
     params->modelKey = modelKey;
     params->eventTaskId = eventTaskId;
     params->resourceId = resourceId;
