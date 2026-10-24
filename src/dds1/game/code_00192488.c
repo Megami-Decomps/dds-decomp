@@ -555,8 +555,8 @@ void dds3BuildSplineCoefsSkipDup(EffPrimitiveCurve *primitive, f32 *tangents) {
 }
 
 /* Allocate the small channel when at least four records exist; borrow the supplied rows and set its default step. */
-void *effCreateChannel(void *rows, u32 recordCount) {
-    void *channel = NULL;
+EffChan *effCreateChannel(EffFloatRows *rows, u32 recordCount) {
+    EffChan *channel = NULL;
     sdfMemHandle_t *allocation;
     EffChan *channelObject;
 
