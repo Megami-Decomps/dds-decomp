@@ -502,10 +502,10 @@ void mnuDrawThresholdNodeWithSelectedAccents(s32 x, s32 y, s32 depth, struct Men
 
 
 /* Omit the input-array position `excluded`, not all entries with that same value. */
-struct MenuList *mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excludedEntryIndex, s32 ownerAddress) {
-    struct MenuList *list = mnuCreateListState(0, count, 0x15, ownerAddress);
+struct MenuList *mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excludedEntryIndex, void *owner) {
+    struct MenuList *list = mnuCreateListState(0, count, 0x15, owner);
     s32 entryIndex;
-    list->context = (void *)ownerAddress;
+    list->context = owner;
     list->drawCallback = mnuDrawThresholdNodeWithSelectedAccents;
     list->scale = 0;
     for (entryIndex = 0; entryIndex < count; entryIndex++) {
@@ -588,7 +588,7 @@ void mnuTerminalBuildMenus(MenuTerminalWork *host) {
         count = 2;
         break;
     }
-    host->commandLists[0] = (struct MenuList *)mnuBuildThresholdNodeList(table + row * 5, count, excludedEntryIndex, (s32)host);
+    host->commandLists[0] = (struct MenuList *)mnuBuildThresholdNodeList(table + row * 5, count, excludedEntryIndex, host);
     mnuBuildTerminalNodeList(host);
     mnuResolveStaffImageHandles(host->imageHandles);
     mnuUpdateGroupResources(host);
