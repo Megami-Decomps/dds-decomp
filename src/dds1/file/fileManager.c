@@ -6,6 +6,7 @@
 #include "sdf_dev_state.h"
 #include "file_manager_api.h"
 #include "file_request.h"
+#include "file_request_kind.h"
 
 FileManWork fileQueueHead __attribute__((section(".bss")));
 
@@ -13,9 +14,6 @@ extern s32 pacFileHandleFree(struct FilePacRequest *);
 
 
 
-#define FILE_REQUEST_KIND_CALLBACK 0
-#define FILE_REQUEST_KIND_PAC 1
-#define FILE_REQUEST_KIND_VALUE_PAIR 2
 #define FILE_REQUEST_COMPLETE 6
 #define FILE_READ_SLOT_COUNT 4
 #define FILE_LAST_READ_SLOT 3
@@ -42,10 +40,10 @@ s32 fileHandleFree(struct FileRequest *request) {
 
 extern char *sdfStrdupChip(const char *text);
 
-/* Duplicate the request name, narrow kind to a byte and append under the
- * semaphore. Start processing only after an empty-to-nonempty transition.
+/* Duplicate the request name, store its kind in the byte field, and append
+ * under the semaphore. Start processing only after an empty-to-nonempty transition.
  * The caller supplies initialized next linkage; this function does not clear it. */
-void fileLinkQueue(FileRequest *request, s32 kind, const char *requestName,
+void fileLinkQueue(FileRequest *request, FileRequestKind kind, const char *requestName,
                    void *callback, void *userData) {
     FileManWork *work;
     char *duplicatedName;
