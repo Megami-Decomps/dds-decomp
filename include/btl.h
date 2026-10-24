@@ -65,7 +65,7 @@ extern void *memcpy(void *, const void *, unsigned int);
 /* Six-byte status-entry record; each game's battle unit contains seven. */
 typedef struct BtlUnitEntrySlot {
     s16 code;
-    s16 unk02;
+    s16 initialValue;
     s16 countdown;
 } BtlUnitEntrySlot;
 

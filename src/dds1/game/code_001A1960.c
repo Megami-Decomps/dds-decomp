@@ -1413,7 +1413,7 @@ void btlAdjustActorEntryCode(BtlUnit *unit, s32 index, s16 delta) {
         code = btlActorEntryCodeDefaults[index].minCode;
     }
     if (code != 0) {
-        unit->entrySlots[index].unk02 = btlActorEntryCodeDefaults[index].initialValue;
+        unit->entrySlots[index].initialValue = btlActorEntryCodeDefaults[index].initialValue;
         unit->entrySlots[index].countdown = btlActorEntryCodeDefaults[index].countdownFrames;
     }
     unit->entrySlots[index].code = code;
@@ -1425,7 +1425,7 @@ void btlSetActorEntryCode(BtlUnit *unit, s32 index, u16 code) {
 
 void btlClearActorEntrySlot(BtlUnit *unit, s32 index) {
     unit->entrySlots[index].code = 0;
-    unit->entrySlots[index].unk02 = -1;
+    unit->entrySlots[index].initialValue = -1;
     unit->entrySlots[index].countdown = -1;
 }
 
