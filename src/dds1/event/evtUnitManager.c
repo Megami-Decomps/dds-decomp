@@ -11,6 +11,7 @@ struct EffNodeDescriptor;
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
+#include "evt_unit_transition_flags.h"
 #include "evt_effect_scale_object.h"
 #include "evt_unit_motion_setup.h"
 #include "sdf_float_counter.h"
@@ -244,14 +245,14 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         flags = unit->flags;
     }
     /* Direction consumes the snapshot after the target transition updates. */
-    if (flags & 0x6000) {
+    if (flags & EVT_UNIT_FLAG_DIRECTION_TRANSITION) {
         if (unit->directionFramesRemaining) {
             factor = 1.0f / unit->directionFramesRemaining;
         } else {
             factor = 1.0f;
         }
         SDF_VU0_LOADVECTOR(unit->vec20);
-        if (flags & 0x2000) {
+        if (flags & EVT_UNIT_FLAG_USE_STORED_DIRECTION_SOURCE) {
             SDF_VU0_LOADVECTOR_B(unit->vec30);
         } else if (ownVector) {
             SDF_VU0_LOADVECTOR_B(target->direction);
@@ -269,15 +270,15 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         SDF_VU0_STOREVECTOR_NOMEM(unit->vec20);
         if (unit->directionFramesRemaining == 0) {
             flags = unit->flags;
-            if (flags & 0x4000) {
-                unit->flags &= ~0x400;
+            if (flags & EVT_UNIT_FLAG_DISABLE_DIRECTION_HOLD_ON_TRANSITION_END) {
+                unit->flags &= ~EVT_UNIT_FLAG_HOLD_TARGET_DIRECTION;
                 flags = unit->flags;
             }
-            unit->flags = flags & ~0x6000;
+            unit->flags = flags & ~EVT_UNIT_FLAG_DIRECTION_TRANSITION;
         } else {
             unit->directionFramesRemaining--;
         }
-    } else if (!(flags & 0x400)) {
+    } else if (!(flags & EVT_UNIT_FLAG_HOLD_TARGET_DIRECTION)) {
         if (ownVector) {
             SDF_VU0_LOADVECTOR(target->direction);
         } else {
@@ -325,7 +326,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
     /* Advance the two local colour tracks before applying target influence. */
     originalFlags = unit->flags;
     flags = originalFlags;
-    if (originalFlags & 0x1800) {
+    if (originalFlags & EVT_UNIT_FLAG_COLOR_TRANSITION) {
         u32 firstPacked;
         u32 secondPacked;
 
@@ -338,7 +339,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         EE_MMI_RGBA_UNPACK_READONLY(firstSource, 0.0078125f);
         VU0_SCALE_VF(vf10, 1.0f - factor);
         SDF_VU0_COPYVECTOR_A_TO_B();
-        if (unit->flags & 0x800) {
+        if (unit->flags & EVT_UNIT_FLAG_USE_LOCAL_COLOR_TARGETS) {
             firstTarget[0] = unit->color08;
             EE_MMI_RGBA_UNPACK_READONLY(firstTarget, 0.0078125f);
         } else if (ownVector) {
@@ -357,7 +358,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         EE_MMI_RGBA_UNPACK_READONLY(secondSource, 0.0078125f);
         VU0_SCALE_VF(vf10, 1.0f - factor);
         SDF_VU0_COPYVECTOR_A_TO_B();
-        if (unit->flags & 0x800) {
+        if (unit->flags & EVT_UNIT_FLAG_USE_LOCAL_COLOR_TARGETS) {
             secondTarget[0] = unit->color58;
             EE_MMI_RGBA_UNPACK_READONLY(secondTarget, 0.0078125f);
         } else if (ownVector) {
@@ -373,10 +374,10 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         unit->color54 = secondResult[0];
         unit->color5C = unit->color54;
         if (unit->colorFramesRemaining == 0) {
-            if (originalFlags & 0x1000) {
+            if (originalFlags & EVT_UNIT_FLAG_DISABLE_UNIT_COLORS_ON_TRANSITION_END) {
                 flags = unit->flags = originalFlags & ~EVT_UNIT_FLAG_USE_UNIT_COLOR_CHANNELS;
             }
-            unit->flags = flags & ~0x1800;
+            unit->flags = flags & ~EVT_UNIT_FLAG_COLOR_TRANSITION;
         } else {
             unit->colorFramesRemaining--;
         }
@@ -551,7 +552,7 @@ void GetBaseLightDir(evtUnitHandle_t *unit) {
             ownVector = 1;
         }
     }
-    if (unit->flags & 0x400) {
+    if (unit->flags & EVT_UNIT_FLAG_HOLD_TARGET_DIRECTION) {
                 SDF_VU0_LOADVECTOR(unit->vec10);
     } else if (ownVector) {
                 SDF_VU0_LOADVECTOR(unit->vec10);
@@ -672,7 +673,8 @@ void evtSetUnitLightAndAmbient(evtUnitHandle_t *unit, s32 duration, u32 firstCol
     EE_MMI_RGBA_PACK_UNIT(secondPackedColor, packedScale.scaleBits);
     secondColorVector[0] = secondPackedColor;
     unit->color54 = secondPackedColor;
-    unit->flags = (unit->flags | 0x800) & ~0x1000;
+    unit->flags = (unit->flags | EVT_UNIT_FLAG_USE_LOCAL_COLOR_TARGETS) &
+                  ~EVT_UNIT_FLAG_DISABLE_UNIT_COLORS_ON_TRANSITION_END;
 }
 
 /* vu0 routine: normalize the direction in vf10, store it to vec30, then vf10 from GetBaseLightDir to vec20 */
@@ -683,7 +685,9 @@ void evtSetUnitLightDir(evtUnitHandle_t *unit, s32 directionMode) {
         SDF_VU0_STOREVECTOR_NOMEM(unit->vec30);
     GetBaseLightDir(unit);
         SDF_VU0_STOREVECTOR_NOMEM(unit->vec20);
-    unit->flags = (unit->flags | 0x2400) & ~0x4000;
+    unit->flags = (unit->flags | EVT_UNIT_FLAG_HOLD_TARGET_DIRECTION |
+                   EVT_UNIT_FLAG_USE_STORED_DIRECTION_SOURCE) &
+                  ~EVT_UNIT_FLAG_DISABLE_DIRECTION_HOLD_ON_TRANSITION_END;
 }
 
 
@@ -739,10 +743,12 @@ void evtUnitLightOff(evtUnitHandle_t *unit, s32 duration) {
         unit->flags &= ~0x2800;
     } else {
         evtSetUnitLightAndAmbient(unit, duration, 0, 0);
-        unit->flags = (unit->flags & ~0x800) | 0x1000;
+        unit->flags = (unit->flags & ~EVT_UNIT_FLAG_USE_LOCAL_COLOR_TARGETS) |
+                      EVT_UNIT_FLAG_DISABLE_UNIT_COLORS_ON_TRANSITION_END;
                 SDF_VU0_LOADIDENTITYVECTOR();
         evtSetUnitLightDir(unit, duration);
-        unit->flags = (unit->flags & ~0x2000) | 0x4000;
+        unit->flags = (unit->flags & ~EVT_UNIT_FLAG_USE_STORED_DIRECTION_SOURCE) |
+                      EVT_UNIT_FLAG_DISABLE_DIRECTION_HOLD_ON_TRANSITION_END;
     }
 }
 
