@@ -544,9 +544,9 @@ void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
 
 extern _FRQ * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
 
-void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, u32 font) {
+void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, const char *text) {
     frEnableMode(1);
-    fileMenuStringGlyph = frFontBuildGlyphChain((const char *)(u32)font, 0, 0, 0, 0);
+    fileMenuStringGlyph = frFontBuildGlyphChain(text, 0, 0, 0, 0);
     frDisableMode(1);
     frSetFontSpace(fileMenuStringGlyph, 1);
     frSetDrawPosition(fileMenuStringGlyph, x << 4, y << 3);
@@ -690,7 +690,7 @@ extern char fileNoSaveDataMessageLine1[];
 extern char fileNoSaveDataMessageLine2[];
 extern char fileNoSaveDataMessageLine3[];
 
-static inline void fileDrawDialogLine(s32 line, u32 glyphSource) {
+static inline void fileDrawDialogLine(s32 line, const char *glyphSource) {
     mcdCreateFontDrawHandle(86, 114 + line * 24, 0x89FEFF80U, glyphSource);
 }
 
@@ -701,63 +701,63 @@ void fileShowStatusDialog(void) {
             D_003BC840 = 0;
             fileResetLoadContextSlide();
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)fileNoCardStatus1MessageLine1);
-                fileDrawDialogLine(1, (u32)fileNoCardStatus1MessageLine2);
-                fileDrawDialogLine(2, (u32)fileNoCardStatus1MessageLine3);
-                fileDrawDialogLine(3, (u32)fileNoCardStatus1MessageLine4);
-                fileDrawDialogLine(4, (u32)fileNoCardStatus1MessageLine5);
+                fileDrawDialogLine(0, fileNoCardStatus1MessageLine1);
+                fileDrawDialogLine(1, fileNoCardStatus1MessageLine2);
+                fileDrawDialogLine(2, fileNoCardStatus1MessageLine3);
+                fileDrawDialogLine(3, fileNoCardStatus1MessageLine4);
+                fileDrawDialogLine(4, fileNoCardStatus1MessageLine5);
                 fileDrawPulsingSaveHighlight();
                 D_003BC810 = 0;
             }
         }
         if (D_003BC854 == 2) {
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)fileNoCardStatus2MessageLine1);
-                fileDrawDialogLine(1, (u32)fileNoCardStatus2MessageLine2);
-                fileDrawDialogLine(2, (u32)fileNoCardStatus2MessageLine3);
-                fileDrawDialogLine(3, (u32)fileNoCardStatus2MessageLine4);
-                fileDrawDialogLine(4, (u32)fileNoCardStatus2MessageLine5);
+                fileDrawDialogLine(0, fileNoCardStatus2MessageLine1);
+                fileDrawDialogLine(1, fileNoCardStatus2MessageLine2);
+                fileDrawDialogLine(2, fileNoCardStatus2MessageLine3);
+                fileDrawDialogLine(3, fileNoCardStatus2MessageLine4);
+                fileDrawDialogLine(4, fileNoCardStatus2MessageLine5);
                 fileDrawPulsingSaveHighlight();
                 D_003BC810 = 0;
             }
         }
         if (D_003BC854 == 3) {
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)fileLoadFailedText);
+                fileDrawDialogLine(0, fileLoadFailedText);
                 fileDrawPulsingSaveHighlight();
                 D_003BC810 = 0;
             }
         }
         if (D_003BC854 == 4) {
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)fileSaveFailedText);
+                fileDrawDialogLine(0, fileSaveFailedText);
                 fileDrawPulsingSaveHighlight();
                 D_003BC810 = 0;
             }
         }
         if (D_003BC854 == 5) {
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)fileInsufficientSpaceMessageLine1);
-                fileDrawDialogLine(1, (u32)fileInsufficientSpaceMessageLine2);
-                fileDrawDialogLine(2, (u32)fileInsufficientSpaceMessageLine3);
-                fileDrawDialogLine(3, (u32)fileInsufficientSpaceMessageLine4);
-                fileDrawDialogLine(4, (u32)fileInsufficientSpaceMessageLine5);
+                fileDrawDialogLine(0, fileInsufficientSpaceMessageLine1);
+                fileDrawDialogLine(1, fileInsufficientSpaceMessageLine2);
+                fileDrawDialogLine(2, fileInsufficientSpaceMessageLine3);
+                fileDrawDialogLine(3, fileInsufficientSpaceMessageLine4);
+                fileDrawDialogLine(4, fileInsufficientSpaceMessageLine5);
                 fileDrawPulsingSaveHighlight();
                 D_003BC810 = 0;
             }
         }
         if (D_003BC854 == 6) {
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)fileFormatFailedText);
+                fileDrawDialogLine(0, fileFormatFailedText);
                 fileDrawPulsingSaveHighlight();
                 D_003BC810 = 0;
             }
         }
         if (D_003BC854 == 7) {
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)fileNoSaveDataMessageLine1);
-                fileDrawDialogLine(1, (u32)fileNoSaveDataMessageLine2);
-                fileDrawDialogLine(2, (u32)fileNoSaveDataMessageLine3);
+                fileDrawDialogLine(0, fileNoSaveDataMessageLine1);
+                fileDrawDialogLine(1, fileNoSaveDataMessageLine2);
+                fileDrawDialogLine(2, fileNoSaveDataMessageLine3);
                 fileDrawPulsingSaveHighlight();
                 D_003BC810 = 0;
             }
@@ -779,55 +779,55 @@ void fileShowFlowDialog(void) {
     if (D_003BC850 != 0) {
         if (D_003BC850 == 1) {
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)fileCheckingCardMessageLine1);
-                fileDrawDialogLine(1, (u32)fileCheckingCardMessageLine2);
-                fileDrawDialogLine(2, (u32)fileCheckingCardMessageLine3);
+                fileDrawDialogLine(0, fileCheckingCardMessageLine1);
+                fileDrawDialogLine(1, fileCheckingCardMessageLine2);
+                fileDrawDialogLine(2, fileCheckingCardMessageLine3);
                 fileDrawSaveWindow();
             }
         }
         if (D_003BC850 == 2) {
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)fileSavingText);
-                fileDrawDialogLine(1, (u32)fileCardBusyCardWarningText);
-                fileDrawDialogLine(2, (u32)fileCardBusyControllerWarningText);
-                fileDrawDialogLine(3, (u32)fileCardBusyConsoleWarningText);
+                fileDrawDialogLine(0, fileSavingText);
+                fileDrawDialogLine(1, fileCardBusyCardWarningText);
+                fileDrawDialogLine(2, fileCardBusyControllerWarningText);
+                fileDrawDialogLine(3, fileCardBusyConsoleWarningText);
                 fileDrawSaveWindow();
             }
         }
         if (D_003BC850 == 3) {
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)fileLoadingText);
-                fileDrawDialogLine(1, (u32)fileCardBusyCardWarningText);
-                fileDrawDialogLine(2, (u32)fileCardBusyControllerWarningText);
-                fileDrawDialogLine(3, (u32)fileCardBusyConsoleWarningText);
+                fileDrawDialogLine(0, fileLoadingText);
+                fileDrawDialogLine(1, fileCardBusyCardWarningText);
+                fileDrawDialogLine(2, fileCardBusyControllerWarningText);
+                fileDrawDialogLine(3, fileCardBusyConsoleWarningText);
                 fileDrawSaveWindow();
             }
         }
         if (D_003BC850 == 4) {
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)fileSaveSuccessfulText);
+                fileDrawDialogLine(0, fileSaveSuccessfulText);
                 fileDrawPulsingSaveHighlight();
             }
             D_003BC81C = 1;
         }
         if (D_003BC850 == 5) {
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)fileFormattingText);
-                fileDrawDialogLine(1, (u32)fileCardBusyCardWarningText);
-                fileDrawDialogLine(2, (u32)fileCardBusyControllerWarningText);
-                fileDrawDialogLine(3, (u32)fileCardBusyConsoleWarningText);
+                fileDrawDialogLine(0, fileFormattingText);
+                fileDrawDialogLine(1, fileCardBusyCardWarningText);
+                fileDrawDialogLine(2, fileCardBusyControllerWarningText);
+                fileDrawDialogLine(3, fileCardBusyConsoleWarningText);
                 fileDrawSaveWindow();
             }
         }
         if (D_003BC850 == 6) {
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)fileFormatSuccessfulText);
+                fileDrawDialogLine(0, fileFormatSuccessfulText);
                 fileDrawPulsingSaveHighlight();
             }
         }
         if (D_003BC850 == 13) {
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)fileLoadSuccessfulText);
+                fileDrawDialogLine(0, fileLoadSuccessfulText);
                 fileDrawPulsingSaveHighlight();
             }
             D_003BC81C = 2;
