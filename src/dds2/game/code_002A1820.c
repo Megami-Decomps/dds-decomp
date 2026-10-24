@@ -40,6 +40,12 @@
 #define MNU_STREAM_COMMIT_READY 3
 #define MNU_STREAM_COMMIT_COMPLETE 4
 
+typedef struct MovieMenuPulse {
+    s32 active;
+    s32 phase;
+    s32 alpha;
+} MovieMenuPulse;
+
 typedef struct MovieMenuState {
     struct sdfMemHandle_t *allocation;
     u8 pad04[0x0C];
@@ -49,9 +55,9 @@ typedef struct MovieMenuState {
     u8 pad1C[0x10];
     s8 movieOpened;      /* 0x2C */
     u8 pad2D[3];
-    u32 bar[2];           /* 0x30 */
-    u32 barB[2];          /* 0x38 */
-    u32 barSmall[3];      /* 0x40 */
+    SlideBar bar;         /* 0x30 */
+    SlideBar barB;        /* 0x38 */
+    MovieMenuPulse barSmall; /* 0x40 */
     PickList paired;      /* 0x4C */
     SlideBarTimed timedA; /* 0xE0: pos below 0x200 while the menu bar is on screen */
     SlideBarTimed timedB; /* 0xF0 */
@@ -767,9 +773,9 @@ void mnuReleaseTitleMenuAssetsAndMarkClosed(void) {
     D_00435BB0 = 1;
 }
 
-extern void mnuSlideBarSetState(u32 *work, s32 state);
-extern void mnuSlideBarSetStateB(u32 *state, u32 mode);
-extern void mnuSlideBarSetStateSmall(u32 *state, u32 mode);
+extern void mnuSlideBarSetState(SlideBar *work, s32 state);
+extern void mnuSlideBarSetStateB(SlideBar *bar, u32 mode);
+extern void mnuSlideBarSetStateSmall(MovieMenuPulse *pulse, u32 mode);
 extern void mnuPairedSlideBarSetState(PickList *work, s32 state);
 extern void mnuTimedSlideBarSetState(SlideBarTimed *bar, s32 mode, s32 timer);
 extern void sdfSetGridScaledDrawBounds(s32 column, s32 row, s32 width, s32 height, u32 drawColor);
@@ -786,32 +792,32 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
 
     switch (event) {
     case 2:
-        mnuSlideBarSetStateSmall(titleWork->barSmall, 2);
+        mnuSlideBarSetStateSmall(&titleWork->barSmall, 2);
         mnuPairedSlideBarSetState(&titleWork->paired, 2);
         mnuTimedSlideBarSetState(&titleWork->timedA, 2, 0);
         mnuTimedSlideBarSetState(&titleWork->timedB, 2, 0);
-        mnuSlideBarSetState(titleWork->bar, 2);
-        mnuSlideBarSetStateB(titleWork->barB, 2);
+        mnuSlideBarSetState(&titleWork->bar, 2);
+        mnuSlideBarSetStateB(&titleWork->barB, 2);
         break;
     case 3:
         dds3FadeOut(0, 0, 0, 0);
-        mnuSlideBarSetStateSmall(titleWork->barSmall, 3);
+        mnuSlideBarSetStateSmall(&titleWork->barSmall, 3);
         mnuPairedSlideBarSetState(&titleWork->paired, 3);
         mnuTimedSlideBarSetState(&titleWork->timedA, 2, 0);
         mnuTimedSlideBarSetState(&titleWork->timedB, 3, 0);
-        mnuSlideBarSetState(titleWork->bar, 3);
-        mnuSlideBarSetStateB(titleWork->barB, 2);
+        mnuSlideBarSetState(&titleWork->bar, 3);
+        mnuSlideBarSetStateB(&titleWork->barB, 2);
         sdfSetStreamFrameDrawMode(1);
         sdfSetGridScaledDrawBounds(-0xA7, 0x5A, 0x200, 0x1C0, 0x80808080);
         mnuArmTitleMovieDrawAndResetFrame(0x5B, 0);
         break;
     case 5:
-        mnuSlideBarSetStateSmall(titleWork->barSmall, 2);
+        mnuSlideBarSetStateSmall(&titleWork->barSmall, 2);
         mnuPairedSlideBarSetState(&titleWork->paired, 2);
         mnuTimedSlideBarSetState(&titleWork->timedA, 2, 0);
         mnuTimedSlideBarSetState(&titleWork->timedB, 2, 0);
-        mnuSlideBarSetState(titleWork->bar, 2);
-        mnuSlideBarSetStateB(titleWork->barB, 2);
+        mnuSlideBarSetState(&titleWork->bar, 2);
+        mnuSlideBarSetStateB(&titleWork->barB, 2);
         mnuResetMovieWorkState(titleWork->movie);
         sdfSetStreamFrameDrawMode(0);
         mnuStopTitleMovieDraw();
@@ -826,16 +832,16 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
         if (++titleWork->cursor < 0x14B) {
             break;
         }
-        mnuSlideBarSetState(titleWork->bar, 1);
+        mnuSlideBarSetState(&titleWork->bar, 1);
         mnuTimedSlideBarSetState(&titleWork->timedB, 1, 0);
         break;
     case 23:
-        mnuSlideBarSetStateSmall(titleWork->barSmall, 1);
+        mnuSlideBarSetStateSmall(&titleWork->barSmall, 1);
         mnuTimedSlideBarSetState(&titleWork->timedA, 3, 0);
         mnuTimedSlideBarSetState(&titleWork->timedA, 0, 0x14);
         mnuTimedSlideBarSetState(&titleWork->timedB, 3, 0);
-        mnuSlideBarSetState(titleWork->bar, 3);
-        mnuSlideBarSetStateB(titleWork->barB, 1);
+        mnuSlideBarSetState(&titleWork->bar, 3);
+        mnuSlideBarSetStateB(&titleWork->barB, 1);
         sdfSetStreamFrameDrawMode(1);
         sdfSetGridScaledDrawBounds(-0xA7, 0x5A, 0x200, 0x1C0, 0x808080);
         mnuArmTitleMovieDrawAndResetFrame(0x5B, 1);
@@ -872,12 +878,12 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
             break;
         }
         done = 1;
-        mnuSlideBarSetStateSmall(titleWork->barSmall, 2);
+        mnuSlideBarSetStateSmall(&titleWork->barSmall, 2);
         mnuPairedSlideBarSetState(&titleWork->paired, 2);
         mnuTimedSlideBarSetState(&titleWork->timedA, 2, 0);
         mnuTimedSlideBarSetState(&titleWork->timedB, 2, 0);
-        mnuSlideBarSetState(titleWork->bar, 2);
-        mnuSlideBarSetStateB(titleWork->barB, 2);
+        mnuSlideBarSetState(&titleWork->bar, 2);
+        mnuSlideBarSetStateB(&titleWork->barB, 2);
         mnuResetMovieWorkState(titleWork->movie);
         mnuStopTitleMovieDraw();
         sdfSetStreamFrameDrawMode(0);
@@ -887,12 +893,6 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
 }
 
 /* Actual cross-unit contracts used by the title-menu callback. */
-typedef struct MovieMenuPulse {
-    s32 active;
-    s32 phase;
-    s32 alpha;
-} MovieMenuPulse;
-
 typedef struct SlideBarPair {
     u8 active[2];
     u8 pad[2];
@@ -1290,11 +1290,11 @@ s32 mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
     mnuAdvanceTimedSlideBar(&titleWork->timedA, 0x52);
     mnuAdvanceMultiSpriteSlideBar(&titleWork->timedB.control, 0x52);
     mnuDrawMovieMenuSlideBar(&titleWork->timedA, &titleWork->timedB.control, 0x52);
-    mnuDrawExpandingMovieMenuPulseBar((MovieMenuPulse *)titleWork->barSmall, 0x52);
+    mnuDrawExpandingMovieMenuPulseBar(&titleWork->barSmall, 0x52);
     mnuAdvancePairedSlideBars((SlideBarPair *)titleWork->movie, 0x52);
-    mnuAdvanceSlideBarValue((SlideBar *)titleWork->barB, 0x52);
+    mnuAdvanceSlideBarValue(&titleWork->barB, 0x52);
     mnuAdvanceSlideBar(&titleWork->paired, 0x53);
-    mnuDrawAndAdvanceMovieMenuBar((SlideBar *)titleWork->bar, 0x53);
+    mnuDrawAndAdvanceMovieMenuBar(&titleWork->bar, 0x53);
     return 0;
 }
 

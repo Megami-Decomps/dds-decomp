@@ -192,20 +192,20 @@ void mnuDrawMovieMenuSpriteSlot21(u32 alpha) {
     mnuDrawSprite(0, 0, 0, alpha, 0, 0x21, 0x53);
 }
 
-void mnuSlideBarSetState(u32 *work, s32 state) {
+void mnuSlideBarSetState(SlideBar *bar, s32 state) {
     switch (state) {
     case 2:
-        work[1] = 0;
+        bar->pos = 0;
         state = 0;
         break;
     case 3:
-        work[1] = 0x200;
+        bar->pos = 0x200;
         state = 1;
         break;
     default:
         break;
     }
-    work[0] = state;
+    bar->active = state;
 }
 
 extern void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode, s32 spriteIndex,
@@ -232,12 +232,12 @@ void mnuDrawAndAdvanceMovieMenuBar(SlideBar *bar, s32 value) {
     }
 }
 
-void mnuSlideBarSetStateB(u32 *state, u32 mode) {
+void mnuSlideBarSetStateB(SlideBar *bar, u32 mode) {
     switch (mode) {
-    case 2: state[1] = 0; mode = 0; break;
-    case 3: mode = 1; state[1] = 0x200; break;
+    case 2: bar->pos = 0; mode = 0; break;
+    case 3: mode = 1; bar->pos = 0x200; break;
     }
-    state[0] = mode;
+    bar->active = mode;
 }
 
 
@@ -259,21 +259,21 @@ void mnuAdvanceSlideBarValue(SlideBar *bar, s32 value) {
     }
 }
 
-void mnuSlideBarSetStateSmall(u32 *state, u32 mode) {
-    switch (mode) {
-    case 2: state[2] = 0; mode = 0; break;
-    case 3: mode = 1; state[2] = 0x80; break;
-    }
-    state[0] = mode;
-}
-
-/* Three-word small-bar control embedded in the movie-menu state. */
 typedef struct MovieMenuPulse {
     s32 active;
     s32 phase;
     s32 alpha;
 } MovieMenuPulse;
 
+void mnuSlideBarSetStateSmall(MovieMenuPulse *pulse, u32 mode) {
+    switch (mode) {
+    case 2: pulse->alpha = 0; mode = 0; break;
+    case 3: mode = 1; pulse->alpha = 0x80; break;
+    }
+    pulse->active = mode;
+}
+
+/* Three-word small-bar control embedded in the movie-menu state. */
 /* Resize and draw the pulsing bar, then advance its alpha and phase. */
 void mnuDrawExpandingMovieMenuPulseBar(MovieMenuPulse *pulse, s32 drawContext) {
     EffectSlotSet *sprites;
