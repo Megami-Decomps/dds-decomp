@@ -110,37 +110,37 @@ u32 evtCommand_TEX_LOAD(void) {
 }
 
 u32 evtCommand_TEX_ON(void) {
-    u32 task;
+    dds3ProcessID_t *task;
     s32 registered;
 
-    task = scrGetIntPara(0);
-    registered = dds3ExistProcess((dds3ProcessID_t *)task);
+    task = (dds3ProcessID_t *)scrGetIntPara(0);
+    registered = dds3ExistProcess(task);
     if (registered != 0) {
-        evtPictureDrawOn((dds3ProcessID_t *)task);
+        evtPictureDrawOn(task);
     }
     return 1;
 }
 
 u32 evtCommand_TEX_OFF(void) {
-    u32 task;
+    dds3ProcessID_t *task;
     s32 registered;
 
-    task = scrGetIntPara(0);
-    registered = dds3ExistProcess((dds3ProcessID_t *)task);
+    task = (dds3ProcessID_t *)scrGetIntPara(0);
+    registered = dds3ExistProcess(task);
     if (registered != 0) {
-        evtPictureDrawOff((dds3ProcessID_t *)task);
+        evtPictureDrawOff(task);
     }
     return 1;
 }
 
-extern void evtKillPictureProcess(u32 taskHandle);
+extern void evtKillPictureProcess(dds3ProcessID_t *task);
 
 u32 evtCommand_TEX_CLS(void) {
-    u32 task;
+    dds3ProcessID_t *task;
     s32 registered;
 
-    task = scrGetIntPara(0);
-    registered = dds3ExistProcess((dds3ProcessID_t *)task);
+    task = (dds3ProcessID_t *)scrGetIntPara(0);
+    registered = dds3ExistProcess(task);
     if (registered != 0) {
         evtKillPictureProcess(task);
     }

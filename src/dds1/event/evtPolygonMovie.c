@@ -970,8 +970,8 @@ void evtPictureDrawOff(dds3ProcessID_t *task) {
     context->drawEnabled = context->drawEnabled & ~EVT_PICTURE_FLAG_DRAW_ENABLED;
 }
 
-void evtKillPictureProcess(u32 taskHandle) {
-    dds3KillProcess((dds3ProcessID_t *)taskHandle, 1);
+void evtKillPictureProcess(dds3ProcessID_t *task) {
+    dds3KillProcess(task, 1);
 }
 
 /* Allocate the picture task's flag and texture state. */
