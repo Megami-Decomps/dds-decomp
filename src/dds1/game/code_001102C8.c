@@ -8,7 +8,7 @@
 
 struct WorldIndexNode;
 
-extern u32 fldLoadAreaRoomResourcesFromRequest(u32, u32, u32, u32,
+extern u32 fldLoadAreaRoomResourcesFromRequest(u32, u32, u8 *, u8 *,
                         const SdfTextureOffsetListHeader *, u32);
 
 extern struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *);
@@ -383,7 +383,7 @@ void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *object, u32 area, u32 room,
     u32 handle;
 
     data = ((EvtWorldTable *)object->data);
-    handle = fldLoadAreaRoomResourcesFromRequest(area, room, (u32)resource0Data, (u32)resource1Data,
+    handle = fldLoadAreaRoomResourcesFromRequest(area, room, resource0Data, resource1Data,
                                                  textureOffsets, flags);
     data->indexedHandle = handle;
 }
