@@ -89,7 +89,7 @@ extern s32 frDefaultFontHandle;
 extern u32 itfTextLipsMotionId;
 
 extern u32 itfTextLipsUnitId;
-extern u32 D_003BD818;
+extern s32 D_003BD818;
 void frFontEnsureSlotLoaded(s32 id, const char *path);
 extern u16 itfGlyphDecodeTable[];
 
@@ -879,7 +879,7 @@ u32 itfReturnThirdCallbackValue(u32 unused0, u32 unused1, u32 value) {
 }
 
 /* Return the byte count saved by the most recent packed-resource decode. */
-u32 itfGetLastDecodedByteCount(void) {
+s32 itfGetLastDecodedByteCount(void) {
     return D_003BD818;
 }
 
