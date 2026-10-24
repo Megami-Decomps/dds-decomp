@@ -197,7 +197,7 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
             mnuReleaseSoundBufferLocked();
         }
         resource = fileGetMemHandle(args->request);
-        data = (const void *)(u32)sdfMemLock(resource);
+        data = sdfMemLock(resource);
         size = (s32)fileGetLoadSize(args->request);
         fileHandleFree(args->request);
         mnuInstallTitleSoundBufferFromData(data, size, D_003E0F60[args->entryIndex].format);
@@ -261,7 +261,7 @@ s32 sndDeadAtracPlaybackTask(BtlDeadLoadArgs *args) {
         if (pacFileCheckEnd(args->request) != 0) {
             args->resourceAllocation =
                 fileGetMemHandle(args->request);
-            data = (const void *)(u32)sdfMemLock(args->resourceAllocation);
+            data = sdfMemLock(args->resourceAllocation);
             size = (s32)fileGetLoadSize(args->request);
             fileHandleFree(args->request);
             mnuInstallTitleSoundBufferFromData(data, size,
