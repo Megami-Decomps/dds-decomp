@@ -11258,6 +11258,8 @@ typedef struct BattleFormationActionArgs {
     u32 unk10;
 } BattleFormationActionArgs;
 
+typedef char BattleFormationActionArgs_size[(sizeof(BattleFormationActionArgs) == 0x14) ? 1 : -1];
+
 
 /* Select the linkage formation by command row; task completion is always one. */
 INCLUDE_RODATA(const s32, "game/code_001DEFE0", D_003A5328);
@@ -11335,7 +11337,7 @@ extern u32 btlApplyLinkageFormation(BattleFormationActionArgs *);
 /* Package the action, two companion addresses, skill and flags for formation. */
 u8 *btlCreateLinkageFormationTask(u8 *owner, u32 firstActorAddress, u32 secondActorAddress, u32 skillId, u32 flags) {
     u8 *task = btlAllocTask(20);
-    u32 *arguments;
+    BattleFormationActionArgs *arguments;
     u8 *unit;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
@@ -11346,11 +11348,11 @@ u8 *btlCreateLinkageFormationTask(u8 *owner, u32 firstActorAddress, u32 secondAc
     *(u32 *)(task + 0x48) = 0;
     *(u64 *)(task + 0x40) = *(u64 *)(unit + 0x108);
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    arguments[1] = firstActorAddress;
-    arguments[2] = secondActorAddress;
-    arguments[3] = skillId;
-    arguments[4] = flags;
+    arguments->link = (BtlTask *)owner;
+    arguments->first = (BtlUnit *)firstActorAddress;
+    arguments->second = (BtlUnit *)secondActorAddress;
+    arguments->actionId = skillId;
+    arguments->unk10 = flags;
     return task;
 }
 
