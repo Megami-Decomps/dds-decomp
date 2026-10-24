@@ -45,7 +45,8 @@ typedef char BtlBossEffectPayloadSizeCheck[(sizeof(BtlBossEffectPayload) == 0x10
 typedef struct BtlUnit BtlUnit;
 
 void btlInitFxLights(BtlUnit *unit);
-void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *unit, s32 kind, s32 index);
+void btlInitializeEffectVectorsFromSourceRecords(
+    BtlUnit *unit, s32 resourceKind, s32 resourceIndex);
 
 struct evtUnitHandle_t;
 struct sdfMemHandle_t;

@@ -2265,9 +2265,12 @@ void btlInitFxLights(BtlUnit *fx) {
     fx->positionZOffsetBits = 0;
 }
 
-void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *fx, s32 kind, s32 index) {
-    BtlActorTransformParameters *alt = btlSelectSharedOrIndexedTransformParameters(kind, index);
-    BtlEffectResource *base = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(kind, index);
+void btlInitializeEffectVectorsFromSourceRecords(
+    BtlUnit *fx, s32 resourceKind, s32 resourceIndex) {
+    BtlActorTransformParameters *alt =
+        btlSelectSharedOrIndexedTransformParameters(resourceKind, resourceIndex);
+    BtlEffectResource *base = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(
+        resourceKind, resourceIndex);
 
     if (alt->overrideEnabled == 0.0f) {
         SDF_VU0_COPYVECTOR(fx->bodyOffset, base);
