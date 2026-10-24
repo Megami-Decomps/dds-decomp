@@ -14,6 +14,16 @@ typedef struct EffModelOwner {
     u32 flags;
 } EffModelOwner;
 
+/* Floor-list lifecycle and deferred-refresh state shared by both providers. */
+enum {
+    EFF_MODEL_OWNER_FLAG_UPDATE_PENDING = 0x01,
+    EFF_MODEL_OWNER_FLAG_DESTROY_REQUESTED = 0x02,
+    EFF_MODEL_OWNER_FLAG_FLOOR_LISTED = 0x04,
+    EFF_MODEL_OWNER_FLAG_DESTROY_READY = 0x08,
+    EFF_MODEL_OWNER_FLAG_LISTED_OBJECT = 0x10,
+    EFF_MODEL_OWNER_FLAG_UPDATE_DEFERRED = 0x20
+};
+
 typedef char EffModelOwner_size_check[
     (sizeof(EffModelOwner) == 0x10) ? 1 : -1];
 typedef char EffModelOwner_model_offset_check[

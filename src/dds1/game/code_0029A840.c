@@ -252,9 +252,9 @@ EffModelOwner *effCreateFloorModelOwner(u8 *source) {
 }
 
 void effMarkFloorModelForDestruction(EffModelOwner *work) {
-    u32 flags = work->flags | 2;
+    u32 flags = work->flags | EFF_MODEL_OWNER_FLAG_DESTROY_REQUESTED;
     work->flags = flags;
-    if ((flags & 4) == 0) {
+    if ((flags & EFF_MODEL_OWNER_FLAG_FLOOR_LISTED) == 0) {
         effDestroyModelOwner(work);
     }
 }
@@ -328,14 +328,15 @@ extern u32 effModelUpdateControlFlags;
 
 void effMarkFloorModelForUpdate(EffModelOwner *work) {
     u32 previous = work->flags;
-    u32 flags = previous | 1;
+    u32 flags = previous | EFF_MODEL_OWNER_FLAG_UPDATE_PENDING;
     work->flags = flags;
-    if ((flags & 4) == 0) {
+    if ((flags & EFF_MODEL_OWNER_FLAG_FLOOR_LISTED) == 0) {
         if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_DEFER_FLOOR_REFRESH) == 0) {
             effRenderModelOwnerWithGsTests(work);
         }
     } else if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_DEFER_FLOOR_REFRESH) != 0) {
-        work->flags = previous | 0x31;
+        work->flags = previous | EFF_MODEL_OWNER_FLAG_UPDATE_PENDING |
+                      EFF_MODEL_OWNER_FLAG_LISTED_OBJECT | EFF_MODEL_OWNER_FLAG_UPDATE_DEFERRED;
     }
 }
 
@@ -353,7 +354,7 @@ void effFloorModelListPush(EffModelOwner *obj) {
         entry->next = NULL;
     }
     effFloorModelListHead = entry;
-    ((EffModelOwner *)entry->object)->flags |= 4;
+    ((EffModelOwner *)entry->object)->flags |= EFF_MODEL_OWNER_FLAG_FLOOR_LISTED;
 }
 
 extern char D_003B2AA0[];
@@ -384,11 +385,13 @@ void effSweepFloorModelList(void) {
     if (node != NULL) {
         do {
             next = node->next;
-            if (!(((EffModelOwner *)node->object)->flags & 8)) {
-                if ((((EffModelOwner *)node->object)->flags & 0x31) == 1) {
+            if (!(((EffModelOwner *)node->object)->flags & EFF_MODEL_OWNER_FLAG_DESTROY_READY)) {
+                if ((((EffModelOwner *)node->object)->flags &
+                     (EFF_MODEL_OWNER_FLAG_UPDATE_PENDING | EFF_MODEL_OWNER_FLAG_LISTED_OBJECT |
+                      EFF_MODEL_OWNER_FLAG_UPDATE_DEFERRED)) == EFF_MODEL_OWNER_FLAG_UPDATE_PENDING) {
                     effRenderModelOwnerWithGsTests(node->object);
                 }
-                ((EffModelOwner *)node->object)->flags &= ~0x20;
+                ((EffModelOwner *)node->object)->flags &= ~EFF_MODEL_OWNER_FLAG_UPDATE_DEFERRED;
             } else {
                 effFloorModelListRemove(node);
             }
@@ -406,8 +409,8 @@ void mdlPropagateObjectFlag(void) {
         do {
             object = node->object;
             flags = object->flags;
-            if ((flags & 2) != 0) {
-                object->flags = flags | 8;
+            if ((flags & EFF_MODEL_OWNER_FLAG_DESTROY_REQUESTED) != 0) {
+                object->flags = flags | EFF_MODEL_OWNER_FLAG_DESTROY_READY;
             }
             node = node->next;
         } while (node != NULL);
@@ -422,7 +425,7 @@ void mdlClearListedObjectFlag(void) {
     while (node != NULL) {
         object = node->object;
         node = node->next;
-        object->flags = object->flags & 0xffffffef;
+        object->flags = object->flags & ~EFF_MODEL_OWNER_FLAG_LISTED_OBJECT;
     }
 }
 
@@ -434,7 +437,7 @@ void mdlSetListedObjectFlag(void) {
     while (node != NULL) {
         object = node->object;
         node = node->next;
-        object->flags = object->flags | 0x10;
+        object->flags = object->flags | EFF_MODEL_OWNER_FLAG_LISTED_OBJECT;
     }
 }
 
@@ -450,7 +453,8 @@ void mdlMarkAndProcessObjectNodes(void) {
     do {
         object = node->object;
         next = node->next;
-        flags = object->flags | 0xA;
+        flags = object->flags | EFF_MODEL_OWNER_FLAG_DESTROY_REQUESTED |
+                EFF_MODEL_OWNER_FLAG_DESTROY_READY;
         object->flags = flags;
         effFloorModelListRemove(node);
         node = next;
