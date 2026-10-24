@@ -15,6 +15,8 @@ typedef union ScrStackValue {
     char *s;
 } ScrStackValue;
 
+typedef s8 ScrStackValueType;
+
 /* Four-byte decoded VM instruction; DDS1/2 script/scrTraceCode.c via scrProcessWork_s. */
 typedef union ScrInstr {
     struct {
@@ -58,7 +60,7 @@ typedef struct scrProcessWork_s {
     char name[24];
     s32 pc;
     s32 sp;
-    s8 stackTypes[28];
+    ScrStackValueType stackTypes[28];
     ScrStackValue stackValues[28];
     struct BfFlw0Header *scriptHeader;
     ScrSection *sections;

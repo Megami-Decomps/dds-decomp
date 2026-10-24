@@ -152,7 +152,7 @@ s32 scrStartProcessProcedure(scrProcessWork_s *process, s32 procedureIndex)
     process->sp = 0;
     {
         ScrStackValue *stackValue = process->stackValues;
-        s8 *stackType = process->stackTypes;
+        ScrStackValueType *stackType = process->stackTypes;
 
         for (cursor = SCR_STACK_RET; cursor >= 0; cursor--) {
             *stackType++ = 0;
