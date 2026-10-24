@@ -3973,7 +3973,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                     if (target->status.flags & 0x400) {
                         return 1;
                     }
-                    if (runtime->unk268 == 3) {
+                    if (runtime->cameraPresetMode == 3) {
                         targetSlot = target->lookupId;
                     } else {
                         targetSlot = target->lookupId == 0 ? 0 : 2;
@@ -4174,7 +4174,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
             if (attackTarget->status.flags & 0x400) {
                 return 1;
             }
-            if (runtime->unk268 == 3) {
+            if (runtime->cameraPresetMode == 3) {
                 targetSlot = attackTarget->lookupId;
             } else {
                 targetSlot = attackTarget->lookupId == 0 ? 0 : 2;
@@ -5084,8 +5084,8 @@ void btlScheduleCherunShadowSkillPresentation(ActionStateLink *actor, BtlUnit *t
     task->startDelay = 0xDA;
     btlStartTask(task);
 
-    if (battle->unk268 != twoUnitCameraMode) {
-        if (battle->unk268 == 3) {
+    if (battle->cameraPresetMode != twoUnitCameraMode) {
+        if (battle->cameraPresetMode == 3) {
             preset = boss->lookupId * 2;
         } else {
             preset = 2;
@@ -6417,7 +6417,7 @@ u8 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camera
         return 1;
     }
 
-    if (battle->unk268 == 3) {
+    if (battle->cameraPresetMode == 3) {
         cameraPreset = target->lookupId;
     } else {
         cameraPreset = target->lookupId == 0 ? 0 : 2;
@@ -6462,7 +6462,7 @@ u8 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camera
             D_003BF768[speciesPreset][cameraPreset].qz,
             D_003BF768[speciesPreset][cameraPreset].qw, 40.0f);
 
-        if (rotate == 1 && battle->unk268 == 3) {
+        if (rotate == 1 && battle->cameraPresetMode == 3) {
             switch (cameraPreset) {
             case 0:
                 SetRotateMatrixX(-0.13089969f);

@@ -3204,7 +3204,7 @@ void btlScheduleSummonActionTasks(ActionStateLink *action) {
     task->ownerId = action->unit->owner;
     btlStartTask(task);
     if (action->unit->status.flags & 0x200) {
-        if (unit->lookupId != 1 && battle->unk268 == 3) {
+        if (unit->lookupId != 1 && battle->cameraPresetMode == 3) {
             unit->currentPosition[2] = unit->position[2] - 45.0f;
         }
         if (!(unit->status.flags & 0xE0)) {

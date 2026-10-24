@@ -357,7 +357,7 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
         s32 flags = unit->status.flags;
         if (flags & 0x200) {
             actors[count++] = unit;
-            if ((flags & 1) || battle->unk268 == 3) {
+            if ((flags & 1) || battle->cameraPresetMode == 3) {
                 markedCount++;
             }
         }
@@ -379,7 +379,7 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
             }
         }
     }
-    if (battle->unk268 >= markedCount) {
+    if (battle->cameraPresetMode >= markedCount) {
         return 0;
     }
     if (markedCount >= 2) {
@@ -405,8 +405,8 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
         btlSetUnitPosition(unit, position);
         angle += step;
     }
-    if (battle->unk268 < markedCount) {
-        battle->unk268 = markedCount;
+    if (battle->cameraPresetMode < markedCount) {
+        battle->cameraPresetMode = markedCount;
         return 1;
     }
     return 0;

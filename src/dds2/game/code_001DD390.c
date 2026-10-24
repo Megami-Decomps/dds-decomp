@@ -6248,7 +6248,7 @@ s32 btlPositionActorIndexUnits(BtlLinkedCommand *action) {
     BtlUnit *unit;
     u32 count;
     f32 pos[4];
-    if (work->unk268 != 3) {
+    if (work->cameraPresetMode != 3) {
         return 0;
     }
     count = btlGetIndexListCount(action->targetList);

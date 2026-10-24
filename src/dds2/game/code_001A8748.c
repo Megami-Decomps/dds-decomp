@@ -2111,7 +2111,7 @@ s32 btlMarkInactiveActorCandidates(void) {
     if (count == 0) {
         return 0;
     }
-    if (battle->unk268 == 3 && count == 2) {
+    if (battle->cameraPresetMode == 3 && count == 2) {
         eligible[0]->status.flags |= 0x100;
         eligible[1]->status.flags |= 0x100;
     } else {

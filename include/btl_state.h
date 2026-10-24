@@ -470,7 +470,7 @@ typedef struct BtlState {
     u8 pad264[4];
     union {
         struct {
-            u16 unk268;
+            u16 cameraPresetMode; /* 0x268 */
             u16 cameraActorHighWater;
         };
         u32 cameraActorConfiguration; /* 0x268: mode and persistent actor count. */

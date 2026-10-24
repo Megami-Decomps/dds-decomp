@@ -1449,7 +1449,7 @@ void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *action, BtlCamState *p
     case 3:
         reverse = 0;
         alternate = 1;
-        if (((BtlState *)btlGetRuntime())->unk268 == mode &&
+        if (((BtlState *)btlGetRuntime())->cameraPresetMode == mode &&
                 action->link->unit->lookupId == 1) {
             u32 index;
             u32 count;
@@ -2759,7 +2759,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
 
         if ((btlUnitStatusPair(unit) & 0x300) != 0x300) {
             flags = unit->status.flags;
-        } else if (runtime->unk268 != 3) {
+        } else if (runtime->cameraPresetMode != 3) {
             flags = unit->status.flags;
         } else {
             if (unit->lookupId != 1) {
@@ -2832,8 +2832,8 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
     }
 
     if (target != NULL && (target->status.flags & 2) != 0 &&
-        (runtime->unk268 == 1 ||
-         (runtime->unk268 == 3 && target->lookupId == 1))) {
+        (runtime->cameraPresetMode == 1 ||
+         (runtime->cameraPresetMode == 3 && target->lookupId == 1))) {
         s32 field = mdlGetMotionNum(target->ext->owner, 0);
 
         if (field == 0xD || field == 0x12) {
@@ -2926,7 +2926,7 @@ void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
         span = btlMeasureUnitIndexListBounds(indices, &height, &depth);
     }
     VU0_STORE_VF_PTR(vf10, vectors.center);
-    if (mode == 0 || runtime->unk268 == 3) {
+    if (mode == 0 || runtime->cameraPresetMode == 3) {
         span += ffabsf(vectors.center[0]);
         vectors.center[0] = 0.0f;
         vectors.center[1] = -(height + depth) * 0.5f;
@@ -3250,7 +3250,7 @@ void btlFrameEarliestAnimatedUnitCameraPair(BtlLinkedCommand *action, BtlCamStat
     }
     btlFlagAllUnitsDefeatCandidate();
     action->focus = selected;
-    switch (work->unk268) {
+    switch (work->cameraPresetMode) {
     case 0:
     case 1:
         pose = 1;
