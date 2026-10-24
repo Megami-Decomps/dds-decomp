@@ -16842,11 +16842,11 @@ EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entry
     return effect;
 }
 
-s32 effSetSlotOverrideWork(EffectSlotSet *owner, u32 slot, void *payload) {
-    if (owner->workEntries[slot].alternate.payload == NULL) {
-        effAttachSlotWorkOwner(owner, slot, payload);
+u32 effSetSlotOverrideWork(EffectSlotSet *owner, s32 slotIndex, void *payload) {
+    if (owner->workEntries[slotIndex].alternate.payload == NULL) {
+        effAttachSlotWorkOwner(owner, slotIndex, payload);
     }
-    owner->workEntries[slot].alternate.payload = payload;
+    owner->workEntries[slotIndex].alternate.payload = payload;
     return 1;
 }
 
