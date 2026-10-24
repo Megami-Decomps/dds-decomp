@@ -2,6 +2,7 @@
 #define SDF_PROJECTION_H
 
 #include "common.h"
+#include "eff_matrix4.h"
 
 /* Native 0x90-byte camera/viewport owner shared by both projection builders. */
 typedef struct SdfCamera {
@@ -60,7 +61,7 @@ void effScreenOffset(void);
 /* Read vector inputs; VU0 forms first minus second and stores second in vf31. */
 void LookAtMatrix(const void *directionPoint, const void *basisOrigin, const void *up);
 struct ConsMatrixPacket;
-extern void sdf3DMakeViewportPacket(struct ConsMatrixPacket *, SdfProjectionRecord *, const void *);
-extern void sdf3DSetCamera(SdfProjectionRecord *, const void *);
+extern void sdf3DMakeViewportPacket(struct ConsMatrixPacket *, SdfProjectionRecord *, const Matrix4 *);
+extern void sdf3DSetCamera(SdfProjectionRecord *, const Matrix4 *);
 
 #endif /* SDF_PROJECTION_H */

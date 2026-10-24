@@ -1192,8 +1192,8 @@ extern u32 D_00435CBC;
 extern sdfGrFrameSet_t D_0040B290;
 extern SdfLightSources D_0037F770;
 extern f32 kwlnDefaultColorVector[4];
-extern u8 sdfViewMatrix[];
-extern u8 D_00384790[];
+extern Matrix4 sdfViewMatrix;
+extern Matrix4 D_00384790;
 extern SdfLightSources kwlnOverlayLightSources;
 extern f32 kwlnOverlayAmbientColor[4];
 extern void sdf3DLinkInitPacket(sdfDrawTag_t *, DmaPacketHeader *);
@@ -1218,13 +1218,13 @@ void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
                                  &D_00380870[bufferIndex].linkedList,
                                  &D_00380870[bufferIndex].scene.link);
     sdf3DMakeViewportPacket(&D_00380870[bufferIndex].sceneMatrix,
-                             &dds3ScreenParam, sdfViewMatrix);
+                             &dds3ScreenParam, &sdfViewMatrix);
     sdfDrawTagLink(&D_00380870[bufferIndex].sceneList, (u32)&D_00380870[bufferIndex].sceneMatrix);
     sdf3DMakeLightParallelPacket(&D_00380870[bufferIndex].scenePacketStorage, D_0037F770, kwlnDefaultColorVector);
     sdfDrawTagLink(&D_00380870[bufferIndex].sceneList, (u32)&D_00380870[bufferIndex].scenePacketStorage);
 
     sdfDrawTagInit(&D_00380870[bufferIndex].thirdList);
-    sdf3DMakeViewportPacket(&D_00380870[bufferIndex].thirdMatrix, &D_0037F980, D_00384790);
+    sdf3DMakeViewportPacket(&D_00380870[bufferIndex].thirdMatrix, &D_0037F980, &D_00384790);
     sdfDrawTagLink(&D_00380870[bufferIndex].thirdList, (u32)&D_00380870[bufferIndex].thirdMatrix);
     sdf3DMakeLightParallelPacket(&D_00380870[bufferIndex].overlayLightPacket, kwlnOverlayLightSources, kwlnOverlayAmbientColor);
     sdfDrawTagLink(&D_00380870[bufferIndex].thirdList, (u32)&D_00380870[bufferIndex].overlayLightPacket);
@@ -1258,7 +1258,7 @@ extern u16 D_00435CCE;
 extern u32 D_00435CD0;
 extern SdfLightSources kwlnHeldTextureLightSources;
 extern f32 kwlnHeldTextureAmbientColor[4];
-extern u8 kwlnHeldTextureViewMatrix[0x40];
+extern Matrix4 kwlnHeldTextureViewMatrix;
 
 /* Rebuild the held-texture render target's view and both frame banks. */
 void dds3InitRenderDrawEnv(void) {
@@ -1278,7 +1278,7 @@ void dds3InitRenderDrawEnv(void) {
         sdfGrSetDrawEnv(&D_00380870[i].heldTexture.scene, &dds3RenderTexId, 0);
         *(u32 *)&D_00380870[i].heldTexture.scene.centeredBounds.rgbaq.value = D_00435CD0;
         sdfDrawTagLink(&D_00380870[i].heldTexture.list, (u32)&D_00380870[i].heldTexture.scene);
-        sdf3DMakeViewportPacket(&D_00380870[i].heldTexture.matrix, &D_0037F7B0, kwlnHeldTextureViewMatrix);
+        sdf3DMakeViewportPacket(&D_00380870[i].heldTexture.matrix, &D_0037F7B0, &kwlnHeldTextureViewMatrix);
         sdfDrawTagLink(&D_00380870[i].heldTexture.list, (u32)&D_00380870[i].heldTexture.matrix);
         sdf3DMakeLightParallelPacket(&D_00380870[i].heldTexture.lighting, kwlnHeldTextureLightSources, kwlnHeldTextureAmbientColor);
         sdfDrawTagLink(&D_00380870[i].heldTexture.list, (u32)&D_00380870[i].heldTexture.lighting);

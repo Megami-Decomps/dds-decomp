@@ -1200,7 +1200,7 @@ extern s32 D_003BAEAC, D_003BAEB8, D_003BAEBC, D_003BAEC0;
 extern s32 D_003BAEF0, D_003BAEF4, D_003BAF00, D_003BAF04, D_003BAF08;
 extern f32 D_003BAEF8, D_003BAEFC, D_003BAF0C, D_003BAF10, D_003BAF14;
 extern u8 dds3PadButtonState[2][2][16];
-extern f32 D_00329790[4][4], sdfViewMatrix[4][4];
+extern Matrix4 D_00329790, sdfViewMatrix;
 extern f32 D_00324A20[4] __attribute__((aligned(16)));
 extern sdfModelRootNode_t *D_00348F30[];
 extern void frSetFontDrawOT(u32);
@@ -1242,7 +1242,7 @@ void fldDrawAutomapScene(void) {
 
     proposed = fldAutoMapGetFloorMax();
     frSetFontDrawOT(0x5E);
-    VU0_LOAD_MATRIX(D_00329790);
+    VU0_LOAD_MATRIX(&D_00329790);
     InversMatrix();
     D_003BAEF0 = D_003BAEB8;
     if ((s8)dds3PadButtonState[1][0][8] < 0 && D_003BAEF0 < proposed) {
@@ -1284,7 +1284,7 @@ void fldDrawAutomapScene(void) {
         D_003BAEF8 += 500.0f; D_003BAEFC += 500.0f;
     } else { D_003BAEF8 = 0.0f; }
     D_003BAEB8 = D_003BAEF0;
-    sdf3DSetCamera(&dds3ScreenParam, D_00329790);
+    sdf3DSetCamera(&dds3ScreenParam, &D_00329790);
     rsetOtOfs(0x56);
     rsetAlpha(0);
     rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
@@ -1461,7 +1461,7 @@ void fldDrawAutomapScene(void) {
 
     rsetAlpha(0);
     rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
-    sdf3DSetCamera(&dds3ScreenParam, sdfViewMatrix);
+    sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
     D_003BAF10 += 0.4f;
     D_003BAF14 += 0.2f;
     PCP_COPY_VECTOR_F32(focus, D_00324A20);
@@ -1786,12 +1786,12 @@ void fldDrawAutomapScene(void) {
         frDestroyFontRequestAfter(D_003BD7CC);
     }
 
-    VU0_LOAD_MATRIX(sdfViewMatrix);
+    VU0_LOAD_MATRIX(&sdfViewMatrix);
 }
 
 extern f32 D_003BAF18;
-extern f32 D_00329790[4][4];
-extern f32 sdfViewMatrix[4][4];
+extern Matrix4 D_00329790;
+extern Matrix4 sdfViewMatrix;
 extern void InversMatrix(void);
 extern void aDrawBoxF(s32, s32, s32, s32, u32, u32, u32, u32);
 
@@ -1804,9 +1804,9 @@ void fldDrawFieldBackdropFrame(void) {
 
     /* The stored single-precision phase step is just below 0.1. */
     D_003BAF18 += 0x1.999998p-4f;
-    VU0_LOAD_MATRIX(D_00329790);
+    VU0_LOAD_MATRIX(&D_00329790);
     InversMatrix();
-    sdf3DSetCamera(&dds3ScreenParam, D_00329790);
+    sdf3DSetCamera(&dds3ScreenParam, &D_00329790);
 
     rsetOtOfs(0x56);
     rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
@@ -1868,8 +1868,8 @@ void fldDrawFieldBackdropFrame(void) {
     }
 
     rsetAlpha(0);
-    sdf3DSetCamera(&dds3ScreenParam, sdfViewMatrix);
-    VU0_LOAD_MATRIX(sdfViewMatrix);
+    sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
+    VU0_LOAD_MATRIX(&sdfViewMatrix);
     rsetOtOfs(0x5E);
     rsetTest(1, 5, 0x81, 1, 0, 0, 1, 2);
     rsetAlpha(0);

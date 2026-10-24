@@ -130,7 +130,7 @@ extern u8 aViewTarget[];
 extern u8 aViewDown[];
 extern u8 sdfViewShakeVector[];
 extern u8 evtStageTestViewUpVector[];
-extern u8 sdfViewMatrix[];
+extern Matrix4 sdfViewMatrix;
 extern u8 D_003270F0[];
 extern void evtStageTestAdvanceMotionQueue(void);
 extern void mnuQueuePartyPanelSlotBlend(MenuPageWindow *, s32, u32, s32);
@@ -2447,8 +2447,8 @@ void evtStageTestResetViewAndLighting(void)
     SDF_VU0_COPYVECTOR(sdfViewTargetVector, evtStageTestViewTargetVector);
     SDF_VU0_COPYVECTOR(aViewTarget, evtStageTestViewEyeVector);
     SDF_VU0_COPYVECTOR(aViewDown, evtStageTestViewUpVector);
-    VU0_LOAD_MATRIX(sdfViewMatrix);
-    sdf3DSetCamera(&dds3ScreenParam, sdfViewMatrix);
+    VU0_LOAD_MATRIX(&sdfViewMatrix);
+    sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
 }
 
 /* Set the horizontal projection offset while retaining the native GS-coordinate bias. */
@@ -2734,9 +2734,9 @@ void evtStageTestUpdateCamera(void)
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&target);
     LookAtMatrix(&eye, &target, aViewDown);
-    VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
-    sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(D_003270F0 + drawBufferIndex * 8000), &dds3ScreenParam, sdfViewMatrix);
-    sdf3DSetCamera(&dds3ScreenParam, sdfViewMatrix);
+    VU0_STORE_MATRIX_UNCLOBBERED(&sdfViewMatrix);
+    sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(D_003270F0 + drawBufferIndex * 8000), &dds3ScreenParam, &sdfViewMatrix);
+    sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
 }
 
 s8 evtStageTestUpdate(struct SdfPoolNode **surfaces) {

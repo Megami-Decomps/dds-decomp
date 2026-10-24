@@ -1363,7 +1363,7 @@ s32 fldAutoMapGetFloorMax(void) {
 extern s32 D_00436240, D_0043624C, D_00436250, D_00436254;
 extern s32 D_00436288, D_0043628C, D_00436298, D_0043629C, D_004362A0;
 extern f32 D_00436290, D_00436294, D_004362A4, D_004362A8, D_004362AC;
-extern f32 D_00384790[16], sdfViewMatrix[16];
+extern Matrix4 D_00384790, sdfViewMatrix;
 extern f32 D_0037FA20[4] __attribute__((aligned(16)));
 extern void frSetFontDrawOT(u32);
 extern void InversMatrix(void);
@@ -1387,7 +1387,7 @@ extern s32 D_00436250, D_00436254;
 extern s32 D_00436288, D_0043628C, D_00436298, D_0043629C, D_004362A0;
 extern f32 D_00436290, D_004362A4, D_004362A8, D_004362AC;
 
-extern f32 sdfViewMatrix[16];
+extern Matrix4 sdfViewMatrix;
 extern void rsetAlpha(s32);
 extern void rsetOtOfs(u32);
 extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
@@ -1423,7 +1423,7 @@ void fldDrawAutomapScene(void) {
 
     proposed = fldAutoMapGetFloorMax();
     frSetFontDrawOT(0x5E);
-    VU0_LOAD_MATRIX(D_00384790);
+    VU0_LOAD_MATRIX(&D_00384790);
     InversMatrix();
     D_00436288 = D_0043624C;
     if ((s8)dds3PadButtonState[1][0][8] < 0 && D_00436288 < proposed) {
@@ -1465,7 +1465,7 @@ void fldDrawAutomapScene(void) {
         D_00436290 += 500.0f; D_00436294 += 500.0f;
     } else { D_00436290 = 0.0f; }
     D_0043624C = D_00436288;
-    sdf3DSetCamera(&dds3ScreenParam, D_00384790);
+    sdf3DSetCamera(&dds3ScreenParam, &D_00384790);
     rsetOtOfs(0x56);
     rsetAlpha(0);
     rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
@@ -1646,7 +1646,7 @@ void fldDrawAutomapScene(void) {
 
     rsetAlpha(0);
     rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
-    sdf3DSetCamera(&dds3ScreenParam, sdfViewMatrix);
+    sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
     D_004362A8 += 0.4f;
     D_004362AC += 0.2f;
     PCP_COPY_VECTOR_F32(focus, D_0037FA20);
@@ -2033,7 +2033,7 @@ void fldDrawAutomapScene(void) {
         frDestroyFontRequestAfter(D_00438ED4);
     }
 
-    VU0_LOAD_MATRIX(sdfViewMatrix);
+    VU0_LOAD_MATRIX(&sdfViewMatrix);
 }
 
 extern s32 sdfGrAllocPacketBuff(s32);
@@ -2117,8 +2117,8 @@ void func_00148188(f32 centerX, f32 centerY, f32 angle) {
 
 extern f32 D_004362B0;
 extern f32 D_004362B4;
-extern f32 D_00384790[16];
-extern f32 sdfViewMatrix[16];
+extern Matrix4 D_00384790;
+extern Matrix4 sdfViewMatrix;
 extern sdfTexHandle_t *D_0044F7F8[8];
 extern void InversMatrix(void);
 extern void rsetOtOfs(u32 buffer);
@@ -2139,9 +2139,9 @@ void fldDrawScrollingLayerOverlay(void) {
     s32 panelOffset;
 
     D_004362B0 += 0.04f;
-    VU0_LOAD_MATRIX(D_00384790);
+    VU0_LOAD_MATRIX(&D_00384790);
     InversMatrix();
-    sdf3DSetCamera(&dds3ScreenParam, D_00384790);
+    sdf3DSetCamera(&dds3ScreenParam, &D_00384790);
 
     rsetOtOfs(0x56);
     rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
@@ -2215,8 +2215,8 @@ void fldDrawScrollingLayerOverlay(void) {
     rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
     rsetAlpha(0);
     rsetAlpha(0);
-    sdf3DSetCamera(&dds3ScreenParam, sdfViewMatrix);
-    VU0_LOAD_MATRIX(sdfViewMatrix);
+    sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
+    VU0_LOAD_MATRIX(&sdfViewMatrix);
     rsetOtOfs(0x5E);
     rsetTest(1, 5, 0x81, 1, 0, 0, 1, 2);
     rsetAlpha(0);

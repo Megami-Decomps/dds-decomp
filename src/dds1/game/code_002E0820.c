@@ -282,7 +282,7 @@ SdfDrawPacket *sdf2DAllocSprite(s32 loopCount) {
 }
 
 /* Emit two matrices and three vectors; also cache the inverse origin in node. */
-void sdf3DMakeViewportPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node, const void *transformMatrix) {
+void sdf3DMakeViewportPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node, const Matrix4 *transformMatrix) {
     packet->quadwords = 0xC;
     packet->command = 0x6C0BC000;
     packet->reservedWord = 0;
@@ -313,7 +313,7 @@ extern u8 sdfCameraTm[];
 extern u8 sdf3DEyeOffset[];
 
 /* Cache node data, its composed transform, and the transformed cached origin. */
-void sdf3DSetCamera(SdfProjectionRecord *node, const void *transformMatrix) {
+void sdf3DSetCamera(SdfProjectionRecord *node, const Matrix4 *transformMatrix) {
     VU0_LOAD_MATRIX(transformMatrix);
     VU0_STORE_MATRIX(sdfCameraTm);
     sdfPostmultiplyVuMatrixFromMemory(node->camera.matrix);

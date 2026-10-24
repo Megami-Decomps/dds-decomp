@@ -200,11 +200,11 @@ extern f32 kwlnDefaultColorVector[4];
 extern f32 kwlnHeldTextureTargetVector[4], kwlnHeldTextureEyeVector[4], kwlnHeldTextureUpVector[4];
 extern f32 D_0037FA20[4], kwlnOverlayEyeVector[4], kwlnOverlayUpVector[4];
 extern KwlnDrawVectorParams kwlnHeldTextureFrustumParameters, kwlnOverlayFrustumParameters, kwlnDrawVector;
-extern u8 kwlnHeldTextureViewMatrix[0x40];
-extern u8 D_00384790[];
+extern Matrix4 kwlnHeldTextureViewMatrix;
+extern Matrix4 D_00384790;
 extern u8 aViewTarget[], sdfViewTargetVector[], aViewDown[];
 extern u8 sdfViewShakeVector[];
-extern u8 sdfViewMatrix[0x40];
+extern Matrix4 sdfViewMatrix;
 extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern void kwlnAdvanceShakeOffsets(void);
 extern u32 evtCheckSelectionState(void);
@@ -240,9 +240,9 @@ s32 kwlnBuildFrameScenePackets(dds3ProcessID_t *task) {
             u64 *sceneFrustum;
             sdfCameraBuildProjection(&D_0037F7B0.camera);
             LookAtMatrix(kwlnHeldTextureTargetVector, kwlnHeldTextureEyeVector, kwlnHeldTextureUpVector);
-            VU0_STORE_MATRIX_UNCLOBBERED(kwlnHeldTextureViewMatrix);
+            VU0_STORE_MATRIX_UNCLOBBERED(&kwlnHeldTextureViewMatrix);
             sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(kwlnHeldTextureMatrixPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
-                &D_0037F7B0, kwlnHeldTextureViewMatrix);
+                &D_0037F7B0, &kwlnHeldTextureViewMatrix);
             sceneNode = &sdfGrOtTable[1];
             sceneNode->append(sceneNode,
                 (sdfDrawTag_t *)(kwlnHeldTextureMatrixPackets - 0x190 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
@@ -261,8 +261,8 @@ s32 kwlnBuildFrameScenePackets(dds3ProcessID_t *task) {
             kwlnOverlayLightSources, kwlnOverlayAmbientColor);
         sdfCameraBuildProjection(&D_0037F980.camera);
         LookAtMatrix(D_0037FA20, kwlnOverlayEyeVector, kwlnOverlayUpVector);
-        VU0_STORE_MATRIX_UNCLOBBERED(D_00384790);
-        sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(kwlnOverlayMatrixPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES), &D_0037F980, D_00384790);
+        VU0_STORE_MATRIX_UNCLOBBERED(&D_00384790);
+        sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(kwlnOverlayMatrixPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES), &D_0037F980, &D_00384790);
         overlayNode = &sdfGrOtTable[85];
         overlayNode->append(overlayNode, (sdfDrawTag_t *)(kwlnOverlayMatrixPackets - 0x20 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
         overlayList = dds3FontReqAllocDrawTag();
@@ -288,14 +288,14 @@ s32 kwlnBuildFrameScenePackets(dds3ProcessID_t *task) {
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&target);
     LookAtMatrix(&eye, &target, aViewDown);
-    VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
+    VU0_STORE_MATRIX_UNCLOBBERED(&sdfViewMatrix);
     {
         SdfPoolNode *viewNode;
         sdfDrawTag_t *viewList;
         u64 *viewFrustum;
         sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(D_003820F0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
-            &dds3ScreenParam, sdfViewMatrix);
-        sdf3DSetCamera(&dds3ScreenParam, sdfViewMatrix);
+            &dds3ScreenParam, &sdfViewMatrix);
+        sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
         viewNode = &sdfGrOtTable[7];
         viewNode->append(viewNode, (sdfDrawTag_t *)(D_003820F0 - 0x250 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
         viewList = dds3FontReqAllocDrawTag();

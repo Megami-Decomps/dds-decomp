@@ -526,7 +526,7 @@ extern SdfLightSources D_00324770;
 
 extern f32 kwlnDefaultColorVector[4];
 
-extern u8 sdfViewMatrix[0x40];
+extern Matrix4 sdfViewMatrix;
 
 extern u8 aViewTarget[];
 
@@ -544,11 +544,11 @@ void itfInitDoubleBufferedScenePackets(void) {
 
     sdfCameraBuildProjection(&dds3ScreenParam.camera);
     LookAtMatrix(aViewTarget, sdfViewTargetVector, aViewDown);
-    VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
+    VU0_STORE_MATRIX_UNCLOBBERED(&sdfViewMatrix);
     for (i = 0; i < 2; i++) {
         sdfDrawTagInit(&D_003DFAB0[i]);
         sdf3DLinkInitPacket(&D_003DFAB0[i], &D_003DFAF0[i]);
-        sdf3DMakeViewportPacket((struct ConsMatrixPacket *)&D_003DFD30[i], &dds3ScreenParam, sdfViewMatrix);
+        sdf3DMakeViewportPacket((struct ConsMatrixPacket *)&D_003DFD30[i], &dds3ScreenParam, &sdfViewMatrix);
         sdfDrawTagLink(&D_003DFAB0[i], (u32)&D_003DFD30[i]);
         sdfDrawTagInit(&D_003DFB30[i]);
         sdf3DMakeLightParallelPacket(&D_003DFB70[i], D_00324770, kwlnDefaultColorVector);
