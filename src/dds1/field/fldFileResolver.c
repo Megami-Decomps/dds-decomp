@@ -862,7 +862,7 @@ extern s32 fldSetSparkVectors(s32 index, const u128 *position, const u128 *rotat
 
 extern void fldAddSe3D(s32 soundId, f32 radius, f32 sourceX, f32 sourceY, f32 sourceZ);
 
-extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32, void *, void *);
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32, u128 *, u128 *);
 
 /* Serialized transforms leave the position W component zero. */
 static inline void fldCopySpawnTransform(f32 *position, f32 *rotation, const f32 *source) {
@@ -1031,7 +1031,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                     spawnResource->id |= 0x800000;
                 }
                 fldCopySpawnTransform(position, rotation, spawnResource->transform);
-                spawnedObject = dds3AddCameraObjectBasicTypeFree(spawnResource->id, position, rotation);
+                spawnedObject = dds3AddCameraObjectBasicTypeFree(spawnResource->id, (u128 *)position, (u128 *)rotation);
                 ((CameraData *)spawnedObject->data)->fieldOfView = *(f32 *)spawnResource->data;
                 dds3SetUnitObjectId(spawnedObject, spawnResource->name);
             }

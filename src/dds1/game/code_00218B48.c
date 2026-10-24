@@ -3762,7 +3762,7 @@ s32 dds3BitEditorProcess(void) {
 }
 
 
-extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 counter, f32 *position, f32 *rotation);
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 counter, u128 *position, u128 *rotation);
 
 
 extern void dds3ObjectBaseCreateMover(dds3Basic_t *object);
@@ -3775,7 +3775,7 @@ void evtSetTestCamera(void) {
 
     memset(rotation, 0, 0x10);
     rotation[3] = 1.0f;
-    object = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), position, rotation);
+    object = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), (u128 *)position, (u128 *)rotation);
     dds3GetRadiusPoseSet((dds3Basic_t *)object, 10.0f);
     dds3ObjectBaseCreateMover(object);
     dds3SetActiveCameraSceneBasic(dds3GetControlScene(), (dds3Basic_t *)object);

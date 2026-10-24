@@ -5946,7 +5946,7 @@ extern f32 btlCreatedCameraTarget[4], btlCreatedCameraRotation[4];
 
 extern u32 D_00436A98;
 
-extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32, void *, void *);
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32, u128 *, u128 *);
 
 
 extern void dds3GetRadiusPoseSet(dds3Basic_t *, f32);
@@ -5973,7 +5973,7 @@ void btlInitializeWorldCamera(void) {
         dds3CameraObjectBasicSetFovy(camera, 0.6981317f);
         data->fovUpdatePending |= 1;
     }
-    camera = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), btlCreatedCameraTarget, btlCreatedCameraRotation);
+    camera = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), (u128 *)btlCreatedCameraTarget, (u128 *)btlCreatedCameraRotation);
     camera->value = (const char *)D_00436A98;
     dds3GetRadiusPoseSet(camera, 10.0f);
     dds3ObjectBaseCreateMover(camera);

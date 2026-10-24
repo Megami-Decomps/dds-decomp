@@ -56,11 +56,11 @@ void evtPathLoop(dds3Basic_t *worldObject, s32 enabled) {
     }
 }
 
-extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 world, f32 *pos, f32 *rot);
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 world, u128 *pos, u128 *rot);
 extern void dds3GetRadiusPoseSet(dds3Basic_t *obj, f32 value);
 
 dds3Basic_t *evtAddCamera(f32 *pos, f32 *rot) {
-    dds3Basic_t *obj = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), pos, rot);
+    dds3Basic_t *obj = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), (u128 *)pos, (u128 *)rot);
 
     if (obj == NULL) {
         return obj;

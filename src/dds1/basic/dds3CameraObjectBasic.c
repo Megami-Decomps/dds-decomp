@@ -108,7 +108,7 @@ dds3Basic_t *dds3AllocCameraObjectBasic(s32 key) {
 }
 
 /* Create a camera with the default local eye/up vectors and relative eye mode. */
-dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 key, void *targetPosition, void *rotation) {
+dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 key, u128 *targetPosition, u128 *rotation) {
     CameraVector initialUp;
     CameraVector initialEyeOffset;
     dds3Basic_t *camera;
@@ -130,7 +130,7 @@ dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 key, void *targetPosition, voi
 }
 
 /* Create a camera with an explicit world eye and an up vector rotated by its node. */
-dds3Basic_t *dds3AddCameraObjectBasicTypeLookAt(s32 key, void *targetPosition, u128 *worldEye, u128 *localUp) {
+dds3Basic_t *dds3AddCameraObjectBasicTypeLookAt(s32 key, u128 *targetPosition, u128 *worldEye, u128 *localUp) {
     dds3Basic_t *obj = dds3AllocCameraObjectBasic(key);
     CameraData *data = obj->data;
 
@@ -146,7 +146,7 @@ dds3Basic_t *dds3AddCameraObjectBasicTypeLookAt(s32 key, void *targetPosition, u
 
 /* Store the eye vector as a local offset; flag 0 also seeds the world eye.
  * The basis rebuild transforms that offset only when eyeIsRelative is 1. */
-dds3Basic_t *dds3AddCameraObjectBasic(s32 key, f32 fieldOfView, void *targetPosition, u128 *eyeVector, u128 *localUp, s32 eyeIsRelative) {
+dds3Basic_t *dds3AddCameraObjectBasic(s32 key, f32 fieldOfView, u128 *targetPosition, u128 *eyeVector, u128 *localUp, s32 eyeIsRelative) {
     dds3Basic_t *obj = dds3AllocCameraObjectBasic(key);
     CameraData *data = obj->data;
 
@@ -230,4 +230,3 @@ void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *obj, f32 *worldEyeOut, f32 *tar
 INCLUDE_RODATA(const s32, "basic/dds3CameraObjectBasic", D_0039F6F8);
 
 INCLUDE_RODATA(const s32, "basic/dds3CameraObjectBasic", D_0039F708);
-

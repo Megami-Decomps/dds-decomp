@@ -38,7 +38,7 @@
 #define MNU_STREAM_COMMIT_COMPLETE 4
 
 
-extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 counter, f32 *position, f32 *rotation);
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 counter, u128 *position, u128 *rotation);
 
 
 extern void dds3GetRadiusPoseSet(dds3Basic_t *object, f32 value);
@@ -693,7 +693,7 @@ void mnuLoadTitleMenuAssets(void) {
 INCLUDE_RODATA(const s32, "game/code_00269C10", D_003AFD48);
 
 void mnuCreateTitleCameraWorldEntry(void) {
-    mnuTitleCameraObject = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), (f32 *)mnuTitleCameraPosition, (f32 *)mnuTitleCameraRotation);
+    mnuTitleCameraObject = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), (u128 *)mnuTitleCameraPosition, (u128 *)mnuTitleCameraRotation);
     dds3SetUnitObjectId(mnuTitleCameraObject, "title_camera");
     dds3GetRadiusPoseSet(mnuTitleCameraObject, 2.0f);
     dds3SetActiveCameraSceneBasic(dds3GetControlScene(), mnuTitleCameraObject);

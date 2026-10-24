@@ -57,7 +57,7 @@ extern void fldPauseBgm(void);
 extern void fldUpdateCameraTarget(void);
 extern void fldSubmitSelectedActorWaypointTransition(void);
 
-extern dds3Basic_t *dds3AddCameraObjectBasicTypeLookAt(s32 key, void *targetPosition, u128 *worldEye, u128 *localUp);
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeLookAt(s32 key, u128 *targetPosition, u128 *worldEye, u128 *localUp);
 
 extern void fldSkySetTableAnime(u32);
 
@@ -1378,7 +1378,7 @@ void fldCreateSecondaryWorldCamera(void) {
     memset(&targetPosition, 0, sizeof(targetPosition));
     targetPosition.w = 1.0f;
     worldEye = D_0039FC90;
-    cameraObject = dds3AddCameraObjectBasicTypeLookAt(dds3AllocObjectId(), &targetPosition, &worldEye, &localUp);
+    cameraObject = dds3AddCameraObjectBasicTypeLookAt(dds3AllocObjectId(), (u128 *)&targetPosition, (u128 *)&worldEye, (u128 *)&localUp);
     *cameraObjectSlot = cameraObject;
     dds3SetUnitObjectId(cameraObject, D_003BABC0);
     dds3CameraObjectBasicGetCameraTM(*cameraObjectSlot, (u128 *)&worldEye);

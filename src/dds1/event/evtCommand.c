@@ -146,7 +146,7 @@ extern void fldSetDeferredFieldCommand(s32 a, s32 b);
 
 
 
-extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 world, void *pos, void *rot);
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 world, u128 *pos, u128 *rot);
 
 
 /* Copy two source points into the primary effect object. */
@@ -731,7 +731,7 @@ s32 evtCommand_CAM_CREATE(void) {
     memset(rotation, 0, 0x10);
     rotation[3] = 1.0f;
     world = dds3AllocObjectId();
-    dds3GetRadiusPoseSet(dds3AddCameraObjectBasicTypeFree(world, position, rotation), 1.0f);
+    dds3GetRadiusPoseSet(dds3AddCameraObjectBasicTypeFree(world, (u128 *)position, (u128 *)rotation), 1.0f);
     scrSetIntReturnValue(world);
     return 1;
 }

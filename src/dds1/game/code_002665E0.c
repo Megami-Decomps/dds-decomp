@@ -717,7 +717,7 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *prog
 #define MNU_STREAM_COMMIT_COMPLETE 4
 
 
-extern struct dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 counter, f32 *position, f32 *rotation);
+extern struct dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 counter, u128 *position, u128 *rotation);
 
 struct dds3Basic_t;
 
