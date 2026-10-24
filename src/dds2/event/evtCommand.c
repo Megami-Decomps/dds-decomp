@@ -1090,11 +1090,11 @@ extern void evtPolygonMovieClearFlagBits(dds3ProcessID_t *task, u32 bits);
 /* Clear bit 0 and echo the movie ID through the VM result. */
 s32 evtCommandClearPolygonMovieFlag(void)
 {
-    s32 movieId;
+    dds3ProcessID_t *movieTask;
 
-    movieId = scrGetIntPara(0);
-    evtPolygonMovieClearFlagBits((dds3ProcessID_t *)(u32)movieId, 1);
-    scrSetIntReturnValue(movieId);
+    movieTask = (dds3ProcessID_t *)(u32)scrGetIntPara(0);
+    evtPolygonMovieClearFlagBits(movieTask, 1);
+    scrSetIntReturnValue((s32)(u32)movieTask);
     return 1;
 }
 
