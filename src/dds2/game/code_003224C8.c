@@ -569,7 +569,8 @@ void mnuApplyShortRecordRepeatDirective(MenuWorkEntry *entry, MenuShortRecordLis
 
 extern f32 sdfVectorLength(const f32 *vector);
 
-s32 mnuUpdateActiveMenuWorkEntries(s32 context) {
+/* Advance active work, skipping timed spawns outside shooting phase two. */
+s32 mnuUpdateActiveMenuWorkEntries(s32 skipTimedSpawnUpdates) {
     MenuRuntimeList *runtimeList = mnuGetRuntimeHitTargetList();
     MenuProgressParameters *parameters = mnuGetResourceProgressParameters();
     s32 entryIndex;
@@ -615,7 +616,7 @@ s32 mnuUpdateActiveMenuWorkEntries(s32 context) {
                 entry->flagsBits.pendingDeactivate = 1;
             }
 
-            if (context == 0) {
+            if (skipTimedSpawnUpdates == 0) {
                 mnuUpdateTimedSpawns(entry->callback, runtimeList,
                               (s32)entry->currentX, currentYInteger,
                               entry->currentAngleRadians);
