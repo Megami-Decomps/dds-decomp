@@ -361,12 +361,12 @@ u32 func_0026C168(void) {
     return 0xffffffff;
 }
 
-s32 evtCopyWorldObjectEntryValue(s32 id, s32 dst) {
+s32 evtCopyWorldObjectEntryValue(const char *objectName, s32 dst) {
     dds3Basic_t *src;
     dds3Basic_t *destinationNode;
 
     src = dds3SceneBasicSearchNameAndType((dds3Basic_t *)dds3GetControlScene(), EFF_WORLD_KIND_LIGHT,
-                                               (const u8 *)id);
+                                               objectName);
     if (src != NULL) {
         destinationNode = (dds3Basic_t *)dst;
         *(s32 *)((u8 *)destinationNode->data + 0x80) = (s32)((EffLightData *)src->data)->buffer;

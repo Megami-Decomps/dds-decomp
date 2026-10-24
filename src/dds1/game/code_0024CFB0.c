@@ -322,12 +322,12 @@ u32 func_0024D608(void) {
 
 /* Copy the source node's nested value only on a successful lookup.
  * The destination and both nested data pointers are caller-owned. */
-s32 evtCopyWorldObjectEntryValue(s32 objectId, s32 destination) {
+s32 evtCopyWorldObjectEntryValue(const char *objectName, s32 destination) {
     dds3Basic_t *source;
     dds3Basic_t *destinationNode;
 
     source = dds3SceneBasicSearchNameAndType((dds3Basic_t *)dds3GetControlScene(), EFF_WORLD_KIND_LIGHT,
-                                                  (const u8 *)objectId);
+                                                  objectName);
     if (source != NULL) {
         destinationNode = (dds3Basic_t *)destination;
         *(s32 *)((u8 *)destinationNode->data + 0x80) =
