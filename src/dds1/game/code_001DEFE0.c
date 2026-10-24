@@ -18,6 +18,7 @@
 #include "btl_blend_color_api.h"
 #include "kwln_fade.h"
 #include "mnu_title_stream.h"
+#include "mnu_title_sound.h"
 #include "eff_random_mod.h"
 #include "btl_tint_transition.h"
 #include "eff_random.h"
@@ -10300,8 +10301,6 @@ extern void mnuReleaseSoundBufferLocked(void);
 
 extern void mnuPrintTitleDebugBanner(void);
 
-extern void mnuInstallTitleSoundBufferFromData(u32, u32, s32);
-
 #include "sdf_debug_api.h"
 
 INCLUDE_RODATA(const s32, "game/code_001DEFE0", D_003A5178);
@@ -10319,7 +10318,7 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
     SoundSlotOwner *owner = args->actor->soundSlotOwner;
     SoundSlotWork *soundWork;
     u32 key;
-    u32 data;
+    const void *data;
     u32 size;
 
     if (owner == 0) {
@@ -10350,7 +10349,7 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
                 mnuResetSoundBufferLocked();
                 mnuReleaseSoundBufferLocked();
             }
-            data = (void *)sdfMemGetPtr(soundWork->resourceHandles[args->slot]);
+            data = sdfMemGetPtr(soundWork->resourceHandles[args->slot]);
             size = sdfMemGetSize(soundWork->resourceHandles[args->slot]);
             mnuInstallTitleSoundBufferFromData(data, size, 2);
             printf("%%%%%%%%%%%%%%%% EARRING : %d\n", args->slot);
@@ -10544,7 +10543,7 @@ extern char D_003A5358[];
 s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
     char path[0x80];
     struct sdfMemHandle_t *resource;
-    u32 data;
+    const void *data;
     u32 size;
 
     if (args->state == 0) {
@@ -10556,7 +10555,7 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
             mnuReleaseSoundBufferLocked();
         }
         resource = fileGetMemHandle(args->request);
-        data = sdfMemLock(resource);
+        data = (const void *)(u32)sdfMemLock(resource);
         size = (s32)fileGetLoadSize(args->request);
         fileHandleFree(args->request);
         mnuInstallTitleSoundBufferFromData(data, size, D_00377650[args->entryIndex].volume);
@@ -10619,7 +10618,7 @@ extern char D_003A53B0[];
 extern char D_003A53D0[];
 
 u32 sndUpdateEarringDeadPlayback(BtlDeadLoadArgs *args) {
-    u32 data;
+    const void *data;
     u32 size;
 
     if (args->request == 0) {
@@ -10629,7 +10628,7 @@ u32 sndUpdateEarringDeadPlayback(BtlDeadLoadArgs *args) {
         if (pacFileCheckEnd(args->request) != 0) {
             args->resourceAllocation =
                 fileGetMemHandle(args->request);
-            data = sdfMemLock(args->resourceAllocation);
+            data = (const void *)(u32)sdfMemLock(args->resourceAllocation);
             size = (s32)fileGetLoadSize(args->request);
             fileHandleFree(args->request);
             mnuInstallTitleSoundBufferFromData(data, size, 2);
