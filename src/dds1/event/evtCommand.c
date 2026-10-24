@@ -364,19 +364,19 @@ s32 evtCommand_SEARCH_ID(void) {
     return 1;
 }
 
-s32 evtCommand_RTRN_TITLE(void)
+u32 evtCommand_RTRN_TITLE(void)
 {
     dds3AdminiCallSequence(2, 0, 0, 0);
     return 1;
 }
 
-s32 evtCommand_CALL_STAFF(void)
+u32 evtCommand_CALL_STAFF(void)
 {
     dds3AdminiCallSequence(0xc, 0, 0, 0);
     return 1;
 }
 
-s32 evtCommand_CALL_ENDSAVE(void)
+u32 evtCommand_CALL_ENDSAVE(void)
 {
     dds3AdminiCallSequence(4, 0, 0, 0);
     return 1;
@@ -419,7 +419,7 @@ s32 evtCommand_CALL_EVENT(void)
     return 1;
 }
 
-s32 evtCommandSignalAdminAtTimerZero(void)
+u32 evtCommandSignalAdminAtTimerZero(void)
 {
     if (scrGetCommandTimer() == 0) {
         dds3AdminiExitSequence();
@@ -573,7 +573,7 @@ s32 evtCommand_FIELD_DSP(void)
     return 1;
 }
 
-s32 evtCommand_FIELD_ANIME_START(void)
+u32 evtCommand_FIELD_ANIME_START(void)
 {
     s32 baseMode;
 
@@ -582,7 +582,7 @@ s32 evtCommand_FIELD_ANIME_START(void)
     return 1;
 }
 
-s32 evtCommand_FIELD_ANIME_STOP(void)
+u32 evtCommand_FIELD_ANIME_STOP(void)
 {
     s32 upperMode;
 
@@ -970,13 +970,13 @@ s32 evtCommand_OBJ_PATH_WAIT(void) {
     }
 }
 
-s32 evtCommand_MOON_START(void)
+u32 evtCommand_MOON_START(void)
 {
     evtEnableMoonCalc();
     return 1;
 }
 
-s32 evtCommand_MOON_STOP(void)
+u32 evtCommand_MOON_STOP(void)
 {
     evtDisableMoonCalc();
     return 1;
@@ -994,7 +994,7 @@ s32 evtCommand_GET_MOON16(void)
     return 1;
 }
 
-s32 evtCommand_CHG_MOON(void)
+u32 evtCommand_CHG_MOON(void)
 {
     evtSetAgeOfMoon(scrGetIntPara(0));
     return 1;
