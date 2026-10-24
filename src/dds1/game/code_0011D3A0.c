@@ -15,6 +15,7 @@
 #include "fld_activation_entry.h"
 #include "fld_camera_follow_row.h"
 #include "fld_named_camera_table.h"
+#include "fld_label_row.h"
 #include "mdl_flag_api.h"
 #include "sdf_trig.h"
 #include "dds3_path.h"
@@ -96,15 +97,15 @@ extern void ptyReturnOne(s32);
 
 extern FieldStageCoordinate fldStageCoordinateRecords[];
 
-extern u8 D_0033F068[];
+extern FldLabelRow28 D_0033F068[];
 
-extern u8 D_00342868[];
+extern FldLabelRow28 D_00342868[];
 
 struct dds3Basic_t;
 
 extern s16 D_0032C9B0[];
 
-extern u8 D_00346068[];
+extern FldLabelRow28 D_00346068[];
 
 void fldSetPacketArgumentPair(u32 *packet, u32 first, u32 second) {
     packet[4] = first;
@@ -2015,7 +2016,7 @@ u8 fldTestObjectActivationFlag(u32 flagIndex) {
 
 /* Search records 1..511 of the 28-byte coordinate table; return zero on miss. */
 s32 fldFindMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex) {
-    u8 *records = D_0033F068;
+    u8 *records = (u8 *)D_0033F068;
     u8 *yColumn = records + 2;
     s32 index = 1;
     s32 offset = 28;
@@ -2032,7 +2033,7 @@ s32 fldFindMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex) {
 
 /* Search the second 28-byte coordinate table, also reserving index zero. */
 s32 fldFindSecondaryMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex) {
-    u8 *records = D_00342868;
+    u8 *records = (u8 *)D_00342868;
     u8 *yColumn = records + 2;
     s32 index = 1;
     s32 offset = 28;
@@ -2049,7 +2050,7 @@ s32 fldFindSecondaryMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex) {
 
 /* Search the 28-byte map records, skipping row zero; zero denotes a miss. */
 s32 fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex) {
-    u8 *records = D_00346068;
+    u8 *records = (u8 *)D_00346068;
     u8 *yColumn = records + 2;
     s32 index = 1;
     s32 offset = 28;

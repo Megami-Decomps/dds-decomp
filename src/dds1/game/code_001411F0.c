@@ -6,6 +6,7 @@
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
 #include "fld_area_work.h"
+#include "fld_label_row.h"
 #include "fld_room_effect_entry.h"
 #include "fld_object_slot.h"
 #include "fld_activation_entry.h"
@@ -895,7 +896,7 @@ extern s32 fldFindSecondaryMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex);
 extern s32 fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex);
 
 
-extern char D_0033F06C[][0x1C], D_0034286C[][0x1C], D_0034606C[][0x1C];
+extern FldLabelRow28 D_0033F068[], D_00342868[], D_00346068[];
 
 extern char D_0033EC90[][0x18];
 
@@ -909,13 +910,13 @@ void fldCacheMapLabelLengths(s32 mapId) {
     s32 i;
 
     for (i = 0; i < 41; i++) {
-        D_003D43B0[i] = strlen(D_0033F06C[fldFindMapLabelIndexByCoordinate(mapId, i)]);
+        D_003D43B0[i] = strlen((const char *)D_0033F068[fldFindMapLabelIndexByCoordinate(mapId, i)].name);
     }
     for (i = 0; i < 24; i++) {
-        D_003D4460[i] = strlen(D_0034286C[fldFindSecondaryMapLabelIndexByCoordinate(mapId, i)]);
+        D_003D4460[i] = strlen((const char *)D_00342868[fldFindSecondaryMapLabelIndexByCoordinate(mapId, i)].name);
     }
     for (i = 0; i < 41; i++) {
-        D_003D4408[i] = strlen(D_0034606C[fldFindMapCoordinateIndex(mapId, i)]);
+        D_003D4408[i] = strlen((const char *)D_00346068[fldFindMapCoordinateIndex(mapId, i)].name);
     }
     i = 0;
     if (D_0032E3C0[0] < 100) {
@@ -1760,7 +1761,7 @@ void fldDrawAutomapScene(void) {
         D_003BD7CC = itfCreateConvertedTextGlyph(
             (450 - (D_003D4408[D_003BAEF4] / 2) * 12) << 4,
             (D_003BAF08 + 42) << 3, 0, labelColor,
-            (const u8 *)D_0034606C[labelIndex], 0);
+            D_00346068[labelIndex].name, 0);
         frSetPriority(D_003BD7CC, 0xFFFFFF);
         frFontDrawGlyphWithSharedFlags(D_003BD7CC, 1);
         frDestroyFontRequestAfter(D_003BD7CC);
@@ -1782,7 +1783,7 @@ void fldDrawAutomapScene(void) {
         D_003BD7CC = itfCreateConvertedTextGlyph(
             (450 - (D_003D4408[D_003BAEF0] / 2) * 12) << 4,
             (D_003BAF04 << 3) + 332, 0, labelColor,
-            (const u8 *)D_0034606C[labelIndex], 0);
+            D_00346068[labelIndex].name, 0);
         frSetPriority(D_003BD7CC, 0xFFFFFF);
         frFontDrawGlyphWithSharedFlags(D_003BD7CC, 1);
         frDestroyFontRequestAfter(D_003BD7CC);
@@ -2692,7 +2693,7 @@ interpolate:
             s32 queryX = work->area % 100;
             record = fldFindSecondaryMapLabelIndexByCoordinate(queryX, queryY);
         }
-        textWidth = frFontMeasureTextAdvance((const u8 *)D_0034286C[record], 1, 0);
+        textWidth = frFontMeasureTextAdvance(D_00342868[record].name, 1, 0);
         fldDrawAnimatedFieldBanner(textWidth, xOffset, yOffset);
         if (textWidth >= 0x9E) {
             x = 0x155;
@@ -2700,7 +2701,7 @@ interpolate:
             x = 0x1A3 - textWidth / 2;
         }
         y = (yOffset + 0x12) / 2;
-        fldKanjiDraw(xOffset + x, y, 0xF0DC6480, (const u8 *)D_0034286C[record]);
+        fldKanjiDraw(xOffset + x, y, 0xF0DC6480, D_00342868[record].name);
     } else {
         lookupIndex = work->primaryMapLabelSelection;
         if (lookupIndex == map || D_003D43B0[lookupIndex] < 2) {
@@ -2711,7 +2712,7 @@ interpolate:
             s32 queryX = work->area % 100;
             record = fldFindMapLabelIndexByCoordinate(queryX, queryY);
         }
-        textWidth = frFontMeasureTextAdvance((const u8 *)D_0033F06C[record], 1, 0);
+        textWidth = frFontMeasureTextAdvance(D_0033F068[record].name, 1, 0);
         fldDrawAnimatedFieldBanner(textWidth, xOffset, yOffset);
         if (textWidth >= 0x9E) {
             x = 0x155;
@@ -2719,7 +2720,7 @@ interpolate:
             x = 0x1A3 - textWidth / 2;
         }
         y = (yOffset + 0x12) / 2;
-        fldKanjiDraw(xOffset + x, y, 0xA09DC380, (const u8 *)D_0033F06C[record]);
+        fldKanjiDraw(xOffset + x, y, 0xA09DC380, D_0033F068[record].name);
     }
 }
 
