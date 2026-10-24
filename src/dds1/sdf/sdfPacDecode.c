@@ -5,6 +5,7 @@
 #include "sdf.h"
 #include "sdf_pac_packet.h"
 #include "sdf_pac_state.h"
+#include "sdf_pac_decode.h"
 #include "sdf_pac_work.h"
 #include "sdf_pac_reloc.h"
 #include "sdf_resource_list_item.h"
@@ -40,19 +41,19 @@ void sdfPacTmxDecoderInit(PacState *state, SdfPacStreamPacketHeader *packet);
 
 
 /* Feed one input span through packet-boundary, skip, and decoder phases. */
-s32 sdfPacDecode(PacState *state, const u8 *input, s32 inputByteCount) {
+SdfPacPhase sdfPacDecode(PacState *state, const u8 *input, s32 inputByteCount) {
     s32 consumeBytes;
 
     state->inputCursor = input;
     state->inputAvailable = inputByteCount;
     while (state->inputAvailable > 0) {
         switch (state->phase) {
-        case -1:
-            return -1;
-        case 0:
+        case SDF_PAC_PHASE_COMPLETE:
+            return SDF_PAC_PHASE_COMPLETE;
+        case SDF_PAC_PHASE_CALLBACK_BOUNDARY:
             sdfPacAdvanceCallbackBoundary(state);
             break;
-        case 1:
+        case SDF_PAC_PHASE_SKIP_BYTES:
             consumeBytes = state->pendingBytes;
             if (state->inputAvailable < consumeBytes) {
                 consumeBytes = state->inputAvailable;
@@ -60,10 +61,10 @@ s32 sdfPacDecode(PacState *state, const u8 *input, s32 inputByteCount) {
             sdfPacUseSrc(state, consumeBytes);
             state->pendingBytes -= consumeBytes;
             if (state->pendingBytes == 0) {
-                state->phase = 0;
+                state->phase = SDF_PAC_PHASE_CALLBACK_BOUNDARY;
             }
             break;
-        case 2:
+        case SDF_PAC_PHASE_INPUT_HANDLER:
             state->onInput(state);
             break;
         }
@@ -213,7 +214,7 @@ void sdfPacMemDecoderFuncInit(PacState *state, SdfPacStreamPacketHeader *packet)
         state->onInput = sdfPacMemStayDecoderFunc;
     } else {
         PacWork *node;
-        state->phase = 2;
+        state->phase = SDF_PAC_PHASE_INPUT_HANDLER;
         node = sdfPacNewResrc(state, packet);
         if (state->flags & PAC_STATE_ALLOCATE_HIGH) {
             PAC_WORK_ALLOCATION(node) = sdfMemAllocFromTailDirect(allocationSize);

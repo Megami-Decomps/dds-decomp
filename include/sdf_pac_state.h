@@ -66,6 +66,9 @@ typedef struct PacState {
     PacWork *queueTail; /* 0x34 */
 } PacState;
 
+/* The decode result follows this signed phase domain but keeps its 32-bit ABI. */
+typedef s32 SdfPacPhase;
+
 typedef char PacState_size_must_be_0x38[(sizeof(PacState) == 0x38) ? 1 : -1];
 typedef char PacState_phase_must_be_at_0x00[
     ((u32)&((PacState *)0)->phase == 0x00) ? 1 : -1];
@@ -79,7 +82,7 @@ typedef char PacState_queueTail_must_be_at_0x34[
     ((u32)&((PacState *)0)->queueTail == 0x34) ? 1 : -1];
 
 void sdfPacInit(PacState *state, void *callbackAddress);
-s32 sdfPacDecode(PacState *state, const u8 *input, s32 inputByteCount);
+SdfPacPhase sdfPacDecode(PacState *state, const u8 *input, s32 inputByteCount);
 void sdfPacUseSrc(PacState *state, s32 consumedBytes);
 void sdfPacTexListDecoder0(PacState *state);
 void sdfPacSkipAllocationEntryBytes(PacState *state);

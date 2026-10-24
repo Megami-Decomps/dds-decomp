@@ -9,6 +9,7 @@
 #include "file_manager_api.h"
 #include "file_transfer_job.h"
 #include "file_pac.h"
+#include "sdf_pac_decode.h"
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
 
@@ -376,7 +377,7 @@ s32 fileManager(void) {
         if (kind == 1) {
             FilePacRequest *request = (FilePacRequest *)job;
             if (request != NULL &&
-                sdfPacDecode(&request->packet, input, work->slots[slot].value) == -1) {
+                sdfPacDecode(&request->packet, input, work->slots[slot].value) == SDF_PAC_PHASE_COMPLETE) {
                 fileUnlinkQueue((FileRequest *)request);
                 request->readinessEnabled = kind;
                 if (request->completionCallback != NULL) {

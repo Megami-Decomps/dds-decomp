@@ -3,6 +3,7 @@
 #include "sdf_semaphore_api.h"
 #include "kwln_task_create.h"
 #include "file_pac.h"
+#include "sdf_pac_decode.h"
 #include "sdf_resource.h"
 #include "file.h"
 #include "file_slot_flags.h"
@@ -376,7 +377,7 @@ s32 fileManager(void) {
         if (kind == 1) {
             FilePacRequest *request = (FilePacRequest *)job;
             if (request != NULL &&
-                sdfPacDecode(&request->packet, input, work->slots[slot].value) == -1) {
+                sdfPacDecode(&request->packet, input, work->slots[slot].value) == SDF_PAC_PHASE_COMPLETE) {
                 fileUnlinkQueue((FileRequest *)request);
                 request->readinessEnabled = kind;
                 if (request->completionCallback != NULL) {
