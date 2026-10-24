@@ -1821,12 +1821,12 @@ BtlRuntimeTask *btlCreateRefreshEligibleActorsTask(void) {
 
 extern void datAddCurrencyClamped(s32 delta);
 
-u32 btlApplyQueuedCurrencyReward(s32 taskArgs) {
-    datAddCurrencyClamped(*(u32 *)(taskArgs + 4));
+u32 btlApplyQueuedCurrencyReward(BtlRuntimeTaskArgs *taskArgs) {
+    datAddCurrencyClamped(taskArgs->option);
     return 1;
 }
 
-BtlRuntimeTask *btlCreateCurrencyRewardTask(BtlUnit *actor, s32 option) {
+BtlRuntimeTask *btlCreateCurrencyRewardTask(BtlUnit *actor, s32 currencyDelta) {
     BtlRuntimeTask *task = btlAllocTask(8);
     BtlRuntimeTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -1837,7 +1837,7 @@ BtlRuntimeTask *btlCreateCurrencyRewardTask(BtlUnit *actor, s32 option) {
     task->onStart = 0;
     args = btlGetTaskArguments(task);
     args->actor = actor;
-    args->option = option;
+    args->option = currencyDelta;
     return task;
 }
 
