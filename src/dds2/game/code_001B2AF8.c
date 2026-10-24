@@ -9124,7 +9124,7 @@ BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *object, u16 *o
 extern u16 btlReadUnitStatusMask(datUnitWork_t *);
 #include "btl_command_affinity_api.h"
 extern void btlCreateReserveActorPanelTask(void);
-extern s32 btlIsSupportedCommandKind(BattleIndexWork *);
+extern s32 btlIsSupportedCommandKind(const s32 *phase);
 extern s32 btlCheckScenePairResult(BtlUnit *, BattleRosterPair *);
 extern s16 D_004368BC;
 extern s16 D_004368BE;
@@ -9162,7 +9162,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
                     }
                     object->commandData->phase = 2;
                     object->commandData->skillId = *picked;
-                    if (btlIsSupportedCommandKind(object->commandData) == 0) {
+                    if (btlIsSupportedCommandKind(&object->commandData->phase) == 0) {
                         btlSetActorCommandSelection((s32)object, 2, entry, (s16)*picked);
                     } else {
                         D_004368BC = 2;

@@ -328,8 +328,8 @@ void btlDispatchCommandViaHookOrDefault(u8 *command, BattleIndexWork *argument) 
     }
 }
 
-s32 btlIsSupportedCommandKind(s32 *state) {
-    switch (*state) {
+s32 btlIsSupportedCommandKind(const s32 *phase) {
+    switch (*phase) {
     case 1:
     case 2:
     case 3:

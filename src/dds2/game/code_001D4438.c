@@ -1010,7 +1010,7 @@ void btlEnterCommandSelectionState(ActionStateLink *task) {
 
 extern s32 fldGetSceneObjectState(void);
 extern void btlRequestCommandPanelClose(void);
-extern s32 btlIsSupportedCommandKind(s32 *);
+extern s32 btlIsSupportedCommandKind(const s32 *phase);
 extern s32 btlAiCheckStatusRollEligibility(ActionStateLink *);
 
 /* Poll command-panel selection and dispatch the selected action state. */
