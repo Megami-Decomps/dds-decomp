@@ -34,7 +34,7 @@ s32 brsMessageInputStep(dds3ProcessID_t *input) {
         if (brsPollResultCounterCompletion() != 0 &&
             ((buttons & 1) != 0 || (D_00324530[3] & 2) != 0)) {
             mnuClearTitleState(context);
-            mnuSetPopupEntry(transitionState, D_0036D3EC);
+            mnuSetPopupEntry(transitionState, (MenuPopupEntry *)D_0036D3EC);
         }
     }
     return 0;

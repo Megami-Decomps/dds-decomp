@@ -293,10 +293,10 @@ s32 mnuStaffFreeDisplayResources(dds3ProcessID_t *task) {
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
-extern char mnuCampItemUseListPopupEntry[];
-extern char mnuCampAmmoPartySelectionPopupEntry[];
-extern char mnuCampSpecialItemListPopupEntry[];
-extern char mnuCampCommandSelectionPopupEntry[];
+extern MenuPopupEntry mnuCampItemUseListPopupEntry[];
+extern MenuPopupEntry mnuCampAmmoPartySelectionPopupEntry[];
+extern MenuPopupEntry mnuCampSpecialItemListPopupEntry[];
+extern MenuPopupEntry mnuCampCommandSelectionPopupEntry[];
 
 /* Handle staff-item selection and window navigation while the popup is idle. */
 s32 mnuHandleStaffDisplayInput(dds3ProcessID_t *callback) {
@@ -322,20 +322,20 @@ s32 mnuHandleStaffDisplayInput(dds3ProcessID_t *callback) {
             switch (itemKind) {
             case 0:
                 resources->selection = 0;
-                mnuSetPopupEntry(popup, (void *)mnuCampItemUseListPopupEntry);
+                mnuSetPopupEntry(popup, mnuCampItemUseListPopupEntry);
                 break;
             case 1:
-                mnuSetPopupEntry(popup, (void *)mnuCampAmmoPartySelectionPopupEntry);
+                mnuSetPopupEntry(popup, mnuCampAmmoPartySelectionPopupEntry);
                 break;
             default:
-                mnuSetPopupEntry(popup, (void *)mnuCampSpecialItemListPopupEntry);
+                mnuSetPopupEntry(popup, mnuCampSpecialItemListPopupEntry);
                 break;
             }
             mnuSeekListNode(0, resources->windows[0]->list);
             mnuSeekListNode(0, resources->windows[1]->list);
         }
         if (input & 2) {
-            mnuSetPopupEntryFlagged(popup, (void *)mnuCampCommandSelectionPopupEntry);
+            mnuSetPopupEntryFlagged(popup, mnuCampCommandSelectionPopupEntry);
             mnuActivatePanelAndConfigureGridResources((MenuScrollPanel *)(u32)context->unk138,
                                                       (struct EffectSlotSet *)(u32)context->unk6C, 0, 1);
         }
@@ -426,8 +426,8 @@ void mnuRefreshStaffItemSelection(s32 selection, StaffDisplayContext *context) {
 }
 
 extern s32 mnuGetAbilityTargetCategory(u16);
-extern char mnuCampItemTargetSelectionPopupEntry[];
-extern char mnuCampItemCategoryPopupEntry[];
+extern MenuPopupEntry mnuCampItemTargetSelectionPopupEntry[];
+extern MenuPopupEntry mnuCampItemCategoryPopupEntry[];
 
 /* Use an eligible staff item and update its selection window while messages are idle. */
 s32 mnuHandleStaffInventoryListInput(dds3ProcessID_t *task) {
@@ -460,7 +460,7 @@ s32 mnuHandleStaffInventoryListInput(dds3ProcessID_t *task) {
                     if (mnuGetAbilityTargetCategory((u16)evtGetIndexedEventRecordId(item)) == 0) {
                         mnuRefreshStaffItemSelection(item, context);
                     } else {
-                        mnuSetPopupEntry(popup, (void *)mnuCampItemTargetSelectionPopupEntry);
+                        mnuSetPopupEntry(popup, mnuCampItemTargetSelectionPopupEntry);
                     }
                 } else {
                     input = 0x8000;
@@ -470,7 +470,7 @@ s32 mnuHandleStaffInventoryListInput(dds3ProcessID_t *task) {
             }
         }
         if (input & 2) {
-            mnuSetPopupEntry(popup, (void *)mnuCampItemCategoryPopupEntry);
+            mnuSetPopupEntry(popup, mnuCampItemCategoryPopupEntry);
         }
         window = resources->windows[0];
         if (window != NULL) {

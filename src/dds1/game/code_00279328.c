@@ -21,7 +21,7 @@ extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 extern u8 *datSkillMessages;
 extern void mnuUpdatePartyPanelPercentDisplays(s32);
 extern s32 mnuGetAbilityTargetCategory(u16);
-extern char mnuSkillMenuPagePopupEntry[];
+extern MenuPopupEntry mnuSkillMenuPagePopupEntry[];
 extern void mnuPlayInputSound(s32, s32, u32 *);
 
 /* These context pointers lack a proven allocator path; retain only their

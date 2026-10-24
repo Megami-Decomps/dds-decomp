@@ -127,7 +127,7 @@ extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct Effe
 
 
 extern void evtStageTestUpdateCamera(void);
-extern char brsPrimaryRewardPopupEntry[];
+extern MenuPopupEntry brsPrimaryRewardPopupEntry[];
 
 /* Terminal panel poll: once the message window is idle, apply the pending reward step or open the popup. */
 s32 brsAdvanceRewardPanelAfterMessage(dds3ProcessID_t *request) {

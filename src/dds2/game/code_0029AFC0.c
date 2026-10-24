@@ -27,7 +27,7 @@ extern s32 evtStageTestUpdateCamera(void);
 
 
 
-extern char brsRewardMessagePopupEntry[];
+extern MenuPopupEntry brsRewardMessagePopupEntry[];
 extern void mnuClearItemSelectionSlots(BrsSkillPackageWork *);
 extern void mnuRefreshPartyUnitVitalsPanels(datUnitWork_t *, BrsSkillPackageWork *);
 
@@ -55,7 +55,7 @@ s32 mnuCheckTableSums(const datUnitWork_t *unit, const BrsSkillPackageWork *skil
 }
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
-extern char brsStatConfirmationPopupEntry[];
+extern MenuPopupEntry brsStatConfirmationPopupEntry[];
 
 
 s32 mnuHandleStatPointAssignment(dds3ProcessID_t *task) {
@@ -167,7 +167,7 @@ u32 mnuStatAssignmentMessageLeaveNoOp(void) {
 
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern s32 btlAddBaseStats(s32 *, datUnitWork_t *);
-extern char brsLevelChangePopupEntry[];
+extern MenuPopupEntry brsLevelChangePopupEntry[];
 
 s32 mnuCommitAssignedStatPoints(dds3ProcessID_t *task) {
     BrsSkillPackageWork *work;

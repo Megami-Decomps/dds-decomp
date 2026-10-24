@@ -182,10 +182,10 @@ extern s32 mnuInitializeStaffPartyScene(dds3ProcessID_t *);
 extern void mnuClearWindowListSelectionFlags(s32);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
-extern u8 mnuSkillMenuFieldUsePopupEntry[];
-extern u8 mnuSkillMenuEquippedSlotsPopupEntry[];
-extern u8 mnuStaffPartyBrowsePopupEntry[];
-extern u8 mnuStaffFieldSkillDisplayPopupEntry[];
+extern MenuPopupEntry mnuSkillMenuFieldUsePopupEntry[];
+extern MenuPopupEntry mnuSkillMenuEquippedSlotsPopupEntry[];
+extern MenuPopupEntry mnuStaffPartyBrowsePopupEntry[];
+extern MenuPopupEntry mnuStaffFieldSkillDisplayPopupEntry[];
 extern void evtStageTestInit(s32);
 
 extern s32 evtStageTestPollModelRequest(void);
@@ -197,7 +197,7 @@ extern _FRQ *itfDrawUnderscoreTextSegment(s32, s32, s32, u32, const u8 *, s32);
 extern u8 *D_003BAA70;
 extern void mnuDestroyWindowContainer(u32);
 
-extern u8 mnuCampPartySelectionReturnPopupEntry[];
+extern MenuPopupEntry mnuCampPartySelectionReturnPopupEntry[];
 extern struct MenuPanelState *mnuCreatePanelState(s32 width, s32 height);
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
 extern void mnuAttachWindowTextureState(MenuWindowContainer *, u32, u32, u32, u32);
@@ -491,7 +491,7 @@ s32 mnuShopReleaseResources(dds3ProcessID_t *task) {
 
 void mnuPreparePartyPanelTransition(CampMenuContext *menu) {
     mnuRestorePartyEntriesAndRefresh(menu);
-    mnuSetPopupEntryFlagged(&menu->popupState, (void *)mnuCampPartySelectionReturnPopupEntry);
+    mnuSetPopupEntryFlagged(&menu->popupState, mnuCampPartySelectionReturnPopupEntry);
     mnuActivatePanelAndConfigureGridResources(
         (MenuScrollPanel *)(u32)menu->display,
         (struct EffectSlotSet *)(u32)menu->displayVariant, 0, 1);
@@ -1058,7 +1058,7 @@ s32 mnuStaffSwitchPartyPage(dds3ProcessID_t *requestArgument) {
 }
 
 extern u8 mnuIsStaffMenuInputBlocked(void);
-extern u8 mnuStaffCampPagePopupEntry[];
+extern MenuPopupEntry mnuStaffCampPagePopupEntry[];
 
 /* Update popup state before page navigation, view toggles, and exit requests.
  * stateWord holds the update result first, then the stored popup state. */
@@ -1757,9 +1757,9 @@ s32 mnuCloseItemSelectionState(dds3ProcessID_t *contextArg) {
     return 1;
 }
 
-extern u8 mnuSkillMenuPagePopupEntry[];
-extern u8 mnuSkillMenuDetailPopupEntry[];
-extern u8 mnuCampFieldSkillPopupEntry[];
+extern MenuPopupEntry mnuSkillMenuPagePopupEntry[];
+extern MenuPopupEntry mnuSkillMenuDetailPopupEntry[];
+extern MenuPopupEntry mnuCampFieldSkillPopupEntry[];
 
 s32 ptySkillMenuShellUpdate(dds3ProcessID_t *callback) {
     CampMenuContext *context = (CampMenuContext *)dds3GetProcessData(callback);
@@ -1963,7 +1963,7 @@ void mnuCampMenuHandleInput(dds3ProcessID_t *task) {
 }
 
 extern void ptySkillMenuRefreshEntries(CampMenuContext *);
-extern u8 mnuSkillMenuDetailPopupEntry[];
+extern MenuPopupEntry mnuSkillMenuDetailPopupEntry[];
 
 void ptySkillMenuHandleSelection(dds3ProcessID_t *callback) {
     CampMenuContext *context = (CampMenuContext *)dds3GetProcessData(callback);
@@ -2032,7 +2032,7 @@ void mnuSwapPartySkillSlots(datUnitWork_t *party, s32 firstSlot, s32 secondSlot)
 }
 
 
-extern u8 mnuSkillMenuDetailPopupEntry[];
+extern MenuPopupEntry mnuSkillMenuDetailPopupEntry[];
 /* First confirm stores a slot; a different second slot swaps and rebuilds.
  * Cancel clears the saved slot, opening the exit popup only if none was saved. */
 void ptySkillMenuHandleSlotReorder(dds3ProcessID_t *callback) {

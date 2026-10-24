@@ -1483,7 +1483,7 @@ s32 mnuPollTaskState(void) {
     return 0;
 }
 
-extern u8 mnuShopMessageSequencePopupEntry[];
+extern MenuPopupEntry mnuShopMessageSequencePopupEntry[];
 
 s32 mnuCampRunPanel0(dds3ProcessID_t *request) {
     s32 state = dds3GetProcessData(request);
@@ -2059,7 +2059,7 @@ extern void mnuDrawDispatchProgressIcons(s32, s32);
 extern s32 mnuDrawCommandClosePhase(ShopScene *);
 
 extern void mnuStorePendingMenuCommandValue(struct MenuList *, u32);
-extern u8 mnuShopReturnFadePopupEntry[];
+extern MenuPopupEntry mnuShopReturnFadePopupEntry[];
 
 extern void mnuStepShopWindowTransition(ShopScene *, s32);
 
@@ -2076,7 +2076,7 @@ extern void dspRequestMessageWindowModeOne(void);
 extern MenuPopupEntry mnuShopCommandPopupEntries[];
 extern MenuPopupEntry mnuShopCatalogPopupEntries[];
 extern MenuPopupEntry mnuShopFilteredCatalogPopupEntries[];
-extern u8 mnuShopSaleCommandPopupEntries[];
+extern MenuPopupEntry mnuShopSaleCommandPopupEntries[];
 
 
 
@@ -2101,7 +2101,7 @@ extern s32 mnuCampClampSceneCounter(s32, ShopScene *);
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
-extern u8 mnuShopQuantityPopupEntry[];
+extern MenuPopupEntry mnuShopQuantityPopupEntry[];
 extern void mnuSelectLastListNode(struct MenuList *);
 
 
@@ -2119,7 +2119,7 @@ s32 evtIsFadeDispatchIdle(void) {
 #define MNU_INSTALL_STATE_TABLE(ctx, table, entry) \
     do { \
         (ctx)->popupTable = (MenuPopupEntry *)(table); \
-        mnuSetPopupEntry(&(ctx)->dispatchState, (void *)(entry)); \
+        mnuSetPopupEntry(&(ctx)->dispatchState, entry); \
     } while (0)
 
 void evtInstallStateTable(ShopScene *state) {
@@ -2316,7 +2316,7 @@ s32 mnuShopPollBuyCommandSelection(dds3ProcessID_t *task) {
             mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->ownedWindows[0]->list, 10);
             break;
         case 7:
-            mnuSetPopupEntryFlagged(dispatchSlot, (void *)mnuShopQuantityPopupEntry);
+            mnuSetPopupEntryFlagged(dispatchSlot, mnuShopQuantityPopupEntry);
             break;
         case 8:
             mnuSetCommandPhase((ShopScene *)stateAddress, 6);
@@ -2437,7 +2437,7 @@ s32 mnuShopPollFilteredCommandSelection(dds3ProcessID_t *task) {
             mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->ownedWindows[0]->list, 10);
             break;
         case 7:
-            mnuSetPopupEntryFlagged(dispatchSlot, (void *)mnuShopQuantityPopupEntry);
+            mnuSetPopupEntryFlagged(dispatchSlot, mnuShopQuantityPopupEntry);
             break;
         case 8:
             mnuSetCommandPhase((ShopScene *)stateAddress, 6);
@@ -2495,7 +2495,7 @@ s32 evtSetupDispatchSyncC(dds3ProcessID_t *callbackContext) {
 
 void evtInstallStateTableD(ShopScene *state) {
     if (state->menuMode == 2) {
-        MNU_INSTALL_STATE_TABLE(state, mnuShopSaleCommandPopupEntries, mnuShopSaleCommandPopupEntries + 0x70);
+        MNU_INSTALL_STATE_TABLE(state, mnuShopSaleCommandPopupEntries, mnuShopSaleCommandPopupEntries + 4);
     }
 }
 
@@ -2553,7 +2553,7 @@ s32 mnuShopPollSaleCommandSelection(dds3ProcessID_t *task) {
             mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->ownedWindows[0]->list, 10);
             break;
         case 7:
-            mnuSetPopupEntryFlagged(dispatchSlot, (void *)mnuShopQuantityPopupEntry);
+            mnuSetPopupEntryFlagged(dispatchSlot, mnuShopQuantityPopupEntry);
             break;
         case 8:
             mnuSetCommandPhase((ShopScene *)stateAddress, 6);
@@ -2670,7 +2670,7 @@ s32 evtAdvanceStateStage(dds3ProcessID_t *task) {
 
 extern s32 mnuTickCommandWaitPhase(ShopScene *);
 extern void mnuSetQuantityListTransition(struct MenuList *, u32);
-extern u8 mnuShopTransactionPopupEntry[];
+extern MenuPopupEntry mnuShopTransactionPopupEntry[];
 
 s32 evtPollQuantitySelection(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
@@ -2694,7 +2694,7 @@ s32 evtPollQuantitySelection(dds3ProcessID_t *callbackContext) {
         break;
     }
     case 12:
-        mnuSetPopupEntryFlagged(dispatchSlot, (void *)mnuShopTransactionPopupEntry);
+        mnuSetPopupEntryFlagged(dispatchSlot, mnuShopTransactionPopupEntry);
         break;
     case 11:
     default:
@@ -2930,7 +2930,7 @@ s32 evtDispatchShopSelectionAction(dds3ProcessID_t *task) {
             mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCatalogPopupEntries);
             break;
         case 3:
-            mnuSetPopupEntryFlagged(dispatchSlot, (void *)mnuShopSaleCommandPopupEntries);
+            mnuSetPopupEntryFlagged(dispatchSlot, mnuShopSaleCommandPopupEntries);
             break;
         }
     }
@@ -3255,7 +3255,7 @@ u32 evtStartFadeOut(void) {
 }
 
 extern const char D_003AF528[];
-extern s32 mnuShopFadeCompletePopupEntry[];
+extern MenuPopupEntry mnuShopFadeCompletePopupEntry[];
 extern s32 evtIsActiveFlagSet(s32 flagIndex);
 
 s32 evtUpdateMainTaskPopupEntry(dds3ProcessID_t *task) {

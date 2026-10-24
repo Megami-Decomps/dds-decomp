@@ -18,6 +18,9 @@ typedef struct MenuPopupEntry {
     MenuPopupCallback canEnter;
 } MenuPopupEntry;
 
+typedef char MenuPopupEntry_size_must_be_0x1C[
+    (sizeof(MenuPopupEntry) == 0x1C) ? 1 : -1];
+
 /* Both games keep sixteen saved entries and the current/previous entry pointers. */
 typedef struct MenuPopupState {
     s32 count;

@@ -26,7 +26,7 @@ extern void mnuDrawTerminalBackdrop(s32);
 
 
 
-extern char mnuTerminalPopupEntries[];
+extern MenuPopupEntry mnuTerminalPopupEntries[];
 
 extern MnuSceneFlagEntry mnuSceneFlagEventEntries[MNU_SCENE_FLAG_ENTRY_COUNT];
 extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
@@ -157,7 +157,9 @@ s32 mnuUpdateTerminalPanelPopupWhenIdle(dds3ProcessID_t *request) {
     s32 result = mnuDispatchPopupTransition((u8 *)context + 8, panelState, 0, request);
     if (result == 0) {
         if (*panelState == 0 && dds3FadeCheck() == 0) {
-            mnuSetPopupEntryFlagged(panelState, D_003CE998);
+            MenuPopupEntry *entry = (MenuPopupEntry *)D_003CE998;
+
+            mnuSetPopupEntryFlagged(panelState, entry);
         }
         result = 0;
     }

@@ -562,15 +562,15 @@ s32 mnuDestroyWindowOwnerResourceSet(dds3ProcessID_t *task) {
 extern void mnuClearWindowListSelectionFlags(s32);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
-extern char mnuCampItemUseListPopupEntry[];
-extern char mnuCampAmmoPartySelectionPopupEntry[];
-extern char mnuCampRingEquipmentPartyPopupEntry[];
-extern char mnuCampRingCustomizationPartyPopupEntry[];
-extern char mnuCampSpecialItemListPopupEntry[];
-extern char mnuCampCommandSelectionPopupEntry[];
+extern MenuPopupEntry mnuCampItemUseListPopupEntry[];
+extern MenuPopupEntry mnuCampAmmoPartySelectionPopupEntry[];
+extern MenuPopupEntry mnuCampRingEquipmentPartyPopupEntry[];
+extern MenuPopupEntry mnuCampRingCustomizationPartyPopupEntry[];
+extern MenuPopupEntry mnuCampSpecialItemListPopupEntry[];
+extern MenuPopupEntry mnuCampCommandSelectionPopupEntry[];
 extern void mnuSetStateValue(u32 *, u32);
-extern char mnuCampItemCategoryPopupEntry[];
-extern char mnuCampItemTargetSelectionPopupEntry[];
+extern MenuPopupEntry mnuCampItemCategoryPopupEntry[];
+extern MenuPopupEntry mnuCampItemTargetSelectionPopupEntry[];
 
 /* Handle staff-item popup selection and idle-window navigation. */
 s32 mnuHandleStaffPopupSelection(dds3ProcessID_t *callback) {

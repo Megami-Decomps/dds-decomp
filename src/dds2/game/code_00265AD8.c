@@ -26,7 +26,7 @@ extern MnuSceneFlagEntry mnuSceneFlagEventEntries[MNU_SCENE_FLAG_ENTRY_COUNT];
 extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
 
 
-extern u8 mnuShopFadeCompletePopupEntry[];
+extern MenuPopupEntry mnuShopFadeCompletePopupEntry[];
 
 
 typedef struct EventMenuSelection {
@@ -68,8 +68,8 @@ typedef struct EventDispatchState {
 } EventDispatchState;
 
 extern const char D_00424D08[];
-extern u8 mnuTerminalMenuMessagePopupEntry[];
-extern u8 mnuShopCommandPopupEntries[];
+extern MenuPopupEntry mnuTerminalMenuMessagePopupEntry[];
+extern MenuPopupEntry mnuShopCommandPopupEntries[];
 extern ShopRankPriceRow mnuShopRankPriceRows[];
 extern const u8 (*D_00435E5C)[25];
 extern s32 evtIsActiveFlagSet(s32);
@@ -260,7 +260,7 @@ u32 mnuTerminalMenuMessageLeaveNoOp(void) {
     return 1;
 }
 
-extern u8 mnuShopReturnFadePopupEntry[];
+extern MenuPopupEntry mnuShopReturnFadePopupEntry[];
 
 s32 mnuPollMessageWindowBeforeClosing(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);

@@ -56,7 +56,7 @@ extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 
-extern char mnuCampFieldSkillPopupEntry[];
+extern MenuPopupEntry mnuCampFieldSkillPopupEntry[];
 
 
 
@@ -106,8 +106,8 @@ void mnuSeekSelectedWindowRow(s32 menu, s32 target) {
     mnuResetListNodeFadeCounters(((MenuWindowContainer *)window)->list);
 }
 
-extern char mnuSkillMenuPagePopupEntry[];
-extern char mnuSkillMenuEquippedSlotsPopupEntry[];
+extern MenuPopupEntry mnuSkillMenuPagePopupEntry[];
+extern MenuPopupEntry mnuSkillMenuEquippedSlotsPopupEntry[];
 extern s32 ptySkillMenuHandlePageSwitch(dds3ProcessID_t *);
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);

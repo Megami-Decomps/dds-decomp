@@ -20,7 +20,7 @@ extern void mnuSwitchCampVisualCategory(s32 nextCategory, MenuStaffContext *menu
 
 extern s32 checkConfigState(void);
 
-extern u8 mnuCampCommandReturnPopupEntry[];
+extern MenuPopupEntry mnuCampCommandReturnPopupEntry[];
 
 
 extern u8 mnuRingCustomizationItemRows[];
@@ -30,7 +30,7 @@ extern u8 D_003E73F8[];
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
-extern u8 mnuCampCommandDispatchEntries[];
+extern MenuPopupEntry mnuCampCommandDispatchEntries[];
 
 
 
@@ -83,7 +83,7 @@ s32 mnuHandleCampFieldSkillInput(dds3ProcessID_t *callback) {
             if ((entry->flags48 & 1) == 0) {
                 u32 index = entry->sortKeyPrimary + 1;
 
-                mnuSetPopupEntry(popup, (mnuCampCommandDispatchEntries + index * 0x1C));
+                mnuSetPopupEntry(popup, mnuCampCommandDispatchEntries + index);
                 context->titleFadingOut = 1;
             } else {
                 input = 0x8000;

@@ -106,7 +106,7 @@ extern CampFlagRow mnuCampFlagRows[];
 
 
 
-extern u8 mnuShopMessageSequencePopupEntry[];
+extern MenuPopupEntry mnuShopMessageSequencePopupEntry[];
 
 extern sdfTexHandle_t *dds3RenderTexture;
 
@@ -2547,12 +2547,12 @@ extern s32 mnuDrawCampCommandTransition(MenuTerminalContext *);
 
 
 extern s32 mnuShopProgressSlotRows[];
-extern u8 mnuShopRangeFilteredCommandPopupEntries[];
+extern MenuPopupEntry mnuShopRangeFilteredCommandPopupEntries[];
 extern void mnuSetQuantityListTransition(struct MenuList *, u32);
 extern s32 mnuCampAdvanceCounter(s32, MenuTerminalContext *);
 
 
-extern u8 mnuShopCommandPopupEntries[];
+extern MenuPopupEntry mnuShopCommandPopupEntries[];
 extern u8 *datUnitNames;
 extern char D_00437840[];
 extern s32 D_003C9A20[];
@@ -2561,13 +2561,13 @@ extern void evtClearActiveFlag();
 extern void mnuBuildEnabledCampEntryWindow();
 extern s32 mnuCampHasEligibleOwnedItems();
 extern s32 mnuShopProgressCompletionFlagView[];
-extern u8 mnuShopSelectedRewardPopupEntry[];
+extern MenuPopupEntry mnuShopSelectedRewardPopupEntry[];
 extern const EvtFlagGate D_003CE400[];
 extern s32 mnuTickExtendedCommandPhase(MenuTerminalContext *);
 
 
 extern s32 mnuIsSolarPricedItemId();
-extern u8 mnuShopProgressGatePopupEntry[];
+extern MenuPopupEntry mnuShopProgressGatePopupEntry[];
 extern u16 D_003CE3F8[];
 extern void mnuDrawSpriteMenuFadeOut();
 extern s32 mnuDrawCommandClosePhase(MenuTerminalContext *);
@@ -2576,19 +2576,19 @@ extern void mnuSetCommandPhase(MenuTerminalContext *, u32);
 
 extern void dspRequestMessageWindowModeOne(void);
 
-extern u8 mnuShopCatalogPopupEntries[];
+extern MenuPopupEntry mnuShopCatalogPopupEntries[];
 
 extern void mnuSetValueListTransition(struct MenuList *, u32);
 
 extern void mnuDrawFadingValueListRow();
 
-extern u8 mnuShopFilteredCatalogPopupEntries[];
+extern MenuPopupEntry mnuShopFilteredCatalogPopupEntries[];
 
-extern u8 mnuShopSaleCommandPopupEntries[];
+extern MenuPopupEntry mnuShopSaleCommandPopupEntries[];
 
 extern s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *);
 
-extern u8 mnuShopReturnFadePopupEntry[];
+extern MenuPopupEntry mnuShopReturnFadePopupEntry[];
 
 extern void mnuStorePendingMenuCommandValue(struct MenuList *, u32);
 
@@ -2596,7 +2596,7 @@ extern void mnuSetSelectionListTransition(struct MenuList *, u32);
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
-extern u8 mnuShopQuantityPopupEntry[];
+extern MenuPopupEntry mnuShopQuantityPopupEntry[];
 
 
 s32 evtIsFadeDispatchIdle(void) {
@@ -2611,13 +2611,13 @@ s32 evtIsFadeDispatchIdle(void) {
 /* Install a dispatch state table and point the popup at the shared terminal entry. */
 #define MNU_INSTALL_STATE_TABLE(ctx, table, entry) \
     do { \
-        (ctx)->popupTable = (MenuPopupEntry *)(table); \
+        (ctx)->popupTable = (table); \
         mnuSetPopupEntry(&(ctx)->popupState, (entry)); \
     } while (0)
 
 void evtInstallStateTable(MenuTerminalContext *state) {
     if (state->dispatchMode == 2) {
-        MNU_INSTALL_STATE_TABLE(state, mnuShopCommandPopupEntries, mnuShopCommandPopupEntries + 0x118);
+        MNU_INSTALL_STATE_TABLE(state, mnuShopCommandPopupEntries, mnuShopCommandPopupEntries + 10);
     }
 }
 
@@ -2648,7 +2648,7 @@ s32 evtAdvancePhaseOne(dds3ProcessID_t *task) {
 }
 
 extern s32 mnuTickCommandPhase(MenuTerminalContext *);
-extern u8 mnuShopReturnDelayPopupEntry[];
+extern MenuPopupEntry mnuShopReturnDelayPopupEntry[];
 
 s32 mnuShopPollCommandSelection(dds3ProcessID_t *task) {
     MenuTerminalContext *state;
@@ -2681,7 +2681,7 @@ s32 mnuShopPollCommandSelection(dds3ProcessID_t *task) {
     case 1: {
         struct MenuListNode *node = state->ownedWindows[0]->list->cursor;
         mnuSetPopupEntryFlagged(&state->popupState,
-                                (void *)(mnuShopCatalogPopupEntries + node->camp.value * 0x1C));
+                                mnuShopCatalogPopupEntries + node->camp.value);
         return 0;
     }
     case 2:
@@ -2708,7 +2708,7 @@ s32 mnuShopPollCommandSelection(dds3ProcessID_t *task) {
                     if (selection >= 5) {
                         mnuSetPopupEntryFlagged(
                             &state->popupState,
-                            (void *)(mnuShopCatalogPopupEntries + node->camp.value * sizeof(MenuPopupEntry)));
+                            mnuShopCatalogPopupEntries + node->camp.value);
                     } else {
                         mnuSetCommandPhase(state, 1);
                         mnuSetSelectionListTransition(list, 4);
@@ -2753,7 +2753,7 @@ s32 evtSetupDispatchSync(dds3ProcessID_t *callbackContext) {
 
 void evtInstallStateTableB(MenuTerminalContext *state) {
     if (state->dispatchMode == 1) {
-        MNU_INSTALL_STATE_TABLE(state, mnuShopCatalogPopupEntries, mnuShopCatalogPopupEntries + 0xfc);
+        MNU_INSTALL_STATE_TABLE(state, mnuShopCatalogPopupEntries, mnuShopCatalogPopupEntries + 9);
     }
 }
 
@@ -2880,7 +2880,7 @@ s32 evtSetupDispatchSyncB(dds3ProcessID_t *callbackContext) {
 
 void evtInstallStateTableC(MenuTerminalContext *state) {
     if (state->dispatchMode == 1) {
-        MNU_INSTALL_STATE_TABLE(state, mnuShopFilteredCatalogPopupEntries, mnuShopFilteredCatalogPopupEntries + 0xe0);
+        MNU_INSTALL_STATE_TABLE(state, mnuShopFilteredCatalogPopupEntries, mnuShopFilteredCatalogPopupEntries + 8);
     }
 }
 
@@ -2997,7 +2997,7 @@ s32 evtSetupDispatchSyncC(dds3ProcessID_t *callbackContext) {
 
 void mnuInstallNoCapacityStateTable(MenuTerminalContext *state) {
     if (state->dispatchMode == 1) {
-        MNU_INSTALL_STATE_TABLE(state, mnuShopRangeFilteredCommandPopupEntries, mnuShopRangeFilteredCommandPopupEntries + 0xc4);
+        MNU_INSTALL_STATE_TABLE(state, mnuShopRangeFilteredCommandPopupEntries, mnuShopRangeFilteredCommandPopupEntries + 7);
     }
 }
 
@@ -3117,7 +3117,7 @@ s32 evtSetupDispatchSyncD(dds3ProcessID_t *callbackContext) {
 
 void evtInstallStateTableD(MenuTerminalContext *state) {
     if (state->dispatchMode == 2) {
-        MNU_INSTALL_STATE_TABLE(state, mnuShopSaleCommandPopupEntries, mnuShopSaleCommandPopupEntries + 0xa8);
+        MNU_INSTALL_STATE_TABLE(state, mnuShopSaleCommandPopupEntries, mnuShopSaleCommandPopupEntries + 6);
     }
 }
 
@@ -3416,7 +3416,7 @@ s32 evtAdvanceStateStage(dds3ProcessID_t *task) {
 }
 
 extern s32 mnuTickCommandWaitPhase(MenuTerminalContext *);
-extern u8 mnuShopTransactionPopupEntry[];
+extern MenuPopupEntry mnuShopTransactionPopupEntry[];
 
 /* Poll command phases, adjust the idle quantity selection, and play UI sounds. */
 s32 evtPollQuantitySelection(dds3ProcessID_t *callbackContext) {
@@ -3442,8 +3442,8 @@ s32 evtPollQuantitySelection(dds3ProcessID_t *callbackContext) {
         struct MenuList *primaryList =
             ((MenuTerminalContext *)stateAddress)->ownedWindows[0]->list;
         values->value = values->price;
-        mnuSetPopupEntryFlagged(dispatchSlot, (mnuShopCatalogPopupEntries +
-            primaryList->cursor->camp.value * 0x1C));
+        mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCatalogPopupEntries +
+            primaryList->cursor->camp.value);
         break;
     }
     case 12:
@@ -3649,8 +3649,8 @@ s32 evtApplyShopQuantityTransaction(dds3ProcessID_t *task) {
 }
 
 extern s8 evtGetCapturedWindowPanelValue(void);
-extern u8 mnuShopPendingRewardPopupEntry[];
-extern u8 mnuShopSlotAdvancePopupEntry[];
+extern MenuPopupEntry mnuShopPendingRewardPopupEntry[];
+extern MenuPopupEntry mnuShopSlotAdvancePopupEntry[];
 
 /* Complete an idle shop confirmation and queue its followup state. */
 s32 evtDispatchShopSelectionAction(dds3ProcessID_t *task) {
@@ -3866,7 +3866,7 @@ extern u8 mnuCampGetCompactRewardKind(s32, s32);
 extern s32 mnuCampResolveOwnedItemVariant(s32, s32);
 extern s32 mnuCampGetCompactEntryId(s32, s32);
 extern s32 mnuIsHighRangeItemId(s32);
-extern u8 mnuShopSlotAdvancePopupEntry[];
+extern MenuPopupEntry mnuShopSlotAdvancePopupEntry[];
 extern char D_00437848[];
 extern char D_00437850[];
 
@@ -4144,7 +4144,7 @@ extern void dspRequestMessageWindowModeOne(void);
 
 
 
-extern char mnuShopGrantedRewardPopupEntry[];
+extern MenuPopupEntry mnuShopGrantedRewardPopupEntry[];
 extern char D_00437850[];
 extern s32 mnuSelectUnclaimedProgressRewardTier();
 extern void mnuShopReleaseWindowSprites(s32, MenuTerminalContext *);

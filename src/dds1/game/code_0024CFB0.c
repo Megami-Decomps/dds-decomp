@@ -94,7 +94,7 @@ extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const char *sourceTe
 extern void itfMesMngSetPhase(s32 windowIndex, s32 status);
 extern void itfMesMngSetSelPhase(s32 windowIndex, s32 status);
 extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
-extern char mnuTerminalPopupEntries[];
+extern MenuPopupEntry mnuTerminalPopupEntries[];
 extern void itfMesMngRelease(s32 window);
 extern u8 *D_003BAA70;
 extern u8 *D_003BAA74;
@@ -259,7 +259,7 @@ s32 mnuUpdateTerminalReadyPopup(dds3ProcessID_t *request) {
             ready = dds3FadeCheck() == 0;
         }
         if (ready) {
-            mnuSetPopupEntryFlagged(popupSlot, D_0036AE48);
+            mnuSetPopupEntryFlagged(popupSlot, (MenuPopupEntry *)D_0036AE48);
         }
     }
     return 0;

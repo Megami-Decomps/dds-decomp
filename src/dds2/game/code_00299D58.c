@@ -45,8 +45,8 @@ extern s16 fldGetSparkPickupCount(void);
 extern void brsSelectNextUnit(BrsSkillPackageWork *, s32);
 extern s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *);
 extern s32 btlHasPendingRuntimeActivity(void);
-extern char brsRewardFadeWaitPopupEntry[];
-extern char brsPrimaryRewardPopupEntry[];
+extern MenuPopupEntry brsRewardFadeWaitPopupEntry[];
+extern MenuPopupEntry brsPrimaryRewardPopupEntry[];
 
 extern void brsNoOpMessageInputCallback(void *);
 extern void mnuClearTitleState(BrsSkillPackageWork *);
@@ -75,7 +75,7 @@ s32 brsMessageInputStep(dds3ProcessID_t *input) {
         if (brsPollResultCounterCompletion() != 0 &&
             ((buttons & 1) != 0 || (D_0037F530[3] & 2) != 0)) {
             mnuClearTitleState(context);
-            mnuSetPopupEntry(transitionState, D_003D643C);
+            mnuSetPopupEntry(transitionState, (MenuPopupEntry *)D_003D643C);
         }
     }
     return 0;
@@ -429,8 +429,8 @@ extern void mnuStaffCopyPanelBlock(datUnitWork_t *, BrsSkillPackageWork *);
 extern void mnuRefreshSelectedUnitPanels(datUnitWork_t *, BrsSkillPackageWork *);
 extern s32 btlAddBaseStats(s32 *, datUnitWork_t *);
 extern void p2sdStopBGM(u32);
-extern char brsStatAssignmentPopupEntry[];
-extern char brsLevelChangePopupEntry[];
+extern MenuPopupEntry brsStatAssignmentPopupEntry[];
+extern MenuPopupEntry brsLevelChangePopupEntry[];
 
 /* Advance the selected party member, apply its gains, and choose the next popup. */
 s32 brsProcessNextPrimaryReward(dds3ProcessID_t *task) {
@@ -484,4 +484,3 @@ s32 brsProcessNextPrimaryReward(dds3ProcessID_t *task) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00299D58", D_004379B0);
-

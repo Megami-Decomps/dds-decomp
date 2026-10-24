@@ -34,9 +34,9 @@ extern void mnuSetStateValue(u32 *out, u32 value);
 extern u32 mnuSetPartyEntryMenuValue(datUnitWork_t *entry, u32 menuValue);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern u8 mnuCampItemCommandHelpTextBank[];
-extern char mnuCampAmmoEquipmentPopupEntry[];
-extern char mnuCampItemCategoryPopupEntry[];
-extern char mnuCampAmmoPartySelectionPopupEntry[];
+extern MenuPopupEntry mnuCampAmmoEquipmentPopupEntry[];
+extern MenuPopupEntry mnuCampItemCategoryPopupEntry[];
+extern MenuPopupEntry mnuCampAmmoPartySelectionPopupEntry[];
 
 /* The allocated staff resource record begins with three owned windows; the
  * display callbacks use the following selection and input-state words. */
@@ -128,7 +128,7 @@ s32 mnuStaffImageExitA(dds3ProcessID_t *task) {
             menu->pendingItem = 0;
             if (mnuIsStaffWindowReadyForItem((u16)item,
                                              (struct StaffDisplayContext *)context) == 0) {
-                mnuSetPopupEntry(&context->popupState, (void *)mnuCampItemCategoryPopupEntry);
+                mnuSetPopupEntry(&context->popupState, mnuCampItemCategoryPopupEntry);
             }
         }
     }
@@ -205,7 +205,7 @@ s32 mnuHandleSecondaryStaffObjectInput(dds3ProcessID_t *task) {
         buttons = 0;
     }
     if (buttons & MNU_STAFF_INPUT_CANCEL) {
-        mnuSetPopupEntry(popup, (void *)mnuCampItemCategoryPopupEntry);
+        mnuSetPopupEntry(popup, mnuCampItemCategoryPopupEntry);
     }
     window = menu->secondaryObject;
     if (window != NULL) {
@@ -259,7 +259,7 @@ u32 mnuStaffItemUseLeaveNoOp(void) {
 
 extern u32 evtGetIndexedEventRecordId(s32);
 extern s32 mnuGetAbilityTargetCategory(u16);
-extern char mnuCampItemUseListPopupEntry[];
+extern MenuPopupEntry mnuCampItemUseListPopupEntry[];
 
 s32 mnuHandleStaffItemUseInput(dds3ProcessID_t *task) {
     u32 userValue = dds3GetProcessData(task);
@@ -521,13 +521,13 @@ s32 mnuUpdateStaffPartySelectionState(dds3ProcessID_t *task) {
         }
         if (buttons & MNU_STAFF_INPUT_CANCEL) {
             menu->inputState = 1;
-            mnuSetPopupEntryFlagged(&context->popupState, (void *)mnuCampAmmoPartySelectionPopupEntry);
+            mnuSetPopupEntryFlagged(&context->popupState, mnuCampAmmoPartySelectionPopupEntry);
         }
         mnuPlayInputSound(0, buttons, (u32 *)list->list);
     } else {
         if (mnuRefreshStaffBulletItemList(menu->itemToInsert, menu->inventoryItem, context) == 0) {
             mnuClearListFlags(0, &context->pageWindow);
-            mnuSetPopupEntryFlagged(&context->popupState, (void *)mnuCampItemCategoryPopupEntry);
+            mnuSetPopupEntryFlagged(&context->popupState, mnuCampItemCategoryPopupEntry);
         } else {
             menu->listState = 0;
         }

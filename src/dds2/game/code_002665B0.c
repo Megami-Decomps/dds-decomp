@@ -69,7 +69,7 @@ typedef struct MenuSlotState {
     u32 initFlags; /* 0x04: entry initialization bits */
     MenuPopupState transitionWork; /* 0x08 */
     s32 dispatchStatus; /* 0x54 */
-    char *popupTable; /* 0x58: table restored after panel dispatch */
+    MenuPopupEntry *popupTable; /* 0x58: table restored after panel dispatch */
     EvtResourcePair messageResources; /* 0x5C */
     EffectSlotSet *resourceBank[4]; /* 0x64: loaded effect-slot owners */
     EffectSlotSet *alternateBatch; /* 0x74 */
@@ -214,7 +214,7 @@ typedef struct MenuList MenuList;
 
 
 
-extern u8 mnuTerminalPreparationPopupEntry[];
+extern MenuPopupEntry mnuTerminalPreparationPopupEntry[];
 
 
 extern void mnuReleaseCampTextureHandlesAndClearOutput(EffectSlotSet **);
@@ -1177,14 +1177,14 @@ s32 evtIsFadeCompleteAndMessageWindowIdle(void) {
     return fclChkMessage() == 0;
 }
 
-extern char mnuTerminalPopupEntries[];
+extern MenuPopupEntry mnuTerminalPopupEntries[];
 
 s32 mnuOpenTerminalPopupForAction(s32 action, s32 context) {
     switch (action) {
     case 3:
         if (*(s32 *)(*(s32 *)(context + 0x7C) + 0x20) == 0) {
-            *(char **)(context + 0x58) = mnuTerminalPopupEntries;
-            mnuSetPopupEntry((s32 *)(context + 0x54), mnuTerminalPopupEntries + 0xC4);
+            *(char **)(context + 0x58) = (char *)mnuTerminalPopupEntries;
+            mnuSetPopupEntry((s32 *)(context + 0x54), mnuTerminalPopupEntries + 7);
             *(s32 *)(context + 0x90) = 1;
             **(u32 **)(context + 0x54) |= 0x20000;
             return 1;
@@ -1192,8 +1192,8 @@ s32 mnuOpenTerminalPopupForAction(s32 action, s32 context) {
         break;
     case 2:
         if (*(s32 *)(*(s32 *)(context + 0x80) + 0x20) == 0) {
-            *(char **)(context + 0x58) = mnuTerminalPopupEntries;
-            mnuSetPopupEntry((s32 *)(context + 0x54), mnuTerminalPopupEntries + 0xC4);
+            *(char **)(context + 0x58) = (char *)mnuTerminalPopupEntries;
+            mnuSetPopupEntry((s32 *)(context + 0x54), mnuTerminalPopupEntries + 7);
             *(s32 *)(context + 0x90) = 2;
             **(u32 **)(context + 0x54) |= 0x20000;
             return 1;
@@ -1799,7 +1799,7 @@ extern const MenuGridPositions D_00424FF8;
 
 
 
-extern u8 mnuTerminalFollowupFadePopupEntry[];
+extern MenuPopupEntry mnuTerminalFollowupFadePopupEntry[];
 
 
 /* Slide the threshold list out while closing, or in after its grid entry completes. */
@@ -1892,10 +1892,10 @@ extern s32 mnuOpenTerminalPopupForAction(s32 action, s32 context);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);
 extern s32 mnuTerminalActionTable[];
-extern char mnuTerminalPopupEntries[];
-extern char mnuTerminalSelectionPopupEntry[];
-extern char mnuTerminalSelectionCancelPopupEntry[];
-extern char mnuTerminalEntryMessagePopupEntry[];
+extern MenuPopupEntry mnuTerminalPopupEntries[];
+extern MenuPopupEntry mnuTerminalSelectionPopupEntry[];
+extern MenuPopupEntry mnuTerminalSelectionCancelPopupEntry[];
+extern MenuPopupEntry mnuTerminalEntryMessagePopupEntry[];
 
 /* Event panel input: confirm opens the popup for the selected entry's action, cancel opens the back popup, left/right step the list. */
 s32 evtBHandleSelectionPanelInput(dds3ProcessID_t *input) {
@@ -1936,7 +1936,7 @@ s32 evtBHandleSelectionPanelInput(dds3ProcessID_t *input) {
                     case 1:
                         dds3FadeOut(0, 0, 0, 0xF);
                     default:
-                        mnuSetPopupEntryFlagged(state, mnuTerminalPopupEntries + action * 28);
+                        mnuSetPopupEntryFlagged(state, mnuTerminalPopupEntries + action);
                         break;
                     }
                 }
@@ -2343,7 +2343,7 @@ extern void mnuCreateResourceTask(void);
 
 
 
-extern char mnuTerminalPopupEntries[];
+extern MenuPopupEntry mnuTerminalPopupEntries[];
 
 
 /* Dispatch completion waits for the fade and pending resource/graph work;
@@ -2417,7 +2417,7 @@ u32 mnuTerminalEntryMessageLeaveNoOp(void) {
 }
 
 extern s8 evtGetCapturedWindowPanelValue(void);
-extern char mnuTerminalReturnToMenuPopupEntry[];
+extern MenuPopupEntry mnuTerminalReturnToMenuPopupEntry[];
 
 s32 evtOpenTerminalOwnerStatePopup(dds3ProcessID_t *request) {
     MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
@@ -2623,7 +2623,7 @@ u32 mnuTerminalExitPopupLeaveNoOp(void) {
 
 extern s32 mnuHasMantraSpriteTaskFinished(void);
 extern char D_00425008[];
-extern char mnuTerminalPanelPopupEntry[];
+extern MenuPopupEntry mnuTerminalPanelPopupEntry[];
 
 /* Wait for the mode's load/fade barrier before binding the terminal exit popup. */
 s32 evtWaitForTerminalExitPopup(dds3ProcessID_t *request) {

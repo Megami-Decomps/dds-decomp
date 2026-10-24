@@ -54,11 +54,11 @@ extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void mnuRefreshStaffWindowDescription();
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
-extern char mnuCampAmmoEquipmentPopupEntry[];
-extern char mnuCampRingEquipmentPopupEntry[];
-extern char mnuCampRingCustomizationPopupEntry[];
-extern char mnuCampItemCategoryPopupEntry[];
-extern char mnuCampRingEquipmentPartyPopupEntry[];
+extern MenuPopupEntry mnuCampAmmoEquipmentPopupEntry[];
+extern MenuPopupEntry mnuCampRingEquipmentPopupEntry[];
+extern MenuPopupEntry mnuCampRingCustomizationPopupEntry[];
+extern MenuPopupEntry mnuCampItemCategoryPopupEntry[];
+extern MenuPopupEntry mnuCampRingEquipmentPartyPopupEntry[];
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern s32 mnuUpdateStaffEntrySelectionFlags(s32, s32, MenuStaffContext *);
 extern u32 mnuSetPartyEntryCurrentId(datUnitWork_t *, u32);
@@ -346,7 +346,7 @@ s32 mnuStaffImageExitD(dds3ProcessID_t *task) {
     return menuSetHandler((void *)context, 2, (void *)task);
 }
 
-extern char mnuCampItemUseListPopupEntry[];
+extern MenuPopupEntry mnuCampItemUseListPopupEntry[];
 
 s32 mnuStaffUseSelectedItemTask(dds3ProcessID_t *task) {
     s32 item = 0;
@@ -541,8 +541,8 @@ s32 mnuStaffListInput(dds3ProcessID_t *task) {
 
 extern s32 mnuRefreshStaffBulletItemList(s32, s32, MenuStaffContext *);
 extern u32 mnuSetPartyEntryMenuValue(datUnitWork_t *entry, u32 menuValue);
-extern char mnuCampItemCategoryPopupEntry[];
-extern char mnuCampAmmoPartySelectionPopupEntry[];
+extern MenuPopupEntry mnuCampItemCategoryPopupEntry[];
+extern MenuPopupEntry mnuCampAmmoPartySelectionPopupEntry[];
 
 /* Handle staff-item selection, confirmation and popup input. */
 s32 mnuUpdateStaffPartySelectionState(dds3ProcessID_t *task) {
@@ -1173,9 +1173,9 @@ s32 mnuIsStaffRequirementUnmet(s32 entryId) {
 }
 
 extern s32 mnuRefreshOwnedCatalogItemList(s32, MenuStaffContext *);
-extern char mnuCampRingCustomizationPartyPopupEntry[];
-extern char mnuRingCustomizationApplyPopupEntry[];
-extern char mnuRingCustomizationResetPopupEntry[];
+extern MenuPopupEntry mnuCampRingCustomizationPartyPopupEntry[];
+extern MenuPopupEntry mnuRingCustomizationApplyPopupEntry[];
+extern MenuPopupEntry mnuRingCustomizationResetPopupEntry[];
 
 s32 mnuHandleStaffOwnedCatalogInput(dds3ProcessID_t *task) {
     MenuStaffContext *context = (MenuStaffContext *)dds3GetProcessData(task);

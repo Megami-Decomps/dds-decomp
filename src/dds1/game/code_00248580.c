@@ -1016,7 +1016,7 @@ s32 fldPollSceneState(void) {
     return 0;
 }
 
-extern char mnuTerminalPreparationPopupEntry[];
+extern MenuPopupEntry mnuTerminalPreparationPopupEntry[];
 
 /* Seed the task's popup slot before running panel mode zero with the supplied request. */
 s32 mnuPrepareTerminalPopupAndDispatch(dds3ProcessID_t *task) {
@@ -1052,7 +1052,7 @@ s32 evtIsFadeCompleteAndMessageWindowIdle(void) {
     return fclChkMessage() == 0;
 }
 
-extern u8 mnuTerminalPopupEntries[];
+extern MenuPopupEntry mnuTerminalPopupEntries[];
 
 s32 mnuOpenTerminalPopupForAction(s32 action, s32 context) {
     MenuTerminalWork *work = (MenuTerminalWork *)context;
@@ -1060,8 +1060,8 @@ s32 mnuOpenTerminalPopupForAction(s32 action, s32 context) {
     switch (action) {
     case 3:
         if (work->list->count == 0) {
-            work->popupTable = (MenuPopupEntry *)mnuTerminalPopupEntries;
-            mnuSetPopupEntry(&work->popupState, mnuTerminalPopupEntries + 0xC4);
+            work->popupTable = mnuTerminalPopupEntries;
+            mnuSetPopupEntry(&work->popupState, mnuTerminalPopupEntries + 7);
             work->panelMode = 1;
             **(u32 **)&work->popupState |= 0x20000;
             return 1;
@@ -1069,8 +1069,8 @@ s32 mnuOpenTerminalPopupForAction(s32 action, s32 context) {
         break;
     case 2:
         if (work->owner->count == 0) {
-            work->popupTable = (MenuPopupEntry *)mnuTerminalPopupEntries;
-            mnuSetPopupEntry(&work->popupState, mnuTerminalPopupEntries + 0xC4);
+            work->popupTable = mnuTerminalPopupEntries;
+            mnuSetPopupEntry(&work->popupState, mnuTerminalPopupEntries + 7);
             work->panelMode = 2;
             **(u32 **)&work->popupState |= 0x20000;
             return 1;
@@ -1699,10 +1699,10 @@ extern s32 mnuOpenTerminalPopupForAction(s32 action, s32 context);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);
 extern s32 mnuTerminalActionTable[];
-extern u8 mnuTerminalPopupEntries[];
-extern u8 mnuTerminalSelectionPopupEntry[];
-extern u8 mnuTerminalSelectionCancelPopupEntry[];
-extern u8 mnuTerminalEntryMessagePopupEntry[];
+extern MenuPopupEntry mnuTerminalPopupEntries[];
+extern MenuPopupEntry mnuTerminalSelectionPopupEntry[];
+extern MenuPopupEntry mnuTerminalSelectionCancelPopupEntry[];
+extern MenuPopupEntry mnuTerminalEntryMessagePopupEntry[];
 
 /* Event-B panel input: confirm opens the popup for the selected entry's action, cancel opens the back popup, left/right step the list. */
 s32 evtBHandleSelectionPanelInput(dds3ProcessID_t *input) {
@@ -1743,7 +1743,7 @@ s32 evtBHandleSelectionPanelInput(dds3ProcessID_t *input) {
                     case 1:
                         dds3FadeOut(0, 0, 0, 0xF);
                     default:
-                        mnuSetPopupEntryFlagged(state, mnuTerminalPopupEntries + action * 28);
+                        mnuSetPopupEntryFlagged(state, mnuTerminalPopupEntries + action);
                         break;
                     }
                 }
@@ -2075,7 +2075,7 @@ u32 evtSelectFinalVisualNode(dds3ProcessID_t *task) {
 }
 
 /* Terminal panel poll: once the message window is idle and the field frames are drained, open the follow-up popup. */
-extern u8 mnuTerminalFollowupFadePopupEntry[];
+extern MenuPopupEntry mnuTerminalFollowupFadePopupEntry[];
 s32 evtOpenTerminalFollowupPopupWhenIdle(dds3ProcessID_t *request) {
     s32 state = dds3GetProcessData(request);
     MenuTerminalWork *work = (MenuTerminalWork *)state;
@@ -2087,7 +2087,7 @@ s32 evtOpenTerminalFollowupPopupWhenIdle(dds3ProcessID_t *request) {
     if (*panel == 0) {
         if (fclChkMessage() == 0) {
             if (fldClassifyRemainingFrames(state) == 0) {
-                mnuSetPopupEntry(panel, (void *)mnuTerminalFollowupFadePopupEntry);
+                mnuSetPopupEntry(panel, mnuTerminalFollowupFadePopupEntry);
             }
         }
     }
@@ -2254,7 +2254,7 @@ u32 mnuTerminalEntryMessageLeaveNoOp(void) {
 }
 
 extern s8 evtGetCapturedWindowPanelValue(void);
-extern u8 mnuTerminalReturnToMenuPopupEntry[];
+extern MenuPopupEntry mnuTerminalReturnToMenuPopupEntry[];
 
 s32 evtBChooseSelectionCompletionPopup(dds3ProcessID_t *input) {
     MenuTerminalWork *context;
@@ -2473,7 +2473,7 @@ u32 mnuTerminalExitPopupLeaveNoOp(void) {
 }
 
 extern const char D_003AF710[];
-extern u8 mnuTerminalPanelPopupEntry[];
+extern MenuPopupEntry mnuTerminalPanelPopupEntry[];
 
 s32 evtOpenTerminalActionPopupWhenReady(dds3ProcessID_t *input) {
     MenuTerminalWork *context = (MenuTerminalWork *)dds3GetProcessData(input);

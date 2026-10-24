@@ -122,7 +122,7 @@ extern s32 evtStageTestAdvanceResourceWork(void);
 
 extern s32 mnuIsStaffMenuInputBlocked();
 
-extern char mnuStaffCampPagePopupEntry[];
+extern MenuPopupEntry mnuStaffCampPagePopupEntry[];
 
 extern void mnuDrawWindowDecorations(s32, s32, s32, s32, s32);
 
@@ -147,22 +147,22 @@ extern void mnuDrawSlotIcons(s32 x, MenuPageWindow *page);
 extern void frEnableMode(s32);
 extern u8 frDisableMode(u8);
 
-extern char mnuCampPartySelectionReturnPopupEntry[];
+extern MenuPopupEntry mnuCampPartySelectionReturnPopupEntry[];
 
 extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 
-extern char mnuSkillMenuDetailPopupEntry[];
+extern MenuPopupEntry mnuSkillMenuDetailPopupEntry[];
 
-extern char mnuCampFieldSkillPopupEntry[];
+extern MenuPopupEntry mnuCampFieldSkillPopupEntry[];
 
-extern char mnuSkillMenuFieldUsePopupEntry[];
+extern MenuPopupEntry mnuSkillMenuFieldUsePopupEntry[];
 
-extern char mnuSkillMenuEquippedSlotsPopupEntry[];
+extern MenuPopupEntry mnuSkillMenuEquippedSlotsPopupEntry[];
 
 
-extern char mnuSkillMenuPagePopupEntry[];
+extern MenuPopupEntry mnuSkillMenuPagePopupEntry[];
 
 extern s32 ptySkillMenuApplyFieldUseAndCost();
 
@@ -192,7 +192,7 @@ extern s32 mnuApplyRandomStatItemEffect();
 
 extern void mnuPrepareStaffValueChangeDialog(MenuStaffContext *, datUnitWork_t *, s32, s32);
 
-extern char mnuCampRingCustomizationPopupEntry[];
+extern MenuPopupEntry mnuCampRingCustomizationPopupEntry[];
 
 extern void mnuDrawCampGridAndLabel();
 
@@ -220,8 +220,8 @@ extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
 extern void mnuUpdateWindowPanelHandleStatesKindFourFive(MenuIconState *);
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
-extern char mnuStaffPartyBrowsePopupEntry[];
-extern char mnuStaffFieldSkillDisplayPopupEntry[];
+extern MenuPopupEntry mnuStaffPartyBrowsePopupEntry[];
+extern MenuPopupEntry mnuStaffFieldSkillDisplayPopupEntry[];
 typedef struct MenuPanelDrawEntry {
     s32 slotIndex;
     s32 x;

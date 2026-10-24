@@ -45,7 +45,7 @@ s32 mnuCheckTableSums(const datUnitWork_t *unit, const BrsSkillPackageWork *skil
 
 extern s32 evtStageTestUpdateCamera(void);
 extern void mnuPlayInputSound(s32, s32, u32 *);
-extern char brsStatConfirmationPopupEntry[];
+extern MenuPopupEntry brsStatConfirmationPopupEntry[];
 
 
 s32 mnuHandleStatPointAssignment(dds3ProcessID_t *task) {
@@ -162,7 +162,7 @@ u32 mnuStatAssignmentMessageLeaveNoOp(void) {
 
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern s32 btlAddBaseStats(s32 *, datUnitWork_t *);
-extern char brsLevelChangePopupEntry[];
+extern MenuPopupEntry brsLevelChangePopupEntry[];
 
 s32 mnuCommitAssignedStatPoints(dds3ProcessID_t *task) {
     BrsSkillPackageWork *work;
@@ -238,7 +238,7 @@ u32 mnuLevelChangeMessageLeaveNoOp(void) {
 }
 
 extern s32 evtStageTestUpdateCamera(void);
-extern char brsRewardMessagePopupEntry[];
+extern MenuPopupEntry brsRewardMessagePopupEntry[];
 
 /* On an idle panel, apply the extra fallback only when the auxiliary check also fails. */
 s32 mnuRunPanelWithIdleFallback(dds3ProcessID_t *request) {
@@ -364,7 +364,7 @@ void kwlnItemUpdateDisplay(BrsSkillPackageWork *scene) {
 
 
 
-extern char brsPrimaryRewardPopupEntry[];
+extern MenuPopupEntry brsPrimaryRewardPopupEntry[];
 
 /* Terminal panel poll: once the message window is idle, apply the pending reward step or open the popup. */
 s32 brsAdvanceRewardPanelAfterMessage(dds3ProcessID_t *request) {

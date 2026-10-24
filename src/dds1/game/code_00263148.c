@@ -119,8 +119,8 @@ u32 mnuMarkItemSelectionSceneVisited(BrsSkillPackageWork *scene) {
 extern void brsSelectNextUnit(BrsSkillPackageWork *, s32);
 extern s32 btlHasPendingRuntimeActivity(void);
 extern s32 mnuStaffInitPanel(BrsSkillPackageWork *);
-extern char brsRewardFadeWaitPopupEntry[];
-extern char brsPrimaryRewardPopupEntry[];
+extern MenuPopupEntry brsRewardFadeWaitPopupEntry[];
+extern MenuPopupEntry brsPrimaryRewardPopupEntry[];
 
 s32 prfCapTaskStep(dds3ProcessID_t *request) {
     s32 result;
@@ -269,8 +269,8 @@ extern void mnuRefreshSelectedUnitPanels(datUnitWork_t *, BrsSkillPackageWork *)
 extern u32 mnuInitializeItemSelectionExtent(dds3ProcessID_t *task);
 extern s32 btlAddBaseStats(s32 *, datUnitWork_t *);
 extern void p2sdStopBGM(u32);
-extern char brsStatAssignmentPopupEntry[];
-extern char brsLevelChangePopupEntry[];
+extern MenuPopupEntry brsStatAssignmentPopupEntry[];
+extern MenuPopupEntry brsLevelChangePopupEntry[];
 
 s32 brsProcessNextPrimaryReward(dds3ProcessID_t *task) {
     s32 result;

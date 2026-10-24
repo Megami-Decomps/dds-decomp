@@ -23,7 +23,7 @@ extern char D_003BC6D8[];
 
 extern s32 checkConfigState(void);
 
-extern u8 mnuCampCommandReturnPopupEntry[];
+extern MenuPopupEntry mnuCampCommandReturnPopupEntry[];
 
 extern void mnuDrawBackdrop(s32, s32);
 
@@ -34,7 +34,7 @@ extern void mnuCreateStaffImageSprite(s32);
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
-extern u8 mnuCampCommandDispatchEntries[];
+extern MenuPopupEntry mnuCampCommandDispatchEntries[];
 
 
 
@@ -65,13 +65,13 @@ s32 mnuHandleCampFieldSkillInput(dds3ProcessID_t *callback) {
             if ((entry->flags48 & 1) == 0) {
                 s32 index = entry->sortKeyPrimary + 1;
 
-                mnuSetPopupEntry(popup, (void *)(mnuCampCommandDispatchEntries + index * 0x1C));
+                mnuSetPopupEntry(popup, mnuCampCommandDispatchEntries + index);
             } else {
                 input = 0x8000;
             }
         }
         if (input & 2) {
-            mnuSetPopupEntry(popup, (void *)mnuCampCommandDispatchEntries);
+            mnuSetPopupEntry(popup, mnuCampCommandDispatchEntries);
         }
     }
     if ((input & 0x300000) == 0) {
