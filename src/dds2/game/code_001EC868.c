@@ -9562,7 +9562,8 @@ u32 sndPollMotionSePlayback(BtlRuntimeTaskArgs *args) {
             }
             data = sdfMemGetPtr(soundWork->resourceHandles[args->resourceIndex]);
             size = sdfMemGetSize(soundWork->resourceHandles[args->resourceIndex]);
-            mnuInstallTitleSoundBufferFromData(data, size, 2);
+            mnuInstallTitleSoundBufferFromData(data, size,
+                                               MNU_TITLE_SOUND_FORMAT_MEDIUM_FRAME);
             mnuClearInactiveSoundBufferState();
             work->motionSeLoadFrame = 0;
             btlBossDebugPrintf("btl:motSE play(ATRAC3)\n");

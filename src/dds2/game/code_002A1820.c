@@ -429,19 +429,19 @@ void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex) {
     mnuTitleStreamStatus.repeatFrame = mnuTitleStreamEntries[soundEntryIndex].parameter;
     mnuTitleStreamStatus.control = 2;
     switch (mnuTitleStreamEntries[soundEntryIndex].format) {
-    case 1:
+    case MNU_TITLE_SOUND_FORMAT_LARGE_FRAME:
         mnuTitleStreamDecoderState[2] = mnuTitleStreamEntries[soundEntryIndex].format;
         mnuTitleStreamStatus.frameBytes = MNU_SOUND_FRAME_BYTES_LARGE;
         break;
-    case 2:
+    case MNU_TITLE_SOUND_FORMAT_MEDIUM_FRAME:
         mnuTitleStreamDecoderState[2] = mnuTitleStreamEntries[soundEntryIndex].format;
         mnuTitleStreamStatus.frameBytes = MNU_SOUND_FRAME_BYTES_MEDIUM;
         break;
-    case 3:
+    case MNU_TITLE_SOUND_FORMAT_MEDIUM_FRAME_VARIANT:
         mnuTitleStreamDecoderState[2] = mnuTitleStreamEntries[soundEntryIndex].format;
         mnuTitleStreamStatus.frameBytes = MNU_SOUND_FRAME_BYTES_MEDIUM;
         break;
-    case 4:
+    case MNU_TITLE_SOUND_FORMAT_SMALL_FRAME:
         mnuTitleStreamDecoderState[2] = mnuTitleStreamEntries[soundEntryIndex].format;
         mnuTitleStreamStatus.frameBytes = MNU_SOUND_FRAME_BYTES_SMALL;
         break;
@@ -613,7 +613,7 @@ void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex) {
 /* Install an in-memory ATRAC stream and configure the decoder for its frame
  * format while holding the shared sound-buffer semaphore. The native code
  * has no default-format guard or buffer-capacity check. */
-void mnuInstallTitleSoundBufferFromData(const void *compressedData, s32 dataBytes, s32 format) {
+void mnuInstallTitleSoundBufferFromData(const void *compressedData, s32 dataBytes, MnuTitleSoundFormat format) {
     struct sdfMemHandle_t *allocation = NULL;
     u8 *bufferAddress;
     s32 frameCount;

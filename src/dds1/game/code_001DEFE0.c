@@ -231,7 +231,7 @@ s32 btlGetLoggedIndexedCommandItem(s32 index);
 extern s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *, BtlCamState *, s8, s8);
 
 typedef struct BattleVoiceEntry {
-    u8 volume;
+    u8 format;
     u8 pad01[3];
     char fileName[0xC];
 } BattleVoiceEntry;
@@ -10351,7 +10351,8 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
             }
             data = sdfMemGetPtr(soundWork->resourceHandles[args->slot]);
             size = sdfMemGetSize(soundWork->resourceHandles[args->slot]);
-            mnuInstallTitleSoundBufferFromData(data, size, 2);
+            mnuInstallTitleSoundBufferFromData(data, size,
+                                               MNU_TITLE_SOUND_FORMAT_MEDIUM_FRAME);
             printf("%%%%%%%%%%%%%%%% EARRING : %d\n", args->slot);
             mnuPrintTitleDebugBanner();
             work->motionSeLoadFrame = 0;
@@ -10558,7 +10559,7 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
         data = (const void *)(u32)sdfMemLock(resource);
         size = (s32)fileGetLoadSize(args->request);
         fileHandleFree(args->request);
-        mnuInstallTitleSoundBufferFromData(data, size, D_00377650[args->entryIndex].volume);
+        mnuInstallTitleSoundBufferFromData(data, size, D_00377650[args->entryIndex].format);
         sdfMemFreeDirect(resource);
         btlBossDebugPrintf(D_003A5358);
         return 1;
@@ -10631,7 +10632,8 @@ u32 sndUpdateEarringDeadPlayback(BtlDeadLoadArgs *args) {
             data = (const void *)(u32)sdfMemLock(args->resourceAllocation);
             size = (s32)fileGetLoadSize(args->request);
             fileHandleFree(args->request);
-            mnuInstallTitleSoundBufferFromData(data, size, 2);
+            mnuInstallTitleSoundBufferFromData(data, size,
+                                               MNU_TITLE_SOUND_FORMAT_MEDIUM_FRAME);
             mnuPrintTitleDebugBanner();
             printf(D_003A5390);
             btlBossDebugPrintf(D_003A53B0);

@@ -50,7 +50,7 @@ extern s32 mnuGetSoundBufferStateLocked(void);
 typedef struct BtlUnit BtlUnit;
 
 typedef struct BtlAt3Entry {
-    u8 volume;
+    u8 format;
     u8 pad01[3];
     char fileName[12];
 } BtlAt3Entry;
@@ -200,7 +200,7 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
         data = (const void *)(u32)sdfMemLock(resource);
         size = (s32)fileGetLoadSize(args->request);
         fileHandleFree(args->request);
-        mnuInstallTitleSoundBufferFromData(data, size, D_003E0F60[args->entryIndex].volume);
+        mnuInstallTitleSoundBufferFromData(data, size, D_003E0F60[args->entryIndex].format);
         sdfMemFreeDirect(resource);
         btlBossDebugPrintf("btl:atrac3 SE load end\n");
         return 1;
@@ -264,7 +264,8 @@ s32 sndDeadAtracPlaybackTask(BtlDeadLoadArgs *args) {
             data = (const void *)(u32)sdfMemLock(args->resourceAllocation);
             size = (s32)fileGetLoadSize(args->request);
             fileHandleFree(args->request);
-            mnuInstallTitleSoundBufferFromData(data, size, 2);
+            mnuInstallTitleSoundBufferFromData(data, size,
+                                               MNU_TITLE_SOUND_FORMAT_MEDIUM_FRAME);
             mnuClearInactiveSoundBufferState();
             btlBossDebugPrintf("btl:ATRAC3 dead load end\n");
         }
