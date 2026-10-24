@@ -4698,18 +4698,18 @@ u8 *btlCreateActorPositionEffectTask(u8 *unit) {
 }
 
 /* Apply the queued actor's stored orientation and complete immediately. */
-u32 btlApplyQueuedActorRotation(s32 *taskArgs) {
-    BtlUnit *temp_v0;
+u32 btlApplyQueuedActorRotation(BtlUnit **taskArgs) {
+    BtlUnit *unit;
 
-    temp_v0 = (BtlUnit *)(u32)*taskArgs;
-    temp_v0->status.flags = (u32)temp_v0->status.flags & 0xffffffef;
-    btlSetUnitRotation(temp_v0, (const f32 *)((u8 *)temp_v0 + 0x40));
+    unit = *taskArgs;
+    unit->status.flags = (u32)unit->status.flags & 0xffffffef;
+    btlSetUnitRotation(unit, unit->rotation);
     return 1;
 }
 
 BtlRuntimeTask *btlScheduleActorUpdate(BtlUnit *unit) {
     u8 *task = btlAllocTask(4);
-    u32 *arguments;
+    BtlUnit **arguments;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
@@ -4718,7 +4718,7 @@ BtlRuntimeTask *btlScheduleActorUpdate(BtlUnit *unit) {
     *(s64 *)(task + 0x40) = *(s64 *)((u8 *)unit + 0x108);
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)unit;
+    *arguments = unit;
     return (BtlRuntimeTask *)task;
 }
 
