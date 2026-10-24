@@ -84,7 +84,7 @@ void sdfPacTexListDecoder0(PacState *state) {
 void sdfPacTexListDecoderInit(PacState *state,
                                 SdfPacStreamPacketHeader *packet) {
     sdfPacNewResrc(state, packet);
-    state->slot.list = sdfChipAllocDirect(0x30);
+    state->slot.list = sdfChipAllocDirect(sizeof(PacListAllocation));
     state->onInput = sdfPacTexListDecoder0;
 }
 
