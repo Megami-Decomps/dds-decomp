@@ -591,9 +591,9 @@ void sdfMotCLBK_modelVisibleSeek(SdfMotionKeyFlagBinding *binding, f32 frame) {
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     node = binding->node;
     if (*keyInterval.firstKey == 0) {
-        node->flags = node->flags | SDF_MOTION_KEY_SAMPLE_BYTE_ZERO;
+        node->flags = node->flags | SDF_DRAW_NODE_FLAG_MOTION_HIDDEN;
     } else {
-        node->flags = node->flags & ~SDF_MOTION_KEY_SAMPLE_BYTE_ZERO;
+        node->flags = node->flags & ~SDF_DRAW_NODE_FLAG_MOTION_HIDDEN;
     }
 }
 
@@ -605,9 +605,9 @@ void sdfMotCLBK_modelVisibleBlendSeek(SdfMotionKeyFlagBinding *binding, f32 fram
     sdfMotGetKey((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     node = binding->node;
     if (*keyInterval.firstKey == 0) {
-        node->flags = node->flags | SDF_MOTION_KEY_SAMPLE_BYTE_ZERO;
+        node->flags = node->flags | SDF_DRAW_NODE_FLAG_MOTION_HIDDEN;
     } else {
-        node->flags = node->flags & ~SDF_MOTION_KEY_SAMPLE_BYTE_ZERO;
+        node->flags = node->flags & ~SDF_DRAW_NODE_FLAG_MOTION_HIDDEN;
     }
 }
 

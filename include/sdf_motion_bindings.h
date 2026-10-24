@@ -125,10 +125,6 @@ typedef struct SdfMotionKeyFlagBinding {
     u8 pad11[3];
 } SdfMotionKeyFlagBinding;
 
-enum {
-    SDF_MOTION_KEY_SAMPLE_BYTE_ZERO = 0x0010
-};
-
 typedef char SdfMotionBindingDispatch_size[
     (sizeof(SdfMotionBindingDispatch) == 0x18) ? 1 : -1];
 typedef char SdfMotionBindingDispatch_bind_at_04[

@@ -133,6 +133,7 @@ typedef struct sdfModelNode_t {
 } sdfModelNode_t;
 
 #define SDF_DRAW_NODE_FLAG_SKIP_RENDER 0x0001
+#define SDF_DRAW_NODE_FLAG_MOTION_HIDDEN 0x0010
 #define SDF_DRAW_NODE_FLAG_USE_NODE_COLOR 0x0002
 
 /* Two index/weight pairs stored in each 0x10-byte model slot entry. */

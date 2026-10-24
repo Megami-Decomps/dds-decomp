@@ -587,7 +587,8 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, sdfModelRootNode_t
         globalModeBits <<= 16;
         node = ((sdfModelNode_t **)model->list->buffer)[nodeIndex];
         entry = node->lists[frame];
-        if (entry == NULL || (node->flags & 0x11) != 0) {
+        if (entry == NULL ||
+            (node->flags & (SDF_DRAW_NODE_FLAG_SKIP_RENDER | SDF_DRAW_NODE_FLAG_MOTION_HIDDEN)) != 0) {
             continue;
         }
 
