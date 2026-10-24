@@ -96,7 +96,7 @@ void movieOpenStream(movieStream_t *owner, SdfMovieDescriptor *descriptor, const
     resource = (u8 *)sdfMemLock(allocation);
     pacWork->pacInputBuffer = resource;
     pacWork->pacBuffer = resource + 0x4000;
-    pacWork->ringBuffer = (u8 *)((u32)resource + 0x14000);
+    pacWork->ringBuffer = resource + 0x14000;
     pacWork->scratchSize = 0x20;
     pacWork->scratch = pacWork->scratchBuffer;
     owner->state = SDF_MOVIE_STATE_INITIAL;
