@@ -1121,7 +1121,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
     char path[64];
     s32 resourceSlotIndex;
 
-    fldSetFileResolverIdx(request->record->displayState);
+    fldSetFileResolverIdx(request->record->fileResolverIndex);
     D_00444920[0] = (u32)request->record->resourceA;
     D_00444920[1] = (u32)request->record->resourceB;
     D_00444920[2] = (u32)request->record->resourceC;
@@ -1149,7 +1149,7 @@ void fldProcessFieldRequest(FldSceneRequest *request) {
     state = fldGlobalBase.area;
     if (state != 1 && state < 200) fldCreatePlayerObject();
     fldSpawnPlacementObjectsFromBatches(request->spawnBatches, request->spawnBatchCount, 0);
-    fldGlobalBase.fallbackResourceName = request->record->displayState;
+    fldGlobalBase.fallbackResourceTaskName = request->record->fallbackResourceName;
 }
 
 void fldProcessFieldRequestAlternate(FldSceneRequest *request) {

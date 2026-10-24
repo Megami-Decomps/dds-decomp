@@ -3,37 +3,57 @@
 
 #include "fld.h"
 
-/* Observed prefix of the relocated scene-load record. */
-typedef struct FldLoadRecord {
+/* File-batch chunks use +0x04 as an index into the file-resolver state. */
+typedef struct FldFileResolverRecord {
     u32 unk00;
-    u32 displayState;
+    u32 fileResolverIndex;
     /* Optional path suffixes appended by the field resource resolver. */
     const char *resourceA;
     const char *resourceB;
     const char *resourceC;
     const char *resourceD;
-} FldLoadRecord;
+} FldFileResolverRecord;
+
+/* Scene-placement chunks use the same wire size but store a fallback script
+ * name at +0x04 rather than a file-resolver index. */
+typedef struct FldSceneResourceRecord {
+    u32 unk00;
+    const char *fallbackResourceName;
+    const char *resourceA;
+    const char *resourceB;
+    const char *resourceC;
+    const char *resourceD;
+} FldSceneResourceRecord;
+
+typedef char FldFileResolverRecord_size_check[
+    (sizeof(FldFileResolverRecord) == 0x18) ? 1 : -1];
+typedef char FldSceneResourceRecord_size_check[
+    (sizeof(FldSceneResourceRecord) == 0x18) ? 1 : -1];
 
 /* Observed prefix of the transfer payload passed to the resource-batch loader. */
 typedef struct FldLoadRequest {
     u32 spawnBatchCount;
     FldSpawnBatch *spawnBatches;
-    FldLoadRecord *record;
+    FldFileResolverRecord *record;
 } FldLoadRequest;
 
 /* Counted placement-batch input consumed by both field request paths. */
 typedef struct FldSceneRequest {
     u32 spawnBatchCount;
     FldSpawnBatch *spawnBatches;
-    FldLoadRecord *record;
+    FldSceneResourceRecord *record;
     u32 spawnCount;
     struct FldActionSpawn *spawnList;
 } FldSceneRequest;
 
-typedef char FldLoadRecord_displayState_offset_check[
-    ((u32)&((FldLoadRecord *)0)->displayState == 0x04) ? 1 : -1];
-typedef char FldLoadRecord_resourceA_offset_check[
-    ((u32)&((FldLoadRecord *)0)->resourceA == 0x08) ? 1 : -1];
+typedef char FldFileResolverRecord_fileResolverIndex_offset_check[
+    ((u32)&((FldFileResolverRecord *)0)->fileResolverIndex == 0x04) ? 1 : -1];
+typedef char FldFileResolverRecord_resourceA_offset_check[
+    ((u32)&((FldFileResolverRecord *)0)->resourceA == 0x08) ? 1 : -1];
+typedef char FldSceneResourceRecord_fallbackResourceName_offset_check[
+    ((u32)&((FldSceneResourceRecord *)0)->fallbackResourceName == 0x04) ? 1 : -1];
+typedef char FldSceneResourceRecord_resourceA_offset_check[
+    ((u32)&((FldSceneResourceRecord *)0)->resourceA == 0x08) ? 1 : -1];
 typedef char FldLoadRequest_spawnBatchCount_offset_check[
     ((u32)&((FldLoadRequest *)0)->spawnBatchCount == 0x00) ? 1 : -1];
 typedef char FldLoadRequest_spawnBatches_offset_check[

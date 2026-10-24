@@ -30,7 +30,7 @@ typedef struct FldTextureResource {
  * XYZ is followed by saved XYZ history, not a homogeneous fourth component. */
 typedef struct FldAreaWork {
     struct dds3Basic_t *taskHandle; /* 0x00: first spawned area basic object */
-    char *fallbackResourceName;
+    const char *fallbackResourceTaskName;
     u8 pad08[4];
     s32 consumedFlags;
     s32 area;                    /* 0x10 */

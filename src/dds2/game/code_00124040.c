@@ -2152,8 +2152,8 @@ s32 fldDispatchPendingSceneResource(void) {
         evtStartSceneResourceTask(dds3GetControlScene(), sceneWork->resourceName);
         return 1;
     }
-    if (fldGlobalBase.fallbackResourceName != 0) {
-        evtStartSceneResourceTask(dds3GetControlScene(), fldGlobalBase.fallbackResourceName);
+    if (fldGlobalBase.fallbackResourceTaskName != 0) {
+        evtStartSceneResourceTask(dds3GetControlScene(), fldGlobalBase.fallbackResourceTaskName);
         return 1;
     }
     return 0;
