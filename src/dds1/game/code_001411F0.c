@@ -3179,7 +3179,7 @@ typedef char FldNpcPlacementRule_size_check[
 
 extern FldNpcPlacementRule D_00349030[400];
 extern void FromRotation(f32 angle);
-extern dds3Basic_t *dds3AddUnitObjectBasic(s32 value, void *position, void *rotation);
+extern dds3Basic_t *dds3AddUnitObjectBasic(s32 value, u128 *position, u128 *rotation);
 extern void dds3RebuildObjectModelContext(dds3Basic_t *node, s32 kind, s32 resource);
 extern void dds3GetRadiusPoseSet(dds3Basic_t *node, f32 value);
 extern u32 sdfGetLodChunkValue(sdfModelRootNode_t *model);
@@ -3259,7 +3259,7 @@ void func_001480D0(u32 key, f32 *orientation, f32 x, f32 y, f32 z,
         }
         fldModelSlotTable[outputIndex].size = size;
         if (dds3SceneBasicSearchName(dds3GetControlScene(), "TEX_UNIT") == NULL) {
-            object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
+            object = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position, (u128 *)rotation);
             dds3SetUnitObjectId(object, "TEX_UNIT");
             dds3RebuildObjectModelContext(object, 3, 0x60);
             dds3ObjectBaseOffFlag(object, 0x400);
@@ -3276,7 +3276,7 @@ void func_001480D0(u32 key, f32 *orientation, f32 x, f32 y, f32 z,
         /* Audited SDK-style store: the complete output goes directly to opaque
          * constructor calls, with no scalar C readback or loop reuse. */
         SDF_VU0_STOREVECTOR_NOMEM(rotation);
-        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
+        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position, (u128 *)rotation);
         dds3SetUnitObjectId(object, "NPC_MDL_UNIT");
         fldModelSlotTable[outputIndex].object = object;
         dds3RebuildObjectModelContext(object, kind, resource);
@@ -3370,7 +3370,7 @@ void func_001486D0(u32 id, f32 *rotation, f32 x, f32 y, f32 z) {
         SDF_VU0_LOADVECTOR_B(rotation);
         effMiscQuatMultiplyVU();
         SDF_VU0_STOREVECTOR_NOMEM(resultRotation);
-        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, resultRotation);
+        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position, (u128 *)resultRotation);
         dds3SetUnitObjectId(object, "TAKARA_UNIT");
         dds3RebuildObjectModelContext(object, 2, modelId);
         dds3SetSclPoseSet(object, (u128 *)scale);
@@ -3567,7 +3567,7 @@ void func_00148FF0(s32 kind, u32 id, f32 *rotation, f32 x, f32 y, f32 z) {
         SDF_VU0_LOADVECTOR_B(rotation);
         effMiscQuatMultiplyVU();
         SDF_VU0_STOREVECTOR_NOMEM(resultRotation);
-        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, resultRotation);
+        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position, (u128 *)resultRotation);
         if (kind == 0) {
             dds3SetUnitObjectId(object, "SAVE_UNIT");
             dds3RebuildObjectModelContext(object, 2, 3);
@@ -4375,7 +4375,7 @@ typedef struct FldSparkEntryInfo {
     s16 modelId;
 } FldSparkEntryInfo;
 
-extern dds3Basic_t *dds3AddUnitObjectBasic(s32 value, void *position, void *rotation);
+extern dds3Basic_t *dds3AddUnitObjectBasic(s32 value, u128 *position, u128 *rotation);
 extern void dds3RebuildObjectModelContext(dds3Basic_t *node, s32 kind, s32 resource);
 extern void dds3SetSclPoseSet(dds3Basic_t *node, u128 *vector);
 
@@ -4404,7 +4404,7 @@ void fldCreateSparkSlotObjects(void) {
             *(s32 *)fldSparkObjectEntries[i].pad8 = 0;
         }
         for (i = 0; i < 17; i++) {
-            fldSparkObjectEntries[i].objectHandle = dds3AddUnitObjectBasic(dds3AllocObjectId(), &position, &rotation);
+            fldSparkObjectEntries[i].objectHandle = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)&position, (u128 *)&rotation);
             dds3SetUnitObjectId(fldSparkObjectEntries[i].objectHandle, D_003A0908);
             if (i == 16) {
                 dds3RebuildObjectModelContext(fldSparkObjectEntries[i].objectHandle, 1, ((FldSparkEntryInfo *)fldSparkControlState.entry)->modelId);

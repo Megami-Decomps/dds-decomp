@@ -322,7 +322,7 @@ void fldUnloadPlayerModel(void);
 
 extern void dds3RebuildObjectModelContext(dds3Basic_t *object, s32 resourceGroup, s32 resourceId);
 
-extern dds3Basic_t *dds3AddUnitObjectBasic(s32, void *, void *);
+extern dds3Basic_t *dds3AddUnitObjectBasic(s32, u128 *, u128 *);
 
 extern s32 D_0038A67C[];
 
@@ -1254,7 +1254,7 @@ void fldTogglePlayerModel(void) {
         effMiscQuatMultiplyVU();
         SDF_VU0_STOREVECTOR_NOMEM(work);
     }
-    fldPlayerObject = dds3AddUnitObjectBasic(dds3AllocObjectId(), sceneWork, work);
+    fldPlayerObject = dds3AddUnitObjectBasic(dds3AllocObjectId(), &sceneWork->position, (u128 *)work);
     dds3SetUnitObjectId(fldPlayerObject, D_00412EC0);
     dds3SetActiveUnitSceneBasic(dds3GetControlScene(), fldPlayerObject);
     fldLoadPlayerModel();
@@ -1397,7 +1397,7 @@ void fldCreatePlayerObject(void) {
     memset(rotation, 0, sizeof(rotation));
     rotation[3] = 1.0f;
     if (fldPlayerObject == 0) {
-        fldPlayerObject = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
+        fldPlayerObject = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position, (u128 *)rotation);
         dds3SetUnitObjectId(fldPlayerObject, D_00412EC0);
         dds3SetActiveUnitSceneBasic(dds3GetControlScene(), fldPlayerObject);
         if (D_00435F30 != 0) {
@@ -1456,7 +1456,7 @@ void fldSpawnPlayerUnits(f32 *input) {
 
         player = fldPlayerObject;
         if (player == NULL) {
-            player = dds3AddUnitObjectBasic(dds3AllocObjectId(), input, work);
+            player = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)input, (u128 *)work);
             fldPlayerObject = player;
             dds3SetUnitObjectId(player, D_00412EC0);
             dds3SetActiveUnitSceneBasic(dds3GetControlScene(), fldPlayerObject);
@@ -1496,7 +1496,7 @@ void fldSpawnPlayerUnits(f32 *input) {
             SDF_VU0_LOADVECTOR_B(input + 4);
             effMiscQuatMultiplyVU();
             SDF_VU0_STOREVECTOR(work);
-            fldSecondarySceneObject = dds3AddUnitObjectBasic(dds3AllocObjectId(), input, work);
+            fldSecondarySceneObject = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)input, (u128 *)work);
             dds3SetUnitObjectId(fldSecondarySceneObject, D_00412F00);
             dds3RebuildObjectModelContext(fldSecondarySceneObject, 2, D_0038A67C[0]);
             dds3SetPosPoseSet(fldSecondarySceneObject, (u128 *)input);

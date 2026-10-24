@@ -85,7 +85,7 @@ extern void fldSetCameraNodeModeWithTen(void);
 
 
 extern void FromRotation(f32 angle);
-extern dds3Basic_t *dds3AddUnitObjectBasic(s32 value, void *position, void *rotation);
+extern dds3Basic_t *dds3AddUnitObjectBasic(s32 value, u128 *position, u128 *rotation);
 extern void dds3SetUnitObjectId(dds3Basic_t *node, const char *objectName);
 extern void dds3RebuildObjectModelContext(dds3Basic_t *node, s32 kind, s32 resource);
 extern void dds3GetRadiusPoseSet(dds3Basic_t *node, f32 value);
@@ -3580,7 +3580,7 @@ void func_0014C2B8(s32 key, f32 *orientation, s32 room, char *name, s32 argument
         }
         fldModelSlotTable[outputIndex].size = size;
         if (dds3SceneBasicSearchName(dds3GetControlScene(), "TEX_UNIT") == NULL) {
-            object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
+            object = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position, (u128 *)rotation);
             dds3SetUnitObjectId(object, "TEX_UNIT");
             dds3RebuildObjectModelContext(object, 3, 0x60);
             dds3ObjectBaseOffFlag(object, 0x400);
@@ -3588,7 +3588,7 @@ void func_0014C2B8(s32 key, f32 *orientation, s32 room, char *name, s32 argument
             model->flags |= 1;
         }
         if (fldGlobalBase.area == 15 && dds3SceneBasicSearchName(dds3GetControlScene(), "TEX_UNIT015") == NULL) {
-            object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
+            object = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position, (u128 *)rotation);
             dds3SetUnitObjectId(object, "TEX_UNIT015");
             dds3RebuildObjectModelContext(object, 3, 0xBF);
             dds3ObjectBaseOffFlag(object, 0x400);
@@ -3605,7 +3605,7 @@ void func_0014C2B8(s32 key, f32 *orientation, s32 room, char *name, s32 argument
         /* Audited SDK-style store: the complete output goes directly to opaque
          * constructor calls, with no scalar C readback or loop reuse. */
         SDF_VU0_STOREVECTOR_NOMEM(rotation);
-        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
+        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position, (u128 *)rotation);
         dds3SetUnitObjectId(object, "NPC_MDL_UNIT");
         fldModelSlotTable[outputIndex].object = object;
         dds3RebuildObjectModelContext(object, kind, resource);
@@ -3714,7 +3714,7 @@ void func_0014C9B0(u32 id, f32 *rotation, f32 x, f32 y, f32 z) {
         SDF_VU0_LOADVECTOR_B(rotation);
         effMiscQuatMultiplyVU();
         SDF_VU0_STOREVECTOR_NOMEM(resultRotation);
-        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, resultRotation);
+        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position, (u128 *)resultRotation);
         dds3SetUnitObjectId(object, "TAKARA_UNIT");
         dds3RebuildObjectModelContext(object, 2, modelId);
         dds3SetSclPoseSet(object, (u128 *)scale);
@@ -3915,7 +3915,7 @@ void func_0014D380(s32 kind, u32 id, f32 *rotation, f32 x, f32 y, f32 z) {
         SDF_VU0_LOADVECTOR_B(rotation);
         effMiscQuatMultiplyVU();
         SDF_VU0_STOREVECTOR_NOMEM(resultRotation);
-        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, resultRotation);
+        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position, (u128 *)resultRotation);
         if (kind == 0) {
             dds3SetUnitObjectId(object, "SAVE_UNIT");
             if (fldGlobalBase.area == 29 || fldGlobalBase.area == 30) {
@@ -4755,7 +4755,7 @@ void fldCreateSparkSlotObjects(void) {
         }
         for (i = 0; i < 17; i++) {
             entry = &fldSparkObjectEntries[i];
-            entry->objectHandle = dds3AddUnitObjectBasic(dds3AllocObjectId(), &position, &rotation);
+            entry->objectHandle = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)&position, (u128 *)&rotation);
             dds3SetUnitObjectId(entry->objectHandle, D_00413DD8);
             dds3RebuildObjectModelContext(entry->objectHandle, 1, 0x130);
             dds3SetSclPoseSet(entry->objectHandle, (u128 *)&scale);
@@ -6875,8 +6875,8 @@ void fldCreateGrippedUnitMarker(s32 gridX, s32 gridY, s32 slot) {
         f32 scale[4] __attribute__((aligned(16))) = {1.2f, 1.2f, 1.2f, 1.0f};
         stepX = (f32)D_004363BC;
         stepY = (f32)D_004363BE;
-        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), position,
-                                        rotation);
+        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position,
+                                        (u128 *)rotation);
         dds3SetUnitObjectId(object, "TUKAMI_UNIT");
         dds3SetActiveUnitSceneBasic(dds3GetControlScene(), object);
         dds3RebuildObjectModelContext(object, 2, 0x10);
@@ -6968,7 +6968,7 @@ void fldCreateChaseCameraObject(void) {
     effMiscQuatMultiplyVU();
     /* The SDK store is followed by opaque consumers, with no scalar readback. */
     SDF_VU0_STOREVECTOR_NOMEM(rotation);
-    D_00435F1C = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
+    D_00435F1C = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position, (u128 *)rotation);
     dds3SetUnitObjectId(D_00435F1C, "OIKAKE_UNIT");
     dds3SetActiveUnitSceneBasic(dds3GetControlScene(), D_00435F1C);
     dds3RebuildObjectModelContext(D_00435F1C, 1, 0x103);

@@ -1049,7 +1049,7 @@ extern void dds3RebuildObjectModelContext(dds3Basic_t *object, s32 resourceGroup
 extern void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode);
 extern s32 fldUpdateCameraObjectPose(void);
 
-extern dds3Basic_t *dds3AddUnitObjectBasic(s32, void *, void *);
+extern dds3Basic_t *dds3AddUnitObjectBasic(s32, u128 *, u128 *);
 extern void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode);
 
 extern void dds3DeleteUnitObjectBasic(dds3Basic_t *);
@@ -1095,7 +1095,7 @@ void fldTogglePlayerModel(void) {
         effMiscQuatMultiplyVU();
         SDF_VU0_STOREVECTOR_NOMEM(work);
     }
-    fldPlayerObject = dds3AddUnitObjectBasic(dds3AllocObjectId(), sceneWork, work);
+    fldPlayerObject = dds3AddUnitObjectBasic(dds3AllocObjectId(), &sceneWork->position, (u128 *)work);
     dds3SetUnitObjectId(fldPlayerObject, D_0039FC50);
     dds3SetActiveUnitSceneBasic(dds3GetControlScene(), fldPlayerObject);
     fldLoadPlayerModel();
@@ -1245,7 +1245,7 @@ void fldCreatePlayerObject(void) {
     memset(rotation, 0, sizeof(rotation));
     rotation[3] = 1.0f;
     if (fldPlayerObject == 0) {
-        fldPlayerObject = dds3AddUnitObjectBasic(dds3AllocObjectId(), position, rotation);
+        fldPlayerObject = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position, (u128 *)rotation);
         dds3SetUnitObjectId(fldPlayerObject, D_0039FC50);
         dds3SetActiveUnitSceneBasic(dds3GetControlScene(), fldPlayerObject);
         if (D_003BAB50 != 0) {
@@ -1306,7 +1306,7 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
     SDF_VU0_STOREVECTOR(&quaternion);
     object = fldPlayerObject;
     if (object == 0) {
-        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), transform, &quaternion);
+        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), transform, (u128 *)&quaternion);
         fldPlayerObject = object;
         dds3SetUnitObjectId(object, D_0039FC50);
         dds3SetActiveUnitSceneBasic(dds3GetControlScene(), fldPlayerObject);

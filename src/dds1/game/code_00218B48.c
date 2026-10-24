@@ -3784,7 +3784,7 @@ void evtSetTestCamera(void) {
 
 extern void dds3RebuildObjectModelContext(dds3Basic_t *object, s32, s32);
 
-extern dds3Basic_t *dds3AddUnitObjectBasic(s32 counter, void *position, void *rotation);
+extern dds3Basic_t *dds3AddUnitObjectBasic(s32 counter, u128 *position, u128 *rotation);
 
 
 s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
@@ -3798,7 +3798,7 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     memset(rotation, 0, 0x10);
     rotation[3] = 1.0f;
     counter = dds3AllocObjectId();
-    object = dds3AddUnitObjectBasic(counter, position, rotation);
+    object = dds3AddUnitObjectBasic(counter, (u128 *)position, (u128 *)rotation);
     dds3ObjectBaseOnFlag(object, 0x20);
     dds3GetRadiusPoseSet(object, 10.0f);
     dds3RebuildObjectModelContext(object, slotKind, resource);
@@ -3823,7 +3823,7 @@ s32 evtLoadUnit(s32 slotKind, s32 resource) {
     memset(rotation, 0, 0x10);
     rotation[3] = 1.0f;
     counter = dds3AllocObjectId();
-    object = dds3AddUnitObjectBasic(counter, position, rotation);
+    object = dds3AddUnitObjectBasic(counter, (u128 *)position, (u128 *)rotation);
     dds3ObjectBaseOnFlag(object, 0x20);
     dds3GetRadiusPoseSet(object, 10.0f);
     dds3RebuildObjectModelContext(object, slotKind, resource);

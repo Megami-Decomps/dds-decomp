@@ -199,7 +199,7 @@ typedef struct MdlCountNode {
 
 
 
-extern dds3Basic_t *dds3AddUnitObjectBasic(s32 world, void *pos, void *rot);
+extern dds3Basic_t *dds3AddUnitObjectBasic(s32 world, u128 *pos, u128 *rot);
 
 
 
@@ -3843,7 +3843,7 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     memset(rot, 0, 0x10);
     rot[3] = 1.0f;
     world = dds3AllocObjectId();
-    obj = dds3AddUnitObjectBasic(world, pos, rot);
+    obj = dds3AddUnitObjectBasic(world, (u128 *)pos, (u128 *)rot);
     dds3ObjectBaseOnFlag(obj, 0x20);
     dds3GetRadiusPoseSet(obj, 10.0f);
     dds3RebuildObjectModelContext(obj, slotKind, resource);
@@ -3868,7 +3868,7 @@ s32 evtLoadUnit(s32 slotKind, s32 resource) {
     memset(rot, 0, 0x10);
     rot[3] = 1.0f;
     world = dds3AllocObjectId();
-    obj = dds3AddUnitObjectBasic(world, pos, rot);
+    obj = dds3AddUnitObjectBasic(world, (u128 *)pos, (u128 *)rot);
     dds3ObjectBaseOnFlag(obj, 0x20);
     dds3GetRadiusPoseSet(obj, 10.0f);
     dds3RebuildObjectModelContext(obj, slotKind, resource);

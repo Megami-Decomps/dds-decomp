@@ -27,15 +27,15 @@ dds3ObjectBaseControlWorkData_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic
     return ((EffectObjectData *)object->data)->modelHolder;
 }
 
-dds3Basic_t *dds3AddUnitObjectBasic(s32 a, void *firstVector, void *secondVector) {
+dds3Basic_t *dds3AddUnitObjectBasic(s32 worldId, u128 *position, u128 *rotation) {
     dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_FOLLOW_MODEL);
     EffectObjectData *data;
 
     if (obj != NULL) {
-        obj->key = a;
+        obj->key = worldId;
         dds3ObjectBaseCreateMover(obj);
-        dds3SetPosPoseSet(obj, firstVector);
-        dds3SetRotPoseSet(obj, secondVector);
+        dds3SetPosPoseSet(obj, position);
+        dds3SetRotPoseSet(obj, rotation);
         dds3SetRadiusPoseSet(obj->inner);
         data = ((EffectObjectData *)obj->data);
         data->handle = (dds3ObjectBaseControlWorkData_t *)-1;
