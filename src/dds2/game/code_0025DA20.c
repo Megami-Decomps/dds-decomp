@@ -2885,9 +2885,9 @@ void evtInstallStateTableC(MenuTerminalContext *state) {
 }
 
 s32 evtBuildFilteredShopCatalogIfActive(dds3ProcessID_t *task) {
-    s32 stateAddress = dds3GetProcessData(task);
-    if (((MenuTerminalContext *)stateAddress)->phase == 1) {
-        mnuCampRebuildFilteredStockWindow(stateAddress, 1);
+    MenuTerminalContext *state = (MenuTerminalContext *)dds3GetProcessData(task);
+    if (state->phase == 1) {
+        mnuCampRebuildFilteredStockWindow(state, 1);
     }
     return 1;
 }
@@ -3002,9 +3002,9 @@ void mnuInstallNoCapacityStateTable(MenuTerminalContext *state) {
 }
 
 s32 evtBuildRangeFilteredShopCatalogIfActive(dds3ProcessID_t *task) {
-    s32 stateAddress = dds3GetProcessData(task);
-    if (((MenuTerminalContext *)stateAddress)->phase == 1) {
-        mnuCampRebuildFilteredStockWindow(stateAddress, 3);
+    MenuTerminalContext *state = (MenuTerminalContext *)dds3GetProcessData(task);
+    if (state->phase == 1) {
+        mnuCampRebuildFilteredStockWindow(state, 3);
     }
     return 1;
 }
