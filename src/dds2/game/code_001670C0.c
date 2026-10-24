@@ -51,9 +51,12 @@ extern f32 kwlnHeldTextureTargetVector[];
 extern f32 kwlnHeldTextureEyeVector[];
 extern u8 D_00380870[];
 extern s32 D_00435CD0;
-extern s8 D_00436408;
-extern u32 D_0043640C;
-extern u32 D_00436410;
+#define crossfadeActive D_00436408
+#define crossfadeElapsedFrames D_0043640C
+#define crossfadeDurationFrames D_00436410
+extern s8 crossfadeActive;
+extern u32 crossfadeElapsedFrames;
+extern u32 crossfadeDurationFrames;
 
 
 
@@ -406,7 +409,7 @@ void dds3CrossfadeStart(s32 frames) {
     s32 i;
     u64 clearValue;
 
-    if (D_00436408 != 0) {
+    if (crossfadeActive != 0) {
         dds3EndCrossfade();
     }
     if (frames != 0) {
@@ -429,9 +432,9 @@ void dds3CrossfadeStart(s32 frames) {
             *(u64 *)entry = clearValue;
             entry += 0x1f40;
         } while (i != 2);
-        D_00436410 = frames;
-        D_00436408 = 1;
-        D_0043640C = 0;
+        crossfadeDurationFrames = frames;
+        crossfadeActive = 1;
+        crossfadeElapsedFrames = 0;
         printf("dds3CrossfadeStart\n");
     }
 }
@@ -446,14 +449,14 @@ void dds3UpdateCrossfade(void) {
     KwlnSpriteVertex *vertex;
     u32 alpha;
 
-    if (D_00436408 == 0) {
+    if (crossfadeActive == 0) {
         return;
     }
-    if (D_0043640C == D_00436410) {
+    if (crossfadeElapsedFrames == crossfadeDurationFrames) {
         dds3EndCrossfade();
         return;
     }
-    if (D_0043640C == 0) {
+    if (crossfadeElapsedFrames == 0) {
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         reference = (SdfDmaNode *)sdfGrAllocPacketBuff(0x20);
@@ -501,9 +504,9 @@ void dds3UpdateCrossfade(void) {
         sdfDrawTagLink(list, (u32)sprite);
         D_0037FB88.append(&D_0037FB88, list);
     }
-    D_0043640C = (u32)D_0043640C + 1;
-    alpha = (128 - (u32)((f32)(u32)D_0043640C * 128.0f /
-                       (f32)(u32)D_00436410)) & 0xFF;
+    crossfadeElapsedFrames = (u32)crossfadeElapsedFrames + 1;
+    alpha = (128 - (u32)((f32)(u32)crossfadeElapsedFrames * 128.0f /
+                       (f32)(u32)crossfadeDurationFrames)) & 0xFF;
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     sdf2DLinkTexPacket(list, dds3GetRenderTexture(), SDF_GS_CONTEXT_1);
@@ -533,7 +536,7 @@ void dds3UpdateCrossfade(void) {
 void dds3EndCrossfade(void) {
     dds3RenderTextureOFF();
     dds3FreeRenderTexture();
-    D_00436408 = 0;
+    crossfadeActive = 0;
     printf(D_00414430);
 }
 
