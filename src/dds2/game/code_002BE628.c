@@ -1740,9 +1740,9 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
 }
 
 
-void mnuSetProfilePanelValues(MenuProfilePanel *panel, s32 capValue, s32 optionValue) {
+void mnuSetProfilePanelValues(MenuProfilePanel *panel, s32 capValue, s32 progressValue) {
     panel->capValue = capValue;
-    panel->option = optionValue;
+    panel->option = progressValue;
 }
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
