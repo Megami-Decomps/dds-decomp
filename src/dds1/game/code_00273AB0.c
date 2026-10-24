@@ -63,7 +63,7 @@ typedef struct StaffImageContext {
     s32 spriteArg1; /* 0x68 */
     u8 pad6C[8];
     s32 spriteArg0; /* 0x74 */
-    s32 group; /* 0x78 */
+    struct EffectSlotSet *group; /* 0x78 */
     s32 spriteScene; /* 0x7C */
     s32 windowParam; /* 0x80 */
     u8 pad84[0x54];
@@ -112,7 +112,7 @@ s32 mnuStaffImageEnterA(dds3ProcessID_t *task) {
         effDrawSpriteWithCornerFade(0x550, 0x5D8, 0, menu->primaryObject->fadeScale, 1, ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
         mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);
     }
-    mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((StaffImageContext *)context)->group));
+    mnuDrawStaffGridLabelsForKind(0, ((StaffImageContext *)context)->group);
     return menuRunPanel((void *)context, 1, (void *)task);
 }
 
@@ -179,7 +179,7 @@ s32 mnuPrepareStaffImageAndSelectionLabel(dds3ProcessID_t *task) {
     mnuCreateStaffImageSprite(7);
     mnuDrawCampGridAndLabelDefault(1, ((StaffImageContext *)context)->activeWindow->list->cursor->index, (s32)mnuCampItemCommandHelpTextBank, context, 1, 0x53);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, ((StaffImageContext *)context)->activeWindow, 0x53);
-    mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((StaffImageContext *)context)->group));
+    mnuDrawStaffGridLabelsForKind(0, ((StaffImageContext *)context)->group);
     return menuRunPanel((void *)context, 1, (void *)task);
 }
 
@@ -237,7 +237,7 @@ s32 mnuStaffImageEnterD(dds3ProcessID_t *task) {
         effDrawSpriteWithCornerFade(0x550, 0x5D8, 0, menu->secondaryObject->fadeScale, 1, ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
         mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);
     }
-    mnuDrawStaffGridLabelsForKind(2, (struct EffectSlotSet *)(u32)(((StaffImageContext *)context)->group));
+    mnuDrawStaffGridLabelsForKind(2, ((StaffImageContext *)context)->group);
     return menuRunPanel((void *)context, 1, (void *)task);
 }
 
@@ -316,7 +316,7 @@ s32 mnuStaffImageEnterB(dds3ProcessID_t *task) {
         effDrawSpriteWithCornerFade(0x550, 0x5D8, 0, menu->primaryObject->fadeScale, 1, ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
         mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);
     }
-    mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((StaffImageContext *)context)->group));
+    mnuDrawStaffGridLabelsForKind(0, ((StaffImageContext *)context)->group);
     return menuRunPanel((void *)context, 1, (void *)task);
 }
 
@@ -570,7 +570,7 @@ s32 mnuDrawStaffPartyValuePage(dds3ProcessID_t *task) {
                       ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
         mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);
     }
-    mnuDrawStaffGridLabelsForKind(1, (struct EffectSlotSet *)(u32)(((StaffImageContext *)context)->group));
+    mnuDrawStaffGridLabelsForKind(1, ((StaffImageContext *)context)->group);
     return menuRunPanel((void *)context, 1, (void *)task);
 }
 

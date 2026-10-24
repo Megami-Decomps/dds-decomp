@@ -32,7 +32,7 @@ struct StaffDisplayContext {
     s32 unk6C;
     u8 pad70[4];
     s32 unk74;  /* 0x74 */
-    s32 group; /* 0x78: staff image group */
+    struct EffectSlotSet *group; /* 0x78: staff image resources */
     u8 pad7C[0x5C];
     s32 unkD8;  /* 0xD8 */
     u32 unkDC;
@@ -370,7 +370,7 @@ s32 mnuStaffDrawImagePanelA(dds3ProcessID_t *callback) {
     mnuCreateStaffImageSprite(4);
     mnuDrawCampGridAndLabelDefault(1, ((StaffDisplayContext *)context)->activeWindow->list->cursor->index, (s32)mnuCampItemCommandHelpTextBank, context, 1, 0x53);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, ((StaffDisplayContext *)context)->activeWindow, 0x53);
-    mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((StaffDisplayContext *)context)->group));
+    mnuDrawStaffGridLabelsForKind(0, ((StaffDisplayContext *)context)->group);
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
