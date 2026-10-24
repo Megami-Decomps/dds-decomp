@@ -1219,8 +1219,15 @@ void btlPlaceBothSidesInRadialFormation(ActionStateLink *link, BtlUnit *firstAct
     }
 }
 
-s32 btlMoveOtherUnitsForCategory(u32 *command) {
-    s32 category = command[1];
+typedef struct BtlMoveOtherUnitsTaskArgs {
+    ActionStateLink *link;
+    s32 category;
+    u32 unk_08;
+} BtlMoveOtherUnitsTaskArgs;
+typedef char BtlMoveOtherUnitsTaskArgs_size[(sizeof(BtlMoveOtherUnitsTaskArgs) == 0x0C) ? 1 : -1];
+
+s32 btlMoveOtherUnitsForCategory(BtlMoveOtherUnitsTaskArgs *args) {
+    s32 category = args->category;
     if (category >= 0x1AB) {
         return 1;
     }
@@ -1228,14 +1235,14 @@ s32 btlMoveOtherUnitsForCategory(u32 *command) {
         return 1;
     }
     if (category >= 0x5B) {
-        btlMoveOtherUnitsAway((ActionStateLink *)command[0]);
+        btlMoveOtherUnitsAway(args->link);
     }
     return 1;
 }
 
-BtlRuntimeTask *btlCreateMoveOtherUnitsTask(ActionStateLink *link, s32 option, s32 target) {
+BtlRuntimeTask *btlCreateMoveOtherUnitsTask(ActionStateLink *link, s32 category, s32 target) {
     BtlRuntimeTask *task = btlAllocTask(12);
-    BtlRuntimeTaskArgs *args;
+    BtlMoveOtherUnitsTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlMoveOtherUnitsForCategory;
@@ -1243,8 +1250,8 @@ BtlRuntimeTask *btlCreateMoveOtherUnitsTask(ActionStateLink *link, s32 option, s
     task->onStart = 0;
     task->ownerId = link->unit->owner;
     args = btlGetTaskArguments(task);
-    args->actor = link;
-    args->option = option;
+    args->link = link;
+    args->category = category;
     args->unk_08 = target;
     return task;
 }
