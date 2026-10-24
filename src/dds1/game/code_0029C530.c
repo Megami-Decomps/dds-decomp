@@ -1732,7 +1732,7 @@ void billAdvanceFrameInstances(EffClassWork *work) {
 
 extern u8 effOnesVector[];
 
-extern void effDrawTrackSet(EffTrackSet *, Matrix4 *);
+extern void effDrawTrackSet(EffTrackSet *, const Matrix4 *);
 
 typedef struct EffMeshOutput {
     u32 field_00;       // 0x00
@@ -3826,7 +3826,7 @@ extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(SdfPoolNode *, RefObj *
 struct sdfMat_t;
 
 /* Draw track-set positions/colors/UVs; a null matrix selects the identity transform. */
-void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
+void effDrawTrackSet(EffTrackSet *track, const Matrix4 *matrix) {
     SdfPoolNode *surface;
     void *list;
     EffGsPacket *packet;
@@ -4147,7 +4147,7 @@ void effUpdateExpandingRingPoints(EffClassWork *work) {
     }
 }
 
-extern void effDrawFourPointGroups(EffPointSet *, Matrix4 *);
+extern void effDrawFourPointGroups(EffPointSet *, const Matrix4 *);
 
 void billDrawCellBlendA(BillCellDrawWork *work) {
     u8 *config = work->config;
@@ -4630,7 +4630,7 @@ void effAssetQueueRelease(EffPointSet *set) {
 }
 
 /* vu0 routine: SDK loads the supplied transform or constructs identity. */
-void effDrawFourPointGroups(EffPointSet *set, Matrix4 *matrix) {
+void effDrawFourPointGroups(EffPointSet *set, const Matrix4 *matrix) {
     void *list;
     void *setup;
     EffGsPacket *packet;
@@ -6980,7 +6980,7 @@ void effReleaseRingFadeTable(s32 work) {
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002ABDE0);
 
-extern void effDrawRibbon(EffRibbonWork *, Matrix4 *);
+extern void effDrawRibbon(EffRibbonWork *, const Matrix4 *);
 
 void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     EffBillVortexConfig *config = (EffBillVortexConfig *)((BillCellDrawWork *)work)->config;
@@ -7922,7 +7922,7 @@ static inline u32 packNormalizedColor(void) {
     EE_MMI_RGBA_PACK_UNIT(rgba[0], 128.0f);
     return rgba[0];
 }
-void effDrawRibbon(EffRibbonWork *work, Matrix4 *matrix) {
+void effDrawRibbon(EffRibbonWork *work, const Matrix4 *matrix) {
     SdfPoolNode *surface;
     void *list;
     EffGsPacket *packet;

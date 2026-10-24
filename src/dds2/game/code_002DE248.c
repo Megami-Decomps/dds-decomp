@@ -350,10 +350,10 @@ extern f32 D_0042BC10[4];
 extern u8 effOnesVector[];
 
 struct Matrix4;
-extern void effDrawTrackSet(EffTrackSet *, struct Matrix4 *);
+extern void effDrawTrackSet(EffTrackSet *, const struct Matrix4 *);
 
 struct Matrix4;
-extern void effDrawRibbon(EffRibbonWork *, struct Matrix4 *);
+extern void effDrawRibbon(EffRibbonWork *, const struct Matrix4 *);
 
 
 extern void dds3PadVibrationSet(s32, u8, s32);
@@ -464,7 +464,7 @@ extern u32 effColorEditSelectedAlphaKey;
 extern u32 effSharedTextureReferenceCount;
 
 extern void effAssetQueueRelease(EffPointSet *);
-extern void effDrawFourPointGroups(EffPointSet *, Matrix4 *);
+extern void effDrawFourPointGroups(EffPointSet *, const Matrix4 *);
 
 /* Native resource operations add cloning before the frame callbacks.
  * The final word is the copied payload size, not another callback.
@@ -4030,7 +4030,7 @@ extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(SdfPoolNode *, RefObj *
 struct sdfMat_t;
 
 /* Draw track-set positions/colors/UVs; a null matrix selects the identity transform. */
-void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
+void effDrawTrackSet(EffTrackSet *track, const Matrix4 *matrix) {
     SdfPoolNode *surface;
     void *list;
     EffGsPacket *packet;
@@ -4852,7 +4852,7 @@ void effAssetQueueRelease(EffPointSet *set) {
 }
 
 /* vu0 routine: SDK loads the supplied transform or constructs identity. */
-void effDrawFourPointGroups(EffPointSet *set, Matrix4 *matrix) {
+void effDrawFourPointGroups(EffPointSet *set, const Matrix4 *matrix) {
     void *list;
     void *setup;
     EffGsPacket *packet;
@@ -8346,7 +8346,7 @@ static inline u32 packNormalizedColor(void) {
     EE_MMI_RGBA_PACK_UNIT(rgba[0], 128.0f);
     return rgba[0];
 }
-void effDrawRibbon(EffRibbonWork *work, Matrix4 *matrix) {
+void effDrawRibbon(EffRibbonWork *work, const Matrix4 *matrix) {
     SdfPoolNode *surface;
     void *list;
     EffGsPacket *packet;
