@@ -16,6 +16,7 @@
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "common.h"
+#include "fld_archive_load_state.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
 #include "snd_track_playback_api.h"
@@ -1055,12 +1056,12 @@ void fldPlayArchiveSound(s32 archiveId, s32 soundId) {
 }
 
 void fldResetArchiveLoadPhase(void) {
-    fldFixedArchiveLoadPhase = 0;
+    fldFixedArchiveLoadPhase = FLD_ARCHIVE_LOAD_PHASE_CHECK;
 }
 
 s32 fldStepArchiveLoad(void) {
     switch (fldFixedArchiveLoadPhase) {
-    case 0:
+    case FLD_ARCHIVE_LOAD_PHASE_CHECK:
         if (sndFindPackedTrackLoadStatus(0x680000) == 0) {
             p2sdLoadSMGFile(0x680000);
             fldFixedArchiveLoadPhase = fldFixedArchiveLoadPhase + 1;
@@ -1068,16 +1069,17 @@ s32 fldStepArchiveLoad(void) {
             fldFixedArchiveLoadPhase = fldFixedArchiveLoadPhase + 2;
         }
         break;
-    case 1:
+    case FLD_ARCHIVE_LOAD_PHASE_WAIT:
         if (sndFindPackedTrackLoadStatus(0x680000) == 1) {
             fldFixedArchiveLoadPhase = fldFixedArchiveLoadPhase + 1;
         }
         break;
     default:
-        fldFixedArchiveLoadPhase = -1;
-        return 1;
+        /* Phase 2 and other non-pending phases report completion. */
+        fldFixedArchiveLoadPhase = FLD_ARCHIVE_LOAD_PHASE_REPORTED;
+        return FLD_ARCHIVE_LOAD_COMPLETE;
     }
-    return 0;
+    return FLD_ARCHIVE_LOAD_PENDING;
 }
 
 void fldResetSecondaryArchiveLoadPhase(void) {
@@ -5270,7 +5272,7 @@ void fldUpdateDevilizeEventSequence(void) {
             dds3StartBEDEffectObjectBasic(fldSparkControlState.object, 0);
         }
         fldSparkControlState.state.dialogTimer++;
-        if (fldStepArchiveLoad() != 0) {
+        if (fldStepArchiveLoad() != FLD_ARCHIVE_LOAD_PENDING) {
             mnuQueueTitleSoundStreamEntry(0x12);
             fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_TITLE_STREAM_WAIT;
         }
