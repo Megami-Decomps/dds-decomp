@@ -140,9 +140,9 @@ extern u32 ptyGetSkillNibbleState(datUnitWork_t *, u16);
 
 extern void evtStageTestStop(void);
 
-extern u8 evtStageTestViewEyeVector[];
+extern f32 evtStageTestViewEyeVector[4];
 
-extern u8 evtStageTestViewTargetVector[];
+extern f32 evtStageTestViewTargetVector[4];
 
 
 extern void mnuInitializePanelItemGridSlots(MenuPanelItem *, EffectSlotSet *, s32);
@@ -3258,10 +3258,10 @@ void evtStageTestCopyEntryRotation(s32 encodedIndex, f32 *rotation) {
     rotation[2] = evtStageTestState.entries[encodedIndex & EVT_STAGE_ENTRY_INDEX_MASK].rotation[2];
 }
 
-extern u8 evtStageTestViewUpVector[];
-extern u8 sdfViewTargetVector[];
-extern u8 aViewTarget[];
-extern u8 aViewDown[];
+extern f32 evtStageTestViewUpVector[4];
+extern f32 sdfViewTargetVector[4];
+extern f32 aViewTarget[4];
+extern f32 aViewDown[4];
 extern u8 sdfViewShakeVector[];
 extern Matrix4 sdfViewMatrix;
 extern u8 D_003820F0[];
@@ -3558,7 +3558,7 @@ void evtStageTestUpdateCamera(void)
     SDF_VU0_LOADVECTOR(sdfViewTargetVector);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&target);
-    LookAtMatrix(&eye, &target, aViewDown);
+    LookAtMatrix((const f32 *)&eye, (const f32 *)&target, aViewDown);
     VU0_STORE_MATRIX_UNCLOBBERED(&sdfViewMatrix);
     sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(D_003820F0 + drawBufferIndex * 8000), &dds3ScreenParam, &sdfViewMatrix);
     sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);

@@ -202,7 +202,7 @@ extern f32 D_0037FA20[4], kwlnOverlayEyeVector[4], kwlnOverlayUpVector[4];
 extern KwlnDrawVectorParams kwlnHeldTextureFrustumParameters, kwlnOverlayFrustumParameters, kwlnDrawVector;
 extern Matrix4 kwlnHeldTextureViewMatrix;
 extern Matrix4 D_00384790;
-extern u8 aViewTarget[], sdfViewTargetVector[], aViewDown[];
+extern f32 aViewTarget[4], sdfViewTargetVector[4], aViewDown[4];
 extern u8 sdfViewShakeVector[];
 extern Matrix4 sdfViewMatrix;
 extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
@@ -287,7 +287,7 @@ s32 kwlnBuildFrameScenePackets(dds3ProcessID_t *task) {
     SDF_VU0_LOADVECTOR(sdfViewTargetVector);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&target);
-    LookAtMatrix(&eye, &target, aViewDown);
+    LookAtMatrix((const f32 *)&eye, (const f32 *)&target, aViewDown);
     VU0_STORE_MATRIX_UNCLOBBERED(&sdfViewMatrix);
     {
         SdfPoolNode *viewNode;

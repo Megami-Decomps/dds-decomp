@@ -28,9 +28,9 @@ extern void dds3CameraObjectBasicGetTargetPos(struct dds3Basic_t *object);
 extern f32 effBattleAnchorHeightFactors[];
 extern f32 effBTL_Ptr_D[];
 extern void SetRotateMatrixY(f32 angle);
-extern u8 aViewTarget[];
-extern u8 sdfViewTargetVector[];
-extern u8 aViewDown[];
+extern f32 aViewTarget[4];
+extern f32 sdfViewTargetVector[4];
+extern f32 aViewDown[4];
 extern f32 btlMeasureEffectTargetGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop);
 /* The selected position provider leaves its vector in vf10. */
 void effBTLPartGetPositionPtr(void *owner, EffectVectorRequest *request, u128 *out) {

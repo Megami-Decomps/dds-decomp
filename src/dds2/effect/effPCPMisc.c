@@ -215,8 +215,8 @@ void effPCPSparkleSphereDelete(EffPCPRingWork *work) {
     sdfChipFreeDirect(work);
 }
 
-extern u8 aViewTarget[];
-extern u8 sdfViewTargetVector[];
+extern f32 aViewTarget[4];
+extern f32 sdfViewTargetVector[4];
 extern void dds3BillboardDraw(billHandle_t *effect);
 extern u32 effMagaCylinderCalcColor(u32 flags, u32 color);
 
@@ -2827,7 +2827,7 @@ void effPCPAgiraoFireDelete(EffPCPTripleWork *work) {
     sdfChipFreeDirect(work);
 }
 
-extern u8 aViewDown[];
+extern f32 aViewDown[4];
 
 /* vu0 routine: place three staggered groups in the camera-relative basis. */
 void effPCPAgiraoFireDraw(EffPCPTripleWork *work) {

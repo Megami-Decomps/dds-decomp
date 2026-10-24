@@ -369,7 +369,7 @@ f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
     return sdfAtan2(projectedDelta[1], projectedDelta[0]);
 }
 
-extern u8 aViewTarget[], sdfViewTargetVector[];
+extern f32 aViewTarget[4], sdfViewTargetVector[4];
 
 /* vu0 routine: 1 - |dot(normalised eye - target, axis)|, how far the axis is from the view direction */
 f32 dds3BillboardGetDirectionScale(void *self, f32 *axis) {
@@ -1670,9 +1670,9 @@ void dds3Particle_RadiateDelete(EffLookAtRingEmitter *effect) {
     sdfChipFreeDirect(effect);
 }
 
-extern u8 aViewTarget[];
-extern u8 sdfViewTargetVector[];
-extern u8 aViewDown[];
+extern f32 aViewTarget[4];
+extern f32 sdfViewTargetVector[4];
+extern f32 aViewDown[4];
 
 /* Seed a view-oriented ring packet and initialize its subeffect. */
 void dds3Particle_RadiateBuffInit(EffLookAtRingEmitter *effect, u32 packetIndex) {

@@ -58,8 +58,8 @@ void dds3SetScreenFovy(f32 value);
 /* Project the point in VU0 vf10 through the active view/projection matrices.
  * The routine writes the screen-scaled point back to vf10 and returns no value. */
 void effScreenOffset(void);
-/* Read vector inputs; VU0 forms first minus second and stores second in vf31. */
-void LookAtMatrix(const void *directionPoint, const void *basisOrigin, const void *up);
+/* Build a look-at basis from four-float target, eye, and up vectors. */
+void LookAtMatrix(const f32 *targetPoint, const f32 *eyePosition, const f32 *upVector);
 struct ConsMatrixPacket;
 extern void sdf3DMakeViewportPacket(struct ConsMatrixPacket *, SdfProjectionRecord *, const Matrix4 *);
 extern void sdf3DSetCamera(SdfProjectionRecord *, const Matrix4 *);

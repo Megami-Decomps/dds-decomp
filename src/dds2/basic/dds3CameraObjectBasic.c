@@ -83,7 +83,7 @@ void MakeCamera(dds3Basic_t *camera) {
         SDF_VU0_VECTOR_W_SET_ONE();
         SDF_VU0_STOREVECTOR(&data->worldEye);
     }
-    LookAtMatrix(&data->worldEye, &inner->position, &data->worldUp);
+    LookAtMatrix((const f32 *)&data->worldEye, inner->position, (const f32 *)&data->worldUp);
     VU0_STORE_MATRIX(data->matrix);
 }
 

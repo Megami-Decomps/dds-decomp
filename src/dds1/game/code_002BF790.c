@@ -528,11 +528,11 @@ extern f32 kwlnDefaultColorVector[4];
 
 extern Matrix4 sdfViewMatrix;
 
-extern u8 aViewTarget[];
+extern f32 aViewTarget[4];
 
-extern u8 sdfViewTargetVector[];
+extern f32 sdfViewTargetVector[4];
 
-extern u8 aViewDown[];
+extern f32 aViewDown[4];
 
 
 extern void sdf3DLinkInitPacket(sdfDrawTag_t *, DmaPacketHeader *);

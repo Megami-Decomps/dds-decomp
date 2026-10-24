@@ -1301,8 +1301,8 @@ void effSimpleBEDSetRGBA(effSimpleBED_t *work, u32 color) {
 
 extern f32 D_003B2CD0[];
 extern f32 D_003B2CE8[];
-extern u8 sdfViewTargetVector[];
-extern u8 aViewDown[];
+extern f32 sdfViewTargetVector[4];
+extern f32 aViewDown[4];
 
 /* vu0 routine: leave the selected aim point in vf10, not a C return value.
  * Preserve the non-camera output scratch w, which is not initialized here. */

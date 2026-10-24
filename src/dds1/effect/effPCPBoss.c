@@ -23,7 +23,7 @@ extern EffThunderGroup *effPCP_ThunderPolyListCreate(EffThunderGroupParams *src)
 
 extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
-extern u8 effBossLookAtReferenceAxis[];
+extern f32 effBossLookAtReferenceAxis[4];
 
 extern dds3FlashPolyList_t *dds3FlashPolyListCreate(u32 cellCount);
 extern f32 *dds3FlashPolyListGetVertex(dds3FlashPolyList_t *pool, s32 index);
@@ -529,7 +529,7 @@ void effBossBeamUpdate(EffPCPBossWork *work) {
             SDF_VU0_STOREVECTOR(work->position);
         }
         direction = work->parameterVector;
-        LookAtMatrix(work, direction, effBossLookAtReferenceAxis);
+        LookAtMatrix(work->position, (const f32 *)direction, effBossLookAtReferenceAxis);
         ReverseMatrix();
         SDF_VU0_RESET_ROW3();
         VU0_STORE_MATRIX(matrix);

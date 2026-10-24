@@ -85,16 +85,16 @@ void OuterProduct(f32 *outputVector, const f32 *leftVector, const f32 *rightVect
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 /* vu0 routine: look-at basis in vf28-vf31 (forward, right, up, eye), then its rigid inverse */
-void LookAtMatrix(const void *directionPoint, const void *basisOrigin, const void *up) {
-    SDF_VU0_LOADVECTOR(basisOrigin);
+void LookAtMatrix(const f32 *targetPoint, const f32 *eyePosition, const f32 *upVector) {
+    SDF_VU0_LOADVECTOR(eyePosition);
     SDF_VU0_SET_ROW3();
     SDF_VU0_COPYVECTOR_A_TO_B();
-    SDF_VU0_LOADVECTOR(directionPoint);
+    SDF_VU0_LOADVECTOR(targetPoint);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
     SDF_VU0_SET_ROW2();
     SDF_VU0_COPYVECTOR_A_TO_B();
-    SDF_VU0_LOADVECTOR_BARRIER(up);
+    SDF_VU0_LOADVECTOR_BARRIER(upVector);
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
     SDF_VU0_SET_ROW0();

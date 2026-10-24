@@ -633,9 +633,9 @@ extern ConsMatrixPacket D_0045C600[2];
 extern SdfLightSources D_0037F770;
 extern f32 kwlnDefaultColorVector[4];
 extern Matrix4 sdfViewMatrix;
-extern u8 aViewTarget[];
-extern u8 sdfViewTargetVector[];
-extern u8 aViewDown[];
+extern f32 aViewTarget[4];
+extern f32 sdfViewTargetVector[4];
+extern f32 aViewDown[4];
 extern void sdf3DLinkInitPacket(sdfDrawTag_t *, DmaPacketHeader *);
 
 /* Rebuild the view matrix and both frame banks' matrix and lighting packet lists. */
