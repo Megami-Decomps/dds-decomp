@@ -70,7 +70,7 @@ void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *base) {
     }
     dds3ObjectBaseFreeModelHandle(owner);
     if (base->devSlot != 0) {
-        sdfModelRootFree((sdfModelRootNode_t *)base->devSlot, 1, 1);
+        sdfModelRootFree(base->devSlot, 1, 1);
     }
     dds3FreeBasicArrayHandle(base->worldIndexNode);
     sdfChipFreeDirect(base);

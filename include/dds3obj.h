@@ -13,6 +13,7 @@
 #define DDS3_OBJECT_RESOURCE_RELEASED 3
 
 struct sdfMotionCtrlr_t;
+struct sdfModelRootNode_t;
 
 typedef struct dds3ObjectBaseControlWorkData_t {
     u32 flags;
@@ -21,7 +22,7 @@ typedef struct dds3ObjectBaseControlWorkData_t {
     void *resourceHandle; /* dds3ModelHandle_t or sdfModelRootNode_t pointer according to resourceState. */
     void *slots[8];
     void *extData;
-    s32 devSlot;
+    struct sdfModelRootNode_t *devSlot;
     struct sdfMotionCtrlr_t *motion;
     s32 mode;
     f32 weight;
