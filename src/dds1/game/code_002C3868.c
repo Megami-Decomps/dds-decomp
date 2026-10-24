@@ -65,7 +65,7 @@ extern void evtSubmitPrimaryAlphaBlendMode(s32);
 
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern s32 sdfCounterMeasureLabelWidth(u32);
+extern s32 sdfCounterMeasureLabelWidth(const u8 *);
 
 extern void eglLinkKanji(s32 width, s32 height, s32 colors,
                                         const char *text);
@@ -301,7 +301,7 @@ s32 fldAdvanceLocalMapCameraTransition(void) {
 
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
 extern s32 mdlCollectFlagBitsIntoMask(void);
-extern u8 *sdfResolveSceneCounterInfo(s32);
+extern const u8 *sdfResolveSceneCounterInfo(s32);
 extern void sdfCounterSelectChannelByIndex(struct MenuList *, s32);
 extern void sdfDrawCounterMapSelectionRow(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
 extern char D_00390220[][24];
@@ -327,7 +327,7 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
             memset(display, 0, 0x10);
             display->value = i + 1;
             display->label = D_00390220[i];
-            display->info = sdfResolveSceneCounterInfo(i + 1);
+            display->descriptionText = sdfResolveSceneCounterInfo(i + 1);
             if ((completedMask >> i) & 1) {
                 display->flag = 1;
             }
@@ -357,7 +357,7 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
 
 extern u8 D_00390310[][52];
 
-u8 *sdfResolveSceneCounterInfo(s32 scene) {
+const u8 *sdfResolveSceneCounterInfo(s32 scene) {
     switch (scene) {
     case 3:
         if (evtBitCheck(7)) {
@@ -576,7 +576,7 @@ void sdfCounterDrawChannelPlate(s32 x, s32 y, s32 unused, struct MenuList *rt, s
                   PACK(base, base, base, (u32)((f32)(base + 0x10) * fade)),
                   PACK(base + 0x30, base + 0x30, base + 0x30, (u32)(fade * 64.0f)),
                   PACK(base + 0x60, base + 0x60, base + 0x60, (u32)((f32)(base + 0x70) * fade)));
-    width = sdfCounterMeasureLabelWidth((u32)channel->counterDisplay->label);
+    width = sdfCounterMeasureLabelWidth((const u8 *)channel->counterDisplay->label);
     eglLinkKanji(x + (0x80 - width) / 2 + 1, y + 1,
                                 PACK((u32)(fade * 128.0f), (u32)(fade * 128.0f), (u32)((f32)(base + 0x80) * fade), (u32)(fade * 128.0f)),
                                 channel->counterDisplay->label);

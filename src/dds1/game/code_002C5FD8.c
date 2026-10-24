@@ -46,7 +46,7 @@ extern s32 D_003DFED0[];
 
 extern s32 D_003DFEE0[];
 
-s32 sdfCounterMeasureLabelWidth(u32 labelText);
+s32 sdfCounterMeasureLabelWidth(const u8 *labelText);
 
 s32 fldCountMaskBitsBeforeOrdinal(s32 mask, s32 ordinal) {
     s32 bitIndex = 0;
@@ -160,10 +160,10 @@ void sdfCounterDrawFadingLabelPanel(s32 x, s32 y) {
     color = ((s32)(fade * 0.3f) << 24) | 0x5A3335;
     evtSubmitDefaultDepthGradientRect(0, 0x17E, 0x100, 0x1A, 0x5A3335, color, color, 0x5A3335);
     evtSubmitDefaultDepthGradientRect(0x100, 0x17E, 0x100, 0x1A, color, 0x5A3335, 0x5A3335, color);
-    width = sdfCounterMeasureLabelWidth((u32)display->info);
+    width = sdfCounterMeasureLabelWidth(display->descriptionText);
     x = (s32)((f32)x - (f32)width * 0.5f);
     style = ((u32)fade & 0xFF) | 0x80808000;
-    sdfCounterDrawGlyphAtGridCell(x, y, style, display->info);
+    sdfCounterDrawGlyphAtGridCell(x, y, style, display->descriptionText);
 }
 
 /* Load the ten numbered "sname" tiles plus the two fixed local-map images. */

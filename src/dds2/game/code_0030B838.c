@@ -83,7 +83,7 @@ extern u32 sdfGetInitialMapCameraTransitionState(void);
 
 extern struct MenuList *mnuCreateListState(u32, u32, s32);
 extern s32 mdlCollectFlagBitsIntoMask(void);
-extern u8 *sdfResolveSceneCounterInfo(s32);
+extern const u8 *sdfResolveSceneCounterInfo(s32);
 extern void sdfCounterSelectChannelByIndex(struct MenuList *, s32);
 extern s16 sdfGetCounterChannelValueAtIndex(s32);
 extern void sdfSetLocalMapCounterMarkerState(s32, s32);
@@ -103,7 +103,7 @@ extern s32 frMeasureAndQueueCounterText(const char *text);
 extern void eglLinkKanji(s32 width, s32 height, s32 colors,
                                        const char *text);
 
-extern void sdfCounterDrawGlyphAtGridCell(s32, s32, u32, u8 *);
+extern void sdfCounterDrawGlyphAtGridCell(s32, s32, u32, const u8 *);
 
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
@@ -366,7 +366,7 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
             memset(display, 0, 0x10);
             display->value = i + 1;
             display->label = D_00400AF0[i];
-            display->info = sdfResolveSceneCounterInfo(i + 1);
+            display->descriptionText = sdfResolveSceneCounterInfo(i + 1);
             if ((completedMask >> i) & 1) {
                 display->flag = 1;
             }
@@ -395,7 +395,7 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
     return 1;
 }
 
-u8 *sdfResolveSceneCounterInfo(s32 scene) {
+const u8 *sdfResolveSceneCounterInfo(s32 scene) {
     if (scene == 4) {
         if (evtBitCheck(0x13)) {
             scene = 10;
@@ -927,7 +927,7 @@ void sdfDrawCounterChannelInfoLabel(s32 x, s32 y) {
 
     display = sdfActiveCounterRuntime->cursor->counterDisplay;
     fade = 1.0f - (f32)((SdfCounterTimer *)sdfActiveCounterRuntime->context)->value / 10.0f;
-    width = frMeasureAndQueueCounterText((const char *)display->info);
+    width = frMeasureAndQueueCounterText((const char *)display->descriptionText);
     x = (f32)x - (f32)width * 0.5f;
     if (display->value == 2) {
         x -= 0x10;
@@ -944,7 +944,7 @@ void sdfDrawCounterChannelInfoLabel(s32 x, s32 y) {
     } else {
         x -= 0x14;
     }
-    sdfCounterDrawGlyphAtGridCell(x, y, (u8)(u32)(fade * 128.0f) | 0x80808000, display->info);
+    sdfCounterDrawGlyphAtGridCell(x, y, (u8)(u32)(fade * 128.0f) | 0x80808000, display->descriptionText);
 }
 
 void sdfInstallNonzeroSpriteSlots(SdfSlotSet *set) {

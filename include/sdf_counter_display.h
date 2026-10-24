@@ -6,7 +6,7 @@
 /* A separately allocated label/scene record owned by MenuListNode.counterDisplay. */
 typedef struct SdfCounterDisplay {
     const char *label; /* 0x00: fixed-stride local-map name table */
-    u8 *info;         /* 0x04 */
+    const u8 *descriptionText; /* 0x04: scene description shown by the counter. */
     s16 value;        /* 0x08 */
     u8 pad0A[4];
     s16 flag;         /* 0x0E */
