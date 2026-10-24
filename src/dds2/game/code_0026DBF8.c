@@ -1913,7 +1913,7 @@ void mnuBeginMantraTitleDrawExit(MantraDrawPool *pool) {
 
 typedef struct MantraBlinkState {
     /* 0x00 */ u16 state;
-    /* 0x02 */ u16 unk2;
+    /* 0x02 */ u16 glyphMode;
     /* 0x04 */ s16 timer;
     /* 0x06 */ s16 clock;
     /* 0x08 */ f32 value;
@@ -1952,7 +1952,7 @@ void mnuToggleMantraTitleBlink(MantraDrawPool *pool) {
     MantraBlinkState *blink = mnuFindMantraDrawItemByKind(pool, 6)->data;
 
     blink->delay = 10;
-    blink->unk2 = blink->unk2 ^ 1;
+    blink->glyphMode = blink->glyphMode ^ 1;
 }
 
 void mnuToggleMantraTitleVariant(MantraDrawPool *pool) {
@@ -1965,7 +1965,7 @@ void mnuToggleMantraTitleVariant(MantraDrawPool *pool) {
 u32 mnuInitMantraTitleDraw(void) {
     u32 data = (u32)sdfChipAllocDirect(0x10);
     memset((void *)data, 0, 0x10);
-    ((MantraBlinkState *)data)->unk2 = 0;
+    ((MantraBlinkState *)data)->glyphMode = 0;
     ((MantraBlinkState *)data)->timer = 0;
     *(u16 *)data = 1;
     ((MantraBlinkState *)data)->clock = 0;
@@ -2052,8 +2052,8 @@ s32 mnuDrawMantraTitle(s32 unused, MantraDrawItem *item) {
     blend = 0.0f;
     firstPulse = (sdfSin(firstPulse * 6.2831852f + -1.5707963f) + 1.0f) * 0.5f;
     secondPulse = (sdfSin(secondPulse * 6.2831852f + -1.5707963f) + 1.0f) * 0.5f;
-    if (blink->unk2 != 0) {
-        mode = blink->unk2;
+    if (blink->glyphMode != 0) {
+        mode = blink->glyphMode;
     } else if ((s16)blink->variant != 0) {
         mode = 2;
     } else {
