@@ -629,7 +629,7 @@ void mnuInitializeShootingScene(MnuShootingWork *handle) {
     dds3SetControlScene(node);
     dds3SetActiveScene(node);
     AddCamera();
-    dds3AddAreaBasic(0, (s32)"shooting_Area");
+    dds3AddAreaBasic(0, "shooting_Area");
     color.v[0] = 1.0f;
     color.v[1] = 1.0f;
     color.v[2] = 1.0f;

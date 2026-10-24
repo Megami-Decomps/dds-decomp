@@ -25,10 +25,23 @@ typedef struct FldSceneResourceRecord {
     const char *resourceD;
 } FldSceneResourceRecord;
 
+/* Object-spawn records carry a name pointer and signed world-node key. */
+typedef struct FldActionSpawn {
+    u32 unk00;
+    const char *objectName;
+    s32 key;
+} FldActionSpawn;
+
 typedef char FldFileResolverRecord_size_check[
     (sizeof(FldFileResolverRecord) == 0x18) ? 1 : -1];
 typedef char FldSceneResourceRecord_size_check[
     (sizeof(FldSceneResourceRecord) == 0x18) ? 1 : -1];
+typedef char FldActionSpawn_size_check[
+    (sizeof(FldActionSpawn) == 0x0C) ? 1 : -1];
+typedef char FldActionSpawn_objectName_offset_check[
+    ((u32)&((FldActionSpawn *)0)->objectName == 0x04) ? 1 : -1];
+typedef char FldActionSpawn_key_offset_check[
+    ((u32)&((FldActionSpawn *)0)->key == 0x08) ? 1 : -1];
 
 /* Observed prefix of the transfer payload passed to the resource-batch loader. */
 typedef struct FldLoadRequest {

@@ -916,12 +916,6 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
         }
     }
 }
-typedef struct FldActionSpawn {
-    u32 unk0;
-    u32 objectName; /* 0x04: dds3AddAreaBasic's name/value argument. */
-    u32 key;         /* 0x08: dds3AddAreaBasic's world-node key. */
-} FldActionSpawn;
-
 void fldSpawnActionObjects(FldActionSpawn *spawnList, u32 spawnCount) {
     u32 spawnIndex;
     struct dds3Basic_t *spawnedObject;
