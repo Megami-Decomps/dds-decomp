@@ -90,20 +90,17 @@ PacWork *sdfPacNewResrc(PacState *state, const SdfPacStreamPacketHeader *packet)
 /* Remove an item already in its owner's queue, free it, and return its successor. */
 PacWork *sdfPacFreeResrc(PacWork *work) {
     PacState *state = work->owner;
-    /* Keep a node-shaped link so the queue head can be unlinked like any next pointer. */
-    PacWork *unlinkLink = (PacWork *)&state->queueHead;
+    PacWork **incomingLink = &state->queueHead;
     PacWork *currentWork = state->queueHead;
     PacWork *previousWork = NULL;
     PacWork *nextWork;
-    if (currentWork != work) {
-        do {
-            previousWork = currentWork;
-            currentWork = previousWork->next;
-            unlinkLink = previousWork;
-        } while (currentWork != work);
+    while (currentWork != work) {
+        previousWork = currentWork;
+        incomingLink = &currentWork->next;
+        currentWork = *incomingLink;
     }
     nextWork = work->next;
-    unlinkLink->next = nextWork;
+    *incomingLink = nextWork;
     if (state->queueTail == work) {
         state->queueTail = previousWork;
     }
