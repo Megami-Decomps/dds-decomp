@@ -1345,7 +1345,7 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
             }
             btlRemoveActorsWithFlags(0x400);
             btlClearModelFlagRange();
-            nextMode = scene->requestArgument;
+            nextMode = scene->nextBattleMode;
             nextEntry = scene->nextAdjustmentEntryIndex;
             flags = scene->battleFlags;
             flags &= ~0x800;

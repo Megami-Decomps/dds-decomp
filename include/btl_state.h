@@ -243,7 +243,7 @@ typedef struct BtlState {
     u8 pad259;
     u16 spawnCount; /* 0x25A: enemies spawned, compared with maxEnemySpawns. */
     u16 phase; /* 0x25C */
-    u8 requestMode; /* 0x25E: script sets this to 4 with requestArgument */
+    u8 requestMode; /* 0x25E: script sets this to 4 with nextBattleMode */
     u8 pad25F[5];
     u32 motionSeLoadFrame; /* 0x264: disabled at -1; native updater tests the signed word. */
     u32 skillSeLoadFrame; /* 0x268: same signed disabled sentinel. */
@@ -253,7 +253,7 @@ typedef struct BtlState {
     s32 adjustmentGroupIndex; /* 0x274: encounter reward lookup in code_001A1960 */
     s32 adjustmentEntryIndex; /* 0x278: entry within that encounter group */
     s32 battleMode; /* 0x27C */
-    s32 requestArgument; /* 0x280: sign-extended script halfword */
+    s32 nextBattleMode; /* 0x280: selected by serial encounters or script */
     s32 nextAdjustmentEntryIndex; /* 0x284: entry retained for a follow-up encounter. */
     u16 encounterParamA; /* 0x288: scene record +0x1C, else the test-menu default */
     u16 encounterParamB; /* 0x28A: scene record +0x1E, else the test-menu default */
@@ -498,7 +498,7 @@ typedef struct BtlState {
     s32 adjustmentGroupIndex; /* 0x298: encounter pack's group selector */
     s32 adjustmentEntryIndex; /* 0x29C: entry selector within the group */
     s32 battleMode; /* 0x2A0 */
-    s32 requestArgument; /* 0x2A4 */
+    s32 nextBattleMode; /* 0x2A4: selected by serial encounters or script */
     s32 nextAdjustmentEntryIndex; /* 0x2A8: entry retained for a follow-up encounter. */
     BtlBackgroundId background; /* 0x2AC */
     s32 loadStep;

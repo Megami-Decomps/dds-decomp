@@ -12965,7 +12965,7 @@ become equivalent store-and-return tails after allocation. The
 common outcome local instead permits early `noce_try_cmove` for the winner's
 one/five choice and changes counter homes; a common return alone also misses.
 
-Handle the real pending request first (`requestArgument != 0` publishes five),
+Handle the real pending request first (`nextBattleMode != 0` publishes five),
 with normal victory otherwise publishing one. This mirrors the native EQ-zero
 edge. `estimate_probability` gives that edge `REG_BR_PROB=3999`;
 `fill_slots_from_thread` ultimately selects literal one from its true thread,
@@ -13163,7 +13163,7 @@ field for publication inside the success branch:
 if (datBattleSceneRecords[state->battleMode].serialScene != 0) {
     forcedScene = datBattleSceneRecords[state->battleMode].serialScene;
     state->requestMode = 2;
-    state->requestArgument = forcedScene;
+    state->nextBattleMode = forcedScene;
     btlBossDebugPrintf("btl:serial 100%% [%X]\n", forcedScene);
     return 1;
 }

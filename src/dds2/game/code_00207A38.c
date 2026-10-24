@@ -1674,13 +1674,13 @@ u32 btlScriptSetActorUnitParameter(void) {
 
 u32 btlScriptSetBattleWorkParameter(void) {
     s32 battleAddress;
-    s16 requestArgument;
+    s16 nextBattleMode;
 
     battleAddress = (s32)(u32)btlGetRuntime();
     scrGetData();
-    requestArgument = scrGetIntPara(0);
+    nextBattleMode = scrGetIntPara(0);
     ((BtlState *)battleAddress)->requestMode = 4;
-    ((BtlState *)battleAddress)->requestArgument = requestArgument;
+    ((BtlState *)battleAddress)->nextBattleMode = nextBattleMode;
     return 1;
 }
 

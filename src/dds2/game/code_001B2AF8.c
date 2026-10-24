@@ -909,7 +909,7 @@ s32 btlSelectSerialEncounter(void) {
     u16 rowIndex;
 
     state->requestMode = 0;
-    state->requestArgument = 0;
+    state->nextBattleMode = 0;
     state->nextAdjustmentEntryIndex = selectionIndex;
     encounterPack = (u16)state->encounterPack;
     groupIndex = (u16)state->adjustmentGroupIndex;
@@ -918,7 +918,7 @@ s32 btlSelectSerialEncounter(void) {
         s32 result = serialOverride();
 
         if (result != -1) {
-            state->requestArgument = result;
+            state->nextBattleMode = result;
             state->requestMode = 3;
             btlBossDebugPrintf("btl:serial boss [%X]\n", result);
             return 1;
@@ -933,7 +933,7 @@ s32 btlSelectSerialEncounter(void) {
     if (datBattleSceneRecords[state->battleMode].serialScene != 0) {
         forcedScene = datBattleSceneRecords[state->battleMode].serialScene;
         state->requestMode = 2;
-        state->requestArgument = forcedScene;
+        state->nextBattleMode = forcedScene;
         btlBossDebugPrintf("btl:serial 100%% [%X]\n", forcedScene);
         return 1;
     }
@@ -972,7 +972,7 @@ s32 btlSelectSerialEncounter(void) {
 
         state->requestMode = 1;
         if (candidateCount == 0) {
-            state->requestArgument = battleMode;
+            state->nextBattleMode = battleMode;
             return 1;
         }
 
@@ -981,7 +981,7 @@ s32 btlSelectSerialEncounter(void) {
             u16 selectedIndex = candidates[randomIndex];
 
             state->nextAdjustmentEntryIndex = selectedIndex;
-            state->requestArgument = entries[selectedIndex].sceneIndex;
+            state->nextBattleMode = entries[selectedIndex].sceneIndex;
         }
     }
     return 1;
@@ -1585,7 +1585,7 @@ s32 btlTestSideCountCommandEligibility(ActionStateLink *action) {
     if ((action->pendingFlags & 0x40) != 0) {
         return 0;
     }
-    if (battle->requestArgument != 0) {
+    if (battle->nextBattleMode != 0) {
         return 0;
     }
     if ((battle->commandRestrictFlags & 1) != 0) {

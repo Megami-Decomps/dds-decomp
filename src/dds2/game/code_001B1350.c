@@ -608,7 +608,7 @@ s32 btlResolveBattleTerminalOutcome(void) {
     }
     if (enemyCount == 0) {
         btlBossDebugPrintf("btl:win[%d,%d,%d]\n", partyCount, enemyCount, stoneCount);
-        if (state->requestArgument != 0) {
+        if (state->nextBattleMode != 0) {
             state->eventReady = 5;
         } else {
             state->eventReady = 1;
