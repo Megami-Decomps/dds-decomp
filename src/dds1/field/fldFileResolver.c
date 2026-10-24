@@ -1455,7 +1455,7 @@ extern const u8 *fldCachedRoomResourceData, *fldCachedRoomF1ResourceData, *fldCa
 
 extern u32 fldCachedRoomResourceSize, fldCachedRoomF1ResourceSize, fldCachedRoomF2ResourceSize, fldCachedRoomKF2ResourceSize;
 
-struct sdfMemHandle_t *fldLoadCachedRoomResourceIfLocationMatches(void **destination, s32 area, s32 room) {
+struct sdfMemHandle_t *fldLoadCachedRoomResourceIfLocationMatches(const SdfTextureOffsetListHeader **destination, s32 area, s32 room) {
     if (fldGlobalBase.resourceArea == area) {
         if (fldGlobalBase.resourceFloor == room) {
             struct sdfMemHandle_t *allocation = sdfMemAllocDirect(fldCachedRoomResourceSize);
@@ -1715,7 +1715,7 @@ const char D_0039FF18[] = "%sk%03d_%03d.f2";
 struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
     char path[0x80];
     char directory[0x40];
-    void *roomOffsets;
+    const SdfTextureOffsetListHeader *roomOffsets;
     u8 *roomData;
     FldTransferChunk *chunk;
     struct FileRequest *request;

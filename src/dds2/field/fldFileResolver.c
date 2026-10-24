@@ -1313,7 +1313,7 @@ s32 fldLoadNextGetStatus3(s32 area, s32 room) {
     return fldGlobalBase.resourceFlag != 0;
 }
 
-struct sdfMemHandle_t *fldLoadCachedRoomResourceIfLocationMatches(void **destination, s32 area, s32 room) {
+struct sdfMemHandle_t *fldLoadCachedRoomResourceIfLocationMatches(const SdfTextureOffsetListHeader **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldGlobalBase;
 
     if (state->resourceArea == area) {
@@ -1528,7 +1528,7 @@ extern void fldSe_Init();
 struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
     char path[0x80];
     char directory[0x40];
-    void *roomOffsets;
+    const SdfTextureOffsetListHeader *roomOffsets;
     u8 *roomData;
     FldTransferChunk *chunk;
     struct FileRequest *request;
