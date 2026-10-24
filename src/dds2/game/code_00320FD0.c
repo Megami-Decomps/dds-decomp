@@ -13,7 +13,7 @@ extern MenuProgressParameters D_0045C860;
 
 extern MenuRuntimeCallback mnuRuntimeRecordInitializationCallback;
 
-extern void mnuFreeOptionalBlock(u32);
+extern void mnuFreeOptionalBlock(void *ptr);
 
 
 
@@ -243,7 +243,7 @@ void mnuSetRuntimeRecordInitializationCallback(MenuRuntimeCallback callback) {
 
 void mnuReleaseResourceBlockCallback(u32 unusedFirstWord, u32 resourceWord) {
     if (resourceWord != 0) {
-        mnuFreeOptionalBlock(resourceWord);
+        mnuFreeOptionalBlock((void *)resourceWord);
         return;
     }
 }

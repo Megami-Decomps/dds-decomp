@@ -44,7 +44,7 @@ extern MenuRuntimeList mnuRuntimeHitTargetList;
 extern MenuRuntimeList mnuRuntimeAnimationList;
 
 
-extern void mnuFreeOptionalBlock(u32);
+extern void mnuFreeOptionalBlock(void *ptr);
 void mnuReleaseResourceBlockCallback(u32, u32);
 
 
@@ -165,7 +165,7 @@ MenuStateRecord *mnuCreateNamedRecord(const void *tagData) {
     return record;
 }
 
-void mnuFreeOptionalBlock(u32 ptr) {
+void mnuFreeOptionalBlock(void *ptr) {
     if (ptr != 0) {
         free(ptr);
     }

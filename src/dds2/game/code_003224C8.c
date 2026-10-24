@@ -48,7 +48,6 @@ extern MenuRuntimeList mnuRuntimeAnimationList;
 
 extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 
-extern void mnuFreeOptionalBlock(u32);
 /* SDK malloc wrapper: a successful result owns a fresh allocation. */
 extern void *malloc(u32 bytes) __attribute__((malloc));
 
@@ -1374,7 +1373,7 @@ MenuWorkEntry *mnuCreateAnimatedEffect(u32 context, f32 x, f32 y, f32 progress) 
 /* Removal supplies an index and value; release only the non-null value allocation. */
 void mnuFreeListValueCallback(u32 unused, u32 ptr) {
     if (ptr != 0) {
-        free(ptr);
+        free((void *)ptr);
     }
 }
 
