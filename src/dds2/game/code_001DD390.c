@@ -3856,16 +3856,16 @@ BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *unit, const f32 
     return task;
 }
 
-void btlRequestModelOrReuse(u32 *arguments) {
-    u8 *object = (u8 *)arguments[0];
-    u32 effect = arguments[1];
-    u32 model = arguments[2];
+void btlRequestModelOrReuse(BtlRuntimeTaskArgs *arguments) {
+    u8 *object = (u8 *)arguments->actor;
+    u32 effect = arguments->option;
+    u32 model = arguments->unk_08;
     if ((((BtlUnit *)object)->status.flags & 2) != 0) {
         return;
     }
     if (btlHasMatchingModel(effect, model)) {
         btlBindUnitModel(object, effect, model);
-        if (*(char *)(arguments + 3) == 0) {
+        if (arguments->mode == 0) {
             btlClearUnitDefeatCandidate(object);
             evtSetUnitColorA(((BtlUnit *)object)->ext, 0, 0);
             ((BtlUnit *)object)->overlayColor = ((BtlUnit *)object)->baseColor & 0xFFFFFF;
@@ -3878,10 +3878,10 @@ void btlRequestModelOrReuse(u32 *arguments) {
     }
 }
 
-u32 btlPollModelLoadCompletion(u32 *arguments) {
-    u8 *object = (u8 *)arguments[0];
-    u32 effect = arguments[1];
-    u32 model = arguments[2];
+u32 btlPollModelLoadCompletion(BtlRuntimeTaskArgs *arguments) {
+    u8 *object = (u8 *)arguments->actor;
+    u32 effect = arguments->option;
+    u32 model = arguments->unk_08;
     if ((((BtlUnit *)object)->status.flags & 2) == 0) {
         if (!btlCheckModelAssetByMode(object, effect, model)) {
             return 0;
@@ -3890,7 +3890,7 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
         btlReleaseModelAssetByMode(object, effect, model);
         btlBossDebugPrintf(D_00417B30, effect, model, object);
     }
-    if (*(s8 *)(arguments + 3) == 0) {
+    if (arguments->mode == 0) {
         btlClearUnitDefeatCandidate(object);
         evtSetUnitColorA(((BtlUnit *)object)->ext, 0, 0);
         ((BtlUnit *)object)->overlayColor = ((BtlUnit *)object)->baseColor & 0xFFFFFF;
