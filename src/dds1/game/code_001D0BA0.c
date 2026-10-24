@@ -1588,7 +1588,7 @@ u32 btlConsumeFlaggedCommandItem(BtlCommandItemWork *work) {
 }
 
 /* Queue an actor/item argument pair for conditional inventory consumption. */
-u8 *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *actor, s32 itemId) {
+BtlRuntimeTask *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *actor, s32 itemId) {
     u8 *task = btlAllocTask(8);
     BtlCommandItemWork *data;
 
@@ -1601,7 +1601,7 @@ u8 *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *actor, s32 itemId) {
     data = (BtlCommandItemWork *)btlGetTaskArguments(task);
     data->actor = actor;
     data->itemId = itemId;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 /* Add one to the argument's 16-bit item ID quantity, then complete the task. */
@@ -1611,20 +1611,21 @@ u32 btlIncrementCommandItemQuantity(BtlRuntimeTaskArgs *taskArgs) {
 }
 
 /* Queue an owner-bound task that increments this item's inventory quantity. */
-u8 *btlCreateItemQuantityIncrementTask(u8 *actor, u16 itemId) {
+BtlRuntimeTask *btlCreateItemQuantityIncrementTask(BtlUnit *actor, u16 itemId) {
     u8 *task = btlAllocTask(8);
+    u8 *actorBytes = (u8 *)actor;
     BtlRuntimeTaskArgs *data;
 
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x4E;
     *(void **)(task + 0x4C) = btlIncrementCommandItemQuantity;
-    *(u64 *)(task + 0x40) = *(u64 *)(actor + 0x108);
+    *(u64 *)(task + 0x40) = *(u64 *)(actorBytes + 0x108);
     *(s32 *)(task + 0x48) = 0;
     data = btlGetTaskArguments(task);
     data->actor = actor;
     data->optionId = itemId;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 u32 btlAddEpFromPacket(BtlRewardPacket *packet) {

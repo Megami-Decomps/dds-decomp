@@ -1430,7 +1430,7 @@ BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source,
         BtlUnit *owner, u32 duration);
 s32 sndMapResourceType(s32 category, s32 id);
 extern BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *, u32, u32);
-extern u8 *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *, s32);
+extern BtlRuntimeTask *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *, s32);
 s32 btlFormatActionEventFilename(s32 skillIndex, char *output);
 extern BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *, const char *);
 extern BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *, BtlUnit *, s32, s32, BtlUnit *, u16);
