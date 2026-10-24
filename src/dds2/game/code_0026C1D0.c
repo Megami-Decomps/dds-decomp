@@ -460,14 +460,14 @@ void evtMoveMessageWindowWithPanelOffset(s32 x, s32 y) {
 }
 
 /* Recognize all three scheduler queues. Preserve the repeated queries. */
-s32 fclChkMessageDraw(s32 task) {
-    if (dds3GetProcessStat((dds3ProcessID_t *)task) == KWLN_TASK_DELAYED_START) {
+s32 fclChkMessageDraw(dds3ProcessID_t *task) {
+    if (dds3GetProcessStat(task) == KWLN_TASK_DELAYED_START) {
         return 1;
     }
-    if (dds3GetProcessStat((dds3ProcessID_t *)task) == KWLN_TASK_ACTIVE) {
+    if (dds3GetProcessStat(task) == KWLN_TASK_ACTIVE) {
         return 1;
     }
-    return dds3GetProcessStat((dds3ProcessID_t *)task) == KWLN_TASK_DESTROY_PENDING;
+    return dds3GetProcessStat(task) == KWLN_TASK_DESTROY_PENDING;
 }
 
 extern s8 evtActiveEntryFlags[8];
