@@ -373,11 +373,11 @@ void ptyRecomputeMaxHpMp(datUnitWork_t *unit) {
 extern DspMantraName *D_003BAA78;
 
 void prfCopyMantraNamePart(u16 scriptId, s32 namePartMode, char *destination) {
-    u8 *name = D_003BAA78[scriptId].encodedText;
+    const u8 *name = D_003BAA78[scriptId].encodedText;
     s32 split = 0;
     s32 offset = 0;
 
-    for (; offset < strlen((char *)name); offset += 2) {
+    for (; offset < strlen((const char *)name); offset += 2) {
         if (name[offset] == 0x82 && name[offset + 1] == 0x8A) {
             split = offset;
         }
@@ -385,9 +385,9 @@ void prfCopyMantraNamePart(u16 scriptId, s32 namePartMode, char *destination) {
     switch (namePartMode) {
     case 1:
         if (split >= 4) {
-            strcpy(destination, (char *)&name[split + 2]);
+            strcpy(destination, (const char *)&name[split + 2]);
         } else {
-            strcpy(destination, (char *)name);
+            strcpy(destination, (const char *)name);
         }
         return;
     case 2:
@@ -395,7 +395,7 @@ void prfCopyMantraNamePart(u16 scriptId, s32 namePartMode, char *destination) {
         destination[split] = 0;
         break;
     default:
-        strcpy(destination, (char *)name);
+        strcpy(destination, (const char *)name);
         break;
     }
 }
