@@ -8,7 +8,7 @@
 extern s16 D_003D6670[];
 
 
-EffMagatuhiOwner *effMagaCylinderAllocPart(const u32 *source) {
+EffMagatuhiOwner *effMagaCylinderAllocPart(const EffMagatuhiHistoryParams *source) {
     EffMagatuhiOwner *effect;
 
     effect = sdfChipAllocDirect(sizeof(*effect));

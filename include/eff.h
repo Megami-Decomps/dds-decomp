@@ -82,7 +82,7 @@ typedef char EffMagatuhiValueWork_historyScalars_offset[((u32)&((EffMagatuhiValu
 typedef char EffMagatuhiHistoryParams_size_must_be_0x1C[(sizeof(EffMagatuhiHistoryParams) == 0x1C) ? 1 : -1];
 typedef char EffMagatuhiOwner_size_must_be_0x20[(sizeof(EffMagatuhiOwner) == 0x20) ? 1 : -1];
 
-EffMagatuhiOwner *effMagaCylinderAllocPart(const u32 *source);
+EffMagatuhiOwner *effMagaCylinderAllocPart(const EffMagatuhiHistoryParams *source);
 void effMagaCylinderFree(EffMagatuhiOwner *owner);
 void effMagaCylinderFreeParts(EffMagatuhiValueWork *work);
 void effMagaCylinderSetPart(EffMagatuhiValueWork *work, s32 index, u32 color);

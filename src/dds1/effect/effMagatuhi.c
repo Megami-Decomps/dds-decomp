@@ -421,7 +421,7 @@ EffMagatuhiWideFirst *effMagaSmokeConvCreate(EffMagatuhiHeadFirst *src) {
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
     }
-    work->managedResource = effMagaCylinderAllocPart(&work->head.particleCount);
+    work->managedResource = effMagaCylinderAllocPart((const EffMagatuhiHistoryParams *)&work->head.particleCount);
     work->mathResource = dds3Bezier4PCreate(count);
     spread = work->head.delaySpread;
     for (particleIndex = 0; particleIndex < count; particleIndex++) {
@@ -631,7 +631,7 @@ EffMagatuhiWideSecond *effMagaPoint4Create(EffMagatuhiHeadSecond *src) {
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
     }
-    work->managedResource = effMagaCylinderAllocPart(&work->head.particleCount);
+    work->managedResource = effMagaCylinderAllocPart((const EffMagatuhiHistoryParams *)&work->head.particleCount);
     work->mathResource = dds3Bezier4PCreate(count);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
@@ -921,7 +921,7 @@ EffMagatuhiRingWork *effMagaCylinderCreate(EffMagatuhiRingParams *src) {
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
     }
-    work->managedResource = effMagaCylinderAllocPart(&work->head.particleCount);
+    work->managedResource = effMagaCylinderAllocPart((const EffMagatuhiHistoryParams *)&work->head.particleCount);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
         particle->age = -(dds3GetRandA((EffRandState *)effDefaultRandomState) % spread);
@@ -1125,7 +1125,7 @@ EffMagatuhiOrbitWork *effMagaSpiralCreate(EffMagatuhiOrbitParams *src) {
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
     }
-    work->managedResource = effMagaCylinderAllocPart(&work->head.particleCount);
+    work->managedResource = effMagaCylinderAllocPart((const EffMagatuhiHistoryParams *)&work->head.particleCount);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
         particle->age = -(dds3GetRandA((EffRandState *)effDefaultRandomState) % spread);
@@ -1347,7 +1347,7 @@ EffMagatuhiDriftWork *effMagaSmokeCreate(EffMagatuhiDriftParams *src) {
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
     }
-    work->managedResource = effMagaCylinderAllocPart(&work->head.particleCount);
+    work->managedResource = effMagaCylinderAllocPart((const EffMagatuhiHistoryParams *)&work->head.particleCount);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
         particle->age = -(dds3GetRandA((EffRandState *)effDefaultRandomState) % spread);
