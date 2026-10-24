@@ -1725,14 +1725,14 @@ u32 btlRefreshEligibleActors(void) {
     return 1;
 }
 
-void *btlCreateRefreshEligibleActorsTask(void) {
+BtlRuntimeTask *btlCreateRefreshEligibleActorsTask(void) {
     u8 *task = btlAllocTask(0);
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(void **)(task + 0x4C) = btlRefreshEligibleActors;
     *(u16 *)(task + 0x20) = 0x51;
     *(u32 *)(task + 0x48) = 0;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 extern char D_003A3A40[];

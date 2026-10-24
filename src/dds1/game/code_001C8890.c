@@ -938,7 +938,7 @@ extern BtlRuntimeTask *btlCreateDeferredActorStatsTask(BtlUnit *, BtlOperandEntr
 extern u8 *btlCreateActorSoundOptionTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlScheduleMoneyPacketTask(BtlUnit *, s32);
-extern void *btlCreateRefreshEligibleActorsTask(void);
+extern BtlRuntimeTask *btlCreateRefreshEligibleActorsTask(void);
 extern BtlRuntimeTask *btlCreateImmediateCompletionTask(void);
 extern BtlRuntimeTask *btlCreateUpdateUnitEffectsTask(void);
 extern BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32);
