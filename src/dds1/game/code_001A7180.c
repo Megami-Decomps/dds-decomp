@@ -918,11 +918,11 @@ s32 btlChooseRandomAvailableOption(BtlUnit *actor) {
     return -1;
 }
 
-s32 btlChooseEligibleSkill(s32 object) {
+s32 btlChooseEligibleSkill(BtlUnit *actor) {
     s32 choices[24];
     s32 count = 0;
     u32 i;
-    u16 *ids = (u16 *)(object + 0x142);
+    u16 *ids = actor->partyRecord.effectData;
     for (i = 0; i < 24; i++) {
         u32 id = *ids++;
         if (id != 0) {
