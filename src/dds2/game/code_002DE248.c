@@ -10706,11 +10706,11 @@ u32 *effCreatePayloadPointerWorkFromRequest(u8 *request) {
     return work;
 }
 
-void effReleaseOwnedClassResourceWork(u32 handle) {
-    if (*(s32 *)handle != 0) {
-        effDestroyClassResourceWork((EffClassWork *)*(s32 *)handle);
+void effReleaseOwnedClassResourceWork(u32 *handle) {
+    if (*handle != 0) {
+        effDestroyClassResourceWork((EffClassWork *)*handle);
     }
-    sdfChipFreeDirect((void *)handle);
+    sdfChipFreeDirect(handle);
 }
 
 /* vu0 routine: orient along the vector between two requested positions and advance the resource. */
