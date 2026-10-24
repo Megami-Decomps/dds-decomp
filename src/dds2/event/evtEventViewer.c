@@ -2744,7 +2744,7 @@ u16 evtViewerPopHistory(EvtRuntime *viewer) {
     return historyId;
 }
 
-extern s16 itfMesMngGetSelPhase(s32 windowIndex);
+extern s32 itfMesMngGetSelPhase(s32 windowIndex);
 extern void itfMesMngSetSelPhase(s32 windowIndex, s16 status);
 extern void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock);
 extern void itfMesMngRequestSelectRelease(s32 window);
