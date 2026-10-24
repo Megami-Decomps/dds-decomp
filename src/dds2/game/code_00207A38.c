@@ -3009,7 +3009,7 @@ void btlBindActorSlot(ActionStateLink *aiTask, s32 option) {
         itfMesSetTextSlotFromValue(window, 0, unit->partyRecord.unitId, width);
     }
     dds3LinkProcess(((BtlState *)battle)->scriptOwner, task);
-    ((BtlState *)battle)->boundTask = (s32)task;
+    ((BtlState *)battle)->boundTask = task;
 }
 
 void func_0020CE28(void) {

@@ -2698,7 +2698,7 @@ void btlBindActorSlot(BtlTask *task, s32 taskArg) {
         itfMesSetTextSlotFromValue(handle, 0, unit->partyRecord.unitId, (unit->partyRecord.flags & 0x20) ? 1 : 2);
     }
     dds3LinkProcess(state->scriptOwner, slot);
-    state->boundTask = (s32)slot;
+    state->boundTask = slot;
 }
 
 
