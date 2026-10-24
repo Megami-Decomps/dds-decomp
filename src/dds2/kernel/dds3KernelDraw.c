@@ -10,7 +10,7 @@
 #include "eff_event_work_api.h"
 #include "eff.h"
 
-extern f32 *D_0037F770[4]; /* three light sources and a null */
+extern f32 (*D_0037F770[4])[4]; /* three light sources and a null */
 
 extern u32 dds3DrawFlag;
 
@@ -131,7 +131,7 @@ void dds3SetFog(KwlnDrawVectorParams *source) {
 }
 
 /* Store a light-source pointer in the indexed light table. */
-void dds3SetLight(f32 *lightSource, s32 index) {
+void dds3SetLight(f32 (*lightSource)[4], s32 index) {
     D_0037F770[index] = lightSource;
 }
 
