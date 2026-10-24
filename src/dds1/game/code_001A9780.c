@@ -1942,7 +1942,7 @@ extern void btlReleaseTaskAndRefreshCursorIfFlagged(dds3ProcessID_t *);
 /* Create the analysis panel, replacing any panel task already registered. */
 extern u32 btlHasRegisteredAnalysisPanelTask(void);
 
-s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
+s32 btlCreateAnalysisPanelTask(BtlUnit *unit, s32 duration) {
     BtlState *context = (BtlState *)btlGetRuntime();
     BtlAnalysisPanelWork *data;
     dds3ProcessID_t *task;
@@ -1968,7 +1968,7 @@ s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
     data->x = -20;
     data->y = 133;
     data->duration = duration;
-    data->entry = entry;
+    data->unit = unit;
     data->frame = 0;
     task = dds3StartProcess(btlAnalyzPanelTaskNameRef, 0x2B0E, 1, 1, btlUpdateAndDrawAnalysisPanel,
                           btlReleaseTaskAndRefreshCursorIfFlagged, (u32)data);
@@ -2649,7 +2649,7 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
                         btlDrawPanelIconGroup(0, work->alpha);
                         break;
                     }
-                    actor = (BtlUnit *)work->entry;
+                    actor = work->unit;
                     if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(0, work->alpha);
                         break;
@@ -2664,7 +2664,7 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
                 }
                 case 1: {
                     BtlUnit *actor;
-                    actor = (BtlUnit *)work->entry;
+                    actor = work->unit;
                     glyph = itfCreateConvertedTextGlyph(
                         (work->x + xOffset - 6) << 4, (work->y - 8) << 3,
                         0xFF0000, 0x80808000 | (s32)work->alpha,
@@ -2674,7 +2674,7 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
                 }
                 case 2: {
                     BtlUnit *actor;
-                    actor = (BtlUnit *)work->entry;
+                    actor = work->unit;
                     glyph = itfCreateConvertedTextGlyph(
                         (work->x + xOffset + 2) << 4, (work->y - 7) << 3,
                         0xFF0000, 0x80808000 | (s32)work->alpha,
@@ -2688,7 +2688,7 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
                         btlDrawPanelIconGroup(1, work->alpha);
                         break;
                     }
-                    actor = (BtlUnit *)work->entry;
+                    actor = work->unit;
                     if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(1, work->alpha);
                         break;
@@ -2709,7 +2709,7 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
                         btlDrawPanelIconGroup(2, work->alpha);
                         break;
                     }
-                    actor = (BtlUnit *)work->entry;
+                    actor = work->unit;
                     if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(2, work->alpha);
                         break;
@@ -2734,7 +2734,7 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
                         btlDrawPanelIconGroup(3, work->alpha);
                         break;
                     }
-                    actor = (BtlUnit *)work->entry;
+                    actor = work->unit;
                     if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(3, work->alpha);
                         break;
@@ -2762,7 +2762,7 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
                         btlDrawPanelIconGroup(4, work->alpha);
                         break;
                     }
-                    actor = (BtlUnit *)work->entry;
+                    actor = work->unit;
                     if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(4, work->alpha);
                         break;
@@ -2770,7 +2770,7 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
                     position = 0;
                     memset(btlAnalysisTextScratch, 0, 256);
                     sprintf((char *)btlAnalysisTextScratch, D_003BB410,
-                        D_003BAA80 + ((BtlUnit *)work->entry)->partyRecord.unitId * 189);
+                        D_003BAA80 + work->unit->partyRecord.unitId * 189);
                     while ((character = btlAnalysisTextScratch[position]) != 0) {
                         s32 length = 0;
                         if (character != '_' && character != 0) {
@@ -3172,13 +3172,13 @@ void btlDrawAnalysisPanelVitalBars(BtlAnalysisPanelWork *work, s32 stat, s32 x, 
     f32 spriteWidth;
 
     if (stat == 0) {
-        current = ((BtlUnit *)work->entry)->partyRecord.hp;
-        maximum = ((BtlUnit *)work->entry)->partyRecord.maxHp;
+        current = work->unit->partyRecord.hp;
+        maximum = work->unit->partyRecord.maxHp;
         divisor = (f32)maximum;
         ratio = (f32)current;
     } else {
-        current = ((BtlUnit *)work->entry)->partyRecord.mp;
-        maximum = ((BtlUnit *)work->entry)->partyRecord.maxMp;
+        current = work->unit->partyRecord.mp;
+        maximum = work->unit->partyRecord.maxMp;
         divisor = (f32)maximum;
         ratio = (f32)current;
     }

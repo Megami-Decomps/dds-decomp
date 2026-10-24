@@ -2859,7 +2859,7 @@ extern s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task);
 
 extern void btlReleaseTaskAndRefreshCursorIfFlagged(dds3ProcessID_t *task);
 
-s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
+s32 btlCreateAnalysisPanelTask(BtlUnit *unit, s32 duration) {
     BtlState *context = (BtlState *)btlGetRuntime();
     BtlAnalysisPanelWork *data;
     dds3ProcessID_t *task;
@@ -2885,7 +2885,7 @@ s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
     data->x = -20;
     data->y = 133;
     data->duration = duration;
-    data->unit = (BtlUnit *)entry;
+    data->unit = unit;
     data->frame = 0;
     task = dds3StartProcess(btlAnalyzPanelTaskNameRef, 0x2B0E, 1, 1, btlUpdateAndDrawAnalysisPanel,
                           btlReleaseTaskAndRefreshCursorIfFlagged, (u32)data);

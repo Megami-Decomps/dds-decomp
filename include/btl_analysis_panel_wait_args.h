@@ -1,13 +1,13 @@
 #ifndef BTL_ANALYSIS_PANEL_WAIT_ARGS_H
 #define BTL_ANALYSIS_PANEL_WAIT_ARGS_H
 
-#include "common.h"
+#include "btl.h"
 
 /* Eight-byte callback arguments allocated by btlAllocTask(8). The first word
- * is forwarded as the analysis-panel entry to btlCreateAnalysisPanelTask. The
- * second word counts callback updates before panel creation. */
+ * is the battle unit shown by the analysis panel; the second counts callback
+ * updates before panel creation. */
 typedef struct BtlAnalysisPanelWaitArgs {
-    s32 panelEntry;
+    BtlUnit *unit;
     u32 elapsedTicks;
 } BtlAnalysisPanelWaitArgs;
 

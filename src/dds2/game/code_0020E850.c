@@ -31,7 +31,7 @@
 #include "btl_boss_debug_api.h"
 #include "eff.h"
 /* Declared before first use (were implicit int). */
-extern s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration);
+extern s32 btlCreateAnalysisPanelTask(BtlUnit *unit, s32 duration);
 extern s32 btlGetRegisteredTaskValueOrDefault(void);
 extern void btlSetCommandPanelFadeMode(s8 mode, s32 duration);
 extern s32 btlIsLowHpActionReady(BtlUnit *unit, s32 input);
@@ -1155,7 +1155,7 @@ BtlRuntimeTask *btlCreateEffectWaitTask(BtlUnit *owner, u16 mode) {
 /* Waits for the task startup delay, then finishes when its two actor slots are clear. */
 s32 btlWaitEffectTask(BtlAnalysisPanelWaitArgs *task) {
     if (task->elapsedTicks == 0) {
-        btlCreateAnalysisPanelTask(task->panelEntry, 0);
+        btlCreateAnalysisPanelTask(task->unit, 0);
         btlSetCommandPanelFadeMode(0, 8);
     }
     if (task->elapsedTicks >= 0x11) {

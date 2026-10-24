@@ -9,7 +9,7 @@
 typedef struct BtlAnalysisPanelWork {
     s8 state;
     u8 pad01[3];
-    s32 entry;
+    BtlUnit *unit;
     s32 duration;
     s32 frame;
     u8 pad10[4];
