@@ -183,7 +183,7 @@ extern void evtSetWaitHokanFrame(struct evtUnitHandle_t *, s32, s32);
 
 extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 
-extern u8 *btlCreateStiffenDamageShakeTask(u8 *, f32);
+extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *, f32);
 
 s32 btlGetLoggedIndexedCommandItem(s32 index);
 
@@ -2560,7 +2560,7 @@ INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3AD0);
 void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
     BtlState *context;
     BtlEffectResource *table;
-    u8 *task;
+    BtlRuntimeTask *task;
     dds3ModelHandle_t *model;
     s32 selected;
     s32 node;
@@ -2582,8 +2582,8 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
             case 11:
             case 18:
                 task = btlCreateStiffenDamageShakeTask(unit, 8.0f);
-                *(s32 *)(task + 0x28) = 1;
-                *(u64 *)(task + 0x40) = 0;
+                task->startDelay = 1;
+                task->ownerId = 0;
                 btlStartTask(task);
                 break;
             }
@@ -4587,18 +4587,19 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
 
 extern u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *);
 
-u8 *btlCreateStiffenDamageShakeTask(u8 *owner, f32 value) {
-    u8 *task = btlAllocTask(sizeof(BtlDamageShakeArgs));
+BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *owner, f32 value) {
+    BtlRuntimeTask *task = (BtlRuntimeTask *)btlAllocTask(sizeof(BtlDamageShakeArgs));
+    u8 *ownerBytes = (u8 *)owner;
     BtlDamageShakeArgs *arguments;
 
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(u16 *)(task + 0x20) = 0x1D;
-    *(void **)(task + 0x4C) = btlStiffenDamageShakeStep;
-    *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
-    *(u32 *)(task + 0x48) = 0;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
+    task->taskId = 0x1D;
+    task->callback = btlStiffenDamageShakeStep;
+    task->ownerId = *(u64 *)(ownerBytes + 0x108);
+    task->onStart = 0;
     arguments = btlGetTaskArguments(task);
-    arguments->unit = (BtlUnit *)owner;
+    arguments->unit = owner;
     arguments->amplitude = value;
     arguments->tick = 0;
     return task;

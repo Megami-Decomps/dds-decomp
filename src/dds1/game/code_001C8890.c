@@ -139,7 +139,7 @@ extern void btlRefreshUnitMotionSelection(BtlUnit *unit);
 
 extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 
-extern u8 *btlCreateStiffenDamageShakeTask(u8 *, f32);
+extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *, f32);
 
 s32 btlGetLoggedIndexedCommandItem(s32 index);
 
@@ -2836,7 +2836,7 @@ void btlProcessPostActionStatusEffects(BtlTask *action) {
                 btlStartTask(btlCreateActorModelBlendTask(unit, 0, 11, 2, 1.0f));
                 btlStartTask(btlCreateMoveOtherUnitsTask(unit, 11));
             } else {
-                btlStartTask(btlCreateStiffenDamageShakeTask((u8 *)unit, 8.0f));
+                btlStartTask(btlCreateStiffenDamageShakeTask(unit, 8.0f));
             }
         }
         btlDispatchStateHandler(action, 0x1A);
@@ -2859,7 +2859,7 @@ void btlProcessPostActionStatusEffects(BtlTask *action) {
             btlStartTask(btlCreateActorModelBlendTask(unit, 0, 11, 2, 1.0f));
             btlStartTask(btlCreateMoveOtherUnitsTask(unit, 11));
         } else {
-            btlStartTask(btlCreateStiffenDamageShakeTask((u8 *)unit, 8.0f));
+            btlStartTask(btlCreateStiffenDamageShakeTask(unit, 8.0f));
         }
         btlDispatchStateHandler(action, 0x1A);
         return;

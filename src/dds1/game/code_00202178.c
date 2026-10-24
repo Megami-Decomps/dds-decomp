@@ -73,7 +73,7 @@ extern void btlInitializePartyRecordFromEnemy(datUnitWork_t *, s32);
 extern void btlCopyUnitCurrentPosition(BtlUnit *unit, f32 *destination);
 
 
-extern u8 *btlCreateStiffenDamageShakeTask(u8 *, f32);
+extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *, f32);
 
 extern void btlSetUnitPosition(BtlUnit *, const f32 *);
 
@@ -1884,7 +1884,7 @@ s32 btlChooseLinkedPairMotion(BtlUnit *unit, s32 code, s32 unused) {
     } else {
         if (second == unit) {
             if (code == 1 && btlHasEffectActor() != 0) {
-                task = (BtlRuntimeTask *)btlCreateStiffenDamageShakeTask((u8 *)unit, 8.0f);
+                task = btlCreateStiffenDamageShakeTask(unit, 8.0f);
                 task->startDelay = code;
                 btlStartTask(task);
                 return -1;
@@ -4580,7 +4580,7 @@ s32 btlMapLinkedCommandResult(BtlUnit *unit, s32 commandResult) {
         case 8:
             return 4;
         case 1:
-            task = (BtlRuntimeTask *)btlCreateStiffenDamageShakeTask((u8 *)unit, 8.0f);
+            task = btlCreateStiffenDamageShakeTask(unit, 8.0f);
             task->startDelay = 1;
             btlStartTask(task);
             return -1;
