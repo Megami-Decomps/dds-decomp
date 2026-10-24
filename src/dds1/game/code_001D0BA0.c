@@ -4706,7 +4706,7 @@ u32 btlApplyQueuedActorRotation(s32 *taskArgs) {
     return 1;
 }
 
-void *btlScheduleActorUpdate(u8 *owner) {
+BtlRuntimeTask *btlScheduleActorUpdate(BtlUnit *unit) {
     u8 *task = btlAllocTask(4);
     u32 *arguments;
 
@@ -4714,11 +4714,11 @@ void *btlScheduleActorUpdate(u8 *owner) {
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = btlApplyQueuedActorRotation;
     *(u16 *)(task + 0x20) = 0x1F;
-    *(s64 *)(task + 0x40) = *(s64 *)(owner + 0x108);
+    *(s64 *)(task + 0x40) = *(s64 *)((u8 *)unit + 0x108);
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    return task;
+    arguments[0] = (u32)unit;
+    return (BtlRuntimeTask *)task;
 }
 
 u32 btlRefreshUnitFxVectorTask(u32 *taskArgs) {

@@ -950,7 +950,7 @@ extern BtlRuntimeTask *btlCreateEffObjC(BtlUnit *, s32);
 extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(SoundResourceNode *, BtlUnit *, u16, s32, u32);
 extern BtlRuntimeTask *sndCreateSetStateTask(void);
 extern BtlRuntimeTask *sndCreateClearStateTask(void);
-extern void *btlScheduleActorUpdate(u8 *);
+extern BtlRuntimeTask *btlScheduleActorUpdate(BtlUnit *unit);
 extern void *btlCreateClearActorEntrySelectionTask(BtlUnit *);
 extern u8 *btlCreateActorPositionEffectTask(u8 *);
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
@@ -1240,7 +1240,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
                 btlStartTask(task);
             }
             if ((indexedTarget->status.flags & 0x10) != 0 && operandIndex == 0) {
-                task = btlScheduleActorUpdate((u8 *)indexedTarget);
+                task = btlScheduleActorUpdate(indexedTarget);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = operandTask->handle;
                 btlStartTask(task);
@@ -1679,7 +1679,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
                     btlStartTask(task);
                 }
                 if ((indexedTarget->status.flags & 0x10) != 0 && operandIndex == 0) {
-                    task = btlScheduleActorUpdate((u8 *)indexedTarget);
+                    task = btlScheduleActorUpdate(indexedTarget);
                     task->startCondition.kind = 4;
                     task->startCondition.value.handle = operandTask->handle;
                     btlStartTask(task);
