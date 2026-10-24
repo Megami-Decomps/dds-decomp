@@ -8,7 +8,7 @@
  * while the updater also uses the remaining points and all eight fade rows. */
 typedef struct BattlePhasePanelWork {
     s32 frames;
-    s32 mode;
+    s32 variant;
     s8 phase;
     s8 secondaryPhase;
     u8 pad0A[2];

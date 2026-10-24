@@ -3080,10 +3080,10 @@ s32 btlCreatePhaseChangePanelTask(s32 variant) {
     btlTrackedTaskHandles->phaseGate = 0;
     work = sdfAllocAndClearQuadwords(sizeof(*work));
     if (variant == 0) {
-        work->mode = 0;
+        work->variant = 0;
         points = &firstPoints;
     } else {
-        work->mode = 1;
+        work->variant = 1;
         points = &secondPoints;
     }
     /* Copy the five coordinate pairs into the current rows. */
@@ -4659,7 +4659,7 @@ void btlUpdatePhasePanelSecondaryAnimation(BattlePhasePanelWork *work) {
     memcpy(modeZeroSlots, D_00436838, sizeof(modeZeroSlots));
     memcpy(modeOneBounds, D_00416458, sizeof(modeOneBounds));
     memcpy(modeZeroBounds, D_00416468, sizeof(modeZeroBounds));
-    if (work->mode == 0) {
+    if (work->variant == 0) {
         bounds = modeZeroBounds;
         slots = modeZeroSlots;
     } else {
@@ -4786,7 +4786,7 @@ void btlDrawPhaseChangePanelEchoes(BattlePhasePanelWork *work) {
         return;
     }
     slots = modeZeroSlots;
-    if (work->mode != 0) {
+    if (work->variant != 0) {
         slots = modeOneSlots;
     }
     eglSetOt(0x53);
