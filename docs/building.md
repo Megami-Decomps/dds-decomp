@@ -29,24 +29,19 @@ and the build fails.
 
 Script and data sources are retail content, so they are not in the repository.
 `src/<v>/scripts` and `src/<v>/data` are ignored, and you import them from a
-disc image you own with the corpus tools:
+disc image you own:
 
 ```sh
-python3 tools/fld_corpus.py dds1 game.iso \
-  --output-dir src/dds1/data/field --manifest config/dds1/field_fld2.sha1
-python3 tools/fld_corpus.py dds1 game.iso --kind fld1 \
-  --output-dir src/dds1/data/field --manifest config/dds1/field_fld1.sha1
-python3 tools/amb_corpus.py dds1 game.iso --output-dir src/dds1/data/field
-python3 tools/field_environment_corpus.py dds1 game.iso \
-  --output-dir src/dds1/data/field
-python3 tools/field_archive_corpus.py dds1 game.iso --resources build/dds1 --write
+python3 tools/import_corpus.py dds1 game.iso
+python3 tools/import_corpus.py dds2 game.iso
 ```
 
-INF, WAP, battle tables, and BF scripts have no bulk importer; disassemble
-those per file with `tools/inf.py`, `tools/wap.py`, `tools/battle_tbl.py`, and
-`tools/flw0.py` (see the format pages below). Every importer and every
-`assemble` is checked against the SHA-1 manifests in `config/<v>/`, which are
-tracked, so an import that does not reproduce retail bytes fails.
+The importer writes every source the SHA-1 manifests in `config/<v>/` list,
+with the same format tools that assemble them, and never changes a manifest.
+Names that are not on the disc, such as the field script local variables in
+`config/<v>/script_locals.json`, are applied as it writes. The format pages
+below describe each source, and `tools/flw0.py`, `tools/inf.py`,
+`tools/wap.py` and `tools/battle_tbl.py` also disassemble single files.
 
 `configure.py` emits these targets only for the sources it finds, and the data
 tests skip when nothing was imported. The retail executable targets never

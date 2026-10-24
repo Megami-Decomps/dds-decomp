@@ -96,7 +96,7 @@ class FldSceneTests(unittest.TestCase):
     def test_loads_paired_field_script_procedure_indices(self) -> None:
         field_path = ROOT / "src/dds1/data/field/f001_000.fldasm"
         script_path = ROOT / "src/dds1/scripts/field/f001.bfasm"
-        corpus.require(field_path, script_path)
+        corpus.require(script_path)
         self.assertEqual(fld_scene._paired_script_path(1, field_path), script_path)
         procedures = fld_scene._script_procedures(script_path)
         self.assertEqual(procedures["warp_label"], 4)

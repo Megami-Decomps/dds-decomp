@@ -28,7 +28,7 @@ python3 tools/battle_tbl.py assemble msg.tblasm MSG.TBL
 ninja dds1-battle-data dds2-battle-data
 ```
 
-The tracked DDS1 and DDS2 sources reassemble to the retail SHA-1s. The normal
+The imported DDS1 and DDS2 sources reassemble to the retail SHA-1s. The normal
 `dds1` and `dds2` targets include those checks.
 
 ## Physical container

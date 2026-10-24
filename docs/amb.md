@@ -8,7 +8,7 @@ python3 tools/amb.py assemble f011.ambasm f011.amb
 python3 tools/amb.py verify f011.amb
 ```
 
-The tracked corpus contains all 32 DDS1 and 22 DDS2 resources. Together they
+The imported corpus contains all 32 DDS1 and 22 DDS2 resources. Together they
 define 1,446 named map areas, 3,780 sub-blocks, 1,625 icons, 10,739 model
 nodes, and 6,143 meshes. The normal `dds1-field-data` and `dds2-field-data`
 targets assemble every source and check its retail SHA-1.
@@ -127,7 +127,7 @@ tagged faces. These cases remain explicit in graph output.
 ## Scene export
 
 `tools/amb_scene.py` turns the decoded graph into a self-contained glTF 2.0
-GLB. It accepts either a retail binary or tracked source:
+GLB. It accepts either a retail binary or imported source:
 
 ```sh
 python3 tools/amb_scene.py f024.amb f024.glb --meters-per-unit 0.01

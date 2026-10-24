@@ -63,7 +63,7 @@ decimal.
 
 ## Build and corpus verification
 
-The normal build assembles every tracked source and checks it against the
+The normal build assembles every imported source and checks it against the
 manifest:
 
 ```sh
@@ -73,7 +73,7 @@ ninja dds1-field-data dds2-field-data
 
 The corpus importer validates the game executable, reads the loose resources
 from `DDS3.IMG`, round-trips all of them in memory, and can regenerate the
-tracked source and manifests from a disc image you own:
+imported source and manifests from a disc image you own:
 
 ```sh
 python3 tools/field_environment_corpus.py dds1 /path/to/game.iso

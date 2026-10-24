@@ -51,8 +51,8 @@ reports these without treating them as version 23.
 
 For FLD1, the importer verifies 554 version-23 source identities in DDS1 and
 568 in DDS2. DDS1 has two version-21 files and one unrelated `.f1` payload;
-DDS2 has 20 byte-identical loose/archive occurrences. The paired sources are
-tracked first because most of the roughly 830 MiB decompressed corpus is model
+DDS2 has 20 byte-identical loose/archive occurrences. The corpus covers the
+paired sources first because most of the roughly 830 MiB decompressed corpus is model
 data whose inner structures are still being recovered.
 
 ## Object and relocation model
@@ -377,12 +377,12 @@ retained words. A kind-1 placement with a nonnegative event index carries the
 label and serial of that exact resource, exposing the native relationship
 without guessing which globally named BF procedure owns it. Runtime resolves
 that label in the BF/FLW0 script attached to the active world object. The
-tracked `fNNN_000` archive pairs this script with the field data, so source
+imported `fNNN_000` archive pairs this script with the field data, so source
 exports automatically add the exact procedure name and index as
 `ddsEventProcedure`. Loose binaries can provide the same identity with
 `--scripts fNNN.bf`. No field script contains a duplicate procedure name.
 
-Across the tracked corpus, all 1,273 such placement references resolve to
+Across the imported corpus, all 1,273 such placement references resolve to
 labeled resources: 557 in DDS1 and 716 in DDS2. Of these, 526 and 675
 respectively resolve in the paired field script. The remaining 72 retain their
 resource label without a procedure link; the exporter does not use a global
@@ -438,7 +438,7 @@ guess. Together the tables expose 333 nondefault flag selectors and 453
 message/action rows. Alternate `kNNN_AAA` sources do not acquire an inferred
 INF table, though callers may supply one explicitly for inspection.
 
-Across field areas present in the tracked FLD2 corpus, 2,731 of 2,780 named WAP
+Across field areas present in the imported FLD2 corpus, 2,731 of 2,780 named WAP
 rows resolve to placement nodes: 1,552 of 1,582 in DDS1 and 1,179 of 1,198 in
 DDS2. Sixty DDS1 and 43 DDS2 placement identities own more than one row; the
 exporter preserves every alternative and its gate.
@@ -581,7 +581,7 @@ retaining any remaining blocks from an extracted retail base. See
 [`lb.md`](lb.md) for the LB container, compression codec, archive source, and
 exact build targets.
 
-Run the codec, relocation, semantic-link, and tracked-source tests with:
+Run the codec, relocation, semantic-link, and corpus tests with:
 
 ```sh
 python3 tools/test_fld.py

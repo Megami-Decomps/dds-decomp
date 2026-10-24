@@ -1,7 +1,7 @@
 # LB field archives
 
 `tools/lb.py` reads and rebuilds the `.LB` resource archives used by DDS and
-Nocturne. The tracked sources reconstruct all 31 DDS1 and 25 DDS2 shared field
+Nocturne. The imported sources reconstruct all 31 DDS1 and 25 DDS2 shared field
 archives from authored INF, NPL, SKY, WAP, BF, and AMB resources. The
 `f011_001.lbasm` sources also place rebuilt FLD2 and FLD1 resources back beside
 the area's retained texture resource. Run:
