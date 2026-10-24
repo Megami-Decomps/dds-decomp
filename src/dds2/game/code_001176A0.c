@@ -850,7 +850,7 @@ u32 sdfQueryChannelBits(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t 
     return result;
 }
 
-extern void datResetBadStat(void *item, s32 mask);
+extern void datResetBadStat(datUnitWork_t *item, s32 mask);
 /* HP/MP mutators deliberately have no prototypes in this TU; see docs/idioms.md. */
 void sdfRaisePackedChannelValue(datUnitWork_t *item, u32 minimumValue);
 

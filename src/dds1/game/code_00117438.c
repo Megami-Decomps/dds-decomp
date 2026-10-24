@@ -816,7 +816,7 @@ u32 sdfQueryChannelBits(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t 
 }
 
 extern s32 sdfCalculateCommandVitalDelta(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item, u32 mode, u8 vital);
-extern void datResetBadStat(void *item, s32 mask);
+extern void datResetBadStat(datUnitWork_t *item, s32 mask);
 /* These unused-result legacy mutator calls had no prototype in scope. */
 void sdfRaisePackedChannelValue(datUnitWork_t *item, u32 minimumValue);
 
