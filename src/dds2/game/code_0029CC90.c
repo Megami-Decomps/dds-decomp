@@ -184,7 +184,7 @@ s32 mnuIsTitleEntryAvailable(datUnitWork_t *unit) {
 s32 brsBuildPartyRewardBatch(BrsRewardBatch *batch, BrsRewardSummary *summary) {
     s32 i;
     /* Value blocks are interleaved with each row's party-record pointer. */
-    u8 *values = (u8 *)&batch->rows + sizeof(batch->rows[0].unit);
+    u8 *values = (u8 *)&batch->rows[0].values;
 
     memset(batch, 0, sizeof(*batch));
     for (i = 0; i < 5; i++) {
@@ -268,7 +268,7 @@ s32 mnuCountAdvancingTitleAnimations(void) {
 
 s32 brsBuildLevelUpList(BrsRewardBatch *batch) {
     s32 i;
-    u8 *values = (u8 *)&batch->rows + sizeof(batch->rows[0].unit);
+    u8 *values = (u8 *)&batch->rows[0].values;
 
     memset(batch, 0, sizeof(*batch));
     batch->count = 0;
@@ -300,7 +300,7 @@ s32 brsBuildProfileCapList(BrsRewardBatch *batch) {
     PrfSkillList skills;
     s32 remaining;
     s32 partyOffset = 0;
-    u8 *values = (u8 *)&batch->rows + sizeof(batch->rows[0].unit);
+    u8 *values = (u8 *)&batch->rows[0].values;
 
     memset(batch, 0, sizeof(*batch));
     batch->count = 0;

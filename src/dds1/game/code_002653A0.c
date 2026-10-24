@@ -170,7 +170,7 @@ extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
 s32 brsBuildRewardRows(BrsRewardBatch *batch, BrsRewardSummary *summary) {
     s32 i;
     /* Value blocks are interleaved with each row's party-record pointer. */
-    u8 *values = (u8 *)&batch->rows + sizeof(batch->rows[0].unit);
+    u8 *values = (u8 *)&batch->rows[0].values;
 
     memset(batch, 0, sizeof(*batch));
     for (i = 0; i < 5; i++) {
@@ -254,7 +254,7 @@ s32 mnuCountAdvancingTitleAnimations(void) {
 
 s32 brsBuildLevelUpList(BrsRewardBatch *batch) {
     s32 i;
-    u8 *values = (u8 *)&batch->rows + sizeof(batch->rows[0].unit);
+    u8 *values = (u8 *)&batch->rows[0].values;
 
     memset(batch, 0, sizeof(*batch));
     batch->count = 0;
@@ -290,7 +290,7 @@ extern u32 prfBuildSkillListState0(datUnitWork_t *, DatProfileRecord *, PrfSkill
 s32 brsBuildProfileCapList(BrsRewardBatch *batch) {
     s32 i;
     u32 partyOffset = 0;
-    u8 *values = (u8 *)&batch->rows + sizeof(batch->rows[0].unit);
+    u8 *values = (u8 *)&batch->rows[0].values;
 
     memset(batch, 0, sizeof(*batch));
     batch->count = 0;
