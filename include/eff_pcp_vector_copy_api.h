@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+struct EffPCPChargeWork;
+
 /* Shared effect PCP callback contract: paired DDS1/DDS2 providers receive
  * destination work/storage first and the source parameter vector second. */
 void effPCPSparkleSphereSetPosition(void *dst, const f32 sourcePosition[4]);
@@ -10,7 +12,7 @@ void effPCPHama01SetPosition(void *dst, const f32 sourcePosition[4]);
 void effPCPHama02SetPosition(void *dst, const f32 sourcePosition[4]);
 void effPCPHamaonSetPosition(void *dst, const f32 sourcePosition[4]);
 void effPCPMHanma01SetPosition(void *dst, const f32 sourcePosition[4]);
-void effPCPMudoSetPosition(void *work, const f32 sourcePosition[4]);
+void effPCPMudoSetPosition(struct EffPCPChargeWork *work, const f32 sourcePosition[4]);
 void effPCPHwave01SetPosition(void *dst, const f32 sourcePosition[4]);
 void effPCPZiodin01SetPosition(void *dst, const f32 sourcePosition[4]);
 void effPCPZiodin02SetPosition(void *dst, const f32 sourcePosition[4]);

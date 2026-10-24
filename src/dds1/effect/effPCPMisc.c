@@ -801,8 +801,8 @@ void effPCPMudoDraw(EffPCPChargeWork *work) {
     }
 }
 
-void effPCPMudoSetPosition(void *work, const f32 sourcePosition[4]) {
-    SDF_VU0_COPYVECTOR(((EffPCPChargeWork *)work)->vectorWords, sourcePosition);
+void effPCPMudoSetPosition(EffPCPChargeWork *work, const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(work->vectorWords, sourcePosition);
 }
 
 void effPCPMudoSetScale(EffPCPChargeWork *work, f32 val) {
