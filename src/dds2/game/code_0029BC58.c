@@ -135,7 +135,7 @@ s32 brsAdvanceRewardPanelAfterMessage(dds3ProcessID_t *request) {
     s32 result;
 
     evtStageTestUpdateCamera();
-    result = mnuDispatchPopupTransition(&panel->transition, &panel->transition.state, 0, request);
+    result = mnuDispatchPopupTransition(&panel->transition.data, &panel->transition.state, 0, request);
     if (result != 0) {
         return result;
     }

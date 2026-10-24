@@ -70,7 +70,7 @@ s32 mnuHandleStatPointAssignment(dds3ProcessID_t *task) {
     inputFlags = mnuMapPadMaskToFlags(0xF3);
     entry = work->selectedRewardRow->unit;
     evtStageTestUpdateCamera();
-    result = mnuDispatchPopupTransition(&work->transition, &work->transition.state, 0, task);
+    result = mnuDispatchPopupTransition(&work->transition.data, &work->transition.state, 0, task);
     if (result != 0) {
         return result;
     }
@@ -177,7 +177,7 @@ s32 mnuCommitAssignedStatPoints(dds3ProcessID_t *task) {
     work = (BrsSkillPackageWork *)dds3GetProcessData(task);
     entry = work->selectedRewardRow->unit;
     evtStageTestUpdateCamera();
-    result = mnuDispatchPopupTransition(&work->transition, &work->transition.state, 0, task);
+    result = mnuDispatchPopupTransition(&work->transition.data, &work->transition.state, 0, task);
     if (result != 0) {
         return result;
     }
@@ -251,7 +251,7 @@ s32 mnuRunPanelWithIdleFallback(dds3ProcessID_t *request) {
     s32 result;
 
     evtStageTestUpdateCamera();
-    result = mnuDispatchPopupTransition(&context->transition, panelState, 0, request);
+    result = mnuDispatchPopupTransition(&context->transition.data, panelState, 0, request);
     if (result == 0) {
         if ((*panelState == 0) && (result = fclChkMessage(), result == 0)) {
             mnuSetPopupEntryFlagged(panelState, brsRewardMessagePopupEntry);

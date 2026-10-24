@@ -66,7 +66,7 @@ s32 brsMessageInputStep(dds3ProcessID_t *input) {
     if (brsTaskIsUiUpdateAllowed(context) == 0) {
         return 0;
     }
-    result = mnuDispatchPopupTransition(&context->transition, transitionState, 0, input);
+    result = mnuDispatchPopupTransition(&context->transition.data, transitionState, 0, input);
     if (result != 0) {
         return result;
     }
@@ -274,7 +274,7 @@ s32 mnuDispatchProfileSelectionScene(dds3ProcessID_t *task) {
     BrsSkillPackageWork *scene = (BrsSkillPackageWork *)dds3GetProcessData(task);
     s32 *dispatchStatus = &scene->transition.state;
 
-    result = mnuDispatchPopupTransition(&scene->transition, dispatchStatus, 0, task);
+    result = mnuDispatchPopupTransition(&scene->transition.data, dispatchStatus, 0, task);
     if (result == 0) {
         if (*dispatchStatus == 0 &&
             (result = fclChkMessage(), result == 0)) {
@@ -445,7 +445,7 @@ s32 brsProcessNextPrimaryReward(dds3ProcessID_t *task) {
         return 0;
     }
     dispatchStatus = &scene->transition.state;
-    result = mnuDispatchPopupTransition(&scene->transition, dispatchStatus, 0, task);
+    result = mnuDispatchPopupTransition(&scene->transition.data, dispatchStatus, 0, task);
     if (result != 0) {
         return result;
     }

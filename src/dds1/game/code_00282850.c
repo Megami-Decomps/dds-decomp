@@ -1368,7 +1368,8 @@ s32 mnuHasPopupSelectionFlag(s32 *flags) {
     return (*flags & 0x200000) > 0;
 }
 
-s32 mnuDispatchPopupTransition(void *work, s32 *entrySlot, s32 mode, void *callback) {
+s32 mnuDispatchPopupTransition(MenuPopupState *work, s32 *entrySlot, s32 mode,
+                               void *callback) {
     MenuPopupState *state = work;
     MenuPopupEntry **slot = (MenuPopupEntry **)entrySlot;
     MenuPopupEntry *entry;

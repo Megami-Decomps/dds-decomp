@@ -97,7 +97,7 @@ u32 mnuTerminalPanelLeaveNoOp(void) {
 s32 dspUpdateFlagEvent(dds3ProcessID_t *request) {
     s32 state = dds3GetProcessData(request);
     s32 *panel = (s32 *)(state + 0x54);
-    s32 result = mnuDispatchPopupTransition((u8 *)state + 8, panel, 0, (void *)request);
+    s32 result = mnuDispatchPopupTransition((MenuPopupState *)((u8 *)state + 8), panel, 0, (void *)request);
     if (result != 0) {
         return result;
     }
@@ -154,7 +154,7 @@ extern char D_003CE998[];
 s32 mnuUpdateTerminalPanelPopupWhenIdle(dds3ProcessID_t *request) {
     MenuTerminalContext *context = (MenuTerminalContext *)dds3GetProcessData(request);
     s32 *panelState = (s32 *)&context->transitionWork.lastEntryAddress;
-    s32 result = mnuDispatchPopupTransition((u8 *)context + 8, panelState, 0, request);
+    s32 result = mnuDispatchPopupTransition((MenuPopupState *)((u8 *)context + 8), panelState, 0, request);
     if (result == 0) {
         if (*panelState == 0 && dds3FadeCheck() == 0) {
             MenuPopupEntry *entry = (MenuPopupEntry *)D_003CE998;

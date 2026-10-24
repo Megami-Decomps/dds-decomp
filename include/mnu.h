@@ -20,24 +20,29 @@ struct MenuListNode *mnuAdvanceWindowListSelection(struct MenuWindowContainer *w
 /* Clear only the window's panel-transition bit. */
 void mnuClearWindowPanelTransitionFlag(struct MenuWindowContainer *window);
 
-/* DDS2 scheduler word: zero or the encoded next-handler address. */
-extern s32 mnuDispatchPopupTransition(void *work, s32 *entrySlot, s32 mode, void *callback);
+/* Advance one popup transition state using its current scheduler word. */
+s32 mnuDispatchPopupTransition(MenuPopupState *work, s32 *entrySlot, s32 mode,
+                               void *callback);
 void mnuSetPopupEntry(s32 *entrySlot, MenuPopupEntry *entry);
 void mnuSetPopupEntryFlagged(s32 *entrySlot, MenuPopupEntry *entry);
 
 
 static inline s32 menuSetHandler(void *context, s32 mode, void *callback) {
-    return mnuDispatchPopupTransition((u8 *)context + 8, (s32 *)((u8 *)context + 0x54), mode, callback);
+    return mnuDispatchPopupTransition((MenuPopupState *)((u8 *)context + 8),
+                                      (s32 *)((u8 *)context + 0x54), mode,
+                                      callback);
 }
-/* DDS1 uses the same scheduler-word contract as the DDS2 dispatcher. */
-extern s32 mnuDispatchPopupTransition(void *work, s32 *entrySlot, s32 mode, void *callback);
 
 static inline s32 menuRunPanel(void *context, s32 mode, void *callback) {
-    return mnuDispatchPopupTransition((u8 *)context + 8, (s32 *)((u8 *)context + 0x54), mode, callback);
+    return mnuDispatchPopupTransition((MenuPopupState *)((u8 *)context + 8),
+                                      (s32 *)((u8 *)context + 0x54), mode,
+                                      callback);
 }
 
 static inline s32 evtMenuSetHandler(void *context, s32 mode, void *callback) {
-    return mnuDispatchPopupTransition((u8 *)context + 0xC, (s32 *)((u8 *)context + 0x58), mode, callback);
+    return mnuDispatchPopupTransition((MenuPopupState *)((u8 *)context + 0xC),
+                                      (s32 *)((u8 *)context + 0x58), mode,
+                                      callback);
 }
 
 static inline void panelSetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alpha) {
