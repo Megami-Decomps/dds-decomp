@@ -1662,7 +1662,7 @@ void fldApplyCurrentTaskScene(const char *name) {
 /* Dispatch the first enabled field actor matching this action.
  * Elevator block IDs occupy the second six-halfword bank of body.data,
  * the same canonical header view used by fldDoor_GetElvTbl below. */
-void func_001411F8(s32 action) {
+void fldDispatchSceneAction(s32 action) {
     fldSceneParam_t sequence;
     s32 preview[2];
     s32 event;

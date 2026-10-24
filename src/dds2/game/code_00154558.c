@@ -1513,13 +1513,13 @@ u32 fldCmdSetCurrentTaskScene(void) {
     return 1;
 }
 
-extern void func_001411F8(s32 action);
+extern void fldDispatchSceneAction(s32 action);
 
 u32 fldCmdExecuteSceneAction(void) {
     s32 sceneAction;
 
     sceneAction = scrGetIntPara(0);
-    func_001411F8(sceneAction);
+    fldDispatchSceneAction(sceneAction);
     return 1;
 }
 
