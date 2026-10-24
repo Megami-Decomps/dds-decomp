@@ -1181,7 +1181,7 @@ s32 evtCommand_PATH_START(void) {
 s32 evtCommand_PATH_RATE(void) {
     dds3Basic_t *worldNode;
     s32 roomNumber;
-    char *roomName;
+    const char *roomName;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
@@ -1195,7 +1195,7 @@ s32 evtCommand_PATH_RATE(void) {
         }
     }
     evtPathRate(worldNode, scrGetFloatPara(1));
-    roomName = (char *)worldNode->value;
+    roomName = worldNode->value;
     if (roomName == 0) {
         return 1;
     }
@@ -1215,7 +1215,7 @@ s32 evtCommand_PATH_RATE(void) {
 s32 evtCommand_PATH_DIR(void) {
     dds3Basic_t *worldNode;
     s32 roomNumber;
-    char *roomName;
+    const char *roomName;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
@@ -1229,7 +1229,7 @@ s32 evtCommand_PATH_DIR(void) {
         }
     }
     evtPathDir(worldNode, scrGetIntPara(1));
-    roomName = (char *)worldNode->value;
+    roomName = worldNode->value;
     if (roomName == 0) {
         return 1;
     }
