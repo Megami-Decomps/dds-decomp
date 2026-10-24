@@ -237,13 +237,13 @@ s32 bfWaitCbCreateTask(void)
 
 s32 scrCommand_SCR_KILL(void)
 {
-    s32 taskHandle;
-    taskHandle = scrGetIntPara(0);
-    if (dds3ExistProcess((dds3ProcessID_t *)taskHandle) == 0)
+    dds3ProcessID_t *task;
+    task = (dds3ProcessID_t *)scrGetIntPara(0);
+    if (dds3ExistProcess(task) == 0)
     {
         return 1;
     }
-    dds3KillProcess((dds3ProcessID_t *)taskHandle, 1);
+    dds3KillProcess(task, 1);
     return 1;
 }
 
