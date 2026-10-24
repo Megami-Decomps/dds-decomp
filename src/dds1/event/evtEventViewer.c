@@ -29,6 +29,7 @@
 #include "evt_world.h"
 #include "pcp_vu0.h"
 #include "evt_unit.h"
+#include "evt_unit_vector_slot.h"
 #include "eff_transform.h"
 #include "eff_blur.h"
 #include "eff_event_draw.h"
@@ -1071,7 +1072,7 @@ extern void dds3FadeClear(void);
 extern void dds3SetLightColor(s32, s32, f32 *);
 extern void dds3SetLightDir(s32, s32, f32 *);
 extern void dds3SetAmbientColor(s32, f32 *);
-extern void evtSetSlotVectors(s32, EvtUnitVectorSlotState, s32, const f32 *, const f32 *, const f32 *);
+extern void evtSetSlotVectors(s32, EvtUnitVectorSlotState, evtUnitHandle_t *, const f32 *, const f32 *, const f32 *);
 extern void evtSetSlotVector(s32, f32, f32);
 extern void dds3SetFogPara(s32, f32, f32, f32, f32);
 extern f32 evtHokanFloat(s32, f32, f32, f32);
@@ -1263,7 +1264,7 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
                 break;
             }
         }
-        evtSetSlotVectors(group->setterId, group->metadata.option, (s32)unit,
+        evtSetSlotVectors(group->setterId, group->metadata.option, unit,
                 D_003D7DA0[0], D_003D7DA0[1], D_003D7DA0[2]);
         {
             s32 slot = group->setterId;

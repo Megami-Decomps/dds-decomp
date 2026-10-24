@@ -63,24 +63,6 @@ enum EvtTargetInfoFlags {
     EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR = 0x8
 };
 
-typedef enum EvtUnitVectorSlotState {
-    EVT_UNIT_VECTOR_SLOT_EMPTY = 0,
-    EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK = 2,
-    EVT_UNIT_VECTOR_SLOT_UNIT_BOUND = 3
-} EvtUnitVectorSlotState;
-
-/* Native 0x40-byte slot: three vec4 followed by two auxiliary coordinates.
- * The static pool contains seven slots in DDS1 and ten in DDS2. */
-typedef struct EvtUnitVectorSlot {
-    EvtUnitVectorSlotState state; /* 0x00: slot ownership state. */
-    s32 id;                       /* 0x04: unit bound to a state-3 slot. */
-    f32 vec[12];                  /* 0x08: vec4 at 0x08/0x18/0x28. */
-    f32 auxX;                     /* 0x38: auxiliary coordinates (scalar fields: */
-    f32 auxY;                     /* 0x3C: writers split the address at 0x30). */
-} EvtUnitVectorSlot;
-
-typedef char EvtUnitVectorSlotSizeCheck[sizeof(EvtUnitVectorSlot) == 0x40 ? 1 : -1];
-
 /* Event motion work, not the world-list node which contains its address.
  * Setup opcodes pass this same object to evtSetUnitMotion and
  * evtConfigureUnitMotionSlot; the direction updater passes it to planar aim.

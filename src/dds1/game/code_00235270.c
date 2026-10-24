@@ -28,6 +28,7 @@
 #include "kwln_task_create.h"
 #include "evt_task.h"
 #include "evt_unit.h"
+#include "evt_unit_vector_slot.h"
 #include "evt_event_pack.h"
 #include "evt_polygon_movie.h"
 #include "evt_effect_scale_object.h"
@@ -2422,7 +2423,7 @@ extern void mnuShopRestoreTransform(EvtRuntime *);
 extern void dds3SetLightColor(s32, s32, f32 *);
 extern void dds3SetLightDir(s32, s32, f32 *);
 extern void dds3SetAmbientColor(s32, f32 *);
-extern void evtSetSlotVectors(s32, EvtUnitVectorSlotState, s32, const f32 *, const f32 *, const f32 *);
+extern void evtSetSlotVectors(s32, EvtUnitVectorSlotState, evtUnitHandle_t *, const f32 *, const f32 *, const f32 *);
 
 
 /* Select and draw one light-color bank at the current panel offset. */
@@ -2611,7 +2612,7 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
         if (node != NULL) {
             nestedValue = evtGetUnitHandle2(node);
         }
-        evtSetSlotVectors(group->setterId, group->metadata.option, (s32)nestedValue,
+        evtSetSlotVectors(group->setterId, group->metadata.option, nestedValue,
                           &runtime->commandMatrix[0], &runtime->commandMatrix[4], &runtime->commandMatrix[8]);
         break;
     }
@@ -2645,7 +2646,7 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
                 printf((char *)D_003AEB60);
                 break;
             }
-            evtSetSlotVectors(group->setterId, group->metadata.option, (s32)nestedValue,
+            evtSetSlotVectors(group->setterId, group->metadata.option, nestedValue,
                               &runtime->savedCommandMatrix[0],
                               &runtime->savedCommandMatrix[4],
                               &runtime->savedCommandMatrix[8]);

@@ -11,6 +11,7 @@ struct EffNodeDescriptor;
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
+#include "evt_unit_vector_slot.h"
 #include "evt_unit_motion_slot_flags.h"
 #include "evt_unit_transition_flags.h"
 #include "evt_unit_motion_setup.h"
@@ -1547,11 +1548,11 @@ void evtResetUnitVectorSlots(void) {
     for (i = 0; i < 10; i++) {
         mnuInitializeCampPanelVisualDefaults(&evtUnitVectorSlots[i].vec[0], &evtUnitVectorSlots[i].vec[4], &evtUnitVectorSlots[i].vec[8], &evtUnitVectorSlots[i].auxX, &evtUnitVectorSlots[i].auxY);
         evtUnitVectorSlots[i].state = EVT_UNIT_VECTOR_SLOT_EMPTY;
-        evtUnitVectorSlots[i].id = 0;
+        evtUnitVectorSlots[i].unitHandle = NULL;
     }
 }
 
-void evtSetSlotVectors(s32 slotIndex, EvtUnitVectorSlotState slotState, s32 unitId,
+void evtSetSlotVectors(s32 slotIndex, EvtUnitVectorSlotState slotState, evtUnitHandle_t *unitHandle,
                        const f32 *firstEndpoint, const f32 *secondEndpoint, const f32 *color) {
     if (slotIndex < 10) {
         evtUnitVectorSlots[slotIndex].vec[0] = firstEndpoint[0];
@@ -1568,9 +1569,9 @@ void evtSetSlotVectors(s32 slotIndex, EvtUnitVectorSlotState slotState, s32 unit
         evtUnitVectorSlots[slotIndex].vec[10] = color[2];
         evtUnitVectorSlots[slotIndex].vec[11] = 1.0f;
         if (slotState == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND) {
-            evtUnitVectorSlots[slotIndex].id = unitId;
+            evtUnitVectorSlots[slotIndex].unitHandle = unitHandle;
         } else {
-            evtUnitVectorSlots[slotIndex].id = 0;
+            evtUnitVectorSlots[slotIndex].unitHandle = NULL;
         }
     }
 }
@@ -1582,13 +1583,13 @@ void evtSetSlotVector(s32 slotIndex, f32 x, f32 y) {
     }
 }
 
-/* Copy the second vector of the slot bound to `id` (else the first state-2 slot). */
-s32 evtCopyUnitVectorSlotEndpoint(s32 id, f32 *out) {
+/* Copy the second vector of the slot bound to `unitHandle` (else the first state-2 slot). */
+s32 evtCopyUnitVectorSlotEndpoint(evtUnitHandle_t *unitHandle, f32 *out) {
     s32 found = -1;
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && evtUnitVectorSlots[i].id == id) {
+        if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && evtUnitVectorSlots[i].unitHandle == unitHandle) {
             found = i;
             break;
         }
@@ -1619,7 +1620,7 @@ void evtApplyMatchingUnitSlotEndpoints(evtUnitHandle_t *unit) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && evtUnitVectorSlots[i].id == (s32)unit) {
+        if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && evtUnitVectorSlots[i].unitHandle == unit) {
             found = i;
             break;
         }
@@ -1661,7 +1662,7 @@ s32 evtFindUnitSlotAuxCoordinates(evtUnitHandle_t *unit, f32 *outX, f32 *outY) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && evtUnitVectorSlots[i].id == (s32)unit) {
+        if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && evtUnitVectorSlots[i].unitHandle == unit) {
             *outX = evtUnitVectorSlots[i].auxX;
             *outY = evtUnitVectorSlots[i].auxY;
             return 1;

@@ -11,6 +11,7 @@ struct EffNodeDescriptor;
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
+#include "evt_unit_vector_slot.h"
 #include "evt_unit_motion_slot_flags.h"
 #include "evt_unit_transition_flags.h"
 #include "evt_effect_scale_object.h"
@@ -1485,11 +1486,11 @@ void evtResetUnitVectorSlots(void) {
     for (i = 0; i < 7; i++) {
         mnuInitializeCampPanelVisualDefaults(&D_003D7BD8[i].vec[0], &D_003D7BD8[i].vec[4], &D_003D7BD8[i].vec[8], &D_003D7BD8[i].auxX, &D_003D7BD8[i].auxY);
         D_003D7BD8[i].state = EVT_UNIT_VECTOR_SLOT_EMPTY;
-        D_003D7BD8[i].id = 0;
+        D_003D7BD8[i].unitHandle = NULL;
     }
 }
 
-void evtSetSlotVectors(s32 slotIndex, EvtUnitVectorSlotState slotState, s32 unitId,
+void evtSetSlotVectors(s32 slotIndex, EvtUnitVectorSlotState slotState, evtUnitHandle_t *unitHandle,
                        const f32 *firstEndpoint, const f32 *secondEndpoint, const f32 *color) {
     if (slotIndex < 7) {
         D_003D7BD8[slotIndex].vec[0] = firstEndpoint[0];
@@ -1506,9 +1507,9 @@ void evtSetSlotVectors(s32 slotIndex, EvtUnitVectorSlotState slotState, s32 unit
         D_003D7BD8[slotIndex].vec[10] = color[2];
         D_003D7BD8[slotIndex].vec[11] = 1.0f;
         if (slotState == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND) {
-            D_003D7BD8[slotIndex].id = unitId;
+            D_003D7BD8[slotIndex].unitHandle = unitHandle;
         } else {
-            D_003D7BD8[slotIndex].id = 0;
+            D_003D7BD8[slotIndex].unitHandle = NULL;
         }
     }
 }
@@ -1520,13 +1521,13 @@ void evtSetSlotVector(s32 slotIndex, f32 x, f32 y) {
     }
 }
 
-/* Copy the second vector of the slot bound to `id` (else the first state-2 slot). */
-s32 evtCopyUnitVectorSlotEndpoint(s32 id, f32 *out) {
+/* Copy the second vector of the slot bound to `unitHandle` (else the first state-2 slot). */
+s32 evtCopyUnitVectorSlotEndpoint(evtUnitHandle_t *unitHandle, f32 *out) {
     s32 found = -1;
     s32 i;
 
     for (i = 0; i < 7; i++) {
-        if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && D_003D7BD8[i].id == id) {
+        if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && D_003D7BD8[i].unitHandle == unitHandle) {
             found = i;
             break;
         }
@@ -1557,7 +1558,7 @@ void evtApplyMatchingUnitSlotEndpoints(evtUnitHandle_t *unit) {
     s32 i;
 
     for (i = 0; i < 7; i++) {
-        if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && D_003D7BD8[i].id == (s32)unit) {
+        if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && D_003D7BD8[i].unitHandle == unit) {
             found = i;
             break;
         }
@@ -1599,7 +1600,7 @@ s32 evtFindUnitSlotAuxCoordinates(evtUnitHandle_t *unit, f32 *outX, f32 *outY) {
     s32 i;
 
     for (i = 0; i < 7; i++) {
-        if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && D_003D7BD8[i].id == (s32)unit) {
+        if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && D_003D7BD8[i].unitHandle == unit) {
             *outX = D_003D7BD8[i].auxX;
             *outY = D_003D7BD8[i].auxY;
             return 1;
