@@ -9167,7 +9167,7 @@ void sndStartFileLoad(SoundFileTaskArgs *args) {
     ActiveSoundNode *node = args->node;
     args->request = fileLoad(args->filename);
     node->flags |= SOUND_FILE_STATE_REQUEST_PENDING;
-    node->packedTrackPosition = (args->frames + 0x200) << 16;
+    node->packedTrackPosition = (args->skillIndex + 0x200) << 16;
     node->loadState = 2;
     btlBossDebugPrintf("btl:sound file load start[%s]\n", args->filename);
 }
@@ -9205,7 +9205,7 @@ s32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
     return 0;
 }
 
-BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, s32 option, const char *name) {
+BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, s32 skillIndex, const char *name) {
     BtlRuntimeTask *task = btlAllocTask(strlen(name) + sizeof(SoundFileTaskArgs));
     SoundFileTaskArgs *args;
     char *copy;
@@ -9218,7 +9218,7 @@ BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, s32 option, const c
     args = btlGetTaskArguments(task);
     copy = (char *)(args + 1);
     args->node = node;
-    args->frames = option;
+    args->skillIndex = skillIndex;
     args->filename = copy;
     strcpy(copy, name);
     return task;

@@ -333,9 +333,9 @@ typedef struct SoundFileTaskArgs {
     struct FileRequest *request; /* 0x04: queued file request */
     struct sdfMemHandle_t *resourceAllocation; /* 0x08: retained file allocation */
 #ifdef VERSION_DDS1
-    u32 blockIndex; /* 0x0C */
+    u32 skillIndex; /* 0x0C: relative to the first skill sound block, 0x200. */
 #else
-    s32 frames; /* 0x0C */
+    s32 skillIndex; /* 0x0C: relative to the first skill sound block, 0x200. */
 #endif
     const char *filename; /* 0x10: points to inline bytes after this header */
 } SoundFileTaskArgs;
@@ -350,9 +350,9 @@ typedef char SoundFileTaskArgs_allocation_offset_must_be_8[
     ((u32)&((SoundFileTaskArgs *)0)->resourceAllocation == 8) ? 1 : -1];
 typedef char SoundFileTaskArgs_index_offset_must_be_C[
 #ifdef VERSION_DDS1
-    ((u32)&((SoundFileTaskArgs *)0)->blockIndex == 0x0C) ? 1 : -1];
+    ((u32)&((SoundFileTaskArgs *)0)->skillIndex == 0x0C) ? 1 : -1];
 #else
-    ((u32)&((SoundFileTaskArgs *)0)->frames == 0x0C) ? 1 : -1];
+    ((u32)&((SoundFileTaskArgs *)0)->skillIndex == 0x0C) ? 1 : -1];
 #endif
 typedef char SoundFileTaskArgs_filename_offset_must_be_10[
     ((u32)&((SoundFileTaskArgs *)0)->filename == 0x10) ? 1 : -1];
@@ -370,9 +370,9 @@ struct BtlRuntimeTask *sndCreateDataFileLoadTask(struct BtlUnit *unit);
 void sndStartFileLoad(SoundFileTaskArgs *args);
 s32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *args);
 #ifdef VERSION_DDS1
-struct BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, u32 blockIndex, const char *filename);
+struct BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, u32 skillIndex, const char *filename);
 #else
-struct BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, s32 frames, const char *filename);
+struct BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, s32 skillIndex, const char *filename);
 #endif
 
 /* Both factories store full words; callbacks use the low 16 duration bits. */

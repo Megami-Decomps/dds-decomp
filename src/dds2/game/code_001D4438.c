@@ -1937,7 +1937,7 @@ s32 btlFormatActionEventFilename(s32 skillIndex, char *output);
 BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *effect,
         char *name);
 void sndFormatResourceNameFromIndex(s32 skillIndex, char *output);
-BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *value, s32 option, const char *name);
+BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, s32 skillIndex, const char *name);
 BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *effect,
         BtlUnit *sourceOwner, s32 source, s32 target, BtlUnit *actor,
         s32 frames);
@@ -2126,7 +2126,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
     btlStartTask(task);
     sndFormatResourceNameFromIndex(skill, resourceName);
     unit->listNode = sndAllocListNode();
-    task = sndCreateFileLoadTask((ActiveSoundNode *)unit->listNode, skill, resourceName);
+    task = sndCreateFileLoadTask(unit->listNode, skill, resourceName);
     task->startCondition.kind = 4;
     task->startCondition.value.handle = soundHandle;
     task->ownerId = masterOwner;
