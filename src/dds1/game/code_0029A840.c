@@ -471,7 +471,7 @@ typedef char EffResourceModelConfig_size_check[
 
 
 /* Create an empty owner, or load its model and per-record queues from a file job. */
-u8 *effCreateResourceOwner(void *input) {
+EffResourceOwner *effCreateResourceOwner(void *input) {
     FileJobPayload *source = input;
     EffResourceOwner *owner = sdfChipAllocDirect(sizeof(EffResourceOwner));
     u8 *data;
@@ -492,7 +492,7 @@ u8 *effCreateResourceOwner(void *input) {
         }
         owner->count = sdfModelGetMarkPosCount(owner->model->inner);
         if (owner->count == 0) {
-            return (u8 *)owner;
+            return owner;
         }
         data = (u8 *)fileResolveSecondaryBuffer(source);
         if (data != NULL) {
@@ -504,7 +504,7 @@ u8 *effCreateResourceOwner(void *input) {
             }
         }
     }
-    return (u8 *)owner;
+    return owner;
 }
 
 
@@ -525,15 +525,16 @@ void effDestroyResourceOwner(EffResourceOwner *owner) {
 }
 
 
-extern u8 *effCreateResourceOwner(void *);
+extern EffResourceOwner *effCreateResourceOwner(void *);
 
 extern void effCopyResourceOwner(EffResourceOwner *, EffResourceOwner *);
 
-u8 *effDuplicateModelOwner(u8 *source) {
-    u8 *effect = effCreateResourceOwner(0);
+EffResourceOwner *effDuplicateModelOwner(EffResourceOwner *source) {
+    EffResourceOwner *effect = effCreateResourceOwner(0);
 
-    *(EffResourceModelConfig *)(effect + 8) = *(EffResourceModelConfig *)(source + 8);
-    effCopyResourceOwner((EffResourceOwner *)effect, (EffResourceOwner *)source);
+    *(EffResourceModelConfig *)((u8 *)effect + 8) =
+        *(EffResourceModelConfig *)((u8 *)source + 8);
+    effCopyResourceOwner(effect, source);
     return effect;
 }
 
