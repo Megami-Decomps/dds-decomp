@@ -66,7 +66,7 @@ extern char evtViewerTaskName[]; /* "EventViewer" */
 s32 evtViewerHasUpdateFlag(struct EvtRuntime *viewer);
 s32 evtViewerUpdateFrame(dds3ProcessID_t *task);
 void fldInitializeCameraColorResource(void);
-s32 evtInitFrameVar(void);
+dds3ProcessID_t *evtInitFrameVar(void);
 s32 evtViewerScheduleFrameVariableTask(dds3ProcessID_t *task);
 extern void evtEventViewerPollMovieResources(PolyMovieWork *assets);
 
@@ -4005,7 +4005,7 @@ s32 evtViewerScheduleFrameVariableTask(dds3ProcessID_t *task) {
 
     viewer = (EvtRuntime *)dds3GetProcessData(task);
     evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
-    dds3LinkProcess(task, (dds3ProcessID_t *)evtInitFrameVar());
+    dds3LinkProcess(task, evtInitFrameVar());
     dds3DrawFlag |= 0x2000000;
     return (s32)(u32)evtViewerUpdateFrame;
 }
