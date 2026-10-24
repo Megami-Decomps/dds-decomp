@@ -81,7 +81,7 @@ extern char *btlCommandPanelTaskNameRef;
 
 extern void btlSetCommandPanelFadeMode(s32, s32);
 
-extern void btlSetActionActorPanelPresentation(s32, s32, s32);
+extern void btlSetActionActorPanelPresentation(ActionStateLink *, s8, s8);
 
 
 extern void btlResetDebugEncounterSelection(s32);
@@ -1231,9 +1231,9 @@ s32 btlAiTaskUpdate(ActionStateLink *task) {
     }
 }
 
-void btlMarkSceneTaskAfterReset(s32 task) {
-    btlSetActionActorPanelPresentation(task, 0, 0);
-    ((ActionStateLink *)task)->pendingFlags = ((ActionStateLink *)task)->pendingFlags | 0x20;
+void btlMarkSceneTaskAfterReset(ActionStateLink *actor) {
+    btlSetActionActorPanelPresentation(actor, 0, 0);
+    actor->pendingFlags = actor->pendingFlags | 0x20;
 }
 
 extern void btlPrepareSavedCommandTargets(ActionStateLink *, BattleIndexWork *);
