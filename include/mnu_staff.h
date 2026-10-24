@@ -87,8 +87,8 @@ s32 mnuUseFieldSkillOnParty(PartyPanel *party, MenuPageWindow *page, s32 commit)
 s32 mnuIsEntryCostUnaffordable(u16 commandId, struct datUnitWork_t *entry);
 void mnuReleaseAndRefreshWindowSlots(MenuPageWindow *page);
 void mnuRefreshPartyPanelBars(MenuPageWindow *page);
-s32 func_002C6008(PartyPanel *party, MenuPageWindow *page,
-                 struct datUnitWork_t *entry, s32 commit);
+s32 mnuTryUseBestPartyHealingSkill(PartyPanel *party, MenuPageWindow *page,
+                                   struct datUnitWork_t *caster, s32 commit);
 /* Append entry pointers whose optional model-flag requirements are met. */
 MenuWindowContainer *mnuCreateStaffResourceListWindow(
     void *const *entries, s32 entryCount, s32 width, s32 rowHeight,

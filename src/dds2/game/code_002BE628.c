@@ -3044,8 +3044,8 @@ s32 mnuComparePartyEntryCostRatio(u32 *left, u32 *right) {
 extern const u16 D_0042B518[];
 
 
-s32 func_002C6008(PartyPanel *partyPanel, MenuPageWindow *page,
-                  datUnitWork_t *caster, s32 commit) {
+s32 mnuTryUseBestPartyHealingSkill(PartyPanel *partyPanel, MenuPageWindow *page,
+                                   datUnitWork_t *caster, s32 commit) {
     datUnitWork_t *targets[5];
     datUnitWork_t preview[5];
     u16 abilities[6];
@@ -3139,7 +3139,7 @@ s32 mnuUseFieldSkillOnParty(PartyPanel *partyPanel, MenuPageWindow *page, s32 co
             if (pass == 0) {
                 result = mnuTryUseFieldSkill(partyPanel, page, entry, commit);
             } else {
-                result = func_002C6008(partyPanel, page, entry, commit);
+                result = mnuTryUseBestPartyHealingSkill(partyPanel, page, entry, commit);
             }
             switch (result) {
             case 0:

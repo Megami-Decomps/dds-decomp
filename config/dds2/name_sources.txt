@@ -7073,7 +7073,8 @@
 0x002C5DE0	mnuFindPartyEntryBySelection	inferred	matches entry+0xE against a local {mask,id} table {0x400,0xD4},{0x100,0xCF},{0x80,0xA9},{0x40,0xCE},{0x10,0xA8}; returns the entry and writes the id
 0x002C5EA8	mnuTryUseFieldSkill	inferred	resolves the selected party entry, checks skill nibble state and func_002C4FB8, and optionally applies skillApplyFieldUseEffect + panel refresh; returns 3/1/0/2
 0x002C5F78	mnuComparePartyEntryCostRatio	inferred	Sorts frontline before reserve then compares scaled primary/denominator ratios. [names_reviewed5.tsv]
-0x002C6348	mnuUseFieldSkillOnParty	inferred	loops mnuPickBestPartyEntry with mnuTryUseFieldSkill/func_002C6008 [names_M59_D2Mid.tsv]
+0x002C6008	mnuTryUseBestPartyHealingSkill	inferred	Called in the second pass of mnuUseFieldSkillOnParty; previews six affordable abilities on injured party members and selects the one minimizing total remaining HP deficit, optionally applying it and consuming its cost.
+0x002C6348	mnuUseFieldSkillOnParty	inferred	loops mnuPickBestPartyEntry with mnuTryUseFieldSkill/mnuTryUseBestPartyHealingSkill [names_M59_D2Mid.tsv]
 0x002C6480	mnuIsStaffMenuInputBlocked	inferred	Returns the global guard checked before staff-menu input; DDS1 twin 0x00286F48.
 0x002C6490	evtStageTestSetModelScalingEnabled	inferred	Sets stage-test scaling flag that chooses profile-based vector scale. [names_reviewed5.tsv]
 0x002C64B8	evtStageTestGetActiveModel	inferred	Returns current stage-test model handle. [names_reviewed5.tsv]
