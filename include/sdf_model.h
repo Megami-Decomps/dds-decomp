@@ -59,13 +59,13 @@ typedef char SdfItemList_firstItem_must_be_at_0x10[
 
 typedef struct sdfModelDef_t {
     SdfItemList *items; /* 0x00 */
-    u32 *serializedAssetData; /* 0x04: count followed by flag-driven asset records */
+    struct SdfMaterialAssetList *serializedAssets; /* 0x04: count-prefixed material records */
     s32 slotPairCount; /* 0x08: passed to sdfModelMakeMorphList */
     struct SdfChunkHeader *chunkTable; /* 0x0C: borrowed by sdfModelRootNode_t */
 } sdfModelDef_t;
 
 typedef char SdfItemListRef_size_must_be_0x10[(sizeof(sdfModelDef_t) == 0x10) ? 1 : -1];
-typedef char SdfItemListRef_serializedAssetData_at_4[((u32)&((sdfModelDef_t *)0)->serializedAssetData == 4) ? 1 : -1];
+typedef char SdfItemListRef_serializedAssets_at_4[((u32)&((sdfModelDef_t *)0)->serializedAssets == 4) ? 1 : -1];
 typedef char SdfItemListRef_slotPairCount_at_8[((u32)&((sdfModelDef_t *)0)->slotPairCount == 8) ? 1 : -1];
 typedef char SdfItemListRef_chunkTable_at_C[((u32)&((sdfModelDef_t *)0)->chunkTable == 0xC) ? 1 : -1];
 

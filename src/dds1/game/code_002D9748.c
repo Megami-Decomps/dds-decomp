@@ -24,6 +24,7 @@
 #include "sdf_draw_packet_groups.h"
 #include "sdf_motion.h"
 #include "sdf_motion_node_api.h"
+#include "sdf_material_asset_list.h"
 
 #define SDF_CHUNK_NAMED_IDS 0x4D4E444E
 #define SDF_ASSET_LIST_MIN_CAPACITY 0x20
@@ -899,9 +900,9 @@ void sdfApplyAssetEntryChangesWithForcedTexture(sdfMat_t *asset, s32 entryIndex)
 }
 
 /* Parse the declared number of variable-sized assets, reserving at least the minimum capacity. */
-DevRequest *sdfMatListMake(DevRequest *lookup, u32 *data) {
-    u32 remainingAssets = *data;
-    u8 *parameterCursor = (u8 *)(data + 1);
+DevRequest *sdfMatListMake(DevRequest *lookup, SdfMaterialAssetList *serializedAssets) {
+    u32 remainingAssets = serializedAssets->assetCount;
+    u8 *parameterCursor = serializedAssets->records;
     DevRequest *list = sdfMatListNew(remainingAssets >= SDF_ASSET_LIST_MIN_CAPACITY ? remainingAssets : SDF_ASSET_LIST_MIN_CAPACITY);
     while (remainingAssets != 0) {
         sdfMat_t *asset = sdfMatNew();

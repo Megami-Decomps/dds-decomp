@@ -8,6 +8,7 @@
 #include "sdf_vu_lighting.h"
 #include "sdf_chip.h"
 #include "sdf_model.h"
+#include "sdf_material_asset_list.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
 #include "sdf_model_copy.h"
@@ -344,7 +345,6 @@ sdfModelNode_t *sdfModelNodeNew(void);
 sdfModelRootNode_t *sdfModelRootNew(void);
 void sdfModelAllocNodeList(sdfModelRootNode_t *model, s32 count);
 void sdfModelNodeAdd(sdfModelRootNode_t *list, sdfModelNode_t *owner, sdfModelNode_t *node);
-DevRequest *sdfMatListMake(DevRequest *lookup, u32 *data);
 
 /* Build the buffered model, parse its asset records and create one draw node per
  * item, linking each node under its parent item's node when it has one. */
@@ -358,7 +358,7 @@ sdfModelRootNode_t *sdfModelMakeRoot(DevRequest *resourceList, sdfModelDef_t *li
     sdfModelNode_t *parent;
 
     model->assetData = resourceList;
-    model->resources = sdfMatListMake(resourceList, listRef->serializedAssetData);
+    model->resources = sdfMatListMake(resourceList, listRef->serializedAssets);
     model->chunkTable = listRef->chunkTable;
     sdfModelMakeMorphList(model, listRef->slotPairCount);
     list = listRef->items;
