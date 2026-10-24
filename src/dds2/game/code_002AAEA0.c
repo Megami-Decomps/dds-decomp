@@ -175,7 +175,7 @@ s32 mnuDrawStaffImageScreen(dds3ProcessID_t *callback) {
     s32 context;
 
     context = dds3GetProcessData(callback);
-    mnuDrawCampIconBackdrop(context + 0x11C, 0x20);
+    mnuDrawCampIconBackdrop(&((MenuStaffContext *)context)->campEffect, 0x20);
     mnuDrawStaffScrollPanel(-0x10, -8, 0, ((MenuStaffContext *)context)->scrollPanel, 0x54);
     mnuCreateStaffImageSprite(0x18);
     mnuDrawStaffGridLabelsForKind(2, ((MenuStaffContext *)context)->resources.baseResources[0]);

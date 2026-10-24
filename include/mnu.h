@@ -921,7 +921,7 @@ typedef struct MenuStaffContext {
     MenuWindowContainer *resourceListWindow; /* 0x10C: third window made by mnuStaffInitResourceLists. */
     struct EffMappedResource *motion[2]; /* 0x110 and 0x114 */
     struct MenuScrollPanel *scrollPanel; /* 0x118: owned camp scroll panel */
-    u8 pad11C[0x168];
+    MenuCampEffect campEffect; /* 0x11C: backdrop resources, sparks and fade state. */
     /* 002BD480 consumes the full page owner; its first list is at 0xA914. */
     MenuPageWindow partyWindow; /* 0x284..0xA927 */
     PartyPanel partyPanel;     /* 0xA928: initialized by 002A9068 and 002ACF38. */

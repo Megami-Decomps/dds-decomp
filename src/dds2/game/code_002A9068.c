@@ -92,7 +92,7 @@ extern void ptyClearProfileRecords(void);
 
 extern void ptyRebuildAllProfiles(void);
 
-extern void mnuDrawCampIconBackdrop(u8 *, s32);
+extern void mnuDrawCampIconBackdrop(MenuCampEffect *, s32);
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
@@ -864,7 +864,7 @@ void mnuDestroyStaffMenuTask(dds3ProcessID_t *task) {
     mnuDestroyScrollPanel(((MenuStaffContext *)menuBytes)->scrollPanel);
     mnuShutdownContext((MenuPageWindow *)(menuBytes + 0x284));
     fclDestroyMessage();
-    mnuDestroyEffectResources(menuBytes + 0x11c);
+    mnuDestroyEffectResources(&((MenuStaffContext *)menuBytes)->campEffect.resources);
     mnuReleaseTitleEffectResourceGroups((MenuStaffContext *)menuBytes);
     movReleaseTitleEffects(menuBytes);
     effDestroyEffectList(((MenuStaffContext *)menuBytes)->menuResource);
@@ -1127,7 +1127,7 @@ void mnuDrawCampIconBackdropByKind(s32 kind, dds3ProcessID_t *task) {
     struct EffectSlotSet *resources;
     BdWork *slots;
 
-    mnuDrawCampIconBackdrop(work + 0x11C, 0x20);
+    mnuDrawCampIconBackdrop(&visual->campEffect, 0x20);
     switch (kind) {
     case 2:
         effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, visual->highlightOpacity, 0, visual->resources.baseResources[0], 0x19, 0x53);
