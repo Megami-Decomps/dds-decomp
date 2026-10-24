@@ -4701,9 +4701,8 @@ s32 func_0020A860(void) {
 
 extern const BtlAffinityRow *datExternalAffinityTable;
 
-/* Unit 0x11B command hook: when the command's mapped skill is a present enemy
- * unit, return that command's entry from affinity row 0x175. */
-s32 func_0020AB08(datUnitWork_t *record, s32 command) {
+/* Resolve the mapped command's row-0x175 affinity for the special unit. */
+s32 btlResolveSpecialUnitCommandAffinity(datUnitWork_t *record, s32 command) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     s32 skill;

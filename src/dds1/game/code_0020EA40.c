@@ -271,7 +271,7 @@ void func_00206608(void);
 void btlQueueLinkedPairModelSwapTasks(BtlTask *, s32, u64, u64, u64);
 void func_00209EB8(BtlTask *);
 s32 func_0020A860(void);
-s32 func_0020AB08(datUnitWork_t *, s32);
+s32 btlResolveSpecialUnitCommandAffinity(datUnitWork_t *, s32);
 s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
 void btlUpdateBossUnitScaleTransition(void);
 s32 btlOffsetSpecialTargetPositionForActionHook(BtlLinkedCommand *, s32, s32);
@@ -482,7 +482,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         effBTLFieldColorSetFlags(1);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlMapLinkedCommandResult);
         BTL_INSTALL_CALLBACK(battle->pad5B0, 0x0, func_0020A860);
-        BTL_INSTALL_CALLBACK(battle->unitValueOverrideHook, 0x0, func_0020AB08);
+        BTL_INSTALL_CALLBACK(battle->unitValueOverrideHook, 0x0, btlResolveSpecialUnitCommandAffinity);
         BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlFadeOtherEnemyUnitsWhenSpecialModeActive);
         BTL_INSTALL_CALLBACK(battle->summonEffectId, 0x0, btlMapSkillToCode);
         BTL_INSTALL_CALLBACK(battle->summonEffectDelay, 0x0, btlMapSkillRange);
