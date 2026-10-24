@@ -218,7 +218,7 @@ void sdfTexRebuildPacket(sdfTexHandle_t *texture) {
     }
 }
 
-sdfTexHandle_t *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header, s32 mode) {
+sdfTexHandle_t *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header, s32 borrowPixels) {
     sdfTexHandle_t *texture;
     u8 *pixels;
     s32 format;
@@ -249,7 +249,7 @@ sdfTexHandle_t *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header, s
     if (sdfTexGetCLUTCount(texture) != 0) {
         sdfTexAllocClutBuff(texture);
         sdfTexCopyClutData(texture, pixels);
-        pixels = sdfTexTransCLUT(texture, sdfTexGetCLUTAddr(texture), pixels, mode);
+        pixels = sdfTexTransCLUT(texture, sdfTexGetCLUTAddr(texture), pixels, borrowPixels);
     }
     format = texture->pixelFormat;
     width = texture->width;
@@ -258,7 +258,7 @@ sdfTexHandle_t *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header, s
     destination = sdfTexGetPixelAddr(texture);
     bits = sdfTexGetTexelBitCount(format);
     do {
-        pixels = sdfTexTransData(destination, width, height, format, pixels, mode);
+        pixels = sdfTexTransData(destination, width, height, format, pixels, borrowPixels);
         levels--;
         destination += (bits * width * height) >> 5;
         width >>= 1;
@@ -268,12 +268,12 @@ sdfTexHandle_t *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header, s
     return texture;
 }
 
-/* Build the texture and its packet with variant zero. */
+/* Build the texture and packet using queue-owned copies of the input pixels. */
 sdfTexHandle_t *sdfTexSet(const SdfTextureFileHeader *header) {
     return sdfTexCreateFromFileHeader(header, 0);
 }
 
-/* Build the texture and its packet with variant one. */
+/* Build the texture and packet while borrowing input pixels through transfer. */
 sdfTexHandle_t *sdfTexSetDirect(const SdfTextureFileHeader *header) {
     return sdfTexCreateFromFileHeader(header, 1);
 }
