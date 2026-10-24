@@ -163,7 +163,7 @@ void dds3FontReqDrawFont(void *owner) {
     frFontDrawGlyphInDefaultMode(node->glyph);
 }
 
-Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, void *text) {
+Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, const char *text) {
     struct _FRQ *glyph;
     Dds3FontNode *node;
 

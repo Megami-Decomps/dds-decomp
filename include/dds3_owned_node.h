@@ -60,7 +60,7 @@ void dds3SetLinkedNodeValue(Dds3IntrusiveNode *node, u32 value);
 void dds3FontReqListRunTo(s32 value);
 void dds3FontReqListCount(void);
 
-Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, void *text);
+Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, const char *text);
 void dds3FontReqSetColorNo(Dds3FontNode *node, u8 value);
 void dds3FontReqDestroy(void *owner);
 void dds3FontReqDrawFont(void *owner);
