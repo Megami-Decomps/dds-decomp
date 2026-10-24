@@ -3605,11 +3605,10 @@ void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit) {
     }
 }
 
-u32 btlApplyIndexedUnitEffectTask(u8 *arguments) {
-    s32 index = ((BtlRuntimeTaskArgs *)arguments)->option;
+u32 btlApplyIndexedUnitEffectTask(BtlRuntimeTaskArgs *taskArgs) {
+    s32 index = taskArgs->option;
     if (index >= 0) {
-        btlApplyScaledUnitEffectParameter(((BtlRuntimeTaskArgs *)arguments)->actor, index, ((BtlRuntimeTaskArgs *)arguments)->unk_08,
-                        ((BtlRuntimeTaskArgs *)arguments)->scale2);
+        btlApplyScaledUnitEffectParameter(taskArgs->actor, index, taskArgs->unk_08, taskArgs->scale2);
     }
     return 1;
 }
