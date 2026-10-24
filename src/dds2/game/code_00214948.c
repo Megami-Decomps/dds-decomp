@@ -2419,9 +2419,9 @@ void btlQueueGateComponentScriptAndSound(ActionStateLink *record) {
     record->flags = flags & ~8;
 }
 
-extern f32 D_003BF6A0[];
+extern f32 D_003BF6A0[4];
 
-extern void btlSetUnitRotation(BtlUnit *, s128 *);
+extern void btlSetUnitRotation(BtlUnit *, const f32 [4]);
 
 /* Reset the special actor groups to their fixed facing and battle position. */
 void btlResetGateComponentTransforms(void) {
@@ -2443,7 +2443,7 @@ void btlResetGateComponentTransforms(void) {
                         continue;
                     }
                 }
-                btlSetUnitRotation(unit, (s128 *)D_003BF6A0);
+                btlSetUnitRotation(unit, D_003BF6A0);
                 /* Stop automatic facing before installing the reset pose. */
                 unit->status.flags &= ~0x80000;
                 unit->position[0] = 0.0f;
@@ -3116,7 +3116,7 @@ s32 btlMotionOffsetForActor(s32 actor, s32 base) {
     return base;
 }
 
-extern void btlSetUnitRotation(BtlUnit *, s128 *);
+extern void btlSetUnitRotation(BtlUnit *, const f32 [4]);
 
 extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
 
@@ -4632,7 +4632,7 @@ extern void btlSetRuntimeFlag2000(void);
 
 extern u8 D_003BF6C0[][5];
 
-extern u8 D_003BF950[];
+extern f32 D_003BF950[4];
 
 extern void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *);
 
@@ -4656,7 +4656,7 @@ extern void btlSetSatanFixedActionCamera(u32);
 
 extern void btlApplyMaskedActorEntryAdjustments(BtlUnit *unit, u32 flags, s16 delta);
 
-extern void btlSetUnitRotation(BtlUnit *, s128 *);
+extern void btlSetUnitRotation(BtlUnit *, const f32 [4]);
 
 extern void btlSetSpecialEnemyGeometry(void);
 
@@ -6360,7 +6360,7 @@ void btlRefreshSpecialActionUnits(void) {
                 s32 action = unit->partyRecord.unitId;
                 if (action < 0x122) {
                     if (action >= 0x11d) {
-                        btlSetUnitRotation(unit, (s128 *)D_003BF950);
+                        btlSetUnitRotation(unit, D_003BF950);
                         unit->status.flags &= ~0x80000;
                     }
                 }
@@ -8419,7 +8419,7 @@ void btlRestoreLinkedEffectUnitPose(BtlUnit *source) {
     unit->status.stateFlags &= ~0x80;
     unit->status.stateFlags &= ~0x100;
     btlSetUnitPosition(unit, unit->position);
-    btlSetUnitRotation(effect->linked.actor, (s128 *)effect->linked.actor->rotation);
+    btlSetUnitRotation(effect->linked.actor, effect->linked.actor->rotation);
     unit = effect->linked.actor;
 
     if (unit->status.flags & 2) {
@@ -8615,9 +8615,9 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
         btlSetUnitPosition(mainUnit, mainUnit->position);
         SDF_VU0_COPYVECTOR(twin->position, mainUnit->position);
         btlSetUnitPosition(twin, mainUnit->position);
-        btlSetUnitRotation(mainUnit, (s128 *)mainUnit->rotation);
+        btlSetUnitRotation(mainUnit, mainUnit->rotation);
         SDF_VU0_COPYVECTOR(twin->rotation, mainUnit->rotation);
-        btlSetUnitRotation(twin, (s128 *)mainUnit->rotation);
+        btlSetUnitRotation(twin, mainUnit->rotation);
         if (mainUnit->resourceIndex != twin->resourceIndex) {
             btlInitializeEffectVectorsFromSourceRecords(mainUnit,
                 mainUnit->resourceKind, mainUnit->resourceIndex);
@@ -8655,7 +8655,7 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
             SDF_VU0_COPYVECTOR(position, twin->position);
             position[0] += 420.0f;
             btlSetUnitPosition(twin, position);
-            btlSetUnitRotation(twin, (s128 *)twin->rotation);
+            btlSetUnitRotation(twin, twin->rotation);
             btlInitializeEffectVectorsFromSourceRecords(twin, 1, 0x12F);
             twin->status.stateFlags |= 0x100;
             btlRestoreLinkedEffectUnitPose(twin);
@@ -8671,7 +8671,7 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
             /* The snapshot is not used by the following main-unit refresh. */
             SDF_VU0_COPYVECTOR(position, twin->position);
             btlSetUnitPosition(mainUnit, mainUnit->position);
-            btlSetUnitRotation(mainUnit, (s128 *)mainUnit->rotation);
+            btlSetUnitRotation(mainUnit, mainUnit->rotation);
             btlInitializeEffectVectorsFromSourceRecords(mainUnit, 1, 0x12E);
         }
     }

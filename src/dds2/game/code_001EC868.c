@@ -303,7 +303,7 @@ extern struct SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id);
 
 extern void btlSetUnitPosition(BtlUnit *unit, const f32 *position);
 
-extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
+extern void btlSetUnitRotation(BtlUnit *unit, const f32 rotation[4]);
 
 
 
@@ -315,7 +315,7 @@ extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
 
 extern void btlUnitGetBodyPosVU(BtlUnit *);
 
-extern void btlSetUnitRotation(BtlUnit *, s128 *);
+extern void btlSetUnitRotation(BtlUnit *, const f32 [4]);
 
 extern void effBattleUpdate(effBTLCutHandle_t *);
 
@@ -902,7 +902,7 @@ void btlBuildDistanceClampedActionCameraBlend(BtlLinkedCommand *action, BtlCamSt
                 SDF_VU0_STOREVECTOR_NOMEM(center);
                 if (btlAimHorizontalDirectionVU(bodyPosition, center) != 0) {
                     SDF_VU0_STOREVECTOR_NOMEM(rotation);
-                    btlSetUnitRotation(unit, (s128 *)rotation);
+                    btlSetUnitRotation(unit, rotation);
                 }
             }
         } else {
@@ -1820,7 +1820,7 @@ void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out
         SDF_VU0_STOREVECTOR_NOMEM(userPosition);
         if (btlAimHorizontalDirectionVU(targetPosition, userPosition) != 0) {
             SDF_VU0_STOREVECTOR_NOMEM(rotation);
-            btlSetUnitRotation(target, (s128 *)rotation);
+            btlSetUnitRotation(target, rotation);
         }
     }
     btlAdjustCameraDirectionForDefaultPlane(out);
@@ -1845,7 +1845,7 @@ void btlActionAimUserAtTargets(BtlLinkedCommand *action, BtlCamState *pose, BtlC
         SDF_VU0_STOREVECTOR_NOMEM(vec[1]);
         if (btlAimHorizontalDirectionVU(vec[1], vec[0]) != 0) {
             SDF_VU0_STOREVECTOR_NOMEM(&rot);
-            btlSetUnitRotation(unit, &rot);
+            btlSetUnitRotation(unit, (const f32 *)&rot);
         }
     }
 }
@@ -5005,7 +5005,7 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
                             SDF_VU0_STOREVECTOR_NOMEM(facing);
                         }
                     }
-                    btlSetUnitRotation(unit, (s128 *)facing);
+                    btlSetUnitRotation(unit, facing);
                 }
             }
             ++instruction;
@@ -7042,7 +7042,7 @@ void btlInitTargetCursorAndFacing(BtlLinkedCommand *action, BtlCamState *state) 
         SDF_VU0_STOREVECTOR_NOMEM(position);
         btlAimHorizontalDirectionVU((f32 *)aimPosition, (f32 *)position);
         SDF_VU0_STOREVECTOR_NOMEM(rotation);
-        btlSetUnitRotation(unit, (s128 *)rotation);
+        btlSetUnitRotation(unit, rotation);
     }
 }
 

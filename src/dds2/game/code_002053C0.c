@@ -83,12 +83,12 @@ extern void mnuReleaseSoundBufferLocked(void);
 
 extern void btlSetUnitPosition(BtlUnit *unit, const f32 *position);
 
-extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
+extern void btlSetUnitRotation(BtlUnit *unit, const f32 rotation[4]);
 
 
 extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
 
-extern void btlSetUnitRotation(BtlUnit *, s128 *);
+extern void btlSetUnitRotation(BtlUnit *, const f32 [4]);
 
 extern char D_00436A28[];
 
@@ -374,7 +374,7 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
             SDF_VU0_STOREVECTOR_NOMEM(position);
             if (btlAimHorizontalDirectionVU(position, target) != 0) {
                 SDF_VU0_STOREVECTOR_NOMEM(direction);
-                btlSetUnitRotation(unit, (s128 *)direction);
+                btlSetUnitRotation(unit, direction);
             }
         }
     }
@@ -515,7 +515,7 @@ s32 btlArrangeFormationSlots(s32 filter) {
         btlSetUnitPosition(unit, position);
         SDF_VU0_COPYVECTOR(unit->rotation, rotation);
         angle += halfAngle;
-        btlSetUnitRotation(unit, (s128 *)rotation);
+        btlSetUnitRotation(unit, rotation);
         angle += spacingAngle;
     }
     if (battle->postPlacementCallback != 0) {
@@ -580,7 +580,7 @@ void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, 
     btlSetUnitPosition(slot[1], pos);
     if (btlAimHorizontalDirectionVU((f32 *)pos, (f32 *)center) != 0) {
         SDF_VU0_STOREVECTOR_NOMEM(rotation);
-        btlSetUnitRotation(slot[1], (s128 *)rotation);
+        btlSetUnitRotation(slot[1], rotation);
     }
     angle = 30.0f * 0.017453293f;
     pos[0] = center[0] - sdfCos(angle) * radius;
@@ -589,7 +589,7 @@ void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, 
     btlSetUnitPosition(slot[0], pos);
     if (btlAimHorizontalDirectionVU((f32 *)pos, (f32 *)center) != 0) {
         SDF_VU0_STOREVECTOR_NOMEM(rotation);
-        btlSetUnitRotation(slot[0], (s128 *)rotation);
+        btlSetUnitRotation(slot[0], rotation);
     }
     pos[0] = center[0] + sdfCos(angle) * radius;
     pos[1] = 0.0f;
@@ -597,7 +597,7 @@ void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, 
     btlSetUnitPosition(slot[2], pos);
     if (btlAimHorizontalDirectionVU((f32 *)pos, (f32 *)center) != 0) {
         SDF_VU0_STOREVECTOR_NOMEM(rotation);
-        btlSetUnitRotation(slot[2], (s128 *)rotation);
+        btlSetUnitRotation(slot[2], rotation);
     }
 }
 
@@ -736,7 +736,7 @@ void btlPlaceTripleFormationAroundMiddleActor(ActionStateLink *link, BtlUnit *fi
             btlSetUnitPosition(slot[i], pos);
             if (btlAimHorizontalDirectionVU((f32 *)pos, (f32 *)center) != 0) {
                 SDF_VU0_STOREVECTOR_NOMEM(rot);
-                btlSetUnitRotation(slot[i], (s128 *)rot);
+                btlSetUnitRotation(slot[i], rot);
             }
         }
     }
@@ -779,7 +779,7 @@ void btlOrientFrontAndBackUnitsTowardTargets(ActionStateLink *link, BtlUnit *a, 
         SDF_VU0_STOREVECTOR_NOMEM(vec[1]);
         if (btlAimHorizontalDirectionVU(vec[0], vec[1]) != 0) {
             SDF_VU0_STOREVECTOR_NOMEM(&rot);
-            btlSetUnitRotation(front, &rot);
+            btlSetUnitRotation(front, (const f32 *)&rot);
         }
     }
     btlUnitFaceTarget(back, front);
@@ -942,7 +942,7 @@ void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other)
         btlSetUnitPosition(slot[i], pos);
         if (btlAimHorizontalDirectionVU((f32 *)pos, (f32 *)muzzle) != 0) {
             SDF_VU0_STOREVECTOR_NOMEM(rot);
-            btlSetUnitRotation(slot[i], (s128 *)rot);
+            btlSetUnitRotation(slot[i], rot);
         }
     }
 }
@@ -1067,7 +1067,7 @@ void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
         btlSetUnitPosition(slots[i], position);
         if (btlAimHorizontalDirectionVU(position, muzzle) != 0) {
             SDF_VU0_STOREVECTOR_NOMEM(rotation);
-            btlSetUnitRotation(slots[i], (s128 *)rotation);
+            btlSetUnitRotation(slots[i], rotation);
         }
     }
 }
@@ -1188,7 +1188,7 @@ void btlPlaceBothSidesInRadialFormation(ActionStateLink *link, BtlUnit *firstAct
             btlSetUnitPosition(second[slot], position);
             if (btlAimHorizontalDirectionVU(position, effZeroVector)) {
                 SDF_VU0_STOREVECTOR_NOMEM(rotation);
-                btlSetUnitRotation(second[slot], (s128 *)rotation);
+                btlSetUnitRotation(second[slot], rotation);
             }
         }
         if (first[slot] != NULL) {
@@ -1206,7 +1206,7 @@ void btlPlaceBothSidesInRadialFormation(ActionStateLink *link, BtlUnit *firstAct
             btlSetUnitPosition(first[slot], position);
             if (btlAimHorizontalDirectionVU(position, target)) {
                 SDF_VU0_STOREVECTOR_NOMEM(rotation);
-                btlSetUnitRotation(first[slot], (s128 *)rotation);
+                btlSetUnitRotation(first[slot], rotation);
             }
         }
         SDF_VU0_LOADVECTOR(secondDirection);

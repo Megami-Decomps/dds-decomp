@@ -1088,7 +1088,7 @@ void btlClearActorUnitDefeatCandidates(BtlIndexList *list) {
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
 extern void btlSetUnitPosition(BtlUnit *, const f32 *);
-extern void btlSetUnitRotation(BtlUnit *, s128 *);
+extern void btlSetUnitRotation(BtlUnit *, const f32 [4]);
 
 extern s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *unit);
 
@@ -1100,7 +1100,7 @@ void btlUpdateUnitActors(void) {
     while (unit != NULL) {
         btlFlagUnitDefeatCandidate(unit);
         btlSetUnitPosition(unit, unit->position);
-        btlSetUnitRotation(unit, (s128 *)unit->rotation);
+        btlSetUnitRotation(unit, unit->rotation);
         if ((btlIsActorModeAcceptedByBattleHook((s32)unit) == 0 && unit->effectState != 0) ||
             (unit->updateFlags & 2) != 0) {
             btlRefreshUnitMotionSelection(unit);
