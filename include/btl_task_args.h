@@ -210,6 +210,24 @@ typedef char BtlModelChangeArgsSizeCheck[sizeof(BtlModelChangeArgs) == 0x1C ? 1 
 typedef char BtlModelChangeArgsElapsedOffsetCheck[(u32)&((BtlModelChangeArgs *)0)->elapsed == 0x14 ? 1 : -1];
 typedef char BtlModelChangeArgsPhaseOffsetCheck[(u32)&((BtlModelChangeArgs *)0)->phase == 0x18 ? 1 : -1];
 
+/* Task 0x0F applies two packed unit colors after checking unit status. */
+typedef struct BtlUnitLightAndAmbientTaskArgs {
+    u32 firstColor;       /* 0x00 */
+    u32 secondColor;      /* 0x04 */
+    s32 duration;         /* 0x08 */
+    struct BtlUnit *unit; /* 0x0C */
+} BtlUnitLightAndAmbientTaskArgs;
+typedef char BtlUnitLightAndAmbientTaskArgsSizeCheck[
+    sizeof(BtlUnitLightAndAmbientTaskArgs) == 0x10 ? 1 : -1];
+typedef char BtlUnitLightAndAmbientTaskArgsFirstColorOffsetCheck[
+    (u32)&((BtlUnitLightAndAmbientTaskArgs *)0)->firstColor == 0 ? 1 : -1];
+typedef char BtlUnitLightAndAmbientTaskArgsSecondColorOffsetCheck[
+    (u32)&((BtlUnitLightAndAmbientTaskArgs *)0)->secondColor == 4 ? 1 : -1];
+typedef char BtlUnitLightAndAmbientTaskArgsDurationOffsetCheck[
+    (u32)&((BtlUnitLightAndAmbientTaskArgs *)0)->duration == 8 ? 1 : -1];
+typedef char BtlUnitLightAndAmbientTaskArgsUnitOffsetCheck[
+    (u32)&((BtlUnitLightAndAmbientTaskArgs *)0)->unit == 0xC ? 1 : -1];
+
 /* Shared 0x28-byte record used by battle runtime callbacks and task setup. */
 typedef struct BtlRuntimeTaskArgs {
     union {

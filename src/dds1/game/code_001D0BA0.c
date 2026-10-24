@@ -4019,23 +4019,23 @@ BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 re
     return (BtlRuntimeTask *)task;
 }
 
-void btlApplyLinkedUnitStatusWhenActorActive(BtlRuntimeTaskArgs *taskArgs) {
-    if ((taskArgs->unitC->status.flags & 2) != 0) {
-        evtUnitLightOn(taskArgs->unitC->ext);
+void btlApplyLinkedUnitStatusWhenActorActive(BtlUnitLightAndAmbientTaskArgs *taskArgs) {
+    if ((taskArgs->unit->status.flags & 2) != 0) {
+        evtUnitLightOn(taskArgs->unit->ext);
         return;
     }
 }
 
-u32 btlApplyUnitFxWhenLoaded(BtlRuntimeTaskArgs *taskArgs) {
-    if ((btlUnitStatusPair(taskArgs->unitC) & 0x1000000002) == 0x1000000002) {
-        evtSetUnitLightAndAmbient(taskArgs->unitC->ext, taskArgs->unk_08, taskArgs->value, taskArgs->option);
+u32 btlApplyUnitFxWhenLoaded(BtlUnitLightAndAmbientTaskArgs *taskArgs) {
+    if ((btlUnitStatusPair(taskArgs->unit) & 0x1000000002) == 0x1000000002) {
+        evtSetUnitLightAndAmbient(taskArgs->unit->ext, taskArgs->duration, taskArgs->firstColor, taskArgs->secondColor);
     }
     return 1;
 }
 
 u8 *btlCreateUnitTask0F(BtlUnit *unit, s32 firstColor, s32 secondColor, s32 duration) {
     u8 *task = btlAllocTask(16);
-    BtlRuntimeTaskArgs *args;
+    BtlUnitLightAndAmbientTaskArgs *args;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0xF;
@@ -4043,10 +4043,10 @@ u8 *btlCreateUnitTask0F(BtlUnit *unit, s32 firstColor, s32 secondColor, s32 dura
     *(void **)(task + 0x48) = btlApplyLinkedUnitStatusWhenActorActive;
     *(void **)(task + 0x4C) = btlApplyUnitFxWhenLoaded;
     args = btlGetTaskArguments(task);
-    args->unitC = unit;
-    args->value = firstColor;
-    args->option = secondColor;
-    args->unk_08 = duration;
+    args->unit = unit;
+    args->firstColor = firstColor;
+    args->secondColor = secondColor;
+    args->duration = duration;
     return task;
 }
 
