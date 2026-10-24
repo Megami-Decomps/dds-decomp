@@ -314,7 +314,7 @@ void mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
         break;
     }
 
-    evtStageTestQueueMotion(2, 1);
+    evtStageTestQueueMotion(EVT_STAGE_MOTION_SECONDARY_SUPPRESS_FALLBACK, 1);
     if (work->rewardMode >= 4) {
         return;
     }

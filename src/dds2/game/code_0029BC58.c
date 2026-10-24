@@ -69,14 +69,14 @@ void mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
     case 1:
     case 2:
     case 3:
-        evtStageTestQueueMotion(2, 1);
+        evtStageTestQueueMotion(EVT_STAGE_MOTION_SECONDARY_SUPPRESS_FALLBACK, 1);
         evtStageTestSetPendingEffect(0);
         return;
     case 4:
-        evtStageTestQueueMotion(2, 1);
+        evtStageTestQueueMotion(EVT_STAGE_MOTION_SECONDARY_SUPPRESS_FALLBACK, 1);
         return;
     case 5:
-        evtStageTestQueueMotion(2, 2);
+        evtStageTestQueueMotion(EVT_STAGE_MOTION_SECONDARY_SUPPRESS_FALLBACK, 2);
         break;
     }
 }

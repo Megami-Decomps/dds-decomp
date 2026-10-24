@@ -2790,7 +2790,7 @@ s32 evtStageTestCountFlags(s32 columnKind) {
 /* Index a motion column directly and queue a 15-frame blend.
  * Kinds 1/2 use column 1 with zero lead and clear/set fallback suppression;
  * all other kinds use column 0 with a 15-frame lead and retain that flag. */
-void evtStageTestQueueMotion(s32 motionKind, u32 columnIndex) {
+void evtStageTestQueueMotion(EvtStageMotionKind motionKind, u32 columnIndex) {
     StageTestSlot *activeSlot = evtStageTestState.queue.slot;
     f32 blendLeadFrames = 0.0f;
     s32 motionIndex;
@@ -2801,11 +2801,11 @@ void evtStageTestQueueMotion(s32 motionKind, u32 columnIndex) {
             blendLeadFrames = EVT_STAGE_DEFAULT_BLEND_FRAMES;
             motionIndex = *(evtStageTestState.entries[activeSlot->entryIndex].column[0] + columnIndex);
             break;
-        case 1:
+        case EVT_STAGE_MOTION_SECONDARY_ALLOW_FALLBACK:
             motionIndex = *(evtStageTestState.entries[activeSlot->entryIndex].column[1] + columnIndex);
             activeSlot->flags &= ~EVT_STAGE_MOTION_SUPPRESS_FALLBACK;
             break;
-        case 2:
+        case EVT_STAGE_MOTION_SECONDARY_SUPPRESS_FALLBACK:
             motionIndex = *(evtStageTestState.entries[activeSlot->entryIndex].column[1] + columnIndex);
             activeSlot->flags |= EVT_STAGE_MOTION_SUPPRESS_FALLBACK;
             break;

@@ -5,6 +5,13 @@
 
 s32 evtStageTestCountFlags(s32 columnKind);
 s32 evtStageTestHasPendingMotion(void);
-void evtStageTestQueueMotion(s32 motionKind, u32 columnIndex);
+
+typedef enum EvtStageMotionKind {
+    EVT_STAGE_MOTION_PRIMARY_COLUMN = 0,
+    EVT_STAGE_MOTION_SECONDARY_ALLOW_FALLBACK = 1,
+    EVT_STAGE_MOTION_SECONDARY_SUPPRESS_FALLBACK = 2
+} EvtStageMotionKind;
+
+void evtStageTestQueueMotion(EvtStageMotionKind motionKind, u32 columnIndex);
 
 #endif

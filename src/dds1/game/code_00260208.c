@@ -1142,7 +1142,7 @@ void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
         brsSelectLevelBonusMode(work->selectedRewardRow->unit, work);
         evtStageTestSelectEntryWithoutInitialValue(
             work->selectedRewardRow->unit->unitId, 0);
-        evtStageTestQueueMotion(1, 0);
+        evtStageTestQueueMotion(EVT_STAGE_MOTION_SECONDARY_ALLOW_FALLBACK, 0);
 
         if (*selectedIndex < work->primaryRewards.count) {
             mnuForwardTableByte(

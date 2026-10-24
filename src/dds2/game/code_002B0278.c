@@ -1651,7 +1651,8 @@ void mnuIdleVoiceTimer(StaffMenuRuntime *object) {
             }
             if (object->idleFrames >= 0x12d) {
                 count = evtStageTestCountFlags(0);
-                evtStageTestQueueMotion(0, dds3GetRandA(0) % count);
+                evtStageTestQueueMotion(
+                    EVT_STAGE_MOTION_PRIMARY_COLUMN, dds3GetRandA(0) % count);
                 object->idleFrames = 0;
             }
         }
