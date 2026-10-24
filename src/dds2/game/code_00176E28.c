@@ -112,7 +112,7 @@ EffRingWork *source;
 }
 
 /* Create a ring from the first parameter-table block. */
-EffRingWork *effPCPFlashPolyRingExpHCreatePCF(void *table) {
+EffRingWork *effPCPFlashPolyRingExpHCreatePCF(const EffParamTable *table) {
     void *parameterBlock;
 
     parameterBlock = dds3EffectPCPDataGetData(table, 0);
