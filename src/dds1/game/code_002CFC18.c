@@ -41,13 +41,13 @@ s32 VblankIntcHandler(s32 eventId) {
     return 0;
 }
 
-extern SdfHandlerNode *sdfAddHandler(s32, s32, SdfHandlerCallback, s32, s32);
+extern SdfHandlerNode *sdfAddHandler(SdfHandlerKind, s32, SdfHandlerCallback, s32, s32);
 
 /* Each wake-up broadcasts to every tracked thread under the list semaphore. */
 void VblankThreadProc(void) {
     SdfThreadNode *threadEntry;
 
-    sdfAddHandler(0, SDF_THREAD_COMPLETION_EVENT, VblankIntcHandler, -1, 0);
+    sdfAddHandler(SDF_HANDLER_KIND_INTERRUPT, SDF_THREAD_COMPLETION_EVENT, VblankIntcHandler, -1, 0);
     EnableIntc(SDF_THREAD_COMPLETION_EVENT);
     for (;;) {
         SleepThread();

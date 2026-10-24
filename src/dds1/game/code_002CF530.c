@@ -66,11 +66,11 @@ extern void FatalError(const char *format, ...) __attribute__((noreturn));
 extern s32 AddIntcHandler2(s32, s32, s32, s32);
 extern s32 AddDmacHandler2(s32, s32, s32, s32);
 
-SdfHandlerNode *sdfAddHandler(s32 kind, s32 channel, SdfHandlerCallback handler, s32 arg, s32 next) {
+SdfHandlerNode *sdfAddHandler(SdfHandlerKind kind, s32 channel, SdfHandlerCallback handler, s32 arg, s32 next) {
     SdfHandlerNode *node;
     s32 id;
 
-    switch (kind) {
+    switch ((s32)kind) {
     case SDF_HANDLER_KIND_INTERRUPT:
         id = AddIntcHandler2(channel, (s32)handler, arg, next);
         break;
