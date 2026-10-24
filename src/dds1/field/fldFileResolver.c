@@ -134,7 +134,7 @@ extern struct dds3Basic_t *dds3AddMatterObjectBasic(s32 key, f32 *offset, f32 *r
 
 extern char D_0039FD50[]; 
 struct dds3Basic_t *fldMakeDmyMatter(void) {
-    u32 args[8];
+    f32 args[8];
     struct dds3Basic_t *matter;
     args[0] = 0;
     args[1] = 0;
@@ -144,7 +144,7 @@ struct dds3Basic_t *fldMakeDmyMatter(void) {
     args[5] = 0;
     args[6] = 0;
     args[7] = 0;
-    matter = dds3AddMatterObjectBasic(dds3AllocObjectId(), (f32 *)args, (f32 *)(args + 4));
+    matter = dds3AddMatterObjectBasic(dds3AllocObjectId(), args, args + 4);
     dds3SetUnitObjectId(matter, D_0039FD50);
     return matter;
 }
