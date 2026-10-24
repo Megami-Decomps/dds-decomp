@@ -593,7 +593,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, sdfModelRootNode_t
         }
 
         VU0_LOAD_MATRIX(node->worldMatrix);
-        sdfPostmultiplyVuMatrixFromMemory(sdf3DScreenTm);
+        sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)sdf3DScreenTm);
         if (node->boundsCorners != NULL &&
             sdfModelCheckBounds(node->boundsCorners) != 0) {
             continue;

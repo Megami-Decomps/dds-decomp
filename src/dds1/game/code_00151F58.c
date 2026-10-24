@@ -336,7 +336,7 @@ f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
     f32 projectedEndpoint[4];
 
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
+    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)sdfProjectionMatrix);
     SDF_VU0_LOADVECTOR(position);
     SDF_VU0_COPYVECTOR_A_TO_C();
     SDF_VU0_APPLYMATRIX_XYZ1();

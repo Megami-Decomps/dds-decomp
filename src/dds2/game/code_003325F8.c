@@ -290,7 +290,7 @@ void sdfModelMakeMarkPosMatrix(sdfModelRootNode_t *model, SdfMapPositionRecord *
     SDF_VU0_SET_ROW0();
     SDF_VU0_LOAD_ROW3(&record->position);
     SDF_VU0_MATRIX_ROW3_W_SET_ONE();
-    sdfPostmultiplyVuMatrixFromMemory(drawNode->worldMatrix);
+    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)drawNode->worldMatrix);
 }
 
 /* vu0 routine: transform the map-record position by its draw-node matrix;

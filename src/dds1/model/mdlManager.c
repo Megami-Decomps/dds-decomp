@@ -1047,7 +1047,7 @@ void mdlSetEffectScale(dds3ModelHandle_t *ctx, f32 amount) {
 void mdlGetScreenOffset(dds3ModelHandle_t *ctx, const f32 point[4])
 {
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
+    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)sdfProjectionMatrix);
     VU0_MOVE_VF(vf24, vf28);
     VU0_MOVE_VF(vf25, vf29);
     VU0_MOVE_VF(vf26, vf30);
@@ -1077,8 +1077,8 @@ void mdlProjectPoints(dds3ModelHandle_t *ctx, f32 (*inputPoints)[4], f32 (*outpu
     VU0_LOAD_MATRIX(ctx->inner->matrix);
     SDF_VU0_LOADVECTOR(ctx->inner->scaleVector);
     SDF_VU0_SCALE_XYZ();
-    sdfPostmultiplyVuMatrixFromMemory(sdfViewMatrix);
-    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
+    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)sdfViewMatrix);
+    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)sdfProjectionMatrix);
     for (pointIndex = 0; pointIndex < pointCount; pointIndex++) {
         SDF_VU0_LOADVECTOR(inputPoints[pointIndex]);
         SDF_VU0_APPLYMATRIX_XYZ1();

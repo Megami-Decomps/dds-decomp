@@ -236,7 +236,7 @@ u64 *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted) {
     SDF_VU0_VECTOR_W_SET_ZERO();
     SDF_VU0_SET_ROW1();
     SDF_VU0_RESET_ROW3();
-    sdfPostmultiplyVuMatrixFromMemory(sdfViewMatrix);
+    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)sdfViewMatrix);
     SDF_VU0_LOADVECTOR(D_00386470);
     SDF_VU0_SCALE_XYZ_REV();
     axis[0] = (f32)x;

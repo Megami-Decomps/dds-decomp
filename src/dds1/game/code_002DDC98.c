@@ -54,7 +54,7 @@ void MultMatrix(const f32 *matrix) {
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-void sdfPostmultiplyVuMatrixFromMemory(const void *matrix) {
+void sdfPostmultiplyVuMatrixFromMemory(const struct Matrix4 *matrix) {
     SDF_VU0_LOADMATRIX_B(matrix);
     MultMatrixRevNoArg();
 }

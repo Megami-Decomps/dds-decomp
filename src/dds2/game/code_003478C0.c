@@ -405,7 +405,7 @@ SdfPacket *effDebugDrawWireModel(const f32 vertices[][4], const u32 *colors, s32
 
 /* vu0 routine: compose the current matrix with the cached transform, then render line pairs. */
 SdfPacket *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
-    sdfPostmultiplyVuMatrixFromMemory(sdf3DScreenTm);
+    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)sdf3DScreenTm);
     return sdfDrawModelWithMatrix(vertices, colors, vertexCount, primitiveFlags);
 }
 

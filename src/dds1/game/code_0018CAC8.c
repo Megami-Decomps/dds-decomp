@@ -707,7 +707,7 @@ void effScreenOffset(void) {
     u8 *projectionData;
     VU0_LOAD_MATRIX(sdfViewMatrix);
     projectionData = sdfProjectionMatrix;
-    sdfPostmultiplyVuMatrixFromMemory(projectionData);
+    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)projectionData);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
     projectionData += EFF_MATRIX_BYTES;

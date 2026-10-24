@@ -440,7 +440,7 @@ void egl3Dto2D(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z) {
     point[2] = z;
     point[3] = 1.0f;
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
+    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)sdfProjectionMatrix);
     SDF_VU0_COPYMATRIX_A_TO_B();
     SDF_VU0_LOADVECTOR(point);
     SDF_VU0_APPLYMATRIX_XYZ1();

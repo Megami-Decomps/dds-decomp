@@ -1235,7 +1235,7 @@ void func_002DF6C8(EffKindWork *work) {
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, ahead);
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
+    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)sdfProjectionMatrix);
     VU0_LOAD_VF(vf10, ahead);
     VU0_TRANSFORM_POINT(vf10, vf10);
     SDF_VU0_PERSVECTOR();

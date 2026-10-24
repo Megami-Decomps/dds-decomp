@@ -306,7 +306,7 @@ void sdf3DMakeViewportPacket(SdfVuBonePacket *packet, SdfProjectionRecord *node,
     packet->reservedWord = 0;
     VU0_LOAD_MATRIX(transformMatrix);
     VU0_STORE_MATRIX(packet->matrixA);
-    sdfPostmultiplyVuMatrixFromMemory(node->camera.matrix);
+    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)node->camera.matrix);
     VU0_STORE_MATRIX(packet->matrixB);
     SDF_VU0_LOADVECTOR(&node->camera.halfWidth);
         SDF_VU0_STOREVECTOR_NOMEM(packet->vecA);
@@ -334,7 +334,7 @@ extern u8 sdf3DEyeOffset[];
 void sdf3DSetCamera(SdfProjectionRecord *node, const Matrix4 *transformMatrix) {
     VU0_LOAD_MATRIX(transformMatrix);
     VU0_STORE_MATRIX(sdfCameraTm);
-    sdfPostmultiplyVuMatrixFromMemory(node->camera.matrix);
+    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)node->camera.matrix);
         SDF_VU0_LOADVECTOR(node->inverseOrigin);
     VU0_STORE_MATRIX(sdf3DScreenTm);
     SDF_VU0_APPLYMATRIX_XYZ1();
