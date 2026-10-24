@@ -677,7 +677,7 @@ void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char 
     record->sequenceWord38 = 0;
     strcpy(record->name, name);
     record->stage = stage;
-    record->enabled = 1;
+    record->retainCachedAreaResource = 1;
     record->mode = 2;
     record->kind = kind;
     record->code = 0;
@@ -705,7 +705,7 @@ void fldSetSceneParam3(fldSceneParam_t *record, s32 stage, s32 kind, const char 
     record->sequenceWord38 = 0;
     strcpy(record->name, name);
     record->stage = stage;
-    record->enabled = 1;
+    record->retainCachedAreaResource = 1;
     record->mode = 3;
     record->kind = kind;
     record->code = 0;
@@ -732,7 +732,7 @@ void fldSetSceneParam4(fldSceneParam_t *record, s32 stage, s32 kind, const char 
     record->sequenceWord38 = 0;
     strcpy(record->name, name);
     record->stage = stage;
-    record->enabled = 1;
+    record->retainCachedAreaResource = 1;
     record->kind = kind;
     record->code = code;
     record->link = link;
@@ -759,7 +759,7 @@ void fldSetSceneParam5(fldSceneParam_t *record, s32 stage, s32 kind, const char 
     record->sequenceWord38 = 0;
     strcpy(record->name, name);
     record->stage = stage;
-    record->enabled = 1;
+    record->retainCachedAreaResource = 1;
     record->mode = 2;
     record->kind = kind;
     record->code = code;
@@ -776,7 +776,7 @@ void fldSetSceneParamLoad(fldSceneParam_t *record, s32 stage, s32 kind, const ch
     record->sequenceWord3C = 0;
     record->sequenceWord38 = 0;
     strcpy(record->name, name);
-    record->enabled = 1;
+    record->retainCachedAreaResource = 1;
     record->stage = stage;
     record->kind = kind;
     record->code = code;
@@ -2375,7 +2375,7 @@ void fldProcTrigSequence(fldSceneParam_t *record, u32 mode) {
         scene->sequenceCode = record->code;
         scene->room = record->kind;
         scene->sequenceMode = record->sequenceMode;
-        scene->retainCachedAreaResource = record->enabled;
+        scene->retainCachedAreaResource = record->retainCachedAreaResource;
         scene->secondaryState = record->mode;
         scene->cameraLinkMode = record->link;
         strcpy(scene->cameraName, record->detail);
@@ -2495,8 +2495,8 @@ s32 fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter) {
 /* Validate the packet where its native initialization is reconstructed. */
 typedef char FieldSequenceRecord_size_check[
     (sizeof(fldSceneParam_t) == 0xA0) ? 1 : -1];
-typedef char FieldSequenceRecord_enabled_offset_check[
-    ((u32)&((fldSceneParam_t *)0)->enabled == 0x58) ? 1 : -1];
+typedef char FieldSequenceRecord_retainCachedAreaResource_offset_check[
+    ((u32)&((fldSceneParam_t *)0)->retainCachedAreaResource == 0x58) ? 1 : -1];
 
 INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FD30);
 
