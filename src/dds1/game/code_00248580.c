@@ -110,7 +110,7 @@ extern u8 D_003BC3F8[];
 
 extern void mnuDrawStaffPageMarkerIcons(MenuPageWindow *window, StaffSlots *work);
 extern void mnuDrawStaffPanelGridBackdrop(s32 flag, StaffSlots *work);
-extern void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, void *menu, s32 surface);
+extern void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 surface);
 extern void mnuDrawPartyProfilePanelContents(s32, s32, s32, datUnitWork_t *, s32, MenuSimpleSpriteState *, s32);
 extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
 
