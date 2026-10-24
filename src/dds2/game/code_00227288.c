@@ -1840,7 +1840,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         commandFlags = battle->commandRestrictFlags;
         battle->commandRestrictFlags = commandFlags | 4;
         BTL_INSTALL_CALLBACK(battle->selectSoundEffectTarget, 0x0, btlFindUnitByMode);
-        BTL_INSTALL_CALLBACK(battle->unk6E4, 0x0, btlMaskValueWhenSubtaskInactive);
+        BTL_INSTALL_CALLBACK(battle->sourceEffectSelectorOverride, 0x0, btlMaskValueWhenSubtaskInactive);
         BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, btlRestoreMarkedUnitMotionOnStateChange);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlToggleActionByteForFlaggedActor);
         BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlGetMarkedUnitActionResponse);

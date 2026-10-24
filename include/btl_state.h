@@ -636,8 +636,8 @@ typedef struct BtlState {
     u8 pad6D8[4];
     s32 (*commandRangeOverride)(BtlUnit *, s32); /* 0x6DC: btlSelectCommandHitCount calls the range override. */
     BtlUnit *(*selectSoundEffectTarget)(BtlUnit *); /* 0x6E0: DDS2 00201FD8 consumes the returned actor. */
-    s32 (*unk6E4)(BtlUnit *);
-    s32 (*unk6E8)(BtlUnit *);
+    s32 (*sourceEffectSelectorOverride)(BtlUnit *);
+    s32 (*targetEffectSelectorOverride)(BtlUnit *);
     s32 (*scriptReturnHook)(); /* Optional script-return hook; preserve its unspecified retail prototype. */
     void (*prepareMotionHook)(BtlUnit *, s32, s32, s32, s32, f32); /* 0x6F0: index, start, end, mode, frame rate. */
     void (*refreshMotionHook)(BtlUnit *, s32, f32); /* 0x6F4: index and frame rate. */

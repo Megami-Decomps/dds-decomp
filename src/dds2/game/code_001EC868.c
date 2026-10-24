@@ -8067,15 +8067,15 @@ BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *effect, B
     task->callback = btlUpdateReferencedBattleEffect;
     task->onFinish = sndReleaseEffectReferences;
     work = (BtlState *)btlGetRuntime();
-    if (work->unk6E4 != 0) {
-        sourceSelector = work->unk6E4(actor);
+    if (work->sourceEffectSelectorOverride != 0) {
+        sourceSelector = work->sourceEffectSelectorOverride(actor);
     }
     if (sourceSelector == 0) {
         sourceSelector = sourceOwner.selectorKey;
     }
     targetSelector = 0;
-    if (work->unk6E8 != 0) {
-        targetSelector = work->unk6E8(actor);
+    if (work->targetEffectSelectorOverride != 0) {
+        targetSelector = work->targetEffectSelectorOverride(actor);
     }
     if (targetSelector == 0) {
         targetSelector = sourceOwner.selectorKey;
