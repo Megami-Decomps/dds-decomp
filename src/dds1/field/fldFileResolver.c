@@ -6512,8 +6512,8 @@ void fldCopyCameraSetting(FldCameraSetting *destination) {
     *destination = *fldAppliedCameraSettings;
 }
 
-void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
-    FldColorParams *color = &setting->color;
+void fldUpdateCameraColorEffect(const FldCameraSetting *setting) {
+    const FldColorParams *color = &setting->color;
 
     if (color->enabled != 0) {
         fldCameraColorParameters->color.finalColor = fldCameraColorParameters->color.initialColor = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;

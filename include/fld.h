@@ -242,6 +242,6 @@ typedef char FldCameraSettingSizeCheck[(sizeof(FldCameraSetting) == 0x54) ? 1 : 
 
 void evtBlendParamsH(s32 enable, f32 t, const EvtBlendKey *a, const EvtBlendKey *b, EvtBlendKey *out);
 void fldCopyCameraSetting(FldCameraSetting *destination);
-void fldUpdateCameraColorEffect(FldCameraSetting *setting);
+void fldUpdateCameraColorEffect(const FldCameraSetting *setting);
 
 #endif /* FLD_H */
