@@ -121,7 +121,7 @@ s32 AreaBasicConstructor(dds3Basic_t *object) {
     return 1;
 }
 
-s32 CB_ReleaseObjectBasic(void *areaObject);
+s32 CB_ReleaseObjectBasic(dds3Basic_t *areaObject);
 
 
 

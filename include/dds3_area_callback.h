@@ -18,6 +18,6 @@ struct Dds3AreaObjectView {
 typedef char Dds3AreaCallbackOffsetCheck[((u32)&((Dds3AreaCallbackRecordView *)0)->callback == 0x0C) ? 1 : -1];
 typedef char Dds3AreaRecordPointerOffsetCheck[((u32)&((Dds3AreaObjectView *)0)->callbackRecord == 0x10) ? 1 : -1];
 
-s32 CB_BasicDrawProcuder(void *areaObject);
+s32 CB_BasicDrawProcuder(dds3Basic_t *areaObject);
 
 #endif

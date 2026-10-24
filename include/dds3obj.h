@@ -113,7 +113,8 @@ u32 dds3SetBasicArray(dds3BasicArrayHandle_t *object, u32 value);
 u32 dds3GetBasicArray(const dds3BasicArrayHandle_t *object);
 u32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *object);
 u32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *object);
-s32 dds3ForEachBasicArray(dds3BasicArrayHandle_t *object, s32 (*callback)(void *));
+/* Visit stored dds3Basic_t pointers in order; the list still stores 32-bit words. */
+s32 dds3ForEachBasicArray(dds3BasicArrayHandle_t *object, s32 (*callback)(dds3Basic_t *));
 WorldIndexNode *dds3SceneBasicGetList(dds3Basic_t *object, s32 kind);
 
 void dds3AreaBasicRegistItem(dds3Basic_t *indexOwner, dds3Basic_t *node);
