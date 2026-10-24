@@ -4,11 +4,20 @@
 #include "common.h"
 #include "eff_ref_obj.h"
 
+typedef u16 BtlRuntimeFadeState;
+typedef enum BtlRuntimeFadeStateValue {
+    BTL_RUNTIME_FADE_IDLE = 0,
+    BTL_RUNTIME_FADE_SETUP = 1,
+    BTL_RUNTIME_FADE_IN = 2,
+    BTL_RUNTIME_FADE_OUT = 3,
+    BTL_RUNTIME_FADE_CLEANUP = 4,
+} BtlRuntimeFadeStateValue;
+
 /* The battle's runtime state, as the overlay effects read it. */
 #ifdef VERSION_DDS1
 typedef struct BattleRuntimeState {
     s32 counter;
-    u16 state;
+    BtlRuntimeFadeState state;
     u8 fadeMode; /* selects the initial overlay alpha in btlInitFadeColors */
     s8 pending;
     s8 active;
@@ -47,7 +56,7 @@ typedef struct BtlFadeParticle {
 
 typedef struct BattleRuntimeState {
     s32 counter; /* Active encounter updates since initialization. */
-    u16 state;
+    BtlRuntimeFadeState state;
     u8 fadeMode; /* selects the initial overlay alpha in btlInitFadeColors */
     s8 pending;
     s8 active;

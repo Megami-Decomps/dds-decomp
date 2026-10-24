@@ -1830,14 +1830,14 @@ s32 btlUpdateRuntimeFadeState(void) {
         return 0;
     }
     switch (btlRuntimeState.state) {
-    case 1:
+    case BTL_RUNTIME_FADE_SETUP:
         if (btlRuntimeState.fadeMode < 2) {
             fldSkyDrawFilter();
             if (btlRuntimeState.counter == 0) {
                 btlBossDebugPrintf(D_003A69C0);
                 break;
             }
-            btlRuntimeState.state = 2;
+            btlRuntimeState.state = BTL_RUNTIME_FADE_IN;
             btlInitializeGraphicsRuntime();
             btlInitFadeColors();
         } else {
@@ -1851,7 +1851,7 @@ s32 btlUpdateRuntimeFadeState(void) {
                     btlBossDebugPrintf(D_003A69D8);
                     break;
                 }
-                btlRuntimeState.state = 2;
+                btlRuntimeState.state = BTL_RUNTIME_FADE_IN;
                 while (sdfDelayedResrcCheck() != 0) {
                 }
                 btlClearOverlayBuffers();
@@ -1860,7 +1860,7 @@ s32 btlUpdateRuntimeFadeState(void) {
             }
         }
         /* Fall through after preparing the initial fade. */
-    case 2:
+    case BTL_RUNTIME_FADE_IN:
         if (btlRuntimeState.counter == 2 && (btlRuntimeState.options & 1) == 0) {
             while (sdfDelayedResrcCheck() != 0) {
             }
@@ -1870,16 +1870,16 @@ s32 btlUpdateRuntimeFadeState(void) {
         if (btlUpdateFadeIn() != 0) {
             if (btlRuntimeState.pending != 0) {
                 btlFadeInCompleteNoOp();
-                btlRuntimeState.state = 3;
+                btlRuntimeState.state = BTL_RUNTIME_FADE_OUT;
             }
         }
         break;
-    case 3:
+    case BTL_RUNTIME_FADE_OUT:
         if (btlUpdateFadeOut() != 0) {
-            btlRuntimeState.state = 4;
+            btlRuntimeState.state = BTL_RUNTIME_FADE_CLEANUP;
         }
         break;
-    case 4:
+    case BTL_RUNTIME_FADE_CLEANUP:
         btlReleaseRuntimeResource();
         btlResetRuntimeState();
         btlBossDebugPrintf(D_003A69F0);
@@ -1894,7 +1894,7 @@ void btlClearRuntimeState(void) {
     BattleRuntimeState *state = &btlRuntimeState;
     memset(state, 0, sizeof(*state));
     state->counter = 0;
-    state->state = 0;
+    state->state = BTL_RUNTIME_FADE_IDLE;
     state->fadeMode = 0;
     state->pending = 0;
     state->active = 0;
@@ -1918,7 +1918,7 @@ void btlActivateRuntime(u8 fadeMode) {
     BattleRuntimeState *battle = &btlRuntimeState;
     battle->fadeMode = fadeMode;
     battle->counter = 0;
-    battle->state = 1;
+    battle->state = BTL_RUNTIME_FADE_SETUP;
     battle->active = 1;
     battle->pending = 0;
     battle->options = 0;
@@ -1928,7 +1928,7 @@ void btlActivateRuntime(u8 fadeMode) {
 }
 
 void btlResetRuntimeState(void) {
-    btlRuntimeState.state = 0;
+    btlRuntimeState.state = BTL_RUNTIME_FADE_IDLE;
     btlRuntimeState.active = 0;
     btlReleaseOwnedData();
 }
@@ -1939,30 +1939,30 @@ s32 btlGetRuntimeResult(void) {
 
 /* True while idle/inactive or in the initial fade phase; not a fade-complete test. */
 s32 btlIsFadeInPhaseOrIdle(void) {
-    u16 state;
+    BtlRuntimeFadeState state;
 
     if (btlRuntimeState.active == 0) {
         return 1;
     }
     state = btlRuntimeState.state;
-    if (state == 0) {
+    if (state == BTL_RUNTIME_FADE_IDLE) {
         return 1;
     }
-    return state == 2;
+    return state == BTL_RUNTIME_FADE_IN;
 }
 
 /* True while idle/inactive or after the outgoing fade, awaiting phase-4 cleanup. */
 s32 btlIsFadeOutCompleteOrIdle(void) {
-    u16 state;
+    BtlRuntimeFadeState state;
 
     if (btlRuntimeState.active == 0) {
         return 1;
     }
     state = btlRuntimeState.state;
-    if (state == 0) {
+    if (state == BTL_RUNTIME_FADE_IDLE) {
         return 1;
     }
-    return state == 4;
+    return state == BTL_RUNTIME_FADE_CLEANUP;
 }
 
 void btlMarkRuntimeUpdatePending(void) {
