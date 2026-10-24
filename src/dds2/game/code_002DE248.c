@@ -1647,9 +1647,9 @@ void effReplaceBillboardClone(s32 dst, s32 src) {
     ((EffBillboardWork *)dst)->billboard = billboard;
 }
 
-void effBillboardEntryFrameReset(s32 work) {
-    dds3BillboardSetAnimKey2(((EffBillboardWork *)work)->billboard, 0);
-    ((EffBillboardWork *)work)->frame = 0;
+void effBillboardEntryFrameReset(EffBillboardWork *work) {
+    dds3BillboardSetAnimKey2(work->billboard, 0);
+    work->frame = 0;
 }
 
 
