@@ -314,11 +314,6 @@ typedef struct BtlCameraVectors {
     f32 target[3];
 } BtlCameraVectors;
 
-typedef struct BtlCameraTaskArgs {
-    u32 kind;
-    f32 component[8]; /* camera origin/direction inputs, offsets 0x04..0x20 */
-} BtlCameraTaskArgs;
-
 typedef struct BtlVectorTaskArgs {
     u8 pad00[0x20];
     f32 scale;

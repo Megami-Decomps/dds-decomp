@@ -110,11 +110,6 @@ typedef char BtlUnitLightDirectionTaskArgs_unit_offset_check[
 
 extern s128 btlDefaultUnitBodyOffset;
 
-typedef struct BtlCameraTaskArgs {
-    u32 kind;
-    f32 component[8]; /* camera origin/direction inputs, offsets 0x04..0x20 */
-} BtlCameraTaskArgs;
-
 typedef struct BtlVectorTaskArgs {
     u8 pad00[0x20];
     f32 scale;
@@ -5732,19 +5727,21 @@ BtlRuntimeTask *btlCreateCommandSoundWithArguments(ActionStateLink *actor, BtlUn
     return task;
 }
 
-u32 btlInitializeMotionTransformFromTaskArguments(u8 *arguments) {
+u32 btlInitializeMotionTransformFromTaskArguments(BtlCameraTransformTaskArgs *arguments) {
     u8 *context = (u8 *)btlGetRuntime();
-    btlSetCameraCommandMode(1, *(ActionStateLink **)arguments, 0, 0, 0);
-    btlInitMotionTransformFromComponents(&((BtlState *)context)->cameraCommand.camera, ((BtlCameraTaskArgs *)arguments)->component[0], ((BtlCameraTaskArgs *)arguments)->component[1],
-                    ((BtlCameraTaskArgs *)arguments)->component[2], ((BtlCameraTaskArgs *)arguments)->component[3],
-                    ((BtlCameraTaskArgs *)arguments)->component[4], ((BtlCameraTaskArgs *)arguments)->component[5],
-                    ((BtlCameraTaskArgs *)arguments)->component[6], ((BtlCameraTaskArgs *)arguments)->component[7]);
+    btlSetCameraCommandMode(1, arguments->actor, 0, 0, 0);
+    btlInitMotionTransformFromComponents(&((BtlState *)context)->cameraCommand.camera,
+                    arguments->position[0], arguments->position[1], arguments->position[2],
+                    arguments->direction[0], arguments->direction[1], arguments->direction[2],
+                    arguments->direction[3], arguments->fovDegrees);
     return 1;
 }
 
-BtlRuntimeTask *btlCreateFloatTask28(ActionStateLink *actor, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f, f32 g, f32 h) {
+BtlRuntimeTask *btlCreateFloatTask28(ActionStateLink *actor, f32 x, f32 y, f32 z,
+                                     f32 directionX, f32 directionY, f32 directionZ,
+                                     f32 directionW, f32 fovDegrees) {
     BtlRuntimeTask *task = btlAllocTask(0x24);
-    f32 *args;
+    BtlCameraTransformTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x2B;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -5754,15 +5751,15 @@ BtlRuntimeTask *btlCreateFloatTask28(ActionStateLink *actor, f32 a, f32 b, f32 c
     task->callback = btlInitializeMotionTransformFromTaskArguments;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    *(ActionStateLink **)args = actor;
-    args[1] = a;
-    args[2] = b;
-    args[3] = c;
-    args[4] = d;
-    args[5] = e;
-    args[6] = f;
-    args[7] = g;
-    args[8] = h;
+    args->actor = actor;
+    args->position[0] = x;
+    args->position[1] = y;
+    args->position[2] = z;
+    args->direction[0] = directionX;
+    args->direction[1] = directionY;
+    args->direction[2] = directionZ;
+    args->direction[3] = directionW;
+    args->fovDegrees = fovDegrees;
     return task;
 }
 

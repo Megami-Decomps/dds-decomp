@@ -5,6 +5,29 @@
 
 struct BtlUnit;
 struct BtlTask;
+struct ActionStateLink;
+
+/* The camera-transform task's complete 0x24-byte pose payload. */
+typedef struct BtlCameraTransformTaskArgs {
+#ifdef VERSION_DDS1
+    struct BtlTask *actor; /* 0x00: nullable command actor. */
+#else
+    struct ActionStateLink *actor; /* 0x00: nullable command actor. */
+#endif
+    f32 position[3];       /* 0x04: camera origin xyz. */
+    f32 direction[4];      /* 0x10: camera direction quaternion xyzw. */
+    f32 fovDegrees;        /* 0x20 */
+} BtlCameraTransformTaskArgs;
+typedef char BtlCameraTransformTaskArgsSizeCheck[
+    sizeof(BtlCameraTransformTaskArgs) == 0x24 ? 1 : -1];
+typedef char BtlCameraTransformTaskArgsActorOffsetCheck[
+    (u32)&((BtlCameraTransformTaskArgs *)0)->actor == 0x00 ? 1 : -1];
+typedef char BtlCameraTransformTaskArgsPositionOffsetCheck[
+    (u32)&((BtlCameraTransformTaskArgs *)0)->position == 0x04 ? 1 : -1];
+typedef char BtlCameraTransformTaskArgsDirectionOffsetCheck[
+    (u32)&((BtlCameraTransformTaskArgs *)0)->direction == 0x10 ? 1 : -1];
+typedef char BtlCameraTransformTaskArgsFovOffsetCheck[
+    (u32)&((BtlCameraTransformTaskArgs *)0)->fovDegrees == 0x20 ? 1 : -1];
 
 /* Kind 0x27 command-sound tasks allocate this 0x14-byte camera-mode packet.
  * The task builder fills actor/mode; targeted variants add category or units. */

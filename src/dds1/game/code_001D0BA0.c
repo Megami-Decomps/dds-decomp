@@ -5573,37 +5573,39 @@ BtlRuntimeTask *btlCreateCommandSoundWithArguments(BtlTask *actor, BtlUnit *unit
     return task;
 }
 
-u32 btlInitializeMotionTransformFromTaskArguments(u8 *arguments) {
+u32 btlInitializeMotionTransformFromTaskArguments(BtlCameraTransformTaskArgs *arguments) {
     u8 *context = (u8 *)btlGetRuntime();
-    btlSetCameraCommandMode(1, *(BtlTask **)arguments, 0, 0, 0);
-    btlInitMotionTransformFromComponents(&((BtlState *)context)->cameraCommand.camera, *(f32 *)(arguments + 4), *(f32 *)(arguments + 8),
-                    *(f32 *)(arguments + 0xC), *(f32 *)(arguments + 0x10),
-                    *(f32 *)(arguments + 0x14), *(f32 *)(arguments + 0x18),
-                    *(f32 *)(arguments + 0x1C), *(f32 *)(arguments + 0x20));
+    btlSetCameraCommandMode(1, arguments->actor, 0, 0, 0);
+    btlInitMotionTransformFromComponents(&((BtlState *)context)->cameraCommand.camera,
+                    arguments->position[0], arguments->position[1], arguments->position[2],
+                    arguments->direction[0], arguments->direction[1], arguments->direction[2],
+                    arguments->direction[3], arguments->fovDegrees);
     return 1;
 }
 
-u8 *btlCreateFloatTask28(u8 *actor, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f, f32 g, f32 h) {
+u8 *btlCreateFloatTask28(BtlTask *actor, f32 x, f32 y, f32 z, f32 directionX,
+                         f32 directionY, f32 directionZ, f32 directionW,
+                         f32 fovDegrees) {
     u8 *task = btlAllocTask(0x24);
-    f32 *args;
+    BtlCameraTransformTaskArgs *args;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x28;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
-    if (actor != 0 && *(u8 **)(actor + 0x18) != 0) {
-        *(u64 *)(task + 0x40) = *(u64 *)(*(u8 **)(actor + 0x18) + 0x108);
+    if (actor != NULL && actor->unit != NULL) {
+        *(u64 *)(task + 0x40) = actor->unit->identity;
     }
     *(void **)(task + 0x4C) = btlInitializeMotionTransformFromTaskArguments;
     *(u32 *)(task + 0x48) = 0;
     args = btlGetTaskArguments(task);
-    *(u8 **)args = actor;
-    args[1] = a;
-    args[2] = b;
-    args[3] = c;
-    args[4] = d;
-    args[5] = e;
-    args[6] = f;
-    args[7] = g;
-    args[8] = h;
+    args->actor = actor;
+    args->position[0] = x;
+    args->position[1] = y;
+    args->position[2] = z;
+    args->direction[0] = directionX;
+    args->direction[1] = directionY;
+    args->direction[2] = directionZ;
+    args->direction[3] = directionW;
+    args->fovDegrees = fovDegrees;
     return task;
 }
 
