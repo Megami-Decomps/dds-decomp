@@ -385,7 +385,7 @@ void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *object) {
 
 extern void mnuDestroyMantraDrawPool(struct MantraDrawPool *pool);
 extern void evtReleaseMantraSelectionWork(MantraFlagResource *work);
-extern void mnuReleaseMantraIconSpriteHandle(u32 *sprite);
+extern void mnuReleaseMantraIconSpriteHandle(MantraPanelPool *pool);
 
 void mnuReleaseMantraMenuDrawResources(MnuStatusResource *object) {
     MantraMenuWork *state;
@@ -405,7 +405,7 @@ void mnuReleaseMantraMenuDrawResources(MnuStatusResource *object) {
         handle++;
     }
     if (state->resource != 0) {
-        mnuReleaseMantraIconSpriteHandle((u32 *)state->resource);
+        mnuReleaseMantraIconSpriteHandle(state->resource);
     }
 }
 

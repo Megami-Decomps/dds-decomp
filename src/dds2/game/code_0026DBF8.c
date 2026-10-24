@@ -3858,7 +3858,7 @@ typedef void (*MantraPanelRelease)(MantraPanelAnimation *);
 /* Native creator copies fourteen callback entries into its stack snapshots,
  * then initializes the full 974-slot tables from those snapshots. */
 struct MantraPanelPool {
-    u32 handle;
+    struct sdfMemHandle_t *allocation;
     MantraPanelAnimation *items;
     s32 count;
     MantraPanelDraw draw[974];
@@ -3990,7 +3990,7 @@ MantraPanelPool *mnuCreateMantraPanelPool(s32 count, MnuStatusResource *menuOwne
     handle = sdfMemAllocDirect(allocationSize);
     pool = (MantraPanelPool *)sdfMemGetPtr(handle);
     memset(pool, 0, allocationSize);
-    pool->handle = (u32)handle;
+    pool->allocation = handle;
     pool->items = (MantraPanelAnimation *)((u8 *)pool + 0x2DB8);
     pool->count = count;
     pool->menuOwner = menuOwner;
@@ -4004,9 +4004,9 @@ MantraPanelPool *mnuCreateMantraPanelPool(s32 count, MnuStatusResource *menuOwne
 }
 
 
-void mnuReleaseMantraIconSpriteHandle(u32 *sprite) {
-    if (sprite != 0) {
-        sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(*sprite));
+void mnuReleaseMantraIconSpriteHandle(MantraPanelPool *pool) {
+    if (pool != 0) {
+        sdfMemFreeDirect(pool->allocation);
     }
 }
 
