@@ -8206,7 +8206,7 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
     return 0;
 }
 
-s32 fldCreateSceneTileTask(u32 stage, u32 variant) {
+BtlRuntimeTask *fldCreateSceneTileTask(s32 stage, s32 variant) {
     u8 *task = btlAllocTask(40);
     BtlFieldLoadArgs *args;
 
@@ -8220,7 +8220,7 @@ s32 fldCreateSceneTileTask(u32 stage, u32 variant) {
     args->stage = stage;
     args->variant = variant;
     args->frame = 0;
-    return (s32)task;
+    return (BtlRuntimeTask *)task;
 }
 
 s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {

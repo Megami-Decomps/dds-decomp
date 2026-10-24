@@ -230,7 +230,7 @@ extern BtlRuntimeTask * btlCreateFloorLoadTask(s32 stage, s32 variant);
 extern BtlRuntimeTask * fldCreateSceneTileTask(s32 value, s32 option);
 
 u64 fldMarkGridTiles(BtlState *scene) {
-    BtlRuntimeTask *tile = (BtlRuntimeTask *)fldCreateSceneTileTask(scene->background.ids.major, scene->background.ids.minor);
+    BtlRuntimeTask *tile = fldCreateSceneTileTask(scene->background.ids.major, scene->background.ids.minor);
     tile->ownerId = 0x8000000000000001ULL;
     btlStartTask(tile);
     tile = (BtlRuntimeTask *)btlCreateFloorLoadTask(scene->background.ids.major, scene->background.ids.minor);

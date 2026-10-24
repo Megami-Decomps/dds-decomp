@@ -139,7 +139,7 @@ typedef char BattleSceneWorkSizeCheck[(sizeof(BattleSceneWork) == 0x5FC) ? 1 : -
 
 extern s32 btlCountTasksForOwner(s64);
 extern u64 btlStartTask(void *);
-extern s32 fldCreateSceneTileTask(u32 soundId, u32 variant);
+extern BtlRuntimeTask *fldCreateSceneTileTask(s32 stage, s32 variant);
 extern void btlDispatchStateHandler(void *, s32);
 
 extern void btlSetCommandPanelFadeMode(s8 mode, s32 duration);
@@ -212,7 +212,7 @@ extern u8 * btlCreateFloorLoadTask(u32 stage, u32 variant);
 u64 fldMarkGridTiles(u8 *context) {
     BtlState *state = (BtlState *)context;
     BtlRuntimeTask *node =
-        (BtlRuntimeTask *)fldCreateSceneTileTask((s16)state->encounterParamA,
+        fldCreateSceneTileTask((s16)state->encounterParamA,
                                                   (s16)state->encounterParamB);
     node->ownerId = 0x8000000000000001ULL;
     btlStartTask(node);
