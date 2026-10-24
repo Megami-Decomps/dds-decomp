@@ -63,7 +63,7 @@ extern void effPCPFlashPolyRingExp2PartSetVertex(PcpFlashFadingOrbitWork *, s32)
 
 extern void effPCPFlashPolyCirclePartSetVertex(PcpFlashOffsetRadialWork *, s32, void *);
 
-PcpFlashTrianglePulseWork *effPCPFlashPolySphere2CreatePCF(void *table)
+PcpFlashTrianglePulseWork *effPCPFlashPolySphere2CreatePCF(const EffParamTable *table)
 {
     return effPCPFlashPolySphere2Create((PcpFlashTrianglePulseParams *)dds3EffectPCPDataGetData(table, 0));
 }
@@ -254,7 +254,7 @@ PcpFlashStreakWork *effPCPFlashPolySphereCreate(PcpFlashStreakParams *src) {
     return work;
 }
 
-PcpFlashStreakWork *effPCPFlashPolySphereCreatePCF(void *data)
+PcpFlashStreakWork *effPCPFlashPolySphereCreatePCF(const EffParamTable *data)
 {
     return effPCPFlashPolySphereCreate(dds3EffectPCPDataGetData(data, 0));
 }
@@ -528,7 +528,7 @@ PcpFlashScalingOrbitWork *effPCPFlashPolyRingCreate(PcpFlashScalingOrbitParams *
     return work;
 }
 
-PcpFlashScalingOrbitWork *effPCPFlashPolyRingCreatePCF(void *data)
+PcpFlashScalingOrbitWork *effPCPFlashPolyRingCreatePCF(const EffParamTable *data)
 {
     return effPCPFlashPolyRingCreate(dds3EffectPCPDataGetData(data, 0));
 }
@@ -771,7 +771,7 @@ PcpFlashAccumulatingWork *effPCPFlashPolyPipeCreate(PcpFlashAccumulatingParams *
     return work;
 }
 
-PcpFlashAccumulatingWork *effPCPFlashPolyPipeCreatePCF(void *data)
+PcpFlashAccumulatingWork *effPCPFlashPolyPipeCreatePCF(const EffParamTable *data)
 {
     return effPCPFlashPolyPipeCreate(dds3EffectPCPDataGetData(data, 0));
 }
@@ -1034,7 +1034,7 @@ PcpFlashOrbitArcWork *effPCPFlashPolyRingExpCreate(PcpFlashOrbitArcParams *param
     return ring;
 }
 
-PcpFlashOrbitArcWork *effPCPFlashPolyRingExpCreatePCF(void *data)
+PcpFlashOrbitArcWork *effPCPFlashPolyRingExpCreatePCF(const EffParamTable *data)
 {
     return effPCPFlashPolyRingExpCreate(dds3EffectPCPDataGetData(data, 0));
 }
@@ -1288,7 +1288,7 @@ PcpFlashRotatingQuadWork *effPCPFlashPolySphereExpCreate(PcpFlashRotatingQuadPar
     return work;
 }
 
-PcpFlashRotatingQuadWork *effPCPFlashPolySphereExpCreatePCF(void *data)
+PcpFlashRotatingQuadWork *effPCPFlashPolySphereExpCreatePCF(const EffParamTable *data)
 {
     return effPCPFlashPolySphereExpCreate(dds3EffectPCPDataGetData(data, 0));
 }
@@ -1542,7 +1542,7 @@ PcpFlashRadialTriangleWork *effPCPFlashPolySphere2ExpCreate(PcpFlashRadialTriang
     return work;
 }
 
-PcpFlashRadialTriangleWork *effPCPFlashPolySphere2ExpCreatePCF(void *data)
+PcpFlashRadialTriangleWork *effPCPFlashPolySphere2ExpCreatePCF(const EffParamTable *data)
 {
     return effPCPFlashPolySphere2ExpCreate(dds3EffectPCPDataGetData(data, 0));
 }
@@ -1740,7 +1740,7 @@ PcpFlashRadialStripWork *effPCPFlashPolySphere3Create(PcpFlashRadialStripParams 
     return work;
 }
 
-PcpFlashRadialStripWork *effPCPFlashPolySphere3CreatePCF(void *data)
+PcpFlashRadialStripWork *effPCPFlashPolySphere3CreatePCF(const EffParamTable *data)
 {
     return effPCPFlashPolySphere3Create(dds3EffectPCPDataGetData(data, 0));
 }
@@ -2008,7 +2008,7 @@ PcpFlashFadingOrbitWork *effPCPFlashPolyRingExp2Create(PcpFlashFadingOrbitParams
     return work;
 }
 
-PcpFlashFadingOrbitWork *effPCPFlashPolyRingExp2CreatePCF(void *data)
+PcpFlashFadingOrbitWork *effPCPFlashPolyRingExp2CreatePCF(const EffParamTable *data)
 {
     return effPCPFlashPolyRingExp2Create(dds3EffectPCPDataGetData(data, 0));
 }
@@ -2244,7 +2244,7 @@ PcpFlashOffsetRadialWork *effPCPFlashPolyCircleCreate(PcpFlashOffsetRadialParams
     return work;
 }
 
-PcpFlashOffsetRadialWork *effPCPFlashPolyCircleCreatePCF(void *data)
+PcpFlashOffsetRadialWork *effPCPFlashPolyCircleCreatePCF(const EffParamTable *data)
 {
     return effPCPFlashPolyCircleCreate(dds3EffectPCPDataGetData(data, 0));
 }
