@@ -2995,9 +2995,9 @@ s32 evtSetupDispatchSyncC(dds3ProcessID_t *callbackContext) {
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-void mnuInstallNoCapacityStateTable(s32 stateAddress) {
-    if (((MenuTerminalContext *)stateAddress)->dispatchMode == 1) {
-        MNU_INSTALL_STATE_TABLE(((MenuTerminalContext *)stateAddress), mnuShopRangeFilteredCommandPopupEntries, mnuShopRangeFilteredCommandPopupEntries + 0xc4);
+void mnuInstallNoCapacityStateTable(MenuTerminalContext *state) {
+    if (state->dispatchMode == 1) {
+        MNU_INSTALL_STATE_TABLE(state, mnuShopRangeFilteredCommandPopupEntries, mnuShopRangeFilteredCommandPopupEntries + 0xc4);
     }
 }
 
@@ -3068,7 +3068,7 @@ s32 mnuShopPollRangeFilteredCommandSelection(dds3ProcessID_t *callbackContext) {
         return 0;
     }
     case 6:
-        mnuInstallNoCapacityStateTable((s32)state);
+        mnuInstallNoCapacityStateTable(state);
         break;
     default:
         break;
