@@ -6,6 +6,7 @@
 #include "mnu.h"
 #include "mnu_list.h"
 #include "eff.h"
+#include "mnu_slide_bar_pair.h"
 
 extern s32 mnuGetSlidePathSegmentWeight(s32);
 extern s32 mnuMovieMenuSlidePathData[];
@@ -688,29 +689,24 @@ void mnuDrawMovieMenuSlideBar(SlideBarTimed *primary, SlideBar *secondary, s32 d
     mnuDrawSprite(0, 0, 0, x, 0, 0x1D, drawContext);
 }
 
-void mnuSetMovieWorkFlag(s32 buffer, s32 index, u8 value) {
-    *(u8 *)(buffer + index) = value;
+void mnuSetMovieWorkFlag(MnuSlideBarPair *work, s32 index, u8 value) {
+    work->active[index] = value;
 }
 
-void mnuResetMovieWorkState(u8 *work) {
+void mnuResetMovieWorkState(MnuSlideBarPair *work) {
+    u8 *bytes = (u8 *)work;
     u32 i;
     for (i = 0; i < 2; i++) {
-        work[i] = 0;
-        *(u32 *)(work + 4 + i * 4) = 0;
+        bytes[i] = 0;
+        *(u32 *)(bytes + 4 + i * 4) = 0;
     }
 }
 
-typedef struct {
-    u8 active[2];
-    u8 pad2[2];
-    s32 pos[2];
-} SlideBarPair;
-
-void mnuAdvancePairedSlideBars(SlideBarPair *bars, s32 drawContext) {
+void mnuAdvancePairedSlideBars(MnuSlideBarPair *bars, s32 drawContext) {
     u32 i;
 
     for (i = 0; i < 2; i++) {
-        s32 pos = bars->pos[i];
+        s32 pos = bars->position[i];
 
         switch (i) {
         case 0:
@@ -722,15 +718,15 @@ void mnuAdvancePairedSlideBars(SlideBarPair *bars, s32 drawContext) {
             break;
         }
         if (bars->active[i] == 0) {
-            bars->pos[i] -= 8;
+            bars->position[i] -= 8;
         } else {
-            bars->pos[i] += 8;
+            bars->position[i] += 8;
         }
-        if (bars->pos[i] < 0) {
-            bars->pos[i] = 0;
+        if (bars->position[i] < 0) {
+            bars->position[i] = 0;
         }
-        if (bars->pos[i] > 0x80) {
-            bars->pos[i] = 0x80;
+        if (bars->position[i] > 0x80) {
+            bars->position[i] = 0x80;
         }
     }
 }

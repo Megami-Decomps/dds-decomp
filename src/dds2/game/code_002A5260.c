@@ -18,6 +18,7 @@
 #include "eff.h"
 #include "mnu_list.h"
 #include "mnu_movie_resource.h"
+#include "mnu_slide_bar_pair.h"
 #include "kwln_task_lifecycle.h"
 #include "kwln_fade.h"
 #include "sdf_packet_alloc.h"
@@ -42,11 +43,15 @@ typedef struct MenuTitleState {
     struct MenuList *selectionList; /* 0x24 */
     s32 phase;         /* 0x28 */
     u8 pad2C[0xD4];
-    u8 movie[0xC];     /* 0x100 */
+    MnuSlideBarPair movieWork; /* 0x100 */
     u32 movieDrawActive; /* 0x10C */
     u32 drawAlpha;       /* 0x110 */
     u32 movieFrame;      /* 0x114 */
 } MenuTitleState;
+typedef char MenuTitleState_movieWork_at_0x100[
+    (u32)&((MenuTitleState *)0)->movieWork == 0x100 ? 1 : -1];
+typedef char MenuTitleState_size_must_be_0x118[
+    sizeof(MenuTitleState) == 0x118 ? 1 : -1];
 
 extern MenuTitleState *titleWork;
 
@@ -130,7 +135,7 @@ extern void mnuDrawTitleMenuFadeOverlay(s32, s32);
 
 extern void mnuDrawMovieChoiceTransition(s32, s32);
 
-extern void mnuSetMovieWorkFlag(s32, s32, u8);
+extern void mnuSetMovieWorkFlag(MnuSlideBarPair *, s32, u8);
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
@@ -289,11 +294,11 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
                 opening->phase = 1;
                 opening->selectedPage = 0;
             }
-            mnuSetMovieWorkFlag((s32)&titleWork->movie, 0, 1);
+            mnuSetMovieWorkFlag(&titleWork->movieWork, 0, 1);
             return 0;
         }
         p2sdPlaySE(8, 127, 63);
-        mnuSetMovieWorkFlag((s32)&titleWork->movie, 0, 0);
+        mnuSetMovieWorkFlag(&titleWork->movieWork, 0, 0);
         return 1;
     case 1:
         if (state->selectedPage < 90) {
@@ -303,7 +308,7 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
         }
         if (mnuIsAnyMenuInputPressed() != 0) {
             p2sdPlaySE(8, 127, 63);
-            mnuSetMovieWorkFlag((s32)&titleWork->movie, 0, 0);
+            mnuSetMovieWorkFlag(&titleWork->movieWork, 0, 0);
             return 1;
         }
         state = (MenuTitleState *)titleWork;
@@ -487,11 +492,11 @@ void mnuDrawTitleSceneForPhase(void) {
     case 1:
         mnuDrawTitleMenuFadeOverlay(2, ((MenuTitleState *)titleWork)->selectedPage);
         mnuDrawMovieChoiceTransition(0, ((MenuTitleState *)titleWork)->selectedPage);
-        mnuSetMovieWorkFlag((s32)&titleWork->movie, 1, 1);
+        mnuSetMovieWorkFlag(&titleWork->movieWork, 1, 1);
         return;
     case 0:
         mnuDrawMovieChoiceTransition(1, ((MenuTitleState *)titleWork)->selectedPage);
-        mnuSetMovieWorkFlag((s32)&titleWork->movie, 1, 1);
+        mnuSetMovieWorkFlag(&titleWork->movieWork, 1, 1);
         return;
     case 2:
         mnuCallInitWide(0, 0, 0, (s32)((MenuTitleState *)titleWork)->selectionList, 0x53);
@@ -499,7 +504,7 @@ void mnuDrawTitleSceneForPhase(void) {
     case 3:
     case 4:
         mnuDrawMovieChoiceTransition(2, ((MenuTitleState *)titleWork)->selectedPage);
-        mnuSetMovieWorkFlag((s32)&titleWork->movie, 1, 0);
+        mnuSetMovieWorkFlag(&titleWork->movieWork, 1, 0);
         break;
     }
 }

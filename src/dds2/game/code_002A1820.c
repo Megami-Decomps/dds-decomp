@@ -24,6 +24,7 @@
 #include "mnu_title_sound.h"
 #include "mnu_title_stream_status_snapshot.h"
 #include "mnu_title_stream_entry.h"
+#include "mnu_slide_bar_pair.h"
 
 #define SND_MIX_SAMPLE_COUNT 0x800
 #define SND_MIX_SAMPLE_LIMIT 0x7FFF
@@ -61,11 +62,15 @@ typedef struct MovieMenuState {
     PickList paired;      /* 0x4C */
     SlideBarTimed timedA; /* 0xE0: pos below 0x200 while the menu bar is on screen */
     SlideBarTimed timedB; /* 0xF0 */
-    u8 movie[0xC];        /* 0x100 */
+    MnuSlideBarPair movieWork; /* 0x100 */
     s32 movieDrawn;       /* 0x10C */
     s32 movieAlpha;       /* 0x110 */
     s32 movieFrame;       /* 0x114 */
 } MovieMenuState;
+typedef char MovieMenuState_movieWork_at_0x100[
+    (u32)&((MovieMenuState *)0)->movieWork == 0x100 ? 1 : -1];
+typedef char MovieMenuState_size_must_be_0x118[
+    sizeof(MovieMenuState) == 0x118 ? 1 : -1];
 
 
 extern u32 D_004285E0[4];
@@ -781,7 +786,7 @@ extern void mnuTimedSlideBarSetState(SlideBarTimed *bar, s32 mode, s32 timer);
 extern void sdfSetGridScaledDrawBounds(s32 column, s32 row, s32 width, s32 height, u32 drawColor);
 extern void mnuArmTitleMovieDrawAndResetFrame(u32 movieIndex, s32 startTransparent);
 extern u32 mnuIsTitleMovieDrawActive(void);
-extern void mnuResetMovieWorkState(void *work);
+extern void mnuResetMovieWorkState(MnuSlideBarPair *work);
 
 /* Title-menu event handler (proposed mnuHandleTitleMenuEvent): drives the menu's slide bars, the background
  * movie and its fade for menu events 2..32; returns 1 once the movie has stopped after event 32. */
@@ -818,7 +823,7 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
         mnuTimedSlideBarSetState(&titleWork->timedB, 2, 0);
         mnuSlideBarSetState(&titleWork->bar, 2);
         mnuSlideBarSetStateB(&titleWork->barB, 2);
-        mnuResetMovieWorkState(titleWork->movie);
+        mnuResetMovieWorkState(&titleWork->movieWork);
         sdfSetStreamFrameDrawMode(0);
         mnuStopTitleMovieDraw();
         break;
@@ -884,7 +889,7 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
         mnuTimedSlideBarSetState(&titleWork->timedB, 2, 0);
         mnuSlideBarSetState(&titleWork->bar, 2);
         mnuSlideBarSetStateB(&titleWork->barB, 2);
-        mnuResetMovieWorkState(titleWork->movie);
+        mnuResetMovieWorkState(&titleWork->movieWork);
         mnuStopTitleMovieDraw();
         sdfSetStreamFrameDrawMode(0);
         break;
@@ -893,12 +898,6 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
 }
 
 /* Actual cross-unit contracts used by the title-menu callback. */
-typedef struct SlideBarPair {
-    u8 active[2];
-    u8 pad[2];
-    s32 pos[2];
-} SlideBarPair;
-
 extern void dds3FadeClear(void);
 extern s32 mnuIsAnyMenuInputPressed(void);
 extern u8 mnuHasSpriteHandle(void);
@@ -925,7 +924,7 @@ extern void mnuAdvanceTimedSlideBar(SlideBarTimed *, s32);
 extern void mnuAdvanceMultiSpriteSlideBar(SlideBar *, s32);
 extern void mnuDrawMovieMenuSlideBar(SlideBarTimed *, SlideBar *, s32);
 extern void mnuDrawExpandingMovieMenuPulseBar(MovieMenuPulse *, s32);
-extern void mnuAdvancePairedSlideBars(SlideBarPair *, s32);
+extern void mnuAdvancePairedSlideBars(MnuSlideBarPair *, s32);
 extern void mnuAdvanceSlideBarValue(SlideBar *, s32);
 extern void mnuAdvanceSlideBar(PickList *, s32);
 extern void mnuDrawAndAdvanceMovieMenuBar(SlideBar *, s32);
@@ -1291,7 +1290,7 @@ s32 mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
     mnuAdvanceMultiSpriteSlideBar(&titleWork->timedB.control, 0x52);
     mnuDrawMovieMenuSlideBar(&titleWork->timedA, &titleWork->timedB.control, 0x52);
     mnuDrawExpandingMovieMenuPulseBar(&titleWork->barSmall, 0x52);
-    mnuAdvancePairedSlideBars((SlideBarPair *)titleWork->movie, 0x52);
+    mnuAdvancePairedSlideBars(&titleWork->movieWork, 0x52);
     mnuAdvanceSlideBarValue(&titleWork->barB, 0x52);
     mnuAdvanceSlideBar(&titleWork->paired, 0x53);
     mnuDrawAndAdvanceMovieMenuBar(&titleWork->bar, 0x53);
