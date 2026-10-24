@@ -317,7 +317,7 @@ extern char D_003BAC40[];
 
 extern s32 fldRoomEventPlacementCount;
 
-extern dds3Basic_t *dds3AddEventBasic(s32 key, void *work, const char *name);
+extern dds3Basic_t *dds3AddEventBasic(s32 key, const char *resourcePath, const char *name);
 
 extern u32 fldEveHit_AddEveData(FldFileResource *, dds3Basic_t *);
 
@@ -993,7 +993,7 @@ extern char D_00330760[];
 
 extern char fldHitProgramName[];
 
-extern dds3Basic_t *dds3AddEventBasic(s32, void *, const char *);
+extern dds3Basic_t *dds3AddEventBasic(s32, const char *, const char *);
 
 extern char D_00330780[];
 

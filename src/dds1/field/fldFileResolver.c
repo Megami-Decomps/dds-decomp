@@ -841,7 +841,7 @@ extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, const f32 *, const ch
 
 extern void dds3SetPathBasicSpline(dds3Basic_t *path, u32 value);
 
-extern dds3Basic_t *dds3AddEventBasic(s32 key, void *work, const char *name);
+extern dds3Basic_t *dds3AddEventBasic(s32 key, const char *resourcePath, const char *name);
 
 extern dds3Basic_t *dds3AddPathBasic(s32 key, void *work, const char *name);
 
@@ -943,7 +943,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                     fldRoomEventPlacementCount++;
                 }
                 event = spawnResource->data;
-                spawnedObject = dds3AddEventBasic(spawnResource->id, (void *)event->label, spawnResource->name);
+                spawnedObject = dds3AddEventBasic(spawnResource->id, event->label, spawnResource->name);
                 fldEveHit_AddEveData(spawnResource, spawnedObject);
             }
             break;

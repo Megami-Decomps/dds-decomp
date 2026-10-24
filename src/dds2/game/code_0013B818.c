@@ -684,11 +684,11 @@ const char *fldEveHitResName_Find(dds3ProcessID_t *task) {
 
 extern FldActionRow fldActionRows[];
 
-extern u8 D_0038BC00[];
+extern const char D_0038BC00[];
 
 extern char fldHitProgramName[];
 
-extern u8 D_0038BC20[];
+extern const char D_0038BC20[];
 
 static inline void fldInitializeActionTransform(FldActionTransformFields *transform, f32 x, f32 y, f32 z) {
     transform->position[3] = 1.0f;
@@ -705,7 +705,7 @@ static inline void fldInitializeActionTransform(FldActionTransformFields *transf
     transform->rotation[3] = 0.0f;
 }
 
-extern dds3Basic_t *dds3AddEventBasic(s32, void *, const char *);
+extern dds3Basic_t *dds3AddEventBasic(s32 key, const char *resourcePath, const char *name);
 
 void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
     FldActionTransformFields *transform;
@@ -718,7 +718,7 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
 
     index = fldActionRowCount;
     counter = dds3AllocObjectId();
-    object = dds3AddEventBasic(counter, D_0038BC20, (const char *)D_0038BC00);
+    object = dds3AddEventBasic(counter, D_0038BC20, D_0038BC00);
     fldActionRows[index].displayResource.id = counter;
     slot = fldEveHit_AddEveData(&fldActionRows[index].displayResource, object);
     fldActionRows[index].prefix.task.shape.radius = triggerRadius;
@@ -732,7 +732,7 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
     fldActionRows[index].childResource.transform = transform->position;
     fldActionRows[index].childResource.data = &fldActionRows[index].prefix.task.info;
     fldActionRows[index].childResource.id = dds3AllocObjectId();
-    fldActionRows[index].childResource.name = (const char *)D_0038BC00;
+    fldActionRows[index].childResource.name = D_0038BC00;
     child = dds3AddPointBasic(fldActionRows[index].childResource.id, (EvtWorldSourceTransformPrefix *)fldActionRows[index].childResource.transform, fldHitProgramName);
     roomIndex = fldRegisterRoomObject(&fldActionRows[index].childResource, child);
     fldEveHitTable[roomIndex].roomId = roomId;
@@ -743,9 +743,9 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
 
 INCLUDE_ASM(const s32, "game/code_0013B818", fldSpawnNpcTrigger);
 
-extern char D_0038BC30[];
+extern const char D_0038BC30[];
 
-extern char D_0038BC40[];
+extern const char D_0038BC40[];
 
 void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
                                 f32 x, f32 y, f32 z, f32 radius) {
@@ -756,9 +756,9 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
     s32 taskIndex;
 
     if (kind == 0) {
-        object = dds3AddEventBasic(worldKey, D_0038BC40, (const char *)D_0038BC00);
+        object = dds3AddEventBasic(worldKey, D_0038BC40, D_0038BC00);
     } else {
-        object = dds3AddEventBasic(worldKey, D_0038BC30, (const char *)D_0038BC00);
+        object = dds3AddEventBasic(worldKey, D_0038BC30, D_0038BC00);
     }
     fldActionRows[index].displayResource.id = worldKey;
     taskIndex = fldEveHit_AddEveData(
@@ -785,7 +785,7 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
     transform->rotation[3] = 0.0f;
     transform->rotation[0] = 0.0f;
     fldActionRows[index].childResource.id = dds3AllocObjectId();
-    fldActionRows[index].childResource.name = (const char *)D_0038BC00;
+    fldActionRows[index].childResource.name = D_0038BC00;
     object = dds3AddPointBasic(fldActionRows[index].childResource.id,
                                  (EvtWorldSourceTransformPrefix *)fldActionRows[index].childResource.transform,
                                  fldHitProgramName);
