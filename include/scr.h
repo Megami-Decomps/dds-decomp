@@ -141,8 +141,15 @@ typedef struct {
 
 /* ScrVmOperand is intentionally local: DDS1's +0x04 is u16, DDS2's is u8. */
 
-/* Script VM stack value types. */
-#define SCR_STACK_TYPE_STRING 5
+/* Script VM stack value tags stored in ScrData.stackTypes. */
+enum {
+    SCR_STACK_TYPE_INTEGER = 0,
+    SCR_STACK_TYPE_FLOAT = 1,
+    SCR_STACK_TYPE_INTEGER_REFERENCE = 2,
+    SCR_STACK_TYPE_FLOAT_REFERENCE = 3,
+    SCR_STACK_TYPE_RETURN_ADDRESS = 4,
+    SCR_STACK_TYPE_STRING = 5
+};
 #define SCR_STACK_RET 27
 
 #endif /* SCR_H */
