@@ -396,12 +396,12 @@ void mnuClearNodeBroadcastFlag(MnuEffectRecord *record) {
 /* Resolves a model from a resource and releases its temporary resource data. */
 
 
-u32 mnuLoadNodeModelFromResource(u32 *owner, u32 resource) {
+FileQueue *mnuLoadNodeModelFromResource(FileQueue **owner, const char *resourcePath) {
     u32 handle;
     u32 other;
-    struct sdfMemHandle_t *data = sdfDevLoadFileEx((const char *)(u32)resource, &handle, &other);
-    *owner = (u32)fileCloneQueueEntries((FileQueue *)handle);
-    fileQueueNotifyAllJobsComplete((FileQueue *)*owner);
+    struct sdfMemHandle_t *data = sdfDevLoadFileEx(resourcePath, &handle, &other);
+    *owner = fileCloneQueueEntries((FileQueue *)handle);
+    fileQueueNotifyAllJobsComplete(*owner);
     sdfMemFreeDirect(data);
     return *owner;
 }
