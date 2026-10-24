@@ -12,7 +12,7 @@
 #include "mdl_motion_end_status.h"
 #include "mdl_part_tag_record.h"
 #include "mdl_resource_table.h"
-#include "sdf_motion.h"
+#include "sdf_motion_loop.h"
 #include "sdf_motion_next_result.h"
 #include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
@@ -278,7 +278,7 @@ extern MdlResourceTable D_00367900[];
 extern MdlResourceTable D_00365858[];
 
 sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *ctx, s32 searchId);
-void mdlMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex, s32 loopEnabled,
+void mdlMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex, SdfMotionLoopMode loopMode,
                                      f32 blendLeadFrames, f32 blendDurationFrames);
 
 extern u32 mdlManagerWork;
@@ -750,8 +750,6 @@ extern void RotateMatrixY(f32 angle);
 #define MDL_FULL_BLEND_PITCH 25.0f
 #define MDL_ENTRY_ENABLED 1
 #define MDL_PRIMARY_MOTION_SLOT 0
-#define MDL_MOTION_LOOP_ENABLED 1
-#define MDL_MOTION_LOOP_DISABLED 0
 
 /* Blend the selected basis towards pitch/yaw (degrees), then update transforms
  * and anchors. For abs(pitch)<25, weight is abs(pitch)/25; otherwise one;
@@ -842,7 +840,7 @@ extern sdfMotionCtrlr_t *mdlCreateMotion(dds3ModelHandle_t *owner, s32 searchId)
 /* Select the first matching searchId, or create it, and make it current in its
  * signed slot index. Allocation success/slot bounds are assumed. Slot zero
  * also becomes ctx->first; id and motionIndex narrow into the current pair. */
-void mdlMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex, s32 loopEnabled,
+void mdlMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex, SdfMotionLoopMode loopMode,
                                      f32 blendLeadFrames, f32 blendDurationFrames) {
     sdfMotionCtrlr_t *node;
     s16 slotIndex;
@@ -860,7 +858,7 @@ void mdlMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex, s32 loopEn
     if (slotIndex == MDL_PRIMARY_MOTION_SLOT) {
         ctx->first = node;
     }
-    sdfMotionChangeBlend(node, motionIndex, loopEnabled, blendLeadFrames, blendDurationFrames);
+    sdfMotionChangeBlend(node, motionIndex, loopMode, blendLeadFrames, blendDurationFrames);
     ctx->current.h.id = searchId;
     ctx->current.h.motionIndex = motionIndex;
     mdlStopEffect(ctx, slotIndex);
@@ -869,26 +867,26 @@ void mdlMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex, s32 loopEn
 
 /* Select a looping motion with both blend-frame parameters zero. */
 void mdlLoopMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex) {
-    mdlMotion(ctx, searchId, motionIndex, MDL_MOTION_LOOP_ENABLED, 0.0f, 0.0f);
+    mdlMotion(ctx, searchId, motionIndex, SDF_MOTION_LOOP_ENABLED, 0.0f, 0.0f);
 }
 
 /* Select a nonlooping motion with both blend-frame parameters zero. */
 void mdlSingleMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex) {
-    mdlMotion(ctx, searchId, motionIndex, MDL_MOTION_LOOP_DISABLED, 0.0f, 0.0f);
+    mdlMotion(ctx, searchId, motionIndex, SDF_MOTION_LOOP_DISABLED, 0.0f, 0.0f);
 }
 
 /* Select a looping motion with the supplied blend-frame parameters. */
 void mdlSmoothLoopMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
                           f32 blendDurationFrames) {
     mdlMotion(
-        ctx, searchId, motionIndex, MDL_MOTION_LOOP_ENABLED, blendLeadFrames, blendDurationFrames);
+        ctx, searchId, motionIndex, SDF_MOTION_LOOP_ENABLED, blendLeadFrames, blendDurationFrames);
 }
 
 /* Select a nonlooping motion with the supplied blend-frame parameters. */
 void mdlSmoothSingleMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
                         f32 blendDurationFrames) {
     mdlMotion(
-        ctx, searchId, motionIndex, MDL_MOTION_LOOP_DISABLED, blendLeadFrames, blendDurationFrames);
+        ctx, searchId, motionIndex, SDF_MOTION_LOOP_DISABLED, blendLeadFrames, blendDurationFrames);
 }
 
 sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *ctx, s32 searchId) {

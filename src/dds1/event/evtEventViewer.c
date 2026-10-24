@@ -13,7 +13,7 @@
 #include "kwln_draw_buffer.h"
 #include "mdl_motion_api.h"
 #include "mdl_world_object_source_vector_api.h"
-#include "sdf_motion.h"
+#include "sdf_motion_loop.h"
 #include "itf_mes_window.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
@@ -1868,7 +1868,7 @@ void evtViewerSyncModelMotionChannels(s32 frame, dds3Basic_t *object, EvtRuntime
                 continue;
             }
             motion = mdlGetMotionCtrlr(model, channel);
-            sdfMotionChangeBlend(motion, 0, 0, 0.0f, 0.0f);
+            sdfMotionChangeBlend(motion, 0, SDF_MOTION_LOOP_DISABLED, 0.0f, 0.0f);
             if (mdlGetMotionLengthEx(model, channel) != 0) {
                 if ((s32)mdlGetMotionLengthEx(model, channel) - 1 < frame) {
                     sampleFrame = (s32)mdlGetMotionLengthEx(model, channel) - 1;
@@ -1901,18 +1901,18 @@ void evtViewerSyncModelMotionChannels(s32 frame, dds3Basic_t *object, EvtRuntime
         }
 
         {
-            s32 loopEnabled;
+            SdfMotionLoopMode loopMode;
             s32 nodeFrameCount;
 
             if (mode == 0 && track->motionKeyCache[channel] == key) {
                 continue;
             }
-            loopEnabled = key->p0C.sb[2] == 0;
+            loopMode = key->p0C.sb[2] == 0 ? SDF_MOTION_LOOP_ENABLED : SDF_MOTION_LOOP_DISABLED;
             motion = mdlGetMotionCtrlr(model, channel);
-            sdfMotionChangeBlend(motion, key->p0C.sb[1], loopEnabled,
+            sdfMotionChangeBlend(motion, key->p0C.sb[1], loopMode,
                                 0.0f, (f32)key->p0C.sb[3]);
             if (mode == 1) {
-                if (loopEnabled == mode) {
+                if (loopMode == mode) {
                     nodeFrameCount = (s32)mdlGetMotionLengthEx(model, channel);
                     if (nodeFrameCount != 0) {
                         nodeFrameCount = (s32)mdlGetMotionLengthEx(model, channel);

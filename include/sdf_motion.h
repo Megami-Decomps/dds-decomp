@@ -15,11 +15,8 @@ typedef enum {
     SDF_MOTION_STATE_SUSPENDED = 6,
 } SdfMotionState;
 
-void sdfMotionChange(struct sdfMotionCtrlr_t *motion, s32 motionIndex, s32 loopEnabled);
 struct sdfMotionCtrlr_t *sdfMotionCtrlrNew(struct sdfModelRootNode_t *model, struct MotionTable *table);
 void sdfMotionCtrlrFree(struct sdfMotionCtrlr_t *motion);
-void sdfMotionChangeBlend(struct sdfMotionCtrlr_t *motion, s32 motionIndex, s32 loopEnabled,
-                         f32 blendLeadFrames, f32 blendDurationFrames);
 void sdfMotionSeek(struct sdfMotionCtrlr_t *motion, f32 frame);
 void sdfMotionPause(struct sdfMotionCtrlr_t *motion);
 void sdfMotionPauseOff(struct sdfMotionCtrlr_t *motion);

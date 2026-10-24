@@ -1,6 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "sdf_motion.h"
+#include "sdf_motion_loop.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
 #include "sdf_model.h"
@@ -62,7 +62,7 @@ sdfMotionCtrlr_t *dds3ModelBasicSetMotion(dds3Basic_t *object, sdfModelRootNode_
     work = object->data;
     if (work->motionTable != NULL) {
         motion = sdfMotionCtrlrNew(owner, work->motionTable);
-        sdfMotionChange(motion, 0, 1);
+        sdfMotionChange(motion, 0, SDF_MOTION_LOOP_ENABLED);
     }
     return motion;
 }

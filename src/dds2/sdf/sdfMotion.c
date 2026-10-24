@@ -8,7 +8,7 @@
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "sdf_motion_bindings.h"
-#include "sdf_motion.h"
+#include "sdf_motion_loop.h"
 #include "sdf_motion_next_result.h"
 #include "sdf_motion_node_api.h"
 #include "sdf_vu_matrix.h"
@@ -136,7 +136,7 @@ void sdfMotionCtrlrFree(sdfMotionCtrlr_t *node)
 }
 
 /* Select a motion entry, initialize its timing and state, and bind its setup records. */
-void sdfMotionChangeBlend(sdfMotionCtrlr_t *motion, s32 motionIndex, s32 loopEnabled, f32 blendLeadFrames,
+void sdfMotionChangeBlend(sdfMotionCtrlr_t *motion, s32 motionIndex, SdfMotionLoopMode loopMode, f32 blendLeadFrames,
                          f32 blendDurationFrames) {
     s32 i;
     const MotionEntry *entry;
@@ -156,7 +156,7 @@ void sdfMotionChangeBlend(sdfMotionCtrlr_t *motion, s32 motionIndex, s32 loopEna
         motion->blendStartFrame = 0.0f;
     }
 
-    motion->loopEnabled = loopEnabled;
+    motion->loopEnabled = loopMode;
     motion->state = SDF_MOTION_STATE_INITIALIZED;
     motion->currentFrame = motion->blendStartFrame;
     entry = motion->motionTable->entries[motionIndex];
@@ -176,8 +176,8 @@ void sdfMotionChangeBlend(sdfMotionCtrlr_t *motion, s32 motionIndex, s32 loopEna
 }
 
 /* Select a motion with no lead-in and no blend duration. */
-void sdfMotionChange(sdfMotionCtrlr_t *motion, s32 motionIndex, s32 loopEnabled) {
-    sdfMotionChangeBlend(motion, motionIndex, loopEnabled, 0.0f, 0.0f);
+void sdfMotionChange(sdfMotionCtrlr_t *motion, s32 motionIndex, SdfMotionLoopMode loopMode) {
+    sdfMotionChangeBlend(motion, motionIndex, loopMode, 0.0f, 0.0f);
 }
 
 void sdfMotionSeek(sdfMotionCtrlr_t *motion, f32 frame) {
@@ -234,7 +234,7 @@ SdfMotionNextResult sdfMotionNext(sdfMotionCtrlr_t *motion) {
     case SDF_MOTION_STATE_SAMPLING:
         frame = motion->currentFrame + motion->frameStep;
         frameCount = motion->frameCount;
-        if (motion->loopEnabled == 0) {
+        if (motion->loopEnabled == SDF_MOTION_LOOP_DISABLED) {
             if (frameCount <= frame) {
                 sdfMotionSeek(motion, frameCount);
                 motion->state = SDF_MOTION_STATE_TERMINAL;
@@ -325,7 +325,7 @@ void sdfMotGetKey(SdfMotionKeyBinding *binding,
     currentFrame = keyFrames[middleKeyIndex];
     out->firstKey = (f32 *)firstKeyData;
     if (nextKeyIndex == keyCount) {
-        if (binding->motion->loopEnabled == 0) {
+        if (binding->motion->loopEnabled == SDF_MOTION_LOOP_DISABLED) {
             out->secondKey = (f32 *)firstKeyData;
             nextFrame = currentFrame;
         } else {

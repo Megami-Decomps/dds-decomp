@@ -16,7 +16,7 @@
 #include "dds3_admin_control_api.h"
 #include "kwln_task_add_child.h"
 #include "mdl_motion_api.h"
-#include "sdf_motion.h"
+#include "sdf_motion_loop.h"
 #include "sdf_texture_draw_packet.h"
 #include "bill_object_api.h"
 #include "sdf_chip.h"
@@ -2168,10 +2168,10 @@ void mdlApplyViewerResourceMenuAction(void) {
             motion = resource->first;
             if (motion != NULL) {
                 entryId = resource->current.h.motionIndex;
-                if (motion->loopEnabled == 0) {
-                    sdfMotionChange(motion, entryId, 0);
+                if (motion->loopEnabled == SDF_MOTION_LOOP_DISABLED) {
+                    sdfMotionChange(motion, entryId, SDF_MOTION_LOOP_DISABLED);
                 } else {
-                    sdfMotionChange(motion, entryId, 1);
+                    sdfMotionChange(motion, entryId, SDF_MOTION_LOOP_ENABLED);
                 }
             }
         }
