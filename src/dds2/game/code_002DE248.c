@@ -8626,8 +8626,8 @@ void effInitializeAnimationPositions(u8 *work) {
     }
 }
 
-u32 effClampSlotCount(u8 *p) {
-    return effSlotCount(p, 200);
+u32 effClampSlotCount(FileKeyBlock *mapping) {
+    return effSlotCount((u8 *)mapping, 200);
 }
 
 u32 effRetainScalyTextureReference(void);
@@ -8681,7 +8681,7 @@ void effSynchronizeFileTransform(u8 *work) {
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F2AE8);
 
 EffAnimationState *effCreatePrimarySlotAnimationState(u8 *work) {
-    u8 *mapping = work + 0x3C;
+    FileKeyBlock *mapping = (FileKeyBlock *)(work + 0x3C);
     u32 count = effClampSlotCount(mapping);
     EffAnimationState *state = effCreateAnimationState((u32)work, count);
 
@@ -8690,7 +8690,7 @@ EffAnimationState *effCreatePrimarySlotAnimationState(u8 *work) {
 }
 
 EffAnimationState *effCreateAlternateSlotAnimationState(u8 *work) {
-    u8 *mapping = work + 0x3C;
+    FileKeyBlock *mapping = (FileKeyBlock *)(work + 0x3C);
     u32 count = effClampSlotCount(mapping);
     EffAnimationState *state = effCreateAnimationState((u32)work, count);
 
