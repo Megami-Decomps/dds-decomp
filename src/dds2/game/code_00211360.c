@@ -1277,8 +1277,8 @@ s32 btlCanQueryElementAgainstEnemies(s32 unused, s32 action) {
     return 1;
 }
 
-s32 btlCheckActorEligibilityWithDebug(s32 actor) {
-    if (btlWouldUiValueFallBelowQuarter((BtlUnit *)actor, 0) != 0) {
+s32 btlCheckActorEligibilityWithDebug(BtlUnit *actor) {
+    if (btlWouldUiValueFallBelowQuarter(actor, 0) != 0) {
         if (sdfHddValid == 0) {
             btlBossDebugPrintf(D_00419C30);
         }

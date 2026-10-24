@@ -1192,8 +1192,8 @@ extern s32 btlWouldUiValueFallBelowQuarter(BtlUnit *, s32);
 
 extern u8 sdfHddValid;
 
-s32 btlCheckActorEligibilityWithDebug(s32 actor) {
-    if (btlWouldUiValueFallBelowQuarter((BtlUnit *)actor, 0) != 0) {
+s32 btlCheckActorEligibilityWithDebug(BtlUnit *actor) {
+    if (btlWouldUiValueFallBelowQuarter(actor, 0) != 0) {
         if (sdfHddValid == 0) {
             btlBossDebugPrintf(D_003A5A80);
         }
