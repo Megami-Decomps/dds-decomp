@@ -196,7 +196,7 @@ void btlSelectAndRunModeAiAction(ActionStateLink *task, u32 mode) {
     btlSelectConditionalAiRoute(unit, species, &row, variant);
     index = btlPickWeightedAiSlot(unit, species, row);
     btlExecuteAiTableAction(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,
-                  datEnemyAiRecords[species].slot[row * 5 + index].actionArg);
+                  datEnemyAiRecords[species].slot[row * 5 + index].packedAction);
     if (mode == 2) {
         btlSyncEligibleActorPanelHpMp(task);
     }

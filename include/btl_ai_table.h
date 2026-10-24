@@ -8,14 +8,14 @@ typedef struct AiSlot {
     u8 weight; /* 0x00: used by the weighted-slot selector. */
     u8 pad01;
     u16 actionId; /* 0x02 */
-    u32 actionArg; /* 0x04 */
+    u32 packedAction; /* 0x04: top 10 bits select the handler; low 22 bits carry its argument. */
 } AiSlot;
 
 typedef char AiSlot_size_must_be_8[(sizeof(AiSlot) == 8) ? 1 : -1];
 typedef char AiSlot_actionId_offset_must_be_2[
     ((u32)&((AiSlot *)0)->actionId == 2) ? 1 : -1];
-typedef char AiSlot_actionArg_offset_must_be_4[
-    ((u32)&((AiSlot *)0)->actionArg == 4) ? 1 : -1];
+typedef char AiSlot_packedAction_offset_must_be_4[
+    ((u32)&((AiSlot *)0)->packedAction == 4) ? 1 : -1];
 
 /* One AICALC.TBL decision tier: three packed predicates and eight routes. */
 typedef struct AiDecisionRow {

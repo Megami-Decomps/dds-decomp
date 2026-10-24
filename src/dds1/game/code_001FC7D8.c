@@ -1267,7 +1267,7 @@ s32 btlRunRandomWeightedAiTableAction(BtlTask *task) {
     btlSelectTierMatrixAiRoute(unit, species, &row, 0);
     index = btlPickWeightedAiSlot(unit, species, row);
     btlRunAiAction(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,
-                   datEnemyAiRecords[species].slot[row * 5 + index].actionArg);
+                   datEnemyAiRecords[species].slot[row * 5 + index].packedAction);
     sdfChipFreeDirect((void *)btlActionScratchWork);
     return 1;
 }

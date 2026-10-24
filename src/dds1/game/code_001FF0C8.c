@@ -186,7 +186,7 @@ void btlSelectAndRunModeAiAction(BtlTask *task, u32 mode) {
             actionId = datEnemyAiRecords[species].slot[row * 5 + index].actionId;
         }
     }
-    btlRunAiAction(task, actionId, datEnemyAiRecords[species].slot[row * 5 + index].actionArg);
+    btlRunAiAction(task, actionId, datEnemyAiRecords[species].slot[row * 5 + index].packedAction);
     if (mode == 2) {
         btlSyncEligibleActorPanelHpMp(task);
     }
