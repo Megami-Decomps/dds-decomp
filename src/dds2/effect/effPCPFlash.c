@@ -299,7 +299,7 @@ void effPCPFlashPolySpherePartSetVC(PcpFlashStreakWork *work, s32 index, s32 col
 
 extern EffRandState effDefaultRandomState[];
 
-void effPCPFlashPolySpherePartInit(PcpFlashStreakWork *work, s32 index, void *orientation) {
+void effPCPFlashPolySpherePartInit(PcpFlashStreakWork *work, s32 index, const f32 *orientation) {
     PcpFlashRotatingParticle *part = work->parts + index;
     f32 direction[4];
     f32 factor;
@@ -385,7 +385,7 @@ void effPCPFlashPolySpherePartSetVertex(PcpFlashStreakWork *work, s32 index, con
     SDF_VU0_SUBVECTOR();
     SDF_VU0_STOREVECTOR(quad + 4);
 }
-void effPCPFlashPolySpherePartRotate(PcpFlashStreakWork *work, s32 index, void *orientation)
+void effPCPFlashPolySpherePartRotate(PcpFlashStreakWork *work, s32 index, const f32 *orientation)
 {
     PcpFlashRotatingParticle *part = &work->parts[index];
     f32 position[4];
@@ -439,7 +439,7 @@ void effPCPFlashPolySphereDraw(PcpFlashStreakWork *work) {
         f32 blend;
 
         if (part->age == 0) {
-            effPCPFlashPolySpherePartInit(work, index, &axis);
+            effPCPFlashPolySpherePartInit(work, index, (const f32 *)&axis);
             effPCPFlashPolySpherePartSetVertex(work, index, (const f32 *)&axis);
             effPCPFlashPolySpherePartSetVC(work, index, 0);
             if (ramp == 0) {
@@ -464,7 +464,7 @@ void effPCPFlashPolySphereDraw(PcpFlashStreakWork *work) {
                         part->scale = maxScale;
                     }
                 }
-                effPCPFlashPolySpherePartRotate(work, index, &axis);
+                effPCPFlashPolySpherePartRotate(work, index, (const f32 *)&axis);
                 effPCPFlashPolySpherePartSetVertex(work, index, (const f32 *)&axis);
                 if (part->age < half) {
                     blend = (f32)age / (f32)half;
