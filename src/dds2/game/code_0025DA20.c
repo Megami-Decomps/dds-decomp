@@ -2766,17 +2766,17 @@ s32 evtBuildShopCatalogIfActive(dds3ProcessID_t *task) {
 }
 
 s32 evtSelectStateAction(dds3ProcessID_t *task) {
-    s32 stateAddress = dds3GetProcessData(task);
+    MenuTerminalContext *state = (MenuTerminalContext *)dds3GetProcessData(task);
     struct MenuList *linkedList;
-    if (((MenuTerminalContext *)stateAddress)->phase == 5) {
-        mnuSetCommandPhase((MenuTerminalContext *)stateAddress, 3);
-    } else if (((MenuTerminalContext *)stateAddress)->phase == 7) {
-        mnuSetCommandPhase((MenuTerminalContext *)stateAddress, 9);
-        linkedList = ((MenuTerminalContext *)stateAddress)->window->list;
+    if (state->phase == 5) {
+        mnuSetCommandPhase(state, 3);
+    } else if (state->phase == 7) {
+        mnuSetCommandPhase(state, 9);
+        linkedList = state->window->list;
         linkedList->drawCallback = mnuDrawFadingValueListRow;
         mnuSetValueListTransition(linkedList, 0xa);
     }
-    ((MenuTerminalContext *)stateAddress)->stateStep = 0;
+    state->stateStep = 0;
     return 1;
 }
 
@@ -2893,17 +2893,17 @@ s32 evtBuildFilteredShopCatalogIfActive(dds3ProcessID_t *task) {
 }
 
 s32 evtSelectStateActionB(dds3ProcessID_t *task) {
-    s32 context = dds3GetProcessData(task);
+    MenuTerminalContext *context = (MenuTerminalContext *)dds3GetProcessData(task);
     struct MenuList *linkedList;
-    if (((MenuTerminalContext *)context)->phase == 5) {
-        mnuSetCommandPhase((MenuTerminalContext *)context, 3);
-    } else if (((MenuTerminalContext *)context)->phase == 7) {
-        mnuSetCommandPhase((MenuTerminalContext *)context, 9);
-        linkedList = ((MenuTerminalContext *)context)->window->list;
+    if (context->phase == 5) {
+        mnuSetCommandPhase(context, 3);
+    } else if (context->phase == 7) {
+        mnuSetCommandPhase(context, 9);
+        linkedList = context->window->list;
         linkedList->drawCallback = mnuDrawFadingValueListRow;
         mnuSetValueListTransition(linkedList, 0xa);
     }
-    ((MenuTerminalContext *)context)->stateStep = 0;
+    context->stateStep = 0;
     return 1;
 }
 
@@ -3010,17 +3010,17 @@ s32 evtBuildRangeFilteredShopCatalogIfActive(dds3ProcessID_t *task) {
 }
 
 s32 mnuResetCommandStepAndSelectPhase(dds3ProcessID_t *task) {
-    s32 stateAddress = dds3GetProcessData(task);
+    MenuTerminalContext *state = (MenuTerminalContext *)dds3GetProcessData(task);
     struct MenuList *linkedList;
-    if (((MenuTerminalContext *)stateAddress)->phase == 5) {
-        mnuSetCommandPhase((MenuTerminalContext *)stateAddress, 3);
-    } else if (((MenuTerminalContext *)stateAddress)->phase == 7) {
-        mnuSetCommandPhase((MenuTerminalContext *)stateAddress, 9);
-        linkedList = ((MenuTerminalContext *)stateAddress)->window->list;
+    if (state->phase == 5) {
+        mnuSetCommandPhase(state, 3);
+    } else if (state->phase == 7) {
+        mnuSetCommandPhase(state, 9);
+        linkedList = state->window->list;
         linkedList->drawCallback = mnuDrawFadingValueListRow;
         mnuSetValueListTransition(linkedList, 0xa);
     }
-    ((MenuTerminalContext *)stateAddress)->stateStep = 0;
+    state->stateStep = 0;
     return 1;
 }
 
