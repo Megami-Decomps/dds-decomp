@@ -2341,7 +2341,7 @@ extern void btlInitializePartyRecordFromEnemy(datUnitWork_t *, s32);
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 extern BtlRuntimeTask *btlCreateMoveOtherUnitsTask(BtlUnit *, u32);
 extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
-extern u8 *btlCreateGunLoadPollTask(u8 *);
+extern BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *);
 extern s32 btlGetUnitModelFrameCount(BtlUnit *);
 extern void btlSetUnitPosition(BtlUnit *, const f32 *);
 extern void btlApplyUnitEffectScale(BtlUnit *);
@@ -2559,7 +2559,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         if (mnuListMoveCursor(&state->debug.gunMenu)) {
             if ((btlUnitStatusPair(unit) & 0x1200) == 0x200) {
                 unit->partyRecord.menuValue = state->debug.gunMenu.cursor + 0xA0;
-                btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));
+                btlStartTask(btlCreateGunLoadPollTask(unit));
                 state->debug.phase = 2;
             }
         } else if (dds3PadBitTable[3] < 0) {

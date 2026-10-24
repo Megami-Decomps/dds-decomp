@@ -444,7 +444,7 @@ extern BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *, u32, u32);
 extern BtlRuntimeTask *sndCreateActorEffectTask(struct SoundResourceNode *, BtlUnit *, u32);
 extern BtlRuntimeTask *btlCreateImmediateCompletionTask(void);
-extern u8 *btlCreateGunLoadPollTask(u8 *);
+extern BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *);
 extern struct BtlRuntimeTask *sndCreateEarringTask(void);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern s32 btlIsActorModeActionCodeAllowed(BtlUnit *);
@@ -585,7 +585,7 @@ u64 btlQueueSceneActorModelEntry(s32 sceneAddress) {
     }
     for (unit = tail; unit != NULL; unit = unit->previousActor) {
         if ((btlUnitStatusPair(unit) & 0x203) == 0x201) {
-            task = (BtlRuntimeTask *)btlCreateGunLoadPollTask((u8 *)unit);
+            task = btlCreateGunLoadPollTask(unit);
             task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             task->startCondition.value.handle = chain;
             btlStartTask(task);

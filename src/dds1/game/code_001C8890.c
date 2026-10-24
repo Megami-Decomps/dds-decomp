@@ -1932,7 +1932,7 @@ void btlMarkLinkedActorStatusFlag(s32 task) {
     ;
 }
 
-extern u8 *btlCreateGunLoadPollTask(u8 *);
+extern BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *);
 extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode);
 
 /* State-handler table entry (0x359BEC); the table holds s32 handlers (btlCommandStateSelectB) and this one
@@ -1996,7 +1996,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
                 btlStartTask(spawned);
             }
         }
-        btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));
+        btlStartTask(btlCreateGunLoadPollTask(unit));
         btlStartTask(sndCreateEffectSourceTask(state->resources[45], unit, change->handle));
         btlStartTask(sndCreateStationedSeTask(0x1000F));
         spawned = (BtlRuntimeTask *)btlCreateEffObjA(unit, task->indexWork.phase);
@@ -2051,7 +2051,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
         change = btlCreateModelChangeTask(unit, unit->modelId, unit->modelVariant, motion, 0x12,
                                                        3);
         btlStartTask(change);
-        btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));
+        btlStartTask(btlCreateGunLoadPollTask(unit));
         btlStartTask(sndCreateEffectSourceTask(state->resources[47], unit, change->handle));
         btlStartTask(sndCreateStationedSeTask(0x1000F));
         unit->status.flags &= ~0x400000;
@@ -2128,7 +2128,7 @@ void btlScheduleDevilStateModelChange(BtlTask *task) {
                 btlStartTask(spawned);
             }
         }
-        btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));
+        btlStartTask(btlCreateGunLoadPollTask(unit));
         btlStartTask(sndCreateEffectSourceTask(state->resources[45], unit, change->handle));
         btlStartTask(sndCreateStationedSeTask(0x1000F));
         spawned = (BtlRuntimeTask *)btlCreateEffObjA(unit, task->indexWork.phase);
@@ -2168,7 +2168,7 @@ void btlScheduleDevilStateModelChange(BtlTask *task) {
         change = btlCreateModelChangeTask(unit, unit->modelResourceKind, unit->displaySpecies, motion, 0x12,
                                                        3);
         btlStartTask(change);
-        btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));
+        btlStartTask(btlCreateGunLoadPollTask(unit));
         btlStartTask(sndCreateEffectSourceTask(state->resources[47], unit, change->handle));
         btlStartTask(sndCreateStationedSeTask(0x1000F));
         unit->status.flags &= ~0x20000000;
@@ -2493,7 +2493,7 @@ void btlScheduleSummonActionTasks(BtlTask *action) {
     task->startCondition.kind = 4;
     task->startCondition.value.handle = load->handle;
     btlStartTask(task);
-    task = (BtlRuntimeTask *)btlCreateGunLoadPollTask((u8 *)unit);
+    task = btlCreateGunLoadPollTask(unit);
     task->startCondition.kind = 10;
     task->startCondition.value.taskKind = 0x40;
     task->ownerId = action->unit->identity;
@@ -2671,7 +2671,7 @@ void btlReloadLinkedUnitAndQueueEffects(BtlTask *task) {
     rate = 1.0f;
     load->ownerId = task->unit->identity;
     btlStartTask(load);
-    spawned = (BtlRuntimeTask *)btlCreateGunLoadPollTask((u8 *)unit);
+    spawned = btlCreateGunLoadPollTask(unit);
     spawned->ownerId = task->unit->identity;
     btlStartTask(spawned);
     spawned = btlCreateUnitPositionLerpTowardTargetTask(unit, unit->currentPosition, rate);

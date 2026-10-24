@@ -231,7 +231,7 @@ extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind,
 
 extern s32 btlCountTasksByKind(u16 kind);
 
-extern u8 *btlCreateGunLoadPollTask(u8 *);
+extern BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *);
 
 extern BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *, s32);
 
@@ -4779,21 +4779,22 @@ extern void btlStartGunFinishLoad(GunLoadArgs *);
 
 extern u32 btlPollGunLoad(GunLoadArgs *);
 
-u8 *btlCreateGunLoadPollTask(u8 *owner) {
+BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *owner) {
     u8 *task = btlAllocTask(8);
+    u8 *ownerBytes = (u8 *)owner;
     GunLoadArgs *arguments;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u16 *)(task + 0x20) = 0x23;
     *(u16 *)(task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
-    *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
+    *(u64 *)(task + 0x40) = *(u64 *)(ownerBytes + 0x108);
     *(void **)(task + 0x48) = btlStartGunFinishLoad;
     *(void **)(task + 0x4C) = btlPollGunLoad;
     arguments = btlGetTaskArguments(task);
-    arguments->unit = (BtlUnit *)owner;
+    arguments->unit = owner;
     arguments->request = NULL;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 u32 btlUpdateUnitEffectsTask(void) {
