@@ -1331,8 +1331,7 @@ void *btlCreateDeferredActorStatsTask(BtlUnit *owner, BtlOperandEntry *spec) {
     return task;
 }
 
-u32 btlApplyDeferredUnitStatus(void *taskArgs) {
-    BtlDeferredUnitStatusArgs *arguments = taskArgs;
+u32 btlApplyDeferredUnitStatus(BtlDeferredUnitStatusArgs *arguments) {
     BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *unit = arguments->unit;
     if ((work->battleFlags & 0x80) == 0) {
@@ -1346,7 +1345,7 @@ u32 btlApplyDeferredUnitStatus(void *taskArgs) {
 
 extern void *btlAllocTask(s32);
 
-extern u32 btlApplyDeferredUnitStatus(void *);
+extern u32 btlApplyDeferredUnitStatus(BtlDeferredUnitStatusArgs *);
 
 void *btlCreateDeferredUnitStatusTask(BtlUnit *owner, u32 value) {
     u8 *task = btlAllocTask(8);

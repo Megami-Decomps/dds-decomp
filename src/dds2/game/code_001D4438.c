@@ -25,6 +25,7 @@
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "btl_task_condition.h"
+#include "btl_deferred_unit_status_args.h"
 #include "dat_command.h"
 #include "btl_scene_fade.h"
 #include "btl_command.h"
@@ -411,7 +412,7 @@ extern char D_004192D8[];
 
 extern char D_00436AE8[];
 
-extern u32 btlApplyDeferredUnitStatus(void *);
+extern u32 btlApplyDeferredUnitStatus(BtlDeferredUnitStatusArgs *);
 
 extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 

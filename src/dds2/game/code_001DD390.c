@@ -153,7 +153,7 @@ extern void btlBossDebugPrintf(const char *format, ...);
 extern s32 btlSampleActorModelPositionVU(BtlUnit *, s32);
 
 
-extern u32 btlApplyDeferredUnitStatus(void *);
+extern u32 btlApplyDeferredUnitStatus(BtlDeferredUnitStatusArgs *);
 
 extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 
@@ -1434,8 +1434,7 @@ BtlRuntimeTask *btlCreateDeferredActorStatsTask(BtlUnit *unit, BtlOperandEntry *
     return task;
 }
 
-u32 btlApplyDeferredUnitStatus(void *taskArgs) {
-    BtlDeferredUnitStatusArgs *args = taskArgs;
+u32 btlApplyDeferredUnitStatus(BtlDeferredUnitStatusArgs *args) {
     BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *unit = args->unit;
     if (!(work->battleFlags & 0x80)) {
