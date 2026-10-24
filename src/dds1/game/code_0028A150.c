@@ -194,11 +194,11 @@ extern u32 *fileWriteDataSizeSlot;
 
 extern FileMenuContinuationCallback fileWriteContinuation;
 
-extern u32 *fileWritePendingRequestSlot;
+extern struct FileRequest **fileWritePendingRequestSlot;
 
 extern u32 D_003BC824;
 
-extern s32 slSaveWriteFile(const char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, FileMenuContinuationCallback continuation, u32 *pendingRequestStatus);
+extern s32 slSaveWriteFile(const char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest **pendingRequestStatus);
 
 extern s32 slSaveProc_openFile(void);
 
@@ -286,7 +286,7 @@ extern FileMenuContinuationCallback fileMenuContinuation;
 
 extern struct sdfMemHandle_t *fileSaveIconResourceHandle;
 
-extern u32 fileSaveIconRequest;
+extern struct FileRequest *fileSaveIconRequest;
 
 extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
 
@@ -1078,7 +1078,7 @@ s32 slCancel(void) {
 
 s32 fileLoadIconFileAndResetSelection(void) {
     fileSaveIconResourceHandle = 0;
-    fileSaveIconRequest = (u32)fileLoad(D_003B2668);
+    fileSaveIconRequest = fileLoad(D_003B2668);
     return fileResetSelection();
 }
 
@@ -1088,7 +1088,7 @@ s32 fileResetSlotSelection(void) {
 
 s32 fileLoadIconFileAndBeginSlotReset(void) {
     fileSaveIconResourceHandle = 0;
-    fileSaveIconRequest = (u32)fileLoad(D_003B2668);
+    fileSaveIconRequest = fileLoad(D_003B2668);
     return slEndingTop();
 }
 
@@ -2046,7 +2046,7 @@ s32 slSaveData_deleteIconSys(void) {
     return (s32)fileBuildMainBlobAfterDelete;
 }
 
-s32 slSaveWriteFile(const char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, FileMenuContinuationCallback continuation, u32 *pendingRequestStatus) {
+s32 slSaveWriteFile(const char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest **pendingRequestStatus) {
     fileWriteDataAddressSlot = dataAddressSlot;
     fileWriteDataSizeSlot = dataSizeSlot;
     fileWriteContinuation = continuation;
@@ -2608,7 +2608,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
 
 s32 slCalc(dds3ProcessID_t *task) {
     s32 next;
-    u32 job;
+    struct FileRequest *job;
     s32 (*cur)();
     D_003BC814++;
     fileDrawMenuFrame((s32)task);
@@ -2622,12 +2622,12 @@ s32 slCalc(dds3ProcessID_t *task) {
         cur = (s32 (*)())next;
     }
     fileMenuStateHandler = cur;
-    if (job != 0 && pacFileCheckEnd((struct FileRequest *)job) != 0) {
+    if (job != 0 && pacFileCheckEnd(job) != 0) {
         fileSaveIconRequest = 0;
-        fileSaveIconResourceHandle = fileGetMemHandle((struct FileRequest *)(u32)job);
-        fileSaveIconData = (u32)fileGetLoadPtr((struct FileRequest *)(u32)job);
-        fileSaveIconDataSize = fileGetLoadSize((struct FileRequest *)(u32)job);
-        fileHandleFree((struct FileRequest *)(u32)job);
+        fileSaveIconResourceHandle = fileGetMemHandle(job);
+        fileSaveIconData = (u32)fileGetLoadPtr(job);
+        fileSaveIconDataSize = fileGetLoadSize(job);
+        fileHandleFree(job);
     }
     return 0;
 }
@@ -2835,9 +2835,9 @@ void fileReleaseMenuResources(void) {
             dds3VisibleSceneBasic((dds3Basic_t *)world, 1);
         }
         if (fileSaveIconRequest != 0) {
-            fileSync((struct FileRequest *)fileSaveIconRequest);
-            fileSaveIconResourceHandle = fileGetMemHandle((struct FileRequest *)(u32)fileSaveIconRequest);
-            fileHandleFree((struct FileRequest *)(u32)fileSaveIconRequest);
+            fileSync(fileSaveIconRequest);
+            fileSaveIconResourceHandle = fileGetMemHandle(fileSaveIconRequest);
+            fileHandleFree(fileSaveIconRequest);
             fileSaveIconRequest = 0;
         }
         sdfMemFreeHandleDirect(&fileSaveIconResourceHandle);
@@ -3631,7 +3631,7 @@ INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC7ED);
 
 INCLUDE_SDATA(dds3ProcessID_t * const, "game/code_0028A150", D_003BC7F0);
 
-INCLUDE_SDATA(const s32, "game/code_0028A150", fileSaveIconRequest);
+INCLUDE_SDATA(struct FileRequest * const, "game/code_0028A150", fileSaveIconRequest);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC7FC);
 
