@@ -19,7 +19,15 @@ extern sdfGsMemSlice_t * sdfGsMemAllocFromTail(s32 size, s32 allocationMode);
 extern sdfTexHandle_t * sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, sdfGsMemSlice_t *primary, s32 paletteFormat, s32 paletteCount, sdfGsMemSlice_t *secondary);
 
 /* PlayStation 2 GS pixel storage formats used to size indexed palettes. */
-enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
+enum {
+    SDF_PSMCT32 = 0x00,
+    SDF_PSMCT24 = 0x01,
+    SDF_PSMCT16 = 0x02,
+    SDF_PSMCT16S = 0x0A,
+    SDF_PSMT8 = 0x13,
+    SDF_PSMT4 = 0x14,
+    SDF_PSMT8H = 0x1B,
+};
 
 
 
@@ -67,21 +75,21 @@ sdfTexHandle_t *sdfTexAlloc(s32 width, s32 height, u32 format,
     u32 mipLevel;
 
     switch (format) {
-    case 0:
-    case 1:
+    case SDF_PSMCT32:
+    case SDF_PSMCT24:
         bitsPerPixel = 32;
         break;
-    case 2:
+    case SDF_PSMCT16:
         bitsPerPixel = 16;
         break;
-    case 10:
+    case SDF_PSMCT16S:
         bitsPerPixel = 16;
         break;
-    case 19:
+    case SDF_PSMT8:
         indexed = 1;
         bitsPerPixel = 8;
         break;
-    case 20:
+    case SDF_PSMT4:
         indexed = 1;
         bitsPerPixel = 4;
         break;
