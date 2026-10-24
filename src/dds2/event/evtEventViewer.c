@@ -805,10 +805,10 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         if (currentFrame == key->frame) {
             DelBED(key);
             if (track->metadata.option == 0) {
-                key->payload = evtEventViewerCreateOriginEffect(track->resourceData,
+                key->payload = evtEventViewerCreateOriginEffect(track->soundMixerResource,
                     (s32)key->p0C.sb[0], key->p08.sh[1], -1, key->frame, viewer);
             } else {
-                key->payload = evtEventViewerCreateOriginEffect(track->resourceData,
+                key->payload = evtEventViewerCreateOriginEffect(track->soundMixerResource,
                     (s32)key->p0C.sb[0], key->p08.sh[1], -1, 0, viewer);
             }
         }

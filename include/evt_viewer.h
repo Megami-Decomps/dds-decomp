@@ -7,6 +7,7 @@
 #include "fld.h"
 
 struct dds3ProcessID_t;
+struct SoundMixer;
 
 /* A timeline key's scalar formats are selected by its track kind. */
 typedef union EvtViewParam {
@@ -74,7 +75,8 @@ typedef struct EvtRuntimeGroup {
     s32 argument0C;
     dds3Basic_t *info;
     union {
-        void *resourceData;
+        void *resourceData; /* Heterogeneous borrowed resource for non-BED tracks. */
+        struct SoundMixer *soundMixerResource; /* Type 0x12 borrowed BED template. */
         struct { u16 resourceGroup, resourceId; } resourceIds;
     };
     EvtGroupMetadata metadata;
