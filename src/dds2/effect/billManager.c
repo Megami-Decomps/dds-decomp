@@ -457,11 +457,8 @@ billHandle_t *billAllocChild(SdfTextureFileHeader *resourceData) {
 }
 
 void billReleaseChild(billHandle_t *obj) {
-    s32 child;
-
-    child = (s32)obj->child;
-    if (child != 0) {
-        effReleaseSharedTextureRecord(child);
+    if (obj->child != NULL) {
+        effReleaseSharedTextureRecord(obj->child);
     }
     sdfChipFreeDirect(obj);
 }
