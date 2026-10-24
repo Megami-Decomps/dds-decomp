@@ -3510,9 +3510,9 @@ extern void btlReleaseRegisteredChildTaskWork(dds3ProcessID_t *);
 void btlStartRegisteredChildTask(void) {
     s32 context = (s32)(u32)btlGetRuntime();
     u32 data = (u32)sdfAllocAndClearQuadwords(sizeof(BattleRegisteredPanelWork));
-    u32 task = (u32)dds3StartProcess(D_003BB3C0, 0x2B0E, 1, 1, btlUpdateRegisteredPanelTask, btlReleaseRegisteredChildTaskWork, data);
-    dds3LinkProcess((dds3ProcessID_t *)*(u32 *)(context + 0x29C), (dds3ProcessID_t *)task);
-    btlSetTrackedTaskHandle(7, task);
+    dds3ProcessID_t *task = dds3StartProcess(D_003BB3C0, 0x2B0E, 1, 1, btlUpdateRegisteredPanelTask, btlReleaseRegisteredChildTaskWork, data);
+    dds3LinkProcess((dds3ProcessID_t *)*(u32 *)(context + 0x29C), task);
+    btlSetTrackedTaskHandle(7, (s32)task);
 }
 
 /* Reset panel entrance mode and its initial horizontal offset. */
