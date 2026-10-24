@@ -216,7 +216,7 @@ void sdfPacAdvanceCallbackBoundary(PacState *state) {
     inputHeader = (SdfPacStreamPacketHeader *)state->inputCursor;
     /* Advance only the fixed header; retain its original address for the callback. */
     sdfPacUseSrc(state, PAC_HEADER_BYTES);
-    packetBytes = inputHeader->payloadSize;
+    packetBytes = inputHeader->packetByteCount;
     state->packetCounter++;
     /* The high nibble encodes extension bytes, not a bit offset. */
     headerBytes = (inputHeader->flags & PAC_EXTENSION_BYTES_MASK) + PAC_HEADER_BYTES;

@@ -9,7 +9,7 @@ typedef struct SdfPacStreamPacketHeader {
     u8 command; /* 0x00 */
     u8 flags; /* 0x01 */
     u8 reserved02[2];
-    s32 payloadSize; /* 0x04: serialized packet bytes */
+    s32 packetByteCount; /* 0x04: serialized packet bytes, including this header */
     u8 reserved08[4];
     s32 decodedSize; /* 0x0C */
     u8 payload[0]; /* 0x10: variable packet contents */
@@ -20,7 +20,7 @@ typedef struct SdfPacModelPacketHeader {
     u8 command; /* 0x00 */
     u8 flags; /* 0x01 */
     u8 reserved02[2]; /* 0x02 */
-    s32 payloadSize; /* 0x04 */
+    s32 packetByteCount; /* 0x04: serialized packet bytes, including this header */
     u32 tag; /* 0x08 */
     s32 decodedSize; /* 0x0C */
     u8 payload[0]; /* 0x10: variable packet contents */
@@ -35,8 +35,8 @@ typedef char SdfPacModelPacketHeader_decodedSize_must_be_at_0x0C[
 
 typedef char SdfPacStreamPacketHeader_size_must_be_0x10[
     (sizeof(SdfPacStreamPacketHeader) == 0x10) ? 1 : -1];
-typedef char SdfPacStreamPacketHeader_payloadSize_offset_must_be_4[
-    ((u32)&((SdfPacStreamPacketHeader *)0)->payloadSize == 4) ? 1 : -1];
+typedef char SdfPacStreamPacketHeader_packetByteCount_offset_must_be_4[
+    ((u32)&((SdfPacStreamPacketHeader *)0)->packetByteCount == 4) ? 1 : -1];
 typedef char SdfPacStreamPacketHeader_decodedSize_offset_must_be_0x0C[
     ((u32)&((SdfPacStreamPacketHeader *)0)->decodedSize == 0x0C) ? 1 : -1];
 

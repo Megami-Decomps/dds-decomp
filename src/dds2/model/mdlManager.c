@@ -1362,7 +1362,7 @@ PacWork *mdlPackSet(PacWork *packetWork, s32 group, s32 id, s32 mode) {
             case 0x555049:
                 objectSize = ((SdfPacModelPacketHeader *)packetWork->packet)->decodedSize;
                 if (objectSize == 0) {
-                    objectSize = ((SdfPacModelPacketHeader *)packetWork->packet)->payloadSize
+                    objectSize = ((SdfPacModelPacketHeader *)packetWork->packet)->packetByteCount
                                + (((SdfPacModelPacketHeader *)packetWork->packet)->flags & 0xF0) - 0x10;
                 }
                 mdlCreateEffectResrc_IPU(partList, packetWork->dataCursor,

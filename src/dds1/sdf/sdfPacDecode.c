@@ -203,7 +203,7 @@ void sdfPacMemStayDecoderFunc(PacState *state) {
 void sdfPacMemDecoderFuncInit(PacState *state, SdfPacStreamPacketHeader *packet) {
     s32 allocationSize = packet->decodedSize;
     if (allocationSize == 0) {
-        allocationSize = packet->payloadSize + (packet->flags & PAC_EXTENSION_BYTES_MASK) - PAC_HEADER_BYTES;
+        allocationSize = packet->packetByteCount + (packet->flags & PAC_EXTENSION_BYTES_MASK) - PAC_HEADER_BYTES;
     }
     if (state->flags & PAC_STATE_USE_PACKET_MEMORY) {
         PacWork *node = sdfPacNewResrc(state, packet);
@@ -349,16 +349,16 @@ void sdfPacTmxStayDecoderFunc(PacState *state) {
  * block and copy (raw) or decode (compressed) the payload into it. */
 void sdfPacTmxDecoderInitFunc(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer) {
     state->resourceBuffer = buffer;
-    buffer->remainingBytes = packet->payloadSize - PAC_HEADER_BYTES;
+    buffer->remainingBytes = packet->packetByteCount - PAC_HEADER_BYTES;
     if (state->flags & PAC_STATE_USE_PACKET_MEMORY) {
         state->onInput = sdfPacTmxStayDecoderFunc;
         buffer->cursor = (u8 *)(state->inputCursor - PAC_HEADER_BYTES);
         return;
     }
     if (state->flags & PAC_STATE_ALLOCATE_HIGH) {
-        buffer->resourceSlot = sdfMemAllocFromTailDirect(packet->payloadSize);
+        buffer->resourceSlot = sdfMemAllocFromTailDirect(packet->packetByteCount);
     } else {
-        buffer->resourceSlot = sdfMemAllocDirect(packet->payloadSize);
+        buffer->resourceSlot = sdfMemAllocDirect(packet->packetByteCount);
     }
     buffer->cursor = (u8 *)sdfMemLock(buffer->resourceSlot);
     memcpy(buffer->cursor, packet, PAC_HEADER_BYTES);
