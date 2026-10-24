@@ -34,6 +34,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "btl_effect_position.h"
+#include "btl_effect_table.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
 #include "active_sound_node.h"
@@ -11174,17 +11175,8 @@ enum {
     BATTLE_FORMATION_ACTION_COUNT = 0x55
 };
 
-typedef struct BattleFormationActionRow {
-    u16 unknown00;
-    u16 kind;
-    s8 actorSelector[3];
-    u8 unknown07;
-} BattleFormationActionRow;
-
-typedef char BattleFormationActionRowSizeCheck[(sizeof(BattleFormationActionRow) == 8) ? 1 : -1];
-
 typedef struct BattleFormationActionTable {
-    BattleFormationActionRow rows[BATTLE_FORMATION_ACTION_COUNT];
+    BtlEffectActionRecord rows[BATTLE_FORMATION_ACTION_COUNT];
 } BattleFormationActionTable;
 
 typedef char BattleFormationActionTableSizeCheck[(sizeof(BattleFormationActionTable) == 0x2A8) ? 1 : -1];
@@ -11222,12 +11214,12 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
     flatY = 0.0f;
     for (i = 0; i < 3; i++) {
         BtlUnit *actor = participants[i];
-        const BattleFormationActionRow *row;
+        const BtlEffectActionRecord *row;
         if (actor == NULL) {
             continue;
         }
         row = &D_003BAA64->rows[actionCode - BATTLE_FORMATION_ACTION_FIRST];
-        selector = row->actorSelector[i];
+        selector = row->participantSelectors[i];
         if (selector == -1) {
             continue;
         }
@@ -11279,7 +11271,7 @@ INCLUDE_RODATA(const s32, "game/code_001DEFE0", D_003A53D0);
 u32 btlApplyLinkageFormation(BattleFormationActionArgs *args) {
     BtlTask *link;
     BtlUnit *first;
-    BattleFormationActionRow *row;
+    BtlEffectActionRecord *row;
     BtlState *runtime;
 
     runtime = (BtlState *)btlGetRuntime();
