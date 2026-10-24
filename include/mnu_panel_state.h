@@ -14,14 +14,14 @@ void mnuSetPanelState(struct MenuPanelState *panel, u32 state);
 void mnuSetPanelFirstGridSlot(struct MenuPanelState *panel, u32 valueA,
                               u32 valueB, struct EffectSlotSet *resource,
                               u32 index);
-void mnuSetPanelSecondGridSlot(struct MenuPanelState *panel, u32 valueA,
-                               u32 valueB, struct EffectSlotSet *resource,
+void mnuSetPanelSecondGridSlot(struct MenuPanelState *panel, s32 offsetX,
+                               s32 offsetY, struct EffectSlotSet *resource,
                                u32 index);
-void mnuSetPanelThirdGridSlot(struct MenuPanelState *panel, u32 valueA,
-                              u32 valueB, struct EffectSlotSet *resource,
+void mnuSetPanelThirdGridSlot(struct MenuPanelState *panel, s32 offsetX,
+                              s32 offsetY, struct EffectSlotSet *resource,
                               u32 index);
-void mnuSetPanelFourthGridSlot(struct MenuPanelState *panel, u32 valueA,
-                               u32 valueB, struct EffectSlotSet *resource,
+void mnuSetPanelFourthGridSlot(struct MenuPanelState *panel, s32 offsetX,
+                               s32 offsetY, struct EffectSlotSet *resource,
                                u32 index, u32 additionalValue);
 void mnuInitializePanelResource(struct MenuPanelState *panel,
                                 struct EffectSlotSet *resource,

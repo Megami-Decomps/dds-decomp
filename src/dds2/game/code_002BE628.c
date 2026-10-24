@@ -992,11 +992,11 @@ typedef struct MenuPanelState {
     MenuGridSlot selectedCenterSlot; /* 0x50 */
     MenuGridSlot selectedCornerSlot; /* 0x58 */
     MenuGridSlot rowSlot; /* 0x60 */
-    u32 secondValueA; /* 0x68 */
-    u32 secondValueB; /* 0x6C */
+    s32 secondOffsetX; /* 0x68: row position relative to the panel. */
+    s32 secondOffsetY; /* 0x6C */
     MenuGridSlot headingSlot; /* 0x70 */
-    u32 thirdValueA; /* 0x78 */
-    u32 thirdValueB; /* 0x7C */
+    s32 thirdOffsetX; /* 0x78: heading position relative to the panel. */
+    s32 thirdOffsetY; /* 0x7C */
     const s32 *headingIndices; /* 0x80: caller supplies a static sprite-index table. */
     u8 pad84[4];
     struct MenuIconState *resourceHandle; /* 0x88 */
@@ -1051,17 +1051,17 @@ void mnuInitializePanelResource(MenuPanelState *panel, s32 resource, s32 materia
     panel->resourceHandle = mnuCreatePanelIconState(5, resource, material);
 }
 
-void mnuSetPanelSecondGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,
+void mnuSetPanelSecondGridSlot(MenuPanelState *panel, s32 offsetX, s32 offsetY, EffectSlotSet *resource,
                                     s32 resourceIndex) {
-    panel->secondValueA = valueA;
-    panel->secondValueB = valueB;
+    panel->secondOffsetX = offsetX;
+    panel->secondOffsetY = offsetY;
     itfGridStorePosition(&panel->rowSlot, resource, resourceIndex);
 }
 
-void mnuSetPanelThirdGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,
+void mnuSetPanelThirdGridSlot(MenuPanelState *panel, s32 offsetX, s32 offsetY, EffectSlotSet *resource,
                                     const s32 *indices) {
-    panel->thirdValueA = valueA;
-    panel->thirdValueB = valueB;
+    panel->thirdOffsetX = offsetX;
+    panel->thirdOffsetY = offsetY;
     itfGridStorePosition(&panel->headingSlot, resource, 0);
     panel->headingIndices = indices;
 }
@@ -1085,13 +1085,13 @@ void mnuDrawPanelState(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawA
     if (rowSet != NULL) {
         itfDrawGridWithResolvedSlot(x, y, depth, 1, rowSet, rowIndex, drawArg);
     }
-    rowX = panel->thirdValueA;
-    rowY = panel->thirdValueB;
+    rowX = panel->thirdOffsetX;
+    rowY = panel->thirdOffsetY;
     itfDrawGridWithResolvedSlot(x + rowX, y + rowY,
                                 depth, 1, panel->headingSlot.set,
                                 panel->headingIndices[panel->common.state], drawArg);
-    rowX = panel->secondValueA;
-    rowY = panel->secondValueB;
+    rowX = panel->secondOffsetX;
+    rowY = panel->secondOffsetY;
     rowSet = panel->rowSlot.set;
     rowIndex = panel->rowSlot.index;
     {

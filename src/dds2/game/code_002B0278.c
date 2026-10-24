@@ -2058,8 +2058,8 @@ s32 mnuIsSkillCodeInBitset(s32 skillCode, u32 *bits) {
 /* DDS2 page setup uses the same full owners as the surrounding menu code. */
 extern struct MenuPanelState *mnuCreatePanelState(s32 width, s32 height);
 extern void mnuSetPanelFirstGridSlot(struct MenuPanelState *, u32, u32, EffectSlotSet *, s32);
-extern void mnuSetPanelSecondGridSlot(struct MenuPanelState *, u32, u32, EffectSlotSet *, s32);
-extern void mnuSetPanelThirdGridSlot(struct MenuPanelState *, u32, u32, EffectSlotSet *, const s32 *);
+extern void mnuSetPanelSecondGridSlot(struct MenuPanelState *, s32, s32, EffectSlotSet *, s32);
+extern void mnuSetPanelThirdGridSlot(struct MenuPanelState *, s32, s32, EffectSlotSet *, const s32 *);
 extern void mnuSetPanelCornerGeometry(struct MenuPanelState *, s32, s32, EffectSlotSet *, s32, s32);
 extern void mnuInitializePanelResource(struct MenuPanelState *, s32, s32);
 extern MenuList *mnuCreateListState(u32, u32, s32);
