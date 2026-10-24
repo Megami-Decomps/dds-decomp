@@ -3,9 +3,14 @@
 
 #include "common.h"
 
+enum {
+    PAR_COLOR_RAMP_MODE_CONSTANT = 1,
+    PAR_COLOR_RAMP_MODE_SINGLE_SEGMENT = 2
+};
+
 /* Per-emitter color ramp initialized by dds3ParticleSetColorTable. */
 typedef struct ParColorRamp {
-    s32 mode;          /* 0x00: 1 = no ramp, 2 = color0-to-color1 only */
+    s32 mode;          /* 0x00: constant color, one segment, or full ramp */
     u32 color[3];      /* 0x04: ramp stops 0, 1, 2 */
     u32 alpha;         /* 0x10 */
     s32 fadeInFrames;  /* 0x14 */

@@ -303,10 +303,10 @@ void dds3ParticleSetColorTable(ParColorRamp *p, s32 frames) {
         p->fadeOut = alpha / p->fadeOutFrames;
     }
     p->frames = frames;
-    if (p->mode == 1) {
+    if (p->mode == PAR_COLOR_RAMP_MODE_CONSTANT) {
         return;
     }
-    if (p->mode == 2) {
+    if (p->mode == PAR_COLOR_RAMP_MODE_SINGLE_SEGMENT) {
         p->rampFrames = frames;
     } else {
         p->rampFrames = frames >> 1;
@@ -320,7 +320,7 @@ void dds3ParticleSetColorTable(ParColorRamp *p, s32 frames) {
     p->rStep[0] = ((f32)(a & 0xFF) - (f32)(b & 0xFF)) / span;
     p->gStep[0] = ((f32)((a >> 8) & 0xFF) - (f32)((b >> 8) & 0xFF)) / span;
     p->bStep[0] = ((f32)((a >> 16) & 0xFF) - (f32)((b >> 16) & 0xFF)) / span;
-    if (p->mode == 2) {
+    if (p->mode == PAR_COLOR_RAMP_MODE_SINGLE_SEGMENT) {
         return;
     }
     a = p->color[2];
@@ -348,7 +348,7 @@ u32 dds3ParticleColorAnim(ParColorRamp *p, u32 color, s32 age) {
     } else {
         alpha = p->alpha << 24;
     }
-    if (p->mode == 1) {
+    if (p->mode == PAR_COLOR_RAMP_MODE_CONSTANT) {
         return p->color[0] | alpha;
     }
     t = age;
