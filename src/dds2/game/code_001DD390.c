@@ -4288,8 +4288,7 @@ BtlRuntimeTask *btlCreateUnitFadeOutTask(BtlUnit *unit, u32 value, u32 variant) 
     return task;
 }
 
-s32 btlStepUnitDefeatFadeIn(u32 *arguments) {
-    BtlUnitFadeTaskArgs *taskArgs = (BtlUnitFadeTaskArgs *)arguments;
+s32 btlStepUnitDefeatFadeIn(BtlUnitFadeTaskArgs *taskArgs) {
     BtlUnit *unit = taskArgs->unit;
     u32 alpha;
 
@@ -4337,8 +4336,7 @@ BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *actor, s32 option) {
     return task;
 }
 
-s32 btlStepUnitDefeatFadeOut(u32 *arguments) {
-    BtlUnitFadeTaskArgs *taskArgs = (BtlUnitFadeTaskArgs *)arguments;
+s32 btlStepUnitDefeatFadeOut(BtlUnitFadeTaskArgs *taskArgs) {
     BtlUnit *unit = taskArgs->unit;
     u32 alpha;
 
@@ -4376,8 +4374,7 @@ BtlRuntimeTask *btlCreateUnitDefeatFadeOutTask(BtlUnit *actor, s32 option) {
 }
 
 /* Arguments hold unit, mode and elapsed ticks; return one after the exit fade. */
-u32 btlStepUnitExitFade(u32 *arguments) {
-    BtlUnitFadeTaskArgs *taskArgs = (BtlUnitFadeTaskArgs *)arguments;
+u32 btlStepUnitExitFade(BtlUnitFadeTaskArgs *taskArgs) {
     BtlUnit *unit = taskArgs->unit;
     s32 finished = 0;
     u32 alpha;
