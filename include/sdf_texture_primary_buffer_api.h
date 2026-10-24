@@ -7,7 +7,7 @@ struct sdfTexHandle_t;
 struct sdfTexPacket_t;
 
 /* Requires a non-NULL texture; returns its primary buffer as a borrowed view. */
-struct sdfTexPacket_t *sdfTexGetPacket(struct sdfTexHandle_t *texture);
+struct sdfTexPacket_t *sdfTexGetPacket(const struct sdfTexHandle_t *texture);
 
 /* Requires a non-NULL texture; returns 0 for no primary buffer, otherwise
  * ((gifTagWord & 0x7fff) + 1) * 16 bytes. */

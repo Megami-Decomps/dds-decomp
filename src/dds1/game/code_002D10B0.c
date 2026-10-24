@@ -827,7 +827,7 @@ void sdfImageSetInit(void) {
     sdfImageSetClearCb(obj);
 }
 
-sdfTexPacket_t *sdfTexGetPacket(sdfTexHandle_t *texture) {
+sdfTexPacket_t *sdfTexGetPacket(const sdfTexHandle_t *texture) {
     return texture->primaryBuffer;
 }
 
