@@ -2608,7 +2608,7 @@ s32 btlScriptSetCameraBlendEnd(void) {
     return 1;
 }
 
-extern s32 btlCreateFloatTask29(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern struct BtlRuntimeTask *btlCreateFloatTask29(BtlTask *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 u32 btlCmdCameraMoveBlend(void) {
     f32 timeA = scrGetFloatPara(0);

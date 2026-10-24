@@ -2285,7 +2285,7 @@ extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit);
 extern BtlTask *fldGetSceneGroupEntry(s32);
 extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
 extern s32 btlGetSlotRateKind(BtlUnit *, s32);
-extern u8 *btlCreateFloatTask29(u8 *, f32, f32, f32, f32, f32, f32, f32, f32,
+extern BtlRuntimeTask *btlCreateFloatTask29(BtlTask *, f32, f32, f32, f32, f32, f32, f32, f32,
                                  f32, f32, f32, f32, f32, f32, f32, f32);
 
 /* Queue model transitions and their sound/camera/fade dependencies for modes
@@ -2357,7 +2357,7 @@ void btlQueueLinkedPairModelSwapTasks(BtlTask *action, s32 mode, u64 refreshBarr
         task->ownerId = action->unit->identity;
         btlStartTask(task);
 
-        task = (BtlRuntimeTask *)btlCreateFloatTask29(0, -352.6f, -398.1f, -718.1f, 0.097f,
+        task = btlCreateFloatTask29(0, -352.6f, -398.1f, -718.1f, 0.097f,
                                          -0.307f, -0.045f, 0.937f, -424.3f,
                                          -352.6f, -852.0f, 0.075f, -0.307f,
                                          -0.037f, 0.939f, 40.0f, 30.0f);
@@ -4400,14 +4400,14 @@ void func_00209EB8(BtlTask *action) {
 
     switch (effect->formCount) {
     case 1:
-        task = (BtlRuntimeTask *)btlCreateFloatTask29((u8 *)action,
+        task = btlCreateFloatTask29(action,
             47.0f, -33.8f, -119.3f, -0.035f, 0.101f, -0.014f, 0.985f, 47.0f,
             -253.8f, -119.3f, -0.035f, 0.101f, -0.014f, 0.985f, 40.0f, 35.0f);
         task->startCondition.kind = 7;
         task->startCondition.value.owner = cameraBarrier;
         task->ownerId = action->unit->identity;
         btlStartTask(task);
-        timedTask = (BtlRuntimeTask *)btlCreateFloatTask29((u8 *)action,
+        timedTask = btlCreateFloatTask29(action,
             -57.0f, -371.3f, -988.4f, -0.113f, 0.033f, 0.014f, -0.984f, 190.0f,
             -362.6f, -968.3f, -0.114f, -0.118f, -0.004f, -0.977f, 40.0f, 50.0f);
         timedTask->startCondition.kind = 7;
@@ -4418,7 +4418,7 @@ void func_00209EB8(BtlTask *action) {
         updateSound = 1;
         break;
     case 2:
-        timedTask = (BtlRuntimeTask *)btlCreateFloatTask29((u8 *)action,
+        timedTask = btlCreateFloatTask29(action,
             118.6f, -176.9f, -129.4f, 0.14f, -0.171f, 0.034f, -0.965f, 146.4f,
             -117.5f, -207.6f, 0.14f, -0.171f, 0.034f, -0.965f, 40.0f, 35.0f);
         timedTask->startCondition.kind = 7;
@@ -4429,7 +4429,7 @@ void func_00209EB8(BtlTask *action) {
         updateSound = 1;
         break;
     case 3:
-        timedTask = (BtlRuntimeTask *)btlCreateFloatTask29((u8 *)action,
+        timedTask = btlCreateFloatTask29(action,
             219.6f, -134.0f, -142.0f, -0.106f, 0.247f, -0.03f, 0.952f, 67.6f,
             -136.2f, -197.4f, -0.109f, 0.086f, -0.012f, 0.98f, 40.0f, 30.0f);
         timedTask->startCondition.kind = 7;

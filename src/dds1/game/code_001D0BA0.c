@@ -5634,14 +5634,14 @@ s32 btlApplyEffectCameraKeyframes(BtlCameraKeyframesTaskArgs *args) {
     return 1;
 }
 
-u8 *btlCreateFloatTask29(u8 *actor, f32 a1, f32 a2, f32 a3, f32 a4, f32 a5, f32 a6, f32 a7, f32 a8, f32 a9, f32 a10, f32 a11, f32 a12, f32 a13, f32 a14, f32 a15, f32 a16) {
+BtlRuntimeTask *btlCreateFloatTask29(BtlTask *actor, f32 a1, f32 a2, f32 a3, f32 a4, f32 a5, f32 a6, f32 a7, f32 a8, f32 a9, f32 a10, f32 a11, f32 a12, f32 a13, f32 a14, f32 a15, f32 a16) {
     u8 *task = btlAllocTask(0x44);
     BtlCameraKeyframesTaskArgs *args;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x29;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
-    if (actor != 0 && *(u8 **)(actor + 0x18) != 0) {
-        *(u64 *)(task + 0x40) = *(u64 *)(*(u8 **)(actor + 0x18) + 0x108);
+    if (actor != 0 && *(u8 **)((u8 *)actor + 0x18) != 0) {
+        *(u64 *)(task + 0x40) = *(u64 *)(*(u8 **)((u8 *)actor + 0x18) + 0x108);
     }
     *(void **)(task + 0x4C) = btlApplyEffectCameraKeyframes;
     *(u32 *)(task + 0x48) = 0;
@@ -5663,7 +5663,7 @@ u8 *btlCreateFloatTask29(u8 *actor, f32 a1, f32 a2, f32 a3, f32 a4, f32 a5, f32 
     args->backDirection[3] = a14;
     args->scale = a15;
     args->motionParameter = a16;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 u32 btlRunCameraMotionResetTask(void) {

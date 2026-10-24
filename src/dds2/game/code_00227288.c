@@ -553,7 +553,7 @@ s32 btlEffectTaskStartFinale(ActionStateLink *task) {
 
 extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
 extern s32 btlGetSlotRateKind(BtlUnit *, s32);
-extern u8 *btlCreateFloatTask29(u8 *, f32, f32, f32, f32, f32, f32, f32, f32,
+extern BtlRuntimeTask *btlCreateFloatTask29(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32,
                                  f32, f32, f32, f32, f32, f32, f32, f32);
 
 /* Queue model transitions and their sound/camera/fade dependencies for modes
@@ -625,7 +625,7 @@ void btlQueueLinkedPairModelSwapTasks(ActionStateLink *action, s32 mode, u64 ref
         task->ownerId = action->unit->owner;
         btlStartTask(task);
 
-        task = (BtlRuntimeTask *)btlCreateFloatTask29(0, -352.6f, -398.1f, -718.1f, 0.097f,
+        task = btlCreateFloatTask29(0, -352.6f, -398.1f, -718.1f, 0.097f,
                                          -0.307f, -0.045f, 0.937f, -424.3f,
                                          -352.6f, -852.0f, 0.075f, -0.307f,
                                          -0.037f, 0.939f, 40.0f, 30.0f);
