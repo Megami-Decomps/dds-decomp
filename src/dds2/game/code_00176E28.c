@@ -477,9 +477,9 @@ void dds3FlashPolyListSetABGR(dds3FlashPolyList_t *pool, u32 color) {
     pool->color = color;
 }
 
-/* Set the pool scale without changing the native byte-pointer interface. */
-void dds3FlashPolyListSetScale(u8 *work, f32 scale) {
-    ((dds3FlashPolyList_t *)work)->scale = scale;
+/* Set the pool scale. */
+void dds3FlashPolyListSetScale(dds3FlashPolyList_t *work, f32 scale) {
+    work->scale = scale;
 }
 
 
