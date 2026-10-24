@@ -227,7 +227,7 @@ extern s32 fldTriggeredSavePointValue;
 
 extern s32 fldEveHitState;
 
-extern f32 fldVecDot(f32 *, f32 *);
+extern f32 fldVecDot(const f32 *, const f32 *);
 
 extern FldRoomState fldEveHitTable[];
 

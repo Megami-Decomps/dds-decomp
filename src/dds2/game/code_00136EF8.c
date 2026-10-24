@@ -73,7 +73,7 @@ extern s32 D_00436188;
 
 extern s32 D_0043617C;
 
-extern f32 fldVecDot(f32 *, f32 *);
+extern f32 fldVecDot(const f32 *, const f32 *);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", fldDrawCameraColorScrollingGradient);
 
@@ -164,7 +164,7 @@ void fldFreeMatterTable(void) {
 }
 
 /* Dot product of XYZ only; any fourth vector component is ignored. */
-float fldVecDot(float *left, float *right) {
+float fldVecDot(const float *left, const float *right) {
     return *left * *right + left[1] * right[1] + left[2] * right[2];
 }
 
@@ -854,7 +854,8 @@ void fldMakePlane(FldCollisionDescriptor *geometry, f32 *translation,
     D_00436188++;
 }
 
-s32 HitPositionInside2(f32 *out, s32 mode, s32 count, f32 margin, f32 *pos, FldValueRecord *zone) {
+s32 HitPositionInside2(f32 *out, s32 mode, s32 count, f32 margin, const f32 *pos,
+                        const FldValueRecord *zone) {
     f32 probe[3];
     f32 planar[2];
     f32 best = margin;
@@ -1211,7 +1212,8 @@ void func_0013AA88(void) {
 /* Project away the selected axis and reject points outside expanded bounds.
  * Return the last negative plane's margin-adjusted distance, not a minimum;
  * no negative plane leaves margin unchanged. Reject results below 0.001. */
-f32 HitPositionInside3(s32 axisMode, s32 planeCount, f32 margin, f32 *position, FldValueRecord *zone) {
+f32 HitPositionInside3(s32 axisMode, s32 planeCount, f32 margin, const f32 *position,
+                       const FldValueRecord *zone) {
     f32 projectedPosition[3];
     f32 planarPosition[2];
     f32 clearance = margin;

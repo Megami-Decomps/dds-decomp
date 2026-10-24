@@ -532,7 +532,7 @@ typedef struct FldRoomPlanes {
 
 extern FldRoomPlanes D_003C9470[];
 
-extern f32 fldVecDot(f32 *, f32 *);
+extern f32 fldVecDot(const f32 *, const f32 *);
 
 extern FldRoomState fldEveHitTable[];
 
