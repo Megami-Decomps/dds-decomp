@@ -421,7 +421,7 @@ void btlUnitFaceTarget(BtlUnit *unit, BtlUnit *target);
 
 void btlUnitFaceTargetScaled(BtlUnit *unit, BtlUnit *target, f32 scale);
 
-void btlCopyUnitCurrentPosition(void *object, f32 *dst);
+void btlCopyUnitCurrentPosition(BtlUnit *unit, f32 *destination);
 
 extern void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 

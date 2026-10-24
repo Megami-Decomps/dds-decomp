@@ -3074,8 +3074,8 @@ void btlSetUnitPosition(BtlUnit *unit, const f32 *vec) {
     }
 }
 
-void btlCopyUnitCurrentPosition(void *object, f32 *dst) {
-    SDF_VU0_COPYVECTOR(dst, ((BtlUnit *)object)->currentPosition);
+void btlCopyUnitCurrentPosition(BtlUnit *unit, f32 *destination) {
+    SDF_VU0_COPYVECTOR(destination, unit->currentPosition);
 }
 
 void btlGetUnitWorldPos(BtlUnit *unit, f32 *dst) {
@@ -3166,12 +3166,12 @@ void effBTLModelGetMarkMatrix2(BtlUnit *unit, s32 mode) {
     }
 }
 
-s32 btlIsUnitAtStoredPosition(u8 *object) {
+s32 btlIsUnitAtStoredPosition(BtlUnit *unit) {
     f32 position[4];
-    btlCopyUnitCurrentPosition(object, position);
-    if (((BtlUnit *)object)->position[0] == position[0] &&
-        ((BtlUnit *)object)->position[1] == position[1] &&
-        ((BtlUnit *)object)->position[2] == position[2]) {
+    btlCopyUnitCurrentPosition(unit, position);
+    if (unit->position[0] == position[0] &&
+        unit->position[1] == position[1] &&
+        unit->position[2] == position[2]) {
         return 1;
     }
     return 0;
@@ -4743,13 +4743,13 @@ u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *task) {
         delta = task->amount * -velocity;
         task->amount -= delta;
         if (task->amount <= 0.01f) {
-            btlCopyUnitCurrentPosition((u8 *)task->unit, position);
+            btlCopyUnitCurrentPosition(task->unit, position);
             position[2] += task->unit->positionZOffset;
             dds3SetPosPoseSet(task->unit->effectObject, (u128 *)position);
             return 1;
         }
     }
-    btlCopyUnitCurrentPosition((u8 *)task->unit, position);
+    btlCopyUnitCurrentPosition(task->unit, position);
     position[0] += offset;
     position[2] += task->unit->positionZOffset;
     dds3SetPosPoseSet(task->unit->effectObject, (u128 *)position);

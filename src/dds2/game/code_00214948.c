@@ -204,7 +204,7 @@ extern BtlRuntimeTask *btlCreateUnitFadeOutTask(BtlUnit *, u32, u32);
 
 extern u64 btlStartTask(void *);
 
-extern void btlCopyUnitCurrentPosition(void *, f32 *);
+extern void btlCopyUnitCurrentPosition(BtlUnit *, f32 *);
 
 extern void btlSetUnitPosition(BtlUnit *, const f32 *);
 
@@ -7189,7 +7189,7 @@ extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamS
 
 extern void btlPrepareHeightScaledActionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-extern void btlCopyUnitCurrentPosition(void *, f32 *);
+extern void btlCopyUnitCurrentPosition(BtlUnit *, f32 *);
 
 s32 btlSelectLinkedActionCameraPose(BtlLinkedCommand *command, s8 modeA, s8 modeB) {
     BtlState *battle;
@@ -8577,7 +8577,7 @@ extern void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *, s32, s32);
 
 extern void btlBeginEffectActorFadeOut(void);
 
-extern void btlCopyUnitCurrentPosition(void *, f32 *);
+extern void btlCopyUnitCurrentPosition(BtlUnit *, f32 *);
 
 extern void btlRestoreLinkedEffectUnitPose(BtlUnit *);
 

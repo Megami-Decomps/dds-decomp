@@ -5945,7 +5945,7 @@ extern ActionStateLink *fldGetActiveSceneGroupValue(void);
 extern void dspRequestMessageWindowModeOne(void);
 extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
 extern u64 btlStartTask(void *);
-extern void btlCopyUnitCurrentPosition(void *, f32 *);
+extern void btlCopyUnitCurrentPosition(BtlUnit *, f32 *);
 extern void btlCopyUnitRotationQuaternion(BtlUnit *, f32 dst[4]);
 extern void btlSetCommandPanelFadeMode(s8, s32);
 extern s32 fclDestroyMessage(void);

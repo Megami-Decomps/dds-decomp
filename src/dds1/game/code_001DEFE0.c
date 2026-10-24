@@ -370,7 +370,7 @@ void btlUnitFaceTarget(BtlUnit *object, BtlUnit *target);
 
 void btlUnitFaceTargetScaled(BtlUnit *object, BtlUnit *target, f32 scale);
 
-void btlCopyUnitCurrentPosition(u8 *object, void *position);
+void btlCopyUnitCurrentPosition(BtlUnit *unit, f32 *destination);
 
 /* vu0 routine: preserve the actor's primary position and rotation quaternion while * evaluating the requested model record; return the sampled vector in vf10. */ s32 btlSampleActorModelPositionVU(BtlUnit *unit, s32 value);
 
@@ -2654,7 +2654,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
             flags = unit->status.flags;
         } else {
             if (unit->lookupId != 1) {
-                btlCopyUnitCurrentPosition((u8 *)unit, vectors.position);
+                btlCopyUnitCurrentPosition(unit, vectors.position);
                 vectors.position[2] = unit->position[2] - 45.0f;
                 btlSetUnitPosition((u8 *)unit, vectors.position);
             }
@@ -11152,7 +11152,7 @@ void btlAlignTripleFormationWithTarget(BtlTask *link, BtlUnit *first, BtlUnit *s
             offsetZ = 0.0f;
         }
         for (i = 0; i < 3; i++) {
-            btlCopyUnitCurrentPosition((u8 *)slot[i], position);
+            btlCopyUnitCurrentPosition(slot[i], position);
             position[0] += offsetX;
             position[2] += offsetZ;
             btlSetUnitPosition(slot[i], position);
@@ -11230,7 +11230,7 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
         actorStatusAddress = btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->species);
         spacing = (const BtlFormationSpacingCell *)(selector * sizeof(BtlFormationSpacingCell) + (s32)(u32)actorStatusAddress + 0x38);
         distance = spacing->spacing * participants[i]->scale + target->reach * target->scale;
-        btlCopyUnitCurrentPosition((u8 *)participants[i], oldPosition);
+        btlCopyUnitCurrentPosition(participants[i], oldPosition);
         btlUnitGetMuzzlePosVU(participants[i]);
         VU0_LOAD_VF(vf11, targetPosition);
         VU0_SUB(vf10, vf10, vf11);

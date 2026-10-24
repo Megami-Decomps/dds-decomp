@@ -2962,8 +2962,8 @@ void btlSetUnitPosition(BtlUnit *object, const f32 *position) {
 }
 
 /* Copy the stored current-position vector, without the runtime world offset. */
-void btlCopyUnitCurrentPosition(u8 *object, void *position) {
-    SDF_VU0_COPYVECTOR(position, object + 0x60);
+void btlCopyUnitCurrentPosition(BtlUnit *unit, f32 *destination) {
+    SDF_VU0_COPYVECTOR(destination, (u8 *)unit + 0x60);
 }
 
 void btlGetUnitWorldPos(BtlUnit *unit, f32 *worldPosition) {
@@ -3070,7 +3070,7 @@ void effBTLModelGetMarkMatrix2(BtlUnit *unit, s32 mode) {
 
 s32 btlIsUnitAtStoredPosition(u8 *object) {
     f32 position[4];
-    btlCopyUnitCurrentPosition(object, position);
+    btlCopyUnitCurrentPosition((BtlUnit *)object, position);
     if (*(f32 *)(object + 0x30) == position[0] &&
         *(f32 *)(object + 0x34) == position[1] &&
         *(f32 *)(object + 0x38) == position[2]) {
@@ -4567,7 +4567,7 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
             SDF_VU0_STOREVECTOR_NOMEM(pos);
             pos[0] += scale;
         } else {
-            btlCopyUnitCurrentPosition((u8 *)actor, pos);
+            btlCopyUnitCurrentPosition(actor, pos);
             pos[0] += scale;
             pos[2] += task->unit->positionZOffset;
         }
@@ -4579,7 +4579,7 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
             dds3GetPosPoseSet(actor->effectObject);
             SDF_VU0_STOREVECTOR_NOMEM(pos);
         } else {
-            btlCopyUnitCurrentPosition((u8 *)actor, pos);
+            btlCopyUnitCurrentPosition(actor, pos);
             pos[2] += task->unit->positionZOffset;
         }
         dds3SetPosPoseSet(task->unit->effectObject, (u128 *)pos);
@@ -4664,13 +4664,13 @@ u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *task) {
         delta = task->amount * -velocity;
         task->amount -= delta;
         if (task->amount <= 0.01f) {
-            btlCopyUnitCurrentPosition((u8 *)task->unit, position);
+            btlCopyUnitCurrentPosition(task->unit, position);
             position[2] += task->unit->positionZOffset;
             dds3SetPosPoseSet(task->unit->effectObject, (u128 *)position);
             return 1;
         }
     }
-    btlCopyUnitCurrentPosition((u8 *)task->unit, position);
+    btlCopyUnitCurrentPosition(task->unit, position);
     position[0] += offset;
     position[2] += task->unit->positionZOffset;
     dds3SetPosPoseSet(task->unit->effectObject, (u128 *)position);

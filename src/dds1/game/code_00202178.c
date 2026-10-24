@@ -70,7 +70,7 @@ extern BtlTask *btlFindUnitByActor(BtlUnit *);
 
 extern void btlInitializePartyRecordFromEnemy(datUnitWork_t *, s32);
 
-extern void btlCopyUnitCurrentPosition(void *, void *);
+extern void btlCopyUnitCurrentPosition(BtlUnit *unit, f32 *destination);
 
 
 extern u8 *btlCreateStiffenDamageShakeTask(u8 *, f32);

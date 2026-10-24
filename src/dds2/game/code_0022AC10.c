@@ -2405,7 +2405,7 @@ extern BtlIndexList *btlGetSelectedTargetList(void);
 extern s32 btlGetTargetSelectionState(void);
 extern void btlCreateTargetSelectionTask(s32 sourceTask);
 extern void btlRequestTargetSelectionClose(void);
-extern void btlCopyUnitCurrentPosition(BtlUnit *, f32 *);
+extern void btlCopyUnitCurrentPosition(BtlUnit *unit, f32 *destination);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateControlObject(void);
 extern void btlCopyUnitStats(BtlUnit *, datUnitWork_t *);

@@ -134,7 +134,7 @@ void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 
 void btlUnitFaceTarget(BtlUnit *unit, BtlUnit *target);
 
-void btlCopyUnitCurrentPosition(void *object, f32 *dst);
+void btlCopyUnitCurrentPosition(BtlUnit *unit, f32 *destination);
 
 s32 sndLoadAndPlayStationedSe(u32 soundId);
 
@@ -1117,7 +1117,7 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
         actorStatusAddress = btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->resourceIndex);
         spacing = (const BtlFormationSpacingCell *)(selector * sizeof(BtlFormationSpacingCell) + (s32)(u32)actorStatusAddress + 0x38);
         distance = spacing->spacing * participants[i]->scale + target->reach * target->scale;
-        btlCopyUnitCurrentPosition((u8 *)participants[i], oldPosition);
+        btlCopyUnitCurrentPosition(participants[i], oldPosition);
         btlUnitGetMuzzlePosVU(participants[i]);
         SDF_VU0_LOADVECTOR_B(targetPosition);
         SDF_VU0_SUBVECTOR();

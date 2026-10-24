@@ -26,7 +26,7 @@ extern char D_003BB8A8[];
 extern s32 datActionAnimationRecords;
 
 
-extern void btlCopyUnitCurrentPosition(void *, void *);
+extern void btlCopyUnitCurrentPosition(BtlUnit *unit, f32 *destination);
 
 extern void btlSetUnitPosition(BtlUnit *, const f32 *);
 
