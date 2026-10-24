@@ -382,7 +382,7 @@ typedef char DatBattleSceneRecordSizeCheck[sizeof(DatBattleSceneRecord) == 0x28 
 /* One 0x20C-byte encounter adjustment record. Sound selection shares the
  * header with condition/variant data; four complete weighted groups follow. */
 typedef struct BattleAdjustmentEntry {
-    u16 sceneIndex;
+    u16 battleMode;
     u16 weight;
     s8 value;
     u8 serialEncounterChanceAdjustment; /* 0x05: input percentage before world-flag scaling and clamp. */
@@ -416,7 +416,7 @@ extern BattleAdjustmentRecord *datBattleAdjustmentRecords;
 /* DDS2 encounter records carry two background IDs, four opaque bytes, and
  * three conditional weighted encounter groups (0x190 bytes total). */
 typedef struct BattleAdjustmentEntry {
-    u16 sceneIndex;
+    u16 battleMode;
     u16 weight;
     s8 value;
     u8 serialEncounterChanceAdjustment; /* 0x05: input percentage before world-flag scaling and clamp. */

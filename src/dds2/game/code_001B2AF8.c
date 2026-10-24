@@ -962,9 +962,9 @@ s32 btlSelectSerialEncounter(void) {
         candidateCount = 0;
         battleMode = state->battleMode;
         for (rowIndex = 0; rowIndex < 20; rowIndex++) {
-            if (state->battleMode != entries[rowIndex].sceneIndex &&
-                entries[rowIndex].sceneIndex != 0 && entries[rowIndex].weight != 0 &&
-                !(datBattleSceneRecords[entries[rowIndex].sceneIndex].flags & 0x40)) {
+            if (state->battleMode != entries[rowIndex].battleMode &&
+                entries[rowIndex].battleMode != 0 && entries[rowIndex].weight != 0 &&
+                !(datBattleSceneRecords[entries[rowIndex].battleMode].flags & 0x40)) {
                 candidates[candidateCount] = rowIndex;
                 candidateCount++;
             }
@@ -981,7 +981,7 @@ s32 btlSelectSerialEncounter(void) {
             u16 selectedIndex = candidates[randomIndex];
 
             state->nextAdjustmentEntryIndex = selectedIndex;
-            state->nextBattleMode = entries[selectedIndex].sceneIndex;
+            state->nextBattleMode = entries[selectedIndex].battleMode;
         }
     }
     return 1;

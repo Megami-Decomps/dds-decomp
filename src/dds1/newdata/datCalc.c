@@ -1983,16 +1983,16 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
     }
     total = 0;
     for (i = 0; i < 20; i++) {
-        if (datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].sceneIndex != 0) {
+        if (datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].battleMode != 0) {
             total += datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].weight;
         }
     }
     count = 0;
     roll = dds3GetRandIntA(0, total);
     for (i = 0; i < 20; i++) {
-        if (datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].sceneIndex != 0) {
+        if (datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].battleMode != 0) {
             if (roll < count + datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].weight) {
-                scene = datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].sceneIndex;
+                scene = datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].battleMode;
                 if ((DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_ENCOUNTER_LEVEL_GATE) == 0 || btlCheckScenePartyLevelThreshold(scene) != 0) {
                     packed = (group << 24) | (i << 16) | scene;
                     btlSelectedConditionalEncounterIndex = encounterIndex;
