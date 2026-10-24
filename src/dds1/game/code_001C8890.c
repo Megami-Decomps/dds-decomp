@@ -924,7 +924,7 @@ void btlEnterAttackActionState(void) {
 extern u8 *datRosterDetails;
 extern f32 btlGetActorEffectScale(BtlTask *);
 extern void *btlCreateTargetedCommandSoundTask(s32, s32, u32);
-extern u8 *btlAllocateApproachTargetTask(u8 *, s32, f32);
+extern BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *, BtlUnit *, f32);
 extern s32 btlIsBattleRecordEligible(BtlUnit *, BtlUnit *, s32, s32);
 extern SoundResourceNode *sndCreateResourceNode(SoundMixer *);
 extern BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *, BtlUnit *, BtlUnit *, u16);
@@ -1042,8 +1042,8 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
                 action->indexWork.slot, action->indexWork.skillId) != 0) {
             if ((action->unit->status.flags & indexedTarget->status.flags & 0x600) == 0 ||
                     (indexedTarget->status.flags & 0x200) != 0) {
-                task = (BtlRuntimeTask *)btlAllocateApproachTargetTask((u8 *)action->unit,
-                    (s32)indexedTarget, state->modelFrameScale);
+                task = btlAllocateApproachTargetTask(action->unit, indexedTarget,
+                    state->modelFrameScale);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = moveHandle;
                 btlStartTask(task);

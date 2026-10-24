@@ -3619,19 +3619,19 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
 
 extern s32 btlApproachTargetTask(BtlApproachTaskArgs *);
 
-u8 *btlAllocateApproachTargetTask(u8 *owner, s32 index, f32 scale) {
-    u8 *task = btlAllocTask(24);
+BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *unit, BtlUnit *target, f32 scale) {
+    BtlRuntimeTask *task = btlAllocTask(24);
     BtlApproachTaskArgs *arguments;
 
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(void **)(task + 0x4C) = btlApproachTargetTask;
-    *(u16 *)(task + 0x20) = 0xE;
-    *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
-    *(u32 *)(task + 0x48) = 0;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
+    task->callback = btlApproachTargetTask;
+    task->taskId = 0xE;
+    task->ownerId = unit->identity;
+    task->onStart = 0;
     arguments = btlGetTaskArguments(task);
-    arguments->unit = (BtlUnit *)owner;
-    arguments->target = (BtlUnit *)(u32)index;
+    arguments->unit = unit;
+    arguments->target = target;
     arguments->scale = scale;
     arguments->offset = 0.0f;
     arguments->count = 0;
