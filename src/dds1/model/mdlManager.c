@@ -277,7 +277,7 @@ extern u8 D_003BBB60[];
 extern MdlResourceTable D_00367900[];
 extern MdlResourceTable D_00365858[];
 
-sdfMotionCtrlr_t *mdlGetMotionCtrlr(dds3ModelHandle_t *ctx, s32 searchId);
+sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *ctx, s32 searchId);
 void mdlMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex, s32 loopEnabled,
                                      f32 blendLeadFrames, f32 blendDurationFrames);
 
@@ -891,7 +891,7 @@ void mdlSmoothSingleMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex
         ctx, searchId, motionIndex, MDL_MOTION_LOOP_DISABLED, blendLeadFrames, blendDurationFrames);
 }
 
-sdfMotionCtrlr_t *mdlGetMotionCtrlr(dds3ModelHandle_t *ctx, s32 searchId) {
+sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *ctx, s32 searchId) {
     sdfMotionCtrlr_t *node;
 
     for (node = ctx->inner->motionList; node != NULL; node = node->next) {
@@ -904,7 +904,7 @@ sdfMotionCtrlr_t *mdlGetMotionCtrlr(dds3ModelHandle_t *ctx, s32 searchId) {
 
 static inline const sdfMotionCtrlr_t *mdlFindNodeByIdReadOnly(const dds3ModelHandle_t *ctx, s32 searchId) {
     /* The mutable lookup remains available to writers; this path only reads. */
-    return mdlGetMotionCtrlr((dds3ModelHandle_t *)ctx, searchId);
+    return mdlGetMotionCtrlr(ctx, searchId);
 }
 
 #define MDL_NODE_FIELD_MISSING (-1)
@@ -1428,4 +1428,3 @@ s32 mdlFileLoad(s32 group, s32 id, s32 jobArg, const char *requestPath, void (*o
 INCLUDE_SDATA(const s32, "model/mdlManager", D_003BBB60);
 
 INCLUDE_SDATA(const s32, "model/mdlManager", D_003BBB68);
-
