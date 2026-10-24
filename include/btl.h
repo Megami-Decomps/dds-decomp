@@ -170,7 +170,7 @@ typedef struct BtlUnit {
     struct sdfModelRootNode_t *transparencyModel; /* 0x324: alternate SDF model retained during transparency. */
     struct BtlUnit *mirror; /* 0x328: unit drawn from this unit's transparency packet buffer */
     s32 transparencyBuffer; /* 0x32C: mirror pass's 512x224 transfer image. */
-    s32 transparencyBufferAllocation; /* 0x330: general allocation released with the image. */
+    struct sdfMemHandle_t *transparencyBufferAllocation; /* 0x330: allocation handle released with the image. */
     u8 pad334[8];
     struct sdfMemHandle_t *handle; /* 0x33C: allocation that owns this unit. */
     struct BtlUnit *previousActor; /* 0x340 */
@@ -258,7 +258,7 @@ typedef struct BtlUnit {
     struct sdfModelRootNode_t *transparencyModel; /* Alternate SDF model used by the transparency path. */
     struct BtlUnit *mirror; /* 0x348: created and destroyed by the model-change task. */
     s32 transparencyBuffer; /* 0x34C: mirror pass's 512x224 transfer image. */
-    s32 transparencyBufferAllocation; /* 0x350: general allocation released with the image. */
+    struct sdfMemHandle_t *transparencyBufferAllocation; /* 0x350: allocation handle released with the image. */
     u8 pad354[8];
     struct sdfMemHandle_t *handle; /* 0x35C: allocation that owns this unit. */
     struct BtlUnit *previousActor; /* 0x360 */

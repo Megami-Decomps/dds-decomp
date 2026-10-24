@@ -3980,7 +3980,7 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
             btlDestroyUnit(unit->mirror);
             unit->mirror = NULL;
             if (unit->transparencyBufferAllocation != 0) {
-                sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)unit->transparencyBufferAllocation);
+                sdfMemFreeDelayedDirect(unit->transparencyBufferAllocation);
                 unit->transparencyBufferAllocation = 0;
                 unit->transparencyBuffer = 0;
             }
@@ -5072,7 +5072,7 @@ void btlReleaseUnitResources(BtlUnit *unit) {
     }
     btlReleaseActorModelResources(unit);
     if (unit->transparencyBufferAllocation != 0) {
-        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)unit->transparencyBufferAllocation);
+        sdfMemFreeDelayedDirect(unit->transparencyBufferAllocation);
         unit->transparencyBufferAllocation = 0;
         unit->transparencyBuffer = 0;
     }
