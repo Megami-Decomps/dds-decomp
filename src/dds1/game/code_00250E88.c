@@ -1183,7 +1183,7 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
     switch (work->scenePhase) {
     case MNU_MANTRA_PHASE_INITIALIZE:
         evtStageTestInit(0);
-        work->unk52C = mnuScheduleUnlockedMantraMessages(work);
+        work->hasPendingUnlockedMantraMessages = mnuScheduleUnlockedMantraMessages(work);
         work->scenePhase = MNU_MANTRA_PHASE_WAIT_INITIAL_SHADE;
         return 0;
     case MNU_MANTRA_PHASE_APPLY_PENDING_SELECTION:
@@ -1218,7 +1218,7 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
         if (mnuDisplayNextPendingMantra(work)) {
             fclDestroyMessage();
             work->phaseFrame = 0;
-            work->unk52C = 0;
+            work->hasPendingUnlockedMantraMessages = 0;
             work->scenePhase = MNU_MANTRA_PHASE_APPLY_PENDING_SELECTION;
             return 0;
         } else {
@@ -1314,7 +1314,7 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
         mnuReinitializeSceneGrid((s32)work);
         return 0;
     case MNU_MANTRA_PHASE_ACTIVE:
-        if (work->unk52C) {
+        if (work->hasPendingUnlockedMantraMessages) {
             work->scenePhase = MNU_MANTRA_PHASE_START_PENDING_MESSAGE;
         }
         if (work->transitionBlendCounter > 0) {
@@ -1323,8 +1323,8 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
                 btlStopStage();
                 mnuStopResourceAnimation();
                 mnuReinitializeSceneGrid((s32)work);
-                work->unk52C = mnuScheduleUnlockedMantraMessages(work);
-                if (work->unk52C) {
+                work->hasPendingUnlockedMantraMessages = mnuScheduleUnlockedMantraMessages(work);
+                if (work->hasPendingUnlockedMantraMessages) {
                     work->transitionBlendCounter = 0;
                 }
             }
@@ -1334,8 +1334,8 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
                 btlStopStage();
                 mnuResetResourceAnimation();
                 mnuReinitializeSceneGrid((s32)work);
-                work->unk52C = mnuScheduleUnlockedMantraMessages(work);
-                if (work->unk52C) {
+                work->hasPendingUnlockedMantraMessages = mnuScheduleUnlockedMantraMessages(work);
+                if (work->hasPendingUnlockedMantraMessages) {
                     work->transitionBlendCounter = 0;
                 }
             }
@@ -1971,7 +1971,7 @@ s32 mnuHandleMantraSceneInput(void) {
         sdfSetTaskItemMode(mnuSceneResourceContext, 1, 1);
         return -1;
     case 1:
-        if (work->unk52C != 0) {
+        if (work->hasPendingUnlockedMantraMessages != 0) {
             host->phase = 2;
             host->frame = 0;
             work->pendingPhase13 = 1;
@@ -1983,8 +1983,8 @@ s32 mnuHandleMantraSceneInput(void) {
             if (work->transitionBlendCounter == 5) {
                 mnuStopResourceAnimation();
                 mnuRestoreMantraGridSelection(work);
-                work->unk52C = mnuScheduleUnlockedMantraMessages(work);
-                if (work->unk52C != 0) {
+                work->hasPendingUnlockedMantraMessages = mnuScheduleUnlockedMantraMessages(work);
+                if (work->hasPendingUnlockedMantraMessages != 0) {
                     work->transitionBlendCounter = 0;
                 }
             }
@@ -1993,8 +1993,8 @@ s32 mnuHandleMantraSceneInput(void) {
             if (work->transitionBlendCounter == -5) {
                 mnuResetResourceAnimation();
                 mnuRestoreMantraGridSelection(work);
-                work->unk52C = mnuScheduleUnlockedMantraMessages(work);
-                if (work->unk52C != 0) {
+                work->hasPendingUnlockedMantraMessages = mnuScheduleUnlockedMantraMessages(work);
+                if (work->hasPendingUnlockedMantraMessages != 0) {
                     work->transitionBlendCounter = 0;
                 }
             }

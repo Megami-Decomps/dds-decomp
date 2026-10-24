@@ -77,7 +77,7 @@ typedef struct MenuSceneWork {
     MenuSceneCoordinateRing coordinateRing; /* 0x490 */
     s32 pendingMantras[8]; /* 0x4EC */
     u8 pad50C[0x20];
-    s32 unk52C; /* 0x52C: native-accessed scene-task state. */
+    s32 hasPendingUnlockedMantraMessages; /* 0x52C: native-accessed scene-task state. */
     u32 pendingGridColumn; /* 0x530: cursor column before pending-entry display */
     u32 pendingGridRow; /* 0x534: cursor row before pending-entry display */
     MenuSceneCoordinate pendingCursorCoordinates; /* 0x538: saved signed cursor position */
@@ -116,7 +116,7 @@ typedef char MenuSceneWorkLayoutAssert[
      (u32)&((MenuSceneWork *)0)->coordinateRing.coordinates == 0x49C &&
      (u32)&((MenuSceneWork *)0)->pendingMantras == 0x4EC &&
      sizeof(((MenuSceneWork *)0)->pendingMantras) == 0x20 &&
-     (u32)&((MenuSceneWork *)0)->unk52C == 0x52C &&
+     (u32)&((MenuSceneWork *)0)->hasPendingUnlockedMantraMessages == 0x52C &&
      (u32)&((MenuSceneWork *)0)->pendingGridColumn == 0x530 &&
      (u32)&((MenuSceneWork *)0)->pendingGridRow == 0x534 &&
      (u32)&((MenuSceneWork *)0)->pendingCursorCoordinates == 0x538 &&
