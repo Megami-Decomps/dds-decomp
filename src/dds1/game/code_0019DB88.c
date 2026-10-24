@@ -18,6 +18,10 @@
 #include "itf_panel_draw.h"
 #include "itf_panel_api.h"
 
+enum {
+    BTL_FADE_PHASE_ALPHA_RISING = 0,
+    BTL_FADE_PHASE_ALPHA_FALLING = 1
+};
 
 
 #include "sdf.h"
@@ -173,7 +177,7 @@ void InitializeCurCtr(BtlFade *fade, s32 preserveKind) {
     if (preserveKind == 0) {
         fade->kind = 0;
     }
-    fade->phase = 0;
+    fade->phase = BTL_FADE_PHASE_ALPHA_RISING;
     fade->timer = 0;
     fade->alpha = 0x40;
     fade->textAdvanceFrameCount = 0;
@@ -444,7 +448,7 @@ void itfUpdateSoundSelectionTransition(instanceMes_tag *panel) {
             }
             selection->selectedIndex = GetMaskedIndex(selection->selectedIndex, selection->panelValue);
             selection->optionCount = 0;
-            ForceSetCurCtr(&panel->fade, 1, 0x7F, 0);
+            ForceSetCurCtr(&panel->fade, BTL_FADE_PHASE_ALPHA_FALLING, 0x7F, 0);
             panel->flags = (panel->flags & ~0x38) | 0x28;
             selection->glyphColorIntensity = 0x80;
             selection->selectionState = 3;
@@ -585,20 +589,20 @@ void CalcCurCtr(instanceMes_tag *panel) {
             fade->timer -= 8;
         }
         switch (fade->phase) {
-        case 0:
+        case BTL_FADE_PHASE_ALPHA_RISING:
             fade->alpha += 8;
             if (fade->alpha >= 0xFF) {
-                fade->phase = 1;
+                fade->phase = BTL_FADE_PHASE_ALPHA_FALLING;
                 fade->alpha = 0xFF;
                 fade->timer = 0x80;
             }
             break;
-        case 1:
+        case BTL_FADE_PHASE_ALPHA_FALLING:
             fade->alpha -= 8;
             minimumAlpha = (fade->kind & 1) ? 0x20 : 0x40;
             if (fade->alpha <= minimumAlpha) {
                 fade->alpha = minimumAlpha;
-                fade->phase = 0;
+                fade->phase = BTL_FADE_PHASE_ALPHA_RISING;
             }
             break;
         }
