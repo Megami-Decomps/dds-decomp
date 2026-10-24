@@ -41,7 +41,7 @@ typedef char SdfPacStreamPacketHeader_decodedSize_offset_must_be_0x0C[
     ((u32)&((SdfPacStreamPacketHeader *)0)->decodedSize == 0x0C) ? 1 : -1];
 
 struct PacState;
-s32 sdfPacStdCallback(struct PacState *state, s32 status,
+s32 sdfPacStdCallback(struct PacState *state, s32 event,
                          SdfPacStreamPacketHeader *packet);
 u8 *sdfPacGetResrcFileName(SdfPacStreamPacketHeader *header);
 

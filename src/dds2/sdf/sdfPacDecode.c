@@ -19,6 +19,8 @@ enum {
     PAC_COMMAND_MOTION = 8,
     PAC_COMMAND_TEXTURE_LIST = 9,
     PAC_COMMAND_END = 0xFF,
+    PAC_CALLBACK_EVENT_PACKET_HEADER = 0,
+    PAC_CALLBACK_EVENT_PACKET_COMPLETE = 1,
     PAC_ENCODING_RAW = 0,
     PAC_ENCODING_COMPRESSED = 1,
     PAC_HEADER_BYTES = 0x10,
@@ -135,8 +137,8 @@ PacWork *sdfPacFreeResrc(PacWork *work) {
 }
 
 /* Dispatch recognized PAC commands; one marks end-of-stream. */
-s32 sdfPacStdCallback(PacState *state, s32 status, SdfPacStreamPacketHeader *packet) {
-    if (status == 0) {
+s32 sdfPacStdCallback(PacState *state, s32 event, SdfPacStreamPacketHeader *packet) {
+    if (event == PAC_CALLBACK_EVENT_PACKET_HEADER) {
         switch (packet->command) {
         case PAC_COMMAND_PAYLOAD:
             sdfPacMemDecoderInit(state, packet);
