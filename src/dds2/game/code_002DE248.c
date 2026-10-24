@@ -8241,8 +8241,8 @@ void effCopyBlockResourceOrientation(s128 *dst, s128 *src) {
     SDF_VU0_COPYVECTOR(dst + 1, src);
 }
 
-void effSetBlockResourceColor(s32 work, u32 color) {
-    ((EffClassWork *)work)->color = color;
+void effSetBlockResourceColor(EffClassWork *work, u32 color) {
+    work->color = color;
 }
 
 void effSetBlockResourceMatrixComponent(Matrix4 *mat, float value) {
