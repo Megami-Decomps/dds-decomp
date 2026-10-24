@@ -966,7 +966,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                 transform = spawnResource->transform;
                 fldCopySpawnTransform(position, rotation, transform);
                 switch (((FldPlacementData *)spawnResource->data)->kind) {
-                case 8:
+                case FLD_PLACEMENT_KIND_SPECIAL_POINT:
                     point = ((FldPlacementData *)spawnResource->data)->payload.specialPoint;
                     switch (point->kind) {
                     case 1:
@@ -986,14 +986,14 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                         break;
                     }
                     break;
-                case 0:
+                case FLD_PLACEMENT_KIND_POINT:
                     dds3AddPointBasic(spawnResource->id, (EvtWorldSourceTransformPrefix *)transform, spawnResource->name);
                     break;
-                case 1:
+                case FLD_PLACEMENT_KIND_REGISTERED_POINT:
                     spawnedObject = dds3AddPointBasic(spawnResource->id, (EvtWorldSourceTransformPrefix *)transform, spawnResource->name);
                     fldRegisterRoomObject(spawnResource, spawnedObject);
                     break;
-                case 2:
+                case FLD_PLACEMENT_KIND_EVENT_PLACEMENT:
                     if (D_0032E4B4[0] != 0) {
                         break;
                     }
@@ -1010,14 +1010,14 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                                       room, spawnResource->name, placement->event);
                     }
                     break;
-                case 3:
+                case FLD_PLACEMENT_KIND_WORD_ARRAY_PLACEMENT:
                     parameters = ((FldPlacementData *)spawnResource->data)->payload.words;
                     func_001486D0(parameters[0], rotation, position[0], position[1], position[2]);
                     if (isAppended == 0) {
                         fldRoomEventPlacementCount++;
                     }
                     break;
-                case 7:
+                case FLD_PLACEMENT_KIND_PENDING_SOUND:
                     pendingSound = ((FldPlacementData *)spawnResource->data)->payload.pendingSound;
                     fldAddSe3D(pendingSound->value, pendingSound->scalar,
                                         position[0], position[1], position[2]);

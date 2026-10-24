@@ -5,6 +5,14 @@
 
 struct FldSpecialPoint;
 
+/* Type-10 placement tag values select both spawn behavior and payload view. */
+#define FLD_PLACEMENT_KIND_POINT 0
+#define FLD_PLACEMENT_KIND_REGISTERED_POINT 1
+#define FLD_PLACEMENT_KIND_EVENT_PLACEMENT 2
+#define FLD_PLACEMENT_KIND_WORD_ARRAY_PLACEMENT 3
+#define FLD_PLACEMENT_KIND_PENDING_SOUND 7
+#define FLD_PLACEMENT_KIND_SPECIAL_POINT 8
+
 /* The kind word at +0 selects the pointed-to view of this relocated payload.
  * Kind 8 points to a two-word special point. Kinds 2 and 3 are consumed as
  * word arrays, while kind 7 carries a float followed by an integer. Keep the
