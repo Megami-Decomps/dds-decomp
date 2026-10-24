@@ -379,7 +379,7 @@ s32 mnuHandleMovieMenuInput(void) {
     if (dds3PadButtonState[0x21] < 0) {
         selection = mnuGetMovieMenuSelectionIndex();
         if (selection < 0) {
-            return 1;
+            return MNU_MOVIE_INPUT_CONFIRMED;
         }
         if (selection >= 2) {
             if (selection == 2) {
@@ -388,18 +388,18 @@ s32 mnuHandleMovieMenuInput(void) {
         } else {
             p2sdPlaySE(0x310001, 127, 63);
         }
-        return 1;
+        return MNU_MOVIE_INPUT_CONFIRMED;
     }
     if (dds3PadButtonState[0x23] < 0) {
         p2sdPlaySE(10, 127, 63);
-        return 2;
+        return MNU_MOVIE_INPUT_CANCELLED;
     }
-    return moved ? -1 : 0;
+    return moved ? MNU_MOVIE_INPUT_MOVED : MNU_MOVIE_INPUT_IDLE;
 }
 
 void mnuTitleResetSequenceTimers(void) {
     MenuTitleState *title = (MenuTitleState *)titleWork;
-    title->phase = 1;
+    title->phase = MNU_MOVIE_PHASE_FADE_IN;
     title->sequenceTimer = title->selectedPage = 0;
 }
 
@@ -412,55 +412,55 @@ s32 mnuUpdateMovieMenuInputState(void) {
     s32 result;
 
     switch (titleWork->phase) {
-    case 1:
+    case MNU_MOVIE_PHASE_FADE_IN:
         if (titleWork->selectedPage < 23) {
             titleWork->selectedPage++;
         } else {
             titleWork->selectedPage = 0;
-            titleWork->phase = 2;
+            titleWork->phase = MNU_MOVIE_PHASE_SELECTION;
         }
         if (titleWork->selectedPage >= 4) {
             result = mnuHandleMovieMenuInput();
             switch (result) {
-            case 0:
+            case MNU_MOVIE_INPUT_IDLE:
             default:
                 titleWork->sequenceTimer = 0;
                 break;
-            case 2:
-                titleWork->phase = 4;
+            case MNU_MOVIE_INPUT_CANCELLED:
+                titleWork->phase = MNU_MOVIE_PHASE_CANCEL_EXIT;
                 titleWork->selectedPage = 0;
                 break;
-            case 1:
-                titleWork->phase = 3;
+            case MNU_MOVIE_INPUT_CONFIRMED:
+                titleWork->phase = MNU_MOVIE_PHASE_CONFIRM_EXIT;
                 titleWork->selectedPage = 0;
                 break;
             }
         }
         break;
-    case 0:
+    case MNU_MOVIE_PHASE_OPENING_ANIMATION:
         if (titleWork->selectedPage < 14) {
             titleWork->selectedPage++;
         } else {
             titleWork->selectedPage = 0;
-            titleWork->phase = 2;
+            titleWork->phase = MNU_MOVIE_PHASE_SELECTION;
         }
         break;
-    case 2:
+    case MNU_MOVIE_PHASE_SELECTION:
         result = mnuHandleMovieMenuInput();
         switch (result) {
-        case 1:
-            titleWork->phase = 3;
+        case MNU_MOVIE_INPUT_CONFIRMED:
+            titleWork->phase = MNU_MOVIE_PHASE_CONFIRM_EXIT;
             titleWork->selectedPage = 0;
             break;
-        case 2:
-            titleWork->phase = 4;
+        case MNU_MOVIE_INPUT_CANCELLED:
+            titleWork->phase = MNU_MOVIE_PHASE_CANCEL_EXIT;
             titleWork->selectedPage = 0;
             break;
-        case 0:
+        case MNU_MOVIE_INPUT_IDLE:
             if (titleWork->sequenceTimer < 450) {
                 titleWork->sequenceTimer++;
             } else {
-                titleWork->phase = 4;
+                titleWork->phase = MNU_MOVIE_PHASE_CANCEL_EXIT;
                 titleWork->sequenceTimer = 0;
                 titleWork->selectedPage = 0;
             }
@@ -470,20 +470,20 @@ s32 mnuUpdateMovieMenuInputState(void) {
             break;
         }
         break;
-    case 3:
+    case MNU_MOVIE_PHASE_CONFIRM_EXIT:
         if (titleWork->selectedPage < 10) {
             titleWork->selectedPage++;
             break;
         }
-        return 1;
-    case 4:
+        return MNU_MOVIE_UPDATE_CONFIRMED;
+    case MNU_MOVIE_PHASE_CANCEL_EXIT:
         if (titleWork->selectedPage < 10) {
             titleWork->selectedPage++;
             break;
         }
-        return 2;
+        return MNU_MOVIE_UPDATE_CANCELLED;
     }
-    return 0;
+    return MNU_MOVIE_UPDATE_RUNNING;
 }
 
 

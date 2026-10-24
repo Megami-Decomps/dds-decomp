@@ -1225,13 +1225,13 @@ s32 mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
         mnuHandleTitleMenuEvent(titleWork->state);
         menuAction = mnuUpdateMovieMenuInputState();
         switch (menuAction) {
-        case 1:
+        case MNU_MOVIE_UPDATE_CONFIRMED:
             mnuDrawTitleSceneForPhase();
             titleWork->state = 32;
             titleWork->cursor = 0;
             dds3FadeOut(0, 0, 0, 0xF);
             break;
-        case 2:
+        case MNU_MOVIE_UPDATE_CANCELLED:
             mnuDrawTitleSceneForPhase();
             titleWork->state = 33;
             titleWork->cursor = 0;

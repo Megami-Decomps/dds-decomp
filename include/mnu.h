@@ -10,6 +10,22 @@
 #include "mnu_shop.h"
 #endif
 
+/* Title-movie menu transition phases shared by DDS1 and DDS2. */
+#define MNU_MOVIE_PHASE_OPENING_ANIMATION 0
+#define MNU_MOVIE_PHASE_FADE_IN 1
+#define MNU_MOVIE_PHASE_SELECTION 2
+#define MNU_MOVIE_PHASE_CONFIRM_EXIT 3
+#define MNU_MOVIE_PHASE_CANCEL_EXIT 4
+
+/* Results returned by the title-movie menu input and update handlers. */
+#define MNU_MOVIE_INPUT_MOVED -1
+#define MNU_MOVIE_INPUT_IDLE 0
+#define MNU_MOVIE_INPUT_CONFIRMED 1
+#define MNU_MOVIE_INPUT_CANCELLED 2
+#define MNU_MOVIE_UPDATE_RUNNING 0
+#define MNU_MOVIE_UPDATE_CONFIRMED 1
+#define MNU_MOVIE_UPDATE_CANCELLED 2
+
 struct MenuWindowContainer;
 struct MenuListNode;
 struct MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width,

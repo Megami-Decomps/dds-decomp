@@ -394,13 +394,13 @@ s32 mnuUpdateMovieMenuTask(dds3ProcessID_t *task) {
         mnuRunMovieMenuIdleFrame();
         menuAction = mnuUpdateMovieMenuInputState();
         switch (menuAction) {
-        case 1:
+        case MNU_MOVIE_UPDATE_CONFIRMED:
             mnuDrawMovieChoiceTransition();
             mnuMovieMenuState->state = 0x1F;
             mnuMovieMenuState->cursor = 0;
             dds3FadeOut(0, 0, 0, 0xF);
             break;
-        case 2:
+        case MNU_MOVIE_UPDATE_CANCELLED:
             mnuDrawMovieChoiceTransition();
             mnuMovieMenuState->state = 0x20;
             mnuMovieMenuState->cursor = 0;

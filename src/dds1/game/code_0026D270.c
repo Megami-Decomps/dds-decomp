@@ -17,7 +17,7 @@ void mnuDrawMovieMenuBackdrop(void) {
     f32 alpha;
 
     switch (mnuMovieMenuState->transitionMode) {
-    case 0:
+    case MNU_MOVIE_PHASE_OPENING_ANIMATION:
         if (mnuMovieMenuState->cursor < 10) {
             factor = mnuMovieMenuState->cursor / 10.0f;
             alpha = sdfSin(factor * 1.5707963f) * 128.0f;
@@ -36,8 +36,8 @@ void mnuDrawMovieMenuBackdrop(void) {
         }
         mnuDrawSprite(0, 0, 0, (s32)(factor * 128.0f), 0, 6, 0x53);
         return;
-    case 1:
-    case 2:
+    case MNU_MOVIE_PHASE_FADE_IN:
+    case MNU_MOVIE_PHASE_SELECTION:
         factor = mnuMovieMenuState->cursor / 90.0f;
         factor = sdfSin(factor * 6.2831852f - 1.5707963f);
         factor = (factor + 1.0f) * 0.5f;
@@ -78,7 +78,7 @@ s32 mnuHandleMovieMenuInput(void) {
     if (dds3PadButtonState[0x21] < 0) {
         selection = mnuGetMovieMenuSelectionIndex();
         if (selection < 0) {
-            return 1;
+            return MNU_MOVIE_INPUT_CONFIRMED;
         }
         if (selection >= 2) {
             if (selection == 2) {
@@ -87,17 +87,17 @@ s32 mnuHandleMovieMenuInput(void) {
         } else {
             p2sdPlaySE(0x310001, 127, 63);
         }
-        return 1;
+        return MNU_MOVIE_INPUT_CONFIRMED;
     }
     if (dds3PadButtonState[0x23] < 0) {
         p2sdPlaySE(10, 127, 63);
-        return 2;
+        return MNU_MOVIE_INPUT_CANCELLED;
     }
-    return moved ? -1 : 0;
+    return moved ? MNU_MOVIE_INPUT_MOVED : MNU_MOVIE_INPUT_IDLE;
 }
 
 void mnuTitleResetSequenceTimers(void) {
-    mnuMovieMenuState->transitionMode = 1;
+    mnuMovieMenuState->transitionMode = MNU_MOVIE_PHASE_FADE_IN;
     mnuMovieMenuState->cursor = 0;
     mnuMovieMenuState->idleTicks = 0;
 }
@@ -109,55 +109,55 @@ s32 mnuUpdateMovieMenuInputState(void) {
     s32 result;
 
     switch (mnuMovieMenuState->transitionMode) {
-    case 1:
+    case MNU_MOVIE_PHASE_FADE_IN:
         if (mnuMovieMenuState->cursor < 23) {
             mnuMovieMenuState->cursor++;
         } else {
             mnuMovieMenuState->cursor = 0;
-            mnuMovieMenuState->transitionMode = 2;
+            mnuMovieMenuState->transitionMode = MNU_MOVIE_PHASE_SELECTION;
         }
         if (mnuMovieMenuState->cursor >= 4) {
             result = mnuHandleMovieMenuInput();
             switch (result) {
-            case 0:
+            case MNU_MOVIE_INPUT_IDLE:
             default:
                 mnuMovieMenuState->idleTicks = 0;
                 break;
-            case 2:
-                mnuMovieMenuState->transitionMode = 4;
+            case MNU_MOVIE_INPUT_CANCELLED:
+                mnuMovieMenuState->transitionMode = MNU_MOVIE_PHASE_CANCEL_EXIT;
                 mnuMovieMenuState->cursor = 0;
                 break;
-            case 1:
-                mnuMovieMenuState->transitionMode = 3;
+            case MNU_MOVIE_INPUT_CONFIRMED:
+                mnuMovieMenuState->transitionMode = MNU_MOVIE_PHASE_CONFIRM_EXIT;
                 mnuMovieMenuState->cursor = 0;
                 break;
             }
         }
         break;
-    case 0:
+    case MNU_MOVIE_PHASE_OPENING_ANIMATION:
         if (mnuMovieMenuState->cursor < 14) {
             mnuMovieMenuState->cursor++;
         } else {
             mnuMovieMenuState->cursor = 0;
-            mnuMovieMenuState->transitionMode = 2;
+            mnuMovieMenuState->transitionMode = MNU_MOVIE_PHASE_SELECTION;
         }
         break;
-    case 2:
+    case MNU_MOVIE_PHASE_SELECTION:
         result = mnuHandleMovieMenuInput();
         switch (result) {
-        case 1:
-            mnuMovieMenuState->transitionMode = 3;
+        case MNU_MOVIE_INPUT_CONFIRMED:
+            mnuMovieMenuState->transitionMode = MNU_MOVIE_PHASE_CONFIRM_EXIT;
             mnuMovieMenuState->cursor = 0;
             break;
-        case 2:
-            mnuMovieMenuState->transitionMode = 4;
+        case MNU_MOVIE_INPUT_CANCELLED:
+            mnuMovieMenuState->transitionMode = MNU_MOVIE_PHASE_CANCEL_EXIT;
             mnuMovieMenuState->cursor = 0;
             break;
-        case 0:
+        case MNU_MOVIE_INPUT_IDLE:
             if (mnuMovieMenuState->idleTicks < 450) {
                 mnuMovieMenuState->idleTicks++;
             } else {
-                mnuMovieMenuState->transitionMode = 4;
+                mnuMovieMenuState->transitionMode = MNU_MOVIE_PHASE_CANCEL_EXIT;
                 mnuMovieMenuState->idleTicks = 0;
                 mnuMovieMenuState->cursor = 0;
             }
@@ -167,20 +167,20 @@ s32 mnuUpdateMovieMenuInputState(void) {
             break;
         }
         break;
-    case 3:
+    case MNU_MOVIE_PHASE_CONFIRM_EXIT:
         if (mnuMovieMenuState->cursor < 10) {
             mnuMovieMenuState->cursor++;
             break;
         }
-        return 1;
-    case 4:
+        return MNU_MOVIE_UPDATE_CONFIRMED;
+    case MNU_MOVIE_PHASE_CANCEL_EXIT:
         if (mnuMovieMenuState->cursor < 10) {
             mnuMovieMenuState->cursor++;
             break;
         }
-        return 2;
+        return MNU_MOVIE_UPDATE_CANCELLED;
     }
-    return 0;
+    return MNU_MOVIE_UPDATE_RUNNING;
 }
 
 
@@ -193,7 +193,7 @@ void mnuDrawMovieChoiceTransition(void) {
     f32 factor;
 
     switch (mnuMovieMenuState->transitionMode) {
-    case 1:
+    case MNU_MOVIE_PHASE_FADE_IN:
         if (mnuMovieMenuState->cursor < 3) {
             factor = 1.0f;
         } else if (mnuMovieMenuState->cursor < 20) {
@@ -232,7 +232,7 @@ void mnuDrawMovieChoiceTransition(void) {
             }
         }
         break;
-    case 0:
+    case MNU_MOVIE_PHASE_OPENING_ANIMATION:
         for (i = 0; i < 3; i++) {
             elapsed = mnuMovieMenuState->cursor - i * 2;
             if (elapsed < 0) {
@@ -250,11 +250,11 @@ void mnuDrawMovieChoiceTransition(void) {
             }
         }
         break;
-    case 2:
+    case MNU_MOVIE_PHASE_SELECTION:
         mnuCallInitWide(0, 0, 0, (s32)mnuMovieMenuState->selectionList, 0x53);
         return;
-    case 3:
-    case 4:
+    case MNU_MOVIE_PHASE_CONFIRM_EXIT:
+    case MNU_MOVIE_PHASE_CANCEL_EXIT:
         factor = (10 - mnuMovieMenuState->cursor) / 10.0f;
         if (factor < 0.0f) {
             factor = 0.0f;
@@ -269,4 +269,3 @@ void mnuDrawMovieChoiceTransition(void) {
         break;
     }
 }
-
