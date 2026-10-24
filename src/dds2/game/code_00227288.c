@@ -58,7 +58,7 @@ extern s32 btlHasEffectActor(void);
 
 extern s32 btlHasEffectActor(void);
 
-extern u64 btlStartTask(void *);
+extern u64 btlStartTask(BtlRuntimeTask *);
 
 extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 

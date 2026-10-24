@@ -220,7 +220,7 @@ typedef struct BattleScriptTaskData {
 
 extern char D_0041B7E0[];
 
-extern u64 btlStartTask(void *);
+extern u64 btlStartTask(BtlRuntimeTask *);
 
 extern s32 scrGetIntPara(s32);
 

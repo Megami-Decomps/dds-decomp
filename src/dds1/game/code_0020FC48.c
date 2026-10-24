@@ -143,7 +143,7 @@ extern s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *);
 
 extern s32 btlLowestSetPairIndex(u32);
 
-extern u64 btlStartTask(void *);
+extern u64 btlStartTask(BtlRuntimeTask *);
 
 extern void dds3RenderTextureOFF(void);
 

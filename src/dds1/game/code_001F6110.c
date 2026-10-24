@@ -2537,7 +2537,7 @@ u32 btlScriptFlagEnemyDefeatCandidates(void) {
 extern u8 *btlCreateFloatTask28(u8 *actor, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f, f32 g, f32 h);
 extern struct BtlRuntimeTask *btlScheduleContextReset(void);
 
-extern u64 btlStartTask(void *taskObject);
+extern u64 btlStartTask(struct BtlRuntimeTask *taskObject);
 
 u32 btlCmdCameraMove(void) {
     f32 pos[3];

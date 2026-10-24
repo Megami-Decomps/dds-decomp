@@ -693,7 +693,7 @@ extern void btlFlagUnitDefeatCandidate(BtlUnit *);
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
 
-extern u64 btlStartTask(void *);
+extern u64 btlStartTask(BtlRuntimeTask *);
 
 void btlReleaseIdleUnitSoundAndAdvanceTask(ActionStateLink *task) {
     BtlState *runtime;

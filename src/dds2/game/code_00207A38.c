@@ -46,7 +46,7 @@
 #include "sdf_vu_matrix.h"
 
 
-extern u64 btlStartTask(void *taskObject);
+extern u64 btlStartTask(BtlRuntimeTask *taskObject);
 
 enum {
     BTL_RESOURCE_DESCRIPTOR_BYTES = 0x48,

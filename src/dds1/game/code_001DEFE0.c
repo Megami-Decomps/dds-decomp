@@ -114,7 +114,7 @@ extern void effObjSetOpacityPassEnabled(u32 enabled);
 extern void btlBossDebugPrintf(const char *format, ...);
 
 
-extern u64 btlStartTask(void *);
+extern u64 btlStartTask(BtlRuntimeTask *);
 
 extern BtlCameraCursorView btlCameraCursor;
 

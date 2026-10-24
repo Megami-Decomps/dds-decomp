@@ -89,7 +89,7 @@ extern s32 btlIsUnitInActiveList(BtlUnit *unit);
 extern void btlBossDebugPrintf(const char *format, ...);
 
 
-extern u64 btlStartTask(void *);
+extern u64 btlStartTask(BtlRuntimeTask *);
 
 extern void btlDispatchStateHandler(void *, s32);
 
@@ -2098,7 +2098,7 @@ void btlFreeTask(BtlRuntimeTask *task) {
 }
 
 /* Install a fresh handle/reset phase counters, invoke startup, then reread handle. */
-u64 btlStartTask(void *taskObject) {
+u64 btlStartTask(BtlRuntimeTask *taskObject) {
     u64 value = btlAdvanceRuntimeSequenceCounter();
     BtlRuntimeTask *task = taskObject;
     void (*callback)(u32) = task->onStart;

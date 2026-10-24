@@ -95,7 +95,7 @@ extern void btlDebugPrintf(const char *, ...);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
-extern u64 btlStartTask(void *);
+extern u64 btlStartTask(BtlRuntimeTask *);
 
 extern void btlDispatchStateHandler(void *, s32);
 

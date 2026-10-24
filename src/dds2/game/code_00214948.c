@@ -202,7 +202,7 @@ extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 
 extern BtlRuntimeTask *btlCreateUnitFadeOutTask(BtlUnit *, u32, u32);
 
-extern u64 btlStartTask(void *);
+extern u64 btlStartTask(BtlRuntimeTask *);
 
 extern void btlCopyUnitCurrentPosition(BtlUnit *, f32 *);
 

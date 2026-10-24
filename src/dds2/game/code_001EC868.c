@@ -9472,7 +9472,7 @@ void sndReleaseAllSlotOwners(void) {
     }
 }
 
-extern u64 btlStartTask(void *taskObject);
+extern u64 btlStartTask(BtlRuntimeTask *taskObject);
 
 void btlStartMoveOtherUnitsTask(BtlUnit *unit, s32 soundId) {
     struct BtlRuntimeTask *task;

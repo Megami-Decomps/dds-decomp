@@ -1200,7 +1200,7 @@ void btlClearSpecialEnemyRestrictionAfterAction(BtlTask *task) {
     }
 }
 
-extern u64 btlStartTask(void *);
+extern u64 btlStartTask(BtlRuntimeTask *);
 extern BtlRuntimeTask *btlCreateUnitFadeOutTask(BtlUnit *, u32, u32);
 
 s32 btlDisableNonBossUnits(void) {
@@ -2266,7 +2266,7 @@ s32 btlEffectTaskStartFinale(BtlTask *task) {
 
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
-extern u64 btlStartTask(void *);
+extern u64 btlStartTask(BtlRuntimeTask *);
 
 extern BtlRuntimeTask *btlCreateActionTask(BtlUnit *, s32);
 
@@ -2729,7 +2729,7 @@ u64 btlScheduleActionAndSoundSequence(BtlTask *action) {
 
 extern BtlRuntimeTask *btlCreateUnitFadeOutTask(BtlUnit *, u32, u32);
 
-extern u64 btlStartTask(void *);
+extern u64 btlStartTask(BtlRuntimeTask *);
 
 s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit) {
     u8 *battle = (u8 *)btlGetRuntime();

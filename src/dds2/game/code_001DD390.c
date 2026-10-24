@@ -2215,9 +2215,7 @@ void btlFreeTask(BtlRuntimeTask *task) {
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
 /* Install a fresh handle/reset phase counters, invoke startup, then reread handle. */
-u64 btlStartTask(taskObject)
-    void *taskObject;
-{
+u64 btlStartTask(BtlRuntimeTask *taskObject) {
     BtlRuntimeTask *task = taskObject;
     task->handle = btlAdvanceRuntimeSequenceCounter();
     task->flags |= BTL_TASK_FLAG_STARTED;

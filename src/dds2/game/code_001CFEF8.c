@@ -67,7 +67,7 @@ typedef char BtlStateTotalApOffsetCheck[
 extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 
 extern void btlDispatchStateHandler(void *, s32);
-extern u64 btlStartTask(void *);
+extern u64 btlStartTask(BtlRuntimeTask *);
 extern BtlRuntimeTask *btlAllocTask(s32);
 
 extern s32 btlHasRegisteredGuidePanelTask(void);

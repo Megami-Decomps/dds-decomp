@@ -1231,7 +1231,7 @@ extern s32 scrGetIntPara(s32 index);
 extern BtlUnit *btlFindUnitByModeClear(s32 id);
 extern BtlUnit *btlFindUnitByModeFlagged(s32 id);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *actor, s32 arg);
-extern u64 btlStartTask(void *);
+extern u64 btlStartTask(BtlRuntimeTask *);
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
 s32 btlCmdSpawnEffectTaskForSelectedUnit(void) {
