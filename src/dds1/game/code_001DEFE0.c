@@ -48,6 +48,7 @@
 #include "btl_state.h"
 #include "btl_model_record.h"
 #include "btl_task_args.h"
+#include "btl_custom_fade_task_args.h"
 #include "btl_field_load_task_args.h"
 #include "file_pac.h"
 #include "btl_floor_load_task_args.h"
@@ -9175,22 +9176,23 @@ BtlRuntimeTask *btlCreateFadeInTask(u32 sound) {
     return (BtlRuntimeTask *)task;
 }
 
-u32 btlTaskStartCustomFadeIn(u8 *taskArgs) {
-    dds3FadeOut(*taskArgs, taskArgs[1], taskArgs[2], *(u32 *)(taskArgs + 4));
+u32 btlTaskStartCustomFadeIn(BtlCustomFadeTaskArgs *taskArgs) {
+    dds3FadeOut(taskArgs->rgb.red, taskArgs->rgb.green, taskArgs->rgb.blue,
+                taskArgs->duration);
     return 1;
 }
 
-BtlRuntimeTask *sndCreateCustomTask(u32 soundId, u32 options) {
-    BtlRuntimeTask *task = (BtlRuntimeTask *)btlAllocTask(8);
-    u32 *data;
+BtlRuntimeTask *sndCreateCustomTask(u32 packedColor, u32 duration) {
+    BtlRuntimeTask *task = (BtlRuntimeTask *)btlAllocTask(sizeof(BtlCustomFadeTaskArgs));
+    BtlCustomFadeTaskArgs *data;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x36;
     task->callback = btlTaskStartCustomFadeIn;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->onStart = 0;
-    data = btlGetTaskArguments(task);
-    data[0] = soundId;
-    data[1] = options;
+    data = (BtlCustomFadeTaskArgs *)btlGetTaskArguments(task);
+    data->packedColor = packedColor;
+    data->duration = duration;
     return task;
 }
 

@@ -46,6 +46,7 @@
 #include "btl_camera_pose_api.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
+#include "btl_custom_fade_task_args.h"
 #include "btl_field_load_task_args.h"
 #include "file_pac.h"
 #include "btl_floor_load_task_args.h"
@@ -8452,24 +8453,25 @@ BtlRuntimeTask *btlCreateFadeInTask(u32 value) {
     return task;
 }
 
-u32 btlTaskStartCustomFadeIn(u8 *taskArgs) {
-    dds3FadeOut(*taskArgs, taskArgs[1], taskArgs[2], *(u32 *)(taskArgs + 4));
+u32 btlTaskStartCustomFadeIn(BtlCustomFadeTaskArgs *taskArgs) {
+    dds3FadeOut(taskArgs->rgb.red, taskArgs->rgb.green, taskArgs->rgb.blue,
+                taskArgs->duration);
     return 1;
 }
 
-extern u32 btlTaskStartCustomFadeIn(u8 *);
+extern u32 btlTaskStartCustomFadeIn(BtlCustomFadeTaskArgs *);
 
-BtlRuntimeTask *sndCreateCustomTask(s32 value, s32 option) {
-    BtlRuntimeTask *task = btlAllocTask(8);
-    BtlRuntimeTaskArgs *args;
+BtlRuntimeTask *sndCreateCustomTask(s32 packedColor, s32 duration) {
+    BtlRuntimeTask *task = btlAllocTask(sizeof(BtlCustomFadeTaskArgs));
+    BtlCustomFadeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x39;
     task->callback = btlTaskStartCustomFadeIn;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->onStart = 0;
-    args = btlGetTaskArguments(task);
-    args->value = value;
-    args->option = option;
+    args = (BtlCustomFadeTaskArgs *)btlGetTaskArguments(task);
+    args->packedColor = packedColor;
+    args->duration = duration;
     return task;
 }
 
