@@ -2486,9 +2486,9 @@ extern char D_0041A378[]; /* "md_01all_02" */
 #include "dds3_object_payload.h"
 
 /* Before marking a gate enemy, notify md_01all_02 with payload word 1; always allow. */
-s32 btlPrepareGateDefeatCandidateSet(u8 *unit) {
+s32 btlPrepareGateDefeatCandidateSet(BtlUnit *unit) {
     dds3Basic_t *object;
-    if (!(((BtlUnit *)unit)->status.flags & 0x400)) {
+    if (!(unit->status.flags & 0x400)) {
         return 1;
     }
     if (((BattleWork *)btlGetRuntime())->state22C == 5) {
@@ -2503,9 +2503,9 @@ s32 btlPrepareGateDefeatCandidateSet(u8 *unit) {
 }
 
 /* Before clearing that mark, notify the same model with word 2; always allow. */
-s32 btlPrepareGateDefeatCandidateClear(u8 *unit) {
+s32 btlPrepareGateDefeatCandidateClear(BtlUnit *unit) {
     dds3Basic_t *object;
-    if (!(((BtlUnit *)unit)->status.flags & 0x400)) {
+    if (!(unit->status.flags & 0x400)) {
         return 1;
     }
     if (((BattleWork *)btlGetRuntime())->state22C == 5) {
@@ -5983,16 +5983,16 @@ void btlDestroyActionActor(void) {
 }
 
 /* Brahman's mark veto excludes model resource (kind 1, index 0x10B), not an enemy ID. */
-u32 btlAllowBrahmanDefeatCandidateSet(u32 unit) {
-    if (((BtlUnit *)unit)->resourceKind == 1 && ((BtlUnit *)unit)->resourceIndex == 0x10b) {
+s32 btlAllowBrahmanDefeatCandidateSet(BtlUnit *unit) {
+    if (unit->resourceKind == 1 && unit->resourceIndex == 0x10b) {
         return 0;
     }
     return 1;
 }
 
 /* The clear veto excludes the same resource; the two native hooks stay separate. */
-u32 btlAllowBrahmanDefeatCandidateClear(u32 unit) {
-    if (((BtlUnit *)unit)->resourceKind == 1 && ((BtlUnit *)unit)->resourceIndex == 0x10b) {
+s32 btlAllowBrahmanDefeatCandidateClear(BtlUnit *unit) {
+    if (unit->resourceKind == 1 && unit->resourceIndex == 0x10b) {
         return 0;
     }
     return 1;
