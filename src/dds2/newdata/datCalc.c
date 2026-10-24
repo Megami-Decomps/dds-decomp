@@ -6,6 +6,7 @@
 #include "pty_roster_value_record.h"
 #include "sdf.h"
 #include "dat_state.h"
+#include "pty_skill_nibble_state.h"
 #include "dat_world_field_flags.h"
 #include "btl_affinity_row.h"
 #include "btl_resolve_unit_value_api.h"
@@ -1188,7 +1189,6 @@ extern void ptyApplyProfile(datUnitWork_t *, u16);
 extern u32 ptyGetProfileRecordValue(datUnitWork_t *, u16);
 extern void ptySetProfileRecordValue(datUnitWork_t *, u16, u32);
 extern void mtrSynchronizeMantraFlagsAcrossParty(void);
-extern u32 ptyGetSkillNibbleState(datUnitWork_t *, u16);
 extern s32 scrSetFlag(datUnitWork_t *, u16);
 
 /* Merge saved templates 1 and 2 into roster 8, taking their greater level

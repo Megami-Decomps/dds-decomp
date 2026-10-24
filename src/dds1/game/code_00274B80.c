@@ -15,6 +15,7 @@
 #include "mnu_scroll_panel.h"
 #include "mnu_list.h"
 #include "dat_state.h"
+#include "pty_skill_nibble_state.h"
 #include "prf_skill_list_buffer.h"
 #include "kwln.h"
 #include "pty_skill_menu_api.h"
@@ -203,7 +204,6 @@ extern struct MenuList *mnuCreateListState(s32, s32, s32);
 extern void mnuAttachWindowTextureState(MenuWindowContainer *, u32, u32, u32, u32);
 extern s32 mnuGetIndexedNonzeroEffect(s32);
 extern u16 mnuLookupPartyTableValue(u32, s32, s32);
-extern u32 ptyGetSkillNibbleState(datUnitWork_t *, u16);
 extern void mnuSortItems(struct MenuList *, s32, s32);
 extern void ptySkillMenuDrawEntry();
 extern u8 mnuCampSkillHeadingFrameIndices[];

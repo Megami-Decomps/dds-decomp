@@ -43,6 +43,7 @@
 #include "mdl_asset_request.h"
 #include "eff.h"
 #include "dat_state.h"
+#include "pty_skill_nibble_state.h"
 #include "evt_stage_test.h"
 #include "kwln_task_lifecycle.h"
 #include "btl.h"
@@ -135,7 +136,6 @@ extern void evtStageTestQueueMotionSegment(u32, f32, f32);
 extern void evtStageTestCreateModelEffect(s32);
 extern void evtStageTestUpdateCamera(void);
 extern void btlUpdateJobPositionFromModel(struct SoundHandleNode *node);
-extern u32 ptyGetSkillNibbleState(datUnitWork_t *, u16);
 
 extern void evtStageTestStop(void);
 

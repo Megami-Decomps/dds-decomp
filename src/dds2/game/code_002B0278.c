@@ -24,6 +24,7 @@
 #include "mnu_shop.h"
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
+#include "pty_skill_nibble_state.h"
 #include "pty_roster_api.h"
 #include "prf_skill_list_buffer.h"
 #include "eff_random.h"
@@ -2065,7 +2066,6 @@ extern MenuList *mnuCreateListState(u32, u32, s32);
 extern void mnuSortItems(MenuList *, s32, s32);
 extern s32 mnuGetIndexedNonzeroEffect(s32);
 extern u16 mnuLookupPartyTableValue(u32, s32, s32);
-extern u32 ptyGetSkillNibbleState(datUnitWork_t *, u16);
 extern const s32 mnuCampSkillHeadingFrameIndices[];
 
 void ptySkillMenuInitPages(MenuContext *context) {

@@ -27,6 +27,7 @@ extern void memset(void *dst, s32 value, s32 size);
 #include "itf.h"
 #include "fr_font.h"
 #include "dat_state.h"
+#include "pty_skill_nibble_state.h"
 #include "mnu_mantra.h"
 #include "mnu_mantra_position_api.h"
 #include "prf_profile_cap.h"
@@ -113,7 +114,6 @@ extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
 extern s32 scrSetFlag(datUnitWork_t *, u16);
-extern u32 ptyGetSkillNibbleState(datUnitWork_t *, u16);
 extern s32 scrFindSlot(datUnitWork_t *, u16);
 extern s32 scrRemoveSlot(datUnitWork_t *, u16);
 
@@ -605,8 +605,8 @@ s32 scrSetFlag(datUnitWork_t *work, u16 flagId) {
 
 void scrRemoveAvailableSkillFlagAndSlot(datUnitWork_t *work, u16 id) {
     u32 word, shift;
-    u32 status = ptyGetSkillNibbleState(work, id);
-    if (status == 1) {
+    PtySkillNibbleState status = ptyGetSkillNibbleState(work, id);
+    if (status == PTY_SKILL_NIBBLE_STATE_PRIMARY_BIT_SET) {
         scrDecodePackedFlagIndex(work, id, &word, &shift);
         work->skillFlags[word] &= ~(status << shift);
         if (scrFindSlot(work, id) >= 0) {
@@ -677,15 +677,17 @@ u32 scrGetSecondaryScriptFlag(datUnitWork_t *work, u16 flagId) {
 
 /* Bit 1 takes precedence and returns state 2; otherwise return boolean bit 0.
  * The secondary bit does not affect this state. */
-u32 ptyGetSkillNibbleState(datUnitWork_t *partyRecord, u16 flagId) {
+PtySkillNibbleState ptyGetSkillNibbleState(datUnitWork_t *partyRecord, u16 flagId) {
     u32 wordIndex, bitShift;
     u32 flagWord;
     scrDecodePackedFlagIndex(partyRecord, flagId, &wordIndex, &bitShift);
     flagWord = partyRecord->skillFlags[wordIndex];
     if (flagWord & (SCR_SKILL_STATE_TWO_BIT << bitShift)) {
-        return 2;
+        return PTY_SKILL_NIBBLE_STATE_BIT_1_SET;
     }
-    return (flagWord & (SCR_FLAG_PRIMARY_BIT << bitShift)) != 0;
+    return (flagWord & (SCR_FLAG_PRIMARY_BIT << bitShift)) != 0
+               ? PTY_SKILL_NIBBLE_STATE_PRIMARY_BIT_SET
+               : PTY_SKILL_NIBBLE_STATE_CLEAR;
 }
 
 /* Search all slots for the low 16-bit ID; zero can match an empty slot. */
@@ -844,7 +846,7 @@ s32 prfBuildSkillList(datUnitWork_t *unit, DatProfileRecord *unusedProfile, PrfS
     u32 sourceIndex;
     u16 *profileSkillCursor;
     u16 skillId;
-    u32 skillState;
+    PtySkillNibbleState skillState;
     s32 selectedProfileId;
 
     memset(&compactedList, 0, sizeof(PrfSkillList));
@@ -856,11 +858,11 @@ s32 prfBuildSkillList(datUnitWork_t *unit, DatProfileRecord *unusedProfile, PrfS
             skillId = *profileSkillCursor++;
             if (skillId != 0) {
                 skillState = ptyGetSkillNibbleState(unit, skillId);
-                if (skillState != 0 && includeFlagged == 0) {
+                if (skillState != PTY_SKILL_NIBBLE_STATE_CLEAR && includeFlagged == 0) {
                     continue;
                 }
                 compactedList.flags[compactedList.count] = 0;
-                if (skillState != 0) {
+                if (skillState != PTY_SKILL_NIBBLE_STATE_CLEAR) {
                     compactedList.flags[compactedList.count] |= PRF_SKILL_LIST_FLAGGED;
                 }
                 compactedList.skills[compactedList.count] = skillId;
@@ -1575,4 +1577,3 @@ INCLUDE_SDATA(const s32, "game/code_00313BB8", sdfDebugLogAppendMode);
 INCLUDE_SDATA(const s32, "game/code_00313BB8", sdfDebugLogPairFormat);
 
 INCLUDE_SDATA(const s32, "game/code_00313BB8", D_00438918);
-

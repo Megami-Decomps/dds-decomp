@@ -19,6 +19,7 @@
 #include "itf.h"
 #include "fr_font.h"
 #include "dat_state.h"
+#include "pty_skill_nibble_state.h"
 #include "file.h"
 #include "prf_profile_cap.h"
 #include "prf_requirement.h"
@@ -642,15 +643,17 @@ u32 scrGetSecondaryScriptFlag(datUnitWork_t *work, u16 flagId) {
 
 /* Bit 1 takes precedence and returns state 2; otherwise return boolean bit 0.
  * The secondary bit does not affect this state. */
-u32 ptyGetSkillNibbleState(datUnitWork_t *partyRecord, u16 flagId) {
+PtySkillNibbleState ptyGetSkillNibbleState(datUnitWork_t *partyRecord, u16 flagId) {
     u32 wordIndex, bitShift;
     u32 flagWord;
     scrDecodePackedFlagIndex(partyRecord, flagId, &wordIndex, &bitShift);
     flagWord = partyRecord->skillFlags[wordIndex];
     if (flagWord & (SCR_SKILL_STATE_TWO_BIT << bitShift)) {
-        return 2;
+        return PTY_SKILL_NIBBLE_STATE_BIT_1_SET;
     }
-    return (flagWord & (SCR_FLAG_PRIMARY_BIT << bitShift)) != 0;
+    return (flagWord & (SCR_FLAG_PRIMARY_BIT << bitShift)) != 0
+               ? PTY_SKILL_NIBBLE_STATE_PRIMARY_BIT_SET
+               : PTY_SKILL_NIBBLE_STATE_CLEAR;
 }
 
 /* Search all slots for the low 16-bit ID; zero can match an empty slot. */
@@ -675,14 +678,14 @@ void ptyRemoveProfileSkills(datUnitWork_t *unit, u16 profileId) {
     u32 wordIndex, bitShift;
     u32 index = 0;
     s32 skill;
-    u32 state;
+    PtySkillNibbleState state;
     u16 flagId;
 
     do {
         skill = prfGetSkillAtIndex(profileId, index);
         flagId = skill & 0xFFFF;
         state = ptyGetSkillNibbleState(unit, flagId);
-        if (state == 1) {
+        if (state == PTY_SKILL_NIBBLE_STATE_PRIMARY_BIT_SET) {
             scrDecodePackedFlagIndex(unit, flagId, &wordIndex, &bitShift);
             if (skill != 0) {
                 unit->skillFlags[wordIndex] &= ~(state << bitShift);
@@ -836,7 +839,7 @@ s32 prfBuildSkillList(datUnitWork_t *unit, DatProfileRecord *unusedProfile, PrfS
     u32 sourceIndex;
     u16 *profileSkillCursor;
     u16 skillId;
-    u32 skillState;
+    PtySkillNibbleState skillState;
     s32 selectedProfileId;
 
     memset(&compactedList, 0, sizeof(PrfSkillList));
@@ -848,11 +851,11 @@ s32 prfBuildSkillList(datUnitWork_t *unit, DatProfileRecord *unusedProfile, PrfS
             skillId = *profileSkillCursor++;
             if (skillId != 0) {
                 skillState = ptyGetSkillNibbleState(unit, skillId);
-                if (skillState != 0 && includeFlagged == 0) {
+                if (skillState != PTY_SKILL_NIBBLE_STATE_CLEAR && includeFlagged == 0) {
                     continue;
                 }
                 compactedList.flags[compactedList.count] = 0;
-                if (skillState != 0) {
+                if (skillState != PTY_SKILL_NIBBLE_STATE_CLEAR) {
                     compactedList.flags[compactedList.count] |= PRF_SKILL_LIST_FLAGGED;
                 }
                 compactedList.skills[compactedList.count] = skillId;
