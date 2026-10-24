@@ -3937,8 +3937,7 @@ INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417B10);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417B30);
 
-void btlBeginModelChange(u32 argumentsAddress) {
-    BtlModelChangeArgs *arguments = (BtlModelChangeArgs *)argumentsAddress;
+void btlBeginModelChange(BtlModelChangeArgs *arguments) {
     BtlUnit *unit = arguments->unit;
     u32 model = arguments->resourceKind;
     u32 variant = arguments->resourceId;
