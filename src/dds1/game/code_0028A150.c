@@ -108,16 +108,15 @@ extern void fileLoadCtxSlideUpdate(void);
 
 
 extern void dds3PadVibrationSet(s32, u8, s32);
-extern s32 D_003BC87C;
-
-
-extern s32 fileSavePreviewPortraitTextures[];
-extern s32 D_003BC868;
-extern s32 D_003BC86C;
-extern s32 D_003BC870;
-extern s32 D_003BC874;
-extern s32 D_003BC878;
-extern s32 D_003BC87C;
+extern struct sdfTexHandle_t *fileSavePreviewPortraitTextures[5];
+extern struct sdfTexHandle_t *D_003BC868;
+extern struct sdfTexHandle_t *D_003BC86C;
+extern struct sdfTexHandle_t *D_003BC870;
+extern struct sdfTexHandle_t *D_003BC874;
+extern struct sdfTexHandle_t *D_003BC878;
+extern struct sdfTexHandle_t *D_003BC87C;
+extern struct sdfTexHandle_t *D_003BC880;
+extern struct sdfTexHandle_t *D_003BC884;
 
 extern u8 sdfViewTargetVector[];
 extern u8 aViewTarget[];
@@ -141,8 +140,6 @@ extern s32 slFormatCancel(void);
 extern FileSavePreviewRecord fileSavePreviewRecords[10];
 
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
-extern s32 D_003BC880;
-
 extern s32 fileReadSlotPreviewBegin(void);
 extern s32 fileAdvanceSlotScan(void);
 
@@ -591,13 +588,11 @@ extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32,
 extern void fileCursorPulseUpdate(void);
 extern void fileDrawCursorPulse(s32, s32, s32);
 extern s32 D_003BC85C;
-extern s32 D_003BC884;
-
 void fileDrawSaveWindow(void) {
     eglSetOt(0x56);
     evtSubmitPrimaryAlphaBlendMode(0);
-    evtSubmitTexturedGradientQuad(0x112, 0x113, 0x98, 0x34, 0x14A, 0x1C5, 0x98, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct sdfTexHandle_t *)(u32)(D_003BC884));
-    evtSubmitTexturedGradientQuad(0x56, 0x113, 0xBC, 0x34, 0x14A, 0x1C5, 1, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct sdfTexHandle_t *)(u32)(D_003BC884));
+    evtSubmitTexturedGradientQuad(0x112, 0x113, 0x98, 0x34, 0x14A, 0x1C5, 0x98, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_003BC884);
+    evtSubmitTexturedGradientQuad(0x56, 0x113, 0xBC, 0x34, 0x14A, 0x1C5, 1, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_003BC884);
     fileCursorPulseUpdate();
     fileDrawCursorPulse(0x17E, 0x118, 0x56);
     D_003BC85C++;
@@ -636,7 +631,7 @@ s32 fileDrawStatusDialogFrame(void) {
                  (((value << 7) / 100) << 24) | 0x808080,
                  (((value << 7) / 100) << 24) | 0x808080,
                  (((value << 7) / 100) << 24) | 0x808080,
-                 (((value << 7) / 100) << 24) | 0x808080, (struct sdfTexHandle_t *)(u32)(D_003BC880));
+                 (((value << 7) / 100) << 24) | 0x808080, D_003BC880);
     if (D_003BC860 < 4) {
         value = D_003BC860 * 70 / 4;
     } else {
@@ -2415,9 +2410,9 @@ s32 fileDrawSlotListAndPreview(s32 work) {
         D_003BC818++;
     }
     if (D_003BC848 == 0) {
-        evtSubmitTexturedGradientQuad(0x56, 0x33, 0x137, 0x17, 5, 0x1C4, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct sdfTexHandle_t *)(u32)(D_003BC880));
+        evtSubmitTexturedGradientQuad(0x56, 0x33, 0x137, 0x17, 5, 0x1C4, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_003BC880);
     } else {
-        evtSubmitTexturedGradientQuad(0x56, 0x33, 0x137, 0x17, 5, 0x1DD, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct sdfTexHandle_t *)(u32)(D_003BC880));
+        evtSubmitTexturedGradientQuad(0x56, 0x33, 0x137, 0x17, 5, 0x1DD, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_003BC880);
     }
     eglSetOt(0x55);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 2, 0, 0, 1, 1);
@@ -2491,13 +2486,13 @@ s32 fileDrawSlotListAndPreview(s32 work) {
             detailColor = fileClampPackedColorByte(detailColor, fileLoadMenuState.standardRowAlpha, 0);
         }
         baseColor = (alpha << 24) | 0x808080;
-        evtSubmitTexturedGradientQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, baseColor, baseColor, baseColor, baseColor, (struct sdfTexHandle_t *)(u32)(D_003BC868));
+        evtSubmitTexturedGradientQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, baseColor, baseColor, baseColor, baseColor, D_003BC868);
         if (fileSlotDisplayStates[slot] == FILE_SLOT_DISPLAY_NO_RECOGNIZED_SAVE) {
-            evtSubmitTexturedGradientQuad(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, (struct sdfTexHandle_t *)(u32)(D_003BC870));
+            evtSubmitTexturedGradientQuad(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, D_003BC870);
         } else if (fileSlotDisplayStates[slot] == FILE_SLOT_DISPLAY_DIRECTORY_WITHOUT_SAVE) {
-            evtSubmitTexturedGradientQuad(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, (struct sdfTexHandle_t *)(u32)(D_003BC878));
+            evtSubmitTexturedGradientQuad(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, D_003BC878);
         } else if (fileSavePreviewRecords[slot].status > 0) {
-            evtSubmitTexturedGradientQuad(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, (struct sdfTexHandle_t *)(u32)(D_003BC874));
+            evtSubmitTexturedGradientQuad(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, D_003BC874);
         }
         if (slot != 10) {
             fileDrawSlotIcon(slot + 1, 0x5A, y + 4, alpha);
@@ -2505,19 +2500,19 @@ s32 fileDrawSlotListAndPreview(s32 work) {
                 trailAlpha = 16;
                 if (D_003BC818 > 0) {
                     for (trail = 0; trail < D_003BC818; trail++, trailAlpha -= 2) {
-                        evtSubmitTexturedGradientQuad(0x1F, y - trail * 4, 0x1BB, trail * 4 + 16, 3, 3, 0x1BB, trail * 4 + 16, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (struct sdfTexHandle_t *)(u32)(D_003BC86C));
+                        evtSubmitTexturedGradientQuad(0x1F, y - trail * 4, 0x1BB, trail * 4 + 16, 3, 3, 0x1BB, trail * 4 + 16, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, D_003BC86C);
                     }
                 } else if (D_003BC818 < 0) {
                     trailAlpha = 32;
                     for (trail = 0; trail < -D_003BC818; trail++, trailAlpha -= 4) {
-                        evtSubmitTexturedGradientQuad(0x1F, y + 0x58, 0x1BB, trail * 4 + 16, 3, 0x5B - trail * 4, 0x1BB, trail * 4 + 16, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (struct sdfTexHandle_t *)(u32)(D_003BC86C));
+                        evtSubmitTexturedGradientQuad(0x1F, y + 0x58, 0x1BB, trail * 4 + 16, 3, 0x5B - trail * 4, 0x1BB, trail * 4 + 16, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, D_003BC86C);
                     }
                 }
             }
             if (fileSlotDisplayStates[slot] != FILE_SLOT_DISPLAY_SAVE_PRESENT) {
                 if (fileSelectedSlotIndex == slot) {
                     u32 highlightColor = ((D_0037D4D0[0] + 0x80) << 24) | 0x808080;
-                    evtSubmitTexturedGradientQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, (struct sdfTexHandle_t *)(u32)(D_003BC86C));
+                    evtSubmitTexturedGradientQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, D_003BC86C);
                 }
             } else {
                 u32 bannerColor;
@@ -2527,7 +2522,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
                     mnuDrawAndStoreTextGlyphHandle(0x40, y + 0x20, detailColor, fileNewCycleLabel);
                 }
                 bannerColor = (alpha << 24) | 0x808080;
-                evtSubmitTexturedGradientQuad(0x88, y + 4, 0x137, 0x1F, 4, 0x1C5, 0x137, 0x1F, bannerColor, bannerColor, bannerColor, bannerColor, (struct sdfTexHandle_t *)(u32)(D_003BC884));
+                evtSubmitTexturedGradientQuad(0x88, y + 4, 0x137, 0x1F, 4, 0x1C5, 0x137, 0x1F, bannerColor, bannerColor, bannerColor, bannerColor, D_003BC884);
                 if (preview->newCycle == 0) {
                     if (preview->mapGroup == 0) {
                         mnuDrawAndStoreTextGlyphHandle(0xF0, y, detailColor, D_00347C68[preview->mapIndex]);
@@ -2550,7 +2545,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
                 fileDrawMenuImageAtPoint(0x1BD, y + 0x15, titleColor, text);
                 if (fileSelectedSlotIndex == slot) {
                     u32 highlightColor = ((D_0037D4D0[0] + 0x80) << 24) | 0x808080;
-                    evtSubmitTexturedGradientQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, (struct sdfTexHandle_t *)(u32)(D_003BC86C));
+                    evtSubmitTexturedGradientQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, D_003BC86C);
                 }
                 if (fileSavePreviewRecords[slot].newCycle == 0) {
                     if (fileSelectedSlotIndex == slot) {
@@ -2568,7 +2563,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
                             case 5: portrait = 3; break;
                             case 6: portrait = 4; break;
                             }
-                            evtSubmitTexturedGradientQuad(partyIndex * 60 + 0x80, y + 0x23, 0x32, 0x3E, 1, 1, 0x32, 0x3E, partyColor, partyColor, partyColor, partyColor, (struct sdfTexHandle_t *)(u32)(fileSavePreviewPortraitTextures[portrait]));
+                            evtSubmitTexturedGradientQuad(partyIndex * 60 + 0x80, y + 0x23, 0x32, 0x3E, 1, 1, 0x32, 0x3E, partyColor, partyColor, partyColor, partyColor, fileSavePreviewPortraitTextures[portrait]);
                             sprintf(text, D_003BC8A8, fileSavePreviewRecords[slot].levels[partyIndex]);
                             fileDrawMenuImageAtPoint(partyIndex * 60 + 0x98, y + 0x51, titleColor, text);
                         }
@@ -2582,20 +2577,20 @@ s32 fileDrawSlotListAndPreview(s32 work) {
     if (D_003BC840 > 0) {
         u32 arrowColor;
 
-        evtSubmitTexturedGradientQuad(0xF8, 0x50, 0xF, 0x22, 0x35, 2, 0xF, 0x22, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct sdfTexHandle_t *)(u32)(D_003BC87C));
+        evtSubmitTexturedGradientQuad(0xF8, 0x50, 0xF, 0x22, 0x35, 2, 0xF, 0x22, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_003BC87C);
         wave = sdfSin((f32)((fileScrollArrowState.angle + 90) % 360) / 180.0f * 3.1415899f);
         fileScrollArrowState.upAlpha = (s32)((wave + 1.0f) * 0.5f * 176.0f + 16.0f);
         arrowColor = (fileScrollArrowState.upAlpha << 24) | 0x808080;
-        evtSubmitTexturedGradientQuad(0xF8, 0x50, 0xF, 0x22, 0x35, 2, 0xF, 0x22, arrowColor, arrowColor, arrowColor, arrowColor, (struct sdfTexHandle_t *)(u32)(D_003BC87C));
+        evtSubmitTexturedGradientQuad(0xF8, 0x50, 0xF, 0x22, 0x35, 2, 0xF, 0x22, arrowColor, arrowColor, arrowColor, arrowColor, D_003BC87C);
     }
     if (D_003BC840 < 7) {
         u32 arrowColor;
 
-        evtSubmitTexturedGradientQuad(0xF8, 0x18B, 0xF, 0x22, 0x47, 2, 0xF, 0x22, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct sdfTexHandle_t *)(u32)(D_003BC87C));
+        evtSubmitTexturedGradientQuad(0xF8, 0x18B, 0xF, 0x22, 0x47, 2, 0xF, 0x22, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_003BC87C);
         wave = sdfSin((f32)((fileScrollArrowState.angle + 90) % 360) / 180.0f * 3.1415899f);
         fileScrollArrowState.downAlpha = (s32)((wave + 1.0f) * 0.5f * 176.0f + 16.0f);
         arrowColor = (fileScrollArrowState.downAlpha << 24) | 0x808080;
-        evtSubmitTexturedGradientQuad(0xF8, 0x18B, 0xF, 0x22, 0x47, 2, 0xF, 0x22, arrowColor, arrowColor, arrowColor, arrowColor, (struct sdfTexHandle_t *)(u32)(D_003BC87C));
+        evtSubmitTexturedGradientQuad(0xF8, 0x18B, 0xF, 0x22, 0x47, 2, 0xF, 0x22, arrowColor, arrowColor, arrowColor, arrowColor, D_003BC87C);
     }
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 5, 0x80, 3, 0, 0, 1, 1);
@@ -2638,9 +2633,9 @@ s32 fileDrawMenuFrame(s32 work) {
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     if (D_003BC80C != 0) {
         evtSubmitTexturedGradientQuad(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
-                      (struct sdfTexHandle_t *)(u32)(D_003BC880));
+                      D_003BC880);
         evtSubmitTexturedGradientQuad(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
-                      (struct sdfTexHandle_t *)(u32)(D_003BC884));
+                      D_003BC884);
     }
     if (D_003BC810 != 0) {
         fileDrawSlotListAndPreview(work);
@@ -2676,43 +2671,43 @@ void fileEnterMcPackScene(s32 mode) {
     while (node != NULL) {
         switch (index) {
         case 0:
-            D_003BC868 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
+            D_003BC868 = sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 1:
-            D_003BC86C = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
+            D_003BC86C = sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 2:
-            D_003BC870 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
+            D_003BC870 = sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 3:
-            D_003BC874 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
+            D_003BC874 = sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 4:
-            D_003BC878 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
+            D_003BC878 = sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 5:
-            D_003BC87C = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
+            D_003BC87C = sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 6:
-            D_003BC880 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
+            D_003BC880 = sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 7:
-            D_003BC884 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
+            D_003BC884 = sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 8:
-            fileSavePreviewPortraitTextures[0] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
+            fileSavePreviewPortraitTextures[0] = sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 9:
-            fileSavePreviewPortraitTextures[1] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
+            fileSavePreviewPortraitTextures[1] = sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 10:
-            fileSavePreviewPortraitTextures[2] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
+            fileSavePreviewPortraitTextures[2] = sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 11:
-            fileSavePreviewPortraitTextures[3] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
+            fileSavePreviewPortraitTextures[3] = sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 12:
-            fileSavePreviewPortraitTextures[4] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
+            fileSavePreviewPortraitTextures[4] = sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         }
         sdfMemFreeDirect(PAC_WORK_ALLOCATION(node));
@@ -2780,54 +2775,54 @@ void fileMenuReleaseNoOp(void) {
 }
 
 void fileReleaseMenuResources(void) {
-    s32 *slot;
+    struct sdfTexHandle_t **slot;
     s32 i;
     void *world;
-    s32 handle;
+    struct sdfTexHandle_t *texture;
 
     if (D_003BC7FC != 0) {
         D_003BC7FC = 0;
         slot = fileSavePreviewPortraitTextures;
         i = 4;
         do {
-            handle = *slot;
+            texture = *slot;
             i--;
-            if (handle != 0) {
-                sdfTexReleaseReferenceViaHandler((struct sdfTexHandle_t *)handle);
+            if (texture != 0) {
+                sdfTexReleaseReferenceViaHandler(texture);
                 *slot = 0;
             }
             slot++;
         } while (i >= 0);
         if (D_003BC884 != 0) {
-            sdfTexReleaseReferenceViaHandler((struct sdfTexHandle_t *)D_003BC884);
+            sdfTexReleaseReferenceViaHandler(D_003BC884);
             D_003BC884 = 0;
         }
         if (D_003BC880 != 0) {
-            sdfTexReleaseReferenceViaHandler((struct sdfTexHandle_t *)D_003BC880);
+            sdfTexReleaseReferenceViaHandler(D_003BC880);
             D_003BC880 = 0;
         }
         if (D_003BC87C != 0) {
-            sdfTexReleaseReferenceViaHandler((struct sdfTexHandle_t *)D_003BC87C);
+            sdfTexReleaseReferenceViaHandler(D_003BC87C);
             D_003BC87C = 0;
         }
         if (D_003BC878 != 0) {
-            sdfTexReleaseReferenceViaHandler((struct sdfTexHandle_t *)D_003BC878);
+            sdfTexReleaseReferenceViaHandler(D_003BC878);
             D_003BC878 = 0;
         }
         if (D_003BC874 != 0) {
-            sdfTexReleaseReferenceViaHandler((struct sdfTexHandle_t *)D_003BC874);
+            sdfTexReleaseReferenceViaHandler(D_003BC874);
             D_003BC874 = 0;
         }
         if (D_003BC870 != 0) {
-            sdfTexReleaseReferenceViaHandler((struct sdfTexHandle_t *)D_003BC870);
+            sdfTexReleaseReferenceViaHandler(D_003BC870);
             D_003BC870 = 0;
         }
         if (D_003BC86C != 0) {
-            sdfTexReleaseReferenceViaHandler((struct sdfTexHandle_t *)D_003BC86C);
+            sdfTexReleaseReferenceViaHandler(D_003BC86C);
             D_003BC86C = 0;
         }
         if (D_003BC868 != 0) {
-            sdfTexReleaseReferenceViaHandler((struct sdfTexHandle_t *)D_003BC868);
+            sdfTexReleaseReferenceViaHandler(D_003BC868);
             D_003BC868 = 0;
         }
         world = dds3GetActiveScene();
@@ -3123,7 +3118,7 @@ void fileDrawSlotIcon(s32 index, s32 x, s32 y, s32 alpha) {
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     evtSubmitTexturedGradientQuad(x, y, 0x16, 0x10, uv[index][0], uv[index][1], 0x16, 0x10, (alpha << 24) | 0x808080,
-                  (alpha << 24) | 0x808080, (alpha << 24) | 0x808080, (alpha << 24) | 0x808080, (struct sdfTexHandle_t *)(u32)(D_003BC87C));
+                  (alpha << 24) | 0x808080, (alpha << 24) | 0x808080, (alpha << 24) | 0x808080, D_003BC87C);
 }
 
 void fileCursorOffsetLookup(s32 dir, s32 step, s32 *outX, s32 *outY) {
@@ -3206,7 +3201,7 @@ void fileDrawCursorPulse(s32 x, s32 y, s32 surface) {
                              ((u32)fileCursorPulseState.alpha[i] << 24) | 0x808080,
                              ((u32)fileCursorPulseState.alpha[i] << 24) | 0x808080,
                              ((u32)fileCursorPulseState.alpha[i] << 24) | 0x808080,
-                             (struct sdfTexHandle_t *)(u32)(D_003BC87C));
+                             D_003BC87C);
             }
         }
     }
@@ -3687,21 +3682,21 @@ INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC860);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC864);
 
-INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC868);
+INCLUDE_SDATA(struct sdfTexHandle_t *, "game/code_0028A150", D_003BC868);
 
-INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC86C);
+INCLUDE_SDATA(struct sdfTexHandle_t *, "game/code_0028A150", D_003BC86C);
 
-INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC870);
+INCLUDE_SDATA(struct sdfTexHandle_t *, "game/code_0028A150", D_003BC870);
 
-INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC874);
+INCLUDE_SDATA(struct sdfTexHandle_t *, "game/code_0028A150", D_003BC874);
 
-INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC878);
+INCLUDE_SDATA(struct sdfTexHandle_t *, "game/code_0028A150", D_003BC878);
 
-INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC87C);
+INCLUDE_SDATA(struct sdfTexHandle_t *, "game/code_0028A150", D_003BC87C);
 
-INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC880);
+INCLUDE_SDATA(struct sdfTexHandle_t *, "game/code_0028A150", D_003BC880);
 
-INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC884);
+INCLUDE_SDATA(struct sdfTexHandle_t *, "game/code_0028A150", D_003BC884);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC888);
 
