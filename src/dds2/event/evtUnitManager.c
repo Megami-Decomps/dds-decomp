@@ -2012,7 +2012,7 @@ void evtRunKutiMotion(void) {
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_00421810);
 
 void evtLipsExecFunction(s32 unitUniqueId, s32 motionId) {
-    void *unit = NULL;
+    evtUnitHandle_t *unit = NULL;
     dds3ModelHandle_t *model = NULL;
     dds3Basic_t *node;
 
@@ -2041,7 +2041,7 @@ void evtLipsExecFunction(s32 unitUniqueId, s32 motionId) {
 }
 
 void evtLipsStopFunction(void) {
-    void *unit = NULL;
+    evtUnitHandle_t *unit = NULL;
     dds3ModelHandle_t *model = NULL;
     dds3Basic_t *node;
 
