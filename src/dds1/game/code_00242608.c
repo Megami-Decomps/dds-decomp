@@ -1068,9 +1068,9 @@ void mnuValidateCampTimelineScriptRegisters(EvtRuntime *scene) {
 }
 
 /* Save the first and last four-component vectors; leave the middle unsaved. */
-void mnuShopSavePrimaryTransform(u8 *scene) {
+void mnuShopSavePrimaryTransform(EvtRuntime *scene) {
     s32 componentIndex;
-    f32 *transformComponents = ((EvtRuntime *)scene)->commandMatrix;
+    f32 *transformComponents = scene->commandMatrix;
     for (componentIndex = 0; componentIndex < CAMP_TRANSFORM_COMPONENT_COUNT; componentIndex++) {
         mnuShopSavedLastTransformVector[componentIndex] = transformComponents[componentIndex + CAMP_TRANSFORM_LAST_START];
         mnuShopSavedFirstTransformVector[componentIndex] = transformComponents[componentIndex];
@@ -1079,9 +1079,9 @@ void mnuShopSavePrimaryTransform(u8 *scene) {
 }
 
 /* Save all three vectors and enable the middle-vector restore path. */
-void mnuShopSaveFullTransform(u8 *scene) {
+void mnuShopSaveFullTransform(EvtRuntime *scene) {
     s32 componentIndex;
-    f32 *transformComponents = ((EvtRuntime *)scene)->commandMatrix;
+    f32 *transformComponents = scene->commandMatrix;
     for (componentIndex = 0; componentIndex < CAMP_TRANSFORM_COMPONENT_COUNT; componentIndex++) {
         mnuShopSavedLastTransformVector[componentIndex] = transformComponents[componentIndex + CAMP_TRANSFORM_LAST_START];
         mnuShopSavedMiddleTransformVector[componentIndex] = transformComponents[componentIndex + CAMP_TRANSFORM_MIDDLE_START];
@@ -1091,9 +1091,9 @@ void mnuShopSaveFullTransform(u8 *scene) {
 }
 
 /* Keep the native restore-mode snapshot and last/middle/first write order. */
-void mnuShopRestoreTransform(u8 *scene) {
+void mnuShopRestoreTransform(EvtRuntime *scene) {
     s32 componentIndex;
-    f32 *transformComponents = ((EvtRuntime *)scene)->commandMatrix;
+    f32 *transformComponents = scene->commandMatrix;
     s32 restoreMiddle = mnuShopRestoreMiddleVector;
     for (componentIndex = 0; componentIndex < CAMP_TRANSFORM_COMPONENT_COUNT; componentIndex++) {
         transformComponents[componentIndex + CAMP_TRANSFORM_LAST_START] = mnuShopSavedLastTransformVector[componentIndex];

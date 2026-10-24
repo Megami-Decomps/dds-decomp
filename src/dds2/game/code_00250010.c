@@ -2534,9 +2534,9 @@ extern const char D_00424160[];
 extern const char D_00424170[];
 extern u64 *dds3PrimLine3D(s32, s32, s32, s32);
 extern void dds3PrimDebugTextBox(void *, s32, s32, s32, f32 *);
-extern void mnuShopSavePrimaryTransform(u8 *);
-extern void mnuShopSaveFullTransform(u8 *);
-extern void mnuShopRestoreTransform(u8 *);
+extern void mnuShopSavePrimaryTransform(EvtRuntime *);
+extern void mnuShopSaveFullTransform(EvtRuntime *);
+extern void mnuShopRestoreTransform(EvtRuntime *);
 extern void dds3SetLightColor(s32, s32, f32 *);
 extern void dds3SetLightDir(s32, s32, f32 *);
 extern void dds3SetAmbientColor(s32, f32 *);
@@ -2622,13 +2622,13 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
     if (dds3PadButtonState.confirm < 0) {
         switch (runtime->lightEditorSelectionIndex) {
         case 7:
-            mnuShopSavePrimaryTransform((u8 *)runtime);
+            mnuShopSavePrimaryTransform(runtime);
             break;
         case 8:
-            mnuShopSaveFullTransform((u8 *)runtime);
+            mnuShopSaveFullTransform(runtime);
             break;
         case 9:
-            mnuShopRestoreTransform((u8 *)runtime);
+            mnuShopRestoreTransform(runtime);
             break;
         default:
             changed = 1;
