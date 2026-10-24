@@ -30,7 +30,7 @@ void effPCPNeedleSpiralDelete(EffPCPNeedleWork *work) {
     sdfMemFreeDirect(work->allocationHandle);
 }
 
-EffPCPNeedleWork *effPCPNeedleSpiralCreatePCF(void *parameters) {
+EffPCPNeedleWork *effPCPNeedleSpiralCreatePCF(const EffParamTable *parameters) {
     EffPCPNeedleParams *work;
 
     work = dds3EffectPCPDataGetData(parameters, 0);

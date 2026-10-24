@@ -31,7 +31,7 @@ void effPCPNeedleSpiralDelete(EffPCPNeedleWork *work) {
 }
 
 /* The first parameter block supplies the effect's runtime work. */
-EffPCPNeedleWork *effPCPNeedleSpiralCreatePCF(void *data) {
+EffPCPNeedleWork *effPCPNeedleSpiralCreatePCF(const EffParamTable *data) {
     EffPCPNeedleParams *work;
 
     work = dds3EffectPCPDataGetData(data, 0);
