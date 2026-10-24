@@ -2761,7 +2761,7 @@ EffPCPTripleWork *effPCPAgiraoFireCreate(EffPCPTripleParams *params, EffNodeDesc
     struct EffNode **handle;
     u32 i;
 
-    work = sdfChipAllocDirect(0xAC);
+    work = sdfChipAllocDirect(sizeof(EffPCPTripleWork));
     work->head = *params;
     work->frame = 0;
     work->color = 0x80808080;
