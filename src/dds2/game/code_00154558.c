@@ -67,7 +67,7 @@ extern s32 D_00436338;
 
 extern s32 D_0043633C;
 
-extern s32 D_004363C4;
+extern struct sdfMemHandle_t *D_004363C4;
 
 extern struct dds3Basic_t *fldPlayerObject;
 

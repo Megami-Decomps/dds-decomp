@@ -172,7 +172,7 @@ extern s32 D_00438EEC;
 extern s32 D_00438EF0;
 
 
-extern s32 D_004363C4;
+extern struct sdfMemHandle_t *D_004363C4;
 
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 
@@ -5620,7 +5620,7 @@ void fldLoadTargetGuideResource(void) {
 
     fldMakeFilePath(directory, fldGlobalBase.area, fldGlobalBase.floor + 1);
     sprintf(path, D_00413F20, directory, fldGlobalBase.area, fldGlobalBase.floor + 1);
-    D_004363C4 = (s32)(u32)sdfDevLoadFileEx(path, &resource, 0);
+    D_004363C4 = sdfDevLoadFileEx(path, &resource, 0);
     base = (u32)resource;
     first = base + resource->firstOffset;
     second = base + resource->secondOffset;
@@ -5634,7 +5634,7 @@ void fldLoadTargetGuideResource(void) {
 
 void fldFreeRunMapData(void) {
     if (D_004363C4 != 0) {
-        sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)D_004363C4);
+        sdfMemFreeDelayedDirect(D_004363C4);
         D_004363C4 = 0;
         D_004363C8 = 0;
         D_004363CC = 0;
@@ -7280,7 +7280,7 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363C0);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363C2);
 
-INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363C4);
+INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_001442D0", D_004363C4);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363C8);
 
