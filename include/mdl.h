@@ -97,8 +97,11 @@ typedef struct dds3ModelEffectCtrlr_t {
     } payload;
 } dds3ModelEffectCtrlr_t;
 
+#define MDL_MOTION_REGISTRATION_CREATE_ON_MODEL_LOAD 0x100
+#define MDL_MOTION_SLOT_CREATE_ON_MODEL_LOAD 1
+
 typedef struct BattleGroupSlot {
-    s32 flags;
+    s32 flags; /* 0x00: bit 0 creates a motion owner for new model contexts. */
     s16 motionSlotIndex;
     s16 motionIndex;
     MotionTable *motionTable;

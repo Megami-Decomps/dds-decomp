@@ -343,8 +343,8 @@ void mdlRegistMotion(s32 group, s32 id, u32 mode, s32 motionIndex, s32 searchId,
     slot->motionTable = data;
     slot->resourceHandle = resourceHandle;
     slot->flags = 0;
-    if (mode & 0x100) {
-        slot->flags = 1;
+    if (mode & MDL_MOTION_REGISTRATION_CREATE_ON_MODEL_LOAD) {
+        slot->flags = MDL_MOTION_SLOT_CREATE_ON_MODEL_LOAD;
     }
     if (mode & 0x200) {
         slot->flags |= 2;
@@ -660,7 +660,8 @@ dds3ModelHandle_t *mdlLoad(u32 group, u32 id) {
     ctx->current.h.id = -1;
     ctx->current.h.motionIndex = -1;
     for (searchId = 0; searchId != 8; searchId++) {
-        if (node->slots[searchId].motionTable != NULL && (node->slots[searchId].flags & 1)) {
+        if (node->slots[searchId].motionTable != NULL &&
+            (node->slots[searchId].flags & MDL_MOTION_SLOT_CREATE_ON_MODEL_LOAD)) {
             mdlCreateMotion(ctx, searchId);
             if (searchId > 0) {
                 if (node->slots[searchId].motionIndex >= 0) {
