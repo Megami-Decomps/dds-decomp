@@ -2979,7 +2979,9 @@ void fldParseMixLb(void) {
     pacFileHandleFree_(lb);
 }
 
-extern s32 D_003BAF48, D_003BAF4C, D_003BAF40, D_003BAF3C;
+extern s32 D_003BAF48, D_003BAF40;
+
+extern EffNode *D_003BAF4C, *D_003BAF3C;
 
 extern sdfTexHandle_t *D_003BAF30, *D_003BAF34, *D_003BAF38;
 
@@ -2987,18 +2989,14 @@ extern s32 D_003BD7F0, D_003BD7D8, D_003BD7E0, D_003BD7E8;
 
 void fldInitializeMenuResources(void) {
     if (D_0032E3C0[0] < 200) {
-        D_003BAF4C = (s32)dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BAF48);
-        D_003BAF3C = (s32)dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BD7F0);
+        D_003BAF4C = dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BAF48);
+        D_003BAF3C = dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BD7F0);
         D_003BAF40 = 0;
         D_003BAF30 = sdfTexSet((SdfTextureFileHeader *)(D_003BD7D8));
         D_003BAF34 = sdfTexSet((SdfTextureFileHeader *)(D_003BD7E0));
         D_003BAF38 = sdfTexSet((SdfTextureFileHeader *)(D_003BD7E8));
     }
 }
-
-extern s32 D_003BAF3C;
-
-extern s32 D_003BAF4C;
 
 extern EffNode *D_003BAF58;
 
@@ -3018,7 +3016,7 @@ void fldReleaseResourceHandles(void) {
         D_003BAF38 = 0;
     }
     if (D_003BAF4C != 0) {
-        dds3EffectDelete((EffNode *)(u32)D_003BAF4C);
+        dds3EffectDelete(D_003BAF4C);
         D_003BAF4C = 0;
     }
     if (D_003BAF58 != 0) {
@@ -3030,7 +3028,7 @@ void fldReleaseResourceHandles(void) {
         D_003BAF64 = 0;
     }
     if (D_003BAF3C != 0) {
-        dds3EffectDelete((EffNode *)(u32)D_003BAF3C);
+        dds3EffectDelete(D_003BAF3C);
         D_003BAF3C = 0;
     }
 }
@@ -3054,9 +3052,9 @@ void fldClearMenuEntries(void) {
     fldNpcModelTable = 0;
 }
 
-extern s32 D_003BAF70;
+extern EffNode *D_003BAF70;
 
-extern s32 D_003BAF7C;
+extern EffNode *D_003BAF7C;
 
 
 void fldResetObjectSlots(void) {
@@ -3339,21 +3337,21 @@ void func_001486D0(u32 id, f32 *rotation, f32 x, f32 y, f32 z) {
         case 0:
         case 3:
             if (D_003BAF70 == 0) {
-                D_003BAF70 = (s32)dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BAF6C);
-                fldTakaraSlotTable[fldTakaraCount].effectNode = (EffNode *)(u32)D_003BAF70;
+                D_003BAF70 = dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BAF6C);
+                fldTakaraSlotTable[fldTakaraCount].effectNode = D_003BAF70;
             } else {
                 fldTakaraSlotTable[fldTakaraCount].effectNode =
-                    dds3EffectCopy((EffNode *)(u32)D_003BAF70);
+                    dds3EffectCopy(D_003BAF70);
             }
             modelId = 21;
             break;
         case 1:
             if (D_003BAF7C == 0) {
-                D_003BAF7C = (s32)dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BAF78);
-                fldTakaraSlotTable[fldTakaraCount].effectNode = (EffNode *)(u32)D_003BAF7C;
+                D_003BAF7C = dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BAF78);
+                fldTakaraSlotTable[fldTakaraCount].effectNode = D_003BAF7C;
             } else {
                 fldTakaraSlotTable[fldTakaraCount].effectNode =
-                    dds3EffectCopy((EffNode *)(u32)D_003BAF7C);
+                    dds3EffectCopy(D_003BAF7C);
             }
             modelId = 22;
             break;
@@ -3475,7 +3473,7 @@ void fldUpdateObjectSlotActivation(void) {
                         D_003BAF58 = 0;
                     }
                     D_003BAF58 = dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BAF54);
-                    dds3EffectReset((EffNode *)(u32)D_003BAF4C);
+                    dds3EffectReset(D_003BAF4C);
                     break;
                 case 1:
                     if (D_003BAF64 != 0) {
@@ -3483,7 +3481,7 @@ void fldUpdateObjectSlotActivation(void) {
                         D_003BAF64 = 0;
                     }
                     D_003BAF64 = dds3EffectLoad((EffNodeDescriptor *)(u32)D_003BAF60);
-                    dds3EffectReset((EffNode *)(u32)D_003BAF4C);
+                    dds3EffectReset(D_003BAF4C);
                     break;
                 }
             } else {
@@ -5236,7 +5234,7 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF34);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF38);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF3C);
+INCLUDE_SDATA(EffNode *, "game/code_001411F0", D_003BAF3C);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF40);
 
@@ -5244,7 +5242,7 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF44);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF48);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF4C);
+INCLUDE_SDATA(EffNode *, "game/code_001411F0", D_003BAF4C);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF50);
 
@@ -5262,13 +5260,13 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF68);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF6C);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF70);
+INCLUDE_SDATA(EffNode *, "game/code_001411F0", D_003BAF70);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF74);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF78);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF7C);
+INCLUDE_SDATA(EffNode *, "game/code_001411F0", D_003BAF7C);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldTakaraCount);
 
