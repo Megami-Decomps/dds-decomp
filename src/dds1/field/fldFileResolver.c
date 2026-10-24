@@ -399,7 +399,7 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
                 }
             }
             break;
-        case 9:
+        case FLD_SPAWN_BATCH_KIND_PATH:
             for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
                 dds3AddPathBasic(resource->id, resource->data, resource->name);
             }
@@ -945,7 +945,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                 fldEveHit_AddEveData(spawnResource, spawnedObject);
             }
             break;
-        case 9:
+        case FLD_SPAWN_BATCH_KIND_PATH:
             for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++, spawnResource++) {
                 if (isAppended != 0) {
                     spawnResource->id |= 0x800000;

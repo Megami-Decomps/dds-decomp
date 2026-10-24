@@ -10227,7 +10227,7 @@ void effInitializeCopiedPayloadSlots(EffCopiedPayload *payload) {
         u32 entryCount = group->count;
         u32 j;
 
-        if (group->kind == 9) {
+        if (group->kind == FLD_SPAWN_BATCH_KIND_PATH) {
             for (j = 0; j < entryCount; j++, count++) {
                 void *data = entry->data;
                 u32 id = entry->id;

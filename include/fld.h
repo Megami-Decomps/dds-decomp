@@ -197,9 +197,14 @@ typedef struct FldFileResource {
     void *data;
 } FldFileResource;
 
+typedef u32 FldSpawnBatchKind;
+
+/* The path group is shared by field placement and copied payload setup. */
+#define FLD_SPAWN_BATCH_KIND_PATH 9
+
 /* Counted resource group consumed by field spawning and copied payloads. */
 typedef struct FldSpawnBatch {
-    u32 kind;
+    FldSpawnBatchKind kind;
     u32 count;
     FldFileResource *entries;
 } FldSpawnBatch;
