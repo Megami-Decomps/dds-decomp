@@ -8358,6 +8358,7 @@ void sndAddSourceReferences(SoundEffectSourceArgs *args) {
     unit->effectLink.referenceCount = unit->effectLink.referenceCount + 1;
 }
 
+/* Fade in the effect, hold it while the dependency task exists, then fade out. */
 s32 sndUpdateEffectSourceFade(SoundEffectSourceArgs *args) {
     BtlUnit *owner;
     u32 flags;
@@ -8371,7 +8372,7 @@ s32 sndUpdateEffectSourceFade(SoundEffectSourceArgs *args) {
     }
     if (args->frameCount < 12) {
         args->effect->color = ((u32)((f32)args->frameCount * 128.0f / 12.0f) << 24) | 0x808080;
-    } else if (btlFindTaskByHandle(args->resource) == 0) {
+    } else if (btlFindTaskByHandle(args->waitForTaskHandle) == 0) {
         if (args->fadeOutFrame != 12) {
             args->effect->color = ((u32)((1.0f - (f32)args->fadeOutFrame / 12.0f) * 128.0f) << 24) | 0x808080;
             args->fadeOutFrame++;
@@ -8411,7 +8412,8 @@ void sndFinishEffectSourceTask(SoundEffectSourceArgs *args) {
 
 extern s32 sndUpdateEffectSourceFade(SoundEffectSourceArgs *);
 
-BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *effect, BtlUnit *owner, u64 resource) {
+BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *effect, BtlUnit *owner,
+                                          u64 waitForTaskHandle) {
     BtlRuntimeTask *task = btlAllocTask(sizeof(SoundEffectSourceArgs));
     SoundEffectSourceArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
@@ -8425,7 +8427,7 @@ BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *effect, BtlUnit *ow
     args = btlGetTaskArguments(task);
     args->source = effect;
     args->owner.unit = owner;
-    args->resource = resource;
+    args->waitForTaskHandle = waitForTaskHandle;
     args->effect = 0;
     args->frameCount = 0;
     args->fadeOutFrame = 0;

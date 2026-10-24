@@ -2516,7 +2516,8 @@ extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit);
 extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *unit, u32 value, u32 variant);
 extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode);
 extern BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *unit);
-extern BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *resource, BtlUnit *unit, u64 wait);
+extern BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *resource, BtlUnit *unit,
+                                                  u64 waitForTaskHandle);
 extern BtlRuntimeTask *btlCreateEffObjA(BtlUnit *unit, s32 effect);
 extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *unit, s32 ability);
 

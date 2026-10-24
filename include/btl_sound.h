@@ -228,7 +228,7 @@ typedef struct SoundEffectSourceArgs {
     effBTLCutHandle_t *effect;
     ActorEffectOwner owner;
     u8 pad0C[4];
-    u64 resource;
+    u64 waitForTaskHandle;
     s32 frameCount;
     s32 fadeOutFrame;
 } SoundEffectSourceArgs;
@@ -296,7 +296,8 @@ void btlExtendTaskFrameLimit(SoundResourceNode *effect, s32 frames);
 u32 sndGetResourceStatus(SoundResourceNode *effect);
 s32 sndHasResourceFlagsOneOrEight(struct ActiveSoundNode *node);
 struct BtlRuntimeTask *sndCreateStationedSeTask(u32 soundId);
-struct BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *source, struct BtlUnit *owner, u64 resource);
+struct BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *source, struct BtlUnit *owner,
+                                                u64 waitForTaskHandle);
 effBTLCutHandle_t *func_00160958(SoundMixer *mixer, u16 kind, void *owner, s32 value);
 effBTLCutHandle_t *func_00168548(SoundMixer *mixer, u16 kind, void *owner, s32 value);
 void effBTLCutListRelease(effBTLCutHandle_t *effect);
