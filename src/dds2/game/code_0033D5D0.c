@@ -134,14 +134,14 @@ extern s32 sceCdGetDiskType(void);
 
 
 extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path,
-                                void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32), s32 callbackContext);
+                                void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32), void *callbackContext);
 
 extern s32 sdfFileCmdAnalyzeFileName(const char *path, char **outResolvedPath);
 
 extern void sdfFileCmdAllocHandle(sdfFileCmdHandle_t *state);
 
 extern sdfFileCmdHandle_t *sdfFileCmdNewHandle(char *resolvedPath, s32 workerIndex, s32 operation,
-                                void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32), s32 callbackContext);
+                                void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32), void *callbackContext);
 
 extern u16 sdfFileCmdDefaultCreateMode;
 extern void sceCdMmode(u32 discType);
@@ -1163,7 +1163,7 @@ void sdfFileCmdFinish(sdfFileCmdHandle_t *state, s32 result) {
     state->state = SDF_DEV_STATE_INACTIVE;
     sdfFileCmdReleaseHandle(state);
     if (state->callback != NULL) {
-        state->callback(state, SDF_DEV_EVENT_INACTIVE, 0, 0, state->callbackContext);
+        state->callback(state, SDF_DEV_EVENT_INACTIVE, 0, 0, (s32)state->callbackContext);
     }
 }
 
@@ -1204,7 +1204,7 @@ void sdfFileCmdThread(DevWorkerEntry *worker) {
             state->transferred = 0;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, SDF_DEV_EVENT_OPENED, 0, 0, state->callbackContext);
+                callback(state, SDF_DEV_EVENT_OPENED, 0, 0, (s32)state->callbackContext);
             }
             continue;
 
@@ -1220,7 +1220,7 @@ void sdfFileCmdThread(DevWorkerEntry *worker) {
             state->transferred = 0;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, SDF_DEV_EVENT_OPENED, 0, 0, state->callbackContext);
+                callback(state, SDF_DEV_EVENT_OPENED, 0, 0, (s32)state->callbackContext);
             }
             continue;
 
@@ -1235,7 +1235,7 @@ void sdfFileCmdThread(DevWorkerEntry *worker) {
             state->transferred = endOffset;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, SDF_DEV_EVENT_SEEK_REPLY, 0, endOffset, state->callbackContext);
+                callback(state, SDF_DEV_EVENT_SEEK_REPLY, 0, endOffset, (s32)state->callbackContext);
             }
             continue;
 
@@ -1260,7 +1260,7 @@ void sdfFileCmdThread(DevWorkerEntry *worker) {
             state->transferred = endOffset;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, SDF_DEV_EVENT_SIZE_REPLY, 0, endOffset, state->callbackContext);
+                callback(state, SDF_DEV_EVENT_SIZE_REPLY, 0, endOffset, (s32)state->callbackContext);
             }
             continue;
 
@@ -1277,7 +1277,7 @@ void sdfFileCmdThread(DevWorkerEntry *worker) {
             callback = state->callback;
             if (callback != NULL) {
                 callback(state, SDF_DEV_EVENT_READ_REPLY, (s32)state->requestData, result,
-                                state->callbackContext);
+                                (s32)state->callbackContext);
             }
             continue;
 
@@ -1294,7 +1294,7 @@ void sdfFileCmdThread(DevWorkerEntry *worker) {
             callback = state->callback;
             if (callback != NULL) {
                 callback(state, SDF_DEV_EVENT_WRITE_REPLY, (s32)state->requestData, result,
-                                state->callbackContext);
+                                (s32)state->callbackContext);
             }
             continue;
 
@@ -1310,7 +1310,7 @@ void sdfFileCmdThread(DevWorkerEntry *worker) {
             state->state = SDF_DEV_STATE_COMPLETE;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, SDF_DEV_EVENT_CLOSED, 0, 0, state->callbackContext);
+                callback(state, SDF_DEV_EVENT_CLOSED, 0, 0, (s32)state->callbackContext);
             }
             continue;
 
@@ -1358,7 +1358,7 @@ void sdfFileCmdThread(DevWorkerEntry *worker) {
             callback = state->callback;
             if (callback != NULL) {
                 callback(state, SDF_DEV_EVENT_BUFFER_REPLY, (s32)state->requestData, transferResult,
-                         state->callbackContext);
+                         (s32)state->callbackContext);
             }
             SignalSema(worker->semaphore);
             continue;
@@ -1394,7 +1394,7 @@ void sdfFileCmdThread(DevWorkerEntry *worker) {
         callback = state->callback;
         if (callback != NULL) {
             callback(state, SDF_DEV_EVENT_BUFFER_REPLY, (s32)state->requestData, transferResult,
-                            state->callbackContext);
+                            (s32)state->callbackContext);
         }
         SignalSema(worker->semaphore);
     }
@@ -1430,7 +1430,7 @@ void sdfFileCdImageCmdThread(DevWorkerEntry *worker) {
             state->transferred = 0;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, SDF_DEV_EVENT_OPENED, 0, 0, state->callbackContext);
+                callback(state, SDF_DEV_EVENT_OPENED, 0, 0, (s32)state->callbackContext);
             }
             continue;
 
@@ -1439,7 +1439,7 @@ void sdfFileCdImageCmdThread(DevWorkerEntry *worker) {
             callback = state->callback;
             if (callback != NULL) {
                 callback(state, SDF_DEV_EVENT_SIZE_REPLY, 0, sdfCdImageGetCurrFileSize(),
-                                state->callbackContext);
+                                (s32)state->callbackContext);
             }
             continue;
 
@@ -1455,7 +1455,7 @@ void sdfFileCdImageCmdThread(DevWorkerEntry *worker) {
             callback = state->callback;
             if (callback != NULL) {
                 callback(state, SDF_DEV_EVENT_READ_REPLY, (s32)state->requestData, result,
-                                state->callbackContext);
+                                (s32)state->callbackContext);
             }
             continue;
 
@@ -1466,7 +1466,7 @@ void sdfFileCdImageCmdThread(DevWorkerEntry *worker) {
             state->state = SDF_DEV_STATE_COMPLETE;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, SDF_DEV_EVENT_CLOSED, 0, 0, state->callbackContext);
+                callback(state, SDF_DEV_EVENT_CLOSED, 0, 0, (s32)state->callbackContext);
             }
             continue;
 
@@ -1502,7 +1502,7 @@ void sdfFileCdImageCmdThread(DevWorkerEntry *worker) {
             callback = state->callback;
             if (callback != NULL) {
                 callback(state, SDF_DEV_EVENT_BUFFER_REPLY, (s32)state->requestData, transferResult,
-                                state->callbackContext);
+                                (s32)state->callbackContext);
             }
             continue;
 
@@ -1626,9 +1626,9 @@ s32 sdfFileCmdAnalyzeFileName(const char *path, char **resolvedPath) {
     return worker;
 }
 
-/* Allocate a request state and retain the callback's opaque context word. */
+/* Allocate a request state and retain the callback's opaque context pointer. */
 sdfFileCmdHandle_t *sdfFileCmdNewHandle(char *resolvedPath, s32 workerIndex, s32 operation,
-                        void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32), s32 callbackContext) {
+                        void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32), void *callbackContext) {
     sdfFileCmdHandle_t *state = (sdfFileCmdHandle_t *)sdfAllocAndClearQuadwords(SDF_DEV_STATE_BYTES);
     state->resolvedPath = resolvedPath;
     state->workerIndex = workerIndex;
@@ -1642,7 +1642,7 @@ sdfFileCmdHandle_t *sdfFileCmdNewHandle(char *resolvedPath, s32 workerIndex, s32
 
 /* Resolve a path to its worker and enqueue an asynchronous read-only open. */
 sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32),
-                        s32 callbackContext) {
+                        void *callbackContext) {
     char *resolvedPath;
     s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
     sdfFileCmdHandle_t *state;
@@ -1657,7 +1657,7 @@ sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void (*callback)(sdfFil
 
 /* Enqueue a write open; zero options select the device's default creation options. */
 sdfFileCmdHandle_t *sdfFileCmdWriteOpen(const char *path, void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32),
-                        s32 callbackContext, s32 options) {
+                        void *callbackContext, s32 options) {
     char *resolvedPath;
     s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
     sdfFileCmdHandle_t *state;
@@ -1752,7 +1752,7 @@ s32 sdfFileCmdFree(sdfFileCmdHandle_t *state) {
 
 /* Enqueue a one-shot read: negative byte count requests the whole file. */
 sdfFileCmdHandle_t *sdfFileCmdReadFile(const char *path, void *buffer, s32 byteCount,
-                        void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32), s32 callbackContext) {
+                        void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32), void *callbackContext) {
     char *resolvedPath;
     s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
     sdfFileCmdHandle_t *state;
@@ -1771,7 +1771,7 @@ sdfFileCmdHandle_t *sdfFileCmdReadFile(const char *path, void *buffer, s32 byteC
 /* Enqueue a one-shot write using the supplied buffer, byte count and creation options. */
 sdfFileCmdHandle_t *sdfFileCmdWriteFile(const char *path, void *buffer, s32 byteCount,
                         void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32),
-                        s32 callbackContext, s32 options) {
+                        void *callbackContext, s32 options) {
     char *resolvedPath;
     s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
     sdfFileCmdHandle_t *state;

@@ -31,7 +31,7 @@ typedef struct PacAlloc {
     s32 resource;
 } PacAlloc;
 
-extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void *callback, s32 callbackContext);
+extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void *callback, void *callbackContext);
 extern s32 movieStreamSema;
 extern s32 movieSemaCount;
 extern u8 D_003BD638[];
@@ -78,7 +78,7 @@ void movieOpenStream(movieStream_t *owner, SdfMovieDescriptor *descriptor, const
         }
         owner->state = SDF_MOVIE_STATE_INITIAL;
         owner->deviceState = sdfFileCmdReadOpen(name,
-                                                        (void *)movieGetStreamSize, (s32)owner);
+                                                        (void *)movieGetStreamSize, owner);
         sdfSoundInitFormattedAndAppendNode(&owner->soundNode, &soundFormat,
                                             movieCopyChunk, owner, descriptor->source);
         return;
@@ -102,7 +102,7 @@ void movieOpenStream(movieStream_t *owner, SdfMovieDescriptor *descriptor, const
     pacWork->scratch = pacWork->scratchBuffer;
     owner->state = SDF_MOVIE_STATE_INITIAL;
     owner->deviceState = sdfFileCmdReadOpen(name,
-                                                    (void *)movieReadChunk, (s32)owner);
+                                                    (void *)movieReadChunk, owner);
     owner->pacEnabled = 1;
     owner->packetLimit = 0x7F;
     sdfSoundInitFormattedAndAppendNode(&owner->soundNode, &soundFormat,
@@ -269,4 +269,3 @@ void sdfDecodePacNodeAndAdvanceTail(PacState *state) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_002ED8D0", D_003BD638);
-

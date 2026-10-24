@@ -406,7 +406,7 @@ extern u8 D_003FF4C0[];
 extern s32 D_003FF480[];
 extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path,
                                           s32 (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32),
-                                          s32 callbackContext);
+                                          void *callbackContext);
 extern s32 sdfFileCmdFileSize(sdfFileCmdHandle_t *state);
 extern s32 sdfFileRpcReadCallback(sdfFileCmdHandle_t *, s32, s32, s32, s32);
 

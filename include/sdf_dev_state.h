@@ -27,7 +27,7 @@ typedef struct sdfFileCmdHandle_t {
     s32 transferred; /* 0x30 */
     u8 pad34[4]; /* 0x34 */
     void (*callback)(struct sdfFileCmdHandle_t *, s32, s32, s32, s32); /* 0x38 */
-    s32 callbackContext; /* 0x3C: opaque callback-context word */
+    void *callbackContext; /* 0x3C: caller-owned callback context */
 } sdfFileCmdHandle_t;
 
 typedef char DevState_size_must_be_0x40[(sizeof(sdfFileCmdHandle_t) == 0x40) ? 1 : -1];

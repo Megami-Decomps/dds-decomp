@@ -28,10 +28,10 @@ extern void fileLinkCloseWait(FileManWork *work, FileRequest *job);
 extern void fileUnlinkCloseWait(FileManWork *work, FileRequest *job);
 
 extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path,
-                        s32 (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, FileTransferJob *), FileTransferJob *job);
+                        s32 (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, FileTransferJob *), void *callbackContext);
 
 extern sdfFileCmdHandle_t *sdfFileCmdWriteOpen(const char *path,
-                        s32 (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, FileTransferJob *), FileTransferJob *job,
+                        s32 (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, FileTransferJob *), void *callbackContext,
                         s32 options);
 
 extern s32 sdfPrintf(const char *fmt, ...);
