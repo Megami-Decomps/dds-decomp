@@ -3074,9 +3074,8 @@ void btlCommandTaskReleaseActor(s32 task) {
     *(u32 *)(task + 8) |= 2;
 }
 
-void btlFlagLinkedActorActionInProgress(s32 unit) {
-    ((BtlTask *)unit)->unit->status.flags = (u32)((BtlTask *)unit)->unit->status.flags | 0x4000
-    ;
+void btlFlagLinkedActorActionInProgress(BtlTask *unit) {
+    unit->unit->status.flags |= 0x4000;
 }
 void btlRunHookAndAdvanceUnitState(s32 object) {
     void (*callback)(s32) = *(void (**)(s32))((u8 *)btlGetRuntime() + 0x660);
