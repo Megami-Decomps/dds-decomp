@@ -241,7 +241,7 @@ extern s32 filePollSlotRequestAndResumeFlow(void);
 
 extern s32 fileSlotScanIndex;
 
-extern void mcdFormatSaveSlotName(void *buffer, s32 slot);
+extern void mcdFormatSaveSlotName(char *buffer, s32 slot);
 
 extern s32 slChooseData_getCardInfo2(void);
 
@@ -498,7 +498,7 @@ s8 fileMenuTaskIsAlive(void) {
 void mnuFormatSaveSlotHeaderName(void) {
 }
 
-void mcdFormatSaveSlotName(void *buffer, s32 slot) {
+void mcdFormatSaveSlotName(char *buffer, s32 slot) {
     s32 titleId = 0x52a0;
     if (mcdOriginalTitleFileMode != 0) {
         titleId = 0x51ee;
@@ -1512,7 +1512,7 @@ s32 filePollSlotRequestAndResumeFlow(void) {
 }
 
 s32 fileBeginReadSlotIcon(void) {
-    u8 buf[0x50];
+    char buf[0x50];
 
     buf[0] = 0x2F;
     mcdFormatSaveSlotName(&buf[1], fileSlotScanIndex);
@@ -1622,7 +1622,7 @@ s32 mcResetSlotMetadata(void) {
 }
 
 s32 fileBeginSaveSlotIconScan(void) {
-    u8 buf[0x50];
+    char buf[0x50];
 
     buf[0] = 0x2F;
     mcdFormatSaveSlotName(&buf[1], fileSlotScanIndex);
@@ -1714,7 +1714,7 @@ s32 mcClearSlotMetadata(void) {
 }
 
 s32 slSaveData(void) {
-    u8 name[0x50];
+    char name[0x50];
     u32 entry = fileMemoryCardRequestIndex;
     s32 slot = fileReqGetSelectedSlot(entry);
     fileReqGetSlotFlags(entry, slot);
@@ -1730,7 +1730,7 @@ s32 slSaveData(void) {
 }
 
 s32 slSaveData_chdir(void) {
-    u8 buf[0x50];
+    char buf[0x50];
     u32 entry = fileMemoryCardRequestIndex;
     s32 v = fileReqGetSelectedSlot(entry);
 

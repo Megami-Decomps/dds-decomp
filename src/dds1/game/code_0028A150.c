@@ -379,7 +379,7 @@ extern char D_003B2658[];
 
 extern s32 slExitWait(void *callback);
 
-extern void mcFormatSaveFilename(void *dst, s32 number);
+extern void mcFormatSaveFilename(char *dst, s32 number);
 
 extern s32 slChooseData_getCardInfo2(void);
 
@@ -505,7 +505,7 @@ s8 fileMenuTaskIsAlive(void) {
 void mnuFormatSaveSlotHeaderName(void) {
 }
 
-void mcFormatSaveFilename(void *dst, s32 number) {
+void mcFormatSaveFilename(char *dst, s32 number) {
     sprintf(dst, "BASLUS-%05d-new-%d", D_003BC888, number);
 }
 
@@ -1427,11 +1427,11 @@ s32 filePollSlotRequestAndResumeFlow(void) {
 }
 
 s32 fileBeginReadSlotIcon(void) {
-    u8 buf[0x50];
+    char buf[0x50];
 
     buf[0] = 0x2F;
     mcFormatSaveFilename(&buf[1], fileSlotScanIndex);
-    sdfMcFuncChdir(fileMemoryCardRequestIndex, (const char *)buf);
+    sdfMcFuncChdir(fileMemoryCardRequestIndex, buf);
     return (s32)slChooseData_getCardInfo2;
 }
 
@@ -1521,11 +1521,11 @@ s32 mcResetSlotMetadata(void) {
 }
 
 s32 fileBeginSaveSlotIconScan(void) {
-    u8 buf[0x50];
+    char buf[0x50];
 
     buf[0] = 0x2F;
     mcFormatSaveFilename(&buf[1], fileSlotScanIndex);
-    sdfMcFuncChdir(fileMemoryCardRequestIndex, (const char *)buf);
+    sdfMcFuncChdir(fileMemoryCardRequestIndex, buf);
     return (s32)slChooseData_getCardInfo2_B;
 }
 
@@ -1613,7 +1613,7 @@ s32 mcClearSlotMetadata(void) {
 }
 
 s32 slSaveData(void) {
-    u8 name[0x50];
+    char name[0x50];
     u32 entry = fileMemoryCardRequestIndex;
     s32 slot = fileReqGetSelectedSlot(entry);
     fileReqGetSlotFlags(entry, slot);
@@ -1624,18 +1624,18 @@ s32 slSaveData(void) {
     }
     name[0] = '/';
     mcFormatSaveFilename(name + 1, slot);
-    sdfMcFuncMkdir(entry, (const char *)name);
+    sdfMcFuncMkdir(entry, name);
     return (s32)slSaveProc_Write_mkdir;
 }
 
 s32 slSaveData_chdir(void) {
-    u8 buf[0x50];
+    char buf[0x50];
     u32 entry = fileMemoryCardRequestIndex;
     s32 v = fileReqGetSelectedSlot(entry);
 
     buf[0] = 0x2F;
     mcFormatSaveFilename(&buf[1], v);
-    sdfMcFuncChdir(entry, (const char *)buf);
+    sdfMcFuncChdir(entry, buf);
     return (s32)filePrepareMainBlobWrite;
 }
 
