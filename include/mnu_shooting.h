@@ -213,7 +213,7 @@ typedef struct MnuShootingWork {
     MnuSpriteNumberPool *spriteNumberPool;
     MnuHitEffectPool *hitEffectPool;
     union {
-        u32 resourceSlots[7];
+        struct EffectSlotSet *resourceSlots[7];
         struct {
             u32 slot30;
             struct EffectSlotSet *fadeSprites;

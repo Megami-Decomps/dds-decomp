@@ -290,7 +290,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             if (work->resourceSlots[D_0040A970[work->packageEntryIndex].value] == 0) {
                 effRequestResourceByMode(D_00438920,
                     D_0040A970[work->packageEntryIndex].name, 0,
-                    &work->resourceSlots[D_0040A970[work->packageEntryIndex].value]);
+                    (u32 *)&work->resourceSlots[D_0040A970[work->packageEntryIndex].value]);
             } else {
                 work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_PROCESS_ENTRY;
             }
@@ -706,7 +706,7 @@ void mnuInitializeShootingScene(MnuShootingWork *handle) {
 /* Release the shooting task's owned lists, queues, slots and world object. */
 void mnuDestroyShootingWork(MnuShootingWork *work) {
     s32 i;
-    u32 *slot;
+    struct EffectSlotSet **slot;
 
     itfReleaseSpriteWorkPool(work->spriteNumberPool);
     itfReleaseSpriteHitEffectWorkPool(work->hitEffectPool);
@@ -740,9 +740,9 @@ void mnuDestroyShootingWork(MnuShootingWork *work) {
     mnuCleanupShootingPauseNoOp(work);
     itfClearTintAndWorkBuffers((u8 *)work);
     for (i = 6; i >= 0; i--, slot++) {
-        if (*slot != 0) {
-            effDestroyResourceSlotSet((struct EffectSlotSet *)*slot);
-            *slot = 0;
+        if (*slot != NULL) {
+            effDestroyResourceSlotSet(*slot);
+            *slot = NULL;
         }
     }
     D_00435CBC = 0x80000000;
@@ -886,7 +886,7 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
         }
     }
     if (work->work24 == NULL) {
-        itfInstallIndexedImageResourceBanks(work->resourceSlots, 7);
+        itfInstallIndexedImageResourceBanks((u32 *)work->resourceSlots, 7);
         counts = sdfChipAllocDirect(work->drawObjects->count * 4);
         records = (MenuRegistryParameters *)work->drawObjects->objects;
         for (i = 0; i < work->drawObjects->count; i++) {
