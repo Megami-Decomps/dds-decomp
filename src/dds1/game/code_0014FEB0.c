@@ -103,7 +103,7 @@ BillChildPayload *BillboardLoadTex(SdfTextureFileHeader *resource) {
     s32 pendingIndex;
 
     allocation = sdfMemAllocDirect(0x450);
-    work = (BillPacketWork *)(u32)sdfMemLock(allocation);
+    work = (BillPacketWork *)sdfMemLock(allocation);
     child = (BillChildPayload *)((u8 *)work + sizeof(*work));
 
     child->refCount = 0;
