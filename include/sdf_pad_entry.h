@@ -1,15 +1,15 @@
 #ifndef SDF_PAD_ENTRY_H
 #define SDF_PAD_ENTRY_H
 
-#include "common.h"
+#include "sdf_pad_mode.h"
 
 typedef struct SdfPadEntry {
     u8 port;                 /* 0x00 */
     u8 slot;                 /* 0x01 */
     u8 state;                /* 0x02 */
     u8 opaque03;
-    u8 mode;                 /* 0x04 */
-    u8 requestedMode;        /* 0x05 */
+    SdfPadMode mode;          /* 0x04 */
+    SdfPadMode requestedMode; /* 0x05 */
     u16 buttons;             /* 0x06 */
     u16 prevButtons;         /* 0x08 */
     u8 opaque0A[2];

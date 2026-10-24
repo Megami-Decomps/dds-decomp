@@ -108,8 +108,8 @@ s32 sdfInitializeRuntimeAndStartMainLoop(void) {
     LoadMcModules(D_00411130, 1);
     dds3InitSubsystems(0x17C0000, 0x200000, 0x335000);
     D_00438A8C = 1;
-    sdfPadChangeMode(0, 3);
-    sdfPadChangeMode(1, 3);
+    sdfPadChangeMode(0, SDF_PAD_MODE_DUALSHOCK_LOCKED);
+    sdfPadChangeMode(1, SDF_PAD_MODE_DUALSHOCK_LOCKED);
     sdfFileSetHostRoot(D_00411140);
     sdfFileSetDefaultSrc(3);
     sdfFileCmdStartThread(3);

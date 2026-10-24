@@ -1294,10 +1294,10 @@ void sdfPadControl(SdfPadEntry *entry) {
             entry->lastLargeMotor = -1;
             requestedMode = entry->mode = entry->requestedMode;
             switch (requestedMode) {
-            case 0:
+            case SDF_PAD_MODE_KEEP_CURRENT:
                 entry->state = 3;
                 break;
-            case 1:
+            case SDF_PAD_MODE_DIGITAL_UNLOCKED:
                 if (padState == 6) {
                     if (scePadSetMainMode(port, slot, 0, 0) == 1) {
                         entry->state = 1;
@@ -1306,7 +1306,7 @@ void sdfPadControl(SdfPadEntry *entry) {
                     entry->state = 3;
                 }
                 break;
-            case 2:
+            case SDF_PAD_MODE_DIGITAL_LOCKED:
                 if (padState == 6) {
                     if (scePadSetMainMode(port, slot, 0, 3) == 1) {
                         entry->state = 1;
@@ -1315,7 +1315,7 @@ void sdfPadControl(SdfPadEntry *entry) {
                     entry->state = 3;
                 }
                 break;
-            case 3:
+            case SDF_PAD_MODE_DUALSHOCK_LOCKED:
                 if (padState == 6) {
                     if (scePadSetMainMode(port, slot, 1, 3) == 1) {
                         entry->state = 1;
@@ -1485,7 +1485,7 @@ void sdfPadBuildButtonStates(void) {
 }
 
 /* Store a mode request for the indexed logical pad; setup applies it later. */
-void sdfPadChangeMode(s32 padIndex, u8 requestedMode) {
+void sdfPadChangeMode(s32 padIndex, SdfPadMode requestedMode) {
     sdfPadCb[padIndex].requestedMode = requestedMode;
 }
 
@@ -1530,8 +1530,8 @@ void sdfPadInitManager(void) {
         entry->port = port;
         entry->slot = slot;
         entry->state = 0;
-        entry->mode = 0;
-        entry->requestedMode = 0;
+        entry->mode = SDF_PAD_MODE_KEEP_CURRENT;
+        entry->requestedMode = SDF_PAD_MODE_KEEP_CURRENT;
         entry->buttons = 0;
         entry->prevButtons = 0;
         entry->smallMotor = 0;
