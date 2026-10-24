@@ -41,6 +41,17 @@ enum MtrMantraEquipState {
     MTR_MANTRA_EQUIP_STATE_WAIT_COMPLETION_AND_RESTORE_MENU = 12
 };
 
+enum MtrUnitSelectionState {
+    MTR_UNIT_SELECTION_STATE_WAIT_FADE_IN = 1,
+    MTR_UNIT_SELECTION_STATE_WAIT_FADE_OUT = 2,
+    MTR_UNIT_SELECTION_STATE_WAIT_FADE_BEFORE_SUSPEND = 3,
+    MTR_UNIT_SELECTION_STATE_RESOLVE_OUTCOME = 4,
+    MTR_UNIT_SELECTION_STATE_WAIT_INPUT = 5,
+    MTR_UNIT_SELECTION_STATE_START_MESSAGE = 6,
+    MTR_UNIT_SELECTION_STATE_WAIT_MESSAGE = 7,
+    MTR_UNIT_SELECTION_STATE_RESTORE_INPUT = 8
+};
+
 extern void mtrMantraSetBit(datUnitWork_t *);
 
 struct MnuStatusResource;
@@ -767,7 +778,7 @@ void mtrInitUnitSelectionWork(MnuStatusResource *resourceWork) {
     MenuList *unitList;
     s32 unitIndex;
 
-    selectionState->state = 1;
+    selectionState->state = MTR_UNIT_SELECTION_STATE_WAIT_FADE_IN;
     selectionState->timer = 0;
     unitList = mtrBuildUnitSelectionList();
     unitList->userData = (u32)selectionState;
@@ -776,7 +787,7 @@ void mtrInitUnitSelectionWork(MnuStatusResource *resourceWork) {
 
     if (evtBitCheck(0x1B1) != 0) {
         if (evtBitCheck(0x995) == 0) {
-            selectionState->state = 3;
+            selectionState->state = MTR_UNIT_SELECTION_STATE_WAIT_FADE_BEFORE_SUSPEND;
             dds3FadeOut(0, 0, 0, MTR_UNIT_FADE_FRAMES);
         }
         mnuInitializeMantraSelectionWork(resourceWork);
@@ -789,7 +800,7 @@ void mtrInitUnitSelectionWork(MnuStatusResource *resourceWork) {
                     }
                 }
             }
-            selectionState->state = 3;
+            selectionState->state = MTR_UNIT_SELECTION_STATE_WAIT_FADE_BEFORE_SUSPEND;
             dds3FadeOut(0, 0, 0, MTR_UNIT_FADE_FRAMES);
         }
     }
@@ -813,65 +824,65 @@ s32 mtrUnitSelectUpdateState(MnuStatusResource *resourceWork) {
     }
     selection = &resourceWork->selection;
     switch (selection->state) {
-    case 1:
+    case MTR_UNIT_SELECTION_STATE_WAIT_FADE_IN:
         if (++selection->timer >= 8) {
-            selection->state = 5;
+            selection->state = MTR_UNIT_SELECTION_STATE_WAIT_INPUT;
         }
         break;
-    case 2:
+    case MTR_UNIT_SELECTION_STATE_WAIT_FADE_OUT:
         if (++selection->timer >= 16) {
             selection->timer = 0;
-            selection->state = 4;
+            selection->state = MTR_UNIT_SELECTION_STATE_RESOLVE_OUTCOME;
         }
         break;
-    case 3:
+    case MTR_UNIT_SELECTION_STATE_WAIT_FADE_BEFORE_SUSPEND:
         if (++selection->timer >= 10) {
             selection->timer = 0;
-            selection->state = 1;
+            selection->state = MTR_UNIT_SELECTION_STATE_WAIT_FADE_IN;
             result = 2;
         }
         break;
-    case 4:
+    case MTR_UNIT_SELECTION_STATE_RESOLVE_OUTCOME:
         if (selection->outcome != 2) {
             selection->outcome = 0;
-            selection->state = 1;
+            selection->state = MTR_UNIT_SELECTION_STATE_WAIT_FADE_IN;
             result = 4;
         } else {
             selection->outcome = 2;
-            selection->state = 3;
+            selection->state = MTR_UNIT_SELECTION_STATE_WAIT_FADE_BEFORE_SUSPEND;
             dds3FadeOut(0, 0, 0, 10);
         }
         break;
-    case 5:
+    case MTR_UNIT_SELECTION_STATE_WAIT_INPUT:
         result = mnuHandleMantraSelectionInput(resourceWork);
         switch (result) {
         case 2:
             if (evtBitCheck(0x1B1) == 0) {
-                selection->state = 6;
+                selection->state = MTR_UNIT_SELECTION_STATE_START_MESSAGE;
                 result = 0;
                 break;
             }
             /* Confirmation and cancellation both enter the selection fade. */
         case 3:
             selection->outcome = result;
-            selection->state = 2;
+            selection->state = MTR_UNIT_SELECTION_STATE_WAIT_FADE_OUT;
             result = 0;
             break;
         }
         break;
-    case 6:
+    case MTR_UNIT_SELECTION_STATE_START_MESSAGE:
         fclDestroyMessage();
         fclInitMessage(resourceWork->messageDefinition);
         fclStartMessage(2);
-        selection->state = 7;
+        selection->state = MTR_UNIT_SELECTION_STATE_WAIT_MESSAGE;
         break;
-    case 7:
+    case MTR_UNIT_SELECTION_STATE_WAIT_MESSAGE:
         if (fclChkMessage() == 0) {
-            selection->state = 8;
+            selection->state = MTR_UNIT_SELECTION_STATE_RESTORE_INPUT;
         }
         break;
-    case 8:
-        selection->state = 5;
+    case MTR_UNIT_SELECTION_STATE_RESTORE_INPUT:
+        selection->state = MTR_UNIT_SELECTION_STATE_WAIT_INPUT;
         break;
     }
     return result;
@@ -894,14 +905,14 @@ s32 mtrDrawUnitSelectionOverlay(MnuStatusResource *resourceWork) {
     dspRequestMessageWindowModeOne();
     selectionState = &resourceWork->selection;
     switch (selectionState->state) {
-        case 1:
+        case MTR_UNIT_SELECTION_STATE_WAIT_FADE_IN:
             fadePhase = selectionState->timer * MTR_SELECTION_PHASE_PER_TICK;
             break;
-        case 2:
+        case MTR_UNIT_SELECTION_STATE_WAIT_FADE_OUT:
             fadePhase = selectionState->timer * MTR_SELECTION_PHASE_PER_TICK;
             break;
-        case 3:
-        case 4:
+        case MTR_UNIT_SELECTION_STATE_WAIT_FADE_BEFORE_SUSPEND:
+        case MTR_UNIT_SELECTION_STATE_RESOLVE_OUTCOME:
             fadePhase = 0.0f;
             break;
     }
