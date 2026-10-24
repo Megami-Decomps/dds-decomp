@@ -4036,9 +4036,9 @@ u32 *effSegmentPointerSet(u8 *work) {
 
 extern void effAssetQueueRelease(EffPointSet *);
 
-void effReleaseRingResourceHandle(u32 handle) {
-    effAssetQueueRelease((EffPointSet *)(u32)*(u32 *)handle);
-    sdfChipFreeDirect((void *)handle);
+void effReleaseRingResourceHandle(u32 *handle) {
+    effAssetQueueRelease((EffPointSet *)*handle);
+    sdfChipFreeDirect(handle);
 }
 
 /* Class 1 ring parameters have a distinct 0x6C-byte copied layout. */
