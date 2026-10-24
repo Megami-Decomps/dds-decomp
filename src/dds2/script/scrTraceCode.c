@@ -1,6 +1,7 @@
 #include "dat_state.h"
 #include "common.h"
 #include "scr.h"
+#include "scr_trace_result.h"
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
 
@@ -465,7 +466,7 @@ s32 scrTraceCode(scrProcessWork_s *scr) {
         handlerResult = codefunc[scr->instructions[scr->pc].parts.opCode](scr);
         if (handlerResult == 0) {
             scr->cmdTimer = 0;
-            return 2;
+            return SCR_TRACE_RESULT_FINISHED;
         }
         if (handlerResult == 2) {
             break;
@@ -476,7 +477,7 @@ s32 scrTraceCode(scrProcessWork_s *scr) {
     }
     scr->cmdTimer++;
     scr->timer++;
-    return 1;
+    return SCR_TRACE_RESULT_YIELDED;
 }
 
 /* Script command parameter `parameterIndex` (0 = first) as an int, converting floats and

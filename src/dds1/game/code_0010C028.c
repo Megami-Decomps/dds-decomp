@@ -2,6 +2,7 @@
 #include "kwln.h"
 #include "dat_state.h"
 #include "scr.h"
+#include "scr_trace_result.h"
 
 
 void scrSetUserData(dds3ProcessID_t *task, void *actor) {
@@ -36,9 +37,9 @@ s32 scrScriptProcess(dds3ProcessID_t *task) {
     switch (scrTraceCode((scrProcessWork_s *)dds3GetProcessData(task))) {
     case 0:
         return -1;
-    case 2:
+    case SCR_TRACE_RESULT_FINISHED:
         return -1;
-    case 1:
+    case SCR_TRACE_RESULT_YIELDED:
     default:
         return 0;
     }
