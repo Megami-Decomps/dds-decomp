@@ -327,7 +327,7 @@ extern EffRecordBucket D_00400508[];
 
 #include "eff_bill_cell_draw_work.h"
 
-extern void effSetCurveEmitterStartPosition(s32, void *);
+extern void effSetCurveEmitterStartPosition(FileSlotTable *record, const f32 *value);
 
 extern void sdfVuMatrixToQuaternion(const f32 matrix[4][4]);
 
@@ -335,7 +335,7 @@ extern f32 effWorldUpVector[4];
 
 extern u8 effZeroVector[];
 
-extern void effSetCurveEmitterEndPosition(s32, void *);
+extern void effSetCurveEmitterEndPosition(FileSlotTable *record, const f32 *value);
 
 extern f32 effComputeProjectedOffsetAngle(void *, void *);
 
