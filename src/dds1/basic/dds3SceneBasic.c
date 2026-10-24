@@ -50,7 +50,7 @@ s32 evtLoadSceneResourceFrom(dds3Basic_t *worldNode, const char *resourceName) {
  * a NULL resolved address fails attachment without undoing the retain. */
 s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *worldNode, struct sdfMemHandle_t *resourceHandle) {
     s32 notAttachedStatus = 0;
-    u32 resourceAddress;
+    void *resourceAddress;
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
 
     if (resourceHandle == NULL) {
