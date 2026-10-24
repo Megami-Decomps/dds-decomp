@@ -2758,9 +2758,9 @@ void evtInstallStateTableB(MenuTerminalContext *state) {
 }
 
 s32 evtBuildShopCatalogIfActive(dds3ProcessID_t *task) {
-    s32 stateAddress = dds3GetProcessData(task);
-    if (((MenuTerminalContext *)stateAddress)->phase == 1) {
-        mnuCampRebuildItemStockWindow(stateAddress);
+    MenuTerminalContext *state = (MenuTerminalContext *)dds3GetProcessData(task);
+    if (state->phase == 1) {
+        mnuCampRebuildItemStockWindow(state);
     }
     return 1;
 }
