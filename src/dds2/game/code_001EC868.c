@@ -7498,27 +7498,27 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     if (args->state == 0) {
         sprintf(path, "/fld/b/f%03d/f%03d_%03df.tmx", stage, stage, variant);
         result = 0;
-        args->frontHandle = fileLoad(path);
+        args->frontRequest = fileLoad(path);
         btlBossDebugPrintf("btl:load 0[%s]\n", path);
         sprintf(path, "/fld/b/f%03d/f%03d_%03ds.tmx", stage, stage, variant);
-        args->sideHandle = fileLoad(path);
+        args->sideRequest = fileLoad(path);
         btlBossDebugPrintf("btl:load 1[%s]\n", path);
     } else {
-        if (args->frontHandle != 0) {
-            if (pacFileCheckEnd(args->frontHandle) != 0) {
-                work->primaryBuffer = (void *)sdfMemLock(fileGetMemHandle(args->frontHandle));
-                fileHandleFree(args->frontHandle);
-                args->frontHandle = 0;
+        if (args->frontRequest != 0) {
+            if (pacFileCheckEnd(args->frontRequest) != 0) {
+                work->primaryBuffer = (void *)sdfMemLock(fileGetMemHandle(args->frontRequest));
+                fileHandleFree(args->frontRequest);
+                args->frontRequest = 0;
                 btlBossDebugPrintf("btl:floor load end 0\n");
             } else {
                 result = 0;
             }
         }
-        if (args->sideHandle != 0) {
-            if (pacFileCheckEnd(args->sideHandle) != 0) {
-                work->secondaryBuffer = (void *)sdfMemLock(fileGetMemHandle(args->sideHandle));
-                fileHandleFree(args->sideHandle);
-                args->sideHandle = 0;
+        if (args->sideRequest != 0) {
+            if (pacFileCheckEnd(args->sideRequest) != 0) {
+                work->secondaryBuffer = (void *)sdfMemLock(fileGetMemHandle(args->sideRequest));
+                fileHandleFree(args->sideRequest);
+                args->sideRequest = 0;
                 btlBossDebugPrintf("btl:floor load end 1\n");
             } else {
                 result = 0;
@@ -7538,8 +7538,8 @@ BtlRuntimeTask *btlCreateFloorLoadTask(s32 stage, s32 variant) {
     task->callback = btlPollFloorLoadTask;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = btlGetTaskArguments(task);
-    args->frontHandle = 0;
-    args->sideHandle = 0;
+    args->frontRequest = 0;
+    args->sideRequest = 0;
     args->stage = stage;
     args->variant = variant;
     args->state = 0;

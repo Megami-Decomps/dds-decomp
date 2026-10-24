@@ -8234,29 +8234,29 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     if (args->state == 0) {
         sprintf(path, D_003A4B98, stage, stage, variant);
         result = 0;
-        args->frontHandle = fileLoad(path);
+        args->frontRequest = fileLoad(path);
         btlBossDebugPrintf(D_003A4BB8, path);
         sprintf(path, D_003A4BC8, stage, stage, variant);
-        args->sideHandle = fileLoad(path);
+        args->sideRequest = fileLoad(path);
         btlBossDebugPrintf(D_003A4BE8, path);
     } else {
-        if (args->frontHandle != 0) {
-            if (pacFileCheckEnd(args->frontHandle) != 0) {
+        if (args->frontRequest != 0) {
+            if (pacFileCheckEnd(args->frontRequest) != 0) {
                 work->frontFloorResource =
-                    (void *)sdfMemLock(fileGetMemHandle(args->frontHandle));
-                fileHandleFree(args->frontHandle);
-                args->frontHandle = 0;
+                    (void *)sdfMemLock(fileGetMemHandle(args->frontRequest));
+                fileHandleFree(args->frontRequest);
+                args->frontRequest = 0;
                 btlBossDebugPrintf(D_003A4BF8);
             } else {
                 result = 0;
             }
         }
-        if (args->sideHandle != 0) {
-            if (pacFileCheckEnd(args->sideHandle) != 0) {
+        if (args->sideRequest != 0) {
+            if (pacFileCheckEnd(args->sideRequest) != 0) {
                 work->sideFloorResource =
-                    (void *)sdfMemLock(fileGetMemHandle(args->sideHandle));
-                fileHandleFree(args->sideHandle);
-                args->sideHandle = 0;
+                    (void *)sdfMemLock(fileGetMemHandle(args->sideRequest));
+                fileHandleFree(args->sideRequest);
+                args->sideRequest = 0;
                 btlBossDebugPrintf(D_003A4C10);
             } else {
                 result = 0;
@@ -8277,8 +8277,8 @@ u8 *btlCreateFloorLoadTask(u32 stage, u32 variant) {
     *(void **)(task + 0x4C) = btlPollFloorLoadTask;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     arguments = btlGetTaskArguments(task);
-    arguments->frontHandle = 0;
-    arguments->sideHandle = 0;
+    arguments->frontRequest = 0;
+    arguments->sideRequest = 0;
     arguments->stage = stage;
     arguments->variant = variant;
     arguments->state = 0;
