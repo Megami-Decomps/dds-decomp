@@ -396,13 +396,13 @@ void TbLoadCallback(struct FileRequest *resource, MdlLoadRequest *destination) {
 
 
 /* Retain the resource handle, relocate the loaded payload and retire the file
- * entry. Execute the group job now only when the command is not deferred. */
+ * entry. Execute the group job now only when no motion load is pending. */
 void MbLoadCallback(struct FileRequest *resource, MdlLoadRequest *request) {
     request->payload.requestAllocation = fileGetMemHandle(resource);
     request->payload.itemList = (struct sdfModelDef_t *)sdfRelocatePackedResourcePayload(
         (SdfPackedRelocationHeader *)fileGetLoadPtr(resource));
     fileHandleFree(resource);
-    if (request->deferred == 0) {
+    if (request->awaitingMotionLoad == 0) {
         TbMbAbLoadEnd(request);
     }
 }
@@ -473,7 +473,7 @@ s32 mdlPrepare(s32 group, s32 id, s32 blocking) {
         request->group = group;
         request->id = id;
         if (paths->motionPath != NULL) {
-            request->deferred = 1;
+            request->awaitingMotionLoad = 1;
         }
         if (paths->resourceListPath != NULL) {
             request->resourceListRequested = 1;

@@ -145,7 +145,7 @@ typedef struct MdlLoadRequest {
     u16 id;
     u8 resourceListRequested;
     u8 itemsRequested;
-    u8 deferred;
+    u8 awaitingMotionLoad;
     u8 pad7;
     u32 options;
     MdlLoadPayload payload;
