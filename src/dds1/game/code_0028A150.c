@@ -3359,7 +3359,7 @@ FileConfigTask *fileCreateConfigTask(s32 mode) {
     task = (FileConfigTask *)sdfMemLock(block);
     memset(task, 0, 0x3C);
     task->backingAllocation = block;
-    task->state = mode;
+    task->mode = mode;
     task->ticks = 0;
     task->result = 0;
     list = mnuCreateListState(0, 5, 0x23);
@@ -3520,7 +3520,7 @@ s32 fileUpdateConfigurationMenu(dds3ProcessID_t *task) {
         }
         break;
     case 3:
-        if (GBWK->state == 1) {
+        if (GBWK->mode == 1) {
             dds3FadeOut(0, 0, 0, 15);
         }
         GBWK->ticks = 0;
@@ -3906,7 +3906,7 @@ void fileDrawConfigurationMenuBackground(void *unused) {
                  0, (u32)(labelFade * 256.0f), 0,
                  GBWK->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
                  sprites[spriteIndex][FILE_CONFIG_FRAME], 0x53);
-    if (GBWK->state == 1) {
+    if (GBWK->mode == 1) {
         mnuDrawMantraPulseAndSparks((void *)GBWK->effect, 0x80, 0x52);
     }
     spriteIndex++;

@@ -12,9 +12,9 @@ struct MenuResourceWork;
 typedef struct FileConfigTask {
     struct sdfMemHandle_t *backingAllocation; /* 0x00 */
 #ifdef VERSION_DDS2
-    u32 state; /* 0x04 */
+    u32 mode; /* 0x04: selects the configuration task's display behavior. */
 #else
-    s32 state; /* 0x04 */
+    s32 mode; /* 0x04: selects the configuration task's display behavior. */
 #endif
     s32 ticks; /* 0x08 */
     struct MenuList *frame; /* 0x0C */
@@ -42,8 +42,8 @@ typedef struct FileConfigTask {
 
 typedef char FileConfigTask_size_check[
     (sizeof(FileConfigTask) == 0x3C) ? 1 : -1];
-typedef char FileConfigTask_state_offset_check[
-    ((u32)&((FileConfigTask *)0)->state == 0x04) ? 1 : -1];
+typedef char FileConfigTask_mode_offset_check[
+	((u32)&((FileConfigTask *)0)->mode == 0x04) ? 1 : -1];
 #ifdef VERSION_DDS1
 typedef char FileConfigTask_result_offset_check[
     ((u32)&((FileConfigTask *)0)->result == 0x24) ? 1 : -1];

@@ -3792,7 +3792,7 @@ FileConfigTask *fileCreateConfigTask(s32 mode) {
     task = (FileConfigTask *)sdfMemLock(block);
     memset(task, 0, 0x40);
     task->backingAllocation = block;
-    task->state = mode;
+    task->mode = mode;
     task->ticks = 0;
     task->result = 0;
     list = mnuCreateListState(0, 5, 0x23);
@@ -3949,7 +3949,7 @@ s32 fileUpdateConfigurationMenu(dds3ProcessID_t *task) {
         }
         break;
     case 3:
-        if (GBWK->state == 1) {
+        if (GBWK->mode == 1) {
             dds3FadeOut(0, 0, 0, 15);
         }
         GBWK->ticks = 0;
@@ -4349,7 +4349,7 @@ void fileDrawConfigurationMenuBackground(void *unusedTask) {
                  (u32)(labelFade * 256.0f), 0,
                  GBWK->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
                  sprites[spriteIndex][FILE_CONFIG_FRAME], 0x53);
-    if (GBWK->state == 1) {
+    if (GBWK->mode == 1) {
         effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, 256, 0,
                      GBWK->slots[4], 0, 0x53);
     }
