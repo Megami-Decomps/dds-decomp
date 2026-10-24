@@ -3,12 +3,12 @@
 
 #include "common.h"
 
-/* Shared address returned by the disc path lookup. Only the third word has
- * an established meaning in the reconstructed callers. */
+/* Entry in the relative-offset disc index. Directories use a negative size
+ * whose magnitude is their child count; files use a nonnegative byte size. */
 typedef struct SdfDiscFileRecord {
-    u32 field0;
-    u32 field4;
-    s32 size;
+    u32 nameOffset; /* 0x00: string offset from the loaded index base */
+    u32 dataOffset; /* 0x04: child records for directories, file data for files */
+    s32 sizeOrNegativeChildCount; /* 0x08: file bytes or negative directory entry count */
 } SdfDiscFileRecord;
 
 typedef char SdfDiscFileRecordSizeCheck[

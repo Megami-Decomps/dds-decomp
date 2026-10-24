@@ -544,7 +544,7 @@ SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(u32 pathAddress, u8 *sect
                 SignalSema(sdfCdImageFd);
                 continue;
             }
-            D_003F9FC0.size = sceLseek(fd, 0, 2);
+            D_003F9FC0.sizeOrNegativeChildCount = sceLseek(fd, 0, 2);
             sceClose(fd);
             SignalSema(sdfCdImageFd);
             break;
@@ -611,16 +611,16 @@ SdfDiscFileRecord *sdfCdImageSearchFile(u32 pathAddress, u8 *sectorOut, u32 flag
         }
         memcpy(name, segment, length);
         name[length] = 0;
-        entries = (SdfDiscFileRecord *)(base + node->field4);
+        entries = (SdfDiscFileRecord *)(base + node->dataOffset);
         low = 0;
-        high = -node->size;
+        high = -node->sizeOrNegativeChildCount;
         for (;;) {
             if (low >= high) {
                 return NULL;
             }
             mid = (low + high) >> 1;
             node = &entries[mid];
-            order = strcmp(name, (char *)(base + node->field0));
+            order = strcmp(name, (char *)(base + node->nameOffset));
             if (order == 0) {
                 break;
             }
@@ -632,7 +632,7 @@ SdfDiscFileRecord *sdfCdImageSearchFile(u32 pathAddress, u8 *sectorOut, u32 flag
         }
         segment = cursor;
     } while (*cursor != 0);
-    *(u32 *)sectorOut = D_003BDA40 + node->field4;
+    *(u32 *)sectorOut = D_003BDA40 + node->dataOffset;
     if (flag != NULL) {
         *flag = 0;
     }
@@ -647,7 +647,7 @@ s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
     file = sdfCdImageSearchFile((u32)name, (u8 *)request, (u32)&sdfDiscReadMode);
     result = -1;
     if (file != 0) {
-        D_003BDA4C = file->size;
+        D_003BDA4C = file->sizeOrNegativeChildCount;
         sdfCdImageCurrFile = file;
         sdfCdImageCurrActive = 0;
         if (name[1] == 0x76 || name[1] == 0x56) {
@@ -655,7 +655,7 @@ s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
         } else {
             sdfCdStStart(request[0]);
         }
-        result = file->size;
+        result = file->sizeOrNegativeChildCount;
     }
     return result;
 }
@@ -750,7 +750,7 @@ s32 sdfCdImageGetFileSize(u32 request) {
 
     record = sdfCdImageSearchFile(request, buffer, 0);
     if (record != 0) {
-        return record->size;
+        return record->sizeOrNegativeChildCount;
     }
     return -1;
 }
@@ -759,7 +759,7 @@ s32 sdfCdImageGetCurrFileSize(void) {
     if (sdfCdImageCurrFile == 0) {
         FatalError("file didn't open.");
     }
-    return sdfCdImageCurrFile->size;
+    return sdfCdImageCurrFile->sizeOrNegativeChildCount;
 }
 
 
