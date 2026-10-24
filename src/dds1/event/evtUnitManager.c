@@ -1627,14 +1627,14 @@ s32 evtFindUnitSlotAuxCoordinates(evtUnitHandle_t *unit, f32 *outX, f32 *outY) {
 }
 
 dds3Basic_t *evtSearchBasic(s32 objectKind, s32 worldObjectKey) {
-    void *world;
+    dds3Basic_t *world;
 
     world = dds3GetActiveScene();
     return dds3SearchSceneBasic(world, worldObjectKey, objectKind);
 }
 
 u32 evtCommand_MODEL_PLAYER(void) {
-    void *world;
+    dds3Basic_t *world;
     dds3Basic_t *object;
     s32 playerObjectKey;
 
@@ -1697,9 +1697,9 @@ u32 evtCommand_MODEL_POS(void) {
 }
 
 u32 evtCommand_MODEL_SHADOW_ON(void) {
-    void *ctx;
+    dds3Basic_t *ctx;
     s32 worldObjectKey;
-    void *unit;
+    dds3Basic_t *unit;
     u32 ret = 1;
 
     ctx = dds3GetActiveScene();
@@ -1714,9 +1714,9 @@ u32 evtCommand_MODEL_SHADOW_ON(void) {
 }
 
 u32 evtCommand_MODEL_SHADOW_ON2(void) {
-    void *ctx;
+    dds3Basic_t *ctx;
     s32 worldObjectKey;
-    void *unit;
+    dds3Basic_t *unit;
     u32 ret = 1;
 
     ctx = dds3GetActiveScene();
@@ -1731,9 +1731,9 @@ u32 evtCommand_MODEL_SHADOW_ON2(void) {
 }
 
 u32 evtCommand_MODEL_SHADOW_OFF(void) {
-    void *ctx;
+    dds3Basic_t *ctx;
     s32 worldObjectKey;
-    void *unit;
+    dds3Basic_t *unit;
     u32 ret = 1;
 
     ctx = dds3GetActiveScene();
@@ -1781,7 +1781,7 @@ u32 evtOpClearWorldObjectPendingValue(void) {
 
 u32 evtOpModelLodChg(void) {
     s32 lod;
-    void *world;
+    dds3Basic_t *world;
     dds3Basic_t *unit;
     EffectObjectData *data;
     dds3ObjectBaseControlWorkData_t *modelHolder;
@@ -1825,9 +1825,9 @@ u32 evtOpModelLodChg(void) {
 
 u32 evtCommand_MODEL_POS_XYZ(void) {
     f32 v[4];
-    void *ctx;
+    dds3Basic_t *ctx;
     s32 worldObjectKey;
-    void *unit;
+    dds3Basic_t *unit;
 
     memset(v, 0, 0x10);
     ctx = dds3GetActiveScene();
@@ -1845,9 +1845,9 @@ u32 evtCommand_MODEL_POS_XYZ(void) {
 
 u32 evtCommand_MODEL_ROT_XYZ(void) {
     f32 v[4];
-    void *ctx;
+    dds3Basic_t *ctx;
     s32 worldObjectKey;
-    void *unit;
+    dds3Basic_t *unit;
     f32 toRad;
     f32 x;
     f32 y;
@@ -1874,9 +1874,9 @@ u32 evtCommand_MODEL_ROT_XYZ(void) {
 
 u32 evtCommand_MODEL_SCL_XYZ(void) {
     f32 v[4];
-    void *ctx;
+    dds3Basic_t *ctx;
     s32 worldObjectKey;
-    void *unit;
+    dds3Basic_t *unit;
 
     memset(v, 0, 0x10);
     v[3] = 1.0f;
@@ -2084,9 +2084,9 @@ u32 evtCommand_MODEL_EXWAIT(void) {
 }
 
 u32 evtCmdDestroySelectedWorldUnit(void) {
-    void *ctx;
+    dds3Basic_t *ctx;
     s32 worldObjectKey;
-    void *unit;
+    dds3Basic_t *unit;
     u32 ret = 1;
 
     ctx = dds3GetActiveScene();
@@ -2655,7 +2655,7 @@ u32 evtCommand_EFFBED_BE_EVO(void) {
 
 u32 evtCommand_EFFBED_START(void) {
     s32 worldObjectKey;
-    void *unit;
+    dds3Basic_t *unit;
     u32 entryId;
 
     worldObjectKey = scrGetIntPara(0);
@@ -2686,7 +2686,7 @@ f32 evtComputeClampedModelScale(s32 modelRecordIndex) {
 extern f32 evtComputeClampedModelScale(s32);
 
 u32 evtCommand_EFFBED_START_EVO(void) {
-    void *unit;
+    dds3Basic_t *unit;
 
     unit = evtSearchBasic(7, scrGetIntPara(0));
     if (unit != NULL) {
