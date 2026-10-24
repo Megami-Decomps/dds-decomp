@@ -263,9 +263,9 @@ typedef struct BtlState {
     struct dds3ProcessID_t *scriptOwner; /* 0x29C: parent task; script tasks use its priority minus one */
     s32 scriptTask; /* 0x2A0: scheduler task handle, not another list pointer */
     s32 boundTask; /* 0x2A4: actor-slot binding task */
-    s32 sceneObject; /* 0x2A8: fldDestroySceneTasksAndBuffers destroys this task handle. */
-    s32 spriteObject; /* 0x2AC: same cleanup destroys the sprite task. */
-    s32 cleanupTask; /* 0x2B0: fldCreateSceneCleanupTask stores its task handle. */
+    struct dds3ProcessID_t *sceneObject; /* 0x2A8: command-panel task. */
+    struct dds3ProcessID_t *spriteObject; /* 0x2AC: target-selection task. */
+    struct dds3ProcessID_t *cleanupTask; /* 0x2B0: scene-panel cleanup task. */
     BtlItemDrop itemDrops[3]; /* 0x2B4: battle defeat item aggregation in code_001A1960 */
     s32 moneyEarned;
     s32 moneyTotal; /* 0x2C4: accumulated battle money. */

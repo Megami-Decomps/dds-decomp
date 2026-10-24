@@ -8685,15 +8685,15 @@ s32 fldGetSceneObjectState(void) {
 void btlOpenBattleCommandPanel(BtlTask *task) {
     BtlState *scene;
     BattleSceneObject *object;
-    u32 handle;
+    dds3ProcessID_t *handle;
 
     if (dds3SearchProcessName(btlCommandPanelTaskNameRef) == 0) {
         scene = (BtlState *)btlGetRuntime();
         object = sdfAllocAndClearQuadwords(sizeof(*object));
         fldInitializeSceneObject(object, task);
-        handle = (u32)dds3StartProcess(btlCommandPanelTaskNameRef, 0x2B0E, 1, 1,
+        handle = dds3StartProcess(btlCommandPanelTaskNameRef, 0x2B0E, 1, 1,
                                btlUpdateBattleSceneCommands, btlReleaseCommandPanelTask, (u32)object);
-        dds3LinkProcess(scene->scriptOwner, (dds3ProcessID_t *)handle);
+        dds3LinkProcess(scene->scriptOwner, handle);
         scene->sceneObject = handle;
         btlSetActionActorPanelPresentation(task, 0, 0);
         btlInitializeSelectionWork();
@@ -9468,7 +9468,7 @@ extern SceneAiWork *btlCreateTargetSelectionWork(BtlTask *);
 
 void btlCreateTargetSelectionTask(s32 sourceTask) {
     BtlState *scene;
-    s32 task;
+    dds3ProcessID_t *task;
     dds3SearchProcessName(D_003BB3A0);
     if (btlIsNamedBattleTaskRegistered() != 0) {
         dds3KillProcess((dds3ProcessID_t *)btlGetTrackedTaskHandle(0xA), 0);
@@ -9483,9 +9483,9 @@ void btlCreateTargetSelectionTask(s32 sourceTask) {
         dds3KillProcess((dds3ProcessID_t *)btlGetTrackedTaskHandle(0), 0);
     }
     scene = (BtlState *)btlGetRuntime();
-    task = (s32)dds3StartProcess(D_003BB3A0, 0x2B0E, 1, 1, btlUpdateTargetSelectionTask, btlReleaseTargetSelectionTask,
+    task = dds3StartProcess(D_003BB3A0, 0x2B0E, 1, 1, btlUpdateTargetSelectionTask, btlReleaseTargetSelectionTask,
                           (u32)btlCreateTargetSelectionWork((BtlTask *)sourceTask));
-    dds3LinkProcess(scene->scriptOwner, (dds3ProcessID_t *)task);
+    dds3LinkProcess(scene->scriptOwner, task);
     scene->spriteObject = task;
 }
 
@@ -10488,13 +10488,13 @@ extern s32 btlUpdateScenePanelTask(dds3ProcessID_t *);
 void fldCreateSceneCleanupTask(void) {
     dds3ProcessID_t *oldTask = dds3SearchProcessName(D_003BB488);
     BtlState *context;
-    u32 task;
+    dds3ProcessID_t *task;
     if (oldTask == 0) {
         btlGetRuntime();
     }
     context = (BtlState *)btlGetRuntime();
-    task = (u32)dds3StartProcess(D_003BB488, 0x2B0E, 1, 1, btlUpdateScenePanelTask, btlClearScenePanelTaskHandle, 0);
-    dds3LinkProcess(context->scriptOwner, (dds3ProcessID_t *)task);
+    task = dds3StartProcess(D_003BB488, 0x2B0E, 1, 1, btlUpdateScenePanelTask, btlClearScenePanelTaskHandle, 0);
+    dds3LinkProcess(context->scriptOwner, task);
     context->cleanupTask = task;
     btlLoadResourceBlock();
     btlStartRegisteredChildTask();
@@ -10526,15 +10526,15 @@ void fldDestroySceneTasksAndBuffers(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
 
     if (battle->sceneObject != 0) {
-        dds3KillProcess((dds3ProcessID_t *)battle->sceneObject, 0);
+        dds3KillProcess(battle->sceneObject, 0);
         battle->sceneObject = 0;
     }
     if (battle->spriteObject != 0) {
-        dds3KillProcess((dds3ProcessID_t *)battle->spriteObject, 0);
+        dds3KillProcess(battle->spriteObject, 0);
         battle->spriteObject = 0;
     }
     if (battle->cleanupTask != 0) {
-        dds3KillProcess((dds3ProcessID_t *)battle->cleanupTask, 0);
+        dds3KillProcess(battle->cleanupTask, 0);
         battle->cleanupTask = 0;
     }
     if (btlHasRegisteredPsechgPanelTask() != 0) {
