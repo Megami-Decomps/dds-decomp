@@ -99,7 +99,6 @@ extern char D_003BC7A0[];
 #define EVT_STAGE_PROJECTION_BIAS 2048.0f
 #define EVT_STAGE_DEFAULT_TARGET_Z -400.0f
 #define EVT_STAGE_SCREEN_WORK_BYTES 0x20
-#define FILE_REQUEST_COMPLETE_STATE 6
 #define EVT_STAGE_USE_ENTRY_MOTION 0xffffffffffffffff
 
 extern void evtStageTestQueueMotionSegment(s32, f32, f32);
@@ -3054,7 +3053,7 @@ void btlCreateStageTestTask(void) {
 s32 pacFileHandleFree(request)
     FilePacRequest *request;
 {
-    if (request->state == FILE_REQUEST_COMPLETE_STATE) {
+    if (request->state == FILE_REQUEST_STATE_COMPLETE) {
         sdfFileCmdHandle_t *deviceRequest = request->deviceRequest;
         if (deviceRequest != NULL) {
             sdfFileCmdFree(deviceRequest);

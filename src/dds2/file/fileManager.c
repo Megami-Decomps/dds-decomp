@@ -13,7 +13,6 @@ FileManWork fileQueueHead __attribute__((section(".bss")));
 
 extern s32 pacFileHandleFree(struct FilePacRequest *);
 #include "sdf_debug_api.h"
-#define FILE_REQUEST_COMPLETE 6
 #define FILE_READ_SLOT_COUNT 4
 #define FILE_LAST_READ_SLOT 3
 #define FILE_READ_SLOT_BYTES 0x10000
@@ -26,7 +25,7 @@ s32 fileHandleFree(struct FileRequest *request) {
     if (request->kind == FILE_REQUEST_KIND_PAC) {
         return pacFileHandleFree((struct FilePacRequest *)request);
     }
-    if (request->state == FILE_REQUEST_COMPLETE) {
+    if (request->state == FILE_REQUEST_STATE_COMPLETE) {
         if (request->deviceRequest != NULL) {
             sdfFileCmdFree(request->deviceRequest);
         }
@@ -203,18 +202,18 @@ s32 pacFileCheckEnd(const FileRequest *request) {
     if (request->kind == FILE_REQUEST_KIND_PAC) {
         result = 0;
         if (request->readinessEnabled != 0) {
-            result = request->state == FILE_REQUEST_COMPLETE;
+            result = request->state == FILE_REQUEST_STATE_COMPLETE;
         }
         return result;
     }
-    return request->state == FILE_REQUEST_COMPLETE;
+    return request->state == FILE_REQUEST_STATE_COMPLETE;
 }
 
 /* Always require the enable gate and state six, irrespective of request kind. */
 s32 pacCheckEnd(const FileRequest *request) {
     s32 result = 0;
     if (request->readinessEnabled != 0) {
-        result = request->state == FILE_REQUEST_COMPLETE;
+        result = request->state == FILE_REQUEST_STATE_COMPLETE;
     }
     return result;
 }

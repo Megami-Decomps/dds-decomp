@@ -25,6 +25,10 @@ struct sdfMemHandle_t;
  * callback. */
 typedef void (*FileRequestCallback)(void *request, u32 arg);
 
+enum {
+    FILE_REQUEST_STATE_COMPLETE = 6
+};
+
 #define FILE_REQUEST_FIELDS(Link, Callback)                                  \
     u8 kind;                              /* 0x00 */                         \
     u8 state;                             /* 0x01 */                         \
