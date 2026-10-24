@@ -14,6 +14,7 @@ ROOT = TOOLS.parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
+import corpus  # noqa: E402
 import wap  # noqa: E402
 
 
@@ -230,10 +231,10 @@ end
         self.assertEqual(wap.parse_source(rendered), model)
 
     def test_paired_references(self) -> None:
-        references = wap.load_references(
-            ROOT / "src/dds1/scripts/field/f004.bfasm",
-            ROOT / "src/dds1/data/field/f004.infasm",
-        )
+        script = ROOT / "src/dds1/scripts/field/f004.bfasm"
+        interactions = ROOT / "src/dds1/data/field/f004.infasm"
+        corpus.require(script, interactions)
+        references = wap.load_references(script, interactions)
         assert references.procedures is not None
         assert references.interactions is not None
         self.assertIn("meri_enc_off", references.procedures)
@@ -249,7 +250,7 @@ end
                 expected[Path(path).stem] = digest
 
             source_dir = ROOT / f"src/{game}/data/field"
-            sources = sorted(source_dir.glob("*.wapasm"))
+            sources = corpus.require_sources(source_dir, "*.wapasm")
             self.assertEqual({path.stem for path in sources}, expected.keys())
             total_files += len(sources)
             for source in sources:

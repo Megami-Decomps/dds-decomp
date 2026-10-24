@@ -16,6 +16,7 @@ ROOT = TOOLS.parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
+import corpus
 import lb  # noqa: E402
 
 
@@ -153,6 +154,7 @@ class LbCodecTests(unittest.TestCase):
         }
         for game, digest in expected.items():
             path = ROOT / "src" / game / "data" / "field" / "f011_001.lbasm"
+            corpus.require(path)
             with self.subTest(game=game):
                 source = lb.parse_source(path.read_text(encoding="utf-8"))
                 self.assertEqual(source.base_sha1, digest)
@@ -165,7 +167,7 @@ class LbCodecTests(unittest.TestCase):
         extensions = ["INF", "NPL", "SKY", "WAP", "BF", "AMB"]
         for game, expected_count in expected_counts.items():
             directory = ROOT / "src" / game / "data" / "field"
-            paths = sorted(directory.glob("f???_00[0a-d].lbasm"))
+            paths = corpus.require_sources(directory, "f???_00[0a-d].lbasm")
             with self.subTest(game=game):
                 self.assertEqual(len(paths), expected_count)
             for path in paths:

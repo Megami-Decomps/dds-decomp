@@ -9,6 +9,10 @@
 orig/*/
 !orig/.gitkeep
 
+# Game data and scripts: extracted locally, never committed
+/src/*/data/
+/src/*/scripts/
+
 # Generated
 /asm/
 /build/

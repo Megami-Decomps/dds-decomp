@@ -13,6 +13,7 @@ ROOT = TOOLS.parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
+import corpus
 import amb  # noqa: E402
 import automap_flow  # noqa: E402
 import fld  # noqa: E402
@@ -209,7 +210,9 @@ class AutomapFlowTests(unittest.TestCase):
                             amb.parse_source(source.read_text(encoding="utf-8"))
                         ),
                     )
-                    for source in sorted(directory.glob("f[0-9][0-9][0-9].ambasm"))
+                    for source in corpus.require_sources(
+                        directory, "f[0-9][0-9][0-9].ambasm"
+                    )
                 }
                 sections = automap_flow.build_sections(fields, automaps)
                 self.assertEqual(sections["automapSummary"], expected_summary)

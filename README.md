@@ -69,8 +69,10 @@ ninja
 retail SHA-1. Use `ninja dds1` or `ninja dds2` to build one game. A checksum
 mismatch fails the build.
 
-See [Building](docs/building.md) for optional script, data, and development
-targets, generated files, and checksum troubleshooting. The
+Script and data sources are retail content and are not in the repository; see
+[Building](docs/building.md) for importing them from your own disc image, plus
+the optional script, data, and development targets, generated files, and
+checksum troubleshooting. The
 [toolchain notes](docs/toolchain.md) explain the original compiler, assembler,
 and pinned 32-bit runtime.
 

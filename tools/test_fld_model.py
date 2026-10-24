@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
 import fld  # noqa: E402
+import corpus
 import fld_model  # noqa: E402
 import tmx  # noqa: E402
 
@@ -190,6 +191,7 @@ class FldModelTests(unittest.TestCase):
         }
         for version, counts in expected.items():
             path = ROOT / "src" / version / "data" / "field" / "f011_001.f1asm"
+            corpus.require(path)
             data = fld.encode(fld.parse_source(path.read_text(encoding="utf-8")))
             document, binary = fld_model.build_gltf(
                 data,

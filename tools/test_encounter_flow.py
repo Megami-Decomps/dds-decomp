@@ -14,6 +14,7 @@ if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
 import battle_tbl  # noqa: E402
+import corpus
 import encounter_flow  # noqa: E402
 import flw0_profiles  # noqa: E402
 
@@ -139,9 +140,9 @@ class EncounterFlowTests(unittest.TestCase):
         expected = {"dds1": (1024, 257), "dds2": (1024, 768)}
         for game, (count, populated) in expected.items():
             with self.subTest(game=game):
-                table, symbols = encounter_flow.load_sources(
-                    ROOT / f"src/{game}/data/battle"
-                )
+                directory = ROOT / f"src/{game}/data/battle"
+                corpus.require(directory)
+                table, symbols = encounter_flow.load_sources(directory)
                 self.assertEqual(table.profile.name, game)
                 self.assertEqual(len(table.encounters), count)
                 self.assertNotEqual(
