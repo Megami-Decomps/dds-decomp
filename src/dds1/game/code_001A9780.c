@@ -2369,7 +2369,7 @@ void btlChooseActorPanelColors(BtlUnit *unit, s8 style, s8 phase, s32 unused, Ba
 }
 
 extern void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector);
-extern void itfMesMngSetVarImmediate(s32, u32, const void *);
+extern void itfMesMngSetVarImmediate(s32, u32, const char *);
 extern char D_003BB3F8[];
 extern void eglSetOt(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);

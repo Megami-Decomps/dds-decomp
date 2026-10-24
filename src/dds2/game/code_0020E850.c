@@ -121,7 +121,7 @@ extern void btlReplaceDialogTasksAndQueueMessage(s32, s32);
 extern u32 btlHasRegisteredSkillNamePanelTask(void);
 extern u32 btlHasRegisteredAphNamePanelTask(void);
 extern char D_00436CA8[];
-extern void itfMesMngSetVarImmediate(s32, u32, const void *);
+extern void itfMesMngSetVarImmediate(s32, u32, const char *);
 extern u8 *datSkillNames;
 extern u8 btlActionPassLabel[];
 extern u8 btlActionRetreatLabel[];

@@ -727,14 +727,14 @@ u8 *itfMesMngGetVar(s32 window, s32 slotIndex) {
     return pinst[window].mes->textSlots.addresses[slotIndex];
 }
 
-extern u8 *D_003BAA70;
-extern u8 *D_003BAA74;
-extern u8 *D_003BAA84;
-extern u8 *D_003BAA88;
-extern u8 *D_003BAA8C;
-extern u8 *D_003BAA90;
-extern char D_00347C68[][0x20];
-extern char D_003482A8[][0x20];
+extern const char *D_003BAA70;
+extern const char *D_003BAA74;
+extern const char *D_003BAA84;
+extern const char *D_003BAA88;
+extern const char *D_003BAA8C;
+extern const char *D_003BAA90;
+extern const char D_00347C68[][0x20];
+extern const char D_003482A8[][0x20];
 extern s32 D_0032ACA8[128];
 extern char D_003BB1F0[];
 extern void itfConvertText(char *dst, const char *src);
@@ -757,38 +757,38 @@ void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 select
         itfMesMngSetVarImmediate(window, slotIndex, formatted);
         break;
     case 1:
-        itfMesMngSetVarImmediate(window, slotIndex, (const void *)(D_003BAA74 + value * 0x11));
+        itfMesMngSetVarImmediate(window, slotIndex, D_003BAA74 + value * 0x11);
         break;
     case 14:
         memset(converted14, 0, sizeof(converted14));
-        itfConvertText(converted14, (char *)D_003BAA74 + value * 0x11);
+        itfConvertText(converted14, D_003BAA74 + value * 0x11);
         itfMesMngSetVarImmediate(window, slotIndex, converted14);
         break;
     case 8:
-        itfMesMngSetVarImmediate(window, slotIndex, (const void *)(D_003BAA88 + value * 7));
+        itfMesMngSetVarImmediate(window, slotIndex, D_003BAA88 + value * 7);
         break;
     case 2:
-        itfMesMngSetVarImmediate(window, slotIndex, (const void *)(D_003BAA70 + value * 0x11));
+        itfMesMngSetVarImmediate(window, slotIndex, D_003BAA70 + value * 0x11);
         break;
     case 15:
         memset(converted15, 0, sizeof(converted15));
-        itfConvertText(converted15, (char *)D_003BAA70 + value * 0x11);
+        itfConvertText(converted15, D_003BAA70 + value * 0x11);
         itfMesMngSetVarImmediate(window, slotIndex, converted15);
         break;
     case 11:
-        itfMesMngSetVarImmediate(window, slotIndex, (const void *)(D_003BAA90 + value * 0x11));
+        itfMesMngSetVarImmediate(window, slotIndex, D_003BAA90 + value * 0x11);
         break;
     case 12:
         memset(converted12, 0, sizeof(converted12));
-        itfConvertText(converted12, (char *)D_003BAA90 + value * 0x11);
+        itfConvertText(converted12, D_003BAA90 + value * 0x11);
         itfMesMngSetVarImmediate(window, slotIndex, converted12);
         break;
     case 3:
-        itfMesMngSetVarImmediate(window, slotIndex, (const void *)(D_003BAA84 + value * 0x19));
+        itfMesMngSetVarImmediate(window, slotIndex, D_003BAA84 + value * 0x19);
         break;
     case 13:
         memset(converted13, 0, sizeof(converted13));
-        itfConvertText(converted13, (char *)D_003BAA84 + value * 0x19);
+        itfConvertText(converted13, D_003BAA84 + value * 0x19);
         itfMesMngSetVarImmediate(window, slotIndex, converted13);
         break;
     case 4:
@@ -809,7 +809,7 @@ void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 select
         itfMesMngSetVarImmediate(window, slotIndex, number);
         break;
     case 5:
-        itfMesMngSetVarImmediate(window, slotIndex, (const void *)(D_003BAA8C + value * 0x11));
+        itfMesMngSetVarImmediate(window, slotIndex, D_003BAA8C + value * 0x11);
         break;
     case 6:
         itfMesMngSetVarImmediate(window, slotIndex, D_00347C68[value]);
