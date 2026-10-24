@@ -43,13 +43,13 @@ void dds3FreePoseSet(dds3Basic_t *node);
 void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *objectBase);
 /* Dispatchers take (bill handle, 16-byte vector, extra); the vector is
    loaded with lqc2 and the extra is forwarded to dds3AddEffectObjectBasic. */
-dds3Basic_t *AddP2AEffect(void *bill, void *vec, s32 extra);
+dds3Basic_t *AddP2AEffect(void *bill, const u128 *vec, s32 extra);
 void dds3BillboardSetAnimNumber(void *arg, u32 entryIndex);
-dds3Basic_t *AddTMXEffect(void *bill, void *vec, s32 extra);
-dds3Basic_t *effObjCreateWithBoundBill(void *bill, void *vec, void *secondVector);
-dds3Basic_t *effObjCreateBillboardInWorld(void *bill, void *firstVector, void *secondVector);
+dds3Basic_t *AddTMXEffect(void *bill, const u128 *vec, s32 extra);
+dds3Basic_t *effObjCreateWithBoundBill(void *bill, const u128 *vec, void *secondVector);
+dds3Basic_t *effObjCreateBillboardInWorld(void *bill, const u128 *firstVector, void *secondVector);
 dds3Basic_t *AddBEDEffect();
-dds3Basic_t *AddESPEffect(const char *name, void *firstVector, void *secondVector, f32 scale);
+dds3Basic_t *AddESPEffect(const char *name, const u128 *firstVector, void *secondVector, f32 scale);
 /* Old-style (K&R) callee: callers pass (kind, value) positionally. */
 dds3Basic_t *AddMG12Effect();
 extern const f32 D_0039F800[10];
@@ -288,7 +288,7 @@ dds3Basic_t *dds3AddEffectObjectBasic(u32 worldCounter, const u128 *position, co
 
 
 
-dds3Basic_t *AddP2AEffect(void *bill, void *vec, s32 extra) {
+dds3Basic_t *AddP2AEffect(void *bill, const u128 *vec, s32 extra) {
     u8 vector[0x10];
     dds3Basic_t *obj;
     EffectDependencyState *data;
@@ -321,7 +321,7 @@ dds3Basic_t *AddP2AEffect(void *bill, void *vec, s32 extra) {
 }
 
 /* Clone the shared bill and return the newly constructed effect object. */
-dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *obj, void *firstVector, s32 secondVectorAddress) {
+dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *obj, const u128 *firstVector, s32 secondVectorAddress) {
     struct billHandle_t *bill;
 
     bill = dds3BillboardCopy((struct billHandle_t *)((EffectDependencyState *)obj->data)->handle);
@@ -329,7 +329,7 @@ dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *obj, void *firstVector, s
 }
 
 /* Create a kind-one indexed bill; the native constructor result is discarded. */
-void dds3AddP2AEffectObjectBasic2(u32 billId, void *firstVector, s32 secondVectorAddress) {
+void dds3AddP2AEffectObjectBasic2(u32 billId, const u128 *firstVector, s32 secondVectorAddress) {
     struct billHandle_t *bill;
 
     bill = dds3BillboardCreate(1, billId);
@@ -337,7 +337,7 @@ void dds3AddP2AEffectObjectBasic2(u32 billId, void *firstVector, s32 secondVecto
 }
 
 /* Create a kind-one resource bill and return its effect object. */
-dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *path, void *firstVector, s32 secondVectorAddress) {
+dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *path, const u128 *firstVector, s32 secondVectorAddress) {
     void *bill;
 
     bill = billCreateFromResource(1, path);
@@ -351,7 +351,7 @@ void dds3EffectObjectBasicSetAnmeID(dds3Basic_t *obj, u32 entryIndex) {
 
 /* Create a state-three bill effect and attach the first kind-two world node if present.
    secondVectorAddress retains the integer ABI used for the second vector pointer. */
-dds3Basic_t *AddTMXEffect(void *bill, void *firstVector, s32 secondVectorAddress) {
+dds3Basic_t *AddTMXEffect(void *bill, const u128 *firstVector, s32 secondVectorAddress) {
     u8 copiedVector[EFF_OBJ_VECTOR_BYTES];
     dds3Basic_t *obj;
     EffectDependencyState *data;
@@ -384,7 +384,7 @@ dds3Basic_t *AddTMXEffect(void *bill, void *firstVector, s32 secondVectorAddress
 }
 
 /* Clone the shared bill and return its state-three effect object. */
-dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *obj, void *firstVector, s32 secondVectorAddress) {
+dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *obj, const u128 *firstVector, s32 secondVectorAddress) {
     struct billHandle_t *bill;
 
     bill = dds3BillboardCopy((struct billHandle_t *)((EffectDependencyState *)obj->data)->handle);
@@ -392,7 +392,7 @@ dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *obj, void *firstVector, s
 }
 
 /* Create a kind-zero indexed bill for the state-three constructor. */
-dds3Basic_t *effObjCreateIndexedKindZero(u32 billId, void *firstVector, s32 secondVectorAddress) {
+dds3Basic_t *effObjCreateIndexedKindZero(u32 billId, const u128 *firstVector, s32 secondVectorAddress) {
     struct billHandle_t *bill;
 
     bill = dds3BillboardCreate(0, billId);
@@ -400,7 +400,7 @@ dds3Basic_t *effObjCreateIndexedKindZero(u32 billId, void *firstVector, s32 seco
 }
 
 /* Create a kind-zero resource bill for the state-three constructor. */
-dds3Basic_t *effObjCreateResourceKindZero(const char *path, void *firstVector, s32 secondVectorAddress) {
+dds3Basic_t *effObjCreateResourceKindZero(const char *path, const u128 *firstVector, s32 secondVectorAddress) {
     void *bill;
 
     bill = billCreateFromResource(0, path);
@@ -409,7 +409,7 @@ dds3Basic_t *effObjCreateResourceKindZero(const char *path, void *firstVector, s
 
 /* Bind the supplied bill through its node-instance vector copy, selecting state one.
    The object-base state word remains a separate native value of two. */
-dds3Basic_t *effObjCreateWithBoundBill(void *bill, void *firstVector, void *secondVector) {
+dds3Basic_t *effObjCreateWithBoundBill(void *bill, const u128 *firstVector, void *secondVector) {
     u8 copiedVector[EFF_OBJ_VECTOR_BYTES];
     dds3Basic_t *obj;
     EffectDependencyState *data;
@@ -417,7 +417,7 @@ dds3Basic_t *effObjCreateWithBoundBill(void *bill, void *firstVector, void *seco
     dds3Basic_t *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
-    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), (u128 *)firstVector,
+    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), firstVector,
                                   (u128 *)secondVector);
     if (obj == NULL) {
         return NULL;
@@ -443,7 +443,7 @@ dds3Basic_t *effObjCreateWithBoundBill(void *bill, void *firstVector, void *seco
 }
 
 /* Create the descriptor-sourced node and return its bound world object. */
-dds3Basic_t *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector) {
+dds3Basic_t *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, const u128 *firstVector, void *secondVector) {
     struct EffNode *bill;
 
     bill = dds3EffectLoad(descriptor);
@@ -451,7 +451,7 @@ dds3Basic_t *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descript
 }
 
 /* Load and bind the named resource, returning the created object. */
-dds3Basic_t *effObjSpawnLoadedResourceEffect(const char *resourceName, void *firstVector, void *secondVector) {
+dds3Basic_t *effObjSpawnLoadedResourceEffect(const char *resourceName, const u128 *firstVector, void *secondVector) {
     struct EffNode *bill;
 
     bill = dds3EffectFileLoad(resourceName);
@@ -459,7 +459,7 @@ dds3Basic_t *effObjSpawnLoadedResourceEffect(const char *resourceName, void *fir
 }
 
 /* The world-bill entry uses the same state-one/node-instance initialization as binding. */
-dds3Basic_t *effObjCreateBillboardInWorld(void *bill, void *firstVector, void *secondVector) {
+dds3Basic_t *effObjCreateBillboardInWorld(void *bill, const u128 *firstVector, void *secondVector) {
     u8 copiedVector[EFF_OBJ_VECTOR_BYTES];
     dds3Basic_t *obj;
     EffectDependencyState *data;
@@ -467,7 +467,7 @@ dds3Basic_t *effObjCreateBillboardInWorld(void *bill, void *firstVector, void *s
     dds3Basic_t *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
-    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), (u128 *)firstVector,
+    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), firstVector,
                                   (u128 *)secondVector);
     if (obj == NULL) {
         return NULL;
@@ -493,7 +493,7 @@ dds3Basic_t *effObjCreateBillboardInWorld(void *bill, void *firstVector, void *s
 }
 
 /* Feed the third source factory's result to the world-bill constructor. */
-dds3Basic_t *dds3AddD3PEffectObjectBasic(void *resourceData, void *firstVector, void *secondVector) {
+dds3Basic_t *dds3AddD3PEffectObjectBasic(void *resourceData, const u128 *firstVector, void *secondVector) {
     struct EffNode *bill;
 
     bill = effCreateNodeFromParameter((u32)resourceData);
@@ -515,7 +515,7 @@ dds3Basic_t *AddBEDEffect(source, firstVector, secondVector)
     dds3ObjectBaseControlWorkData_t *objectHandle;
     dds3Basic_t *worldNode;
 
-    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), (u128 *)firstVector,
+    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), firstVector,
                                   (u128 *)secondVector);
     if (obj == NULL) {
         return NULL;
@@ -544,12 +544,12 @@ dds3Basic_t *AddBEDEffect(source, firstVector, secondVector)
 }
 
 
-dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, const void *position, const void *scale) {
+dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, const u128 *position, const void *scale) {
     return AddBEDEffect(resource, position, scale);
 }
 
 /* Resolve the resource address, create from it, then release the temporary resource. */
-dds3Basic_t *dds3AddBEDEffectObjectBasic(void *resource, void *firstVector, void *secondVector) {
+dds3Basic_t *dds3AddBEDEffectObjectBasic(void *resource, const u128 *firstVector, void *secondVector) {
     u32 resolvedId;
     struct sdfMemHandle_t *resourceHandle;
     dds3Basic_t *created;
@@ -583,13 +583,13 @@ void dds3StartBEDEffectObjectBasic(dds3Basic_t *obj, u32 entryId) {
     data->node = effEveBEDCutCreate(data->handle, (u16)(entryId & EFF_OBJ_ENTRY_ID_MASK), data->vector);
 }
 
-dds3Basic_t *AddESPEffect(const char *name, void *firstVector, void *secondVector, f32 scale) {
+dds3Basic_t *AddESPEffect(const char *name, const u128 *firstVector, void *secondVector, f32 scale) {
     dds3Basic_t *obj;
     EffectDependencyState *data;
     dds3ObjectBaseControlWorkData_t *objectHandle;
     dds3Basic_t *worldNode;
 
-    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), (u128 *)firstVector,
+    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), firstVector,
                                   (u128 *)secondVector);
     if (obj == NULL) {
         return NULL;
@@ -616,7 +616,7 @@ dds3Basic_t *AddESPEffect(const char *name, void *firstVector, void *secondVecto
     return obj;
 }
 
-dds3Basic_t *dds3AddESPEffectObjectBasic(const char *name, void *firstVector, void *secondVector, f32 scale) {
+dds3Basic_t *dds3AddESPEffectObjectBasic(const char *name, const u128 *firstVector, void *secondVector, f32 scale) {
     return AddESPEffect(name, firstVector, secondVector, scale);
 }
 
