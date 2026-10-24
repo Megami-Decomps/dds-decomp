@@ -663,7 +663,7 @@ extern void mnuSpawnAlternateMantraSpecialNodeIcon(struct MantraDrawPool *);
 extern void mnuSpawnMantraSpecialNodeIcon(struct MantraDrawPool *);
 extern void mnuSpawnMantraIconAtPositionWithShortLoop(u32, u32, struct MantraDrawPool *);
 extern void mnuSpawnMantraIconWithShortLoop(struct MantraDrawPool *);
-extern void mtrDrawRankPass(s32, u16);
+extern void mtrDrawRankPass(MnuStatusResource *, u16);
 extern void mnuSpawnMantraMapPanels(MnuStatusResource *, u16, u16);
 /* The following three declarations remain inferred from native callers. */
 extern s32 mnuAdvanceMantraSelectionCursor(MnuStatusResource *, s32);
@@ -928,7 +928,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
     case 12:
         evtPrintDeveloperConsoleMessage(D_00426F38);
         if (work->src->bits & 0x8000) {
-            mtrDrawRankPass((s32)object, work->src->fields.unitIndex);
+            mtrDrawRankPass(object, work->src->fields.unitIndex);
             work->delayFrames = 60;
         } else if ((work->src->bits & 0xF00) == 0x200) {
             mnuApplyMantraUnlockToPartyList(object, work->src->fields.unitIndex);
@@ -1466,10 +1466,10 @@ MantraNodePos *mnuFindCompatibleMantraNeighbor(MnuStatusResource *object, u16 no
 }
 
 extern void mnuStorePanelEntry(s32 soundHandle, s32 framesRemaining);
-extern void mnuRefreshMantraUnitNodeFlags(s32);
+extern void mnuRefreshMantraUnitNodeFlags(MnuStatusResource *);
 
 /* Collect selected neighbours, then advance their three rank chains for at most 20 passes. */
-void mtrDrawRankPass(s32 object, u16 index) {
+void mtrDrawRankPass(MnuStatusResource *object, u16 index) {
     MantraNodePos *nodes[3];
     MantraNodePos **cursor;
     MantraNodePos **neighbors;
@@ -1484,13 +1484,13 @@ void mtrDrawRankPass(s32 object, u16 index) {
 
     evtPrintDeveloperConsoleMessage("DrawRank[%d]\n", modelFlagState);
     memset(nodes, 0, sizeof(nodes));
-    selected = mnuActivateMantraNeighborEdges((MnuStatusResource *)object, index, modelFlagState, 0);
+    selected = mnuActivateMantraNeighborEdges(object, index, modelFlagState, 0);
     record = (MantraNodePos *)mnuGetMantraNodePositionRecord(index);
     neighbors = record->neighbors;
     nextNode = nodes;
     for (; i < 6; i++, neighbors++) {
         if ((selected >> i) & 1) {
-            *nextNode++ = mnuFindCompatibleMantraNeighbor((MnuStatusResource *)object, (*neighbors)->id, modelFlagState, 0);
+            *nextNode++ = mnuFindCompatibleMantraNeighbor(object, (*neighbors)->id, modelFlagState, 0);
             hasNode = 1;
         }
     }
@@ -1502,7 +1502,7 @@ void mtrDrawRankPass(s32 object, u16 index) {
             cursor = nodes;
             for (i = 2; i >= 0; i--, cursor++) {
                 if (*cursor != NULL) {
-                    *cursor = mnuFindCompatibleMantraNeighbor((MnuStatusResource *)object, (*cursor)->id, modelFlagState, rank);
+                    *cursor = mnuFindCompatibleMantraNeighbor(object, (*cursor)->id, modelFlagState, rank);
                     hasNode = 1;
                 }
             }
@@ -1513,13 +1513,13 @@ void mtrDrawRankPass(s32 object, u16 index) {
     mnuRefreshMantraUnitNodeFlags(object);
 }
 
-void mnuRefreshMantraUnitNodeFlags(s32 object) {
+void mnuRefreshMantraUnitNodeFlags(MnuStatusResource *object) {
     s32 modelFlagState = mnuGetActiveMantraModelFlagState();
-    struct MenuListNode *node = ((MnuStatusResource *)object)->list->first;
+    struct MenuListNode *node = object->list->first;
     MantraFlagResource **resourceSlot;
 
     if (node != 0) {
-        resourceSlot = ((MnuStatusResource *)object)->menu.slots;
+        resourceSlot = object->menu.slots;
         do {
             datUnitWork_t *unit = (datUnitWork_t *)node->userValue;
             MantraNodePos *record =
