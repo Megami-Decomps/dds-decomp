@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "eff_matrix4.h"
 #include "sdf_vu0.h"
 #include "sdf_model_packet_callback.h"
 #include "sdf_vu_rotation_axes.h"
