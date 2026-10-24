@@ -153,7 +153,7 @@ extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
 
 extern AiSpecies D_003BEDD0[];
 
-s32 btlSelectConditionalAiRoute(s32 context, s32 species, u32 *selected, u32 requestedRow);
+s32 btlSelectConditionalAiRoute(BtlUnit *, s32, s32 *, s32);
 
 void btlSelectAndRunModeAiAction(ActionStateLink *task, u32 mode) {
     BtlAiScratchWork *work;
@@ -193,7 +193,7 @@ void btlSelectAndRunModeAiAction(ActionStateLink *task, u32 mode) {
     btlActionScratchWork = work;
     work->actor = task;
     work->speciesId = unit->partyRecord.unitId;
-    btlSelectConditionalAiRoute((s32)unit, species, (u32 *)&row, variant);
+    btlSelectConditionalAiRoute(unit, species, &row, variant);
     index = btlPickWeightedAiSlot(unit, species, row);
     btlExecuteAiTableAction(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,
                   datEnemyAiRecords[species].slot[row * 5 + index].actionArg);
@@ -244,7 +244,7 @@ extern u32 btlResolvePackedAiRoute(u32 route);
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
 /* Test the tier/predicate matrix, resolve its route byte and dispatch the action. */
-s32 btlSelectTierMatrixAiRoute(s32 context, s32 species, u32 *selected, u32 requestedRow) {
+s32 btlSelectTierMatrixAiRoute(BtlUnit *context, s32 species, s32 *selected, s32 requestedRow) {
     s8 matches[3][3];
     u32 predicates[3];
     u32 firstTier, endTier;
@@ -266,7 +266,7 @@ s32 btlSelectTierMatrixAiRoute(s32 context, s32 species, u32 *selected, u32 requ
         predicates[1] = datEnemyAiRecords[species].decisions[tier].predicates[1];
         predicates[2] = datEnemyAiRecords[species].decisions[tier].predicates[2];
         for (predicateIndex = 0; predicateIndex < 3; predicateIndex++) {
-            matches[tier][predicateIndex] = btlDispatchPackedEffectAction(context, predicates[predicateIndex]);
+            matches[tier][predicateIndex] = btlDispatchPackedEffectAction((s32)context, predicates[predicateIndex]);
         }
     }
     for (tier = 0; tier < 3; tier++) {
@@ -350,7 +350,7 @@ s32 btlSelectTierMatrixAiRoute(s32 context, s32 species, u32 *selected, u32 requ
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
 /* Choose the first matching tier condition, retaining the native fallback route. */
-s32 btlSelectConditionalAiRoute(s32 context, s32 species, u32 *selected, u32 requestedRow) {
+s32 btlSelectConditionalAiRoute(BtlUnit *context, s32 species, s32 *selected, s32 requestedRow) {
     s8 matches[3];
     u32 predicates[3];
     u32 firstTier, endTier;
@@ -367,7 +367,7 @@ s32 btlSelectConditionalAiRoute(s32 context, s32 species, u32 *selected, u32 req
         predicates[1] = datEnemyAiRecords[species].decisions[tier].predicates[1];
         predicates[2] = datEnemyAiRecords[species].decisions[tier].predicates[2];
         for (predicateIndex = 0; predicateIndex < 3; predicateIndex++) {
-            matches[predicateIndex] = btlDispatchPackedEffectAction(context, predicates[predicateIndex]);
+            matches[predicateIndex] = btlDispatchPackedEffectAction((s32)context, predicates[predicateIndex]);
         }
         if (matches[0] && matches[1] && matches[2]) {
             if (datEnemyAiRecords[species].decisions[tier].routes[0] != 8) {

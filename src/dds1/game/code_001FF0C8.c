@@ -101,7 +101,7 @@ extern s32 btlResolveCommandSlotAndKind(BtlTask *, s32, u16 *, s32 *);
 extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
 
 extern AiSpecies D_00360640[];
-extern s32 btlSelectConditionalAiRoute(s32, s32, u32 *, u32);
+extern s32 btlSelectConditionalAiRoute(BtlUnit *, s32, s32 *, s32);
 extern s32 btlRollAiBucket(void);
 extern s32 btlHasAdjacentActorRecordStatus(s32);
 extern u32 btlIsActorHighStateFlagClear(s32);
@@ -154,7 +154,7 @@ void btlSelectAndRunModeAiAction(BtlTask *task, u32 mode) {
     btlActionScratchWork = work;
     work->actor = task;
     work->speciesId = unit->partyRecord.unitId;
-    btlSelectConditionalAiRoute((s32)unit, species, (u32 *)&row, variant);
+    btlSelectConditionalAiRoute(unit, species, &row, variant);
     index = btlPickWeightedAiSlot(unit, species, row);
     actionId = datEnemyAiRecords[species].slot[row * 5 + index].actionId;
     if (mode == 3 && actionId == 0x8008) {
@@ -199,7 +199,7 @@ u32 func_001FF558(void) {
 
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
-s32 btlSelectTierMatrixAiRoute(s32 context, s32 species, u32 *selected, u32 requestedRow) {
+s32 btlSelectTierMatrixAiRoute(BtlUnit *context, s32 species, s32 *selected, s32 requestedRow) {
     s8 matches[3][3];
     u32 predicates[3];
     u32 firstTier, endTier;
@@ -222,7 +222,7 @@ s32 btlSelectTierMatrixAiRoute(s32 context, s32 species, u32 *selected, u32 requ
         predicates[1] = datEnemyAiRecords[species].decisions[tier].predicates[1];
         predicates[2] = datEnemyAiRecords[species].decisions[tier].predicates[2];
         for (predicateIndex = 0; predicateIndex < 3; predicateIndex++) {
-            matches[tier][predicateIndex] = btlDispatchPackedEffectAction(context, predicates[predicateIndex]);
+            matches[tier][predicateIndex] = btlDispatchPackedEffectAction((s32)context, predicates[predicateIndex]);
         }
     }
     for (tier = 0; tier < 3; tier++) {
@@ -295,7 +295,7 @@ s32 btlSelectTierMatrixAiRoute(s32 context, s32 species, u32 *selected, u32 requ
     return 1;
 }
 
-s32 btlSelectConditionalAiRoute(s32 context, s32 species, u32 *selected, u32 requestedRow) {
+s32 btlSelectConditionalAiRoute(BtlUnit *context, s32 species, s32 *selected, s32 requestedRow) {
     s8 matches[3];
     u32 predicates[3];
     u32 firstTier, endTier;
@@ -312,7 +312,7 @@ s32 btlSelectConditionalAiRoute(s32 context, s32 species, u32 *selected, u32 req
         predicates[1] = datEnemyAiRecords[species].decisions[tier].predicates[1];
         predicates[2] = datEnemyAiRecords[species].decisions[tier].predicates[2];
         for (predicateIndex = 0; predicateIndex < 3; predicateIndex++) {
-            matches[predicateIndex] = btlDispatchPackedEffectAction(context, predicates[predicateIndex]);
+            matches[predicateIndex] = btlDispatchPackedEffectAction((s32)context, predicates[predicateIndex]);
         }
         if (matches[0] && matches[1] && matches[2]) {
             if (datEnemyAiRecords[species].decisions[tier].routes[0] != 8) {
