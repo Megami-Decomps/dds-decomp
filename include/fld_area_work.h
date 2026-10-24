@@ -8,6 +8,12 @@ struct sdfMemHandle_t;
 struct SdfTextureFileHeader;
 struct dds3Basic_t;
 
+typedef enum FldAreaResourceRequestState {
+    FLD_AREA_RESOURCE_REQUEST_IDLE = 0,
+    FLD_AREA_RESOURCE_REQUEST_LOAD_PENDING = 1,
+    FLD_AREA_RESOURCE_REQUEST_SATISFIED_FROM_CACHE = 2
+} FldAreaResourceRequestState;
+
 /* Field loaders retain the allocation owner and its texture-file data. */
 typedef struct FldResourceBlock {
     struct sdfMemHandle_t *allocation;
@@ -48,7 +54,7 @@ typedef struct FldAreaWork {
     f32 dist;
     s32 sceneMode;
     s32 sceneState;
-    s32 resourceFlag;            /* 0x78: local-map resource state */
+    FldAreaResourceRequestState resourceFlag; /* 0x78: local-map request state. */
     s32 resourceArea;
     s32 resourceFloor;
     s32 positionPending;

@@ -1352,7 +1352,7 @@ s32 fldLoadNextFile_BtlRet(void) {
         fldMakeFilePath(directory, area, 1);
         sprintf(path, D_0039FE38, directory, area, floor);
         pFldNextFileDataF2 = pacLoad(path);
-        fldGlobalBase.resourceFlag = 1;
+        fldGlobalBase.resourceFlag = FLD_AREA_RESOURCE_REQUEST_LOAD_PENDING;
         return 1;
     }
     return 0;
@@ -1371,12 +1371,12 @@ s32 fldRequestAreaResource(s32 area, s32 room) {
     if (fldGlobalBase.area != area) {
         return 1;
     }
-    if (fldGlobalBase.resourceFlag == 1) {
+    if (fldGlobalBase.resourceFlag == FLD_AREA_RESOURCE_REQUEST_LOAD_PENDING) {
         return 1;
     }
     if (fldGlobalBase.resourceArea == area &&
         fldGlobalBase.resourceFloor == room) {
-        fldGlobalBase.resourceFlag = 2;
+        fldGlobalBase.resourceFlag = FLD_AREA_RESOURCE_REQUEST_SATISFIED_FROM_CACHE;
         return 1;
     }
     fldFreeNextFile();
@@ -1392,7 +1392,7 @@ s32 fldRequestAreaResource(s32 area, s32 room) {
     fldMakeFilePath(directory, area, 1);
     sprintf(path, D_0039FE38, directory, area, room);
     pFldNextFileDataF2 = pacLoad(path);
-    fldGlobalBase.resourceFlag = 1;
+    fldGlobalBase.resourceFlag = FLD_AREA_RESOURCE_REQUEST_LOAD_PENDING;
     return 1;
 }
 
@@ -1413,16 +1413,16 @@ void fldFreeNextFile(void) {
     fldPendingFloor = 0;
     fldGlobalBase.resourceArea = 0;
     fldGlobalBase.resourceFloor = 0;
-    fldGlobalBase.resourceFlag = 0;
+    fldGlobalBase.resourceFlag = FLD_AREA_RESOURCE_REQUEST_IDLE;
 }
 
 u32 fldPollAreaResourceLoad(void) {
-    u32 sceneState = fldGlobalBase.resourceFlag;
+    FldAreaResourceRequestState resourceState = fldGlobalBase.resourceFlag;
 
-    if (sceneState != 0) {
-        if (sceneState == 1) {
+    if (resourceState != FLD_AREA_RESOURCE_REQUEST_IDLE) {
+        if (resourceState == FLD_AREA_RESOURCE_REQUEST_LOAD_PENDING) {
             if (pacCheckEnd(pFldNextFileDataF2) != 0) {
-                fldGlobalBase.resourceFlag = 0;
+                fldGlobalBase.resourceFlag = FLD_AREA_RESOURCE_REQUEST_IDLE;
                 D_003BA734 = 0;
             }
         }
@@ -1450,7 +1450,7 @@ s32 fldLoadNextGetStatus3(s32 area, s32 room) {
     if (pFldNextFileDataF2 != 0 && pacCheckEnd(pFldNextFileDataF2) != 0) {
         return 1;
     }
-    return fldGlobalBase.resourceFlag != 0;
+    return fldGlobalBase.resourceFlag != FLD_AREA_RESOURCE_REQUEST_IDLE;
 }
 
 extern const u8 *fldCachedRoomResourceData, *fldCachedRoomF1ResourceData, *fldCachedRoomF2ResourceData,
