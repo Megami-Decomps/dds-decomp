@@ -2532,7 +2532,7 @@ extern char D_00437730[];
 extern const char D_00424150[];
 extern const char D_00424160[];
 extern const char D_00424170[];
-extern void *dds3PrimLine3D(s32, s32, s32, s32);
+extern u64 *dds3PrimLine3D(s32, s32, s32, s32);
 extern void dds3PrimDebugTextBox(void *, s32, s32, s32, f32 *);
 extern void mnuShopSavePrimaryTransform(u8 *);
 extern void mnuShopSaveFullTransform(u8 *);

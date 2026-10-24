@@ -3161,7 +3161,7 @@ extern SdfPoolNode D_00380708;
 extern void fldStepValueByPad(f32 *value, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
 extern void dds3PrimDebugTextBox(void *packetList, s32 x, s32 y, s32 selected, f32 *values);
 /* Direction-preview packet builder consumes the vector loaded in vf10. */
-extern void *dds3PrimLine3D(s32, s32, s32, s32);
+extern u64 *dds3PrimLine3D(s32, s32, s32, s32);
 
 extern void FromRotation(f32 angle);
 

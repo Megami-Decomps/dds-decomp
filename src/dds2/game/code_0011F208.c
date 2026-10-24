@@ -201,7 +201,7 @@ extern const f32 D_00386470[4];
 extern const u8 D_00386440[20][2];
 
 /* Build the light-direction gizmo packet: 20 GS lines over 13 transformed outline points. */
-void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted) {
+u64 *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted) {
     u64 xyz[13];
     u64 color[13];
     volatile f32 axis[4] __attribute__((aligned(16)));
