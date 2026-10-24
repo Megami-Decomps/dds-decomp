@@ -815,7 +815,7 @@ s32 mnuStaffCloseSelectionState(dds3ProcessID_t *task) {
 }
 
 /* Open selection work in staff-view mode; the task argument is forwarded unchanged. */
-s32 mnuOpenStaffSelectionEntry(u32 context) {
+s32 mnuOpenStaffSelectionEntry(dds3ProcessID_t *context) {
     return mnuInitializeStaffSelectionState(context, 1);
 }
 
@@ -824,7 +824,7 @@ s32 mnuFinishStaffSelectionEntry(dds3ProcessID_t *task) {
 }
 
 /* Open the same selection work in party-view mode. */
-s32 mnuOpenPartySelectionEntry(u32 context) {
+s32 mnuOpenPartySelectionEntry(dds3ProcessID_t *context) {
     return mnuInitializeStaffSelectionState(context, 0);
 }
 
