@@ -110,12 +110,12 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
             } else {
                 switch (data->ownerKind) {
                 case 4: case 5: case 6: case 7: case 8: case 9:
-                    SDF_VU0_LOADVECTOR(((dds3Basic_t *)data->owner)->inner->rotation);
+                    SDF_VU0_LOADVECTOR(data->owner->inner->rotation);
                     SDF_VU0_STOREVECTOR(rotation);
                     effMiscQuaternionToMatrixVU();
                     break;
                 case EFF_OBJ_OWNER_KIND_EXTRA:
-                    SDF_VU0_LOADVECTOR(((EvtWorldSourceTransformPrefix *)((dds3Basic_t *)data->owner)->data)->rotation);
+                    SDF_VU0_LOADVECTOR(((EvtWorldSourceTransformPrefix *)data->owner->data)->rotation);
                     SDF_VU0_STOREVECTOR(rotation);
                     effMiscQuaternionToMatrixVU();
                     break;
@@ -135,11 +135,11 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
             if ((data->flags & EFF_OBJ_FLAG_OWNER_BILL_ENTRY) == 0) {
                 switch (data->ownerKind) {
                 case 4: case 5: case 6: case 7: case 8: case 9:
-                    SDF_VU0_LOADVECTOR_B(((dds3Basic_t *)data->owner)->inner->position);
+                    SDF_VU0_LOADVECTOR_B(data->owner->inner->position);
                     SDF_VU0_ADDVECTOR();
                     break;
                 case EFF_OBJ_OWNER_KIND_EXTRA:
-                    SDF_VU0_LOADVECTOR_B(&((EvtWorldSourceTransformPrefix *)((dds3Basic_t *)data->owner)->data)->position);
+                    SDF_VU0_LOADVECTOR_B(&((EvtWorldSourceTransformPrefix *)data->owner->data)->position);
                     SDF_VU0_ADDVECTOR();
                     break;
                 }

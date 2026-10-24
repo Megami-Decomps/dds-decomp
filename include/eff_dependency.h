@@ -28,7 +28,7 @@ typedef struct EffectDependencyState {
     void *handle;
     f32 ownerLocalOffset[3];
     u8 pad1C[4];
-    void *owner;
+    dds3Basic_t *owner;
     u16 entryId;
     u16 ownerKind;
     void *vector;
