@@ -27,7 +27,7 @@ typedef struct SdfGrid {
     u16 visibleRows;
     u16 columnMargin;
     u16 rowMargin;
-    u32 userData;
+    void *userData;
 } SdfGrid;
 
 typedef char SdfGridLayoutAssert[

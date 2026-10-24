@@ -260,7 +260,7 @@ void sdfNoOpGridDrawCallback(void) {
 /* Allocate a grid header followed by its cells, install the no-op callbacks
  * (or the caller's destroy hook), and start with every cell released. */
 SdfGrid *sdfGridCreate(s32 width, s32 height, u16 cellWidth, u16 cellHeight, u16 visibleColumns,
-                       u16 visibleRows, u32 userData, void (*onDestroy)(s32, u32)) {
+                       u16 visibleRows, void *userData, void (*onDestroy)(s32, u32)) {
     u32 cellCount = width * height;
     s32 size = sizeof(SdfGrid) + cellCount * sizeof(SdfGridCell);
     struct sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
@@ -303,7 +303,7 @@ void sdfSetShortPairValues(SdfGrid *grid, s32 columnMargin, s32 rowMargin) {
 void sdfDestroyGridWork(SdfGrid *owner) {
     if (owner != NULL) {
         sdfGridReleaseAllCells(owner);
-        owner->onDestroy(0, owner->userData);
+        owner->onDestroy(0, (u32)owner->userData);
         sdfMemFreeDirect(owner->allocation);
     }
 }

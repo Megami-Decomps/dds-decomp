@@ -376,7 +376,7 @@ void mnuDrawMantraProfileGridEntry(s32 x, s32 y, s32 depth, s32 alpha,
     }
     memset(prerequisiteIds, 0, sizeof(prerequisiteIds));
     record = &mnuMantraPrerequisiteRecords[scene->sceneId];
-    states = (MnuMantraNodeState *)(u32)grid->userData;
+    states = grid->userData;
     if (record->kind != 0) {
         return;
     }

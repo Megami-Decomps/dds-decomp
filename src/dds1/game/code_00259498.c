@@ -206,7 +206,7 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, SdfGrid *grid,
         return;
     }
     selection = mnuGetSelectedNodeValue();
-    states = (MnuMantraNodeState *)(u32)grid->userData;
+    states = grid->userData;
     display = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     record = &mnuMantraPrerequisiteRecords[scene->sceneId];
     alpha = display->displayAlpha;
@@ -437,7 +437,7 @@ void mnuDrawScaledMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCel
     x = (s32)((f32)x + (f32)mnuMantraVariantSpritePlacements[scene->sceneId][2] / 10.0f);
     y = (s32)((f32)y + (f32)mnuMantraVariantSpritePlacements[scene->sceneId][3] / 10.0f);
     selection = mnuGetSelectedNodeValue();
-    states = (MnuMantraNodeState *)(u32)grid->userData;
+    states = grid->userData;
     sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     record = &mnuMantraPrerequisiteRecords[scene->sceneId];
     memset(prerequisiteFlags, 0, sizeof(prerequisiteFlags));
@@ -563,4 +563,3 @@ INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4C0);
 INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4C8);
 
 INCLUDE_SDATA(const s32, "game/code_00259498", mnuSceneResourceContext);
-

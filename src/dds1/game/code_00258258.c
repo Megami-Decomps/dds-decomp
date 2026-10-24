@@ -129,7 +129,7 @@ void mnuDrawMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cel
         return;
     }
     selection = mnuGetSelectedNodeValue();
-    states = (MnuMantraNodeState *)(u32)grid->userData;
+    states = grid->userData;
     sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     record = &mnuMantraPrerequisiteRecords[scene->sceneId];
     memset(prerequisiteFlags, 0, sizeof(prerequisiteFlags));
@@ -467,4 +467,3 @@ INCLUDE_SDATA(const s32, "game/code_00258258", D_003BC488);
 INCLUDE_SDATA(const s32, "game/code_00258258", D_003BC490);
 
 INCLUDE_SDATA(const s32, "game/code_00258258", D_003BC498);
-

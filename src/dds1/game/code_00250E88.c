@@ -1411,7 +1411,7 @@ extern SdfGridCell *sdfGridCursorLeftToFilledCell(SdfGrid *);
 /* Select the connected left neighbor, or fall back to the previous filled cell. */
 s32 mnuSelectMantraGridLeftNeighbor(SdfGrid *grid) {
     MnuMantraGridEntry *entry = (MnuMantraGridEntry *)(u32)grid->cursor->value;
-    MnuMantraNodeState *coordinates = (MnuMantraNodeState *)(u32)grid->userData;
+    MnuMantraNodeState *coordinates = grid->userData;
     s32 x = coordinates[entry->sceneId].x;
     s32 y = coordinates[entry->sceneId].y;
 
@@ -1438,7 +1438,7 @@ s32 mnuSelectMantraGridRightNeighbor(SdfGrid *grid) {
     MenuSceneWork *scene = (MenuSceneWork *)sdfGetTaskValueByKey(
         mnuSceneResourceContext, 1);
     MnuMantraGridEntry *entry = (MnuMantraGridEntry *)grid->cursor->value;
-    MnuMantraNodeState *coordinates = (MnuMantraNodeState *)grid->userData;
+    MnuMantraNodeState *coordinates = grid->userData;
     s32 x = coordinates[entry->sceneId].x;
     s32 y = coordinates[entry->sceneId].y;
 
@@ -1507,7 +1507,7 @@ extern void sdfGridSetCellValue(SdfGrid *grid, s32 column, s32 row, u32 cellValu
  * when the record's x is -1), report the selected profile's cell, then set the three
  * requirement-group bits in boundsFlags. */
 void mnuBuildMantraGridAndGetProfileCoordinates(MenuSceneWork *work, MnuProfileProgress *selection, s32 *outX, s32 *outY) {
-    MnuMantraNodeState *nodes = (MnuMantraNodeState *)work->gridHandle->userData;
+    MnuMantraNodeState *nodes = work->gridHandle->userData;
     MnuMantraGridEntry *entry;
     SdfGrid *grid;
     u32 column;
@@ -1606,7 +1606,7 @@ s32 mnuRestoreMantraGridSelection(MenuSceneWork *work) {
     SdfGridCell *cursor = grid->cursor;
     MnuMantraGridEntry *selected = (MnuMantraGridEntry *)(u32)cursor->value;
     u16 entryId = selected->sceneId;
-    MnuMantraNodeState *entries = (MnuMantraNodeState *)grid->userData;
+    MnuMantraNodeState *entries = grid->userData;
     s16 x = entries[entryId].x;
     s16 y = entries[entryId].y;
     MnuResourceTask *resourceTask;
