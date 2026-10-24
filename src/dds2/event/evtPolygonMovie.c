@@ -420,21 +420,29 @@ void evtBlendParamsH(s32 enable, f32 t, const EvtBlendKey *a, const EvtBlendKey 
     }
 }
 
+enum {
+    EVT_POLYGON_MOVIE_MODE_TRANSFORMS_ENABLED = 0,
+    EVT_POLYGON_MOVIE_MODE_TRANSFORMS_SKIPPED = 1,
+    EVT_POLYGON_MOVIE_MODE_UNIT_DEFAULT_FLAGS_OFF = 2,
+    EVT_POLYGON_MOVIE_MODE_UNIT_400_ON_200_OFF = 3,
+    EVT_POLYGON_MOVIE_MODE_UNIT_400_OFF_200_ON = 4,
+};
+
 void evtPolygonMovieSetObjectMode(dds3Basic_t *obj, u32 mode, u32 setFlags, u32 clearFlags) {
     switch (mode) {
-    case 0:
+    case EVT_POLYGON_MOVIE_MODE_TRANSFORMS_ENABLED:
         dds3GetUnitHandleObjectBasic(obj)->owner->flags &= ~MDL_SKIP_TRANSFORMS;
         break;
-    case 1:
+    case EVT_POLYGON_MOVIE_MODE_TRANSFORMS_SKIPPED:
         dds3GetUnitHandleObjectBasic(obj)->owner->flags |= MDL_SKIP_TRANSFORMS;
         break;
-    case 2:
+    case EVT_POLYGON_MOVIE_MODE_UNIT_DEFAULT_FLAGS_OFF:
         dds3ObjectBaseOffFlag(obj, 0x400);
         dds3ObjectBaseOffFlag(obj, 0x200);
         dds3ObjectBaseOffFlag(obj, 0x4000);
         dds3ObjectBaseOffFlag(obj, 0x8000);
         return;
-    case 3:
+    case EVT_POLYGON_MOVIE_MODE_UNIT_400_ON_200_OFF:
         dds3ObjectBaseOnFlag(obj, 0x400);
         dds3ObjectBaseOffFlag(obj, 0x200);
         if (setFlags != 0) {
@@ -444,7 +452,7 @@ void evtPolygonMovieSetObjectMode(dds3Basic_t *obj, u32 mode, u32 setFlags, u32 
             dds3ObjectBaseOffFlag(obj, clearFlags);
         }
         return;
-    case 4:
+    case EVT_POLYGON_MOVIE_MODE_UNIT_400_OFF_200_ON:
         dds3ObjectBaseOffFlag(obj, 0x400);
         dds3ObjectBaseOnFlag(obj, 0x200);
         if (setFlags != 0) {
