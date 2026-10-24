@@ -19,6 +19,8 @@
 #include "eff_dispatch_state.h"
 #include "eff_offset_triangle.h"
 
+struct BtlUnit;
+
 extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 extern sdfTexHandle_t *dds3GetRenderTexture(void);
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
@@ -598,7 +600,7 @@ extern void * sdfChipAllocDirect(s32 size);
 
 INCLUDE_RODATA(const s32, "game/code_0015F4D0", D_003A0D70);
 
-effBTLCutHandle_t *effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value) {
+effBTLCutHandle_t *effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, struct BtlUnit *owner, s32 value) {
     EffBattleEntryList *bank;
     EffBattleEntryList *parameters;
     effBTLCutHandle_t *effect;

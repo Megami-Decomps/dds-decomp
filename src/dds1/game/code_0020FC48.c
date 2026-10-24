@@ -53,7 +53,7 @@
 /* Declared before first use (were implicit int). */
 extern s32 btlActorEntryIsExpired(BtlUnit *unit, s32 index);
 extern void dds3WorkClear(void);
-extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
+extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, struct BtlUnit *owner, s32 value);
 extern s32 scrGetIntPara(s32 parameterIndex);
 extern void p2sdLoadSMGFile(s32 packed);
 extern s32 sndFindPackedTrackLoadStatus(s32 packed);

@@ -276,7 +276,7 @@ extern struct BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32);
 
 extern void effBattleUpdate(effBTLCutHandle_t *);
 
-extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
+extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, struct BtlUnit *owner, s32 value);
 extern void effBTLFieldColorSetSelectors(s32 baseId, u32 variant, s32 overrideId, s32 finalId);
 
 /* Advance the current event through release, preparation, playback and completion. */

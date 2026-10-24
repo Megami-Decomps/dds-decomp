@@ -4437,7 +4437,7 @@ BtlRuntimeTask *btlCreateUnitExitFadeTask(BtlUnit *actor, s32 option) {
 
 extern void effBattleUpdate(effBTLCutHandle_t *);
 
-extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
+extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, struct BtlUnit *owner, s32 value);
 
 /* Start from the selected-unit SYSEFF source, then update through its duration.
  * Return one for an ineligible unit or expiry, zero while updating. */
