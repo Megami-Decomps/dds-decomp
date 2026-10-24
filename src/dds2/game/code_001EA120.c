@@ -451,8 +451,8 @@ s32 btlMapActorCategory(BtlLinkedCommand *actor) {
     }
 }
 
-s32 btlIsSpecialActorCategory(s32 actor) {
-    switch ((u32)((BtlLinkedCommand *)actor)->actionCode) {
+s32 btlIsSpecialActorCategory(BtlLinkedCommand *action) {
+    switch ((u32)action->actionCode) {
     case 0x5B:
     case 0x5C:
     case 0x5D:
@@ -1051,7 +1051,7 @@ void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
         if (work->timedCameraFinishHook != 0 && work->timedCameraFinishHook(action) != 0) {
             return;
         }
-        if (btlIsSpecialActorCategory((s32)action) != 0) {
+        if (btlIsSpecialActorCategory(action) != 0) {
             btlBuildBattleUnitFramingCameraPose(action, &action->camera, 0.0f);
             SetRotateMatrixX(-(10.0f * 0.017453293f));
             SDF_VU0_STOREVECTOR_NOMEM(action->camera.direction);
