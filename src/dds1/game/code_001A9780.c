@@ -3474,8 +3474,8 @@ u8 btlHasRequiredActorStatusBits(BtlUnit *unit) {
 }
 
 /* Store the confirmed command-selection tuple on the owning actor. */
-void btlSetActorCommandSelection(s32 object, s16 first, s16 second, s16 slot) {
-    BtlUnit *unit = ((BattleSceneObject *)object)->owner->unit;
+void btlSetActorCommandSelection(BattleSceneObject *object, s16 first, s16 second, s16 slot) {
+    BtlUnit *unit = object->owner->unit;
 
     unit->partyRecord.savedCommandPhase = first;
     unit->partyRecord.savedCommandSelectionEntry = second;
@@ -7920,7 +7920,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
                 commands = btlGatherActorCommandsByKind((s32)object, (s16 *)&count, 0, 2, 3);
                 if (entry == (u16)count) {
                     object->commandData->phase = 10;
-                    btlSetActorCommandSelection((s32)object, 10, entry, 0);
+                    btlSetActorCommandSelection(object, 10, entry, 0);
                 } else {
                     picked = &commands[entry - 1];
                     if (btlGetCommandFailureReason(object->owner->unit, *picked) != 0) {
@@ -7930,7 +7930,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
                     object->commandData->phase = 2;
                     object->commandData->skillId = *picked;
                     if (btlIsSupportedCommandKind(&object->commandData->phase) == 0) {
-                        btlSetActorCommandSelection((s32)object, 2, entry, *picked);
+                        btlSetActorCommandSelection(object, 2, entry, *picked);
                     } else {
                         D_003BB494 = 2;
                         D_003BB496 = entry;
@@ -7969,9 +7969,9 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
             object->state = 3;
             object->owner->indexWork.companionB = D_00359160.entries[entry].second;
             if ((battle->battleFlags & 0x1000000) != 0) {
-                btlSetActorCommandSelection((s32)object, 3, entry, D_00359160.entries[entry].skill);
+                btlSetActorCommandSelection(object, 3, entry, D_00359160.entries[entry].skill);
             } else {
-                btlSetActorCommandSelection((s32)object, 0, 0, 0);
+                btlSetActorCommandSelection(object, 0, 0, 0);
             }
             sndSetStationedSeVolume(8);
             return 1;
@@ -7979,7 +7979,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
             object->commandData->phase = 4;
             object->commandData->reference = D_00358FE0[entry * 2];
             object->state = 3;
-            btlSetActorCommandSelection((s32)object, 0, 0, 0);
+            btlSetActorCommandSelection(object, 0, 0, 0);
             sndSetStationedSeVolume(8);
             return 1;
         case 3:
@@ -7991,7 +7991,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
                 }
                 object->commandData->phase = 5;
                 object->state = 3;
-                btlSetActorCommandSelection((s32)object, 0, 0, 0);
+                btlSetActorCommandSelection(object, 0, 0, 0);
                 sndSetStationedSeVolume(8);
                 return 1;
             case 1: {
@@ -8025,7 +8025,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
                 object->commandData->phase = 11;
                 object->commandData->linkedUnit = object->owner->unit;
                 object->state = 3;
-                btlSetActorCommandSelection((s32)object, 0, 0, 0);
+                btlSetActorCommandSelection(object, 0, 0, 0);
                 sndSetStationedSeVolume(8);
                 return 1;
             }
@@ -8037,7 +8037,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
             }
             object->commandData->phase = 6;
             object->state = 3;
-            btlSetActorCommandSelection((s32)object, 0, 0, 0);
+            btlSetActorCommandSelection(object, 0, 0, 0);
             sndSetStationedSeVolume(8);
             return 1;
         case 1:
@@ -8097,7 +8097,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
         }
         object->commandData->phase = 10;
         count = btlGetCommandOptionCount((s32)object, 0, 1);
-        btlSetActorCommandSelection((s32)object, 10, (s16)(count - 1), 0);
+        btlSetActorCommandSelection(object, 10, (s16)(count - 1), 0);
         object->state = 3;
         sndSetStationedSeVolume(8);
         return 1;
@@ -9093,13 +9093,13 @@ void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode
             object->state = 9;
             object->commandData->linkedUnit =
                 (BtlUnit *)btlGetIndexListEntry(work->listA, work->entry);
-            btlSetActorCommandSelection((s32)object, 0, 0, 0);
+            btlSetActorCommandSelection(object, 0, 0, 0);
             sndSetStationedSeVolume(9);
             return;
         }
         work->state = 3;
         if (btlGetActorCommandClass(object, btlCommandPanelWork->classIndex) == 0) {
-            btlSetActorCommandSelection((s32)object, D_003BB494, D_003BB496, D_003BB498);
+            btlSetActorCommandSelection(object, D_003BB494, D_003BB496, D_003BB498);
         }
         return;
     }
