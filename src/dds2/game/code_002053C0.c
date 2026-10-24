@@ -1268,10 +1268,19 @@ typedef struct BtlFormationTaskArgs {
 } BtlFormationTaskArgs;
 
 typedef char BtlFormationTaskArgs_size[(sizeof(BtlFormationTaskArgs) == 0x14) ? 1 : -1];
+typedef char BtlFormationTaskArgs_actor_offset[
+    ((u32)&((BtlFormationTaskArgs *)0)->actor == 0) ? 1 : -1];
+typedef char BtlFormationTaskArgs_first_offset[
+    ((u32)&((BtlFormationTaskArgs *)0)->first == 4) ? 1 : -1];
+typedef char BtlFormationTaskArgs_second_offset[
+    ((u32)&((BtlFormationTaskArgs *)0)->second == 8) ? 1 : -1];
+typedef char BtlFormationTaskArgs_commandId_offset[
+    ((u32)&((BtlFormationTaskArgs *)0)->commandId == 0xC) ? 1 : -1];
+typedef char BtlFormationTaskArgs_flags_offset[
+    ((u32)&((BtlFormationTaskArgs *)0)->flags == 0x10) ? 1 : -1];
 
 /* Select the linkage formation by command row; task completion is always one. */
-s32 btlApplyLinkageFormation(u32 *rawArgs) {
-    BtlFormationTaskArgs *args = (BtlFormationTaskArgs *)rawArgs;
+s32 btlApplyLinkageFormation(BtlFormationTaskArgs *args) {
     BtlState *work = (BtlState *)btlGetRuntime();
     u16 category;
 
@@ -1327,7 +1336,8 @@ s32 btlApplyLinkageFormation(u32 *rawArgs) {
 }
 
 /* Package the action, two companion addresses, skill and flags for formation. */
-BtlRuntimeTask *btlCreateLinkageFormationTask(ActionStateLink *link, u32 firstActorAddress, u32 secondActorAddress, u32 skillId, u32 flags) {
+BtlRuntimeTask *btlCreateLinkageFormationTask(ActionStateLink *link, BtlUnit *firstActor,
+                                              BtlUnit *secondActor, u32 skillId, u32 flags) {
     BtlRuntimeTask *task = btlAllocTask(20);
     BtlFormationTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
@@ -1338,8 +1348,8 @@ BtlRuntimeTask *btlCreateLinkageFormationTask(ActionStateLink *link, u32 firstAc
     task->ownerId = link->unit->owner;
     args = btlGetTaskArguments(task);
     args->actor = link;
-    args->first = (BtlUnit *)firstActorAddress;
-    args->second = (BtlUnit *)secondActorAddress;
+    args->first = firstActor;
+    args->second = secondActor;
     args->commandId = skillId;
     args->flags = flags;
     return task;
