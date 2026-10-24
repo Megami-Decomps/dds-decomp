@@ -14,7 +14,7 @@ enum {
 
 /* Pixel upload inputs shared by texture and font-atlas producers. */
 typedef struct SdfImageUploadRequest {
-    void *pixels;
+    u8 *pixels;
     struct sdfMemHandle_t *allocation;
     u8 allocationMode;
     u8 format;
