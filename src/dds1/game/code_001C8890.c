@@ -55,7 +55,7 @@ extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *owner);
 extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *owner, u32 value, u32 variant);
 extern s32 btlCheckStatusActionEligibility(BtlTask *task);
 extern BtlRuntimeTask * btlCreateCommandSoundTask(BtlTask *, s32 variant);
-extern u8 * btlCreateSecondaryCommandSoundTask(void);
+extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 extern void btlDispatchCommandViaHookOrDefault(u8 *command, BattleIndexWork *argument);
 extern u32 btlGetActiveUnitId(void);
 extern s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId);
@@ -1015,7 +1015,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
     task->startCondition.kind = 4;
     task->startCondition.value.handle = moveHandle;
     btlStartTask(task);
-    task = (BtlRuntimeTask *)btlCreateSecondaryCommandSoundTask();
+    task = btlCreateSecondaryCommandSoundTask();
     task->startCondition.kind = 4;
     task->startCondition.value.handle = moveHandle;
     btlStartTask(task);
@@ -2007,7 +2007,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
-        spawned = (BtlRuntimeTask *)btlCreateSecondaryCommandSoundTask();
+        spawned = btlCreateSecondaryCommandSoundTask();
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
@@ -2139,7 +2139,7 @@ void btlScheduleDevilStateModelChange(BtlTask *task) {
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
-        spawned = (BtlRuntimeTask *)btlCreateSecondaryCommandSoundTask();
+        spawned = btlCreateSecondaryCommandSoundTask();
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);

@@ -4444,7 +4444,7 @@ u32 btlUpdateCommandSoundTaskSecondary(void) {
     return 1;
 }
 
-u8 *btlCreateSecondaryCommandSoundTask(void) {
+BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void) {
     u8 *task = btlAllocTask(0);
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x1C;
@@ -4452,7 +4452,7 @@ u8 *btlCreateSecondaryCommandSoundTask(void) {
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u32 *)(task + 0x48) = 0;
     *(void **)(task + 0x4C) = btlUpdateCommandSoundTaskSecondary;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 /* Complete the empty task on its first process call; no sound operation is performed. */

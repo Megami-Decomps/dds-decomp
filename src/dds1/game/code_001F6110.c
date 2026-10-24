@@ -156,7 +156,7 @@ typedef union BtlVec4 {
     u128 q;
 } BtlVec4;
 
-extern u8 *btlCreateSecondaryCommandSoundTask(void);
+extern struct BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 
 struct BtlRuntimeTask;
 extern struct BtlRuntimeTask *btlCreateCommandSoundTask(BtlTask *, s32 variant);

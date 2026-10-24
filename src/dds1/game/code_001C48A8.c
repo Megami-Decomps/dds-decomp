@@ -436,7 +436,7 @@ s32 fldSceneStateRestoreDisplay(u8 *scene) {
 
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern struct BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
-extern u8 *btlCreateSecondaryCommandSoundTask(void);
+extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 extern BtlRuntimeTask *btlCreateCommandSoundTask(BtlTask *, s32);
 extern u8 *btlCreateModelLoadPollTask(u8 *, u32, u32, s8);
 extern BtlRuntimeTask *btlCreateActorTransparencyTask(BtlUnit *);
@@ -1020,7 +1020,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
                     task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                     task->startCondition.value.handle = sound->handle;
                     btlStartTask(task);
-                    task = (BtlRuntimeTask *)btlCreateSecondaryCommandSoundTask();
+                    task = btlCreateSecondaryCommandSoundTask();
                     task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                     task->startCondition.value.handle = sound->handle;
                     btlStartTask(task);
@@ -1050,7 +1050,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
         task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         task->startCondition.value.handle = clear->handle;
         btlStartTask(task);
-        task = (BtlRuntimeTask *)btlCreateSecondaryCommandSoundTask();
+        task = btlCreateSecondaryCommandSoundTask();
         task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         task->startCondition.value.handle = clear->handle;
         btlStartTask(task);
