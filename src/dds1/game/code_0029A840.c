@@ -81,9 +81,9 @@ extern void mdlPackDecode(s32, u16, s32, const u8 *, s32);
 
 extern void effInitModelVUState(dds3ModelHandle_t *);
 
-dds3ModelHandle_t *effLoadViewerModelWithVUState(void *first, u32 second) {
+dds3ModelHandle_t *effLoadViewerModelWithVUState(void *modelData, u32 modelDataSize) {
     dds3ModelHandle_t *model;
-    mdlPackDecode(6, D_003BC944, 0x101, first, second);
+    mdlPackDecode(6, D_003BC944, 0x101, modelData, modelDataSize);
     model = mdlLoad(6, D_003BC944);
     effInitModelVUState(model);
     D_003BC944++;

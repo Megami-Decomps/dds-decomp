@@ -398,7 +398,7 @@ extern u128 D_00458470[];
 extern SdfLightSources D_003E9F50;
 extern u8 btlIsRuntimeAllocated(void);
 
-extern dds3ModelHandle_t *effLoadViewerModelWithVUState(void *, u32);
+extern dds3ModelHandle_t *effLoadViewerModelWithVUState(void *modelData, u32 modelDataSize);
 
 #include "eff_emitter_type.h"
 

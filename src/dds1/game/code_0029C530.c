@@ -539,7 +539,7 @@ extern char D_003B2AA0[];
 
 void effDestroyModelContext(dds3ModelHandle_t *model);
 
-dds3ModelHandle_t *effLoadViewerModelWithVUState(void *first, u32 second);
+dds3ModelHandle_t *effLoadViewerModelWithVUState(void *modelData, u32 modelDataSize);
 
 typedef struct EffFadeHeaderWork {
     s32 frame;

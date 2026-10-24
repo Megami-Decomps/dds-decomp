@@ -84,12 +84,12 @@ void effInitModelVUState(dds3ModelHandle_t *model) {
 }
 
 /* Load under an unused group-6 viewer ID and initialize the model's VU state. */
-dds3ModelHandle_t *effLoadViewerModelWithVUState(void *modelData, u32 parameter) {
+dds3ModelHandle_t *effLoadViewerModelWithVUState(void *modelData, u32 modelDataSize) {
     dds3ModelHandle_t *result;
     while (mdlSearchResrc(6, D_00437E2C) != 0) {
         D_00437E2C++;
     }
-    mdlPackDecode(6, D_00437E2C, 0x101, modelData, parameter);
+    mdlPackDecode(6, D_00437E2C, 0x101, modelData, modelDataSize);
     result = mdlLoad(6, D_00437E2C);
     effInitModelVUState(result);
     D_00437E2C++;
