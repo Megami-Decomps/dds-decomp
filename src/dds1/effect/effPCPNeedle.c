@@ -213,7 +213,7 @@ void effPCPNeedleSpiralDraw(EffPCPNeedleWork *work) {
     dds3NeedleModelDraw(work->resource);
 }
 
-void effPCPNeedleSpiralSetPosition(void *dst, void *src) {
+void effPCPNeedleSpiralSetPosition(u128 *dst, const u128 *src) {
     SDF_VU0_COPYVECTOR(dst, src);
 }
 
