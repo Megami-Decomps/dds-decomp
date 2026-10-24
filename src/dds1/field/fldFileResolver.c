@@ -1274,10 +1274,10 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
 
 /* Handle a field request, creating the player only in non-special scene states. */
 void fldProcessFieldRequest(FldSceneRequest *request) {
-    s32 state;
+    s32 areaId;
     fldSpawnActionObjects(request->spawnList, request->spawnCount);
-    state = fldGlobalBase.area;
-    if (state != 1 && state < 200) fldCreatePlayerObject();
+    areaId = fldGlobalBase.area;
+    if (areaId != 1 && areaId < 200) fldCreatePlayerObject();
     fldSpawnPlacementObjectsFromBatches(request->spawnBatches, request->spawnBatchCount, 0);
     fldGlobalBase.fallbackResourceTaskName = request->record->fallbackResourceName;
 }
