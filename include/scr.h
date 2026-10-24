@@ -33,8 +33,17 @@ typedef struct ScrLabel {
 } ScrLabel;
 
 /* FLW0 section descriptor (0x10), including the file-relative data offset. */
+typedef s32 BfFlw0SectionKind;
+enum {
+    BF_FLW0_SECTION_PROCEDURES = 0,
+    BF_FLW0_SECTION_LABELS = 1,
+    BF_FLW0_SECTION_INSTRUCTIONS = 2,
+    BF_FLW0_SECTION_AUXILIARY = 3,
+    BF_FLW0_SECTION_STRINGS = 4
+};
+
 typedef struct ScrSection {
-    s32 type;
+    BfFlw0SectionKind type;
     s32 unk04;
     s32 count;
     s32 offset;

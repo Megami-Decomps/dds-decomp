@@ -190,7 +190,7 @@ s32 scrSearchProcedureName(const BfFlw0Header *header, const char *procedureName
     }
     sections = header->sections;
     for (sectionIndex = 0; sectionIndex < header->sectionCount; sectionIndex++) {
-        if (sections[sectionIndex].type == 0) {
+        if (sections[sectionIndex].type == BF_FLW0_SECTION_PROCEDURES) {
             procedures = (const ScrLabel *)((const u8 *)header + sections[sectionIndex].offset);
             break;
         }
