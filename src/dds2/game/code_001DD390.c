@@ -4144,9 +4144,9 @@ void btlApplyLinkedUnitStatusWhenActorActive(s32 taskArgs) {
     }
 }
 
-u32 btlApplyUnitFxWhenLoaded(u32 *taskArgs) {
-    if ((btlUnitStatusPair((BtlUnit *)taskArgs[3]) & 0x1000000002) == 0x1000000002) {
-        evtSetUnitLightAndAmbient(((BtlUnit *)taskArgs[3])->ext, taskArgs[2], *taskArgs, taskArgs[1]);
+u32 btlApplyUnitFxWhenLoaded(BtlRuntimeTaskArgs *taskArgs) {
+    if ((btlUnitStatusPair(taskArgs->unitC) & 0x1000000002) == 0x1000000002) {
+        evtSetUnitLightAndAmbient(taskArgs->unitC->ext, taskArgs->unk_08, taskArgs->value, taskArgs->option);
     }
     return 1;
 }
