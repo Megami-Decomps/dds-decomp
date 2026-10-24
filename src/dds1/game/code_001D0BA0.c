@@ -1347,7 +1347,7 @@ extern void *btlAllocTask(s32);
 
 extern u32 btlApplyDeferredUnitStatus(BtlDeferredUnitStatusArgs *);
 
-void *btlCreateDeferredUnitStatusTask(BtlUnit *owner, u32 value) {
+BtlRuntimeTask *btlCreateDeferredUnitStatusTask(BtlUnit *owner, u32 value) {
     u8 *task = btlAllocTask(8);
     s64 data;
     BtlDeferredUnitStatusArgs *arguments;
@@ -1362,7 +1362,7 @@ void *btlCreateDeferredUnitStatusTask(BtlUnit *owner, u32 value) {
     arguments = btlGetTaskArguments(task);
     arguments->unit = owner;
     arguments->minimumValue = value;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 u32 btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *args) {
@@ -3523,16 +3523,17 @@ u32 btlApplyScaledUnitModelTask(BtlUnit **taskArgs) {
     return 1;
 }
 
-void *btlCreateScaledUnitModelTask(u8 *owner) {
+BtlRuntimeTask *btlCreateScaledUnitModelTask(BtlUnit *owner) {
     u8 *task = btlAllocTask(4);
+    u8 *ownerBytes = (u8 *)owner;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = btlApplyScaledUnitModelTask;
     *(u16 *)(task + 0x20) = 10;
-    *(s64 *)(task + 0x40) = *(s64 *)(owner + 0x108);
+    *(s64 *)(task + 0x40) = *(s64 *)(ownerBytes + 0x108);
     *(u32 *)(task + 0x48) = 0;
-    *(BtlUnit **)btlGetTaskArguments(task) = (BtlUnit *)owner;
-    return task;
+    *(BtlUnit **)btlGetTaskArguments(task) = owner;
+    return (BtlRuntimeTask *)task;
 }
 
 u32 btlPollThresholdTask(BtlRuntimeTaskArgs *arguments) {
@@ -4721,16 +4722,17 @@ u32 btlRefreshUnitFxVectorTask(BtlUnit **taskArgs) {
     return 1;
 }
 
-void *btlCreateUnitFxVectorRefreshTask(u8 *owner) {
+BtlRuntimeTask *btlCreateUnitFxVectorRefreshTask(BtlUnit *owner) {
     u8 *task = btlAllocTask(4);
+    u8 *ownerBytes = (u8 *)owner;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = btlRefreshUnitFxVectorTask;
     *(u16 *)(task + 0x20) = 0x22;
-    *(s64 *)(task + 0x40) = *(s64 *)(owner + 0x108);
+    *(s64 *)(task + 0x40) = *(s64 *)(ownerBytes + 0x108);
     *(u32 *)(task + 0x48) = 0;
-    *(BtlUnit **)btlGetTaskArguments(task) = (BtlUnit *)owner;
-    return task;
+    *(BtlUnit **)btlGetTaskArguments(task) = owner;
+    return (BtlRuntimeTask *)task;
 }
 
 INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3CA0);
