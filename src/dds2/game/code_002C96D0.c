@@ -423,8 +423,6 @@ extern s32 slEndingTop(void);
 
 extern s32 D_00437D30;
 
-extern s32 slQueryYesNo(void *start, void *finish, s32 mode);
-
 extern s32 slEndingUpd2(void);
 
 extern char D_0042B698[];
@@ -2858,7 +2856,7 @@ u32 fileGetSelectionPendingFlag(void) {
     return fileSelectionPending;
 }
 
-extern u32 D_00439024, D_00439028;
+extern FileSelectionCallback D_00439024, D_00439028;
 /* Yes/no cursor input while the card request is idle. */
 static inline void filePollPromptChoice(void) {
     if (D_00437D20 == 0 && slChkWindowOpenDone() != 0) {
@@ -2970,7 +2968,7 @@ s32 fileUpdatePromptDialog(void) {
             p2sdPlaySE(0xA, 0x7F, 0x3F);
             D_00437D18 = -1;
             D_00437D1C = 0;
-            return ((s32 (*)(void))D_00439028)();
+            return D_00439028();
         }
         goto idle;
     }
@@ -3016,11 +3014,11 @@ begin:
 yes:
     D_00437D1C = 0;
     D_00437D18 = -1;
-    return ((s32 (*)(void))D_00439024)();
+    return D_00439024();
 no:
     D_00437D1C = 0;
     D_00437D18 = -1;
-    return ((s32 (*)(void))D_00439028)();
+    return D_00439028();
 restartRequest:
     D_00437D1C = 0;
     D_00437D18 = -1;
@@ -3037,13 +3035,11 @@ idle:
     return 0;
 }
 
-extern u32 D_00439024;
-extern u32 D_00439028;
 extern s32 fileUpdatePromptDialog(void);
 
-s32 slQueryYesNo(void *start, void *finish, s32 mode) {
-    D_00439024 = (u32)start;
-    D_00439028 = (u32)finish;
+s32 slQueryYesNo(FileSelectionCallback start, FileSelectionCallback finish, s32 mode) {
+    D_00439024 = start;
+    D_00439028 = finish;
     D_00437D18 = (u32)mode;
     D_00437D20 = 0;
     if (D_00437D1C != 4 && D_00437D1C != 8) {
@@ -3287,7 +3283,7 @@ s32 fileCreateDetectionAudioCallback(FileMenuContinuationCallback callback) {
     return (s32)mcdFinishFileDetectionWithAudio;
 }
 
-extern u32 fileFourWayDialogCancelCallback;
+extern FileSelectionCallback fileFourWayDialogCancelCallback;
 
 s32 fileFourWayDialogPoll(void) {
     if (slChkWindowOpenDone() == 0) {
@@ -3306,24 +3302,22 @@ s32 fileFourWayDialogPoll(void) {
     } else if (dds3PadButtonState[0x21] < 0) {
         p2sdPlaySE(8, 0x7f, 0x3f);
         if (D_00437D18 == 0) {
-            return ((s32 (*)())D_00439024)();
+            return D_00439024();
         }
-        return ((s32 (*)())D_00439028)();
+        return D_00439028();
     } else if (dds3PadButtonState[0x23] < 0) {
         if (fileFourWayDialogCancelCallback != 0) {
             p2sdPlaySE(0xA, 0x7f, 0x3f);
-            return ((s32 (*)())fileFourWayDialogCancelCallback)();
+            return fileFourWayDialogCancelCallback();
         }
     }
     return 0;
 }
 
-extern u32 D_00439024;
-extern u32 D_00439028;
-extern u32 fileFourWayDialogCancelCallback;
 extern s32 fileFourWayDialogPoll(void);
 
-s32 fileBeginFourWayDialog(u32 ready, u32 completed, u32 cancelled, u32 state) {
+s32 fileBeginFourWayDialog(FileSelectionCallback ready, FileSelectionCallback completed,
+                           FileSelectionCallback cancelled, u32 state) {
     D_00439024 = ready;
     D_00439028 = completed;
     fileFourWayDialogCancelCallback = cancelled;
@@ -3422,7 +3416,7 @@ s32 fileSelectLoadWithHardInit(void) {
 s32 fileBeginLoadBranchDialog(void) {
     slSetInfo(0);
     D_00437D1C = 12;
-    return fileBeginFourWayDialog((u32)fileSelectLoadWithoutHardInit, (u32)fileSelectLoadWithHardInit, 0, 0);
+    return fileBeginFourWayDialog(fileSelectLoadWithoutHardInit, fileSelectLoadWithHardInit, 0, 0);
 }
 
 s32 fileStartLoadDetectionAfterBranchDialog(void) {
@@ -3441,7 +3435,7 @@ s32 fileRestartSelectionFlow(void) {
 s32 fileBeginLoadConfirmationDialog(void) {
     slSetInfo(0);
     D_00437D1C = 11;
-    return fileBeginFourWayDialog((u32)fileStartLoadDetectionAfterBranchDialog, (u32)fileRestartSelectionFlow, (u32)fileRestartSelectionFlow, 0);
+    return fileBeginFourWayDialog(fileStartLoadDetectionAfterBranchDialog, fileRestartSelectionFlow, fileRestartSelectionFlow, 0);
 }
 
 extern s32 fileNextMenuFlowState(void);
@@ -3496,7 +3490,7 @@ s32 fileBeginLoadOrAbortDialog(void) {
     slSetInfo(0);
     D_00437D1C = 10;
     fileLoadSelectionWork->applyLoadResult = 0;
-    return fileBeginFourWayDialog((u32)fileRestartSelectionFlow, (u32)fileBeginFadeAndConfirmSound, (u32)fileFadeBeforeResettingRequest, 0);
+    return fileBeginFourWayDialog(fileRestartSelectionFlow, fileBeginFadeAndConfirmSound, fileFadeBeforeResettingRequest, 0);
 }
 
 s32 mcdContinueLoadSelection(void) {

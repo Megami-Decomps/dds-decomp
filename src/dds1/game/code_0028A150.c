@@ -401,8 +401,6 @@ extern s32 slBootError2(void);
 
 extern u32 D_003BC834;
 
-extern s32 slQueryYesNo(void *start, void *finish, s32 mode);
-
 extern s32 filePollSlotDetectionAndBranch(void);
 extern s32 slLoadProc_openFile(void);
 extern s32 slLoadProc_readFile(void);
@@ -2853,7 +2851,7 @@ u32 fileGetSelectionPendingFlag(void) {
     return fileSelectionPending;
 }
 
-extern void *D_003BD908, *D_003BD90C;
+extern FileSelectionCallback D_003BD908, D_003BD90C;
 /* Yes/no cursor input while the card request is idle. */
 static inline void filePollPromptChoice(void) {
     if (D_003BC838 == 0 && slChkWindowOpenDone() != 0) {
@@ -2965,7 +2963,7 @@ s32 fileUpdatePromptDialog(void) {
             p2sdPlaySE(0xA, 0x7F, 0x3F);
             D_003BC830 = -1;
             D_003BC834 = 0;
-            return ((s32 (*)(void))D_003BD90C)();
+            return D_003BD90C();
         }
         goto idle;
     }
@@ -3011,11 +3009,11 @@ begin:
 yes:
     D_003BC834 = 0;
     D_003BC830 = -1;
-    return ((s32 (*)(void))D_003BD908)();
+    return D_003BD908();
 no:
     D_003BC834 = 0;
     D_003BC830 = -1;
-    return ((s32 (*)(void))D_003BD90C)();
+    return D_003BD90C();
 restartRequest:
     D_003BC834 = 0;
     D_003BC830 = -1;
@@ -3032,10 +3030,8 @@ idle:
     return 0;
 }
 
-extern void *D_003BD908;
-extern void *D_003BD90C;
 extern s32 fileUpdatePromptDialog(void);
-s32 slQueryYesNo(void *start, void *finish, s32 mode) {
+s32 slQueryYesNo(FileSelectionCallback start, FileSelectionCallback finish, s32 mode) {
     D_003BD908 = start;
     D_003BD90C = finish;
     D_003BC830 = mode;
