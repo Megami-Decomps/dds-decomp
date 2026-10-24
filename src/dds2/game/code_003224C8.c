@@ -176,7 +176,7 @@ static inline f32 mnuGetShortRecordInterpolationFactor(MenuWorkEntry *work,
     return fraction;
 }
 
-void func_003226D8(MenuWorkEntry *work, MenuShortRecordList *list,
+void mnuApplyShortRecordMotion(MenuWorkEntry *work, MenuShortRecordList *list,
                    MenuShortRecord *fixed)
 {
     MenuWorkEntry *active = mnuGetActiveEffectWorkEntry();
@@ -397,7 +397,7 @@ void mnuDeactivateWorkEntry(MenuWorkEntry *entry) {
     }
 }
 
-extern void func_003226D8(MenuWorkEntry *, MenuShortRecordList *, MenuShortRecord *);
+extern void mnuApplyShortRecordMotion(MenuWorkEntry *, MenuShortRecordList *, MenuShortRecord *);
 extern s32 mnuAdvanceRegistryRow(MenuWorkEntry *, MenuRegistryTable *, MenuRegistryRecord *, MenuShortRecord *);
 
 /* Tick the packed countdown and dispatch the row's fixed-kind record. */
@@ -424,7 +424,7 @@ s32 mnuAdvanceRegistryWorkEntry(MenuWorkEntry *entry) {
         memset(&empty, 0, sizeof(empty));
         record = &empty;
     }
-    func_003226D8(entry, list, record);
+    mnuApplyShortRecordMotion(entry, list, record);
     entry->elapsed++;
     switch (mnuAdvanceRegistryRow(entry, table, row, record)) {
     case 1:
