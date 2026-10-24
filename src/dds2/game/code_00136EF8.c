@@ -254,7 +254,7 @@ void fldClrCollision(void) {
     }
 }
 
-void fldMakePlane(FldCollisionDescriptor *geometry, f32 *translation,
+void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation,
                    u32 id, s32 sceneFlag, s32 ownerIndex) {
     f32 vertices[4][4];
     f32 copiedVertices[4][4];

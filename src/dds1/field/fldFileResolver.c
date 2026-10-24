@@ -248,7 +248,7 @@ extern void dds3GetRadiusPoseSet(dds3Basic_t *, f32);
 
 extern void dds3SetLightObjectResoruce(dds3Basic_t *, WorldTransformSetup *);
 
-extern void fldMakePlane(FldCollisionDescriptor *geometry, f32 *translation,
+extern void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation,
                                                u32 id, s32 sceneFlag, s32 ownerIndex);
 
 extern s32 fldCommand_GetHojiID(const char *);
@@ -834,7 +834,7 @@ extern s16 D_0032E4B4[];
 
 extern s32 fldCommand_GetHojiID(const char *);
 
-extern void fldMakePlane(FldCollisionDescriptor *geometry, f32 *translation,
+extern void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation,
                                                u32 id, s32 sceneFlag, s32 ownerIndex);
 
 extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, const f32 *, const char *);
@@ -6654,7 +6654,7 @@ void fldClrCollision(void) {
     }
 }
 
-void fldMakePlane(FldCollisionDescriptor *geometry, f32 *translation,
+void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation,
                    u32 id, s32 sceneFlag, s32 ownerIndex) {
     f32 vertices[4][4];
     f32 copiedVertices[4][4];
