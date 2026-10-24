@@ -2240,14 +2240,14 @@ void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer) {
                 } while (glyph != NULL);
             }
             if (best == NULL) {
-                if (node->objectAttached == 1) {
+                if (node->attachmentState == EVT_OBJECT_ATTACHMENT_ATTACHED) {
                     dds3SetPosPoseSet(node->info,
                                            (u128 *)node->savedPosition);
                     dds3SetRotPoseSet(node->info,
                                             (u128 *)node->savedRotation);
                     dds3GetPosPoseSet(node->info);
                     SDF_VU0_STOREVECTOR(&node->info->inner->smoothedPosition);
-                    node->objectAttached = 0;
+                    node->attachmentState = EVT_OBJECT_ATTACHMENT_DETACHED;
                 }
             } else if (best->frame == position) {
                 s16 channel = best->p0C.sh[0];
@@ -2259,14 +2259,14 @@ void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer) {
                                             (u128 *)node->savedRotation);
                     dds3GetPosPoseSet(node->info);
                     SDF_VU0_STOREVECTOR(&node->info->inner->smoothedPosition);
-                    node->objectAttached = 0;
+                    node->attachmentState = EVT_OBJECT_ATTACHMENT_DETACHED;
                 } else {
                     dds3Basic_t *object = dds3SceneBasicSearchName(
                         dds3GetActiveScene(), viewer->entryName[channel]);
 
                     evtSetUnitPos(
                         node->info->key, object->key);
-                    node->objectAttached = 1;
+                    node->attachmentState = EVT_OBJECT_ATTACHMENT_ATTACHED;
                 }
             }
         }

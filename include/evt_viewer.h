@@ -65,6 +65,11 @@ typedef struct EvtGroupMetadata {
     s8 extra2;
 } EvtGroupMetadata;
 
+typedef enum EvtObjectAttachmentState {
+    EVT_OBJECT_ATTACHMENT_DETACHED = 0,
+    EVT_OBJECT_ATTACHMENT_ATTACHED = 1
+} EvtObjectAttachmentState;
+
 /* Complete 0x84-byte entry: metadata, selected object and owned key list. */
 typedef struct EvtRuntimeGroup {
     s32 type;
@@ -87,7 +92,7 @@ typedef struct EvtRuntimeGroup {
     s32 usePendingKey; /* 0x28: type-24 tracks apply the queued key when set. */
     f32 savedPosition[4];
     f32 savedRotation[4];
-    s32 objectAttached;
+    EvtObjectAttachmentState attachmentState;
     s32 childCount;
     EvtRuntimeChild *children;
     EvtRuntimeChild *lastChild;
