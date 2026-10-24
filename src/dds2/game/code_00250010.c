@@ -5791,7 +5791,8 @@ void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
 extern EvtModelScaleEntry *D_00435DE0;
 extern EvtModelScaleEntry *D_00435DF0;
 extern void dds3EffectObjectBasicStatOn(dds3Basic_t *object, u32 flags);
-extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *obj, void *vecA, void *vecB);
+struct SoundMixer;
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, const void *position, const void *scale);
 
 /* Spawn from a keyed task resource with two zeroed constructor vectors.
  * A nonnegative index applies the selected model-table scale relative to the base. */

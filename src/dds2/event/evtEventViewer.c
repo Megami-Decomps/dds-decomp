@@ -480,7 +480,8 @@ void evtViewerBindNamedOwner(dds3Basic_t *effectObject, s32 ownerNameIndex, s32 
 
 
 extern void dds3EffectObjectBasicStatOn(dds3Basic_t *obj, u32 flags);
-extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *resource, void *position, void *scale);
+struct SoundMixer;
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, const void *position, const void *scale);
 extern void dds3StartBEDEffectObjectBasic(dds3Basic_t *obj, u32 entryId);
 struct EffNodeDescriptor;
 extern dds3Basic_t *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);

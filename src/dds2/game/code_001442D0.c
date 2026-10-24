@@ -5175,7 +5175,8 @@ extern struct sdfMemHandle_t *D_004363A4;
 extern u32 D_004363A8;
 extern void dspRequestMessageWindowModeOne(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
-extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *, void *, void *);
+struct SoundMixer;
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *, const void *, const void *);
 extern void dds3EffectObjectBasicStatOff(dds3Basic_t *, u32);
 extern void dds3EffectObjectBasicStatOn(dds3Basic_t *, u32);
 extern void dds3StartBEDEffectObjectBasic(dds3Basic_t *, u32);
@@ -5250,7 +5251,7 @@ void fldUpdateDevilizeEventSequence(void) {
             position[0] = fldGlobalBase.x;
             position[1] = fldGlobalBase.y;
             position[2] = fldGlobalBase.z;
-            node = dds3AddBEDEffectObjectBasic2((void *)D_004363A8, position, rotation);
+            node = dds3AddBEDEffectObjectBasic2((struct SoundMixer *)D_004363A8, position, rotation);
             fldSparkControlState.object = node;
             dds3EffectObjectBasicStatOff(node, 1);
             fileHandleFree(D_004363A0);

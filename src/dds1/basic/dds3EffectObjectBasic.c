@@ -544,7 +544,7 @@ dds3Basic_t *AddBEDEffect(source, firstVector, secondVector)
 }
 
 
-dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *resource, void *position, void *scale) {
+dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, const void *position, const void *scale) {
     return AddBEDEffect(resource, position, scale);
 }
 
