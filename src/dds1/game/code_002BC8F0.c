@@ -176,7 +176,7 @@ extern char D_003BD198[];
 EffectSlotSet *effLoadIndexedResource(const char *base, const char *name, u32 keepAllocation) {
     char path[EFF_RESOURCE_PATH_BYTES];
     u32 sourceAddress;
-    u32 allocation;
+    struct sdfMemHandle_t *allocation;
     EffectSlotSet *instance;
 
     sprintf(path, D_003BD198, base, name);
