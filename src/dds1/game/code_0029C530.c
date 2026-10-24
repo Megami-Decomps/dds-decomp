@@ -176,9 +176,9 @@ extern RefObj *effSharedScalyStripResource;
 
 extern u32 effWindTextureHandle;
 
-extern u32 D_003BC984;
+extern struct sdfMemHandle_t *D_003BC984;
 
-extern u32 D_003BC994;
+extern struct sdfMemHandle_t *D_003BC994;
 
 
 extern u8 D_0038E000[];
@@ -3733,7 +3733,7 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
 
 extern struct SdfTextureFileHeader *D_003BC96C;
 
-INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BC960);
+INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_0029C530", D_003BC960);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", effFlashTextureHandles);
 
@@ -3978,11 +3978,11 @@ void effDrawTrackSet(EffTrackSet *track, const Matrix4 *matrix) {
 }
 
 
-extern u32 D_003BC960[2];
+extern struct sdfMemHandle_t *D_003BC960[2];
 
 void effLoadFlashTextures(void) {
-    D_003BC960[0] = (u32)sdfDevLoadFileEx("/effect/flash00.tmx", (u32 *)&effFlashTextureHandles, 0);
-    D_003BC960[1] = (u32)sdfDevLoadFileEx("/effect/flash01.tmx", (u32 *)(&effFlashTextureHandles + 1), 0);
+    D_003BC960[0] = sdfDevLoadFileEx("/effect/flash00.tmx", (u32 *)&effFlashTextureHandles, 0);
+    D_003BC960[1] = sdfDevLoadFileEx("/effect/flash01.tmx", (u32 *)(&effFlashTextureHandles + 1), 0);
 }
 
 u32 effGetFlashTextureHandle(s32 flashTextureIndex) {
@@ -13617,7 +13617,7 @@ INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BC97C);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", effCurrentRenderPacket);
 
-INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BC984);
+INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_0029C530", D_003BC984);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", effWindTextureHandle);
 
@@ -13625,7 +13625,7 @@ INCLUDE_SDATA(const s32, "game/code_0029C530", effSharedRibbonReferenceCount);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BC990);
 
-INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BC994);
+INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_0029C530", D_003BC994);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", effScalyTextureHandle);
 

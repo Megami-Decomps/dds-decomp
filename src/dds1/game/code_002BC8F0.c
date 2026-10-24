@@ -52,9 +52,9 @@ extern u32 effSharedScalyStripResource;
 
 extern u32 effWindTextureHandle;
 
-extern u32 D_003BC984;
+extern struct sdfMemHandle_t *D_003BC984;
 
-extern u32 D_003BC994;
+extern struct sdfMemHandle_t *D_003BC994;
 
 
 
@@ -135,7 +135,7 @@ typedef struct EffectResourceEntry {
 extern u16 D_003BC944;
 
 extern u8 *D_003BC958;
-extern u32 D_003BC960[2];
+extern struct sdfMemHandle_t *D_003BC960[2];
 
 extern s8 D_003BC9AC;
 

@@ -545,13 +545,13 @@ extern struct sdfDrawTag_t *effCurrentRenderPacket;
 
 
 
-extern u32 D_00437E6C;
+extern sdfMemHandle_t *D_00437E6C;
 
 
 
 extern u8 *effAllocateTexturedStripWork(u32 count, u32 repeat);
 
-extern u32 D_00437E7C;
+extern sdfMemHandle_t *D_00437E7C;
 
 
 extern u32 effPartsListScroll;
@@ -3894,7 +3894,7 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
 
 extern struct SdfTextureFileHeader *D_00437E54;
 
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00437E48);
+INCLUDE_SDATA(sdfMemHandle_t * const, "game/code_002DE248", D_00437E48);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", effFlashTextureHandles);
 
@@ -4182,11 +4182,11 @@ void effDrawTrackSet(EffTrackSet *track, const Matrix4 *matrix) {
 }
 
 
-extern u32 D_00437E48[2];
+extern sdfMemHandle_t *D_00437E48[2];
 
 void effLoadFlashTextures(void) {
-    D_00437E48[0] = (u32)sdfDevLoadFileEx("/effect/flash00.tmx", (u32 *)&effFlashTextureHandles, 0);
-    D_00437E48[1] = (u32)sdfDevLoadFileEx("/effect/flash01.tmx", (u32 *)(&effFlashTextureHandles + 1), 0);
+    D_00437E48[0] = sdfDevLoadFileEx("/effect/flash00.tmx", (u32 *)&effFlashTextureHandles, 0);
+    D_00437E48[1] = sdfDevLoadFileEx("/effect/flash01.tmx", (u32 *)(&effFlashTextureHandles + 1), 0);
 }
 
 u32 effGetFlashTextureHandle(s32 flashTextureIndex) {
@@ -8462,7 +8462,7 @@ void effDrawRibbon(EffRibbonWork *work, const Matrix4 *matrix) {
 }
 
 void effLoadWindTexture(void) {
-    D_00437E6C = (u32)sdfDevLoadFileEx("/effect/wind00.tmx", &effWindTextureHandle, 0);
+    D_00437E6C = sdfDevLoadFileEx("/effect/wind00.tmx", &effWindTextureHandle, 0);
 }
 
 u32 effGetWindTextureHandle(void) {
@@ -9269,7 +9269,7 @@ void func_002F3F70(u8 *owner, void *matrix) {
 }
 
 void effLoadScalyTexture(void) {
-    D_00437E7C = (u32)sdfDevLoadFileEx("/effect/scaly00.tmx", &effScalyTextureHandle, 0);
+    D_00437E7C = sdfDevLoadFileEx("/effect/scaly00.tmx", &effScalyTextureHandle, 0);
 }
 
 u32 effGetScalyTextureHandle(void) {
@@ -17222,7 +17222,7 @@ INCLUDE_SDATA(const s32, "game/code_002DE248", D_00437E64);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", effCurrentRenderPacket);
 
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00437E6C);
+INCLUDE_SDATA(sdfMemHandle_t * const, "game/code_002DE248", D_00437E6C);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", effWindTextureHandle);
 
@@ -17230,7 +17230,7 @@ INCLUDE_SDATA(const s32, "game/code_002DE248", effSharedRibbonReferenceCount);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_00437E78);
 
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00437E7C);
+INCLUDE_SDATA(sdfMemHandle_t * const, "game/code_002DE248", D_00437E7C);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", effScalyTextureHandle);
 
