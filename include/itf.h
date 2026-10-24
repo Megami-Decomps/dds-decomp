@@ -309,7 +309,7 @@ typedef struct ItfMesSlot {
 void InitializeSpeaker(ItfMesBlk14 *cursor, s32 resetPosition);
 void InitializeMessage(ItfMesEntryBlock *cursor, s32 resetPosition);
 
-_FRQ *itfMesBuildNodeRows(u32 *items, s32 itemCount, u32 mask,
+_FRQ *itfMesBuildNodeRows(const u32 *items, s32 itemCount, u32 mask,
     s32 x, s32 y, s32 renderValue);
 _FRQ *UnchainFontHandleUnit(_FRQ *glyph, s32 from, s32 to);
 _FRQ *GetLastLinkFontHandle(_FRQ *glyph);
