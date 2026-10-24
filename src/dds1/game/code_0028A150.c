@@ -2676,46 +2676,46 @@ void fileEnterMcPackScene(s32 mode) {
     while (node != NULL) {
         switch (index) {
         case 0:
-            D_003BC868 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            D_003BC868 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 1:
-            D_003BC86C = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            D_003BC86C = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 2:
-            D_003BC870 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            D_003BC870 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 3:
-            D_003BC874 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            D_003BC874 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 4:
-            D_003BC878 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            D_003BC878 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 5:
-            D_003BC87C = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            D_003BC87C = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 6:
-            D_003BC880 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            D_003BC880 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 7:
-            D_003BC884 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            D_003BC884 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 8:
-            fileSavePreviewPortraitTextures[0] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[0] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 9:
-            fileSavePreviewPortraitTextures[1] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[1] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 10:
-            fileSavePreviewPortraitTextures[2] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[2] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 11:
-            fileSavePreviewPortraitTextures[3] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[3] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         case 12:
-            fileSavePreviewPortraitTextures[4] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[4] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr(PAC_WORK_ALLOCATION(node))));
             break;
         }
-        sdfMemFreeDirect((struct sdfMemHandle_t *)node->resourceHandle);
+        sdfMemFreeDirect(PAC_WORK_ALLOCATION(node));
         index++;
         node = node->next;
     }

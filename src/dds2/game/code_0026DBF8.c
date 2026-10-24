@@ -573,8 +573,9 @@ s32 mnuLoadMantraSpriteTask(dds3ProcessID_t *task) {
         s32 i;
         for (i = 4; entry != 0; entry = entry->next, i++) {
             if (((SdfPacStreamPacketHeader *)entry->packet)->command == 1) {
-                mnuMantraSpriteSlots[i] = (u32)effCreateResourceSlotSetFromAllocation((struct sdfMemHandle_t *)entry->resourceHandle, 0);
-                sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)((u32)entry->resourceHandle));
+                mnuMantraSpriteSlots[i] = (u32)effCreateResourceSlotSetFromAllocation(
+                    PAC_WORK_ALLOCATION(entry), 0);
+                sdfMemFreeDirect(PAC_WORK_ALLOCATION(entry));
             }
         }
         pacFileHandleFree_(request);

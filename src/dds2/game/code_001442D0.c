@@ -3255,12 +3255,12 @@ void fldParseMixLb(void) {
     for (node = lb->packet.queueHead; node != NULL; node = node->next, index++) {
         switch (index) {
         case 5:
-            D_00436338 = (s32)(u32)node->resourceHandle;
-            D_0043633C = sdfMemGetPtr(node->resourceHandle);
+            D_00436338 = (s32)(u32)PAC_WORK_ALLOCATION(node);
+            D_0043633C = sdfMemGetPtr(PAC_WORK_ALLOCATION(node));
             break;
         case 6:
-            D_004362D4 = (s32)(u32)node->resourceHandle;
-            D_004362D8 = sdfMemGetPtr(node->resourceHandle);
+            D_004362D4 = (s32)(u32)PAC_WORK_ALLOCATION(node);
+            D_004362D8 = sdfMemGetPtr(PAC_WORK_ALLOCATION(node));
             break;
         case 0:
         case 1:

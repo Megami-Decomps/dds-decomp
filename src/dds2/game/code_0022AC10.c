@@ -1376,7 +1376,7 @@ void btlFinalizeModelPackEntry(s32 kind, s32 id) {
                      * "Trace-justified pointer staging: sound-table row". */
                     const SoundSlotTableEntry *part = parts + i;
                     if (part->resourceOffset >= 0) {
-                        entry->soundOwner->work.resourceHandles[i] = (struct sdfMemHandle_t *)node->resourceHandle;
+                        entry->soundOwner->work.resourceHandles[i] = PAC_WORK_ALLOCATION(node);
                         entry->soundOwner->work.fileRequests[i] = 0;
                         btlBossDebugPrintf("btl:pack motSE load[%02d][%02d]\n", i, part->resourceOffset);
                         node = node->next;
@@ -1387,7 +1387,7 @@ void btlFinalizeModelPackEntry(s32 kind, s32 id) {
                 }
             } else {
                 for (node = entry->packRequest->packet.queueHead; node != NULL; node = node->next) {
-                    sdfMemFreeDirect((struct sdfMemHandle_t *)node->resourceHandle);
+                    sdfMemFreeDirect(PAC_WORK_ALLOCATION(node));
                 }
             }
             pacFileHandleFree_(entry->packRequest);

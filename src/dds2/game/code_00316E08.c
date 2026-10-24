@@ -435,7 +435,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
                             fileCloneQueueEntries((struct FileQueue *)entry->dataCursor);
                         *queueSlot++ = clone;
                         fileQueueNotifyAllJobsComplete(clone);
-                        sdfMemFreeDirect((sdfMemHandle_t *)entry->resourceHandle);
+                        sdfMemFreeDirect(PAC_WORK_ALLOCATION(entry));
                     }
                     entry = entry->next;
                 } while (entry != NULL);
@@ -457,25 +457,25 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
                     case 0:
                         evtPrintDeveloperConsoleMessage(D_0042D618, D_0040A970[work->packageEntryIndex].name, 0);
                         work->drawObjects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
-                        sdfMemFreeDirect((sdfMemHandle_t *)entry->resourceHandle);
+                        sdfMemFreeDirect(PAC_WORK_ALLOCATION(entry));
                         evtPrintDeveloperConsoleMessage(D_0042D578);
                         break;
                     case 1:
                         evtPrintDeveloperConsoleMessage(D_0042D640, D_0040A970[work->packageEntryIndex].name, 1);
                         work->playerObjects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
-                        sdfMemFreeDirect((sdfMemHandle_t *)entry->resourceHandle);
+                        sdfMemFreeDirect(PAC_WORK_ALLOCATION(entry));
                         evtPrintDeveloperConsoleMessage(D_0042D578);
                         break;
                     case 2:
                         evtPrintDeveloperConsoleMessage(D_0042D668, D_0040A970[work->packageEntryIndex].name, 2);
                         work->objects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
-                        sdfMemFreeDirect((sdfMemHandle_t *)entry->resourceHandle);
+                        sdfMemFreeDirect(PAC_WORK_ALLOCATION(entry));
                         evtPrintDeveloperConsoleMessage(D_0042D578);
                         break;
                     case 3:
                         evtPrintDeveloperConsoleMessage(D_0042D690, D_0040A970[work->packageEntryIndex].name, 3);
                         work->mapObjects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
-                        sdfMemFreeDirect((sdfMemHandle_t *)entry->resourceHandle);
+                        sdfMemFreeDirect(PAC_WORK_ALLOCATION(entry));
                         evtPrintDeveloperConsoleMessage(D_0042D578);
                         break;
                     default:
@@ -498,7 +498,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             while (entry != NULL) {
                 if (entry->packet[0] == 1) {
                     mdlLoadViewerPackageFromWork(entry);
-                    sdfMemFreeDirect((sdfMemHandle_t *)entry->resourceHandle);
+                    sdfMemFreeDirect(PAC_WORK_ALLOCATION(entry));
                 }
                 entry = entry->next;
             }

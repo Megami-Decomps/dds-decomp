@@ -1399,7 +1399,7 @@ void fldFreeNextFile(void) {
 
         if (work != NULL) {
             do {
-                sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)work->resourceHandle);
+                sdfMemFreeDelayedDirect(PAC_WORK_ALLOCATION(work));
                 work = work->next;
             } while (work != NULL);
         }
@@ -1591,34 +1591,34 @@ void fldLoadFieldPack(void) {
             case FLD_PACKED_RESOURCE_INFO_TABLE:
                 fldInfLoadFromMem((const FldInfTable *)work->dataCursor);
                 sdfMemFreeDelayedDirect(
-                    (struct sdfMemHandle_t *)work->resourceHandle);
+                    PAC_WORK_ALLOCATION(work));
                 break;
             case FLD_PACKED_RESOURCE_NPC_PALETTE:
                 fldSetNpcPalette((const FldNpcPalette *)work->dataCursor);
                 sdfMemFreeDelayedDirect(
-                    (struct sdfMemHandle_t *)work->resourceHandle);
+                    PAC_WORK_ALLOCATION(work));
                 break;
             case FLD_PACKED_RESOURCE_SKY_BUFFER:
                 fldUploadSkyBuffer((FldSkyBuffer *)work->dataCursor);
                 sdfMemFreeDelayedDirect(
-                    (struct sdfMemHandle_t *)work->resourceHandle);
+                    PAC_WORK_ALLOCATION(work));
                 break;
             case FLD_PACKED_RESOURCE_ACTOR_WAYPOINT_TABLE:
                 fldGetDoorEntry((FldWaypointBlock *)work->dataCursor);
                 sdfMemFreeDelayedDirect(
-                    (struct sdfMemHandle_t *)work->resourceHandle);
+                    PAC_WORK_ALLOCATION(work));
                 break;
             case FLD_PACKED_RESOURCE_RETAINED_COPY:
                 fldFieldPackData = sdfMemAllocDirect(
-                    sdfMemGetSize((struct sdfMemHandle_t *)work->resourceHandle));
+                    sdfMemGetSize(PAC_WORK_ALLOCATION(work)));
                 memcpy((void *)sdfMemGetPtr(fldFieldPackData),
-                       (void *)sdfMemGetPtr((struct sdfMemHandle_t *)work->resourceHandle),
-                       sdfMemGetSize((struct sdfMemHandle_t *)work->resourceHandle));
+                       (void *)sdfMemGetPtr(PAC_WORK_ALLOCATION(work)),
+                       sdfMemGetSize(PAC_WORK_ALLOCATION(work)));
                 sdfMemFreeDelayedDirect(
-                    (struct sdfMemHandle_t *)work->resourceHandle);
+                    PAC_WORK_ALLOCATION(work));
                 break;
             case FLD_PACKED_RESOURCE_SCENE_RECORD_CHUNK:
-                fldSetSceneRecordChunk(work->dataCursor, work->resourceHandle);
+                fldSetSceneRecordChunk(work->dataCursor, PAC_WORK_ALLOCATION(work));
                 break;
             }
         }
@@ -1783,7 +1783,7 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
             switch (index) {
             case 0:
                 fldRoomSoundResources = sdfTexSetTB((const SdfTextureOffsetListHeader *)work->dataCursor);
-                sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)work->resourceHandle);
+                sdfMemFreeDelayedDirect(PAC_WORK_ALLOCATION(work));
                 fldCachedRoomResourceAllocation = NULL;
                 break;
             case 1:
@@ -1992,7 +1992,7 @@ void fldReleaseFieldResources(void) {
         if (work != 0) {
             do {
                 if (i > 0) {
-                    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)work->resourceHandle);
+                    sdfMemFreeDelayedDirect(PAC_WORK_ALLOCATION(work));
                 }
                 work = work->next;
                 i++;

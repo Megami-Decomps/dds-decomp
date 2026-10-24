@@ -7434,15 +7434,15 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
             while (node != NULL) {
                 switch (i) {
                 case 0:
-                    blocks->fieldTBResourceId = node->resourceHandle;
+                    blocks->fieldTBResourceId = (u32)PAC_WORK_ALLOCATION(node);
                     args->fieldTB = (const SdfTextureOffsetListHeader *)node->dataCursor;
                     break;
                 case 1:
-                    blocks->fieldF2ResourceId = node->resourceHandle;
+                    blocks->fieldF2ResourceId = (u32)PAC_WORK_ALLOCATION(node);
                     args->fieldF2 = node->dataCursor;
                     break;
                 case 2:
-                    blocks->fieldF1ResourceId = node->resourceHandle;
+                    blocks->fieldF1ResourceId = (u32)PAC_WORK_ALLOCATION(node);
                     args->fieldF1 = node->dataCursor;
                     break;
                 }
@@ -8919,7 +8919,7 @@ void sndLoadSysEffLb(void) {
     i = 0;
     while (node != NULL) {
         if (D_003BDE18[i].enabled != 0) {
-            u32 unk08 = (u32)node->resourceHandle;
+            u32 unk08 = (u32)PAC_WORK_ALLOCATION(node);
             D_003BDE18[i].opaque08 = unk08;
             D_003BDE18[i].archiveData = node->dataCursor;
             node = node->next;

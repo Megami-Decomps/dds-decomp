@@ -13574,7 +13574,7 @@ s32 effPollResourceList(EffectList *list) {
                 for (item = list->request->packet.queueHead; item != NULL; item = item->next) {
                     if (((SdfPacStreamPacketHeader *)item->packet)->command == 1) {
                         node = list->first;
-                        allocation = (struct sdfMemHandle_t *)item->resourceHandle;
+                        allocation = PAC_WORK_ALLOCATION(item);
                         *node->reference = effCreateResourceSlotSetFromAllocation(allocation, node->kind);
                         if (node->kind == 0) {
                             sdfMemFreeDirect(allocation);

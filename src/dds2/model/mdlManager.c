@@ -1272,7 +1272,7 @@ PacWork *mdlPackSetOld(PacWork *work, s32 group, s32 id, s32 mode) {
             switch (((SdfPacModelPacketHeader *)work->packet)->tag) {
             case 0x30424950:
                 setup.partInfo = work->dataCursor;
-                setup.resourceHandle = (struct sdfMemHandle_t *)work->resourceHandle;
+                setup.resourceHandle = PAC_WORK_ALLOCATION(work);
                 count = mdlPibGetEffectCount((MdlRecord *)work->dataCursor);
                 if (count > 0) {
                     parts = mdlEffectResrcListNew(count);
@@ -1281,26 +1281,26 @@ PacWork *mdlPackSetOld(PacWork *work, s32 group, s32 id, s32 mode) {
                 break;
             case 0x413250:
                 mdlCreateEffectResrc_P2A(parts, work->dataCursor);
-                sdfMemFreeDirect((struct sdfMemHandle_t *)work->resourceHandle);
+                sdfMemFreeDirect(PAC_WORK_ALLOCATION(work));
                 break;
             case 0x503344:
                 mdlCreateEffectResrc_D3P(parts, (struct EffNodeDescriptor *)work->dataCursor);
-                sdfMemFreeDirect((struct sdfMemHandle_t *)work->resourceHandle);
+                sdfMemFreeDirect(PAC_WORK_ALLOCATION(work));
                 break;
             }
             break;
         case 9:
-            setup.resourceList = (DevRequest *)work->resourceHandle;
+            setup.resourceList = PAC_WORK_TEXTURE_LIST(work);
             break;
         case 6:
             if (setup.requestAllocation == NULL) {
-                setup.requestAllocation = (struct sdfMemHandle_t *)work->resourceHandle;
+                setup.requestAllocation = PAC_WORK_ALLOCATION(work);
                 setup.itemList = (struct sdfModelDef_t *)work->dataCursor;
             }
             break;
         case 8:
             if (setup.motionResource == NULL) {
-                setup.motionResource = (struct sdfMemHandle_t *)work->resourceHandle;
+                setup.motionResource = PAC_WORK_ALLOCATION(work);
                 setup.motionTable = (MotionTable *)work->dataCursor;
             }
             break;
@@ -1340,7 +1340,7 @@ PacWork *mdlPackSet(PacWork *packetWork, s32 group, s32 id, s32 mode) {
 
     memset(&groupSetup, 0, sizeof(groupSetup));
     groupSetup.partInfo = record;
-    groupSetup.resourceHandle = (struct sdfMemHandle_t *)packetWork->resourceHandle;
+    groupSetup.resourceHandle = PAC_WORK_ALLOCATION(packetWork);
     packetWork = sdfPacFreeResrc(packetWork);
     partCount = mdlPibGetEffectCount(record);
     remainingParts = partCount;
@@ -1353,11 +1353,11 @@ PacWork *mdlPackSet(PacWork *packetWork, s32 group, s32 id, s32 mode) {
             switch (((SdfPacModelPacketHeader *)packetWork->packet)->tag) {
             case 0x413250:
                 mdlCreateEffectResrc_P2A(partList, packetWork->dataCursor);
-                sdfMemFreeDirect((struct sdfMemHandle_t *)packetWork->resourceHandle);
+                sdfMemFreeDirect(PAC_WORK_ALLOCATION(packetWork));
                 break;
             case 0x503344:
                 mdlCreateEffectResrc_D3P(partList, (struct EffNodeDescriptor *)packetWork->dataCursor);
-                sdfMemFreeDirect((struct sdfMemHandle_t *)packetWork->resourceHandle);
+                sdfMemFreeDirect(PAC_WORK_ALLOCATION(packetWork));
                 break;
             case 0x555049:
                 objectSize = ((SdfPacModelPacketHeader *)packetWork->packet)->decodedSize;
@@ -1366,7 +1366,7 @@ PacWork *mdlPackSet(PacWork *packetWork, s32 group, s32 id, s32 mode) {
                                + (((SdfPacModelPacketHeader *)packetWork->packet)->flags & 0xF0) - 0x10;
                 }
                 mdlCreateEffectResrc_IPU(partList, packetWork->dataCursor,
-                                    (struct sdfMemHandle_t *)packetWork->resourceHandle, objectSize);
+                                    PAC_WORK_ALLOCATION(packetWork), objectSize);
                 break;
             default:
                 /* Retail retains these metadata stores: DDS1 2188E0/2188E4,
@@ -1382,10 +1382,10 @@ PacWork *mdlPackSet(PacWork *packetWork, s32 group, s32 id, s32 mode) {
     }
 
     if (((SdfPacModelPacketHeader *)packetWork->packet)->command == 9) {
-        groupSetup.resourceList = (DevRequest *)packetWork->resourceHandle;
+        groupSetup.resourceList = PAC_WORK_TEXTURE_LIST(packetWork);
         packetWork = sdfPacFreeResrc(packetWork);
     }
-    groupSetup.requestAllocation = (struct sdfMemHandle_t *)packetWork->resourceHandle;
+    groupSetup.requestAllocation = PAC_WORK_ALLOCATION(packetWork);
     groupSetup.itemList = (struct sdfModelDef_t *)packetWork->dataCursor;
     packetWork = sdfPacFreeResrc(packetWork);
     mdlRegistModelSet(group, id, mode, &groupSetup);
@@ -1397,7 +1397,7 @@ PacWork *mdlPackSet(PacWork *packetWork, s32 group, s32 id, s32 mode) {
                                       slotRecord->payload.stream.selectorA,
                                       slotRecord->payload.stream.selectorB,
                                       (MotionTable *)packetWork->dataCursor,
-                                      (struct sdfMemHandle_t *)packetWork->resourceHandle);
+                                      PAC_WORK_ALLOCATION(packetWork));
         packetWork = sdfPacFreeResrc(packetWork);
         slotCount--;
     }
@@ -1459,4 +1459,3 @@ s32 mdlFileLoad(s32 group, s32 id, s32 jobArg, const char *requestPath, void (*o
 INCLUDE_SDATA(const s32, "model/mdlManager", D_00436FA0);
 
 INCLUDE_SDATA(const s32, "model/mdlManager", D_00436FA8);
-

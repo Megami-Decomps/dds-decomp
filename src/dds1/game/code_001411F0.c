@@ -2900,75 +2900,75 @@ void fldParseMixLb(void) {
     for (node = lb->packet.queueHead; node != NULL; node = node->next, index++) {
         switch (index) {
         case 0:
-            allocation = node->resourceHandle;
+            allocation = PAC_WORK_ALLOCATION(node);
             D_003BD7EC = (s32)(u32)allocation;
             D_003BD7F0 = sdfMemGetPtr(allocation);
             break;
         case 1:
-            allocation = node->resourceHandle;
+            allocation = PAC_WORK_ALLOCATION(node);
             D_003BAF68 = (s32)(u32)allocation;
             D_003BAF6C = sdfMemGetPtr(allocation);
             break;
         case 2:
-            allocation = node->resourceHandle;
+            allocation = PAC_WORK_ALLOCATION(node);
             D_003BAF50 = (s32)(u32)allocation;
             D_003BAF54 = sdfMemGetPtr(allocation);
             break;
         case 3:
-            allocation = node->resourceHandle;
+            allocation = PAC_WORK_ALLOCATION(node);
             D_003BAF74 = (s32)(u32)allocation;
             D_003BAF78 = sdfMemGetPtr(allocation);
             break;
         case 4:
-            allocation = node->resourceHandle;
+            allocation = PAC_WORK_ALLOCATION(node);
             D_003BAF5C = (s32)(u32)allocation;
             D_003BAF60 = sdfMemGetPtr(allocation);
             break;
         case 5:
-            allocation = node->resourceHandle;
+            allocation = PAC_WORK_ALLOCATION(node);
             D_003BAF84 = (s32)(u32)allocation;
             D_003BAF88 = sdfMemGetPtr(allocation);
             break;
         case 6:
-            allocation = node->resourceHandle;
+            allocation = PAC_WORK_ALLOCATION(node);
             D_003BAF44 = (s32)(u32)allocation;
             D_003BAF48 = sdfMemGetPtr(allocation);
             break;
         case 7:
-            allocation = node->resourceHandle;
+            allocation = PAC_WORK_ALLOCATION(node);
             D_003BD7D4 = (s32)(u32)allocation;
             D_003BD7D8 = sdfMemGetPtr(allocation);
             break;
         case 8:
-            allocation = node->resourceHandle;
+            allocation = PAC_WORK_ALLOCATION(node);
             D_003BD7DC = (s32)(u32)allocation;
             D_003BD7E0 = sdfMemGetPtr(allocation);
             break;
         case 9:
-            allocation = node->resourceHandle;
+            allocation = PAC_WORK_ALLOCATION(node);
             D_003BD7E4 = (s32)(u32)allocation;
             D_003BD7E8 = sdfMemGetPtr(allocation);
             break;
         case 10:
-            allocation = node->resourceHandle;
+            allocation = PAC_WORK_ALLOCATION(node);
             fldGlobalBase.mapResources[0].allocation = allocation;
             fldGlobalBase.mapResources[0].resourceData =
                 (struct SdfTextureFileHeader *)sdfMemGetPtr(allocation);
             break;
         case 11:
-            allocation = node->resourceHandle;
+            allocation = PAC_WORK_ALLOCATION(node);
             fldGlobalBase.mapResources[1].allocation = allocation;
             fldGlobalBase.mapResources[1].resourceData =
                 (struct SdfTextureFileHeader *)sdfMemGetPtr(allocation);
             break;
         case 12:
-            allocation = node->resourceHandle;
+            allocation = PAC_WORK_ALLOCATION(node);
             fldGlobalBase.mapResources[2].allocation = allocation;
             fldGlobalBase.mapResources[2].resourceData =
                 (struct SdfTextureFileHeader *)sdfMemGetPtr(allocation);
             break;
         case 13:
-            allocation = node->resourceHandle;
+            allocation = PAC_WORK_ALLOCATION(node);
             fldGlobalBase.mapResources[3].allocation = allocation;
             fldGlobalBase.mapResources[3].resourceData =
                 (struct SdfTextureFileHeader *)sdfMemGetPtr(allocation);

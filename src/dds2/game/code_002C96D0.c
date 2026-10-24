@@ -2656,55 +2656,55 @@ void fileStartMemoryCardMenuForMode(s32 mode) {
     while (node != NULL) {
         switch (index) {
         case 0:
-            D_00437D5C = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            D_00437D5C = (s32)sdfTexSet((SdfTextureFileHeader *)sdfMemGetPtr(PAC_WORK_ALLOCATION(node)));
             break;
         case 1:
-            D_00437D60 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            D_00437D60 = (s32)sdfTexSet((SdfTextureFileHeader *)sdfMemGetPtr(PAC_WORK_ALLOCATION(node)));
             break;
         case 2:
-            D_00437D64 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            D_00437D64 = (s32)sdfTexSet((SdfTextureFileHeader *)sdfMemGetPtr(PAC_WORK_ALLOCATION(node)));
             break;
         case 3:
-            D_00437D68 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            D_00437D68 = (s32)sdfTexSet((SdfTextureFileHeader *)sdfMemGetPtr(PAC_WORK_ALLOCATION(node)));
             break;
         case 4:
-            D_00437D6C = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            D_00437D6C = (s32)sdfTexSet((SdfTextureFileHeader *)sdfMemGetPtr(PAC_WORK_ALLOCATION(node)));
             break;
         case 5:
-            D_00437D70 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            D_00437D70 = (s32)sdfTexSet((SdfTextureFileHeader *)sdfMemGetPtr(PAC_WORK_ALLOCATION(node)));
             break;
         case 6:
-            D_00437D74 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            D_00437D74 = (s32)sdfTexSet((SdfTextureFileHeader *)sdfMemGetPtr(PAC_WORK_ALLOCATION(node)));
             break;
         case 7:
-            D_00437D78 = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            D_00437D78 = (s32)sdfTexSet((SdfTextureFileHeader *)sdfMemGetPtr(PAC_WORK_ALLOCATION(node)));
             break;
         case 8:
-            fileSavePreviewPortraitTextures[0] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[0] = (s32)sdfTexSet((SdfTextureFileHeader *)sdfMemGetPtr(PAC_WORK_ALLOCATION(node)));
             break;
         case 9:
-            fileSavePreviewPortraitTextures[1] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[1] = (s32)sdfTexSet((SdfTextureFileHeader *)sdfMemGetPtr(PAC_WORK_ALLOCATION(node)));
             break;
         case 10:
-            fileSavePreviewPortraitTextures[2] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[2] = (s32)sdfTexSet((SdfTextureFileHeader *)sdfMemGetPtr(PAC_WORK_ALLOCATION(node)));
             break;
         case 11:
-            fileSavePreviewPortraitTextures[3] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[3] = (s32)sdfTexSet((SdfTextureFileHeader *)sdfMemGetPtr(PAC_WORK_ALLOCATION(node)));
             break;
         case 12:
-            fileSavePreviewPortraitTextures[4] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[4] = (s32)sdfTexSet((SdfTextureFileHeader *)sdfMemGetPtr(PAC_WORK_ALLOCATION(node)));
             break;
         case 13:
-            fileSavePreviewPortraitTextures[5] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[5] = (s32)sdfTexSet((SdfTextureFileHeader *)sdfMemGetPtr(PAC_WORK_ALLOCATION(node)));
             break;
         case 14:
-            fileSavePreviewPortraitTextures[6] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[6] = (s32)sdfTexSet((SdfTextureFileHeader *)sdfMemGetPtr(PAC_WORK_ALLOCATION(node)));
             break;
         case 15:
-            fileSavePreviewPortraitTextures[7] = (s32)sdfTexSet((SdfTextureFileHeader *)(sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[7] = (s32)sdfTexSet((SdfTextureFileHeader *)sdfMemGetPtr(PAC_WORK_ALLOCATION(node)));
             break;
         }
-        sdfMemFreeDirect((struct sdfMemHandle_t *)node->resourceHandle);
+        sdfMemFreeDirect(PAC_WORK_ALLOCATION(node));
         index++;
         node = node->next;
     }

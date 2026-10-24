@@ -240,11 +240,11 @@ void sdfPacMemDecoderFuncInit(PacState *state, SdfPacStreamPacketHeader *packet)
         state->phase = 2;
         node = sdfPacNewResrc(state, packet);
         if (state->flags & PAC_STATE_ALLOCATE_HIGH) {
-            node->resourceHandle = sdfMemAllocFromTailDirect(allocationSize);
+            PAC_WORK_ALLOCATION(node) = sdfMemAllocFromTailDirect(allocationSize);
         } else {
-            node->resourceHandle = sdfMemAllocDirect(allocationSize);
+            PAC_WORK_ALLOCATION(node) = sdfMemAllocDirect(allocationSize);
         }
-        state->outputCursor = node->dataCursor = (u8 *)sdfMemLock((struct sdfMemHandle_t *)(node->resourceHandle));
+        state->outputCursor = node->dataCursor = (u8 *)sdfMemLock(PAC_WORK_ALLOCATION(node));
         switch (packet->flags & PAC_ENCODING_MASK) {
         case PAC_ENCODING_RAW:
             state->onInput = sdfPacMemDecoderFunc;
@@ -404,7 +404,7 @@ void sdfPacTmxDecoderInitFunc(PacState *state, SdfPacStreamPacketHeader *packet,
 }
 
 void sdfPacTmxDecoderEndFunc(PacState *state) {
-    state->queueTail->resourceHandle = state->slot.resource->texture;
+    PAC_WORK_TEXTURE(state->queueTail) = state->slot.resource->texture;
     sdfChipFreeDirect(state->slot.resource);
     sdfDecodePacNodeAndAdvanceTail(state);
 }
@@ -438,7 +438,7 @@ void sdfPacResetOutputToAllocationEntry(PacState *state) {
 /* Advance the entry index and complete or request the next entry. */
 void sdfPacAdvanceAllocationEntry(PacState *state) {
     PacListAllocation *allocation = state->slot.list;
-    sdfTexListAdd(state->queueTail->resourceHandle, allocation->buffer.texture);
+    sdfTexListAdd(PAC_WORK_TEXTURE_LIST(state->queueTail), allocation->buffer.texture);
     {
         s32 nextIndex = allocation->entryIndex + 1;
         allocation->entryIndex = nextIndex;

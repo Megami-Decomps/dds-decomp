@@ -93,14 +93,14 @@ void effInitializeBillResourceOwners(void) {
         configOffset = 0;
         do {
             billboard = dds3BillboardCreate(((EffBillResourceInit *)(configOffset + (u32)configTable))->billboardKind,
-                                          (u32)sdfMemGetPtr((struct sdfMemHandle_t *)node->resourceHandle));
+                                          (u32)sdfMemGetPtr(PAC_WORK_ALLOCATION(node)));
             scale = (f32 *)(configOffset + (u32)scaleTable);
             configOffset += sizeof(EffBillResourceInit);
             payload = billboard->child;
             *owner++ = billboard;
             payload->halfWidth = payload->halfWidth * *scale;
             payload->halfHeight = payload->halfHeight * *scale;
-            sdfMemFreeDirect((struct sdfMemHandle_t *)(node->resourceHandle));
+            sdfMemFreeDirect(PAC_WORK_ALLOCATION(node));
             node = node->next;
         } while (node != NULL);
     }
@@ -205,4 +205,3 @@ INCLUDE_RODATA(const s32, "game/code_00157A50", D_00414298);
 INCLUDE_RODATA(const s32, "game/code_00157A50", D_004142B0);
 
 INCLUDE_RODATA(const s32, "game/code_00157A50", D_004142C0);
-
