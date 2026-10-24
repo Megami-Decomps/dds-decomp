@@ -1446,8 +1446,7 @@ void fldMarkLinkedSceneActors(s32 context) {
 extern void ptyApplySkillRecovery(datUnitWork_t *entry, u32 skillId);
 extern void dds3WorkClear(void);
 
-s32 btlFinishScenePartyRecovery(s32 sceneAddress) {
-    BtlState *scene = (BtlState *)sceneAddress;
+s32 btlFinishScenePartyRecovery(BtlState *scene) {
     u32 i;
 
     if (scene->tasks != NULL) {
