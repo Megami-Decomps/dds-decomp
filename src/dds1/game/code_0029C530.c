@@ -1734,14 +1734,6 @@ extern u8 effOnesVector[];
 
 extern void effDrawTrackSet(EffTrackSet *, const Matrix4 *);
 
-typedef struct EffMeshOutput {
-    u32 field_00;       // 0x00
-    u32 textureId;      // 0x04
-    u32 color;          // 0x08
-    u8 pad_0C[8];
-    u8 mode;            // 0x14
-} EffMeshOutput;
-
 #include "eff_bill_cell_draw_work.h"
 
 void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
@@ -8174,9 +8166,9 @@ void effUpdateTintedScaledMesh(BillCellDrawWork *work) {
     eeUnpackRGBAWord(second, unit);
     SDF_VU0_MULVECTOR();
     packed = eePackRGBAWord(128.0f);
-    ((EffMeshOutput *)out)->color = packed;
-    ((EffMeshOutput *)out)->textureId = ((EffBillFlameConfig *)config)->header.timed.alphaTrack.surfaceIndex;
-    ((EffMeshOutput *)out)->mode = ((EffBillFlameConfig *)config)->meshMode;
+    ((EffStripWork *)out)->color = packed;
+    ((EffStripWork *)out)->type = ((EffBillFlameConfig *)config)->header.timed.alphaTrack.surfaceIndex;
+    ((EffStripWork *)out)->flag = ((EffBillFlameConfig *)config)->meshMode;
     SDF_VU0_LOADVECTOR(work->transform);
     effMiscQuaternionToMatrixVU();
     SDF_VU0_LOADVECTOR(effOnesVector);
@@ -8500,9 +8492,9 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
     SDF_VU0_MULVECTOR();
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
-    ((EffMeshOutput *)out)->color = blended[0];
-    ((EffMeshOutput *)out)->textureId = ((EffBillQuantizedConfig *)config)->alphaTrack.surfaceIndex;
-    ((EffMeshOutput *)out)->mode = ((EffBillQuantizedConfig *)config)->meshMode;
+    ((EffStripWork *)out)->color = blended[0];
+    ((EffStripWork *)out)->type = ((EffBillQuantizedConfig *)config)->alphaTrack.surfaceIndex;
+    ((EffStripWork *)out)->flag = ((EffBillQuantizedConfig *)config)->meshMode;
     scale = effSampleScalarCurve(&((EffBillQuantizedConfig *)config)->scaleCurve, limit, progress) * work->scale;
     SDF_VU0_LOADVECTOR(work->transform);
     effMiscQuaternionToMatrixVU();

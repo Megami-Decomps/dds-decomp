@@ -8565,14 +8565,6 @@ void effReleaseTextureAnimationWork(s32 work) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", effUpdateBillFlame);
 
-typedef struct EffMeshOutput {
-    u32 field_00;       // 0x00
-    u32 textureId;      // 0x04
-    u32 color;          // 0x08
-    u8 pad_0C[8];
-    u8 mode;            // 0x14
-} EffMeshOutput;
-
 void func_002F3F70(u8 *owner, void *matrix);
 
 void effUpdateTintedScaledMesh(BillCellDrawWork *work) {
@@ -8596,9 +8588,9 @@ void effUpdateTintedScaledMesh(BillCellDrawWork *work) {
     eeUnpackRGBAWord(second, unit);
     VU0_MUL(vf10, vf10, vf11);
     packed = eePackRGBAWord(128.0f);
-    ((EffMeshOutput *)out)->color = packed;
-    ((EffMeshOutput *)out)->textureId = ((EffBillFlameConfig *)config)->header.timed.alphaTrack.surfaceIndex;
-    ((EffMeshOutput *)out)->mode = ((EffBillFlameConfig *)config)->meshMode;
+    ((EffStripWork *)out)->color = packed;
+    ((EffStripWork *)out)->type = ((EffBillFlameConfig *)config)->header.timed.alphaTrack.surfaceIndex;
+    ((EffStripWork *)out)->flag = ((EffBillFlameConfig *)config)->meshMode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, effOnesVector);
@@ -8914,9 +8906,9 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
-    ((EffMeshOutput *)out)->color = blended[0];
-    ((EffMeshOutput *)out)->textureId = ((EffBillQuantizedConfig *)config)->alphaTrack.surfaceIndex;
-    ((EffMeshOutput *)out)->mode = ((EffBillQuantizedConfig *)config)->meshMode;
+    ((EffStripWork *)out)->color = blended[0];
+    ((EffStripWork *)out)->type = ((EffBillQuantizedConfig *)config)->alphaTrack.surfaceIndex;
+    ((EffStripWork *)out)->flag = ((EffBillQuantizedConfig *)config)->meshMode;
     scale = effSampleScalarCurve(&((EffBillQuantizedConfig *)config)->scaleCurve, limit, progress) * work->scale;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
