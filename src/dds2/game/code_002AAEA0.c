@@ -36,25 +36,25 @@ extern u8 mnuCampCommandDispatchEntries[];
 
 
 u32 mnuPrepareCampFieldSkillDisplay(dds3ProcessID_t *task) {
-    s32 context;
+    MenuStaffContext *context;
 
-    context = dds3GetProcessData(task);
-    if (mnuUseFieldSkillOnParty(&((MenuStaffContext *)context)->partyPanel, &((MenuStaffContext *)context)->partyWindow, 0) == 0) {
-        ((MenuStaffContext *)context)->skillWindow->list->last->flags48 |= 1;
+    context = (MenuStaffContext *)dds3GetProcessData(task);
+    if (mnuUseFieldSkillOnParty(&context->partyPanel, &context->partyWindow, 0) == 0) {
+        context->skillWindow->list->last->flags48 |= 1;
     } else {
-        ((MenuStaffContext *)context)->skillWindow->list->last->flags48 &= ~1;
+        context->skillWindow->list->last->flags48 &= ~1;
     }
-    ((MenuStaffContext *)context)->titleOpacity = 0;
-    ((MenuStaffContext *)context)->titleFadingOut = 0;
-    ((MenuStaffContext *)context)->titleSlide = -0x32;
+    context->titleOpacity = 0;
+    context->titleFadingOut = 0;
+    context->titleSlide = -0x32;
     return 1;
 }
 
 u32 mnuStartCampTitleFadeOut(dds3ProcessID_t *task) {
-    s32 context;
+    MenuStaffContext *context;
 
-    context = dds3GetProcessData(task);
-    ((MenuStaffContext *)context)->titleFadingOut = 1;
+    context = (MenuStaffContext *)dds3GetProcessData(task);
+    context->titleFadingOut = 1;
     return 1;
 }
 
@@ -130,38 +130,36 @@ s32 mnuDrawCampFieldSkillPage(dds3ProcessID_t *task) {
 }
 
 s32 mnuFinishStaffConfigPopup(dds3ProcessID_t *callback) {
-    s32 context;
+    MenuStaffContext *context;
 
-    context = dds3GetProcessData(callback);
-    return menuSetHandler((void *)context, 2, (void *)callback);
+    context = (MenuStaffContext *)dds3GetProcessData(callback);
+    return menuSetHandler(context, 2, (void *)callback);
 }
 
 u32 mnuOpenCampConfigPanelTasks(dds3ProcessID_t *task) {
-    s32 context;
+    MenuStaffContext *context;
 
-    context = dds3GetProcessData(task);
-    mnuSwitchCampVisualCategory(5, (MenuStaffContext *)context);
-    mnuConfigurePanelResource(((MenuStaffContext *)context)->scrollPanel,
-                              ((MenuStaffContext *)context)->contextTitle, 0, 0);
+    context = (MenuStaffContext *)dds3GetProcessData(task);
+    mnuSwitchCampVisualCategory(5, context);
+    mnuConfigurePanelResource(context->scrollPanel, context->contextTitle, 0, 0);
     dds3ConfigProcessStart(0);
     return 1;
 }
 
 /* Switch the staff display to the alternate resource at context + 0x60. */
 u32 mnuConfigureCampDrawContextPanel(dds3ProcessID_t *task) {
-    s32 context;
+    MenuStaffContext *context;
 
-    context = dds3GetProcessData(task);
-    mnuConfigurePanelResource(((MenuStaffContext *)context)->scrollPanel,
-                              ((MenuStaffContext *)context)->resources.baseResources[0], 0, 1);
+    context = (MenuStaffContext *)dds3GetProcessData(task);
+    mnuConfigurePanelResource(context->scrollPanel, context->resources.baseResources[0], 0, 1);
     return 1;
 }
 
 /* Dispatch a callback; on idle, install the default entry unless busy. */
 s32 mnuDispatchStaffMenuWithIdlePopup(dds3ProcessID_t *callback) {
-    s32 context = dds3GetProcessData(callback);
-    s32 *dispatchEntry = &((MenuStaffContext *)context)->popupState;
-    s32 state = mnuDispatchPopupTransition(&((MenuStaffContext *)context)->transitionWork, dispatchEntry, 0, (void *)callback);
+    MenuStaffContext *context = (MenuStaffContext *)dds3GetProcessData(callback);
+    s32 *dispatchEntry = &context->popupState;
+    s32 state = mnuDispatchPopupTransition(&context->transitionWork, dispatchEntry, 0, (void *)callback);
     if (state == 0) {
         if (checkConfigState() == 0) {
             mnuSetPopupEntryFlagged(dispatchEntry, mnuCampCommandReturnPopupEntry);
@@ -172,14 +170,14 @@ s32 mnuDispatchStaffMenuWithIdlePopup(dds3ProcessID_t *callback) {
 }
 
 s32 mnuDrawStaffImageScreen(dds3ProcessID_t *callback) {
-    s32 context;
+    MenuStaffContext *context;
 
-    context = dds3GetProcessData(callback);
-    mnuDrawCampIconBackdrop(&((MenuStaffContext *)context)->campEffect, 0x20);
-    mnuDrawStaffScrollPanel(-0x10, -8, 0, ((MenuStaffContext *)context)->scrollPanel, 0x54);
+    context = (MenuStaffContext *)dds3GetProcessData(callback);
+    mnuDrawCampIconBackdrop(&context->campEffect, 0x20);
+    mnuDrawStaffScrollPanel(-0x10, -8, 0, context->scrollPanel, 0x54);
     mnuCreateStaffImageSprite(0x18);
-    mnuDrawStaffGridLabelsForKind(2, ((MenuStaffContext *)context)->resources.baseResources[0]);
-    return menuSetHandler((void *)context, 1, (void *)callback);
+    mnuDrawStaffGridLabelsForKind(2, context->resources.baseResources[0]);
+    return menuSetHandler(context, 1, (void *)callback);
 }
 
 s32 mnuFinishStaffImagePopup(dds3ProcessID_t *callback) {
@@ -198,16 +196,16 @@ u32 mnuRunCampFieldSkillDisplayTask(dds3ProcessID_t *task) {
 }
 
 s32 mnuPollCampFieldSkillAndPopup(dds3ProcessID_t *callback) {
-    s32 context;
+    MenuStaffContext *context;
     s32 state;
 
-    context = dds3GetProcessData(callback);
-    state = menuSetHandler((void *)context, 0, (void *)callback);
+    context = (MenuStaffContext *)dds3GetProcessData(callback);
+    state = menuSetHandler(context, 0, (void *)callback);
     if (state != 0) {
         return state;
     }
-    mnuUseFieldSkillOnParty(&((MenuStaffContext *)context)->partyPanel, &((MenuStaffContext *)context)->partyWindow, 1);
-    mnuSetPopupEntry(&((MenuStaffContext *)context)->popupState, mnuCampCommandReturnPopupEntry);
+    mnuUseFieldSkillOnParty(&context->partyPanel, &context->partyWindow, 1);
+    mnuSetPopupEntry(&context->popupState, mnuCampCommandReturnPopupEntry);
     return 0;
 }
 
@@ -230,10 +228,10 @@ s32 mnuDrawStaffCampImageScreen(dds3ProcessID_t *task) {
 }
 
 s32 mnuFinishFieldSkillPopup(dds3ProcessID_t *callback) {
-    s32 context;
+    MenuStaffContext *context;
 
-    context = dds3GetProcessData(callback);
-    return menuSetHandler((void *)context, 2, (void *)callback);
+    context = (MenuStaffContext *)dds3GetProcessData(callback);
+    return menuSetHandler(context, 2, (void *)callback);
 }
 
 /* Always allow entry to the registered staff-display return popup. */
