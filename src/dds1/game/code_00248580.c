@@ -1120,8 +1120,7 @@ extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, void *, s32, s3
 /* Draw the terminal panels before advancing their 0..256 blend weight.
  * Reduced modes one/two set an endpoint immediately; normal opening adds twelve,
  * closing subtracts seventeen. Keep the native draw-before-update order. */
-void mnuDrawAndStepTerminalPanelFade(s32 close, s32 context) {
-    MenuTerminalWork *work = (MenuTerminalWork *)context;
+void mnuDrawAndStepTerminalPanelFade(s32 close, MenuTerminalWork *work) {
     s32 positions[3][2];
     s32 (*position)[2];
     u32 i;
@@ -1656,7 +1655,7 @@ extern void dspRequestMessageWindowModeOne(void);
 
 
 
-extern void mnuDrawAndStepTerminalPanelFade(s32, s32);
+extern void mnuDrawAndStepTerminalPanelFade(s32, MenuTerminalWork *);
 
 
 
@@ -1774,7 +1773,7 @@ s32 evtDispatchSelectionAfterFieldFrameGate(dds3ProcessID_t *request) {
     s32 state = dds3GetProcessData(request);
 
     mnuDrawTerminalEffectIfAvailable(state);
-    mnuDrawAndStepTerminalPanelFade(0, state);
+    mnuDrawAndStepTerminalPanelFade(0, (MenuTerminalWork *)state);
     if (fldClassifyRemainingFrames(state) != 2) {
         return 0;
     }
@@ -1934,7 +1933,7 @@ s32 mnuUpdateTerminalSelectionInput(dds3ProcessID_t *input) {
 s32 mnuUpdateAndDrawTerminalScene(dds3ProcessID_t *item) {
     s32 state = dds3GetProcessData(item);
     mnuDrawTerminalEffectIfAvailable(state);
-    mnuDrawAndStepTerminalPanelFade(0, state);
+    mnuDrawAndStepTerminalPanelFade(0, (MenuTerminalWork *)state);
     mnuDispatchTransitionHostCallbacks(state);
     mnuDrawTerminalSlotGauge((MenuTerminalWork *)state);
     mnuDrawTerminalSelectedSlots(state);
@@ -2050,7 +2049,7 @@ s32 mnuInitializeSelectionDispatchWhenModeUnset(dds3ProcessID_t *item) {
     s32 state = dds3GetProcessData(item);
     MenuTerminalWork *work = (MenuTerminalWork *)state;
     mnuDrawTerminalEffectIfAvailable(state);
-    mnuDrawAndStepTerminalPanelFade(0, state);
+    mnuDrawAndStepTerminalPanelFade(0, (MenuTerminalWork *)state);
     mnuDispatchTransitionHostCallbacks(state);
     mnuDrawTerminalSlotGauge((MenuTerminalWork *)state);
     mnuDrawTerminalSelectedSlots(state);
@@ -2108,11 +2107,11 @@ s32 mnuBeginTerminalExitTransition(dds3ProcessID_t *item) {
     }
     mnuDrawTerminalEffectIfAvailable(state);
     if (((MenuTerminalWork *)state)->reduced == 0) {
-        mnuDrawAndStepTerminalPanelFade(1, state);
+        mnuDrawAndStepTerminalPanelFade(1, (MenuTerminalWork *)state);
     } else if (mnuGetTerminalFrameFade((MenuTerminalWork *)state) == 0) {
-        mnuDrawAndStepTerminalPanelFade(1, state);
+        mnuDrawAndStepTerminalPanelFade(1, (MenuTerminalWork *)state);
     } else {
-        mnuDrawAndStepTerminalPanelFade(0, state);
+        mnuDrawAndStepTerminalPanelFade(0, (MenuTerminalWork *)state);
     }
     mnuDispatchTransitionHostCallbacks((MenuTerminalWork *)state);
     mnuDrawTerminalSlotGauge((MenuTerminalWork *)state);
@@ -2211,11 +2210,11 @@ s32 evtBPollSelectionChainPanel(dds3ProcessID_t *item) {
     mnuDrawTerminalEffectIfAvailable(state);
     if (fldClassifyRemainingFrames((MenuTerminalWork *)state) != 0) {
         if (((MenuTerminalWork *)state)->reduced == 0) {
-            mnuDrawAndStepTerminalPanelFade(1, state);
+            mnuDrawAndStepTerminalPanelFade(1, (MenuTerminalWork *)state);
         } else if (mnuGetTerminalFrameFade((MenuTerminalWork *)state) == 0) {
-            mnuDrawAndStepTerminalPanelFade(1, state);
+            mnuDrawAndStepTerminalPanelFade(1, (MenuTerminalWork *)state);
         } else {
-            mnuDrawAndStepTerminalPanelFade(0, state);
+            mnuDrawAndStepTerminalPanelFade(0, (MenuTerminalWork *)state);
         }
         mnuDispatchTransitionHostCallbacks((MenuTerminalWork *)state);
         mnuDrawTerminalSlotGauge((MenuTerminalWork *)state);
@@ -2288,7 +2287,7 @@ s32 evtBChooseSelectionCompletionPopup(dds3ProcessID_t *input) {
 s32 mnuDrawTerminalSelectionPanel(dds3ProcessID_t *item) {
     s32 state = dds3GetProcessData(item);
     mnuDrawTerminalEffectIfAvailable(state);
-    mnuDrawAndStepTerminalPanelFade(0, state);
+    mnuDrawAndStepTerminalPanelFade(0, (MenuTerminalWork *)state);
     mnuDispatchTransitionHostCallbacks(state);
     mnuDrawTerminalSlotGauge((MenuTerminalWork *)state);
     mnuDrawTerminalSelectedSlots(state);
@@ -2338,7 +2337,7 @@ s32 evtBContinueDispatchOrRestoreTable(dds3ProcessID_t *input) {
 s32 mnuPrepareDispatchStateAndBindHandler(dds3ProcessID_t *item) {
     s32 state = dds3GetProcessData(item);
     mnuDrawTerminalEffectIfAvailable(state);
-    mnuDrawAndStepTerminalPanelFade(0, state);
+    mnuDrawAndStepTerminalPanelFade(0, (MenuTerminalWork *)state);
     mnuDispatchTransitionHostCallbacks(state);
     mnuDrawTerminalSlotGauge((MenuTerminalWork *)state);
     mnuDrawTerminalSelectedSlots(state);
@@ -2435,9 +2434,9 @@ s32 evtBDispatchSyncD2(dds3ProcessID_t *item) {
 
     mnuDrawTerminalEffectIfAvailable(state);
     if (mnuGetTerminalFrameFade((MenuTerminalWork *)state) == 0) {
-        mnuDrawAndStepTerminalPanelFade(1, state);
+        mnuDrawAndStepTerminalPanelFade(1, (MenuTerminalWork *)state);
     } else {
-        mnuDrawAndStepTerminalPanelFade(0, state);
+        mnuDrawAndStepTerminalPanelFade(0, (MenuTerminalWork *)state);
     }
     mnuDispatchTransitionHostCallbacks(state);
     if (((MenuTerminalWork *)state)->effectStage != 3) {
