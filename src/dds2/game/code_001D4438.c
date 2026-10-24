@@ -1937,7 +1937,7 @@ s32 btlFormatActionEventFilename(s32 skillIndex, char *output);
 BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *effect,
         char *name);
 void sndFormatResourceNameFromIndex(s32 skillIndex, char *output);
-BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *value, s32 option, char *name);
+BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *value, s32 option, const char *name);
 BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *effect,
         BtlUnit *sourceOwner, s32 source, s32 target, BtlUnit *actor,
         s32 frames);

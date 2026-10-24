@@ -9205,7 +9205,7 @@ u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
     return 0;
 }
 
-BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, s32 option, char *name) {
+BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, s32 option, const char *name) {
     BtlRuntimeTask *task = btlAllocTask(strlen(name) + sizeof(SoundFileTaskArgs));
     SoundFileTaskArgs *args;
     char *copy;

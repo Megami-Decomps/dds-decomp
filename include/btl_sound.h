@@ -372,7 +372,7 @@ u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *args);
 #ifdef VERSION_DDS1
 struct BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, u32 blockIndex, const char *filename);
 #else
-struct BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, s32 frames, char *filename);
+struct BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, s32 frames, const char *filename);
 #endif
 
 /* Both factories store full words; callbacks use the low 16 duration bits. */
