@@ -10,6 +10,7 @@
 #define BTL_STATE_FLAG_DISABLE_COMMAND_TARGET_ELIGIBILITY 0x40
 
 struct dds3ProcessID_t;
+struct SoundMixer;
 struct BtlRuntimeTask;
 struct SdfFlagListWork;
 struct sdfMemHandle_t;
@@ -197,7 +198,7 @@ typedef struct BtlState {
     s16 eventActive; /* 0x1CC */
     u8 pad1CE[2];
     s32 eventAction; /* 0x1D0 */
-    void *eventResult; /* 0x1D4 */
+    struct SoundMixer *eventResult; /* 0x1D4 */
     void *eventRequest; /* 0x1D8 */
     void *eventData; /* 0x1DC */
     BtlUnit *eventUnit; /* 0x1E0 */
@@ -438,7 +439,7 @@ typedef struct BtlState {
     s16 eventActive; /* 0x1F0 */
     u8 pad1F2[2];
     s32 eventAction; /* 0x1F4 */
-    void *eventResult; /* 0x1F8 */
+    struct SoundMixer *eventResult; /* 0x1F8 */
     void *eventRequest; /* 0x1FC */
     void *eventData; /* 0x200 */
     BtlUnit *eventUnit; /* 0x204 */

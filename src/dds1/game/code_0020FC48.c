@@ -207,7 +207,7 @@ void btlUpdateEventPlayback(void) {
         if (battle->eventRequest != NULL) {
             sndReleaseAllVoices((SoundMixer *)battle->eventRequest);
         }
-        battle->eventRequest = sndMixerClone((SoundMixer *)battle->eventResult);
+        battle->eventRequest = sndMixerClone(battle->eventResult);
         battle->eventActive = 2;
         break;
 
