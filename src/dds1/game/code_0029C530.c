@@ -524,7 +524,7 @@ extern EffKindDesc D_0037E7E8[];
 
 
 /* VU0 model helpers consume vf10 directly, matching the original macro-mode setup. */
-extern void func_002B0B70(u8 *, void *);
+extern void func_002B0B70(EffStripWork *, void *);
 
 extern u16 D_003BC944;
 
@@ -8687,11 +8687,10 @@ extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
 extern void sdfBuildFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
-void func_002B0B70(u8 *owner, void *matrix) {
+void func_002B0B70(EffStripWork *work, void *matrix) {
     f32 normalizedColor[4];
     s32 baseColor[4];
     u32 packedColor;
-    EffStripWork *work = (EffStripWork *)owner;
     SdfPoolNode *surface;
     void *list;
     sdfTexHandle_t *texture;
