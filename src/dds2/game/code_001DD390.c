@@ -5763,17 +5763,23 @@ BtlRuntimeTask *btlCreateFloatTask28(ActionStateLink *actor, f32 x, f32 y, f32 z
     return task;
 }
 
-s32 btlApplyEffectCameraKeyframes(f32 *args) {
+s32 btlApplyEffectCameraKeyframes(BtlCameraKeyframesTaskArgs *args) {
     s32 context = (s32)(u32)btlGetRuntime();
-    btlSetCameraCommandMode(1, *(ActionStateLink **)args, 0, 0, 0);
-    btlSetEffectCameraKeys(context + 0x70, args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8],
-                  args[9], args[10], args[11], args[12], args[13], args[14], args[15], args[16]);
+    btlSetCameraCommandMode(1, args->actor, 0, 0, 0);
+    btlSetEffectCameraKeys(context + 0x70,
+                  args->frontPosition[0], args->frontPosition[1], args->frontPosition[2],
+                  args->frontDirection[0], args->frontDirection[1],
+                  args->frontDirection[2], args->frontDirection[3],
+                  args->backPosition[0], args->backPosition[1], args->backPosition[2],
+                  args->backDirection[0], args->backDirection[1],
+                  args->backDirection[2], args->backDirection[3],
+                  args->scale, args->motionParameter);
     return 1;
 }
 
 BtlRuntimeTask *btlCreateFloatTask29(ActionStateLink *actor, f32 a1, f32 a2, f32 a3, f32 a4, f32 a5, f32 a6, f32 a7, f32 a8, f32 a9, f32 a10, f32 a11, f32 a12, f32 a13, f32 a14, f32 a15, f32 a16) {
     BtlRuntimeTask *task = btlAllocTask(0x44);
-    f32 *args;
+    BtlCameraKeyframesTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x2C;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -5783,27 +5789,27 @@ BtlRuntimeTask *btlCreateFloatTask29(ActionStateLink *actor, f32 a1, f32 a2, f32
     task->callback = btlApplyEffectCameraKeyframes;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    *(ActionStateLink **)args = actor;
-    args[1] = a1;
-    args[2] = a2;
-    args[3] = a3;
-    args[4] = a4;
-    args[5] = a5;
-    args[6] = a6;
-    args[7] = a7;
-    args[8] = a8;
-    args[9] = a9;
-    args[10] = a10;
-    args[11] = a11;
-    args[12] = a12;
-    args[13] = a13;
-    args[14] = a14;
-    args[15] = a15;
-    args[16] = a16;
+    args->actor = actor;
+    args->frontPosition[0] = a1;
+    args->frontPosition[1] = a2;
+    args->frontPosition[2] = a3;
+    args->frontDirection[0] = a4;
+    args->frontDirection[1] = a5;
+    args->frontDirection[2] = a6;
+    args->frontDirection[3] = a7;
+    args->backPosition[0] = a8;
+    args->backPosition[1] = a9;
+    args->backPosition[2] = a10;
+    args->backDirection[0] = a11;
+    args->backDirection[1] = a12;
+    args->backDirection[2] = a13;
+    args->backDirection[3] = a14;
+    args->scale = a15;
+    args->motionParameter = a16;
     return task;
 }
 
-u32 btlApplyCameraKeysAndMarkRuntimeChange(u32 taskArgs) {
+u32 btlApplyCameraKeysAndMarkRuntimeChange(BtlCameraKeyframesTaskArgs *taskArgs) {
     s32 work;
 
     work = (s32)(u32)btlGetRuntime();

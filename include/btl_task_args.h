@@ -29,6 +29,37 @@ typedef char BtlCameraTransformTaskArgsDirectionOffsetCheck[
 typedef char BtlCameraTransformTaskArgsFovOffsetCheck[
     (u32)&((BtlCameraTransformTaskArgs *)0)->fovDegrees == 0x20 ? 1 : -1];
 
+/* The camera-keyframes task carries two poses and their blend controls. */
+typedef struct BtlCameraKeyframesTaskArgs {
+#ifdef VERSION_DDS1
+    struct BtlTask *actor; /* 0x00: nullable command actor. */
+#else
+    struct ActionStateLink *actor; /* 0x00: nullable command actor. */
+#endif
+    f32 frontPosition[3];    /* 0x04: first camera origin xyz. */
+    f32 frontDirection[4];  /* 0x10: first direction quaternion xyzw. */
+    f32 backPosition[3];    /* 0x20: second camera origin xyz. */
+    f32 backDirection[4];   /* 0x2C: second direction quaternion xyzw. */
+    f32 scale;               /* 0x3C: passed to both pose initializers. */
+    f32 motionParameter;     /* 0x40: camera pose blend parameter. */
+} BtlCameraKeyframesTaskArgs;
+typedef char BtlCameraKeyframesTaskArgsSizeCheck[
+    sizeof(BtlCameraKeyframesTaskArgs) == 0x44 ? 1 : -1];
+typedef char BtlCameraKeyframesTaskArgsActorOffsetCheck[
+    (u32)&((BtlCameraKeyframesTaskArgs *)0)->actor == 0x00 ? 1 : -1];
+typedef char BtlCameraKeyframesTaskArgsFrontPositionOffsetCheck[
+    (u32)&((BtlCameraKeyframesTaskArgs *)0)->frontPosition == 0x04 ? 1 : -1];
+typedef char BtlCameraKeyframesTaskArgsFrontDirectionOffsetCheck[
+    (u32)&((BtlCameraKeyframesTaskArgs *)0)->frontDirection == 0x10 ? 1 : -1];
+typedef char BtlCameraKeyframesTaskArgsBackPositionOffsetCheck[
+    (u32)&((BtlCameraKeyframesTaskArgs *)0)->backPosition == 0x20 ? 1 : -1];
+typedef char BtlCameraKeyframesTaskArgsBackDirectionOffsetCheck[
+    (u32)&((BtlCameraKeyframesTaskArgs *)0)->backDirection == 0x2C ? 1 : -1];
+typedef char BtlCameraKeyframesTaskArgsScaleOffsetCheck[
+    (u32)&((BtlCameraKeyframesTaskArgs *)0)->scale == 0x3C ? 1 : -1];
+typedef char BtlCameraKeyframesTaskArgsMotionParameterOffsetCheck[
+    (u32)&((BtlCameraKeyframesTaskArgs *)0)->motionParameter == 0x40 ? 1 : -1];
+
 /* Kind 0x27 command-sound tasks allocate this 0x14-byte camera-mode packet.
  * The task builder fills actor/mode; targeted variants add category or units. */
 typedef struct BtlCommandSoundTaskArgs {
