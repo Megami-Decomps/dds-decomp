@@ -787,11 +787,11 @@ effPCPCrack_t *effPCPCrack2Copy(effPCPCrack_t *src) {
     return work;
 }
 
-void effPCPCrack2Delete(void *work) {
+void effPCPCrack2Delete(effPCPCrack_t *work) {
     effPCPCrackDelete(work);
 }
 
-void effPCPCrack2Draw(void *work) {
+void effPCPCrack2Draw(effPCPCrack_t *work) {
     effPCPCrackDraw(work);
 }
 
