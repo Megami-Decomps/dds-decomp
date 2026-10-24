@@ -43,7 +43,7 @@ void dds3FreePoseSet(dds3Basic_t *node);
 void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *objectBase);
 /* Dispatchers take (bill handle, 16-byte vector, extra); the vector is
    loaded with lqc2 and the extra is forwarded to dds3AddEffectObjectBasic. */
-dds3Basic_t *AddP2AEffect(void *bill, const u128 *vec, s32 extra);
+dds3Basic_t *AddP2AEffect(billHandle_t *bill, const u128 *vec, s32 extra);
 void dds3BillboardSetAnimNumber(struct billHandle_t *arg, u32 entryIndex);
 dds3Basic_t *AddTMXEffect(void *bill, const u128 *vec, s32 extra);
 dds3Basic_t *effObjCreateWithBoundBill(void *bill, const u128 *vec, void *secondVector);
@@ -288,7 +288,7 @@ dds3Basic_t *dds3AddEffectObjectBasic(u32 worldCounter, const u128 *position, co
 
 
 
-dds3Basic_t *AddP2AEffect(void *bill, const u128 *vec, s32 extra) {
+dds3Basic_t *AddP2AEffect(billHandle_t *bill, const u128 *vec, s32 extra) {
     f32 vector[4];
     dds3Basic_t *obj;
     EffectDependencyState *data;
@@ -302,7 +302,7 @@ dds3Basic_t *AddP2AEffect(void *bill, const u128 *vec, s32 extra) {
     }
     SDF_VU0_LOADVECTOR(vec);
     SDF_VU0_STOREVECTOR(vector);
-    effCopyVector(((billHandle_t *)bill)->position, vector);
+    effCopyVector(bill->position, vector);
     data = obj->data;
     data->handle = bill;
     data->flags = 0;
@@ -338,7 +338,7 @@ void dds3AddP2AEffectObjectBasic2(u32 billId, const u128 *firstVector, s32 secon
 
 /* Create a kind-one resource bill and return its effect object. */
 dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *path, const u128 *firstVector, s32 secondVectorAddress) {
-    void *bill;
+    billHandle_t *bill;
 
     bill = billCreateFromResource(1, path);
     return AddP2AEffect(bill, firstVector, secondVectorAddress);

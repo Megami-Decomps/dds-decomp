@@ -279,7 +279,7 @@ dds3Basic_t *dds3AddEffectObjectBasic(u32 worldCounter, const u128 *position, co
 extern dds3Basic_t *dds3GetFirstWorldObjectNodeOfKind2(void);
 
 dds3Basic_t *AddP2AEffect(bill, vec, extra)
-    void *bill;
+    billHandle_t *bill;
     const u128 *vec;
     s32 extra;
 {
@@ -296,7 +296,7 @@ dds3Basic_t *AddP2AEffect(bill, vec, extra)
     }
     SDF_VU0_LOADVECTOR(vec);
     SDF_VU0_STOREVECTOR(vector);
-    effCopyVector(((billHandle_t *)bill)->position, vector);
+    effCopyVector(bill->position, vector);
     data = obj->data;
     data->handle = bill;
     data->flags = 0;
