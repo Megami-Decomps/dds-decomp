@@ -10041,8 +10041,8 @@ void effTransitionSelectedActorRgbColors(EffActiveResource *work) {
                         continue;
                     }
                     handled = 0;
-                    if (state->unk618 != NULL) {
-                        handled = state->unk618(actors[i]);
+                    if (state->actorSceneExceptionPredicate != NULL) {
+                        handled = state->actorSceneExceptionPredicate(actors[i]);
                     }
                     if (!(btlGetEntryFlagsUnlessDisabled(&actors[i]->partyRecord) & 0x200) || handled == 1) {
                         continue;
@@ -10073,8 +10073,8 @@ void effTransitionSelectedActorRgbColors(EffActiveResource *work) {
                         continue;
                     }
                     handled = 0;
-                    if (state->unk618 != NULL) {
-                        handled = state->unk618(actors[i]);
+                    if (state->actorSceneExceptionPredicate != NULL) {
+                        handled = state->actorSceneExceptionPredicate(actors[i]);
                     }
                     if (!(btlGetEntryFlagsUnlessDisabled(&actors[i]->partyRecord) & 0x200) || handled == 1) {
                         continue;

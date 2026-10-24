@@ -1851,7 +1851,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->pad674, 0x4, btlIsNonCalamityAction);
         BTL_INSTALL_CALLBACK(battle->pad6C0, 0x4, btlMapActorMotionId);
         BTL_INSTALL_CALLBACK(battle->pad694, 0x0, btlScheduleCherunShadowSkillPresentation);
-        BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSpecialMotion);
+        BTL_INSTALL_CALLBACK(battle->actorSceneExceptionPredicate, 0x0, btlIsSpecialMotion);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlFilterListedUnitMotionChoice);
         allocation = sdfAllocAuto(0x8);
         battle->effect = allocation;
@@ -1916,7 +1916,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlStartMarkedActionRuntimeUpdate);
         BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlTickAction6B);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
-        BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSceneUnitModeListed);
+        BTL_INSTALL_CALLBACK(battle->actorSceneExceptionPredicate, 0x0, btlIsSceneUnitModeListed);
         break;
     }
     case 0x317:
@@ -1924,7 +1924,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlResetDelayedActionTimer);
         BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlTickDelayedMarkedAction);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
-        BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSceneUnitModeListed);
+        BTL_INSTALL_CALLBACK(battle->actorSceneExceptionPredicate, 0x0, btlIsSceneUnitModeListed);
         break;
     }
     case 0x315: {
@@ -1975,7 +1975,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlMarkChaturbhujaCameraBlend);
         BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlStartChaturbhujaCameraStep);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
-        BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSceneUnitModeListed);
+        BTL_INSTALL_CALLBACK(battle->actorSceneExceptionPredicate, 0x0, btlIsSceneUnitModeListed);
         break;
     }
     case 0x31A: {
@@ -1994,7 +1994,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->timedCameraFinishHook, 0x0, btlFinishRaisedActionCamera);
         BTL_INSTALL_CALLBACK(battle->actionEffectOverride, 0x0, btlGetDesertWindEffectOverride);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
-        BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSceneUnitModeListed);
+        BTL_INSTALL_CALLBACK(battle->actorSceneExceptionPredicate, 0x0, btlIsSceneUnitModeListed);
         break;
     }
     case 0x31B: {
@@ -2108,7 +2108,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         battle->cameraCommand.cameraDistanceOffset = 100.0f;
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlOffsetKaliTargetForScriptAction);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
-        BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSceneUnitModeListed);
+        BTL_INSTALL_CALLBACK(battle->actorSceneExceptionPredicate, 0x0, btlIsSceneUnitModeListed);
         break;
     }
     case 0x345: {
@@ -2147,7 +2147,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
     case 0x31F:
     case 0x328: {
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
-        BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSceneUnitModeListed);
+        BTL_INSTALL_CALLBACK(battle->actorSceneExceptionPredicate, 0x0, btlIsSceneUnitModeListed);
         break;
     }
     default:

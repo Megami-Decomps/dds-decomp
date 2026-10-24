@@ -3721,8 +3721,8 @@ void btlStartActorDefeatTransition(ActionStateLink *command) {
         } else {
             entryFlags = btlGetEntryFlagsUnlessDisabled(profile);
             result = 0;
-            if (work->unk618 != NULL) {
-                result = work->unk618(actor);
+            if (work->actorSceneExceptionPredicate != NULL) {
+                result = work->actorSceneExceptionPredicate(actor);
             }
             if ((entryFlags & 0x200) && result == 0) {
                 result = 1;
@@ -3769,8 +3769,8 @@ void btlRemoveEligibleActorSceneTask(ActionStateLink *task) {
         hookResult = 0;
         work = (BtlState *)btlGetRuntime();
         entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->partyRecord);
-        if (work->unk618 != 0) {
-            hookResult = work->unk618(unit);
+        if (work->actorSceneExceptionPredicate != 0) {
+            hookResult = work->actorSceneExceptionPredicate(unit);
         }
         if (!(unit->status.flags & 0x40)) {
             if (!(entryFlags & 0x200)) {
