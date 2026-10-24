@@ -2468,7 +2468,7 @@ void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer) {
     }
 }
 
-extern void mnuCheckMovieDecoderStatus(void);
+extern s32 mnuCheckMovieDecoderStatus(void);
 extern void movieStop(void);
 /* Advance or stop the timed viewer action according to the current position. */
 s32 evtViewerUpdateTimedAction(EvtRuntime *viewer) {

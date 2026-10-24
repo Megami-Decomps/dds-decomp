@@ -99,7 +99,7 @@ dds3Basic_t *dds3GetActiveScene(void);
 f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *camera);
 void dds3SetScreenFovy(f32 fieldOfView);
 void movieStop(void);
-void mnuCheckMovieDecoderStatus(void);
+s32 mnuCheckMovieDecoderStatus(void);
 
 /* Handles retained by the viewer and by its owning task context. */
 

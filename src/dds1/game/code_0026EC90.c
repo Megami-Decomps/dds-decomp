@@ -540,7 +540,7 @@ void movieStop(void) {
 extern s32 sdfMovieIsFinished(movieStream_t *job);
 
 s32 mnuCheckMovieDecoderStatus(void) {
-    sdfMovieIsFinished(&mnuMovieDrawContext);
+    return sdfMovieIsFinished(&mnuMovieDrawContext);
 }
 
 
@@ -711,4 +711,3 @@ INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC620);
 INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC628);
 
 INCLUDE_SDATA(const s32, "game/code_0026EC90", PlayingNo);
-
