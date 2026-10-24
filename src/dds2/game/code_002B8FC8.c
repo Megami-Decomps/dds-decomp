@@ -339,7 +339,7 @@ s32 mnuIsFinalItemIndex(s32 index, const struct MenuList *list);
 
 
 
-void mnuDestroyPartySelectionWindow(s32 context);
+void mnuDestroyPartySelectionWindow(MenuContext *context);
 
 
 /* Snapshot the five party entries and cap the menu's displayed slot count. */
@@ -361,7 +361,7 @@ s32 mnuCountActiveSlots(void);
 void mnuClearPartySelectionAndActivateSlots(MenuContext *context);
 
 /* Release panel textures before reinitializing slots and updating handle state. */
-void mnuRefreshPartyPanelSlots(s32 context);
+void mnuRefreshPartyPanelSlots(MenuContext *context);
 
 
 

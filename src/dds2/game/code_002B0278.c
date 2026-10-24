@@ -694,8 +694,8 @@ void mnuCreatePartySelectionWindow(MenuContext *context) {
     party->primaryWindow = window;
 }
 
-void mnuDestroyPartySelectionWindow(s32 context) {
-    mnuDestroyWindowContainer(((PartyMenuData *)((MenuContext *)context)->party)->primaryWindow);
+void mnuDestroyPartySelectionWindow(MenuContext *context) {
+    mnuDestroyWindowContainer(((PartyMenuData *)context->party)->primaryWindow);
 }
 
 
@@ -829,10 +829,10 @@ void mnuClearPartySelectionAndActivateSlots(MenuContext *context) {
 }
 
 /* Release panel textures before reinitializing slots and updating handle state. */
-void mnuRefreshPartyPanelSlots(s32 context) {
-    mnuReleasePartyPanelTextures((MenuPageWindow *)(context + MNU_STAFF_PARTY_PANEL_BASE));
-    mnuInitPartyPanelSlots(&((MenuContext *)context)->partyPanel);
-    mnuReleaseAndRefreshWindowSlots(&((MenuContext *)context)->partyWindow);
+void mnuRefreshPartyPanelSlots(MenuContext *context) {
+    mnuReleasePartyPanelTextures(&context->partyWindow);
+    mnuInitPartyPanelSlots(&context->partyPanel);
+    mnuReleaseAndRefreshWindowSlots(&context->partyWindow);
 }
 
 s32 mnuInitializePartySelectionState(dds3ProcessID_t *task) {
@@ -877,8 +877,8 @@ s32 mnuInitializePartySelectionState(dds3ProcessID_t *task) {
 }
 
 u32 mnuReleasePartySelectionResources(dds3ProcessID_t *task) {
-    s32 context = dds3GetProcessData(task);
-    PartyMenuData *selection = (PartyMenuData *)((MenuContext *)context)->party;
+    MenuContext *context = (MenuContext *)dds3GetProcessData(task);
+    PartyMenuData *selection = (PartyMenuData *)context->party;
     mnuRefreshPartyPanelSlots(context);
     mnuDestroyPartySelectionWindow(context);
     mnuNoOpPartySelectionCleanup(context);
