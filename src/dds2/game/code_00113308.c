@@ -62,7 +62,7 @@ evtUnitHandle_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *object) {
     return ((EffectObjectData *)object->data)->transitionWork;
 }
 
-void dds3UnitObjectBasicSetOt(dds3Basic_t *object, u32 value) {
+void dds3UnitObjectBasicSetOt(dds3Basic_t *object, s32 value) {
     ((EffectObjectData *)object->data)->followParameterIndex = value;
 }
 
@@ -358,10 +358,10 @@ s32 dds3UpdateEffectObjectFollowParameters(dds3Basic_t *obj) {
     if (dds3ObjectBaseCheckFlag(obj, 0x200) && target != NULL && !(target->owner->flags & MDL_SKIP_TRANSFORMS)) {
         fldDrawEffectObjectShadow(obj);
     }
-    if ((s32)((EffectObjectData *)obj->data)->followParameterIndex == -1) {
+    if (((EffectObjectData *)obj->data)->followParameterIndex == -1) {
         effObjApplyTransformParameters(kwlnSceneSurfaceSets[0], obj);
     } else {
-        effObjApplyTransformParameters(kwlnSceneSurfaceSets[(s32)((EffectObjectData *)obj->data)->followParameterIndex], obj);
+        effObjApplyTransformParameters(kwlnSceneSurfaceSets[((EffectObjectData *)obj->data)->followParameterIndex], obj);
     }
     if (!dds3ObjectBaseCheckFlag(obj, 0x400)) {
         return 1;
