@@ -285,11 +285,11 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
         case 0:
         case 1:
             break;
-        case 2:
+        case FLD_SPAWN_BATCH_KIND_SCRIPT_RESOURCE:
             D_003BD7B0 = resource;
             D_003BD7B4 = resourceCount;
             break;
-        case 11:
+        case FLD_SPAWN_BATCH_KIND_BILLBOARD_EFFECT:
             for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
                 BillConfig *config;
                 u32 *resourceKeys;
@@ -366,7 +366,7 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
                 }
             }
             break;
-        case 12:
+        case FLD_SPAWN_BATCH_KIND_LIGHT:
             for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
                 if (resource->transform != NULL) {
                     position[0] = resource->transform[0];
@@ -404,7 +404,7 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
                 dds3AddPathBasic(resource->id, resource->data, resource->name);
             }
             break;
-        case 3:
+        case FLD_SPAWN_BATCH_KIND_COLLISION:
             for (resourceIndex = 0, pathIndex = 1; resourceIndex < resourceCount; resourceIndex++, resource++, pathIndex++) {
                 resource->id |= 0x20000;
                 if (resource->transform != NULL) {
@@ -909,12 +909,12 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
         switch (spawnBatch->kind) {
         case 0:
         case 1:
-        case 2:
+        case FLD_SPAWN_BATCH_KIND_SCRIPT_RESOURCE:
         case 5:
         case 8:
-        case 11:
+        case FLD_SPAWN_BATCH_KIND_BILLBOARD_EFFECT:
             break;
-        case 3:
+        case FLD_SPAWN_BATCH_KIND_COLLISION:
             if (isAppended != 0) {
                 break;
             }
@@ -933,7 +933,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                 }
             }
             break;
-        case 6:
+        case FLD_SPAWN_BATCH_KIND_EVENT:
             for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++, spawnResource++) {
                 if (isAppended != 0) {
                     spawnResource->id |= 0x800000;
@@ -953,7 +953,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                 dds3AddPathBasic(spawnResource->id, spawnResource->data, spawnResource->name);
             }
             break;
-        case 10:
+        case FLD_SPAWN_BATCH_KIND_PLACEMENT_DATA:
             for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++, spawnResource++) {
                 if (isAppended != 0) {
                     spawnResource->id |= 0x800000;
@@ -1020,7 +1020,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                 }
             }
             break;
-        case 4:
+        case FLD_SPAWN_BATCH_KIND_CAMERA:
             for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++, spawnResource++) {
                 if (isAppended != 0) {
                     spawnResource->id |= 0x800000;
