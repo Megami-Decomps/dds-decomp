@@ -870,7 +870,7 @@ s32 mnuDrawStaffCampPageWithImage(dds3ProcessID_t *callback) {
     CampMenuContext *work = (CampMenuContext *)context;
     StaffMenuRuntime *menu = (StaffMenuRuntime *)work->menu;
 
-    if (effHasFirstTextureHandle((EffectSlotSet *)(u32)work->resource) != 0) {
+    if (effHasFirstTextureHandle(work->resource) != 0) {
         mnuDrawStaffCampScreen(0, callback);
     } else {
         mnuDrawStaffCampScreen(1, callback);
@@ -949,7 +949,7 @@ s32 mnuInitializeStaffPartyScene(dds3ProcessID_t *task) {
     datUnitWork_t *record = &DDS3_GBWK->party[index];
     MenuProfilePanel *profilePanel;
 
-    effReleaseTextureHandlesAndResetSlots((EffectSlotSet *)context->resource);
+    effReleaseTextureHandlesAndResetSlots(context->resource);
     mnuStoreScrollPanelSelectionAndGridPosition((struct MenuScrollPanel *)context->display,
                                                context->staffVariant, 0x3D, 1);
     mnuSetWindowResource(index, page, (s32)context->staffVariant, context->staffParam);

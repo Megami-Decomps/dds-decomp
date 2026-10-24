@@ -13,7 +13,7 @@ typedef struct CampMenuContext {
     s32 popupState; /* 0x54: popup entry word */
     u8 pad58[8];
     s32 unk60;
-    s32 resource;             /* 0x64 */
+    EffectSlotSet *resource;  /* 0x64 */
     s32 unk68;
     s32 displayVariant;       /* 0x6C: passed with display to menu drawing */
     u8 pad70[4];
