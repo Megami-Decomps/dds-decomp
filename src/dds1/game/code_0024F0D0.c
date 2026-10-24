@@ -3219,7 +3219,38 @@ void mnuDrawMantraPulseStripAndKind(MenuSceneWork *object, s32 scale, s32 contex
                                  object, scale, context);
 }
 
-INCLUDE_ASM(const s32, "game/code_0024F0D0", mnuDrawMantraGridPulseEntry);
+void mnuDrawMantraGridPulseEntry(s32 x, s32 y, s32 z, MenuSceneWork *work, s32 alpha, s32 surface) {
+    MnuProfileProgress *selection;
+    MnuMantraGridEntry *entry;
+    u32 flags;
+    s32 placementIndex;
+
+    selection = mnuGetSelectedNodeValue();
+    itfDspDrawStrip(x, y, z, alpha, surface);
+    entry = (MnuMantraGridEntry *)(u32)work->gridHandle->cursor->value;
+    if (entry != NULL) {
+        if (work->entryMessageInProgress == 0) {
+            if (entry->state != 3) {
+                if (entry->profileFlag != 0) {
+                    mnuDrawMantraCostPlaceholder(x, y, z, alpha, entry->sceneId, surface);
+                } else {
+                    mnuDrawMantraCostCounter(x, y, z, alpha, entry->sceneId, surface);
+                }
+            } else {
+                mnuDrawMantraPanelSprite(x, y, z, alpha, entry->sceneId, surface);
+            }
+        }
+        flags = mnuGetMantraDisplayFlags(entry, selection);
+        if (flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) {
+            placementIndex = 9;
+        } else if (flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP) {
+            placementIndex = 8;
+        } else {
+            placementIndex = (flags & MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_1) ? 6 : 7;
+        }
+        mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, z, alpha, placementIndex, surface);
+    }
+}
 
 extern s16 mnuMantraVariantSpritePlacements[][6];
 extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
