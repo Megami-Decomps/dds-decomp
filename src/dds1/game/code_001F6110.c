@@ -193,7 +193,7 @@ typedef struct BtlControlObject {
     void (*update)(void); /* 0x4C */
 } BtlControlObject;
 
-u8 *btlCreateControlObject(void) {
+struct BtlRuntimeTask *btlCreateControlObject(void) {
     BtlControlObject *object;
     object = (BtlControlObject *)btlAllocTask(0);
     object->enabled = 1;
@@ -201,7 +201,7 @@ u8 *btlCreateControlObject(void) {
     object->type = 0x60;
     object->status = 0;
     object->state = 0;
-    return (u8 *)object;
+    return (struct BtlRuntimeTask *)object;
 }
 
 extern f32 sdfViewTargetVector[];

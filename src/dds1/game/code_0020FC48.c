@@ -2335,7 +2335,7 @@ extern void btlRequestTargetSelectionClose(void);
 extern void btlCreateTargetSelectionTask(BtlTask *sourceTask);
 extern void btlCopyUnitCurrentPosition(BtlUnit *, f32 *);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
-extern u8 *btlCreateControlObject(void);
+extern struct BtlRuntimeTask *btlCreateControlObject(void);
 extern void btlCopyUnitStats(BtlUnit *unit, datUnitWork_t *source);
 extern void btlInitializePartyRecordFromEnemy(datUnitWork_t *, s32);
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
@@ -2429,7 +2429,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
                 state->debug.modelMenu.cursor, 0, 0, 1);
             btlStartTask(task);
             unit->status.flags &= ~2;
-            dependent = (BtlRuntimeTask *)btlCreateControlObject();
+            dependent = btlCreateControlObject();
             dependent->startCondition.kind = 4;
             dependent->startCondition.value.handle = task->handle;
             btlStartTask(dependent);

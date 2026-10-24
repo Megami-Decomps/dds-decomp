@@ -2366,7 +2366,7 @@ void btlStartLinkedActorEffectTask(s32 task) {
 extern void btlResetUnitLinks(BtlUnit *);
 extern void btlInitializePartyRecordFromEnemy(datUnitWork_t *, s32);
 extern void btlInsertPartyActorByPriority(BtlUnit *, u8, u8);
-extern u8 *btlCreateControlObject(void);
+extern struct BtlRuntimeTask *btlCreateControlObject(void);
 extern BtlTask *btlCreateActionSeq(void);
 extern void btlBindActorTaskAndSelectActionNumber(BtlTask *, BtlUnit *);
 extern void btlSetSceneTaskActiveFlag(BtlTask *);
@@ -2451,7 +2451,7 @@ void btlScheduleSummonActionTasks(BtlTask *action) {
                 controlDelay = 2;
             }
         }
-        controlTask = (BtlRuntimeTask *)btlCreateControlObject();
+        controlTask = btlCreateControlObject();
         controlTask->startDelay = controlDelay;
         controlTask->startCondition.kind = 10;
         controlTask->startCondition.value.taskKind = 0x40;
