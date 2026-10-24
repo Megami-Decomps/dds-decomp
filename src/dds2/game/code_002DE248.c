@@ -14617,7 +14617,7 @@ typedef struct EffBankStatus {
     char fullName[0xC8]; /* Formatted path or selected built-in name. */
     s32 type;
     s32 state;
-    s32 count;
+    s32 pathVariant;
 } EffBankStatus;
 
 
@@ -14641,7 +14641,7 @@ void effPollResourceBank(u32 mode, EffBankStatus *status) {
         btlUpdateAndDrawResourceBrowser(effResourceBankDescriptor);
         status->state = btlGetResourceBrowserSelectionStatus(effResourceBankDescriptor);
         status->type = btlFormatSelectedResourceName(effResourceBankDescriptor, status->fullName);
-        status->count = btlGetResourcePathVariant(effResourceBankDescriptor);
+        status->pathVariant = btlGetResourcePathVariant(effResourceBankDescriptor);
         if (status->state == BTL_RESOURCE_SELECTION_ACCEPTED) {
             btlDestroyResourceDescriptor(effResourceBankDescriptor);
             effResourceBankDescriptor = 0;
@@ -15503,7 +15503,7 @@ s32 effPollFileQueueRecord(s32 mode) {
         result = 0x400000;
     } else if (((EffBankStatus *)status)->state == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (((EffBankStatus *)status)->type != 8) {
-            entry = fileQueueGetAt(effFileQueue, -((EffBankStatus *)status)->count);
+            entry = fileQueueGetAt(effFileQueue, -((EffBankStatus *)status)->pathVariant);
             if (effCurrentFileQueueEntry != entry) {
                 fileQueueDetachSectorFollower(effFileQueue, effCurrentFileQueueEntry);
                 fileQueueLinkJobToSectorLeader(effFileQueue, effCurrentFileQueueEntry, entry);
