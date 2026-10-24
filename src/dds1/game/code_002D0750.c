@@ -151,9 +151,9 @@ void sdfMemFreeDelayedDirect(struct sdfMemHandle_t *allocation) {
 
 
 /* Increment the signed reference count and return the stored data address. */
-u32 sdfMemLock(sdfMemHandle_t *allocation) {
+void *sdfMemLock(sdfMemHandle_t *allocation) {
     allocation->referenceCount = allocation->referenceCount + 1;
-    return allocation->address;
+    return (void *)allocation->address;
 }
 
 /* This path reads the same reference-count storage unsigned and never decrements zero. */

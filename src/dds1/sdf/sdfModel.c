@@ -172,7 +172,6 @@ SdfCommandNode *sdfModelNewPacketHeader(sdfModelNode_t *drawNode, s32 packetSele
 
 struct sdfMemHandle_t;
 extern struct sdfMemHandle_t * sdfMemAllocDirect(s32 requestedBytes);
-extern u32 sdfMemLock(struct sdfMemHandle_t *allocation);
 
 /* The list head slot is declared `void **` (generic list storage), not `SdfCommandNode **`: its alias set must
  * conflict with the node's `void *payload` store. cc1probe --sched (hooked==unhooked): sched2 then ranks the

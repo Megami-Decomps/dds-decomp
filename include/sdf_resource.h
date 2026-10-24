@@ -49,7 +49,7 @@ void *sdfAllocAuto(s32 size);
 void sdfFreeAuto(void *data);
 void sdfFreeAutoDelayed(void *data);
 
-u32 sdfMemLock(struct sdfMemHandle_t *allocation);
+void *sdfMemLock(struct sdfMemHandle_t *allocation);
 void sdfMemUnlock(struct sdfMemHandle_t *allocation);
 void sdfMemFreeDirect(struct sdfMemHandle_t *allocation);
 void sdfMemFreeHandleDirect(struct sdfMemHandle_t **slot);
