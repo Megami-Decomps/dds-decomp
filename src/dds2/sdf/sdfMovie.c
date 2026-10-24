@@ -165,12 +165,12 @@ s32 movieReadChunk(sdfFileCmdHandle_t *deviceState, s32 operation, const void *r
         }
         break;
     case SDF_MOVIE_STATE_PAC_MASK_READ:
-        if (operation == 5) {
+        if (operation == SDF_DEV_EVENT_READ_REPLY) {
             movieReadHeaderChunk(movie);
         }
         break;
     case SDF_MOVIE_STATE_DATA_READ: {
-        if (operation == 5) {
+        if (operation == SDF_DEV_EVENT_READ_REPLY) {
             const u8 *source = readBuffer;
             s32 blockBytes = stream->blockBytes;
             s32 blocksRemaining = bytesRead / blockBytes;
