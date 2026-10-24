@@ -4762,8 +4762,7 @@ void btlStartGunFinishLoad(GunLoadArgs *taskArgs) {
     actor->gunResourceFlags = (actor->gunResourceFlags | 4) & ~8;
 }
 
-u32 btlPollGunLoad(u32 *taskArgs) {
-    GunLoadArgs *loadArgs = (GunLoadArgs *)taskArgs;
+u32 btlPollGunLoad(GunLoadArgs *loadArgs) {
     BtlUnit *unit = loadArgs->unit;
     if (loadArgs->request == NULL) {
         return 1;
@@ -4780,7 +4779,7 @@ u32 btlPollGunLoad(u32 *taskArgs) {
 
 extern void btlStartGunFinishLoad(GunLoadArgs *);
 
-extern u32 btlPollGunLoad(u32 *);
+extern u32 btlPollGunLoad(GunLoadArgs *);
 
 u8 *btlCreateGunLoadPollTask(u8 *owner) {
     u8 *task = btlAllocTask(8);
