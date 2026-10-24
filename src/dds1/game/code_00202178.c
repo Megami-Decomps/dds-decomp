@@ -2268,7 +2268,7 @@ extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
 extern u64 btlStartTask(void *);
 
-extern BtlRuntimeTask *btlCreateActionTask(void *, s32);
+extern BtlRuntimeTask *btlCreateActionTask(BtlUnit *, s32);
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 
