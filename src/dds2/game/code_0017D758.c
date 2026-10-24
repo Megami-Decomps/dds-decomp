@@ -25,8 +25,8 @@ extern void dds3ScatterPolyListTexResourceDelete(PcpScatterRes *);
  * instance, not to the drawable used by the resource helpers below. */
 
 /* Copy the flat effect's source vector; the renderer reads the embedded copy. */
-void effPCPWwSpherePolySetPosition(PcpScatterPlainInstance *work, void *src) {
-    SDF_VU0_COPYVECTOR(work->params.origin, src);
+void effPCPWwSpherePolySetPosition(PcpScatterPlainInstance *work, const f32 position[4]) {
+    SDF_VU0_COPYVECTOR(work->params.origin, position);
 }
 
 /* Set the instance scale that its update forwards to the drawable. */
