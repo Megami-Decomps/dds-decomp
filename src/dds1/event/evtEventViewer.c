@@ -2118,7 +2118,7 @@ void evtViewerCountFlaggedUpdates(EvtRuntime *viewer) {
     }
 }
 
-extern s32 campAnyPackedFlagSet(void *scene);
+extern s32 campAnyPackedFlagSet(EvtRuntime *scene);
 extern s32 scrCommandIsProcessControlFlagClear(void);
 extern u32 mnuCampGetSecondaryOption(EvtRuntime *scene);
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
