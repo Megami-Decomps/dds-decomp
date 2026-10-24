@@ -1,6 +1,17 @@
 #ifndef SDF_SOUND_RPC_RECORDS_H
 #define SDF_SOUND_RPC_RECORDS_H
 
+enum SdfSoundRpcCommand {
+    SDF_SOUND_RPC_OPEN_VOICE_FILE = 0,
+    SDF_SOUND_RPC_READ_VOICE_FILE = 1,
+    SDF_SOUND_RPC_CLOSE_VOICE_FILE = 2,
+    SDF_SOUND_RPC_RESET_RESIDENT_BUFFER_OFFSET = 3,
+    SDF_SOUND_RPC_READ_RESIDENT_BUFFER = 4,
+    SDF_SOUND_RPC_GET_PCM_CALLBACK_WORD = 6,
+    SDF_SOUND_RPC_READ_PCM_CALLBACK_BUFFER = 7,
+    SDF_SOUND_RPC_CLEAR_PCM_CALLBACK_BUSY = 8
+};
+
 typedef struct SdfSoundRpcRequest {
     u8 opaque00[8];
     s32 destination; /* 0x08: destination address for the IOP copy */

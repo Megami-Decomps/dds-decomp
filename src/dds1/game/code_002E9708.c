@@ -225,7 +225,7 @@ u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
     char path[0x100];
 
     switch (command) {
-    case 0: {
+    case SDF_SOUND_RPC_OPEN_VOICE_FILE: {
         sdfFileCmdHandle_t *state;
         if (D_00398948[0] == 0) {
             D_003FEAC0[0] = 0;
@@ -248,7 +248,7 @@ u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
         D_003FEAC0[0] = (u32)state;
         break;
     }
-    case 1: {
+    case SDF_SOUND_RPC_READ_VOICE_FILE: {
         sdfMemHandle_t *allocation;
         void *buffer;
         D_003BDA74 = request;
@@ -265,7 +265,7 @@ u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
         }
         break;
     }
-    case 2:
+    case SDF_SOUND_RPC_CLOSE_VOICE_FILE:
         sdfFileCmdClose(D_003BDA7C);
         WaitSema(sifRpcServerSema);
         sdfFileCmdFree(D_003BDA7C);
@@ -273,11 +273,11 @@ u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
         p2sdPcmState = 0;
         D_003FEAC0[0] = 0;
         break;
-    case 3:
+    case SDF_SOUND_RPC_RESET_RESIDENT_BUFFER_OFFSET:
         D_003BDA78 = 0;
         D_003FEAC0[0] = 0;
         break;
-    case 4: {
+    case SDF_SOUND_RPC_READ_RESIDENT_BUFFER: {
         s32 bytes;
         D_003BDA74 = request;
         sdfSndTransToIOP(request->destination, D_003FEA98.data + D_003BDA78, request->byteCount);
@@ -289,7 +289,7 @@ u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
     case 5:
         D_003FEAC0[0] = 0;
         break;
-    case 6: {
+    case SDF_SOUND_RPC_GET_PCM_CALLBACK_WORD: {
         u32 word = D_003BD494.word;
         if (word != 0) {
             p2sdPcmBusy = 1;
@@ -297,7 +297,7 @@ u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
         D_003FEAC0[0] = word;
         break;
     }
-    case 7: {
+    case SDF_SOUND_RPC_READ_PCM_CALLBACK_BUFFER: {
         void *buffer;
         D_003BDA74 = request;
         buffer = D_003BD494.read(request->byteCount);
@@ -309,7 +309,7 @@ u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
         }
         break;
     }
-    case 8:
+    case SDF_SOUND_RPC_CLEAR_PCM_CALLBACK_BUSY:
         p2sdPcmBusy = 0;
         D_003FEAC0[0] = 0;
         break;
