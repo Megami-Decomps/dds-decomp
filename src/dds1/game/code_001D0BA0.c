@@ -1394,7 +1394,7 @@ u32 btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *args) {
 
 extern u32 btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *);
 
-void *btlCreateCategoryStatDamageTask(u8 *owner, u32 value, u32 extra) {
+BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *owner, u32 value, u32 extra) {
     u8 *task = btlAllocTask(12);
     BtlCategoryStatDamageArgs *arguments;
 
@@ -1402,13 +1402,13 @@ void *btlCreateCategoryStatDamageTask(u8 *owner, u32 value, u32 extra) {
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = btlApplyCategoryStatDamage;
     *(u16 *)(task + 0x20) = 0x48;
-    *(s64 *)(task + 0x40) = *(s64 *)(owner + 0x108);
+    *(s64 *)(task + 0x40) = *(s64 *)((u8 *)owner + 0x108);
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
-    arguments->unit = (BtlUnit *)owner;
+    arguments->unit = owner;
     arguments->category = value;
     arguments->amount = extra;
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 /* Apply the operand's masked entry changes; complete immediately. */
