@@ -368,7 +368,7 @@ enum {
 s32 sndLoadDataFile(const SoundDataFileArgs *data);
 struct BtlRuntimeTask *sndCreateDataFileLoadTask(struct BtlUnit *unit);
 void sndStartFileLoad(SoundFileTaskArgs *args);
-u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *args);
+s32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *args);
 #ifdef VERSION_DDS1
 struct BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, u32 blockIndex, const char *filename);
 #else

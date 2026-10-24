@@ -9933,7 +9933,7 @@ extern char D_003A5138[];
 
 extern void p2sdSetPcmBuffer(u32, s32);
 
-u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
+s32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
     ActiveSoundNode *node = request->node;
     if (sndHasActiveFileLoad()) {
         btlBossDebugPrintf(D_003A50D8);

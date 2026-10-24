@@ -9172,7 +9172,7 @@ void sndStartFileLoad(SoundFileTaskArgs *args) {
     btlBossDebugPrintf("btl:sound file load start[%s]\n", args->filename);
 }
 
-u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
+s32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
     ActiveSoundNode *node = request->node;
     if (sndHasActiveFileLoad()) {
         btlBossDebugPrintf("btl:sound wait[motSE]\n");
