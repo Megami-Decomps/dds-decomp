@@ -173,7 +173,7 @@ typedef struct BtlSceneInsertArgs {
 #else
     struct ActionStateLink *actor;
 #endif
-    u32 count;
+    s32 count;
 } BtlSceneInsertArgs;
 
 /* The model-blend task allocates and initializes this complete 0x1C-byte packet. */

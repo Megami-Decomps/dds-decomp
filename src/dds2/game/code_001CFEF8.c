@@ -2264,7 +2264,7 @@ s32 fldActivateRequestedSceneActor(BtlSceneInsertArgs *request) {
 }
 
 /* Allocate a slot-insert request; its update callback clears advancement. */
-BtlRuntimeTask *fldCreateSceneActorAction(ActionStateLink *actorTask, u32 slotCount) {
+BtlRuntimeTask *fldCreateSceneActorAction(ActionStateLink *actorTask, s32 slotCount) {
     BtlRuntimeTask *actionTask = btlAllocTask(FLD_SCENE_INSERT_REQUEST_BYTES);
     BtlSceneInsertArgs *requestData;
     actionTask->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
