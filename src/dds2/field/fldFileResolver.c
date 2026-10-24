@@ -1516,9 +1516,9 @@ extern void fldAddressResolver(u8 *buffer, FldTransferChunk *chunk);
 
 const char D_00413128[] = "%sk%03d_%03d.f2";
 
-extern void fldClrCollision();
-extern void fldResetZoneRecordsAndActorSlots();
-extern void fldSe_Init();
+extern void fldClrCollision(void);
+extern void fldResetZoneRecordsAndActorSlots(void);
+extern void fldSe_Init(void);
 
 struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
     char path[0x80];
@@ -1687,25 +1687,25 @@ extern u32 fldLoadAreaRoomResourcesFromRequest(u32 area, u32 room,
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", fldLoadAreaRoomResourcesFromRequest);
 
-extern void fldDestroyTitleTask();
+extern void fldDestroyTitleTask(void);
 
-extern void fldFreeSceneResources();
+extern void fldFreeSceneResources(void);
 
-extern void fldReleaseObjectSlots();
+extern void fldReleaseObjectSlots(void);
 
 extern void fldReleaseResourceSlots(void);
 
 
 
-extern s32 fldTitleMiniIsActive();
+extern s32 fldTitleMiniIsActive(void);
 
 
-extern void fldReleaseMenuSlotsAfterWait();
+extern void fldReleaseMenuSlotsAfterWait(void);
 
-extern void fldReleaseIndexedResourceEffect();
+extern void fldReleaseIndexedResourceEffect(void);
 
 
-extern void mnuReleaseResourceEntries();
+extern void mnuReleaseResourceEntries(void);
 
 
 extern struct sdfMemHandle_t *D_00444930[];

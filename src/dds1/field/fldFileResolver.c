@@ -774,23 +774,23 @@ extern u32 D_003BAE4C;
 
 extern s32 D_003BAE50;
 
-extern void fldDestroyTitleTask();
+extern void fldDestroyTitleTask(void);
 
-extern void fldReleaseObjectSlots();
+extern void fldReleaseObjectSlots(void);
 
 extern void fldReleaseTitleSlots(void);
 
 extern void fldReleaseResourceHandles();
 
-extern s32 fldTitleMiniIsActive();
+extern s32 fldTitleMiniIsActive(void);
 
-extern void fldResetZoneRecordsAndActorSlots();
+extern void fldResetZoneRecordsAndActorSlots(void);
 
-extern void fldSe_Init();
+extern void fldSe_Init(void);
 
-extern void fldReleaseMenuSlotsAfterWait();
+extern void fldReleaseMenuSlotsAfterWait(void);
 
-extern void mnuReleaseResourceEntries();
+extern void mnuReleaseResourceEntries(void);
 
 extern void fldDrwZFree(void);
 
