@@ -8565,7 +8565,7 @@ void effReleaseTextureAnimationWork(s32 work) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", effUpdateBillFlame);
 
-void func_002F3F70(u8 *owner, void *matrix);
+void effDrawScalyTexturedStrip(u8 *owner, void *matrix);
 
 void effUpdateTintedScaledMesh(BillCellDrawWork *work) {
     u8 *config = work->config;
@@ -8600,7 +8600,7 @@ void effUpdateTintedScaledMesh(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002F3F70(out, mtx);
+    effDrawScalyTexturedStrip(out, mtx);
 }
 
 void effInitializeAnimationPositions(EffClassWork *work) {
@@ -8919,7 +8919,7 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002F3F70(out, mtx);
+    effDrawScalyTexturedStrip(out, mtx);
 }
 
 EffClassWork *effAllocateBlockWithModel(u16 kind, void *source) {
@@ -9095,7 +9095,7 @@ extern void sdfBuildMaskedFrameRegisterReference(
 extern void sdfBuildFrameRegisterReference(
     const u8 *source, struct SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
-void func_002F3F70(u8 *owner, void *matrix) {
+void effDrawScalyTexturedStrip(u8 *owner, void *matrix) {
     f32 normalizedColor[4];
     s32 baseColor[4];
     u32 packedColor;

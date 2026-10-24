@@ -524,7 +524,7 @@ extern EffKindDesc D_0037E7E8[];
 
 
 /* VU0 model helpers consume vf10 directly, matching the original macro-mode setup. */
-extern void func_002B0B70(EffStripWork *, void *);
+extern void effDrawScalyTexturedStrip(EffStripWork *, void *);
 
 extern u16 D_003BC944;
 
@@ -8178,7 +8178,7 @@ void effUpdateTintedScaledMesh(BillCellDrawWork *work) {
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
     VU0_STORE_MATRIX(mtx);
-    func_002B0B70(out, mtx);
+    effDrawScalyTexturedStrip(out, mtx);
 }
 
 
@@ -8505,7 +8505,7 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
     VU0_STORE_MATRIX(mtx);
-    func_002B0B70(out, mtx);
+    effDrawScalyTexturedStrip(out, mtx);
 }
 
 EffClassWork *effAllocateBlockWithModel(u16 kind, void *source) {
@@ -8679,7 +8679,7 @@ extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
 extern void sdfBuildFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
-void func_002B0B70(EffStripWork *work, void *matrix) {
+void effDrawScalyTexturedStrip(EffStripWork *work, void *matrix) {
     f32 normalizedColor[4];
     s32 baseColor[4];
     u32 packedColor;
